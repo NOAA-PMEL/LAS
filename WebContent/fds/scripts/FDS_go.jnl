@@ -1,3 +1,0 @@
-set mode verify:always
-go "$1"
-

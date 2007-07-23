@@ -1,3 +1,0 @@
-Manifest-Version: 1.0
-Class-Path: lib/dods.jar
-Main-Class: gov.noaa.pmel.tmap.ferret.test.FDSTest
