@@ -1,0 +1,5 @@
+<h3>Variable definition error</h3>
+
+You attempted to define a variable using a variable that only has one axis.
+Please return to the <a href="dataset?lastvar=1">variables page</a> and select
+another variable.

@@ -1,0 +1,33 @@
+#info_table_start()
+  Below is a history of all plots you have made this session.<br>
+  Clicking on a link will open that plot in a new window.
+#info_table_end("history")
+
+#table_start()
+      <tr>
+        #td_advice("Select&nbsp;a&nbsp;plot")
+        <td align="right" valign="center">
+          <a onMouseOver="status='Constrain selected variables';return true"
+             href="" onClick="return stuffForm('dataset')"
+             class="redbold">Start&nbsp;Over&nbsp;&gt;</a>
+        </td>
+      <tr>
+#if (!$history)
+      <tr>
+	<td colspan="2" bgcolor="#ffffff" valign=top>No plots have been created
+        </td>
+      </tr>
+#end
+#foreach($item in $history)
+      <tr>
+	<td colspan="2" bgcolor="#ffffff" valign=top>
+	<a href="" onMouseOver="status='View plot/data';return true"
+         onClick="newwin=window.open('$item.getUrl()', '', 'menubar=yes,toolbar=yes,resizable=yes,scrollbars=yes'); newwin.focus();return false">$item</a>
+	</td>
+      </tr>
+#end  ## foreach ($item...)
+#table_end()
+
+
+
+

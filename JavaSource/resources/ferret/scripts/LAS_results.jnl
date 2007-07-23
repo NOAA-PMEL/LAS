@@ -1,0 +1,100 @@
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! LAS_results.jnl
+! 
+! $Author: ansley $
+! $Date: 2006/07/13 18:08:18 $
+! 3/30/2007 ACM When writing the map_scale.xml file, first list the urls separately;
+!               long URLs can make the Ferret command too long.
+
+!
+! LAS_results.jnl creates the result files. 
+!
+! The argument is the refmap type "box", "xline", "yline", or "point"
+
+
+! Result "plot_image" is the the image file result_plot_image_filename
+
+ IF ($result_plot_image_filename%0|*>1%) THEN FRAME/FORMAT=gif/FILE="($result_plot_image_filename)"
+
+! Result map_scale_file is output map scale file
+! Write the output immediately after drawing the plot; it uses symbols 
+! that are set when making the plot. If a colorbar is made, do that after the
+! map_scale file is written.
+ 
+! X region for plot does not apply to the abstract axis for 
+! the variables SYMS_NAMES, SYMS_VALS, so cancel region
+! assume we are running Ferret v5.81 + with /NOROWLAB qualifier on LIST command
+
+cancel region 
+
+! First list the urls and variable names; the URLs can be so long they make the
+! commands too long for the Ferret command-line buffer. 
+
+IF ($result_map_scale_filename%0|*>1%) THEN 
+   LET syms_names = {"DATA_0_URL"}
+   LET syms_vals = {"($DATA_0_URL)"}
+   LIST/CLOBBER/FILE="($result_map_scale_filename)"/NOHEAD/NOROWLAB syms_names, syms_vals
+   LET syms_names = {"DATA_0_VAR"}
+   LET syms_vals = {"($DATA_0_VAR)"}
+   LIST/APPEND/FILE="($result_map_scale_filename)"/NOHEAD/NOROWLAB syms_names, syms_vals
+
+   LET syms_names = {"DATA_1_URL"}
+   LET syms_vals = {"($DATA_1_URL)"}
+   LIST/APPEND/FILE="($result_map_scale_filename)"/NOHEAD/NOROWLAB syms_names, syms_vals
+   LET syms_names = {"DATA_1_VAR"}
+   LET syms_vals = {"($DATA_1_VAR)"}
+   LIST/APPEND/FILE="($result_map_scale_filename)"/NOHEAD/NOROWLAB syms_names, syms_vals
+
+! assume we are running Ferret v5.81_ with /NOROWLAB qualifier on LIST command
+   LIST/APPEND/FILE="($result_map_scale_filename)"/NOHEAD/NOROWLAB syms_names, syms_vals
+
+   LET syms_names = {\
+     "PPL$XMIN", "PPL$XMAX", \
+      "PPL$YMIN", "PPL$YMAX",\
+      "PPL$XPIXEL", "PPL$YPIXEL",\
+      "PPL$WIDTH", "PPL$HEIGHT",\
+      "PPL$XORG","PPL$YORG",\
+      "PPL$XLEN","PPL$YLEN",\
+      "XAXIS_MIN","XAXIS_MAX",\
+      "YAXIS_MIN","YAXIS_MAX",\
+      "VP_TOP_MARGIN","VP_RT_MARGIN"}
+   LET syms_vals = {\
+      "($PPL$XMIN)", "($PPL$XMAX)", \
+      "($PPL$YMIN)", "($PPL$YMAX)", \
+      "($PPL$XPIXEL)", "($PPL$YPIXEL)",\
+      "($PPL$WIDTH)", "($PPL$HEIGHT)",\
+      "($PPL$XORG)", "($PPL$YORG)",\
+      "($PPL$XLEN)", "($PPL$YLEN)",\
+      "($XAXIS_MIN)", "($XAXIS_MAX)",\
+      "($YAXIS_MIN)", "($YAXIS_MAX)",\
+      "($VP_TOP_MARGIN)","($VP_RT_MARGIN)"}
+
+   IF `($XAXIS_MIN"0|*>1) EQ 0 OR ($YAXIS_MIN"0|*>1) EQ 0 ` THEN LET syms_vals = {\
+      "($PPL$XMIN)", "($PPL$XMAX)", \
+      "($PPL$YMIN)", "($PPL$YMAX)", \
+      "($PPL$XPIXEL)", "($PPL$YPIXEL)",\
+      "($PPL$WIDTH)", "($PPL$HEIGHT)",\
+      "($PPL$XORG)", "($PPL$YORG)",\
+      "($PPL$XLEN)", "($PPL$YLEN)",\
+      "($PPL$XMIN1)", "($PPL$XMAX1)", \
+      "($PPL$YMIN1)", "($PPL$YMAX1)", \
+      "($VP_TOP_MARGIN)","($VP_RT_MARGIN)"}
+
+! assume we are running Ferret v5.81_ with /NOROWLAB qualifier on LIST command
+   LIST/APPEND/FILE="($result_map_scale_filename)"/NOHEAD/NOROWLAB syms_names, syms_vals
+
+ENDIF
+
+! Result "colorbar" is the legend of the plot_image...only for Google Earth
+IF ($result_colorbar_filename%0|*>1%) THEN GO colorbar
+
+! Result ref_map is a ref map. Save to result_ref_map_filename
+
+IF  ($ferret_use_ref_map%0|false>0|*>1%) THEN 
+  CAN VIEW
+  SET VIEW full
+  GO std_refmap ($region_0_x_lo) ($region_0_x_hi) ($region_0_y_lo) ($region_0_y_hi) $1%box% ($ref_magnify%0%) ($ref_xcompress%0%) ($ref_ycompress%0%)
+  FRAME/FORMAT=gif/FILE="($result_ref_map_filename)"
+ENDIF
+
+! End of file ------------LAS_results.jnl--------------------------

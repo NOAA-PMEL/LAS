@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+ <!DOCTYPE spec SYSTEM "spec.dtd" [
+
+  <!-- Declaration of operations files to be included -->
+  <!ENTITY operations SYSTEM "operations.xml">
+
+  <!-- Declaration of dataset files to be included -->
+
+ ]>
+
+ <lasdata>
+
+  <!-- Define properties -->
+  <properties>
+    <ferret>
+        <land_type>shade</land_type>
+	<fill_type>fill</fill_type>
+    </ferret>
+  </properties>
+
+  <!-- Operations supported by this server -->
+  <operations url="">
+     &operations;
+  </operations>
+
+  <!-- Datasets provided by this server -->
+
+ </lasdata>

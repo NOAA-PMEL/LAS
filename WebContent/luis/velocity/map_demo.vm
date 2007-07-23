@@ -1,0 +1,1016 @@
+<script language="JavaScript">
+
+var IsNetscape = document.all == null;
+var IsIE = !IsNetscape;
+var IsStandard = document.getElementById;
+
+function dumpProps(obj) {
+  var str = "";
+  for (var prop in obj){
+    str += prop + ":" + obj[prop] + "\n";
+  }
+  alert(str);
+}
+
+function setInherit(cName, bName) {
+   if (IsNetscape){
+    eval(cName + ".prototype.__proto__ = " + bName + ".prototype");
+  } else {
+    var aProto = eval(bName + ".prototype");
+    for (var prop in aProto){
+      var theCom = cName + ".prototype." + prop + "=" + bName + ".prototype."
+	+ prop;
+      eval(theCom);
+    }
+  }
+}
+
+function funcName(f, length) {
+  var s = f.toString();
+  if (!length){
+      length = 200;
+  }
+  if (s==null || s.length == 0) s = "anonymous";
+  if (s.length > length){
+      s = s.substring(0,length) + "\n...\n";
+  }
+  return s;
+}
+
+function stackTrace(length) {
+  var s = "";
+  for (var a = arguments.caller; a != null; a = a.caller){
+    s += funcName(a.callee, length) + "\n";
+    if (a.caller == a) break;
+  }
+  return s;
+}
+
+function Assert(isTrue){
+  if (!isTrue){
+    var result = "Assertion failed:\n";
+    result += stackTrace();
+    alert(result);
+  }
+}
+
+/*
+ * Define a Widget object
+ */
+function Widget(form, element) {
+  var theFormEl = findForm(form);
+  Assert(theFormEl);
+  this.mForm = theFormEl;
+  this.mElement = theFormEl.elements[element];
+  Assert(this.mElement);
+  this.mElement.mObject = this;
+  this.mCallbackList = new Array();
+}
+
+/*
+ * Set the currently selected to value (if it exists)
+ */
+Widget.prototype.setSelected = function(value) {
+  var e = this.mElement;
+  var options = e.options;
+  Assert(options);
+  if (options){
+    var selected = 0;
+    for (var i=0; i < options.length; ++i){
+      if (value == options[i].value){
+        selected = i;
+	break;
+      }
+    }
+    e.selectedIndex = selected;
+  }
+}
+
+/*
+ * Return the value of the currently selected element
+ */
+Widget.prototype.getSelected = function() {
+  var e = this.mElement;
+  var options = e.options;
+  if (options){
+    return options[options.selectedIndex].value;
+  } else {
+    return e.value;
+  }
+}
+
+Widget.prototype.getSelectedIndex = function() {
+  return this.mElement.options.selectedIndex;
+}
+
+/*
+ * Return the element associated with a (form, element) name pair
+ */
+Widget.prototype.getElement = function() {
+  return this.mElement;
+}
+
+/*
+ * Add a callback to this widget
+ */
+Widget.prototype.addCallback = function(intype, obj) {
+  var type = intype.toLowerCase();
+  if (type == "onchange"){
+    this.mCallbackList[this.mCallbackList.length] = "onchange()";
+    if (obj != null){
+      this.mElement.mObject = obj;
+      this.mElement.mObject.onChange = obj.onChange;
+    }
+    this.mElement.onchange = this.globalActionChange;
+  } else if (type == "onclick"){
+    this.mCallbackList[this.mCallbackList.length] = "onclick()";
+    this.mElement.onclick = this.globalActionClick;
+  } else if (type == "onblur"){
+    this.mCallbackList[this.mCallbackList.length] = "onblur()";
+    this.mElement.onblur = this.globalActionBlur;
+  } else {
+    alert("Bad callback type " + type);
+  }
+}
+
+/*
+ * Execute the callbacks for this widget
+ */
+
+Widget.prototype.execCallbacks = function() {
+  for (var prop in this.mCallbackList){
+    var mname =this.mCallbackList[prop];
+    with(this.mElement){
+      eval(mname);
+    }
+  }
+}
+
+/*
+ * Following methods needed because, in JavaScript, 'this' will refer
+ * to the form element associated with the event, not the Widget
+ * object
+ */
+Widget.prototype.globalActionChange = function() {
+  this.mObject.onChange(this.mObject);
+}
+
+Widget.prototype.globalActionClick = function() {
+  this.mObject.onClick(this.mObject);
+}
+
+Widget.prototype.globalActionBlur = function() {
+  this.mObject.onBlur(this.mObject);
+}
+
+/*
+ * Default onClick and onChange handlers
+ */
+Widget.prototype.onClick = function() {
+}
+
+Widget.prototype.onChange = function() {
+}
+
+Widget.prototype.onBlur = function() {
+}
+
+// Multiwidget contains multiple select widgets and one text field
+//
+
+TimeMultiWidgetList = new Array();
+
+function MultiWidget(formName, names, category) {
+  var widgets = new Array();
+  for (var j=0; j < names.length-1; ++j){
+    widgets[widgets.length] = new Widget(formName, names[j]);
+  }
+  // Hack for events
+  if (names[0].indexOf("t_") == 0){
+      TimeMultiWidgetList[TimeMultiWidgetList.length] = this;
+  }
+  var form = findForm(formName);
+  var textField = form.elements[names[names.length-1]];
+  for (var i=0; i < widgets.length; ++i){
+    widgets[i].addCallback("onchange", this);
+  }
+  this.mWidgets = widgets;
+  this.mTextEl = textField;
+  this.mCategory = category;
+  this.onChange();
+}
+
+MultiWidget.prototype.setSelected = function(newval, splitStr) {
+  var splitit = newval.split(splitStr);
+  Assert(this.mWidgets.length == splitit.length);
+  for (var i=0; i < splitit.length; i++){
+      this.mWidgets[i].setSelected(splitit[i]);
+  }
+  this.onChange();
+}
+
+MultiWidget.prototype.getWidgets = function() {
+  return this.mWidgets;
+}
+
+MultiWidget.prototype.onChange = function(widget) {
+  var widgets = this.mWidgets;
+  var value = widgets[0].getSelected();
+  var ymdLength = Math.min(3, widgets.length);
+  var isClim = this.mCategory == 'ctime';
+  if (isClim){
+    ymdLength = Math.min(2, widgets.length);
+  }
+  for (var i=1; i < ymdLength; ++i){
+    value += '-' + widgets[i].getSelected();
+  }
+
+  // Only support hours for now
+  if (i < widgets.length){
+    var hour = widgets[i].getSelected();
+    if (hour.length == 1){
+      hour = '0' + hour;	// Gotta love that Ferret parser...
+    }
+    hour += ':00:00';
+    if (isClim){
+      value += '-0001 ' + hour;
+    } else {
+      value += ' ' + hour;
+    }
+  }
+  this.mTextEl.value = value;
+}
+
+MultiWidget.prototype.getValue = function() {
+  return this.mTextEl.value;
+}
+
+MultiWidget.prototype.getSelectedIndex = function() {
+  var length = this.mWidgets.length;
+  var rval = new Array(length)
+    for (var i=0; i < length; ++i){
+      rval[i] = this.mWidgets[i].getSelectedIndex();
+    }
+  return rval;
+}
+
+function ViewWidget(form,element){
+  this.base = Widget;
+  this.base(form,element);
+  this.mAction = this.mForm.action;
+  this.addCallback("onchange");
+}
+setInherit("ViewWidget", "Widget");
+
+ViewWidget.prototype.onChange = function() {
+  this.mAction.value="changeView";
+  doSubmit();
+  this.mForm.submit();
+}
+
+// Emulate MapTool applet if user elects not to use Java
+function MapTextWidget(parent,wtype,form,element) {
+  this.base = Widget;
+  this.base(form,element);
+  this.mParent = parent;
+  this.mType = wtype;
+  this.addCallback("onblur");
+  this.mFvalue = 0.0;
+}
+setInherit("MapTextWidget", "Widget");
+
+function round(inval) {
+  return Math.round(inval * 10.0)/10.0;
+}
+
+MapTextWidget.prototype.validate = function() {
+  var str = this.mElement.value;
+  var index = str.search(/[\-\+]?[\d\.]+\s*[ewns]?\s*$/i);
+  if (index == -1){
+    this.setValue(this.mFvalue);
+  } else {
+    this.setValue(this.getValue());
+  }
+}
+
+MapTextWidget.prototype.onBlur = function(widget) {
+  return; // SHouldn't get here, but just in case
+  this.validate();
+  this.mParent.onBlur(widget);
+}
+
+MapTextWidget.prototype.setValue = function(fvalue){
+  fvalue = round(fvalue);
+  this.mFvalue = fvalue;
+  if (this.mType == "lon"){
+    this.convert_lon(fvalue);
+  } else {
+    this.convert_lat(fvalue);
+  }
+}
+
+MapTextWidget.prototype.getValue = function(){
+  if (this.mType == "lon"){
+    return this.unconvert_lon();
+  } else {
+    return this.unconvert_lat();
+  }
+}
+
+MapTextWidget.prototype.unconvert_lat = function(){
+  var inval = this.mElement.value;
+  var index = inval.search(/\s*[ns]\s*$/i);
+  if (index > -1){
+    var orig_val = inval.substring(0, index);
+    if (inval.search(/\s*s\s*$/i) > -1){
+      orig_val = - orig_val;
+    }
+    inval = orig_val;
+  }
+  return inval;
+}
+
+function convert_modulo(inval) {
+  inval = inval % 360;
+  if (inval < 0){
+    inval += 360;
+  }
+  if (inval > 180){
+    inval -= 360;
+  }
+  return inval;
+}
+
+MapTextWidget.prototype.unconvert_lon = function(){
+  var inval = this.mElement.value;
+  var index = inval.search(/\s*[ew]\s*$/i);
+  if (index > -1){
+    var orig_val = inval.substring(0, index);
+    if (inval.search(/\s*w\s*$/i) > -1){
+      orig_val = - orig_val;
+    }
+    inval = convert_modulo(orig_val);
+  }
+  return inval;
+}
+
+MapTextWidget.prototype.convert_lon = function(inval){
+  var val = inval + 0.;
+  if (val > 180) val -= 360;
+  if (val < 0){
+    this.mElement.value = -val + " W";
+  } else {
+    this.mElement.value = val + " E";
+  }
+}
+
+MapTextWidget.prototype.convert_lat = function(inval){
+  var val = inval + 0.;
+  if (val < 0){
+     this.mElement.value = -inval + " S";
+  } else {
+     this.mElement.value = inval + " N";
+  }
+}
+
+
+function MapWidget(formName) {
+  this.mTool = "XY";
+  var es = getFormElements(formName);
+  this.wx = new Array();
+  this.wy = new Array();
+  this.wx[0] = new MapTextWidget(this,"lon", formName,"xlo_text");
+  this.wx[1] = new MapTextWidget(this,"lon", formName,"xhi_text");
+  this.wy[0] = new MapTextWidget(this,"lat", formName,"ylo_text");
+  this.wy[1] = new MapTextWidget(this,"lat", formName,"yhi_text");
+  this.minx = -180.0;
+  this.maxx = 180.0;
+  this.miny = -90.0;
+  this.maxy = 90.0;
+  this.mFirstPointState = false;
+  this.mImageQueue = new Array();
+
+
+  if (IsIE){ // IE 4/5/6
+    document.all.mapdiv.onclick = this.image_click;
+    document.imagemap.onload = this.image_load;
+  } else if (IsStandard){ // Standards compliant
+      document.getElementById("mapdiv").addEventListener("click",
+				       this.image_click, true);
+      document.imagemap.onload = this.image_load;
+  } else {
+    // Can't figure out how to get correct click coordinates in NN4
+    // As a parting gesture, I bequeath this to any willing/brave soul
+    alert("This prototype only functions in IE4/5/6 or Mozilla\n" +
+          "It does not work in Netscape 4.x");
+    return;
+
+    var theLink;
+    for (var i=0; i < document.links.length; ++i){
+      var link = document.links[i];
+      if (link.href.indexOf("mapdiv") >= 0){
+	theLink = link;
+	break;
+      }
+    }
+    if (theLink == null){
+      alert("Sorry, no support for this browser");
+    }
+    theLink.onclick = this.image_click;
+  }
+}
+
+MapWidget.prototype.newimage = function(url){
+  this.mImageQueue.push("mapgen" + url + "&ran=" + Math.random());
+}
+
+MapWidget.prototype.set_first_pt = function(x,y) {
+  this.newimage("?op=firstpt&x=" + x + "&y=" + y);
+}
+
+MapWidget.prototype.set_tool_domain = function(xlo,xhi,ylo,yhi) {
+  this.newimage("?op=settdomain&xlo=" + xlo +
+	   "&xhi=" + xhi +
+	   "&ylo=" + ylo +
+	   "&yhi=" + yhi);
+}
+
+MapWidget.prototype.restrict_tool_domain = function(xlo,xhi,ylo,yhi) {
+  this.newimage("?op=restdomain&xlo=" + xlo +
+	   "&xhi=" + xhi +
+	   "&ylo=" + ylo +
+	   "&yhi=" + yhi);
+}
+
+MapWidget.prototype.set_itool_domain = function(x,y) {
+  this.newimage("?op=setidomain&x=" + x +
+	   "&y=" + y);
+}
+
+MapWidget.prototype.image_load = function(e) {
+  if (e == null) e = window.event;
+  if (e == null){
+    alert("Browser doesn't support image click events");
+    return false;
+  }
+  var applet = aMapTool.mApplet;
+  applet.finalize();
+}
+
+// Only works in IE, Mozilla
+MapWidget.prototype.image_click = function(e) {
+  if (e == null) e = window.event;
+  if (e == null){
+    alert("Browser doesn't support image click events");
+    return false;
+  }
+  var applet = aMapTool.mApplet;
+  var x = e.offsetX; var y = e.offsetY;
+  if (x == null){
+    if (e.preventDefault){
+      var offsetx = 0, offsety = 0;
+      var offsetParent = e.target.offsetParent;
+      while (offsetParent != null){
+	offsetx += offsetParent.offsetLeft;
+  	offsety += offsetParent.offsetTop;
+        offsetParent = offsetParent.offsetParent;
+      }
+      x = e.clientX - offsetx; y = e.clientY - offsety;
+      e.preventDefault();
+    } else {
+      x = e.x; y = e.y;
+    }
+  }
+  var tool = applet.mTool;
+  //  alert("FirstPointState:" + applet.mFirstPointState + x + ":" + y + ":" + tool);
+  if (x < 0 || y < 0 || x > 320 || y > 160) return false;
+  if (tool == "PT"){
+    applet.mFirstPointState = false;
+    applet.set_itool_domain(x,y);
+  } else {
+    applet.mFirstPointState = ! applet.mFirstPointState;
+    if (applet.mFirstPointState){
+      applet.set_first_pt(x,y);
+    } else {
+      applet.set_itool_domain(x, y);
+    }
+  }
+  applet.finalize();
+  return false;
+}
+
+MapWidget.prototype.pan_up = function() {
+  this.newimage("?op=pan&dir=up");
+  this.finalize();
+}
+
+MapWidget.prototype.pan_down = function() {
+  this.newimage("?op=pan&dir=down");
+  this.finalize();
+}
+
+MapWidget.prototype.pan_left = function() {
+  this.newimage("?op=pan&dir=left");
+  this.finalize();
+}
+
+MapWidget.prototype.pan_right = function() {
+  this.newimage("?op=pan&dir=right");
+  this.finalize();
+}
+
+MapWidget.prototype.zoom_in = function() {
+  this.newimage("?op=zoomin");
+  this.finalize();
+}
+
+MapWidget.prototype.zoom_out = function() {
+  this.newimage("?op=zoomout");
+  this.finalize();
+}
+
+MapWidget.prototype.onBlur = function(widget){
+  var tool = this.mTool;
+  var value = widget.getValue();
+
+  if (widget.mType == "lon"){
+    value = this.clip_lon(value);
+  } else {
+    value = this.clip_lat(value);
+  }
+  widget.setValue(value);
+  var x1 = this.wx[0].getValue();
+  var x2 = this.wx[1].getValue();
+  if (x2 < x1){
+    x2 += 360.0;
+  }
+  var y1 = this.wy[0].getValue();
+  var y2 = this.wy[1].getValue();
+  this.set_tool_domain(x1,x2,y1,y2);
+  this.finalize();
+}
+
+MapWidget.prototype.setMode = function() {
+}
+
+MapWidget.prototype.clip_lon = function(x) {
+  x = convert_modulo(x);
+  if (x < this.minx){
+    x = this.minx;
+  }
+  if (x > this.maxx){
+    x = this.maxx;
+  }
+  return x;
+}
+
+MapWidget.prototype.clip_lat = function(y){
+  if (y < this.miny){
+    y = this.miny;
+  }
+  if (y > this.maxy){
+    y = this.maxy;
+  }
+  return y;
+}
+
+MapWidget.prototype.positionTool = function(xlo,xhi,ylo,yhi) {
+  this.set_tool_domain(xlo,xhi,ylo,yhi);
+  this.finalize();
+}
+
+function unconvert_mod_range(xvals){
+    if (xvals[1] - xvals[0] >= 360.0){
+	return [-180.0, 180.0];
+    }
+    var rvals = [xvals[0], xvals[1]];
+    if (xvals[1] < xvals[0]){
+	xvals[1] += 360.0;
+    }
+    return rvals;
+}
+
+MapWidget.prototype.intersect = function(x1,x2,ox1,ox2, ctype){
+    var xrange = [x1,x2];
+    var oxrange = [ox1, ox2];
+    if (ctype == "lon"){
+	xrange = unconvert_mod_range(xrange);
+	oxrange = unconvert_mod_range(oxrange);
+    }
+    x1 = xrange[0]; x2 = xrange[1]; ox1 = oxrange[0]; ox2 = oxrange[1];
+    if ((x1 <= ox1 && x2 <= ox1) || (x1 >= ox2 && x2 >= ox2)){
+	return [x1,x2];
+    }
+    var rvals = [Math.max(x1,ox1),Math.min(x2,ox2)];
+    if (ctype == "lon"){
+	rvals[0] = convert_modulo(rvals[0]);
+	rvals[1] = convert_modulo(rvals[1]);
+    }
+    return rvals;
+}
+
+MapWidget.prototype.restrictToolRange = function(dummy,x1,x2,y1,y2) {
+  var xvals = [x1,x2];
+  var yvals = [y1,y2];
+  this.restrict_tool_domain(xvals[0], xvals[1], yvals[0], yvals[1]);
+}
+
+MapWidget.prototype.get_x_range = function() {
+  var x1 = this.wx[0].getValue();
+  var x2 = this.wx[1].getValue();
+  if (x1 == x2 && "Y" != this.mTool && "PT" != this.mTool){
+    x1 = this.minx; x2 = this.maxx;
+  }
+  if (x2 < x1){
+    x2 += 360.0;
+  }
+  return x1 + " " + x2;
+}
+
+MapWidget.prototype.get_y_range = function() {
+    return this.wy[0].getValue() + " " + this.wy[1].getValue();
+}
+
+MapWidget.prototype.setToolRangeFull = function() {
+    this.positionTool(-180,180,-90,90);
+}
+
+MapWidget.prototype.setTool = function(tool) {
+  this.mTool = tool;
+  this.newimage("?op=seltool&type=" + this.mTool);
+}
+
+MapWidget.prototype.getBounds = function() {
+  function loadedXml() {
+    var applet = aMapTool.mApplet;
+    var doc = aMapTool.mApplet.mXdoc;
+    var xinfo = doc.getElementsByTagName("x")[0];
+    var yinfo = doc.getElementsByTagName("y")[0];
+    var xlo = xinfo.getAttribute("low");
+    var xhi = xinfo.getAttribute("high");
+    var ylo = yinfo.getAttribute("low");
+    var yhi = yinfo.getAttribute("high");
+    applet.minx = xlo; applet.maxx = xhi;
+    applet.miny = ylo; applet.maxy = yhi;
+    if (applet.wx[0]){
+      applet.wx[0].setValue(xlo);
+      applet.wx[1].setValue(xhi);
+      applet.wy[0].setValue(ylo);
+      applet.wy[1].setValue(yhi);
+    }
+  }
+
+  var xmlloc = "mapgen?op=gettdomain&ran=" + Math.random();
+  if (IsIE){
+    this.mXdoc = new ActiveXObject("Msxml.DOMDocument");
+    this.mXdoc.async = false;
+    this.mXdoc.load(xmlloc);
+    loadedXml();
+  } else if (IsStandard){
+    this.mXdoc = document.implementation.createDocument("","doc",null);
+    this.mXdoc.onload = loadedXml;
+    this.mXdoc.load(xmlloc);
+  }
+}
+
+MapWidget.prototype.finalize = function() {
+  if (this.mImageQueue.length == 0){
+    this.getBounds();
+    return;
+  }
+  document.imagemap.src = this.mImageQueue.shift();
+}
+
+// MapTool object
+function MapTool(applet, formName){
+  if (formName == null){
+    formName = 'region';
+  } 
+  this.mForm = document.forms[formName];
+  this.mApplet = new MapWidget(formName);
+}
+
+MapTool.prototype.setMode = function(mode_name) {
+    this.mApplet.setMode(mode_name);
+}
+
+MapTool.prototype.finalize = function() {
+    this.mApplet.finalize();
+}
+
+MapTool.prototype.setRanges = function(){
+  var txlo = parseFloat("$region.getAxisLo("x")");
+  var txhi = parseFloat("$region.getAxisHi("x")");
+  var tylo = parseFloat("$region.getAxisLo("y")");
+  var tyhi = parseFloat("$region.getAxisHi("y")");
+  this.mApplet.restrictToolRange(0, txlo, txhi, Math.min(tylo, tyhi),
+			    Math.max(tylo,tyhi));
+}
+
+MapTool.prototype.setRegion = function(label){
+  if ( label.indexOf('No Region') != -1 ) {
+    // no op;
+  } else if ( label.indexOf('Full Region') != -1 ) {
+    this.mApplet.setToolRangeFull();
+  } else {
+    regionarray = label.split(",");
+    var xlo = parseFloat(regionarray[0]);
+    var xhi = parseFloat(regionarray[1]);
+    var ylo = parseFloat(regionarray[2]);
+    var yhi = parseFloat(regionarray[3]);
+    if (Math.abs(xlo-xhi) >= 360.0){
+      xlo = -180;
+      xhi = 180;
+    }
+    this.mApplet.positionTool(xlo, xhi, Math.min(ylo,yhi), 
+                              Math.max(ylo, yhi));
+    // Time events
+    if (regionarray.length > 4){
+	var timeLength = TimeMultiWidgetList.length;
+	if (timeLength > 0){
+	    TimeMultiWidgetList[0].setSelected(regionarray[4], "-");
+	}
+	if (timeLength > 1){
+	    TimeMultiWidgetList[1].setSelected(regionarray[5], "-");
+	}
+    }
+  }
+}
+
+MapTool.prototype.selectTool = function(view) {
+  // Tell the Java LiveMap about this choice
+
+  var toolInt = 0;
+  var result;
+  if ( view.indexOf('x')!=-1 ) toolInt += 1;
+  if ( view.indexOf('y')!=-1 ) toolInt += 2;
+  switch(toolInt){
+  case 0:
+    result = "PT";
+    break;
+  case 1:
+    result = "X";
+    break;
+  case 2:
+    result = "Y";
+    break;
+  case 3:
+    result = "XY";
+    break;
+  }
+  Assert(result != null);
+  this.mApplet.setTool(result);
+}
+
+function RegionWidget(form, element){
+  this.base = Widget;
+  this.base(form, element);
+  this.addCallback("onchange");
+}
+setInherit("RegionWidget", "Widget");
+
+RegionWidget.prototype.onChange = function() {
+  var index = this.getSelected();
+  aMapTool.setRegion(index);
+}
+
+</script>
+
+
+<script language="JavaScript">
+var aMapTool;
+var aRegionWidget;
+
+function setRegionWidget() {
+  aRegionWidget.onChange();
+}
+
+function doSubmit() {
+//   if (aMapTool){
+//     aMapTool.getRanges();
+//   }
+}
+
+function init() {
+  aMapTool = new MapTool(document.map);
+  aMapTool.setMode('single');
+  aMapTool.selectTool("$region.getViewRegion()");
+  aMapTool.setRanges();
+  aMapTool.finalize();
+}
+
+
+</script>
+
+## Informative text
+#info_table_start()
+  Select your desired view (geometry of output) and output (type of product).
+  Then set the 4-D region (lon-lat-depth-time) and any additional constraints.
+#info_table_end("constrain")
+
+
+#error_message($form)
+
+#set($category=$region.getCategory())
+#set($include=$category.getConstrainInclude())
+#set($include_header=$category.getConstrainIncludeHeader())
+
+#if($include_header)
+#parse("$include_header")
+#end ## if($include_header)
+
+
+$form.getStart("region", "doSubmit()")
+    <input type="hidden" name="action" value="">
+    $form.hidden("use_java", "$use_java")
+
+
+#table_start()
+
+  <tr>
+    #td_advice("Select&nbsp;view")
+    <td width="140" align="left"><font size=2>
+      $form.select("view", $region.getViewItems())
+      </font>
+    </td>
+    <td align="right" valign="center">
+      <a onMouseOver="status='Get output for selected variable';return true"
+         href="" onClick="return stuffForm('data')"
+         class="redbold">Next&nbsp;&gt;</a>
+    </td>
+    <script language="JavaScript">
+      var foo = new ViewWidget("region", "view");
+    </script>
+  </tr>
+
+  <tr>
+    #td_advice("Select&nbsp;output")
+    <td><font size="2">
+      $form.select("output", $region.getProducts())
+      </font>
+    </td>
+    <td align="right" valign="center">
+      &nbsp;
+    </td>
+  </tr>
+
+  <tr>
+    #td_advice("Select&nbsp;region")
+    <td align="left"><font size=2>
+         $form.select("region", $region.getRegionItems())
+       </font>
+       <a href="javascript: setRegionWidget()"><img src="../images/go.gif" alt="Go" border="0"></a>
+    </td>
+    <td align="right" valign="center">
+      &nbsp;
+    </td>
+    <script language="JavaScript">
+       aRegionWidget = new RegionWidget("region", "region");
+    </script>
+  </tr>
+
+#table_end()
+
+
+#table_start()
+  <tr><td>&nbsp;</td</tr>
+  <tr>
+    <td> 
+      <table border="0" cellpadding="0" cellspacing="0" >
+	<tr><td>
+<!--
+	  <div id="mapdiv">
+	    <img name="imagemap" src="mapgen?" width=320 height=160>
+	  </div>
+-->
+        <a id="mapdiv" name="mapdiv" href="mapdiv">
+	    <img border="0" name="imagemap" src="mapgen?" width=320 height=160>
+        </a>
+        </td>
+	  <td valign="top" bgcolor="white">
+	    <table border="0" cellpadding="0" cellspacing="0">
+	      <tr> 
+		<td colspan=3 align="center"> 
+		  <input type="text" readonly size=10 name="yhi_text">
+		</td>
+	      </tr>
+	      <tr> 
+		<td align="right"> 
+		  <input type="text" readonly size=10 name="xlo_text">
+		</td>
+		<td width=30>&nbsp;</td>
+		<td align="left"> 
+		  <input type="text" readonly size=10 name="xhi_text">
+		</td>
+	      </tr>
+	      <tr> 
+		<td colspan=3 align="center"> 
+		  <input type="text" readonly size=10 name="ylo_text">
+		</td>
+	      </tr>
+	    </table>
+	  </td>
+        </tr>
+        <tr><td>
+	  <input name="pan_left" type="button" id="pan_left" onClick="aMapTool.mApplet.pan_left()" value="Pan Left">
+	  <input name="pan_right" type="button" id="pan_right" onClick="aMapTool.mApplet.pan_right()" value="Pan Right">
+	  <input name="pan_up" type="button" id="pan_up" onClick="aMapTool.mApplet.pan_up()" value="Pan Up">
+	  <input name="pan_down" type="button" id="pan_down" onClick="aMapTool.mApplet.pan_down()" value="Pan Down">
+        </td></tr>
+        <tr><td>
+	  <input name="zoom_in" type="button" id="zoom_in" onClick="aMapTool.mApplet.zoom_in()" value="Zoom In">
+	  <input name="zoom_out" type="button" id="zoom_out" onClick="aMapTool.mApplet.zoom_out()" value="Zoom Out">
+        </td></tr>
+      </table>
+    </td>
+
+  </tr>
+  <tr><td>&nbsp;</td</tr>
+#table_end()
+
+#table_start()
+
+## Create axis widgets
+
+#if($region.hasAxis("t"))
+#set($axis=$region.getAxis("t"))
+  <tr>
+  #set($isRange=$region.isRange("t"))
+  #if($isRange)
+    #td_advice("Select&nbsp;time&nbsp;range")
+  #else
+    #td_advice("Select&nbsp;time")
+  #end ##if($region.isRange("t"))
+  <td align="left"><font size="2">
+  $form.axisSelect("lo", "region", "t_lo", $axis)
+  #if($isRange)
+     to <br>
+     $form.axisSelect("hi", "region", "t_hi", $axis)
+  #end
+  </font></td>
+  </tr>
+#end ## region.hasAxis
+
+#if($region.hasAxis("z"))
+#set($axis=$region.getAxis("z"))
+  <tr>
+  #set($isRange=$region.isRange("z"))
+  #if($isRange)
+    #td_advice("$region.getUI().get_z_text()&nbsp;range")
+  #else
+    #td_advice("$region.getUI().get_z_text()")
+  #end ##if($region.isRange("z"))
+  <td align="left"><font size="2">
+  $form.axisSelect("lo", "region", "z_lo", $axis)
+  #if($isRange)
+     to <br>
+     $form.axisSelect("hi", "region", "z_hi", $axis)
+  #end
+  </font></td>
+  </tr>
+#end ## region.hasAxis
+
+#table_end()
+
+## Create constraints (if any)
+
+
+#if($region.getUI().isConstrained())
+#set($index=0)
+#set($constraints=$region.getUI().getConstraints())
+
+#table_start()
+
+#if($include)
+#parse("$include")
+#else ## if($include)
+
+  <tr>
+    #td_advice("Select&nbsp;Constraints")
+  </tr>
+  #foreach($constraint in $constraints)
+      #foreach($dummy in $constraint.getCountList())
+  <tr>
+    <td><font size="2">
+          #foreach($widget in $form.constraintSelect("region", $index, $constraint, $category))
+             $widget
+          #end ## #foreach($widget...)
+    </font></td>
+  </tr>
+	  #set($index=$index+1)
+      #end ##foreach($dummy...)
+  #end ## foreach($constraint...)
+  <tr>
+    <td width="100%" height="20" align="right" valign="center">
+      <a onMouseOver="status='Get output for selected variable';return true"
+         href="" onClick="return stuffForm('data')"
+         class="redbold">Next&nbsp;&gt;</a>
+    </td>
+  </tr>
+#end ## if($include)
+#table_end()
+#end ## isConstrained
+
+$form.End
+
+

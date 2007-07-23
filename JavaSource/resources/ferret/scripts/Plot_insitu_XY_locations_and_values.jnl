@@ -1,0 +1,8 @@
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! 
+! $Author: rhs $
+!
+! Set a couple of variables and call the script that does the work.
+DEFINE SYMBOL data_0_x_var = ($database_access_0_longitude)
+DEFINE SYMBOL data_0_y_var = ($database_access_0_latitude)
+go xy_insitu_poly

@@ -1,0 +1,179 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<title>MapGenerator Tester</title>
+<meta http-equiv="Content-Type" content="text/html;
+charset=iso-8859-1">
+<script language="JavaScript" type="text/JavaScript">
+
+Base = "http://pc.sirvin.com:8080/las/servlets/mapgen";
+FirstPointState = false;
+FirstX = null;
+FirstY = null;
+Mode = "xy";
+
+function newimage(url){
+  document.images[0].src = Base + url;
+}
+
+function pan_up() {
+  newimage("?op=pan&dir=up");
+}
+
+function pan_down() {
+  newimage("?op=pan&dir=down");
+}
+
+function pan_left() {
+  newimage("?op=pan&dir=left");
+}
+
+function pan_right() {
+  newimage("?op=pan&dir=right");
+}
+
+function zoom_in() {
+  newimage("?op=zoomin");
+}
+
+function zoom_out() {
+  newimage("?op=zoomout");
+}
+
+function set_tool_domain() {
+  var f = document.forms.test_form;
+  newimage("?op=settdomain&xlo=" + f.txlo.value +
+	   "&xhi=" + f.txhi.value +
+	   "&ylo=" + f.tylo.value +
+	   "&yhi=" + f.tyhi.value);
+}
+
+function set_itool_domain(xlo,xhi,ylo,yhi) {
+  newimage("?op=setidomain&xlo=" + xlo +
+	   "&xhi=" + xhi +
+	   "&ylo=" + ylo +
+	   "&yhi=" + yhi);
+}
+
+function set_restricted() {
+  var f = document.forms.test_form;
+  newimage("?op=restdomain&xlo=" + f.rxlo.value +
+	   "&xhi=" + f.rxhi.value +
+	   "&ylo=" + f.rylo.value +
+	   "&yhi=" + f.ryhi.value);
+}
+
+function set_first_pt(x,y) {
+  newimage("?op=firstpt&x=" + x + "&y=" + y);
+}
+
+function set_tool() {
+  var f = document.forms.test_form;
+  var val = f.select.value;
+  Mode = val;
+  newimage("?op=seltool&type=" + val);
+}
+
+// Only works in IE, Mozilla
+function image_click(e) {
+  if (e == null) e = window.event;
+  if (e == null){
+    alert("Browser doesn't support image click events");
+    return;
+  }
+  var x = e.offsetX; var y = e.offsetY;
+  if (x == null) {
+    x = e.layerX; y = e.layerY;
+  }
+  if (x < 0 || y < 0 || x > 320 || y > 160) return;
+  alert("FirstPointState:" + FirstPointState + x + ":" + y + ":" + Mode);
+  if (Mode == "pt"){
+    FirstPointState = false;
+    set_itool_domain(x,x,y,y);
+  } else {
+    FirstPointState = ! FirstPointState;
+    if (FirstPointState){
+      FirstX = x;
+      FirstY = y;
+      set_first_pt(x,y);
+    } else {
+      if (Mode == "x") y = FirstY;
+      if (Mode == "y") x = FirstX;
+      set_itool_domain(FirstX, x, FirstY, y);
+    }
+
+  }
+    
+}
+
+function init() {
+  if (document.all){ // IE 4/5/6
+    document.all.map.onclick = image_click;
+  } else if (document.getElementById){ // Standards compliant
+    document.getElementById("map").addEventListener("click",
+						    image_click, true);
+  } else {
+    alert("Clickable map only supported in IE 4/5/6 && Mozilla");
+  }
+}
+
+</script>
+<script language="JavaScript" type="text/JavaScript">
+<!--
+function MM_callJS(jsStr) { //v2.0
+  return eval(jsStr)
+}
+//-->
+</script>
+
+</head>
+
+<body onLoad = "init()">
+<p><div id="map">
+<img src="http://pc.sirvin.com:8080/las/servlets/mapgen?" 
+ width=320 height=160>
+</div>
+</p>
+<form action="" method="get" name="test_form" id="test_form">
+<p>
+  <input name="pan_left" type="button" id="pan_left" onClick="MM_callJS('pan_left()')" value="Pan Left">
+  <input name="pan_right" type="button" id="pan_right" onClick="MM_callJS('pan_right()')" value="Pan Right">
+  <input name="pan_up" type="button" id="pan_up" onClick="MM_callJS('pan_up()')" value="Pan Up">
+  <input name="pan_down" type="button" id="pan_down" onClick="MM_callJS('pan_down()')" value="Pan Down">
+</p>
+<p>
+  <input name="zoom_in" type="button" id="zoom_in" onClick="MM_callJS('zoom_in()')" value="Zoom In">
+  <input name="zoom_out" type="button" id="zoom_out" onClick="MM_callJS('zoom_out()')" value="Zoom Out">
+</p>
+<p>Tool type: 
+  <select name="select" onChange="MM_callJS('set_tool()')">
+  <option value="xy">xy</option>
+  <option value="x">x</option>
+  <option value="y">y</option>
+  <option value="pt">pt</option>
+  </select>
+</p>
+<p>
+  <input name="tool_domain" type="button" id="tool_domain" onClick="MM_callJS('set_tool_domain()')" value="Set Tool Domain">
+  xlo 
+  <input name="txlo" type="text" id="txlo" value="-180" size="8" maxlength="8">
+  xhi
+  <input name="txhi" type="text" id="txhi" value="180" size="8" maxlength="8">
+  ylo
+  <input name="tylo" type="text" id="tylo" value="-90" size="8" maxlength="8">
+  yhi
+  <input name="tyhi" type="text" id="tyhi" value="90" size="8" maxlength="8">
+</p>
+<p><input name="rest_domain" type="button" id="rest_domain" onClick="MM_callJS('set_restricted()')" value="Set Restricted">
+  xlo
+  <input name="rxlo" type="text" id="txlo5" value="-180" size="8" maxlength="8">
+xhi
+<input name="rxhi" type="text" id="rxhi" value="180" size="8" maxlength="8">
+ylo
+<input name="rylo" type="text" id="rylo" value="-90" size="8" maxlength="8">
+yhi
+<input name="ryhi" type="text" id="ryhi" value="90" size="8" maxlength="8">
+</p>
+</form>
+</body>
+</html>

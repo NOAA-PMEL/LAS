@@ -1,0 +1,55 @@
+$form.Start
+<table>
+<tr><td colspan="2" class="heading">$category.getName()</td></tr>
+<tr><td class=advice_noimg colspan="2">
+<div style="margin-left: 25px">
+Datasets
+</div>
+</td></tr>
+#foreach($c in $thisCategory)
+<tr>
+   <td colspan="2" class="heading">
+   <div style="margin-left: 30px">
+   $c.getName()
+   </div>
+   </td>
+</tr>
+<tr>
+   #set($children=$c.getChildren())
+   #set($num_children=$children.size())
+   #foreach ($v in $children)
+      #set ($index = ($velocityCount - 1)*2)
+      #set ($next  = ($velocityCount - 1)*2 + 1)
+      #if ( $index < $num_children )
+         #set ($v1 = $children.get($index))
+      #end
+      #if ( $next < $num_children )
+        #set ($v2 = $children.get($next))
+      #end
+  #if ( $index < $num_children )
+  ## TODO: comparison mode logic
+   <tr>
+      <td width="50%">
+        <div style="margin-left: 40px">
+        #a_metadata($v1)
+        #a_dataset("" $v1 $v1.getName() $comparison_mode)
+	</div>
+      </td>
+      #if ( $next < $num_children )
+         <td width="50%">
+           <div style="margin-left: 40px">
+           #a_metadata($v2)
+           #a_dataset("" $v2 $v2.getName() $comparison_mode)
+	   </div>
+         </td>
+      #else
+         <td width="50%"></td>
+      #end
+   </tr>
+   #end
+   #end ## foreach variable in this category
+</td>
+<tr>
+#end ## foreach (category in the current list)
+</table>
+$form.End

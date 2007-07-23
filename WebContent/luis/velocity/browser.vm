@@ -1,0 +1,115 @@
+<html>
+<head>
+<title>Browser Detection</title>
+</head>
+<body>
+#if ($browser.isIE() && $browser.isWin() && !$browser.isRejected())
+#info_table_start()
+   You are running Internet Explorer on MS Windows and your browser
+   is already accepted for use with the applet.
+#info_table_end("browser")
+Your UserAgent HTTP Header String:<br>
+<b>$browser.getAgent()</b>
+<p>
+#elseif ($browser.isMozilla() && $browser.isWin() && !$browser.isRejected())
+#info_table_start()
+   You are running a Netscape/Mozilla version greater than 6 on Windows and 
+   your browser is already accepted for use with the applet.
+#info_table_end("browser")
+Your UserAgent HTTP Header String:<br>
+<b>$browser.getAgent()</b>
+<p>
+#elseif ($browser.isCompatible() )
+#info_table_start()
+   I'm not sure what browser you are running, but it is in the list
+   of compatible browsers and should work with the applet.
+#info_table_end("browser")
+Your UserAgent HTTP Header String:<br>
+<b>$browser.getAgent()</b>
+<p>
+#else
+#info_table_start()
+   You are not running on Windows with IE or Netscape/Mozilla.
+   If you know how your browser behaves with the Map applet you 
+   can add your browser to the list of tested browsers, by checking
+   the appropriate button and clicking <span class="redbold">Next&nbsp;&gt;</span>.
+#info_table_end("browser")
+Your UserAgent HTTP Header String:<br>
+<b>$browser.getAgent()</b>
+<p>
+$form.Start
+#a_Next("dataset" "Submit this browser to the database.")<br>
+$form.hidden("agent","$browser.getAgent()")
+$form.radio("applet","false","checked")This browser <b><i>IS NOT</i></b> compatible with the Map applet.<br>
+$form.radio("applet","true")This browser is compatible with the Map applet.</input>
+$form.End
+#end
+<table border="2">
+<tr>
+<th colspan="2" align="center">
+Known Browsers.
+</th>
+</tr>
+<tr>
+<td colspan="2" bgcolor="ffff99" align="center">
+If your browser is in the list it is highlighted in yellow.
+</td>
+</tr>
+<tr>
+<th width="80%">User-Agent</th>
+<th>Use the applet?</th>
+</tr>
+#foreach ($br in $browser.deserializeAggregate())
+<tr>
+#if ($br.getAgent().equals($browser.getAgent()))
+<td width="80%" bgcolor="ffff99">$br.getAgent()</td>
+#else
+<td width="80%">$br.getAgent()</td>
+#end
+#if ($br.isCompatible())
+<td bgcolor="33FF33" align="center">Yes</td>
+#else
+<td bgcolor="FF3333" align="center">No</td>
+#end ## if compatible
+</tr>
+#end ## Browser loop
+</table>
+
+#set($cands=$candidate.deserializeAggregate())
+#if($cands.size() > 0)
+<table border="2">
+<tr>
+<th colspan="2" align="center">
+Candidate Browsers.
+</th>
+</tr>
+<tr>
+<td colspan="2" bgcolor="ffff99" align="center">
+If your browser is in the list it is highlighted in yellow.
+</td>
+</tr>
+<tr>
+<th width="80%">User-Agent</th>
+<th>Use the applet?</th>
+</tr>
+#foreach ($br in $cands)
+<tr>
+#if ($br.getAgent().equals($browser.getAgent()))
+<td width="80%" bgcolor="ffff99">$br.getAgent()</td>
+#else
+<td width="80%">$br.getAgent()</td>
+#end
+#if ($br.isCompatible())
+<td bgcolor="33FF33" align="center">Yes</td>
+#else
+<td bgcolor="FF3333" align="center">No</td>
+#end ## if compatible
+</tr>
+#end ## Browser loop
+</table>
+#end ## If candidates size > 0
+
+
+</body>
+</html>
+

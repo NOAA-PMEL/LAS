@@ -1,0 +1,16 @@
+<html>
+<head>
+<title>$title -- output</title>
+</head>
+<body>
+#table_start()
+
+<tr><td>
+$result
+</td></tr>
+          <tr><td align="center">
+          <a target="_blank" href="$dataurl" title="Open a Permanent link to this plot/datain a new window.">Open a permanent link to this plot/data in a new window.</a>
+          </td></tr>
+#table_end()
+</body>
+</html>

@@ -1,0 +1,5 @@
+use levitus_climatology
+let/d=levitus_climatology temp_20 = temp[d=levitus_climatology,z=0:20@sum]
+set var/title="surface heat content"/units="deg C" temp_20[d=levitus_climatology]
+use coads_climatology
+let A = TEMP[d=1]*2.56

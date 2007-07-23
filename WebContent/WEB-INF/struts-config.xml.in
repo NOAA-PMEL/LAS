@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE struts-config PUBLIC
+          "-//Apache Software Foundation//DTD Struts Configuration 1.3//EN"
+          "http://struts.apache.org/dtds/struts-config_1_3.dtd">
+<struts-config>
+        <form-beans>
+           <form-bean name="constrain" type="gov.noaa.pmel.tmap.las.ui.ConstrainForm"/>
+           <form-bean name="progress" type="gov.noaa.pmel.tmap.las.product.server.ProgressForm"/>
+        </form-beans>
+	<action-mappings>
+		<action path="/ProductServer"
+                        name="progress"
+			type="gov.noaa.pmel.tmap.las.product.server.ProductServerAction">
+			<forward name="error"
+				path="/productserver/templates/error.vm" redirect="false" />
+			<forward name="batch_error" path="/productserver/templates/batch_error.vm" redirect="false"/>
+			<forward name="progress" 
+			    path="/productserver/templates/progress.vm" redirect="false"/>
+			<forward name="info" path="/productserver/templates/info.vm" redirect="false"/>
+			<forward name="cancel" path="/productserver/templates/cancel.vm" redirect="false"/>
+		</action>
+          <action name="constrain" path="/Constrain" scope="session" type="gov.noaa.pmel.tmap.las.ui.ConstrainAction">
+            <forward name="constrain" path="/constrain.jsp"/>
+          </action>
+          <action name="constrain" path="/InitConstrain" scope="session" type="gov.noaa.pmel.tmap.las.ui.InitConstrainAction">
+            <forward name="constrain" path="/constrain.jsp"/>
+          </action>
+          <action name="constrain" path="/MyConstrain" scope="session" type="gov.noaa.pmel.tmap.las.ui.ConstrainAction">
+            <forward name="constrain" path="/myconstrain.jsp"/>
+          </action>
+          <action name="constrain" path="/MyInitConstrain" scope="session" type="gov.noaa.pmel.tmap.las.ui.InitConstrainAction">
+        <forward name="constrain" path="/myconstrain.jsp" />
+          </action>
+          <action path="/getViews" type="gov.noaa.pmel.tmap.las.ui.getViews" />
+          <action path="/getGrid" type="gov.noaa.pmel.tmap.las.ui.getGrid" />
+          <action path="/getOperations" type="gov.noaa.pmel.tmap.las.ui.getOperations" />
+          <action path="/getOptions" type="gov.noaa.pmel.tmap.las.ui.getOptions" />
+          <action path="/getCategories" type="gov.noaa.pmel.tmap.las.ui.getCategories" />
+	</action-mappings>
+	<plug-in
+		className="gov.noaa.pmel.tmap.las.product.server.LASConfigPlugIn">
+		<set-property property="configFileName"
+			value="@PWD@/conf/server/las.xml" />
+		<set-property property="v7OperationsFileName"
+			value="@PWD@/conf/server/operationsV7.xml" />
+                <set-property property="lasUIFileName" 
+                        value="@PWD@/conf/server/ui.xml" />
+		<set-property property="serverConfigFileName"
+			value="@PWD@/conf/server/productserver.xml" />
+	</plug-in>
+</struts-config>

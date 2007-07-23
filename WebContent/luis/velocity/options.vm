@@ -1,0 +1,94 @@
+#info_table_start()
+  The following options are available for this variable/view/output product.<br>
+  Modify them as desired or reset them to their default values.
+#info_table_end("options")
+
+#error_message($form)
+
+$form.getStart("options", "doSubmit()")
+
+#table_start()
+            <tr>
+              #td_advice("Select&nbsp;options")
+              <td align="right" valign="center">
+                <a onMouseOver="status='Get output for selected variable';return true"
+                   class="redbold" href="" onClick="return stuffForm('data')">
+                   Next&nbsp;&gt;
+                </a>
+              </td>
+            </tr>
+
+## Test code for variable menu
+##	<tr><td><font size="2">
+##           $form.selectedVariables("output", $region)
+##       </font></td></tr>
+
+## End test code
+
+
+
+
+#if($options.size() == 0)
+            <tr>
+              <td colspan=2 align=center>
+                No options available for this output product
+              </td>
+            </tr>
+#else
+            <tr>
+              <td colspan=2 align=center>
+                <table border=0 cellpadding=5 cellspacing=0>
+
+#foreach($o in $options)
+#set($optionsWidget = $o.getOptionsWidget())
+	    <TR>
+		##<TD WIDTH=26>
+		<TD>
+		    <P ALIGN=CENTER>
+                        <A class="nav" 
+                         href="javascript:showInfo('$o.getTitle()', '$o.getHelp()')" 
+                         onMouseOver="window.status='Click for help'; return true"
+                         onMouseOut="window.status=''; return true"
+                        >
+                             <IMG SRC="../images/icon_white_question.gif"
+                              ALIGN=BOTTOM WIDTH=13 HEIGHT=13 BORDER=0></A>
+                     </P>
+		</TD>
+		##<TD WIDTH=288>
+		<TD>
+		    <P><FONT SIZE=2>$o.getTitle()</FONT></P>
+		</TD>
+		##<TD WIDTH=220><FONT SIZE=2>
+		<TD WIDTH=220><FONT SIZE=2>
+		    #if($o.getType() == "m")
+			$form.select("$optionsWidget.getName()", $optionsWidget.getItems())
+		    </FONT>
+		    #elseif($o.getType() == "t")
+		        $form.text("$optionsWidget.getName()")
+	            #elseif($o.getType() == "v")
+                        $form.selectedVariables("$optionsWidget.getName()", $region)
+		    #else
+                        (Internal: unknown widget)
+	            #end
+		</TD>
+	     </TR>
+#end ## foreach($o in $options)
+
+                 </table>
+               </td>
+             </tr>
+
+             <tr><td colspan=2>&nbsp;</td></tr>
+
+             <tr>
+               <td colspan=2 align="center">
+                 <a href="javascript:document.forms['options'].reset()"
+                    onMouseOver="status='Reset form to defaults'; 
+                    return true;"Use&nbsp;Defaults</a>   
+               </td>
+             </tr>
+#end ## if($options.size() == 0)
+
+#table_end()
+
+$form.End

@@ -1,0 +1,6 @@
+## Velocity template for the 'Dataset' page in single dataset mode.
+
+#set($comparison_mode="")
+#set($thisCategory=$dataset)
+
+#parse("dataset_body.vm")

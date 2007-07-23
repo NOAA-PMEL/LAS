@@ -1,0 +1,97 @@
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! $RCSfile: LAS_initialize_dataset.jnl
+
+! This is the first part of LAS_initialize_data.jnl used for standard and
+! customized init scripts
+
+! $Author: ansley, jing
+! $Date: 2007/29/2007
+
+! 6/29/2007
+! Allow for data_0_units or data_1_units etc to be defined a null string or a
+! string containing a single space. If data_0_units is either undefined or is 
+! one of these blank strings, then use the attnames syntax to see if the dataset 
+! variable has units defined, and if so define the data_units symbol from that.
+
+! The LAS_initialize_data.jnl script takes care of everything having to
+! do with initializing a datset for later use.
+!
+! LAS_initialize_data.jnl takes an argument that specifies which data
+! item [0|1|2|3|...] to create symbols for. 
+
+!ACM_note: if we use a loop in the plot routine, we are not 
+! limited to 9 data items
+! DEFINE SYMBOL num ($1"0|0|1|2|3|4|5|6|7|8|9")
+DEFINE SYMBOL num ($1"0")
+
+! TODO:  It would be nice if the java code removed this dependency upon
+! TODO:  whether an operation was 'chained' or not.
+
+! Check whether the source data was part of a 'chained' operation.
+!ACM note: How does this jibe with what I do below changing data_url to data_num??
+
+IF ($data_($num)_chained"0|1|*>1) THEN
+  DEFINE SYMBOL data_url \"($data_($num)_file)\"
+ELSE
+  DEFINE SYMBOL data_url \"($data_($num)_url)\"
+ENDIF
+
+IF ($data_($num)_var"0|*>1") THEN DEFINE SYMBOL data_var ($data_($num)_var)
+IF ($data_($num)_units"0|*>1") THEN DEFINE SYMBOL data_units (($data_($num)_units))
+
+! Do not define data_units with an empty string
+IF ($data_($num)_units%1|"">1|*>0%) THEN CANCEL SYMBOL data_units
+IF ($data_($num)_units%1|" ">1|*>0%) THEN CANCEL SYMBOL data_units
+
+IF ($data_($num)_name"0|1|*>1) THEN 
+   IF ($data_($num)_title"0|*>1") THEN DEFINE SYMBOL data_title ($data_($num)_title)
+ELSE
+   IF ($data_($num)_var"0|*>1") THEN DEFINE SYMBOL data_title ($data_($num)_var)
+ENDIF
+
+DEFINE SYMBOL ferret_plot_title "($data_title) ($data_units)"
+
+! TODO:  Use new error features in Ferret to turn off STDERR and check
+! TODO:  for Ferret error symbols to see if the SET DATA command actually worked.
+
+! SET DATA and check for errors
+
+SET DATA ($data_url)
+
+IF ($fer_last_error"0|*>1") THEN
+  DEFINE SYMBOL error_status = ERROR
+  DEFINE SYMBOL error_type = DATA
+  DEFINE SYMBOL error_string = The ($data_var) source file -- ($data_url) did not open successfully.
+  EXIT/SCRIPT
+ENDIF
+DEFINE SYMBOL data_num = `($data_var),return=dsetnum`
+ 
+! Be sure units and title are defined.
+! If units are not defined, try to get units from the data variable.
+! If the variable in the file has no units, leave data_units symbol undefined.
+ 
+LET anames = ($data_var).attnames
+IF `IS_ELEMENT_OF_STR (anames, "units") OR IS_ELEMENT_OF_STR (anames, "UNITS")` THEN
+   DEFINE SYMBOL data_var_units `($data_var),RETURN=units`
+   DEFINE SYMBOL data_units (`($data_var),RETURN=units`)
+ENDIF
+
+DEFINE SYMBOL ferret_plot_title "($data_title) ($data_units)"
+
+IF `($data_title"0|*>1") EQ 0` THEN 
+  IF (strcmp (" ", "`a,return=units`") NE 0` THEN \
+  define symbol ferret_plot_title "($data_var) ($data_units)"
+ENDIF
+
+! From the region and the grid we can define striding. 
+! TODO: (When there's going to be a transformation, should this be done??)
+!  Do this only for the HYCOM high resolution data, so put it in  HYCOM_init script
+! GO LAS_set_strides.jnl
+
+!test stride for Google Earth
+IF `STRINDEX( "($operation_ID)", "GE" ) NE 0` THEN
+    GO LAS_set_strides_GE
+ENDIF
+
+! End of $RCSfile ------------LAS_initialize_dataset.jnl--------------------------
+

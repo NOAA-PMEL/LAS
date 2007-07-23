@@ -1,0 +1,626 @@
+/**
+ * This software is provided by NOAA for full, free and open release.  It is
+ * understood by the recipient/user that NOAA assumes no liability for any
+ * errors contained in the code.  Although this software is released without
+ * conditions or restrictions in its use, it is expected that appropriate
+ * credit be given to its author and to the National Oceanic and Atmospheric
+ * Administration should the software be included by the recipient as an
+ * element in other product development. 
+ */
+package gov.noaa.pmel.tmap.iosp;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.StringReader;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+
+import org.apache.log4j.Logger;
+import org.jdom.Document;
+import org.jdom.Element;
+
+import ucar.ma2.Array;
+import ucar.ma2.DataType;
+import ucar.ma2.IndexIterator;
+import ucar.ma2.InvalidRangeException;
+import ucar.ma2.Range;
+import ucar.nc2.Attribute;
+import ucar.nc2.Dimension;
+import ucar.nc2.IOServiceProvider;
+import ucar.nc2.NCdump;
+import ucar.nc2.NetcdfFile;
+import ucar.nc2.Variable;
+import ucar.nc2.dataset.NetcdfDataset;
+import ucar.nc2.util.CancelTask;
+import ucar.unidata.io.RandomAccessFile;
+
+/**
+ * This is the implementation of the netCDF Java IO Service Provider interface that turns Ferret scripts
+ * and the variables it accesses and defines into an OPeNDAP netCDF data source.  The variables that are
+ * defined by the script must be assoicated with an existing open data set.  E.g.
+ * 
+ * use levitus_climatology
+ * let/d=levitus_climatology temp_20 = temp[d=levitus_climatology,z=0:20@sum]
+ * set var/title="surface heat content"/units="deg C" temp_20[d=levitus_climatology]
+ * use coads_climatology
+ * let/d=coads_climatology sst_5 = SST[d=coads_climatology]*5.0
+ * @author Roland Schweitzer
+ *
+ */
+public class FerretIOServiceProvider implements IOServiceProvider {
+    static private Logger log = Logger.getLogger(FerretIOServiceProvider.class.getName());
+    private ucar.nc2.NetcdfFile ncds;
+    private String jnl;
+    private String cacheKey;
+    private FerretTool tool;
+    static private final long maxHeader = 512;
+    
+    /**
+     * The default constructor, warms up the FerretTool that will be used to run Ferret.
+     *
+     */
+    public FerretIOServiceProvider () {
+        super();
+        
+        try {
+            tool = new FerretTool();
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        
+    }
+
+    /* (non-Javadoc)
+     * @see ucar.nc2.IOServiceProvider#close()
+     */
+    public void close() throws IOException {
+        // TODO Auto-generated method stub
+
+    }
+
+    /* (non-Javadoc)
+     * @see ucar.nc2.IOServiceProvider#getDetailInfo()
+     */
+    public String getDetailInfo() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    /* (non-Javadoc)
+     * @see ucar.nc2.IOServiceProvider#isValidFile(ucar.unidata.io.RandomAccessFile)
+     */
+    public boolean isValidFile(RandomAccessFile raf) throws IOException {
+        log.debug("Checking valid file for Ferret netCDF file.");
+
+        long pos = 0;
+        long size = raf.length();
+        
+        byte[] b = new byte[10];
+        try {
+            while ( pos < size && pos < maxHeader ) {
+               raf.seek(pos);
+               raf.read(b);
+               String magic = new String(b);
+               if ( FerretCommands.containsCommand(magic)) {
+                   log.debug("Yes, is valid");
+                   return true;
+               }
+               pos++;
+            }          
+        } catch (IOException e) { } // fall through
+        log.debug("No, is not valid");
+        return false;
+    }
+
+    /* (non-Javadoc)
+     * @see ucar.nc2.IOServiceProvider#open(ucar.unidata.io.RandomAccessFile, ucar.nc2.NetcdfFile, ucar.nc2.util.CancelTask)
+     */
+    public void open(RandomAccessFile raf, NetcdfFile ncfile,
+            CancelTask cancelTask) throws IOException {
+        log.debug("Opening " + raf.getLocation());
+        raf.seek(0);
+        StringReader sr;
+        try {
+            byte[] b = new byte[(int)raf.length()];
+            raf.read(b);
+            sr = new StringReader(new String(b));
+        } catch (IOException e) {
+            log.debug("IO Exception reading the random access file.");
+            throw e;
+        }
+
+
+        // Use this script to run Ferret and produce the equivalent of
+        // the netCDF header by reading the XML output from Ferret and building all
+        // the dimensions, variables and attributes.
+
+        // Run the FerretTool to make the XML.
+
+        jnl = null;
+
+        StringBuffer inJnl = new StringBuffer();
+
+        BufferedReader jnlBuffReader = new BufferedReader(sr);
+        try {
+            String line = jnlBuffReader.readLine();
+
+            while (line != null) {
+                inJnl.append(line+"\n");
+                line = jnlBuffReader.readLine();
+            }
+        } catch (IOException e) {
+        }
+        jnl = inJnl.toString();
+
+        cacheKey = JDOMUtils.MD5Encode(jnl);           
+        String xmlHeader = null;
+        try {
+            xmlHeader = tool.run_header("header.jnl", jnl, cacheKey);
+        } catch (Exception e1) {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
+        }
+
+
+        log.debug("process the XML header in "+xmlHeader);
+        // Process the XML.
+        Document header = new Document();
+        try {
+            JDOMUtils.XML2JDOM(new File(xmlHeader), header);
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        log.debug("document built "+header.toString());
+
+
+
+        
+        // First build a hash that identifies the data set to which an axis belongs.
+        HashMap<String, String> axis_datasets = new HashMap<String, String>();
+        List data = header.getRootElement().getChild("datasets").getChildren("dataset");
+        for (Iterator dataIt = data.iterator(); dataIt.hasNext();) {
+            Element dataset = (Element) dataIt.next();
+            String dataset_name = dataset.getAttributeValue("name");
+            List vars = dataset.getChildren("var");
+            for (Iterator varIt = vars.iterator(); varIt.hasNext();) {
+                Element var = (Element) varIt.next();
+                List var_axes = var.getChild("grid").getChild("axes").getChildren();             
+                for (Iterator axisIt = var_axes.iterator(); axisIt.hasNext();) {
+                    Element axis = (Element) axisIt.next();
+                    String axisName = axis.getTextNormalize();
+                    axis_datasets.put(axisName, dataset_name);
+                }
+            }
+        }
+        log.debug("Finished parsing the XML file.");
+        // This creates the dimensions and the coordinate variables from the Ferret XML description.
+        List axes = header.getRootElement().getChild("axes").getChildren("axis");
+        
+        
+        
+        
+
+        log.debug("Found "+axes.size()+" axis elements.");
+
+
+        // Keep a list of all the Dimensions created.
+        ArrayList<Dimension> allDims = new ArrayList<Dimension>();
+        HashMap<String, String> directions = new HashMap<String, String>(); 
+        for (Iterator axisIt = axes.iterator(); axisIt.hasNext();) {
+            Element axisE = (Element) axisIt.next();
+            Element length = axisE.getChild("length");
+            String name = axisE.getAttributeValue("name");
+            log.debug("Working on axis: "+name);
+            if ( length != null ) {
+                String dimS = length.getTextNormalize();
+                Dimension dim = new Dimension(name, Integer.valueOf(dimS).intValue(), true);
+                log.debug("New dim with size: "+dim.getLength());
+                List<Dimension> dims = new ArrayList<Dimension>();
+                dims.add(dim);
+                allDims.add(dim);
+                ncfile.addDimension(null, dim);
+                Variable coord = new Variable(ncfile, null, null, name);
+                coord.setDimensions(dims);
+                coord.setDataType(DataType.DOUBLE);
+                List attributes = axisE.getChildren();
+                coord.addAttribute(new Attribute("dataset", axis_datasets.get(name)));
+                for (Iterator attIt = attributes.iterator(); attIt.hasNext();) {
+                    Element attribute = (Element) attIt.next();
+                    log.debug("adding attribute: "+attribute.getName()+" "+attribute.getTextNormalize());
+                    if ( !attribute.getName().equals("length") && 
+                            !attribute.getName().equals("start") && 
+                            !attribute.getName().equals("end")) {
+
+                        String value = attribute.getTextNormalize();
+                        String aname = attribute.getName();
+                        
+                        if ( aname.equals("direction") ) {
+                            directions.put(name, value);
+                        }
+                        try {
+                           double dvalue = Double.valueOf(value).doubleValue();
+                           coord.addAttribute(new Attribute(aname, new Double(dvalue)));
+                        } catch (NumberFormatException nfe) {
+                           coord.addAttribute(new Attribute(attribute.getName(), attribute.getTextNormalize()));
+                        }
+                    }
+                }
+                ncfile.addVariable(null, coord);
+            }
+        }
+
+        log.debug("Finished with coordinate axes variables.");
+        /* This creates the data variables form the Ferret XML description (global section).
+         * Only grab the one's whose grids are != 'ABSTRACT'.
+         * */
+        ArrayList<String> globalNames = new ArrayList<String>();
+        Element globalE = header.getRootElement().getChild("global");
+
+        if ( globalE != null ) {
+            List globalVars = globalE.getChildren("var");
+
+            log.debug("Found "+globalVars.size()+" 'global' variables");
+
+            for (Iterator varIt = globalVars.iterator(); varIt.hasNext();) {
+                Element var = (Element) varIt.next();
+                String name = var.getAttributeValue("name");                
+                // Find the name of the data set to which this variable is being added.
+                String dsname = name.replaceAll(" ","");
+                int end = dsname.indexOf("]");
+                if ( dsname.indexOf(",") > 0 ) {
+                    end = Math.min(end, dsname.indexOf(","));
+                }
+                if ( dsname.contains("D=") ) {
+                    dsname = dsname.substring(dsname.indexOf("[D=")+3, end);
+                } else if ( dsname.contains("d=")){
+                    dsname = dsname.substring(dsname.indexOf("[d=")+3, end);
+                } else {
+                    dsname="1";
+                }
+                // Get rid of the [d="dataset"] in the netCDF variable name.
+                if ( name.contains("D=") ) {
+                    name = name.substring(0, name.indexOf("[D="));
+                } else if ( name.contains("d=")){
+                    name = name.substring(0, name.indexOf("[d="));
+                }
+                globalNames.add(name);
+                Variable dataVar = new Variable(ncfile, null, null, name);
+                List var_axes = var.getChild("grid").getChild("axes").getChildren();
+                ArrayList<Dimension> varDims = new ArrayList<Dimension>();
+                String direction = "";
+                for (Iterator axisIt = var_axes.iterator(); axisIt.hasNext();) {
+                    Element axis = (Element) axisIt.next();
+                    String axisName = axis.getTextNormalize();
+                    for (Iterator dimIt = allDims.iterator(); dimIt.hasNext();) {
+                        Dimension dim = (Dimension) dimIt.next();
+                        if ( dim.getName().equals(axisName) ) {
+                            varDims.add(dim);
+                            direction = direction + directions.get(dim.getName());
+                        }                     
+                    }
+                }
+                Collections.reverse(varDims);
+                dataVar.setDimensions(varDims);
+                dataVar.setDataType(DataType.FLOAT);
+                dataVar.addAttribute(new Attribute("dataset", dsname));
+                List attributes = var.getChildren();
+                /* 
+                 * The netCDF attributes are listed as XML elements.
+                 * Confusing...
+                 */
+                dataVar.addAttribute(new Attribute("direction", direction));
+                boolean abstract_grid = false;
+                for (Iterator attIt = attributes.iterator(); attIt.hasNext();) {
+                    Element attribute = (Element) attIt.next();
+                    if ( !attribute.getName().equals("grid") ) {
+                        String value = attribute.getTextNormalize();
+                        String aname = attribute.getName();
+                        try {
+                            float fvalue = Float.valueOf(value).floatValue();
+                            dataVar.addAttribute(new Attribute(aname, new Float(fvalue)));
+                        } catch (NumberFormatException nfe) {
+                            dataVar.addAttribute(new Attribute(aname, attribute.getTextNormalize()));
+                        }
+                    } else {
+                      if ( attribute.getAttributeValue("name").equals("ABSTRACT") ) {
+                         abstract_grid = true;
+                      }
+                    }
+                }
+                dataVar.addAttribute(new Attribute("virtual", "true"));
+                String def = var.getAttributeValue("def");
+                if ( def != null ) {
+                    dataVar.addAttribute(new Attribute("ferret_definition", def));
+                }
+                if ( !abstract_grid ) {
+                   ncfile.addVariable(null, dataVar);
+                }
+            }
+        }
+        // This creates the data variables form the Ferret XML description.
+        
+        log.debug("Found "+data.size()+" 'datasets'");
+        for (Iterator dataIt = data.iterator(); dataIt.hasNext();) {
+            Element dataset = (Element) dataIt.next();
+            String dataset_name = dataset.getAttributeValue("name");
+            List vars = dataset.getChildren("var");
+            for (Iterator varIt = vars.iterator(); varIt.hasNext();) {
+                Element var = (Element) varIt.next();
+                String name = var.getAttributeValue("name");
+                if ( !globalNames.contains(name)) {
+                    Variable dataVar = new Variable(ncfile, null, null, name);
+                    List var_axes = var.getChild("grid").getChild("axes").getChildren();
+                    ArrayList<Dimension> varDims = new ArrayList<Dimension>();
+                    String direction = "";
+                    for (Iterator axisIt = var_axes.iterator(); axisIt.hasNext();) {
+                        Element axis = (Element) axisIt.next();
+                        String axisName = axis.getTextNormalize();
+                        for (Iterator dimIt = allDims.iterator(); dimIt.hasNext();) {
+                            Dimension dim = (Dimension) dimIt.next();
+                            if ( dim.getName().equals(axisName) ) {
+                                varDims.add(dim);
+                                direction = direction + directions.get(dim.getName());
+                            }
+                        }
+                    }
+                    Collections.reverse(varDims);
+                    dataVar.setDimensions(varDims);
+                    dataVar.addAttribute(new Attribute("direction", direction));
+                    dataVar.setDataType(DataType.FLOAT);
+                    List attributes = var.getChildren();
+                    for (Iterator attIt = attributes.iterator(); attIt.hasNext();) {
+                        Element attribute = (Element) attIt.next();
+                        if ( !attribute.getName().equals("grid") ) {
+                            String value = attribute.getTextNormalize();
+                            String aname = attribute.getName();
+                            try {
+                                float fvalue = Float.valueOf(value).floatValue();
+                                dataVar.addAttribute(new Attribute(aname, new Float(fvalue)));
+                            } catch (NumberFormatException nfe) {
+                                dataVar.addAttribute(new Attribute(aname, attribute.getTextNormalize()));
+                            }
+                        }
+                    }
+                    dataVar.addAttribute(new Attribute("dataset", dataset_name));
+                    ncfile.addVariable(null, dataVar);
+                }
+            }
+        }
+        ncfile.addAttribute(null, new Attribute("Conventions", "COARDS"));
+        
+        ncds = ncfile;
+
+        log.debug("parsing complete.");
+
+        int nothing = 0;
+        nothing++;
+    }
+
+    /* (non-Javadoc)
+     * @see ucar.nc2.IOServiceProvider#readData(ucar.nc2.Variable, java.util.List)
+     */
+    public Array readData(Variable v2, List section) throws IOException,
+    InvalidRangeException {
+        Array a=null;
+        log.debug("Entering read for "+v2.getName()+" and "+section.size()+" ranges.");
+
+        String varname = v2.getName();
+        String readname = v2.getName();
+        Dimension dim = v2.getCoordinateDimension();
+        Attribute dataset_attr = v2.findAttribute("dataset");
+        String dataset="";
+        if ( dataset_attr != null ) {
+            dataset = dataset_attr.getStringValue();
+            
+        }
+        
+        String direction = "";
+        Attribute direction_attr = v2.findAttribute("direction");
+        if ( direction_attr != null ) {
+            direction = direction_attr.getStringValue();
+        }
+        
+        boolean isCoordinateVariable = false;
+        if ( dim != null ) {               
+            readname = "COORDS";
+            isCoordinateVariable = true;
+        }
+        String filename = tool.getTempDir()+cacheKey+File.separator+"data_"+varname+"_"+Range.makeSectionSpec(section)+".nc";
+
+        // Simplest form of caching is that the exact file we need already exists.
+
+        File datatemp = new File(filename);
+        // Create a range section that pulls out the whole block from the temporary data file.
+        ArrayList<Range> newsection = new ArrayList<Range>(); 
+
+        if ( !datatemp.exists() ) {
+                String slice;
+                StringBuffer indx;
+                if (isCoordinateVariable) {
+                    indx = new StringBuffer("go get_coord \""+filename+"\" "+"\""+dataset+"\" "+varname+" "+direction+" ");
+                } else {
+                    indx = new StringBuffer("go get_datavar \""+filename+"\" "+"\""+dataset+"\" "+varname+" "+direction+" ");
+                }
+                // This is the get_data order XYZT
+                ArrayList ferret_section = new ArrayList(section);
+                Collections.reverse(ferret_section);
+
+                for (Iterator rangeIt = ferret_section.iterator(); rangeIt.hasNext();) {
+                    Range range = (Range) rangeIt.next();
+                    int start = range.first()+1;
+                    int end = range.last()+1;
+                    indx.append(start+" "+end+" "+range.stride()+" ");
+                }
+
+                // This is the C and Java data order (TZYX).
+                for (Iterator rangeIt = section.iterator(); rangeIt.hasNext();) {
+                    Range range = (Range) rangeIt.next();
+                    Range newrange = new Range(0, range.length()-1, 1);
+                    newsection.add(newrange);
+                }
+
+                // Before we go off and run Ferret see if we can get the data from
+                // an existing file.
+
+                slice = jnl+"\n"+indx.toString();
+                log.debug("Using jnl: "+slice);
+                try {
+                    tool.run("data.jnl", slice, cacheKey, filename);
+                } catch (Exception e) {
+                    throw new IOException("Unable run data extract tool "+e.toString());
+                }  
+                /*
+            }
+                */
+        } else { // if the file exists drop through to here...
+            log.debug("Cache hit on: "+filename);
+            for (Iterator rangeIt = section.iterator(); rangeIt.hasNext();) {
+                Range range = (Range) rangeIt.next();
+                Range newrange = new Range(0, range.length()-1, 1);
+                newsection.add(newrange);
+            }
+        }
+
+        log.debug("Attempting to open data file: "+filename);
+        NetcdfFile nds = NetcdfFile.open(filename, null);
+        log.debug("Attempting to find variable : "+readname);
+        Variable v = nds.findVariable(readname);
+        if ( readname.equals("COORDS")) {
+            List dims = v.getDimensions();
+            // Should be only 1.
+            if ( dims.size() < 0 || dims.size() > 1 ) {
+                log.error("A coordinate variable has more than one dimension.");
+            }
+            Dimension cdim = (Dimension) dims.get(0);
+            String name = cdim.getName();
+            v = nds.findVariable(name);
+        }
+        log.debug("Attempting to read var: "+readname+" with ranges "+Range.makeSectionSpec(newsection));
+        a = v.read(newsection);
+        log.debug("Finished reading variable data.");
+        return a;
+    }
+
+    /* (non-Javadoc)
+     * @see ucar.nc2.IOServiceProvider#readNestedData(ucar.nc2.Variable, java.util.List)
+     */
+    public Array readNestedData(Variable v2, List section) throws IOException,
+            InvalidRangeException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    /* (non-Javadoc)
+     * @see ucar.nc2.IOServiceProvider#setSpecial(java.lang.Object)
+     */
+    public void setSpecial(Object special) {
+        // TODO Auto-generated method stub
+
+    }
+
+    /* (non-Javadoc)
+     * @see ucar.nc2.IOServiceProvider#sync()
+     */
+    public boolean sync() throws IOException {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    /* (non-Javadoc)
+     * @see ucar.nc2.IOServiceProvider#syncExtend()
+     */
+    public boolean syncExtend() throws IOException {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    /* (non-Javadoc)
+     * @see ucar.nc2.IOServiceProvider#toStringDebug(java.lang.Object)
+     */
+    public String toStringDebug(Object o) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+    
+    public static void main(String[] args) {
+        
+        try {
+            log.debug("Registering gov.noaa.pmel.tmap.iosp.FerretIOServiceProvider");
+            NetcdfFile.registerIOProvider("gov.noaa.pmel.tmap.iosp.FerretIOServiceProvider");
+        } catch (IllegalAccessException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (InstantiationException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        
+        //String filename = "http://porter.pmel.noaa.gov:8920/thredds/dodsC/las/coads_climatology_cdf/data_coads_climatology.jnl";
+        String filename = "/home/porter/rhs/data/coads_climatology.cdf";
+        NetcdfDataset ncd = null;
+        try {
+          log.debug("Calling openDataset");
+          ncd = NetcdfDataset.openDataset(filename);
+          log.debug("Finished openDataset");
+        } catch (IOException ioe) {
+          log.error("trying to open " + filename + "  " + ioe);
+        } finally { 
+          if (null != ncd) try {
+            List variables = ncd.getVariables();
+            StringBuffer vars = new StringBuffer();
+            for (Iterator vIt = variables.iterator(); vIt.hasNext();) {
+                Variable v = (Variable) vIt.next();
+                if ( v.getCoordinateDimension() != null) {
+                   if ( vars.length() > 0 ) vars.append(";");
+                   vars.append(v.getName());
+                } 
+            }
+            NCdump.print(ncd, System.out, true, true, false, true, vars.toString(), null);
+            for (Iterator vIt = variables.iterator(); vIt.hasNext();) {
+                Variable v = (Variable) vIt.next();
+                if ( v.getCoordinateDimension() == null) {
+                    log.debug("reading "+v.getName());
+                    int[] shape = v.getShape();
+                    int[] origin = new int[shape.length];
+                    for ( int s = 0; s < shape.length; s++) {
+                        if ( shape[s] > 7 ) {
+                           origin[s] = shape[s]/2;
+                        } else {
+                           origin[s] = 0;
+                        }
+                        shape[s] = Math.min(3,shape[s]);
+                        log.debug("for dimension s="+s+" setting origin="+origin[s]+" shape="+shape[s]);
+                    }
+                    Array a = v.read(origin, shape);
+                    IndexIterator it = a.getIndexIterator();
+                    log.debug("Iterate on the array.");
+                    while ( it.hasNext() ) {
+                        float val = it.getFloatNext();
+                        log.debug("Value for "+it.toString()+ "=" +val);
+                    }
+                }
+            }
+                ncd.close();
+            } catch (IOException ioe) {
+                log.error("trying to close " + filename + "  " + ioe.toString());
+            } catch (InvalidRangeException ire) {
+                log.error("bad range: "+ ire.toString());
+            }
+          }
+
+        }
+
+    public String getDataDir() {
+        return tool.getDataDir();
+    }
+
+}

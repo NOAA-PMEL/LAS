@@ -1,0 +1,118 @@
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! $RCSfile: xy_plot_2D.jnl,v $
+!
+! $Author: ansley $
+! $Date: 2006/10/05 $
+!
+! xy_vector_plot.jnl creates an XY vector plot for use with the Back End Server
+! code that sits behind a Live Access Server (LAS).
+! 3/29/2007 ACM Fix logic interpreting contents of ferret_interpolate_data 
+!
+! NOTE:  This code handles overlays but not differencing.
+!
+! Set any Ferret modes
+!
+! NOTE:  Should we support any of the following Ferrt modes?
+! NOTE:    ASCII_FONT, CALENDAR, DEPTH_LABEL, LABELS, LATIT_LABEL, LONG_LABEL
+
+IF ($ferret_interpolate_data"0") THEN SET MODE INTERPOLATE
+
+! Define symbols associated with the regign and data and perform any
+! initialization needed for this dataset.
+!
+! NOTE:  Adding support for a 'base layer' variable would mean passing
+! NOTE:  some other argument.  For now, though, we always use 'data_0'
+! NOTE:  for the base layer and region.
+
+GO LAS_initialize_region 0
+GO ($ferret_init_script"LAS_initialize_data|*>*") 0
+DEFINE SYMBOL ferret_vector_1 ($ferret_plot_var)
+DEFINE SYMBOL ferret_plot_title "($data_title) (($data_units))"
+
+GO ($ferret_init_script"LAS_initialize_data|*>*") 1
+DEFINE SYMBOL ferret_vector_2 ($ferret_plot_var)
+DEFINE SYMBOL ferret_plot_title "($ferret_plot_title), ($data_title) (($data_units))"
+
+
+! Check for errors (They often occur during dataset initialization.)
+
+IF ($error_status"0|*>1") THEN
+  MESSAGE/ERROR **ERROR ($error_string)
+  EXIT/PROGRAM
+ENDIF
+
+! Check whether the region is too small; reduces to a single grid point.
+! (Region is a point)
+GO LAS_check_2d_region
+
+! Check for errors 
+IF ($error_status"0|ERROR>1") THEN
+  MESSAGE/ERROR ($error_string)
+  EXIT/PROGRAM
+ENDIF
+! Open the window and set the aspect ratio to match the region
+!ACM_note: Setting the window aspect is the right thing to do mathemetically
+!ACM_note: Currently it is an option, "calculate aspect ratio". Shall the
+!ACM_note: default setting be "yes"?
+
+SET WINDOW/SIZE = ($ferret_size"0.5")
+IF ($ferret_set_aspect"1|default>1|no>0|yes>1|0|1") THEN SET WINDOW/ASPECT = `($region_Y_range)/($region_X_range)`:axis
+
+!IF ($ferret_no_margins"0") THEN
+   DEFINE VIEW/AXES/XLIM=0:1/YLIM=0:1 WMSview
+   SET VIEW WMSview
+!ENDIF
+
+! TODO:  Should the creation of the ($qualifiers) symbol for standard
+! TODO:  2D plots be separated out in a separate script called:
+! TODO:    LAS_2D_plot_qualifiers.jnl
+!
+! Build up the plot qualifiers
+
+CANCEL SYMBOL qualifiers
+
+IF ($ferret_plot_key"0|0|nokey>0|*>1") THEN
+  DEFINE SYMBOL qualifiers = ($qualifiers)/NOKEY
+ENDIF
+
+IF ($ferret_use_graticules"1|0|*>1) THEN
+  SET MODE GRATICULE:(DASH,COLOR=black)
+ENDIF
+
+!IF ($ferret_no_margins"0") THEN
+  DEFINE SYMBOL qualifiers = ($qualifiers)/NOAXES
+!ENDIF
+! Do the plot
+
+VECTOR($qualifiers)/TITLE="($ferret_plot_title)" ($ferret_vector_1), ($ferret_vector_2)
+
+! Overlay additional data
+
+IF `($data_count"0") GT 1` THEN
+
+REPEAT/range=2:`($data_count)-1`/NAME=m (  \
+  GO LAS_initialize_region `m` ;  \
+  GO ($ferret_init_script"LAS_initialize_data|*>*")  `m` ; \
+  DEFINE SYMBOL qualifiers_over = /LINE=`m` ;\
+  CONTOUR/OVER($qualifiers_over) ($ferret_plot_var) \
+)
+
+! Overlay additional cartography data (land mask, outlines, rivers, ...)
+
+IF ($ferret_land_type"1|none>0|contour>0|filled>1|default>1|*>0") THEN
+  GO LAS_fland
+ELIF ($ferret_land_type"0|none>0|contour>1|filled>0|*>0") THEN
+  GO land
+ENDIF
+
+! Mark grid points. Options are no, subsample (tests if subsampling needed)
+! or all to force marking all points.
+
+IF ($ferret_mark_grid"0|no>0|all>1|subsample>1|*>0") THEN GO mark_grid
+
+! Save the results
+GO LAS_results box
+
+! End of $RCSfile -----------------------------------------------------
+
+

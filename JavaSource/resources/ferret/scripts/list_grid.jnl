@@ -1,0 +1,106 @@
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! $RCSfile: list_data.jnl,v $
+! $Revision: 1.4 $
+! 
+! $Author: ansley $
+! $Date: 2006/07/06 
+!
+! 2006/8/10 ACM define output variable with its region.
+! 2007/3/13 ACM Set up to write netCDF files of curvilinear data
+!
+! list_data.jnl creates a listing, CDF or ASCII (based on std_list.jnl)
+! Assumes symbol ferret_format which will be one of "cdf" "txt" "tsv" "csv" "asc"
+! Assumes symbol ferret_listing is the output file.
+! Assumes symbol data_dup_varname is the optional duplicate variable name to be used on output
+
+! DEFINE SYMBOLs associated with the regiogn and data and perform any
+! initialization needed for this dataset.
+
+GO LAS_initialize_region 0
+GO ($ferret_init_script"LAS_initialize_data|*>*") 0
+
+! Here is the variable we will list out, with the region specified.
+DEFINE SYMBOL ferret_list_var = ($ferret_plot_var)
+
+! Check for errors (They often occur during dataset initialization.)
+
+IF ($error_status"0|*>1") THEN
+  MESSAGE/ERROR **ERROR ($error_string)
+  EXIT/PROGRAM
+ENDIF
+ 
+! Decode format argument
+! ACM NOTE: The slashes mess up parsing in the DEFINE SYMBOL if we do them all at once.
+! ferret_format may be asc, txt, or cdf
+
+CANCEL SYMBOL frmt 
+
+SET LIST/FILE="($result_ferret_listing_filename)"
+
+
+   LET llon = X[GX=($ferret_list_var), X=($region_x_lo):($region_x_hi)] + 0*Y[GY=($ferret_list_var),Y=($region_y_lo):($region_y_hi)]
+   LET llat = 0*X[GX=($ferret_list_var),X=($region_x_lo):($region_x_hi)] + Y[GY=($ferret_list_var),Y=($region_y_lo):($region_y_hi)]
+
+!   LIST/NOHEADER/NOROWHEADER/APPEND/FILE  XSEQUENCE(llon), XSEQUENCE(llat)
+
+  ! mask is 1 where ferret_list_var is valid, and missing otherwise.
+  !LET mask =  IF ($ferret_list_var) THEN 1
+
+IF ($ferret_view"|xyt>1|*>0") THEN
+  LET xytvar = ($ferret_list_var)
+  LET mask =  IF xytvar[T=@NGD] GT 0 THEN 1
+ENDIF
+
+IF ($ferret_view"|xyz>1|*>0") THEN
+  LET xyzvar = ($ferret_list_var)
+  LET mask =  IF xyzvar[Z=@NGD] GT 0 THEN 1
+ENDIF
+
+  LET llon_list = XSEQUENCE(llon*mask)
+  LET llat_list = XSEQUENCE(llat*mask)
+
+  LET ngood = llon_list[x=@ngd]
+
+  LET dsID = "($data_0_dataset_ID)"
+  define variable len = STRLEN(dsID)
+  define symbol fmt = A`len`
+  list/nohead/format=(($fmt))/FILE/append dsID
+
+  LET varID = "($data_0_ID)"
+  define variable len = STRLEN(varID)
+  define symbol fmt = A`len`
+  list/nohead/format=(($fmt))/FILE/append varID
+
+  LET view = "($ferret_view)"
+  define variable len = STRLEN(view)
+  define symbol fmt = A`len`
+  list/nohead/format=(($fmt))/FILE/append view
+
+IF ($ferret_view"|xyt>1|*>0") THEN
+  LET tlo = "($region_0_t_lo)"
+  define variable len = STRLEN(tlo)
+  define symbol fmt = A`len`
+  list/nohead/format=(($fmt))/FILE/append tlo
+
+  LET thi = "($region_0_t_hi)"
+  define variable len = STRLEN(thi)
+  define symbol fmt = A`len`
+  list/nohead/format=(($fmt))/FILE/append thi
+ENDIF
+
+IF ($ferret_view"|xyz>1|*>0") THEN
+  LET zlo = "($region_0_z_lo)"
+  define variable len = STRLEN(zlo)
+  define symbol fmt = A`len`
+  list/nohead/format=(($fmt))/FILE/append zlo
+
+  LET zhi = "($region_0_z_hi)"
+  define variable len = STRLEN(zhi)
+  define symbol fmt = A`len`
+  list/nohead/format=(($fmt))/FILE/append zhi
+ENDIF
+
+!  LIST/NOHEADER/NOROWHEADER/APPEND/FILE dsID
+ 
+  LIST/I=1:`ngood`/NOHEADER/NOROWHEADER/APPEND/FILE  COMPRESSI(llon_list), COMPRESSI(llat_list)
+

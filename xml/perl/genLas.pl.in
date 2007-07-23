@@ -1,0 +1,376 @@
+#!@PERL@ -w
+# Copyright (c) 2001 TMAP, NOAA
+# ALL RIGHTS RESERVED
+#
+# Please read the full copyright notice in the file COPYRIGHT
+# included with this code distribution
+
+# $Id: genLas.pl.in,v 1.15 2005/03/21 23:47:42 callahan Exp $
+use Config;
+use lib ('../../xml/perl','.', '../../xml/perl/install/lib/' . $Config{version},
+         '../../xml/perl/install/lib/site_perl/' . $Config{version},
+         '../../xml/perl/install/lib/perl5/' . $Config{version},
+         '../../xml/perl/install/lib/perl5/site_perl/' . $Config{version});
+use LAS;
+use LASUI;
+use LASServlet;
+use URI::URL;
+use Digest::MD5  qw(md5 md5_hex md5_base64);
+use File::PathConvert qw(rel2abs splitpath);
+use Carp qw(carp croak);
+require('LAS_config.pl');
+use Getopt::Std;
+my %opts;
+my ($DBuser, $DBpasswd, $DBhost, $CatalogFile);
+my %UiHash = ();
+
+sub getAnswer($$;$) {
+    my ($mess, $default, $doEcho) = @_;
+    $doEcho = 1 if ! defined($doEcho);
+    print STDERR "$mess: [$default] ";
+    system('stty -echo') if ! $doEcho;
+    my $answer = <STDIN>;
+    system('stty echo') if ! $doEcho;
+    print STDERR "\n" if ! $doEcho;
+    chomp($answer);
+    $answer = $default if ! $answer;
+    return $answer;
+}
+
+sub genDB {
+    my ($files, $user, $passwd, $host) = @_;
+    my @fullFiles = ();
+    foreach my $file (@{$files}){
+	push(@fullFiles, rel2abs($file));
+    }
+    my $ser = new LASDB::Serializer('LASDB::MySQL', $user, $passwd, $host);
+    $ser->addURLs(@fullFiles);
+    $ser->serialize;
+}
+
+##
+# Get all of the XML configuration files that have been installed as
+# packages
+
+sub getPackageFiles {
+    my @files = ();
+    return @files if ! -e 'packages.xml';
+    my $parser = new LAS::Parser('packages.xml');
+    my $root = new LAS::PackageConfig($parser);
+    foreach my $package ($root->getChildren){
+	push(@files, $package->getFiles);
+    }
+    @files;
+}
+
+sub genProperties {
+    my ($db, @files) = @_;
+    #
+    # The first time ths runs using configure this file should get created with
+    # the host set to the fully qualified domain name.  We need to save that
+    # and add the database map.
+    #
+    my $host;
+    if (open IN, "<../../WebContent/WEB-INF/classes/las.properties") {
+       while (<IN>) {
+          $line = $_;
+          chomp $line;
+          if ( $line =~ /host/ ) {
+             @parts = split("=", $line);
+             $host=$parts[1];
+          }
+       }
+    }
+    close IN;
+    my $admn_db=new LASDB::Utility::MySQL('mysql', $DBuser, $DBpasswd, $DBhost);
+    my $rows = $admn_db->{dbh}->do(qq(select * from user where user='las' and (Host like '%$host%' or Host='localhost'))) || die "Can't run select query on MySQL user table";
+    if ($rows < 1) {
+       die "No las DB user is available.  Try running configure again for this LAS.\n";
+    }
+    open OUT,">../../WebContent/WEB-INF/classes/las.properties" or die "Can't open '../../WebContent/WEB-INF/classes/las.properties'";
+    print OUT "las.db.host=$host\n";
+    print OUT "las.db.user=las\n";
+    print OUT "las.db.password=lasrules\n";
+    my $file = rel2abs($files[0]);
+    my $dbname = $db->mapURL('file:' . $file);
+    print OUT "las.db.dbase=$dbname\n";
+    close OUT;
+}
+
+sub usage {
+    print STDERR <<EOL;
+Usage: genLas.pl [-h dbhost -u dblogin [-p dbpasswd]] 
+                   [-b] [-n] [-f] [-s] xmlfile;
+        -b                  Generate the database tables in the background,
+                            updating the database only when they are ready
+        -h dbhost           Use database on host dbhost
+        -n                  Don't compile installed packages
+        -p dbpasswd         Use dbpasswd as database password
+        -u dblogin          Use dblogin as database login name
+        -f                  Force Tomcat restart
+        -s                  Skip Tomcat restart
+        If both -s and -f options are included, -f overrides -s
+EOL
+    exit;
+}
+
+sub getUIObj {
+    my ($fname) = @_;
+    my $ui = $UiHash{$fname};
+    if (!$ui){
+	my ($junk,$dir,$file) = splitpath(rel2abs($fname));
+	my @files = ($dir . "ui.xml", $dir . "options.xml");
+	my $uiparser = new LAS::Parser($files[0]);
+	$ui = new LAS::UI::Generator($uiparser, $dir);
+	$UiHash{$fname} = $ui;
+    }
+    $ui;
+}
+
+# Dumps the browser tables to a file
+# A hopeless hack, but we'll fix it in the Java version.  :-)
+
+sub dumpBrowser {
+  my ($mainfile) = @_;
+    my $db = new LASDB::Utility::MySQL('las', $DBuser, $DBpasswd, $DBhost);
+    my $dbname = eval { $db->mapURL(&LASDB::getURL($mainfile)); };
+    open BXML, ">newbrowsers.xml" or warn "Can't dump browser database.";
+    print BXML "<las_browsers>\n";
+    if ( $db->tableExists("Browser") ) {
+       my $statement = qq{select agent,applet from Browser};
+       my $sth = $db->{dbh}->prepare($statement)
+          or warn "Can't dump browser database.\n";
+       my $rc = $sth->execute or
+          warn "Can't dump browser database.\n";
+       while ((my $agent, my $applet) = $sth->fetchrow_array) {
+          my $applet_string = "";
+          if ( $applet ) {
+             $applet_string = "true";
+          } else {
+             $applet_string = "false";
+          }
+          print BXML "\t<browser agent=\"$agent\" applet=\"$applet_string\"/>\n"
+       }
+    }
+    if ( $db->tableExists("BrowserCandidate") ) {
+       my $statement = qq{select agent,applet from BrowserCandidate};
+       my $sth = $db->{dbh}->prepare($statement)
+          or warn "Can't dump browser database.\n";
+       my $rc = $sth->execute or
+          warn "Can't dump browser database.\n";
+       while ((my $agent, my $applet) = $sth->fetchrow_array) {
+          my $applet_string = "";
+          if ( $applet ) {
+             $applet_string = "true";
+          } else {
+             $applet_string = "false";
+          }
+          print BXML "\t<browser_candidate agent=\"$agent\" applet=\"$applet_string\"/>\n"
+       }
+    }
+    print BXML "</las_browsers>\n";
+}
+
+getopts('c:u:p:h:bnfs', \%opts);
+
+if ($opts{h}){
+    $DBhost = $opts{h};
+}
+
+if ($opts{u}){
+    $DBuser = $opts{u};
+    if (defined $opts{p}){
+	$DBpasswd = $opts{p};
+    }
+}
+
+if ($opts{c}){
+    printerrln "-c option no longer available";
+    printerrln "categories file must now be included in las.xml file";
+    usage;
+}
+
+if (scalar @ARGV == 0){
+    printerrln "Need to specify XML file";
+    usage;
+}
+
+if (scalar @ARGV > 1){
+    printerrln "Only one XML configuration file allowed";
+    usage;
+}
+
+my $dbtest = "";
+while (!$dbtest){
+    if (! defined $DBhost){
+	$DBhost = getAnswer('DB host', '');
+    }
+    if (! defined $DBuser){
+	$DBuser = getAnswer('DB login name', 'root');
+    }
+    if (! defined $DBpasswd){
+	$DBpasswd = getAnswer('DB password', '', 0);
+    }
+    if (! defined $DBhost){
+      $DBhost = getAnswer('DB host', '');
+    }
+    eval {
+	$dbtest = new LASDB::MySQL('las',$DBuser, $DBpasswd, $DBhost);
+    };
+    if ($@){
+	print $@;
+	$dbtest="";
+	undef $DBuser;
+	undef $DBpasswd;
+	undef $DBhost;
+    }
+}
+
+my $js = new LAS::ServletDB::Generator;
+my @files;
+
+# TODO: The checks above restrict ARGV to length = 1.
+# TODO: We should get rid of the outmoded @files array as it
+# TODO: only confuses things.
+
+while (@ARGV){
+    my $fname = shift;
+    push(@files, $fname);
+}
+
+# In order to avoid down time when updating large LAS installations
+# we will have genLAS.pl create and populate a temporary database
+# and then, after it is completely fille in, copy all of the tables
+# over to the correct database.
+#
+# The easiest way to do this is to change the incoming $fname and 
+# proceed as normal.  At the very end we will modify the entry in
+# the Config table and then copy the tables to the correct database.
+
+my $orig_file = $files[0];
+my $temp_file = "_temp_" . $orig_file;
+
+dumpBrowser($orig_file);
+
+if ($opts{b}) {
+
+# Need to check that there is already a database for this
+# configuration file.  Otherwise we should die.
+
+  my $db = new LASDB::Utility::MySQL('las', $DBuser, $DBpasswd, $DBhost);
+  my $dbname = eval { $db->mapURL(&LASDB::getURL($files[0])); };
+  if ($@) {
+    printerrln " You may not give the -b option the very first time you build";
+    printerrln " the LAS database.  Please try again without this option.";
+    usage;
+  }
+  use File::Copy;
+  copy($orig_file,$temp_file);
+  $files[0] = $temp_file;
+
+}
+
+my @packFiles = ();
+if ($opts{n}){
+    print STDERR "Skipping installed packages...\n";
+} else {
+    @packFiles = getPackageFiles;
+    if ($#packFiles >= 0){
+	foreach my $file (@packFiles){
+	    print "Adding package config file $file...\n";
+	}
+	push(@files,@packFiles);
+    }
+}
+
+my @Configs;
+foreach my $fname (@files){
+    die "Can't open file $fname" if ! -r $fname;
+    my $parser = new LAS::Parser($fname);
+    my $config = new LAS::Config($parser);
+    push(@Configs, $config);
+}
+
+
+genDB(\@files, $DBuser, $DBpasswd, $DBhost);
+my $db = new LASDB::MySQL::Servlet('las',$DBuser, $DBpasswd, $DBhost);
+$db->init($files[0]);
+
+# TODO -- use catalog doc associated with package
+
+my $count = 0;
+my $multi = $#files > 0;
+foreach my $fname (@files){
+    my $isPackage = $count > 0;
+# Add config info if more than one configuration (from installed packages)
+
+    my $config = shift @Configs;
+    my $ui = getUIObj($fname);
+    $ui->setFile($fname);
+    $js->generate($config, $isPackage, $fname, $ui, $db, $multi);
+    genProperties($db, @files);
+    $count++;
+
+    my $ldb = new LASDB::Utility::MySQL('las', $DBuser, $DBpasswd, $DBhost);
+    my $dbname = $db->mapURL(&LASDB::getURL($files[0]));
+    my $vdb = new LASDB::Utility::MySQL($dbname, $DBuser, $DBpasswd, $DBhost);
+    my $varCount = $vdb->tableSize("VariableInfo");
+    my $varTotal = 0;
+
+    if ($varTotal + $varCount == $varTotal) {
+          print STDERR <<EOM;
+The filters in the <las_categories> section of the configuration
+for the file $fname has resulted in NO variables being selected for
+the user interface.
+
+Please check your configuration.
+EOM
+       exit;
+    }
+
+    $varTotal = $varTotal + $varCount;
+
+}
+
+# Final steps if we are working with the '_temp_' configuration file
+#
+# 1) copy tables from the _temp_ database to the empty database
+# 2) remove the _temp_ configuration file
+#
+# There is no need to remove the _temp_ database as it will be needed
+# for the next time we generate LAS with the -b option.
+
+if ($opts{b}) {
+
+  my $las_db = new LASDB::Utility::MySQL('las', $DBuser, $DBpasswd, $DBhost);
+  my $orig_dbname = $las_db->mapURL(&LASDB::getURL($orig_file));
+  my $temp_dbname = $las_db->mapURL(&LASDB::getURL($temp_file));
+
+  $las_db->swapTempTables($temp_dbname,$orig_dbname);
+  unlink $temp_file;
+
+}
+
+# With the addition of FDS, The TOMCAT Server must be bounced in order
+# to propagate las.xml configuration changes to FDS/LAS.
+
+if ($opts{f}){
+    if(system("cd ../..; rebootserver.sh") != 0){
+	print "rebootserver.sh failed, Please restart your Tomcat server by hand.\n";
+    }
+}elsif($opts{s}){
+    exit;
+}else{
+    print "\nLAS v6.5 includes the OPeNDAP server FDS.\n";
+    print "In order to propagate changes in your LAS configuration to FDS,\n";
+    print "The Tomcat server must be restarted.\n\n";
+    my $reboot = getAnswer('Restart the Tomcat server?', 'yes');
+    if ($reboot =~ m/Y|y|Yes|yes/){
+        if(system("cd ../..; rebootserver.sh") != 0){
+	    print "rebootserver.sh failed, Please restart your Tomcat server by hand.\n";
+        }
+    }else{
+        print "\nThe Tomcat server was not restarted and changes\n";
+        print "to your LAS configuration are not reflected in the FDS.\n";
+    }
+}

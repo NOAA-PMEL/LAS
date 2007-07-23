@@ -1,0 +1,27 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- LAS SERVER OK -->
+<head><title>LAS Output</title></head>
+<body bgcolor="white">
+<h3>This is the $!title LAS Product Server</h3>
+#if ( $institution.name != "" && $institution.url != "" )
+<h4>Run by the <a href="$institution.url">$institution.name.</a></h4>
+#end
+#if ( $institution.contact != "" )
+<h4>Contact us at <a href="mailto:$institution.contact">$institution.contact</a></h4>
+#end
+<h3>Services for this Product Server</h3>
+<table>
+<tr><th>Service Name:</th><th>URL</th><tr>
+#foreach ($service in $services)
+#if ($service.getValue() == "Local Service")
+<tr>
+<td>$service.getName()</td><td>$service.getValue()</td>
+</tr>
+#else
+<tr><td>$service.getName()</td><td><a href="$service.getValue()">$service.getValue()</a></td></tr>
+#end ##if local service
+#end ## service loop
+</table>
+</body>
+</html>

@@ -1,0 +1,120 @@
+#set ($template_name = "variable.vm")
+
+#info_table_start()
+  #if($comparison_mode == '_compare1')
+    Select a variable and then click <span class="redbold">Next&nbsp;&gt;</span> to select a dataset and variable for comparison.
+  #else
+    Select a variable and then click <span class="redbold">Next&nbsp;&gt;</span> to proceed to the Constraints page.
+  #end
+#info_table_end("variable")
+
+
+<table>
+<tr><td colspan="2"><div class="heading">&nbsp;$category.getName()</div></td></tr>
+##
+## Show all user defined variables together at the top.
+##
+#foreach($c in $thisCategory)
+## Show the user defined variables for this sub-category (if there are any).
+  #set($vchildren = $c.getDerivedItems($session, $c.getLink()))
+  #any_user_variables($vchildren)
+  #if($user_variables == "true")
+    #tr_advice_user("<nobr>User&nbsp;variable(s)</nobr>" $vchildren.get(0).getCategory().getParentid() )
+    <tr>
+       <td class="subheading">
+       <div style="margin-left: 30px">
+       $c.getName()
+       </div>
+       </td>
+    </tr>
+## This loops through the derived variable children of this sub-category.
+<tr>
+<td colspan="2">
+<div style="margin-left: 40px">
+<table>
+  #set ($num_vchildren = $vchildren.size())
+  #foreach ($vc in $vchildren)
+     #set ($vindex = $velocityCount - 1)
+     #set ($vindex = $vindex*2)
+     #set ($vnext = $velocityCount - 1)
+     #set ($vnext = $vnext*2)
+     #set ($vnext = $vnext+1)
+     #if ($vindex < $num_vchildren)
+        #set ($cv1 = $vchildren.get($vindex))
+     #end
+     #if ($vnext < $num_vchildren)
+        #set ($cv2 = $vchildren.get($vnext))
+     #end
+     #if ( $vindex < $num_vchildren ) 
+   <tr>
+      <td>
+        $form.checkbox("variables","$cv1.Link")<a name="#$cv1.Link"/>$cv1.getName()</a>
+      </td>
+      #if ( $vnext < $num_vchildren )
+         <td>
+	   $form.checkbox("variables","$cv2.Link")<a name="#$cv2.Link"/>$cv2.getName()</a>
+         </td>
+      #else
+         <td></td>
+      #end
+   </tr>
+   #end
+   #end ## foreach derived variable in this category
+   </table>
+   </div>
+   </td>
+   <tr>
+ #end ## end if any derived variables
+#end ## end for each category
+##
+## This section puts up the variables that belong to each dataset.
+##
+#tr_advice_select("Dataset&nbsp;variable(s)")
+$form.Start
+#foreach($c in $thisCategory)
+<tr>
+   <td class="subheading">
+   <div style="margin-left: 30px">
+   $c.getName()
+   </div>
+   </td>
+   <td align="right">#a_variable_Next($comparison_mode)</td>
+</tr>
+<tr>
+<td colspan="2">
+<div style="margin-left: 40px">
+<table>
+   #set ($children = $c.getChildren())
+   #set ($num_children = $children.size())
+   #foreach ($v in $children)
+      #set ($index = ($velocityCount - 1)*2)
+      #set ($next  = ($velocityCount - 1)*2 + 1)
+      #if ( $index < $num_children )
+         #set ($v1 = $children.get($index))
+      #end
+      #if ( $next < $num_children )
+        #set ($v2 = $children.get($next))
+      #end
+  #if ( $index < $num_children )
+  ## TODO: comparison mode logic
+   <tr>
+      <td>
+        $form.checkbox("variables","$v1.Link")<a name="#$v1.Link"/>$v1.getName()</a>
+      </td>
+      #if ( $next < $num_children )
+         <td>
+	   $form.checkbox("variables","$v2.Link")<a name="#$v2.Link"/>$v2.getName()</a>
+         </td>
+      #else
+         <td></td>
+      #end
+   </tr>
+   #end
+   #end ## foreach variable in this category
+</table>
+</div>
+</td>
+<tr>
+#end ## foreach (category in the current list)
+</table>
+$form.End

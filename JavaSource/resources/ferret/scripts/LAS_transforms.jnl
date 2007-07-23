@@ -1,0 +1,42 @@
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! LAS_transforms.jnl
+! 
+! $Author: ansley $
+! $Date: 2006/09/27  $
+! 2007/3/13 ACM changes for all slices of curvilinear data.
+! 4/2007    ACM Apply Ferret symbols for any expression that may have been defined
+
+!
+! LAS_transforms.jnl applies one or more transforms to $ferret_plot_var
+
+! This script is called from LAS_initialize_data after the region and
+! data have been initialized.
+
+IF `($constraint_0_lhs"0|Seasonal_Regridding>1|*>0")` THEN 
+   DEFINE SYMBOL data_var_transform = , Seasonal Regridding
+   GO transform_seasonal.jnl
+   DEFINE SYMBOL data_dup_varname ($data_var)_regrid
+ENDIF
+
+! See if the grid is curvilinear in XY, Hybrid Z or both
+
+DEFINE SYMBOL do_curvi_xy = 0
+DEFINE SYMBOL do_hybrid_z = 0
+DEFINE SYMBOL do_curvi_xy_and_hybrid_z = 0
+
+IF ($ferret_curvi_coord_lat"0|*>1") THEN DEFINE SYMBOL do_curvi_xy = 1
+IF ($ferret_thk_var"0|*>1") THEN  DEFINE SYMBOL do_hybrid_z = 1
+IF `($do_curvi_xy) + ($do_hybrid_z) EQ 2` THEN DEFINE SYMBOL do_curvi_xy_and_hybrid_z = 1
+
+IF ($do_curvi_xy_and_hybrid_z) THEN
+   GO transform_hybrid_z_curvi_xy
+
+ELIF ($do_curvi_xy) THEN ! Set up to deal with curvilinear XY data
+   GO transform_curvi_xy.jnl
+
+ELIF ($do_hybrid_z) THEN  ! Set up to deal with hybrid-Z data. 
+   GO transform_hybrid_z.jnl
+ENDIF
+
+! End of $RCSfile ------------LAS_transforms.jnl-------------------------------
+

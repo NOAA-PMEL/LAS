@@ -1,0 +1,169 @@
+!\cancel mode verify
+! list_arc_ascii.jnl - create Arcinfo GIS output of regular grids
+! Ansley Manke 6/2007, based on old LAS script arc_ascii.jnl
+!
+! Description: create Arcinfo GIS output of regular grids
+
+! Usage: GO list_arc_ascii 
+
+! Define symbols associated with the region and data and perform any
+! initialization needed for this dataset.
+
+GO LAS_initialize_region 0
+GO ($ferret_init_script"LAS_initialize_data|*>*") 0
+
+! Here is the variable we will list out, with the region specified.
+DEFINE SYMBOL ferret_list_var = ($ferret_plot_var)
+
+SET LIST/FILE="($result_ferret_listing_filename)"
+LET expr = ($ferret_plot_var)
+
+! This script is only applicable to the XY plane
+
+     ! Ferret v6.04+ will write a block of XML to std error if the symbol
+     ! LAS_errmsg_list has been set. In it, put a set of properties and
+     ! related symbol names; Ferret checks those symbol values and
+     ! writes properties for the error.
+
+
+DEFINE SYMBOL varshape `expr,RETURN=shape`
+IF ($varshape"1|XY>0|*>1") THEN
+  DEFINE SYMBOL error_status = ERROR
+  DEFINE SYMBOL error_type REGION
+  DEFINE SYMBOL error_action = running Ferret scripts for ($operation_ID) arc_ascii
+  DEFINE SYMBOL error_string "Region is ($varshape): you can only obtain GIS output for XY maps"
+  GO LAS_error_result
+ENDIF
+GO LAS_default_errsyms
+
+! Subscript limits in XY plane
+LET istart `i[gx=expr,x=($region_x_lo)]`
+LET iend `i[gx=expr,x=($region_x_hi)]`
+
+LET jstart `j[gy=expr,y=($region_y_lo)]`
+LET jend `j[gy=expr,y=($region_y_hi)]`
+
+! size of grid
+LET Ni = `expr,RETURN=isize`
+LET Nj = `expr,RETURN=jsize`
+
+! coordinate arrays
+LET xcoords = x[gx=expr]
+LET ycoords = y[gy=expr]
+
+! coordinate bounds of grid
+! Make sure West long is < 0, change both hi & lo if xlo is > 180
+LET slon = xcoords[i=`istart`]
+IF `slon GT 180` THEN
+   LET xlo = xcoords[i=`istart`] - 360
+   LET xhi = xcoords[i=`iend`] - 360
+ELSE
+   LET xlo = xcoords[i=`istart`]
+   LET xhi = xcoords[i=`iend`]
+ENDIF
+LET ylo = ycoords[j=`jstart`]
+
+! size of grid cells
+LET xcell_size = XBOX[gx=expr,X=($region_x_lo)]
+LET ycell_size = YBOX[gy=expr,Y=($region_y_lo)]
+
+LET cell_size = (xcell_size+ycell_size)/2
+! Check for regularly-spaced data
+CANCEL MODE LAT
+CANCEL MODE LON
+LET del = XBOX[GX=expr,X=($region_x_lo)]
+LET reg = 1
+IF `Ni GT 2` THEN
+   REPEAT/NAME=m/RANGE=`($region_x_lo)+cell_size`:($region_x_hi):`cell_size` \
+    ( LET reg = XBOX[gx=expr,x=`m`] EQ del; IF `reg EQ 0` THEN EXIT/LOOP ) 
+ENDIF
+IF `reg EQ 0` THEN
+  DEFINE SYMBOL error_status = ERROR
+  DEFNE SYMBOL grid
+  DEFINE SYMBOL error_action = running Ferret scripts for ($operation_ID) arc_ascii
+  DEFINE SYMBOL error_string "Cells are not regularly-spaced"
+  GO LAS_error_result
+ENDIF
+
+IF `Nj GT 2` THEN
+   REPEAT/NAME=m/RANGE=`($region_y_lo)+cell_size`:($region_y_hi):`cell_size` \
+    ( LET reg = YBOX[gy=expr,y=`m`] EQ del; IF `reg EQ 0` THEN EXIT/LOOP ) 
+ENDIF
+IF `reg EQ 0` THEN
+  DEFINE SYMBOL error_status = ERROR
+  DEFNE SYMBOL grid
+  DEFINE SYMBOL error_action = running Ferret scripts for ($operation_ID) arc_ascii
+  DEFINE SYMBOL error_string "Cells are not regularly-spaced"
+  GO LAS_error_result
+ENDIF
+
+! size of grid cells
+LET xcell_size = XBOX[gx=expr,X=($region_x_lo)]
+LET ycell_size = YBOX[gy=expr,Y=($region_y_lo)]
+
+LET cell_size = (xcell_size+ycell_size)/2
+
+! SCRIPT IS ONLY APPLICABLE WHERE X and Y spacings are equal
+IF `ABS(xcell_size-ycell_size)/(xcell_size+ycell_size) GT 1E-6` THEN
+  DEFINE SYMBOL error_status = ERROR
+  DEFNE SYMBOL grid
+  DEFINE SYMBOL error_action = running Ferret scripts for ($operation_ID) arc_ascii
+  DEFINE SYMBOL error_string "Cell sizes in X and Y differ:" `xcell_size`, `ycell_size`
+  GO LAS_error_result
+ENDIF
+
+! Check for regularly-spaced data
+CANCEL MODE LAT
+CANCEL MODE LON
+LET del = XBOX[GX=expr,X=($region_x_lo)]
+LET reg = 1
+IF `Ni GT 2` THEN
+   REPEAT/NAME=m/RANGE=`($region_x_lo)+cell_size`:($region_x_hi):`cell_size` \
+    ( LET reg = XBOX[gx=expr,x=`m`] EQ del; IF `reg EQ 0` THEN EXIT/LOOP ) 
+ENDIF
+IF `reg EQ 0` THEN
+  DEFINE SYMBOL error_status = ERROR
+  DEFNE SYMBOL grid
+  DEFINE SYMBOL error_action = running Ferret scripts for ($operation_ID) arc_ascii
+  DEFINE SYMBOL error_string "Cells are not regularly-spaced in X"
+  GO LAS_error_result
+ENDIF
+
+IF `Nj GT 2` THEN
+   REPEAT/NAME=m/RANGE=`($region_y_lo)+cell_size`:($region_y_hi):`cell_size` \
+    ( LET reg = YBOX[gy=expr,y=`m`] EQ del; IF `reg EQ 0` THEN EXIT/LOOP ) 
+ENDIF
+IF `reg EQ 0` THEN
+  DEFINE SYMBOL error_status = ERROR
+  DEFNE SYMBOL grid
+  DEFINE SYMBOL error_action = running Ferret scripts for ($operation_ID) arc_ascii
+  DEFINE SYMBOL error_string "Cells are not regularly-spaced in Y"
+  GO LAS_error_result
+ENDIF
+
+SET MODE/LAST LAT
+SET MODE/LAST LON
+
+! make a heading as in this example
+!	ncols 180
+!	nrows 359
+!	xllcenter -89.54166   !!?? corner or center ??
+!	yllcenter 0.4583334
+!	cellsize 1.
+!       nodata -9.9999998E+33
+
+LET nodata = `expr,RETURN=bad`
+LIST/FILE/NOHEAD/APPEND/FORMAT="('ncols',1PG15.7)" Ni
+LIST/FILE/NOHEAD/APPEND/FORMAT="('nrows',1PG15.7)" Nj
+LIST/FILE/NOHEAD/APPEND/FORMAT="('xllcenter',1PG15.7)" xlo
+LIST/FILE/NOHEAD/APPEND/FORMAT="('yllcenter',1PG15.7)" ylo
+LIST/FILE/NOHEAD/APPEND/FORMAT="('cellsize',1PG15.7)"  cell_size
+LIST/FILE/NOHEAD/APPEND/FORMAT="('nodata',1PG15.7)"   nodata
+
+! List the data to the file, with northernmost data first.
+
+REPEAT/NAME=m/RANGE=`jend`:`jstart`:-1 \
+  (LIST/APPEND/FILE/NOHEAD/NOROWHEAD/FORMAT="(1PG15.7)" expr[j=`m`])
+
+SET MODE/LAST VERIFY
+

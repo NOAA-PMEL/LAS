@@ -1,0 +1,3 @@
+set mode verify:always
+$1 "$2"
+go "$3"

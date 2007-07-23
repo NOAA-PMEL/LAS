@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://earth.google.com/kml/2.1">
+  <Document>  
+    <Folder>
+    <name>
+    $dsID($varID)
+    </name>
+#foreach ($placemark in $allPlacemarks)
+    $placemark.toString()
+#end
+    </Folder>
+  </Document>
+</kml>

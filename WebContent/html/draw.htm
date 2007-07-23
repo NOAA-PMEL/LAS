@@ -1,0 +1,88 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<!-- saved from url=(0043)http://tmap.pmel.noaa.gov:8180/LPS/draw.htm -->
+<HTML>
+<HEAD>
+<META http-equiv=Content-Type content="text/html; charset=windows-1252">
+<STYLE type=text/css>@import url( ../css/lasUI.css );</STYLE>
+
+<SCRIPT language=JavaScript src="../js/LASImage.js"></SCRIPT>
+
+<SCRIPT language=JavaScript src="../js/LASDrawing.js"></SCRIPT>
+
+<SCRIPT>
+//for test
+var test_img = parent.currImage;
+/*
+var test_img = new Object();
+test_img.url = "../images/ref_map.gif";
+test_img.offX = 0;
+test_img.oggY = 0;
+test_img.wholeImageWidth = 516;
+test_img.wholeImageHeight = 383;
+test_img.width = 514;
+test_img.height = 382;
+*/
+
+function doSomething()
+{
+	alert(this.frameborder);
+	return;
+
+   this.style.color = '#cc0000';
+}
+
+function initialize() {
+  //change the background image and its paremeters
+  var imgBody = document.getElementById("img_body");
+  if (imgBody)
+    imgBody.background = test_img.url;
+
+  startX = test_img.offX;
+  startY = test_img.offY;
+  endX = startX + test_img.width;
+  endY = startY + test_img.height;
+  imgWidth = test_img.wholeImageWidth;
+  imgHeight = test_img.wholeImageHeight;
+
+  //set the image window size
+  var imgWindow = parent.document.getElementById("imgWindow");
+  if (imgWindow) {
+    imgWindow.style.width = imgWidth + "px";
+    imgWindow.style.height = imgHeight + "px";
+
+//      alert(imgWidth);
+//  alert("aaa " + imgHeight);
+  }
+
+  parent.document.getElementById("img_table_cell").width = imgWidth;
+
+  Img = new LASImage(document.getElementById("img_body"));
+  Img.setDrawingArea(startX, startY, endX, endY);
+  Img.setView(parent.currView == null? "rect" : parent.currView);
+
+  //pass the object to the global
+  //parent.drawObj = Img.getDrawObj();
+  //parent.drawObj.setView(parent.currView == null? "rect" : parent.currView);
+
+  parent.Img = Img;
+//  alert(parent.Img);
+
+//  alert(Img.getState());
+}
+
+function changeState(s) {
+  Img.setState(s);
+}
+</SCRIPT>
+
+<!--body onload="initialize()" id="img_body" background='a.gif' style="border:solid 1px black"--><!--border not work in FireFox--><!--ok but needn't a.gif body onload="initialize()" id="img_body" name="img_body" background='a.gif'-->
+<META content="MSHTML 6.00.2800.1106" name=GENERATOR></HEAD>
+<BODY id=img_body onload=initialize() name="img_body"><!--div id="rubberBand" style="position: absolute; visibility: hidden; width:0px; height:0px; line-height:0px; border:2px solid #FFFF00;"-->
+<DIV class=rubberBox id=rubberBand>
+<DIV id=rubberBand_h
+style="BORDER-RIGHT: #aaff00 1px solid; BORDER-TOP: #aaff00 1px solid; VISIBILITY: hidden; BORDER-LEFT: #aaff00 1px solid; WIDTH: 0px; LINE-HEIGHT: 0px; BORDER-BOTTOM: #aaff00 1px solid; POSITION: absolute; HEIGHT: 0px">
+<DIV onmouseup="changeState('drawing')" onmousedown="changeState('moving')"
+id=rubberBand_c
+style="BORDER: #FFFF00 2px solid; WIDTH: 0px; LINE-HEIGHT: 0px; POSITION: absolute; HEIGHT: 0px">
+<DIV id=rubberBand_v
+style="BORDER-RIGHT: #ffff00 1px solid; BORDER-TOP: #ffff00 1px solid; VISIBILITY: hidden; BORDER-LEFT: #ffff00 1px solid; WIDTH: 0px; LINE-HEIGHT: 0px; BORDER-BOTTOM: #ffff00 1px solid; POSITION: absolute; HEIGHT: 0px"></DIV></DIV></DIV></DIV></BODY></HTML>

@@ -1,0 +1,894 @@
+##----------------------------------------------------------------------
+## Complete list of Velocity macros defined in this library:
+##
+##
+## tr_list_dsets($comparison_mode)
+## a_dataset($style_class $item $text $comparison_mode)
+## href_dataset($item $comparison_mode)
+## href_variable($item $comparison_mode)
+## any_user_vars($dataset)
+## tr_list_all_vars($dataset $comparison_mode)
+## tr_list_dset_vars($dataset $comparison_mode)
+## tr_list_user_vars($dataset $comparison_mode)
+## tr_variable($item $text $comparison_mode)
+## td_variable($item $text)
+## a_variable_Next($comparison_mode)
+## a_metadata($item)
+##
+## tr_advice_select($text)
+## tr_advice_reset($text)
+## tr_advice($text)
+## td_advice($text)
+##
+## a_Reset()
+## a_Select_all()
+## a_Unselect_all()
+## a_Next($page $status_text)
+##
+## table_start()
+## table_end()
+## error_message($form)
+## info_table_start()
+## info_table_end($anchor)
+## status($hideVars)
+## dset_status($hideVars $dset $var $dsetlink $dset $preface)
+## banner($title)
+## control_tabs()
+##
+##----------------------------------------------------------------------
+
+##----------------------------------------------------------------------
+## tr_list_dsets($list $comparison_mode)
+##
+##   $list            - array of datasets or subcategories
+##   $comparison_mode - [""|"_compare1"|"_compare2"] for dataset.vm,
+##                      dataset_compare1.vm and dataset_compare2.vm
+##                      respectively.
+##
+## Create a single column list of all the items in this category.  Items
+## may be datasets or subcategories.
+##
+##----------------------------------------------------------------------
+#macro(tr_list_dsets $list $comparison_mode)
+  #foreach($item in $list)
+          <tr>
+            <td bgcolor="#ffffff" valign=top>
+              #a_metadata($item)
+              #a_dataset("" $item $item.getName() $comparison_mode)
+              <br>
+            </td>
+          </tr>
+  #end
+#end
+
+
+##----------------------------------------------------------------------
+## a_dataset($style_class $item $text $comparison_mode)
+##
+##   $style_class     - class definition for a predefined stylesheet
+##                      class.
+##   $item            - category item (subcategory or dataset)
+##   $text            - text to display.  If none is supplied,
+##                      $item.getName() is used.
+##   $comparison_mode - [""|"compare1"|"compare2"] for dataset.vm,
+##                      dataset_compare1.vm and dataset_compare2.vm
+##                      respectively.
+##
+## Returns a link to the dataset or variable page associated with this
+## item.
+##----------------------------------------------------------------------
+
+#macro(a_dataset $style_class $item $text $comparison_mode)
+  #if ($style_class == "")
+    #set($style_class = "dataset")
+  #end
+  #if ($text == "")
+    #set($text = $item.getName())
+  #end
+  <a class="$style_class" #href_dataset($item $comparison_mode)>$text</a>
+#end
+
+
+##----------------------------------------------------------------------
+## href_dataset($item $comparison_mode)
+##
+##   $item            - category item (subcategory or dataset)
+##   $comparison_mode - [""|"compare1"|"compare2"] for dataset.vm,
+##                      dataset_compare1.vm and dataset_compare2.vm
+##                      respectively.
+##
+## Returns only the href portion of a link to the dataset or variable 
+## page associated with this item.
+##----------------------------------------------------------------------
+
+#macro(href_dataset $item $comparison_mode)
+href="dataset${comparison_mode}?catitem=$item.getLink()"#end
+
+
+##----------------------------------------------------------------------
+## href_variable($item $comparison_mode)
+##
+##   $item            - category item (subcategory or dataset)
+##   $comparison_mode - [""|"compare1"|"compare2"] for dataset.vm,
+##                      dataset_compare1.vm and dataset_compare2.vm
+##                      respectively.
+##
+## Returns only the href portion of a link to the Constraints page
+## associated with this item.
+##----------------------------------------------------------------------
+
+#macro(href_variable $item $comparison_mode)
+#if($comparison_mode == "")
+href="constrain?var=$item.getLink()"#else
+href="constrain_compare?var=$item.getLink()"#end
+#end
+
+
+##----------------------------------------------------------------------
+## tr_list_all_vars($dataset $comparison_mode)
+##
+##   $dataset         - an array of variables
+##   $comparison_mode - [""|"_compare1"|"_compare2"] for variable.vm,
+##                      variable_compare1.vm and variable_compare2.vm
+##                      respectively.
+##
+## Create a single column list of all the variables in this dataset 
+## with a checkbox next to each.
+##
+##----------------------------------------------------------------------
+
+#macro(tr_list_all_vars $dataset $comparison_mode)
+  
+  #any_user_variables($dataset)
+  #if($user_variables == "true")
+    #tr_advice_user("<nobr>User&nbsp;variable(s)</nobr>" $dataset.get(0).getCategory().getParentid())
+    #tr_list_user_vars($dataset $comparison_mode)
+  #end
+  #tr_advice_select("Dataset&nbsp;variable(s)")
+  #tr_list_dset_vars($dataset $comparison_mode)
+
+#end
+
+
+##----------------------------------------------------------------------
+## any_user_variables($dataset)
+##
+##   $dataset         - an array of variables
+##
+## $user_variables variable is set to 'true' if user variables
+## exist in this dataset, 'false' otherwise.
+##
+##----------------------------------------------------------------------
+#macro(any_user_variables $dataset)
+  #set($user_variables="")
+  #foreach($item in $dataset)
+    #if($item.isDerived())
+      #set($user_variables="true")
+    #end
+  #end
+#end
+
+
+##----------------------------------------------------------------------
+## tr_list_dset_vars($dataset $comparison_mode)
+##
+##   $dataset         - an array of variables
+##   $comparison_mode - [""|"_compare1"|"_compare2"] for variable.vm,
+##                      variable_compare1.vm and variable_compare2.vm
+##                      respectively.
+##
+## Create a single column list of all the variables in this dataset 
+## with a checkbox next to each.
+##
+## For variable comparison, composite variables are not listed.
+##
+##----------------------------------------------------------------------
+#macro(tr_list_dset_vars $dataset $comparison_mode)
+
+  #if($comparison_mode == "")
+
+    #foreach($item in $dataset)
+      #if(!$item.isDerived())
+        #tr_variable($item "" $comparison_mode)
+      #end
+    #end
+
+  #elseif($comparison_mode == "_compare1")
+
+    #foreach($item in $dataset)
+      #if(!$item.isDerived())
+        #set($varinfo=$item.getVariableInfo())
+        #if($varinfo && !$varinfo.isComposite())
+          #tr_variable($item "" $comparison_mode)
+        #end
+      #end
+    #end
+
+  #elseif($comparison_mode == "_compare2")
+
+    #set($totalComparable=0)
+    #foreach($item in $dataset)
+      #if(!$item.isDerived())
+        #set($varinfo=$item.getVariableInfo())
+        #if($varinfo && !$varinfo.isComposite())
+          #if($item.isComparable())
+            #set($totalComparable=$totalComparable+1)
+            #tr_variable($item "" $comparison_mode)
+          #end
+        #end
+      #end
+    #end
+    #if($totalComparable == 0)
+          <tr><td>No matching variables in this dataset</td></tr>
+    #end
+
+  #end
+
+#end
+
+
+##----------------------------------------------------------------------
+## tr_list_user_vars_only($dataset $comparison_mode)
+##
+##   $dataset         - an array of variables
+##   $comparison_mode - [""|"_compare1"|"_compare2"] for variable.vm,
+##                      variable_compare1.vm and variable_compare2.vm
+##                      respectively.
+##
+## Create a single column list of all the variables in this dataset 
+## with a checkbox next to each.
+##
+##----------------------------------------------------------------------
+#macro(tr_list_user_vars_only $dataset $comparison_mode)
+
+  #if($comparison_mode == "")
+
+    #set($index=0)
+    #foreach($item in $dataset)
+      #if($item.isDerived())
+        #set($index=$index+1)
+        #tr_user_variable($item "" $comparison_mode $index)
+      #end
+    #end
+
+  #elseif($comparison_mode == "_compare1")
+
+    #set($index=0)
+    #foreach($item in $dataset)
+      #if($item.isDerived())
+        #set($varinfo=$item.getVariableInfo())
+        #if($varinfo && !$varinfo.isComposite())
+          #set($index=$index+1)
+          #tr_user_variable($item "" $comparison_mode)
+        #end
+      #end
+    #end
+
+  #else
+
+    #set($totalComparable=0)
+    #foreach($item in $dataset)
+      #if($item.isDerived())
+        #set($varinfo=$item.getVariableInfo())
+        #if($varinfo && !$varinfo.isComposite())
+          #if($item.isComparable())
+            #set($totalComparable=$totalComparable+1)
+            #tr_user_variable($item "" $comparison_mode $totalComparable)
+          #end
+        #end
+      #end
+    #end
+    #if($totalComparable == 0)
+          <tr><td>No matching user defined variables</td></tr>
+    #end
+
+  #end
+
+#end
+##----------------------------------------------------------------------
+## tr_list_user_vars($dataset $comparison_mode)
+##
+##   $dataset         - an array of variables
+##   $comparison_mode - [""|"_compare1"|"_compare2"] for variable.vm,
+##                      variable_compare1.vm and variable_compare2.vm
+##                      respectively.
+##
+## Create a single column list of all the variables in this dataset 
+## with a checkbox next to each.
+##
+##----------------------------------------------------------------------
+#macro(tr_list_user_vars $dataset $comparison_mode)
+
+  #if($comparison_mode == "")
+
+    #foreach($item in $dataset)
+      #if($item.isDerived())
+        #tr_variable($item "" $comparison_mode)
+      #end
+    #end
+
+  #elseif($comparison_mode == "_compare1")
+
+    #foreach($item in $dataset)
+      #if($item.isDerived())
+        #set($varinfo=$item.getVariableInfo())
+        #if($varinfo && !$varinfo.isComposite())
+          #tr_variable($item "" $comparison_mode)
+        #end
+      #end
+    #end
+
+  #else
+
+    #set($totalComparable=0)
+    #foreach($item in $dataset)
+      #if($item.isDerived())
+        #set($varinfo=$item.getVariableInfo())
+        #if($varinfo && !$varinfo.isComposite())
+          #if($item.isComparable())
+            #set($totalComparable=$totalComparable+1)
+            #tr_variable($item "" $comparison_mode)
+          #end
+        #end
+      #end
+    #end
+    #if($totalComparable == 0)
+          <tr><td>No matching user defined variables</td></tr>
+    #end
+
+  #end
+
+#end
+
+
+##----------------------------------------------------------------------
+## tr_variable($item $text $comparison_mode)
+##
+##   $item            - variable item
+##   $text            - text to display.  If none is supplied,
+##                      $item.getName() is used.
+##   $comparison_mode - [""|"compare1"|"compare2"] for variable.vm,
+##                      variable_compare1.vm and variable_compare2.vm
+##                      respectively.
+##
+## Returns a table row with a checkbox and the variable name.
+##----------------------------------------------------------------------
+#macro(tr_variable $item $text $comparison_mode)
+      <tr> 
+        <td valign=top>
+        #if($comparison_mode == "")
+          $form.checkbox("variables","$item.Link")
+        #else
+          $form.radio("variables","$item.Link")
+        #end
+        </td>
+        #td_variable($item "")
+        <td align="right">
+        #if ($velocityCount % 10 == 1)
+          #a_variable_Next($comparison_mode)
+        #else
+          &nbsp;
+        #end
+        </td>
+      </tr>
+#end
+
+##----------------------------------------------------------------------
+## tr_user_variable($item $text $comparison_mode $index)
+##
+##   $item            - variable item
+##   $text            - text to display.  If none is supplied,
+##                      $item.getName() is used.
+##   $comparison_mode - [""|"compare1"|"compare2"] for variable.vm,
+##                      variable_compare1.vm and variable_compare2.vm
+##                      respectively.
+##
+##   $index           - count of number of user variables found so far
+##                      Needed to manage "Next" links
+##
+## Returns a table row with a checkbox and the variable name.
+##----------------------------------------------------------------------
+#macro(tr_user_variable $item $text $comparison_mode $index)
+      <tr> 
+        <td valign=top>
+        #if($comparison_mode == "")
+          $form.checkbox("variables","$item.Link")
+        #else
+          $form.radio("variables","$item.Link")
+        #end
+        </td>
+        #td_variable($item "")
+        <td align="right">
+        #if ($index % 10 == 1)
+          #a_Next("dataset?catitem=$item.getParent().getLink()" "Select a new variable.")
+        #else
+          &nbsp;
+        #end
+        </td>
+      </tr>
+#end
+
+##----------------------------------------------------------------------
+## a_variable_Next($comparison_mode)
+##
+##   $comparison_mode - [""|"compare1"|"compare2"] for variable.vm,
+##                      variable_compare1.vm and variable_compare2.vm
+##                      respectively.
+##
+## Returns the Variable page Next button.
+##----------------------------------------------------------------------
+#macro(a_variable_Next $comparison_mode)
+  #if($comparison_mode == "")
+    #a_Next("constrain" "Constrain selected variables")
+  #elseif($comparison_mode == "_compare1")
+    #a_Next("dataset_compare2" "Select comparison variable")
+  #elseif($comparison_mode =="_compare2")
+    #a_Next("constrain_compare" "Constrain selected variables")
+  #end
+#end
+
+
+##----------------------------------------------------------------------
+## td_variable($item $text)
+##
+##   $item            - variable item
+##   $text            - text to display.  If none is supplied,
+##                      $item.getName() is used.
+##
+## Returns a table cell with an HTML anchor and the variable name.
+##----------------------------------------------------------------------
+
+#macro(td_variable $item $text)
+  #if ($text == "")
+    #set($text = $item.getName())
+  #end
+  <td width="80%" class="variable" valign=top bgcolor="#ffffff">
+    <a name="#$item.Link"/>$item.getName()</a>
+  #if($item.isDerived())
+    #set($category=$item.getCategory())
+    <br>( from $category.getParentName().$category.getAnalysisExpression() )
+  #end
+    <br>
+  </td>
+#end
+
+
+##----------------------------------------------------------------------
+## a_metadata($item)
+##
+##   $item - category item (subcategory or dataset)
+##
+## Returns the information icon as a link which will open up an external
+## metadata page when cliked.   No icon will appear if the getMetaData()
+## method of this item returns null.
+##----------------------------------------------------------------------
+
+#macro(a_metadata $item)
+  #if(!$item.getMetaData())
+              <img width=12 height=12 border="0" src="../images/icon_info_spacer.gif">
+  #else
+              <a class="nav" href="javascript:openDoc('metadata?catitem=$item.getLink()')"
+                 onMouseOver="window.status='Click for documentation'; return true"
+                 onMouseOut="window.status=''; return true">
+                 <img width=12 height=12 border="0" src="../images/icon_info.gif"></a>
+  #end
+#end
+
+##----------------------------------------------------------------------
+## a_metadata_nospace($item)
+##
+##   $item - category item (subcategory or dataset)
+##
+## Returns the information icon as a link which will open up an external
+## metadata page when cliked.   No icon will appear if the getMetaData()
+## method of this item returns null, but no "spacer" image will be included.
+##----------------------------------------------------------------------
+
+#macro(a_metadata_nospace $item)
+  #if($item.getMetaData())
+              <a class="nav" href="javascript:openDoc('metadata?catitem=$item.getLink()')"
+                 onMouseOver="window.status='Click for documentation'; return true"
+                 onMouseOut="window.status=''; return true">
+                 <img width=12 height=12 border="0" src="../images/icon_info.gif"></a>
+  #end
+#end
+
+##----------------------------------------------------------------------
+## tr_advice_select($text)
+##
+##   $text - text to be formatted as 'advice'
+##
+## Create a table row with advice text on the left and "Reset", 
+## "Select all" and "Unselect all" links on the right.  This is
+## typically seen at the top of the list of variables on the variables
+## page.
+##----------------------------------------------------------------------
+
+#macro(tr_advice_select $text)
+      <tr>
+        <td colspan=2>
+          <table width="100%" border=0 cellpadding=0 cellspacing=0>
+            <tr>
+              #td_advice($text)
+              <td align="right">
+                #a_Reset() | #a_Select_all() | #a_Unselect_all()
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+#end
+
+##----------------------------------------------------------------------
+## tr_advice_user($text $id)
+##
+##   $text - text to be formatted as 'advice'
+##   $id - id of the parent category to link to for remove
+##
+## Create a table row with advice text on the left and 
+## link to the page to remove the user defined variables.
+##----------------------------------------------------------------------
+
+#macro(tr_advice_user $text $id)
+      <tr>
+        <td colspan=2>
+          <table width="100%" border=0 cellpadding=0 cellspacing=0>
+            <tr>
+              #td_advice($text)
+              <td align="right">
+                <a href="remove?catitem=$id">Remove a user defined variable.</a>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+#end
+
+
+##----------------------------------------------------------------------
+## tr_advice_reset($text)
+##
+##   $text - text to be formatted as 'advice'
+##
+## Create a table row with advice text on the left and a "Reset" link
+## on the right.  This is typically seen at the top of the list of 
+## variables on the variables_compare# page.
+##----------------------------------------------------------------------
+
+#macro(tr_advice_reset $text)
+      <tr>
+        <td colspan=2>
+          <table width="100%" border=0 cellpadding=0 cellspacing=0>
+            <tr>
+              #td_advice("Dataset&nbsp;variable(s)")
+              <td align="right">
+                #a_Reset()
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+#end
+
+
+##----------------------------------------------------------------------
+## tr_advice($text)
+##
+##   $text - text to be formatted as 'advice'
+##
+## Create a table row with text formatted as 'advice'.  This is used
+## for "Select dataset:", "Select view:", etc.
+##----------------------------------------------------------------------
+
+#macro(tr_advice $text)
+          <tr>
+            #td_advice($text)
+          </tr>
+#end
+
+
+##----------------------------------------------------------------------
+## td_advice($text)
+##
+##   $text - text to be formatted as 'advice'
+##
+## Create a table cell with text formatted as 'advice'.  This is used
+## for "Select dataset:", "Select view:", etc.
+##----------------------------------------------------------------------
+
+#macro(td_advice $text)
+            <td class=advice_noimg width=160 height=20 align="left">
+              &nbsp;&nbsp;&nbsp;$text:
+            </td>
+#end
+
+
+##----------------------------------------------------------------------
+## a_Reset()
+##
+## "<a href="javascript:findForm().reset()">Reset</a>"
+##----------------------------------------------------------------------
+
+#macro(a_Reset)
+              <a href="javascript:findForm().reset()">Reset</a>
+#end
+
+##----------------------------------------------------------------------
+## a_Select_all()
+##
+## "<a href="javascript:selectAll('variables')">Select all</a>"
+##----------------------------------------------------------------------
+
+#macro(a_Select_all)
+              <a href="javascript:selectAll('variables')">Select all</a>
+#end
+
+##----------------------------------------------------------------------
+## a_Unselect_all()
+##
+## "<a href="javascript:unselectAll('variables')">Unselect all</a>"
+##----------------------------------------------------------------------
+
+#macro(a_Unselect_all)
+              <a href="javascript:unselectAll('variables')">Unselect all</a>
+#end
+
+
+##----------------------------------------------------------------------
+## a_Next($page $status_text)
+##
+##   $page        - page the user will be taken to
+##   $status_text - text to appear in the status bar
+##
+## Create a "Next" link that, when clicked, will take the user to the 
+## next page in the interface.
+##----------------------------------------------------------------------
+
+#macro(a_Next $page $status_text)
+              <a onMouseOver="status='$status_text';return true"
+                 href="" onClick="return stuffForm('$page')"
+                 class="redbold">Next&nbsp;&gt;</a>
+#end
+
+
+##----------------------------------------------------------------------
+## table_start()
+##
+## Shorthand for the opening table tag.
+##----------------------------------------------------------------------
+
+#macro(table_start)
+  <table width="100%" cellpadding=1 cellspacing=0 border=0 bgcolor="#ffffff" >
+#end
+
+
+##----------------------------------------------------------------------
+## table_end()
+##
+## Shorthand for the closing table tag.
+##----------------------------------------------------------------------
+
+#macro(table_end)
+  </table>
+#end
+
+
+##----------------------------------------------------------------------
+## error_message($form)
+##
+##   $form - the form which might generate an error message
+## 
+## Check to see if the form being processed by the servlet has generated
+## an error message and spit it out if it has.
+##----------------------------------------------------------------------
+
+#macro(error_message $form)
+  #if ($form.ErrorMessage != "")
+    <div class="error">$form.ErrorMessage</div>
+  #end
+#end
+
+
+##----------------------------------------------------------------------
+## info_table_start()
+##
+## Begin a table wrapper to go around the short information text
+## shown near the top of each page.
+##----------------------------------------------------------------------
+
+#macro(info_table_start)
+        <!-- BEGIN INFO TABLE -->
+        <!-- NOTE:  cellpadding in outer table makes white space around info text. -->
+        <table width="100%" cellpadding=10 cellspacing=0 border=0>
+          <tr><td>
+            <table width="100%" cellpadding=1 cellspacing=0 border=0
+                   bgcolor="#003399">
+          <tr><td>
+            <table width="100%" cellpadding=5 cellspacing=0 border=0
+                   bgcolor="#ffffff">
+              <tr>
+                <td width=50>&nbsp;</td>
+                <td align="center"><font size="2">
+#end
+
+
+##----------------------------------------------------------------------
+## info_table_end($anchor)
+##
+##   $anchor - HTML section anchor in the UI Help page
+##
+## End a table wrapper and link the 'Help' anchor to the appropriate
+## anchor in the UI Help page.
+##----------------------------------------------------------------------
+
+#macro(info_table_end $anchor)
+                </font></td>
+                <td width=50 align="center">
+                  <a href="javascript:openDoc('../doc/LASInfo.htm#$anchor')"
+                     onMouseOver="window.status='Click for user help'; return true"
+                     onMouseOut="window.status=''; return true">
+                  Help</a>
+                </td>
+              </tr>
+            </table>
+          </td></tr>
+            </table>
+          </td></tr>
+        </table>
+        <!-- END INFO TABLE -->
+#end ## macro
+
+
+##----------------------------------------------------------------------
+## status($hideVars)
+##
+## Create a status bar using the dset_status() macro
+##----------------------------------------------------------------------
+
+#macro(status $hideVars)
+  #set($compareState=$context.getCompareState($template_name))
+  #if($compareState == 0)
+    #dset_status($hideVars $dataset $category "dataset" "")
+  #else
+    #dset_status($hideVars $compare_dataset.get(0) $compare_category.get(0) "dataset_compare1" "1:")
+    #dset_status($hideVars $compare_dataset.get(1) $compare_category.get(1) "dataset_compare2" "2:")
+  #end
+#end ## macro
+
+
+##----------------------------------------------------------------------
+## dset_status($hideVars $dset $var $dsetlink $dset $preface)
+##
+## Display a status line for a given dataset, variable
+##----------------------------------------------------------------------
+
+#macro(dset_status $hideVars $dset $var $dsetlink $dset_preface)
+  #set($item=$dset.elementAt(0))
+  #set($parent=$item.getParent())
+  #set($size=$item.getPath().size())
+                <table width="100%" border=0 cellpadding=0 cellspacing=0>
+                  <tr><td align="left">
+
+  #if($size > 1 && $parent && $parent.getMetaData())
+    <a class="nav" href="javascript:openDoc('metadata?catitem=$parent.getLink()')"
+	 onMouseOver="window.status='Click for documentation'; return true"
+	 onMouseOut="window.status=''; return true">
+	 <img width=12 height=12 border="0" src="../images/icon_info.gif"></a>
+  #else
+    <img width=12 height=12 border="0" src="../images/icon_info_spacer.gif">
+  #end ## if($parent && $parent.get...)
+
+  #if($dset_preface && $dset_preface!="")
+      <b>$dset_preface</b>
+  #end
+  #foreach($link in $item.getPath())
+    #if($velocityCount != 1)
+&gt; 
+    #end
+
+<a href="" onMouseOver="window.status='';return true" onClick="return stuffForm('$dsetlink?catitem=$link.getID()')">$link.getPath()</a>
+    #end ## foreach
+
+                  &nbsp; </td></tr>
+
+  #if(! $hideVars)
+    #if($var)
+                  <tr>
+                    <td align="left">
+                      <img width=12 height=12 border="0" 
+                       src="../images/icon_info_spacer.gif">
+                      <b>$dset_preface </b>Variable(s): <b>$var.getName()
+
+      #if($var.isAnalysis())
+                      ( from $var.getParentName().$var.getAnalysisExpression() )
+      #end
+
+      #if($categories.size() > 1)
+,&nbsp;$categories.get(1).getName()
+      #if($categories.size() > 2)
+,&nbsp;...
+      #end ##if($categories.size() > 2)
+ ($categories.size() selected)
+      #end ##if($categories.size() > 1)
+		      </b>
+                    </td> 
+                  </tr>
+    #end ##if($var)
+  #end ##(!$hideVars)
+                </table>
+
+#end
+
+
+##----------------------------------------------------------------------
+## banner($title)
+##
+##   $title - text description of this LAS as set in ui.xml:
+##            <lasui title="Live Access Server">
+##
+##
+## Create the banner at the top of every page.
+##----------------------------------------------------------------------
+
+#macro(banner $title)
+<table bordercolor="#003399" border="1" width="800" border="0" cellpadding="0" cellspacing="0">
+  <tr><td>
+  <table cellpadding="8" cellspacing="0" width="800">
+  <!------  Begin of Banner ------>
+      <form method="POST" name="search" action="search">
+      <tr>
+        <td class="bannertitle" align="left">$title</td>
+	<td valign="center" align="right">
+               <a href="$req.getContextPath()/fds/" target="_blank">OPeNDAP (FDS)</a> | 
+               <a  href="javascript:showInfo('THREDDS Catalog', 'The <a href=http://my.unidata.ucar.edu/content/projects/THREDDS/index.html>THREDDS</a> project is bridging the gap between data providers and data users.  <p>A THREDDS catalog is available from each LAS installation (6.5 and above) by connecting to the same URL as the LAS, but substituting <b>thredds</b> for <b>dataset</b> in the URL.</p>  <p>Clicking <a href=thredds>here</a> will deliver an XML THREDDS catalog.  You can copy the link location by right clicking the link and selecting <b>Copy Link Location</b>, <b>Copy Shortcut</b> or a similar option.   Paste the URL of the catalog into your favorite THREDDS client to use the data sets installed in this LAS in that client.  Clicking the THREDDS <a href=thredds>XML Catalog</a> link may result in a blank page in the Web browser.  View the page source to see the XML document.')" 
+                         onMouseOver="window.status='Click for help'; return true"
+                         onMouseOut="window.status=''; return true"
+                        >THREDDS</a> | 
+                <a href="index">Index</a> | Search: <input type="text" name="terms">
+                <a href="" onMouseOver="status='Search';return true" onClick="return stuffForm('search','search')"><image border="0" src="../images/go.gif" alt="Go"></a>
+		<input type="hidden" name="nexturl">
+        </td>
+      </tr>
+      </form>
+  <!------    End of Banner ------>
+  </table>
+  </td></tr>
+</table>
+<table cellspacing="0" cellpadding="0" border="0"><tr><td class="spacer">&nbsp;</td></tr></table>
+#end
+
+
+##----------------------------------------------------------------------
+## control_tabs()
+##
+## Creates the "single data set" / "compare two" tabs at the top of the
+## left hand navigation column.
+##----------------------------------------------------------------------
+
+#macro(control_tabs)
+  #set($compareState=$context.getCompareState($template_name))
+  #if($compareState == 0)
+      <img height=47 width=130 border=0
+           align="top" vspace="0"
+           alt="Compare two datasets" 
+           src="../images/tabs_single_compare.gif"
+           usemap="#compare">
+      <map name="compare">
+          <area shape="poly" coords="66,35,69,3,123,3,126,35" 
+           href="javascript:stuffForm('constrain_compare')">
+      </map>
+
+  #else
+      <img height=47 width=130 border=0
+           align="top" vspace="0"
+           alt="Compare two datasets" 
+           src="../images/tabs_compare_compare.gif"
+           usemap="#compare">
+      <map name="compare">
+          <area shape="poly" coords="2,40,4,1,58,1,58,40"
+           href="javascript:stuffForm('constrain')">
+      </map>
+
+  #end
+#end
+

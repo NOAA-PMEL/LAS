@@ -1,0 +1,28 @@
+## Velocity template for the 'Vataset' page in single dataset mode.
+
+#set($comparison_mode="")
+#set($thisCategory=$dataset)
+
+#set($firstItem=$thisCategory.get(0))
+
+#info_table_start()
+    Select the defined variables you want to <b>remove</b> and then click <span class="redbold">Next&nbsp;&gt;</span> to go back to the variable selection page.
+#info_table_end("remove")
+
+#error_message($form)
+
+#if($include_header)
+  #parse("${include_header}.vm")
+#end
+
+#if($include)
+  #parse("${include}.vm")
+#else
+  $form.Start
+  #table_start()
+  #tr_advice("<nobr>User&nbsp;variable(s)</nobr>")
+  #tr_list_user_vars_only($thisCategory $comparison_mode)
+  #table_end()
+  $form.End
+#end
+

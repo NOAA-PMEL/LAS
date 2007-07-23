@@ -1,0 +1,35 @@
+## Velocity template with the guts of the variable page. 
+##
+## The $comparison_mode and $thisCategory variables are defined
+## in the calling template (variable*.vm)
+
+
+#set($firstItem=$thisCategory.get(0))
+#set($category=$firstItem.getCategory().getParent())
+#set($include=$category.getVariableInclude())
+#set($include_header=$category.getVariableIncludeHeader())
+
+#info_table_start()
+  #if($comparison_mode == '_compare1')
+    Select a variable and then click <span class="redbold">Next&nbsp;&gt;</span> to select a dataset and variable for comparison.
+  #else
+    Select a variable and then click <span class="redbold">Next&nbsp;&gt;</span> to proceed to the Constraints page.
+  #end
+#info_table_end("variable")
+
+#error_message($form)
+
+#if($include_header)
+  #parse("${include_header}.vm")
+#end
+
+#if($include)
+  #parse("${include}.vm")
+#else
+  $form.Start
+  #table_start()
+  #tr_list_all_vars($thisCategory $comparison_mode)
+  #table_end()
+  $form.End
+#end
+

@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databases>
+   <database name="LAS_insitu_demo" driver="com.mysql.jdbc.Driver" connectionURL="mysql://@DB_HOST@:3306/LAS_insitu_demo?autoReconnect=true" user="las" password="lasrules"/>
+</databases>
