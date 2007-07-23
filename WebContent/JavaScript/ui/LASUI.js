@@ -31,14 +31,14 @@
 		
 		// server side resource urls
 		this.hrefs = {
-					"getProduct"  : {"url" : "../ProductServer.do"},
-					"getCategories" : {"url" : "../getCategories.do"},
-					"getDatasets" : {"url" : "../getDatasets.do"},
-					"getVariables" : {"url" : "../getVariables.do"},
-					"getGrid" : {"url" : "../getGrid.do"},
-					"getViews" : {"url" : "../getViews.do"},
-					"getOperations" : {"url" : "../getOperations.do"},
-					"getOptions" : {"url" : "../getOptions.do"}
+					"getProduct"  : {"url" : "ProductServer.do"},
+					"getCategories" : {"url" : "getCategories.do"},
+					"getDatasets" : {"url" : "getDatasets.do"},
+					"getVariables" : {"url" : "getVariables.do"},
+					"getGrid" : {"url" : "getGrid.do"},
+					"getViews" : {"url" : "getViews.do"},
+					"getOperations" : {"url" : "getOperations.do"},
+					"getOptions" : {"url" : "getOptions.do"}
 				};
 		//application state
 		this.state = {
@@ -849,7 +849,7 @@ LASUI.prototype.initMap = function (mapid) {
   				  		'height' : 150
   				  },
   				  'img' : {
-  				  		'src' : '../ProductServer.do?xml=%3C%3Fxml%20version%3D%221.0%22%3F%3E%3ClasRequest%20href%3D%22file%3Alas.xml%22%3E%3Clink%20match%3D%22/lasdata/operations/operation%5B@ID%3D%27xy_map%27%5D%22%3E%3C/link%3E%3Cproperties%3E%3Cferret%3E%3Cview%3Exy%3C/view%3E%3C/ferret%3E%3C/properties%3E%3Cargs%3E%3Clink%20match%3D%22/lasdata/datasets/coads_climatology_cdf/variables/airt%22%3E%3C/link%3E%3Cregion%3E%3Crange%20type%3D%22y%22%20low%3D%22-90%22%20high%3D%2290%22%3E%3C/range%3E%3Crange%20type%3D%22x%22%20low%3D%22-180%22%20high%3D%22180%22%3E%3C/range%3E%3Cpoint%20type%3D%22t%22%20v%3D%2215-Jan%22%3E%3C/point%3E%3C/region%3E%3C/args%3E%3C/lasRequest%3E&stream=true&stream_ID=plot_image',
+  				  		'src' : 'ProductServer.do?xml=%3C%3Fxml%20version%3D%221.0%22%3F%3E%3ClasRequest%20href%3D%22file%3Alas.xml%22%3E%3Clink%20match%3D%22/lasdata/operations/operation%5B@ID%3D%27xy_map%27%5D%22%3E%3C/link%3E%3Cproperties%3E%3Cferret%3E%3Cview%3Exy%3C/view%3E%3C/ferret%3E%3C/properties%3E%3Cargs%3E%3Clink%20match%3D%22/lasdata/datasets/coads_climatology_cdf/variables/airt%22%3E%3C/link%3E%3Cregion%3E%3Crange%20type%3D%22y%22%20low%3D%22-90%22%20high%3D%2290%22%3E%3C/range%3E%3Crange%20type%3D%22x%22%20low%3D%22-180%22%20high%3D%22180%22%3E%3C/range%3E%3Cpoint%20type%3D%22t%22%20v%3D%2215-Jan%22%3E%3C/point%3E%3C/region%3E%3C/args%3E%3C/lasRequest%3E&stream=true&stream_ID=plot_image',
   				  		'width' : 300,
   				  		'height' :150,
   				  		'extent' : {
