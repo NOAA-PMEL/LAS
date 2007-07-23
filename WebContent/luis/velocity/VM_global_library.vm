@@ -839,7 +839,7 @@ href="constrain_compare?var=$item.getLink()"#end
       <tr>
         <td class="bannertitle" align="left">$title</td>
 	<td valign="center" align="right">
-               <a href="$req.getContextPath()/fds/" target="_blank">OPeNDAP (FDS)</a> | 
+               <a href="../../thredds/dodsC/las/" target="_blank">OPeNDAP (F-TDS)</a> | 
                <a  href="javascript:showInfo('THREDDS Catalog', 'The <a href=http://my.unidata.ucar.edu/content/projects/THREDDS/index.html>THREDDS</a> project is bridging the gap between data providers and data users.  <p>A THREDDS catalog is available from each LAS installation (6.5 and above) by connecting to the same URL as the LAS, but substituting <b>thredds</b> for <b>dataset</b> in the URL.</p>  <p>Clicking <a href=thredds>here</a> will deliver an XML THREDDS catalog.  You can copy the link location by right clicking the link and selecting <b>Copy Link Location</b>, <b>Copy Shortcut</b> or a similar option.   Paste the URL of the catalog into your favorite THREDDS client to use the data sets installed in this LAS in that client.  Clicking the THREDDS <a href=thredds>XML Catalog</a> link may result in a blank page in the Web browser.  View the page source to see the XML document.')" 
                          onMouseOver="window.status='Click for help'; return true"
                          onMouseOut="window.status=''; return true"
