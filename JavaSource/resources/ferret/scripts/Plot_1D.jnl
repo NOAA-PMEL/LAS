@@ -1,0 +1,34 @@
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! 
+! $Author: rhs $
+!
+! Plot_1D.jnl decides which script to call to make a 1D plot.
+! In the "old" LAS UI a 1D plot has the same options and other
+! UI characteristics regardless of the dimension so it's easier
+! to have one script like this to drive all the others.
+! In the new UI it's likely we'll define one operation per
+! dimension.
+!
+IF ($ferret_view"|x>1|*>0") THEN
+
+   !! Make a plot along an X line...
+   go x_plot_1D
+
+ELIF ($ferret_view"|y>1|*>0") THEN
+
+   !! Make a plot along an Y line...
+   go y_plot_1D
+
+ELIF ($ferret_view"|z>1|*>0") THEN
+
+   !! Make a plot along an Z line...
+   go z_plot_1D
+
+ELIF ($ferret_view"|t>1|*>0") THEN
+
+   !! Make a plot along an T line...
+   go t_plot_1D
+
+ELSE
+  say " **ERROR: Attempt to make a plot in ($ferret_view) with 1D plot script."
+ENDIF

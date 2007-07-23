@@ -1,0 +1,175 @@
+<project name="SATCHMO" default="dist" basedir=".">
+   
+  <property environment="env"/>
+  <property name="app.name" value="@APPNAME@"/>
+  <property name="jakarta.home" value="@JAKARTA_HOME@"/>
+  <property name="deploy.home"    value="${jakarta.home}/webapps/${app.name}"/>
+  <property name="dist.war"       value="${jakarta.home}/webapps/${app.name}.war"/>
+  <property name="build.compiler.emacs" value="true"/>
+
+  <target name="prepare">
+     <mkdir dir="WebContent/WEB-INF/classes"/>
+     <mkdir dir="WebContent/docs"/>
+     <copy todir="WebContent/WEB-INF/classes">        
+        <fileset dir="JavaSource">
+           <include name="resources/**"/>     
+           <include name="**.properties"/>     
+        </fileset>
+     </copy> 
+     <copy file="WebContent/luis/web/levitus_monthly.html" tofile="WebContent/docs"/>
+     <mkdir dir="conf/server/custom/las_servlet/src"/>
+     <mkdir dir="conf/server/custom/las_servlet/web/images"/>
+     <mkdir dir="conf/server/custom/las_servlet/web"/>
+     <mkdir dir="conf/server/custom/las_servlet/web/images"/>
+  </target>
+  <target name="iosp" depends="compile">
+     <mkdir dir="dist/lib"/>
+     <jar jarfile="dist/lib/ferret_iosp.jar" basedir="WebContent/WEB-INF/classes"
+        includes="gov/noaa/pmel/tmap/iosp/**, gov/noaa/pmel/tmap/ftds/**, resources/iosp/FerretConfig.xml, resources/iosp/**" excludes="dods**, thredds**, ucar**"/>
+  </target>
+
+  <target name="javadoc-all">
+     <delete dir="WebContent/docs"/>
+     <javadoc access="public" author="true" destdir="WebContent/docs" doctitle="The Java Live Access Server" nodeprecated="false" nodeprecatedlist="false" noindex="false" nonavbar="false" notree="false" overview="overview.html" packagenames="gov.noaa.pmel.tmap.las.jdom,gov.noaa.pmel.tmap.ferret.server.dodstype,org.iges.anagram.service,gov.noaa.pmel.tmap.las.product.request,gov.noaa.pmel.tmap.las.service.java,gov.noaa.pmel.tmap.las.service.ferret,gov.noaa.pmel.tmap.las.luis.map,gov.noaa.pmel.tmap.ferret.server.importer,gov.noaa.pmel.tmap.ferret.server.dodsservice,org.iges.anagram.filter,gov.noaa.pmel.tmap.las.filter,gov.noaa.pmel.tmap.las.luis.db,org.iges.util,gov.noaa.pmel.tmap.las.luis,gov.noaa.pmel.tmap.las.product.server,gov.noaa.pmel.tmap.ferret.server,gov.noaa.pmel.tmap.las.service,gov.noaa.pmel.tmap.las.ui.state,gov.noaa.pmel.tmap.las.service.database,gov.noaa.pmel.tmap.las.service.drds,gov.noaa.pmel.tmap.las.ui,gov.noaa.pmel.tmap.las.util,org.iges.anagram" source="1.5" sourcepath="JavaSource" splitindex="true" use="true" version="true">
+	   <classpath>
+               <pathelement path="classes"/>
+               <fileset dir="WebContent/WEB-INF/lib">
+	           <include name="**/*.jar"/>
+	       </fileset>
+               <fileset dir="${jakarta.home}/common/lib">
+	           <include name="**/*.jar"/>
+               </fileset>
+	   </classpath>
+      </javadoc>
+      <copy file="WebContent/luis/web/levitus_monthly.html" tofile="WebContent/docs/levitus_monthly.html"/>
+  </target>
+
+  <target name="javadoc">
+     <delete dir="WebContent/docs"/>
+     <javadoc access="public" author="true" destdir="WebContent/docs" doctitle="The Java Live Access Server" nodeprecated="false" nodeprecatedlist="false" noindex="false" nonavbar="false" notree="false" overview="overview.html" packagenames="gov.noaa.pmel.tmap.las.jdom,gov.noaa.pmel.tmap.las.product.request,gov.noaa.pmel.tmap.las.service.java,gov.noaa.pmel.tmap.las.service.ferret,gov.noaa.pmel.tmap.las.filter,gov.noaa.pmel.tmap.las.product.server,gov.noaa.pmel.tmap.las.service,gov.noaa.pmel.tmap.las.service.database,gov.noaa.pmel.tmap.las.service.drds,gov.noaa.pmel.tmap.las.util" source="1.5" sourcepath="JavaSource" splitindex="true" use="true" version="true">
+	   <classpath>
+               <pathelement path="classes"/>
+               <fileset dir="WebContent/WEB-INF/lib">
+	           <include name="**/*.jar"/>
+	       </fileset>
+               <fileset dir="${jakarta.home}/common/lib">
+	           <include name="**/*.jar"/>
+               </fileset>
+	   </classpath>
+      </javadoc>
+      <copy file="WebContent/luis/web/levitus_monthly.html" tofile="WebContent/docs/levitus_monthly.html"/>
+  </target>
+
+
+  <target name="clean">
+     <delete dir="WebContent/WEB-INF/classes/gov" />
+     <delete dir="WebContent/WEB-INF/classes/resources" />
+     <delete file="${app.name}.war"/>
+  </target>
+
+
+  <target name="compile" depends="prepare">
+     <javac srcdir="JavaSource" includes="gov/**" destdir="WebContent/WEB-INF/classes"
+           debug="on" optimize="off" deprecation="off">
+	   <classpath>
+               <pathelement path="classes"/>
+               <fileset dir="WebContent/WEB-INF/lib">
+	           <include name="**/*.jar"/>
+	       </fileset>
+               <fileset dir="${jakarta.home}/common/lib">
+	           <include name="**/*.jar"/>
+               </fileset>
+	   </classpath>
+    </javac>
+  </target>
+
+  <target name="dist" depends="prepare,compile">
+    <war jarfile="${app.name}.war" webxml="WebContent/WEB-INF/web.xml">
+       <classes dir="WebContent/WEB-INF/classes" includes="**"/>
+       <fileset dir="WebContent">
+          <include name="classes/**"/>
+          <include name="productserver/**"/>
+          <include name="fds/**"/>
+          <include name="output/**"/>
+          <include name="images/**"/>
+          <include name="css/**"/>
+          <include name="html/**"/>
+          <include name="js/**"/>
+          <include name="docs/**"/>
+          <include name="WEB-INF/**"/>
+          <include name="**.html"/>
+          <include name="**.htm"/>
+          <include name="**.js"/>
+          <include name="**.jsp"/>
+       </fileset>
+       <fileset dir="WebContent/luis/velocity">
+          <include name="**.vm"/>
+          <include name="**.html"/>
+          <include name="**.htm"/>
+          <include name="**.js"/>
+       </fileset>
+       <fileset dir="WebContent/luis">
+          <include name="images/**"/>
+       </fileset>
+       <fileset dir="conf/server/custom/las_servlet/web">
+          <include name="images/**"/>
+       </fileset>
+       <fileset dir="conf/server/custom/las_servlet">
+          <include name="web/**/*.ht*"/>
+       </fileset>
+    </war>
+  </target>
+
+  <target name="deploy" depends="dist">
+     <!-- Delete old IOSP code. -->
+     <delete dir="${jakarta.home}/webapps/thredds/WEB-INF/classes/gov/noaa/pmel/tmap"/>
+     <!-- Deploy new IOSP code. -->
+     <copy todir="${jakarta.home}/webapps/thredds/WEB-INF/classes">
+        <fileset dir="WebContent/WEB-INF/classes">
+           <include name="gov/noaa/pmel/tmap/iosp/**"/>     
+        </fileset>
+        <fileset dir="JavaSource">
+           <include name="resources/iosp/**"/>     
+        </fileset>
+     </copy> 
+     <copy file="JavaSource/resources/ferret/FerretBackendConfig.xml" tofile="${jakarta.home}/webapps/thredds/WEB-INF/classes/resources/iosp/FerretConfig.xml"/>
+     <delete dir="${deploy.home}"/>
+     <copy file="${app.name}.war" tofile="${dist.war}"/>
+  </target>
+
+  <target name="lps-lbes" depends="prepare,compile">
+    <war jarfile="${app.name}.war" webxml="WebContent/WEB-INF/web.xml">
+       <classes dir="WebContent/WEB-INF/classes" includes="**"/>
+       <fileset dir="WebContent">
+          <include name="classes/gov/noaa/pmel/tmap/las/filter/**"/>
+          <include name="classes/gov/noaa/pmel/tmap/las/jdom/**"/>
+          <include name="classes/gov/noaa/pmel/tmap/las/product/**"/>
+          <include name="classes/gov/noaa/pmel/tmap/las/service/**"/>
+          <include name="productserver/**"/>
+          <include name="fds/**"/>
+          <include name="output/**"/>
+          <include name="images/**"/>
+          <include name="WEB-INF/**"/>
+          <include name="**.html"/>
+          <include name="**.htm"/>
+          <include name="**.js"/>
+          <include name="**.jsp"/>
+       </fileset>
+    </war>
+  </target>
+
+  <target name="lps-lbes-deploy" depends="prepare,compile,lps-lbes">
+     <delete dir="${ps-deploy.home}"/>
+     <copy file="${app.name}.war" tofile="${dist.war}"/>
+  </target>
+
+  <target name="lps-lbes-clean">
+     <delete dir="WebContent/classes/gov/noaa/pmel/tmap/las/filter"/>
+     <delete dir="WebContent/classes/gov/noaa/pmel/tmap/las/jdom"/>
+     <delete dir="WebContent/classes/gov/noaa/pmel/tmap/las/product"/>
+     <delete dir="WebContent/classes/gov/noaa/pmel/tmap/las/service"/>
+     <delete dir="WebContent/WEB-INF/classes/resources" />
+     <delete file="${app.name}.war"/>
+  </target>
+
+</project>

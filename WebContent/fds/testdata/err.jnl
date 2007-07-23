@@ -1,0 +1,3 @@
+use "/home/flat/rogers/work/fds/testdata/coads_climatology.cdf" 
+show data/var/xml
+notarealcommand

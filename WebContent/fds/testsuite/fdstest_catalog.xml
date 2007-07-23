@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<fdstest>
+   <taskfactory>
+       <!-- all attributes of task tag:
+         <task name="string" subtask="sequential/parallel" timeout="integer(ms)" numrepeats="integer" 
+               repeattask="sequential/parallel" rooturl="absolute url" url="relative or absolute url" />
+       -->
+       <task name="test" rooturl="http://localhost:9090/FDS">
+           <task name="catalog" url="/dropin.catalog?timeout=60000" />
+       </task>
+   </taskfactory>
+</fdstest>

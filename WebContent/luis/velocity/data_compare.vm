@@ -1,0 +1,58 @@
+<script language="JavaScript">
+function setNewOutputWindow(newval){
+  getFormElements('data').new_output_window.value = newval;
+  stuffForm('constrain_compare');
+  var owner = window.opener;
+  while(owner != null){
+    owner.location.reload(true);
+    owner = owner.opener;
+  }
+}
+</script>
+$form.getStart("data", "doSubmit()")
+    $form.hidden("action", "")
+    $form.hidden("new_output_window", "$new_output_window")
+$form.End
+
+#info_table_start()
+  You may modify the appearance of plots through the "Options" page.<br>
+  The navigation bar on the left will take you directly to any LAS page.
+#info_table_end("data")
+
+#table_start()
+          <tr>
+            <td width="100%" height="20" align="right" valign="center">
+              <a onMouseOver="status='Start over';return true"
+                 href="" onClick="return stuffForm('dataset')"
+                 class="redbold">Start&nbsp;Over&nbsp;&gt;</a>
+            </td>
+          </tr>
+
+          <tr><td>
+             <table><tr><td>$result</td></tr></table>
+          </td></tr>
+
+	  <tr><td align="center">
+#set($item=$history.first())
+          <a href="" onMouseOver="status='View this plot in new window';return true"
+            onClick="newwin=window.open('$item.getUrl()', '', 'menubar=yes,toolbar=yes,resizable=y
+es,scrollbars=yes'); newwin.focus();return false">View in new window</a>
+
+          </td></tr>
+#if(!$new_output_window)
+          <tr><td align="center">
+          <a
+           onMouseOver="status='View all plots in a single external window';return true"
+            href="data_compare?new_output_window=true&new_output_window_name=data">Send all plot output to
+ a single new window</a>
+          </td></tr>
+          <tr><td align="center">
+          <a
+           onMouseOver="status='Open a new window for each plot';return true"
+            href="data_compare?new_output_window=true&new_output_window_name=_blank">Open a new window for each plot</a>
+          </td></tr>
+#end
+          <tr><td align="center">
+          <a target="_blank" href="$dataurl" title="Permanent link to this plot/data">Permanent link to this plot/data</a>
+          </td></tr>
+#table_end()

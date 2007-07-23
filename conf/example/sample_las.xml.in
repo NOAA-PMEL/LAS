@@ -1,0 +1,67 @@
+<?xml version='1.0' ?>
+<!DOCTYPE spec SYSTEM "spec.dtd" [
+
+<!-- Declaration of operations files to be included -->
+<!ENTITY operations SYSTEM "operations.xml">
+
+<!ENTITY insitu_operations SYSTEM "insitu_operations.xml">
+
+<!-- Declaration of dataset files to be included -->
+<!-- Default LAS datasets -->
+<!ENTITY coads SYSTEM "coads.xml">
+<!ENTITY levitus SYSTEM "levitus.xml">
+<!ENTITY paco SYSTEM "DODS_IRI_NOAA_NCEP_EMC_CMB_Pac_ocean.xml">
+
+<!-- Sample insitu datasets -->
+<!ENTITY insitu_demo_1 SYSTEM "insitu_demo_1.xml">
+<!ENTITY insitu_demo_2 SYSTEM "insitu_demo_2.xml">
+
+]>
+
+
+<lasdata>
+
+ <output_dir>@JAKARTA_HOME@/webapps/@APPNAME@/output</output_dir>
+ <institution name="Pacific Marine Environmental Lab"
+              contact="@ADMIN_EMAIL@"
+              url="http://www.pmel.noaa.gov"/>
+
+ <!-- Default properties for this server -->
+ <properties>
+
+  <product_server>
+   <ui_timeout>20</ui_timeout>
+   <ps_timeout>3600</ps_timeout>
+   <use_cache>true</use_cache>
+  </product_server>
+
+  <ferret>
+   <land_type>contour</land_type>
+   <fill_type>fill</fill_type>
+  </ferret>
+
+ </properties>
+
+ <!-- Operations supported by this server -->
+ <operations url="http://@SERVLET_ROOT_URL@/@APPNAME@/ProductServer.do">
+   &operations;
+   &insitu_operations;
+ </operations>
+
+ <!-- Datasets provided by this server -->
+ <!-- Default LAS datasets -->
+ &coads;
+ &levitus;
+ &paco;
+ <!--
+      To install the insitu_demo datasets referenced below you should
+          cd ../contrib;
+          make insitu;
+ -->
+ <!-- Uncomment the next lines to include the sample insitu datasets. -->
+<!--
+ &insitu_demo_1;
+ &insitu_demo_2;
+-->
+
+</lasdata>

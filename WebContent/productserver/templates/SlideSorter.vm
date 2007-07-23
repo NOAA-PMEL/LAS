@@ -1,0 +1,335 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+
+<html>
+
+  <head>
+    <title>SlideSorter test page</title>
+<!-- 
+ * Imported libaries:
+ *
+ * xmldom.js              Parses the LASRequest XML.  Used by LASRequest.js.
+ * json.js                Parses the LASResponse JSON.  Used by LASResponse.js.
+ * sarissa.js             Cross-browser wrapper for AJAX communication.
+ * LatitudeWidget.js      Creates and populates a Latitude Selector.
+ * LongitudeWidget.js     Creates and populates a Longitude Selector.
+ * MenuWidget.js          Creates and populates a basic Selector (menu).
+ * DateWidget.js          Creates and populates a date Widget (group of Selectors).
+ * LASRequest.js          Provides an API for accessing/modifying LASRequest elements.
+ * LASResponse.js         Provides an API for accessing LASResponse elements.
+ * LASGetGridResponse.js  Provides an API for accessing getGrid.do response elements.
+ * LASContentCell.js      Creates and populates DOM elements according to content type.
+ * LASSlideSorter.js      Creates a menu-controlled slide sorter of content cells
+-->
+    <script type="text/javascript" src="JavaScript/components/xmldom.js"></script>
+    <script type="text/javascript" src="JavaScript/components/json.js"></script>
+    <script type="text/javascript" src="JavaScript/components/sarissa.js"></script>
+    <script type="text/javascript" src="JavaScript/components/MenuWidget.js"></script>
+    <script type="text/javascript" src="JavaScript/components/LatitudeWidget.js"></script>
+    <script type="text/javascript" src="JavaScript/components/LongitudeWidget.js"></script>
+    <script type="text/javascript" src="JavaScript/components/DateWidget.js"></script>
+    <script type="text/javascript" src="JavaScript/components/LASRequest.js"></script>
+    <script type="text/javascript" src="JavaScript/components/LASResponse.js"></script>
+    <script type="text/javascript" src="JavaScript/components/LASGetGridResponse.js"></script>
+    <script type="text/javascript" src="JavaScript/components/LASContentCell.js"></script>
+    <script type="text/javascript" src="JavaScript/components/LASSlideSorter.js"></script>
+    <script type="text/javascript">
+
+
+var dsid = "coads_climatology_cdf";
+var varid = "sst";
+
+#set( $view = $las_request.getProperty('ferret','view') )
+var view = '$view';
+
+function initializeLASSlideSorter() {
+  // NOTE:  Req must be defined before LSS because the LSS object uses the Req
+  // NOTE:  object in createLASRequest() when the LSS object is initialized.
+  ReqImg = new LASRequest('$las_request.toJavaScriptSafeString()');
+  ReqA = new LASRequest('$las_request.toJavaScriptSafeString()');
+  dsid = ReqImg.getDataset();
+  varid = ReqImg.getVariable();
+  sendGetGridRequest();
+}
+
+
+/**
+ * Updates the LASRequest to reflect the current state of the user interface.
+ * @return LASRequest
+ */
+function createLASRequest(AA) {
+
+  ReqImg.prefix = 'ProductServer.do?xml=';
+  ReqImg.setVariable(dsid,varid);
+// NOTE:  In order to create a different default size for the SlideSorter
+// NOTE:  I had to create a new menu name.  Of course, that property won't
+// NOTE:  be understood by the Ferret scripts that expect 'size', so here
+// NOTE:  we switch back by adding the 'size' property.
+  var size_SS = ReqImg.getProperty('ferret','size_SS');
+  if (size_SS == null) {
+    ReqImg.setProperty('ferret','size','0.2')
+  } else {
+    ReqImg.setProperty('ferret','size',size_SS)
+  }
+
+// TODO:  Need to query the SlideSorter to determine the view instead of
+// TODO:  of having it always set to the view of the original request.
+  ReqImg.setProperty('ferret','view',view);
+
+
+// Set the contour levels/scaling if defined
+  var user_option =  document.getElementById('LSS_optionTextField').value;
+  if (user_option != '') {
+    if (view == 'x' || view == 'y' || view == 'z' || view == 't') {
+      ReqImg.setProperty('ferret','dep_axis_scale',user_option);
+    } else {
+      ReqImg.setProperty('ferret','fill_levels',user_option);
+    }
+  }
+
+  if (view != 'x' && view != 'xy' && view != 'xz' && view != 'xt') {
+    if (AA.x) {
+      ReqImg.setRange('x',AA.x);
+    }
+  }
+  if (view != 'y' && view != 'xy' && view != 'yz' && view != 'yt') {
+    if (AA.y) {
+      ReqImg.setRange('y',AA.y);
+    }
+  }
+  if (view != 'z' && view != 'xz' && view != 'yz' && view != 'zt') {
+    if (AA.z) {
+      ReqImg.setRange('z',AA.z);
+    }
+  }
+  if (view != 't' && view != 'xt' && view != 'yt' && view != 'zt') {
+    if (AA.t) {
+      ReqImg.setRange('t',AA.t);
+    }
+  }
+
+  if (view == 'x' || view == 'y' || view == 'z' || view == 't') {
+    ReqImg.setOperation('Plot_1D');
+  } else {
+    if (view == 'xy') {
+      ReqImg.setOperation('Plot_2D_XY');
+    } else {
+      ReqImg.setOperation('Plot_2D');
+    }
+  }
+
+  return ReqImg;
+}
+
+/**
+ * Handles the LASResponse returned from the XMLHTTP request,
+ * creates the appropriate DOM elements based on the LASResponse and
+ * inserts appropriate content into those DOM elements.
+ */
+function handleLASResponse(LASResponseText,row,col) {
+
+  var contentCell_id = "LSS_ContentCell" + row + col; 
+
+  var aGif_id = "aGif" + row + col;
+  var aGif = document.getElementById(aGif_id);
+  aGif.parentNode.parentNode.parentNode.parentNode.parentNode.style.backgroundColor = '#ACE';
+  aGif.parentNode.parentNode.parentNode.parentNode.style.backgroundColor = '#ACE';
+  aGif.parentNode.parentNode.parentNode.style.backgroundColor = '#ACE';
+  aGif.style.visibility = 'hidden';
+
+  // First, make sure we can parse the LASResponse
+  var Response;
+  try {
+    var JSONObject = LASResponseText.parseJSON();
+    Response = new LASResponse(JSONObject);
+  } catch(e) {
+    // TODO:  Create Error Cell with this text?
+    alert('Error parsing LASResponse:  ' + e);
+    return;
+  }
+
+  // We have a valid JSON object.
+
+  var CCell = new LASContentCell();
+  CCell.render(contentCell_id);
+
+  if ( Response.isError() ) {
+    CCell.display(Response,'las_message');
+  } else {
+    CCell.display(Response,'plot_image');
+  }           
+}
+
+/**
+ *
+ */
+function applyOptions() {
+  LSS.loadAllImages();
+  //sendGetGridRequest();
+}
+
+/**
+ * Sends a getGrid request to the product server using Sarissa
+ * method and registers handleLASGetGridResponse as a callback
+ * routine.
+ */
+function sendGetGridRequest() {
+  var url = 'getGrid.do?dsid=' + dsid + '&varid=' + varid;
+  var xmlhttp = new XMLHttpRequest();
+  xmlhttp.open('GET', url, true);
+  xmlhttp.onreadystatechange = function() {
+    if (xmlhttp.readyState == 4) {
+      handleLASGetGridResponse(xmlhttp.responseText);
+    }
+  }
+  xmlhttp.send(null);
+}
+
+/**
+ * Handles the LASGetGridResponse returned from the XMLHTTP request,
+ * creates the LSSInitObject and reinitializaes the LASSlideSorter.
+ */
+function handleLASGetGridResponse(LASResponseText) {
+  // First, make sure we can parse the LASResponse
+  var Response;
+  try {
+    var JSONObject = LASResponseText.parseJSON();
+    Response = new LASGetGridResponse(JSONObject);
+  } catch(e) {
+    // TODO:  Create Error Cell with this text?
+    alert('Error parsing LASResponseText as JSON');
+    return;
+  }
+
+  // At this point we have a valid JSON object.
+
+  // Clear the LSSInitObject();
+  LSSInitObject = new Object();
+
+  // Create the Longitude axis menus
+
+  if (view != 'x' && view != 'xy' && view != 'xz' && view != 'xt') {
+    if (Response.hasAxis('x')) {
+      LSSInitObject["x"] = new Object();
+      LSSInitObject["x"].title = 'Longitude';
+      LSSInitObject["x"].type = 'longitudeWidget';
+      LSSInitObject["x"].initial_value = ReqImg.getRangeLo('x');
+      LSSInitObject["x"].data = new Object();
+      LSSInitObject["x"].data.lo = Response.getLo('x');
+      LSSInitObject["x"].data.hi = Response.getHi('x');
+      LSSInitObject["x"].data.delta = Response.getDelta('x');
+    }
+  }
+    
+  if (view != 'y' && view != 'xy' && view != 'yz' && view != 'yt') {
+    if (Response.hasAxis('y')) {
+      LSSInitObject["y"] = new Object();
+      LSSInitObject["y"].title = 'Latitude';
+      LSSInitObject["y"].type = 'latitudeWidget';
+      LSSInitObject["y"].initial_value = ReqImg.getRangeLo('y');
+      LSSInitObject["y"].data = new Object();
+      LSSInitObject["y"].data.lo = Response.getLo('y');
+      LSSInitObject["y"].data.hi = Response.getHi('y');
+      LSSInitObject["y"].data.delta = Response.getDelta('y');
+    }
+  }
+    
+  if (view != 'z' && view != 'xz' && view != 'yz' && view != 'zt') {
+    if (Response.hasAxis('z')) {
+      LSSInitObject["z"] = new Object();
+      LSSInitObject["z"].title = 'Depth';
+      LSSInitObject["z"].type = 'menuWidget';
+      LSSInitObject["z"].initial_value = ReqImg.getRangeLo('z');
+      LSSInitObject["z"].data = Response.getMenu('z');
+    }
+  }
+
+  if (view != 't' && view != 'xt' && view != 'yt' && view != 'zt') {
+    if (Response.hasAxis('t')) {
+      LSSInitObject["t"] = new Object();
+      LSSInitObject["t"].title = 'Time';
+      if (Response.getDisplayType('t') == 'menu') {
+        LSSInitObject["t"].type = 'menuWidget';
+        LSSInitObject["t"].initial_value = ReqImg.getRangeLo('t');
+        LSSInitObject["t"].data = Response.getMenu('t');
+      } else {
+// NOTE:  If it's not of type 'menu' it must be of type 'widget'
+        LSSInitObject["t"].type = 'dateWidget';
+        LSSInitObject["t"].format = Response.getRenderFormat('t');
+        LSSInitObject["t"].initial_value = ReqImg.getRangeLo('t');
+        LSSInitObject["t"].data = new Object();
+        LSSInitObject["t"].data.lo = Response.getLo('t');
+        LSSInitObject["t"].data.hi = Response.getHi('t');
+      }
+    }
+  }
+
+  // Choose an initial menu
+
+  var initial_menu;
+
+  if (view.indexOf('t') == -1 && Response.hasAxis('t')) {
+    initial_menu = 't';
+  } else {
+    if (view.indexOf('z') == -1 && Response.hasAxis('z')) {
+      initial_menu = 'z';
+    } else {
+      if (view.indexOf('y') == -1 && Response.hasAxis('y')) {
+        initial_menu = 'y';
+      } else {
+        if (view.indexOf('x') == -1 && Response.hasAxis('x')) {
+          initial_menu = 'x';
+        }
+      }
+    }
+  }
+
+  // Reinitialize the SlideSorter
+  LSS = new LASSlideSorter(document.LASSlideSorterForm,LSSInitObject);
+  LSS.render("LASSlideSorter",2,2,initial_menu);
+
+}
+  </script>
+
+  <style type="text/css" media="all">
+    @import "JavaScript/components/SlideSorter.css";
+  </style>
+</head>
+
+<body onload="initializeLASSlideSorter()">
+
+  <form id="LSS_Form" name="LASSlideSorterForm" onSubmit="return false">
+    <div id="LSS_Container">
+
+  	<table id="LSS_Table">
+      <tbody>
+
+        <tr class="LSS_optionRow">
+          <td>
+#if ($view == 'x' || $view == 'y' || $view == 'z' || $view == 't')
+            <span id="LSS_optionLabel">Dependent axis scale</span>
+#else
+            <span id="LSS_optionLabel">Color fill levels</span>
+#end
+            <input id="LSS_optionTextField" type="text" name="LSS_optionTextField"></input>
+            <input id="ApplyButton" type="button" value="Apply" onclick="javascript:applyOptions()"></input>
+          </td>
+        </tr>
+
+<!--
+The SlideSorter render() method invoked during initialization above will 
+automatically build the SlideSorter table inside the 'LASSlideSorter' DOM element.
+-->
+
+        <tr class="LSS_slideSorterRow">
+          <td id="LASSlideSorter"> </td>
+        </tr>
+
+      </tbody>
+  	</table>
+
+    </div>
+  </form>
+
+</body>
+
+</html>

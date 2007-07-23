@@ -1,0 +1,8 @@
+cancel mode verify
+go "$1"
+say <?xml version="1.0" encoding="ISO-8859-1" standalone="yes"?> 
+say <data>
+show var/xml
+show data/var/xml
+show axis/all/xml
+say </data>

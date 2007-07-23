@@ -1,0 +1,368 @@
+#set($region=$compare_region.get(0))
+#set($c_region=$compare_region.get(1))
+#parse("constrain_include.vm")
+
+<script language="JavaScript">
+var aMapTool;
+var aRegionWidget;
+
+function updateMap() {
+   var widxlot = new MapTextWidget(this,"lon", 'region',"xlo_text");
+   var widxhit = new MapTextWidget(this,"lon", 'region',"xhi_text");
+   var widylot = new MapTextWidget(this,"lat", 'region',"ylo_text");
+   var widyhit = new MapTextWidget(this,"lat", 'region',"yhi_text");
+   document.location.href="constrain_compare?"+widxlot.getValue()+","+widxhit.getValue()+","+widylot.getValue()+","+widyhit.getValue();
+}
+
+MapTool.prototype.setCompareRanges = function(){
+  var xlo = parseFloat(document.forms.region.elements.compare_x_lo.value);
+  var xhi = parseFloat(document.forms.region.elements.compare_x_hi.value);
+  var ylo = parseFloat(document.forms.region.elements.compare_y_lo.value);
+  var yhi = parseFloat(document.forms.region.elements.compare_y_hi.value);
+  // This looks like a bug to me, but the applet switches correctly
+  // using this call.
+  if ( "$use_java" == "true" ) {
+  this.mApplet.positionTool(1, xlo, xhi, Math.min(ylo, yhi),
+			    Math.max(ylo,yhi));
+  }
+  else {
+      this.mApplet.positionTool(1, xlo, xhi, Math.min(ylo, yhi),
+                            Math.max(ylo,yhi));
+  }
+  // Values in the text box are handled on the servlet side for non-java case.
+  if ( "$use_java" == "true" ) {
+     var txlo = parseFloat("$c_region.getAxisLo("x")");
+     var txhi = parseFloat("$c_region.getAxisHi("x")");
+     var tylo = parseFloat("$c_region.getAxisLo("y")");
+     var tyhi = parseFloat("$c_region.getAxisHi("y")");
+     this.mApplet.restrictToolRange(1, txlo, txhi, Math.min(tylo, tyhi),
+			       Math.max(tylo,tyhi));
+  }
+}
+
+MapTool.prototype.getCompareRanges = function(){
+  var rval = new Array(2);
+  var str = new String(this.mApplet.get_x_range(1));
+  rval.x = str.split(" ");
+// Applet sometimes returns only one value...no comment...
+  if (rval.x[1] == null){
+    rval.x[1] = rval.x[0];
+  }
+  str = new String(this.mApplet.get_y_range(1));
+  rval.y = str.split(" ");
+  if (rval.y[1] == null){
+    rval.y[1] = rval.y[0];
+  }
+  // Values in the text box are handled on the servlet side for non-java case.
+  if ( "$use_java" == "true" ) {
+     document.forms.region.elements.compare_x_lo.value = rval.x[0];
+     document.forms.region.elements.compare_x_hi.value = rval.x[1];
+     document.forms.region.elements.compare_y_lo.value = rval.y[0];
+     document.forms.region.elements.compare_y_hi.value = rval.y[1];
+  }
+  else {
+     document.forms.region.elements.compare_x_lo.value = $mapstate.getXlo_compare();
+     document.forms.region.elements.compare_x_hi.value = $mapstate.getXhi_compare();
+     document.forms.region.elements.compare_y_lo.value = $mapstate.getYlo_compare();
+     document.forms.region.elements.compare_y_hi.value = $mapstate.getYhi_compare();
+  }
+}
+
+function setRegionWidget() {
+  aRegionWidget.onChange();
+}
+
+function doSubmit() {
+  var tf = findForm();
+  tf.target="_top";
+  if (aMapTool){
+    aMapTool.getRanges();
+    aMapTool.getCompareRanges();
+  }
+}
+
+function init() {
+  aMapTool = new MapTool(document.map);
+  aMapTool.setMode('comparison');
+  aMapTool.selectTool("$region.getViewRegion()");
+
+  aMapTool.setRanges();
+  aMapTool.setCompareRanges();
+
+}
+
+function setUseJava(newval){
+  getFormElements('region').use_java.value = newval;
+  stuffForm('constrain_compare');
+}
+
+function popupDataWindow() {
+   winCom = "location=yes,menubar=yes,toolbar=yes,resizable=yes,scrollbars=yes";
+   winCom += ",width=800,height=600";
+   var dataWindow = window.open("","data", winCom);
+   dataWindow.focus();
+   var theForm=findForm();
+   doSubmit();
+   theForm.nexturl.value="data_compare_popup";
+   theForm.target = "data";
+   theForm.submit();
+}
+
+</script>
+
+## Informative text
+#info_table_start()
+  Select your desired view (geometry of output) and output (type of product).<br>
+  Then set the 4-D region (lon-lat-depth-time) and any additional constraints.
+#info_table_end("constrain")
+
+
+#error_message($form)
+
+#set($category=$region.getCategory())
+#set($include=$category.getConstrainInclude())
+#set($include_header=$category.getConstrainIncludeHeader())
+
+#if($include_header)
+#parse("${include_header}.vm")
+#end ## if($include_header)
+
+$form.getStart("region", "doSubmit()")
+    <input type="hidden" name="action" value="">
+    $form.hidden("x_lo","-180")
+    $form.hidden("x_hi", "180")
+    $form.hidden("y_lo", "-90")
+    $form.hidden("y_hi", "90")
+    $form.hidden("compare_x_lo","-180")
+    $form.hidden("compare_x_hi", "180")
+    $form.hidden("compare_y_lo", "-90")
+    $form.hidden("compare_y_hi", "90")
+    $form.hidden("use_java", "$use_java")
+
+
+#table_start()
+
+  <tr>
+    #td_advice("Select&nbsp;view")
+    <td width="140" align="left"><font size=2>
+      $form.select("view", $region.getViewItems())
+      </font>
+    </td>
+    <td align="right" valign="center">
+      <a
+         onMouseOver="status='Get output for selected variable';return true"
+         href="javascript:var godata=true;popupDataWindow();"
+         class="redbold">Next&nbsp;&gt;</a>
+    </td>
+    <script language="JavaScript">
+      var foo = new ViewWidget("region", "view");
+    </script>
+  </tr>
+
+  <tr>
+    #td_advice("Select&nbsp;output")
+    <td><font size="2">
+      $form.select("output", $region.getComparisonProducts())
+      </font>
+    </td>
+    <td align="right" valign="center">
+      &nbsp;
+    </td>
+    <script language="JavaScript">
+      var bar = new OutputWidget("region", "output");
+    </script>
+  </tr>
+
+  <tr>
+    #td_advice("Select&nbsp;region")
+    <td align="left"><font size=2>
+         $form.select("region", $region.getRegionItems())
+       </font>
+       <a href="javascript: setRegionWidget()"><img src="../images/go.gif" alt="Go" border="0"></a>
+    </td>
+    <td align="right" valign="center">
+      &nbsp;
+    </td>
+    <script language="JavaScript">
+       aRegionWidget = new RegionWidget("region", "region");
+    </script>
+  </tr>
+
+#table_end()
+
+#parse("applet_include.vm")
+
+#table_start()
+
+## Create axis widgets
+
+#if($region.hasAxis("t"))
+#set($axis=$region.getAxis("t"))
+  <tr>
+  #set($isRange=$region.isRange("t"))
+  #if($isRange)
+    #td_advice("Select&nbsp;time&nbsp;range")
+  #else
+    #td_advice("Select&nbsp;time&nbsp;for&nbsp;first&nbsp;variable")
+  #end ##if($region.isRange("t"))
+  <td align="left"><font size="2">
+  $form.axisSelect("lo", "region", "t_lo", $axis)
+  #if($isRange)
+     to <br>
+     $form.axisSelect("hi", "region", "t_hi", $axis)
+  #end
+  </font></td>
+  </tr>
+#end ## region.hasAxis
+
+#if($region.hasAxis("z"))
+#set($axis=$region.getAxis("z"))
+  <tr>
+  #set($isRange=$region.isRange("z"))
+  #if($isRange)
+    #td_advice("$region.getUI().get_z_text()&nbsp;range")
+  #else
+    #td_advice("$region.getUI().get_z_text()&nbsp;for&nbsp;first&nbsp;variable")
+  #end ##if($region.isRange("z"))
+  <td align="left"><font size="2">
+  $form.axisSelect("lo", "region", "z_lo", $axis)
+  #if($isRange)
+     to <br>
+     $form.axisSelect("hi", "region", "z_hi", $axis)
+  #end
+  </font></td>
+  </tr>
+#end ## region.hasAxis
+
+## Create compare axis widgets
+
+#if($c_region.hasAxis("t"))
+#set($axis=$c_region.getAxis("t"))
+  <tr>
+  #set($isRange=$c_region.isRange("t"))
+  #if(!$isRange)
+    #td_advice("Select&nbsp;time&nbsp;for&nbsp;second&nbsp;variable")
+  <td align="left"><font size="2">
+  $form.axisSelect("lo", "region", "compare_t_lo", $axis)
+  </font></td>
+  #end ##if($isRange)
+  </tr>
+#end ## region.hasAxis
+
+#if($c_region.hasAxis("z"))
+#set($axis=$c_region.getAxis("z"))
+  <tr>
+  #set($isRange=$c_region.isRange("z"))
+  #if(! $isRange)
+    #td_advice("$c_region.getUI().get_z_text()&nbsp;for&nbsp;second&nbsp;variable")
+  <td align="left"><font size="2">
+  $form.axisSelect("lo", "region", "compare_z_lo", $axis)
+  </font></td>
+  #end ##if(!$isRange)
+  </tr>
+#end ## region.hasAxis
+
+#table_end()
+
+## Create constraints (if any)
+
+
+
+#if($region.getUI().isConstrained())
+#set($index=0)
+#set($constraints=$region.getUI().getConstraints())
+
+#table_start()
+#if($include)
+#parse("${include}.vm")
+#else ## if($include)
+
+  <tr>
+    #td_advice("Select&nbsp;Constraints")
+  </tr>
+  #foreach($constraint in $constraints)
+      #foreach($dummy in $constraint.getCountList())
+  <tr>
+    <td><font size="2">
+          #foreach($widget in $form.constraintSelect("region", $index, $constraint, $category))
+             $widget
+          #end ## #foreach($widget...)
+    </font></td>
+  </tr>
+	  #set($index=$index+1)
+      #end ##foreach($dummy...)
+  #end ## foreach($constraint...)
+  <tr>
+    <td width="100%" height="20" align="right" valign="center">
+      <a onMouseOver="status='Get output for selected variable';return true"
+         href="javascript:var godata=true;popupDataWindow();"
+         class="redbold">Next&nbsp;&gt;</a>
+    </td>
+  </tr>
+#end ## if($include)
+#table_end()
+#end ## isConstrained
+#table_start()
+<tr>
+<td colspan="3">
+<center><hr width="550"></center>
+</td>
+</tr>
+<tr>
+#td_advice("Select&nbsp;options")
+</tr>
+
+#if($options.size() == 0)
+            <tr>
+              <td colspan=2 align=center>
+                No options available for this output product
+              </td>
+            </tr>
+#else
+
+#foreach($o in $options)
+#set($optionsWidget = $o.getOptionsWidget())
+	    <TR>
+		##<TD WIDTH=26>
+		<TD>
+		    <P ALIGN=CENTER>
+                        <A class="nav" 
+                         href="javascript:showInfo('$o.getTitle()', '$o.getHelp()')" 
+                         onMouseOver="window.status='Click for help'; return true"
+                         onMouseOut="window.status=''; return true"
+                        >
+                             <IMG SRC="../images/icon_white_question.gif"
+                              ALIGN=BOTTOM WIDTH=13 HEIGHT=13 BORDER=0></A>
+                     </P>
+		</TD>
+		##<TD WIDTH=288>
+		<TD>
+          #if ($o.getTitle().equals("Evaluate expression"))
+		    <P><b><FONT color="green" SIZE=2>$o.getTitle()</FONT></b></P>
+          #elseif ($o.getTitle().equals("Evaluate expression for comparison variable"))
+		    <P><b><FONT color="green" SIZE=2>$o.getTitle()</FONT></b></P>
+          #else
+		    <P><FONT SIZE=2>$o.getTitle()</FONT></P>
+          #end
+		</TD>
+		##<TD WIDTH=220><FONT SIZE=2>
+		<TD WIDTH=220><FONT SIZE=2>
+		    #if($o.getType() == "m")
+			$form.select("$optionsWidget.getName()", $optionsWidget.getItems())
+		    </FONT>
+		    #elseif($o.getType() == "t")
+		        $form.text("$optionsWidget.getName()")
+	            #elseif($o.getType() == "v")
+                        $form.selectedVariables("$optionsWidget.getName()", $region)
+		    #else
+                        (Internal: unknown widget)
+	            #end
+		</TD>
+	     </TR>
+#end ## foreach($o in $options)
+#end ## end else if options size == 0
+#table_end()
+
+$form.End
+
+

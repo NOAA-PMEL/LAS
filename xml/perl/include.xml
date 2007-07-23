@@ -1,0 +1,52 @@
+<?xml version='1.0' ?>
+<!DOCTYPE spec SYSTEM "spec.dtd" [
+<!ENTITY coads SYSTEM "coads.xml">
+<!ENTITY levitus SYSTEM "levitus.xml">
+]>
+
+<lasdata>
+  <institution name="Pacific Marine Environmental Lab"
+   url="http://www.pmel.noaa.gov"/>
+ <!-- Define properties -->
+  <properties>
+   <ferret>
+    <land_type>shade        
+    </land_type>
+    <fill_type>fill        
+    </fill_type>
+    <view_centered>no        
+    </view_centered>
+    <fill_levels/>
+    <format>netcdf        
+    </format>
+   </ferret>
+  </properties>
+  <!-- Define operations -->
+   <operations url="http://localhost.localdomain/las-bin/LASserver.pl">
+    <shade name="Shade a variable">
+     <arg type="variable"/>
+     <arg type="region"/>
+    </shade>
+    <line name="Draw line from variable">
+     <arg type="variable"/>
+     <arg type="region"/>
+    </line>
+    <data name="Return variable data">
+     <arg type="variable"/>
+     <arg type="region"/>
+    </data>
+    <vrml name="Generate a VRML graphic">
+     <arg type="variable"/>
+     <arg type="region"/>
+    </vrml>
+    <vector name="Vector graphic">
+     <arg type="variable"/>
+     <arg type="variable"/>
+     <arg type="region"/>
+    </vector>
+   </operations>
+
+&coads;
+&levitus;
+
+  </lasdata>

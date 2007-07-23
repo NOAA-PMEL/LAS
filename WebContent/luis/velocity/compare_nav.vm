@@ -1,0 +1,63 @@
+#control_tabs()
+      <table border=1 cellpadding=0 cellspacing=0
+             width="130" vspace="0" valign="top"
+             bgcolor="#003399" bordercolor="#003399">
+
+        <tr><td bgcolor="FFFFFF">
+          <table width="100%" border="0" cellspacing="0" cellpadding="4">
+
+#if($template_name == "dataset_compare1.vm")
+            <tr><td class="navhighlight" align="right">Dataset 1</td></tr>
+#else
+            <tr><td align="right"><a class="nav" onMouseOver="status='Show datasets for first variable';return true" href="" onClick="return stuffForm('dataset_compare1')">Dataset 1</a></td></tr>
+#end
+
+#if($template_name == "variable_compare1.vm")
+            <tr><td class="navhighlight" align="right">Variable 1</td></tr>
+#else
+            <tr><td align="right"><a class="nav" onMouseOver="status='Show first compare variable';return true" href="" onClick="return stuffForm('dataset_compare1?lastvar=1')">Variable 1</a></td></tr>
+#end
+
+#if($template_name == "dataset_compare2.vm")
+            <tr><td class="navhighlight" align="right">Dataset 2</td></tr>
+#else
+            <tr><td align="right"><a class="nav" onMouseOver="status='Show datasets for second variable';return true" href="" onClick="return stuffForm('dataset_compare2')">Dataset 2</a></td></tr>
+#end
+
+#if($template_name == "variable_compare2.vm")
+            <tr><td class="navhighlight" align="right">Variable 2</td></tr>
+#else
+            <tr><td align="right"><a class="nav" onMouseOver="status='Show second compare variable';return true" href="" onClick="return stuffForm('dataset_compare2?lastvar=1')">Variable 2</a></td></tr>
+#end
+
+#if($template_name == "constrain_compare.vm")
+            <tr><td class="navhighlight" align="right">Constraints</td></tr>
+#else
+            <tr><td align="right"><a class="nav" onMouseOver="status='Constrain selected variables';return true" href="" onClick="return stuffForm('constrain_compare')">Constraints</a></td></tr>
+#end
+
+            <tr><td align="right"><hr width="60%"></td></tr>
+
+#if($template_name == "history_compare.vm")
+            <tr><td class="navhighlight" align="right">Previous Output</td></tr>
+#elseif (!$history)
+            <tr><td class="navgray" align="right">Previous Output</td></tr>
+#else
+            <tr><td align="right"><a class="nav" onMouseOver="status='Get plot history';return true" href="" onClick="return stuffForm('history_compare')">Previous Output</a></td></tr>
+#end
+
+            <tr><td align="right"><hr width="60%"></td></tr>
+            <tr><td align="right"><a class="nav" onMouseOver="status='Find out about LAS';return true" href="" onClick="window.open('http://www.ferret.noaa.gov/Ferret/LAS'); return false">About</a></td></tr>
+#if ($configs.get(0).getContact() != "")
+            <tr><td align="right"><a class="nav" onMouseOver="status='Contact administrator of this LAS';return true" href="mailto:$configs.get(0).getContact()?subject=$title" onClick="">Contact</a></td></tr>
+#end
+            <tr><td align="right"><hr width="60%"></td></tr>
+            <tr><td align="right">LAS UI Version $ui_version</td></tr>
+            <tr><td align="right">LAS Product Server: </td></tr>
+            <tr><td align="right">Armstrong 0.4 Beta</td></tr>
+          </table>
+
+        </td></tr>
+
+      </table>
+

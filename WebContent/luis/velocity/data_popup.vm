@@ -1,0 +1,22 @@
+</html>
+#if ($pure_html)
+$result
+#else
+<html>
+<head>
+<title>$title -- output</title>
+</head>
+<body onLoad="self.focus()">
+
+#table_start()
+
+<tr><td>
+$result
+</td></tr>
+          <tr><td align="center">
+          <a target="perm" href="$dataurl" title="Open a permanent link to this plot/data">Open a permanent link to this plot/data in a new window.</a>
+          </td></tr>
+#table_end()
+</body>
+</html>
+#end

@@ -1,0 +1,54 @@
+#set($parent=$category.getParent())
+$form.Start
+<table>
+<tr><td colspan="2" class="heading">$parent.getName()</td></tr>
+##
+## Show all user defined variables at the top for all categories.
+##
+#foreach($c in $parent.getChildren())
+## Show the user defined variables for this category (if there are any).
+  #set($vchildren = $c.getDerivedItems($session, $c.getLink()))
+  #any_user_variables($vchildren)
+  #if($user_variables == "true")
+    #tr_advice_user("<nobr>User&nbsp;variable(s)</nobr>" $vchildren.get(0).getCategory().getParentid())
+    <tr>
+       <td class="subheading">
+       <div style="margin-left: 30px">
+       $c.getName()
+       </div>
+       </td>
+    </tr>
+<tr>
+<td colspan="2">
+   <div style="margin-left: 40px;">
+   #foreach ($vderived in $vchildren)
+        $form.checkbox("variables","$vderived.Link")<a name="#$vderived.Link"/>$vderived.getName()</a><br>
+   #end ## foreach derived variable in this category
+   </div>
+</td>
+</tr>
+  #end ## endif derived children
+#end ## foreach (category in the current list)
+#tr_advice_select("Dataset&nbsp;variable(s)")
+#foreach($c in $parent.getChildren())
+<tr>
+   <td class="subheading">
+   <div style="margin-left: 30px">
+   $c.getName()
+   </div>
+   </td>
+   <td align="right">#a_variable_Next($comparison_mode)</td>
+</tr>
+<tr>
+<td colspan="2">
+   <div style="margin-left: 40px">
+   #foreach ($v in $c.getChildren())
+   ## TODO: comparison mode logic
+        $form.checkbox("variables","$v.Link")<a name="#$v.Link"/>$v.getName()</a><br>
+   #end ## foreach variable in this category
+   </div>
+</td>
+<tr>
+#end ## foreach (category in the current list)
+</table>
+$form.End

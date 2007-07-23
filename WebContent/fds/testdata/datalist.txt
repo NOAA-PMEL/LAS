@@ -1,0 +1,6 @@
+*** this is a data list for FDS ***
+*** two space-separated strings for each line, 
+*** the first stirng is the DODS name, the second is the source name
+***  
+lwi.des testdata/DODS_GSFC_dao4d_lwi.des
+ww.cdf  testdata/ww.cdf

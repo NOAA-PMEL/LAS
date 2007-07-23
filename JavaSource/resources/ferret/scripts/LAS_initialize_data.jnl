@@ -1,0 +1,25 @@
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! $RCSfile: LAS_initialize_data.jnl,v $
+! $Revision: 1.2 $
+! 
+! $Author: ansley $
+! $Date: 2007/29/2007
+!
+! The LAS_initialize_data.jnl script takes care of everything having to
+! do with initializing a datset for later use.
+!
+! LAS_initialize_data.jnl takes an argument that specifies which data
+! item [0|1|2|3|...] to create symbols for. 
+!
+! 3/2007:
+! split up previous version of LAS_initialize_data.jnl into two;
+! initialize the dataset and define the plot (or output listing) variable.
+! This allows the custom init scripts to call LAS_initialize_dataset, then
+! issue commands for the customization, then call LAS_initialize_variable
+!
+GO LAS_initialize_dataset ($1"0")
+
+GO LAS_initialize_variable 
+
+! End of $RCSfile ------------LAS_initialize_data.jnl--------------------------
+

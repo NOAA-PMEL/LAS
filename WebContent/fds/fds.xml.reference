@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+This is a configuration file for the Ferret-Data Server.
+
+See http://ferret.pmel.noaa.gov/Ferret/FDS for general FDS information.
+
+If you want to reset your FDS to its "factory settings", overwrite
+fds.xml with the file fds.xml.reference.
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+<!-- if you are using proxy, use "home" attribute. 
+  Example: <fds home="http://flat.pmel.noaa.gov:9090"> -->
+
+<fds>
+
+  <catalog temp_entry_limit="10000">
+    <data>
+
+      <lasdata name = "LAS"
+               las_root = "testdata/las" />
+
+      <mountdir name = "dropin"
+                dir = "testdata/dropin"
+      />
+
+      <datadir name="static" 
+                dir ="testdata/static"
+      />
+
+      <datalist name="datalist"
+                file="testdata/datalist.txt"
+                list_format="name"               
+      />
+
+      <dataset name = "coads_local"
+               source = "testdata/coads_climatology.cdf"
+               format = "cdf"
+      />
+
+      <dataset name = "virtual_jnl"
+               source = "testdata/virtual.jnl"
+               format = "jnl"
+               variables = "A,TEMP,SST, TEMP_20"
+      />
+
+      <dataset name = "levitus_local"
+               source = "testdata/levitus_climatology.cdf"
+      />
+
+      <dataset name = "coads_remote"
+               source = "http://ferret.pmel.noaa.gov/cgi-bin/nph-nc/data/COADS_climatology.nc"
+      />
+
+      <dataset name = "wao98_inited" 
+               source = "testdata/wao98_inited.jnl"
+               format = "jnl"
+               variables ="chlorophyll"
+      />
+
+      <mapdir name="private">
+ 
+         <dataset name = "small_coads"
+               source = "testdata/yy.cdf"
+         />
+
+         <!-- specify private datasets here -->
+
+          <mapdir name="public">
+            <dataset name = "small_levitus"
+               source = "testdata/ww.cdf"
+            />
+          </mapdir>
+      </mapdir>
+
+    </data>
+  </catalog>
+
+  <log mode="rotate" frequency="day" file="log/fds.log" level="debug" print_module="true" />
+
+  <ferret>
+    <invoker ferret_bin="ferret" time_limit="200" />
+    <cacher dataset="true" dataset_queue_size="10000" dataset_size="40" 
+            subset="true" subset_queue_size="10000"
+            meta ="true" meta_queue_size="10000" />
+    <environment variables="FER_GO=scripts testdata $FER_GO;FER_DESCR=testdata $FER_DESCR"/>
+  </ferret>
+
+  <servlet>
+
+    <filter-abuse enabled="false" hits="1000" timeout="24" />
+    <filter-overload enabled="false" limit="20" />
+    <!-- edit these tags to enable 'throttling' features  -->
+
+    <filter-analysis enabled="true" />
+
+  </servlet>
+
+
+  <mapper>
+
+    <service-admin enabled="false" auth="open-sesame" /> 
+    <!-- edit this tag to enable the administration service -->
+
+  </mapper>
+
+
+  <privilege_mgr default="public"> 
+
+    <ip_range mask="127.0.0.1" privilege="private" />
+
+    <privilege name="default">
+        <deny commands="all" />
+        <allow commands="define,let" />
+        <allow path="/" />
+        <deny path="/private" />
+        <deny path="http://localhost" />
+        <deny path="http://127.0.0.1" />
+    </privilege>
+
+    <privilege name="public" output_limit="20" inherit="default"> 
+        <allow path="/private/public" commands="cancel"/>
+    </privilege>
+
+    <privilege name="private" admin_allowed="true" inherit="default">
+        <allow path="all" />
+    </privilege>
+
+  </privilege_mgr>
+
+</fds>

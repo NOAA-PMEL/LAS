@@ -1,0 +1,14 @@
+#!/usr/bin/perl
+
+open OUTPUT, ">TAGS" or die "Can't open 'TAGS'";
+
+my $package;
+while(<>){
+    if (/^package/){
+	my ($junk, $pname, $mjunk) = split(/[\s\x7f]+/);
+	$package = $pname;
+    } elsif (/^sub/){
+	s/\x7fsub /\x7f$package\:\:/;
+    }
+    print OUTPUT;
+}

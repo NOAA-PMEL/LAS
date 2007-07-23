@@ -1,0 +1,19 @@
+</html>
+#if ($pure_html)
+$result
+#else
+<html>
+<head>
+<title>$title -- output</title>
+</head>
+<body onLoad="self.focus()">
+
+#table_start()
+
+<tr><td>
+The output product you selected can have a maximum of <b>$maxvars</b> variable(s) as arguments.  Return to the main interface window and either select the "Variables" navigation link and reset the number of variables, or select a new output product from constraints page.
+</td></tr>
+#table_end()
+</body>
+</html>
+#end

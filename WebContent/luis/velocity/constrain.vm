@@ -1,0 +1,276 @@
+#parse("constrain_include.vm")
+
+<script language="JavaScript">
+var aMapTool;
+var aRegionWidget;
+
+function updateMap() {
+   var widxlot = new MapTextWidget(this,"lon", 'region',"xlo_text");
+   var widxhit = new MapTextWidget(this,"lon", 'region',"xhi_text");
+   var widylot = new MapTextWidget(this,"lat", 'region',"ylo_text");
+   var widyhit = new MapTextWidget(this,"lat", 'region',"yhi_text");
+   document.location.href="constrain?"+widxlot.getValue()+","+widxhit.getValue()+","+widylot.getValue()+","+widyhit.getValue();
+}
+
+function setRegionWidget() {
+  aRegionWidget.onChange();
+}
+
+function doSubmit() {
+  var tf = findForm();
+  tf.target="_top";
+  if (aMapTool){
+    aMapTool.getRanges();
+  }
+}
+
+function init() {
+  aMapTool = new MapTool(document.map);
+  aMapTool.setMode('single');
+  aMapTool.selectTool("$region.getViewRegion()");
+  aMapTool.setRanges();
+}
+
+function setUseJava(newval){
+  getFormElements('region').use_java.value = newval;
+  stuffForm('constrain');
+}
+
+function popupDataWindow() {
+   winCom = "location=yes,menubar=yes,toolbar=yes,resizable=yes,scrollbars=yes";
+   winCom += ",width=800,height=600";
+   var dataWindow = window.open("","data", winCom);
+   dataWindow.focus();
+   var theForm=findForm();
+   doSubmit();
+   theForm.nexturl.value="data_popup";
+   theForm.target = "data";
+   theForm.submit();
+}
+</script>
+
+
+## Informative text
+#info_table_start()
+  Select your desired view (geometry of output) and output (type of product).<br>
+  Then set the 4-D region (lon-lat-depth-time) and any additional constraints.
+#info_table_end("constrain")
+
+
+#error_message($form)
+
+#set($category=$region.getCategory())
+#set($include=$category.getConstrainInclude())
+#set($include_header=$category.getConstrainIncludeHeader())
+
+#if($include_header)
+#parse("${include_header}.vm")
+#end ## if($include_header)
+
+
+$form.getStart("region", "doSubmit()")
+    <input type="hidden" name="action" value="">
+    $form.hidden("x_lo","-180")
+    $form.hidden("x_hi", "180")
+    $form.hidden("y_lo", "-90")
+    $form.hidden("y_hi", "90")
+    $form.hidden("use_java", "$use_java")
+
+
+#table_start()
+
+  <tr>
+    #td_advice("Select&nbsp;view")
+    <td width="140" align="left"><font size=2>
+      $form.select("view", $region.getViewItems())
+      </font>
+    </td>
+    <td align="right" valign="center">
+      <a 
+         onMouseOver="status='Get output for selected variable';return true"
+         href="javascript:popupDataWindow();"
+         class="redbold">Next&nbsp;&gt;</a>
+    </td>
+    <script language="JavaScript">
+      var foo = new ViewWidget("region", "view");
+    </script>
+  </tr>
+
+  <tr>
+    #td_advice("Select&nbsp;output")
+    <td><font size="2">
+      $form.select("output", $region.getProducts())
+      </font>
+    </td>
+    <td align="right" valign="center">
+      &nbsp;
+    </td>
+    <script language="JavaScript">
+      var bar = new OutputWidget("region", "output");
+    </script>
+  </tr>
+
+  <tr>
+    #td_advice("Select&nbsp;region")
+    <td align="left"><font size=2>
+         $form.select("region", $region.getRegionItems())
+       </font>
+       <a href="javascript: setRegionWidget()"><img src="../images/go.gif" alt="Go" border="0"></a>
+    </td>
+    <td align="right" valign="center">
+      &nbsp;
+    </td>
+    <script language="JavaScript">
+       aRegionWidget = new RegionWidget("region", "region");
+    </script>
+  </tr>
+
+#table_end()
+
+#parse("applet_include.vm")
+#table_start()
+
+## Create axis widgets
+
+#if($region.hasAxis("t"))
+#set($axis=$region.getAxis("t"))
+  <tr>
+  #set($isRange=$region.isRange("t"))
+  #if($isRange)
+    #td_advice("Select&nbsp;time&nbsp;range")
+  #else
+    #td_advice("Select&nbsp;time")
+  #end ##if($region.isRange("t"))
+  <td align="left"><font size="2">
+  $form.axisSelect("lo", "region", "t_lo", $axis)
+  #if($isRange)
+     to <br>
+     $form.axisSelect("hi", "region", "t_hi", $axis)
+  #end
+  </font></td>
+  </tr>
+#end ## region.hasAxis
+
+#if($region.hasAxis("z"))
+#set($axis=$region.getAxis("z"))
+  <tr>
+  #set($isRange=$region.isRange("z"))
+  #if($isRange)
+    #td_advice("$region.getUI().get_z_text()&nbsp;range")
+  #else
+    #td_advice("$region.getUI().get_z_text()")
+  #end ##if($region.isRange("z"))
+  <td align="left"><font size="2">
+  $form.axisSelect("lo", "region", "z_lo", $axis)
+  #if($isRange)
+     to <br>
+     $form.axisSelect("hi", "region", "z_hi", $axis)
+  #end
+  </font></td>
+  </tr>
+#end ## region.hasAxis
+
+#table_end()
+
+## Create constraints (if any)
+
+
+#if($region.getUI().isConstrained())
+#set($index=0)
+#set($constraints=$region.getUI().getConstraints())
+
+#table_start()
+
+#if($include)
+#parse("{$include}.vm")
+#else ## if($include)
+
+  <tr>
+    #td_advice("Select&nbsp;Constraints")
+  </tr>
+  #foreach($constraint in $constraints)
+      #foreach($dummy in $constraint.getCountList())
+  <tr>
+    <td><font size="2">
+          #foreach($widget in $form.constraintSelect("region", $index, $constraint, $category))
+             $widget
+          #end ## #foreach($widget...)
+    </font></td>
+  </tr>
+	  #set($index=$index+1)
+      #end ##foreach($dummy...)
+  #end ## foreach($constraint...)
+  <tr>
+    <td width="100%" height="20" align="right" valign="center">
+      <a onMouseOver="status='Get output for selected variable';return true"
+         href="javascript:popupDataWindow();"
+         class="redbold">Next&nbsp;&gt;</a>
+    </td>
+  </tr>
+#end ## if($include)
+#table_end()
+#end ## isConstrained
+
+
+#table_start()
+<tr>
+<td colspan="3">
+<center><hr width="550"></center>
+</td>
+</tr>
+<tr>
+#td_advice("Select&nbsp;options")
+</tr>
+
+#if($options.size() == 0)
+            <tr>
+              <td colspan=2 align=center>
+                No options available for this output product
+              </td>
+            </tr>
+#else
+
+#foreach($o in $options)
+#set($optionsWidget = $o.getOptionsWidget())
+	    <TR>
+		##<TD WIDTH=26>
+		<TD>
+		    <P ALIGN=CENTER>
+                        <A class="nav" 
+                         href="javascript:showInfo('$o.getTitle()', '$o.getHelp()')" 
+                         onMouseOver="window.status='Click for help'; return true"
+                         onMouseOut="window.status=''; return true"
+                        >
+                             <IMG SRC="../images/icon_white_question.gif"
+                              ALIGN=BOTTOM WIDTH=13 HEIGHT=13 BORDER=0></A>
+                     </P>
+		</TD>
+		##<TD WIDTH=288>
+		<TD>
+          #if ($o.getTitle().equals("Evaluate expression"))
+		    <P><b><FONT color="green" SIZE=2>$o.getTitle()</FONT></b></P>
+          #else
+		    <P><FONT SIZE=2>$o.getTitle()</FONT></P>
+          #end
+		</TD>
+		##<TD WIDTH=220><FONT SIZE=2>
+		<TD WIDTH=220><FONT SIZE=2>
+		    #if($o.getType() == "m")
+			$form.select("$optionsWidget.getName()", $optionsWidget.getItems())
+		    </FONT>
+		    #elseif($o.getType() == "t")
+		        $form.text("$optionsWidget.getName()")
+	            #elseif($o.getType() == "v")
+                        $form.selectedVariables("$optionsWidget.getName()", $region)
+		    #else
+                        (Internal: unknown widget)
+	            #end
+		</TD>
+	     </TR>
+#end ## foreach($o in $options)
+#end ## end else if options size == 0
+#table_end()
+
+$form.End
+
+

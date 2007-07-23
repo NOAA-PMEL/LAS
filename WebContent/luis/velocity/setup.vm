@@ -1,0 +1,35 @@
+$context.setLayoutManager("dataset.vm", "DefaultLayout.vm");
+$context.setLayoutManager("remove.vm", "DefaultLayout.vm");
+$context.setLayoutManager("variable.vm", "DefaultLayout.vm");
+$context.setLayoutManager("constrain.vm", "DefaultLayout.vm");
+$context.setLayoutManager("data.vm", "DefaultLayout.vm");
+$context.setLayoutManager("noconstraint.vm", "DefaultLayout.vm");
+$context.setLayoutManager("history.vm", "DefaultLayout.vm");
+$context.setLayoutManager("options.vm", "DefaultLayout.vm");
+$context.setLayoutManager("search.vm", "DefaultLayout.vm");
+$context.setLayoutManager("index.vm", "DefaultLayout.vm");
+$context.setLayoutManager("noregulardata.vm", "DefaultLayout.vm");
+$context.setLayoutManager("analysis.vm", "DefaultLayout.vm");
+$context.setLayoutManager("define_error.vm", "DefaultLayout.vm");
+$context.setLayoutManager("map_demo.vm", "DefaultLayout.vm");
+$context.setLayoutManager("browser.vm", "DefaultLayout.vm");
+
+$context.setLayoutManager("dataset_compare1.vm", "DefaultCompareLayout.vm");
+$context.setLayoutManager("dataset_compare2.vm", "DefaultCompareLayout.vm");
+$context.setLayoutManager("variable_compare1.vm", "DefaultCompareLayout.vm");
+$context.setLayoutManager("variable_compare2.vm", "DefaultCompareLayout.vm");
+$context.setLayoutManager("constrain_compare.vm", "DefaultCompareLayout.vm");
+$context.setLayoutManager("data_compare.vm", "DefaultCompareLayout.vm");
+$context.setLayoutManager("options_compare.vm", "DefaultCompareLayout.vm");
+$context.setLayoutManager("history_compare.vm", "DefaultCompareLayout.vm");
+
+$context.setCompareState("dataset_compare1.vm", 1);
+$context.setCompareState("dataset_compare2.vm", 2);
+$context.setCompareState("variable_compare1.vm", 1);
+$context.setCompareState("variable_compare2.vm", 2);
+$context.setCompareState("constrain_compare.vm", 3);
+$context.setCompareState("data_compare.vm", 4);
+
+
+
+

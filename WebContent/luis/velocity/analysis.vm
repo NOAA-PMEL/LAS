@@ -1,0 +1,135 @@
+#parse("constrain_include.vm")
+
+<script language="JavaScript">
+var aMapTool;
+var aRegionWidget;
+
+function setRegionWidget() {
+  aRegionWidget.onChange();
+}
+
+function doSubmit() {
+  if (aMapTool){
+    aMapTool.getRanges();
+  }
+}
+
+function init() {
+  aMapTool = new MapTool(document.map, "analysis");
+  aMapTool.setMode('single');
+  aMapTool.setRanges();
+}
+
+function setUseJava(newval){
+  document.forms.analysis.use_java.value = newval;
+  stuffForm('analysis');
+}
+</script>
+
+#info_table_start()
+  Select an analysis type and the axes to which it will be applied.<br>
+  For the relevant axes, define the ranges to be included in the analysis.
+#info_table_end("analysis")
+
+#error_message($form)
+
+$form.getStart("analysis", "doSubmit()")
+$form.hidden("x_lo","-180")
+$form.hidden("x_hi", "180")
+$form.hidden("y_lo", "-90")
+$form.hidden("y_hi", "90")
+$form.hidden("use_java", "$use_java")
+
+#if($category)
+    #table_start()
+	#set($varinfo=$category.getVariableInfo())
+	#set($ui=$varinfo.getUI())
+        #set($varname=$category.getName())
+	<tr>
+	#td_advice("Select&nbsp;analysis&nbsp;type")
+	<td width="140" align="left"><font size=2>
+	  $form.select("analysis_type", $ui.getAnalysisItems())
+	  </font>
+	</td>
+	<td align="right" valign="center">
+	  <a onMouseOver="status='Create new variable';return true"
+	     href="" onClick="return stuffForm('constrain')"
+	     class="redbold">Next&nbsp;&gt;</a><br>
+	  <a onMouseOver="status='Cancel variable definition';return true"
+	     href="constrain" 
+	     class="redbold">Cancel&nbsp;&gt;</a><br>
+	</td>
+	</tr>
+	<tr>
+	#td_advice("Name&nbsp;for&nbsp;this&nbsp;variable")
+	<td><input type="text" name="result" value="${varname}_1"></td>
+        </tr>
+
+	<tr>
+	#td_advice("Apply&nbsp;to&nbsp;these&nbsp;axes")
+        <td>
+	#set($xaxis=$varinfo.getAxisByType("x"))
+	#if($xaxis && ! $xaxis.isAnalysis())
+          <b>X</b>&nbsp;$form.checkbox("axis_select", "x")
+	#end ## if($xaxis)
+	#set($yaxis=$varinfo.getAxisByType("y"))
+	#if($yaxis && ! $yaxis.isAnalysis())
+          <b>Y</b>&nbsp;$form.checkbox("axis_select", "y")
+	#end ## if($yaxis)
+	#set($zaxis=$varinfo.getAxisByType("z"))
+	#if($zaxis && ! $zaxis.isAnalysis())
+          <b>Z</b>&nbsp;$form.checkbox("axis_select", "z")
+	#end ## if($zaxis)
+	#set($taxis=$varinfo.getAxisByType("t"))
+	#if($taxis && ! $taxis.isAnalysis())
+          <b>T</b>&nbsp;$form.checkbox("axis_select", "t")
+	#end ## if($taxis)
+        </td>
+	</tr>
+        
+	<tr>
+	#td_advice("Mask")
+        <td>
+	  <b>None</b>$form.radio("mask", "n", "checked")
+          <b>Ocean</b>$form.radio("mask", "o")
+          <b>Land</b>$form.radio("mask", "l")
+        </td>
+	</tr>
+        
+    #table_end()
+
+    #table_start()
+	<tr>
+	   #td_advice("Select&nbsp;range&nbsp;for&nbsp;applicable&nbsp;axis");
+        </tr>
+    #table_end()
+    #parse("applet_include.vm")
+    
+    #table_start()
+	#if($zaxis)
+	   <tr>
+	       #td_advice("Z&nbsp;range")
+	       <td align="left"><font size="2">
+	       $form.axisSelect("lo", "analysis", "z_lo", $zaxis)
+	        to <br>
+		$form.axisSelect("hi", "analysis", "z_hi", $zaxis)
+	       </font></td>
+	   </tr>
+	#end ## $if($zaxis)
+
+	#if($taxis)
+	   <tr>
+	       #td_advice("T&nbsp;range")
+	       <td align="left"><font size="2">
+	       $form.axisSelect("lo", "analysis", "t_lo", $taxis)
+	        to <br>
+		$form.axisSelect("hi", "analysis", "t_hi", $taxis)
+	       </font></td>
+	   </tr>
+	#end ## $if($taxis)
+    #table_end()
+#end ## if ($category)
+
+
+$form.End
+

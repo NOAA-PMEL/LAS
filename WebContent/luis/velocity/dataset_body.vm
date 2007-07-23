@@ -1,0 +1,35 @@
+## Velocity template with the guts of the dataset page. 
+##
+## The $comparison_mode and $thisCategory variables are defined
+## in the calling template (dataset*.vm)
+
+#set($firstItem=$thisCategory.get(0))
+#set($category=$firstItem.getCategory().getParent())
+#set($include=$category.getCategoryInclude())
+#set($include_header=$category.getCategoryIncludeHeader())
+
+#if($include_header)
+  #parse("${include_header}.vm")
+#end
+
+#if($include)
+  #error_message($form)
+  #parse("${include}.vm")
+#else
+
+  #error_message($form)
+
+  #info_table_start()
+  Click on a dataset to continue or an 
+  <img width=12 height=12 border=0 align="absmiddle" src="../images/icon_info.gif">
+  for information about a dataset.
+  #info_table_end("dataset")
+
+  #table_start()
+  #tr_advice("Select&nbsp;dataset")
+  #tr_list_dsets($thisCategory $comparison_mode)
+  #table_end()
+#end
+
+
+

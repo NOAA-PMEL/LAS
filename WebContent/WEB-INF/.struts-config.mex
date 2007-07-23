@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FlowViewLayout Version="1.2">
+  <StrutsActivity path="/ProductServer.do" location="15,240" dimension="335,88" />
+  <StrutsActivity path="/getDatasets.do" location="650,250" dimension="231,88" />
+  <StrutsActivity path="/FDS.do" location="650,50" dimension="181,88" />
+  <StrutsActivity path="/getVariables.do" location="950,250" dimension="231,88" />
+  <StrutsActivity path="/productserver/templates/info.vm" location="75,405" dimension="192,49" />
+  <StrutsActivity path="/productserver/templates/progress.vm" location="15,345" dimension="216,49" />
+  <StrutsActivity path="/productserver/templates/error.vm" location="135,465" dimension="198,49" />
+  <StrutsActivity path="/productserver/templates/cancel.vm" location="225,525" dimension="204,49" />
+  <StrutsActivity path="http://porter.pmel.noaa.gov:8920/thredds/dodsC/ferret/coads_climatology.cdf" location="950,150" dimension="412,49" />
+  <StrutsActivity path="/constrain.jsp" location="350,50" dimension="95,49" />
+  <StrutsActivity path="/getGrid.do" location="650,450" dimension="207,88" />
+  <StrutsTransition id="/FDS.do,tds,http://porter.pmel.noaa.gov:8920/thredds/dodsC/ferret/coads_climatology.cdf,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="831,94" />
+      <AbsolutePoint location="1156,94" />
+      <AbsolutePoint location="1156,150" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/ProductServer.do,error,/productserver/templates/error.vm,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="282,328" />
+      <AbsolutePoint location="282,465" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/ProductServer.do,cancel,/productserver/templates/cancel.vm,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="348,328" />
+      <AbsolutePoint location="348,525" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/ProductServer.do,progress,/productserver/templates/progress.vm,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="182,328" />
+      <AbsolutePoint location="182,345" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+  <StrutsTransition id="/ProductServer.do,info,/productserver/templates/info.vm,1" routingType="0">
+    <AutomaticBendpoints>
+      <AbsolutePoint location="246,328" />
+      <AbsolutePoint location="246,405" />
+    </AutomaticBendpoints>
+  </StrutsTransition>
+</FlowViewLayout>
+

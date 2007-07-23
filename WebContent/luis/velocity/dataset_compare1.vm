@@ -1,0 +1,7 @@
+## Velocity template for the 'Dataset' page in comparison_mode mode when
+## selecting the first dataset.
+
+#set($comparison_mode="_compare1")
+#set($thisCategory=$compare_dataset.get(0))
+
+#parse("dataset_body.vm")

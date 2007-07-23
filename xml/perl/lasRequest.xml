@@ -1,0 +1,43 @@
+<?xml version="1.0"?>
+
+<!-- Sample data request -->
+
+<lasRequest href="file:las.xml#data_op">
+      <properties>
+         <ferret>
+             <format>netcdf</format>      
+         </ferret>
+      </properties>
+      <args>
+         <link match="/lasData/datasets/coads_climatology/variables/sst"/>
+         <region>
+	    <range low="0" high="180" />
+	    <range low="-45" high="45" />
+	    <point v="15-May" />
+	  </region>
+      </args>
+</lasRequest>
+
+
+<!-- Sample graphic request -->
+<!--
+<lasRequest href="file:las.xml#shade_op">
+       <args>
+	 <link href="#cvar_2" />
+	 <region>
+	   <range href="#lon_2deg" low="0" high="180" />
+	   <range href="#lat_2deg" low="-45" high="45" />
+	   <point href="#month_climatology" value="15-May" />
+	 </region>
+       </args>
+	 <properties>
+           <ferret>
+	       <render_type>shade</render_type>
+	       <levels>(0,50,2)</levels>
+	       <format>gif</format>
+	       <palette>inverse_greyscale</palette>
+           </ferret>
+	 </properties>
+</lasRequest>
+-->
+       

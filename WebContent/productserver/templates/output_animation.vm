@@ -1,0 +1,301 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 3.2//EN">
+<HTML>
+<HEAD>
+<TITLE>LAS Animation</TITLE>
+
+<script language="JavaScript" src="js/xmldom.js"></script>
+<script language="JavaScript" src="js/LASRequestDOM.js"></script>
+<script language="JavaScript" src="js/DateWidget.js"></script>
+
+<script language="JavaScript" src="js/LASAnimationDOM.js"></script>
+
+<SCRIPT language="javascript">
+<!-- hide the script from old browsers 
+
+//=== the initial LAS request
+initReq_xml = "$las_request.toJavaScriptSafeString()";
+initReq = new LASRequest(initReq_xml);
+server_url = "$server_url";
+
+//=== XML returned from LAS for animation
+animation_xml = "$las_response.getResultAsJavaScriptSafeString("ferret_listing")";
+las_animation = new LASAnimation(animation_xml);
+
+//=== the time frames
+theTimes = las_animation.getFrames();
+
+first_image = 0;                    //first image number
+last_image = las_animation.getNumFrames()-1; //last image number
+
+//animation_height = las_animation.getImageSizeY();              //height of the images in the animation
+//animation_width = las_animation.getImageSizeX();               //width of the images in the animation
+animation_height = 640;              //height of the images in the animation
+animation_width = 800;               //width of the images in the animation
+
+//**************************************************************************
+//=== THE CODE STARTS HERE - no need to change anything below ===
+//=== global variables ====
+theImages    = new Array(); 
+imagesLoaded = new Array(); //flags for checking if a image is loaded
+firstTimeLoad= new Array();
+
+for (var i = first_image; i <= last_image; i++){
+    firstTimeLoad[i] = 1;
+}
+
+//unit of speed is frames/second
+var initial_speed = 1;
+speed     = initial_speed;
+speed_max = 128;
+speed_min = 0.5;
+delay     = 1000/speed; //delay between frames in 1/1000 seconds, i.e. milliseconds
+
+current_image = first_image;     //number of the current image
+timeID = null;
+var status = 0;        // 0-stopped, 1-playing
+play_mode = 0;         // 0-play once, 1-loop
+size_valid = 0;
+
+//===> make sure the first image number is not bigger than the last image number
+if (first_image > last_image) 
+{
+    var help = last_image;
+    last_image = first_image;
+    first_image = help;
+};
+
+//===> load the next image
+function animate_loadNextImage(currentImg){
+    animate_loadImages(currentImg+1,currentImg+1);
+    //foward to next image only when currentImg is loaded first time
+    if((firstTimeLoad[currentImg] == 1) && (status == 1)){
+       firstTimeLoad[currentImg] = 0;
+
+       //make sure the previous image is flagged
+       if(currentImg > 0){firstTimeLoad[currentImg-1] = 0;}
+
+       go2next(currentImg+1);
+    }
+}
+
+//===> load the images from index startImg to endImg
+function animate_loadImages(startImg, endImg){
+
+    //make sure the index is less than the last_image
+    if(startImg >= last_image){
+        startImg = last_image;
+    };
+
+    if(endImg >= last_image){
+        endImg = last_image;
+    };
+
+    //load images
+    for (var i = startImg; i <= endImg; i++){
+        //do nothing if it is already loaded
+        if(imagesLoaded[i] != 1){
+            theImages[i] = new Image();
+            theImages[i].src = animate_makeLASRequest(theTimes[i]);
+            imagesLoaded[i] = 1;
+        }
+    };
+}
+
+//===> make LAS request for a frame
+function animate_makeLASRequest(timePoint) {
+
+    //check the type of view and change view for the new request
+    var initView = initReq.getProperty('ferret','view');
+
+    if(initView == 'xyt' || initView == 'yxt'){
+        initReq.setOperation('Plot_2D_XY');
+        initReq.setProperty('ferret','view','xy');
+    };
+
+    if(initView == 'xzt' || initView == 'zxt'){
+        initReq.setOperation('Plot_2D');
+        initReq.setProperty('ferret','view','xz');
+    };
+
+    if(initView == 'yzt' || initView == 'zyt'){
+        initReq.setOperation('Plot_2D');
+        initReq.setProperty('ferret','view','yz');
+    };
+
+    //get the fill_levels computed from the whole domain (e.g. xyt range)
+    var fillLevels = las_animation.getFillLevels();
+    if(fillLevels != null){
+        initReq.setProperty('ferret','fill_levels', fillLevels);
+    };
+
+    //change the time from range to point
+    initReq.setRange('t',timePoint);
+
+    var prefix = 'ProductServer.do?stream=true&stream_ID=plot_image&xml=';
+    var img_src = prefix + escape(initReq.toString());
+
+    return img_src;
+}
+
+//===> displays image depending on the play mode in forward direction
+function animate_fwd() 
+{
+    current_image++;
+    if(current_image > last_image)
+    { 
+        if (play_mode == 0) 
+        {
+            current_image = last_image; 
+            status=0;
+            return;
+        };                           //NORMAL
+        if (play_mode == 1) 
+        {
+            current_image = first_image; //LOOP
+        };
+    };                             
+
+    //check if it's loaded; if not, let it wait
+    //while(imagesLoaded[current_image] != 1){
+    //    current_image--;
+    //    setTimeout("animate_fwd()", 100);
+    //};
+
+    document.animation.src = theImages[current_image].src;
+    document.control_form.frame_nr.value = current_image+1;
+    timeID = setTimeout("animate_fwd()", delay);
+}
+
+//===> changes playing speed by doubling or halfing the current speed
+function change_speed(dv)
+{
+    if(dv == 1 ) speed = speed*2;
+    if(dv == -1) speed = speed/2;
+   
+    if(speed > speed_max) speed = speed_max;
+    if(speed < speed_min) speed = speed_min;
+    
+    delay = 1000/speed;
+    document.control_form.speed_nr.value = speed;
+}
+
+//===> stop the animation
+function stop() 
+{
+    if (status == 1) clearTimeout(timeID);
+    status = 0;
+}
+
+//===> "play forward"
+function fwd() 
+{
+    stop();
+    status = 1;
+    animate_fwd();
+}
+
+//===> go to the next image without turning off play mode
+function go2next(number)
+{
+    if (number > last_image) number = last_image;
+    if (number < first_image) number = first_image;
+    current_image = number;
+    document.animation.src = theImages[current_image].src;
+    document.control_form.frame_nr.value = current_image+1;
+}
+
+//===> jumps to a given image number
+function go2image(number)
+{
+
+    //check if it's loading 
+    var loading = 0;
+    for (var i = first_image; i <= last_image; i++){
+        if(firstTimeLoad[i]==1){
+            loading = 1;
+        } 
+    } 
+    
+    //only when it's not loading, jump to a given image
+    if(loading == 0){
+        //if not loading
+        stop();
+        if (number > last_image) number = last_image;
+        if (number < first_image) number = first_image;
+        current_image = number;
+        document.animation.src = theImages[current_image].src;
+        document.control_form.frame_nr.value = current_image+1;
+    }
+}
+
+//===> changes play mode (normal, loop, swing)
+function change_mode(mode) 
+{
+   play_mode = mode;
+}
+
+//===> sets everything once the whole page and the images are loaded (onLoad handler in <body>)
+function launch() 
+{
+   //load the first image
+   animate_loadImages(0,0);
+
+   //turn on play mode
+   status = 1;
+
+   current_image = first_image;
+   document.animation.src = theImages[current_image].src;
+   document.control_form.frame_nr.value = current_image+1;
+   change_mode (document.control_form.play_mode_selection.selectedIndex);
+}
+
+//===> writes the interface into the code where you want it
+function animation()
+{
+   //document.write(" <P><IMG NAME=\"animation\" SRC=",theImages[0]," HEIGHT=",animation_height, " WIDTH=", animation_width, "\" ALT=\"[jsMoviePlayer]\">");
+   document.write(" <P><IMG NAME=\"animation\" onLoad=\"animate_loadNextImage(current_image)\" SRC=",theImages[0],"\" ALT=\"[jsMoviePlayer]\">");
+
+   document.write(" <FORM Method=POST Name=\"control_form\"> ");
+   document.write("    <INPUT TYPE=\"button\" Value=\" |< \" onClick=\"go2image(first_image)\"> ");
+   document.write("    <INPUT TYPE=\"button\" Value=\" -1 \" onClick=\"go2image(--current_image)\"> ");
+   //document.write("    <INPUT TYPE=\"button\" Value=\" < \"  onClick=\"rev()\"> ");
+   document.write("    <INPUT TYPE=\"button\" Value=\" || \" onClick=\"stop()\"> ");
+   document.write("    <INPUT TYPE=\"button\" Value=\" > \"  onClick=\"fwd()\"> ");
+   document.write("    <INPUT TYPE=\"button\" Value=\" +1 \" onClick=\"go2image(++current_image)\"> ");
+   document.write("    <INPUT TYPE=\"button\" Value=\" >| \" onClick=\"go2image(last_image)\"> ");
+   document.write(" <BR> ");
+   document.write("    <SELECT NAME=\"play_mode_selection\" onChange=\"change_mode(this.selectedIndex)\"> ");
+   document.write("       <OPTION SELECTED VALUE=0>play once ");
+   document.write("       <OPTION VALUE=1>loop ");
+   //document.write("       <OPTION VALUE=2>swing ");
+   document.write("    </SELECT> ");
+   document.write("    <INPUT TYPE=\"text\" NAME=\"frame_nr\" VALUE=\"1\" SIZE=\"5\" ");
+   document.write("     onFocus=\"this.select()\" onChange=\"go2image(this.value)\"> ");
+   document.write("    &nbsp; Speed(Fr./S)<INPUT TYPE=\"button\" Value=\" - \" onClick=\"change_speed(-1)\"> ");
+   document.write("    <INPUT TYPE=\"text\" NAME=\"speed_nr\" VALUE=\"1\" SIZE=\"4\"> ");
+   document.write("    <INPUT TYPE=\"button\" Value=\" + \" onClick=\"change_speed(1)\"> ");
+   document.write(" </FORM> ");
+   document.write(" </P> ");
+};
+
+//=== THE CODE ENDS HERE - no need to change anything above === -->
+</SCRIPT>
+</HEAD>
+
+<BODY BGCOLOR="#FFFFFF" onLoad="launch()">
+<!--
+<center></center><A HREF="jv_main.html"><IMG SRC="java.gif" ALT="Back to JS main page" width=33 height=33></A><P>
+BY:<a href="mailto:xholecko@sgi.felk.cvut.cz">Martin Holecko</a>...<a href="http://sgi.felk.cvut.cz/~xholecko" target="_top">BASTaRT PIX</a><BR>
+DATE:1996-12-09<BR>
+<hr>
+-->
+<center>
+<FONT size=+3><b>LAS Animation </b></FONT><br>
+<!-- ************ HERE STARTS THE jsMoviePlayer(TM) PART ***************** -->
+<SCRIPT language="javascript">
+<!-- 
+animation();
+//-->
+</SCRIPT>
+</body>
+</HTML>

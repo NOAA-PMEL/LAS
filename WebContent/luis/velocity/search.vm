@@ -1,0 +1,66 @@
+<script language="JavaScript">
+function unlimited_search() {
+    var newref = "search?terms=" + escape("$terms") + "&unlimited=true";
+    document.location.href=newref;
+}
+</script>
+
+#info_table_start()
+  Click on any link to go to the associated dataset page.
+#info_table_end("search")
+
+Search results for "$terms"<br>
+#if($cat_search.size() == 0 && $var_search.size() == 0)
+Your search did not match any datasets or variables.
+#else
+$cat_search.size() dataset(s) and $var_search.size() variable(s) matched<br>
+
+#if($cat_search.size() > 0)
+<h3>Dataset matches:</h3>
+#foreach($item in $cat_search)
+#set ($theseCats = $item.getCategories())
+<div class="indent">
+#foreach ($cat in $theseCats)
+#if ($velocityCount != 1)
+&gt;
+#end ##if count
+#a_metadata_nospace($cat)<a href="dataset?catitem=$cat.getLink()">$cat.getName()</a>
+#end ## foreach($cat in $item)
+</div>
+#end ## foreach($item in $cat_search)
+#end ## if($cat_search.size() > 0)
+
+#if($var_search.size() > 0)
+<h3>Variable matches:</h3>
+
+#foreach($item in $var_search)
+#set ($theseVars=$item.getVariables())
+#set ($theseCats = $item.getCategories())
+#foreach($var in $theseVars)
+<div class="indent">
+    <a href="constrain?var=$var.getLink()">$var.getName()</a>
+#end ## foreach $var
+ from 
+ ## This code will expand the entire hierarchy, but it makes a mess.
+###foreach ($cat in $theseCats)
+###if ($velocityCount != 1)
+##&gt;
+###end ##if count
+###a_metadata_nospace($cat)<a href="dataset?catitem=$cat.getLink()">$cat.getName()</a>
+###end ## foreach($cat in $item)
+##
+## I'm doing this instead, which just displays the last leaf in the hierarchy.
+#set($cat=$theseCats.lastElement())
+#a_metadata_nospace($cat)<a href="dataset?catitem=$cat.getLink()">$cat.getName()</a>
+<br>
+</div>
+#end ## foreach($item in $var_search)
+
+
+#end ## if($var_search.size() > 0)
+
+#if(($var_search.size() == 50 || $cat_search.size() == 50) && !$unlimited)
+<p><a align="center" href="javascript:unlimited_search()">Show all matches</a>
+#end ## if($var_search.size()...
+
+#end ## else block of no results test.

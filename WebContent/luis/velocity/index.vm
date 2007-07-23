@@ -1,0 +1,142 @@
+<html>
+<head>
+<title>LAS Index</title>
+</head>
+<body>
+
+## If the dataset list and the category list are exactly the same size
+## and the names of the first category and the last category in the hierarchy are 
+## the same then assume there are no "category" elements in the configuration
+## and just show one expansion of the hierarchy.
+
+#if ($categories.size() == $dataset.size() && $categories.firstElement().getCategories().firstElement().getName().equals($datasets.firstElement().getName()) && $categories.lastElement().getCategories().lastElement().getName().equals($datasets.lastElement().getName()) )
+
+#info_table_start()
+  Below is a listing of all of the Categories in this LAS.  Click on a link to
+  use the item in LAS.
+#info_table_end("indexpage")
+
+<div class="indent">
+<h2>by Category</h2>
+</div>
+#foreach($item in $categories)
+#set ($theseCats = $item.getCategories())
+#set ($theseVars = $item.getVariables())
+<div class="indent">
+$item.getIndex().&nbsp;
+#foreach ($cat in $theseCats)
+#if ($velocityCount != 1)
+&gt;
+#end ##if count
+<a href="dataset?catitem=$cat.getLink()">$cat.getName()</a>
+#end
+</div>
+<ul>
+#foreach ($vars in $theseVars)
+<li><a href="constrain?var=$vars.getLink()">$vars.getName()</a></li>
+#end ## foreach ($vars)
+</ul>
+#end ## foreach ($item...)
+#if ($pages.size()>1)
+<div class="indent">
+See more categories:&nbsp;
+#set($temp=false)
+#set($temp=$!previous)
+#if ( $temp )
+<a href="$temp">Previous</a>&nbsp;
+#end ## if temp
+#foreach ($page in $pages)
+#if ( $page.equals("") )
+<span class="redbold">$velocityCount</span>&nbsp;
+#else
+<a href="$page">$velocityCount</a>&nbsp;
+#end ##if then else current page.
+#end ## foreach page
+#set($temp=false)
+#set($temp=$!next)
+#if ( $temp )
+<a href="$temp">Next</a>&nbsp;
+#end ## if temp
+</div>
+#end
+
+## Show both categories and datasets.
+#else
+#info_table_start()
+  Below is a listing of all of the Categories and all of the Data sets in this LAS.  
+  Click on a link to use the item in LAS.
+#info_table_end("indexpage")
+
+<div class="indent">
+<a name="category">See index <a href="#category">by Category</a> or <a href="#dataset">by Dataset</a>
+</div>
+
+<div class="indent">
+<h2>by Category</h2>
+</div>
+#foreach($item in $categories)
+#set ($theseCats = $item.getCategories())
+#set ($theseVars = $item.getVariables())
+<div class="indent">
+$item.getIndex().&nbsp;
+#foreach ($cat in $theseCats)
+#if ($velocityCount != 1)
+&gt;
+#end ##if count
+<a href="dataset?catitem=$cat.getLink()">$cat.getName()</a>
+#end
+</div>
+<ul>
+#foreach ($vars in $theseVars)
+<li><a href="constrain?var=$vars.getLink()">$vars.getName()</a></li>
+#end ## foreach ($vars)
+</ul>
+#end ## foreach ($item...)
+#if ($pages.size()>1)
+<div class="indent">
+See more categories:&nbsp;
+#set($temp=false)
+#set($temp=$!previous)
+#if ( $temp )
+<a href="$temp">Previous</a>&nbsp;
+#end ## if temp
+#foreach ($page in $pages)
+#if ( $page.equals("") )
+<span class="redbold">$velocityCount</span>&nbsp;
+#else
+<a href="$page">$velocityCount</a>&nbsp;
+#end ##if then else current page.
+#end ## foreach page
+#set($temp=false)
+#set($temp=$!next)
+#if ( $temp )
+<a href="$temp">Next</a>&nbsp;
+#end ## if temp
+</div>
+#end
+<center><hr width="80%"></center>
+<div class="indent">
+<a name="dataset">See index <a href="#category">by Category</a> or <a href="#dataset">by Dataset</a>
+</div>
+<div class="indent">
+<h2>by Dataset</h2>
+</div>
+#foreach($item in $datasets)
+<div class="indent">
+<h3>$item.getName()</h3>
+#set($children=$item.getChildren())
+</div>
+<ul>
+#foreach($child in $children)
+<li><a href="dataset?title=$item.getName()&varname=$child.getName()">$child.getName()</a></li>
+#end ## foreach ($child...)
+</ul>
+#end ## foreach ($item...)
+<div class="indent">
+<br><a href="#category">Top</a><br>
+</div>
+#end  ## else block of if categories and datasets are the same
+</body>
+</html>
+
+

@@ -1,0 +1,49 @@
+\cancel mode verify
+! DODS_LDEO_noaa_nodc_woa98_numObs_init.jnl
+! 03/2002 set axis z depth and bad flag = 0
+!
+! The optional second variable is included for vector plots.
+
+! Description: open (and initialize) a dataset and set the depth
+! flag on the Z axis of the incoming variable(s).
+
+! arguments:                 1        2         3        4 
+! Usage: GO std_initialize [dset] [var num] [dset num] [var1]
+!
+! dset -- the name of the dataset
+! var num [1/2] -- first var or second (comparison) var
+! dset num [1/2] -- first dataset opened or second
+!                   (comparison var may be from first dataset)
+! var 1 -- name of var 1
+! var 2 -- name of var 2 (for vectors) 
+
+! e.g. yes? go std_initialize  coads_climatology 1 uwnd
+
+! check the arguments
+! (var2 is optional)
+
+! We cannot check argument 1 because absolute pathnames
+! are parsed by ferret as command qualifiers.  Checking
+! for arguments 2 - 4 should be sufficient.
+
+query/ignore $2%<Usage: GO std_initialize data_set var_# data_set_# variable_1%
+query/ignore $3%<Usage: GO std_initialize data_set var_# data_set_# variable_1%
+query/ignore $4%<Usage: GO std_initialize data_set var_# data_set_# variable_1%
+
+! Hack to get a quoted string for DODS datasets.
+def symbol dset = "$1"
+set data ($dset)
+
+set axis/depth `$4,return=zaxis`
+set var/bad=0/units="distribution" $4
+
+! We must define var$2_grid use in differencing
+! This grid must reference a file variable: one that actually
+! exists in dataset 'dset' as opposed to a virtual variable
+! created with an expression involving other variables.
+define grid/like=$4[d=$3] var$2_grid_
+
+! Any extra work: defining virtual variables, regridding, etc
+! should be done at this time.
+
+

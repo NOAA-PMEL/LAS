@@ -1,0 +1,274 @@
+<html>
+<head>
+<title>Info for $metadata_dataset.getName()</title>
+</head>
+<body bgcolor="white">
+
+##
+## $metadata_dataset is the data set (or category) for which the metadata page is being
+## created.
+
+#set($children=$metadata_dataset.getChildren())
+##
+## Get the children for this page...
+##
+#if($children.size() > 0)
+  #set($var_test=$children.get(0))
+#end
+##
+## Get the children for the first link down the hierarchy
+##
+#set($nextgeneration=$var_test.getChildren())
+#if($nextgeneration.size() > 0 )
+   #set($var_test_ng=$nextgeneration.get(0))
+#end
+
+
+## If there is a document and no variables as children and the next level down
+## are not variables and there are no contributors to credit then, 
+## load the document directly instead of a page with a link.
+#if ( $metadata.getDocUrl() != "" && !$var_test.isVariable() && !$var_test_ng.isVariable() && $contributors.size()<1)
+<script language="JavaScript">
+window.location.href="$metadata.getDocUrl()";
+</script>
+#end
+
+##If the children are variables, run through the list and make the 
+##table of variables.
+
+#if ($var_test.isVariable()) 
+
+#if ($metadata.getDocUrl() == "")
+   <h2>$metadata_dataset.getName()</h2>
+#else
+   <h2>$metadata_dataset.getName() (<a href="$metadata.getDocUrl()">more...</a>)</h2>
+#end
+
+#if($children.size() > 0)
+  #set($firstVar=$children.get(0))
+  #if($firstVar.getVariableInfo().getInstitution())
+    #set($institution=$firstVar.getVariableInfo().getInstitution())
+  #end
+#end ## if($children.size() > 0)
+
+#if($institution)
+<font size="+1" style="bold">Served by: <a href="$institution.getUrl()">$institution.getName()</a></font>
+#end ## if($institution!="")
+<p>
+#if($contributors)
+#foreach ($contrib in $contributors)
+<font size="+1" style="bold">$contrib.getRole(): <a href="$contrib.getUrl()">$contrib.getName()</a></font><br>
+#end ## foreach contrib in contributors
+#end ## if($institution!="")
+
+#print_table_headers()
+#print_vars($metadata_dataset)
+
+## end of the block where the first level down contains variables.
+#else ##############################################################################
+## This block is for the case where the next level down is a set of categories.
+
+#if ($metadata.getDocUrl() == "")
+   <h2>$metadata_dataset.getName()</h2>
+#else
+   <h2>$metadata_dataset.getName() (<a href="$metadata.getDocUrl()">more...</a>)</h2>
+#end
+
+<p>
+#if($contributors)
+#foreach ($contrib in $contributors)
+<font size="+1" style="bold">$contrib.getRole(): <a href="$contrib.getUrl()">$contrib.getName()</a></font><br>
+#end ## foreach contrib in contributors
+#end ## if(contributors)
+
+## Loop through the categories in the next level down
+#foreach ($item in $children)
+<h2>$item.getName()</h2>
+#set ($varchildren=$item.getChildren())
+#if($varchildren.size() > 0)
+  #set($Var1=$varchildren.get(0))
+  #if($Var1.getVariableInfo().getInstitution())
+    #set($inst=$Var1.getVariableInfo().getInstitution())
+  #end
+#end ## if($children.size() > 0)
+
+#if($inst)
+<h4>Served by: <a href="$inst.getUrl()">$inst.getName()</a></h4>
+#end ## if($inst!="")
+
+## If there is a child and if it is a variable...
+#if ($Var1)
+#if ($Var1.isVariable())
+#print_table_headers()
+#print_vars($item)
+#end  ## It's a variable
+#end  ## a child exists
+#end ##foreach
+#end ## This is the end of the else block.  This section is for the case where
+     ## the items in the level below the current level are categories.
+</body>
+</html>
+#macro(print_vars $category)
+#foreach($item in $category.getChildren())
+#if($item.isVariable())
+<!-- If the getAxisByType returns null the LHS will not be set to null.
+     Once set, the object cannot be removed from the context (set to null).
+     This hack gets around this Velocity behavoir and prevents the 
+     previous value of the axis showing up in the next line of output. -->
+#set($varinfo=$item.getVariableInfo())
+#set($xaxis=false)
+#set($yaxis=false)
+#set($zaxis=false)
+#set($taxis=false)
+#set($xaxis=$varinfo.getAxisByType("x"))
+#set($yaxis=$varinfo.getAxisByType("y"))
+#set($zaxis=$varinfo.getAxisByType("z"))
+#set($taxis=$varinfo.getAxisByType("t"))
+#if ($varinfo.getDodsUrl() == "")
+  <tr bgcolor="white"> 
+    <td> 
+      <div align="center">$item.getName()</div>
+    </td>
+#else
+  <tr bgcolor="white"> 
+    <td rowspan="2"> 
+      <div align="center">$item.getName()</div>
+    </td>
+    <td nowrap colspan="5" bgcolor="#dddddd">
+      <div align="left"><b>OPeNDAP URL:</b>&nbsp;${varinfo.getDodsUrl()}&nbsp;&nbsp;(<a href="${varinfo.getDodsUrl()}.info">info</a>,&nbsp;<a href="${varinfo.getDodsUrl()}.version">version</a>)</div>
+    </td> 
+  </tr>
+  <tr bgcolor="white">
+#end
+    <td>
+      <div align="center">
+#if($xaxis)
+   ## Must be single quotes to properly escape the pound special character.
+   #set($xlo=$xaxis.getLoFormatted('###.##'))
+   #set($xhi=$xaxis.getHiFormatted('###.##'))
+   #if ($xlo != $xhi)
+        $xlo:$xhi
+   #else
+        $xlo
+   #end
+#else
+        &nbsp;
+#end
+      </div>
+    </td>
+    <td> 
+      <div align="center">
+#if($yaxis)
+   ## Must be single quotes to properly escape the pound special character.
+   #set($ylo=$yaxis.getLoFormatted('###.##'))
+   #set($yhi=$yaxis.getHiFormatted('###.##'))
+   #if ($ylo != $yhi)
+        $ylo:$yhi
+   #else
+        $ylo
+   #end
+#else
+        &nbsp;
+#end
+      </div>
+    </td>
+    <td> 
+      <div align="center">
+#if($zaxis)
+   ## Must be single quotes to properly escape the pound special character.
+   #set($zlo=$zaxis.getLoFormatted('#####.##'))
+   #set($zhi=$zaxis.getHiFormatted('#####.##'))
+   #if ($zlo != $zhi)
+        $zlo:$zhi
+   #else
+        $zlo
+   #end
+#else
+        &nbsp;
+#end
+      </div>
+    </td>
+    <td> 
+      <div align="center">
+#if($taxis)
+        $taxis.getLo() to $taxis.getHi()
+#else
+        &nbsp;
+#end
+      </div>
+    </td>
+    <td>
+#if ($varinfo.getUnits() == "")
+      <div align="center">&nbsp;</div>
+#else
+      <div align="center">$varinfo.getUnits()</div>
+#end
+    </td>
+  </tr>
+#end ## #if($item.isVariable())
+#end ## #foreach($item in $metadata_dataset)
+</table>
+
+#if($metadata_dataset_derived.size() > 0)
+<h3>User Defined Variables</h3>
+<table bgcolor="#dddddd" width="100%" border="1" cellpadding="2">
+  <tr> 
+    <td width="20%"> 
+      <div align="center"><b>Name</b></div>
+    </td>
+    <td width="20%"> 
+      <div align="center"><b>Source variable name</b></div>
+    </td>
+    <td> 
+      <div align="center"><b>Analysis function</b></div>
+    </td>
+  </tr>
+
+#foreach($item in $metadata_dataset_derived)
+#set($varinfo=$item.getVariableInfo())
+#set($dc=$item.getCategory())
+  <tr bgcolor="white"> 
+    <td> 
+      <div align="center">$item.getName()</div>
+    </td>
+    <td>
+	<div align="center">$dc.getParentName()</div>
+    </td> 
+    <td>
+	<div align="center"><nobr>$dc.getAnalysisExpression()</nobr></div>
+    </td> 
+  </tr>
+#end ##foreach($item in $metadata_dataset_derived)
+</table>
+#end ## if($metadata_dataset_derived.size() > 0)
+
+#end
+#macro(print_table_headers)
+<h3>Variables</h3>
+<table bgcolor="#dddddd" width="100%" border="1" cellpadding="2">
+  <tr> 
+    <td rowspan="2" width="20%"> 
+      <div align="center"><b>Name</b></div>
+    </td>
+    <td colspan="5"> 
+      <div align="left"><b><a href="http://www.opendap.org/">OPeNDAP</a></b> URL</div>
+    </td>
+  </tr>
+  <tr>
+    <td width="14%"> 
+      <div align="center"><b>X range</b></div>
+    </td>
+    <td width="14%"> 
+      <div align="center"><b>Y range</b></div>
+    </td>
+    <td width="14%"> 
+      <div align="center"><b>Z range</b></div>
+    </td>
+    <td width="18%"> 
+      <div align="center"><b>T range</b></div>
+    </td>
+    <td width="14%"> 
+      <div align="center"><b>Units</b></div>
+    </td>
+  </tr>
+#end

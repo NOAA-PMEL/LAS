@@ -1,0 +1,52 @@
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! 
+! $Author: rhs $
+!
+! Plot_2d.jnl decides which script to call to make a 2D plot.
+! In the "old" LAS UI a 2D plot has the same options and other
+! UI characteristics regardless of the dimension so it's easier
+! to have one script like this to drive all the others.
+! In the new UI it's likely we'll define one operation per
+! dimension.
+!
+! plot_2D_GE
+
+IF ($ferret_view"|xt>1|*>0") THEN
+
+   !! Make a plot in XT...
+   go xt_plot_2D
+
+ELIF ($ferret_view"|xy>1|*>0") THEN
+
+   !! Make a plot in XY...
+   ! Redefine a few symbols for Google-Earth style plots
+   DEFINE SYMBOL ferret_margins = false
+   DEFINE SYMBOL qualifiers = ($qualifiers)/LINE/NOAXES
+   DEFINE SYMBOL ferret_google_plot = 1
+   DEFINE SYMBOL ferret_land_type = contour
+
+   go xy_plot_2D
+
+ELIF ($ferret_view"|xz>1|*>0") THEN
+
+   !! Make a plot in XZ...
+   go xz_plot_2D
+
+ELIF ($ferret_view"|yt>1|*>0") THEN
+
+   !! Make a plot in YT...
+   go yt_plot_2D
+
+ELIF ($ferret_view"|yz>1|*>0") THEN
+
+   !! Make a plot in YZ...
+   go yz_plot_2D
+
+ELIF ($ferret_view"|zt>1|*>0") THEN
+
+   !! Make a plot in ZT...
+   go zt_plot_2D
+
+ELSE
+  say " **ERROR: Attempt to make a plot in ($ferret_view) with 2D plot script."
+ENDIF

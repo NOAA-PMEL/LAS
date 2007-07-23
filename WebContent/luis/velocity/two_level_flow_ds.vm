@@ -1,0 +1,25 @@
+$form.Start
+<table>
+<tr><td class="heading">$category.getName()</td></tr>
+#tr_advice("Datasets")
+#foreach($c in $thisCategory)
+<tr>
+   <td class="heading">
+   <div style="margin-left: 30px">
+   $c.getName()
+   </div>
+   </td>
+</tr>
+<tr>
+<td>
+<div style="margin-left: 40px">
+   #foreach ($v in $c.getChildren())
+        #a_metadata($v)
+        #a_dataset("" $v $v.getName() $comparison_mode)&nbsp;&nbsp;
+   #end ## foreach variable in this category
+</div>
+</td>
+<tr>
+#end ## foreach (category in the current list)
+</table>
+$form.End

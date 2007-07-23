@@ -1,0 +1,69 @@
+#control_tabs()
+      <table border=1 cellpadding=0 cellspacing=0
+             width="130" vspace="0" valign="top"
+             bgcolor="#003399" bordercolor="#003399">
+
+        <tr><td bgcolor="FFFFFF">
+          <table width="100%" border="0" cellspacing="0" cellpadding="4">
+
+#if($template_name == "dataset.vm")
+            <tr><td class="navhighlight" align="right">Datasets</td></tr>
+#else
+            <tr><td align="right"><a class="nav" onMouseOver="status='Show datasets';return true" href="" onClick="return stuffForm('dataset')">Datasets</a></td></tr>
+#end
+
+#if($template_name == "variable.vm")
+            <tr><td class="navhighlight" align="right">Variables</td></tr>
+#else
+            <tr><td align="right"><a class="nav" onMouseOver="status='Show variables';return true" href="" onClick="return stuffForm('dataset?lastvar=1')">Variables</a></td></tr>
+#end
+
+#if($template_name == "constrain.vm")
+            <tr><td class="navhighlight" align="right">Constraints</td></tr>
+#else
+            <tr><td align="right"><a class="nav" onMouseOver="status='Constrain selected variables';return true" href="" onClick="return stuffForm('constrain')">Constraints</a></td></tr>
+#end
+
+            <tr><td align="right"><hr width="60%"></td></tr>
+
+#if($template_name == "history.vm")
+            <tr><td class="navhighlight" align="right">Previous Output</td></tr>
+#elseif (!$history)
+            <tr><td class="navgray" align="right">Previous Output</td></tr>
+#else
+            <tr><td align="right"><a class="nav" onMouseOver="status='Get plot history';return true" href="" onClick="return stuffForm('history')">Previous Output</a></td></tr>
+#end
+#*  Eliminate the "Define Variable" choice for the Armstrong 0.1 Beta
+            <tr><td align="right"><hr width="60%"></td></tr>
+#if($template_name == "analysis.vm")
+            <tr><td class="navhighlight" align="right">Define variable</td></tr>
+#else
+            <tr><td align="right"><a class="nav" onMouseOver="status='Define a new variable';return true" href="" onClick="return stuffForm('analysis')">Define variable</a></td></tr>
+#end
+*#
+
+## put back the Define variable -- jli
+<tr><td align="right"><hr width="60%"></td></tr>
+#if($template_name == "analysis.vm")
+            <tr><td class="navhighlight" align="right">Define variable</td></tr>
+#else
+            <tr><td align="right"><a class="nav" onMouseOver="status='Define a new variable';return true" href="" onClick="return stuffForm('analysis')">Define variable</a></td></tr>
+#end
+
+
+
+            <tr><td align="right"><hr width="60%"></td></tr>
+            <tr><td align="right"><a class="nav" onMouseOver="status='Find out about LAS';return true" href="" onClick="window.open('http://www.ferret.noaa.gov/Ferret/LAS'); return false">About</a></td></tr>
+#if ($configs.get(0).getContact() != "")
+            <tr><td align="right"><a class="nav" onMouseOver="status='Contact administrator of this LAS';return true" href="mailto:$configs.get(0).getContact()?subject=$title" onClick="">Contact</a></td></tr>
+#end
+            <tr><td align="right"><hr width="60%"></td></tr>
+            <tr><td align="right">LAS UI Version $ui_version</td></tr>
+            <tr><td align="right">LAS Product Server: </td></tr>
+            <tr><td align="right">Armstrong 0.4 Beta</td></tr>
+          </table>
+
+        </td></tr>
+
+      </table>
+

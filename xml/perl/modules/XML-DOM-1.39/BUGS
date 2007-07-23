@@ -1,0 +1,2 @@
+There have been reports of XML::DOM core dumping when
+the 'use diagnostics' pragma is set.  Patches welcome!

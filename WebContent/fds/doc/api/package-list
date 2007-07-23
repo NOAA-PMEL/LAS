@@ -1,0 +1,8 @@
+gov.noaa.pmel.tmap.ferret.server
+gov.noaa.pmel.tmap.ferret.server.dodsservice
+gov.noaa.pmel.tmap.ferret.server.dodstype
+gov.noaa.pmel.tmap.ferret.server.importer
+org.iges.anagram
+org.iges.anagram.filter
+org.iges.anagram.service
+org.iges.util

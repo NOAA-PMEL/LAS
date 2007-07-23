@@ -1,0 +1,5 @@
+#!/bin/sh
+etags -o tmpTAGS$$ --regex='/package[ \t]+\([a-zA-Z\:]+\)/\1/' LAS.pm LASDB.pm LASUI.pm
+mungeTags tmpTAGS$$
+rm -f tmpTAGS$$
+
