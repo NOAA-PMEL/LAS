@@ -1608,7 +1608,7 @@ MapWidget.prototype.panPlot = function (dx,dy) {
 	req.setRange("x",this.getPlotGridXMin(),this.getPlotGridXMax());
 	req.setRange("y",this.getPlotGridYMin(),this.getPlotGridYMax());
 	req.setProperty("ferret","view","xy");
-	this.plot.src = "../ProductServer.do?xml=" + escape(req.getXMLText()) + "&stream=true&stream_ID=plot_image";
+	this.plot.src = "ProductServer.do?xml=" + escape(req.getXMLText()) + "&stream=true&stream_ID=plot_image";
    if((this.getDataGridXMax()-this.getDataGridXMin())>355) {
    	this.extents.data.grid.x.min+=dx;
    	this.extents.data.grid.x.max+=dx;
