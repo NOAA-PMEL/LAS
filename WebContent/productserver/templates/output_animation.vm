@@ -3,9 +3,9 @@
 <HEAD>
 <TITLE>LAS Animation</TITLE>
 
-<script language="JavaScript" src="js/xmldom.js"></script>
-<script language="JavaScript" src="js/LASRequestDOM.js"></script>
-<script language="JavaScript" src="js/DateWidget.js"></script>
+<script language="JavaScript" src="JavaScript/components/xmldom.js"></script>
+<script language="JavaScript" src="JavaScript/components/LASRequest.js"></script>
+<script language="JavaScript" src="JavaScript/components/DateWidget.js"></script>
 
 <script language="JavaScript" src="js/LASAnimationDOM.js"></script>
 
@@ -27,10 +27,8 @@ theTimes = las_animation.getFrames();
 first_image = 0;                    //first image number
 last_image = las_animation.getNumFrames()-1; //last image number
 
-//animation_height = las_animation.getImageSizeY();              //height of the images in the animation
-//animation_width = las_animation.getImageSizeX();               //width of the images in the animation
-animation_height = 640;              //height of the images in the animation
-animation_width = 800;               //width of the images in the animation
+//animation_height = 640;              //height of the images in the animation
+//animation_width = 800;               //width of the images in the animation
 
 //**************************************************************************
 //=== THE CODE STARTS HERE - no need to change anything below ===
@@ -132,7 +130,8 @@ function animate_makeLASRequest(timePoint) {
     initReq.setRange('t',timePoint);
 
     var prefix = 'ProductServer.do?stream=true&stream_ID=plot_image&xml=';
-    var img_src = prefix + escape(initReq.toString());
+    //var img_src = prefix + escape(initReq.toString());
+    var img_src = prefix + escape(initReq.getXMLText());
 
     return img_src;
 }
