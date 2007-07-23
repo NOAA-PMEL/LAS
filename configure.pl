@@ -42,7 +42,6 @@ if ($ARGV[0] && $ARGV[0] eq '-noui'){
 #
     
 my @Scripts = qw(build.xml
-                 WebContent/fds/fds.xml
                  xml/perl/genLas.pl
                  xml/perl/template.xml
                  xml/perl/genTests.pl
