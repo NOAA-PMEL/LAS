@@ -195,12 +195,21 @@
     </operation>
 
 <!-- Animation on browser (fast response) [public]-->
-    <operation name="Animation" ID="Animation" output_template="output_animation" service_action="Data_Extract_Frames" private="true" order="9999">
+    <operation name="Animation" ID="Animation" output_template="output_animation" service_action="Data_Extract_Frames" order="9999">
           <service>ferret</service>
           <response ID="Data_Extract_Frames_Response">
               <result type="xml" ID="ferret_listing" streamable="true" mime_type="text/xml" file_suffix=".xml"/>
               <result type="debug" ID="debug" file_suffix=".txt"/>
           </response>
+          <region>
+            <intervals name="xyt" />
+            <intervals name="xzt" />
+            <intervals name="yzt" />
+          </region>
+          <grid_types>
+            <grid_type name="regular" />
+          </grid_types>
+          <optionsdef IDREF="Options_2D_image_contour_xy"/> 
     </operation>
 
 <!-- Operations for Google Earth -->
@@ -239,7 +248,7 @@
     </operation>
 
     <!-- overlay kml for vector plots [public]-->
-    <operation name="Google Earth kml" ID="Vector_GE_kml" mime_type="application/vnd.google-earth.kml+xml" output_template="output_GE">
+    <operation name="Vector Plot to Google Earth" ID="Vector_GE_kml" mime_type="application/vnd.google-earth.kml+xml" output_template="output_GE">
       <operation name="Plot_vector_GE" ID="Vector_for_GE" service_action="Plot_vector_GE">
         <response ID="PlotResp">
           <result type="image" ID="plot_image" streamable="true" mime_type="image/png" file_suffix=".gif"/>
