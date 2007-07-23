@@ -51,3 +51,6 @@ SHADE($qualifiers) rose[($region_xy)]
 
 ! End of file: xy_map.jnl -----------------------------------------------------
 
+! Save the results
+GO LAS_results box
+
