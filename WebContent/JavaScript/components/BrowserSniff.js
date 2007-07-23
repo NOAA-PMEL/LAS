@@ -59,5 +59,5 @@ else if((agt.indexOf('mozilla')!=-1)&&(parseInt(navigator.appVersion)>=4)){
 if(agt.indexOf('escape')!=-1){exclude=1;ns4=0;}
 if(typeof navigator.__ice_version!="undefined"){exclude=1;ie4=0;}
 
-if(op5||op6||op7||ie5||ie||ie4) 
-	document.location="bad_browser.html";
+if(!mz7||!ie6||!saf) 
+	document.location="browser.html";
