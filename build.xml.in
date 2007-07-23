@@ -94,7 +94,7 @@
           <include name="images/**"/>
           <include name="css/**"/>
           <include name="html/**"/>
-          <include name="js/**"/>
+          <include name="JavaScript/**"/>
           <include name="docs/**"/>
           <include name="WEB-INF/**"/>
           <include name="**.html"/>
