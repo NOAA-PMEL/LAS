@@ -7,7 +7,7 @@
 <script language="JavaScript" src="JavaScript/components/LASRequest.js"></script>
 <script language="JavaScript" src="JavaScript/components/DateWidget.js"></script>
 
-<script language="JavaScript" src="js/LASAnimationDOM.js"></script>
+<script language="JavaScript" src="JavaScript/components/LASAnimationDOM.js"></script>
 
 <SCRIPT language="javascript">
 <!-- hide the script from old browsers 
