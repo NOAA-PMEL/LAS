@@ -1548,19 +1548,19 @@ MapWidget.prototype.showDataMask = function () {
 	if(Math.round(this.getDataPixYMin()-this.getPlotPixYMin())>0)		
 		this.drawingMask.style.borderTop = Math.round(this.getDataPixYMin()-this.getPlotPixYMin()) + "px solid grey";
 	else
-		this.drawingMask.style.borderTop = "0px solid grey";
+		this.drawingMask.style.borderTop = "0pt";
 	if(Math.round(this.getDataPixXMin()-this.getPlotPixXMin())>0)
 		this.drawingMask.style.borderLeft = Math.round(this.getDataPixXMin()-this.getPlotPixXMin()) + "px solid grey";
 	else
-		this.drawingMask.style.borderLeft = "0px solid grey";
+		this.drawingMask.style.borderLeft = "0pt";
 	if(Math.round(this.getPlotPixXMax()-this.getDataPixXMax())>0)
 		this.drawingMask.style.borderRight = Math.round(this.getPlotPixXMax()-this.getDataPixXMax()) + "px solid grey";
 	else
-		this.drawingMask.style.borderRight = "0px solid grey";
+		this.drawingMask.style.borderRight = "0pt";
 	if(Math.round(this.getPlotPixYMax()-this.getDataPixYMax())>0)
 		this.drawingMask.style.borderBottom= Math.round(this.getPlotPixYMax()-this.getDataPixYMax()) + "px solid grey";
 	else
-		this.drawingMask.style.borderBottom= "0px solid grey";
+		this.drawingMask.style.borderBottom= "0pt";
 
 	this.drawingMask.style.width = Math.round(this.getDataPixXMax()-this.getDataPixXMin()) +  'px';
 	this.drawingMask.style.height = Math.round(this.getDataPixYMax() - this.getDataPixYMin()) + 'px';
