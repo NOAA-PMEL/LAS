@@ -44,7 +44,7 @@ define symbol fmt = A`len`
 list/nohead/format=(($fmt))/FILE/append framesStart
 
 !-------------------------------------------------
-! time units in seconds
+! fill_levels
 LET f = "<fill_levels>"
 list/norowhead/nohead/format=(A13)/FILE/append f
 
@@ -57,26 +57,34 @@ list/norowhead/nohead/format=(A14)/FILE/append f
 
 !-------------------------------------------------
 ! time units in seconds
-LET f = "<units>"
-list/norowhead/nohead/format=(A7)/FILE/append f
+!LET f = "<units>"
+!list/norowhead/nohead/format=(A7)/FILE/append f
 
 define symbol time_units = `tax_units(t[gt=($ferret_list_var),L=1])`
-let nlen = strlen ("($time_units)")
-let a = "($time_units)"
-list/norowhead/nohead/format=(A`nlen`)/FILE/append a
+!let nlen = strlen ("($time_units)")
+!let a = "($time_units)"
+!list/norowhead/nohead/format=(A`nlen`)/FILE/append a
 
-LET f = "</units>"
-list/norowhead/nohead/format=(A8)/FILE/append f
+!LET f = "</units>"
+!list/norowhead/nohead/format=(A8)/FILE/append f
 
 !------------------------------------------------
 define symbol time_resolution = "hours"
 
-LET f = "<frames>"
-list/norowhead/nohead/format=(A8)/FILE/append f
+!LET f = "<frames>"
+!list/norowhead/nohead/format=(A8)/FILE/append f
 
 ! ouput individual time points
 
 IF `strcmp("($time_units)", "1") EQ 0` THEN
+    !====>output time units
+    LET f = "<units>seconds</units>"
+    list/norowhead/nohead/format=(A22)/FILE/append f
+
+    LET f = "<frames>"
+    list/norowhead/nohead/format=(A8)/FILE/append f
+
+    !====>output time frames
     define symbol first_time = `tax_datestring(t[gt=($ferret_list_var),L=1], t[gt=($ferret_list_var)], "seconds")`
     let nlen = strlen ("($first_time)")
     list/norowhead/nohead/format=("<frame>",A`nlen`,"</frame>")/FILE/append tax_datestring(t[gt=($ferret_list_var),L=($lmin):($lmax)], t[gt=($ferret_list_var)], "seconds")
@@ -84,6 +92,14 @@ IF `strcmp("($time_units)", "1") EQ 0` THEN
     !====>TODO: need to compute time resolution
 
 ELIF `strcmp("($time_units)", "60") EQ 0` THEN
+    !====>output time units
+    LET f = "<units>minutes</units>"
+    list/norowhead/nohead/format=(A22)/FILE/append f
+
+    LET f = "<frames>"
+    list/norowhead/nohead/format=(A8)/FILE/append f
+
+    !====>output time frames
     define symbol first_time = `tax_datestring(t[gt=($ferret_list_var),L=1], t[gt=($ferret_list_var)], "minutes")`
     let nlen = strlen ("($first_time)")
     list/norowhead/nohead/format=("<frame>",A`nlen`,"</frame>")/FILE/append tax_datestring(t[gt=($ferret_list_var),L=($lmin):($lmax)], t[gt=($ferret_list_var)], "minutes")
@@ -91,6 +107,14 @@ ELIF `strcmp("($time_units)", "60") EQ 0` THEN
     !====>TODO: need to compute time resolution
 
 ELIF `strcmp("($time_units)", "3600") EQ 0` THEN
+    !====>output time units
+    LET f = "<units>hours</units>"
+    list/norowhead/nohead/format=(A20)/FILE/append f
+
+    LET f = "<frames>"
+    list/norowhead/nohead/format=(A8)/FILE/append f
+
+    !====>output time frames
     define symbol first_time = `tax_datestring(t[gt=($ferret_list_var),L=1], t[gt=($ferret_list_var)], "hours")`
     let nlen = strlen ("($first_time)")
     list/norowhead/nohead/format=("<frame>",A`nlen`,"</frame>")/FILE/append tax_datestring(t[gt=($ferret_list_var),L=($lmin):($lmax)], t[gt=($ferret_list_var)], "hours")
@@ -116,6 +140,14 @@ ELIF `strcmp("($time_units)", "3600") EQ 0` THEN
     ENDIF
 
 ELIF `strcmp("($time_units)", "86400") EQ 0` THEN
+    !====>output time units
+    LET f = "<units>days<</units>"
+    list/norowhead/nohead/format=(A19)/FILE/append f
+
+    LET f = "<frames>"
+    list/norowhead/nohead/format=(A8)/FILE/append f
+
+    !====>output time frames
     define symbol first_time = `tax_datestring(t[gt=($ferret_list_var),L=1], t[gt=($ferret_list_var)], "days")`
     let nlen = strlen ("($first_time)")
     list/norowhead/nohead/format=("<frame>",A`nlen`,"</frame>")/FILE/append tax_datestring(t[gt=($ferret_list_var),L=($lmin):($lmax)], t[gt=($ferret_list_var)], "days")
@@ -137,6 +169,14 @@ ELIF `strcmp("($time_units)", "86400") EQ 0` THEN
     ENDIF
 
 ELIF `strcmp("($time_units)", "2629746") EQ 0` THEN
+    !====>output time units
+    LET f = "<units>months</units>"
+    list/norowhead/nohead/format=(A21)/FILE/append f
+
+    LET f = "<frames>"
+    list/norowhead/nohead/format=(A8)/FILE/append f
+
+    !====>output time frames
     define symbol first_time = `tax_datestring(t[gt=($ferret_list_var),L=1], t[gt=($ferret_list_var)], "months")`
     let nlen = strlen ("($first_time)")
     list/norowhead/nohead/format=("<frame>",A`nlen`,"</frame>")/FILE/append tax_datestring(t[gt=($ferret_list_var),L=($lmin):($lmax)], t[gt=($ferret_list_var)], "months")
@@ -155,6 +195,14 @@ ELIF `strcmp("($time_units)", "2629746") EQ 0` THEN
     ENDIF
 
 ELIF `strcmp("($time_units)", "31536000") EQ 0` THEN
+    !====>output time units
+    LET f = "<units>years</units>"
+    list/norowhead/nohead/format=(A20)/FILE/append f
+
+    LET f = "<frames>"
+    list/norowhead/nohead/format=(A8)/FILE/append f
+
+    !====>output time frames
     define symbol first_time = `tax_datestring(t[gt=($ferret_list_var),L=1], t[gt=($ferret_list_var)], "years")`
     let nlen = strlen ("($first_time)")
     list/norowhead/nohead/format=("<frame>",A`nlen`,"</frame>")/FILE/append tax_datestring(t[gt=($ferret_list_var),L=($lmin):($lmax)], t[gt=($ferret_list_var)], "years")
