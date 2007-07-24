@@ -299,20 +299,30 @@ public class ProductRequest {
                                     data.setAttribute("var",gridToVar);
                                     data.setAttribute("title", lasConfig.getVariableTitle(varXPath));
                                 } else {
-                                    // Use regrid all others to same grid as first.
+                                    // Use regrid all others to same grid as first, but
+                                    // only if the URL is different.
 
+                                    String current_url = lasConfig.getTFDSURL(varXPath);
 
-                                    String var = lasConfig.getVariableName(varXPath);
-                                    String expression = "";
-                                    try {
-                                        expression = URLEncoder.encode("_expr_{"+lasConfig.getTFDSURL(varXPath)+"}{let "+var+"_regrid="+var+"[d="+var_count+",gxy="+gridToVar+"[d=1]]}", "UTF-8");
-                                    } catch (UnsupportedEncodingException e) {
-                                        expression = ""; 
+                                    if ( !gridToURL.equals(current_url) ) {
+
+                                        String var = lasConfig.getVariableName(varXPath);
+                                        String expression = "";
+                                        try {
+                                            expression = URLEncoder.encode("_expr_{"+lasConfig.getTFDSURL(varXPath)+"}{let "+var+"_regrid="+var+"[d="+var_count+",gxy="+gridToVar+"[d=1]]}", "UTF-8");
+                                        } catch (UnsupportedEncodingException e) {
+                                            expression = ""; 
+                                        }
+                                        data.setAttribute("url", gridToURL+expression);
+                                        data.setAttribute("var", var+"_regrid");
+                                        data.setAttribute("title", lasConfig.getVariableTitle(varXPath)+"on the grid of"+gridToVar+"[d=1]");
+                                    } else {
+                                        // It's the same data set so use it as normal.
+                                        data.setAttribute("url",current_url);
+                                        data.setAttribute("var",lasConfig.getVariableName(varXPath));
+                                        data.setAttribute("title", lasConfig.getVariableTitle(varXPath));
+                                        data.setAttribute("xpath", varXPath);
                                     }
-                                    data.setAttribute("url", gridToURL+expression);
-                                    data.setAttribute("var", var+"_regrid");
-                                    data.setAttribute("title", lasConfig.getVariableTitle(varXPath)+"on the grid of"+gridToVar+"[d=1]");
-                                     
                                 }
 
                             } else if ( regrid && do_analysis ) {
