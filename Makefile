@@ -25,11 +25,13 @@ clean-noant:
 	rm -rf JavaSource/resources/ferret/FerretBackendConfig.xml
 	rm -rf JavaSource/resources/database/DatabaseBackendConfig.xml
 	rm -rf JavaSource/resources/ferret/FerretBackendConfig.xml.base
-	rm -rf WebContent/fds/fds.xml
+	rm -rf JavaSource/resources/kml/KMLBackendConfig.xml
+	rm -rf WebContent/TestLinks.html
 	rm -rf WebContent/classes
 	rm -rf WebContent/docs
 	rm -rf WebContent/WEB-INF/classes
 	rm -rf WebContent/WEB-INF/struts-config.xml
+	rm -rf WebContent/WEB-INF/web.xml
 	rm -rf xml/perl/genLas.pl
 	rm -rf build.xml
 
