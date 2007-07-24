@@ -43,7 +43,6 @@
 	    <item values="Data_Extract_netCDF,cdf,20">NetCDF file</item>
 	    <item values="Data_Extract_File,asc,20">ASCII file</item>
 	    <item values="Gen_Scripts,html,20">Desktop application data access scripts</item>
-            <item values="GE_Placemarks_2D,shade,2">Google Earth (place marks)</item>
 	</menu>
 	<menu type="ops" name="Ops_Std2D_xy">
 	    <item values="Plot_2D_XY,shade,2">Color plot</item>
@@ -244,7 +243,6 @@
             <ifoptions op="Plot_GE_Overlay" href="#Options_2D_image_contour_xy_GE"/>
             <ifoptions op="Plot_GE_kml" href="#Options_2D_image_contour_xy_GE"/>
             <ifoptions op="Data_Extract_Grid" href="#Options_Data"/>
-            <ifoptions op="GE_Placemarks_2D" href="#Options_2D_image_contour"/>
             <ifoptions op="Animation" href="#Options_2D_image_contour"/>
             <ifoptions op="XY_zoomable_image" href="#Options_2D_image_contour_xy"/>
             <ifoptions op="Google_Earth_Animation" href="#Options_2D_image_contour"/>
