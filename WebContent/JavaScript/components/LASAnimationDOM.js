@@ -6,6 +6,8 @@ function LASAnimation(xml) {
     this.getFillLevels = LASAni_getFillLevels;
     this.getFrames     = LASAni_getFrames;
     this.getNumFrames  = LASAni_getNumFrames;
+    this.getTimeUnits = LASAni_getTimeUnits;
+    this.getTimeResolution = LASAni_getTimeResolution;
 }
 
 function LASAni_getFillLevels(){
@@ -18,11 +20,21 @@ function LASAni_getFrames() {
     var framesNode = this.DOM.selectNode("/frames");
     var frameElements = framesNode.getElements("frame");
  
+    var unitsNode = this.DOM.selectNode("/units");
+    var resolutionNode = this.DOM.selectNode("/resolution"); 
+
     theTimes = new Array();
     for (var i = 0; i < frameElements.length; i++){
-        theTimes[i]=frameElements[i].getText(); 
+        //if((unitsNode.getText() == "months")&&(resolutionNode.getText() == "months")){
+        //append day(dd) in front of a date string, e.g., JAN-1997
+        if(unitsNode.getText() == "months"){
+            theTimes[i]= "15-"+frameElements[i].getText();
+        }else if(unitsNode.getText() == "years"){
+            theTimes[i]= "15-DEC"+frameElements[i].getText();
+        }else{
+            theTimes[i]=frameElements[i].getText();
+        } 
     };
-
     return theTimes;
 }
 
@@ -30,6 +42,16 @@ function LASAni_getNumFrames() {
     var framesNode = this.DOM.selectNode("/frames");
     var frameElements = framesNode.getElements("frame");
     return frameElements.length;
+}
+
+function LASAni_getTimeUnits(){
+    var unitsNode = this.DOM.selectNode("/units");
+    return unitsNode.getText();
+}
+
+function LASAni_getTimeResolution(){
+    var resolutionNode = this.DOM.selectNode("/resolution");
+    return resolutionNode.getText();
 }
 
 /**
