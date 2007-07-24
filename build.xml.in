@@ -96,6 +96,7 @@
           <include name="html/**"/>
           <include name="JavaScript/**"/>
           <include name="docs/**"/>
+          <include name="doc/**"/>
           <include name="WEB-INF/**"/>
           <include name="**.html"/>
           <include name="**.htm"/>
