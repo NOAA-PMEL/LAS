@@ -6,7 +6,7 @@
          <IRI-otemp2027 name="Ocean Temperature monthly mean" units="degC" url="#temp" >
              <link match="/lasdata/grids/IRI-grid-lon21-lat22-level23-time44"/>
          </IRI-otemp2027>
-         <IRI-salt2031 name="Salinity monthly mean" units="deviation from .035" url="sal" >
+         <IRI-salt2031 name="Salinity monthly mean" units="deviation from .035" url="#sal" >
              <link match="/lasdata/grids/IRI-grid-lon21-lat22-level23-time44"/>
          </IRI-salt2031>
          <IRI-tc2038 name="Temperature Correction monthly mean" units="DegC/hour" url="#tcor" >

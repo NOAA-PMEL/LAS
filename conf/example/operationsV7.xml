@@ -29,7 +29,7 @@
         </grid_types>
         <optiondef IDREF="Options_gen_script"/>
        </operation>
-       <operation name="2D Overlay Plot" ID="Overlay_Plot_2D" output_template="output" service_action="Overlay_Plot_2D" order="0200">
+       <operation name="2D Overlay Plot" ID="Overlay_Plot_2D" output_template="output" service_action="Overlay_Plot_2D" order="0200" private="true">
           <service>ferret</service>
           <response ID="PlotResp">
              <result type="image" ID="plot_image" streamable="true" mime_type="image/png" file_suffix=".gif" />
@@ -52,7 +52,7 @@
           </grid_types>
           <optiondef IDREF="Options_2D"/>
     </operation>
-    <operation name="2D Difference Plot" ID="Compare_Plot" output_template="output" service_action="Compare_Plot" order="0201" regrid_prn="true">
+    <operation name="2D Difference Plot" ID="Compare_Plot" output_template="output" service_action="Compare_Plot" order="0201" regrid_prn="true" private="true">
           <service>ferret</service>
           <response ID="PlotResp">
              <result type="image" ID="plot_image" streamable="true" mime_type="image/png" file_suffix=".gif"/>
@@ -430,7 +430,7 @@
         <optiondef IDREF="Options_2D_image_contour"/>
     </operation>
     <operation name="Vector Plot" ID="Plot_vector"
-        output_template="output" service_action="Plot_vector" order="0103">
+        output_template="output" service_action="Plot_vector" order="0103" private="true">
         <service>ferret</service>
         <response ID="PlotResp">
             <result type="image" ID="plot_image" streamable="true"
