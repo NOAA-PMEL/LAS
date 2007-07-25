@@ -32,6 +32,7 @@ public class GEPlacemark{
     String tlo;
     String zhi;
     String zlo;
+    String dsIntervals;
 
     String base_URL;
 
@@ -45,7 +46,6 @@ public class GEPlacemark{
         initLASInfo = initLAS;
         lasBackendRequest = lasBackendReq;
         base_URL = baseURL;
-        log.info("base_URL="+baseURL);
         init();
         checkPointLon();
         makeKMLString();
@@ -55,11 +55,14 @@ public class GEPlacemark{
         dataset_ID = initLASInfo.get("dsID");
         var_ID = initLASInfo.get("varID");
         view   = initLASInfo.get("view");
-        if(view.contains("t")){
+        dsIntervals = initLASInfo.get("dsIntervals");
+
+        if(dsIntervals.contains("t")){
             tlo = initLASInfo.get("tlo");
             thi = initLASInfo.get("thi");
         }
-        if(view.contains("z")){
+
+        if(dsIntervals.contains("z")){
             zlo = initLASInfo.get("zlo");
             zhi = initLASInfo.get("zhi");
         }
@@ -167,12 +170,23 @@ public class GEPlacemark{
         points.put("x", xp);
         points.put("y", yp); 
 
+/*
         if(view.equals("xyt")){
             String[] ti = new String[] {tlo,thi};  
             intervals.put("t",ti);
         }
 
         if(view.equals("xyz")){
+            String[] zi = new String[] {zlo,zhi};
+            intervals.put("z",zi);
+        }
+*/
+        if(dsIntervals.contains("t")){
+            String[] ti = new String[] {tlo,thi};
+            intervals.put("t",ti);
+        }
+
+        if(dsIntervals.contains("z")){
             String[] zi = new String[] {zlo,zhi};
             intervals.put("z",zi);
         }
