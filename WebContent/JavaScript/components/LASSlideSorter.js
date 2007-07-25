@@ -13,12 +13,12 @@
  * <p>
  * Throughout this code the word 'Select' will refer to the 
  * form elements that are updated and the word 'Menu' will refer
- * to an element from the ISSInitObject[] array of objects that contain
+ * to an element from the this.InitObject[] array of objects that contain
  * the contents used to populate the Select objects.
  * <p>
  * The basic structure of the HTML table is shown below with
  * individual cell select objects named 'widgetCell#'.  The full suite of
- * available menus are given by the 'iss_G#' objects.
+ * available menus are given by the 'lss_G#' objects.
  *
  * <pre>
  *     ____________________
@@ -33,87 +33,87 @@
  *     !     !     !     !</pre>
  *
  * @author Jonathan Callahan
- * @version $Revision: 1293 $
+ * @version $Revision: 1485 $
  */ 
 
 /**
- * Construct a new ImageSlideSorter object.<br>
- * @class This is the basic ImageSlideSorter class.
+ * Construct a new LASSlideSorter object.<br>
+ * @class This is the basic LASSlideSorter class.
  * @constructor
- * @param {string} form name of the form in which the ImageSlideSorter is located
- * @param {int} numRows number of rows in the table
- * @param {int} numCols number of columns in the table
- * @param {string} chosenMenuName name of the 'Menu' that will be used for the initial
+ * @param {string} form name of the form in which the LASSlideSorter is located
  * population of the table
- * @return A new ImageSlideSorter object
+ * @return A new LASSlideSorter object
  */
-function ImageSlideSorter(form,numRows,numCols,chosenMenuName) {
+function LASSlideSorter(form,init_object) {
 
 /*
- * The ImageSlideSorter object must be attached to the document
- * so that it is available to the 'ImageSlideSorter_cellWidgetChoice' event
+ * The LASSlideSorter object must be attached to the document
+ * so that it is available to the 'LASSlideSorter_cellWidgetChoice' event
  * handler which is a function of the document and not of
- * the ImageSlideSorter object.
+ * the LASSlideSorter object.
  */
 
-  document.ISS = this;
+  document.LSS = this;
 
 // Internal Constants
 
 
 // Public functions
 
-  this.render = ImageSlideSorter_render;
+  this.render = LASSlideSorter_render;
 
-  this.createCellWidgets = ImageSlideSorter_createCellWidgets;
-  this.createGlobalWidgets = ImageSlideSorter_createGlobalWidgets;
-  this.createGlobalRadios = ImageSlideSorter_createGlobalRadios;
-  //this.loadCellImage = ImageSlideSorter_loadCellImage;
-  this.loadAllImages = ImageSlideSorter_loadAllImages;
-  this.loadContentCell = ImageSlideSorter_loadContentCell;
-//  this.handleLASResponse = ImageSlideSorter_handleLASResponse;
+  this.createCellWidgets = LASSlideSorter_createCellWidgets;
+  this.createGlobalWidgets = LASSlideSorter_createGlobalWidgets;
+  this.createGlobalRadios = LASSlideSorter_createGlobalRadios;
+  //this.loadCellImage = LASSlideSorter_loadCellImage;
+  this.loadAllImages = LASSlideSorter_loadAllImages;
+  this.loadContentCell = LASSlideSorter_loadContentCell;
 
 // Internal functions
 
 // Callback functions (when a Widget event is triggered)
 
-  document.globalWidgetChoice = ImageSlideSorter_globalWidgetChoice;
-  document.cellWidgetChoice = ImageSlideSorter_cellWidgetChoice;
+  document.globalWidgetChoice = LASSlideSorter_globalWidgetChoice;
+  document.cellWidgetChoice = LASSlideSorter_cellWidgetChoice;
 
 // Event handlers
 
-  document.radioChoice = ImageSlideSorter_radioChoice;
-  document.imgComplete = ImageSlideSorter_imgComplete;
+  document.radioChoice = LASSlideSorter_radioChoice;
+  document.imgComplete = LASSlideSorter_imgComplete;
 
-// Initialization
+// Initialization (default settings for rows, cols and chosenMenuName)
 
   this.form = form;
-  this.numRows = numRows;
-  this.numCols = numCols;
-  this.chosenMenuName = chosenMenuName;
+  this.InitObject = init_object;
+  this.numRows = 2;
+  this.numCols = 2;
+  this.chosenMenuName = 't';
   this.Widgets = new Object();
 }
 
 ////////////////////////////////////////////////////////////
 //                                                        //
-// Define methods of the ImageSlideSorter object          //
+// Define methods of the LASSlideSorter object          //
 //                                                        //
 ////////////////////////////////////////////////////////////
 
 /**
  * Creates the SlideSorter table with the desired number of
  * rows and columns.  The number of widgets to create is
- * determined from the length of the ISSInitObject.
+ * determined from the length of the this.InitObject.
  * @param {string} element_id 'id' attribute of the element 
- *        into which the ImageSlideSorter is inserted.
+ *        into which the LASSlideSorter is inserted.
  * @param {int} rows number of rows in the SlideSorter
  * @param {int} cols number of cols in the SlideSorter
+ * @param {string} initial_menu name of the 'Menu' that will be used for the initial
+ * population of the table
  */
-function ImageSlideSorter_render(element_id,rows,cols) {
+function LASSlideSorter_render(element_id,rows,cols,initial_menu) {
 
   this.element_id = element_id;
   this.numRows = rows;
   this.numCols = cols;
+  this.chosenMenuName = initial_menu;
 
   var node = document.getElementById(this.element_id);
   var children = node.childNodes;
@@ -129,65 +129,65 @@ function ImageSlideSorter_render(element_id,rows,cols) {
     }
   }
 
-  // Create the ImageSlideSorter table
+  // Create the LASSlideSorter table
 
   var id_text;
 
   // Overall table
-  var ISS_table = document.createElement('table');
-  node.appendChild(ISS_table);
+  var LSS_table = document.createElement('table');
+  node.appendChild(LSS_table);
 
-  var ISS_tbody = document.createElement('tbody');
-  ISS_table.appendChild(ISS_tbody);
+  var LSS_tbody = document.createElement('tbody');
+  LSS_table.appendChild(LSS_tbody);
 
   // Control row, cell, table and tbody
-  var ISS_controlRow = document.createElement('tr');
-  id_text = 'ISS_controlRow';
-  ISS_controlRow.setAttribute('id',id_text);
-  ISS_tbody.appendChild(ISS_controlRow);
+  var LSS_controlRow = document.createElement('tr');
+  id_text = 'LSS_controlRow';
+  LSS_controlRow.setAttribute('id',id_text);
+  LSS_tbody.appendChild(LSS_controlRow);
 
-  var ISS_controlCell = document.createElement('td');
-  id_text = 'ISS_controlCell';
-  ISS_controlCell.setAttribute('id',id_text);
-  ISS_controlRow.appendChild(ISS_controlCell);
+  var LSS_controlCell = document.createElement('td');
+  id_text = 'LSS_controlCell';
+  LSS_controlCell.setAttribute('id',id_text);
+  LSS_controlRow.appendChild(LSS_controlCell);
 
-  var ISS_controlTable = document.createElement('table');
-  id_text = 'ISS_controlTable';
-  ISS_controlTable.setAttribute('id',id_text);
-  ISS_controlCell.appendChild(ISS_controlTable);
+  var LSS_controlTable = document.createElement('table');
+  id_text = 'LSS_controlTable';
+  LSS_controlTable.setAttribute('id',id_text);
+  LSS_controlCell.appendChild(LSS_controlTable);
 
-  var ISS_controlBody = document.createElement('tbody');
-  ISS_controlTable.appendChild(ISS_controlBody);
+  var LSS_controlBody = document.createElement('tbody');
+  LSS_controlTable.appendChild(LSS_controlBody);
 
   // One row for the basic menus and one for the differencing menus
-  var ISS_basicMenusRow = document.createElement('tr');
-  id_text = 'ISS_basicMenusRow';
-  ISS_basicMenusRow.setAttribute('id',id_text);
-  ISS_controlBody.appendChild(ISS_basicMenusRow);
+  var LSS_basicMenusRow = document.createElement('tr');
+  id_text = 'LSS_basicMenusRow';
+  LSS_basicMenusRow.setAttribute('id',id_text);
+  LSS_controlBody.appendChild(LSS_basicMenusRow);
 
-  var ISS_diffMenusRow = document.createElement('tr');
-  id_text = 'ISS_diffMenusRow';
-  ISS_diffMenusRow.setAttribute('id',id_text);
-  ISS_controlBody.appendChild(ISS_diffMenusRow);
+  var LSS_diffMenusRow = document.createElement('tr');
+  id_text = 'LSS_diffMenusRow';
+  LSS_diffMenusRow.setAttribute('id',id_text);
+  LSS_controlBody.appendChild(LSS_diffMenusRow);
 
   // Now add a cell for the diffencging-mode checkbox and
-  // one additional cell for each 'Menu' defined in ISSInitObject
+  // one additional cell for each 'Menu' defined in this.InitObject
 
-  var ISS_basicCheckboxCell = document.createElement('td');
-  id_text = 'ISS_basicCheckboxCell';
-  ISS_basicCheckboxCell.setAttribute('id',id_text);
-  ISS_basicMenusRow.appendChild(ISS_basicCheckboxCell);
+  var LSS_basicCheckboxCell = document.createElement('td');
+  id_text = 'LSS_basicCheckboxCell';
+  LSS_basicCheckboxCell.setAttribute('id',id_text);
+  LSS_basicMenusRow.appendChild(LSS_basicCheckboxCell);
 
-  var ISS_diffCheckboxCell = document.createElement('td');
-  id_text = 'ISS_diffCheckboxCell';
-  ISS_diffCheckboxCell.setAttribute('id',id_text);
-  ISS_diffMenusRow.appendChild(ISS_diffCheckboxCell);
+  var LSS_diffCheckboxCell = document.createElement('td');
+  id_text = 'LSS_diffCheckboxCell';
+  LSS_diffCheckboxCell.setAttribute('id',id_text);
+  LSS_diffMenusRow.appendChild(LSS_diffCheckboxCell);
 
   var i=1;
-  for (var menuName in ISSInitObject) {
+  for (var menuName in this.InitObject) {
 // NOTE:  json.js breaks for loops by adding the toJSONString() method.
 // NOTE:  See:  http://yuiblog.com/blog/2006/09/26/for-in-intrigue/
-    if (typeof ISSInitObject[menuName] !== 'function') { 
+    if (typeof this.InitObject[menuName] !== 'function') { 
 
 /*
     <td id="basicCell'>
@@ -205,7 +205,7 @@ function ImageSlideSorter_render(element_id,rows,cols) {
       var basicCell = document.createElement('td');
       id_text = 'basicCell' + i;
       basicCell.setAttribute('id',id_text);
-      ISS_basicMenusRow.appendChild(basicCell);
+      LSS_basicMenusRow.appendChild(basicCell);
 
       var basicTable = document.createElement('table');
       id_text = 'basicTable' + i;
@@ -259,7 +259,7 @@ function ImageSlideSorter_render(element_id,rows,cols) {
       var diffCell = document.createElement('td');
       id_text = 'diffCell' + i;
       diffCell.setAttribute('id',id_text);
-      ISS_diffMenusRow.appendChild(diffCell);
+      LSS_diffMenusRow.appendChild(diffCell);
 
       var diffTable = document.createElement('table');
       id_text = 'diffTable' + i;
@@ -297,34 +297,34 @@ function ImageSlideSorter_render(element_id,rows,cols) {
 
 
   // Images row, cell, table and tbody
-  var ISS_imagesRow = document.createElement('tr');
-  id_text = 'ISS_imagesRow';
-  ISS_imagesRow.setAttribute('id',id_text);
-  ISS_tbody.appendChild(ISS_imagesRow);
+  var LSS_imagesRow = document.createElement('tr');
+  id_text = 'LSS_imagesRow';
+  LSS_imagesRow.setAttribute('id',id_text);
+  LSS_tbody.appendChild(LSS_imagesRow);
 
-  var ISS_imagesCell = document.createElement('td');
-  ISS_imagesRow.appendChild(ISS_imagesCell);
+  var LSS_imagesCell = document.createElement('td');
+  LSS_imagesRow.appendChild(LSS_imagesCell);
 
-  var ISS_imagesTable = document.createElement('table');
-  id_text = 'ISS_imagesTable';
-  ISS_imagesTable.setAttribute('id',id_text);
-  ISS_imagesCell.appendChild(ISS_imagesTable);
+  var LSS_imagesTable = document.createElement('table');
+  id_text = 'LSS_imagesTable';
+  LSS_imagesTable.setAttribute('id',id_text);
+  LSS_imagesCell.appendChild(LSS_imagesTable);
 
-  var ISS_imagesBody = document.createElement('tbody');
-  ISS_imagesTable.appendChild(ISS_imagesBody);
+  var LSS_imagesBody = document.createElement('tbody');
+  LSS_imagesTable.appendChild(LSS_imagesBody);
 
 // Now create rows and columns of imageCells
 
 /*
-    		<tr class="iss_imageRow">
-          <td class="iss_imageCell">
+    		<tr class="lss_imageRow">
+          <td class="lss_imageCell">
             <table>
               <tbody>
-                <tr> <td id="iss_ContentCell11" colspan="3"> <a id="iss_A11"><img id="iss_Img11"></img></a> </td> </tr>
+                <tr> <td id="lss_ContentCell11" colspan="3"> <a id="lss_A11"><img id="lss_Img11"></img></a> </td> </tr>
                 <tr>
-                  <td id="iss_Widget11"></td>
-                  <td><img id="iss_AnimatedGif11" src="mozilla_blu.gif"></img></td>
-                  <td><a id="iss_Refresh11" href="javascript: ISS.loadContentCell(1,1)">Refresh</a></td>
+                  <td id="lss_Widget11"></td>
+                  <td><img id="lss_AnimatedGif11" src="mozilla_blu.gif"></img></td>
+                  <td><a id="lss_Refresh11" href="javascript: LSS.loadContentCell(1,1)">Refresh</a></td>
                 </tr>
               </tbody>
             </table>
@@ -334,17 +334,17 @@ function ImageSlideSorter_render(element_id,rows,cols) {
   for (var i=1; i<=this.numRows; i++) {
 
     var imageRow = document.createElement('tr');
-    imageRow.setAttribute('class','ISS_imageRow');
-    ISS_imagesBody.appendChild(imageRow);
+    imageRow.setAttribute('class','LSS_imageRow');
+    LSS_imagesBody.appendChild(imageRow);
 
     for (var j=1; j<=this.numCols; j++) {
 
       var imageCell = document.createElement('td');
-      imageCell.setAttribute('class','ISS_imageCell');
+      imageCell.setAttribute('class','LSS_imageCell');
       imageRow.appendChild(imageCell);
 
       var imageCellTable = document.createElement('table');
-      imageCellTable.setAttribute('class','ISS_imageCellTable');
+      imageCellTable.setAttribute('class','LSS_imageCellTable');
       imageCell.appendChild(imageCellTable);
 
       var imageCellBody = document.createElement('tbody');
@@ -366,10 +366,8 @@ function ImageSlideSorter_render(element_id,rows,cols) {
       // End of IE7 hack
 
       var contentCell = document.createElement('td');
-      id_text = 'ISS_ContentCell' + i + j;
+      id_text = 'LSS_ContentCell' + i + j;
       contentCell.setAttribute('id',id_text);
-      //contentCell.setAttribute('colspan',3);
-      //imageContentRow.appendChild(contentCell);
       tr.appendChild(contentCell);
 
       var imageWidgetRow = document.createElement('tr');
@@ -391,15 +389,13 @@ function ImageSlideSorter_render(element_id,rows,cols) {
       id_text = 'widgetCell' + i + j;
       widgetCell.setAttribute('id',id_text);
       widgetCell.setAttribute('class','widgetCell');
-      //imageWidgetRow.appendChild(widgetCell);
       tr.appendChild(widgetCell);
 
       var aGifCell = document.createElement('td');
       aGifCell.setAttribute('class','aGifCell');
-      //imageWidgetRow.appendChild(aGifCell);
       tr.appendChild(aGifCell);
 
-      var aGif = document.createElement('gif');
+      var aGif = document.createElement('img');
       id_text = 'aGif' + i + j;
       aGif.setAttribute('id',id_text);
       aGif.setAttribute('src','mozilla_blu.gif');
@@ -407,13 +403,12 @@ function ImageSlideSorter_render(element_id,rows,cols) {
 
       var refreshCell = document.createElement('td');
       refreshCell.setAttribute('class','refreshCell');
-      //imageWidgetRow.appendChild(refreshCell);
       tr.appendChild(refreshCell);
 
       var refresh = document.createElement('a');
       id_text = 'refresh' + i + j;
       refresh.setAttribute('id',id_text);
-      var href = 'javascript: ISS.loadContentCell(' + i + ',' + j + ')';
+      var href = 'javascript: LSS.loadContentCell(' + i + ',' + j + ')';
       refresh.setAttribute('href',href);
       refreshCell.appendChild(refresh);
 
@@ -435,43 +430,44 @@ function ImageSlideSorter_render(element_id,rows,cols) {
 
 
 /**
- * Associates values and onclick() event handlers with the 'iss_G#Radio' 
+ * Associates values and onclick() event handlers with the 'lss_G#Radio' 
  * radio buttons defined in the HTML page.
  */
-function ImageSlideSorter_createGlobalRadios() {
-// NOTE:  Radio buttons are handled directly by the ImageSlideSorter.
+function LASSlideSorter_createGlobalRadios() {
+// NOTE:  Radio buttons are handled directly by the LASSlideSorter.
 // NOTE:  There is no 'widget interface' abstraction layer.
   var i = 1;
-/*
-  var first = 1;
-  var firstRadio;
-*/
   var num_radios = 0;
 
-  for (var menuName in ISSInitObject) {
+  for (var menuName in this.InitObject) {
 // NOTE:  json.js breaks for loops by adding the toJSONString() method.
 // NOTE:  See:  http://yuiblog.com/blog/2006/09/26/for-in-intrigue/
-    if (typeof ISSInitObject[menuName] !== 'function') { 
+    if (typeof this.InitObject[menuName] !== 'function') { 
       var radioButton_id = 'basicRadioButton' + i;
       var titleCell_id = 'basicTitleCell' + i;
-      var Menu = ISSInitObject[menuName];
+      var Menu = this.InitObject[menuName];
       var RadioButton = document.getElementById(radioButton_id);
       var TitleCell = document.getElementById(titleCell_id);
 
 // TODO:  Is this a robust way of changing the title?
       if (TitleCell.firstchild) {
-        TitleCell.firstChild.nodeValue = Menu.title;
+        if (menuName == this.chosenMenuName) {
+          TitleCell.firstChild.nodeValue = 'Compare ' + Menu.title;
+        } else {
+          TitleCell.firstChild.nodeValue = Menu.title;
+        }
       } else {
         var textNode = document.createTextNode(Menu.title);
+        if (menuName == this.chosenMenuName) {
+          var textNode = document.createTextNode('Compare ' + Menu.title);
+        }
         TitleCell.appendChild(textNode);
       }
       RadioButton.value = menuName;
       RadioButton.onclick = document.radioChoice;
-      RadioButton.ISS = this;
-      //if (first) {
+      RadioButton.LSS = this;
       if (menuName == this.chosenMenuName) {
         RadioButton.checked = true;
-        firstRadio = RadioButton;
         first = 0;
         TitleCell.style.fontWeight = "bold";
         TitleCell.style.color = "#D33";
@@ -480,13 +476,13 @@ function ImageSlideSorter_createGlobalRadios() {
       num_radios++;
     }
   }
-  // TODO:  Make this more robust by looking for a tag name
-  // NOTE:  If there is only one radio button, it will be disabled.
-  // NOTE:  Better off not showing it at all.
 
+  // NOTE:  Remove global widgets if there is only one.  It would be disabled
+  // NOTE:  anyway as it is the one replicated in the imageCells.
   if (num_radios == 1) {
-    firstRadio.parentNode.style.display = 'none';
-    //firstRadio.parentNode.parentNode.style.display = 'none';
+    var RadioButton = document.getElementById('basicRadioButton1');
+    RadioButton.style.display = 'none';
+//    document.getElementById('LSS_controlRow').style.display = 'none';
   }
 
 }
@@ -496,16 +492,20 @@ function ImageSlideSorter_createGlobalRadios() {
  * Populates each of the global Widget objects with options
  * from the 'Menu's defined in the HTML page.
  */
-function ImageSlideSorter_createGlobalWidgets() {
+function LASSlideSorter_createGlobalWidgets() {
   var i = 1;
-  for (var menuName in ISSInitObject) {
+  for (var menuName in this.InitObject) {
 // NOTE:  json.js breaks for loops by adding the toJSONString() method.
 // NOTE:  See:  http://yuiblog.com/blog/2006/09/26/for-in-intrigue/
-    if (typeof ISSInitObject[menuName] !== 'function') { 
+    if (typeof this.InitObject[menuName] !== 'function') { 
       var basicWidgetCell_id = "basicWidgetCell" + i;
       var Widget;
-      var Menu = ISSInitObject[menuName];
+      var Menu = this.InitObject[menuName];
 
+// TODO:  The javascript components are very close to having a uniform
+// TODO:  'interface'.  When that happens then the only things inside the
+// TODO:  statement should be the 'new ~Widget' lines.  Everything about
+// TODO:  rendering, setting initial values, etc can be moved outside the block.
       switch (Menu.type) {
         case 'latitudeWidget':
           if (Menu.data.delta) {
@@ -514,6 +514,8 @@ function ImageSlideSorter_createGlobalWidgets() {
             Widget = new LatitudeWidget(Menu.data.lo, Menu.data.hi);
           }
           Widget.render(basicWidgetCell_id);
+          Widget.setCallback(document.globalWidgetChoice);
+          if (Menu.initial_value) { Widget.setValue(Menu.initial_value); }
           break;
         case 'longitudeWidget':
           if (Menu.data.delta) {
@@ -522,11 +524,14 @@ function ImageSlideSorter_createGlobalWidgets() {
             Widget = new LongitudeWidget(Menu.data.lo, Menu.data.hi);
           }
           Widget.render(basicWidgetCell_id);
+          Widget.setCallback(document.globalWidgetChoice);
+          if (Menu.initial_value) { Widget.setValue(Menu.initial_value); }
           break;
-        case 'menuWidget':
         case 'menuWidget':
           Widget = new MenuWidget(Menu.data);
           Widget.render(basicWidgetCell_id);
+          Widget.setCallback(document.globalWidgetChoice);
+          if (Menu.initial_value) { Widget.setValue(Menu.initial_value); }
           break;
         case 'dateWidget':
           Widget = new DateWidget(Menu.data.lo, Menu.data.hi);
@@ -535,10 +540,26 @@ function ImageSlideSorter_createGlobalWidgets() {
           } else {
             Widget.render(basicWidgetCell_id,"MY");
           }
+          Widget.setCallback(document.globalWidgetChoice);
+          if (Menu.initial_value) {
+            // NOTE:  Dates used by the LAS UI come in as 'DD-Mon-YYYY' whereas the DateWidget
+            // NOTE:  needs 'YYYY-MM-DD'.  Make the change here so as not to burden the DateWidget
+            // NOTE:  code with this LAS specific translation.
+            var months = {jan:'01',feb:'02',mar:'03',apr:'04',may:'05',jun:'06',jul:'07',aug:'08',sep:'09',oct:'10',nov:'11',dec:'12'};
+            var dateTime = String(Menu.initial_value).split(' ');
+            var YMD = String(dateTime[0]).split('-');  
+            var HMS = String(dateTime[1]).split(':');
+            var mon = String(YMD[1].toLowerCase());
+            var MM = months[mon];
+            var YMDHMS = YMD[2] + '-' + MM + '-' + YMD[0];
+            if (dateTime[1]) {
+              YMDHMS += ' ' + HMS;
+            }
+            Widget.setValue(YMDHMS);
+          }
           break;
       }
 
-      Widget.setCallback(document.globalWidgetChoice);
       if (menuName == this.chosenMenuName) { Widget.disable() };
       this.Widgets[basicWidgetCell_id] = Widget;
       i++;
@@ -551,7 +572,7 @@ function ImageSlideSorter_createGlobalWidgets() {
  * Populates each of the image cell Widget objects with the first N
  * options defined in a single 'Menu'.
  */
-function ImageSlideSorter_createCellWidgets(chosenMenuName) {
+function LASSlideSorter_createCellWidgets(chosenMenuName) {
   var index = 0;
   for (var i=0; i<this.numRows; i++) {
     for (var j=0; j<this.numCols; j++) {
@@ -559,7 +580,7 @@ function ImageSlideSorter_createCellWidgets(chosenMenuName) {
       var jnum = j+1;
       var widget_id = "widgetCell" + inum + jnum;
       var Widget;
-      var Menu = ISSInitObject[chosenMenuName];
+      var Menu = this.InitObject[chosenMenuName];
       switch (Menu.type) {
         case 'latitudeWidget':
           if (Menu.data.delta) {
@@ -568,7 +589,8 @@ function ImageSlideSorter_createCellWidgets(chosenMenuName) {
             Widget = new LatitudeWidget(Menu.data.lo, Menu.data.hi);
           }
           Widget.render(widget_id);
-          Widget.setValueByIndex(index);
+          Widget.setCallback(document.cellWidgetChoice);
+          if (Menu.initial_value) { Widget.setValue(Menu.initial_value); }
           break;
         case 'longitudeWidget':
           if (Menu.data.delta) {
@@ -577,12 +599,14 @@ function ImageSlideSorter_createCellWidgets(chosenMenuName) {
             Widget = new LongitudeWidget(Menu.data.lo, Menu.data.hi);
           }
           Widget.render(widget_id);
-          Widget.setValueByIndex(index);
+          Widget.setCallback(document.cellWidgetChoice);
+          if (Menu.initial_value) { Widget.setValue(Menu.initial_value); }
           break;
         case 'menuWidget':
           Widget = new MenuWidget(Menu.data);
           Widget.render(widget_id);
-          Widget.setValueByIndex(index);
+          Widget.setCallback(document.cellWidgetChoice);
+          if (Menu.initial_value) { Widget.setValue(Menu.initial_value); }
           break;
         case 'dateWidget':
           Widget = new DateWidget(Menu.data.lo, Menu.data.hi);
@@ -591,11 +615,25 @@ function ImageSlideSorter_createCellWidgets(chosenMenuName) {
           } else {
             Widget.render(widget_id,"MY");
           }
-          // TODO:  Add setValueByIndex() method to DateWidget
+          if (Menu.initial_value) {
+            // NOTE:  Dates used by the LAS UI come in as 'DD-Mon-YYYY' whereas the DateWidget
+            // NOTE:  needs 'YYYY-MM-DD'.  Make the change here so as not to burden the DateWidget
+            // NOTE:  code with this LAS specific translation.
+            var months = {jan:'01',feb:'02',mar:'03',apr:'04',may:'05',jun:'06',jul:'07',aug:'08',sep:'09',oct:'10',nov:'11',dec:'12'};
+            var dateTime = String(Menu.initial_value).split(' ');
+            var YMD = String(dateTime[0]).split('-');  
+            var HMS = String(dateTime[1]).split(':');
+            var mon = String(YMD[1].toLowerCase());
+            var MM = months[mon];
+            var YMDHMS = YMD[2] + '-' + MM + '-' + YMD[0];
+            if (dateTime[1]) {
+              YMDHMS += ' ' + HMS;
+            }
+            Widget.setValue(YMDHMS);
+          }
           break;
       }
 
-      Widget.setCallback(document.cellWidgetChoice);
       this.Widgets[widget_id] = Widget;
       index++;
     }
@@ -606,7 +644,7 @@ function ImageSlideSorter_createCellWidgets(chosenMenuName) {
  * Reloads all the images in the table based on the current values
  * of the Widget objects.
  */
-function ImageSlideSorter_loadAllImages() {
+function LASSlideSorter_loadAllImages() {
   for (var i=1; i<=this.numRows; i++) {
     for (var j=1; j<=this.numCols; j++) {
       this.loadContentCell(i,j);
@@ -618,15 +656,16 @@ function ImageSlideSorter_loadAllImages() {
  * Loads in image into a specified cell based on the current values
  * of the Widget objects.
  */
-function ImageSlideSorter_loadContentCell(row,col) {
+function LASSlideSorter_loadContentCell(row,col) {
 
 // Modify the background color until the image is loaded
 // TODO:  Clean up ugly parentNode.parentNode... stuff
 // TODO:  use style sheet properties instead of hardcoding the color
   var aGifID = "aGif" + row + col;
   var aGif = document.getElementById(aGifID);
-  var bop = aGif.parentNode.parentNode.parentNode;
-  bop.style.backgroundColor = '#ECA';
+  aGif.parentNode.parentNode.parentNode.parentNode.parentNode.style.backgroundColor = '#ECA';
+  aGif.parentNode.parentNode.parentNode.parentNode.style.backgroundColor = '#ECA';
+  aGif.parentNode.parentNode.parentNode.style.backgroundColor = '#ECA';
   aGif.style.visibility = 'visible';
 
 // Create an Associative Array that will consist of name:value pairs
@@ -636,10 +675,10 @@ function ImageSlideSorter_loadContentCell(row,col) {
 // Get the values from the enabled Global Widgets 
 
   var i = 1;
-  for (var menuName in ISSInitObject) {
+  for (var menuName in this.InitObject) {
 // NOTE:  json.js breaks for loops by adding the toJSONString() method.
 // NOTE:  See:  http://yuiblog.com/blog/2006/09/26/for-in-intrigue/
-    if (typeof ISSInitObject[menuName] !== 'function') { 
+    if (typeof this.InitObject[menuName] !== 'function') { 
       var widget_id = "basicWidgetCell" + i;
       var Widget = this.Widgets[widget_id];
       if (!Widget.disabled) {
@@ -648,6 +687,8 @@ function ImageSlideSorter_loadContentCell(row,col) {
       i++;
     }
   }
+
+// TODO:  Need to figure out how to add the current 'view' to AA.
 
 // Now get the values from the Cell Widgets
 // Pass the Associative Array to the user defined createLASRequest()
@@ -679,7 +720,7 @@ function ImageSlideSorter_loadContentCell(row,col) {
   // 2) Send LAS Request URL using Sarissa methods
   //    Register handleLASResponse(...) as callback routine
 
-  var contentCell_id = "ISS_ContentCell" + row + col; 
+  var contentCell_id = "LSS_ContentCell" + row + col; 
 
   var xmlhttp = new XMLHttpRequest();
   xmlhttp.open('GET', url, true);
@@ -692,36 +733,6 @@ function ImageSlideSorter_loadContentCell(row,col) {
   xmlhttp.send(null);
 }
 
-// TODO:  Is this an event handler?
-/**
- * Handles the LASResponse returned from the XMLHTTP request,
- * creates the appropriate DOM elements based on the LASResponse and
- * inserts appropriate content into those DOM elements.
- */
-function OLD_ImageSlideSorter_handleLASResponse(LASResponseText,row,col) {
-  // First, make sure we can parse the LASResponse
-  var Response;
-  try {
-    Response = new LASResponse(LASResponseText);
-  } catch(e) {
-    // TODO:  Create Error Cell with this text?
-    alert('Error parsing LASResponseText as JSON');
-    return;
-  }
-
-  // We have a valid JSON object.
-
-  var contentCell_id = "ISS_ContentCell" + row + col; 
-  var CCell = new LASContentCell();
-  CCell.render(contentCell_id);
-
-  if ( Response.isError() ) {
-    //CCell.display(Response,'las_message');
-    CCell.display(Response,'full_error');
-  } else {
-    CCell.display(Response,'plot_image');
-  }           
-}
 
 ////////////////////////////////////////////////////////////
 //                                                        //
@@ -732,7 +743,7 @@ function OLD_ImageSlideSorter_handleLASResponse(LASResponseText,row,col) {
 /**
  * Change the background color back to normal after an image is loaded.
  */
-function ImageSlideSorter_imgComplete(e) {
+function LASSlideSorter_imgComplete(e) {
   // Cross-browser discovery of the event target
   // By Stuart Landridge in "DHTML Utopia ..."
   // NOTE:  'load' events require 'e.currentTarget' instead of 'e.target'. 
@@ -742,56 +753,57 @@ function ImageSlideSorter_imgComplete(e) {
   } else if (e && e.currentTarget) {
     target = e.currentTarget;
   } else {
-    alert('ImageSlideSorter ERROR:\n> selectChange:  This browser does not support standard javascript events.');
+    alert('LASSlideSorter ERROR:\n> selectChange:  This browser does not support standard javascript events.');
     return;
   }
   // TODO:  use style sheet properties instead of hardcoding the color
 
   var Img = target;
-  var bop = Img.parentNode.parentNode.parentNode.parentNode.parentNode;
-  bop.style.backgroundColor = '#ACE';
+  Img.parentNode.parentNode.parentNode.parentNode.parentNode.style.backgroundColor = '#ACE';
+  Img.parentNode.parentNode.parentNode.parentNode.style.backgroundColor = '#ACE';
+  Img.parentNode.parentNode.parentNode.style.backgroundColor = '#ACE';
   Img.aGif.style.visibility = 'hidden';
 
 }
 
 /**
- * The ImageSlideSorter_cellWidgetChoice() function is registered as the
+ * The LASSlideSorter_cellWidgetChoice() function is registered as the
  * 'onchange' event handler for all automatically generated cell Widgets.
  * @param {object} Widget object that responded to the event
  * @ignore
  */
-function ImageSlideSorter_cellWidgetChoice(Widget) {
+function LASSlideSorter_cellWidgetChoice(Widget) {
   var i = Number(Widget.element_id.charAt(10));
   var j = Number(Widget.element_id.charAt(11));
-  var ISS = document.ISS;
-  //ISS.loadCellImage(i,j);
-  ISS.loadContentCell(i,j);
+  var LSS = document.LSS;
+  //LSS.loadCellImage(i,j);
+  LSS.loadContentCell(i,j);
 }
 
 /**
- * The ImageSlideSorter_globalWidgetChoice() function is registered as the
+ * The LASSlideSorter_globalWidgetChoice() function is registered as the
  * callback function called during event processing for all automatically 
  * generated global Widgets.
  * @param {object} Widget object that responded to the event
  * @ignore
  */
-function ImageSlideSorter_globalWidgetChoice(Widget) {
-  document.ISS.loadAllImages();
+function LASSlideSorter_globalWidgetChoice(Widget) {
+  document.LSS.loadAllImages();
 }
 
 /**
- * The ImageSlideSorter_radioChoice() function is registered as the
+ * The LASSlideSorter_radioChoice() function is registered as the
  * 'onclick' event handler for all global radio buttons.
  * These are the buttons that cause a different 'Menu' to be used
  * to populate the individual cell Widgets.
  *
  * Inside of this function 'this' refers to the widget that registered
- * the event, not to the ImageSlideSorter object.  Hence the
- * need to access 'document.ISS'.
+ * the event, not to the LASSlideSorter object.  Hence the
+ * need to access 'document.LSS'.
  * @param {Event} e selection event
  * @ignore
  */
-function ImageSlideSorter_radioChoice(e) {
+function LASSlideSorter_radioChoice(e) {
 
   // Cross-browser discovery of the event target
   // By Stuart Landridge in "DHTML Utopia ..."
@@ -801,39 +813,41 @@ function ImageSlideSorter_radioChoice(e) {
   } else if (e && e.target) {
     target = e.target;
   } else {
-    alert('ImageSlideSorter ERROR:\n> selectChange:  This browser does not support standard javascript events.');
+    alert('LASSlideSorter ERROR:\n> selectChange:  This browser does not support standard javascript events.');
     return;
   }
 
   var Radio = target;
   var menuName = Radio.value;
-  var ISS = Radio.ISS;
+  var LSS = Radio.LSS;
 
 // Create new select objects for each cell
-  ISS.createCellWidgets(menuName);
-  ISS.chosenMenuName = menuName;
+  LSS.createCellWidgets(menuName);
+  LSS.chosenMenuName = menuName;
 
 // Dis/en-able Global selects so that only those
 // 'orthogonal' to the rows and columns are available.
 
   var i = 0;
-  for (var menuName in ISSInitObject) {
+  for (var menuName in LSS.InitObject) {
 // NOTE:  json.js breaks for loops by adding the toJSONString() method.
 // NOTE:  See:  http://yuiblog.com/blog/2006/09/26/for-in-intrigue/
-    if (typeof ISSInitObject[menuName] !== 'function') { 
+    if (typeof LSS.InitObject[menuName] !== 'function') { 
       var num = i+1;
       var widget_id = "basicWidgetCell" + num;
       var title_id = "basicTitleCell" + num;
       var radio_id = "basicRadioButton" + num;
-      var Widget = ISS.Widgets[widget_id];
+      var Widget = LSS.Widgets[widget_id];
       var Title = document.getElementById(title_id);
       var Radio = document.getElementById(radio_id);
       if (Radio.checked) {
         Widget.disable();
+        Title.firstChild.nodeValue = 'Compare ' + LSS.InitObject[menuName].title;
         Title.style.fontWeight = "bold";
         Title.style.color = "#D33";
       } else {
         Widget.enable();
+        Title.firstChild.nodeValue = LSS.InitObject[menuName].title;
         Title.style.fontWeight = "normal";
         Title.style.color = "#000";
       }
@@ -841,5 +855,5 @@ function ImageSlideSorter_radioChoice(e) {
     }
   }
 
-  ISS.loadAllImages();
+  LSS.loadAllImages();
 }

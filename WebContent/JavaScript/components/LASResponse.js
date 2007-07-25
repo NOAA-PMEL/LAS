@@ -45,9 +45,8 @@
  * @param {object} JSONObject instantiated from JSON serialization of the LASResponse
  * @return A new LASResponse object
  */
-function LASResponse(LASResponseText) {
+function LASResponse(JSONObject) {
 
-  var JSONObject = LASResponseText.parseJSON();
   this.response = JSONObject.backend_response.response;
 
 // Add methods to this object
@@ -149,15 +148,30 @@ function LASResponse_getRSSURL() {
 }
 
 /**
- * Returns 1 if response.ID == 'error_response', 0 otherwise.
+ * Returns 1 if response.ID == 'error_response' or if any result
+ * has (type == 'error'), 0 otherwise.
  * @return {int} isError state of the LASResponse
  */
 function LASResponse_isError() {
+  var length = this.response.result.length;
   if ( this.response.ID == 'error_response') {
     return 1;
   } else {
-    return 0;
+// NOTE:  The result may be either an object or an array
+// NOTE:  of objects.  We need to test for that here.
+    if (length) {
+      for (i=0; i<length; i++) {
+        if (this.response.result[i].type == 'error') {
+          return 1;
+        }
+      }
+    } else {
+      if (this.response.result.type == 'error') {
+        return 1;
+      }
+    }
   }
+  return 0;
 }
 
 /**
@@ -171,20 +185,26 @@ function LASResponse_isError() {
 function LASResponse_getResult(ID) {
 // TODO:  Throw exception when Result is not found?
   var length = this.response.result.length;
-  for (i=0; i<length; i++) {
-    if (this.response.result[i].ID == ID) {
-      return this.response.result[i];
+  if (length) {
+    for (i=0; i<length; i++) {
+      if (this.response.result[i].ID == ID) {
+        return this.response.result[i];
+      }
+    }
+  } else {
+    if (this.response.result.ID == ID) {
+        return this.response.result;
     }
   }
   return null;
 }
 
-////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////
 // Utility methods
-////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////
 
 
-////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////
 // Private methods
-////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////
 
