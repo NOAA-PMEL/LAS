@@ -1,17 +1,14 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! $RCSfile: list_data.jnl,v $
+! $RCSfile: list_grid.jnl,v $
 ! $Revision: 1.4 $
 ! 
-! $Author: ansley $
-! $Date: 2006/07/06 
+! $Author: Jing $
+! $Date: 2007/07/24 
 !
-! 2006/8/10 ACM define output variable with its region.
-! 2007/3/13 ACM Set up to write netCDF files of curvilinear data
 !
-! list_data.jnl creates a listing, CDF or ASCII (based on std_list.jnl)
-! Assumes symbol ferret_format which will be one of "cdf" "txt" "tsv" "csv" "asc"
-! Assumes symbol ferret_listing is the output file.
-! Assumes symbol data_dup_varname is the optional duplicate variable name to be used on output
+! list_grid.jnl creates a listing (in XML format) of grid point locations
+! and some ancillary information, dataset ID, variable ID, ferret_view,
+! data intervals, z and or t region
 
 ! DEFINE SYMBOLs associated with the regiogn and data and perform any
 ! initialization needed for this dataset.
@@ -43,7 +40,7 @@ SET LIST/FILE="($result_ferret_listing_filename)"
 
 !   LIST/NOHEADER/NOROWHEADER/APPEND/FILE  XSEQUENCE(llon), XSEQUENCE(llat)
 
-  ! mask is 1 where ferret_list_var is valid, and missing otherwise.
+! mask is 1 where ferret_list_var is valid, and missing otherwise.
   !LET mask =  IF ($ferret_list_var) THEN 1
 
 IF ($ferret_view"|xyt>1|*>0") THEN
@@ -56,51 +53,121 @@ IF ($ferret_view"|xyz>1|*>0") THEN
   LET mask =  IF xyzvar[Z=@NGD] GT 0 THEN 1
 ENDIF
 
-  LET llon_list = XSEQUENCE(llon*mask)
-  LET llat_list = XSEQUENCE(llat*mask)
+LET llon_list = XSEQUENCE(llon*mask)
+LET llat_list = XSEQUENCE(llat*mask)
 
-  LET ngood = llon_list[x=@ngd]
+LET ngood = llon_list[x=@ngd]
 
-  LET dsID = "($data_0_dataset_ID)"
-  define variable len = STRLEN(dsID)
-  define symbol fmt = A`len`
-  list/nohead/format=(($fmt))/FILE/append dsID
+!root of the xml file
+LET f = "<grids>"
+list/norowhead/nohead/format=(A7)/FILE/append f
 
-  LET varID = "($data_0_ID)"
-  define variable len = STRLEN(varID)
-  define symbol fmt = A`len`
-  list/nohead/format=(($fmt))/FILE/append varID
+!===> output dataset ID
+LET dsID = "($data_0_dataset_ID)"
+define variable len = STRLEN(dsID)
+define symbol fmt = A`len`
+list/nohead/format=("<dataset_id>",($fmt),"</dataset_id>")/FILE/append dsID
 
-  LET view = "($ferret_view)"
-  define variable len = STRLEN(view)
-  define symbol fmt = A`len`
-  list/nohead/format=(($fmt))/FILE/append view
+!===>output variable ID
+LET varID = "($data_0_ID)"
+define variable len = STRLEN(varID)
+define symbol fmt = A`len`
+list/nohead/format=("<variable_id>",($fmt),"</variable_id>"))/FILE/append varID
 
-IF ($ferret_view"|xyt>1|*>0") THEN
+!===>output view
+LET view = "($ferret_view)"
+define variable len = STRLEN(view)
+define symbol fmt = A`len`
+list/nohead/format=("<ferret_view>",($fmt),"</ferret_view>")/FILE/append view
+
+!===> output data interval
+LET dsIntervals = "($data_0_intervals)"
+define variable len = STRLEN(dsIntervals)
+define symbol fmt = A`len`
+list/nohead/format=("<data_intervals>",($fmt),"</data_intervals>")/FILE/append dsIntervals
+
+!===> output z or t ranges
+IF ($data_0_intervals"|xyt>1|*>0") THEN
+  LET f = "<t_region>"
+  list/norowhead/nohead/format=(A10)/FILE/append f
+
   LET tlo = "($region_0_t_lo)"
   define variable len = STRLEN(tlo)
   define symbol fmt = A`len`
-  list/nohead/format=(($fmt))/FILE/append tlo
+  list/nohead/format=("<t_lo>",($fmt),"</t_lo>")/FILE/append tlo
 
   LET thi = "($region_0_t_hi)"
   define variable len = STRLEN(thi)
   define symbol fmt = A`len`
-  list/nohead/format=(($fmt))/FILE/append thi
+  list/nohead/format=("<t_hi>",($fmt),"</t_hi>")/FILE/append thi
+
+  LET f = "</t_region>"
+  list/norowhead/nohead/format=(A11)/FILE/append f
+
 ENDIF
 
-IF ($ferret_view"|xyz>1|*>0") THEN
+IF ($data_0_intervals"|xyz>1|*>0") THEN
+  LET f = "<z_region>"
+  list/norowhead/nohead/format=(A10)/FILE/append f
+
   LET zlo = "($region_0_z_lo)"
   define variable len = STRLEN(zlo)
   define symbol fmt = A`len`
-  list/nohead/format=(($fmt))/FILE/append zlo
+  list/nohead/format=("<z_lo>",($fmt),"</z_lo>")/FILE/append zlo
 
   LET zhi = "($region_0_z_hi)"
   define variable len = STRLEN(zhi)
   define symbol fmt = A`len`
-  list/nohead/format=(($fmt))/FILE/append zhi
+  list/nohead/format=("<z_hi>",($fmt),"</z_hi>")/FILE/append zhi
+
+  LET f = "</z_region>"
+  list/norowhead/nohead/format=(A11)/FILE/append f
+
 ENDIF
 
-!  LIST/NOHEADER/NOROWHEADER/APPEND/FILE dsID
+IF ($data_0_intervals"|xyzt>1|*>0") THEN
+  LET f = "<z_region>"
+  list/norowhead/nohead/format=(A10)/FILE/append f
+
+  LET zlo = "($region_0_z_lo)"
+  define variable len = STRLEN(zlo)
+  define symbol fmt = A`len`
+  list/nohead/format=("<z_lo>",($fmt),"</z_lo>")/FILE/append zlo
+
+  LET zhi = "($region_0_z_hi)"
+  define variable len = STRLEN(zhi)
+  define symbol fmt = A`len`
+  list/nohead/format=("<z_hi>",($fmt),"</z_hi>")/FILE/append zhi
+
+  LET f = "</z_region>"
+  list/norowhead/nohead/format=(A11)/FILE/append f
+
+  LET f = "<t_region>"
+  list/norowhead/nohead/format=(A10)/FILE/append f
+  
+  LET tlo = "($region_0_t_lo)"
+  define variable len = STRLEN(tlo)
+  define symbol fmt = A`len`
+  list/nohead/format=("<t_lo>",($fmt),"</t_lo>")/FILE/append tlo
+
+  LET thi = "($region_0_t_hi)"
+  define variable len = STRLEN(thi)
+  define symbol fmt = A`len`
+  list/nohead/format=("<t_hi>",($fmt),"</t_hi>")/FILE/append thi
+
+  LET f = "</t_region>"
+  list/norowhead/nohead/format=(A11)/FILE/append f
+ENDIF
+
+!===> output grid point locations
+LET f = "<points>"
+list/norowhead/nohead/format=(A8)/FILE/append f
  
-  LIST/I=1:`ngood`/NOHEADER/NOROWHEADER/APPEND/FILE  COMPRESSI(llon_list), COMPRESSI(llat_list)
+LIST/I=1:`ngood`/NOHEADER/NOROWHEADER/APPEND/FORMAT=("<point>"/"<lon>",f7.2,"</lon>"/"<lat>",f7.2,"</lat>"/"</point>")/FILE  COMPRESSI(llon_list), COMPRESSI(llat_list)
+
+LET f = "</points>"
+list/norowhead/nohead/format=(A9)/FILE/append f
+
+LET f = "</grids>"
+list/norowhead/nohead/format=(A8)/FILE/append f
 
