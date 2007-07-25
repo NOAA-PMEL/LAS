@@ -62,7 +62,12 @@ import gov.noaa.pmel.tmap.las.jdom.LASFerretBackendConfig;
 import gov.noaa.pmel.tmap.las.jdom.LASKMLBackendConfig;
 import gov.noaa.pmel.tmap.las.jdom.LASMapScale;
 import gov.noaa.pmel.tmap.las.service.TemplateTool;
+import gov.noaa.pmel.tmap.las.jdom.LASDocument;
 
+import org.jdom.Document;
+import org.jdom.Element;
+
+import java.util.Iterator;
 /**
  * @author Roland Schweitzer
  *
@@ -227,7 +232,6 @@ public class KMLTool extends TemplateTool  {
     throws Exception {
         LASBackendResponse lasBackendResponse = new LASBackendResponse();
         String output = lasBackendRequest.getResultAsFile("kml");
-        //log.info("lasBackendRequest: "+lasBackendRequest.toString());
         String baseURL = kmlBackendConfig.getHttpBaseURL();
 
         String ferret_listing_file = lasBackendRequest.getChainedDataFile("ferret_listing");
@@ -239,63 +243,78 @@ public class KMLTool extends TemplateTool  {
         }
 
         ArrayList allPlacemarks = new ArrayList();
+        LASDocument gridList = new LASDocument();
+        String dsID="";
+        String varID="";
 
         //read in the lat/lon of each grid point and create a placemark for it
-        File f = new File(ferret_listing_file);
+        File gridListFile = new File(ferret_listing_file);
 /*
+
             FileInputStream fis = new FileInputStream(f);
             BufferedInputStream bis = new BufferedInputStream(fis);
             DataInputStream dis = new DataInputStream(bis);
 */
             //try different way to read
-        BufferedReader in = new BufferedReader(new FileReader(f));
-        String nextLine;
+        try{
+            JDOMUtils.XML2JDOM(gridListFile,gridList);
 
-        HashMap<String, String> initLASReq = new HashMap<String, String>();
 
-        String dsID = in.readLine();
-        String varID= in.readLine();
-        String view = in.readLine();
+            HashMap<String, String> initLASReq = new HashMap<String, String>();
 
-        initLASReq.put("dsID", dsID);
-        initLASReq.put("varID", varID);
-        initLASReq.put("view", view);
+            Element dsIDElement = gridList.getElementByXPath("/grids/dataset_id");
+            dsID = dsIDElement.getText();
 
-        if(view.contains("z")){
-            String zlo  = in.readLine();
-            String zhi  = in.readLine();
-            initLASReq.put("zlo", zlo);
-            initLASReq.put("zhi", zhi);
-        }
-       
-        if(view.contains("t")){
-            String tlo  = in.readLine();
-            String thi  = in.readLine();
-            initLASReq.put("tlo", tlo);
-            initLASReq.put("thi", thi);
-        }
+            Element varIDElement = gridList.getElementByXPath("/grids/variable_id");
+            varID = varIDElement.getText();
 
-        //read lines(lon, lat) from the file
-        while (true){
-            //nextLine =dis.readLine();
-            nextLine =in.readLine();
+            Element viewElement = gridList.getElementByXPath("/grids/ferret_view");
+            String view = viewElement.getText();
 
-            if (nextLine !=null){
-                String gridPair = nextLine;
-                gridPair = gridPair.trim();
-                Pattern p = Pattern.compile("\\s");
-                String[] gp = gridPair.split(p.pattern());
-                String gridLon = gp[0];
-                String gridLat = gp[gp.length-1];
-               // log.info("lat="+gridLat+" lon="+gridLon);
-                GEPlacemark pl = new GEPlacemark(gridLat,gridLon,initLASReq,lasBackendRequest,baseURL);
-               // log.info("placemark "+pl.toString());
-                allPlacemarks.add(pl);
-            }else{
-                break;
+            Element dsIntervalsElement = gridList.getElementByXPath("/grids/data_intervals");
+            String dsIntervals = dsIntervalsElement.getText();
+
+            initLASReq.put("dsID", dsID);
+            initLASReq.put("varID", varID);
+            initLASReq.put("view", view);
+            initLASReq.put("dsIntervals", dsIntervals);
+
+            if(dsIntervals.contains("z")){
+                Element zElement = gridList.getElementByXPath("/grids/z_region");
+                Element zloElement = zElement.getChild("z_lo");
+                String zlo  = zloElement.getText();
+                Element zhiElement = zElement.getChild("z_hi");
+                String zhi  = zhiElement.getText();
+                initLASReq.put("zlo", zlo);
+                initLASReq.put("zhi", zhi);
             }
-        }    
-        in.close();
+       
+            if(dsIntervals.contains("t")){
+                Element tElement = gridList.getElementByXPath("/grids/t_region");
+                Element tloElement = tElement.getChild("t_lo");
+                String tlo  = tloElement.getText();
+                Element thiElement = tElement.getChild("t_hi");
+                String thi  = thiElement.getText();
+                initLASReq.put("tlo", tlo);
+                initLASReq.put("thi", thi);
+            }
+
+            Element pointsElement = gridList.getElementByXPath("/grids/points");
+            Iterator itr = (pointsElement.getChildren()).iterator();
+            while(itr.hasNext()) {
+                Element pointElement = (Element)itr.next();
+                Element lonElement = pointElement.getChild("lon");
+                String gridLon = lonElement.getText();
+                Element latElement = pointElement.getChild("lat");
+                String gridLat = latElement.getText();
+                GEPlacemark pl = new GEPlacemark(gridLat,gridLon,initLASReq,lasBackendRequest,baseURL);
+                allPlacemarks.add(pl);
+            } 
+
+        } catch (Exception e){
+            log.info("error while reading grid points: " + e.toString());
+        }
+    
 
         context.put("dsID",dsID);
         context.put("varID",varID);
