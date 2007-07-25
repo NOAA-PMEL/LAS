@@ -147,8 +147,10 @@ function eval2(strJson) {
  if (zoomButton) {
   if (previousXRegionsLo[0]) {
    zoomButton.style["display"] = "block"
+   document.getElementById('zoomInfo').style["display"]="none";
   } else {
    zoomButton.style["display"] = "none"
+   document.getElementById('zoomInfo').style["display"]="block";
  }
 }
 
@@ -214,6 +216,13 @@ function submitZoomOutXML() {
     <td>
 	<div id="zoom_button" name="zoom_button">
 	<input type="button" name"zoom" value="Zoom Back" onclick="submitZoomOutXML()">
+	</div>	
+    </td>
+  </tr>
+  <tr>
+    <td>
+	<div id="zoomInfo" name="zoomInfo">
+	<font color="red" size="+1">Click and drag to Select a zoom region</font>
 	</div>	
     </td>
   </tr>
