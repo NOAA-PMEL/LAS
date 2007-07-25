@@ -149,19 +149,14 @@ function LASContentCell_display(LASResponse,result_type) {
 
     case 'full_error':
       var CC_div = document.createElement('div');
-      CC_div.style.fontFamily = 'sans-serif';
-      CC_div.style.fontWeight = 'bold';
-      CC_div.style.color = '#E33';
+      CC_div.setAttribute('class','CCell_las_message');
       node.appendChild(CC_div);
       var text = LASResponse.getResult('las_message').content;
       var textNode = document.createTextNode(text);
-      // TODO:  Get error message style from a stylesheet
       CC_div.appendChild(textNode);
 
       CC_div = document.createElement('div');
-      CC_div.style.fontFamily = 'sans-serif';
-      CC_div.style.fontWeight = 'normal';
-      CC_div.style.color = '#000';
+      CC_div.setAttribute('class','CCell_text');
       node.appendChild(CC_div);
       var text = LASResponse.getResult('exception_message').content;
       var sub_header = 'exception message is ' + text.length + ' characters long.  The first 200 are:'
@@ -169,28 +164,31 @@ function LASContentCell_display(LASResponse,result_type) {
       CC_div.appendChild(textNode);
 
       CC_div = document.createElement('div');
-      CC_div.style.fontFamily = 'courier';
-      CC_div.style.fontWeight = 'normal';
-      CC_div.style.color = '#000';
+      CC_div.setAttribute('class','CCell_exception_message');
       node.appendChild(CC_div);
       var sub_text = text.slice(0,200) + ' ...';
       var textNode = document.createTextNode(sub_text);
-      // TODO:  Get error message style from a stylesheet
       CC_div.appendChild(textNode);
 
       break;
 
     case 'las_message':
       var CC_div = document.createElement('div');
-      CC_div.style.fontFamily = 'sans-serif';
-      CC_div.style.fontWeight = 'bold';
-      CC_div.style.color = '#E33';
+      CC_div.setAttribute('class','CCell_las_message');
       node.appendChild(CC_div);
       var text = LASResponse.getResult('las_message').content;
-      //var text = 'Error response';
       var textNode = document.createTextNode(text);
-      // TODO:  Get error message style from a stylesheet
       CC_div.appendChild(textNode);
+
+      CC_div = document.createElement('div');
+      CC_div.setAttribute('class','CCell_error_link');
+      node.appendChild(CC_div);
+      var error_link = document.createElement('a');
+      error_link.href = LASResponse.getResult('debug').url;
+      textNode = document.createTextNode('More details about this error.');
+      error_link.appendChild(textNode);
+      CC_div.appendChild(error_link);
+
       break;
 
     case 'plot_image':

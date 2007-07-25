@@ -4,9 +4,9 @@
  * The LongitudeWidget object manages the initialization and rendering of a
  * longitude Selector.
  * <p>
- * The LongitudeWidget object is initialized with a valid range (LonLo <--> LonHi)
+ * The LongitudeWidget object is initialized with a valid range (Lo <--> Hi)
  * and allows the user to select a longitude within this range.
- * (LonLo <= Lon <= LonHi).
+ * (Lo <= Lon <= Hi).
  * <p>
  * TODO:  The LongitudeWidget should create either a single Selector or a pair
  * TODO:  of Selectors depending on whether a point or range is required.
@@ -29,8 +29,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 /**
- * Constructs a new LongitudeWidget object.
  * @constructor
+ * Constructs a new LongitudeWidget object.
  * <p>
  * @param {float} lo end of the domain of valid longitudes in decimal degrees
  * @param {float} hi end of the domain of valid longitudes in decimal degrees
@@ -46,6 +46,7 @@ function LongitudeWidget(lo, hi, delta) {
   this.enable = LongitudeWidget_enable;
   this.show = LongitudeWidget_show;
   this.hide = LongitudeWidget_hide;
+  this.getSelectedIndex = LongitudeWidget_getSelectedIndex;
   this.getValue = LongitudeWidget_getValue;
   this.getValues = LongitudeWidget_getValues;
 
@@ -59,17 +60,46 @@ function LongitudeWidget(lo, hi, delta) {
 
   // Initialization
 
+/**
+ * Lowest value displayed in the Select menu.
+ */
   this.lo = Number(lo);
+/**
+ * Highest value displayed in the Select menu.
+ */
   this.hi = Number(hi);
+/**
+ * Spacing beteen Select options (decimal degrees)
+ */
   this.delta = Number(delta);
+/**
+ * Number of Options in the Select menu.
+ */
+  this.length = 0;
+/**
+ * Select object type ['select-one' | 'select-multiple'] (currently only 'select-one' is supported)
+ */
   this.type = 'select-one';
+/**
+ * ID string identifying this widget.
+ */
   this.widgetType = 'LongitudeWidget';
+/**
+ * Specifies whether this widget is currently disabled.
+ */
   this.disabled = 0;
-  //this.callback = callback;
+/**
+ * Specifies whether this widget is currently visible.
+ */
+  this.visible = 0;
+/**
+ * Callback function attached to the onChange event.
+ */
+  this.callback = null;
 }
 
 /**
- * Creates the javascript Select object associated with the LongitudeWidget.
+ * Creates the javascript Select object associated with the LongitudeWidget inside the named DOM element.
  * <p>
  * Any children of element_id will be removed and replaced with a Select object
  * <p>
@@ -141,6 +171,15 @@ function LongitudeWidget_render(element_id,type) {
   // Store the pointer to the Select object inside the LongitudeWidget object
 
   this.Select = Select;
+  this.length = this.Select.length;
+}
+
+/**
+ * Returns the selectedIndex of this LongitudeWidget when it is of type 'select-one'.
+ * @return {int} 
+ */
+function LongitudeWidget_getSelectedIndex() {
+  return this.selectedIndex;
 }
 
 /**
@@ -227,7 +266,7 @@ function LongitudeWidget_setValue(lon) {
 /**
  * Sets the selected Option.
  * @param {int} index index into the Options array [0 <= index <= N]
- * @throws {string} throws exception if index is outside of Options array
+ * @throws 'ERROR:  LongitudeWidgetsetValueByIndex: index [...] does not match any options.'
  */
 function LongitudeWidget_setValueByIndex(index) {
   if (index < 0 || index >= this.Select.length) {
@@ -245,7 +284,9 @@ function LongitudeWidget_setValueByIndex(index) {
 ////////////////////////////////////////////////////////////////////////////////
 
 /**
- * Process the event and call the user specified callback.
+ * @private
+ * Event handler that calls the user specified callback function
+ * if one has been defined.
  * @param e event
  */
 function LongitudeWidget_selectChange(e) {

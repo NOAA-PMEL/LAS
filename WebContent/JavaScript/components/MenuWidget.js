@@ -1,23 +1,22 @@
 /**
- * @private
  * @fileoverview 
- * The MenuWidget object manages the initialization, and rendering of
- * Selectors so that new MenuWidgets may be created at will when required
+ * The MenuWidget object manages the initialization and rendering of a
+ * Selector so that new MenuWidgets may be created at will when required
  * by a user ineterface.
  * <p>
- * The MenuWidget object is initialized with an array of {text,vaue} pairs.
+ * The MenuWidget object is initialized with a Menu object that consists of
+ * an array of [text,vaue] pairs.
  * <pre>
- *   Menu = [
+ *   Menu : [
  *     [text0,value0],
  *     [text1,value1],
  *     [text2,value2]
  *   ]
  * </pre>
  * <p>
- * TODO:  Mention 'unobtrusive' javascript.
  *
  * @author Jonathan Callahan
- * @version 1.0
+ * @version 2.0
  */
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -27,23 +26,13 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 /**
- * Constructs a new MenuWidget object.
  * @constructor
- * <p>
- * The 'lo' and 'hi' parameters must be of the form "YYYY-MM-DD [HH:mm:SS]'
- * or the string 'TODAY' or 'NOW' (see the parseDate() method).
- * <p>
- * The 'deltaMinutes' and 'offsetMinutes' parameters can be used to 
- * support, for example, 6 hourly forecats that appear 15 minutes after 
- * the hour.
- * <p>
- * @param {object} Menu menu object with {Array text, Array value}
- * @param {int} selectedIndex currently selected option (or first for multi-select)
- * @param {string} type javascript Select type ['select-one' | 'select-multiple']
- * @param {string} callback javascript function to be attached to the MenuWidget onChange event
+ * Constructs a new MenuWidget object.
+ * @param {object} Menu Menu object (Array of [text,value] arrays)
  * @return new MenuWidget object
+ * @type Object
  */
-function MenuWidget(Menu, selectedIndex, type, callback) {
+function MenuWidget(Menu) {
 
   // Public methods
 
@@ -52,6 +41,7 @@ function MenuWidget(Menu, selectedIndex, type, callback) {
   this.enable = MenuWidget_enable;
   this.show = MenuWidget_show;
   this.hide = MenuWidget_hide;
+  this.getSelectedIndex = MenuWidget_getSelectedIndex;
   this.getValue = MenuWidget_getValue;
   this.getValues = MenuWidget_getValues;
   this.setCallback = MenuWidget_setCallback;
@@ -64,17 +54,42 @@ function MenuWidget(Menu, selectedIndex, type, callback) {
 
   // Initialization
 
+/**
+ * Menu object of [text,value pairs] passed in during initialization.
+ */
   this.Menu = Menu;
-  this.selectedIndex = selectedIndex ? selectedIndex : 0;
-  this.type = type ? type : 'select-one';
+/**
+ * Number of Options in the Select menu.
+ */
+  this.length = Menu.length;
+/**
+ * Index of the currently selected option.
+ */
+  this.selectedIndex = 0;
+/**
+ * Select object type ['select-one' | 'select-multiple'] (currently only 'select-one' is supported)
+ */
+  this.type = 'select-one';
+/**
+ * ID string identifying this widget.
+ */
   this.widgetType = 'MenuWidget';
+/**
+ * Specifies whether this widget is currently disabled.
+ */
   this.disabled = 0;
+/**
+ * Specifies whether this widget is currently visible.
+ */
   this.visible = 0;
-  this.callback = callback;
+/**
+ * Callback function attached to the onChange event.
+ */
+  this.callback = null;
 }
 
 /**
- * Creates the javascript Select object associated with the MenuWidget.
+ * Creates the javascript Select object associated with the MenuWidget inside the named DOM element.
  * <p>
  * Any children of element_id will be removed and replaced with a Select object
  * <p>
@@ -108,7 +123,7 @@ function MenuWidget_render(element_id,type) {
   
 
   with (Select) {
-    //TODO:  deal with setting the 'type'
+    // TODO:  deal with setting the 'type'
     // NOTE:  IE doesn't support the setAttribute() method for the 'type' attribute
     // NOTE:  We just remove this capability for now (defaults to 'select-one'
     //Select.setAttribute('type', this.type);
@@ -125,9 +140,19 @@ function MenuWidget_render(element_id,type) {
   node.appendChild(Select);
 
   this.visible = 1;
+
   // Store the pointer to the Select object inside the MenuWidget object
 
   this.Select = Select;
+  this.length = this.Select.length;
+}
+
+/**
+ * Returns the selectedIndex of this MenuWidget when it is of type 'select-one'.
+ * @return {int} 
+ */
+function MenuWidget_getSelectedIndex() {
+  return this.selectedIndex;
 }
 
 /**
@@ -140,6 +165,8 @@ function MenuWidget_getValue() {
 
 /**
  * Returns the selected values associated with a MenuWidget of type 'select-multiple'.
+ * <p>
+ * Currently functions identically to getValue().
  * @return {string} 
  */
 function MenuWidget_getValues() {
@@ -164,7 +191,7 @@ function MenuWidget_enable() {
 }
 
 /**
- * Set's the Widget container's visibility to 'visible'
+ * Sets the Widget container's visibility to 'visible'.
  */
 function MenuWidget_show() {
   var node = document.getElementById(this.element_id);
@@ -173,7 +200,7 @@ function MenuWidget_show() {
 }
 
 /**
- * Set's the Widget container's visibility to 'hidden'
+ * Sets the Widget container's visibility to 'hidden'.
  */
 function MenuWidget_hide() {
   var node = document.getElementById(this.element_id);
@@ -192,7 +219,7 @@ function MenuWidget_setCallback(callback) {
 /**
  * Sets the selected Option to match the incoming value
  * @param {string} value Option value to match
- * @throw TODO:  throw exception if value is not found
+ * @throws 'Error: MenuWidgetSetValue: value [...] does not match any options.'
  */
 function MenuWidget_setValue(value) {
   var no_match = 1;
@@ -200,7 +227,7 @@ function MenuWidget_setValue(value) {
     if ( this.Select.options[i].value == value ) {
       this.Select.selectedIndex = i;
       this.selectedIndex = i;
-      found_match = 0;
+      no_match = 0;
     }
   }
 
@@ -212,7 +239,7 @@ function MenuWidget_setValue(value) {
 /**
  * Sets the selected Option.
  * @param {int} index index into the Options array [0 <= index <= N]
- * @throws {string} throws exception if index is outside of Options array
+ * @throws 'ERROR:  MenuWidgetsetValueByIndex: index [...] does not match any options.'
  */
 function MenuWidget_setValueByIndex(index) {
   if (index < 0 || index >= this.Select.length) {
@@ -230,7 +257,9 @@ function MenuWidget_setValueByIndex(index) {
 ////////////////////////////////////////////////////////////////////////////////
 
 /**
- * Process the event and call the user specified callback.
+ * @private
+ * Event handler that calls the user specified callback function
+ * if one has been defined.
  * @param e event
  */
 function MenuWidget_selectChange(e) {

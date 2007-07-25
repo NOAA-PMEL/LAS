@@ -22,7 +22,7 @@
  * TODO:  Mention 'unobtrusive' javascript.
  *
  * @author Jonathan Callahan
- * @version $Revision: 1252 $
+ * @version $Revision: 1137 $
  */
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -61,6 +61,7 @@ function DateWidget(lo,hi,deltaMinutes,offsetMinutes,add_sub_1,add_sub_2) {
   this.show = DateWidget_show;
   this.hide = DateWidget_hide;
   this.getValue = DateWidget_getValue;
+  this.setValue = DateWidget_setValue;
 
   // Public methods
 
@@ -702,6 +703,21 @@ function DateWidget_getValue() {
     result = result + "," + this.getDate2_Ferret();
   }
   return result;
+}
+
+/** 
+ * Sets the value of the DateWidget.
+ * @param {string} Date string
+ * @param {int} index [1 | 2] identifying which Date to set (optional)
+ * @return {string} Date1 and Date2 strings (separated by a comma) for use in an LASRequest
+ */
+function DateWidget_setValue(value,index) {
+  var index = index ? index : 1;
+  if (index == 1) {
+    this.setDate1(value);
+  } else {
+    this.setDate2(value);
+  }
 }
 
 /**
