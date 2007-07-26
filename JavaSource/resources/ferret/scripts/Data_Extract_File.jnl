@@ -5,4 +5,7 @@
 ! Extracting to a netCDF file and some text and table files have different
 ! options in the UI.  Need to separate them at this level to keep the UI
 ! happy.  All the Data_Extract* scripts launch the same list_data.jnl script.
+!
+! This will have a ferret_format symbol defined from a UI option with the value set to
+! one of "tsv" "csv" "asc".
 GO list_data
