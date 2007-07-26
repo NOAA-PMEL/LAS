@@ -119,8 +119,17 @@
         </operation>
     </operation>
 
-    <operation name="1D Plot comparison" ID="Plot_1D_SlideSorter" output_template="SlideSorter" service_action="" order="0801">
-      <service>template</service>
+    <operation name="1D Plot Slide Sorter" ID="Plot_1D_SlideSorter" output_template="SlideSorter" service_action="" order="0801">
+          <service>template</service>
+          <region>
+            <intervals name="x" />
+            <intervals name="y" />
+            <intervals name="z" />
+            <intervals name="t" />
+          </region>
+          <grid_types>
+            <grid_type name="regular" />
+          </grid_types>
     </operation>
 
     <operation name="1D Plot" ID="Plot_1D" output_template="output" service_action="Plot_1D" order="0102">
@@ -145,8 +154,14 @@
           <optiondef IDREF="Options_1D"/>
     </operation>
 
-    <operation name="2D Plot in XY comparison" ID="Plot_2D_XY_SlideSorter" output_template="SlideSorter" service_action="">
-      <service>template</service>
+    <operation name="2D Plot in XY Slide Sorter" ID="Plot_2D_XY_SlideSorter" output_template="SlideSorter" service_action="">
+        <service>template</service>
+        <region>
+            <intervals name="xy" />
+        </region>
+        <grid_types>
+            <grid_type name="regular" />
+        </grid_types>
     </operation>
 
     <operation name="2D Plot in XY" ID="Plot_2D_XY"
@@ -399,8 +414,19 @@
         </grid_types>
     </operation>
 
-    <operation name="2D Plot comparison" ID="Plot_2D_SlideSorter" output_template="SlideSorter" service_action="">
-      <service>template</service>
+    <operation name="2D Plot Slide Sorter" ID="Plot_2D_SlideSorter" output_template="SlideSorter" service_action="">
+        <service>template</service>
+        <region>
+            <!--  xy has its own operation -->
+            <intervals name="xz" />
+            <intervals name="xt" />
+            <intervals name="yz" />
+            <intervals name="yt" />
+            <intervals name="zt" />
+        </region>
+        <grid_types>
+            <grid_type name="regular" />
+        </grid_types>
     </operation>
 
     <operation name="2D Plot" ID="Plot_2D" output_template="output"
@@ -1025,7 +1051,7 @@
 
 
 <!-- Begin: interactive 2d XY plot additions -->
-    <operation name="2D Plot in XY" ID="XY_2D_zoom" output_template="newImageInfo" service_action="Plot_2D_XY">
+    <operation name="2D Plot in XY" ID="XY_2D_zoom" output_template="newImageInfo" service_action="Plot_2D_XY" private="true">
           <service>ferret</service>
           <response ID="PlotResp">
              <result type="image" ID="plot_image" streamable="true" mime_type="image/png"/>
@@ -1035,6 +1061,13 @@
              <result type="debug" ID="debug"/>
              <result type="cancel" ID="cancel"/>
           </response>
+          <region>
+             <intervals name="xy" />
+          </region>
+          <grid_types>
+             <grid_type name="regular"/>
+          </grid_types>
+
     </operation>
     <operation name="2D XY Zoom" ID="XY_zoomable_image" output_template="zoom_2D_XY" service_action="Plot_2D_XY">
           <service>ferret</service>
@@ -1046,6 +1079,12 @@
              <result type="debug" ID="debug"/>
              <result type="cancel" ID="cancel"/>
           </response>
+          <region>
+             <intervals name="xy" />
+          </region>
+          <grid_types>
+             <grid_type name="regular"/>
+          </grid_types>
     </operation>
 
 <!-- End: interactive 2d XY plot additions -->
