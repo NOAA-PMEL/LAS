@@ -1512,6 +1512,9 @@ MapWidget.prototype.recenterOnDataBBox = function (bbox) {
 	
  	//update the data grid coords		
 	this.setSelectionGridBBox(bbox);
+	this.displayBox(true);
+	this.displayCentralBox(true);
+	
 	
 	if (this.ondraw) this.ondraw(this);	
 	if (this.onafterdraw) this.onafterdraw(this);
@@ -1615,42 +1618,42 @@ MapWidget.prototype.panPlot = function (dx,dy) {
    	this.extents.data.grid.x.min+=dx;
    	this.extents.data.grid.x.max+=dx;
 	}  
-	this.plot.onload = function (evt) { 	
-	this.setDataGridBBox(this.extents.data.grid);
-	this.setSelectionGridBBox(this.extents.selection.grid);
+	this.plot.onload = function (evt) { 		
+		this.setDataGridBBox(this.extents.data.grid);
+		this.setSelectionGridBBox(this.extents.selection.grid);
 	
-	var r_w = this.getBoxWidth(this.rubberBand);
-   var r_h = this.getBoxHeight(this.rubberBand);
-   var m_x = (this.getSelectionPixXMin()+this.getSelectionPixXMax())/2;
-   var m_y = (this.getSelectionPixYMin()+this.getSelectionPixYMax())/2;
+		var r_w = this.getBoxWidth(this.rubberBand);
+   	var r_h = this.getBoxHeight(this.rubberBand);
+   	var m_x = (this.getSelectionPixXMin()+this.getSelectionPixXMax())/2;
+   	var m_y = (this.getSelectionPixYMin()+this.getSelectionPixYMax())/2;
    
-   //This is needed for the FireFox
-   r_w = isNaN(r_w)? 0 : r_w;
-   r_h = isNaN(r_h)? 0 : r_h;   
+   	//This is needed for the FireFox
+  		r_w = isNaN(r_w)? 0 : r_w;
+	   r_h = isNaN(r_h)? 0 : r_h;   
 
-   //moving the box
-   m_x0 = m_x - r_w/2;
-   if (m_x - r_w/2 < this.getDataPixXMin())   
-  	  m_x0 = this.getDataPixXMin();
-   else if (m_x + r_w/2 > this.getDataPixXMax()) 
-	m_x0 =this.getDataPixXMax() - r_w;
-   
-   
-   m_y0 = m_y - r_h/2;
-   if (m_y - r_h/2 < this.getDataPixYMin())
-     m_y0 =  this.getDataPixYMin();
-   else if (m_y + r_h/2 > this.getDataPixYMax()) 		m_y0 = this.getDataPixYMax() - r_h;
-   
-   this.Y0 = m_y0;
-   this.Y1 = m_y0 + r_h;
-	this.X0 = m_x0;
-   this.X1 = m_x0 + r_w;
-   
-   this.displayBox(true);
-   this.displayCentralBox(true);
+   	//moving the box
+  	 	m_x0 = m_x - r_w/2;
+  	 	if (m_x - r_w/2 < this.getDataPixXMin())   
+  	  		m_x0 = this.getDataPixXMin();
+  		else if (m_x + r_w/2 > this.getDataPixXMax()) 
+			m_x0 =this.getDataPixXMax() - r_w;
+  			m_y0 = m_y - r_h/2;
+   	if (m_y - r_h/2 < this.getDataPixYMin())
+    		m_y0 =  this.getDataPixYMin();
+  		else if (m_y + r_h/2 > this.getDataPixYMax()) 			m_y0 = this.getDataPixYMax() - r_h;
 
-	if (this.ondraw) this.ondraw(this);	
-	if (this.onafterdraw) this.onafterdraw(this);
+		this.Y0 = m_y0;
+  		this.Y1 = m_y0 + r_h;
+		this.X0 = m_x0;
+  		this.X1 = m_x0 + r_w;
+   
+  		if (this.enabled) {
+ 	 		this.displayBox(true);
+  		 	this.displayCentralBox(true);
+		
+			if (this.ondraw) this.ondraw(this);	
+			if (this.onafterdraw) this.onafterdraw(this);
+		}
 	}.bindAsEventListener(this);
 	this.plot.src = "ProductServer.do?xml=" + escape(req.getXMLText()) + "&stream=true&stream_ID=plot_image";
  
