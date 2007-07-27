@@ -24,7 +24,7 @@ if ( !Function.prototype.bindAsEventListener ) {
 		this.img = null;
 	if(args.plot_area)
 		this.plot_area = args.plot_area;
-	else
+	else 
 		this.plot_area = {};	
 						
    if(!this.plot_area.offX)
@@ -1497,10 +1497,11 @@ MapWidget.prototype.recenterOnDataBBox = function (bbox) {
 	
    var req = new LASRequest();
 	
+	req.removeVariables();
+	req.removeRegion();
 	req.setOperation("xy_map");
 	req.setRange("x",this.getPlotGridXMin(),this.getPlotGridXMax());
 	req.setRange("y",this.getPlotGridYMin(),this.getPlotGridYMax());
-	req.setProperty("ferret","view","xy");
 	this.plot.src = "ProductServer.do?xml=" + escape(req.getXMLText()) + "&stream=true&stream_ID=plot_image";
    
 
@@ -1598,23 +1599,26 @@ MapWidget.prototype.panPlot = function (dx,dy) {
 		return false;
 
 
-	//reset the plot grid coords
+	//reset the plot grid coord
 	this.setPlotGridXMin(this.getPlotGridXMin() + dx);
 	this.setPlotGridXMax(this.getPlotGridXMax() + dx);
 	
    var req = new LASRequest();
 	
+
+	req.removeVariables();
+	req.removeRegion();
 	req.setOperation("xy_map");
 	req.setRange("x",this.getPlotGridXMin(),this.getPlotGridXMax());
 	req.setRange("y",this.getPlotGridYMin(),this.getPlotGridYMax());
-	req.setProperty("ferret","view","xy");
-	this.plot.src = "ProductServer.do?xml=" + escape(req.getXMLText()) + "&stream=true&stream_ID=plot_image";
-   if((this.getDataGridXMax()-this.getDataGridXMin())>355) {
+	  if((this.getDataGridXMax()-this.getDataGridXMin())>355) {
    	this.extents.data.grid.x.min+=dx;
    	this.extents.data.grid.x.max+=dx;
-	}   	
+	}  
+	this.plot.onload = function (evt) { 	
 	this.setDataGridBBox(this.extents.data.grid);
 	this.setSelectionGridBBox(this.extents.selection.grid);
+	
 	var r_w = this.getBoxWidth(this.rubberBand);
    var r_h = this.getBoxHeight(this.rubberBand);
    var m_x = (this.getSelectionPixXMin()+this.getSelectionPixXMax())/2;
@@ -1647,6 +1651,8 @@ MapWidget.prototype.panPlot = function (dx,dy) {
 
 	if (this.ondraw) this.ondraw(this);	
 	if (this.onafterdraw) this.onafterdraw(this);
-
+	}.bindAsEventListener(this);
+	this.plot.src = "ProductServer.do?xml=" + escape(req.getXMLText()) + "&stream=true&stream_ID=plot_image";
+ 
 }
 
