@@ -33,7 +33,7 @@ ENDIF
 
 SET LIST/FILE="($result_ferret_listing_filename)"
 
-LET xmlhead = "<?xml version='1.0'?>"
+LET xmlhead = "<?xml version='1.0' encoding='UTF-8'?>"
 define variable len = STRLEN(xmlhead)
 define symbol fmt = A`len`
 list/nohead/format=(($fmt))/FILE/append xmlhead
@@ -141,7 +141,7 @@ ELIF `strcmp("($time_units)", "3600") EQ 0` THEN
 
 ELIF `strcmp("($time_units)", "86400") EQ 0` THEN
     !====>output time units
-    LET f = "<units>days<</units>"
+    LET f = "<units>days</units>"
     list/norowhead/nohead/format=(A19)/FILE/append f
 
     LET f = "<frames>"
