@@ -246,6 +246,8 @@ public class KMLTool extends TemplateTool  {
         LASDocument gridList = new LASDocument();
         String dsID="";
         String varID="";
+        String gridLon="";
+        String gridLat="";
 
         //read in the lat/lon of each grid point and create a placemark for it
         File gridListFile = new File(ferret_listing_file);
@@ -304,9 +306,9 @@ public class KMLTool extends TemplateTool  {
             while(itr.hasNext()) {
                 Element pointElement = (Element)itr.next();
                 Element lonElement = pointElement.getChild("lon");
-                String gridLon = lonElement.getText();
+                gridLon = lonElement.getText();
                 Element latElement = pointElement.getChild("lat");
-                String gridLat = latElement.getText();
+                gridLat = latElement.getText();
                 GEPlacemark pl = new GEPlacemark(gridLat,gridLon,initLASReq,lasBackendRequest,baseURL);
                 allPlacemarks.add(pl);
             } 
@@ -315,9 +317,13 @@ public class KMLTool extends TemplateTool  {
             log.info("error while reading grid points: " + e.toString());
         }
     
-
         context.put("dsID",dsID);
         context.put("varID",varID);
+
+        //for creating the <LookAt> tag in KML
+        context.put("gridLon",checkLon(gridLon));
+        context.put("gridLat",gridLat);
+
         context.put("allPlacemarks", allPlacemarks);
 
         PrintWriter kmlWriter = null;
@@ -333,4 +339,33 @@ public class KMLTool extends TemplateTool  {
 
         return lasBackendResponse;
     }
+
+    /**
+     * check longitude and convert it to be in [-180,180]
+     */
+    private String checkLon(String point_lon){
+        double glon = Double.parseDouble(point_lon);
+        if(glon > 180.0){
+            double glon360 = glon % 360.0;
+            //west
+            if(glon360 > 180.0){
+                point_lon = Double.toString(glon360-360.0);
+            //east
+            }else{
+                point_lon = Double.toString(glon360);
+            }
+        }
+        if(glon < -180.0){
+            double glon360 = glon % 360.0;
+            //east
+            if(glon360 < -180.0){
+                point_lon = Double.toString(glon360+360.0);
+            //west
+            }else{
+                point_lon = Double.toString(glon360);
+            }
+        }
+        return point_lon;
+    }
+
 }
