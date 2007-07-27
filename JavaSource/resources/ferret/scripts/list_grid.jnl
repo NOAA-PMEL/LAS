@@ -58,6 +58,11 @@ LET llat_list = XSEQUENCE(llat*mask)
 
 LET ngood = llon_list[x=@ngd]
 
+LET xml = "<?xml version='1.0' encoding='UTF-8'?>"
+define variable len = STRLEN(xml)
+define symbol fmt = A`len`
+list/norowhead/nohead/format=(($fmt))/FILE/append xml
+
 !root of the xml file
 LET f = "<grids>"
 list/norowhead/nohead/format=(A7)/FILE/append f
