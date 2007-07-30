@@ -408,14 +408,20 @@ MapWidget.prototype.setView = function (view) {
 										
  					break;
   			}
+  			
+  			this.setSelectionPixXMin(this.X0);
+  			this.setSelectionPixXMax(this.X1);
+  			this.setSelectionPixYMin(this.Y0);
+  			this.setSelectionPixYMax(this.Y1);
+  			this.getSelectionGrid();  			
   			if(this.rubberBand.style.visibility != "hidden") {
 	  			
   				this.displayBox(true);
   				this.displayCentralBox(true);
   			}
-
+			
   	 		 if(this.ondraw && this.rubberBand.style.visibilty != 'hidden') this.ondraw(this);	this.last.X0 = this.X0;
-  					
+  			
 	 
   		}
   	  this.view = view;
