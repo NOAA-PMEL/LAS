@@ -77,8 +77,10 @@
 		if(this.qs.params.opid) 
 			this.state.operation = this.qs.params.opid;
 		
-		//if(this.qs.params.autoupdate) 
-		//	this.autoupdate = true;
+		if(this.qs.params.dsid&&this.qs.params.varid) 
+			this.submitOnLoad = true;
+		else
+			this.submitOnLoad = false;
 	
 	}
 											
@@ -117,12 +119,7 @@
 									{"title" : "Output Types", "isFolder" : "true", "id" : "operations"},
 									{"title" : "Output Options", "isFolder" : "true", "id" : "options"}
 								];
-		//var _treeNode = dojo.widget.createWidget("TreeNode");
-		//var a = document.createElement("A");
-		//a.onclick = this.makeRequest.bindAsEventListener(this);
-		//a.innerHTML = "Make Request";
-		//_treeNode.titleNode.appendChild(a);
-		//_tree.addChild(_treeNode);
+
 		for(var i=0;i<_rootNodes.length;i++) {
 			var _treeNode = dojo.widget.createWidget("TreeNode");
 			for(var s in _rootNodes[i]) 
@@ -130,8 +127,7 @@
 			
 			// keep a references to the root tree nodes so we can easily grab them later
 			eval("this.refs." + _rootNodes[i].id + "={'DojoNode' : _treeNode};");
-			//if(_rootNodes[i].id!="categories")
-				_treeNode.onTreeClick = this.collapseRootNodes.bindAsEventListener(this,  _rootNodes[i].id);
+			_treeNode.onTreeClick = this.collapseRootNodes.bindAsEventListener(this,  _rootNodes[i].id);
 			_tree.addChild(_treeNode); 
 		}
 	
@@ -511,8 +507,8 @@
 		}
 		
 		
-		document.getElementById("Date").style.innerHTML = "<br><br>";
-		document.getElementById("Depth").style.innerHTML = "<br><br>";
+		document.getElementById("Date").innerHTML = "<br><br>";
+		document.getElementById("Depth").innerHTML = "<br><br>";
 		
 		for(var d=0;d<this.state.view.length;d++) 
 			eval("this.init" + this.state.view[d].toUpperCase() + "Constraint('range')");
@@ -860,8 +856,11 @@
 			}
 		}
 
-		if(this.autoupdate)
+		if(this.autoupdate || this.submitOnLoad)
 			this.makeRequest();
+		
+		this.submitOnLoad = false;
+
 		//if(!this.refs.options.DojoNode.isExpanded) this.refs.options.DojoNode.expand();
 	}
 	LASUI.prototype.setOptionDojoNode = function (id) {
