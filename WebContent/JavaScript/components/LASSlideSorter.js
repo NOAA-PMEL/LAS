@@ -548,7 +548,7 @@ function LASSlideSorter_createGlobalWidgets() {
             var months = {jan:'01',feb:'02',mar:'03',apr:'04',may:'05',jun:'06',jul:'07',aug:'08',sep:'09',oct:'10',nov:'11',dec:'12'};
             var dateTime = String(Menu.initial_value).split(' ');
             var YMD = String(dateTime[0]).split('-');  
-            var HMS = String(dateTime[1]).split(':');
+            var HMS = dateTime[1];
             var mon = String(YMD[1].toLowerCase());
             var MM = months[mon];
             var YMDHMS = YMD[2] + '-' + MM + '-' + YMD[0];
@@ -622,7 +622,7 @@ function LASSlideSorter_createCellWidgets(chosenMenuName) {
             var months = {jan:'01',feb:'02',mar:'03',apr:'04',may:'05',jun:'06',jul:'07',aug:'08',sep:'09',oct:'10',nov:'11',dec:'12'};
             var dateTime = String(Menu.initial_value).split(' ');
             var YMD = String(dateTime[0]).split('-');  
-            var HMS = String(dateTime[1]).split(':');
+            var HMS = dateTime[1];
             var mon = String(YMD[1].toLowerCase());
             var MM = months[mon];
             var YMDHMS = YMD[2] + '-' + MM + '-' + YMD[0];
