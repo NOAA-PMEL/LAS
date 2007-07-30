@@ -64,8 +64,22 @@
 		 					}
 							
 		this.request = new LASRequest();
-		this.qs = new Querystring();	
+		this.qs = new Querystring();
 		
+		if(this.qs.params.dsid) {
+			this.state.dataset = this.qs.params.dsid;
+			if(this.qs.params.varid)
+				this.state.variables[this.qs.params.dsid] = this.qs.params.varid.split(",");
+		}
+		if(this.qs.params.view) 
+			this.state.view = this.qs.params.view;
+		
+		if(this.qs.params.opid) 
+			this.state.operation = this.qs.params.opid;
+		
+		//if(this.qs.params.autoupdate) 
+		//	this.autoupdate = true;
+	
 	}
 											
 	LASUI.prototype.initUI = function ()
@@ -186,6 +200,8 @@
 		node.DojoNode.addChild(node.children[i].DojoNode);
 		
 		if(!node.DojoNode.isExpanded) node.DojoNode.expand();
+		if(node.category.getChildType(i)=='dataset' && node.category.getChildID(i)==this.state.dataset) 
+			this.getCategory(node, i);
 		
 	}
 	LASUI.prototype.createVariableTreeNode = function (node, i) {
@@ -205,11 +221,46 @@
 		checkbox.id = node.category.getChildName(i);
 		node.children[i].DojoNode.titleNode.appendChild(checkbox);
 		node.children[i].DojoNode.titleNode.appendChild(title);	
+		
+		if(this.state.variables && this.state.dataset)
+			if(this.state.variables[this.state.dataset])
+				for(var v=0;v<this.state.variables[this.state.dataset].length;v++)
+					if(this.state.variables[this.state.dataset][v]==node.category.getChildID(i))
+				  { 
+					this.setVariable({}, node, i, true);
+					checkbox.checked=true;
+				}
+
 		node.DojoNode.addChild(node.children[i].DojoNode);
 		if(!node.DojoNode.isExpanded) node.DojoNode.expand();
+	
+
 		
 	}
 	
+	LASUI.prototype.getCategory = function (parentNode, i) {
+		if(!parentNode.children[i].category) {
+			var _bindArgs = {	
+					url: this.hrefs.getCategories.url + "?catid=" + parentNode.category.getChildID(i),
+					mimetype: "text/plain",
+					error: function(type,error) {alert(error.type + ' ' + error.message);},
+									load:	dojo.lang.hitch(this, (function(type,data,event) {this.setCategoryTreeNode(data, parentNode.children[i], parentNode.category.getChildID(i)); }))
+							};
+			var _request = dojo.io.bind(_bindArgs);
+		} 
+		if(!parentNode.children[i].DojoNode.isExpanded) {
+			for(var c=0;c< parentNode.children.length;c++)
+				parentNode.children[c].DojoNode.collapse();
+			parentNode.children[i].DojoNode.expand();	//expand the category if it has been selected 
+			if(parentNode.children[i].category) //if the category is a dataset set it as the selected dataset
+				if(parentNode.children[i].category.getCategoryType()=="dataset"){
+						this.setDataset(parentNode.category.getChildID(i));
+				}
+		} else
+			parentNode.children[i].DojoNode.collapse();
+			
+			
+	}
 	LASUI.prototype.selectCategory = function (evt) {
 		var args = $A(arguments);
 		var parentNode = args[1];
@@ -242,12 +293,13 @@
 		var args = $A(arguments)
 		var dataset = args[1];
 		var i = args[2];
-		if(evt.target) 
-			var loadVariable = evt.target.checked;
-		else if (evt.srcElement)
-			var loadVariable = evt.srcElement.checked;
-		else if(args.length>3)
-			var loadVariable = args[3];
+
+			if(evt.target) 
+				var loadVariable = evt.target.checked;
+			else if (evt.srcElement)
+				var loadVariable = evt.srcElement.checked;
+			else if(args.length>3)
+				var loadVariable = args[3];
 			
 		var datasetID = dataset.category.getDatasetID();
 		var variableID = dataset.category.getChildID(i);
@@ -317,7 +369,8 @@
 		if(this.refs.operations.operations.getOperationByID(id).optiondef)
 			this.getOptions(this.refs.operations.operations.getOperationByID(id).optiondef.IDREF);	
 		else if (this.refs.operations.operations.getOperationByID(id).optionsdef)
-			this.getOptions(this.refs.operations.operations.getOperationByID(id).optionsdef.IDREF);	
+			this.getOptions(this.refs.operations.operations.getOperationByID(id).optionsdef.IDREF);
+	
 	}
 		
 	/*
@@ -727,9 +780,10 @@
 							this.request.addRange('t',this.refs.DW.getDate1_Ferret());
 					break;
 				case 'z' :
-					if(this.refs.DepthSelect.length>1) 
+					if(this.refs.DepthSelect)
+						if(this.refs.DepthSelect.length>1) 
 							this.request.addRange('z',this.refs.DepthSelect[0].value,this.refs.DepthSelect[1].value); 
-					else
+						else
 							this.request.addRange('z',this.refs.DepthSelect[0].value); 
 					break;
 			} 
@@ -745,6 +799,27 @@
 		else
 			window.open(this.hrefs.getProduct.url + '?xml=' +  escape(this.request.getXMLText()));
 		
+		if(this.qs.params.debug){
+		
+			var req_text = document.createElement("TEXTAREA");
+			req_text.cols = 80;
+			req_text.rows = 10;
+			req_text.value= this.request.getXMLText();
+			var req_submit = document.createElement("INPUT");
+			req_submit.type = "submit";
+			req_submit.value = "Submit debug request";
+			req_submit.onclick  = function (evt) {
+				var args = $A(arguments);
+				var req_text = args[1];
+				document.getElementById('output').src = (this.hrefs.getProduct.url + '?xml=' + escape(req_text.value));
+			}.bindAsEventListener(this,req_text);
+			
+			document.getElementById("debug").innerHTML="";
+			document.getElementById("debug").appendChild(req_text);
+			document.getElementById("debug").appendChild(document.createElement("BR"));			
+			document.getElementById("debug").appendChild(req_submit);
+			document.getElementById("debug").style.display ="";
+		}
 	}
 	
 	
@@ -785,7 +860,8 @@
 			}
 		}
 
-
+		if(this.autoupdate)
+			this.makeRequest();
 		//if(!this.refs.options.DojoNode.isExpanded) this.refs.options.DojoNode.expand();
 	}
 	LASUI.prototype.setOptionDojoNode = function (id) {

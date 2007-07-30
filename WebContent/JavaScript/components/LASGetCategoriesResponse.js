@@ -16,6 +16,7 @@ function LASGetCategoriesResponse(JSONObject) {
   this.getChild = LASGetCategoriesResponse_getChild;  //return a child of this category (pass index # < getCategorySize)	
   this.getChildrenType = LASGetCategoriesResponse_getChildrenType;  //what kind of children does the category have (dataset, variable, or category)?
   this.getChildID =  LASGetCategoriesResponse_getChildID;  //the ID of the child
+  this.getChildType =  LASGetCategoriesResponse_getChildType;  //the type of the child
   this.getChildChildrenType = LASGetCategoriesResponse_getChildChildrenType;  //what kind of children (dataset, variable, or category)?
   this.getChildName = LASGetCategoriesResponse_getChildName;  //what is the name of this child category?
 }
@@ -99,6 +100,18 @@ function LASGetCategoriesResponse_getChildrenType(i) {
    switch(this.getCategoryType()) {
    	case "category": return "categories"; break;
    	case "dataset": return "variables"; break;
+   	default: return false;
+   }
+}
+/**
+ * Returns the type of children this category has
+ * @return string "dataset", "category", or "variable"
+ * @type string
+ */
+function LASGetCategoriesResponse_getChildType(i) {
+   switch(this.getChildChildrenType(i)) {
+   	case "variables": return "dataset"; break;
+   	case "categories": return "category"; break;
    	default: return false;
    }
 }
