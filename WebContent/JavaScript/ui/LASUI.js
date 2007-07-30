@@ -210,11 +210,12 @@
 		var title = document.createElement("TEXT");
 		title.innerHTML = node.category.getChildName(i);
 		var checkbox = document.createElement("INPUT");
-		checkbox.type="checkbox";
+		checkbox.type="radio";
+		checkbox.name=node.category.getDatasetID();
 		checkbox.onclick=this.setVariable.bindAsEventListener(this, node, i);
 //		node.DojoNode.onTreeClick = function(){if(this.isExpanded) this.collapse(); else this.expand();};
-		checkbox.name = node.category.getChildName(i);
-		checkbox.id = node.category.getChildName(i);
+		//checkbox.name = node.category.getChildName(i);
+		checkbox.id = node.category.getChildID(i);
 		node.children[i].DojoNode.titleNode.appendChild(checkbox);
 		node.children[i].DojoNode.titleNode.appendChild(title);	
 		
@@ -314,7 +315,10 @@
 			//start an array of selected variables for this dataset if we havent already
 			if(typeof this.state.variables[datasetID] != 'object') 
 				this.state.variables[datasetID] = [];
-					
+			
+			//REMOVE TO ENABLE MULTI-VARIABLE SELCTION
+			this.state.variables[datasetID] = [];
+		
 			//if this variable has not already been selected, add it to the list for that dataset
 			this.state.variables[datasetID]=this.state.variables[datasetID].without(variableID);
 			this.state.variables[datasetID].push(variableID);
