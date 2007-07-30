@@ -634,7 +634,7 @@ public class LASConfig extends LASDocument {
         return t;
     }
     
-    public TimeAxis getTime(Element variable) throws JDOMException {
+    public TimeAxis getTime(Element variable) throws JDOMException, LASException {
         TimeAxis t = null;
         if (variable == null) {
             return t;
@@ -683,16 +683,123 @@ public class LASConfig extends LASDocument {
                     String units = axis.getAttributeValue("units");
                     double size = Double.valueOf(arange.getAttributeValue("size")).doubleValue();
                     double step = Double.valueOf(arange.getAttributeValue("step")).doubleValue();
-                    DateTimeFormatter fmt = DateTimeFormat.forPattern("yyyy-MM-dd HH").withZone(DateTimeZone.UTC);
-                    DateTimeFormatter zfmt = DateTimeFormat.forPattern("yyyy-MM-dd").withZone(DateTimeZone.UTC);
-                    DateTimeFormatter longfmt = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss").withZone(DateTimeZone.UTC);
-                    DateTime lodt;
-                    if ( tlo.length() == 10 ) {
-                        lodt = zfmt.parseDateTime(tlo);
-                    } else {
-                        lodt = fmt.parseDateTime(tlo);
+                    String time_formats[] = {
+                            "yyyy-MM-dd HH:mm:ss",
+                            "yyyy-MM-dd HH:mm",
+                            "yyyy-MM-dd HH",
+                            "yyyy-MM-dd",
+                            "yyy-MM-dd HH:mm:ss",
+                            "yyy-MM-dd HH:mm",
+                            "yyy-MM-dd HH",
+                            "yyy-MM-dd",
+                            "yy-MM-dd HH:mm:ss",
+                            "yy-MM-dd HH:mm",
+                            "yy-MM-dd HH",
+                            "yy-MM-dd",
+                            "y-MM-dd HH:mm:ss",
+                            "y-MM-dd HH:mm",
+                            "y-MM-dd HH",
+                            "y-MM-dd",
+                            "yyyy-M-dd HH:mm:ss",
+                            "yyyy-M-dd HH:mm",
+                            "yyyy-M-dd HH",
+                            "yyy-M-dd",
+                            "yyy-M-dd HH:mm:ss",
+                            "yyy-M-dd HH:mm",
+                            "yyy-M-dd HH",
+                            "yyy-M-dd",
+                            "yy-M-dd HH:mm:ss",
+                            "yy-M-dd HH:mm",
+                            "yy-M-dd HH",
+                            "yy-M-dd",
+                            "y-M-dd HH:mm:ss",
+                            "y-M-dd HH:mm",
+                            "y-M-dd HH",
+                            "y-M-dd",
+                            "yyyy-MM-d HH:mm:ss",
+                            "yyyy-MM-d HH:mm",
+                            "yyyy-MM-d HH",
+                            "yyyy-MM-d",
+                            "yyy-MM-d HH:mm:ss",
+                            "yyy-MM-d HH:mm",
+                            "yyy-MM-d HH",
+                            "yyy-MM-d",
+                            "yy-MM-d HH:mm:ss",
+                            "yy-MM-d HH:mm",
+                            "yy-MM-d HH",
+                            "yy-MM-d",
+                            "y-MM-d HH:mm:ss",
+                            "y-MM-d HH:mm",
+                            "y-MM-d HH",
+                            "y-MM-d",
+                            "yyyy-M-d HH:mm:ss",
+                            "yyyy-M-d HH:mm",
+                            "yyyy-M-d HH",
+                            "yyyy-M-d",
+                            "yyy-M-d HH:mm:ss",
+                            "yyy-M-d HH:mm",
+                            "yyy-M-d HH",
+                            "yyy-M-d",
+                            "yy-M-d HH:mm:ss",
+                            "yy-M-d HH:mm",
+                            "yy-M-d HH",
+                            "yy-M-d",
+                            "y-M-d HH:mm:ss",
+                            "y-M-d HH:mm",
+                            "y-M-d HH",
+                            "y-M-d",
+                            "dd-MMM-yyyy HH:mm:ss",
+                            "dd-MMM-yyyy HH:mm",
+                            "dd-MMM-yyyy HH",
+                            "dd-MMM-yyyy",
+                            "d-MMM-yyyy HH:mm:ss",
+                            "d-MMM-yyyy HH:mm",
+                            "d-MMM-yyyy HH",
+                            "d-MMM-yyyy",
+                            "dd-MMM-yyy HH:mm:ss",
+                            "dd-MMM-yyy HH:mm",
+                            "dd-MMM-yyy HH",
+                            "dd-MMM-yyy",
+                            "d-MMM-yyy HH:mm:ss",
+                            "d-MMM-yyy HH:mm",
+                            "d-MMM-yyy HH",
+                            "d-MMM-yyy",
+                            "dd-MMM-yy HH:mm:ss",
+                            "dd-MMM-yy HH:mm",
+                            "dd-MMM-yy HH",
+                            "dd-MMM-yy",
+                            "d-MMM-yy HH:mm:ss",
+                            "d-MMM-yy HH:mm",
+                            "d-MMM-yy HH",
+                            "d-MMM-yy",
+                            "dd-MMM-y HH:mm:ss",
+                            "dd-MMM-y HH:mm",
+                            "dd-MMM-y HH",
+                            "dd-MMM-y",
+                            "d-MMM-y HH:mm:ss",
+                            "d-MMM-y HH:mm",
+                            "d-MMM-y HH",
+                            "d-MMM-y"
+                    };
+                    DateTimeFormatter fmt = null;
+                    DateTime lodt = new DateTime("9000-01-01");
+                    boolean found = false;
+                    for (int i = 0; i < time_formats.length; i++) {
+                        fmt = DateTimeFormat.forPattern(time_formats[i]).withZone(DateTimeZone.UTC);
+                        try {
+                           lodt = fmt.parseDateTime(tlo);
+                           found = true;
+                        } catch ( IllegalArgumentException e ) {
+                            found = false;
+                        }
+                        if (found) break;
                     }
-                    t.setLo(lodt.toString(longfmt));
+                    
+                    if ( !found ) {
+                        throw new LASException("Time format for "+tlo+" could not be parsed.");
+                    }
+                    
+                    t.setLo(lodt.toString(fmt));
                     DateTime hidt = new DateTime();
                     if ( units.contains("hour") ) {
                         t.setHourNeeded(true);
@@ -703,7 +810,7 @@ public class LASConfig extends LASDocument {
                         int minuteInterval = (int) Math.round(step*60.);
                         t.setMinuteInterval(minuteInterval);                       
                         hidt = lodt.plus(Period.hours(hours));
-                        t.setHi(hidt.toString(longfmt));
+                        t.setHi(hidt.toString(fmt));
                     } else if ( units.contains("day") ) {
                         t.setHourNeeded(false);
                         t.setDayNeeded(true);
@@ -711,7 +818,7 @@ public class LASConfig extends LASDocument {
                         t.setYearNeeded(true);
                         int days = (int) Math.round((size-1)*step);
                         hidt = lodt.plus(Period.days(days));
-                        t.setHi(hidt.toString(longfmt));
+                        t.setHi(hidt.toString(fmt));
                     } else if ( units.contains("month") ) {
                         t.setHourNeeded(false);
                         t.setDayNeeded(false);
@@ -719,7 +826,7 @@ public class LASConfig extends LASDocument {
                         t.setYearNeeded(true);
                         int months = (int) Math.round((size-1)*step);
                         hidt = lodt.plus(Period.months(months));
-                        t.setHi(hidt.toString(longfmt));
+                        t.setHi(hidt.toString(fmt));
                     } else if ( units.contains("year") ) {
                         t.setHourNeeded(false);
                         t.setDayNeeded(false);
@@ -728,7 +835,7 @@ public class LASConfig extends LASDocument {
                         double start = Double.valueOf(tlo).doubleValue();
                         int years = (int) Math.round(start + (size-1)*step);
                         hidt = lodt.plus(Period.years(years));
-                        t.setHi(hidt.toString(longfmt));
+                        t.setHi(hidt.toString(fmt));
                     }
                 }
             }
@@ -738,9 +845,10 @@ public class LASConfig extends LASDocument {
     /**
      * Get time selector object the specified variable
      * @param varpath XPath to the variable 
+     * @throws LASException 
      * 
      */
-    public TimeAxis getTime(String varpath) throws JDOMException {
+    public TimeAxis getTime(String varpath) throws JDOMException, LASException {
         
         /*
          * We know this is a variable XPath.  If it's "old style" fix it.
@@ -2406,12 +2514,18 @@ public class LASConfig extends LASDocument {
             } else {
                 // This config has no "categories", just datasets and variables.  Use them.
                 Element dataset = getDatasetElement(catid);
-                Element container_dataset = (Element) dataset.clone();
+                Element container_dataset;
+                if ( dataset != null ) {
+                    container_dataset = (Element) dataset.clone();
+                } else {
+                    // send an empty one
+                    container_dataset = new Element("dataset");
+                }
                 Element category = new Element("category");
                 category.addContent(container_dataset);
                 categories.add(new Category(category));
-            }           
-        }
+            }
+        }           
         return categories;
     }
     
