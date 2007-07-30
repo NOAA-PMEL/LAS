@@ -653,7 +653,7 @@
 	*/
 	LASUI.prototype.initTConstraint = function (mode) {
 		
-		document.getElementById("Date").style.innerHTML="<br><br>";
+		document.getElementById("Date").innerHTML="<br><br>";
 		switch(this.state.grid.getDisplayType('t')) {
 			case "widget":	
 				switch(mode) {
@@ -661,7 +661,7 @@
 						document.getElementById("Date").style.display="";
 						this.refs.DW = new DateWidget(this.state.grid.getLo('t'),this.state.grid.getHi('t')); 
 						this.refs.DW.render("Date","MDY","MDY");
-						document.getElementById("Date").firstChild.align="center";parentNode.children[i].
+						document.getElementById("Date").firstChild.align="center";
 						document.getElementById("Date").style.display="";
 						
 						var label = document.createElement('strong');
@@ -768,7 +768,7 @@
 					 	this.request.addRange('y',this.refs.XYSelect.extents.selection.grid.y.min,this.refs.XYSelect.extents.selection.grid.y.max); 
 					break;
 				case 't' : 
-					if(this.refs.DW.length>1) 
+					if(this.state.view.indexOf('t')>=0) 
 						if(this.state.grid.hasMenu('t'))
 							this.request.addRange('t',this.refs.DW[0].value,this.refs.DW[1].value); 
 						else
