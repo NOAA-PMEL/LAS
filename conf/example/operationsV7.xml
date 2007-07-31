@@ -1085,6 +1085,7 @@
           <grid_types>
              <grid_type name="regular"/>
           </grid_types>
+         <optiondef IDREF="Options_2D_image_contour_xy"/>
     </operation>
 
 <!-- End: interactive 2d XY plot additions -->
