@@ -703,7 +703,7 @@ public class LASConfig extends LASDocument {
                             "yyyy-M-dd HH:mm:ss",
                             "yyyy-M-dd HH:mm",
                             "yyyy-M-dd HH",
-                            "yyy-M-dd",
+                            "yyyy-M-dd",
                             "yyy-M-dd HH:mm:ss",
                             "yyy-M-dd HH:mm",
                             "yyy-M-dd HH",
