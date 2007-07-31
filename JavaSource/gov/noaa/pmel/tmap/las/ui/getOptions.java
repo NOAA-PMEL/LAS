@@ -77,7 +77,7 @@ public class getOptions extends Action {
                 respout.print(Util.toXML(options, "options"));
             } else {
                 response.setContentType("application/json");
-                JSONObject json_response = toJSON(options, "options");
+                JSONObject json_response = Util.toJSONarray(options, "options");
                 log.debug(json_response.toString(3));
                 json_response.write(respout);      
             }
