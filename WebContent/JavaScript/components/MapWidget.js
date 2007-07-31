@@ -154,12 +154,11 @@ if ( !Function.prototype.bindAsEventListener ) {
 	this.rubberBand_c.style.backgroundColor = "red";
 	this.rubberBand.appendChild(this.rubberBand_c);
 	document.body.appendChild(this.rubberBand);
-   
+ 
   	window.onbeforeresize = this.onbeforeresize.bindAsEventListener(this);
    window.onresize = this.onafterresize.bindAsEventListener(this);
   
    this.initImage();
-   
 	this.setMaxDrawingArea();
 	this.enable();
 	
@@ -190,24 +189,17 @@ MapWidget.prototype.disable = function() {
 }
 
 MapWidget.prototype.destroy = function() {
-	
+
 	if (this.rubberBand_c) {
 		this.rubberBand_c.parentNode.removeChild(this.rubberBand_c);
-		delete this.rubberBand_c;
+		//delete this.rubberBand_c;
 	}
 	if (this.rubberBand) {
 		this.rubberBand.parentNode.removeChild(this.rubberBand);
-		delete this.rubberBand;
+		//delete this.rubberBand;
 	}
-	if (this.plot){
-		this.plot.parentNode.removeChild(this.plot);
-		delete this.plot;
-	}
-	//for(child in this.DOMNode.childNodes)
-	//	this.DOMNode.removeChild(child);
-	if(this.DOMNode.offsets)
-		delete this.DOMNode.offsets;
-			
+
+	this.DOMNode.innerHTML = "";			
 	this.DOMNode.onmousedown = null;
 	this.DOMNode.onmouseup = null;
 	this.DOMNode.onmousemove = null;
@@ -329,7 +321,7 @@ MapWidget.prototype.getView = function () {
 
 //sets a new view, and remembers a little about the last one
 MapWidget.prototype.setView = function (view) {
- 	if(this.view!=view && this.rubberBand && this.rubberBand_c)
+ 	 	if(this.view!=view && this.rubberBand && this.rubberBand_c)
   	{	
   		if (!this.last)
   			this.last = {};
@@ -414,15 +406,15 @@ MapWidget.prototype.setView = function (view) {
   			this.setSelectionPixYMin(this.Y0);
   			this.setSelectionPixYMax(this.Y1);
   			this.getSelectionGrid();  			
+  			
   			if(this.rubberBand.style.visibility != "hidden") {
 	  			
   				this.displayBox(true);
   				this.displayCentralBox(true);
   			}
-			
-  	 		 if(this.ondraw && this.rubberBand.style.visibilty != 'hidden') this.ondraw(this);	this.last.X0 = this.X0;
-  			
-	 
+		
+  	 		 if(this.ondraw && this.rubberBand.style.visibility != 'hidden') 
+  	 		 	this.ondraw(this);		 
   		}
   	  this.view = view;
 }
@@ -1176,7 +1168,6 @@ MapWidget.prototype.stop = function (evt) {
 
 // initialize an image, or grab a default inmage from ferret
 MapWidget.prototype.initImage = function () {
-	
 	this.plot = document.createElement("IMG");
 	if (this.img) {
 		this.plot.src = this.img.src;
@@ -1480,7 +1471,7 @@ MapWidget.prototype.setSelectionGridBBox = function (bbox) {
 	//var view = this.view;	
 	//this.view = "";
 	//this.setView(view);
-	
+	if (this.rubberBand.style)
 	if (this.rubberBand.style.visibility != 'hidden') {
 		this.displayBox(true);
 		this.displayCentralBox(true);
@@ -1555,23 +1546,26 @@ MapWidget.prototype.showDataMask = function () {
 		this.drawingMask.style.position = 'absolute';
 		this.DOMNode.appendChild(this.drawingMask);	
 	}
-	if(Math.round(this.getDataPixYMin()-this.getPlotPixYMin())>0)		
+	if(Math.round(this.getDataPixYMin()-this.getPlotPixYMin())>1)		
 		this.drawingMask.style.borderTop = Math.round(this.getDataPixYMin()-this.getPlotPixYMin()) + "px solid grey";
 	else
-		this.drawingMask.style.borderTop = "0pt";
-	if(Math.round(this.getDataPixXMin()-this.getPlotPixXMin())>0)
+		this.drawingMask.style.borderTop = "0px";
+	if(Math.round(this.getDataPixXMin()-this.getPlotPixXMin())>1)
 		this.drawingMask.style.borderLeft = Math.round(this.getDataPixXMin()-this.getPlotPixXMin()) + "px solid grey";
 	else
 		this.drawingMask.style.borderLeft = "0pt";
-	if(Math.round(this.getPlotPixXMax()-this.getDataPixXMax())>0)
+	if(Math.round(this.getPlotPixXMax()-this.getDataPixXMax())>1)
 		this.drawingMask.style.borderRight = Math.round(this.getPlotPixXMax()-this.getDataPixXMax()) + "px solid grey";
 	else
-		this.drawingMask.style.borderRight = "0pt";
-	if(Math.round(this.getPlotPixYMax()-this.getDataPixYMax())>0)
+		this.drawingMask.style.borderRight = "0px";
+	if(Math.round(this.getPlotPixYMax()-this.getDataPixYMax())>1){
+		//alert("this.drawingMask.style.borderBottom= " + Math.round(this.getPlotPixYMax()-this.getDataPixYMax()) + "px solid grey");
 		this.drawingMask.style.borderBottom= Math.round(this.getPlotPixYMax()-this.getDataPixYMax()) + "px solid grey";
-	else
+	}
+	else 
+		{
 		this.drawingMask.style.borderBottom= "0pt";
-
+}
 	this.drawingMask.style.width = Math.round(this.getDataPixXMax()-this.getDataPixXMin()) +  'px';
 	this.drawingMask.style.height = Math.round(this.getDataPixYMax() - this.getDataPixYMin()) + 'px';
 	this.drawingMask.style.left = Math.round(this.getPlotPixXMin()) +  'px';
@@ -1590,9 +1584,9 @@ MapWidget.prototype.clone = function (obj) {
  }
 
 MapWidget.prototype.onbeforeresize = function(evt) {
-	this.rubberBand.style.display = "none";
-	this.rubberBand_c.style.display = "none";	
-	this.drawingMask.style.display = "none";
+	//this.rubberBand.style.visibility = "hidden";
+	//this.rubberBand_c.style.visibility = "hidden";
+	//this.drawingMask.style.visibility = "hidden";
 }
 
 MapWidget.prototype.onafterresize = function(evt) {
