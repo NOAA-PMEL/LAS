@@ -6,6 +6,7 @@ package gov.noaa.pmel.tmap.las.ui;
 
 import gov.noaa.pmel.tmap.las.jdom.LASConfig;
 import gov.noaa.pmel.tmap.las.product.server.LASConfigPlugIn;
+import gov.noaa.pmel.tmap.las.util.Category;
 import gov.noaa.pmel.tmap.las.util.ContainerComparator;
 import gov.noaa.pmel.tmap.las.util.NameValuePair;
 import gov.noaa.pmel.tmap.las.util.Operation;
@@ -98,7 +99,7 @@ public class getOperations extends Action {
                 respout.print(Util.toXML(operations, "operations"));
             } else {
                 response.setContentType("application/json");
-                JSONObject json_response = Util.toJSON(operations, "operations");
+                JSONObject json_response = toJSON(operations, "operations");
                 log.debug(json_response.toString(3));
                 json_response.write(respout);      
             }
@@ -112,5 +113,16 @@ public class getOperations extends Action {
         }
         log.debug("Processing request for grid for dsid="+dsID+" and varid="+varID+".");
         return null;
+    }
+    private JSONObject toJSON(ArrayList<Operation> operations, String string) throws JSONException {
+        JSONObject json_response = new JSONObject();
+        JSONObject operations_object = new JSONObject();
+        for (Iterator catIt = operations.iterator(); catIt.hasNext();) {
+            Operation op = (Operation) catIt.next();
+            JSONObject operation = op.toJSON();        
+            operations_object.array_accumulate("operation", operation);
+        }
+        json_response.put("operations", operations_object);
+        return json_response;
     }
 }
