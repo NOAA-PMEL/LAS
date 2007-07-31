@@ -615,6 +615,7 @@ function LASSlideSorter_createCellWidgets(chosenMenuName) {
           } else {
             Widget.render(widget_id,"MY");
           }
+          Widget.setCallback(document.cellWidgetChoice);
           if (Menu.initial_value) {
             // NOTE:  Dates used by the LAS UI come in as 'DD-Mon-YYYY' whereas the DateWidget
             // NOTE:  needs 'YYYY-MM-DD'.  Make the change here so as not to burden the DateWidget
