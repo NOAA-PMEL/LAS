@@ -84,7 +84,7 @@ public class getCategories extends Action {
                 respout.print(Util.toXML(categories, "categories"));
             } else {
                 response.setContentType("application/json");
-                JSONObject json_response = toJSON(categories, "categories");
+                JSONObject json_response = Util.toJSON(categories, "categories");
                 log.debug(json_response.toString(3));
                 json_response.write(respout);
             }
