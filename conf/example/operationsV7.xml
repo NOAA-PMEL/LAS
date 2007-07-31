@@ -263,7 +263,7 @@
     </operation>
 
     <!-- overlay kml for vector plots [public]-->
-    <operation name="Vector Plot to Google Earth" ID="Vector_GE_kml" mime_type="application/vnd.google-earth.kml+xml" output_template="output_GE">
+    <operation name="Vector Plot to Google Earth" ID="Vector_GE_kml" mime_type="application/vnd.google-earth.kml+xml" output_template="output_GE" private="true">
       <operation name="Plot_vector_GE" ID="Vector_for_GE" service_action="Plot_vector_GE">
         <response ID="PlotResp">
           <result type="image" ID="plot_image" streamable="true" mime_type="image/png" file_suffix=".gif"/>
