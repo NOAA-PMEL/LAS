@@ -99,7 +99,7 @@ public class getOperations extends Action {
                 respout.print(Util.toXML(operations, "operations"));
             } else {
                 response.setContentType("application/json");
-                JSONObject json_response = toJSON(operations, "operations");
+                JSONObject json_response = Util.toJSONarray(operations, "operations");
                 log.debug(json_response.toString(3));
                 json_response.write(respout);      
             }
