@@ -1,5 +1,7 @@
 package gov.noaa.pmel.tmap.las.util;
 
+import gov.noaa.pmel.tmap.las.ui.Util;
+
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -10,9 +12,13 @@ import org.jdom.Attribute;
 import org.jdom.Element;
 import org.jdom.output.Format;
 import org.jdom.output.XMLOutputter;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.json.XML;
 
 public class Container {
-
+    
+    String container_type;
     Element element;
     
     public Container(Element element) {
@@ -134,5 +140,9 @@ public class Container {
     
     public Element getElement() {
         return element;
+    }
+    
+    public JSONObject toJSON() throws JSONException {
+        return XML.toJSONObject(toXML());
     }
 }

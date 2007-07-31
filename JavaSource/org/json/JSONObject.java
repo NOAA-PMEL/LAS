@@ -303,7 +303,30 @@ public class JSONObject {
         }
         return this;
     }
-
+    
+    /**
+     * Accumulate values under a key. It is similar to the put method except
+     * but always use an JSONArray.
+     * In contrast, the put method replaces the previous value.
+     * @param key   A key string.
+     * @param value An object to be accumulated under the key.
+     * @return this.
+     * @throws JSONException If the value is an invalid number
+     *  or if the key is null.
+     */
+    public JSONObject array_accumulate(String key, Object value)
+            throws JSONException {
+        testValidity(value);
+        Object o = opt(key);
+        if (o == null) {
+            put(key, new JSONArray().put(value));
+        } else if (o instanceof JSONArray) {
+            ((JSONArray)o).put(value);
+        } else {
+            put(key, new JSONArray().put(o).put(value));
+        }
+        return this;
+    }
 
     /**
      * Append values to the array under a key. If the key does not exist in the

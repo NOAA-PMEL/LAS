@@ -6,6 +6,7 @@ package gov.noaa.pmel.tmap.las.ui;
 
 import gov.noaa.pmel.tmap.las.jdom.LASConfig;
 import gov.noaa.pmel.tmap.las.product.server.LASConfigPlugIn;
+import gov.noaa.pmel.tmap.las.util.Category;
 import gov.noaa.pmel.tmap.las.util.NameValuePair;
 import gov.noaa.pmel.tmap.las.util.Option;
 
@@ -76,7 +77,7 @@ public class getOptions extends Action {
                 respout.print(Util.toXML(options, "options"));
             } else {
                 response.setContentType("application/json");
-                JSONObject json_response = Util.toJSON(options, "options");
+                JSONObject json_response = toJSON(options, "options");
                 log.debug(json_response.toString(3));
                 json_response.write(respout);      
             }
@@ -90,5 +91,16 @@ public class getOptions extends Action {
         }
         log.debug("Processing request for options for operation id "+opid+".");
         return null;
+    }
+    private JSONObject toJSON(ArrayList<Option> options, String string) throws JSONException {
+        JSONObject json_response = new JSONObject();
+        JSONObject options_object = new JSONObject();
+        for (Iterator opIt = options.iterator(); opIt.hasNext();) {
+            Option op = (Option) opIt.next();
+            JSONObject option = op.toJSON();           
+            options_object.array_accumulate("option", option);
+        }
+        json_response.put("options", options_object);
+        return json_response;
     }
 }

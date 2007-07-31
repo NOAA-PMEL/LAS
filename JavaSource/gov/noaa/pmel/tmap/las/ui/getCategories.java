@@ -76,6 +76,7 @@ public class getCategories extends Action {
         }
         
         Collections.sort(categories, new ContainerComparator("name"));
+        
         try {
             PrintWriter respout = response.getWriter();
             if (format.equals("xml")) {
@@ -83,7 +84,7 @@ public class getCategories extends Action {
                 respout.print(Util.toXML(categories, "categories"));
             } else {
                 response.setContentType("application/json");
-                JSONObject json_response = Util.toJSON(categories, "categories");
+                JSONObject json_response = toJSON(categories, "categories");
                 log.debug(json_response.toString(3));
                 json_response.write(respout);
             }
@@ -108,5 +109,20 @@ public class getCategories extends Action {
         }
         */   
         return null;
+    }
+    private JSONObject toJSON(ArrayList<Category> categories, String string) throws JSONException {
+        JSONObject json_response = new JSONObject();
+        JSONObject categories_object = new JSONObject();
+        for (Iterator catIt = categories.iterator(); catIt.hasNext();) {
+            Category cat = (Category) catIt.next();
+            JSONObject category = cat.toJSON();
+            if ( cat.hasVariableChildren() ) {
+                categories_object.accumulate("category", category);
+            } else {
+               categories_object.array_accumulate("category", category);
+            }
+        }
+        json_response.put("categories", categories_object);
+        return json_response;
     }
 }

@@ -33,11 +33,15 @@
  */
 package gov.noaa.pmel.tmap.las.util;
 
+import gov.noaa.pmel.tmap.las.ui.Util;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
 import org.jdom.Element;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * @author Roland Schweitzer
@@ -47,6 +51,7 @@ public class Option extends Container implements OptionInterface {
     
     public Option(Element element) {
         super(element);
+        container_type = "array";
     }
 
     /* (non-Javadoc)
@@ -124,6 +129,10 @@ public class Option extends Container implements OptionInterface {
     public void setType(String type) {
         element.setAttribute("type", type);
     }
-    
+    public JSONObject toJSON() throws JSONException {
+        ArrayList<String> asArrays = new ArrayList<String>();
+        asArrays.add("option");
+        return Util.toJSON(element, asArrays);
+    }
 
 }
