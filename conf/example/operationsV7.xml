@@ -1,5 +1,5 @@
 <operations>
-   <operation name="Data Access Scripts for Desktop Apps"
+   <operation name="Desktop application data access scripts"
         ID="Gen_Scripts" output_template="scripts"
         service_action="Convert_to_Index" order="0600">
         <service>ferret</service>
@@ -29,7 +29,7 @@
         </grid_types>
         <optiondef IDREF="Options_gen_script"/>
        </operation>
-       <operation name="2D Overlay Plot" ID="Overlay_Plot_2D" output_template="output" service_action="Overlay_Plot_2D" order="0200" private="true">
+       <operation name="Overlay plot" ID="Overlay_Plot_2D" output_template="output" service_action="Overlay_Plot_2D" order="0200" private="true">
           <service>ferret</service>
           <response ID="PlotResp">
              <result type="image" ID="plot_image" streamable="true" mime_type="image/png" file_suffix=".gif" />
@@ -52,7 +52,7 @@
           </grid_types>
           <optiondef IDREF="Options_2D"/>
     </operation>
-    <operation name="2D Difference Plot" ID="Compare_Plot" output_template="output" service_action="Compare_Plot" order="0201" regrid_prn="true" private="true">
+    <operation name="Difference plot" ID="Compare_Plot" output_template="output" service_action="Compare_Plot" order="0201" regrid_prn="true" private="true">
           <service>ferret</service>
           <response ID="PlotResp">
              <result type="image" ID="plot_image" streamable="true" mime_type="image/png" file_suffix=".gif"/>
@@ -75,7 +75,7 @@
           </grid_types>
           <optiondef IDREF="Options_Compare"/>
     </operation>
-    <operation name="Side-by-Side Plot" ID="SidebySide_Plot_2D"
+    <operation name="Adjacent plots (GIF only)" ID="SidebySide_Plot_2D"
         output_template="side_by_side" service_action="SideBySide" order="0202">
         <operation name="2D Plot" ID="Side1" output_template="output"
             service_action="Side1">
@@ -119,7 +119,7 @@
         </operation>
     </operation>
 
-    <operation name="1D Plot Slide Sorter" ID="Plot_1D_SlideSorter" output_template="SlideSorter" service_action="" order="0801">
+    <operation name="Line plot comparison" ID="Plot_1D_SlideSorter" output_template="SlideSorter" service_action="" order="0801">
           <service>template</service>
           <region>
             <intervals name="x" />
@@ -132,7 +132,7 @@
           </grid_types>
     </operation>
 
-    <operation name="1D Plot" ID="Plot_1D" output_template="output" service_action="Plot_1D" order="0102">
+    <operation name="Line plot" ID="Plot_1D" output_template="output" service_action="Plot_1D" order="0102">
           <service>ferret</service>
           <response ID="PlotResp">
              <result type="image" ID="plot_image" streamable="true" mime_type="image/png" file_suffix=".gif"/>
@@ -154,7 +154,7 @@
           <optiondef IDREF="Options_1D"/>
     </operation>
 
-    <operation name="2D Plot in XY Slide Sorter" ID="Plot_2D_XY_SlideSorter" output_template="SlideSorter" service_action="">
+    <operation name="Color plot comparison" ID="Plot_2D_XY_SlideSorter" output_template="SlideSorter" service_action="">
         <service>template</service>
         <region>
             <intervals name="xy" />
@@ -164,7 +164,7 @@
         </grid_types>
     </operation>
 
-    <operation name="2D Plot in XY" ID="Plot_2D_XY"
+    <operation name="Color plot" ID="Plot_2D_XY"
         output_template="output" service_action="Plot_2D_XY" order="0100">
         <service>ferret</service>
         <response ID="PlotResp">
@@ -230,7 +230,7 @@
 <!-- Operations for Google Earth -->
     <!-- Begin: static overlay -->
     <!-- overlay kml for non-vector plots [public]-->
-    <operation name="Plot to Google Earth" ID="Plot_GE_kml" mime_type="application/vnd.google-earth.kml+xml" output_template="output_GE">
+    <operation name="Plot to Google Earth (static)" ID="Plot_GE_kml" mime_type="application/vnd.google-earth.kml+xml" output_template="output_GE">
       <operation name="Plot_2D_GE" ID="Plot_for_GE" service_action="Plot_2D_GE">
         <response ID="PlotResp">
                         <result type="image" ID="plot_image" streamable="true" mime_type="image/png" file_suffix=".gif"/>
@@ -263,7 +263,7 @@
     </operation>
 
     <!-- overlay kml for vector plots [public]-->
-    <operation name="Vector Plot to Google Earth" ID="Vector_GE_kml" mime_type="application/vnd.google-earth.kml+xml" output_template="output_GE" private="true">
+    <operation name="Plot to Google Earth (static)" ID="Vector_GE_kml" mime_type="application/vnd.google-earth.kml+xml" output_template="output_GE" private="true">
       <operation name="Plot_vector_GE" ID="Vector_for_GE" service_action="Plot_vector_GE">
         <response ID="PlotResp">
           <result type="image" ID="plot_image" streamable="true" mime_type="image/png" file_suffix=".gif"/>
@@ -297,7 +297,7 @@
 
     <!-- BEGIN: grid points on Google Earth [public] -->
     <!-- place mark kml for grid points -->
-    <operation name="Grid on Google Earth" ID="Grid_GE_kml" mime_type="application/vnd.google-earth.kml+xml" output_template="output_GE">
+    <operation name="Grid points to Google Earth" ID="Grid_GE_kml" mime_type="application/vnd.google-earth.kml+xml" output_template="output_GE">
       <operation name="Data_Extract_Grid" ID="Grid_for_GE" service_action="Data_Extract_Grid">
         <response ID="Data_Extract_Grid_Response">
           <result type="text" ID="ferret_listing" streamable="true" mime_type="text/plain" file_suffix=".txt"/>
@@ -348,7 +348,7 @@
     </operation>
 
     <!-- Google Earth: extract grid locations used by placemarks KML [private]-->
-    <operation name="Grid Locations" ID="Data_Extract_Grid"
+    <operation name="Grid locations" ID="Data_Extract_Grid"
         output_template="output_response" service_action="Data_Extract_Grid" private="true" order="9999">
         <service>ferret</service>
         <response ID="Data_Extract_Grid_Response">
@@ -414,7 +414,7 @@
         </grid_types>
     </operation>
 
-    <operation name="2D Plot Slide Sorter" ID="Plot_2D_SlideSorter" output_template="SlideSorter" service_action="">
+    <operation name="Color plot comparison" ID="Plot_2D_SlideSorter" output_template="SlideSorter" service_action="">
         <service>template</service>
         <region>
             <!--  xy has its own operation -->
@@ -429,7 +429,7 @@
         </grid_types>
     </operation>
 
-    <operation name="2D Plot" ID="Plot_2D" output_template="output"
+    <operation name="Color plot" ID="Plot_2D" output_template="output"
         service_action="Plot_2D" order="0101">
         <service>ferret</service>
         <response ID="PlotResp">
@@ -455,7 +455,7 @@
         </grid_types>
         <optiondef IDREF="Options_2D_image_contour"/>
     </operation>
-    <operation name="Vector Plot" ID="Plot_vector"
+    <operation name="Vector plot" ID="Plot_vector"
         output_template="output" service_action="Plot_vector" order="0103" private="true">
         <service>ferret</service>
         <response ID="PlotResp">
@@ -481,7 +481,7 @@
         </grid_types>
         <optiondef IDREF="Options_Vector"/>
     </operation>
-    <operation name="Table of Values" ID="Data_Extract"
+    <operation name="Table of values (text)" ID="Data_Extract"
         output_template="table" service_action="Data_Extract" order="0300">
         <service>ferret</service>
         <response ID="Data_Extract_Response">
@@ -511,7 +511,7 @@
         </grid_types>
         <optiondef IDREF="Options_Data"/>
     </operation>
-    <operation name="Extract a sub-set into a netCDF file"
+    <operation name="NetCDF file"
         ID="Data_Extract_netCDF" output_template="netcdf"
         service_action="Data_Extract_netCDF" order="0500">
         <service>ferret</service>
@@ -541,7 +541,7 @@
         </grid_types>
         <optiondef IDREF="Options_Data"/>
     </operation>
-    <operation name="Extract a sub-set into a formatted ASCII file"
+    <operation name="ASCII file"
         ID="Data_Extract_File" output_template="ascii"
         service_action="Data_Extract_File" order="0400">
         <service>ferret</service>
@@ -572,7 +572,7 @@
         </grid_types>
         <optiondef IDREF="Options_Data_file"/>
     </operation>
-    <operation name="ArcView ASCII Output File"
+    <operation name="ArcView gridded"
         ID="Data_Extract_ArcView" output_template="arcview"
         service_action="Data_Extract_ArcView" order="0800">
         <service>ferret</service>
@@ -1051,7 +1051,7 @@
 
 
 <!-- Begin: interactive 2d XY plot additions -->
-    <operation name="2D Plot in XY" ID="XY_2D_zoom" output_template="newImageInfo" service_action="Plot_2D_XY" private="true">
+    <operation name="Color plot" ID="XY_2D_zoom" output_template="newImageInfo" service_action="Plot_2D_XY" private="true">
           <service>ferret</service>
           <response ID="PlotResp">
              <result type="image" ID="plot_image" streamable="true" mime_type="image/png"/>
@@ -1069,7 +1069,7 @@
           </grid_types>
 
     </operation>
-    <operation name="2D XY Zoom" ID="XY_zoomable_image" output_template="zoom_2D_XY" service_action="Plot_2D_XY">
+    <operation name="Interactive color plot" ID="XY_zoomable_image" output_template="zoom_2D_XY" service_action="Plot_2D_XY">
           <service>ferret</service>
           <response ID="PlotResp">
              <result type="image" ID="plot_image" streamable="true" mime_type="image/png"/>
