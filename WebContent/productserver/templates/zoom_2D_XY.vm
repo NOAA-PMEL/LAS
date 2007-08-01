@@ -7,16 +7,40 @@
 <title>LAS Output -- $las_config.getTitle()</title>
 
 #set($use_ref_map=$las_request.getProperty("ferret", "use_ref_map"))
+</head>
+
+<body onload="initializeLASRequest(); loadMap()">
+
+
+<table>
+  <tr>
+    <td> 
+	<DIV id="img_body" name="img_body"></DIV>
+    </td>
+  </tr>
+  <tr>
+    <td>
+	<div id="zoom_button" name="zoom_button">
+	<input type="button" name"zoom" value="Zoom Back" onclick="submitZoomOutXML()">
+	</div>	
+    </td>
+  </tr>
+  <tr>
+    <td>
+	<div id="zoomInfo" name="zoomInfo">
+	<font color="red" size="+1">Click and drag to Select a zoom region</font>
+	</div>	
+    </td>
+  </tr>
+ </table>
+
+
+</body>
+
 <script language="JavaScript" src="JavaScript/components/xmldom.js"></script>
 <script language="JavaScript" src="JavaScript/components/LASRequest.js"></script>
 <script type="text/javascript" src="JavaScript/frameworks/dojo/dojo.js"></script>
 <SCRIPT language="JavaScript" src="JavaScript/components/MapWidget.js"></SCRIPT>
-
-
-
-
-<STYLE type=text/css>
-</STYLE>
 
 
 <script language="JavaScript">
@@ -168,6 +192,10 @@ function submitXML() {
 * figure out what view this and use the axis values (ie x or y), to get the ranges.  Not 
 * really needed for the XY zoom, but leave it in because we will need for other views
 */
+
+  if ((myMapWidget.extents.selection.grid.x.min == myMapWidget.extents.selection.grid.x.max) || (myMapWidget.extents.selection.grid.y.min == myMapWidget.extents.selection.grid.y.max)) {
+    alert ("Please select an XY region, and not a line");
+  } else {
     var view = Req.getProperty('ferret','view');
     axisLow = view.substr(0,1);
     axisHi = view.substr(1,1);
@@ -183,7 +211,7 @@ function submitXML() {
     Req.setOperation('XY_2D_zoom','LAS7');
     var URL = './ProductServer.do?xml=' + escape(Req.getXMLText());
     evalMyRequest(URL);
-
+  }
 }
 
 /*
@@ -201,34 +229,6 @@ function submitZoomOutXML() {
 
 
 </script>
-</head>
 
-<body onload="initializeLASRequest(); loadMap()">
-
-
-<table>
-  <tr>
-    <td> 
-	<DIV id="img_body" name="img_body"></DIV>
-    </td>
-  </tr>
-  <tr>
-    <td>
-	<div id="zoom_button" name="zoom_button">
-	<input type="button" name"zoom" value="Zoom Back" onclick="submitZoomOutXML()">
-	</div>	
-    </td>
-  </tr>
-  <tr>
-    <td>
-	<div id="zoomInfo" name="zoomInfo">
-	<font color="red" size="+1">Click and drag to Select a zoom region</font>
-	</div>	
-    </td>
-  </tr>
- </table>
-
-
-</body>
 </html>
 
