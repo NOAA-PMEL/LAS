@@ -210,7 +210,8 @@
     </operation>
 
 <!-- Animation on browser (fast response) [public]-->
-    <operation name="Animation" ID="Animation" output_template="output_animation" service_action="Data_Extract_Frames" order="9999">
+    <!-- animate XY plots -->
+    <operation name="Animation" ID="Animation_2D_XY" output_template="output_animation" service_action="Data_Extract_Frames" order="9999">
           <service>ferret</service>
           <response ID="Data_Extract_Frames_Response">
               <result type="xml" ID="ferret_listing" streamable="true" mime_type="text/xml" file_suffix=".xml"/>
@@ -218,13 +219,28 @@
           </response>
           <region>
             <intervals name="xyt" />
+          </region>
+          <grid_types>
+            <grid_type name="regular" />
+          </grid_types>
+          <optionsdef IDREF="Options_2D_image_contour_animation_xy"/>
+    </operation>
+
+    <!-- animate XZ or YZ plots -->
+    <operation name="Animation" ID="Animation_2D" output_template="output_animation" service_action="Data_Extract_Frames" order="9999">
+          <service>ferret</service>
+          <response ID="Data_Extract_Frames_Response">
+              <result type="xml" ID="ferret_listing" streamable="true" mime_type="text/xml" file_suffix=".xml"/>
+              <result type="debug" ID="debug" file_suffix=".txt"/>
+          </response>
+          <region>
             <intervals name="xzt" />
             <intervals name="yzt" />
           </region>
           <grid_types>
             <grid_type name="regular" />
           </grid_types>
-          <optionsdef IDREF="Options_2D_image_contour_xy"/> 
+          <optionsdef IDREF="Options_2D_image_contour_animation"/>
     </operation>
 
 <!-- Operations for Google Earth -->
