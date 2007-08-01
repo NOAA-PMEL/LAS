@@ -657,6 +657,11 @@ i.e. 48 - start time: 24 hours before selected timestep
   <!--  'land_type' reserved for XY plots only -->
   <optiondef name="Options_2D_image_contour_xy" inherit="#Options_2D_image_contour,#set_aspect,#land_type"/>
 
+  <!-- 2-dimensional plots for animation (no image format and reference map)-->
+  <optiondef name="Options_2D_animation" inherit="#expression,#interpolate_data,#size,#use_graticules,#margins,#deg_min_sec,#palette"/>
+  <optiondef name="Options_2D_image_contour_animation" inherit="#Options_2D_animation,#contour_style,#fill_levels,#contour_levels,#mark_grid"/>
+  <optiondef name="Options_2D_image_contour_animation_xy" inherit="#Options_2D_image_contour_animation,#set_aspect,#land_type"/>
+
   <!-- for Google Earth 2D plot -->
   <optiondef name="Options_2D_GE" inherit="#Options_Default,#palette_GE"/>
   <optiondef name="Options_2D_contour_GE" inherit="#Options_2D_GE,#contour_style,#fill_levels,#contour_levels,#mark_grid"/>
