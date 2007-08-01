@@ -67,7 +67,7 @@
             <item values="Data_Extract_File,asc,20">ASCII file</item>
             <item values="Gen_Scripts,html,20">Desktop application data access scripts</item>
             <item values="Grid_GE_kml,txt,20">Grid Points on Google Earth</item>
-            <item values="Animation,txt,20">Animation</item>
+            <item values="Animation_2D_XY,txt,20">Animation</item>
         </menu>
         <menu type="ops" name="Ops_Std3D_xyz">
             <item values="Data_Extract,txt,20">Table of values (text)</item>
@@ -81,7 +81,7 @@
             <item values="Data_Extract_netCDF,cdf,20">NetCDF file</item>
             <item values="Data_Extract_File,asc,20">ASCII file</item>
             <item values="Gen_Scripts,html,20">Desktop application data access scripts</item>
-            <item values="Animation,txt,20">Animation</item>
+            <item values="Animation_2D,txt,20">Animation</item>
         </menu>
         <menu type="ops" name="Ops_Std4D">
             <item values="Data_Extract,txt,20">Table of values (text)</item>
@@ -222,9 +222,9 @@
             <ifoptions op="Plot_GE_Overlay" href="#Options_2D_image_contour_xy_GE"/>
             <ifoptions op="Plot_GE_kml" href="#Options_2D_image_contour_xy_GE"/>
             <ifoptions op="Data_Extract_Grid" href="#Options_Data"/>
-            <ifoptions op="Animation" href="#Options_2D_image_contour"/>
+            <ifoptions op="Animation_2D_XY" href="#Options_2D_image_contour_animation_xy"/>
+            <ifoptions op="Animation_2D" href="#Options_2D_image_contour_animation"/> 
             <ifoptions op="XY_zoomable_image" href="#Options_2D_image_contour_xy"/>
-            <ifoptions op="Google_Earth_Animation" href="#Options_2D_image_contour"/>
             <options href=""/>
         </map>
         <map type="ops" name="DefaultOperations_HybridZ">
