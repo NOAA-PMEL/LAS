@@ -10,7 +10,6 @@
 <script language="JavaScript" src="JavaScript/components/LASAnimationDOM.js"></script>
 
 <SCRIPT language="javascript">
-<!-- hide the script from old browsers 
 
 //=== the initial LAS request
 initReq_xml = "$las_request.toJavaScriptSafeString()";
@@ -24,35 +23,29 @@ las_animation = new LASAnimation(animation_xml);
 //=== the time frames
 theTimes = las_animation.getFrames();
 
+//=== global variables ====
 first_image = 0;                    //first image number
 last_image = las_animation.getNumFrames()-1; //last image number
 
-//animation_height = 640;              //height of the images in the animation
-//animation_width = 800;               //width of the images in the animation
-
-//**************************************************************************
-//=== THE CODE STARTS HERE - no need to change anything below ===
-//=== global variables ====
 theImages    = new Array(); 
 imagesLoaded = new Array(); //flags for checking if a image is loaded
-firstTimeLoad= new Array();
 
+firstTimeLoad= new Array();
 for (var i = first_image; i <= last_image; i++){
     firstTimeLoad[i] = 1;
 }
 
-//unit of speed is frames/second
-var initial_speed = 1;
+//unit of speed is frames per second
+var initial_speed = 8;
 speed     = initial_speed;
 speed_max = 128;
-speed_min = 0.5;
+speed_min = 1;
 delay     = 1000/speed; //delay between frames in 1/1000 seconds, i.e. milliseconds
 
 current_image = first_image;     //number of the current image
 timeID = null;
 var status = 0;        // 0-stopped, 1-playing
-play_mode = 0;         // 0-play once, 1-loop
-size_valid = 0;
+play_mode = 1;         // 0-play once, 1-loop
 
 //===> make sure the first image number is not bigger than the last image number
 if (first_image > last_image) 
@@ -67,12 +60,17 @@ function animate_loadNextImage(currentImg){
     animate_loadImages(currentImg+1,currentImg+1);
     //foward to next image only when currentImg is loaded first time
     if((firstTimeLoad[currentImg] == 1) && (status == 1)){
-       firstTimeLoad[currentImg] = 0;
+        firstTimeLoad[currentImg] = 0;
 
-       //make sure the previous image is flagged
-       if(currentImg > 0){firstTimeLoad[currentImg-1] = 0;}
+        //make sure the previous image is flagged
+        if(currentImg > 0){firstTimeLoad[currentImg-1] = 0;}
 
-       go2next(currentImg+1);
+        go2next(currentImg+1);
+   
+        //start animation after loading all images
+        if(currentImg == last_image){
+            animate_fwd();
+        }
     }
 }
 
@@ -130,7 +128,6 @@ function animate_makeLASRequest(timePoint) {
     initReq.setRange('t',timePoint);
 
     var prefix = 'ProductServer.do?stream=true&stream_ID=plot_image&xml=';
-    //var img_src = prefix + escape(initReq.toString());
     var img_src = prefix + escape(initReq.getXMLText());
 
     return img_src;
@@ -153,12 +150,6 @@ function animate_fwd()
             current_image = first_image; //LOOP
         };
     };                             
-
-    //check if it's loaded; if not, let it wait
-    //while(imagesLoaded[current_image] != 1){
-    //    current_image--;
-    //    setTimeout("animate_fwd()", 100);
-    //};
 
     document.animation.src = theImages[current_image].src;
     document.control_form.frame_nr.value = current_image+1;
@@ -200,14 +191,13 @@ function go2next(number)
     if (number < first_image) number = first_image;
     current_image = number;
     document.animation.src = theImages[current_image].src;
-    document.control_form.frame_nr.value = current_image+1;
+    document.control_form.frame_nr.value = current_image;
 }
 
 //===> jumps to a given image number
 function go2image(number)
 {
-
-    //check if it's loading 
+    //check if it's still loading 
     var loading = 0;
     for (var i = first_image; i <= last_image; i++){
         if(firstTimeLoad[i]==1){
@@ -264,37 +254,26 @@ function animation()
    document.write("    <INPUT TYPE=\"button\" Value=\" >| \" onClick=\"go2image(last_image)\"> ");
    document.write(" <BR> ");
    document.write("    <SELECT NAME=\"play_mode_selection\" onChange=\"change_mode(this.selectedIndex)\"> ");
-   document.write("       <OPTION SELECTED VALUE=0>play once ");
-   document.write("       <OPTION VALUE=1>loop ");
-   //document.write("       <OPTION VALUE=2>swing ");
+   document.write("       <OPTION VALUE=0>play once ");
+   document.write("       <OPTION SELECTED VALUE=1>loop ");
    document.write("    </SELECT> ");
    document.write("    <INPUT TYPE=\"text\" NAME=\"frame_nr\" VALUE=\"1\" SIZE=\"5\" ");
    document.write("     onFocus=\"this.select()\" onChange=\"go2image(this.value)\"> ");
    document.write("    &nbsp; Speed(Fr./S)<INPUT TYPE=\"button\" Value=\" - \" onClick=\"change_speed(-1)\"> ");
-   document.write("    <INPUT TYPE=\"text\" NAME=\"speed_nr\" VALUE=\"1\" SIZE=\"4\"> ");
+   document.write("    <INPUT TYPE=\"text\" NAME=\"speed_nr\" VALUE=\"8\" SIZE=\"4\"> ");
    document.write("    <INPUT TYPE=\"button\" Value=\" + \" onClick=\"change_speed(1)\"> ");
    document.write(" </FORM> ");
    document.write(" </P> ");
 };
 
-//=== THE CODE ENDS HERE - no need to change anything above === -->
 </SCRIPT>
 </HEAD>
 
 <BODY BGCOLOR="#FFFFFF" onLoad="launch()">
-<!--
-<center></center><A HREF="jv_main.html"><IMG SRC="java.gif" ALT="Back to JS main page" width=33 height=33></A><P>
-BY:<a href="mailto:xholecko@sgi.felk.cvut.cz">Martin Holecko</a>...<a href="http://sgi.felk.cvut.cz/~xholecko" target="_top">BASTaRT PIX</a><BR>
-DATE:1996-12-09<BR>
-<hr>
--->
 <center>
 <FONT size=+3><b>LAS Animation </b></FONT><br>
-<!-- ************ HERE STARTS THE jsMoviePlayer(TM) PART ***************** -->
 <SCRIPT language="javascript">
-<!-- 
 animation();
-//-->
 </SCRIPT>
 </body>
 </HTML>
