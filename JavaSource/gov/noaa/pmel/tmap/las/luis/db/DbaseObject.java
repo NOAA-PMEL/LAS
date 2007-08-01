@@ -468,7 +468,7 @@ public class DbaseObject implements IDbaseObject {
           command += " " + addedConstraint;
         }
         Log.debug(this, "SQL: "+command);
-        ResultSet rs = stmt.executeQuery(command);
+        int rs = stmt.executeUpdate(command);
      }
 
   /**
