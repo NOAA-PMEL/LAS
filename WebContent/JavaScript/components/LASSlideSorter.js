@@ -225,14 +225,23 @@ function LASSlideSorter_render(element_id,rows,cols,initial_menu) {
       basicRadioCell.setAttribute('id',id_text);
       basicRow.appendChild(basicRadioCell);
 
-      var basicRadioButton = document.createElement('input');
+// NOTE:  IE 6 & 7 don't support setting the 'name' attribute so we must do some
+// NOTE:  browser sniffing at this point and branch the code.
+// NOTE:  See http://www.thescripts.com/forum/thread91778.html for more information.
+
+      if (document.all) {
+        /* IE only */
+        var basicRadioButton = document.createElement('<input type="radio" name="basicRadios">')
+      } else {
+        var basicRadioButton = document.createElement('input');
+        basicRadioButton.setAttribute('type','radio');
+        basicRadioButton.setAttribute('name','basicRadios');
+      }
       id_text = 'basicRadioButton' + i;
       basicRadioButton.setAttribute('id',id_text);
-      basicRadioButton.setAttribute('type','radio');
       basicRadioButton.setAttribute('class','basicRadios');
-      basicRadioButton.setAttribute('name','basicRadios');
       basicRadioCell.appendChild(basicRadioButton);
-
+     
       var basicTitleCell = document.createElement('td');
       id_text = 'basicTitleCell' + i;
       basicTitleCell.setAttribute('id',id_text);
