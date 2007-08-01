@@ -323,7 +323,7 @@ function LASSlideSorter_render(element_id,rows,cols,initial_menu) {
                 <tr> <td id="lss_ContentCell11" colspan="3"> <a id="lss_A11"><img id="lss_Img11"></img></a> </td> </tr>
                 <tr>
                   <td id="lss_Widget11"></td>
-                  <td><img id="lss_AnimatedGif11" src="mozilla_blu.gif"></img></td>
+                  <td><img id="lss_AnimatedGif11" src="JavaScript/components/mozilla_blu.gif"></img></td>
                   <td><a id="lss_Refresh11" href="javascript: LSS.loadContentCell(1,1)">Refresh</a></td>
                 </tr>
               </tbody>
@@ -398,7 +398,7 @@ function LASSlideSorter_render(element_id,rows,cols,initial_menu) {
       var aGif = document.createElement('img');
       id_text = 'aGif' + i + j;
       aGif.setAttribute('id',id_text);
-      aGif.setAttribute('src','mozilla_blu.gif');
+      aGif.setAttribute('src','JavaScript/components/mozilla_blu.gif');
       aGifCell.appendChild(aGif);
 
       var refreshCell = document.createElement('td');
