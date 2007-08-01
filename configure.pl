@@ -1472,7 +1472,6 @@ BEGIN {
                    Log::Agent
                    MD5
                    MIME::Base64
-                   Mail::Sendmail
                    Parse::Lex
                    Parse::Yapp
                    Template
