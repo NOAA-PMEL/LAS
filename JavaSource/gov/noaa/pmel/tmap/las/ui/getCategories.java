@@ -41,61 +41,62 @@ import org.json.XML;
  * @struts.action validate="true"
  */
 public class getCategories extends Action {
-    /*
-     * Generated Methods
-     */
+	/*
+	 * Generated Methods
+	 */
 
-    /** 
-     * Method execute
-     * @param mapping
-     * @param form
-     * @param request
-     * @param response
-     * @return ActionForward
-     */
-    private static Logger log = LogManager.getLogger(getCategories.class.getName());
-    public ActionForward execute(ActionMapping mapping, ActionForm form,
-            HttpServletRequest request, HttpServletResponse response) {
+	/** 
+	 * Method execute
+	 * @param mapping
+	 * @param form
+	 * @param request
+	 * @param response
+	 * @return ActionForward
+	 */
+	private static Logger log = LogManager.getLogger(getCategories.class.getName());
+	public ActionForward execute(ActionMapping mapping, ActionForm form,
+			HttpServletRequest request, HttpServletResponse response) {
+		
+		String format = request.getParameter("format");
+		if ( format == null ) {
+			format = "json";
+		}
+		String catid = request.getParameter("catid");
+		log.info("Starting: getCategories.do?catid="+catid+"&format="+format);
 
-        String format = request.getParameter("format");
-        if ( format == null ) {
-            format = "json";
-        }
-        String catid = request.getParameter("catid");
-        
-        // Get the LASConfig (sub-class of JDOM Document) from the servlet context.
-        log.debug("Processing request for dataset list.");
-        LASConfig lasConfig = (LASConfig)servlet.getServletContext().getAttribute(LASConfigPlugIn.LAS_CONFIG_KEY); 
-                
-        ArrayList<Category> categories = new ArrayList<Category>();
-        try {
-            categories = lasConfig.getCategories(catid);
-        } catch (JDOMException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        
-        Collections.sort(categories, new ContainerComparator("name"));
-        
-        try {
-            PrintWriter respout = response.getWriter();
-            if (format.equals("xml")) {
-                response.setContentType("application/xml");
-                respout.print(Util.toXML(categories, "categories"));
-            } else {
-                response.setContentType("application/json");
-                JSONObject json_response = Util.toJSON(categories, "categories");
-                log.debug(json_response.toString(3));
-                json_response.write(respout);
-            }
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (JSONException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }        
-        /*
+		// Get the LASConfig (sub-class of JDOM Document) from the servlet context.
+		log.debug("Processing request for dataset list.");
+		LASConfig lasConfig = (LASConfig)servlet.getServletContext().getAttribute(LASConfigPlugIn.LAS_CONFIG_KEY); 
+
+		ArrayList<Category> categories = new ArrayList<Category>();
+		try {
+			categories = lasConfig.getCategories(catid);
+		} catch (JDOMException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		Collections.sort(categories, new ContainerComparator("name"));
+
+		try {
+			PrintWriter respout = response.getWriter();
+			if (format.equals("xml")) {
+				response.setContentType("application/xml");
+				respout.print(Util.toXML(categories, "categories"));
+			} else {
+				response.setContentType("application/json");
+				JSONObject json_response = toJSON(categories, "categories");
+				log.debug(json_response.toString(3));
+				json_response.write(respout);
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}        
+		/*
         try {        
             JSONUtil.fill(datasets, json_datasets);           
             log.debug(json_datasets.toString(3));
@@ -107,22 +108,19 @@ public class getCategories extends Action {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-        */   
-        return null;
-    }
-    private JSONObject toJSON(ArrayList<Category> categories, String string) throws JSONException {
-        JSONObject json_response = new JSONObject();
-        JSONObject categories_object = new JSONObject();
-        for (Iterator catIt = categories.iterator(); catIt.hasNext();) {
-            Category cat = (Category) catIt.next();
-            JSONObject category = cat.toJSON();
-            if ( cat.hasVariableChildren() ) {
-                categories_object.accumulate("category", category);
-            } else {
-               categories_object.array_accumulate("category", category);
-            }
-        }
-        json_response.put("categories", categories_object);
-        return json_response;
-    }
+		 */   
+		log.info("Finished: getCategories.do?catid="+catid+"&format="+format);
+		return null;
+	}
+	private JSONObject toJSON(ArrayList<Category> categories, String string) throws JSONException {
+		JSONObject json_response = new JSONObject();
+		JSONObject categories_object = new JSONObject();
+		for (Iterator catIt = categories.iterator(); catIt.hasNext();) {
+			Category cat = (Category) catIt.next();
+			JSONObject category = cat.toJSON();          
+			categories_object.array_accumulate("category", category);           
+		}
+		json_response.put("categories", categories_object);
+		return json_response;
+	}
 }

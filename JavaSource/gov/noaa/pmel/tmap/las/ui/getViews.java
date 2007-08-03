@@ -9,6 +9,7 @@ import gov.noaa.pmel.tmap.las.product.server.LASConfigPlugIn;
 import gov.noaa.pmel.tmap.las.util.Container;
 import gov.noaa.pmel.tmap.las.util.ContainerComparator;
 import gov.noaa.pmel.tmap.las.util.NameValuePair;
+import gov.noaa.pmel.tmap.las.util.Option;
 import gov.noaa.pmel.tmap.las.util.View;
 
 import java.io.IOException;
@@ -58,12 +59,11 @@ public class getViews extends Action {
         LASConfig lasConfig = (LASConfig)servlet.getServletContext().getAttribute(LASConfigPlugIn.LAS_CONFIG_KEY);
         String dsID = request.getParameter("dsid");
         String varID = request.getParameter("varid");
-        String format = request.getParameter("format");
-
+        String format = request.getParameter("format");        
         if ( format == null ) {
             format = "json";
         }
-
+        log.info("Starting: getViews.do?dsid="+dsID+"&varid="+varID+"&format="+format);
         try {
             ArrayList<View> views = lasConfig.getViewsByDatasetAndVariable(dsID, varID);
             //Collections.sort(views, new ContainerComparator("value"));
@@ -73,7 +73,8 @@ public class getViews extends Action {
                 respout.print(Util.toXML(views, "views"));
             } else {
                 response.setContentType("application/json");
-                JSONObject json_response = Util.toJSON(views, "views");
+                //JSONObject json_response = Util.toJSON_keep_array(views, "views");
+                JSONObject json_response = toJSON(views, "views");
                 log.debug(json_response.toString(3));
                 json_response.write(respout);
             }
@@ -87,11 +88,18 @@ public class getViews extends Action {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-
-        log.debug("Processing request for views for dsid="+dsID+" and varid="+varID+".");
-
-
-
+        log.info("Finished: getViews.do?dsid="+dsID+"&varid="+varID+"&format="+format);
         return null;
+    }
+    public JSONObject toJSON(ArrayList<View> views, String wrapper) throws JSONException {
+        JSONObject json_response = new JSONObject();
+        JSONObject views_object = new JSONObject();
+        for (Iterator viewIt = views.iterator(); viewIt.hasNext();) {
+            View view = (View) viewIt.next();
+            JSONObject view_object = view.toJSON();            
+            views_object.array_accumulate("view", view_object);
+        }
+        json_response.put("views", views_object);
+        return json_response;
     }
 }

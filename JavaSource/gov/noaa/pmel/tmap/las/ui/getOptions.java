@@ -59,7 +59,7 @@ public class getOptions extends Action {
         if ( format == null ) {
             format = "json";
         }
-        
+        log.info("Starting: getOptions.do?opid="+opid+"&format="+format);
         ArrayList<Option> options = new ArrayList<Option>();
         
         try {
@@ -77,7 +77,7 @@ public class getOptions extends Action {
                 respout.print(Util.toXML(options, "options"));
             } else {
                 response.setContentType("application/json");
-                JSONObject json_response = Util.toJSONarray(options, "options");
+                JSONObject json_response = toJSON(options, "options");
                 log.debug(json_response.toString(3));
                 json_response.write(respout);      
             }
@@ -89,7 +89,7 @@ public class getOptions extends Action {
             // TODO fix
             e.printStackTrace();
         }
-        log.debug("Processing request for options for operation id "+opid+".");
+        log.info("Finished: getOptions.do?opid="+opid+"&format="+format);
         return null;
     }
     private JSONObject toJSON(ArrayList<Option> options, String string) throws JSONException {

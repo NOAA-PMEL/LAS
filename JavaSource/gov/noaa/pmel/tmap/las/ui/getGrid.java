@@ -66,6 +66,7 @@ public class getGrid extends Action {
         if ( format == null ) {
             format = "json";
         }
+        log.info("Starting: getGrid.do?dsid="+dsID+"&varid="+varID+"&format="+format);
         Grid grid = null;
         
         StringBuffer xml = new StringBuffer();
@@ -165,7 +166,7 @@ public class getGrid extends Action {
             e.printStackTrace();
         }
         */
-        log.debug("Processing request for grid for dsid="+dsID+" and varid="+varID+".");
+        log.info("Starting: getGrid.do?dsid="+dsID+"&varid="+varID+"&format="+format);
         return null;
     }
     private JSONObject makeJSONAxis(Grid grid, String type) throws JSONException {
