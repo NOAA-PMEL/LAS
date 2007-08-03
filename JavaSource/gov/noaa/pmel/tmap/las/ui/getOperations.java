@@ -60,10 +60,12 @@ public class getOperations extends Action {
         String varID = request.getParameter("varid");
         String view = request.getParameter("view");
         String format = request.getParameter("format");
+        log.info("Finishing: getOperations.do?dsid="+dsID+" and varid="+varID+".");
         String grid_type = "";
         if ( format == null ) {
             format = "json";
         }
+        log.info("Starting: getOperations?dsid="+dsID+"&varid="+varID+"&view="+view+".");
         try {
             grid_type = lasConfig.getGridType(dsID, varID);
         } catch (JDOMException e) {
@@ -99,7 +101,7 @@ public class getOperations extends Action {
                 respout.print(Util.toXML(operations, "operations"));
             } else {
                 response.setContentType("application/json");
-                JSONObject json_response = Util.toJSONarray(operations, "operations");
+                JSONObject json_response = toJSON(operations, "operations");
                 log.debug(json_response.toString(3));
                 json_response.write(respout);      
             }
@@ -111,14 +113,14 @@ public class getOperations extends Action {
             // TODO fix
             e.printStackTrace();
         }
-        log.debug("Processing request for grid for dsid="+dsID+" and varid="+varID+".");
+        log.info("Finished: getOperations.do?dsid="+dsID+"&varid="+varID+"&view="+view+".");
         return null;
     }
     private JSONObject toJSON(ArrayList<Operation> operations, String string) throws JSONException {
         JSONObject json_response = new JSONObject();
         JSONObject operations_object = new JSONObject();
-        for (Iterator catIt = operations.iterator(); catIt.hasNext();) {
-            Operation op = (Operation) catIt.next();
+        for (Iterator operIt = operations.iterator(); operIt.hasNext();) {
+            Operation op = (Operation) operIt.next();
             JSONObject operation = op.toJSON();        
             operations_object.array_accumulate("operation", operation);
         }

@@ -2507,7 +2507,9 @@ public class LASConfig extends LASDocument {
                          * is a getDataset call...
                          */
                         Dataset dataset = getDataset(filter);
-                        category_container.addContent(dataset.getElement());
+                        if ( dataset != null ) {
+                            category_container.addContent(dataset.getElement());
+                        }
                     }
                     categories.add(new Category(category_container));
                 }               
