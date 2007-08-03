@@ -229,7 +229,7 @@ public class ProductRequest {
                                             }
                                         }
                                         String opArg_type = opArg.getAttributeValue("type");
-                                        // This result is assoicated with a variable so add the variable attributes.
+                                        // This result is associated with a variable so add the variable attributes.
                                         if ( opArg_type.equals("variable") ) {
                                             data.setAttribute("var",lasConfig.getVariableName(varXPath));
                                             data.setAttribute("title", lasConfig.getVariableTitle(varXPath));
@@ -572,7 +572,11 @@ public class ProductRequest {
             String op   = axis.getAttributeValue("op");
             String lo = axis.getAttributeValue("lo");
             String hi = axis.getAttributeValue("hi");
-            grid = ","+grid+type+"="+lo+":"+hi+"@"+op;
+            if ( type.equals("t") ) {
+            	grid = grid+","+type+"=\""+lo+"\":\""+hi+"\"@"+op;
+            } else {
+            	grid = grid+","+type+"="+lo+":"+hi+"@"+op;
+            }
         }
 
         String ocean_mask = analysis.getAttributeValue("oceanmask");
