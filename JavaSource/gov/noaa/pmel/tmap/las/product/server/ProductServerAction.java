@@ -60,7 +60,6 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.log4j.LogManager;
 
-
 /**
  * @author Roland Schweitzer
  *
@@ -71,8 +70,8 @@ public final class ProductServerAction extends Action {
     public ActionForward execute(ActionMapping mapping,
             ActionForm form,
             HttpServletRequest request,
-            HttpServletResponse response) {
-        
+            HttpServletResponse response){
+
         ProgressForm progress = (ProgressForm) form;
         
         log.debug("Entering ProductServerAction");
@@ -94,16 +93,14 @@ public final class ProductServerAction extends Action {
         }
         
         String serverURL;
-        
-            try {
-                serverURL = lasConfig.getServerURL();
-            } catch (JDOMException e) {
-                logerror(request, "Error getting product server URL...", e);
-                return mapping.findForward("error");
-            }
-        
-            
-        
+        String serverBaseURL; 
+        try {
+            serverURL = lasConfig.getServerURL();
+            serverBaseURL = lasConfig.getBaseServerURL();
+        } catch (JDOMException e) {
+            logerror(request, "Error getting product server URL...", e);
+            return mapping.findForward("error");
+        }
         
         if (serverURL.equals("")) {
             logerror(request, "No product server URL defined.", "Check las.xml operations element...");
@@ -162,6 +159,8 @@ public final class ProductServerAction extends Action {
             // Always set the request XML JDOM object in the request servlet context
             // so it can be used in any output template including the error template.
             request.setAttribute("las_request", lasRequest);
+            request.setAttribute("server_base_url", serverBaseURL);
+
         } catch (Exception e) {
             logerror(request, "Error parsing the request XML. ", e);
             return mapping.findForward("error");
@@ -326,6 +325,7 @@ public final class ProductServerAction extends Action {
                         return mapping.findForward("error");
                     }
                     request.setAttribute("server_url", serverURL);
+
                     if ( sessions != null ) {
                         request.setAttribute("JSESSIONID", JSESSIONID);
                     }
@@ -662,7 +662,6 @@ public final class ProductServerAction extends Action {
             
             return new ActionForward("/productserver/templates/"+productRequest.getTemplate()+".vm");
         }
-        
         
     }
     
