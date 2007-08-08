@@ -59,7 +59,7 @@
             -->
 	    <item values="XY_zoomable_image,html,20">Interactive Color plot</item>
             <item values="Gen_Scripts,html,20">Desktop application data access scripts</item>
-            <item values="Plot_GE_kml,html,20">Plot to Google Earth (static)</item>
+            <item values="Plot_GE_Overlay,html,20">Plot to Google Earth</item>
         </menu>
          <menu type="ops" name="Ops_Std3D_xyt">
             <item values="Data_Extract,txt,20">Table of values (text)</item>
@@ -91,7 +91,7 @@
         </menu>
         <menu type="ops" name="Ops_StdVec">
             <item values="Plot_vector,vector,2">Vector plot</item>
-            <item values="Vector_GE_kml,vector">Plot to Google Earth (static)</item>
+            <item values="Vector_GE_Overlay,html,20">Plot to Google Earth</item>
         </menu>
         <menu type="views" name="Views_StdVec">
             <ifitem view="xy" values="xy">Longitude-Latitude map (xy)</ifitem>
@@ -217,8 +217,8 @@
             <ifoptions op="SidebySide_Plot_2D" href="#Options_Side"/>
             <ifoptions op="Plot_vector" href="#Options_Vector"/>
             <ifoptions op="gen_script" href="#Options_gen_script"/>
-            <ifoptions op="Vector_GE_Overlay" href="#Options_Vector"/>
-            <ifoptions op="Vector_GE_kml" href="#Options_Vector"/>
+            <ifoptions op="Vector_GE_Overlay" href="#Options_Vector_GE"/>
+            <ifoptions op="Vector_GE_kml" href="#Options_Vector_GE"/>
             <ifoptions op="Plot_GE_Overlay" href="#Options_2D_image_contour_xy_GE"/>
             <ifoptions op="Plot_GE_kml" href="#Options_2D_image_contour_xy_GE"/>
             <ifoptions op="Data_Extract_Grid" href="#Options_Data"/>
