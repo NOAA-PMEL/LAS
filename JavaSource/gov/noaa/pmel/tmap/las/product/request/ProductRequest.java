@@ -315,7 +315,7 @@ public class ProductRequest {
                                         }
                                         data.setAttribute("url", gridToURL+expression);
                                         data.setAttribute("var", var+"_regrid");
-                                        data.setAttribute("title", lasConfig.getVariableTitle(varXPath)+"on the grid of"+gridToVar+"[d=1]");
+                                        data.setAttribute("title", lasConfig.getVariableTitle(varXPath)+"on the grid of "+gridToVar+"[d=1]");
                                     } else {
                                         // It's the same data set so use it as normal.
                                         data.setAttribute("url",current_url);
@@ -663,7 +663,12 @@ public class ProductRequest {
         fdsURL = fdsURL+expression;
         data.setAttribute("url", fdsURL);
         data.setAttribute("var",var+"_regrid");
-        data.setAttribute("title",analysis.getAttributeValue("label")+" ["+grid+"]");
+        String title = analysis.getAttributeValue("label")+" ["+grid+"]";
+        // Clean out junk that might make Ferret mad...
+        title = title.replaceAll(",", " ");
+        title = title.replaceAll("\""," ");
+        title = title.replaceAll(";", " ");
+        data.setAttribute("title",title);
 
     }
 
