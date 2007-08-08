@@ -935,66 +935,6 @@
         </properties>
         <service>dapper</service>
     </operation>
-    <operation name="Extract Dapper Data and Plot Location and Value"
-        ID="Dapper_extract_location_value_plot" output_template="output" order="0109">
-        <operation name="Database Extraction" ID="DapperExtract"
-            service_action="dapper">
-            <response ID="DBExtractResponse">
-                <result type="debug" ID="db_debug" file_suffix=".txt"/>
-                <result type="netCDF" ID="netcdf" file_suffix=".nc"/>
-                <result type="cancel" ID="cancel" file_suffix=".txt"/>
-            </response>
-            <properties>
-                <property_group type="backend_request">
-                    <property>
-                        <name>exclude</name>
-                        <value>ferret</value>
-                    </property>
-                </property_group>
-            </properties>
-            <service>dapper</service>
-        </operation>
-        <operation chained="true" name="Dapper location and value plot"
-            ID="Plot_Dapper_XY_locations_and_values" output_template="output"
-            service_action="Plot_insitu_XY_locations_and_values">
-            <args>
-                <arg chained="true" type="variable" index="1"
-                    operation="DapperExtract" result="netcdf" file_suffix=".nc"/>
-                <arg type="region" index="1" ID="in-situ-Region" />
-            </args>
-            <response ID="PlotResp" type="HTML" index="1">
-                <result type="image" ID="plot_image" streamable="true"
-                    mime_type="image/png"  file_suffix=".gif"/>
-                <result type="ps" ID="plot_postscript" streamable="true"
-                    mime_type="application/postscript" file_suffix=".ps"/>
-                <result type="image" ID="ref_map"  file_suffix=".gif"/>
-                <result type="debug" ID="debug" file_suffix=".txt"/>
-                <result type="cancel" ID="cancel" file_suffix=".txt"/>
-            </response>
-            <service>ferret</service>
-        </operation>
-        <region>
-            <!-- Not sure about this since the plot is planar in XY but the extract doesn't have to be. -->
-            <intervals name="x" />
-            <intervals name="y" />
-            <intervals name="z" />
-            <intervals name="t" />
-            <intervals name="xy" />
-            <intervals name="xz" />
-            <intervals name="xt" />
-            <intervals name="yz" />
-            <intervals name="yt" />
-            <intervals name="zt" />
-            <intervals name="xyz" />
-            <intervals name="xyt" />
-            <intervals name="xzt" />
-            <intervals name="yzt" />
-            <intervals name="xyzt" />
-        </region>
-        <grid_types>
-            <grid_type name="scattered" />
-        </grid_types>
-    </operation>
     <operation name="Extract Dapper Data and Plot Location"
         ID="Dapper_extract_location_plot" output_template="output" order="0110">
         <operation name="Database Extraction" ID="DapperExtract"
@@ -1054,6 +994,67 @@
         <grid_types>
             <grid_type name="scattered" />
         </grid_types>
+    </operation>
+    <operation name="Extract Dapper Data and Time Series Plot"
+        ID="Dapper_extract_time_series_plot" output_template="output" order="0140">
+        <operation name="Database Extraction" ID="DapperExtract"
+            service_action="dapper">
+            <response ID="DBExtractResponse">
+                <result type="debug" ID="db_debug" file_suffix=".txt"/>
+                <result type="netCDF" ID="netcdf" file_suffix=".nc"/>
+                <result type="cancel" ID="cancel" file_suffix=".txt"/>
+            </response>
+            <properties>
+                <property_group type="backend_request">
+                    <property>
+                        <name>exclude</name>
+                        <value>ferret</value>
+                    </property>
+                </property_group>
+            </properties>
+            <service>dapper</service>
+        </operation>
+        <operation chained="true" name="Dapper time series plot"
+            ID="Plot_Dapper_Time_Series" output_template="output"
+            service_action="dapper_stack_line">
+            <args>
+                <arg chained="true" type="variable" index="1"
+                    operation="DapperExtract" result="netcdf" file_suffix=".nc"/>
+                <arg type="region" index="1" ID="in-situ-Region" />
+            </args>
+            <response ID="PlotResp" type="HTML" index="1">
+                <result type="image" ID="plot_image" streamable="true"
+                    mime_type="image/png"  file_suffix=".gif"/>
+                <result type="ps" ID="plot_postscript" streamable="true"
+                    mime_type="application/postscript" file_suffix=".ps" />
+                <result type="image" ID="ref_map"  file_suffix=".gif"/>
+                <result type="debug" ID="debug" file_suffix=".txt"/>
+                <result type="cancel" ID="cancel" file_suffix=".txt"/>
+            </response>
+            <service>ferret</service>
+        </operation>
+        <region>
+            <!-- Not sure about this since the plot is planar in XY but the extract doesn't have to be. -->
+            <intervals name="x" />
+            <intervals name="y" />
+            <intervals name="z" />
+            <intervals name="t" />
+            <intervals name="xy" />
+            <intervals name="xz" />
+            <intervals name="xt" />
+            <intervals name="yz" />
+            <intervals name="yt" />
+            <intervals name="zt" />
+            <intervals name="xyz" />
+            <intervals name="xyt" />
+            <intervals name="xzt" />
+            <intervals name="yzt" />
+            <intervals name="xyzt" />
+        </region>
+        <grid_types>
+            <grid_type name="scattered" />
+        </grid_types>
+        <optiondef IDREF="Options_1D"/>
     </operation>
     <operation name="Process Template" ID="Template" output_template="direct_output" private="true" order="9999">
         <service>template</service>

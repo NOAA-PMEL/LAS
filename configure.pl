@@ -1502,7 +1502,6 @@ BEGIN {
                    Log::Agent => 'Log-Agent-0.301',
                    MD5 => 'MD5-2.03',
                    MIME::Base64 => 'MIME-Base64-3.05',
-                   Mail::Sendmail => 'Mail-Sendmail-0.79',
                    Parse::Lex => 'ParseLex-2.15',
                    Parse::Yapp => 'Parse-Yapp-1.05',
                    Template => 'Template-Toolkit-2.14',
