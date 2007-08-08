@@ -3,6 +3,9 @@
 ! 
 ! Author: ansley 
 ! Date: July 18, 2007
+! ACM 8/7/2007 - use symbols region_small* rather than looking for 
+!                certain text within the labels for a more robust
+!                means of setting up for the region-too-small label.
 
 ! Add labels at the top for the location of overlaid lines,
 ! transformations, and for URLs if they exist  
@@ -18,7 +21,7 @@ IF ($n_left_labels"0|*>1") THEN
 
    LET labyloc = `($ppl$ylen) + labdel*($n_left_labels"1") `
 
-   IF `STRINDEX("($upper_left_1)", "region is smaller than") GT 0` THEN 
+   IF ($region_small_1"0|*>1") THEN 
       LET labsiz = 0.16
       LET labyloc = `($ppl$ylen) + 0.5*labdel*($n_left_labels"1")`
    LABEL/NOUSER 0, `labyloc`, -1, 0.0, `labsiz`, ($upper_left_1)
@@ -28,14 +31,14 @@ IF ($n_left_labels"0|*>1") THEN
    LET labsiz = 0.1
 
    IF `($n_left_labels) GT 1` THEN 
-      IF `STRINDEX("($($upper_left_2)", "region is smaller than") GT 0` THEN LET labsiz = 0.16
+      IF IF ($region_small_2"0|*>1") THEN THEN LET labsiz = 0.16
       LABEL/NOUSER 0, `labyloc`, -1, 0.0, `labsiz`, ($upper_left_2)
       LET labsiz = 0.1
       LET labyloc = `labyloc - labdel`
    ENDIF
 
    IF `($n_left_labels) GT 2` THEN
-      IF `STRINDEX("($($upper_left_3)", "region is smaller than") GT 0` THEN LET labsiz = 0.16
+      IF IF ($region_small_3"0|*>1") THEN THEN LET labsiz = 0.16
       LABEL/NOUSER 0, `labyloc`, -1, 0.0, `labsiz`, ($upper_left_3)
       LET labsiz = 0.1
       LET labyloc = `labyloc - labdel`
