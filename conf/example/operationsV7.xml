@@ -244,9 +244,56 @@
     </operation>
 
 <!-- Operations for Google Earth -->
+    <!-- BEGIN: dynamic overlay on Google Earth -->
+    <!-- for non-vector plots [public]-->
+    <operation name="Plot to Google Earth" ID="Plot_GE_Overlay"  mime_type="application/vnd.google-earth.kml+xml"
+        output_template="output_GE_overlay" service_action="Plot_2D_GE" >
+        <service>ferret</service>
+        <response ID="PlotResp">
+                <result type="image" ID="plot_image" streamable="true"
+                        mime_type="image/png" />
+                <result type="ps" ID="plot_postscript" streamable="true"
+                        mime_type="application/postscript" />
+                <result type="image" ID="ref_map" />
+                <result type="map_scale" ID="map_scale" />
+                <result type="debug" ID="debug" />
+                <result type="cancel" ID="cancel" />
+        </response>
+        <region>
+                <intervals name="xy" />
+        </region>
+        <grid_types>
+                <grid_type name="regular" />
+        </grid_types>
+        <optionsdef IDREF="Options_2D_image_contour_xy"/>
+    </operation>
+    <!-- for vector plots [private]; only visible on V6 UI-->
+    <operation name="Vector Plot to Google Earth" ID="Vector_GE_Overlay"  mime_type="application/vnd.google-earth.kml+xml"
+        output_template="output_GE_overlay" service_action="Plot_vector_GE" private="true">
+        <service>ferret</service>
+        <response ID="PlotResp">
+                <result type="image" ID="plot_image" streamable="true"
+                        mime_type="image/png" />
+                <result type="ps" ID="plot_postscript" streamable="true"
+                        mime_type="application/postscript" />
+                <result type="image" ID="ref_map" />
+                <result type="map_scale" ID="map_scale" />
+                <result type="debug" ID="debug" />
+                <result type="cancel" ID="cancel" />
+        </response>
+        <region>
+                <intervals name="xy" />
+        </region>
+        <grid_types>
+                <grid_type name="regular" />
+        </grid_types>
+        <optionsdef IDREF="Options_Vector_GE"/>
+    </operation>
+    <!-- END: dynamic overlay on Google Earth -->
+
     <!-- Begin: static overlay -->
-    <!-- overlay kml for non-vector plots [public]-->
-    <operation name="Plot to Google Earth (static)" ID="Plot_GE_kml" mime_type="application/vnd.google-earth.kml+xml" output_template="output_GE">
+     <!-- overlay kml for non-vector plots [private]; it is used by the dynamic overlay-->
+    <operation name="Plot to Google Earth (static)" ID="Plot_GE_kml" mime_type="application/vnd.google-earth.kml+xml" output_template="output_GE" private="true">
       <operation name="Plot_2D_GE" ID="Plot_for_GE" service_action="Plot_2D_GE">
         <response ID="PlotResp">
                         <result type="image" ID="plot_image" streamable="true" mime_type="image/png" file_suffix=".gif"/>
@@ -276,9 +323,10 @@
         <grid_types>
                 <grid_type name="regular" />
         </grid_types>
+        <optionsdef IDREF="Options_2D_image_contour_xy"/>
     </operation>
 
-    <!-- overlay kml for vector plots [public]-->
+    <!-- overlay kml for vector plots [private]; it is used by the dynamic overlay-->
     <operation name="Plot to Google Earth (static)" ID="Vector_GE_kml" mime_type="application/vnd.google-earth.kml+xml" output_template="output_GE" private="true">
       <operation name="Plot_vector_GE" ID="Vector_for_GE" service_action="Plot_vector_GE">
         <response ID="PlotResp">
@@ -307,6 +355,7 @@
       <grid_types>
         <grid_type name="regular" />
       </grid_types>
+      <optionsdef IDREF="Options_Vector_GE"/>
     </operation>
 
     <!-- END: static overlay -->
