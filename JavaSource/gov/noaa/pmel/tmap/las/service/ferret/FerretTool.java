@@ -14,6 +14,7 @@ import gov.noaa.pmel.tmap.las.util.Message;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -197,8 +198,13 @@ public class FerretTool extends TemplateTool{
             String map_scale_filename = lasBackendRequest.getResultAsFileByType("map_scale");
             if ( map_scale_filename != null && !map_scale_filename.equals("") ) {
                 File map_scale = new File(map_scale_filename);
-                LASMapScale lasMapScale = new LASMapScale(map_scale);
-                lasMapScale.write(map_scale);
+                
+                try {
+                	LASMapScale lasMapScale = new LASMapScale(map_scale);
+                    lasMapScale.write(map_scale);
+                } catch (FileNotFoundException e) {
+                	lasBackendResponse.setError("The map scale file was not found.", e);
+                }
             }    
             
             log.debug("Creating the index file.");
@@ -207,8 +213,12 @@ public class FerretTool extends TemplateTool{
             String index_filename = lasBackendRequest.getResultAsFileByType("index");
             if ( index_filename != null && !index_filename.equals("") ) {
                 File index = new File(index_filename);
-                LASRegionIndex lasRegionIndex = new LASRegionIndex(index);                
-                lasRegionIndex.write(index);
+                try {
+                    LASRegionIndex lasRegionIndex = new LASRegionIndex(index);                
+                    lasRegionIndex.write(index);
+                } catch (FileNotFoundException e){
+                	lasBackendResponse.setError("The region index file was not found.", e);                	
+                }
             }
         }
         else {
