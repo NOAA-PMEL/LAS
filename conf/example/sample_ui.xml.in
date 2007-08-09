@@ -66,7 +66,7 @@
             <item values="Data_Extract_netCDF,cdf,20">NetCDF file</item>
             <item values="Data_Extract_File,asc,20">ASCII file</item>
             <item values="Gen_Scripts,html,20">Desktop application data access scripts</item>
-            <item values="Grid_GE_kml,txt,20">Grid Points on Google Earth</item>
+            <item values="Grid_GE_kml,txt,20">Time Series from Google Earth</item>
             <item values="Animation_2D_XY,txt,20">Animation</item>
         </menu>
         <menu type="ops" name="Ops_Std3D_xyz">
@@ -74,7 +74,7 @@
             <item values="Data_Extract_netCDF,cdf,20">NetCDF file</item>
             <item values="Data_Extract_File,asc,20">ASCII file</item>
             <item values="Gen_Scripts,html,20">Desktop application data access scripts</item>
-            <item values="Grid_GE_kml,txt,20">Grid Points on Google Earth</item>
+            <item values="Grid_GE_kml,txt,20">Vertical Profiles from Google Earth</item>
         </menu>
         <menu type="ops" name="Ops_Std3D">
             <item values="Data_Extract,txt,20">Table of values (text)</item>
