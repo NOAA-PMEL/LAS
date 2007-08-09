@@ -574,7 +574,7 @@ public class ProductServerRunner  extends Thread  {
                 status.add(i, "done");
             } else if ( i == currentOp ) {
                 if ( currentOp == statusOp ) {
-                    runningDots = runningDots+"*";
+                    runningDots = runningDots+"***";
                 } else {
                     statusOp = currentOp;
                     runningDots = "***";

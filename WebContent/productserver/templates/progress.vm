@@ -8,8 +8,6 @@
 		<link rel="alternate" type="application/rss+xml" title="RSS Feed" href="$feed">
 	</head>
 	<body>
-		<img src="images/await.gif" alt="Wait Indicator" border="0"
-			align="middle">
 		<h3>
 			LAS is working on your request.
 		</h3>
@@ -28,7 +26,11 @@
 					$job
 				</td>
 				<td>
+                                      #if ( $status.get($index).contains("*") )
+					$status.get($index) (Each refresh adds *'s to the current step.)
+                                      #else
 					$status.get($index)
+                                      #end
 				</td>
 			</tr>
 			#end
