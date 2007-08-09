@@ -362,7 +362,7 @@
 
     <!-- BEGIN: grid points on Google Earth [public] -->
     <!-- place mark kml for grid points -->
-    <operation name="Grid points to Google Earth" ID="Grid_GE_kml" mime_type="application/vnd.google-earth.kml+xml" output_template="output_GE">
+    <operation name="Time Series/Vertical Profiles from Google Earth" ID="Grid_GE_kml" mime_type="application/vnd.google-earth.kml+xml" output_template="output_GE">
       <operation name="Data_Extract_Grid" ID="Grid_for_GE" service_action="Data_Extract_Grid">
         <response ID="Data_Extract_Grid_Response">
           <result type="text" ID="ferret_listing" streamable="true" mime_type="text/plain" file_suffix=".txt"/>
