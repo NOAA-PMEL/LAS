@@ -283,9 +283,16 @@ function handleLASGetGridResponse(LASResponseText) {
     }
   }
 
-  // Reinitialize the SlideSorter
-  LSS = new LASSlideSorter(document.LASSlideSorterForm,LSSInitObject);
-  LSS.render("LASSlideSorter",2,2,initial_menu);
+  if (!initial_menu) {
+
+    alert('This variable exists only on the axes used in the plot.  No comparison is possible with this variable');
+
+  } else {
+
+    // Reinitialize the SlideSorter
+    LSS = new LASSlideSorter(document.LASSlideSorterForm,LSSInitObject);
+    LSS.render("LASSlideSorter",2,2,initial_menu);
+  }
 
 }
   </script>
