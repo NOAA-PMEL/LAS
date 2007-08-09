@@ -1070,6 +1070,15 @@ public class LASConfig extends LASDocument {
         if (arange == null) {
                             
             List v = axis.getChildren("v");
+            for (Iterator vIt = v.iterator(); vIt.hasNext();) {
+                Element vE = (Element) vIt.next();
+                String label = vE.getAttributeValue("label");
+                if ( label == null ) {
+                    String content = vE.getTextTrim();
+                    vE.setAttribute("label", content);
+                }
+                
+            }
             Element v0 = (Element) v.get(0);
             String tlo = v0.getTextTrim();
             Element vN = (Element) v.get(v.size()-1);
