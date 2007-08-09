@@ -376,13 +376,23 @@ function LASGetGridResponse_getMenu(axis) {
 // NOTE:          {"label2":"content2"},
 // NOTE:          ...
 // NOTE:          {"labelN":"contentN"}],
-// NOTE:  
-// NOTE:  The (for key in menu) loop below is picking up the otoJSONString() method 
-// NOTE:  added to all objects by the json.js library.  The fix is described here:
-// NOTE:  http://yuiblog.com/blog/2006/09/26/for-in-intrigue/
-// NOTE:  and requires the !== 'function' test
+
     for (var i=0; i<menu.length; i++) {
       if (axis_lc == 't') {
+//TODO:  Remove this hack after resolution of trac ticket #147.
+        var month_name = String(menu[i].content).toLowerCase();
+        if (month_name == 'jan') { menu[i].content = '15-Jan'; }
+        if (month_name == 'feb') { menu[i].content = '15-Feb'; }
+        if (month_name == 'mar') { menu[i].content = '15-Mar'; }
+        if (month_name == 'apr') { menu[i].content = '15-Apr'; }
+        if (month_name == 'may') { menu[i].content = '15-May'; }
+        if (month_name == 'jun') { menu[i].content = '15-Jun'; }
+        if (month_name == 'jul') { menu[i].content = '15-Jul'; }
+        if (month_name == 'aug') { menu[i].content = '15-Aug'; }
+        if (month_name == 'sep') { menu[i].content = '15-Sep'; }
+        if (month_name == 'oct') { menu[i].content = '15-Oct'; }
+        if (month_name == 'nov') { menu[i].content = '15-Nov'; }
+        if (month_name == 'dec') { menu[i].content = '15-Dec'; }
         value[i] = new Array(menu[i].label,menu[i].content);
       } else {
         value[i] = new Array(menu[i],menu[i]);
