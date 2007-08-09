@@ -64,6 +64,7 @@ public class ProductServerRunner  extends Thread  {
     protected boolean batch;
     protected boolean error;
     protected boolean previous_batch_error;
+    protected long start;
 
     private static Logger log = LogManager.getLogger(ProductServerRunner.class.getName());
     public ProductServerRunner (ProductRequest productRequest, LASConfig lasConfig, ServerConfig serverConfig, HttpServletRequest request, ActionMapping mapping, Cache cache) {
@@ -100,6 +101,7 @@ public class ProductServerRunner  extends Thread  {
         log.debug("ProductServerRunner started.");
         HttpSession session = request.getSession();
         stillWorking = true;
+        start = System.currentTimeMillis();
         compoundResponse.setRootElement(new Element("backend_response"));
         // Check the cache.
         boolean globalUseCache = productRequest.getUseCache();
@@ -569,6 +571,7 @@ public class ProductServerRunner  extends Thread  {
 
     public ArrayList getStatus() {
         ArrayList<String> status = new ArrayList<String>();
+        long time = (System.currentTimeMillis() - start) / 1000;
         for (int i = 0; i<productRequest.getRequestXML().size(); i++ ) {
             if ( i < currentOp ) {
                 status.add(i, "done");
@@ -579,7 +582,7 @@ public class ProductServerRunner  extends Thread  {
                     statusOp = currentOp;
                     runningDots = "***";
                 }
-                status.add(i, "running"+runningDots);
+                status.add(i, "has been running for "+time+" seconds "+runningDots);
             } else {
                 status.add(i, "pending");
             }
@@ -634,4 +637,5 @@ public class ProductServerRunner  extends Thread  {
     public boolean getBatch() {
         return batch;
     }
+    
 }
