@@ -1,6 +1,9 @@
 !\cancel mode verify
 ! list_arc_ascii.jnl - create Arcinfo GIS output of regular grids
 ! Ansley Manke 6/2007, based on old LAS script arc_ascii.jnl
+! 8/ 9/2007 ACM Check that just one variable has been chosen.
+!       TODO    Find out if Arc-ascii allows for multi-variable files and
+!               if so how is that organized.
 !
 ! Description: create Arcinfo GIS output of regular grids
 
@@ -8,6 +11,15 @@
 
 ! Define symbols associated with the region and data and perform any
 ! initialization needed for this dataset.
+
+IF `($data_count"0|1|*>0") NE 1` THEN
+  DEFINE SYMBOL error_status = ERROR
+  DEFINE SYMBOL error_type VARIABLES
+  DEFINE SYMBOL error_action = running Ferret scripts for ($operation_ID) arc_ascii
+  DEFINE SYMBOL error_string "This product is designed for single-variable output only. Choose 1 variable."
+  GO LAS_error_result
+ENDIF
+GO LAS_default_errsyms
 
 GO LAS_initialize_region 0
 GO ($ferret_init_script"LAS_initialize_data|*>*") 0
