@@ -48,6 +48,18 @@ function initializeLASSlideSorter() {
   ReqA = new LASRequest('$las_request.toJavaScriptSafeString()');
   dsid = ReqImg.getDataset();
   varid = ReqImg.getVariable();
+
+  // set options field to values in request
+  var user_option;
+  if (view == 'x' || view == 'y' || view == 'z' || view == 't') {
+    user_option = ReqImg.getProperty('ferret','dep_axis_scale');
+  } else {
+    user_option = ReqImg.getProperty('ferret','fill_levels');
+  }
+  if (user_option) {
+    document.getElementById('LSS_optionTextField').value = user_option;
+  }
+  
   sendGetGridRequest();
 }
 
@@ -78,12 +90,10 @@ function createLASRequest(AA) {
 
 // Set the contour levels/scaling if defined
   var user_option =  document.getElementById('LSS_optionTextField').value;
-  if (user_option != '') {
-    if (view == 'x' || view == 'y' || view == 'z' || view == 't') {
-      ReqImg.setProperty('ferret','dep_axis_scale',user_option);
-    } else {
-      ReqImg.setProperty('ferret','fill_levels',user_option);
-    }
+  if (view == 'x' || view == 'y' || view == 'z' || view == 't') {
+    ReqImg.setProperty('ferret','dep_axis_scale',user_option);
+  } else {
+    ReqImg.setProperty('ferret','fill_levels',user_option);
   }
 
   if (view != 'x' && view != 'xy' && view != 'xz' && view != 'xt') {
