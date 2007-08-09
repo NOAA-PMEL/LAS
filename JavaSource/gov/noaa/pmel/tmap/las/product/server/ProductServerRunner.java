@@ -78,6 +78,7 @@ public class ProductServerRunner  extends Thread  {
         this.statusOp= 0;
         this.emails = new HashSet<String>();
         this.runningDots = "***";
+        this.start=0;
 
         this.error = false;
         this.batch = false;
@@ -101,7 +102,7 @@ public class ProductServerRunner  extends Thread  {
         log.debug("ProductServerRunner started.");
         HttpSession session = request.getSession();
         stillWorking = true;
-        start = System.currentTimeMillis();
+       
         compoundResponse.setRootElement(new Element("backend_response"));
         // Check the cache.
         boolean globalUseCache = productRequest.getUseCache();
@@ -150,6 +151,7 @@ public class ProductServerRunner  extends Thread  {
 
             ArrayList requestXMLList = productRequest.getRequestXML();
             for(int index = 0; index < requestXMLList.size(); index++ ) {
+            	start = System.currentTimeMillis();
                 int request = index+1;
                 log.debug("Processing request "+request+" of " + requestXMLList.size());
 
