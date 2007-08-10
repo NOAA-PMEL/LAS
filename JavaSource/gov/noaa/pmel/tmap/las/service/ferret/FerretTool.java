@@ -228,7 +228,14 @@ public class FerretTool extends TemplateTool{
             log.debug("Error message: "+errorMessage);
             log.debug("stderr: "+stderr);
             log.debug("stdout: "+output);
-            String error_message = findMessage(stderr);
+            String error_message = "An error occurred creating your product.";
+            try {
+                error_message = findMessage(stderr);
+            } catch (Exception e) {
+            	
+            		// Go on with a generic error message.
+            	
+            }
             lasBackendResponse.setError("las_message", error_message);
             lasBackendResponse.addError("exception_message", stderr+"\n"+output);
             return lasBackendResponse;
