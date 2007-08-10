@@ -66,7 +66,8 @@ DEFINE axis/z/depth/units=`($ferret_thk_var)[d=($thk_num)],return=units`/bounds 
 ! From the region and the grid we can define striding. 
 ! Eventually this might be done in a general way, in LAS_initialize_dataset.
 !  Do this only for the HYCOM high resolution data, so put it in  HYCOM_init script
-GO LAS_set_strides.jnl
+GO LAS_set_strides_curvilinear.jnl
+
 
 ! TODO:  From here to the end probably won't work with the regridded
 ! TODO:  variable I've already created.
