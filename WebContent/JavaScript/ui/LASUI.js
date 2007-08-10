@@ -3,17 +3,13 @@
 	dojo.require("dojo.lang.*");
 	dojo.require("dojo.io.*");
 	dojo.require("dojo.event.*");
-	dojo.require("dojo.widget.Tree");
-	dojo.require("dojo.widget.TreeNode");
-	dojo.require("dojo.widget.TreeSelector");
-	dojo.require("dojo.widget.TreeBasicController");
-	dojo.require("dojo.undo.browser");
+	//dojo.require("dojo.undo.browser");
 	
- 	var djConfig = new Object;
- 	djConfig.isDebug          = true;
- 	djConfig.debugAtAllCosts  = true;
- 	djConfig.debugContainerId = "_dojoDebugConsole";
- 	djConfig.baseScriptUri = "dojo/dojo.js";
+ //	var djConfig = new Object;
+ //	djConfig.isDebug          = false;//true;
+ //	djConfig.debugAtAllCosts  = false; //true;
+ //	djConfig.debugContainerId = "_dojoDebugConsole";
+ //	djConfig.baseScriptUri = "dojo/dojo.js";
 	
 	if ( ! Function.prototype.bindAsEventListener ) {
     Function.prototype.bindAsEventListener = function(object) {
@@ -100,7 +96,53 @@
 		
 		//inititialize the map widget
 		this.initMap('MapWidget');
+		if(this.qs.params.debug) 
+			this.showDebugWindow();
 	}
+	LASUI.prototype.showDebugWindow = function () {
+		dojo.require("dojo.widget.ContentPane");
+		dojo.require("dojo.widget.FloatingPane");
+		dojo.require("dojo.widget.ResizeHandle");
+
+			var properties = {
+				hasShadow: true,
+				displayMinimizeAction: false,
+				displayMaximizeAction: true,
+				displayCloseAction: true,
+				executeScripts: true,
+				constrainToContainer: false,
+				style: "",
+				title: "LAS UI Debugger",
+				titleHeight: "20",
+				id: "dojoWindowId"
+			};
+			node = document.createElement("div");
+			node.style.width = "540px";	
+			node.style.height = "300px";
+			node.style.left = "100px";
+			node.style.top = "100px";
+			node.style.zIndex = 10;
+	
+			var req_text = document.createElement("TEXTAREA");
+			req_text.cols = 80;
+			req_text.rows = 10;
+			req_text.value= "alert('Click the button below to evaluate script in this box.');";
+			var req_submit = document.createElement("INPUT");
+			req_submit.type = "submit";
+			req_submit.value = "Submit debug request";
+			req_submit.onclick  = function (evt) {
+				var args = $A(arguments);
+				var req_text = args[1];
+				eval(req_text.value);
+			}.bindAsEventListener(this,req_text);
+			node.appendChild(document.createElement("BR"));			
+			node.appendChild(req_text);
+			node.appendChild(document.createElement("BR"));			
+			node.appendChild(req_submit);
+			document.body.appendChild(node);
+			dojoWindow = dojo.widget.createWidget("FloatingPane",properties,node);		
+	}
+	
 	/*
 	 * function to initialize the control tree
 	 * parameters:
@@ -110,8 +152,11 @@
 	{
 		
 		// create 1st level tree and nodes.
-		var _tree = dojo.widget.createWidget("Tree");
-		dojo.byId(anchorId).appendChild(_tree.domNode);
+		var _tree = document.createElement("UL");//dojo.widget.createWidget("Tree");
+	   _tree.style.paddingLeft ="0px";
+	   _tree.style.marginLeft ="0px";
+	   
+		dojo.byId(anchorId).appendChild(_tree);
 		
 		var _rootNodes  = [
 									{"title" : "Categories","isFolder" : "true", "id" : "categories"},
@@ -121,14 +166,31 @@
 								];
 
 		for(var i=0;i<_rootNodes.length;i++) {
-			var _treeNode = dojo.widget.createWidget("TreeNode");
-			for(var s in _rootNodes[i]) 
-				eval("_treeNode.edit({'" + s + "' : '" + _rootNodes[i][s]  + "'})");
+			this.refs[_rootNodes[i].id] = {};
+			this.refs[_rootNodes[i].id].LINode = document.createElement("LI");//dojo.widget.createWidget("TreeNode");
+			this.refs[_rootNodes[i].id].title = document.createElement("SPAN");
+			this.refs[_rootNodes[i].id].IMGNode = document.createElement("IMG"); 
+			this.refs[_rootNodes[i].id].title.onclick = this.collapseRootNodes.bindAsEventListener(this,  _rootNodes[i].id);
+			this.refs[_rootNodes[i].id].title.innerHTML = _rootNodes[i].title;
+			this.refs[_rootNodes[i].id].title.style.cursor = "pointer";
+			this.refs[_rootNodes[i].id].title.style.cursor = "hand";
+			this.refs[_rootNodes[i].id].title.style.verticalAlign = "middle";
+			this.refs[_rootNodes[i].id].IMGNode.src = "http://www.mattkruse.com/javascript/mktree/plus.gif";
+			this.refs[_rootNodes[i].id].IMGNode.style.cursor = "pointer";
+			this.refs[_rootNodes[i].id].IMGNode.style.cursor = "hand";
+			this.refs[_rootNodes[i].id].IMGNode.style.verticalAlign = "middle";
+			this.refs[_rootNodes[i].id].IMGNode.onclick = this.collapseRootNodes.bindAsEventListener(this,  _rootNodes[i].id);
 			
-			// keep a references to the root tree nodes so we can easily grab them later
-			eval("this.refs." + _rootNodes[i].id + "={'DojoNode' : _treeNode};");
-			_treeNode.onTreeClick = this.collapseRootNodes.bindAsEventListener(this,  _rootNodes[i].id);
-			_tree.addChild(_treeNode); 
+			this.refs[_rootNodes[i].id].LINode.style.listStyleType = "none";
+			
+			this.refs[_rootNodes[i].id].ULNode = document.createElement("UL");
+			if(!document.all)this.refs[_rootNodes[i].id].ULNode.style.marginLeft="4px;"
+			if(!document.all)this.refs[_rootNodes[i].id].ULNode.style.paddingLeft="4px;"
+			this.refs[_rootNodes[i].id].LINode.appendChild(this.refs[_rootNodes[i].id].IMGNode);
+			this.refs[_rootNodes[i].id].LINode.appendChild(this.refs[_rootNodes[i].id].title);
+			this.refs[_rootNodes[i].id].LINode.appendChild(this.refs[_rootNodes[i].id].ULNode);
+			this.refs[_rootNodes[i].id].isExpanded = false;
+			_tree.appendChild(this.refs[_rootNodes[i].id].LINode); 
 		}
 	
 		
@@ -137,10 +199,12 @@
 		var _bindArgs = {	
 								url: this.hrefs.getCategories.url,
 								mimetype: "text/plain",
-								error: function(type,error) {alert(error.type + ' ' + error.message);},
+								sync : false,
+								error: function(type,error) {alert('initDojoTree AJAX error.' + error.type + ' ' + error.message);},
 								load:	dojo.lang.hitch(this, (function(type,data,event) {this.setCategoryTreeNode(data,this.refs.categories,"categories"); }))
 						};
-		var _request = dojo.io.bind(_bindArgs);	
+		var _request = dojo.io.bind(_bindArgs);
+			this.expand(this.refs.categories);	
 	}
 		/*
 	 * function to load a UI category tree node from a json response
@@ -150,13 +214,14 @@
 	 */
 	LASUI.prototype.setCategoryTreeNode = function (strJson, node, id) {
 		var response = eval("(" + strJson + ")");
-		
+
 		node.category = new LASGetCategoriesResponse(response);
-		
+					
 		if(node.category.getCategoryType()=="category")
 			node.children=[];
 		for(var i=0; i<node.category.getCategorySize();i++)
 			this.setCategoryTreeSubNode(node, i,id);
+		
 		
 	}
 	/*
@@ -177,25 +242,51 @@
 	LASUI.prototype.createCategoryTreeNode = function (node, i, id) {
 		
 		if(node==this.refs.categories && node.category.getChildChildrenType(i)=="variables")
-					this.refs.categories.DojoNode.edit("title","Datasets");
+					this.refs.categories.title.innerHTML="Datasets";
 	
 		node.children[i] = {};
-		node.children[i].DojoNode = dojo.widget.createWidget("TreeNode");	
-		node.children[i].DojoNode.edit({'isFolder' : true});
-		var title = document.createElement("TEXT");
-		title.innerHTML = node.category.getChildName(i);
-		//var radio = document.createElement("INPUT");
-		//radio.onclick=this.selectCategory.bindAsEventListener(this, node, i);
-		//radio.name = id;
-		//radio.type="radio";
-		//radio.id = node.category.getDatasetID();
-		//node.children[i].DojoNode.titleNode.appendChild(radio);
-		node.children[i].DojoNode.titleNode.appendChild(title);	
-		node.children[i].DojoNode.onTreeClick = this.selectCategory.bindAsEventListener(this, node, i);		
+		node.children[i].LINode = document.createElement("LI"); //dojo.widget.createWidget("TreeNode");	
+		node.children[i].IMGNode =  document.createElement("IMG");
+		node.children[i].IMGNode.onclick = this.selectCategory.bindAsEventListener(this, node, i);
+		node.children[i].IMGNode.style.cursor = "pointer";
+		node.children[i].IMGNode.style.cursor = "hand";
+		//node.children[i].IMGNode.style.verticalAlign = "middle";
+		node.children[i].IMGNode.src = "http://www.mattkruse.com/javascript/mktree/plus.gif";
+		node.children[i].LINode.style.listStyleType = "none";
+		node.children[i].isExpanded = false;
 
-		node.DojoNode.addChild(node.children[i].DojoNode);
+		node.children[i].ULNode = document.createElement("ul");
+		if(!document.all)node.children[i].ULNode.style.marginLeft = "4px";
+		if(!document.all)node.children[i].ULNode.style.paddingLeft = "4px";
+		var table = document.createElement("TABLE");
+		table.cellpadding = 0;
+		table.cellspacing = 0;
+		var tbody = document.createElement("TBODY");
+		var tr = document.createElement("TR");
+		var td1 = document.createElement("TD");
+		td1.style.verticalAlign="top";
+		td1.appendChild(node.children[i].IMGNode);
 		
-		if(!node.DojoNode.isExpanded) node.DojoNode.expand();
+		var td2 = document.createElement("TD");
+		td2.style.verticalAlign = "top";
+		td2.onclick = this.selectCategory.bindAsEventListener(this, node, i);
+		td2.innerHTML = node.category.getChildName(i);
+		td2.style.cursor = "pointer";
+		td2.style.cursor = "hand";
+		
+		td2.halign = "left";
+		tr.appendChild(td1);
+		tr.appendChild(td2);
+		tbody.appendChild(tr);
+		table.appendChild(tbody);
+		
+		//node.children[i].LINode.appendChild(node.children[i].IMGNode);
+		node.children[i].LINode.appendChild(table);
+		//node.children[i].LINode.appendChild(category_title);
+		node.children[i].LINode.appendChild(node.children[i].ULNode);
+		node.ULNode.appendChild(node.children[i].LINode);
+		
+		//if(!node.ULNode.style.display!="none") node.ULNode.style.display="";
 		if(node.category.getChildType(i)=='dataset' && node.category.getChildID(i)==this.state.dataset) 
 			this.getCategory(node, i);
 		
@@ -205,19 +296,46 @@
 		if(!node.children)
 			node.children=[];
 		node.children[i] = {};
-		node.children[i].DojoNode = dojo.widget.createWidget("TreeNode");	
-		node.children[i].DojoNode.edit({'isFolder' : false});
-		var title = document.createElement("TEXT");
-		title.innerHTML = node.category.getChildName(i);
-		var checkbox = document.createElement("INPUT");
-		checkbox.type="radio";
-		checkbox.name=node.category.getDatasetID();
-		checkbox.onclick=this.setVariable.bindAsEventListener(this, node, i);
-//		node.DojoNode.onTreeClick = function(){if(this.isExpanded) this.collapse(); else this.expand();};
-		//checkbox.name = node.category.getChildName(i);
-		checkbox.id = node.category.getChildID(i);
-		node.children[i].DojoNode.titleNode.appendChild(checkbox);
-		node.children[i].DojoNode.titleNode.appendChild(title);	
+		node.children[i].LINode = document.createElement("LI");
+		node.children[i].LINode.style.listStyleType = "none";
+		node.children[i].LINode.style.listStyleImage = "none";
+		node.children[i].LINode.style.marginLeft ="0px";
+		if(!document.all)node.children[i].LINode.style.paddingLeft ="0px";
+		if(document.all) {
+			var elem_nm = "<INPUT NAME='" + node.category.getDatasetID()+"'>";
+			node.children[i].INPUTNode = document.createElement(elem_nm);
+		} else {
+			node.children[i].INPUTNode = document.createElement("INPUT");
+			node.children[i].INPUTNode.name=node.category.getDatasetID();
+		}
+		node.children[i].INPUTNode.type="radio";
+		node.children[i].INPUTNode.onclick=this.setVariable.bindAsEventListener(this, node, i);
+		node.children[i].INPUTNode.id = node.category.getChildID(i);
+		
+		var table = document.createElement("TABLE");
+		table.cellpadding = 0;
+		table.cellspacing = 0;
+		
+		var tbody = document.createElement("TBODY");
+		var tr = document.createElement("TR");
+		var td1 = document.createElement("TD");
+		td1.style.verticalAlign="top";
+		td1.appendChild(node.children[i].INPUTNode);
+		
+		var td2 = document.createElement("TD");
+		td2.style.verticalAlign = "top";
+		td2.innerHTML= node.category.getChildName(i);
+		td2.style.cursor = "pointer";
+		td2.style.cursor = "hand";
+		
+		td2.halign = "left";
+		tr.appendChild(td1);
+		tr.appendChild(td2);
+		tbody.appendChild(tr);
+		table.appendChild(tbody);
+		
+		node.children[i].LINode.appendChild(table);
+		
 		
 		if(this.state.variables && this.state.dataset)
 			if(this.state.variables[this.state.dataset])
@@ -225,14 +343,10 @@
 					if(this.state.variables[this.state.dataset][v]==node.category.getChildID(i))
 				  { 
 					this.setVariable({}, node, i, true);
-					checkbox.checked=true;
+					node.children[i].INPUTNode.checked=true;
 				}
 
-		node.DojoNode.addChild(node.children[i].DojoNode);
-		if(!node.DojoNode.isExpanded) node.DojoNode.expand();
-	
-
-		
+		node.ULNode.appendChild(node.children[i].LINode);
 	}
 	
 	LASUI.prototype.getCategory = function (parentNode, i) {
@@ -240,21 +354,22 @@
 			var _bindArgs = {	
 					url: this.hrefs.getCategories.url + "?catid=" + parentNode.category.getChildID(i),
 					mimetype: "text/plain",
-					error: function(type,error) {alert(error.type + ' ' + error.message);},
-									load:	dojo.lang.hitch(this, (function(type,data,event) {this.setCategoryTreeNode(data, parentNode.children[i], parentNode.category.getChildID(i)); }))
-							};
+					error: function(type,error) {alert('getCategory AJAX error.' + error.type + ' ' + error.message);},
+					sync : false,
+					load:	dojo.lang.hitch(this, (function(type,data,event) {this.setCategoryTreeNode(data, parentNode.children[i], parentNode.category.getChildID(i)); }))
+			};
 			var _request = dojo.io.bind(_bindArgs);
 		} 
-		if(!parentNode.children[i].DojoNode.isExpanded) {
+		if(parentNode.children[i].ULNode.style.display=="none") {
 			for(var c=0;c< parentNode.children.length;c++)
-				parentNode.children[c].DojoNode.collapse();
-			parentNode.children[i].DojoNode.expand();	//expand the category if it has been selected 
+				parentNode.children[c].ULNode.style.display="none";
+			parentNode.children[i].style.display="";	//expand the category if it has been selected 
 			if(parentNode.children[i].category) //if the category is a dataset set it as the selected dataset
 				if(parentNode.children[i].category.getCategoryType()=="dataset"){
 						this.setDataset(parentNode.category.getChildID(i));
 				}
 		} else
-			parentNode.children[i].DojoNode.collapse();
+			parentNode.children[i].ULNode.style.display="none";
 			
 			
 	}
@@ -262,26 +377,30 @@
 		var args = $A(arguments);
 		var parentNode = args[1];
 		var i = args[2];		
+		if(!parentNode.children[i].isExpanded) {
+			for(var c=0;c< parentNode.children.length;c++)
+				this.collapse(parentNode.children[c]);
+			this.expand(parentNode.children[i]);	//expand the category if it has been selected 
+			/*if(parentNode.children[i].category) //if the category is a dataset set it as the selected dataset
+				if(parentNode.children[i].category.getCategoryType()=="dataset"){
+						this.setDataset(parentNode.children[i].category.getDatasetID());
+				}
+			else*/
+				if(parentNode.category.getChildChildrenType(i)=="variables")
+					this.setDataset(parentNode.category.getChildID(i));
+		} else
+			this.collapse(parentNode.children[i]);
 
 		if(!parentNode.children[i].category) {
 			var _bindArgs = {	
 					url: this.hrefs.getCategories.url + "?catid=" + parentNode.category.getChildID(i),
 					mimetype: "text/plain",
-					error: function(type,error) {alert(error.type + ' ' + error.message);},
-									load:	dojo.lang.hitch(this, (function(type,data,event) {this.setCategoryTreeNode(data, parentNode.children[i], parentNode.category.getChildID(i)); }))
+					sync : false,
+					error: function(type,error) {alert('selectCategory AJAX error.' + error.type + ' ' + error.message);},
+					load:	dojo.lang.hitch(this, (function(type,data,event) {this.setCategoryTreeNode(data, parentNode.children[i], parentNode.category.getChildID(i)); }))
 							};
 			var _request = dojo.io.bind(_bindArgs);
 		} 
-		if(!parentNode.children[i].DojoNode.isExpanded) {
-			for(var c=0;c< parentNode.children.length;c++)
-				parentNode.children[c].DojoNode.collapse();
-			parentNode.children[i].DojoNode.expand();	//expand the category if it has been selected 
-			if(parentNode.children[i].category) //if the category is a dataset set it as the selected dataset
-				if(parentNode.children[i].category.getCategoryType()=="dataset"){
-						this.setDataset(parentNode.category.getChildID(i));
-				}
-		} else
-			parentNode.children[i].DojoNode.collapse();
 			
 			
 	}
@@ -300,18 +419,9 @@
 			
 		var datasetID = dataset.category.getDatasetID();
 		var variableID = dataset.category.getChildID(i);
-		var variableDojoNode = dataset.children[i].DojoNode;
+		var variableLINode = dataset.children[i].LINode;
 		
-		if (loadVariable) {
-			//add a variable to the state
-			//if we havent set a dataset, set this one
-			//if(this.state.dataset == null) {
-				this.state.dataset = datasetID;
-				//check its radio button
-				//try {dataset.DojoNode.titleNode.firstChild.checked = true;}
-				//catch (e) {}
-			//}
-			
+		if (loadVariable) {			
 			//start an array of selected variables for this dataset if we havent already
 			if(typeof this.state.variables[datasetID] != 'object') 
 				this.state.variables[datasetID] = [];
@@ -341,13 +451,13 @@
 		var args = $A(arguments)
 		var view = args[1];	
 		this.state.view = view;
-		this.refs.operations.DojoNode.destroyChildren();
-		this.refs.options.DojoNode.destroyChildren();
+		this.refs.operations.ULNode.innerHTML="";
+		this.refs.options.ULNode.innerHTML="";
 		this.state.properties = {};	
 		
-
-		this.getOperations(this.state.dataset,this.state.variables[this.state.dataset].last(),this.state.view);
 		this.updateConstraints();
+		this.getOperations(this.state.dataset,this.state.variables[this.state.dataset].last(),this.state.view);
+
 	}	
 	LASUI.prototype.getOperations= function (dataset, variable, view) {
 	
@@ -355,7 +465,7 @@
 		var _bindArgs = {	
 				url: this.hrefs.getOperations.url + '?dsid=' + dataset + '&varid=' + variable + '&view=' + view,
 				mimetype: "text/plain",
-				error: function(type,error) {alert(error.type + ' ' + error.message);},
+				error: function(type,error) {alert('getOperations AJAX error.' + error.type + ' ' + error.message);},
 				load: dojo.lang.hitch(this, (function(type,data,event) {this.setOperationList(data);})) 
 			};
 		var _request = dojo.io.bind(_bindArgs);
@@ -365,7 +475,7 @@
 		var args = $A(arguments);
 		var id = args[1];
 		this.state.operation=id;
-		this.refs.options.DojoNode.destroyChildren();
+		this.refs.options.ULNode.innerHTML="";
 		if(this.refs.operations.operations.getOperationByID(id).optiondef)
 			this.getOptions(this.refs.operations.operations.getOperationByID(id).optiondef.IDREF);	
 		else if (this.refs.operations.operations.getOperationByID(id).optionsdef)
@@ -378,47 +488,47 @@
 	 */	
 	LASUI.prototype.setOperationList = function (strJson) {
 		//clear the current view list and state
-		this.refs.operations.DojoNode.destroyChildren();
+		this.refs.operations.ULNode.innerHTML="";
 		var response = eval("(" + strJson + ")");
 		var setDefault = true;
 		this.refs.operations.operations = new LASGetOperationsResponse(response);
 		for(var i=0;i<this.refs.operations.operations.getOperationCount();i++) {
-			this.setOperationDojoNode(this.refs.operations.operations.getOperationID(i), this.refs.operations.operations.getOperationName(i));	
+			this.setOperationLINode(this.refs.operations.operations.getOperationID(i), this.refs.operations.operations.getOperationName(i));	
 			if(this.refs.operations.operations.getOperationID(i)==this.state.operation) 
 				setDefault = false;
 		}
 		if(setDefault) {
 			this.state.operation=this.refs.operations.operations.getOperationID(0);
-			this.refs.operations.operations.getOperationByID(this.state.operation).DojoNode.titleNode.firstChild.checked=true;		
+			this.refs.operations.operations.getOperationByID(this.state.operation).INPUTNode.checked=true;		
 		}
 		if(this.refs.operations.operations.getOperationByID(this.state.operation).optiondef)
 			this.getOptions(this.refs.operations.operations.getOperationByID(this.state.operation).optiondef.IDREF);	
 		else if (this.refs.operations.operations.getOperationByID(this.state.operation).optionsdef)
 			this.getOptions(this.refs.operations.operations.getOperationByID(this.state.operation).optionsdef.IDREF);	
 
-		//if(!this.refs.operations.DojoNode.isExpanded) this.refs.operations.DojoNode.expand();
+		//if(!this.refs.operations.ULNode.style.display!="none") this.refs.operations.ULNode.style.display="";
 	}
-	LASUI.prototype.setOperationDojoNode = function (id, name) {
-		this.refs.operations.operations.getOperationByID(id).DojoNode = dojo.widget.createWidget("TreeNode");	
-		this.refs.operations.operations.getOperationByID(id).DojoNode.edit({'isFolder' : false});
+	LASUI.prototype.setOperationLINode = function (id, name) {
+		this.refs.operations.operations.getOperationByID(id).LINode = document.createElement("LI");	
+		this.refs.operations.operations.getOperationByID(id).LINode.style.listStyleType = "none";
 		var title = document.createElement("TEXT");
 		title.innerHTML = name;
-		var radio = document.createElement("INPUT");
-		radio.type="radio";
-		radio.onclick=this.setOperation.bindAsEventListener(this, id);
-		radio.name = "operations";
+		this.refs.operations.operations.getOperationByID(id).INPUTNode =  document.createElement("INPUT");
+		this.refs.operations.operations.getOperationByID(id).INPUTNode.type="radio";
+		this.refs.operations.operations.getOperationByID(id).INPUTNode.onclick=this.setOperation.bindAsEventListener(this, id);
+		this.refs.operations.operations.getOperationByID(id).INPUTNode.name = "operations";
 		if (this.state.operation == id)
-			radio.checked = true;		
-		radio.id = id;
-		this.refs.operations.operations.getOperationByID(id).DojoNode.titleNode.appendChild(radio);
-		this.refs.operations.operations.getOperationByID(id).DojoNode.titleNode.appendChild(title);	
-		this.refs.operations.DojoNode.addChild(this.refs.operations.operations.getOperationByID(id).DojoNode);	
+			this.refs.operations.operations.getOperationByID(id).INPUTNode.checked = true;		
+		this.refs.operations.operations.getOperationByID(id).INPUTNode.id = id;
+		this.refs.operations.operations.getOperationByID(id).LINode.appendChild(this.refs.operations.operations.getOperationByID(id).INPUTNode);
+		this.refs.operations.operations.getOperationByID(id).LINode.appendChild(title);	
+		this.refs.operations.ULNode.appendChild(this.refs.operations.operations.getOperationByID(id).LINode);	
 }
 	LASUI.prototype.getGrid = function (dataset, variable) {
 				var _bindArgs = {	
 						url: this.hrefs.getGrid.url + '?dsid=' + dataset + '&varid=' + variable,
 						mimetype: "text/plain",
-						error: function(type,error) {alert(error.type + ' ' + error.message);},
+						error: function(type,error) {alert('getGrid AJAX error.' + error.type + ' ' + error.message);},
 						load: dojo.lang.hitch(this, (function(type,data,event) {this.setGrid(data);})),
 						timeout: dojo.lang.hitch(this, (function() { alert("The dataset you selected is currently unavailable.")})),
 						timeoutSeconds: 3 //The number of seconds to wait until firing timeout callback in case of timeout. 
@@ -444,7 +554,7 @@
 		var _bindArgs = {	
 			url: this.hrefs.getViews.url + '?dsid=' + dataset + '&varid=' +variable,
 			mimetype: "text/plain",
-			error: function(type,error) {alert(error.type + ' ' + error.message);},
+			error: function(type,error) {alert('getViews AJAX error.' + error.type + ' ' + error.message);},
 			load: dojo.lang.hitch(this, (function(type,data,event) {this.setViewList(data);})),
 			timeout: dojo.lang.hitch(this, (function() { alert("The dataset you selected is currently unavailable.")})),
 			timeoutSeconds: 3 //The number of seconds to wait until firing timeout callback in case of timeout. 
@@ -457,53 +567,53 @@
 	 */	
 	LASUI.prototype.setViewList = function (strJson) {
 		//clear the current view list and state
-		this.refs.views.DojoNode.destroyChildren();
+		this.refs.views.ULNode.innerHTML="";
 		var response = eval("(" + strJson + ")");
 		var setDefault = true;
 		this.refs.views.views = new LASGetViewsResponse(response);
 		for(var i=0;i<this.refs.views.views.getViewCount();i++) {
 			var useView = true;
 			for(var v=0;v<this.refs.views.views.getViewID(i).length;v++)
-				if(!this.state.grid.hasAxis(this.refs.views.views.getViewID(i)[v]))
+				if(!this.state.grid.hasAxis(this.refs.views.views.getViewID(i).charAt(v)))
 					useView = false;
 			if(useView) {
-				this.setViewDojoNode(this.refs.views.views.getViewID(i), this.refs.views.views.getViewName(i));	
+				this.setViewNode(this.refs.views.views.getViewID(i), this.refs.views.views.getViewName(i));	
 				if(this.refs.views.views.getViewID(i)==this.state.view)
 					setDefault = false;
 			}
 		}
 		if(setDefault) {
 			this.state.view=this.refs.views.views.getViewID(0);
-			this.refs.views.views.getViewByID(this.state.view).DojoNode.titleNode.firstChild.checked=true;
+			this.refs.views.views.getViewByID(this.state.view).INPUTNode.checked=true;
 			
 		}
 		this.getOperations(this.state.dataset,this.state.variables[this.state.dataset].last(),this.state.view);
-		//if(!this.refs.views.DojoNode.isExpanded) 
-		//	this.refs.views.DojoNode.expand();
+		//if(!this.refs.views.ULNode.style.display!="none") 
+		//	this.refs.views.ULNode.style.display="";
 		
 		this.updateConstraints();
 	}
-	LASUI.prototype.setViewDojoNode = function (id, name) {
-		this.refs.views.views.getViewByID(id).DojoNode = dojo.widget.createWidget("TreeNode");	
-		this.refs.views.views.getViewByID(id).DojoNode.edit({'isFolder' : false});
+	LASUI.prototype.setViewNode = function (id, name) {
+		this.refs.views.views.getViewByID(id).LINode = document.createElement("LI");
+		this.refs.views.views.getViewByID(id).LINode.style.listStyleType = "none";	
 		var title = document.createElement("TEXT");
 		title.innerHTML = name;
-		var radio = document.createElement("INPUT");
-		radio.type="radio";
-		radio.onclick=this.setView.bindAsEventListener(this, id);
-		radio.name = "views";
+		this.refs.views.views.getViewByID(id).INPUTNode = document.createElement("INPUT");
+		this.refs.views.views.getViewByID(id).INPUTNode.type="radio";
+		this.refs.views.views.getViewByID(id).INPUTNode.onclick=this.setView.bindAsEventListener(this, id);
+		this.refs.views.views.getViewByID(id).INPUTNode.name = "views";
 		if (this.state.view == id)
-			radio.checked = true;		
-		radio.id = id;
-		this.refs.views.views.getViewByID(id).DojoNode.titleNode.appendChild(radio);
-		this.refs.views.views.getViewByID(id).DojoNode.titleNode.appendChild(title);	
-		this.refs.views.DojoNode.addChild(this.refs.views.views.getViewByID(id).DojoNode);	
+			this.refs.views.views.getViewByID(id).INPUTNode.checked = true;		
+		this.refs.views.views.getViewByID(id).INPUTNode.id = id;
+		this.refs.views.views.getViewByID(id).LINode.appendChild(this.refs.views.views.getViewByID(id).INPUTNode);
+		this.refs.views.views.getViewByID(id).LINode.appendChild(title);	
+		this.refs.views.ULNode.appendChild(this.refs.views.views.getViewByID(id).LINode);	
 }
 	/*
 	 * update the 4D Constraints selectors
 	 */	
 	LASUI.prototype.updateConstraints = function () {
-			
+		this.updating = true;		
 		if(this.state.grid.getAxis('x') || this.state.grid.getAxis('y')) {
 			if(!this.refs.XYSelect.enabled) 			
 				this.refs.XYSelect.enable();
@@ -514,11 +624,13 @@
 		document.getElementById("Date").innerHTML = "<br><br>";
 		document.getElementById("Depth").innerHTML = "<br><br>";
 		
-		for(var d=0;d<this.state.view.length;d++) 
-			eval("this.init" + this.state.view[d].toUpperCase() + "Constraint('range')");
+		for(var d=0;d<this.state.view.length;d++)
+			eval("this.init" + this.state.view.charAt(d).toUpperCase() + "Constraint('range')");
+		
 		for(var d=0;d<this.state.grid.response.grid.axis.length;d++) 
 			if(this.state.view.indexOf(this.state.grid.response.grid.axis[d].type) < 0) 
 				eval("this.init" + this.state.grid.response.grid.axis[d].type.toUpperCase() + "Constraint('point')");
+		this.updating = false;
 	}
 	
 	/*
@@ -527,9 +639,8 @@
 	LASUI.prototype.initXYSelect = function () {	
 		if(this.refs.XYSelect && this.state.view)
 			this.refs.XYSelect.enable();
-		if(this.state.grid.getAxis('x') && this.state.grid.getAxis('y') && this.state.view)	
+		if(this.state.grid.getAxis('x') && this.state.grid.getAxis('y') && this.state.view)	 {
 
-			
 			var bbox = {"x": {"min" : 0, "max" :0}, "y" : {"min" :0, "max" : 0}};
 
 			if(this.state.grid.hasArange('x')) {
@@ -551,6 +662,7 @@
 				this.refs.XYSelect.setView("y");
 			else if(this.state.view.indexOf('x')<0 && this.state.view.indexOf('y')<0)
 				this.refs.XYSelect.setView("point");
+			}
 	}
 	/*
 	* Initialize an X grid control
@@ -736,89 +848,69 @@
 	 * Put together and submit an LAS request
 	 */
 	LASUI.prototype.makeRequest = function () {
-		this.request = null;
-		this.request = new LASRequest('');
-		this.request.removeVariables();
-		this.request.removeConstraints();
-		
-		if(this.state.dataset==null) {alert("Please select a dataset and variables."); return;}
-		if(this.state.variables[this.state.dataset]==null) {alert("Please select variables in the selected dataset."); return;}
-		if(this.state.variables[this.state.dataset].length==0) {alert("Please select variables in the selected dataset."); return;}
-		if(this.state.view==null) {alert("Please select a view."); return;}
-		if(this.state.operation==null) {alert("Please select an output."); return;}
-		
-		//add the operation
-		this.request.setOperation(this.state.operation);
-		
-		//set the options
-		for(var p in this.state.properties)
-			if((typeof this.state.properties[p] != "function") && (typeof this.state.properties[p] == "object")) { 
-				this.request.setProperty(this.state.properties[p].type, p, escape(this.state.properties[p].value));
-			}
-		this.request.setProperty("ferret","view",this.state.view);
-		
-		this.request.removeRegion();
-		this.request.addRegion();	
-		for(var d=0;d<this.state.grid.response.grid.axis.length;d++) 
-			switch(this.state.grid.response.grid.axis[d].type) {
-				case 'x' : 
-						this.request.addRange('x',this.refs.XYSelect.extents.selection.grid.x.min,this.refs.XYSelect.extents.selection.grid.x.max); 
-					break;
-				case 'y' : 
-					 	this.request.addRange('y',this.refs.XYSelect.extents.selection.grid.y.min,this.refs.XYSelect.extents.selection.grid.y.max); 
-					break;
-				case 't' : 
-					if(this.state.view.indexOf('t')>=0) 
-						if(this.state.grid.hasMenu('t'))
-							this.request.addRange('t',this.refs.DW[0].value,this.refs.DW[1].value); 
-						else
-							this.request.addRange('t',this.refs.DW.getDate1_Ferret(),this.refs.DW.getDate2_Ferret());
-					else
-						if(this.state.grid.hasMenu('t'))
-							this.request.addRange('t',this.refs.DW[0].value); 
-						else
-							this.request.addRange('t',this.refs.DW.getDate1_Ferret());
-					break;
-				case 'z' :
-					if(this.refs.DepthSelect)
-						if(this.refs.DepthSelect.length>1) 
-							this.request.addRange('z',this.refs.DepthSelect[0].value,this.refs.DepthSelect[1].value); 
-						else
-							this.request.addRange('z',this.refs.DepthSelect[0].value); 
-					break;
-			} 
+		if(!this.updating) {
+			this.request = null;
+			this.request = new LASRequest('');
+			this.request.removeVariables();
+			this.request.removeConstraints();
 			
-			//add the variables
-		for(var v in this.state.variables[this.state.dataset]) 
-			if(typeof this.state.variables[this.state.dataset][v] != "function" && typeof this.state.variables[this.state.dataset][v] =="string")
-				this.request.addVariable(this.state.dataset, this.state.variables[this.state.dataset][v]);
-		
+			if(this.state.dataset==null) {alert("Please select a dataset and variables."); return;}
+			if(this.state.variables[this.state.dataset]==null) {alert("Please select variables in the selected dataset."); return;}
+			if(this.state.variables[this.state.dataset].length==0) {alert("Please select variables in the selected dataset."); return;}
+			if(this.state.view==null) {alert("Please select a view."); return;}
+			if(this.state.operation==null) {alert("Please select an output."); return;}
 			
-		if(this.state.embed)
-			document.getElementById('output').src = (this.hrefs.getProduct.url + '?xml=' + escape(this.request.getXMLText()));
-		else
-			window.open(this.hrefs.getProduct.url + '?xml=' +  escape(this.request.getXMLText()));
-		
-		if(this.qs.params.debug){
-		
-			var req_text = document.createElement("TEXTAREA");
-			req_text.cols = 80;
-			req_text.rows = 10;
-			req_text.value= this.request.getXMLText();
-			var req_submit = document.createElement("INPUT");
-			req_submit.type = "submit";
-			req_submit.value = "Submit debug request";
-			req_submit.onclick  = function (evt) {
-				var args = $A(arguments);
-				var req_text = args[1];
-				document.getElementById('output').src = (this.hrefs.getProduct.url + '?xml=' + escape(req_text.value));
-			}.bindAsEventListener(this,req_text);
+			//add the operation
+			this.request.setOperation(this.state.operation);
 			
-			document.getElementById("debug").innerHTML="";
-			document.getElementById("debug").appendChild(req_text);
-			document.getElementById("debug").appendChild(document.createElement("BR"));			
-			document.getElementById("debug").appendChild(req_submit);
-			document.getElementById("debug").style.display ="";
+			//set the options
+			for(var p in this.state.properties)	
+				if((typeof this.state.properties[p] != "function") && (typeof this.state.properties[p] == "object")) { 
+					this.request.setProperty(this.state.properties[p].type, p, escape(this.state.properties[p].value));
+				}
+			this.request.setProperty("ferret","view",this.state.view);
+		
+			this.request.removeRegion();
+			this.request.addRegion();	
+			for(var d=0;d<this.state.grid.response.grid.axis.length;d++) 
+				switch(this.state.grid.response.grid.axis[d].type) {
+					case 'x' : 
+							this.request.addRange('x',this.refs.XYSelect.extents.selection.grid.x.min,this.refs.XYSelect.extents.selection.grid.x.max); 
+						break;
+					case 'y' : 
+						 	this.request.addRange('y',this.refs.XYSelect.extents.selection.grid.y.min,this.refs.XYSelect.extents.selection.grid.y.max); 
+						break;
+					case 't' : 
+						if(this.state.view.indexOf('t')>=0) 
+							if(this.state.grid.hasMenu('t'))
+								this.request.addRange('t',this.refs.DW[0].value,this.refs.DW[1].value); 
+							else
+								this.request.addRange('t',this.refs.DW.getDate1_Ferret(),this.refs.DW.getDate2_Ferret());
+						else
+							if(this.state.grid.hasMenu('t'))
+								this.request.addRange('t',this.refs.DW[0].value); 
+							else
+								this.request.addRange('t',this.refs.DW.getDate1_Ferret());
+						break;
+					case 'z' :
+						if(this.refs.DepthSelect)
+							if(this.refs.DepthSelect.length>1) 
+								this.request.addRange('z',this.refs.DepthSelect[0].value,this.refs.DepthSelect[1].value); 
+							else
+								this.request.addRange('z',this.refs.DepthSelect[0].value); 
+						break;
+				} 
+				
+				//add the variables
+			for(var v in this.state.variables[this.state.dataset]) 
+				if(typeof this.state.variables[this.state.dataset][v] != "function" && typeof this.state.variables[this.state.dataset][v] =="string")
+					this.request.addVariable(this.state.dataset, this.state.variables[this.state.dataset][v]);
+			
+				
+			if(this.state.embed)
+				document.getElementById('output').src = (this.hrefs.getProduct.url + '?xml=' + escape(this.request.getXMLText()));
+			else
+				window.open(this.hrefs.getProduct.url + '?xml=' +  escape(this.request.getXMLText()));
 		}
 	}
 	
@@ -829,7 +921,7 @@
 		var _bindArgs = {	
 				url: this.hrefs.getOptions.url + '?opid=' + optiondef,
 				mimetype: "text/plain",
-				error: function(type,error) {alert(error.type + ' ' + error.message);},
+				error: function(type,error) {alert('getOptions AJAX error.' + error.type + ' ' + error.message);},
 				load: dojo.lang.hitch(this, (function(type,data,event) {this.setOptionList(data);})) 
 			};
 		var _request = dojo.io.bind(_bindArgs);
@@ -841,7 +933,7 @@
 	 */	
 	LASUI.prototype.setOptionList = function (strJson) {
 		//clear the current view list and state
-		this.refs.options.DojoNode.destroyChildren();
+		this.refs.options.ULNode.innerHTML="";
 		var response = eval("(" + strJson + ")");
 		var setDefault = true;
 		this.state.properties = [];		
@@ -849,7 +941,7 @@
 		var ct = this.refs.options.options.getOptionCount();
 		if(ct) 
 		for(var i=0;i<ct;i++) {
-			this.setOptionDojoNode(this.refs.options.options.getOptionID(i));	
+			this.setOptionLINode(this.refs.options.options.getOptionID(i));	
 			switch(this.refs.options.options.getOptionType(i)) {
 				case "menu" : 
 					this.state.properties[this.refs.options.options.getOptionID(i)]={"type":"ferret", "value":this.refs.options.options.getOption(i).menu.item[0].values};
@@ -865,11 +957,12 @@
 		
 		this.submitOnLoad = false;
 
-		//if(!this.refs.options.DojoNode.isExpanded) this.refs.options.DojoNode.expand();
+		//if(!this.refs.options.ULNode.style.display!="none") this.refs.options.ULNode.style.display="";
 	}
-	LASUI.prototype.setOptionDojoNode = function (id) {
-		this.refs.options.options.getOptionByID(id).DojoNode = dojo.widget.createWidget("TreeNode");	
-		this.refs.options.options.getOptionByID(id).DojoNode.edit({'isFolder' : false});
+	LASUI.prototype.setOptionLINode = function (id) {
+		this.refs.options.options.getOptionByID(id).LINode = document.createElement("LI");	
+		this.refs.options.options.getOptionByID(id).LINode.style.listStyleType = "none";	
+		
 		var title = document.createElement("TEXT");
 		title.innerHTML = this.refs.options.options.getOptionByID(id).title
 		if(this.refs.options.options.getOptionByID(id).menu) {
@@ -888,9 +981,9 @@
 			obj.type = "text";
 		}	
 		obj.onchange = this.setOption.bindAsEventListener(this,id);
-		this.refs.options.options.getOptionByID(id).DojoNode.titleNode.appendChild(title);	
-		this.refs.options.options.getOptionByID(id).DojoNode.titleNode.appendChild(obj);	
-		this.refs.options.DojoNode.addChild(this.refs.options.options.getOptionByID(id).DojoNode);
+		this.refs.options.options.getOptionByID(id).LINode.appendChild(title);	
+		this.refs.options.options.getOptionByID(id).LINode.appendChild(obj);	
+		this.refs.options.ULNode.appendChild(this.refs.options.options.getOptionByID(id).LINode);
 	}
 
 	
@@ -991,12 +1084,23 @@ LASUI.prototype.handleDateChange = function (evt) {
 
 LASUI.prototype.collapseRootNodes = function (evt) {
 	var args = $A(arguments);
-	if(!this.refs[args[1]].DojoNode.isExpanded) {
-		this.refs[args[1]].DojoNode.expand();
-		if(args[1]!="categories") this.refs.categories.DojoNode.collapse();
-		if(args[1]!="views") this.refs.views.DojoNode.collapse();
-		if(args[1]!="operations") this.refs.operations.DojoNode.collapse();
-		if(args[1]!="options") this.refs.options.DojoNode.collapse();
+	if(!this.refs[args[1]].isExpanded) {
+		this.expand(this.refs[args[1]]);
+		if(args[1]!="categories") this.collapse(this.refs.categories);
+		if(args[1]!="views") this.collapse(this.refs.views);
+		if(args[1]!="operations") this.collapse(this.refs.operations);
+		if(args[1]!="options") this.collapse(this.refs.options);
 	} else
-		this.refs[args[1]].DojoNode.collapse();
+		this.collapse(this.refs[args[1]]);
 }
+LASUI.prototype.collapse = function (obj) {
+		if(obj.ULNode) obj.ULNode.style.display = "none";
+		if(obj.IMGNode) obj.IMGNode.src = "http://www.mattkruse.com/javascript/mktree/plus.gif";
+		obj.isExpanded = false;
+}
+LASUI.prototype.expand = function (obj) {
+	if(obj.ULNode) obj.ULNode.style.display = "";
+	if(obj.IMGNode) obj.IMGNode.src = "http://www.mattkruse.com/javascript/mktree/minus.gif";
+	obj.isExpanded = true;
+}
+
