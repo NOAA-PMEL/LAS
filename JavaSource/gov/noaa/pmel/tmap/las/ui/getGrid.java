@@ -4,6 +4,7 @@
  */
 package gov.noaa.pmel.tmap.las.ui;
 
+import gov.noaa.pmel.tmap.las.exception.LASException;
 import gov.noaa.pmel.tmap.las.jdom.LASConfig;
 import gov.noaa.pmel.tmap.las.product.server.LASConfigPlugIn;
 import gov.noaa.pmel.tmap.las.util.Arange;
@@ -26,6 +27,7 @@ import org.apache.struts.action.Action;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
+import org.jdom.Element;
 import org.jdom.JDOMException;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -39,7 +41,7 @@ import org.json.XML;
  * XDoclet definition:
  * @struts.action validate="true"
  */
-public class getGrid extends Action {
+public class getGrid extends ConfigService {
     /*
      * Generated Methods
      */
@@ -77,163 +79,29 @@ public class getGrid extends Action {
         // this JSON object won't be consistent with the others...
         try {
             grid = lasConfig.getGrid(dsID, varID);
+            // special case to add status message since container is a singleton ("grid").
+            grid.ok();
             xml.append(grid.toXML());
             PrintWriter respout = response.getWriter();
             if ( format.equals("xml") ) {
                 respout.print(xml.toString());
             } else {
                 JSONObject json_response = XML.toJSONObject(xml.toString());
+                json_response.put("status", "ok");
+                json_response.put("error", "");
                 log.debug(json_response.toString(3));
                 json_response.write(respout);
             }
         } catch (JSONException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            sendError(response, "grid", format, e.toString());
         } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+        	sendError(response, "grid", format, e.toString());
         } catch (JDOMException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+        	sendError(response, "grid", format, e.toString());
+        } catch (LASException e) {
+        	sendError(response, "grid", format, e.toString());
         }
-        /*
-        
-        JSONObject json_grid = new JSONObject();
-        
-        Grid grid = null;
-        try {
-            grid = lasConfig.getGrid(dsID, varID);
-        } catch (JDOMException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (Exception e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        if ( grid == null ) {
-            return null;
-        }
-        JSONObject json_axis = new JSONObject();
-        ArrayList<JSONObject> json_axes = new ArrayList<JSONObject>();
-        
-        if ( grid.hasX() ) {
-            try {
-                json_axis = makeJSONAxis(grid, "x");
-                json_grid.put("x", json_axis);
-            } catch (JSONException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }            
-        }
-        if ( grid.hasY() ) {
-            try {
-                json_axis = makeJSONAxis(grid, "y");
-                json_grid.put("y", json_axis);
-            } catch (JSONException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }           
-        }
-        if ( grid.hasZ() ) {
-            try {
-                json_axis = makeJSONAxis(grid, "z");
-                json_grid.put("z", json_axis);
-            } catch (JSONException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }            
-        }
-        if ( grid.hasT() ) {
-            try {
-                json_axis = makeJSONAxis(grid, "t");
-                json_grid.put("t", json_axis);
-            } catch (JSONException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }           
-        }
-            
-        response.setContentType("application/json");
-        
-        try {
-            log.debug(json_grid.toString(3));
-            json_grid.write(response.getWriter());
-        } catch (JSONException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        */
-        log.info("Starting: getGrid.do?dsid="+dsID+"&varid="+varID+"&format="+format);
+        log.info("Finishing: getGrid.do?dsid="+dsID+"&varid="+varID+"&format="+format);
         return null;
-    }
-    private JSONObject makeJSONAxis(Grid grid, String type) throws JSONException {
-        JSONObject axis = new JSONObject();
-        if ( type.equalsIgnoreCase("x") || type.equalsIgnoreCase("y") || type.equalsIgnoreCase("z") ) {
-            Axis lasAxis = grid.getAxis(type);
-            if ( lasAxis.hasV() ) {    
-                JSONArray verts = new JSONArray();
-                ArrayList<NameValuePair> verticies = lasAxis.getVerticies();
-                for (Iterator vertIt = verticies.iterator(); vertIt.hasNext();) {
-                    NameValuePair vert = (NameValuePair) vertIt.next();
-                    JSONObject json_vert = new JSONObject();
-                    json_vert.put(vert.getName(), vert.getValue());
-                    verts.put(json_vert);
-                }
-                axis.put("v", verts);
-            } else {
-                Arange ar = lasAxis.getArange();
-                JSONObject arange = new JSONObject();
-                arange.put("name", ar.getName());
-                arange.put("ID", ar.getID());
-                ArrayList nvp = ar.getAttributes();
-                for (Iterator nvpIt = nvp.iterator(); nvpIt.hasNext();) {
-                    NameValuePair attr = (NameValuePair) nvpIt.next();
-                    arange.put(attr.getName(), attr.getValue());
-                }
-                axis.put("arange", arange);
-            }
-            ArrayList axisAttrs = lasAxis.getAttributes();
-            for (Iterator axAttrIt = axisAttrs.iterator(); axAttrIt.hasNext();) {
-                NameValuePair nvp = (NameValuePair) axAttrIt.next();
-                axis.put(nvp.getName(), nvp.getValue());
-            }
-        } else {
-            TimeAxis t = grid.getTime();
-            axis.put(type, t.getType());
-            if (t.getDisplay_type().equals("widget")) {
-                axis.put("display_type", "widget");
-                axis.put("name", "t");
-                axis.put("ID", t.getID());
-                axis.put("hi", t.getHi());
-                axis.put("lo", t.getLo());
-                axis.put("yearNeeded", t.isYearNeeded());
-                axis.put("monthNeeded", t.isMonthNeeded());
-                axis.put("dayNeeded", t.isDayNeeded());
-                axis.put("hourNeeded", t.isHourNeeded());
-                axis.put("minuteInterval", t.getMinuteInterval());
-            } else {
-                axis.put("display_type", "menu");
-                axis.put("name", "t");
-                JSONArray menu = new JSONArray();
-                ArrayList<NameValuePair> menuList = t.getVerticies();
-                for (Iterator mnuLstIt = menuList.iterator(); mnuLstIt.hasNext();) {
-                    NameValuePair item = (NameValuePair) mnuLstIt.next();
-                    JSONObject json_item = new JSONObject();
-                    json_item.put(item.getName(), item.getValue());
-                    menu.put(json_item);
-                }
-                axis.put("v", menu);               
-            }
-            ArrayList<NameValuePair> attrs = t.getAttributes();
-            for (Iterator atIt = attrs.iterator(); atIt.hasNext();) {
-                NameValuePair attr = (NameValuePair) atIt.next();
-                axis.put(attr.getName(), attr.getValue());
-            }
-        }
-        return axis;
-
     }
 }

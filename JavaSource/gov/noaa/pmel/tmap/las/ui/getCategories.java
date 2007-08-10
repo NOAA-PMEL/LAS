@@ -40,7 +40,7 @@ import org.json.XML;
  * XDoclet definition:
  * @struts.action validate="true"
  */
-public class getCategories extends Action {
+public class getCategories extends ConfigService {
 	/*
 	 * Generated Methods
 	 */
@@ -56,7 +56,7 @@ public class getCategories extends Action {
 	private static Logger log = LogManager.getLogger(getCategories.class.getName());
 	public ActionForward execute(ActionMapping mapping, ActionForm form,
 			HttpServletRequest request, HttpServletResponse response) {
-		
+
 		String format = request.getParameter("format");
 		if ( format == null ) {
 			format = "json";
@@ -71,14 +71,17 @@ public class getCategories extends Action {
 		ArrayList<Category> categories = new ArrayList<Category>();
 		try {
 			categories = lasConfig.getCategories(catid);
-		} catch (JDOMException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 
-		Collections.sort(categories, new ContainerComparator("name"));
 
-		try {
+			// Check to see if there's anything good in the top level category.
+			Category cat = categories.get(0);
+			if (!cat.hasVariableChildren() && !cat.hasCategoryChildren() ) {
+				sendError(response, "categories", format, "No categories found.");
+				return null;
+			}
+
+			Collections.sort(categories, new ContainerComparator("name"));
+
 			PrintWriter respout = response.getWriter();
 			if (format.equals("xml")) {
 				response.setContentType("application/xml");
@@ -89,26 +92,10 @@ public class getCategories extends Action {
 				log.debug(json_response.toString(3));
 				json_response.write(respout);
 			}
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (JSONException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}        
-		/*
-        try {        
-            JSONUtil.fill(datasets, json_datasets);           
-            log.debug(json_datasets.toString(3));
-            json_datasets.write(response.getWriter());
-        } catch (JSONException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-		 */   
+			// IOExceptiono, JSONException and JDOM Exception are expected.
+		} catch (Exception e) {
+			sendError(response, "categories", format, e.toString());
+		}     
 		log.info("Finished: getCategories.do?catid="+catid+"&format="+format);
 		return null;
 	}
@@ -120,6 +107,8 @@ public class getCategories extends Action {
 			JSONObject category = cat.toJSON();          
 			categories_object.array_accumulate("category", category);           
 		}
+		categories_object.put("status", "ok");
+		categories_object.put("error", "");
 		json_response.put("categories", categories_object);
 		return json_response;
 	}

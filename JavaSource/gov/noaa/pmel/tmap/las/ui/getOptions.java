@@ -36,71 +36,63 @@ import org.json.XML;
  * XDoclet definition:
  * @struts.action validate="true"
  */
-public class getOptions extends Action {
-    private static Logger log = LogManager.getLogger(getOptions.class.getName());
-    /*
-     * Generated Methods
-     */
+public class getOptions extends ConfigService {
+	private static Logger log = LogManager.getLogger(getOptions.class.getName());
+	/*
+	 * Generated Methods
+	 */
 
-    /** 
-     * Method execute
-     * @param mapping
-     * @param form
-     * @param request
-     * @param response
-     * @return ActionForward
-     */
-    public ActionForward execute(ActionMapping mapping, ActionForm form,
-            HttpServletRequest request, HttpServletResponse response) {
-        LASConfig lasConfig = (LASConfig)servlet.getServletContext().getAttribute(LASConfigPlugIn.LAS_CONFIG_KEY);
-        String opid = request.getParameter("opid");
-        String format = request.getParameter("format");
+	/** 
+	 * Method execute
+	 * @param mapping
+	 * @param form
+	 * @param request
+	 * @param response
+	 * @return ActionForward
+	 */
+	public ActionForward execute(ActionMapping mapping, ActionForm form,
+			HttpServletRequest request, HttpServletResponse response) {
+		LASConfig lasConfig = (LASConfig)servlet.getServletContext().getAttribute(LASConfigPlugIn.LAS_CONFIG_KEY);
+		String opid = request.getParameter("opid");
+		String format = request.getParameter("format");
 
-        if ( format == null ) {
-            format = "json";
-        }
-        log.info("Starting: getOptions.do?opid="+opid+"&format="+format);
-        ArrayList<Option> options = new ArrayList<Option>();
-        
-        try {
-            options = lasConfig.getOptions(opid);
-        } catch (JDOMException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        
-        try {
-            PrintWriter respout = response.getWriter();
+		if ( format == null ) {
+			format = "json";
+		}
+		log.info("Starting: getOptions.do?opid="+opid+"&format="+format);
+		ArrayList<Option> options = new ArrayList<Option>();
 
-            if ( format.equals("xml") ) {
-                response.setContentType("application/xml");
-                respout.print(Util.toXML(options, "options"));
-            } else {
-                response.setContentType("application/json");
-                JSONObject json_response = toJSON(options, "options");
-                log.debug(json_response.toString(3));
-                json_response.write(respout);      
-            }
+		try {
+			options = lasConfig.getOptions(opid);
+			PrintWriter respout = response.getWriter();
 
-        } catch (JSONException e) {
-            // TODO fix
-            e.printStackTrace();
-        } catch (IOException e) {
-            // TODO fix
-            e.printStackTrace();
-        }
-        log.info("Finished: getOptions.do?opid="+opid+"&format="+format);
-        return null;
-    }
-    private JSONObject toJSON(ArrayList<Option> options, String string) throws JSONException {
-        JSONObject json_response = new JSONObject();
-        JSONObject options_object = new JSONObject();
-        for (Iterator opIt = options.iterator(); opIt.hasNext();) {
-            Option op = (Option) opIt.next();
-            JSONObject option = op.toJSON();           
-            options_object.array_accumulate("option", option);
-        }
-        json_response.put("options", options_object);
-        return json_response;
-    }
+			if ( format.equals("xml") ) {
+				response.setContentType("application/xml");
+				respout.print(Util.toXML(options, "options"));
+			} else {
+				response.setContentType("application/json");
+				JSONObject json_response = toJSON(options, "options");
+				log.debug(json_response.toString(3));
+				json_response.write(respout);      
+			}
+			// JDOMException, JSONException and IOException expected.
+		} catch (Exception e) {
+			sendError(response, "options", format, e.toString());
+		} 
+		log.info("Finished: getOptions.do?opid="+opid+"&format="+format);
+		return null;
+	}
+	private JSONObject toJSON(ArrayList<Option> options, String string) throws JSONException {
+		JSONObject json_response = new JSONObject();
+		JSONObject options_object = new JSONObject();
+		for (Iterator opIt = options.iterator(); opIt.hasNext();) {
+			Option op = (Option) opIt.next();
+			JSONObject option = op.toJSON();           
+			options_object.array_accumulate("option", option);
+		}
+		options_object.put("status", "ok");
+		options_object.put("error", "");
+		json_response.put("options", options_object);
+		return json_response;
+	}
 }

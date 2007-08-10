@@ -27,6 +27,7 @@ import org.apache.struts.action.Action;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
+import org.apache.tools.ant.taskdefs.SendEmail;
 import org.jdom.JDOMException;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -40,7 +41,7 @@ import org.json.XML;
  * XDoclet definition:
  * @struts.action validate="true"
  */
-public class getViews extends Action {
+public class getViews extends ConfigService {
     /*
      * Generated Methods
      */
@@ -78,15 +79,9 @@ public class getViews extends Action {
                 log.debug(json_response.toString(3));
                 json_response.write(respout);
             }
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (JSONException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (JDOMException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            // Catch for IOException, JSONException and JDOMException and anything unexpected.
+        } catch (Exception e) {
+            sendError(response, "views", format, e.toString());
         }
         log.info("Finished: getViews.do?dsid="+dsID+"&varid="+varID+"&format="+format);
         return null;
@@ -99,6 +94,8 @@ public class getViews extends Action {
             JSONObject view_object = view.toJSON();            
             views_object.array_accumulate("view", view_object);
         }
+        views_object.put("status", "ok");
+        views_object.put("error", "");
         json_response.put("views", views_object);
         return json_response;
     }
