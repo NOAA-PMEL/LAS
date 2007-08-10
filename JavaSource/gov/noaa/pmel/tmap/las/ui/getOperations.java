@@ -39,92 +39,93 @@ import org.json.XML;
  * XDoclet definition:
  * @struts.action validate="true"
  */
-public class getOperations extends Action {
-    private static Logger log = LogManager.getLogger(getOperations.class.getName());
-    /*
-     * Generated Methods
-     */
+public class getOperations extends ConfigService {
+	private static Logger log = LogManager.getLogger(getOperations.class.getName());
+	/*
+	 * Generated Methods
+	 */
 
-    /** 
-     * Method execute
-     * @param mapping
-     * @param form
-     * @param request
-     * @param response
-     * @return ActionForward
-     */
-    public ActionForward execute(ActionMapping mapping, ActionForm form,
-            HttpServletRequest request, HttpServletResponse response) {
-        LASConfig lasConfig = (LASConfig)servlet.getServletContext().getAttribute(LASConfigPlugIn.LAS_CONFIG_KEY);
-        String dsID = request.getParameter("dsid");
-        String varID = request.getParameter("varid");
-        String view = request.getParameter("view");
-        String format = request.getParameter("format");
-        log.info("Finishing: getOperations.do?dsid="+dsID+" and varid="+varID+".");
-        String grid_type = "";
-        if ( format == null ) {
-            format = "json";
-        }
-        log.info("Starting: getOperations?dsid="+dsID+"&varid="+varID+"&view="+view+".");
-        try {
-            grid_type = lasConfig.getGridType(dsID, varID);
-        } catch (JDOMException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        String ui_default = "";
-        try {
-            ui_default = lasConfig.getVariablePropertyValue("/lasdata/datasets/dataset[@ID='"+dsID+"']/variables/variable[@ID='"+varID+"']","ui", "default");
-        } catch (JDOMException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+	/** 
+	 * Method execute
+	 * @param mapping
+	 * @param form
+	 * @param request
+	 * @param response
+	 * @return ActionForward
+	 */
+	public ActionForward execute(ActionMapping mapping, ActionForm form,
+			HttpServletRequest request, HttpServletResponse response) {
+		LASConfig lasConfig = (LASConfig)servlet.getServletContext().getAttribute(LASConfigPlugIn.LAS_CONFIG_KEY);
+		String dsID = request.getParameter("dsid");
+		String varID = request.getParameter("varid");
+		String view = request.getParameter("view");
+		String format = request.getParameter("format");
+		log.info("Starting: getOperations.do?dsid="+dsID+" and varid="+varID+".");
+		String grid_type = "";
+		if ( format == null ) {
+			format = "json";
+		}
+		log.info("Starting: getOperations?dsid="+dsID+"&varid="+varID+"&view="+view+".");
+		try {
+			grid_type = lasConfig.getGridType(dsID, varID);
 
-        ArrayList<Operation> operations = new ArrayList<Operation>();
-        try {
-            if ( ui_default != null && !ui_default.equals("") ) {
-                ui_default = ui_default.substring(ui_default.indexOf("#")+1, ui_default.length());
-                operations = lasConfig.getOperationsByDefault(view, ui_default);
-            } else {
-                operations = lasConfig.getOperationsByIntervalAndGridType(view, grid_type);
-            }
-        } catch (JDOMException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        Collections.sort(operations, new ContainerComparator("order", "name"));
-        try {
-            PrintWriter respout = response.getWriter();
+			String ui_default = "";
 
-            if ( format.equals("xml") ) {
-                response.setContentType("application/xml");
-                respout.print(Util.toXML(operations, "operations"));
-            } else {
-                response.setContentType("application/json");
-                JSONObject json_response = toJSON(operations, "operations");
-                log.debug(json_response.toString(3));
-                json_response.write(respout);      
-            }
+			ui_default = lasConfig.getVariablePropertyValue("/lasdata/datasets/dataset[@ID='"+dsID+"']/variables/variable[@ID='"+varID+"']","ui", "default");
 
-        } catch (JSONException e) {
-            // TODO fix
-            e.printStackTrace();
-        } catch (IOException e) {
-            // TODO fix
-            e.printStackTrace();
-        }
-        log.info("Finished: getOperations.do?dsid="+dsID+"&varid="+varID+"&view="+view+".");
-        return null;
-    }
-    private JSONObject toJSON(ArrayList<Operation> operations, String string) throws JSONException {
-        JSONObject json_response = new JSONObject();
-        JSONObject operations_object = new JSONObject();
-        for (Iterator operIt = operations.iterator(); operIt.hasNext();) {
-            Operation op = (Operation) operIt.next();
-            JSONObject operation = op.toJSON();        
-            operations_object.array_accumulate("operation", operation);
-        }
-        json_response.put("operations", operations_object);
-        return json_response;
-    }
+			ArrayList<Operation> operations = new ArrayList<Operation>();
+
+			if ( ui_default != null && !ui_default.equals("") ) {
+				ui_default = ui_default.substring(ui_default.indexOf("#")+1, ui_default.length());
+				operations = lasConfig.getOperationsByDefault(view, ui_default);
+			} else {
+				operations = lasConfig.getOperationsByIntervalAndGridType(view, grid_type);
+			}
+            
+			if ( operations.size() <= 0 ) {
+				sendError(response, "operations", format, "No operations found.");
+				return null;
+			} else {
+				// Check to see if there's something in there.
+				Operation op = operations.get(0);
+				String name = op.getName();
+				if ( name == null || name.equals("") ) {
+					sendError(response, "operations", format, "No operations found.");
+					return null;
+				}
+			}
+			
+			Collections.sort(operations, new ContainerComparator("order", "name"));
+
+			PrintWriter respout = response.getWriter();
+
+			if ( format.equals("xml") ) {
+				response.setContentType("application/xml");
+				respout.print(Util.toXML(operations, "operations"));
+			} else {
+				response.setContentType("application/json");
+				JSONObject json_response = toJSON(operations, "operations");
+				log.debug(json_response.toString(3));
+				json_response.write(respout);      
+			}
+			// JDOMException, JSONException and IOException expected
+		} catch (Exception e) {
+			sendError(response, "operations", format, e.toString());
+		} 
+		log.info("Finished: getOperations.do?dsid="+dsID+"&varid="+varID+"&view="+view+".");
+		return null;
+	}
+	private JSONObject toJSON(ArrayList<Operation> operations, String string) throws JSONException {
+		JSONObject json_response = new JSONObject();
+		JSONObject operations_object = new JSONObject();
+		for (Iterator operIt = operations.iterator(); operIt.hasNext();) {
+			Operation op = (Operation) operIt.next();
+			JSONObject operation = op.toJSON();        
+			operations_object.array_accumulate("operation", operation);
+		}
+		operations_object.put("status", "ok");
+		operations_object.put("error", "");
+		json_response.put("operations", operations_object);
+		return json_response;
+	}
 }

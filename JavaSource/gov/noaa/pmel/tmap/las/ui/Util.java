@@ -24,7 +24,7 @@ public class Util {
 			Container container = (Container) conIt.next();
 			xml.append(container.toXML());
 		}
-
+        xml.append("<status>ok</status><error></error>");
 		xml.append("</"+wrapper+">");
 
 		return xml.toString();
