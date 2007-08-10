@@ -176,7 +176,11 @@ IF `($data_count"0") EQ 1` THEN
    ENDIF
 
    IF ($ferret_contour_style"0|default>0|color_filled_plus_lines>1|raster_plus_lines>1|*>0") THEN
-     IF ($ferret_contour_levels"0|*>1") THEN DEFINE SYMBOL levsym =  /LEVELS=($ferret_contour_levels)
+      IF ($ferret_contour_levels"0|*>1") THEN 
+         DEFINE SYMBOL levsym = /LEVELS=($ferret_contour_levels)
+      ELSE
+         IF ($ferret_fill_levels"0|*>1") THEN DEFINE SYMBOL levsym = /LEVELS=($ferret_fill_levels)
+      ENDIF
      CONTOUR/OVER/NOLAB($levsym) ($ferret_var_0)
    ENDIF
 
