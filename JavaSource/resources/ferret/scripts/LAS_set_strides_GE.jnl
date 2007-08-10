@@ -12,35 +12,41 @@ IF ($ferret_size"0|0.25>1|*>0")    THEN LET maxpix = 500  ! medium
 IF ($ferret_size"0|0.5>1|*>0")     THEN LET maxpix = 600  ! default
 IF ($ferret_size"0|0.8333>1|*>0")  THEN LET maxpix = 700  ! large
 
-IF `($ferret_google_plot"0|*>1")` THEN LET  maxpix = `2*maxpix`
+!limit
+!IF `($ferret_google_plot"0|*>1")` THEN LET  maxpix = `2*maxpix`
 
 ! For 2D plots
 
 ! curvilinear grid? Get percentage of total that the region represents, see
 ! if the nominal number of points looks like it will be large.
 
-      IF ($region_x_lo"0|*>1") THEN 
-         LET xx = x[gx=($data_var)[d=($data_num)]]
-         LET nx = xx[i=@ngd]
-         LET x_pct = ($region_x_range)/360
-         LET pixsize = `nx*x_pct`
+!limit number of points in X (for place mark operation)
+IF `STRINDEX( "($operation_ID)", "Grid" ) NE 0` THEN LET maxpix = 150
+
+IF ($region_x_lo"0|*>1") THEN 
+    LET xx = x[gx=($data_var)[d=($data_num)]]
+    LET nx = xx[i=@ngd]
+    LET x_pct = ($region_x_range)/360
+    LET pixsize = `nx*x_pct`
 !         LET pixsize = `MAX(pixsize, nx)`
 
-         IF `pixsize GT maxpix` THEN SET AXIS/STRIDE=`INT((pixsize/maxpix)+1)` `($data_var)[d=($data_num)],return=xaxis`
-         IF `pixsize GT maxpix` THEN SAY SET AXIS/STRIDE=`INT((pixsize/maxpix)+1)` `($data_var)[d=($data_num)],return=xaxis`
-      ENDIF
+    IF `pixsize GT maxpix` THEN SET AXIS/STRIDE=`INT((pixsize/maxpix)+1)` `($data_var)[d=($data_num)],return=xaxis`
+    IF `pixsize GT maxpix` THEN SAY SET AXIS/STRIDE=`INT((pixsize/maxpix)+1)` `($data_var)[d=($data_num)],return=xaxis`
+ENDIF
 
-      IF ($region_y_lo"0|*>1") THEN 
-         LET yy = y[gy=($data_var)[d=($data_num)]]
-         LET ny = yy[j=@ngd]
-         LET y_pct = ($region_y_range)/180
-         LET pixsize = `ny*y_pct`
+!limit number of points in Y (for place mark operation)
+IF `STRINDEX( "($operation_ID)", "Grid" ) NE 0` THEN LET maxpix = 100
 
+IF ($region_y_lo"0|*>1") THEN 
+    LET yy = y[gy=($data_var)[d=($data_num)]]
+    LET ny = yy[j=@ngd]
+    LET y_pct = ($region_y_range)/180
+    LET pixsize = `ny*y_pct`
 !         LET pixsize = `MAX(pixsize, ny)`
 
-         IF `pixsize GT maxpix` THEN SET AXIS/STRIDE=`2*INT((pixsize/maxpix)+1)` `($data_var)[d=($data_num)],return=yaxis`
-         IF `pixsize GT maxpix` THEN SAY SET AXIS/STRIDE=`2*INT((pixsize/maxpix)+1)` `($data_var)[d=($data_num)],return=yaxis`
-      ENDIF
+    IF `pixsize GT maxpix` THEN SET AXIS/STRIDE=`2*INT((pixsize/maxpix)+1)` `($data_var)[d=($data_num)],return=yaxis`
+    IF `pixsize GT maxpix` THEN SAY SET AXIS/STRIDE=`2*INT((pixsize/maxpix)+1)` `($data_var)[d=($data_num)],return=yaxis`
+ENDIF
 
 ! End of $RCSfile ------------LAS_set_strides_GE.jnl--------------------------
 
