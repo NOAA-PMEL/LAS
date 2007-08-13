@@ -173,4 +173,14 @@ public class Grid extends Container implements Cloneable, GridInterface {
           return false;
         }
     }
+
+	public void ok() {
+		Element status = new Element("status");
+		Element error = new Element("error");
+		status.setText("ok");
+		error.setText("ok");
+		element.addContent(status);
+		element.addContent(error);
+		
+	}
 }
