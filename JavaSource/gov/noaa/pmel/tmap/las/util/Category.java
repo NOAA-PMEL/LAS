@@ -15,6 +15,14 @@ public class Category extends Container implements CategoryInterface {
 	public Category(Element category) {
 		super(category);
 	}
+	public boolean hasCategoryChildren() {
+		String ID = element.getAttributeValue("ID");
+		if (ID != null ) {
+			return true;
+		} else {
+			return false;
+		}
+	}
 	public boolean hasVariableChildren() {
 		Element dataset = element.getChild("dataset");
 		Element variables = null;

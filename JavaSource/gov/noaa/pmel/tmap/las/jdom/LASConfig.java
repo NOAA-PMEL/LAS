@@ -1040,7 +1040,7 @@ public class LASConfig extends LASDocument {
      * @return grid the Grid object with up to for Axes
      * @throws JDOMException 
      */
-    public Grid getGrid(String dsID, String varID) throws JDOMException {
+    public Grid getGrid(String dsID, String varID) throws JDOMException, LASException {
         Element variable = getElementByXPath("/lasdata/datasets/dataset[@ID='"+dsID+"']/variables/variable[@ID='"+varID+"']");
         ArrayList<Element> axes_list = new ArrayList<Element>();
         Element gridE = null;
@@ -1061,9 +1061,13 @@ public class LASConfig extends LASDocument {
                 }
             }
         }
-        // Replace the rerferences with the actual axis definition.
-        gridE.setContent(axes_list);
-        return new Grid(gridE);
+        // Replace the references with the actual axis definition.
+        if ( gridE != null ) {
+            gridE.setContent(axes_list);
+            return new Grid(gridE);
+        } else {
+        	throw new LASException("The grid was empty.");
+        }
     }
     private void addTimeAxisAttributes(Element axis) {
         Element arange = axis.getChild("arange");
