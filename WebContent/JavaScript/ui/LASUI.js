@@ -182,8 +182,12 @@
 			this.refs[_rootNodes[i].id].IMGNode.onclick = this.collapseRootNodes.bindAsEventListener(this,  _rootNodes[i].id);
 			
 			this.refs[_rootNodes[i].id].LINode.style.listStyleType = "none";
+			this.refs[_rootNodes[i].id].LINode.style.padding = "0";
+			this.refs[_rootNodes[i].id].LINode.style.margin = "0";
 			
 			this.refs[_rootNodes[i].id].ULNode = document.createElement("UL");
+			
+			this.refs[_rootNodes[i].id].ULNode.style.display="none";
 			if(!document.all)this.refs[_rootNodes[i].id].ULNode.style.marginLeft="4px;"
 			if(!document.all)this.refs[_rootNodes[i].id].ULNode.style.paddingLeft="4px;"
 			this.refs[_rootNodes[i].id].LINode.appendChild(this.refs[_rootNodes[i].id].IMGNode);
@@ -246,6 +250,9 @@
 	
 		node.children[i] = {};
 		node.children[i].LINode = document.createElement("LI"); //dojo.widget.createWidget("TreeNode");	
+		node.children[i].LINode.style.padding = "0";
+		node.children[i].LINode.style.margin = "0";
+		
 		node.children[i].IMGNode =  document.createElement("IMG");
 		node.children[i].IMGNode.onclick = this.selectCategory.bindAsEventListener(this, node, i);
 		node.children[i].IMGNode.style.cursor = "pointer";
@@ -258,9 +265,13 @@
 		node.children[i].ULNode = document.createElement("ul");
 		if(!document.all)node.children[i].ULNode.style.marginLeft = "4px";
 		if(!document.all)node.children[i].ULNode.style.paddingLeft = "4px";
+	   node.children[i].ULNode.style.marginTop = "0";
+		node.children[i].ULNode.style.paddingTop = "0";
+	   node.children[i].ULNode.style.marginBottom = "0";
+		node.children[i].ULNode.style.paddingBottom = "0";		
 		var table = document.createElement("TABLE");
-		table.cellpadding = 0;
-		table.cellspacing = 0;
+		table.cellpadding = "0";
+		table.cellspacing = "0";
 		var tbody = document.createElement("TBODY");
 		var tr = document.createElement("TR");
 		var td1 = document.createElement("TD");
@@ -299,8 +310,8 @@
 		node.children[i].LINode = document.createElement("LI");
 		node.children[i].LINode.style.listStyleType = "none";
 		node.children[i].LINode.style.listStyleImage = "none";
-		node.children[i].LINode.style.marginLeft ="0px";
-		if(!document.all)node.children[i].LINode.style.paddingLeft ="0px";
+		node.children[i].LINode.style.margin ="0";
+		if(!document.all)node.children[i].LINode.style.padding ="0";
 		if(document.all) {
 			var elem_nm = "<INPUT NAME='" + node.category.getDatasetID()+"'>";
 			node.children[i].INPUTNode = document.createElement(elem_nm);
@@ -313,8 +324,8 @@
 		node.children[i].INPUTNode.id = node.category.getChildID(i);
 		
 		var table = document.createElement("TABLE");
-		table.cellpadding = 0;
-		table.cellspacing = 0;
+		table.cellpadding = "0";
+		table.cellspacing = "0";
 		
 		var tbody = document.createElement("TBODY");
 		var tr = document.createElement("TR");
