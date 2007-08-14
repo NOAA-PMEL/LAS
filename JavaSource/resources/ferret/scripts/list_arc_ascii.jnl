@@ -16,8 +16,7 @@ IF `($data_count"0|1|*>0") NE 1` THEN
   DEFINE SYMBOL error_status = ERROR
   DEFINE SYMBOL error_type VARIABLES
   DEFINE SYMBOL error_action = running Ferret scripts for ($operation_ID) arc_ascii
-  DEFINE SYMBOL error_string "This product is designed for single-variable output only. Choose 1 variable."
-  GO LAS_error_result
+  MESSAGE/ERROR **ERROR "This product is designed for single-variable output only. Choose 1 variable."
 ENDIF
 GO LAS_default_errsyms
 
