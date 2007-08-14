@@ -24,9 +24,8 @@ DEFINE SYMBOL viewshape =  `UPCASE("($ferret_view)")`
 IF `STRCMP("($varshape)", "POINT") EQ 0` THEN
   DEFINE SYMBOL error_status = ERROR
   DEFINE SYMBOL error_type = REGION
-  DEFINE SYMBOL error_action = Checking grid and region
-  DEFINE SYMBOL error_string = **ERROR The ($viewshape) region is too small, it reduces to a single point
-  GO LAS_error_result
+  DEFINE SYMBOL error_action = Checking grid and region  
+  MESSAGE/ERROR **ERROR ($error_string) **ERROR The ($viewshape) region is too small, it reduces to a single point
   EXIT/SCRIPT
 ENDIF
 
