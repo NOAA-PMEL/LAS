@@ -341,6 +341,13 @@ automatically build the SlideSorter table inside the 'LASSlideSorter' DOM elemen
           <td id="LASSlideSorter"> </td>
         </tr>
 
+        <tr>
+          <td class="LSS_footer">
+            The LAS comparison plot interface was originally inspired by the
+            <a href="http://www.ngdc.noaa.gov/wist/">Web Image Slide Tray</a> from NOAA/NGDC.
+          </td>
+        </tr>
+
       </tbody>
   	</table>
 
