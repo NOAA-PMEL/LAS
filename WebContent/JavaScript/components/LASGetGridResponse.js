@@ -101,12 +101,16 @@ function LASGetGridResponse(response) {
 
 // Check for incomplete LASGetGridResponse.
 
-/*
-// TODO:  Do I need to check if the response is empty?  How?
-  if (!this.response) {
-    throw("LASGetGridResponse is empty.");
+  if (response == null) {
+    var error_string = 'getGrid.do returned a null response.';
+    throw(error_string);
+  } else {
+    if (response.status != 'ok') {
+      var error_string = response.error ? response.error : 'Unknown error in LASGetGridResponse.';
+      throw(error_string);
+    }
   }
-*/
+
 }
 
 ////////////////////////////////////////////////////////////
