@@ -201,12 +201,19 @@ function sendGetGridRequest() {
 function handleLASGetGridResponse(LASResponseText) {
   // First, make sure we can parse the LASResponse
   var Response;
+  var JSONObject;
   try {
     var JSONObject = LASResponseText.parseJSON();
+  } catch(e) {
+    alert('Error parsing LASResponseText as JSON.');
+    return;
+  }
+
+  try {
     Response = new LASGetGridResponse(JSONObject);
   } catch(e) {
     // TODO:  Create Error Cell with this text?
-    alert('Error parsing LASResponseText as JSON');
+    alert(e);
     return;
   }
 
