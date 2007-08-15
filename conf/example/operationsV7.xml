@@ -219,6 +219,7 @@
           </response>
           <region>
             <intervals name="xyt" />
+            <intervals name="xy" />
           </region>
           <grid_types>
             <grid_type name="regular" />
@@ -236,11 +237,31 @@
           <region>
             <intervals name="xzt" />
             <intervals name="yzt" />
+            <intervals name="xz" />
+            <intervals name="yz" />
           </region>
           <grid_types>
             <grid_type name="regular" />
           </grid_types>
           <optionsdef IDREF="Options_2D_image_contour_animation"/>
+    </operation>
+    
+    <!-- animate X, Y, or Z plots -->
+    <operation name="Animation" ID="Animation_1D" output_template="output_animation" service_action="Data_Extract_Frames" order="9999">
+          <service>ferret</service>
+          <response ID="Data_Extract_Frames_Response">
+              <result type="xml" ID="ferret_listing" streamable="true" mime_type="text/xml" file_suffix=".xml"/>
+              <result type="debug" ID="debug" file_suffix=".txt"/>
+          </response>
+          <region>
+            <intervals name="xt" />
+            <intervals name="yt" />
+            <intervals name="zt" />
+          </region>
+          <grid_types>
+            <grid_type name="regular" />
+          </grid_types>
+          <optionsdef IDREF="Options_1D_Animation"/>
     </operation>
 
 <!-- Operations for Google Earth -->
