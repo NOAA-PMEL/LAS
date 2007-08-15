@@ -33,6 +33,50 @@ ENDIF
 
 SET LIST/FILE="($result_ferret_listing_filename)"
 
+DEFINE SYMBOL hasT = 1
+
+!-----------------------------------------
+!for animation on XY view 
+!-----------------------------------------
+!- only a single time ponit was selected
+!- or, there is not time axis at all
+
+! max_tpoints is the arbitrary size limit of the time range
+! 21 might be a good value for an animation
+! 251 might be a good value for a time series plot
+DEFINE SYMBOL max_tpoints 21   ! should be an odd number
+
+! Determine a new time range if just a single point requested
+DEFINE SYMBOL nt `($ferret_plot_var),return=lsize`   ! no. of time points requested
+IF `($nt) eq 1` THEN
+    LET L0 = `($ferret_plot_var),return=lstart`
+  
+    IF `L0 EQ 0` THEN
+        DEFINE SYMBOL hasT = 0
+    ENDIF
+
+    !  CANCEL REGION/T
+    LET maxL = `($data_var),return=lsize`   ! no. of time points total
+    LET hafmax = `INT(($max_tpoints)/2)`
+    IF `maxL LE ($max_tpoints)` THEN
+        DEFINE SYMBOL lmin 1
+        DEFINE SYMBOL lmax `maxL`
+     ELSE
+        DEFINE SYMBOL lmin `MAX(L0-hafmax,1)`
+        DEFINE SYMBOL lmax `MIN(L0+hafmax,maxL)`
+     ENDIF
+     !SET REGION/T="`($data_var)[L=($lmin)],return=TSTART`":"`($data_var)[L=($lmax)],return=TEND`"
+     DEFINE SYMBOL region_t = T="`($data_var)[L=($lmin)],return=TSTART`":"`($data_var)[L=($lmax)],return=TEND`"
+     DEFINE SYMBOL region_xyzt = ($region_xyz),($region_t)
+     DEFINE SYMBOL region_full = ($region_xyzt)
+     DEFINE SYMBOL ferret_plot_var = ($data_var)[d=($data_num),($region_full)]
+ENDIF
+
+DEFINE SYMBOL ferret_list_var = ($ferret_plot_var)
+
+!----------------------------------------
+! start writing to the file
+!----------------------------------------
 LET xmlhead = "<?xml version='1.0' encoding='UTF-8'?>"
 define variable len = STRLEN(xmlhead)
 define symbol fmt = A`len`
@@ -43,8 +87,9 @@ define variable len = STRLEN(framesStart)
 define symbol fmt = A`len`
 list/nohead/format=(($fmt))/FILE/append framesStart
 
-!-------------------------------------------------
+!------------
 ! fill_levels
+!------------
 LET f = "<fill_levels>"
 list/norowhead/nohead/format=(A13)/FILE/append f
 
@@ -55,27 +100,26 @@ list/norowhead/nohead/format=(A`nlen`)/FILE/append a
 LET f = "</fill_levels>"
 list/norowhead/nohead/format=(A14)/FILE/append f
 
-!-------------------------------------------------
-! time units in seconds
-!LET f = "<units>"
-!list/norowhead/nohead/format=(A7)/FILE/append f
+!------------
+! hasT
+!------------
+LET f = "<hasT>"
+list/norowhead/nohead/format=(A6)/FILE/append f
 
-define symbol time_units = `tax_units(t[gt=($ferret_list_var),L=1])`
-!let nlen = strlen ("($time_units)")
-!let a = "($time_units)"
-!list/norowhead/nohead/format=(A`nlen`)/FILE/append a
+let nlen = strlen ("($hasT)")
+let a = "($hasT)"
+list/norowhead/nohead/format=(A`nlen`)/FILE/append a
 
-!LET f = "</units>"
-!list/norowhead/nohead/format=(A8)/FILE/append f
-
-!------------------------------------------------
-define symbol time_resolution = "hours"
-
-!LET f = "<frames>"
-!list/norowhead/nohead/format=(A8)/FILE/append f
+LET f = "</hasT>"
+list/norowhead/nohead/format=(A7)/FILE/append f
 
 ! ouput individual time points
 
+DEFINE SYMBOL time_units = `tax_units(t[gt=($ferret_list_var),L=1])`
+
+!---------------------
+! time unit in seconds
+!---------------------
 IF `strcmp("($time_units)", "1") EQ 0` THEN
     !====>output time units
     LET f = "<units>seconds</units>"
@@ -88,8 +132,6 @@ IF `strcmp("($time_units)", "1") EQ 0` THEN
     define symbol first_time = `tax_datestring(t[gt=($ferret_list_var),L=1], t[gt=($ferret_list_var)], "seconds")`
     let nlen = strlen ("($first_time)")
     list/norowhead/nohead/format=("<frame>",A`nlen`,"</frame>")/FILE/append tax_datestring(t[gt=($ferret_list_var),L=($lmin):($lmax)], t[gt=($ferret_list_var)], "seconds")
-
-    !====>TODO: need to compute time resolution
 
 ELIF `strcmp("($time_units)", "60") EQ 0` THEN
     !====>output time units
@@ -106,6 +148,12 @@ ELIF `strcmp("($time_units)", "60") EQ 0` THEN
 
     !====>TODO: need to compute time resolution
 
+    LET f = "</frames>"
+    list/norowhead/nohead/format=(A9)/FILE/append f
+
+!--------------------
+! time unit in hours
+!--------------------
 ELIF `strcmp("($time_units)", "3600") EQ 0` THEN
     !====>output time units
     LET f = "<units>hours</units>"
@@ -139,6 +187,12 @@ ELIF `strcmp("($time_units)", "3600") EQ 0` THEN
         define symbol time_resolution = "hours"
     ENDIF
 
+    LET f = "</frames>"
+    list/norowhead/nohead/format=(A9)/FILE/append f
+
+!--------------------
+! time unit in days
+!--------------------
 ELIF `strcmp("($time_units)", "86400") EQ 0` THEN
     !====>output time units
     LET f = "<units>days</units>"
@@ -167,7 +221,13 @@ ELIF `strcmp("($time_units)", "86400") EQ 0` THEN
     IF `interval EQ 1` THEN
         define symbol time_resolution = "days"
     ENDIF
+ 
+    LET f = "</frames>"
+    list/norowhead/nohead/format=(A9)/FILE/append f
 
+!--------------------
+! time unit in months
+!--------------------
 ELIF `strcmp("($time_units)", "2629746") EQ 0` THEN
     !====>output time units
     LET f = "<units>months</units>"
@@ -194,6 +254,12 @@ ELIF `strcmp("($time_units)", "2629746") EQ 0` THEN
         define symbol time_resolution = "months"
     ENDIF
 
+    LET f = "</frames>"
+    list/norowhead/nohead/format=(A9)/FILE/append f
+
+!------------------
+!time unit in years
+!------------------
 ELIF `strcmp("($time_units)", "31536000") EQ 0` THEN
     !====>output time units
     LET f = "<units>years</units>"
@@ -213,21 +279,25 @@ ELIF `strcmp("($time_units)", "31536000") EQ 0` THEN
         define symbol time_resolution = "years"
     ENDIF
 
+    LET f = "</frames>"
+    list/norowhead/nohead/format=(A9)/FILE/append f
+
 ENDIF
 
-LET f = "</frames>"
-list/norowhead/nohead/format=(A9)/FILE/append f
+!----------------------
+! time frame resolution
+!----------------------
+IF ($time_resolution"0|*>1") THEN
+    LET f = "<resolution>"
+    list/norowhead/nohead/format=(A12)/FILE/append f
 
-!---------------------------------------------------------
-LET f = "<resolution>"
-list/norowhead/nohead/format=(A12)/FILE/append f
+    let nlen = strlen (($time_resolution))
+    let a = ($time_resolution)
+    list/norowhead/nohead/format=(A`nlen`)/FILE/append a
 
-let nlen = strlen (($time_resolution))
-let a = ($time_resolution)
-list/norowhead/nohead/format=(A`nlen`)/FILE/append a
-
-LET f = "</resolution>"
-list/norowhead/nohead/format=(A13)/FILE/append f
+    LET f = "</resolution>"
+    list/norowhead/nohead/format=(A13)/FILE/append f
+ENDIF
 
 !--------------------------------------------------
 ! compute and output image size
