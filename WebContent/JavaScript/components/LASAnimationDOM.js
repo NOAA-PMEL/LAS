@@ -4,6 +4,7 @@ function LASAnimation(xml) {
     this.DOM = new XMLDoc(xml,_LASAni_parseError);
     
     this.getFillLevels = LASAni_getFillLevels;
+    this.getHasT = LASAni_getHasT;
     this.getFrames     = LASAni_getFrames;
     this.getNumFrames  = LASAni_getNumFrames;
     this.getTimeUnits = LASAni_getTimeUnits;
@@ -13,6 +14,11 @@ function LASAnimation(xml) {
 function LASAni_getFillLevels(){
     var filllevelsNode = this.DOM.selectNode("/fill_levels");
     return filllevelsNode.getText();
+}
+
+function LASAni_getHasT(){
+    var hasTNode = this.DOM.selectNode("/hasT");
+    return hasTNode.getText();
 }
 
 function LASAni_getFrames() {
