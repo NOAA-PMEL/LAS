@@ -43,7 +43,17 @@
 	    <item values="Data_Extract_netCDF,cdf,20">NetCDF file</item>
 	    <item values="Data_Extract_File,asc,20">ASCII file</item>
 	    <item values="Gen_Scripts,html,20">Desktop application data access scripts</item>
+            <item values="Animation_2D,txt,2">Animation</item>
 	</menu>
+        <menu type="ops" name="Ops_Std2D_t">
+            <item values="Plot_2D,shade,2">Color plot</item>
+            <item values="Plot_2D_SlideSorter,shade,2">Color plot comparison</item>
+            <item values="Data_Extract,txt,20">Table of values (text)</item>
+            <item values="Data_Extract_netCDF,cdf,20">NetCDF file</item>
+            <item values="Data_Extract_File,asc,20">ASCII file</item>
+            <item values="Gen_Scripts,html,20">Desktop application data access scripts</item>
+            <item values="Animation_1D,txt,2">Animation</item>
+        </menu>
 	<menu type="ops" name="Ops_Std2D_xy">
 	    <item values="Plot_2D_XY,shade,2">Color plot</item>
             <item values="Plot_2D_XY_SlideSorter,shade,2">Color plot comparison</item>
@@ -55,7 +65,7 @@
             -->
 	    <item values="Gen_Scripts,html,20">Desktop application data access scripts</item>
 	    <item values="XY_zoomable_image,html,20">Interactive Color plot</item>
-            <item values="Plot_GE_Overlay,html,20">Plot to Google Earth</item>
+            <item values="Plot_GE_Overlay,html,2">Plot to Google Earth</item>
 	</menu>
         <menu type="ops" name="Ops_Std3D_xyt">
             <item values="Data_Extract,txt,20">Table of values (text)</item>
@@ -63,21 +73,21 @@
             <item values="Data_Extract_File,asc,20">ASCII file</item>
             <item values="Gen_Scripts,html,20">Desktop application data access scripts</item>
             <item values="Grid_GE_kml,txt,20">Time Series from Google Earth</item>
-            <item values="Animation_2D_XY,txt,20">Animation</item>
+            <item values="Animation_2D_XY,txt,2">Animation</item>
         </menu>
         <menu type="ops" name="Ops_Std3D_xyz">
             <item values="Data_Extract,txt,20">Table of values (text)</item>
             <item values="Data_Extract_netCDF,cdf,20">NetCDF file</item>
             <item values="Data_Extract_File,asc,20">ASCII file</item>
             <item values="Gen_Scripts,html,20">Desktop application data access scripts</item>
-            <item values="Grid_GE_kml,txt,20">Vertical Profiles from Google Earth</item>
+            <item values="Grid_GE_kml,txt,1">Vertical Profiles from Google Earth</item>
         </menu>
 	<menu type="ops" name="Ops_Std3D">
 	    <item values="Data_Extract,txt,20">Table of values (text)</item>
 	    <item values="Data_Extract_netCDF,cdf,20">NetCDF file</item>
 	    <item values="Data_Extract_File,asc,20">ASCII file</item>
 	    <item values="Gen_Scripts,html,20">Desktop application data access scripts</item>
-            <item values="Animation_2D,txt,20">Animation</item>
+            <item values="Animation_2D,txt,2">Animation</item>
 	</menu>
 	<menu type="ops" name="Ops_Std4D">
 	    <item values="Data_Extract,txt,20">Table of values (text)</item>
@@ -246,17 +256,16 @@
             <ifoptions op="Data_Extract_Grid" href="#Options_Data"/>
             <ifoptions op="Animation_2D_XY" href="#Options_2D_image_contour_animation_xy"/>
             <ifoptions op="Animation_2D" href="#Options_2D_image_contour_animation"/>
+            <ifoptions op="Animation_1D" href="#Options_1D_Animation"/>
             <ifoptions op="XY_zoomable_image" href="#Options_2D_image_contour_xy"/>
             <options href=""/>
         </map>
         <map type="ops" name="DefaultOperations_HybridZ">
 	    <ifmenu mode="comparison" href="#Ops_StdCompare"/>
 	    <ifmenu view="x,y,z,t" href="#Ops_Std1D"/>
-	    <ifmenu view="xz,xt,yz,yt,zt" href="#Ops_Std2D"/>
+            <ifmenu view="xz,yz" href="#Ops_Std2D"/>
+            <ifmenu view="xt,yt,zt" href="#Ops_Std2D_t"/>
 	    <ifmenu view="xy" href="#Ops_Std2D_xy"/>
-<!--
-	    <ifmenu view="xyz,xyt,yzt,xzt" href="#Ops_Std3D"/>
--->
             <ifmenu view="yzt,xzt" href="#Ops_Std3D"/>
             <ifmenu view="xyz" href="#Ops_Std3D_xyz"/>
             <ifmenu view="xyt" href="#Ops_Std3D_xyt"/>
@@ -265,11 +274,9 @@
         <map type="ops" name="DefaultOperations">
 	    <ifmenu mode="comparison" href="#Ops_StdCompare"/>
 	    <ifmenu view="x,y,z,t" href="#Ops_Std1D"/>
-	    <ifmenu view="xz,xt,yz,yt,zt" href="#Ops_Std2D"/>
+            <ifmenu view="xz,yz" href="#Ops_Std2D"/>
+            <ifmenu view="xt,yt,zt" href="#Ops_Std2D_t"/>
 	    <ifmenu view="xy" href="#Ops_Std2D_xy"/>
-<!--
-	    <ifmenu view="xyz,xyt,yzt,xzt" href="#Ops_Std3D"/>
--->
             <ifmenu view="yzt,xzt" href="#Ops_Std3D"/>
             <ifmenu view="xyz" href="#Ops_Std3D_xyz"/>
             <ifmenu view="xyt" href="#Ops_Std3D_xyt"/>
