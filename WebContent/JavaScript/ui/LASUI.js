@@ -188,8 +188,16 @@
 			this.refs[_rootNodes[i].id].ULNode = document.createElement("UL");
 			
 			this.refs[_rootNodes[i].id].ULNode.style.display="none";
-			if(!document.all)this.refs[_rootNodes[i].id].ULNode.style.marginLeft="4px;"
-			if(!document.all)this.refs[_rootNodes[i].id].ULNode.style.paddingLeft="4px;"
+			this.refs[_rootNodes[i].id].ULNode.style.marginLeft="4px";
+			this.refs[_rootNodes[i].id].ULNode.style.paddingLeft="4px";
+			this.refs[_rootNodes[i].id].ULNode.style.marginTop="0";
+			this.refs[_rootNodes[i].id].ULNode.style.paddingTop="0";
+			this.refs[_rootNodes[i].id].ULNode.style.marginBottom="0";
+			this.refs[_rootNodes[i].id].ULNode.style.paddingBottom="0";
+			
+			
+			
+			
 			this.refs[_rootNodes[i].id].LINode.appendChild(this.refs[_rootNodes[i].id].IMGNode);
 			this.refs[_rootNodes[i].id].LINode.appendChild(this.refs[_rootNodes[i].id].title);
 			this.refs[_rootNodes[i].id].LINode.appendChild(this.refs[_rootNodes[i].id].ULNode);
@@ -277,13 +285,17 @@
 		var td1 = document.createElement("TD");
 		td1.style.verticalAlign="top";
 		td1.appendChild(node.children[i].IMGNode);
-		
+		td1.style.padding=0;
+		td1.style.margin=0;		
 		var td2 = document.createElement("TD");
 		td2.style.verticalAlign = "top";
 		td2.onclick = this.selectCategory.bindAsEventListener(this, node, i);
 		td2.innerHTML = node.category.getChildName(i);
 		td2.style.cursor = "pointer";
 		td2.style.cursor = "hand";
+		td2.style.padding=0;
+		td2.style.margin=0;
+		
 		
 		td2.halign = "left";
 		tr.appendChild(td1);
@@ -331,6 +343,7 @@
 		var tr = document.createElement("TR");
 		var td1 = document.createElement("TD");
 		td1.style.verticalAlign="top";
+		td1.style.padding=0;
 		td1.appendChild(node.children[i].INPUTNode);
 		
 		var td2 = document.createElement("TD");
@@ -338,6 +351,8 @@
 		td2.innerHTML= node.category.getChildName(i);
 		td2.style.cursor = "pointer";
 		td2.style.cursor = "hand";
+		td2.style.padding=0;
+		
 		
 		td2.halign = "left";
 		tr.appendChild(td1);
@@ -373,7 +388,7 @@
 		} 
 		if(parentNode.children[i].ULNode.style.display=="none") {
 			for(var c=0;c< parentNode.children.length;c++)
-				parentNode.children[c].ULNode.style.display="none";
+				parentNode.children[c].ULNode.style.display="none";ULNo
 			parentNode.children[i].style.display="";	//expand the category if it has been selected 
 			if(parentNode.children[i].category) //if the category is a dataset set it as the selected dataset
 				if(parentNode.children[i].category.getCategoryType()=="dataset"){
@@ -525,9 +540,18 @@
 		var title = document.createElement("TEXT");
 		title.innerHTML = name;
 		this.refs.operations.operations.getOperationByID(id).INPUTNode =  document.createElement("INPUT");
+				if(document.all) {
+			var elem_nm = "<INPUT NAME='operations'>";
+			
+		this.refs.operations.operations.getOperationByID(id).INPUTNode =  document.createElement(elem_nm);
+		} else {
+			
+		this.refs.operations.operations.getOperationByID(id).INPUTNode =   document.createElement("INPUT");
+			
+		this.refs.operations.operations.getOperationByID(id).INPUTNode.name="operations";
+		}
 		this.refs.operations.operations.getOperationByID(id).INPUTNode.type="radio";
 		this.refs.operations.operations.getOperationByID(id).INPUTNode.onclick=this.setOperation.bindAsEventListener(this, id);
-		this.refs.operations.operations.getOperationByID(id).INPUTNode.name = "operations";
 		if (this.state.operation == id)
 			this.refs.operations.operations.getOperationByID(id).INPUTNode.checked = true;		
 		this.refs.operations.operations.getOperationByID(id).INPUTNode.id = id;
@@ -609,10 +633,16 @@
 		this.refs.views.views.getViewByID(id).LINode.style.listStyleType = "none";	
 		var title = document.createElement("TEXT");
 		title.innerHTML = name;
-		this.refs.views.views.getViewByID(id).INPUTNode = document.createElement("INPUT");
+		if(document.all) {
+			var elem_nm = "<INPUT NAME='views'>";
+			this.refs.views.views.getViewByID(id).INPUTNode =  document.createElement(elem_nm);
+		} else {
+			this.refs.views.views.getViewByID(id).INPUTNode =  document.createElement("INPUT");
+			this.refs.views.views.getViewByID(id).INPUTNode.name="views";
+		}
 		this.refs.views.views.getViewByID(id).INPUTNode.type="radio";
 		this.refs.views.views.getViewByID(id).INPUTNode.onclick=this.setView.bindAsEventListener(this, id);
-		this.refs.views.views.getViewByID(id).INPUTNode.name = "views";
+	
 		if (this.state.view == id)
 			this.refs.views.views.getViewByID(id).INPUTNode.checked = true;		
 		this.refs.views.views.getViewByID(id).INPUTNode.id = id;
