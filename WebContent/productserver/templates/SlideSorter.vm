@@ -228,12 +228,18 @@ function handleLASGetGridResponse(LASResponseText) {
     if (Response.hasAxis('x')) {
       LSSInitObject["x"] = new Object();
       LSSInitObject["x"].title = 'Longitude';
-      LSSInitObject["x"].type = 'longitudeWidget';
       LSSInitObject["x"].initial_value = ReqImg.getRangeLo('x');
-      LSSInitObject["x"].data = new Object();
-      LSSInitObject["x"].data.lo = Response.getLo('x');
-      LSSInitObject["x"].data.hi = Response.getHi('x');
-      LSSInitObject["x"].data.delta = Response.getDelta('x');
+      if (Response.getAxis('x').v) {
+        LSSInitObject["x"].type = 'menuWidget';
+        LSSInitObject["x"].data = Response.getMenu('x');
+      } else {
+// NOTE:  If it doesn't have a 'v' array it must have an 'arange'
+        LSSInitObject["x"].type = 'longitudeWidget';
+        LSSInitObject["x"].data = new Object();
+        LSSInitObject["x"].data.lo = Response.getLo('x');
+        LSSInitObject["x"].data.hi = Response.getHi('x');
+        LSSInitObject["x"].data.delta = Response.getDelta('x');
+      }
     }
   }
     
@@ -241,12 +247,18 @@ function handleLASGetGridResponse(LASResponseText) {
     if (Response.hasAxis('y')) {
       LSSInitObject["y"] = new Object();
       LSSInitObject["y"].title = 'Latitude';
-      LSSInitObject["y"].type = 'latitudeWidget';
       LSSInitObject["y"].initial_value = ReqImg.getRangeLo('y');
-      LSSInitObject["y"].data = new Object();
-      LSSInitObject["y"].data.lo = Response.getLo('y');
-      LSSInitObject["y"].data.hi = Response.getHi('y');
-      LSSInitObject["y"].data.delta = Response.getDelta('y');
+      if (Response.getAxis('y').v) {
+        LSSInitObject["y"].type = 'menuWidget';
+        LSSInitObject["y"].data = Response.getMenu('y');
+      } else {
+// NOTE:  If it doesn't have a 'v' array it must have an 'arange'
+        LSSInitObject["y"].type = 'latitudeWidget';
+        LSSInitObject["y"].data = new Object();
+        LSSInitObject["y"].data.lo = Response.getLo('y');
+        LSSInitObject["y"].data.hi = Response.getHi('y');
+        LSSInitObject["y"].data.delta = Response.getDelta('y');
+      }
     }
   }
     
@@ -254,8 +266,8 @@ function handleLASGetGridResponse(LASResponseText) {
     if (Response.hasAxis('z')) {
       LSSInitObject["z"] = new Object();
       LSSInitObject["z"].title = 'Depth';
-      LSSInitObject["z"].type = 'menuWidget';
       LSSInitObject["z"].initial_value = ReqImg.getRangeLo('z');
+      LSSInitObject["z"].type = 'menuWidget';
       LSSInitObject["z"].data = Response.getMenu('z');
     }
   }
@@ -264,15 +276,14 @@ function handleLASGetGridResponse(LASResponseText) {
     if (Response.hasAxis('t')) {
       LSSInitObject["t"] = new Object();
       LSSInitObject["t"].title = 'Time';
+      LSSInitObject["t"].initial_value = ReqImg.getRangeLo('t');
       if (Response.getDisplayType('t') == 'menu') {
         LSSInitObject["t"].type = 'menuWidget';
-        LSSInitObject["t"].initial_value = ReqImg.getRangeLo('t');
         LSSInitObject["t"].data = Response.getMenu('t');
       } else {
 // NOTE:  If it's not of type 'menu' it must be of type 'widget'
         LSSInitObject["t"].type = 'dateWidget';
         LSSInitObject["t"].format = Response.getRenderFormat('t');
-        LSSInitObject["t"].initial_value = ReqImg.getRangeLo('t');
         LSSInitObject["t"].data = new Object();
         LSSInitObject["t"].data.lo = Response.getLo('t');
         LSSInitObject["t"].data.hi = Response.getHi('t');
