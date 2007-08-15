@@ -637,9 +637,11 @@ i.e. 48 - start time: 24 hours before selected timestep
 
   <!-- Graphical products --> 
   <optiondef name="Options_Default" inherit="#expression,#interpolate_data,#image_format,#size,#use_ref_map,#use_graticules,#margins,#deg_min_sec"/>
+  <optiondef name="Options_Default_Animation" inherit="#expression,#interpolate_data,#size,#use_graticules,#margins,#deg_min_sec"/>
 
   <!-- 1-dimensional plots -->
   <optiondef name="Options_1D" inherit="#Options_Default,#line_or_sym,#line_color,#line_thickness,#dep_axis_scale"/>
+  <optiondef name="Options_1D_Animation" inherit="#Options_Default_Animation,#line_or_sym,#line_color,#line_thickness,#dep_axis_scale"/>
 
   <!-- Vector plots NOTE THERE SHOULD BE A SEPARATE Options_Vector_XY -->
   <optiondef name="Options_Vector" inherit="#Options_Default,#set_aspect,#land_type,#vector_skip,#vector_length"/>
