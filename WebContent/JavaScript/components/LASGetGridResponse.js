@@ -229,8 +229,8 @@ function LASGetGridResponse_getHi(axis) {
     value = this.getAxis(axis_lc).hi;
   } else {
     if (this.hasMenu(axis)) { // <v> array
-      var length = this.getAxis(axis_lc).v.length;
-      value = this.getAxis(axis_lc).v[length];
+      var index = this.getAxis(axis_lc).v.length - 1;
+      value = this.getAxis(axis_lc).v[index];
     } else { // <arange ...>
       var start = Number(this.getAxis(axis_lc).arange.start);
       var size = Number(this.getAxis(axis_lc).arange.size);
