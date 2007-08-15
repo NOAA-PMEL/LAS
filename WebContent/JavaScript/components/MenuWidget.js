@@ -231,8 +231,43 @@ function MenuWidget_setValue(value) {
     }
   }
 
+  var numericValue;
+  try {
+    numericValue = Number(value);
+  } catch(e) {
+    alert('ERROR:  MenuWidget_setValue: value [' + value + '] is not an available option and is not numeric.');
+    throw('ERROR:  MenuWidget_setValue: value [' + value + '] is not an available option and is not numeric.');
+  }
+    
+// No match - look for nearest value in lo -> hi ordering
+  if (no_match) {
+    for (var i=0; i<this.Select.length-1; i++) {
+      var thisOption = Number(this.Select.options[i].value);
+      var nextOption = Number(this.Select.options[i+1].value);
+      if (numericValue > thisOption && numericValue < nextOption) {
+        this.Select.selectedIndex = i;
+        this.selectedIndex = i;
+        no_match = 0;
+      }
+    }
+  }
+
+// Still no match - look for nearest value in hi -> lo ordering
+  if (no_match) {
+    for (var i=0; i<this.Select.length-1; i++) {
+      var thisOption = Number(this.Select.options[i].value);
+      var nextOption = Number(this.Select.options[i+1].value);
+      if (numericValue > thisOption && numericValue < nextOption) {
+        this.Select.selectedIndex = i;
+        this.selectedIndex = i;
+        no_match = 0;
+      }
+    }
+  }
+
   if (no_match) { 
-    throw('ERROR:  MenuWidget_setValue: value [' + value + '] does not match any options.');
+    alert('ERROR:  MenuWidget_setValue: value [' + value + '] is outside the range of options.');
+    throw('ERROR:  MenuWidget_setValue: value [' + value + '] is outside the range of options.');
   }
 }
 
@@ -243,6 +278,7 @@ function MenuWidget_setValue(value) {
  */
 function MenuWidget_setValueByIndex(index) {
   if (index < 0 || index >= this.Select.length) {
+    alert('ERROR:  MenuWidget_setValueByIndex: index [' + index + '] does not match any options.');
     throw('ERROR:  MenuWidget_setValueByIndex: index [' + index + '] does not match any options.');
   } else {
     this.Select.selectedIndex = index;
