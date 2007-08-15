@@ -351,10 +351,10 @@ function LASGetGridResponse_getRenderFormat(axis) {
   switch (axis_lc) {
     case 't':
       value = "";
-      if (this.getAxis('t').yearNeeded)  { value += "Y"; }
-      if (this.getAxis('t').monthNeeded) { value += "M"; }
-      if (this.getAxis('t').dayNeeded)   { value += "D"; }
-      if (this.getAxis('t').hourNeeded)  { value += "T"; }
+      if (this.getAxis('t').yearNeeded == 'true')  { value += "Y"; }
+      if (this.getAxis('t').monthNeeded == 'true') { value += "M"; }
+      if (this.getAxis('t').dayNeeded == 'true')   { value += "D"; }
+      if (this.getAxis('t').hourNeeded == 'true')  { value += "T"; }
       break;
   }
   return value;
