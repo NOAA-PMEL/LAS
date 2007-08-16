@@ -39,6 +39,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 
+import java.io.BufferedInputStream;
+import java.io.DataInputStream;
+import java.io.FileInputStream;
+
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -230,11 +234,14 @@ public class KMLTool extends TemplateTool  {
 
     private LASBackendResponse makePlacemarksKML(LASBackendRequest lasBackendRequest,VelocityContext context)
     throws Exception {
+        log.info("enter makePlacemarksKML");
+
         LASBackendResponse lasBackendResponse = new LASBackendResponse();
         String output = lasBackendRequest.getResultAsFile("kml");
         String baseURL = kmlBackendConfig.getHttpBaseURL();
 
         String ferret_listing_file = lasBackendRequest.getChainedDataFile("ferret_listing");
+        String las_req_info_file = lasBackendRequest.getChainedDataFile("las_request_info");
 
         //get the kml template
         String kml = lasBackendRequest.getServiceAction();
@@ -242,38 +249,30 @@ public class KMLTool extends TemplateTool  {
             kml = kml+".vm";
         }
 
-        ArrayList allPlacemarks = new ArrayList();
-        LASDocument gridList = new LASDocument();
+        ArrayList allPlacemarks = new ArrayList(43000);
+        LASDocument lasReqInfo = new LASDocument();
         String dsID="";
         String varID="";
         String gridLon="";
         String gridLat="";
-
-        //read in the lat/lon of each grid point and create a placemark for it
-        File gridListFile = new File(ferret_listing_file);
-/*
-
-            FileInputStream fis = new FileInputStream(f);
-            BufferedInputStream bis = new BufferedInputStream(fis);
-            DataInputStream dis = new DataInputStream(bis);
-*/
-            //try different way to read
+        HashMap<String, String> initLASReq = new HashMap<String, String>();
+        File lasReqInfoFile = new File(las_req_info_file);
+        
         try{
-            JDOMUtils.XML2JDOM(gridListFile,gridList);
+            JDOMUtils.XML2JDOM(lasReqInfoFile,lasReqInfo);
 
+            //HashMap<String, String> initLASReq = new HashMap<String, String>();
 
-            HashMap<String, String> initLASReq = new HashMap<String, String>();
-
-            Element dsIDElement = gridList.getElementByXPath("/grids/dataset_id");
+            Element dsIDElement = lasReqInfo.getElementByXPath("/las_req_info/dataset_id");
             dsID = dsIDElement.getText();
 
-            Element varIDElement = gridList.getElementByXPath("/grids/variable_id");
+            Element varIDElement = lasReqInfo.getElementByXPath("/las_req_info/variable_id");
             varID = varIDElement.getText();
 
-            Element viewElement = gridList.getElementByXPath("/grids/ferret_view");
+            Element viewElement = lasReqInfo.getElementByXPath("/las_req_info/ferret_view");
             String view = viewElement.getText();
 
-            Element dsIntervalsElement = gridList.getElementByXPath("/grids/data_intervals");
+            Element dsIntervalsElement = lasReqInfo.getElementByXPath("/las_req_info/data_intervals");
             String dsIntervals = dsIntervalsElement.getText();
 
             initLASReq.put("dsID", dsID);
@@ -282,7 +281,7 @@ public class KMLTool extends TemplateTool  {
             initLASReq.put("dsIntervals", dsIntervals);
 
             if(dsIntervals.contains("z")){
-                Element zElement = gridList.getElementByXPath("/grids/z_region");
+                Element zElement = lasReqInfo.getElementByXPath("/las_req_info/z_region");
                 Element zloElement = zElement.getChild("z_lo");
                 String zlo  = zloElement.getText();
                 Element zhiElement = zElement.getChild("z_hi");
@@ -292,7 +291,7 @@ public class KMLTool extends TemplateTool  {
             }
        
             if(dsIntervals.contains("t")){
-                Element tElement = gridList.getElementByXPath("/grids/t_region");
+                Element tElement = lasReqInfo.getElementByXPath("/las_req_info/t_region");
                 Element tloElement = tElement.getChild("t_lo");
                 String tlo  = tloElement.getText();
                 Element thiElement = tElement.getChild("t_hi");
@@ -300,23 +299,47 @@ public class KMLTool extends TemplateTool  {
                 initLASReq.put("tlo", tlo);
                 initLASReq.put("thi", thi);
             }
+        } catch (Exception e){
+            log.info("error while reading las request info: " + e.toString());
+        }
 
-            Element pointsElement = gridList.getElementByXPath("/grids/points");
-            Iterator itr = (pointsElement.getChildren()).iterator();
-            while(itr.hasNext()) {
-                Element pointElement = (Element)itr.next();
-                Element lonElement = pointElement.getChild("lon");
-                gridLon = lonElement.getText();
-                Element latElement = pointElement.getChild("lat");
-                gridLat = latElement.getText();
+        //read grid points and create a placemark KML String for each
+        File gridListFile = new File(ferret_listing_file);
+        FileInputStream fis = null;
+        BufferedInputStream bis = null;
+        DataInputStream dis = null;
+
+        try {
+            fis = new FileInputStream(gridListFile);
+
+            // Here BufferedInputStream is added for fast reading.
+            bis = new BufferedInputStream(fis);
+            dis = new DataInputStream(bis);
+
+            // dis.available() returns 0 if the file does not have more lines.
+            while (dis.available() != 0) {
+                // this statement reads the line from the file and print it to
+                // the console.
+                String gridPair = dis.readLine();
+                gridPair = gridPair.trim();
+                Pattern p = Pattern.compile("\\s");
+                String[] gp = gridPair.split(p.pattern());
+                gridLon = gp[0];
+                gridLat = gp[gp.length-1]; 
                 GEPlacemark pl = new GEPlacemark(gridLat,gridLon,initLASReq,lasBackendRequest,baseURL);
                 allPlacemarks.add(pl);
-            } 
+            }
+            fis.close();
+            bis.close();
+            dis.close();
 
-        } catch (Exception e){
-            log.info("error while reading grid points: " + e.toString());
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     
+        //output to velocity context
         context.put("dsID",dsID);
         context.put("varID",varID);
 
@@ -325,6 +348,8 @@ public class KMLTool extends TemplateTool  {
         context.put("gridLat",gridLat);
 
         context.put("allPlacemarks", allPlacemarks);
+
+        log.info("finish creating allPlacemarks");
 
         PrintWriter kmlWriter = null;
         try {
