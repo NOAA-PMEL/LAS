@@ -32,8 +32,8 @@ ENDIF
 
 CANCEL SYMBOL frmt 
 
-SET LIST/FILE="($result_ferret_listing_filename)"
-
+!SET LIST/FILE="($result_ferret_listing_filename)"
+SET LIST/FILE="($result_las_request_info_filename)"
 
    LET llon = X[GX=($ferret_list_var), X=($region_x_lo):($region_x_hi)] + 0*Y[GY=($ferret_list_var),Y=($region_y_lo):($region_y_hi)]
    LET llat = 0*X[GX=($ferret_list_var),X=($region_x_lo):($region_x_hi)] + Y[GY=($ferret_list_var),Y=($region_y_lo):($region_y_hi)]
@@ -58,14 +58,18 @@ LET llat_list = XSEQUENCE(llat*mask)
 
 LET ngood = llon_list[x=@ngd]
 
+!==================================================
+! output info about the LAS request and the dataset
+!==================================================
+
 LET xml = "<?xml version='1.0' encoding='UTF-8'?>"
 define variable len = STRLEN(xml)
 define symbol fmt = A`len`
 list/norowhead/nohead/format=(($fmt))/FILE/append xml
 
 !root of the xml file
-LET f = "<grids>"
-list/norowhead/nohead/format=(A7)/FILE/append f
+LET f = "<las_req_info>"
+list/norowhead/nohead/format=(A14)/FILE/append f
 
 !===> output dataset ID
 LET dsID = "($data_0_dataset_ID)"
@@ -165,14 +169,19 @@ IF ($data_0_intervals"|xyzt>1|*>0") THEN
 ENDIF
 
 !===> output grid point locations
-LET f = "<points>"
-list/norowhead/nohead/format=(A8)/FILE/append f
+!LET f = "<points>"
+!list/norowhead/nohead/format=(A8)/FILE/append f
  
-LIST/I=1:`ngood`/NOHEADER/NOROWHEADER/APPEND/FORMAT=("<point>"/"<lon>",f7.2,"</lon>"/"<lat>",f7.2,"</lat>"/"</point>")/FILE  COMPRESSI(llon_list), COMPRESSI(llat_list)
+!LIST/I=1:`ngood`/NOHEADER/NOROWHEADER/APPEND/FORMAT=("<point>"/"<lon>",f7.2,"</lon>"/"<lat>",f7.2,"</lat>"/"</point>")/FILE  COMPRESSI(llon_list), COMPRESSI(llat_list)
 
-LET f = "</points>"
-list/norowhead/nohead/format=(A9)/FILE/append f
+!LET f = "</points>"
+!list/norowhead/nohead/format=(A9)/FILE/append f
 
-LET f = "</grids>"
-list/norowhead/nohead/format=(A8)/FILE/append f
+LET f = "</las_req_info>"
+list/norowhead/nohead/format=(A15)/FILE/append f
 
+!====================================
+! list grid points to a separate file
+!====================================
+SET LIST/FILE="($result_ferret_listing_filename)"
+LIST/I=1:`ngood`/NOHEADER/NOROWHEADER/APPEND/FORMAT=(f7.2, f7.2)/FILE  COMPRESSI(llon_list), COMPRESSI(llat_list)
