@@ -313,7 +313,7 @@
     <!-- END: dynamic overlay on Google Earth -->
 
     <!-- Begin: static overlay -->
-     <!-- overlay kml for non-vector plots [private]; it is used by the dynamic overlay-->
+    <!-- overlay kml for non-vector plots [private]; it is used by the dynamic overlay-->
     <operation name="Plot to Google Earth (static)" ID="Plot_GE_kml" mime_type="application/vnd.google-earth.kml+xml" output_template="output_GE" private="true">
       <operation name="Plot_2D_GE" ID="Plot_for_GE" service_action="Plot_2D_GE">
         <response ID="PlotResp">
@@ -387,13 +387,15 @@
       <operation name="Data_Extract_Grid" ID="Grid_for_GE" service_action="Data_Extract_Grid">
         <response ID="Data_Extract_Grid_Response">
           <result type="text" ID="ferret_listing" streamable="true" mime_type="text/plain" file_suffix=".txt"/>
+          <result type="text" ID="las_request_info" streamable="true" mime_type="text/plain" file_suffix=".txt"/>
           <result type="debug" ID="debug"/>
         </response>
         <service>ferret</service>
       </operation>
       <operation chained="true" name="Make KML File" ID="kml" service_action="kml_placemarks">
         <args>
-          <arg chained="true" type="image" operation="Grid_for_GE" result="ferret_listing" />
+          <arg chained="true" type="text" operation="Grid_for_GE" result="ferret_listing" />
+          <arg chained="true" type="text" operation="Grid_for_GE" result="las_request_info" />
         </args>
         <response ID="KMLResp" type="HTML" index="1">
           <result type="kml" ID="kml" streamable="true" mime_type="application/vnd.google-earth.kml+xml" file_suffix=".kml"/>
