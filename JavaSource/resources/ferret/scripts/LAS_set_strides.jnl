@@ -19,9 +19,9 @@ DEFINE SYMBOL memsize = ($FERRET_MEMORY"6.4")* 1.e6
 
 DEFINE SYMBOL nvars = ($data_count)
 
-! If ($data_count) larger than 1 multiply the size of the variables.
+! If ($data_count) larger than 1 add the size of the variables.
 LET pvar = ($ferret_plot_var) 
-DEFINE SYMBOL var_size = ($var_size"1")* `pvar,RETURN=size`
+DEFINE SYMBOL var_size = ($var_size"0") + `pvar,RETURN=size`
 
 ! The exception to the above is side-by-side plots; each var loaded separately
 IF `STRINDEX( "($operation_ID)", "Side" ) NE 0` THEN 
@@ -32,12 +32,13 @@ ENDIF
 IF `($num)+1 EQ ($nvars)` THEN
    LET varsiz `pvar,RETURN=size`
    DEFINE SYMBOL stride_for_mem = `INT( 1+ varsiz/(.5*($memsize)) )`
+
 ENDIF
 
 ! If not a graphics product, apply the strides
+
 IF `STRINDEX( "($operation_ID)", "Plot" ) EQ 0` THEN
-   IF ($stride_for_mem"0") THEN
-   define symbol stride_for_mem = 50  ! testing...
+   IF `($stride_for_mem"0") GT 1` THEN
       IF `($region_x_range"0") GT 0` THEN 
          SET AXIS/STRIDE=($stride_for_mem) `pvar,RETURN=xaxis`
          DEFINE SYMBOL add_to_title = Stride ($stride_for_mem) in X
