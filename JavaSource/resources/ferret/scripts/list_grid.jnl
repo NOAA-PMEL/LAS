@@ -43,14 +43,29 @@ SET LIST/FILE="($result_las_request_info_filename)"
 ! mask is 1 where ferret_list_var is valid, and missing otherwise.
   !LET mask =  IF ($ferret_list_var) THEN 1
 
-IF ($ferret_view"|xyt>1|*>0") THEN
+!IF ($ferret_view"|xyt>1|*>0") THEN
+!  LET xytvar = ($ferret_list_var)
+!  LET mask =  IF xytvar[T=@NGD] GT 0 THEN 1
+!ENDIF
+
+!IF ($ferret_view"|xyz>1|*>0") THEN
+!  LET xyzvar = ($ferret_list_var)
+!  LET mask =  IF xyzvar[Z=@NGD] GT 0 THEN 1
+!ENDIF
+
+IF ($data_0_intervals"|xyt>1|*>0") THEN
   LET xytvar = ($ferret_list_var)
   LET mask =  IF xytvar[T=@NGD] GT 0 THEN 1
 ENDIF
 
-IF ($ferret_view"|xyz>1|*>0") THEN
+IF ($data_0_intervals"|xyz>1|*>0") THEN
   LET xyzvar = ($ferret_list_var)
   LET mask =  IF xyzvar[Z=@NGD] GT 0 THEN 1
+ENDIF
+
+IF ($data_0_intervals"|xyzt>1|*>0") THEN
+  LET xyzvar = ($ferret_list_var)
+  LET mask =  IF xyzvar[Z=@NGD,T=@NGD] GT 0 THEN 1
 ENDIF
 
 LET llon_list = XSEQUENCE(llon*mask)
@@ -71,101 +86,312 @@ list/norowhead/nohead/format=(($fmt))/FILE/append xml
 LET f = "<las_req_info>"
 list/norowhead/nohead/format=(A14)/FILE/append f
 
-!===> output dataset ID
+!===============================
+! output dataset ID
+!===============================
 LET dsID = "($data_0_dataset_ID)"
 define variable len = STRLEN(dsID)
 define symbol fmt = A`len`
 list/nohead/format=("<dataset_id>",($fmt),"</dataset_id>")/FILE/append dsID
 
-!===>output variable ID
+!===============================
+! output variable ID
+!===============================
 LET varID = "($data_0_ID)"
 define variable len = STRLEN(varID)
 define symbol fmt = A`len`
 list/nohead/format=("<variable_id>",($fmt),"</variable_id>"))/FILE/append varID
 
-!===>output view
-LET view = "($ferret_view)"
-define variable len = STRLEN(view)
-define symbol fmt = A`len`
-list/nohead/format=("<ferret_view>",($fmt),"</ferret_view>")/FILE/append view
-
-!===> output data interval
+!===============================
+! output data interval
+!===============================
 LET dsIntervals = "($data_0_intervals)"
 define variable len = STRLEN(dsIntervals)
 define symbol fmt = A`len`
 list/nohead/format=("<data_intervals>",($fmt),"</data_intervals>")/FILE/append dsIntervals
 
-!===> output z or t ranges
+!===============================
+! output ferret_view
+!===============================
+LET view = "($ferret_view)"
+define variable len = STRLEN(view)
+define symbol fmt = A`len`
+list/nohead/format=("<ferret_view>",($fmt),"</ferret_view>")/FILE/append view
+
+!===============================
+! output ferret_deg_min_sec
+!===============================
+IF ($ferret_deg_min_sec"0|*>1") THEN
+    LET dms = "($ferret_deg_min_sec)"
+    define variable len = STRLEN(dms)
+    define symbol fmt = A`len`
+    list/nohead/format=("<ferret_deg_min_sec>",($fmt),"</ferret_deg_min_sec>")/FILE/append dms
+ENDIF
+
+!===============================
+! output ferret_dep_axis_scale
+!===============================
+IF ($ferret_dep_axis_scale"0|*>1") THEN
+    LET das = "($ferret_dep_axis_scale)"
+    define variable len = STRLEN(das)
+    define symbol fmt = A`len`
+    list/nohead/format=("<ferret_dep_axis_scale>",($fmt),"</ferret_dep_axis_scale>")/FILE/append das
+ENDIF
+
+!===============================
+! output ferret_expression
+!===============================
+IF ($ferret_expression"0|*>1") THEN
+    LET expression = "($ferret_expression)"
+    define variable len = STRLEN(expression)
+    define symbol fmt = A`len`
+    list/nohead/format=("<ferret_expression>",($fmt),"</ferret_expression>")/FILE/append expression
+ENDIF
+
+!===============================
+! output ferret_fill_type
+!=============================== 
+IF ($ferret_fill_type"0|*>1") THEN
+    LET fillType = "($ferret_fill_type)"
+    define variable len = STRLEN(fillType)
+    define symbol fmt = A`len`
+    list/nohead/format=("<ferret_fill_type>",($fmt),"</ferret_fill_type>")/FILE/append fillType
+ENDIF
+
+!===============================
+! output ferret_interpolate_data
+!===============================
+IF ($ferret_interpolate_data"0|*>1") THEN
+    LET intpData = "($ferret_interpolate_data)"
+    define variable len = STRLEN(intpData)
+    define symbol fmt = A`len`
+    list/nohead/format=("<ferret_interpolate_data>",($fmt),"</ferret_interpolate_data>")/FILE/append intpData
+ENDIF
+
+!===============================
+! output ferret_line_color
+!===============================
+IF ($ferret_line_color"0|*>1") THEN
+    LET lineColor = "($ferret_line_color)"
+    define variable len = STRLEN(lineColor)
+    define symbol fmt = A`len`
+    list/nohead/format=("<ferret_line_color>",($fmt),"</ferret_line_color>")/FILE/append lineColor
+ENDIF
+
+!===============================
+! output ferret_line_or_sym
+!===============================
+IF ($ferret_line_or_sym"0|*>1") THEN
+    LET lineSym = "($ferret_line_or_sym)"
+    define variable len = STRLEN(lineSym)
+    define symbol fmt = A`len`
+    list/nohead/format=("<ferret_line_or_sym>",($fmt),"</ferret_line_or_sym>")/FILE/append lineSym
+ENDIF
+                      
+!===============================
+! output ferret_line_thickness
+!===============================
+IF ($ferret_line_thickness"0|*>1") THEN
+    LET lineThickness = "($ferret_line_thickness)"
+    define variable len = STRLEN(lineThickness)
+    define symbol fmt = A`len`
+    list/nohead/format=("<ferret_line_thickness>",($fmt),"</ferret_line_thickness>")/FILE/append lineThickness
+ENDIF
+          
+!===============================
+! output ferret_margins
+!===============================
+IF ($ferret_margins"0|*>1") THEN
+    LET margins = "($ferret_margins)"
+    define variable len = STRLEN(margins)
+    define symbol fmt = A`len`
+    list/nohead/format=("<ferret_margins>",($fmt),"</ferret_margins>")/FILE/append margins
+ENDIF
+!===============================
+! output ferret_size
+!===============================
+IF ($ferret_size"0|*>1") THEN
+    LET size = "($ferret_size)"
+    define variable len = STRLEN(size)
+    define symbol fmt = A`len`
+    list/nohead/format=("<ferret_size>",($fmt),"</ferret_size>")/FILE/append size
+ENDIF
+ 
+!===============================
+! output ferret_use_graticules
+!===============================
+IF ($ferret_use_graticules"0|*>1") THEN
+    LET useGraticules = "($ferret_use_graticules)"
+    define variable len = STRLEN(useGraticules)
+    define symbol fmt = A`len`
+    list/nohead/format=("<ferret_use_graticules>",($fmt),"</ferret_use_graticules>")/FILE/append useGraticules
+ENDIF
+
+!===============================
+! output ferret_use_ref_map
+!===============================
+IF ($ferret_use_ref_map"0|*>1") THEN
+    LET useRefMap = "($ferret_use_ref_map)"
+    define variable len = STRLEN(useRefMap)
+    define symbol fmt = A`len`
+    list/nohead/format=("<ferret_use_ref_map>",($fmt),"</ferret_use_ref_map>")/FILE/append useRefMap
+ENDIF
+
+!=========================
+! output z and/or t ranges
+!=========================
+DEFINE SYMBOL max_tpoints 21   ! should be an odd number
+
+!XYTi dataset
 IF ($data_0_intervals"|xyt>1|*>0") THEN
-  LET f = "<t_region>"
-  list/norowhead/nohead/format=(A10)/FILE/append f
+    DEFINE SYMBOL nt `($ferret_plot_var),return=lsize`   ! no. of time points requested
+    IF `($nt) eq 1` THEN
+        LET L0 = `($ferret_plot_var),return=lstart`
+        LET maxL = `($data_var),return=lsize`   ! no. of time points total
+        LET hafmax = `INT(($max_tpoints)/2)`
+        IF `maxL LE ($max_tpoints)` THEN
+            DEFINE SYMBOL lmin 1
+            DEFINE SYMBOL lmax `maxL`
+        ELSE
+            DEFINE SYMBOL lmin `MAX(L0-hafmax,1)`
+            DEFINE SYMBOL lmax `MIN(L0+hafmax,maxL)`
+        ENDIF
+        LET tlo = "`($data_var)[L=($lmin)],return=TSTART`"
+        LET thi = "`($data_var)[L=($lmax)],return=TEND`"
+ 
+    ELSE
+        LET tlo = "($region_0_t_lo)"
+        LET thi = "($region_0_t_hi)"
+    ENDIF
 
-  LET tlo = "($region_0_t_lo)"
-  define variable len = STRLEN(tlo)
-  define symbol fmt = A`len`
-  list/nohead/format=("<t_lo>",($fmt),"</t_lo>")/FILE/append tlo
+    LET f = "<t_region>"
+    list/norowhead/nohead/format=(A10)/FILE/append f
 
-  LET thi = "($region_0_t_hi)"
-  define variable len = STRLEN(thi)
-  define symbol fmt = A`len`
-  list/nohead/format=("<t_hi>",($fmt),"</t_hi>")/FILE/append thi
+        !LET tlo = "($region_0_t_lo)"
+    define variable len = STRLEN(tlo)
+    define symbol fmt = A`len`
+    list/nohead/format=("<t_lo>",($fmt),"</t_lo>")/FILE/append tlo
 
-  LET f = "</t_region>"
-  list/norowhead/nohead/format=(A11)/FILE/append f
+        !LET thi = "($region_0_t_hi)"
+    define variable len = STRLEN(thi)
+    define symbol fmt = A`len`
+    list/nohead/format=("<t_hi>",($fmt),"</t_hi>")/FILE/append thi
 
+    LET f = "</t_region>"
+    list/norowhead/nohead/format=(A11)/FILE/append f
 ENDIF
 
+!XYZ dataset
 IF ($data_0_intervals"|xyz>1|*>0") THEN
-  LET f = "<z_region>"
-  list/norowhead/nohead/format=(A10)/FILE/append f
 
-  LET zlo = "($region_0_z_lo)"
-  define variable len = STRLEN(zlo)
-  define symbol fmt = A`len`
-  list/nohead/format=("<z_lo>",($fmt),"</z_lo>")/FILE/append zlo
+    DEFINE SYMBOL nz `($ferret_plot_var),return=ksize`   ! no. of depth points requested
+    
+    IF `($nz) eq 1` THEN                                 ! XY view being selected
+        LET maxK = `($data_var),return=ksize`            ! no. of depth points total
+        DEFINE SYMBOL kmin 1
+        DEFINE SYMBOL kmax `maxK`
+        LET zlo = "`($data_var)[K=($kmin)],return=ZSTART`"
+        LET zhi = "`($data_var)[K=($kmax)],return=ZEND`"
+    ELSE                                                 ! XYZ view being selected
+        LET zlo = "($region_0_z_lo)"
+        LET zhi = "($region_0_z_hi)"
+    ENDIF
 
-  LET zhi = "($region_0_z_hi)"
-  define variable len = STRLEN(zhi)
-  define symbol fmt = A`len`
-  list/nohead/format=("<z_hi>",($fmt),"</z_hi>")/FILE/append zhi
+    LET f = "<z_region>"
+    list/norowhead/nohead/format=(A10)/FILE/append f
 
-  LET f = "</z_region>"
-  list/norowhead/nohead/format=(A11)/FILE/append f
+!  LET zlo = "($region_0_z_lo)"
+    define variable len = STRLEN(zlo)
+    define symbol fmt = A`len`
+    list/nohead/format=("<z_lo>",($fmt),"</z_lo>")/FILE/append zlo
+
+!  LET zhi = "($region_0_z_hi)"
+    define variable len = STRLEN(zhi)
+    define symbol fmt = A`len`
+    list/nohead/format=("<z_hi>",($fmt),"</z_hi>")/FILE/append zhi
+
+    LET f = "</z_region>"
+    list/norowhead/nohead/format=(A11)/FILE/append f
 
 ENDIF
 
+!XYZT
 IF ($data_0_intervals"|xyzt>1|*>0") THEN
-  LET f = "<z_region>"
-  list/norowhead/nohead/format=(A10)/FILE/append f
 
-  LET zlo = "($region_0_z_lo)"
-  define variable len = STRLEN(zlo)
-  define symbol fmt = A`len`
-  list/nohead/format=("<z_lo>",($fmt),"</z_lo>")/FILE/append zlo
+    IF ($ferret_view"|xy>1|*>0") THEN    ! XY view being selected
 
-  LET zhi = "($region_0_z_hi)"
-  define variable len = STRLEN(zhi)
-  define symbol fmt = A`len`
-  list/nohead/format=("<z_hi>",($fmt),"</z_hi>")/FILE/append zhi
+        ! output user selected T
+        LET userT = "($region_0_t_lo)"
+        define variable len = STRLEN(userT)
+        define symbol fmt = A`len`
+        list/nohead/format=("<t_user>",($fmt),"</t_user>")/FILE/append userT
 
-  LET f = "</z_region>"
-  list/norowhead/nohead/format=(A11)/FILE/append f
+        ! output user selected Z
+        LET userZ = "($region_0_z_lo)"
+        define variable len = STRLEN(userZ)
+        define symbol fmt = A`len`
+        list/nohead/format=("<z_user>",($fmt),"</z_user>")/FILE/append userZ
 
-  LET f = "<t_region>"
-  list/norowhead/nohead/format=(A10)/FILE/append f
+        ! output whole range of Z
+        LET maxK = `($data_var),return=ksize`            ! no. of depth points total
+        DEFINE SYMBOL kmin 1
+        DEFINE SYMBOL kmax `maxK`
+        LET zlo = "`($data_var)[K=($kmin)],return=ZSTART`"
+        LET zhi = "`($data_var)[K=($kmax)],return=ZEND`"
+
+        ! compute range of T with maximum size of 21
+        !user selected T is in the middle if # of total time points >= 21
+        LET L0 = `($ferret_plot_var),return=lstart`
+        LET maxL = `($data_var),return=lsize`            ! no. of time points total
+        LET hafmax = `INT(($max_tpoints)/2)`
+        IF `maxL LE ($max_tpoints)` THEN
+            DEFINE SYMBOL lmin 1
+            DEFINE SYMBOL lmax `maxL`
+        ELSE
+            DEFINE SYMBOL lmin `MAX(L0-hafmax,1)`
+            DEFINE SYMBOL lmax `MIN(L0+hafmax,maxL)`
+        ENDIF
+        LET tlo = "`($data_var)[L=($lmin)],return=TSTART`"
+        LET thi = "`($data_var)[L=($lmax)],return=TEND`"
+
+    ELSE                                ! either XYZ or XYT view being selected
+        LET zlo = "($region_0_z_lo)"
+        LET zhi = "($region_0_z_hi)"
+        LET tlo = "($region_0_t_lo)"
+        LET thi = "($region_0_t_hi)"
+    ENDIF
+
+    LET f = "<z_region>"
+    list/norowhead/nohead/format=(A10)/FILE/append f
+
+  !LET zlo = "($region_0_z_lo)"
+    define variable len = STRLEN(zlo)
+    define symbol fmt = A`len`
+    list/nohead/format=("<z_lo>",($fmt),"</z_lo>")/FILE/append zlo
+
+    !LET zhi = "($region_0_z_hi)"
+    define variable len = STRLEN(zhi)
+    define symbol fmt = A`len`
+    list/nohead/format=("<z_hi>",($fmt),"</z_hi>")/FILE/append zhi
+
+    LET f = "</z_region>"
+    list/norowhead/nohead/format=(A11)/FILE/append f
+
+    LET f = "<t_region>"
+    list/norowhead/nohead/format=(A10)/FILE/append f
   
-  LET tlo = "($region_0_t_lo)"
-  define variable len = STRLEN(tlo)
-  define symbol fmt = A`len`
-  list/nohead/format=("<t_lo>",($fmt),"</t_lo>")/FILE/append tlo
+  !LET tlo = "($region_0_t_lo)"
+    define variable len = STRLEN(tlo)
+    define symbol fmt = A`len`
+    list/nohead/format=("<t_lo>",($fmt),"</t_lo>")/FILE/append tlo
 
-  LET thi = "($region_0_t_hi)"
-  define variable len = STRLEN(thi)
-  define symbol fmt = A`len`
-  list/nohead/format=("<t_hi>",($fmt),"</t_hi>")/FILE/append thi
+  !LET thi = "($region_0_t_hi)"
+    define variable len = STRLEN(thi)
+    define symbol fmt = A`len`
+    list/nohead/format=("<t_hi>",($fmt),"</t_hi>")/FILE/append thi
 
-  LET f = "</t_region>"
-  list/norowhead/nohead/format=(A11)/FILE/append f
+    LET f = "</t_region>"
+    list/norowhead/nohead/format=(A11)/FILE/append f
 ENDIF
 
 !===> output grid point locations
@@ -182,6 +408,7 @@ list/norowhead/nohead/format=(A15)/FILE/append f
 
 !====================================
 ! list grid points to a separate file
+! each line is a grid point (lon lat)
 !====================================
 SET LIST/FILE="($result_ferret_listing_filename)"
 LIST/I=1:`ngood`/NOHEADER/NOROWHEADER/APPEND/FORMAT=(f7.2, f7.2)/FILE  COMPRESSI(llon_list), COMPRESSI(llat_list)
