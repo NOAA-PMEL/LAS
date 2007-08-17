@@ -85,3 +85,7 @@ ELIF ($ferret_view"|t>1|*>0") THEN
 ELSE
   say " **ERROR: Attempt to make an overlay plot in ($ferret_view) with this plot script.  Only x, y, z, t, xy, xt, xz, yt, yz, and zt are allowed"
 ENDIF
+
+! If striding is going to happen, for side-by-side plots the data for each
+! is loaded separately so any need forstriding is based on each variable alone
+CANCEL MEMORY/ALL
