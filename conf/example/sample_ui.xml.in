@@ -71,6 +71,7 @@
             <item values="Gen_Scripts,html,20">Desktop application data access scripts</item>
             <item values="Plot_GE_Overlay,html,2">Plot to Google Earth</item>
             <item values="Animation_2D_XY,txt,2">Animation</item>
+             <item values="Grid_GE_kml,txt,1">Time Series or Vertical Profiles from Google Earth</item>
         </menu>
         <menu type="ops" name="Ops_Std3D_xyt">
             <item values="Data_Extract,txt,20">Table of values (text)</item>
@@ -237,6 +238,7 @@
             <ifoptions op="Animation_2D" href="#Options_2D_image_contour_animation"/> 
             <ifoptions op="Animation_1D" href="#Options_1D_Animation"/>
             <ifoptions op="XY_zoomable_image" href="#Options_2D_image_contour_xy"/>
+            <ifoptions op="Grid_GE_kml" href="#Options_1D_Animation"/>
             <options href=""/>
         </map>
         <map type="ops" name="DefaultOperations_HybridZ">
