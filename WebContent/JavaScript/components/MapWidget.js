@@ -141,17 +141,22 @@ if ( !Function.prototype.bindAsEventListener ) {
  
    this.DOMNode.style.overflow = "hidden";
    this.rubberBand = document.createElement('DIV');
-   this.rubberBand.style.border = "1px solid red";
+   this.rubberBand.style.border = "1px solid black";
    this.rubberBand.style.position = "absolute";
    this.rubberBand.style.visibility = "hidden";
    this.rubberBand.style.zIndex =1;
+   this.rubberBand.style.backgroundColor = "yellow";
+ //  if(!document.all)
+   this.rubberBand.style.opacity = 0.50;
+	this.rubberBand.style.filter = "alpha(opacity=50)";
    this.rubberBand_c = document.createElement('DIV');
-   this.rubberBand_c.style.border = "1px solid red";
+   this.rubberBand_c.style.border = "1px solid black";
+   
    this.rubberBand_c.style.position = "absolute";
 	this.rubberBand_c.style.visibility = "hidden";
 	this.rubberBand_c.style.zIndex =1;
 	this.rubberBand_c.style.overflow = "hidden";
-	this.rubberBand_c.style.backgroundColor = "red";
+	this.rubberBand_c.style.backgroundColor = "black";
 	this.rubberBand.appendChild(this.rubberBand_c);
 	document.body.appendChild(this.rubberBand);
  
@@ -321,7 +326,7 @@ MapWidget.prototype.getView = function () {
 
 //sets a new view, and remembers a little about the last one
 MapWidget.prototype.setView = function (view) {
- 	 	if(this.view!=view && this.rubberBand && this.rubberBand_c)
+ 	 	if(this.rubberBand && this.rubberBand_c)
   	{	
   		if (!this.last)
   			this.last = {};
