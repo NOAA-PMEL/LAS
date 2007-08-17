@@ -83,16 +83,5 @@ IF `($data_title"0|*>1") EQ 0` THEN
   define symbol ferret_plot_title "($data_var) ($data_units)"
 ENDIF
 
-! From the region and the grid we can define striding. 
-! TODO: (When there's going to be a transformation, should this be done??)
-!  Do this for the HYCOM high resolution data, so curvi version is in  HYCOM_init script
-! ACM 8/07 Call this, but inside the strides script do not do striding for curvi data
-GO LAS_set_strides.jnl
-
-!test stride for Google Earth
-IF `STRINDEX( "($operation_ID)", "GE" ) NE 0` THEN
-    GO LAS_set_strides_GE
-ENDIF
-
 ! End of $RCSfile ------------LAS_initialize_dataset.jnl--------------------------
 

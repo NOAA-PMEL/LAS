@@ -58,5 +58,20 @@ GO LAS_transforms
 
 DEFINE SYMBOL variables_initialized `1 + ($variables_initialized"0")`
 
+IF `($variables_initialized) EQ ($data_count)` THEN
+
+! From the variable we can define striding. 
+! TODO: script works only for rectangular data so far...
+
+
+!test stride for Google Earth
+   IF `STRINDEX( "($operation_ID)", "GE" ) NE 0` THEN
+      GO LAS_set_strides_GE
+   ELSE
+      GO LAS_set_strides.jnl
+   ENDIF
+
+ENDIF
+
 ! End of $RCSfile ------------LAS_initialize_variable.jnl--------------------------
 
