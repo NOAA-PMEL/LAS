@@ -144,6 +144,7 @@ if ( !Function.prototype.bindAsEventListener ) {
    this.rubberBand.style.border = "1px solid black";
    this.rubberBand.style.position = "absolute";
    this.rubberBand.style.visibility = "hidden";
+   this.rubberBand.style.overflow = "visible";
    this.rubberBand.style.zIndex =1;
    this.rubberBand.style.backgroundColor = "yellow";
  //  if(!document.all)
