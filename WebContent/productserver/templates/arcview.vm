@@ -28,7 +28,7 @@ $error
   </tr>
   <tr>
      <td width="100%">
-        <iframe src="$las_response.getResult("debug")" width="100%">
+        <iframe src="$las_response.getResult("debug")" width="600">
            Missing debug output.
         </iframe>
      </td>
