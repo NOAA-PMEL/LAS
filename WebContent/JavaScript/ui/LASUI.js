@@ -183,13 +183,16 @@
 			
 			this.refs[_rootNodes[i].id].LINode.style.listStyleType = "none";
 			this.refs[_rootNodes[i].id].LINode.style.padding = "0";
-			this.refs[_rootNodes[i].id].LINode.style.margin = "0";
+			this.refs[_rootNodes[i].id].LINode.style.margin = "-4pt";
 			
-			this.refs[_rootNodes[i].id].ULNode = document.createElement("UL");
+			if(_rootNodes[i].id == "options")
+				this.refs[_rootNodes[i].id].ULNode = document.createElement("DIV");
+			else
+				this.refs[_rootNodes[i].id].ULNode = document.createElement("UL");
 			
 			this.refs[_rootNodes[i].id].ULNode.style.display="none";
-			this.refs[_rootNodes[i].id].ULNode.style.marginLeft="4px";
-			this.refs[_rootNodes[i].id].ULNode.style.paddingLeft="4px";
+			this.refs[_rootNodes[i].id].ULNode.style.marginLeft="6pt";
+			this.refs[_rootNodes[i].id].ULNode.style.paddingLeft="6pt";
 			this.refs[_rootNodes[i].id].ULNode.style.marginTop="0";
 			this.refs[_rootNodes[i].id].ULNode.style.paddingTop="0";
 			this.refs[_rootNodes[i].id].ULNode.style.marginBottom="0";
@@ -259,7 +262,7 @@
 		node.children[i] = {};
 		node.children[i].LINode = document.createElement("LI"); //dojo.widget.createWidget("TreeNode");	
 		node.children[i].LINode.style.padding = "0";
-		node.children[i].LINode.style.margin = "0";
+		node.children[i].LINode.style.margin = "-4pt";
 		
 		node.children[i].IMGNode =  document.createElement("IMG");
 		node.children[i].IMGNode.onclick = this.selectCategory.bindAsEventListener(this, node, i);
@@ -271,8 +274,8 @@
 		node.children[i].isExpanded = false;
 
 		node.children[i].ULNode = document.createElement("ul");
-		if(!document.all)node.children[i].ULNode.style.marginLeft = "4px";
-		if(!document.all)node.children[i].ULNode.style.paddingLeft = "4px";
+		node.children[i].ULNode.style.marginLeft = "6pt";
+		node.children[i].ULNode.style.paddingLeft = "6pt";
 	   node.children[i].ULNode.style.marginTop = "0";
 		node.children[i].ULNode.style.paddingTop = "0";
 	   node.children[i].ULNode.style.marginBottom = "0";
@@ -280,8 +283,14 @@
 		var table = document.createElement("TABLE");
 		table.cellpadding = "0";
 		table.cellspacing = "0";
+		table.style.padding=0;
+		table.style.margin=0;
 		var tbody = document.createElement("TBODY");
+		tbody.style.padding=0;
+		tbody.style.margin=0;
 		var tr = document.createElement("TR");
+		tr.style.padding=0;
+		tr.style.margin=0;
 		var td1 = document.createElement("TD");
 		td1.style.verticalAlign="top";
 		td1.appendChild(node.children[i].IMGNode);
@@ -322,8 +331,8 @@
 		node.children[i].LINode = document.createElement("LI");
 		node.children[i].LINode.style.listStyleType = "none";
 		node.children[i].LINode.style.listStyleImage = "none";
-		node.children[i].LINode.style.margin ="0";
-		if(!document.all)node.children[i].LINode.style.padding ="0";
+		node.children[i].LINode.style.margin ="-4pt";
+		node.children[i].LINode.style.padding ="0";
 		if(document.all) {
 			var elem_nm = "<INPUT NAME='" + node.category.getDatasetID()+"'>";
 			node.children[i].INPUTNode = document.createElement(elem_nm);
@@ -388,7 +397,7 @@
 		} 
 		if(parentNode.children[i].ULNode.style.display=="none") {
 			for(var c=0;c< parentNode.children.length;c++)
-				parentNode.children[c].ULNode.style.display="none";ULNo
+				parentNode.children[c].ULNode.style.display="none";
 			parentNode.children[i].style.display="";	//expand the category if it has been selected 
 			if(parentNode.children[i].category) //if the category is a dataset set it as the selected dataset
 				if(parentNode.children[i].category.getCategoryType()=="dataset"){
@@ -478,7 +487,7 @@
 		var view = args[1];	
 		this.state.view = view;
 		this.refs.operations.ULNode.innerHTML="";
-		this.refs.options.ULNode.innerHTML="";
+		//this.refs.options.ULNode.innerHTML="";
 		this.state.properties = {};	
 		
 		this.updateConstraints();
@@ -501,7 +510,7 @@
 		var args = $A(arguments);
 		var id = args[1];
 		this.state.operation=id;
-		this.refs.options.ULNode.innerHTML="";
+		//this.refs.options.ULNode.innerHTML="";
 		if(this.refs.operations.operations.getOperationByID(id).optiondef)
 			this.getOptions(this.refs.operations.operations.getOperationByID(id).optiondef.IDREF);	
 		else if (this.refs.operations.operations.getOperationByID(id).optionsdef)
@@ -578,7 +587,13 @@
 			return -1;
 		}
 		eval("var response = (" + strJson + ")");
+		if(this.state.grid)
+			this.state.lastgrid = this.state.grid;
+		else
+			this.state.lastgrid={};		
+			
 		this.state.grid = new LASGetGridResponse(response);
+		
 		this.getViews(this.state.dataset,this.state.variables[this.state.dataset].last());
 	}
 	/*
@@ -625,8 +640,12 @@
 		this.getOperations(this.state.dataset,this.state.variables[this.state.dataset].last(),this.state.view);
 		//if(!this.refs.views.ULNode.style.display!="none") 
 		//	this.refs.views.ULNode.style.display="";
-		
-		this.updateConstraints();
+		if(this.state.lastgrid.response){
+			if(this.state.lastgrid.response.grid.ID!=this.state.grid.response.grid.ID)
+				this.updateConstraints();
+		}
+		else
+			this.updateConstraints();
 	}
 	LASUI.prototype.setViewNode = function (id, name) {
 		this.refs.views.views.getViewByID(id).LINode = document.createElement("LI");
@@ -695,7 +714,7 @@
 				
 			this.refs.XYSelect.recenterOnDataBBox(bbox);
 			this.refs.XYSelect.setSelectionGridBBox(bbox);
-						if(this.state.view.indexOf('x')>=0 && this.state.view.indexOf('y')>=0) 
+			if(this.state.view.indexOf('x')>=0 && this.state.view.indexOf('y')>=0) 
 				this.refs.XYSelect.setView("xy");
 			else if(this.state.view.indexOf('x')>=0 && this.state.view.indexOf('y')<0)
 				this.refs.XYSelect.setView("x");
@@ -839,15 +858,15 @@
 			case "menu": 
 				switch(mode) {
 					case 'range': 
-						
+						document.getElementById("Date").style.display="";
 						this.refs.DW = [document.createElement("SELECT"),document.createElement("SELECT")];
 						for(var m=0;m<this.refs.DW.length;m++) {
-							this.refs.DW[m].id = "DW" + m;
+							//this.refs.DW[m].id = "DW" + m;
 							this.refs.DW[m].onchange=this.handleDateRangeChange.bindAsEventListener(this);
 							for(var v=0;v<this.state.grid.getMenu('t').length;v++) {
 								var _opt = document.createElement("OPTION");
 								_opt.value = this.state.grid.getMenu('t')[v][1];
-								_opt.id = "date" + m;
+								
 								_opt.innerHTML=this.state.grid.getMenu('t')[v][0];
 								if(m==1 && v >= this.state.grid.getMenu('t').length-1)
 									_opt.selected=true;
@@ -858,7 +877,10 @@
 						}
 						document.getElementById("Date").innerHTML="<strong>Start Date : </strong>";	
 						document.getElementById("Date").appendChild(this.refs.DW[0]);
-						document.getElementById("Date").innerHTML+="<br><strong>Stop Date : </strong>";	
+						document.getElementById("Date").appendChild(document.createElement("BR"));
+						var label = document.createElement("STRONG");
+						document.getElementById("Date").appendChild(label);
+						label.innerHTML="<strong>Stop Date : </strong>";	
 						document.getElementById("Date").appendChild(this.refs.DW[1]);
 						document.getElementById("Date").style.display="";
 						break;
@@ -970,19 +992,32 @@
 	}
 		
 	/*
-	 *  Update the views list with the allowed views
+	 *  Update the options lis
 	 */	
 	LASUI.prototype.setOptionList = function (strJson) {
 		//clear the current view list and state
-		this.refs.options.ULNode.innerHTML="";
+		
+		this.refs.options.ULNode.innerHTML = ""; 
+		var table = document.createElement("TABLE");
+		table.style.margin = "-4pt";
+		table.style.marginLeft = "6pt";
+		table.cellpadding = "0";
+		table.cellspacing = "0";
+		this.refs.options.TBODYNode = document.createElement("TBODY");
+		table.appendChild(this.refs.options.TBODYNode);
+		this.refs.options.ULNode.appendChild(table);
+		
+
+		
 		var response = eval("(" + strJson + ")");
+		
 		var setDefault = true;
 		this.state.properties = [];		
 		this.refs.options.options = new LASGetOptionsResponse(response);
 		var ct = this.refs.options.options.getOptionCount();
 		if(ct) 
 		for(var i=0;i<ct;i++) {
-			this.setOptionLINode(this.refs.options.options.getOptionID(i));	
+			this.setOptionTRNode(this.refs.options.options.getOptionID(i));	
 			switch(this.refs.options.options.getOptionType(i)) {
 				case "menu" : 
 					this.state.properties[this.refs.options.options.getOptionID(i)]={"type":"ferret", "value":this.refs.options.options.getOption(i).menu.item[0].values};
@@ -992,7 +1027,7 @@
 					break;
 			}
 		}
-
+		
 		if(this.autoupdate || this.submitOnLoad)
 			this.makeRequest();
 		
@@ -1000,12 +1035,11 @@
 
 		//if(!this.refs.options.ULNode.style.display!="none") this.refs.options.ULNode.style.display="";
 	}
-	LASUI.prototype.setOptionLINode = function (id) {
-		this.refs.options.options.getOptionByID(id).LINode = document.createElement("LI");	
-		this.refs.options.options.getOptionByID(id).LINode.style.listStyleType = "none";	
-		
-		var title = document.createElement("TEXT");
-		title.innerHTML = this.refs.options.options.getOptionByID(id).title
+	LASUI.prototype.setOptionTRNode = function (id) {
+		this.refs.options.options.getOptionByID(id).TRNode = document.createElement("TR");	
+		var TD1 = document.createElement("TD");
+		TD1.width="45%";
+		TD1.innerHTML = this.refs.options.options.getOptionByID(id).title
 		if(this.refs.options.options.getOptionByID(id).menu) {
 			var obj = document.createElement("SELECT");
 			obj.setAttribute('name', id);
@@ -1022,9 +1056,11 @@
 			obj.type = "text";
 		}	
 		obj.onchange = this.setOption.bindAsEventListener(this,id);
-		this.refs.options.options.getOptionByID(id).LINode.appendChild(title);	
-		this.refs.options.options.getOptionByID(id).LINode.appendChild(obj);	
-		this.refs.options.ULNode.appendChild(this.refs.options.options.getOptionByID(id).LINode);
+		var TD2 = document.createElement("TD");
+		TD2.appendChild(obj);
+		this.refs.options.options.getOptionByID(id).TRNode.appendChild(TD1);	
+		this.refs.options.options.getOptionByID(id).TRNode.appendChild(TD2);	
+		this.refs.options.TBODYNode.appendChild(this.refs.options.options.getOptionByID(id).TRNode);
 	}
 
 	
