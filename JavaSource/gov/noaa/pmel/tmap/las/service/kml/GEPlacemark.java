@@ -193,6 +193,11 @@ public class GEPlacemark{
                       + "'><h2>Vertical Profile Plot</h2></a><br />";
         }
 */
+        if(dsIntervals.equals("xy")){
+            description = description  + 
+                          "No Time Series or Vertical Profile available for this dataset";
+        }
+
         if(dsIntervals.equals("xyt")){
             description = description  + "<a href='"
                       + make1DPlotRequest("t",null,null,tlo,thi)
