@@ -165,8 +165,9 @@
             <item values="-360,360,-90,90">No Regions Available</item>
         </menu>
         <!-- The following 3 menus may be used for time series data to include a
-             timeline list product for interactive selection of timesteps
-             add <properties><ui>file:ui.xml#timeline_list</default>,</ui></properties> to your xml configuration -->
+             timeline list product for interactive selection of timesteps  
+             add <properties><ui>file:ui.xml#timeline_list</default>,</ui></properties> 
+             to your xml configuration -->
         <menu type="views" name="Views_timeline">
             <ifitem view="xy" values="xy">Longitude-Latitude map (xy)</ifitem>
             <ifitem view="xz" values="xz">Longitude-depth sections (xz)</ifitem>
