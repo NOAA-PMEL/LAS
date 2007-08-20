@@ -53,6 +53,11 @@ SET LIST/FILE="($result_las_request_info_filename)"
 !  LET mask =  IF xyzvar[Z=@NGD] GT 0 THEN 1
 !ENDIF
 
+IF ($data_0_intervals"|xy>1|*>0") THEN
+  LET xytvar = ($ferret_list_var)
+  LET mask =  IF xytvar GT 0 THEN 1
+ENDIF
+
 IF ($data_0_intervals"|xyt>1|*>0") THEN
   LET xytvar = ($ferret_list_var)
   LET mask =  IF xytvar[T=@NGD] GT 0 THEN 1
