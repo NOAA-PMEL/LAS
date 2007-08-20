@@ -71,7 +71,6 @@ function initializeLASSlideSorter() {
 function createLASRequest(AA) {
 
   ReqImg.prefix = 'ProductServer.do?xml=';
-  ReqImg.setVariable(dsid,varid);
 // NOTE:  In order to create a different default size for the SlideSorter
 // NOTE:  I had to create a new menu name.  Of course, that property won't
 // NOTE:  be understood by the Ferret scripts that expect 'size', so here
