@@ -286,7 +286,7 @@
         <grid_types>
                 <grid_type name="regular" />
         </grid_types>
-        <optionsdef IDREF="Options_2D_image_contour_xy"/>
+        <optionsdef IDREF="Options_2D_image_contour_xy_GE"/>
     </operation>
     <!-- for vector plots [private]; only visible on V6 UI-->
     <operation name="Vector Plot to Google Earth" ID="Vector_GE_Overlay"  mime_type="application/vnd.google-earth.kml+xml"
@@ -344,7 +344,7 @@
         <grid_types>
                 <grid_type name="regular" />
         </grid_types>
-        <optionsdef IDREF="Options_2D_image_contour_xy"/>
+        <optionsdef IDREF="Options_2D_image_contour_xy_GE"/>
     </operation>
 
     <!-- overlay kml for vector plots [private]; it is used by the dynamic overlay-->
