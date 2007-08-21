@@ -141,6 +141,7 @@ public class ProductRequest {
         if ( regrid_prop != null && regrid_prop.equalsIgnoreCase("true") ) {
             regrid = true;
         }
+        boolean do_analysis = false;
         addProperty(mergedProperties, "operation", "service_action", operation.getAttributeValue("service_action"));
         String service = operation.getChildText("service");
         if ( service != null && service != "" ) {
@@ -184,7 +185,7 @@ public class ProductRequest {
                         String varXPath = arg.getAttributeValue("match");
                         String chained = operation.getAttributeValue("chained");
                         Element analysis = arg.getChild("analysis");
-                        boolean do_analysis = analysis != null;
+                        do_analysis = analysis != null;
 
                         // The source for this variable is a previous operation.
                         if ( chained != null && chained.equals("true") ) {
@@ -492,6 +493,11 @@ public class ProductRequest {
         // "backend_request", "exclude" property for this operation and therefore should be 
         // removed from this request.  
         removePropertyExcludedGroups(operation, backendRequestDocument);
+        
+        // If this is an analysis or comparison with re-grid operation, we need to remove the init_script property.
+        if ( do_analysis || regrid ) {
+            backendRequestDocument.removeProperty("ferret", "init_script");
+        }
 
         // Compute the cache key as the document exists now without the key in the document.
         String key = JDOMUtils.MD5Encode(backendRequestDocument.toString());
@@ -503,7 +509,7 @@ public class ProductRequest {
         }
 
         // Use the key for the sub-request for the file name so caching on the sub-request
-        // works right.  This means the cache key is independant of the results and their file
+        // works right.  This means the cache key is independent of the results and their file
         // names, but this won't matter since the results are fixed by the operation definition
         // not the request.
         // You don't have to have a response element in an operation.  Do you?
@@ -547,7 +553,8 @@ public class ProductRequest {
         requestXML.add(backendRequestDocument);
 
     }
-    /**
+
+	/**
      * This is a hack to build the analysis URL by writing a script
      * instead of building a _expr_ URL.
      * @param analysis
@@ -564,6 +571,7 @@ public class ProductRequest {
         
         String key = JDOMUtils.MD5Encode(varXPath);
         StringBuffer jnl = new StringBuffer();
+        
         List axes = analysis.getChildren("axis");
         String grid = "";
         for (Iterator axisIt = axes.iterator(); axisIt.hasNext();) {
@@ -701,6 +709,7 @@ public class ProductRequest {
         }
 
     }
+
 
     /**
      * Merges the properties associated with the current variable (which have already been merged with the properties

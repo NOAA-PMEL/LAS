@@ -1338,4 +1338,10 @@ public class LASBackendRequest extends LASDocument {
             return "";
         }
     }
+	public boolean removeProperty(String group, String property) throws LASException {
+		Element groupE = findPropertyGroup(group);
+		Element propE = findProperty(groupE, property);
+		boolean remove = groupE.removeContent(propE);
+		return remove;
+	}
 }
