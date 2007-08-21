@@ -1,6 +1,7 @@
 // $Id: AnalysisFormBean.java,v 1.9 2002/12/20 23:35:41 sirott Exp $
 package gov.noaa.pmel.tmap.las.luis;
 import gov.noaa.pmel.tmap.las.luis.db.*;
+
 import javax.servlet.*;
 import javax.servlet.http.*;
 import java.util.*;
@@ -76,9 +77,28 @@ public class AnalysisFormBean extends AbstractFormBean {
 
     // Error if all axes are selected
     ICategory mainCat = getSessionContext().getRegion().getCategory();
+    DerivedCategory dCat;
     Set allAxesSet = new HashSet();
     Set usedAxesSet = new HashSet();
     IVariableInfo mainVarInfo = mainCat.getVariableInfo();
+    if ( mainCat instanceof DerivedCategory ) {
+    	dCat = (DerivedCategory)mainCat;
+    	String expr = dCat.getAnalysisExpression();
+    	if ( expr.contains("x=") ) {
+    		usedAxesSet.add("x");
+    	}
+    	if ( expr.contains("y=") ) {
+    		usedAxesSet.add("y");
+    	}
+    	if ( expr.contains("z=") ) {
+    		usedAxesSet.add("z");
+    	}
+    	if ( expr.contains("t=") ) {
+    		usedAxesSet.add("t");
+    	}
+    }
+   
+    
     for (Iterator i = mainVarInfo.getAxes().iterator(); i.hasNext(); ){
       allAxesSet.add(((IAxis)i.next()).getType());
     }
