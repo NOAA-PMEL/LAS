@@ -290,58 +290,6 @@ at the edges of the plot (WMS-style plots). By default margins are shown.
     </option>
   </optiondef>
 
-   <!-- only for Google Earth -->
-   <optiondef name="palette_GE">
-    <option>
-      <help>Set the color scale of the plot. Only applies to shaded plots.</help>
-      <title>Palette</title>
-      <menu type="options" name="palette_GE">
-        <item values="ocean_temp">Default</item>
-        <item values="rainbow">temperature rainbow</item>
-        <item values="rnb2">precipitation rainbow</item>
-        <item values="light_rainbow">pastel rainbow</item>
-        <item values="rainbow_by_levels">rainbow by levels</item>
-        <item values="ocean_temp">ocean temperature</item>
-        <item values="light_centered">anomaly</item>
-        <item values="land_sea">topography/bathymetry</item>
-        <item values="dark_land_sea">dark topography/bathymetry</item>
-        <item values="ocean_blue">blue bathymetry</item>
-        <item values="terrestrial">topography</item>
-        <item values="dark_terrestrial">dark topography</item>
-
-        <item values="bluescale">range of blues</item>
-        <item values="inverse_bluescale">inverse range of blues</item>
-        <item values="redscale">range of reds</item>
-        <item values="inverse_redscale">inverse range of reds</item>
-        <item values="greenscale">range of greens</item>
-        <item values="inverse_greenscale">inverse range of greens</item>
-        <item values="grayscale">range of grays</item>
-        <item values="inverse_grayscale">inverse range of grays</item>
-
-        <item values="low_blue">low_blue</item>
-        <item values="no_blue">no_blue</item>
-        <item values="low_green">low_green</item>
-        <item values="no_green">no_green</item>
-        <item values="low_red">low_red</item>
-        <item values="no_red">no_red</item>
-        <item values="no_blue_centered">no_blue_centered</item>
-        <item values="no_green_centered">no_green_centered</item>
-        <item values="no_red_centered">no_red_centered</item>
-        <item values="white_centered">white_centered</item>
-
-        <item values="orange">solid orange</item>
-        <item values="gray">solid gray</item>
-        <item values="green">solid green</item>
-        <item values="red">solid red</item>
-
-        <item values="violet">solid violet</item>
-        <item values="white">solid white</item>
-        <item values="yellow">solid yellow</item>
-      </menu>
-    </option>
-  </optiondef>
-
-
   <optiondef name="contour_style">
     <option>
       <help>What style of contours to draw
@@ -665,7 +613,7 @@ i.e. 48 - start time: 24 hours before selected timestep
   <optiondef name="Options_2D_image_contour_animation_xy" inherit="#Options_2D_image_contour_animation,#set_aspect,#land_type"/>
 
   <!-- for Google Earth 2D plot -->
-  <optiondef name="Options_2D_GE" inherit="#expression,#interpolate_data,#size,#use_graticules,#margins,#deg_min_sec,#palette_GE"/>
+  <optiondef name="Options_2D_GE" inherit="#expression,#interpolate_data,#size,#use_graticules,#margins,#deg_min_sec,#palette"/>
   <optiondef name="Options_2D_contour_GE" inherit="#Options_2D_GE,#contour_style,#fill_levels,#contour_levels,#mark_grid"/>
   <optiondef name="Options_2D_image_contour_GE" inherit="#Options_2D_contour_GE"/>
   <optiondef name="Options_2D_image_contour_xy_GE" inherit="#Options_2D_image_contour_GE,#set_aspect,#land_type"/>  
