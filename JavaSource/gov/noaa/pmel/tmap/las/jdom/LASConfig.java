@@ -273,6 +273,7 @@ public class LASConfig extends LASDocument {
                ds_novars.removeChild(remove.get(i));
             }
             ds_novars.setAttribute("children", "variables");
+            ds_novars.setAttribute("children_dsid", ds_novars.getAttributeValue("ID"));
             Category ds = new Category(ds_novars);                
             datasets.add(ds);
         }
@@ -1188,7 +1189,9 @@ public class LASConfig extends LASDocument {
                     Element variablesE = (Element) variablesEelementsIt.next();
                     List variables = variablesE.getChildren("variable");
                     for (Iterator varsIt = variables.iterator(); varsIt.hasNext();) {
-                        Element variable = (Element) varsIt.next();                       
+                        Element variable = (Element) varsIt.next();
+                        String varID = variable.getAttributeValue("ID");
+                        String var = getVariableName(dsID,varID);
                         String grid_type = variable.getAttributeValue("grid_type");
                         if ( grid_type.equals("regular") ) {
                             File datadir = new File(fds_dir+dsID);
@@ -1202,7 +1205,7 @@ public class LASConfig extends LASDocument {
                             String init = getVariablePropertyValue(variable,"ferret","init_script");
                             String key;
                             if ( init != null && !init.equals("") ) {
-                                key = url+"_"+init;
+                                key = url+"_"+init+"_"+var;
                             } else {
                                 key = url;
                             }
@@ -1214,9 +1217,10 @@ public class LASConfig extends LASDocument {
                             
                             if ( !jnls.containsKey(key) ) {
                                 StringBuffer jnl = new StringBuffer(); 
-                                if ( init != null && !init.equals("") ) {                                                                     
+                                if ( init != null && !init.equals("") ) {  
+                                	jnl.append("DEFINE SYMBOL data_url "+url+"\n");
+                                	jnl.append("DEFINE SYMBOL data_var "+var+"\n");
                                     jnl.append("GO "+init+"\n");
-                                    jnl.append("USE \""+url+"\"\n");
                                     jnls.put(key, jnl.toString());
                                 } else {
                                     jnl.append("USE \""+url+"\"\n");
@@ -1242,7 +1246,10 @@ public class LASConfig extends LASDocument {
             }
         }
     }
-    /**
+    public String getVariableName(String dsID, String varID) throws JDOMException, LASException {
+		return getVariableName("/lasdata/datasets/dataset[@ID='"+dsID+"']/variables/variable[@ID='"+varID+"']");
+	}
+	/**
      * Adds attributes to all variables that indicate whether or not the variable
      * has a range or a point in the definition of each axis.  Must be a version
      * 7.0 style document before this method is invoked.
@@ -2462,6 +2469,9 @@ public class LASConfig extends LASDocument {
                         }
                         // Set the "chidren" attribute to identify what kind of kids it has.
                         if ( category.getChild("filter") != null ) {
+                        	Element filter = category.getChild("filter");
+                        	Dataset dataset = getDataset(filter);
+                        	category_container.setAttribute("children_dsid", dataset.getAttributeValue("ID"));
                             category_container.setAttribute("children", "variables");
                         } else {
                             category_container.setAttribute("children", "categories");
@@ -2499,6 +2509,9 @@ public class LASConfig extends LASDocument {
                         }
                         List filters = cat.getChildren("filter");
                         if ( filters.size() > 0 ) {
+                        	Element filter = (Element)filters.get(0);
+                        	Dataset dataset = getDataset(filter);
+                        	cat_nokids.setAttribute("children_dsid", dataset.getAttributeValue("ID"));
                             cat_nokids.setAttribute("children", "variables");
                         } else {
                             cat_nokids.setAttribute("children", "categories");
@@ -2515,7 +2528,7 @@ public class LASConfig extends LASDocument {
                         /*
                          * The rules say that all of the variables caught by a filter
                          * must come from the same dataset.  I think the best way to
-                         * represent this collection of informtion is via a dataset
+                         * represent this collection of information is via a dataset
                          * element the filtered list of variables.  Therefore this
                          * is a getDataset call...
                          */
