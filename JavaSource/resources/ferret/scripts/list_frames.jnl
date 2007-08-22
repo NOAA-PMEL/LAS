@@ -1,3 +1,19 @@
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! $RCSfile: list_frames.jnl,v $
+!
+! $Author: Jing Y. Li $
+! $Date: 2007/08/22
+!
+! list_frames.jnl creates a listing in XML format for animation
+! Assumes symbol ferret_listing is the output file.
+! The listing file includes: 
+! - fill_levels      for 2D contour
+! - dep_axis_scale   for 1D plot
+! - hasT             used to determine if the dataset has time axis
+! - units            units of the time axis
+! - resolution       resolution of time frames
+! - frames           list of each individual time points
+
 GO LAS_initialize_region 0
 GO ($ferret_init_script"LAS_initialize_data|*>*") 0
 
@@ -20,7 +36,7 @@ DEFINE SYMBOL lsize `($ferret_list_var),return=lsize`
 
 !compute color fill levels if not given
 LET the_var = ($ferret_plot_var)
-IF ($ferret_fill_levels"1|*>0") THEN
+IF `($ferret_fill_levels"1|*>0") OR ($ferret_dep_axis_scale"1|*>0")` THEN
     LOAD the_var
     LET vmin = the_var[x=@min,y=@min,z=@min,t=@min]
     LET vmax = the_var[x=@max,y=@max,z=@max,t=@max]
@@ -28,7 +44,14 @@ IF ($ferret_fill_levels"1|*>0") THEN
     DEFINE SYMBOL lo_lim ($PPL$RANGE_LOW)
     DEFINE SYMBOL hi_lim ($PPL$RANGE_HIGH)
     DEFINE SYMBOL delta ($PPL$RANGE_INC)
-    DEFINE SYMBOL ferret_fill_levels (($PPL$RANGE_LOW),($PPL$RANGE_HIGH),($PPL$RANGE_INC))
+
+    IF ($ferret_fill_levels"1|*>0") THEN
+        DEFINE SYMBOL ferret_fill_levels (($PPL$RANGE_LOW),($PPL$RANGE_HIGH),($PPL$RANGE_INC))
+    ENDIF
+
+    IF ($ferret_dep_axis_scale"1|*>0") THEN
+        DEFINE SYMBOL ferret_dep_axis_scale ($PPL$RANGE_LOW),($PPL$RANGE_HIGH),($PPL$RANGE_INC)
+    ENDIF
 ENDIF
 
 SET LIST/FILE="($result_ferret_listing_filename)"
@@ -99,6 +122,19 @@ list/norowhead/nohead/format=(A`nlen`)/FILE/append a
 
 LET f = "</fill_levels>"
 list/norowhead/nohead/format=(A14)/FILE/append f
+
+!---------------
+! dep_axis_scale
+!---------------
+LET f = "<dep_axis_scale>"
+list/norowhead/nohead/format=(A16)/FILE/append f
+
+let nlen = strlen ("($ferret_dep_axis_scale)")
+let a = "($ferret_dep_axis_scale)"
+list/norowhead/nohead/format=(A`nlen`)/FILE/append a
+
+LET f = "</dep_axis_scale>"
+list/norowhead/nohead/format=(A17)/FILE/append f
 
 !------------
 ! hasT
