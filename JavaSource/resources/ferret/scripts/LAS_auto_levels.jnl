@@ -1,0 +1,75 @@
+! LAS_auto_levels.jnl
+! ACM 8/22/2007
+
+! Based on a variables value over its entire range, set strides
+! if needed to quickly get stats on the variable. Use this to set levels.
+
+! Argument: the variable to use in setting the levels.
+
+! The symbol ferret_center_levels, if set to 1, forces the levels
+! to be 2 std above and below zero. Otherwise use 2 std above 
+! and below the data mean
+
+! This script should be done BEFORE any other striding is done.
+! It operates on the variable on its entire native unstrided grid.
+
+! Determine striding for speed in operating the STAT command
+LET memsize = 0.5* 1.e6
+
+LET pvar = ($data_var)[d=($data_num)]
+
+LET zsiz = `pvar,return=ksize`
+IF `zsiz GT 0` THEN LET pvar = ($data_var)[d=($data_num),($region_z)]
+
+LET var_size =  `pvar,RETURN=size`
+LET stride_for_speed = `INT( 1+ (var_size/memsize) )`
+
+IF `stride_for_speed GT 1` THEN
+
+   IF `($region_x_range"0") GT 0` THEN \
+     SET AXIS/STRIDE=`stride_for_speed` `pvar,RETURN=xaxis`
+
+   IF `($region_y_range"0") GT 0` THEN \
+     SET AXIS/STRIDE=`stride_for_speed` `pvar,RETURN=yaxis`
+
+   IF `($region_z_range"0") GT 0` THEN \
+     SET AXIS/STRIDE=`stride_for_speed` `pvar,RETURN=zaxis`
+
+   IF `($region_t_range"0") GT 0` THEN   \
+     SET AXIS/STRIDE=`stride_for_speed` `pvar,RETURN=taxis`
+
+ENDIF
+
+! Execute the stat command to load symbols with the variables
+! mean, max, min, std.
+
+STAT pvar
+
+! Undo the striding. Other striding may be set later
+
+IF `stride_for_speed GT 1` THEN
+   IF `($region_x_range"0") GT 0` THEN CANCEL AXIS/STRIDE `pvar,RETURN=xaxis`
+   IF `($region_y_range"0") GT 0` THEN CANCEL AXIS/STRIDE `pvar,RETURN=yaxis`
+   IF `($region_z_range"0") GT 0` THEN CANCEL AXIS/STRIDE `pvar,RETURN=zaxis`
+   IF `($region_t_range"0") GT 0` THEN CANCEL AXIS/STRIDE `pvar,RETURN=taxis`
+ENDIF
+
+! Compute rounded-off levels with the PPL %RANGE command.
+
+IF ($ferret_center_levels"0|1|TRUE>1|*>0") THEN
+   PPL %RANGE `-2*($stat_std)`, `+2*($stat_std)`, 50
+ELSE
+   PPL %RANGE `($stat_mean)-2*($stat_std)`, `($stat_mean)+2*($stat_std)`, 50
+ENDIF
+
+DEFINE SYMBOL ferret_auto_levels = (-inf)(($ppl$range_low),($ppl$range_high),($ppl$range_inc))(inf) 
+
+! Use these levels to set ferret_contour_levels and ferret_fill_levels 
+! if they are not already set.
+
+IF ($ferret_auto_levels"0|*>1") THEN
+   IF `($ferret_contour_levels"0|*>1") EQ 0` THEN \
+     DEFINE SYMBOL ferret_contour_levels = ($ferret_auto_levels)
+   IF `($ferret_fill_levels"0|*>1") EQ 0` THEN \
+     DEFINE SYMBOL ferret_fill_levels = ($ferret_auto_levels)
+ENDIF
