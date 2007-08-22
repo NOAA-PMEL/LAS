@@ -569,6 +569,101 @@
         </grid_types>
         <optiondef IDREF="Options_Vector"/>
     </operation>
+    <!-- Data extract operations for difference of two variables.  -->
+    <operation name="Table of difference values (text)" 
+        ID="Compare_Data_Extract"
+        output_template="table" 
+        service_action="Compare_Data_Extract" order="0300">
+        <service>ferret</service>
+        <response ID="Data_Extract_Response">
+            <result type="text" ID="ferret_listing" streamable="true"
+                mime_type="text/plain" />
+            <result type="debug" ID="debug" file_suffix=".txt"/>
+        </response>
+        <region>
+            <intervals name="x" />
+            <intervals name="y" />
+            <intervals name="z" />
+            <intervals name="t" />
+            <intervals name="xy" />
+            <intervals name="xz" />
+            <intervals name="xt" />
+            <intervals name="yz" />
+            <intervals name="yt" />
+            <intervals name="zt" />
+            <intervals name="xyz" />
+            <intervals name="xyt" />
+            <intervals name="xzt" />
+            <intervals name="yzt" />
+            <intervals name="xyzt" />
+        </region>
+        <grid_types>
+            <grid_type name="regular" />
+        </grid_types>
+        <optiondef IDREF="Options_Data"/>
+    </operation>
+    <operation name="NetCDF difference file"
+        ID="Compare_Data_netCDF" output_template="netcdf"
+        service_action="Compare_Data_Extract_netCDF" order="0500">
+        <service>ferret</service>
+        <response ID="Data_Extract_netCDF_Response">
+            <result type="netcdf" ID="ferret_listing" file_suffix=".nc"/>
+            <result type="debug" ID="debug" file_suffix=".txt"/>
+        </response>
+        <region>
+            <intervals name="x" />
+            <intervals name="y" />
+            <intervals name="z" />
+            <intervals name="t" />
+            <intervals name="xy" />
+            <intervals name="xz" />
+            <intervals name="xt" />
+            <intervals name="yz" />
+            <intervals name="yt" />
+            <intervals name="zt" />
+            <intervals name="xyz" />
+            <intervals name="xyt" />
+            <intervals name="xzt" />
+            <intervals name="yzt" />
+            <intervals name="xyzt" />
+        </region>
+        <grid_types>
+            <grid_type name="regular" />
+        </grid_types>
+        <optiondef IDREF="Options_Data"/>
+    </operation>
+    <operation name="ASCII difference file"
+        ID="Compare_Data_Extract_File" output_template="ascii"
+        service_action="Compare_Data_Extract_File" order="0400">
+        <service>ferret</service>
+        <response ID="Data_Extract_File_Response">
+            <result type="ascii" ID="ferret_listing" streamable="true"
+                mime_type="text/plain" file_suffix=".txt"/>
+            <result type="debug" ID="debug" file_suffix=".txt"/>
+        </response>
+        <region>
+            <intervals name="x" />
+            <intervals name="y" />
+            <intervals name="z" />
+            <intervals name="t" />
+            <intervals name="xy" />
+            <intervals name="xz" />
+            <intervals name="xt" />
+            <intervals name="yz" />
+            <intervals name="yt" />
+            <intervals name="zt" />
+            <intervals name="xyz" />
+            <intervals name="xyt" />
+            <intervals name="xzt" />
+            <intervals name="yzt" />
+            <intervals name="xyzt" />
+        </region>
+        <grid_types>
+            <grid_type name="regular" />
+        </grid_types>
+        <optiondef IDREF="Options_Data_file"/>
+    </operation>
+    <!-- End of Data Extract operations for differences. -->
     <operation name="Table of values (text)" ID="Data_Extract"
         output_template="table" service_action="Data_Extract" order="0300">
         <service>ferret</service>
