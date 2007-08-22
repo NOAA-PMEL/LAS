@@ -5,14 +5,25 @@
 ! $Author: Ansley, Jing $
 ! $Date: 2007/29/2007
 ! ACM 4/2007 apply ferret_expression2 to second plot of comparisons.
+! ACM 8/2007 Call LAS_auto_levels to set up auto contour/fill levels.
 
 ! this is the second part of LAS_initialize_data.jnl
 
 ! Define the plot variable. For comparison plots, we want to save the dataset number
 ! for each dataset.
 
-DEFINE SYMBOL data_num = `($data_var),return=dsetnum`
-DEFINE SYMBOL data_($num)_num = `($data_var),return=dsetnum`
+DEFINE SYMBOL data_num = `($data_var),RETURN=dsetnum`
+DEFINE SYMBOL data_($num)_num = `($data_var),RETURN=dsetnum`
+
+! IF contour and fill levels havent been set already, set levels 
+! based on the entire variable without the region definition; uses 
+! strides to speed this up. This should be done BEFORE LAS_set_strides.jnl 
+! is called. It operates on the variable on its entire unstrided grid.
+
+IF `( ($ferret_contour_levels"0|*>1") EQ 0 ) AND\ 
+    ( ($ferret_fill_levels"0|*>1")    EQ 0 ) ` THEN
+   GO LAS_auto_levels ($data_var)[d=($data_num)]
+ENDIF
 
 DEFINE SYMBOL ferret_plot_var = ($data_var)[d=($data_num),($region_full)]
 DEFINE SYMBOL ferret_plot_base_var = ($ferret_plot_var) 
@@ -21,15 +32,17 @@ DEFINE SYMBOL ferret_plot_base_var = ($ferret_plot_var)
 ! This renames the data variable, and so redefines the symbol data_var
 ! and sets up the analysis: e.g. ,z=0:2000@ave
 
-IF ($data_0_analysis_label"0|*>1") THEN 
-   GO LAS_analysis
-   DEFINE SYMBOL ferret_plot_var = ($data_var)[d=($data_num),($region_full)($data_analysis_expr)]
-   DEFINE SYMBOL ferret_plot_var = ($data_var)[d=($data_num),($region_full)($data_analysis_expr)]
-   IF ($data_0_analysis_oceanmask"0|*>1") THEN 
-     LET/d=($data_num) plot_var =  ($data_var)[d=($data_num)] * analysis_mask
-     DEFINE SYMBOL ferret_plot_var = plot_var[($region_full)($data_analysis_expr)]
-   ENDIF
-ENDIF
+! unComment this for testing.
+
+! IF ($data_0_analysis_label"0|*>1") THEN 
+!    GO LAS_analysis
+!    DEFINE SYMBOL ferret_plot_var = ($data_var)[d=($data_num),($region_full)($data_analysis_expr)]
+!    DEFINE SYMBOL ferret_plot_var = ($data_var)[d=($data_num),($region_full)($data_analysis_expr)]
+!    IF ($data_0_analysis_oceanmask"0|*>1") THEN 
+!      LET/d=($data_num) plot_var =  ($data_var)[d=($data_num)] * analysis_mask
+!      DEFINE SYMBOL ferret_plot_var = plot_var[($region_full)($data_analysis_expr)]
+!    ENDIF
+! ENDIF
 
 ! Needed for transform_seasonal, save variable definition without any
 ! time-region information that may be added.
