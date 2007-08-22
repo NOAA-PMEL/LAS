@@ -109,62 +109,86 @@ function animate_makeLASRequest(timePoint) {
     //check the type of view and change view for the new request
     var initView = initReq.getProperty('ferret','view');
 
+    //get the fill_levels computed from the whole domain (e.g. xyt range)
+    var fillLevels = las_animation.getFillLevels();
+    var depAxisScale = las_animation.getDepAxisScale();
+
     //for XY view
     if(initView == 'xy' || initView == 'yx'){
         initReq.setOperation('Plot_2D_XY');
-        //initReq.setProperty('ferret','view','xy');
+        if(fillLevels != null){
+            initReq.setProperty('ferret','fill_levels', fillLevels);
+        };
     };
 
     //for XZ view
     if(initView == 'xz' || initView == 'zx'){
         initReq.setOperation('Plot_2D');
+        if(fillLevels != null){
+            initReq.setProperty('ferret','fill_levels', fillLevels);
+        };
+    };
+
+    //for YZ view
+    if(initView == 'yz' || initView == 'zy'){
+        initReq.setOperation('Plot_2D');
+        if(fillLevels != null){
+            initReq.setProperty('ferret','fill_levels', fillLevels);
+        };
     };
 
     //for XT view
     if(initView == 'xt' || initView == 'tx'){
         initReq.setOperation('Plot_1D');
         initReq.setProperty('ferret','view','x');
-    };
-
-    //for YZ view
-    if(initView == 'yz' || initView == 'zy'){
-        initReq.setOperation('Plot_2D');
+        if(depAxisScale != null){
+            initReq.setProperty('ferret','dep_axis_scale', depAxisScale);
+        };
     };
 
     //for YT view
     if(initView == 'yt' || initView == 'ty'){
         initReq.setOperation('Plot_1D');
         initReq.setProperty('ferret','view','y');
+        if(depAxisScale != null){
+            initReq.setProperty('ferret','dep_axis_scale', depAxisScale);
+        };
     };
 
     //for ZT view
     if(initView == 'zt' || initView == 'tz'){
         initReq.setOperation('Plot_1D');
         initReq.setProperty('ferret','view','z');
+        if(depAxisScale != null){
+            initReq.setProperty('ferret','dep_axis_scale', depAxisScale);
+        };
     };
 
     //for XYT view
     if(initView == 'xyt' || initView == 'yxt'){
         initReq.setOperation('Plot_2D_XY');
         initReq.setProperty('ferret','view','xy');
+        if(fillLevels != null){
+            initReq.setProperty('ferret','fill_levels', fillLevels);
+        };
     };
 
     //for XZT view
     if(initView == 'xzt' || initView == 'zxt'){
         initReq.setOperation('Plot_2D');
         initReq.setProperty('ferret','view','xz');
+        if(fillLevels != null){
+            initReq.setProperty('ferret','fill_levels', fillLevels);
+        };
     };
 
     //for YZT view
     if(initView == 'yzt' || initView == 'zyt'){
         initReq.setOperation('Plot_2D');
         initReq.setProperty('ferret','view','yz');
-    };
-
-    //get the fill_levels computed from the whole domain (e.g. xyt range)
-    var fillLevels = las_animation.getFillLevels();
-    if(fillLevels != null){
-        initReq.setProperty('ferret','fill_levels', fillLevels);
+        if(fillLevels != null){
+            initReq.setProperty('ferret','fill_levels', fillLevels);
+        };
     };
 
     //change the time from range to point
@@ -280,18 +304,13 @@ function launch()
        document.animation.src = theImages[current_image].src;
        document.control_form.frame_nr.value = current_image+1;
        change_mode (document.control_form.play_mode_selection.selectedIndex);
-   }else{
-       //no time axis; no animation;just a single XY plot
-       //initReq.setOperation('Plot_2D_XY');
-       //var prefix = 'ProductServer.do?stream=true&stream_ID=plot_image&xml=';
-       //var plot_src = prefix + escape(initReq.getXMLText());
-       //document.write(" <IMG NAME=\"plot\" SRC=",plot_src," alt=\"plot_image\">");
    }
 }
 
 //===> writes the interface into the code where you want it
 function animation()
 {
+    //interface for animation
     if(hasT==1){
         document.write("<FONT size=+3><b>LAS Animation </b></FONT><br>");
 
@@ -318,7 +337,10 @@ function animation()
         document.write("    <INPUT TYPE=\"button\" Value=\" + \" onClick=\"change_speed(1)\"> ");
         document.write(" </FORM> ");
         document.write(" </P> ");
-    }else{
+    }
+    
+    //interface for a single plot
+    if(hasT==0){
         //no time axis in the dataset, so just a single plot
         document.write(" <h2>Animation not available for this dataset!</h2> ");
         //initReq.setOperation('Plot_2D_XY');
