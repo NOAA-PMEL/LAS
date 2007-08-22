@@ -8,6 +8,18 @@
 <!-- UI elements specific to the LAS_insitu_demo -->
 <!ENTITY insitu_demo_ui SYSTEM "insitu_demo_ui.xml">
 
+<!-- UI elements specific to the LAS_seasonal_regridding_demo -->
+<!ENTITY Regrid_to_Seasonal_ui SYSTEM "Regrid_to_Seasonal_ui.xml">
+
+<!-- UI elements specific to the LAS_curv_to_rect_regridding_demo -->
+<!ENTITY Regrid_Curv_Rect_ui SYSTEM "Regrid_Curv_Rect_ui.xml">
+
+<!-- UI elements specific to the LAS_hybrid Z hydae demo -->
+<!ENTITY Hybrid_Z_ui SYSTEM "Hybrid_Z_ui.xml">
+
+<!-- UI elements specific to the LAS_hybrid Z hycom demo -->
+<!ENTITY HYCOM_Hybrid_Z_ui SYSTEM "HYCOM_Hybrid_Z_ui.xml">
+
 ]>
 <lasui title="@TITLE@">
    <ui url="http://@SERVLET_ROOT_URL@/@APPNAME@/servlets/"/>
@@ -19,6 +31,14 @@
 <!-- Uncomment this next line to get specific behavior for the LAS_insitu_demo datasets.
     &insitu_demo_ui;
 -->
+
+<!-- These next lines set the transformations: Regrid to Seasonal time axis, Regrid
+     curvilinear to rectilinear, Hybrid Z regridding.
+-->
+    &Regrid_to_Seasonal_ui;
+    &Regrid_Curv_Rect_ui;
+    &Hybrid_Z_ui;
+    &HYCOM_Hybrid_Z_ui;
 
     <images>
         <image name="Image_StdWorld" url="gifs/java_0_world.gif" 
@@ -64,9 +84,7 @@
             <item values="Data_Extract,txt,20">Table of values (text)</item>
             <item values="Data_Extract_netCDF,cdf,20">NetCDF file</item>
             <item values="Data_Extract_File,asc,20">ASCII file</item>
-            <!-- Remove until the Ferret script is ready.
             <item values="Data_Extract_ArcView,arc,20">ArcView gridded</item>
-            -->
 	    <item values="XY_zoomable_image,html,20">Interactive Color plot</item>
             <item values="Gen_Scripts,html,20">Desktop application data access scripts</item>
             <item values="Plot_GE_Overlay,html,2">Plot to Google Earth</item>
@@ -191,9 +209,7 @@
             <item values="data,txt,20">Table of values (text)</item>
             <item values="data,cdf,20">NetCDF file</item>
             <item values="data_file,asc,20">ASCII file</item>
-            <!-- Remove until Ferret script is ready.
             <item values="data,arc,20">ArcView gridded (XY view only)</item>
-            -->
             <item values="gen_script,html,20">Desktop application data access scripts</item>
         </menu>
         <menu type="ops" name="Ops_timeline_xyt">
