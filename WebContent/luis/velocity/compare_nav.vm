@@ -47,7 +47,7 @@
 #end
 
             <tr><td align="right"><hr width="60%"></td></tr>
-            <tr><td align="right"><a class="nav" onMouseOver="status='Find out about LAS';return true" href="" onClick="window.open('http://www.ferret.noaa.gov/Ferret/LAS'); return false">About</a></td></tr>
+            <tr><td align="right"><a class="nav" onMouseOver="status='Find out about LAS';return true" href="" onClick="window.open('http://www.ferret.noaa.gov/LAS/home'); return false">About</a></td></tr>
 #if ($configs.get(0).getContact() != "")
             <tr><td align="right"><a class="nav" onMouseOver="status='Contact administrator of this LAS';return true" href="mailto:$configs.get(0).getContact()?subject=$title" onClick="">Contact</a></td></tr>
 #end
