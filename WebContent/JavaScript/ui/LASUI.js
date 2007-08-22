@@ -422,7 +422,7 @@
 				}
 			else*/
 				if(parentNode.category.getChildChildrenType(i)=="variables")
-					this.setDataset(parentNode.category.getChildID(i));
+					this.setDataset(parentNode.category.getChildDatasetID(i));
 		} else
 			this.collapse(parentNode.children[i]);
 
@@ -470,7 +470,7 @@
 						
 			//if we are in the selected dataset, get the grids for this dataset/variable combo
 			if (this.state.dataset == datasetID) 
-					this.getGrid(datasetID,variableID);				
+				this.getGrid(datasetID,variableID);				
 		}	
 		else if (typeof this.state.variables[datasetID] == 'object')
 					 this.state.variables[datasetID]=this.state.variables[datasetID].without(variableID);
