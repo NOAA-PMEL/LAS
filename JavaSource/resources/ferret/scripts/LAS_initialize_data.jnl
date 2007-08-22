@@ -17,7 +17,16 @@
 ! This allows the custom init scripts to call LAS_initialize_dataset, then
 ! issue commands for the customization, then call LAS_initialize_variable
 !
+! 8/2007:
+! The custom init scripts now consist of only SET DATA and the custom commands.
+! This lets F-TDS run first and call the init script to create the data set
+! that will be used by the Ferret product script. When F-TDS is done it will 
+! not send the symbol ferret_init_script to the product scripts so we will just skip
+! that step.
+!
 GO LAS_initialize_dataset ($1"0")
+
+IF($ferret_init_script"0") THEN GO ($ferret_init_script) $1
 
 GO LAS_initialize_variable 
 

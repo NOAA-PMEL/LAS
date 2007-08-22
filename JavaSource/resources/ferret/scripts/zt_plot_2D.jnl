@@ -39,7 +39,7 @@ DEFINE SYMBOL fview = `UPCASE("($ferret_view)")`
 ! NOTE:  for the base layer and region.
 
 GO LAS_initialize_region 0
-GO ($ferret_init_script"LAS_initialize_data|*>*") 0
+GO LAS_initialize_data 0
 
 ! Check for errors (They often occur during dataset initialization.)
 
@@ -114,7 +114,7 @@ IF ($plot_type"0|FILL>1|*>0) THEN DEFINE SYMBOL shade_underlay = TRUE
 IF `($data_count"0") EQ 2` THEN
 
    GO LAS_initialize_region 1
-   GO ($ferret_init_script"LAS_initialize_data|*>*") 1 
+   GO LAS_initialize_data 1 
    DEFINE SYMBOL qualifiers_over = /LINE=1 
 
    ! Check for errors (They often occur during dataset initialization.)
@@ -200,7 +200,7 @@ ENDIF
 ! 
 ! REPEAT/range=1:`($data_count)-1`/NAME=m (  \
 !   GO LAS_initialize_region `m` ;  \
-!   GO ($ferret_init_script"LAS_initialize_data|*>*")  `m` ; \
+!   GO LAS_initialize_data  `m` ; \
 !   DEFINE SYMBOL qualifiers_over = /LINE=`m` ;\
 !   CONTOUR/OVER($qualifiers_over) ($ferret_plot_var) \
 ! )

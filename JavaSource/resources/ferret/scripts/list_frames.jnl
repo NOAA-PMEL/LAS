@@ -15,7 +15,7 @@
 ! - frames           list of each individual time points
 
 GO LAS_initialize_region 0
-GO ($ferret_init_script"LAS_initialize_data|*>*") 0
+GO LAS_initialize_data 0
 
 ! Here is the variable we will list out, with the region specified.
 DEFINE SYMBOL ferret_list_var = ($ferret_plot_var)

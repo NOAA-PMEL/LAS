@@ -10,8 +10,7 @@
 !
 
 GO LAS_initialize_region 0
-GO ($ferret_init_script"LAS_initialize_data|*>*") 0
-
+GO LAS_initialize_data 0
 
 ! Check for errors (They often occur during dataset initialization.)
 
