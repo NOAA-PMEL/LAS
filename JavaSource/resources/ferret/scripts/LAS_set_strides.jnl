@@ -43,7 +43,7 @@ IF `STRINDEX( "($operation_ID)", "Plot" ) EQ 0` THEN
          SET AXIS/STRIDE=($stride_for_mem) `pvar,RETURN=xaxis`
          DEFINE SYMBOL add_to_title = Stride ($stride_for_mem) in X
       ENDIF
-      IF `($region_x_range"0") GT 0` THEN 
+      IF `($region_y_range"0") GT 0` THEN 
          SET AXIS/STRIDE=($stride_for_mem) `pvar,RETURN=yaxis`
          DEFINE SYMBOL add_to_title = ($add_to_title) Stride ($stride_for_mem) in Y
       ENDIF
