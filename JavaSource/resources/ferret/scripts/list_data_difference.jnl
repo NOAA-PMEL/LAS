@@ -31,7 +31,7 @@ ENDIF
 
 GO LAS_initialize_region 0
 
-GO ($ferret_init_script"LAS_initialize_data|*>*") 0
+GO LAS_initialize_data 0
 ! Here is variable 0 and its title
 
 DEFINE SYMBOL ferret_var_0 = ($ferret_plot_var)
@@ -58,7 +58,7 @@ CANCEL SYMBOL ferret_expression
 
 GO LAS_initialize_region 1
 
-GO ($ferret_init_script"LAS_initialize_data|*>*")  1 
+GO LAS_initialize_data  1 
 
 ! Check for errors 
 

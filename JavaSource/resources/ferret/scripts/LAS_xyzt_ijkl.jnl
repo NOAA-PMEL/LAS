@@ -18,7 +18,7 @@
 ! Symbols from the server defined
 ! Operation script called, inclding: 
 !    GO LAS_initialize_region 0
-!    GO ($ferret_init_script"LAS_initialize_data|*>*") 0
+!    GO LAS_initialize_data 0
 ! 
 !    GO LAS_xyzt_ijkl.jnl
 
