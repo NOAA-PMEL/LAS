@@ -9,11 +9,17 @@ function LASAnimation(xml) {
     this.getNumFrames  = LASAni_getNumFrames;
     this.getTimeUnits = LASAni_getTimeUnits;
     this.getTimeResolution = LASAni_getTimeResolution;
+    this.getDepAxisScale = LASAni_getDepAxisScale;
 }
 
 function LASAni_getFillLevels(){
     var filllevelsNode = this.DOM.selectNode("/fill_levels");
     return filllevelsNode.getText();
+}
+
+function LASAni_getDepAxisScale(){
+    var depAxisScaleNode = this.DOM.selectNode("/dep_axis_scale");
+    return depAxisScaleNode.getText();
 }
 
 function LASAni_getHasT(){
