@@ -249,7 +249,9 @@
 		
 		switch(node.category.getCategoryType()) {
 			case "category":
-				this.createCategoryTreeNode(node,i,id); break;
+				if((node.category.getChildChildrenType(i) == "variables" && node.category.getChild(i).children_dsid)||node.category.getChildChildrenType(i) != "variables")
+					this.createCategoryTreeNode(node,i,id); 
+				break;
 			case "dataset":
 				this.createVariableTreeNode(node,i);break;
 		}
@@ -375,7 +377,7 @@
 		if(this.state.variables && this.state.dataset)
 			if(this.state.variables[this.state.dataset])
 				for(var v=0;v<this.state.variables[this.state.dataset].length;v++)
-					if(this.state.variables[this.state.dataset][v]==node.category.getChildID(i))
+					if(this.state.variables[this.state.dataset][v]==node.category.getChild(i))
 				  { 
 					this.setVariable({}, node, i, true);
 					node.children[i].INPUTNode.checked=true;
@@ -454,6 +456,7 @@
 			
 		var datasetID = dataset.category.getDatasetID();
 		var variableID = dataset.category.getChildID(i);
+		var variable = dataset.category.getChild(i);
 		var variableLINode = dataset.children[i].LINode;
 		
 		if (loadVariable) {			
@@ -461,16 +464,18 @@
 			if(typeof this.state.variables[datasetID] != 'object') 
 				this.state.variables[datasetID] = [];
 			
-			//REMOVE TO ENABLE MULTI-VARIABLE SELCTION
+			//REMOVE TO ENABLE MULTI-VARIABLE SELECTION
 			this.state.variables[datasetID] = [];
 		
 			//if this variable has not already been selected, add it to the list for that dataset
-			this.state.variables[datasetID]=this.state.variables[datasetID].without(variableID);
-			this.state.variables[datasetID].push(variableID);
+			this.state.variables[datasetID]=this.state.variables[datasetID].without(variable); //ID);
+			this.state.variables[datasetID].push(variable); //ID);
 						
 			//if we are in the selected dataset, get the grids for this dataset/variable combo
 			if (this.state.dataset == datasetID) 
-				this.getGrid(datasetID,variableID);				
+				this.getGrid(datasetID,variableID);	
+			
+						
 		}	
 		else if (typeof this.state.variables[datasetID] == 'object')
 					 this.state.variables[datasetID]=this.state.variables[datasetID].without(variableID);
@@ -480,7 +485,7 @@
 	LASUI.prototype.setDataset = function (dataset) {
 			this.state.dataset = dataset;
 			if(typeof this.state.variables[dataset] == 'object') 
-				this.getGrid(dataset, this.state.variables[dataset].last());
+				this.getGrid(dataset, this.state.variables[dataset].last().ID);
 	}
 	LASUI.prototype.setView = function (evt) {
 		var args = $A(arguments)
@@ -491,7 +496,7 @@
 		this.state.properties = {};	
 		
 		this.updateConstraints();
-		this.getOperations(this.state.dataset,this.state.variables[this.state.dataset].last(),this.state.view);
+		this.getOperations(this.state.dataset,this.state.variables[this.state.dataset].last().ID,this.state.view);
 
 	}	
 	LASUI.prototype.getOperations= function (dataset, variable, view) {
@@ -594,7 +599,7 @@
 			
 		this.state.grid = new LASGetGridResponse(response);
 		
-		this.getViews(this.state.dataset,this.state.variables[this.state.dataset].last());
+		this.getViews(this.state.dataset,this.state.variables[this.state.dataset].last().ID);
 	}
 	/*
 	 * get the allowed views list
@@ -637,7 +642,7 @@
 			this.refs.views.views.getViewByID(this.state.view).INPUTNode.checked=true;
 			
 		}
-		this.getOperations(this.state.dataset,this.state.variables[this.state.dataset].last(),this.state.view);
+		this.getOperations(this.state.dataset,this.state.variables[this.state.dataset].last().ID,this.state.view);
 		//if(!this.refs.views.ULNode.style.display!="none") 
 		//	this.refs.views.ULNode.style.display="";
 		if(this.state.lastgrid.response){
@@ -689,7 +694,10 @@
 		
 		for(var d=0;d<this.state.grid.response.grid.axis.length;d++) 
 			if(this.state.view.indexOf(this.state.grid.response.grid.axis[d].type) < 0) 
-				eval("this.init" + this.state.grid.response.grid.axis[d].type.toUpperCase() + "Constraint('point')");
+				if(this.state.variables[this.state.dataset].last().grid_type!="scattered")
+					eval("this.init" + this.state.grid.response.grid.axis[d].type.toUpperCase() + "Constraint('point')");
+				else
+					eval("this.init" + this.state.grid.response.grid.axis[d].type.toUpperCase() + "Constraint('range')");					
 		this.updating = false;
 	}
 	
@@ -944,7 +952,7 @@
 						 	this.request.addRange('y',this.refs.XYSelect.extents.selection.grid.y.min,this.refs.XYSelect.extents.selection.grid.y.max); 
 						break;
 					case 't' : 
-						if(this.state.view.indexOf('t')>=0) 
+						if(this.state.view.indexOf('t')>=0||this.state.variables[this.state.dataset].last().grid_type=="scattered") 
 							if(this.state.grid.hasMenu('t'))
 								this.request.addRange('t',this.refs.DW[0].value,this.refs.DW[1].value); 
 							else
@@ -966,8 +974,8 @@
 				
 				//add the variables
 			for(var v in this.state.variables[this.state.dataset]) 
-				if(typeof this.state.variables[this.state.dataset][v] != "function" && typeof this.state.variables[this.state.dataset][v] =="string")
-					this.request.addVariable(this.state.dataset, this.state.variables[this.state.dataset][v]);
+				if(typeof this.state.variables[this.state.dataset][v] != "function" && typeof this.state.variables[this.state.dataset][v] =="object")
+					this.request.addVariable(this.state.dataset, this.state.variables[this.state.dataset][v].ID);
 			
 				
 			if(this.state.embed)
