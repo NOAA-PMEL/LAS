@@ -2471,7 +2471,9 @@ public class LASConfig extends LASDocument {
                         if ( category.getChild("filter") != null ) {
                         	Element filter = category.getChild("filter");
                         	Dataset dataset = getDataset(filter);
-                        	category_container.setAttribute("children_dsid", dataset.getAttributeValue("ID"));
+                        	if ( dataset != null ) {
+                        	    category_container.setAttribute("children_dsid", dataset.getAttributeValue("ID"));
+                        	}
                             category_container.setAttribute("children", "variables");
                         } else {
                             category_container.setAttribute("children", "categories");
@@ -2508,10 +2510,14 @@ public class LASConfig extends LASDocument {
                             cat_nokids.setAttribute(attr.getName(), attr.getValue());
                         }
                         List filters = cat.getChildren("filter");
-                        if ( filters.size() > 0 ) {
+                        if ( filters.size() > 0 ) {  
                         	Element filter = (Element)filters.get(0);
                         	Dataset dataset = getDataset(filter);
-                        	cat_nokids.setAttribute("children_dsid", dataset.getAttributeValue("ID"));
+                        	if ( dataset != null ) {
+                        		// Add only if the filter returns a dataset.  It's possible to create
+                        		// a filter that returns an empty list.
+                        	    cat_nokids.setAttribute("children_dsid", dataset.getAttributeValue("ID"));
+                        	}
                             cat_nokids.setAttribute("children", "variables");
                         } else {
                             cat_nokids.setAttribute("children", "categories");

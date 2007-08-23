@@ -64,8 +64,6 @@ public class getCategories extends ConfigService {
 		String catid = request.getParameter("catid");
 		log.info("Starting: getCategories.do?catid="+catid+"&format="+format);
 
-		// Get the LASConfig (sub-class of JDOM Document) from the servlet context.
-		log.debug("Processing request for dataset list.");
 		LASConfig lasConfig = (LASConfig)servlet.getServletContext().getAttribute(LASConfigPlugIn.LAS_CONFIG_KEY); 
 
 		ArrayList<Category> categories = new ArrayList<Category>();
