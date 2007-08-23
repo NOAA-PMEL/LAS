@@ -21,7 +21,8 @@ ELIF ($ferret_view"|xy>1|*>0") THEN
    !! Make a plot in XY...
    ! Redefine a few symbols for Google-Earth style plots
    DEFINE SYMBOL ferret_margins = false !always no margins for plot on GE
-   DEFINE SYMBOL qualifiers = ($qualifiers)/LINE/NOAXES
+   !DEFINE SYMBOL qualifiers = ($qualifiers)/LINE/NOAXES
+   DEFINE SYMBOL qualifiers = ($qualifiers)/NOAXES
    DEFINE SYMBOL ferret_google_plot = 1
 
    go xy_plot_2D
