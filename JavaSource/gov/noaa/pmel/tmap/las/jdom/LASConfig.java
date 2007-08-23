@@ -1218,7 +1218,7 @@ public class LASConfig extends LASDocument {
                             if ( !jnls.containsKey(key) ) {
                                 StringBuffer jnl = new StringBuffer(); 
                                 if ( init != null && !init.equals("") ) {  
-                                	jnl.append("DEFINE SYMBOL data_url "+url+"\n");
+                                	jnl.append("DEFINE SYMBOL data_url \\\""+url+"\\\"\n");
                                 	jnl.append("DEFINE SYMBOL data_var "+var+"\n");
                                     jnl.append("GO "+init+"\n");
                                     jnls.put(key, jnl.toString());
