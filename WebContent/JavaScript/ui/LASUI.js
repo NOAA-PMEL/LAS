@@ -520,6 +520,8 @@
 			this.getOptions(this.refs.operations.operations.getOperationByID(id).optiondef.IDREF);	
 		else if (this.refs.operations.operations.getOperationByID(id).optionsdef)
 			this.getOptions(this.refs.operations.operations.getOperationByID(id).optionsdef.IDREF);
+		else if (this.autoupdate)
+			this.makeRequest();
 	
 	}
 		
@@ -541,11 +543,13 @@
 			this.state.operation=this.refs.operations.operations.getOperationID(0);
 			this.refs.operations.operations.getOperationByID(this.state.operation).INPUTNode.checked=true;		
 		}
+		this.refs.options.ULNode.innerHTML = "";
 		if(this.refs.operations.operations.getOperationByID(this.state.operation).optiondef)
 			this.getOptions(this.refs.operations.operations.getOperationByID(this.state.operation).optiondef.IDREF);	
 		else if (this.refs.operations.operations.getOperationByID(this.state.operation).optionsdef)
 			this.getOptions(this.refs.operations.operations.getOperationByID(this.state.operation).optionsdef.IDREF);	
-
+		else if(this.autoupdate)
+			this.makeRequest();
 		//if(!this.refs.operations.ULNode.style.display!="none") this.refs.operations.ULNode.style.display="";
 	}
 	LASUI.prototype.setOperationLINode = function (id, name) {
@@ -756,7 +760,6 @@
 				case 'range':
 					this.refs.DepthSelect = [document.createElement("SELECT"),document.createElement("SELECT")];
 					for(var m=0;m<this.refs.DepthSelect.length;m++) {
-						this.refs.DepthSelect[m].onchange=this.handleDepthRangeChange.bindAsEventListener(this);
 						for(var v=0;v<this.state.grid.getMenu('z').length;v++) {
 							var _opt = document.createElement("OPTION");
 							_opt.value = this.state.grid.getMenu('z')[v][1];
@@ -767,6 +770,7 @@
 								_opt.selected=true;
 							this.refs.DepthSelect[m].appendChild(_opt);
 						}
+						this.refs.DepthSelect[m].onchange=this.handleDepthRangeChange.bindAsEventListener(this);
 					}
 					var depth_label1 = document.createElement("STRONG");
 					depth_label1.innerHTML ="Depth (" + this.state.grid.getAxis('z').units +")";
@@ -785,13 +789,13 @@
 					break;
 				case 'point':
 					this.refs.DepthSelect = [document.createElement("SELECT")];
-					this.refs.DepthSelect.onchange=this.handleDepthChange.bindAsEventListener(this);
 					for(var v=0;v<this.state.grid.getMenu('z').length;v++) {
 						var _opt = document.createElement("OPTION");
 						_opt.value = this.state.grid.getMenu('z')[v][1];
 						_opt.innerHTML=this.state.grid.getMenu('z')[v][0];
 						this.refs.DepthSelect[0].appendChild(_opt);
 					}
+					this.refs.DepthSelect[0].onchange=this.handleDepthChange.bindAsEventListener(this);
 					var depth_label = document.createElement("STRONG");
 					depth_label.innerHTML="Depth (" + this.state.grid.getAxis('z').units + ") : ";
 					document.getElementById("Depth").appendChild(document.createElement("BR"));					
@@ -802,6 +806,7 @@
 			}
 		}
 		if(this.state.grid.hasArange('z')){
+			this.refs.DepthSelect = [];
 			switch (mode) {
 				case 'range':
 					this.refs.DepthSelect = [document.createElement("SELECT"),document.createElement("SELECT")];
@@ -864,6 +869,7 @@
 					case 'range': 
 						document.getElementById("Date").style.display="";
 						this.refs.DW = new DateWidget(this.state.grid.getLo('t'),this.state.grid.getHi('t')); 
+						this.refs.DW.callback = this.handleDateRangeChange.bindAsEventListener(this);
 						this.refs.DW.render("Date","MDY","MDY");
 						document.getElementById("Date").firstChild.align="center";
 						document.getElementById("Date").style.display="";
@@ -878,6 +884,7 @@
 						break;
 					case 'point':
 						this.refs.DW = new DateWidget(this.state.grid.getLo('t'),this.state.grid.getHi('t')); 
+						this.refs.DW.callback = this.handleDateChange.bindAsEventListener(this);
 						this.refs.DW.render("Date","MDY");
 						document.getElementById("Date").firstChild.align="center";						
 						document.getElementById("Date").style.display="";
