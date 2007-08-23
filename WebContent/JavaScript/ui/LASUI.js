@@ -249,7 +249,7 @@
 		
 		switch(node.category.getCategoryType()) {
 			case "category":
-				if((node.category.getChildChildrenType(i) == "variables" && node.category.getChild(i).children_dsid)||node.category.getChildChildrenType(i) != "variables")
+				//if((node.category.getChildChildrenType(i) == "variables" && node.category.getChild(i).children_dsid)||node.category.getChildChildrenType(i) != "variables")
 					this.createCategoryTreeNode(node,i,id); 
 				break;
 			case "dataset":
@@ -642,7 +642,10 @@
 			this.refs.views.views.getViewByID(this.state.view).INPUTNode.checked=true;
 			
 		}
+	
+		
 		this.getOperations(this.state.dataset,this.state.variables[this.state.dataset].last().ID,this.state.view);
+		
 		//if(!this.refs.views.ULNode.style.display!="none") 
 		//	this.refs.views.ULNode.style.display="";
 		if(this.state.lastgrid.response){
@@ -684,7 +687,7 @@
 				this.refs.XYSelect.enable();
 			this.initXYSelect();
 		}
-		
+	
 		
 		document.getElementById("Date").innerHTML = "<br><br>";
 		document.getElementById("Depth").innerHTML = "<br><br>";
@@ -765,9 +768,18 @@
 							this.refs.DepthSelect[m].appendChild(_opt);
 						}
 					}
-					document.getElementById("Depth").innerHTML="<strong>Depth (" + this.state.grid.getAxis('z').units +")</strong><br><strong>Minimum : </strong>";	
+					var depth_label1 = document.createElement("STRONG");
+					depth_label1.innerHTML ="Depth (" + this.state.grid.getAxis('z').units +")";
+					document.getElementById("Depth").appendChild(depth_label1);
+					document.getElementById("Depth").appendChild(document.createElement("BR"));
+					var depth_label2 =document.createElement("STRONG");
+					depth_label2.innerHTML = "Minimum : ";
+					document.getElementById("Depth").appendChild(depth_label2);
 					document.getElementById("Depth").appendChild(this.refs.DepthSelect[0]);
-					document.getElementById("Depth").innerHTML+= "<br><strong>Maximum : </strong>";
+					document.getElementById("Depth").appendChild(document.createElement("BR"));
+					var depth_label3 =document.createElement("STRONG");
+					depth_label3.innerHTML = "Maximum : ";
+					document.getElementById("Depth").appendChild(depth_label3);
 					document.getElementById("Depth").appendChild(this.refs.DepthSelect[1]);
 					document.getElementById("Depth").style.display="";
 					break;
@@ -782,7 +794,7 @@
 					}
 					var depth_label = document.createElement("STRONG");
 					depth_label.innerHTML="Depth (" + this.state.grid.getAxis('z').units + ") : ";
-					document.getElementById("Depth").innerHTML="<br>";					
+					document.getElementById("Depth").appendChild(document.createElement("BR"));					
 					document.getElementById("Depth").appendChild(depth_label);	
 					document.getElementById("Depth").appendChild(this.refs.DepthSelect[0]);
 					document.getElementById("Depth").style.display="";
@@ -806,9 +818,18 @@
 							this.refs.DepthSelect[m].appendChild(_opt);
 						}
 					}
-					document.getElementById("Depth").innerHTML="<strong>Depth (" + this.state.grid.getAxis('z').units +")</strong><br><strong>Minimum : </strong>";	
+					var depth_label1 = document.createElement("STRONG");
+					depth_label1.innerHTML ="Depth (" + this.state.grid.getAxis('z').units +")";
+					document.getElementById("Depth").appendChild(depth_label1);
+					document.getElementById("Depth").appendChild(document.createElement("BR"));
+					var depth_label2 =document.createElement("STRONG");
+					depth_label2.innerHTML = "Minimum : ";
+					document.getElementById("Depth").appendChild(depth_label2);
 					document.getElementById("Depth").appendChild(this.refs.DepthSelect[0]);
-					document.getElementById("Depth").innerHTML+= "<br><strong>Maximum : </strong>";
+					document.getElementById("Depth").appendChild(document.createElement("BR"));
+					var depth_label3 =document.createElement("STRONG");
+					depth_label3.innerHTML = "Maximum : ";
+					document.getElementById("Depth").appendChild(depth_label3);
 					document.getElementById("Depth").appendChild(this.refs.DepthSelect[1]);
 					document.getElementById("Depth").style.display="";
 					break;
@@ -820,8 +841,10 @@
 						_opt.value = v;
 						_opt.innerHTML=v;
 						this.refs.DepthSelect[0].appendChild(_opt);
-					}
-					document.getElementById("Depth").innerHTML="<strong>Depth (" + this.state.grid.getAxis('z').units + ") : </strong>";	
+					}					var depth_label = document.createElement("STRONG");
+					depth_label.innerHTML="Depth (" + this.state.grid.getAxis('z').units + ") : ";
+					document.getElementById("Depth").appendChild(document.createElement("BR"));					
+					document.getElementById("Depth").appendChild(depth_label);	
 					document.getElementById("Depth").appendChild(this.refs.DepthSelect[0]);
 					document.getElementById("Depth").style.display="";
 					break;
@@ -903,7 +926,10 @@
 							_opt.innerHTML=this.state.grid.getMenu('t')[v][0];
 							this.refs.DW[0].appendChild(_opt);
 						}
-						document.getElementById("Date").innerHTML="<br><strong>Date : </strong>";	
+						document.getElementById("Date").appendChild(document.createElement("BR"));
+						var date_label = document.createElement("STRONG");
+						date_label.innerHTML = "Date : ";
+						document.getElementById("Date").appendChild(date_label);	
 						document.getElementById("Date").appendChild(this.refs.DW[0]);
 						document.getElementById("Date").style.display="";
 						break;

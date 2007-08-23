@@ -1225,20 +1225,20 @@ MapWidget.prototype.initImage = function () {
 MapWidget.prototype.getSelectionGrid = function () {
 	
 	if(this.plot_area.invertX){
-		this.setSelectionGridXMin(this.getPlotGridXMin() + (this.getSelectionPixXMax()-this.getPlotPixXMax())*-1*this.getXPixRes());
-		this.setSelectionGridXMax(this.getPlotGridXMin() + (this.getSelectionPixXMin()-this.getPlotPixXMax())*-1*this.getXPixRes());
+		this.setSelectionGridXMin((Math.round((this.getPlotGridXMin() + (this.getSelectionPixXMax()-this.getPlotPixXMax())*-1*this.getXPixRes())*10000))/10000);
+		this.setSelectionGridXMax((Math.round((this.getPlotGridXMin() + (this.getSelectionPixXMin()-this.getPlotPixXMax())*-1*this.getXPixRes())*10000))/10000);
 	}
 	else {
-		this.setSelectionGridXMin(this.getPlotGridXMin() + (this.getSelectionPixXMin()-this.getPlotPixXMin())*this.getXPixRes());
-		this.setSelectionGridXMax(this.getPlotGridXMin() + (this.getSelectionPixXMax()-this.getPlotPixXMin())*this.getXPixRes());
+		this.setSelectionGridXMin((Math.round((this.getPlotGridXMin() + (this.getSelectionPixXMin()-this.getPlotPixXMin())*this.getXPixRes())*1000))/1000);
+		this.setSelectionGridXMax((Math.round((this.getPlotGridXMin() + (this.getSelectionPixXMax()-this.getPlotPixXMin())*this.getXPixRes())*1000))/1000);
 	}
 	
 	if(this.plot_area.invertY){
-		this.setSelectionGridYMax(this.getPlotGridYMax() - (this.getSelectionPixYMax()-this.getPlotPixYMax())*-1*this.getYPixRes());
-		this.setSelectionGridYMin(this.getPlotGridYMax() - (this.getSelectionPixYMin()-this.getPlotPixYMax())*-1*this.getYPixRes());
+		this.setSelectionGridYMax((Math.round((this.getPlotGridYMax() - (this.getSelectionPixYMax()-this.getPlotPixYMax())*-1*this.getYPixRes())*1000))/1000);
+		this.setSelectionGridYMin((Math.round((this.getPlotGridYMax() - (this.getSelectionPixYMin()-this.getPlotPixYMax())*-1*this.getYPixRes())*1000))/1000);
 	} else {
-		this.setSelectionGridYMax(this.getPlotGridYMax() - (this.getSelectionPixYMin()-this.getPlotPixYMin())*this.getYPixRes());
-		this.setSelectionGridYMin(this.getPlotGridYMax() - (this.getSelectionPixYMax()-this.getPlotPixYMin())*this.getYPixRes());
+		this.setSelectionGridYMax((Math.round((this.getPlotGridYMax() - (this.getSelectionPixYMin()-this.getPlotPixYMin())*this.getYPixRes())*1000))/1000);
+		this.setSelectionGridYMin((Math.round((this.getPlotGridYMax() - (this.getSelectionPixYMax()-this.getPlotPixYMin())*this.getYPixRes())*1000))/1000);
 	}	
 	return this.extents.selection.grid;
 }
@@ -1549,33 +1549,36 @@ MapWidget.prototype.showDataMask = function () {
 		this.drawingMask = document.createElement('div');
 		this.drawingMask.style.zIndex = 0;
 	   this.drawingMask.style.opacity = 0.7;
+	   this.drawingMask.style.filter="alpha(opacity=70)";
 		this.drawingMask.style.position = 'absolute';
 		this.DOMNode.appendChild(this.drawingMask);	
 	}
+	
 	if(Math.round(this.getDataPixYMin()-this.getPlotPixYMin())>1)		
-		this.drawingMask.style.borderTop = Math.round(this.getDataPixYMin()-this.getPlotPixYMin()) + "px solid grey";
+		this.drawingMask.style.borderTop = Math.round(this.getDataPixYMin()-this.getPlotPixYMin()) + "px solid gray";
 	else
-		this.drawingMask.style.borderTop = "0px";
+		this.drawingMask.style.borderTop = "0pt";
 	if(Math.round(this.getDataPixXMin()-this.getPlotPixXMin())>1)
-		this.drawingMask.style.borderLeft = Math.round(this.getDataPixXMin()-this.getPlotPixXMin()) + "px solid grey";
+		this.drawingMask.style.borderLeft = Math.round(this.getDataPixXMin()-this.getPlotPixXMin()) + "px solid gray";
 	else
 		this.drawingMask.style.borderLeft = "0pt";
 	if(Math.round(this.getPlotPixXMax()-this.getDataPixXMax())>1)
-		this.drawingMask.style.borderRight = Math.round(this.getPlotPixXMax()-this.getDataPixXMax()) + "px solid grey";
+		this.drawingMask.style.borderRight = Math.round(this.getPlotPixXMax()-this.getDataPixXMax()) + "px solid gray";
 	else
-		this.drawingMask.style.borderRight = "0px";
+		this.drawingMask.style.borderRight = "0pt";
 	if(Math.round(this.getPlotPixYMax()-this.getDataPixYMax())>1){
-		//alert("this.drawingMask.style.borderBottom= " + Math.round(this.getPlotPixYMax()-this.getDataPixYMax()) + "px solid grey");
-		this.drawingMask.style.borderBottom= Math.round(this.getPlotPixYMax()-this.getDataPixYMax()) + "px solid grey";
+		//alert("this.drawingMask.style.borderBottom= " + Math.round(this.getPlotPixYMax()-this.getDataPixYMax()) + "px solid gray");
+		this.drawingMask.style.borderBottom= Math.round(this.getPlotPixYMax()-this.getDataPixYMax()) + "px solid gray";
 	}
 	else 
 		{
 		this.drawingMask.style.borderBottom= "0pt";
-}
+	}
 	this.drawingMask.style.width = Math.round(this.getDataPixXMax()-this.getDataPixXMin()) +  'px';
 	this.drawingMask.style.height = Math.round(this.getDataPixYMax() - this.getDataPixYMin()) + 'px';
 	this.drawingMask.style.left = Math.round(this.getPlotPixXMin()) +  'px';
 	this.drawingMask.style.top = Math.round(this.getPlotPixYMin()) + 'px';
+	
 }
 
 //generic function to clone objects
