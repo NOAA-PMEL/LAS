@@ -806,7 +806,6 @@
 				case 'range':
 					this.refs.DepthSelect = [document.createElement("SELECT"),document.createElement("SELECT")];
 					for(var m=0;m<this.refs.DepthSelect.length;m++) {
-						this.refs.DepthSelect[m].onchange=this.handleDepthRangeChange.bindAsEventListener(this);
 						for(var v=parseFloat(this.state.grid.getLo('z'));v<=parseFloat(this.state.grid.getHi('z'));v+=parseFloat(this.state.grid.getDelta('z'))) {
 							var _opt = document.createElement("OPTION");
 							_opt.value = v;
@@ -817,6 +816,7 @@
 								_opt.selected=true;
 							this.refs.DepthSelect[m].appendChild(_opt);
 						}
+						this.refs.DepthSelect[m].onchange=this.handleDepthRangeChange.bindAsEventListener(this);
 					}
 					var depth_label1 = document.createElement("STRONG");
 					depth_label1.innerHTML ="Depth (" + this.state.grid.getAxis('z').units +")";
@@ -835,13 +835,14 @@
 					break;
 				case 'point':
 					this.refs.DepthSelect = [document.createElement("SELECT")];
-					this.refs.DepthSelect.onchange=this.handleDepthChange.bindAsEventListener(this);
 					for(var v=parseFloat(this.state.grid.getLo('z'));v<=parseFloat(this.state.grid.getHi('z'));v+=parseFloat(this.state.grid.getDelta('z'))) {
 						var _opt = document.createElement("OPTION");
 						_opt.value = v;
 						_opt.innerHTML=v;
 						this.refs.DepthSelect[0].appendChild(_opt);
-					}					var depth_label = document.createElement("STRONG");
+					}
+					this.refs.DepthSelect[0].onchange=this.handleDepthChange.bindAsEventListener(this);
+					var depth_label = document.createElement("STRONG");
 					depth_label.innerHTML="Depth (" + this.state.grid.getAxis('z').units + ") : ";
 					document.getElementById("Depth").appendChild(document.createElement("BR"));					
 					document.getElementById("Depth").appendChild(depth_label);	
