@@ -249,7 +249,6 @@
 		
 		switch(node.category.getCategoryType()) {
 			case "category":
-				//if((node.category.getChildChildrenType(i) == "variables" && node.category.getChild(i).children_dsid)||node.category.getChildChildrenType(i) != "variables")
 					this.createCategoryTreeNode(node,i,id); 
 				break;
 			case "dataset":
@@ -260,7 +259,7 @@
 		
 		if(node==this.refs.categories && node.category.getChildChildrenType(i)=="variables")
 					this.refs.categories.title.innerHTML="Datasets";
-	
+			
 		node.children[i] = {};
 		node.children[i].LINode = document.createElement("LI"); //dojo.widget.createWidget("TreeNode");	
 		node.children[i].LINode.style.padding = "0";
@@ -314,11 +313,12 @@
 		tbody.appendChild(tr);
 		table.appendChild(tbody);
 		
-		//node.children[i].LINode.appendChild(node.children[i].IMGNode);
 		node.children[i].LINode.appendChild(table);
-		//node.children[i].LINode.appendChild(category_title);
 		node.children[i].LINode.appendChild(node.children[i].ULNode);
-		node.ULNode.appendChild(node.children[i].LINode);
+		
+		//do not add categories that do not have children 
+		if((node.category.getChildChildrenType(i) == "variables" && node.category.getChild(i).children_dsid)||node.category.getChildChildrenType(i) != "variables")
+			node.ULNode.appendChild(node.children[i].LINode);
 		
 		//if(!node.ULNode.style.display!="none") node.ULNode.style.display="";
 		if(node.category.getChildType(i)=='dataset' && node.category.getChildID(i)==this.state.dataset) 
