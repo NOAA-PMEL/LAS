@@ -175,7 +175,7 @@
 			this.refs[_rootNodes[i].id].title.style.cursor = "pointer";
 			this.refs[_rootNodes[i].id].title.style.cursor = "hand";
 			this.refs[_rootNodes[i].id].title.style.verticalAlign = "middle";
-			this.refs[_rootNodes[i].id].IMGNode.src = "http://www.mattkruse.com/javascript/mktree/plus.gif";
+			this.refs[_rootNodes[i].id].IMGNode.src = "plus.gif";
 			this.refs[_rootNodes[i].id].IMGNode.style.cursor = "pointer";
 			this.refs[_rootNodes[i].id].IMGNode.style.cursor = "hand";
 			this.refs[_rootNodes[i].id].IMGNode.style.verticalAlign = "middle";
@@ -270,7 +270,7 @@
 		node.children[i].IMGNode.style.cursor = "pointer";
 		node.children[i].IMGNode.style.cursor = "hand";
 		//node.children[i].IMGNode.style.verticalAlign = "middle";
-		node.children[i].IMGNode.src = "http://www.mattkruse.com/javascript/mktree/plus.gif";
+		node.children[i].IMGNode.src = "plus.gif";
 		node.children[i].LINode.style.listStyleType = "none";
 		node.children[i].isExpanded = false;
 
@@ -1012,9 +1012,11 @@
 					this.request.addVariable(this.state.dataset, this.state.variables[this.state.dataset][v].ID);
 			
 				
-			if(this.state.embed)
+			if(this.state.embed){
+				var wait = document.createElement("IMG");
+				wait.src = ""
 				document.getElementById('output').src = (this.hrefs.getProduct.url + '?xml=' + escape(this.request.getXMLText()));
-			else
+			}else
 				window.open(this.hrefs.getProduct.url + '?xml=' +  escape(this.request.getXMLText()));
 		}
 	}
@@ -1214,12 +1216,12 @@ LASUI.prototype.collapseRootNodes = function (evt) {
 }
 LASUI.prototype.collapse = function (obj) {
 		if(obj.ULNode) obj.ULNode.style.display = "none";
-		if(obj.IMGNode) obj.IMGNode.src = "http://www.mattkruse.com/javascript/mktree/plus.gif";
+		if(obj.IMGNode) obj.IMGNode.src = "plus.gif";
 		obj.isExpanded = false;
 }
 LASUI.prototype.expand = function (obj) {
 	if(obj.ULNode) obj.ULNode.style.display = "";
-	if(obj.IMGNode) obj.IMGNode.src = "http://www.mattkruse.com/javascript/mktree/minus.gif";
+	if(obj.IMGNode) obj.IMGNode.src = "minus.gif";
 	obj.isExpanded = true;
 }
 
