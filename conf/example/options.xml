@@ -125,7 +125,7 @@ the current variable; you must have at least one &lt;b&gt;$&lt;/b&gt; in your ex
       <menu type="options" name="image_format">
         <item values="default">Default</item>
         <item values="gif">GIF</item>
-        <item values="ps">PostScript</item>
+        <!-- <item values="ps">PostScript</item> -->
       </menu>
     </option>
   </optiondef>
