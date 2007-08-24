@@ -61,6 +61,9 @@ DEFINE SYMBOL refmap_type $5%box|xline|yline|box|point|%
 DEFINE SYMBOL refmap_xcompress $7%0%
 DEFINE SYMBOL refmap_ycompress $8%0%
 
+! The choice of graticule from the procuct image should not spill over into the ref map.
+CANCEL MODE GRATICULE
+
 ! set the layout in the viewport
 ! (for performance the code from margins can be inserted in here and optimized)
 ! GO margins blah blah
