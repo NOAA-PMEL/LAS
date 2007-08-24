@@ -15,8 +15,8 @@ $las_response.toString()
 <body bgcolor="white">
 <h3>$las_response.getResult("las_message")</h3>
 <hr>
-<a href="ProductServer.do?xml=$las_request.toEncodedURLString()&debug=debug">This is URL of the failed product.</a>  Clicking 
-the link will resubmit the product request with debugging turned on.  Sending this URL to the LAS administrator  is a good way to report the error since the URL 
+<a href="ProductServer.do?xml=$las_request.toEncodedURLString()&debug=debug">Clicking 
+this link will resubmit the product request with debugging turned on.</a>  Sending this URL to the LAS administrator is a good way to report the error since the URL 
 contains everything they need to reproduce the error.  Copy the URL from the link to the failed product and paste it into the body of a message to the 
 site administrator.
 #if ("$!institution.getContact()" != "")
