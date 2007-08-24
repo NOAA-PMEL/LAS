@@ -12,6 +12,10 @@
 
 IF ($operation_ID"Data_Extract_netCDF>1|*>0") THEN EXIT/SCRIPT
 
+
+! See LAS_set_strides_curvilinear for first cut on dealing with strides and curvi data.
+IF ($ferret_curvi_coord_lat"0|0|*>1") THEN EXIT/SCRIPT
+
 ! Step 1  ---------------------------------------------------------------------
 ! Determine striding based on the memory allocation
 
@@ -65,8 +69,6 @@ ENDIF
 ! Now for graphics products, do striding by pixel size, often larger stride than
 ! needed to fit in Ferret memory
 
-! See LAS_set_strides_curvilinear for first cut on dealing with strides and curvi data.
-IF ($ferret_curvi_coord_lat"0|0|*>1") THEN EXIT/SCRIPT
 
 LET maxpix = 600  ! default
 IF ($ferret_size"0|0.06667>1|*>0") THEN LET maxpix = 300  ! small
