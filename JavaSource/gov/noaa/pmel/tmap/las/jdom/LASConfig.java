@@ -2210,45 +2210,55 @@ public class LASConfig extends LASDocument {
          * @throws JDOMException 
          */
         public ArrayList<Operation> getOperationsByDefault(String view, String ui_default) throws JDOMException {
-            ArrayList<Operation> operations = new ArrayList<Operation>();
-            Element def = getUIDefault(ui_default);
-            if ( def != null ) {
-                Element map = getUIMap(def, "ops");               
-                if (map != null) {
-                    List ifmenusElements = map.getChildren("ifmenu");
-                    for (Iterator ifmenusIt = ifmenusElements.iterator(); ifmenusIt
-                            .hasNext();) {
-                        Element ifmenu = (Element) ifmenusIt.next();
-                        String ifmenu_view = ifmenu.getAttributeValue("view");
-                        if (ifmenu_view.equals(view)) {
-                            String ops_menu_ref = ifmenu
-                                    .getAttributeValue("href");
+        	ArrayList<Operation> operations = new ArrayList<Operation>();
+        	Element def = getUIDefault(ui_default);
+        	if ( def != null ) {
+        		Element map = getUIMap(def, "ops");               
+        		if (map != null) {
+        			List ifmenusElements = map.getChildren("ifmenu");
+        			for (Iterator ifmenusIt = ifmenusElements.iterator(); ifmenusIt
+        			.hasNext();) {
+        				Element ifmenu = (Element) ifmenusIt.next();
+        				// An ifmenu is not always controlled by a view.
+        				// Could be the mode as well !!
+        				// TODO handle distinctions for comparison mode
 
-                            Element menu = getElementByXPath("/lasdata/lasui/menus/menu[@name='"
-                                    + ops_menu_ref.substring(1) + "']");
-                            List ops = menu.getChildren("item");
-                            for (Iterator opsIt = ops.iterator(); opsIt
-                                    .hasNext();) {
-                                Element item = (Element) opsIt.next();
-                                String value = item.getAttributeValue("values");
-                                /* This is pulling out information that was designed to be the values
-                                 * of an HTML menu.  It's not such a great way to store informaiton that
-                                 * is intended to be used to extract further information from the XML.
-                                 * Therefore there's a lot of splitting and spitting to get the job done.
-                                 * TODO we should re-think the XML at some point...  Soon?
-                                 */
-                                String opID = value.substring(0, value
-                                        .indexOf(","));
-                                Element opE = getElementByXPath("/lasdata/operations/operation[@ID='"
-                                        + opID + "']");
-                                Operation op = new Operation(opE);
-                                operations.add(op);
-                            }
-                        }
-                    }
-                }                
-            }
-            return operations;
+        				String ifmenu_view = ifmenu.getAttributeValue("view");
+        				if ( ifmenu_view != null ) {
+        					if (ifmenu_view.equals(view)) {
+        						String ops_menu_ref = ifmenu
+        						.getAttributeValue("href");
+
+        						Element menu = getElementByXPath("/lasdata/lasui/menus/menu[@name='"
+        								+ ops_menu_ref.substring(1) + "']");
+        						List ops = menu.getChildren("item");
+        						for (Iterator opsIt = ops.iterator(); opsIt
+        						.hasNext();) {
+        							Element item = (Element) opsIt.next();
+        							String value = item.getAttributeValue("values");
+        							/* This is pulling out information that was designed to be the values
+        							 * of an HTML menu.  It's not such a great way to store informaiton that
+        							 * is intended to be used to extract further information from the XML.
+        							 * Therefore there's a lot of splitting and spitting to get the job done.
+        							 * TODO we should re-think the XML at some point...  Soon?
+        							 */
+        							String opID = value.substring(0, value
+        									.indexOf(","));
+        							Element opE = getElementByXPath("/lasdata/operations/operation[@ID='"
+        									+ opID + "']");
+        							if ( opE != null ) {
+        								Operation op = new Operation(opE);
+        								operations.add(op);
+        							} else {
+        								log.warn("Operation "+opID+" from default "+ui_default+" not found in configuration.");
+        							}
+        						}
+        					}
+        				}
+        			}
+        		}                
+        	}
+        	return operations;
         }
 
     public String getGlobalPropertyValue(String group, String name) {

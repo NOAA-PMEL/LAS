@@ -60,12 +60,11 @@ public class getOperations extends ConfigService {
 		String varID = request.getParameter("varid");
 		String view = request.getParameter("view");
 		String format = request.getParameter("format");
-		log.info("Starting: getOperations.do?dsid="+dsID+" and varid="+varID+".");
 		String grid_type = "";
 		if ( format == null ) {
 			format = "json";
 		}
-		log.info("Starting: getOperations?dsid="+dsID+"&varid="+varID+"&view="+view+".");
+		log.info("Starting: getOperations.do?dsid="+dsID+"&varid="+varID+"&view="+view+".");
 		try {
 			grid_type = lasConfig.getGridType(dsID, varID);
 
