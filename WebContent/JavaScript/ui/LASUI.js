@@ -70,6 +70,8 @@
 			this.submitOnLoad = true;
 		else
 			this.submitOnLoad = false;
+		
+		this.autoupdate=true;
 	
 	}
 											
@@ -222,7 +224,7 @@
 	 */
 	LASUI.prototype.setCategoryTreeNode = function (strJson, node, id) {
 		var response = eval("(" + strJson + ")");
-
+		
 		node.category = new LASGetCategoriesResponse(response);
 					
 		if(node.category.getCategoryType()=="category")
@@ -230,6 +232,7 @@
 		for(var i=0; i<node.category.getCategorySize();i++)
 			this.setCategoryTreeSubNode(node, i,id);
 		
+		this.expand(node);
 		
 	}
 	/*
@@ -370,7 +373,7 @@
 		if(this.state.variables && this.state.dataset)
 			if(this.state.variables[this.state.dataset])
 				for(var v=0;v<this.state.variables[this.state.dataset].length;v++)
-					if(this.state.variables[this.state.dataset][v]==node.category.getChild(i))
+					if(this.state.variables[this.state.dataset][v]==node.category.getChildID(i)||this.state.variables[this.state.dataset][v]==node.category.getChild(i))
 				  { 
 					this.setVariable({}, node, i, true);
 					node.children[i].INPUTNode.checked=true;
@@ -411,17 +414,13 @@
 			for(var c=0;c< parentNode.children.length;c++)
 				this.collapse(parentNode.children[c]);
 			this.expand(parentNode.children[i]);	//expand the category if it has been selected 
-			/*if(parentNode.children[i].category) //if the category is a dataset set it as the selected dataset
-				if(parentNode.children[i].category.getCategoryType()=="dataset"){
-						this.setDataset(parentNode.children[i].category.getDatasetID());
-				}
-			else*/
 				if(parentNode.category.getChildChildrenType(i)=="variables")
 					this.setDataset(parentNode.category.getChildDatasetID(i));
 		} else
 			this.collapse(parentNode.children[i]);
 
 		if(!parentNode.children[i].category) {
+			parentNode.children[i].IMGNode.src = "JavaScript/components/mozilla_blu.gif";
 			var _bindArgs = {	
 					url: this.hrefs.getCategories.url + "?catid=" + parentNode.category.getChildID(i),
 					mimetype: "text/plain",
@@ -477,8 +476,9 @@
 	
 	LASUI.prototype.setDataset = function (dataset) {
 			this.state.dataset = dataset;
-			if(typeof this.state.variables[dataset] == 'object') 
+			if(typeof this.state.variables[dataset] == 'object') {
 				this.getGrid(dataset, this.state.variables[dataset].last().ID);
+			}
 	}
 	LASUI.prototype.setView = function (evt) {
 		var args = $A(arguments)
@@ -686,8 +686,8 @@
 		}
 	
 		
-		document.getElementById("Date").innerHTML = "<br><br>";
-		document.getElementById("Depth").innerHTML = "<br><br>";
+		document.getElementById("Date").innerHTML = "";
+		document.getElementById("Depth").innerHTML = "";
 		
 		for(var d=0;d<this.state.view.length;d++)
 			eval("this.init" + this.state.view.charAt(d).toUpperCase() + "Constraint('range')");
@@ -748,7 +748,7 @@
 	* Initialize an Z grid control
 	*/
 	LASUI.prototype.initZConstraint = function (mode) {	
-		document.getElementById("Depth").style.innerHTML="<br><br>";
+		document.getElementById("Depth").innerHTML="";
 		if(this.state.grid.hasMenu('z')) {			
 			switch (mode) {
 				case 'range':
@@ -766,17 +766,13 @@
 						}
 						this.refs.DepthSelect[m].onchange=this.handleDepthRangeChange.bindAsEventListener(this);
 					}
-					var depth_label1 = document.createElement("STRONG");
-					depth_label1.innerHTML ="Depth (" + this.state.grid.getAxis('z').units +")";
-					document.getElementById("Depth").appendChild(depth_label1);
-					document.getElementById("Depth").appendChild(document.createElement("BR"));
 					var depth_label2 =document.createElement("STRONG");
-					depth_label2.innerHTML = "Minimum : ";
+					depth_label2.innerHTML = "Minimum Depth (" + this.state.grid.getAxis('z').units +") : ";
 					document.getElementById("Depth").appendChild(depth_label2);
 					document.getElementById("Depth").appendChild(this.refs.DepthSelect[0]);
 					document.getElementById("Depth").appendChild(document.createElement("BR"));
 					var depth_label3 =document.createElement("STRONG");
-					depth_label3.innerHTML = "Maximum : ";
+					depth_label3.innerHTML = "Maximum Depth (" + this.state.grid.getAxis('z').units +") : ";
 					document.getElementById("Depth").appendChild(depth_label3);
 					document.getElementById("Depth").appendChild(this.refs.DepthSelect[1]);
 					document.getElementById("Depth").style.display="";
@@ -792,7 +788,7 @@
 					this.refs.DepthSelect[0].onchange=this.handleDepthChange.bindAsEventListener(this);
 					var depth_label = document.createElement("STRONG");
 					depth_label.innerHTML="Depth (" + this.state.grid.getAxis('z').units + ") : ";
-					document.getElementById("Depth").appendChild(document.createElement("BR"));					
+					//document.getElementById("Depth").appendChild(document.createElement("BR"));					
 					document.getElementById("Depth").appendChild(depth_label);	
 					document.getElementById("Depth").appendChild(this.refs.DepthSelect[0]);
 					document.getElementById("Depth").style.display="";
@@ -817,17 +813,13 @@
 						}
 						this.refs.DepthSelect[m].onchange=this.handleDepthRangeChange.bindAsEventListener(this);
 					}
-					var depth_label1 = document.createElement("STRONG");
-					depth_label1.innerHTML ="Depth (" + this.state.grid.getAxis('z').units +")";
-					document.getElementById("Depth").appendChild(depth_label1);
-					document.getElementById("Depth").appendChild(document.createElement("BR"));
 					var depth_label2 =document.createElement("STRONG");
-					depth_label2.innerHTML = "Minimum : ";
+					depth_label2.innerHTML = "Minimum Depth (" + this.state.grid.getAxis('z').units +") : ";
 					document.getElementById("Depth").appendChild(depth_label2);
 					document.getElementById("Depth").appendChild(this.refs.DepthSelect[0]);
 					document.getElementById("Depth").appendChild(document.createElement("BR"));
 					var depth_label3 =document.createElement("STRONG");
-					depth_label3.innerHTML = "Maximum : ";
+					depth_label3.innerHTML = "Maximum Depth (" + this.state.grid.getAxis('z').units +") : ";
 					document.getElementById("Depth").appendChild(depth_label3);
 					document.getElementById("Depth").appendChild(this.refs.DepthSelect[1]);
 					document.getElementById("Depth").style.display="";
@@ -843,7 +835,7 @@
 					this.refs.DepthSelect[0].onchange=this.handleDepthChange.bindAsEventListener(this);
 					var depth_label = document.createElement("STRONG");
 					depth_label.innerHTML="Depth (" + this.state.grid.getAxis('z').units + ") : ";
-					document.getElementById("Depth").appendChild(document.createElement("BR"));					
+					//document.getElementById("Depth").appendChild(document.createElement("BR"));					
 					document.getElementById("Depth").appendChild(depth_label);	
 					document.getElementById("Depth").appendChild(this.refs.DepthSelect[0]);
 					document.getElementById("Depth").style.display="";
@@ -856,7 +848,7 @@
 	*/
 	LASUI.prototype.initTConstraint = function (mode) {
 		
-		document.getElementById("Date").innerHTML="<br><br>";
+		document.getElementById("Date").innerHTML="";
 		switch(this.state.grid.getDisplayType('t')) {
 			case "widget":	
 				switch(mode) {
@@ -865,7 +857,7 @@
 						this.refs.DW = new DateWidget(this.state.grid.getLo('t'),this.state.grid.getHi('t')); 
 						this.refs.DW.callback = this.handleDateRangeChange.bindAsEventListener(this);
 						this.refs.DW.render("Date","MDY","MDY");
-						document.getElementById("Date").firstChild.align="center";
+						//document.getElementById("Date").firstChild.align="center";
 						document.getElementById("Date").style.display="";
 						
 						var label = document.createElement('strong');
@@ -880,7 +872,7 @@
 						this.refs.DW = new DateWidget(this.state.grid.getLo('t'),this.state.grid.getHi('t')); 
 						this.refs.DW.callback = this.handleDateChange.bindAsEventListener(this);
 						this.refs.DW.render("Date","MDY");
-						document.getElementById("Date").firstChild.align="center";						
+						//document.getElementById("Date").firstChild.align="center";						
 						document.getElementById("Date").style.display="";
 						var label = document.createElement('strong');
 						label.innerHTML="<br>Date : ";
