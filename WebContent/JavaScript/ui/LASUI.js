@@ -3,13 +3,6 @@
 	dojo.require("dojo.lang.*");
 	dojo.require("dojo.io.*");
 	dojo.require("dojo.event.*");
-	//dojo.require("dojo.undo.browser");
-	
- //	var djConfig = new Object;
- //	djConfig.isDebug          = false;//true;
- //	djConfig.debugAtAllCosts  = false; //true;
- //	djConfig.debugContainerId = "_dojoDebugConsole";
- //	djConfig.baseScriptUri = "dojo/dojo.js";
 	
 	if ( ! Function.prototype.bindAsEventListener ) {
     Function.prototype.bindAsEventListener = function(object) {
@@ -718,11 +711,12 @@
 
 			var bbox = {"x": {"min" : 0, "max" :0}, "y" : {"min" :0, "max" : 0}};
 
-			if(this.state.grid.hasArange('x')) {
+			if(this.state.grid.hasArange('x')||this.state.grid.hasMenu('x')) {
 				bbox.x.min = parseFloat(this.state.grid.getLo('x'));
 				bbox.x.max = parseFloat(this.state.grid.getHi('x'));
-			}	
-			if(this.state.grid.hasArange('y')) {
+			} 
+			
+			if(this.state.grid.hasArange('y')||this.state.grid.hasMenu('y')) {
 				bbox.y.min = parseFloat(this.state.grid.getLo('y'));
 				bbox.y.max = parseFloat(this.state.grid.getHi('y'));
 			}
@@ -1013,9 +1007,12 @@
 			
 				
 			if(this.state.embed){
-				var wait = document.createElement("IMG");
-				wait.src = ""
+				if(document.getElementById("wait"))
+					document.getElementById("wait").style.display="";
+				
+				document.getElementById('output').onload = function (evt) {document.getElementById("wait").style.display="none"};
 				document.getElementById('output').src = (this.hrefs.getProduct.url + '?xml=' + escape(this.request.getXMLText()));
+				
 			}else
 				window.open(this.hrefs.getProduct.url + '?xml=' +  escape(this.request.getXMLText()));
 		}

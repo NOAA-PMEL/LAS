@@ -2,7 +2,6 @@
 <html debug="true">
 	<head>
 		<title>Live Access Server</title>
-		<script language="javascript" type="text/javascript" src="JavaScript/frameworks/firebug/firebug/firebug.js"></script>		
 		<script type="text/javascript" src="JavaScript/components/BrowserSniff.js" ></script>		
 		<script type="text/javascript" src="JavaScript/components/xmldom.js" ></script>
 		<script type="text/javascript" src="JavaScript/components/LASRequest.js" ></script>
@@ -71,7 +70,7 @@ table {
 							<a id="hideC" style="cursor:pointer;cursor:hand;"onclick="document.getElementById('constraints').style.display='none';LAS.refs.XYSelect.rubberBand.style.display='none';LAS.refs.XYSelect.rubberBand_c.style.display='none';document.getElementById('showC').style.display='';">hide constraints</a>
 						</div>
 							<a id ="showC" style="display:none;cursor:pointer;cursor:hand;"  onclick="document.getElementById('constraints').style.display='';this.style.display='none';LAS.refs.XYSelect.rubberBand.style.display='';LAS.refs.XYSelect.rubberBand_c.style.display='';">show constraints</a>
-						<div style="width:100%;height:600px;border: 1px solid black;padding-top:2px;"><iframe id="output" width="100%" height="100%" frameborder=0></iframe></div>
+						<div  style="width:100%;height:600px;border: 1px solid black;padding-top:2px;"><img id="wait" style="display:none;position:absolute;" src="JavaScript/components/mozilla_blu.gif"><iframe id="output" width="100%" height="100%" frameborder=0></iframe></div>
 					</td>
 				</tr>
 			</table>
