@@ -102,9 +102,8 @@
 			#foreach ( $var in $vars )
 			   set data &quot;${las_config.getDataAccessURL($var, true)}&quot;<br>
 		    #end
-			show dataset
 			<br>
-			set	$las_region_index.getFerretRegion()
+			$las_region_index.getFerretRegion()
 			<br>
 			</div>
 		</blockquote>
