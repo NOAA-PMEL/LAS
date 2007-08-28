@@ -464,7 +464,8 @@
 			this.state.variables[datasetID].push(variable); //ID);
 						
 			//if we are in the selected dataset, get the grids for this dataset/variable combo
-			if (this.state.dataset == datasetID) 
+			//if (this.state.dataset == datasetID) 
+			this.state.dataset = datasetID;
 				this.getGrid(datasetID,variableID);	
 			
 						
