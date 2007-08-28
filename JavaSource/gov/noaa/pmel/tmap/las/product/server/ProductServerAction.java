@@ -77,7 +77,7 @@ public final class ProductServerAction extends Action {
         log.debug("Entering ProductServerAction");
 
         // Get the LASConfig (sub-class of JDOM Document) from the servlet context.
-        log.debug("Processing request.");
+        
         LASConfig lasConfig = (LASConfig)servlet.getServletContext().getAttribute(LASConfigPlugIn.LAS_CONFIG_KEY);
         // Same for the ServerConfig
         ServerConfig serverConfig = (ServerConfig)servlet.getServletContext().getAttribute(ServerConfigPlugIn.SERVER_CONFIG_KEY);
@@ -109,7 +109,7 @@ public final class ProductServerAction extends Action {
         
         // Get the request from the query parameter.
         String requestXML = request.getParameter("xml");
-        
+        log.debug("Processing request xml="+requestXML);
         String stream_param = request.getParameter("stream");
         boolean stream = Boolean.valueOf(stream_param).booleanValue();
         String[] stream_ids = request.getParameterValues("stream_ID");

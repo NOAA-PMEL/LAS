@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import org.jdom.Attribute;
 import org.jdom.Element;
@@ -142,14 +143,16 @@ public class ProductRequest {
             regrid = true;
         }
         boolean do_analysis = false;
-        addProperty(mergedProperties, "operation", "service_action", operation.getAttributeValue("service_action"));
+        String service_action = operation.getAttributeValue("service_action");
+        if ( service_action != null && !service_action.equals("") ) {
+            addProperty(mergedProperties, "operation", "service_action", service_action);
+        }
         String service = operation.getChildText("service");
-        if ( service != null && service != "" ) {
-            addProperty(mergedProperties, service, "service_action", operation.getAttributeValue("service_action"));
-        } else if ( service != null && service.equals("template") ) {
-            return;
-        } else {
-            throw new LASException("No service defined for operation "+operation.getAttributeValue("name"));
+        if ( service == null || service.equals("") ) {
+        	throw new LASException("No service defined for operation "+operation.getAttributeValue("name"));
+        }
+        if ( service_action != null && !service_action.equals("") ) {
+        	addProperty(mergedProperties, service, "service_action", operation.getAttributeValue("service_action"));
         }
 
         // Get the "global" properties from the lasRequest (not all requests have properties)
@@ -555,8 +558,7 @@ public class ProductRequest {
     }
 
 	/**
-     * This is a hack to build the analysis URL by writing a script
-     * instead of building a _expr_ URL.
+     * Builds the _expr_ analysis URL.
      * @param analysis
      * @param data
      * @param lasConfig
@@ -725,7 +727,7 @@ public class ProductRequest {
         /* The requestProperties are "old" style properties
          * <properites>
          *    <ferret>
-         *      <ddo>dad</doo>
+         *      <doo>dad</doo>
          *    </ferret>
          * </properties>
          * the others are "new" style properties
@@ -748,8 +750,14 @@ public class ProductRequest {
         HashMap<String, HashMap<String, String>> merged = propertiesToHashMap(mergedProperties);
         HashMap<String, HashMap<String, String>> request = propertiesToHashMap(requestProperties);
         HashMap<String, HashMap<String, String>> dataset = propertiesToHashMap(dsProperties);
+        
+        /* If a property is in the request, then data set properties for that group must be merged
+         * then any properties in the request can override them below.  So we need a key set for the
+         * request properties to know if we should start a merge group.
+         */
 
-
+        Set<String> request_groups = request.keySet();
+        
         // Only move data set properties into global properties for groups
         // that already exist as global properties.
         ArrayList<String> toRemove = new ArrayList<String>();
@@ -757,6 +765,9 @@ public class ProductRequest {
             String groupName = (String) groupIt.next();
             HashMap<String,String> group = dataset.get(groupName);
             HashMap<String, String> mergedGroup = merged.get(groupName);
+            if ( request_groups.contains(groupName) && mergedGroup == null ) {
+            	mergedGroup = new HashMap<String, String>();
+            }
             if (mergedGroup != null) {
                 // Move it to the merged "global" properties
                 mergedGroup.putAll(group);
@@ -764,7 +775,7 @@ public class ProductRequest {
                 // Remove it from the dataset properties.
                 toRemove.add(groupName);
                 // dataset.remove(groupName);
-            }            
+            }        
         }
         // Remove properites that have been moved.
         for (Iterator rmIt = toRemove.iterator(); rmIt.hasNext();) {
