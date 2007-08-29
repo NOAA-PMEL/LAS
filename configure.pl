@@ -181,7 +181,7 @@ while (! $ferret){
         my $isFerret = 0;
         my $testres = `echo exit | $ferret -nojnl`;
         my @lines = split /^/m, $testres;
-        my $ferretVersion = "6.02";
+        my $ferretVersion = "6.07";
         foreach my $line (@lines){
             my @words = split(/\s+/,$line);
             if ($words[1] =~ /Version|FERRET/){
@@ -205,11 +205,6 @@ while (! $ferret){
 }
 $LasConfig{ferret} = $ferret;
 print "You have a valid version of Ferret.\n\n";
-if ( $version > 6.0 && $version < $ferretVersion ) {
-   print "\nThe generate script product requires Ferret 6.02+.\n";
-   print "\nYou should upgrade your Ferret. \n";
-   print "Until then the 'Generate scripts' product may not work in all cases.\n";
-}
 
 #
 # Check for appropriate Java virtual machine
