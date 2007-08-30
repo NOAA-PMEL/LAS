@@ -573,7 +573,7 @@
     <operation name="Table of difference values (text)" 
         ID="Compare_Data_Extract"
         output_template="table" 
-        service_action="Compare_Data_Extract" order="0300">
+        service_action="Compare_Data_Extract" private="true" order="0300">
         <service>ferret</service>
         <response ID="Data_Extract_Response">
             <result type="text" ID="ferret_listing" streamable="true"
@@ -604,7 +604,7 @@
     </operation>
     <operation name="NetCDF difference file"
         ID="Compare_Data_netCDF" output_template="netcdf"
-        service_action="Compare_Data_Extract_netCDF" order="0500">
+        service_action="Compare_Data_Extract_netCDF" order="0500" private="true">
         <service>ferret</service>
         <response ID="Data_Extract_netCDF_Response">
             <result type="netcdf" ID="ferret_listing" file_suffix=".nc"/>
@@ -634,7 +634,7 @@
     </operation>
     <operation name="ASCII difference file"
         ID="Compare_Data_Extract_File" output_template="ascii"
-        service_action="Compare_Data_Extract_File" order="0400">
+        service_action="Compare_Data_Extract_File" order="0400" private="true">
         <service>ferret</service>
         <response ID="Data_Extract_File_Response">
             <result type="ascii" ID="ferret_listing" streamable="true"
@@ -778,7 +778,7 @@
        </response>
        <service>database</service>
     </operation>
-    <operation name="Extract and Plot" ID="Insitu_extract_location_plot" output_template="output" order="0104">
+    <operation name="Location Plot" ID="Insitu_extract_location_plot" output_template="output" order="0104">
           <operation name="Database Extraction" ID="DBExtract" output_template="ascii" service_action="sql">
                <response ID="DBExtractResponse">
                     <result type="debug" ID="db_debug" file_suffix=".txt"/>
@@ -829,7 +829,7 @@
             <grid_type name="scattered" />
         </grid_types>
     </operation>
-    <operation name="Extract and Plot"
+    <operation name="Location and Value Plot"
         ID="Insitu_extract_location_value_plot" output_template="output" order="0105">
         <operation name="Database Extraction" ID="DBExtract"
             output_template="ascii" service_action="sql">
