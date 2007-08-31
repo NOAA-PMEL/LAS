@@ -2,6 +2,8 @@
 ! From the region and the grid we can define striding. When there's going to be
 ! a transformation or something, then this might be better someplace else, or
 ! might be undone by the transform script.
+! ACM 8/312/2007 Do not issue the SET AXIS/STRIDE= command if the stride is 1
+!                This partially works around TRAC #224.
 
 !show symbol operation_id
 IF `STRINDEX( "($operation_ID)", "GE" ) EQ 0` THEN EXIT/SCRIPT
@@ -30,8 +32,10 @@ IF ($region_x_lo"0|*>1") THEN
     LET pixsize = `nx*x_pct`
 !         LET pixsize = `MAX(pixsize, nx)`
 
-    IF `pixsize GT maxpix` THEN SET AXIS/STRIDE=`INT((pixsize/maxpix)+1)` `($data_var)[d=($data_num)],return=xaxis`
-    IF `pixsize GT maxpix` THEN SAY SET AXIS/STRIDE=`INT((pixsize/maxpix)+1)` `($data_var)[d=($data_num)],return=xaxis`
+    DEFINE SYMBOL xstride = `INT((pixsize/maxpix)+1)`
+    IF `pixsize GT maxpix` THEN 
+       IF `($xstride) GT 1` THEN SET AXIS/STRIDE=($xstride) `($data_var)[d=($data_num)],return=xaxis`
+    ENDIF
 ENDIF
 
 !limit number of points in Y (for place mark operation)
@@ -44,10 +48,10 @@ IF ($region_y_lo"0|*>1") THEN
     LET pixsize = `ny*y_pct`
 !         LET pixsize = `MAX(pixsize, ny)`
 
-    IF `pixsize GT maxpix` THEN SET AXIS/STRIDE=`2*INT((pixsize/maxpix)+1)` `($data_var)[d=($data_num)],return=yaxis`
-    IF `pixsize GT maxpix` THEN SAY SET AXIS/STRIDE=`2*INT((pixsize/maxpix)+1)` `($data_var)[d=($data_num)],return=yaxis`
+    DEFINE SYMBOL ystride = `2*INT((pixsize/maxpix)+1)`
+    IF `pixsize GT maxpix` THEN 
+       IF `($ystride) GT 1` THEN SET AXIS/STRIDE=($ystride) `($data_var)[d=($data_num)],return=yaxis`
+    ENDIF
 ENDIF
 
 ! End of $RCSfile ------------LAS_set_strides_GE.jnl--------------------------
-
-
