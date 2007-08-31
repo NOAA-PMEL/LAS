@@ -4,6 +4,8 @@
 ! From the region and the grid we can define striding. Compute strides 
 ! based first on Ferret memory and then if it is a graphics product, on 
 ! pixel size. 
+! ACM 8/312/2007 Do not issue the SET AXIS/STRIDE= command if the stride is 1
+!                This partially works around TRAC #224.
 
 ! TODO: When there's going to be a transformation or something, then these 
 ! calculations may not be sufficient. Might be better done by the transform script.
@@ -93,7 +95,7 @@ IF ($ferret_view"|xy>1|*>0") THEN
 
       IF `pixsize GT maxpix` THEN DEFINE SYMBOL xstride = `INT((pixsize/maxpix)+1)`
       DEFINE SYMBOL xstride = `MAX(($xstride"1"), ($stride_for_mem"1"))`
-      SET AXIS/STRIDE=($xstride) `($data_var)[d=($data_num)],RETURN=xaxis`
+      IF `($xstride) GT 1` THEN SET AXIS/STRIDE=($xstride) `($data_var)[d=($data_num)],RETURN=xaxis`
    ENDIF
 
    IF ($region_y_range"0|0|*>1") THEN 
@@ -106,7 +108,7 @@ IF ($ferret_view"|xy>1|*>0") THEN
 
       IF `pixsize GT maxpix` THEN DEFINE SYMBOL ystride = `2*INT((pixsize/maxpix)+1)`
       DEFINE SYMBOL ystride = `MAX(($ystride"1"), ($stride_for_mem"1"))`
-      SET AXIS/STRIDE=($ystride) `($data_var)[d=($data_num)],RETURN=yaxis`
+      IF `($ystride) GT 1` THEN SET AXIS/STRIDE=($ystride) `($data_var)[d=($data_num)],RETURN=yaxis`
    ENDIF
 
 ! Add a label about the striding onto upper left.
@@ -138,7 +140,7 @@ ELSE
   
       IF `pixsize GT maxpix` THEN DEFINE SYMBOL xstride = `INT((pixsize/maxpix)+1)`
       DEFINE SYMBOL xstride = `MAX(($xstride"1"), ($stride_for_mem"1"))`
-      SET AXIS/STRIDE=($xstride) `($data_var)[d=($data_num)],RETURN=xaxis`
+      IF `($xstride) GT 1` THEN SET AXIS/STRIDE=($xstride) `($data_var)[d=($data_num)],RETURN=xaxis`
    ENDIF
   
    IF `(STRINDEX("($ferret_view)", "y") GT 0)` THEN 
@@ -150,7 +152,7 @@ ELSE
   
       IF `pixsize GT maxpix` THEN DEFINE SYMBOL ystride = `INT((pixsize/maxpix)+1)`
       DEFINE SYMBOL ystride = `MAX(($ystride"1"), ($stride_for_mem"1"))`
-      SET AXIS/STRIDE=($ystride) `($data_var)[d=($data_num)],RETURN=yaxis`
+      IF `($ystride) GT 1` THEN SET AXIS/STRIDE=($ystride) `($data_var)[d=($data_num)],RETURN=yaxis`
    ENDIF
   
    IF ($region_z_range"0|0|*>1") THEN 
@@ -159,7 +161,7 @@ ELSE
       LET pixsize = `MAX(pixsize, nz)`
       IF `nz GT maxpix` THEN DEFINE SYMBOL zstride = `INT((pixsize/maxpix)+1)`
       DEFINE SYMBOL zstride = `MAX(($zstride"1"), ($stride_for_mem"1"))`
-      SET AXIS/STRIDE=($zstride) `($data_var)[d=($data_num)],RETURN=zaxis`
+      IF `($zstride) GT 1` THEN SET AXIS/STRIDE=($zstride) `($data_var)[d=($data_num)],RETURN=zaxis`
    ENDIF
         
    IF ($region_t_range"0|0|*>1") THEN     
@@ -168,7 +170,7 @@ ELSE
       LET pixsize = `MAX(pixsize, nt)`      
       DEFINE SYMBOL tstride = `INT((pixsize/maxpix)+1)`
       DEFINE SYMBOL tstride = `MAX(($tstride"1"), ($stride_for_mem"1"))`
-      SET AXIS/STRIDE=($tstride) `($data_var)[d=($data_num)],RETURN=taxis`
+      IF `($tstride) GT 1` THEN SET AXIS/STRIDE=($tstride) `($data_var)[d=($data_num)],RETURN=taxis`
    ENDIF
    
 ! Add a label about the striding at the upper left.
@@ -229,28 +231,28 @@ IF `STRLEN("($ferret_view)") EQ 1` THEN
       IF ($region_x_range"0|0|*>1") THEN 
          IF `nx GT maxpix` THEN 
             DEFINE SYMBOL xstride = `2*INT((nx/maxpix)+1)`
-            SET AXIS/STRIDE=($xstride) `($data_var)[d=($data_num)],RETURN=xaxis`
+            IF `($xstride) GT 1` THEN SET AXIS/STRIDE=($xstride) `($data_var)[d=($data_num)],RETURN=xaxis`
          ENDIF
       ENDIF
 
       IF ($region_y_range"0|0|*>1") THEN 
          IF `ny GT maxpix` THEN 
             DEFINE SYMBOL ystride = `2*INT((ny/maxpix)+1)`
-            SET AXIS/STRIDE=($ystride) `($data_var)[d=($data_num)],RETURN=yaxis`
+            IF `($ystride) GT 1` THEN SET AXIS/STRIDE=($ystride) `($data_var)[d=($data_num)],RETURN=yaxis`
          ENDIF
       ENDIF
 
       IF ($region_z_range"0|0|*>1") THEN  
          IF `nz GT maxpix` THEN 
             DEFINE SYMBOL zstride = `2*INT((nz/maxpix)+1)
-            SET AXIS/STRIDE=($zstride) `($data_var)[d=($data_num)],RETURN=zaxis`
+            IF `($zstride) GT 1` THEN SET AXIS/STRIDE=($zstride) `($data_var)[d=($data_num)],RETURN=zaxis`
          ENDIF
       ENDIF
 
       IF ($region_t_range"0|0|*>1") THEN  
          IF `nt GT maxpix` THEN 
             DEFINE SYMBOL tstride = `2*INT((nt/maxpix)+1)`
-            SET AXIS/STRIDE=($tstride) `($data_var)[d=($data_num)],RETURN=taxis`
+            IF `($tstride) GT 1` THEN SET AXIS/STRIDE=($tstride) `($data_var)[d=($data_num)],RETURN=taxis`
          ENDIF
       ENDIF
 
