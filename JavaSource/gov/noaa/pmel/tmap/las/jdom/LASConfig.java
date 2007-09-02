@@ -2205,6 +2205,27 @@ public class LASConfig extends LASDocument {
             return null;
         }
         /**
+         * Get operations for a data set and variable, either by the associated default or by the interval.
+         * @throws JDOMException 
+         */
+        public ArrayList<Operation> getOperations(String view, String dsID, String varID) throws JDOMException {
+        	ArrayList<Operation> operations = new ArrayList<Operation>();
+
+        	String grid_type = getGridType(dsID, varID);
+
+        	String ui_default = "";
+
+        	ui_default = getVariablePropertyValue("/lasdata/datasets/dataset[@ID='"+dsID+"']/variables/variable[@ID='"+varID+"']","ui", "default");
+
+        	if ( ui_default != null && !ui_default.equals("") ) {
+        		ui_default = ui_default.substring(ui_default.indexOf("#")+1, ui_default.length());
+        		operations = getOperationsByDefault(view, ui_default);
+        	} else {
+        		operations = getOperationsByIntervalAndGridType(view, grid_type);
+        	}
+        	return operations;
+        }
+        /**
          * @param ui_default
          * @return operations JSONObject with the operations that are defined for this "default".
          * @throws JDOMException 
