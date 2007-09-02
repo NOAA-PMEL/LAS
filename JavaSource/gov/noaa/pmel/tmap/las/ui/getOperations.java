@@ -66,21 +66,9 @@ public class getOperations extends ConfigService {
 		}
 		log.info("Starting: getOperations.do?dsid="+dsID+"&varid="+varID+"&view="+view+".");
 		try {
-			grid_type = lasConfig.getGridType(dsID, varID);
+			
+			ArrayList<Operation> operations = lasConfig.getOperations(view, dsID, varID);
 
-			String ui_default = "";
-
-			ui_default = lasConfig.getVariablePropertyValue("/lasdata/datasets/dataset[@ID='"+dsID+"']/variables/variable[@ID='"+varID+"']","ui", "default");
-
-			ArrayList<Operation> operations = new ArrayList<Operation>();
-
-			if ( ui_default != null && !ui_default.equals("") ) {
-				ui_default = ui_default.substring(ui_default.indexOf("#")+1, ui_default.length());
-				operations = lasConfig.getOperationsByDefault(view, ui_default);
-			} else {
-				operations = lasConfig.getOperationsByIntervalAndGridType(view, grid_type);
-			}
-            
 			if ( operations.size() <= 0 ) {
 				sendError(response, "operations", format, "No operations found.");
 				return null;
