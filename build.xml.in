@@ -124,6 +124,7 @@
   <target name="deploy" depends="dist">
      <!-- Delete old IOSP code. -->
      <delete dir="${jakarta.home}/webapps/thredds/WEB-INF/classes/gov/noaa/pmel/tmap"/>
+     <delete dir="${jakarta.home}/webapps/thredds/WEB-INF/classes/resources/iosp"/>
      <!-- Deploy new IOSP code. -->
      <copy todir="${jakarta.home}/webapps/thredds/WEB-INF/classes">
         <fileset dir="WebContent/WEB-INF/classes">

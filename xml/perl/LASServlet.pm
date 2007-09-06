@@ -2056,13 +2056,17 @@ sub genUI {
     my $default;
     if ($props){
         my $uiprop = $props->{default};
-        my $url = new URI::URL($uiprop);
-        if ($url->scheme ne 'file' || $url->path ne 'ui.xml'){
-            die "UI property in '$url' must refer to file:ui.xml";
-        }
-        $default = $url->frag;
-        die "'$url' missing reference to UI default" if ! $default;
-        $default =~ s/^#//;
+        # Why all this nonnsense?  Just parse
+        # the string.  Geez.
+        #my $url = new URI::URL($uiprop);
+        #if ($url->scheme ne 'file' || $url->path ne 'ui.xml'){
+        #    die "UI property in '$url' must refer to file:ui.xml";
+        #}
+        #$default = $url->frag;
+        #die "'$url' missing reference to UI default" if ! $default;
+        #$default =~ s/^#//;
+        my @parts = split("#", $uiprop);
+        $default = $parts[1];
     }
     $default = defined($default) ? $default : $jsVarName;
     my $name = 'UI' . $UIcount++;
