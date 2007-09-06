@@ -576,6 +576,17 @@ public class ProductRequest {
         
         List axes = analysis.getChildren("axis");
         String grid = "";
+        
+        /* To calculate an effective mask, we need to know the size
+         * of the area being masked.  The size of the area under consideration
+         * is either in the analysis axis or the range of the product request.
+         */
+        double lon_range;
+        double xhi = -9999.;
+        double xlo = -9999.;
+        double lat_range;
+        double yhi = -9999;
+        double ylo = -9999;
         for (Iterator axisIt = axes.iterator(); axisIt.hasNext();) {
             Element axis = (Element) axisIt.next();
             String type = axis.getAttributeValue("type");
@@ -586,6 +597,14 @@ public class ProductRequest {
             	grid = grid+","+type+"=\""+lo+"\":\""+hi+"\"@"+op;
             } else {
             	grid = grid+","+type+"="+lo+":"+hi+"@"+op;
+            }
+            if ( type.equals("x") ) {
+            	xhi = Double.valueOf(hi).doubleValue();
+            	xlo = Double.valueOf(hi).doubleValue();
+            }
+            if ( type.equals("y") ) {
+            	yhi = Double.valueOf(hi).doubleValue();
+            	ylo = Double.valueOf(lo).doubleValue();
             }
         }
 
@@ -614,31 +633,29 @@ public class ProductRequest {
                     }    
                 }
             }
-            double lon_range;
-            double xhi = -9999.;
-            double xlo = -9999.;
+            
             if ( rangeValues.containsKey("x_lo") && rangeValues.containsKey("x_hi") ) {
                 xhi = Double.valueOf(rangeValues.get("x_hi")).doubleValue(); 
                 xlo = Double.valueOf(rangeValues.get("x_lo")).doubleValue();
-                lon_range = xhi - xlo;
-            } else {
-                lon_range = 1.0;
+                
             }
-            double lat_range;
-            double yhi = -9999;
-            double ylo = -9999;
+            
             if ( rangeValues.containsKey("y_lo") && rangeValues.containsKey("y_hi") ) {
                 yhi = Double.valueOf(rangeValues.get("y_hi")).doubleValue();
                 ylo = Double.valueOf(rangeValues.get("y_lo")).doubleValue();
-                lat_range = ylo - yhi;
-            } else {
-                lat_range = 1.0;
-            }
+               
+            } 
+            
             if ( xlo  < -9990. || xhi < -9990 || yhi < -9990. || ylo < -9990. ) {
-                throw new LASException("Unable to create the mask variabel for this user defined variable.");
+                throw new LASException("Unable to create the mask variable for this user defined variable.");
+            } else {
+               lon_range = xhi - xlo;
+               lat_range = ylo - yhi;
             }
+            
             double area = (lon_range*lat_range)/(360.*180);
             String resolution;
+            
             if ( area < 0.4 ) {
                 resolution = "05";
             } else if ( area < 0.1 ) {
@@ -653,12 +670,12 @@ public class ProductRequest {
             jnl.append("let land_dsetnum = `rose,return=dsetnum`;");
             jnl.append("let rose_on_grid = rose[d=`land_dsetnum`,gxy="+var+"[d="+var_count+"]];");
             if (land_mask != null) {
-                jnl.append("let mask_def = if rose_on_grid lt 0 then 1;");
+                jnl.append("let analysis_mask = if rose_on_grid lt 0 then 1;");
             } else if ( ocean_mask != null) {
-                jnl.append("let mask_def = if rose_on_grid gt 0 then 1;");           
+                jnl.append("let analysis_mask = if rose_on_grid gt 0 then 1;");           
             }
-            jnl.append("let analysis_mask = mask_def[gxy="+var+"[d="+var_count+"]];");
-            jnl.append("let "+var+"_regrid="+var+"[d="+var_count+grid+"]*analysis_mask;");
+            jnl.append("let masked_"+var+"="+var+"[d="+var_count+"]*analysis_mask;");
+            jnl.append("let "+var+"_regrid=masked_"+var+"[d="+var_count+grid+"];");
         } else {
             jnl.append("let "+var+"_regrid="+var+"[d="+var_count+grid+"]");
         }
