@@ -56,6 +56,20 @@ public class LASUIRequest extends LASDocument {
         return variables;
     }
     /**
+     * Get a list of all the variables IDs in this request.
+     * @return ArrayList<String> with the IDs
+     */
+    public ArrayList<String> getVariableIDs() {
+    	ArrayList<String> ids = new ArrayList<String>();
+    	ArrayList<String> vars = getVariables();
+    	for (Iterator varIt = vars.iterator(); varIt.hasNext();) {
+			String varXPath = (String) varIt.next();
+			int isrt = varXPath.indexOf("/variables/");
+	        ids.add(varXPath.substring(isrt+11, varXPath.length()));
+		}
+    	return ids;
+    }
+    /**
      * Sets the region element of the LAS UI Request object.
      * @param region A HashMap of HashMaps; the points map contains point elements, the range map element contains range elements.
      */
@@ -278,7 +292,21 @@ public class LASUIRequest extends LASDocument {
         int iend = dataLink.indexOf("/variables/");
         return dataLink.substring(isrt+18, iend);
     }
-
+    /**
+     * Get a list of all the Data Set IDs in this request.
+     * @return ids an ArrayList<String> of the data sets in this request.
+     */
+    public ArrayList<String> getDatasetIDs() {
+        ArrayList<String> ids = new ArrayList<String>();
+    	ArrayList<String> vars = getVariables();
+    	for (Iterator varIt = vars.iterator(); varIt.hasNext();) {
+			String varXPath = (String) varIt.next();
+			int isrt = varXPath.indexOf("/lasdata/datasets/");
+	        int iend = varXPath.indexOf("/variables/");			
+	        ids.add(varXPath.substring(isrt+18, iend));
+		}
+    	return ids;
+    }
     /**
      * Get name of the variable used by this request
      */

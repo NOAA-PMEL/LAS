@@ -37,6 +37,7 @@
           <action path="/getOptions" type="gov.noaa.pmel.tmap.las.ui.getOptions" />
           <action path="/getCategories" type="gov.noaa.pmel.tmap.las.ui.getCategories" />
           <action path="/getRegions" type="gov.noaa.pmel.tmap.las.ui.getRegions" />
+          <action path="/getDataConstraints" type="gov.noaa.pmel.tmap.las.ui.getDataConstraints" />
           <action path="/GEServer" type="gov.noaa.pmel.tmap.las.service.kml.GEServerAction"/>
 	</action-mappings>
 	<plug-in
