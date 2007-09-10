@@ -5,6 +5,7 @@ import gov.noaa.pmel.tmap.las.filter.CategoryFilter;
 import gov.noaa.pmel.tmap.las.ui.state.StateNameValueList;
 import gov.noaa.pmel.tmap.las.ui.state.TimeSelector;
 import gov.noaa.pmel.tmap.las.util.Category;
+import gov.noaa.pmel.tmap.las.util.DataConstraint;
 import gov.noaa.pmel.tmap.las.util.Dataset;
 import gov.noaa.pmel.tmap.las.util.Grid;
 import gov.noaa.pmel.tmap.las.util.Institution;
@@ -44,6 +45,10 @@ import org.joda.time.format.DateTimeFormatter;
  *
  */
 
+/**
+ * @author rhs
+ *
+ */
 /**
  * @author rhs
  *
@@ -679,7 +684,135 @@ public class LASConfig extends LASDocument {
             throw new JDOMException("No server URL found in the las.xml operations element.");
         }
     }
-
+    /**
+     * Get any applicable data constraints for a particular data set and variable.
+     * @param dsID
+     * @param varID
+     * @return
+     * @throws JDOMException
+     */
+    public ArrayList<DataConstraint> getConstraints(String dsID, String varID) throws JDOMException {
+    	String ui_default = getUIDefaultName(dsID, varID);
+    	ui_default = ui_default.substring(ui_default.indexOf("#")+1);
+    	if ( ui_default != null && !ui_default.equals("") ) {
+    		return getConstraints(ui_default, dsID, varID);
+    	} else {
+    		return new ArrayList<DataConstraint>();
+    	}
+    } 
+    /**
+     * Get any constraints from the named UI default.
+     * 
+     * @param ui_default
+     * @return
+     * @throws JDOMException
+     */
+    public ArrayList<DataConstraint> getConstraints(String ui_default, String dsID, String varID) throws JDOMException {
+    	ArrayList<DataConstraint> constraints = new ArrayList<DataConstraint>();
+    	Element def = getUIDefault(ui_default);
+    	Element op = getUIMap(def, "ops");
+    	List cons = op.getChildren("constraint");
+    	for (Iterator consIt = cons.iterator(); consIt.hasNext();) {
+    		// Get the reference to the constraint...
+			Element constraint = (Element) consIt.next();
+			
+		    String type = constraint.getAttributeValue("type");
+		    if ( type.equals("variable") ) {
+		    	constraints.add(getVariableConstraint(dsID, varID));
+		    } else {
+		    	// Build the constraint...
+		    	Element full_constraint = new Element("constraint");
+		    	// First copy the attributes...
+		    	List attrs = constraint.getAttributes();
+		    	for (Iterator attIt = attrs.iterator(); attIt.hasNext();) {
+					Attribute attr = (Attribute) attIt.next();
+					full_constraint.setAttribute(attr.getName(), attr.getValue());
+				}
+		    	// Then follow the references to get the three parts, left-hand side menu, operations, right-hand side menu
+		    	List menus = constraint.getChildren("menu");
+		    	int it = 0;
+		    	for (Iterator menuIt = menus.iterator(); menuIt.hasNext();) {
+					Element menu_ref = (Element) menuIt.next();
+					String href = menu_ref.getAttributeValue("href");
+					href = href.substring(1, href.length());
+					Element menu = getUIMenu(href);
+					Element menu_clone = (Element) menu.clone();
+					if ( it == 0 ) {
+						menu_clone.setAttribute("position", "lhs");
+					} else if ( it == 1 ) {
+						menu_clone.setAttribute("postion", "ops");
+					} else if ( it == 2 ) {
+						menu_clone.setAttribute("position", "rhs");
+					}
+					full_constraint.addContent(menu_clone);
+					it++;
+				}
+		    	constraints.add(new DataConstraint(full_constraint));
+		    }
+		}
+    	return constraints;
+    }
+    public DataConstraint getVariableConstraint(String dsID, String varID) throws JDOMException {
+    	Element constraint = new Element("constraint");
+    	constraint.setAttribute("type", "variable");
+    	ArrayList<Variable> vars = getVariables(dsID);
+    	Element menu = new Element("menu");
+    	menu.setAttribute("position", "lhs");
+    	menu.setAttribute("type", "constraint");
+		menu.setAttribute("name","variable_"+dsID);
+    	for (Iterator varIt = vars.iterator(); varIt.hasNext();) {
+			Variable var = (Variable) varIt.next();			
+			Element item = new Element("item");
+			item.setAttribute("values", var.getID());
+			item.setText(var.getName());
+			menu.addContent(item);
+		}
+    	constraint.addContent(menu);
+    	menu = new Element("menu");
+    	menu.setAttribute("position", "ops");
+    	menu.setAttribute("type", "constraint");
+		menu.setAttribute("name","variable_"+dsID);
+    	
+		Element item = new Element("item");
+    	item.setAttribute("values",">=");
+    	item.setText(">=");
+    	menu.addContent(item);
+    	
+    	item = new Element("item");
+    	item.setAttribute("values",">");
+    	item.setText(">");
+    	menu.addContent(item);
+		
+		item = new Element("item");
+    	item.setAttribute("values","=");
+    	item.setText("=");
+    	menu.addContent(item);
+    	
+    	item = new Element("item");
+    	item.setAttribute("values","!=");
+    	item.setText("!=");
+    	menu.addContent(item);
+    	
+    	item = new Element("item");
+    	item.setAttribute("values","<");
+    	item.setText("<");
+    	menu.addContent(item);
+    	
+    	item = new Element("item");
+    	item.setAttribute("values","<=");
+    	item.setText("<=");
+    	menu.addContent(item);
+    	
+    	constraint.addContent(menu);
+    	
+    	return new DataConstraint(constraint);
+    }
+    /**
+     * Get the categories directly below this id.  If the id is null get the top.
+     * @param catid
+     * @return
+     * @throws JDOMException
+     */
     public ArrayList<Category> getCategories(String catid) throws JDOMException {
         ArrayList<Category> categories = new ArrayList<Category>();
         List tops = getRootElement().getChildren("las_categories");
@@ -2193,9 +2326,12 @@ public class LASConfig extends LASDocument {
             }
             return null;
         }
+        public Element getUIMenu (String href) throws JDOMException {
+        	return getElementByXPath("/lasdata/lasui/menus/menu[@name='"+href+"']");
+        }
 
         /**
-		 * Extracts of list of known LAS UI Clients for thiis product server.
+		 * Extracts of list of known LAS UI Clients for this product server.
 		 * @return ui_url_list a list of URLs of known LAS UI Clients for this server
 		 * @throws JDOMException
 		 */
