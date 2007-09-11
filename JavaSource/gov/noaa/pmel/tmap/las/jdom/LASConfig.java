@@ -740,7 +740,7 @@ public class LASConfig extends LASDocument {
 					if ( it == 0 ) {
 						menu_clone.setAttribute("position", "lhs");
 					} else if ( it == 1 ) {
-						menu_clone.setAttribute("postion", "ops");
+						menu_clone.setAttribute("position", "ops");
 					} else if ( it == 2 ) {
 						menu_clone.setAttribute("position", "rhs");
 					}
@@ -1196,6 +1196,15 @@ public class LASConfig extends LASDocument {
             }
         }
         return datasets;
+    }
+    public Dataset getDataset(String dsID) throws JDOMException {
+    	String xpathValue = "/lasdata/datasets/dataset[@ID='"+dsID+"']";
+    	Element ds = getElementByXPath(xpathValue);
+    	if ( ds != null ) {
+    		return new Dataset(ds);
+    	} else {
+    		return null;
+    	}
     }
     /**
      * !!!! returns datasets list This ignores categories for now.  Have to fix this.
