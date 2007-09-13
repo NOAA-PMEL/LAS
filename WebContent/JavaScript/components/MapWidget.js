@@ -1,3 +1,6 @@
+/**
+ * bindAsEventListener is required to maintain context with DOM events.
+ */
 if ( !Function.prototype.bindAsEventListener ) {
     Function.prototype.bindAsEventListener = function(object) {
         var __method = this;
@@ -6,9 +9,10 @@ if ( !Function.prototype.bindAsEventListener ) {
         };
     };
 }
-
- 
- function MapWidget(args) {
+/**
+ * The MapWidget class
+ */
+function MapWidget(args) {
   
    if(typeof args != 'object')
    	args={};
@@ -38,19 +42,17 @@ if ( !Function.prototype.bindAsEventListener ) {
 
   	if(!this.plot_area.height)
   		this.plot_area.height = this.DOMNode.clientHeight;
-  					
-	
+  						
  	if(args.view)
   		this.setView(args.view);
    else
   		this.setView("xy");
-
-
+   
    this.pan = false;
    this.panned = {'x' : 0, 'y' : 0};
 	
-	this.g_box = "xy";      //views
-	this.g_vLine = "y";
+	this.g_box   = "xy";			//"views" ... these are actually MapWidget selection types, not true views.
+	this.g_vLine = "y";			
 	this.g_hLine = "x";
 	this.g_point = "point";
 	this.g_vRange = "y_range";
@@ -147,12 +149,10 @@ if ( !Function.prototype.bindAsEventListener ) {
    this.rubberBand.style.overflow = "visible";
    this.rubberBand.style.zIndex =1;
    this.rubberBand.style.backgroundColor = "yellow";
- //  if(!document.all)
    this.rubberBand.style.opacity = 0.50;
 	this.rubberBand.style.filter = "alpha(opacity=50)";
    this.rubberBand_c = document.createElement('DIV');
-   this.rubberBand_c.style.border = "1px solid black";
-   
+   this.rubberBand_c.style.border = "1px solid black";   
    this.rubberBand_c.style.position = "absolute";
 	this.rubberBand_c.style.visibility = "hidden";
 	this.rubberBand_c.style.zIndex =1;
@@ -1492,12 +1492,21 @@ MapWidget.prototype.setSelectionGridBBox = function (bbox) {
 MapWidget.prototype.recenterOnDataBBox = function (bbox) {
    var old_grid_cx = (this.getPlotGridXMin()+this.getPlotGridXMax())/2;
 	var new_grid_cx = (bbox.x.min+bbox.x.max)/2;
+   var old_grid_cy = (this.getPlotGridYMin()+this.getPlotGridYMax())/2;
+	var new_grid_cy = (bbox.y.min+bbox.y.max)/2;
+	
 	var grid_dx = (new_grid_cx-old_grid_cx);
 	var pix_dx = this.getXPixRes()*grid_dx;
+
+	var grid_dy = (new_grid_cy-old_grid_cy);
+	var pix_dy = this.getYPixRes()*grid_dy;
+	
 	//reset the plot grid coords
 	this.setPlotGridXMin(this.getPlotGridXMin() + grid_dx);
 	this.setPlotGridXMax(this.getPlotGridXMax() + grid_dx);
-	
+	this.setPlotGridYMin(this.getPlotGridYMin() + grid_dy);
+	this.setPlotGridYMax(this.getPlotGridYMax() + grid_dy);	
+
    var req = new LASRequest();
 	
 	req.removeVariables();
