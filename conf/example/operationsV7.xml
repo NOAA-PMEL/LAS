@@ -778,7 +778,7 @@
        </response>
        <service>database</service>
     </operation>
-    <operation name="Database Extraction to Row Set" ID="DBExtractRowset" output_template="webrowset" service_action="sql" order="0501">
+    <operation name="Table of values (text)" ID="DBExtractRowset" output_template="webrowset" service_action="sql" order="0501">
        <response ID="DBExtractRowsetResponse">
           <result type="debug" ID="db_debug" file_suffix=".txt"/>
           <result type="webrowset" ID="webrowset" file_suffix=".xml"/>
