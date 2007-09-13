@@ -21,6 +21,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
@@ -28,6 +29,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.sql.SQLException;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -46,6 +48,9 @@ import javax.mail.internet.MimeMessage;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.sql.rowset.WebRowSet;
+
+import oracle.jdbc.rowset.OracleWebRowSet;
 
 import org.apache.struts.action.Action;
 import org.apache.struts.action.ActionForm;
@@ -59,6 +64,8 @@ import org.joda.time.format.DateTimeFormatter;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.log4j.LogManager;
+
+import com.sun.rowset.WebRowSetImpl;
 
 /**
  * @author Roland Schweitzer
@@ -501,6 +508,7 @@ public final class ProductServerAction extends Action {
             }
         }
         log.debug("Preparing the range index file.");
+        LASRegionIndex lasRegionIndex = new LASRegionIndex();
         if ( compoundResponse.isResultByTypeRemote("index")) {
             String index_url = compoundResponse.getResult("index");
             if (index_url != null && !index_url.equals("") ) {
@@ -524,7 +532,7 @@ public final class ProductServerAction extends Action {
                     return mapping.findForward("error");
                 }
                 try {
-                    JDOMUtils.XML2JDOM(index_buffer.toString(), lasMapScale);
+                    JDOMUtils.XML2JDOM(index_buffer.toString(), lasRegionIndex);
                 } catch (Exception e) {
                     logerror(request, "Error parsing the map scale file.", e);
                     return mapping.findForward("error");
@@ -535,7 +543,7 @@ public final class ProductServerAction extends Action {
             String region_index_filename = compoundResponse.getResultAsFileByType("index");
             if ( !region_index_filename.equals("")) {
                 // Create a lasRegionIndex object.
-                LASRegionIndex lasRegionIndex = new LASRegionIndex();
+                
                 File region_index_file = new File(region_index_filename);
                 try {
                     JDOMUtils.XML2JDOM(region_index_file, lasRegionIndex);
@@ -546,6 +554,58 @@ public final class ProductServerAction extends Action {
 
                 // Put these objects in the context so the output template can use them.
                 request.setAttribute("las_region_index", lasRegionIndex);
+            }
+        }
+        // Put the webrowset result into the output context if one exists.
+        String driver = lasRequest.getProperty("database_access", "driver");
+        WebRowSet webrowset;
+        try {
+            if ( driver.contains("oracle") ) {
+               webrowset = new OracleWebRowSet();
+            } else {
+               webrowset = new WebRowSetImpl();
+            }
+        } catch (Exception e) {
+            logerror(request, "Unable to create webrowset: ", e);
+            return mapping.findForward("error");
+        }
+        
+        if ( compoundResponse.isResultByTypeRemote("webrowset")) {
+            String rowset_url = compoundResponse.getResult("webrowset");
+            if (rowset_url != null && !rowset_url.equals("") ) {
+                try {
+                    URL index = new URL(rowset_url);
+                    BufferedReader in = new BufferedReader(
+                            new InputStreamReader(index.openStream()));
+                    webrowset.readXml(in);
+                } catch (MalformedURLException e) {
+                    logerror(request, "Error parsing the webrowset file.", e);
+                    return mapping.findForward("error");
+                } catch (IOException e) {
+                    logerror(request, "Error parsing the webrowset file.", e);
+                    return mapping.findForward("error");
+                } catch (SQLException e) {
+                	logerror(request, "Error parsing the webrowset file.", e);
+                    return mapping.findForward("error");
+				}
+            }            
+
+        } else {
+            String webrowsetFileName = compoundResponse.getResultAsFileByType("webrowset");
+            if ( !webrowsetFileName.equals("")) {
+                
+                try {
+					FileReader in = new FileReader(new File(webrowsetFileName));
+					webrowset.readXml(in);
+				} catch (FileNotFoundException e) {
+					logerror(request, "Error parsing the webrowset file.", e);
+                    return mapping.findForward("error");
+				} catch (SQLException e) {
+					logerror(request, "Error parsing the webrowset file.", e);
+                    return mapping.findForward("error");
+				}
+                // Put these objects in the context so the output template can use them.
+                request.setAttribute("las_webrowset", webrowset);
             }
         }
         // Remove the runner from the servlet context.

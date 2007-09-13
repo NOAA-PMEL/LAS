@@ -53,6 +53,7 @@
 	<menu type="ops" name="Ops_insituProfileXY">
 	    <item values="Insitu_extract_location_plot,gif">Data location plot</item>
             <item values="Insitu_extract_location_value_plot,gif">Data value plot</item>
+            <item values="DBExtractRowset,txt,25">Table of values (text)</item>
             <item values="DBExtract,gif,25">netCDF file</item>
             <!-- not yet implemented
 	    <item values="insitu_gaussian_xy,gif">Interpolated (gridded) data plot</item>

@@ -298,12 +298,13 @@ href="constrain_compare?var=$item.getLink()"#end
 ##
 ##----------------------------------------------------------------------
 #macro(tr_list_user_vars $dataset $comparison_mode)
-
+  #set($varCount = 1)
   #if($comparison_mode == "")
 
     #foreach($item in $dataset)
       #if($item.isDerived())
         #tr_variable($item "" $comparison_mode)
+        #set ($varCount = $varCount + 1)
       #end
     #end
 
@@ -314,6 +315,7 @@ href="constrain_compare?var=$item.getLink()"#end
         #set($varinfo=$item.getVariableInfo())
         #if($varinfo && !$varinfo.isComposite())
           #tr_variable($item "" $comparison_mode)
+          #set ($varCount = $varCount + 1)
         #end
       #end
     #end
@@ -328,6 +330,7 @@ href="constrain_compare?var=$item.getLink()"#end
           #if($item.isComparable())
             #set($totalComparable=$totalComparable+1)
             #tr_variable($item "" $comparison_mode)
+            #set ($varCount = $varCount + 1)
           #end
         #end
       #end
@@ -364,7 +367,7 @@ href="constrain_compare?var=$item.getLink()"#end
         </td>
         #td_variable($item "")
         <td align="right">
-        #if ($velocityCount % 10 == 1)
+        #if ($varCount % 10 == 1)
           #a_variable_Next($comparison_mode)
         #else
           &nbsp;
@@ -781,8 +784,10 @@ href="constrain_compare?var=$item.getLink()"#end
   #if($dset_preface && $dset_preface!="")
       <b>$dset_preface</b>
   #end
+  #set($linkCount = 0)
   #foreach($link in $item.getPath())
-    #if($velocityCount != 1)
+    #set($linkCount = $linkCount + 1)
+    #if($linkCount != 1)
 &gt; 
     #end
 

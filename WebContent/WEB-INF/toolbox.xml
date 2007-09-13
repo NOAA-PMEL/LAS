@@ -30,6 +30,7 @@
 		<key>alternator</key>
 		<scope>application</scope>
 		<class>org.apache.velocity.tools.generic.AlternatorTool</class>
+        <parameter name="auto-alternate" value="true"/>	
 	</tool>
 	<tool>
 		<key>parser</key>

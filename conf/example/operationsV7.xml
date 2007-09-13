@@ -778,6 +778,13 @@
        </response>
        <service>database</service>
     </operation>
+    <operation name="Database Extraction to Row Set" ID="DBExtractRowset" output_template="webrowset" service_action="sql" order="0501">
+       <response ID="DBExtractRowsetResponse">
+          <result type="debug" ID="db_debug" file_suffix=".txt"/>
+          <result type="webrowset" ID="webrowset" file_suffix=".xml"/>
+       </response>
+       <service>database</service>
+    </operation>
     <operation name="Location Plot" ID="Insitu_extract_location_plot" output_template="output" order="0104">
           <operation name="Database Extraction" ID="DBExtract" output_template="ascii" service_action="sql">
                <response ID="DBExtractResponse">
