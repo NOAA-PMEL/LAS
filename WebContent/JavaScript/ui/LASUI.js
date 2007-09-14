@@ -1015,8 +1015,10 @@ LASUI.prototype.makeRequest = function () {
 		if(this.state.embed){
 			if(document.getElementById("wait"))
 				document.getElementById("wait").style.display="";
-			
-			document.getElementById('output').onload = function (evt) {document.getElementById("wait").style.display="none"};
+			if(document.getElementById("wait_msg"))
+				document.getElementById("wait_msg").style.display="";
+			document.getElementById('output').style.display = "none";
+			document.getElementById('output').onload = function (evt) {document.getElementById("wait").style.display="none";document.getElementById("wait_msg").style.display="none";document.getElementById('output').style.display = ""};
 			document.getElementById('output').src = (this.hrefs.getProduct.url + '?xml=' + escape(this.request.getXMLText()));
 				
 		}else
