@@ -184,12 +184,13 @@ href="constrain_compare?var=$item.getLink()"#end
 ##
 ##----------------------------------------------------------------------
 #macro(tr_list_dset_vars $dataset $comparison_mode)
-
+  #set($varCount = 1)
   #if($comparison_mode == "")
 
     #foreach($item in $dataset)
       #if(!$item.isDerived())
         #tr_variable($item "" $comparison_mode)
+        #set($varCount = $varCount + 1)
       #end
     #end
 
@@ -200,6 +201,7 @@ href="constrain_compare?var=$item.getLink()"#end
         #set($varinfo=$item.getVariableInfo())
         #if($varinfo && !$varinfo.isComposite())
           #tr_variable($item "" $comparison_mode)
+          #set($varCount = $varCount + 1)
         #end
       #end
     #end
@@ -214,6 +216,7 @@ href="constrain_compare?var=$item.getLink()"#end
           #if($item.isComparable())
             #set($totalComparable=$totalComparable+1)
             #tr_variable($item "" $comparison_mode)
+            #set($varCount = $varCount + 1)
           #end
         #end
       #end
