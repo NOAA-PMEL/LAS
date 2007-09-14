@@ -1490,7 +1490,7 @@ MapWidget.prototype.setSelectionGridBBox = function (bbox) {
 
 //recenter the map on bbox (TODO recenter and zoom on bbox)
 MapWidget.prototype.recenterOnDataBBox = function (bbox) {
-   var old_grid_cx = (this.getPlotGridXMin()+this.getPlotGridXMax())/2;
+  /* var old_grid_cx = (this.getPlotGridXMin()+this.getPlotGridXMax())/2;
 	var new_grid_cx = (bbox.x.min+bbox.x.max)/2;
    var old_grid_cy = (this.getPlotGridYMin()+this.getPlotGridYMax())/2;
 	var new_grid_cy = (bbox.y.min+bbox.y.max)/2;
@@ -1506,6 +1506,29 @@ MapWidget.prototype.recenterOnDataBBox = function (bbox) {
 	this.setPlotGridXMax(this.getPlotGridXMax() + grid_dx);
 	this.setPlotGridYMin(this.getPlotGridYMin() + grid_dy);
 	this.setPlotGridYMax(this.getPlotGridYMax() + grid_dy);	
+*/
+	var bbox_width  = (bbox.x.max-bbox.x.min);
+	var bbox_height =  (bbox.y.max-bbox.y.min);
+	var plot_width  =(this.getPlotGridXMax()-this.getPlotGridXMin());
+	var plot_height = (this.getPlotGridYMax()-this.getPlotGridYMin());
+	var bbox_aspect = (bbox_height)/(bbox_width);
+	var plot_aspect = (plot_height)/(plot_width);
+	var bbox_screen_aspect = (bbox_height*this.getXPixRes())/(bbox_width*this.getYPixRes());
+	var plot_screen_aspect = (plot_height*this.getXPixRes())/(plot_width*this.getYPixRes());
+	var bbox_cx = (bbox.x.max+bbox.x.min)/2;
+	var bbox_cy = (bbox.y.max+bbox.y.min)/2;
+	
+	if(bbox_screen_aspect>plot_screen_aspect) {
+		this.setPlotGridYMin(bbox.y.min);
+		this.setPlotGridYMax(bbox.y.max);
+		this.setPlotGridXMin(bbox_cx-bbox_height/(plot_aspect*2));
+		this.setPlotGridXMax(bbox_cx+bbox_height/(plot_aspect*2));	
+	} else {
+		this.setPlotGridXMin(bbox.x.min);
+		this.setPlotGridXMax(bbox.x.max);
+		this.setPlotGridYMin(bbox_cy-bbox_width*(plot_aspect/2));
+		this.setPlotGridYMax(bbox_cy+bbox_width*(plot_aspect/2));	
+	}
 
    var req = new LASRequest();
 	

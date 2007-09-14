@@ -235,7 +235,7 @@ function LASGetGridResponse_getHi(axis) {
       var start = Number(this.getAxis(axis_lc).arange.start);
       var size = Number(this.getAxis(axis_lc).arange.size);
       var step = Number(this.getAxis(axis_lc).arange.step);
-      value = start + size * step;
+      value = start + (size-1) * step;
     }
   }
   return value;
