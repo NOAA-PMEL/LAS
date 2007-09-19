@@ -63,13 +63,14 @@
 
   <target name="clean">
      <delete dir="WebContent/WEB-INF/classes/gov" />
+     <delete dir="WebContent/WEB-INF/classes/au" />
      <delete dir="WebContent/WEB-INF/classes/resources" />
      <delete file="${app.name}.war"/>
   </target>
 
 
   <target name="compile" depends="prepare">
-     <javac srcdir="JavaSource" includes="gov/**" destdir="WebContent/WEB-INF/classes"
+     <javac srcdir="JavaSource" includes="gov/**,au/**" destdir="WebContent/WEB-INF/classes"
            debug="on" optimize="off" deprecation="off">
 	   <classpath>
                <pathelement path="classes"/>
