@@ -1,0 +1,541 @@
+/*
+*	Copyright Insight4 Pty Ltd 2005-2007 (http://www.insight4.com)
+*	See the COPYRIGHT file supplied with the source distribution for information about
+*	distribution and copying of this software.
+*/
+package au.org.tpac.servlet;
+
+import gov.noaa.pmel.tmap.las.jdom.LASBackendRequest;
+import gov.noaa.pmel.tmap.las.jdom.JDOMUtils;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpServletRequestWrapper;
+import javax.servlet.ServletOutputStream;
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
+import javax.media.jai.JAI;
+import javax.media.jai.RenderedOp;
+import javax.imageio.ImageIO;
+import java.io.*;
+import java.net.*;
+import au.org.tpac.las.wrapper.lib.providers.LASProvider;
+import au.org.tpac.las.wrapper.lib.converters.ConverterLasToWms;
+import au.org.tpac.las.wrapper.lib.converters.RequestConverterLasToWms;
+import au.org.tpac.wms.lib.WMSCapabilities;
+//jli
+import au.org.tpac.wms.lib.WMSCapabilities_111;
+
+import au.org.tpac.wms.request.WMSRequest;
+import au.org.tpac.wms.exception.WMSException;
+import org.apache.log4j.Logger;
+import com.sun.media.jai.codec.FileCacheSeekableStream;
+
+
+/**
+ * @author Pauline Mak (pauline@insight4.com)
+ */
+public class WMSServlet extends HttpServlet
+{
+    private static Logger log = Logger.getLogger(WMSServlet.class);
+    private String lasXMLFile;
+    private String legendConfigFile;
+
+    /**
+     * This initialises the servlet.
+     * There are two parameters in WebContent/WEB-INF/web.xml that has to be changed:<br>
+     *      - lasXMLFile : which points to the las.xml file<br>
+     *      - legendConfigFile: which points to a text file with legend configuration (see LegendConfig)
+     * @param config configuration object
+     * @throws ServletException problems with reading configuration files...
+     */
+    public void init(ServletConfig config) throws ServletException
+    {
+        super.init(config);
+        lasXMLFile = config.getInitParameter("lasXMLFile");
+        legendConfigFile = config.getInitParameter("legendConfigFile");
+    }
+
+
+    /**
+     * The servlet will respond to a POST request in the same way as a GET request (i.e. an image)
+     * @param request
+     * @param response
+     * @throws IOException
+     */
+    public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException
+    {
+        doGet(request,response);
+    }
+
+    /**
+     * This gets called whenever the servlet has been requested.
+     * @param request standard argument for doGet
+     * @param response standard argument for doGet
+     * @throws IOException
+     */
+    public void doGet (HttpServletRequest request, HttpServletResponse response) throws IOException
+    {
+
+        if((request.getParameter("SERVICE") != null) && (request.getParameter("SERVICE").equalsIgnoreCase("WMS")))
+        {
+            if(request.getParameter("REQUEST") != null)
+            {
+                if(request.getParameter("REQUEST").equalsIgnoreCase("GetCapabilities"))
+                {
+                    doGetCap(request, response);
+                }
+            }
+            else
+                printErrorMessage("REQUEST argument expected.  Please refer to the WMS specification for correct WMS Request strings", response);
+        }
+        else
+        {
+            if(request.getParameter("REQUEST") != null)
+            {
+                if(request.getParameter("REQUEST").equalsIgnoreCase("GetMap"))
+                {
+                    doGetMap(request, response);
+                }
+                if(request.getParameter("REQUEST").equalsIgnoreCase("GetLegend"))
+                {
+                    doGetLegend(request, response);
+                }
+
+            }
+            else
+                printErrorMessage("REQUEST argument expected.  Please refer to the WMS specification for correct WMS Request strings", response);
+        }
+    }
+
+    /**
+     * This is called when the WMS request has been successful - and will write the image to the HttpServletResponse
+     * @param imgLoc This is the LOCAL file location (not URL)
+     * @param wmsReq WMSRequest that constructed this image
+     * @param response Response for getting
+     */
+    protected void showPicture(String imgLoc, WMSRequest wmsReq, HttpServletResponse response)
+    {
+        try
+        {
+            InputStream picStream = new FileInputStream(imgLoc);
+
+            response.setHeader("Content-Type", wmsReq.getImageFormat());
+
+            RenderedOp image = JAI.create("stream", new FileCacheSeekableStream(picStream));
+
+            ServletOutputStream outStream  = response.getOutputStream();
+            ImageIO.write(image, wmsReq.getImageFormat().split("/")[1], outStream);
+            outStream.flush();
+            outStream.close();
+        }
+        catch(IOException ioe)
+        {
+            //something's gone wrong....
+            log.info("error: " + ioe.toString());
+        }
+    }
+
+    /**
+     * This will construct a WMSException object and sends this back to the client.
+     * @param error error message to display
+     * @param wmsReq WMSRequest object that caused the error
+     * @param response
+     */
+    protected void showErrorMsg(String error, WMSRequest wmsReq, HttpServletResponse response)
+    {
+        response.setHeader("Content-Type", "text/xml");
+        if(wmsReq.getVersion().equalsIgnoreCase("1.1.1"))
+        {
+            WMSException wmsEx = new WMSException(error);
+            try
+            {
+                System.out.println("errorMsg: " + error);
+                ServletOutputStream outStream  = response.getOutputStream();
+                outStream.write(wmsEx.toString().getBytes());
+                outStream.flush();
+                outStream.close();
+            }
+            catch(IOException ioe)
+            {
+                //something's gone wrong....
+                log.info("error while sending WMSException back: " + ioe.toString());
+
+            }
+        }
+    }
+
+    /**
+     * A convinient way of creating a LAS to WMS request converter
+     * @param request HttpRequest used for extrating the WMS query string
+     * @return a new RequestConverterLasToWms
+     */
+    protected RequestConverterLasToWms makeConverter(HttpServletRequest request)
+    {
+//jli
+        String reqURL = this.makeURL(request) + "?" + request.getQueryString();
+        //String reqURL = "http://porter.pmel.noaa.gov:8922/las/wms_servlet?VERSION=1.1.1&REQUEST=GetMap&LAYERS=airt&STYLES=ferret_default&DIM_COADS_CLIMATOLOGY_CDF_TIME=15-Jan&EXCEPTIONS=application%2Fvnd.ogc.se_inimage&FORMAT=image%2Fjpeg&SRS=EPSG%3A4326&BBOX=-180,-90,180,90&WIDTH=1000&HEIGHT=400";
+
+        try{
+            reqURL = java.net.URLDecoder.decode(reqURL,"UTF-8");
+        }catch(UnsupportedEncodingException e){
+        }
+        //reqURL = "http://porter.pmel.noaa.gov:8922/las/wms_servlet?VERSION=1.1.1&REQUEST=GetMap&LAYERS=airt&STYLES=ferret_default&WIDTH=640&HEIGHT=320&FORMAT=image/png&SRS=EPSG:4326&BBOX=-180.0,-90.0,180.0,90.0&EXCEPTION=application/vnd.ogc.se_xml&DIM_COADS_CLIMATOLOGY_CDF_TIME=15-Jan <http://porter.pmel.noaa.gov:8922/las/wms_servlet?VERSION=1.1.1&REQUEST=GetMap&LAYERS=airt&STYLES=ferret_default&WIDTH=640&HEIGHT=320&FORMAT=image/png&SRS=EPSG:4326&BBOX=-180.0,-90.0,180.0,90.0&EXCEPTION=application/vnd.ogc.se_xml&DIM_COADS_CLIMATOLOGY_CDF_TIME=15-Jan>";
+        return (new RequestConverterLasToWms(lasXMLFile, reqURL,
+            this.makeURL(request), RequestConverterLasToWms.OP_PLOT_WMS, this.makeProductServerURL(request)));
+
+/*
+        return (new RequestConverterLasToWms(lasXMLFile, this.makeURL(request) + "?" + request.getQueryString(),
+            this.makeURL(request), RequestConverterLasToWms.OP_PLOT_WMS, this.makeProductServerURL(request)));
+*/
+    }
+
+
+    /**
+     * Looks at the result of a WMS request from LAS.  LAS will return an XML file that either contains
+     * the URL to the product image, or error messages
+     * @param result XML retrieved after making a LAS requeset
+     * @param wmsReq original WMS request
+     * @param request The HttpRequest
+     * @param response response object
+     */
+    protected void handleResult(String result, WMSRequest wmsReq, HttpServletRequest request, HttpServletResponse response)
+    {
+            LASBackendRequest backend = new LASBackendRequest();
+            try
+            {
+                JDOMUtils.XML2JDOM(result.trim(), backend);
+                String resultID = backend.getResultID(0);
+
+                if(resultID.equalsIgnoreCase("plot_image"))
+                {
+                    String type = backend.getResultType(0);
+                    if(type.equalsIgnoreCase("image"))
+                    {
+                        System.out.println("showImage");
+                        showPicture(backend.getResultFileName(0), wmsReq, response);
+                    }
+                    else
+                    {
+                        System.out.println("showErrorMsg");
+                        showErrorMsg(result, wmsReq, response);
+                        // showPicture(backend.getResultFileName(0), wmsReq, response);
+                    }
+                }
+                //jli
+                //showPicture(backend.getResultFileName(0), wmsReq, response);
+            }
+            catch(Exception e)
+            {
+                log.info("Error encountered while trying to interpret backend XML: " + e.toString());
+                System.out.println("showErrorMsg");
+                showErrorMsg(result, wmsReq, response);
+                //showErrorMsg("got error", wmsReq, response);
+                //showPicture(backend.getResultFileName(0), wmsReq, response);
+            }
+    }
+
+    protected void handleResult2(String result, WMSRequest wmsReq, HttpServletRequest request, HttpServletResponse response)
+    {
+            LASBackendRequest backend = new LASBackendRequest();
+            try
+            {
+                JDOMUtils.XML2JDOM(result.trim(), backend);
+                String resultID = backend.getResultID(1);
+
+                if(resultID.equalsIgnoreCase("colorbar"))
+                {
+                    String type = backend.getResultType(1);
+                    if(type.equalsIgnoreCase("image"))
+                    {
+                        System.out.println("showImage");
+                        showPicture(backend.getResultFileName(1), wmsReq, response);
+                    }
+                    else
+                    {
+                        System.out.println("showErrorMsg");
+                        showErrorMsg(result, wmsReq, response);
+                        // showPicture(backend.getResultFileName(0), wmsReq, response);
+                    }
+                }
+                //jli
+                //showPicture(backend.getResultFileName(0), wmsReq, response);
+            }
+            catch(Exception e)
+            {
+                log.info("Error encountered while trying to interpret backend XML: " + e.toString());
+                System.out.println("showErrorMsg");
+                showErrorMsg(result, wmsReq, response);
+                //showErrorMsg("got error", wmsReq, response);
+                //showPicture(backend.getResultFileName(0), wmsReq, response);
+            }
+    }
+
+
+    /**
+     * This method handles the getMap request.
+     * The request parameters will contain a WMS request statement.  If no errors are encountered, this will
+     * send back an image of the resulting image.  Otherwise a WMSException xml will be sent back to the client.
+     * @param request
+     * @param response
+     */
+    protected void doGetMap(HttpServletRequest request, HttpServletResponse response)
+    {
+        RequestConverterLasToWms wmsReqConverter = makeConverter(request);
+        WMSRequest wmsReq = wmsReqConverter.getWmsReq();
+        wmsReq.setImageFormat("image/png");
+        String result = "";
+
+        log.info("in doGetMap: wmsReq: " + wmsReq.toString());
+
+        try
+        {
+            BufferedReader reader = new BufferedReader(new FileReader(legendConfigFile));
+            String s = "";
+            String firstLayerName = wmsReq.getFirstLayerName();
+
+            while((s = reader.readLine()) != null)
+            {
+                if(s.contains(firstLayerName))
+                {
+                    log.info("reading legendConfigFile: " + s);
+                    String splits[]  = s.split(":");
+                    if(splits.length == 3)
+                    {
+                        //e.g. coads_climatology_cdf:airt:(-50, 40, 10)
+                        //jli
+                        //wmsReqConverter.setLevels(splits[2]);
+                    }
+                }
+            }
+            reader.close();
+        }
+        catch(IOException e)
+        {
+            //do nothing - assuming that levels don't work!
+            log.info("Cannot find legendConfigFile: " + legendConfigFile);
+        }
+
+
+        String myReq = wmsReqConverter.convert();
+
+
+        try
+        {
+            URL url = new URI(myReq).toURL();
+            URLConnection connection = url.openConnection();
+            connection.connect();
+            InputStream inStream = connection.getInputStream();
+
+            //From Roland for reading in input streams :);
+            char[] buf = new char[1024];
+            BufferedReader is = new BufferedReader(new InputStreamReader(inStream));
+
+            int length = is.read(buf, 0, 1024);
+
+            while (length >= 0)
+            {
+                String tmpString = new String(buf, 0, 1024);
+                result += tmpString;
+                System.out.println("result is: " + result);
+                length = is.read(buf, 0, 1024);
+            }
+
+            handleResult(result, wmsReq, request, response);
+        }
+        catch(URISyntaxException urie)
+        {
+            //no...
+            log.info("error: " + urie.toString());
+        }
+        catch(IOException ioe)
+        {
+            log.info("Error while reading response from Product Server (" + myReq + ") " + ioe.toString());
+        }
+    }
+
+    protected void doGetLegend(HttpServletRequest request, HttpServletResponse response)
+    {
+        RequestConverterLasToWms wmsReqConverter = makeConverter(request);
+        WMSRequest wmsReq = wmsReqConverter.getWmsReq();
+        wmsReq.setImageFormat("image/png");
+        String result = "";
+
+        log.info("in doGetLegend: wmsReq: " + wmsReq.toString());
+
+        try
+        {
+            BufferedReader reader = new BufferedReader(new FileReader(legendConfigFile));
+            String s = "";
+            String firstLayerName = wmsReq.getFirstLayerName();
+
+            while((s = reader.readLine()) != null)
+            {
+                if(s.contains(firstLayerName))
+                {
+                    log.info("reading legendConfigFile: " + s);
+                    String splits[]  = s.split(":");
+                    if(splits.length == 3)
+                    {
+                        //e.g. coads_climatology_cdf:airt:(-50, 40, 10)
+                        //jli
+                        //wmsReqConverter.setLevels(splits[2]);
+                    }
+                }
+            }
+            reader.close();
+        }
+        catch(IOException e)
+        {
+            //do nothing - assuming that levels don't work!
+            log.info("Cannot find legendConfigFile: " + legendConfigFile);
+        }
+
+        String myReq = wmsReqConverter.convert();
+
+        try
+        {
+            URL url = new URI(myReq).toURL();
+            URLConnection connection = url.openConnection();
+            connection.connect();
+            InputStream inStream = connection.getInputStream();
+
+            //From Roland for reading in input streams :);
+            char[] buf = new char[1024];
+            BufferedReader is = new BufferedReader(new InputStreamReader(inStream));
+
+            int length = is.read(buf, 0, 1024);
+
+            while (length >= 0)
+            {
+                String tmpString = new String(buf, 0, 1024);
+                result += tmpString;
+                System.out.println("result is: " + result);
+                length = is.read(buf, 0, 1024);
+            }
+
+            handleResult2(result, wmsReq, request, response);
+        }
+        catch(URISyntaxException urie)
+        {
+            //no...
+            log.info("error: " + urie.toString());
+        }
+        catch(IOException ioe)
+        {
+            log.info("Error while reading response from Product Server (" + myReq + ") " + ioe.toString());
+        }
+    }
+
+
+    /**
+     * This method handles the getCapabilities request.
+     * This reads the las.xml file directory and then this to a WMS capabilities XML.
+     * @param request request object
+     * @param response response object
+     */
+    protected void doGetCap(HttpServletRequest request, HttpServletResponse response)
+    {
+//jli
+     //   LASProvider lasProvider = new LASProvider("/usr/local/armstrong-beta-0.1/conf/server/las.xml");
+        //LASProvider lasProvider = new LASProvider("/home/porter/jing/armstrong/conf/server/las.xml");
+        LASProvider lasProvider = new LASProvider(lasXMLFile);
+
+        //LASProvider lasProvider = new LASProvider("http://porter.pmel.noaa.gov:8922/las/output/lasV7.xml");
+        String productServerURL = makeProductServerURL(request);
+        ConverterLasToWms convert = new ConverterLasToWms("1.1.1", lasProvider, makeURL(request), productServerURL.substring(0, productServerURL.lastIndexOf('/')));
+
+        WMSCapabilities wmsCap = convert.getConverted();
+        //WMSCapabilities_111 wmsCap = convert.getConverted();
+
+        try
+        {
+            //jli
+            response.setContentType("text/xml");
+
+            ServletOutputStream outStream = response.getOutputStream();
+            //outStream.println(wmsCap.writeCapabilities());
+
+            //jli
+            String tst ="<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+                        //+ "<!DOCTYPE WMT_MS_Capabilities (View Source for full doctype...)>"
+                        + "<!DOCTYPE WMT_MS_Capabilities PUBLIC \"WMT_MS_Capabilities\""
+                        + " \"http://schemas.opengis.net/wms/1.1.1/capabilities_1_1_1.dtd\"> "
+                        + "<WMT_MS_Capabilities version=\"1.1.1\">"
+                        + "<Service>"
+                        + "<Title>TPAC LAS to WMS Converter ---jli</Title>" 
+                        + "</Service>"
+                        
+                        + "</WMT_MS_Capabilities>";
+
+            outStream.println(wmsCap.writeCapabilities());
+            //outStream.println(tst);
+            outStream.flush();
+            outStream.close();
+        }
+        catch(IOException ioe)
+        {
+            //something's gone wrong....
+        }
+
+    }
+
+    /**
+     * Prints an error message back to the requester.
+     * @param message message to print
+     * @param response response object to print message to
+     */
+    protected void printErrorMessage(String message,  HttpServletResponse response)
+    {
+        try
+        {
+            ServletOutputStream outStream = response.getOutputStream();
+            outStream.write(message.getBytes());
+            outStream.flush();
+            outStream.close();
+        }
+        catch(IOException ioe)
+        {
+            //something's gone wrong....
+        }
+    }
+
+    /**
+     * Creates the URL of this servlet. NOTE: PLEASE CHANGE THIS TO THE PRODUCTION PART
+     * IF USED ON A PRODUCTION SERVER.
+     * @param request
+     * @return returns the URL of this servlet
+     */
+    protected String makeURL(HttpServletRequest request)
+    {
+        HttpServletRequestWrapper reqWrapper = new HttpServletRequestWrapper(request);
+
+        //PAULINE -- MASSIVE HACK - this is for pointing to the right server
+        //REMOVE THIS IF USED ON A PRODUCTION SERVER THAT DOESN'T HAVE ADDRESS FORWARDING
+
+        //return "http://linux.dev.insight4.com" + ":" +reqWrapper.getServerPort() + reqWrapper.getRequestURI();
+
+        //USE THIS FOR PRODUCTION SERVERS!!!
+//jli
+        return "http://" + reqWrapper.getServerName() + ":" +reqWrapper.getServerPort() + reqWrapper.getRequestURI();
+    }
+
+    /**
+     * Makes a URL to the Product Server based on the context path.  NOTE: PLEASE CHANGE THIS TO THE PRODUCTION PART
+     * IF USED ON A PRODUCTION SERVER.
+     * @param request
+     * @return a URL with productserver.do.
+     */
+    protected String makeProductServerURL(HttpServletRequest request)
+    {
+
+        HttpServletRequestWrapper reqWrapper = new HttpServletRequestWrapper(request);
+        //PAULINE -- MASSIVE HACK - this is for pointing to the right server
+        //REMOVE THIS IF USED ON A PRODUCTION SERVER THAT DOESN'T HAVE ADDRESS FORWARDING
+        //return "http://linux.dev.insight4.com"  + ":" + reqWrapper.getServerPort() + reqWrapper.getContextPath() + "/ProductServer.do";
+
+        //USE THIS FOR PRODUCTION SERVERS!!!!
+//jli
+        return "http://" + reqWrapper.getServerName() + ":" +reqWrapper.getServerPort() + reqWrapper.getContextPath() + "/ProductServer.do";
+    }
+}
