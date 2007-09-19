@@ -487,6 +487,7 @@
 
 <!-- End of operations for Google Earth -->
 
+<!-- Operation for WMS -->
     <operation name="2D Plot for WMS" ID="Plot_2D_WMS"
         output_template="output_wms" service_action="Plot_2D_WMS" private="true" order="9999">
         <response ID="PlotResp">
@@ -501,6 +502,22 @@
             <grid_type name="regular" />
         </grid_types>
     </operation>
+
+    <operation name="2D Color Key for WMS" ID="Plot_2D_ColorKey" 
+          output_template="output_colorkey" service_action="Plot_2D_WMS" private="true">
+          <response ID="PlotResp">
+             <result type="image" ID="colorbar" streamable="true" mime_type="image/png" />
+          </response>
+        <service>ferret</service>
+        <region>
+            <intervals name="xy" />
+        </region>
+        <grid_types>
+            <grid_type name="regular" />
+        </grid_types>
+        <optionsdef IDREF="Options_2D_image_contour_xy"/>
+    </operation>
+<!-- End of operation for WMS -->
 
     <operation name="Color plot comparison" ID="Plot_2D_SlideSorter" output_template="SlideSorter" service_action="">
         <service>template</service>
