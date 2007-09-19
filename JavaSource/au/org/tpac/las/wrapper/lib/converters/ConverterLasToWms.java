@@ -263,8 +263,13 @@ public class ConverterLasToWms
         //add <args>
         Element args = new Element("args");
 
-        String dsID = layer.getParent().getLayerName();
-        String varID= layer.getLayerName();
+        //String dsID = layer.getParent().getLayerName();
+        //layer name is changed to dsID:varID
+        //String varID= layer.getLayerName();
+        String layName[] = layer.getLayerName().split(":");
+        String dsID = layName[0];
+        String varID = layName[1];
+
         Element link = new Element("link");
         link.setAttribute("match", "/lasdata/datasets/dataset[@ID='"+dsID+"']/variables/variable[@ID='"+varID+"']");
         args.addContent(link);
