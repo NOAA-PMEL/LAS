@@ -461,6 +461,16 @@ public class LASConfig extends LASDocument {
                 hidt = lodt.plus(Period.years(years));
                 axis.setAttribute("hi", hidt.toString(longfmt));
             }
+            
+            String modulo = axis.getAttributeValue("modulo");
+            String climatology = axis.getAttributeValue("climatology");
+            if ( modulo != null && modulo.equals("true") ) {
+            	axis.setAttribute("yearNeeded", "false");
+            }
+            if ( climatology != null && climatology.equals("true") ) {
+            	axis.setAttribute("yearNeeded", "false");
+            }
+            
         }
         
     }
