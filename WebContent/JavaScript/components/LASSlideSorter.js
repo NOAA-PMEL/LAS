@@ -551,20 +551,7 @@ function LASSlideSorter_createGlobalWidgets() {
           }
           Widget.setCallback(document.globalWidgetChoice);
           if (Menu.initial_value) {
-            // NOTE:  Dates used by the LAS UI come in as 'DD-Mon-YYYY' whereas the DateWidget
-            // NOTE:  needs 'YYYY-MM-DD'.  Make the change here so as not to burden the DateWidget
-            // NOTE:  code with this LAS specific translation.
-            var months = {jan:'01',feb:'02',mar:'03',apr:'04',may:'05',jun:'06',jul:'07',aug:'08',sep:'09',oct:'10',nov:'11',dec:'12'};
-            var dateTime = String(Menu.initial_value).split(' ');
-            var YMD = String(dateTime[0]).split('-');  
-            var HMS = dateTime[1];
-            var mon = String(YMD[1].toLowerCase());
-            var MM = months[mon];
-            var YMDHMS = YMD[2] + '-' + MM + '-' + YMD[0];
-            if (dateTime[1]) {
-              YMDHMS += ' ' + HMS;
-            }
-            Widget.setValue(YMDHMS);
+            Widget.setValue(Menu.initial_value);
           }
           break;
       }
@@ -626,20 +613,7 @@ function LASSlideSorter_createCellWidgets(chosenMenuName) {
           }
           Widget.setCallback(document.cellWidgetChoice);
           if (Menu.initial_value) {
-            // NOTE:  Dates used by the LAS UI come in as 'DD-Mon-YYYY' whereas the DateWidget
-            // NOTE:  needs 'YYYY-MM-DD'.  Make the change here so as not to burden the DateWidget
-            // NOTE:  code with this LAS specific translation.
-            var months = {jan:'01',feb:'02',mar:'03',apr:'04',may:'05',jun:'06',jul:'07',aug:'08',sep:'09',oct:'10',nov:'11',dec:'12'};
-            var dateTime = String(Menu.initial_value).split(' ');
-            var YMD = String(dateTime[0]).split('-');  
-            var HMS = dateTime[1];
-            var mon = String(YMD[1].toLowerCase());
-            var MM = months[mon];
-            var YMDHMS = YMD[2] + '-' + MM + '-' + YMD[0];
-            if (dateTime[1]) {
-              YMDHMS += ' ' + HMS;
-            }
-            Widget.setValue(YMDHMS);
+            Widget.setValue(Menu.initial_value);
           }
           break;
       }
