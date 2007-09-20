@@ -20,8 +20,6 @@
  * higher than the current Date2 causes Date2 to reset to the
  * same value as Date1, satisfying (Date1 <= Date2).
  * <p>
- * TODO:  Mention 'unobtrusive' javascript.
- * <p>
  * <b>Note:</b>  Safari's implementation of the javascript Date object has 
  * a greatly restricted range:  1901-12-13 to 2038-01-19.  The DateWidget
  * will not work properly on Safari with dates outside that range.  To see
