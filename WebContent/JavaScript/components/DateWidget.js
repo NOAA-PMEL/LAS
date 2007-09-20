@@ -12,7 +12,8 @@
  * It also handles the number of days in each month as well as leap years  
  * so that the user can never select an invalid date (<i>e.g.</i> "Sept 31").
  * <p>
- * TODO:  Climatologies are handled by ???
+ * Climatologies are handled by excluding 'Y' from the menu_sets passed to the
+ * render() method.
  * <p>
  * The Date1 and Date2 Year-Month-Day-Time selectors each show all
  * possible dates in the valid range.  Setting Date1 to a value
@@ -20,6 +21,13 @@
  * same value as Date1, satisfying (Date1 <= Date2).
  * <p>
  * TODO:  Mention 'unobtrusive' javascript.
+ * <p>
+ * <b>Note:</b>  Safari's implementation of the javascript Date object has 
+ * a greatly restricted range:  1901-12-13 to 2038-01-19.  The DateWidget
+ * will not work properly on Safari with dates outside that range.  To see
+ * the range of valid dates for your browser, please point it to:
+ *
+ * http://www.merlyn.demon.co.uk/js-datex.htm#DRF
  *
  * @author Jonathan Callahan
  * @version $Revision: 1137 $
@@ -96,6 +104,7 @@ function DateWidget(lo,hi,deltaMinutes,offsetMinutes,add_sub_1,add_sub_2) {
   this.parseDate = DateWidget_parseDate;
   this.febDays = DateWidget_febDays;
   this.twoDigit = DateWidget_twoDigit;
+  this.fourDigit = DateWidget_fourDigit;
   this.correctOrder = DateWidget_correctOrder;
   this.addEvent = DateWidget_addEvent;
   this.flash = DateWidget_flash;
@@ -115,6 +124,7 @@ function DateWidget(lo,hi,deltaMinutes,offsetMinutes,add_sub_1,add_sub_2) {
   // Initialization
 
   this.widgetType = 'DateWidget';
+  this.climatology = 0;
   this.disabled = 0;
   this.visible = 0;
 
@@ -169,13 +179,13 @@ function DateWidget(lo,hi,deltaMinutes,offsetMinutes,add_sub_1,add_sub_2) {
   try {
     date1 = this.parseDate(lo,add_sub_1);
   } catch(error) {
-    error_msg = "DateWidget ERROR:\n> new:  error parsing \"" + lo + "\"\n" + error;
+    error_msg = "DateWidget ERROR: new:  error parsing \"" + lo + "\"\n" + error;
     alert(error_msg);
   }
   try {
     date2 = this.parseDate(hi,add_sub_2);
   } catch(error) {
-    error_msg = "DateWidget ERROR:\n> new:  error parsing \"" + hi + "\"\n" + error;
+    error_msg = "DateWidget ERROR: new:  error parsing \"" + hi + "\"\n" + error;
     alert(error_msg);
   }
 
@@ -257,84 +267,105 @@ function DateWidget_render(element_id,menu_set_1,menu_set_2) {
   // Give the DateWidget a reference to each Select object
 
   if (!menu_set_1) {
-    error_msg = "DateWidget ERROR:\n>  render: menu_set_1 must be defined and  must contain only characters from \"YMDT\"";
+    error_msg = "DateWidget ERROR:  render: menu_set_1 must be defined and  must contain only characters from \"YMDT\"";
     throw(error_msg);
   }
 
   // TODO:  Create the 'id' attribute from this.element_id + "_Year1" etc. 
   // TODO:  instead of just "DW_Year1" etc.
-  if (menu_set_1.indexOf('Y') >= 0) {
-    Year1 = document.createElement('select');
-    Year1.setAttribute('id','DW_Year1'); 
-    Year1.widget = this;
-    this.Year1 = Year1;
-  } else {
-    text1 = document.createTextNode('Climatology:  ');
-    Text1 = document.createElement('span:');
+
+  // The Year, Month, Day and Time widgets are always created so that initialization
+  // along the path: "Year -> Month -> Day" can procede as usual.  The formatting
+  // specified inthe menu_set only determines whether they are visible or not.
+  Year1 = document.createElement('select');
+  Year1.setAttribute('id','DW_Year1'); 
+  Year1.widget = this;
+  this.Year1 = Year1;
+  if (menu_set_1.indexOf('Y') < 0) {
+    this.Year1.style.display = 'none';
+/*
+    Text1 = document.createTextNode('Climatology:  ');
+    Text1 = document.createElement('span');
     Text1.setAttribute('id','DW_Text1'); 
-    Text1.appendChild(text1);
+    Text1.appendChild(Text1);
     Text1.widget = this;
     this.Text1 = Text1;
+*/
     climatology_1 = 1;
+    this.climatology = 1;
   }
-  if (menu_set_1.indexOf('M') >= 0) {
-    Month1 = document.createElement('select');
-    Month1.setAttribute('id','DW_Month1'); 
-    Month1.widget = this;
-    this.Month1 = Month1;
+
+  Month1 = document.createElement('select');
+  Month1.setAttribute('id','DW_Month1'); 
+  Month1.widget = this;
+  this.Month1 = Month1;
+  if (menu_set_1.indexOf('M') < 0) {
+    this.Month1.style.display = 'none';
   }
-  if (menu_set_1.indexOf('D') >= 0) {
-    Day1 = document.createElement('select');
-    Day1.setAttribute('id','DW_Day1'); 
-    Day1.widget = this;
-    this.Day1 = Day1;
+
+  Day1 = document.createElement('select');
+  Day1.setAttribute('id','DW_Day1'); 
+  Day1.widget = this;
+  this.Day1 = Day1;
+  if (menu_set_1.indexOf('D') < 0) {
+    this.Day1.style.display = 'none';
   }
-  if (menu_set_1.indexOf('T') >= 0) {
-    Time1 = document.createElement('select');
-    Time1.setAttribute('id','DW_Time1'); 
-    Time1.widget = this;
-    this.Time1 = Time1;
+
+  Time1 = document.createElement('select');
+  Time1.setAttribute('id','DW_Time1'); 
+  Time1.widget = this;
+  this.Time1 = Time1;
+  if (menu_set_1.indexOf('T') < 0) {
+    this.Time1.style.display = 'none';
   }
 
   if (menu_set_2) {
-    if (menu_set_2.indexOf('Y') >= 0) {
-      Year2 = document.createElement('select');
-      Year2.setAttribute('id','DW_Year2'); 
-      Year2.widget = this;
-      this.Year2 = Year2;
-    } else {
+    Year2 = document.createElement('select');
+    Year2.setAttribute('id','DW_Year2'); 
+    Year2.widget = this;
+    this.Year2 = Year2;
+    if (menu_set_2.indexOf('Y') < 0) {
+      this.Year2.style.display = 'none';
+/*
       text2 = document.createTextNode('Climatology:  ');
-      Text2 = document.createElement('span:');
+      Text2 = document.createElement('span');
       Text2.setAttribute('id','DW_Text2'); 
       Text2.appendChild(text2);
       Text2.widget = this;
       this.Text2 = Text2;
+*/
       climatology_2 = 1;
     }
-    if (menu_set_2.indexOf('M') >= 0) {
-      Month2 = document.createElement('select');
-      Month2.setAttribute('id','DW_Month2'); 
-      Month2.widget = this;
-      this.Month2 = Month2;
-    }
-    if (menu_set_2.indexOf('D') >= 0) {
-      Day2 = document.createElement('select');
-      Day2.setAttribute('id','DW_Day2'); 
-      Day2.widget = this;
-      this.Day2 = Day2;
-    }
-    if (menu_set_2.indexOf('T') >= 0) {
-      Time2 = document.createElement('select');
-      Time2.setAttribute('id','DW_Time2'); 
-      Time2.widget = this;
-      this.Time2 = Time2;
-    }
-  }
 
-  if (climatology_1 != climatology_2) {
-    error_msg = "DateWidget ERROR:\n>  render: menu_set_1 \"" + menu_set_1 + "\" and menu_set_2 \"" + menu_set_2 +
-                "\" must both include or both exclude the \"Y\" flag in the menu_set" ;
-    throw(error_msg);
+    Month2 = document.createElement('select');
+    Month2.setAttribute('id','DW_Month2'); 
+    Month2.widget = this;
+    this.Month2 = Month2;
+    if (menu_set_2.indexOf('M') < 0) {
+      this.Month2.style.display = 'none';
+    }
+
+    Day2 = document.createElement('select');
+    Day2.setAttribute('id','DW_Day2'); 
+    Day2.widget = this;
+    this.Day2 = Day2;
+    if (menu_set_2.indexOf('D') < 0) {
+      this.Day2.style.display = 'none';
+    }
+
+    Time2 = document.createElement('select');
+    Time2.setAttribute('id','DW_Time2'); 
+    Time2.widget = this;
+    this.Time2 = Time2;
+    if (menu_set_2.indexOf('T') < 0) {
+      this.Time2.style.display = 'none';
+    }
+
+    if (climatology_1 != climatology_2) {
+      error_msg = "DateWidget ERROR:  render: menu_set_1 \"" + menu_set_1 + "\" and menu_set_2 \"" + menu_set_2 +
+                  "\" must both include or both exclude the \"Y\" flag in the menu_set" ;
+      throw(error_msg);
+    }
   }
 
   // Create the table that holds the menus
@@ -353,10 +384,21 @@ function DateWidget_render(element_id,menu_set_1,menu_set_2) {
   DW_tbody.appendChild(DW_tr1);
   DW_tr1.appendChild(DW_td1);
 
-  if (Text1) {
-    DW_td1.appendChild(Text1);
-  }
   // Create the first DateWidget
+  // Add the hidden menus first, then order the visible ones as per formatting instructions
+  if (Year1.style.display == 'none') {
+    DW_td1.appendChild(Year1);
+    //DW_td1.appendChild(Text1);
+  }
+  if (Month1.style.display == 'none') {
+    DW_td1.appendChild(Month1);
+  }
+  if (Day1.style.display == 'none') {
+    DW_td1.appendChild(Day1);
+  }
+  if (Time1.style.display == 'none') {
+    DW_td1.appendChild(Time1);
+  }
   for (i=0; i<menu_set_1.length; i++) {
     switch (menu_set_1.charAt(i)) {
       case 'Y':
@@ -372,7 +414,7 @@ function DateWidget_render(element_id,menu_set_1,menu_set_2) {
         DW_td1.appendChild(Time1);
         break;
       default:
-        error_msg = "DateWidget ERROR:\n>  render: menu_set \"" + menu_set_1 + "\" must contain only characters from \"YMDT\"";
+        error_msg = "DateWidget ERROR:  render: menu_set \"" + menu_set_1 + "\" must contain only characters from \"YMDT\"";
         throw(error_msg);
         break;
     }
@@ -387,8 +429,19 @@ function DateWidget_render(element_id,menu_set_1,menu_set_2) {
     DW_tbody.appendChild(DW_tr2);
     DW_tr2.appendChild(DW_td2);
 
-    if (Text2) {
-      DW_td2.appendChild(Text2);
+    // Add the hidden menus first, then order the visible ones as per formatting instructions
+    if (Year2.style.display == 'none') {
+      DW_td2.appendChild(Year2);
+      //DW_td2.appendChild(Text2);
+    }
+    if (Month2.style.display == 'none') {
+      DW_td2.appendChild(Month2);
+    }
+    if (Day2.style.display == 'none') {
+      DW_td2.appendChild(Day2);
+    }
+    if (Time2.style.display == 'none') {
+      DW_td2.appendChild(Time2);
     }
     // Create the second DateWidget
     for (i=0; i<menu_set_2.length; i++) {
@@ -406,7 +459,7 @@ function DateWidget_render(element_id,menu_set_1,menu_set_2) {
           DW_td2.appendChild(Time2);
           break;
         default:
-          error_msg = "DateWidget ERROR:\n>  render: menu_set \"" + menu_set_2 + "\" must contain only characters from \"YMDT\"";
+          error_msg = "DateWidget ERROR:  render: menu_set \"" + menu_set_2 + "\" must contain only characters from \"YMDT\"";
           throw(error_msg);
           break;
       }
@@ -419,7 +472,7 @@ function DateWidget_render(element_id,menu_set_1,menu_set_2) {
   if (menu_set_2) {
     this.initializeYearMenu(Year2);
   }
-  
+ 
   this.visible = 1;
 }
 
@@ -469,9 +522,9 @@ function DateWidget_initializeYearMenu(YearMenu) {
 // Create a new set of options and then select
 // a year: current selection or nearest available unless initializing.
 
-// NOTE:  See Quirksmode for many hins on cross-browser scripting (http://www.quirksmode.org/)
+// NOTE:  See Quirksmode for many hints on cross-browser scripting (http://www.quirksmode.org/)
 // NOTE:  
-// NOTE:  1) Qurksmode recommends usig the traditional model for even registering
+// NOTE:  1) Qurksmode recommends usig the traditional model for event registering
 // NOTE:
 // NOTE:  2) Safari 1.3 doesn't support events on Options
 // NOTE:     Instead, attach an onchange event to the Select object
@@ -480,19 +533,15 @@ function DateWidget_initializeYearMenu(YearMenu) {
   var y = loYear;
   with (YearMenu) {
     options.length=0;
-    if (this.yearLo == '0000') {
-      options[0]=new Option('Climatology',y);
-      //this.addEvent(options[0], 'click', this.optionClick, false);
-    } else {
-      for (i=0; i<n; i++) {
-        options[i]=new Option(y,y);
-        //this.addEvent(options[i], 'click', this.optionClick, false);
-        y++;  
-      }
+    for (i=0; i<n; i++) {
+      options[i]=new Option(y,y);
+      //this.addEvent(options[i], 'click', this.optionClick, false);
+      y++;  
     }
     if (this.initializing) {
+      // Initialize Year1 to the first year
+      // Initialize Year2 to the last year
       this.internallyForced = 1;
-//TODO:  What was this check suppsed to do?  Tha variable 'name' isn't defined.
       if (name == 'Year1') {
         options[0].selected=true;
       } else {
@@ -554,7 +603,7 @@ function DateWidget_setDate1(String1,add_sub_1) {
   this.hour1 = date1[3];
   this.minute1 = date1[4];
   this.second1 = date1[5];
-  if (this.Year1) {
+  if (!this.climatology) {
     this.initializeYearMenu(this.Year1);
   } else {
     if (this.Month1) {
@@ -614,7 +663,7 @@ function DateWidget_getDateLo() {
   var monthLo = (this.monthLo == '00') ? '' : '-' + this.monthLo;
   var dayLo = (this.dayLo == '00') ? '' : '-' + this.dayLo;
   var timeLo = (this.Time1) ? ' ' + this.twoDigit(this.hourLo) + ':' + this.twoDigit(this.minuteLo) + ':' + this.twoDigit(this.secondLo) : '';
-  var message = this.yearLo + monthLo + dayLo + timeLo;
+  var message = this.fourDigit(this.yearLo) + monthLo + dayLo + timeLo;
   return message;
 }
 
@@ -628,7 +677,7 @@ function DateWidget_getDateHi() {
   var monthHi = (this.monthHi == '00') ? '' : '-' + this.monthHi;
   var dayHi = (this.dayHi == '00') ? '' : '-' + this.dayHi;
   var timeHi = (this.Time2) ? ' ' + this.twoDigit(this.hourHi) + ':' + this.twoDigit(this.minuteHi) + ':' + this.twoDigit(this.secondHi) : '';
-  var message = this.yearHi + monthHi + dayHi + timeHi;
+  var message = this.fourDigit(this.yearHi) + monthHi + dayHi + timeHi;
   return message;
 }
 
@@ -642,7 +691,7 @@ function DateWidget_getDate1() {
   var month1 = (this.month1 == '00') ? '' : '-' + this.month1;
   var day1 = (this.day1 == '00') ? '' : '-' + this.day1;
   var time1 = (this.Time1) ? ' ' + this.twoDigit(this.hour1) + ':' + this.twoDigit(this.minute1) + ':' + this.twoDigit(this.second1) : '';
-  var message = this.year1 + month1 + day1 + time1;
+  var message = this.fourDigit(this.year1) + month1 + day1 + time1;
   return message;
 }
 
@@ -656,7 +705,7 @@ function DateWidget_getDate2() {
   var month2 = (this.month2 == '00') ? '' : '-' + this.month2;
   var day2 = (this.day2 == '00') ? '' : '-' + this.day2;
   var time2 = (this.Time2) ? ' ' + this.twoDigit(this.hour2) + ':' + this.twoDigit(this.minute2) + ':' + this.twoDigit(this.second2) : '';
-  var message = (this.Year2) ? this.year2 + month2 + day2 + time2 : '';
+  var message = (this.Year2) ? this.fourDigit(this.year2) + month2 + day2 + time2 : '';
   return message;
 }
 
@@ -672,7 +721,7 @@ function DateWidget_getDate1_Ferret() {
   var month1 = (this.month1 == '00') ? '' : '-' + monthNames[Number(this.month1)-1];
   var day1 = (this.day1 == '00') ? '' : this.day1;
   var time1 = (this.Time1) ? ' ' + this.twoDigit(this.hour1) + ':' + this.twoDigit(this.minute1) + ':' + this.twoDigit(this.second1) : '';
-  var message = day1 + month1 + '-' + this.year1 + time1;
+  var message = day1 + month1 + '-' + this.fourDigit(this.year1) + time1;
   return message;
 }
 
@@ -688,7 +737,7 @@ function DateWidget_getDate2_Ferret() {
   var month2 = (this.month2 == '00') ? '' : '-' + monthNames[Number(this.month2)-1];
   var day2 = (this.day2 == '00') ? '' : this.day2;
   var time2 = (this.Time2) ? ' ' + this.twoDigit(this.hour2) + ':' + this.twoDigit(this.minute2) + ':' + this.twoDigit(this.second2) : '';
-  var message = (this.Year2) ? day2 + month2 + '-' + this.year2 + time2 : '';
+  var message = (this.Year2) ? day2 + month2 + '-' + this.fourDigit(this.year2) + time2 : '';
   return message;
 }
 
@@ -825,9 +874,9 @@ function DateWidget_setCallback(callback) {
 
 
 /**
- * Parses a date string of the format 'YYYY-MM-DD [HH:mm:SS]'.
+ * Parses a date string in ISO 8601 format 'YYYY-MM-DD [HH:mm:SS]'.
  * <p>
- * Also accepts the strings 'TODAY' and 'NOW'
+ * Also accepts the strings 'TODAY' and 'NOW' or Ferret-style '15-Jan-2002'
  * <dl>
  *   <dt>TODAY</dt>
  *   <dd>Sets the date elements of the returning array to today's
@@ -835,6 +884,9 @@ function DateWidget_setCallback(callback) {
  *   <dt>NOW</dt>
  *   <dd>Sets all elements of the returning array to the values
  *   returned by the javascrpit Date() method.</dd>
+ *   <dt>15-Jan</dt>
+ *   <dd>Ferret climatological dates will be converted to
+ *   0001-MM-DD.</dd>
  * </dl>
  * An optional argument may be passed in describing the number
  * of minutes to add or subtract from the date.
@@ -864,7 +916,54 @@ function DateWidget_parseDate(dateString,add_sub) {
       break;
     default:
       var dateTime = String(dateString).split(' ');
-      YMDHMS = String(dateTime[0]).split('-');  
+      var YMD = String(dateTime[0]).split('-');  
+      var YMDHMS = String(dateTime[0]).split('-');  
+
+      // Ferret format: 'D?-Mon[-YYYY]'
+      if (String(YMD[1]).length == 3) {
+        var months = {jan:'01',feb:'02',mar:'03',apr:'04',may:'05',jun:'06',jul:'07',aug:'08',sep:'09',oct:'10',nov:'11',dec:'12'};
+        var mon = String(YMD[1].toLowerCase());
+        var MM = months[mon];
+        if (YMD[2]) { 
+          YMDHMS[0] = YMD[2];
+        } else {
+          YMDHMS[0] = '0001';
+        }
+        YMDHMS[1] = MM;
+        YMDHMS[2] = YMD[0];
+      }
+
+      if (YMDHMS[0]) {
+        // NOTE:  The javascript Date object in most browsers treats all 0000 < years < 0100 as if they were two-digit 
+        // NOTE:  representations of '19YY'.  To account for this we will add 8000 to all 
+        // NOTE:  years < 0100 for internal Date object calculations and then subtract 8000
+        // NOTE:  at the end.
+        if (Number(YMDHMS[0]).valueOf() >= 8000) {
+          error_msg = 'The DateWidget cannot handle years >= 8000.  Incoming date is "' +  dateString + '"';
+          throw(error_msg);
+        }
+        var year = Number(YMDHMS[0]).valueOf();
+        if (year < 100) {
+          year += 8000;
+          YMDHMS[0] = String(year);
+        }
+        // NOTE:  Test for restricted Safari range as described here:
+        // NOTE:  http://www.merlyn.demon.co.uk/js-datex.htm
+        var in_year = Number(YMDHMS[0]);
+        var Safari_date = new Date(in_year,1,1);
+        var Safari_year = Safari_date.getFullYear();
+        if (Safari_year != in_year) {
+          if (in_year > 8000) { in_year -= 8000 } // convert back to original for error message
+          error_msg = 'Browser Issue!  Some browsers, eg Safari, only support years within the restricted range of "1902" to "2037".  Incoming year is "' + in_year + '".';
+          throw(error_msg);
+        }
+
+      } else {
+        error_msg = 'DateWidget ERROR:  parseDate: bad date "' + dateString + '"';
+        throw(error_msg);
+      }
+
+       
       if (dateTime[1]) {
         var HMS = String(dateTime[1]).split(':');
         YMDHMS[3] = HMS[0];
@@ -878,23 +977,23 @@ function DateWidget_parseDate(dateString,add_sub) {
       // Throw exceptions if appropriate
       var error_msg;
       if (Number(YMDHMS[1]).valueOf() < 1 || Number(YMDHMS[1]).valueOf() > 12) {
-        error_msg = "> parseDate:  month \"" + YMDHMS[1] + "\" must be in the range 1:12";
+        error_msg = "DateWidget ERROR:  parseDate:  month \"" + YMDHMS[1] + "\" must be in the range 1:12";
         throw(error_msg);
       }
       if (Number(YMDHMS[2]).valueOf() < 1 || Number(YMDHMS[2]).valueOf() > 31) {
-        error_msg = "> parseDate:  day \"" + YMDHMS[2] + "\" must be in the range 1:31";
+        error_msg = "DateWidget ERROR:  parseDate:  day \"" + YMDHMS[2] + "\" must be in the range 1:31";
         throw(error_msg);
       }
       if (Number(YMDHMS[3]).valueOf() < 0 || Number(YMDHMS[3]).valueOf() > 23) {
-        error_msg = "> parseDate:  hour \"" + YMDHMS[3] + "\" must be in the range 0:23";
+        error_msg = "DateWidget ERROR:  parseDate:  hour \"" + YMDHMS[3] + "\" must be in the range 0:23";
         throw(error_msg);
       }
       if (Number(YMDHMS[4]).valueOf() < 0 || Number(YMDHMS[4]).valueOf() > 59) {
-        error_msg = "> parseDate:  minute \"" + YMDHMS[4] + "\" must be in the range 0:59";
+        error_msg = "DateWidget ERROR:  parseDate:  minute \"" + YMDHMS[4] + "\" must be in the range 0:59";
         throw(error_msg);
       }
       if (Number(YMDHMS[5]).valueOf() < 0 || Number(YMDHMS[5]).valueOf() > 59) {
-        error_msg = "> parseDate:  second \"" + YMDHMS[5] + "\" must be in the range 0:59";
+        error_msg = "DateWidget ERROR:  parseDate:  second \"" + YMDHMS[5] + "\" must be in the range 0:59";
         throw(error_msg);
       }
       date = new Date(YMDHMS[0],YMDHMS[1]-1,YMDHMS[2],YMDHMS[3],YMDHMS[4],YMDHMS[5]);
@@ -906,12 +1005,18 @@ function DateWidget_parseDate(dateString,add_sub) {
     milli = date.valueOf() + 60 * 1000 * add_sub;
     newDate = new Date(milli);
   }
+
+  // NOTE:  Store integer values (not Strings) in YMDHMS.
   with (newDate) {
     YMDHMS = new Array(getFullYear(),getMonth()+1,getDate(),getHours(),getMinutes(),getSeconds());
   }
 
-// NOTE: no support for seconds at this time
-  YMDHMS[5] = '00';
+// NOTE:  No support for seconds at this time
+  YMDHMS[5] = 0;
+// NOTE:  Return years > 8000 to their original 
+  if (YMDHMS[0] >= 8000) {
+    YMDHMS[0] -= 8000;
+  }
   return YMDHMS;
 }
 
@@ -932,19 +1037,30 @@ function DateWidget_febDays(year) {
       }
     }
   }
-// Climatological February has 28 days
-// TODO:  fix this //  if (year == '0000') { febDays = 28; }
   return febDays;
 }
 
 /**
- * Forces all MM, DD, HH, mm, SS integers to two digits.
+ * Forces all MM, DD, HH, mm, SS integers to two digit strings.
  * @private
  * @param {int} num value to test
  * @return {int} num two digit version of the value
  */
 function DateWidget_twoDigit(num) {
   if (String(num).length == 1) {
+    num = '0' + String(num);
+  }
+  return num;
+}
+
+/**
+ * Forces YYYY integers into four digits strings.
+ * @private
+ * @param {int} num value to test
+ * @return {int} num two digit version of the value
+ */
+function DateWidget_fourDigit(num) {
+  while (String(num).length < 4) {
     num = '0' + String(num);
   }
   return num;

@@ -282,7 +282,7 @@ function handleLASGetGridResponse(LASResponseText) {
       } else {
 // NOTE:  If it's not of type 'menu' it must be of type 'widget'
         LSSInitObject["t"].type = 'dateWidget';
-        LSSInitObject["t"].format = Response.getRenderFormat('t');
+        LSSInitObject["t"].render_format = Response.getRenderFormat('t');
         LSSInitObject["t"].data = new Object();
         LSSInitObject["t"].data.lo = Response.getLo('t');
         LSSInitObject["t"].data.hi = Response.getHi('t');
