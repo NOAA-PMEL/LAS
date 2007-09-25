@@ -1,3 +1,6 @@
+! Special version of get_curv_coord_bbox.jnl with kludge to
+! speed up finding the bounding-box.
+
 ! get_curv_coord_bbox.jnl
 
 ! get the I,J range from curvilinear coordinate variables for
@@ -12,24 +15,48 @@
 ! clat_jmin
 ! clat_jmax
 
-LET  box_longitude = ($ferret_curvi_coord_lon)[d=($data_num)]
-LET  box_latitude = ($ferret_curvi_coord_lat)[d=($data_num)]
+! If the whole grid is specified, we are done.
 
+LET xlodiff =  ABS(($curv_lon_min) - ($region_x_lo) )
+LET xhidiff =  ABS(($curv_lon_max) - ($region_x_hi) )
+IF `xlodiff + xhidiff LT 0.2` THEN
+   LET ylodiff =  ABS(($curv_lat_min) - ($region_y_lo) )
+   LET yhidiff =  ABS(($curv_lat_max) - ($region_y_hi) )
+   IF `ylodiff + yhidiff LT 0.2` THEN
+      LET clon_imin = 1
+      LET clon_imax = `($ferret_curvi_coord_lon),RETURN=isize`
+      LET clon_jmin = 1
+      LET clon_jmax = `($ferret_curvi_coord_lon),RETURN=jsize`
+      EXIT/SCRIPT
+   ENDIF
+ENDIF
 
-!!let nx = `($ferret_curvi_coord_lon)[d=($data_num),j=1,x=@ngd]`
-!!let ny = `($ferret_curvi_coord_lon)[d=($data_num),i=1,y=@ngd]`
+LET kludge = 1
 
+IF `kludge LT 1` THEN
+   LET  box_longitude = ($ferret_curvi_coord_lon)[d=($data_num)]
+   LET  box_latitude = ($ferret_curvi_coord_lat)[d=($data_num)]
+
+ELSE
 ! TODO: VERY KLUDGY way of getting a subset of the data to do this on, 
 ! otherwise its very slow...
-!!!
-!!let dx = MAX(1,`INT(nx/500)`)
-!!let dy = MAX(1,`INT(ny/500)`)
+!
+   LET nx = `($ferret_curvi_coord_lon)[d=($data_num),j=1,x=@ngd]`
+   LET ny = `($ferret_curvi_coord_lon)[d=($data_num),i=1,y=@ngd]`
 
-!!LET  box_longitude = ($ferret_curvi_coord_lon)[d=($data_num),i=1:`nx`:`dx`,j=1:`ny`:`dy`]
-!!LET  box_latitude = ($ferret_curvi_coord_lat)[d=($data_num),i=1:`nx`:`dx`,j=1:`ny`:`dy`]
+   IF `MAX(nx,ny) GT 500` THEN 
+      LET ns = 50
+   ELIF `MAX(nx,ny) GT 100` THEN
+      LET ns = 20
+   ELSE
+      LET ns = 5
+   ENDIF
+   LET dx = MAX(1,`INT(nx/ns)`)
+   LET dy = MAX(1,`INT(ny/ns)`)
 
-LET  box_longitude = ($ferret_curvi_coord_lon)[d=($data_num)]
-LET  box_latitude = ($ferret_curvi_coord_lat)[d=($data_num)]
+   LET  box_longitude = ($ferret_curvi_coord_lon)[d=($data_num),i=1:`nx`:`dx`,j=1:`ny`:`dy`]
+   LET  box_latitude = ($ferret_curvi_coord_lat)[d=($data_num),i=1:`nx`:`dx`,j=1:`ny`:`dy`]
+ENDIF
 
 ! See if this is a rectangle or an X line; if an X line then expand
 ! the region to make a rectangle.
@@ -74,26 +101,27 @@ LET mapbox = curv_to_rect_map (box_longitude, box_latitude, lonlatbox, 10)
 ! the four nearest neighbors (K=1:4) in the curvilinear grid, which map
 ! to the i=1,j=1 location on the output axes.
 
-load mapbox
+LOAD mapbox
 LIST/I=1/J=1/L=2:3 mapbox
-
-
 
 DEFINE SYMBOL clon_imin `mapbox[i=1,j=@min,l=2,k=@min]`
 DEFINE SYMBOL clon_imax `mapbox[i=2,j=@max,l=2,k=@max]`
 DEFINE SYMBOL clat_jmin `mapbox[i=@min,j=1,l=3,k=@min]`
 DEFINE SYMBOL clat_jmax `mapbox[i=@max,j=2,l=3,k=@max]`
 
-! Restore striding done above, via DX
+! Restore striding done above, via DX,DY; making sure indices 
+! dont go outside data range.
+IF `KLUDGE GE 1` THEN
+   DEFINE SYMBOL clon_imin `MAX(1,dx*mapbox[i=1,j=@min,l=2,k=@min])`
+   DEFINE SYMBOL clon_imax `MIN(nx,dx*mapbox[i=2,j=@max,l=2,k=@max])`
+   DEFINE SYMBOL clat_jmin `MAX(1,dy*mapbox[i=@min,j=1,l=3,k=@min])`
+   DEFINE SYMBOL clat_jmax `MIN(ny,dy*mapbox[i=@max,j=2,l=3,k=@max])`
+ENDIF
 
-!!DEFINE SYMBOL clon_imin `dx*mapbox[i=1,j=@min,l=2,k=@min]`
-!!DEFINE SYMBOL clon_imax `dx*mapbox[i=2,j=@max,l=2,k=@max]`
-!!DEFINE SYMBOL clat_jmin `dy*mapbox[i=@min,j=1,l=3,k=@min]`
-!!DEFINE SYMBOL clat_jmax `dy*mapbox[i=@max,j=2,l=3,k=@max]`
 ! If the region extends over the branch cut, return the whole 
 ! range of longitude indices
 
 IF `($clon_imin) GT ($clon_imax)` THEN
    DEFINE SYMBOL clon_imin 1
-   DEFINE SYMBOL clon_imax `box_longitude,return=isize`
+   DEFINE SYMBOL clon_imax `box_longitude,RETURN=isize`
 ENDIF
