@@ -91,7 +91,7 @@ ELSE
         DEFINE SYMBOL native_curvilinear_xy = 1
 
         ! Get the range of I,J needed to grab the region. Use it to define the plot or output variable.
-!        GO get_curv_coord_bbox
+        GO get_curv_coord_bbox
 
         ! Remove this  and uncomment the above to set index range by region
         DEFINE SYMBOl clon_imin = 1
@@ -119,7 +119,7 @@ ELSE
            DEFINE SYMBOL ferret_plot_title "($expr1)($data_title)($expr3)($data_title)($expr4) (($data_units)) Native Curvilinear Plot"
         ENDIF
 
-        DEFINE SYMBOL ferret_curvi_quals MODULO
+        IF ($ferret_lon_modulo"1|1|0") THEN DEFINE SYMBOL ferret_curvi_quals MODULO
         IF ($region_x_lo"0|*>1") THEN DEFINE SYMBOL ferret_curvi_quals \   
           ($ferret_curvi_quals)/HLIM=($region_x_lo):($region_x_hi)
         IF ($region_y_lo"0|*>1") THEN DEFINE SYMBOL ferret_curvi_quals \   
