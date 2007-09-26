@@ -68,6 +68,10 @@ function DateWidget(lo,hi,deltaMinutes,offsetMinutes,add_sub_1,add_sub_2) {
   this.hide = DateWidget_hide;
   this.getValue = DateWidget_getValue;
   this.setValue = DateWidget_setValue;
+/*
+ * TODO:  Implelement this one as part of the LAS 'Widget Interface'
+  this.setValueByIndex = DateWidget_setValueByIndex;
+ */
 
   // Public methods
 
@@ -116,32 +120,30 @@ function DateWidget(lo,hi,deltaMinutes,offsetMinutes,add_sub_1,add_sub_2) {
 
   // Event handlers      
 
+/*
+ * See optoinClick method below
   this.optionClick = DateWidget_optionClick;
+ */
   this.selectChange = DateWidget_selectChange;
 
   // Initialization
 
-  this.widgetType = 'DateWidget';
-  this.climatology = 0;
-  this.disabled = 0;
-  this.visible = 0;
-
 /**
- * The mode of operation -- either 'DEFAULT' or 'RESTRICT_OPTIONS'.
- * <dl>
- * <dt>DEFAULT</dt>
- * <dd>The Date1 and Date2 Year-Month-Day-Time selectors each show all
- * possible dates in the valid range.  Setting Date1 to a value
- * higher than the current Date2 causes Date2 to reset to the
- * same value as Date1, satisfying (Date1 <= Date2).</dd>
- * <dt>RESTRICT_OPTIONS</dt>
- * <dd>The Date1 selector only shows dates between DateLo and Date2
- * Similarly, the Date2 selector only shows dates between Date1 and DateHi.
- * Whenever Date1 or Date2 is changed, the range of available dates in the
- * other selector is adjusted to reflect this change.</dd>
- * </dl>
+ * The SlideSorter requires that each widget must have a type attribute identifying it.
  */
-  this.mode = 'DEFAULT';
+  this.widgetType = 'DateWidget';
+/**
+ * @ignore
+ */
+  this.climatology = 0;
+/**
+ * @ignore
+ */
+  this.disabled = 0;
+/**
+ * @ignore
+ */
+  this.visible = 0;
 
 /**
  * The number of minutes between options in the Time selector.
@@ -189,32 +191,104 @@ function DateWidget(lo,hi,deltaMinutes,offsetMinutes,add_sub_1,add_sub_2) {
 
   // Set the time domain
 
+/**
+ * The Year associated with the earliest valid date.
+ */
   this.yearLo = date1[0];
+/**
+ * The Month associated with the earliest valid date.
+ */
   this.monthLo = date1[1];
+/**
+ * The Day associated with the earliest valid date.
+ */
   this.dayLo = date1[2];
+/**
+ * The Hour associated with the earliest valid date.
+ */
   this.hourLo = date1[3];
+/**
+ * The Minute associated with the earliest valid date.
+ */
   this.minuteLo = date1[4];
+/**
+ * The Second associated with the earliest valid date.
+ */
   this.secondLo = date1[5];
+/**
+ * The Year associated with the latest valid date.
+ */
   this.yearHi = date2[0];
+/**
+ * The Month associated with the latest valid date.
+ */
   this.monthHi = date2[1];
+/**
+ * The Day associated with the latest valid date.
+ */
   this.dayHi = date2[2];
+/**
+ * The Hour associated with the latest valid date.
+ */
   this.hourHi = date2[3];
+/**
+ * The Minute associated with the latest valid date.
+ */
   this.minuteHi = date2[4];
+/**
+ * The Second associated with the latest valid date.
+ */
   this.secondHi = date2[5];
 
   // On initialization, set the time range to the full domain
 
+/**
+ * The currently selected low Year
+ */
   this.year1 = this.yearLo;
+/**
+ * The currently selected low Month
+ */
   this.month1 = this.monthLo;
+/**
+ * The currently selected low Day
+ */
   this.day1 = this.dayLo;
+/**
+ * The currently selected low Hour
+ */
   this.hour1 = this.hourLo;
+/**
+ * The currently selected low Minute
+ */
   this.minute1 = this.minuteLo;
+/**
+ * The currently selected low Second
+ */
   this.second1 = this.secondLo;
+/**
+ * The currently selected high Year
+ */
   this.year2 = this.yearHi;
+/**
+ * The currently selected high Month
+ */
   this.month2 = this.monthHi;
+/**
+ * The currently selected high Day
+ */
   this.day2 = this.dayHi;
+/**
+ * The currently selected high Hour
+ */
   this.hour2 = this.hourHi;
+/**
+ * The currently selected high Minute
+ */
   this.minute2 = this.minuteHi;
+/**
+ * The currently selected high Second
+ */
   this.second2 = this.secondHi;
 
 }
@@ -281,16 +355,15 @@ function DateWidget_render(element_id,menu_set_1,menu_set_2) {
   this.Year1 = Year1;
   if (menu_set_1.indexOf('Y') < 0) {
     this.Year1.style.display = 'none';
-/*
-    Text1 = document.createTextNode('Climatology:  ');
-    Text1 = document.createElement('span');
-    Text1.setAttribute('id','DW_Text1'); 
-    Text1.appendChild(Text1);
-    Text1.widget = this;
-    this.Text1 = Text1;
-*/
     climatology_1 = 1;
     this.climatology = 1;
+
+    text1 = document.createTextNode('Climatology:  ');
+    Text1 = document.createElement('span');
+    Text1.setAttribute('id','DW_Text1'); 
+    Text1.appendChild(text1);
+    Text1.widget = this;
+    this.Text1 = Text1;
   }
 
   Month1 = document.createElement('select');
@@ -324,15 +397,14 @@ function DateWidget_render(element_id,menu_set_1,menu_set_2) {
     this.Year2 = Year2;
     if (menu_set_2.indexOf('Y') < 0) {
       this.Year2.style.display = 'none';
-/*
+      climatology_2 = 1;
+
       text2 = document.createTextNode('Climatology:  ');
       Text2 = document.createElement('span');
       Text2.setAttribute('id','DW_Text2'); 
       Text2.appendChild(text2);
       Text2.widget = this;
       this.Text2 = Text2;
-*/
-      climatology_2 = 1;
     }
 
     Month2 = document.createElement('select');
@@ -386,7 +458,7 @@ function DateWidget_render(element_id,menu_set_1,menu_set_2) {
   // Add the hidden menus first, then order the visible ones as per formatting instructions
   if (Year1.style.display == 'none') {
     DW_td1.appendChild(Year1);
-    //DW_td1.appendChild(Text1);
+    DW_td1.appendChild(Text1);
   }
   if (Month1.style.display == 'none') {
     DW_td1.appendChild(Month1);
@@ -430,7 +502,7 @@ function DateWidget_render(element_id,menu_set_1,menu_set_2) {
     // Add the hidden menus first, then order the visible ones as per formatting instructions
     if (Year2.style.display == 'none') {
       DW_td2.appendChild(Year2);
-      //DW_td2.appendChild(Text2);
+      DW_td2.appendChild(Text2);
     }
     if (Month2.style.display == 'none') {
       DW_td2.appendChild(Month2);
@@ -482,10 +554,6 @@ function DateWidget_render(element_id,menu_set_1,menu_set_2) {
 function DateWidget_initializeYearMenu(YearMenu) {
 
 // Recreate the Year menu
-// RESTRICT_OPTIONS: 
-//   If widget #1, range = yearLo:year2
-//   If widget #2, range = year1:yearHi
-// DEFAULT: 
 //   If widget #1, range = yearLo:yearHi
 //   If widget #2, range = yearLo:yearHi
 
@@ -499,7 +567,7 @@ function DateWidget_initializeYearMenu(YearMenu) {
   // TODO:  this.entry_id + "_Year1"
   if (YearMenu.getAttribute('id') == 'DW_Year1') {
     loYear = this.yearLo;
-    hiYear = (this.mode == 'RESTRICT_OPTIONS') ? this.year2 : this.yearHi;
+    hiYear = this.yearHi;
     if (this.year1 > this.year2) {
       currentYear = this.year2;
       this.flash(YearMenu);
@@ -507,7 +575,7 @@ function DateWidget_initializeYearMenu(YearMenu) {
       currentYear = this.year1;
     }
   } else {
-    loYear = (this.mode == 'RESTRICT_OPTIONS') ? this.year1 : this.yearLo;
+    loYear = this.yearLo;
     hiYear = this.yearHi;
     if (this.year1 > this.year2) {
       currentYear = this.year1;
@@ -1105,7 +1173,7 @@ function DateWidget_correctOrder() {
  * @param useCapture flag
  */
 // NOTE:  Based on advice from Quirksmode (http://www.quirksmode.org) I will not use the
-// NOTE:  W3C method of even registration in this version (March, 2007) of the code.
+// NOTE:  W3C method of event registration in this version (March, 2007) of the code.
 // NOTE:  Instead, look for the traditional method (e.g. YearMenu.onchange = selectChange;)
 // NOTE:  in the code.
 function DateWidget_addEvent(elm, evType, fn, useCapture) {
@@ -1140,7 +1208,7 @@ function DateWidget_flash(Menu) {
 ////////////////////////////////////////////////////////////////////////////////
 
 /**
- * 'onchange' event handler for the 'Year1' and 'Year2' selectors.
+ * Method called by event handler for the 'Year1' and 'Year2' selectors.
  * @param YearMenu document select object for year
  */
 function DateWidget_selectYear(YearMenu) {
@@ -1173,10 +1241,6 @@ function DateWidget_selectYear(YearMenu) {
   }
 
 // Recreate the Month menu
-// RESTRICT_OPTIONS: 
-//   If widget #1, range = yearLo-monthLo:year2-month2
-//   If widget #2, range = year1-month1:yearHi-monthHi
-// DEFAULT: 
 //   If widget #1, range = yearLo-monthLo:yearHi-monthHi
 //   If widget #2, range = yearLo-monthLo:yearHi-monthHi
 
@@ -1188,25 +1252,13 @@ function DateWidget_selectYear(YearMenu) {
     if (currentYear == this.yearLo) {
       loMonth = this.monthLo - 1; 
     }
-    if (this.mode == 'RESTRICT_OPTIONS') {
-      if (currentYear == this.year2) {
-        hiMonth = this.month2 - 1; 
-      }
-    } else {
-      if (currentYear == this.yearHi) {
-        hiMonth = this.monthHi - 1; 
-      }
+    if (currentYear == this.yearHi) {
+      hiMonth = this.monthHi - 1; 
     }
   } else {
     OtherYearMenu = this.Year1;
-    if (this.mode == 'RESTRICT_OPTIONS') {
-      if (currentYear == this.year1) {
-        loMonth = this.month1 - 1; 
-      }
-    } else {
-      if (currentYear == this.yearLo) {
-        loMonth = this.monthLo - 1; 
-      }
+    if (currentYear == this.yearLo) {
+      loMonth = this.monthLo - 1; 
     }
     if (currentYear == this.yearHi) {
       hiMonth = this.monthHi - 1; 
@@ -1248,7 +1300,7 @@ function DateWidget_selectYear(YearMenu) {
       this.internallyForced = 0;
     } else {
       if (OtherYearMenu) {
-        if (this.mode == 'RESTRICT_OPTIONS' || !this.correctOrder()) {
+        if (!this.correctOrder()) {
           this.internallyForced = 1;
           this.initializeYearMenu(OtherYearMenu);
         }
@@ -1260,7 +1312,7 @@ function DateWidget_selectYear(YearMenu) {
 
 
 /**
- * 'onchange' event handler for the 'Month1' and 'Month2' selectors.
+ * Method called by event handler for the 'Month1' and 'Month2' selectors.
  * @param MonthMenu document Select object for Month
  */
 function DateWidget_selectMonth(MonthMenu) {
@@ -1288,32 +1340,22 @@ function DateWidget_selectMonth(MonthMenu) {
     DayMenu = this.Day1;
     currentYear = this.year1;
     this.month1 = currentMonth;
-    if (this.mode == 'RESTRICT_OPTIONS') {
-      currentDay = this.day1;
+    if (this.year1 == this.year2 && this.month1 == this.month2 && this.day1 > this.day2) {
+      currentDay = this.day2;
+      this.flash(DayMenu);
     } else {
-      if (this.year1 == this.year2 && this.month1 == this.month2 &&
-          this.day1 > this.day2) {
-        currentDay = this.day2;
-        this.flash(DayMenu);
-      } else {
-        currentDay = this.day1;
-      }
+      currentDay = this.day1;
     }
   } else {
     OtherYearMenu = this.Year1;
     DayMenu = this.Day2;
     currentYear = this.year2;
     this.month2 = currentMonth;
-    if (this.mode == 'RESTRICT_OPTIONS') {
-      currentDay = this.day2;
+    if (this.year1 == this.year2 && this.month1 == this.month2 && this.day1 > this.day2) {
+      currentDay = this.day1;
+      this.flash(DayMenu);
     } else {
-      if (this.year1 == this.year2 && this.month1 == this.month2 &&
-          this.day1 > this.day2) {
-        currentDay = this.day1;
-        this.flash(DayMenu);
-      } else {
-        currentDay = this.day2;
-      }
+      currentDay = this.day2;
     }
   }
 
@@ -1340,39 +1382,23 @@ function DateWidget_selectMonth(MonthMenu) {
   }
 
 // Recreate the Day menu
-// RESTRICT_OPTIONS: 
-//   If widget #1, range = yearLo-monthLo-dayLo:year2-month2-day2
-//   If widget #2, range = year1-month1-day1:yearHi-monthHi-dayHi
-// DEFAULT: 
 //   If widget #1, range = yearLo-monthLo-dayLo:yearHi-monthHi-dayHi
 //   If widget #2, range = yearLo-monthLo-dayLo:yearHi-monthHi-dayHi
 
   if (MonthMenu.getAttribute('id') == 'DW_Month1') {
-   if (currentYear == this.yearLo && currentMonth == this.monthLo) {
-     loDay = this.dayLo; 
-   }
-   if (this.mode == 'RESTRICT_OPTIONS') {
-     if (currentYear == this.year2 && currentMonth == this.month2) {
-       hiDay = this.day2; 
-     }
-   } else {
-     if (currentYear == this.yearHi && currentMonth == this.monthHi) {
-       hiDay = this.dayHi; 
-     }
-   }
+    if (currentYear == this.yearLo && currentMonth == this.monthLo) {
+      loDay = this.dayLo; 
+    }
+    if (currentYear == this.yearHi && currentMonth == this.monthHi) {
+      hiDay = this.dayHi; 
+    }
   } else {
-   if (this.mode == 'RESTRICT_OPTIONS') {
-     if (currentYear == this.year1 && currentMonth == this.month1) {
-       loDay = this.day1; 
-     }
-   } else {
-     if (currentYear == this.yearLo && currentMonth == this.monthLo) {
-       loDay = this.dayLo; 
-     }
-   }
-   if (currentYear == this.yearHi && currentMonth == this.monthHi) {
-     hiDay = this.dayHi; 
-   }
+    if (currentYear == this.yearLo && currentMonth == this.monthLo) {
+      loDay = this.dayLo; 
+    }
+    if (currentYear == this.yearHi && currentMonth == this.monthHi) {
+      hiDay = this.dayHi; 
+    }
   }
 
 // Create a new set of options and then select
@@ -1411,7 +1437,7 @@ function DateWidget_selectMonth(MonthMenu) {
       this.internallyForced = 0;
     } else {
       if (OtherYearMenu) {
-        if (this.mode == 'RESTRICT_OPTIONS' || !this.correctOrder()) {
+        if (!this.correctOrder()) {
           this.internallyForced = 1;
           this.initializeYearMenu(OtherYearMenu);
         }
@@ -1423,7 +1449,7 @@ function DateWidget_selectMonth(MonthMenu) {
 
 
 /**
- * 'onchange' event handler for the 'Day1' and 'Day2' selectors.
+ * Method called by event handler for the 'Day1' and 'Day2' selectors.
  * @param DayMenu document select object for day
  */
 function DateWidget_selectDay(DayMenu) {
@@ -1443,7 +1469,6 @@ function DateWidget_selectDay(DayMenu) {
   // TODO:  Use matching instead of '==' when 'DW_Day1' is replaced by
   // TODO:  this.entry_id + "_Month1"
   if (DayMenu.getAttribute('id') == 'DW_Day1') {
-// TODO: handle RESTRICT_OPTIONS for Time menu
     this.day1 = currentDay;
     TimeMenu = this.Time1;
     OtherYearMenu = this.Year2;
@@ -1472,7 +1497,6 @@ function DateWidget_selectDay(DayMenu) {
   }
   var loMinute = this.offsetMinutes;
   var hiMinute = 1440;
-//TODO: handle RESTRICT_OPTIONS for Time menu
 // NOTE: use Number() to prevent '60' + '60' = '6060'
   if (currentYear == this.yearLo && 
      currentMonth == this.monthLo &&
@@ -1516,7 +1540,7 @@ function DateWidget_selectDay(DayMenu) {
     this.internallyForced = 0;
   } else {
     if (OtherYearMenu) {
-      if (this.mode == 'RESTRICT_OPTIONS' || !this.correctOrder()) {
+      if (!this.correctOrder()) {
         this.internallyForced = 1;
         this.initializeYearMenu(OtherYearMenu);
       }
@@ -1526,7 +1550,7 @@ function DateWidget_selectDay(DayMenu) {
 }
 
 /**
- * 'onchange' event handler for the 'Time1' and 'Time2' selectors.
+ * Method called by event handler for the 'Time1' and 'Time2' selectors.
  * @param TimeMenu document select object for time
  */
 function DateWidget_selectTime(TimeMenu) {
@@ -1550,6 +1574,13 @@ function DateWidget_selectTime(TimeMenu) {
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 
+/**
+ * 'onchange' event handler for all DateWidget selectors.
+ * This event handler tests for the 'id' of the Selector and then calls
+ * the appropriate selectYear(), selectMonth(), selectDay() or selectTime() method
+ * of the DateWidget.
+ * @param e event
+ */
 function DateWidget_selectChange(e) {
 
   // Cross-browser discovery of the event target
@@ -1603,8 +1634,9 @@ function DateWidget_selectChange(e) {
   }
 }
 
-// NOTE:  Compatibility wih Safare requires that we attach the event handler to the Select object.
+// NOTE:  Compatibility wih Safari requires that we attach the event handler to the Select object.
 // NOTE:  the optionClick method is not currently used.
+/*
 function DateWidget_optionClick(e) {
 
   // Cross-browser discovery of the event target
@@ -1657,3 +1689,4 @@ function DateWidget_optionClick(e) {
     DW.callback(DW);
   }
 }
+*/
