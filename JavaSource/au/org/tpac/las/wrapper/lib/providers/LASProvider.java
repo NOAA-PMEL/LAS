@@ -217,9 +217,18 @@ public class LASProvider extends Provider
         //parsing the layers
         for(int i = 0; i < list.getLength(); i++)
         {
-
-            LasDatasetInfo info = new LasDatasetInfo(list.item(i));
-            layersMap.put(info.getDatasetId(), info);
+            //<datasets> may contain multiple datasets
+            Node dssNode = list.item(i);
+            NodeList children = dssNode.getChildNodes();
+            for(int j=0;j<children.getLength();j++){
+                LasDatasetInfo inf = new LasDatasetInfo(children.item(j));
+                String dsID = inf.getDatasetId();
+                if(dsID != null){
+                    layersMap.put(dsID, inf);
+                }
+            }
+            //LasDatasetInfo info = new LasDatasetInfo(list.item(i));
+            //layersMap.put(info.getDatasetId(), info);
         }
 
         //parsing the "grids" - a grid contains contraints of each axes
