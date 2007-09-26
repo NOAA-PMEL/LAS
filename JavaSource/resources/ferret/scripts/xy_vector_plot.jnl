@@ -33,11 +33,11 @@ DEFINE SYMBOL fview = `UPCASE("($ferret_view)")`
 GO LAS_initialize_region 0
 GO LAS_initialize_data 0
 DEFINE SYMBOL ferret_vector_1 ($ferret_plot_var)
-DEFINE SYMBOL ferret_plot_title "($data_title) (($data_units))"
+DEFINE SYMBOL ferret_plot_title_1 "($data_title) (($data_units))"
 
 GO LAS_initialize_data 1
 DEFINE SYMBOL ferret_vector_2 ($ferret_plot_var)
-DEFINE SYMBOL ferret_plot_title "($ferret_plot_title), ($data_title) (($data_units))"
+DEFINE SYMBOL ferret_plot_title "($ferret_plot_title_1), ($data_title) (($data_units))"
 
 
 ! Check for errors (They often occur during dataset initialization.)
@@ -74,8 +74,7 @@ IF ($ferret_use_graticules"1|0|*>1) THEN
   SET MODE GRATICULE:(DASH,COLOR=black)
 ENDIF
 
-
-! Vectoro length scale
+! Vector length scale
 
 IF `($ferret_vector_length"0") GT 0` THEN  
    DEFINE SYMBOL qualifiers = ($qualifiers)/LENGTH=($ferret_vector_length)

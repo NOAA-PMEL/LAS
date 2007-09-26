@@ -27,11 +27,11 @@ IF ($ferret_interpolate_data"0") THEN SET MODE INTERPOLATE
 GO LAS_initialize_region 0
 GO LAS_initialize_data 0
 DEFINE SYMBOL ferret_vector_1 ($ferret_plot_var)
-DEFINE SYMBOL ferret_plot_title "($data_title) (($data_units))"
+DEFINE SYMBOL ferret_plot_title_1 "($data_title) (($data_units))"
 
 GO LAS_initialize_data 1
 DEFINE SYMBOL ferret_vector_2 ($ferret_plot_var)
-DEFINE SYMBOL ferret_plot_title "($ferret_plot_title), ($data_title) (($data_units))"
+DEFINE SYMBOL ferret_plot_title "($ferret_plot_title_1), ($data_title) (($data_units))"
 
 
 ! Check for errors (They often occur during dataset initialization.)
