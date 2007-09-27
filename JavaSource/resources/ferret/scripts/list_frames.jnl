@@ -169,6 +169,9 @@ IF `strcmp("($time_units)", "1") EQ 0` THEN
     let nlen = strlen ("($first_time)")
     list/norowhead/nohead/format=("<frame>",A`nlen`,"</frame>")/FILE/append tax_datestring(t[gt=($ferret_list_var),L=($lmin):($lmax)], t[gt=($ferret_list_var)], "seconds")
 
+    LET f = "</frames>"
+    list/norowhead/nohead/format=(A9)/FILE/append f
+
 ELIF `strcmp("($time_units)", "60") EQ 0` THEN
     !====>output time units
     LET f = "<units>minutes</units>"
