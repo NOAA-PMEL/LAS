@@ -7,9 +7,13 @@
  *
  * xmldom.js              Parses the LASRequest XML.  Used by LASRequest.js.
  * LASRequest.js          Provides an API for accessing/modifying LASRequest elements.
+ *
+ * NOTE:  This example has to go up one directory '../' to find 'JavaScript/components/'
+ * NOTE:  because this example is found in WebContent/examples/.  
+ * NOTE:  Any pages you include directly in the WebContent/ directory won't need '../'.
 --> 
-  <script type="text/javascript" src="JavaScript/components/xmldom.js"></script>
-  <script type="text/javascript" src="JavaScript/components/LASRequest.js"></script>
+  <script type="text/javascript" src="../JavaScript/components/xmldom.js"></script>
+  <script type="text/javascript" src="../JavaScript/components/LASRequest.js"></script>
 
   <script type="text/javascript">
 
@@ -27,10 +31,12 @@ function initialize() {
 
 /**
  * Submit the LASRequest to the LAS ProductServer.
+ *
+ * NOTE:  As above, we need to go up one directory '../' to find 'ProductServer.do'.
  */
 function submitXML() {
   updateLASRequest();
-  var URL = 'ProductServer.do?xml=' + escape(Req.getXMLText()); 
+  var URL = '../ProductServer.do?xml=' + escape(Req.getXMLText()); 
   var window_decorations = "menubar=yes, location=yes, toobar=yes, resizable=yes, scrollbars=yes";
   var dataWindow = window.open(URL, "DataWindowName", window_decorations);
   dataWindow.focus();
