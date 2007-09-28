@@ -60,7 +60,10 @@ ELSE
 ! so if possible start before the first year in the region, or start at 
 ! the end of year 1.
 
-   LET loffset = `($ferret_season_center) - ( 1+INT(season_length/2) )`
+! Correction if the dataset time axis does not start in January.
+   LET first_month_data = TAX_MONTH(`tt[L=1]`, tt)
+
+   LET loffset = `($ferret_season_center) - ( 1+INT(season_length/2) ) - (first_month_data-1)`
    IF `loffset LT 0` THEN 
       IF `n1 GT 12` THEN 
          LET n1 = `n1-12`
@@ -70,10 +73,11 @@ ELSE
       DEFINE SYMBOL offset_year_1 = 1
    ENDIF
    
-! Create a list of indices corresponding to the months to be averaged. tsiz 
+! Create the list of indices corresponding to the months to be averaged. tsiz 
 ! is the length of the entire axis, so mask that for the region of time that 
 ! is in effect.
-   LET S1_L_months_for_seas = TSEQUENCE(k[k=1:`season_length`] + 12*(l[l=1:`tsiz/12`]-1) + loffset)
+
+   LET S1_L_months_for_seas = TSEQUENCE(k[k=1:`season_length`] + 12*(l[l=1:`INT(tsiz/12)`]-1) + loffset)
    LET time_mask1 = IF S1_L_months_for_seas GT n1 THEN 1
    LET time_mask = time_mask1* (IF S1_L_months_for_seas LE nn THEN S1_L_months_for_seas)
    LET nmsk =` time_mask[L=@ngd]`
@@ -86,7 +90,7 @@ ELSE
    LET mean_seas = S1_months_for_seas[T=@SBX:`season_length`]
 
 ! Index list, once per year on the correct month
-   LET S1_L_sample_centered = `1+INT(season_length/2)` + `season_length`*( L[L=1:`tsiz/12`] - 1  )
+   LET S1_L_sample_centered = `1+INT(season_length/2)` + `season_length`*( L[L=1:`INT(tsiz/12)`] - 1  )
 
 ! Define a time axis, yearly on the month where seasons are centered.
    LET t1 = tt[L=`n1`]
