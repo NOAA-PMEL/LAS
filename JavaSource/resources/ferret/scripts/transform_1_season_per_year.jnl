@@ -1,0 +1,115 @@
+! transform_1_season_per_year.jnl
+!  Returns data with one value per year, from monthly data input.
+!  Season length may be:
+!    1 month (e.g. each January or each April), or 
+!    3 month (e.g. each Jan-Feb-March average or Jun-Jul-Aug average, etc), or
+!    5 month (e.g. each Mar-Apr-May-Jun-Jul or Nov-Dec-Jan-Feb-Mar)
+!  The output time axis is centered on the middle month of the seasonal average
+
+! Inputs:
+! The usual LAS Ferret symbols, defining dataset, data variable, region
+! ferret_season_length  Symbol defining the length in months of the average, may be 1, 3, or 5
+! ferret_season_center  Symbol defining the month on which the average is to be centered.
+! 
+! Results:
+! Defines ferret_plot_var with the correct sampling or averaging in time
+! Adds text to ferret_plot_title explaining the sampling or averaging.
+
+! TODO:  What if some other transformation has been defined on the Time Axis??
+! 
+! TODO:  Can we count on the datasets starting with L=1 in January?? This script assumes so.
+!
+! TODO: the definitions are based on the entire time axis
+
+! Check input symbols
+! The script can handle any season length between 1 and 12, but limit it here to 1, 3, 5
+
+IF `($ferret_season_length"0|1>1|3>1|5>1|*>0") EQ 0` THEN
+  DEFINE SYMBOL error_status = ERROR
+  DEFINE SYMBOL error_type = TRANSFORM
+  DEFINE SYMBOL error_string = Season Length = ($ferret_season_length). Must be 1, 3, or 5
+  EXIT/SCRIPT
+ENDIF
+
+IF `( ($ferret_season_center"0") LE 0 ) OR ( ($ferret_season_center"0") GT 12 )` THEN
+  DEFINE SYMBOL error_status = ERROR
+  DEFINE SYMBOL error_type = TRANSFORM
+  DEFINE SYMBOL error_string = Season centering is ($ferret_season_center). Must be a month between 1 and 12
+  EXIT/SCRIPT
+ENDIF
+
+LET season_length = ($ferret_season_length)
+
+! The dataset, region and plot variable have already been initialized
+LET S1_the_plot_var = ($ferret_plot_var)
+LET tt = t[gt=S1_the_plot_var]
+LET tsiz = `tt,RETURN=lsize`
+
+LET n1 = `S1_the_plot_var,RETURN=lstart`
+LET nn = `S1_the_plot_var,RETURN=lend`
+
+! If the season length is 1, we just need to set up some striding.
+IF `season_length EQ 1` THEN
+   DEFINE SYMBOL ferret_plot_var S1_the_plot_var[L=($ferret_season_center):`tsiz`:12]
+   DEFINE SYMBOL ferret_plot_title ($ferret_plot_title) (($ferret_season_length)-month sampling, every ($mon1))
+ELSE
+
+! Define a variable containing the indices that correspond to the data we 
+! need for the seasonal averages. Start with the first month needed; if
+! centering is at the start of a year, avgs run across the end of a year, 
+! so if possible start before the first year in the region, or start at 
+! the end of year 1.
+
+   LET loffset = `($ferret_season_center) - ( 1+INT(season_length/2) )`
+   IF `loffset LT 0` THEN 
+      IF `n1 GT 12` THEN 
+         LET n1 = `n1-12`
+      ELSE
+         LET loffset = `loffset + 12`
+      ENDIF
+      DEFINE SYMBOL offset_year_1 = 1
+   ENDIF
+   
+! Create a list of indices corresponding to the months to be averaged. tsiz 
+! is the length of the entire axis, so mask that for the region of time that 
+! is in effect.
+   LET S1_L_months_for_seas = TSEQUENCE(k[k=1:`season_length`] + 12*(l[l=1:`tsiz/12`]-1) + loffset)
+   LET time_mask1 = IF S1_L_months_for_seas GT n1 THEN 1
+   LET time_mask = time_mask1* (IF S1_L_months_for_seas LE nn THEN S1_L_months_for_seas)
+   LET nmsk =` time_mask[L=@ngd]`
+   LET S1_mask_for_tregion = COMPRESSL(time_mask)
+
+! Sampe the variable at only the months that will be used in the avgs.
+   LET S1_months_for_seas = SAMPLEL(S1_the_plot_var,S1_mask_for_tregion[l=1:`nmsk`])
+
+! Define boxcar average; only the center of each season will be saved.
+   LET mean_seas = S1_months_for_seas[T=@SBX:`season_length`]
+
+! Index list, once per year on the correct month
+   LET S1_L_sample_centered = `1+INT(season_length/2)` + `season_length`*( L[L=1:`tsiz/12`] - 1  )
+
+! Define a time axis, yearly on the month where seasons are centered.
+   LET t1 = tt[L=`n1`]
+   DEFINE SYMBOL y1 = `TAX_YEAR(t1, tt)`
+   IF `($offset_year_1"0") EQ 1` THEN DEFINE SYMBOL y1 = `($y1) + 1`
+   LET ylast = TAX_YEAR(tt[L=`nn`], tt)
+   DEFINE SYMBOL yn = `ylast`
+   
+   LET months = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"}
+   DEFINE SYMBOL mon1 = `months[I=($ferret_season_center)]`
+   DEFINE AXIS/T="15-($mon1)-($y1)":"15-($mon1)-($yn)":12/UNITS=month timeax_years
+
+! Sample the averaged data at the center of each average, and 
+! put the sampled data onto this axis.
+   LET sampled_on_month = SAMPLEL( mean_seas, S1_L_sample_centered)
+   
+   LET S1_seas_per_year = sampled_on_month[GT=timeax_years@ASN]
+   LIST S1_seas_per_year[T=1-JAN-1985:31-DEC-1989]
+   
+   DEFINE SYMBOL ferret_plot_var S1_seas_per_year
+
+! Add information to the title
+   DEFINE SYMBOL ferret_plot_title ($ferret_plot_title) (($ferret_season_length)-month ave, every ($mon1))
+
+ENDIF  ! Season length longer than 1
+
