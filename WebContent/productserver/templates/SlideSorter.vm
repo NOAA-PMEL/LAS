@@ -344,7 +344,7 @@ function handleLASGetGridResponse(LASResponseText) {
 #else
             <span id="LSS_optionLabel">Color fill levels</span>
 #end
-            <input id="LSS_optionTextField" type="text" name="LSS_optionTextField"></input>
+            <input id="LSS_optionTextField" type="text" name="LSS_optionTextField" onchange="javascript:applyOptions()"></input>
             <input id="ApplyButton" type="button" value="Apply" onclick="javascript:applyOptions()"></input>
           </td>
         </tr>
