@@ -45,7 +45,14 @@ LET stride_4 = ($16"1")
 
 ! Get the shape e.g. IJL. Use this to generate the indices required
 
-DEFINE SYMBOL shape = `UPCASE("($4)")`
+DEFINE SYMBOL shape = `UPCASE("($4"NONE")")`
+
+! IF there are no axes, a purely scalar variable, just write it and exit.
+
+IF ($shape"0|NONE>1|*>0") THEN
+   SAVE/FILE="$1"/CLOBBER $3
+   EXIT/SCRIPT
+ENDIF
 
 LET count = 0
 DEFINE SYMBOL mdim = `count`
