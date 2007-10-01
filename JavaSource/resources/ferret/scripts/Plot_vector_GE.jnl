@@ -18,7 +18,12 @@ ELIF ($ferret_view"|xy>1|*>0") THEN
    DEFINE SYMBOL qualifiers ($qualifiers)/NOAXES
    DEFINE SYMBOL ferret_land_type = contour
    DEFINE SYMBOL ferret_google_plot = 1
-   go xy_vector_plot
+   !always use large size for plots on GE
+   DEFINE SYMBOL ferret_size = 0.8333
+
+   IF `STRINDEX( "($operation_ID)", "Vector_for_GE" ) NE 0` THEN
+       go xy_vector_plot
+   ENDIF
 
 ELIF ($ferret_view"|xz>1|*>0") THEN
 
