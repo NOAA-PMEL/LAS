@@ -271,14 +271,8 @@
         output_template="output_GE_overlay" service_action="Plot_2D_GE" >
         <service>ferret</service>
         <response ID="PlotResp">
-                <result type="image" ID="plot_image" streamable="true"
-                        mime_type="image/png" />
-                <result type="ps" ID="plot_postscript" streamable="true"
-                        mime_type="application/postscript" />
-                <result type="image" ID="ref_map" />
-                <result type="map_scale" ID="map_scale" />
-                <result type="debug" ID="debug" />
-                <result type="cancel" ID="cancel" />
+                <result type="debug" ID="debug" file_suffix=".txt"/>
+                <result type="cancel" ID="cancel" file_suffix=".txt"/>
         </response>
         <region>
                 <intervals name="xy" />
@@ -293,14 +287,8 @@
         output_template="output_GE_overlay" service_action="Plot_vector_GE" private="true">
         <service>ferret</service>
         <response ID="PlotResp">
-                <result type="image" ID="plot_image" streamable="true"
-                        mime_type="image/png" />
-                <result type="ps" ID="plot_postscript" streamable="true"
-                        mime_type="application/postscript" />
-                <result type="image" ID="ref_map" />
-                <result type="map_scale" ID="map_scale" />
-                <result type="debug" ID="debug" />
-                <result type="cancel" ID="cancel" />
+                <result type="debug" ID="debug" file_suffix=".txt"/>
+                <result type="cancel" ID="cancel" file_suffix=".txt"/>
         </response>
         <region>
                 <intervals name="xy" />
