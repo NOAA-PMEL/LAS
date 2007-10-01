@@ -24,6 +24,8 @@ ELIF ($ferret_view"|xy>1|*>0") THEN
    !DEFINE SYMBOL qualifiers = ($qualifiers)/LINE/NOAXES
    DEFINE SYMBOL qualifiers = ($qualifiers)/NOAXES
    DEFINE SYMBOL ferret_google_plot = 1
+   !always use large size for plots on GE
+   DEFINE SYMBOL ferret_size = 0.8333
 
    go xy_plot_2D
 
