@@ -593,7 +593,7 @@ i.e. 48 - start time: 24 hours before selected timestep
 
   <!-- Vector plots NOTE THERE SHOULD BE A SEPARATE Options_Vector_XY -->
   <optiondef name="Options_Vector" inherit="#Options_Default,#set_aspect,#land_type,#vector_skip,#vector_length"/>
-  <optiondef name="Options_Vector_GE" inherit="#expression,#interpolate_data,#size,#use_graticules,#deg_min_sec,#set_aspect,#land_type,#vector_skip,#vector_length"/>
+  <optiondef name="Options_Vector_GE" inherit="#expression,#interpolate_data,#use_graticules,#deg_min_sec,#set_aspect,#land_type,#vector_skip,#vector_length"/>
   <!-- 2 dimensional plots -->
   <optiondef name="Options_2D" inherit="#Options_Default,#palette"/>
 
