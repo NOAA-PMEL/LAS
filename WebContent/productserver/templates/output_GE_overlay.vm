@@ -11,7 +11,7 @@
       <Link>
         <href>$server_base_url/GEServer.do?xml=$las_request.toEncodedURLString()</href>
         <refreshMode>onInterval</refreshMode>
-        <refreshInverval>4</refreshInverval>
+        <refreshInterval>4</refreshInterval>
         <refreshMode>onChange</refreshMode>
         <viewRefreshMode>onStop</viewRefreshMode>
         <viewRefreshTime>2</viewRefreshTime>
