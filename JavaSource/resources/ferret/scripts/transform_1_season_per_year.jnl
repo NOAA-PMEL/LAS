@@ -24,6 +24,13 @@
 ! Check input symbols
 ! The script can handle any season length between 1 and 12, but limit it here to 1, 3, 5
 
+! The lhs constraint contains Season_length_1, Season_length_3, or Season_length_5
+LET ipos = STRLEN("($constraint_0_lhs)")
+DEFINE SYMBOL ferret_season_length = `SUBSTRING("($constraint_0_lhs)", ipos, 1)`
+
+! The rhs constraint contains a month number 1 through 12.
+DEFINE SYMBOL ferret_season_center = ($constraint_0_rhs)
+
 IF `($ferret_season_length"0|1>1|3>1|5>1|*>0") EQ 0` THEN
   DEFINE SYMBOL error_status = ERROR
   DEFINE SYMBOL error_type = TRANSFORM
