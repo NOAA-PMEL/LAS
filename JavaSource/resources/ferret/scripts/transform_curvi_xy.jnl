@@ -119,16 +119,16 @@ ELSE
            DEFINE SYMBOL ferret_plot_title "($expr1)($data_title)($expr3)($data_title)($expr4) (($data_units)) Native Curvilinear Plot"
         ENDIF
 
-        IF ($ferret_lon_modulo"1|1|0") THEN DEFINE SYMBOL ferret_curvi_quals MODULO
+        IF ($ferret_lon_modulo"1|1|0|yes>1|no>0|*>0") THEN DEFINE SYMBOL ferret_curvi_quals MODULO
         IF ($region_x_lo"0|*>1") THEN DEFINE SYMBOL ferret_curvi_quals \   
           ($ferret_curvi_quals)/HLIM=($region_x_lo):($region_x_hi)
         IF ($region_y_lo"0|*>1") THEN DEFINE SYMBOL ferret_curvi_quals \   
           ($ferret_curvi_quals)/VLIM=($region_y_lo):($region_y_hi)
 
-        IF ($region_z"0|*>1") THEN DEFINE SYMBOL ferret_curvi_quals  \   
-          ($ferret_curvi_quals)/($region_z)
-        IF ($region_t"0|*>1") THEN DEFINE SYMBOL ferret_curvi_quals  \   
-          ($ferret_curvi_quals)/($region_t)
+!        IF ($region_z"0|*>1") THEN DEFINE SYMBOL ferret_curvi_quals  \   
+!          ($ferret_curvi_quals)/($region_z)
+!        IF ($region_t"0|*>1") THEN DEFINE SYMBOL ferret_curvi_quals  \   
+!          ($ferret_curvi_quals)/($region_t)
         CANCEL SYMBOL ferret_use_graticule
 
      ENDIF  ! setup for NOT curv-to-rect regridding
