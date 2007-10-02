@@ -114,7 +114,7 @@ IF `($constraint_0_rhs"0|DJF>1|*>0")` THEN
 ENDIF
 
 IF `($constraint_0_rhs"0|JFM>1|*>0")` THEN 
-   DEFINE AXIS/T0=($time_org)/UNITS=months/T=1:`nmonths`:3 tseasd
+   DEFINE AXIS/T0=($time_org)/UNITS=months/T=1:`nmonths`:3 tseas
 ENDIF
 
 IF `($constraint_0_rhs"0|FMA>1|*>0)` THEN 
