@@ -16,7 +16,7 @@
  * DateWidget.js          Creates and populates a date Widget (group of Selectors).
  * LASRequest.js          Provides an API for accessing/modifying LASRequest elements.
  * LASResponse.js         Provides an API for accessing LASResponse elements.
- * LASGetGridResponse.js  Provides an API for accessing getGrid.do response elements.
+ * LASGrid.js             Provides an API for accessing LAS Grid elements.
  * LASContentCell.js      Creates and populates DOM elements according to content type.
  * LASSlideSorter.js      Creates a menu-controlled slide sorter of content cells
 -->
@@ -29,7 +29,7 @@
     <script type="text/javascript" src="JavaScript/components/DateWidget.js"></script>
     <script type="text/javascript" src="JavaScript/components/LASRequest.js"></script>
     <script type="text/javascript" src="JavaScript/components/LASResponse.js"></script>
-    <script type="text/javascript" src="JavaScript/components/LASGetGridResponse.js"></script>
+    <script type="text/javascript" src="JavaScript/components/LASGrid.js"></script>
     <script type="text/javascript" src="JavaScript/components/LASContentCell.js"></script>
     <script type="text/javascript" src="JavaScript/components/LASSlideSorter.js"></script>
     <script type="text/javascript">
@@ -60,12 +60,173 @@ function initializeLASSlideSorter() {
     document.getElementById('LSS_optionTextField').value = user_option;
   }
   
-  sendGetGridRequest();
+  // Get the JSON representation of the Grid associated with this
+  // dataset and variable.
+  ## The tepmlating language has no access to javascript variables
+  ## so we must get dsID and varID the 'template way'
+  #set($dsID = $las_request.datasetIDs.get(0))
+  #set($varID = $las_request.variableIDs.get(0))
+  #set($grid = $las_config.getGrid($dsID,$varID))
+  #set($grid_JSON = $grid.toJSON().toString())
+  var gridJSON = '$grid_JSON';
+
+  // First, make sure we can parse the LASResponse
+  var Grid;
+  var JSONObject;
+  try {
+    var JSONObject = gridJSON.parseJSON();
+  } catch(e) {
+    alert('Error parsing gridJSON as JSON.');
+    return;
+  }
+
+  try {
+    Grid = new LASGrid(JSONObject);
+  } catch(e) {
+    // TODO:  Create Error Cell with this text?
+    alert(e);
+    return;
+  }
+
+  // At this point we have what we hope is a valid Grid.
+
+  // Clear the LSSInitObject();
+  LSSInitObject = new Object();
+
+  // Define any 'ensemble' axis if present
+  ## Use the dsid and varid created earlier
+  #set($dsID = $las_request.datasetIDs.get(0))
+  #set($varID = $las_request.variableIDs.get(0))
+  #set($var = $las_config.getVariable($dsID,$varID))
+  #set($properties = $var.getProperties('ensemble'))
+  // Hack to check if the ensemble property is defined
+  #set($ensemble = 0)
+  #foreach ($property in $properties)
+    #set($ensemble = 1)
+  #end
+  #if ($ensemble)
+    #set($initial_value = $properties.get(0).getValue())
+  LSSInitObject["ensemble"] = new Object();
+  LSSInitObject["ensemble"].title = 'Ensemble';
+  LSSInitObject["ensemble"].initial_value = '$initial_value'
+  LSSInitObject["ensemble"].type = 'menuWidget';
+  menuContents = new Array;
+    #set($counter = 0)
+    #foreach ($property in $properties)
+      #set($member_dsID = $property.value)
+      #set($member_name = $las_config.getDataset($member_dsID).getName())
+  menuContents[$counter] = new Array('$member_name','$member_dsID');
+      #set($counter = $counter + 1)
+    #end
+  LSSInitObject["ensemble"].data = menuContents
+  #end
+
+  // Create the Longitude axis menus
+
+  if (view != 'x' && view != 'xy' && view != 'xz' && view != 'xt') {
+    if (Grid.hasAxis('x')) {
+      LSSInitObject["x"] = new Object();
+      LSSInitObject["x"].title = 'Longitude';
+      LSSInitObject["x"].initial_value = ReqImg.getRangeLo('x');
+      if (Grid.getAxis('x').v) {
+        LSSInitObject["x"].type = 'menuWidget';
+        LSSInitObject["x"].data = Grid.getMenu('x');
+      } else {
+// NOTE:  If it doesn't have a 'v' array it must have an 'arange'
+        LSSInitObject["x"].type = 'longitudeWidget';
+        LSSInitObject["x"].data = new Object();
+        LSSInitObject["x"].data.lo = Grid.getLo('x');
+        LSSInitObject["x"].data.hi = Grid.getHi('x');
+        LSSInitObject["x"].data.delta = Grid.getDelta('x');
+      }
+    }
+  }
+    
+  if (view != 'y' && view != 'xy' && view != 'yz' && view != 'yt') {
+    if (Grid.hasAxis('y')) {
+      LSSInitObject["y"] = new Object();
+      LSSInitObject["y"].title = 'Latitude';
+      LSSInitObject["y"].initial_value = ReqImg.getRangeLo('y');
+      if (Grid.getAxis('y').v) {
+        LSSInitObject["y"].type = 'menuWidget';
+        LSSInitObject["y"].data = Grid.getMenu('y');
+      } else {
+// NOTE:  If it doesn't have a 'v' array it must have an 'arange'
+        LSSInitObject["y"].type = 'latitudeWidget';
+        LSSInitObject["y"].data = new Object();
+        LSSInitObject["y"].data.lo = Grid.getLo('y');
+        LSSInitObject["y"].data.hi = Grid.getHi('y');
+        LSSInitObject["y"].data.delta = Grid.getDelta('y');
+      }
+    }
+  }
+    
+  if (view != 'z' && view != 'xz' && view != 'yz' && view != 'zt') {
+    if (Grid.hasAxis('z')) {
+      LSSInitObject["z"] = new Object();
+      LSSInitObject["z"].title = 'Depth';
+      LSSInitObject["z"].initial_value = ReqImg.getRangeLo('z');
+      LSSInitObject["z"].type = 'menuWidget';
+      LSSInitObject["z"].data = Grid.getMenu('z');
+    }
+  }
+
+  if (view != 't' && view != 'xt' && view != 'yt' && view != 'zt') {
+    if (Grid.hasAxis('t')) {
+      LSSInitObject["t"] = new Object();
+      LSSInitObject["t"].title = 'Time';
+      LSSInitObject["t"].initial_value = ReqImg.getRangeLo('t');
+      if (Grid.getDisplayType('t') == 'menu') {
+        LSSInitObject["t"].type = 'menuWidget';
+        LSSInitObject["t"].data = Grid.getMenu('t');
+      } else {
+// NOTE:  If it's not of type 'menu' it must be of type 'widget'
+        LSSInitObject["t"].type = 'dateWidget';
+        LSSInitObject["t"].render_format = Grid.getRenderFormat('t');
+        LSSInitObject["t"].data = new Object();
+        LSSInitObject["t"].data.lo = Grid.getLo('t');
+        LSSInitObject["t"].data.hi = Grid.getHi('t');
+      }
+    }
+  }
+
+  // Choose an initial menu
+
+  var initial_menu;
+
+  if (view.indexOf('t') == -1 && Grid.hasAxis('t')) {
+    initial_menu = 't';
+  } else {
+    if (view.indexOf('z') == -1 && Grid.hasAxis('z')) {
+      initial_menu = 'z';
+    } else {
+      if (view.indexOf('y') == -1 && Grid.hasAxis('y')) {
+        initial_menu = 'y';
+      } else {
+        if (view.indexOf('x') == -1 && Grid.hasAxis('x')) {
+          initial_menu = 'x';
+        }
+      }
+    }
+  }
+
+  if (!initial_menu) {
+
+    alert('This variable exists only on the axes used in the plot.  No comparison is possible with this variable');
+
+  } else {
+
+    // Reinitialize the SlideSorter
+    LSS = new LASSlideSorter(document.LASSlideSorterForm,LSSInitObject);
+    LSS.render("LASSlideSorter",2,2,initial_menu);
+  }
+
 }
 
 
 /**
  * Updates the LASRequest to reflect the current state of the user interface.
+ * @param AA AssociativeArray object of menu titles and user selected values
  * @return LASRequest
  */
 function createLASRequest(AA) {
@@ -93,6 +254,11 @@ function createLASRequest(AA) {
     ReqImg.setProperty('ferret','dep_axis_scale',user_option);
   } else {
     ReqImg.setProperty('ferret','fill_levels',user_option);
+  }
+
+  if (AA.ensemble) {
+    ReqImg.removeVariables()
+    ReqImg.addVariable(AA.ensemble,varid);
   }
 
   if (view != 'x' && view != 'xy' && view != 'xz' && view != 'xt') {
@@ -173,155 +339,9 @@ function handleLASResponse(LASResponseText,row,col) {
  */
 function applyOptions() {
   LSS.loadAllImages();
-  //sendGetGridRequest();
 }
 
-/**
- * Sends a getGrid request to the product server using Sarissa
- * method and registers handleLASGetGridResponse as a callback
- * routine.
- */
-function sendGetGridRequest() {
-  var url = 'getGrid.do?dsid=' + dsid + '&varid=' + varid;
-  var xmlhttp = new XMLHttpRequest();
-  xmlhttp.open('GET', url, true);
-  xmlhttp.onreadystatechange = function() {
-    if (xmlhttp.readyState == 4) {
-      handleLASGetGridResponse(xmlhttp.responseText);
-    }
-  }
-  xmlhttp.send(null);
-}
 
-/**
- * Handles the LASGetGridResponse returned from the XMLHTTP request,
- * creates the LSSInitObject and reinitializaes the LASSlideSorter.
- */
-function handleLASGetGridResponse(LASResponseText) {
-  // First, make sure we can parse the LASResponse
-  var Response;
-  var JSONObject;
-  try {
-    var JSONObject = LASResponseText.parseJSON();
-  } catch(e) {
-    alert('Error parsing LASResponseText as JSON.');
-    return;
-  }
-
-  try {
-    Response = new LASGetGridResponse(JSONObject);
-  } catch(e) {
-    // TODO:  Create Error Cell with this text?
-    alert(e);
-    return;
-  }
-
-  // At this point we have a valid JSON object.
-
-  // Clear the LSSInitObject();
-  LSSInitObject = new Object();
-
-  // Create the Longitude axis menus
-
-  if (view != 'x' && view != 'xy' && view != 'xz' && view != 'xt') {
-    if (Response.hasAxis('x')) {
-      LSSInitObject["x"] = new Object();
-      LSSInitObject["x"].title = 'Longitude';
-      LSSInitObject["x"].initial_value = ReqImg.getRangeLo('x');
-      if (Response.getAxis('x').v) {
-        LSSInitObject["x"].type = 'menuWidget';
-        LSSInitObject["x"].data = Response.getMenu('x');
-      } else {
-// NOTE:  If it doesn't have a 'v' array it must have an 'arange'
-        LSSInitObject["x"].type = 'longitudeWidget';
-        LSSInitObject["x"].data = new Object();
-        LSSInitObject["x"].data.lo = Response.getLo('x');
-        LSSInitObject["x"].data.hi = Response.getHi('x');
-        LSSInitObject["x"].data.delta = Response.getDelta('x');
-      }
-    }
-  }
-    
-  if (view != 'y' && view != 'xy' && view != 'yz' && view != 'yt') {
-    if (Response.hasAxis('y')) {
-      LSSInitObject["y"] = new Object();
-      LSSInitObject["y"].title = 'Latitude';
-      LSSInitObject["y"].initial_value = ReqImg.getRangeLo('y');
-      if (Response.getAxis('y').v) {
-        LSSInitObject["y"].type = 'menuWidget';
-        LSSInitObject["y"].data = Response.getMenu('y');
-      } else {
-// NOTE:  If it doesn't have a 'v' array it must have an 'arange'
-        LSSInitObject["y"].type = 'latitudeWidget';
-        LSSInitObject["y"].data = new Object();
-        LSSInitObject["y"].data.lo = Response.getLo('y');
-        LSSInitObject["y"].data.hi = Response.getHi('y');
-        LSSInitObject["y"].data.delta = Response.getDelta('y');
-      }
-    }
-  }
-    
-  if (view != 'z' && view != 'xz' && view != 'yz' && view != 'zt') {
-    if (Response.hasAxis('z')) {
-      LSSInitObject["z"] = new Object();
-      LSSInitObject["z"].title = 'Depth';
-      LSSInitObject["z"].initial_value = ReqImg.getRangeLo('z');
-      LSSInitObject["z"].type = 'menuWidget';
-      LSSInitObject["z"].data = Response.getMenu('z');
-    }
-  }
-
-  if (view != 't' && view != 'xt' && view != 'yt' && view != 'zt') {
-    if (Response.hasAxis('t')) {
-      LSSInitObject["t"] = new Object();
-      LSSInitObject["t"].title = 'Time';
-      LSSInitObject["t"].initial_value = ReqImg.getRangeLo('t');
-      if (Response.getDisplayType('t') == 'menu') {
-        LSSInitObject["t"].type = 'menuWidget';
-        LSSInitObject["t"].data = Response.getMenu('t');
-      } else {
-// NOTE:  If it's not of type 'menu' it must be of type 'widget'
-        LSSInitObject["t"].type = 'dateWidget';
-        LSSInitObject["t"].render_format = Response.getRenderFormat('t');
-        LSSInitObject["t"].data = new Object();
-        LSSInitObject["t"].data.lo = Response.getLo('t');
-        LSSInitObject["t"].data.hi = Response.getHi('t');
-      }
-    }
-  }
-
-  // Choose an initial menu
-
-  var initial_menu;
-
-  if (view.indexOf('t') == -1 && Response.hasAxis('t')) {
-    initial_menu = 't';
-  } else {
-    if (view.indexOf('z') == -1 && Response.hasAxis('z')) {
-      initial_menu = 'z';
-    } else {
-      if (view.indexOf('y') == -1 && Response.hasAxis('y')) {
-        initial_menu = 'y';
-      } else {
-        if (view.indexOf('x') == -1 && Response.hasAxis('x')) {
-          initial_menu = 'x';
-        }
-      }
-    }
-  }
-
-  if (!initial_menu) {
-
-    alert('This variable exists only on the axes used in the plot.  No comparison is possible with this variable');
-
-  } else {
-
-    // Reinitialize the SlideSorter
-    LSS = new LASSlideSorter(document.LASSlideSorterForm,LSSInitObject);
-    LSS.render("LASSlideSorter",2,2,initial_menu);
-  }
-
-}
   </script>
 
   <style type="text/css" media="all">
