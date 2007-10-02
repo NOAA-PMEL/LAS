@@ -115,7 +115,6 @@ ELSE
    LET sampled_on_month = SAMPLEL( mean_seas, S1_L_sample_centered)
    
    LET S1_seas_per_year = sampled_on_month[GT=timeax_years@ASN]
-   LIST S1_seas_per_year[T=1-JAN-1985:31-DEC-1989]
    
    DEFINE SYMBOL ferret_plot_var S1_seas_per_year
 
