@@ -93,12 +93,29 @@ IF ($result_map_scale_filename%0|*>1%) THEN
       LET syms_names = {"AX_HORIZ", "AX_HORIZ_POSTV", "AX_VERT", "AX_VERT_POSTV"}
 
       DEFINE SYMBOL the_axis =  `($DATA_0_VAR),RETURN=($ax_horiz)axis`
-      LET attlist = (($the_axis)).attnames
-      IF `IS_ELEMENT_OF_STR(attlist, "positive") GT 0` THEN \
+      IF `STRINDEX("($the_axis)", "(") GT 0` THEN 
+         LET attlist = ($the_axis).attnames
+         IF `IS_ELEMENT_OF_STR(attlist, "positive") GT 0` THEN \
+         DEFINE SYMBOL AX_HORIZ_POSTV = `($the_axis).positive`
+      ELSE
+         LET attlist = (($the_axis)).attnames
+         IF `IS_ELEMENT_OF_STR(attlist, "positive") GT 0` THEN \
          DEFINE SYMBOL AX_HORIZ_POSTV = `(($the_axis)).positive`
+      ENDIF
+      pause
 
       DEFINE SYMBOL the_axis =  `($DATA_0_VAR),RETURN=($ax_vert)axis`
-      LET attlist = (($the_axis)).attnames
+      IF `STRINDEX("($the_axis)", "(") GT 0` THEN 
+         LET attlist = ($the_axis).attnames
+         IF `IS_ELEMENT_OF_STR(attlist, "positive") GT 0` THEN \
+         DEFINE SYMBOL AX_VERT_POSTV = `($the_axis).positive`
+      ELSE
+         LET attlist = (($the_axis)).attnames
+         IF `IS_ELEMENT_OF_STR(attlist, "positive") GT 0` THEN \
+         DEFINE SYMBOL AX_VERT_POSTV = `(($the_axis)).positive`
+      ENDIF
+      pause
+
       IF `IS_ELEMENT_OF_STR(attlist, "positive") GT 0` THEN \
          DEFINE SYMBOL AX_VERT_POSTV = `(($the_axis)).positive`
 
