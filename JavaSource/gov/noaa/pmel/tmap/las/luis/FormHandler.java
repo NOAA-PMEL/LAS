@@ -401,7 +401,46 @@ public class FormHandler {
       mCompare = new SelectWidget(mBaseName + "_ops", null, mCompareItems);
       convertToStrings();
     }
+    VariableConstraintSelect(String formName,Integer index,
+    		Constraint constraint, DerivedCategory category)
+    		throws SQLException,ServletException {
 
+    	super(formName,index,constraint);
+    	Vector datasets  = DatasetItem.getItems(category.getParentid());
+    	Vector widgetItems = new Vector();
+    	for (Iterator i = DatasetItem.getItems(category.getParentid()).iterator();
+    	i.hasNext(); ){
+    		IWidgetItem wi = new DbaseWidgetItem("");
+    		DatasetItem ditem = (DatasetItem)i.next();
+    		String label = ditem.getName();
+    		if (label.length() > MAX_LABEL_LENGTH){
+    			label = label.substring(0, MAX_LABEL_LENGTH);
+    			label += "...";
+    		}
+    		wi.setLabel(label);
+    		wi.setValue(ditem.getVariableInfo().getUrl1());
+    		widgetItems.addElement(wi);
+    	}
+
+    	String wname = mBaseName + "_select";
+    	if (constraint.getStyle().equals("check")){
+    		mSelect = new RadioOrCheckWidget(wname,null,widgetItems);
+    	} else {
+    		mSelect = new SelectWidget(wname,null,widgetItems);
+    	}
+    	mSelect.addProperty("size", constraint.getSize());
+
+    	mText = new Text(mBaseName + "_text", null, "size=12");
+
+    	for (int i=0; i < mCompareOps.length; ++i){
+    		IWidgetItem wi = new DbaseWidgetItem("");
+    		wi.setValue(mCompareOpsValues[i]);
+    		wi.setLabel(mCompareOps[i]);
+    		mCompareItems.addElement(wi);
+    	}
+    	mCompare = new SelectWidget(mBaseName + "_ops", null, mCompareItems);
+    	convertToStrings();
+    }
     public void convertToStrings () {
       if (mCheck instanceof CheckBox){
         mResults.add("<b>Apply</b>:");
@@ -451,7 +490,36 @@ public class FormHandler {
       }
       convertToStrings();
     }
+    TextConstraintSelect(String formName,Integer index,
+    		Constraint constraint, DerivedCategory category)
+    		throws SQLException,ServletException {
+    	super(formName, index, constraint);
 
+    	int count = 0;
+    	Vector widgets = constraint.getWidgets();
+    	int size = widgets.size();
+    	for (Iterator i = widgets.iterator(); i.hasNext(); count++){
+    		ConstraintWidget widget = (ConstraintWidget)i.next();
+    		Vector items = widget.getItems();
+    		String wname = mBaseName + "_select_" + count;
+    		IFormWidget newWidget;
+    		if (widget.getStyle().equals("check")){
+    			newWidget = new RadioOrCheckWidget(wname, null, items);
+    		} else {
+    			newWidget = new SelectWidget(wname, null, items);
+    		}
+    		newWidget.addProperty("size", widget.getSize());
+    		if (size == count+1 && constraint.isMultiselect()){
+    			if (newWidget instanceof RadioOrCheckWidget){
+    				((RadioOrCheckWidget)newWidget).setCheck();
+    			} else {
+    				newWidget.addProperty("multiple");
+    			}
+    		}
+    		mWidgets.addElement(newWidget);
+    	}
+    	convertToStrings();
+    }
     public void convertToStrings() {
       if (mCheck instanceof CheckBox){
         mResults.add("<b>Apply</b>:");
@@ -479,7 +547,14 @@ public class FormHandler {
       mText = new Text(mBaseName + "_text", null, "size=12");
       convertToStrings();
     }
+    TextFieldConstraintSelect(String formName,Integer index,
+    		Constraint constraint, DerivedCategory category)
+    		throws SQLException,ServletException {
 
+    	super(formName,index,constraint);
+    	mText = new Text(mBaseName + "_text", null, "size=12");
+    	convertToStrings();
+    }
     public void convertToStrings() {
       if (mCheck instanceof CheckBox){
         mResults.add("<b>Apply</b>:");
@@ -833,6 +908,27 @@ public class FormHandler {
   public Vector constraintSelect(String formName, Integer index,
                                  Constraint constraint,
                                  Category category)
+    throws SQLException,ServletException {
+    String type = constraint.getType();
+    ConstraintSelect cs = null;
+    if (type.equals("variable")){
+      cs = new VariableConstraintSelect(formName,index,constraint, category);
+    } else if (type.equals("text")){
+      cs = new TextConstraintSelect(formName,index,constraint, category);
+    } else if (type.equals("textfield")){
+      cs = new TextFieldConstraintSelect(formName,index,constraint, category);
+    }
+    if (cs == null){
+      throw new SQLException("Unknown constraint type: " + type);
+    }
+    return cs.getWidgetList();
+  }
+  /**
+   * Create widgets for selecting constraints
+   */
+  public Vector constraintSelect(String formName, Integer index,
+                                 Constraint constraint,
+                                 DerivedCategory category)
     throws SQLException,ServletException {
     String type = constraint.getType();
     ConstraintSelect cs = null;

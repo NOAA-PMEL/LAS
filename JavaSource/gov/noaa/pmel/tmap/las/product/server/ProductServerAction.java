@@ -556,57 +556,75 @@ public final class ProductServerAction extends Action {
                 request.setAttribute("las_region_index", lasRegionIndex);
             }
         }
-        // Put the webrowset result into the output context if one exists.
-        String driver = lasRequest.getProperty("database_access", "driver");
-        WebRowSet webrowset;
-        try {
-            if ( driver.contains("oracle") ) {
-               webrowset = new OracleWebRowSet();
-            } else {
-               webrowset = new WebRowSetImpl();
-            }
-        } catch (Exception e) {
-            logerror(request, "Unable to create webrowset: ", e);
-            return mapping.findForward("error");
-        }
-        
-        if ( compoundResponse.isResultByTypeRemote("webrowset")) {
-            String rowset_url = compoundResponse.getResult("webrowset");
-            if (rowset_url != null && !rowset_url.equals("") ) {
-                try {
-                    URL index = new URL(rowset_url);
-                    BufferedReader in = new BufferedReader(
-                            new InputStreamReader(index.openStream()));
-                    webrowset.readXml(in);
-                } catch (MalformedURLException e) {
-                    logerror(request, "Error parsing the webrowset file.", e);
-                    return mapping.findForward("error");
-                } catch (IOException e) {
-                    logerror(request, "Error parsing the webrowset file.", e);
-                    return mapping.findForward("error");
-                } catch (SQLException e) {
-                	logerror(request, "Error parsing the webrowset file.", e);
-                    return mapping.findForward("error");
-				}
-            }            
+        if (compoundResponse.isResultByTypeRemote("webrowset") || !compoundResponse.getResultAsFileByType("webrowset").equals("")) {
+          	// Put the webrowset result into the output context if one exists.
 
-        } else {
-            String webrowsetFileName = compoundResponse.getResultAsFileByType("webrowset");
-            if ( !webrowsetFileName.equals("")) {
-                
-                try {
-					FileReader in = new FileReader(new File(webrowsetFileName));
-					webrowset.readXml(in);
-				} catch (FileNotFoundException e) {
-					logerror(request, "Error parsing the webrowset file.", e);
-                    return mapping.findForward("error");
-				} catch (SQLException e) {
-					logerror(request, "Error parsing the webrowset file.", e);
-                    return mapping.findForward("error");
+        	String db_type;
+			try {
+				LASBackendRequest db_request = productRequest.getRequestByService("database");
+				db_type = "mysql";
+				if ( db_request != null ) {
+					db_type = db_request.getDatabaseProperty("db_type");
 				}
-                // Put these objects in the context so the output template can use them.
-                request.setAttribute("las_webrowset", webrowset);
-            }
+			} catch (JDOMException e) {
+				logerror(request, "Unable to create webrowset.  Can't find db_type: ", e);
+        		return mapping.findForward("error");
+			} catch (LASException e) {
+				logerror(request, "Unable to create webrowset.  Can't find db_type: ", e);
+        		return mapping.findForward("error");
+			}           
+        	WebRowSet webrowset;
+        	try {
+        		if ( db_type.contains("oracle") ) {
+        			webrowset = new OracleWebRowSet();
+        			System.setProperty("javax.xml.parsers.SAXParserFactory","com.sun.org.apache.xerces.internal.jaxp.SAXParserFactoryImpl");
+        		} else {
+        			webrowset = new WebRowSetImpl();
+        		}
+        	} catch (Exception e) {
+        		logerror(request, "Unable to create webrowset: ", e);
+        		return mapping.findForward("error");
+        	}
+        	if ( compoundResponse.isResultByTypeRemote("webrowset")) {
+
+
+        		String rowset_url = compoundResponse.getResult("webrowset");
+        		if (rowset_url != null && !rowset_url.equals("") ) {
+        			try {
+        				URL index = new URL(rowset_url);
+        				BufferedReader in = new BufferedReader(
+        						new InputStreamReader(index.openStream()));
+        				webrowset.readXml(in);
+        			} catch (MalformedURLException e) {
+        				logerror(request, "Error parsing the webrowset file.", e);
+        				return mapping.findForward("error");
+        			} catch (IOException e) {
+        				logerror(request, "Error parsing the webrowset file.", e);
+        				return mapping.findForward("error");
+        			} catch (SQLException e) {
+        				logerror(request, "Error parsing the webrowset file.", e);
+        				return mapping.findForward("error");
+        			}
+        		}            
+
+        	} else {
+        		String webrowsetFileName = compoundResponse.getResultAsFileByType("webrowset");
+        		if ( !webrowsetFileName.equals("")) {
+
+        			try {
+        				FileReader in = new FileReader(new File(webrowsetFileName));
+        				webrowset.readXml(in);
+        			} catch (FileNotFoundException e) {
+        				logerror(request, "Error parsing the webrowset file.", e);
+        				return mapping.findForward("error");
+        			} catch (SQLException e) {
+        				logerror(request, "Error parsing the webrowset file.", e);
+        				return mapping.findForward("error");
+        			}
+        			// Put these objects in the context so the output template can use them.
+        			request.setAttribute("las_webrowset", webrowset);
+        		}
+        	}
         }
         // Remove the runner from the servlet context.
         servlet.getServletContext().removeAttribute("sessions_"+productRequest.getCacheKey());

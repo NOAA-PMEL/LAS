@@ -7,6 +7,8 @@ import gov.noaa.pmel.tmap.las.jdom.LASBackendResponse;
 import gov.noaa.pmel.tmap.las.jdom.LASConfig;
 import gov.noaa.pmel.tmap.las.jdom.LASUIRequest;
 import gov.noaa.pmel.tmap.las.product.server.ProductServerAction;
+import gov.noaa.pmel.tmap.las.util.Grid;
+import gov.noaa.pmel.tmap.las.util.GridTo;
 
 import java.io.File;
 import java.io.UnsupportedEncodingException;
@@ -161,23 +163,21 @@ public class ProductRequest {
         if ( props != null ) {
             requestProperties = (Element)props.clone();
         }
-
+        String view = lasRequest.getProperty("ferret", "view");
         // Add the response information to the request xml.
-
+        
         Element response = (Element)operation.getChild("response");
         Element backendResponse = new Element("backend_response");
 
         Element argsE = lasRequest.getRootElement().getChild("args");
         Element dataObjectsE = new Element("dataObjects");
+        ArrayList<String> datasetList = new ArrayList<String>();
         if ( argsE != null ) {
             List args = argsE.getChildren();		    
             if ( args != null ) {
                 int region_index = 0;		
                 // TODO eventually this might be extracted from a property some how.
-                String gridToURL = "";
-                String gridToVar = "";
-                String gridToVarXPath = "";
-                String gridToDSID = "";
+                GridTo gridTo = new GridTo();
                 int var_count=0;
                 for (Iterator argsIt = args.iterator(); argsIt.hasNext();) {
                     Element arg = (Element) argsIt.next();
@@ -283,43 +283,77 @@ public class ProductRequest {
                             // We are here because the data is not from a chained operation.
                             // However, it may be a user defined variable, part of an operation that requires
                             // regriding or both or neither.  :-)
+                            
+                            String current_url = lasConfig.getDataObjectURL(varXPath);
+                            String current_var = lasConfig.getVariableName(varXPath);
+                            String current_title = lasConfig.getVariableTitle(varXPath);
+                            
+                            String current_dsID = lasConfig.getVariableByXPath(varXPath).getDSID();
+                            String current_gridID = lasConfig.getGrid(varXPath).getID();
+                            
+                            if ( !datasetList.contains(current_dsID) ) {
+                            	datasetList.add(current_dsID);
+                            } 
+                            int dataset_number = datasetList.indexOf(current_dsID)+1;
 
                             // Neither is the easiest
                             if ( !regrid && !do_analysis ) {                               
-                                data.setAttribute("url",lasConfig.getDataObjectURL(varXPath));
-                                data.setAttribute("var",lasConfig.getVariableName(varXPath));
-                                data.setAttribute("title", lasConfig.getVariableTitle(varXPath));
+                                data.setAttribute("url",current_url);
+                                data.setAttribute("var",current_var);
+                                data.setAttribute("title", current_title);
                                 data.setAttribute("xpath", varXPath);
                             } else if ( !regrid && do_analysis ) {
-                                setAnalysisURL(analysis, data, lasConfig, lasRequest, varXPath, var_count);                               
+                            	// Send in all the gridTo junk, but it won't get used.  
+                            	// This will all be redone in the next implementation when this moves to it's own service/class.
+                                setAnalysisURL(analysis, data, lasConfig, lasRequest, varXPath, var_count, dataset_number);                               
                             } else if ( regrid && !do_analysis ) {
+                            	
                                 if ( dataObjectsE.getChildren("data").size() <= 0 ) {
+                                	
+                                	// TODO set up the gridTo.AxisNeeded !!!!
+                                	
                                     // We're going to regrid.  Access first data variable via FDS
-                                    gridToURL = lasConfig.getTFDSURL(varXPath);
-                                    data.setAttribute("url", gridToURL);
-                                    gridToVar = lasConfig.getVariableName(varXPath);
-                                    gridToVarXPath = varXPath;
-                                    gridToDSID = lasConfig.getDatasetAttributes(varXPath).get("ID");
-                                    data.setAttribute("var",gridToVar);
+                                    gridTo.setURL(lasConfig.getTFDSURL(varXPath));
+                                    gridTo.setGridID(lasConfig.getGrid(varXPath).getID());
+                                    data.setAttribute("url", gridTo.getURL());
+                                    gridTo.setVar(lasConfig.getVariableName(varXPath));
+                                    gridTo.setVarXPath(varXPath);
+                                    gridTo.setDsID(lasConfig.getDatasetAttributes(varXPath).get("ID"));
+                                    data.setAttribute("var",gridTo.getVar());
                                     data.setAttribute("title", lasConfig.getVariableTitle(varXPath));
+                                    gridTo.setData(data);
                                 } else {
                                     // Use regrid all others to same grid as first, but
                                     // only if the URL is different.
 
-                                    String current_url = lasConfig.getTFDSURL(varXPath);
-
-                                    if ( !gridToURL.equals(current_url) ) {
+                                    if ( !gridTo.getGridID().equals(current_gridID) ) {
 
                                         String var = lasConfig.getVariableName(varXPath);
                                         String expression = "";
                                         try {
-                                            expression = URLEncoder.encode("_expr_{"+lasConfig.getTFDSURL(varXPath)+"}{let "+var+"_regrid="+var+"[d="+var_count+",gxy="+gridToVar+"[d=1]]}", "UTF-8");
+                                        	// The inner URL of the expression must be encoded separately.
+                                        	String encoded = URLEncoder.encode(lasConfig.getTFDSURL(varXPath), "UTF-8");
+                                        	String g = "g"+view;
+                                        	if (gridTo.isAnalysis()) {
+                                        		StringBuffer jnl = gridTo.getJnl();
+                                        		jnl.append(";let "+var+"_"+var_count+"_regrid="+var+"[d="+dataset_number+","+g+"="+gridTo.getVar()+"[d=1]]}");
+                                        		// Get the original URL for the gridTo data set and append the new combined analysis and regrid URL.
+                                        		String expr = URLEncoder.encode("_expr_{"+encoded+"}{"+jnl.toString(), "UTF-8");
+                                        		String comboURL = lasConfig.getTFDSURL(gridTo.getVarXPath())+expr;                                       			
+                                        		data.setAttribute("url", comboURL);
+                                        		// Retroactively set the gridTo data URL to be the same.  This means that both URL will use the same cache area in F-TDS.
+                                        		gridTo.getData().setAttribute("url", comboURL);
+                                        		gridTo.setURL(gridTo.getData().getAttributeValue("url"));
+                                        	} else {                                        		
+                                                expression = URLEncoder.encode("_expr_{"+encoded+"}{let "+var+"_"+var_count+"_regrid="+var+"[d="+dataset_number+","+g+"="+gridTo.getVar()+"[d=1]]}", "UTF-8");
+                                                data.setAttribute("url", gridTo.getURL()+expression);
+                                        	}
                                         } catch (UnsupportedEncodingException e) {
                                             expression = ""; 
                                         }
-                                        data.setAttribute("url", gridToURL+expression);
-                                        data.setAttribute("var", var+"_regrid");
-                                        data.setAttribute("title", lasConfig.getVariableTitle(varXPath)+"on the grid of "+gridToVar+"[d=1]");
+                                        
+                                        data.setAttribute("var", var+"_"+var_count+"_regrid");
+                                        data.setAttribute("title", lasConfig.getVariableTitle(varXPath)+" on the grid of "+gridTo.getVar()+"[d=1]");
                                     } else {
                                         // It's the same data set so use it as normal.
                                         data.setAttribute("url",current_url);
@@ -330,8 +364,49 @@ public class ProductRequest {
                                 }
 
                             } else if ( regrid && do_analysis ) {
-                                // Shouldn't be hard.  Build the analysis variable then, add the information that specifies the new grid.
-                                throw new LASException("Sorry, regridding on user defined variables is not yet implemented.");
+                            	// Create the analyzed variable then set the gridTo information to use it.
+                            	StringBuffer jnl = setAnalysisURL(analysis, data, lasConfig, lasRequest, varXPath, var_count, dataset_number);
+                                if ( dataObjectsE.getChildren("data").size() <= 0 ) {
+                                	gridTo.setJnl(jnl);
+                                    gridTo.setURL(data.getAttributeValue("url"));
+                                    gridTo.setVar(lasConfig.getVariableName(varXPath)+"_"+var_count+"_regrid");                                   
+                                    gridTo.setGridID(lasConfig.getGrid(varXPath).getID());
+                                    gridTo.setVarXPath(varXPath);
+                                    gridTo.setDsID(lasConfig.getDatasetAttributes(varXPath).get("ID"));
+                                    gridTo.setData(data);
+                                    gridTo.setAnalysis(true);
+                                } else {
+                                	
+                                	String var = lasConfig.getVariableName(varXPath);
+                                    String expression = "";
+                                    String encoded = URLEncoder.encode(lasConfig.getTFDSURL(varXPath), "UTF-8");
+                                    if ( !gridTo.getGridID().equals(current_gridID) ) {
+                                    	String g = "g"+view;
+                                    	if (gridTo.isAnalysis()) {                                    		
+                                    		StringBuffer analysis_jnl = gridTo.getJnl();
+                                    		analysis_jnl.append(";"+jnl);
+                                    		var = data.getAttributeValue("var");
+                                    		String revar = var+"_"+var_count+"_regrid";
+                                    		data.setAttribute("var", revar);
+                                    		analysis_jnl.append(";let "+revar+"="+var+"[d="+dataset_number+","+g+"="+gridTo.getVar()+"[d=1]]}");
+                                    		// Get the original URL for the gridTo data set and append the new combined analysis and regrid URL.
+                                    		String expr = URLEncoder.encode("_expr_{"+encoded+"}{"+analysis_jnl.toString(), "UTF-8");
+                                    		String comboURL = lasConfig.getTFDSURL(gridTo.getVarXPath())+expr;                                       			
+                                    		data.setAttribute("url", comboURL);
+                                    		// Retroactively set the gridTo data URL to be the same.  This means that both URL will use the same cache area in F-TDS.
+                                    		gridTo.getData().setAttribute("url", comboURL);
+                                    		gridTo.setURL(gridTo.getData().getAttributeValue("url"));
+                                    	} else {    
+                                    		var = data.getAttributeValue("var");
+                                    		jnl.append(";let "+var+"_"+var_count+"_regrid="+var+"[d="+dataset_number+","+g+"="+gridTo.getVar()+"[d=1]]");
+                                    		expression = URLEncoder.encode("_expr_{"+encoded+"}"+"{"+jnl.toString()+"}", "UTF-8");
+                                    		data.setAttribute("url", gridTo.getURL()+expression);
+                                    		data.setAttribute("var", var+"_"+var_count+"_regrid");
+                                    		//data.setAttribute("title", "Transformed Variable");
+                                    		data.setAttribute("title", lasConfig.getVariableTitle(varXPath)+"on the grid of "+gridTo.getVar()+"[d=1]");
+                                    	}
+                                    }
+                                }
                             }
 
 
@@ -352,7 +427,7 @@ public class ProductRequest {
                                     // The url attribute is special; don't mess with.
                                     if ( !attrib.getName().equals("url")) {
                                         // This gets things like units and any other attributes
-                                        // with unknown sematics that get added in the future.
+                                        // with unknown semantics that get added in the future.
                                         data.setAttribute((Attribute)attrib.clone());
                                     }
                                 }                    
@@ -557,6 +632,11 @@ public class ProductRequest {
 
     }
 
+	private void setAxes(Grid grid, Element analysis, GridTo gridTo) {
+		// TODO Auto-generated method stub
+		
+	}
+
 	/**
      * Builds the _expr_ analysis URL.
      * @param analysis
@@ -568,7 +648,7 @@ public class ProductRequest {
      * @throws LASException
      * @throws UnsupportedEncodingException
      */
-    private void setAnalysisURL(Element analysis, Element data, LASConfig lasConfig, LASUIRequest lasReequest, String varXPath, int var_count) throws JDOMException, LASException, UnsupportedEncodingException {
+    private StringBuffer setAnalysisURL(Element analysis, Element data, LASConfig lasConfig, LASUIRequest lasReequest, String varXPath, int var_count, int dataset_number) throws JDOMException, LASException, UnsupportedEncodingException {
         String var = lasConfig.getVariableName(varXPath);
         
         String key = JDOMUtils.MD5Encode(varXPath);
@@ -598,6 +678,7 @@ public class ProductRequest {
             } else {
             	grid = grid+","+type+"="+lo+":"+hi+"@"+op;
             }
+            
             if ( type.equals("x") ) {
             	xhi = Double.valueOf(hi).doubleValue();
             	xlo = Double.valueOf(hi).doubleValue();
@@ -675,9 +756,9 @@ public class ProductRequest {
                 jnl.append("let analysis_mask = if rose_on_grid gt 0 then 1;");           
             }
             jnl.append("let masked_"+var+"="+var+"[d="+var_count+"]*analysis_mask;");
-            jnl.append("let "+var+"_regrid=masked_"+var+"[d="+var_count+grid+"];");
+            jnl.append("let "+var+"_"+var_count+"_regrid=masked_"+var+"[d="+dataset_number+grid+"];");
         } else {
-            jnl.append("let "+var+"_regrid="+var+"[d="+var_count+grid+"]");
+            jnl.append("let "+var+"_"+var_count+"_regrid="+var+"[d="+dataset_number+grid+"]");
         }
 
         String fdsURL = lasConfig.getTFDSURL(varXPath);
@@ -689,13 +770,18 @@ public class ProductRequest {
         }
         fdsURL = fdsURL+expression;
         data.setAttribute("url", fdsURL);
-        data.setAttribute("var",var+"_regrid");
+        data.setAttribute("var",var+"_"+var_count+"_regrid");
         String title = analysis.getAttributeValue("label")+" ["+grid+"]";
         // Clean out junk that might make Ferret mad...
         title = title.replaceAll(",", " ");
         title = title.replaceAll("\""," ");
         title = title.replaceAll(";", " ");
+        
         data.setAttribute("title",title);
+        //data.setAttribute("title", "Transformed Variable");
+        // For cases that combine analysis and regridding we have to
+        // accumulate the contents of the script.
+        return jnl;
 
     }
 
@@ -1252,5 +1338,15 @@ public class ProductRequest {
     public void setLasRequest(LASUIRequest lasRequest) {
         this.lasRequest = lasRequest;
     }
+
+	public LASBackendRequest getRequestByService(String service) throws JDOMException, LASException {
+		for (Iterator reqIt = requestXML.iterator(); reqIt.hasNext();) {
+			LASBackendRequest request = (LASBackendRequest) reqIt.next();
+			if ( request.getService().equals(service) ) {
+				return request;
+			}
+		}
+		return null;
+	}
 
 }
