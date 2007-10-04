@@ -1,0 +1,119 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>14-user-defined-regular-different-dataset</title>
+</head>
+<body>
+<table cellpadding="1" cellspacing="1" border="1">
+<thead>
+<tr><td rowspan="1" colspan="3">14-user-defined-regular-different-dataset</td></tr>
+</thead><tbody>
+<tr>
+	<td>deleteCookie</td>
+	<td>JSESSIONID</td>
+	<td>/las</td>
+</tr>
+<tr>
+	<td>open</td>
+	<td>/las/servlets/dataset</td>
+	<td></td>
+</tr>
+<tr>
+	<td>clickAndWait</td>
+	<td>link=COADS climatology</td>
+	<td></td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>variables</td>
+	<td></td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>document.main.variables[3]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>clickAndWait</td>
+	<td>link=Define variable</td>
+	<td></td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>document.analysis.axis_select[2]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>select</td>
+	<td>t_hi_0</td>
+	<td>label=15-Jun</td>
+</tr>
+<tr>
+	<td>clickAndWait</td>
+	<td>link=Next &gt;</td>
+	<td></td>
+</tr>
+<tr>
+	<td>clickAndWait</td>
+	<td>//area</td>
+	<td></td>
+</tr>
+<tr>
+	<td>clickAndWait</td>
+	<td>link=Dataset 2</td>
+	<td></td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>link=NCEP Monthly Pacific Ocean Analysis Data at Multiple Depths served by IRI</td>
+	<td></td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>variables</td>
+	<td></td>
+</tr>
+<tr>
+	<td>clickAndWait</td>
+	<td>link=Next &gt;</td>
+	<td></td>
+</tr>
+<tr>
+	<td>select</td>
+	<td>compare_t_lo_2</td>
+	<td>label=1982</td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>link=Next &gt;</td>
+	<td></td>
+</tr>
+<tr>
+	<td>pause</td>
+	<td>4000</td>
+	<td></td>
+</tr>
+<tr>
+	<td>waitForPopUp</td>
+	<td>data</td>
+	<td>30000</td>
+</tr>
+<tr>
+	<td>pause</td>
+	<td>4000</td>
+	<td></td>
+</tr>
+<tr>
+	<td>selectWindow</td>
+	<td>data</td>
+	<td></td>
+</tr>
+<tr>
+	<td>assertElementPresent</td>
+	<td>//img[@alt='Plot Image']</td>
+	<td></td>
+</tr>
+
+</tbody></table>
+</body>
+</html>
