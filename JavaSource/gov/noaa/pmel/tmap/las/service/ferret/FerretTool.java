@@ -237,7 +237,11 @@ public class FerretTool extends TemplateTool{
             	
             }
             lasBackendResponse.setError("las_message", error_message);
-            lasBackendResponse.addError("exception_message", stderr+"\n"+output);
+            try {
+            	lasBackendResponse.addError("exception_message", stderr+"\n"+output);
+            } catch (Exception e) {
+            		lasBackendResponse.addError("exception_message", "Check debug output file for details.");
+            }
             return lasBackendResponse;
         }
 

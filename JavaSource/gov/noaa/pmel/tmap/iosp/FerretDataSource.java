@@ -59,8 +59,9 @@ public class FerretDataSource implements DatasetSource {
         if ( expressions.size() == 2 ) {
             if ( !expressions.get(0).trim().equals("") ) {
                 String[] urls = expressions.get(0).split(",");
-                for ( int i = 0; i < urls.length; i++ ) {
-                    jnl.append("use \""+urls[i]+"\"\n");
+                for ( int i = 0; i < urls.length; i++ ) { 
+                	String dataURL = URLDecoder.decode(urls[i], "UTF-8");
+                    jnl.append("use \""+dataURL+"\"\n");
                 }
             }
             if ( !expressions.get(1).trim().equals("") ) {
@@ -73,9 +74,14 @@ public class FerretDataSource implements DatasetSource {
             if ( !expressions.get(0).trim().equals("") ) {
                 String[] urls = expressions.get(0).split(",");
                 for ( int i = 0; i < urls.length; i++ ) {
-                    jnl.append("use \""+urls[i]+"\"\n");
+                	String dataURL = URLDecoder.decode(urls[i], "UTF-8");
+                    jnl.append("use \""+dataURL+"\"\n");
                 }
             }
+        } else if ( expressions.size() == 0 ) {
+        	throw new IOException("Expression parsing failed for this URL. "+url+" Now expressions found inside the curly brackets.");
+        } else if ( expressions.size() > 2 ) {
+        	throw new IOException("Expression parsing failed for this URL. "+url+" Too many expressions found.");
         }
         
         String key = JDOMUtils.MD5Encode(jnl.toString());

@@ -1358,15 +1358,19 @@ public class LASConfig extends LASDocument {
         return value;
     }
     /**
-     * Get grid for a particular dataset and variable.
-     * 
-     * @param dsid the id of the desired data set
-     * @param varid the id if the desired variable
-     * @return grid the Grid object with up to for Axes
-     * @throws JDOMException 
+     * Get the grid of a variable from its XPath
+     * @param varXPath
+     * @return
+     * @throws JDOMException
+     * @throws LASException
      */
-    public Grid getGrid(String dsID, String varID) throws JDOMException, LASException {
-        Element variable = getElementByXPath("/lasdata/datasets/dataset[@ID='"+dsID+"']/variables/variable[@ID='"+varID+"']");
+    public Grid getGrid(String varXPath) throws JDOMException, LASException {
+    	if (!varXPath.contains("@ID")) {
+            String[] parts = varXPath.split("/");
+            // Throw away index 0 since the string has a leading "/".
+            varXPath = "/"+parts[1]+"/"+parts[2]+"/dataset[@ID='"+parts[3]+"']/"+parts[4]+"/variable[@ID='"+parts[5]+"']";
+        }
+    	Element variable = getElementByXPath(varXPath);
         ArrayList<Element> axes_list = new ArrayList<Element>();
         Element gridE = null;
         if (variable != null) {
@@ -1393,6 +1397,17 @@ public class LASConfig extends LASDocument {
         } else {
         	throw new LASException("The grid was empty.");
         }
+    }
+    /**
+     * Get grid for a particular dataset and variable.
+     * 
+     * @param dsid the id of the desired data set
+     * @param varid the id if the desired variable
+     * @return grid the Grid object with up to for Axes
+     * @throws JDOMException 
+     */
+    public Grid getGrid(String dsID, String varID) throws JDOMException, LASException {
+        return getGrid("/lasdata/datasets/dataset[@ID='"+dsID+"']/variables/variable[@ID='"+varID+"']");
     }
     /**
 	 * Get the grid_type for the variable (regular, scattered, ...)
@@ -2631,16 +2646,6 @@ public class LASConfig extends LASDocument {
             }
         }
         return variables;
-    }
-    /**
-     * Returns a single variable from a given a dataset as a pmel.tmap.las.util.Variable object.
-     * @param dsID ID of the dataset that contains the variable
-     * @param varID ID of the variable
-     * @return variable Variable object
-     */
-    public Variable getVariable(String dsID, String varID) throws JDOMException {
-        String variableXPath = "/lasdata/datasets/dataset[@ID='"+dsID+"']/variables/variable[@ID='"+varID+"']";
-        return getVariableByXPath(variableXPath);
     }
     /**
      * Returns list of variables give a dataset

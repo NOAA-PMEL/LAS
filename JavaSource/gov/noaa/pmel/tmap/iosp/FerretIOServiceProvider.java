@@ -13,6 +13,8 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -549,7 +551,7 @@ public class FerretIOServiceProvider implements IOServiceProvider {
     }
     
     public static void main(String[] args) {
-        
+        /*
         try {
             log.debug("Registering gov.noaa.pmel.tmap.iosp.FerretIOServiceProvider");
             NetcdfFile.registerIOProvider("gov.noaa.pmel.tmap.iosp.FerretIOServiceProvider");
@@ -563,10 +565,36 @@ public class FerretIOServiceProvider implements IOServiceProvider {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-        
+        */
         //String filename = "http://porter.pmel.noaa.gov:8920/thredds/dodsC/las/coads_climatology_cdf/data_coads_climatology.jnl";
-        String filename = "/home/porter/rhs/data/coads_climatology.cdf";
+        //String filename = "/home/porter/rhs/data/coads_climatology.cdf";
+    	
+    	String filename = "http://porter.pmel.noaa.gov:8920/thredds/dodsC/las/NOAA_NCEP_EMC_CMB_Ocean_Analysis_ml/data__iridl.ldeo.columbia.edu_SOURCES_.NOAA_.NCEP_.EMC_.CMB_.Pacific_.monthly_dods.jnl";
+    	
+        
+        //String filename = "http://strider.weathertopconsulting.com:8880/thredds/dodsC/las/coads_climatology_cdf/data_coads_climatology.jnl";
+        //String expr = 		"_expr_{levitus_climatology}{let airt_regrid=airt[d=1,t=\"15-Jan\":\"15-Dec\"@ave];let temp_regrid=temp[d=2,gxy=airt_regrid[d=1]]}";
+        String inner = "http://porter.pmel.noaa.gov:8920/thredds/dodsC/las/levitus_climatology_cdf/coads_climatology_cdf.jnl";
+        String ninner = "";
+        try {
+			ninner = URLEncoder.encode(inner, "UTF-8");
+		} catch (UnsupportedEncodingException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+        String expr = 		"_expr_{"+ninner+"}{let temp_1_regrid=temp[d=1,z=5.00:75.00@ave];let sst_2_regrid=sst[d=2,t=\"15-Jan\":\"15-Mar\"@ave];let sst_2_regrid_2_regrid=sst_2_regrid[d=2,gxy=temp_1_regrid[d=1]]}";
+        try {
+			filename = filename + URLEncoder.encode(expr, "UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
         NetcdfDataset ncd = null;
+        if ( filename.startsWith("http")) {
+        	System.out.println(filename);
+        	//System.exit(0);
+        }
         try {
           log.debug("Calling openDataset");
           ncd = NetcdfDataset.openDataset(filename);
