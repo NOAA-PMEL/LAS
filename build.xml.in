@@ -88,6 +88,7 @@
     <war jarfile="${app.name}.war" webxml="WebContent/WEB-INF/web.xml">
        <classes dir="WebContent/WEB-INF/classes" includes="**"/>
        <fileset dir="WebContent">
+          <include name="examples/**"/>
           <include name="classes/**"/>
           <include name="productserver/**"/>
           <include name="fds/**"/>
