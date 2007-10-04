@@ -55,10 +55,31 @@ LET tsiz = `tt,RETURN=lsize`
 LET n1 = `S1_the_plot_var,RETURN=lstart`
 LET nn = `S1_the_plot_var,RETURN=lend`
 
+! Correction if the dataset time axis does not start in January.
+LET first_month_data = TAX_MONTH(`tt[L=1]`, tt)
+
+LET loffset = `($ferret_season_center) - ( 1+INT(season_length/2) ) - (first_month_data-1)`
+IF `loffset LT 0` THEN 
+   LET loffset = `loffset + 12`
+   DEFINE SYMBOL offset_year_1 = 1
+ENDIF
+   
+!IF `STRINDEX ( UPCASE("($ferret_view)"), "T") EQ 0` THEN 
+!   LET n1 = MAX(1, `n1 - ($ferret_season_length)` )
+!   LET nn = MIN(
+
+! Get the string corresponding to the month at the center.
+LET months = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"}
+DEFINE SYMBOL mon1 = `months[I=($ferret_season_center)]`
+
 ! If the season length is 1, we just need to set up some striding.
-IF `season_length EQ 1` THEN
-   DEFINE SYMBOL ferret_plot_var S1_the_plot_var[L=($ferret_season_center):`tsiz`:12]
-   DEFINE SYMBOL ferret_plot_title ($ferret_plot_title) (($ferret_season_length)-month sampling, every ($mon1))
+IF `season_length EQ 1  AND STRINDEX("($ferret_view)", "t") NE 0` THEN
+   sho sym ferret_plot_var
+   LET S1_the_plot_var = ($ferret_xyz_var)
+   DEFINE SYMBOL ferret_plot_var S1_the_plot_var[L=`n1+loffset`:`nn`:12]
+   DEFINE SYMBOL ferret_plot_title ($ferret_plot_title) every ($mon1)
+
+   pause
 ELSE
 
 ! Define a variable containing the indices that correspond to the data we 
@@ -67,59 +88,47 @@ ELSE
 ! so if possible start before the first year in the region, or start at 
 ! the end of year 1.
 
-! Correction if the dataset time axis does not start in January.
-   LET first_month_data = TAX_MONTH(`tt[L=1]`, tt)
-
-   LET loffset = `($ferret_season_center) - ( 1+INT(season_length/2) ) - (first_month_data-1)`
-   IF `loffset LT 0` THEN 
-      IF `n1 GT 12` THEN 
-         LET n1 = `n1-12`
-      ELSE
-         LET loffset = `loffset + 12`
-      ENDIF
-      DEFINE SYMBOL offset_year_1 = 1
-   ENDIF
    
 ! Create the list of indices corresponding to the months to be averaged. tsiz 
 ! is the length of the entire axis, so mask that for the region of time that 
 ! is in effect.
 
-   LET S1_L_months_for_seas = TSEQUENCE(k[k=1:`season_length`] + 12*(l[l=1:`INT(tsiz/12)`]-1) + loffset)
-   LET time_mask1 = IF S1_L_months_for_seas GT n1 THEN 1
-   LET time_mask = time_mask1* (IF S1_L_months_for_seas LE nn THEN S1_L_months_for_seas)
+   LET S1_L_indx = TSEQUENCE(k[k=1:`season_length`] + 12*(l[l=1:`INT(tsiz/12)`]-1) + loffset)
+   LET time_mask1 = IF S1_L_indx GE n1 THEN 1
+   LET time_mask = time_mask1* (IF S1_L_indx LE nn THEN S1_L_indx)
    LET nmsk =` time_mask[L=@ngd]`
-   LET S1_mask_for_tregion = COMPRESSL(time_mask)
+   LET S1_L_indx_T = COMPRESSL(time_mask)
 
-! Sampe the variable at only the months that will be used in the avgs.
-   LET S1_months_for_seas = SAMPLEL(S1_the_plot_var,S1_mask_for_tregion[l=1:`nmsk`])
+! Sample the variable at only the months that will be used in the avgs.
+   LET S1_seas_months = SAMPLEL(S1_the_plot_var,S1_L_indx_T[l=1:`nmsk`])
+   LET tsample = SAMPLEL(t[gt=S1_the_plot_var],S1_L_indx_T[l=1:`nmsk`])
 
-! Define boxcar average; only the center of each season will be saved.
-   LET mean_seas = S1_months_for_seas[T=@SBX:`season_length`]
+   DEFINE AXIS/T/T0="`tt,RETURN=t0`"/UNITS=`tt,RETURN=tunits` taxis_sampled = tsample
+   LET s1_to_average = S1_seas_months[gt=taxis_sampled@ASN]
 
 ! Index list, once per year on the correct month
-   LET S1_L_sample_centered = `1+INT(season_length/2)` + `season_length`*( L[L=1:`INT(tsiz/12)`] - 1  )
 
-! Define a time axis, yearly on the month where seasons are centered.
-   LET t1 = tt[L=`n1`]
-   DEFINE SYMBOL y1 = `TAX_YEAR(t1, tt)`
-   IF `($offset_year_1"0") EQ 1` THEN DEFINE SYMBOL y1 = `($y1) + 1`
-   LET ylast = TAX_YEAR(tt[L=`nn`], tt)
-   DEFINE SYMBOL yn = `ylast`
-   
-   LET months = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"}
-   DEFINE SYMBOL mon1 = `months[I=($ferret_season_center)]`
-   DEFINE AXIS/T="15-($mon1)-($y1)":"15-($mon1)-($yn)":12/UNITS=month timeax_years
+   IF `loffset LT 0` THEN LET loffset = `loffset + 12`
+   LET L1 = 1+INT(season_length/2)
 
-! Sample the averaged data at the center of each average, and 
-! put the sampled data onto this axis.
-   LET sampled_on_month = SAMPLEL( mean_seas, S1_L_sample_centered)
-   
-   LET S1_seas_per_year = sampled_on_month[GT=timeax_years@ASN]
-   
+   DEFINE AXIS/T/T0="`tt,RETURN=t0`"/UNITS=`tt,RETURN=tunits` timeax_years = tsample[L=`(1+INT(season_length/2))`:`NMSK`:($ferret_season_length)]
+   DEFINE AXIS/T/T0="`tt,RETURN=t0`"/UNITS=`tt,RETURN=tunits` timeax_years = tsample[L=`L1`:`NMSK`:($ferret_season_length)]
+
+! Average from the n-Month-per-year axis to once per year.
+! Weight by the box sizes from the original time axis.
+
+   LET boxes = tbox[gt=tt]
+   LET boxes_sampled = SAMPLEL(boxes,S1_L_indx_T[l=1:`nmsk`])
+   LET weights = boxes_sampled[gt=taxis_sampled@ASN]
+
+   LET S1_weighted = s1_to_average*weights
+   LET S1 = S1_weighted[GT=timeax_years@SUM]
+   LET weight_sum = weights[GT=timeax_years@SUM]
+   LET S1_seas_per_year = S1/weight_sum
+
    DEFINE SYMBOL ferret_plot_var S1_seas_per_year
 
 ! Add information to the title
    DEFINE SYMBOL ferret_plot_title ($ferret_plot_title) (($ferret_season_length)-month ave, every ($mon1))
 
 ENDIF  ! Season length longer than 1
-
