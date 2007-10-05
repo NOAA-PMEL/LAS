@@ -40,7 +40,8 @@ public class LASMapScale extends LASDocument {
                 5    /  5: "PPL$XMIN"   "62.50"
                 6    /  6: "PPL$XMAX"   "348.5"
                 7    /  7: "PPL$YMIN"   "-64.50"
-                8    /  8: "PPL$YMAX"   "74.50"          
+                8    /  8: "PPL$YMAX"   "74.50"    
+                      
                  */
 
                 // 
@@ -63,6 +64,12 @@ public class LASMapScale extends LASDocument {
                 "PPL$WIDTH"     "12.19"
                 "PPL$HEIGHT"    "7.602"
                 "PPL$XORG"      "1.200"
+                "VP_TOP_MARGIN" "1.4"       
+                "VP_RT_MARGIN"  "1"         
+                "AX_HORIZ"       "X"   
+                "AX_HORIZ_POSTV" " "   
+                "AX_VERT"        "Z"   
+                "AX_VERT_POSTV"  "down"
                  */
                 else {
                     // Just split on the quotes
@@ -162,8 +169,6 @@ public class LASMapScale extends LASDocument {
         }
 
 
-
-
         Element map_scaleE = new Element("map_scale");
         this.setRootElement(map_scaleE);
         map_scaleE.addContent(makeElement("x_pixels_per_inch", xppi));
@@ -180,11 +185,22 @@ public class LASMapScale extends LASDocument {
         map_scaleE.addContent(makeElement("y_axis_lower_left", axisLLY));
         map_scaleE.addContent(makeElement("x_axis_upper_right", axisURX));
         map_scaleE.addContent(makeElement("y_axis_upper_right", axisURY));
+        map_scaleE.addContent(makeElement("axis_horizontal", scale.get("AX_HORIZ")));
+        map_scaleE.addContent(makeElement("axis_vertical", scale.get("AX_VERT")));
+        map_scaleE.addContent(makeElement("axis_vertical_positive", scale.get("AX_VERT_POSTV")));
+        map_scaleE.addContent(makeElement("axis_horizontal_positive", scale.get("AX_HORIZ_POSTV")));
+        
     }
     
     private Element makeElement(String name, float value) {
         Element element = new Element(name);
         element.setText(String.valueOf(value));
+        return element;
+    }
+    
+    private Element makeElement(String name, String value) {
+        Element element = new Element(name);
+        element.setText(value);
         return element;
     }
     
@@ -229,5 +245,17 @@ public class LASMapScale extends LASDocument {
     }
     public String getYAxisUpperRight() {
         return this.getRootElement().getChildTextTrim("y_axis_upper_right");
+    }
+    public String getAxis_horizontal() {
+    	return this.getRootElement().getChildText("axis_horizontal");
+    }
+    public String getAxis_vertical() {
+    	return this.getRootElement().getChildText("axis_vertical");
+    }
+    public String getAxis_vertical_positive() {
+    	return this.getRootElement().getChildText("axis_vertical_positive");
+    }
+    public String getAxis_horizontal_positive() {
+    	return this.getRootElement().getChildText("axis_horizontal_positive");
     }
 }
