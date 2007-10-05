@@ -77,7 +77,9 @@ DEFINE SYMBOL mon1 = `months[I=($ferret_season_center)]`
 
 IF `season_length EQ 1` THEN
    LET S1_the_plot_var = ($ferret_xyz_var)
-! 1 time step in result region, Choose nearest ferret_season_center month.
+! 1 time step in result region, choose the month specified for the season_center which
+! is closest to the month chosen on the time widget.
+
    IF `nn EQ n1` THEN 	
       IF `STRINDEX("($ferret_view)", "t") EQ 0` THEN 
          LET L1 = n1 + loffset - (first_month_selected-1)
@@ -137,15 +139,17 @@ ELSE
 
    LET boxes = tbox[gt=tt]
    LET boxes_sampled = SAMPLEL(boxes,S1_L_indx_T[l=1:`nmsk`])
+   LET s1_mask = IF s1_to_average THEN 1
    LET weights = boxes_sampled[gt=taxis_sampled@ASN]
+   LET weights2D = s1_mask * boxes_sampled
 
-   LET S1_weighted = s1_to_average*weights
-   LET S1 = S1_weighted[GT=timeax_years@SUM]
-   LET weight_sum = weights[GT=timeax_years@SUM]
-   LET S1_seas_per_year = S1/weight_sum
+   LET S1_weighted = s1_to_average*weights2D
+   LET S1_sum = S1_weighted[GT=timeax_years@SUM]
+   LET weight_sum = weights2D[GT=timeax_years@SUM]
+   LET S1_seas_per_year = S1_sum/weight_sum 
 
    DEFINE SYMBOL ferret_plot_var S1_seas_per_year
-
+pause
 ! Add information to the title
    DEFINE SYMBOL ferret_plot_title ($ferret_plot_title) (($ferret_season_length)-month ave, every ($mon1))
 
