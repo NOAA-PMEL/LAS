@@ -17,29 +17,35 @@
 !
 ! If there is a long URL, put URLs at the top, and use dataset names
 ! in the title
+! 
+! 10-Oct-2007 Remove extra units labels from 2nd dataset. Allow for one dataset
+! to be a URL and  the other a simple dataset name. Add upper-left label for
+! locations or times normal to the plot, previously missed if region was defined 
+! for variable 2 but not variable 1
 
 DEFINE SYMBOL ferret_diff_title = \
 @AC($ferret_title_0) from ($data_0_dataset_name)(1) \
-<NL> -  @P2($ferret_title_1)(($data_1_units)) from ($data_1_dataset_name)(2)
+<NL> -  @P2($ferret_title_1)) from ($data_1_dataset_name)(2)
 
 DEFINE SYMBOL ferret_over_title = \
 @AC($ferret_title_0) from ($data_0_dataset_name)(1) \
-<NL>  @P2($ferret_title_1)(($data_1_units)) from ($data_1_dataset_name)(2)
+<NL>  @P2($ferret_title_1)) from ($data_1_dataset_name)(2)
 
 IF `STRLEN("($ferret_diff_title)") GT 150` THEN
   DEFINE SYMBOL ferret_diff_title = ($ferret_title_0) from \
-  <NL>  ($data_0_dataset_name)(1) <NL> -  @P2($ferret_title_1)(($data_1_units)) from \
+  <NL>  ($data_0_dataset_name)(1) <NL> -  @P2($ferret_title_1)) from \
   <NL>  ($data_1_dataset_name)(2)
   DEFINE SYMBOL title_size 0.12   ! make title text smaller...
 ENDIF
 
 IF `STRLEN("($ferret_over_title)") GT 150` THEN
   DEFINE SYMBOL ferret_over_title = ($ferret_title_0) from \
-  <NL>  ($data_0_dataset_name)(1) <NL>  @P2($ferret_title_1)(($data_1_units)) from \
+  <NL>  ($data_0_dataset_name)(1) <NL>  @P2($ferret_title_1)) from \
   <NL>  ($data_1_dataset_name)(2)
   DEFINE SYMBOL title_size 0.12   ! make title text smaller...
 ENDIF
-! Set the upper-left labels
+
+! Set the upper-left labels, locations/time normal to the plot 
 
 IF `($n_left_labels"0|*>1") EQ 0` THEN DEFINE SYMBOL n_left_labels = 0
 
@@ -49,6 +55,9 @@ IF `STRINDEX("($plotshape)", "X") EQ 0` THEN
    IF ($region_0_x_lo"0|*>1") THEN
       DEFINE SYMBOL n_left_labels = `($n_left_labels)+1`
       DEFINE SYMBOL upper_left_($n_left_labels) = "Longitude(1): ($region_0_x_lo) @P2Longitude(2): ($region_1_x_lo)"
+   ELIF ($region_1_x_lo"0|*>1") THEN 
+      DEFINE SYMBOL n_left_labels = `($n_left_labels)+1`
+      DEFINE SYMBOL upper_left_($n_left_labels) = "Longitude(2): ($region_1_x_lo)"
    ENDIF
 ENDIF
 
@@ -56,6 +65,9 @@ IF `STRINDEX("($plotshape)", "Y") EQ 0` THEN
    IF ($region_0_y_lo"0|*>1") THEN 
       DEFINE SYMBOL n_left_labels = `($n_left_labels)+1`
       DEFINE SYMBOL upper_left_($n_left_labels) = "Latitude(1): ($region_0_y_lo) @P2Latitude(2): ($region_1_y_lo)"
+   ELIF ($region_1_y_lo"0|*>1") THEN 
+      DEFINE SYMBOL n_left_labels = `($n_left_labels)+1`
+      DEFINE SYMBOL upper_left_($n_left_labels) = "Latitude(2): ($region_1_y_lo)"
    ENDIF
 ENDIF
 
@@ -63,6 +75,9 @@ IF `STRINDEX("($plotshape)", "Z") EQ 0` THEN
    IF ($region_0_z_lo"0|*>1") THEN
       DEFINE SYMBOL n_left_labels = `($n_left_labels)+1`
       DEFINE SYMBOL upper_left_($n_left_labels) = "Depth(1): ($region_0_z_lo) @P2Depth(2): ($region_1_z_lo)"
+   ELIF ($region_1_z_lo"0|*>1") THEN 
+      DEFINE SYMBOL n_left_labels = `($n_left_labels)+1`
+      DEFINE SYMBOL upper_left_($n_left_labels) = "Depth(2): ($region_1_z_lo)"
    ENDIF
 ENDIF
 
@@ -70,6 +85,9 @@ IF `STRINDEX("($plotshape)", "T") EQ 0` THEN
    IF ($region_0_t_lo"0|*>1") THEN 
       DEFINE SYMBOL n_left_labels = `($n_left_labels)+1`
       DEFINE SYMBOL upper_left_($n_left_labels) = "Time(1): ($region_0_t_lo) @P2TIME(2): ($region_1_t_lo)"
+   ELIF ($region_1_t_lo"0|*>1") THEN 
+      DEFINE SYMBOL n_left_labels = `($n_left_labels)+1`
+      DEFINE SYMBOL upper_left_($n_left_labels) = "TIME(2): ($region_1_t_lo)"
    ENDIF
 ENDIF
 
@@ -95,12 +113,14 @@ IF `STRINDEX("($data_0_url)","http") NE 0` THEN
    ENDIF
 
    DEFINE SYMBOL n_right_labels = `($n_right_labels)+1`
-   DEFINE SYMBOL upper_right_($n_right_labels) = "DODS URL: @AC($data_0_urlpath)/"
+   DEFINE SYMBOL upper_right_($n_right_labels) = "@ACDODS URL: ($data_0_urlpath)/"
    IF `last_slash_0 EQ 0` THEN \
-      DEFINE SYMBOL upper_right_($n_right_labels) = "DODS URL: @AC($data_0_urlpath)"
+      DEFINE SYMBOL upper_right_($n_right_labels) = @AC"DODS URL: ($data_0_urlpath)"
 
    IF `STRCMP("($data_0_urlpath)", "($data_1_urlpath)") NE 0` THEN   ! different URLs   
-      DEFINE SYMBOL upper_right_($n_right_labels) = "DODS URL: @AC($data_0_urlpath)/(1)"
+      DEFINE SYMBOL upper_right_($n_right_labels) = "@ACDODS URL: ($data_0_urlpath)/(1)"
       DEFINE SYMBOL n_right_labels = `($n_right_labels)+1`
-      DEFINE SYMBOL upper_right_($n_right_labels) = "@P2          @AC($data_1_urlpath)/(2)"
+      DEFINE SYMBOL upper_right_($n_right_labels) = "@P2@AC          ($data_1_urlpath)/(2)"
    ENDIF
+
+ENDIF
