@@ -57,6 +57,7 @@ LET nn = `S1_the_plot_var,RETURN=lend`
 
 ! Correction if the dataset time axis does not start in January.
 LET first_month_data = TAX_MONTH(`tt[L=1]`, tt)
+LET first_month_selected = tax_month(tt[L=`n1`], tt)
 
 LET loffset = `($ferret_season_center) - ( 1+INT(season_length/2) ) - (first_month_data-1)`
 IF `loffset LT 0` THEN 
@@ -73,11 +74,28 @@ LET months = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oc
 DEFINE SYMBOL mon1 = `months[I=($ferret_season_center)]`
 
 ! If the season length is 1, we just need to set up some striding.
-IF `season_length EQ 1  AND STRINDEX("($ferret_view)", "t") NE 0` THEN
-   sho sym ferret_plot_var
+
+IF `season_length EQ 1` THEN
    LET S1_the_plot_var = ($ferret_xyz_var)
-   DEFINE SYMBOL ferret_plot_var S1_the_plot_var[L=`n1+loffset`:`nn`:12]
-   DEFINE SYMBOL ferret_plot_title ($ferret_plot_title) every ($mon1)
+! 1 time step in result region, Choose nearest ferret_season_center month.
+   IF `nn EQ n1` THEN 	
+      IF `STRINDEX("($ferret_view)", "t") EQ 0` THEN 
+         LET L1 = n1 + loffset - (first_month_selected-1)
+         IF `ABS( first_month_selected-($ferret_season_center) ) GT 6` THEN  
+            IF `first_month_selected GT ($ferret_season_center)` THEN LET L1 = `L1+12`
+            IF `first_month_selected LT ($ferret_season_center)` THEN LET L1 = `L1-12`
+            IF `L1 GT tsiz` THEN LET L1 = tsiz
+            IF `L1 LT 1` THEN LET L1 = 1
+         ENDIF
+      ENDIF
+      DEFINE SYMBOL ferret_plot_var S1_the_plot_var[L=`L1`]
+      DEFINE SYMBOL ferret_plot_title ($ferret_plot_title) every ($mon1)
+   ELSE
+      LET L1 = n1 - first_month_selected
+      LET L1 = `n1 + loffset - (first_month_selected-1)`
+      DEFINE SYMBOL ferret_plot_var S1_the_plot_var[L=`L1`:`nn`:12]
+      DEFINE SYMBOL ferret_plot_title ($ferret_plot_title) every ($mon1)
+   ENDIF
 
    pause
 ELSE
