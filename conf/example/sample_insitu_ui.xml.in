@@ -42,6 +42,7 @@
 	    <item values="Data_Extract,txt,20">Table of values (text)</item>
 	    <item values="Data_Extract_netCDF,cdf,20">NetCDF file</item>
 	    <item values="Data_Extract_File,asc,20">ASCII file</item>
+	    <item values="Zoomable_image,html,20">Interactive Color plot</item>
 	    <item values="Gen_Scripts,html,20">Desktop application data access scripts</item>
             <item values="Animation_2D,txt,2">Animation</item>
 	</menu>
@@ -51,6 +52,7 @@
             <item values="Data_Extract,txt,20">Table of values (text)</item>
             <item values="Data_Extract_netCDF,cdf,20">NetCDF file</item>
             <item values="Data_Extract_File,asc,20">ASCII file</item>
+	    <item values="Zoomable_image,html,20">Interactive Color plot</item>
             <item values="Gen_Scripts,html,20">Desktop application data access scripts</item>
             <item values="Animation_1D,txt,2">Animation</item>
         </menu>
@@ -260,7 +262,8 @@
             <ifoptions op="Animation_2D" href="#Options_2D_image_contour_animation"/>
             <ifoptions op="Animation_1D" href="#Options_1D_Animation"/>
             <ifoptions op="XY_zoomable_image" href="#Options_2D_image_contour_xy"/>
-             <ifoptions op="Grid_GE_kml" href="#Options_1D_Animation"/>
+            <ifoptions op="Zoomable_image" href="#Options_2D_image_contour_xy"/>
+            <ifoptions op="Grid_GE_kml" href="#Options_1D_Animation"/>
             <options href=""/>
         </map>
         <map type="ops" name="DefaultOperations_HybridZ">

@@ -6,7 +6,7 @@
 <head>
 <title>LAS Output -- $las_config.getTitle()</title>
 
-#set($use_ref_map=$las_request.getProperty("ferret", "use_ref_map"))
+#set($use_refmap=$las_request.getProperty("ferret", "use_ref_map"))
 </head>
 
 <body onload="initializeLASRequest(); loadMap()">
@@ -65,10 +65,8 @@ var previousXRegionsLo = new Array();
 var previousYRegionsLo = new Array();
 var previousXRegionsHi = new Array();
 var previousYRegionsHi = new Array();
-var axisLow = "";
-var axisHi = "";
-
-
+#set($axVert = $las_map_scale.getAxis_vertical())
+#set($axHoriz = $las_map_scale.getAxis_horizontal())
 
 
 
@@ -103,7 +101,7 @@ function evalMyRequest (request) {
 function loadMap (){
 var zoomButton = document.getElementById('zoom_button');
 if (zoomButton) {
-   zoomButton.style["display"] = "none"
+   zoomButton.style["display"] = "none";
 }
 var args = {
                    'DOMNode' : document.getElementById('img_body'), // the container Node
@@ -131,6 +129,7 @@ var args = {
                        }
                   };
 myMapWidget = new MapWidget(args);
+if (needToInvertYaxisValues()) myMapWidget.plot_area.invertY = "true";
 }
 
 
@@ -172,6 +171,7 @@ function eval2(strJson) {
 // document.getElementById('img_body').innerHTML = "";
  myMapWidget = {};
  myMapWidget = new MapWidget(args);
+if (needToInvertYaxisValues()) myMapWidget.plot_area.invertY = "true";
 
 /*
 * if this isn't the first plot, show the zoom out button
@@ -182,7 +182,7 @@ function eval2(strJson) {
    zoomButton.style["display"] = "block"
    document.getElementById('zoomInfo').style["display"]="none";
   } else {
-   zoomButton.style["display"] = "none"
+   zoomButton.style["display"] = "none";
    document.getElementById('zoomInfo').style["display"]="block";
  }
 }
@@ -196,29 +196,44 @@ function initializeLASRequest() {
 
 }
 
+
+function needToInvertYaxisValues() {
+   var view = Req.getProperty('ferret','view');
+   if (view == 'xz' || view == 'yz'  || view == 'zt') {
+     return 1;
+   } else {
+	return 0;
+   }
+}
+
+
 function submitXML() {
 
 /*
 * figure out what view this and use the axis values (ie x or y), to get the ranges.  Not 
-`* really needed for the XY zoom, but leave it in because we will need for other views
+* really needed for the XY zoom, but leave it in because we will need for other views
 */
 
+  var view = Req.getProperty('ferret','view');
   if ((myMapWidget.extents.selection.grid.x.min == myMapWidget.extents.selection.grid.x.max) || (myMapWidget.extents.selection.grid.y.min == myMapWidget.extents.selection.grid.y.max)) {
-    alert ("Please select an XY region, and not a line");
+    alert ("Please select a " + view + " region, and not a line");
   } else {
-    var view = Req.getProperty('ferret','view');
-    axisLow = view.substr(0,1);
-    axisHi = view.substr(1,1);
+
+    #set($axVert = $las_map_scale.getAxis_vertical())
+    #set($axHoriz = $las_map_scale.getAxis_horizontal())
+    
+    if ("$axVert.toLowerCase()" == "z") myMapWidget.plot_area.invertY = "true";
     if (myMapWidget.extents.selection.grid.x.min) {
-     previousXRegionsLo.push(Req.getRangeLo(axisLow));
-     previousXRegionsHi.push(Req.getRangeHi(axisLow));
-     previousYRegionsLo.push(Req.getRangeLo(axisHi));
-     previousYRegionsHi.push(Req.getRangeHi(axisHi));
-     Req.setRange(axisLow,myMapWidget.extents.selection.grid.x.min,myMapWidget.extents.selection.grid.x.max);
-     Req.setRange(axisHi,myMapWidget.extents.selection.grid.y.min,myMapWidget.extents.selection.grid.y.max);
+     
+     previousXRegionsLo.push(Req.getRangeLo("$axHoriz.toLowerCase()"));
+     previousXRegionsHi.push(Req.getRangeHi("$axHoriz.toLowerCase()"));
+     previousYRegionsLo.push(Req.getRangeLo("$axVert.toLowerCase()"));
+     previousYRegionsHi.push(Req.getRangeHi("$axVert.toLowerCase()"));
+     Req.setRange("$axHoriz.toLowerCase()",myMapWidget.extents.selection.grid.x.min,myMapWidget.extents.selection.grid.x.max);
+     Req.setRange("$axVert.toLowerCase()",myMapWidget.extents.selection.grid.y.min,myMapWidget.extents.selection.grid.y.max);
     }
    
-    Req.setOperation('XY_2D_zoom','LAS7');
+    Req.setOperation('Zoom_2D','LAS7');
     var URL = './ProductServer.do?xml=' + escape(Req.getXMLText());
     evalMyRequest(URL);
   }
@@ -229,9 +244,9 @@ function submitXML() {
 */
 function submitZoomOutXML() {
 
-     Req.setRange(axisLow,previousXRegionsLo.pop(),previousXRegionsHi.pop());
-     Req.setRange(axisHi,previousYRegionsLo.pop(),previousYRegionsHi.pop());
-     Req.setOperation('XY_2D_zoom','LAS7');
+     Req.setRange("$axHoriz.toLowerCase()",previousXRegionsLo.pop(),previousXRegionsHi.pop());
+     Req.setRange("$axVert.toLowerCase()",previousYRegionsLo.pop(),previousYRegionsHi.pop());
+     Req.setOperation('Zoom_2D','LAS7');
      var URL = './ProductServer.do?xml=' + escape(Req.getXMLText());
      evalMyRequest(URL);
 

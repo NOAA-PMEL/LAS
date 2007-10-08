@@ -1286,6 +1286,31 @@
 
 <!-- End: interactive 2d XY plot additions -->
 
+<!-- Begin: interactive plot additions -->
+    <operation name="2D Plot" ID="Zoom_2D" output_template="newImageInfo" service_action="Plot_2D">
+          <service>ferret</service>
+          <response ID="PlotResp">
+             <result type="image" ID="plot_image" streamable="true" mime_type="image/png"/>
+             <result type="ps" ID="plot_postscript" streamable="true" mime_type="application/postscript"/>
+             <result type="image" ID="ref_map"/>
+             <result type="map_scale" ID="map_scale"/>
+             <result type="debug" ID="debug"/>
+             <result type="cancel" ID="cancel"/>
+          </response>
+    </operation>
+    <operation name="2D Zoom" ID="Zoomable_image" output_template="zoom_2D" service_action="Plot_2D">
+          <service>ferret</service>
+          <response ID="PlotResp">
+             <result type="image" ID="plot_image" streamable="true" mime_type="image/png"/>
+             <result type="ps" ID="plot_postscript" streamable="true" mime_type="application/postscript"/>
+             <result type="image" ID="ref_map"/>
+             <result type="map_scale" ID="map_scale"/>
+             <result type="debug" ID="debug"/>
+             <result type="cancel" ID="cancel"/>
+          </response>
+    </operation>
+
+<!-- End: interactive 2d plot additions -->
 
 
 
