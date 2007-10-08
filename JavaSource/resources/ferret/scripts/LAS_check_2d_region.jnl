@@ -341,7 +341,7 @@ IF `STRINDEX("($viewshape)", "XT") GT 0` THEN
       LET tt = T[GT=($data_var),d=($data_num)]
       LET tlo = `TT[T=($region_t_lo)@ITP]`
       LET thi = `TT[T=($region_t_hi)@ITP]`
-      IF `STRCMP("($region_t_lo)", "($region_t_hi)") NE 0` THEN DEFINE SYMBOL qualifiers = 
+      IF `STRCMP("($region_t_lo)", "($region_t_hi)") NE 0` THEN DEFINE SYMBOL qualifiers = \
         ($qualifiers)/VLIM=`tlo`:`thi`
 
       IF ($region_yz"0|*>1") THEN
