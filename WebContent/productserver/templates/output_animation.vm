@@ -321,8 +321,8 @@ function animation()
         document.write("    <INPUT TYPE=\"button\" Value=\" |< \" onClick=\"go2image(first_image)\"> ");
         document.write("    <INPUT TYPE=\"button\" Value=\" -1 \" onClick=\"go2image(--current_image)\"> ");
    //document.write("    <INPUT TYPE=\"button\" Value=\" < \"  onClick=\"rev()\"> ");
-        document.write("    <INPUT TYPE=\"button\" Value=\" || \" onClick=\"stop()\"> ");
-        document.write("    <INPUT TYPE=\"button\" Value=\" > \"  onClick=\"fwd()\"> ");
+        document.write("    <INPUT TYPE=\"button\" Value=\" || \" STYLE=\"color:white; background-color:red; \" onClick=\"stop()\"> ");
+        document.write("    <INPUT TYPE=\"button\" Value=\" > \"  STYLE=\"color:white; background-color:green; \" onClick=\"fwd()\"> ");
         document.write("    <INPUT TYPE=\"button\" Value=\" +1 \" onClick=\"go2image(++current_image)\"> ");
         document.write("    <INPUT TYPE=\"button\" Value=\" >| \" onClick=\"go2image(last_image)\"> ");
         document.write(" <BR><BR> ");
@@ -332,7 +332,7 @@ function animation()
         document.write("    </SELECT> ");
         document.write("    <INPUT TYPE=\"text\" NAME=\"frame_nr\" VALUE=\"1\" SIZE=\"5\" ");
         document.write("     onFocus=\"this.select()\" onChange=\"go2image(this.value)\"> ");
-        document.write("    &nbsp; Speed(Fr./S)<INPUT TYPE=\"button\" Value=\" - \" onClick=\"change_speed(-1)\"> ");
+        document.write("    &nbsp; Speed <INPUT TYPE=\"button\" Value=\" - \" onClick=\"change_speed(-1)\"> ");
         document.write("    <INPUT TYPE=\"text\" NAME=\"speed_nr\" VALUE=\"8\" SIZE=\"4\"> ");
         document.write("    <INPUT TYPE=\"button\" Value=\" + \" onClick=\"change_speed(1)\"> ");
         document.write(" </FORM> ");
