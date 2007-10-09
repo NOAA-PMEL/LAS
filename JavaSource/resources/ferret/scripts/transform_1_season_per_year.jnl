@@ -55,6 +55,7 @@ LET tsiz = `tt,RETURN=lsize`
 LET n1 = `S1_the_plot_var,RETURN=lstart`
 LET nn = `S1_the_plot_var,RETURN=lend`
 
+
 ! Correction if the dataset time axis does not start in January.
 LET first_month_data = TAX_MONTH(`tt[L=1]`, tt)
 LET first_month_selected = tax_month(tt[L=`n1`], tt)
@@ -99,8 +100,38 @@ IF `season_length EQ 1` THEN
       DEFINE SYMBOL ferret_plot_title ($ferret_plot_title) every ($mon1)
    ENDIF
 
-   pause
 ELSE
+
+
+
+! When there is just one time in the result, redefine S1_the_plot_var and the 
+! index range for the time axis. The computation will use an expanded time range
+! and then sample from that the desired output time.
+
+   IF `nn EQ n1` THEN
+      DEFINE SYMBOL ferret_expand_time = 1
+      IF `STRINDEX("($ferret_view)", "t") EQ 0` THEN 
+         LET S1_the_plot_var = ($ferret_xyz_var)
+         IF `($REGION_X_LO) LT 0` THEN
+            LET S1_the_plot_var =  ($data_var)[d=($data_num),($region_x_p360)]
+            IF ($region_y"0|*>1") THEN \
+              LET S1_the_plot_var =  ($data_var)[d=($data_num),($region_x_p360),($region_y)]
+            IF `($region_y"0|*>1") AND ($region_z"0|*>1")` THEN \
+               LET S1_the_plot_var = ($data_var)[d=($data_num),($region_x_p360),($region_y)],($region_z)]
+         ENDIF
+   
+         LET L1 = n1 + loffset - (first_month_selected-1)
+         IF `first_month_selected GT ($ferret_season_center) AND first_month_selected-($ferret_season_center) LT 6` THEN LET L1 = `L1-12`
+         IF `L1 GT tsiz` THEN LET L1 = tsiz
+         IF `L1 LT 1` THEN LET L1 = 1
+         LET nn = `L1 + 24`
+         LET n1 = `L1`
+         IF `L1 EQ tsiz` THEN
+            LET n1 = `L1 - 24`
+            LET nn = `L1`
+         ENDIF
+      ENDIF
+   ENDIF
 
 ! Define a variable containing the indices that correspond to the data we 
 ! need for the seasonal averages. Start with the first month needed; if
@@ -116,7 +147,7 @@ ELSE
    LET S1_L_indx = TSEQUENCE(k[k=1:`season_length`] + 12*(l[l=1:`INT(tsiz/12)`]-1) + loffset)
    LET time_mask1 = IF S1_L_indx GE n1 THEN 1
    LET time_mask = time_mask1* (IF S1_L_indx LE nn THEN S1_L_indx)
-   LET nmsk =` time_mask[L=@ngd]`
+   LET nmsk = MAX(1, `time_mask[L=@ngd]`)
    LET S1_L_indx_T = COMPRESSL(time_mask)
 
 ! Sample the variable at only the months that will be used in the avgs.
@@ -139,8 +170,8 @@ ELSE
 
    LET boxes = tbox[gt=tt]
    LET boxes_sampled = SAMPLEL(boxes,S1_L_indx_T[l=1:`nmsk`])
-   LET s1_mask = IF s1_to_average THEN 1
    LET weights = boxes_sampled[gt=taxis_sampled@ASN]
+   LET s1_mask = IF s1_to_average THEN 1
    LET weights2D = s1_mask * boxes_sampled
 
    LET S1_weighted = s1_to_average*weights2D
@@ -149,7 +180,8 @@ ELSE
    LET S1_seas_per_year = S1_sum/weight_sum 
 
    DEFINE SYMBOL ferret_plot_var S1_seas_per_year
-pause
+   IF ($ferret_expand_time"0|*>1) THEN DEFINE SYMBOL ferret_plot_var S1_seas_per_year[($region_t)]
+
 ! Add information to the title
    DEFINE SYMBOL ferret_plot_title ($ferret_plot_title) (($ferret_season_length)-month ave, every ($mon1))
 
