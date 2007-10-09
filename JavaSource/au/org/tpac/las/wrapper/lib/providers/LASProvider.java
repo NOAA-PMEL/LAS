@@ -217,7 +217,7 @@ public class LASProvider extends Provider
         //parsing the layers
         for(int i = 0; i < list.getLength(); i++)
         {
-            //<datasets> may contain multiple datasets
+            //parse all children of <datasets>, which may contain multiple datasets
             Node dssNode = list.item(i);
             NodeList children = dssNode.getChildNodes();
             for(int j=0;j<children.getLength();j++){
