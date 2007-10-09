@@ -102,8 +102,6 @@ IF `season_length EQ 1` THEN
 
 ELSE
 
-
-
 ! When there is just one time in the result, redefine S1_the_plot_var and the 
 ! index range for the time axis. The computation will use an expanded time range
 ! and then sample from that the desired output time.
@@ -117,11 +115,12 @@ ELSE
             IF ($region_y"0|*>1") THEN \
               LET S1_the_plot_var =  ($data_var)[d=($data_num),($region_x_p360),($region_y)]
             IF `($region_y"0|*>1") AND ($region_z"0|*>1")` THEN \
-               LET S1_the_plot_var = ($data_var)[d=($data_num),($region_x_p360),($region_y)],($region_z)]
+               LET S1_the_plot_var = ($data_var)[d=($data_num),($region_x_p360),($region_y),($region_z)]
          ENDIF
    
          LET L1 = n1 + loffset - (first_month_selected-1)
-         IF `first_month_selected GT ($ferret_season_center) AND first_month_selected-($ferret_season_center) LT 6` THEN LET L1 = `L1-12`
+         IF `first_month_selected GE ($ferret_season_center) AND first_month_selected-($ferret_season_center) LT 6` THEN LET L1 = `L1-12`
+         IF `first_month_selected LT ($ferret_season_center) AND ($ferret_season_center)-first_month_selected GT 6` THEN LET L1 = `L1-12`
          IF `L1 GT tsiz` THEN LET L1 = tsiz
          IF `L1 LT 1` THEN LET L1 = 1
          LET nn = `L1 + 24`
