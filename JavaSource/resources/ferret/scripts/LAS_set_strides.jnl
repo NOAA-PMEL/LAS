@@ -130,6 +130,7 @@ IF ($ferret_view"|xy>1|*>0") THEN
 ! Other views than xy
 
 ELSE
+   LET pixsize = 1  ! initialize 
 
    IF `(STRINDEX("($ferret_view)", "x") GT 0)` THEN 
       LET xx = x[gx=($data_var)[d=($data_num)]]
@@ -172,7 +173,7 @@ ELSE
       DEFINE SYMBOL tstride = `MAX(($tstride"1"), ($stride_for_mem"1"))`
       IF `($tstride) GT 1` THEN SET AXIS/STRIDE=($tstride) `($data_var)[d=($data_num)],RETURN=taxis`
    ENDIF
-   
+
 ! Add a label about the striding at the upper left.
    IF ($xstride"0|1>0|*>1")  THEN 
       DEFINE SYMBOL n_left_labels = `($n_left_labels"0")+1`
