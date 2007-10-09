@@ -183,9 +183,9 @@ public class RequestConverterLasToWms
         //String reqStyleName = (String)(wmsReq.getStyles().get(firstLayer.getLayerName()));
         //WMSStyle reqStyle = firstLayer.getStyleByName(reqStyleName);
 
+        //use default style if missing
         if(wmsReq.getStyles() == null){
 	    header += "<contour_style>default</contour_style>";
-	    System.out.println("in getHeader(): styles is null");
         }else{
             String reqStyleName = (String)(wmsReq.getStyles().get(firstLayer.getLayerName()));
 	    WMSStyle reqStyle = firstLayer.getStyleByName(reqStyleName);
