@@ -153,6 +153,7 @@ public class ConverterLasToWms
         {
             String key = (String)(keysIt.next());
             LasDatasetInfo info = (LasDatasetInfo)(layersMap.get(key));
+            System.out.println("dataset ID == " + info.getDatasetId());
             addDataset(topLayer, info);
         }
     }
@@ -342,7 +343,6 @@ public class ConverterLasToWms
         float yMin = Float.MIN_VALUE;
         float yMax = Float.MIN_VALUE;
 
-        //jli
         String tMin = "";
         String zMin = "";
 
@@ -373,7 +373,6 @@ public class ConverterLasToWms
                 if(timeRange.hasMultipleValues())
                 {
                     Object end = timeRange.getEnd();
-//jli
                     tMin =  timeRange.getStart().toString();
 
                     wmsDim.setName(dim.getName());
@@ -403,7 +402,6 @@ public class ConverterLasToWms
                     extent.addMinValue(convertCalendarToDateStrings(timeRange.getStart()));
                     extent.addMaxValue(convertCalendarToDateStrings(timeRange.getEnd()));
 
-//jli
                     DateTimeFormatter ferretfmt = DateTimeFormat.forPattern("dd-MMM-yyyy HH:mm:ss").withZone(DateTimeZone.UTC);
                     DateTime dt_min = new DateTime(timeRange.getStart());
                     tMin = dt_min.toString(ferretfmt);
@@ -440,8 +438,7 @@ public class ConverterLasToWms
                     varLayer.addExtents("time", extent);
                     converted.getTopLayer().addDimension(wmsDim);
                 }
-                //jli set default value
-
+                //set default value for <Extent>
                 if(tMin != null){extent.setDefaultValue(tMin);}
 
             }
@@ -465,7 +462,6 @@ public class ConverterLasToWms
 
                 if(aRange.hasMultipleValues())
                 {
-//jli
                     zMin = aRange.getStart().toString();
 
                     Object end = aRange.getEnd();
@@ -484,10 +480,9 @@ public class ConverterLasToWms
                     extent.addMinValue(aRange.getDoubleStart() + "");
                     extent.addMaxValue(aRange.getDoubleEnd() + "");
 
-//jli
                     zMin = Double.toString(aRange.getDoubleStart());
                 }
-                //jli set default value for <Extent>
+                //set default value for <Extent>
                 if(zMin != null){extent.setDefaultValue(zMin);}
 
                 varLayer.addExtents(extent.getExtentName(), extent);
@@ -504,7 +499,6 @@ public class ConverterLasToWms
             varLayer.setLatLongBox(latLongBox);
         }
 
-//jli
         addStyles(varLayer, xMin, xMax, yMin,yMax,zMin,tMin);
     }
 }
