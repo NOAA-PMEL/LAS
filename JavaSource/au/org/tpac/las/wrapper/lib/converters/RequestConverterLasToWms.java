@@ -234,7 +234,7 @@ public class RequestConverterLasToWms
 
 
     /**
-     * Call this function to convert the WMS Request into a LAS request URL (that includes
+     * Convert the WMS Request into a LAS request URL (that includes
      * an XML parameter for ProductServer.do.)
      * Note that the XML part of the URL is HTTP encoded.
      * @return a LAS request XML that points to the product server.
@@ -247,13 +247,12 @@ public class RequestConverterLasToWms
         WMSLayer firstLayer  = (WMSLayer)(set.first());
         String result = getHeader();
 
-        System.out.println("first layer name "+ firstLayer.getLayerName());
-        //jli
+        //System.out.println("first layer name "+ firstLayer.getLayerName());
         String layName[] = firstLayer.getLayerName().split(":");
         String dstID = layName[0];
         String varID = layName[1];
 
-        //jli: result += "<link+match=\"/lasdata/datasets/" + firstLayer.getParent().getLayerName() + "/variables/" + firstLayer.getLayerName() + "\"+/>";
+        //result += "<link+match=\"/lasdata/datasets/" + firstLayer.getParent().getLayerName() + "/variables/" + firstLayer.getLayerName() + "\"+/>";
 
         result += "<link+match=\"/lasdata/datasets/" + dstID + "/variables/" + varID + "\"+/>";
 
@@ -261,14 +260,14 @@ public class RequestConverterLasToWms
         result += "<range+low=\"" + wmsReq.getMinX()  + "\"+type=\"x\"+high=\"" + wmsReq.getMaxX() +"\"+/>";
         result += "<range+low=\"" + wmsReq.getMinY()  + "\"+type=\"y\"+high=\"" + wmsReq.getMaxY() +"\"+/>";
 
-        //jli: LasDatasetInfo datasetInfo = (LasDatasetInfo)(provider.getLayersMap().get(firstLayer.getParent().getLayerName()));
+        //LasDatasetInfo datasetInfo = (LasDatasetInfo)(provider.getLayersMap().get(firstLayer.getParent().getLayerName()));
         System.out.println("dstID " + dstID);
         System.out.println("varID " + varID);
 
         LasDatasetInfo datasetInfo = (LasDatasetInfo)(provider.getLayersMap().get(dstID));
         System.out.println("dstID " + dstID);
 
-        //jli: LasVariable var = datasetInfo.getVariable(firstLayer.getLayerName());
+        //LasVariable var = datasetInfo.getVariable(firstLayer.getLayerName());
         LasVariable var = datasetInfo.getVariable(varID);
         LasGrid grid = var.getGrid();
         HashMap map = grid.getDimensions();
@@ -280,7 +279,6 @@ public class RequestConverterLasToWms
         //3. check if all extents are set
 
         //use default values when dimension parameters are not specified in GetMap request
-//jli---
         if(extents.isEmpty()){
             //find all extents for this variable
             extents = firstLayer.getExtents();
@@ -290,75 +288,80 @@ public class RequestConverterLasToWms
                 WMSLayerExtent layerExtent = (WMSLayerExtent)extents.get(key);
                 Iterator it = map.keySet().iterator();
 
-                System.out.println("=======layer extent default"+ layerExtent.getDefaultValue());
- 
                 while(it.hasNext())
                 {
                     String mapKey = (String)(it.next());
                     LasDimension dim = (LasDimension)(grid.getDimensions().get(mapKey));
 
+                    System.out.println("mapKey is " + mapKey);
+                    System.out.println("key is " + key);
+                    System.out.println("dim type is " + dim.getType());
+
+                    //for z dimension or time specified as a list of <v>
                     if(mapKey.equalsIgnoreCase(key))
                     {
                         result += "<point type=\"" + dim.getType() + "\" v=\""+ layerExtent.getDefaultValue() + "\"/>";
                     }
-                }        
-                //result += "<point type=\"" + "t" + "\" v=\""+ "15-Jan" + "\"/>";
-            }
-//---jli
-        }else{
-        
-        for(Enumeration exEnum = extents.keys(); exEnum.hasMoreElements();)
-        {
-            String key = exEnum.nextElement().toString();
-            System.out.println("---------------------"+key);
-            String dimType = "";
-            if(key.equalsIgnoreCase("time"))
-                dimType = "t";
-            else if( key.equalsIgnoreCase("elevation"))
-                dimType = "z";
 
-            Iterator it = map.keySet().iterator();
-
-            System.out.println(map.keySet());
-
-            while(it.hasNext())
-            {
-                String mapKey = (String)(it.next());
-                LasDimension dim = (LasDimension)(grid.getDimensions().get(mapKey));
-
-                if(dim.getType().equalsIgnoreCase(dimType))
-                {
-                    Object value = extents.get(key);
-                    System.out.println(value.getClass());
-                    if(dimType.equalsIgnoreCase("t"))
+                    //for time dimension specified as <arange> in data config XML file
+                    if((dim.getType()).equalsIgnoreCase("t") && (key.equalsIgnoreCase("time")))
                     {
-                        DateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-                        DateFormat toFormat = new SimpleDateFormat("dd-MMM-yyyy");
-                        try
-                        {
-                            Date toDate = format.parse((String)value);
-                            value = toFormat.format(toDate);
-                        }
-                        catch(ParseException pe)
-                        {
-                            System.out.println("cannot parse date: " + value);
-                        }
+                         result += "<point type=\"" + "t" + "\" v=\""+ layerExtent.getDefaultValue() + "\"/>";
                     }
-                    result += "<point type=\"" + dimType + "\" v=\""+ value + "\"/>";
-                }
-                else if(mapKey.equalsIgnoreCase(key))
+                }        
+            }
+
+        }else{
+    
+            for(Enumeration exEnum = extents.keys(); exEnum.hasMoreElements();)
+            {
+                String key = exEnum.nextElement().toString();
+                String dimType = "";
+                if(key.equalsIgnoreCase("time"))
+                    dimType = "t";
+                else if( key.equalsIgnoreCase("elevation"))
+                    dimType = "z";
+
+                Iterator it = map.keySet().iterator();
+
+                System.out.println(map.keySet());
+
+                while(it.hasNext())
                 {
-                    result += "<point type=\"" + dim.getType() + "\" v=\""+ extents.get(key) + "\"/>";
+                    String mapKey = (String)(it.next());
+                    LasDimension dim = (LasDimension)(grid.getDimensions().get(mapKey));
+
+                    if(dim.getType().equalsIgnoreCase(dimType))
+                    {
+                        Object value = extents.get(key);
+                        System.out.println(value.getClass());
+                        if(dimType.equalsIgnoreCase("t"))
+                        {
+                            DateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+                            DateFormat toFormat = new SimpleDateFormat("dd-MMM-yyyy");
+                            try
+                            {
+                                Date toDate = format.parse((String)value);
+                                value = toFormat.format(toDate);
+                            }
+                            catch(ParseException pe)
+                            {
+                                System.out.println("cannot parse date: " + value);
+                            }
+                        }
+                        result += "<point type=\"" + dimType + "\" v=\""+ value + "\"/>";
+                    }
+                    else if(mapKey.equalsIgnoreCase(key))
+                    {
+                        result += "<point type=\"" + dim.getType() + "\" v=\""+ extents.get(key) + "\"/>";
+                    }
                 }
             }
         }
-        }//jli
 
         result += "</region>";
         result += "</args>";
         result += "</lasRequest>";
-
-        System.out.println("request======"+result);
 
         try
         {
@@ -370,5 +373,4 @@ public class RequestConverterLasToWms
             return null;
         }
     }
-
 }
