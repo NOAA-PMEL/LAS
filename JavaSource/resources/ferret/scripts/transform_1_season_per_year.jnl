@@ -48,7 +48,19 @@ ENDIF
 LET season_length = ($ferret_season_length)
 
 ! The dataset, region and plot variable have already been initialized
-LET S1_the_plot_var = ($ferret_plot_var)
+LET/D=($data_num) S1_the_plot_var = ($ferret_plot_var)
+LET/D=($data_num) S1_the_plot_var_noregion = ($ferret_plot_var_noregion)
+
+
+! If we have averaged over T then cant do this. Return a message.
+DEFINE SYMBOL op_num = `($data_num) - 1`
+IF ($DATA_($op_num)_ANALYSIS_AXIS_0_OP"0|*>1") THEN 
+   DEFINE SYMBOL error_status = ERROR
+   DEFINE SYMBOL error_type = TRANSFORM
+   DEFINE SYMBOL error_string Cannot do seasonal average on a time-averaged grid
+  EXIT/SCRIPT
+ENDIF
+
 LET tt = t[gt=S1_the_plot_var]
 LET tsiz = `tt,RETURN=lsize`
 
@@ -92,11 +104,13 @@ IF `season_length EQ 1` THEN
          ENDIF
       ENDIF
       DEFINE SYMBOL ferret_plot_var S1_the_plot_var[L=`L1`]
+      DEFINE SYMBOL ferret_plot_var_noregion S1_the_plot_noregion_var[L=`L1`]
       DEFINE SYMBOL ferret_plot_title ($ferret_plot_title) every ($mon1)
    ELSE
       LET L1 = n1 - first_month_selected
       LET L1 = `n1 + loffset - (first_month_selected-1)`
       DEFINE SYMBOL ferret_plot_var S1_the_plot_var[L=`L1`:`nn`:12]
+      DEFINE SYMBOL ferret_plot_var_noregion S1_the_plot_var_noregion[L=`L1`:`nn`:12]
       DEFINE SYMBOL ferret_plot_title ($ferret_plot_title) every ($mon1)
    ENDIF
 
@@ -130,6 +144,17 @@ ELSE
             LET nn = `L1`
          ENDIF
       ENDIF
+
+
+   ENDIF
+
+   IF `nn-n1 LT 24` THEN
+      DEFINE SYMBOL ferret_expand_time = 1
+
+      IF `( STRLEN("($ferret_view)") EQ 2 ) AND ( STRINDEX("($ferret_view)", "t") NE 0 )` THEN 
+      LET nn = MIN(`tsiz`, `nn + 24`)
+         LET n1 = MAX(1, `n1-24`)
+      ENDIF
    ENDIF
 
 ! Define a variable containing the indices that correspond to the data we 
@@ -151,18 +176,20 @@ ELSE
 
 ! Sample the variable at only the months that will be used in the avgs.
    LET S1_seas_months = SAMPLEL(S1_the_plot_var,S1_L_indx_T[l=1:`nmsk`])
+   LET S1_seas_months_noregion = SAMPLEL(S1_the_plot_var_noregion,S1_L_indx_T[l=1:`nmsk`])
    LET tsample = SAMPLEL(t[gt=S1_the_plot_var],S1_L_indx_T[l=1:`nmsk`])
 
    DEFINE AXIS/T/T0="`tt,RETURN=t0`"/UNITS=`tt,RETURN=tunits` taxis_sampled = tsample
    LET s1_to_average = S1_seas_months[gt=taxis_sampled@ASN]
+   LET s1_to_average_noregion = S1_seas_months_noregion[gt=taxis_sampled@ASN]
 
 ! Index list, once per year on the correct month
 
    IF `loffset LT 0` THEN LET loffset = `loffset + 12`
    LET L1 = 1+INT(season_length/2)
 
-   DEFINE AXIS/T/T0="`tt,RETURN=t0`"/UNITS=`tt,RETURN=tunits` timeax_years = tsample[L=`(1+INT(season_length/2))`:`NMSK`:($ferret_season_length)]
    DEFINE AXIS/T/T0="`tt,RETURN=t0`"/UNITS=`tt,RETURN=tunits` timeax_years = tsample[L=`L1`:`NMSK`:($ferret_season_length)]
+
 
 ! Average from the n-Month-per-year axis to once per year.
 ! Weight by the box sizes from the original time axis.
@@ -174,14 +201,20 @@ ELSE
    LET weights2D = s1_mask * boxes_sampled
 
    LET S1_weighted = s1_to_average*weights2D
+   LET S1_weighted_noregion = s1_to_average_noregion*weights2D
    LET S1_sum = S1_weighted[GT=timeax_years@SUM]
+   LET S1_sum_noregion = S1_weighted_noregion[GT=timeax_years@SUM]
    LET weight_sum = weights2D[GT=timeax_years@SUM]
-   LET S1_seas_per_year = S1_sum/weight_sum 
+   LET/D=($data_num) S1_seas_per_year = S1_sum/weight_sum 
+   LET/D=($data_num) S1_seas_per_year_noregion = S1_sum_noregion/weight_sum 
 
    DEFINE SYMBOL ferret_plot_var S1_seas_per_year
+   DEFINE SYMBOL ferret_plot_var_noregion S1_seas_per_year_noregion
    IF ($ferret_expand_time"0|*>1) THEN DEFINE SYMBOL ferret_plot_var S1_seas_per_year[($region_t)]
 
 ! Add information to the title
    DEFINE SYMBOL ferret_plot_title ($ferret_plot_title) (($ferret_season_length)-month ave, every ($mon1))
 
 ENDIF  ! Season length longer than 1
+
+
