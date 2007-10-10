@@ -995,16 +995,21 @@ public class FormHandler {
   public String getStart(String name) {
     return getStart(name, null);
   }
-
-  public String getStart(String name, String submitProc){
-    String outname = "", proc="";
+  public String getStart(String name, String submitProc ) {
+	  return getStart(name, submitProc, null);
+  }
+  public String getStart(String name, String submitProc, String id){
+    String outname = "", proc="", form_id="";
     if (name != null){
       outname = "name=\"" + name + "\"";
     }
     if (submitProc != null){
       proc = "onSubmit=\"" + submitProc + "\"";
     }
-    String rval = "<form " + proc + " " + outname + " method=\"POST\" action=\"" + getTarget() + "\">";
+    if ( id != null ) {
+    	form_id = "id=\""+id+"\"";
+    }
+    String rval = "<form " +form_id+" "+ proc + " " + outname + " method=\"POST\" action=\"" + getTarget() + "\">";
     // All forms must have a nexturl field
     rval += new Hidden("nexturl", " ", null).toString();
     return rval;
