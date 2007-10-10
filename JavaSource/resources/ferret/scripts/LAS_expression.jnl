@@ -40,6 +40,7 @@ ENDIF
 ! Define the plot variable and title
 
 DEFINE SYMBOL ferret_plot_var ($expr1)($data_var)[d=($data_num),($region_full)]($expr2)
+DEFINE SYMBOL ferret_plot_var_noregion ($expr1)($data_var)[d=($data_num)]($expr2)
 DEFINE SYMBOL ferret_plot_title ($expr1) ($data_title) ($expr2)
 
 ! This works except if the expression has spaces around the $ characters.
@@ -56,6 +57,8 @@ IF `esecond GT 0` THEN
    IF `e2 LT en` THEN DEFINE SYMBOL expr4 = `SUBSTRING("($expr2)", e2, en)`
 
    DEFINE SYMBOL ferret_plot_var ($expr1)($data_var)[d=($data_num),($region_full)]($expr3)($data_var)[d=($data_num),($region_full)]($expr4)
+   DEFINE SYMBOL ferret_plot_var_noregion ($expr1)($data_var)[d=($data_num),($region_full)]($expr3)($data_var)[d=($data_num)]($expr4)
+
    DEFINE SYMBOL ferret_plot_title ($expr1) ($data_title) ($expr3) ($data_title) ($expr4)
 ENDIF
 

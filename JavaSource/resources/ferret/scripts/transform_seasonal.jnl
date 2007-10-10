@@ -48,12 +48,20 @@ IF `tmod` THEN
    DEFINE AXIS/T/MODULO/UNITS=months/EDGES/t0=1-jan-0000 tseas = {1.,4.,7.,10.,13.}
 
    LET the_var_tseas_mod = ($ferret_plot_var)
+   LET the_var_tseas_mod_noregion = ($ferret_plot_var_noregion)
+
    LET regrid_var_tseas_mod = the_var_tseas_mod[GT=tseas@MOD]
+   LET regrid_var_tseas_mod_noregion = the_var_tseas_mod_noregion[GT=tseas@MOD]
+
    DEFINE SYMBOL ferret_plot_var ($expr1)regrid_var_tseas_mod($expr2)
+   DEFINE SYMBOL ferret_plot_var_noregion ($expr1)the_var_tseas_mod_noregion($expr2)
+
    DEFINE SYMBOL ferret_plot_title "($expr1) ($data_title) ($expr2) (($data_units)) Seasonal regrid"
 
    IF ($expr3"0|*>1") THEN
       DEFINE SYMBOL ferret_plot_var ($expr1)regrid_var_tseas_mod($expr3)regrid_var_tseas_mod($expr4)
+      DEFINE SYMBOL ferret_plot_var_noregion \
+       ($expr1)regrid_var_tseas_mod_noregion($expr3)regrid_var_tseas_mod_noregion($expr4)
       DEFINE SYMBOL ferret_plot_title "($expr1)($data_title)($expr3)($data$data_title_var)($expr4) Seasonal regrid"
    ENDIF
 
@@ -90,6 +98,7 @@ ENDIF
 !   January before the first seasonal point (which may be December) 
 
 LET the_var_tseas = ($ferret_plot_var)
+LET the_var_tseas_noregion = ($ferret_plot_var_noregion)
 
 LET tt = t[gt=the_var_tseas]
 LET year1 = tax_year (tt[t=($region_t_lo)], tt)
@@ -129,6 +138,7 @@ ENDIF
 ! Define the regridded variable
 
 LET regrid_var_tseas = the_var_tseas[GT=tseas]
+LET regrid_var_tseas_noregion = the_var_tseas_noregion[GT=tseas]
 
 ! When this is an XY, XZ, or XZ plot, with no time dependence, we want to regrid 
 ! the requested month and surrounding months to the seasonal point requested,
@@ -154,14 +164,21 @@ IF `STRCMP("($region_t_lo)", "($region_t_hi)") EQ 0` THEN
       LET the_var_expanded_t = the_var_tseas[L=`L1`:`LN`]
       LET regrid_var_tseas = the_var_expanded_t[T=($region_t_lo),GT=tseas]
 
+      LET the_var_tseas_noregion = ($ferret_plot_var_noregion)
+      LET the_var_expanded_t_noregion = the_var_tseas_noregion[L=`L1`:`LN`]
+      LET regrid_var_tseas_noregion = the_var_expanded_t_noregion[T=($region_t_lo),GT=tseas]
+
+
    ENDIF
 ENDIF
 
 DEFINE SYMBOL ferret_plot_var ($expr1)regrid_var_tseas($expr2)
+DEFINE SYMBOL ferret_plot_var_noregion ($expr1)regrid_var_tseas_noregion($expr2)
 DEFINE SYMBOL ferret_plot_title "($expr1) ($data_title) ($expr2) (($data_units)) Seasonal Regrid"
 
 IF ($expr3"0|*>1") THEN
    DEFINE SYMBOL ferret_plot_var ($expr1)regrid_var_tseas($expr3)($data_var)regrid_var_tseas($expr4)
+   DEFINE SYMBOL ferret_plot_var_noregion ($expr1)regrid_var_tseas_noregion($expr3)($data_var)regrid_var_tseas_noregion($expr4)
    DEFINE SYMBOL ferret_plot_title "($expr1) ($data_title) ($expr3) ($data_title) ($expr4) Seasonal Regrid"
 ENDIF
 
