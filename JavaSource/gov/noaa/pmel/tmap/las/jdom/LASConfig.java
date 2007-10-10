@@ -957,21 +957,16 @@ public class LASConfig extends LASDocument {
             fds = true;
         }
         if (fds) {
-            // TODO - this needs to reference the server config to get the ftds base
-            // TODO - perhaps I can insert those elements under <lasdata> in the plugin.
-            String fdsServerURL = getServerURL().replace("ProductServer.do", "fds/data/");
-            String dsID = "";
-            String varID = "";
-            if (!xpath.contains("@ID")) {
-                String[] parts = xpath.split("/");
-                // Throw away index 0 since the string has a leading "/".
-                dsID = parts[3];
-                varID = parts[5];
-            } else {
-               dsID = xpath.substring(xpath.indexOf("dataset@ID='"),xpath.indexOf("']"));
-               varID = xpath.substring(xpath.indexOf("variable[@ID='"), xpath.lastIndexOf("']"));
-            }
-            url = fdsServerURL+dsID+"/"+varID;
+        	/*
+    	     * We know this is a variable XPath.  If it's "old style" fix it.
+    	     */
+    	    if (!xpath.contains("@ID")) {
+    	        String[] parts = xpath.split("/");
+    	        // Throw away index 0 since the string has a leading "/".
+    	        xpath = "/"+parts[1]+"/"+parts[2]+"/dataset[@ID='"+parts[3]+"']/"+parts[4]+"/variable[@ID='"+parts[5]+"']";
+    	    }
+            Element dataset = getElementByXPath(xpath);
+            return dataset.getAttributeValue("ftds_url");
         } else {
             url = dataObjectURL;
         }
