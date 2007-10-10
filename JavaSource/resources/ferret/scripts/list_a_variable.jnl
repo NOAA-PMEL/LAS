@@ -65,7 +65,7 @@ IF `IS_ELEMENT_OF_STR(attlist, "history") GT 0` THEN \
 DEFINE ATTRIBUTE/OUTPUT ($data_var).history = "($data_var_history)($data_var_transform)"
 
 IF `($data_var_history"0|*>1")+($data_var_transform"0|*>1") GT 0` THEN 
-   DEFINE SYMBOL var_history  "History: ($data_var_history)"
+   DEFINE SYMBOL var_history  "History: ($data_var_history)($data_var_transform)"
    LET var_hist = "($var_history)"
 ENDIF
 

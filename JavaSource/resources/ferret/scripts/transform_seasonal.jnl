@@ -183,5 +183,6 @@ IF ($expr3"0|*>1") THEN
 ENDIF
 
 ! ENDIF  ! not modulo
+DEFINE SYMBOL data_var_transform = , Seasonal Regrid
 
 ! End of $RCSfile ---------- transform_seasonal.jnl----------------------------
