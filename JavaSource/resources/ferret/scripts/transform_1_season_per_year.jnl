@@ -57,7 +57,7 @@ DEFINE SYMBOL op_num = `($data_num) - 1`
 IF ($DATA_($op_num)_ANALYSIS_AXIS_0_OP"0|*>1") THEN 
    DEFINE SYMBOL error_status = ERROR
    DEFINE SYMBOL error_type = TRANSFORM
-   DEFINE SYMBOL error_string Cannot do seasonal average on a time-averaged grid
+   DEFINE SYMBOL error_string Cannot do seasonal average on a time-averaged variable
   EXIT/SCRIPT
 ENDIF
 
