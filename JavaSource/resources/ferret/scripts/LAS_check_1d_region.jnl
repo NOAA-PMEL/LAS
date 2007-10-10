@@ -19,6 +19,7 @@ IF `($do_curvi_xy_and_hybrid_z)` THEN EXIT/SCRIPT
 ! IF `STRINDEX ("($ferret_plot_var)", "sampled_var") GT 0` THEN EXIT/SCRIPT
 
 LET the_plot_var = ($ferret_plot_var)
+LOAD the_plot_var
 DEFINE SYMBOL varshape = `the_plot_var,RETURN=shape`
 DEFINE SYMBOL viewshape =  `UPCASE("($ferret_view)")`
 IF `STRCMP("($varshape)", "POINT") EQ 0` THEN
