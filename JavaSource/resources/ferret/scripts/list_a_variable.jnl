@@ -139,7 +139,10 @@ IF `size LE max_size` THEN
 !      DEFINE SYMBOL var_path = `($ferret_list_var),ret=dsetpath`
       SET VAR/TITLE="($data_title)" ($data_dup_varname)
       SET VAR/UNITS="`($ferret_list_var),RET=UNITS`" ($data_dup_varname)
+
+      DEFINE ATTRIBUTE/OUTPUT ($data_var).history = "($data_var_history)($data_var_transform)"
       DEFINE ATTRIBUTE/OUTPUT ($data_dup_varname).history = "($data_var_history)($data_var_transform)"
+      DEFINE ATTRIBUTE/OUTPUT ($data_dup_varname).description = "($data_var_history)($data_var_transform)"
 
       IF `($ferret_format"0|asc>1|*>0") + ($ferret_format"0|txt>1|*>0") GT 0` THEN
          IF ($var_history"0|*>1") THEN LIST/APPEND/NOHEAD/FORMAT=(A)/FILE="($result_ferret_listing_filename)" var_hist
