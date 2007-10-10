@@ -11,7 +11,11 @@
 ! Check whether the region is too small to make a 2D plot on this grid.
 ! Call after region and dataset have been initialized for 2D plot.
 
+! Change ($data_var)[d=($data_num) to the_plot_var_noregion[
+
 CANCEL SYMBOL region_small*
+
+LET/D=($data_num) the_plot_var_noregion = ($ferret_plot_var_noregion)
 
 IF ($data_analysis_expr"0|*>1") THEN
    DEFINE SYMBOL apply_analysis_expr = ($data_analysis_expr)
@@ -29,11 +33,12 @@ IF `($do_curvi_xy_and_hybrid_z)` THEN EXIT/SCRIPT
 ! always correct for these variables (dont exit, test works for some cases)
 ! IF `STRINDEX ("($ferret_plot_var)", "sampled_var") GT 0` THEN EXIT/SCRIPT
 
-LET the_plot_var = ($ferret_plot_var)
+LET/D=($data_num) the_plot_var = ($ferret_plot_var)
+LOAD the_plot_var
 DEFINE SYMBOL varshape = `the_plot_var,RETURN=shape`
 DEFINE SYMBOL viewshape =  `UPCASE("($ferret_view)")`
-IF `STRCMP("($varshape)", "POINT") EQ 0` THEN
 
+IF `STRCMP("($varshape)", "POINT") EQ 0` THEN
 !  DEFINE SYMBOL error_status = ERROR
 !  DEFINE SYMBOL error_type = REGION
 !  DEFINE SYMBOL error_action = Checking grid and region
@@ -113,9 +118,9 @@ IF `STRCMP("($varshape)", "POINT") EQ 0` THEN
       IF `STRCMP("($region_y_lo)", "($region_y_hi)") NE 0` THEN DEFINE SYMBOL qualifiers = \
        ($qualifiers)/VLIM=`($region_y_lo)`:`($region_y_hi)`
       IF ($region_zt"0|*>1") THEN 
-         DEFINE SYMBOL ferret_plot_var = ($data_var)[d=($data_num),I=`ilo`:`ihi`,J=`jlo`:`jhi`($data_analysis_expr),($region_zt)]
+         DEFINE SYMBOL ferret_plot_var = the_plot_var_noregion[I=`ilo`:`ihi`,J=`jlo`:`jhi`($data_analysis_expr),($region_zt)]
       ELSE
-         DEFINE SYMBOL ferret_plot_var = ($data_var)[d=($data_num),I=`ilo`:`ihi`,J=`jlo`:`jhi`($data_analysis_expr)]
+         DEFINE SYMBOL ferret_plot_var = the_plot_var_noregion[I=`ilo`:`ihi`,J=`jlo`:`jhi`($data_analysis_expr)]
       ENDIF
    ENDIF
 
@@ -125,9 +130,9 @@ IF `STRCMP("($varshape)", "POINT") EQ 0` THEN
       IF `STRCMP("($region_z_lo)", "($region_z_hi)") NE 0` THEN DEFINE SYMBOL qualifiers = \
        ($qualifiers /VLIM=`($region_z_lo)`:`($region_z_hi)`
       IF ($region_yt"0|*>1") THEN
-         DEFINE SYMBOL ferret_plot_var = ($data_var)[d=($data_num),I=`ilo`:`ihi`,K=`klo`:`khi`($data_analysis_expr),($region_yt)]
+         DEFINE SYMBOL ferret_plot_var = the_plot_var_noregion[I=`ilo`:`ihi`,K=`klo`:`khi`($data_analysis_expr),($region_yt)]
       ELSE
-         DEFINE SYMBOL ferret_plot_var = ($data_var)[d=($data_num),I=`ilo`:`ihi`,K=`klo`:`khi`($data_analysis_expr)]
+         DEFINE SYMBOL ferret_plot_var = the_plot_var_noregion[I=`ilo`:`ihi`,K=`klo`:`khi`($data_analysis_expr)]
       ENDIF
    ENDIF
 
@@ -137,11 +142,12 @@ IF `STRCMP("($varshape)", "POINT") EQ 0` THEN
       IF `STRCMP("($region_t_lo)", "($region_t_hi)") NE 0` THEN DEFINE SYMBOL qualifiers = \
        ($qualifiers)/VLIM="($region_t_lo)":"($region_t_hi)"
       IF ($region_yz"0|*>1") THEN
-         DEFINE SYMBOL ferret_plot_var = ($data_var)[d=($data_num),I=`ilo`:`ihi`,L=`llo`:`lhi`($data_analysis_expr),($region_yz)]
+         DEFINE SYMBOL ferret_plot_var = the_plot_var_noregion[I=`ilo`:`ihi`,L=`llo`:`lhi`($data_analysis_expr),($region_yz)]
       ELSE
-         DEFINE SYMBOL ferret_plot_var = ($data_var)[d=($data_num),I=`ilo`:`ihi`,L=`llo`:`lhi`($data_analysis_expr)]
+         DEFINE SYMBOL ferret_plot_var = the_plot_var_noregion[I=`ilo`:`ihi`,L=`llo`:`lhi`($data_analysis_expr)]
       ENDIF
       DEFINE SYMBOL axtype_command TXTYPE,mon,day 
+      DEFINE SYMBOL axtype_command TXTYPE,yr,mon 
    ENDIF
 
    IF `STRINDEX("($viewshape)", "YZ") GT 0` THEN
@@ -150,9 +156,9 @@ IF `STRCMP("($varshape)", "POINT") EQ 0` THEN
       IF `STRCMP("($region_z_lo)", "($region_z_hi)") NE 0` THEN DEFINE SYMBOL qualifiers = \
        ($qualifiers)/VLIM=`($region_z_lo)`:`($region_z_hi)`
       IF ($region_xt"0|*>1") THEN
-         DEFINE SYMBOL ferret_plot_var = ($data_var)[d=($data_num),J=`jlo`:`jhi`,K=`klo`:`khi`($data_analysis_expr),($region_xt)]
+         DEFINE SYMBOL ferret_plot_var = the_plot_var_noregion[J=`jlo`:`jhi`,K=`klo`:`khi`($data_analysis_expr),($region_xt)]
       ELSE
-         DEFINE SYMBOL ferret_plot_var = ($data_var)[d=($data_num),J=`jlo`:`jhi`,K=`klo`:`khi`($data_analysis_expr)]
+         DEFINE SYMBOL ferret_plot_var = the_plot_var_noregion[J=`jlo`:`jhi`,K=`klo`:`khi`($data_analysis_expr)]
       ENDIF
 message shouldnt get here.....      
    ENDIF
@@ -163,11 +169,12 @@ message shouldnt get here.....
       IF `STRCMP("($region_y_lo)", "($region_y_hi)") NE 0` THEN DEFINE SYMBOL qualifiers = \
        ($qualifiers)/VLIM=`($region_y_lo)`:`($region_y_hi)`
       IF ($region_xz"0|*>1") THEN
-         DEFINE SYMBOL ferret_plot_var = ($data_var)[d=($data_num),J=`jlo`:`jhi`,L=`llo`:`lhi`($data_analysis_expr),($region_xz)]
+         DEFINE SYMBOL ferret_plot_var = the_plot_var_noregion[J=`jlo`:`jhi`,L=`llo`:`lhi`($data_analysis_expr),($region_xz)]
       ELSE
-         DEFINE SYMBOL ferret_plot_var = ($data_var)[d=($data_num),J=`jlo`:`jhi`,L=`llo`:`lhi`($data_analysis_expr)]
+         DEFINE SYMBOL ferret_plot_var = the_plot_var_noregion[J=`jlo`:`jhi`,L=`llo`:`lhi`($data_analysis_expr)]
       ENDIF
       DEFINE SYMBOL axtype_command TXTYPE,mon,day 
+      DEFINE SYMBOL axtype_command TXTYPE,yr,mon 
    ENDIF
 
    IF `STRINDEX("($viewshape)", "ZT") GT 0` THEN
@@ -176,11 +183,12 @@ message shouldnt get here.....
       IF `STRCMP("($region_z_lo)", "($region_z_hi)") NE 0` THEN DEFINE SYMBOL qualifiers = \
        ($qualifiers)/VLIM=`($region_z_lo)`:`($region_z_hi)`
       IF ($region_xy"0|*>1") THEN
-         DEFINE SYMBOL ferret_plot_var = ($data_var)[d=($data_num),K=`klo`:`khi`L=`llo`:`lhi`($data_analysis_expr),($region_xy)]
+         DEFINE SYMBOL ferret_plot_var = the_plot_var_noregion[K=`klo`:`khi`L=`llo`:`lhi`($data_analysis_expr),($region_xy)]
       ELSE
-         DEFINE SYMBOL ferret_plot_var = ($data_var)[d=($data_num),K=`klo`:`khi`L=`llo`:`lhi`($data_analysis_expr)]
+         DEFINE SYMBOL ferret_plot_var = the_plot_var_noregion[K=`klo`:`khi`L=`llo`:`lhi`($data_analysis_expr)]
       ENDIF
       DEFINE SYMBOL axtype_command TXTYPE,mon,day 
+      DEFINE SYMBOL axtype_command TXTYPE,yr,mon 
    ENDIF
 
 ENDIF   ! degenerated to a point.
@@ -218,10 +226,10 @@ IF `STRINDEX("($viewshape)", "XY") GT 0` THEN
        ($qualifiers)/HLIM=`($region_x_lo)`:`($region_x_hi)`
 
       IF ($region_zt"0|*>1") THEN
-         DEFINE SYMBOL ferret_plot_var = ($data_var)[d=($data_num), \
+         DEFINE SYMBOL ferret_plot_var = the_plot_var_noregion[ \
          X=`($region_x_lo)-addx`:`($region_x_hi)+addx`($data_analysis_expr),($region_y),($region_zt)]
       ELSE
-         DEFINE SYMBOL ferret_plot_var = ($data_var)[d=($data_num), \
+         DEFINE SYMBOL ferret_plot_var = the_plot_var_noregion[ \
          X=`($region_x_lo)-addx`:`($region_x_hi)+addx`($data_analysis_expr),($region_y)]
       ENDIF
 
@@ -242,10 +250,10 @@ IF `STRINDEX("($viewshape)", "XY") GT 0` THEN
         ($qualifiers)/VLIM=`($region_y_lo)`:`($region_y_hi)`
 
       IF ($region_zt"0|*>1") THEN
-         DEFINE SYMBOL ferret_plot_var = ($data_var)[d=($data_num), \
+         DEFINE SYMBOL ferret_plot_var = the_plot_var_noregion[ \
          Y=`($region_y_lo)-addy`:`($region_y_hi)+addy`($data_analysis_expr),($region_x),($region_zt)]
       ELSE
-         DEFINE SYMBOL ferret_plot_var = ($data_var)[d=($data_num), \
+         DEFINE SYMBOL ferret_plot_var = the_plot_var_noregion[ \
          Y=`($region_y_lo)-addy`:`($region_y_hi)+addy`($data_analysis_expr),($region_x)]
       ENDIF
 
@@ -269,10 +277,10 @@ IF `STRINDEX("($viewshape)", "XZ") GT 0` THEN
         ($qualifiers)/HLIM=`($region_x_lo)`:`($region_x_hi)`
 
       IF ($region_yt"0|*>1") THEN
-         DEFINE SYMBOL ferret_plot_var = ($data_var)[d=($data_num), \
+         DEFINE SYMBOL ferret_plot_var = the_plot_var_noregion[ \
          X=`($region_x_lo)-addx`:`($region_x_hi)+addx`($data_analysis_expr),($region_z),($region_yt)]
       ELSE
-         DEFINE SYMBOL ferret_plot_var = ($data_var)[d=($data_num), \
+         DEFINE SYMBOL ferret_plot_var = the_plot_var_noregion[ \
          X=`($region_x_lo)-addx`:`($region_x_hi)+addx`($data_analysis_expr),($region_z)]
       ENDIF
 
@@ -292,10 +300,10 @@ IF `STRINDEX("($viewshape)", "XZ") GT 0` THEN
         ($qualifiers)/VLIM=`($region_z_lo)`:`($region_z_hi)`
 
       IF ($region_yt"0|*>1") THEN 
-         DEFINE SYMBOL ferret_plot_var = ($data_var)[d=($data_num), \
+         DEFINE SYMBOL ferret_plot_var = the_plot_var_noregion[ \
          Z=`($region_z_lo)-addz`:`($region_z_hi)+addz`($data_analysis_expr),($region_x),($region_yt)]
       ELSE
-         DEFINE SYMBOL ferret_plot_var = ($data_var)[d=($data_num), \
+         DEFINE SYMBOL ferret_plot_var = the_plot_var_noregion[ \
          Z=`($region_z_lo)-addz`:`($region_z_hi)+addz`($data_analysis_expr),($region_x)]
       ENDIF
 
@@ -319,10 +327,10 @@ IF `STRINDEX("($viewshape)", "XT") GT 0` THEN
         ($qualifiers)/HLIM=`($region_x_lo)`:`($region_x_hi)`
 
       IF ($region_yz"0|*>1") THEN 
-         DEFINE SYMBOL ferret_plot_var = ($data_var)[d=($data_num), \
+         DEFINE SYMBOL ferret_plot_var = the_plot_var_noregion[ \
          X=`($region_x_lo)-addx`:`($region_x_hi)+addx`($data_analysis_expr),($region_t),($region_yz)]
       ELSE
-         DEFINE SYMBOL ferret_plot_var = ($data_var)[d=($data_num), \
+         DEFINE SYMBOL ferret_plot_var = the_plot_var_noregion[ \
          X=`($region_x_lo)-addx`:`($region_x_hi)+addx`($data_analysis_expr),($region_t)]
       ENDIF
 
@@ -345,10 +353,10 @@ IF `STRINDEX("($viewshape)", "XT") GT 0` THEN
         ($qualifiers)/VLIM=`tlo`:`thi`
 
       IF ($region_yz"0|*>1") THEN
-         DEFINE SYMBOL ferret_plot_var = ($data_var)[d=($data_num), \
+         DEFINE SYMBOL ferret_plot_var = the_plot_var_noregion[ \
          T=`tlo-addt`:`thi+addt`($data_analysis_expr),($region_x),($region_yz)]
       ELSE
-         DEFINE SYMBOL ferret_plot_var = ($data_var)[d=($data_num), \
+         DEFINE SYMBOL ferret_plot_var = the_plot_var_noregion[ \
          T=`tlo-addt`:`thi+addt`($data_analysis_expr),($region_x)]
       ENDIF
 
@@ -356,6 +364,7 @@ IF `STRINDEX("($viewshape)", "XT") GT 0` THEN
       DEFINE SYMBOL axtic_command TICS ,,0,0
       DEFINE SYMBOL axlen_command AXLEN,,2
       DEFINE SYMBOL axtype_command TXTYPE,mon,day 
+      DEFINE SYMBOL axtype_command TXTYPE,yr,mon 
       
       DEFINE SYMBOL n_left_labels = `($n_left_labels"0")+1`
       DEFINE SYMBOL upper_left_($n_left_labels"0") = @CR@P2[The requested T region is smaller than 1 grid cell]
@@ -374,10 +383,10 @@ IF `STRINDEX("($viewshape)", "YZ") GT 0` THEN
         ($qualifiers)/HLIM=`($region_y_lo)`:`($region_y_hi)`
 
       IF ($region_xt"0|*>1") THEN
-         DEFINE SYMBOL ferret_plot_var = ($data_var)[d=($data_num), \
+         DEFINE SYMBOL ferret_plot_var = the_plot_var_noregion[ \
          Y=`($region_y_lo)-addy`:`($region_y_hi)+addy`($data_analysis_expr),($region_z),($region_xt)]
       ELSE
-         DEFINE SYMBOL ferret_plot_var = ($data_var)[d=($data_num), \
+         DEFINE SYMBOL ferret_plot_var = the_plot_var_noregion[ \
          Y=`($region_y_lo)-addy`:`($region_y_hi)+addy`($data_analysis_expr),($region_z)]
       ENDIF
 
@@ -397,10 +406,10 @@ IF `STRINDEX("($viewshape)", "YZ") GT 0` THEN
         ($qualifiers)/VLIM=`($region_z_lo)`:`($region_z_hi)`
 
       IF ($region_xt"0|*>1") THEN
-         DEFINE SYMBOL ferret_plot_var = ($data_var)[d=($data_num), \
+         DEFINE SYMBOL ferret_plot_var = the_plot_var_noregion[ \
          Z=`($region_z_lo)-addz`:`($region_z_hi)+addz`($data_analysis_expr),($region_y),($region_xt)]
       ELSE
-         DEFINE SYMBOL ferret_plot_var = ($data_var)[d=($data_num), \
+         DEFINE SYMBOL ferret_plot_var = the_plot_var_noregion[ \
          Z=`($region_z_lo)-addz`:`($region_z_hi)+addz`($data_analysis_expr),($region_y)]
       ENDIF
 
@@ -425,10 +434,10 @@ IF `STRINDEX("($viewshape)", "YT") GT 0` THEN
         ($qualifiers)/VLIM=`($region_y_lo)`:`($region_y_hi)`
 
       IF ($region_xz"0|*>1") THEN
-         DEFINE SYMBOL ferret_plot_var = ($data_var)[d=($data_num), \
+         DEFINE SYMBOL ferret_plot_var = the_plot_var_noregion[ \
          Y=`($region_y_lo)-addy`:`($region_y_hi)+addy`($data_analysis_expr),($region_t),($region_xz)]
       ELSE
-         DEFINE SYMBOL ferret_plot_var = ($data_var)[d=($data_num), \
+         DEFINE SYMBOL ferret_plot_var = the_plot_var_noregion[ \
          Y=`($region_y_lo)-addy`:`($region_y_hi)+addy`($data_analysis_expr),($region_t)]
       ENDIF
 
@@ -452,10 +461,10 @@ IF `STRINDEX("($viewshape)", "YT") GT 0` THEN
         ($qualifiers)/HLIM=`tlo`:`thi`
 
       IF ($region_xz"0|*>1") THEN 
-         DEFINE SYMBOL ferret_plot_var = ($data_var)[d=($data_num), \
+         DEFINE SYMBOL ferret_plot_var = the_plot_var_noregion[ \
          T=`tlo-addt`:`thi+addt`($data_analysis_expr),($region_y),($region_xz)]
       ELSE
-      DEFINE SYMBOL ferret_plot_var = ($data_var)[d=($data_num), \
+      DEFINE SYMBOL ferret_plot_var = the_plot_var_noregion[ \
         T=`tlo-addt`:`thi+addt`($data_analysis_expr),($region_y)]
       ENDIF
 
@@ -463,6 +472,7 @@ IF `STRINDEX("($viewshape)", "YT") GT 0` THEN
       DEFINE SYMBOL axtic_command TICS ,,0,0
       DEFINE SYMBOL axlen_command AXLEN,2
       DEFINE SYMBOL axtype_command TXTYPE,mon,day 
+      DEFINE SYMBOL axtype_command TXTYPE,yr,mon 
       
       DEFINE SYMBOL n_left_labels = `($n_left_labels"0")+1`
       DEFINE SYMBOL upper_left_($n_left_labels"0") = @CR@P2[The requested T region is smaller than 1 grid cell]
@@ -480,10 +490,10 @@ IF `STRINDEX("($viewshape)", "ZT") GT 0` THEN
         ($qualifiers)/VLIM=`($region_z_lo)`:`($region_z_hi)`
 
       IF ($region_xy"0|*>1") THEN
-         DEFINE SYMBOL ferret_plot_var = ($data_var)[d=($data_num), \
+         DEFINE SYMBOL ferret_plot_var = the_plot_var_noregion[ \
          Z=`($region_z_lo)-addz`:`($region_z_hi)+addz`($data_analysis_expr),($region_t),($region_xy)]
       ELSE
-         DEFINE SYMBOL ferret_plot_var = ($data_var)[d=($data_num), \
+         DEFINE SYMBOL ferret_plot_var = the_plot_var_noregion[ \
          Z=`($region_z_lo)-addz`:`($region_z_hi)+addz`($data_analysis_expr),($region_t)]
       ENDIF
 
@@ -507,10 +517,10 @@ IF `STRINDEX("($viewshape)", "ZT") GT 0` THEN
         ($qualifiers)/HLIM=`tlo`:`thi`
 
       IF ($region_xy"0|*>1") THEN 
-         DEFINE SYMBOL ferret_plot_var = ($data_var)[d=($data_num), \
+         DEFINE SYMBOL ferret_plot_var = the_plot_var_noregion[ \
          T=`tlo-addt`:`thi+addt`($data_analysis_expr),($region_z),($region_xy)]
       ELSE
-         DEFINE SYMBOL ferret_plot_var = ($data_var)[d=($data_num), \
+         DEFINE SYMBOL ferret_plot_var = the_plot_var_noregion[ \
          T=`tlo-addt`:`thi+addt`($data_analysis_expr),($region_z)]
       ENDIF
 
@@ -518,6 +528,7 @@ IF `STRINDEX("($viewshape)", "ZT") GT 0` THEN
       DEFINE SYMBOL axtic_command TICS ,,0,0
       DEFINE SYMBOL axlen_command AXLEN,,2
       DEFINE SYMBOL axtype_command TXTYPE,mon,day 
+      DEFINE SYMBOL axtype_command TXTYPE,yr,mon 
       
       DEFINE SYMBOL n_left_labels = `($n_left_labels"0")+1`
       DEFINE SYMBOL upper_left_($n_left_labels"0") = @CR@P2[The requested T region is smaller than 1 grid cell]
