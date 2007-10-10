@@ -34,14 +34,14 @@ IF ($n_left_labels"0|*>1") THEN
    LET labsiz = 0.1
 
    IF `($n_left_labels) GT 1` THEN 
-      IF ($region_small_2"0|*>1") THEN THEN LET labsiz = 0.16
+      IF ($region_small_2"0|*>1") THEN LET labsiz = 0.16
       LABEL/NOUSER 0, `labyloc`, -1, 0.0, `labsiz`, ($upper_left_2)
       LET labsiz = 0.1
       LET labyloc = `labyloc - labdel`
    ENDIF
 
    IF `($n_left_labels) GT 2` THEN
-      IF ($region_small_3"0|*>1") THEN THEN LET labsiz = 0.16
+      IF ($region_small_3"0|*>1") THEN LET labsiz = 0.16
       LABEL/NOUSER 0, `labyloc`, -1, 0.0, `labsiz`, ($upper_left_3)
       LET labsiz = 0.1
       LET labyloc = `labyloc - labdel`
