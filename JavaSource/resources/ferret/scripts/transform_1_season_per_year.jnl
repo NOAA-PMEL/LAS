@@ -113,7 +113,6 @@ IF `season_length EQ 1` THEN
       DEFINE SYMBOL ferret_plot_var_noregion S1_the_plot_var_noregion[L=`L1`:`nn`:12]
       DEFINE SYMBOL ferret_plot_title ($ferret_plot_title) every ($mon1)
    ENDIF
-   pause
 
 ELSE
 
@@ -145,7 +144,6 @@ ELSE
             LET nn = `L1`
          ENDIF
       ENDIF
-pause
 
    ENDIF
 
@@ -187,8 +185,12 @@ pause
 ! Index list, once per year on the correct month
 
    IF `loffset LT 0` THEN LET loffset = `loffset + 12`
-   LET L1 = MOD(`1+INT(season_length/2) + loffset`,12)
-pause
+   IF ($ferret_expand_time"0") THEN 
+      LET L1 = 1+INT(season_length/2) 
+   ELSE 
+      LET L1 = MOD(`1+INT(season_length/2) + loffset`,12)
+   ENDIF
+
    DEFINE AXIS/T/T0="`tt,RETURN=t0`"/UNITS=`tt,RETURN=tunits` timeax_years = tsample[L=`L1`:`NMSK`:($ferret_season_length)]
 
 
@@ -221,4 +223,3 @@ pause
 
 ENDIF  ! Season length longer than 1
 
-pause
