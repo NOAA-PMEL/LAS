@@ -95,12 +95,11 @@ $form.getStart("region", "doSubmit()", "region_form_id")
     $form.hidden("y_lo", "-90")
     $form.hidden("y_hi", "90")
     $form.hidden("use_java", "$use_java")
-#if($date_widget == "true" && $region.hasAxis("t"))
-#set($axis=$region.getAxis("t"))
+#if($date_widget == "true" && $region.hasAxis("t") &&  $region.getAxis("t").getDMYT() != "")
 #set($isRange=$region.isRange("t"))
-    $form.hidden("t_lo",$axis.getLo())
+    $form.hidden("t_lo",$region.getAxis("t").getLo())
     #if($isRange)
-    $form.hidden("t_hi",$axis.getHi())
+    $form.hidden("t_hi",$region.getAxis("t").getHi())
 	#end
 #end
 
