@@ -14,12 +14,9 @@ function setTimeRange() {
    */
    
       var theRegionForm = document.getElementById("region_form_id");
-      theRegionForm.t_lo=DW.getDate1_Ferret();
-      alert("date1 = "+theRegionForm.t_lo);
-      if (DW.menu_set_2) {
-        theRegionForm.t_hi = DW.getDate2_Ferret();
-        alert("date2 = "+theRegionForm.t_hi);
-      }
+      theRegionForm.t_lo.value=DW.getDate1_Ferret();
+      if (DW.menu_set_2) 
+        theRegionForm.t_hi.value = DW.getDate2_Ferret();
 
 }
 #end
@@ -98,7 +95,14 @@ $form.getStart("region", "doSubmit()", "region_form_id")
     $form.hidden("y_lo", "-90")
     $form.hidden("y_hi", "90")
     $form.hidden("use_java", "$use_java")
-
+#if($date_widget == "true" && $region.hasAxis("t"))
+#set($axis=$region.getAxis("t"))
+#set($isRange=$region.isRange("t"))
+    $form.hidden("t_lo",$axis.getLo())
+    #if($isRange)
+    $form.hidden("t_hi",$axis.getHi())
+	#end
+#end
 
 #table_start()
 
@@ -182,7 +186,7 @@ $form.getStart("region", "doSubmit()", "region_form_id")
   
   #else
   ## Render as a DateWidget
-      <td id='timeDT' align="left"></td>
+      <td id='timeDT'></td>
       <script language="JavaScript">
          DW = new DateWidget('$axis.getLo()', '$axis.getHi()' );
       </script>
