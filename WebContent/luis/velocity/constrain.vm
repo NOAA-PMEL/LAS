@@ -1,8 +1,29 @@
 #parse("constrain_include.vm")
-
+#set($date_widget = "false")
+<script type="text/javascript" src="../JavaScript/components/DateWidget.js"></script>
 <script language="JavaScript">
 var aMapTool;
 var aRegionWidget;
+
+#if ( $date_widget == "true"  ) 
+function setTimeRange() {
+
+  /*
+   * if the DateWidget is being used, set the form
+   * values here.
+   */
+   
+      var theRegionForm = document.getElementById("region_form_id");
+      theRegionForm.t_lo=DW.getDate1_Ferret();
+      alert("date1 = "+theRegionForm.t_lo);
+      if (DW.menu_set_2) {
+        theRegionForm.t_hi = DW.getDate2_Ferret();
+        alert("date2 = "+theRegionForm.t_hi);
+      }
+
+}
+#end
+
 
 function updateMap() {
    var widxlot = new MapTextWidget(this,"lon", 'region',"xlo_text");
@@ -18,6 +39,7 @@ function setRegionWidget() {
 
 function doSubmit() {
   var tf = findForm();
+
   tf.target="_top";
   if (aMapTool){
     aMapTool.getRanges();
@@ -45,6 +67,7 @@ function popupDataWindow() {
    doSubmit();
    theForm.nexturl.value="data_popup";
    theForm.target = "data";
+  
    theForm.submit();
 }
 </script>
@@ -68,7 +91,7 @@ function popupDataWindow() {
 #end ## if($include_header)
 
 
-$form.getStart("region", "doSubmit()")
+$form.getStart("region", "doSubmit()", "region_form_id")
     <input type="hidden" name="action" value="">
     $form.hidden("x_lo","-180")
     $form.hidden("x_hi", "180")
@@ -130,6 +153,8 @@ $form.getStart("region", "doSubmit()")
 #parse("applet_include.vm")
 #table_start()
 
+
+
 ## Create axis widgets
 
 #if($region.hasAxis("t"))
@@ -141,6 +166,12 @@ $form.getStart("region", "doSubmit()")
   #else
     #td_advice("Select&nbsp;time")
   #end ##if($region.isRange("t"))
+  
+  )
+  
+  #if( $axis.getDMYT() == "" || $date_widget != "true")
+  
+  ## Render as old style widget.
   <td align="left"><font size="2">
   $form.axisSelect("lo", "region", "t_lo", $axis)
   #if($isRange)
@@ -148,6 +179,33 @@ $form.getStart("region", "doSubmit()")
      $form.axisSelect("hi", "region", "t_hi", $axis)
   #end
   </font></td>
+  
+  #else
+  ## Render as a DataWidget
+      <td id='timeDT' align="left">
+      <script language="JavaScript">
+         DW = new DateWidget('$axis.getLo()', '$axis.getHi()' );
+      </script>
+      #if ($isRange)
+         <script language="JavaScript">
+         #if ( !$axis.getDeltaMinutes().equals("0") )
+            DW.setDeltaMinutes('$axis.getDeltaMinutes()');
+         #end
+         DW.render('timeDT', '$axis.getDMYT()', '$axis.getDMYT()');
+         DW.setCallback(setTimeRange);
+         </script>
+      #else
+         <script language="JavaScript">
+         #if ( !$axis.getDeltaMinutes().equals("0") )
+            DW.setDeltaMinutes('$axis.getDeltaMinutes()');           
+         #end
+         DW.render('timeDT', '$axis.getDMYT()');
+         DW.setCallback(setTimeRange);
+         </script>
+      #end
+      </td>
+  #end
+  
   </tr>
 #end ## region.hasAxis
 
