@@ -993,18 +993,25 @@ public class FormHandler {
    * Create a HTML <form> start field
    */
   public String getStart(String name) {
-    return getStart(name, null);
+    return getStart(name, null, null);
+  }
+  
+  public String getStart(String name, String submitProc) {
+	  return getStart(name, submitProc, null);
   }
 
-  public String getStart(String name, String submitProc){
-    String outname = "", proc="";
+  public String getStart(String name, String submitProc, String form_id){
+    String outname = "", proc="", fid="";
     if (name != null){
       outname = "name=\"" + name + "\"";
     }
     if (submitProc != null){
       proc = "onSubmit=\"" + submitProc + "\"";
     }
-    String rval = "<form " + proc + " " + outname + " method=\"POST\" action=\"" + getTarget() + "\">";
+    if ( form_id != null ) {
+    	fid = "id=\"" + form_id + "\"";
+    }
+    String rval = "<form " + fid + " " + proc + " " + outname + " method=\"POST\" action=\"" + getTarget() + "\">";
     // All forms must have a nexturl field
     rval += new Hidden("nexturl", " ", null).toString();
     return rval;
