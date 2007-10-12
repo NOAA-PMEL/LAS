@@ -141,7 +141,17 @@
      <copy file="${app.name}.war" tofile="${dist.war}"/>
   </target>
 
-  <target name="lps-lbes" depends="prepare,compile">
+<target name="velocity">
+       <copy todir="${jakarta.home}/webapps/${app.name}">
+               <fileset dir="WebContent/luis/velocity">
+                         <include name="**.vm"/>
+                         <include name="**.html"/>
+                         <include name="**.htm"/> 
+                         <include name="**.js"/>
+               </fileset>               
+       </copy> 
+ </target>
+ <target name="lps-lbes" depends="prepare,compile">
     <war jarfile="${app.name}.war" webxml="WebContent/WEB-INF/web.xml">
        <classes dir="WebContent/WEB-INF/classes" includes="**"/>
        <fileset dir="WebContent">
