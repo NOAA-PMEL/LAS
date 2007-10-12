@@ -170,8 +170,6 @@ $form.getStart("region", "doSubmit()", "region_form_id")
     #td_advice("Select&nbsp;time")
   #end ##if($region.isRange("t"))
   
-  )
-  
   #if( $axis.getDMYT() == "" || $date_widget != "true")
   
   ## Render as old style widget.
@@ -187,7 +185,7 @@ $form.getStart("region", "doSubmit()", "region_form_id")
   ## Render as a DateWidget
       <td id='timeDT'></td>
       <script language="JavaScript">
-         DW = new DateWidget('$axis.getLo()', '$axis.getHi()' );
+         DW = new DateWidget('$axis.getLo()', '$axis.getHi()');
       </script>
       #if ($isRange)
          <script language="JavaScript">
