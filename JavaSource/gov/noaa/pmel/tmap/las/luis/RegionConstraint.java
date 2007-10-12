@@ -33,7 +33,7 @@ public class RegionConstraint {
     mAxes = vi.getAxes();
     for (Iterator i = mAxes.iterator(); i.hasNext(); ){
       IAxis a = (IAxis)i.next();
-      if (a.getSize() > 1 && !a.isAnalysis()){
+      if (a.getSize() >= 1 && !a.isAnalysis()){
 	mAxesSet.add(a.getType());
       }
     }
