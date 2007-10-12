@@ -1,5 +1,5 @@
 #parse("constrain_include.vm")
-#set($date_widget = "false")
+#set($date_widget = "true")
 <script type="text/javascript" src="../JavaScript/components/DateWidget.js"></script>
 <script language="JavaScript">
 var aMapTool;
@@ -181,8 +181,8 @@ $form.getStart("region", "doSubmit()", "region_form_id")
   </font></td>
   
   #else
-  ## Render as a DataWidget
-      <td id='timeDT' align="left">
+  ## Render as a DateWidget
+      <td id='timeDT' align="left"></td>
       <script language="JavaScript">
          DW = new DateWidget('$axis.getLo()', '$axis.getHi()' );
       </script>
@@ -203,7 +203,6 @@ $form.getStart("region", "doSubmit()", "region_form_id")
          DW.setCallback(setTimeRange);
          </script>
       #end
-      </td>
   #end
   
   </tr>
