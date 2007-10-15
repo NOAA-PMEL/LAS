@@ -49,7 +49,7 @@
  </grids>
  <axes>
    <IRI-time44 type="t" units="month">
-     <arange start="1980-01-01" step="1" size="301"/>
+     <arange start="1980-01-15" step="1" size="301"/>
    </IRI-time44>
    <IRI-lon21 type="x" units = "degrees_east">
       <arange start="122.25" step="1.50" size="112"/>
