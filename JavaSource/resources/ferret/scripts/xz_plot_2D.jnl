@@ -151,6 +151,9 @@ IF `($data_count"0") EQ 1` THEN
          IF ($axlab_command"0|*>1") THEN PPL ($axlab_command)
          IF ($axtic_command"0|*>1") THEN PPL ($axtic_command)
          IF ($axlen_command"0|*>1") THEN PPL ($axlen_command)
+         if ($labnum_dset"0|*>1") THEN go unlabel ($labnum_dset)
+         if ($labnum_datitl"0|*>1") THEN go unlabel ($labnum_datitl)
+         if ($labnum_dods"0|*>1") THEN go unlabel ($labnum_dods)
       PPL SHADE
       IF `($LEV_NUM"0") GT 245/2` THEN PPL SHASET RESET
       ($plot_type)($qualifiers)/OVER/NOLAB ($ferret_var_0)
@@ -161,8 +164,12 @@ IF `($data_count"0") EQ 1` THEN
          IF ($axlab_command"0|*>1") THEN PPL ($axlab_command)
          IF ($axtic_command"0|*>1") THEN PPL ($axtic_command)
          IF ($axlen_command"0|*>1") THEN PPL ($axlen_command)
+         if ($labnum_dset"0|*>1") THEN go unlabel ($labnum_dset)
+         if ($labnum_datitl"0|*>1") THEN go unlabel ($labnum_datitl)
+         if ($labnum_dods"0|*>1") THEN go unlabel ($labnum_dods)
       PPL ($plot_type)
    ENDIF
+   GO LAS_url_label 
 
    IF ($ferret_contour_style"0|default>0|color_filled_plus_lines>1|raster_plus_lines>1|*>0") THEN
       IF ($ferret_contour_levels"0|*>1") THEN 
