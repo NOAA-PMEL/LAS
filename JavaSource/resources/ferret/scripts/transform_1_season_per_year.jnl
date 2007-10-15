@@ -134,11 +134,11 @@ ELSE
    
          LET L1 = n1 + loffset - (first_month_selected-1)
          IF `first_month_selected GE ($ferret_season_center) AND first_month_selected-($ferret_season_center) LT 6` THEN LET L1 = `L1-12`
-         IF `first_month_selected LT ($ferret_season_center) AND ($ferret_season_center)-first_month_selected GT 6` THEN LET L1 = `L1-12`
+         IF `first_month_selected LT ($ferret_season_center) AND ($ferret_season_center)-first_month_selected GT 6` THEN LET L1 = `L1-24`
          IF `L1 GT tsiz` THEN LET L1 = tsiz
+         IF `L1 LT 1` THEN LET L1 = `L1-12`
          IF `L1 LT 1` THEN LET L1 = 1
          LET nn = `L1 + 24`
-         LET n1 = `L1`
          IF `L1 EQ tsiz` THEN
             LET n1 = `L1 - 24`
             LET nn = `L1`
@@ -190,9 +190,7 @@ ELSE
    ELSE 
       LET L1 = MOD(`1+INT(season_length/2) + loffset`,12)
    ENDIF
-
    DEFINE AXIS/T/T0="`tt,RETURN=t0`"/UNITS=`tt,RETURN=tunits` timeax_years = tsample[L=`L1`:`NMSK`:($ferret_season_length)]
-
 
 ! Average from the n-Month-per-year axis to once per year.
 ! Weight by the box sizes from the original time axis.
