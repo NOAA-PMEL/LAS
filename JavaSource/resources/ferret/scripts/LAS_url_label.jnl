@@ -1,0 +1,21 @@
+! LAS_url_label.jnl
+
+
+! Define upper-right labels with the url; the URL is not plotted automatically when the var is
+! (the same thing may be done in transform scripts or in differencing setup; that is ok
+
+IF `($n_right_labels"0") EQ 0` THEN DEFINE SYMBOL n_right_labels = 0
+IF `STRINDEX("($data_$1_url)","http") NE 0` THEN
+
+   DEFINE SYMBOL data_$1_urlpath = ($data_$1_dataset_url)
+
+   DEFINE SYMBOL n_right_labels = `($n_right_labels)+1`
+   DEFINE SYMBOL upper_right_($n_right_labels) = "DODS URL: @AC($data_$1_urlpath)"
+
+ELSE
+   DEFINE SYMBOL n_right_labels = `($n_right_labels)+1`
+   DEFINE SYMBOL upper_right_($n_right_labels) = DATA SET: @AC`($data_var)[d=($data_num)],RETURN=dset`
+ENDIF
+
+! End of $RCSfile ------------LAS_url_label.jnl--------------------------
+
