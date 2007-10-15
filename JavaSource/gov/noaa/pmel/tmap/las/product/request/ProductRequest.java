@@ -779,6 +779,7 @@ public class ProductRequest {
         title = title.replaceAll(";", " ");
         
         data.setAttribute("title",title);
+        data.setAttribute("xpath", varXPath);
         //data.setAttribute("title", "Transformed Variable");
         // For cases that combine analysis and regridding we have to
         // accumulate the contents of the script.
