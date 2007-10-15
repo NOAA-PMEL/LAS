@@ -216,9 +216,9 @@ ELSE
    IF ($ferret_expand_time"0|*>1) THEN DEFINE SYMBOL ferret_plot_var S1_seas_per_year[($region_t)]
 
 ! Add information to the title
-   DEFINE SYMBOL ferret_plot_title ($ferret_plot_title) (($ferret_season_length)-month ave, every ($mon1))
+   DEFINE SYMBOL ferret_plot_title ($ferret_plot_title) (($ferret_season_length)-month ave, Centered ($mon1))
 
-   DEFINE SYMBOL data_var_transform = , (($ferret_season_length)-month ave, every ($mon1))
+   DEFINE SYMBOL data_var_transform = , (($ferret_season_length)-month ave, Centered ($mon1))
 
 
 ENDIF  ! Season length longer than 1
