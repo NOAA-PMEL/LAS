@@ -355,8 +355,8 @@ public class ProductRequest {
                                         data.setAttribute("var", var+"_"+var_count+"_regrid");
                                         data.setAttribute("title", lasConfig.getVariableTitle(varXPath)+" on the grid of "+gridTo.getVar()+"[d=1]");
                                     } else {
-                                        // It's the same data set so use it as normal.
-                                        data.setAttribute("url",current_url);
+                                        // It's the same data set so use it as normal except switch it to the F-TDS URL.
+                                        data.setAttribute("url",lasConfig.getTFDSURL(varXPath));
                                         data.setAttribute("var",lasConfig.getVariableName(varXPath));
                                         data.setAttribute("title", lasConfig.getVariableTitle(varXPath));
                                         data.setAttribute("xpath", varXPath);
@@ -380,7 +380,8 @@ public class ProductRequest {
                                 	String var = lasConfig.getVariableName(varXPath);
                                     String expression = "";
                                     String encoded = URLEncoder.encode(lasConfig.getTFDSURL(varXPath), "UTF-8");
-                                    if ( !gridTo.getGridID().equals(current_gridID) ) {
+                                    if ( !gridTo.getGridID().equals(current_gridID) ||
+                                    	 !gridTo.getDsID().equals(current_dsID)) {
                                     	String g = "g"+view;
                                     	if (gridTo.isAnalysis()) {                                    		
                                     		StringBuffer analysis_jnl = gridTo.getJnl();
@@ -403,9 +404,9 @@ public class ProductRequest {
                                     		data.setAttribute("url", gridTo.getURL()+expression);
                                     		data.setAttribute("var", var+"_"+var_count+"_regrid");
                                     		//data.setAttribute("title", "Transformed Variable");
-                                    		data.setAttribute("title", lasConfig.getVariableTitle(varXPath)+"on the grid of "+gridTo.getVar()+"[d=1]");
+                                    		data.setAttribute("title", lasConfig.getVariableTitle(varXPath)+" on the grid of "+gridTo.getVar()+"[d=1]");
                                     	}
-                                    }
+                                    } 
                                 }
                             }
 
