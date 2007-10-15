@@ -158,6 +158,9 @@ IF `($data_count"0") EQ 1` THEN
          IF ($axtic_command"0|*>1") THEN PPL ($axtic_command)
          IF ($axlen_command"0|*>1") THEN PPL ($axlen_command)
          IF ($axtype_command"0|*>1") THEN PPL ($axtype_command)
+         if ($labnum_dset"0|*>1") THEN go unlabel ($labnum_dset)
+         if ($labnum_datitl"0|*>1") THEN go unlabel ($labnum_datitl)
+         if ($labnum_dods"0|*>1") THEN go unlabel ($labnum_dods)
       PPL SHADE
       IF `($LEV_NUM"0") GT 245/2` THEN PPL SHASET RESET
       ($plot_type)($qualifiers)/OVER/NOLAB ($ferret_var_0)
@@ -171,6 +174,9 @@ IF `($data_count"0") EQ 1` THEN
          IF ($axtic_command"0|*>1") THEN PPL ($axtic_command)
          IF ($axlen_command"0|*>1") THEN PPL ($axlen_command)
          IF ($axtype_command"0|*>1") THEN PPL ($axtype_command)
+         if ($labnum_dset"0|*>1") THEN go unlabel ($labnum_dset)
+         if ($labnum_datitl"0|*>1") THEN go unlabel ($labnum_datitl)
+         if ($labnum_dods"0|*>1") THEN go unlabel ($labnum_dods)
    PPL ($plot_type)
       PPL ($plot_type)
    ENDIF
@@ -204,8 +210,10 @@ ELIF  `($data_count"0") EQ 2` THEN
       IF ($axlen_command"0|*>1") THEN PPL ($axlen_command)
       IF ($axtype_command"0|*>1") THEN PPL ($axtype_command)
    PPL ($plot_type)
+   GO LAS_url_label 
 
    CONTOUR/OVER($qualifiers_over)/NOKEY/NOLAB ($ferret_var_1) 
+   GO LAS_url_label 1
 
 ENDIF
 
