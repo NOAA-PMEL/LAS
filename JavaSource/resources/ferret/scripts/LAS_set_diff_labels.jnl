@@ -32,14 +32,14 @@ DEFINE SYMBOL ferret_over_title = \
 <NL>  @P2($ferret_title_1)) from ($data_1_dataset_name)(2)
 
 IF `STRLEN("($ferret_diff_title)") GT 150` THEN
-  DEFINE SYMBOL ferret_diff_title = ($ferret_title_0) from \
+  DEFINE SYMBOL ferret_diff_title = ($ferret_title_0) @ACfrom \
   <NL>  ($data_0_dataset_name)(1) <NL> -  @P2($ferret_title_1)) from \
   <NL>  ($data_1_dataset_name)(2)
   DEFINE SYMBOL title_size 0.12   ! make title text smaller...
 ENDIF
 
 IF `STRLEN("($ferret_over_title)") GT 150` THEN
-  DEFINE SYMBOL ferret_over_title = ($ferret_title_0) from \
+  DEFINE SYMBOL ferret_over_title = ($ferret_title_0) @ACfrom \
   <NL>  ($data_0_dataset_name)(1) <NL>  @P2($ferret_title_1)) from \
   <NL>  ($data_1_dataset_name)(2)
   DEFINE SYMBOL title_size 0.12   ! make title text smaller...
