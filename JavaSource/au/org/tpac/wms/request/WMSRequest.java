@@ -40,6 +40,9 @@ public class WMSRequest
     protected String errorFormatType;
     protected float minXLimit, minYLimit, maxXLimit, maxYLimit;
 
+    private boolean isValid;
+    private String exceptionCode;
+
     /**
      * an empty constructor
      */
@@ -62,6 +65,9 @@ public class WMSRequest
         layers = new TreeSet();
         extents = new Hashtable();
         styles = new Hashtable();
+
+        isValid =  true;
+        exceptionCode = null;
     }
 
     /**
@@ -92,6 +98,10 @@ public class WMSRequest
         styles = new Hashtable();
         extents = new Hashtable();
 
+//jli
+        isValid =  true;
+        exceptionCode = null;
+
         Vector excp = cap.getExceptionTypes();
 
         //put in the first one :)
@@ -106,10 +116,14 @@ public class WMSRequest
      */
     public WMSRequest(String wmsString, WMSCapabilities wmsCap)
     {
+//jli
+        isValid =  true;
+        exceptionCode = null;
+
         finalRequestString = wmsString;
 
         cap = wmsCap;
-
+ 
         //defualt width & height
         imageWidth = 800;
         imageHeight = 600;
@@ -196,6 +210,9 @@ public class WMSRequest
                     minY = Float.parseFloat(coords[1]);
                     maxX = Float.parseFloat(coords[2]);
                     maxY = Float.parseFloat(coords[3]);
+ //jli
+                    //check if BBOX is valid
+                    checkBBOX(layersNames);
                 }
                 else if(key.equalsIgnoreCase("EXCEPTION"))
                 {
@@ -250,6 +267,71 @@ public class WMSRequest
     public TreeSet getLayers()
     {
         return layers;
+    }
+
+    /*
+     * Check if BBOX parameter is valid
+     */
+    private void checkBBOX(String[] layersNames){
+        if((minX >= maxX) || (minY >= maxY)){
+            isValid = false;
+            exceptionCode = "Invalid BBOX value";
+        }
+
+        //check if BBOX is in range
+        for(int j = 0; j < layersNames.length; j++){
+
+            //get a layer's LatLonBoundingBox
+            WMSLayer wmsLay = cap.getLayer(layersNames[j]);
+            WMSLatLongBox wmsLatLongBBOX = wmsLay.getLatLongBox();
+            float wmsMinX = wmsLatLongBBOX.getMinX();
+            float wmsMaxX = wmsLatLongBBOX.getMaxX();
+            float wmsMinY = wmsLatLongBBOX.getMinY();
+            float wmsMaxY = wmsLatLongBBOX.getMaxY();
+
+            //System.out.println("minY="+minY+"; wmsMaxY="+wmsMaxY);
+            if( (maxY < wmsMinY) || (minY > wmsMaxY) ){
+                isValid = false;
+                exceptionCode = "Invalid BBOX value";
+            }
+
+/* use relaxed constraint for X
+            //[minX, maxX] is not inside, or does not overlap, or does not include [wmsMinX, wmsMaxX]
+            if( isNotInRange(minX, wmsMinX, wmsMaxX) && isNotInRange(maxX, wmsMinX, wmsMaxX)
+                && isNotInRange(wmsMinX, minX, maxX) && isNotInRange(wmsMaxX, minX, maxX)){
+                isValid = false;
+                exceptionCode = "Invalid BBOX value";
+            }
+*/
+        }
+    }
+
+    //assume lon form BBOX parameter is in range of [-180,360]
+    private boolean isNotInRange(float lon, float minLon, float maxLon){
+       System.out.println("lon="+lon+"; minlon="+minLon +"; maxLon="+maxLon);
+       if( (lon > minLon) && (lon < maxLon) ){
+           return false;
+       } 
+
+       //global
+       if(maxLon - minLon >= 360.0){return false;}
+
+       if( lon < 0.0){
+           if(maxLon < 180.0){
+               return true;
+           }else if( (maxLon >= 180.0) && (maxLon <= 360.0) ){
+               float tmp = maxLon-360.0f;
+               if(lon < tmp){return false;}
+           }
+       }else{
+           if(lon < 180.0){
+               return true;
+           }else{
+               float tmp = lon-360.0f;
+               if(tmp > minLon){return false;}
+           }           
+       }
+       return true;
     }
 
     /**
@@ -835,5 +917,21 @@ public class WMSRequest
         return version;
     }
 
+    /**
+     * Returns the isValid
+     * @return the isValid 
+     */
+    public boolean isValid()
+    {
+        return isValid;
+    }
 
+    /**
+     * Returns exception code of this WMSRequest if it is not valid
+     * @return the exception code as a string
+     */
+    public String getExceptionCode()
+    {
+        return exceptionCode;
+    }
 }
