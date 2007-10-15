@@ -57,7 +57,7 @@ ENDIF
 ! Compute rounded-off levels with the PPL %RANGE command.
 
 IF ($ferret_center_levels"0|1|TRUE>1|*>0") THEN
-   PPL %RANGE `-2*($stat_std)`, `+2*($stat_std)`, 50
+   PPL %RANGE `-2*($stat_std)`, `+2*($stat_std)`, ($ferret_num_contour_levels"50")
 ELSE
    PPL %RANGE `($stat_mean)-2*($stat_std)`, `($stat_mean)+2*($stat_std)`, 50
 ENDIF
