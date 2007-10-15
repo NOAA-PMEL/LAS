@@ -22,10 +22,10 @@ DEFINE SYMBOL data_($num)_num = `($data_var),RETURN=dsetnum`
 
 ! unComment this for testing.
 
-! IF `( ($ferret_contour_levels"0|*>1") EQ 0 ) AND\ 
-!     ( ($ferret_fill_levels"0|*>1")    EQ 0 ) ` THEN
-!    GO LAS_auto_levels ($data_var)[d=($data_num)]
-! ENDIF
+IF `( ($ferret_contour_levels"0|*>1") EQ 0 ) AND\ 
+    ( ($ferret_fill_levels"0|*>1")    EQ 0 ) ` THEN
+    GO LAS_auto_levels ($data_var)[d=($data_num)]
+ENDIF
 
 DEFINE SYMBOL ferret_plot_var = ($data_var)[d=($data_num),($region_full)]
 DEFINE SYMBOL ferret_plot_var_noregion = ($data_var)[d=($data_num)]
