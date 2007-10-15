@@ -89,7 +89,7 @@ DEFINE SYMBOL mon1 = `months[I=($ferret_season_center)]`
 ! If the season length is 1, we just need to set up some striding.
 
 IF `season_length EQ 1` THEN
-   LET S1_the_plot_var = ($ferret_xyz_var)
+   LET/D=($data_num) S1_the_plot_var = ($ferret_xyz_var)
 ! 1 time step in result region, choose the month specified for the season_center which
 ! is closest to the month chosen on the time widget.
 
@@ -123,13 +123,13 @@ ELSE
    IF `nn EQ n1` THEN
       DEFINE SYMBOL ferret_expand_time = 1
       IF `STRINDEX("($ferret_view)", "t") EQ 0` THEN 
-         LET S1_the_plot_var = ($ferret_xyz_var)
+         LET/D=($data_num) S1_the_plot_var = ($ferret_xyz_var)
          IF `($REGION_X_LO) LT 0` THEN
-            LET S1_the_plot_var =  ($data_var)[d=($data_num),($region_x_p360)]
+            LET/D=($data_num) S1_the_plot_var =  ($data_var)[d=($data_num),($region_x_p360)]
             IF ($region_y"0|*>1") THEN \
-              LET S1_the_plot_var =  ($data_var)[d=($data_num),($region_x_p360),($region_y)]
+              LET/D=($data_num) S1_the_plot_var =  ($data_var)[d=($data_num),($region_x_p360),($region_y)]
             IF `($region_y"0|*>1") AND ($region_z"0|*>1")` THEN \
-               LET S1_the_plot_var = ($data_var)[d=($data_num),($region_x_p360),($region_y),($region_z)]
+               LET/D=($data_num) S1_the_plot_var = ($data_var)[d=($data_num),($region_x_p360),($region_y),($region_z)]
          ENDIF
    
          LET L1 = n1 + loffset - (first_month_selected-1)
@@ -149,12 +149,14 @@ ELSE
 
    IF `nn-n1 LT 24` THEN
       DEFINE SYMBOL ferret_expand_time = 1
+      LET/D=($data_num) S1_the_plot_var = ($ferret_xyz_var)
 
-      IF `( STRLEN("($ferret_view)") EQ 2 ) AND ( STRINDEX("($ferret_view)", "t") NE 0 )` THEN 
+!      IF `( STRLEN("($ferret_view)") EQ 2 ) AND ( STRINDEX("($ferret_view)", "t") NE 0 )` THEN 
       LET nn = MIN(`tsiz`, `nn + 24`)
          LET n1 = MAX(1, `n1-24`)
-      ENDIF
+!      ENDIF
    ENDIF
+   
 
 ! Define a variable containing the indices that correspond to the data we 
 ! need for the seasonal averages. Start with the first month needed; if
@@ -178,6 +180,8 @@ ELSE
    LET S1_seas_months_noregion = SAMPLEL(S1_the_plot_var_noregion,S1_L_indx_T[l=1:`nmsk`])
    LET tsample = SAMPLEL(t[gt=S1_the_plot_var],S1_L_indx_T[l=1:`nmsk`])
 
+
+
    DEFINE AXIS/T/T0="`tt,RETURN=t0`"/UNITS=`tt,RETURN=tunits` taxis_sampled = tsample
    LET s1_to_average = S1_seas_months[gt=taxis_sampled@ASN]
    LET s1_to_average_noregion = S1_seas_months_noregion[gt=taxis_sampled@ASN]
@@ -191,6 +195,8 @@ ELSE
       LET L1 = MOD(`1+INT(season_length/2) + loffset`,12)
    ENDIF
    DEFINE AXIS/T/T0="`tt,RETURN=t0`"/UNITS=`tt,RETURN=tunits` timeax_years = tsample[L=`L1`:`NMSK`:($ferret_season_length)]
+   IF `nmsk eq 1` THEN \
+      DEFINE AXIS/T/T0="`tt,RETURN=t0`"/UNITS=`tt,RETURN=tunits` timeax_years = tsample[L=`L1`:`L1`:($ferret_season_length)]
 
 ! Average from the n-Month-per-year axis to once per year.
 ! Weight by the box sizes from the original time axis.
