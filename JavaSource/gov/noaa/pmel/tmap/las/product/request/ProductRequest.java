@@ -326,7 +326,8 @@ public class ProductRequest {
                                     // Use regrid all others to same grid as first, but
                                     // only if the URL is different.
 
-                                    if ( !gridTo.getGridID().equals(current_gridID) ) {
+                                    if ( !gridTo.getGridID().equals(current_gridID) ||
+                                       	 !gridTo.getDsID().equals(current_dsID)) {
 
                                         String var = lasConfig.getVariableName(varXPath);
                                         String expression = "";
