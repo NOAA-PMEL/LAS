@@ -92,7 +92,7 @@ public class JDOMUtils {
     /**
      * Makes a nice String with the bytes of the MD5 Hash.
      * @param bytes the bytes to be converted.
-     * @return the resulting String.
+     * @return hash - the resulting String.
      */
     protected static String toHexString(byte bytes[]) {
         char chars[] = new char[bytes.length * 2];
@@ -110,7 +110,7 @@ public class JDOMUtils {
      * Finds objects in the classpath.
      * @param object
      * @param resource
-     * @return
+     * @return the fully qualified path name of the requested object.
      */
     public static String getResourcePath(Object object, String resource) {
 

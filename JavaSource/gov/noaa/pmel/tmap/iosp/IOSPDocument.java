@@ -73,7 +73,7 @@ public class IOSPDocument extends Document {
     }
     /**
      * Returns the document encoded by the URLEncoder class after striping carriage returns and line feeds.
-     * @return
+     * @return the encoded string
      * @throws UnsupportedEncodingException
      */
     public String toEncodedURLString() throws UnsupportedEncodingException {

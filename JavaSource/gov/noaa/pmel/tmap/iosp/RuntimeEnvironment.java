@@ -133,10 +133,10 @@ public class RuntimeEnvironment implements Cloneable{
         }
     }
     /**
-     * Builds fully qualified path names based on a base and a string of blank saparated paths.  Relative paths get the basePath prepended.
+     * Builds fully qualified path names based on a base and a string of blank separated paths.  Relative paths get the basePath prepended.
      * @param paths to be resolved
      * @param basePath the "root" path
-     * @return
+     * @return the fully qualified path
      */
     public String resolvePaths(String paths, String basePath){
         String returnVal="";
