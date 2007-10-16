@@ -40,7 +40,7 @@ public class FerretConfig extends IOSPDocument {
      * A relative path name (like scripts or jnls) will get resolved
      * by pre-pending the full path to the "base_dir" attribute
      * from the &lt;invoker&gt; element.
-     * 
+     *  <pre>
      *  &lt;variable&gt;
      *       &lt;name&gt;FER_GO&lt;/name&gt;
      *        &lt;value&gt;.&lt;/value&gt;
@@ -53,6 +53,7 @@ public class FerretConfig extends IOSPDocument {
      *        &lt;value&gt;jnls/section&lt;/value&gt;
      *        &lt;value&gt;scripts&lt;/value&gt;
      *   &lt;/variable&gt;
+     *   </pre>
      * @return HashMap containing the Ferret environment variables as keys and their values as values
      * @throws IOSPException if the base_dir is not a full path (i.e. does not start with a "/").
      * @throws Exception
@@ -132,7 +133,6 @@ public class FerretConfig extends IOSPDocument {
     }
     /**
      * Set the path to the iosp_base_dir used by the IOSP.
-     * @see getBaseDir
      * @param dir the directory to set
      */
     public void setIOSPBaseDir(String dir) {
@@ -143,7 +143,6 @@ public class FerretConfig extends IOSPDocument {
     }
     /**
      * Set the path to the base_dir use by LAS.
-     * @see getBaseDir
      * @param dir the directory to set
      */
     public void setBaseDir(String dir) {

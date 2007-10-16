@@ -19,7 +19,7 @@ public class Tool {
     /**
      * Resolve the full path name for the location of the resource used by this tool.
      * @param resource The 
-     * @return
+     * @return the fully qualified path of the requested resource
      */
     public String getResourcePath(String resource) {
         

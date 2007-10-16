@@ -27,9 +27,11 @@ public class FerretNetcdfFile extends NetcdfFile {
     static private Logger log = Logger.getLogger(FerretNetcdfFile.class.getName());
 
     /**
-     * Takes the HTTP Servlet Request which contains an _expr_ and turns it into a Ferret script.
-     * @param request which contains the URL that must be cracked and turned into a Ferret script.
-     * @throws IOException if it has trouble writing the script.
+     * Construct a new netCDF file from the RandomAccessFile (which contains the resulting Ferret script) and TDS request URI that was used to
+     * create the script.
+     * @param raf
+     * @param location
+     * @throws IOException
      */
     public FerretNetcdfFile(RandomAccessFile raf, String location) throws IOException {
         super(new FerretIOServiceProvider(), raf, location, null);  
