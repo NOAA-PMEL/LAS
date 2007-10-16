@@ -273,12 +273,9 @@ public class RequestConverterLasToWms
         HashMap map = grid.getDimensions();
         Hashtable extents = wmsReq.getExtents();
 
-        //TODO:
-        //1. need to check if extents is empty; if so, use default values for all extents
-        //2. if not empty; get values of extents
-        //3. check if all extents are set
+        Hashtable wmsExtents = firstLayer.getExtents();
 
-        //use default values when dimension parameters are not specified in GetMap request
+/*
         if(extents.isEmpty()){
             //find all extents for this variable
             extents = firstLayer.getExtents();
@@ -293,9 +290,9 @@ public class RequestConverterLasToWms
                     String mapKey = (String)(it.next());
                     LasDimension dim = (LasDimension)(grid.getDimensions().get(mapKey));
 
-                    System.out.println("mapKey is " + mapKey);
-                    System.out.println("key is " + key);
-                    System.out.println("dim type is " + dim.getType());
+                    //System.out.println("mapKey is " + mapKey);
+                    //System.out.println("key is " + key);
+                    //System.out.println("dim type is " + dim.getType());
 
                     //for z dimension or time specified as a list of <v>
                     if(mapKey.equalsIgnoreCase(key))
@@ -311,8 +308,89 @@ public class RequestConverterLasToWms
                 }        
             }
 
+        }else if( (!extents.isEmpty()) && (extents.size() != wmsExtents.size()) ){
+*/
+        //use default values when dimension parameters are not specified in GetMap request
+        if( extents.size() != wmsExtents.size() ){
+            //check each wmsExtent to see if it is set; if not, use default value
+            for(Enumeration wmsExtentEnum = wmsExtents.keys(); wmsExtentEnum.hasMoreElements();)
+            {
+                String wmsKey = wmsExtentEnum.nextElement().toString();
+                WMSLayerExtent layerExtent = (WMSLayerExtent)wmsExtents.get(wmsKey);
+
+                //check if it is set by the GetMap request
+                boolean isSet = false;
+                for(Enumeration exEnum = extents.keys(); exEnum.hasMoreElements();){
+                    String key = exEnum.nextElement().toString();
+                    if(wmsKey.equalsIgnoreCase(key)){isSet=true;}
+                }
+                
+                //the extent identified by wmsKey if not set; use default value
+                if(!isSet){
+                    Iterator it = map.keySet().iterator();
+
+                    while(it.hasNext())
+                    {
+                        String mapKey = (String)(it.next());
+                        LasDimension dim = (LasDimension)(grid.getDimensions().get(mapKey));
+
+                        //for z dimension or time specified as a list of <v>
+                        if(mapKey.equalsIgnoreCase(wmsKey))
+                        {
+                            result += "<point type=\"" + dim.getType() + "\" v=\""+ layerExtent.getDefaultValue() + "\"/>";
+                        }
+
+                        //for time dimension specified as <arange> in data config XML file
+                        if((dim.getType()).equalsIgnoreCase("t") && (wmsKey.equalsIgnoreCase("time")))
+                        {
+                            result += "<point type=\"" + "t" + "\" v=\""+ layerExtent.getDefaultValue() + "\"/>";
+                        }
+                    }
+                }else{
+                //the extent identified by wmsKey if set
+                    String dimType = "";
+                    if(wmsKey.equalsIgnoreCase("time")){
+                        dimType = "t";
+                    }else if( wmsKey.equalsIgnoreCase("elevation")){
+                        dimType = "z";
+                    }
+
+                    Iterator it = map.keySet().iterator();
+
+                    while(it.hasNext())
+                    {
+                        String mapKey = (String)(it.next());
+                        LasDimension dim = (LasDimension)(grid.getDimensions().get(mapKey));
+
+                        if(dim.getType().equalsIgnoreCase(dimType))
+                        {
+                            Object value = extents.get(wmsKey);
+                            System.out.println(value.getClass());
+                            if(dimType.equalsIgnoreCase("t"))
+                            {
+                                DateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+                                DateFormat toFormat = new SimpleDateFormat("dd-MMM-yyyy");
+                                try
+                                {
+                                    Date toDate = format.parse((String)value);
+                                    value = toFormat.format(toDate);
+                                }
+                                catch(ParseException pe)
+                                {
+                                    System.out.println("cannot parse date: " + value);
+                                }
+                            }
+                            result += "<point type=\"" + dimType + "\" v=\""+ value + "\"/>";
+                        }
+                        else if(mapKey.equalsIgnoreCase(wmsKey))
+                        {
+                            result += "<point type=\"" + dim.getType() + "\" v=\""+ extents.get(wmsKey) + "\"/>";
+                        }
+                    }
+                }
+            } 
         }else{
-    
+        //extents are all set by the GetMap request
             for(Enumeration exEnum = extents.keys(); exEnum.hasMoreElements();)
             {
                 String key = exEnum.nextElement().toString();
@@ -323,9 +401,6 @@ public class RequestConverterLasToWms
                     dimType = "z";
 
                 Iterator it = map.keySet().iterator();
-
-                System.out.println(map.keySet());
-
                 while(it.hasNext())
                 {
                     String mapKey = (String)(it.next());
