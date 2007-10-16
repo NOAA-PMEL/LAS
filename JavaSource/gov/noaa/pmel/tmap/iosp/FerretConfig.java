@@ -27,15 +27,41 @@ import org.jdom.Element;
  */
 
 public class FerretConfig extends IOSPDocument {
+	/*
+	 * This number can be any string that uniquely identifies the version of this class code.  
+	 * The Eclipse IDE will generate it automatically for you.  We do not depend on this
+	 * since we do not serialize our code across the wire.
+	 */
     private static final long serialVersionUID = 4074966641591379924L;
     
     /**
-     * Returns the Ferret environtment
+     * Returns the Ferret environment.
+     * The environment section of the config file looks like this.
+     * A relative path name (like scripts or jnls) will get resolved
+     * by pre-pending the full path to the "base_dir" attribute
+     * from the &lt;invoker&gt; element.
+     * 
+     *  &lt;variable&gt;
+     *       &lt;name&gt;FER_GO&lt;/name&gt;
+     *        &lt;value&gt;.&lt;/value&gt;
+     *        &lt;value&gt;/home/porter/tmap/ferret/tmap_go&lt;/value&gt;
+     *        &lt;value&gt;/home/porter/tmap/ferret/x86_64-linux/contrib&lt;/value&gt;
+     *        &lt;value&gt;/home/porter/tmap/ferret/x86_64-linux/examples&lt;/value&gt;
+     *        &lt;value&gt;/home/porter/tmap/ferret/x86_64-linux/go&lt;/value&gt;
+     *        &lt;value&gt;jnls&lt;/value&gt;
+     *        &lt;value&gt;jnls/insitu&lt;/value&gt;
+     *        &lt;value&gt;jnls/section&lt;/value&gt;
+     *        &lt;value&gt;scripts&lt;/value&gt;
+     *   &lt;/variable&gt;
      * @return HashMap containing the Ferret environment variables as keys and their values as values
      * @throws IOSPException if the base_dir is not a full path (i.e. does not start with a "/").
      * @throws Exception
      */
     public HashMap<String, String> getEnvironment() throws IOSPException   {
+    	/*
+    	 
+    	 *
+    	 */
         HashMap<String, String> env = new HashMap<String, String>();
         Element environment = this.getRootElement().getChild("environment");
         String base_dir = getIOSPBaseDir();
@@ -88,7 +114,7 @@ public class FerretConfig extends IOSPDocument {
         return "";
     }
     /**
-     * Get the base resource directory which the contains the Ferret config and other resources.
+     * Get the base resource directory for LAS which the contains the Ferret config and other resources.
      * @return String containing the base_dir attribute for the Ferret config.
      */
     public String getBaseDir() {
@@ -105,7 +131,7 @@ public class FerretConfig extends IOSPDocument {
         return "";
     }
     /**
-     * Set the path to the iosp_base_dir.\
+     * Set the path to the iosp_base_dir used by the IOSP.
      * @see getBaseDir
      * @param dir the directory to set
      */
@@ -116,7 +142,7 @@ public class FerretConfig extends IOSPDocument {
         }
     }
     /**
-     * Set the path to the base_dir.\
+     * Set the path to the base_dir use by LAS.
      * @see getBaseDir
      * @param dir the directory to set
      */
@@ -144,7 +170,7 @@ public class FerretConfig extends IOSPDocument {
         return "";
     }
     /**
-     * Returns the directory where the Ferret scripts are stored.
+     * Returns the directory where the Ferret scripts for LAS are stored.
      * @return String containing the path to the scripts directory
      */
     public String getScriptDir() {

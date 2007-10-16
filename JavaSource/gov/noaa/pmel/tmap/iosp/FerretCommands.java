@@ -16,6 +16,9 @@ package gov.noaa.pmel.tmap.iosp;
  *
  */
 public class FerretCommands {
+	static final String forbidden_command[] = {
+		"SPAWN"
+	};
     static final String command[] = {
             "ALIAS", 
             "CANCEL",
@@ -66,6 +69,19 @@ public class FerretCommands {
     static public boolean containsCommand(String string) {
         for ( int i=0; i<command.length; i++ ) {
             if ( string.toUpperCase().contains(command[i]))  {
+                return true;
+            }
+        }
+        return false;
+    }
+    /**
+     * Test if a string contains a Ferret command.
+     * @param string - the string to test
+     * @return true if the string contains a Ferret command; false if it does not.
+     */
+    static public boolean containsForbiddenCommand(String string) {
+        for ( int i=0; i<command.length; i++ ) {
+            if ( string.toUpperCase().contains(forbidden_command[i]))  {
                 return true;
             }
         }

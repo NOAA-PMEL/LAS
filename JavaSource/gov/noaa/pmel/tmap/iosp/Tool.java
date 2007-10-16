@@ -10,7 +10,7 @@
 package gov.noaa.pmel.tmap.iosp;
 
 /**
- * Tool class which defines a method for gettinga path to the resources this tool uses.
+ * Tool class which defines a method for getting path to the resources this tool uses.
  * @author Roland Schweitzer
  *
  */
