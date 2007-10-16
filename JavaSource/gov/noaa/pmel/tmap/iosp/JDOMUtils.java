@@ -89,6 +89,11 @@ public class JDOMUtils {
         }
         return returnVal;
     }
+    /**
+     * Makes a nice String with the bytes of the MD5 Hash.
+     * @param bytes the bytes to be converted.
+     * @return the resulting String.
+     */
     protected static String toHexString(byte bytes[]) {
         char chars[] = new char[bytes.length * 2];
         
@@ -101,7 +106,12 @@ public class JDOMUtils {
     
     protected static final char HEXCODE[] = { '0', '1', '2', '3', '4', '5',
         '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };   
-    
+    /**
+     * Finds objects in the classpath.
+     * @param object
+     * @param resource
+     * @return
+     */
     public static String getResourcePath(Object object, String resource) {
 
         if ( resource.startsWith("/") ) {

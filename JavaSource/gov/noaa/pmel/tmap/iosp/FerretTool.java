@@ -15,7 +15,11 @@ import java.io.PrintWriter;
 import java.util.HashMap;
 
 import org.apache.log4j.Logger;
-
+/**
+ * This is the Tool class (based on the Anagram Tool class) that runs Ferret so it can do work for the IOSP.
+ * @author rhs
+ *
+ */
 public class FerretTool extends Tool{
     static private Logger log = Logger.getLogger(FerretTool.class.getName());
     //final Logger log = Logger.getLogger(FerretTool.class.getName());
@@ -23,6 +27,10 @@ public class FerretTool extends Tool{
     String scriptDir;
     String tempDir;
     String dataDir;
+    /**
+     * The default constructor that reads the config file and readies the tool to be used.
+     * @throws Exception
+     */
     public FerretTool() throws Exception {
 
         // Set up the Java Properties Object
@@ -74,7 +82,14 @@ public class FerretTool extends Tool{
         log.debug("Setting data dir to: "+ dataDir);
 
     }
-
+    /**
+     * This runs the tool and captures the output to a debug file.
+     * @param driver the command to run (ferret in this case).
+     * @param jnl the command file.
+     * @param cacheKey the cache key (should be removed since we don't need it)
+     * @param output_filename where to write STDOUT, can be a debug file or the header.xml file.
+     * @throws Exception
+     */
     public void run (String driver, String jnl, String cacheKey, String output_filename) throws Exception {
         log.debug("Running the FerretTool.");
 
@@ -183,6 +198,14 @@ public class FerretTool extends Tool{
         log.debug("Finished running the FerretTool.");
 
     }
+    /**
+     * Run Ferret and capture STDOUT into the header.xml file for this data set.
+     * @param driver which command to run (ferret in this case).
+     * @param jnl the file with the commands to run.
+     * @param cacheKey not used, should be removed.
+     * @return return the full path to the STDOUT file (header.xml in this case).
+     * @throws Exception
+     */
     public String run_header(String driver, String jnl, String cacheKey) throws Exception {
         log.debug("Entering method.");
         String tempDir   = ferretConfig.getIOSPTempDir();
@@ -209,6 +232,12 @@ public class FerretTool extends Tool{
         
         return header_filename;
     }
+    /**
+     * Create a journal file that Ferret will use to perform a task.
+     * @param jnl
+     * @param jnlFile
+     * @throws Exception
+     */
     private void createJournal(String jnl, File jnlFile) throws Exception {
         PrintWriter jnlWriter = null;
         try {
@@ -223,6 +252,16 @@ public class FerretTool extends Tool{
         jnlWriter.close();
 
     }
+    /**
+     * The construct a Task which is the definition of the command line arguments for particular invocation of the Tool.
+     * @param runTimeEnv the Java instantiation of the shell run time environment for the invocation of this command.
+     * @param args the command line arguments
+     * @param timeLimit how long to let it run
+     * @param scriptDir where to look for the "driver" script.
+     * @param tempDir where to write temp files if you need it.
+     * @return the task object
+     * @throws Exception
+     */
     public Task task(RuntimeEnvironment runTimeEnv, String[] args, long timeLimit, String scriptDir, String tempDir) throws Exception {
         String[] errors = { "**ERROR", " **ERROR"," **TMAP ERR", "STOP -script mode", "Segmentation fault", "No such"};
 

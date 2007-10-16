@@ -30,8 +30,12 @@ import ucar.unidata.io.RandomAccessFile;
  * This is the implementation of the netCDF Java DataSource interface which allows a class
  * to create a netCDF data source based on the contents of the HTTP Servlet Request.  This
  * is used by F-TDS to make netCDF data source from URLS of the form:
- * http://server.gov/data/file_expr_{data_source, data source2}{command1, command2}{region}
+ * http://server.gov/data/file_expr_{data_source, data source2}{command1, command2}
  * @author Roland Schweitzer
+ *
+ */
+/**
+ * @author rhs
  *
  */
 public class FerretDataSource implements DatasetSource {
@@ -67,7 +71,9 @@ public class FerretDataSource implements DatasetSource {
             if ( !expressions.get(1).trim().equals("") ) {
                 String [] cmds = expressions.get(1).split(";");
                 for ( int i = 0; i < cmds.length; i++ ) {
-                    jnl.append(cmds[i]+"\n");
+                	if ( !FerretCommands.containsForbiddenCommand(cmds[i])) {
+                       jnl.append(cmds[i]+"\n");
+                	}
                 }
             }
         } else if ( expressions.size() == 1 ) {
@@ -117,10 +123,21 @@ public class FerretDataSource implements DatasetSource {
         }
         return false;
     }
-    
+    /**
+     * Return the portion of the URL that comes before the expression (_expr_).
+     * @param url the full URL from which to extract the base.
+     * @return the base portion of the URL
+     */
     private String getBaseURL(String url) {
         return url.substring(0, url.indexOf("_expr_"));
     }
+    /**
+     * 
+     * @param url
+     * @return An ArrayList of the expressions (the strings contained in the curly braces) in the URL.  The first expression
+     * (if it exists) is a comma separated list of OPeNDAP or local data sets.  The second expression (if it exists) is a semi-colon
+     * separated list of Ferret commands.  
+     */
     private ArrayList<String> getExpressions(String url) {
         ArrayList<String> expressions = new ArrayList<String>();
         String[] tokens = null;

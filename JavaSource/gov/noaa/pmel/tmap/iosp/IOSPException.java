@@ -16,6 +16,11 @@ package gov.noaa.pmel.tmap.iosp;
  */
 
 public class IOSPException extends Exception {
+    /*
+	 * This number can be any string that uniquely identifies the version of this class code.  
+	 * The Eclipse IDE will generate it automatically for you.  We do not depend on this
+	 * since we do not serialize our code across the wire.
+	 */
     private static final long serialVersionUID = -9084893017702988427L;
     /**
      * Construct an Exception with our message.

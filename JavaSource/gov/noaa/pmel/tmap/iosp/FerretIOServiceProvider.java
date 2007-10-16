@@ -43,7 +43,7 @@ import ucar.unidata.io.RandomAccessFile;
 /**
  * This is the implementation of the netCDF Java IO Service Provider interface that turns Ferret scripts
  * and the variables it accesses and defines into an OPeNDAP netCDF data source.  The variables that are
- * defined by the script must be assoicated with an existing open data set.  E.g.
+ * defined by the script must be associated with an existing open data set.  E.g.
  * 
  * use levitus_climatology
  * let/d=levitus_climatology temp_20 = temp[d=levitus_climatology,z=0:20@sum]

@@ -29,7 +29,6 @@ public class MyResolver implements EntityResolver {
 
     public MyResolver() {
         super();
-        // TODO Auto-generated constructor stub
     }
     /**
      * This method is called whenever an external entity is accessed

@@ -99,7 +99,10 @@ public class Task {
     public String getCmd() {
         return cmdString;
     }
-
+    /**
+     * Returns the STDERR stream as a string.
+     * @return STDERR
+     */
     public String getStderr() {
         return stderr.toString();
     }
