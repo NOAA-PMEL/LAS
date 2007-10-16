@@ -155,11 +155,16 @@ IF `($data_count"0") GT 1` THEN
      IF `($title_size%0|*>1%)` THEN PPL LABSET ($title_size)
      IF `($ferret_dep_axis_scale"0|*>1")` THEN PPL YAXIS ($ferret_dep_axis_scale)
    PPL PLOT
+   GO LAS_url_label `($data_count)-1`
 ELSE
    PLOT($qualifiers)/NOKEY/SET/TITLE="($ferret_title_0)" ($plot_arg)
       IF ($xform_dms"0|*>1") THEN PPL XFOR (($xform_dms))
       IF `($ferret_dep_axis_scale"0|*>1")` THEN PPL YAXIS ($ferret_dep_axis_scale)
+      IF `($labnum_dset%0|*>1%)` THEN GO unlabel ($labnum_dset)
+      IF `($labnum_datitl%0|*>1%)` THEN GO unlabel ($labnum_datitl)
+      IF `($labnum_dods%0|*>1%)` THEN GO unlabel ($labnum_dods)
    PPL PLOT
+   GO LAS_url_label 0
 ENDIF
 
 LABEL/NOUSER `($ppl$xlen)/2`, `($ppl$ylen)+1.2`, 0, 0, 0.12, "LAS 7.+/Ferret ($FERRET_VERSION)     NOAA/PMEL"
