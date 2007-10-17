@@ -169,7 +169,7 @@ public class ConverterLasToWms
 
         parentLayer.addSubLayer(subLayer);
 
-        //jli: only a variable layer has a name
+        //only a variable layer has a name
         //subLayer.setName(info.getDatasetId());
 
         subLayer.setTitle(info.getTitle());
@@ -182,9 +182,14 @@ public class ConverterLasToWms
         {
             String key = (String)(keyIt.next());
             LasVariable var = (LasVariable)(varMap.get(key));
-            //jli
             //addVariable(subLayer, var);
-            addVariable(subLayer, var, info);
+
+            String dsID = info.getDatasetId();
+            String varID= var.getVarId();
+            //only list variable with regular grid type; not list insitu data 
+            if(lasProvider.getGridType(dsID,varID).equalsIgnoreCase("regular")){
+                addVariable(subLayer, var, info);
+            }
         }
     }
 
