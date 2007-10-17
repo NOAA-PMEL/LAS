@@ -33,7 +33,7 @@
           <service>ferret</service>
           <response ID="PlotResp">
              <result type="image" ID="plot_image" streamable="true" mime_type="image/png" file_suffix=".gif" />
-             <result type="ps" ID="plot_postscript" streamable="true" mime_type="application/postscript"/>
+             <!-- <result type="ps" ID="plot_postscript" streamable="true" mime_type="application/postscript"/> -->
              <result type="image" ID="ref_map"  file_suffix=".gif" />
              <result type="map_scale" ID="map_scale"/>
              <result type="debug" ID="debug"/>
@@ -56,7 +56,7 @@
           <service>ferret</service>
           <response ID="PlotResp">
              <result type="image" ID="plot_image" streamable="true" mime_type="image/png" file_suffix=".gif"/>
-             <result type="ps" ID="plot_postscript" streamable="true" mime_type="application/postscript"/>
+             <!-- <result type="ps" ID="plot_postscript" streamable="true" mime_type="application/postscript"/> -->
              <result type="image" ID="ref_map" file_suffix=".gif" />
              <result type="map_scale" ID="map_scale" file_suffix=".xml"/>
              <result type="debug" ID="debug" file_suffix=".txt"/>
@@ -83,8 +83,8 @@
             <response ID="PlotResp">
                 <result type="image" ID="plot_image1" streamable="true"
                     mime_type="image/png" file_suffix=".gif"/>
-                <result type="ps" ID="plot_postscript1"
-                    streamable="true" mime_type="application/postscript" file_suffix=".ps"/>
+                <!-- <result type="ps" ID="plot_postscript1"
+                    streamable="true" mime_type="application/postscript" file_suffix=".ps"/> --> -->
                 <result type="image" ID="ref_map1"  file_suffix=".gif"/>
                 <result type="map_scale" ID="map_scale1" file_suffix=".xml"/>
                 <result type="debug" ID="debug1" file_suffix=".txt"/>
@@ -97,8 +97,8 @@
             <response ID="PlotResp">
                 <result type="image" ID="plot_image2" streamable="true"
                     mime_type="image/png" file_suffix=".gif" />
-                <result type="ps" ID="plot_postscript2"
-                    streamable="true" mime_type="application/postscript" file_suffix=".ps"/>
+                <!-- <result type="ps" ID="plot_postscript2"
+                    streamable="true" mime_type="application/postscript" file_suffix=".ps"/> -->
                 <result type="image" ID="ref_map2" file_suffix=".gif" />
                 <result type="map_scale" ID="map_scale2" file_suffix=".xml"/>
                 <result type="debug" ID="debug2" file_suffix=".txt"/>
@@ -136,7 +136,7 @@
           <service>ferret</service>
           <response ID="PlotResp">
              <result type="image" ID="plot_image" streamable="true" mime_type="image/png" file_suffix=".gif"/>
-             <result type="ps" ID="plot_postscript" streamable="true" mime_type="application/postscript" file_suffix=".ps"/>
+             <!-- <result type="ps" ID="plot_postscript" streamable="true" mime_type="application/postscript" file_suffix=".ps"/> -->
              <result type="image" ID="ref_map" file_suffix=".gif"/>
              <result type="map_scale" ID="map_scale" file_suffix=".xml"/>
              <result type="debug" ID="debug" file_suffix=".txt"/>
@@ -170,8 +170,8 @@
         <response ID="PlotResp">
             <result type="image" ID="plot_image" streamable="true"
                 mime_type="image/png" file_suffix=".gif" />
-            <result type="ps" ID="plot_postscript" streamable="true"
-                mime_type="application/postscript" file_suffix=".ps"/>
+            <!-- <result type="ps" ID="plot_postscript" streamable="true"
+                mime_type="application/postscript" file_suffix=".ps"/> -->
             <result type="image" ID="ref_map" file_suffix=".gif" />
             <result type="map_scale" ID="map_scale" file_suffix=".xml"/>
             <result type="debug" ID="debug" file_suffix=".txt"/>
@@ -193,8 +193,8 @@
         <response ID="PlotResp">
             <result type="image" ID="plot_image" streamable="true"
                 mime_type="image/png" />
-            <result type="ps" ID="plot_postscript" streamable="true"
-                mime_type="application/postscript" />
+            <!-- <result type="ps" ID="plot_postscript" streamable="true"
+                mime_type="application/postscript" /> -->
             <result type="image" ID="ref_map" />
             <result type="map_scale" ID="map_scale" />
             <result type="debug" ID="debug" />
@@ -307,7 +307,7 @@
         <response ID="PlotResp">
                         <result type="image" ID="plot_image" streamable="true" mime_type="image/png" file_suffix=".gif"/>
                         <result type="image" ID="colorbar" streamable="true" mime_type="image/png" file_suffix=".gif"/>
-                        <result type="ps" ID="plot_postscript" streamable="true" mime_type="application/postscript" file_suffix=".ps"/>
+                        <!-- <result type="ps" ID="plot_postscript" streamable="true" mime_type="application/postscript" file_suffix=".ps"/> -->
                         <result type="image" ID="ref_map" file_suffix=".gif"/>
                         <result type="map_scale" ID="map_scale" file_suffix=".xml"/>
                         <result type="debug" ID="debug" file_suffix=".txt"/>
@@ -340,7 +340,7 @@
       <operation name="Plot_vector_GE" ID="Vector_for_GE" service_action="Plot_vector_GE">
         <response ID="PlotResp">
           <result type="image" ID="plot_image" streamable="true" mime_type="image/png" file_suffix=".gif"/>
-          <result type="ps" ID="plot_postscript" streamable="true" mime_type="application/postscript" file_suffix=".ps"/>
+          <!-- <result type="ps" ID="plot_postscript" streamable="true" mime_type="application/postscript" file_suffix=".ps"/> -->
           <result type="image" ID="ref_map" file_suffix=".gif"/>
           <result type="map_scale" ID="map_scale" file_suffix=".xml"/>
           <result type="debug" ID="debug" file_suffix=".txt"/>
@@ -405,7 +405,7 @@
           <service>ferret</service>
           <response ID="PlotResp">
              <result type="image" ID="plot_image" streamable="true" mime_type="image/png" file_suffix=".gif"/>
-             <result type="ps" ID="plot_postscript" streamable="true" mime_type="application/postscript" file_suffix=".ps"/>
+             <!-- <result type="ps" ID="plot_postscript" streamable="true" mime_type="application/postscript" file_suffix=".ps"/> -->
              <result type="image" ID="ref_map" file_suffix=".gif"/>
              <result type="map_scale" ID="map_scale" file_suffix=".xml"/>
              <result type="debug" ID="debug" file_suffix=".txt"/>
@@ -528,8 +528,8 @@
         <response ID="PlotResp">
             <result type="image" ID="plot_image" streamable="true"
                 mime_type="image/png" file_suffix=".gif" />
-            <result type="ps" ID="plot_postscript" streamable="true"
-                mime_type="application/postscript" />
+            <!-- <result type="ps" ID="plot_postscript" streamable="true"
+                mime_type="application/postscript" /> -->
             <result type="image" ID="ref_map" file_suffix=".gif" />
             <result type="map_scale" ID="map_scale" file_suffix=".xml"/>
             <result type="debug" ID="debug" file_suffix=".txt"/>
@@ -554,8 +554,8 @@
         <response ID="PlotResp">
             <result type="image" ID="plot_image" streamable="true"
                 mime_type="image/png" file_suffix=".gif" />
-            <result type="ps" ID="plot_postscript" streamable="true"
-                mime_type="application/postscript" file_suffix=".ps"/>
+            <!-- <result type="ps" ID="plot_postscript" streamable="true"
+                mime_type="application/postscript" file_suffix=".ps"/> -->
             <result type="image" ID="ref_map" file_suffix=".gif" />
             <result type="map_scale" ID="map_scale" file_suffix=".xml"/>
             <result type="debug" ID="debug" file_suffix=".txt"/>
@@ -813,7 +813,7 @@
                </args>
                <response ID="PlotResp" type="HTML" index="1">
                     <result type="image" ID="plot_image" streamable="true" mime_type="image/png" file_suffix=".gif"/>
-                    <result type="ps" ID="plot_postscript" streamable="true" mime_type="application/postscript" file_suffix=".ps"/>
+                    <!-- <result type="ps" ID="plot_postscript" streamable="true" mime_type="application/postscript" file_suffix=".ps"/> -->
                     <result type="image" ID="ref_map" file_suffix=".gif" />
                     <result type="debug" ID="debug" file_suffix=".txt"/>
                </response>
@@ -870,8 +870,8 @@
             <response ID="PlotResp" type="HTML" index="1">
                 <result type="image" ID="plot_image" streamable="true"
                     mime_type="image/png"  file_suffix=".gif"/>
-                <result type="ps" ID="plot_postscript" streamable="true"
-                    mime_type="application/postscript" file_suffix=".ps"/>
+                <!-- <result type="ps" ID="plot_postscript" streamable="true"
+                    mime_type="application/postscript" file_suffix=".ps"/> -->
                 <result type="image" ID="ref_map"  file_suffix=".gif"/>
                 <result type="debug" ID="debug" file_suffix=".txt"/>
             </response>
@@ -945,8 +945,8 @@
             <response ID="PlotResp" type="HTML" index="1">
                 <result type="image" ID="plot_image" streamable="true"
                     mime_type="image/png"  file_suffix=".gif"/>
-                <result type="ps" ID="plot_postscript" streamable="true"
-                    mime_type="application/postscript" file_suffix=".ps"/>
+                <!-- <result type="ps" ID="plot_postscript" streamable="true"
+                    mime_type="application/postscript" file_suffix=".ps"/> -->
                 <result type="image" ID="ref_map"  file_suffix=".gif"/>
                 <result type="debug" ID="debug" file_suffix=".txt"/>
                 <result type="cancel" ID="cancel" file_suffix=".txt"/>
@@ -1005,8 +1005,8 @@
             <response ID="PlotResp" type="HTML" index="1">
                 <result type="image" ID="plot_image" streamable="true"
                     mime_type="image/png"  file_suffix=".gif"/>
-                <result type="ps" ID="plot_postscript" streamable="true"
-                    mime_type="application/postscript" file_suffix=".ps"/>
+                <!-- <result type="ps" ID="plot_postscript" streamable="true"
+                    mime_type="application/postscript" file_suffix=".ps"/> -->
                 <result type="image" ID="ref_map"  file_suffix=".gif" />
                 <result type="debug" ID="debug" file_suffix=".txt"/>
                 <result type="cancel" ID="cancel" file_suffix=".txt"/>
@@ -1065,8 +1065,8 @@
             <response ID="PlotResp" type="HTML" index="1">
                 <result type="image" ID="plot_image" streamable="true"
                     mime_type="image/png"  file_suffix=".gif"/>
-                <result type="ps" ID="plot_postscript" streamable="true"
-                    mime_type="application/postscript" file_suffix=".ps"/>
+                <!-- <result type="ps" ID="plot_postscript" streamable="true"
+                    mime_type="application/postscript" file_suffix=".ps"/> -->
                 <result type="image" ID="ref_map"  file_suffix=".gif" />
                 <result type="debug" ID="debug" file_suffix=".txt"/>
                 <result type="cancel" ID="cancel" file_suffix=".txt"/>
@@ -1144,8 +1144,8 @@
             <response ID="PlotResp" type="HTML" index="1">
                 <result type="image" ID="plot_image" streamable="true"
                     mime_type="image/png"  file_suffix=".gif"/>
-                <result type="ps" ID="plot_postscript" streamable="true"
-                    mime_type="application/postscript" file_suffix=".ps" />
+                <!-- <result type="ps" ID="plot_postscript" streamable="true"
+                    mime_type="application/postscript" file_suffix=".ps" /> -->
                 <result type="image" ID="ref_map"  file_suffix=".gif"/>
                 <result type="debug" ID="debug" file_suffix=".txt"/>
                 <result type="cancel" ID="cancel" file_suffix=".txt"/>
@@ -1204,8 +1204,8 @@
             <response ID="PlotResp" type="HTML" index="1">
                 <result type="image" ID="plot_image" streamable="true"
                     mime_type="image/png"  file_suffix=".gif"/>
-                <result type="ps" ID="plot_postscript" streamable="true"
-                    mime_type="application/postscript" file_suffix=".ps" />
+                <!-- <result type="ps" ID="plot_postscript" streamable="true"
+                    mime_type="application/postscript" file_suffix=".ps" /> -->
                 <result type="image" ID="ref_map"  file_suffix=".gif"/>
                 <result type="debug" ID="debug" file_suffix=".txt"/>
                 <result type="cancel" ID="cancel" file_suffix=".txt"/>
@@ -1251,7 +1251,7 @@
           <service>ferret</service>
           <response ID="PlotResp">
              <result type="image" ID="plot_image" streamable="true" mime_type="image/png"/>
-             <result type="ps" ID="plot_postscript" streamable="true" mime_type="application/postscript"/>
+             <!-- <result type="ps" ID="plot_postscript" streamable="true" mime_type="application/postscript"/> -->
              <result type="image" ID="ref_map"/>
              <result type="map_scale" ID="map_scale"/>
              <result type="debug" ID="debug"/>
@@ -1269,7 +1269,7 @@
           <service>ferret</service>
           <response ID="PlotResp">
              <result type="image" ID="plot_image" streamable="true" mime_type="image/png"/>
-             <result type="ps" ID="plot_postscript" streamable="true" mime_type="application/postscript"/>
+             <!-- <result type="ps" ID="plot_postscript" streamable="true" mime_type="application/postscript"/> -->
              <result type="image" ID="ref_map"/>
              <result type="map_scale" ID="map_scale"/>
              <result type="debug" ID="debug"/>
@@ -1291,7 +1291,7 @@
           <service>ferret</service>
           <response ID="PlotResp">
              <result type="image" ID="plot_image" streamable="true" mime_type="image/png"/>
-             <result type="ps" ID="plot_postscript" streamable="true" mime_type="application/postscript"/>
+             <!-- <result type="ps" ID="plot_postscript" streamable="true" mime_type="application/postscript"/> -->
              <result type="image" ID="ref_map"/>
              <result type="map_scale" ID="map_scale"/>
              <result type="debug" ID="debug"/>
@@ -1302,7 +1302,7 @@
           <service>ferret</service>
           <response ID="PlotResp">
              <result type="image" ID="plot_image" streamable="true" mime_type="image/png"/>
-             <result type="ps" ID="plot_postscript" streamable="true" mime_type="application/postscript"/>
+             <!-- <result type="ps" ID="plot_postscript" streamable="true" mime_type="application/postscript"/> -->
              <result type="image" ID="ref_map"/>
              <result type="map_scale" ID="map_scale"/>
              <result type="debug" ID="debug"/>
