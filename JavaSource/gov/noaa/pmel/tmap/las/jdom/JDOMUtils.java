@@ -1,3 +1,12 @@
+/**
+ * This software is provided by NOAA for full, free and open release.  It is
+ * understood by the recipient/user that NOAA assumes no liability for any
+ * errors contained in the code.  Although this software is released without
+ * conditions or restrictions in its use, it is expected that appropriate
+ * credit be given to its author and to the National Oceanic and Atmospheric
+ * Administration should the software be included by the recipient as an
+ * element in other product development. 
+ */
 package gov.noaa.pmel.tmap.las.jdom;
 
 import gov.noaa.pmel.tmap.las.exception.LASException;
@@ -86,6 +95,11 @@ public class JDOMUtils {
         }
         return returnVal;
     }
+    /**
+     * Convert a collection of bytes from an MD5 hash to a string.
+     * @param bytes the bytes to be converted
+     * @return the resulting string
+     */
     protected static String toHexString(byte bytes[]) {
         char chars[] = new char[bytes.length * 2];
         
@@ -98,7 +112,12 @@ public class JDOMUtils {
     
     protected static final char HEXCODE[] = { '0', '1', '2', '3', '4', '5',
         '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };   
-    
+    /**
+     * Return the fully qualified path of the requested resource object.
+     * @param object the requested object type
+     * @param the desired resource
+     * @return its fully qualified path name.
+     */
     public static String getResourcePath(Object object, String resource) {
         
         URL resourceURL = object.getClass().getClassLoader().getResource(resource);
@@ -117,8 +136,9 @@ public class JDOMUtils {
     }
 
     /**
-     * @param content
-     * @return
+     * Convert a string to a JavaScript safe string (escape quotes and remove cr and lf).
+     * @param content the input string
+     * @return the JavaScript safe result.
      */
     public static String toJavaScriptSafeString(String content) {
         content = content.replaceAll("'","\\\\'");
