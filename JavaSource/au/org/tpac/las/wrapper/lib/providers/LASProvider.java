@@ -85,6 +85,17 @@ public class LASProvider extends Provider
             lasConfig = new LASConfig();
             JDOMUtils.XML2JDOM(xmlFile, lasConfig);
             lasConfig.convertToSeven();
+
+            lasConfig.mergeProperites();
+
+            //add grid type for variables
+            try {
+                lasConfig.addGridType();
+            } catch (Exception e) {
+                System.out.println("Could not add the grid_type to variables in this LAS configuration.");
+            }
+
+            System.out.println("grid type sst of coads======"+lasConfig.getGridType("coads_climatology_cdf", "sst"));
             ByteArrayInputStream stringStream = new ByteArrayInputStream(lasConfig.toString().getBytes());
 
             genMapping(stringStream);
@@ -120,6 +131,22 @@ public class LASProvider extends Provider
     public LASConfig getLasConfig()
     {
         return lasConfig;
+    }
+
+    /**
+     * Retrieves grid type of a variable
+     * @param dsID dataset ID
+     * @param varID variable ID
+     * @return the grid type, either regular or scattered
+     */
+    public String getGridType(String dsID, String varID){   
+        String gridType = null;
+        try{
+            gridType = lasConfig.getGridType(dsID, varID);
+        } catch(Exception e) {
+            e.printStackTrace(System.out);
+        }
+        return gridType;
     }
 
     /**
