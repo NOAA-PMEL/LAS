@@ -1,3 +1,12 @@
+/**
+ * This software is provided by NOAA for full, free and open release.  It is
+ * understood by the recipient/user that NOAA assumes no liability for any
+ * errors contained in the code.  Although this software is released without
+ * conditions or restrictions in its use, it is expected that appropriate
+ * credit be given to its author and to the National Oceanic and Atmospheric
+ * Administration should the software be included by the recipient as an
+ * element in other product development. 
+ */
 package gov.noaa.pmel.tmap.las.jdom;
 
 import gov.noaa.pmel.tmap.las.exception.LASException;
@@ -42,15 +51,6 @@ import org.joda.time.format.DateTimeFormatter;
 /**
  * This class is the JDOM instantiation of the "las.xml" file and any entities it references (data stubs and operationsV7.xml).
  * @author Roland Schweitzer
- *
- */
-
-/**
- * @author rhs
- *
- */
-/**
- * @author rhs
  *
  */
 public class LASConfig extends LASDocument {
@@ -153,11 +153,21 @@ public class LASConfig extends LASDocument {
             "d-MMM-y HH",
             "d-MMM-y"
     };
-    // Combo routines based on code by Robert Sedgewick and Kevin Wayne.
-    // from their book Introduction to Programming in Java published by Adison Wesley.
+    /**.
+     * Get all the possible combinations of the characters in a string.  Combo routines based on code by Robert Sedgewick and Kevin Wayne.
+     * from their book Introduction to Programming in Java published by Adison Wesley.
+     * @param s
+     * @return
+     */
     private static ArrayList<String> combo(String s) {
         return combo("", s);
     }
+    /**
+     * Get combinations of the characters in a string.
+     * @param prefix A prefix for the combinations
+     * @param s the string to scramble
+     * @return the combinations
+     */
     private static ArrayList<String> combo(String prefix, String s) {
         ArrayList<String> comboList = new ArrayList<String>(); 
         
@@ -174,7 +184,9 @@ public class LASConfig extends LASDocument {
         return comboList;
     }
     /**
-     * @param fds_base
+     * Take F-TDS server URL and data directory and build the F-TDS URLs for each variable. 
+     * @param fds_base the base URL of the F-TDS server http://server:port/thredds/dodsC
+     * @param fds_dir the directory into which the F-TDS journal files will be written
      * @throws FileNotFoundException 
      */
     public void addFDS(String fds_base, String fds_dir) throws LASException, JDOMException, FileNotFoundException {
@@ -373,6 +385,11 @@ public class LASConfig extends LASDocument {
             }
         }
     }
+    /**
+     * Create all the extra fancy attributes for a time axis so the DateWidgets can be initialized.
+     * @param axis the axis description from this config
+     * @throws LASException
+     */
     private void addTimeAxisAttributes(Element axis) throws LASException {
         Element arange = axis.getChild("arange");
         if (arange == null) {
@@ -507,8 +524,9 @@ public class LASConfig extends LASDocument {
         
     } */
     /**
-     * @param id
-     * @return
+     * See if this config contains a grid with this ID
+     * @param id the id to check
+     * @return true if found; false if not
      */
     private boolean containsGrid(String grid_id) {
         
@@ -528,12 +546,14 @@ public class LASConfig extends LASDocument {
         return false;
     }
     /**
-     * @param dsid
-     * @param id
+     * Does this config contain this data set and variable?
+     * @param dsid the data set
+     * @param id the variable
      * @return
      * @throws JDOMException 
      */
     private boolean containsVariable(String dsid, String var_id) throws JDOMException {
+    	// Could be done with getElementByXPath, no?
         Element dataset = getDatasetElement(dsid);
         List variables = dataset.getChild("variables").getChildren("variable");
         for (Iterator varIt = variables.iterator(); varIt.hasNext();) {
@@ -674,6 +694,12 @@ public class LASConfig extends LASDocument {
         }
         return options;
     }
+    /**
+     * A filter to find a category by its ID
+     * @param catid the ID to find
+     * @return the category element
+     * @throws JDOMException
+     */
     private Element findCategory(String catid) throws JDOMException {      
         CategoryFilter filter = new CategoryFilter(catid);
         Iterator catIt= getRootElement().getDescendants(filter);
@@ -698,7 +724,7 @@ public class LASConfig extends LASDocument {
      * Get any applicable data constraints for a particular data set and variable.
      * @param dsID
      * @param varID
-     * @return
+     * @return the list of constraints
      * @throws JDOMException
      */
     public ArrayList<DataConstraint> getConstraints(String dsID, String varID) throws JDOMException {
@@ -714,7 +740,7 @@ public class LASConfig extends LASDocument {
      * Get any constraints from the named UI default.
      * 
      * @param ui_default
-     * @return
+     * @return the constraints
      * @throws JDOMException
      */
     public ArrayList<DataConstraint> getConstraints(String ui_default, String dsID, String varID) throws JDOMException {
@@ -762,6 +788,13 @@ public class LASConfig extends LASDocument {
 		}
     	return constraints;
     }
+    /**
+     * Build a variable constraint from a particular variable
+     * @param dsID the data set ID of the variable
+     * @param varID the variable id
+     * @return the data constraint for this variable
+     * @throws JDOMException
+     */
     public DataConstraint getVariableConstraint(String dsID, String varID) throws JDOMException {
     	Element constraint = new Element("constraint");
     	constraint.setAttribute("type", "variable");
@@ -1038,9 +1071,9 @@ public class LASConfig extends LASDocument {
 	    return variable.getAttributes();
 	}
     /**
-     * 
+     * Extract data sets based on a &lt;filter&gt; element from the config. 
      * @param filter A category filter element to be used to select variables from the configuration.
-     * @return
+     * @return the data set that matches the filter
      */
     private Dataset getDataset(Element filter) {
         Dataset container_dataset = null;
@@ -1121,8 +1154,8 @@ public class LASConfig extends LASDocument {
     
     /**
 	 * Get all of the attributes from the parent data set element.
-	 * @param varXPath
-	 * @return
+	 * @param varXPath the variable whose parent data set will be used
+	 * @return the attributes
 	 * @throws JDOMException 
 	 */
 	public HashMap <String, String> getDatasetAttributes(String varXPath) throws JDOMException {
@@ -1147,6 +1180,7 @@ public class LASConfig extends LASDocument {
 	    return attrs;
 	}
     /**
+     * Get the &lt;dataset&gt; element from this config that matches this ID
      * @param dsid
      * @return
      * @throws JDOMException 
@@ -1207,6 +1241,12 @@ public class LASConfig extends LASDocument {
         }
         return datasets;
     }
+    /**
+     * Get a &lt;dataset&gt; element base on the data set id
+     * @param dsID the id of the dataset 
+     * @return the data set element
+     * @throws JDOMException
+     */
     public Dataset getDataset(String dsID) throws JDOMException {
     	String xpathValue = "/lasdata/datasets/dataset[@ID='"+dsID+"']";
     	Element ds = getElementByXPath(xpathValue);
@@ -1218,10 +1258,12 @@ public class LASConfig extends LASDocument {
     }
     /**
      * !!!! returns datasets list This ignores categories for now.  Have to fix this.
+     * Don't need this anymore
+     * @deprecated
      */
     //TODO decide what to do about categories...
     public ArrayList<NameValuePair> getDatasetsAsNameValueBeans() {
-        ArrayList<NameValuePair> datasets = new ArrayList<NameValuePair>();
+        ArrayList <NameValuePair> datasets = new ArrayList<NameValuePair>();
         List datasetsElements = getRootElement().getChildren("datasets");
         for (Iterator dseIt = datasetsElements.iterator(); dseIt.hasNext();) {
             Element dsets = (Element) dseIt.next();
@@ -1335,6 +1377,12 @@ public class LASConfig extends LASDocument {
         }
          return url;
     }
+    /**
+     * Get the value of a "global" property (a property in the config that is not in any particular data set or variable).
+     * @param group the name of the property group
+     * @param name the name of the property
+     * @return the value of specified property
+     */
     public String getGlobalPropertyValue(String group, String name) {
         String value = "";
         Element properties = getRootElement().getChild("properties");
@@ -1652,6 +1700,7 @@ public class LASConfig extends LASDocument {
      * !! temporarily busted for V7 XML -- Returns the merged properties for a particular (maybe this should be private)
      * This /lasdata/datasets/DatasetTagName/variables/VariableTagName path and it
      * should be /lasdata/datasets/dataset[@ID='DatasetID']/variables/variable[@ID='VariableID'].
+     * @deprecated
      * @param xpathValue
      * @return Element The varaible element with the properties merged into it.
      * @throws JDOMException
@@ -1689,6 +1738,7 @@ public class LASConfig extends LASDocument {
 	}
 
 	/**
+	 * Get the operations that are include with a particular UI default
 	 * @param ui_default
 	 * @return operations JSONObject with the operations that are defined for this "default".
 	 * @throws JDOMException 
@@ -1745,9 +1795,10 @@ public class LASConfig extends LASDocument {
 		return operations;
 	}
     /**
-	 * @param view
-	 * @param grid_type
-	 * @return
+     * Get the operations based on the axes defined on an interval and the grid type.
+	 * @param view  The view to be matched to the interval specifications in the operation config
+	 * @param grid_type the desired grid type
+	 * @return the list of operations
 	 */
 	public ArrayList<Operation> getOperationsByIntervalAndGridType(String view, String grid_type) throws JDOMException {
 
@@ -1813,7 +1864,7 @@ public class LASConfig extends LASDocument {
     
 
     /**
-     * Returns the options assoicated with this option ID
+     * Returns the options associated with this option ID
      * @param optionID option ID
      * @return options the options for this id.
      * @throws JDOMException 
@@ -1825,7 +1876,7 @@ public class LASConfig extends LASDocument {
         return options;
     }
     /**
-     * Returns the options assoicated with this operation ID
+     * Returns the options associated with this operation ID
      * @param operationID operation ID
      * @return options the options for this operation.
      * @throws JDOMException 
@@ -1954,6 +2005,12 @@ public class LASConfig extends LASDocument {
     	}
     	return regions;
     }
+    /**
+     * Get all variables in a data set that are defined on a regular grid
+     * @param dsID the data set
+     * @return the list of variables
+     * @throws JDOMException
+     */
     public ArrayList<NameValuePair> getRegularVariables(String dsID) throws JDOMException {
         ArrayList<NameValuePair> variables = new ArrayList<NameValuePair>();
         Element dataset = getElementByXPath("/lasdata/datasets/dataset[@ID='"+dsID+"']");
@@ -1987,7 +2044,7 @@ public class LASConfig extends LASDocument {
     }
     
     /**
-     * Get the name of the service based on the operaton ID.
+     * Get the name of the service based on the operation ID.
      * @param opID the ID of the operation
      * @return service the name of the service associated with this operation
      * @throws JDOMException 
@@ -2143,8 +2200,9 @@ public class LASConfig extends LASDocument {
         }
         
         /**
-		 * @param varXPath
-		 * @return
+         * Get the F-TDS URL for this variable
+		 * @param variable the variable element
+		 * @return the F-TDS URL
 		 * @throws JDOMException
 		 */
 		public String getTFDSURL(Element variable) {
@@ -2157,8 +2215,9 @@ public class LASConfig extends LASDocument {
 		}
         
         /**
-		 * @param varXPath
-		 * @return
+         * Get the F-TDS URL for the variable specified by the XPath
+		 * @param varXPath the XPath of the variable
+		 * @return the F-TDS URL
 		 * @throws JDOMException
 		 */
 		public String getTFDSURL(String varXPath) throws JDOMException {
@@ -2170,7 +2229,13 @@ public class LASConfig extends LASDocument {
 		    Element variable = getElementByXPath(varXPath);
 		    return getTFDSURL(variable);
 		}
-        
+        /**
+         * Create a time axis with all the info needed for the DateWidgets
+         * @param variable the variable whose time axis will be built
+         * @return the time axis specification
+         * @throws JDOMException
+         * @throws LASException
+         */
         public TimeAxis getTime(Element variable) throws JDOMException, LASException {
 		    TimeAxis t = null;
 		    if (variable == null) {
@@ -2318,12 +2383,31 @@ public class LASConfig extends LASDocument {
 		    }
 		    return title;
 		}
+		/**
+		 * Get the name of the UI Default associated with this variable.
+		 * @param dsID the data set
+		 * @param varID the variable
+		 * @return the UI Default name; can be null
+		 * @throws JDOMException
+		 */
 	    public String getUIDefaultName(String dsID, String varID) throws JDOMException {
 			return getVariablePropertyValue("/lasdata/datasets/dataset[@ID='"+dsID+"']/variables/variable[@ID='"+varID+"']","ui", "default");
 		}
+	    /**
+	     * Get the actual UI Default element
+	     * @param dsID the data set
+	     * @param varID the variable
+	     * @return the default element (can be null)
+	     * @throws JDOMException
+	     */
 	    public Element getUIDefault(String dsID, String varID) throws JDOMException {
 	    	return getUIDefault(getUIDefaultName(dsID, varID));
 	    }
+	    /**
+	     * Get the default element based on its name
+	     * @param ui_default the name of the desired default
+	     * @return the default element (can be null)
+	     */
         public Element getUIDefault(String ui_default) {
             List defaultsElements = getRootElement().getChild("lasui").getChildren("defaults");
             for (Iterator defsIt = defaultsElements.iterator(); defsIt.hasNext();) {

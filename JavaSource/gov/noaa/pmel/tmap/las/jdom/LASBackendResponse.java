@@ -1,5 +1,11 @@
 /**
- * 
+ * This software is provided by NOAA for full, free and open release.  It is
+ * understood by the recipient/user that NOAA assumes no liability for any
+ * errors contained in the code.  Although this software is released without
+ * conditions or restrictions in its use, it is expected that appropriate
+ * credit be given to its author and to the National Oceanic and Atmospheric
+ * Administration should the software be included by the recipient as an
+ * element in other product development. 
  */
 package gov.noaa.pmel.tmap.las.jdom;
 
@@ -22,15 +28,20 @@ import org.json.JSONException;
 import org.json.XML;
 
 /**
+ * This class is the container for the response from the backend service.
  * @author Roland Schweitzer
  *
  */
 public class LASBackendResponse extends LASDocument {
-    /**
-     * 
-     */
+    /*
+	 * Any number that uniquely identifies the version of this class' code.  
+	 * The Eclipse IDE will generate it automatically for you.  We do not depend on this
+	 * since we do not serialize our code across the wire.
+	 */
     private static final long serialVersionUID = -8183503354778875380L;
-
+    /**
+     * Default constructor that builds an empty document with just a root element.
+     */
     public LASBackendResponse () {
         this.setRootElement(new Element("backend_response"));
     }
@@ -82,6 +93,11 @@ public class LASBackendResponse extends LASDocument {
 
         return "";    
     }
+    /**
+     * Find out if a result is from a remote service
+     * @param ID the id of the result to check
+     * @return true if the service is remote (and therefore you must access the result via a URL); false if it's local
+     */
     public boolean isResultRemote(String ID) {
         Element result = getResultElement(ID);
         if ( result != null ) {
@@ -210,6 +226,10 @@ public class LASBackendResponse extends LASDocument {
         
         return "";
     }
+    /**
+     * Check to see if this reponse has a result that is "streamable"
+     * @return true if it has a streamable result; false if it does not
+     */
     public boolean hasStreamedResult() {
         List responses = this.getRootElement().getChildren("response");
         if (responses.size() == 0) {
@@ -281,7 +301,7 @@ public class LASBackendResponse extends LASDocument {
     }
     /**
      * Remove a result.  This is used to eliminate results that did not get created by the backend service for whatever reason.
-     * @param ID - the IDE of the result to be removed
+     * @param ID - the ID of the result to be removed
      */
     public void removeResult(String ID) {
         List responses = this.getRootElement().getChildren("response");
@@ -451,6 +471,10 @@ public class LASBackendResponse extends LASDocument {
     public String getResultAsTable(String ID) throws IOException, JDOMException {
         return getResultTransformedByXSL(ID, "webrowsetToTable.xsl");
     }
+    /**
+     * Take the suggested file names on the local server and construct URLs for those results
+     * @param serverURL the URL of the local server
+     */
     public void mapResultsToURL(String serverURL) {
         List responses = this.getRootElement().getChildren("response");
         for (Iterator respIt = responses.iterator(); respIt.hasNext();) {
@@ -472,7 +496,11 @@ public class LASBackendResponse extends LASDocument {
             }
         }
     }
-
+    /**
+     * Take an LASResponse and merge its results with this one.  Use for building a
+     * single response from a compound product.
+     * @param lasResponse the response to be merged
+     */
     public void merge(LASBackendResponse lasResponse) {
         
         // There should only be one in this docuemnt.
@@ -481,14 +509,20 @@ public class LASBackendResponse extends LASDocument {
         this.getRootElement().addContent(response);
         
     }
-
+    /**
+     * Set an id for this response
+     * @param key the ID (usually the cache key)
+     */
     public void setID(String key) {
         Element response = this.getRootElement().getChild("response");
         if ( response != null ) {
            response.setAttribute("ID", key);
         }
     }
-
+    /**
+     * Pull out the first error result from the response.
+     * @return the error message for this error result
+     */
     public String getError() {
         List responses = this.getRootElement().getChildren("response");
         for (Iterator respoIt = responses.iterator(); respoIt.hasNext();) {
@@ -503,7 +537,10 @@ public class LASBackendResponse extends LASDocument {
         }
         return "";
     }
-    
+    /**
+     * See if this response contains an error result.
+     * @return true if response has an error; false if not
+     */
     public boolean hasError() {
         String error = getError();
         if ( error.equals("")) {
@@ -512,7 +549,10 @@ public class LASBackendResponse extends LASDocument {
             return true;
         }
     }
-    
+    /**
+     * Set an error for this response, which will remove all other results.
+     * @param message the message for the error being set.
+     */
     public void setError(String message) {       
         Element backend_response = getRootElement();
         Element debug = null;
@@ -538,6 +578,10 @@ public class LASBackendResponse extends LASDocument {
         setDate(response);
         backend_response.setContent(response);        
     }
+    /**
+     * Add an error result to the response.
+     * @param message the error message to add
+     */
     public void addError(String message) {
         Element response = getRootElement().getChild("response");
         Element result = new Element("result");
@@ -545,6 +589,11 @@ public class LASBackendResponse extends LASDocument {
         result.setText(message);
         response.addContent(result);
     }
+    /**
+     * Turn this response into an error response using the message as the error message.
+     * @param ID The ID of the error result
+     * @param message the message for this error
+     */
     public void setError(String ID, String message) {  
         Element backend_response = getRootElement();
         Element debug = null;
@@ -571,6 +620,11 @@ public class LASBackendResponse extends LASDocument {
         setDate(response);
         backend_response.setContent(response);        
     }
+    /**
+     * Add an error result to the response giving it a particular ID
+     * @param ID the ID of the error result
+     * @param message the error message
+     */
     public void addError(String ID, String message) {
         Element response = getRootElement().getChild("response");
         Element result = new Element("result");
@@ -579,6 +633,10 @@ public class LASBackendResponse extends LASDocument {
         result.setText(message);
         response.addContent(result);
     }
+    /**
+     * Add the date time/stamp to the response element.
+     * @param response
+     */
     private void setDate(Element response) {
         DateTime now = new DateTime();
         DateTimeFormatter fmt = ISODateTimeFormat.dateTime();
@@ -586,6 +644,11 @@ public class LASBackendResponse extends LASDocument {
         date.setText(fmt.print(now));
         response.addContent(date);
     }
+    /**
+     * Get the date from the response.  All responses should be tagged with a
+     * date/time stamp when they are created.
+     * @return the data/time string
+     */
     public String getDate() {
         Element root = getRootElement();
         List responses = root.getChildren("response");
@@ -615,6 +678,11 @@ public class LASBackendResponse extends LASDocument {
             return dateString;
         }
     }
+    /**
+     * Set this as an error response using the Java Exception for a detailed message.
+     * @param message The LAS message
+     * @param e the Exception from which to get the details of the failure.
+     */
     public void setError(String message, Exception e) {
         Element backend_response = getRootElement();
         Element debug = null;
@@ -652,6 +720,7 @@ public class LASBackendResponse extends LASDocument {
     }
     
     /**
+     * Get a remote result by type
      * @param in_type the result type that we are checking
      * @return true if the result was supplied by a remote service
      */

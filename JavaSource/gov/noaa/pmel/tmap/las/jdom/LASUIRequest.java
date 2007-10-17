@@ -224,7 +224,39 @@ public class LASUIRequest extends LASDocument {
         }
         return false;
     }
-
+    /**
+     * Return the list of axes (x, y, z, t) that are analysis axes for a variable in a request.
+     * @param dsID the data set
+     * @param varID the variable
+     * @return the list of compressed axes
+     */
+    public ArrayList<String> getAnalysisAxes(String dsID, String varID) {
+    	String oldstyle_varXPath = "/lasdata/datasets/"+dsID+"/variables/"+varID;
+        return getAnalysisAxes(oldstyle_varXPath);
+    } 
+    /**
+     * Return the list of axes (x, y, z, t) that are analysis axes for a variable in a request.
+     * @param oldstyle_xpath variable XPath in the "old" style. e.g. /lasdata/datasets/dsID/variables/varID
+     * @param varID the variable
+     * @return the list of compressed axes
+     */
+    public ArrayList<String> getAnalysisAxes(String oldstyle_xpath) {
+    	ArrayList<String> axes = new ArrayList<String>();
+    	List args = getRootElement().getChild("args").getChildren();
+    	for (Iterator argsIt = args.iterator(); argsIt.hasNext();) {
+    		Element arg = (Element) argsIt.next();
+    		String match = arg.getAttributeValue("match");
+    		Element analysis = arg.getChild("analysis");
+    		if ( analysis != null && match.equals(oldstyle_xpath)) {
+    			List axesElements = analysis.getChildren("axis");
+    			for (Iterator axisIt = axesElements.iterator(); axisIt.hasNext();) {
+    				Element axis = (Element) axisIt.next();
+                    axes.add(axis.getAttributeValue("type"));
+    			}
+    		}
+    	}
+    	return axes;
+    } 
 
     /**
      * Sets a range element of the LAS UI Request object.
