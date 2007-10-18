@@ -92,7 +92,11 @@ IF ($result_map_scale_filename%0|*>1%) THEN
    IF `STRLEN("($ferret_view)") EQ 2` THEN 
       LET syms_names = {"AX_HORIZ", "AX_HORIZ_POSTV", "AX_VERT", "AX_VERT_POSTV"}
 
-      LET the_plot_var =  ($ferret_plot_var)
+      LET the_plot_var = ($ferret_plot_var)
+      IF `($ferret_curvi_coord_lat"0|*>1") EQ 1 AND \
+        ($constraint_0_lhs"0|Curv_to_Rect_Regridding>1|*>0") EQ 0` THEN \
+          LET the_plot_var = plot_var 
+
       DEFINE SYMBOL the_axis =  `the_plot_var,RETURN=($ax_horiz)axis`
       IF `STRINDEX("($the_axis)", "(") GT 0` THEN 
          LET attlist = ($the_axis).attnames
