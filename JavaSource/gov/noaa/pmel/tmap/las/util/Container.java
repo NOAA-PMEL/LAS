@@ -71,6 +71,31 @@ public class Container {
         }
         return properties;
     }
+    /**
+     * Returns an ArrayList of properties in a particular property group.
+     *
+     * @param property_group property group identifier
+     * @return properties all properties within the named property group
+     */
+    public ArrayList<NameValuePair> getProperties(String property_group) {
+        ArrayList<NameValuePair> noProperties = new ArrayList<NameValuePair>();
+        List propGroups = element.getChild("properties").getChildren("property_group");
+        for (Iterator propGroupIt = propGroups.iterator(); propGroupIt.hasNext();) {
+            ArrayList<NameValuePair> propGroup = new ArrayList<NameValuePair>();
+            Element propGroupE = (Element) propGroupIt.next();
+            String type = propGroupE.getAttributeValue("type");
+            if (type.equals(property_group)) {
+                List props = propGroupE.getChildren("property");
+                for (Iterator propsIt = props.iterator(); propsIt.hasNext();) {
+                    Element prop = (Element) propsIt.next();
+                    NameValuePair property = new NameValuePair(prop.getChild("name").getTextNormalize(),prop.getChild("value").getTextNormalize());
+                    propGroup.add(property);
+                }
+                return propGroup;
+            }
+        }
+        return noProperties;
+    }
     public void setProperties(HashMap<String, ArrayList<NameValuePair>> propertiesHash) {
         Element properties = new Element("properties");
         for (Iterator groupsIt = propertiesHash.keySet().iterator(); groupsIt.hasNext();) {
