@@ -27,7 +27,7 @@ IF `($do_curvi_xy"0") AND ($native_curvilinear_xy"0")` THEN EXIT/SCRIPT
 IF `($do_hybrid_z"0") AND ($native_Z_plot"0")` THEN EXIT/SCRIPT
 IF `($do_curvi_xy_and_hybrid_z)` THEN EXIT/SCRIPT
 
-! IF `($do_curvi_xy"0") OR ($do_hybrid_z"0") OR ($do_curvi_xy_and_hybrid_z)` THEN EXIT/SCRIPT
+IF `($do_curvi_xy"0") OR ($do_hybrid_z"0") OR ($do_curvi_xy_and_hybrid_z)` THEN EXIT/SCRIPT
 
 ! If doing a slice of a curvilinear variable then note that RETURN=shape is not
 ! always correct for these variables (dont exit, test works for some cases)
@@ -35,6 +35,7 @@ IF `($do_curvi_xy_and_hybrid_z)` THEN EXIT/SCRIPT
 
 LET/D=($data_num) the_plot_var = ($ferret_plot_var)
 LOAD the_plot_var
+
 DEFINE SYMBOL varshape = `the_plot_var,RETURN=shape`
 DEFINE SYMBOL viewshape =  `UPCASE("($ferret_view)")`
 
