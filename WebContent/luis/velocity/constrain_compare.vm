@@ -1,10 +1,37 @@
 #set($region=$compare_region.get(0))
 #set($c_region=$compare_region.get(1))
 #parse("constrain_include.vm")
+#set($date_widget = "true")
+<script type="text/javascript" src="../JavaScript/components/DateWidget.js"></script>
 
 <script language="JavaScript">
 var aMapTool;
 var aRegionWidget;
+
+#if ( $date_widget == "true"  ) 
+function setTimeRange() {
+
+  /*
+   * if the DateWidget is being used, set the form
+   * values here.
+   */
+   
+      var theRegionForm = document.getElementById("region_form_id");
+      
+      theRegionForm.t_lo.value=DW.getDate1_Ferret();
+      alert("t_lo set "+theRegionForm.t_lo.value);
+      if (DW.menu_set_2) 
+        theRegionForm.t_hi.value = DW.getDate2_Ferret();
+        
+      #if( $axis.getDMYT() != "" || $date_widget == "true")
+      
+          theRegionForm.compare_t_lo.value=compare_DW.getDate1_Ferret();
+          alert("compare_t_lo set "+theRegionForm.compare_t_lo.value);
+          
+      #end
+
+}
+#end
 
 function updateMap() {
    var widxlot = new MapTextWidget(this,"lon", 'region',"xlo_text");
@@ -127,7 +154,7 @@ function popupDataWindow() {
 #parse("${include_header}.vm")
 #end ## if($include_header)
 
-$form.getStart("region", "doSubmit()")
+$form.getStart("region", "doSubmit()", "region_form_id")
     <input type="hidden" name="action" value="">
     $form.hidden("x_lo","-180")
     $form.hidden("x_hi", "180")
@@ -138,6 +165,18 @@ $form.getStart("region", "doSubmit()")
     $form.hidden("compare_y_lo", "-90")
     $form.hidden("compare_y_hi", "90")
     $form.hidden("use_java", "$use_java")
+    #if($date_widget == "true" && $region.hasAxis("t") &&  $region.getAxis("t").getDMYT() != "")
+        #set($isRange=$region.isRange("t"))
+        $form.hidden("t_lo",$region.getAxis("t").getLo())
+        #if($isRange)
+            $form.hidden("t_hi",$region.getAxis("t").getHi())
+	    #end
+    #end
+    #if($date_widget == "true" && $c_region.hasAxis("t") &&  $c_region.getAxis("t").getDMYT() != "")
+        #if (!$isRange)
+            $form.hidden("compare_t_lo",$c_region.getAxis("t").getLo())
+	    #end
+    #end
 
 
 #table_start()
@@ -205,13 +244,44 @@ $form.getStart("region", "doSubmit()")
   #else
     #td_advice("Select&nbsp;time&nbsp;for&nbsp;first&nbsp;variable")
   #end ##if($region.isRange("t"))
-  <td align="left"><font size="2">
-  $form.axisSelect("lo", "region", "t_lo", $axis)
-  #if($isRange)
-     to <br>
-     $form.axisSelect("hi", "region", "t_hi", $axis)
+  
+   #if( $axis.getDMYT() == "" || $date_widget != "true")
+  
+     ## Render as old-style widgets.
+     <td align="left"><font size="2">
+      $form.axisSelect("lo", "region", "t_lo", $axis)
+      #if($isRange)
+         to <br>
+         $form.axisSelect("hi", "region", "t_hi", $axis)
+      #end
+     </font></td>
+  
+  #else
+    ## Render as a DateWidget
+      <td id='timeDT'></td>
+      <script language="JavaScript">
+         DW = new DateWidget('$axis.getLo()', '$axis.getHi()');
+      </script>
+      #if ($isRange)
+         <script language="JavaScript">
+         #if ( !$axis.getDeltaMinutes().equals("0") )
+            DW.setDeltaMinutes('$axis.getDeltaMinutes()');
+         #end
+         DW.render('timeDT', '$axis.getDMYT()', '$axis.getDMYT()');
+         DW.setCallback(setTimeRange);
+         </script>
+      #else
+         <script language="JavaScript">
+         #if ( !$axis.getDeltaMinutes().equals("0") )
+            DW.setDeltaMinutes('$axis.getDeltaMinutes()');           
+         #end
+         DW.render('timeDT', '$axis.getDMYT()');
+         DW.setCallback(setTimeRange);
+         </script>
+      #end
   #end
-  </font></td>
+  
+  
   </tr>
 #end ## region.hasAxis
 
@@ -223,7 +293,7 @@ $form.getStart("region", "doSubmit()")
     #td_advice("$region.getUI().get_z_text()&nbsp;range")
   #else
     #td_advice("$region.getUI().get_z_text()&nbsp;for&nbsp;first&nbsp;variable")
-  #end ##if($region.isRange("z"))
+  #end ##if($region.isRange("z")) 
   <td align="left"><font size="2">
   $form.axisSelect("lo", "region", "z_lo", $axis)
   #if($isRange)
@@ -242,9 +312,30 @@ $form.getStart("region", "doSubmit()")
   #set($isRange=$c_region.isRange("t"))
   #if(!$isRange)
     #td_advice("Select&nbsp;time&nbsp;for&nbsp;second&nbsp;variable")
-  <td align="left"><font size="2">
-  $form.axisSelect("lo", "region", "compare_t_lo", $axis)
-  </font></td>
+    
+    #if( $axis.getDMYT() == "" || $date_widget != "true")
+    ## Use old style widgets
+      <td align="left"><font size="2">
+      $form.axisSelect("lo", "region", "compare_t_lo", $axis)
+      </font></td>
+   #else 
+   
+      <td id='compare_timeDT'></td>
+      <script language="JavaScript">
+         compare_DW = new DateWidget('$axis.getLo()', '$axis.getHi()');
+        
+         #if ( !$axis.getDeltaMinutes().equals("0") )
+            compare_DW.setDeltaMinutes('$axis.getDeltaMinutes()');           
+         #end
+         compare_DW.render('compare_timeDT', '$axis.getDMYT()');
+         compare_DW.setCallback(setTimeRange);
+        
+      </script>
+   
+   
+   #end
+  
+  
   #end ##if($isRange)
   </tr>
 #end ## region.hasAxis
