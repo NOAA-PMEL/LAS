@@ -28,7 +28,7 @@ import org.jdom.Element;
 
 public class FerretConfig extends IOSPDocument {
 	/*
-	 * This number can be any string that uniquely identifies the version of this class code.  
+	 * Any number that uniquely identifies the version of this class' code.  
 	 * The Eclipse IDE will generate it automatically for you.  We do not depend on this
 	 * since we do not serialize our code across the wire.
 	 */
