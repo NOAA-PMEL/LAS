@@ -2732,6 +2732,16 @@ public class LASConfig extends LASDocument {
         return variables;
     }
     /**
+     * Returns a single variable from a given a dataset as a pmel.tmap.las.util.Variable object.
+     * @param dsID ID of the dataset that contains the variable
+     * @param varID ID of the variable
+     * @return variable Variable object
+     */
+    public Variable getVariable(String dsID, String varID) throws JDOMException {
+        String variableXPath = "/lasdata/datasets/dataset[@ID='"+dsID+"']/variables/variable[@ID='"+varID+"']";
+        return getVariableByXPath(variableXPath);
+    }
+    /**
      * Returns list of variables give a dataset
      * @param dsID ID of the dataset for which variables should be listed.
      * @return variables Array list of variables
