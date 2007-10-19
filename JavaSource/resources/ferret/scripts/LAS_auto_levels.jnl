@@ -99,7 +99,6 @@ IF ($ferret_center_levels"0|1|TRUE>1|*>0") THEN
 ELSE
    PPL %RANGE `($stat_mean)-($stat_std)`, `($stat_mean)+($stat_std)`, ($num_fine_levels)
 ENDIF
-pause
 
 DEFINE SYMBOL coarse_delta = `($ppl$range_inc)*density_factor`
 DEFINE SYMBOL coarse_lo = `($ppl$range_low) - ($half_num_coarse_levels) * ($coarse_delta)`
