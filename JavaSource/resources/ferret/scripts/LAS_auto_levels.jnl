@@ -93,11 +93,13 @@ ENDIF
 ! Compute rounded-off levels with the PPL %RANGE command.
 
 IF ($ferret_center_levels"0|1|TRUE>1|*>0") THEN
+   PPL %RANGE `-2*($stat_std)`, `+2*($stat_std)`, ($ferret_num_contour_levels"50")
    LET centered_max = MAX(ABS(`($stat_mean)-($stat_std)`), ABS(`($stat_mean)+($stat_std)`) )
    PPL %RANGE `-1*centered_max`, `centered_max`, ($num_fine_levels)
 ELSE
    PPL %RANGE `($stat_mean)-($stat_std)`, `($stat_mean)+($stat_std)`, ($num_fine_levels)
 ENDIF
+pause
 
 DEFINE SYMBOL coarse_delta = `($ppl$range_inc)*density_factor`
 DEFINE SYMBOL coarse_lo = `($ppl$range_low) - ($half_num_coarse_levels) * ($coarse_delta)`
@@ -107,6 +109,5 @@ DEFINE SYMBOL ferret_auto_levels = (-inf)(($coarse_lo),($ppl$range_low),($coarse
 
 ! Use these levels to reset ferret_contour_levels and ferret_fill_levels 
 
-IF ($ferret_contour_style"CONTOUR>0|*>1") THEN DEFINE SYMBOL ferret_fill_levels = ($ferret_auto_levels)
-IF `STRINDEX("($ferret_contour_style%FILL%)", "contour") GT 0` THEN DEFINE SYMBOL ferret_contour_levels = ($ferret_auto_levels)
-
+DEFINE SYMBOL ferret_fill_levels = ($ferret_auto_levels)
+IF `($ferret_contour_levels"0|*>1") EQ 0` THEN DEFINE SYMBOL ferret_contour_levels = ($ferret_auto_levels)
