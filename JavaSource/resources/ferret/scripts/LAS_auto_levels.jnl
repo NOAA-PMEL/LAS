@@ -93,7 +93,8 @@ ENDIF
 ! Compute rounded-off levels with the PPL %RANGE command.
 
 IF ($ferret_center_levels"0|1|TRUE>1|*>0") THEN
-   PPL %RANGE `-2*($stat_std)`, `+2*($stat_std)`, ($ferret_num_contour_levels"50")
+   LET centered_max = MAX(ABS(`($stat_mean)-($stat_std)`), ABS(`($stat_mean)+($stat_std)`) )
+   PPL %RANGE `-1*centered_max`, `centered_max`, ($num_fine_levels)
 ELSE
    PPL %RANGE `($stat_mean)-($stat_std)`, `($stat_mean)+($stat_std)`, ($num_fine_levels)
 ENDIF
