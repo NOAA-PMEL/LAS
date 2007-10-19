@@ -56,14 +56,14 @@ ENDIF
 
 ! Compute rounded-off levels with the PPL %RANGE command.
 
-IF ($ferret_center_levels"0|1|TRUE>1|*>0") THEN
-   PPL %RANGE `-2*($stat_std)`, `+2*($stat_std)`, ($ferret_num_contour_levels"50")
-ELSE
-   PPL %RANGE `($stat_mean)-2*($stat_std)`, `($stat_mean)+2*($stat_std)`, 50
-ENDIF
-
-DEFINE SYMBOL ferret_auto_levels_simple = (-inf)(($ppl$range_low),($ppl$range_high),($ppl$range_inc))(inf) 
-
+! IF ($ferret_center_levels"0|1|TRUE>1|*>0") THEN
+!    PPL %RANGE `-2*($stat_std)`, `+2*($stat_std)`, ($ferret_num_contour_levels"50")
+! ELSE
+!    PPL %RANGE `($stat_mean)-2*($stat_std)`, `($stat_mean)+2*($stat_std)`, 50
+! ENDIF
+! 
+! DEFINE SYMBOL ferret_auto_levels_simple = (-inf)(($ppl$range_low),($ppl$range_high),($ppl$range_inc))(inf) 
+! 
 !!!  Suggestions from Hankin
 ! Determine contour levels to use such that a fine density of levels is used within +/- 1 std dev
 ! and a coarse density is used out to +/- 2 std dev.
@@ -79,21 +79,31 @@ DEFINE SYMBOL half_num_coarse_levels = `($num_coarse_levels)/2`
 ! See if centered levels were requested, either by setting the symbol ferret_center_levels
 ! or with a contour_levels or fill_levels that is centered.
 
-IF `($ferret_center_levels"0|1|TRUE>1|*>0") EQ 0` THEN
-   IF ($ferret_contour_levels"0|*>1") THEN 
-      DEFINE SYMBOL ferret_center_levels = `STRINDEX("($ferret_contour_levels)", "C") GT 0`
-      DEFINE SYMBOL ferret_center_levels = `STRINDEX("($ferret_contour_levels)", "c") GT 0`
+! If contour levels requested with levels of nC, e.g. 20C, then get the value to
+! set num_fine_levels in the %RANGE command below
+
+IF ($ferret_contour_levels"0|*>1") THEN 
+   DEFINE SYMBOL up_contour_levels = `UPCASE("($ferret_contour_levels)")`
+   LET nc = `STRINDEX("($up_contour_levels)", "C")`
+   DEFINE SYMBOL ferret_center_levels = `nc GT 0`
+   IF `nc GT 0` THEN 
+      LET slen = STRLEN ("($up_fill_levels)") 
+      IF `slen GT 1` THEN DEFINE SYMBOL num_fine_levels = `SUBSTRING ("($up_fill_levels)", 1, slen-1)`
    ENDIF
-   IF ($ferret_fill_levels"0|*>1") THEN 
-      DEFINE SYMBOL ferret_center_levels = `STRINDEX("($ferret_fill_levels)", "C") GT 0`
-      DEFINE SYMBOL ferret_center_levels = `STRINDEX("($ferret_fill_levels)", "c") GT 0`
+ENDIF
+IF ($ferret_fill_levels"0|*>1") THEN 
+   DEFINE SYMBOL up_fill_levels = `UPCASE("($ferret_fill_levels)")`
+   LET nc = `STRINDEX("($up_fill_levels)", "C")`
+   DEFINE SYMBOL ferret_center_levels = `nc GT 0`
+   IF `nc GT 0` THEN 
+      LET slen = STRLEN ("($up_fill_levels)") 
+      IF `slen GT 1` THEN DEFINE SYMBOL num_fine_levels = `SUBSTRING ("($up_fill_levels)", 1, slen-1)`
    ENDIF
 ENDIF
 
 ! Compute rounded-off levels with the PPL %RANGE command.
 
 IF ($ferret_center_levels"0|1|TRUE>1|*>0") THEN
-   PPL %RANGE `-2*($stat_std)`, `+2*($stat_std)`, ($ferret_num_contour_levels"50")
    LET centered_max = MAX(ABS(`($stat_mean)-($stat_std)`), ABS(`($stat_mean)+($stat_std)`) )
    PPL %RANGE `-1*centered_max`, `centered_max`, ($num_fine_levels)
 ELSE
