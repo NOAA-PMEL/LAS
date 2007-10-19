@@ -68,13 +68,36 @@ DEFINE SYMBOL ferret_auto_levels_simple = (-inf)(($ppl$range_low),($ppl$range_hi
 ! Determine contour levels to use such that a fine density of levels is used within +/- 1 std dev
 ! and a coarse density is used out to +/- 2 std dev.
 ! The ratio of densities is density_factor = fine/coarse.
+
 LET density_factor = 4
 ! fraction_that_are_fine = density_factor/(1+density_factor)
+
 DEFINE SYMBOL num_fine_levels = `(density_factor/(1+density_factor)) * ($num_contour_levels"50")`
 DEFINE SYMBOL num_coarse_levels =  `($num_contour_levels"50") - ($num_fine_levels)`
 DEFINE SYMBOL half_num_coarse_levels = `($num_coarse_levels)/2`
 
-PPL %RANGE `($stat_mean)-($stat_std)`, `($stat_mean)+($stat_std)`, ($num_fine_levels)
+! See if centered levels were requested, either by setting the symbol ferret_center_levels
+! or with a contour_levels or fill_levels that is centered.
+
+IF `($ferret_center_levels"0|1|TRUE>1|*>0") EQ 0` THEN
+   IF ($ferret_contour_levels"0|*>1") THEN 
+      DEFINE SYMBOL ferret_center_levels = `STRINDEX("($ferret_contour_levels)", "C") GT 0`
+      DEFINE SYMBOL ferret_center_levels = `STRINDEX("($ferret_contour_levels)", "c") GT 0`
+   ENDIF
+   IF ($ferret_fill_levels"0|*>1") THEN 
+      DEFINE SYMBOL ferret_center_levels = `STRINDEX("($ferret_fill_levels)", "C") GT 0`
+      DEFINE SYMBOL ferret_center_levels = `STRINDEX("($ferret_fill_levels)", "c") GT 0`
+   ENDIF
+ENDIF
+
+! Compute rounded-off levels with the PPL %RANGE command.
+
+IF ($ferret_center_levels"0|1|TRUE>1|*>0") THEN
+   LET centered_max = MAX(ABS(`($stat_mean)-($stat_std)`), ABS(`($stat_mean)+($stat_std)`) )
+   PPL %RANGE `-1*centered_max`, `centered_max`, ($num_fine_levels)
+ELSE
+   PPL %RANGE `($stat_mean)-($stat_std)`, `($stat_mean)+($stat_std)`, ($num_fine_levels)
+ENDIF
 
 DEFINE SYMBOL coarse_delta = `($ppl$range_inc)*density_factor`
 DEFINE SYMBOL coarse_lo = `($ppl$range_low) - ($half_num_coarse_levels) * ($coarse_delta)`
@@ -82,12 +105,8 @@ DEFINE SYMBOL coarse_hi = `($ppl$range_high) + ($half_num_coarse_levels) * ($coa
 
 DEFINE SYMBOL ferret_auto_levels = (-inf)(($coarse_lo),($ppl$range_low),($coarse_delta))(($ppl$range_low),($ppl$range_high),($ppl$range_inc))(($ppl$range_high),($coarse_hi),($coarse_delta))(inf)
 
-! Use these levels to set ferret_contour_levels and ferret_fill_levels 
-! if they are not already set.
+! Use these levels to reset ferret_contour_levels and ferret_fill_levels 
 
-IF ($ferret_auto_levels"0|*>1") THEN
-   IF `($ferret_contour_levels"0|*>1") EQ 0` THEN \
-     DEFINE SYMBOL ferret_contour_levels = ($ferret_auto_levels)
-   IF `($ferret_fill_levels"0|*>1") EQ 0` THEN \
-     DEFINE SYMBOL ferret_fill_levels = ($ferret_auto_levels)
-ENDIF
+IF ($ferret_contour_style"CONTOUR>0|*>1") THEN DEFINE SYMBOL ferret_fill_levels = ($ferret_auto_levels)
+IF `STRINDEX("($ferret_contour_style%FILL%)", "contour") GT 0` THEN DEFINE SYMBOL ferret_contour_levels = ($ferret_auto_levels)
+
