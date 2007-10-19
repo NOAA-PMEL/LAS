@@ -70,6 +70,13 @@ function initializeLASSlideSorter() {
   #set($grid_JSON = $grid.toJSON().toString())
   var gridJSON = '$grid_JSON';
 
+  // See if there are any 'compressed' axes
+  var analysisAxes = new Object();
+  #set($analysisAxes = $las_request.getAnalysisAxes($dsID,$varID))
+  #foreach ($analysisAxis in $analysisAxes)
+    analysisAxes["$analysisAxis"] = 1;
+  #end
+
   // First, make sure we can parse the LASResponse
   var Grid;
   var JSONObject;
@@ -122,7 +129,7 @@ function initializeLASSlideSorter() {
   // Create the Longitude axis menus
 
   if (view != 'x' && view != 'xy' && view != 'xz' && view != 'xt') {
-    if (Grid.hasAxis('x')) {
+    if (Grid.hasAxis('x') && !analysisAxes["x"]) {
       LSSInitObject["x"] = new Object();
       LSSInitObject["x"].title = 'Longitude';
       LSSInitObject["x"].initial_value = ReqImg.getRangeLo('x');
@@ -141,7 +148,7 @@ function initializeLASSlideSorter() {
   }
     
   if (view != 'y' && view != 'xy' && view != 'yz' && view != 'yt') {
-    if (Grid.hasAxis('y')) {
+    if (Grid.hasAxis('y') && !analysisAxes["y"]) {
       LSSInitObject["y"] = new Object();
       LSSInitObject["y"].title = 'Latitude';
       LSSInitObject["y"].initial_value = ReqImg.getRangeLo('y');
@@ -160,7 +167,7 @@ function initializeLASSlideSorter() {
   }
     
   if (view != 'z' && view != 'xz' && view != 'yz' && view != 'zt') {
-    if (Grid.hasAxis('z')) {
+    if (Grid.hasAxis('z') && !analysisAxes["z"]) {
       LSSInitObject["z"] = new Object();
       LSSInitObject["z"].title = 'Depth';
       LSSInitObject["z"].initial_value = ReqImg.getRangeLo('z');
@@ -170,7 +177,7 @@ function initializeLASSlideSorter() {
   }
 
   if (view != 't' && view != 'xt' && view != 'yt' && view != 'zt') {
-    if (Grid.hasAxis('t')) {
+    if (Grid.hasAxis('t') && !analysisAxes["t"]) {
       LSSInitObject["t"] = new Object();
       LSSInitObject["t"].title = 'Time';
       LSSInitObject["t"].initial_value = ReqImg.getRangeLo('t');
@@ -192,16 +199,16 @@ function initializeLASSlideSorter() {
 
   var initial_menu;
 
-  if (view.indexOf('t') == -1 && Grid.hasAxis('t')) {
+  if (view.indexOf('t') == -1 && Grid.hasAxis('t') && !analysisAxes["t"]) {
     initial_menu = 't';
   } else {
-    if (view.indexOf('z') == -1 && Grid.hasAxis('z')) {
+    if (view.indexOf('z') == -1 && Grid.hasAxis('z') && !analysisAxes["z"]) {
       initial_menu = 'z';
     } else {
-      if (view.indexOf('y') == -1 && Grid.hasAxis('y')) {
+      if (view.indexOf('y') == -1 && Grid.hasAxis('y') && !analysisAxes["y"]) {
         initial_menu = 'y';
       } else {
-        if (view.indexOf('x') == -1 && Grid.hasAxis('x')) {
+        if (view.indexOf('x') == -1 && Grid.hasAxis('x') && !analysisAxes["x"]) {
           initial_menu = 'x';
         }
       }
