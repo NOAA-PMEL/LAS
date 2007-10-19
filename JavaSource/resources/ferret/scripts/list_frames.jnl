@@ -33,10 +33,64 @@ DEFINE SYMBOL lmin `($ferret_list_var),return=lstart`
 DEFINE SYMBOL lmax `($ferret_list_var),return=lend`
 DEFINE SYMBOL lsize `($ferret_list_var),return=lsize`
 
+!both ferret_contour_levels and ferret_fill_levels are not set
+!use LAS_auto_levels to compute them
+IF `( ($ferret_contour_levels"0|*>1") EQ 0 ) AND\
+    ( ($ferret_fill_levels"0|*>1")    EQ 0 ) ` THEN
+    GO LAS_auto_levels ($data_var)[d=($data_num)]
+ENDIF
 
-!compute color fill levels if not given
+!check if contour_levels is set like 20C
+IF ($ferret_contour_levels"0|*>1") THEN
+   DEFINE SYMBOL up_contour_levels = `UPCASE("($ferret_contour_levels)")`
+   LET nc = `STRINDEX("($up_contour_levels)", "C")`
+   IF `nc GT 0` THEN
+       GO LAS_auto_levels ($data_var)[d=($data_num)]
+   ENDIF
+ENDIF
+ 
+! check if fill_levels is set like 20C
+IF ($ferret_fill_levels"0|*>1") THEN
+   DEFINE SYMBOL up_fill_levels = `UPCASE("($ferret_fill_levels)")`
+   LET nc = `STRINDEX("($up_fill_levels)", "C")`
+   IF `nc GT 0` THEN
+       GO LAS_auto_levels ($data_var)[d=($data_num)]
+   ENDIF
+ENDIF
+
 LET the_var = ($ferret_plot_var)
-IF `($ferret_fill_levels"1|*>0") OR ($ferret_dep_axis_scale"1|*>0")` THEN
+!IF `($ferret_contour_levels"1|*>0") OR ($ferret_fill_levels"1|*>0") OR ($ferret_dep_axis_scale"1|*>0")` THEN
+!    LOAD the_var
+!    LET vmin = the_var[x=@min,y=@min,z=@min,t=@min]
+!    LET vmax = the_var[x=@max,y=@max,z=@max,t=@max]
+!    PPL %RANGE `vmin,p=9` `vmax,p=9` 10
+!    DEFINE SYMBOL lo_lim ($PPL$RANGE_LOW)
+!    DEFINE SYMBOL hi_lim ($PPL$RANGE_HIGH)
+!    DEFINE SYMBOL delta ($PPL$RANGE_INC)
+!    IF `($ferret_fill_levels"1|*>0")` THEN
+!        DEFINE SYMBOL ferret_fill_levels (($PPL$RANGE_LOW),($PPL$RANGE_HIGH),($PPL$RANGE_INC))
+!    ENDIF
+!    IF `($ferret_contour_levels"1|*>0")` THEN
+!        DEFINE SYMBOL ferret_contour_levels (($PPL$RANGE_LOW),($PPL$RANGE_HIGH),($PPL$RANGE_INC))
+!    ENDIF
+!    IF ($ferret_dep_axis_scale"1|*>0") THEN
+!        DEFINE SYMBOL ferret_dep_axis_scale ($PPL$RANGE_LOW),($PPL$RANGE_HIGH),($PPL$RANGE_INC)
+!    ENDIF
+!ENDIF
+
+!ferret_contour_levels is not set BUT ferret_fill_levels is set
+IF `($ferret_contour_levels"1|*>0") AND ($ferret_fill_levels"0|*>1")` THEN
+    DEFINE SYMBOL ferret_contour_levels = ($ferret_fill_levels)
+ENDIF
+
+!ferret_fill_levels is not set BUT ferret_contour_levels is set
+IF `($ferret_contour_levels"0|*>1") AND ($ferret_fill_levels"1|*>0")` THEN
+    DEFINE SYMBOL ferret_fill_levels = ($ferret_contour_levels)
+ENDIF
+
+!for animation of 1D plots
+IF `($ferret_dep_axis_scale"1|*>0")` THEN
+!    GO LAS_auto_levels ($data_var)[d=($data_num)]
     LOAD the_var
     LET vmin = the_var[x=@min,y=@min,z=@min,t=@min]
     LET vmax = the_var[x=@max,y=@max,z=@max,t=@max]
@@ -44,14 +98,7 @@ IF `($ferret_fill_levels"1|*>0") OR ($ferret_dep_axis_scale"1|*>0")` THEN
     DEFINE SYMBOL lo_lim ($PPL$RANGE_LOW)
     DEFINE SYMBOL hi_lim ($PPL$RANGE_HIGH)
     DEFINE SYMBOL delta ($PPL$RANGE_INC)
-
-    IF ($ferret_fill_levels"1|*>0") THEN
-        DEFINE SYMBOL ferret_fill_levels (($PPL$RANGE_LOW),($PPL$RANGE_HIGH),($PPL$RANGE_INC))
-    ENDIF
-
-    IF ($ferret_dep_axis_scale"1|*>0") THEN
-        DEFINE SYMBOL ferret_dep_axis_scale ($PPL$RANGE_LOW),($PPL$RANGE_HIGH),($PPL$RANGE_INC)
-    ENDIF
+    DEFINE SYMBOL ferret_dep_axis_scale ($PPL$RANGE_LOW),($PPL$RANGE_HIGH),($PPL$RANGE_INC)
 ENDIF
 
 SET LIST/FILE="($result_ferret_listing_filename)"
@@ -122,6 +169,19 @@ list/norowhead/nohead/format=(A`nlen`)/FILE/append a
 
 LET f = "</fill_levels>"
 list/norowhead/nohead/format=(A14)/FILE/append f
+
+!------------
+! contour_levels
+!------------
+LET f = "<contour_levels>"
+list/norowhead/nohead/format=(A16)/FILE/append f
+
+let nlen = strlen ("($ferret_contour_levels)")
+let a = "($ferret_contour_levels)"
+list/norowhead/nohead/format=(A`nlen`)/FILE/append a
+
+LET f = "</contour_levels>"
+list/norowhead/nohead/format=(A17)/FILE/append f
 
 !---------------
 ! dep_axis_scale
