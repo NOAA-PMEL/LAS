@@ -80,7 +80,7 @@ public class FerretCommands {
      * @return true if the string contains a Ferret command; false if it does not.
      */
     static public boolean containsForbiddenCommand(String string) {
-        for ( int i=0; i<command.length; i++ ) {
+        for ( int i=0; i<forbidden_command.length; i++ ) {
             if ( string.toUpperCase().contains(forbidden_command[i]))  {
                 return true;
             }
