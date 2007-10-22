@@ -8,11 +8,16 @@
 !show symbol operation_id
 IF `STRINDEX( "($operation_ID)", "GE" ) EQ 0` THEN EXIT/SCRIPT
 
-LET maxpix = 600  ! default
-IF ($ferret_size"0|0.06667>1|*>0") THEN LET maxpix = 300  ! small
-IF ($ferret_size"0|0.25>1|*>0")    THEN LET maxpix = 500  ! medium
-IF ($ferret_size"0|0.5>1|*>0")     THEN LET maxpix = 600  ! default
-IF ($ferret_size"0|0.8333>1|*>0")  THEN LET maxpix = 700  ! large
+!LET maxpix = 600  ! default
+!IF ($ferret_size"0|0.06667>1|*>0") THEN LET maxpix = 300  ! small
+!IF ($ferret_size"0|0.25>1|*>0")    THEN LET maxpix = 500  ! medium
+!IF ($ferret_size"0|0.5>1|*>0")     THEN LET maxpix = 600  ! default
+!IF ($ferret_size"0|0.8333>1|*>0")  THEN LET maxpix = 700  ! large
+
+LET maxpix = 500  ! default
+IF ($ferret_stride_quality_factor"0|1.0>1|*>0") THEN LET maxpix = 200  ! draft(fast)
+IF ($ferret_stride_quality_factor"0|0.5>1|*>0") THEN LET maxpix = 500  ! medium
+IF ($ferret_stride_quality_factor"0|0.0>1|*>0") THEN LET maxpix = 700  ! best(slow)
 
 !limit
 !IF `($ferret_google_plot"0|*>1")` THEN LET  maxpix = `2*maxpix`
@@ -48,7 +53,7 @@ IF ($region_y_lo"0|*>1") THEN
     LET pixsize = `ny*y_pct`
 !         LET pixsize = `MAX(pixsize, ny)`
 
-    DEFINE SYMBOL ystride = `2*INT((pixsize/maxpix)+1)`
+    DEFINE SYMBOL ystride = `INT((pixsize/maxpix)+1)`
     IF `pixsize GT maxpix` THEN 
        IF `($ystride) GT 1` THEN SET AXIS/STRIDE=($ystride) `($data_var)[d=($data_num)],return=yaxis`
     ENDIF
