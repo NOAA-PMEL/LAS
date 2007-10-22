@@ -12,40 +12,21 @@
 ! region_~_range   -- numeric range on a given axis
 ! region_~         -- domain in 'lo:hi' notation
 ! region_full      -- synonym for 'region_xyzt'
-
-
+!
 ! Incoming argument determines which region to use
 ! The default number is 0, and the default region is region_0.
 ! If we are making only a map, then there are no data_ symbols
 ! defined, so data_0_region is not set, but we can define region 
 ! as region_0.
+!
+! ACM trac 267: Do not cancel any previously set limits or region symbols; 
+! The previous v6 UI as to how it worked in the old product server expects
+! to inherit some or all region info from the first dataset for use by the 
+! second in comparisons etc. Keep this behavior.
 
 DEFINE SYMBOL num ($1"0")
 DEFINE SYMBOL region_name data_($num)_region
 DEFINE SYMBOL region ($($region_name)"region_0")
-
-! Cancel any previously set limits or region symbols
-
-CANCEL SYMBOL limits_x
-CANCEL SYMBOL limits_y
-CANCEL SYMBOL limits_z
-CANCEL SYMBOL limits_t
-CANCEL SYMBOL region_x
-CANCEL SYMBOL region_y
-CANCEL SYMBOL region_z
-CANCEL SYMBOL region_t
-CANCEL SYMBOL region_xy
-CANCEL SYMBOL region_xz
-CANCEL SYMBOL region_xt
-CANCEL SYMBOL region_yz
-CANCEL SYMBOL region_yt
-CANCEL SYMBOL region_zt
-CANCEL SYMBOL region_xyz
-CANCEL SYMBOL region_xyt
-CANCEL SYMBOL region_xzt
-CANCEL SYMBOL region_yzt
-CANCEL SYMBOL region_xyzt
-CANCEL SYMBOL region_full
 
 ! NOTE:  Occasionally the LAS applet will send in a longitude or latitude
 ! NOTE:  that looks like "24.400000000000002".  Such long, numerically
