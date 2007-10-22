@@ -94,8 +94,9 @@ DEFINE SYMBOL ferret_diff_var = ($ferret_var_0) - ($ferret_var_1)
 ! and time in directions normal to the plot, and in the upper right listing
 ! urls if dataset are opendap.
 
+pause
 GO LAS_set_diff_labels ($fview)
-
+pause
 ! Open the window, apply size, scale options
 GO LAS_open_window
 
@@ -147,13 +148,14 @@ IF ($ferret_deg_min_sec"0|false>0|*>1") THEN GO LAS_set_deg_min_sec.jnl
   IF `($labnum_z%0|*>1%)` THEN GO unlabel ($labnum_z)
   IF `($labnum_t%0|*>1%)` THEN GO unlabel ($labnum_t)
   IF `($title_size%0|*>1%)` THEN PPL LABSET ($title_size)
+  IF `($labnum_dset%0|*>1%)` THEN GO unlabel ($labnum_dset)
+  IF `($labnum_datitl%0|*>1%)` THEN GO unlabel ($labnum_datitl)
+  IF `($labnum_dods%0|*>1%)` THEN GO unlabel ($labnum_dods)
 PPL ($plot_type)
 
 LABEL/NOUSER `($ppl$xlen)/2`, `($ppl$ylen)+1.2`, 0, 0, 0.12, "LAS 7.+/Ferret ($FERRET_VERSION)     NOAA/PMEL"
-IF ($needs_url"0|*>1") THEN \
-LABEL/NOUSER `($ppl$xlen)*.33`, `($ppl$ylen)+1.`, -1, 0, 0.10, "DATA SET: @AS($data_var_url)"
 
-! Put the labels in the upper left
+! Put the labels for time/location in the upper left
 
 LET labdel = 0.2
 LET labyloc = `($ppl$ylen) + labdel*($n_left_labels) `
@@ -174,7 +176,8 @@ IF `($n_right_labels) GT 0` THEN
 
    LABEL/NOUSER `labxloc`, `labyloc`, 1, 0.0, `labsiz`, ($upper_right_1)
    LET labyloc = `labyloc - labdel`
-   IF `($n_right_labels) GT 1` THEN LABEL/NOUSER `labxloc`, `labyloc`, 1, 0.0, `labsiz`, ($upper_right_2)
+   IF `STRINDEX("($upper_right_1)", "<NL>") GT 0` THEN LET labyloc = `labyloc - labdel`
+   IF `($n_right_labels) GT 1` THEN LABEL/NOUSER `labxloc`, `labyloc`, 1, 0.0, `labsiz`, @P2($upper_right_2)
 ENDIF 
 
 IF ($ferret_contour_style"0|default>0|color_filled_plus_lines>1|raster_plus_lines>1|*>0") THEN
