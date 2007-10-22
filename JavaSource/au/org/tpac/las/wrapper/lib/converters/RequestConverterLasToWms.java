@@ -129,6 +129,8 @@ public class RequestConverterLasToWms
         wmsCap = converter.getConverted();
         this.opName = _opName;
 
+        //jli: should us different operation for insitu datasets
+        //this.opName = "Insitu_extract_location_plot";
         wmsReq = new WMSRequest(_wmsReq, wmsCap);
     }
 
@@ -310,8 +312,10 @@ public class RequestConverterLasToWms
 
         }else if( (!extents.isEmpty()) && (extents.size() != wmsExtents.size()) ){
 */
-        //use default values when dimension parameters are not specified in GetMap request
-        if( extents.size() != wmsExtents.size() ){
+        //some datasets don't have <extent>, such as topography data
+        if(extents !=null & wmsExtents!=null){
+         //use default values when dimension parameters are not specified in GetMap request
+         if( extents.size() != wmsExtents.size() ){
             //check each wmsExtent to see if it is set; if not, use default value
             for(Enumeration wmsExtentEnum = wmsExtents.keys(); wmsExtentEnum.hasMoreElements();)
             {
@@ -389,8 +393,8 @@ public class RequestConverterLasToWms
                     }
                 }
             } 
-        }else{
-        //extents are all set by the GetMap request
+          }else{
+          //extents are all set by the GetMap request
             for(Enumeration exEnum = extents.keys(); exEnum.hasMoreElements();)
             {
                 String key = exEnum.nextElement().toString();
@@ -432,6 +436,7 @@ public class RequestConverterLasToWms
                     }
                 }
             }
+          }
         }
 
         result += "</region>";
