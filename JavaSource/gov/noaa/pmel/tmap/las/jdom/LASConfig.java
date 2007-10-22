@@ -647,12 +647,34 @@ public class LASConfig extends LASDocument {
             } else if (child.getName().equalsIgnoreCase("axes")) {
                 List axes = child.getChildren();        
                 for (Iterator axesIt = axes.iterator(); axesIt.hasNext();) {                    
-                    Element axis = (Element) axesIt.next();
-                    if ( !axis.getName().equals("properties")) {
-                        String AID = axis.getName();
-                        axis.setName("axis");
-                        axis.setAttribute("ID", AID);
-                    } else {
+                	Element axis = (Element) axesIt.next();
+                	if ( !axis.getName().equals("properties")) {
+                		String AID = axis.getName();
+                		axis.setName("axis");
+                		axis.setAttribute("ID", AID);
+                		List v = axis.getChildren("v");
+                		boolean warn = false;
+                		if ( v != null && axis.getAttributeValue("type").equals("t") ) {
+                			for (Iterator vIt = v.iterator(); vIt.hasNext();) {
+                				Element ve = (Element) vIt.next();
+                				String value = ve.getTextTrim();
+                				if ( value.equalsIgnoreCase("jan") || value.equalsIgnoreCase("feb") || 
+                						value.equalsIgnoreCase("mar") || value.equalsIgnoreCase("apr") ||
+                						value.equalsIgnoreCase("may") || value.equalsIgnoreCase("jun") ||
+                						value.equalsIgnoreCase("jul") || value.equalsIgnoreCase("aug") ||
+                						value.equalsIgnoreCase("sep") || value.equalsIgnoreCase("oct") ||
+                						value.equalsIgnoreCase("nov") || value.equalsIgnoreCase("dec") ) {
+
+                					ve.setAttribute("label", value);
+                					ve.setText("15-"+value);
+                					warn = true;
+                				}
+                			}
+                			if ( warn ) {
+                				log.warn("Converted <v>Jan</v> syntax to <v label=\"Jan\">15-Jan</v> syntax for axis "+AID);
+                			}
+                		}
+                	} else {
                         axis.setContent(LASDocument.convertProperties(axis));
                     }
                 }
