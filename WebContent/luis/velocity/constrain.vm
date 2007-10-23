@@ -171,6 +171,7 @@ $form.getStart("region", "doSubmit()", "region_form_id")
   #end ##if($region.isRange("t"))
   
   #if( $axis.getDMYT() == "" || $date_widget != "true")
+
   
   ## Render as old style widget.
   <td align="left"><font size="2">

@@ -114,6 +114,8 @@ function init() {
   aMapTool.setRanges();
   aMapTool.setCompareRanges();
 
+  setTimeRange();
+
 }
 
 function setUseJava(newval){
