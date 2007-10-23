@@ -19,14 +19,12 @@ function setTimeRange() {
       var theRegionForm = document.getElementById("region_form_id");
       
       theRegionForm.t_lo.value=DW.getDate1_Ferret();
-      alert("t_lo set "+theRegionForm.t_lo.value);
       if (DW.menu_set_2) 
         theRegionForm.t_hi.value = DW.getDate2_Ferret();
         
-      #if( $axis.getDMYT() != "" || $date_widget == "true")
+     #if($date_widget == "true" && $c_region.hasAxis("t") &&  $c_region.getAxis("t").getDMYT() != "")
       
           theRegionForm.compare_t_lo.value=compare_DW.getDate1_Ferret();
-          alert("compare_t_lo set "+theRegionForm.compare_t_lo.value);
           
       #end
 
