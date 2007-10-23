@@ -48,6 +48,9 @@ function init() {
   aMapTool.setMode('single');
   aMapTool.selectTool("$region.getViewRegion()");
   aMapTool.setRanges();
+
+  setTimeRange();
+
 }
 
 function setUseJava(newval){
