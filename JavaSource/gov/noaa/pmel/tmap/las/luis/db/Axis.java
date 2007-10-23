@@ -134,7 +134,7 @@ public class Axis extends DbaseObject implements IAxis {
 		  }
 	  } else if (getCategory().equals("ctime") ) {
 		 if ( size == 3 ) {
-			  return "MDH";
+			  return "MDT";
 		  } else if ( size == 2 ) {
 			  return "MD";
 		  }
