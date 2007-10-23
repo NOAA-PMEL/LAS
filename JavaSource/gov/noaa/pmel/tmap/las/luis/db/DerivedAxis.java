@@ -3,6 +3,7 @@ package gov.noaa.pmel.tmap.las.luis.db;
 
 import java.util.Vector;
 import java.sql.SQLException;
+import java.text.DecimalFormat;
 
 
 public class DerivedAxis extends DbaseObject implements IAxis {
@@ -138,4 +139,52 @@ public class DerivedAxis extends DbaseObject implements IAxis {
     return mSourceAxis.getCategory();
   }
 
+  public String getDMYT() throws java.sql.SQLException {
+	  int size = getWidgets().size();
+	  if ( getCategory().equals("rtime")) {
+		  if ( size == 4 ) {
+			  return "DMYT";
+		  } else if ( size == 3 ) {
+			  Vector widgets = getWidgets();
+			  AxisWidget one = (AxisWidget) widgets.get(0);
+			  int widget_size = one.getItems().size();
+			  if ( widget_size == 1 ) {
+				  return "MY";
+			  } else {
+				  return "DMY";
+			  }
+		  } else if ( size == 2 ) {
+			  return "MY";
+		  }
+	  } else if (getCategory().equals("ctime") ) {
+		 if ( size == 3 ) {
+			  return "MDT";
+		  } else if ( size == 2 ) {
+			  return "MD";
+		  }
+	  }
+	  return "";
+  }
+  public String getDeltaMinutes() throws SQLException {
+	  int size = getWidgets().size();
+	  if ( size == 4 ) {
+		  DecimalFormat format = new DecimalFormat("##");
+		  Vector widgets = getWidgets();
+		  AxisWidget one = (AxisWidget) widgets.get(3);
+		  Vector items = one.getItems();
+		  double sum = 0.0;
+		  for (int i=0; i<items.size()-1; i++) {
+			  AxisWidgetItem itemI = (AxisWidgetItem)items.get(i);
+			  AxisWidgetItem itemIP1 = (AxisWidgetItem)items.get(i+1);
+			double delta = 
+				Double.valueOf(itemIP1.getValue()).doubleValue() - 
+			    Double.valueOf(itemI.getValue()).doubleValue();
+			sum = sum + delta;
+		  }
+		  double ave = (sum/Double.valueOf(items.size()-1).doubleValue())*60.;
+		  return format.format(ave);
+	  } else {
+		  return "0";
+	  }
+  }
 }
