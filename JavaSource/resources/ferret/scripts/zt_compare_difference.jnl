@@ -128,9 +128,7 @@ IF ($ferret_use_graticules"1|0|*>1) THEN
   SET MODE GRATICULE:(DASH,COLOR=black)
 ENDIF
 
-IF ($ferret_palette"0|*>1") THEN
-  DEFINE SYMBOL qualifiers = ($qualifiers)/PALETTE=($ferret_palette"rainbow|default>rainbow|*>*)
-ENDIF
+DEFINE SYMBOL qualifiers = ($qualifiers)/PALETTE=($ferret_palette"rainbow|default>rainbow|*>*)
 
 ! Do the plot (SHADE or CONTOUR)
 !
