@@ -262,7 +262,10 @@ at the edges of the plot (WMS-style plots). By default margins are shown.
         <item values="rnb2">precipitation rainbow</item>
         <item values="light_rainbow">pastel rainbow</item>
         <item values="rainbow_by_levels">rainbow by levels</item>
-        <item values="ocean_temp">ocean temperature</item>
+        <item values="ocean_temp">ocean temperature(by-value)</item>
+        <item values="land_sea_values">topography/bathymetry(by-value)</item>
+        <item values="etop_values">ocean/terrestrial elevation(by-value)</item>
+        <item values="light_bottom">light bottom(by-value)</item>
         <item values="light_centered">anomaly</item>
         <item values="land_sea">topography/bathymetry</item>
         <item values="dark_land_sea">dark topography/bathymetry</item>
@@ -478,7 +481,10 @@ Detailed info is available in the Ferret User\'s Guide.
         <item values="rnb2">precipitation rainbow</item>
         <item values="light_rainbow">pastel rainbow</item>
         <item values="rainbow_by_levels">rainbow by levels</item>
-        <item values="ocean_temp">ocean temperature</item>
+        <item values="ocean_temp">ocean temperature(by-value)</item>
+        <item values="land_sea_values">topography/bathymetry(by-value)</item>
+        <item values="etop_values">ocean/terrestrial elevation(by-value)</item>
+        <item values="light_bottom">light bottom(by-value)</item>
         <item values="light_centered">anomaly</item>
         <item values="land_sea">topography/bathymetry</item>
         <item values="dark_land_sea">dark topography/bathymetry</item>
