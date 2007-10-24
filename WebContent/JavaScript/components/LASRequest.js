@@ -356,6 +356,9 @@ function LASReq_setVariable(dataset,variable) {
 /**
  * Adds a <code>&lt;link match=.../></code> element to the <code>&lt;args></code> section of the LASRequest.<br>
  * This will add a new dataset-variable pair to the LASRequest.<br>
+ * Note that the order in which variables appear in an LASRequest is important as differencing products
+ * (as of 2007-10-24) always subtract the second variable from the first.  The LASRequest syntax currently
+ * has no way of expressing this other than the order of the variables.<br>
  * @param {string} dataset dataset name
  * @param {string} variable variable name
  * @see #getDataset
@@ -365,10 +368,18 @@ function LASReq_setVariable(dataset,variable) {
  * @see #removeVariables
  */
 function LASReq_addVariable(dataset,variable) {
-  var argsNode = this.DOM.selectNode("/args");
   var nodeXML = '<link match=\"/lasdata/datasets/' + dataset + '/variables/' + variable + '\"></link>';
   var newNode = this.DOM.createXMLNode(nodeXML);
-  this.DOM = this.DOM.insertNodeInto(argsNode,newNode);
+  var argsNode = this.DOM.selectNode("/args");
+  var variableNodes = argsNode.getElements('link');
+
+  if ( variableNodes.length == 0 ) {
+    this.DOM = this.DOM.insertNodeInto(argsNode,newNode);
+  } else {
+    var lastIndex = variableNodes.length - 1;
+    var lastVariableNode = variableNodes[lastIndex];
+    this.DOM = this.DOM.insertNodeAfter(lastVariableNode,newNode);
+  }
 }
 
 /**
@@ -530,15 +541,21 @@ function LASReq_removeAnalyses(dataset,variable) {
  * Adds a Region element to the <code>&lt;args></code> section of the LASRequest.<br>
  * The region added will initially be empty.
  * The <code>setRange()</code> method is used to populate the 'region' with axis ranges<br>
- * @param {int} region_ID (optional) index of Region.  Defaults to <code>0</code> which is appropriate for
- * single region requests.
  * @see #removeRegion
  */
 function LASReq_addRegion() {
-  var argsNode = this.DOM.selectNode("/args");
   var nodeXML = '<region></region>';
   var newNode = this.DOM.createXMLNode(nodeXML);
-  this.DOM = this.DOM.insertNodeInto(argsNode,newNode);
+  var argsNode = this.DOM.selectNode("/args");
+  var childNodes = argsNode.getElements();
+
+  if ( childNodes.length == 0 ) {
+    this.DOM = this.DOM.insertNodeInto(argsNode,newNode);
+  } else {
+    var lastIndex = childNodes.length - 1;
+    var lastChildNode = childNodes[lastIndex];
+    this.DOM = this.DOM.insertNodeAfter(lastChildNode,newNode);
+  }
 }
 
 /**
