@@ -116,8 +116,7 @@ public class ConverterLasToWms
         exceptionTypes.add("application/vnd.ogc.se_xml");
         converted.setExceptionTypes(exceptionTypes);
 
-        converted.setTitle("PMEL LAS-WMS Map Server");
-        //jli
+        converted.setTitle("LAS-WMS Map Server");
         converted.setName("OGC:WMS");
         //this URL is for test only; it should be configurable
         converted.setOnlineResourceURL("http://ferret.pmel.noaa.gov/Ferret/LAS/");
@@ -140,7 +139,7 @@ public class ConverterLasToWms
 
         topLayer.setTitle("Converted LAS to WMS Layers");
 
-        //jli: should not set name for a layer that is not a map but only a category
+        //should not set name for a layer that is not a map but only a category
         //topLayer.setName("LAS_WMSLayers");
 
         topLayer.addSupportedSRS("EPSG:4326");  //most commonly used standard for lat/lon specification.
@@ -334,7 +333,7 @@ public class ConverterLasToWms
         parentLayer.addSubLayer(varLayer);
         varLayer.setName(info.getDatasetId()+":"+var.getVarId());
         varLayer.setTitle(info.getTitle()+": "+var.getName());
-//jli
+
 //        addStyles(varLayer);
 
         LasGrid varGrid = var.getGrid();
