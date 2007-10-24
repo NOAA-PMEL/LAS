@@ -30,4 +30,5 @@ This information is serialized to the Browser table in the database.
    <browser agent="Mozilla/5.0 (Macintosh; U; PPC; en-US; rv:1.0.1) Gecko/20020823 Netscape/7.0" applet="false"/>
    <browser agent="Mozilla/5.0 (Macintosh; U; PPC; en-US; rv:0.9.4) Gecko/20011130 Netscape6/6.2.1" applet="false"/>
    <browser agent="Mozilla/4.79 (Macintosh; U; PPC)" applet="true"/>
+   <browser agent="Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.8.1.8) Gecko/20061201 Firefox/2.0.0.8 (Ubuntu-feisty)" applet="true"/>
 </las_browsers>
