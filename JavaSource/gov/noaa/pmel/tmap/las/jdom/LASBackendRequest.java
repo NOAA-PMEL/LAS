@@ -109,7 +109,6 @@ public class LASBackendRequest extends LASDocument {
     /**
      * Create a hash map of all of the information in the dataObjects so they can be written out as Ferret symbols.
      * @return HashMap of symbol names and values.
-     * @deprecated
      * @see gov.noaa.pmel.tmap.las.jdom.LASBackendRequest#getDataSymbols()
      */
     public HashMap<String, String> getDataAsSymbols() {
