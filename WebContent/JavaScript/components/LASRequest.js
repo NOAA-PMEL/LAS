@@ -71,6 +71,7 @@ function LASRequest(xml) {
   this.addVariable = LASReq_addVariable;
   this.removeVariable = LASReq_removeVariable;
   this.removeVariables = LASReq_removeVariables;
+  this.replaceVariable = LASReq_replaceVariable;
 
   this.getDataset = LASReq_getDataset;
 
@@ -303,6 +304,7 @@ function LASReq_removeProperty(group,property) {
  * @see #addVariable
  * @see #removeVariable
  * @see #removeVariables
+ * @see #replaceVariable
  */
 function LASReq_getDataset(data_ID) {
   var index = (data_ID) ? data_ID : 0;
@@ -322,6 +324,7 @@ function LASReq_getDataset(data_ID) {
  * @see #addVariable
  * @see #removeVariable
  * @see #removeVariables
+ * @see #replaceVariable
  */
 function LASReq_getVariable(data_ID) {
   var index = (data_ID) ? data_ID : 0;
@@ -347,6 +350,7 @@ function LASReq_getVariable(data_ID) {
  * @see #addVariable
  * @see #removeVariable
  * @see #removeVariables
+ * @see #replaceVariable
  */
 function LASReq_setVariable(dataset,variable) {
   this.removeVariables();
@@ -366,6 +370,7 @@ function LASReq_setVariable(dataset,variable) {
  * @see #setVariable
  * @see #removeVariable
  * @see #removeVariables
+ * @see #replaceVariable
  */
 function LASReq_addVariable(dataset,variable) {
   var nodeXML = '<link match=\"/lasdata/datasets/' + dataset + '/variables/' + variable + '\"></link>';
@@ -391,6 +396,7 @@ function LASReq_addVariable(dataset,variable) {
  * @see #setVariable
  * @see #addVariable
  * @see #removeVariables
+ * @see #replaceVariable
  */
 function LASReq_removeVariable(dataset,variable) {
   var argsNode = this.DOM.selectNode("/args");
@@ -412,6 +418,7 @@ function LASReq_removeVariable(dataset,variable) {
  * @see #setVariable
  * @see #addVariable
  * @see #removeVariable
+ * @see #replaceVariable
  */
 function LASReq_removeVariables() {
   var argsNode = this.DOM.selectNode("/args");
@@ -419,6 +426,27 @@ function LASReq_removeVariables() {
   for (i=0;i<variableNodes.length;i++) {
     this.DOM = this.DOM.removeNodeFromTree(variableNodes[i]);
   }
+}
+
+/**
+ * Replaces a single <code>&lt;link match=...></code> element defined in the <code>&lt;args></code> section of the LASRequest.<br>
+ * @param {string} dataset dataset name in the element to be created
+ * @param {string} variable variable name in the element to be created
+ * @param {int} data_ID (optional) index of the <code>&lt;link match=...></code> element.  Defaults to <code>0</code> which is appropriate for single variable requests.
+ * @see #getDataset
+ * @see #getVariable
+ * @see #setVariable
+ * @see #addVariable
+ * @see #removeVariable
+ * @see #removeVariables
+ */
+function LASReq_replaceVariable(dataset,variable,data_ID) {
+  var nodeXML = '<link match=\"/lasdata/datasets/' + dataset + '/variables/' + variable + '\"></link>';
+  var newNode = this.DOM.createXMLNode(nodeXML);
+  var index = (data_ID) ? data_ID : 0;
+  var oldNode = this.DOM.selectNode('/args/link[' + index + ']');
+  this.DOM = this.DOM.insertNodeAfter(oldNode,newNode);
+  this.DOM = this.DOM.removeNodeFromTree(oldNode);
 }
 
 ////////////////////////////////////////////////////////////
