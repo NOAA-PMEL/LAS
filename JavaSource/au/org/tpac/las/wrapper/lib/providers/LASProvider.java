@@ -95,7 +95,7 @@ public class LASProvider extends Provider
                 System.out.println("Could not add the grid_type to variables in this LAS configuration.");
             }
 
-            System.out.println("grid type sst of coads======"+lasConfig.getGridType("coads_climatology_cdf", "sst"));
+            //System.out.println("grid type sst of coads======"+lasConfig.getGridType("coads_climatology_cdf", "sst"));
             ByteArrayInputStream stringStream = new ByteArrayInputStream(lasConfig.toString().getBytes());
 
             genMapping(stringStream);
@@ -211,7 +211,6 @@ public class LASProvider extends Provider
             {
                 lastError = "Error with SAX.  Exception message: " + saxe.toString();
             }
-            //jli
             catch(IOException e)
             {
                 System.out.println(e.toString()); 
