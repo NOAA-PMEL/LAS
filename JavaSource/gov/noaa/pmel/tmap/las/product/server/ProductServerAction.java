@@ -9,7 +9,6 @@ import gov.noaa.pmel.tmap.las.jdom.LASBackendRequest;
 import gov.noaa.pmel.tmap.las.jdom.LASBackendResponse;
 import gov.noaa.pmel.tmap.las.jdom.LASConfig;
 import gov.noaa.pmel.tmap.las.jdom.LASMapScale;
-import gov.noaa.pmel.tmap.las.jdom.LASRSSFeed;
 import gov.noaa.pmel.tmap.las.jdom.LASRegionIndex;
 import gov.noaa.pmel.tmap.las.jdom.LASUIRequest;
 import gov.noaa.pmel.tmap.las.jdom.ServerConfig;
@@ -21,7 +20,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
@@ -30,21 +28,9 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.sql.SQLException;
-import java.util.Date;
 import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Properties;
 
 import javax.imageio.ImageIO;
-import javax.mail.Address;
-import javax.mail.Message;
-import javax.mail.MessagingException;
-import javax.mail.SendFailedException;
-import javax.mail.Session;
-import javax.mail.Transport;
-import javax.mail.internet.AddressException;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeMessage;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -52,18 +38,14 @@ import javax.sql.rowset.WebRowSet;
 
 import oracle.jdbc.rowset.OracleWebRowSet;
 
+import org.apache.log4j.Level;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import org.apache.struts.action.Action;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.jdom.JDOMException;
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-import org.apache.log4j.LogManager;
 
 import com.sun.rowset.WebRowSetImpl;
 
@@ -71,7 +53,7 @@ import com.sun.rowset.WebRowSetImpl;
  * @author Roland Schweitzer
  *
  */
-public final class ProductServerAction extends Action {
+public final class ProductServerAction extends LASAction {
     private static Logger log = LogManager.getLogger(ProductServerAction.class.getName());
     
     public ActionForward execute(ActionMapping mapping,
@@ -741,34 +723,5 @@ public final class ProductServerAction extends Action {
             return new ActionForward("/productserver/templates/"+productRequest.getTemplate()+".vm");
         }
         
-    }
-    
-
-    private void logerror(HttpServletRequest request) {
-        LASBackendResponse error = (LASBackendResponse) request.getSession().getAttribute("las_response");
-        log.error(error.getResult("las_message"));
-        log.error(error.getResult("exception_message"));
-    }
-    
-    private void logerror(HttpServletRequest request, String las_message, String exception_message) {
-        LASBackendResponse lasBackendResponse = new LASBackendResponse();
-        lasBackendResponse.setError("las_message", las_message);
-        lasBackendResponse.addError("exception_message", exception_message);
-        request.setAttribute("las_response", lasBackendResponse);
-        log.error(las_message);
-        log.error(exception_message);         
-    }
-    
-    private void logerror(HttpServletRequest request, String las_message, Exception e) {
-        LASBackendResponse lasBackendResponse = new LASBackendResponse();
-        lasBackendResponse.setError("las_message", las_message);
-        lasBackendResponse.addError("exception_message", e.toString());
-        request.setAttribute("las_response", lasBackendResponse);
-        StackTraceElement[] trace =  e.getStackTrace();
-        log.error(las_message);
-        log.error(e.toString());
-        if ( trace.length > 0 ) {
-            log.error(trace[0].toString());
-        }           
     }
 }
