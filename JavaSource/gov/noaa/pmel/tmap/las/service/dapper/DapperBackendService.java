@@ -61,18 +61,11 @@ public class DapperBackendService extends BackendService {
         return lasBackendResponse.toString();
     }
 
-    /** The suggested resultsDirectory at PMEL. */
-    public final static String PMEL_TEST_RESULTS_DIRECTORY = 
-        "C:\\";
-
-    /** The suggested resultsDirectory at ERD. */
-    public final static String ERD_TEST_RESULTS_DIRECTORY = "c:\\programs\\las\\";
-
     /** This is the directory where the test results files will be placed. */
-    public static String testResultsDirectory = PMEL_TEST_RESULTS_DIRECTORY;
+    public static String testResultsDirectory = "C:\\";
 
     /** This is the file name for the test results file (should match the name in the xml info). */
-    public static String testResultsNcName = "a.nc";
+    public static String testResultsNcName = "TestDapperBackendService.nc";
 
     /** 
      * This is the LASDapperBackendRequest.xml info that is used to test this class via main(null). 
@@ -141,7 +134,7 @@ public class DapperBackendService extends BackendService {
 "     <region IDREF=\"region_0\" />\n" +
 "     <properties>\n" +
 "       <property_group type=\"database_access\">\n" +
-"         <property>\n" +                           //optional
+"         <property>\n" +                           //required? DapperTool always returns positive down
 "           <name>positive</name>\n" +
 "           <value>down</value>\n" +
 "         </property>\n" +
@@ -150,7 +143,7 @@ public class DapperBackendService extends BackendService {
 "           <value>location.profile.TIME</value>\n" +
 "         </property>\n" +
 "         <property>\n" +
-"           <name>depth_units</name>\n" +           //required
+"           <name>depth_units</name>\n" +           //required? DapperTool always returns depth in meters
 "           <value>meters</value>\n" +
 "         </property>\n" +
 "         <property>\n" +
@@ -165,10 +158,10 @@ public class DapperBackendService extends BackendService {
 "           <name>db_title</name>\n" +
 "           <value>NOAA Time Series</value>\n" +
 "         </property>\n" +
-"         <property>\n" +
-"           <name>missing</name>\n" +               //required, used only if no data rows found
-"           <value>NaN</value>\n" +
-"         </property>\n" +
+//"         <property>\n" +
+//"           <name>missing</name>\n" +               //not used?
+//"           <value>NaN</value>\n" +
+//"         </property>\n" +
 "         <property>\n" +
 "           <name>lon_domain</name>\n" +            //required
 "           <value>0:360</value>\n" +
@@ -224,12 +217,22 @@ public class DapperBackendService extends BackendService {
 "       </property_group>\n" +
 "     </properties>\n" +
 "   </data>\n" +
-" </dataObjects>\n" +
+
+//Test getting other variables via other <data> objects.
+//!!!This BackendService only looks at 'var'. Everything else is assumed to be the same!
+"   <data url=\"http://las.pfeg.noaa.gov/dods/ndbc/all_noaa_time_series.cdp\" \n" +  //required (especially 'url')
+  "var=\"location.profile.BAR1\" title=\"Sea Level Pressure\" xpath=\"/lasdata/datasets/ndbcMet/variables/ndbcMet_bar1\" \n" +
+  "dataset_name=\"NOAA Time Series\" dataset_ID=\"ndbcMet\" units=\"hPa\" name=\"Sea Level Pressure\" ID=\"ndbcMet_bar1\" \n" +
+  "points=\"xyzt\" intervals=\"xyzt\" grid_type=\"scattered\">\n" +
+"     <region IDREF=\"region_0\" />\n" +
+"   </data>\n" +
+
+  " </dataObjects>\n" +
 " <response ID=\"DBExtractResponse\">\n" +
 "   <result type=\"debug\" ID=\"db_debug\" \n" +   //recommended
   "file=\"" + testResultsDirectory + "F9B6C974354E316D391E061962284986_db_debug.txt\" \n" +
   "index=\"0\" />\n" +
-"   <result type=\"netCDF\" ID=\"netcdf\" \n" +    //required 
+"   <result type=\"netCDF\" ID=\"netcdf\" \n" +    //results file; required 
   "file=\"" + testResultsDirectory + testResultsNcName + "\" \n" +
   "index=\"1\" />\n" +
 " </response>\n" +
@@ -238,7 +241,7 @@ public class DapperBackendService extends BackendService {
     /**
      * This runs DapperBackendService with the xml file you specify, or with
      * a standard test xml file.
-     * This method prints getProduct's result to the System.out.
+     * This method prints getProduct's result to System.out.
      * This puts the results in a file called testResultsDirectory + testResultsName.
      *
      * @param args If present, args[0] should be the name of a LASDapperBackendRequest.xml file.
@@ -247,10 +250,9 @@ public class DapperBackendService extends BackendService {
      */
     public static void main(String args[]) throws Exception {
 
-//when Bob does the test on his computer:
-//testResultsDirectory = ERD_TEST_RESULTS_DIRECTORY;
-        
         //get the requestXml
+        String2.log("\n*** DapperBackendService");
+        long time = System.currentTimeMillis();
         String requestXml = testRequestXml;
         boolean doStandardTest = true;
         if (args != null && args.length > 0) {
@@ -263,7 +265,8 @@ public class DapperBackendService extends BackendService {
 
         //run DapperBackendService
         DapperBackendService service = new DapperBackendService();
-        System.out.println(service.getProduct(requestXml, null)); 
+        String resultXml = service.getProduct(requestXml, null);
+        System.out.println("resultXml=\n" + resultXml); 
 
         //check the results of the standard test
         if (doStandardTest) {
@@ -275,16 +278,18 @@ public class DapperBackendService extends BackendService {
             Table table = new Table();
             table.readFlatNc(testResultsDirectory + testResultsNcName, null, 1);
             String2.log(table.toString());
-            Test.ensureEqual(table.nColumns(), 5, "");
+            Test.ensureEqual(table.nColumns(), 6, "");
             Test.ensureEqual(table.nRows(), 2, "");
             Test.ensureEqual(table.getColumnName(1), "LON", "");  //note that LON and LAT are dataset order, 
             Test.ensureEqual(table.getColumnName(0), "LAT", "");  //not in order I requested!
             Test.ensureEqual(table.getColumnName(2), "DEPTH", "");
             Test.ensureEqual(table.getColumnName(3), "TIME", "");
             Test.ensureEqual(table.getColumnName(4), "WSPD1", "");
+            Test.ensureEqual(table.getColumnName(5), "BAR1", "");
             Test.ensureEqual(table.getColumn(0).getElementTypeString(), "float", "");
             Test.ensureEqual(table.getColumn(3).getElementTypeString(), "double", "");
             Test.ensureEqual(table.getColumn(4).getElementTypeString(), "float", "");
+            Test.ensureEqual(table.getColumn(5).getElementTypeString(), "float", "");
             Test.ensureEqual(table.globalAttributes().getString("Conventions"), 
                 "LAS Intermediate netCDF File, Unidata Observation Dataset v1.0", "");  //cf? coards? epic in-situ?
             Test.ensureEqual(table.globalAttributes().get("lat_range").toString(), "32.43, 42.75", "");
@@ -297,16 +302,42 @@ public class DapperBackendService extends BackendService {
             Test.ensureEqual(table.columnAttributes(0).getString("long_name"), "Latitude", "");
             Test.ensureEqual(table.columnAttributes(0).getDouble("missing_value"), Double.NaN, "");
             Test.ensureEqual(table.columnAttributes(0).getString("axis"), "Y", "");
+            //inner attributes...
+            Test.ensureEqual(table.columnAttributes(2).getString("_CoordinateAxisType"), "Depth", "");
+            Test.ensureEqual(table.columnAttributes(2).getString("axis"), "Z", "");
+            Test.ensureEqual(table.columnAttributes(2).getString("long_name"), "DEPTH", "");
+            Test.ensureEqual(table.columnAttributes(2).getString("positive"), "down", "");
+            Test.ensureEqual(table.columnAttributes(2).getString("units"), "meters", ""); 
+
+            Test.ensureEqual(table.columnAttributes(3).getString("_CoordinateAxisType"), "Time", "");
+            Test.ensureEqual(table.columnAttributes(3).getString("axis"), "T", "");
+            Test.ensureEqual(table.columnAttributes(3).getString("long_name"), "Time", "");
+            Test.ensureEqual(table.columnAttributes(3).getString("time_origin"), "01-Jan-1970 00:00:00", ""); 
+            Test.ensureEqual(table.columnAttributes(3).getString("units"), "msec since 1970-01-01 00:00:00", ""); //GMT?
+
             Test.ensureEqual(table.getDoubleData(3, 0), time1, "");
             Test.ensureEqual(table.getDoubleData(3, 1), time2, "");
-            //inner attributes...
-            Test.ensureEqual(table.columnAttributes(3).getString("units"), "msec since 1970-01-01 00:00:00", ""); //GMT?
-            Test.ensureEqual(table.columnAttributes(3).getString("long_name"), "Time", "");
-            Test.ensureEqual(table.columnAttributes(3).getDouble("missing_value"), Double.NaN, "");
-            Test.ensureEqual(table.columnAttributes(3).getString("axis"), "T", "");
+
+            //data col 1:  wspd1
+            Test.ensureEqual(table.columnAttributes(4).getString("units"), "m s^-1", "");  //units are from datasource! ok?
+            Test.ensureEqual(table.columnAttributes(4).getString("long_name"), "wind speed", ""); 
             Test.ensureEqual(table.getFloatData(4, 0), 2.0f, ""); //wspd1
             Test.ensureEqual(table.getFloatData(4, 1), 5.9f, "");
+            //data col 2: bar
+            Test.ensureEqual(table.columnAttributes(5).getString("units"), "hpa", ""); //units are from datasource! ok?
+            Test.ensureEqual(table.columnAttributes(5).getString("long_name"), "sea level pressure", ""); 
+            Test.ensureEqual(table.getFloatData(5, 0), 1010.7f, ""); //bar
+            Test.ensureEqual(table.getFloatData(5, 1), 1010.4f, "");
+
+//Need test of request that returns no data. Is table as desired?
+//Need test of xLo > xHi, so split lon request.
         }
 
+        //it is possible to pass the standard test but get an error code back from the service
+        Test.ensureTrue(resultXml.indexOf("type=\"error\"") < 0, 
+            String2.ERROR + " in resultXml=\n" + resultXml);
+
+        String2.log("  DapperBackendService finished successfully. TIME=" +
+            (System.currentTimeMillis() - time));
     }
 }

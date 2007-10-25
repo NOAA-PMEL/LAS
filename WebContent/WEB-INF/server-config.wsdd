@@ -51,6 +51,16 @@
   <parameter name="className" value="gov.noaa.pmel.tmap.las.service.dapper.DapperBackendService"/>
   <parameter name="scope" value="Application"/>
  </service>
+ <service name="LASObisBackend" provider="java:RPC">
+  <parameter name="allowedMethods" value="getProduct"/>
+  <parameter name="className" value="gov.noaa.pmel.tmap.las.service.obis.ObisBackendService"/>
+  <parameter name="scope" value="Application"/>
+ </service>
+ <service name="LASIobisBackend" provider="java:RPC">
+  <parameter name="allowedMethods" value="getProduct"/>
+  <parameter name="className" value="gov.noaa.pmel.tmap.las.service.iobis.IobisBackendService"/>
+  <parameter name="scope" value="Application"/>
+ </service>
   <service name="LASKMLBackend" provider="java:RPC">
   <parameter name="allowedMethods" value="*"/>
   <parameter name="className" value="gov.noaa.pmel.tmap.las.service.kml.KMLBackendService"/>
