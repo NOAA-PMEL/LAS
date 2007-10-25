@@ -4,6 +4,7 @@
 package gov.noaa.pmel.tmap.las.service.dapper;
 
 import com.cohort.array.DoubleArray;
+import com.cohort.array.StringArray;
 import com.cohort.util.Math2;
 import com.cohort.util.MustBe;
 import com.cohort.util.String2;
@@ -112,7 +113,7 @@ public class DapperTool extends TemplateTool {
      */
     public LASBackendResponse run(LASDapperBackendRequest dapperBackendRequest) {
 
-        log.debug("Entered Dapper Backend Service run method."); // debug
+        log.debug("Entered DapperTool.run method."); // debug
 
         //If exception occurs in try/catch block, 'causeOfError' was the cause.
         String causeOfError = "Unexpected error: "; 
@@ -155,7 +156,7 @@ public class DapperTool extends TemplateTool {
                 throw new LASException(causeOfError);
             
             //if defined, use the "debug" resultsAsFile as the place to build the constraint statement.
-            causeOfError = "Unable to getResultAsFileByType(debug): ";
+            causeOfError = "Unable to getResultAsFile(debug): ";
             String constraintFileName = dapperBackendRequest.getResultAsFile("debug");
             if (constraintFileName == null || constraintFileName.length() == 0) {
                 //make a constraintFile in resources/database/temp.
@@ -177,12 +178,13 @@ public class DapperTool extends TemplateTool {
             BufferedReader constraintReader = new BufferedReader(new FileReader(constraintFile));
             
             //There may be 1 or 2 lines (if getting lon tails) in the constraint file.
+            //Look at diagram in class javadoc above to understand this.
             causeOfError = "Could not read the constraint generated from the template: ";
             String constraintString = constraintReader.readLine();
             Table data = new Table();
             if (constraintString == null) throw new LASException("Constraint file is empty.");
             while (constraintString != null) {
-                constraintString = constraintString.trim();
+                constraintString = String2.replaceAll(constraintString, " ", ""); //multi var request has internal spaces!
                 if (constraintString.length() == 0) {
                     log.warn("!!constraint is \"\"!!");  //should this be an error?
                 } else {
@@ -212,28 +214,32 @@ public class DapperTool extends TemplateTool {
                 return lasBackendResponse;
             }
             
-            causeOfError = "Could not enhance netCDF file metadata: ";
-            enhance(dapperBackendRequest, data);
-            
             //make table with 1 mv row if no results were returned
             log.debug("found nRows=" + data.nRows());
             if (data.nRows() == 0) {
-                String timeName = afterDot(dapperBackendRequest.getRequiredDatabaseProperty("time"));
-
-                causeOfError = "Could not create empty netCDF file: ";
-//but does this crude fake nc file satisfy the request (e.g., desired variables are present)?
 
                 //if no columns, add a time column
-                if (data.nColumns() == 0) 
-                    data.addColumn(timeName, new DoubleArray());
+                causeOfError = "Could not create empty netCDF file: ";
+                if (data.nColumns() == 0) { //Dapper likes these, all uppercase names
+                    data.addColumn("LON",   new DoubleArray());
+                    data.addColumn("LAT",   new DoubleArray());
+                    data.addColumn("DEPTH", new DoubleArray());
+                    data.addColumn("TIME",  new DoubleArray());
+                    data.addColumn("ID",    new StringArray());
+                    String vars[] = String2.split(dapperBackendRequest.getVariablesAsString(), ',');
+                    for (int vari = 0; vari < vars.length; vari++)
+                        data.addColumn(vars[vari], new DoubleArray());
+                }
 
                 //add a row of missing values
-                String miss_string = dapperBackendRequest.getRequiredDatabaseProperty("missing");
                 for (int col = 0; col < data.nColumns(); col++) 
-                    data.getColumn(col).addString(miss_string);
+                    data.getColumn(col).addString(""); //represents missing value
             } else {
-                log.debug("first up-to-100 rows found: " + data.toString("rows", 100));
+                //log.debug("first up-to-100 rows found: " + data.toString("rows", 100));
             }
+            causeOfError = "Could not enhance netCDF file metadata: ";
+            enhance(dapperBackendRequest, data);            
+
             causeOfError = "Could not write netCDF file to disk: ";
             data.saveAsFlatNc(netcdfFilename, "row");
 
@@ -368,7 +374,7 @@ public class DapperTool extends TemplateTool {
         //set up the Velocity Context
         VelocityContext context = new VelocityContext(getToolboxContext());       
         context.put("dapperBackendRequest", dapperBackendRequest);
-        
+
         //convert the serviceAction into a constraint
         //serviceAction guaranteed to be set by the Product Server
         String serviceAction = dapperBackendRequest.getProperty("operation", "service_action") + ".vm";

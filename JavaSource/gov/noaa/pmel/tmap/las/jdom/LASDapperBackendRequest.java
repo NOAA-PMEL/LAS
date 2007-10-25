@@ -182,4 +182,54 @@ public class LASDapperBackendRequest extends LASBackendRequest {
         return axisConstraints;
 
     }
+
+    /**
+     * Returns an array list of gov.noaa.pmel.tmap.las.util.Constraint objects
+     * of the specified type (e.g., "variable", "text").
+     * <pre>
+     * &lt;constraint type="variable"&gt;
+     *   &lt;lhs&gt;genus&lt;/lhs&gt;
+     *   &lt;op&gt;eq&lt;/op&gt;
+     *   &lt;rhs&gt;Macrocystis&lt;/rhs&gt;
+     * &lt;/constraint&gt;
+     * </pre>
+     *
+     * @return constraints an ArrayList of gov.noaa.pmel.tmap.las.util.Constraint objects
+     */
+    public ArrayList getConstraintsByType(String type) {
+        ArrayList<Constraint> constraints = new ArrayList<Constraint>();
+        List constraintElements = this.getRootElement().getChildren("constraint");
+        for (Iterator cIt = constraintElements.iterator(); cIt.hasNext();) {
+            Element constraint = (Element) cIt.next();
+            String tType = constraint.getAttributeValue("type");
+            if (tType == null || !tType.equals(type)) 
+                continue;
+            String rhsString = constraint.getChildText("rhs");
+            String lhsString = constraint.getChildText("lhs");
+            String opString = constraint.getChildText("op");
+            Constraint c = new Constraint(lhsString, opString, rhsString);
+            constraints.add(c);
+        }
+        return constraints;
+    }
+
+    /**
+     * This returns the "variable" constraints (from getConstraintsByType("variable"))
+     * as an opendap constraint string, e.g.,
+     * "&amp;genus=Macrocystis&amp;species=integrifolia".
+     *
+     * @return the "variable" constraints (from getConstraintsByType("variable"))
+     *   as an opendap constraint string. Returns "" if no variable constraints.
+     *   There is no checking of the validity of the constraints.
+     * @throws Exception if trouble, e.g., unknown op
+     */
+     public String getOpendapConstraint() {
+         ArrayList al = getConstraintsByType("variable");
+         StringBuffer sb = new StringBuffer();
+         for (int i = 0; i < al.size(); i++) {
+             Constraint c = (Constraint)al.get(i);
+             sb.append("&" + c.getLhs() + c.getOpAsSymbol() + c.getRhs());
+         }
+         return sb.toString();
+     }
 }

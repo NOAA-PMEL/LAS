@@ -2,10 +2,11 @@
 	<cache size="10000" file="cache"/>
 	<servers>
 		<service name="ferret" url="http://@SERVLET_ROOT_URL@/@APPNAME@/services/LASFerretBackend" method="getProduct"/>
-		<service name="analysis" url="http://@SERVLET_ROOT_URL@/@APPNAME@/services/LASFerretBackend" method="doAnalysis"/>
 		<service name="database" url="http://@SERVLET_ROOT_URL@/@APPNAME@/services/LASDatabaseBackend" method="getProduct"/>
 		<service name="drds" url="http://@SERVLET_ROOT_URL@/@APPNAME@/services/LASDRDSBackend" method="getProduct"/>
 		<service name="dapper" url="http://@SERVLET_ROOT_URL@/@APPNAME@/services/LASDapperBackend" method="getProduct"/>
+		<service name="obis" url="http://@SERVLET_ROOT_URL@/@APPNAME@/services/LASObisBackend" method="getProduct"/>
+		<service name="iobis" url="http://@SERVLET_ROOT_URL@/@APPNAME@/services/LASIobisBackend" method="getProduct"/>
 		<service name="kml" url="http://@SERVLET_ROOT_URL@/@APPNAME@/services/LASKMLBackend" method="mapScaleToKML"/>
                 <service name="local" method="getTHREDDS" url="local"/>
 	</servers>
