@@ -85,7 +85,7 @@ LET ngood = llon_list[x=@ngd]
 LET xml = "<?xml version='1.0' encoding='UTF-8'?>"
 define variable len = STRLEN(xml)
 define symbol fmt = A`len`
-list/norowhead/nohead/format=(($fmt))/FILE/append xml
+list/norowhead/nohead/clobber/format=(($fmt))/FILE xml
 
 !root of the xml file
 LET f = "<las_req_info>"
@@ -399,15 +399,6 @@ IF ($data_0_intervals"|xyzt>1|*>0") THEN
     list/norowhead/nohead/format=(A11)/FILE/append f
 ENDIF
 
-!===> output grid point locations
-!LET f = "<points>"
-!list/norowhead/nohead/format=(A8)/FILE/append f
- 
-!LIST/I=1:`ngood`/NOHEADER/NOROWHEADER/APPEND/FORMAT=("<point>"/"<lon>",f7.2,"</lon>"/"<lat>",f7.2,"</lat>"/"</point>")/FILE  COMPRESSI(llon_list), COMPRESSI(llat_list)
-
-!LET f = "</points>"
-!list/norowhead/nohead/format=(A9)/FILE/append f
-
 LET f = "</las_req_info>"
 list/norowhead/nohead/format=(A15)/FILE/append f
 
@@ -416,4 +407,5 @@ list/norowhead/nohead/format=(A15)/FILE/append f
 ! each line is a grid point (lon lat)
 !====================================
 SET LIST/FILE="($result_ferret_listing_filename)"
-LIST/I=1:`ngood`/NOHEADER/NOROWHEADER/APPEND/FORMAT=(f7.2, f7.2)/FILE  COMPRESSI(llon_list), COMPRESSI(llat_list)
+LIST/I=1:1/NOHEADER/NOROWHEADER/CLOBBER/FORMAT=(f7.2, f7.2)/FILE  COMPRESSI(llon_list), COMPRESSI(llat_list)
+LIST/I=2:`ngood`/NOHEADER/NOROWHEADER/APPEND/FORMAT=(f7.2, f7.2)/FILE  COMPRESSI(llon_list), COMPRESSI(llat_list)
