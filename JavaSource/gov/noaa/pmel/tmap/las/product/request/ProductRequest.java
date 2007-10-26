@@ -71,27 +71,31 @@ public class ProductRequest {
         if ( operationElement == null ) {
             throw new LASException ("No operation "+lasRequest.getOperationXPath()+" found.");
         }
+        // Only make the backend requet objects if it's not a template request.
+        if ( !operationElement.getChild("service").getTextTrim().equals("template") ) {
+        	List operations = operationElement.getChildren("operation");
 
-        List operations = operationElement.getChildren("operation");
 
+        	if (operations.size() == 0) {
+        		//This is a simple operation.
+        		makeRequest(operationElement, lasConfig, lasRequest, debug, JSESSIONID);
+        		useCache = useCache && getUseCache(operationIDs.get(0));
+        	} else {
+        		// This is a compound operation.  
+        		for (Iterator opIt = operations.iterator(); opIt.hasNext();) {
+        			Element operation = (Element) opIt.next();
+        			makeRequest(operation, lasConfig, lasRequest, debug, JSESSIONID);
+        		}
+        	}
 
-        if (operations.size() == 0) {
-            //This is a simple operation.
-            makeRequest(operationElement, lasConfig, lasRequest, debug, JSESSIONID);
-            useCache = useCache && getUseCache(operationIDs.get(0));
-        } else {
-            // This is a compound operation.  
-            for (Iterator opIt = operations.iterator(); opIt.hasNext();) {
-                Element operation = (Element) opIt.next();
-                makeRequest(operation, lasConfig, lasRequest, debug, JSESSIONID);
-            }
+        	for (int i=0; i < operations.size(); i++) {
+        		// If one data set in any sub-operation turns off the cache
+        		// we have to turn it off...
+        		useCache = useCache && getUseCache(operationIDs.get(i));
+        	}
         }
-
-        for (int i=0; i < operations.size(); i++) {
-            // If one data set in any sub-operation turns off the cache
-            // we have to turn it off...
-            useCache = useCache && getUseCache(operationIDs.get(i));
-        }
+        operations.add(operationElement);
+        operationIDs.add(operationElement.getAttributeValue("ID"));
 
     }
 
@@ -313,7 +317,7 @@ public class ProductRequest {
                                 	// TODO set up the gridTo.AxisNeeded !!!!
                                 	
                                     // We're going to regrid.  Access first data variable via FDS
-                                    gridTo.setURL(lasConfig.getTFDSURL(varXPath));
+                                    gridTo.setURL(lasConfig.getFTDSURL(varXPath));
                                     gridTo.setGridID(lasConfig.getGrid(varXPath).getID());
                                     data.setAttribute("url", gridTo.getURL());
                                     gridTo.setVar(lasConfig.getVariableName(varXPath));
@@ -333,14 +337,14 @@ public class ProductRequest {
                                         String expression = "";
                                         try {
                                         	// The inner URL of the expression must be encoded separately.
-                                        	String encoded = URLEncoder.encode(lasConfig.getTFDSURL(varXPath), "UTF-8");
+                                        	String encoded = URLEncoder.encode(lasConfig.getFTDSURL(varXPath), "UTF-8");
                                         	String g = "g"+view;
                                         	if (gridTo.isAnalysis()) {
                                         		StringBuffer jnl = gridTo.getJnl();
                                         		jnl.append(";let "+var+"_"+var_count+"_regrid="+var+"[d="+dataset_number+","+g+"="+gridTo.getVar()+"[d=1]]}");
                                         		// Get the original URL for the gridTo data set and append the new combined analysis and regrid URL.
                                         		String expr = URLEncoder.encode("_expr_{"+encoded+"}{"+jnl.toString(), "UTF-8");
-                                        		String comboURL = lasConfig.getTFDSURL(gridTo.getVarXPath())+expr;                                       			
+                                        		String comboURL = lasConfig.getFTDSURL(gridTo.getVarXPath())+expr;                                       			
                                         		data.setAttribute("url", comboURL);
                                         		// Retroactively set the gridTo data URL to be the same.  This means that both URL will use the same cache area in F-TDS.
                                         		gridTo.getData().setAttribute("url", comboURL);
@@ -357,7 +361,7 @@ public class ProductRequest {
                                         data.setAttribute("title", lasConfig.getVariableTitle(varXPath)+" on the grid of "+gridTo.getVar()+"[d=1]");
                                     } else {
                                         // It's the same data set so use it as normal except switch it to the F-TDS URL.
-                                        data.setAttribute("url",lasConfig.getTFDSURL(varXPath));
+                                        data.setAttribute("url",lasConfig.getFTDSURL(varXPath));
                                         data.setAttribute("var",lasConfig.getVariableName(varXPath));
                                         data.setAttribute("title", lasConfig.getVariableTitle(varXPath));
                                         data.setAttribute("xpath", varXPath);
@@ -380,7 +384,7 @@ public class ProductRequest {
                                 	
                                 	String var = lasConfig.getVariableName(varXPath);
                                     String expression = "";
-                                    String encoded = URLEncoder.encode(lasConfig.getTFDSURL(varXPath), "UTF-8");
+                                    String encoded = URLEncoder.encode(lasConfig.getFTDSURL(varXPath), "UTF-8");
                                     if ( !gridTo.getGridID().equals(current_gridID) ||
                                     	 !gridTo.getDsID().equals(current_dsID)) {
                                     	String g = "g"+view;
@@ -393,7 +397,7 @@ public class ProductRequest {
                                     		analysis_jnl.append(";let "+revar+"="+var+"[d="+dataset_number+","+g+"="+gridTo.getVar()+"[d=1]]}");
                                     		// Get the original URL for the gridTo data set and append the new combined analysis and regrid URL.
                                     		String expr = URLEncoder.encode("_expr_{"+encoded+"}{"+analysis_jnl.toString(), "UTF-8");
-                                    		String comboURL = lasConfig.getTFDSURL(gridTo.getVarXPath())+expr;                                       			
+                                    		String comboURL = lasConfig.getFTDSURL(gridTo.getVarXPath())+expr;                                       			
                                     		data.setAttribute("url", comboURL);
                                     		// Retroactively set the gridTo data URL to be the same.  This means that both URL will use the same cache area in F-TDS.
                                     		gridTo.getData().setAttribute("url", comboURL);
@@ -768,7 +772,7 @@ public class ProductRequest {
             jnl.append("let "+var+"_"+var_count+"_regrid="+var+"[d="+dset+grid+"]");
         }
 
-        String fdsURL = lasConfig.getTFDSURL(varXPath);
+        String fdsURL = lasConfig.getFTDSURL(varXPath);
         String expression = "";
         try {
             expression = URLEncoder.encode("_expr_{}{"+jnl.toString()+"}", "UTF-8");

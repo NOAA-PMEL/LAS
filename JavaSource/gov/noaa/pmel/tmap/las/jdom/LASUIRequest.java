@@ -329,14 +329,23 @@ public class LASUIRequest extends LASDocument {
      * @return ids an ArrayList<String> of the data sets in this request.
      */
     public ArrayList<String> getDatasetIDs() {
-        ArrayList<String> ids = new ArrayList<String>();
+    	ArrayList<String> ids = new ArrayList<String>();
     	ArrayList<String> vars = getVariables();
     	for (Iterator varIt = vars.iterator(); varIt.hasNext();) {
-			String varXPath = (String) varIt.next();
-			int isrt = varXPath.indexOf("/lasdata/datasets/");
-	        int iend = varXPath.indexOf("/variables/");			
-	        ids.add(varXPath.substring(isrt+18, iend));
-		}
+    		String varXPath = (String) varIt.next();
+    		if ( varXPath.contains("variables") ) {
+    			int isrt = varXPath.indexOf("/lasdata/datasets/");
+    			int iend = varXPath.indexOf("/variables/");			
+    			ids.add(varXPath.substring(isrt+18, iend));
+    		} else {
+    			// Assume it's a data set path and add it
+    			if ( varXPath.contains("datasets") ) {
+    				int isrt = varXPath.indexOf("/lasdata/datasets/");
+    				int iend = varXPath.length();
+    				ids.add(varXPath.substring(isrt+18, iend));
+    			}
+    		}
+    	}
     	return ids;
     }
     /**
