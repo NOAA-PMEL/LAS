@@ -1,5 +1,6 @@
 package gov.noaa.pmel.tmap.las.util;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -34,6 +35,9 @@ public class Axis extends Container implements AxisInterface {
             Element v = (Element) vsIt.next();
             String name = v.getAttributeValue("label");
             String value = v.getTextNormalize();
+            if ( name == null ) {
+               name = value;	
+            }
             verticies.add(new NameValuePair(name,value));
         }
         return verticies;
@@ -76,5 +80,29 @@ public class Axis extends Container implements AxisInterface {
             return true;
         }
         return false;
+    }
+    
+    public String getHi() {
+       Arange arange = getArange();
+       if ( arange != null ) {
+    	   double start = Double.valueOf(arange.getStart()).doubleValue();
+    	   double size = Double.valueOf(arange.getSize()).doubleValue();
+    	   double step = Double.valueOf(arange.getStep()).doubleValue();
+    	   double hi = start + (size-1.0)*step;
+    	   DecimalFormat format = new DecimalFormat("#####.##");
+    	   return format.format(hi);
+       } else {
+    	   ArrayList<NameValuePair> v = getVerticies();
+    	   return v.get(v.size()-1).getValue();
+       }
+    }
+    
+    public String getLo() {
+    	Arange arange = getArange();
+    	if ( arange != null ) {
+    		return arange.getStart();
+    	} else {
+    		return (String) getVerticies().get(0).getValue();
+    	}
     }
 }

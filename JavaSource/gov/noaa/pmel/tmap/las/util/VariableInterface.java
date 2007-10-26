@@ -29,5 +29,6 @@ public interface VariableInterface {
      * @param string
      */
     public abstract void setURL(String var_url);
+    public abstract String getUnits();
 
 }

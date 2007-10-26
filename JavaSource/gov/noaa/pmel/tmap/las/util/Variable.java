@@ -11,7 +11,6 @@ import org.jdom.Element;
  */
 public class Variable extends Container implements VariableInterface {
     
-    Element element;
     String dsid;
     
     public Variable(Element variable, String dsid) {
@@ -54,5 +53,14 @@ public class Variable extends Container implements VariableInterface {
      */
     public void setURL(String var_url) {
         element.setAttribute("url", var_url);
+    }
+    
+    /* (non-Javadoc)
+     * @see gov.noaa.pmel.tmap.las.util.VariableInterface#getUnits()
+     */
+    public String getUnits() {
+    	String uni = element.getAttributeValue("units");
+    	return uni;
+    	//return element.getAttributeValue("units");
     }
 }

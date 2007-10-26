@@ -2547,13 +2547,16 @@ EOL
             # Hack off the leading "/" so it becomes a relateive URL.
             # Tack on the magic that points to the FDS.
             if ( $LAS::Server::Config{proxy} eq "yes" ) {
-               $fdsurl = "http://".$LAS::Server::Config{serverhost}.$LAS::Server::Config{uipath}."/fds/data";
+               $fdsurl = "http://".$LAS::Server::Config{serverhost}.$LAS::Server::Config{uipath}."/thredds/dodsC";
             }
             else {
-               $fdsurl = "http://".$LAS::Server::Config{tomcathost}.":".$LAS::Server::Config{tomcatport}.$LAS::Server::Config{uipath}."/fds/data";
+               $fdsurl = "http://".$LAS::Server::Config{tomcathost}.":".$LAS::Server::Config{tomcatport}.$LAS::Server::Config{uipath}."/thredds/dodsC";
             }
             # Glue it together with the XML path name.
-            $dods = $fdsurl."/".$dpath."/".$vpath;
+            # $dods = $fdsurl."/".$dpath."/".$vpath;
+            # For just use the catalog.  We'll fix this when we get rid of the database (the template for data set nav will have easy access to the FTDSURL
+            # from the config object to set up metadata requests).
+            $dods = $fdsurl;
         }
 
         my $vtype="";

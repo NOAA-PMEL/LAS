@@ -1312,7 +1312,10 @@
 
 <!-- End: interactive 2d plot additions -->
 
-
+<!--  Create a Metadata operation to replace the metadata action managed by the old UI. -->
+   <operation name="Metadata" ID="Metadata" output_template="metadata" service_action="" private="true">
+          <service>template</service>
+    </operation>
 
 
 </operations>

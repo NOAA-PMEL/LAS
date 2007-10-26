@@ -2227,7 +2227,7 @@ public class LASConfig extends LASDocument {
 		 * @return the F-TDS URL
 		 * @throws JDOMException
 		 */
-		public String getTFDSURL(Element variable) {
+		public String getFTDSURL(Element variable) {
 		    String ftds_url = variable.getAttributeValue("ftds_url");
 		    if ( ftds_url != null ) {
 		        return ftds_url;
@@ -2242,14 +2242,26 @@ public class LASConfig extends LASDocument {
 		 * @return the F-TDS URL
 		 * @throws JDOMException
 		 */
-		public String getTFDSURL(String varXPath) throws JDOMException {
+		public String getFTDSURL(String varXPath) throws JDOMException {
 		    if (!varXPath.contains("@ID")) {
 		        String[] parts = varXPath.split("/");
 		        // Throw away index 0 since the string has a leading "/".
 		        varXPath = "/"+parts[1]+"/"+parts[2]+"/dataset[@ID='"+parts[3]+"']/"+parts[4]+"/variable[@ID='"+parts[5]+"']";
 		    }
 		    Element variable = getElementByXPath(varXPath);
-		    return getTFDSURL(variable);
+		    return getFTDSURL(variable);
+		}
+		/**
+         * Get the F-TDS URL for the variable specified by the dsID and varID
+		 * @param dsID of the variable
+		 * @param varID of the variable
+		 * @return the F-TDS URL
+		 * @throws JDOMException
+		 */
+		public String getFTDSURL(String dsID, String varID) throws JDOMException {
+			String varXPath = "/lasdata/datasets/dataset[@ID='"+dsID+"']/"+"variables/variable[@ID='"+varID+"']";
+		    Element variable = getElementByXPath(varXPath);
+		    return getFTDSURL(variable);
 		}
         /**
          * Create a time axis with all the info needed for the DateWidgets

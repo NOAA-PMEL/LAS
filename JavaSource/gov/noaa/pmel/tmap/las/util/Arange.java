@@ -7,4 +7,13 @@ public class Arange extends Container implements ArangeInterface {
         super(element);
     }
 
+	public String getStart() {
+		return element.getAttributeValue("start");
+	}
+	public String getStep() {
+		return element.getAttributeValue("step");
+	}
+    public String getSize() {
+    	return element.getAttributeValue("size");
+    }
 }
