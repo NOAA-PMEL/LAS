@@ -4,17 +4,22 @@ function LASAnimation(xml) {
     this.DOM = new XMLDoc(xml,_LASAni_parseError);
     
     this.getFillLevels = LASAni_getFillLevels;
+    this.getContourLevels = LASAni_getContourLevels;
     this.getHasT = LASAni_getHasT;
     this.getFrames     = LASAni_getFrames;
     this.getNumFrames  = LASAni_getNumFrames;
     this.getTimeUnits = LASAni_getTimeUnits;
-    this.getTimeResolution = LASAni_getTimeResolution;
     this.getDepAxisScale = LASAni_getDepAxisScale;
 }
 
 function LASAni_getFillLevels(){
     var filllevelsNode = this.DOM.selectNode("/fill_levels");
     return filllevelsNode.getText();
+}
+
+function LASAni_getContourLevels(){
+    var contourlevelsNode = this.DOM.selectNode("/contour_levels");
+    return contourlevelsNode.getText();
 }
 
 function LASAni_getDepAxisScale(){
@@ -33,7 +38,6 @@ function LASAni_getFrames() {
     var frameElements = framesNode.getElements("frame");
  
     var unitsNode = this.DOM.selectNode("/units");
-    var resolutionNode = this.DOM.selectNode("/resolution"); 
 
     theTimes = new Array();
     for (var i = 0; i < frameElements.length; i++){
@@ -59,11 +63,6 @@ function LASAni_getNumFrames() {
 function LASAni_getTimeUnits(){
     var unitsNode = this.DOM.selectNode("/units");
     return unitsNode.getText();
-}
-
-function LASAni_getTimeResolution(){
-    var resolutionNode = this.DOM.selectNode("/resolution");
-    return resolutionNode.getText();
 }
 
 /**
