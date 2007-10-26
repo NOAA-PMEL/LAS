@@ -7,11 +7,11 @@
 ! list_frames.jnl creates a listing in XML format for animation
 ! Assumes symbol ferret_listing is the output file.
 ! The listing file includes: 
-! - fill_levels      for 2D contour
-! - dep_axis_scale   for 1D plot
+! - fill_levels      for 2D plots
+! - contour_levels   for 2D plots
+! - dep_axis_scale   for 1D plots
 ! - hasT             used to determine if the dataset has time axis
 ! - units            units of the time axis
-! - resolution       resolution of time frames
 ! - frames           list of each individual time points
 
 GO LAS_initialize_region 0
@@ -58,26 +58,6 @@ IF ($ferret_fill_levels"0|*>1") THEN
    ENDIF
 ENDIF
 
-LET the_var = ($ferret_plot_var)
-!IF `($ferret_contour_levels"1|*>0") OR ($ferret_fill_levels"1|*>0") OR ($ferret_dep_axis_scale"1|*>0")` THEN
-!    LOAD the_var
-!    LET vmin = the_var[x=@min,y=@min,z=@min,t=@min]
-!    LET vmax = the_var[x=@max,y=@max,z=@max,t=@max]
-!    PPL %RANGE `vmin,p=9` `vmax,p=9` 10
-!    DEFINE SYMBOL lo_lim ($PPL$RANGE_LOW)
-!    DEFINE SYMBOL hi_lim ($PPL$RANGE_HIGH)
-!    DEFINE SYMBOL delta ($PPL$RANGE_INC)
-!    IF `($ferret_fill_levels"1|*>0")` THEN
-!        DEFINE SYMBOL ferret_fill_levels (($PPL$RANGE_LOW),($PPL$RANGE_HIGH),($PPL$RANGE_INC))
-!    ENDIF
-!    IF `($ferret_contour_levels"1|*>0")` THEN
-!        DEFINE SYMBOL ferret_contour_levels (($PPL$RANGE_LOW),($PPL$RANGE_HIGH),($PPL$RANGE_INC))
-!    ENDIF
-!    IF ($ferret_dep_axis_scale"1|*>0") THEN
-!        DEFINE SYMBOL ferret_dep_axis_scale ($PPL$RANGE_LOW),($PPL$RANGE_HIGH),($PPL$RANGE_INC)
-!    ENDIF
-!ENDIF
-
 !ferret_contour_levels is not set BUT ferret_fill_levels is set
 IF `($ferret_contour_levels"1|*>0") AND ($ferret_fill_levels"0|*>1")` THEN
     DEFINE SYMBOL ferret_contour_levels = ($ferret_fill_levels)
@@ -89,6 +69,7 @@ IF `($ferret_contour_levels"0|*>1") AND ($ferret_fill_levels"1|*>0")` THEN
 ENDIF
 
 !for animation of 1D plots
+LET the_var = ($ferret_plot_var)
 IF `($ferret_dep_axis_scale"1|*>0")` THEN
 !    GO LAS_auto_levels ($data_var)[d=($data_num)]
     LOAD the_var
@@ -106,7 +87,7 @@ SET LIST/FILE="($result_ferret_listing_filename)"
 DEFINE SYMBOL hasT = 1
 
 !-----------------------------------------
-!for animation on XY view 
+! compute time range for animation on XY view 
 !-----------------------------------------
 !- only a single time ponit was selected
 !- or, there is not time axis at all
@@ -150,7 +131,7 @@ DEFINE SYMBOL ferret_list_var = ($ferret_plot_var)
 LET xmlhead = "<?xml version='1.0' encoding='UTF-8'?>"
 define variable len = STRLEN(xmlhead)
 define symbol fmt = A`len`
-list/nohead/format=(($fmt))/FILE/append xmlhead
+list/nohead/clobber/format=(($fmt))/FILE xmlhead
 
 LET framesStart = "<lasAnimation>"
 define variable len = STRLEN(framesStart)
@@ -170,9 +151,9 @@ list/norowhead/nohead/format=(A`nlen`)/FILE/append a
 LET f = "</fill_levels>"
 list/norowhead/nohead/format=(A14)/FILE/append f
 
-!------------
+!---------------
 ! contour_levels
-!------------
+!---------------
 LET f = "<contour_levels>"
 list/norowhead/nohead/format=(A16)/FILE/append f
 
@@ -231,7 +212,9 @@ IF `strcmp("($time_units)", "1") EQ 0` THEN
 
     LET f = "</frames>"
     list/norowhead/nohead/format=(A9)/FILE/append f
-
+!---------------------
+! time unit in minutes
+!---------------------
 ELIF `strcmp("($time_units)", "60") EQ 0` THEN
     !====>output time units
     LET f = "<units>minutes</units>"
@@ -266,26 +249,6 @@ ELIF `strcmp("($time_units)", "3600") EQ 0` THEN
     let nlen = strlen ("($first_time)")
     list/norowhead/nohead/format=("<frame>",A`nlen`,"</frame>")/FILE/append tax_datestring(t[gt=($ferret_list_var),L=($lmin):($lmax)], t[gt=($ferret_list_var)], "hours")
 
-    !====>compute time resolution
-    !--->get difference between two adjacent time points
-    let interval = t[gt=($ferret_list_var), L=2]-t[gt=($ferret_list_var), L=1]
-    !--->annual
-    IF `interval LE 8780  AND interval GT 2880` THEN
-        define symbol time_resolution = "years"
-    ENDIF
-    !--->monthly
-    IF `interval LT 1440 AND interval GT 24` THEN
-        define symbol time_resolution = "months"
-    ENDIF    
-    !--->daily
-    IF `interval EQ 24` THEN
-        define symbol time_resolution = "days"
-    ENDIF
-    !--->hourly
-    IF `interval EQ 1` THEN
-        define symbol time_resolution = "hours"
-    ENDIF
-
     LET f = "</frames>"
     list/norowhead/nohead/format=(A9)/FILE/append f
 
@@ -305,22 +268,6 @@ ELIF `strcmp("($time_units)", "86400") EQ 0` THEN
     let nlen = strlen ("($first_time)")
     list/norowhead/nohead/format=("<frame>",A`nlen`,"</frame>")/FILE/append tax_datestring(t[gt=($ferret_list_var),L=($lmin):($lmax)], t[gt=($ferret_list_var)], "days")
 
-    !====>compute time resolution
-    !--->get difference between two adjacent time points
-    let interval = t[gt=($ferret_list_var), L=2]-t[gt=($ferret_list_var), L=1]
-    !--->annual
-    IF `interval LE 366 AND interval GT 120` THEN
-        define symbol time_resolution = "years"
-    ENDIF
-    !--->monthly 
-    IF `interval LT 60 AND interval GT 1` THEN
-        define symbol time_resolution = "months"
-    ENDIF
-    !--->daily
-    IF `interval EQ 1` THEN
-        define symbol time_resolution = "days"
-    ENDIF
- 
     LET f = "</frames>"
     list/norowhead/nohead/format=(A9)/FILE/append f
 
@@ -339,19 +286,6 @@ ELIF `strcmp("($time_units)", "2629746") EQ 0` THEN
     define symbol first_time = `tax_datestring(t[gt=($ferret_list_var),L=1], t[gt=($ferret_list_var)], "months")`
     let nlen = strlen ("($first_time)")
     list/norowhead/nohead/format=("<frame>",A`nlen`,"</frame>")/FILE/append tax_datestring(t[gt=($ferret_list_var),L=($lmin):($lmax)], t[gt=($ferret_list_var)], "months")
-
-    !====>TODO: need to compute time resolution 
-    !====>compute time resolution
-    !--->get difference between two adjacent time points
-    let interval = t[gt=($ferret_list_var), L=2]-t[gt=($ferret_list_var), L=1]
-    !--->annual
-    IF `interval EQ 12` THEN
-        define symbol time_resolution = "years"
-    ENDIF
-    !--->monthly
-    IF `interval EQ 1` THEN
-        define symbol time_resolution = "months"
-    ENDIF
 
     LET f = "</frames>"
     list/norowhead/nohead/format=(A9)/FILE/append f
@@ -372,44 +306,10 @@ ELIF `strcmp("($time_units)", "31536000") EQ 0` THEN
     let nlen = strlen ("($first_time)")
     list/norowhead/nohead/format=("<frame>",A`nlen`,"</frame>")/FILE/append tax_datestring(t[gt=($ferret_list_var),L=($lmin):($lmax)], t[gt=($ferret_list_var)], "years")
 
-    !====>TODO: need to compute time resolution
-    let interval = t[gt=($ferret_list_var), L=2]-t[gt=($ferret_list_var), L=1]
-    IF `interval EQ 1` THEN
-        define symbol time_resolution = "years"
-    ENDIF
-
     LET f = "</frames>"
     list/norowhead/nohead/format=(A9)/FILE/append f
 
 ENDIF
-
-!----------------------
-! time frame resolution
-!----------------------
-IF ($time_resolution"0|*>1") THEN
-    LET f = "<resolution>"
-    list/norowhead/nohead/format=(A12)/FILE/append f
-
-    let nlen = strlen (($time_resolution))
-    let a = ($time_resolution)
-    list/norowhead/nohead/format=(A`nlen`)/FILE/append a
-
-    LET f = "</resolution>"
-    list/norowhead/nohead/format=(A13)/FILE/append f
-ENDIF
-
-!--------------------------------------------------
-! compute and output image size
-SET WINDOW/SIZE = ($ferret_size"0.5")
-!shade/l=1 ($ferret_list_var)
-
-!let xsize = "($ppl$xpixel)"
-!let nlen = strlen (xsize)
-!list/norowhead/nohead/format=("<x_image_size>",A3,"</x_image_size>")/FILE/append xsize
-
-!let ysize = "($ppl$ypixel)"
-!let nlen = strlen (ysize)
-!list/norowhead/nohead/format=("<y_image_size>",A3,"</y_image_size>")/FILE/append ysize 
 
 LET framesEnd = "</lasAnimation>"
 list/nohead/format=(A15)/FILE/append framesEnd
