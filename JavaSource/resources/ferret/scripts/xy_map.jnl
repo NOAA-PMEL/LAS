@@ -20,10 +20,10 @@
 ! These are always the settings for a map plot
 
 DEFINE SYMBOL ferret_margins = false
-! DEFINE SYMBOL ferret_palette = topo
+DEFINE SYMBOL ferret_palette = topo
 ! DEFINE SYMBOL ferret_fill_levels = (-9000,-1000,1000)(-1000,-100,100)(-100,100,10)(100,1000,100)(1000,6000,1000)
 ! DEFINE SYMBOL ferret_palette = dark_land_sea 
-! DEFINE SYMBOL ferret_fill_levels = (-10500,-5500,5000)(-5500,0,500)(0,2000,250)(2000,5000,1000)
+DEFINE SYMBOL ferret_fill_levels = (-10500,-5500,5000)(-5500,0,500)(0,2000,250)(2000,5000,1000)
 
 DEFINE SYMBOL ferret_set_aspect = yes
 DEFINE SYMBOL ferret_view = xy
