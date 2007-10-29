@@ -77,6 +77,12 @@ ENDIF
 DEFINE SYMBOL ferret_var_1 = ($ferret_plot_var)
 DEFINE SYMBOL ferret_title_1 = ($ferret_plot_title"($data_var)")
 
+! This is a Time plot. If the output axis is a modulo time axis, check
+! for the case of the first dataset on a modulo axis and the second a
+! non-modulo axis, which often results in all-missing result.
+
+GO check_t_axes
+
 ! Compare the X and T axes of the two variables. They must be the same.
 
 GO LAS_compare_axes "($data_0_var)[d=($data_0_num)]" "($data_1_var)[d=($data_1_num)]" ($fview)
