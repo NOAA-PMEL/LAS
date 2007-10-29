@@ -151,6 +151,14 @@
                </fileset>               
        </copy> 
  </target>
+ <target name="ui_images">
+	       <copy todir="${jakarta.home}/webapps/${app.name}/images">
+	               <fileset dir="WebContent/luis/images">
+	                         <include name="**.jpg"/>
+	                         <include name="**.gif"/>
+	               </fileset>               
+	       </copy> 
+	 </target>
  <target name="lps-lbes" depends="prepare,compile">
     <war jarfile="${app.name}.war" webxml="WebContent/WEB-INF/web.xml">
        <classes dir="WebContent/WEB-INF/classes" includes="**"/>
