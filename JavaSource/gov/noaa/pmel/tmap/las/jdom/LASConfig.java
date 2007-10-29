@@ -230,6 +230,10 @@ public class LASConfig extends LASDocument {
                             key = key.replaceAll("/","_");
                             key = key.replaceAll(":","_");
                             
+                            if ( key.startsWith("_") ) {
+                            	key = key.substring(1,key.length());
+                            }
+                            
                             if ( !jnls.containsKey(key) ) {
                                 StringBuffer jnl = new StringBuffer(); 
                                 if ( init != null && !init.equals("") ) {  
