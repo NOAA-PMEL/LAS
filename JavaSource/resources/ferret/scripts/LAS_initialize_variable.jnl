@@ -37,7 +37,6 @@ IF `STRLEN("($ferret_view)") EQ 2 AND STRINDEX("($operation_ID)", "Plot") GT 0` 
    GO LAS_auto_levels
 ENDIF
 ! TESTING TESTING
-pause
 
 DEFINE SYMBOL ferret_plot_var = ($data_var)[d=($data_num),($region_full)]
 DEFINE SYMBOL ferret_plot_var_noregion = ($data_var)[d=($data_num)]
