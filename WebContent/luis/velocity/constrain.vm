@@ -5,7 +5,7 @@
 var aMapTool;
 var aRegionWidget;
 
-#if ( $date_widget == "true"  ) 
+#if ( $date_widget == "true" && $region.hasAxis("t") &&  $region.getAxis("t").getDMYT() != "") 
 function setTimeRange() {
 
   /*
@@ -48,8 +48,9 @@ function init() {
   aMapTool.setMode('single');
   aMapTool.selectTool("$region.getViewRegion()");
   aMapTool.setRanges();
-
+  #if($date_widget == "true" && $region.hasAxis("t") &&  $region.getAxis("t").getDMYT() != "")
   setTimeRange();
+  #end
 
 }
 
@@ -99,7 +100,7 @@ $form.getStart("region", "doSubmit()", "region_form_id")
     $form.hidden("y_hi", "90")
     $form.hidden("use_java", "$use_java")
 #if($date_widget == "true" && $region.hasAxis("t") &&  $region.getAxis("t").getDMYT() != "")
-#set($isRange=$region.isRange("t"))
+    #set($isRange=$region.isRange("t"))
     $form.hidden("t_lo",$region.getAxis("t").getLo())
     #if($isRange)
     $form.hidden("t_hi",$region.getAxis("t").getHi())
