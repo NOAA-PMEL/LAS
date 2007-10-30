@@ -94,9 +94,8 @@ DEFINE SYMBOL ferret_diff_var = ($ferret_var_0) - ($ferret_var_1)
 ! and time in directions normal to the plot, and in the upper right listing
 ! urls if dataset are opendap.
 
-pause
 GO LAS_set_diff_labels ($fview)
-pause
+
 ! Open the window, apply size, scale options
 GO LAS_open_window
 
