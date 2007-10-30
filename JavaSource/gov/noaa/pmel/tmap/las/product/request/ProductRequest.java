@@ -93,9 +93,10 @@ public class ProductRequest {
         		// we have to turn it off...
         		useCache = useCache && getUseCache(operationIDs.get(i));
         	}
+        } else {
+           operations.add(operationElement);
+           operationIDs.add(operationElement.getAttributeValue("ID"));
         }
-        operations.add(operationElement);
-        operationIDs.add(operationElement.getAttributeValue("ID"));
 
     }
 
