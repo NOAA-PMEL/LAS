@@ -72,14 +72,17 @@ public class ProductRequest {
             throw new LASException ("No operation "+lasRequest.getOperationXPath()+" found.");
         }
         // Only make the backend requet objects if it's not a template request.
-        if ( !operationElement.getChild("service").getTextTrim().equals("template") ) {
+        
         	List operations = operationElement.getChildren("operation");
-
-
         	if (operations.size() == 0) {
-        		//This is a simple operation.
-        		makeRequest(operationElement, lasConfig, lasRequest, debug, JSESSIONID);
-        		useCache = useCache && getUseCache(operationIDs.get(0));
+        		if ( !operationElement.getChild("service").getTextTrim().equals("template") ) {
+        			//This is a simple operation.
+        			makeRequest(operationElement, lasConfig, lasRequest, debug, JSESSIONID);
+        			useCache = useCache && getUseCache(operationIDs.get(0));
+        		} else {
+        			operations.add(operationElement);
+        			operationIDs.add(operationElement.getAttributeValue("ID"));
+        		}
         	} else {
         		// This is a compound operation.  
         		for (Iterator opIt = operations.iterator(); opIt.hasNext();) {
@@ -87,17 +90,11 @@ public class ProductRequest {
         			makeRequest(operation, lasConfig, lasRequest, debug, JSESSIONID);
         		}
         	}
-
         	for (int i=0; i < operations.size(); i++) {
         		// If one data set in any sub-operation turns off the cache
         		// we have to turn it off...
         		useCache = useCache && getUseCache(operationIDs.get(i));
         	}
-        } else {
-           operations.add(operationElement);
-           operationIDs.add(operationElement.getAttributeValue("ID"));
-        }
-
     }
 
     /**
