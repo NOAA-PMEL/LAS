@@ -249,7 +249,11 @@ public class ProductRequest {
                                                 String value = dataset_attrs.get(name);
                                                 data.setAttribute(new Attribute("dataset_" + name, value));
                                             }
-
+                                            
+                                            String datasetURL = data.getAttributeValue("dataset_url");
+                                            if ( datasetURL == null || datasetURL.equals("") ) {
+                                            	data.setAttribute(new Attribute("dataset_url", lasConfig.getDataAccessURL(varXPath, false)));
+                                            }
 
                                             List attribs = lasConfig.getDataOjectAttributes(varXPath);
 
