@@ -151,6 +151,13 @@
                </fileset>               
        </copy> 
  </target>
+ <target name="selenium">
+    <copy todir="${jakarta.home}/webapps/${app.name}">
+       <fileset dir="test">
+          <include name="**"/>
+       </fileset>
+    </copy>
+ </target>
  <target name="ui_images">
 	       <copy todir="${jakarta.home}/webapps/${app.name}/images">
 	               <fileset dir="WebContent/luis/images">
