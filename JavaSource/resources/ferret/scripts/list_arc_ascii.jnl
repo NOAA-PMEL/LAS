@@ -72,7 +72,7 @@ ELSE
   LET xlo = xbounds[i=`istart`]
   LET xhi = xbounds[i=`iend`]
 ENDIF
-LET ylo = yboxlo[j=`jstart`]
+LET ylo = ybounds[j=`jstart`]
 
 ! size of grid cells
 LET xcell_size = XBOX[gx=expr,X=($region_x_lo)]
