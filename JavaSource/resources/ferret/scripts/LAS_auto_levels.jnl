@@ -54,6 +54,8 @@ IF `stride_for_speed GT 1` THEN
    IF `($region_t_range"0") GT 0` THEN CANCEL AXIS/STRIDE `pvar,RETURN=taxis`
 ENDIF
 
+IF `($stat_ngood"0") EQ 0` THEN EXIT_SCRIPT
+
 ! Compute rounded-off levels with the PPL %RANGE command.
 
 ! IF ($ferret_center_levels"0|1|TRUE>1|*>0") THEN
