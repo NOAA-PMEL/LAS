@@ -62,9 +62,7 @@
 	    <item values="Data_Extract,txt,20">Table of values (text)</item>
 	    <item values="Data_Extract_netCDF,cdf,20">NetCDF file</item>
 	    <item values="Data_Extract_File,asc,20">ASCII file</item>
-            <!-- Remove until the Ferret script is ready.
 	    <item values="Data_Extract_ArcView,arc,20">ArcView gridded</item>
-            -->
 	    <item values="Gen_Scripts,html,20">Desktop application data access scripts</item>
 	    <item values="XY_zoomable_image,html,20">Interactive Color plot</item>
             <item values="Plot_GE_Overlay,html,2">Plot to Google Earth</item>
