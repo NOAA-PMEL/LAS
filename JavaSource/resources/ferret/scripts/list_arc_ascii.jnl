@@ -58,21 +58,21 @@ LET jend `j[gy=expr,y=($region_y_hi)]`
 LET Ni = `expr,RETURN=isize`
 LET Nj = `expr,RETURN=jsize`
 
-! coordinate arrays
-LET xcoords = x[gx=expr]
-LET ycoords = y[gy=expr]
+! lower cell bounds arrays
+LET xbounds = xboxlo[gx=expr]
+LET ybounds = yboxlo[gy=expr]
 
-! coordinate bounds of grid
+! lower cell bounds of grid
 ! Make sure West long is < 0, change both hi & lo if xlo is > 180
-LET slon = xcoords[i=`istart`]
+LET slon = xbounds[i=`istart`]
 IF `slon GT 180` THEN
-   LET xlo = xcoords[i=`istart`] - 360
-   LET xhi = xcoords[i=`iend`] - 360
+  LET xlo = xbounds[i=`istart`] - 360
+  LET xhi = xbounds[i=`iend`] - 360
 ELSE
-   LET xlo = xcoords[i=`istart`]
-   LET xhi = xcoords[i=`iend`]
+  LET xlo = xbounds[i=`istart`]
+  LET xhi = xbounds[i=`iend`]
 ENDIF
-LET ylo = ycoords[j=`jstart`]
+LET ylo = yboxlo[j=`jstart`]
 
 ! size of grid cells
 LET xcell_size = XBOX[gx=expr,X=($region_x_lo)]
@@ -166,8 +166,8 @@ SET MODE/LAST LON
 LET nodata = `expr,RETURN=bad`
 LIST/FILE/NOHEAD/APPEND/FORMAT="('ncols',1PG15.7)" Ni
 LIST/FILE/NOHEAD/APPEND/FORMAT="('nrows',1PG15.7)" Nj
-LIST/FILE/NOHEAD/APPEND/FORMAT="('xllcenter',1PG15.7)" xlo
-LIST/FILE/NOHEAD/APPEND/FORMAT="('yllcenter',1PG15.7)" ylo
+LIST/FILE/NOHEAD/APPEND/FORMAT="('xllcorner',1PG15.7)" xlo
+LIST/FILE/NOHEAD/APPEND/FORMAT="('yllcorner',1PG15.7)" ylo
 LIST/FILE/NOHEAD/APPEND/FORMAT="('cellsize',1PG15.7)"  cell_size
 LIST/FILE/NOHEAD/APPEND/FORMAT="('nodata',1PG15.7)"   nodata
 
