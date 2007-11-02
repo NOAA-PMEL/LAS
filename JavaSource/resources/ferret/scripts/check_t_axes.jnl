@@ -15,16 +15,20 @@ ENDIF
    
 ! Get the name of the original data variable from dataset 1
 
-DEFINE SYMBOL the_def= `($data_1_var).ferret_definition`
-LET bracket = STRINDEX("($the_def)", "[")
-DEFINE SYMBOL orig_var_1 = SUBSTRING("H[D=2,GT=AIRT[D=1]]", 1, 1)
+LET all_attrs = ($data_1_var).attnames
+DEFINE SYMBOL orig_var_1 = ($data_1_var)
+IF `IS_ELEMENT_OF_STR (all_attrs, "ferret_definition") EQ 1` THEN
+   DEFINE SYMBOL the_def= `($data_1_var).ferret_definition`
+   LET bracket = `STRINDEX("($the_def)", "[") - 1`
+   IF `bracket GT 0` THEN DEFINE SYMBOL orig_var_1 = `SUBSTRING("($the_def)", 1, bracket)`
+ENDIF
 
 ! See if that variable had a modulo time axis
 SET DATA/SAVE
 SET DATA 1
 DEFINE SYMBOL mod_len = "`($orig_var_1),RETURN=tmod`"
 SET DATA/RESTORE
-
+pause
 ! Now see if the variable ferret_var_1 has any non-missing data. 
 IF `STRCMP(($mod_len), " ") EQ 0` THEN 
   STAT ($ferret_var_1)
