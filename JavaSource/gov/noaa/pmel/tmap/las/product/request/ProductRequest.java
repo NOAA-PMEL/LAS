@@ -73,8 +73,8 @@ public class ProductRequest {
         }
         // Only make the backend requet objects if it's not a template request.
         
-        	List operations = operationElement.getChildren("operation");
-        	if (operations.size() == 0) {
+        	List operations_list = operationElement.getChildren("operation");
+        	if (operations_list.size() == 0) {
         		if ( !operationElement.getChild("service").getTextTrim().equals("template") ) {
         			//This is a simple operation.
         			makeRequest(operationElement, lasConfig, lasRequest, debug, JSESSIONID);
@@ -85,12 +85,12 @@ public class ProductRequest {
         		}
         	} else {
         		// This is a compound operation.  
-        		for (Iterator opIt = operations.iterator(); opIt.hasNext();) {
+        		for (Iterator opIt = operations_list.iterator(); opIt.hasNext();) {
         			Element operation = (Element) opIt.next();
         			makeRequest(operation, lasConfig, lasRequest, debug, JSESSIONID);
         		}
         	}
-        	for (int i=0; i < operations.size(); i++) {
+        	for (int i=0; i < operations_list.size(); i++) {
         		// If one data set in any sub-operation turns off the cache
         		// we have to turn it off...
         		useCache = useCache && getUseCache(operationIDs.get(i));
