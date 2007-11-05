@@ -635,7 +635,7 @@ i.e. 48 - start time: 24 hours before selected timestep
   <optiondef name="Options_2D_GE" inherit="#expression,#interpolate_data,#palette"/>
   <optiondef name="Options_2D_contour_GE" inherit="#Options_2D_GE,#contour_style,#fill_levels,#contour_levels,#mark_grid"/>
   <optiondef name="Options_2D_image_contour_GE" inherit="#Options_2D_contour_GE"/>
-  <optiondef name="Options_2D_image_contour_xy_GE" inherit="#Options_2D_image_contour_GE,#set_aspect,#land_type"/>  
+  <optiondef name="Options_2D_image_contour_xy_GE" inherit="#Options_2D_image_contour_GE,#set_aspect,#land_type,#stride_quality_factor"/>  
   <!-- Comparison 2-dimensional plots -->
   <optiondef name="Options_Compare" inherit="#Options_2D_contour,#expression2"/>
 
