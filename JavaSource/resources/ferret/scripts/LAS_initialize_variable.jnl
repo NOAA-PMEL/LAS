@@ -32,11 +32,16 @@ IF `( ($ferret_contour_levels"0|*>1") EQ 0 ) AND\
    DEFINE SYMBOL ferret_auto_levels ($ferret_num_contour_levels"50")
 ENDIF
 
-! TESTING TESTING
+! Mark whether there are contour levels set on first entry. 
+! Compute automatic open-ended levels.
+
+IF `($data_num) EQ 1` THEN
+   IF ($ferret_contour_levels"0|*>1) THEN DEFINE SYMBOL input_contour_levels = 1
+   IF ($ferret_fill_levels"0|*>1) THEN DEFINE SYMBOL input_fill_levels = 1
+ENDIF
 IF `STRLEN("($ferret_view)") EQ 2 AND STRINDEX("($operation_ID)", "Plot") GT 0` THEN
    GO LAS_auto_levels
 ENDIF
-! TESTING TESTING
 
 DEFINE SYMBOL ferret_plot_var = ($data_var)[d=($data_num),($region_full)]
 DEFINE SYMBOL ferret_plot_var_noregion = ($data_var)[d=($data_num)]

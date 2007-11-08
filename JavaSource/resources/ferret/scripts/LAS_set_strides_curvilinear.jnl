@@ -4,8 +4,7 @@
 ! might be undone by the transform script.
 
 show symbol operation_id
-!IF `STRINDEX( "($operation_ID)", "Plot" ) EQ 0` THEN EXIT/SCRIPT
-IF `STRINDEX( "($operation_service_action)", "Plot" ) EQ 0` THEN EXIT/SCRIPT
+IF `STRINDEX( "($operation_ID)", "Plot" ) EQ 0` THEN EXIT/SCRIPT
 
 LET maxpix = 600  ! default
 IF ($ferret_size"0|0.06667>1|*>0") THEN LET maxpix = 300  ! small
@@ -29,7 +28,7 @@ IF `STRLEN("($ferret_view)") EQ 2` THEN
          LET nx = xx[i=@ngd]
          LET x_pct = ($region_x_range)/360
          LET pixsize = `nx*x_pct`
-!         LET pixsize = `MAX(pixsize, nx)`  ! comment this out to set strides by region
+         LET pixsize = `MAX(pixsize, nx)`  ! comment this out to set strides by region
 
          IF `pixsize GT maxpix` THEN SET AXIS/STRIDE=`INT((pixsize/maxpix)+1)` `($data_var)[d=($data_num)],return=xaxis`
          IF `pixsize GT maxpix` THEN SAY SET AXIS/STRIDE=`INT((pixsize/maxpix)+1)` `($data_var)[d=($data_num)],return=xaxis`
@@ -41,7 +40,7 @@ IF `STRLEN("($ferret_view)") EQ 2` THEN
          LET y_pct = ($region_y_range)/180
          LET pixsize = `ny*y_pct`
 
-!         LET pixsize = `MAX(pixsize, ny)`  ! comment this out to set strides by region
+         LET pixsize = `MAX(pixsize, ny)`  ! comment this out to set strides by region
 
          IF `pixsize GT maxpix` THEN SET AXIS/STRIDE=`2*INT((pixsize/maxpix)+1)` `($data_var)[d=($data_num)],return=yaxis`
          IF `pixsize GT maxpix` THEN SAY SET AXIS/STRIDE=`2*INT((pixsize/maxpix)+1)` `($data_var)[d=($data_num)],return=yaxis`
@@ -56,7 +55,7 @@ IF `STRLEN("($ferret_view)") EQ 2` THEN
            LET nx = xx[i=@ngd]
            LET x_pct = ($region_x_range)/360
            LET pixsize = `nx*x_pct`
-!           LET pixsize = `MAX(pixsize, nx)`  ! comment this out to set strides by region
+           LET pixsize = `MAX(pixsize, nx)`  ! comment this out to set strides by region
   
            IF `pixsize GT maxpix` THEN SET AXIS/STRIDE=`INT((pixsize/maxpix)+1)` `($data_var)[d=($data_num)],return=xaxis`
         ENDIF
@@ -66,7 +65,7 @@ IF `STRLEN("($ferret_view)") EQ 2` THEN
            LET ny = yy[j=@ngd]
            LET y_pct = ($region_y_range)/180
            LET pixsize = `ny*y_pct`
-!           LET pixsize = `MAX(pixsize, ny)`  ! comment this out to set strides by region
+           LET pixsize = `MAX(pixsize, ny)`  ! comment this out to set strides by region
   
            IF `pixsize GT maxpix` THEN SET AXIS/STRIDE=`INT((pixsize/maxpix)+1)` `($data_var)[d=($data_num)],return=yaxis`
         ENDIF

@@ -166,7 +166,7 @@ IF `($data_count"0") EQ 1` THEN
          if ($labnum_dods"0|*>1") THEN go unlabel ($labnum_dods)
       PPL ($plot_type)
    ENDIF
-   GO LAS_url_label 
+   GO LAS_url_label 0
 
    IF ($ferret_contour_style"0|default>0|color_filled_plus_lines>1|raster_plus_lines>1|*>0") THEN
       IF ($ferret_contour_levels"0|*>1") THEN 

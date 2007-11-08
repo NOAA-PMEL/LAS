@@ -105,6 +105,9 @@ GO LAS_open_window
 !
 ! Build up the plot qualifiers
 
+! Get levels based on ferret_diff_var
+GO LAS_auto_levels
+
 !ACM note: All color plots use $ferret_fill_levels. Contour plots use $ferret_contour_levels.
 
 IF ($ferret_contour_style"0|contour_lines>1|*>0") THEN
@@ -133,6 +136,7 @@ DEFINE SYMBOL qualifiers = ($qualifiers)/PALETTE=($ferret_palette"rainbow|defaul
 ! DEFINE SYMBOL plot_type = ($ferret_contour_style"contour_lines>CONTOUR|*>SHADE")
 
 DEFINE SYMBOL plot_type =($ferret_contour_style"FILL|default>FILL|raster>SHADE|color_filled_contours>FILL|color_filled_plus_lines>FILL|contour_lines>CONTOUR|raster_plus_lines>SHADE")
+
 
 ! Set up for degrees-minutes-seconds labels on independent variable axis
 ! If this was not requested, the script just returns.

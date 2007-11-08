@@ -114,7 +114,8 @@ GO LAS_open_window
 !
 ! Build up the plot qualifiers
 
-!ACM note: All color plots use $ferret_fill_levels. Contour plots use $ferret_contour_levels.
+! Get levels based on ferret_diff_var
+GO LAS_auto_levels
 
 IF ($ferret_contour_style"0|contour_lines>1|*>0") THEN
    IF ($ferret_contour_levels"0|*>1") THEN
@@ -185,11 +186,6 @@ IF `($n_right_labels) GT 0` THEN
    IF `STRINDEX("($upper_right_1)", "<NL>") GT 0` THEN LET labyloc = `labyloc - labdel`
    IF `($n_right_labels) GT 1` THEN LABEL/NOUSER `labxloc`, `labyloc`, 1, 0.0, `labsiz`, @P2($upper_right_2)
 ENDIF 
-
-IF ($ferret_contour_style"0|default>0|color_filled_plus_lines>1|raster_plus_lines>1|*>0") THEN
-  IF ($ferret_contour_levels"0|*>1") THEN DEFINE SYMBOL levsym =  /LEVELS=($ferret_contour_levels)
-  CONTOUR/OVER/NOLAB($levsym) ($ferret_diff_var)
-ENDIF
 
 IF ($ferret_contour_style"0|default>0|color_filled_plus_lines>1|raster_plus_lines>1|*>0") THEN
   IF ($ferret_contour_levels"0|*>1") THEN DEFINE SYMBOL levsym =  /LEVELS=($ferret_contour_levels)

@@ -208,7 +208,7 @@ ELIF  `($data_count"0") EQ 2` THEN
       IF ($axlen_command"0|*>1") THEN PPL ($axlen_command)
       IF ($axtype_command"0|*>1") THEN PPL ($axtype_command)
    PPL ($plot_type)
-   GO LAS_url_label 
+   GO LAS_url_label 0
 
    CONTOUR/OVER($qualifiers_over)/NOKEY/NOLAB ($ferret_var_1) 
    GO LAS_url_label 1
