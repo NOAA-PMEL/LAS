@@ -113,7 +113,8 @@ GO LAS_open_window
 !
 ! Build up the plot qualifiers
 
-!ACM note: All color plots use $ferret_fill_levels. Contour plots use $ferret_contour_levels.
+! Get levels based on ferret_diff_var
+GO LAS_auto_levels
 
 IF ($ferret_contour_style"0|contour_lines>1|*>0") THEN
    IF ($ferret_contour_levels"0|*>1") THEN
