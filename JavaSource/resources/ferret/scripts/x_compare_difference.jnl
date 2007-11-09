@@ -8,7 +8,8 @@
 !           in degenerate plot into LAS_initialize_data.jnl rather than in the 
 !           individual plot scripts.
 ! 3/29/2007 ACM Fix logic interpreting contents of ferret_interpolate_data 
-
+! 11/9/2007 ACM If ferret_dep_axis_scale is defined, use it to set vertical axis.
+!
 ! x_compare_difference.jnl creates an X line plot for use with the Back 
 ! End Server code that sits behind a Live Access Server (LAS). 
 ! It produces a difference plot of 2 variables which are on the same
@@ -100,6 +101,25 @@ DEFINE SYMBOL ferret_diff_var = ($ferret_var_0)  -  ($ferret_var_1)
 
 GO LAS_set_diff_labels ($fview)
 
+! If the user gave dependent axis scaling, check for third argument and add it if needed.
+
+IF ($ferret_dep_axis_scale"0|*>1") THEN
+  LET slen = STRLEN("($ferret_dep_axis_scale)")
+  LET nc = 0
+  REPEAT/RANGE=2:`slen`/NAME=m (let c = `m`; \
+     DEFINE SYMBOL next = `SUBSTRING("($ferret_dep_axis_scale)", c, 1)`; sh sym next; \
+     IF `STRCMP("($next)", ",") EQ 0` THEN let nc = `nc+1`)
+
+ IF `nc EQ 1` THEN   
+     LET c = STRINDEX ("($ferret_dep_axis_scale)", ",")
+     DEFINE SYMBOL lo_ax = `SUBSTRING("($ferret_dep_axis_scale)", 1, c-1)`
+     DEFINE SYMBOL hi_ax = `SUBSTRING("($ferret_dep_axis_scale)", c+1, slen)`
+     PPL %RANGE ($lo_ax), ($hi_ax), 10
+     DEFINE SYMBOL ferret_dep_axis_scale = ($ferret_dep_axis_scale),($ppl$range_inc)
+  ENDIF
+
+ENDIF
+
 ! Open the window, apply size, scale options
 GO LAS_open_window
 
@@ -149,8 +169,8 @@ IF `($title_size%0|*>1%)` THEN PPL LABSET ($title_size)
 IF `($labnum_dset%0|*>1%)` THEN GO unlabel ($labnum_dset)
 IF `($labnum_datitl%0|*>1%)` THEN GO unlabel ($labnum_datitl)
 IF `($labnum_dods%0|*>1%)` THEN GO unlabel ($labnum_dods)
+IF `($ferret_dep_axis_scale"0|*>1")` THEN PPL YAXIS ($ferret_dep_axis_scale)
 PPL plot
-
 LABEL/NOUSER `($ppl$xlen)/2`, `($ppl$ylen)+1.2`, 0, 0, 0.12, "LAS 7.+/Ferret ($FERRET_VERSION)     NOAA/PMEL"
 
 ! Put the labels for time/location in the upper left
