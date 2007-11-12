@@ -5,7 +5,12 @@ body {
 }
 
 /*
- * # Signifies elements identified by 'id' 
+ * Elements identified by HTML tag
+ */
+
+
+/*
+ * Elements identified by id  (begin with '#')
  */
 
 /* Overall table */
@@ -43,8 +48,7 @@ body {
 /* Control row */
 
 #LSS_controlTable {
-  background-color: #ACE;
-  border: solid 2px black;
+  border: 2px solid black;
   padding: 4px;
   width: 100%;
 }
@@ -59,6 +63,18 @@ body {
   font-weight: bold;
 }
 
+#LSS_modeCell {
+  border: 1px solid black;
+  padding: 2px;
+  width: 8em;
+  text-align: center;
+}
+
+#LSS_modeAnchor {
+  color: black;
+  text-decoration: none;
+}
+
 /* Images row */
 
 #LSS_imagesTable {
@@ -66,8 +82,20 @@ body {
 }
 
 /*
- * . Signifies elements identified by 'class'
+ * Elements identified by class (begin with '.')
  */
+
+.regularBackground {
+  background-color: #ACE;
+}
+
+.anomalyBackground {
+  background-color: #8C8;
+}
+
+.downloadingBackground {
+  background-color: #ECA;
+}
 
 .LSS_imageCell {
   padding: 2px;
@@ -76,10 +104,6 @@ body {
 
 .LSS_imageCell img{
   border: none;
-}
-
-.LSS_imageCell table {
-  background-color: #ACE;
 }
 
 .CCell_las_message {

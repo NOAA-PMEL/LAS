@@ -114,8 +114,8 @@ function LASContentCell_render(element_id,type) {
  * <p>
  * Any children of element_id will be removed and replaced with a Select object
  * <p>
- * @param {string} element_id 'id' attribute of the element into which the ContentCell is inserted.
- * @param {string} type ignored for now
+ * @param {Object} LASResponse LASResponse object
+ * @param {string} result_type type of result to be displayed
  */
 function LASContentCell_display(LASResponse,result_type) {
 
@@ -192,9 +192,16 @@ function LASContentCell_display(LASResponse,result_type) {
       break;
 
     case 'plot_image':
+      var CC_anchor = document.createElement('a');
+      CC_anchor.setAttribute('target','_blank');
+      if (LASResponse.large_img_url) {
+        CC_anchor.href = LASResponse.large_img_url;
+      }
+      node.appendChild(CC_anchor);
+
       var CC_img = document.createElement('img');
       CC_img.setAttribute('src',LASResponse.getImageURL());
-      node.appendChild(CC_img);
+      CC_anchor.appendChild(CC_img);
       break;
 
   }

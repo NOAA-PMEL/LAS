@@ -50,8 +50,8 @@ function LASRequest(xml) {
  * the incoming XML.
  */
   if (!this.DOM.selectNode('/properties')) {
-    var Node = this.DOM.createXMLNode('<properties></properties>');
-    this.DOM = this.DOM.insertNodeAfter(operationNode,Node);
+    var newNode = this.DOM.createXMLNode('<properties></properties>');
+    this.DOM = this.DOM.insertNodeAfter(operationNode,newNode);
   }
 
 // Add methods to this object
@@ -219,8 +219,8 @@ function LASReq_removePropertyGroup(group) {
  */
 function LASReq_getProperty(group,property) {
   var nodePath = '/properties/' + group + '/' + property;
-  var Node = this.DOM.selectNode(nodePath);
-  if (Node) {
+  var propertyNode = this.DOM.selectNode(nodePath);
+  if (propertyNode) {
     return this.DOM.selectNodeText(nodePath);
   } else {
     return null;
@@ -239,9 +239,9 @@ function LASReq_getProperty(group,property) {
  */
 function LASReq_setProperty(group,property,value) {
   var nodePath = '/properties/' + group + '/' + property;
-  var Node = this.DOM.selectNode(nodePath);
-  if (Node) {
-    this.DOM = this.DOM.replaceNodeContents(Node,value);
+  var propertyNode = this.DOM.selectNode(nodePath);
+  if (propertyNode) {
+    this.DOM = this.DOM.replaceNodeContents(propertyNode,value);
   } else {
     this.addProperty(group,property,value);
   }
@@ -264,8 +264,8 @@ function LASReq_addProperty(group,property,value) {
     this.addPropertyGroup(group);
   }
   var nodePath = '/properties/' + group + '/' + property;
-  var Node = this.DOM.selectNode(nodePath);
-  if (Node) {
+  var propertyNode = this.DOM.selectNode(nodePath);
+  if (propertyNode) {
     this.setProperty(group,property,value);
   } else {
     var parentPath = '/properties/' + group;
@@ -286,8 +286,8 @@ function LASReq_addProperty(group,property,value) {
  */
 function LASReq_removeProperty(group,property) {
   var nodePath = '/properties/' + group + '/' + property;
-  var Node = this.DOM.selectNode(nodePath);
-  this.DOM = this.DOM.removeNodeFromTree(Node);
+  var propertyNode = this.DOM.selectNode(nodePath);
+  this.DOM = this.DOM.removeNodeFromTree(propertyNode);
 }
 
 ////////////////////////////////////////////////////////////
@@ -329,9 +329,13 @@ function LASReq_getDataset(data_ID) {
 function LASReq_getVariable(data_ID) {
   var index = (data_ID) ? data_ID : 0;
   var variableNode = this.DOM.selectNode('/args/link[' + index + ']');
-  matchString = new String(variableNode.getAttribute("match"));
-  var pieces = matchString.split('/');
-  return pieces[5];
+  if (variableNode) {
+    matchString = new String(variableNode.getAttribute("match"));
+    var pieces = matchString.split('/');
+    return pieces[5];
+  } else {
+    return;
+  }
 }
 
 /**
@@ -376,14 +380,14 @@ function LASReq_addVariable(dataset,variable) {
   var nodeXML = '<link match=\"/lasdata/datasets/' + dataset + '/variables/' + variable + '\"></link>';
   var newNode = this.DOM.createXMLNode(nodeXML);
   var argsNode = this.DOM.selectNode("/args");
-  var variableNodes = argsNode.getElements('link');
+  var childNodes = argsNode.getElements();
 
-  if ( variableNodes.length == 0 ) {
+  if ( childNodes.length == 0 ) {
     this.DOM = this.DOM.insertNodeInto(argsNode,newNode);
   } else {
-    var lastIndex = variableNodes.length - 1;
-    var lastVariableNode = variableNodes[lastIndex];
-    this.DOM = this.DOM.insertNodeAfter(lastVariableNode,newNode);
+    var lastIndex = childNodes.length - 1;
+    var lastChildNode = childNodes[lastIndex];
+    this.DOM = this.DOM.insertNodeAfter(lastChildNode,newNode);
   }
 }
 
@@ -398,7 +402,7 @@ function LASReq_addVariable(dataset,variable) {
  * @see #removeVariables
  * @see #replaceVariable
  */
-function LASReq_removeVariable(dataset,variable) {
+function LASReq_OLD_removeVariable(dataset,variable) {
   var argsNode = this.DOM.selectNode("/args");
   var variableNodes = argsNode.getElements('link');
   for (i=0;i<variableNodes.length;i++) {
@@ -409,6 +413,28 @@ function LASReq_removeVariable(dataset,variable) {
     }
   }
 }
+
+/**
+ * Removes a single <code>&lt;link match=...></code> element defined in the <code>&lt;args></code> section of the LASRequest.<br>
+ * @param {int} data_ID (optional) index of the <code>&lt;link match=...></code> element.  Defaults to <code>0</code> which is appropriate
+ * for single variable requests.<br>
+ * If the Variables array is not as long as indicated by the data_ID index no action is taken.
+ * @see #getDataset
+ * @see #getVariable
+ * @see #setVariable
+ * @see #addVariable
+ * @see #removeVariables
+ * @see #replaceVariable
+ */
+function LASReq_removeVariable(data_ID) {
+  var index = (data_ID) ? data_ID : 0;
+  var argsNode = this.DOM.selectNode("/args");
+  var variableNodes = argsNode.getElements('link');
+  if (variableNodes.length > index) {
+    this.DOM = this.DOM.removeNodeFromTree(variableNodes[index]);
+  }
+}
+
 
 /**
  * Removes all <code>&lt;link match=...></code> elements defined in the <code>&lt;args></code> section of the LASRequest.<br>
@@ -598,7 +624,9 @@ function LASReq_removeRegion(region_ID) {
   var index = (region_ID) ? region_ID : 0;
   var argsNode = this.DOM.selectNode("/args");
   var regionNodes = argsNode.getElements('region');
-  this.DOM = this.DOM.removeNodeFromTree(regionNodes[index]);
+  if (regionNodes.length > index) {
+    this.DOM = this.DOM.removeNodeFromTree(regionNodes[index]);
+  }
 }
 
 ////////////////////////////////////////////////////////////
@@ -622,12 +650,12 @@ function LASReq_getRangeLo(xyzt,region_ID) {
   var type = this.getAxisType(xyzt,region_ID);
   if (type == 'range') {
     var index = (region_ID) ? region_ID : 0;
-    var Node = this.DOM.selectNode('/args/region[' + index + ']/range[@type=\"' + xyzt + '\"]');
-    lo = Node.getAttribute('low');
+    var axisNode = this.DOM.selectNode('/args/region[' + index + ']/range[@type=\"' + xyzt + '\"]');
+    lo = axisNode.getAttribute('low');
   } else if (type == 'point') {
     var index = (region_ID) ? region_ID : 0;
-    var Node = this.DOM.selectNode('/args/region[' + index + ']/point[@type=\"' + xyzt + '\"]');
-    lo = Node.getAttribute('v');
+    var axisNode = this.DOM.selectNode('/args/region[' + index + ']/point[@type=\"' + xyzt + '\"]');
+    lo = axisNode.getAttribute('v');
   } else {
     lo = null;
   } 
@@ -652,8 +680,8 @@ function LASReq_getRangeHi(xyzt,region_ID) {
   var type = this.getAxisType(xyzt,region_ID);
   if (type == 'range') {
     var index = (region_ID) ? region_ID : 0;
-    var Node = this.DOM.selectNode('/args/region[' + index + ']/range[@type=\"' + xyzt + '\"]');
-    hi = Node.getAttribute('high');
+    var axisNode = this.DOM.selectNode('/args/region[' + index + ']/range[@type=\"' + xyzt + '\"]');
+    hi = axisNode.getAttribute('high');
   } else {
     hi = null;
   }
@@ -675,12 +703,12 @@ function LASReq_getRangeHi(xyzt,region_ID) {
 function LASReq_getAxisType(xyzt,region_ID) {
   var type = null;
   var index = (region_ID) ? region_ID : 0;
-  var Node = this.DOM.selectNode('/args/region[' + index + ']/range[@type=\"' + xyzt + '\"]');
-  if (Node) {
+  var axisNode = this.DOM.selectNode('/args/region[' + index + ']/range[@type=\"' + xyzt + '\"]');
+  if (axisNode) {
     type = 'range';
   } else {
-    Node = this.DOM.selectNode('/args/region[' + index + ']/point[@type=\"' + xyzt + '\"]');
-    if (Node) {
+    axisNode = this.DOM.selectNode('/args/region[' + index + ']/point[@type=\"' + xyzt + '\"]');
+    if (axisNode) {
       type = 'point';
     }
   }
@@ -756,13 +784,13 @@ function LASReq_removeRange(xyzt,region_ID) {
   // If the regionNode is found, remove the <range...> or <point...> node whose
   // 'type' attribute = xyzt.
   if (regionNode) {
-    var Node = this.DOM.selectNode('/args/region[' + index + ']/range[@type=\"' + xyzt + '\"]');
-    if (Node) {
-      this.DOM = this.DOM.removeNodeFromTree(Node);
+    var axisNode = this.DOM.selectNode('/args/region[' + index + ']/range[@type=\"' + xyzt + '\"]');
+    if (axisNode) {
+      this.DOM = this.DOM.removeNodeFromTree(axisNode);
     } else {
-      Node = this.DOM.selectNode('/args/region[' + index + ']/point[@type=\"' + xyzt + '\"]');
-      if (Node) {
-        this.DOM = this.DOM.removeNodeFromTree(Node);
+      var axisNode = this.DOM.selectNode('/args/region[' + index + ']/point[@type=\"' + xyzt + '\"]');
+      if (axisNode) {
+        this.DOM = this.DOM.removeNodeFromTree(axisNode);
       }
     }
   }
