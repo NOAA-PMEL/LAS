@@ -68,7 +68,7 @@
 		<blockquote>
 		    #set($vars = $las_request.getVariables())
 		    #foreach ($var in $vars)
-		       $las_config.getDataAccessURL($var, true)<br>
+		       $las_config.getFTDSURL($var)<br>
 		    #end
 			<p>
 			These OPeNDAP links can be viewed in a browser to get more
@@ -76,11 +76,11 @@
 			<br>
 			#set($vars = $las_request.getVariables())
 			#foreach ( $var in $vars )
-			   <a href="${las_config.getDataAccessURL($var, true)}.info">INFO</a> (Information)
+			   <a href="${las_config.getFTDSURL($var)}.info">INFO</a> (Information)
 			<br>
-			   <a href="${las_config.getDataAccessURL($var, true)}.das">DAS</a>&nbsp;&nbsp; (Data Attribute Structure)
+			   <a href="${las_config.getFTDSURL($var)}.das">DAS</a>&nbsp;&nbsp; (Data Attribute Structure)
 			<br>
-			   <a href="${las_config.getDataAccessURL($var, true)}.dds">DDS</a>&nbsp;&nbsp; (Data Description Structure)
+			   <a href="${las_config.getFTDSURL($var)}.dds">DDS</a>&nbsp;&nbsp; (Data Description Structure)
 			#end
 		</blockquote>
 		#if ( $las_region_index.getNumberOfSections() > 1 ) 
@@ -100,7 +100,7 @@
 		    <div class="color">
 		    #set($vars = $las_request.getVariables())
 			#foreach ( $var in $vars )
-			   set data &quot;${las_config.getDataAccessURL($var, true)}&quot;<br>
+			   set data &quot;${las_config.getFTDSURL($var)}&quot;<br>
 		    #end
 			<br>
 			$las_region_index.getFerretRegion()
@@ -115,7 +115,7 @@
 		<div class="color">
 		#set($vars = $las_request.getVariables())
 	    #foreach ( $var in $vars )
-		    sdfopen ${las_config.getDataAccessURL($var, true)}<br>
+		    sdfopen ${las_config.getFTDSURL($var)}<br>
 		#end
 		#set ($original = $las_region_index.getOriginalRegion())        
             #foreach ($key in $original.keySet())
@@ -146,7 +146,7 @@
                #set($vars = $las_request.getVariables())
 	           #foreach ( $var in $vars )                
                           $las_region_index.getRangesCovered($i)<br>
-		          loaddods(${las_config.getDataAccessURL($var, true)}?${las_config.getVariableName($var)}$las_region_index.getOPeNDAPConstraint($i)) <br>
+		          loaddods(${las_config.getFTDSURL($var)}?${las_config.getVariableName($var)}$las_region_index.getOPeNDAPConstraint($i)) <br>
 		       #end
 		    #set($i=$i+1)
             #end
