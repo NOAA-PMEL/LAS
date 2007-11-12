@@ -2553,10 +2553,10 @@ EOL
             # Hack off the leading "/" so it becomes a relateive URL.
             # Tack on the magic that points to the FDS.
             if ( $LAS::Server::Config{proxy} eq "yes" ) {
-               $fdsurl = "http://".$LAS::Server::Config{serverhost}."/thredds/dodsC/las";
+               $fdsurl = "http://".$LAS::Server::Config{serverhost}."/thredds/dodsC".$LAS::Server::Config{uipath};
             }
             else {
-               $fdsurl = "http://".$LAS::Server::Config{tomcathost}.":".$LAS::Server::Config{tomcatport}."/thredds/dodsC/las";
+               $fdsurl = "http://".$LAS::Server::Config{tomcathost}.":".$LAS::Server::Config{tomcatport}."/thredds/dodsC".$LAS::Server::Config{uipath};
             }
             # Glue it together with the XML path name.
             $dods = $fdsurl."/".$dpath."/"."data_".$url.".jnl";
