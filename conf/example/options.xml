@@ -529,7 +529,7 @@ Detailed info is available in the Ferret User\'s Guide.
 
   <optiondef name="vector_skip">
     <option>
-      <help>Enter two numbers: m,n Ferret draws every nth vector along two coordinate directions beginning with the first vector requested. By default, Ferret "thins" vectors to achieve a clear plot; this option gives you control over the thinning; every mth vector in the horizontal direction, every nth in the vertical.
+      <help>Enter two numbers: m,n Ferret draws every nth vector along two coordinate directions beginning with the first vector requested. By default, Ferret thins vectors to achieve a clear plot; this option gives you control over the thinning; every mth vector in the horizontal direction, every nth in the vertical.
       </help>
       <title>Vector xskip,yskip</title>
       <textfield name="vector_skip"/>
