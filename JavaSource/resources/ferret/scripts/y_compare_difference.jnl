@@ -8,7 +8,7 @@
 !           in degenerate plot into LAS_initialize_data.jnl rather than in the 
 !           individual plot scripts.
 ! 3/29/2007 ACM Fix logic interpreting contents of ferret_interpolate_data 
-! 11/9/2007 ACM If ferret_dep_axis_scale is defined, use it to set vertical axis.
+! 11/9/2007 ACM If ferret_dep_axis_scale is defined, apply vertical axis scaling.
 !
 ! y_compare_difference.jnl creates a Y line plot for use with the Back 
 ! End Server code that sits behind a Live Access Server (LAS). 
