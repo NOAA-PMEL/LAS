@@ -85,13 +85,10 @@ function LASRequest(xml) {
   //this.removeConstraint = LASReq_removeConstraints ??
   this.removeConstraints = LASReq_removeConstraints;
 
-  // NOTE:  Some guidance is needed on the best way to return the contents of an Analysis.  The
-  // NOTE:  getAnalysis() method not be implemented in this version of the code.
-  //this.getAnalysis ??
-  //this.setAnalysis ??
-  this.addAnalysis = LASReq_addAnalysis;
+  // NOTE:  Do we need to support a get/setAnalysis(dataset,variable) method?
+  this.setAnalysis = LASReq_setAnalysis;
+  this.getAnalysis = LASReq_getAnalysis;
   this.removeAnalysis = LASReq_removeAnalysis;
-  this.removeAnalyses = LASReq_removeAnalyses;
 
   this.addRegion = LASReq_addRegion;
   this.removeRegion = LASReq_removeRegion;
@@ -106,6 +103,7 @@ function LASRequest(xml) {
   this.getXMLText = LASReq_getXMLText;
 
   this.getVariableNode = LASReq_getVariableNode;
+  this.getVariableNodeByIndex = LASReq_getVariableNodeByIndex;
 }
 
 ////////////////////////////////////////////////////////////
@@ -536,51 +534,73 @@ function LASReq_removeConstraints() {
  * Adds an Analysis element to an existing Variable in the <code>&lt;args></code> section of the LASRequest.<br>
  * Each analysis is applied to a single axis and will 
  * typically be a Ferret axis-compressing transform like SUM, AVE, etc.
- * @param {string} dataset dataset name
- * @param {string} variable variable name
- * @param {string} label identifier for the analysis
- * @param {string} xyzt axis to which this analysis is applied: 'x','y','z' or 't'
- * @param {string} lo lower bound of region of interest (axis specific)
- * @param {string} hi upper bound of region of interest
- * @param {string} transform named Ferret transform (e.g. SUM, AVE, etc.)
+ * The analysis object has the following form:
+ * <ul>
+ * <li>Analysis.label - identifier for the analysis
+ * <li>Analysis.axis - array of axis objects on which this analysis is defined
+ * <li>Analysis.axis[#].type - one of [x|y|z|t]
+ * <li>Analysis.axis[#].lo - lower bound of region of interest (axis specific)
+ * <li>Analysis.axis[#].hi - upper bound of region of interest
+ * <li>Analysis.axis[#].op - named Ferret transform (e.g. SUM, AVE, etc.)
+ * </ul>
+ * Up to four axis objects may be included in the Analysis object.
+ * @param {int} index position of the Link node (Variable) in the LASRequest
+ * @param {object} Analysis object containing analysis information
+ * @see #getAnalysis
  * @see #removeAnalysis
- * @see #removeAnalyses
  */
-function LASReq_addAnalysis(dataset,variable,label,xyzt,lo,hi,transform) {
-  var variableNode = this.getVariableNode(dataset,variable)
-  var nodeXML = '<analysis label=\"' + label + '\"><axis type=\"' + xyzt + '\" lo=\"' + lo + '\" hi=\"' + hi + '\" op=\"' + transform + '\"/></analysis>';
-  var newNode = this.DOM.createXMLNode(nodeXML);
-  this.DOM = this.DOM.insertNodeInto(variableNode,newNode);
-}
-
-/**
- * Removes a single Analysis element, identified by the <code>label</code>, from an existing Variable defined in the <code>&lt;args></code> section of the LASRequest.<br>
- * @param {string} dataset dataset name
- * @param {string} variable variable name
- * @param {string} label identifier for the analysis
- * @see #addAnalysis
- * @see #removeAnalyses
- */
-function LASReq_removeAnalysis(dataset,variable,label) {
-  var variableNode = this.getVariableNode(dataset,variable)
-  var analysisNodes = variableNode.getElements('analysis');
-  for (i=0;i<analysisNodes.length;i++) {
-    if (label == String(analysisNodes[i].getAttribute("label"))) {
-      this.DOM = this.DOM.removeNodeFromTree(analysisNodes[i]);
-    }
+function LASReq_setAnalysis(index,A) {
+  var variableNode = this.getVariableNodeByIndex(index);
+  var nodeXML = '<analysis label=\"' + A.label + '\"></analysis>';
+  var AnalysisNode = this.DOM.createXMLNode(nodeXML);
+  this.DOM = this.DOM.insertNodeInto(variableNode,AnalysisNode);
+  for (i=0;i<A.axis.length;i++) {
+    var nodeXML = '<axis type=\"' + A.axis[i].type + '\" lo=\"' + A.axis[i].lo + '\" hi=\"' + A.axis[i].hi + '\" op=\"' + A.axis[i].op + '\"/>';
+    var AxisNode = this.DOM.createXMLNode(nodeXML);
+    this.DOM = this.DOM.insertNodeInto(AnalysisNode,AxisNode);
   }
 }
 
 /**
- * Removes all Analysis elements from an existing Variable defined in the <code>&lt;args></code> section of the LASRequest.<br>
- * No 'data options' will be applied before creating the product.
- * @param {string} dataset dataset name
- * @param {string} variable variable name
- * @see #addAnalysis
+ * Returns an Analysis object with the following attributes:
+ * <ul>
+ * <li>Analysis.label - identifier for the analysis
+ * <li>Analysis.axis - array of axis objects on which this analysis is defined
+ * <li>Analysis.axis[#].type - one of [x|y|z|t]
+ * <li>Analysis.axis[#].lo - lower bound of region of interest (axis specific)
+ * <li>Analysis.axis[#].hi - upper bound of region of interest
+ * <li>Analysis.axis[#].op - named Ferret transform (e.g. SUM, AVE, etc.)
+ * </ul>
+ * @param {int} index position of the Link node (Variable) in the LASRequest
+ * @return {object} Analysis Analysis object associated with the Variable at this position
  * @see #removeAnalysis
+ * @see #setAnalysis
  */
-function LASReq_removeAnalyses(dataset,variable) {
-  var variableNode = this.getVariableNode(dataset,variable)
+function LASReq_getAnalysis(index) {
+  var Analysis = new Object;
+  Analysis.axis = [];
+  var variableNode = this.getVariableNodeByIndex(index);
+  var analysisNode = variableNode.getElements('analysis')[0];
+  Analysis.label = String(analysisNode.getAttribute("label"));
+  var axisNodes = analysisNode.getElements('axis');
+  for (i=0;i<axisNodes.length;i++) {
+    Analysis.axis[i] = Object;
+    Analysis.axis[i].type = String(axisNodes[i].getAttribute("type"));
+    Analysis.axis[i].lo = String(axisNodes[i].getAttribute("lo"));
+    Analysis.axis[i].hi = String(axisNodes[i].getAttribute("hi"));
+    Analysis.axis[i].op = String(axisNodes[i].getAttribute("op"));
+  }
+  return Analysis;
+}
+
+/**
+ * Removes the Analysis element from an existing Variable defined in the <code>&lt;args></code> section of the LASRequest.<br>
+ * @param {int} index position of the Link node (Variable) in the LASRequest
+ * @see #getAnalysis
+ * @see #setAnalysis
+ */
+function LASReq_removeAnalysis(index) {
+  var variableNode = this.getVariableNodeByIndex(index);
   var analysisNodes = variableNode.getElements('analysis');
   for (i=0;i<analysisNodes.length;i++) {
     this.DOM = this.DOM.removeNodeFromTree(analysisNodes[i]);
@@ -828,6 +848,21 @@ function LASReq_getVariableNode(dataset,variable) {
     if (pieces[5] == variable) {
       return variableNodes[i];
     }
+  }
+}
+
+/**
+ * Returns the n'th Link node or null if there aren't that many Link nodes defined in the request.
+ * @private
+ * @param {int} index position of the Link node in the LASRequest (begins with 0)
+ */
+function LASReq_getVariableNodeByIndex(index) {
+  var argsNode = this.DOM.selectNode("/args");
+  var variableNodes = argsNode.getElements('link');
+  if (variableNodes[index]) {
+    return variableNodes[index];
+  } else {
+    return null;
   }
 }
 

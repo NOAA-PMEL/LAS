@@ -378,6 +378,15 @@ function createLASRequest(AA) {
         LASReq.replaceVariable(dsid,varid,1);
       }    
 
+// Now duplicate for variable[1] any analyses attached to variable[0].
+// See the LASRequest documentation for details on the Analysis object returned.
+     
+      var Analysis = LASReq.getAnalysis(0);
+      LASReq.setAnalysis(1,Analysis);
+      //LASReq.setAnalysis(1,LASReq.getAnalysis(0));
+
+// Now set any additional ranges
+
       if (view != 'x' && view != 'xy' && view != 'xz' && view != 'xt') {
         if (AA.x) {
           LASReq.setRange('x',AA.x,AA.x,1);
@@ -398,6 +407,8 @@ function createLASRequest(AA) {
           LASReq.setRange('t',AA.t,AA.t,1);
         }
       }
+
+// Finally, set the operation to 'Compare_Plot'
 
       LASReq.setOperation('Compare_Plot');
     }
