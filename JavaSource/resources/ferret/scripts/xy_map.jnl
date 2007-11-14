@@ -22,12 +22,13 @@
 DEFINE SYMBOL ferret_margins = false
 DEFINE SYMBOL ferret_palette = topo
 ! DEFINE SYMBOL ferret_fill_levels = (-9000,-1000,1000)(-1000,-100,100)(-100,100,10)(100,1000,100)(1000,6000,1000)
-! DEFINE SYMBOL ferret_palette = dark_land_sea 
+DEFINE SYMBOL ferret_palette = dark_land_sea 
+DEFINE SYMBOL ferret_palette = land_sea 
+DEFINE SYMBOL ferret_palette = topo_light 
 DEFINE SYMBOL ferret_fill_levels = (-10500,-5500,5000)(-5500,0,500)(0,2000,250)(2000,5000,1000)
 
 DEFINE SYMBOL ferret_set_aspect = yes
 DEFINE SYMBOL ferret_view = xy
-
 
 GO LAS_initialize_region 0
 GO LAS_open_window.jnl
@@ -52,7 +53,8 @@ ELSE
   SET DATA etopo40
 ENDIF
 
-SHADE($qualifiers) rose[($region_xy)]
+DEFINE SYMBOL ferret_plot_var = rose[($region_xy)]
+SHADE($qualifiers) ($ferret_plot_var)
 
 ! Save the results
 GO LAS_results box
