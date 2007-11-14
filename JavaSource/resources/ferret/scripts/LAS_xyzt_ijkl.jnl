@@ -3,6 +3,9 @@
 ! 
 ! Author: ansley 
 ! Date: 2006/09/06
+!  11/14/2007 update to check the variable shape before trying to get  
+!             axis info based on regions which may come in as x=0:0
+!             when there is no x axis.
 !
 ! From a dataset and region, output the corresponding x,y,z,t and i,j,k,l 
 ! coordinates and indices.  If there is a modulo X axis, and the region crosses
@@ -58,7 +61,13 @@ ELSE
 ENDIF
 SET MODE/LAST ignore_error
 
+DEFINE SYMBOL varshape = `($data_var),RETURN=shape`
+
 ! X region
+show symbol region_x*
+pause
+
+IF `STRINDEX("($varshape)", "X") NE 0` THEN
 
 IF `xmod EQ 0` THEN
    IF ($region_x_hi"0|*>1") THEN
@@ -166,10 +175,12 @@ ELSE ! not xmod eq 0
 
    ENDIF !!! `($section"0|0|1|2>1|*>0")`
 
+ENDIF
 ENDIF   !!! X region
-
+ 
 ! Y region
 
+IF `STRINDEX("($varshape)", "Y") NE 0` THEN
 IF ($region_y_hi"0|*>1") THEN
 
    DEFINE SYMBOL y_lo `y[gy=($data_var),y=($region_y_lo)]`
@@ -177,22 +188,25 @@ IF ($region_y_hi"0|*>1") THEN
    DEFINE SYMBOL y_hi `y[gy=($data_var),y=($region_y_hi)]`
    DEFINE SYMBOL j_hi `j[gy=($data_var),y=($region_y_hi)]`
 
+ENDIF
 ENDIF    !!! Y region
 
 
 ! Z region
 
+IF `STRINDEX("($varshape)", "Y") NE 0` THEN
 IF ($region_z_hi"0|*>1") THEN
 
    DEFINE SYMBOL z_lo `z[gz=($data_var),z=($region_z_lo)]`
    DEFINE SYMBOL k_lo `k[gz=($data_var),z=($region_z_lo)]`
    DEFINE SYMBOL z_hi `z[gz=($data_var),z=($region_z_hi)]`
    DEFINE SYMBOL k_hi `k[gz=($data_var),z=($region_z_hi)]`
-
+ENDIF
 ENDIF   !!! Z region
 
 ! T region
 
+IF `STRINDEX("($varshape)", "Y") NE 0` THEN
 IF ($region_t_hi"0|*>1") THEN
    
    LET tt = `t[gt=($data_var),t="($region_t_lo)"]`
@@ -202,6 +216,7 @@ IF ($region_t_hi"0|*>1") THEN
    DEFINE SYMBOL l_lo `l[gt=($data_var),t="($region_t_lo)"]`
    DEFINE SYMBOL l_hi `l[gt=($data_var),t="($region_t_hi)"]`
 
+ENDIF
 ENDIF   !!! T region
 
 ! Write out as we do for the mapscale file...
@@ -232,10 +247,10 @@ IF ($region_z_lo"0|*>1") THEN DEFINE SYMBOL original_z_lo ($region_z_lo)
 IF ($region_z_hi"0|*>1") THEN DEFINE SYMBOL original_z_hi ($region_z_hi)
 IF ($region_t_lo"0|*>1") THEN DEFINE SYMBOL original_t_lo ($region_t_lo)
 IF ($region_t_hi"0|*>1") THEN DEFINE SYMBOL original_t_hi ($region_t_hi)
-IF ($region_z_lo"0|*>1") THEN DEFINE SYMBOL original_k_lo ($k_lo)
-IF ($region_z_hi"0|*>1") THEN DEFINE SYMBOL original_k_hi ($k_hi)
-IF ($region_t_lo"0|*>1") THEN DEFINE SYMBOL original_l_lo ($l_lo)
-IF ($region_t_hi"0|*>1") THEN DEFINE SYMBOL original_l_hi ($l_hi)
+IF `($region_z_lo"0|*>1") AND ($k_lo"0|*>1")` THEN DEFINE SYMBOL original_k_lo ($k_lo)
+IF `($region_z_hi"0|*>1") AND ($k_hi"0|*>1")` THEN DEFINE SYMBOL original_k_hi ($k_hi)
+IF `($region_t_lo"0|*>1") AND ($l_lo"0|*>1")` THEN DEFINE SYMBOL original_l_lo ($l_lo)
+IF `($region_t_hi"0|*>1") AND ($l_hi"0|*>1")` THEN DEFINE SYMBOL original_l_hi ($l_hi)
 
 LET syms_names = {\
      "original_x_lo", "original_x_hi",  \
