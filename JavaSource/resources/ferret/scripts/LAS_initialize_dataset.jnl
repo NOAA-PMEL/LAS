@@ -72,8 +72,13 @@ DEFINE SYMBOL data_num = `($data_var),return=dsetnum`
  
 LET anames = ($data_var).attnames
 IF `IS_ELEMENT_OF_STR (anames, "units") OR IS_ELEMENT_OF_STR (anames, "UNITS")` THEN
-   DEFINE SYMBOL data_var_units `($data_var),RETURN=units`
-   DEFINE SYMBOL data_units (`($data_var),RETURN=units`)
+   DEFINE SYMBOL data_var_units `($data_var),RETURN=units`123   ! check for empty units string.
+   IF `STRLEN("($data_var_units)" ) EQ 3` THEN
+      CANCEL SYMBOL data_var_units
+   ELSE
+      DEFINE SYMBOL data_var_units `($data_var),RETURN=units`
+      DEFINE SYMBOL data_units (`($data_var),RETURN=units`)
+   ENDIF
 ENDIF
 
 DEFINE SYMBOL ferret_plot_title "($data_title) ($data_units)"
