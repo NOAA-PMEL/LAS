@@ -1,6 +1,9 @@
 ! LAS_auto_levels.jnl
 ! ACM 8/22/2007
 
+! acm 9/11/07 If its a descriptor file Ferret wont allow striding. 
+!             check for that case and just set num levels.
+
 ! Based on a variables value over its entire range, set strides
 ! if needed to quickly get stats on the variable. Use this to set levels.
 
@@ -73,10 +76,19 @@ IF ($ferret_fill_levels"0|*>1") THEN
 ENDIF
 
 
-
-
 ! Apply to the variable over the entire grid, applying z region if given.
 LET pvar = ($data_var)[d=($data_num)]
+
+! cannot do native striding if this is a descriptor dataset. In that case
+! just set the number of levels
+DEFINE SYMBOL check_for_des =  `pvar,return=dsetpath`
+IF `STRINDEX("($check_for_des)", ".des") GT 0` THEN
+   IF `($input_contour_levels"0|0|1") EQ 0` THEN \
+   DEFINE SYMBOL ferret_fill_levels = ($num_fine_levels"30")
+   IF `($input_contour_levels"0|0|1") EQ 0` THEN \
+   DEFINE SYMBOL ferret_contour_levels = ($num_fine_levels"30")
+   EXIT/SCRIPT
+ENDIF
 
 LET zsiz = `pvar,return=ksize`
 IF `zsiz GT 0` THEN LET pvar = ($data_var)[d=($data_num),($region_z)]
@@ -147,6 +159,9 @@ IF `($stat_ngood"0") EQ 0` THEN EXIT_SCRIPT
 
 LET density_factor = 4
 ! fraction_that_are_fine = density_factor/(1+density_factor)
+
+! This can happen if the data is a constant value...
+IF `($stat_min) EQ ($stat_max)` THEN EXIT/SCRIPT
 
 DEFINE SYMBOL num_fine_levels = `(density_factor/(1+density_factor)) * ($num_contour_levels"50")`
 DEFINE SYMBOL num_coarse_levels =  `($num_contour_levels"50") - ($num_fine_levels)`
