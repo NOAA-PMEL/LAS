@@ -83,7 +83,11 @@ IF ($ferret_deg_min_sec"0|false>0|*>1") THEN GO LAS_set_deg_min_sec.jnl
 VECTOR($qualifiers)/TITLE="($ferret_plot_title)"/SET ($ferret_vector_1), ($ferret_vector_2)
    IF ($xform_dms"0|*>1") THEN PPL XFOR (($xform_dms))
    IF ($yform_dms"0|*>1") THEN PPL YFOR (($yform_dms))
-PPL VECTOR
+IF ($ferret_vector_skip"0|*>1") THEN
+   PPL VECTOR,`xs`,`ys`
+ELSE
+   PPL VECTOR
+ENDIF
 
 IF ($ferret_contour_style"0|default>0|color_filled_plus_lines>1|raster_plus_lines>1|*>0") THEN
   IF ($ferret_contour_levels"0|*>1") THEN DEFINE SYMBOL levsym =  /LEVELS=($ferret_contour_levels)

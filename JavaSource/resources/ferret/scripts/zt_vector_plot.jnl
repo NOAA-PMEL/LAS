@@ -87,7 +87,11 @@ IF ($ferret_deg_min_sec"0|false>0|*>1") THEN GO LAS_set_deg_min_sec.jnl
 VECTOR($qualifiers)/TITLE="($ferret_plot_title)"/SET ($ferret_vector_1), ($ferret_vector_2)
    IF ($xform_dms"0|*>1") THEN PPL XFOR (($xform_dms))
    IF ($yform_dms"0|*>1") THEN PPL YFOR (($yform_dms))
-PPL VECTOR
+IF ($ferret_vector_skip"0|*>1") THEN
+   PPL VECTOR,`xs`,`ys`
+ELSE
+   PPL VECTOR
+ENDIF
 
 LABEL/NOUSER `($ppl$xlen)/2`, `($ppl$ylen)+1.2`, 0, 0, 0.12, "LAS 7.+/Ferret ($FERRET_VERSION)     NOAA/PMEL"
 IF ($needs_url"0|*>1") THEN \

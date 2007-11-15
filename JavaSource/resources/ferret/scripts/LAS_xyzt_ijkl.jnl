@@ -43,13 +43,21 @@
 ! 2007/07/03 acm Make the test for modulo x axis more robust using `var,return=xmod` syngax.
 !                Also use a better test on symbol ($section) which allows for it to be 
 !                undefined, 0, 1, or 2.
+! 2007/11/14 acm If there is no x axis at all then the `LOAD var,return=xmod` results in an 
+!                error. Check for the existence of an axis in the x direction first.  (trac 315)
 
 CANCEL MODE long
 CANCEL MODE lat
 
+DEFINE SYMBOL varshape = `($data_var),RETURN=shape`
+LET xmod = 0
+
+! X region
+
+IF `STRINDEX("($varshape)", "X") NE 0` THEN
+
 ! Check whether X axis is modulo
 
-SET MODE ignore_error
 LOAD `($data_var),return=xmod` 
 
 DEFINE SYMBOL var_xmod = "`($data_var),return=xmod`"  
@@ -59,15 +67,6 @@ IF  `STRCMP (" ", ($var_xmod)) EQ 0` THEN
 ELSE
    LET xmod = 1
 ENDIF
-SET MODE/LAST ignore_error
-
-DEFINE SYMBOL varshape = `($data_var),RETURN=shape`
-
-! X region
-show symbol region_x*
-pause
-
-IF `STRINDEX("($varshape)", "X") NE 0` THEN
 
 IF `xmod EQ 0` THEN
    IF ($region_x_hi"0|*>1") THEN
@@ -194,7 +193,7 @@ ENDIF    !!! Y region
 
 ! Z region
 
-IF `STRINDEX("($varshape)", "Y") NE 0` THEN
+IF `STRINDEX("($varshape)", "T") NE 0` THEN
 IF ($region_z_hi"0|*>1") THEN
 
    DEFINE SYMBOL z_lo `z[gz=($data_var),z=($region_z_lo)]`
@@ -206,7 +205,7 @@ ENDIF   !!! Z region
 
 ! T region
 
-IF `STRINDEX("($varshape)", "Y") NE 0` THEN
+IF `STRINDEX("($varshape)", "T") NE 0` THEN
 IF ($region_t_hi"0|*>1") THEN
    
    LET tt = `t[gt=($data_var),t="($region_t_lo)"]`
@@ -330,4 +329,4 @@ LIST/APPEND/FILE="($result_xyzt_ijkl_filename)"/NOHEAD/NOROWLAB out_name
 SET MODE/LAST long
 SET MODE/LAST lat
 
-
+! End of $RCSfile ------------LAS_xyzt_ijkl.jnl-------------------------------

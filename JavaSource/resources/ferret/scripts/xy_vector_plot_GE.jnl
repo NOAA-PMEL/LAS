@@ -78,6 +78,31 @@ ENDIF
 IF ($ferret_use_graticules"1|0|*>1) THEN
   SET MODE GRATICULE:(DASH,COLOR=black)
 ENDIF
+! Vector xskip and yskip
+
+IF ($ferret_vector_skip"0|*>1") THEN
+   LET comloc = `STRINDEX("($ferret_vector_skip)", ",")`
+   LET nlen = `STRLEN("($ferret_vector_skip)")`
+   IF `comloc GT 1` THEN
+       DEFINE SYMBOL xskp = `SUBSTRING ("($ferret_vector_skip)", 1, comloc-1)`
+       DEFINE SYMBOL yskp = `SUBSTRING ("($ferret_vector_skip)", comloc+1, nlen-comloc)`
+    ELSE
+       DEFINE SYMBOL xskp = ($ferret_vector_skip)
+       DEFINE SYMBOL yskp = ($ferret_vector_skip)
+    ENDIF
+
+    LET xs = STRFLOAT ("($xskp)")
+    LET ys = STRFLOAT ("($yskp)")
+
+    IF ($error_status"0|*>1") THEN
+       MESSAGE/ERROR **ERROR format of vector skip is xskip,yskip
+       EXIT/PROGRAM
+    ENDIF
+
+    DEFINE SYMBOL qualifiers = ($qualifiers)/XSKIP=`xs`/YSKIP=`ys`
+
+ENDIF
+
 
 !IF ($ferret_no_margins"0") THEN
   DEFINE SYMBOL qualifiers = ($qualifiers)/NOAXES
