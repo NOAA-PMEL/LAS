@@ -339,7 +339,7 @@ function LASReq_getVariable(data_ID) {
 /**
  * Replaces all existing dataset-variable Link elements defined in the <code>&lt;args></code> section of the LASRequest
  * with the incoming pair.<br>
- * <b>NOTE:</b> The <code>setVariable(...)</code> method is deprecated.  Multiple variables
+ * <b>NOTE: The <code>setVariable(...)</code> method is deprecated.</b>  Multiple variables
  * are possible and the ability to modify only a single variable would normally require
  * that you identify an existing variable you wish to modify.  The current implementation of
  * the <code>setVariable(...)</code> method removes any additional variables that may be defined in the request.<p>
