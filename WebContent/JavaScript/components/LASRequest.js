@@ -531,6 +531,47 @@ function LASReq_removeConstraints() {
 ////////////////////////////////////////////////////////////
 
 /**
+ * Returns an Analysis object with the following attributes:
+ * <ul>
+ * <li>Analysis.label - identifier for the analysis
+ * <li>Analysis.axis - array of axis objects on which this analysis is defined
+ * <li>Analysis.axis[#].type - one of [x|y|z|t]
+ * <li>Analysis.axis[#].lo - lower bound of region of interest (axis specific)
+ * <li>Analysis.axis[#].hi - upper bound of region of interest
+ * <li>Analysis.axis[#].op - named Ferret transform (e.g. SUM, AVE, etc.)
+ * </ul>
+ * @param {int} index position of the Link node (Variable) in the LASRequest
+ * @return {object} Analysis Analysis object associated with the Variable at this position or null if no Analysis object is defined
+ * @see #removeAnalysis
+ * @see #setAnalysis
+ */
+function LASReq_getAnalysis(index) {
+  var Analysis = null;
+  var variableNode = this.getVariableNodeByIndex(index);
+  if (variableNode) {
+    var analysisNode = variableNode.getElements('analysis')[0];
+    if (analysisNode) {
+      Analysis = new Object;
+      Analysis.axis = [];
+      Analysis.label = String(analysisNode.getAttribute("label"));
+      var axisNodes = analysisNode.getElements('axis');
+      for (i=0;i<axisNodes.length;i++) {
+        Analysis.axis[i] = Object;
+        Analysis.axis[i].type = String(axisNodes[i].getAttribute("type"));
+        Analysis.axis[i].lo = String(axisNodes[i].getAttribute("lo"));
+        Analysis.axis[i].hi = String(axisNodes[i].getAttribute("hi"));
+        Analysis.axis[i].op = String(axisNodes[i].getAttribute("op"));
+      }
+    } else {
+      Analysis = null;
+    }
+  } else {
+    Analysis = null;
+  }
+  return Analysis;
+}
+
+/**
  * Adds an Analysis element to an existing Variable in the <code>&lt;args></code> section of the LASRequest.<br>
  * Each analysis is applied to a single axis and will 
  * typically be a Ferret axis-compressing transform like SUM, AVE, etc.
@@ -559,38 +600,6 @@ function LASReq_setAnalysis(index,A) {
     var AxisNode = this.DOM.createXMLNode(nodeXML);
     this.DOM = this.DOM.insertNodeInto(AnalysisNode,AxisNode);
   }
-}
-
-/**
- * Returns an Analysis object with the following attributes:
- * <ul>
- * <li>Analysis.label - identifier for the analysis
- * <li>Analysis.axis - array of axis objects on which this analysis is defined
- * <li>Analysis.axis[#].type - one of [x|y|z|t]
- * <li>Analysis.axis[#].lo - lower bound of region of interest (axis specific)
- * <li>Analysis.axis[#].hi - upper bound of region of interest
- * <li>Analysis.axis[#].op - named Ferret transform (e.g. SUM, AVE, etc.)
- * </ul>
- * @param {int} index position of the Link node (Variable) in the LASRequest
- * @return {object} Analysis Analysis object associated with the Variable at this position
- * @see #removeAnalysis
- * @see #setAnalysis
- */
-function LASReq_getAnalysis(index) {
-  var Analysis = new Object;
-  Analysis.axis = [];
-  var variableNode = this.getVariableNodeByIndex(index);
-  var analysisNode = variableNode.getElements('analysis')[0];
-  Analysis.label = String(analysisNode.getAttribute("label"));
-  var axisNodes = analysisNode.getElements('axis');
-  for (i=0;i<axisNodes.length;i++) {
-    Analysis.axis[i] = Object;
-    Analysis.axis[i].type = String(axisNodes[i].getAttribute("type"));
-    Analysis.axis[i].lo = String(axisNodes[i].getAttribute("lo"));
-    Analysis.axis[i].hi = String(axisNodes[i].getAttribute("hi"));
-    Analysis.axis[i].op = String(axisNodes[i].getAttribute("op"));
-  }
-  return Analysis;
 }
 
 /**
