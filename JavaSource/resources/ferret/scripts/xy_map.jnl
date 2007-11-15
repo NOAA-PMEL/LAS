@@ -53,7 +53,7 @@ SHADE($qualifiers) ($ferret_plot_var)
 
 ! Overlay land with a simple gray over land.
 ! SHADE/NOLAB/NOKEY/OVER/palette=grayscale/LEVELS=(0,100,10)(100,1000,100)(1000,6000,1000) ($ferret_plot_var)
-SHADE/NOLAB/NOKEY/OVER/palette=gray_dark ($ferret_plot_var)
+SHADE/NOLAB/NOKEY/OVER/palette=gray_dark/LEVELS=(0,6000,6000) ($ferret_plot_var)
 
 ! Save the results
 GO LAS_results box
