@@ -28,7 +28,7 @@ SET DATA/SAVE
 SET DATA 1
 DEFINE SYMBOL mod_len = "`($orig_var_1),RETURN=tmod`"
 SET DATA/RESTORE
-
+pause
 ! Now see if the variable ferret_var_1 has any non-missing data. 
 IF `STRCMP(($mod_len), " ") EQ 0` THEN 
   STAT ($ferret_var_1)
