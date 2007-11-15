@@ -38,6 +38,8 @@ DEFINE SYMBOL qualifiers = ($qualifiers)/PALETTE=($ferret_palette)
 
 DEFINE SYMBOL qualifiers = ($qualifiers)/LEVELS=(-9000,-1000,1000)(-1000,-100,100)(-100,100,10)(100,1000,100)(1000,6000,1000)
 
+DEFINE SYMBOL qualifiers = ($qualifiers)/LEVELS=(-9000,-1000,1000)(-1000,-100,100)(-100,0,10)
+
 
 LET map_area = `(($region_x_range) * ($region_y_range)) / (360 * 180)`
 
@@ -55,6 +57,8 @@ ENDIF
 
 DEFINE SYMBOL ferret_plot_var = rose[($region_xy)]
 SHADE($qualifiers) ($ferret_plot_var)
+
+SHADE/NOLAB/NOKEY/OVER/palette=gray_dark/LEVELS=(0,6000,6000) ($ferret_plot_var)
 
 ! Save the results
 GO LAS_results box
