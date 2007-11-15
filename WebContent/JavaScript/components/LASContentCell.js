@@ -24,11 +24,13 @@
  * Constructs a new LASContentCell object.<br>
  * The LASContentCell object knows how to deal with the following
  * types of information returned in the LASResponse:
- * &lt;ul>
- * &lt;li> errors
- * &lt;li> images
- * &lt;/ul>
- * 
+ * <ul>
+ *   <li> errors
+ *   <li> images
+ * </ul>
+ * Based on the type of response, LASContentCell fills a table cell, 
+ * identified by element_id, with an appropriate sub-table and then 
+ * displays the results of the LAS response in the sub-table.
  * @class This is the basic LASContentCell class.
  * @constructor
  * @return A new LASContentCell object
@@ -51,9 +53,9 @@ function LASContentCell() {
 ////////////////////////////////////////////////////////////
 
 /**
- * Creates a table with sub-elements appropriate to the LASResponse.
+ * Creates a sub-table within element_id containing elements appropriate to the LASResponse.
  * <p>
- * Any children of element_id will be removed and replaced with a Select object
+ * Any children of element_id will be removed and replaced with new sub-table elements.
  * <p>
  * @param {string} element_id 'id' attribute of the element into which the ContentCell is inserted.
  * @param {string} type ignored for now
@@ -110,15 +112,18 @@ function LASContentCell_render(element_id,type) {
 
 /**
  * Displays the contents of the LASResponse Result of type = 'type'.
- * // TODO:  Should we use 'type' or 'ID' for this switch in the code?
  * <p>
- * Any children of element_id will be removed and replaced with a Select object
+ * Any previous results/errors will be removed and replaced with the current results/errors.
  * <p>
+ * If the calling javascript adds the <code>large_img_url</code> property to the
+ * LASResponse object passed in, displayed images will be clickable and will link
+ * to the URL found in <code>LASResponse.large_img_url</code>.
  * @param {Object} LASResponse LASResponse object
  * @param {string} result_type type of result to be displayed
  */
 function LASContentCell_display(LASResponse,result_type) {
 
+  // TODO:  Should we use 'type' or 'ID' for this switch in the code?
   // Default behavior is to plot the image found in the LASResponse.
   if (!result_type) { result_type = 'plot_image'; }
 

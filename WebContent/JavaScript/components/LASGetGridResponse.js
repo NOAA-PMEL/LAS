@@ -78,7 +78,9 @@
  */
 function LASGetGridResponse(response) {
 
-  //var JSONObject = LASGetGridResponseText.parseJSON();
+/**
+ * LAS Grid object returned by the getGrid.do request.
+ */
   this.response = response;
 
 // Add methods to this object

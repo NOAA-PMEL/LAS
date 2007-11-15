@@ -1,14 +1,35 @@
 /**
- * @fileoverview This file is to be included in any HTML documents that
- * wishes to process the response from a getGrid.do request a Live Access Server.
- * This file and the required 'json.js' file should be included in the following
- * manner in the head of the HTML file:
+ * @fileoverview This file is to be included in any Velocity Template that
+ * wishes to access grid information available while generating an LAS product.
+ * This information is identical to the information returned by the getGrid.do
+ * servlet.<p>
+ * Here is some example template code that demonstrates accessing and interpreting
+ * the grid:
  * <pre>
- * &lt;head>
- *   &lt;script language="JavaScript" src="json.js"&gt;&lt;/script&gt;
- *   &lt;script language="JavaScript" src="LASGrid.js"&gt;&lt;/script&gt;
- *   ...
- * &lt;/head></pre>
+ * ## The tepmlating language has no access to javascript variables
+ * ## so we must get dsID and varID the 'template way'
+ * #set($dsID = $las_request.datasetIDs.get(0))
+ * #set($varID = $las_request.variableIDs.get(0))
+ * #set($grid = $las_config.getGrid($dsID,$varID))
+ * #set($grid_JSON = $grid.toJSON().toString())
+ * var gridJSON = '$grid_JSON';
+ *
+ * // First, make sure we can parse the LASResponse
+ * var Grid;
+ * var JSONObject;
+ * try {
+ *   var JSONObject = gridJSON.parseJSON();
+ * } catch(e) {
+ *   alert('Error parsing gridJSON as JSON.');
+ *   return;
+ * }
+ *
+ * try {
+ *   Grid = new LASGrid(JSONObject);
+ * } catch(e) {
+ *   alert(e);
+ *   return;
+ * }</pre>
  * For more information about LAS and the LASGrid please see:
  * {@link http://ferret.pmel.noaa.gov/armstrong/ Armstrong Documentation}.<br>
  *
@@ -16,13 +37,12 @@
  * {@link http://www.json.org/json.html}.
  *
  * @author Jonathan Callahan
- * @version $Revision: 783 $
  */
 
 /**
  * Constructs a new LASGrid object.<br>
- * The LASGrid object contains all the information returned from a
- * getGrid.do request to the LAS product server .  An XML representation of
+ * The LASGrid object contains all the information associated with an LAS Grid.
+ * An XML representation of
  * the JSON object returned by the LAS product server would look like this:
  * <pre>
  * &lt;t&gt;?
@@ -73,12 +93,14 @@
  * to get individual pieces of information without navigating the hierarchy.
  * @class This is the basic LASGrid class.
  * @constructor
- * @param {object} JSONObject instantiated from JSON serialization of the getGrid.do response
+ * @param {object} JSONObject instantiated from JSON serialization of the LAS Grid.
  * @return A new LASGrid object
  */
 function LASGrid(response) {
 
-  //var JSONObject = LASGridText.parseJSON();
+/**
+ * LAS Grid object obtained from the Velocity template.
+ */
   this.response = response;
 
 // Add methods to this object
