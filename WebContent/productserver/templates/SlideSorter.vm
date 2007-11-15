@@ -382,8 +382,9 @@ function createLASRequest(AA) {
 // See the LASRequest documentation for details on the Analysis object returned.
      
       var Analysis = LASReq.getAnalysis(0);
-      LASReq.setAnalysis(1,Analysis);
-      //LASReq.setAnalysis(1,LASReq.getAnalysis(0));
+      if (Analysis) {
+        LASReq.setAnalysis(1,Analysis);
+      }
 
 // Now set any additional ranges
 
