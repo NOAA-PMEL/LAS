@@ -11,6 +11,7 @@
 <!ENTITY coads SYSTEM "coads.xml">
 <!ENTITY levitus SYSTEM "levitus.xml">
 <!ENTITY paco SYSTEM "DODS_IRI_NOAA_NCEP_EMC_CMB_Pac_ocean.xml">
+<!ENTITY ocean_atlas_subset SYSTEM "ocean_atlas_subset.xml">
 
 <!-- Sample insitu datasets -->
 <!ENTITY insitu_demo_1 SYSTEM "insitu_demo_1.xml">
@@ -55,6 +56,7 @@
  &coads;
  &levitus;
  &paco;
+ &ocean_atlas_subset;
  <!-- Example scattered LAS datasets -->
  &insitu_demo_1;
  &insitu_demo_2;

@@ -1162,6 +1162,8 @@ sub genSamples {
     $sample_out[5] = "conf/server/DODS_IRI_NOAA_NCEP_EMC_CMB_Pac_ocean.xml";
     $sample_in[6] = "xml/perl/levitus.xml";
     $sample_out[6] = "conf/server/levitus.xml";
+    $sample_in[7] = "conf/example/ocean_atlas_subset.xml";
+    $sample_out[7] = "conf/server/ocean_atlas_subset.xml";
     $insitu_in[0] = "conf/example/insitu_demo_1.xml";
     $insitu_out[0] = "conf/server/insitu_demo_1.xml";
     $insitu_in[1] = "conf/example/insitu_demo_2.xml";
