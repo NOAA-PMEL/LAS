@@ -1,0 +1,54 @@
+<datasets>
+  <id-2c2b44e493 name="Subset of World Ocean Atlas monthly 1994 Monthly Means" url="/home/shiva2/data/ocean_atlas_subset.nc">
+    <variables>
+      <properties>
+        <ferret>
+          <palette>ocean_temp</palette>
+        </ferret>
+      </properties>
+      <TEMP-id-2c2b44e493 name="Temperature" units="Deg C" url="#TEMP">
+        <link match="/lasdata/grids/grid-AX006-AX007-ZAXLEVIT19-TIME-id-2c2b44e493" />
+      </TEMP-id-2c2b44e493>
+    </variables>
+  </id-2c2b44e493>
+</datasets>
+<grids>
+  <grid-AX006-AX007-ZAXLEVIT19-TIME-id-2c2b44e493>
+    <link match="/lasdata/axes/AX006-x-id-2c2b44e493" />
+    <link match="/lasdata/axes/AX007-y-id-2c2b44e493" />
+    <link match="/lasdata/axes/ZAXLEVIT19-z-id-2c2b44e493" />
+    <link match="/lasdata/axes/TIME-t-id-2c2b44e493" />
+  </grid-AX006-AX007-ZAXLEVIT19-TIME-id-2c2b44e493>
+</grids>
+<axes>
+  <AX006-x-id-2c2b44e493 type="x" units="degrees_east">
+    <arange start="20.5" size="180" step="2" />
+  </AX006-x-id-2c2b44e493>
+  <AX007-y-id-2c2b44e493 type="y" units="degrees_north">
+    <arange start="-89.5" size="90" step="2" />
+  </AX007-y-id-2c2b44e493>
+  <ZAXLEVIT19-z-id-2c2b44e493 type="z" units="METERS">
+    <v>0</v>
+    <v>10</v>
+    <v>20</v>
+    <v>30</v>
+    <v>50</v>
+    <v>75</v>
+    <v>100</v>
+    <v>125</v>
+    <v>150</v>
+    <v>200</v>
+    <v>250</v>
+    <v>300</v>
+    <v>400</v>
+    <v>500</v>
+    <v>600</v>
+    <v>700</v>
+    <v>800</v>
+    <v>900</v>
+    <v>1000</v>
+  </ZAXLEVIT19-z-id-2c2b44e493>
+  <TIME-t-id-2c2b44e493 type="t" units="month" climatology="true">
+    <arange start="0001-01-16" size="12" step="1" />
+  </TIME-t-id-2c2b44e493>
+</axes>
