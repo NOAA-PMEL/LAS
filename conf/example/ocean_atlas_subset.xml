@@ -1,12 +1,12 @@
 <datasets>
   <id-2c2b44e493 name="Subset of World Ocean Atlas monthly 1994 Monthly Means" url="/home/shiva2/data/ocean_atlas_subset.nc">
     <variables>
-      <properties>
-        <ferret>
-          <palette>ocean_temp</palette>
-        </ferret>
-      </properties>
       <TEMP-id-2c2b44e493 name="Temperature" units="Deg C" url="#TEMP">
+        <properties>
+          <ferret>
+            <palette>ocean_temp</palette>
+          </ferret>
+        </properties>
         <link match="/lasdata/grids/grid-AX006-AX007-ZAXLEVIT19-TIME-id-2c2b44e493" />
       </TEMP-id-2c2b44e493>
     </variables>
