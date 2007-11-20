@@ -1,4 +1,7 @@
 <operations>
+   <operation name="V7 User Interface" ID="V7UI" output_template="V7UI" service_action="V7UI" private="true">
+        <service>template</service>
+   </operation>
    <operation name="Desktop application data access scripts"
         ID="Gen_Scripts" output_template="scripts"
         service_action="Convert_to_Index" order="0600">
