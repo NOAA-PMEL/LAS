@@ -1,4 +1,10 @@
 /**
+ * MapWidget.js
+ * author: Jeremy Malczyk
+ * A tool to allow rubberbanding on images and other DOM objects. 
+ */
+
+/**
  * bindAsEventListener is required to maintain context with DOM events.
  */
 if ( !Function.prototype.bindAsEventListener ) {
@@ -62,82 +68,19 @@ function MapWidget(args) {
 	//object to keep track of pixel and grid coordinates
 	this.extents = {
 		DOMNode : { //area of the widget
-			pixel : {
-				x : {
-					min : null,
-					max : null
-				},
-				y : {
-					min : null,
-					max : null
-				}
-			}
+			pixel : { x : {min : null,max : null}, y : {min : null, max : null}}
 		},
 		plot  : { //area of the plot
-			pixel : {
-				x : {
-					min : null,
-					max : null
-				},
-				y : {
-					min : null,
-					max : null
-				}
-			},
-			grid  : {
-				x : {
-					min : null,
-					max : null
-				},
-				y : {
-					min : null,
-					max : null
-				}
-			} 
+			pixel : {x : {min : null,max : null},y : {min : null,max : null}},
+			grid  : {x : {min : null,max : null},y : {min : null,max : null}} 
 		},
 		data : { //area the data exists in
-			pixel : {
-				x : {
-					min : null,
-					max : null
-				},
-				y : {
-					min : null,
-					max : null
-				}
-			},
-			grid  : {
-				x : {
-					min : null,
-					max : null
-				},
-				y : {
-					min : null,
-					max : null
-				}
-			} 
+			pixel : {x : {min : null,max : null},y : {min : null,max : null}},
+			grid  : {x : {min : null,max : null},y : {min : null,max : null}} 
 		},
 		selection : { //the selected area covered by the rubberBand object
-			pixel : {
-				x : {
-					min : null,
-					max : null
-				},
-				y : {
-					min : null,
-					max : null
-				}
-			},
-			grid  : {
-				x : {
-					min : null,
-					max : null
-				},
-				y : {
-					min : null,
-					max : null
-				}
-			} 
+			pixel : {x : {min : null,max : null},y : {min : null,max : null}},
+			grid  : {x : {min : null,max : null},y : {min : null,max : null}} 
 		}
 	}
  
@@ -254,6 +197,9 @@ MapWidget.prototype.initPixelExtents = function(evt) {
 		this.displayBox(true);
 		this.displayCentralBox(true);
 	}
+	if (this.ondraw) this.ondraw(this);	
+	if (this.onafterdraw) this.onafterdraw(this);
+
 
 }
 
@@ -413,13 +359,13 @@ MapWidget.prototype.setView = function (view) {
   			this.setSelectionPixYMax(this.Y1);
   			this.getSelectionGrid();  			
   			
-  			if(this.rubberBand.style.visibility != "hidden") {
+  			//if(this.rubberBand.style.visibility != "hidden") {
 	  			
   				this.displayBox(true);
   				this.displayCentralBox(true);
-  			}
+  			//}
 		
-  	 		 if(this.ondraw && this.rubberBand.style.visibility != 'hidden') 
+  	 		 //if(this.ondraw && this.rubberBand.style.visibility != 'hidden') 
   	 		 	this.ondraw(this);		 
   		}
   	  this.view = view;
@@ -1489,24 +1435,8 @@ MapWidget.prototype.setSelectionGridBBox = function (bbox) {
 }
 
 //recenter the map on bbox (TODO recenter and zoom on bbox)
-MapWidget.prototype.recenterOnDataBBox = function (bbox) {
-  /* var old_grid_cx = (this.getPlotGridXMin()+this.getPlotGridXMax())/2;
-	var new_grid_cx = (bbox.x.min+bbox.x.max)/2;
-   var old_grid_cy = (this.getPlotGridYMin()+this.getPlotGridYMax())/2;
-	var new_grid_cy = (bbox.y.min+bbox.y.max)/2;
-	
-	var grid_dx = (new_grid_cx-old_grid_cx);
-	var pix_dx = this.getXPixRes()*grid_dx;
-
-	var grid_dy = (new_grid_cy-old_grid_cy);
-	var pix_dy = this.getYPixRes()*grid_dy;
-	
-	//reset the plot grid coords
-	this.setPlotGridXMin(this.getPlotGridXMin() + grid_dx);
-	this.setPlotGridXMax(this.getPlotGridXMax() + grid_dx);
-	this.setPlotGridYMin(this.getPlotGridYMin() + grid_dy);
-	this.setPlotGridYMax(this.getPlotGridYMax() + grid_dy);	
-*/
+MapWidget.prototype.zoomOnBBox = function (bbox) {
+  
 	var bbox_width  = (bbox.x.max-bbox.x.min);
 	var bbox_height =  (bbox.y.max-bbox.y.min);
 	var plot_width  =(this.getPlotGridXMax()-this.getPlotGridXMin());
@@ -1517,17 +1447,26 @@ MapWidget.prototype.recenterOnDataBBox = function (bbox) {
 	var plot_screen_aspect = (plot_height*this.getXPixRes())/(plot_width*this.getYPixRes());
 	var bbox_cx = (bbox.x.max+bbox.x.min)/2;
 	var bbox_cy = (bbox.y.max+bbox.y.min)/2;
+
 	
 	if(bbox_screen_aspect>plot_screen_aspect) {
 		this.setPlotGridYMin(bbox.y.min);
-		this.setPlotGridYMax(bbox.y.max);
+	   this.setPlotGridYMax(bbox.y.max);
 		this.setPlotGridXMin(bbox_cx-bbox_height/(plot_aspect*2));
 		this.setPlotGridXMax(bbox_cx+bbox_height/(plot_aspect*2));	
+		this.setDataGridYMin(bbox.y.min);
+	   this.setDataGridYMax(bbox.y.max);
+		this.setDataGridXMin(bbox_cx-bbox_height/(plot_aspect*2));
+		this.setDataGridXMax(bbox_cx+bbox_height/(plot_aspect*2));	
 	} else {
 		this.setPlotGridXMin(bbox.x.min);
 		this.setPlotGridXMax(bbox.x.max);
 		this.setPlotGridYMin(bbox_cy-bbox_width*(plot_aspect/2));
 		this.setPlotGridYMax(bbox_cy+bbox_width*(plot_aspect/2));	
+		this.setDataGridXMin(bbox.x.min);
+		this.setDataGridXMax(bbox.x.max);
+		this.setDataGridYMin(bbox_cy-bbox_width*(plot_aspect/2));
+		this.setDataGridYMax(bbox_cy+bbox_width*(plot_aspect/2));	
 	}
 
    var req = new LASRequest();
@@ -1538,22 +1477,10 @@ MapWidget.prototype.recenterOnDataBBox = function (bbox) {
 	req.setRange("x",this.getPlotGridXMin(),this.getPlotGridXMax());
 	req.setRange("y",this.getPlotGridYMin(),this.getPlotGridYMax());
 	this.plot.src = "ProductServer.do?xml=" + escape(req.getXMLText()) + "&stream=true&stream_ID=plot_image";
+	
+   this.plot.onload = this.updatePixelExtents.bindAsEventListener(this);
    
-
-
- 	//update the data grid coords		
-	this.setDataGridBBox(bbox);
 	
-	
- 	//update the data grid coords		
-	this.setSelectionGridBBox(bbox);
-	this.displayBox(true);
-	this.displayCentralBox(true);
-	
-	
-	if (this.ondraw) this.ondraw(this);	
-	if (this.onafterdraw) this.onafterdraw(this);
-
 }
 
 //set the data region to bbox. shrink selection box to fit
@@ -1699,4 +1626,29 @@ MapWidget.prototype.panPlot = function (dx,dy) {
 	this.plot.src = "ProductServer.do?xml=" + escape(req.getXMLText()) + "&stream=true&stream_ID=plot_image";
  
 }
-
+/**
+ * Zoom the map by zoom factor f on the selected region, or center of data region.
+ */
+MapWidget.prototype.zoom = function (f) {
+	
+if(f>0) {
+	var bbox = this.extents.selection.grid;
+	var width = (bbox.x.max-bbox.x.min);
+	var height = (bbox.y.max-bbox.y.min);
+	var cx = (bbox.x.min+bbox.x.max)/2;
+	var cy = (bbox.y.min+bbox.y.max)/2;
+	bbox.x.min = cx - width/2;
+	bbox.x.max = cx + width/2;
+	bbox.y.min = cy - height/2;
+	bbox.y.max = cy + height/2;	
+	if(!this.extents.lastData)
+		this.extents.lastData = [];
+	this.extents.lastData.push(this.clone(this.extents.data.grid));
+} else
+	if (this.extents.lastData.length>0) 
+		var bbox = this.extents.lastData.pop();
+		
+	
+	this.zoomOnBBox(bbox);
+	
+}
