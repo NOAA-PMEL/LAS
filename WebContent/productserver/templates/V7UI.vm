@@ -1,0 +1,154 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html debug="true">
+	<head>
+		<title>$las_config.getTitle()</title>
+		<script type="text/javascript" src="JavaScript/components/BrowserSniff.js" ></script>		
+		<script type="text/javascript" src="JavaScript/components/xmldom.js" ></script>
+		<script type="text/javascript" src="JavaScript/components/LASRequest.js" ></script>
+		<script type="text/javascript" src="JavaScript/components/LASGetGridResponse.js" ></script>
+		<script type="text/javascript" src="JavaScript/components/LASGetCategoriesResponse.js" ></script>
+		<script type="text/javascript" src="JavaScript/components/LASGetViewsResponse.js" ></script>
+		<script type="text/javascript" src="JavaScript/components/LASGetOperationsResponse.js" ></script>
+		<script type="text/javascript" src="JavaScript/components/LASGetOptionsResponse.js" ></script>
+		<script type="text/javascript" src="JavaScript/components/MapWidget.js" ></script>
+		<script type="text/javascript" src="JavaScript/components/querystring.js" ></script>
+		<script  type="text/javascript" src="JavaScript/components/DateWidget.js" ></script>
+		<script  type="text/javascript" src="JavaScript/components/MenuWidget.js" ></script>
+		<script type="text/javascript" src="JavaScript/frameworks/json/json2.js" ></script>
+		<script type="text/javascript" src="JavaScript/frameworks/dojo/dojo.js" ></script>
+		<script type="text/javascript" src="JavaScript/frameworks/prototype/prototype.js" ></script>
+		<script type="text/javascript" src="JavaScript/ui/LASUI.js" ></script>
+		<script type="text/javascript">
+			var LAS = new LASUI();
+			LAS.products = {
+				"Maps" : {
+					"Latitude-Longitude" : {"view" : "xy", "id" : "Plot_2D_XY", "optiondef" : "Options_2D_image_contour_xy"}
+				},
+				"Line Plots" : {
+					"Time series" : {"view" : "t", "id" : "Plot_1D", "optiondef" : "Options_1D"},
+					"Longitude" : {"view" : "y", "id" : "Plot_1D", "optiondef" : "Options_1D"},
+					"Latitude" : {"view" : "x", "id" : "Plot_1D", "optiondef" : "Options_1D"},
+					"Depth" : {"view" : "z", "id" : "Plot_1D", "optiondef" : "Options_1D"}
+				},
+				"Vertical Section Plots" : {
+					"Longitude-depth" : {"view" : "yz", "id" : "Plot_2D", "optiondef" : "Options_2D_image_contour"},
+					"Latitude-depth" : {"view" : "xz", "id" : "Plot_2D", "optiondef" : "Options_2D_image_contour"}										
+				},
+				"Hofmuller Plots" : {
+					"Longitude-time" : {"view" : "yt", "id" : "Plot_2D", "optiondef" : "Options_2D_image_contour"},
+					"Latitude-time" : {"view" : "xt", "id" : "Plot_2D", "optiondef" : "Options_2D_image_contour"},
+					"Depth-time" : {"view" : "zt", "id" : "Plot_2D", "optiondef" : "Options_2D_image_contour"}													
+				},
+				"Data Volumes" : {
+					"Latitude-Longitude-depth" : {"view" : "xyz", "id" : "Data_Extract", "optiondef" : ""},	
+					"Latitude-Longitude-time" : {"view" : "xyt", "id" : "Data_Extract", "optiondef" : ""},	
+					"Latitude-Longitude-depth-time" : {"view" : "xyzt", "id" : "Data_Extract", "optiondef" : ""}	
+				}
+			};
+			LAS.params = {
+#if ($las_request.getProperty('ui','state')!="")
+				'state' : $las_request.getProperty('ui','state'),
+#end
+
+#if ($las_request.getProperty('ui','catid')!="")
+				'catid' :$las_request.getProperty('ui','catid'),
+#else
+				'catid' : {},
+#end
+				'dsid' : "$las_request.getProperty('ui','dsid')",
+#if  ($las_request.getProperty('ui','varid')!="")
+				'varid' : $las_request.getProperty('ui','varid'),
+#else
+				'varid' : [],
+#end
+				'view' : "$las_request.getProperty('ui','view')",
+				'plot' : "$las_request.getProperty('ui','plot')",
+#if ($las_request.getProperty('ui','x')!="")
+				'x' : $las_request.getProperty('ui','x'),		
+#end
+#if ($las_request.getProperty('ui','y')!="")
+				'y' : $las_request.getProperty('ui','y'),		
+#end
+#if ($las_request.getProperty('ui','z')!="")
+				'z' : $las_request.getProperty('ui','z'),		
+#end
+#if ($las_request.getProperty('ui','t')!="")
+				't' : $las_request.getProperty('ui','t'),		
+#end
+#if ($las_request.getProperty('ui','options')!="")
+				'options' : $las_request.getProperty('ui','options')
+#else
+				'options' :{}				
+#end
+			
+
+		}
+		</script>
+		<style media="all" type="text/css">
+			@import "JavaScript/ui/LASUI.css";
+		</style>
+	</head>
+	<body onload="LAS.initUI();">
+		#parse ("/productserver/templates/V7UIHeader.vm") 
+			<table width="1024px" height="100%" border=0>
+				<tbody>
+				<tr>
+					<td valign="top" bgcolor="silver" width="400px" height="100%" >
+						<div><a href="doc/las_v7_ui_introduction.html" target="_new"><img src="images/help.png"></a></div>
+						<div style="margin:2pt;" id="categories"></div></td>
+					<td valign="top">
+						<div id="constraints" style="width:100%;border: 1px solid black">
+							<font size=-3>Click a button to launch a product in a new window.</font>
+							<table><tbody id="productButtons"><tr >
+								<td align=center width="20%"><INPUT class="LASProductButton" width="100%" disabled="true" ID="Table of values (text)" value="Table of values" type="button"></td>
+								<td align=center width="20%"><INPUT class="LASProductButton" width="100%" disabled="true" ID="ASCII file" value="ASCII file" type="submit"></td>
+								<td align=center width="20%"><INPUT class="LASProductButton" width="100%" disabled="true" ID="Desktop application data access scripts" value="Desktop application data access scripts" type="button"></td>
+								<td align=center width="20%"><INPUT class="LASProductButton" width="100%" disabled="true" ID="ArcView gridded" value="ArcView gridded" type="button"></td></tr><tr>
+								<td align=center width="20%"><INPUT class="LASProductButton" width="100%" disabled="true" ID="Animation" value="Animation" type="button"></td>
+								<td align=center width="20%"><INPUT class="LASProductButton" width="100%" disabled="true" ID="Color plot comparison" value="Color Plot Comparison" type="button"></td>
+								<td align=center width="20%"><INPUT class="LASProductButton" width="100%" disabled="true" ID="Interactive color plot" value="Interactive Color Plot" type="button"></td>
+								<td align=center width="20%"><INPUT class="LASProductButton" width="100%" disabled="true" ID="Plot to Google Earth" value="Plot to Google Earth" type="button"></td>
+							</tr></tbody></table>
+							<table width="100%" height="220pt" border=0>
+							<tbody><tr>
+								<td width="20px" valign="top"><img id="wait" style="visibility:hidden;" src="JavaScript/components/mozilla_blu.gif">&nbsp;</td>
+								<td width="50%"  align="left" valign="center">
+										<table height="100%" width="100%"><tbody><tr><td valign="top">
+											<div id="plotType"></div><div class="LASOptionsDIVNode" style="display:none" id="plotOptions"></div><br>
+											<div id="Date"></div>
+											<div id="Depth"></div>
+										</td></tr>
+								</tbody></table>
+								</td>
+								<td width="50%">
+									<table><tbody>
+										<tr><td></td><td align="center"><strong>Max Lat : </strong><input size=3  id="input_maxY" type="text" value="90.0"></td><td></td></tr>
+										<tr><td align="right"><strong>Min<br><b onmousedown="LAS.refs.XYSelect.panPlot(-20,0);" class="LASlink">&larr;</b> Lon<br></strong><input size=6 id="input_minX" value="-180.0"><br><a  class="LASlink" onclick="LAS.refs.XYSelect.zoom(1);">ZOOM IN</a></td><td><div id="MapWidget" style="border:1px solid black;" ></div><td align="left"><strong>Max<br>Lon <b onmousedown="LAS.refs.XYSelect.panPlot(20,0);" class="LASlink">&rarr;</b></strong><br><input value="180.0" size=6 id="input_maxX"><br><a class="LASlink" onclick="LAS.refs.XYSelect.zoom(-1)">ZOOM OUT</a></td></tr>
+										<tr><td></td><td align="center"><strong>Min Lat : </strong><input id="input_minY" size=3 type="text" value="-90.0"></td><td></td></tr>
+									</tbody></table>
+								</td>
+							</tr>						
+							</tbody>
+							</table>
+						<table width="100%"><tr>
+							<td><a href="javascript:" class="LASlink" alt="Hide the constraints pane" onmouseover="window.status='Hide the constraints pane';" onmouseout="window.status=''"  id="hideC"  onclick="document.getElementById('constraints').style.display='none';LAS.refs.XYSelect.rubberBand.style.display='none';LAS.refs.XYSelect.rubberBand_c.style.display='none';document.getElementById('showC').style.display='';">Hide constraints</a></td>										
+							<td><a href="javascript:" class="LASlink" onmouseover="window.status='Show plot options';" onmouseout="window.status=''"   class="LASlink" onclick="document.getElementById('plotOptions').style.display='';">Set plot options.</a></td>
+							<td><a href="javascript:" class="LASlink" onmouseover="window.status='Link to this plot';" onmouseout="window.status=''"   class="LASlink" onclick="prompt('Bookmark this link to save the current application state.','http://' + document.location.host + document.pathname + '?xml=' + escape(LAS.uirequest.getXMLText()) )">Link to this plot.</a></td>
+<td><a href="javascript:" onclick="LAS.state.embed=false;LAS.makeRequest();LAS.state.embed=true;">Open plot in a new window.</a></td>
+						</tr></table>
+						</div>
+						<div  style="width:100%;height:600px;border: 1px solid black;padding-top:2px;"><a id ="showC" href="javascript:" alt="Show the constraints pane" onmouseover="window.status='Hide the constraints pane';" onmouseout="window.status=''"   style="display:none;cursor:pointer;"  onclick="document.getElementById('constraints').style.display='';this.style.display='none';LAS.refs.XYSelect.rubberBand.style.display='';LAS.refs.XYSelect.rubberBand_c.style.display='';LAS.refs.XYSelect.updatePixelExtents();">Show constraints</a>
+											<div style="display:none;margin:20pt;padding:20pt;" id="wait_msg"><H3>Please wait while your product loads.</H3></div><iframe id="output" width="100%" height="100%" frameborder=0></iframe></div>
+					</td>
+				</tr>
+				</tbody>
+			</table>
+		</div>
+		#parse( "/productserver/templates/V7UIFooter.vm") 
+		<div id="debug" style="border:1pt solid black;position:absolute;top:200px;left:150px;display:none;"></div>
+		<div id="plotOptions" style="border:1pt solid black;background-color:white;z-index:6;position:absolute;top:200px;left:150px;display:none;"></div>
+	</body>
+</html>
+
+
+
