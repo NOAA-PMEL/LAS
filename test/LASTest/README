@@ -1,0 +1,9 @@
+
+LASTest
+
+This tool is used to test your LAS installation on command line.
+
+It tests 
+- connections of remote data sets through OPeNDAP
+- responses from a LAS product server
+

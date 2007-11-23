@@ -1,0 +1,52 @@
+<project name="LASTest" basedir=".">
+   
+  <property name="src" location="src"/>
+  <property name="build" location="build"/>
+  <property name="las.home" value="../../"/>
+
+  <target name="init">
+        <mkdir dir="${build}"/>
+        <mkdir dir="las"/>
+        <jar destfile="las/las.jar"
+          basedir="${las.home}/WebContent/WEB-INF/classes"
+        />
+  </target>
+
+  <target name="compileTest" depends="init" description="compile the test program">
+     <javac srcdir="${src}" destdir="${build}">
+           <classpath>
+               <fileset dir="las">
+                   <include name="**/*.jar"/>
+               </fileset>
+               <fileset dir="${las.home}/WebContent/WEB-INF/lib">
+                   <include name="**/*.jar"/>
+               </fileset>
+           </classpath>
+     </javac>
+  </target>
+
+   <target name="lastest" depends="compileTest" description="executes the test program">
+    <java classname="LASTest">
+    <arg value="${dds}" />
+    <arg value="${v}" />
+    <arg value="${d}" />
+    <arg value="${a}" />
+    <arg value="${e}" />
+    <arg value="${h}" />
+    <arg value="${c}" />
+    <arg value="${r}" />
+    <arg value="${vb}" />
+    <classpath>
+        <pathelement location="las"/>
+            <fileset dir="las">
+                   <include name="**/*.jar"/>
+               </fileset>
+            <fileset dir="${las.home}/WebContent/WEB-INF/lib">
+                <include name="**/*.jar"/>
+            </fileset>
+            <pathelement path="${build}"/>
+    </classpath>
+    </java>
+  </target>
+
+</project>
