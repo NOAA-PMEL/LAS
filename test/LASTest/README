@@ -7,3 +7,5 @@ It tests
 - connections of remote data sets through OPeNDAP
 - responses from a LAS product server
 
+Run "ant lastest -Dh=1" to get usage.
+
