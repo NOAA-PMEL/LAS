@@ -152,7 +152,7 @@
        </copy> 
  </target>
  <target name="selenium">
-    <copy todir="${jakarta.home}/webapps/${app.name}">
+    <copy todir="${jakarta.home}/webapps/${app.name}/test">
        <fileset dir="test">
           <include name="**"/>
        </fileset>
