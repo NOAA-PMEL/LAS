@@ -26,10 +26,10 @@ import gov.noaa.pmel.tmap.las.util.TimeAxis;
 import gov.noaa.pmel.tmap.las.util.Variable;
 import gov.noaa.pmel.tmap.las.util.View;
 
-import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.File;
 import java.io.PrintWriter;
-import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -187,9 +187,25 @@ public class LASConfig extends LASDocument {
      * Take F-TDS server URL and data directory and build the F-TDS URLs for each variable. 
      * @param fds_base the base URL of the F-TDS server http://server:port/thredds/dodsC
      * @param fds_dir the directory into which the F-TDS journal files will be written
-     * @throws FileNotFoundException 
+     * @throws LASException
+     * @throws JDOMExcption
+     * @throws IOFoundException 
      */
-    public void addFDS(String fds_base, String fds_dir) throws LASException, JDOMException, FileNotFoundException {
+    public void addFDS(String fds_base, String fds_dir) throws LASException, JDOMException, IOException {
+        File datadir = new File(fds_dir);
+        if ( !datadir.exists() ) {
+            boolean success = datadir.mkdirs();
+            if ( !success ) {
+                log.warn("No T-FDS directory.");
+            }
+        }
+        datadir = new File(fds_dir+"dynamic");
+        if ( !datadir.exists() ) {
+            boolean success = datadir.mkdirs();
+            if ( !success ) {
+                log.warn("No T-FDS directory for user defined data.");
+            }
+        }
         List datasetsElements = getRootElement().getChildren("datasets");
         for (Iterator datasetsElementIt = datasetsElements.iterator(); datasetsElementIt.hasNext();) {
             Element datasetsE = (Element) datasetsElementIt.next();
@@ -209,7 +225,7 @@ public class LASConfig extends LASDocument {
                         String var = getVariableName(dsID,varID);
                         String grid_type = variable.getAttributeValue("grid_type");
                         if ( grid_type.equals("regular") ) {
-                            File datadir = new File(fds_dir+dsID);
+                            datadir = new File(fds_dir+dsID);
                             if ( !datadir.exists() ) {
                                 boolean success = datadir.mkdirs();
                                 if ( !success ) {
@@ -256,7 +272,7 @@ public class LASConfig extends LASDocument {
                     for (Iterator jnlsIt = jnls.keySet().iterator(); jnlsIt.hasNext();) {
                         String key = (String) jnlsIt.next();
                         File varjnl = new File(fds_dir+dsID+File.separator+"data_"+key+".jnl");
-                        PrintWriter data_script = new PrintWriter(new FileOutputStream(varjnl));
+                        PrintWriter data_script = new PrintWriter(new FileWriter(varjnl));
                         data_script.println(jnls.get(key));
                         data_script.close();
                         index++;

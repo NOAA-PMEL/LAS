@@ -9,7 +9,6 @@ import gov.noaa.pmel.tmap.las.exception.LASException;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.FileNotFoundException;
 import java.util.Iterator;
 import java.util.List;
 
@@ -204,15 +203,12 @@ public class LASConfigPlugIn implements PlugIn {
             log.debug("Adding F-TDS attributes to data set.");
             log.debug("base url: "+fds_base+" local directory "+fds_dir);
             lasConfig.addFDS(fds_base, fds_dir);
-        } catch (LASException e1) {
-            // TODO Auto-generated catch block
-            e1.printStackTrace();
-        } catch (JDOMException e1) {
-            // TODO Auto-generated catch block
-            e1.printStackTrace();
-        } catch (FileNotFoundException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+        } catch (LASException e) {
+            log.error("Could not add F-TDS URLs to data configuration. "+e.toString());
+        } catch (JDOMException e) {
+            log.error("Could not add F-TDS URLs to data configuration. "+e.toString());
+        } catch (IOException e) {
+            log.error("Could not add F-TDS URLs to data configuration. "+e.toString());
         }
         
         if (lasUIFileName == null || lasUIFileName.length() == 0) {
