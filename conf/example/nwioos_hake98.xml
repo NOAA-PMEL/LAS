@@ -14,7 +14,7 @@
       <db_name>1998 Hake Survey ADCP</db_name>
       <db_title>1998 Hake Survey ADCP</db_title>
       <db_host>localhost</db_host>
-      <db_table>adcp98</db_table>
+      <db_table>ADCP98</db_table>
       <longitude>X</longitude>
       <lon_domain>-180:180</lon_domain>
       <latitude>Y</latitude>
