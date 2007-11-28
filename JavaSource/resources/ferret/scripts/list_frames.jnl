@@ -5,9 +5,10 @@
 ! $Date: 2007/08/22
 ! 2007/11/27 ACM If the variable is a native curvilinear data variable, operate 
 !                on the data field not the var,xcoord,ycoord which has been 
-!                defined as the *plot variable*". Question: should the longitud/
-!                latitude coordinates or other informatino about the curvilinear
-!                grid be listed in the xml file?
+!                defined as the *plot variable*". Specify the XY region for the
+!                variable using the i,j box limits previously computed.
+!                Question: should the longitude/ latitude coordinates or other 
+!                informatino about the curvilinear grid be listed in the xml file?
 !
 ! list_frames.jnl creates a listing in XML format for animation
 ! Assumes symbol ferret_listing is the output file.
@@ -25,18 +26,32 @@ GO LAS_initialize_data 0
 ! Here is the variable we will list out, with the region specified.
 DEFINE SYMBOL ferret_list_var = ($ferret_plot_var)
 
-DEFINE SYMBOL imin `($ferret_plot_base_var),return=xstart`
-DEFINE SYMBOL imax `($ferret_plot_base_var),return=iend`
-DEFINE SYMBOL isize `($ferret_plot_base_var),return=isize`
-DEFINE SYMBOL jmin `($ferret_plot_base_var),return=jstart`
-DEFINE SYMBOL jmax `($ferret_plot_base_var),return=jend`
-DEFINE SYMBOL jsize `($ferret_plot_base_var),return=jsize`
-DEFINE SYMBOL kmin `($ferret_plot_base_var),return=kstart`
-DEFINE SYMBOL kmax `($ferret_plot_base_var),return=kend`
-DEFINE SYMBOL ksize `($ferret_plot_base_var),return=ksize`
-DEFINE SYMBOL lmin `($ferret_plot_base_var),return=lstart`
-DEFINE SYMBOL lmax `($ferret_plot_base_var),return=lend`
-DEFINE SYMBOL lsize `($ferret_plot_base_var),return=lsize`
+IF ($native_curvilinear_xy"0") THEN 
+   LET the_var = ($data_var)[d=($data_num),i=($clon_imin):($clon_imax),j=($clat_jmin):($clat_jmax)]
+   IF ($region_zt"0|*>1") THEN \
+    LET the_var = ($data_var)[d=($data_num),i=($clon_imin):($clon_imax),j=($clat_jmin):($clat_jmax),($region_zt)]
+   DEFINE SYMBOL imin ($clon_imin)
+   DEFINE SYMBOL imax ($clon_imax)
+   DEFINE SYMBOL isize `($clon_imax) - ($clon_imin) + 1`
+   DEFINE SYMBOL jmin ($clat_jmin)
+   DEFINE SYMBOL jmax ($clat_jmax)
+   DEFINE SYMBOL jsize `($clat_jmax) - ($clat_jmin) + 1`
+ELSE
+   LET the_var = ($ferret_plot_var)
+   DEFINE SYMBOL imin `the_var,return=xstart`
+   DEFINE SYMBOL imax `the_var,return=iend`
+   DEFINE SYMBOL isize `the_var,return=isize`
+   DEFINE SYMBOL jmin `the_var,return=jstart`
+   DEFINE SYMBOL jmax `the_var,return=jend`
+   DEFINE SYMBOL jsize `the_var,return=jsize`
+ENDIF
+
+DEFINE SYMBOL kmin `the_var,return=kstart`
+DEFINE SYMBOL kmax `the_var,return=kend`
+DEFINE SYMBOL ksize `the_var,return=ksize`
+DEFINE SYMBOL lmin `the_var,return=lstart`
+DEFINE SYMBOL lmax `the_var,return=lend`
+DEFINE SYMBOL lsize `the_var,return=lsize`
 
 !both ferret_contour_levels and ferret_fill_levels are not set
 !use LAS_auto_levels to compute them
@@ -77,11 +92,6 @@ IF `($ferret_contour_levels"0|*>1") AND ($ferret_fill_levels"1|*>0")` THEN
 ENDIF
 
 !for animation of 1D plots
-IF ($native_curvilinear_xy"0") THEN 
-   LET the_var = ($ferret_plot_base_var)
-ELSE
-   LET the_var = ($ferret_plot_var)
-ENDIF
 
 IF `($ferret_dep_axis_scale"1|*>0")` THEN
 !    GO LAS_auto_levels ($data_var)[d=($data_num)]
@@ -112,18 +122,13 @@ DEFINE SYMBOL max_tpoints 21   ! should be an odd number
 
 ! Determine a new time range if just a single point requested
 IF ($native_curvilinear_xy"0") THEN 
-   DEFINE SYMBOL nt `($ferret_plot_base_var),return=lsize`   ! no. of time points requested
+   DEFINE SYMBOL nt = `the_var,return=lsize`   ! no. of time points requested
 ELSE
-   DEFINE SYMBOL nt `($ferret_plot_var),return=lsize`   ! no. of time points requested
+   DEFINE SYMBOL nt = `the_var,return=lsize`   ! no. of time points requested
 ENDIF
 
 IF `($nt) eq 1` THEN
 
-    IF ($native_curvilinear_xy"0") THEN 
-      LET the_var = ($ferret_plot_base_var)
-    ELSE
-      LET the_var = ($ferret_plot_var)
-    ENDIF
     LET L0 = `the_var,return=lstart`
   
     IF `L0 EQ 0` THEN
