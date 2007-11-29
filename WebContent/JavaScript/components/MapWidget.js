@@ -5,21 +5,22 @@
  */
 
 /**
- * bindAsEventListener is required to maintain context with DOM events.
- */
-if ( !Function.prototype.bindAsEventListener ) {
-    Function.prototype.bindAsEventListener = function(object) {
-        var __method = this;
-        return function(event) {
-            __method.call(object, event || window.event);
-        };
-    };
-}
-/**
  * The MapWidget class
  */
 function MapWidget(args) {
-  
+  	for(var f in this)	
+		if(typeof this[f] == "function")
+			this[f].bindAsEventListener = function(object) {
+		var __method = this;
+		var args = [];	
+		for (var i = 0, length = arguments.length; i < length; i++)
+      			args.push(arguments[i]);	
+		var object = args.shift();
+		return function(event) {
+			return __method.apply(object, [event || window.event].concat(args));
+		}
+	}
+
    if(typeof args != 'object')
    	args={};
    
@@ -119,6 +120,7 @@ function MapWidget(args) {
 	 	this.onafterdraw = args.onafterdraw;
 	else
 		this.onafterdraw = function () {};  	
+	
 
 }
 MapWidget.prototype.enable = function() {

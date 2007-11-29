@@ -15,8 +15,8 @@
 		<script  type="text/javascript" src="JavaScript/components/DateWidget.js" ></script>
 		<script  type="text/javascript" src="JavaScript/components/MenuWidget.js" ></script>
 		<script type="text/javascript" src="JavaScript/frameworks/json/json2.js" ></script>
-		<script type="text/javascript" src="JavaScript/frameworks/dojo/dojo.js" ></script>
-		<script type="text/javascript" src="JavaScript/frameworks/prototype/prototype.js" ></script>
+		<!--<script type="text/javascript" src="JavaScript/frameworks/dojo/dojo.js" ></script>
+		<script type="text/javascript" src="JavaScript/frameworks/prototype/prototype.js" ></script>-->
 		<script type="text/javascript" src="JavaScript/ui/LASUI.js" ></script>
 		<script type="text/javascript">
 			var LAS = new LASUI();
@@ -69,6 +69,12 @@
 #if ($las_request.getProperty('ui','y')!="")
 				'y' : $las_request.getProperty('ui','y'),		
 #end
+#if ($las_request.getProperty('ui','viewx')!="")
+				'viewx' : $las_request.getProperty('ui','viewx'),		
+#end
+#if ($las_request.getProperty('ui','y')!="")
+				'viewy' : $las_request.getProperty('ui','viewy'),		
+#end
 #if ($las_request.getProperty('ui','z')!="")
 				'z' : $las_request.getProperty('ui','z'),		
 #end
@@ -80,8 +86,6 @@
 #else
 				'options' :{}				
 #end
-			
-
 		}
 		</script>
 		<style media="all" type="text/css">
@@ -92,12 +96,12 @@
 		#parse ("/productserver/templates/V7UIHeader.vm") 
 			<table width="1024px" height="100%" border=0>
 				<tbody>
-				<tr>
-					<td valign="top" bgcolor="silver" width="400px" height="100%" >
-						<div><a href="doc/las_v7_ui_introduction.html" target="_new"><img src="images/help.png"></a></div>
-						<div style="margin:2pt;" id="categories"></div></td>
-					<td valign="top">
-						<div id="constraints" style="width:100%;border: 1px solid black">
+					<tr>
+						<td valign="top" bgcolor="silver" width="400px" height="100%" >
+							<div><a href="doc/las_v7_ui_introduction.html" target="_new"><img src="images/help.png"></a></div>
+							<div style="margin:2pt;" id="categories"></div></td>
+						<td valign="top">
+						<div id="constraints" style="width:100%; border: 1px solid black">
 							<font size=-3>Click a button to launch a product in a new window.</font>
 							<table><tbody id="productButtons"><tr >
 								<td align=center width="20%"><INPUT class="LASProductButton" width="100%" disabled="true" ID="Table of values (text)" value="Table of values" type="button"></td>
@@ -131,13 +135,13 @@
 							</tbody>
 							</table>
 						<table width="100%"><tr>
-							<td><a href="javascript:" class="LASlink" alt="Hide the constraints pane" onmouseover="window.status='Hide the constraints pane';" onmouseout="window.status=''"  id="hideC"  onclick="document.getElementById('constraints').style.display='none';LAS.refs.XYSelect.rubberBand.style.display='none';LAS.refs.XYSelect.rubberBand_c.style.display='none';document.getElementById('showC').style.display='';">Hide constraints</a></td>										
-							<td><a href="javascript:" class="LASlink" onmouseover="window.status='Show plot options';" onmouseout="window.status=''"   class="LASlink" onclick="document.getElementById('plotOptions').style.display='';">Set plot options.</a></td>
-							<td><a href="javascript:" class="LASlink" onmouseover="window.status='Link to this plot';" onmouseout="window.status=''"   class="LASlink" onclick="prompt('Bookmark this link to save the current application state.','http://' + document.location.host + document.pathname + '?xml=' + escape(LAS.uirequest.getXMLText()) )">Link to this plot.</a></td>
-<td><a href="javascript:" onclick="LAS.state.embed=false;LAS.makeRequest();LAS.state.embed=true;">Open plot in a new window.</a></td>
+							<td><a class="LASlink" alt="Hide the constraints pane" onmouseover="window.status='Hide the constraints pane';" onmouseout="window.status=''"  id="hideC"  onclick="document.getElementById('constraints').style.display='none';LAS.refs.XYSelect.rubberBand.style.display='none';LAS.refs.XYSelect.rubberBand_c.style.display='none';document.getElementById('showC').style.display='';">Hide constraints</a></td>										
+							<td><a class="LASlink" onmouseover="window.status='Show plot options';" onmouseout="window.status=''"   class="LASlink" onclick="document.getElementById('plotOptions').style.display='';">Set plot options.</a></td>
+							<td><a class="LASlink" onmouseover="window.status='Link to this plot';" onmouseout="window.status=''"   class="LASlink" onclick="prompt('Bookmark this link to save the current application state.','http://' + document.location.host + document.location.pathname + '?xml=' + escape(LAS.uirequest.getXMLText()) )">Link to this plot.</a></td>
+<td><a onclick="LAS.state.embed=false;LAS.makeRequest();LAS.state.embed=true;">Open plot in a new window.</a></td>
 						</tr></table>
 						</div>
-						<div  style="width:100%;height:600px;border: 1px solid black;padding-top:2px;"><a id ="showC" href="javascript:" alt="Show the constraints pane" onmouseover="window.status='Hide the constraints pane';" onmouseout="window.status=''"   style="display:none;cursor:pointer;"  onclick="document.getElementById('constraints').style.display='';this.style.display='none';LAS.refs.XYSelect.rubberBand.style.display='';LAS.refs.XYSelect.rubberBand_c.style.display='';LAS.refs.XYSelect.updatePixelExtents();">Show constraints</a>
+						<div  style="width:100%;height:600px;border: 1px solid black;padding-top:2px;"><a id ="showC" alt="Show the constraints pane" onmouseover="window.status='Hide the constraints pane';" onmouseout="window.status=''"   style="display:none;cursor:pointer;"  onclick="document.getElementById('constraints').style.display='';this.style.display='none';LAS.refs.XYSelect.rubberBand.style.display='';LAS.refs.XYSelect.rubberBand_c.style.display='';LAS.refs.XYSelect.updatePixelExtents();">Show constraints</a>
 											<div style="display:none;margin:20pt;padding:20pt;" id="wait_msg"><H3>Please wait while your product loads.</H3></div><iframe id="output" width="100%" height="100%" frameborder=0></iframe></div>
 					</td>
 				</tr>
