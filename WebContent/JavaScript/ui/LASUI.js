@@ -114,7 +114,7 @@ LASUI.prototype.initUI = function (anchorId)
 		var req = new XMLHttpRequest(this);
 		req.onreadystatechange = this.AJAXhandler.LASBind(this, req, "this.setCategoryTreeNode(req.responseText,this.refs.categories,'categories');");
 		req.open("GET", this.hrefs.getCategories.url);
-		req.send();
+		req.send(null);
 	}
 }
 
@@ -373,7 +373,7 @@ LASUI.prototype.getCategory = function (parentNode, i) {
 		var req = new XMLHttpRequest(this);
 		req.onreadystatechange = this.AJAXhandler.LASBind(this, req, "this.setCategoryTreeNode(req.responseText,args[3].children[args[4]],args[3].category.getChild(args[4]));", parentNode, i);
 		req.open("GET", this.hrefs.getCategories.url + "?catid=" + parentNode.category.getChildID(i));
-		req.send();
+		req.send(null);
 
 	} 
 	if(parentNode.children[i].ULNode.style.display=="none") {
@@ -416,7 +416,7 @@ LASUI.prototype.selectCategory = function (evt) {
 		var req = new XMLHttpRequest(this);
 		req.onreadystatechange = this.AJAXhandler.LASBind(this, req, "this.setCategoryTreeNode(req.responseText,args[3].children[args[4]],args[3].category.getChild(args[4]));", parentNode, i);
 		req.open("GET", this.hrefs.getCategories.url + "?catid=" + parentNode.category.getChildID(i));
-		req.send();
+		req.send(null);
 	} 
 }
 /**
@@ -503,7 +503,7 @@ LASUI.prototype.getOperations = function (dataset, variable, view) {
 		var req = new XMLHttpRequest(this);
 		req.onreadystatechange = this.AJAXhandler.LASBind(this, req, "this.setOperationList(req.responseText);");
 		req.open("GET", this.hrefs.getOperations.url + '?dsid=' + dataset + '&varid=' + variable + '&view=' + view);
-		req.send();
+		req.send(null);
 		
 		
 }
@@ -629,7 +629,7 @@ LASUI.prototype.getGrid = function (dataset, variable) {
 	var req = new XMLHttpRequest(this);
 		req.onreadystatechange = this.AJAXhandler.LASBind(this, req, "this.setGrid(req.responseText);");
 		req.open("GET",  this.hrefs.getGrid.url + '?dsid=' + dataset + '&varid=' + variable);
-		req.send();
+		req.send(null);
 			
 
 	
@@ -662,7 +662,7 @@ LASUI.prototype.getViews = function (dataset,variable) {
 		var req = new XMLHttpRequest(this);
 		req.onreadystatechange = this.AJAXhandler.LASBind(this, req, "this.setViewList(req.responseText);");
 		req.open("GET", this.hrefs.getViews.url + '?dsid=' + dataset + '&varid=' +variable);
-		req.send();
+		req.send(null);
 	
 }
 /**
@@ -1265,7 +1265,7 @@ LASUI.prototype.getOptions = function (optiondef, DOMNode) {
 	var req = new XMLHttpRequest(this);
 	req.onreadystatechange = this.AJAXhandler.LASBind(this, req, "this.setOptionList(req.responseText,args[3]);",DOMNode);
 	req.open("GET", this.hrefs.getOptions.url + '?opid=' + optiondef);
-	req.send();
+	req.send(null);
 	
 
 }
