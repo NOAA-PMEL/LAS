@@ -37,7 +37,6 @@
 .LASMetadataDIVNode {
 	position : absolute;
 	background-color : white;
-	display : none;
 	border : 1pt solid black;
 	z-index : 6;
 }
