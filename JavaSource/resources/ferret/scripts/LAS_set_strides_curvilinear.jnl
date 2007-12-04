@@ -14,6 +14,50 @@ IF ($ferret_size"0|0.8333>1|*>0")  THEN LET maxpix = 700  ! large
 
 IF `($ferret_google_plot"0|*>1")` THEN LET  maxpix = `2*maxpix`
 
+
+! Step 1  ---------------------------------------------------------------------
+! Determine striding based on the memory allocation
+
+DEFINE SYMBOL memsize = ($FERRET_MEMORY"6.4")* 1.e6
+
+! If ($data_count) larger than 1 add the size of the variables.
+!LET pvar = ($ferret_plot_var) 
+LET pvar = ($data_var)[d=1]
+IF ($region_zt"0|*>1") THEN LET pvar = ($data_var)[d=1,($region_zt)]
+
+LET varsiz `pvar,RETURN=size`
+DEFINE SYMBOL stride_for_mem = `INT( 1+ varsiz/(.5*($memsize)) )`
+
+! If not a graphics product, apply the strides
+
+IF `STRINDEX( "($operation_ID)", "Plot" ) EQ 0` THEN
+   IF `($stride_for_mem"0") GT 1` THEN
+      IF `($region_x_range"0") GT 0` THEN 
+         SET AXIS/STRIDE=($stride_for_mem) `pvar,RETURN=xaxis`
+         DEFINE SYMBOL add_to_title = Stride ($stride_for_mem) in X
+      ENDIF
+      IF `($region_y_range"0") GT 0` THEN 
+         SET AXIS/STRIDE=($stride_for_mem) `pvar,RETURN=yaxis`
+         DEFINE SYMBOL add_to_title = ($add_to_title) Stride ($stride_for_mem) in Y
+      ENDIF
+      IF `($region_z_range"0") GT 0` THEN 
+         SET AXIS/STRIDE=($stride_for_mem) `pvar,RETURN=zaxis`
+         DEFINE SYMBOL add_to_title = ($add_to_title) Stride ($stride_for_mem) in Z
+      ENDIF
+      IF `($region_t_range"0") GT 0` THEN 
+         SET AXIS/STRIDE=($stride_for_mem) `pvar,RETURN=taxis`
+         DEFINE SYMBOL add_to_title = ($add_to_title) Stride ($stride_for_mem) in T
+      ENDIF
+      SET VAR/TITLE="($ferret_plot_title) ($add_to_title)" ($ferret_plot_var) 
+
+   ENDIF
+   EXIT/SCRIPT
+ENDIF
+
+! Step 2  ---------------------------------------------------------------------
+! Now for graphics products, do striding by pixel size, often larger stride than
+! needed to fit in Ferret memory
+
 ! For 2D plots
 IF `STRLEN("($ferret_view)") EQ 2` THEN
 
@@ -21,6 +65,7 @@ IF `STRLEN("($ferret_view)") EQ 2` THEN
 ! if the number of points looks like it will be large.
 
 ! Curvilinear and XY plot
+
    IF `($ferret_curvi_coord_lat"0|*>1") + ($ferret_view"|xy>1|*>0") EQ 2 ` THEN 
    
       IF ($region_x_lo"0|*>1") THEN 
@@ -28,10 +73,13 @@ IF `STRLEN("($ferret_view)") EQ 2` THEN
          LET nx = xx[i=@ngd]
          LET x_pct = ($region_x_range)/360
          LET pixsize = `nx*x_pct`
-         LET pixsize = `MAX(pixsize, nx)`  ! comment this out to set strides by region
+!         LET pixsize = `MAX(pixsize, nx)`  ! comment this out to set strides by region
 
-         IF `pixsize GT maxpix` THEN SET AXIS/STRIDE=`INT((pixsize/maxpix)+1)` `($data_var)[d=($data_num)],return=xaxis`
-         IF `pixsize GT maxpix` THEN SAY SET AXIS/STRIDE=`INT((pixsize/maxpix)+1)` `($data_var)[d=($data_num)],return=xaxis`
+!         IF `pixsize GT maxpix` THEN DEFINE SYMBOL xstride = `INT((pixsize/maxpix)+1)`
+         IF `2*pixsize GT maxpix` THEN DEFINE SYMBOL xstride = `2*INT((pixsize/maxpix)+1)`
+         DEFINE SYMBOL xstride = `MAX(($xstride"1"), ($stride_for_mem"1"))`
+         IF `($xstride) GT 1` THEN SET AXIS/STRIDE=($xstride) `($data_var)[d=($data_num)],RETURN=xaxis`
+
       ENDIF
 
       IF ($region_y_lo"0|*>1") THEN 
@@ -40,10 +88,29 @@ IF `STRLEN("($ferret_view)") EQ 2` THEN
          LET y_pct = ($region_y_range)/180
          LET pixsize = `ny*y_pct`
 
-         LET pixsize = `MAX(pixsize, ny)`  ! comment this out to set strides by region
+ !        LET pixsize = `MAX(pixsize, ny)`  ! comment this out to set strides by region
 
-         IF `pixsize GT maxpix` THEN SET AXIS/STRIDE=`2*INT((pixsize/maxpix)+1)` `($data_var)[d=($data_num)],return=yaxis`
-         IF `pixsize GT maxpix` THEN SAY SET AXIS/STRIDE=`2*INT((pixsize/maxpix)+1)` `($data_var)[d=($data_num)],return=yaxis`
+!         IF `pixsize GT maxpix` THEN DEFINE SYMBOL ystride = `2*INT((pixsize/maxpix)+1)`
+         IF `2*pixsize GT maxpix` THEN DEFINE SYMBOL ystride = `2*INT((pixsize/maxpix)+1)`
+         DEFINE SYMBOL ystride = `MAX(($ystride"1"), ($stride_for_mem"1"))`
+         IF `($ystride) GT 1` THEN SET AXIS/STRIDE=($ystride) `($data_var)[d=($data_num)],RETURN=yaxis`
+
+      ENDIF
+
+! Add a label about the striding onto upper left.
+
+      IF `($xstride"0|1>0|*>1") + ($ystride"0|1>0|*>1") EQ 2` THEN
+         DEFINE SYMBOL n_left_labels = `($n_left_labels"0")+1`
+         DEFINE SYMBOL upper_left_($n_left_labels) = "Strided ($xstride) in X, Strided ($ystride) in Y"
+      ENDIF
+      
+      IF `($xstride"0|1>0|*>1") + ($ystride"0|1>0|*>1") EQ 1` THEN 
+         DEFINE SYMBOL n_left_labels = `($n_left_labels"0")+1`
+         IF ($xstride"0|1>0|*>1") THEN \
+         DEFINE SYMBOL upper_left_($n_left_labels) = "Strided ($xstride) in X"
+      
+         IF ($ystride"0|1>0|*>1") THEN \
+         DEFINE SYMBOL upper_left_($n_left_labels) = "Strided ($ystride) in Y"
       ENDIF
 
 ! Curvilinear and some other view than xy
@@ -56,8 +123,11 @@ IF `STRLEN("($ferret_view)") EQ 2` THEN
            LET x_pct = ($region_x_range)/360
            LET pixsize = `nx*x_pct`
            LET pixsize = `MAX(pixsize, nx)`  ! comment this out to set strides by region
-  
-           IF `pixsize GT maxpix` THEN SET AXIS/STRIDE=`INT((pixsize/maxpix)+1)` `($data_var)[d=($data_num)],return=xaxis`
+    
+           IF `pixsize GT maxpix` THEN DEFINE SYMBOL xstride = `INT((pixsize/maxpix)+1)`
+           DEFINE SYMBOL xstride = `MAX(($xstride"1"), ($stride_for_mem"1"))`
+           IF `($xstride) GT 1` THEN SET AXIS/STRIDE=($xstride) `($data_var)[d=($data_num)],RETURN=xaxis`
+
         ENDIF
   
         IF `(STRINDEX("($ferret_view)", "y") GT 0)` THEN 
@@ -67,25 +137,56 @@ IF `STRLEN("($ferret_view)") EQ 2` THEN
            LET pixsize = `ny*y_pct`
            LET pixsize = `MAX(pixsize, ny)`  ! comment this out to set strides by region
   
-           IF `pixsize GT maxpix` THEN SET AXIS/STRIDE=`INT((pixsize/maxpix)+1)` `($data_var)[d=($data_num)],return=yaxis`
+           IF `pixsize GT maxpix` THEN DEFINE SYMBOL ystride = `INT((pixsize/maxpix)+1)`
+           DEFINE SYMBOL ystride = `MAX(($ystride"1"), ($stride_for_mem"1"))`
+           IF `($ystride) GT 1` THEN SET AXIS/STRIDE=($ystride) `($data_var)[d=($data_num)],RETURN=yaxis`
+
         ENDIF
   
         IF ($region_z_lo"0|*>1") THEN 
            LET zz = z[gz=($data_var)[d=($data_num)],($region_z)]
            LET nz = zz[k=@ngd]
            LET pixsize = `MAX(pixsize, nz)`
-           IF `nz GT maxpix` THEN SET AXIS/STRIDE=`2*INT((nz/maxpix)+1)` `($data_var)[d=($data_num)],return=zaxis`
+           
+           IF `nz GT maxpix` THEN DEFINE SYMBOL zstride = `INT((pixsize/maxpix)+1)`
+           DEFINE SYMBOL zstride = `MAX(($zstride"1"), ($stride_for_mem"1"))`
+           IF `($zstride) GT 1` THEN SET AXIS/STRIDE=($zstride) `($data_var)[d=($data_num)],RETURN=zaxis`
+
         ENDIF
         
         IF ($region_t_lo"0|*>1") THEN     
            LET nt = tt[l=@ngd]
            LET tt = t[gt=($data_var)[d=($data_num)],($region_t)]
            LET pixsize = `MAX(pixsize, nt)`
-           IF `nt GT maxpix` THEN SET AXIS/STRIDE=`2*INT((nt/maxpix)+1)` `($data_var)[d=($data_num)],return=taxis`
-        ENDIF
-  
-   ENDIF 
 
+           DEFINE SYMBOL tstride = `INT((pixsize/maxpix)+1)`
+           DEFINE SYMBOL tstride = `MAX(($tstride"1"), ($stride_for_mem"1"))`
+           IF `($tstride) GT 1` THEN SET AXIS/STRIDE=($tstride) `($data_var)[d=($data_num)],RETURN=taxis`
+
+        ENDIF
+     
+! Add a label about the striding at the upper left.
+        IF ($xstride"0|1>0|*>1")  THEN 
+           DEFINE SYMBOL n_left_labels = `($n_left_labels"0")+1`
+           DEFINE SYMBOL upper_left_($n_left_labels) = "Strided ($xstride) in X"
+        ENDIF
+   
+        IF ($ystride"0|1>0|*>1")  THEN 
+           DEFINE SYMBOL n_left_labels = `($n_left_labels"0")+1`
+           DEFINE SYMBOL upper_left_($n_left_labels) = "Strided ($ystride) in Y"
+        ENDIF
+   
+        IF ($zstride"0|1>0|*>1")  THEN 
+           DEFINE SYMBOL n_left_labels = `($n_left_labels"0")+1`
+           DEFINE SYMBOL upper_left_($n_left_labels) = "Strided ($zstride) in Z"
+        ENDIF
+   
+        IF ($tstride"0|1>0|*>1")  THEN 
+           DEFINE SYMBOL n_left_labels = `($n_left_labels"0")+1`
+           DEFINE SYMBOL upper_left_($n_left_labels) = "Strided ($tstride) in T"
+        ENDIF
+
+   ENDIF ! xy or not
 ENDIF  ! 2D plots
 
 ! For 1D plots
@@ -114,18 +215,56 @@ IF `STRLEN("($ferret_view)") EQ 1` THEN
    
    IF `pixsize GT maxpix` THEN
 
-      IF ($region_x_lo"0|*>1") THEN \
-         IF `nx GT maxpix` THEN SET AXIS/STRIDE=`2*INT((nx/maxpix)+1)` `($data_var)[d=($data_num)],return=xaxis`
+      IF ($region_x_range"0|0|*>1") THEN 
+         IF `nx GT maxpix` THEN 
+            DEFINE SYMBOL xstride = `2*INT((nx/maxpix)+1)`
+            IF `($xstride) GT 1` THEN SET AXIS/STRIDE=($xstride) `($data_var)[d=($data_num)],RETURN=xaxis`
+         ENDIF
+      ENDIF
 
-      IF ($region_y_lo"0|*>1") THEN \
-         IF `ny GT maxpix` THEN SET AXIS/STRIDE=`2*INT((ny/maxpix)+1)` `($data_var)[d=($data_num)],return=yaxis`
+      IF ($region_y_range"0|0|*>1") THEN 
+         IF `ny GT maxpix` THEN 
+            DEFINE SYMBOL ystride = `2*INT((ny/maxpix)+1)`
+            IF `($ystride) GT 1` THEN SET AXIS/STRIDE=($ystride) `($data_var)[d=($data_num)],RETURN=yaxis`
+         ENDIF
+      ENDIF
 
-      IF ($region_z_lo"0|*>1") THEN  \
-         IF `nz GT maxpix` THEN SET AXIS/STRIDE=`2*INT((nz/maxpix)+1)` `($data_var)[d=($data_num)],return=zaxis`
+      IF ($region_z_range"0|0|*>1") THEN  
+         IF `nz GT maxpix` THEN 
+            DEFINE SYMBOL zstride = `2*INT((nz/maxpix)+1)
+            IF `($zstride) GT 1` THEN SET AXIS/STRIDE=($zstride) `($data_var)[d=($data_num)],RETURN=zaxis`
+         ENDIF
+      ENDIF
 
-      IF ($region_t_lo"0|*>1") THEN  \
-         IF `nt GT maxpix` THEN SET AXIS/STRIDE=`2*INT((nt/maxpix)+1)` `($data_var)[d=($data_num)],return=taxis`
+      IF ($region_t_range"0|0|*>1") THEN  
+         IF `nt GT maxpix` THEN 
+            DEFINE SYMBOL tstride = `2*INT((nt/maxpix)+1)`
+            IF `($tstride) GT 1` THEN SET AXIS/STRIDE=($tstride) `($data_var)[d=($data_num)],RETURN=taxis`
+         ENDIF
+      ENDIF
+
    ENDIF
+
+! Add a label about the striding at the upper left.
+      IF ($xstride"0|1>0|*>1")  THEN 
+         DEFINE SYMBOL n_left_labels = `($n_left_labels"0")+1`
+         DEFINE SYMBOL upper_left_($n_left_labels) = "Strided ($xstride) in X"
+      ENDIF
+   
+      IF ($ystride"0|1>0|*>1")  THEN 
+         DEFINE SYMBOL n_left_labels = `($n_left_labels"0")+1`
+         DEFINE SYMBOL upper_left_($n_left_labels) = "Strided ($ystride) in Y"
+      ENDIF
+   
+      IF ($zstride"0|1>0|*>1")  THEN 
+         DEFINE SYMBOL n_left_labels = `($n_left_labels"0")+1`
+         DEFINE SYMBOL upper_left_($n_left_labels) = "Strided ($zstride) in Z"
+      ENDIF
+   
+      IF ($tstride"0|1>0|*>1")  THEN 
+         DEFINE SYMBOL n_left_labels = `($n_left_labels"0")+1`
+         DEFINE SYMBOL upper_left_($n_left_labels) = "Strided ($tstride) in T"
+      ENDIF
 
 ENDIF ! 1D plots
 
