@@ -116,6 +116,11 @@ LASUI.prototype.initUI = function (anchorId)
 		req.open("GET", this.hrefs.getCategories.url);
 		req.send(null);
 	}
+	this.UIMask = document.createElement("DIV");
+	this.UIMask.className = "LASUIMask";
+	this.UIMask.style.display = "none";
+	document.body.appendChild(this.UIMask);
+
 }
 
 LASUI.prototype.AJAXhandler = function  (app) {
@@ -533,7 +538,7 @@ LASUI.prototype.setOperation = function (evt) {
 		cancel.type = "submit";
 		cancel.value="Cancel";
 		cancel.className = "LASSubmitInputNode";
-		cancel.onclick = this.genericHandler.LASBind(this,"this.refs.options.ULNode.style.display='none';");
+		cancel.onclick = this.genericHandler.LASBind(this,"this.refs.options.ULNode.style.display='none';this.UIMask.style.display='none';");
 		this.refs.options.ULNode.innerHTML = "";		
 		this.refs.options.ULNode.appendChild(cancel);
 		this.getOptions(optiondef, this.refs.options.ULNode);
@@ -592,34 +597,36 @@ LASUI.prototype.doProductIconClick = function (evt) {
 	var args = arguments;
 	var id = args[1];
 	this.state.externaloperation = id;
+	this.UIMask.style.display='';
 	this.refs.externaloperations.operations.DIVNode.innerHTML = "";
-		if(this.refs.externaloperations.operations.getOperationByID(id).optiondef)
-			this.getOptions(this.refs.externaloperations.operations.getOperationByID(id).optiondef.IDREF, this.refs.externaloperations.operations.DIVNode);	
-		else if(this.refs.externaloperations.operations.getOperationByID(id).optionsdef)
-			this.getOptions(this.refs.externaloperations.operations.getOperationByID(id).optionsdef.IDREF, this.refs.externaloperations.operations.DIVNode);	
-		else {		
-			this.refs.externaloperations.operations.DIVNode.style.display='none';
-			this.launchExternalProduct(); 
-			return;
-		}	
-			
-		var submit = document.createElement("INPUT");
-		var cancel = document.createElement("INPUT");
-		submit.type = "submit";
-		submit.value = "Submit";
-		submit.className = "LASSubmitInputNode";
-		submit.onclick = this.genericHandler.LASBind(this, "this.refs.externaloperations.operations.DIVNode.style.display='none';this.launchExternalProduct()");
-		cancel.type = "submit";
-		cancel.value="Cancel";
-		cancel.className = "LASSubmitInputNode";
-		cancel.onclick = this.genericHandler.LASBind(this, "this.refs.externaloperations.operations.DIVNode.style.display='none';");
+	var submit = document.createElement("INPUT");
+	var cancel = document.createElement("INPUT");
+	submit.type = "submit";
+	submit.value = "Submit";
+	submit.className = "LASSubmitInputNode";
+	submit.onclick = this.genericHandler.LASBind(this, "this.refs.externaloperations.operations.DIVNode.style.display='none';this.launchExternalProduct();this.UIMask.style.display='none'");
+	cancel.type = "submit";
+	cancel.value="Cancel";
+	cancel.className = "LASSubmitInputNode";
+	cancel.onclick = this.genericHandler.LASBind(this, "this.refs.externaloperations.operations.DIVNode.style.display='none';this.UIMask.style.display='none'");
+	
+	this.refs.externaloperations.operations.DIVNode.appendChild(submit);
+	this.refs.externaloperations.operations.DIVNode.appendChild(cancel);
+	if(this.refs.externaloperations.operations.getOperationByID(id).optiondef)
+		this.getOptions(this.refs.externaloperations.operations.getOperationByID(id).optiondef.IDREF, this.refs.externaloperations.operations.DIVNode);	
+	else if(this.refs.externaloperations.operations.getOperationByID(id).optionsdef)
+		this.getOptions(this.refs.externaloperations.operations.getOperationByID(id).optionsdef.IDREF, this.refs.externaloperations.operations.DIVNode);	
+	else {		
+		this.refs.externaloperations.operations.DIVNode.style.display='none';
+		this.launchExternalProduct(); 
+		return;
+	}	
 		
-		this.refs.externaloperations.operations.DIVNode.appendChild(submit);
-		this.refs.externaloperations.operations.DIVNode.appendChild(cancel);
-		this.refs.externaloperations.operations.DIVNode.style.left="200pt";
-		this.refs.externaloperations.operations.DIVNode.style.top="100pt";
-		this.refs.externaloperations.operations.DIVNode.zIndex =0;
-	}
+
+	this.refs.externaloperations.operations.DIVNode.style.left="200pt";
+	this.refs.externaloperations.operations.DIVNode.style.top="100pt";
+	this.refs.externaloperations.operations.DIVNode.zIndex =0;
+}
 /**
  * Method to query the server for the available grids
  * @param {string} dataset A dataset id
@@ -737,9 +744,7 @@ LASUI.prototype.setProductTypeNode = function(type) {
 	this.refs.operations.children[type].LINode = document.createElement("LI");
 	this.refs.operations.children[type].title = document.createElement("TEXT");
 	this.refs.operations.children[type].title.innerHTML = "<b>" + type + "</b>";
-	this.refs.operations.children[type].LINode.style.listStyleType = "none";
-	this.refs.operations.children[type].LINode.style.padding = "0";
-	this.refs.operations.children[type].LINode.style.margin = "-4pt";
+	this.refs.operations.children[type].LINode.className = "LASTreeLINode";
 	this.refs.operations.children[type].LINode.appendChild(this.refs.operations.children[type].title);
 	this.refs.operations.ULNode.appendChild(this.refs.operations.children[type].LINode);
 }
@@ -747,9 +752,7 @@ LASUI.prototype.setProductNode = function(type, product) {
 	
 	this.refs.operations.children[product] = {};
 	this.refs.operations.children[product].LINode = document.createElement("LI");
-	this.refs.operations.children[product].LINode.style.listStyleType = "none";
-	this.refs.operations.children[product].LINode.style.padding = "0";
-	this.refs.operations.children[product].LINode.style.margin = "-4pt";
+	this.refs.operations.children[product].LINode.className = "LASTreeLINode";
 	this.refs.operations.children[product].title = document.createElement("TEXT");
 	this.refs.operations.children[product].title.innerHTML =  product;
 	this.refs.operations.children[product].radio = document.createElement("INPUT");
