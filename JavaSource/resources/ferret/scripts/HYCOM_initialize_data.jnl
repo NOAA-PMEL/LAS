@@ -5,7 +5,6 @@
 ! $Author:$
 ! $Date:$
 
-GO LAS_initialize_dataset ($1"0")
 
 ! Define the plot variable. For comparison plots, we want to save the dataset number
 ! for each dataset.
@@ -68,52 +67,5 @@ DEFINE axis/z/depth/units=`($ferret_thk_var)[d=($thk_num)],return=units`/bounds 
 !  Do this only for the HYCOM high resolution data, so put it in  HYCOM_init script
 GO LAS_set_strides_curvilinear.jnl
 
-
-! TODO:  From here to the end probably won't work with the regridded
-! TODO:  variable I've already created.
-
-! Get any DEFINE VARIABLE analysis definitions
-! This renames the data variable, and so redefines the symbol data_var
-! and sets up the analysis: e.g. ,z=0:2000@ave
-
-IF ($data_0_analysis_label"0|*>1") THEN 
-   GO LAS_analysis
-   DEFINE SYMBOL ferret_plot_var = ($data_var)[d=($data_num),($region_full)($data_analysis_expr)]
-   DEFINE SYMBOL ferret_plot_var = ($data_var)[d=($data_num),($region_full)($data_analysis_expr)]
-   IF ($data_0_analysis_oceanmask"0|*>1") THEN 
-     LET/d=($data_num) plot_var =  ($data_var)[d=($data_num)] * analysis_mask
-     DEFINE SYMBOL ferret_plot_var = plot_var[($region_full)($data_analysis_expr)]
-   ENDIF
-ENDIF
-
-! Needed for transform_seasonal, save variable definition without any
-! time-region information that may be added.
-
-DEFINE SYMBOL ferret_xyz_var = ($data_var)[d=($data_num),($region_xyz)]
-
-! Apply the expression in ferret_expression. $ represents the variable.
-
-! Check if we are working with the second of two variables in comparison mode
-IF ($variables_initialized"0|*>1") THEN
-   IF ($ferret_expression2"0|*>1") THEN DEFINE SYMBOL ferret_expression ($ferret_expression2)
-ENDIF
-
-! The side by side plots pretend that the second plot is plot 1, so 
-IF `STRCMP("($operation_service_action)", "Side2") EQ 0` THEN
-   IF ($ferret_expression2"0|*>1") THEN DEFINE SYMBOL ferret_expression ($ferret_expression2)
-ENDIF
-
-IF ($ferret_expression"0|*>1") THEN GO LAS_expression
-
-! Apply any transforms that may have been specified.
-
-GO LAS_transforms
-
-! Keep track of variables initialized, to tell us if next time we
-! want ferret_expression or ferret_expression2
-
-DEFINE SYMBOL variables_initialized `1 + ($variables_initialized"0")`
-
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 ! End of HYCOM_initialize_data.jnl  ------------------------------------------------------

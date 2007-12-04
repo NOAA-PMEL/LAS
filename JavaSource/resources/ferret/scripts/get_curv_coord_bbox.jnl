@@ -19,16 +19,24 @@
 
 LET xlodiff =  ABS(($curv_lon_min) - ($region_x_lo) )
 LET xhidiff =  ABS(($curv_lon_max) - ($region_x_hi) )
-IF `xlodiff + xhidiff LT 0.2` THEN
-   LET ylodiff =  ABS(($curv_lat_min) - ($region_y_lo) )
-   LET yhidiff =  ABS(($curv_lat_max) - ($region_y_hi) )
-   IF `ylodiff + yhidiff LT 0.2` THEN
-      LET clon_imin = 1
-      LET clon_imax = `($ferret_curvi_coord_lon),RETURN=isize`
-      LET clon_jmin = 1
-      LET clon_jmax = `($ferret_curvi_coord_lon),RETURN=jsize`
-      EXIT/SCRIPT
-   ENDIF
+IF `ABS((xlodiff) -  (xhidiff)) LT 0.2` THEN
+   LET clon_imin = 1
+   LET xx = x[gx=($ferret_curvi_coord_lon)]
+   STAT xx
+   LET clon_imax = ($STAT_NGOOD)
+
+   LET clat_jmin = 1
+   LET yy = y[gy=($ferret_curvi_coord_lon)]
+   STAT yy
+   LET clat_jmax = ($STAT_NGOOD)
+
+   DEFINE SYMBOL clon_imin `clon_imin`
+   DEFINE SYMBOL clon_imax `clon_imax`
+   DEFINE SYMBOL clat_jmin `clat_jmin`
+   DEFINE  SYMBOL clat_jmax `clat_jmax`
+
+   EXIT/SCRIPT
+   
 ENDIF
 
 LET kludge = 1
@@ -48,6 +56,13 @@ ELSE
       LET ns = 50
    ELIF `MAX(nx,ny) GT 100` THEN
       LET ns = 20
+   ELSE
+      LET ns = 5
+   ENDIF
+   IF `MAX(nx,ny) GT 500` THEN 
+      LET ns = 20
+   ELIF `MAX(nx,ny) GT 100` THEN
+      LET ns = 10
    ELSE
       LET ns = 5
    ENDIF

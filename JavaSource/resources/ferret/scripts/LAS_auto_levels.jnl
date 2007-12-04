@@ -28,7 +28,7 @@ LET memsize = 0.5* 1.e6
 DEFINE SYMBOL op = `UPCASE("($operation_ID)")`
 
 IF `STRLEN("($ferret_view)") NE 2` THEN EXIT/SCRIPT
-IF `STRINDEX("($op)", "PLOT") EQ 0` THEN EXIT/SCRIPT
+IF `STRINDEX("($op)", "PLOT") EQ 0 AND STRINDEX("($op)", "ANIMATION") EQ 0` THEN EXIT/SCRIPT
 
 ! If its a compare plot, and if the ($ferret_diff_var) is not yet defined, 
 ! just return.
@@ -112,32 +112,69 @@ LET stride_for_speed = `INT( 1+ (var_size/memsize) )`
 
 IF `stride_for_speed GT 1` THEN
 
-   IF `($region_x_range"0") GT 0` THEN \
+   IF `(($region_x_range"0|*>1") GT 0) AND (($xstride"0|*>1") EQ 0)` THEN
      SET AXIS/STRIDE=`stride_for_speed` `pvar,RETURN=xaxis`
+     DEFINE SYMBOL undo_x = 1
+   ENDIF
 
-   IF `($region_y_range"0") GT 0` THEN \
+   IF `(($region_y_range"0|*>1") GT 0) AND (($ystride"0|*>1") EQ 0)` THEN 
      SET AXIS/STRIDE=`stride_for_speed` `pvar,RETURN=yaxis`
+     DEFINE SYMBOL undo_y = 1
+   ENDIF
 
-   IF `($region_z_range"0") GT 0` THEN \
-     SET AXIS/STRIDE=`stride_for_speed` `pvar,RETURN=zaxis`
-
-   IF `($region_t_range"0") GT 0` THEN   \
+   IF `(($region_t_range"0|*>1") GT 0) AND (($tstride"0|*>1") EQ 0)` THEN 
      SET AXIS/STRIDE=`stride_for_speed` `pvar,RETURN=taxis`
+     DEFINE SYMBOL undo_t = 1
+   ENDIF
 
+ENDIF
+
+IF ($xstride"0|*>1") THEN 
+   LET xsize  `pvar,RETURN=isize`
+   IF `xsize GT 50` THEN \
+     DEFINE SYMBOL index_strides = i=1:`xsize`:`INT(xsize/10)`
+ENDIF
+
+IF ($ystride"0|*>1") THEN 
+   LET ysize  `pvar,RETURN=jsize`
+   IF `xsize GT 50` THEN 
+     IF ($index_strides"0|*>1") THEN 
+        DEFINE SYMBOL index_strides = ($index_strides),j=1:`ysize`:`INT(ysize/10)`
+     ELSE
+        DEFINE SYMBOL index_strides = j=1:`ysize`:`INT(ysize/10)`
+     ENDIF
+   ENDIF
+ENDIF
+
+IF ($tstride"0|*>1") THEN 
+   LET tsize  `pvar,RETURN=lsize`
+   IF `tsize GT 50` THEN 
+     IF ($index_strides"0|*>1") THEN 
+        DEFINE SYMBOL index_strides = ($index_strides),L=1:`tsize`:`INT(tsize/10)`
+     ELSE
+        DEFINE SYMBOL  index_strides = L=1:`tsize`:`INT(tsize/10)`
+     ENDIF
+   ENDIF
+ENDIF
+IF ($index_strides"0|*>1") THEN 
+   DEFINE SYMBOL ppvar = pvar[($index_strides)]
+   IF ($region_zt"0|*>1") THEN DEFINE SYMBOL ppvar = pvar[($index_strides),($region_zt)]
+ELSE
+   DEFINE SYMBOL ppvar = pvar
+   IF ($region_zt"0|*>1") THEN DEFINE SYMBOL ppvar = pvar[($region_zt)]
 ENDIF
 
 ! Execute the stat command to load symbols with the variables
 ! mean, max, min, std.
 
-STAT pvar
-
-! Undo the striding. Other striding may be set later
+STAT ($ppvar)
+! Undo the striding. Other striding may be set elsewhere
 
 IF `stride_for_speed GT 1` THEN
-   IF `($region_x_range"0") GT 0` THEN CANCEL AXIS/STRIDE `pvar,RETURN=xaxis`
-   IF `($region_y_range"0") GT 0` THEN CANCEL AXIS/STRIDE `pvar,RETURN=yaxis`
-   IF `($region_z_range"0") GT 0` THEN CANCEL AXIS/STRIDE `pvar,RETURN=zaxis`
-   IF `($region_t_range"0") GT 0` THEN CANCEL AXIS/STRIDE `pvar,RETURN=taxis`
+   IF `($undo_x"0") GT 0` THEN CANCEL AXIS/STRIDE `pvar,RETURN=xaxis`
+   IF `($undo_y"0") GT 0` THEN CANCEL AXIS/STRIDE `pvar,RETURN=yaxis`
+   IF `($undo_z"0") GT 0` THEN CANCEL AXIS/STRIDE `pvar,RETURN=zaxis`
+   IF `($undo_t"0") GT 0` THEN CANCEL AXIS/STRIDE `pvar,RETURN=taxis`
 ENDIF
 
 IF `($stat_ngood"0") EQ 0` THEN EXIT_SCRIPT
