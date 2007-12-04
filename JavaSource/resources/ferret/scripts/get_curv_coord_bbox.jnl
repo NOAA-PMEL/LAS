@@ -15,6 +15,10 @@
 ! clat_jmin
 ! clat_jmax
 
+! If this has already been called, we are done.
+IF ($curv_coord_bbox_done"0") THEN EXIT/SCRIPT
+DEFINE SYMBOL curv_coord_bbox_done = 1
+
 ! If the whole grid is specified, we are done.
 
 LET xlodiff =  ABS(($curv_lon_min) - ($region_x_lo) )
@@ -52,23 +56,9 @@ ELSE
    LET nx = `($ferret_curvi_coord_lon)[d=($data_num),j=1,x=@ngd]`
    LET ny = `($ferret_curvi_coord_lon)[d=($data_num),i=1,y=@ngd]`
 
-   IF `MAX(nx,ny) GT 500` THEN 
-      LET ns = 50
-   ELIF `MAX(nx,ny) GT 100` THEN
-      LET ns = 20
-   ELSE
-      LET ns = 5
-   ENDIF
-   IF `MAX(nx,ny) GT 500` THEN 
-      LET ns = 20
-   ELIF `MAX(nx,ny) GT 100` THEN
-      LET ns = 10
-   ELSE
-      LET ns = 5
-   ENDIF
+   LET ns = 50
    LET dx = MAX(1,`INT(nx/ns)`)
    LET dy = MAX(1,`INT(ny/ns)`)
-
    LET  box_longitude = ($ferret_curvi_coord_lon)[d=($data_num),i=1:`nx`:`dx`,j=1:`ny`:`dy`]
    LET  box_latitude = ($ferret_curvi_coord_lat)[d=($data_num),i=1:`nx`:`dx`,j=1:`ny`:`dy`]
 ENDIF
@@ -127,10 +117,10 @@ DEFINE SYMBOL clat_jmax `mapbox[i=@max,j=2,l=3,k=@max]`
 ! Restore striding done above, via DX,DY; making sure indices 
 ! dont go outside data range.
 IF `KLUDGE GE 1` THEN
-   DEFINE SYMBOL clon_imin `MAX(1,dx*mapbox[i=1,j=@min,l=2,k=@min])`
-   DEFINE SYMBOL clon_imax `MIN(nx,dx*mapbox[i=2,j=@max,l=2,k=@max])`
-   DEFINE SYMBOL clat_jmin `MAX(1,dy*mapbox[i=@min,j=1,l=3,k=@min])`
-   DEFINE SYMBOL clat_jmax `MIN(ny,dy*mapbox[i=@max,j=2,l=3,k=@max])`
+   DEFINE SYMBOL clon_imin `MAX(1,dx*mapbox[i=1,j=@min,l=2,k=@min]-dx)`
+   DEFINE SYMBOL clon_imax `MIN(nx,dx*mapbox[i=2,j=@max,l=2,k=@max]+dx)`
+   DEFINE SYMBOL clat_jmin `MAX(1,dy*mapbox[i=@min,j=1,l=3,k=@min]-dy)`
+   DEFINE SYMBOL clat_jmax `MIN(ny,dy*mapbox[i=@max,j=2,l=3,k=@max]+dy)`
 ENDIF
 
 ! If the region extends over the branch cut, return the whole 
@@ -140,3 +130,4 @@ IF `($clon_imin) GT ($clon_imax)` THEN
    DEFINE SYMBOL clon_imin 1
    DEFINE SYMBOL clon_imax `box_longitude,RETURN=isize`
 ENDIF
+
