@@ -1,3 +1,57 @@
+body {
+font: 70% "Lucida Grande", Verdana, Lucida, Helvetica, Arial, sans-serif;
+}
+a {
+color: #436976;
+background-color: transparent;
+}
+p {
+margin: 0 0 0.75em 0;
+line-height: 1.5em;
+}
+h1 {
+font-size: 160%;
+}
+h2 {
+font-size: 150%;
+}
+h3 {
+font-size: 125%;
+border-bottom: none;
+font-weight: bold;
+}
+h4 {
+font-size: 110%;
+border-bottom: none;
+font-weight: bold;
+}
+h5 {
+font-size: 100%;
+border-bottom: none;
+font-weight: bold;
+}
+h6 {
+font-size: 85%;
+border-bottom: none;
+font-weight: bold;
+}
+.LASUIMask {
+	position:absolute;
+	top:0pt;
+	left:0pt;
+	width:100%;
+	height:100%;
+	z-index:4;
+	background-color:black;
+	filter : alpha(opacity=10);
+	opacity : .50;
+}
+.LASLink {
+	color : #436976;
+	text-decoration : underline;
+	cursor : pointer;
+
+}
 .LASTreeULNode { 
 	margin-left:6pt;
 	padding-left:6pt;
@@ -9,7 +63,7 @@
 .LASTreeLINode {
 	list-style-type : none;
 	padding :0;
-	margin : -2pt;
+	margin : -2fpt;
 	margin-right : 0;	
 }
 
@@ -45,7 +99,7 @@
 	position:absolute;
 	top :0pt;
 	right:0pt;
-	background-color: gray;
+	background-color: grey;
 }
 .LASOptionsDIVNode {
 	position:absolute;
@@ -53,6 +107,8 @@
 	top:100pt;
 	background-color : white;
 	border : 2pt solid black;
+	border-color: #99cccc;
+	padding : 8pt;
 	margin : 8pt;
 	z-index : 5;
 }

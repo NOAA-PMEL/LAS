@@ -1,7 +1,11 @@
-<TABLE CELLPADDING="0" CELLSPACING="0" BORDER="0" WIDTH="100%">
+		<TABLE CELLPADDING="0" CELLSPACING="0" BORDER="0" WIDTH="100%">
 				<TR>
-				<TD width="20%" bgcolor="#003399"><img src="JavaScript/ui/tmap_combined_logo.gif"  height="60"></TD>
- 	  			<TD width="60%" bgcolor="#003399" align="center"><text class="LASTitleTextNode">$las_config.getTitle()</text></TD>
-				<TD bgcolor="#003399" align="right" valign="bottom" width="20%"><font color="white">Armstrong&nbsp;1.1&nbsp;<br>V7&nbsp;Beta&nbsp;UI&nbsp;</font></TD>
-				<TD bgcolor="#003399" align="center"></TD>  				
+				
+    <TD width="37%" bgcolor="#99CCCC"><img src="JavaScript/ui/logoLAS.jpg" width="200"  height="115"></TD>
+ 	  			
+    <TD width="37%" bgcolor="#99CCCC" align="center"><p><text class="LASTitleTextNode">$las_config.getTitle()</text></p></TD>
+				
+    <TD bgcolor="#99CCCC" align="right" valign="bottom" width="26%"><font color="white">Armstrong&nbsp;1.1&nbsp;<br>
+      V7&nbsp;Beta&nbsp;UI&nbsp;</font></TD>
+				<TD width="0%" align="center" bgcolor="#003399"></TD>  				
 			</TR></TABLE>
