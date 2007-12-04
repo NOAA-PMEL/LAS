@@ -17,6 +17,7 @@ IF ($region_zt"0|*>1") THEN DEFINE SYMBOL region_sample = ,($region_zt)
 
 ! default value; may be redefined in this script
 LET sampled_var = ($ferret_plot_var)
+IF ($ferret_view"|zt>1|*>0") THEN LET sampled_var = ($data_var)[d=1($region_sample)]
 
 ! Call CURV_RANGE to get the I,J range for the requested output rectangle
 
@@ -74,6 +75,7 @@ IF `yslice GT 0` THEN
          z[gz=fer_plot_var]+t[gt=fer_plot_var]
 
       LET sampled_var = RESHAPE(fer_plot_var, sample_var)
+
       DEFINE SYMBOL needs_url 1
 
    ELIF ($ferret_view"|yt>1|*>0") THEN 
@@ -86,6 +88,7 @@ IF `yslice GT 0` THEN
          z[gz=fer_plot_var]+t[gt=fer_plot_var]
 
       LET sampled_var = RESHAPE(fer_plot_var, sample_var)
+
       DEFINE SYMBOL needs_url 1
    ENDIF
 
@@ -131,6 +134,7 @@ IF `xslice GT 0` THEN
          z[gz=fer_plot_var] + t[gt=fer_plot_var]
 
       LET sampled_var = RESHAPE(fer_plot_var, sample_var)
+
       DEFINE SYMBOL needs_url 1
 
    ELIF ($ferret_view"|xz>1|*>0") THEN 
@@ -143,6 +147,7 @@ IF `xslice GT 0` THEN
          z[gz=fer_plot_var]+t[gt=fer_plot_var]
 
       LET sampled_var = RESHAPE(fer_plot_var, sample_var)
+
       DEFINE SYMBOL needs_url 1
 
    ELIF ($ferret_view"|xt>1|*>0") THEN 
@@ -155,9 +160,44 @@ IF `xslice GT 0` THEN
          z[gz=fer_plot_var]+t[gt=fer_plot_var]
 
       LET sampled_var = RESHAPE(fer_plot_var, sample_var)
+
       DEFINE SYMBOL needs_url 1
    ENDIF
 
+ENDIF
+
+! ZT slice
+LET ztslice = ($ferret_view"|zt>1|*>0") 
+IF `ztslice GT 0` THEN
+
+! Define the x and y point to sample at 
+
+   LET fer_plot_var = SAMPLEXY_CURV_NRST( \
+     ($data_var)[d=($data_num),i=($clon_imin):($clon_imax), j=($clat_jmin):($clat_jmax)($region_sample)], \
+     ($ferret_curvi_coord_lon)[d=($data_num),i=($clon_imin):($clon_imax), j=($clat_jmin):($clat_jmax)], \
+     ($ferret_curvi_coord_lat)[d=($data_num),i=($clon_imin):($clon_imax), j=($clat_jmin):($clat_jmax)], \
+     ($region_x_lo), ($region_y_lo))
+   LET sampled_var = fer_plot_var
+
+   DEFINE SYMBOL needs_url 1
+
+! Define upper-left labels with the longitude region
+   
+   DEFINE SYMBOL n_left_labels = `($n_left_labels"0")+1`
+   DEFINE SYMBOL upper_left_($n_left_labels"0") = "Longitude: ($region_x_lo)E"
+   IF `($region_x_lo) LT 0` THEN 
+         DEFINE SYMBOL west_region_x_lo = `-1* ($region_x_lo)`
+      DEFINE SYMBOL upper_left_($n_left_labels"0") = "Longitude: ($west_region_x_lo)W"
+   ENDIF
+
+! Define upper-left labels with the latitude region
+
+   DEFINE SYMBOL n_left_labels = `($n_left_labels"0")+1`
+   DEFINE SYMBOL upper_left_($n_left_labels"0") = "Latitude: ($region_y_lo)N"
+   IF `($region_y_lo) LT 0` THEN 
+      DEFINE SYMBOL south_region_y_lo = `-1* ($region_y_lo)`
+      DEFINE SYMBOL upper_left_($n_left_labels"0") = "Latitude: ($south_region_y_lo)S"
+   ENDIF
 ENDIF
 
 ! T line
@@ -186,6 +226,7 @@ IF `tslice GT 0` THEN
          t[gt=fer_plot_var] + z[gz=fer_plot_var]
 
    LET sampled_var = RESHAPE(fer_plot_var, sample_var)
+
    DEFINE SYMBOL needs_url 1
 
 ENDIF
@@ -217,6 +258,7 @@ IF `zslice GT 0` THEN
          t[gt=fer_plot_var] + z[gz=fer_plot_var]
 
    LET sampled_var = RESHAPE(fer_plot_var, sample_var)
+
    DEFINE SYMBOL needs_url 1
 
 ENDIF
