@@ -123,9 +123,6 @@ IF ($result_map_scale_filename%0|*>1%) THEN
          DEFINE SYMBOL AX_VERT_POSTV = `(($the_axis)).positive`
       ENDIF
 
-      IF `IS_ELEMENT_OF_STR(attlist, "positive") GT 0` THEN \
-         DEFINE SYMBOL AX_VERT_POSTV = `(($the_axis)).positive`
-
       LET syms_vals = {"($AX_HORIZ)", "($AX_HORIZ_POSTV)", "($AX_VERT)", "($AX_VERT_POSTV)"}
       
       LIST/APPEND/FILE="($result_map_scale_filename)"/NOHEAD/NOROWLAB syms_names, syms_vals
