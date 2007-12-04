@@ -50,7 +50,7 @@ ENDIF
 
 DEFINE SYMBOL ferret_plot_var = rose[($region_xy)]
 SHADE($qualifiers) ($ferret_plot_var)
-SHADE/OVER/NOLAB/NOKEY/LEV=(0,8000,8000)/PAL=gray rose
+SHADE/OVER/NOLAB/NOKEY/LEV=(0,8000,8000)/PAL=gray ($ferret_plot_var)
 
 ! Save the results
 GO LAS_results box
