@@ -106,6 +106,9 @@ DEFINE SYMBOL plot_type =($ferret_contour_style"FILL|default>FILL|raster>SHADE|c
 DEFINE SYMBOL shade_underlay = FALSE
 IF ($plot_type"0|FILL>1|*>0) THEN DEFINE SYMBOL shade_underlay = TRUE
 
+! Set the URL label for the first dataset.
+GO LAS_url_label 0
+
 ! Set up for second variable, overlaid as contour lines.
 ! If there were more than 2 data sets, then use a loop (below) with
 ! CONTOUR/OVERLAY and rely on automatic Ferret labelling of the contours.
@@ -167,7 +170,6 @@ IF `($data_count"0") EQ 1` THEN
          if ($labnum_dods"0|*>1") THEN go unlabel ($labnum_dods)
       PPL ($plot_type)
    ENDIF
-   GO LAS_url_label 0
 
    IF ($ferret_contour_style"0|default>0|color_filled_plus_lines>1|raster_plus_lines>1|*>0") THEN
       IF ($ferret_contour_levels"0|*>1") THEN 
@@ -219,8 +221,6 @@ ENDIF
 
 ! Overall header at the very top
 LABEL/NOUSER `($ppl$xlen)/2`, `($ppl$ylen)+1.2`, 0, 0, 0.12, "LAS 7.+/Ferret ($FERRET_VERSION)     NOAA/PMEL"
-IF ($needs_url"0|*>1") THEN \
-LABEL/NOUSER `($ppl$xlen)*.33`, `($ppl$ylen)+1.`, -1, 0, 0.10, "DATA SET: @AS($data_var_url)"
 
 ! Add labels at the top for the location of any overlaid lines
 ! or hybrid z native plots and for URLs if labels have been defined
