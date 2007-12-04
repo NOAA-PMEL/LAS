@@ -159,8 +159,6 @@ ELSE
 ENDIF
 
 LABEL/NOUSER `($ppl$xlen)/2`, `($ppl$ylen)+1.2`, 0, 0, 0.12, "LAS 7.+/Ferret ($FERRET_VERSION)     NOAA/PMEL"
-IF ($needs_url"0|*>1") THEN \
-LABEL/NOUSER `($ppl$xlen)*.33`, `($ppl$ylen)+1.`, -1, 0, 0.10, "DATA SET: @AS($data_var_url)"
 
 ! Add labels at the top for the location of overlaid lines
 ! and for URLs if they exist  
@@ -193,6 +191,10 @@ IF `($data_count"0") GT 1` THEN
       IF `($n_right_labels) GT 1` THEN LABEL/NOUSER `labxloc`, `labyloc`, 1, 0.0, `labsiz`, ($upper_right_2)
    ENDIF 
    
+! even for 1 dataset, put URL label on.
+ELSE
+   IF `($n_right_labels"0") GT 0` THEN GO labels_above_plot
+
 ENDIF
 
 ! Save the results
