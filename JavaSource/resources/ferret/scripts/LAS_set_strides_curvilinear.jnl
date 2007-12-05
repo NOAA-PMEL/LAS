@@ -6,6 +6,10 @@
 show symbol operation_id
 IF `STRINDEX( "($operation_ID)", "Plot" ) EQ 0` THEN EXIT/SCRIPT
 
+! If striding has already been set (e.g. for the other vector component) then exit
+IF `($xstride"0|1>0|*>1") + ($ystride"0|1>0|*>1") + ($zstride"0|1>0|*>1") + ($tstride"0|1>0|*>1") GT 0` THEN EXIT/SCRIPT
+
+
 LET maxpix = 600  ! default
 IF ($ferret_size"0|0.06667>1|*>0") THEN LET maxpix = 300  ! small
 IF ($ferret_size"0|0.25>1|*>0")    THEN LET maxpix = 500  ! medium
@@ -78,7 +82,7 @@ IF `STRLEN("($ferret_view)") EQ 2` THEN
 !         IF `pixsize GT maxpix` THEN DEFINE SYMBOL xstride = `INT((pixsize/maxpix)+1)`
          IF `2*pixsize GT maxpix` THEN DEFINE SYMBOL xstride = `2*INT((pixsize/maxpix)+1)`
          DEFINE SYMBOL xstride = `MAX(($xstride"1"), ($stride_for_mem"1"))`
-         IF `($xstride) GT 1` THEN SET AXIS/STRIDE=($xstride) `($data_var)[d=($data_num)],RETURN=xaxis`
+         IF `($xstride"0") GT 1` THEN SET AXIS/STRIDE=($xstride) `($data_var)[d=($data_num)],RETURN=xaxis`
 
       ENDIF
 
@@ -88,29 +92,13 @@ IF `STRLEN("($ferret_view)") EQ 2` THEN
          LET y_pct = ($region_y_range)/180
          LET pixsize = `ny*y_pct`
 
- !        LET pixsize = `MAX(pixsize, ny)`  ! comment this out to set strides by region
+!         LET pixsize = `MAX(pixsize, ny)`  ! comment this out to set strides by region
 
 !         IF `pixsize GT maxpix` THEN DEFINE SYMBOL ystride = `2*INT((pixsize/maxpix)+1)`
          IF `2*pixsize GT maxpix` THEN DEFINE SYMBOL ystride = `2*INT((pixsize/maxpix)+1)`
          DEFINE SYMBOL ystride = `MAX(($ystride"1"), ($stride_for_mem"1"))`
-         IF `($ystride) GT 1` THEN SET AXIS/STRIDE=($ystride) `($data_var)[d=($data_num)],RETURN=yaxis`
+         IF `($ystride"0") GT 1` THEN SET AXIS/STRIDE=($ystride) `($data_var)[d=($data_num)],RETURN=yaxis`
 
-      ENDIF
-
-! Add a label about the striding onto upper left.
-
-      IF `($xstride"0|1>0|*>1") + ($ystride"0|1>0|*>1") EQ 2` THEN
-         DEFINE SYMBOL n_left_labels = `($n_left_labels"0")+1`
-         DEFINE SYMBOL upper_left_($n_left_labels) = "Strided ($xstride) in X, Strided ($ystride) in Y"
-      ENDIF
-      
-      IF `($xstride"0|1>0|*>1") + ($ystride"0|1>0|*>1") EQ 1` THEN 
-         DEFINE SYMBOL n_left_labels = `($n_left_labels"0")+1`
-         IF ($xstride"0|1>0|*>1") THEN \
-         DEFINE SYMBOL upper_left_($n_left_labels) = "Strided ($xstride) in X"
-      
-         IF ($ystride"0|1>0|*>1") THEN \
-         DEFINE SYMBOL upper_left_($n_left_labels) = "Strided ($ystride) in Y"
       ENDIF
 
 ! Curvilinear and some other view than xy
@@ -124,9 +112,11 @@ IF `STRLEN("($ferret_view)") EQ 2` THEN
            LET pixsize = `nx*x_pct`
            LET pixsize = `MAX(pixsize, nx)`  ! comment this out to set strides by region
     
-           IF `pixsize GT maxpix` THEN DEFINE SYMBOL xstride = `INT((pixsize/maxpix)+1)`
-           DEFINE SYMBOL xstride = `MAX(($xstride"1"), ($stride_for_mem"1"))`
-           IF `($xstride) GT 1` THEN SET AXIS/STRIDE=($xstride) `($data_var)[d=($data_num)],RETURN=xaxis`
+           IF `pixsize GT maxpix` THEN 
+              DEFINE SYMBOL xstride = `INT((pixsize/maxpix)+1)`
+              DEFINE SYMBOL xstride = `MAX(($xstride"1"), ($stride_for_mem"1"))`
+           ENDIF
+           IF `($xstride"0") GT 1` THEN SET AXIS/STRIDE=($xstride) `($data_var)[d=($data_num)],RETURN=xaxis`
 
         ENDIF
   
@@ -137,9 +127,11 @@ IF `STRLEN("($ferret_view)") EQ 2` THEN
            LET pixsize = `ny*y_pct`
            LET pixsize = `MAX(pixsize, ny)`  ! comment this out to set strides by region
   
-           IF `pixsize GT maxpix` THEN DEFINE SYMBOL ystride = `INT((pixsize/maxpix)+1)`
-           DEFINE SYMBOL ystride = `MAX(($ystride"1"), ($stride_for_mem"1"))`
-           IF `($ystride) GT 1` THEN SET AXIS/STRIDE=($ystride) `($data_var)[d=($data_num)],RETURN=yaxis`
+           IF `pixsize GT maxpix` THEN 
+              DEFINE SYMBOL ystride = `INT((pixsize/maxpix)+1)`
+              DEFINE SYMBOL ystride = `MAX(($ystride"1"), ($stride_for_mem"1"))`
+           ENDIF
+           IF `($ystride"0") GT 1` THEN SET AXIS/STRIDE=($ystride) `($data_var)[d=($data_num)],RETURN=yaxis`
 
         ENDIF
   
@@ -148,42 +140,26 @@ IF `STRLEN("($ferret_view)") EQ 2` THEN
            LET nz = zz[k=@ngd]
            LET pixsize = `MAX(pixsize, nz)`
            
-           IF `nz GT maxpix` THEN DEFINE SYMBOL zstride = `INT((pixsize/maxpix)+1)`
-           DEFINE SYMBOL zstride = `MAX(($zstride"1"), ($stride_for_mem"1"))`
-           IF `($zstride) GT 1` THEN SET AXIS/STRIDE=($zstride) `($data_var)[d=($data_num)],RETURN=zaxis`
+           IF `nz GT maxpix` THEN 
+              DEFINE SYMBOL zstride = `INT((pixsize/maxpix)+1)`
+              DEFINE SYMBOL zstride = `MAX(($zstride"1"), ($stride_for_mem"1"))`
+           ENDIF
+           IF `($zstride"0") GT 1` THEN SET AXIS/STRIDE=($zstride) `($data_var)[d=($data_num)],RETURN=zaxis`
 
         ENDIF
         
         IF ($region_t_lo"0|*>1") THEN     
-           LET nt = tt[l=@ngd]
            LET tt = t[gt=($data_var)[d=($data_num)],($region_t)]
+           LET nt = `tt[l=@ngd]`
+           stat tt
            LET pixsize = `MAX(pixsize, nt)`
 
-           DEFINE SYMBOL tstride = `INT((pixsize/maxpix)+1)`
-           DEFINE SYMBOL tstride = `MAX(($tstride"1"), ($stride_for_mem"1"))`
-           IF `($tstride) GT 1` THEN SET AXIS/STRIDE=($tstride) `($data_var)[d=($data_num)],RETURN=taxis`
+           IF `nz GT maxpix` THEN 
+              DEFINE SYMBOL tstride = `INT((pixsize/maxpix)+1)`
+              DEFINE SYMBOL tstride = `MAX(($tstride"1"), ($stride_for_mem"1"))`
+           ENDIF
+           IF `($tstride"0") GT 1` THEN SET AXIS/STRIDE=($tstride) `($data_var)[d=($data_num)],RETURN=taxis`
 
-        ENDIF
-     
-! Add a label about the striding at the upper left.
-        IF ($xstride"0|1>0|*>1")  THEN 
-           DEFINE SYMBOL n_left_labels = `($n_left_labels"0")+1`
-           DEFINE SYMBOL upper_left_($n_left_labels) = "Strided ($xstride) in X"
-        ENDIF
-   
-        IF ($ystride"0|1>0|*>1")  THEN 
-           DEFINE SYMBOL n_left_labels = `($n_left_labels"0")+1`
-           DEFINE SYMBOL upper_left_($n_left_labels) = "Strided ($ystride) in Y"
-        ENDIF
-   
-        IF ($zstride"0|1>0|*>1")  THEN 
-           DEFINE SYMBOL n_left_labels = `($n_left_labels"0")+1`
-           DEFINE SYMBOL upper_left_($n_left_labels) = "Strided ($zstride) in Z"
-        ENDIF
-   
-        IF ($tstride"0|1>0|*>1")  THEN 
-           DEFINE SYMBOL n_left_labels = `($n_left_labels"0")+1`
-           DEFINE SYMBOL upper_left_($n_left_labels) = "Strided ($tstride) in T"
         ENDIF
 
    ENDIF ! xy or not
@@ -218,55 +194,75 @@ IF `STRLEN("($ferret_view)") EQ 1` THEN
       IF ($region_x_range"0|0|*>1") THEN 
          IF `nx GT maxpix` THEN 
             DEFINE SYMBOL xstride = `2*INT((nx/maxpix)+1)`
-            IF `($xstride) GT 1` THEN SET AXIS/STRIDE=($xstride) `($data_var)[d=($data_num)],RETURN=xaxis`
+            IF `($xstride"0") GT 1` THEN SET AXIS/STRIDE=($xstride) `($data_var)[d=($data_num)],RETURN=xaxis`
          ENDIF
       ENDIF
 
       IF ($region_y_range"0|0|*>1") THEN 
          IF `ny GT maxpix` THEN 
             DEFINE SYMBOL ystride = `2*INT((ny/maxpix)+1)`
-            IF `($ystride) GT 1` THEN SET AXIS/STRIDE=($ystride) `($data_var)[d=($data_num)],RETURN=yaxis`
+            IF `($ystride"0") GT 1` THEN SET AXIS/STRIDE=($ystride) `($data_var)[d=($data_num)],RETURN=yaxis`
          ENDIF
       ENDIF
 
       IF ($region_z_range"0|0|*>1") THEN  
          IF `nz GT maxpix` THEN 
             DEFINE SYMBOL zstride = `2*INT((nz/maxpix)+1)
-            IF `($zstride) GT 1` THEN SET AXIS/STRIDE=($zstride) `($data_var)[d=($data_num)],RETURN=zaxis`
+            IF `($zstride"0") GT 1` THEN SET AXIS/STRIDE=($zstride) `($data_var)[d=($data_num)],RETURN=zaxis`
          ENDIF
       ENDIF
 
       IF ($region_t_range"0|0|*>1") THEN  
          IF `nt GT maxpix` THEN 
             DEFINE SYMBOL tstride = `2*INT((nt/maxpix)+1)`
-            IF `($tstride) GT 1` THEN SET AXIS/STRIDE=($tstride) `($data_var)[d=($data_num)],RETURN=taxis`
+            IF `($tstride"0") GT 1` THEN SET AXIS/STRIDE=($tstride) `($data_var)[d=($data_num)],RETURN=taxis`
          ENDIF
       ENDIF
 
    ENDIF
 
-! Add a label about the striding at the upper left.
-      IF ($xstride"0|1>0|*>1")  THEN 
-         DEFINE SYMBOL n_left_labels = `($n_left_labels"0")+1`
-         DEFINE SYMBOL upper_left_($n_left_labels) = "Strided ($xstride) in X"
-      ENDIF
-   
-      IF ($ystride"0|1>0|*>1")  THEN 
-         DEFINE SYMBOL n_left_labels = `($n_left_labels"0")+1`
-         DEFINE SYMBOL upper_left_($n_left_labels) = "Strided ($ystride) in Y"
-      ENDIF
-   
-      IF ($zstride"0|1>0|*>1")  THEN 
-         DEFINE SYMBOL n_left_labels = `($n_left_labels"0")+1`
-         DEFINE SYMBOL upper_left_($n_left_labels) = "Strided ($zstride) in Z"
-      ENDIF
-   
-      IF ($tstride"0|1>0|*>1")  THEN 
-         DEFINE SYMBOL n_left_labels = `($n_left_labels"0")+1`
-         DEFINE SYMBOL upper_left_($n_left_labels) = "Strided ($tstride) in T"
-      ENDIF
-
 ENDIF ! 1D plots
+
+! Add a label about the striding at the upper left.
+
+LET need_comma = 0
+IF `($xstride"0|1>0|*>1") + ($ystride"0|1>0|*>1") + ($zstride"0|1>0|*>1") + ($tstride"0|1>0|*>1") GT 0` THEN
+
+   DEFINE SYMBOL n_left_labels = `($n_left_labels"0")+1`
+   DEFINE SYMBOL upper_left_($n_left_labels) = Strided 
+
+   IF `($xstride"0|1>0|*>1")` THEN 
+      DEFINE SYMBOL upper_left_($n_left_labels) =\
+         ($upper_left_($n_left_labels)) ($xstride) in X
+      LET need_comma = 1
+   ENDIF
+
+   IF `($ystride"0|1>0|*>1")` THEN 
+      IF `need_comma GT 0` THEN DEFINE SYMBOL upper_left_($n_left_labels) =\
+         ($upper_left_($n_left_labels)),  
+      DEFINE SYMBOL upper_left_($n_left_labels) =\
+         ($upper_left_($n_left_labels)) ($ystride) in Y
+      LET need_comma = 1
+   ENDIF
+
+   IF `($zstride"0|1>0|*>1")` THEN 
+      IF `need_comma GT 0` THEN DEFINE SYMBOL upper_left_($n_left_labels) =\
+         ($upper_left_($n_left_labels)),  
+      DEFINE SYMBOL upper_left_($n_left_labels) =\
+         ($upper_left_($n_left_labels)) ($zstride) in Z
+      LET need_comma = 1
+   ENDIF
+
+   IF `($tstride"0|1>0|*>1")` THEN 
+      IF `need_comma GT 0` THEN DEFINE SYMBOL upper_left_($n_left_labels) =\
+         ($upper_left_($n_left_labels)),  
+      DEFINE SYMBOL upper_left_($n_left_labels) =\
+         ($upper_left_($n_left_labels)) ($tstride) in T
+      LET need_comma = 1
+   ENDIF
+
+ENDIF
+
 
 ! End of $RCSfile ------------LAS_set_strides.jnl--------------------------
 
