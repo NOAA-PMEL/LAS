@@ -161,12 +161,14 @@ LASUI.prototype.showInfo = function (evt) {
 			if(node.category.getChild(i).properties) {
 			var infobox = document.createElement("DIV");
 			infobox.className = "LASMetadataDIVNode"; 
-			infobox.style.left = evt.clientX + "pt";
-			infobox.style.top = evt.clientY + "pt";
-			var cancel = document.createElement("A");
-			cancel.className = "LASCancelButton";
-			cancel.innerHTML = "<B>x</B>";
-			cancel.onclick = this.genericHandler.LASBind(this,"arguments[2].parentNode.removeChild(arguments[2]);",infobox);
+			infobox.style.left = "150pt";
+			infobox.style.top = "150pt";
+			var cancel = document.createElement("INPUT");
+			cancel.type = "submit";
+			this.UIMask.style.display='';
+			//cancel.className = "LASCancelButton";
+			cancel.value = "Close";
+			cancel.onclick = this.genericHandler.LASBind(this,"arguments[2].parentNode.removeChild(arguments[2]);this.UIMask.style.display='none';",infobox);
 			infobox.appendChild(cancel);
 			var property_group=[];
 			if(!node.category.getChild(i).properties.property_group.length)
@@ -176,7 +178,8 @@ LASUI.prototype.showInfo = function (evt) {
 			for(var n in property_group) {
 				var group = property_group[n];
 				var table = document.createElement("table");
-				table.border=1;
+				
+				table.className = "LASMetadataTableNode";
 				var tbody = document.createElement("tbody");
 				var title = document.createElement("td");
 				var tr = document.createElement("tr");
@@ -533,7 +536,6 @@ LASUI.prototype.setOperation = function (evt) {
 	this.updateConstraints();	
 	
 	if(optiondef) {
-
 		var cancel = document.createElement("INPUT");		
 		cancel.type = "submit";
 		cancel.value=	"Close";
@@ -938,12 +940,12 @@ LASUI.prototype.initZConstraint = function (mode) {
 					this.refs.DepthSelect[m].onchange=this.handleDepthRangeChange.LASBind(this);
 				}
 				var depth_label2 =document.createElement("STRONG");
-				depth_label2.innerHTML = "Minimum Depth (" + this.state.grid.getAxis('z').units +") : ";
+				depth_label2.innerHTML = "Minimum Depth (" + this.state.grid.getAxis('z').units +")";
 				document.getElementById("Depth").appendChild(depth_label2);
 				document.getElementById("Depth").appendChild(this.refs.DepthSelect[0]);
 				document.getElementById("Depth").appendChild(document.createElement("BR"));
 				var depth_label3 =document.createElement("STRONG");
-				depth_label3.innerHTML = "Maximum Depth (" + this.state.grid.getAxis('z').units +") : ";
+				depth_label3.innerHTML = "Maximum Depth (" + this.state.grid.getAxis('z').units +")";
 				document.getElementById("Depth").appendChild(depth_label3);
 				document.getElementById("Depth").appendChild(this.refs.DepthSelect[1]);
 				document.getElementById("Depth").style.display="";
@@ -962,7 +964,7 @@ LASUI.prototype.initZConstraint = function (mode) {
 				}
 				this.refs.DepthSelect[0].onchange=this.handleDepthChange.LASBind(this);
 				var depth_label = document.createElement("STRONG");
-				depth_label.innerHTML="Depth (" + this.state.grid.getAxis('z').units + ") : ";
+				depth_label.innerHTML="Depth (" + this.state.grid.getAxis('z').units + ")";
 				document.getElementById("Depth").appendChild(depth_label);	
 				document.getElementById("Depth").appendChild(this.refs.DepthSelect[0]);
 				document.getElementById("Depth").style.display="";
@@ -992,10 +994,10 @@ LASUI.prototype.initTConstraint = function (mode) {
 					this.refs.DW.render("Date","MDY","MDY");
 					document.getElementById("Date").style.display="";				
 					var label = document.createElement('strong');
-					label.innerHTML="Start Date : ";
+					label.innerHTML="Start Date<br>";
 					document.getElementById("DW_td1").insertBefore(label,document.getElementById("DW_td1").firstChild);
 					var label = document.createElement('strong');
-					label.innerHTML="End Date : ";
+					label.innerHTML="End Date<br>";
 					document.getElementById("DW_td2").insertBefore(label,document.getElementById("DW_td2").firstChild);
 					break;
 				case 'point':
@@ -1005,7 +1007,7 @@ LASUI.prototype.initTConstraint = function (mode) {
 					this.refs.DW.render("Date","MDY");
 					document.getElementById("Date").style.display="";
 					var label = document.createElement('strong');
-					label.innerHTML="Date : ";
+					label.innerHTML="Date<br>";
 					document.getElementById("DW_td1").insertBefore(label,document.getElementById("DW_td1").firstChild);
 					break;
 			}	
@@ -1034,12 +1036,13 @@ LASUI.prototype.initTConstraint = function (mode) {
 							this.refs.DW[m].appendChild(_opt);
 						}
 					}
-					document.getElementById("Date").innerHTML="<strong>Start Date : </strong>";	
+					document.getElementById("Date").innerHTML="<strong>Start Date</strong><br>";	
 					document.getElementById("Date").appendChild(this.refs.DW[0]);
 					document.getElementById("Date").appendChild(document.createElement("BR"));
 					var label = document.createElement("STRONG");
 					document.getElementById("Date").appendChild(label);
-					label.innerHTML="<strong>Stop Date : </strong>";	
+					label.innerHTML="<strong>Stop Date</strong>";
+					document.getElementById("Date").appendChild(document.createElement("BR"));
 					document.getElementById("Date").appendChild(this.refs.DW[1]);
 					document.getElementById("Date").style.display="";
 					break;
@@ -1059,8 +1062,9 @@ LASUI.prototype.initTConstraint = function (mode) {
 					}
 					//document.getElementById("Date").appendChild(document.createElement("BR"));
 					var date_label = document.createElement("STRONG");
-					date_label.innerHTML = "Date : ";
+					date_label.innerHTML = "Date";
 					document.getElementById("Date").appendChild(date_label);	
+					document.getElementById("Date").appendChild(document.createElement("BR"));
 					document.getElementById("Date").appendChild(this.refs.DW[0]);
 					document.getElementById("Date").style.display="";
 					break;
