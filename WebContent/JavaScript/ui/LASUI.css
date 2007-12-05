@@ -50,7 +50,12 @@ font-weight: bold;
 	color : #436976;
 	text-decoration : underline;
 	cursor : pointer;
-
+	font-weight: bold;
+}
+.LASLink:hover {
+	color : #c30;
+	text-decoration : none;
+	font-weight: bold;
 }
 .LASTreeULNode { 
 	margin-left:6pt;
@@ -61,6 +66,21 @@ font-weight: bold;
 	padding-bottom:0;
 }
 .LASTreeLINode {
+	list-style-type : none;
+	padding :0;
+	margin : -2fpt;
+	margin-right : 0;	
+}
+.LASPlotCategory { 
+	list-style-type : none;
+	margin-left:-6pt;
+	padding-left:0pt;
+	margin-top:20;
+	padding-top:0;
+	margin-bottom:0;
+	padding-bottom:0;
+}
+.LASPlotType {
 	list-style-type : none;
 	padding :0;
 	margin : -2fpt;
