@@ -79,14 +79,29 @@ ENDIF
 IF ($ferret_deg_min_sec"0|false>0|*>1") THEN GO LAS_set_deg_min_sec.jnl
 
 ! Do the plot
+! Do a shade underlay if deg-min labelling is requested, then we dont have
+! to do VECTOR/SET which ignores the automatic skip 
 
-VECTOR($qualifiers)/TITLE="($ferret_plot_title)"/SET ($ferret_vector_1), ($ferret_vector_2)
+SHADE/pal=white/nokey/TITLE="($ferret_plot_title)"/SET  ($ferret_vector_1)
    IF ($xform_dms"0|*>1") THEN PPL XFOR (($xform_dms))
    IF ($yform_dms"0|*>1") THEN PPL YFOR (($yform_dms))
-IF ($ferret_vector_skip"0|*>1") THEN
-   PPL VECTOR,`xs`,`ys`
+PPL SHADE
+
+! use XSKIP and YSKIP if given
+IF ($ferret_vector_skip"0") THEN
+
+   VECTOR/OVER/NOLAB($qualifiers)/TITLE="($ferret_plot_title)"/XSKIP=`xs`/YSKIP=`ys` \
+       ($ferret_vector_1), ($ferret_vector_2)
+
+   DEFINE SYMBOL n_left_labels = `($n_left_labels"0")+1`
+   DEFINE SYMBOL upper_left_($n_left_labels) = Vector xskip=`xs`,yskip=`ys` 
+
 ELSE
-   PPL VECTOR
+   VECTOR/OVER/NOLAB($qualifiers)/TITLE="($ferret_plot_title)" ($ferret_vector_1), ($ferret_vector_2)
+
+   DEFINE SYMBOL n_left_labels = `($n_left_labels"0")+1`
+   DEFINE SYMBOL upper_left_($n_left_labels) = Automatic vector xskip,yskip 
+
 ENDIF
 
 IF ($ferret_contour_style"0|default>0|color_filled_plus_lines>1|raster_plus_lines>1|*>0") THEN
