@@ -111,22 +111,6 @@ IF ($ferret_view"|xy>1|*>0") THEN
       IF `($ystride) GT 1` THEN SET AXIS/STRIDE=($ystride) `($data_var)[d=($data_num)],RETURN=yaxis`
    ENDIF
 
-! Add a label about the striding onto upper left.
-
-   IF `($xstride"0|1>0|*>1") + ($ystride"0|1>0|*>1") EQ 2` THEN
-      DEFINE SYMBOL n_left_labels = `($n_left_labels"0")+1`
-      DEFINE SYMBOL upper_left_($n_left_labels) = "Strided ($xstride) in X, Strided ($ystride) in Y"
-   ENDIF
-      
-   IF `($xstride"0|1>0|*>1") + ($ystride"0|1>0|*>1") EQ 1` THEN 
-      DEFINE SYMBOL n_left_labels = `($n_left_labels"0")+1`
-      IF ($xstride"0|1>0|*>1") THEN \
-      DEFINE SYMBOL upper_left_($n_left_labels) = "Strided ($xstride) in X"
-      
-      IF ($ystride"0|1>0|*>1") THEN \
-      DEFINE SYMBOL upper_left_($n_left_labels) = "Strided ($ystride) in Y"
-   ENDIF
-
 ! Other views than xy
 
 ELSE
@@ -174,26 +158,6 @@ ELSE
       IF `($tstride) GT 1` THEN SET AXIS/STRIDE=($tstride) `($data_var)[d=($data_num)],RETURN=taxis`
    ENDIF
 
-! Add a label about the striding at the upper left.
-   IF ($xstride"0|1>0|*>1")  THEN 
-      DEFINE SYMBOL n_left_labels = `($n_left_labels"0")+1`
-      DEFINE SYMBOL upper_left_($n_left_labels) = "Strided ($xstride) in X"
-   ENDIF
-   
-   IF ($ystride"0|1>0|*>1")  THEN 
-      DEFINE SYMBOL n_left_labels = `($n_left_labels"0")+1`
-      DEFINE SYMBOL upper_left_($n_left_labels) = "Strided ($ystride) in Y"
-   ENDIF
-   
-   IF ($zstride"0|1>0|*>1")  THEN 
-      DEFINE SYMBOL n_left_labels = `($n_left_labels"0")+1`
-      DEFINE SYMBOL upper_left_($n_left_labels) = "Strided ($zstride) in Z"
-   ENDIF
-   
-   IF ($tstride"0|1>0|*>1")  THEN 
-      DEFINE SYMBOL n_left_labels = `($n_left_labels"0")+1`
-      DEFINE SYMBOL upper_left_($n_left_labels) = "Strided ($tstride) in T"
-   ENDIF
 ENDIF ! xy or not
 ENDIF  ! 2D plots
 
@@ -259,27 +223,46 @@ IF `STRLEN("($ferret_view)") EQ 1` THEN
 
    ENDIF
 
-! Add a label about the striding at the upper left.
-      IF ($xstride"0|1>0|*>1")  THEN 
-         DEFINE SYMBOL n_left_labels = `($n_left_labels"0")+1`
-         DEFINE SYMBOL upper_left_($n_left_labels) = "Strided ($xstride) in X"
-      ENDIF
-   
-      IF ($ystride"0|1>0|*>1")  THEN 
-         DEFINE SYMBOL n_left_labels = `($n_left_labels"0")+1`
-         DEFINE SYMBOL upper_left_($n_left_labels) = "Strided ($ystride) in Y"
-      ENDIF
-   
-      IF ($zstride"0|1>0|*>1")  THEN 
-         DEFINE SYMBOL n_left_labels = `($n_left_labels"0")+1`
-         DEFINE SYMBOL upper_left_($n_left_labels) = "Strided ($zstride) in Z"
-      ENDIF
-   
-      IF ($tstride"0|1>0|*>1")  THEN 
-         DEFINE SYMBOL n_left_labels = `($n_left_labels"0")+1`
-         DEFINE SYMBOL upper_left_($n_left_labels) = "Strided ($tstride) in T"
-      ENDIF
-
 ENDIF ! 1D plots
+
+! Add a label about the striding at the upper left.
+
+LET need_comma = 0
+IF `($xstride"0|1>0|*>1") + ($ystride"0|1>0|*>1") + ($zstride"0|1>0|*>1") + ($tstride"0|1>0|*>1") GT 0` THEN
+
+   DEFINE SYMBOL n_left_labels = `($n_left_labels"0")+1`
+   DEFINE SYMBOL upper_left_($n_left_labels) = Strided 
+
+   IF `($xstride"0|1>0|*>1")` THEN 
+      DEFINE SYMBOL upper_left_($n_left_labels) =\
+         ($upper_left_($n_left_labels)) ($xstride) in X
+      LET need_comma = 1
+   ENDIF
+
+   IF `($ystride"0|1>0|*>1")` THEN 
+      IF `need_comma GT 0` THEN DEFINE SYMBOL upper_left_($n_left_labels) =\
+         ($upper_left_($n_left_labels)),  
+      DEFINE SYMBOL upper_left_($n_left_labels) =\
+         ($upper_left_($n_left_labels)) ($ystride) in Y
+      LET need_comma = 1
+   ENDIF
+
+   IF `($zstride"0|1>0|*>1")` THEN 
+      IF `need_comma GT 0` THEN DEFINE SYMBOL upper_left_($n_left_labels) =\
+         ($upper_left_($n_left_labels)),  
+      DEFINE SYMBOL upper_left_($n_left_labels) =\
+         ($upper_left_($n_left_labels)) ($zstride) in Z
+      LET need_comma = 1
+   ENDIF
+
+   IF `($tstride"0|1>0|*>1")` THEN 
+      IF `need_comma GT 0` THEN DEFINE SYMBOL upper_left_($n_left_labels) =\
+         ($upper_left_($n_left_labels)),  
+      DEFINE SYMBOL upper_left_($n_left_labels) =\
+         ($upper_left_($n_left_labels)) ($tstride) in T
+      LET need_comma = 1
+   ENDIF
+
+ENDIF
 
 ! End of $RCSfile ------------LAS_set_strides.jnl--------------------------
