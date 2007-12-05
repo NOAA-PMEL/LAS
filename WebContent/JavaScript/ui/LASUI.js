@@ -744,7 +744,7 @@ LASUI.prototype.setProductTypeNode = function(type) {
 	this.refs.operations.children[type].LINode = document.createElement("LI");
 	this.refs.operations.children[type].title = document.createElement("TEXT");
 	this.refs.operations.children[type].title.innerHTML = "<b>" + type + "</b>";
-	this.refs.operations.children[type].LINode.className = "LASTreeLINode";
+	this.refs.operations.children[type].LINode.className = "LASPlotCategory";
 	this.refs.operations.children[type].LINode.appendChild(this.refs.operations.children[type].title);
 	this.refs.operations.ULNode.appendChild(this.refs.operations.children[type].LINode);
 }
@@ -752,7 +752,7 @@ LASUI.prototype.setProductNode = function(type, product) {
 	
 	this.refs.operations.children[product] = {};
 	this.refs.operations.children[product].LINode = document.createElement("LI");
-	this.refs.operations.children[product].LINode.className = "LASTreeLINode";
+	this.refs.operations.children[product].LINode.className = "LASPlotType";
 	this.refs.operations.children[product].title = document.createElement("TEXT");
 	this.refs.operations.children[product].title.innerHTML =  product;
 	this.refs.operations.children[product].radio = document.createElement("INPUT");
