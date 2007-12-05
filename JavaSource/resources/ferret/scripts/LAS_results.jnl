@@ -1,3 +1,5 @@
+exit/script
+
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! LAS_results.jnl
 ! 
@@ -95,7 +97,7 @@ IF ($result_map_scale_filename%0|*>1%) THEN
       IF ($native_curvilinear_xy"0|*>1") THEN 
          LET the_plot_var = ($ferret_plot_base_var)
       ELIF ($native_Z_plot"0|*>1") THEN
-         LET the_plot_var = ($ferret_plot_base_var)
+         LET the_plot_var = ($ferret_var_0)
       ELSE
          LET the_plot_var = ($ferret_plot_var)
       ENDIF
