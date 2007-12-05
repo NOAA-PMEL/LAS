@@ -4,6 +4,7 @@
 ! Set up for curvilinear XY data: curvilinear-to-rectilinear regridding
 ! or native curvilinear xy plots or sample from curvilinear coordinates.
 
+DEFINE SYMBOL which_var ($num)
 
 IF `($constraint_0_lhs"0|Curv_to_Rect_Regridding>1|*>0")` THEN 
    DEFINE SYMBOL data_var_transform = , Regridded Curvilinear to Rectilinear ($constraint_0_rhs)-degree Grid,
@@ -111,6 +112,8 @@ ELSE
         DEFINE SYMBOL ferret_plot_base_var = \ ($data_var)[d=($data_num),i=($clon_imin):($clon_imax),j=($clat_jmin):($clat_jmax)]
         IF ($region_zt"0|*>1") THEN DEFINE SYMBOL ferret_plot_base_var = \
         ($data_var)[d=($data_num),i=($clon_imin):($clon_imax),j=($clat_jmin):($clat_jmax),($region_zt)]
+
+        DEFINE SYMBOL ferret_plot_base_var_($which_var) ($ferret_plot_base_var)
 
         DEFINE SYMBOL ferret_plot_var ($expr1)plot_var($expr2), xcoord, ycoord
         IF ($region_zt"0|*>1") THEN DEFINE SYMBOL ferret_plot_var ($expr1)plot_var($expr2), xcoord, ycoord
