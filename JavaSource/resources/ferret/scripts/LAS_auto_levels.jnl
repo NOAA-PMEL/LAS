@@ -275,4 +275,3 @@ IF `($input_contour_levels"0|0|1") EQ 0` THEN \
 IF `($input_contour_levels"0|0|1") EQ 0` THEN \
    DEFINE SYMBOL ferret_contour_levels = ($ferret_auto_lines)
 
-pause
