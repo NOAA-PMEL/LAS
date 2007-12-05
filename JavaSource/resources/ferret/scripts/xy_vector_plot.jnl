@@ -110,27 +110,27 @@ ENDIF
 IF ($ferret_deg_min_sec"0|false>0|*>1") THEN GO LAS_set_deg_min_sec.jnl
 
 ! Do the plot. On VECTOR/SET the /XSKIP and /YSKIP are ignored. 
-! So, put these on the PPL VECTOR command if they exist.
 
 ! Do a shade underlay if deg-min labelling is requested, then we dont have
 ! to do VECTOR/SET which ignores the automatic skip 
 
-IF `($xform_dms"0|*>1") OR ($yform_dms"0|*>1")` THEN
-   SHADE/pal=white/nolab/TITLE="($ferret_plot_title)"/SET
-      IF ($xform_dms"0|*>1") THEN PPL XFOR (($xform_dms))
-      IF ($yform_dms"0|*>1") THEN PPL YFOR (($yform_dms))
-   PPL SHADE
-ENDIF
+DEFINE SYMBOL shade_var = ($ferret_vector_1)
+IF ($native_curvilinear_xy"0") THEN DEFINE SYMBOL  shade_var = ($ferret_plot_base_var_0)
 
-! use XSKIP and YSKIP if given
+SHADE/pal=white/nokey/TITLE="($ferret_plot_title)"/SET  ($ferret_vector_1)
+   IF ($xform_dms"0|*>1") THEN PPL XFOR (($xform_dms))
+   IF ($yform_dms"0|*>1") THEN PPL YFOR (($yform_dms))
+PPL SHADE
+
+! use XSKIP and YSKIP as qualifiers if given
 IF ($ferret_vector_skip"0") THEN
 
    IF ($native_curvilinear_xy"0") THEN 
-      VECTOR/OVER($qualifiers)/TITLE="($ferret_plot_title)"/XSKIP=`xs`/YSKIP=`ys` \
+      VECTOR/OVER/NOLAB($qualifiers)/TITLE="($ferret_plot_title)"/XSKIP=`xs`/YSKIP=`ys` \
        ($ferret_plot_base_var_0), ($ferret_plot_base_var_1), xcoord, ycoord
 
    ELSE
-      VECTOR/OVER($qualifiers)/TITLE="($ferret_plot_title)"/XSKIP=`xs`/YSKIP=`ys` \
+      VECTOR/OVER/NOLAB($qualifiers)/TITLE="($ferret_plot_title)"/XSKIP=`xs`/YSKIP=`ys` \
        ($ferret_vector_1), ($ferret_vector_2)
 
    ENDIF
@@ -140,11 +140,11 @@ IF ($ferret_vector_skip"0") THEN
 
 ELSE
    IF ($native_curvilinear_xy"0") THEN 
-      VECTOR/OVER($qualifiers)/TITLE="($ferret_plot_title)" \
+      VECTOR/OVER/NOLAB($qualifiers)/TITLE="($ferret_plot_title)" \
       ($ferret_plot_base_var_0), ($ferret_plot_base_var_1), xcoord, ycoord
 
    ELSE
-   VECTOR/OVER($qualifiers)/TITLE="($ferret_plot_title)" ($ferret_vector_1), ($ferret_vector_2)
+   VECTOR/OVER/NOLAB($qualifiers)/TITLE="($ferret_plot_title)" ($ferret_vector_1), ($ferret_vector_2)
 
    ENDIF
    DEFINE SYMBOL n_left_labels = `($n_left_labels"0")+1`
@@ -174,9 +174,9 @@ IF ($ferret_land_type"1|none>0|contour>0|filled>1|default>1|*>0") THEN
 ELIF ($ferret_land_type"0|none>0|contour>1|filled>0|*>0") THEN
   GO land 
 ENDIF
-
+pause
 go labels_above_plot
-
+pause
 ! Mark grid points. Options are no, subsample (tests if subsampling needed)
 ! or all to force marking all points.
 
