@@ -108,10 +108,11 @@
 <td><INPUT class="LASProductButton" width="100%" disabled="true" ID="Plot to Google Earth" value="Google Earth" type="button"></td>
 <td><INPUT class="LASProductButton" width="100%" disabled="true" ID="Table of values (text)" value="Show Values" type="button"></td>
 
-		<td><select name="Export to">
+		<td><select onafterchange="this.selectedIndex=0;" name="Export to">
                 <option>Export to...</option>
                 <option ID="ArcView gridded">Arc GIS</option>
                 <option ID="ASCII file" >ASCII File</option>
+					 <option ID="NetCDF file" >NetCDF File</option>
                 <option ID="Desktop application data access scripts">Desktop Application</option>
               </select></td>
 								</tr></tbody></table>
@@ -120,7 +121,7 @@
 								<td width="23px" valign="top"><img id="wait" style="visibility:hidden;" src="JavaScript/components/mozilla_blu.gif">&nbsp;</td>
 								<td class="LASPlotTypeContainer" style="border-right:1pt solid  #99cccc;" width="20%"  align="left" valign="center">
 									<div id="plotType"></div><div class="LASOptionsDIVNode" style="display:none" id="plotOptions"></div>
-								<td class="LASZTContainer" style="border-top:1pt solid  #99cccc;padding:3pt;">
+								<td class="LASZTContainer" align="center" style="border-top:1pt solid  #99cccc;padding:3pt;">
 									<div id="Date"></div>
 									<div id="Depth"></div>
 								</td>
