@@ -114,12 +114,12 @@ font-weight: bold;
 }
 .LASMetadataDIVNode {
 	position : absolute;
-	margin: 6px;
+	margin: 12px;
 	background-color : white;
-	border-top: 1px solid #436976;
-	border-left: 1px solid #436976;
-	border-right: 3px solid #ccc;   
-	border-bottom: 3px solid #ccc;
+	border-top: 1px solid #666;
+	border-left: 1px solid #666;
+	border-right: 3px solid #999;   
+	border-bottom: 3px solid #999;
 	z-index : 6;
 }
 .LASMetadataTableNode {
