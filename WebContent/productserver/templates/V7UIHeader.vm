@@ -1,11 +1,11 @@
-		<TABLE CELLPADDING="0" CELLSPACING="0" BORDER="0" WIDTH="100%">
+		<TABLE CELLPADDING="16" CELLSPACING="0" BORDER="0" WIDTH="100%">
 				<TR>
 				
-    <TD width="37%" bgcolor="#99CCCC"><img src="JavaScript/ui/logoLAS.jpg" width="200"  height="115"></TD>
- 	  			
-    <TD width="37%" bgcolor="#99CCCC" align="center"><p><text class="LASTitleTextNode">$las_config.getTitle()</text></p></TD>
+    <TD width="250px" bgcolor="#ffffff" align="center"><img src="JavaScript/ui/LASlogo.jpg"></TD>  			
+    <TD bgcolor="#99CCCC"><p><font color="#ffffff" size="200%" style="line-height:80%"><b>$las_config.getTitle()</b></font></p>
+<p>&nbsp;</p>
+<p><b><a href="doc/las_v7_ui_introduction.html" target="_new">HELP WITH LAS</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="LASLink" onmouseover="window.status='Link to this plot';" onmouseout="window.status=''"   class="LASLink" onclick="prompt('Bookmark this link to save the current application state.','http://' + document.location.host + document.location.pathname + '?xml=' + escape(LAS.uirequest.getXMLText()) )">Link to this page</a></TD>
 				
-    <TD bgcolor="#99CCCC" align="right" valign="bottom" width="26%"><font color="white">Armstrong&nbsp;1.1&nbsp;<br>
+    <TD bgcolor="#99CCCC" align="right" valign="top" width="26%"><font color="white">Armstrong&nbsp;1.1&nbsp;<br>
       V7&nbsp;Beta&nbsp;UI&nbsp;</font></TD>
-				<TD width="0%" align="center" bgcolor="#003399"></TD>  				
-			</TR></TABLE>
+					</TR></TABLE>

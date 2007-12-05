@@ -11,9 +11,12 @@
 		<script type="text/javascript" src="JavaScript/components/LASGetOperationsResponse.js" ></script>
 		<script type="text/javascript" src="JavaScript/components/LASGetOptionsResponse.js" ></script>
 		<script type="text/javascript" src="JavaScript/components/MapWidget.js" ></script>
+		<script type="text/javascript" src="JavaScript/components/querystring.js" ></script>
 		<script  type="text/javascript" src="JavaScript/components/DateWidget.js" ></script>
 		<script  type="text/javascript" src="JavaScript/components/MenuWidget.js" ></script>
 		<script type="text/javascript" src="JavaScript/frameworks/json/json2.js" ></script>
+		<!--<script type="text/javascript" src="JavaScript/frameworks/dojo/dojo.js" ></script>
+		<script type="text/javascript" src="JavaScript/frameworks/prototype/prototype.js" ></script>-->
 		<script type="text/javascript" src="JavaScript/ui/LASUI.js" ></script>
 		<script type="text/javascript">
 			var LAS = new LASUI();
@@ -95,29 +98,29 @@
 				<tbody>
 					<tr>
 						<td valign="top" bgcolor="#e2ffb5" width="400px" height="100%" >
-							<div><a href="doc/las_v7_ui_introduction.html" target="_new"><img src="images/help.png"></a></div>
+						
 							<div style="margin:2pt;" id="categories"></div></td>
 						<td valign="top">
-						<div id="constraints" style="width:100%; border: 1px solid black">
-							<font size=-3>Click a button to launch a product in a new window.</font>
-							<table><tbody id="productButtons"><tr >
-								<td align=center width="20%"><INPUT class="LASProductButton" width="100%" disabled="true" ID="Table of values (text)" value="Table of values" type="button"></td>
-								<td align=center width="20%"><INPUT class="LASProductButton" width="100%" disabled="true" ID="ASCII file" value="ASCII file" type="submit"></td>
-								<td align=center width="20%"><INPUT class="LASProductButton" width="100%" disabled="true" ID="Desktop application data access scripts" value="Desktop application data access scripts" type="button"></td>
-								<td align=center width="20%"><INPUT class="LASProductButton" width="100%" disabled="true" ID="ArcView gridded" value="ArcView gridded" type="button"></td></tr><tr>
-								<td align=center width="20%"><INPUT class="LASProductButton" width="100%" disabled="true" ID="Animation" value="Animation" type="button"></td>
-								<td align=center width="20%"><INPUT class="LASProductButton" width="100%" disabled="true" ID="Color plot comparison" value="Color Plot Comparison" type="button"></td>
-								<td align=center width="20%"><INPUT class="LASProductButton" width="100%" disabled="true" ID="Interactive color plot" value="Interactive Color Plot" type="button"></td>
-								<td align=center width="20%"><INPUT class="LASProductButton" width="100%" disabled="true" ID="Plot to Google Earth" value="Plot to Google Earth" type="button"></td>
-							</tr></tbody></table>
+						<div id="constraints" style="width:100%; border: 1px solid #99cccc">
+							<table width="80%" cellpadding="6"><tbody id="productButtons"><tr >
+<td align=center width="20%"><INPUT class="LASProductButton" width="100%" disabled="true" ID="Animation" value="Animation" type="button"></td>
+<td align=center width="20%"><INPUT class="LASProductButton" width="100%" disabled="true" ID="Color plot comparison" value="Comparison" type="button"></td>							
+<td align=center width="20%"><INPUT class="LASProductButton" width="100%" disabled="true" ID="Plot to Google Earth" value="Google Earth" type="button"></td>
+<td align=center width="20%"><INPUT class="LASProductButton" width="100%" disabled="true" ID="Table of values (text)" value="Show Values" type="button"></td>
+
+		<td><select name="Export to">
+                <option>Export to...</option>
+                <option ID="ArcView gridded">Arc GIS</option>
+                <option ID="ASCII file" >ASCII File</option>
+                <option ID="Desktop application data access scripts">Desktop Application</option>
+              </select></td>
+								</tr></tbody></table>
 							<table width="100%" height="220pt" border=0>
 							<tbody><tr>
 								<td width="20px" valign="top"><img id="wait" style="visibility:hidden;" src="JavaScript/components/mozilla_blu.gif">&nbsp;</td>
 								<td width="50%"  align="left" valign="center">
 										<table height="100%" width="100%"><tbody><tr><td valign="top">
-											<div id="plotType"></div>
-                          <div class="LASOptionsDIVNode" style="display:none" id="plotOptions"></div>
-                          <br>
+											<div id="plotType"></div><div class="LASOptionsDIVNode" style="display:none" id="plotOptions"></div><br>
 											<div id="Date"></div>
 											<div id="Depth"></div>
 										</td></tr>
@@ -126,21 +129,21 @@
 								<td width="50%">
 									<table><tbody>
 										<tr><td></td><td align="center"><strong>Max Lat : </strong><input size=3  id="input_maxY" type="text" value="90.0"></td><td></td></tr>
-										<tr><td align="right"><strong>Min<br><b onmousedown="LAS.refs.XYSelect.panPlot(-20,0);" class="LASLinkf">&larr;</b> Lon<br></strong><input size=6 id="input_minX" value="-180.0"><br><a  class="LASLink" onclick="LAS.refs.XYSelect.zoom(1);">ZOOM IN</a></td><td><div id="MapWidget" style="border:1px solid black;" ></div><td align="left"><strong>Max<br>Lon <b onmousedown="LAS.refs.XYSelect.panPlot(20,0);" class="LASLink">&rarr;</b></strong><br><input value="180.0" size=6 id="input_maxX"><br><a class="LASLink" onclick="LAS.refs.XYSelect.zoom(-1)">ZOOM OUT</a></td></tr>
+										<tr><td align="right"><strong>Min<br><b onmousedown="LAS.refs.XYSelect.panPlot(-20,0);" class="LASLink">&larr;</b> Lon<br></strong><input size=6 id="input_minX" value="-180.0"><br><a  class="LASLink" onclick="LAS.refs.XYSelect.zoom(1);">ZOOM IN</a></td><td><div id="MapWidget" style="border:1px solid black;" ></div><td align="left"><strong>Max<br>Lon <b onmousedown="LAS.refs.XYSelect.panPlot(20,0);" class="LASLink">&rarr;</b></strong><br><input value="180.0" size=6 id="input_maxX"><br><a class="LASLink" onclick="LAS.refs.XYSelect.zoom(-1)">ZOOM OUT</a></td></tr>
 										<tr><td></td><td align="center"><strong>Min Lat : </strong><input id="input_minY" size=3 type="text" value="-90.0"></td><td></td></tr>
 									</tbody></table>
 								</td>
 							</tr>						
 							</tbody>
 							</table>
-						<table width="100%"><tr>
-							<td><a class="LASLink" alt="Hide the constraints pane" onmouseover="window.status='Hide the constraints pane';" onmouseout="window.status=''"  id="hideC"  onclick="document.getElementById('constraints').style.display='none';LAS.refs.XYSelect.rubberBand.style.display='none';LAS.refs.XYSelect.rubberBand_c.style.display='none';document.getElementById('showC').style.display='';">Hide constraints</a></td>										
-							<td><a class="LASLink" onmouseover="window.status='Show plot options';" onmouseout="window.status=''"   class="LASLink" onclick="if(LAS.state.operation != '') {LAS.UIMask.style.display='';document.getElementById('plotOptions').style.display='';}">Set plot options.</a></td>
-							<td><a class="LASLink" onmouseover="window.status='Link to this plot';" onmouseout="window.status=''"   class="LASLink" onclick="prompt('Bookmark this link to save the current application state.','http://' + document.location.host + document.location.pathname + '?xml=' + escape(LAS.uirequest.getXMLText()) )">Link to this plot.</a></td>
-<td><a class="LASLink" onclick="LAS.state.embed=false;LAS.makeRequest();LAS.state.embed=true;">Open plot in a new window.</a></td>
-						</tr></table>
+						
 						</div>
-						<div  style="width:100%;height:600px;border: 1px solid black;padding-top:2px;"><a id ="showC" alt="Show the constraints pane" onmouseover="window.status='Hide the constraints pane';" onmouseout="window.status=''"   style="display:none;cursor:pointer;"  onclick="document.getElementById('constraints').style.display='';this.style.display='none';LAS.refs.XYSelect.rubberBand.style.display='';LAS.refs.XYSelect.rubberBand_c.style.display='';LAS.refs.XYSelect.updatePixelExtents();">Show constraints</a>
+<table width="50%" cellpadding="6"><tr>
+							<td><a class="LASLink" alt="Hide the constraints pane" onmouseover="window.status='Hide the constraints pane';" onmouseout="window.status=''"  id="hideC"  onclick="document.getElementById('constraints').style.display='none';LAS.refs.XYSelect.rubberBand.style.display='none';LAS.refs.XYSelect.rubberBand_c.style.display='none';document.getElementById('showC').style.display='';">Hide constraints</a></td>										
+							<td><a class="LASLink" onmouseover="window.status='Show plot options';" onmouseout="window.status=''"   class="LASLink" onclick="document.getElementById('plotOptions').style.display='';">Set plot options</a></td>
+							<td><a class="LASLink" onclick="LAS.state.embed=false;LAS.makeRequest();LAS.state.embed=true;">Open plot in a new window</a></td>
+						</tr></table>
+						<div  style="width:100%;height:600px;border: 1px solid #99cccc;padding-top:2px;"><a id ="showC" alt="Show the constraints pane" onmouseover="window.status='Hide the constraints pane';" onmouseout="window.status=''"   style="display:none;cursor:pointer;"  onclick="document.getElementById('constraints').style.display='';this.style.display='none';LAS.refs.XYSelect.rubberBand.style.display='';LAS.refs.XYSelect.rubberBand_c.style.display='';LAS.refs.XYSelect.updatePixelExtents();">Show constraints</a>
 											<div style="display:none;margin:20pt;padding:20pt;" id="wait_msg"><H3>Please wait while your product loads.</H3></div><iframe id="output" width="100%" height="100%" frameborder=0></iframe></div>
 					</td>
 				</tr>
@@ -149,7 +152,7 @@
 		</div>
 		#parse( "/productserver/templates/V7UIFooter.vm") 
 		<div id="debug" style="border:1pt solid black;position:absolute;top:200px;left:150px;display:none;"></div>
-		<div id="plotOptions" style="border:1pt solid black;background-color:white;z-index:6;position:absolute;top:200px;left:150px;display:none;"></div>
+		<div id="plotOptions" style="border:1pt solid #99cccc;background-color:white;z-index:6;position:absolute;top:200px;left:150px;display:none;"></div>
 	</body>
 </html>
 
