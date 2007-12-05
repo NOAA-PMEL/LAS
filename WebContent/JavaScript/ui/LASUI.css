@@ -68,22 +68,24 @@ font-weight: bold;
 .LASTreeLINode {
 	list-style-type : none;
 	padding :0;
-	margin : -2fpt;
+	margin : -2pt;
 	margin-right : 0;	
 }
 .LASPlotCategory { 
+	color: #c30;
+	
 	list-style-type : none;
 	margin-left:-6pt;
 	padding-left:0pt;
 	margin-top:20;
-	padding-top:0;
+	padding-top: 20;
 	margin-bottom:0;
 	padding-bottom:0;
 }
 .LASPlotType {
 	list-style-type : none;
 	padding :0;
-	margin : -2fpt;
+	margin-left : -5pt;
 	margin-right : 0;	
 }
 
