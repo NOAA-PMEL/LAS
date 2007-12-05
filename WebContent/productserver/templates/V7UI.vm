@@ -97,16 +97,16 @@
 			<table width="100%" height="100%" border=0>
 				<tbody>
 					<tr>
-						<td valign="top" bgcolor="#e2ffb5" width="400px" height="100%" >
+						<td class="leftNav" valign="top" bgcolor="#e2ffb5" width="400px" height="100%">
 						
 							<div style="margin:2pt;" id="categories"></div></td>
 						<td valign="top">
 						<div id="constraints" style="width:100%; border: 1px solid #99cccc">
-							<table width="80%" cellpadding="6"><tbody id="productButtons"><tr >
-<td align=center width="20%"><INPUT class="LASProductButton" width="100%" disabled="true" ID="Animation" value="Animation" type="button"></td>
-<td align=center width="20%"><INPUT class="LASProductButton" width="100%" disabled="true" ID="Color plot comparison" value="Comparison" type="button"></td>							
-<td align=center width="20%"><INPUT class="LASProductButton" width="100%" disabled="true" ID="Plot to Google Earth" value="Google Earth" type="button"></td>
-<td align=center width="20%"><INPUT class="LASProductButton" width="100%" disabled="true" ID="Table of values (text)" value="Show Values" type="button"></td>
+							<table width="70%" cellpadding="9"><tbody id="productButtons"><tr>
+<td><INPUT class="LASProductButton" width="100%" disabled="true" ID="Animation" value="Animation" type="button"></td>
+<td><INPUT class="LASProductButton" width="100%" disabled="true" ID="Color plot comparison" value="Comparison" type="button"></td>							
+<td><INPUT class="LASProductButton" width="100%" disabled="true" ID="Plot to Google Earth" value="Google Earth" type="button"></td>
+<td><INPUT class="LASProductButton" width="100%" disabled="true" ID="Table of values (text)" value="Show Values" type="button"></td>
 
 		<td><select name="Export to">
                 <option>Export to...</option>
@@ -136,7 +136,7 @@
 							</table>
 						
 						</div>
-<table width="50%" cellpadding="6"><tr>
+<table cellpadding="15"><tr>
 							<td><a class="LASLink" alt="Hide the constraints pane" onmouseover="window.status='Hide the constraints pane';" onmouseout="window.status=''"  id="hideC"  onclick="document.getElementById('constraints').style.display='none';LAS.refs.XYSelect.rubberBand.style.display='none';LAS.refs.XYSelect.rubberBand_c.style.display='none';document.getElementById('showC').style.display='';">Hide constraints</a></td>										
 							<td><a class="LASLink" onmouseover="window.status='Show plot options';" onmouseout="window.status=''"   class="LASLink" onclick="document.getElementById('plotOptions').style.display='';">Set plot options</a></td>
 							<td><a class="LASLink" onclick="LAS.state.embed=false;LAS.makeRequest();LAS.state.embed=true;">Open plot in a new window</a></td>

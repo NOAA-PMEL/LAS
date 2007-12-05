@@ -69,20 +69,22 @@ font-weight: bold;
 	list-style-type : none;
 	padding :0;
 	margin : -2pt;
-	margin-right : 0;	
+	margin-right : 0;   
 }
 .LASPlotCategory { 
 	color: #c30;
-	
+	line-height: 1.85em;
+	text-transform: uppercase;
+	margin-top:20;
+	padding-top: 20;
 	list-style-type : none;
 	margin-left:-6pt;
 	padding-left:0pt;
-	margin-top:20;
-	padding-top: 20;
 	margin-bottom:0;
 	padding-bottom:0;
 }
 .LASPlotType {
+	line-height: 1.5em;
 	list-style-type : none;
 	padding :0;
 	margin-left : -5pt;
@@ -140,6 +142,12 @@ font-weight: bold;
 	color : white;
 	font-size:40pt;
 	font-size-adjust:none;
+}
+.LASProductButton  {
+	padding: 3px 4px 3px 4px;
+	font-size: .85em;
+	font-style: bold;
+	background-color: #grey;
 }
 
 .LASSelectNode {
