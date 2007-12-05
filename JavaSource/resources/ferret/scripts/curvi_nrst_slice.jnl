@@ -17,7 +17,7 @@ IF ($region_zt"0|*>1") THEN DEFINE SYMBOL region_sample = ,($region_zt)
 
 ! default value; may be redefined in this script
 LET sampled_var = ($ferret_plot_var)
-IF ($ferret_view"|zt>1|*>0") THEN LET sampled_var = ($data_var)[d=1($region_sample)]
+IF ($ferret_view"|zt>1|*>0") THEN LET sampled_var = ($data_var)[d=($data_num)($region_sample)]
 
 ! Call CURV_RANGE to get the I,J range for the requested output rectangle
 
