@@ -34,8 +34,14 @@ IF ($ferret_view"|xy>1|*>0") THEN
       IF `( x_pct GT ($PPL$XPIXEL)/10 )` THEN LET dx = MAX(1, `INT ( 10*x_pct/($PPL$XPIXEL) )` )
       IF `( y_pct GT ($PPL$YPIXEL)/10 )` THEN LET dy = MAX(1, `INT ( 10*y_pct/($PPL$YPIXEL) )` )
       IF ($native_curvilinear_xy"0") THEN 
-         LET xpts = xcoord[i=1:`nx`:`dx`,j=1:`ny`:`dy`]
-         LET ypts = ycoord[i=1:`nx`:`dx`,j=1:`ny`:`dy`]
+         let xc = xcoord
+         let yc = ycoord
+         let imin = `xc,return=istart`
+         let imax = `xc,return=iend`
+         let jmin = `xc,return=jstart`
+         let jmax = `xc,return=jend`
+         LET xpts = xc[i=`imin`:`imax`:`dx`,j=`jmin`:`jmax`:`dy`]
+         LET ypts = yc[i=`imin`:`imax`:`dx`,j=`jmin`:`jmax`:`dy`]
       ELSE
          LET xx =  X[GX=mvar]
          LET yy =  Y[GY=mvar]
@@ -55,8 +61,6 @@ IF ($ferret_view"|xy>1|*>0") THEN
      PLOT/OVER/VS/COLOR=BLACK/SYMBOL=dot/NOLAB xpts-360, ypts  
 
 ENDIF
-
-
 !  XZ view
 
 IF ($ferret_view"|xz>1|*>0") THEN
