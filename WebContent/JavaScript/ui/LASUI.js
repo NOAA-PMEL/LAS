@@ -1341,35 +1341,45 @@ LASUI.prototype.setOptionTRNode = function (id,TBODYNode) {
 		var TD1 = document.createElement("TD");
 		TD1.width="45%";
 		TD1.innerHTML =this.refs.options.cache[id].title
+		var TD2 = document.createElement("TD");
 		if(this.refs.options.cache[id].menu) {
-			var obj = document.createElement("SELECT");
-			obj.setAttribute('name', id);
+			this.refs.options.cache[id].SELECTNode = document.createElement("SELECT");
+			this.refs.options.cache[id].SELECTNode.setAttribute('name', id);
   			for (var i=0;i<this.refs.options.cache[id].menu.item.length;i++) {
    			var option = document.createElement("OPTION");
      			option.value=this.refs.options.cache[id].menu.item[i].values;
      			option.text=this.refs.options.cache[id].menu.item[i].content;
     			//code branch for add() method differences between IE and FF
-     			try {obj.add(option);}
-     			catch(err) {obj.add(option,null);}
+     			try {this.refs.options.cache[id].SELECTNode.add(option);}
+     			catch(err) {this.refs.options.cache[id].SELECTNode.add(option,null);}
      		}
+			TD2.appendChild(this.refs.options.cache[id].SELECTNode);
 		} else {			
-			var obj = document.createElement("INPUT");
-			obj.type = "text";
-			obj.className="LASTextInputNode";
+			this.refs.options.cache[id].INPUTNode = document.createElement("INPUT");
+			this.refs.options.cache[id].INPUTNode.type = "text";
+			this.refs.options.cache[id].INPUTNode.className="LASTextInputNode";
+			TD2.appendChild(this.refs.options.cache[id].INPUTNode);
 		}
-		if(TBODYNode == this.refs.options.ULNode.TBODYNode)		
-			obj.onchange = this.setOption.LASBind(this,id,"properties");
-		else
-			obj.onchange = this.setOption.LASBind(this,id,"externalproperties");
-		var TD2 = document.createElement("TD");
-		TD2.appendChild(obj);
+		
 		this.refs.options.cache[id].TRNode.appendChild(TD1);	
 		this.refs.options.cache[id].TRNode.appendChild(TD2);
-	} 
-	if(TBODYNode == this.refs.options.ULNode.TBODYNode)			 
+	} 	
+
+	if(TBODYNode == this.refs.options.ULNode.TBODYNode)	{
+		if(this.refs.options.cache[id].SELECTNode)		
+			this.refs.options.cache[id].SELECTNode.onchange = this.setOption.LASBind(this,id,"properties");
+		if(this.refs.options.cache[id].INPUTNode)
+			this.refs.options.cache[id].INPUTNode.onchange = this.setOption.LASBind(this,id,"properties");
 		TBODYNode.appendChild(this.refs.options.cache[id].TRNode);	//first time, add it to the product
-	else
-		TBODYNode.appendChild(this.refs.options.cache[id].TRNode.cloneNode(true));	//second time, we need a copy
+	}
+	else {
+		var obj = this.refs.options.cache[id].TRNode.cloneNode(true);
+		if(obj.SELECTNode)		//second time, we need a copy
+			obj.SELECTNode.onchange = this.setOption.LASBind(this,id,"externalproperties");
+		if(obj.INPUTNode)		
+			obj.INPUTNode.onchange = this.setOption.LASBind(this,id,"externalproperties");
+		TBODYNode.appendChild(obj);	
+	}
 }
 /**
  * Event handler to respond to option changes
