@@ -114,10 +114,23 @@ font-weight: bold;
 }
 .LASMetadataDIVNode {
 	position : absolute;
+	margin: 6px;
 	background-color : white;
-	border : 1pt solid black;
+	border-top: 1px solid #436976;
+	border-left: 1px solid #436976;
+	border-right: 3px solid #ccc;   
+	border-bottom: 3px solid #ccc;
 	z-index : 6;
 }
+.LASMetadataTableNode {
+	background-color : white;
+	border: 1pt solid #436976;
+	cell-spacing:0;
+	cell-padding:4;
+	z-index : 9;
+	margin: 6px;
+}
+
 .LASCancelButton {
 	cursor:pointer;
 	position:absolute;
@@ -145,11 +158,18 @@ font-weight: bold;
 }
 .LASProductButton  {
 	padding: 3px 4px 3px 4px;
-	font-size: .85em;
+	font-size: .9em;
 	font-style: bold;
 	background-color: #grey;
 }
 
+.leftNav {
+	border-top: 3px solid #436976;
+	border-left: 1px solid #436976;
+	border-right: 3px solid #436976;
+	border-bottom: 3px solid #436976;
+
+}
 .LASSelectNode {
 }
 

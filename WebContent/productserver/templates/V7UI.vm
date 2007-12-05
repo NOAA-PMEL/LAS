@@ -141,8 +141,8 @@
 							<td><a class="LASLink" onmouseover="window.status='Show plot options';" onmouseout="window.status=''"   class="LASLink" onclick="LAS.UIMask.style.display='';document.getElementById('plotOptions').style.display='';">Set plot options</a></td>
 							<td><a class="LASLink" onclick="LAS.state.embed=false;LAS.makeRequest();LAS.state.embed=true;">Open plot in a new window</a></td>
 						</tr></table>
-						<div  style="width:100%;height:600px;border: 1px solid #99cccc;padding-top:2px;"><a id ="showC" alt="Show the plot controls pane" onmouseover="window.status='Hide the constraints pane';" onmouseout="window.status=''"   style="display:none;cursor:pointer;"  onclick="document.getElementById('constraints').style.display='';this.style.display='none';LAS.refs.XYSelect.rubberBand.style.display='';LAS.refs.XYSelect.rubberBand_c.style.display='';LAS.refs.XYSelect.updatePixelExtents();">Show constraints</a>
-											<div style="display:none;margin:20pt;padding:20pt;" id="wait_msg"><H3>Please wait while your product loads.</H3></div><iframe id="output" width="100%" height="100%" frameborder=0></iframe></div>
+						<div  style="width:100%;height:600px;border: 1px solid #99cccc;padding-top:2px;"><a id ="showC" alt="Show the plot controls pane" onmouseover="window.status='Hide the constraints pane';" onmouseout="window.status=''"   style="display:none;cursor:pointer;"  onclick="document.getElementById('constraints').style.display='';this.style.display='none';LAS.refs.XYSelect.rubberBand.style.display='';LAS.refs.XYSelect.rubberBand_c.style.display='';LAS.refs.XYSelect.updatePixelExtents();"><b>Show constraints</b></a>
+											<div style="display:none;margin:20pt;padding:20pt;" id="wait_msg"><H3>Product loading...</H3></div><iframe id="output" width="100%" height="100%" frameborder=0></iframe></div>
 					</td>
 				</tr>
 				</tbody>
