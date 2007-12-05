@@ -536,7 +536,7 @@ LASUI.prototype.setOperation = function (evt) {
 
 		var cancel = document.createElement("INPUT");		
 		cancel.type = "submit";
-		cancel.value="Cancel";
+		cancel.value=	"Close";
 		cancel.className = "LASSubmitInputNode";
 		cancel.onclick = this.genericHandler.LASBind(this,"this.refs.options.ULNode.style.display='none';this.UIMask.style.display='none';");
 		this.refs.options.ULNode.innerHTML = "";		
@@ -606,7 +606,7 @@ LASUI.prototype.doProductIconClick = function (evt) {
 	submit.className = "LASSubmitInputNode";
 	submit.onclick = this.genericHandler.LASBind(this, "this.refs.externaloperations.operations.DIVNode.style.display='none';this.launchExternalProduct();this.UIMask.style.display='none'");
 	cancel.type = "submit";
-	cancel.value="Cancel";
+	cancel.value="Close";
 	cancel.className = "LASSubmitInputNode";
 	cancel.onclick = this.genericHandler.LASBind(this, "this.refs.externaloperations.operations.DIVNode.style.display='none';this.UIMask.style.display='none'");
 	
