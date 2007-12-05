@@ -115,16 +115,16 @@
                 <option ID="Desktop application data access scripts">Desktop Application</option>
               </select></td>
 								</tr></tbody></table>
-							<table width="100%" height="220pt" border=0>
+							<table width="100%" height="220pt" border=0 cellspacing=0>
 							<tbody><tr>
 								<td width="20px" valign="top"><img id="wait" style="visibility:hidden;" src="JavaScript/components/mozilla_blu.gif">&nbsp;</td>
-								<td width="25%"  align="left" valign="center">
+								<td class="LASPlotTypeContainer" style="border-right:1pt solid  #99cccc;" width="25%"  align="left" valign="center">
 									<div id="plotType"></div><div class="LASOptionsDIVNode" style="display:none" id="plotOptions"></div>
-								<td>
+								<td class="LASZTContainer" style="border-top:1pt solid  #99cccc;padding:3pt;">
 									<div id="Date"></div>
 									<div id="Depth"></div>
 								</td>
-								<td width="50%">
+								<td width="50%" style="border-top:1pt solid  #99cccc;">
 									<table><tbody>
 										<tr><td></td><td align="center"><strong>Max Lat : </strong><input size=3  id="input_maxY" type="text" value="90.0"></td><td></td></tr>
 										<tr><td align="right"><strong>Min<br><b onmousedown="LAS.refs.XYSelect.panPlot(-20,0);" class="LASLink">&larr;</b> Lon<br></strong><input size=6 id="input_minX" value="-180.0"><br><a  class="LASLink" onclick="LAS.refs.XYSelect.zoom(1);">ZOOM IN</a></td><td><div id="MapWidget" style="border:1px solid black;" ></div><td align="left"><strong>Max<br>Lon <b onmousedown="LAS.refs.XYSelect.panPlot(20,0);" class="LASLink">&rarr;</b></strong><br><input value="180.0" size=6 id="input_maxX"><br><a class="LASLink" onclick="LAS.refs.XYSelect.zoom(-1)">ZOOM OUT</a></td></tr>
@@ -137,11 +137,11 @@
 						
 						</div>
 <table cellpadding="15"><tr>
-							<td><a class="LASLink" alt="Hide the constraints pane" onmouseover="window.status='Hide the constraints pane';" onmouseout="window.status=''"  id="hideC"  onclick="document.getElementById('constraints').style.display='none';LAS.refs.XYSelect.rubberBand.style.display='none';LAS.refs.XYSelect.rubberBand_c.style.display='none';document.getElementById('showC').style.display='';">Hide constraints</a></td>										
-							<td><a class="LASLink" onmouseover="window.status='Show plot options';" onmouseout="window.status=''"   class="LASLink" onclick="document.getElementById('plotOptions').style.display='';">Set plot options</a></td>
+							<td><a class="LASLink" alt="Hide the plot controls pane" onmouseover="window.status='Hide the plot constrols pane';" onmouseout="window.status=''"  id="hideC"  onclick="document.getElementById('constraints').style.display='none';LAS.refs.XYSelect.rubberBand.style.display='none';LAS.refs.XYSelect.rubberBand_c.style.display='none';document.getElementById('showC').style.display='';">Hide controls</a></td>										
+							<td><a class="LASLink" onmouseover="window.status='Show plot options';" onmouseout="window.status=''"   class="LASLink" onclick="LAS.UIMask.style.display='';document.getElementById('plotOptions').style.display='';">Set plot options</a></td>
 							<td><a class="LASLink" onclick="LAS.state.embed=false;LAS.makeRequest();LAS.state.embed=true;">Open plot in a new window</a></td>
 						</tr></table>
-						<div  style="width:100%;height:600px;border: 1px solid #99cccc;padding-top:2px;"><a id ="showC" alt="Show the constraints pane" onmouseover="window.status='Hide the constraints pane';" onmouseout="window.status=''"   style="display:none;cursor:pointer;"  onclick="document.getElementById('constraints').style.display='';this.style.display='none';LAS.refs.XYSelect.rubberBand.style.display='';LAS.refs.XYSelect.rubberBand_c.style.display='';LAS.refs.XYSelect.updatePixelExtents();">Show constraints</a>
+						<div  style="width:100%;height:600px;border: 1px solid #99cccc;padding-top:2px;"><a id ="showC" alt="Show the plot controls pane" onmouseover="window.status='Hide the constraints pane';" onmouseout="window.status=''"   style="display:none;cursor:pointer;"  onclick="document.getElementById('constraints').style.display='';this.style.display='none';LAS.refs.XYSelect.rubberBand.style.display='';LAS.refs.XYSelect.rubberBand_c.style.display='';LAS.refs.XYSelect.updatePixelExtents();">Show constraints</a>
 											<div style="display:none;margin:20pt;padding:20pt;" id="wait_msg"><H3>Please wait while your product loads.</H3></div><iframe id="output" width="100%" height="100%" frameborder=0></iframe></div>
 					</td>
 				</tr>
