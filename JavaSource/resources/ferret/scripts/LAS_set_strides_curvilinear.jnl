@@ -22,8 +22,8 @@ DEFINE SYMBOL memsize = ($FERRET_MEMORY"6.4")* 1.e6
 
 ! If ($data_count) larger than 1 add the size of the variables.
 !LET pvar = ($ferret_plot_var) 
-LET pvar = ($data_var)[d=1]
-IF ($region_zt"0|*>1") THEN LET pvar = ($data_var)[d=1,($region_zt)]
+LET pvar = ($data_var)[d=($data_num)]
+IF ($region_zt"0|*>1") THEN LET pvar = ($data_var)[d=($data_num),($region_zt)]
 
 LET varsiz `pvar,RETURN=size`
 DEFINE SYMBOL stride_for_mem = `INT( 1+ varsiz/(.5*($memsize)) )`
