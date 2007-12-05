@@ -107,9 +107,15 @@ ENDIF
 !IF ($ferret_no_margins"0") THEN
   DEFINE SYMBOL qualifiers = ($qualifiers)/NOAXES
 !ENDIF
-! Do the plot
 
-VECTOR($qualifiers)/TITLE="($ferret_plot_title)" ($ferret_vector_1), ($ferret_vector_2)
+! Do the plot. If the data is curvilinear, use the correct vector components.
+
+IF ($native_curvilinear_xy"0") THEN 
+   VECTOR($qualifiers)/TITLE="($ferret_plot_title)" \
+       ($ferret_plot_base_var_0), ($ferret_plot_base_var_1), xcoord, ycoord
+ELSE
+   VECTOR($qualifiers)/TITLE="($ferret_plot_title)" ($ferret_vector_1), ($ferret_vector_2)
+ENDIF
 
 ! Overlay additional data
 
