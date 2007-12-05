@@ -115,6 +115,7 @@ font-weight: bold;
 .LASMetadataDIVNode {
 	position : absolute;
 	margin: 12px;
+	padding: 8px;
 	background-color : white;
 	border-top: 1px solid #666;
 	border-left: 1px solid #666;
