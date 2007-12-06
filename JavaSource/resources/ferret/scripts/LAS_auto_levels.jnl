@@ -28,9 +28,11 @@ LET memsize = 0.5* 1.e6
 DEFINE SYMBOL op = `UPCASE("($operation_ID)")`
 
 IF `STRLEN("($ferret_view)") NE 2` THEN EXIT/SCRIPT
-IF `STRINDEX("($op)", "PLOT") EQ 0 AND STRINDEX("($op)", "ANIMATION") EQ 0` THEN EXIT/SCRIPT
-
 IF `STRINDEX("($op)", "VECTOR") GT 0` THEN EXIT/SCRIPT
+
+IF `STRINDEX("($op)", "PLOT") EQ 0 AND \
+  STRINDEX("($op)", "ANIMATION") EQ 0 AND \
+  STRINDEX ("($operation_ID)", "zoom") EQ 0` THEN EXIT/SCRIPT
 
 ! If its a compare plot, and if the ($ferret_diff_var) is not yet defined, 
 ! just return.
@@ -77,8 +79,21 @@ IF ($ferret_fill_levels"0|*>1") THEN
    ENDIF
 ENDIF
 
-! Apply to the variable over the entire grid, applying z region if given.
-LET pvar = ($data_var)[d=($data_num)]
+!! PUNT
+
+IF `($ferret_fill_levels"0|*>1") OR ($ferret_contour_levels"0|*>1")` THEN EXIT/SCRIPT
+
+! DEFINE SYMBOL ferret_fill_levels = 60
+! DEFINE SYMBOL ferret_contour_levels = 30
+
+! EXIT/SCRIPT
+
+! Apply to the variable on the requested region
+LET pvar = ($ferret_plot_base_var)
+IF ($ferret_plot_var"0|sampled_var>1|*>0) THEN LET pvar = ($ferret_plot_var)
+IF ($do_curvi_xy_and_hybrid_z"0") THEN LET pvar = plot_var
+
+DEFINE SYMBOL have_pvar = 1
 
 ! cannot do native striding if this is a descriptor dataset. In that case
 ! just set the number of levels
@@ -91,10 +106,6 @@ IF `STRINDEX("($check_for_des)", ".des") GT 0` THEN
    DEFINE SYMBOL ferret_contour_levels = ($num_fine_levels"30")
    EXIT/SCRIPT
 ENDIF
-
-LET zsiz = `pvar,return=ksize`
-IF `zsiz GT 1` THEN LET pvar = ($data_var)[d=($data_num),($region_z)]
-
 
 ! If the ferret_diff_var has been defined, use it.
 ! When no levels are defined, use centered ones.
@@ -142,13 +153,13 @@ ENDIF
 
 ! If already strided, do index strides.
 
-IF ($xstride"0|*>1") THEN 
+IF ($xstride"0|1>0|*>1") THEN 
    LET xsize  `pvar,RETURN=isize`
    IF `xsize GT 50` THEN \
      DEFINE SYMBOL index_strides = i=1:`xsize`:`INT(xsize/10)`
 ENDIF
 
-IF ($ystride"0|*>1") THEN 
+IF ($yxstride"0|1>0|*>1") THEN 
    LET ysize  `pvar,RETURN=jsize`
    IF `ysize GT 50` THEN 
      IF ($index_strides"0|*>1") THEN 
@@ -159,7 +170,7 @@ IF ($ystride"0|*>1") THEN
    ENDIF
 ENDIF
 
-IF ($tstride"0|*>1") THEN 
+IF ($txstride"0|1>0|*>1") THEN 
    LET tsize  `pvar,RETURN=lsize`
    IF `tsize GT 50` THEN 
      IF ($index_strides"0|*>1") THEN 
@@ -172,10 +183,8 @@ ENDIF
 
 IF ($index_strides"0|*>1") THEN 
    DEFINE SYMBOL ppvar = pvar[($index_strides)]
-   IF ($region_zt"0|*>1") THEN DEFINE SYMBOL ppvar = pvar[($index_strides),($region_z)]
 ELSE
    DEFINE SYMBOL ppvar = pvar
-   IF ($region_z"0|*>1") THEN DEFINE SYMBOL ppvar = pvar[($region_z)]
 ENDIF
 
 ! Execute the stat command to load symbols with the variables
@@ -215,13 +224,14 @@ LET density_factor = 4
 ! This can happen if the data is a constant value...
 IF `($stat_min) EQ ($stat_max)` THEN EXIT/SCRIPT
 
-DEFINE SYMBOL num_fine_levels = `(density_factor/(1+density_factor)) * ($num_contour_levels"50")`
-DEFINE SYMBOL num_coarse_levels =  `($num_contour_levels"50") - ($num_fine_levels)`
+DEFINE SYMBOL num_fine_levels = `(density_factor/(1+density_factor)) * ($num_contour_levels"30")`
+DEFINE SYMBOL num_coarse_levels =  `($num_contour_levels"30") - ($num_fine_levels)`
 DEFINE SYMBOL half_num_coarse_levels = `($num_coarse_levels)/2`
 
 ! Compute rounded-off levels with the PPL %RANGE command.
 
 LET nstd = 2*($stat_std)
+LET nstd = 1*($stat_std)
 
 IF ($stat_mean"bad>1|bad>1|*>0") THEN 
   DEFINE SYMBOL error_string "The ($data_var)[d=($data_num)] variable has no valid data"
@@ -234,6 +244,17 @@ IF ($ferret_center_levels"0|1|TRUE>1|*>0") THEN
 ELSE
    PPL %RANGE `($stat_mean)-nstd`, `($stat_mean)+nstd`, ($num_fine_levels)
 ENDIF
+
+DEFINE SYMBOL fine_lo = `MAX(($ppl$range_low), ($stat_min) )`
+DEFINE SYMBOL fine_hi = `MIN(($ppl$range_high), ($stat_max) )`
+IF ($ferret_center_levels"0|1|TRUE>1|*>0") THEN
+  LET fine_max = MAX(($fine_lo), ($fine_hi))
+  DEFINE SYMBOL fine_lo = `-1* fine_max` 
+  DEFINE SYMBOL fine_hi = fine_max` 
+ENDIF
+
+! Use PPL RANGE to round these values off to nice numbers
+PPL %RANGE ($fine_lo), ($fine_hi), ($num_fine_levels)
 
 DEFINE SYMBOL fine_lo = ($ppl$range_low)
 DEFINE SYMBOL fine_hi = ($ppl$range_high)
@@ -254,8 +275,13 @@ IF `($stat_min) LT ($coarse_lo)` THEN
    DEFINE SYMBOL ferret_auto_lines = (-inf)(($coarse_lo),($fine_lo),`2*($coarse_delta)`)(($fine_lo),($fine_hi),`2*($fine_inc)`)
 
 ELSE
-   DEFINE SYMBOL ferret_auto_levels = (($lowest_lev),($fine_lo),($coarse_delta))(($fine_lo),($fine_hi),($fine_inc))
-   DEFINE SYMBOL ferret_auto_lines = (($lowest_lev),($fine_lo),`2*($coarse_delta)`)(($fine_lo),($fine_hi),`2*($fine_inc)`)
+   IF `($fine_lo) - ($lowest_lev) GT ($coarse_delta)` THEN
+      DEFINE SYMBOL ferret_auto_levels = (-inf)(($lowest_lev),($fine_lo),($coarse_delta))(($fine_lo),($fine_hi),($fine_inc))
+      DEFINE SYMBOL ferret_auto_lines = (-inf)(($lowest_lev),($fine_lo),`2*($coarse_delta)`)(($fine_lo),($fine_hi),`2*($fine_inc)`)
+   ELSE
+      DEFINE SYMBOL ferret_auto_levels = (-inf)(($fine_lo),($fine_hi),($fine_inc))
+      DEFINE SYMBOL ferret_auto_lines = (-inf)(($fine_lo),($fine_hi),`2*($fine_inc)`)
+   ENDIF
 
 ENDIF
 
@@ -264,8 +290,13 @@ IF `($stat_max) GT ($coarse_hi)` THEN
    DEFINE SYMBOL ferret_auto_lines = ($ferret_auto_lines)(($fine_hi),($coarse_hi),`2*($coarse_delta)`)(inf)
 
 ELSE
-   DEFINE SYMBOL ferret_auto_levels = ($ferret_auto_levels)(($fine_hi),($highest_lev),($coarse_delta))
-   DEFINE SYMBOL ferret_auto_lines = ($ferret_auto_lines)(($fine_hi),($highest_lev),`2*($coarse_delta)`)
+   IF `($highest_lev) - ($fine_hi) GT ($coarse_delta)` THEN 
+      DEFINE SYMBOL ferret_auto_levels = ($ferret_auto_levels)(($fine_hi),($highest_lev),($coarse_delta))(inf)
+      DEFINE SYMBOL ferret_auto_lines = ($ferret_auto_lines)(($fine_hi),($highest_lev),`2*($coarse_delta)`)(inf)
+   ELSE
+      DEFINE SYMBOL ferret_auto_levels = ($ferret_auto_levels)(inf)
+      DEFINE SYMBOL ferret_auto_lines = ($ferret_auto_lines)(inf)
+   ENDIF
 ENDIF
 
 ! Use these levels to reset ferret_contour_levels and ferret_fill_levels 
@@ -274,4 +305,6 @@ IF `($input_contour_levels"0|0|1") EQ 0` THEN \
    DEFINE SYMBOL ferret_fill_levels = ($ferret_auto_levels)
 IF `($input_contour_levels"0|0|1") EQ 0` THEN \
    DEFINE SYMBOL ferret_contour_levels = ($ferret_auto_lines)
+
+
 
