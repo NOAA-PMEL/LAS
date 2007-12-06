@@ -164,6 +164,33 @@ function animate_makeLASRequest(timePoint) {
         };
     };
 
+    //for X view
+    if(initView == 'x'){
+        initReq.setOperation('Plot_1D');
+        initReq.setProperty('ferret','view','x');
+        if(depAxisScale != null){
+            initReq.setProperty('ferret','dep_axis_scale', depAxisScale);
+        };
+    };
+
+    //for Y view
+    if(initView == 'y'){
+        initReq.setOperation('Plot_1D');
+        initReq.setProperty('ferret','view','y');
+        if(depAxisScale != null){
+            initReq.setProperty('ferret','dep_axis_scale', depAxisScale);
+        };
+    };
+
+    //for Z view
+    if(initView == 'z'){
+        initReq.setOperation('Plot_1D');
+        initReq.setProperty('ferret','view','z');
+        if(depAxisScale != null){
+            initReq.setProperty('ferret','dep_axis_scale', depAxisScale);
+        };
+    };
+
     //for XYT view
     if(initView == 'xyt' || initView == 'yxt'){
         initReq.setOperation('Plot_2D_XY');
