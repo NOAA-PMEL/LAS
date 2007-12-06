@@ -139,7 +139,7 @@ IF `STRLEN("($ferret_view)") EQ 2` THEN
            LET zz = z[gz=($data_var)[d=($data_num)],($region_z)]
            LET nz = zz[k=@ngd]
            LET pixsize = `MAX(pixsize, nz)`
-           
+
            IF `nz GT maxpix` THEN 
               DEFINE SYMBOL zstride = `INT((pixsize/maxpix)+1)`
               DEFINE SYMBOL zstride = `MAX(($zstride"1"), ($stride_for_mem"1"))`
@@ -154,7 +154,7 @@ IF `STRLEN("($ferret_view)") EQ 2` THEN
            stat tt
            LET pixsize = `MAX(pixsize, nt)`
 
-           IF `nz GT maxpix` THEN 
+           IF `nt GT maxpix` THEN 
               DEFINE SYMBOL tstride = `INT((pixsize/maxpix)+1)`
               DEFINE SYMBOL tstride = `MAX(($tstride"1"), ($stride_for_mem"1"))`
            ENDIF
@@ -168,24 +168,30 @@ ENDIF  ! 2D plots
 ! For 1D plots
 IF `STRLEN("($ferret_view)") EQ 1` THEN
    LET pixsize = 1
-   IF ($region_x_lo"0|*>1") THEN 
-      LET xx = x[gx=($data_var)[d=($data_num)],($region_x)]
+   IF `($region_x_range"0|*>1") GT 0` THEN 
+      LET xx = x[gx=($data_var)[d=($data_num)]]
       LET nx = xx[i=@ngd]
-      LET pixsize = `MAX(pixsize, nx)`
+      LET x_pct = ($region_x_range)/360
+      LET pixsize = `nx*x_pct`
+!      LET pixsize = `MAX(pixsize, nx)`  ! comment this out to set strides by region
    ENDIF
-   IF ($region_y_lo"0|*>1") THEN 
-      LET yy = y[gy=($data_var)[d=($data_num)],($region_y)]
+
+   IF `($region_y_range"0|*>1") GT 0` THEN 
+      LET yy = y[gy=($data_var)[d=($data_num)]]
       LET ny = yy[j=@ngd]
-      LET pixsize = `MAX(pixsize, ny)`
+      LET y_pct = ($region_y_range)/180
+      LET pixsize = `ny*y_pct`
+!      LET pixsize = `MAX(pixsize, ny)`  ! comment this out to set strides by region
    ENDIF
    IF ($region_z_lo"0|*>1") THEN 
       LET zz = z[gz=($data_var)[d=($data_num)],($region_z)]
       LET nz = zz[k=@ngd]
       LET pixsize = `MAX(pixsize, nz)`
    ENDIF
-   IF ($region_t_lo"0|*>1") THEN 
-      LET nt = tt[l=@ngd]
+   IF `($region_t_range"0|*>1") GT 0` THEN     
       LET tt = t[gt=($data_var)[d=($data_num)],($region_t)]
+      LET nt = `tt[l=@ngd]`
+      stat tt
       LET pixsize = `MAX(pixsize, nt)`
    ENDIF
    
