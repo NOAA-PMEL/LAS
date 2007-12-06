@@ -59,6 +59,15 @@
             <item values="Data_Extract_netCDF,cdf,20">NetCDF file</item>
             <item values="Data_Extract_File,asc,20">ASCII file</item>
             <item values="Gen_Scripts,html,20">Desktop application data access scripts</item>
+            <item values="Animation_1D,txt,2">Animation</item>
+        </menu>
+        <menu type="ops" name="Ops_Std1D_t">
+            <item values="Plot_1D,line,2">Line plot</item>
+            <item values="Plot_1D_SlideSorter,line,2">Line plot comparison</item>
+            <item values="Data_Extract,txt,20">Table of Values (text)</item>
+            <item values="Data_Extract_netCDF,cdf,20">NetCDF file</item>
+            <item values="Data_Extract_File,asc,20">ASCII file</item>
+            <item values="Gen_Scripts,html,20">Desktop application data access scripts</item>
         </menu>
         <menu type="ops" name="Ops_Std2D">
             <item values="Plot_2D,shade,2">Color plot</item>
@@ -263,7 +272,8 @@
         </map>
         <map type="ops" name="DefaultOperations_HybridZ">
             <ifmenu mode="comparison" href="#Ops_StdCompare"/>
-            <ifmenu view="x,y,z,t" href="#Ops_Std1D"/>
+            <ifmenu view="x,y,z" href="#Ops_Std1D"/>
+            <ifmenu view="t" href="#Ops_Std1D_t"/>
             <ifmenu view="xz,yz" href="#Ops_Std2D"/>
             <ifmenu view="xt,yt,zt" href="#Ops_Std2D_t"/>
             <ifmenu view="xy" href="#Ops_Std2D_xy_HybridZ"/>
@@ -275,7 +285,8 @@
         </map>
         <map type="ops" name="DefaultOperations">
             <ifmenu mode="comparison" href="#Ops_StdCompare"/>
-            <ifmenu view="x,y,z,t" href="#Ops_Std1D"/>
+            <ifmenu view="x,y,z" href="#Ops_Std1D"/>
+            <ifmenu view="t" href="#Ops_Std1D_t"/>
             <ifmenu view="xz,yz" href="#Ops_Std2D"/>
             <ifmenu view="xt,yt,zt" href="#Ops_Std2D_t"/>
             <ifmenu view="xy" href="#Ops_Std2D_xy"/>
