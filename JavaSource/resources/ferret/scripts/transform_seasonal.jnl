@@ -56,7 +56,7 @@ IF `tmod` THEN
    DEFINE SYMBOL ferret_plot_var ($expr1)regrid_var_tseas_mod($expr2)
    DEFINE SYMBOL ferret_plot_var_noregion ($expr1)the_var_tseas_mod_noregion($expr2)
 
-   DEFINE SYMBOL ferret_plot_title "($expr1) ($data_title) ($expr2) (($data_units)) Seasonal regrid"
+   DEFINE SYMBOL ferret_plot_title "($expr1) ($data_title) ($expr2) ($data_units) Seasonal regrid"
 
    IF ($expr3"0|*>1") THEN
       DEFINE SYMBOL ferret_plot_var ($expr1)regrid_var_tseas_mod($expr3)regrid_var_tseas_mod($expr4)
@@ -174,7 +174,7 @@ ENDIF
 
 DEFINE SYMBOL ferret_plot_var ($expr1)regrid_var_tseas($expr2)
 DEFINE SYMBOL ferret_plot_var_noregion ($expr1)regrid_var_tseas_noregion($expr2)
-DEFINE SYMBOL ferret_plot_title "($expr1) ($data_title) ($expr2) (($data_units)) Seasonal Regrid"
+DEFINE SYMBOL ferret_plot_title "($expr1) ($data_title) ($expr2) ($data_units) Seasonal Regrid"
 
 IF ($expr3"0|*>1") THEN
    DEFINE SYMBOL ferret_plot_var ($expr1)regrid_var_tseas($expr3)($data_var)regrid_var_tseas($expr4)
