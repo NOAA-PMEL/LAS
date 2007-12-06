@@ -42,7 +42,11 @@ IF ($data_($num)_title"0|1|*>1) THEN
    DEFINE SYMBOL ferret_plot_title "($data_title) (($data_($num)_units))"
 ENDIF
 
-IF ($data_($num)_units"0|1|*>1") THEN DEFINE SYMBOL data_units ($data_($num)_units)
+IF ($data_($num)_units"0|*>1") THEN 
+   DEFINE SYMBOL data_units (($data_($num)_units))
+   IF `STRINDEX("($data_units)", "((") GT 0` THEN \
+     DEFINE SYMBOL data_units ($data_($num)_units)
+ENDIF
 
 IF ($database_access_($num)_depth_units"0|1|*>1") THEN \
    DEFINE SYMBOL data_depth_units  ($database_access_($num)_depth_units)
@@ -80,6 +84,8 @@ IF ($data_depth_units"0|*>1") THEN SET VAR/UNITS=($data_depth_units) ($data_z_va
 
 ! Put the units in parentheses, as it will appear on the plots
 IF ($data_units"0|*>1") THEN DEFINE SYMBOL data_units (($data_units))
+IF `STRINDEX("($data_units)", "((") GT 0` THEN \
+     DEFINE SYMBOL data_units ($data_($num)_units)
 
 ! Apply the expression in ferret_expression. $ represents the variable.
 

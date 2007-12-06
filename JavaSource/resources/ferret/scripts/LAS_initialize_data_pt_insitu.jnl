@@ -43,7 +43,12 @@ IF ($data_($num)_title"0|1|*>1) THEN
    DEFINE SYMBOL ferret_plot_title "($data_title) (($data_($num)_units))"
 ENDIF
 
-IF ($data_($num)_units"0|1|*>1") THEN DEFINE SYMBOL data_units ($data_($num)_units)
+IF ($data_($num)_units"0|*>1") THEN 
+   DEFINE SYMBOL data_units (($data_($num)_units))
+   IF `STRINDEX("($data_units)", "((") GT 0` THEN \
+     DEFINE SYMBOL data_units ($data_($num)_units)
+ENDIF
+
 ! LET sloc =`STRINDEX ("($data_units)", "degree_c")`
 ! IF `sloc GT 0` THEN  ! change e.g. degree_c to Deg C else Ferret labels as degrees longitude!
 !    DEFINE SYMBOL data_units Deg C
@@ -99,6 +104,8 @@ IF ($data_time_units"0|*>1") THEN SET VAR/UNITS=($data_time_units) ($data_t_var)
 
 ! Put the units in parentheses, as it will appear on the plots
 IF ($data_units"0|*>1") THEN DEFINE SYMBOL data_units (($data_units))
+IF `STRINDEX("($data_units)", "((") GT 0` THEN \
+     DEFINE SYMBOL data_units ($data_($num)_units)
 
 ! Apply the expression in ferret_expression. $ represents the variable.
 

@@ -37,7 +37,11 @@ ELSE
 ENDIF
 
 IF ($data_($num)_var"0|*>1") THEN DEFINE SYMBOL data_var ($data_($num)_var)
-IF ($data_($num)_units"0|*>1") THEN DEFINE SYMBOL data_units (($data_($num)_units))
+IF ($data_($num)_units"0|*>1") THEN 
+   DEFINE SYMBOL data_units (($data_($num)_units))
+   IF `STRINDEX("($data_units)", "((") GT 0` THEN \
+     DEFINE SYMBOL data_units ($data_($num)_units)
+ENDIF
 
 ! Do not define data_units with an empty string
 IF ($data_($num)_units%1|"">1|*>0%) THEN CANCEL SYMBOL data_units
