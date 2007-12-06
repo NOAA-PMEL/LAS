@@ -260,6 +260,9 @@
             <intervals name="xt" />
             <intervals name="yt" />
             <intervals name="zt" />
+            <intervals name="x" />
+            <intervals name="y" />
+            <intervals name="z" />
           </region>
           <grid_types>
             <grid_type name="regular" />
