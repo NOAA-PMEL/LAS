@@ -50,11 +50,13 @@ LET the_var_rect_region = the_var_rect[($region_full)]
 
 DEFINE SYMBOL ferret_plot_var ($expr1)the_var_rect_region($expr2)
 
-DEFINE SYMBOL ferret_plot_title @AC($expr1) ($data_title) ($expr2) (($data_units)) Regridded to ($constraint_0_rhs)@IM09@AC Grid
+DEFINE SYMBOL ferret_plot_base_var ($ferret_plot_var)
+
+DEFINE SYMBOL ferret_plot_title @AC($expr1) ($data_title) ($expr2) ($data_units) Regridded to ($constraint_0_rhs)@IM09@AC Grid
 
 IF ($expr3"0|*>1") THEN
    DEFINE SYMBOL ferret_plot_var ($expr1)the_var_rect_region($expr3)the_var_rect_region($expr4)
-   DEFINE SYMBOL ferret_plot_title ($expr1) ($data_title) ($expr3) ($data_title) ($expr4) (($data_units)) Regridded to ($constraint_0_rhs)@IM09@AC Grid
+   DEFINE SYMBOL ferret_plot_title ($expr1) ($data_title) ($expr3) ($data_title) ($expr4) ($data_units) Regridded to ($constraint_0_rhs)@IM09@AC Grid
 ENDIF
 
 ! End of $RCSfile ---------- transform_curv_to_rect.jnl----------------------------
