@@ -264,7 +264,7 @@ IF `zslice GT 0` THEN
 ENDIF
 
 DEFINE SYMBOL ferret_plot_var = ($expr1)sampled_var($expr2)
-DEFINE SYMBOL ferret_plot_title "($expr1) ($data_title) ($expr2) (($data_units))"
+DEFINE SYMBOL ferret_plot_title "($expr1) ($data_title) ($expr2) ($data_units)"
 
 IF ($expr3"0|*>1") THEN
    DEFINE SYMBOL ferret_plot_var ($expr1)sampled_var($expr3)sampled_var($expr4)
