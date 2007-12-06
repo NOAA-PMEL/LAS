@@ -15,34 +15,6 @@
 DEFINE SYMBOL data_num = `($data_var),RETURN=dsetnum`
 DEFINE SYMBOL data_($num)_num = `($data_var),RETURN=dsetnum`
 
-! IF contour and fill levels havent been set already, set levels 
-! based on the entire variable without the region definition; uses 
-! strides to speed this up. This should be done BEFORE LAS_set_strides.jnl 
-! is called. It operates on the variable on its entire unstrided grid.
-
-! unComment this for testing.
-
-! IF `( ($ferret_contour_levels"0|*>1") EQ 0 ) AND\ 
-!    ( ($ferret_fill_levels"0|*>1")    EQ 0 ) ` THEN
-!    GO LAS_auto_levels ($data_var)[d=($data_num)]
-!ENDIF
-
-IF `( ($ferret_contour_levels"0|*>1") EQ 0 ) AND\ 
-      ( ($ferret_fill_levels"0|*>1")    EQ 0 ) ` THEN
-   DEFINE SYMBOL ferret_auto_levels ($ferret_num_contour_levels"50")
-ENDIF
-
-! Mark whether there are contour levels set on first entry. 
-! Compute automatic open-ended levels.
-
-IF `($data_num) EQ 1` THEN
-   IF ($ferret_contour_levels"0|*>1) THEN DEFINE SYMBOL input_contour_levels = 1
-   IF ($ferret_fill_levels"0|*>1) THEN DEFINE SYMBOL input_fill_levels = 1
-ENDIF
-IF `STRLEN("($ferret_view)") EQ 2 AND STRINDEX("($operation_ID)", "Plot") GT 0` THEN
-   GO LAS_auto_levels
-ENDIF
-
 DEFINE SYMBOL ferret_plot_var = ($data_var)[d=($data_num),($region_full)]
 DEFINE SYMBOL ferret_plot_var_noregion = ($data_var)[d=($data_num)]
 DEFINE SYMBOL ferret_plot_base_var = ($ferret_plot_var) 
@@ -103,7 +75,25 @@ IF `($variables_initialized) EQ ($data_count)` THEN
    ELSE
       GO LAS_set_strides.jnl
    ENDIF
+   
+ENDIF
 
+! IF contour and fill levels havent been set in the configuration or
+! the user interface, set levels based on the variable after it is strided and its region set.
+
+IF `( ($ferret_contour_levels"0|*>1") EQ 0 ) AND\ 
+      ( ($ferret_fill_levels"0|*>1")    EQ 0 ) ` THEN
+     DEFINE SYMBOL ferret_auto_levels ($ferret_num_contour_levels"50")
+ENDIF
+
+! Mark whether there are contour levels set on first entry. 
+! Compute automatic open-ended levels.
+
+IF `($data_num) EQ 1` THEN
+   IF ($ferret_contour_levels"0|*>1) THEN DEFINE SYMBOL input_contour_levels = 1
+   IF ($ferret_fill_levels"0|*>1) THEN DEFINE SYMBOL input_fill_levels = 1
+   IF `STRLEN("($ferret_view)") EQ 2 AND STRINDEX("($operation_ID)", "Plot") GT 0` THEN\
+   GO LAS_auto_levels
 ENDIF
 
 ! End of $RCSfile ------------LAS_initialize_variable.jnl--------------------------

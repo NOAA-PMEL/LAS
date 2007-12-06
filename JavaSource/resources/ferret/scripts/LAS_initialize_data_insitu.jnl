@@ -45,7 +45,11 @@ DEFINE SYMBOL data_y_var ($data_($num)_y_var)
 IF ($data_($num)_var"0|1|*>1) THEN DEFINE SYMBOL data_var ($data_($num)_var)
 IF ($data_($num)_title"0|1|*>1) THEN DEFINE SYMBOL data_title ($data_($num)_title)
 
-IF ($data_($num)_units"0|1|*>1) THEN DEFINE SYMBOL data_units (($data_($num)_units))
+IF ($data_($num)_units"0|*>1") THEN 
+   DEFINE SYMBOL data_units (($data_($num)_units))
+   IF `STRINDEX("($data_units)", "((") GT 0` THEN \
+     DEFINE SYMBOL data_units ($data_($num)_units)
+ENDIF
 
 DEFINE SYMBOL ferret_plot_title ($data_title)
 
