@@ -620,6 +620,7 @@ LASUI.prototype.doProductIconClick = function (evt) {
 		this.getOptions(this.refs.externaloperations.operations.getOperationByID(id).optionsdef.IDREF, this.refs.externaloperations.operations.DIVNode);	
 	else {		
 		this.refs.externaloperations.operations.DIVNode.style.display='none';
+		this.UIMask.style.display="none";		
 		this.launchExternalProduct(); 
 		return;
 	}	
@@ -1367,17 +1368,17 @@ LASUI.prototype.setOptionTRNode = function (id,TBODYNode) {
 
 	if(TBODYNode == this.refs.options.ULNode.TBODYNode)	{
 		if(this.refs.options.cache[id].SELECTNode)		
-			this.refs.options.cache[id].SELECTNode.onchange = this.setOption.LASBind(this,id,"properties");
+			this.refs.options.cache[id].SELECTNode.onchange = this.setOption.LASBind(this,id,"properties", this.refs.options.cache[id]);
 		if(this.refs.options.cache[id].INPUTNode)
-			this.refs.options.cache[id].INPUTNode.onchange = this.setOption.LASBind(this,id,"properties");
+			this.refs.options.cache[id].INPUTNode.onchange = this.setOption.LASBind(this,id,"properties", this.refs.options.cache[id]);
 		TBODYNode.appendChild(this.refs.options.cache[id].TRNode);	//first time, add it to the product
 	}
 	else {
 		var obj = this.refs.options.cache[id].TRNode.cloneNode(true);
 		if(obj.SELECTNode)		//second time, we need a copy
-			obj.SELECTNode.onchange = this.setOption.LASBind(this,id,"externalproperties");
+			obj.SELECTNode.onchange = this.setOption.LASBind(this,id,"externalproperties",obj);
 		if(obj.INPUTNode)		
-			obj.INPUTNode.onchange = this.setOption.LASBind(this,id,"externalproperties");
+			obj.INPUTNode.onchange = this.setOption.LASBind(this,id,"externalproperties",obj);
 		TBODYNode.appendChild(obj);	
 	}
 }
@@ -1391,11 +1392,11 @@ LASUI.prototype.setOptionTRNode = function (id,TBODYNode) {
 LASUI.prototype.setOption = function (evt) {
 	var args = arguments;
 	var id = args[1];
-	if(this.refs.options.options.getOptionByID(id).menu)
-		this.state.properties[id]={"type" : "ferret", "value" : evt.target.options[evt.target.selectedIndex].value};
+	if(args[3].SELECTNode)
+		this.state[args[2]][id]={"type" : "ferret", "value" : evt.target.options[evt.target.selectedIndex].value};
 	else
-		this.state.properties[id]={"type" : "ferret", "value" : evt.target.value};
-	if(this.autoupdate)
+		this.state[args[2]][id]={"type" : "ferret", "value" : evt.target.value};
+	if(this.autoupdate&&args[2]=="properties")
 		this.makeRequest();
 }
 /**

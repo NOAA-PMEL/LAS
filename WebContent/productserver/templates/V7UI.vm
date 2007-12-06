@@ -15,8 +15,6 @@
 		<script  type="text/javascript" src="JavaScript/components/DateWidget.js" ></script>
 		<script  type="text/javascript" src="JavaScript/components/MenuWidget.js" ></script>
 		<script type="text/javascript" src="JavaScript/frameworks/json/json2.js" ></script>
-		<!--<script type="text/javascript" src="JavaScript/frameworks/dojo/dojo.js" ></script>
-		<script type="text/javascript" src="JavaScript/frameworks/prototype/prototype.js" ></script>-->
 		<script type="text/javascript" src="JavaScript/ui/LASUI.js" ></script>
 		<script type="text/javascript">
 			var LAS = new LASUI();
@@ -98,13 +96,13 @@
 				<tbody>
 					<tr>
 						<td class="leftNav" valign="top" bgcolor="#e2ffb5" width="400px" height="100%">
-						
+							<span id="toggleCategories" style="float:right;text-decoration:none;"class="LASLink" onclick="if(document.getElementById('categories').style.display=='none'){document.getElementById('categories').style.display='';this.parentNode.width='400px';setTimeout('document.getElementById(\'toggleCategories\').innerHTML = \'<b><</b>\'',500)} else {document.getElementById('categories').style.display='none';this.parentNode.width='3px';this.parentNode.style.overflow='true';setTimeout('document.getElementById(\'toggleCategories\').innerHTML = \'<b>></b>\'',500)} LAS.refs.XYSelect.updatePixelExtents();"><</span>
 							<div style="margin:2pt;" id="categories"></div></td>
 						<td valign="top">
 						<div id="constraints" style="width:100%; border: 1px solid #99cccc">
 							<table width="70%" cellpadding="9"><tbody id="productButtons"><tr>
 <td><INPUT class="LASProductButton" width="100%" disabled="true" ID="Animation" value="Animation" type="button"></td>
-<td><INPUT class="LASProductButton" width="100%" disabled="true" ID="Color plot comparison" value="Comparison" type="button"></td>							
+<td><INPUT class="LASProductButton" width="100%" disabled="true" ID="Comparison" value="Comparison" type="button"></td>							
 <td><INPUT class="LASProductButton" width="100%" disabled="true" ID="Plot to Google Earth" value="Google Earth" type="button"></td>
 <td><INPUT class="LASProductButton" width="100%" disabled="true" ID="Table of values (text)" value="Show Values" type="button"></td>
 
