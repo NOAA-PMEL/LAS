@@ -105,7 +105,7 @@ IF ($result_map_scale_filename%0|*>1%) THEN
             LET the_plot_var = ($ferret_plot_var)
          ENDIF
       ENDIF
-
+      IF ($ferret_plot_var"0|sampled_var>1|*>0) THEN LET the_plot_var = ($ferret_plot_var)
 
       DEFINE SYMBOL the_axis =  `the_plot_var,RETURN=($ax_horiz)axis`
       IF `STRINDEX("($the_axis)", "(") GT 0` THEN 
