@@ -18,6 +18,9 @@ IF ($operation_ID"Data_Extract_netCDF>1|*>0") THEN EXIT/SCRIPT
 ! See LAS_set_strides_curvilinear for first cut on dealing with strides and curvi data.
 IF ($ferret_curvi_coord_lat"0|0|*>1") THEN EXIT/SCRIPT
 
+! Hybrid Z not dealt with here...
+IF ($do_hybrid_z"0|*>1") THEN EXIT/SCRIPT 
+
 ! Step 1  ---------------------------------------------------------------------
 ! Determine striding based on the memory allocation
 
