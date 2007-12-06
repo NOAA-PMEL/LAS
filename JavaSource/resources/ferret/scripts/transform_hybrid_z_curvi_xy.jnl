@@ -42,7 +42,7 @@ IF `($native_Z_plot"0") EQ 0` THEN
    IF `kmax EQ 1` THEN 
       DEFINE SYMBOL ferret_plot_var = ($data_var)[d=($data_num),k=`kmin`:`kmax`]
       IF ($region_t"0|*>1") THEN DEFINE SYMBOL ferret_plot_var = ($data_var)[d=($data_num),($region_t),k=`kmin`:`kmax`]
-      DEFINE SYMBOL ferret_plot_title ($data_title) (($data_units)) 
+      DEFINE SYMBOL ferret_plot_title ($data_title) ($data_units)
    ELSE
 
       DEFINE SYMBOL ferret_plot_var = ZAXREPLACE_ZLEV( \
@@ -55,7 +55,7 @@ IF `($native_Z_plot"0") EQ 0` THEN
         ($ferret_thk_var)[d=($thk_num),($region_t),k=`kmin`:`kmax`], \
         z[gz=fixed_z_axis,($region_z)] )
 
-      DEFINE SYMBOL ferret_plot_title ($data_title) (($data_units)) Regridded to Fixed-Z Grid
+      DEFINE SYMBOL ferret_plot_title ($data_title) ($data_units) Regridded to Fixed-Z Grid
    ENDIF
 
 ! Now set up curvilinear xy
@@ -101,7 +101,7 @@ ELSE  ! Native_Z_section requested, so set up to do a section plot in xz or yz o
 ! Define the plot variable as 3-argument plot command, with /VLIM to set the vertical region.
       DEFINE SYMBOL ferret_plot_var = \
         /VLIM=($region_z_lo):($region_z_hi) ($data_var)[d=($data_num),($region_xyt)], xval, zval
-      DEFINE SYMBOL ferret_plot_title "($data_title) (($data_units)) native depth thicknesses"
+      DEFINE SYMBOL ferret_plot_title "($data_title) ($data_units) native depth thicknesses"
 
 ! Define upper-left labels with the latitude region
 
@@ -124,7 +124,7 @@ ELSE  ! Native_Z_section requested, so set up to do a section plot in xz or yz o
 ! Define the plot variable as 3-argument plot command, with /VLIM to set the vertical region.
       DEFINE SYMBOL ferret_plot_var = \
         /VLIM=($region_z_lo):($region_z_hi) ($data_var)[d=($data_num),($region_xyt)], yval, zval
-      DEFINE SYMBOL ferret_plot_title "($data_title) (($data_units)) native depth thicknesses"
+      DEFINE SYMBOL ferret_plot_title "($data_title) ($data_units) native depth thicknesses"
 
 ! Define upper-left labels with the longitude region
 
@@ -146,7 +146,7 @@ ELSE  ! Native_Z_section requested, so set up to do a section plot in xz or yz o
 
       DEFINE SYMBOL ferret_plot_var = \
         ($data_var)[d=($data_num),($region_xyt)], tval, zval
-      DEFINE SYMBOL ferret_plot_title "($data_title) (($data_units)) native depth thicknesses"
+      DEFINE SYMBOL ferret_plot_title "($data_title) ($data_units) native depth thicknesses"
 
       DEFINE SYMBOL n_left_labels = `($n_left_labels"0")+1`
       DEFINE SYMBOL upper_left_($n_left_labels"0") = "Longitude: ($region_x_lo)E"
