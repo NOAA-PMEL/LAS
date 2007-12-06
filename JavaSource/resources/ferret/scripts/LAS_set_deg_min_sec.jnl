@@ -13,22 +13,27 @@ CAN MODE LAT
 ! from the curvilinear coordinate variables
 
 IF `($ferret_curvi_coord_lat"0|*>1") + ($constraint_0_lhs"1|Curv_to_Rect_Regridding>0|*>1") EQ 2` THEN
-
-  DEFINE SYMBOL coord_units = `($ferret_curvi_coord_lon)[d=($data_num)],RETURN=units`
-  IF `STRINDEX ("($coord_units)", "deg") GT 0` THEN
-      DEFINE SYMBOL xform_dms = dm
-      DEFINE SYMBOL use_dms 1
-      LET coord_lo = ($ferret_curvi_coord_lon)[d=($data_num),x=@min,y=@min]
-      LET coord_hi = ($ferret_curvi_coord_lon)[d=($data_num),x=@max,y=@max]
-      IF `coord_hi - coord_lo LT 1` THEN DEFINE SYMBOL xform_dms = dms
+  IF `STRINDEX("($ferret_view)", "x") GT 0` THEN 
+     DEFINE SYMBOL coord_units = `($ferret_curvi_coord_lon)[d=($data_num)],RETURN=units`
+     IF `STRINDEX ("($coord_units)", "deg") GT 0` THEN
+         DEFINE SYMBOL xform_dms = dm
+         DEFINE SYMBOL use_dms 1
+         LET coord_lo = ($ferret_curvi_coord_lon)[d=($data_num),x=@min,y=@min]
+         LET coord_hi = ($ferret_curvi_coord_lon)[d=($data_num),x=@max,y=@max]
+         IF `coord_hi - coord_lo LT 1` THEN DEFINE SYMBOL xform_dms = dms
+     ENDIF
   ENDIF
+
+  IF `STRINDEX("($ferret_view)", "y") GT 0` THEN 
+
   DEFINE SYMBOL coord_units = `($ferret_curvi_coord_lat)[d=($data_num)],RETURN=units`
-  IF `STRINDEX ("($coord_units)", "deg") GT 0` THEN
-      DEFINE SYMBOL yform_dms = dm
-      DEFINE SYMBOL use_dms 1
-      LET coord_lo = ($ferret_curvi_coord_lat)[d=($data_num),x=@min,y=@min]
-      LET coord_hi = ($ferret_curvi_coord_lat)[d=($data_num),x=@max,y=@max]
-      IF `coord_hi - coord_lo LT 1` THEN DEFINE SYMBOL yform_dms = dms
+     IF `STRINDEX ("($coord_units)", "deg") GT 0` THEN
+         DEFINE SYMBOL yform_dms = dm
+         DEFINE SYMBOL use_dms 1
+         LET coord_lo = ($ferret_curvi_coord_lat)[d=($data_num),x=@min,y=@min]
+         LET coord_hi = ($ferret_curvi_coord_lat)[d=($data_num),x=@max,y=@max]
+         IF `coord_hi - coord_lo LT 1` THEN DEFINE SYMBOL yform_dms = dms
+     ENDIF
   ENDIF
 
 ELSE
@@ -72,4 +77,4 @@ ENDIF
 
 SET MODE/LAST LONG
 SET MODE/LAST LAT
-
+pause
