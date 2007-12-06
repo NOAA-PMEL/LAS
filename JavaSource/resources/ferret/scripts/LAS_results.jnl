@@ -92,12 +92,18 @@ IF ($result_map_scale_filename%0|*>1%) THEN
    IF `STRLEN("($ferret_view)") EQ 2` THEN 
       LET syms_names = {"AX_HORIZ", "AX_HORIZ_POSTV", "AX_VERT", "AX_VERT_POSTV"}
 
-      IF ($native_curvilinear_xy"0|*>1") THEN 
-         LET the_plot_var = ($ferret_plot_base_var)
-      ELIF ($native_Z_plot"0|*>1") THEN
-         LET the_plot_var = ($ferret_var_0)
+      IF ($have_pvar"0") THEN 
+         LET the_plot_var = pvar  ! from LAS_auto_levels
       ELSE
-         LET the_plot_var = ($ferret_plot_var)
+         IF ($native_curvilinear_xy"0|*>1") THEN 
+            LET the_plot_var = ($ferret_plot_base_var)
+         ELIF ($do_hybrid_z"0|*>1") THEN
+            LET the_plot_var = ($ferret_plot_base_var)
+         ELIF ($native_Z_plot"0|*>1") THEN
+            LET the_plot_var = ($ferret_var_0)
+         ELSE
+            LET the_plot_var = ($ferret_plot_var)
+         ENDIF
       ENDIF
 
 
