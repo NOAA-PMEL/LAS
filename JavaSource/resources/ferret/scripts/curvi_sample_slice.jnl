@@ -225,9 +225,13 @@ IF `zslice GT 0` THEN
 ENDIF
 
 DEFINE SYMBOL ferret_plot_var = ($expr1)sampled_var($expr2)
-DEFINE SYMBOL ferret_plot_title "($expr1) ($data_title) ($expr2) (($data_units))"
+DEFINE SYMBOL ferret_plot_title "($expr1) ($data_title) ($expr2) ($data_units) Sampled from curvilinear grid"
 
 IF ($expr3"0|*>1") THEN
    DEFINE SYMBOL ferret_plot_var ($expr1)sampled_var($expr3)sampled_var($expr4)
-   DEFINE SYMBOL ferret_plot_title "($expr1) ($data_title) ($expr3) ($data_title) ($expr4)"
+   DEFINE SYMBOL ferret_plot_title "($expr1) ($data_title) ($expr3) ($data_title) ($expr4) Sampled from curvilinear grid"
 ENDIF
+
+
+! End of file ------------curvi_sample_slice.jnl--------------------------
+
