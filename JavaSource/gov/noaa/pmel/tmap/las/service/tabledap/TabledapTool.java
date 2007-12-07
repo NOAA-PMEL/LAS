@@ -12,7 +12,6 @@ import com.cohort.util.String2;
 import com.cohort.util.Test;
 
 import gov.noaa.pfel.coastwatch.pointdata.Table;
-import gov.noaa.pfel.coastwatch.pointdata.DigirHelper;
 
 import gov.noaa.pmel.tmap.las.exception.LASException;
 import gov.noaa.pmel.tmap.las.jdom.JDOMUtils;
@@ -39,8 +38,7 @@ import com.cohort.array.PrimitiveArray;
  * (http://coastwatch.pfel.noaa.gov/coastwatch/erddap/tabledap/index.html).
  *     
  * <p>The associated template will create two constraint expressions if needed to 
- * collect data from the two "edges"
- * of the domain.
+ * collect data from the two "edges" of the domain.
  * 
  *<pre>  
  *
