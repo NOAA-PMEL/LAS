@@ -1,0 +1,4 @@
+<tabledap_servers>
+   <tabledap name="ERD's ERDDAP" url="http://coastwatch.pfel.noaa.gov/coastwatch/erddap/"/>
+
+</tabledap_servers>
