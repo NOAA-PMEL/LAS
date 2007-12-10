@@ -46,6 +46,19 @@
 ! 2007/11/14 acm If there is no x axis at all then the `LOAD var,return=xmod` results in an 
 !                error. Check for the existence of an axis in the x direction first.  (trac 315)
 
+! For the present, this script does not handle curvilinear or hybrid Z data...
+
+IF ($ferret_curvi_coord_lat"0|*>1") THEN
+   DEFINE SYMBOL error_string = "Desktop Access script not available for data on a Curvilinear grid"
+   MESSAGE/ERROR ($error_string)
+   EXIT/PROGRAM
+ENDIF
+IF `($ferret_thk_var"0|*>1")` THEN
+   DEFINE SYMBOL error_string = "Desktop Access script not available for data on a Hybrid Z grid"
+   MESSAGE/ERROR ($error_string)
+   EXIT/PROGRAM
+ENDIF
+
 CANCEL MODE long
 CANCEL MODE lat
 
@@ -57,8 +70,6 @@ LET xmod = 0
 IF `STRINDEX("($varshape)", "X") NE 0` THEN
 
 ! Check whether X axis is modulo
-
-LOAD `($data_var),return=xmod` 
 
 DEFINE SYMBOL var_xmod = "`($data_var),return=xmod`"  
 IF  `STRCMP (" ", ($var_xmod)) EQ 0` THEN
@@ -206,16 +217,20 @@ ENDIF   !!! Z region
 ! T region
 
 IF `STRINDEX("($varshape)", "T") NE 0` THEN
-IF ($region_t_hi"0|*>1") THEN
-   
-   LET tt = `t[gt=($data_var),t="($region_t_lo)"]`
-   DEFINE SYMBOL t_lo "`TAX_DATESTRING(tt, ($ferret_plot_var), "days")`"
-   LET tt = `t[gt=($data_var),t="($region_t_hi)"]`
-   DEFINE SYMBOL t_hi "`TAX_DATESTRING(tt, ($ferret_plot_var), "days")`"
-   DEFINE SYMBOL l_lo `l[gt=($data_var),t="($region_t_lo)"]`
-   DEFINE SYMBOL l_hi `l[gt=($data_var),t="($region_t_hi)"]`
+   IF ($region_t_hi"0|*>1") THEN
 
-ENDIF
+      LET tpts = t[gt=`($ferret_plot_var),return=taxis`]
+
+      LET tt = `t[gt=tpts,t="($region_t_lo)"]`
+      DEFINE SYMBOL t_lo "`TAX_DATESTRING(tt, tpts, "days")`"
+
+      LET tt = `t[gt=tpts,t="($region_t_hi)"]`
+      DEFINE SYMBOL t_lo "`TAX_DATESTRING(tt, tpts, "days")`"
+
+      DEFINE SYMBOL l_lo `l[gt=($data_var),t="($region_t_lo)"]`
+      DEFINE SYMBOL l_hi `l[gt=($data_var),t="($region_t_hi)"]`
+
+   ENDIF
 ENDIF   !!! T region
 
 ! Write out as we do for the mapscale file...
