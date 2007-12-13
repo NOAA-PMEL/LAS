@@ -79,6 +79,11 @@
 #if ($las_request.getProperty('ui','t')!="")
 				't' : $las_request.getProperty('ui','t'),		
 #end
+#if ($las_request.getProperty('ui','autoupdate')!="")
+				'autoupdate' : $las_request.getProperty('ui','autoupdate'),		
+#else
+				'autoupdate' : false,	
+#end
 #if ($las_request.getProperty('ui','options')!="")
 				'options' : $las_request.getProperty('ui','options')
 #else
@@ -126,7 +131,7 @@
 								<td width="50%" style="border-top:1pt solid  #99cccc;">
 									<table><tbody>
 										<tr><td></td><td align="center"><strong>Max Lat : </strong><input size=3  id="input_maxY" type="text" value="90.0"></td><td></td></tr>
-										<tr><td align="right"><strong>Min<br><b onmousedown="LAS.refs.XYSelect.panPlot(-20,0);" class="LASLink">&larr;</b> Lon<br></strong><input size=6 id="input_minX" value="-180.0"><br><a  class="LASLink" onclick="LAS.refs.XYSelect.zoom(1);">ZOOM IN</a></td><td><div id="MapWidget" style="border:1px solid black;" ></div><td align="left"><strong>Max<br>Lon <b onmousedown="LAS.refs.XYSelect.panPlot(20,0);" class="LASLink">&rarr;</b></strong><br><input value="180.0" size=6 id="input_maxX"><br><a class="LASLink" onclick="LAS.refs.XYSelect.zoom(-1)">ZOOM OUT</a></td></tr>
+										<tr><td align="right"><strong>Min<br><b onmousedown="LAS.refs.XYSelect.panPlot(-20,0);" class="LASLink">&larr;</b> Lon<br></strong><input size=6 id="input_minX" value="-180.0"><br><a  class="LASLink" onclick="LAS.refs.XYSelect.zoom(2);">ZOOM IN</a></td><td><div id="MapWidget" style="border:1px solid black;" ></div><td align="left"><strong>Max<br>Lon <b onmousedown="LAS.refs.XYSelect.panPlot(20,0);" class="LASLink">&rarr;</b></strong><br><input value="180.0" size=6 id="input_maxX"><br><a class="LASLink" onclick="LAS.refs.XYSelect.zoom(-1)">ZOOM OUT</a></td></tr>
 										<tr><td></td><td align="center"><strong>Min Lat : </strong><input id="input_minY" size=3 type="text" value="-90.0"></td><td></td></tr>
 									</tbody></table>
 								</td>
@@ -137,8 +142,10 @@
 						</div>
 <table cellpadding="15"><tr>
 							<td><a class="LASLink" alt="Hide the plot controls pane" onmouseover="window.status='Hide the plot constrols pane';" onmouseout="window.status=''"  id="hideC"  onclick="document.getElementById('constraints').style.display='none';LAS.refs.XYSelect.rubberBand.style.display='none';LAS.refs.XYSelect.rubberBand_c.style.display='none';document.getElementById('showC').style.display='';">Hide controls</a></td>										
-							<td><a class="LASLink" onmouseover="window.status='Show plot options';" onmouseout="window.status=''"   class="LASLink" onclick="LAS.UIMask.style.display='';document.getElementById('plotOptions').style.display='';">Set plot options</a></td>
+							<td><a class="LASLink" onmouseover="window.status='Show plot options';" onmouseout="window.status=''"   class="LASLink" onclick="LAS.toggleUIMask('');document.getElementById('plotOptions').style.display='';">Set plot options</a></td>
 							<td><a class="LASLink" onclick="LAS.state.embed=false;LAS.makeRequest();LAS.state.embed=true;">Open plot in a new window</a></td>
+							<td class="LASLink" style="text-decoration:none;" ><input type="checkbox" onclick="LAS.autoupdate=this.checked;if(LAS.autoupdate)LAS.makeRequest();"> Auto Update Plot</td>
+							<td><a id="update" class="LASLink" style="visibility:hidden;" onclick="LAS.makeRequest();">Update Plot</a></td>
 						</tr></table>
 						<div  style="width:100%;height:600px;border: 1px solid #99cccc;padding-top:2px;"><a id ="showC" alt="Show the plot controls pane" onmouseover="window.status='Hide the constraints pane';" onmouseout="window.status=''"   style="display:none;cursor:pointer;"  onclick="document.getElementById('constraints').style.display='';this.style.display='none';LAS.refs.XYSelect.rubberBand.style.display='';LAS.refs.XYSelect.rubberBand_c.style.display='';LAS.refs.XYSelect.updatePixelExtents();"><b>Show constraints</b></a>
 											<div style="display:none;margin:20pt;padding:20pt;" id="wait_msg"><H3>Product loading...</H3></div><iframe id="output" width="100%" height="100%" frameborder=0></iframe></div>

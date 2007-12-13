@@ -28,7 +28,8 @@ function LASUI () {
 		"properties" : [],
 		"externalproperties" : [],
 		"view" : null,
-		"embed" : true
+		"embed" : true,
+		"xybox" : {}
 	};
 					
 	//DOM anchor ids.
@@ -48,7 +49,7 @@ function LASUI () {
 							
 	this.request = new LASRequest();
 			
-	this.autoupdate=true;	
+	this.autoupdate=false;	
 
 	for(var f in this)	
 		if(typeof this[f] == "function")
@@ -71,15 +72,17 @@ function LASUI () {
 LASUI.prototype.initUI = function (anchorId)
 {
 
-	if(this.params) {
+	if(this.params.dsid) {
 		this.state.dataset = this.params.dsid;
 		this.state.categories = this.params.categories;
-	   this.state.variables[this.params.dsid] = this.params.varid;
+	        this.state.variables[this.params.dsid] = this.params.varid;
 		this.state.operation = this.params.plot;
-		this.state.view = this.params.view
+		this.state.view = this.params.view;
+		this.autoupdate = this.params.autoupdate;	
+	}	
+	if(this.autoupdate)
 		this.submitOnLoad = true;
-	}
-	else
+	else	
 		this.submitOnLoad = false;
 
 	this.refs.externaloperations = {};
@@ -118,11 +121,15 @@ LASUI.prototype.initUI = function (anchorId)
 	}
 	this.UIMask = document.createElement("DIV");
 	this.UIMask.className = "LASUIMask";
-	this.UIMask.style.display = "none";
+	this.toggleUIMask('none');
 	document.body.appendChild(this.UIMask);
 
 }
-
+LASUI.prototype.toggleUIMask = function(display) {
+	this.UIMask.style.height=(document.height+30)+'px';
+	this.UIMask.style.width=(document.width+30)+'px';
+	this.UIMask.style.display=display;
+}
 LASUI.prototype.AJAXhandler = function  (app) {
 		var args = arguments;
 		var req = args[1];
@@ -165,10 +172,10 @@ LASUI.prototype.showInfo = function (evt) {
 			infobox.style.top = "150pt";
 			var cancel = document.createElement("INPUT");
 			cancel.type = "submit";
-			this.UIMask.style.display='';
+			this.toggleUIMask('');
 			//cancel.className = "LASCancelButton";
 			cancel.value = "Close";
-			cancel.onclick = this.genericHandler.LASBind(this,"arguments[2].parentNode.removeChild(arguments[2]);this.UIMask.style.display='none';",infobox);
+			cancel.onclick = this.genericHandler.LASBind(this,"arguments[2].parentNode.removeChild(arguments[2]);this.toggleUIMask('none');",infobox);
 			infobox.appendChild(cancel);
 			var property_group=[];
 			if(!node.category.getChild(i).properties.property_group.length)
@@ -476,29 +483,10 @@ LASUI.prototype.setVariable = function (evt) {
  */ 
 LASUI.prototype.setDataset = function (dataset) {
 	this.state.dataset = dataset;
+	this.state.newgrid = true;
 	if(typeof this.state.variables[dataset] == 'object') {
 		this.getGrid(dataset, this.state.variables[dataset][this.state.variables[dataset].length-1].ID);
 	}
-}
-/**
- * Event handler to set the view, bind to view  DOM object events. 
- * @param {object} evt The event object
- * @param {object} arguments Arguments added using function.prototype.LASBind<br> 
- *						this -- the context setView is being called in<br>
- *						view -- a view id 
- */ 
-LASUI.prototype.setView = function (evt) {
-	var args = arguments
-	var view = args[1];	
-	this.state.view = view;
-	if(!this.products)
-		this.refs.operations.ULNode.innerHTML="";
-	
-	//this.refs.options.ULNode.innerHTML="";
-	this.state.properties = {};	
-	
-	this.updateConstraints();
-	this.getOperations(this.state.dataset,this.state.variables[this.state.dataset][this.state.variables[this.state.dataset].length-1].ID,this.state.view);
 }
 /**
  * Method to query the server for a category
@@ -520,7 +508,7 @@ LASUI.prototype.getOperations = function (dataset, variable, view) {
  *	@param {object} evt The event object
  * @arguments Arguments added using function.prototype.LASBind<br>
  *			this -- the context the handler is executing in.<br>
- *			id -- an operation id
+ *get			id -- an operation id
  */
 LASUI.prototype.setOperation = function (evt) {
 	var args = arguments;
@@ -540,7 +528,7 @@ LASUI.prototype.setOperation = function (evt) {
 		cancel.type = "submit";
 		cancel.value=	"Close";
 		cancel.className = "LASSubmitInputNode";
-		cancel.onclick = this.genericHandler.LASBind(this,"this.refs.options.ULNode.style.display='none';this.UIMask.style.display='none';");
+		cancel.onclick = this.genericHandler.LASBind(this,"this.refs.options.ULNode.style.display='none';this.toggleUIMask('none');");
 		this.refs.options.ULNode.innerHTML = "";		
 		this.refs.options.ULNode.appendChild(cancel);
 		this.getOptions(optiondef, this.refs.options.ULNode);
@@ -550,6 +538,9 @@ LASUI.prototype.setOperation = function (evt) {
 	
 	if (this.autoupdate)
 		this.makeRequest();
+	else
+		this.showUpdateLink();
+
 }	
 LASUI.prototype.genericHandler = function (evt) {
 	if(arguments[1])
@@ -599,18 +590,18 @@ LASUI.prototype.doProductIconClick = function (evt) {
 	var args = arguments;
 	var id = args[1];
 	this.state.externaloperation = id;
-	this.UIMask.style.display='';
+	this.toggleUIMask('');
 	this.refs.externaloperations.operations.DIVNode.innerHTML = "";
 	var submit = document.createElement("INPUT");
 	var cancel = document.createElement("INPUT");
 	submit.type = "submit";
 	submit.value = "Submit";
 	submit.className = "LASSubmitInputNode";
-	submit.onclick = this.genericHandler.LASBind(this, "this.refs.externaloperations.operations.DIVNode.style.display='none';this.launchExternalProduct();this.UIMask.style.display='none'");
+	submit.onclick = this.genericHandler.LASBind(this, "this.refs.externaloperations.operations.DIVNode.style.display='none';this.launchExternalProduct();this.toggleUIMask('none')");
 	cancel.type = "submit";
 	cancel.value="Close";
 	cancel.className = "LASSubmitInputNode";
-	cancel.onclick = this.genericHandler.LASBind(this, "this.refs.externaloperations.operations.DIVNode.style.display='none';this.UIMask.style.display='none'");
+	cancel.onclick = this.genericHandler.LASBind(this, "this.refs.externaloperations.operations.DIVNode.style.display='none';this.toggleUIMask('none')");
 	
 	this.refs.externaloperations.operations.DIVNode.appendChild(submit);
 	this.refs.externaloperations.operations.DIVNode.appendChild(cancel);
@@ -620,7 +611,7 @@ LASUI.prototype.doProductIconClick = function (evt) {
 		this.getOptions(this.refs.externaloperations.operations.getOperationByID(id).optionsdef.IDREF, this.refs.externaloperations.operations.DIVNode);	
 	else {		
 		this.refs.externaloperations.operations.DIVNode.style.display='none';
-		this.UIMask.style.display="none";		
+		this.toggleUIMask('none');		
 		this.launchExternalProduct(); 
 		return;
 	}	
@@ -655,7 +646,7 @@ LASUI.prototype.setGrid = function (strJson) {
 	}
 	eval("var response = (" + strJson + ")");
 	if(this.state.grid)
-		this.state.lastgrid = this.state.grid;
+		this.state.lastgrid = this.clone(this.state.grid);
 	else
 		this.state.lastgrid={};		
 			
@@ -670,7 +661,7 @@ LASUI.prototype.setGrid = function (strJson) {
  */
 LASUI.prototype.getViews = function (dataset,variable) {	
 		var req = new XMLHttpRequest(this);
-		req.onreadystatechange = this.AJAXhandler.LASBind(this, req, "this.setViewList(req.responseText);");
+		req.onreadystatechange = this.AJAXhandler.LASBind(this, req, "this.setViews(req.responseText);");
 		req.open("GET", this.hrefs.getViews.url + '?dsid=' + dataset + '&varid=' +variable);
 		req.send(null);
 	
@@ -679,37 +670,13 @@ LASUI.prototype.getViews = function (dataset,variable) {
  * Update the views list with the allowed views
  * @param {string} strJson A string compatible with LASGetViewsResposne.js
  */	
-LASUI.prototype.setViewList = function (strJson) {
+LASUI.prototype.setViews = function (strJson) {
 	//clear the current view list and state
 	var response = eval("(" + strJson + ")");
 	if(!this.refs.views)
 		this.refs.views = {};
 	this.refs.views.views = new LASGetViewsResponse(response);
-	
-if(!this.products) {
-	var setDefault = true;
-	for(var i=0;i<this.refs.views.views.getViewCount();i++) {
-		var useView = true;
-		for(var v=0;v<this.refs.views.views.getViewID(i).length;v++)
-			if(!this.state.grid.hasAxis(this.refs.views.views.getViewID(i).charAt(v)))
-				useView = false;
-		if(useView) {
-			if(this.refs.views.views.getViewID(i)==this.state.view)
-				setDefault = false;
-		}
-	}
-	if(setDefault) 
-		this.state.view=this.refs.views.views.getViewID(0);
-		
-	this.getOperations(this.state.dataset,this.state.variables[this.state.dataset][this.state.variables[this.state.dataset].length-1].ID,this.state.view);
-
-	if(this.state.lastgrid.response){
-		if(this.state.lastgrid.response.grid.ID!=this.state.grid.response.grid.ID)
-			this.updateConstraints();
-	} else
-		this.updateConstraints();
-	} else
-		this.setDefaultProductMenu();
+	this.setDefaultProductMenu();
 }
 LASUI.prototype.setDefaultProductMenu = function () {
 	this.refs.operations.ULNode.innerHTML = "";
@@ -741,6 +708,9 @@ LASUI.prototype.setDefaultProductMenu = function () {
 		this.refs.operations.children[defaultProductName].radio.checked = true;
 
 	}
+	//this.updating=true;
+	this.refs.XYSelect.updatePixelExtents();
+	//this.updating=false;
 }
 LASUI.prototype.setProductTypeNode = function(type) {
 	this.refs.operations.children[type] = {};
@@ -774,7 +744,7 @@ LASUI.prototype.setProductNode = function(type, product) {
  * Update the 4D Constraints selectors
  */	
 LASUI.prototype.updateConstraints = function () {
-	this.updating = true;		
+	this.updating = true;			
 	document.getElementById("Date").innerHTML = "";
 	document.getElementById("Depth").innerHTML = "";
 
@@ -803,7 +773,7 @@ LASUI.prototype.updateConstraints = function () {
 				eval("this.init" + this.state.grid.response.grid.axis[d].type.toUpperCase() + "Constraint('range')");					
 		else
 			eval("this.init" + this.state.grid.response.grid.axis[d].type.toUpperCase() + "Constraint('range')");	
-	
+	this.refs.XYSelect.updatePixelExtents();
 	this.updating = false;
 }
 /**
@@ -816,27 +786,116 @@ LASUI.prototype.initXYSelect = function (mode) {
 		this.refs.XYSelect.enable();
 	if(this.state.grid.getAxis('x') && this.state.grid.getAxis('y') && this.state.view)
 	 {
-		var bbox = {"x": {"min" : 0, "max" :0}, "y" : {"min" :0, "max" : 0}};
-
+		var grid = {"x": {"min" : 0, "max" :0}, "y" : {"min" :0, "max" : 0}};
+		var sel = {"x" : {"min" : this.refs.XYSelect.getSelectionGridXMin(),
+					 "max" : this.refs.XYSelect.getSelectionGridXMax()
+					},
+				 "y" : {"min" : this.refs.XYSelect.getSelectionGridYMin(),
+					 "max" : this.refs.XYSelect.getSelectionGridYMax()
+					}
+				}
 		if(this.state.grid.hasArange('x')||this.state.grid.hasMenu('x')) {
-			bbox.x.min = parseFloat(this.state.grid.getLo('x'));
-			bbox.x.max = parseFloat(this.state.grid.getHi('x'));
+			grid.x.min = parseFloat(this.state.grid.getLo('x'));
+			grid.x.max = parseFloat(this.state.grid.getHi('x'));
 		} 
 			
 		if(this.state.grid.hasArange('y')||this.state.grid.hasMenu('y')) {
-			bbox.y.min = parseFloat(this.state.grid.getLo('y'));
-			bbox.y.max = parseFloat(this.state.grid.getHi('y'));
+			grid.y.min = parseFloat(this.state.grid.getLo('y'));
+			grid.y.max = parseFloat(this.state.grid.getHi('y'));
 		}
-		this.refs.XYSelect.setDataGridBBox(bbox);
-		this.refs.XYSelect.setSelectionGridBBox(bbox);
-		this.refs.XYSelect.zoomOnBBox(bbox);				
+
+		if (sel.x.min>grid.x.min&&sel.x.min<grid.x.max) {
+			if(sel.x.min == sel.x.max&&mode!='y'&&mode!='point') {
+				if(this.state.xybox.width) {
+					if(sel.x.min-this.state.xybox.width/2 > grid.x.min)
+						sel.x.min=sel.x.min-this.state.xybox.width/2;
+					else
+						sel.x.min=grid.x.min;
+					if(sel.x.max+this.state.xybox.width/2 < grid.x.max)	
+ 						sel.x.max=sel.x.max+this.state.xybox.width/2;
+					else
+						sel.x.max=grid.x.max;
+				} else {
+					sel.x.min=grid.x.min;
+ 					sel.x.max=grid.x.max;
+			   	}
+			}
+		} else
+			sel.x.min=grid.x.min;
+
+		if (sel.x.max>grid.x.min&&sel.x.max<grid.x.max) {
+			if(sel.x.min == sel.x.max&&mode!='y'&&mode!='point') {
+				if(this.state.xybox.width) {
+					if(sel.x.min-this.state.xybox.width/2 > grid.x.min)
+						sel.x.min=sel.x.min-this.state.xybox.width/2;
+					else
+						sel.x.min=grid.x.min;
+					if(sel.x.max+this.state.xybox.width/2 < grid.x.max)	
+ 						sel.x.max=sel.x.max+this.state.xybox.width/2;
+					else
+						sel.x.max=grid.x.max;
+				} else {
+					sel.x.min=grid.x.min;
+ 					sel.x.max=grid.x.max;
+				}		
+			}
+		} else
+			sel.x.max=grid.x.max;
+
+		if (sel.y.min>grid.y.min&&sel.y.min<grid.y.max){
+			if(sel.y.min == sel.y.max&&mode!='x'&&mode!='point') {
+				if(this.state.xybox.height) {
+					if(sel.y.min-this.state.xybox.height/2 > grid.y.min)
+						sel.y.min=sel.y.min-this.state.xybox.height/2;
+					else
+						sel.y.min=grid.y.min;
+					if(sel.y.max+this.state.xybox.height/2 < grid.y.max)	
+ 						sel.y.max=sel.y.max+this.state.xybox.height/2;
+					else
+						sel.y.max=grid.y.max;
+				} else {
+					sel.y.min=grid.y.min;
+	 				sel.y.max=grid.y.max;
+				}			
+			}
+		} else
+			sel.y.min=grid.y.min;
+
+		if (sel.y.max>grid.y.min&&sel.y.max<grid.y.max) {
+			if(sel.y.min == sel.y.max&&mode!='x'&&mode!='point') {
+				if(this.state.xybox.height) {
+					if(sel.y.min-this.state.xybox.height/2 > grid.y.min)
+						sel.y.min=sel.y.min-this.state.xybox.height/2;
+					else
+						sel.y.min=grid.y.min;
+					if(sel.y.max+this.state.xybox.height/2 < grid.y.max)	
+ 						sel.y.max=sel.y.max+this.state.xybox.height/2;
+					else
+						sel.y.max=grid.y.max;
+				} else {				
+					sel.y.min=grid.y.min;
+ 					sel.y.max=grid.y.max;
+				}			
+			}
+		} else
+			sel.y.max=grid.y.max;
+
+		this.refs.XYSelect.setDataGridBBox(grid);
+		this.refs.XYSelect.zoomOnBBox(grid);
+				
+		if(this.state.newgrid)
+			this.refs.XYSelect.setSelectionGridBBox(grid);	
+		else
+			this.refs.XYSelect.setSelectionGridBBox(sel);
+		delete(this.state.newgrid);					
 		if(this.submitOnLoad && this.params){
 			if(this.params.x)				
 				bbox.x = this.params.x;
 			if(this.params.y)				
 				bbox.y = this.params.y;
+			this.refs.XYSelect.setSelectionGridBBox(sel);	
+				
 		}
-		this.refs.XYSelect.setSelectionGridBBox(bbox);	
 		
 		if(this.submitOnLoad && this.params){
 			if(this.params.viewx)				
@@ -844,7 +903,14 @@ LASUI.prototype.initXYSelect = function (mode) {
 			if(this.params.viewy)				
 				bbox.y = this.params.viewy;
 		}
-		this.refs.XYSelect.zoomOnBBox(bbox);
+		//this.refs.XYSelect.zoomOnBBox(bbox);
+		//save some params in case we return		
+		if(sel.x.min!=sel.x.max)
+			this.state.xybox.width=(sel.x.max-sel.x.min);
+		if(sel.y.min!=sel.y.max)
+			this.state.xybox.height=(sel.y.max-sel.y.min);
+						
+		
 		this.refs.XYSelect.setView(mode);
 		
 	}
@@ -973,10 +1039,12 @@ LASUI.prototype.initZConstraint = function (mode) {
 		}
 	}
 	
-			if(!this.updating&&this.autoUpdate) {
+			if(!this.updating&&this.autoupdate) {
 				
 				this.makeRequest();
-			}
+			}	else
+		this.showUpdateLink();
+
 }
 /**
  * Initialize an T grid  control
@@ -1073,11 +1141,23 @@ LASUI.prototype.initTConstraint = function (mode) {
 			break;
 	 }		
 	 
-	 		if(!this.updating&&this.autoUpdate) {
+	 		if(!this.updating&&this.autoupdate) {
 				
 				this.makeRequest();		
-			}
-}			
+			}	else
+		this.showUpdateLink();
+
+}
+LASUI.prototype.showUpdateLink = function (){
+	try	{
+		if(!this.updating&&this.state.view!=""&&this.refs.XYSelect.enabled&&this.state.dataset!=null&&this.state.variables[this.state.dataset]!=null&&this.state.variables[this.state.dataset].length>0&&this.state.view!=null&&this.state.operation!=null) 
+		document.getElementById('update').style.visibility="visible";
+	else
+		document.getElementById('update').style.visibility="hidden";
+	} 
+	catch (err){ 
+		document.getElementById('update').style.visibility="hidden";	
+}	}		
 /**
  * Put together and submit an LAS request
  */
@@ -1197,6 +1277,7 @@ LASUI.prototype.makeRequest = function () {
 		}else
 			window.open(this.hrefs.getProduct.url + '?xml=' +  escape(this.request.getXMLText()));
 	}
+	document.getElementById('update').style.visibility='hidden';
 }
 /**
  * Put together and submit an LAS request
@@ -1325,6 +1406,9 @@ LASUI.prototype.setOptionList = function (strJson,DOMNode) {
 		}
 	if(this.autoupdate || this.submitOnLoad)
 		this.makeRequest();
+	else
+		this.showUpdateLink();
+
 	this.submitOnLoad = false;
 }
 /** 
@@ -1374,12 +1458,12 @@ LASUI.prototype.setOptionTRNode = function (id,TBODYNode) {
 		TBODYNode.appendChild(this.refs.options.cache[id].TRNode);	//first time, add it to the product
 	}
 	else {
-		var obj = this.refs.options.cache[id].TRNode.cloneNode(true);
+		var obj = this.refs.options.cache[id];
 		if(obj.SELECTNode)		//second time, we need a copy
 			obj.SELECTNode.onchange = this.setOption.LASBind(this,id,"externalproperties",obj);
 		if(obj.INPUTNode)		
 			obj.INPUTNode.onchange = this.setOption.LASBind(this,id,"externalproperties",obj);
-		TBODYNode.appendChild(obj);	
+		TBODYNode.appendChild(obj.TRNode.cloneNode(true));	
 	}
 }
 /**
@@ -1398,6 +1482,8 @@ LASUI.prototype.setOption = function (evt) {
 		this.state[args[2]][id]={"type" : "ferret", "value" : evt.target.value};
 	if(this.autoupdate&&args[2]=="properties")
 		this.makeRequest();
+	else
+		this.showUpdateLink();
 }
 /**
  * initMap()
@@ -1482,13 +1568,6 @@ LASUI.prototype.setMaxY = function (evt) {
 	this.refs.XYSelect.updateSelectionGridYMax(this.refs.inputs.maxY.value);
 }
 /**
- * Event handler for the auto update toggle checkbox
- * @param {object} evt The event object
- */
-LASUI.prototype.autoUpdate = function (evt) {
-	this.autoupdate = evt.target.checked;
-}
-/**
  * Event handler to be attached to the MapWidget onafterdraw function
  * @param {object} evt The event object		
  */
@@ -1497,7 +1576,9 @@ LASUI.prototype.onafterdraw = function (evt) {
 	if(this.autoupdate) {
 		
 		this.makeRequest();
-	}
+	}	else
+		this.showUpdateLink();
+
 }
 /**
  * Event handler called on depth widget/menu changes
@@ -1509,7 +1590,9 @@ LASUI.prototype.handleDepthRangeChange = function (evt) {
 		
 		this.makeRequest();
 				
-	}
+	}	else
+		this.showUpdateLink();
+
 }
 /**
  * Event handler called on depth widget/menu changes
@@ -1519,6 +1602,9 @@ LASUI.prototype.handleDepthChange = function (evt) {
 	
 	if(this.autoupdate)
 		this.makeRequest();
+	else
+		this.showUpdateLink();
+
 }
 /**
  * Event handler called on date range widget/menu changes
@@ -1528,6 +1614,9 @@ LASUI.prototype.handleDateRangeChange = function (evt) {
 	
 	if(this.autoupdate)
 		this.makeRequest();
+	else
+		this.showUpdateLink();
+
 }
 /**
  * Event handler called on date widget/menu changes
@@ -1537,6 +1626,9 @@ LASUI.prototype.handleDateChange = function (evt) {
 		
 	if(this.autoupdate)
 		this.makeRequest();
+	else
+		this.showUpdateLink();
+
 }
 /**
  * Event handler to collapse all root nodes in the tree
