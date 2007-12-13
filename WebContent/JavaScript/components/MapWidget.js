@@ -189,10 +189,11 @@ MapWidget.prototype.initPixelExtents = function(evt) {
 
 //update the extents to reflect a new DOMNode position/size. Call this when a page change shifts the DOMNode. MapWidget.prototype.updatePixelExtents = function(evt) {
 	var oldOffsets = this.clone(this.DOMNode.offsets);
-	var selection = this.clone(this.extents.selection.grid)
+	var selection = this.clone(this.extents.selection.grid);
+	var data = this.extents.data.grid;
 	this.getDOMNodeOffsets();
 	if(this.DOMNode.offsets != oldOffsets) {
-		this.setDataGridBBox(this.extents.data.grid);
+		this.setDataGridBBox(data);
 		this.setSelectionGridBBox(selection);
 	}
 	if (this.rubberBand.style.visibility != 'hidden') {
@@ -1634,23 +1635,23 @@ MapWidget.prototype.panPlot = function (dx,dy) {
 MapWidget.prototype.zoom = function (f) {
 	
 if(f>0) {
-	var bbox = this.extents.selection.grid;
+	var bbox = this.extents.data.grid;
 	var width = (bbox.x.max-bbox.x.min);
 	var height = (bbox.y.max-bbox.y.min);
 	var cx = (bbox.x.min+bbox.x.max)/2;
 	var cy = (bbox.y.min+bbox.y.max)/2;
-	bbox.x.min = cx - width/2;
-	bbox.x.max = cx + width/2;
-	bbox.y.min = cy - height/2;
-	bbox.y.max = cy + height/2;	
+	bbox.x.min = cx - width/(2*f);
+	bbox.x.max = cx + width/(2*f);
+	bbox.y.min = cy - height/(2*f);
+	bbox.y.max = cy + height/(2*f);	
 	if(!this.extents.lastData)
 		this.extents.lastData = [];
 	this.extents.lastData.push(this.clone(this.extents.data.grid));
 } else
 	if (this.extents.lastData.length>0) 
 		var bbox = this.extents.lastData.pop();
-		
-	
-	this.zoomOnBBox(bbox);
+	if(bbox)	
+		this.zoomOnBBox(bbox);
+	this.displayBox(true);
 	
 }
