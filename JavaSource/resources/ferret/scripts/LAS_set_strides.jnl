@@ -19,7 +19,8 @@ IF ($operation_ID"Data_Extract_netCDF>1|*>0") THEN EXIT/SCRIPT
 IF ($ferret_curvi_coord_lat"0|0|*>1") THEN EXIT/SCRIPT
 
 ! Hybrid Z not dealt with here...
-IF ($do_hybrid_z"0|*>1") THEN EXIT/SCRIPT 
+
+IF ($do_hybrid_z"0|0|1|*>1") THEN EXIT/SCRIPT 
 
 ! Step 1  ---------------------------------------------------------------------
 ! Determine striding based on the memory allocation
