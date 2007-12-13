@@ -210,15 +210,15 @@ MapWidget.prototype.initPixelExtents = function(evt) {
 // set the drawing area to the full plhttp://porter.pmel.noaa.gov:8580/las_newui/ui/ot area
 MapWidget.prototype.setMaxDrawingArea = function() {
 	this.getDOMNodeOffsets();
-   this.setPlotPixXMin(this.getDOMNodePixXMin() + this.plot_area.offX);
-	this.setPlotPixXMax(this.getPlotPixXMin() + this.plot_area.width);
-	this.setPlotPixYMin(this.getDOMNodePixYMin()  + this.plot_area.offY);
-	this.setPlotPixYMax(this.getPlotPixYMin() + this.plot_area.height);
+   this.setDataPixXMin(this.getPlotPixXMin());
+   this.setDataPixXMax(this.getPlotPixXMin());
+   this.setDataPixYMin(this.getPlotPixYMin());
+   this.setDataPixYMax(this.getPlotPixYMin());
    this.setCBoxSize(6);
    this.setState("drawing");
 }
 
-// set the drawing area to specific area
+// set the drawing area to specific area (the data region)
 MapWidget.prototype.setDrawingArea = function(minX, minY,maxX,maxY) {
    if(minY>maxY) {
 		var temp = maxY;	
@@ -230,6 +230,15 @@ MapWidget.prototype.setDrawingArea = function(minX, minY,maxX,maxY) {
 		maxX = minX;
 		minX = temp;
 	}
+	if(minY<this.getPlotPixYMin())
+		minY=this.getPlotPixYMin();
+	if(minX<this.getPlotPixXMin())
+		minX=this.getPlotPixXMin();
+	if(maxY>this.getPlotPixYMax())
+		maxY=this.getPlotPixYMax();
+	if(maxX>this.getPlotPixXMax())
+		maxX=this.getPlotPixXMax();
+
 	this.setDataPixXMin(minX);
 	this.setDataPixXMax(maxX);
 	this.setDataPixYMin(minY);
@@ -1458,7 +1467,7 @@ MapWidget.prototype.zoomOnBBox = function (bbox) {
 		this.setPlotGridXMin(bbox_cx-bbox_height/(plot_aspect*2));
 		this.setPlotGridXMax(bbox_cx+bbox_height/(plot_aspect*2));	
 		this.setDataGridYMin(bbox.y.min);
-	   this.setDataGridYMax(bbox.y.max);
+	        this.setDataGridYMax(bbox.y.max);
 		this.setDataGridXMin(bbox_cx-bbox_height/(plot_aspect*2));
 		this.setDataGridXMax(bbox_cx+bbox_height/(plot_aspect*2));	
 	} else {
@@ -1500,6 +1509,15 @@ MapWidget.prototype.setDataGridBBox = function (bbox) {
 		x : {min : minx, max :maxx},
 		y : {min : miny, max :maxy}
 	}
+	if(minx<this.getPlotPixXMin())
+		minx=this.clone(this.extents.plot.pixel.x.min);	
+	if(miny<this.getPlotPixYMin())
+		miny=this.clone(this.extents.plot.pixel.y.min);	
+	if(maxx>this.getPlotPixXMax())
+		minx=this.clone(this.extents.plot.pixel.x.max);	
+	if(maxy>this.getPlotPixYMax())
+		minx=this.clone(this.extents.plot.pixel.y.max);	
+
 	this.setDrawingArea(minx,miny,maxx,maxy);
 	this.showDataMask();
 	
@@ -1644,12 +1662,12 @@ if(f>0) {
 	bbox.x.max = cx + width/(2*f);
 	bbox.y.min = cy - height/(2*f);
 	bbox.y.max = cy + height/(2*f);	
-	if(!this.extents.lastData)
-		this.extents.lastData = [];
-	this.extents.lastData.push(this.clone(this.extents.data.grid));
+	if(!this.extents.last)
+		this.extents.last = [];
+	this.extents.last.push(this.clone(this.extents.plot.grid));
 } else
-	if (this.extents.lastData.length>0) 
-		var bbox = this.extents.lastData.pop();
+	if (this.extents.last.length>0) 
+		var bbox = this.extents.last.pop();
 	if(bbox)	
 		this.zoomOnBBox(bbox);
 	this.displayBox(true);
