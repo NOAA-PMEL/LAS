@@ -22,6 +22,7 @@
 DEFINE SYMBOL ferret_margins = false
 
 DEFINE SYMBOL ferret_palette = topo_light 
+DEFINE SYMBOL ferret_palette = topo_blue_brown 
 DEFINE SYMBOL ferret_set_aspect = yes
 DEFINE SYMBOL ferret_view = xy
 
@@ -31,8 +32,7 @@ GO LAS_open_window.jnl
 DEFINE SYMBOL qualifiers = ($qualifiers)/NOLAB/NOKEY/NOAXES
 DEFINE SYMBOL qualifiers = ($qualifiers)/PALETTE=($ferret_palette)
 
-DEFINE SYMBOL qualifiers = ($qualifiers)/LEVELS=(-9000,-1000,1000)(-1000,-100,100)(-100,0,10)
-
+DEFINE SYMBOL qualifiers = ($qualifiers)/LEVELS=(-inf)(-6000,-1000,1000)(-1000,-100,100)(-100,100,10)(0,1000,100)(1000,4000,1000)(inf)
 
 LET map_area = `(($region_x_range) * ($region_y_range)) / (360 * 180)`
 
@@ -50,7 +50,6 @@ ENDIF
 
 DEFINE SYMBOL ferret_plot_var = rose[($region_xy)]
 SHADE($qualifiers) ($ferret_plot_var)
-SHADE/OVER/NOLAB/NOKEY/LEV=(0,8000,8000)/PAL=gray ($ferret_plot_var)
 
 ! Save the results
 GO LAS_results box
