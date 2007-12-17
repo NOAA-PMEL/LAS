@@ -26,6 +26,7 @@ public class LASTest{
 
     private LASConfig las_config;
     private LASDocument las_operationsV7;
+    private LASDocument las_test_config;
     //private LASDocument las_ui;
     //private LASDocument las_options;
     
@@ -37,29 +38,24 @@ public class LASTest{
     	
         las_config = new LASConfig();
         las_operationsV7 = new LASDocument();
-        //las_ui = new LASDocument();
-        //las_options = new LASDocument();
-
+        las_test_config = new LASDocument();
         try{
-            //File file1 = new File("/home/porter/kobrien/gfdl/armstrong/conf/server/las.xml");
-            File file1 = new File("../../conf/server/las.xml");
-            //for run in eclipse
-            //File file1 = new File("Z:/armstrong/LASTest/xml/las.xml");
+            File file = new File("las_test_config.xml");
+            JDOMUtils.XML2JDOM(file, las_test_config);
+            //System.out.println(las_test_config.toCompactString());
+            Element lasv7E = las_test_config.getElementByXPath("lasTest/lasv7");
+            String lasv7xml = lasv7E.getAttributeValue("dir")+"/lasV7.xml";
+            //System.out.println(lasv7xml);
+ 
+            //File file1 = new File("../../conf/server/las.xml");
+            //File file1 = new File("/home/porter/jing/tomcat/apache-tomcat-5.5.25/webapps/las/output/lasV7.xml");
+            File file1 = new File(lasv7xml);
             JDOMUtils.XML2JDOM(file1, las_config);
-            //convert to  'version 7'
-            las_config.convertToSeven();
-            //System.out.println(las_config.toString());
+            //las_config.convertToSeven();////convert to  'version 7'
 
-            //File file2 = new File("/home/porter/kobrien/gfdl/armstrong/conf/server/operationsV7.xml");
             File file2 = new File("../../conf/server/operationsV7.xml");
-            //File file2 = new File("Z:/armstrong/LASTest/xml/operationsV7.xml");
             JDOMUtils.XML2JDOM(file2, las_operationsV7);
-            //System.out.println(las_operationsV7.toString());
 
-            //File file3 = new File("LASTest/xml/options.xml");
-            //File file3 = new File("Z:/armstrong/LASTest/xml/options.xml");
-            //JDOMUtils.XML2JDOM(file3, las_options);
-            //System.out.println(las_options.toString());
         } catch (Exception e){
             e.printStackTrace();
         }
@@ -73,7 +69,12 @@ public class LASTest{
         LASDatasetTester ltd = new LASDatasetTester(las_config, lto);
         ltd.testDataset();
     }
-    
+
+    public void testFTDS(){
+        LASDatasetTester ltd = new LASDatasetTester(las_config, lto);
+        ltd.testFTDS();
+    }
+
     /**
      * Test whether responses from product server are correct
      *
@@ -85,18 +86,25 @@ public class LASTest{
     } 
 
     public void runTest(LASTestOptions lto){
+        //lto.showOptions();
+
     	//showing usage of test code
     	if(lto.showHelp()){
-    		lto.showUsage();
+    		lto.showUsage2();
     	}
     	
-    	//test data connection
+    	//test OPeNDAP URLs 
     	if(lto.testConn()){
             System.out.println("==== LAS test: Are the datasets alive? =================");
             testDataset();
         }
         System.out.println();
-        
+        //test F-TDS URLs 
+        if(lto.testFTDS()){
+            System.out.println("==== LAS test: Are the FTDS URLs working? =================");
+            testFTDS();
+        }
+        System.out.println();
         //test product response
         if(lto.testResp()){
             System.out.println("==== LAS test: Are the product reponses correct? =======");
@@ -105,51 +113,74 @@ public class LASTest{
     }
     public static void main(String [] args){
 
-    	System.out.println(args[0]);
-    	System.out.println(args[1]);
-    	System.out.println(args[2]);
     	LASTestOptions lto = new LASTestOptions();
     	
+        int cnt = 0; //count number of options being set
+
     	//show DDS
     	if( !args[0].equals("${dds}")){
     	    lto.setDDS();
+            cnt++;
     	}
+
     	//user defined view
-    	if( !(args[1].equals("${v}")) ){lto.setView(args[1]);}
+    	if( !(args[1].equals("${v}")) ){
+            lto.setView(args[1]);
+            cnt++;
+        }
     	
     	//dataset pattern
-    	if(!(args[2].equals("${d}"))){lto.setDataset(args[2]);}
+    	if(!(args[2].equals("${d}"))){
+            lto.setDataset(args[2]);
+            cnt++;
+        }
     	
     	//all variables in each dataset
-    	if(!(args[3].equals("${a}"))){lto.setAllVariable();}
+    	if(!(args[3].equals("${a}"))){
+            lto.setAllVariable();
+            cnt++;
+        }
     	
     	//exit on first error
-    	if(!(args[4].equals("${e}"))){lto.setExitFirst();}
+    	if(!(args[4].equals("${e}"))){
+            lto.setExitFirst();
+            cnt++;
+        }
     	
         //show help
-    	if(!(args[5].equals("${h}"))){lto.setHelp();}
+    	if(!(args[5].equals("${h}"))){
+            lto.setHelp();
+            cnt++;
+        }
     	
         //only test dataset connection
-    	if(!(args[6].equals("${c}"))){lto.setConnectionOnly();}
+    	if(!(args[6].equals("${c}"))){
+            lto.setConnectionOnly();
+            cnt++;
+        }
     	
         //only test product response
-    	if(!(args[7].equals("${r}"))){lto.setResponseOnly();}
+    	if(!(args[7].equals("${r}"))){
+            lto.setResponseOnly();
+            cnt++;
+        }
     	
         //verbose output of error message
-        if(!(args[8].equals("${vb}"))){lto.setVerbose();}
+        if(!(args[8].equals("${vb}"))){
+            lto.setVerbose();
+            cnt++;
+        }
+
+        //test URL of F-TDS
+        if(!(args[9].equals("${f}"))){
+            lto.setTestFTDS();
+            cnt++;
+        }
+
+        //if no options being set; test opendap, ftds, and products 
+        if(cnt == 0){lto.setTestAll();}
 
         LASTest lt = new LASTest(lto);
         lt.runTest(lto);
-        
-        //if(lto.testConn()){
-          //  System.out.println("==== LAS test: Are the datasets alive? =================");
-          //  lt.testDataset();
-        //}
-        //System.out.println();
-        
-        //if(lto.testResp()){
-          //  System.out.println("==== LAS test: Are the product reponses correct? =======");
-          //  lt.testResponse();
-        //}
     }
 }
