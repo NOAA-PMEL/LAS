@@ -132,17 +132,17 @@ public class TabledapTool extends TemplateTool {
                 "dataObjects").getChild("data").getAttributeValue("url");
             required(url, causeOfError);
 
-            //get db_name (what tabledap calls websiteID), e.g., pmel_dapper
-            causeOfError = "Could not get db_name."; 
-            String websiteID = lasBackendRequest.getDatabaseProperty("db_name");
-            log.debug("Got db_name/websiteID: " + websiteID); 
-            required(websiteID, causeOfError);
+            //get websiteID, e.g., pmel_dapper   (was db_name)
+            causeOfError = "Could not get webSiteID."; 
+            String webSiteID = getTabledapProperty(lasBackendRequest, "webSiteID");
+            log.debug("Got webSiteID: " + webSiteID); 
+            required(webSiteID, causeOfError);
 
-            //get db_table (what tabledap calls datasetID), e.g., tao
+            //get datasetID (was db_table, e.g., tao
             causeOfError = "Could not get db_table.";   
-            String datasetID = lasBackendRequest.getDatabaseProperty("db_table");
-            log.debug("Got db_table/datasetID: " + datasetID);
-            required(websiteID, causeOfError);
+            String datasetID = getTabledapProperty(lasBackendRequest, "datasetID");
+            log.debug("Got datasetID: " + datasetID);
+            required(datasetID, causeOfError);
        
             //get "debug" file name, may be null or ""
             //if defined, use the "debug" resultsAsFile as the place to save the constraint statement.
@@ -152,10 +152,10 @@ public class TabledapTool extends TemplateTool {
             //create the query.   First: variables
             StringBuffer query = new StringBuffer();
             //get axis var names   ("" if not available from dataset)
-            if (lasBackendRequest.getDatabaseProperty("longitude").length() > 0) query.append("longitude,");
-            if (lasBackendRequest.getDatabaseProperty("latitude").length() > 0)  query.append("latitude,");
-            if (lasBackendRequest.getDatabaseProperty("depth").length() > 0)     query.append("altitude,");
-            if (lasBackendRequest.getDatabaseProperty("time").length() > 0)      query.append("time,");
+            if (getTabledapProperty(lasBackendRequest, "longitude").length() > 0) query.append("longitude,");
+            if (getTabledapProperty(lasBackendRequest, "latitude").length() > 0)  query.append("latitude,");
+            if (getTabledapProperty(lasBackendRequest, "altitude").length() > 0)  query.append("altitude,");
+            if (getTabledapProperty(lasBackendRequest, "time").length() > 0)      query.append("time,");
             //response variables   (no trailing comma)
             query.append(String2.replaceAll(lasBackendRequest.getVariablesAsString(), " ", ""));
 
@@ -206,7 +206,7 @@ public class TabledapTool extends TemplateTool {
 
             //get the data   
             causeOfError = "Could not convert the data source to a netCDF file: ";   
-            String dsUrl = url + websiteID + "/" + datasetID + "?";  //don't include ".dods"; readOpendapSequence does that
+            String dsUrl = url + webSiteID + "/" + datasetID + "?";  //don't include ".dods"; readOpendapSequence does that
             Table data = new Table();
             if (xlo.length() > 0 && xhi.length() > 0 && 
                 String2.parseDouble(xhi) < String2.parseDouble(xlo)) {
@@ -341,6 +341,18 @@ log.debug("first up-to-100 rows found (raw): " + data.toString("rows", 100));
             return true;
         }
         return false;
+    }
+
+    /**
+     * Get the value of a particular database property.
+     * @param property
+     * @return the value of the property
+     * @throws LASException
+     */
+    public String getTabledapProperty(LASBackendRequest backendRequest, String property) throws LASException {
+        Element data = backendRequest.getRootElement().getChild("dataObjects").getChild("data");
+        Element td_access = backendRequest.findPropertyGroup(data, "tabledap_access");
+        return backendRequest.findPropertyValue(td_access, property);
     }
 
 }
