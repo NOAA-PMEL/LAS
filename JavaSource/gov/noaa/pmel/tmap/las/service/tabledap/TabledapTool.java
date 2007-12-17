@@ -263,26 +263,25 @@ public class TabledapTool extends TemplateTool {
                     data.getColumn(col).addString(""); //represents missing value
             } 
 
-            //(don't) convert from Tabledap-style file to LAS Intermediate File-style
+            //convert from Tabledap-style file to LAS Intermediate File-style
             int lonCol  = data.findColumnNumber("longitude"); //names are standardized in tabledap
             int latCol  = data.findColumnNumber("latitude");
             int altCol  = data.findColumnNumber("altitude");
             int timeCol = data.findColumnNumber("time");
-            //if (lonCol >= 0) data.setColumnName(lonCol, "LON");
-            //if (latCol >= 0) data.setColumnName(latCol, "LAT");
+            // //for now, I'm leaving alt as alt, not converting to depth
             //if (altCol >= 0) {
-            //    data.setColumnName(altCol, "DEPTH");
+            //    data.setColumnName(altCol, "depth");
             //    data.getColumn(altCol).scaleAddOffset(-1, 0); //altitude -> depth (metadata changed below)
             //}
-            //if (timeCol >= 0) data.setColumnName(timeCol, "TIME");
-            //data.globalAttributes().set("Conventions", "LAS Intermediate netCDF File, Unidata Observation Dataset v1.0");
+            data.globalAttributes().set("Conventions", "LAS Intermediate netCDF File, Unidata Observation Dataset v1.0");
+log.debug("first up-to-100 rows found (raw): " + data.toString("rows", 100));
 
-            //set actuaRangeAndBoundingBox
-            data.setActualRangeAndBoundingBox(lonCol, latCol, altCol, timeCol, "Time");
-log.debug("first up-to-100 rows found: " + data.toString("rows", 100));
+            //setActualRangeAndBoundingBox
+            //(since attributes and data were grabbed via opendap, raw bounding box is for entire dataset)
+            data.setActualRangeAndBoundingBox(lonCol, latCol, -1, altCol, timeCol, "Time");
 
             causeOfError = "Could not write netCDF file to disk: ";
-            data.saveAsFlatNc(netcdfFilename, "row");
+            data.saveAsFlatNc(netcdfFilename, "row", false); //false because mv's are already sourceMissingValues
 
             // The service just wrote the file to the requested location so
             // copy the response element from the request to the response.
