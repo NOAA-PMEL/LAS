@@ -61,6 +61,7 @@ my @Scripts = qw(build.xml
                  WebContent/WEB-INF/struts-config.xml
                  WebContent/WEB-INF/web.xml
                  WebContent/TestLinks.html
+                 test/LASTest/las_test_config.xml
                  );
 
 my $configp = "config.results";
