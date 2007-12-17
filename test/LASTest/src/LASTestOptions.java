@@ -11,6 +11,7 @@ public class LASTestOptions{
     private boolean testConnection;
     private boolean testResponse;
     private boolean verbose;  
+    private boolean testFTDS;
   
     public LASTestOptions(){
         dds       = false;
@@ -19,11 +20,26 @@ public class LASTestOptions{
         allVar    = false;
         exitFirst = false;
         help      = false;
-        testConnection = true;
-        testResponse = true;
-        verbose = false;
+        testConnection = false;
+        testResponse = false;
+        verbose  = false;
+        testFTDS = false;
     } 
     
+    public void setTestAll(){
+        testFTDS = true;
+        testConnection = true;
+        testResponse = true;
+    }
+
+    public void setTestFTDS(){
+        testFTDS = true;
+    }
+
+    public boolean testFTDS(){
+        return testFTDS;
+    }
+
     public void setDDS(){
     	dds = true;
     }
@@ -33,11 +49,11 @@ public class LASTestOptions{
     }
     
     public void setConnectionOnly(){
-    	testResponse = false;
+        testConnection = true;
     }
     
     public void setResponseOnly(){
-    	testConnection = false;
+        testResponse = true;
     }
     
     public boolean testConn(){
@@ -50,13 +66,11 @@ public class LASTestOptions{
     
     public void setHelp(){
     	help = true;
-    	testResponse = false;
-    	testConnection = false;
     }
     
     public void showUsage(){
-    	System.out.println("Usage: ant lastest [-Dh=1][-Da=1][-Ddds=1][-Dv=view]");
-    	System.out.println("                   [-De=1][-Dd=URL][-Dc=1][-Dr=1][-Dvb=1]");
+    	System.out.println("Usage: ant lastest [-Dh=1][-Da=1][-Ddds=1][-Dv=view][-De=1]");
+    	System.out.println("                   [-Dd=URL][-Dc=1][-Dr=1][-Dvb=1][-Df=1]");
     	System.out.println("       Default   1. Test dataset connections and does not show DDS ");
     	System.out.println("                 2. Test product responses for all possible plots of the first variable in each dataset");
     	System.out.println("                 3. Does not exit on first error");
@@ -66,12 +80,41 @@ public class LASTestOptions{
     	System.out.println("       -Dd=URL   Only test dataset with the given URL");
     	System.out.println("       -Ddds=1   Show DDS on console");
     	System.out.println("       -De=1     Exit on first error");
+        System.out.println("       -Df=1     Only test F-TDS URLs of this LAS server");
     	System.out.println("       -Dh=1     Show usage");
     	System.out.println("       -Dv=view  Only test a certain view; view could be x,y,z,t,xy,xz,xt,yz,yt,zt");
     	System.out.println("                 Being ignored if such view does not exist for a variable");
     	System.out.println("       -Dr=1     Only test product responses");
         System.out.println("       -Dvb=1    Verbose output of error message");
     }
+
+     public void showUsage2(){
+        System.out.println("Usage 1: ant lastest [-Dh=1] ");
+        System.out.println("         -Dh=1     Show usage");
+        System.out.println();
+        System.out.println("Usage 2: ant lastest -Dc=1 [-Ddds=1]");
+        System.out.println("         -Dc=1     Only test OPeNDAP URLs used by datasets in this LAS");
+        System.out.println("         -Ddds=1   Show DDS on console");
+        System.out.println();
+        System.out.println("Usage 3: ant lastest -Df=1");
+        System.out.println("         -Df=1     Only test F-TDS URLs provided by this LAS server");
+        System.out.println();
+        System.out.println("Usage 4: ant lastest -Dr=1 [-Da=1][-Dd=1][-De=1][-Dv=view][-Dvb=1]");
+        System.out.println("         -Dr=1     Only test product responses.");
+        System.out.println("                   Without other options:");
+        System.out.println("                   1. it tests product responses for all possible plots of the first"); 
+        System.out.println("                      variable in each dataset");
+        System.out.println("                   2. it does not exit on first error");
+        System.out.println("                   3. it assume that x and y dimensions always exist");
+        System.out.println("         -Da=1     Test product responses for all possible plots of all variables in each");
+        System.out.println("                   dataset");
+        System.out.println("         -Dd=str   Only test dataset whose URL contains this string");
+        System.out.println("         -De=1     Exit on first error");
+        System.out.println("         -Dv=view  Only test a certain view; view could be x,y,z,t,xy,xz,xt,yz,yt,zt");
+        System.out.println("                   Being ignored if such view does not exist for a variable");
+        System.out.println("         -Dvb=1    Verbose output of error message");
+    }
+
     
     public boolean showHelp(){
     	return help;
@@ -115,5 +158,20 @@ public class LASTestOptions{
     
     public boolean exitFirst(){
     	return exitFirst;
+    }
+
+    public void showOptions(){
+        System.out.println("-Da  = "+ allVar);
+        System.out.println("-Dc  = "+ testConnection);
+        System.out.println("-Dd  = " + dataset);
+        System.out.println("-Ddds= " + dds);
+        System.out.println("-De  = "+ exitFirst);
+        System.out.println("-Df  = "+ testFTDS);
+        System.out.println("-Dh  = "+ help);
+        System.out.println("-Dc  = "+ testConnection);
+        System.out.println("-Dr  = "+ testResponse);
+        System.out.println("-Dv  = " + view);
+        System.out.println("-Dvb = "+ verbose);
+
     }
 }
