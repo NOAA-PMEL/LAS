@@ -36,6 +36,7 @@
     <arg value="${c}" />
     <arg value="${r}" />
     <arg value="${vb}" />
+    <arg value="${f}" />
     <classpath>
         <pathelement location="las"/>
             <fileset dir="las">
