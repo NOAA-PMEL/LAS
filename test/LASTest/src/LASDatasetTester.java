@@ -43,9 +43,11 @@ import org.joda.time.DateTime;
 import org.joda.time.Period;
 
 /**
- * This is the suite for testing LAS installations
- * @author Jing Yang Li
+ * This classes tests the remote OPeNDAP URLs used by this LAS server
+ * and the F-TDS URLs provided by this LAS server
  *
+ * @author Jing Yang Li
+ * 
  */
 public class LASDatasetTester{
 
@@ -61,7 +63,7 @@ public class LASDatasetTester{
     }
 
     /**
-     * Test datasets are alive or not
+     * Test remote OPeNDAP URLs
      *
      */
     public void testDataset(){
@@ -104,7 +106,7 @@ public class LASDatasetTester{
                 if(dsURL != null && dsURL.contains("http")){
                 	String ds = lto.getDataset();
                 	if( (ds == null) || ((ds != null)&&(dsURL.contains(ds))) ){                
-                        getDDS(dsURL);
+                            getDDS(dsURL);
                 	}
                 }
             }
@@ -113,6 +115,45 @@ public class LASDatasetTester{
         }
     }
 
+    /**
+     * Test F-TDS URLs
+     *
+     */
+    public void testFTDS(){
+        String dsID;
+        String varID;
+        String varpath;
+
+        ArrayList<Dataset> datasets = new ArrayList<Dataset>();
+        ArrayList<Variable> variables = new ArrayList<Variable>();
+
+        try{
+            //get datasets
+            Element datasetsE = las_config.getDatasetsAsElement();
+            List datasetElements = datasetsE.getChildren("dataset");
+
+
+            //loop over each dataset
+            for(Iterator dsIt = datasetElements.iterator(); dsIt.hasNext();){
+                Element datasetE = (Element) dsIt.next();
+                dsID = datasetE.getAttributeValue("ID");
+
+                //get first variable of this dataset
+                variables = las_config.getVariables(dsID);
+                varID = variables.get(0).getID();
+
+                //build XPath for this variable
+                varpath = "/lasdata/datasets/dataset[@ID='"+dsID+"']/variables/variable[@ID='"+varID+"']";
+
+                //test FTDS URLs
+                String ftdsURL= las_config.getDataAccessURL(varpath, true);
+                //System.out.println("F-TDS URL: "+ftdsURL);
+                getDDS(ftdsURL);
+            }
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+    }
 
     /**
      * Get URL of product server, which is specfied in las.xml
