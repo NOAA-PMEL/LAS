@@ -145,8 +145,24 @@ longitude,latitude,time,sea_surface_temperature,air_temperature&longitude>264.9&
 "           <value>tao</value>\n" +
 "         </property>\n" +
 "         <property>\n" +
-"           <name>lon_domain</name>\n" +            //required      STILL???
+"           <name>longitude</name>\n" +       
+"           <value>longitude</value>\n" +
+"         </property>\n" +
+"         <property>\n" +
+"           <name>lon_domain</name>\n" +            
 "           <value>0:360</value>\n" +
+"         </property>\n" +
+"         <property>\n" +
+"           <name>latitude</name>\n" +       
+"           <value>latitude</value>\n" +
+"         </property>\n" +
+"         <property>\n" +
+"           <name>altitude</name>\n" +            
+"           <value>altitude</value>\n" +
+"         </property>\n" +
+"         <property>\n" +
+"           <name>time</name>\n" +          
+"           <value>time</value>\n" +
 "         </property>\n" +
 "       </property_group>\n" +
 "       <property_group type=\"ui\">\n" +
