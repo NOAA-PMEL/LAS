@@ -160,7 +160,7 @@ IF `($title_size%0|*>1%)` THEN PPL LABSET ($title_size)
 IF `($labnum_dset%0|*>1%)` THEN GO unlabel ($labnum_dset)
 IF `($labnum_datitl%0|*>1%)` THEN GO unlabel ($labnum_datitl)
 IF `($labnum_dods%0|*>1%)` THEN GO unlabel ($labnum_dods)
-IF `($ferret_dep_axis_scale"0|*>1")` THEN PPL YAXIS ($ferret_dep_axis_scale)
+IF `($ferret_dep_axis_scale"0|*>1")` THEN PPL XAXIS ($ferret_dep_axis_scale)
 PPL plot
 
 LABEL/NOUSER `($ppl$xlen)/2`, `($ppl$ylen)+1.2`, 0, 0, 0.12, "LAS 7.+/Ferret ($FERRET_VERSION)     NOAA/PMEL"
