@@ -4,7 +4,7 @@
 package gov.noaa.pmel.tmap.las.service.tabledap;
 
 import com.cohort.array.DoubleArray;
-import com.cohort.array.StringArray;
+import com.cohort.array.PrimitiveArray;
 import com.cohort.util.Calendar2;
 import com.cohort.util.Math2;
 import com.cohort.util.MustBe;
@@ -31,7 +31,6 @@ import org.apache.log4j.Logger;
 import org.apache.log4j.LogManager;
 import org.jdom.Element;
 
-import com.cohort.array.PrimitiveArray;
 
 /**
  * Creates an intermediate netCDF file from a Tabledap dataset
@@ -132,18 +131,12 @@ public class TabledapTool extends TemplateTool {
                 "dataObjects").getChild("data").getAttributeValue("url");
             required(url, causeOfError);
 
-            //get websiteID, e.g., pmel_dapper   (was db_name)
-            causeOfError = "Could not get webSiteID."; 
-            String webSiteID = getTabledapProperty(lasBackendRequest, "webSiteID");
-            log.debug("Got webSiteID: " + webSiteID); 
-            required(webSiteID, causeOfError);
-
-            //get datasetID (was db_table, e.g., tao
-            causeOfError = "Could not get db_table.";   
-            String datasetID = getTabledapProperty(lasBackendRequest, "datasetID");
-            log.debug("Got datasetID: " + datasetID);
-            required(datasetID, causeOfError);
-       
+            //get id, e.g., pmel_dapper/tao   
+            causeOfError = "Could not get id."; 
+            String id = getTabledapProperty(lasBackendRequest, "id");
+            log.debug("Got id: " + id); 
+            required(id, causeOfError);
+     
             //get "debug" file name, may be null or ""
             //if defined, use the "debug" resultsAsFile as the place to save the constraint statement.
             causeOfError = "Unable to getResultAsFile(debug): ";
@@ -206,7 +199,7 @@ public class TabledapTool extends TemplateTool {
 
             //get the data   
             causeOfError = "Could not convert the data source to a netCDF file: ";   
-            String dsUrl = url + webSiteID + "/" + datasetID + "?";  //don't include ".dods"; readOpendapSequence does that
+            String dsUrl = url + id + "?";  //don't include ".dods"; readOpendapSequence does that
             Table data = new Table();
             if (xlo.length() > 0 && xhi.length() > 0 && 
                 String2.parseDouble(xhi) < String2.parseDouble(xlo)) {
