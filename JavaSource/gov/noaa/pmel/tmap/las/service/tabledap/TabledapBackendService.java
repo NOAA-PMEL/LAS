@@ -137,15 +137,11 @@ longitude,latitude,time,sea_surface_temperature,air_temperature&longitude>264.9&
 "     <properties>\n" +
 "       <property_group type=\"tabledap_access\">\n" +
 "         <property>\n" +                           
-"           <name>webSiteID</name>\n" +
-"           <value>pmel_dapper</value>\n" +
-"         </property>\n" +
-"         <property>\n" +                          
-"           <name>datasetID</name>\n" +
-"           <value>tao</value>\n" +
+"           <name>id</name>\n" +
+"           <value>pmel_dapper/tao</value>\n" +
 "         </property>\n" +
 "         <property>\n" +
-"           <name>longitude</name>\n" +       
+"           <name>longitude</name>\n" +      //lon,lat,alt,time indicate if the variables exist and should be requested. 
 "           <value>longitude</value>\n" +
 "         </property>\n" +
 "         <property>\n" +
@@ -174,11 +170,11 @@ longitude,latitude,time,sea_surface_temperature,air_temperature&longitude>264.9&
 "       <property_group type=\"product_server\">\n" +
 "         <property>\n" +
 "           <name>ui_timeout</name>\n" +
-"           <value>1000</value>\n" +   //units?    ignored here
+"           <value>120000</value>\n" +  //seconds    ignored here
 "         </property>\n" +
 "         <property>\n" +
 "           <name>ps_timeout</name>\n" +
-"           <value>3600</value>\n" +  //units?     ignored here
+"           <value>120000</value>\n" +  //seconds    ignored here
 "         </property>\n" +
 "         <property>\n" +
 "           <name>use_cache</name>\n" +
@@ -221,6 +217,11 @@ longitude,latitude,time,sea_surface_temperature,air_temperature&longitude>264.9&
      * @throws Exception if there is an error
      */
     public static void main(String args[]) throws Exception {
+
+        //one time thing:  
+//!!! currently uses cwexperimental; eventually switch to coastwatch
+        //GenerateTabledapXml.test();
+        //if (true) System.exit(0);
 
         //get the requestXml
         String2.log("\n*** TabledapBackendService");

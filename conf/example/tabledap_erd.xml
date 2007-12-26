@@ -1,0 +1,2013 @@
+<datasets>
+  <csc_mwfs_wt
+    name = "Buoy Data (Water Temperature) from the NOAA CSC microWFS"
+    url = "http://coastwatch.pfel.noaa.gov/cwexperimental/erddap/tabledap/csc_mwfs/wt"
+    doc = "http://www.csc.noaa.gov/DTL/dtl_proj4_gmlsfp_wfs.html">
+    <properties>
+      <ui>
+        <default>file:ui.xml#dapper_demo</default>
+      </ui>
+      <tabledap_access>
+        <server>ERD TableDAP</server>
+        <id>csc_mwfs/wt</id>
+        <title>Buoy Data (Water Temperature) from the NOAA CSC microWFS</title>
+        <longitude>longitude</longitude>
+        <lon_domain>-180:180</lon_domain>
+        <latitude>latitude</latitude>
+        <altitude>altitude</altitude>
+        <altitude_units>meters</altitude_units>
+        <positive>up</positive>
+        <time>time</time>
+        <time_units>sec since 1970-01-01T00:00:00Z</time_units>
+        <time_type>double</time_type>
+      </tabledap_access>
+      <product_server>
+        <ui_timeout>120000</ui_timeout>
+        <ps_timeout>120000</ps_timeout>
+        <use_cache>false</use_cache>
+      </product_server>
+    </properties>
+    <variables>
+      <station_id name="Station ID"
+        url="#station_id">
+      <station_id>
+      <sea_water_temperature units="degree_C" name="Sea Water Temperature"
+        url="#sea_water_temperature">
+      <sea_water_temperature>
+    </variables>
+  </csc_mwfs_wt>
+  <gomoos_sos_buoy
+    name = "Buoy Data from the GoMOOS SOS Server"
+    url = "http://coastwatch.pfel.noaa.gov/cwexperimental/erddap/tabledap/gomoos_sos/buoy"
+    doc = "http://www.oostethys.org/ogc-oceans-interoperability-experiment">
+    <properties>
+      <ui>
+        <default>file:ui.xml#dapper_demo</default>
+      </ui>
+      <tabledap_access>
+        <server>ERD TableDAP</server>
+        <id>gomoos_sos/buoy</id>
+        <title>Buoy Data from the GoMOOS SOS Server</title>
+        <longitude>longitude</longitude>
+        <lon_domain>-180:180</lon_domain>
+        <latitude>latitude</latitude>
+        <altitude>altitude</altitude>
+        <altitude_units>meters</altitude_units>
+        <positive>up</positive>
+        <time>time</time>
+        <time_units>sec since 1970-01-01T00:00:00Z</time_units>
+        <time_type>double</time_type>
+      </tabledap_access>
+      <product_server>
+        <ui_timeout>120000</ui_timeout>
+        <ps_timeout>120000</ps_timeout>
+        <use_cache>false</use_cache>
+      </product_server>
+    </properties>
+    <variables>
+      <station_id name="Station ID"
+        url="#station_id">
+      <station_id>
+      <sea_water_temperature units="degree_C" name="Sea Water Temperature"
+        url="#sea_water_temperature">
+      <sea_water_temperature>
+      <sea_water_salinity units="psu" name="Sea Water Salinity"
+        url="#sea_water_salinity">
+      <sea_water_salinity>
+    </variables>
+  </gomoos_sos_buoy>
+  <nos_coops_wind
+    name = "Buoy Wind Data from the NOAA NOS SOAP+XML Server"
+    url = "http://coastwatch.pfel.noaa.gov/cwexperimental/erddap/tabledap/nos_coops/wind"
+    doc = "http://opendap.co-ops.nos.noaa.gov/axis/">
+    <properties>
+      <ui>
+        <default>file:ui.xml#dapper_demo</default>
+      </ui>
+      <tabledap_access>
+        <server>ERD TableDAP</server>
+        <id>nos_coops/wind</id>
+        <title>Buoy Wind Data from the NOAA NOS SOAP+XML Server</title>
+        <longitude>longitude</longitude>
+        <lon_domain>-180:180</lon_domain>
+        <latitude>latitude</latitude>
+        <time>time</time>
+        <time_units>sec since 1970-01-01T00:00:00Z</time_units>
+        <time_type>double</time_type>
+      </tabledap_access>
+      <product_server>
+        <ui_timeout>120000</ui_timeout>
+        <ps_timeout>120000</ps_timeout>
+        <use_cache>false</use_cache>
+      </product_server>
+    </properties>
+    <variables>
+      <station_name name="Station Name"
+        url="#station_name">
+      <station_name>
+      <station_id name="Station ID"
+        url="#station_id">
+      <station_id>
+      <wind_speed units="m s-1" name="Wind Speed"
+        url="#wind_speed">
+      <wind_speed>
+      <wind_from_direction units="degrees_true" name="Wind From Direction"
+        url="#wind_from_direction">
+      <wind_from_direction>
+      <wind_speed_of_gust units="m s-1" name="Wind Speed of Gust"
+        url="#wind_speed_of_gust">
+      <wind_speed_of_gust>
+      <MaxExceeded units="0=False, 1=True" name="Max Value Was Exceeded"
+        url="#MaxExceeded">
+      <MaxExceeded>
+      <RateExceeded units="0=False, 1=True" name="Rate of Change Tolerance Limit Was Exceeded"
+        url="#RateExceeded">
+      <RateExceeded>
+    </variables>
+  </nos_coops_wind>
+  <nwioos_drds_coral
+    name = "Coral Data Collected off West Coast of US (1980-2005)"
+    url = "http://coastwatch.pfel.noaa.gov/cwexperimental/erddap/tabledap/nwioos_drds/coral"
+    doc = "http://nwioos.coas.oregonstate.edu:8080/dods/drds/Coral%201980-2005.das.info">
+    <properties>
+      <ui>
+        <default>file:ui.xml#dapper_demo</default>
+      </ui>
+      <tabledap_access>
+        <server>ERD TableDAP</server>
+        <id>nwioos_drds/coral</id>
+        <title>Coral Data Collected off West Coast of US (1980-2005)</title>
+        <longitude>longitude</longitude>
+        <lon_domain>-180:180</lon_domain>
+        <latitude>latitude</latitude>
+        <altitude>altitude</altitude>
+        <altitude_units>meters</altitude_units>
+        <positive>up</positive>
+      </tabledap_access>
+      <product_server>
+        <ui_timeout>120000</ui_timeout>
+        <ps_timeout>120000</ps_timeout>
+        <use_cache>false</use_cache>
+      </product_server>
+    </properties>
+    <variables>
+      <Year name="Year"
+        url="#Year">
+      <Year>
+      <institution_id name="Institution ID"
+        url="#institution_id">
+      <institution_id>
+      <institution name="Institution"
+        url="#institution">
+      <institution>
+      <species_code name="Species Code"
+        url="#species_code">
+      <species_code>
+      <taxa_scientific name="Taxa Scientific"
+        url="#taxa_scientific">
+      <taxa_scientific>
+      <taxonomic_order name="Taxonomic Order"
+        url="#taxonomic_order">
+      <taxonomic_order>
+      <order_abbreviation name="Order Abbreviation"
+        url="#order_abbreviation">
+      <order_abbreviation>
+      <taxonomic_family name="Taxonomic Family"
+        url="#taxonomic_family">
+      <taxonomic_family>
+      <family_abbreviation name="Family Abbreviation"
+        url="#family_abbreviation">
+      <family_abbreviation>
+      <taxonomic_genus name="Taxonomic Genus"
+        url="#taxonomic_genus">
+      <taxonomic_genus>
+    </variables>
+  </nwioos_drds_coral>
+  <erd_opendap_globec_bottle
+    name = "GLOBEC Rosette Bottle Data (2002) from the ERD OPeNDAP Server"
+    url = "http://coastwatch.pfel.noaa.gov/cwexperimental/erddap/tabledap/erd_opendap/globec_bottle"
+    doc = "http://globec.coas.oregonstate.edu/">
+    <properties>
+      <ui>
+        <default>file:ui.xml#dapper_demo</default>
+      </ui>
+      <tabledap_access>
+        <server>ERD TableDAP</server>
+        <id>erd_opendap/globec_bottle</id>
+        <title>GLOBEC Rosette Bottle Data (2002) from the ERD OPeNDAP Server</title>
+        <longitude>longitude</longitude>
+        <lon_domain>-180:180</lon_domain>
+        <latitude>latitude</latitude>
+        <altitude>altitude</altitude>
+        <altitude_units>meters</altitude_units>
+        <positive>up</positive>
+        <time>time</time>
+        <time_units>sec since 1970-01-01T00:00:00Z</time_units>
+        <time_type>double</time_type>
+      </tabledap_access>
+      <product_server>
+        <ui_timeout>120000</ui_timeout>
+        <ps_timeout>120000</ps_timeout>
+        <use_cache>false</use_cache>
+      </product_server>
+    </properties>
+    <variables>
+      <ship name="Ship"
+        url="#ship">
+      <ship>
+      <cruise_id name="Cruise ID"
+        url="#cruise_id">
+      <cruise_id>
+      <cast name="Cast No"
+        url="#cast">
+      <cast>
+      <bottle_posn name="Bottle Number"
+        url="#bottle_posn">
+      <bottle_posn>
+      <chl_a_total units="ug L-1" name="Chlorophyll-a"
+        url="#chl_a_total">
+      <chl_a_total>
+      <chl_a_10um units="ug L-1" name="Chlorophyll-a after passing 10um screen"
+        url="#chl_a_10um">
+      <chl_a_10um>
+      <phaeo_total units="ug L-1" name="Phaeopigment"
+        url="#phaeo_total">
+      <phaeo_total>
+      <phaeo_10um units="ug L-1" name="Phaeopigment after passing 10um screen"
+        url="#phaeo_10um">
+      <phaeo_10um>
+      <sal00 units="psu" name="Salinity from T0 and C0 sensors"
+        url="#sal00">
+      <sal00>
+      <sal11 units="psu" name="Salinity from T1 and C1 sensors"
+        url="#sal11">
+      <sal11>
+      <temperature0 units="degree_C" name="Temperature T0"
+        url="#temperature0">
+      <temperature0>
+      <temperature1 units="degree_C" name="Temperature T1"
+        url="#temperature1">
+      <temperature1>
+      <fluor_v units="volts" name="Fluorescence electronic data"
+        url="#fluor_v">
+      <fluor_v>
+      <xmiss_v units="volts" name="Transmissometer data"
+        url="#xmiss_v">
+      <xmiss_v>
+      <PO4 units="micromoles L-1" name="Phosphate"
+        url="#PO4">
+      <PO4>
+      <N_N units="micromoles L-1" name="Nitrate + Nitrite combined"
+        url="#N_N">
+      <N_N>
+      <NO3 units="micromoles L-1" name="Nitrate"
+        url="#NO3">
+      <NO3>
+      <Si units="micromoles L-1" name="Silicate"
+        url="#Si">
+      <Si>
+      <NO2 units="micromoles L-1" name="Nitrite"
+        url="#NO2">
+      <NO2>
+      <NH4 units="micromoles L-1" name="Ammonium"
+        url="#NH4">
+      <NH4>
+      <oxygen units="ml L-1" name="Oxygen"
+        url="#oxygen">
+      <oxygen>
+      <par units="volts" name="Photosynthetically available radiation"
+        url="#par">
+      <par>
+    </variables>
+  </erd_opendap_globec_bottle>
+  <nwioos_drds_groundfish
+    name = "Groundfish Data for U.S. West Coast (2003-2004)"
+    url = "http://coastwatch.pfel.noaa.gov/cwexperimental/erddap/tabledap/nwioos_drds/groundfish"
+    doc = "http://nwioos.coas.oregonstate.edu:8080/dods/drds/Groundfish%20Survey%202003-2004.info">
+    <properties>
+      <ui>
+        <default>file:ui.xml#dapper_demo</default>
+      </ui>
+      <tabledap_access>
+        <server>ERD TableDAP</server>
+        <id>nwioos_drds/groundfish</id>
+        <title>Groundfish Data for U.S. West Coast (2003-2004)</title>
+        <longitude>longitude</longitude>
+        <lon_domain>-180:180</lon_domain>
+        <latitude>latitude</latitude>
+      </tabledap_access>
+      <product_server>
+        <ui_timeout>120000</ui_timeout>
+        <ps_timeout>120000</ps_timeout>
+        <use_cache>false</use_cache>
+      </product_server>
+    </properties>
+    <variables>
+      <year name="year"
+        url="#year">
+      <year>
+      <haul_id name="Haul Identifier"
+        url="#haul_id">
+      <haul_id>
+      <scientific_name name="Scientific Name"
+        url="#scientific_name">
+      <scientific_name>
+      <common_name name="Common Name"
+        url="#common_name">
+      <common_name>
+      <position_description name="Position Description"
+        url="#position_description">
+      <position_description>
+      <catch_range_min units="kg km-2" name="Catch Range Min"
+        url="#catch_range_min">
+      <catch_range_min>
+      <catch_range_max units="kg km-2" name="Catch Range Max"
+        url="#catch_range_max">
+      <catch_range_max>
+      <map_legend units="kg km-2" name="Map Legend"
+        url="#map_legend">
+      <map_legend>
+    </variables>
+  </nwioos_drds_groundfish>
+  <nwioos_drds_hud_predators_prey
+    name = "HUD Predators and Prey"
+    url = "http://coastwatch.pfel.noaa.gov/cwexperimental/erddap/tabledap/nwioos_drds/hud_predators_prey"
+    doc = "http://nwioos.coas.oregonstate.edu:8080/dods/drds/HUD%20Predators%20and%20Prey.info">
+    <properties>
+      <ui>
+        <default>file:ui.xml#dapper_demo</default>
+      </ui>
+      <tabledap_access>
+        <server>ERD TableDAP</server>
+        <id>nwioos_drds/hud_predators_prey</id>
+        <title>HUD Predators and Prey</title>
+      </tabledap_access>
+      <product_server>
+        <ui_timeout>120000</ui_timeout>
+        <ps_timeout>120000</ps_timeout>
+        <use_cache>false</use_cache>
+      </product_server>
+    </properties>
+    <variables>
+      <ecoregion name="Ecoregion"
+        url="#ecoregion">
+      <ecoregion>
+      <season name="Season"
+        url="#season">
+      <season>
+      <level_1_habitat name="Level 1 Habitat"
+        url="#level_1_habitat">
+      <level_1_habitat>
+      <level_2_habitat name="Level 2 Habitat"
+        url="#level_2_habitat">
+      <level_2_habitat>
+      <level_3_habitat name="Level 3 Habitat"
+        url="#level_3_habitat">
+      <level_3_habitat>
+      <level_4_habitat name="Level 4 Habitat"
+        url="#level_4_habitat">
+      <level_4_habitat>
+      <scientific_name name="Scientific Name"
+        url="#scientific_name">
+      <scientific_name>
+      <gender name="Gender"
+        url="#gender">
+      <gender>
+      <life_stage name="Life Stage"
+        url="#life_stage">
+      <life_stage>
+      <prey_name name="Prey Name"
+        url="#prey_name">
+      <prey_name>
+      <prey_gender name="Prey Gender"
+        url="#prey_gender">
+      <prey_gender>
+      <prey_life_stage name="Prey Life Stage"
+        url="#prey_life_stage">
+      <prey_life_stage>
+      <predator_name name="Predator Name"
+        url="#predator_name">
+      <predator_name>
+      <predator_gender name="Predator Gender"
+        url="#predator_gender">
+      <predator_gender>
+      <predator_life_stage name="Predator Life Stage"
+        url="#predator_life_stage">
+      <predator_life_stage>
+    </variables>
+  </nwioos_drds_hud_predators_prey>
+  <nwioos_drds_hud_references
+    name = "HUD References"
+    url = "http://coastwatch.pfel.noaa.gov/cwexperimental/erddap/tabledap/nwioos_drds/hud_references"
+    doc = "http://nwioos.coas.oregonstate.edu:8080/dods/drds/HUD%20References.info">
+    <properties>
+      <ui>
+        <default>file:ui.xml#dapper_demo</default>
+      </ui>
+      <tabledap_access>
+        <server>ERD TableDAP</server>
+        <id>nwioos_drds/hud_references</id>
+        <title>HUD References</title>
+      </tabledap_access>
+      <product_server>
+        <ui_timeout>120000</ui_timeout>
+        <ps_timeout>120000</ps_timeout>
+        <use_cache>false</use_cache>
+      </product_server>
+    </properties>
+    <variables>
+      <season name="Season"
+        url="#season">
+      <season>
+      <level_1_habitat name="Level 1 Habitat"
+        url="#level_1_habitat">
+      <level_1_habitat>
+      <level_2_habitat name="Level 2 Habitat"
+        url="#level_2_habitat">
+      <level_2_habitat>
+      <level_3_habitat name="Level 3 Habitat"
+        url="#level_3_habitat">
+      <level_3_habitat>
+      <level_4_habitat name="Level 4 Habitat"
+        url="#level_4_habitat">
+      <level_4_habitat>
+      <scientific_name name="Scientific Name"
+        url="#scientific_name">
+      <scientific_name>
+      <gender name="Gender"
+        url="#gender">
+      <gender>
+      <life_stage name="Life Stage"
+        url="#life_stage">
+      <life_stage>
+      <reference_to name="Reference To"
+        url="#reference_to">
+      <reference_to>
+      <reference_type name="Reference Type"
+        url="#reference_type">
+      <reference_type>
+      <authors name="Authors"
+        url="#authors">
+      <authors>
+      <publication_year name="Publication Year"
+        url="#publication_year">
+      <publication_year>
+      <reference_name name="Reference Name"
+        url="#reference_name">
+      <reference_name>
+      <editor name="Editor"
+        url="#editor">
+      <editor>
+      <publication_name name="Publication Name"
+        url="#publication_name">
+      <publication_name>
+      <publisher_city name="Publisher City"
+        url="#publisher_city">
+      <publisher_city>
+      <publisher name="Publisher"
+        url="#publisher">
+      <publisher>
+      <volume name="Volume"
+        url="#volume">
+      <volume>
+      <number name="Number"
+        url="#number">
+      <number>
+      <referenced_pages name="Referenced Pages"
+        url="#referenced_pages">
+      <referenced_pages>
+      <thesis_type name="Thesis Type"
+        url="#thesis_type">
+      <thesis_type>
+    </variables>
+  </nwioos_drds_hud_references>
+  <nwioos_drds_adcp_1995
+    name = "Hake Survey ADCP (1995)"
+    url = "http://coastwatch.pfel.noaa.gov/cwexperimental/erddap/tabledap/nwioos_drds/adcp_1995"
+    doc = "http://nwioos.coas.oregonstate.edu:8080/dods/drds/1995%20Hake%20Survey%20ADCP.info">
+    <properties>
+      <ui>
+        <default>file:ui.xml#dapper_demo</default>
+      </ui>
+      <tabledap_access>
+        <server>ERD TableDAP</server>
+        <id>nwioos_drds/adcp_1995</id>
+        <title>Hake Survey ADCP (1995)</title>
+        <longitude>longitude</longitude>
+        <lon_domain>-180:180</lon_domain>
+        <latitude>latitude</latitude>
+        <altitude>altitude</altitude>
+        <altitude_units>meters</altitude_units>
+        <positive>up</positive>
+      </tabledap_access>
+      <product_server>
+        <ui_timeout>120000</ui_timeout>
+        <ps_timeout>120000</ps_timeout>
+        <use_cache>false</use_cache>
+      </product_server>
+    </properties>
+    <variables>
+      <year name="year"
+        url="#year">
+      <year>
+      <yearday name="yearday"
+        url="#yearday">
+      <yearday>
+      <eastv units="m s-1" name="Eastward Sea Water Velocity"
+        url="#eastv">
+      <eastv>
+      <northv units="m s-1" name="Northward Sea Water Velocity"
+        url="#northv">
+      <northv>
+    </variables>
+  </nwioos_drds_adcp_1995>
+  <nwioos_drds_adcp_1998
+    name = "Hake Survey ADCP (1998)"
+    url = "http://coastwatch.pfel.noaa.gov/cwexperimental/erddap/tabledap/nwioos_drds/adcp_1998"
+    doc = "http://nwioos.coas.oregonstate.edu:8080/dods/drds/1998%20Hake%20Survey%20ADCP.info">
+    <properties>
+      <ui>
+        <default>file:ui.xml#dapper_demo</default>
+      </ui>
+      <tabledap_access>
+        <server>ERD TableDAP</server>
+        <id>nwioos_drds/adcp_1998</id>
+        <title>Hake Survey ADCP (1998)</title>
+        <longitude>longitude</longitude>
+        <lon_domain>-180:180</lon_domain>
+        <latitude>latitude</latitude>
+        <altitude>altitude</altitude>
+        <altitude_units>meters</altitude_units>
+        <positive>up</positive>
+      </tabledap_access>
+      <product_server>
+        <ui_timeout>120000</ui_timeout>
+        <ps_timeout>120000</ps_timeout>
+        <use_cache>false</use_cache>
+      </product_server>
+    </properties>
+    <variables>
+      <year name="year"
+        url="#year">
+      <year>
+      <yearday name="yearday"
+        url="#yearday">
+      <yearday>
+      <eastv units="m s-1" name="Eastward Sea Water Velocity"
+        url="#eastv">
+      <eastv>
+      <northv units="m s-1" name="Northward Sea Water Velocity"
+        url="#northv">
+      <northv>
+    </variables>
+  </nwioos_drds_adcp_1998>
+  <nwioos_drds_adcp_2001
+    name = "Hake Survey ADCP (2001)"
+    url = "http://coastwatch.pfel.noaa.gov/cwexperimental/erddap/tabledap/nwioos_drds/adcp_2001"
+    doc = "http://nwioos.coas.oregonstate.edu:8080/dods/drds/2001%20Hake%20Survey%20ADCP.info">
+    <properties>
+      <ui>
+        <default>file:ui.xml#dapper_demo</default>
+      </ui>
+      <tabledap_access>
+        <server>ERD TableDAP</server>
+        <id>nwioos_drds/adcp_2001</id>
+        <title>Hake Survey ADCP (2001)</title>
+        <longitude>longitude</longitude>
+        <lon_domain>-180:180</lon_domain>
+        <latitude>latitude</latitude>
+        <altitude>altitude</altitude>
+        <altitude_units>meters</altitude_units>
+        <positive>up</positive>
+      </tabledap_access>
+      <product_server>
+        <ui_timeout>120000</ui_timeout>
+        <ps_timeout>120000</ps_timeout>
+        <use_cache>false</use_cache>
+      </product_server>
+    </properties>
+    <variables>
+      <year name="year"
+        url="#year">
+      <year>
+      <yearday name="yearday"
+        url="#yearday">
+      <yearday>
+      <eastv units="m s-1" name="Eastward Sea Water Velocity"
+        url="#eastv">
+      <eastv>
+      <northv units="m s-1" name="Northward Sea Water Velocity"
+        url="#northv">
+      <northv>
+    </variables>
+  </nwioos_drds_adcp_2001>
+  <nwioos_drds_adcp_2003
+    name = "Hake Survey ADCP (2003)"
+    url = "http://coastwatch.pfel.noaa.gov/cwexperimental/erddap/tabledap/nwioos_drds/adcp_2003"
+    doc = "http://nwioos.coas.oregonstate.edu:8080/dods/drds/2003%20Hake%20Survey%20ADCP.info">
+    <properties>
+      <ui>
+        <default>file:ui.xml#dapper_demo</default>
+      </ui>
+      <tabledap_access>
+        <server>ERD TableDAP</server>
+        <id>nwioos_drds/adcp_2003</id>
+        <title>Hake Survey ADCP (2003)</title>
+        <longitude>longitude</longitude>
+        <lon_domain>-180:180</lon_domain>
+        <latitude>latitude</latitude>
+        <altitude>altitude</altitude>
+        <altitude_units>meters</altitude_units>
+        <positive>up</positive>
+      </tabledap_access>
+      <product_server>
+        <ui_timeout>120000</ui_timeout>
+        <ps_timeout>120000</ps_timeout>
+        <use_cache>false</use_cache>
+      </product_server>
+    </properties>
+    <variables>
+      <year name="year"
+        url="#year">
+      <year>
+      <yearday name="yearday"
+        url="#yearday">
+      <yearday>
+      <eastv units="m s-1" name="Eastward Sea Water Velocity"
+        url="#eastv">
+      <eastv>
+      <northv units="m s-1" name="Northward Sea Water Velocity"
+        url="#northv">
+      <northv>
+    </variables>
+  </nwioos_drds_adcp_2003>
+  <nwioos_drds_adcp_2005
+    name = "Hake Survey ADCP (2005)"
+    url = "http://coastwatch.pfel.noaa.gov/cwexperimental/erddap/tabledap/nwioos_drds/adcp_2005"
+    doc = "http://nwioos.coas.oregonstate.edu:8080/dods/drds/2005%20Hake%20Survey%20ADCP.info">
+    <properties>
+      <ui>
+        <default>file:ui.xml#dapper_demo</default>
+      </ui>
+      <tabledap_access>
+        <server>ERD TableDAP</server>
+        <id>nwioos_drds/adcp_2005</id>
+        <title>Hake Survey ADCP (2005)</title>
+        <longitude>longitude</longitude>
+        <lon_domain>-180:180</lon_domain>
+        <latitude>latitude</latitude>
+        <altitude>altitude</altitude>
+        <altitude_units>meters</altitude_units>
+        <positive>up</positive>
+      </tabledap_access>
+      <product_server>
+        <ui_timeout>120000</ui_timeout>
+        <ps_timeout>120000</ps_timeout>
+        <use_cache>false</use_cache>
+      </product_server>
+    </properties>
+    <variables>
+      <year name="year"
+        url="#year">
+      <year>
+      <yearday name="yearday"
+        url="#yearday">
+      <yearday>
+      <eastv units="m s-1" name="Eastward Sea Water Velocity"
+        url="#eastv">
+      <eastv>
+      <northv units="m s-1" name="Northward Sea Water Velocity"
+        url="#northv">
+      <northv>
+    </variables>
+  </nwioos_drds_adcp_2005>
+  <aadc_obis_argos_tracking
+    name = "OBIS - ARGOS Satellite Tracking of Animals"
+    url = "http://coastwatch.pfel.noaa.gov/cwexperimental/erddap/tabledap/aadc_obis/argos_tracking"
+    doc = "http://data.aad.gov.au/">
+    <properties>
+      <ui>
+        <default>file:ui.xml#dapper_demo</default>
+      </ui>
+      <tabledap_access>
+        <server>ERD TableDAP</server>
+        <id>aadc_obis/argos_tracking</id>
+        <title>OBIS - ARGOS Satellite Tracking of Animals</title>
+        <longitude>longitude</longitude>
+        <lon_domain>-180:180</lon_domain>
+        <latitude>latitude</latitude>
+        <altitude>altitude</altitude>
+        <altitude_units>meters</altitude_units>
+        <positive>up</positive>
+        <time>time</time>
+        <time_units>sec since 1970-01-01T00:00:00Z</time_units>
+        <time_type>double</time_type>
+      </tabledap_access>
+      <product_server>
+        <ui_timeout>120000</ui_timeout>
+        <ps_timeout>120000</ps_timeout>
+        <use_cache>false</use_cache>
+      </product_server>
+    </properties>
+    <variables>
+      <ID name="ID"
+        url="#ID">
+      <ID>
+      <BasisOfRecord name="BasisOfRecord"
+        url="#BasisOfRecord">
+      <BasisOfRecord>
+      <BoundingBox name="BoundingBox"
+        url="#BoundingBox">
+      <BoundingBox>
+      <CatalogNumber name="CatalogNumber"
+        url="#CatalogNumber">
+      <CatalogNumber>
+      <Citation name="Citation"
+        url="#Citation">
+      <Citation>
+      <Class name="Class"
+        url="#Class">
+      <Class>
+      <CollectionCode name="CollectionCode"
+        url="#CollectionCode">
+      <CollectionCode>
+      <Collector name="Collector"
+        url="#Collector">
+      <Collector>
+      <CollectorNumber name="CollectorNumber"
+        url="#CollectorNumber">
+      <CollectorNumber>
+      <ContinentOcean name="ContinentOcean"
+        url="#ContinentOcean">
+      <ContinentOcean>
+      <CoordinatePrecision units="m" name="CoordinatePrecision"
+        url="#CoordinatePrecision">
+      <CoordinatePrecision>
+      <Country name="Country"
+        url="#Country">
+      <Country>
+      <County name="County"
+        url="#County">
+      <County>
+      <DateLastModified name="DateLastModified"
+        url="#DateLastModified">
+      <DateLastModified>
+      <DayCollected name="DayCollected"
+        url="#DayCollected">
+      <DayCollected>
+      <DayIdentified name="DayIdentified"
+        url="#DayIdentified">
+      <DayIdentified>
+      <DepthRange name="DepthRange"
+        url="#DepthRange">
+      <DepthRange>
+      <EndDayCollected name="EndDayCollected"
+        url="#EndDayCollected">
+      <EndDayCollected>
+      <EndJulianDay name="EndJulianDay"
+        url="#EndJulianDay">
+      <EndJulianDay>
+      <EndLatitude units="degrees_north" name="EndLatitude"
+        url="#EndLatitude">
+      <EndLatitude>
+      <EndLongitude units="degrees_east" name="EndLongitude"
+        url="#EndLongitude">
+      <EndLongitude>
+      <EndMonthCollected name="EndMonthCollected"
+        url="#EndMonthCollected">
+      <EndMonthCollected>
+      <EndTimeofDay units="hours" name="EndTimeofDay"
+        url="#EndTimeofDay">
+      <EndTimeofDay>
+      <EndYearCollected name="EndYearCollected"
+        url="#EndYearCollected">
+      <EndYearCollected>
+      <Family name="Family"
+        url="#Family">
+      <Family>
+      <FieldNumber name="FieldNumber"
+        url="#FieldNumber">
+      <FieldNumber>
+      <GMLFeature name="GMLFeature"
+        url="#GMLFeature">
+      <GMLFeature>
+      <Genus name="Genus"
+        url="#Genus">
+      <Genus>
+      <IdentifiedBy name="IdentifiedBy"
+        url="#IdentifiedBy">
+      <IdentifiedBy>
+      <IndividualCount units="count" name="IndividualCount"
+        url="#IndividualCount">
+      <IndividualCount>
+      <InstitutionCode name="InstitutionCode"
+        url="#InstitutionCode">
+      <InstitutionCode>
+      <JulianDay name="JulianDay"
+        url="#JulianDay">
+      <JulianDay>
+      <Kingdom name="Kingdom"
+        url="#Kingdom">
+      <Kingdom>
+      <LifeStage name="LifeStage"
+        url="#LifeStage">
+      <LifeStage>
+      <Locality name="Locality"
+        url="#Locality">
+      <Locality>
+      <MaximumDepth units="m" name="MaximumDepth"
+        url="#MaximumDepth">
+      <MaximumDepth>
+      <MaximumElevation units="m" name="MaximumElevation"
+        url="#MaximumElevation">
+      <MaximumElevation>
+      <MinimumElevation units="m" name="MinimumElevation"
+        url="#MinimumElevation">
+      <MinimumElevation>
+      <MonthCollected name="MonthCollected"
+        url="#MonthCollected">
+      <MonthCollected>
+      <MonthIdentified name="MonthIdentified"
+        url="#MonthIdentified">
+      <MonthIdentified>
+      <Notes name="Notes"
+        url="#Notes">
+      <Notes>
+      <ObservedIndividualCount units="count" name="ObservedIndividualCount"
+        url="#ObservedIndividualCount">
+      <ObservedIndividualCount>
+      <ObservedWeight units="kg" name="ObservedWeight"
+        url="#ObservedWeight">
+      <ObservedWeight>
+      <Order name="Order"
+        url="#Order">
+      <Order>
+      <Phylum name="Phylum"
+        url="#Phylum">
+      <Phylum>
+      <PreparationType name="PreparationType"
+        url="#PreparationType">
+      <PreparationType>
+      <PreviousCatalogNumber name="PreviousCatalogNumber"
+        url="#PreviousCatalogNumber">
+      <PreviousCatalogNumber>
+      <RecordURL name="RecordURL"
+        url="#RecordURL">
+      <RecordURL>
+      <RelatedCatalogItem name="RelatedCatalogItem"
+        url="#RelatedCatalogItem">
+      <RelatedCatalogItem>
+      <RelationshipType name="RelationshipType"
+        url="#RelationshipType">
+      <RelationshipType>
+      <SampleSize name="SampleSize"
+        url="#SampleSize">
+      <SampleSize>
+      <ScientificName name="ScientificName"
+        url="#ScientificName">
+      <ScientificName>
+      <ScientificNameAuthor name="ScientificNameAuthor"
+        url="#ScientificNameAuthor">
+      <ScientificNameAuthor>
+      <Sex name="Sex"
+        url="#Sex">
+      <Sex>
+      <Source name="Source"
+        url="#Source">
+      <Source>
+      <Species name="Species"
+        url="#Species">
+      <Species>
+      <StartDayCollected name="StartDayCollected"
+        url="#StartDayCollected">
+      <StartDayCollected>
+      <StartJulianDay name="StartJulianDay"
+        url="#StartJulianDay">
+      <StartJulianDay>
+      <StartLatitude units="degrees_north" name="StartLatitude"
+        url="#StartLatitude">
+      <StartLatitude>
+      <StartLongitude units="degrees_east" name="StartLongitude"
+        url="#StartLongitude">
+      <StartLongitude>
+      <StartMonthCollected name="StartMonthCollected"
+        url="#StartMonthCollected">
+      <StartMonthCollected>
+      <StartTimeofDay units="hours" name="StartTimeofDay"
+        url="#StartTimeofDay">
+      <StartTimeofDay>
+      <StartYearCollected name="StartYearCollected"
+        url="#StartYearCollected">
+      <StartYearCollected>
+      <Start_EndCoordinatePrecision units="m" name="Start_EndCoordinatePrecision"
+        url="#Start_EndCoordinatePrecision">
+      <Start_EndCoordinatePrecision>
+      <StateProvince name="StateProvince"
+        url="#StateProvince">
+      <StateProvince>
+      <Subgenus name="Subgenus"
+        url="#Subgenus">
+      <Subgenus>
+      <Subspecies name="Subspecies"
+        url="#Subspecies">
+      <Subspecies>
+      <Temperature units="degree_C" name="Temperature"
+        url="#Temperature">
+      <Temperature>
+      <TimeOfDay units="hours" name="TimeOfDay"
+        url="#TimeOfDay">
+      <TimeOfDay>
+      <TimeZone name="TimeZone"
+        url="#TimeZone">
+      <TimeZone>
+      <TypeStatus name="TypeStatus"
+        url="#TypeStatus">
+      <TypeStatus>
+      <YearCollected name="YearCollected"
+        url="#YearCollected">
+      <YearCollected>
+      <YearIdentified name="YearIdentified"
+        url="#YearIdentified">
+      <YearIdentified>
+    </variables>
+  </aadc_obis_argos_tracking>
+  <fishbase_obis_fishbase
+    name = "OBIS - FishBase (Philippine Server)"
+    url = "http://coastwatch.pfel.noaa.gov/cwexperimental/erddap/tabledap/fishbase_obis/fishbase"
+    doc = "http://filaman.ifm-geomar.de/home.htm">
+    <properties>
+      <ui>
+        <default>file:ui.xml#dapper_demo</default>
+      </ui>
+      <tabledap_access>
+        <server>ERD TableDAP</server>
+        <id>fishbase_obis/fishbase</id>
+        <title>OBIS - FishBase (Philippine Server)</title>
+        <longitude>longitude</longitude>
+        <lon_domain>-180:180</lon_domain>
+        <latitude>latitude</latitude>
+        <altitude>altitude</altitude>
+        <altitude_units>meters</altitude_units>
+        <positive>up</positive>
+        <time>time</time>
+        <time_units>sec since 1970-01-01T00:00:00Z</time_units>
+        <time_type>double</time_type>
+      </tabledap_access>
+      <product_server>
+        <ui_timeout>120000</ui_timeout>
+        <ps_timeout>120000</ps_timeout>
+        <use_cache>false</use_cache>
+      </product_server>
+    </properties>
+    <variables>
+      <ID name="ID"
+        url="#ID">
+      <ID>
+      <BasisOfRecord name="BasisOfRecord"
+        url="#BasisOfRecord">
+      <BasisOfRecord>
+      <BoundingBox name="BoundingBox"
+        url="#BoundingBox">
+      <BoundingBox>
+      <CatalogNumber name="CatalogNumber"
+        url="#CatalogNumber">
+      <CatalogNumber>
+      <Citation name="Citation"
+        url="#Citation">
+      <Citation>
+      <Class name="Class"
+        url="#Class">
+      <Class>
+      <CollectionCode name="CollectionCode"
+        url="#CollectionCode">
+      <CollectionCode>
+      <Collector name="Collector"
+        url="#Collector">
+      <Collector>
+      <CollectorNumber name="CollectorNumber"
+        url="#CollectorNumber">
+      <CollectorNumber>
+      <ContinentOcean name="ContinentOcean"
+        url="#ContinentOcean">
+      <ContinentOcean>
+      <CoordinatePrecision units="m" name="CoordinatePrecision"
+        url="#CoordinatePrecision">
+      <CoordinatePrecision>
+      <Country name="Country"
+        url="#Country">
+      <Country>
+      <County name="County"
+        url="#County">
+      <County>
+      <DateLastModified name="DateLastModified"
+        url="#DateLastModified">
+      <DateLastModified>
+      <DayCollected name="DayCollected"
+        url="#DayCollected">
+      <DayCollected>
+      <DayIdentified name="DayIdentified"
+        url="#DayIdentified">
+      <DayIdentified>
+      <DepthRange name="DepthRange"
+        url="#DepthRange">
+      <DepthRange>
+      <EndDayCollected name="EndDayCollected"
+        url="#EndDayCollected">
+      <EndDayCollected>
+      <EndJulianDay name="EndJulianDay"
+        url="#EndJulianDay">
+      <EndJulianDay>
+      <EndLatitude units="degrees_north" name="EndLatitude"
+        url="#EndLatitude">
+      <EndLatitude>
+      <EndLongitude units="degrees_east" name="EndLongitude"
+        url="#EndLongitude">
+      <EndLongitude>
+      <EndMonthCollected name="EndMonthCollected"
+        url="#EndMonthCollected">
+      <EndMonthCollected>
+      <EndTimeofDay units="hours" name="EndTimeofDay"
+        url="#EndTimeofDay">
+      <EndTimeofDay>
+      <EndYearCollected name="EndYearCollected"
+        url="#EndYearCollected">
+      <EndYearCollected>
+      <Family name="Family"
+        url="#Family">
+      <Family>
+      <FieldNumber name="FieldNumber"
+        url="#FieldNumber">
+      <FieldNumber>
+      <GMLFeature name="GMLFeature"
+        url="#GMLFeature">
+      <GMLFeature>
+      <Genus name="Genus"
+        url="#Genus">
+      <Genus>
+      <IdentifiedBy name="IdentifiedBy"
+        url="#IdentifiedBy">
+      <IdentifiedBy>
+      <IndividualCount units="count" name="IndividualCount"
+        url="#IndividualCount">
+      <IndividualCount>
+      <InstitutionCode name="InstitutionCode"
+        url="#InstitutionCode">
+      <InstitutionCode>
+      <JulianDay name="JulianDay"
+        url="#JulianDay">
+      <JulianDay>
+      <Kingdom name="Kingdom"
+        url="#Kingdom">
+      <Kingdom>
+      <LifeStage name="LifeStage"
+        url="#LifeStage">
+      <LifeStage>
+      <Locality name="Locality"
+        url="#Locality">
+      <Locality>
+      <MaximumDepth units="m" name="MaximumDepth"
+        url="#MaximumDepth">
+      <MaximumDepth>
+      <MaximumElevation units="m" name="MaximumElevation"
+        url="#MaximumElevation">
+      <MaximumElevation>
+      <MinimumElevation units="m" name="MinimumElevation"
+        url="#MinimumElevation">
+      <MinimumElevation>
+      <MonthCollected name="MonthCollected"
+        url="#MonthCollected">
+      <MonthCollected>
+      <MonthIdentified name="MonthIdentified"
+        url="#MonthIdentified">
+      <MonthIdentified>
+      <Notes name="Notes"
+        url="#Notes">
+      <Notes>
+      <ObservedIndividualCount units="count" name="ObservedIndividualCount"
+        url="#ObservedIndividualCount">
+      <ObservedIndividualCount>
+      <ObservedWeight units="kg" name="ObservedWeight"
+        url="#ObservedWeight">
+      <ObservedWeight>
+      <Order name="Order"
+        url="#Order">
+      <Order>
+      <Phylum name="Phylum"
+        url="#Phylum">
+      <Phylum>
+      <PreparationType name="PreparationType"
+        url="#PreparationType">
+      <PreparationType>
+      <PreviousCatalogNumber name="PreviousCatalogNumber"
+        url="#PreviousCatalogNumber">
+      <PreviousCatalogNumber>
+      <RecordURL name="RecordURL"
+        url="#RecordURL">
+      <RecordURL>
+      <RelatedCatalogItem name="RelatedCatalogItem"
+        url="#RelatedCatalogItem">
+      <RelatedCatalogItem>
+      <RelationshipType name="RelationshipType"
+        url="#RelationshipType">
+      <RelationshipType>
+      <SampleSize name="SampleSize"
+        url="#SampleSize">
+      <SampleSize>
+      <ScientificName name="ScientificName"
+        url="#ScientificName">
+      <ScientificName>
+      <ScientificNameAuthor name="ScientificNameAuthor"
+        url="#ScientificNameAuthor">
+      <ScientificNameAuthor>
+      <Sex name="Sex"
+        url="#Sex">
+      <Sex>
+      <Source name="Source"
+        url="#Source">
+      <Source>
+      <Species name="Species"
+        url="#Species">
+      <Species>
+      <StartDayCollected name="StartDayCollected"
+        url="#StartDayCollected">
+      <StartDayCollected>
+      <StartJulianDay name="StartJulianDay"
+        url="#StartJulianDay">
+      <StartJulianDay>
+      <StartLatitude units="degrees_north" name="StartLatitude"
+        url="#StartLatitude">
+      <StartLatitude>
+      <StartLongitude units="degrees_east" name="StartLongitude"
+        url="#StartLongitude">
+      <StartLongitude>
+      <StartMonthCollected name="StartMonthCollected"
+        url="#StartMonthCollected">
+      <StartMonthCollected>
+      <StartTimeofDay units="hours" name="StartTimeofDay"
+        url="#StartTimeofDay">
+      <StartTimeofDay>
+      <StartYearCollected name="StartYearCollected"
+        url="#StartYearCollected">
+      <StartYearCollected>
+      <Start_EndCoordinatePrecision units="m" name="Start_EndCoordinatePrecision"
+        url="#Start_EndCoordinatePrecision">
+      <Start_EndCoordinatePrecision>
+      <StateProvince name="StateProvince"
+        url="#StateProvince">
+      <StateProvince>
+      <Subgenus name="Subgenus"
+        url="#Subgenus">
+      <Subgenus>
+      <Subspecies name="Subspecies"
+        url="#Subspecies">
+      <Subspecies>
+      <Temperature units="degree_C" name="Temperature"
+        url="#Temperature">
+      <Temperature>
+      <TimeOfDay units="hours" name="TimeOfDay"
+        url="#TimeOfDay">
+      <TimeOfDay>
+      <TimeZone name="TimeZone"
+        url="#TimeZone">
+      <TimeZone>
+      <TypeStatus name="TypeStatus"
+        url="#TypeStatus">
+      <TypeStatus>
+      <YearCollected name="YearCollected"
+        url="#YearCollected">
+      <YearCollected>
+      <YearIdentified name="YearIdentified"
+        url="#YearIdentified">
+      <YearIdentified>
+    </variables>
+  </fishbase_obis_fishbase>
+  <rutgers_obis_GulfOfMaineBIS
+    name = "OBIS - Gulf of Maine Bottom Trawl Survey Data (NEFSC,NMFS,NOAA)"
+    url = "http://coastwatch.pfel.noaa.gov/cwexperimental/erddap/tabledap/rutgers_obis/GulfOfMaineBIS"
+    doc = "http://www.nefsc.noaa.gov">
+    <properties>
+      <ui>
+        <default>file:ui.xml#dapper_demo</default>
+      </ui>
+      <tabledap_access>
+        <server>ERD TableDAP</server>
+        <id>rutgers_obis/GulfOfMaineBIS</id>
+        <title>OBIS - Gulf of Maine Bottom Trawl Survey Data (NEFSC,NMFS,NOAA)</title>
+        <longitude>longitude</longitude>
+        <lon_domain>-180:180</lon_domain>
+        <latitude>latitude</latitude>
+        <altitude>altitude</altitude>
+        <altitude_units>meters</altitude_units>
+        <positive>up</positive>
+        <time>time</time>
+        <time_units>sec since 1970-01-01T00:00:00Z</time_units>
+        <time_type>double</time_type>
+      </tabledap_access>
+      <product_server>
+        <ui_timeout>120000</ui_timeout>
+        <ps_timeout>120000</ps_timeout>
+        <use_cache>false</use_cache>
+      </product_server>
+    </properties>
+    <variables>
+      <ID name="ID"
+        url="#ID">
+      <ID>
+      <BasisOfRecord name="BasisOfRecord"
+        url="#BasisOfRecord">
+      <BasisOfRecord>
+      <BoundingBox name="BoundingBox"
+        url="#BoundingBox">
+      <BoundingBox>
+      <CatalogNumber name="CatalogNumber"
+        url="#CatalogNumber">
+      <CatalogNumber>
+      <Citation name="Citation"
+        url="#Citation">
+      <Citation>
+      <Class name="Class"
+        url="#Class">
+      <Class>
+      <CollectionCode name="CollectionCode"
+        url="#CollectionCode">
+      <CollectionCode>
+      <Collector name="Collector"
+        url="#Collector">
+      <Collector>
+      <CollectorNumber name="CollectorNumber"
+        url="#CollectorNumber">
+      <CollectorNumber>
+      <ContinentOcean name="ContinentOcean"
+        url="#ContinentOcean">
+      <ContinentOcean>
+      <CoordinatePrecision units="m" name="CoordinatePrecision"
+        url="#CoordinatePrecision">
+      <CoordinatePrecision>
+      <Country name="Country"
+        url="#Country">
+      <Country>
+      <County name="County"
+        url="#County">
+      <County>
+      <DateLastModified name="DateLastModified"
+        url="#DateLastModified">
+      <DateLastModified>
+      <DayCollected name="DayCollected"
+        url="#DayCollected">
+      <DayCollected>
+      <DayIdentified name="DayIdentified"
+        url="#DayIdentified">
+      <DayIdentified>
+      <DepthRange name="DepthRange"
+        url="#DepthRange">
+      <DepthRange>
+      <EndDayCollected name="EndDayCollected"
+        url="#EndDayCollected">
+      <EndDayCollected>
+      <EndJulianDay name="EndJulianDay"
+        url="#EndJulianDay">
+      <EndJulianDay>
+      <EndLatitude units="degrees_north" name="EndLatitude"
+        url="#EndLatitude">
+      <EndLatitude>
+      <EndLongitude units="degrees_east" name="EndLongitude"
+        url="#EndLongitude">
+      <EndLongitude>
+      <EndMonthCollected name="EndMonthCollected"
+        url="#EndMonthCollected">
+      <EndMonthCollected>
+      <EndTimeofDay units="hours" name="EndTimeofDay"
+        url="#EndTimeofDay">
+      <EndTimeofDay>
+      <EndYearCollected name="EndYearCollected"
+        url="#EndYearCollected">
+      <EndYearCollected>
+      <Family name="Family"
+        url="#Family">
+      <Family>
+      <FieldNumber name="FieldNumber"
+        url="#FieldNumber">
+      <FieldNumber>
+      <GMLFeature name="GMLFeature"
+        url="#GMLFeature">
+      <GMLFeature>
+      <Genus name="Genus"
+        url="#Genus">
+      <Genus>
+      <IdentifiedBy name="IdentifiedBy"
+        url="#IdentifiedBy">
+      <IdentifiedBy>
+      <IndividualCount units="count" name="IndividualCount"
+        url="#IndividualCount">
+      <IndividualCount>
+      <InstitutionCode name="InstitutionCode"
+        url="#InstitutionCode">
+      <InstitutionCode>
+      <JulianDay name="JulianDay"
+        url="#JulianDay">
+      <JulianDay>
+      <Kingdom name="Kingdom"
+        url="#Kingdom">
+      <Kingdom>
+      <LifeStage name="LifeStage"
+        url="#LifeStage">
+      <LifeStage>
+      <Locality name="Locality"
+        url="#Locality">
+      <Locality>
+      <MaximumDepth units="m" name="MaximumDepth"
+        url="#MaximumDepth">
+      <MaximumDepth>
+      <MaximumElevation units="m" name="MaximumElevation"
+        url="#MaximumElevation">
+      <MaximumElevation>
+      <MinimumElevation units="m" name="MinimumElevation"
+        url="#MinimumElevation">
+      <MinimumElevation>
+      <MonthCollected name="MonthCollected"
+        url="#MonthCollected">
+      <MonthCollected>
+      <MonthIdentified name="MonthIdentified"
+        url="#MonthIdentified">
+      <MonthIdentified>
+      <Notes name="Notes"
+        url="#Notes">
+      <Notes>
+      <ObservedIndividualCount units="count" name="ObservedIndividualCount"
+        url="#ObservedIndividualCount">
+      <ObservedIndividualCount>
+      <ObservedWeight units="kg" name="ObservedWeight"
+        url="#ObservedWeight">
+      <ObservedWeight>
+      <Order name="Order"
+        url="#Order">
+      <Order>
+      <Phylum name="Phylum"
+        url="#Phylum">
+      <Phylum>
+      <PreparationType name="PreparationType"
+        url="#PreparationType">
+      <PreparationType>
+      <PreviousCatalogNumber name="PreviousCatalogNumber"
+        url="#PreviousCatalogNumber">
+      <PreviousCatalogNumber>
+      <RecordURL name="RecordURL"
+        url="#RecordURL">
+      <RecordURL>
+      <RelatedCatalogItem name="RelatedCatalogItem"
+        url="#RelatedCatalogItem">
+      <RelatedCatalogItem>
+      <RelationshipType name="RelationshipType"
+        url="#RelationshipType">
+      <RelationshipType>
+      <SampleSize name="SampleSize"
+        url="#SampleSize">
+      <SampleSize>
+      <ScientificName name="ScientificName"
+        url="#ScientificName">
+      <ScientificName>
+      <ScientificNameAuthor name="ScientificNameAuthor"
+        url="#ScientificNameAuthor">
+      <ScientificNameAuthor>
+      <Sex name="Sex"
+        url="#Sex">
+      <Sex>
+      <Source name="Source"
+        url="#Source">
+      <Source>
+      <Species name="Species"
+        url="#Species">
+      <Species>
+      <StartDayCollected name="StartDayCollected"
+        url="#StartDayCollected">
+      <StartDayCollected>
+      <StartJulianDay name="StartJulianDay"
+        url="#StartJulianDay">
+      <StartJulianDay>
+      <StartLatitude units="degrees_north" name="StartLatitude"
+        url="#StartLatitude">
+      <StartLatitude>
+      <StartLongitude units="degrees_east" name="StartLongitude"
+        url="#StartLongitude">
+      <StartLongitude>
+      <StartMonthCollected name="StartMonthCollected"
+        url="#StartMonthCollected">
+      <StartMonthCollected>
+      <StartTimeofDay units="hours" name="StartTimeofDay"
+        url="#StartTimeofDay">
+      <StartTimeofDay>
+      <StartYearCollected name="StartYearCollected"
+        url="#StartYearCollected">
+      <StartYearCollected>
+      <Start_EndCoordinatePrecision units="m" name="Start_EndCoordinatePrecision"
+        url="#Start_EndCoordinatePrecision">
+      <Start_EndCoordinatePrecision>
+      <StateProvince name="StateProvince"
+        url="#StateProvince">
+      <StateProvince>
+      <Subgenus name="Subgenus"
+        url="#Subgenus">
+      <Subgenus>
+      <Subspecies name="Subspecies"
+        url="#Subspecies">
+      <Subspecies>
+      <Temperature units="degree_C" name="Temperature"
+        url="#Temperature">
+      <Temperature>
+      <TimeOfDay units="hours" name="TimeOfDay"
+        url="#TimeOfDay">
+      <TimeOfDay>
+      <TimeZone name="TimeZone"
+        url="#TimeZone">
+      <TimeZone>
+      <TypeStatus name="TypeStatus"
+        url="#TypeStatus">
+      <TypeStatus>
+      <YearCollected name="YearCollected"
+        url="#YearCollected">
+      <YearCollected>
+      <YearIdentified name="YearIdentified"
+        url="#YearIdentified">
+      <YearIdentified>
+    </variables>
+  </rutgers_obis_GulfOfMaineBIS>
+  <rutgers_obis_GHMP
+    name = "OBIS - Gwaii Haanas Marine Plants (OBIS Canada)"
+    url = "http://coastwatch.pfel.noaa.gov/cwexperimental/erddap/tabledap/rutgers_obis/GHMP"
+    doc = "http://gcmd.nasa.gov/KeywordSearch/Metadata.do?Portal=caobis&MetadataType=0&KeywordPath=&MetadataView=Full&EntryId=OBIS.Gwaii_MarPlants">
+    <properties>
+      <ui>
+        <default>file:ui.xml#dapper_demo</default>
+      </ui>
+      <tabledap_access>
+        <server>ERD TableDAP</server>
+        <id>rutgers_obis/GHMP</id>
+        <title>OBIS - Gwaii Haanas Marine Plants (OBIS Canada)</title>
+        <longitude>longitude</longitude>
+        <lon_domain>-180:180</lon_domain>
+        <latitude>latitude</latitude>
+        <altitude>altitude</altitude>
+        <altitude_units>meters</altitude_units>
+        <positive>up</positive>
+        <time>time</time>
+        <time_units>sec since 1970-01-01T00:00:00Z</time_units>
+        <time_type>double</time_type>
+      </tabledap_access>
+      <product_server>
+        <ui_timeout>120000</ui_timeout>
+        <ps_timeout>120000</ps_timeout>
+        <use_cache>false</use_cache>
+      </product_server>
+    </properties>
+    <variables>
+      <ID name="ID"
+        url="#ID">
+      <ID>
+      <BasisOfRecord name="BasisOfRecord"
+        url="#BasisOfRecord">
+      <BasisOfRecord>
+      <BoundingBox name="BoundingBox"
+        url="#BoundingBox">
+      <BoundingBox>
+      <CatalogNumber name="CatalogNumber"
+        url="#CatalogNumber">
+      <CatalogNumber>
+      <Citation name="Citation"
+        url="#Citation">
+      <Citation>
+      <Class name="Class"
+        url="#Class">
+      <Class>
+      <CollectionCode name="CollectionCode"
+        url="#CollectionCode">
+      <CollectionCode>
+      <Collector name="Collector"
+        url="#Collector">
+      <Collector>
+      <CollectorNumber name="CollectorNumber"
+        url="#CollectorNumber">
+      <CollectorNumber>
+      <ContinentOcean name="ContinentOcean"
+        url="#ContinentOcean">
+      <ContinentOcean>
+      <CoordinatePrecision units="m" name="CoordinatePrecision"
+        url="#CoordinatePrecision">
+      <CoordinatePrecision>
+      <Country name="Country"
+        url="#Country">
+      <Country>
+      <County name="County"
+        url="#County">
+      <County>
+      <DateLastModified name="DateLastModified"
+        url="#DateLastModified">
+      <DateLastModified>
+      <DayCollected name="DayCollected"
+        url="#DayCollected">
+      <DayCollected>
+      <DayIdentified name="DayIdentified"
+        url="#DayIdentified">
+      <DayIdentified>
+      <DepthRange name="DepthRange"
+        url="#DepthRange">
+      <DepthRange>
+      <EndDayCollected name="EndDayCollected"
+        url="#EndDayCollected">
+      <EndDayCollected>
+      <EndJulianDay name="EndJulianDay"
+        url="#EndJulianDay">
+      <EndJulianDay>
+      <EndLatitude units="degrees_north" name="EndLatitude"
+        url="#EndLatitude">
+      <EndLatitude>
+      <EndLongitude units="degrees_east" name="EndLongitude"
+        url="#EndLongitude">
+      <EndLongitude>
+      <EndMonthCollected name="EndMonthCollected"
+        url="#EndMonthCollected">
+      <EndMonthCollected>
+      <EndTimeofDay units="hours" name="EndTimeofDay"
+        url="#EndTimeofDay">
+      <EndTimeofDay>
+      <EndYearCollected name="EndYearCollected"
+        url="#EndYearCollected">
+      <EndYearCollected>
+      <Family name="Family"
+        url="#Family">
+      <Family>
+      <FieldNumber name="FieldNumber"
+        url="#FieldNumber">
+      <FieldNumber>
+      <GMLFeature name="GMLFeature"
+        url="#GMLFeature">
+      <GMLFeature>
+      <Genus name="Genus"
+        url="#Genus">
+      <Genus>
+      <IdentifiedBy name="IdentifiedBy"
+        url="#IdentifiedBy">
+      <IdentifiedBy>
+      <IndividualCount units="count" name="IndividualCount"
+        url="#IndividualCount">
+      <IndividualCount>
+      <InstitutionCode name="InstitutionCode"
+        url="#InstitutionCode">
+      <InstitutionCode>
+      <JulianDay name="JulianDay"
+        url="#JulianDay">
+      <JulianDay>
+      <Kingdom name="Kingdom"
+        url="#Kingdom">
+      <Kingdom>
+      <LifeStage name="LifeStage"
+        url="#LifeStage">
+      <LifeStage>
+      <Locality name="Locality"
+        url="#Locality">
+      <Locality>
+      <MaximumDepth units="m" name="MaximumDepth"
+        url="#MaximumDepth">
+      <MaximumDepth>
+      <MaximumElevation units="m" name="MaximumElevation"
+        url="#MaximumElevation">
+      <MaximumElevation>
+      <MinimumElevation units="m" name="MinimumElevation"
+        url="#MinimumElevation">
+      <MinimumElevation>
+      <MonthCollected name="MonthCollected"
+        url="#MonthCollected">
+      <MonthCollected>
+      <MonthIdentified name="MonthIdentified"
+        url="#MonthIdentified">
+      <MonthIdentified>
+      <Notes name="Notes"
+        url="#Notes">
+      <Notes>
+      <ObservedIndividualCount units="count" name="ObservedIndividualCount"
+        url="#ObservedIndividualCount">
+      <ObservedIndividualCount>
+      <ObservedWeight units="kg" name="ObservedWeight"
+        url="#ObservedWeight">
+      <ObservedWeight>
+      <Order name="Order"
+        url="#Order">
+      <Order>
+      <Phylum name="Phylum"
+        url="#Phylum">
+      <Phylum>
+      <PreparationType name="PreparationType"
+        url="#PreparationType">
+      <PreparationType>
+      <PreviousCatalogNumber name="PreviousCatalogNumber"
+        url="#PreviousCatalogNumber">
+      <PreviousCatalogNumber>
+      <RecordURL name="RecordURL"
+        url="#RecordURL">
+      <RecordURL>
+      <RelatedCatalogItem name="RelatedCatalogItem"
+        url="#RelatedCatalogItem">
+      <RelatedCatalogItem>
+      <RelationshipType name="RelationshipType"
+        url="#RelationshipType">
+      <RelationshipType>
+      <SampleSize name="SampleSize"
+        url="#SampleSize">
+      <SampleSize>
+      <ScientificName name="ScientificName"
+        url="#ScientificName">
+      <ScientificName>
+      <ScientificNameAuthor name="ScientificNameAuthor"
+        url="#ScientificNameAuthor">
+      <ScientificNameAuthor>
+      <Sex name="Sex"
+        url="#Sex">
+      <Sex>
+      <Source name="Source"
+        url="#Source">
+      <Source>
+      <Species name="Species"
+        url="#Species">
+      <Species>
+      <StartDayCollected name="StartDayCollected"
+        url="#StartDayCollected">
+      <StartDayCollected>
+      <StartJulianDay name="StartJulianDay"
+        url="#StartJulianDay">
+      <StartJulianDay>
+      <StartLatitude units="degrees_north" name="StartLatitude"
+        url="#StartLatitude">
+      <StartLatitude>
+      <StartLongitude units="degrees_east" name="StartLongitude"
+        url="#StartLongitude">
+      <StartLongitude>
+      <StartMonthCollected name="StartMonthCollected"
+        url="#StartMonthCollected">
+      <StartMonthCollected>
+      <StartTimeofDay units="hours" name="StartTimeofDay"
+        url="#StartTimeofDay">
+      <StartTimeofDay>
+      <StartYearCollected name="StartYearCollected"
+        url="#StartYearCollected">
+      <StartYearCollected>
+      <Start_EndCoordinatePrecision units="m" name="Start_EndCoordinatePrecision"
+        url="#Start_EndCoordinatePrecision">
+      <Start_EndCoordinatePrecision>
+      <StateProvince name="StateProvince"
+        url="#StateProvince">
+      <StateProvince>
+      <Subgenus name="Subgenus"
+        url="#Subgenus">
+      <Subgenus>
+      <Subspecies name="Subspecies"
+        url="#Subspecies">
+      <Subspecies>
+      <Temperature units="degree_C" name="Temperature"
+        url="#Temperature">
+      <Temperature>
+      <TimeOfDay units="hours" name="TimeOfDay"
+        url="#TimeOfDay">
+      <TimeOfDay>
+      <TimeZone name="TimeZone"
+        url="#TimeZone">
+      <TimeZone>
+      <TypeStatus name="TypeStatus"
+        url="#TypeStatus">
+      <TypeStatus>
+      <YearCollected name="YearCollected"
+        url="#YearCollected">
+      <YearCollected>
+      <YearIdentified name="YearIdentified"
+        url="#YearIdentified">
+      <YearIdentified>
+    </variables>
+  </rutgers_obis_GHMP>
+  <rutgers_obis_OBIS-SEAMAP
+    name = "OBIS - SEAMAP - marine mammals, birds and turtles"
+    url = "http://coastwatch.pfel.noaa.gov/cwexperimental/erddap/tabledap/rutgers_obis/OBIS-SEAMAP"
+    doc = "http://obis.env.duke.edu">
+    <properties>
+      <ui>
+        <default>file:ui.xml#dapper_demo</default>
+      </ui>
+      <tabledap_access>
+        <server>ERD TableDAP</server>
+        <id>rutgers_obis/OBIS-SEAMAP</id>
+        <title>OBIS - SEAMAP - marine mammals, birds and turtles</title>
+        <longitude>longitude</longitude>
+        <lon_domain>-180:180</lon_domain>
+        <latitude>latitude</latitude>
+        <altitude>altitude</altitude>
+        <altitude_units>meters</altitude_units>
+        <positive>up</positive>
+        <time>time</time>
+        <time_units>sec since 1970-01-01T00:00:00Z</time_units>
+        <time_type>double</time_type>
+      </tabledap_access>
+      <product_server>
+        <ui_timeout>120000</ui_timeout>
+        <ps_timeout>120000</ps_timeout>
+        <use_cache>false</use_cache>
+      </product_server>
+    </properties>
+    <variables>
+      <ID name="ID"
+        url="#ID">
+      <ID>
+      <BasisOfRecord name="BasisOfRecord"
+        url="#BasisOfRecord">
+      <BasisOfRecord>
+      <BoundingBox name="BoundingBox"
+        url="#BoundingBox">
+      <BoundingBox>
+      <CatalogNumber name="CatalogNumber"
+        url="#CatalogNumber">
+      <CatalogNumber>
+      <Citation name="Citation"
+        url="#Citation">
+      <Citation>
+      <Class name="Class"
+        url="#Class">
+      <Class>
+      <CollectionCode name="CollectionCode"
+        url="#CollectionCode">
+      <CollectionCode>
+      <Collector name="Collector"
+        url="#Collector">
+      <Collector>
+      <CollectorNumber name="CollectorNumber"
+        url="#CollectorNumber">
+      <CollectorNumber>
+      <ContinentOcean name="ContinentOcean"
+        url="#ContinentOcean">
+      <ContinentOcean>
+      <CoordinatePrecision units="m" name="CoordinatePrecision"
+        url="#CoordinatePrecision">
+      <CoordinatePrecision>
+      <Country name="Country"
+        url="#Country">
+      <Country>
+      <County name="County"
+        url="#County">
+      <County>
+      <DateLastModified name="DateLastModified"
+        url="#DateLastModified">
+      <DateLastModified>
+      <DayCollected name="DayCollected"
+        url="#DayCollected">
+      <DayCollected>
+      <DayIdentified name="DayIdentified"
+        url="#DayIdentified">
+      <DayIdentified>
+      <DepthRange name="DepthRange"
+        url="#DepthRange">
+      <DepthRange>
+      <EndDayCollected name="EndDayCollected"
+        url="#EndDayCollected">
+      <EndDayCollected>
+      <EndJulianDay name="EndJulianDay"
+        url="#EndJulianDay">
+      <EndJulianDay>
+      <EndLatitude units="degrees_north" name="EndLatitude"
+        url="#EndLatitude">
+      <EndLatitude>
+      <EndLongitude units="degrees_east" name="EndLongitude"
+        url="#EndLongitude">
+      <EndLongitude>
+      <EndMonthCollected name="EndMonthCollected"
+        url="#EndMonthCollected">
+      <EndMonthCollected>
+      <EndTimeofDay units="hours" name="EndTimeofDay"
+        url="#EndTimeofDay">
+      <EndTimeofDay>
+      <EndYearCollected name="EndYearCollected"
+        url="#EndYearCollected">
+      <EndYearCollected>
+      <Family name="Family"
+        url="#Family">
+      <Family>
+      <FieldNumber name="FieldNumber"
+        url="#FieldNumber">
+      <FieldNumber>
+      <GMLFeature name="GMLFeature"
+        url="#GMLFeature">
+      <GMLFeature>
+      <Genus name="Genus"
+        url="#Genus">
+      <Genus>
+      <IdentifiedBy name="IdentifiedBy"
+        url="#IdentifiedBy">
+      <IdentifiedBy>
+      <IndividualCount units="count" name="IndividualCount"
+        url="#IndividualCount">
+      <IndividualCount>
+      <InstitutionCode name="InstitutionCode"
+        url="#InstitutionCode">
+      <InstitutionCode>
+      <JulianDay name="JulianDay"
+        url="#JulianDay">
+      <JulianDay>
+      <Kingdom name="Kingdom"
+        url="#Kingdom">
+      <Kingdom>
+      <LifeStage name="LifeStage"
+        url="#LifeStage">
+      <LifeStage>
+      <Locality name="Locality"
+        url="#Locality">
+      <Locality>
+      <MaximumDepth units="m" name="MaximumDepth"
+        url="#MaximumDepth">
+      <MaximumDepth>
+      <MaximumElevation units="m" name="MaximumElevation"
+        url="#MaximumElevation">
+      <MaximumElevation>
+      <MinimumElevation units="m" name="MinimumElevation"
+        url="#MinimumElevation">
+      <MinimumElevation>
+      <MonthCollected name="MonthCollected"
+        url="#MonthCollected">
+      <MonthCollected>
+      <MonthIdentified name="MonthIdentified"
+        url="#MonthIdentified">
+      <MonthIdentified>
+      <Notes name="Notes"
+        url="#Notes">
+      <Notes>
+      <ObservedIndividualCount units="count" name="ObservedIndividualCount"
+        url="#ObservedIndividualCount">
+      <ObservedIndividualCount>
+      <ObservedWeight units="kg" name="ObservedWeight"
+        url="#ObservedWeight">
+      <ObservedWeight>
+      <Order name="Order"
+        url="#Order">
+      <Order>
+      <Phylum name="Phylum"
+        url="#Phylum">
+      <Phylum>
+      <PreparationType name="PreparationType"
+        url="#PreparationType">
+      <PreparationType>
+      <PreviousCatalogNumber name="PreviousCatalogNumber"
+        url="#PreviousCatalogNumber">
+      <PreviousCatalogNumber>
+      <RecordURL name="RecordURL"
+        url="#RecordURL">
+      <RecordURL>
+      <RelatedCatalogItem name="RelatedCatalogItem"
+        url="#RelatedCatalogItem">
+      <RelatedCatalogItem>
+      <RelationshipType name="RelationshipType"
+        url="#RelationshipType">
+      <RelationshipType>
+      <SampleSize name="SampleSize"
+        url="#SampleSize">
+      <SampleSize>
+      <ScientificName name="ScientificName"
+        url="#ScientificName">
+      <ScientificName>
+      <ScientificNameAuthor name="ScientificNameAuthor"
+        url="#ScientificNameAuthor">
+      <ScientificNameAuthor>
+      <Sex name="Sex"
+        url="#Sex">
+      <Sex>
+      <Source name="Source"
+        url="#Source">
+      <Source>
+      <Species name="Species"
+        url="#Species">
+      <Species>
+      <StartDayCollected name="StartDayCollected"
+        url="#StartDayCollected">
+      <StartDayCollected>
+      <StartJulianDay name="StartJulianDay"
+        url="#StartJulianDay">
+      <StartJulianDay>
+      <StartLatitude units="degrees_north" name="StartLatitude"
+        url="#StartLatitude">
+      <StartLatitude>
+      <StartLongitude units="degrees_east" name="StartLongitude"
+        url="#StartLongitude">
+      <StartLongitude>
+      <StartMonthCollected name="StartMonthCollected"
+        url="#StartMonthCollected">
+      <StartMonthCollected>
+      <StartTimeofDay units="hours" name="StartTimeofDay"
+        url="#StartTimeofDay">
+      <StartTimeofDay>
+      <StartYearCollected name="StartYearCollected"
+        url="#StartYearCollected">
+      <StartYearCollected>
+      <Start_EndCoordinatePrecision units="m" name="Start_EndCoordinatePrecision"
+        url="#Start_EndCoordinatePrecision">
+      <Start_EndCoordinatePrecision>
+      <StateProvince name="StateProvince"
+        url="#StateProvince">
+      <StateProvince>
+      <Subgenus name="Subgenus"
+        url="#Subgenus">
+      <Subgenus>
+      <Subspecies name="Subspecies"
+        url="#Subspecies">
+      <Subspecies>
+      <Temperature units="degree_C" name="Temperature"
+        url="#Temperature">
+      <Temperature>
+      <TimeOfDay units="hours" name="TimeOfDay"
+        url="#TimeOfDay">
+      <TimeOfDay>
+      <TimeZone name="TimeZone"
+        url="#TimeZone">
+      <TimeZone>
+      <TypeStatus name="TypeStatus"
+        url="#TypeStatus">
+      <TypeStatus>
+      <YearCollected name="YearCollected"
+        url="#YearCollected">
+      <YearCollected>
+      <YearIdentified name="YearIdentified"
+        url="#YearIdentified">
+      <YearIdentified>
+    </variables>
+  </rutgers_obis_OBIS-SEAMAP>
+  <pmel_dapper_tao
+    name = "TAO Array Data from the PMEL DAPPER Server"
+    url = "http://coastwatch.pfel.noaa.gov/cwexperimental/erddap/tabledap/pmel_dapper/tao"
+    doc = "http://www.pmel.noaa.gov/tao/">
+    <properties>
+      <ui>
+        <default>file:ui.xml#dapper_demo</default>
+      </ui>
+      <tabledap_access>
+        <server>ERD TableDAP</server>
+        <id>pmel_dapper/tao</id>
+        <title>TAO Array Data from the PMEL DAPPER Server</title>
+        <longitude>longitude</longitude>
+        <lon_domain>0:360</lon_domain>
+        <latitude>latitude</latitude>
+        <altitude>altitude</altitude>
+        <altitude_units>meters</altitude_units>
+        <positive>up</positive>
+        <time>time</time>
+        <time_units>sec since 1970-01-01T00:00:00Z</time_units>
+        <time_type>double</time_type>
+      </tabledap_access>
+      <product_server>
+        <ui_timeout>120000</ui_timeout>
+        <ps_timeout>120000</ps_timeout>
+        <use_cache>false</use_cache>
+      </product_server>
+    </properties>
+    <variables>
+      <station_id name="Station ID"
+        url="#station_id">
+      <station_id>
+      <sea_surface_temperature units="degree_C" name="Sea Surface Temperature"
+        url="#sea_surface_temperature">
+      <sea_surface_temperature>
+      <sea_surface_temperature_quality name="Sea Surface Temperature Quality"
+        url="#sea_surface_temperature_quality">
+      <sea_surface_temperature_quality>
+      <air_temperature units="degree_C" name="Air Temperature"
+        url="#air_temperature">
+      <air_temperature>
+      <air_temperature_quality name="Air Temperature Quality"
+        url="#air_temperature_quality">
+      <air_temperature_quality>
+      <relative_humidity units="percent" name="Relative Humidity"
+        url="#relative_humidity">
+      <relative_humidity>
+      <relative_humidity_quality name="Relative Humidity Quality"
+        url="#relative_humidity_quality">
+      <relative_humidity_quality>
+      <relative_humidity_source name="Relative Humidity Source"
+        url="#relative_humidity_source">
+      <relative_humidity_source>
+      <wind_to_direction units="degrees_true" name="Wind To Direction"
+        url="#wind_to_direction">
+      <wind_to_direction>
+      <wind_direction_quality name="wind direction quality"
+        url="#wind_direction_quality">
+      <wind_direction_quality>
+      <wind_direction_source name="wind direction source"
+        url="#wind_direction_source">
+      <wind_direction_source>
+      <wind_speed units="m s-1" name="Wind Speed"
+        url="#wind_speed">
+      <wind_speed>
+      <wind_speed_quality name="Wind Speed Quality"
+        url="#wind_speed_quality">
+      <wind_speed_quality>
+      <wind_speed_source name="Wind Speed Source"
+        url="#wind_speed_source">
+      <wind_speed_source>
+      <eastward_wind units="m s-1" name="Eastward Wind"
+        url="#eastward_wind">
+      <eastward_wind>
+      <northward_wind units="m s-1" name="Northward Wind"
+        url="#northward_wind">
+      <northward_wind>
+    </variables>
+  </pmel_dapper_tao>
+</datasets>
