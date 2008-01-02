@@ -56,7 +56,7 @@ ENDIF
 IF ($ferret_expression"0|*>1") THEN GO LAS_expression
 
 ! Apply any transforms that may have been specified.
-GO LAS_transforms 
+GO LAS_transforms ($variables_initialized"0|*>1")
 
 ! Keep track of variables initialized, to tell us if next time we
 ! want ferret_expression or ferret_expression2
@@ -81,20 +81,20 @@ ENDIF
 ! IF contour and fill levels havent been set in the configuration or
 ! the user interface, set levels based on the variable after it is strided and its region set.
 
-IF `( ($ferret_contour_levels"0|*>1") EQ 0 ) AND\ 
-      ( ($ferret_fill_levels"0|*>1")    EQ 0 ) ` THEN
-     DEFINE SYMBOL ferret_auto_levels ($ferret_num_contour_levels"50")
-ENDIF
+!IF `( ($ferret_contour_levels"0|*>1") EQ 0 ) AND\ 
+!      ( ($ferret_fill_levels"0|*>1")    EQ 0 ) ` THEN
+!     DEFINE SYMBOL ferret_auto_levels ($ferret_num_contour_levels"50")
+!ENDIF
 
 ! Mark whether there are contour levels set on first entry. 
 ! Compute automatic open-ended levels.
 
 IF `($data_num) EQ 1` THEN
-   IF ($ferret_contour_levels"0|*>1) THEN DEFINE SYMBOL input_contour_levels = 1
-   IF ($ferret_fill_levels"0|*>1) THEN DEFINE SYMBOL input_fill_levels = 1
+   IF ($ferret_contour_levels"0|*>1") THEN DEFINE SYMBOL input_contour_levels = 1
+   IF ($ferret_fill_levels"0|*>1") THEN DEFINE SYMBOL input_fill_levels = 1
+
    IF `STRLEN("($ferret_view)") EQ 2 AND STRINDEX("($operation_ID)", "Plot") GT 0` THEN\
    GO LAS_auto_levels
 ENDIF
 
 ! End of $RCSfile ------------LAS_initialize_variable.jnl--------------------------
-

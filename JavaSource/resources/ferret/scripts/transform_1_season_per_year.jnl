@@ -8,6 +8,9 @@
 
 ! Inputs:
 ! The usual LAS Ferret symbols, defining dataset, data variable, region
+! variable number (0 or 1 if this is a comparison) 
+
+
 ! ferret_season_length  Symbol defining the length in months of the average, may be 1, 3, or 5
 ! ferret_season_center  Symbol defining the month on which the average is to be centered.
 ! 
@@ -31,6 +34,8 @@ DEFINE SYMBOL ferret_season_length = `SUBSTRING("($constraint_0_lhs)", ipos, 1)`
 ! The rhs constraint contains a month number 1 through 12.
 DEFINE SYMBOL ferret_season_center = ($constraint_0_rhs)
 
+DEFINE SYMBOL num ($1"0")
+
 IF `($ferret_season_length"0|1>1|3>1|5>1|*>0") EQ 0` THEN
   DEFINE SYMBOL error_status = ERROR
   DEFINE SYMBOL error_type = TRANSFORM
@@ -48,8 +53,8 @@ ENDIF
 LET season_length = ($ferret_season_length)
 
 ! The dataset, region and plot variable have already been initialized
-LET/D=($data_num) S1_the_plot_var = ($ferret_plot_var)
-LET/D=($data_num) S1_the_plot_var_noregion = ($ferret_plot_var_noregion)
+LET/D=($data_num) S($num)_the_plot_var = ($ferret_plot_var)
+LET/D=($data_num) S($num)_the_plot_var_noregion = ($ferret_plot_var_noregion)
 
 
 ! If we have averaged over T then cant do this. Return a message.
@@ -61,11 +66,11 @@ IF ($DATA_($op_num)_ANALYSIS_AXIS_0_OP"0|*>1") THEN
   EXIT/SCRIPT
 ENDIF
 
-LET tt = t[gt=S1_the_plot_var]
+LET tt = t[gt=S($num)_the_plot_var]
 LET tsiz = `tt,RETURN=lsize`
 
-LET n1 = `S1_the_plot_var,RETURN=lstart`
-LET nn = `S1_the_plot_var,RETURN=lend`
+LET n1 = `S($num)_the_plot_var,RETURN=lstart`
+LET nn = `S($num)_the_plot_var,RETURN=lend`
 
 
 ! Correction if the dataset time axis does not start in January.
@@ -89,7 +94,7 @@ DEFINE SYMBOL mon1 = `months[I=($ferret_season_center)]`
 ! If the season length is 1, we just need to set up some striding.
 
 IF `season_length EQ 1` THEN
-   LET/D=($data_num) S1_the_plot_var = ($ferret_xyz_var)
+   LET/D=($data_num) S($num)_the_plot_var = ($ferret_xyz_var)
 ! 1 time step in result region, choose the month specified for the season_center which
 ! is closest to the month chosen on the time widget.
 
@@ -103,33 +108,33 @@ IF `season_length EQ 1` THEN
             IF `L1 LT 1` THEN LET L1 = 1
          ENDIF
       ENDIF
-      DEFINE SYMBOL ferret_plot_var S1_the_plot_var[L=`L1`]
+      DEFINE SYMBOL ferret_plot_var S($num)_the_plot_var[L=`L1`]
       DEFINE SYMBOL ferret_plot_var_noregion S1_the_plot_noregion_var[L=`L1`]
       DEFINE SYMBOL ferret_plot_title ($ferret_plot_title) every ($mon1)
    ELSE
       LET L1 = n1 - first_month_selected
       LET L1 = `n1 + loffset - (first_month_selected-1)`
-      DEFINE SYMBOL ferret_plot_var S1_the_plot_var[L=`L1`:`nn`:12]
-      DEFINE SYMBOL ferret_plot_var_noregion S1_the_plot_var_noregion[L=`L1`:`nn`:12]
+      DEFINE SYMBOL ferret_plot_var S($num)_the_plot_var[L=`L1`:`nn`:12]
+      DEFINE SYMBOL ferret_plot_var_noregion S($num)_the_plot_var_noregion[L=`L1`:`nn`:12]
       DEFINE SYMBOL ferret_plot_title ($ferret_plot_title) every ($mon1)
    ENDIF
 
 ELSE
 
-! When there is just one time in the result, redefine S1_the_plot_var and the 
+! When there is just one time in the result, redefine S($num)_the_plot_var and the 
 ! index range for the time axis. The computation will use an expanded time range
 ! and then sample from that the desired output time.
 
    IF `nn EQ n1` THEN
       DEFINE SYMBOL ferret_expand_time = 1
       IF `STRINDEX("($ferret_view)", "t") EQ 0` THEN 
-         LET/D=($data_num) S1_the_plot_var = ($ferret_xyz_var)
+         LET/D=($data_num) S($num)_the_plot_var = ($ferret_xyz_var)
          IF `($REGION_X_LO) LT 0` THEN
-            LET/D=($data_num) S1_the_plot_var =  ($data_var)[d=($data_num),($region_x_p360)]
+            LET/D=($data_num) S($num)_the_plot_var =  ($data_var)[d=($data_num),($region_x_p360)]
             IF ($region_y"0|*>1") THEN \
-              LET/D=($data_num) S1_the_plot_var =  ($data_var)[d=($data_num),($region_x_p360),($region_y)]
+              LET/D=($data_num) S($num)_the_plot_var =  ($data_var)[d=($data_num),($region_x_p360),($region_y)]
             IF `($region_y"0|*>1") AND ($region_z"0|*>1")` THEN \
-               LET/D=($data_num) S1_the_plot_var = ($data_var)[d=($data_num),($region_x_p360),($region_y),($region_z)]
+               LET/D=($data_num) S($num)_the_plot_var = ($data_var)[d=($data_num),($region_x_p360),($region_y),($region_z)]
          ENDIF
    
          LET L1 = n1 + loffset - (first_month_selected-1)
@@ -149,7 +154,7 @@ ELSE
 
    IF `nn-n1 LT 24` THEN
       DEFINE SYMBOL ferret_expand_time = 1
-      LET/D=($data_num) S1_the_plot_var = ($ferret_xyz_var)
+      LET/D=($data_num) S($num)_the_plot_var = ($ferret_xyz_var)
 
 !      IF `( STRLEN("($ferret_view)") EQ 2 ) AND ( STRINDEX("($ferret_view)", "t") NE 0 )` THEN 
       LET nn = MIN(`tsiz`, `nn + 24`)
@@ -176,9 +181,9 @@ ELSE
    LET S1_L_indx_T = COMPRESSL(time_mask)
 
 ! Sample the variable at only the months that will be used in the avgs.
-   LET S1_seas_months = SAMPLEL(S1_the_plot_var,S1_L_indx_T[l=1:`nmsk`])
-   LET S1_seas_months_noregion = SAMPLEL(S1_the_plot_var_noregion,S1_L_indx_T[l=1:`nmsk`])
-   LET tsample = SAMPLEL(t[gt=S1_the_plot_var],S1_L_indx_T[l=1:`nmsk`])
+   LET S1_seas_months = SAMPLEL(S($num)_the_plot_var,S1_L_indx_T[l=1:`nmsk`])
+   LET S1_seas_months_noregion = SAMPLEL(S($num)_the_plot_var_noregion,S1_L_indx_T[l=1:`nmsk`])
+   LET tsample = SAMPLEL(t[gt=S($num)_the_plot_var],S1_L_indx_T[l=1:`nmsk`])
 
 
 
@@ -227,3 +232,4 @@ ELSE
 
 ENDIF  ! Season length longer than 1
 
+! End of $RCSfile ------------transform_1_season_per_year.jnl-------------------------------
