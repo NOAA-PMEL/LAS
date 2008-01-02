@@ -53,8 +53,8 @@ ENDIF
 LET season_length = ($ferret_season_length)
 
 ! The dataset, region and plot variable have already been initialized
-LET/D=($data_num) S($num)_the_plot_var = ($ferret_plot_var)
-LET/D=($data_num) S($num)_the_plot_var_noregion = ($ferret_plot_var_noregion)
+LET S($num)_the_plot_var = ($ferret_plot_var)
+LET S($num)_the_plot_var_noregion = ($ferret_plot_var_noregion)
 
 
 ! If we have averaged over T then cant do this. Return a message.
@@ -94,7 +94,7 @@ DEFINE SYMBOL mon1 = `months[I=($ferret_season_center)]`
 ! If the season length is 1, we just need to set up some striding.
 
 IF `season_length EQ 1` THEN
-   LET/D=($data_num) S($num)_the_plot_var = ($ferret_xyz_var)
+   LET S($num)_the_plot_var = ($ferret_xyz_var)
 ! 1 time step in result region, choose the month specified for the season_center which
 ! is closest to the month chosen on the time widget.
 
@@ -128,13 +128,13 @@ ELSE
    IF `nn EQ n1` THEN
       DEFINE SYMBOL ferret_expand_time = 1
       IF `STRINDEX("($ferret_view)", "t") EQ 0` THEN 
-         LET/D=($data_num) S($num)_the_plot_var = ($ferret_xyz_var)
+         LET S($num)_the_plot_var = ($ferret_xyz_var)
          IF `($REGION_X_LO) LT 0` THEN
-            LET/D=($data_num) S($num)_the_plot_var =  ($data_var)[d=($data_num),($region_x_p360)]
+            LET S($num)_the_plot_var =  ($data_var)[d=($data_num),($region_x_p360)]
             IF ($region_y"0|*>1") THEN \
-              LET/D=($data_num) S($num)_the_plot_var =  ($data_var)[d=($data_num),($region_x_p360),($region_y)]
+              LET S($num)_the_plot_var =  ($data_var)[d=($data_num),($region_x_p360),($region_y)]
             IF `($region_y"0|*>1") AND ($region_z"0|*>1")` THEN \
-               LET/D=($data_num) S($num)_the_plot_var = ($data_var)[d=($data_num),($region_x_p360),($region_y),($region_z)]
+               LET S($num)_the_plot_var = ($data_var)[d=($data_num),($region_x_p360),($region_y),($region_z)]
          ENDIF
    
          LET L1 = n1 + loffset - (first_month_selected-1)
@@ -154,7 +154,7 @@ ELSE
 
    IF `nn-n1 LT 24` THEN
       DEFINE SYMBOL ferret_expand_time = 1
-      LET/D=($data_num) S($num)_the_plot_var = ($ferret_xyz_var)
+      LET S($num)_the_plot_var = ($ferret_xyz_var)
 
 !      IF `( STRLEN("($ferret_view)") EQ 2 ) AND ( STRINDEX("($ferret_view)", "t") NE 0 )` THEN 
       LET nn = MIN(`tsiz`, `nn + 24`)
@@ -217,8 +217,8 @@ ELSE
    LET S1_sum = S1_weighted[GT=timeax_years@SUM]
    LET S1_sum_noregion = S1_weighted_noregion[GT=timeax_years@SUM]
    LET weight_sum = weights2D[GT=timeax_years@SUM]
-   LET/D=($data_num) S1_seas_per_year = S1_sum/weight_sum 
-   LET/D=($data_num) S1_seas_per_year_noregion = S1_sum_noregion/weight_sum 
+   LET S1_seas_per_year = S1_sum/weight_sum 
+   LET S1_seas_per_year_noregion = S1_sum_noregion/weight_sum 
 
    DEFINE SYMBOL ferret_plot_var S1_seas_per_year
    DEFINE SYMBOL ferret_plot_var_noregion S1_seas_per_year_noregion
@@ -233,3 +233,4 @@ ELSE
 ENDIF  ! Season length longer than 1
 
 ! End of $RCSfile ------------transform_1_season_per_year.jnl-------------------------------
+
