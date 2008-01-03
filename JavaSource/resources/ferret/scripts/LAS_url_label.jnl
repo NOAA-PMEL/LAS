@@ -48,6 +48,6 @@ DEFINE SYMBOL upper_right_($n_right_labels) = @AC($upper_right_($n_right_labels)
 
 ! For comparison plots get rid of the long ugly URL labels at the upper right.
 ! This could be an option...
-IF ($operation_service_action"0|Compare_Plot>1") THEN DEFINE SYMBOL n_right_labels
+IF ($operation_service_action"0|Compare_Plot>1") THEN DEFINE SYMBOL n_right_labels = 0
 
 ! End of $RCSfile ------------LAS_url_label.jnl--------------------------
