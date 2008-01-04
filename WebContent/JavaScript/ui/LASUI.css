@@ -44,7 +44,7 @@ font-weight: bold;
 	z-index:4;
 	background-color:black;
 	filter : alpha(opacity=10);
-	opacity : .50;
+	opacity : 0.50;
 }
 .LASLink {
 	color : #436976;
@@ -139,16 +139,17 @@ font-weight: bold;
 	right:0pt;
 	background-color: grey;
 }
-.LASOptionsDIVNode {
+.LASPopupDIVNode {
 	position:absolute;
-	left:100pt;
-	top:100pt;
+	left:100px;
+	top:100px;
 	background-color : white;
 	border : 2pt solid black;
 	border-color: #99cccc;
 	padding : 8pt;
 	margin : 8pt;
-	z-index : 5;
+	z-index : 6;
+	width:600px;
 }
 
 .LASTitleTextNode {
@@ -161,7 +162,7 @@ font-weight: bold;
 	padding: 3px 4px 3px 4px;
 	font-size: .9em;
 	font-style: bold;
-	background-color: #grey;
+	background-color: #DCDCDC;
 }
 
 .leftNav {

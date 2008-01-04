@@ -85,30 +85,30 @@ function MapWidget(args) {
 		}
 	}
  
-   this.DOMNode.style.overflow = "hidden";
-   this.rubberBand = document.createElement('DIV');
-   this.rubberBand.style.border = "1px solid black";
-   this.rubberBand.style.position = "absolute";
-   this.rubberBand.style.visibility = "hidden";
-   this.rubberBand.style.overflow = "visible";
-   this.rubberBand.style.zIndex =1;
-   this.rubberBand.style.backgroundColor = "yellow";
-   this.rubberBand.style.opacity = 0.50;
+   	this.DOMNode.style.overflow = "hidden";
+   	this.rubberBand = document.createElement('DIV');
+   	this.rubberBand.style.border = "1px solid black";
+   	this.rubberBand.style.position = "absolute";
+   	this.rubberBand.style.visibility = "hidden";
+   	this.rubberBand.style.overflow = "visible";
+   	this.rubberBand.style.zIndex =1;
+   	this.rubberBand.style.backgroundColor = "yellow";
+   	this.rubberBand.style.opacity = 0.50;
 	this.rubberBand.style.filter = "alpha(opacity=50)";
-   this.rubberBand_c = document.createElement('DIV');
-   this.rubberBand_c.style.border = "1px solid black";   
-   this.rubberBand_c.style.position = "absolute";
+   	this.rubberBand_c = document.createElement('DIV');
+   	this.rubberBand_c.style.border = "1px solid black";   
+	this.rubberBand_c.style.position = "absolute";
 	this.rubberBand_c.style.visibility = "hidden";
 	this.rubberBand_c.style.zIndex =1;
 	this.rubberBand_c.style.overflow = "hidden";
 	this.rubberBand_c.style.backgroundColor = "black";
 	this.rubberBand.appendChild(this.rubberBand_c);
-	document.body.appendChild(this.rubberBand);
+	this.DOMNode.appendChild(this.rubberBand);
  
   	window.onbeforeresize = this.onbeforeresize.bindAsEventListener(this);
-   window.onresize = this.onafterresize.bindAsEventListener(this);
+   	window.onresize = this.onafterresize.bindAsEventListener(this);
   
-   this.initImage();
+	this.initImage();
 	this.setMaxDrawingArea();
 	this.enable();
 	
@@ -126,7 +126,7 @@ function MapWidget(args) {
 MapWidget.prototype.enable = function() {
 	this.enabled=true;
 	this.rubberBand_c.onmouseup=this.stopMoving.bindAsEventListener(this);
-   this.rubberBand_c.onmousedown=this.startMoving.bindAsEventListener(this);
+	this.rubberBand_c.onmousedown=this.startMoving.bindAsEventListener(this);
 	this.rubberBand.onmousedown=this.start.bindAsEventListener(this);
 	this.DOMNode.onmousedown = this.start.bindAsEventListener(this);
 	document.onmouseup = this.stop.bindAsEventListener(this);
@@ -134,7 +134,7 @@ MapWidget.prototype.enable = function() {
 MapWidget.prototype.disable = function() {
 	this.enabled=false;
 	this.rubberBand_c.onmouseup=null;
-   this.rubberBand_c.onmousedown=null;
+   	this.rubberBand_c.onmousedown=null;
 	this.DOMNode.onmousedown = null;
 	document.onmouseup = this.stop.bindAsEventListener(this);
 }
@@ -171,7 +171,7 @@ MapWidget.prototype.initPixelExtents = function(evt) {
 	this.setDOMNodePixYMin(this.DOMNode.offsets[1]);
 	this.setDOMNodePixYMax(this.getDOMNodePixYMin()+this.DOMNode.offsetHeight);
 
-   this.setPlotPixXMin(this.getDOMNodePixXMin()+this.plot_area.offX);
+	this.setPlotPixXMin(this.getDOMNodePixXMin()+this.plot_area.offX);
 	this.setPlotPixXMax(this.getPlotPixXMin()+this.plot_area.width);
 	this.setPlotPixYMin(this.getDOMNodePixXMin()+this.plot_area.offY);
 	this.setPlotPixYMax(this.getPlotPixXMin()+this.plot_area.height);
@@ -1579,7 +1579,7 @@ MapWidget.prototype.onbeforeresize = function(evt) {
 }
 
 MapWidget.prototype.onafterresize = function(evt) {
-	this.updatePixelExtents();
+	//this.updatePixelExtents();
 }
 
 //move the map left
