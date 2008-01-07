@@ -39,6 +39,8 @@ IF `STRINDEX("($op)", "PLOT") EQ 0 AND \
 
 IF `($ferret_diff_var"1|*>0") AND STRINDEX("($op)", "COMPARE_PLOT") NE 0` THEN EXIT/SCRIPT
 
+DEFINE SYMBOL ferret_center_levels ($ferret_center_levels"0|1|TRUE>1|*>0")
+
 ! If levels were requested but not centered ones, just return.
 IF ($input_fill_levels"0") THEN
    DEFINE SYMBOL up_fill_levels = `UPCASE("($ferret_fill_levels)")`
@@ -58,8 +60,6 @@ IF ($input_fill_levels"0") THEN
 ! If contour levels requested with levels of nC, e.g. 20C, then get the value to
 ! set num_fine_levels in the %RANGE command below
 
-! If levels were requested but not centered ones, just return.
-
 IF ($ferret_contour_levels"0|*>1") THEN 
    DEFINE SYMBOL up_contour_levels = `UPCASE("($ferret_contour_levels)")`
    LET nc = `STRINDEX("($up_contour_levels)", "C")`
@@ -78,7 +78,6 @@ IF ($ferret_fill_levels"0|*>1") THEN
       IF `slen GT 1` THEN DEFINE SYMBOL num_fine_levels = `SUBSTRING ("($up_fill_levels)", 1, slen-1)`
    ENDIF
 ENDIF
-
 !! PUNT
 
 IF `($ferret_fill_levels"0|*>1") OR ($ferret_contour_levels"0|*>1")` THEN EXIT/SCRIPT
@@ -110,15 +109,20 @@ ENDIF
 ! If the ferret_diff_var has been defined, use it.
 ! When no levels are defined, use centered ones.
 IF ($ferret_diff_var"0|*>1") THEN 
+
    IF `($input_contour_levels"0|0|1") EQ 0` THEN 
       CANCEL SYMBOL ferret_contour_levels
       DEFINE SYMBOL ferret_contour_levels = 20c
+      DEFINE SYMBOL ferret_center_levels = 1
    ENDIF
+
    IF `($input_fill_levels"0|0|1") EQ 0` THEN 
       CANCEL SYMBOL ferret_fill_levels
       DEFINE SYMBOL ferret_fill_levels = 20c
+      DEFINE SYMBOL ferret_center_levels = 1
    ENDIF
    LET pvar = ($ferret_diff_var)
+
 ENDIF
 
 LET var_size = ABS( `pvar,RETURN=size`)
@@ -205,7 +209,7 @@ IF `($stat_ngood"0") EQ 0` THEN EXIT_SCRIPT
 
 ! Compute rounded-off levels with the PPL %RANGE command.
 
-! IF ($ferret_center_levels"0|1|TRUE>1|*>0") THEN
+! IF ($ferret_center_levels) THEN
 !    PPL %RANGE `-2*($stat_std)`, `+2*($stat_std)`, ($ferret_num_contour_levels"50")
 ! ELSE
 !    PPL %RANGE `($stat_mean)-2*($stat_std)`, `($stat_mean)+2*($stat_std)`, 50
@@ -238,7 +242,7 @@ IF ($stat_mean"bad>1|bad>1|*>0") THEN
   MESSAGE/ERROR **ERROR ($error_string)
   EXIT/PROGRAM
 ENDIF
-IF ($ferret_center_levels"0|1|TRUE>1|*>0") THEN
+IF ($ferret_center_levels) THEN
    LET centered_max = MAX(ABS(`($stat_mean)-nstd`), ABS(`($stat_mean)+nstd`) )
    PPL %RANGE `-1*centered_max`, `centered_max`, ($num_fine_levels)
 ELSE
@@ -247,10 +251,10 @@ ENDIF
 
 DEFINE SYMBOL fine_lo = `MAX(($ppl$range_low), ($stat_min) )`
 DEFINE SYMBOL fine_hi = `MIN(($ppl$range_high), ($stat_max) )`
-IF ($ferret_center_levels"0|1|TRUE>1|*>0") THEN
+IF ($ferret_center_levels) THEN
   LET fine_max = MAX(($fine_lo), ($fine_hi))
   DEFINE SYMBOL fine_lo = `-1* fine_max` 
-  DEFINE SYMBOL fine_hi = fine_max` 
+  DEFINE SYMBOL fine_hi = `fine_max` 
 ENDIF
 
 ! Use PPL RANGE to round these values off to nice numbers
@@ -294,10 +298,45 @@ ELSE
       DEFINE SYMBOL ferret_auto_levels = ($ferret_auto_levels)(($fine_hi),($highest_lev),($coarse_delta))(inf)
       DEFINE SYMBOL ferret_auto_lines = ($ferret_auto_lines)(($fine_hi),($highest_lev),`2*($coarse_delta)`)(inf)
    ELSE
-      DEFINE SYMBOL ferret_auto_levels = ($ferret_auto_levels)(inf)
-      DEFINE SYMBOL ferret_auto_lines = ($ferret_auto_lines)(inf)
+      DEFINE SYMBOL ferret_auto_levels = (($fine_lo),($fine_hi),($fine_inc))(inf)
+      DEFINE SYMBOL ferret_auto_lines = (($fine_lo),($fine_hi),($fine_inc))(inf)
    ENDIF
 ENDIF
+
+! Create centered fine levels surrounded by centered coarse levels.
+
+IF ($ferret_center_levels) THEN
+
+   IF `($stat_min) LT ($coarse_lo)  OR  ($stat_max) GT ($coarse_hi)` THEN
+      DEFINE SYMBOL ferret_auto_levels = \\
+(-inf)(($coarse_lo),($fine_lo),($coarse_delta))\\
+(($fine_lo),($fine_hi),($fine_inc))\\
+(($fine_hi),($coarse_hi),($coarse_delta))(inf)
+      DEFINE SYMBOL ferret_auto_lines =\\
+(-inf)(($coarse_lo),($fine_lo),`2*($coarse_delta)`)\\
+(($fine_lo),($fine_hi),`2*($fine_inc)`)\\
+(($fine_hi),($coarse_hi),2*($coarse_delta))(inf)
+
+   ELSE
+      IF `($fine_lo) - ($lowest_lev) GT ($coarse_delta)  OR ($highest_lev) - ($fine_hi) GT ($coarse_delta)` THEN
+
+         DEFINE SYMBOL ferret_auto_levels = \\
+(-inf)(($lowest_lev),($fine_lo),($coarse_delta))\\
+(($fine_lo),($fine_hi),($fine_inc))\\
+(($fine_hi),($highest_lev),($coarse_delta))(inf)
+         DEFINE SYMBOL ferret_auto_lines = \\
+(-inf)(($lowest_lev),($fine_lo),`2*($coarse_delta)`)\\
+(($fine_lo),($fine_hi),`2*($fine_inc)`)\\
+(($fine_hi),($highest_lev),`2*($coarse_delta)`)(inf)
+
+      ELSE
+         DEFINE SYMBOL ferret_auto_levels = (-inf)(($fine_lo),($fine_hi),($fine_inc))(inf)
+         DEFINE SYMBOL ferret_auto_lines = (-inf)(($fine_lo),($fine_hi),($fine_inc))(inf)
+      ENDIF
+
+   ENDIF
+
+ENDIF   
 
 ! Use these levels to reset ferret_contour_levels and ferret_fill_levels 
 
@@ -306,5 +345,5 @@ IF `($input_contour_levels"0|0|1") EQ 0` THEN \
 IF `($input_contour_levels"0|0|1") EQ 0` THEN \
    DEFINE SYMBOL ferret_contour_levels = ($ferret_auto_lines)
 
-
+! End of file ------------LAS_auto_levels.jnl--------------------------
 
