@@ -34,7 +34,7 @@ import org.jdom.Element;
 
 /**
  * Creates an intermediate netCDF file from a Tabledap dataset
- * (http://coastwatch.pfel.noaa.gov/coastwatch/erddap/tabledap/index.html).
+ * (http://coastwatch.pfel.noaa.gov/erddap/tabledap/index.html).
  *     
  * <p>The associated template will create two constraint expressions if needed to 
  * collect data from the two "edges" of the domain.

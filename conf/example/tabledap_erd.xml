@@ -1,7 +1,7 @@
 <datasets>
   <csc_mwfs_wt
     name = "Buoy Data (Water Temperature) from the NOAA CSC microWFS"
-    url = "http://coastwatch.pfel.noaa.gov/cwexperimental/erddap/tabledap/csc_mwfs/wt"
+    url = "http://coastwatch.pfel.noaa.gov/erddap2/tabledap/csc_mwfs/wt"
     doc = "http://www.csc.noaa.gov/DTL/dtl_proj4_gmlsfp_wfs.html">
     <properties>
       <ui>
@@ -28,17 +28,17 @@
       </product_server>
     </properties>
     <variables>
-      <station_id name="Station ID"
-        url="#station_id">
-      <station_id>
-      <sea_water_temperature units="degree_C" name="Sea Water Temperature"
-        url="#sea_water_temperature">
-      <sea_water_temperature>
+      <station_id name="Station ID" url="#station_id">
+        <link match="/lasdata/grids/csc_mwfs_wt_grid"/>
+      </station_id>
+      <sea_water_temperature units="degree_C" name="Sea Water Temperature" url="#sea_water_temperature">
+        <link match="/lasdata/grids/csc_mwfs_wt_grid"/>
+      </sea_water_temperature>
     </variables>
   </csc_mwfs_wt>
   <gomoos_sos_buoy
     name = "Buoy Data from the GoMOOS SOS Server"
-    url = "http://coastwatch.pfel.noaa.gov/cwexperimental/erddap/tabledap/gomoos_sos/buoy"
+    url = "http://coastwatch.pfel.noaa.gov/erddap2/tabledap/gomoos_sos/buoy"
     doc = "http://www.oostethys.org/ogc-oceans-interoperability-experiment">
     <properties>
       <ui>
@@ -65,20 +65,20 @@
       </product_server>
     </properties>
     <variables>
-      <station_id name="Station ID"
-        url="#station_id">
-      <station_id>
-      <sea_water_temperature units="degree_C" name="Sea Water Temperature"
-        url="#sea_water_temperature">
-      <sea_water_temperature>
-      <sea_water_salinity units="psu" name="Sea Water Salinity"
-        url="#sea_water_salinity">
-      <sea_water_salinity>
+      <station_id name="Station ID" url="#station_id">
+        <link match="/lasdata/grids/gomoos_sos_buoy_grid"/>
+      </station_id>
+      <sea_water_temperature units="degree_C" name="Sea Water Temperature" url="#sea_water_temperature">
+        <link match="/lasdata/grids/gomoos_sos_buoy_grid"/>
+      </sea_water_temperature>
+      <sea_water_salinity units="psu" name="Sea Water Salinity" url="#sea_water_salinity">
+        <link match="/lasdata/grids/gomoos_sos_buoy_grid"/>
+      </sea_water_salinity>
     </variables>
   </gomoos_sos_buoy>
   <nos_coops_wind
     name = "Buoy Wind Data from the NOAA NOS SOAP+XML Server"
-    url = "http://coastwatch.pfel.noaa.gov/cwexperimental/erddap/tabledap/nos_coops/wind"
+    url = "http://coastwatch.pfel.noaa.gov/erddap2/tabledap/nos_coops/wind"
     doc = "http://opendap.co-ops.nos.noaa.gov/axis/">
     <properties>
       <ui>
@@ -102,32 +102,32 @@
       </product_server>
     </properties>
     <variables>
-      <station_name name="Station Name"
-        url="#station_name">
-      <station_name>
-      <station_id name="Station ID"
-        url="#station_id">
-      <station_id>
-      <wind_speed units="m s-1" name="Wind Speed"
-        url="#wind_speed">
-      <wind_speed>
-      <wind_from_direction units="degrees_true" name="Wind From Direction"
-        url="#wind_from_direction">
-      <wind_from_direction>
-      <wind_speed_of_gust units="m s-1" name="Wind Speed of Gust"
-        url="#wind_speed_of_gust">
-      <wind_speed_of_gust>
-      <MaxExceeded units="0=False, 1=True" name="Max Value Was Exceeded"
-        url="#MaxExceeded">
-      <MaxExceeded>
-      <RateExceeded units="0=False, 1=True" name="Rate of Change Tolerance Limit Was Exceeded"
-        url="#RateExceeded">
-      <RateExceeded>
+      <station_name name="Station Name" url="#station_name">
+        <link match="/lasdata/grids/nos_coops_wind_grid"/>
+      </station_name>
+      <station_id name="Station ID" url="#station_id">
+        <link match="/lasdata/grids/nos_coops_wind_grid"/>
+      </station_id>
+      <wind_speed units="m s-1" name="Wind Speed" url="#wind_speed">
+        <link match="/lasdata/grids/nos_coops_wind_grid"/>
+      </wind_speed>
+      <wind_from_direction units="degrees_true" name="Wind From Direction" url="#wind_from_direction">
+        <link match="/lasdata/grids/nos_coops_wind_grid"/>
+      </wind_from_direction>
+      <wind_speed_of_gust units="m s-1" name="Wind Speed of Gust" url="#wind_speed_of_gust">
+        <link match="/lasdata/grids/nos_coops_wind_grid"/>
+      </wind_speed_of_gust>
+      <MaxExceeded units="0=False, 1=True" name="Max Value Was Exceeded" url="#MaxExceeded">
+        <link match="/lasdata/grids/nos_coops_wind_grid"/>
+      </MaxExceeded>
+      <RateExceeded units="0=False, 1=True" name="Rate of Change Tolerance Limit Was Exceeded" url="#RateExceeded">
+        <link match="/lasdata/grids/nos_coops_wind_grid"/>
+      </RateExceeded>
     </variables>
   </nos_coops_wind>
   <nwioos_drds_coral
     name = "Coral Data Collected off West Coast of US (1980-2005)"
-    url = "http://coastwatch.pfel.noaa.gov/cwexperimental/erddap/tabledap/nwioos_drds/coral"
+    url = "http://coastwatch.pfel.noaa.gov/erddap2/tabledap/nwioos_drds/coral"
     doc = "http://nwioos.coas.oregonstate.edu:8080/dods/drds/Coral%201980-2005.das.info">
     <properties>
       <ui>
@@ -151,41 +151,41 @@
       </product_server>
     </properties>
     <variables>
-      <Year name="Year"
-        url="#Year">
-      <Year>
-      <institution_id name="Institution ID"
-        url="#institution_id">
-      <institution_id>
-      <institution name="Institution"
-        url="#institution">
-      <institution>
-      <species_code name="Species Code"
-        url="#species_code">
-      <species_code>
-      <taxa_scientific name="Taxa Scientific"
-        url="#taxa_scientific">
-      <taxa_scientific>
-      <taxonomic_order name="Taxonomic Order"
-        url="#taxonomic_order">
-      <taxonomic_order>
-      <order_abbreviation name="Order Abbreviation"
-        url="#order_abbreviation">
-      <order_abbreviation>
-      <taxonomic_family name="Taxonomic Family"
-        url="#taxonomic_family">
-      <taxonomic_family>
-      <family_abbreviation name="Family Abbreviation"
-        url="#family_abbreviation">
-      <family_abbreviation>
-      <taxonomic_genus name="Taxonomic Genus"
-        url="#taxonomic_genus">
-      <taxonomic_genus>
+      <Year name="Year" url="#Year">
+        <link match="/lasdata/grids/nwioos_drds_coral_grid"/>
+      </Year>
+      <institution_id name="Institution ID" url="#institution_id">
+        <link match="/lasdata/grids/nwioos_drds_coral_grid"/>
+      </institution_id>
+      <institution name="Institution" url="#institution">
+        <link match="/lasdata/grids/nwioos_drds_coral_grid"/>
+      </institution>
+      <species_code name="Species Code" url="#species_code">
+        <link match="/lasdata/grids/nwioos_drds_coral_grid"/>
+      </species_code>
+      <taxa_scientific name="Taxa Scientific" url="#taxa_scientific">
+        <link match="/lasdata/grids/nwioos_drds_coral_grid"/>
+      </taxa_scientific>
+      <taxonomic_order name="Taxonomic Order" url="#taxonomic_order">
+        <link match="/lasdata/grids/nwioos_drds_coral_grid"/>
+      </taxonomic_order>
+      <order_abbreviation name="Order Abbreviation" url="#order_abbreviation">
+        <link match="/lasdata/grids/nwioos_drds_coral_grid"/>
+      </order_abbreviation>
+      <taxonomic_family name="Taxonomic Family" url="#taxonomic_family">
+        <link match="/lasdata/grids/nwioos_drds_coral_grid"/>
+      </taxonomic_family>
+      <family_abbreviation name="Family Abbreviation" url="#family_abbreviation">
+        <link match="/lasdata/grids/nwioos_drds_coral_grid"/>
+      </family_abbreviation>
+      <taxonomic_genus name="Taxonomic Genus" url="#taxonomic_genus">
+        <link match="/lasdata/grids/nwioos_drds_coral_grid"/>
+      </taxonomic_genus>
     </variables>
   </nwioos_drds_coral>
   <erd_opendap_globec_bottle
     name = "GLOBEC Rosette Bottle Data (2002) from the ERD OPeNDAP Server"
-    url = "http://coastwatch.pfel.noaa.gov/cwexperimental/erddap/tabledap/erd_opendap/globec_bottle"
+    url = "http://coastwatch.pfel.noaa.gov/erddap2/tabledap/erd_opendap/globec_bottle"
     doc = "http://globec.coas.oregonstate.edu/">
     <properties>
       <ui>
@@ -212,78 +212,78 @@
       </product_server>
     </properties>
     <variables>
-      <ship name="Ship"
-        url="#ship">
-      <ship>
-      <cruise_id name="Cruise ID"
-        url="#cruise_id">
-      <cruise_id>
-      <cast name="Cast No"
-        url="#cast">
-      <cast>
-      <bottle_posn name="Bottle Number"
-        url="#bottle_posn">
-      <bottle_posn>
-      <chl_a_total units="ug L-1" name="Chlorophyll-a"
-        url="#chl_a_total">
-      <chl_a_total>
-      <chl_a_10um units="ug L-1" name="Chlorophyll-a after passing 10um screen"
-        url="#chl_a_10um">
-      <chl_a_10um>
-      <phaeo_total units="ug L-1" name="Phaeopigment"
-        url="#phaeo_total">
-      <phaeo_total>
-      <phaeo_10um units="ug L-1" name="Phaeopigment after passing 10um screen"
-        url="#phaeo_10um">
-      <phaeo_10um>
-      <sal00 units="psu" name="Salinity from T0 and C0 sensors"
-        url="#sal00">
-      <sal00>
-      <sal11 units="psu" name="Salinity from T1 and C1 sensors"
-        url="#sal11">
-      <sal11>
-      <temperature0 units="degree_C" name="Temperature T0"
-        url="#temperature0">
-      <temperature0>
-      <temperature1 units="degree_C" name="Temperature T1"
-        url="#temperature1">
-      <temperature1>
-      <fluor_v units="volts" name="Fluorescence electronic data"
-        url="#fluor_v">
-      <fluor_v>
-      <xmiss_v units="volts" name="Transmissometer data"
-        url="#xmiss_v">
-      <xmiss_v>
-      <PO4 units="micromoles L-1" name="Phosphate"
-        url="#PO4">
-      <PO4>
-      <N_N units="micromoles L-1" name="Nitrate + Nitrite combined"
-        url="#N_N">
-      <N_N>
-      <NO3 units="micromoles L-1" name="Nitrate"
-        url="#NO3">
-      <NO3>
-      <Si units="micromoles L-1" name="Silicate"
-        url="#Si">
-      <Si>
-      <NO2 units="micromoles L-1" name="Nitrite"
-        url="#NO2">
-      <NO2>
-      <NH4 units="micromoles L-1" name="Ammonium"
-        url="#NH4">
-      <NH4>
-      <oxygen units="ml L-1" name="Oxygen"
-        url="#oxygen">
-      <oxygen>
-      <par units="volts" name="Photosynthetically available radiation"
-        url="#par">
-      <par>
+      <ship name="Ship" url="#ship">
+        <link match="/lasdata/grids/erd_opendap_globec_bottle_grid"/>
+      </ship>
+      <cruise_id name="Cruise ID" url="#cruise_id">
+        <link match="/lasdata/grids/erd_opendap_globec_bottle_grid"/>
+      </cruise_id>
+      <cast name="Cast No" url="#cast">
+        <link match="/lasdata/grids/erd_opendap_globec_bottle_grid"/>
+      </cast>
+      <bottle_posn name="Bottle Number" url="#bottle_posn">
+        <link match="/lasdata/grids/erd_opendap_globec_bottle_grid"/>
+      </bottle_posn>
+      <chl_a_total units="ug L-1" name="Chlorophyll-a" url="#chl_a_total">
+        <link match="/lasdata/grids/erd_opendap_globec_bottle_grid"/>
+      </chl_a_total>
+      <chl_a_10um units="ug L-1" name="Chlorophyll-a after passing 10um screen" url="#chl_a_10um">
+        <link match="/lasdata/grids/erd_opendap_globec_bottle_grid"/>
+      </chl_a_10um>
+      <phaeo_total units="ug L-1" name="Phaeopigment" url="#phaeo_total">
+        <link match="/lasdata/grids/erd_opendap_globec_bottle_grid"/>
+      </phaeo_total>
+      <phaeo_10um units="ug L-1" name="Phaeopigment after passing 10um screen" url="#phaeo_10um">
+        <link match="/lasdata/grids/erd_opendap_globec_bottle_grid"/>
+      </phaeo_10um>
+      <sal00 units="psu" name="Salinity from T0 and C0 sensors" url="#sal00">
+        <link match="/lasdata/grids/erd_opendap_globec_bottle_grid"/>
+      </sal00>
+      <sal11 units="psu" name="Salinity from T1 and C1 sensors" url="#sal11">
+        <link match="/lasdata/grids/erd_opendap_globec_bottle_grid"/>
+      </sal11>
+      <temperature0 units="degree_C" name="Temperature T0" url="#temperature0">
+        <link match="/lasdata/grids/erd_opendap_globec_bottle_grid"/>
+      </temperature0>
+      <temperature1 units="degree_C" name="Temperature T1" url="#temperature1">
+        <link match="/lasdata/grids/erd_opendap_globec_bottle_grid"/>
+      </temperature1>
+      <fluor_v units="volts" name="Fluorescence electronic data" url="#fluor_v">
+        <link match="/lasdata/grids/erd_opendap_globec_bottle_grid"/>
+      </fluor_v>
+      <xmiss_v units="volts" name="Transmissometer data" url="#xmiss_v">
+        <link match="/lasdata/grids/erd_opendap_globec_bottle_grid"/>
+      </xmiss_v>
+      <PO4 units="micromoles L-1" name="Phosphate" url="#PO4">
+        <link match="/lasdata/grids/erd_opendap_globec_bottle_grid"/>
+      </PO4>
+      <N_N units="micromoles L-1" name="Nitrate + Nitrite combined" url="#N_N">
+        <link match="/lasdata/grids/erd_opendap_globec_bottle_grid"/>
+      </N_N>
+      <NO3 units="micromoles L-1" name="Nitrate" url="#NO3">
+        <link match="/lasdata/grids/erd_opendap_globec_bottle_grid"/>
+      </NO3>
+      <Si units="micromoles L-1" name="Silicate" url="#Si">
+        <link match="/lasdata/grids/erd_opendap_globec_bottle_grid"/>
+      </Si>
+      <NO2 units="micromoles L-1" name="Nitrite" url="#NO2">
+        <link match="/lasdata/grids/erd_opendap_globec_bottle_grid"/>
+      </NO2>
+      <NH4 units="micromoles L-1" name="Ammonium" url="#NH4">
+        <link match="/lasdata/grids/erd_opendap_globec_bottle_grid"/>
+      </NH4>
+      <oxygen units="ml L-1" name="Oxygen" url="#oxygen">
+        <link match="/lasdata/grids/erd_opendap_globec_bottle_grid"/>
+      </oxygen>
+      <par units="volts" name="Photosynthetically available radiation" url="#par">
+        <link match="/lasdata/grids/erd_opendap_globec_bottle_grid"/>
+      </par>
     </variables>
   </erd_opendap_globec_bottle>
   <nwioos_drds_groundfish
-    name = "Groundfish Data for U.S. West Coast (2003-2004)"
-    url = "http://coastwatch.pfel.noaa.gov/cwexperimental/erddap/tabledap/nwioos_drds/groundfish"
-    doc = "http://nwioos.coas.oregonstate.edu:8080/dods/drds/Groundfish%20Survey%202003-2004.info">
+    name = "Groundfish Data for U.S. West Coast (2003-2005)"
+    url = "http://coastwatch.pfel.noaa.gov/erddap2/tabledap/nwioos_drds/groundfish"
+    doc = "http://nwioos.coas.oregonstate.edu:8080/dods/drds/Groundfish%20Survey%202003-2005.info">
     <properties>
       <ui>
         <default>file:ui.xml#dapper_demo</default>
@@ -291,7 +291,7 @@
       <tabledap_access>
         <server>ERD TableDAP</server>
         <id>nwioos_drds/groundfish</id>
-        <title>Groundfish Data for U.S. West Coast (2003-2004)</title>
+        <title>Groundfish Data for U.S. West Coast (2003-2005)</title>
         <longitude>longitude</longitude>
         <lon_domain>-180:180</lon_domain>
         <latitude>latitude</latitude>
@@ -303,35 +303,163 @@
       </product_server>
     </properties>
     <variables>
-      <year name="year"
-        url="#year">
-      <year>
-      <haul_id name="Haul Identifier"
-        url="#haul_id">
-      <haul_id>
-      <scientific_name name="Scientific Name"
-        url="#scientific_name">
-      <scientific_name>
-      <common_name name="Common Name"
-        url="#common_name">
-      <common_name>
-      <position_description name="Position Description"
-        url="#position_description">
-      <position_description>
-      <catch_range_min units="kg km-2" name="Catch Range Min"
-        url="#catch_range_min">
-      <catch_range_min>
-      <catch_range_max units="kg km-2" name="Catch Range Max"
-        url="#catch_range_max">
-      <catch_range_max>
-      <map_legend units="kg km-2" name="Map Legend"
-        url="#map_legend">
-      <map_legend>
+      <year name="year" url="#year">
+        <link match="/lasdata/grids/nwioos_drds_groundfish_grid"/>
+      </year>
+      <haul_id name="Haul Identifier" url="#haul_id">
+        <link match="/lasdata/grids/nwioos_drds_groundfish_grid"/>
+      </haul_id>
+      <scientific_name name="Scientific Name" url="#scientific_name">
+        <link match="/lasdata/grids/nwioos_drds_groundfish_grid"/>
+      </scientific_name>
+      <common_name name="Common Name" url="#common_name">
+        <link match="/lasdata/grids/nwioos_drds_groundfish_grid"/>
+      </common_name>
+      <position_description name="Position Description" url="#position_description">
+        <link match="/lasdata/grids/nwioos_drds_groundfish_grid"/>
+      </position_description>
+      <catch_range_min units="kg km-2" name="Catch Range Min" url="#catch_range_min">
+        <link match="/lasdata/grids/nwioos_drds_groundfish_grid"/>
+      </catch_range_min>
+      <catch_range_max units="kg km-2" name="Catch Range Max" url="#catch_range_max">
+        <link match="/lasdata/grids/nwioos_drds_groundfish_grid"/>
+      </catch_range_max>
+      <map_legend units="kg km-2" name="Map Legend" url="#map_legend">
+        <link match="/lasdata/grids/nwioos_drds_groundfish_grid"/>
+      </map_legend>
     </variables>
   </nwioos_drds_groundfish>
+  <nwioos_drds_hud_fish_species_details
+    name = "HUD Fish Species Details"
+    url = "http://coastwatch.pfel.noaa.gov/erddap2/tabledap/nwioos_drds/hud_fish_species_details"
+    doc = "http://nwioos.coas.oregonstate.edu:8080/dods/drds/HUD%20Fish%20Species%20Details.info">
+    <properties>
+      <ui>
+        <default>file:ui.xml#dapper_demo</default>
+      </ui>
+      <tabledap_access>
+        <server>ERD TableDAP</server>
+        <id>nwioos_drds/hud_fish_species_details</id>
+        <title>HUD Fish Species Details</title>
+      </tabledap_access>
+      <product_server>
+        <ui_timeout>120000</ui_timeout>
+        <ps_timeout>120000</ps_timeout>
+        <use_cache>false</use_cache>
+      </product_server>
+    </properties>
+    <variables>
+      <species_id name="Species ID" url="#species_id">
+        <link match="/lasdata/grids/nwioos_drds_hud_fish_species_details_grid"/>
+      </species_id>
+      <common_name name="Common Name" url="#common_name">
+        <link match="/lasdata/grids/nwioos_drds_hud_fish_species_details_grid"/>
+      </common_name>
+      <scientific_name name="Scientific Name" url="#scientific_name">
+        <link match="/lasdata/grids/nwioos_drds_hud_fish_species_details_grid"/>
+      </scientific_name>
+      <life_stage name="Life Stage" url="#life_stage">
+        <link match="/lasdata/grids/nwioos_drds_hud_fish_species_details_grid"/>
+      </life_stage>
+      <absolute_min_depth units="m" name="Absolute Min Depth" url="#absolute_min_depth">
+        <link match="/lasdata/grids/nwioos_drds_hud_fish_species_details_grid"/>
+      </absolute_min_depth>
+      <preferred_min_depth units="m" name="Preferred Min Depth" url="#preferred_min_depth">
+        <link match="/lasdata/grids/nwioos_drds_hud_fish_species_details_grid"/>
+      </preferred_min_depth>
+      <absolute_max_depth units="m" name="Absolute Max Depth" url="#absolute_max_depth">
+        <link match="/lasdata/grids/nwioos_drds_hud_fish_species_details_grid"/>
+      </absolute_max_depth>
+      <preferred_max_depth units="m" name="Preferred Max Depth" url="#preferred_max_depth">
+        <link match="/lasdata/grids/nwioos_drds_hud_fish_species_details_grid"/>
+      </preferred_max_depth>
+      <absolute_min_temp units="degree_C" name="Absolute Min Temperature" url="#absolute_min_temp">
+        <link match="/lasdata/grids/nwioos_drds_hud_fish_species_details_grid"/>
+      </absolute_min_temp>
+      <preferred_min_temp units="degree_C" name="Preferred Min Temperature" url="#preferred_min_temp">
+        <link match="/lasdata/grids/nwioos_drds_hud_fish_species_details_grid"/>
+      </preferred_min_temp>
+      <absolute_max_temp units="degree_C" name="Absolute Max Temperature" url="#absolute_max_temp">
+        <link match="/lasdata/grids/nwioos_drds_hud_fish_species_details_grid"/>
+      </absolute_max_temp>
+      <preferred_max_temp units="degree_C" name="Preferred Max Temperature" url="#preferred_max_temp">
+        <link match="/lasdata/grids/nwioos_drds_hud_fish_species_details_grid"/>
+      </preferred_max_temp>
+      <absolute_min_latitude units="degrees_north" name="Absolute Min Latitude" url="#absolute_min_latitude">
+        <link match="/lasdata/grids/nwioos_drds_hud_fish_species_details_grid"/>
+      </absolute_min_latitude>
+      <preferred_min_latitude units="degrees_north" name="Preferred Min Latitude" url="#preferred_min_latitude">
+        <link match="/lasdata/grids/nwioos_drds_hud_fish_species_details_grid"/>
+      </preferred_min_latitude>
+      <absolute_max_latitude units="degrees_north" name="Absolute Max Latitude" url="#absolute_max_latitude">
+        <link match="/lasdata/grids/nwioos_drds_hud_fish_species_details_grid"/>
+      </absolute_max_latitude>
+      <preferred_max_latitude units="degrees_north" name="Preferred Max Latitude" url="#preferred_max_latitude">
+        <link match="/lasdata/grids/nwioos_drds_hud_fish_species_details_grid"/>
+      </preferred_max_latitude>
+    </variables>
+  </nwioos_drds_hud_fish_species_details>
+  <nwioos_drds_hud_fish_species_occurrence
+    name = "HUD Fish Species Occurrence"
+    url = "http://coastwatch.pfel.noaa.gov/erddap2/tabledap/nwioos_drds/hud_fish_species_occurrence"
+    doc = "http://nwioos.coas.oregonstate.edu:8080/dods/drds/HUD%20Fish%20Species%20Occurrence.info">
+    <properties>
+      <ui>
+        <default>file:ui.xml#dapper_demo</default>
+      </ui>
+      <tabledap_access>
+        <server>ERD TableDAP</server>
+        <id>nwioos_drds/hud_fish_species_occurrence</id>
+        <title>HUD Fish Species Occurrence</title>
+      </tabledap_access>
+      <product_server>
+        <ui_timeout>120000</ui_timeout>
+        <ps_timeout>120000</ps_timeout>
+        <use_cache>false</use_cache>
+      </product_server>
+    </properties>
+    <variables>
+      <common_name name="Common Name" url="#common_name">
+        <link match="/lasdata/grids/nwioos_drds_hud_fish_species_occurrence_grid"/>
+      </common_name>
+      <scientific_name name="Scientific Name" url="#scientific_name">
+        <link match="/lasdata/grids/nwioos_drds_hud_fish_species_occurrence_grid"/>
+      </scientific_name>
+      <life_stage name="Life Stage" url="#life_stage">
+        <link match="/lasdata/grids/nwioos_drds_hud_fish_species_occurrence_grid"/>
+      </life_stage>
+      <gender name="Gender" url="#gender">
+        <link match="/lasdata/grids/nwioos_drds_hud_fish_species_occurrence_grid"/>
+      </gender>
+      <habitat_association name="Habitat Association" url="#habitat_association">
+        <link match="/lasdata/grids/nwioos_drds_hud_fish_species_occurrence_grid"/>
+      </habitat_association>
+      <season name="Season" url="#season">
+        <link match="/lasdata/grids/nwioos_drds_hud_fish_species_occurrence_grid"/>
+      </season>
+      <level_1_habitat name="Level 1 Habitat" url="#level_1_habitat">
+        <link match="/lasdata/grids/nwioos_drds_hud_fish_species_occurrence_grid"/>
+      </level_1_habitat>
+      <level_2_habitat name="Level 2 Habitat" url="#level_2_habitat">
+        <link match="/lasdata/grids/nwioos_drds_hud_fish_species_occurrence_grid"/>
+      </level_2_habitat>
+      <level_3_habitat name="Level 3 Habitat" url="#level_3_habitat">
+        <link match="/lasdata/grids/nwioos_drds_hud_fish_species_occurrence_grid"/>
+      </level_3_habitat>
+      <level_4_habitat name="Level 4 Habitat" url="#level_4_habitat">
+        <link match="/lasdata/grids/nwioos_drds_hud_fish_species_occurrence_grid"/>
+      </level_4_habitat>
+      <activity name="Activity" url="#activity">
+        <link match="/lasdata/grids/nwioos_drds_hud_fish_species_occurrence_grid"/>
+      </activity>
+      <activity_association name="Activity Association" url="#activity_association">
+        <link match="/lasdata/grids/nwioos_drds_hud_fish_species_occurrence_grid"/>
+      </activity_association>
+    </variables>
+  </nwioos_drds_hud_fish_species_occurrence>
   <nwioos_drds_hud_predators_prey
     name = "HUD Predators and Prey"
-    url = "http://coastwatch.pfel.noaa.gov/cwexperimental/erddap/tabledap/nwioos_drds/hud_predators_prey"
+    url = "http://coastwatch.pfel.noaa.gov/erddap2/tabledap/nwioos_drds/hud_predators_prey"
     doc = "http://nwioos.coas.oregonstate.edu:8080/dods/drds/HUD%20Predators%20and%20Prey.info">
     <properties>
       <ui>
@@ -349,56 +477,56 @@
       </product_server>
     </properties>
     <variables>
-      <ecoregion name="Ecoregion"
-        url="#ecoregion">
-      <ecoregion>
-      <season name="Season"
-        url="#season">
-      <season>
-      <level_1_habitat name="Level 1 Habitat"
-        url="#level_1_habitat">
-      <level_1_habitat>
-      <level_2_habitat name="Level 2 Habitat"
-        url="#level_2_habitat">
-      <level_2_habitat>
-      <level_3_habitat name="Level 3 Habitat"
-        url="#level_3_habitat">
-      <level_3_habitat>
-      <level_4_habitat name="Level 4 Habitat"
-        url="#level_4_habitat">
-      <level_4_habitat>
-      <scientific_name name="Scientific Name"
-        url="#scientific_name">
-      <scientific_name>
-      <gender name="Gender"
-        url="#gender">
-      <gender>
-      <life_stage name="Life Stage"
-        url="#life_stage">
-      <life_stage>
-      <prey_name name="Prey Name"
-        url="#prey_name">
-      <prey_name>
-      <prey_gender name="Prey Gender"
-        url="#prey_gender">
-      <prey_gender>
-      <prey_life_stage name="Prey Life Stage"
-        url="#prey_life_stage">
-      <prey_life_stage>
-      <predator_name name="Predator Name"
-        url="#predator_name">
-      <predator_name>
-      <predator_gender name="Predator Gender"
-        url="#predator_gender">
-      <predator_gender>
-      <predator_life_stage name="Predator Life Stage"
-        url="#predator_life_stage">
-      <predator_life_stage>
+      <ecoregion name="Ecoregion" url="#ecoregion">
+        <link match="/lasdata/grids/nwioos_drds_hud_predators_prey_grid"/>
+      </ecoregion>
+      <season name="Season" url="#season">
+        <link match="/lasdata/grids/nwioos_drds_hud_predators_prey_grid"/>
+      </season>
+      <level_1_habitat name="Level 1 Habitat" url="#level_1_habitat">
+        <link match="/lasdata/grids/nwioos_drds_hud_predators_prey_grid"/>
+      </level_1_habitat>
+      <level_2_habitat name="Level 2 Habitat" url="#level_2_habitat">
+        <link match="/lasdata/grids/nwioos_drds_hud_predators_prey_grid"/>
+      </level_2_habitat>
+      <level_3_habitat name="Level 3 Habitat" url="#level_3_habitat">
+        <link match="/lasdata/grids/nwioos_drds_hud_predators_prey_grid"/>
+      </level_3_habitat>
+      <level_4_habitat name="Level 4 Habitat" url="#level_4_habitat">
+        <link match="/lasdata/grids/nwioos_drds_hud_predators_prey_grid"/>
+      </level_4_habitat>
+      <scientific_name name="Scientific Name" url="#scientific_name">
+        <link match="/lasdata/grids/nwioos_drds_hud_predators_prey_grid"/>
+      </scientific_name>
+      <gender name="Gender" url="#gender">
+        <link match="/lasdata/grids/nwioos_drds_hud_predators_prey_grid"/>
+      </gender>
+      <life_stage name="Life Stage" url="#life_stage">
+        <link match="/lasdata/grids/nwioos_drds_hud_predators_prey_grid"/>
+      </life_stage>
+      <prey_name name="Prey Name" url="#prey_name">
+        <link match="/lasdata/grids/nwioos_drds_hud_predators_prey_grid"/>
+      </prey_name>
+      <prey_gender name="Prey Gender" url="#prey_gender">
+        <link match="/lasdata/grids/nwioos_drds_hud_predators_prey_grid"/>
+      </prey_gender>
+      <prey_life_stage name="Prey Life Stage" url="#prey_life_stage">
+        <link match="/lasdata/grids/nwioos_drds_hud_predators_prey_grid"/>
+      </prey_life_stage>
+      <predator_name name="Predator Name" url="#predator_name">
+        <link match="/lasdata/grids/nwioos_drds_hud_predators_prey_grid"/>
+      </predator_name>
+      <predator_gender name="Predator Gender" url="#predator_gender">
+        <link match="/lasdata/grids/nwioos_drds_hud_predators_prey_grid"/>
+      </predator_gender>
+      <predator_life_stage name="Predator Life Stage" url="#predator_life_stage">
+        <link match="/lasdata/grids/nwioos_drds_hud_predators_prey_grid"/>
+      </predator_life_stage>
     </variables>
   </nwioos_drds_hud_predators_prey>
   <nwioos_drds_hud_references
     name = "HUD References"
-    url = "http://coastwatch.pfel.noaa.gov/cwexperimental/erddap/tabledap/nwioos_drds/hud_references"
+    url = "http://coastwatch.pfel.noaa.gov/erddap2/tabledap/nwioos_drds/hud_references"
     doc = "http://nwioos.coas.oregonstate.edu:8080/dods/drds/HUD%20References.info">
     <properties>
       <ui>
@@ -416,74 +544,74 @@
       </product_server>
     </properties>
     <variables>
-      <season name="Season"
-        url="#season">
-      <season>
-      <level_1_habitat name="Level 1 Habitat"
-        url="#level_1_habitat">
-      <level_1_habitat>
-      <level_2_habitat name="Level 2 Habitat"
-        url="#level_2_habitat">
-      <level_2_habitat>
-      <level_3_habitat name="Level 3 Habitat"
-        url="#level_3_habitat">
-      <level_3_habitat>
-      <level_4_habitat name="Level 4 Habitat"
-        url="#level_4_habitat">
-      <level_4_habitat>
-      <scientific_name name="Scientific Name"
-        url="#scientific_name">
-      <scientific_name>
-      <gender name="Gender"
-        url="#gender">
-      <gender>
-      <life_stage name="Life Stage"
-        url="#life_stage">
-      <life_stage>
-      <reference_to name="Reference To"
-        url="#reference_to">
-      <reference_to>
-      <reference_type name="Reference Type"
-        url="#reference_type">
-      <reference_type>
-      <authors name="Authors"
-        url="#authors">
-      <authors>
-      <publication_year name="Publication Year"
-        url="#publication_year">
-      <publication_year>
-      <reference_name name="Reference Name"
-        url="#reference_name">
-      <reference_name>
-      <editor name="Editor"
-        url="#editor">
-      <editor>
-      <publication_name name="Publication Name"
-        url="#publication_name">
-      <publication_name>
-      <publisher_city name="Publisher City"
-        url="#publisher_city">
-      <publisher_city>
-      <publisher name="Publisher"
-        url="#publisher">
-      <publisher>
-      <volume name="Volume"
-        url="#volume">
-      <volume>
-      <number name="Number"
-        url="#number">
-      <number>
-      <referenced_pages name="Referenced Pages"
-        url="#referenced_pages">
-      <referenced_pages>
-      <thesis_type name="Thesis Type"
-        url="#thesis_type">
-      <thesis_type>
+      <season name="Season" url="#season">
+        <link match="/lasdata/grids/nwioos_drds_hud_references_grid"/>
+      </season>
+      <level_1_habitat name="Level 1 Habitat" url="#level_1_habitat">
+        <link match="/lasdata/grids/nwioos_drds_hud_references_grid"/>
+      </level_1_habitat>
+      <level_2_habitat name="Level 2 Habitat" url="#level_2_habitat">
+        <link match="/lasdata/grids/nwioos_drds_hud_references_grid"/>
+      </level_2_habitat>
+      <level_3_habitat name="Level 3 Habitat" url="#level_3_habitat">
+        <link match="/lasdata/grids/nwioos_drds_hud_references_grid"/>
+      </level_3_habitat>
+      <level_4_habitat name="Level 4 Habitat" url="#level_4_habitat">
+        <link match="/lasdata/grids/nwioos_drds_hud_references_grid"/>
+      </level_4_habitat>
+      <scientific_name name="Scientific Name" url="#scientific_name">
+        <link match="/lasdata/grids/nwioos_drds_hud_references_grid"/>
+      </scientific_name>
+      <gender name="Gender" url="#gender">
+        <link match="/lasdata/grids/nwioos_drds_hud_references_grid"/>
+      </gender>
+      <life_stage name="Life Stage" url="#life_stage">
+        <link match="/lasdata/grids/nwioos_drds_hud_references_grid"/>
+      </life_stage>
+      <reference_to name="Reference To" url="#reference_to">
+        <link match="/lasdata/grids/nwioos_drds_hud_references_grid"/>
+      </reference_to>
+      <reference_type name="Reference Type" url="#reference_type">
+        <link match="/lasdata/grids/nwioos_drds_hud_references_grid"/>
+      </reference_type>
+      <authors name="Authors" url="#authors">
+        <link match="/lasdata/grids/nwioos_drds_hud_references_grid"/>
+      </authors>
+      <publication_year name="Publication Year" url="#publication_year">
+        <link match="/lasdata/grids/nwioos_drds_hud_references_grid"/>
+      </publication_year>
+      <reference_name name="Reference Name" url="#reference_name">
+        <link match="/lasdata/grids/nwioos_drds_hud_references_grid"/>
+      </reference_name>
+      <editor name="Editor" url="#editor">
+        <link match="/lasdata/grids/nwioos_drds_hud_references_grid"/>
+      </editor>
+      <publication_name name="Publication Name" url="#publication_name">
+        <link match="/lasdata/grids/nwioos_drds_hud_references_grid"/>
+      </publication_name>
+      <publisher_city name="Publisher City" url="#publisher_city">
+        <link match="/lasdata/grids/nwioos_drds_hud_references_grid"/>
+      </publisher_city>
+      <publisher name="Publisher" url="#publisher">
+        <link match="/lasdata/grids/nwioos_drds_hud_references_grid"/>
+      </publisher>
+      <volume name="Volume" url="#volume">
+        <link match="/lasdata/grids/nwioos_drds_hud_references_grid"/>
+      </volume>
+      <number name="Number" url="#number">
+        <link match="/lasdata/grids/nwioos_drds_hud_references_grid"/>
+      </number>
+      <referenced_pages name="Referenced Pages" url="#referenced_pages">
+        <link match="/lasdata/grids/nwioos_drds_hud_references_grid"/>
+      </referenced_pages>
+      <thesis_type name="Thesis Type" url="#thesis_type">
+        <link match="/lasdata/grids/nwioos_drds_hud_references_grid"/>
+      </thesis_type>
     </variables>
   </nwioos_drds_hud_references>
   <nwioos_drds_adcp_1995
     name = "Hake Survey ADCP (1995)"
-    url = "http://coastwatch.pfel.noaa.gov/cwexperimental/erddap/tabledap/nwioos_drds/adcp_1995"
+    url = "http://coastwatch.pfel.noaa.gov/erddap2/tabledap/nwioos_drds/adcp_1995"
     doc = "http://nwioos.coas.oregonstate.edu:8080/dods/drds/1995%20Hake%20Survey%20ADCP.info">
     <properties>
       <ui>
@@ -507,23 +635,23 @@
       </product_server>
     </properties>
     <variables>
-      <year name="year"
-        url="#year">
-      <year>
-      <yearday name="yearday"
-        url="#yearday">
-      <yearday>
-      <eastv units="m s-1" name="Eastward Sea Water Velocity"
-        url="#eastv">
-      <eastv>
-      <northv units="m s-1" name="Northward Sea Water Velocity"
-        url="#northv">
-      <northv>
+      <year name="year" url="#year">
+        <link match="/lasdata/grids/nwioos_drds_adcp_1995_grid"/>
+      </year>
+      <yearday name="yearday" url="#yearday">
+        <link match="/lasdata/grids/nwioos_drds_adcp_1995_grid"/>
+      </yearday>
+      <eastv units="m s-1" name="Eastward Sea Water Velocity" url="#eastv">
+        <link match="/lasdata/grids/nwioos_drds_adcp_1995_grid"/>
+      </eastv>
+      <northv units="m s-1" name="Northward Sea Water Velocity" url="#northv">
+        <link match="/lasdata/grids/nwioos_drds_adcp_1995_grid"/>
+      </northv>
     </variables>
   </nwioos_drds_adcp_1995>
   <nwioos_drds_adcp_1998
     name = "Hake Survey ADCP (1998)"
-    url = "http://coastwatch.pfel.noaa.gov/cwexperimental/erddap/tabledap/nwioos_drds/adcp_1998"
+    url = "http://coastwatch.pfel.noaa.gov/erddap2/tabledap/nwioos_drds/adcp_1998"
     doc = "http://nwioos.coas.oregonstate.edu:8080/dods/drds/1998%20Hake%20Survey%20ADCP.info">
     <properties>
       <ui>
@@ -547,23 +675,23 @@
       </product_server>
     </properties>
     <variables>
-      <year name="year"
-        url="#year">
-      <year>
-      <yearday name="yearday"
-        url="#yearday">
-      <yearday>
-      <eastv units="m s-1" name="Eastward Sea Water Velocity"
-        url="#eastv">
-      <eastv>
-      <northv units="m s-1" name="Northward Sea Water Velocity"
-        url="#northv">
-      <northv>
+      <year name="year" url="#year">
+        <link match="/lasdata/grids/nwioos_drds_adcp_1998_grid"/>
+      </year>
+      <yearday name="yearday" url="#yearday">
+        <link match="/lasdata/grids/nwioos_drds_adcp_1998_grid"/>
+      </yearday>
+      <eastv units="m s-1" name="Eastward Sea Water Velocity" url="#eastv">
+        <link match="/lasdata/grids/nwioos_drds_adcp_1998_grid"/>
+      </eastv>
+      <northv units="m s-1" name="Northward Sea Water Velocity" url="#northv">
+        <link match="/lasdata/grids/nwioos_drds_adcp_1998_grid"/>
+      </northv>
     </variables>
   </nwioos_drds_adcp_1998>
   <nwioos_drds_adcp_2001
     name = "Hake Survey ADCP (2001)"
-    url = "http://coastwatch.pfel.noaa.gov/cwexperimental/erddap/tabledap/nwioos_drds/adcp_2001"
+    url = "http://coastwatch.pfel.noaa.gov/erddap2/tabledap/nwioos_drds/adcp_2001"
     doc = "http://nwioos.coas.oregonstate.edu:8080/dods/drds/2001%20Hake%20Survey%20ADCP.info">
     <properties>
       <ui>
@@ -587,23 +715,23 @@
       </product_server>
     </properties>
     <variables>
-      <year name="year"
-        url="#year">
-      <year>
-      <yearday name="yearday"
-        url="#yearday">
-      <yearday>
-      <eastv units="m s-1" name="Eastward Sea Water Velocity"
-        url="#eastv">
-      <eastv>
-      <northv units="m s-1" name="Northward Sea Water Velocity"
-        url="#northv">
-      <northv>
+      <year name="year" url="#year">
+        <link match="/lasdata/grids/nwioos_drds_adcp_2001_grid"/>
+      </year>
+      <yearday name="yearday" url="#yearday">
+        <link match="/lasdata/grids/nwioos_drds_adcp_2001_grid"/>
+      </yearday>
+      <eastv units="m s-1" name="Eastward Sea Water Velocity" url="#eastv">
+        <link match="/lasdata/grids/nwioos_drds_adcp_2001_grid"/>
+      </eastv>
+      <northv units="m s-1" name="Northward Sea Water Velocity" url="#northv">
+        <link match="/lasdata/grids/nwioos_drds_adcp_2001_grid"/>
+      </northv>
     </variables>
   </nwioos_drds_adcp_2001>
   <nwioos_drds_adcp_2003
     name = "Hake Survey ADCP (2003)"
-    url = "http://coastwatch.pfel.noaa.gov/cwexperimental/erddap/tabledap/nwioos_drds/adcp_2003"
+    url = "http://coastwatch.pfel.noaa.gov/erddap2/tabledap/nwioos_drds/adcp_2003"
     doc = "http://nwioos.coas.oregonstate.edu:8080/dods/drds/2003%20Hake%20Survey%20ADCP.info">
     <properties>
       <ui>
@@ -627,23 +755,23 @@
       </product_server>
     </properties>
     <variables>
-      <year name="year"
-        url="#year">
-      <year>
-      <yearday name="yearday"
-        url="#yearday">
-      <yearday>
-      <eastv units="m s-1" name="Eastward Sea Water Velocity"
-        url="#eastv">
-      <eastv>
-      <northv units="m s-1" name="Northward Sea Water Velocity"
-        url="#northv">
-      <northv>
+      <year name="year" url="#year">
+        <link match="/lasdata/grids/nwioos_drds_adcp_2003_grid"/>
+      </year>
+      <yearday name="yearday" url="#yearday">
+        <link match="/lasdata/grids/nwioos_drds_adcp_2003_grid"/>
+      </yearday>
+      <eastv units="m s-1" name="Eastward Sea Water Velocity" url="#eastv">
+        <link match="/lasdata/grids/nwioos_drds_adcp_2003_grid"/>
+      </eastv>
+      <northv units="m s-1" name="Northward Sea Water Velocity" url="#northv">
+        <link match="/lasdata/grids/nwioos_drds_adcp_2003_grid"/>
+      </northv>
     </variables>
   </nwioos_drds_adcp_2003>
   <nwioos_drds_adcp_2005
     name = "Hake Survey ADCP (2005)"
-    url = "http://coastwatch.pfel.noaa.gov/cwexperimental/erddap/tabledap/nwioos_drds/adcp_2005"
+    url = "http://coastwatch.pfel.noaa.gov/erddap2/tabledap/nwioos_drds/adcp_2005"
     doc = "http://nwioos.coas.oregonstate.edu:8080/dods/drds/2005%20Hake%20Survey%20ADCP.info">
     <properties>
       <ui>
@@ -667,23 +795,23 @@
       </product_server>
     </properties>
     <variables>
-      <year name="year"
-        url="#year">
-      <year>
-      <yearday name="yearday"
-        url="#yearday">
-      <yearday>
-      <eastv units="m s-1" name="Eastward Sea Water Velocity"
-        url="#eastv">
-      <eastv>
-      <northv units="m s-1" name="Northward Sea Water Velocity"
-        url="#northv">
-      <northv>
+      <year name="year" url="#year">
+        <link match="/lasdata/grids/nwioos_drds_adcp_2005_grid"/>
+      </year>
+      <yearday name="yearday" url="#yearday">
+        <link match="/lasdata/grids/nwioos_drds_adcp_2005_grid"/>
+      </yearday>
+      <eastv units="m s-1" name="Eastward Sea Water Velocity" url="#eastv">
+        <link match="/lasdata/grids/nwioos_drds_adcp_2005_grid"/>
+      </eastv>
+      <northv units="m s-1" name="Northward Sea Water Velocity" url="#northv">
+        <link match="/lasdata/grids/nwioos_drds_adcp_2005_grid"/>
+      </northv>
     </variables>
   </nwioos_drds_adcp_2005>
   <aadc_obis_argos_tracking
     name = "OBIS - ARGOS Satellite Tracking of Animals"
-    url = "http://coastwatch.pfel.noaa.gov/cwexperimental/erddap/tabledap/aadc_obis/argos_tracking"
+    url = "http://coastwatch.pfel.noaa.gov/erddap2/tabledap/aadc_obis/argos_tracking"
     doc = "http://data.aad.gov.au/">
     <properties>
       <ui>
@@ -710,230 +838,230 @@
       </product_server>
     </properties>
     <variables>
-      <ID name="ID"
-        url="#ID">
-      <ID>
-      <BasisOfRecord name="BasisOfRecord"
-        url="#BasisOfRecord">
-      <BasisOfRecord>
-      <BoundingBox name="BoundingBox"
-        url="#BoundingBox">
-      <BoundingBox>
-      <CatalogNumber name="CatalogNumber"
-        url="#CatalogNumber">
-      <CatalogNumber>
-      <Citation name="Citation"
-        url="#Citation">
-      <Citation>
-      <Class name="Class"
-        url="#Class">
-      <Class>
-      <CollectionCode name="CollectionCode"
-        url="#CollectionCode">
-      <CollectionCode>
-      <Collector name="Collector"
-        url="#Collector">
-      <Collector>
-      <CollectorNumber name="CollectorNumber"
-        url="#CollectorNumber">
-      <CollectorNumber>
-      <ContinentOcean name="ContinentOcean"
-        url="#ContinentOcean">
-      <ContinentOcean>
-      <CoordinatePrecision units="m" name="CoordinatePrecision"
-        url="#CoordinatePrecision">
-      <CoordinatePrecision>
-      <Country name="Country"
-        url="#Country">
-      <Country>
-      <County name="County"
-        url="#County">
-      <County>
-      <DateLastModified name="DateLastModified"
-        url="#DateLastModified">
-      <DateLastModified>
-      <DayCollected name="DayCollected"
-        url="#DayCollected">
-      <DayCollected>
-      <DayIdentified name="DayIdentified"
-        url="#DayIdentified">
-      <DayIdentified>
-      <DepthRange name="DepthRange"
-        url="#DepthRange">
-      <DepthRange>
-      <EndDayCollected name="EndDayCollected"
-        url="#EndDayCollected">
-      <EndDayCollected>
-      <EndJulianDay name="EndJulianDay"
-        url="#EndJulianDay">
-      <EndJulianDay>
-      <EndLatitude units="degrees_north" name="EndLatitude"
-        url="#EndLatitude">
-      <EndLatitude>
-      <EndLongitude units="degrees_east" name="EndLongitude"
-        url="#EndLongitude">
-      <EndLongitude>
-      <EndMonthCollected name="EndMonthCollected"
-        url="#EndMonthCollected">
-      <EndMonthCollected>
-      <EndTimeofDay units="hours" name="EndTimeofDay"
-        url="#EndTimeofDay">
-      <EndTimeofDay>
-      <EndYearCollected name="EndYearCollected"
-        url="#EndYearCollected">
-      <EndYearCollected>
-      <Family name="Family"
-        url="#Family">
-      <Family>
-      <FieldNumber name="FieldNumber"
-        url="#FieldNumber">
-      <FieldNumber>
-      <GMLFeature name="GMLFeature"
-        url="#GMLFeature">
-      <GMLFeature>
-      <Genus name="Genus"
-        url="#Genus">
-      <Genus>
-      <IdentifiedBy name="IdentifiedBy"
-        url="#IdentifiedBy">
-      <IdentifiedBy>
-      <IndividualCount units="count" name="IndividualCount"
-        url="#IndividualCount">
-      <IndividualCount>
-      <InstitutionCode name="InstitutionCode"
-        url="#InstitutionCode">
-      <InstitutionCode>
-      <JulianDay name="JulianDay"
-        url="#JulianDay">
-      <JulianDay>
-      <Kingdom name="Kingdom"
-        url="#Kingdom">
-      <Kingdom>
-      <LifeStage name="LifeStage"
-        url="#LifeStage">
-      <LifeStage>
-      <Locality name="Locality"
-        url="#Locality">
-      <Locality>
-      <MaximumDepth units="m" name="MaximumDepth"
-        url="#MaximumDepth">
-      <MaximumDepth>
-      <MaximumElevation units="m" name="MaximumElevation"
-        url="#MaximumElevation">
-      <MaximumElevation>
-      <MinimumElevation units="m" name="MinimumElevation"
-        url="#MinimumElevation">
-      <MinimumElevation>
-      <MonthCollected name="MonthCollected"
-        url="#MonthCollected">
-      <MonthCollected>
-      <MonthIdentified name="MonthIdentified"
-        url="#MonthIdentified">
-      <MonthIdentified>
-      <Notes name="Notes"
-        url="#Notes">
-      <Notes>
-      <ObservedIndividualCount units="count" name="ObservedIndividualCount"
-        url="#ObservedIndividualCount">
-      <ObservedIndividualCount>
-      <ObservedWeight units="kg" name="ObservedWeight"
-        url="#ObservedWeight">
-      <ObservedWeight>
-      <Order name="Order"
-        url="#Order">
-      <Order>
-      <Phylum name="Phylum"
-        url="#Phylum">
-      <Phylum>
-      <PreparationType name="PreparationType"
-        url="#PreparationType">
-      <PreparationType>
-      <PreviousCatalogNumber name="PreviousCatalogNumber"
-        url="#PreviousCatalogNumber">
-      <PreviousCatalogNumber>
-      <RecordURL name="RecordURL"
-        url="#RecordURL">
-      <RecordURL>
-      <RelatedCatalogItem name="RelatedCatalogItem"
-        url="#RelatedCatalogItem">
-      <RelatedCatalogItem>
-      <RelationshipType name="RelationshipType"
-        url="#RelationshipType">
-      <RelationshipType>
-      <SampleSize name="SampleSize"
-        url="#SampleSize">
-      <SampleSize>
-      <ScientificName name="ScientificName"
-        url="#ScientificName">
-      <ScientificName>
-      <ScientificNameAuthor name="ScientificNameAuthor"
-        url="#ScientificNameAuthor">
-      <ScientificNameAuthor>
-      <Sex name="Sex"
-        url="#Sex">
-      <Sex>
-      <Source name="Source"
-        url="#Source">
-      <Source>
-      <Species name="Species"
-        url="#Species">
-      <Species>
-      <StartDayCollected name="StartDayCollected"
-        url="#StartDayCollected">
-      <StartDayCollected>
-      <StartJulianDay name="StartJulianDay"
-        url="#StartJulianDay">
-      <StartJulianDay>
-      <StartLatitude units="degrees_north" name="StartLatitude"
-        url="#StartLatitude">
-      <StartLatitude>
-      <StartLongitude units="degrees_east" name="StartLongitude"
-        url="#StartLongitude">
-      <StartLongitude>
-      <StartMonthCollected name="StartMonthCollected"
-        url="#StartMonthCollected">
-      <StartMonthCollected>
-      <StartTimeofDay units="hours" name="StartTimeofDay"
-        url="#StartTimeofDay">
-      <StartTimeofDay>
-      <StartYearCollected name="StartYearCollected"
-        url="#StartYearCollected">
-      <StartYearCollected>
-      <Start_EndCoordinatePrecision units="m" name="Start_EndCoordinatePrecision"
-        url="#Start_EndCoordinatePrecision">
-      <Start_EndCoordinatePrecision>
-      <StateProvince name="StateProvince"
-        url="#StateProvince">
-      <StateProvince>
-      <Subgenus name="Subgenus"
-        url="#Subgenus">
-      <Subgenus>
-      <Subspecies name="Subspecies"
-        url="#Subspecies">
-      <Subspecies>
-      <Temperature units="degree_C" name="Temperature"
-        url="#Temperature">
-      <Temperature>
-      <TimeOfDay units="hours" name="TimeOfDay"
-        url="#TimeOfDay">
-      <TimeOfDay>
-      <TimeZone name="TimeZone"
-        url="#TimeZone">
-      <TimeZone>
-      <TypeStatus name="TypeStatus"
-        url="#TypeStatus">
-      <TypeStatus>
-      <YearCollected name="YearCollected"
-        url="#YearCollected">
-      <YearCollected>
-      <YearIdentified name="YearIdentified"
-        url="#YearIdentified">
-      <YearIdentified>
+      <ID name="ID" url="#ID">
+        <link match="/lasdata/grids/aadc_obis_argos_tracking_grid"/>
+      </ID>
+      <BasisOfRecord name="BasisOfRecord" url="#BasisOfRecord">
+        <link match="/lasdata/grids/aadc_obis_argos_tracking_grid"/>
+      </BasisOfRecord>
+      <BoundingBox name="BoundingBox" url="#BoundingBox">
+        <link match="/lasdata/grids/aadc_obis_argos_tracking_grid"/>
+      </BoundingBox>
+      <CatalogNumber name="CatalogNumber" url="#CatalogNumber">
+        <link match="/lasdata/grids/aadc_obis_argos_tracking_grid"/>
+      </CatalogNumber>
+      <Citation name="Citation" url="#Citation">
+        <link match="/lasdata/grids/aadc_obis_argos_tracking_grid"/>
+      </Citation>
+      <Class name="Class" url="#Class">
+        <link match="/lasdata/grids/aadc_obis_argos_tracking_grid"/>
+      </Class>
+      <CollectionCode name="CollectionCode" url="#CollectionCode">
+        <link match="/lasdata/grids/aadc_obis_argos_tracking_grid"/>
+      </CollectionCode>
+      <Collector name="Collector" url="#Collector">
+        <link match="/lasdata/grids/aadc_obis_argos_tracking_grid"/>
+      </Collector>
+      <CollectorNumber name="CollectorNumber" url="#CollectorNumber">
+        <link match="/lasdata/grids/aadc_obis_argos_tracking_grid"/>
+      </CollectorNumber>
+      <ContinentOcean name="ContinentOcean" url="#ContinentOcean">
+        <link match="/lasdata/grids/aadc_obis_argos_tracking_grid"/>
+      </ContinentOcean>
+      <CoordinatePrecision units="m" name="CoordinatePrecision" url="#CoordinatePrecision">
+        <link match="/lasdata/grids/aadc_obis_argos_tracking_grid"/>
+      </CoordinatePrecision>
+      <Country name="Country" url="#Country">
+        <link match="/lasdata/grids/aadc_obis_argos_tracking_grid"/>
+      </Country>
+      <County name="County" url="#County">
+        <link match="/lasdata/grids/aadc_obis_argos_tracking_grid"/>
+      </County>
+      <DateLastModified name="DateLastModified" url="#DateLastModified">
+        <link match="/lasdata/grids/aadc_obis_argos_tracking_grid"/>
+      </DateLastModified>
+      <DayCollected name="DayCollected" url="#DayCollected">
+        <link match="/lasdata/grids/aadc_obis_argos_tracking_grid"/>
+      </DayCollected>
+      <DayIdentified name="DayIdentified" url="#DayIdentified">
+        <link match="/lasdata/grids/aadc_obis_argos_tracking_grid"/>
+      </DayIdentified>
+      <DepthRange name="DepthRange" url="#DepthRange">
+        <link match="/lasdata/grids/aadc_obis_argos_tracking_grid"/>
+      </DepthRange>
+      <EndDayCollected name="EndDayCollected" url="#EndDayCollected">
+        <link match="/lasdata/grids/aadc_obis_argos_tracking_grid"/>
+      </EndDayCollected>
+      <EndJulianDay name="EndJulianDay" url="#EndJulianDay">
+        <link match="/lasdata/grids/aadc_obis_argos_tracking_grid"/>
+      </EndJulianDay>
+      <EndLatitude units="degrees_north" name="EndLatitude" url="#EndLatitude">
+        <link match="/lasdata/grids/aadc_obis_argos_tracking_grid"/>
+      </EndLatitude>
+      <EndLongitude units="degrees_east" name="EndLongitude" url="#EndLongitude">
+        <link match="/lasdata/grids/aadc_obis_argos_tracking_grid"/>
+      </EndLongitude>
+      <EndMonthCollected name="EndMonthCollected" url="#EndMonthCollected">
+        <link match="/lasdata/grids/aadc_obis_argos_tracking_grid"/>
+      </EndMonthCollected>
+      <EndTimeofDay units="hours" name="EndTimeofDay" url="#EndTimeofDay">
+        <link match="/lasdata/grids/aadc_obis_argos_tracking_grid"/>
+      </EndTimeofDay>
+      <EndYearCollected name="EndYearCollected" url="#EndYearCollected">
+        <link match="/lasdata/grids/aadc_obis_argos_tracking_grid"/>
+      </EndYearCollected>
+      <Family name="Family" url="#Family">
+        <link match="/lasdata/grids/aadc_obis_argos_tracking_grid"/>
+      </Family>
+      <FieldNumber name="FieldNumber" url="#FieldNumber">
+        <link match="/lasdata/grids/aadc_obis_argos_tracking_grid"/>
+      </FieldNumber>
+      <GMLFeature name="GMLFeature" url="#GMLFeature">
+        <link match="/lasdata/grids/aadc_obis_argos_tracking_grid"/>
+      </GMLFeature>
+      <Genus name="Genus" url="#Genus">
+        <link match="/lasdata/grids/aadc_obis_argos_tracking_grid"/>
+      </Genus>
+      <IdentifiedBy name="IdentifiedBy" url="#IdentifiedBy">
+        <link match="/lasdata/grids/aadc_obis_argos_tracking_grid"/>
+      </IdentifiedBy>
+      <IndividualCount units="count" name="IndividualCount" url="#IndividualCount">
+        <link match="/lasdata/grids/aadc_obis_argos_tracking_grid"/>
+      </IndividualCount>
+      <InstitutionCode name="InstitutionCode" url="#InstitutionCode">
+        <link match="/lasdata/grids/aadc_obis_argos_tracking_grid"/>
+      </InstitutionCode>
+      <JulianDay name="JulianDay" url="#JulianDay">
+        <link match="/lasdata/grids/aadc_obis_argos_tracking_grid"/>
+      </JulianDay>
+      <Kingdom name="Kingdom" url="#Kingdom">
+        <link match="/lasdata/grids/aadc_obis_argos_tracking_grid"/>
+      </Kingdom>
+      <LifeStage name="LifeStage" url="#LifeStage">
+        <link match="/lasdata/grids/aadc_obis_argos_tracking_grid"/>
+      </LifeStage>
+      <Locality name="Locality" url="#Locality">
+        <link match="/lasdata/grids/aadc_obis_argos_tracking_grid"/>
+      </Locality>
+      <MaximumDepth units="m" name="MaximumDepth" url="#MaximumDepth">
+        <link match="/lasdata/grids/aadc_obis_argos_tracking_grid"/>
+      </MaximumDepth>
+      <MaximumElevation units="m" name="MaximumElevation" url="#MaximumElevation">
+        <link match="/lasdata/grids/aadc_obis_argos_tracking_grid"/>
+      </MaximumElevation>
+      <MinimumElevation units="m" name="MinimumElevation" url="#MinimumElevation">
+        <link match="/lasdata/grids/aadc_obis_argos_tracking_grid"/>
+      </MinimumElevation>
+      <MonthCollected name="MonthCollected" url="#MonthCollected">
+        <link match="/lasdata/grids/aadc_obis_argos_tracking_grid"/>
+      </MonthCollected>
+      <MonthIdentified name="MonthIdentified" url="#MonthIdentified">
+        <link match="/lasdata/grids/aadc_obis_argos_tracking_grid"/>
+      </MonthIdentified>
+      <Notes name="Notes" url="#Notes">
+        <link match="/lasdata/grids/aadc_obis_argos_tracking_grid"/>
+      </Notes>
+      <ObservedIndividualCount units="count" name="ObservedIndividualCount" url="#ObservedIndividualCount">
+        <link match="/lasdata/grids/aadc_obis_argos_tracking_grid"/>
+      </ObservedIndividualCount>
+      <ObservedWeight units="kg" name="ObservedWeight" url="#ObservedWeight">
+        <link match="/lasdata/grids/aadc_obis_argos_tracking_grid"/>
+      </ObservedWeight>
+      <Order name="Order" url="#Order">
+        <link match="/lasdata/grids/aadc_obis_argos_tracking_grid"/>
+      </Order>
+      <Phylum name="Phylum" url="#Phylum">
+        <link match="/lasdata/grids/aadc_obis_argos_tracking_grid"/>
+      </Phylum>
+      <PreparationType name="PreparationType" url="#PreparationType">
+        <link match="/lasdata/grids/aadc_obis_argos_tracking_grid"/>
+      </PreparationType>
+      <PreviousCatalogNumber name="PreviousCatalogNumber" url="#PreviousCatalogNumber">
+        <link match="/lasdata/grids/aadc_obis_argos_tracking_grid"/>
+      </PreviousCatalogNumber>
+      <RecordURL name="RecordURL" url="#RecordURL">
+        <link match="/lasdata/grids/aadc_obis_argos_tracking_grid"/>
+      </RecordURL>
+      <RelatedCatalogItem name="RelatedCatalogItem" url="#RelatedCatalogItem">
+        <link match="/lasdata/grids/aadc_obis_argos_tracking_grid"/>
+      </RelatedCatalogItem>
+      <RelationshipType name="RelationshipType" url="#RelationshipType">
+        <link match="/lasdata/grids/aadc_obis_argos_tracking_grid"/>
+      </RelationshipType>
+      <SampleSize name="SampleSize" url="#SampleSize">
+        <link match="/lasdata/grids/aadc_obis_argos_tracking_grid"/>
+      </SampleSize>
+      <ScientificName name="ScientificName" url="#ScientificName">
+        <link match="/lasdata/grids/aadc_obis_argos_tracking_grid"/>
+      </ScientificName>
+      <ScientificNameAuthor name="ScientificNameAuthor" url="#ScientificNameAuthor">
+        <link match="/lasdata/grids/aadc_obis_argos_tracking_grid"/>
+      </ScientificNameAuthor>
+      <Sex name="Sex" url="#Sex">
+        <link match="/lasdata/grids/aadc_obis_argos_tracking_grid"/>
+      </Sex>
+      <Source name="Source" url="#Source">
+        <link match="/lasdata/grids/aadc_obis_argos_tracking_grid"/>
+      </Source>
+      <Species name="Species" url="#Species">
+        <link match="/lasdata/grids/aadc_obis_argos_tracking_grid"/>
+      </Species>
+      <StartDayCollected name="StartDayCollected" url="#StartDayCollected">
+        <link match="/lasdata/grids/aadc_obis_argos_tracking_grid"/>
+      </StartDayCollected>
+      <StartJulianDay name="StartJulianDay" url="#StartJulianDay">
+        <link match="/lasdata/grids/aadc_obis_argos_tracking_grid"/>
+      </StartJulianDay>
+      <StartLatitude units="degrees_north" name="StartLatitude" url="#StartLatitude">
+        <link match="/lasdata/grids/aadc_obis_argos_tracking_grid"/>
+      </StartLatitude>
+      <StartLongitude units="degrees_east" name="StartLongitude" url="#StartLongitude">
+        <link match="/lasdata/grids/aadc_obis_argos_tracking_grid"/>
+      </StartLongitude>
+      <StartMonthCollected name="StartMonthCollected" url="#StartMonthCollected">
+        <link match="/lasdata/grids/aadc_obis_argos_tracking_grid"/>
+      </StartMonthCollected>
+      <StartTimeofDay units="hours" name="StartTimeofDay" url="#StartTimeofDay">
+        <link match="/lasdata/grids/aadc_obis_argos_tracking_grid"/>
+      </StartTimeofDay>
+      <StartYearCollected name="StartYearCollected" url="#StartYearCollected">
+        <link match="/lasdata/grids/aadc_obis_argos_tracking_grid"/>
+      </StartYearCollected>
+      <Start_EndCoordinatePrecision units="m" name="Start_EndCoordinatePrecision" url="#Start_EndCoordinatePrecision">
+        <link match="/lasdata/grids/aadc_obis_argos_tracking_grid"/>
+      </Start_EndCoordinatePrecision>
+      <StateProvince name="StateProvince" url="#StateProvince">
+        <link match="/lasdata/grids/aadc_obis_argos_tracking_grid"/>
+      </StateProvince>
+      <Subgenus name="Subgenus" url="#Subgenus">
+        <link match="/lasdata/grids/aadc_obis_argos_tracking_grid"/>
+      </Subgenus>
+      <Subspecies name="Subspecies" url="#Subspecies">
+        <link match="/lasdata/grids/aadc_obis_argos_tracking_grid"/>
+      </Subspecies>
+      <Temperature units="degree_C" name="Temperature" url="#Temperature">
+        <link match="/lasdata/grids/aadc_obis_argos_tracking_grid"/>
+      </Temperature>
+      <TimeOfDay units="hours" name="TimeOfDay" url="#TimeOfDay">
+        <link match="/lasdata/grids/aadc_obis_argos_tracking_grid"/>
+      </TimeOfDay>
+      <TimeZone name="TimeZone" url="#TimeZone">
+        <link match="/lasdata/grids/aadc_obis_argos_tracking_grid"/>
+      </TimeZone>
+      <TypeStatus name="TypeStatus" url="#TypeStatus">
+        <link match="/lasdata/grids/aadc_obis_argos_tracking_grid"/>
+      </TypeStatus>
+      <YearCollected name="YearCollected" url="#YearCollected">
+        <link match="/lasdata/grids/aadc_obis_argos_tracking_grid"/>
+      </YearCollected>
+      <YearIdentified name="YearIdentified" url="#YearIdentified">
+        <link match="/lasdata/grids/aadc_obis_argos_tracking_grid"/>
+      </YearIdentified>
     </variables>
   </aadc_obis_argos_tracking>
   <fishbase_obis_fishbase
     name = "OBIS - FishBase (Philippine Server)"
-    url = "http://coastwatch.pfel.noaa.gov/cwexperimental/erddap/tabledap/fishbase_obis/fishbase"
+    url = "http://coastwatch.pfel.noaa.gov/erddap2/tabledap/fishbase_obis/fishbase"
     doc = "http://filaman.ifm-geomar.de/home.htm">
     <properties>
       <ui>
@@ -960,230 +1088,230 @@
       </product_server>
     </properties>
     <variables>
-      <ID name="ID"
-        url="#ID">
-      <ID>
-      <BasisOfRecord name="BasisOfRecord"
-        url="#BasisOfRecord">
-      <BasisOfRecord>
-      <BoundingBox name="BoundingBox"
-        url="#BoundingBox">
-      <BoundingBox>
-      <CatalogNumber name="CatalogNumber"
-        url="#CatalogNumber">
-      <CatalogNumber>
-      <Citation name="Citation"
-        url="#Citation">
-      <Citation>
-      <Class name="Class"
-        url="#Class">
-      <Class>
-      <CollectionCode name="CollectionCode"
-        url="#CollectionCode">
-      <CollectionCode>
-      <Collector name="Collector"
-        url="#Collector">
-      <Collector>
-      <CollectorNumber name="CollectorNumber"
-        url="#CollectorNumber">
-      <CollectorNumber>
-      <ContinentOcean name="ContinentOcean"
-        url="#ContinentOcean">
-      <ContinentOcean>
-      <CoordinatePrecision units="m" name="CoordinatePrecision"
-        url="#CoordinatePrecision">
-      <CoordinatePrecision>
-      <Country name="Country"
-        url="#Country">
-      <Country>
-      <County name="County"
-        url="#County">
-      <County>
-      <DateLastModified name="DateLastModified"
-        url="#DateLastModified">
-      <DateLastModified>
-      <DayCollected name="DayCollected"
-        url="#DayCollected">
-      <DayCollected>
-      <DayIdentified name="DayIdentified"
-        url="#DayIdentified">
-      <DayIdentified>
-      <DepthRange name="DepthRange"
-        url="#DepthRange">
-      <DepthRange>
-      <EndDayCollected name="EndDayCollected"
-        url="#EndDayCollected">
-      <EndDayCollected>
-      <EndJulianDay name="EndJulianDay"
-        url="#EndJulianDay">
-      <EndJulianDay>
-      <EndLatitude units="degrees_north" name="EndLatitude"
-        url="#EndLatitude">
-      <EndLatitude>
-      <EndLongitude units="degrees_east" name="EndLongitude"
-        url="#EndLongitude">
-      <EndLongitude>
-      <EndMonthCollected name="EndMonthCollected"
-        url="#EndMonthCollected">
-      <EndMonthCollected>
-      <EndTimeofDay units="hours" name="EndTimeofDay"
-        url="#EndTimeofDay">
-      <EndTimeofDay>
-      <EndYearCollected name="EndYearCollected"
-        url="#EndYearCollected">
-      <EndYearCollected>
-      <Family name="Family"
-        url="#Family">
-      <Family>
-      <FieldNumber name="FieldNumber"
-        url="#FieldNumber">
-      <FieldNumber>
-      <GMLFeature name="GMLFeature"
-        url="#GMLFeature">
-      <GMLFeature>
-      <Genus name="Genus"
-        url="#Genus">
-      <Genus>
-      <IdentifiedBy name="IdentifiedBy"
-        url="#IdentifiedBy">
-      <IdentifiedBy>
-      <IndividualCount units="count" name="IndividualCount"
-        url="#IndividualCount">
-      <IndividualCount>
-      <InstitutionCode name="InstitutionCode"
-        url="#InstitutionCode">
-      <InstitutionCode>
-      <JulianDay name="JulianDay"
-        url="#JulianDay">
-      <JulianDay>
-      <Kingdom name="Kingdom"
-        url="#Kingdom">
-      <Kingdom>
-      <LifeStage name="LifeStage"
-        url="#LifeStage">
-      <LifeStage>
-      <Locality name="Locality"
-        url="#Locality">
-      <Locality>
-      <MaximumDepth units="m" name="MaximumDepth"
-        url="#MaximumDepth">
-      <MaximumDepth>
-      <MaximumElevation units="m" name="MaximumElevation"
-        url="#MaximumElevation">
-      <MaximumElevation>
-      <MinimumElevation units="m" name="MinimumElevation"
-        url="#MinimumElevation">
-      <MinimumElevation>
-      <MonthCollected name="MonthCollected"
-        url="#MonthCollected">
-      <MonthCollected>
-      <MonthIdentified name="MonthIdentified"
-        url="#MonthIdentified">
-      <MonthIdentified>
-      <Notes name="Notes"
-        url="#Notes">
-      <Notes>
-      <ObservedIndividualCount units="count" name="ObservedIndividualCount"
-        url="#ObservedIndividualCount">
-      <ObservedIndividualCount>
-      <ObservedWeight units="kg" name="ObservedWeight"
-        url="#ObservedWeight">
-      <ObservedWeight>
-      <Order name="Order"
-        url="#Order">
-      <Order>
-      <Phylum name="Phylum"
-        url="#Phylum">
-      <Phylum>
-      <PreparationType name="PreparationType"
-        url="#PreparationType">
-      <PreparationType>
-      <PreviousCatalogNumber name="PreviousCatalogNumber"
-        url="#PreviousCatalogNumber">
-      <PreviousCatalogNumber>
-      <RecordURL name="RecordURL"
-        url="#RecordURL">
-      <RecordURL>
-      <RelatedCatalogItem name="RelatedCatalogItem"
-        url="#RelatedCatalogItem">
-      <RelatedCatalogItem>
-      <RelationshipType name="RelationshipType"
-        url="#RelationshipType">
-      <RelationshipType>
-      <SampleSize name="SampleSize"
-        url="#SampleSize">
-      <SampleSize>
-      <ScientificName name="ScientificName"
-        url="#ScientificName">
-      <ScientificName>
-      <ScientificNameAuthor name="ScientificNameAuthor"
-        url="#ScientificNameAuthor">
-      <ScientificNameAuthor>
-      <Sex name="Sex"
-        url="#Sex">
-      <Sex>
-      <Source name="Source"
-        url="#Source">
-      <Source>
-      <Species name="Species"
-        url="#Species">
-      <Species>
-      <StartDayCollected name="StartDayCollected"
-        url="#StartDayCollected">
-      <StartDayCollected>
-      <StartJulianDay name="StartJulianDay"
-        url="#StartJulianDay">
-      <StartJulianDay>
-      <StartLatitude units="degrees_north" name="StartLatitude"
-        url="#StartLatitude">
-      <StartLatitude>
-      <StartLongitude units="degrees_east" name="StartLongitude"
-        url="#StartLongitude">
-      <StartLongitude>
-      <StartMonthCollected name="StartMonthCollected"
-        url="#StartMonthCollected">
-      <StartMonthCollected>
-      <StartTimeofDay units="hours" name="StartTimeofDay"
-        url="#StartTimeofDay">
-      <StartTimeofDay>
-      <StartYearCollected name="StartYearCollected"
-        url="#StartYearCollected">
-      <StartYearCollected>
-      <Start_EndCoordinatePrecision units="m" name="Start_EndCoordinatePrecision"
-        url="#Start_EndCoordinatePrecision">
-      <Start_EndCoordinatePrecision>
-      <StateProvince name="StateProvince"
-        url="#StateProvince">
-      <StateProvince>
-      <Subgenus name="Subgenus"
-        url="#Subgenus">
-      <Subgenus>
-      <Subspecies name="Subspecies"
-        url="#Subspecies">
-      <Subspecies>
-      <Temperature units="degree_C" name="Temperature"
-        url="#Temperature">
-      <Temperature>
-      <TimeOfDay units="hours" name="TimeOfDay"
-        url="#TimeOfDay">
-      <TimeOfDay>
-      <TimeZone name="TimeZone"
-        url="#TimeZone">
-      <TimeZone>
-      <TypeStatus name="TypeStatus"
-        url="#TypeStatus">
-      <TypeStatus>
-      <YearCollected name="YearCollected"
-        url="#YearCollected">
-      <YearCollected>
-      <YearIdentified name="YearIdentified"
-        url="#YearIdentified">
-      <YearIdentified>
+      <ID name="ID" url="#ID">
+        <link match="/lasdata/grids/fishbase_obis_fishbase_grid"/>
+      </ID>
+      <BasisOfRecord name="BasisOfRecord" url="#BasisOfRecord">
+        <link match="/lasdata/grids/fishbase_obis_fishbase_grid"/>
+      </BasisOfRecord>
+      <BoundingBox name="BoundingBox" url="#BoundingBox">
+        <link match="/lasdata/grids/fishbase_obis_fishbase_grid"/>
+      </BoundingBox>
+      <CatalogNumber name="CatalogNumber" url="#CatalogNumber">
+        <link match="/lasdata/grids/fishbase_obis_fishbase_grid"/>
+      </CatalogNumber>
+      <Citation name="Citation" url="#Citation">
+        <link match="/lasdata/grids/fishbase_obis_fishbase_grid"/>
+      </Citation>
+      <Class name="Class" url="#Class">
+        <link match="/lasdata/grids/fishbase_obis_fishbase_grid"/>
+      </Class>
+      <CollectionCode name="CollectionCode" url="#CollectionCode">
+        <link match="/lasdata/grids/fishbase_obis_fishbase_grid"/>
+      </CollectionCode>
+      <Collector name="Collector" url="#Collector">
+        <link match="/lasdata/grids/fishbase_obis_fishbase_grid"/>
+      </Collector>
+      <CollectorNumber name="CollectorNumber" url="#CollectorNumber">
+        <link match="/lasdata/grids/fishbase_obis_fishbase_grid"/>
+      </CollectorNumber>
+      <ContinentOcean name="ContinentOcean" url="#ContinentOcean">
+        <link match="/lasdata/grids/fishbase_obis_fishbase_grid"/>
+      </ContinentOcean>
+      <CoordinatePrecision units="m" name="CoordinatePrecision" url="#CoordinatePrecision">
+        <link match="/lasdata/grids/fishbase_obis_fishbase_grid"/>
+      </CoordinatePrecision>
+      <Country name="Country" url="#Country">
+        <link match="/lasdata/grids/fishbase_obis_fishbase_grid"/>
+      </Country>
+      <County name="County" url="#County">
+        <link match="/lasdata/grids/fishbase_obis_fishbase_grid"/>
+      </County>
+      <DateLastModified name="DateLastModified" url="#DateLastModified">
+        <link match="/lasdata/grids/fishbase_obis_fishbase_grid"/>
+      </DateLastModified>
+      <DayCollected name="DayCollected" url="#DayCollected">
+        <link match="/lasdata/grids/fishbase_obis_fishbase_grid"/>
+      </DayCollected>
+      <DayIdentified name="DayIdentified" url="#DayIdentified">
+        <link match="/lasdata/grids/fishbase_obis_fishbase_grid"/>
+      </DayIdentified>
+      <DepthRange name="DepthRange" url="#DepthRange">
+        <link match="/lasdata/grids/fishbase_obis_fishbase_grid"/>
+      </DepthRange>
+      <EndDayCollected name="EndDayCollected" url="#EndDayCollected">
+        <link match="/lasdata/grids/fishbase_obis_fishbase_grid"/>
+      </EndDayCollected>
+      <EndJulianDay name="EndJulianDay" url="#EndJulianDay">
+        <link match="/lasdata/grids/fishbase_obis_fishbase_grid"/>
+      </EndJulianDay>
+      <EndLatitude units="degrees_north" name="EndLatitude" url="#EndLatitude">
+        <link match="/lasdata/grids/fishbase_obis_fishbase_grid"/>
+      </EndLatitude>
+      <EndLongitude units="degrees_east" name="EndLongitude" url="#EndLongitude">
+        <link match="/lasdata/grids/fishbase_obis_fishbase_grid"/>
+      </EndLongitude>
+      <EndMonthCollected name="EndMonthCollected" url="#EndMonthCollected">
+        <link match="/lasdata/grids/fishbase_obis_fishbase_grid"/>
+      </EndMonthCollected>
+      <EndTimeofDay units="hours" name="EndTimeofDay" url="#EndTimeofDay">
+        <link match="/lasdata/grids/fishbase_obis_fishbase_grid"/>
+      </EndTimeofDay>
+      <EndYearCollected name="EndYearCollected" url="#EndYearCollected">
+        <link match="/lasdata/grids/fishbase_obis_fishbase_grid"/>
+      </EndYearCollected>
+      <Family name="Family" url="#Family">
+        <link match="/lasdata/grids/fishbase_obis_fishbase_grid"/>
+      </Family>
+      <FieldNumber name="FieldNumber" url="#FieldNumber">
+        <link match="/lasdata/grids/fishbase_obis_fishbase_grid"/>
+      </FieldNumber>
+      <GMLFeature name="GMLFeature" url="#GMLFeature">
+        <link match="/lasdata/grids/fishbase_obis_fishbase_grid"/>
+      </GMLFeature>
+      <Genus name="Genus" url="#Genus">
+        <link match="/lasdata/grids/fishbase_obis_fishbase_grid"/>
+      </Genus>
+      <IdentifiedBy name="IdentifiedBy" url="#IdentifiedBy">
+        <link match="/lasdata/grids/fishbase_obis_fishbase_grid"/>
+      </IdentifiedBy>
+      <IndividualCount units="count" name="IndividualCount" url="#IndividualCount">
+        <link match="/lasdata/grids/fishbase_obis_fishbase_grid"/>
+      </IndividualCount>
+      <InstitutionCode name="InstitutionCode" url="#InstitutionCode">
+        <link match="/lasdata/grids/fishbase_obis_fishbase_grid"/>
+      </InstitutionCode>
+      <JulianDay name="JulianDay" url="#JulianDay">
+        <link match="/lasdata/grids/fishbase_obis_fishbase_grid"/>
+      </JulianDay>
+      <Kingdom name="Kingdom" url="#Kingdom">
+        <link match="/lasdata/grids/fishbase_obis_fishbase_grid"/>
+      </Kingdom>
+      <LifeStage name="LifeStage" url="#LifeStage">
+        <link match="/lasdata/grids/fishbase_obis_fishbase_grid"/>
+      </LifeStage>
+      <Locality name="Locality" url="#Locality">
+        <link match="/lasdata/grids/fishbase_obis_fishbase_grid"/>
+      </Locality>
+      <MaximumDepth units="m" name="MaximumDepth" url="#MaximumDepth">
+        <link match="/lasdata/grids/fishbase_obis_fishbase_grid"/>
+      </MaximumDepth>
+      <MaximumElevation units="m" name="MaximumElevation" url="#MaximumElevation">
+        <link match="/lasdata/grids/fishbase_obis_fishbase_grid"/>
+      </MaximumElevation>
+      <MinimumElevation units="m" name="MinimumElevation" url="#MinimumElevation">
+        <link match="/lasdata/grids/fishbase_obis_fishbase_grid"/>
+      </MinimumElevation>
+      <MonthCollected name="MonthCollected" url="#MonthCollected">
+        <link match="/lasdata/grids/fishbase_obis_fishbase_grid"/>
+      </MonthCollected>
+      <MonthIdentified name="MonthIdentified" url="#MonthIdentified">
+        <link match="/lasdata/grids/fishbase_obis_fishbase_grid"/>
+      </MonthIdentified>
+      <Notes name="Notes" url="#Notes">
+        <link match="/lasdata/grids/fishbase_obis_fishbase_grid"/>
+      </Notes>
+      <ObservedIndividualCount units="count" name="ObservedIndividualCount" url="#ObservedIndividualCount">
+        <link match="/lasdata/grids/fishbase_obis_fishbase_grid"/>
+      </ObservedIndividualCount>
+      <ObservedWeight units="kg" name="ObservedWeight" url="#ObservedWeight">
+        <link match="/lasdata/grids/fishbase_obis_fishbase_grid"/>
+      </ObservedWeight>
+      <Order name="Order" url="#Order">
+        <link match="/lasdata/grids/fishbase_obis_fishbase_grid"/>
+      </Order>
+      <Phylum name="Phylum" url="#Phylum">
+        <link match="/lasdata/grids/fishbase_obis_fishbase_grid"/>
+      </Phylum>
+      <PreparationType name="PreparationType" url="#PreparationType">
+        <link match="/lasdata/grids/fishbase_obis_fishbase_grid"/>
+      </PreparationType>
+      <PreviousCatalogNumber name="PreviousCatalogNumber" url="#PreviousCatalogNumber">
+        <link match="/lasdata/grids/fishbase_obis_fishbase_grid"/>
+      </PreviousCatalogNumber>
+      <RecordURL name="RecordURL" url="#RecordURL">
+        <link match="/lasdata/grids/fishbase_obis_fishbase_grid"/>
+      </RecordURL>
+      <RelatedCatalogItem name="RelatedCatalogItem" url="#RelatedCatalogItem">
+        <link match="/lasdata/grids/fishbase_obis_fishbase_grid"/>
+      </RelatedCatalogItem>
+      <RelationshipType name="RelationshipType" url="#RelationshipType">
+        <link match="/lasdata/grids/fishbase_obis_fishbase_grid"/>
+      </RelationshipType>
+      <SampleSize name="SampleSize" url="#SampleSize">
+        <link match="/lasdata/grids/fishbase_obis_fishbase_grid"/>
+      </SampleSize>
+      <ScientificName name="ScientificName" url="#ScientificName">
+        <link match="/lasdata/grids/fishbase_obis_fishbase_grid"/>
+      </ScientificName>
+      <ScientificNameAuthor name="ScientificNameAuthor" url="#ScientificNameAuthor">
+        <link match="/lasdata/grids/fishbase_obis_fishbase_grid"/>
+      </ScientificNameAuthor>
+      <Sex name="Sex" url="#Sex">
+        <link match="/lasdata/grids/fishbase_obis_fishbase_grid"/>
+      </Sex>
+      <Source name="Source" url="#Source">
+        <link match="/lasdata/grids/fishbase_obis_fishbase_grid"/>
+      </Source>
+      <Species name="Species" url="#Species">
+        <link match="/lasdata/grids/fishbase_obis_fishbase_grid"/>
+      </Species>
+      <StartDayCollected name="StartDayCollected" url="#StartDayCollected">
+        <link match="/lasdata/grids/fishbase_obis_fishbase_grid"/>
+      </StartDayCollected>
+      <StartJulianDay name="StartJulianDay" url="#StartJulianDay">
+        <link match="/lasdata/grids/fishbase_obis_fishbase_grid"/>
+      </StartJulianDay>
+      <StartLatitude units="degrees_north" name="StartLatitude" url="#StartLatitude">
+        <link match="/lasdata/grids/fishbase_obis_fishbase_grid"/>
+      </StartLatitude>
+      <StartLongitude units="degrees_east" name="StartLongitude" url="#StartLongitude">
+        <link match="/lasdata/grids/fishbase_obis_fishbase_grid"/>
+      </StartLongitude>
+      <StartMonthCollected name="StartMonthCollected" url="#StartMonthCollected">
+        <link match="/lasdata/grids/fishbase_obis_fishbase_grid"/>
+      </StartMonthCollected>
+      <StartTimeofDay units="hours" name="StartTimeofDay" url="#StartTimeofDay">
+        <link match="/lasdata/grids/fishbase_obis_fishbase_grid"/>
+      </StartTimeofDay>
+      <StartYearCollected name="StartYearCollected" url="#StartYearCollected">
+        <link match="/lasdata/grids/fishbase_obis_fishbase_grid"/>
+      </StartYearCollected>
+      <Start_EndCoordinatePrecision units="m" name="Start_EndCoordinatePrecision" url="#Start_EndCoordinatePrecision">
+        <link match="/lasdata/grids/fishbase_obis_fishbase_grid"/>
+      </Start_EndCoordinatePrecision>
+      <StateProvince name="StateProvince" url="#StateProvince">
+        <link match="/lasdata/grids/fishbase_obis_fishbase_grid"/>
+      </StateProvince>
+      <Subgenus name="Subgenus" url="#Subgenus">
+        <link match="/lasdata/grids/fishbase_obis_fishbase_grid"/>
+      </Subgenus>
+      <Subspecies name="Subspecies" url="#Subspecies">
+        <link match="/lasdata/grids/fishbase_obis_fishbase_grid"/>
+      </Subspecies>
+      <Temperature units="degree_C" name="Temperature" url="#Temperature">
+        <link match="/lasdata/grids/fishbase_obis_fishbase_grid"/>
+      </Temperature>
+      <TimeOfDay units="hours" name="TimeOfDay" url="#TimeOfDay">
+        <link match="/lasdata/grids/fishbase_obis_fishbase_grid"/>
+      </TimeOfDay>
+      <TimeZone name="TimeZone" url="#TimeZone">
+        <link match="/lasdata/grids/fishbase_obis_fishbase_grid"/>
+      </TimeZone>
+      <TypeStatus name="TypeStatus" url="#TypeStatus">
+        <link match="/lasdata/grids/fishbase_obis_fishbase_grid"/>
+      </TypeStatus>
+      <YearCollected name="YearCollected" url="#YearCollected">
+        <link match="/lasdata/grids/fishbase_obis_fishbase_grid"/>
+      </YearCollected>
+      <YearIdentified name="YearIdentified" url="#YearIdentified">
+        <link match="/lasdata/grids/fishbase_obis_fishbase_grid"/>
+      </YearIdentified>
     </variables>
   </fishbase_obis_fishbase>
   <rutgers_obis_GulfOfMaineBIS
     name = "OBIS - Gulf of Maine Bottom Trawl Survey Data (NEFSC,NMFS,NOAA)"
-    url = "http://coastwatch.pfel.noaa.gov/cwexperimental/erddap/tabledap/rutgers_obis/GulfOfMaineBIS"
+    url = "http://coastwatch.pfel.noaa.gov/erddap2/tabledap/rutgers_obis/GulfOfMaineBIS"
     doc = "http://www.nefsc.noaa.gov">
     <properties>
       <ui>
@@ -1210,230 +1338,230 @@
       </product_server>
     </properties>
     <variables>
-      <ID name="ID"
-        url="#ID">
-      <ID>
-      <BasisOfRecord name="BasisOfRecord"
-        url="#BasisOfRecord">
-      <BasisOfRecord>
-      <BoundingBox name="BoundingBox"
-        url="#BoundingBox">
-      <BoundingBox>
-      <CatalogNumber name="CatalogNumber"
-        url="#CatalogNumber">
-      <CatalogNumber>
-      <Citation name="Citation"
-        url="#Citation">
-      <Citation>
-      <Class name="Class"
-        url="#Class">
-      <Class>
-      <CollectionCode name="CollectionCode"
-        url="#CollectionCode">
-      <CollectionCode>
-      <Collector name="Collector"
-        url="#Collector">
-      <Collector>
-      <CollectorNumber name="CollectorNumber"
-        url="#CollectorNumber">
-      <CollectorNumber>
-      <ContinentOcean name="ContinentOcean"
-        url="#ContinentOcean">
-      <ContinentOcean>
-      <CoordinatePrecision units="m" name="CoordinatePrecision"
-        url="#CoordinatePrecision">
-      <CoordinatePrecision>
-      <Country name="Country"
-        url="#Country">
-      <Country>
-      <County name="County"
-        url="#County">
-      <County>
-      <DateLastModified name="DateLastModified"
-        url="#DateLastModified">
-      <DateLastModified>
-      <DayCollected name="DayCollected"
-        url="#DayCollected">
-      <DayCollected>
-      <DayIdentified name="DayIdentified"
-        url="#DayIdentified">
-      <DayIdentified>
-      <DepthRange name="DepthRange"
-        url="#DepthRange">
-      <DepthRange>
-      <EndDayCollected name="EndDayCollected"
-        url="#EndDayCollected">
-      <EndDayCollected>
-      <EndJulianDay name="EndJulianDay"
-        url="#EndJulianDay">
-      <EndJulianDay>
-      <EndLatitude units="degrees_north" name="EndLatitude"
-        url="#EndLatitude">
-      <EndLatitude>
-      <EndLongitude units="degrees_east" name="EndLongitude"
-        url="#EndLongitude">
-      <EndLongitude>
-      <EndMonthCollected name="EndMonthCollected"
-        url="#EndMonthCollected">
-      <EndMonthCollected>
-      <EndTimeofDay units="hours" name="EndTimeofDay"
-        url="#EndTimeofDay">
-      <EndTimeofDay>
-      <EndYearCollected name="EndYearCollected"
-        url="#EndYearCollected">
-      <EndYearCollected>
-      <Family name="Family"
-        url="#Family">
-      <Family>
-      <FieldNumber name="FieldNumber"
-        url="#FieldNumber">
-      <FieldNumber>
-      <GMLFeature name="GMLFeature"
-        url="#GMLFeature">
-      <GMLFeature>
-      <Genus name="Genus"
-        url="#Genus">
-      <Genus>
-      <IdentifiedBy name="IdentifiedBy"
-        url="#IdentifiedBy">
-      <IdentifiedBy>
-      <IndividualCount units="count" name="IndividualCount"
-        url="#IndividualCount">
-      <IndividualCount>
-      <InstitutionCode name="InstitutionCode"
-        url="#InstitutionCode">
-      <InstitutionCode>
-      <JulianDay name="JulianDay"
-        url="#JulianDay">
-      <JulianDay>
-      <Kingdom name="Kingdom"
-        url="#Kingdom">
-      <Kingdom>
-      <LifeStage name="LifeStage"
-        url="#LifeStage">
-      <LifeStage>
-      <Locality name="Locality"
-        url="#Locality">
-      <Locality>
-      <MaximumDepth units="m" name="MaximumDepth"
-        url="#MaximumDepth">
-      <MaximumDepth>
-      <MaximumElevation units="m" name="MaximumElevation"
-        url="#MaximumElevation">
-      <MaximumElevation>
-      <MinimumElevation units="m" name="MinimumElevation"
-        url="#MinimumElevation">
-      <MinimumElevation>
-      <MonthCollected name="MonthCollected"
-        url="#MonthCollected">
-      <MonthCollected>
-      <MonthIdentified name="MonthIdentified"
-        url="#MonthIdentified">
-      <MonthIdentified>
-      <Notes name="Notes"
-        url="#Notes">
-      <Notes>
-      <ObservedIndividualCount units="count" name="ObservedIndividualCount"
-        url="#ObservedIndividualCount">
-      <ObservedIndividualCount>
-      <ObservedWeight units="kg" name="ObservedWeight"
-        url="#ObservedWeight">
-      <ObservedWeight>
-      <Order name="Order"
-        url="#Order">
-      <Order>
-      <Phylum name="Phylum"
-        url="#Phylum">
-      <Phylum>
-      <PreparationType name="PreparationType"
-        url="#PreparationType">
-      <PreparationType>
-      <PreviousCatalogNumber name="PreviousCatalogNumber"
-        url="#PreviousCatalogNumber">
-      <PreviousCatalogNumber>
-      <RecordURL name="RecordURL"
-        url="#RecordURL">
-      <RecordURL>
-      <RelatedCatalogItem name="RelatedCatalogItem"
-        url="#RelatedCatalogItem">
-      <RelatedCatalogItem>
-      <RelationshipType name="RelationshipType"
-        url="#RelationshipType">
-      <RelationshipType>
-      <SampleSize name="SampleSize"
-        url="#SampleSize">
-      <SampleSize>
-      <ScientificName name="ScientificName"
-        url="#ScientificName">
-      <ScientificName>
-      <ScientificNameAuthor name="ScientificNameAuthor"
-        url="#ScientificNameAuthor">
-      <ScientificNameAuthor>
-      <Sex name="Sex"
-        url="#Sex">
-      <Sex>
-      <Source name="Source"
-        url="#Source">
-      <Source>
-      <Species name="Species"
-        url="#Species">
-      <Species>
-      <StartDayCollected name="StartDayCollected"
-        url="#StartDayCollected">
-      <StartDayCollected>
-      <StartJulianDay name="StartJulianDay"
-        url="#StartJulianDay">
-      <StartJulianDay>
-      <StartLatitude units="degrees_north" name="StartLatitude"
-        url="#StartLatitude">
-      <StartLatitude>
-      <StartLongitude units="degrees_east" name="StartLongitude"
-        url="#StartLongitude">
-      <StartLongitude>
-      <StartMonthCollected name="StartMonthCollected"
-        url="#StartMonthCollected">
-      <StartMonthCollected>
-      <StartTimeofDay units="hours" name="StartTimeofDay"
-        url="#StartTimeofDay">
-      <StartTimeofDay>
-      <StartYearCollected name="StartYearCollected"
-        url="#StartYearCollected">
-      <StartYearCollected>
-      <Start_EndCoordinatePrecision units="m" name="Start_EndCoordinatePrecision"
-        url="#Start_EndCoordinatePrecision">
-      <Start_EndCoordinatePrecision>
-      <StateProvince name="StateProvince"
-        url="#StateProvince">
-      <StateProvince>
-      <Subgenus name="Subgenus"
-        url="#Subgenus">
-      <Subgenus>
-      <Subspecies name="Subspecies"
-        url="#Subspecies">
-      <Subspecies>
-      <Temperature units="degree_C" name="Temperature"
-        url="#Temperature">
-      <Temperature>
-      <TimeOfDay units="hours" name="TimeOfDay"
-        url="#TimeOfDay">
-      <TimeOfDay>
-      <TimeZone name="TimeZone"
-        url="#TimeZone">
-      <TimeZone>
-      <TypeStatus name="TypeStatus"
-        url="#TypeStatus">
-      <TypeStatus>
-      <YearCollected name="YearCollected"
-        url="#YearCollected">
-      <YearCollected>
-      <YearIdentified name="YearIdentified"
-        url="#YearIdentified">
-      <YearIdentified>
+      <ID name="ID" url="#ID">
+        <link match="/lasdata/grids/rutgers_obis_GulfOfMaineBIS_grid"/>
+      </ID>
+      <BasisOfRecord name="BasisOfRecord" url="#BasisOfRecord">
+        <link match="/lasdata/grids/rutgers_obis_GulfOfMaineBIS_grid"/>
+      </BasisOfRecord>
+      <BoundingBox name="BoundingBox" url="#BoundingBox">
+        <link match="/lasdata/grids/rutgers_obis_GulfOfMaineBIS_grid"/>
+      </BoundingBox>
+      <CatalogNumber name="CatalogNumber" url="#CatalogNumber">
+        <link match="/lasdata/grids/rutgers_obis_GulfOfMaineBIS_grid"/>
+      </CatalogNumber>
+      <Citation name="Citation" url="#Citation">
+        <link match="/lasdata/grids/rutgers_obis_GulfOfMaineBIS_grid"/>
+      </Citation>
+      <Class name="Class" url="#Class">
+        <link match="/lasdata/grids/rutgers_obis_GulfOfMaineBIS_grid"/>
+      </Class>
+      <CollectionCode name="CollectionCode" url="#CollectionCode">
+        <link match="/lasdata/grids/rutgers_obis_GulfOfMaineBIS_grid"/>
+      </CollectionCode>
+      <Collector name="Collector" url="#Collector">
+        <link match="/lasdata/grids/rutgers_obis_GulfOfMaineBIS_grid"/>
+      </Collector>
+      <CollectorNumber name="CollectorNumber" url="#CollectorNumber">
+        <link match="/lasdata/grids/rutgers_obis_GulfOfMaineBIS_grid"/>
+      </CollectorNumber>
+      <ContinentOcean name="ContinentOcean" url="#ContinentOcean">
+        <link match="/lasdata/grids/rutgers_obis_GulfOfMaineBIS_grid"/>
+      </ContinentOcean>
+      <CoordinatePrecision units="m" name="CoordinatePrecision" url="#CoordinatePrecision">
+        <link match="/lasdata/grids/rutgers_obis_GulfOfMaineBIS_grid"/>
+      </CoordinatePrecision>
+      <Country name="Country" url="#Country">
+        <link match="/lasdata/grids/rutgers_obis_GulfOfMaineBIS_grid"/>
+      </Country>
+      <County name="County" url="#County">
+        <link match="/lasdata/grids/rutgers_obis_GulfOfMaineBIS_grid"/>
+      </County>
+      <DateLastModified name="DateLastModified" url="#DateLastModified">
+        <link match="/lasdata/grids/rutgers_obis_GulfOfMaineBIS_grid"/>
+      </DateLastModified>
+      <DayCollected name="DayCollected" url="#DayCollected">
+        <link match="/lasdata/grids/rutgers_obis_GulfOfMaineBIS_grid"/>
+      </DayCollected>
+      <DayIdentified name="DayIdentified" url="#DayIdentified">
+        <link match="/lasdata/grids/rutgers_obis_GulfOfMaineBIS_grid"/>
+      </DayIdentified>
+      <DepthRange name="DepthRange" url="#DepthRange">
+        <link match="/lasdata/grids/rutgers_obis_GulfOfMaineBIS_grid"/>
+      </DepthRange>
+      <EndDayCollected name="EndDayCollected" url="#EndDayCollected">
+        <link match="/lasdata/grids/rutgers_obis_GulfOfMaineBIS_grid"/>
+      </EndDayCollected>
+      <EndJulianDay name="EndJulianDay" url="#EndJulianDay">
+        <link match="/lasdata/grids/rutgers_obis_GulfOfMaineBIS_grid"/>
+      </EndJulianDay>
+      <EndLatitude units="degrees_north" name="EndLatitude" url="#EndLatitude">
+        <link match="/lasdata/grids/rutgers_obis_GulfOfMaineBIS_grid"/>
+      </EndLatitude>
+      <EndLongitude units="degrees_east" name="EndLongitude" url="#EndLongitude">
+        <link match="/lasdata/grids/rutgers_obis_GulfOfMaineBIS_grid"/>
+      </EndLongitude>
+      <EndMonthCollected name="EndMonthCollected" url="#EndMonthCollected">
+        <link match="/lasdata/grids/rutgers_obis_GulfOfMaineBIS_grid"/>
+      </EndMonthCollected>
+      <EndTimeofDay units="hours" name="EndTimeofDay" url="#EndTimeofDay">
+        <link match="/lasdata/grids/rutgers_obis_GulfOfMaineBIS_grid"/>
+      </EndTimeofDay>
+      <EndYearCollected name="EndYearCollected" url="#EndYearCollected">
+        <link match="/lasdata/grids/rutgers_obis_GulfOfMaineBIS_grid"/>
+      </EndYearCollected>
+      <Family name="Family" url="#Family">
+        <link match="/lasdata/grids/rutgers_obis_GulfOfMaineBIS_grid"/>
+      </Family>
+      <FieldNumber name="FieldNumber" url="#FieldNumber">
+        <link match="/lasdata/grids/rutgers_obis_GulfOfMaineBIS_grid"/>
+      </FieldNumber>
+      <GMLFeature name="GMLFeature" url="#GMLFeature">
+        <link match="/lasdata/grids/rutgers_obis_GulfOfMaineBIS_grid"/>
+      </GMLFeature>
+      <Genus name="Genus" url="#Genus">
+        <link match="/lasdata/grids/rutgers_obis_GulfOfMaineBIS_grid"/>
+      </Genus>
+      <IdentifiedBy name="IdentifiedBy" url="#IdentifiedBy">
+        <link match="/lasdata/grids/rutgers_obis_GulfOfMaineBIS_grid"/>
+      </IdentifiedBy>
+      <IndividualCount units="count" name="IndividualCount" url="#IndividualCount">
+        <link match="/lasdata/grids/rutgers_obis_GulfOfMaineBIS_grid"/>
+      </IndividualCount>
+      <InstitutionCode name="InstitutionCode" url="#InstitutionCode">
+        <link match="/lasdata/grids/rutgers_obis_GulfOfMaineBIS_grid"/>
+      </InstitutionCode>
+      <JulianDay name="JulianDay" url="#JulianDay">
+        <link match="/lasdata/grids/rutgers_obis_GulfOfMaineBIS_grid"/>
+      </JulianDay>
+      <Kingdom name="Kingdom" url="#Kingdom">
+        <link match="/lasdata/grids/rutgers_obis_GulfOfMaineBIS_grid"/>
+      </Kingdom>
+      <LifeStage name="LifeStage" url="#LifeStage">
+        <link match="/lasdata/grids/rutgers_obis_GulfOfMaineBIS_grid"/>
+      </LifeStage>
+      <Locality name="Locality" url="#Locality">
+        <link match="/lasdata/grids/rutgers_obis_GulfOfMaineBIS_grid"/>
+      </Locality>
+      <MaximumDepth units="m" name="MaximumDepth" url="#MaximumDepth">
+        <link match="/lasdata/grids/rutgers_obis_GulfOfMaineBIS_grid"/>
+      </MaximumDepth>
+      <MaximumElevation units="m" name="MaximumElevation" url="#MaximumElevation">
+        <link match="/lasdata/grids/rutgers_obis_GulfOfMaineBIS_grid"/>
+      </MaximumElevation>
+      <MinimumElevation units="m" name="MinimumElevation" url="#MinimumElevation">
+        <link match="/lasdata/grids/rutgers_obis_GulfOfMaineBIS_grid"/>
+      </MinimumElevation>
+      <MonthCollected name="MonthCollected" url="#MonthCollected">
+        <link match="/lasdata/grids/rutgers_obis_GulfOfMaineBIS_grid"/>
+      </MonthCollected>
+      <MonthIdentified name="MonthIdentified" url="#MonthIdentified">
+        <link match="/lasdata/grids/rutgers_obis_GulfOfMaineBIS_grid"/>
+      </MonthIdentified>
+      <Notes name="Notes" url="#Notes">
+        <link match="/lasdata/grids/rutgers_obis_GulfOfMaineBIS_grid"/>
+      </Notes>
+      <ObservedIndividualCount units="count" name="ObservedIndividualCount" url="#ObservedIndividualCount">
+        <link match="/lasdata/grids/rutgers_obis_GulfOfMaineBIS_grid"/>
+      </ObservedIndividualCount>
+      <ObservedWeight units="kg" name="ObservedWeight" url="#ObservedWeight">
+        <link match="/lasdata/grids/rutgers_obis_GulfOfMaineBIS_grid"/>
+      </ObservedWeight>
+      <Order name="Order" url="#Order">
+        <link match="/lasdata/grids/rutgers_obis_GulfOfMaineBIS_grid"/>
+      </Order>
+      <Phylum name="Phylum" url="#Phylum">
+        <link match="/lasdata/grids/rutgers_obis_GulfOfMaineBIS_grid"/>
+      </Phylum>
+      <PreparationType name="PreparationType" url="#PreparationType">
+        <link match="/lasdata/grids/rutgers_obis_GulfOfMaineBIS_grid"/>
+      </PreparationType>
+      <PreviousCatalogNumber name="PreviousCatalogNumber" url="#PreviousCatalogNumber">
+        <link match="/lasdata/grids/rutgers_obis_GulfOfMaineBIS_grid"/>
+      </PreviousCatalogNumber>
+      <RecordURL name="RecordURL" url="#RecordURL">
+        <link match="/lasdata/grids/rutgers_obis_GulfOfMaineBIS_grid"/>
+      </RecordURL>
+      <RelatedCatalogItem name="RelatedCatalogItem" url="#RelatedCatalogItem">
+        <link match="/lasdata/grids/rutgers_obis_GulfOfMaineBIS_grid"/>
+      </RelatedCatalogItem>
+      <RelationshipType name="RelationshipType" url="#RelationshipType">
+        <link match="/lasdata/grids/rutgers_obis_GulfOfMaineBIS_grid"/>
+      </RelationshipType>
+      <SampleSize name="SampleSize" url="#SampleSize">
+        <link match="/lasdata/grids/rutgers_obis_GulfOfMaineBIS_grid"/>
+      </SampleSize>
+      <ScientificName name="ScientificName" url="#ScientificName">
+        <link match="/lasdata/grids/rutgers_obis_GulfOfMaineBIS_grid"/>
+      </ScientificName>
+      <ScientificNameAuthor name="ScientificNameAuthor" url="#ScientificNameAuthor">
+        <link match="/lasdata/grids/rutgers_obis_GulfOfMaineBIS_grid"/>
+      </ScientificNameAuthor>
+      <Sex name="Sex" url="#Sex">
+        <link match="/lasdata/grids/rutgers_obis_GulfOfMaineBIS_grid"/>
+      </Sex>
+      <Source name="Source" url="#Source">
+        <link match="/lasdata/grids/rutgers_obis_GulfOfMaineBIS_grid"/>
+      </Source>
+      <Species name="Species" url="#Species">
+        <link match="/lasdata/grids/rutgers_obis_GulfOfMaineBIS_grid"/>
+      </Species>
+      <StartDayCollected name="StartDayCollected" url="#StartDayCollected">
+        <link match="/lasdata/grids/rutgers_obis_GulfOfMaineBIS_grid"/>
+      </StartDayCollected>
+      <StartJulianDay name="StartJulianDay" url="#StartJulianDay">
+        <link match="/lasdata/grids/rutgers_obis_GulfOfMaineBIS_grid"/>
+      </StartJulianDay>
+      <StartLatitude units="degrees_north" name="StartLatitude" url="#StartLatitude">
+        <link match="/lasdata/grids/rutgers_obis_GulfOfMaineBIS_grid"/>
+      </StartLatitude>
+      <StartLongitude units="degrees_east" name="StartLongitude" url="#StartLongitude">
+        <link match="/lasdata/grids/rutgers_obis_GulfOfMaineBIS_grid"/>
+      </StartLongitude>
+      <StartMonthCollected name="StartMonthCollected" url="#StartMonthCollected">
+        <link match="/lasdata/grids/rutgers_obis_GulfOfMaineBIS_grid"/>
+      </StartMonthCollected>
+      <StartTimeofDay units="hours" name="StartTimeofDay" url="#StartTimeofDay">
+        <link match="/lasdata/grids/rutgers_obis_GulfOfMaineBIS_grid"/>
+      </StartTimeofDay>
+      <StartYearCollected name="StartYearCollected" url="#StartYearCollected">
+        <link match="/lasdata/grids/rutgers_obis_GulfOfMaineBIS_grid"/>
+      </StartYearCollected>
+      <Start_EndCoordinatePrecision units="m" name="Start_EndCoordinatePrecision" url="#Start_EndCoordinatePrecision">
+        <link match="/lasdata/grids/rutgers_obis_GulfOfMaineBIS_grid"/>
+      </Start_EndCoordinatePrecision>
+      <StateProvince name="StateProvince" url="#StateProvince">
+        <link match="/lasdata/grids/rutgers_obis_GulfOfMaineBIS_grid"/>
+      </StateProvince>
+      <Subgenus name="Subgenus" url="#Subgenus">
+        <link match="/lasdata/grids/rutgers_obis_GulfOfMaineBIS_grid"/>
+      </Subgenus>
+      <Subspecies name="Subspecies" url="#Subspecies">
+        <link match="/lasdata/grids/rutgers_obis_GulfOfMaineBIS_grid"/>
+      </Subspecies>
+      <Temperature units="degree_C" name="Temperature" url="#Temperature">
+        <link match="/lasdata/grids/rutgers_obis_GulfOfMaineBIS_grid"/>
+      </Temperature>
+      <TimeOfDay units="hours" name="TimeOfDay" url="#TimeOfDay">
+        <link match="/lasdata/grids/rutgers_obis_GulfOfMaineBIS_grid"/>
+      </TimeOfDay>
+      <TimeZone name="TimeZone" url="#TimeZone">
+        <link match="/lasdata/grids/rutgers_obis_GulfOfMaineBIS_grid"/>
+      </TimeZone>
+      <TypeStatus name="TypeStatus" url="#TypeStatus">
+        <link match="/lasdata/grids/rutgers_obis_GulfOfMaineBIS_grid"/>
+      </TypeStatus>
+      <YearCollected name="YearCollected" url="#YearCollected">
+        <link match="/lasdata/grids/rutgers_obis_GulfOfMaineBIS_grid"/>
+      </YearCollected>
+      <YearIdentified name="YearIdentified" url="#YearIdentified">
+        <link match="/lasdata/grids/rutgers_obis_GulfOfMaineBIS_grid"/>
+      </YearIdentified>
     </variables>
   </rutgers_obis_GulfOfMaineBIS>
   <rutgers_obis_GHMP
     name = "OBIS - Gwaii Haanas Marine Plants (OBIS Canada)"
-    url = "http://coastwatch.pfel.noaa.gov/cwexperimental/erddap/tabledap/rutgers_obis/GHMP"
+    url = "http://coastwatch.pfel.noaa.gov/erddap2/tabledap/rutgers_obis/GHMP"
     doc = "http://gcmd.nasa.gov/KeywordSearch/Metadata.do?Portal=caobis&MetadataType=0&KeywordPath=&MetadataView=Full&EntryId=OBIS.Gwaii_MarPlants">
     <properties>
       <ui>
@@ -1460,230 +1588,230 @@
       </product_server>
     </properties>
     <variables>
-      <ID name="ID"
-        url="#ID">
-      <ID>
-      <BasisOfRecord name="BasisOfRecord"
-        url="#BasisOfRecord">
-      <BasisOfRecord>
-      <BoundingBox name="BoundingBox"
-        url="#BoundingBox">
-      <BoundingBox>
-      <CatalogNumber name="CatalogNumber"
-        url="#CatalogNumber">
-      <CatalogNumber>
-      <Citation name="Citation"
-        url="#Citation">
-      <Citation>
-      <Class name="Class"
-        url="#Class">
-      <Class>
-      <CollectionCode name="CollectionCode"
-        url="#CollectionCode">
-      <CollectionCode>
-      <Collector name="Collector"
-        url="#Collector">
-      <Collector>
-      <CollectorNumber name="CollectorNumber"
-        url="#CollectorNumber">
-      <CollectorNumber>
-      <ContinentOcean name="ContinentOcean"
-        url="#ContinentOcean">
-      <ContinentOcean>
-      <CoordinatePrecision units="m" name="CoordinatePrecision"
-        url="#CoordinatePrecision">
-      <CoordinatePrecision>
-      <Country name="Country"
-        url="#Country">
-      <Country>
-      <County name="County"
-        url="#County">
-      <County>
-      <DateLastModified name="DateLastModified"
-        url="#DateLastModified">
-      <DateLastModified>
-      <DayCollected name="DayCollected"
-        url="#DayCollected">
-      <DayCollected>
-      <DayIdentified name="DayIdentified"
-        url="#DayIdentified">
-      <DayIdentified>
-      <DepthRange name="DepthRange"
-        url="#DepthRange">
-      <DepthRange>
-      <EndDayCollected name="EndDayCollected"
-        url="#EndDayCollected">
-      <EndDayCollected>
-      <EndJulianDay name="EndJulianDay"
-        url="#EndJulianDay">
-      <EndJulianDay>
-      <EndLatitude units="degrees_north" name="EndLatitude"
-        url="#EndLatitude">
-      <EndLatitude>
-      <EndLongitude units="degrees_east" name="EndLongitude"
-        url="#EndLongitude">
-      <EndLongitude>
-      <EndMonthCollected name="EndMonthCollected"
-        url="#EndMonthCollected">
-      <EndMonthCollected>
-      <EndTimeofDay units="hours" name="EndTimeofDay"
-        url="#EndTimeofDay">
-      <EndTimeofDay>
-      <EndYearCollected name="EndYearCollected"
-        url="#EndYearCollected">
-      <EndYearCollected>
-      <Family name="Family"
-        url="#Family">
-      <Family>
-      <FieldNumber name="FieldNumber"
-        url="#FieldNumber">
-      <FieldNumber>
-      <GMLFeature name="GMLFeature"
-        url="#GMLFeature">
-      <GMLFeature>
-      <Genus name="Genus"
-        url="#Genus">
-      <Genus>
-      <IdentifiedBy name="IdentifiedBy"
-        url="#IdentifiedBy">
-      <IdentifiedBy>
-      <IndividualCount units="count" name="IndividualCount"
-        url="#IndividualCount">
-      <IndividualCount>
-      <InstitutionCode name="InstitutionCode"
-        url="#InstitutionCode">
-      <InstitutionCode>
-      <JulianDay name="JulianDay"
-        url="#JulianDay">
-      <JulianDay>
-      <Kingdom name="Kingdom"
-        url="#Kingdom">
-      <Kingdom>
-      <LifeStage name="LifeStage"
-        url="#LifeStage">
-      <LifeStage>
-      <Locality name="Locality"
-        url="#Locality">
-      <Locality>
-      <MaximumDepth units="m" name="MaximumDepth"
-        url="#MaximumDepth">
-      <MaximumDepth>
-      <MaximumElevation units="m" name="MaximumElevation"
-        url="#MaximumElevation">
-      <MaximumElevation>
-      <MinimumElevation units="m" name="MinimumElevation"
-        url="#MinimumElevation">
-      <MinimumElevation>
-      <MonthCollected name="MonthCollected"
-        url="#MonthCollected">
-      <MonthCollected>
-      <MonthIdentified name="MonthIdentified"
-        url="#MonthIdentified">
-      <MonthIdentified>
-      <Notes name="Notes"
-        url="#Notes">
-      <Notes>
-      <ObservedIndividualCount units="count" name="ObservedIndividualCount"
-        url="#ObservedIndividualCount">
-      <ObservedIndividualCount>
-      <ObservedWeight units="kg" name="ObservedWeight"
-        url="#ObservedWeight">
-      <ObservedWeight>
-      <Order name="Order"
-        url="#Order">
-      <Order>
-      <Phylum name="Phylum"
-        url="#Phylum">
-      <Phylum>
-      <PreparationType name="PreparationType"
-        url="#PreparationType">
-      <PreparationType>
-      <PreviousCatalogNumber name="PreviousCatalogNumber"
-        url="#PreviousCatalogNumber">
-      <PreviousCatalogNumber>
-      <RecordURL name="RecordURL"
-        url="#RecordURL">
-      <RecordURL>
-      <RelatedCatalogItem name="RelatedCatalogItem"
-        url="#RelatedCatalogItem">
-      <RelatedCatalogItem>
-      <RelationshipType name="RelationshipType"
-        url="#RelationshipType">
-      <RelationshipType>
-      <SampleSize name="SampleSize"
-        url="#SampleSize">
-      <SampleSize>
-      <ScientificName name="ScientificName"
-        url="#ScientificName">
-      <ScientificName>
-      <ScientificNameAuthor name="ScientificNameAuthor"
-        url="#ScientificNameAuthor">
-      <ScientificNameAuthor>
-      <Sex name="Sex"
-        url="#Sex">
-      <Sex>
-      <Source name="Source"
-        url="#Source">
-      <Source>
-      <Species name="Species"
-        url="#Species">
-      <Species>
-      <StartDayCollected name="StartDayCollected"
-        url="#StartDayCollected">
-      <StartDayCollected>
-      <StartJulianDay name="StartJulianDay"
-        url="#StartJulianDay">
-      <StartJulianDay>
-      <StartLatitude units="degrees_north" name="StartLatitude"
-        url="#StartLatitude">
-      <StartLatitude>
-      <StartLongitude units="degrees_east" name="StartLongitude"
-        url="#StartLongitude">
-      <StartLongitude>
-      <StartMonthCollected name="StartMonthCollected"
-        url="#StartMonthCollected">
-      <StartMonthCollected>
-      <StartTimeofDay units="hours" name="StartTimeofDay"
-        url="#StartTimeofDay">
-      <StartTimeofDay>
-      <StartYearCollected name="StartYearCollected"
-        url="#StartYearCollected">
-      <StartYearCollected>
-      <Start_EndCoordinatePrecision units="m" name="Start_EndCoordinatePrecision"
-        url="#Start_EndCoordinatePrecision">
-      <Start_EndCoordinatePrecision>
-      <StateProvince name="StateProvince"
-        url="#StateProvince">
-      <StateProvince>
-      <Subgenus name="Subgenus"
-        url="#Subgenus">
-      <Subgenus>
-      <Subspecies name="Subspecies"
-        url="#Subspecies">
-      <Subspecies>
-      <Temperature units="degree_C" name="Temperature"
-        url="#Temperature">
-      <Temperature>
-      <TimeOfDay units="hours" name="TimeOfDay"
-        url="#TimeOfDay">
-      <TimeOfDay>
-      <TimeZone name="TimeZone"
-        url="#TimeZone">
-      <TimeZone>
-      <TypeStatus name="TypeStatus"
-        url="#TypeStatus">
-      <TypeStatus>
-      <YearCollected name="YearCollected"
-        url="#YearCollected">
-      <YearCollected>
-      <YearIdentified name="YearIdentified"
-        url="#YearIdentified">
-      <YearIdentified>
+      <ID name="ID" url="#ID">
+        <link match="/lasdata/grids/rutgers_obis_GHMP_grid"/>
+      </ID>
+      <BasisOfRecord name="BasisOfRecord" url="#BasisOfRecord">
+        <link match="/lasdata/grids/rutgers_obis_GHMP_grid"/>
+      </BasisOfRecord>
+      <BoundingBox name="BoundingBox" url="#BoundingBox">
+        <link match="/lasdata/grids/rutgers_obis_GHMP_grid"/>
+      </BoundingBox>
+      <CatalogNumber name="CatalogNumber" url="#CatalogNumber">
+        <link match="/lasdata/grids/rutgers_obis_GHMP_grid"/>
+      </CatalogNumber>
+      <Citation name="Citation" url="#Citation">
+        <link match="/lasdata/grids/rutgers_obis_GHMP_grid"/>
+      </Citation>
+      <Class name="Class" url="#Class">
+        <link match="/lasdata/grids/rutgers_obis_GHMP_grid"/>
+      </Class>
+      <CollectionCode name="CollectionCode" url="#CollectionCode">
+        <link match="/lasdata/grids/rutgers_obis_GHMP_grid"/>
+      </CollectionCode>
+      <Collector name="Collector" url="#Collector">
+        <link match="/lasdata/grids/rutgers_obis_GHMP_grid"/>
+      </Collector>
+      <CollectorNumber name="CollectorNumber" url="#CollectorNumber">
+        <link match="/lasdata/grids/rutgers_obis_GHMP_grid"/>
+      </CollectorNumber>
+      <ContinentOcean name="ContinentOcean" url="#ContinentOcean">
+        <link match="/lasdata/grids/rutgers_obis_GHMP_grid"/>
+      </ContinentOcean>
+      <CoordinatePrecision units="m" name="CoordinatePrecision" url="#CoordinatePrecision">
+        <link match="/lasdata/grids/rutgers_obis_GHMP_grid"/>
+      </CoordinatePrecision>
+      <Country name="Country" url="#Country">
+        <link match="/lasdata/grids/rutgers_obis_GHMP_grid"/>
+      </Country>
+      <County name="County" url="#County">
+        <link match="/lasdata/grids/rutgers_obis_GHMP_grid"/>
+      </County>
+      <DateLastModified name="DateLastModified" url="#DateLastModified">
+        <link match="/lasdata/grids/rutgers_obis_GHMP_grid"/>
+      </DateLastModified>
+      <DayCollected name="DayCollected" url="#DayCollected">
+        <link match="/lasdata/grids/rutgers_obis_GHMP_grid"/>
+      </DayCollected>
+      <DayIdentified name="DayIdentified" url="#DayIdentified">
+        <link match="/lasdata/grids/rutgers_obis_GHMP_grid"/>
+      </DayIdentified>
+      <DepthRange name="DepthRange" url="#DepthRange">
+        <link match="/lasdata/grids/rutgers_obis_GHMP_grid"/>
+      </DepthRange>
+      <EndDayCollected name="EndDayCollected" url="#EndDayCollected">
+        <link match="/lasdata/grids/rutgers_obis_GHMP_grid"/>
+      </EndDayCollected>
+      <EndJulianDay name="EndJulianDay" url="#EndJulianDay">
+        <link match="/lasdata/grids/rutgers_obis_GHMP_grid"/>
+      </EndJulianDay>
+      <EndLatitude units="degrees_north" name="EndLatitude" url="#EndLatitude">
+        <link match="/lasdata/grids/rutgers_obis_GHMP_grid"/>
+      </EndLatitude>
+      <EndLongitude units="degrees_east" name="EndLongitude" url="#EndLongitude">
+        <link match="/lasdata/grids/rutgers_obis_GHMP_grid"/>
+      </EndLongitude>
+      <EndMonthCollected name="EndMonthCollected" url="#EndMonthCollected">
+        <link match="/lasdata/grids/rutgers_obis_GHMP_grid"/>
+      </EndMonthCollected>
+      <EndTimeofDay units="hours" name="EndTimeofDay" url="#EndTimeofDay">
+        <link match="/lasdata/grids/rutgers_obis_GHMP_grid"/>
+      </EndTimeofDay>
+      <EndYearCollected name="EndYearCollected" url="#EndYearCollected">
+        <link match="/lasdata/grids/rutgers_obis_GHMP_grid"/>
+      </EndYearCollected>
+      <Family name="Family" url="#Family">
+        <link match="/lasdata/grids/rutgers_obis_GHMP_grid"/>
+      </Family>
+      <FieldNumber name="FieldNumber" url="#FieldNumber">
+        <link match="/lasdata/grids/rutgers_obis_GHMP_grid"/>
+      </FieldNumber>
+      <GMLFeature name="GMLFeature" url="#GMLFeature">
+        <link match="/lasdata/grids/rutgers_obis_GHMP_grid"/>
+      </GMLFeature>
+      <Genus name="Genus" url="#Genus">
+        <link match="/lasdata/grids/rutgers_obis_GHMP_grid"/>
+      </Genus>
+      <IdentifiedBy name="IdentifiedBy" url="#IdentifiedBy">
+        <link match="/lasdata/grids/rutgers_obis_GHMP_grid"/>
+      </IdentifiedBy>
+      <IndividualCount units="count" name="IndividualCount" url="#IndividualCount">
+        <link match="/lasdata/grids/rutgers_obis_GHMP_grid"/>
+      </IndividualCount>
+      <InstitutionCode name="InstitutionCode" url="#InstitutionCode">
+        <link match="/lasdata/grids/rutgers_obis_GHMP_grid"/>
+      </InstitutionCode>
+      <JulianDay name="JulianDay" url="#JulianDay">
+        <link match="/lasdata/grids/rutgers_obis_GHMP_grid"/>
+      </JulianDay>
+      <Kingdom name="Kingdom" url="#Kingdom">
+        <link match="/lasdata/grids/rutgers_obis_GHMP_grid"/>
+      </Kingdom>
+      <LifeStage name="LifeStage" url="#LifeStage">
+        <link match="/lasdata/grids/rutgers_obis_GHMP_grid"/>
+      </LifeStage>
+      <Locality name="Locality" url="#Locality">
+        <link match="/lasdata/grids/rutgers_obis_GHMP_grid"/>
+      </Locality>
+      <MaximumDepth units="m" name="MaximumDepth" url="#MaximumDepth">
+        <link match="/lasdata/grids/rutgers_obis_GHMP_grid"/>
+      </MaximumDepth>
+      <MaximumElevation units="m" name="MaximumElevation" url="#MaximumElevation">
+        <link match="/lasdata/grids/rutgers_obis_GHMP_grid"/>
+      </MaximumElevation>
+      <MinimumElevation units="m" name="MinimumElevation" url="#MinimumElevation">
+        <link match="/lasdata/grids/rutgers_obis_GHMP_grid"/>
+      </MinimumElevation>
+      <MonthCollected name="MonthCollected" url="#MonthCollected">
+        <link match="/lasdata/grids/rutgers_obis_GHMP_grid"/>
+      </MonthCollected>
+      <MonthIdentified name="MonthIdentified" url="#MonthIdentified">
+        <link match="/lasdata/grids/rutgers_obis_GHMP_grid"/>
+      </MonthIdentified>
+      <Notes name="Notes" url="#Notes">
+        <link match="/lasdata/grids/rutgers_obis_GHMP_grid"/>
+      </Notes>
+      <ObservedIndividualCount units="count" name="ObservedIndividualCount" url="#ObservedIndividualCount">
+        <link match="/lasdata/grids/rutgers_obis_GHMP_grid"/>
+      </ObservedIndividualCount>
+      <ObservedWeight units="kg" name="ObservedWeight" url="#ObservedWeight">
+        <link match="/lasdata/grids/rutgers_obis_GHMP_grid"/>
+      </ObservedWeight>
+      <Order name="Order" url="#Order">
+        <link match="/lasdata/grids/rutgers_obis_GHMP_grid"/>
+      </Order>
+      <Phylum name="Phylum" url="#Phylum">
+        <link match="/lasdata/grids/rutgers_obis_GHMP_grid"/>
+      </Phylum>
+      <PreparationType name="PreparationType" url="#PreparationType">
+        <link match="/lasdata/grids/rutgers_obis_GHMP_grid"/>
+      </PreparationType>
+      <PreviousCatalogNumber name="PreviousCatalogNumber" url="#PreviousCatalogNumber">
+        <link match="/lasdata/grids/rutgers_obis_GHMP_grid"/>
+      </PreviousCatalogNumber>
+      <RecordURL name="RecordURL" url="#RecordURL">
+        <link match="/lasdata/grids/rutgers_obis_GHMP_grid"/>
+      </RecordURL>
+      <RelatedCatalogItem name="RelatedCatalogItem" url="#RelatedCatalogItem">
+        <link match="/lasdata/grids/rutgers_obis_GHMP_grid"/>
+      </RelatedCatalogItem>
+      <RelationshipType name="RelationshipType" url="#RelationshipType">
+        <link match="/lasdata/grids/rutgers_obis_GHMP_grid"/>
+      </RelationshipType>
+      <SampleSize name="SampleSize" url="#SampleSize">
+        <link match="/lasdata/grids/rutgers_obis_GHMP_grid"/>
+      </SampleSize>
+      <ScientificName name="ScientificName" url="#ScientificName">
+        <link match="/lasdata/grids/rutgers_obis_GHMP_grid"/>
+      </ScientificName>
+      <ScientificNameAuthor name="ScientificNameAuthor" url="#ScientificNameAuthor">
+        <link match="/lasdata/grids/rutgers_obis_GHMP_grid"/>
+      </ScientificNameAuthor>
+      <Sex name="Sex" url="#Sex">
+        <link match="/lasdata/grids/rutgers_obis_GHMP_grid"/>
+      </Sex>
+      <Source name="Source" url="#Source">
+        <link match="/lasdata/grids/rutgers_obis_GHMP_grid"/>
+      </Source>
+      <Species name="Species" url="#Species">
+        <link match="/lasdata/grids/rutgers_obis_GHMP_grid"/>
+      </Species>
+      <StartDayCollected name="StartDayCollected" url="#StartDayCollected">
+        <link match="/lasdata/grids/rutgers_obis_GHMP_grid"/>
+      </StartDayCollected>
+      <StartJulianDay name="StartJulianDay" url="#StartJulianDay">
+        <link match="/lasdata/grids/rutgers_obis_GHMP_grid"/>
+      </StartJulianDay>
+      <StartLatitude units="degrees_north" name="StartLatitude" url="#StartLatitude">
+        <link match="/lasdata/grids/rutgers_obis_GHMP_grid"/>
+      </StartLatitude>
+      <StartLongitude units="degrees_east" name="StartLongitude" url="#StartLongitude">
+        <link match="/lasdata/grids/rutgers_obis_GHMP_grid"/>
+      </StartLongitude>
+      <StartMonthCollected name="StartMonthCollected" url="#StartMonthCollected">
+        <link match="/lasdata/grids/rutgers_obis_GHMP_grid"/>
+      </StartMonthCollected>
+      <StartTimeofDay units="hours" name="StartTimeofDay" url="#StartTimeofDay">
+        <link match="/lasdata/grids/rutgers_obis_GHMP_grid"/>
+      </StartTimeofDay>
+      <StartYearCollected name="StartYearCollected" url="#StartYearCollected">
+        <link match="/lasdata/grids/rutgers_obis_GHMP_grid"/>
+      </StartYearCollected>
+      <Start_EndCoordinatePrecision units="m" name="Start_EndCoordinatePrecision" url="#Start_EndCoordinatePrecision">
+        <link match="/lasdata/grids/rutgers_obis_GHMP_grid"/>
+      </Start_EndCoordinatePrecision>
+      <StateProvince name="StateProvince" url="#StateProvince">
+        <link match="/lasdata/grids/rutgers_obis_GHMP_grid"/>
+      </StateProvince>
+      <Subgenus name="Subgenus" url="#Subgenus">
+        <link match="/lasdata/grids/rutgers_obis_GHMP_grid"/>
+      </Subgenus>
+      <Subspecies name="Subspecies" url="#Subspecies">
+        <link match="/lasdata/grids/rutgers_obis_GHMP_grid"/>
+      </Subspecies>
+      <Temperature units="degree_C" name="Temperature" url="#Temperature">
+        <link match="/lasdata/grids/rutgers_obis_GHMP_grid"/>
+      </Temperature>
+      <TimeOfDay units="hours" name="TimeOfDay" url="#TimeOfDay">
+        <link match="/lasdata/grids/rutgers_obis_GHMP_grid"/>
+      </TimeOfDay>
+      <TimeZone name="TimeZone" url="#TimeZone">
+        <link match="/lasdata/grids/rutgers_obis_GHMP_grid"/>
+      </TimeZone>
+      <TypeStatus name="TypeStatus" url="#TypeStatus">
+        <link match="/lasdata/grids/rutgers_obis_GHMP_grid"/>
+      </TypeStatus>
+      <YearCollected name="YearCollected" url="#YearCollected">
+        <link match="/lasdata/grids/rutgers_obis_GHMP_grid"/>
+      </YearCollected>
+      <YearIdentified name="YearIdentified" url="#YearIdentified">
+        <link match="/lasdata/grids/rutgers_obis_GHMP_grid"/>
+      </YearIdentified>
     </variables>
   </rutgers_obis_GHMP>
   <rutgers_obis_OBIS-SEAMAP
     name = "OBIS - SEAMAP - marine mammals, birds and turtles"
-    url = "http://coastwatch.pfel.noaa.gov/cwexperimental/erddap/tabledap/rutgers_obis/OBIS-SEAMAP"
+    url = "http://coastwatch.pfel.noaa.gov/erddap2/tabledap/rutgers_obis/OBIS-SEAMAP"
     doc = "http://obis.env.duke.edu">
     <properties>
       <ui>
@@ -1710,230 +1838,230 @@
       </product_server>
     </properties>
     <variables>
-      <ID name="ID"
-        url="#ID">
-      <ID>
-      <BasisOfRecord name="BasisOfRecord"
-        url="#BasisOfRecord">
-      <BasisOfRecord>
-      <BoundingBox name="BoundingBox"
-        url="#BoundingBox">
-      <BoundingBox>
-      <CatalogNumber name="CatalogNumber"
-        url="#CatalogNumber">
-      <CatalogNumber>
-      <Citation name="Citation"
-        url="#Citation">
-      <Citation>
-      <Class name="Class"
-        url="#Class">
-      <Class>
-      <CollectionCode name="CollectionCode"
-        url="#CollectionCode">
-      <CollectionCode>
-      <Collector name="Collector"
-        url="#Collector">
-      <Collector>
-      <CollectorNumber name="CollectorNumber"
-        url="#CollectorNumber">
-      <CollectorNumber>
-      <ContinentOcean name="ContinentOcean"
-        url="#ContinentOcean">
-      <ContinentOcean>
-      <CoordinatePrecision units="m" name="CoordinatePrecision"
-        url="#CoordinatePrecision">
-      <CoordinatePrecision>
-      <Country name="Country"
-        url="#Country">
-      <Country>
-      <County name="County"
-        url="#County">
-      <County>
-      <DateLastModified name="DateLastModified"
-        url="#DateLastModified">
-      <DateLastModified>
-      <DayCollected name="DayCollected"
-        url="#DayCollected">
-      <DayCollected>
-      <DayIdentified name="DayIdentified"
-        url="#DayIdentified">
-      <DayIdentified>
-      <DepthRange name="DepthRange"
-        url="#DepthRange">
-      <DepthRange>
-      <EndDayCollected name="EndDayCollected"
-        url="#EndDayCollected">
-      <EndDayCollected>
-      <EndJulianDay name="EndJulianDay"
-        url="#EndJulianDay">
-      <EndJulianDay>
-      <EndLatitude units="degrees_north" name="EndLatitude"
-        url="#EndLatitude">
-      <EndLatitude>
-      <EndLongitude units="degrees_east" name="EndLongitude"
-        url="#EndLongitude">
-      <EndLongitude>
-      <EndMonthCollected name="EndMonthCollected"
-        url="#EndMonthCollected">
-      <EndMonthCollected>
-      <EndTimeofDay units="hours" name="EndTimeofDay"
-        url="#EndTimeofDay">
-      <EndTimeofDay>
-      <EndYearCollected name="EndYearCollected"
-        url="#EndYearCollected">
-      <EndYearCollected>
-      <Family name="Family"
-        url="#Family">
-      <Family>
-      <FieldNumber name="FieldNumber"
-        url="#FieldNumber">
-      <FieldNumber>
-      <GMLFeature name="GMLFeature"
-        url="#GMLFeature">
-      <GMLFeature>
-      <Genus name="Genus"
-        url="#Genus">
-      <Genus>
-      <IdentifiedBy name="IdentifiedBy"
-        url="#IdentifiedBy">
-      <IdentifiedBy>
-      <IndividualCount units="count" name="IndividualCount"
-        url="#IndividualCount">
-      <IndividualCount>
-      <InstitutionCode name="InstitutionCode"
-        url="#InstitutionCode">
-      <InstitutionCode>
-      <JulianDay name="JulianDay"
-        url="#JulianDay">
-      <JulianDay>
-      <Kingdom name="Kingdom"
-        url="#Kingdom">
-      <Kingdom>
-      <LifeStage name="LifeStage"
-        url="#LifeStage">
-      <LifeStage>
-      <Locality name="Locality"
-        url="#Locality">
-      <Locality>
-      <MaximumDepth units="m" name="MaximumDepth"
-        url="#MaximumDepth">
-      <MaximumDepth>
-      <MaximumElevation units="m" name="MaximumElevation"
-        url="#MaximumElevation">
-      <MaximumElevation>
-      <MinimumElevation units="m" name="MinimumElevation"
-        url="#MinimumElevation">
-      <MinimumElevation>
-      <MonthCollected name="MonthCollected"
-        url="#MonthCollected">
-      <MonthCollected>
-      <MonthIdentified name="MonthIdentified"
-        url="#MonthIdentified">
-      <MonthIdentified>
-      <Notes name="Notes"
-        url="#Notes">
-      <Notes>
-      <ObservedIndividualCount units="count" name="ObservedIndividualCount"
-        url="#ObservedIndividualCount">
-      <ObservedIndividualCount>
-      <ObservedWeight units="kg" name="ObservedWeight"
-        url="#ObservedWeight">
-      <ObservedWeight>
-      <Order name="Order"
-        url="#Order">
-      <Order>
-      <Phylum name="Phylum"
-        url="#Phylum">
-      <Phylum>
-      <PreparationType name="PreparationType"
-        url="#PreparationType">
-      <PreparationType>
-      <PreviousCatalogNumber name="PreviousCatalogNumber"
-        url="#PreviousCatalogNumber">
-      <PreviousCatalogNumber>
-      <RecordURL name="RecordURL"
-        url="#RecordURL">
-      <RecordURL>
-      <RelatedCatalogItem name="RelatedCatalogItem"
-        url="#RelatedCatalogItem">
-      <RelatedCatalogItem>
-      <RelationshipType name="RelationshipType"
-        url="#RelationshipType">
-      <RelationshipType>
-      <SampleSize name="SampleSize"
-        url="#SampleSize">
-      <SampleSize>
-      <ScientificName name="ScientificName"
-        url="#ScientificName">
-      <ScientificName>
-      <ScientificNameAuthor name="ScientificNameAuthor"
-        url="#ScientificNameAuthor">
-      <ScientificNameAuthor>
-      <Sex name="Sex"
-        url="#Sex">
-      <Sex>
-      <Source name="Source"
-        url="#Source">
-      <Source>
-      <Species name="Species"
-        url="#Species">
-      <Species>
-      <StartDayCollected name="StartDayCollected"
-        url="#StartDayCollected">
-      <StartDayCollected>
-      <StartJulianDay name="StartJulianDay"
-        url="#StartJulianDay">
-      <StartJulianDay>
-      <StartLatitude units="degrees_north" name="StartLatitude"
-        url="#StartLatitude">
-      <StartLatitude>
-      <StartLongitude units="degrees_east" name="StartLongitude"
-        url="#StartLongitude">
-      <StartLongitude>
-      <StartMonthCollected name="StartMonthCollected"
-        url="#StartMonthCollected">
-      <StartMonthCollected>
-      <StartTimeofDay units="hours" name="StartTimeofDay"
-        url="#StartTimeofDay">
-      <StartTimeofDay>
-      <StartYearCollected name="StartYearCollected"
-        url="#StartYearCollected">
-      <StartYearCollected>
-      <Start_EndCoordinatePrecision units="m" name="Start_EndCoordinatePrecision"
-        url="#Start_EndCoordinatePrecision">
-      <Start_EndCoordinatePrecision>
-      <StateProvince name="StateProvince"
-        url="#StateProvince">
-      <StateProvince>
-      <Subgenus name="Subgenus"
-        url="#Subgenus">
-      <Subgenus>
-      <Subspecies name="Subspecies"
-        url="#Subspecies">
-      <Subspecies>
-      <Temperature units="degree_C" name="Temperature"
-        url="#Temperature">
-      <Temperature>
-      <TimeOfDay units="hours" name="TimeOfDay"
-        url="#TimeOfDay">
-      <TimeOfDay>
-      <TimeZone name="TimeZone"
-        url="#TimeZone">
-      <TimeZone>
-      <TypeStatus name="TypeStatus"
-        url="#TypeStatus">
-      <TypeStatus>
-      <YearCollected name="YearCollected"
-        url="#YearCollected">
-      <YearCollected>
-      <YearIdentified name="YearIdentified"
-        url="#YearIdentified">
-      <YearIdentified>
+      <ID name="ID" url="#ID">
+        <link match="/lasdata/grids/rutgers_obis_OBIS-SEAMAP_grid"/>
+      </ID>
+      <BasisOfRecord name="BasisOfRecord" url="#BasisOfRecord">
+        <link match="/lasdata/grids/rutgers_obis_OBIS-SEAMAP_grid"/>
+      </BasisOfRecord>
+      <BoundingBox name="BoundingBox" url="#BoundingBox">
+        <link match="/lasdata/grids/rutgers_obis_OBIS-SEAMAP_grid"/>
+      </BoundingBox>
+      <CatalogNumber name="CatalogNumber" url="#CatalogNumber">
+        <link match="/lasdata/grids/rutgers_obis_OBIS-SEAMAP_grid"/>
+      </CatalogNumber>
+      <Citation name="Citation" url="#Citation">
+        <link match="/lasdata/grids/rutgers_obis_OBIS-SEAMAP_grid"/>
+      </Citation>
+      <Class name="Class" url="#Class">
+        <link match="/lasdata/grids/rutgers_obis_OBIS-SEAMAP_grid"/>
+      </Class>
+      <CollectionCode name="CollectionCode" url="#CollectionCode">
+        <link match="/lasdata/grids/rutgers_obis_OBIS-SEAMAP_grid"/>
+      </CollectionCode>
+      <Collector name="Collector" url="#Collector">
+        <link match="/lasdata/grids/rutgers_obis_OBIS-SEAMAP_grid"/>
+      </Collector>
+      <CollectorNumber name="CollectorNumber" url="#CollectorNumber">
+        <link match="/lasdata/grids/rutgers_obis_OBIS-SEAMAP_grid"/>
+      </CollectorNumber>
+      <ContinentOcean name="ContinentOcean" url="#ContinentOcean">
+        <link match="/lasdata/grids/rutgers_obis_OBIS-SEAMAP_grid"/>
+      </ContinentOcean>
+      <CoordinatePrecision units="m" name="CoordinatePrecision" url="#CoordinatePrecision">
+        <link match="/lasdata/grids/rutgers_obis_OBIS-SEAMAP_grid"/>
+      </CoordinatePrecision>
+      <Country name="Country" url="#Country">
+        <link match="/lasdata/grids/rutgers_obis_OBIS-SEAMAP_grid"/>
+      </Country>
+      <County name="County" url="#County">
+        <link match="/lasdata/grids/rutgers_obis_OBIS-SEAMAP_grid"/>
+      </County>
+      <DateLastModified name="DateLastModified" url="#DateLastModified">
+        <link match="/lasdata/grids/rutgers_obis_OBIS-SEAMAP_grid"/>
+      </DateLastModified>
+      <DayCollected name="DayCollected" url="#DayCollected">
+        <link match="/lasdata/grids/rutgers_obis_OBIS-SEAMAP_grid"/>
+      </DayCollected>
+      <DayIdentified name="DayIdentified" url="#DayIdentified">
+        <link match="/lasdata/grids/rutgers_obis_OBIS-SEAMAP_grid"/>
+      </DayIdentified>
+      <DepthRange name="DepthRange" url="#DepthRange">
+        <link match="/lasdata/grids/rutgers_obis_OBIS-SEAMAP_grid"/>
+      </DepthRange>
+      <EndDayCollected name="EndDayCollected" url="#EndDayCollected">
+        <link match="/lasdata/grids/rutgers_obis_OBIS-SEAMAP_grid"/>
+      </EndDayCollected>
+      <EndJulianDay name="EndJulianDay" url="#EndJulianDay">
+        <link match="/lasdata/grids/rutgers_obis_OBIS-SEAMAP_grid"/>
+      </EndJulianDay>
+      <EndLatitude units="degrees_north" name="EndLatitude" url="#EndLatitude">
+        <link match="/lasdata/grids/rutgers_obis_OBIS-SEAMAP_grid"/>
+      </EndLatitude>
+      <EndLongitude units="degrees_east" name="EndLongitude" url="#EndLongitude">
+        <link match="/lasdata/grids/rutgers_obis_OBIS-SEAMAP_grid"/>
+      </EndLongitude>
+      <EndMonthCollected name="EndMonthCollected" url="#EndMonthCollected">
+        <link match="/lasdata/grids/rutgers_obis_OBIS-SEAMAP_grid"/>
+      </EndMonthCollected>
+      <EndTimeofDay units="hours" name="EndTimeofDay" url="#EndTimeofDay">
+        <link match="/lasdata/grids/rutgers_obis_OBIS-SEAMAP_grid"/>
+      </EndTimeofDay>
+      <EndYearCollected name="EndYearCollected" url="#EndYearCollected">
+        <link match="/lasdata/grids/rutgers_obis_OBIS-SEAMAP_grid"/>
+      </EndYearCollected>
+      <Family name="Family" url="#Family">
+        <link match="/lasdata/grids/rutgers_obis_OBIS-SEAMAP_grid"/>
+      </Family>
+      <FieldNumber name="FieldNumber" url="#FieldNumber">
+        <link match="/lasdata/grids/rutgers_obis_OBIS-SEAMAP_grid"/>
+      </FieldNumber>
+      <GMLFeature name="GMLFeature" url="#GMLFeature">
+        <link match="/lasdata/grids/rutgers_obis_OBIS-SEAMAP_grid"/>
+      </GMLFeature>
+      <Genus name="Genus" url="#Genus">
+        <link match="/lasdata/grids/rutgers_obis_OBIS-SEAMAP_grid"/>
+      </Genus>
+      <IdentifiedBy name="IdentifiedBy" url="#IdentifiedBy">
+        <link match="/lasdata/grids/rutgers_obis_OBIS-SEAMAP_grid"/>
+      </IdentifiedBy>
+      <IndividualCount units="count" name="IndividualCount" url="#IndividualCount">
+        <link match="/lasdata/grids/rutgers_obis_OBIS-SEAMAP_grid"/>
+      </IndividualCount>
+      <InstitutionCode name="InstitutionCode" url="#InstitutionCode">
+        <link match="/lasdata/grids/rutgers_obis_OBIS-SEAMAP_grid"/>
+      </InstitutionCode>
+      <JulianDay name="JulianDay" url="#JulianDay">
+        <link match="/lasdata/grids/rutgers_obis_OBIS-SEAMAP_grid"/>
+      </JulianDay>
+      <Kingdom name="Kingdom" url="#Kingdom">
+        <link match="/lasdata/grids/rutgers_obis_OBIS-SEAMAP_grid"/>
+      </Kingdom>
+      <LifeStage name="LifeStage" url="#LifeStage">
+        <link match="/lasdata/grids/rutgers_obis_OBIS-SEAMAP_grid"/>
+      </LifeStage>
+      <Locality name="Locality" url="#Locality">
+        <link match="/lasdata/grids/rutgers_obis_OBIS-SEAMAP_grid"/>
+      </Locality>
+      <MaximumDepth units="m" name="MaximumDepth" url="#MaximumDepth">
+        <link match="/lasdata/grids/rutgers_obis_OBIS-SEAMAP_grid"/>
+      </MaximumDepth>
+      <MaximumElevation units="m" name="MaximumElevation" url="#MaximumElevation">
+        <link match="/lasdata/grids/rutgers_obis_OBIS-SEAMAP_grid"/>
+      </MaximumElevation>
+      <MinimumElevation units="m" name="MinimumElevation" url="#MinimumElevation">
+        <link match="/lasdata/grids/rutgers_obis_OBIS-SEAMAP_grid"/>
+      </MinimumElevation>
+      <MonthCollected name="MonthCollected" url="#MonthCollected">
+        <link match="/lasdata/grids/rutgers_obis_OBIS-SEAMAP_grid"/>
+      </MonthCollected>
+      <MonthIdentified name="MonthIdentified" url="#MonthIdentified">
+        <link match="/lasdata/grids/rutgers_obis_OBIS-SEAMAP_grid"/>
+      </MonthIdentified>
+      <Notes name="Notes" url="#Notes">
+        <link match="/lasdata/grids/rutgers_obis_OBIS-SEAMAP_grid"/>
+      </Notes>
+      <ObservedIndividualCount units="count" name="ObservedIndividualCount" url="#ObservedIndividualCount">
+        <link match="/lasdata/grids/rutgers_obis_OBIS-SEAMAP_grid"/>
+      </ObservedIndividualCount>
+      <ObservedWeight units="kg" name="ObservedWeight" url="#ObservedWeight">
+        <link match="/lasdata/grids/rutgers_obis_OBIS-SEAMAP_grid"/>
+      </ObservedWeight>
+      <Order name="Order" url="#Order">
+        <link match="/lasdata/grids/rutgers_obis_OBIS-SEAMAP_grid"/>
+      </Order>
+      <Phylum name="Phylum" url="#Phylum">
+        <link match="/lasdata/grids/rutgers_obis_OBIS-SEAMAP_grid"/>
+      </Phylum>
+      <PreparationType name="PreparationType" url="#PreparationType">
+        <link match="/lasdata/grids/rutgers_obis_OBIS-SEAMAP_grid"/>
+      </PreparationType>
+      <PreviousCatalogNumber name="PreviousCatalogNumber" url="#PreviousCatalogNumber">
+        <link match="/lasdata/grids/rutgers_obis_OBIS-SEAMAP_grid"/>
+      </PreviousCatalogNumber>
+      <RecordURL name="RecordURL" url="#RecordURL">
+        <link match="/lasdata/grids/rutgers_obis_OBIS-SEAMAP_grid"/>
+      </RecordURL>
+      <RelatedCatalogItem name="RelatedCatalogItem" url="#RelatedCatalogItem">
+        <link match="/lasdata/grids/rutgers_obis_OBIS-SEAMAP_grid"/>
+      </RelatedCatalogItem>
+      <RelationshipType name="RelationshipType" url="#RelationshipType">
+        <link match="/lasdata/grids/rutgers_obis_OBIS-SEAMAP_grid"/>
+      </RelationshipType>
+      <SampleSize name="SampleSize" url="#SampleSize">
+        <link match="/lasdata/grids/rutgers_obis_OBIS-SEAMAP_grid"/>
+      </SampleSize>
+      <ScientificName name="ScientificName" url="#ScientificName">
+        <link match="/lasdata/grids/rutgers_obis_OBIS-SEAMAP_grid"/>
+      </ScientificName>
+      <ScientificNameAuthor name="ScientificNameAuthor" url="#ScientificNameAuthor">
+        <link match="/lasdata/grids/rutgers_obis_OBIS-SEAMAP_grid"/>
+      </ScientificNameAuthor>
+      <Sex name="Sex" url="#Sex">
+        <link match="/lasdata/grids/rutgers_obis_OBIS-SEAMAP_grid"/>
+      </Sex>
+      <Source name="Source" url="#Source">
+        <link match="/lasdata/grids/rutgers_obis_OBIS-SEAMAP_grid"/>
+      </Source>
+      <Species name="Species" url="#Species">
+        <link match="/lasdata/grids/rutgers_obis_OBIS-SEAMAP_grid"/>
+      </Species>
+      <StartDayCollected name="StartDayCollected" url="#StartDayCollected">
+        <link match="/lasdata/grids/rutgers_obis_OBIS-SEAMAP_grid"/>
+      </StartDayCollected>
+      <StartJulianDay name="StartJulianDay" url="#StartJulianDay">
+        <link match="/lasdata/grids/rutgers_obis_OBIS-SEAMAP_grid"/>
+      </StartJulianDay>
+      <StartLatitude units="degrees_north" name="StartLatitude" url="#StartLatitude">
+        <link match="/lasdata/grids/rutgers_obis_OBIS-SEAMAP_grid"/>
+      </StartLatitude>
+      <StartLongitude units="degrees_east" name="StartLongitude" url="#StartLongitude">
+        <link match="/lasdata/grids/rutgers_obis_OBIS-SEAMAP_grid"/>
+      </StartLongitude>
+      <StartMonthCollected name="StartMonthCollected" url="#StartMonthCollected">
+        <link match="/lasdata/grids/rutgers_obis_OBIS-SEAMAP_grid"/>
+      </StartMonthCollected>
+      <StartTimeofDay units="hours" name="StartTimeofDay" url="#StartTimeofDay">
+        <link match="/lasdata/grids/rutgers_obis_OBIS-SEAMAP_grid"/>
+      </StartTimeofDay>
+      <StartYearCollected name="StartYearCollected" url="#StartYearCollected">
+        <link match="/lasdata/grids/rutgers_obis_OBIS-SEAMAP_grid"/>
+      </StartYearCollected>
+      <Start_EndCoordinatePrecision units="m" name="Start_EndCoordinatePrecision" url="#Start_EndCoordinatePrecision">
+        <link match="/lasdata/grids/rutgers_obis_OBIS-SEAMAP_grid"/>
+      </Start_EndCoordinatePrecision>
+      <StateProvince name="StateProvince" url="#StateProvince">
+        <link match="/lasdata/grids/rutgers_obis_OBIS-SEAMAP_grid"/>
+      </StateProvince>
+      <Subgenus name="Subgenus" url="#Subgenus">
+        <link match="/lasdata/grids/rutgers_obis_OBIS-SEAMAP_grid"/>
+      </Subgenus>
+      <Subspecies name="Subspecies" url="#Subspecies">
+        <link match="/lasdata/grids/rutgers_obis_OBIS-SEAMAP_grid"/>
+      </Subspecies>
+      <Temperature units="degree_C" name="Temperature" url="#Temperature">
+        <link match="/lasdata/grids/rutgers_obis_OBIS-SEAMAP_grid"/>
+      </Temperature>
+      <TimeOfDay units="hours" name="TimeOfDay" url="#TimeOfDay">
+        <link match="/lasdata/grids/rutgers_obis_OBIS-SEAMAP_grid"/>
+      </TimeOfDay>
+      <TimeZone name="TimeZone" url="#TimeZone">
+        <link match="/lasdata/grids/rutgers_obis_OBIS-SEAMAP_grid"/>
+      </TimeZone>
+      <TypeStatus name="TypeStatus" url="#TypeStatus">
+        <link match="/lasdata/grids/rutgers_obis_OBIS-SEAMAP_grid"/>
+      </TypeStatus>
+      <YearCollected name="YearCollected" url="#YearCollected">
+        <link match="/lasdata/grids/rutgers_obis_OBIS-SEAMAP_grid"/>
+      </YearCollected>
+      <YearIdentified name="YearIdentified" url="#YearIdentified">
+        <link match="/lasdata/grids/rutgers_obis_OBIS-SEAMAP_grid"/>
+      </YearIdentified>
     </variables>
   </rutgers_obis_OBIS-SEAMAP>
   <pmel_dapper_tao
     name = "TAO Array Data from the PMEL DAPPER Server"
-    url = "http://coastwatch.pfel.noaa.gov/cwexperimental/erddap/tabledap/pmel_dapper/tao"
+    url = "http://coastwatch.pfel.noaa.gov/erddap2/tabledap/pmel_dapper/tao"
     doc = "http://www.pmel.noaa.gov/tao/">
     <properties>
       <ui>
@@ -1960,54 +2088,296 @@
       </product_server>
     </properties>
     <variables>
-      <station_id name="Station ID"
-        url="#station_id">
-      <station_id>
-      <sea_surface_temperature units="degree_C" name="Sea Surface Temperature"
-        url="#sea_surface_temperature">
-      <sea_surface_temperature>
-      <sea_surface_temperature_quality name="Sea Surface Temperature Quality"
-        url="#sea_surface_temperature_quality">
-      <sea_surface_temperature_quality>
-      <air_temperature units="degree_C" name="Air Temperature"
-        url="#air_temperature">
-      <air_temperature>
-      <air_temperature_quality name="Air Temperature Quality"
-        url="#air_temperature_quality">
-      <air_temperature_quality>
-      <relative_humidity units="percent" name="Relative Humidity"
-        url="#relative_humidity">
-      <relative_humidity>
-      <relative_humidity_quality name="Relative Humidity Quality"
-        url="#relative_humidity_quality">
-      <relative_humidity_quality>
-      <relative_humidity_source name="Relative Humidity Source"
-        url="#relative_humidity_source">
-      <relative_humidity_source>
-      <wind_to_direction units="degrees_true" name="Wind To Direction"
-        url="#wind_to_direction">
-      <wind_to_direction>
-      <wind_direction_quality name="wind direction quality"
-        url="#wind_direction_quality">
-      <wind_direction_quality>
-      <wind_direction_source name="wind direction source"
-        url="#wind_direction_source">
-      <wind_direction_source>
-      <wind_speed units="m s-1" name="Wind Speed"
-        url="#wind_speed">
-      <wind_speed>
-      <wind_speed_quality name="Wind Speed Quality"
-        url="#wind_speed_quality">
-      <wind_speed_quality>
-      <wind_speed_source name="Wind Speed Source"
-        url="#wind_speed_source">
-      <wind_speed_source>
-      <eastward_wind units="m s-1" name="Eastward Wind"
-        url="#eastward_wind">
-      <eastward_wind>
-      <northward_wind units="m s-1" name="Northward Wind"
-        url="#northward_wind">
-      <northward_wind>
+      <station_id name="Station ID" url="#station_id">
+        <link match="/lasdata/grids/pmel_dapper_tao_grid"/>
+      </station_id>
+      <sea_surface_temperature units="degree_C" name="Sea Surface Temperature" url="#sea_surface_temperature">
+        <link match="/lasdata/grids/pmel_dapper_tao_grid"/>
+      </sea_surface_temperature>
+      <sea_surface_temperature_quality name="Sea Surface Temperature Quality" url="#sea_surface_temperature_quality">
+        <link match="/lasdata/grids/pmel_dapper_tao_grid"/>
+      </sea_surface_temperature_quality>
+      <air_temperature units="degree_C" name="Air Temperature" url="#air_temperature">
+        <link match="/lasdata/grids/pmel_dapper_tao_grid"/>
+      </air_temperature>
+      <air_temperature_quality name="Air Temperature Quality" url="#air_temperature_quality">
+        <link match="/lasdata/grids/pmel_dapper_tao_grid"/>
+      </air_temperature_quality>
+      <relative_humidity units="percent" name="Relative Humidity" url="#relative_humidity">
+        <link match="/lasdata/grids/pmel_dapper_tao_grid"/>
+      </relative_humidity>
+      <relative_humidity_quality name="Relative Humidity Quality" url="#relative_humidity_quality">
+        <link match="/lasdata/grids/pmel_dapper_tao_grid"/>
+      </relative_humidity_quality>
+      <relative_humidity_source name="Relative Humidity Source" url="#relative_humidity_source">
+        <link match="/lasdata/grids/pmel_dapper_tao_grid"/>
+      </relative_humidity_source>
+      <wind_to_direction units="degrees_true" name="Wind To Direction" url="#wind_to_direction">
+        <link match="/lasdata/grids/pmel_dapper_tao_grid"/>
+      </wind_to_direction>
+      <wind_direction_quality name="wind direction quality" url="#wind_direction_quality">
+        <link match="/lasdata/grids/pmel_dapper_tao_grid"/>
+      </wind_direction_quality>
+      <wind_direction_source name="wind direction source" url="#wind_direction_source">
+        <link match="/lasdata/grids/pmel_dapper_tao_grid"/>
+      </wind_direction_source>
+      <wind_speed units="m s-1" name="Wind Speed" url="#wind_speed">
+        <link match="/lasdata/grids/pmel_dapper_tao_grid"/>
+      </wind_speed>
+      <wind_speed_quality name="Wind Speed Quality" url="#wind_speed_quality">
+        <link match="/lasdata/grids/pmel_dapper_tao_grid"/>
+      </wind_speed_quality>
+      <wind_speed_source name="Wind Speed Source" url="#wind_speed_source">
+        <link match="/lasdata/grids/pmel_dapper_tao_grid"/>
+      </wind_speed_source>
+      <eastward_wind units="m s-1" name="Eastward Wind" url="#eastward_wind">
+        <link match="/lasdata/grids/pmel_dapper_tao_grid"/>
+      </eastward_wind>
+      <northward_wind units="m s-1" name="Northward Wind" url="#northward_wind">
+        <link match="/lasdata/grids/pmel_dapper_tao_grid"/>
+      </northward_wind>
     </variables>
   </pmel_dapper_tao>
 </datasets>
+<grids>
+  <csc_mwfs_wt_grid>
+    <link match="/lasdata/axes/csc_mwfs_wt_X"/>
+    <link match="/lasdata/axes/csc_mwfs_wt_Y"/>
+    <link match="/lasdata/axes/csc_mwfs_wt_Z"/>
+    <link match="/lasdata/axes/csc_mwfs_wt_T"/>
+  </csc_mwfs_wt_grid>
+  <gomoos_sos_buoy_grid>
+    <link match="/lasdata/axes/gomoos_sos_buoy_X"/>
+    <link match="/lasdata/axes/gomoos_sos_buoy_Y"/>
+    <link match="/lasdata/axes/gomoos_sos_buoy_Z"/>
+    <link match="/lasdata/axes/gomoos_sos_buoy_T"/>
+  </gomoos_sos_buoy_grid>
+  <nos_coops_wind_grid>
+    <link match="/lasdata/axes/nos_coops_wind_X"/>
+    <link match="/lasdata/axes/nos_coops_wind_Y"/>
+    <link match="/lasdata/axes/nos_coops_wind_T"/>
+  </nos_coops_wind_grid>
+  <nwioos_drds_coral_grid>
+    <link match="/lasdata/axes/nwioos_drds_coral_X"/>
+    <link match="/lasdata/axes/nwioos_drds_coral_Y"/>
+    <link match="/lasdata/axes/nwioos_drds_coral_Z"/>
+  </nwioos_drds_coral_grid>
+  <erd_opendap_globec_bottle_grid>
+    <link match="/lasdata/axes/erd_opendap_globec_bottle_X"/>
+    <link match="/lasdata/axes/erd_opendap_globec_bottle_Y"/>
+    <link match="/lasdata/axes/erd_opendap_globec_bottle_Z"/>
+    <link match="/lasdata/axes/erd_opendap_globec_bottle_T"/>
+  </erd_opendap_globec_bottle_grid>
+  <nwioos_drds_groundfish_grid>
+    <link match="/lasdata/axes/nwioos_drds_groundfish_X"/>
+    <link match="/lasdata/axes/nwioos_drds_groundfish_Y"/>
+  </nwioos_drds_groundfish_grid>
+  <nwioos_drds_hud_fish_species_details_grid>
+  </nwioos_drds_hud_fish_species_details_grid>
+  <nwioos_drds_hud_fish_species_occurrence_grid>
+  </nwioos_drds_hud_fish_species_occurrence_grid>
+  <nwioos_drds_hud_predators_prey_grid>
+  </nwioos_drds_hud_predators_prey_grid>
+  <nwioos_drds_hud_references_grid>
+  </nwioos_drds_hud_references_grid>
+  <nwioos_drds_adcp_1995_grid>
+    <link match="/lasdata/axes/nwioos_drds_adcp_1995_X"/>
+    <link match="/lasdata/axes/nwioos_drds_adcp_1995_Y"/>
+    <link match="/lasdata/axes/nwioos_drds_adcp_1995_Z"/>
+  </nwioos_drds_adcp_1995_grid>
+  <nwioos_drds_adcp_1998_grid>
+    <link match="/lasdata/axes/nwioos_drds_adcp_1998_X"/>
+    <link match="/lasdata/axes/nwioos_drds_adcp_1998_Y"/>
+    <link match="/lasdata/axes/nwioos_drds_adcp_1998_Z"/>
+  </nwioos_drds_adcp_1998_grid>
+  <nwioos_drds_adcp_2001_grid>
+    <link match="/lasdata/axes/nwioos_drds_adcp_2001_X"/>
+    <link match="/lasdata/axes/nwioos_drds_adcp_2001_Y"/>
+    <link match="/lasdata/axes/nwioos_drds_adcp_2001_Z"/>
+  </nwioos_drds_adcp_2001_grid>
+  <nwioos_drds_adcp_2003_grid>
+    <link match="/lasdata/axes/nwioos_drds_adcp_2003_X"/>
+    <link match="/lasdata/axes/nwioos_drds_adcp_2003_Y"/>
+    <link match="/lasdata/axes/nwioos_drds_adcp_2003_Z"/>
+  </nwioos_drds_adcp_2003_grid>
+  <nwioos_drds_adcp_2005_grid>
+    <link match="/lasdata/axes/nwioos_drds_adcp_2005_X"/>
+    <link match="/lasdata/axes/nwioos_drds_adcp_2005_Y"/>
+    <link match="/lasdata/axes/nwioos_drds_adcp_2005_Z"/>
+  </nwioos_drds_adcp_2005_grid>
+  <aadc_obis_argos_tracking_grid>
+    <link match="/lasdata/axes/aadc_obis_argos_tracking_X"/>
+    <link match="/lasdata/axes/aadc_obis_argos_tracking_Y"/>
+  </aadc_obis_argos_tracking_grid>
+  <fishbase_obis_fishbase_grid>
+    <link match="/lasdata/axes/fishbase_obis_fishbase_X"/>
+    <link match="/lasdata/axes/fishbase_obis_fishbase_Y"/>
+  </fishbase_obis_fishbase_grid>
+  <rutgers_obis_GulfOfMaineBIS_grid>
+    <link match="/lasdata/axes/rutgers_obis_GulfOfMaineBIS_X"/>
+    <link match="/lasdata/axes/rutgers_obis_GulfOfMaineBIS_Y"/>
+  </rutgers_obis_GulfOfMaineBIS_grid>
+  <rutgers_obis_GHMP_grid>
+    <link match="/lasdata/axes/rutgers_obis_GHMP_X"/>
+    <link match="/lasdata/axes/rutgers_obis_GHMP_Y"/>
+  </rutgers_obis_GHMP_grid>
+  <rutgers_obis_OBIS-SEAMAP_grid>
+    <link match="/lasdata/axes/rutgers_obis_OBIS-SEAMAP_X"/>
+    <link match="/lasdata/axes/rutgers_obis_OBIS-SEAMAP_Y"/>
+  </rutgers_obis_OBIS-SEAMAP_grid>
+  <pmel_dapper_tao_grid>
+    <link match="/lasdata/axes/pmel_dapper_tao_X"/>
+    <link match="/lasdata/axes/pmel_dapper_tao_Y"/>
+    <link match="/lasdata/axes/pmel_dapper_tao_Z"/>
+    <link match="/lasdata/axes/pmel_dapper_tao_T"/>
+  </pmel_dapper_tao_grid>
+</grids>
+<axes>
+  <csc_mwfs_wt_X type="x" units="degrees_east">
+    <arange start="-98" step="1" size="29"/>
+  </csc_mwfs_wt_X>
+  <csc_mwfs_wt_Y type="y" units="degrees_north">
+    <arange start="24" step="1" size="16"/>
+  </csc_mwfs_wt_Y>
+  <csc_mwfs_wt_Z type="z" units="meters">
+    <arange start="0" step="1" size="1"/>
+  </csc_mwfs_wt_Z>
+  <csc_mwfs_wt_T type="t" units="hour">
+    <arange start="2007-01-01 00:00:00" step="1" size="-324335"/>
+  </csc_mwfs_wt_T>
+  <gomoos_sos_buoy_X type="x" units="degrees_east">
+    <arange start="-71" step="1" size="7"/>
+  </gomoos_sos_buoy_X>
+  <gomoos_sos_buoy_Y type="y" units="degrees_north">
+    <arange start="42" step="1" size="4"/>
+  </gomoos_sos_buoy_Y>
+  <gomoos_sos_buoy_Z type="z" units="meters">
+    <arange start="-250" step="1" size="250"/>
+  </gomoos_sos_buoy_Z>
+  <gomoos_sos_buoy_T type="t" units="hour">
+    <arange start="2000-07-10 16:00:00" step="1" size="-267567"/>
+  </gomoos_sos_buoy_T>
+  <nos_coops_wind_X type="x" units="degrees_east">
+    <arange start="-178" step="1" size="358"/>
+  </nos_coops_wind_X>
+  <nos_coops_wind_Y type="y" units="degrees_north">
+    <arange start="-47" step="1" size="119"/>
+  </nos_coops_wind_Y>
+  <nos_coops_wind_T type="t" units="hour">
+    <arange start="1991-05-01 00:00:00" step="1" size="-186959"/>
+  </nos_coops_wind_T>
+  <nwioos_drds_coral_X type="x" units="degrees_east">
+    <arange start="-126" step="1" size="10"/>
+  </nwioos_drds_coral_X>
+  <nwioos_drds_coral_Y type="y" units="degrees_north">
+    <arange start="32" step="1" size="18"/>
+  </nwioos_drds_coral_Y>
+  <nwioos_drds_coral_Z type="z" units="meters">
+    <arange start="-1543" step="1" size="1533"/>
+  </nwioos_drds_coral_Z>
+  <erd_opendap_globec_bottle_X type="x" units="degrees_east">
+    <arange start="-126" step="1" size="3"/>
+  </erd_opendap_globec_bottle_X>
+  <erd_opendap_globec_bottle_Y type="y" units="degrees_north">
+    <arange start="41" step="1" size="5"/>
+  </erd_opendap_globec_bottle_Y>
+  <erd_opendap_globec_bottle_Z type="z" units="meters">
+    <arange start="0" step="1" size="1"/>
+  </erd_opendap_globec_bottle_Z>
+  <erd_opendap_globec_bottle_T type="t" units="hour">
+    <arange start="2002-07-31 00:00:00" step="1" size="457"/>
+  </erd_opendap_globec_bottle_T>
+  <nwioos_drds_groundfish_X type="x" units="degrees_east">
+    <arange start="-126" step="1" size="10"/>
+  </nwioos_drds_groundfish_X>
+  <nwioos_drds_groundfish_Y type="y" units="degrees_north">
+    <arange start="32" step="1" size="18"/>
+  </nwioos_drds_groundfish_Y>
+  <nwioos_drds_adcp_1995_X type="x" units="degrees_east">
+    <arange start="-134" step="1" size="17"/>
+  </nwioos_drds_adcp_1995_X>
+  <nwioos_drds_adcp_1995_Y type="y" units="degrees_north">
+    <arange start="32" step="1" size="25"/>
+  </nwioos_drds_adcp_1995_Y>
+  <nwioos_drds_adcp_1995_Z type="z" units="meters">
+    <arange start="-494" step="1" size="473"/>
+  </nwioos_drds_adcp_1995_Z>
+  <nwioos_drds_adcp_1998_X type="x" units="degrees_east">
+    <arange start="-132" step="1" size="12"/>
+  </nwioos_drds_adcp_1998_X>
+  <nwioos_drds_adcp_1998_Y type="y" units="degrees_north">
+    <arange start="36" step="1" size="18"/>
+  </nwioos_drds_adcp_1998_Y>
+  <nwioos_drds_adcp_1998_Z type="z" units="meters">
+    <arange start="-406" step="1" size="385"/>
+  </nwioos_drds_adcp_1998_Z>
+  <nwioos_drds_adcp_2001_X type="x" units="degrees_east">
+    <arange start="-129" step="1" size="9"/>
+  </nwioos_drds_adcp_2001_X>
+  <nwioos_drds_adcp_2001_Y type="y" units="degrees_north">
+    <arange start="36" step="1" size="15"/>
+  </nwioos_drds_adcp_2001_Y>
+  <nwioos_drds_adcp_2001_Z type="z" units="meters">
+    <arange start="-494" step="1" size="473"/>
+  </nwioos_drds_adcp_2001_Z>
+  <nwioos_drds_adcp_2003_X type="x" units="degrees_east">
+    <arange start="-134" step="1" size="14"/>
+  </nwioos_drds_adcp_2003_X>
+  <nwioos_drds_adcp_2003_Y type="y" units="degrees_north">
+    <arange start="36" step="1" size="20"/>
+  </nwioos_drds_adcp_2003_Y>
+  <nwioos_drds_adcp_2003_Z type="z" units="meters">
+    <arange start="-489" step="1" size="474"/>
+  </nwioos_drds_adcp_2003_Z>
+  <nwioos_drds_adcp_2005_X type="x" units="degrees_east">
+    <arange start="-126" step="1" size="6"/>
+  </nwioos_drds_adcp_2005_X>
+  <nwioos_drds_adcp_2005_Y type="y" units="degrees_north">
+    <arange start="35" step="1" size="15"/>
+  </nwioos_drds_adcp_2005_Y>
+  <nwioos_drds_adcp_2005_Z type="z" units="meters">
+    <arange start="-497" step="1" size="473"/>
+  </nwioos_drds_adcp_2005_Z>
+  <aadc_obis_argos_tracking_X type="x" units="degrees_east">
+    <arange start="-180" step="1" size="361"/>
+  </aadc_obis_argos_tracking_X>
+  <aadc_obis_argos_tracking_Y type="y" units="degrees_north">
+    <arange start="-90" step="1" size="181"/>
+  </aadc_obis_argos_tracking_Y>
+  <fishbase_obis_fishbase_X type="x" units="degrees_east">
+    <arange start="-180" step="1" size="361"/>
+  </fishbase_obis_fishbase_X>
+  <fishbase_obis_fishbase_Y type="y" units="degrees_north">
+    <arange start="-90" step="1" size="181"/>
+  </fishbase_obis_fishbase_Y>
+  <rutgers_obis_GulfOfMaineBIS_X type="x" units="degrees_east">
+    <arange start="-180" step="1" size="361"/>
+  </rutgers_obis_GulfOfMaineBIS_X>
+  <rutgers_obis_GulfOfMaineBIS_Y type="y" units="degrees_north">
+    <arange start="-90" step="1" size="181"/>
+  </rutgers_obis_GulfOfMaineBIS_Y>
+  <rutgers_obis_GHMP_X type="x" units="degrees_east">
+    <arange start="-180" step="1" size="361"/>
+  </rutgers_obis_GHMP_X>
+  <rutgers_obis_GHMP_Y type="y" units="degrees_north">
+    <arange start="-90" step="1" size="181"/>
+  </rutgers_obis_GHMP_Y>
+  <rutgers_obis_OBIS-SEAMAP_X type="x" units="degrees_east">
+    <arange start="-180" step="1" size="361"/>
+  </rutgers_obis_OBIS-SEAMAP_X>
+  <rutgers_obis_OBIS-SEAMAP_Y type="y" units="degrees_north">
+    <arange start="-90" step="1" size="181"/>
+  </rutgers_obis_OBIS-SEAMAP_Y>
+  <pmel_dapper_tao_X type="x" units="degrees_east">
+    <arange start="164" step="1" size="103"/>
+  </pmel_dapper_tao_X>
+  <pmel_dapper_tao_Y type="y" units="degrees_north">
+    <arange start="-9" step="1" size="20"/>
+  </pmel_dapper_tao_Y>
+  <pmel_dapper_tao_Z type="z" units="meters">
+    <arange start="0" step="1" size="1"/>
+  </pmel_dapper_tao_Z>
+  <pmel_dapper_tao_T type="t" units="hour">
+    <arange start="1979-01-01 12:00:00" step="1" size="252241"/>
+  </pmel_dapper_tao_T>
+</axes>
