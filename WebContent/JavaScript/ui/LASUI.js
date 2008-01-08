@@ -4,7 +4,7 @@
  * author: Jeremy Malczyk -- 2007
  */
 /**
- * The LASUI class
+ * The  LASUI class
  */
 function LASUI () {
 	// references for everything the UI builds
