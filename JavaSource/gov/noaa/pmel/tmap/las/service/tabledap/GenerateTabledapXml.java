@@ -46,7 +46,7 @@ public class GenerateTabledapXml {
      *   args[0] must be the name to be given to the server (e.g., "ERD TableDAP")
      *   args[1] must be the id to be given to the server (e.g., erd_tabledap)
      *   args[2] must be the url of the tabledap server
-     *     (e.g., http://coastwatch.pfel.noaa.gov/cwexperimental/erddap/tabledap/).
+     *     (e.g., http://coastwatch.pfel.noaa.gov/erddap/tabledap/).
      *   args[3] must be complete name for the .xml file to be created.
      * @throws Exception if there is an error
      */
@@ -63,7 +63,7 @@ public class GenerateTabledapXml {
         //  "table": {
         //    "columnNames": ["griddap Access", "tabledap Access", "Title", "Institution", "Summary", "Info", "Background Info", "ID"],
         //    "rows": [
-        //      ["", "http://coastwatch.pfel.noaa.gov/cwexperimental/erddap/tabledap/csc_mwfs/wt", "Buoy Data (Water Temperature) from the NOAA CSC microWFS", "NOAA CSC", "[Normally, the summary describes the dataset. Here, it describes \nthe server.] \nThe mission of the NOAA CSC Data Transport Laboratory (DTL) is to \nsupport the employment of data transport technologies that are \ncompatible with Ocean.US Data Management and Communications (DMAC) \nguidance at the local and regional levels. This is accomplished \nthrough the identification, evaluation, and documentation of \nrelevant data transport technology candidates. In following that \nmission, the DTL is exploring the use of the Open Geospatial \nConsortium (OGC) Web Feature Service (WFS) and the Geography \nMarkup Language (GML) Simple Feature Profile to transport in-situ \ntime series data.", "http://www.csc.noaa.gov/DTL/dtl_proj4_gmlsfp_wfs.html", "csc_mwfs/wt"],
+        //      ["", "http://coastwatch.pfel.noaa.gov/erddap/tabledap/csc_mwfs/wt", "Buoy Data (Water Temperature) from the NOAA CSC microWFS", "NOAA CSC", "[Normally, the summary describes the dataset. Here, it describes \nthe server.] \nThe mission of the NOAA CSC Data Transport Laboratory (DTL) is to \nsupport the employment of data transport technologies that are \ncompatible with Ocean.US Data Management and Communications (DMAC) \nguidance at the local and regional levels. This is accomplished \nthrough the identification, evaluation, and documentation of \nrelevant data transport technology candidates. In following that \nmission, the DTL is exploring the use of the Open Geospatial \nConsortium (OGC) Web Feature Service (WFS) and the Geography \nMarkup Language (GML) Simple Feature Profile to transport in-situ \ntime series data.", "http://www.csc.noaa.gov/DTL/dtl_proj4_gmlsfp_wfs.html", "csc_mwfs/wt"],
         Table datasetsTable = new Table();
         String jsonDatasets = SSR.getUrlResponseString(serverUrl + "index.json");
         String2.log("\njsonDatasets=" + jsonDatasets);
@@ -91,6 +91,8 @@ public class GenerateTabledapXml {
         //LAS doesn't specify or use character encoding information(!)
         Writer writer = new BufferedWriter(new FileWriter(xmlFileName));
         writer.write("<datasets>\n");
+        StringBuffer gridsSB = new StringBuffer("<grids>\n");
+        StringBuffer axesSB = new StringBuffer("<axes>\n");
 
         //for each dataset
         //nDatasets = 1; //while developing        
@@ -118,6 +120,7 @@ public class GenerateTabledapXml {
                 "        <server>" + serverName + "</server>\n" + //???
                 "        <id>" + id + "</id>\n" +
                 "        <title>" + title + "</title>\n");  //???how differ from 'name' above
+            gridsSB.append("  <" + idForLAS + "_grid>\n");
             int col = infoTable.findColumnNumber("longitude");
             if (col >= 0) {
                 PrimitiveArray pa = infoTable.columnAttributes(col).get("actual_range");
@@ -125,25 +128,66 @@ public class GenerateTabledapXml {
                 writer.write(
                     "        <longitude>longitude</longitude>\n" +
                     "        <lon_domain>" + domain + "</lon_domain>\n");
+                if (pa != null) {
+                    gridsSB.append("    <link match=\"/lasdata/axes/" + idForLAS + "_X\"/>\n");
+                    int first = Math2.roundToInt(Math.floor(pa.getDouble(0)));
+                    int last =  Math2.roundToInt(Math.ceil( pa.getDouble(1)));
+                    axesSB.append(
+                        "  <" + idForLAS + "_X type=\"x\" units=\"degrees_east\">\n" +
+                        "    <arange start=\"" + first + "\" step=\"1\" size=\"" + (last - first + 1) + "\"/>\n" +
+                        "  </" + idForLAS + "_X>\n");
+                }
             }
             col = infoTable.findColumnNumber("latitude");
             if (col >= 0) {
+                PrimitiveArray pa = infoTable.columnAttributes(col).get("actual_range");
                 writer.write(
                 "        <latitude>latitude</latitude>\n");
+                if (pa != null) {
+                    gridsSB.append("    <link match=\"/lasdata/axes/" + idForLAS + "_Y\"/>\n");
+                    int first = Math2.roundToInt(Math.floor(pa.getDouble(0)));
+                    int last =  Math2.roundToInt(Math.ceil( pa.getDouble(1)));
+                    axesSB.append(
+                        "  <" + idForLAS + "_Y type=\"y\" units=\"degrees_north\">\n" +
+                        "    <arange start=\"" + first + "\" step=\"1\" size=\"" + (last - first + 1) + "\"/>\n" +
+                        "  </" + idForLAS + "_Y>\n");
+                }
             }
             col = infoTable.findColumnNumber("altitude");
             if (col >= 0) {
+                PrimitiveArray pa = infoTable.columnAttributes(col).get("actual_range");
                 writer.write(
                 "        <altitude>altitude</altitude>\n" +
                 "        <altitude_units>meters</altitude_units>\n" +
                 "        <positive>up</positive>\n");
+                if (pa != null) {
+                    gridsSB.append("    <link match=\"/lasdata/axes/" + idForLAS + "_Z\"/>\n");
+                    int first = Math2.roundToInt(Math.floor(pa.getDouble(0)));
+                    int last =  Math2.roundToInt(Math.ceil( pa.getDouble(1)));
+                    axesSB.append(
+                        "  <" + idForLAS + "_Z type=\"z\" units=\"meters\">\n" +
+                        "    <arange start=\"" + first + "\" step=\"1\" size=\"" + (last - first + 1) + "\"/>\n" +
+                        "  </" + idForLAS + "_Z>\n");
+                }
             }
             col = infoTable.findColumnNumber("time");
             if (col >= 0) {
+                PrimitiveArray pa = infoTable.columnAttributes(col).get("actual_range");
                 writer.write(
                 "        <time>time</time>\n" +
                 "        <time_units>sec since 1970-01-01T00:00:00Z</time_units>\n" +
                 "        <time_type>double</time_type>\n");
+                if (pa != null) {
+                    gridsSB.append("    <link match=\"/lasdata/axes/" + idForLAS + "_T\"/>\n");
+                    long first = Math.round(Math.floor(pa.getDouble(0)));
+                    long last =  Math.round(Math.ceil( pa.getDouble(1)));
+                    int stepSize = 3600; //60sec*60min = 1 hour
+                    axesSB.append(
+                        "  <" + idForLAS + "_T type=\"t\" units=\"hour\">\n" + 
+                        "    <arange start=\"" + Calendar2.epochSecondsToIsoStringSpace(first) + 
+                            "\" step=\"1\" size=\"" + ((last - first)/stepSize + 1) + "\"/>\n" + 
+                        "  </" + idForLAS + "_T>\n");
+                }
             }
             writer.write(
                 //"        <missing>NaN</missing>\n" +  //must be same for all variables???
@@ -155,6 +199,7 @@ public class GenerateTabledapXml {
                 "      </product_server>\n" +
                 "    </properties>\n" +
                 "    <variables>\n");
+            gridsSB.append("  </" + idForLAS + "_grid>\n");
 
             //write the info for the non-LonLatAltTime variables
             for (col = 0; col < infoTable.nColumns(); col++) {
@@ -170,10 +215,9 @@ public class GenerateTabledapXml {
                 writer.write(
                     "      <" + colName + 
                         (units == null? "" : " units=\"" + units + "\"") +
-                        " name=\"" + longName + "\"\n" +
-                    "        url=\"#" + colName + "\">\n" +  //huh ???
-                    //"        <link match=\"" + /lasdata/grids/pfeg_grid + "\"/>\n" +  //huh???
-                    "      <" + colName + ">\n");
+                        " name=\"" + longName + "\" url=\"#" + colName + "\">\n" +  
+                    "        <link match=\"/lasdata/grids/" + idForLAS + "_grid\"/>\n" +  
+                    "      </" + colName + ">\n");
             }
             writer.write(
                 "    </variables>\n" +
@@ -181,6 +225,10 @@ public class GenerateTabledapXml {
         }
 
         writer.write("</datasets>\n");
+        writer.write(gridsSB.toString());
+        writer.write("</grids>\n");
+        writer.write(axesSB.toString());
+        writer.write("</axes>\n");
         writer.close();
     }
 
@@ -191,10 +239,10 @@ public class GenerateTabledapXml {
      * @throws Exception if trouble
      */
     public static void test() throws Exception {
-//!!! currently uses cwexperimental; eventually switch to coastwatch
+//!!! currently uses erddap2; eventually switch to erddap
         String fileName = "C:/pmelsvn/conf/example/tabledap_erd.xml";
         GenerateTabledapXml.main(new String[]{"ERD TableDAP", "erd_tabledap",
-            "http://coastwatch.pfel.noaa.gov/cwexperimental/erddap/tabledap/",
+            "http://coastwatch.pfel.noaa.gov/erddap2/tabledap/",
             fileName});
         String2.log("GenerateTabledapXml fileName=" + fileName + "\n" + String2.readFromFile(fileName)[1]);
     }
