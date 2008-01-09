@@ -1,5 +1,5 @@
 /**
- * LASUI.js
+ *  LASUI.js
  * Main class for LAS UI widget management and communication with the LAS json services.
  * author: Jeremy Malczyk -- 2007
  */
