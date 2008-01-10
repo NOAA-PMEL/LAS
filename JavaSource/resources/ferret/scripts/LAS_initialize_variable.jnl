@@ -18,6 +18,7 @@ DEFINE SYMBOL data_($num)_num = `($data_var),RETURN=dsetnum`
 DEFINE SYMBOL ferret_plot_var = ($data_var)[d=($data_num),($region_full)]
 DEFINE SYMBOL ferret_plot_var_noregion = ($data_var)[d=($data_num)]
 DEFINE SYMBOL ferret_plot_base_var = ($ferret_plot_var) 
+DEFINE SYMBOL ferret_plot_base_var_noregion = ($data_var)[d=($data_num)]
 
 ! Get any DEFINE VARIABLE analysis definitions
 ! This renames the data variable, and so redefines the symbol data_var
@@ -93,8 +94,8 @@ IF `($data_num) EQ 1` THEN
    IF ($ferret_contour_levels"0|*>1") THEN DEFINE SYMBOL input_contour_levels = 1
    IF ($ferret_fill_levels"0|*>1") THEN DEFINE SYMBOL input_fill_levels = 1
 
-   IF `STRLEN("($ferret_view)") EQ 2 AND STRINDEX("($operation_ID)", "Plot") GT 0` THEN\
-   GO LAS_auto_levels
+   IF `STRLEN("($ferret_view)") EQ 2 AND STRINDEX("($operation_ID)", "Plot") GT 0` THEN
+   IF `STRINDEX("($op)", "ANIMATION") EQ 0` THEN GO LAS_auto_levels  ! animation levels done elsewhere
 ENDIF
 
 ! End of $RCSfile ------------LAS_initialize_variable.jnl--------------------------
