@@ -282,6 +282,7 @@ log.debug("first up-to-100 rows found (raw): " + data.toString("rows", 100));
             lasBackendResponse.addResponseFromRequest(lasBackendRequest);
 
         } catch (Exception e) {
+            //System.out.println("TabledapTool is processing the exception.");
             log.info(MustBe.throwableToString(e));
             lasBackendResponse.setError(causeOfError, e);
         }
