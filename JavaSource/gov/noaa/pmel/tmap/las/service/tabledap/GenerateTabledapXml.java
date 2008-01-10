@@ -110,7 +110,7 @@ public class GenerateTabledapXml {
             writer.write(
                 "  <" + idForLAS + "\n" +
                 "    name = \"" + title + "\"\n" +
-                "    url = \"" + access + "\"\n" +
+                "    url = \"" + serverUrl + "\"\n" +
                 "    doc = \"" + background + "\">\n" +  
                 "    <properties>\n" +
                 "      <ui>\n" +
@@ -128,14 +128,20 @@ public class GenerateTabledapXml {
                 writer.write(
                     "        <longitude>longitude</longitude>\n" +
                     "        <lon_domain>" + domain + "</lon_domain>\n");
-                if (pa != null) {
+                if (pa != null && pa.size() == 2) {
                     gridsSB.append("    <link match=\"/lasdata/axes/" + idForLAS + "_X\"/>\n");
-                    int first = Math2.roundToInt(Math.floor(pa.getDouble(0)));
-                    int last =  Math2.roundToInt(Math.ceil( pa.getDouble(1)));
-                    axesSB.append(
-                        "  <" + idForLAS + "_X type=\"x\" units=\"degrees_east\">\n" +
-                        "    <arange start=\"" + first + "\" step=\"1\" size=\"" + (last - first + 1) + "\"/>\n" +
-                        "  </" + idForLAS + "_X>\n");
+                    double dFirst = pa.getDouble(0);
+                    double dLast  = pa.getDouble(1);
+                    if (!Double.isNaN(dFirst) && !Double.isNaN(dLast)) {
+                        int first = Math2.roundToInt(Math.floor(dFirst));
+                        int last =  Math2.roundToInt(Math.ceil( dLast));
+                        if (first != last) {
+                            axesSB.append(
+                                "  <" + idForLAS + "_X type=\"x\" units=\"degrees_east\">\n" +
+                                "    <arange start=\"" + first + "\" step=\"0.1\" size=\"" + ((last - first)*10 + 1) + "\"/>\n" +
+                                "  </" + idForLAS + "_X>\n");
+                        }
+                    }
                 }
             }
             col = infoTable.findColumnNumber("latitude");
@@ -143,14 +149,20 @@ public class GenerateTabledapXml {
                 PrimitiveArray pa = infoTable.columnAttributes(col).get("actual_range");
                 writer.write(
                 "        <latitude>latitude</latitude>\n");
-                if (pa != null) {
+                if (pa != null && pa.size() == 2) {
                     gridsSB.append("    <link match=\"/lasdata/axes/" + idForLAS + "_Y\"/>\n");
-                    int first = Math2.roundToInt(Math.floor(pa.getDouble(0)));
-                    int last =  Math2.roundToInt(Math.ceil( pa.getDouble(1)));
-                    axesSB.append(
-                        "  <" + idForLAS + "_Y type=\"y\" units=\"degrees_north\">\n" +
-                        "    <arange start=\"" + first + "\" step=\"1\" size=\"" + (last - first + 1) + "\"/>\n" +
-                        "  </" + idForLAS + "_Y>\n");
+                    double dFirst = pa.getDouble(0);
+                    double dLast  = pa.getDouble(1);
+                    if (!Double.isNaN(dFirst) && !Double.isNaN(dLast)) {
+                        int first = Math2.roundToInt(Math.floor(dFirst));
+                        int last =  Math2.roundToInt(Math.ceil( dLast));
+                        if (first != last) {
+                            axesSB.append(
+                                "  <" + idForLAS + "_Y type=\"y\" units=\"degrees_north\">\n" +
+                                "    <arange start=\"" + first + "\" step=\"0.1\" size=\"" + ((last - first)*10 + 1) + "\"/>\n" +
+                                "  </" + idForLAS + "_Y>\n");
+                        }
+                    }
                 }
             }
             col = infoTable.findColumnNumber("altitude");
@@ -160,14 +172,20 @@ public class GenerateTabledapXml {
                 "        <altitude>altitude</altitude>\n" +
                 "        <altitude_units>meters</altitude_units>\n" +
                 "        <positive>up</positive>\n");
-                if (pa != null) {
+                if (pa != null && pa.size() == 2) {
                     gridsSB.append("    <link match=\"/lasdata/axes/" + idForLAS + "_Z\"/>\n");
-                    int first = Math2.roundToInt(Math.floor(pa.getDouble(0)));
-                    int last =  Math2.roundToInt(Math.ceil( pa.getDouble(1)));
-                    axesSB.append(
-                        "  <" + idForLAS + "_Z type=\"z\" units=\"meters\">\n" +
-                        "    <arange start=\"" + first + "\" step=\"1\" size=\"" + (last - first + 1) + "\"/>\n" +
-                        "  </" + idForLAS + "_Z>\n");
+                    double dFirst = pa.getDouble(0);
+                    double dLast  = pa.getDouble(1);
+                    if (!Double.isNaN(dFirst) && !Double.isNaN(dLast)) {
+                        int first = Math2.roundToInt(Math.floor(dFirst));
+                        int last =  Math2.roundToInt(Math.ceil( dLast));
+                        if (first != last) {
+                            axesSB.append(
+                                "  <" + idForLAS + "_Z type=\"z\" units=\"meters\">\n" +
+                                "    <arange start=\"" + first + "\" step=\"1\" size=\"" + (last - first + 1) + "\"/>\n" +
+                                "  </" + idForLAS + "_Z>\n");
+                        }
+                    }
                 }
             }
             col = infoTable.findColumnNumber("time");
@@ -177,16 +195,23 @@ public class GenerateTabledapXml {
                 "        <time>time</time>\n" +
                 "        <time_units>sec since 1970-01-01T00:00:00Z</time_units>\n" +
                 "        <time_type>double</time_type>\n");
-                if (pa != null) {
+                if (pa != null && pa.size() == 2) {
                     gridsSB.append("    <link match=\"/lasdata/axes/" + idForLAS + "_T\"/>\n");
-                    long first = Math.round(Math.floor(pa.getDouble(0)));
-                    long last =  Math.round(Math.ceil( pa.getDouble(1)));
-                    int stepSize = 3600; //60sec*60min = 1 hour
-                    axesSB.append(
-                        "  <" + idForLAS + "_T type=\"t\" units=\"hour\">\n" + 
-                        "    <arange start=\"" + Calendar2.epochSecondsToIsoStringSpace(first) + 
-                            "\" step=\"1\" size=\"" + ((last - first)/stepSize + 1) + "\"/>\n" + 
-                        "  </" + idForLAS + "_T>\n");
+                    double dFirst = pa.getDouble(0);
+                    double dLast  = pa.getDouble(1);
+                    if (Double.isNaN(dLast))
+                        dLast = Calendar2.gcToEpochSeconds(Calendar2.newGCalendarZulu());
+                    if (!Double.isNaN(dFirst)) {
+                        long first = Math.round(Math.floor(dFirst / 3600)); //convert to hours
+                        long last =  Math.round(Math.ceil( dLast  / 3600));
+                        if (first != last) {
+                            axesSB.append(
+                                "  <" + idForLAS + "_T type=\"t\" units=\"hour\">\n" + 
+                                "    <arange start=\"" + Calendar2.epochSecondsToIsoStringSpace(first * 3600) + 
+                                    "\" step=\"1\" size=\"" + (last - first + 1) + "\"/>\n" + 
+                                "  </" + idForLAS + "_T>\n");
+                        }
+                    }
                 }
             }
             writer.write(
