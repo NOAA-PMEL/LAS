@@ -264,10 +264,9 @@ public class GenerateTabledapXml {
      * @throws Exception if trouble
      */
     public static void test() throws Exception {
-//!!! currently uses erddap2; eventually switch to erddap
         String fileName = "C:/pmelsvn/conf/example/tabledap_erd.xml";
         GenerateTabledapXml.main(new String[]{"ERD TableDAP", "erd_tabledap",
-            "http://coastwatch.pfel.noaa.gov/erddap2/tabledap/",
+            "http://coastwatch.pfel.noaa.gov/erddap/tabledap/",
             fileName});
         String2.log("GenerateTabledapXml fileName=" + fileName + "\n" + String2.readFromFile(fileName)[1]);
     }
