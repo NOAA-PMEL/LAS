@@ -1,7 +1,7 @@
 <datasets>
   <csc_mwfs_wt
     name = "Buoy Data (Water Temperature) from the NOAA CSC microWFS"
-    url = "http://coastwatch.pfel.noaa.gov/erddap2/tabledap/csc_mwfs/wt"
+    url = "http://coastwatch.pfel.noaa.gov/erddap2/tabledap/"
     doc = "http://www.csc.noaa.gov/DTL/dtl_proj4_gmlsfp_wfs.html">
     <properties>
       <ui>
@@ -38,7 +38,7 @@
   </csc_mwfs_wt>
   <gomoos_sos_buoy
     name = "Buoy Data from the GoMOOS SOS Server"
-    url = "http://coastwatch.pfel.noaa.gov/erddap2/tabledap/gomoos_sos/buoy"
+    url = "http://coastwatch.pfel.noaa.gov/erddap2/tabledap/"
     doc = "http://www.oostethys.org/ogc-oceans-interoperability-experiment">
     <properties>
       <ui>
@@ -78,7 +78,7 @@
   </gomoos_sos_buoy>
   <nos_coops_wind
     name = "Buoy Wind Data from the NOAA NOS SOAP+XML Server"
-    url = "http://coastwatch.pfel.noaa.gov/erddap2/tabledap/nos_coops/wind"
+    url = "http://coastwatch.pfel.noaa.gov/erddap2/tabledap/"
     doc = "http://opendap.co-ops.nos.noaa.gov/axis/">
     <properties>
       <ui>
@@ -127,7 +127,7 @@
   </nos_coops_wind>
   <nwioos_drds_coral
     name = "Coral Data Collected off West Coast of US (1980-2005)"
-    url = "http://coastwatch.pfel.noaa.gov/erddap2/tabledap/nwioos_drds/coral"
+    url = "http://coastwatch.pfel.noaa.gov/erddap2/tabledap/"
     doc = "http://nwioos.coas.oregonstate.edu:8080/dods/drds/Coral%201980-2005.das.info">
     <properties>
       <ui>
@@ -185,7 +185,7 @@
   </nwioos_drds_coral>
   <erd_opendap_globec_bottle
     name = "GLOBEC Rosette Bottle Data (2002) from the ERD OPeNDAP Server"
-    url = "http://coastwatch.pfel.noaa.gov/erddap2/tabledap/erd_opendap/globec_bottle"
+    url = "http://coastwatch.pfel.noaa.gov/erddap2/tabledap/"
     doc = "http://globec.coas.oregonstate.edu/">
     <properties>
       <ui>
@@ -282,7 +282,7 @@
   </erd_opendap_globec_bottle>
   <nwioos_drds_groundfish
     name = "Groundfish Data for U.S. West Coast (2003-2005)"
-    url = "http://coastwatch.pfel.noaa.gov/erddap2/tabledap/nwioos_drds/groundfish"
+    url = "http://coastwatch.pfel.noaa.gov/erddap2/tabledap/"
     doc = "http://nwioos.coas.oregonstate.edu:8080/dods/drds/Groundfish%20Survey%202003-2005.info">
     <properties>
       <ui>
@@ -331,7 +331,7 @@
   </nwioos_drds_groundfish>
   <nwioos_drds_hud_fish_species_details
     name = "HUD Fish Species Details"
-    url = "http://coastwatch.pfel.noaa.gov/erddap2/tabledap/nwioos_drds/hud_fish_species_details"
+    url = "http://coastwatch.pfel.noaa.gov/erddap2/tabledap/"
     doc = "http://nwioos.coas.oregonstate.edu:8080/dods/drds/HUD%20Fish%20Species%20Details.info">
     <properties>
       <ui>
@@ -401,7 +401,7 @@
   </nwioos_drds_hud_fish_species_details>
   <nwioos_drds_hud_fish_species_occurrence
     name = "HUD Fish Species Occurrence"
-    url = "http://coastwatch.pfel.noaa.gov/erddap2/tabledap/nwioos_drds/hud_fish_species_occurrence"
+    url = "http://coastwatch.pfel.noaa.gov/erddap2/tabledap/"
     doc = "http://nwioos.coas.oregonstate.edu:8080/dods/drds/HUD%20Fish%20Species%20Occurrence.info">
     <properties>
       <ui>
@@ -459,7 +459,7 @@
   </nwioos_drds_hud_fish_species_occurrence>
   <nwioos_drds_hud_predators_prey
     name = "HUD Predators and Prey"
-    url = "http://coastwatch.pfel.noaa.gov/erddap2/tabledap/nwioos_drds/hud_predators_prey"
+    url = "http://coastwatch.pfel.noaa.gov/erddap2/tabledap/"
     doc = "http://nwioos.coas.oregonstate.edu:8080/dods/drds/HUD%20Predators%20and%20Prey.info">
     <properties>
       <ui>
@@ -526,7 +526,7 @@
   </nwioos_drds_hud_predators_prey>
   <nwioos_drds_hud_references
     name = "HUD References"
-    url = "http://coastwatch.pfel.noaa.gov/erddap2/tabledap/nwioos_drds/hud_references"
+    url = "http://coastwatch.pfel.noaa.gov/erddap2/tabledap/"
     doc = "http://nwioos.coas.oregonstate.edu:8080/dods/drds/HUD%20References.info">
     <properties>
       <ui>
@@ -611,7 +611,7 @@
   </nwioos_drds_hud_references>
   <nwioos_drds_adcp_1995
     name = "Hake Survey ADCP (1995)"
-    url = "http://coastwatch.pfel.noaa.gov/erddap2/tabledap/nwioos_drds/adcp_1995"
+    url = "http://coastwatch.pfel.noaa.gov/erddap2/tabledap/"
     doc = "http://nwioos.coas.oregonstate.edu:8080/dods/drds/1995%20Hake%20Survey%20ADCP.info">
     <properties>
       <ui>
@@ -651,7 +651,7 @@
   </nwioos_drds_adcp_1995>
   <nwioos_drds_adcp_1998
     name = "Hake Survey ADCP (1998)"
-    url = "http://coastwatch.pfel.noaa.gov/erddap2/tabledap/nwioos_drds/adcp_1998"
+    url = "http://coastwatch.pfel.noaa.gov/erddap2/tabledap/"
     doc = "http://nwioos.coas.oregonstate.edu:8080/dods/drds/1998%20Hake%20Survey%20ADCP.info">
     <properties>
       <ui>
@@ -691,7 +691,7 @@
   </nwioos_drds_adcp_1998>
   <nwioos_drds_adcp_2001
     name = "Hake Survey ADCP (2001)"
-    url = "http://coastwatch.pfel.noaa.gov/erddap2/tabledap/nwioos_drds/adcp_2001"
+    url = "http://coastwatch.pfel.noaa.gov/erddap2/tabledap/"
     doc = "http://nwioos.coas.oregonstate.edu:8080/dods/drds/2001%20Hake%20Survey%20ADCP.info">
     <properties>
       <ui>
@@ -731,7 +731,7 @@
   </nwioos_drds_adcp_2001>
   <nwioos_drds_adcp_2003
     name = "Hake Survey ADCP (2003)"
-    url = "http://coastwatch.pfel.noaa.gov/erddap2/tabledap/nwioos_drds/adcp_2003"
+    url = "http://coastwatch.pfel.noaa.gov/erddap2/tabledap/"
     doc = "http://nwioos.coas.oregonstate.edu:8080/dods/drds/2003%20Hake%20Survey%20ADCP.info">
     <properties>
       <ui>
@@ -771,7 +771,7 @@
   </nwioos_drds_adcp_2003>
   <nwioos_drds_adcp_2005
     name = "Hake Survey ADCP (2005)"
-    url = "http://coastwatch.pfel.noaa.gov/erddap2/tabledap/nwioos_drds/adcp_2005"
+    url = "http://coastwatch.pfel.noaa.gov/erddap2/tabledap/"
     doc = "http://nwioos.coas.oregonstate.edu:8080/dods/drds/2005%20Hake%20Survey%20ADCP.info">
     <properties>
       <ui>
@@ -811,7 +811,7 @@
   </nwioos_drds_adcp_2005>
   <aadc_obis_argos_tracking
     name = "OBIS - ARGOS Satellite Tracking of Animals"
-    url = "http://coastwatch.pfel.noaa.gov/erddap2/tabledap/aadc_obis/argos_tracking"
+    url = "http://coastwatch.pfel.noaa.gov/erddap2/tabledap/"
     doc = "http://data.aad.gov.au/">
     <properties>
       <ui>
@@ -1061,7 +1061,7 @@
   </aadc_obis_argos_tracking>
   <fishbase_obis_fishbase
     name = "OBIS - FishBase (Philippine Server)"
-    url = "http://coastwatch.pfel.noaa.gov/erddap2/tabledap/fishbase_obis/fishbase"
+    url = "http://coastwatch.pfel.noaa.gov/erddap2/tabledap/"
     doc = "http://filaman.ifm-geomar.de/home.htm">
     <properties>
       <ui>
@@ -1311,7 +1311,7 @@
   </fishbase_obis_fishbase>
   <rutgers_obis_GulfOfMaineBIS
     name = "OBIS - Gulf of Maine Bottom Trawl Survey Data (NEFSC,NMFS,NOAA)"
-    url = "http://coastwatch.pfel.noaa.gov/erddap2/tabledap/rutgers_obis/GulfOfMaineBIS"
+    url = "http://coastwatch.pfel.noaa.gov/erddap2/tabledap/"
     doc = "http://www.nefsc.noaa.gov">
     <properties>
       <ui>
@@ -1561,7 +1561,7 @@
   </rutgers_obis_GulfOfMaineBIS>
   <rutgers_obis_GHMP
     name = "OBIS - Gwaii Haanas Marine Plants (OBIS Canada)"
-    url = "http://coastwatch.pfel.noaa.gov/erddap2/tabledap/rutgers_obis/GHMP"
+    url = "http://coastwatch.pfel.noaa.gov/erddap2/tabledap/"
     doc = "http://gcmd.nasa.gov/KeywordSearch/Metadata.do?Portal=caobis&MetadataType=0&KeywordPath=&MetadataView=Full&EntryId=OBIS.Gwaii_MarPlants">
     <properties>
       <ui>
@@ -1811,7 +1811,7 @@
   </rutgers_obis_GHMP>
   <rutgers_obis_OBIS-SEAMAP
     name = "OBIS - SEAMAP - marine mammals, birds and turtles"
-    url = "http://coastwatch.pfel.noaa.gov/erddap2/tabledap/rutgers_obis/OBIS-SEAMAP"
+    url = "http://coastwatch.pfel.noaa.gov/erddap2/tabledap/"
     doc = "http://obis.env.duke.edu">
     <properties>
       <ui>
@@ -2061,7 +2061,7 @@
   </rutgers_obis_OBIS-SEAMAP>
   <pmel_dapper_tao
     name = "TAO Array Data from the PMEL DAPPER Server"
-    url = "http://coastwatch.pfel.noaa.gov/erddap2/tabledap/pmel_dapper/tao"
+    url = "http://coastwatch.pfel.noaa.gov/erddap2/tabledap/"
     doc = "http://www.pmel.noaa.gov/tao/">
     <properties>
       <ui>
@@ -2234,149 +2234,140 @@
 </grids>
 <axes>
   <csc_mwfs_wt_X type="x" units="degrees_east">
-    <arange start="-98" step="1" size="29"/>
+    <arange start="-98" step="0.1" size="281"/>
   </csc_mwfs_wt_X>
   <csc_mwfs_wt_Y type="y" units="degrees_north">
-    <arange start="24" step="1" size="16"/>
+    <arange start="24" step="0.1" size="151"/>
   </csc_mwfs_wt_Y>
-  <csc_mwfs_wt_Z type="z" units="meters">
-    <arange start="0" step="1" size="1"/>
-  </csc_mwfs_wt_Z>
   <csc_mwfs_wt_T type="t" units="hour">
-    <arange start="2007-01-01 00:00:00" step="1" size="-324335"/>
+    <arange start="2007-01-01 00:00:00" step="1" size="8976"/>
   </csc_mwfs_wt_T>
   <gomoos_sos_buoy_X type="x" units="degrees_east">
-    <arange start="-71" step="1" size="7"/>
+    <arange start="-71" step="0.1" size="61"/>
   </gomoos_sos_buoy_X>
   <gomoos_sos_buoy_Y type="y" units="degrees_north">
-    <arange start="42" step="1" size="4"/>
+    <arange start="42" step="0.1" size="31"/>
   </gomoos_sos_buoy_Y>
   <gomoos_sos_buoy_Z type="z" units="meters">
     <arange start="-250" step="1" size="250"/>
   </gomoos_sos_buoy_Z>
   <gomoos_sos_buoy_T type="t" units="hour">
-    <arange start="2000-07-10 16:00:00" step="1" size="-267567"/>
+    <arange start="2000-07-10 16:00:00" step="1" size="65744"/>
   </gomoos_sos_buoy_T>
   <nos_coops_wind_X type="x" units="degrees_east">
-    <arange start="-178" step="1" size="358"/>
+    <arange start="-178" step="0.1" size="3571"/>
   </nos_coops_wind_X>
   <nos_coops_wind_Y type="y" units="degrees_north">
-    <arange start="-47" step="1" size="119"/>
+    <arange start="-47" step="0.1" size="1181"/>
   </nos_coops_wind_Y>
   <nos_coops_wind_T type="t" units="hour">
-    <arange start="1991-05-01 00:00:00" step="1" size="-186959"/>
+    <arange start="1991-05-01 00:00:00" step="1" size="146352"/>
   </nos_coops_wind_T>
   <nwioos_drds_coral_X type="x" units="degrees_east">
-    <arange start="-126" step="1" size="10"/>
+    <arange start="-126" step="0.1" size="91"/>
   </nwioos_drds_coral_X>
   <nwioos_drds_coral_Y type="y" units="degrees_north">
-    <arange start="32" step="1" size="18"/>
+    <arange start="32" step="0.1" size="171"/>
   </nwioos_drds_coral_Y>
   <nwioos_drds_coral_Z type="z" units="meters">
     <arange start="-1543" step="1" size="1533"/>
   </nwioos_drds_coral_Z>
   <erd_opendap_globec_bottle_X type="x" units="degrees_east">
-    <arange start="-126" step="1" size="3"/>
+    <arange start="-126" step="0.1" size="21"/>
   </erd_opendap_globec_bottle_X>
   <erd_opendap_globec_bottle_Y type="y" units="degrees_north">
-    <arange start="41" step="1" size="5"/>
+    <arange start="41" step="0.1" size="41"/>
   </erd_opendap_globec_bottle_Y>
-  <erd_opendap_globec_bottle_Z type="z" units="meters">
-    <arange start="0" step="1" size="1"/>
-  </erd_opendap_globec_bottle_Z>
   <erd_opendap_globec_bottle_T type="t" units="hour">
     <arange start="2002-07-31 00:00:00" step="1" size="457"/>
   </erd_opendap_globec_bottle_T>
   <nwioos_drds_groundfish_X type="x" units="degrees_east">
-    <arange start="-126" step="1" size="10"/>
+    <arange start="-126" step="0.1" size="91"/>
   </nwioos_drds_groundfish_X>
   <nwioos_drds_groundfish_Y type="y" units="degrees_north">
-    <arange start="32" step="1" size="18"/>
+    <arange start="32" step="0.1" size="171"/>
   </nwioos_drds_groundfish_Y>
   <nwioos_drds_adcp_1995_X type="x" units="degrees_east">
-    <arange start="-134" step="1" size="17"/>
+    <arange start="-134" step="0.1" size="161"/>
   </nwioos_drds_adcp_1995_X>
   <nwioos_drds_adcp_1995_Y type="y" units="degrees_north">
-    <arange start="32" step="1" size="25"/>
+    <arange start="32" step="0.1" size="241"/>
   </nwioos_drds_adcp_1995_Y>
   <nwioos_drds_adcp_1995_Z type="z" units="meters">
     <arange start="-494" step="1" size="473"/>
   </nwioos_drds_adcp_1995_Z>
   <nwioos_drds_adcp_1998_X type="x" units="degrees_east">
-    <arange start="-132" step="1" size="12"/>
+    <arange start="-132" step="0.1" size="111"/>
   </nwioos_drds_adcp_1998_X>
   <nwioos_drds_adcp_1998_Y type="y" units="degrees_north">
-    <arange start="36" step="1" size="18"/>
+    <arange start="36" step="0.1" size="171"/>
   </nwioos_drds_adcp_1998_Y>
   <nwioos_drds_adcp_1998_Z type="z" units="meters">
     <arange start="-406" step="1" size="385"/>
   </nwioos_drds_adcp_1998_Z>
   <nwioos_drds_adcp_2001_X type="x" units="degrees_east">
-    <arange start="-129" step="1" size="9"/>
+    <arange start="-129" step="0.1" size="81"/>
   </nwioos_drds_adcp_2001_X>
   <nwioos_drds_adcp_2001_Y type="y" units="degrees_north">
-    <arange start="36" step="1" size="15"/>
+    <arange start="36" step="0.1" size="141"/>
   </nwioos_drds_adcp_2001_Y>
   <nwioos_drds_adcp_2001_Z type="z" units="meters">
     <arange start="-494" step="1" size="473"/>
   </nwioos_drds_adcp_2001_Z>
   <nwioos_drds_adcp_2003_X type="x" units="degrees_east">
-    <arange start="-134" step="1" size="14"/>
+    <arange start="-134" step="0.1" size="131"/>
   </nwioos_drds_adcp_2003_X>
   <nwioos_drds_adcp_2003_Y type="y" units="degrees_north">
-    <arange start="36" step="1" size="20"/>
+    <arange start="36" step="0.1" size="191"/>
   </nwioos_drds_adcp_2003_Y>
   <nwioos_drds_adcp_2003_Z type="z" units="meters">
     <arange start="-489" step="1" size="474"/>
   </nwioos_drds_adcp_2003_Z>
   <nwioos_drds_adcp_2005_X type="x" units="degrees_east">
-    <arange start="-126" step="1" size="6"/>
+    <arange start="-126" step="0.1" size="51"/>
   </nwioos_drds_adcp_2005_X>
   <nwioos_drds_adcp_2005_Y type="y" units="degrees_north">
-    <arange start="35" step="1" size="15"/>
+    <arange start="35" step="0.1" size="141"/>
   </nwioos_drds_adcp_2005_Y>
   <nwioos_drds_adcp_2005_Z type="z" units="meters">
     <arange start="-497" step="1" size="473"/>
   </nwioos_drds_adcp_2005_Z>
   <aadc_obis_argos_tracking_X type="x" units="degrees_east">
-    <arange start="-180" step="1" size="361"/>
+    <arange start="-180" step="0.1" size="3601"/>
   </aadc_obis_argos_tracking_X>
   <aadc_obis_argos_tracking_Y type="y" units="degrees_north">
-    <arange start="-90" step="1" size="181"/>
+    <arange start="-90" step="0.1" size="1801"/>
   </aadc_obis_argos_tracking_Y>
   <fishbase_obis_fishbase_X type="x" units="degrees_east">
-    <arange start="-180" step="1" size="361"/>
+    <arange start="-180" step="0.1" size="3601"/>
   </fishbase_obis_fishbase_X>
   <fishbase_obis_fishbase_Y type="y" units="degrees_north">
-    <arange start="-90" step="1" size="181"/>
+    <arange start="-90" step="0.1" size="1801"/>
   </fishbase_obis_fishbase_Y>
   <rutgers_obis_GulfOfMaineBIS_X type="x" units="degrees_east">
-    <arange start="-180" step="1" size="361"/>
+    <arange start="-180" step="0.1" size="3601"/>
   </rutgers_obis_GulfOfMaineBIS_X>
   <rutgers_obis_GulfOfMaineBIS_Y type="y" units="degrees_north">
-    <arange start="-90" step="1" size="181"/>
+    <arange start="-90" step="0.1" size="1801"/>
   </rutgers_obis_GulfOfMaineBIS_Y>
   <rutgers_obis_GHMP_X type="x" units="degrees_east">
-    <arange start="-180" step="1" size="361"/>
+    <arange start="-180" step="0.1" size="3601"/>
   </rutgers_obis_GHMP_X>
   <rutgers_obis_GHMP_Y type="y" units="degrees_north">
-    <arange start="-90" step="1" size="181"/>
+    <arange start="-90" step="0.1" size="1801"/>
   </rutgers_obis_GHMP_Y>
   <rutgers_obis_OBIS-SEAMAP_X type="x" units="degrees_east">
-    <arange start="-180" step="1" size="361"/>
+    <arange start="-180" step="0.1" size="3601"/>
   </rutgers_obis_OBIS-SEAMAP_X>
   <rutgers_obis_OBIS-SEAMAP_Y type="y" units="degrees_north">
-    <arange start="-90" step="1" size="181"/>
+    <arange start="-90" step="0.1" size="1801"/>
   </rutgers_obis_OBIS-SEAMAP_Y>
   <pmel_dapper_tao_X type="x" units="degrees_east">
-    <arange start="164" step="1" size="103"/>
+    <arange start="164" step="0.1" size="1021"/>
   </pmel_dapper_tao_X>
   <pmel_dapper_tao_Y type="y" units="degrees_north">
-    <arange start="-9" step="1" size="20"/>
+    <arange start="-9" step="0.1" size="191"/>
   </pmel_dapper_tao_Y>
-  <pmel_dapper_tao_Z type="z" units="meters">
-    <arange start="0" step="1" size="1"/>
-  </pmel_dapper_tao_Z>
   <pmel_dapper_tao_T type="t" units="hour">
     <arange start="1979-01-01 12:00:00" step="1" size="252241"/>
   </pmel_dapper_tao_T>
