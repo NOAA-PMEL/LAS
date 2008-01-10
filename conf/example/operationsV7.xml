@@ -36,7 +36,8 @@
           <service>ferret</service>
           <response ID="PlotResp">
              <result type="image" ID="plot_image" streamable="true" mime_type="image/png" file_suffix=".gif" />
-             <!-- <result type="ps" ID="plot_postscript" streamable="true" mime_type="application/postscript"/> -->
+             <!--  <result type="ps" ID="plot_postscript" 
+streamable="true" mime_type="application/postscript"/> -->
              <result type="image" ID="ref_map"  file_suffix=".gif" />
              <result type="map_scale" ID="map_scale"/>
              <result type="debug" ID="debug"/>
