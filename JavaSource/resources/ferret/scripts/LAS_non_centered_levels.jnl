@@ -1,0 +1,72 @@
+! LAS_non_centered_levels.jnl
+!
+! Called by LAS_auto_levels.jnl and LAS_auto_levels_animate.jnl
+! Compute levels based on data statistics already computed:
+! stat_min, stat_max, stat_mean, stat_std
+! Levels not constrained to be centered
+
+PPL %RANGE `($stat_mean)-nstd`, `($stat_mean)+nstd`, ($num_fine_levels)
+
+DEFINE SYMBOL fine_lo = `MAX(($ppl$range_low), ($stat_min) )`
+DEFINE SYMBOL fine_hi = `MIN(($ppl$range_high), ($stat_max) )`
+
+! Use PPL RANGE to round these values off to nice numbers
+PPL %RANGE ($fine_lo), ($fine_hi), ($num_fine_levels)
+
+DEFINE SYMBOL fine_lo = ($ppl$range_low)
+DEFINE SYMBOL fine_hi = ($ppl$range_high)
+DEFINE SYMBOL fine_inc = ($ppl$range_inc)
+
+DEFINE SYMBOL coarse_delta = `($fine_inc)*density_factor`
+DEFINE SYMBOL coarse_lo = `($fine_lo) - ($half_num_coarse_levels) * ($coarse_delta)`
+DEFINE SYMBOL coarse_hi = `($fine_hi) + ($half_num_coarse_levels) * ($coarse_delta)`
+
+IF `( ($stat_min) GE ($coarse_lo) ) OR ( ($stat_max) LE ($coarse_hi)) ` THEN
+   PPL %RANGE `($stat_min)`, `($stat_max)`, 2*($num_coarse_levels)
+   DEFINE SYMBOL lowest_lev = ($ppl$range_low)
+   DEFINE SYMBOL highest_lev = ($ppl$range_high)
+ENDIF
+
+IF `($stat_min) LT ($coarse_lo)` THEN
+   DEFINE SYMBOL ferret_auto_levels = \
+(-inf)(($coarse_lo),($fine_lo),($coarse_delta))\
+(($fine_lo),($fine_hi),($fine_inc))
+   DEFINE SYMBOL ferret_auto_lines = \
+(-inf)(($coarse_lo),($fine_lo),`2*($coarse_delta)`)\
+(($fine_lo),($fine_hi),`2*($fine_inc)`)
+ELSE
+   IF `($fine_lo) - ($lowest_lev) GT ($coarse_delta)` THEN
+      DEFINE SYMBOL ferret_auto_levels = \
+(-inf)(($lowest_lev),($fine_lo),($coarse_delta))\
+(($fine_lo),($fine_hi),($fine_inc))
+      DEFINE SYMBOL ferret_auto_lines = \
+(-inf)(($lowest_lev),($fine_lo),`2*($coarse_delta)`)\
+(($fine_lo),($fine_hi),`2*($fine_inc)`)
+   ELSE
+      DEFINE SYMBOL ferret_auto_levels = \
+(-inf)(($fine_lo),($fine_hi),($fine_inc))
+      DEFINE SYMBOL ferret_auto_lines = \
+(-inf)(($fine_lo),($fine_hi),`2*($fine_inc)`)
+   ENDIF
+
+ENDIF
+
+IF `($stat_max) GT ($coarse_hi)` THEN
+   DEFINE SYMBOL ferret_auto_levels = \
+($ferret_auto_levels)(($fine_hi),($coarse_hi),($coarse_delta))(inf)
+   DEFINE SYMBOL ferret_auto_lines = \
+($ferret_auto_lines)(($fine_hi),($coarse_hi),`2*($coarse_delta)`)(inf)
+
+ELSE
+   IF `($highest_lev) - ($fine_hi) GT ($coarse_delta)` THEN 
+      DEFINE SYMBOL ferret_auto_levels = \
+($ferret_auto_levels)(($fine_hi),($highest_lev),($coarse_delta))(inf)
+      DEFINE SYMBOL ferret_auto_lines = \
+($ferret_auto_lines)(($fine_hi),($highest_lev),`2*($coarse_delta)`)(inf)
+   ELSE
+      DEFINE SYMBOL ferret_auto_levels = (($fine_lo),($fine_hi),($fine_inc))(inf)
+      DEFINE SYMBOL ferret_auto_lines = (($fine_lo),($fine_hi),($fine_inc))(inf)
+   ENDIF
+ENDIF
+
+! End of file ------------LAS_non_centered_levels.jnl--------------------------
