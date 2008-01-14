@@ -31,8 +31,12 @@ DEFINE SYMBOL coarse_lo = `($fine_lo) - ($half_num_coarse_levels) * ($coarse_del
 DEFINE SYMBOL coarse_hi = `($fine_hi) + ($half_num_coarse_levels) * ($coarse_delta)`
 
 IF `($stat_min) LT ($coarse_lo)  OR  ($stat_max) GT ($coarse_hi)` THEN ! b
-   DEFINE SYMBOL ferret_auto_levels = (-inf)(($coarse_lo),($fine_lo),($coarse_delta))(($fine_lo),($fine_hi),($fine_inc))(($fine_hi),($coarse_hi),($coarse_delta))(inf)
-   DEFINE SYMBOL ferret_auto_lines =(-inf)(($coarse_lo),($fine_lo),`2*($coarse_delta)`)(($fine_lo),($fine_hi),`2*($fine_inc)`) (($fine_hi),($coarse_hi),2*($coarse_delta))(inf)
+   DEFINE SYMBOL ferret_auto_levels = (-inf)(($coarse_lo),($fine_lo),($coarse_delta))\
+(($fine_lo),($fine_hi),($fine_inc))\
+(($fine_hi),($coarse_hi),($coarse_delta))(inf)
+   DEFINE SYMBOL ferret_auto_lines =(-inf)(($coarse_lo),($fine_lo),`2*($coarse_delta)`)\
+(($fine_lo),($fine_hi),`2*($fine_inc)`)\
+(($fine_hi),($coarse_hi),2*($coarse_delta))(inf)
 
 ELSE ! b
 
@@ -40,10 +44,15 @@ ELSE ! b
    LET lohi = MAX(ABS( ($ppl$range_low)), ABS(($ppl$range_high)) )
    DEFINE SYMBOL lowest_lev = `-1*lohi`
    DEFINE SYMBOL highest_lev = `lohi`
-   IF `ABS( ($fine_lo)-($lowest_lev) )  GT ($coarse_delta)  OR ABS( ($highest_lev)-($fine_hi) ) GT ($coarse_delta)` THEN ! c
+   IF `ABS( ($fine_lo)-($lowest_lev) )  GT ($coarse_delta)  OR \
+       ABS( ($highest_lev)-($fine_hi) ) GT ($coarse_delta)` THEN ! c
 
-      DEFINE SYMBOL ferret_auto_levels = (-inf)(($lowest_lev),($fine_lo),($coarse_delta)) (($fine_lo),($fine_hi),($fine_inc)) (($fine_hi),($highest_lev),($coarse_delta))(inf)
-      DEFINE SYMBOL ferret_auto_lines = (-inf)(($lowest_lev),($fine_lo),`2*($coarse_delta)`) (($fine_lo),($fine_hi),`2*($fine_inc)`) (($fine_hi),($highest_lev),`2*($coarse_delta)`)(inf)
+      DEFINE SYMBOL ferret_auto_levels = (-inf)(($lowest_lev),($fine_lo),($coarse_delta))\
+(($fine_lo),($fine_hi),($fine_inc))\
+(($fine_hi),($highest_lev),($coarse_delta))(inf)
+      DEFINE SYMBOL ferret_auto_lines = (-inf)(($lowest_lev),($fine_lo),`2*($coarse_delta)`)\
+(($fine_lo),($fine_hi),`2*($fine_inc)`)\
+(($fine_hi),($highest_lev),`2*($coarse_delta)`)(inf)
 
    ELSE ! c
       DEFINE SYMBOL ferret_auto_levels = (-inf)(($fine_lo),($fine_hi),($fine_inc))(inf)
@@ -54,3 +63,4 @@ ENDIF ! b
 
 
 ! End of file ------------LAS_centered_levels.jnl--------------------------
+
