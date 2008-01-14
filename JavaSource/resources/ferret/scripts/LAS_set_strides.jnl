@@ -12,8 +12,7 @@
 
 ! If the operation is writing a netCDF file, that is done in chunks. Do not use strides
 
-IF ($operation_ID"Data_Extract_netCDF>1|*>0") THEN EXIT/SCRIPT
-
+IF `STRINDEX( "($operation_ID)", "Data_Extract_netCDF" ) NE 0` THEN EXIT/SCRIPT
 
 ! See LAS_set_strides_curvilinear for first cut on dealing with strides and curvi data.
 IF ($ferret_curvi_coord_lat"0|0|*>1") THEN EXIT/SCRIPT
