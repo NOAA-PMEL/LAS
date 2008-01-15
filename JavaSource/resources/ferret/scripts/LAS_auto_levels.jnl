@@ -96,7 +96,39 @@ ENDIF ! 8
 ! Apply to the variable on the requested region
 LET pvar = ($ferret_plot_base_var)
 IF ($ferret_plot_var"0|sampled_var>1|*>0) THEN LET pvar = ($ferret_plot_var)
-IF ($do_curvi_xy_and_hybrid_z"0") THEN LET pvar = plot_var
+! IF ($do_curvi_xy_and_hybrid_z"0") THEN LET pvar = plot_var
+
+sh sym ferret_plot_base_var
+sh sym ferret_plot_var
+sh var plot_var
+
+! When its a curvi plot, base the levels on the
+! variable masked by the coordinates in the region.
+
+IF ($native_curvilinear_xy"0") THEN
+   STAT ($ferret_curvi_coord_lon)
+   LET xreg_lo = ($region_x_lo)
+   LET xreg_hi = ($region_x_hi)
+   IF `xreg_hi LT ($stat_min)` THEN
+      LET xreg_lo = `xreg_lo + 360`
+      LET xreg_hi = `xreg_hi + 360`
+   ENDIF
+   IF `xreg_lo GT ($stat_max)` THEN
+      LET xreg_lo = `xreg_lo - 360`
+      LET xreg_hi = `xreg_hi - 360`
+   ENDIF
+   
+   let maskx1 = IF ($ferret_curvi_coord_lon)[d=($data_num)] LT `xreg_hi` THEN 1
+   let maskx =  IF ($ferret_curvi_coord_lon)[d=($data_num)] GE `xreg_lo` THEN maskx1
+   let masky1 = IF ($ferret_curvi_coord_lat)[d=($data_num)] LT ($region_y_hi) THEN 1
+   let masky =  IF ($ferret_curvi_coord_lat)[d=($data_num)] GT ($region_y_lo) THEN masky1
+   LET pvar = ($data_var)[d=($data_num)]* maskx* masky
+   IF ($region_zt"0|*>1") THEN LET pvar = ($data_var)[d=($data_num),($region_zt)]* maskx* masky
+
+! ??
+   IF ($do_curvi_xy_and_hybrid_z"0") THEN LET pvar = plot_var* maskx* masky
+
+ENDIF
 
 DEFINE SYMBOL have_pvar = 1
 
@@ -159,6 +191,7 @@ IF `stride_for_speed GT 1` THEN ! 13
 ENDIF ! 13
 
 ! If already strided, do index strides.
+IF `($native_curvilinear_xy"0") EQ 0` THEN  ! region syms dont apply to native curv grid directly
 
 IF ($xstride"0|1>0|*>1") THEN  ! 17
    LET xsize  `pvar,RETURN=isize`
@@ -207,6 +240,9 @@ IF ($tstride"0|1>0|*>1") THEN  ! 26
      ENDIF ! 28
    ENDIF ! 27
 ENDIF ! 26
+
+ENDIF ! region syms dont apply to native curv grid directly
+
 
 IF ($index_strides"0|*>1") THEN  ! 29
    DEFINE SYMBOL ppvar = pvar[($index_strides)]
