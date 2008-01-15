@@ -36,7 +36,7 @@ IF `($stat_min) LT ($coarse_lo)  OR  ($stat_max) GT ($coarse_hi)` THEN
 (($fine_hi),($coarse_hi),($coarse_delta))(inf)
    DEFINE SYMBOL ferret_auto_lines =(-inf)(($coarse_lo),($fine_lo),`2*($coarse_delta)`)\
 (($fine_lo),($fine_hi),`2*($fine_inc)`)\
-(($fine_hi),($coarse_hi),2*($coarse_delta))(inf)
+(($fine_hi),($coarse_hi),`2*($coarse_delta)`)(inf)
 EXIT/SCRIPT
 
 ELSE
