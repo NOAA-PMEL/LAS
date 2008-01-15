@@ -1,12 +1,15 @@
 <!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 3.2//EN">
 <HTML>
+
 <HEAD>
 <TITLE>LAS Animation</TITLE>
 
 <script language="JavaScript" src="JavaScript/components/xmldom.js"></script>
 <script language="JavaScript" src="JavaScript/components/LASRequest.js"></script>
+<script language="JavaScript" src="JavaScript/components/LASResponse.js"></script>
 <script language="JavaScript" src="JavaScript/components/DateWidget.js"></script>
-
+<script language="JavaScript" src="JavaScript/components/sarissa.js"></script>
+<script language="JavaScript" src="JavaScript/components/json.js"></script>
 <script language="JavaScript" src="JavaScript/components/LASAnimationDOM.js"></script>
 
 <SCRIPT language="javascript">
@@ -19,40 +22,55 @@ server_url = "$server_url";
 //=== XML returned from LAS for animation
 animation_xml = "$las_response.getResultAsJavaScriptSafeString("ferret_listing")";
 las_animation = new LASAnimation(animation_xml);
-var hasT = las_animation.getHasT();
 
-//var hasT = 0;
-//1 for dataset with T; 0 for dataset without T
+var hasT = las_animation.getHasT(); //0-no time dimension; 1-has time dimension
+var hasError;                       //has LAS error
+var lasMessage;                     //message in LAS response
+var debugURL;                       //debug URL of LAS
+var speed;                          //animation speed (frames/second)
+var speed_max;                      //max. animation speed
+var speed_min;                      //min. animation speed
+var delay;                          //delay between frames in 1/1000 seconds, i.e. milliseconds 
+theImages    = new Array();         //container for LAS plots
+imagesLoaded = new Array();         //flags for checking if a image is loaded
+firstTimeLoad= new Array();         //flags for checking if it's first time to load the image
+var current_image;                  //index of current image
+var timeID;                         //ID for timeOut
+var status;                         //0-stopped, 1-playing
+var play_mode;                      //0-play once, 1-loop 
 
 if(hasT == 1){
-    //=== the time frames
+    //the time frames
     theTimes = las_animation.getFrames();
 
-    //=== global variables ====
-    first_image = 0;                    //first image number
-    last_image = las_animation.getNumFrames()-1; //last image number
+    //global variables 
+    first_image = 0;                    
+    last_image = las_animation.getNumFrames()-1; 
 
-    theImages    = new Array(); 
-    imagesLoaded = new Array(); //flags for checking if a image is loaded
+    animate_init();
+}
 
-    firstTimeLoad= new Array();
+//===> init global variables
+function animate_init(){
+    hasError = 0;
+
     for (var i = first_image; i <= last_image; i++){
         firstTimeLoad[i] = 1;
+        imagesLoaded[i]=0;
     }
 
     //unit of speed is frames per second
-    var initial_speed = 8;
-    speed     = initial_speed;
+    speed     = 8; 
     speed_max = 128;
     speed_min = 1;
-    delay     = 1000/speed; //delay between frames in 1/1000 seconds, i.e. milliseconds
+    delay     = 1000/speed; 
 
-    current_image = first_image;     //number of the current image
+    current_image = first_image;    
     timeID = null;
-    var status = 0;        // 0-stopped, 1-playing
-    play_mode = 1;         // 0-play once, 1-loop
+    status = 0;        
+    play_mode = 1;    
 
-    //===> make sure the first image number is not bigger than the last image number
+    //make sure the first image number is not bigger than the last image number
     if (first_image > last_image) 
     {
         var help = last_image;
@@ -63,7 +81,8 @@ if(hasT == 1){
 
 //===> load the next image
 function animate_loadNextImage(currentImg){
-    animate_loadImages(currentImg+1,currentImg+1);
+    animate_loadNextImages(currentImg+1,currentImg+1);
+
     //foward to next image only when currentImg is loaded first time
     if((firstTimeLoad[currentImg] == 1) && (status == 1)){
         firstTimeLoad[currentImg] = 0;
@@ -96,21 +115,131 @@ function animate_loadImages(startImg, endImg){
     for (var i = startImg; i <= endImg; i++){
         //do nothing if it is already loaded
         if(imagesLoaded[i] != 1){
+
+            if(i==0){
+                lasReq = animate_makeFirstLASRequest(theTimes[i]);
+            }else{
+                lasReq = animate_makeLASRequest(theTimes[i]);
+            }
+            var prefix = lasReq.prefix;
+            var url = prefix+escape(lasReq.getXMLText())+'&stream=true&stream_ID=plot_image';
+            
             theImages[i] = new Image();
-            theImages[i].src = animate_makeLASRequest(theTimes[i]);
+            theImages[i].src = url;
             imagesLoaded[i] = 1;
         }
     };
 }
 
+//===> load all the images using AJAX call
+function animate_loadAllImages(){
+
+    for (var i = first_image; i <= last_image; i++){
+        if(imagesLoaded[i] != 1){
+            //theImages[i] = new Image();
+            //var lasReq = animate_makeLASRequest(theTimes[i]);
+            if(i==0){
+                lasReq = animate_makeFirstLASRequest(theTimes[i]);
+            }else{
+                lasReq = animate_makeLASRequest(theTimes[i]);
+            }
+            lasReq.setProperty('las','output_type','json');
+            var prefix = lasReq.prefix;
+            var url = prefix+escape(lasReq.getXMLText());
+ 
+            var xmlhttp = new XMLHttpRequest();
+            xmlhttp.open('GET', url, true);
+            xmlhttp.onreadystatechange = function(){
+                if(xmlhttp.readyState == 4){
+                    handleLASResponse(xmlhttp.responseText,i);
+                }
+            }
+            xmlhttp.send(null);
+            //imagesLoaded[i] = 1;
+        }
+    };
+}
+
+//===> load next images from startImg to endImg  using AJAX call
+function animate_loadNextImages(startImg, endImg){
+
+     //make sure the index is less than the last_image
+    if(startImg >= last_image){
+        startImg = last_image;
+    };
+
+    if(endImg >= last_image){
+        endImg = last_image;
+    };
+
+    for (var i = startImg; i <= endImg; i++){
+        if(imagesLoaded[i] != 1){
+            //theImages[i] = new Image();
+            //var lasReq = animate_makeLASRequest(theTimes[i]);
+            if(i==0){
+                lasReq = animate_makeFirstLASRequest(theTimes[i]);
+            }else{
+                lasReq = animate_makeLASRequest(theTimes[i]);
+            }
+
+            lasReq.setProperty('las','output_type','json');
+            var prefix = lasReq.prefix;
+            var url = prefix+escape(lasReq.getXMLText());
+
+            var xmlhttp = new XMLHttpRequest();
+            //wait for response
+            xmlhttp.open('GET', url, false);
+            xmlhttp.onreadystatechange = function(){
+                if(xmlhttp.readyState == 4){
+                    handleLASResponse(xmlhttp.responseText,i);
+                }
+            }
+            xmlhttp.send(null);
+        }
+    };
+}
+
+function handleLASResponse(LASResponseText, i){
+
+    //parse the LASResponse
+    var Response;
+    try{
+        var JSONObject = LASResponseText.parseJSON();
+    }catch(e){
+        alert('Error parsing LASRespnse:' + e);
+        return;
+    }
+
+    try{
+        Response = new LASResponse(JSONObject);
+    }catch(e){
+        alert(e);
+        return;
+    }
+
+    if(Response.isError()){
+        hasError = 1;
+        lasMessage = Response.getResult('las_message').content;
+        debugURL = Response.getDebugURL();
+    }else{
+        var imgURL = Response.getImageURL();
+        //alert('image URL: '+imgURL);
+        theImages[i] = new Image();
+        theImages[i].src =  imgURL;
+        //alert('src:'+theImages[i].src);
+        imagesLoaded[i] = 1;
+    }
+}
+
 //===> make LAS request for a frame
-function animate_makeLASRequest(timePoint) {
+function animate_makeFirstLASRequest(timePoint) {
 
     //check the type of view and change view for the new request
     var initView = initReq.getProperty('ferret','view');
 
     //get the fill_levels computed from the whole domain (e.g. xyt range)
     var fillLevels = las_animation.getFillLevels();
+    var contourLevels = las_animation.getContourLevels();
     var depAxisScale = las_animation.getDepAxisScale();
 
     //for XY view
@@ -118,6 +247,9 @@ function animate_makeLASRequest(timePoint) {
         initReq.setOperation('Plot_2D_XY');
         if(fillLevels != null){
             initReq.setProperty('ferret','fill_levels', fillLevels);
+        };
+        if(contourLevels != null){
+            initReq.setProperty('ferret','contour_levels', contourLevels);
         };
     };
 
@@ -127,6 +259,9 @@ function animate_makeLASRequest(timePoint) {
         if(fillLevels != null){
             initReq.setProperty('ferret','fill_levels', fillLevels);
         };
+        if(contourLevels != null){
+            initReq.setProperty('ferret','contour_levels', contourLevels);
+        };
     };
 
     //for YZ view
@@ -134,6 +269,9 @@ function animate_makeLASRequest(timePoint) {
         initReq.setOperation('Plot_2D');
         if(fillLevels != null){
             initReq.setProperty('ferret','fill_levels', fillLevels);
+        };
+        if(contourLevels != null){
+            initReq.setProperty('ferret','contour_levels', contourLevels);
         };
     };
 
@@ -198,6 +336,9 @@ function animate_makeLASRequest(timePoint) {
         if(fillLevels != null){
             initReq.setProperty('ferret','fill_levels', fillLevels);
         };
+        if(contourLevels != null){
+            initReq.setProperty('ferret','contour_levels', contourLevels);
+        };
     };
 
     //for XZT view
@@ -206,6 +347,9 @@ function animate_makeLASRequest(timePoint) {
         initReq.setProperty('ferret','view','xz');
         if(fillLevels != null){
             initReq.setProperty('ferret','fill_levels', fillLevels);
+        };
+        if(contourLevels != null){
+            initReq.setProperty('ferret','contour_levels', contourLevels);
         };
     };
 
@@ -216,16 +360,33 @@ function animate_makeLASRequest(timePoint) {
         if(fillLevels != null){
             initReq.setProperty('ferret','fill_levels', fillLevels);
         };
+        if(contourLevels != null){
+            initReq.setProperty('ferret','contour_levels', contourLevels);
+        };
     };
 
     //change the time from range to point
     initReq.setRange('t',timePoint);
 
-    var prefix = 'ProductServer.do?stream=true&stream_ID=plot_image&xml=';
-    var img_src = prefix + escape(initReq.getXMLText());
+    //var prefix = 'ProductServer.do?stream=true&stream_ID=plot_image&xml=';
+    //var img_src = prefix + escape(initReq.getXMLText());
+    //return img_src;
 
-    return img_src;
+    initReq.prefix='ProductServer.do?xml=';
+    return initReq;
 }
+
+//===> make LAS request for frames starting from 2nd frame
+function animate_makeLASRequest(timePoint) {
+    initReq.setRange('t',timePoint);
+    return initReq;
+}
+
+//***************************************************************//
+//                                                               //
+//****** Following functions are for controling animation *******//
+//                                                               //
+//***************************************************************//
 
 //===> displays image depending on the play mode in forward direction
 function animate_fwd() 
@@ -266,8 +427,10 @@ function change_speed(dv)
 //===> stop the animation
 function stop() 
 {
-    if (status == 1) clearTimeout(timeID);
-    status = 0;
+    if(!isLoading()){
+        if (status == 1) clearTimeout(timeID);
+        status = 0;
+    }
 }
 
 //===> "play forward"
@@ -288,20 +451,22 @@ function go2next(number)
     document.control_form.frame_nr.value = current_image;
 }
 
-//===> jumps to a given image number
-function go2image(number)
-{
-    //check if it's still loading 
+//===>check if it's still loading
+function isLoading(){
     var loading = 0;
     for (var i = first_image; i <= last_image; i++){
         if(firstTimeLoad[i]==1){
             loading = 1;
-        } 
-    } 
-    
+        }
+    }
+    return (loading==1);
+}
+
+//===> jumps to a given image number
+function go2image(number)
+{
     //only when it's not loading, jump to a given image
-    if(loading == 0){
-        //if not loading
+    if(!isLoading()){
         stop();
         if (number > last_image) number = last_image;
         if (number < first_image) number = first_image;
@@ -322,15 +487,55 @@ function launch()
 {
    if(hasT == 1){
        //load the first image
-       animate_loadImages(0,0);
+       animate_loadNextImages(0,0);
 
-       //turn on play mode
-       status = 1;
+       //no error in making LAS request
+       if(hasError == 0){
 
-       current_image = first_image;
-       document.animation.src = theImages[current_image].src;
-       document.control_form.frame_nr.value = current_image+1;
-       change_mode (document.control_form.play_mode_selection.selectedIndex);
+           //turn on play mode
+           status = 1;
+           current_image = first_image;
+
+           document.animation.src = theImages[current_image].src;
+           document.control_form.frame_nr.value = current_image+1;
+           change_mode (document.control_form.play_mode_selection.selectedIndex);
+
+       //get error in making LAS request
+       }else{
+       
+           var node = document.getElementById("lasResponse");
+
+           //remove old content
+           children = node.childNodes;
+           num_children = children.length;
+           for(var i=num_children-1;i>=0;i--){
+               var child = children[i];
+               if(child){
+                   node.removeChild(child);
+               }
+           }
+
+           //show the error message
+           var CC_div = document.createElement('div');
+           CC_div.setAttribute('class','CCell_las_message');
+           node.appendChild(CC_div);
+           //var text = LASResponse.getResult('las_message').content;
+           var textNode = document.createTextNode(lasMessage);
+           CC_div.appendChild(textNode);
+
+           //show the debug URL
+           CC_div = document.createElement('div');
+           CC_div.setAttribute('class','CCell_error_link');
+           node.appendChild(CC_div);
+           var error_link = document.createElement('a');
+           //error_link.href = LASResponse.getResult('debug').url;
+           error_link.href = debugURL;
+           textNode = document.createTextNode('More details about this error.');
+           //CC_div.setAttribute('style', 'font-size:16px;');
+           error_link.appendChild(textNode);
+           CC_div.appendChild(error_link);
+
+       }
    }
 }
 
@@ -339,35 +544,41 @@ function animation()
 {
     //interface for animation
     if(hasT==1){
-        document.write("<FONT size=+3><b>LAS Animation </b></FONT><br>");
+        document.write("<CENTER><FONT size=+3><b>LAS Animation</b></FONT><br>");
 
-   //document.write(" <P><IMG NAME=\"animation\" SRC=",theImages[0]," HEIGHT=",animation_height, " WIDTH=", animation_width, "\" ALT=\"[jsMoviePlayer]\">");
-        document.write(" <P><IMG NAME=\"animation\" onLoad=\"animate_loadNextImage(current_image)\" SRC=",theImages[0],"\" ALT=\"[jsMoviePlayer]\">");
+        document.write("<br>");
+        document.write("<table style=\"border:10px groove #3366FF;\">");
+        document.write("  <tr>");
+        document.write("    <td ID=\"lasResponse\">");
+        document.write("      <IMG NAME=\"animation\"  onLoad=\"animate_loadNextImage(current_image)\" SRC=",theImages[0],"\" ALT=\"LAS Error\">");
+        document.write("    </td>");
+        document.write("  </tr>");
+        document.write("</table>");
 
-        document.write(" <FORM Method=POST Name=\"control_form\"> ");
-        document.write("    <INPUT TYPE=\"button\" Value=\" |< \" onClick=\"go2image(first_image)\"> ");
-        document.write("    <INPUT TYPE=\"button\" Value=\" -1 \" onClick=\"go2image(--current_image)\"> ");
-   //document.write("    <INPUT TYPE=\"button\" Value=\" < \"  onClick=\"rev()\"> ");
-        document.write("    <INPUT TYPE=\"button\" Value=\" || \" STYLE=\"color:white; background-color:red; \" onClick=\"stop()\"> ");
-        document.write("    <INPUT TYPE=\"button\" Value=\" > \"  STYLE=\"color:white; background-color:green; \" onClick=\"fwd()\"> ");
-        document.write("    <INPUT TYPE=\"button\" Value=\" +1 \" onClick=\"go2image(++current_image)\"> ");
-        document.write("    <INPUT TYPE=\"button\" Value=\" >| \" onClick=\"go2image(last_image)\"> ");
-        document.write(" <BR><BR> ");
-        document.write("    <SELECT NAME=\"play_mode_selection\" onChange=\"change_mode(this.selectedIndex)\"> ");
-        document.write("       <OPTION VALUE=0>play once ");
-        document.write("       <OPTION SELECTED VALUE=1>loop ");
-        document.write("    </SELECT> ");
-        document.write("    <INPUT TYPE=\"text\" NAME=\"frame_nr\" VALUE=\"1\" SIZE=\"5\" ");
+        document.write("<br>");
+        document.write("<FORM  Method=POST Name=\"control_form\"> ");
+        document.write("  <SELECT NAME=\"play_mode_selection\" onChange=\"change_mode(this.selectedIndex)\"> ");
+        document.write("    <OPTION VALUE=0>play once ");
+        document.write("    <OPTION SELECTED VALUE=1>loop ");
+        document.write("  </SELECT> ");
+        document.write("    &nbsp; &nbsp; &nbsp; ");
+        document.write("  <INPUT TYPE=\"button\" Value=\" |< \" onClick=\"go2image(first_image)\"> ");
+        document.write("  <INPUT TYPE=\"button\" Value=\" -1 \" onClick=\"go2image(--current_image)\"> ");
+        document.write("  <INPUT TYPE=\"button\" Value=\" || \" STYLE=\"size:25; color:white; background-color:red; \" onClick=\"stop()\"> ");
+        document.write("  <INPUT TYPE=\"button\" Value=\" > \"  STYLE=\"color:white; background-color:green; \" onClick=\"fwd()\"> ");
+        document.write("  <INPUT TYPE=\"button\" Value=\" +1 \" onClick=\"go2image(++current_image)\"> ");
+        document.write("  <INPUT TYPE=\"button\" Value=\" >| \" onClick=\"go2image(last_image)\"> ");
+        document.write("  <INPUT TYPE=\"text\" NAME=\"frame_nr\" VALUE=\"1\" SIZE=\"5\" ");
         document.write("     onFocus=\"this.select()\" onChange=\"go2image(this.value)\"> ");
-        document.write("    &nbsp; Speed <INPUT TYPE=\"button\" Value=\" - \" onClick=\"change_speed(-1)\"> ");
-        document.write("    <INPUT TYPE=\"text\" NAME=\"speed_nr\" VALUE=\"8\" SIZE=\"4\"> ");
-        document.write("    <INPUT TYPE=\"button\" Value=\" + \" onClick=\"change_speed(1)\"> ");
-        document.write(" </FORM> ");
-        document.write(" </P> ");
+        document.write("  &nbsp; &nbsp; Speed <INPUT TYPE=\"button\" Value=\" - \" onClick=\"change_speed(-1)\"> ");
+        document.write("  <INPUT TYPE=\"text\" NAME=\"speed_nr\" VALUE=\"8\" SIZE=\"4\"> ");
+        document.write("  <INPUT TYPE=\"button\" Value=\" + \" onClick=\"change_speed(1)\"> ");
+        document.write("</FORM> ");
+        //document.write("</P> ");
+
     }
-    
-    //interface for a single plot
-    if(hasT==0){
+    //interface for a single plot when there is no time axis in a dataset
+    else{
         //no time axis in the dataset, so just a single plot
         document.write(" <h2>Animation not available for this dataset!</h2> ");
         //initReq.setOperation('Plot_2D_XY');
@@ -399,9 +610,8 @@ function animation()
 </HEAD>
 
 <BODY BGCOLOR="#FFFFFF" onLoad="launch()">
-<center>
-<SCRIPT language="javascript">
-animation();
-</SCRIPT>
-</body>
+  <SCRIPT language="javascript">
+    animation();
+  </SCRIPT>
+</BODY>
 </HTML>
