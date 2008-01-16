@@ -94,13 +94,14 @@ IF `nc EQ 0` THEN ! 8
 ENDIF ! 8
 
 ! Apply to the variable on the requested region
-LET pvar = ($ferret_plot_base_var)
+IF ($ferret_plot_base_var"0|*>1") THEN 
+   LET pvar = ($ferret_plot_base_var)
+ELSE
+   LET pvar = ($ferret_plot_var)
+ENDIF
+
 IF ($ferret_plot_var"0|sampled_var>1|*>0) THEN LET pvar = ($ferret_plot_var)
 ! IF ($do_curvi_xy_and_hybrid_z"0") THEN LET pvar = plot_var
-
-sh sym ferret_plot_base_var
-sh sym ferret_plot_var
-sh var plot_var
 
 ! When its a curvi plot, base the levels on the
 ! variable masked by the coordinates in the region.
