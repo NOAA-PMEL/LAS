@@ -96,6 +96,24 @@ ENDIF
 IF ($data_title"0|*>1") THEN \
   SET VAR/TITLE="($data_title)" ($data_x_var)[d=`data_num`]
 
+! Mark whether there are contour levels set on first entry. 
+! Compute automatic open-ended levels.
+
+DEFINE SYMBOL data_num = `($data_x_var),return=dsetnum`
+
+IF `($data_num) EQ 1` THEN
+   IF ($ferret_contour_levels"0|*>1") THEN DEFINE SYMBOL input_contour_levels = 1
+   IF ($ferret_fill_levels"0|*>1") THEN DEFINE SYMBOL input_fill_levels = 1
+
+   IF `STRLEN("($ferret_view)") EQ 2 AND STRINDEX("($operation_ID)", "Plot") GT 0` THEN \
+     GO LAS_auto_levels  
+   IF `STRLEN("($ferret_view)") EQ 2 AND STRINDEX("($operation_ID)", "poly") GT 0` THEN \
+     GO LAS_auto_levels  
+
+   IF `($ferret_poly_levels"0|*>1") EQ 0` THEN \
+      IF ($ferret_fill_levels"0|*>1") THEN DEFINE SYMBOL ferret_poly_levels ($ferret_fill_levels)
+ENDIF
+
 ! Apply the expression in ferret_expression. $ represents the variable.
 
 IF ($ferret_expression"0|*>1") THEN 
