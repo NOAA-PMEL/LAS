@@ -96,11 +96,16 @@ ENDIF ! 8
 ! Apply to the variable on the requested region
 IF ($ferret_plot_base_var"0|*>1") THEN 
    LET pvar = ($ferret_plot_base_var)
-ELSE
+ELIF ($ferret_plot_var"0|*>1") THEN 
    LET pvar = ($ferret_plot_var)
+ELSE
+   EXIT/SCRIPT  ! for insitu plots may not have a plot_var
 ENDIF
 
 IF ($ferret_plot_var"0|sampled_var>1|*>0) THEN LET pvar = ($ferret_plot_var)
+
+
+
 ! IF ($do_curvi_xy_and_hybrid_z"0") THEN LET pvar = plot_var
 
 ! When its a curvi plot, base the levels on the
@@ -254,7 +259,7 @@ ENDIF ! 29
 ! Execute the stat command to load symbols with the variables
 ! mean, max, min, std.
 
-STAT ($ppvar)
+DEFINE SYMBOL stat_ngood= 0
 
 ! Undo the striding. Other striding may be set elsewhere
 
@@ -265,7 +270,9 @@ IF `stride_for_speed GT 1` THEN  ! 30
    IF `($undo_t"0") GT 0` THEN CANCEL AXIS/STRIDE `pvar,RETURN=taxis`
 ENDIF ! 30
 
-IF `($stat_ngood"0") EQ 0` THEN EXIT_SCRIPT
+
+sh sym stat*
+IF `($stat_ngood"0") EQ 0` THEN EXIT/SCRIPT
 
 ! Compute rounded-off levels with the PPL %RANGE command.
 
