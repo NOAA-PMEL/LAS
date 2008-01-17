@@ -27,7 +27,7 @@ LET memsize = 0.5* 1.e6
 
 DEFINE SYMBOL op = `UPCASE("($operation_ID)")`
 
-IF `($ferret_view"|xy>1|*>0") NE 1` THEN EXIT/SCRIPT
+!IF `($ferret_view"|xy>1|*>0") NE 1` THEN EXIT/SCRIPT
 IF `STRINDEX("($op)", "VECTOR") GT 0` THEN EXIT/SCRIPT
 
 IF `STRINDEX("($op)", "ANIMATION") EQ 0` THEN EXIT/SCRIPT
