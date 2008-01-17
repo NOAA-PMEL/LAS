@@ -87,9 +87,12 @@ ENDIF
 
 DEFINE SYMBOL ferret_plot_title "($data_title) ($data_units)"
 
-IF `($data_title"0|*>1") EQ 0` THEN 
-  IF (strcmp (" ", "`a,return=units`") NE 0` THEN \
-  define symbol ferret_plot_title "($data_var) ($data_units)"
+IF `($data_title"0|*>1") EQ 0` THEN
+  LET has_units = STRCMP (" ", "`($data_var),return=units`")
+  LET has_units = `has_units OR ($data_units"0|*>1")`
+  IF `has_units NE 0` THEN \
+  DEFINE SYMBOL ferret_plot_title "($data_var) ($data_units)"
+  CANCEL VARIABLE has_units
 ENDIF
 
 ! End of $RCSfile ------------LAS_initialize_dataset.jnl--------------------------
