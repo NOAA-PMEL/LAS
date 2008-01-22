@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <kml xmlns="http://earth.google.com/kml/2.1">
   <Folder>
+    <name>$las_request.getDatasetName(): $las_request.getVarName()</name>
     <NetworkLink>
-      <name>LAS Image Overlay</name>
-      <description>View-based refresh plots</description>
       <visibility>1</visibility>
       <open>1</open>
       <refreshVisibility>1</refreshVisibility>
