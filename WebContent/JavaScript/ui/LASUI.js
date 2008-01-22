@@ -130,7 +130,7 @@ LASUI.prototype.initUI = function (anchorId)
 
 }
 LASUI.prototype.toggleUIMask = function(display) {
-	this.UIMask.style.height=(document.body.offsetHeight+30)+'px';
+	this.UIMask.style.height=(document.body.offsetHeight+100)+'px';
 	this.UIMask.style.width=(document.body.offsetWidth+30)+'px';
 	this.UIMask.style.display=display;
 }
@@ -280,7 +280,8 @@ LASUI.prototype.createCategoryTreeNode = function (node, i, id) {
 	tbody.style.padding=0;
 	tbody.style.margin=0;
 	var tr = document.createElement("TR");
-	tr.style.padding=0;
+	tr.style.padding=0;if(!this.fistload)
+		this.firstload=true;
 	tr.style.margin=0;
 	var td1 = document.createElement("TD");
 	td1.style.verticalAlign="top";
@@ -666,8 +667,8 @@ LASUI.prototype.setGrid = function (strJson) {
 	eval("var response = (" + strJson + ")");
 	if(this.state.grid)
 		this.state.lastgrid = this.clone(this.state.grid);
-	else
-		this.state.lastgrid={};		
+	
+		
 			
 	this.state.grid = new LASGetGridResponse(response);
 		
@@ -771,21 +772,31 @@ LASUI.prototype.updateConstraints = function () {
 	document.getElementById("Depth").innerHTML = "";
 
 	if(this.state.grid.getAxis('x') || this.state.grid.getAxis('y')) {
-		if(!this.refs.XYSelect.enabled) 			
+		if(!this.refs.XYSelect.enabled)  			
 			this.refs.XYSelect.enable();
-	}			
+	}
+	var reset=false;
+				
+	if(this.state.lastgrid) {
+		if(this.state.grid!=this.state.lastgrid)
+			reset=true;
+	}
+	if(!this.initialized)
+		reset=true;
 	
+		
 	if(this.state.view.indexOf('x')>=0&&this.state.view.indexOf('y')>=0) 
-		this.initXYSelect("xy");
+		this.initXYSelect("xy",reset);
 	else if(this.state.view.indexOf('x')>=0&&this.state.view.indexOf('y')<0) 
-		this.initXYSelect("x");	
+		this.initXYSelect("x",reset);	
 	else if(this.state.view.indexOf('x')<0&&this.state.view.indexOf('y')>=0) 
-		this.initXYSelect("y"); 
+		this.initXYSelect("y",reset); 
 	else if(this.state.view.indexOf('x')<0&&this.state.view.indexOf('y')<0) 
-		this.initXYSelect("point");
-
+		this.initXYSelect("point",reset);
+	
 /*	for(var d=0;d<this.state.view.length;d++)
-		eval("this.init" + this.state.view.charAt(d).toUpperCase() + "Constraint('range')");
+		eval("this.init" + this.state.view.charAt(d)
+		this.refs.XYSelect.zoomOnBBox(grid);.toUpperCase() + "Constraint('range')");
 */
 	for(var d=0;d<this.state.grid.response.grid.axis.length;d++) 
 		if(this.state.view.indexOf(this.state.grid.response.grid.axis[d].type) < 0) 
@@ -797,11 +808,13 @@ LASUI.prototype.updateConstraints = function () {
 			eval("this.init" + this.state.grid.response.grid.axis[d].type.toUpperCase() + "Constraint('range')");	
 	this.refs.XYSelect.updatePixelExtents();
 	this.updating = false;
+	
+	this.initialized=true;
 }
 /**
  * Initialize the XY select widget to the grid
  */
-LASUI.prototype.initXYSelect = function (mode) {
+LASUI.prototype.initXYSelect = function (mode, reset) {
 	if(!this.products) 
 		document.getElementById("XYRegionType").style.display = "";	
 	if(this.refs.XYSelect && this.state.view && this.state.dataset && this.state.variables)
@@ -815,16 +828,27 @@ LASUI.prototype.initXYSelect = function (mode) {
 				 "y" : {"min" : this.refs.XYSelect.getSelectionGridYMin(),
 					 "max" : this.refs.XYSelect.getSelectionGridYMax()
 					}
-				}
-		if(this.state.grid.hasArange('x')||this.state.grid.hasMenu('x')) {
-			grid.x.min = parseFloat(this.state.grid.getLo('x'));
-			grid.x.max = parseFloat(this.state.grid.getHi('x'));
-		} 
+			}
 			
-		if(this.state.grid.hasArange('y')||this.state.grid.hasMenu('y')) {
-			grid.y.min = parseFloat(this.state.grid.getLo('y'));
-			grid.y.max = parseFloat(this.state.grid.getHi('y'));
-		}
+		if(reset==true) {		
+			if(this.state.grid.hasArange('x')||this.state.grid.hasMenu('x')) {
+				grid.x.min = parseFloat(this.state.grid.getLo('x'));
+				grid.x.max = parseFloat(this.state.grid.getHi('x'));
+			} 
+			
+			if(this.state.grid.hasArange('y')||this.state.grid.hasMenu('y')) 
+			{
+				grid.y.min = parseFloat(this.state.grid.getLo('y'));
+				grid.y.max = parseFloat(this.state.grid.getHi('y'));
+			}
+		} else
+			grid = {"x" : {"min" : this.refs.XYSelect.getPlotGridXMin(),
+					 "max" : this.refs.XYSelect.getPlotGridXMax()
+					},
+				 "y" : {"min" : this.refs.XYSelect.getPlotGridYMin(),
+					 "max" : this.refs.XYSelect.getPlotGridYMax()
+					}				
+				}
 
 		if (sel.x.min>grid.x.min&&sel.x.min<grid.x.max) {
 			if(sel.x.min == sel.x.max&&mode!='y'&&mode!='point') {
@@ -902,8 +926,11 @@ LASUI.prototype.initXYSelect = function (mode) {
 		} else
 			sel.y.max=grid.y.max;
 
-		this.refs.XYSelect.setDataGridBBox(grid);
-		this.refs.XYSelect.zoomOnBBox(grid);
+		this.refs.XYSelect.zoomOnBBox(grid);		
+		if(reset==true) {
+			this.refs.XYSelect.setDataGridBBox(grid);
+			this.refs.XYSelect.setSelectionGridBBox(grid);		
+		}
 				
 		if(this.state.newgrid)
 			this.refs.XYSelect.setSelectionGridBBox(grid);	

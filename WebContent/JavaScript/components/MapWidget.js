@@ -200,9 +200,10 @@ MapWidget.prototype.initPixelExtents = function(evt) {
 		this.displayBox(true);
 		this.displayCentralBox(true);
 	}
-	if (this.ondraw) this.ondraw(this);	
-	if (this.onafterdraw) this.onafterdraw(this);
-
+	if(this.enabled) {
+		if (this.ondraw) this.ondraw(this);	
+		if (this.onafterdraw) this.onafterdraw(this);
+	}
 
 }
 
@@ -1463,25 +1464,48 @@ MapWidget.prototype.zoomOnBBox = function (bbox) {
 	
 	if(bbox_screen_aspect>plot_screen_aspect) {
 		this.setPlotGridYMin(bbox.y.min);
-	   this.setPlotGridYMax(bbox.y.max);
+	        this.setPlotGridYMax(bbox.y.max);
 		this.setPlotGridXMin(bbox_cx-bbox_height/(plot_aspect*2));
 		this.setPlotGridXMax(bbox_cx+bbox_height/(plot_aspect*2));	
-		this.setDataGridYMin(bbox.y.min);
-	        this.setDataGridYMax(bbox.y.max);
-		this.setDataGridXMin(bbox_cx-bbox_height/(plot_aspect*2));
-		this.setDataGridXMax(bbox_cx+bbox_height/(plot_aspect*2));	
+		//this.setDataGridYMin(bbox.y.min);
+	        //this.setDataGridYMax(bbox.y.max);
+		//this.setDataGridXMin(bbox_cx-bbox_height/(plot_aspect*2));
+		//this.setDataGridXMax(bbox_cx+bbox_height/(plot_aspect*2));	
 	} else {
 		this.setPlotGridXMin(bbox.x.min);
 		this.setPlotGridXMax(bbox.x.max);
 		this.setPlotGridYMin(bbox_cy-bbox_width*(plot_aspect/2));
 		this.setPlotGridYMax(bbox_cy+bbox_width*(plot_aspect/2));	
-		this.setDataGridXMin(bbox.x.min);
-		this.setDataGridXMax(bbox.x.max);
-		this.setDataGridYMin(bbox_cy-bbox_width*(plot_aspect/2));
-		this.setDataGridYMax(bbox_cy+bbox_width*(plot_aspect/2));	
+		//this.setDataGridXMin(bbox.x.min);
+		//this.setDataGridXMax(bbox.x.max);
+		//this.setDataGridYMin(bbox_cy-bbox_width*(plot_aspect/2));
+		//this.setDataGridYMax(bbox_cy+bbox_width*(plot_aspect/2));	
 	}
+	
+        var selection = {"x":{},"y":{}};
+	if(this.extents.plot.grid.x.min>this.extents.selection.grid.x.min)
+		selection.x.min=this.extents.plot.grid.x.min;
+	else
+		selection.x.min=this.extents.selection.grid.x.min;
+	if(this.extents.plot.grid.x.max<this.extents.selection.grid.x.max)
+		selection.x.max=this.extents.plot.grid.x.max;
+	else
+		selection.x.max=this.extents.selection.grid.x.max;
+	if(this.extents.plot.grid.y.min>this.extents.selection.grid.y.min)
+		selection.y.min=this.extents.plot.grid.y.min;
+	else
+		selection.y.min=this.extents.selection.grid.y.min;
+	if(this.extents.plot.grid.y.max<this.extents.selection.grid.y.max)
+		selection.y.max=this.extents.plot.grid.y.max;
+	else
+		selection.y.max=this.extents.selection.grid.y.max
 
-   var req = new LASRequest();
+
+
+
+	this.setSelectionGridBBox(selection);
+	this.setView(this.view);
+        var req = new LASRequest();
 	
 	req.removeVariables();
 	req.removeRegion();
@@ -1579,21 +1603,27 @@ MapWidget.prototype.onbeforeresize = function(evt) {
 }
 
 MapWidget.prototype.onafterresize = function(evt) {
-	//this.updatePixelExtents();
+	this.disable();	
+	this.updatePixelExtents();
+	this.enable();
 }
 
 //move the map left
 MapWidget.prototype.panPlot = function (dx,dy) {
    
-   var pix_dx = this.getXPixRes()*dx;
+    var pix_dx = this.getXPixRes()*dx;
+    var pix_dy = this.getYPixRes()*dy;
 	
-	if((this.getDataGridXMax()-this.getDataGridXMin())<355 && ((this.getPlotGridXMin() + dx) < this.getDataGridXMin() || (this.getPlotGridXMax() + dx) > this.getDataGridXMax()) ) 
+    if((this.getDataGridXMax()-this.getDataGridXMin())<355 && ((this.getPlotGridXMin() + dx) < this.getDataGridXMin() || (this.getPlotGridXMax() + dx) > this.getDataGridXMax() || (this.getPlotGridYMin() + dy) < this.getDataGridYMin() || (this.getPlotGridYMax() + dy) > this.getDataGridYMax())) 
 		return false;
 
 
 	//reset the plot grid coord
 	this.setPlotGridXMin(this.getPlotGridXMin() + dx);
 	this.setPlotGridXMax(this.getPlotGridXMax() + dx);
+	//reset the plot grid coord
+	this.setPlotGridYMin(this.getPlotGridYMin() + dy);
+	this.setPlotGridYMax(this.getPlotGridYMax() + dy);
 	
    var req = new LASRequest();
 	
@@ -1607,8 +1637,12 @@ MapWidget.prototype.panPlot = function (dx,dy) {
    	this.extents.data.grid.x.min+=dx;
    	this.extents.data.grid.x.max+=dx;
 	}  
-	this.plot.onload = function (evt) { 		
-		this.setDataGridBBox(this.extents.data.grid);
+	this.plot.onload = this.onPlotLoad.bindAsEventListener(this);
+	this.plot.src = "ProductServer.do?xml=" + escape(req.getXMLText()) + "&stream=true&stream_ID=plot_image";
+ 
+}
+MapWidget.prototype.onPlotLoad = function (evt) { 		
+		//this.setDataGridBBox(this.extents.data.grid);
 		this.setSelectionGridBBox(this.extents.selection.grid);
 	
 		var r_w = this.getBoxWidth(this.rubberBand);
@@ -1629,45 +1663,49 @@ MapWidget.prototype.panPlot = function (dx,dy) {
   			m_y0 = m_y - r_h/2;
    	if (m_y - r_h/2 < this.getDataPixYMin())
     		m_y0 =  this.getDataPixYMin();
-  		else if (m_y + r_h/2 > this.getDataPixYMax()) 			m_y0 = this.getDataPixYMax() - r_h;
-
-		this.Y0 = m_y0;
-  		this.Y1 = m_y0 + r_h;
-		this.X0 = m_x0;
-  		this.X1 = m_x0 + r_w;
+  	else if (m_y + r_h/2 > this.getDataPixYMax()) 		m_y0 = this.getDataPixYMax() - r_h;
+	
+	this.Y0 = m_y0;
+  	this.Y1 = m_y0 + r_h;
+	this.X0 = m_x0;
+  	this.X1 = m_x0 + r_w;
    
-  		if (this.enabled) {
- 	 		this.displayBox(true);
-  		 	this.displayCentralBox(true);
+  	if (this.enabled) {
+ 		this.displayBox(true);
+  	 	this.displayCentralBox(true);
 		
-			if (this.ondraw) this.ondraw(this);	
-			if (this.onafterdraw) this.onafterdraw(this);
-		}
-	}.bindAsEventListener(this);
-	this.plot.src = "ProductServer.do?xml=" + escape(req.getXMLText()) + "&stream=true&stream_ID=plot_image";
- 
+		if (this.ondraw) this.ondraw(this);	
+		if (this.onafterdraw) this.onafterdraw(this);
+	}
 }
 /**
  * Zoom the map by zoom factor f on the selected region, or center of data region.
  */
 MapWidget.prototype.zoom = function (f) {
 	
-if(f>0) {
-	var bbox = this.extents.data.grid;
-	var width = (bbox.x.max-bbox.x.min);
-	var height = (bbox.y.max-bbox.y.min);
-	var cx = (bbox.x.min+bbox.x.max)/2;
-	var cy = (bbox.y.min+bbox.y.max)/2;
-	bbox.x.min = cx - width/(2*f);
-	bbox.x.max = cx + width/(2*f);
-	bbox.y.min = cy - height/(2*f);
-	bbox.y.max = cy + height/(2*f);	
-	if(!this.extents.last)
-		this.extents.last = [];
-	this.extents.last.push(this.clone(this.extents.plot.grid));
-} else
-	if (this.extents.last.length>0) 
-		var bbox = this.extents.last.pop();
+	if(f>0&&this.extents.selection.grid==this.extents.plot.grid) {
+		var bbox = this.clone(this.extents.plot.grid);
+		var width = (bbox.x.max-bbox.x.min);
+		var height = (bbox.y.max-bbox.y.min);
+		var cx = (bbox.x.min+bbox.x.max)/2;
+		var cy = (bbox.y.min+bbox.y.max)/2;
+		bbox.x.min = cx - width/(2*f);	
+		bbox.x.max = cx + width/(2*f);	
+		bbox.y.min = cy - height/(2*f);
+		bbox.y.max = cy + height/(2*f);	
+		if(!this.extents.last)
+			this.extents.last = [];
+		this.extents.last.push(this.clone(this.extents.plot.grid));
+	} 		
+	else if (f>0){
+		var bbox = this.clone(this.extents.selection.grid);
+		if(!this.extents.last)
+			this.extents.last = [];
+		this.extents.last.push(this.clone(this.extents.plot.grid));
+	}
+	else
+		if (this.extents.last.length>0) 
+			var bbox = this.extents.last.pop();
 	if(bbox)	
 		this.zoomOnBBox(bbox);
 	this.displayBox(true);

@@ -145,9 +145,9 @@
 					</td>
 					<td width="50%" border=0>
 						<table><tbody>
-							<tr><td></td><td align="center"><strong>Max Lat : </strong><input size=3  id="input_maxY" type="text" value="90.0"></td><td></td></tr>
+							<tr><td></td><td align="center"><strong>Max Lat : </strong><input size=3  id="input_maxY" type="text" value="90.0"><b onmousedown="LAS.refs.XYSelect.panPlot(0,10);" class="LASLink">&uarr;</b></td><td></td></tr>
 							<tr><td align="right"><strong>Min<br><b onmousedown="LAS.refs.XYSelect.panPlot(-20,0);" class="LASLink">&larr;</b> Lon<br></strong><input size=6 id="input_minX" value="-180.0"><br><a  class="LASLink" onclick="LAS.refs.XYSelect.zoom(2);">ZOOM IN</a></td><td><div id="MapWidget" style="border:1px solid black;" ></div><td align="left"><strong>Max<br>Lon <b onmousedown="LAS.refs.XYSelect.panPlot(20,0);" class="LASLink">&rarr;</b></strong><br><input value="180.0" size=6 id="input_maxX"><br><a class="LASLink" onclick="LAS.refs.XYSelect.zoom(-1)">ZOOM OUT</a></td></tr>
-							<tr><td></td><td align="center"><strong>Min Lat : </strong><input id="input_minY" size=3 type="text" value="-90.0"></td><td></td></tr>
+							<tr><td></td><td align="center"><strong>Min Lat : </strong><input id="input_minY" size=3 type="text" value="-90.0"><b onmousedown="LAS.refs.XYSelect.panPlot(0,-10);" class="LASLink">&darr;</b></td><td></td></tr>
 						</tbody></table>
 					</td>
 					<td valign="bottom" halign="right" width="10px"><a class="LASLink" style="text-align:bottom;" alt="Hide the plot controls pane" onmouseover="window.status='Hide the plot constrols pane';" onmouseout="window.status=''"  id="hideC"  onclick="document.getElementById('constraints').style.display='none';LAS.refs.XYSelect.rubberBand.style.display='none';LAS.refs.XYSelect.rubberBand_c.style.display='none';document.getElementById('showC').style.display='';">hide</a></td>
