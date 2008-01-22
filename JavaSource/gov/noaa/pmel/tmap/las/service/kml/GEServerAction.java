@@ -158,7 +158,7 @@ public final class GEServerAction extends Action {
         if( (requestURL != "") && (requestURL != null)){
             kmlString = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
                      +"<kml xmlns=\"http://earth.google.com/kml/2.1\">"
-                     +"<Folder><name>coads_climatology_cdf</name>"
+                     +"<Folder>"
                      +"<NetworkLink>"
                      +"<Link>"
                      +"<href>"
