@@ -14,11 +14,13 @@ function LASUI () {
 	this.hrefs = {
 		"getProduct"  : {"url" : "ProductServer.do"},
 		"getCategories" : {"url" : "getCategories.do"},
+		"getDataConstraints" : {"url" : "getDataConstraints.do"},
 		"getGrid" : {"url" : "getGrid.do"},
 		"getViews" : {"url" : "getViews.do"},
 		"getOperations" : {"url" : "getOperations.do"},
 		"getOptions" : {"url" : "getOptions.do"}
 	};
+
 	//application state
 	this.state = {
 		"dataset" : null, 
@@ -294,16 +296,16 @@ LASUI.prototype.createCategoryTreeNode = function (node, i, id) {
 	td2.innerHTML = node.category.getChildName(i);
 	td2.className = "LASTreeTableCell";
 	td2.style.textAlign  = "left";
-	var td3 = document.createElement("TD");
-	node.children[i].A = document.createElement("A");
-	node.children[i].A.innerHTML = "?";
-	node.children[i].A.onclick = this.showInfo.LASBind(this,node,i);
-	td3.appendChild(node.children[i].A);
-	td3.className = "LASTreeTableCell";
-	td3.width="12pt";	
+	//var td3 = document.createElement("TD");
+	//node.children[i].A = document.createElement("A");
+	//node.children[i].A.innerHTML = "<img src='images/icon_info.gif'>";
+	//node.children[i].A.onclick = "window.open()";this.showInfo.LASBind(this,node,i);
+	//td3.appendChild(node.children[i].A);
+	//td3.className = "LASTreeTableCell";
+	//td3.width="12pt";	
 	tr.appendChild(td1);
 	tr.appendChild(td2);
-	tr.appendChild(td3);
+	//tr.appendChild(td3);
 	tbody.appendChild(tr);
 	table.appendChild(tbody);
 	node.children[i].LINode.appendChild(table);
@@ -362,7 +364,7 @@ LASUI.prototype.createVariableTreeNode = function (node, i) {
 	td3.className = "LASTreeTableCell";
    td3.width="12px";
    node.children[i].A = document.createElement("A");
-	node.children[i].A.innerHTML = "?";
+	node.children[i].A.innerHTML = "<img src='images/icon_info.gif'>";
 	node.children[i].A.onclick = this.showInfo.LASBind(this,node,i);
 	td3.appendChild(node.children[i].A);
 	
@@ -477,17 +479,15 @@ LASUI.prototype.setVariable = function (evt) {
 		if(typeof this.state.variables[datasetID] != 'object') 
 			this.state.variables[datasetID] = [];
 			
-		//REMOVE TO ENABLE MULTI-VARIABLE SELECTION
 		this.state.variables[datasetID] = [];
-		
-		//if this variable has not already been selected, add it to the list for that dataset
-		//if			
-		//delete(this.state.variables[datasetID][variable]); //ID);
-		this.state.variables[datasetID].push(variable); //ID);
+		this.state.variables[datasetID].push(variable); 
 						
-		//get the grids for this dataset/variable combo
+		//get all the other data for this dataset/variable combo
 		this.state.dataset = datasetID;
-		this.getGrid(datasetID,variableID);	
+		this.getGrid(datasetID,variableID);
+		this.getDataConstraints(datasetID,variableID);
+		this.getViews(datasetID,variableID);
+
 	}	else if (typeof this.state.variables[datasetID] == 'object')
 			delete(this.state.variables[datasetID][variableID]);		
 	if(this.onSetVariable)
@@ -508,6 +508,36 @@ LASUI.prototype.setDataset = function (dataset) {
 }
 /**
  * Method to query the server for a category
+ * @param {string} dataset The selected dataset id
+ * @param {string} variable The selected variable id
+ *	@param {string} view The selected view id 
+ */	
+LASUI.prototype.getDataConstraints = function (dataset, variable) {
+		if(!document.all)
+			var req = new XMLHttpRequest(this);
+		else
+			var req = new ActiveXObject("Microsoft.XMLHTTP"); 
+		req.onreadystatechange = this.AJAXhandler.LASBind(this, req, "this.setDataConstraints(req.responseText);");
+		req.open("GET", this.hrefs.getDataConstraints.url + '?dsid=' + dataset + '&varid=' + variable);
+		req.send(null);
+}
+/**
+ * Method to query the server for a category
+ * @param {string} dataset The selected dataset id
+ * @param {string} variable The selected variable id
+ *	@param {string} view The selected view id 
+ */	
+LASUI.prototype.setDataConstraints = function (strJson) {
+	if(strJson) {
+		var response = eval("(" + strJson + ")");
+		this.state.constraints = new LASGetDataConstraintsResponse(response);
+	}
+	
+
+	
+}
+/**
+ * Method to query the server for the available operations
  * @param {string} dataset The selected dataset id
  * @param {string} variable The selected variable id
  *	@param {string} view The selected view id 
@@ -671,8 +701,6 @@ LASUI.prototype.setGrid = function (strJson) {
 		
 			
 	this.state.grid = new LASGetGridResponse(response);
-		
-	this.getViews(this.state.dataset,this.state.variables[this.state.dataset][this.state.variables[this.state.dataset].length-1].ID);
 }
 /**
  * Method to query the server for a list of allowed views
@@ -1087,7 +1115,6 @@ LASUI.prototype.initZConstraint = function (mode) {
 				break;
 		}
 	}
-	
 			if(!this.updating&&this.autoupdate) {
 				
 				this.makeRequest();
@@ -1184,16 +1211,18 @@ LASUI.prototype.initTConstraint = function (mode) {
 					document.getElementById("Date").appendChild(date_label);	
 					//document.getElementById("Date").appendChild(document.createElement("BR"));
 					document.getElementById("Date").appendChild(this.refs.DW[0]);
+
 					document.getElementById("Date").style.display="";
 					break;
 			}
 			break;
 	 }		
+
+	
 	 
-	 		if(!this.updating&&this.autoupdate) {
-				
+	 		if(!this.updating&&this.autoupdate) 
 				this.makeRequest();		
-			}	else
+				else
 		this.showUpdateLink();
 
 }
@@ -1234,7 +1263,7 @@ LASUI.prototype.makeRequest = function () {
 
 		this.uirequest.setOperation("V7UI");	
 		this.uirequest.setProperty('ui','plot',this.state.operation);
-		this.uirequest.setProperty('ui','state',JSON.stringify(this.state));
+		//this.uirequest.setProperty('ui','state',JSON.stringify(this.state));
 		var uioptions = {};			
 		//set the options
 		for(var p in this.state.properties)	
@@ -1319,7 +1348,6 @@ LASUI.prototype.makeRequest = function () {
 				document.getElementById("wait_msg").style.display="";
 			document.getElementById('output').style.display = "none";
 			document.getElementById('output').onproductload = function (evt) {
-				
 				document.getElementById("wait").style.visibility="hidden";
 				document.getElementById("wait_msg").style.display="none";
 				document.getElementById('output').style.display = '';
