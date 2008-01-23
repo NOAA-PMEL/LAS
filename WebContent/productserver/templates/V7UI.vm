@@ -7,6 +7,7 @@
 		<script type="text/javascript" src="JavaScript/components/LASRequest.js" ></script>
 		<script type="text/javascript" src="JavaScript/components/LASGetGridResponse.js" ></script>
 		<script type="text/javascript" src="JavaScript/components/LASGetCategoriesResponse.js" ></script>
+		<script type="text/javascript" src="JavaScript/components/LASGetDataConstraintsResponse.js" ></script>
 		<script type="text/javascript" src="JavaScript/components/LASGetViewsResponse.js" ></script>
 		<script type="text/javascript" src="JavaScript/components/LASGetOperationsResponse.js" ></script>
 		<script type="text/javascript" src="JavaScript/components/LASGetOptionsResponse.js" ></script>
@@ -115,6 +116,7 @@
 		<div style="display:none" class="LASPopupDIVNode" id="plotOptions"></div>
 		<span>
 			<INPUT class="LASProductButton" width="100%" value="Choose dataset & variable" type="button" onclick="if(document.getElementById('categories').style.display=='none'){document.getElementById('categories').style.display='';LAS.toggleUIMask('')} else {document.getElementById('categories').style.display='none'; LAS.toggleUIMask('none');}">
+			<INPUT class="LASProductButton" width="100%" value="Choose comparison variable" type="button" onclick="if(document.getElementById('comparison').style.display=='none'){document.getElementById('categories').style.display='';LAS.toggleUIMask('')} else {document.getElementById('categories').style.display='none'; LAS.toggleUIMask('none');}">
 			<INPUT class="LASProductButton" width="100%" value="Set plot options" type="button" onclick="LAS.toggleUIMask('');document.getElementById('plotOptions').style.display='';">
 			<span  class="LASProductButton" style="font-size:0.9em;cursor:default;padding:4px;border-bottom:1pt solid grey;border-right:1pt solid grey;border-top:1pt solid #F8F8FF;border-left:1pt solid #F8F8FF;" id="update" onclick="LAS.makeRequest();">Update Plot <INPUT type="checkbox" style="position:relative;top:2px;" onmousemove="window.status='Check to automatically update the plot.';" onmouseout="window.status='';" onclick="LAS.autoupdate=this.checked;if(LAS.autoupdate)LAS.makeRequest();"></span>
 		</span>
@@ -124,7 +126,7 @@
 			<INPUT class="LASProductButton" width="100%" disabled="true" ID="Plot to Google Earth" value="Google Earth" type="button">
 			<INPUT class="LASProductButton" width="100%" disabled="true" ID="Table of values (text)" value="Show Values" type="button">
 		</span>
-		<select onchange="this.selectedIndex=0;" name="Export to">
+		<select onchange="this.options[0].selected=true;" name="Export to">
                		<option>Export to...</option>
                 	<option ID="ArcView gridded">Arc GIS</option>
                 	<option ID="ASCII file" >ASCII File</option>
@@ -137,19 +139,37 @@
 			<table width="100%" height="180" border=0 cellspacing=0>
 				<tbody><tr>
 					<td width="23px" valign="top"><img id="wait" style="visibility:hidden;" src="JavaScript/components/mozilla_blu.gif">&nbsp;</td>
-					<td class="LASPlotTypeContainer" width="20%"  align="left" valign="center">
+					<td width="150px" class="LASPlotTypeContainer" align="left" valign="center">
 						<div id="plotType"></div>
+					</td>
+					<td class="LASAnalysisContainer">
+						<div id="Analysis">
+							<strong>Variable Analysis</strong>
+							<table>
+							<tr><th>Axis</th><th>Type</th></tr>
+							<tr id="x_analysis"><td>X</td><td><select name="x_analysis_type"><option selected value="">None</option><option value="ave">Average</option><option value="min">Minimum</option><option value="max">Maximum</option><option value="sum">Sum</option><option value="var">Variance</option></select></td></tr>
+							<tr id="y_analysis"><td>Y</td><td><select name="y_analysis_type"><option selected value="">None</option><option value="ave">Average</option><option value="min">Minimum</option><option value="max">Maximum</option><option value="sum">Sum</option><option value="var">Variance</option></select></td></tr>
+							<tr id="z_analysis"><td>Z</td><td><select name="z_analysis_type"><option selected value="">None</option><option value="ave">Average</option><option value="min">Minimum</option><option value="max">Maximum</option><option value="sum">Sum</option><option value="var">Variance</option></select></td></tr>
+							<tr id="t_analysis"><td>T</td><td><select name="t_analysis_type"><option selected value="">None</option><option value="ave">Average</option><option value="min">Minimum</option><option value="max">Maximum</option><option value="sum">Sum</option><option value="var">Variance</option></select></td></tr>
+							</tbody></table>
+	Mask
+	  <b>None</b><input name="mask" checked="checked" value="n" type="radio">
+          <b>Ocean</b><input name="mask" value="o" type="radio">
+          <b>Land</b><input name="mask" value="l" type="radio">
+        
+						</div>
+					</td>
 					<td class="LASZTContainer" align="center" style="padding:3pt;">
 						<div id="Date"></div>
 						<div id="Depth"></div>
 					</td>
 					<td width="50%" border=0>
-						<table><tbody>
+						<table id="map"><tbody>
 							<tr><td></td><td align="center"><strong>Max Lat : </strong><input size=3  id="input_maxY" type="text" value="90.0"><b onmousedown="LAS.refs.XYSelect.panPlot(0,10);" class="LASLink">&uarr;</b></td><td></td></tr>
 							<tr><td align="right"><strong>Min<br><b onmousedown="LAS.refs.XYSelect.panPlot(-20,0);" class="LASLink">&larr;</b> Lon<br></strong><input size=6 id="input_minX" value="-180.0"><br><a  class="LASLink" onclick="LAS.refs.XYSelect.zoom(2);">ZOOM IN</a></td><td><div id="MapWidget" style="border:1px solid black;" ></div><td align="left"><strong>Max<br>Lon <b onmousedown="LAS.refs.XYSelect.panPlot(20,0);" class="LASLink">&rarr;</b></strong><br><input value="180.0" size=6 id="input_maxX"><br><a class="LASLink" onclick="LAS.refs.XYSelect.zoom(-1)">ZOOM OUT</a></td></tr>
 							<tr><td></td><td align="center"><strong>Min Lat : </strong><input id="input_minY" size=3 type="text" value="-90.0"><b onmousedown="LAS.refs.XYSelect.panPlot(0,-10);" class="LASLink">&darr;</b></td><td></td></tr>
 						</tbody></table>
-					</td>
+					</td><td>
 					<td valign="bottom" halign="right" width="10px"><a class="LASLink" style="text-align:bottom;" alt="Hide the plot controls pane" onmouseover="window.status='Hide the plot constrols pane';" onmouseout="window.status=''"  id="hideC"  onclick="document.getElementById('constraints').style.display='none';LAS.refs.XYSelect.rubberBand.style.display='none';LAS.refs.XYSelect.rubberBand_c.style.display='none';document.getElementById('showC').style.display='';">hide</a></td>
 				</tr></tbody>
 			</table>
