@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <kml xmlns="http://earth.google.com/kml/2.1">
   <NetworkLink>
+     <name>$las_request.getDatasetName(): $las_request.getVarName()</name>
+#if( $las_request.getProperty("ferret", "ge_overlay_style")=="static" )
+     <flyToView>1</flyToView>
+#end
      <Link>
          <href>$las_response.getResult("kml")</href>
      </Link>
