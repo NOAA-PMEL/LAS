@@ -111,6 +111,18 @@ the current variable; you must have at least one &lt;b&gt;$&lt;/b&gt; in your ex
     </option>
   </optiondef>
 
+<!-- GE overlay style -->
+  <optiondef name="ge_overlay_style">
+    <option>
+      <help>Sets overlay style on Google Earth</help>
+      <title>Overlay Style</title>
+      <menu type="options" name="ge_overlay_style">
+        <item values="dynamic">dynamic (view-based refresh)</item>
+        <item values="static">static (no refresh)</item>
+      </menu>
+    </option>
+  </optiondef>
+
 <!--  Generic image options -->
 
   <optiondef name="size">
@@ -635,7 +647,7 @@ i.e. 48 - start time: 24 hours before selected timestep
   <optiondef name="Options_2D_GE" inherit="#expression,#interpolate_data,#palette"/>
   <optiondef name="Options_2D_contour_GE" inherit="#Options_2D_GE,#contour_style,#fill_levels,#contour_levels,#mark_grid"/>
   <optiondef name="Options_2D_image_contour_GE" inherit="#Options_2D_contour_GE"/>
-  <optiondef name="Options_2D_image_contour_xy_GE" inherit="#Options_2D_image_contour_GE,#set_aspect,#land_type,#stride_quality_factor"/>  
+  <optiondef name="Options_2D_image_contour_xy_GE" inherit="#Options_2D_image_contour_GE,#set_aspect,#land_type,#stride_quality_factor,#ge_overlay_style"/>  
   <!-- Comparison 2-dimensional plots -->
   <optiondef name="Options_Compare" inherit="#Options_2D_contour,#expression2"/>
 
