@@ -1,6 +1,5 @@
 ! LAS_auto_levels.jnl
 ! ACM 8/22/2007
-
 ! acm 9/11/07 If its a descriptor file Ferret wont allow striding. 
 !             check for that case and just set num levels.
 
@@ -218,7 +217,7 @@ IF ($ystride"0|1>0|*>1") THEN  ! 19
      ELSE
         DEFINE SYMBOL index_strides = j=`strd_lo`:`strd_hi`:`INT(ysize/10)`
      ENDIF ! 21
-   ENDIF ! 22
+   ENDIF ! 20
 ENDIF ! 19
 
 IF ($zstride"0|1>0|*>1") THEN  ! 23
@@ -260,6 +259,7 @@ ENDIF ! 29
 ! mean, max, min, std.
 
 DEFINE SYMBOL stat_ngood= 0
+STAT ($ppvar)
 
 ! Undo the striding. Other striding may be set elsewhere
 
@@ -269,7 +269,6 @@ IF `stride_for_speed GT 1` THEN  ! 30
    IF `($undo_z"0") GT 0` THEN CANCEL AXIS/STRIDE `pvar,RETURN=zaxis`
    IF `($undo_t"0") GT 0` THEN CANCEL AXIS/STRIDE `pvar,RETURN=taxis`
 ENDIF ! 30
-
 
 sh sym stat*
 IF `($stat_ngood"0") EQ 0` THEN EXIT/SCRIPT
