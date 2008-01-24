@@ -772,7 +772,7 @@ streamable="true" mime_type="application/postscript"/> -->
         service_action="Data_Extract_ArcView" order="0800">
         <service>ferret</service>
         <response ID="Data_Extract_File_Response">
-            <result type="arc" ID="ferret_listing" file_suffix=".arc"/>
+            <result type="arc" ID="ferret_listing" file_suffix=".asc"/>
             <result type="debug" ID="debug" file_suffix=".txt"/>
         </response>
         <region>
