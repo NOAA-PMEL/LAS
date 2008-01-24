@@ -58,47 +58,16 @@ public final class GEServerAction extends Action {
             HttpServletResponse response) 
     throws ServletException, IOException{
 
-        String coords = request.getParameter("BBOX");
-        String lasInitRequestXML = request.getParameter("xml");
-        log.info("GEServerAction, bbox="+coords);
-
-        //BBOX is defined as [longitude_west, latitude_south, longitude_east, latitude_north]
-        if (coords==null || coords==""){
-            log.info("There is no BBOX information in this request.");
-            return null;
-        }
+        //log.info("entering GEServerAction");
 
         //use Google Earth Mime type
         response.setContentType("application/keyhole");
-
         PrintWriter out = response.getWriter();
-        String[] coParts= coords.split(",");
 
-        //view center
-        float userlon;
-        float userlat;
+        //create the ground overlay KML for a single plot
+        String kmlString = genPlotOverlayKML(request);
 
-        //view boundary
-        float[] bbox = new float[4];
-
-        String serverURL = getServerURL(request)+"/ProductServer.do";
-
-        //process bbox info
-        try{
-            userlon = ((Float.parseFloat(coParts[2]) - Float.parseFloat(coParts[0]))/2) + Float.parseFloat(coParts[0]);
-            userlat = ((Float.parseFloat(coParts[3]) - Float.parseFloat(coParts[1]))/2) + Float.parseFloat(coParts[1]);
-            bbox[0] = Float.parseFloat(coParts[0]);
-            bbox[2] = Float.parseFloat(coParts[2]);
-            bbox[1] = Float.parseFloat(coParts[1]);
-            bbox[3] = Float.parseFloat(coParts[3]);
-         }catch(NumberFormatException e){
-            log.info("error while process BBOX from Google Earth: " + e.toString());
-            return null;
-        }
-
-        //create the static ground overlay KML for a single plot
-        String kmlString = genPlotOverlayKML(bbox, serverURL, lasInitRequestXML);
-
+        //return back the KML string
         if( (kmlString != "") && (kmlString != null)){
             out.println(kmlString);
         }else{
@@ -110,13 +79,13 @@ public final class GEServerAction extends Action {
     }
 
     /**
-    * Generate a KML for a XY plot; it is just a static overlay
-    * @param bbox The bounding box of the view on Google Earth
-    * @param serverURL URL of the LAS product server
-    * @param lasInitRequestXML the XML of initial LASUIRequest
-    */
-    public String genPlotOverlayKML(float[] bbox, String serverURL, String lasInitRequestXML)
+     * Check if it's dynamic GE overlay 
+     * @param lasInitRequestXML The initail LAS UI request
+     */
+    private boolean isDynamic(HttpServletRequest request)
+        throws ServletException, IOException
     {
+        String lasInitRequestXML = request.getParameter("xml");
         LASUIRequest lasUIRequest = new LASUIRequest();
 
         try{
@@ -125,19 +94,92 @@ public final class GEServerAction extends Action {
             log.info("error while create LASUIRequest: " + e.toString());
         }
 
-        //get the bbox information
-        Float minlon = new Float(bbox[0]);
-        Float maxlon = new Float(bbox[2]);
-        Float minlat = new Float(bbox[1]);
-        Float maxlat = new Float(bbox[3]);
+        if(lasUIRequest.getProperty("ferret", "ge_overlay_style").equals("dynamic")){
+            return true;
+        }else{
+            return false;
+        }
+    }
+    
+    /**
+     * Check the GE overlay style
+     * @param request The HttpServletRequest
+     */
+    private LASUIRequest getLASUIRequest(HttpServletRequest request)
+        throws ServletException, IOException
+    {
+        String lasInitRequestXML = request.getParameter("xml");
+        LASUIRequest lasUIRequest = new LASUIRequest();
+        try{
+            JDOMUtils.XML2JDOM(lasInitRequestXML, lasUIRequest);
+        } catch (Exception e){
+            log.info("error while create LASUIRequest: " + e.toString());
+        }
+        return lasUIRequest;
+    }
+
+    /**
+     * Retrieve the BBOX coming from Google Earth
+     * @param request The HttpServletRequest
+     */
+    private float[] getBBOX(HttpServletRequest request)
+        throws ServletException, IOException 
+    {
+        //get BBOX coming from GE
+        String coords = request.getParameter("BBOX");
+
+            //BBOX is defined as [longitude_west, latitude_south, longitude_east, latitude_north]
+            if (coords==null || coords==""){
+                log.info("There is no BBOX information in this request.");
+                return null;
+            }
+            String[] coParts= coords.split(",");
+
+            float userlon;
+            float userlat;//view center
+            float[] bbox = new float[4];//view boundary
+
+            //process bbox info
+            try{
+                userlon = ((Float.parseFloat(coParts[2]) - Float.parseFloat(coParts[0]))/2) + Float.parseFloat(coParts[0]);
+                userlat = ((Float.parseFloat(coParts[3]) - Float.parseFloat(coParts[1]))/2) + Float.parseFloat(coParts[1]);
+                bbox[0] = Float.parseFloat(coParts[0]);
+                bbox[2] = Float.parseFloat(coParts[2]);
+                bbox[1] = Float.parseFloat(coParts[1]);
+                bbox[3] = Float.parseFloat(coParts[3]);
+             }catch(NumberFormatException e){
+                log.info("error while process BBOX from Google Earth: " + e.toString());
+                return null;
+            }
+        return bbox;
+    }
+
+    /**
+    * Generate a KML file for a XY plot; it is just a ground overlay
+    * @param request The HttpServletRequest
+    */
+    public String genPlotOverlayKML(HttpServletRequest request)
+        throws ServletException, IOException 
+    {
+        LASUIRequest lasUIRequest = getLASUIRequest(request);
+        boolean isDynamic = isDynamic(request);
 
         String requestURL ="";
         String kmlString ="";
+        String serverURL = getServerURL(request)+"/ProductServer.do";
 
         try{
-            //update xy range using the bbox information
-            lasUIRequest.setRange("x", minlon.toString(),maxlon.toString());
-            lasUIRequest.setRange("y", minlat.toString(),maxlat.toString());
+
+            //update XY range for dynamic overlay
+            if(isDynamic){
+                float[] bbox = getBBOX(request);
+                Float minlon = new Float(bbox[0]);
+                Float maxlon = new Float(bbox[2]);
+                Float minlat = new Float(bbox[1]);
+                Float maxlat = new Float(bbox[3]);
+                lasUIRequest.setRange("x", minlon.toString(),maxlon.toString());
+                lasUIRequest.setRange("y", minlat.toString(),maxlat.toString());
+            }
 
             //update operation
             //the KML for non-vector plot contains a screen overlay of colorbar
@@ -170,7 +212,7 @@ public final class GEServerAction extends Action {
                      +"</kml>";
          }
          return kmlString;
-     }
+    }
 
     /**
     * Get the product server URL
@@ -180,7 +222,6 @@ public final class GEServerAction extends Action {
     private String getServerURL(HttpServletRequest request)
     throws ServletException, IOException
     {
-        //get server info
         String name = request.getServerName();
         int port = request.getServerPort();
         String contextPath = request.getContextPath();
