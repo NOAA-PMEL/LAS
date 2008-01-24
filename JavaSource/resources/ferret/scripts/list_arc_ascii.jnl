@@ -28,7 +28,9 @@ GO LAS_initialize_data 0
 DEFINE SYMBOL ferret_list_var = ($ferret_plot_var)
 
 SET LIST/FILE="($result_ferret_listing_filename)"
-LET expr = ($ferret_plot_var)
+LET expr_var = ($ferret_plot_var_noregion)
+LET expr = expr_var[($region_x)]
+IF ($region_zt"0|*>1") THEN LET expr = expr_var[($region_x),($region_zt)]
 
 ! This script is only applicable to the XY plane
 
@@ -38,7 +40,7 @@ LET expr = ($ferret_plot_var)
      ! writes properties for the error.
 
 
-DEFINE SYMBOL varshape `expr,RETURN=shape`
+DEFINE SYMBOL varshape `($ferret_list_var),RETURN=shape`
 IF ($varshape"1|XY>0|*>1") THEN
   DEFINE SYMBOL error_status = ERROR
   DEFINE SYMBOL error_type REGION
@@ -71,9 +73,9 @@ LET jstart `j[gy=expr,y=($region_y_lo)]`
 LET jend `j[gy=expr,y=($region_y_hi)]`
 
 ! size of grid
-LET Ni = `expr,RETURN=isize`
-LET Nj = `expr,RETURN=jsize`
-
+LET Ni = `($ferret_list_var),RETURN=isize`
+LET Nj = `($ferret_list_var),RETURN=jsize`
+pause
 ! lower cell bounds arrays
 LET xbounds = xboxlo[gx=expr]
 LET ybounds = yboxlo[gy=expr]
@@ -157,18 +159,51 @@ SET MODE/LAST LON
 !	cellsize 1.
 !       nodata -9.9999998E+33
 
+! Get the bad-value, and set the bad-value of THIS variable to 
+! a different value (so it can be evaluated below when it is used)
+
 LET nodata = `expr,RETURN=bad`
-LIST/FILE/NOHEAD/APPEND/FORMAT="('ncols',1PG15.7)" Ni
-LIST/FILE/NOHEAD/APPEND/FORMAT="('nrows',1PG15.7)" Nj
-LIST/FILE/NOHEAD/APPEND/FORMAT="('xllcorner',1PG15.7)" xlo
-LIST/FILE/NOHEAD/APPEND/FORMAT="('yllcorner',1PG15.7)" ylo
-LIST/FILE/NOHEAD/APPEND/FORMAT="('cellsize',1PG15.7)"  cell_size
-LIST/FILE/NOHEAD/APPEND/FORMAT="('nodata',1PG15.7)"   nodata
+LET mybad = -1*(`expr,RETURN=bad`)
+IF `mybad EQ 0` THEN LET mybad = 1.
+SET VAR/BAD=`mybad` nodata
+
+! ncols and nrows need to be integer
+! LIST/FILE/NOHEAD/APPEND/FORMAT="('ncols',1PG15.7)" Ni
+! LIST/FILE/NOHEAD/APPEND/FORMAT="('nrows',1PG15.7)" Nj
+LET aout = "ncols `Ni`"
+LIST/FILE/NOHEAD/APPEND/FORMAT="(A)" aout
+LET aout = "nrows `Nj`"
+LIST/FILE/NOHEAD/APPEND/FORMAT="(A)" aout
+
+! These values if written with a simple LIST/FORMAT, result in
+! lines with blanks at the end. 
+
+! LIST/FILE/NOHEAD/APPEND/FORMAT="('xllcorner',1PG15.7)" xlo
+! LIST/FILE/NOHEAD/APPEND/FORMAT="('yllcorner',1PG15.7)" ylo
+! LIST/FILE/NOHEAD/APPEND/FORMAT="('cellsize',1PG15.7)"  cell_size
+! LIST/FILE/NOHEAD/APPEND/FORMAT="('nodata',1PG15.7)"   nodata
+
+! Do them with string variables instead. 
+
+SET LIST/PREC=9
+LET aout = "xllcorner `xlo`"
+LIST/FILE/NOHEAD/APPEND/FORMAT="(A)" aout
+LET aout = "yllcorner `ylo`"
+LIST/FILE/NOHEAD/APPEND/FORMAT="(A)" aout
+
+LET aout = "cellsize `cell_size`"
+LIST/FILE/NOHEAD/APPEND/FORMAT="(A)" aout
+
+!LIST/FILE/NOHEAD/APPEND/FORMAT="('nodata_value',1PG15.7)"  nodata
+LET aout = "nodata_value `nodata`"
+LIST/FILE/NOHEAD/APPEND/FORMAT="(A)" aout
 
 ! List the data to the file, with northernmost data first.
 
+LET yy = y[gy=expr]
 REPEAT/NAME=m/RANGE=`jend`:`jstart`:-1 \
-  (LIST/APPEND/FILE/NOHEAD/NOROWHEAD/FORMAT="(1PG15.7)" expr[j=`m`])
+  (LET this_y = yy[j=`m`];\
+   LIST/APPEND/FILE/NOHEAD/NOROWHEAD/FORMAT="(1PG15.7)" expr[y=`this_y`])
 
 SET MODE/LAST VERIFY
 
