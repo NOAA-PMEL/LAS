@@ -671,6 +671,24 @@ public class LASBackendRequest extends LASDocument {
         return variables;
     }
     /**
+     * Returns an SQL formatted string containing the list of variable names separated by commas.
+     * @return variablesString SQL formatted string
+     */
+    public String getVariablesAsStringWithIFNULL() throws LASException {
+        String variables = "";
+        List data = this.getRootElement().getChild("dataObjects").getChildren("data");
+        for (Iterator varIt = data.iterator(); varIt.hasNext();) {
+            Element variable = (Element) varIt.next();
+            Element db_access = findPropertyGroup(variable,"database_access");
+            String missingValue = findPropertyValue(db_access, "missing");
+            variables = variables+"IFNULL("+variable.getAttributeValue("var")+","+missingValue+")";
+            if (varIt.hasNext()) {
+                variables = variables + ", ";
+            }
+        }
+        return variables;
+    }
+    /**
      * See if the request contains a variable of a particular name.
      * @param var the variable name to check
      * @return true if the request contains the variable
