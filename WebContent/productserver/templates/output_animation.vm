@@ -23,21 +23,24 @@ server_url = "$server_url";
 animation_xml = "$las_response.getResultAsJavaScriptSafeString("ferret_listing")";
 las_animation = new LASAnimation(animation_xml);
 
-var hasT = las_animation.getHasT(); //0-no time dimension; 1-has time dimension
-var hasError;                       //has LAS error
-var lasMessage;                     //message in LAS response
-var debugURL;                       //debug URL of LAS
-var speed;                          //animation speed (frames/second)
-var speed_max;                      //max. animation speed
-var speed_min;                      //min. animation speed
-var delay;                          //delay between frames in 1/1000 seconds, i.e. milliseconds 
-theImages    = new Array();         //container for LAS plots
-imagesLoaded = new Array();         //flags for checking if a image is loaded
-firstTimeLoad= new Array();         //flags for checking if it's first time to load the image
-var current_image;                  //index of current image
-var timeID;                         //ID for timeOut
-var status;                         //0-stopped, 1-playing
-var play_mode;                      //0-play once, 1-loop 
+var hasT = las_animation.getHasT(); // 0-no time dimension; 1-has time dimension
+var hasError;                       // has LAS error
+var lasMessage;                     // message in LAS response
+var debugURL;                       // debug URL of LAS
+var speed;                          // animation speed (frames/second)
+var speed_max;                      // max. animation speed
+var speed_min;                      // min. animation speed
+var delay;                          // delay between frames in 1/1000 seconds, i.e. milliseconds 
+theImages    = new Array();         // container for LAS plots
+imagesLoaded = new Array();         // flags for checking if a image is loaded
+firstTimeLoad= new Array();         // flags for checking if it's first time to load the image
+var current_image;                  // index of current image
+var timeID;                         // ID for timeOut
+var status;                         // 0-stopped, 1-playing
+var play_mode;                      // 0-play once, 1-loop 
+var loading;                        // 0-not loading, 1-loading
+
+var delT;                           // time inetrval
 
 if(hasT == 1){
     //the time frames
@@ -60,15 +63,16 @@ function animate_init(){
     }
 
     //unit of speed is frames per second
-    speed     = 8; 
-    speed_max = 128;
-    speed_min = 1;
-    delay     = 1000/speed; 
-
+    speed         = 8; 
+    speed_max     = 128;
+    speed_min     = 1;
+    delay         = 1000/speed; 
+    delT          = 1;
     current_image = first_image;    
-    timeID = null;
-    status = 0;        
-    play_mode = 1;    
+    timeID        = null;
+    status        = 0;        
+    play_mode     = 1;    
+    loading       = 1;
 
     //make sure the first image number is not bigger than the last image number
     if (first_image > last_image) 
@@ -81,96 +85,61 @@ function animate_init(){
 
 //===> load the next image
 function animate_loadNextImage(currentImg){
-    animate_loadNextImages(currentImg+1,currentImg+1);
-
-    //foward to next image only when currentImg is loaded first time
-    if((firstTimeLoad[currentImg] == 1) && (status == 1)){
-        firstTimeLoad[currentImg] = 0;
-
-        //make sure the previous image is flagged
-        if(currentImg > 0){firstTimeLoad[currentImg-1] = 0;}
-
-        go2next(currentImg+1);
-   
-        //start animation after loading all images
-        if(currentImg == last_image){
-            animate_fwd();
-        }
-    }
+  if(loading == 1){
+      //start animation after loading all images
+      if(currentImg == last_image){
+          loading = 0;
+          document.ani_form.halt_loading.disabled=true;
+          enableButtons();
+          animate_fwd();
+      }else{
+          animate_loadNextImages(currentImg+1,currentImg+1);
+          go2next(currentImg+1);
+      }
+  }
 }
 
-//===> load the images from index startImg to endImg
-function animate_loadImages(startImg, endImg){
-
-    //make sure the index is less than the last_image
-    if(startImg >= last_image){
-        startImg = last_image;
-    };
-
-    if(endImg >= last_image){
-        endImg = last_image;
-    };
-
-    //load images
-    for (var i = startImg; i <= endImg; i++){
-        //do nothing if it is already loaded
-        if(imagesLoaded[i] != 1){
-
-            if(i==0){
-                lasReq = animate_makeFirstLASRequest(theTimes[i]);
-            }else{
-                lasReq = animate_makeLASRequest(theTimes[i]);
-            }
-            var prefix = lasReq.prefix;
-            var url = prefix+escape(lasReq.getXMLText())+'&stream=true&stream_ID=plot_image';
-            
-            theImages[i] = new Image();
-            theImages[i].src = url;
-            imagesLoaded[i] = 1;
-        }
-    };
+//===> enable the control buttons
+function enableButtons(){
+    document.control_form.play_mode_selection.disabled = false;
+    document.control_form.first_img_button.disabled    = false;
+    document.control_form.prev_img_button.disabled     = false;
+    document.control_form.stop_button.disabled         = false;
+    document.control_form.play_button.disabled         = false;
+    document.control_form.next_img_button.disabled     = false;
+    document.control_form.last_img_button.disabled     = false;
+    document.control_form.decre_speed.disabled         = false;
+    document.control_form.incre_speed.disabled         = false;
+    document.control_form.decre_delT.disabled          = false;
+    document.control_form.incre_delT.disabled          = false;
 }
 
-//===> load all the images using AJAX call
-function animate_loadAllImages(){
-
-    for (var i = first_image; i <= last_image; i++){
-        if(imagesLoaded[i] != 1){
-            //theImages[i] = new Image();
-            //var lasReq = animate_makeLASRequest(theTimes[i]);
-            if(i==0){
-                lasReq = animate_makeFirstLASRequest(theTimes[i]);
-            }else{
-                lasReq = animate_makeLASRequest(theTimes[i]);
-            }
-            lasReq.setProperty('las','output_type','json');
-            var prefix = lasReq.prefix;
-            var url = prefix+escape(lasReq.getXMLText());
- 
-            var xmlhttp = new XMLHttpRequest();
-            xmlhttp.open('GET', url, true);
-            xmlhttp.onreadystatechange = function(){
-                if(xmlhttp.readyState == 4){
-                    handleLASResponse(xmlhttp.responseText,i);
-                }
-            }
-            xmlhttp.send(null);
-            //imagesLoaded[i] = 1;
-        }
-    };
+//===> disable the control buttons
+function disableButtons(){
+    document.control_form.play_mode_selection.disabled = true;
+    document.control_form.first_img_button.disabled    = true;
+    document.control_form.prev_img_button.disabled     = true;
+    document.control_form.stop_button.disabled         = true;
+    document.control_form.play_button.disabled         = true;
+    document.control_form.next_img_button.disabled     = true;
+    document.control_form.last_img_button.disabled     = true;
+    document.control_form.decre_speed.disabled         = true;
+    document.control_form.incre_speed.disabled         = true;
+    document.control_form.decre_delT.disabled          = true;
+    document.control_form.incre_delT.disabled          = true;
 }
 
-//===> load next images from startImg to endImg  using AJAX call
+//===> load next images from startImg to endImg using AJAX call
 function animate_loadNextImages(startImg, endImg){
 
      //make sure the index is less than the last_image
     if(startImg >= last_image){
         startImg = last_image;
-    };
+    }
 
     if(endImg >= last_image){
         endImg = last_image;
-    };
+    }
 
     for (var i = startImg; i <= endImg; i++){
         if(imagesLoaded[i] != 1){
@@ -199,6 +168,7 @@ function animate_loadNextImages(startImg, endImg){
     };
 }
 
+//===> precess the LASResponse
 function handleLASResponse(LASResponseText, i){
 
     //parse the LASResponse
@@ -223,15 +193,15 @@ function handleLASResponse(LASResponseText, i){
         debugURL = Response.getDebugURL();
     }else{
         var imgURL = Response.getImageURL();
-        //alert('image URL: '+imgURL);
         theImages[i] = new Image();
         theImages[i].src =  imgURL;
-        //alert('src:'+theImages[i].src);
         imagesLoaded[i] = 1;
+        document.control_form.frame_nr.value=i+1;
+        document.ani_form.loading_nr.value=i+1;
     }
 }
 
-//===> make LAS request for a frame
+//===> make LAS request for the first frame
 function animate_makeFirstLASRequest(timePoint) {
 
     //check the type of view and change view for the new request
@@ -376,7 +346,7 @@ function animate_makeFirstLASRequest(timePoint) {
     return initReq;
 }
 
-//===> make LAS request for frames starting from 2nd frame
+//===> make LAS request for frames starting from 2nd frame;
 function animate_makeLASRequest(timePoint) {
     initReq.setRange('t',timePoint);
     return initReq;
@@ -391,7 +361,9 @@ function animate_makeLASRequest(timePoint) {
 //===> displays image depending on the play mode in forward direction
 function animate_fwd() 
 {
-    current_image++;
+    //current_image++;
+    current_image = current_image + delT;
+
     if(current_image > last_image)
     { 
         if (play_mode == 0) 
@@ -402,7 +374,8 @@ function animate_fwd()
         };                           //NORMAL
         if (play_mode == 1) 
         {
-            current_image = first_image; //LOOP
+            //current_image = first_image; //LOOP
+            current_image = current_image%(last_image+1);
         };
     };                             
 
@@ -424,16 +397,28 @@ function change_speed(dv)
     document.control_form.speed_nr.value = speed;
 }
 
+//===> changes time step by decreasing or increasing by 1
+function change_delT(dv)
+{
+    if(dv == 1 ) delT++;
+    if(dv == -1) delT--;
+    
+    if(delT<1) delT=1;
+    if(delT>=last_image) delT=last_image;
+
+    document.control_form.delT_nr.value = delT;
+}
+
 //===> stop the animation
 function stop() 
 {
-    if(!isLoading()){
+    if(loading == 0){
         if (status == 1) clearTimeout(timeID);
         status = 0;
     }
 }
 
-//===> "play forward"
+//===> play forward
 function fwd() 
 {
     stop();
@@ -448,25 +433,14 @@ function go2next(number)
     if (number < first_image) number = first_image;
     current_image = number;
     document.animation.src = theImages[current_image].src;
-    document.control_form.frame_nr.value = current_image;
+    //document.control_form.frame_nr.value = current_image+1;
 }
 
-//===>check if it's still loading
-function isLoading(){
-    var loading = 0;
-    for (var i = first_image; i <= last_image; i++){
-        if(firstTimeLoad[i]==1){
-            loading = 1;
-        }
-    }
-    return (loading==1);
-}
-
-//===> jumps to a given image number
+//===> jumps to a image with the given number
 function go2image(number)
 {
-    //only when it's not loading, jump to a given image
-    if(!isLoading()){
+    //only when it's not loading, jump to the image
+    if(loading == 0){
         stop();
         if (number > last_image) number = last_image;
         if (number < first_image) number = first_image;
@@ -485,6 +459,8 @@ function change_mode(mode)
 //===> sets everything once the whole page and the images are loaded (onLoad handler in <body>)
 function launch() 
 {
+   disableButtons();
+
    if(hasT == 1){
        //load the first image
        animate_loadNextImages(0,0);
@@ -497,10 +473,10 @@ function launch()
            current_image = first_image;
 
            document.animation.src = theImages[current_image].src;
-           document.control_form.frame_nr.value = current_image+1;
+           //document.control_form.frame_nr.value = current_image+1;
            change_mode (document.control_form.play_mode_selection.selectedIndex);
 
-       //get error in making LAS request
+       //got error in making LAS request
        }else{
        
            var node = document.getElementById("lasResponse");
@@ -539,18 +515,43 @@ function launch()
    }
 }
 
+//===> find the index of the last loaded image
+function getLastImgIndex(){
+    for(i=0;i<last_image;i++){
+        if(imagesLoaded[i] == 0){
+            break;
+        }
+    }
+    return i-1;
+}
+
+//halt loading LAS plots and animate the loaded plots
+function haltLoading(){
+    loading = 0;
+    last_image = getLastImgIndex();
+    document.ani_form.halt_loading.disabled=true;
+    enableButtons();
+    animate_fwd();
+}
+
 //===> writes the interface into the code where you want it
 function animation()
 {
     //interface for animation
     if(hasT==1){
-        document.write("<CENTER><FONT size=+3><b>LAS Animation</b></FONT><br>");
+        document.write("<fieldset style=\"border:2px solid grey;\">");
+        document.write("<legend><FONT size=+3><b>LAS Animation</b></FONT></legend>");
+        document.write("<form name=\"ani_form\" >");
+        document.write("  <input type=\"button\" name=\"halt_loading\" value=\"Stop Download\" size=\"6\" onClick=\"haltLoading()\">");
+        document.write("  Downloading <input type=\"text\" name=\"loading_nr\" value=\"0\" size=\"3\"> frames");
+        document.write("</form>");
+        document.write("</fieldset>");
 
-        document.write("<br>");
+        document.write("<br><center>");
         document.write("<table style=\"border:10px groove #3366FF;\">");
         document.write("  <tr>");
         document.write("    <td ID=\"lasResponse\">");
-        document.write("      <IMG NAME=\"animation\"  onLoad=\"animate_loadNextImage(current_image)\" SRC=",theImages[0],"\" ALT=\"LAS Error\">");
+        document.write("      <IMG NAME=\"animation\"  onLoad=\"animate_loadNextImage(current_image)\" SRC=",theImages[0],"\" ALT=\"LAS Plot\">");
         document.write("    </td>");
         document.write("  </tr>");
         document.write("</table>");
@@ -562,17 +563,22 @@ function animation()
         document.write("    <OPTION SELECTED VALUE=1>loop ");
         document.write("  </SELECT> ");
         document.write("    &nbsp; &nbsp; &nbsp; ");
-        document.write("  <INPUT TYPE=\"button\" Value=\" |< \" onClick=\"go2image(first_image)\"> ");
-        document.write("  <INPUT TYPE=\"button\" Value=\" -1 \" onClick=\"go2image(--current_image)\"> ");
-        document.write("  <INPUT TYPE=\"button\" Value=\" || \" STYLE=\"size:25; color:white; background-color:red; \" onClick=\"stop()\"> ");
-        document.write("  <INPUT TYPE=\"button\" Value=\" > \"  STYLE=\"color:white; background-color:green; \" onClick=\"fwd()\"> ");
-        document.write("  <INPUT TYPE=\"button\" Value=\" +1 \" onClick=\"go2image(++current_image)\"> ");
-        document.write("  <INPUT TYPE=\"button\" Value=\" >| \" onClick=\"go2image(last_image)\"> ");
+        document.write("  <INPUT TYPE=\"button\" name=\"first_img_button\" Value=\" |< \" onClick=\"go2image(first_image)\"> ");
+        document.write("  <INPUT TYPE=\"button\" name=\"prev_img_button\" Value=\" -1 \" onClick=\"go2image(--current_image)\"> ");
+        document.write("  <INPUT  TYPE=\"button\" name=\"stop_button\" Value=\" || \" STYLE=\"size:25; color:white; background-color:red; \" onClick=\"stop()\"> ");
+        document.write("  <INPUT TYPE=\"button\" name=\"play_button\" Value=\" > \"  STYLE=\"color:white; background-color:green; \" onClick=\"fwd()\"> ");
+        document.write("  <INPUT TYPE=\"button\" name=\"next_img_button\" Value=\" +1 \" onClick=\"go2image(++current_image)\"> ");
+        document.write("  <INPUT TYPE=\"button\" name=\"last_img_button\" Value=\" >| \" onClick=\"go2image(last_image)\"> ");
         document.write("  <INPUT TYPE=\"text\" NAME=\"frame_nr\" VALUE=\"1\" SIZE=\"5\" ");
         document.write("     onFocus=\"this.select()\" onChange=\"go2image(this.value)\"> ");
-        document.write("  &nbsp; &nbsp; Speed <INPUT TYPE=\"button\" Value=\" - \" onClick=\"change_speed(-1)\"> ");
+        document.write(" <p>");
+        document.write("  Speed <INPUT name=\"decre_speed\" TYPE=\"button\" Value=\" - \" onClick=\"change_speed(-1)\"> ");
         document.write("  <INPUT TYPE=\"text\" NAME=\"speed_nr\" VALUE=\"8\" SIZE=\"4\"> ");
-        document.write("  <INPUT TYPE=\"button\" Value=\" + \" onClick=\"change_speed(1)\"> ");
+        document.write("  <INPUT TYPE=\"button\" name=\"incre_speed\" Value=\" + \" onClick=\"change_speed(1)\"> ");
+        document.write("&nbsp; &nbsp;");
+        document.write(" Time Step <INPUT name=\"decre_delT\" TYPE=\"button\" Value=\" - \" onClick=\"change_delT(-1)\"> ");
+        document.write("  <INPUT TYPE=\"text\" NAME=\"delT_nr\" VALUE=\"1\" SIZE=\"4\"> ");
+        document.write("  <INPUT TYPE=\"button\" name=\"incre_delT\" Value=\" + \" onClick=\"change_delT(1)\"> ");
         document.write("</FORM> ");
         //document.write("</P> ");
 
