@@ -565,10 +565,11 @@ function animation()
         document.write("    &nbsp; &nbsp; &nbsp; ");
         document.write("  <INPUT TYPE=\"button\" name=\"first_img_button\" Value=\" |< \" onClick=\"go2image(first_image)\"> ");
         document.write("  <INPUT TYPE=\"button\" name=\"prev_img_button\" Value=\" -1 \" onClick=\"go2image(--current_image)\"> ");
-        document.write("  <INPUT  TYPE=\"button\" name=\"stop_button\" Value=\" || \" STYLE=\"size:25; color:white; background-color:red; \" onClick=\"stop()\"> ");
-        document.write("  <INPUT TYPE=\"button\" name=\"play_button\" Value=\" > \"  STYLE=\"color:white; background-color:green; \" onClick=\"fwd()\"> ");
+        document.write("  <INPUT  TYPE=\"button\" name=\"stop_button\" Value=\" STOP \" STYLE=\"size:25; color:white; background-color:red; \" onClick=\"stop()\"> ");
+        document.write("  <INPUT TYPE=\"button\" name=\"play_button\" Value=\" PLAY \"  STYLE=\"color:white; background-color:green; \" onClick=\"fwd()\"> ");
         document.write("  <INPUT TYPE=\"button\" name=\"next_img_button\" Value=\" +1 \" onClick=\"go2image(++current_image)\"> ");
         document.write("  <INPUT TYPE=\"button\" name=\"last_img_button\" Value=\" >| \" onClick=\"go2image(last_image)\"> ");
+        document.write("    &nbsp; &nbsp; &nbsp; ");
         document.write("  <INPUT TYPE=\"text\" NAME=\"frame_nr\" VALUE=\"1\" SIZE=\"5\" ");
         document.write("     onFocus=\"this.select()\" onChange=\"go2image(this.value)\"> ");
         document.write(" <p>");
