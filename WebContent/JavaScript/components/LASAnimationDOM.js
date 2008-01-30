@@ -41,15 +41,39 @@ function LASAni_getFrames() {
 
     theTimes = new Array();
     for (var i = 0; i < frameElements.length; i++){
-        //if((unitsNode.getText() == "months")&&(resolutionNode.getText() == "months")){
-        //append day(dd) in front of a date string, e.g., JAN-1997
-        if(unitsNode.getText() == "months"){
-            theTimes[i]= "15-"+frameElements[i].getText();
-        }else if(unitsNode.getText() == "years"){
-            theTimes[i]= "15-DEC"+frameElements[i].getText();
+        //if date string is MMM-YYYY or YYYY, pre-append dd or dd-MMM
+        var fdate = frameElements[i].getText();
+        //var fdate = "JAN-1997 00:00:00";
+        var patt1 = /^\w\w\w-\d\d\d\d/; //for date starts with "MMM-YYYY"
+        var patt2 = /\s(\w\w\w-\d\d\d\d)(\s*\d*\d*\W*\d*\d*\W*\d*\d*)/; //for date starts with "   MMM-YYYY"
+        var patt3 = /^\d\d\d\d/; //for date starts with "YYYY"
+        var patt4 = /\s(\d\d\d\d)(\s*\d*\d*\W*\d*\d*\W*\d*\d*)/; //for date starts with "       YYYY"
+
+        var r1 = fdate.match(patt1);
+        var r2 = fdate.match(patt2);
+        var r3 = fdate.match(patt3);
+        var r4 = fdate.match(patt4);
+
+        if(r1){
+            theTimes[i]= "15-"+ fdate;
+        }else if(r2){
+            theTimes[i]= "15-"+r[1]+r[2];
+        }else if(r3){
+            theTimes[i]= "15-DEC"+ fdate;
+        }else if(r4){
+            theTimes[i]= "15-DEC"+r[1]+r[2];
         }else{
             theTimes[i]=frameElements[i].getText();
-        } 
+        }
+        
+        //append day(dd) in front of a date string, e.g., JAN-1997
+        //if(unitsNode.getText() == "months"){
+        //    theTimes[i]= "15-"+frameElements[i].getText();
+        //}else if(unitsNode.getText() == "years"){
+        //    theTimes[i]= "15-DEC"+frameElements[i].getText();
+        //}else{
+        //    theTimes[i]=frameElements[i].getText();
+        //} 
     };
     return theTimes;
 }
