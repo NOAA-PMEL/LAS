@@ -123,6 +123,16 @@ the current variable; you must have at least one &lt;b&gt;$&lt;/b&gt; in your ex
     </option>
   </optiondef>
 
+<! -- animation time step i.e., delta T-->
+<optiondef name="time_step">
+    <option>
+    <help>Set the time step for animation. It is between 1 and the number of frames being selected.
+    </help>
+      <title>Time Step</title>
+      <textfield name="time_step"/>
+    </option>
+  </optiondef>
+
 <!--  Generic image options -->
 
   <optiondef name="size">
@@ -639,7 +649,7 @@ i.e. 48 - start time: 24 hours before selected timestep
   <optiondef name="Options_2D_image_contour_xy" inherit="#Options_2D_image_contour,#set_aspect,#land_type"/>
 
   <!-- 2-dimensional plots for animation (no image format and reference map)-->
-  <optiondef name="Options_2D_animation" inherit="#expression,#interpolate_data,#size,#use_graticules,#margins,#deg_min_sec,#palette"/>
+  <optiondef name="Options_2D_animation" inherit="#expression,#interpolate_data,#size,#use_graticules,#margins,#deg_min_sec,#palette,#time_step"/>
   <optiondef name="Options_2D_image_contour_animation" inherit="#Options_2D_animation,#contour_style,#fill_levels,#contour_levels,#mark_grid"/>
   <optiondef name="Options_2D_image_contour_animation_xy" inherit="#Options_2D_image_contour_animation,#set_aspect,#land_type"/>
 
