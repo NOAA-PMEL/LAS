@@ -78,10 +78,12 @@ LASUI.prototype.initUI = function (anchorId)
 	if(this.params.dsid) {
 		this.state.dataset = this.params.dsid;
 		this.state.categories = this.params.categories;
-	        this.state.variables[this.params.dsid] = this.params.varid;
+	        this.state.variables[this.params.dsid] = [];
+		this.state.variables[this.params.dsid][0]=this.params.varid;
 		this.state.operation = this.params.plot;
 		this.state.view = this.params.view;
-		this.autoupdate = this.params.autoupdate;	
+		this.autoupdate = this.params.autoupdate;
+			
 	}	
 	if(this.autoupdate)
 		this.submitOnLoad = true;
@@ -315,8 +317,9 @@ LASUI.prototype.createCategoryTreeNode = function (node, i, id) {
 		node.ULNode.appendChild(node.children[i].LINode);		
 	if(node.category.getChildType(i)=='dataset' && node.category.getChildID(i)==this.state.dataset) 
 		this.getCategory(node, i);		
+
 	if(this.refs.categories[node.category.getChild(i).ID])
-		this.selectCategory().bindAsEvetListener(this,node,i);
+		this.selectCategory().LASBind(this,node,i);
 }
 /**
  * Sub method to create variable tree node and add it to the DOM
@@ -401,15 +404,16 @@ LASUI.prototype.getCategory = function (parentNode, i) {
 		req.send(null);
 
 	} 
-	if(parentNode.children[i].ULNode.style.display=="none") {
+/*	if(parentNode.children[i].ULNode.style.display=="none") {
 		for(var c=0;c< parentNode.children.length;c++)
 			parentNode.children[c].ULNode.style.display="none";
 		parentNode.children[i].ULNode.style.display="";	//expand the category if it has been selected 
 		if(parentNode.children[i].category) //if the category is a dataset set it as the selected dataset
-			if(parentNode.children[i].category.getCategoryType()=="dataset"){
+			if(parentNode.children[i].category.getCategoryType()=="dataset")
+			{
 					this.setDataset(parentNode.category.getChildID(i));
 			}
-	} //else
+	} //else*/
 		//parentNode.children[i].ULNode.style.display="none";
 }
 /**
