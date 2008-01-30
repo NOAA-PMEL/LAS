@@ -45,48 +45,52 @@
 				}*/
 			};
 			LAS.params = {
-#if ($las_request.getProperty('ui','state')!="")
-				'state' : $las_request.getProperty('ui','state'),
+#if ($request.getParameter('state')!="")
+				'state' : $request.getParameter('state'),
 #end
 
-#if ($las_request.getProperty('ui','catid')!="")
-				'catid' :$las_request.getProperty('ui','catid'),
+#if ($request.getParameter('catid')!="")
+				'catid' :$request.getParameter('catid'),
 #else
 				'catid' : {},
 #end
-				'dsid' : "$las_request.getProperty('ui','dsid')",
-#if  ($las_request.getProperty('ui','varid')!="")
-				'varid' : $las_request.getProperty('ui','varid'),
+#if  ($request.getParameter("dsid")!="")
+				'dsid' : '$request.getParameter("dsid")',
+#else
+				'dsid' : '',
+#end
+#if  ($request.getParameter("varid")!="")
+				'varid' : '$request.getParameter("varid")',
 #else
 				'varid' : [],
 #end
-				'view' : "$las_request.getProperty('ui','view')",
-				'plot' : "$las_request.getProperty('ui','plot')",
-#if ($las_request.getProperty('ui','x')!="")
-				'x' : $las_request.getProperty('ui','x'),		
+				'view' : "$request.getParameter('view')",
+				'plot' : "$request.getParameter('plot')",
+#if ($request.getParameter('x')!="")
+				'x' : $request.getParameter('x'),		
 #end
-#if ($las_request.getProperty('ui','y')!="")
-				'y' : $las_request.getProperty('ui','y'),		
+#if ($request.getParameter('y')!="")
+				'y' : $request.getParameter('y'),		
 #end
-#if ($las_request.getProperty('ui','viewx')!="")
-				'viewx' : $las_request.getProperty('ui','viewx'),		
+#if ($request.getParameter('viewx')!="")
+				'viewx' : $request.getParameter('viewx'),		
 #end
-#if ($las_request.getProperty('ui','y')!="")
-				'viewy' : $las_request.getProperty('ui','viewy'),		
+#if ($request.getParameter('y')!="")
+				'viewy' : $request.getParameter('viewy'),		
 #end
-#if ($las_request.getProperty('ui','z')!="")
-				'z' : $las_request.getProperty('ui','z'),		
+#if ($request.getParameter('z')!="")
+				'z' : $request.getParameter('z'),		
 #end
-#if ($las_request.getProperty('ui','t')!="")
-				't' : $las_request.getProperty('ui','t'),		
+#if ($request.getParameter('t')!="")
+				't' : $request.getParameter('t'),		
 #end
-#if ($las_request.getProperty('ui','autoupdate')!="")
-				'autoupdate' : $las_request.getProperty('ui','autoupdate'),		
+#if ($request.getParameter('auto')!="")
+				'autoupdate' : $request.getParameter('auto'),		
 #else
 				'autoupdate' : false,	
 #end
-#if ($las_request.getProperty('ui','options')!="")
-				'options' : $las_request.getProperty('ui','options')
+#if ($request.getParameter('options')!="")
+				'options' : $request.getParameter('options')
 #else
 				'options' :{}				
 #end
@@ -115,10 +119,12 @@
 		<div style="display:none" class="LASPopupDIVNode" id="categories"></div>
 		<div style="display:none" class="LASPopupDIVNode" id="plotOptions"></div>
 		<span>
+		#if ($request.getParameter('dstree')!="hide")
 			<INPUT class="LASProductButton" width="100%" value="Choose dataset & variable" type="button" onclick="if(document.getElementById('categories').style.display=='none'){document.getElementById('categories').style.display='';LAS.toggleUIMask('')} else {document.getElementById('categories').style.display='none'; LAS.toggleUIMask('none');}">
+		#end	
 			<INPUT class="LASProductButton" width="100%" value="Choose comparison variable" type="button" onclick="if(document.getElementById('comparison').style.display=='none'){document.getElementById('categories').style.display='';LAS.toggleUIMask('')} else {document.getElementById('categories').style.display='none'; LAS.toggleUIMask('none');}">
 			<INPUT class="LASProductButton" width="100%" value="Set plot options" type="button" onclick="LAS.toggleUIMask('');document.getElementById('plotOptions').style.display='';">
-			<span  class="LASProductButton" style="font-size:0.9em;cursor:default;padding:4px;border-bottom:1pt solid grey;border-right:1pt solid grey;border-top:1pt solid #F8F8FF;border-left:1pt solid #F8F8FF;" id="update" onclick="LAS.makeRequest();">Update Plot <INPUT type="checkbox" style="position:relative;top:2px;" onmousemove="window.status='Check to automatically update the plot.';" onmouseout="window.status='';" onclick="LAS.autoupdate=this.checked;if(LAS.autoupdate)LAS.makeRequest();"></span>
+			<span  class="LASProductButton" style="font-size:0.9em;cursor:default;padding:4px;border-bottom:1pt solid grey;border-right:1pt solid grey;border-top:1pt solid #F8F8FF;border-left:1pt solid #F8F8FF;" id="update" onclick="LAS.makeRequest();">Update Plot <INPUT type="checkbox" #if($request.getParameter('auto')=='true') checked #end style="position:relative;top:2px;" onmousemove="window.status='Check to automatically update the plot.';" onmouseout="window.status='';" onclick="LAS.autoupdate=this.checked;if(LAS.autoupdate)LAS.makeRequest();"></span>
 		</span>
 		<span id="productButtons">
 			<INPUT class="LASProductButton" width="100%" disabled="true" ID="Animation" value="Animate" type="button">
@@ -142,7 +148,7 @@
 					<td width="150px" class="LASPlotTypeContainer" align="left" valign="center">
 						<div id="plotType"></div>
 					</td>
-					<td class="LASAnalysisContainer">
+					<td class="LASAnalysisContainer" style="display:none">
 						<div id="Analysis">
 							<strong>Variable Analysis</strong>
 							<table>
