@@ -39,7 +39,7 @@ var timeID;                         // ID for timeOut
 var status;                         // 0-stopped, 1-playing
 var play_mode;                      // 0-play once, 1-loop 
 var loading;                        // 0-not loading, 1-loading
-
+var start_image;                    // image number when delT was changed
 var delT;                           // time inetrval
 
 if(hasT == 1){
@@ -73,6 +73,7 @@ function animate_init(){
     status        = 0;        
     play_mode     = 1;    
     loading       = 1;
+    start_image   = 0;
 
     //make sure the first image number is not bigger than the last image number
     if (first_image > last_image) 
@@ -375,7 +376,8 @@ function animate_fwd()
         if (play_mode == 1) 
         {
             //current_image = first_image; //LOOP
-            current_image = current_image%(last_image+1);
+            //current_image = current_image%(last_image+1);
+            current_image = compute_first();
         };
     };                             
 
@@ -407,6 +409,19 @@ function change_delT(dv)
     if(delT>=last_image) delT=last_image;
 
     document.control_form.delT_nr.value = delT;
+    start_image = current_image;
+}
+
+//===> compute first image
+function compute_first(){
+    if(delT == 1){
+        return 0;
+    }else{
+        while(start_image>=0){
+            start_image = start_image - delT;
+        }
+        return start_image+delT;
+    }
 }
 
 //===> stop the animation
@@ -447,6 +462,7 @@ function go2image(number)
         current_image = number;
         document.animation.src = theImages[current_image].src;
         document.control_form.frame_nr.value = current_image+1;
+        start_image = current_image;
     }
 }
 
