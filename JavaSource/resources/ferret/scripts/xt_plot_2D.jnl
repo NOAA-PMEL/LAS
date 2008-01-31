@@ -109,6 +109,18 @@ DEFINE SYMBOL plot_type =($ferret_contour_style"FILL|default>FILL|raster>SHADE|c
 DEFINE SYMBOL shade_underlay = FALSE
 IF ($plot_type"0|FILL>1|*>0) THEN DEFINE SYMBOL shade_underlay = TRUE
 
+! When doing the FILL over SHADE, the plot around the edges shows wierd effects - the shade
+! showing but the fill stops short.  Use /HLIM and /VLIM to get the exact region requested,
+! and request the plot variable for the SHADE command on a +1 cell size larger region.
+
+   LET fill_var = ($ferret_plot_var_noregion)
+   DEFINE SYMBOL qualifiers = ($qualifiers)/HLIM=($limits_x)
+   DEFINE SYMBOL qualifiers = ($qualifiers)/VLIM=`t[gt=fill_var,t="($region_t_lo)"]`:`t[gt=fill_var,t="($region_t_hi)"]`
+   DEFINE SYMBOL ferret_var_0 = fill_var
+   IF ($region_y"0|*>1") THEN DEFINE SYMBOL ferret_var_0 = fill_var[($region_x_plus),($region_t_plus),($region_y)]
+   IF ($region_z"0|*>1") THEN DEFINE SYMBOL ferret_var_0 = fill_var[($region_x_plus),($region_t_plus),($region_z)]
+   IF ($region_yz"0|*>1") THEN DEFINE SYMBOL ferret_var_0 = fill_var[($region_x_plus),($region_t_plus),($region_yz)]
+
 ! Set the URL label for the first dataset.
 GO LAS_url_label 0
 
