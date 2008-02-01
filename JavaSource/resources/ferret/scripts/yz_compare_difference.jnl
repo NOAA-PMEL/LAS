@@ -26,6 +26,9 @@ DEFINE SYMBOL fview = `UPCASE("($ferret_view)")`
 ! initialization needed for this dataset.
 !
 GO LAS_initialize_region 0
+IF ($region_x"0|*>1") THEN DEFINE SYMBOL region_0_x = ($region_x)
+IF ($region_t"0|*>1") THEN DEFINE SYMBOL region_0_t = ($region_t)
+IF ($region_xt"0|*>1") THEN DEFINE SYMBOL region_0_xt = ($region_xt)
 GO LAS_initialize_data 0
 
 ! Check for errors (They often occur during dataset initialization.)
@@ -47,6 +50,7 @@ ENDIF
 ! Here is variable 0 and its title
 
 DEFINE SYMBOL ferret_var_0 = ($ferret_plot_var)
+LET ferret_var_0_noregion = ($ferret_plot_var_noregion)
 DEFINE SYMBOL ferret_title_0 = ($ferret_plot_title"($data_var)")
 
 ! Initialize next dataset. 
@@ -63,6 +67,10 @@ ENDIF
 CANCEL SYMBOL ferret_expression 
 
 GO LAS_initialize_region 1
+IF ($region_x"0|*>1") THEN DEFINE SYMBOL region_1_x = ($region_x)
+IF ($region_t"0|*>1") THEN DEFINE SYMBOL region_1_t = ($region_t)
+IF ($region_xt"0|*>1") THEN DEFINE SYMBOL region_1_xt = ($region_xt)
+GO LAS_initialize_data 0
 GO LAS_initialize_data  1 
 
 ! Check for errors 
@@ -75,6 +83,7 @@ ENDIF
 ! Here is variable 1 and its title
 
 DEFINE SYMBOL ferret_var_1 = ($ferret_plot_var)
+LET ferret_var_1_noregion = ($ferret_plot_var_noregion)
 DEFINE SYMBOL ferret_title_1 = ($ferret_plot_title"($data_var)")
 
 ! Compare the Y and Z axes of the two variables. They must be the same.
@@ -137,21 +146,64 @@ DEFINE SYMBOL qualifiers = ($qualifiers)/PALETTE=($ferret_palette"rainbow|defaul
 
 DEFINE SYMBOL plot_type =($ferret_contour_style"FILL|default>FILL|raster>SHADE|color_filled_contours>FILL|color_filled_plus_lines>FILL|contour_lines>CONTOUR|raster_plus_lines>SHADE")
 
+! For all FILL plots, we will first do a SHADE underlay to get the plot to 
+! draw all the way to the edges.
+
+DEFINE SYMBOL shade_underlay = FALSE
+        IF ($plot_type"0|FILL>1|*>0) THEN DEFINE SYMBOL shade_underlay = TRUE
+
+! When doing the FILL over SHADE, the plot around the edges shows wierd effects - the shade
+! showing but the fill stops short.  Use /HLIM and /VLIM to get the exact region requested,
+! and request the plot variable for the SHADE command on a +1 cell size larger region.
+
+LET ferret_diff_var = ($ferret_var_0) - ($ferret_var_1)
+DEFINE SYMBOL qualifiers = ($qualifiers)/HLIM=($limits_y)
+DEFINE SYMBOL qualifiers = ($qualifiers)/VLIM=($limits_z)
+IF ($region_x"0|*>1") THEN DEFINE SYMBOL ferret_diff_var = \
+       ferret_var_0_noregion[($region_y_plus),($region_z_plus),($region_0_x)] - \
+       ferret_var_1_noregion[($region_y_plus),($region_z_plus),($region_1_x)]
+IF ($region_t"0|*>1") THEN DEFINE SYMBOL ferret_diff_var = \
+      ferret_var_0_noregion[($region_y_plus),($region_z_plus),($region_0_t)] - \
+      ferret_var_1_noregion[($region_y_plus),($region_z_plus),($region_1_t)]
+IF ($region_xt"0|*>1") THEN DEFINE SYMBOL ferret_diff_var = \
+      ferret_var_0_noregion[($region_y_plus),($region_z_plus),($region_0_xt)] - \
+      ferret_var_1_noregion[($region_y_plus),($region_z_plus),($region_1_xt)] 
+
 ! Set up for degrees-minutes-seconds labels on independent variable axis
 ! If this was not requested, the script just returns.
 
 IF ($ferret_deg_min_sec"0|false>0|*>1") THEN GO LAS_set_deg_min_sec.jnl
 
-($plot_type)($qualifiers)/TITLE="($ferret_diff_title)"/SET ($ferret_diff_var)
-  IF ($xform_dms"0|*>1") THEN PPL XFOR (($xform_dms))
-  IF ($yform_dms"0|*>1") THEN PPL YFOR (($yform_dms))
-  IF `($labnum_x%0|*>1%)` THEN GO unlabel ($labnum_x)
-  IF `($labnum_t%0|*>1%)` THEN GO unlabel ($labnum_t)
-  IF `($title_size%0|*>1%)` THEN PPL LABSET ($title_size)
-  IF `($labnum_dset%0|*>1%)` THEN GO unlabel ($labnum_dset)
-  IF `($labnum_datitl%0|*>1%)` THEN GO unlabel ($labnum_datitl)
-  IF `($labnum_dods%0|*>1%)` THEN GO unlabel ($labnum_dods)
-PPL ($plot_type)
+! Draw the plot
+IF ($shade_underlay) THEN 
+   SHADE($qualifiers)/TITLE="($ferret_plot_title)"/SET ($ferret_diff_var)
+      IF ($xform_dms"0|*>1") THEN PPL XFOR (($xform_dms))
+      IF ($yform_dms"0|*>1") THEN PPL YFOR (($yform_dms))
+      IF ($axlab_command"0|*>1") THEN PPL ($axlab_command)
+      IF ($tnmlab_command"0|*>1") THEN PPL ($tnmlab_command)  
+      IF ($axtic_command"0|*>1") THEN PPL ($axtic_command)
+      IF ($axlen_command"0|*>1") THEN PPL ($axlen_command)
+      IF ($axtype_command"0|*>1") THEN PPL ($axtype_command)
+      if ($labnum_dset"0|*>1") THEN go unlabel ($labnum_dset)
+      if ($labnum_datitl"0|*>1") THEN go unlabel ($labnum_datitl)
+      if ($labnum_dods"0|*>1") THEN go unlabel ($labnum_dods)
+   PPL SHADE
+   IF `($LEV_NUM"0") GT 245/2` THEN PPL SHASET RESET
+   ($plot_type)($qualifiers)/OVER/NOLAB ($ferret_diff_var)
+ELSE
+   ($plot_type)($qualifiers)/TITLE="($ferret_plot_title)"/SET ($ferret_diff_var)
+      IF ($xform_dms"0|*>1") THEN PPL XFOR (($xform_dms))
+      IF ($yform_dms"0|*>1") THEN PPL YFOR (($yform_dms))
+      IF ($axlab_command"0|*>1") THEN PPL ($axlab_command)
+      IF ($tnmlab_command"0|*>1") THEN PPL ($tnmlab_command)  
+      IF ($axtic_command"0|*>1") THEN PPL ($axtic_command)
+      IF ($axlen_command"0|*>1") THEN PPL ($axlen_command)
+      IF ($axtype_command"0|*>1") THEN PPL ($axtype_command)
+      if ($labnum_dset"0|*>1") THEN go unlabel ($labnum_dset)
+      if ($labnum_datitl"0|*>1") THEN go unlabel ($labnum_datitl)
+      if ($labnum_dods"0|*>1") THEN go unlabel ($labnum_dods)
+   PPL ($plot_type)
+ENDIF
 
 LABEL/NOUSER `($ppl$xlen)/2`, `($ppl$ylen)+1.2`, 0, 0, 0.12, "LAS 7.+/Ferret ($FERRET_VERSION)     NOAA/PMEL"
 
