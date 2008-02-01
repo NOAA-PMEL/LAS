@@ -1,0 +1,71 @@
+! For 2D plots, we use FILL overlaid on a SHADE.  To get the 
+! best appearance from this, use /HLIM and /VLIM for the exact
+! region, and for the FILL use a region as one grid-cell larger than
+! requested so we fill to the outer borders of the plot.
+
+! Compute that region+1 grid cell
+
+
+! First dimension
+DEFINE SYMBOL dim = `SUBSTRING("($varshape)", 1, 1)`
+
+DEFINE SYMBOL  Pseudo_coord = XYZT
+DEFINE SYMBOL  Pseudo_index = IJKL
+LET idim = STRINDEX("($pseudo_coord)", "($dim)")
+DEFINE SYMBOL indx = `SUBSTRING ("($pseudo_index)", idim, 1)`
+
+LET ilo = ($indx)[g($dim)=ferretvar,($dim)="($region_($dim)_lo)"]
+LET ihi = ($indx)[g($dim)=ferretvar,($dim)="($region_($dim)_hi)"]
+
+LET is_mod = 0
+IF `STRINDEX ("($dim)", "X") GT 0 OR STRINDEX ("($dim)", "T") GT 0` THEN
+   DEFINE SYMBOL modax = "`($data_var), RETURN=($dim)mod`"
+   IF `STRCMP(($modax), " ") NE 0` THEN LET is_mod = 1
+ENDIF
+
+LET ilo = `ilo - 1`
+LET ihi = `ihi + 1`
+
+LET axsiz = `($data_var),RETURN=($indx)size`
+IF `is_mod EQ 0` THEN 
+   LET ilo = `MAX(1,ilo)`
+   LET ihi = `MIN(axsiz,ihi)`
+ENDIF
+
+LET alo = ($dim)[g($dim)=ferretvar,($indx)=`ilo`]
+LET ahi = ($dim)[g($dim)=ferretvar,($indx)=`ihi`]
+
+DEFINE SYMBOL region_($dim)_plus = ($dim)=`alo`:`ahi`
+
+! Second dimension
+DEFINE SYMBOL dim = `SUBSTRING("($varshape)", 2, 1)`
+DEFINE SYMBOL  Pseudo_coord = XYZT
+DEFINE SYMBOL  Pseudo_index = IJKL
+LET idim = STRINDEX("($pseudo_coord)", "($dim)")
+DEFINE SYMBOL indx = `SUBSTRING ("($pseudo_index)", idim, 1)`
+
+LET ilo = ($indx)[g($dim)=ferretvar,($dim)="($region_($dim)_lo)"]
+LET ihi = ($indx)[g($dim)=ferretvar,($dim)="($region_($dim)_hi)"]
+
+LET is_mod = 0
+IF `STRINDEX ("($dim)", "X") GT 0 OR STRINDEX ("($dim)", "T") GT 0` THEN
+   DEFINE SYMBOL modax = "`($data_var), RETURN=($dim)mod`"
+   IF `STRCMP(($modax), " ") NE 0` THEN LET is_mod = 1
+ENDIF
+
+LET ilo = `ilo - 1`
+LET ihi = `ihi + 1`
+
+LET axsiz = `($data_var),RETURN=($indx)size`
+IF `is_mod EQ 0` THEN 
+   LET ilo = `MAX(1,ilo)`
+   LET ihi = `MIN(axsiz,ihi)`
+ENDIF
+
+LET alo = ($dim)[g($dim)=ferretvar,($indx)=`ilo`]
+LET ahi = ($dim)[g($dim)=ferretvar,($indx)=`ihi`]
+
+DEFINE SYMBOL region_($dim)_plus = ($dim)=`alo`:`ahi`
+
+! --------------End of LAS_define_region_plus_1.jnl
+
