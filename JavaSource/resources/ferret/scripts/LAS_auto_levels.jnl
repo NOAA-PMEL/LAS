@@ -93,17 +93,14 @@ IF `nc EQ 0` THEN ! 8
 ENDIF ! 8
 
 ! Apply to the variable on the requested region
-IF ($ferret_plot_base_var"0|*>1") THEN 
-   LET pvar = ($ferret_plot_base_var)
-ELIF ($ferret_plot_var"0|*>1") THEN 
+
+IF ($ferret_plot_var"0|*>1") THEN 
    LET pvar = ($ferret_plot_var)
 ELSE
    EXIT/SCRIPT  ! for insitu plots may not have a plot_var
 ENDIF
 
 IF ($ferret_plot_var"0|sampled_var>1|*>0) THEN LET pvar = ($ferret_plot_var)
-
-
 
 ! IF ($do_curvi_xy_and_hybrid_z"0") THEN LET pvar = plot_var
 
@@ -152,7 +149,6 @@ ENDIF ! 9
 ! If the ferret_diff_var has been defined, use it.
 ! When no levels are defined, use centered ones.
 IF ($ferret_diff_var"0|*>1") THEN  ! 10
-
    IF `($input_contour_levels"0|0|1") EQ 0` THEN  ! 11
       CANCEL SYMBOL ferret_contour_levels
       DEFINE SYMBOL ferret_contour_levels = 20c
