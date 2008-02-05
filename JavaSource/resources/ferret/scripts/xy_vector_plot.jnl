@@ -168,12 +168,20 @@ REPEAT/range=2:`($data_count)-1`/NAME=m (  \
 )
 
 ! Overlay additional cartography data (land mask, outlines, rivers, ...)
+! For land outline, if the region is smaller than 60 degrees in x or 30 degrees in y,
+! use the more-detailed land outline script land_detail.jnl
 
 IF ($ferret_land_type"1|none>0|contour>0|filled>1|default>1|*>0") THEN
   GO LAS_fland 
 ELIF ($ferret_land_type"0|none>0|contour>1|filled>0|*>0") THEN
-  GO land 
+  IF `( ($region_x_range"360") LT 60) OR ( ($region_y_range) LT 30)` THEN
+     GO land_detail
+  ELSE
+     GO land 
+  ENDIF
 ENDIF
+
+
 
 go labels_above_plot
 
