@@ -128,14 +128,18 @@ ELSE
    IF `nn EQ n1` THEN
       DEFINE SYMBOL ferret_expand_time = 1
       IF `STRINDEX("($ferret_view)", "t") EQ 0` THEN 
-         LET S($num)_the_plot_var = ($ferret_xyz_var)
-         IF `($REGION_X_LO) LT 0` THEN
-            LET S($num)_the_plot_var =  ($data_var)[d=($data_num),($region_x_p360)]
-            IF ($region_y"0|*>1") THEN \
-              LET S($num)_the_plot_var =  ($data_var)[d=($data_num),($region_x_p360),($region_y)]
-            IF `($region_y"0|*>1") AND ($region_z"0|*>1")` THEN \
-               LET S($num)_the_plot_var = ($data_var)[d=($data_num),($region_x_p360),($region_y),($region_z)]
-         ENDIF
+
+! Dont apply xyz region; else get errors about inconsistent definitions.
+         LET S($num)_the_plot_var = ($ferret_plot_var_noregion)
+
+!         LET S($num)_the_plot_var = ($ferret_xyz_var)
+!         IF `($REGION_X_LO) LT 0` THEN
+!            LET S($num)_the_plot_var =  ($data_var)[d=($data_num),($region_x_p360)]
+!            IF ($region_y"0|*>1") THEN \
+!              LET S($num)_the_plot_var =  ($data_var)[d=($data_num),($region_x_p360),($region_y)]
+!            IF `($region_y"0|*>1") AND ($region_z"0|*>1")` THEN \
+!               LET S($num)_the_plot_var = ($data_var)[d=($data_num),($region_x_p360),($region_y),($region_z)]
+!         ENDIF
    
          LET L1 = n1 + ($loffset) - (first_month_selected-1)
          IF `first_month_selected GE ($ferret_season_center) AND first_month_selected-($ferret_season_center) LT 6` THEN LET L1 = `L1-12`
