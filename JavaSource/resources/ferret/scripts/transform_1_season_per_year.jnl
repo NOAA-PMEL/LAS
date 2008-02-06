@@ -109,7 +109,7 @@ IF `season_length EQ 1` THEN
          ENDIF
       ENDIF
       DEFINE SYMBOL ferret_plot_var S($num)_the_plot_var[L=`L1`]
-      DEFINE SYMBOL ferret_plot_var_noregion S($num)_the_plot_noregion_var[L=`L1`]
+      DEFINE SYMBOL ferret_plot_var_noregion S($num)_the_plot_var_noregion[L=`L1`]
       DEFINE SYMBOL ferret_plot_title ($ferret_plot_title) every ($mon1)
    ELSE
       LET L1 = n1 - first_month_selected
