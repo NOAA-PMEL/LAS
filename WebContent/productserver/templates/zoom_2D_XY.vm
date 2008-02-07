@@ -7,41 +7,17 @@
 <title>LAS Output -- $las_config.getTitle()</title>
 
 #set($use_ref_map=$las_request.getProperty("ferret", "use_ref_map"))
+		<style media="all" type="text/css">
+			@import "JavaScript/ui/LASUI.css";
+		</style>
 </head>
 
 <body onload="initializeLASRequest(); loadMap()">
-
-
-<table>
-  <tr>
-    <td>
-	<table>
-	  <tr>
-	    <td width="30">
-	      <div id="zoom_button" name="zoom_button">
-	      <input style="background-color:#DDDBAC;" type="button" name"zoom" value="Zoom Back" onclick="submitZoomOutXML()">
-	      </div>	
-	    </td>
-	    <td align="left">
-	      <div id="waiting" style=";filter:alpha(opacity=75);-moz-opacity:.75;opacity:.75;position:absolut" align="left"><img src="JavaScript/components/mozilla_blu.gif" /></div>
-	    </td>
-           <td>
-	      <div id="zoomInfo" name="zoomInfo">
-	      <font color="red" size="+1">Click and drag to Select a zoom region</font>
-	      </div>	
-            </td>
-	  </tr>
-       </table>
-    </td>
-  </tr>
-  <tr>
-    <td> 
-	<DIV id="img_body" name="img_body"></DIV>
-    </td>
-  </tr>
- </table>
-
-
+	<div style="height:20px;">
+	<a class="LASLink" onclick="window.open(document.location)">Open plot in a new window</a>&nbsp;			
+	<a id="zoom_button" name="zoom_button" class="LASLink" onclick="submitZoomOutXML()">Zoom back.</a>&nbsp;	<img id="waiting" src="JavaScript/components/mozilla_blu.gif">&nbsp;	 	<font id="zoomInfo" name="zoomInfo" color="red">Click and drag to zoom in.</font>
+	</div>	
+  	<div id="img_body" name="img_body"></div>
 </body>
 
 <script language="JavaScript" src="JavaScript/components/xmldom.js"></script>
@@ -67,8 +43,11 @@ var previousXRegionsHi = new Array();
 var previousYRegionsHi = new Array();
 var axisLow = "";
 var axisHi = "";
-
-
+#if($request.getParameter('opid'))
+	var opid = "$getParameter('opid')";
+#else
+	var opid = "XY_2D_zoom";
+#end
 
 
 
@@ -84,11 +63,11 @@ var axisHi = "";
 *     request -- the product server request string
 */
 function evalMyRequest (request) {
-              document.getElementById('waiting').style["display"]="block";
+              document.getElementById('waiting').style["display"]="";
               var bindArgs = {                           url: request,
                        mimetype: "text/plain",
                        preventCache:true,
-                       error: function(type,error) {alert('Yo: ' +error.type + ' ' + error.message);},
+                       error: function(type,error) {alert('Zoom Error: ' +error.type + ' ' + error.message);},
                        load: function(type,data,event) {eval2(data);}
                 };
                var request = dojo.io.bind(bindArgs);
@@ -142,16 +121,15 @@ function eval2(strJson) {
  //alert(strJson);
  document.getElementById('waiting').style["display"]="none";
  eval(strJson);
- var args = {
-                   'DOMNode' : document.getElementById('img_body'), // the container Node
-                   'onafterdraw' : function () {submitXML()},      //a function to fire after drawing
-                   'plot_area' : {                                                       // defining the plot region within the image
+                  //myMapWidget.DOMNode = document.getElementById('img_body'), // the container Node
+                  //myMapWidget.onafterdraw = function () {submitXML()},      //a function to fire after drawing
+                   myMapWidget.plot_area = {                                                       // defining the plot region within the image
                            'offX' : newImage.offX,
                            'offY' : newImage.offY,
                            'width' : newImage.width,
                            'height' : newImage.height
                    },
-                   'img' : {                                                                //the image
+                   myMapWidget.img = {                                                                //the image
                            'src' : newImage.url,
                            'width' : newImage.wholeImageWidth,
                            'height' :newImage.wholeImageHeight,
@@ -166,12 +144,14 @@ function eval2(strJson) {
                                }
                            }
                        }
-                  };
-
- myMapWidget.destroy();
-// document.getElementById('img_body').innerHTML = "";
- myMapWidget = {};
- myMapWidget = new MapWidget(args);
+			//myMapWidget.updatePixelExtents();
+ 			myMapWidget.initImage();
+			myMapWidget.extents.selection.grid = myMapWidget.img.extent;
+			myMapWidget.updatePixelExtents();
+			myMapWidget.rubberBand.style.visibility = "hidden";
+			myMapWidget.rubberBand_c.style.visibility = "hidden";
+			if (typeof onPlotLoad == 'function') 
+				onPlotLoad();
 
 /*
 * if this isn't the first plot, show the zoom out button
@@ -179,11 +159,11 @@ function eval2(strJson) {
  var zoomButton = document.getElementById('zoom_button');
  if (zoomButton) {
   if (previousXRegionsLo[0]) {
-   zoomButton.style["display"] = "block"
+   zoomButton.style["display"] = ""
    document.getElementById('zoomInfo').style["display"]="none";
   } else {
    zoomButton.style["display"] = "none"
-   document.getElementById('zoomInfo').style["display"]="block";
+   document.getElementById('zoomInfo').style["display"]="";
  }
 }
 
