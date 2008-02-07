@@ -200,10 +200,10 @@ MapWidget.prototype.initPixelExtents = function(evt) {
 		this.displayBox(true);
 		this.displayCentralBox(true);
 	}
-	if(this.enabled) {
+/*	if(this.enabled) {
 		if (this.ondraw) this.ondraw(this);	
 		if (this.onafterdraw) this.onafterdraw(this);
-	}
+	}*/
 
 }
 
@@ -1133,7 +1133,10 @@ MapWidget.prototype.stop = function (evt) {
 
 // initialize an image, or grab a default inmage from ferret
 MapWidget.prototype.initImage = function () {
-	this.plot = document.createElement("IMG");
+	if(!this.plot) {
+		this.plot = document.createElement("IMG");
+		this.DOMNode.appendChild(this.plot);
+	}	
 	if (this.img) {
 		this.plot.src = this.img.src;
 		this.plot.width = this.img.width;
@@ -1170,7 +1173,6 @@ MapWidget.prototype.initImage = function () {
 		
 	}
 	
-	this.DOMNode.appendChild(this.plot);
 	this.initPixelExtents();
 	this.setPlotPixXMin(this.getDOMNodePixXMin() + this.plot_area.offX);
 	this.setPlotPixYMin(this.getDOMNodePixYMin() + this.plot_area.offY);
@@ -1610,7 +1612,7 @@ MapWidget.prototype.onafterresize = function(evt) {
 
 //move the map left
 MapWidget.prototype.panPlot = function (dx,dy) {
-   
+   this.updating=true;
     var pix_dx = this.getXPixRes()*dx;
     var pix_dy = this.getYPixRes()*dy;
 	
@@ -1639,7 +1641,7 @@ MapWidget.prototype.panPlot = function (dx,dy) {
 	}  
 	this.plot.onload = this.onPlotLoad.bindAsEventListener(this);
 	this.plot.src = "ProductServer.do?xml=" + escape(req.getXMLText()) + "&stream=true&stream_ID=plot_image";
- 
+ 	this.updating=false;
 }
 MapWidget.prototype.onPlotLoad = function (evt) { 		
 		//this.setDataGridBBox(this.extents.data.grid);
@@ -1673,9 +1675,10 @@ MapWidget.prototype.onPlotLoad = function (evt) {
   	if (this.enabled) {
  		this.displayBox(true);
   	 	this.displayCentralBox(true);
-		
-		if (this.ondraw) this.ondraw(this);	
-		if (this.onafterdraw) this.onafterdraw(this);
+		if(!this.updating) {
+			if (this.ondraw) this.ondraw(this);	
+			if (this.onafterdraw) this.onafterdraw(this);
+		}
 	}
 }
 /**
@@ -1704,8 +1707,11 @@ MapWidget.prototype.zoom = function (f) {
 		this.extents.last.push(this.clone(this.extents.plot.grid));
 	}
 	else
-		if (this.extents.last.length>0) 
-			var bbox = this.extents.last.pop();
+		if (this.extents.last) {
+			if (this.extents.last.length>0) 
+				var bbox = this.extents.last.pop();
+		} else
+			var bbox = this.clone(this.extents.data.grid);
 	if(bbox)	
 		this.zoomOnBBox(bbox);
 	this.displayBox(true);
