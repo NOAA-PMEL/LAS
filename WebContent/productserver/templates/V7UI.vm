@@ -135,7 +135,7 @@
 			<INPUT class="LASProductButton" width="100%" disabled="true" ID="Table of values (text)" value="Show Values" type="button">
 		</span>
 		<select id="exportMenu" onchange="this.options[0].selected=true;" name="Export to">
-               		<option>Export to...</option>
+               		<option>Download as...</option>
                 	<option ID="ArcView gridded">Arc GIS</option>
                 	<option ID="ASCII file" >ASCII File</option>
 			<option ID="NetCDF file" >NetCDF File</option>
