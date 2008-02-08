@@ -130,9 +130,19 @@ function PlotWidget(Plot) {
  * Selection box style.
  * NOTE:  Style Could be in a stylesheet but why require an additional file?
  */
+/* Jon's favorites 
   this.selectionBorderWidth = '2px';
   this.selectionBorderStyle = 'dotted';
   this.selectionBorderColor = '#FFF';
+  this.selectionBackgroundColor = 'transparent';
+  this.selectionOpacity = 0.0;
+*/
+  this.selectionBorderWidth = '1px';
+  this.selectionBorderStyle = 'solid';
+  this.selectionBorderColor = 'black';
+  this.selectionBackgroundColor = 'yellow';
+  this.selectionOpacity = 0.5;
+
 /**
  * Number of digits to retain after the decimal point.
  */
@@ -252,6 +262,8 @@ function PlotWidget_render(element_id,type) {
                      this.selectionBorderStyle + ' ' +
                      this.selectionBorderColor;
   SelectionDiv.style.border = border_style;
+  SelectionDiv.style.backgroundColor = this.selectionBackgroundColor;
+  SelectionDiv.style.opacity = this.selectionOpacity;
   SelectionDiv.style.visibility = 'visible';
   SelectionDiv.onmousedown = PlotWidget_mouseDown;
   SelectionDiv.onmousemove = PlotWidget_mouseMove;
