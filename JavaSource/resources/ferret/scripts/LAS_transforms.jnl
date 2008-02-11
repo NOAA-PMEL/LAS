@@ -27,6 +27,7 @@ IF `STRINDEX("($constraint_0_lhs"0")", "Season_length") GT 0` THEN
    DEFINE SYMBOL data_var_transform = , Season_1_per_year
    GO transform_1_season_per_year ($num)
    DEFINE SYMBOL data_dup_varname ($data_var)_regrid
+   DEFINE SYMBOL do_trans_1_seas_per_year = 1
 ENDIF
 
 ! See if the grid is curvilinear in XY, Hybrid Z or both
