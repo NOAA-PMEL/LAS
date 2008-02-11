@@ -90,7 +90,8 @@ IF ($result_map_scale_filename%0|*>1%) THEN
 !       be written or only when that attribute exists??
 
    IF `STRLEN("($ferret_view)") EQ 2` THEN 
-      LET syms_names = {"AX_HORIZ", "AX_HORIZ_POSTV", "AX_VERT", "AX_VERT_POSTV"}
+      LET syms_names = {"AX_HORIZ", "AX_HORIZ_POSTV", "AX_VERT", "AX_VERT_POSTV", \
+      "DATA_EXISTS", "DATA_MIN", "DATA_MAX"}
 
       IF ($have_pvar"0") THEN 
          LET the_plot_var = pvar  ! from LAS_auto_levels
@@ -105,6 +106,8 @@ IF ($result_map_scale_filename%0|*>1%) THEN
             LET the_plot_var = ($ferret_plot_var)
          ENDIF
       ENDIF
+
+* Find the axis directions
       IF ($ferret_plot_var"0|sampled_var>1|*>0) THEN LET the_plot_var = ($ferret_plot_var)
 
       DEFINE SYMBOL the_axis =  `the_plot_var,RETURN=($ax_horiz)axis`
@@ -129,7 +132,21 @@ IF ($result_map_scale_filename%0|*>1%) THEN
          DEFINE SYMBOL AX_VERT_POSTV = `(($the_axis)).positive`
       ENDIF
 
-      LET syms_vals = {"($AX_HORIZ)", "($AX_HORIZ_POSTV)", "($AX_VERT)", "($AX_VERT_POSTV)"}
+* Find the data min, max.  If all data was bad, send blank strings to the output.
+
+      LET pplus_default_zmin = 1.E38  ! PPLUS initializes zmin = 1.E38 and zmax = -1.E38
+      IF `($ppl$zmin) EQ pplus_default_zmin` THEN 
+         DEFINE SYMBOL DATA_EXISTS = 0
+         CANCEL SYMBOL DATA_MIN
+         CANCEL SYMBOL DATA_MAX
+      ELSE
+         DEFINE SYMBOL DATA_EXISTS = 1
+         DEFINE SYMBOL DATA_MIN = ($ppl$zmin)
+         DEFINE SYMBOL DATA_MAX = ($ppl$zmax)
+      ENDIF
+
+      LET syms_vals = {"($AX_HORIZ)", "($AX_HORIZ_POSTV)", "($AX_VERT)", "($AX_VERT_POSTV)",\
+       "($DATA_EXISTS)", "($DATA_MIN)", "($DATA_MAX)"}
       
       LIST/APPEND/FILE="($result_map_scale_filename)"/NOHEAD/NOROWLAB syms_names, syms_vals
    ENDIF
