@@ -70,6 +70,9 @@ public class LASMapScale extends LASDocument {
                 "AX_HORIZ_POSTV" " "   
                 "AX_VERT"        "Z"   
                 "AX_VERT_POSTV"  "down"
+                "DATA_EXISTS"    "1"
+                "DATA_MIN"       "3.608"
+                "DATA_MAX"       "8.209"
                  */
                 else {
                     // Just split on the quotes
@@ -167,7 +170,24 @@ public class LASMapScale extends LASDocument {
         if ( s1 != null ) {
             axisURY = Float.valueOf(s1);
         }
+        
+        float data_min  = 0.0f;
+        s1 = scale.get("DATA_MIN");
+        if ( s1 != null && !s1.equals(" ") && !s1.equals("") ) {
+            data_min = Float.valueOf(s1);
+        }
 
+        float data_max  = 0.0f;
+        s1 = scale.get("DATA_MAX");
+        if ( s1 != null && !s1.equals(" ") && !s1.equals("") ) {
+            data_max = Float.valueOf(s1);
+        }
+        
+        int data_exists = 0;
+        s1 = scale.get("DATA_EXISTS");
+        if ( s1 != null ) {
+            data_exists = Integer.valueOf(s1).intValue();
+        }
 
         Element map_scaleE = new Element("map_scale");
         this.setRootElement(map_scaleE);
@@ -189,10 +209,20 @@ public class LASMapScale extends LASDocument {
         map_scaleE.addContent(makeElement("axis_vertical", scale.get("AX_VERT")));
         map_scaleE.addContent(makeElement("axis_vertical_positive", scale.get("AX_VERT_POSTV")));
         map_scaleE.addContent(makeElement("axis_horizontal_positive", scale.get("AX_HORIZ_POSTV")));
+        map_scaleE.addContent(makeElement("data_min", data_min));
+        map_scaleE.addContent(makeElement("data_max", data_max));
+        map_scaleE.addContent(makeElement("data_exists", data_exists));
+        
         
     }
     
     private Element makeElement(String name, float value) {
+        Element element = new Element(name);
+        element.setText(String.valueOf(value));
+        return element;
+    }
+    
+    private Element makeElement(String name, int value) {
         Element element = new Element(name);
         element.setText(String.valueOf(value));
         return element;
@@ -257,5 +287,14 @@ public class LASMapScale extends LASDocument {
     }
     public String getAxis_horizontal_positive() {
     	return this.getRootElement().getChildText("axis_horizontal_positive");
+    }
+    public String getData_min() {
+    	return this.getRootElement().getChildText("data_min");
+    }
+    public String getData_max() {
+    	return this.getRootElement().getChildText("data_max");
+    }
+    public String getData_exists() {
+    	return this.getRootElement().getChildText("data_exists");
     }
 }
