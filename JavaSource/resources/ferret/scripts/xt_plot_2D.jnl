@@ -202,6 +202,10 @@ IF `($data_count"0") EQ 1` THEN
       ENDIF
      CONTOUR/OVER/NOLAB($levsym) ($ferret_var_0)
    ENDIF
+   
+! One of the results is the data min and max. Save those here.
+   DEFINE SYMBOL data_plotted_min = ($ppl$zmin)
+   DEFINE SYMBOL data_plotted_max = ($ppl$zmax)
 
 ! If there are two variables draw the first, removing the labels at the top
 ! and then overlay the second. 
@@ -223,6 +227,10 @@ ELIF  `($data_count"0") EQ 2` THEN
       IF ($axlen_command"0|*>1") THEN PPL ($axlen_command)
       IF ($axtype_command"0|*>1") THEN PPL ($axtype_command)
    PPL ($plot_type)
+   
+! One of the results is the data min and max. Save those here.
+   DEFINE SYMBOL data_plotted_min = ($ppl$zmin)
+   DEFINE SYMBOL data_plotted_max = ($ppl$zmax)
 
    CONTOUR/OVER($qualifiers_over)/NOKEY/NOLAB ($ferret_var_1) 
 

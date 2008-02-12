@@ -204,6 +204,10 @@ ELSE
       if ($labnum_dods"0|*>1") THEN go unlabel ($labnum_dods)
    PPL ($plot_type)
 ENDIF
+   
+! One of the results is the data min and max. Save those here.
+   DEFINE SYMBOL data_plotted_min = ($ppl$zmin)
+   DEFINE SYMBOL data_plotted_max = ($ppl$zmax)
 
 LABEL/NOUSER `($ppl$xlen)/2`, `($ppl$ylen)+1.2`, 0, 0, 0.12, "LAS 7.+/Ferret ($FERRET_VERSION)     NOAA/PMEL"
 
