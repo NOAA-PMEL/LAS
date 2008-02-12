@@ -1,6 +1,7 @@
 package gov.noaa.pmel.tmap.las.service.database;
 
 import gov.noaa.pmel.tmap.las.exception.LASException;
+import gov.noaa.pmel.tmap.las.exception.LASRowLimitException;
 import gov.noaa.pmel.tmap.las.jdom.JDOMUtils;
 import gov.noaa.pmel.tmap.las.jdom.LASBackendRequest;
 import gov.noaa.pmel.tmap.las.jdom.LASBackendResponse;
@@ -24,8 +25,8 @@ import javax.sql.rowset.WebRowSet;
 
 import oracle.jdbc.rowset.OracleWebRowSet;
 
-import org.apache.log4j.Logger;
 import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import org.apache.velocity.VelocityContext;
 import org.jdom.JDOMException;
 
@@ -222,7 +223,12 @@ public class DatabaseTool extends TemplateTool {
             try {
                makeNetCDF(netcdfFilename, rset, lasBackendRequest);
             } catch (Exception e) {
-                lasBackendResponse.setError("", e);
+            	if ( e instanceof LASRowLimitException ) {
+            		lasBackendResponse.setError("Row limit exceeded.", e);
+            	} else {
+                    lasBackendResponse.setError("Unable to make intermediate netCDF file.", e);
+            	}
+                return lasBackendResponse;
             }
             
             if (lasBackendRequest.isCanceled()) {
@@ -308,7 +314,11 @@ public class DatabaseTool extends TemplateTool {
         try {
             netcdf.create(rset, lasBackendRequest);
         } catch (Exception e) {
-            throw new Exception("Could not create intermediate netCDF file stub with result set: "+e.toString());
+        	if ( e instanceof LASRowLimitException ) {
+                throw e;
+        	} else {
+                throw new Exception("Could not create intermediate netCDF file stub with result set: "+e.toString());
+        	}
         } finally {
             if ( netcdf != null ) {
                 netcdf.close();

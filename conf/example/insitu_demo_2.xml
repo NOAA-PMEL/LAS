@@ -36,6 +36,7 @@
       <executable></executable>
       <missing>-999</missing>
       <timeout>180</timeout>
+      <row_limit>150000</row_limit>
     </database_access>
 
     </properties>
