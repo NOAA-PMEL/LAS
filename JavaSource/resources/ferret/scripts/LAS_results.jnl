@@ -136,7 +136,7 @@ IF ($result_map_scale_filename%0|*>1%) THEN
 * Find the data min, max.  If all data was bad, send blank strings to the output.
 
       LET pplus_default_zmin = 1.E38  ! PPLUS initializes zmin = 1.E38 and zmax = -1.E38
-      IF `($data_plotted_min) EQ pplus_default_zmin` THEN 
+      IF `($data_plotted_min"1.E38") EQ pplus_default_zmin` THEN 
          DEFINE SYMBOL DATA_EXISTS = 0
          CANCEL SYMBOL DATA_MIN
          CANCEL SYMBOL DATA_MAX
