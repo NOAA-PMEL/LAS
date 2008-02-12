@@ -45,38 +45,11 @@ DEFINE SYMBOL ferret_plot_var_noregion = ($data_var)[d=($data_num)]
 DEFINE SYMBOL ferret_plot_base_var = ($ferret_plot_var) 
 DEFINE SYMBOL ferret_plot_base_var_noregion = ($data_var)[d=($data_num)]
 
-! When doing 2D plots, we want the plot region +1 grid cell on all sides, 
-! for shade-under-fill.
-
-DEFINE SYMBOL varshape = `($ferret_plot_var),RETURN=shape`
-
-IF `STRLEN("($varshape)") EQ 2` THEN
-   LET ferretvar = ($ferret_plot_var_noregion)
-   DEFINE SYMBOL dim = `SUBSTRING("($varshape)", 1, 1)`
-   IF `($region_($dim)_plus"0|*>1") EQ 0` THEN GO LAS_define_region_plus_1.jnl
-ENDIF
-
-! Get any DEFINE VARIABLE analysis definitions
-! This renames the data variable, and so redefines the symbol data_var
-! and sets up the analysis: e.g. ,z=0:2000@ave
-
-! unComment this for testing.
-
-IF ($data_0_analysis_label"0|*>1") THEN 
-   GO LAS_analysis
-   DEFINE SYMBOL ferret_plot_var = ($data_var)[d=($data_num),($region_full)($data_analysis_expr)]
-   DEFINE SYMBOL ferret_plot_var_noregion = ($data_var)[d=($data_num)($data_analysis_expr)]
-   IF ($data_0_analysis_oceanmask"0|*>1") THEN 
-     LET/d=($data_num) plot_var =  ($data_var)[d=($data_num)] * analysis_mask
-     DEFINE SYMBOL ferret_plot_var = plot_var[($region_full)($data_analysis_expr)]
-     DEFINE SYMBOL ferret_plot_var_noregion = plot_var[($data_analysis_expr)]
-   ENDIF
-ENDIF
-
 ! Needed for transform_seasonal, save variable definition without any
-! time-region information that may be added.
+! time-region information that may be added, and also with the time region only
 
 DEFINE SYMBOL ferret_xyz_var = ($data_var)[d=($data_num),($region_xyz)]
+DEFINE SYMBOL ferret_t_var = ($data_var)[d=($data_num),($region_t)]
 
 ! Apply the expression in ferret_expression. $ represents the variable.
 
@@ -95,6 +68,27 @@ IF ($ferret_expression"0|*>1") THEN GO LAS_expression
 ! Apply any transforms that may have been specified.
 GO LAS_transforms ($variables_initialized"0|*>1")
 
+! When doing 2D plots, we want the plot region +1 grid cell on all sides, 
+! for shade-under-fill.
+GO LAS_define_region_plus_1
+
+! Get any DEFINE VARIABLE analysis definitions
+! This renames the data variable, and so redefines the symbol data_var
+! and sets up the analysis: e.g. ,z=0:2000@ave
+
+! unComment this for testing.
+
+IF ($data_0_analysis_label"0|*>1") THEN 
+   GO LAS_analysis
+   DEFINE SYMBOL ferret_plot_var = ($data_var)[d=($data_num),($region_full)($data_analysis_expr)]
+   DEFINE SYMBOL ferret_plot_var_noregion = ($data_var)[d=($data_num)($data_analysis_expr)]
+   IF ($data_0_analysis_oceanmask"0|*>1") THEN 
+     LET/d=($data_num) plot_var =  ($data_var)[d=($data_num)] * analysis_mask
+     DEFINE SYMBOL ferret_plot_var = plot_var[($region_full)($data_analysis_expr)]
+     DEFINE SYMBOL ferret_plot_var_noregion = plot_var[($data_analysis_expr)]
+   ENDIF
+ENDIF
+
 ! Keep track of variables initialized, to tell us if next time we
 ! want ferret_expression or ferret_expression2
 
@@ -104,7 +98,6 @@ IF `($variables_initialized) EQ ($data_count)` THEN
 
 ! From the variable we can define striding. 
 ! TODO: script works only for rectangular data so far...
-
 
 !test stride for Google Earth
    IF `STRINDEX( "($operation_ID)", "GE" ) NE 0` THEN
