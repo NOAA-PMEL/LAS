@@ -80,6 +80,8 @@ IF `STRINDEX("($data_0_url)","http") NE 0` THEN
    IF `last_slash_0 EQ 0` THEN \
       DEFINE SYMBOL upper_right_($n_right_labels) = "DODS URL: @AC($data_0_urlpath)"
 
+   DEFINE SYMBOL upper_right_text_($n_right_labels) = DODS URL($data_0_urlpath)
+
 ELSE
    DEFINE SYMBOL n_right_labels = `($n_right_labels)+1`
    DEFINE SYMBOL upper_right_($n_right_labels) = DATA SET: @AC`($data_var)[d=($data_num)],RETURN=dset`
