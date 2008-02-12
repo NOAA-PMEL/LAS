@@ -113,7 +113,7 @@ IF ($plot_type"0|FILL>1|*>0) THEN DEFINE SYMBOL shade_underlay = TRUE
 ! and request the plot variable for the SHADE command on a +1 cell size larger region.
 
    LET fill_var = ($ferret_plot_var_noregion)
-   DEFINE SYMBOL qualifiers = ($qualifiers)/HLIM=`t[gt=fill_var,t="($region_t_lo)"]`:`t[gt=fill_var,t="($region_t_hi)"]`
+   DEFINE SYMBOL qualifiers = ($qualifiers)/HLIM=`t[gt=($ferret_plot_base_var_noregion),t="($region_t_lo)"]`:`t[gt=($ferret_plot_base_var_noregion),t="($region_t_hi)"]`
    DEFINE SYMBOL qualifiers = ($qualifiers)/VLIM=($limits_y)
    DEFINE SYMBOL ferret_var_0 = fill_var
    IF ($region_x"0|*>1") THEN DEFINE SYMBOL ferret_var_0 = fill_var[($region_y_plus),($region_t_plus),($region_x)]
