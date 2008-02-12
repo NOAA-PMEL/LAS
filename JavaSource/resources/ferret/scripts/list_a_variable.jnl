@@ -77,39 +77,92 @@ SET DATA/RESTORE
 ! first data point (sometimes) repeated so we test for that here and switch 
 ! to index space.
 
-DEFINE SYMBOL user_istart `($ferret_list_var),return=istart`
-DEFINE SYMBOL user_iend `($ferret_list_var),return=iend`
-CANCEL REGION/X
-DEFINE SYMBOL data_isize `($ferret_list_var),return=isize`
-IF `($user_iend) - ($user_istart) + 1 - ($data_isize) GT 0` THEN
- DEFINE SYMBOL new_iend `($user_iend) - 1`
-ELSE 
- DEFINE SYMBOL new_iend `($user_iend)`
-ENDIF
-SET REGION/I=($user_istart):($new_iend)
+IF ($region_x"0|*>1") THEN
+   IF `($region_y_range"0|0|*>1") GT 0` THEN
+      LET the_coords = x[gx=($ferret_list_var)]
+      DEFINE SYMBOL user_istart `the_coords,RETURN=istart`
+      DEFINE SYMBOL user_iend `the_coords,RETURN=iend`
+      CANCEL REGION/X
+      DEFINE SYMBOL data_isize `the_coords,RETURN=isize`
+      IF `($user_iend) - ($user_istart) + 1 - ($data_isize) GT 0` THEN
+         DEFINE SYMBOL new_iend `($user_iend) - 1`
+      ELSE 
+         DEFINE SYMBOL new_iend `($user_iend)`
+      ENDIF
+      SET REGION/I=($user_istart):($new_iend)
 
 ! Now get the start, stop and size information
-DEFINE SYMBOL isize `($ferret_list_var),return=isize`
-DEFINE SYMBOL jmin `($ferret_list_var),return=jstart`
-DEFINE SYMBOL jmax `($ferret_list_var),return=jend`
-DEFINE SYMBOL jsize `($ferret_list_var),return=jsize`
-DEFINE SYMBOL kmin `($ferret_list_var),return=kstart`
-DEFINE SYMBOL kmax `($ferret_list_var),return=kend`
-DEFINE SYMBOL ksize `($ferret_list_var),return=ksize`
-DEFINE SYMBOL lmin `($ferret_list_var),return=lstart`
-DEFINE SYMBOL lmax `($ferret_list_var),return=lend`
-DEFINE SYMBOL lsize `($ferret_list_var),return=lsize`
 
-! RETURN=*start returns 0 if the axis is an undefined axis
-! This messes messes up the repeat loop below if the data is chunked.
+     DEFINE SYMBOL imin `the_coords,RETURN=istart`
+     DEFINE SYMBOL iend `the_coords,RETURN=iend`
+     DEFINE SYMBOL isize `the_coords,RETURN=isize`
+
+   ELSE  ! range is 0
+      DEFINE SYMBOL imin 1
+      DEFINE SYMBOL imax 1
+      DEFINE SYMBOL isize 1
+   ENDIF 
+
+ENDIF  ! region_x
+
+! Now get the start, stop and size information for other dimensions.
+
+IF ($region_y"0|*>1") THEN
+   IF `($region_y_range"0|0|*>1") GT 0` THEN
+      LET the_coords = y[gy=($ferret_list_var)]
+      DEFINE SYMBOL jmin `the_coords,RETURN=jstart`
+      DEFINE SYMBOL jmax `the_coords,RETURN=jend`
+      DEFINE SYMBOL jsize `the_coords,RETURN=jsize`
+   ELSE  ! range is 0
+      DEFINE SYMBOL jmin 1
+      DEFINE SYMBOL jmax 1
+      DEFINE SYMBOL jsize 1
+   ENDIF 
+ENDIF  ! region_y
+
+IF ($region_z"0|*>1") THEN
+   IF `($region_z_range"0|0|*>1") GT 0` THEN
+      LET the_coords = z[gz=($ferret_list_var)]
+      DEFINE SYMBOL kmin `the_coords,RETURN=kstart`
+      DEFINE SYMBOL kmax `the_coords,RETURN=kend`
+      DEFINE SYMBOL ksize `the_coords,RETURN=ksize`
+   ELSE  ! range is 0
+      DEFINE SYMBOL kmin 1
+      DEFINE SYMBOL kmax 1 
+      DEFINE SYMBOL ksize 1
+   ENDIF
+ENDIF  ! region_z
+
+IF ($region_t"0|*>1") THEN
+   IF `($region_t_range"0|0|*>1") GT 0` THEN
+      LET the_coords = t[gt=($ferret_list_var)]
+      DEFINE SYMBOL lmin `the_coords,RETURN=lstart`
+      DEFINE SYMBOL lmax `the_coords,RETURN=lend`
+      DEFINE SYMBOL lsize `the_coords,RETURN=lsize`
+   ELSE  ! range is 0
+      DEFINE SYMBOL lmin 1
+      DEFINE SYMBOL lmax 1
+      DEFINE SYMBOL lsize 1
+   ENDIF
+ENDIF  ! region_t
+
+! RETURN=*start returns 0 IF the axis is an undefined axis
+! This messes messes up the repeat loop below IF the data is chunked.
 ! A few more lines of code to handle this.
 
-if `($jmin) lt 1` then DEFINE SYMBOL jmin 1
-if `($jmax) lt 1` then DEFINE SYMBOL jmax 1
-if `($kmin) lt 1` then DEFINE SYMBOL kmin 1
-if `($kmax) lt 1` then DEFINE SYMBOL kmax 1
-if `($lmin) lt 1` then DEFINE SYMBOL lmin 1
-if `($lmax) lt 1` then DEFINE SYMBOL lmax 1
+!  Modulo x axis may have negative indices.
+! IF `($imin"0") lt 1` THEN DEFINE SYMBOL imin 1
+! IF `($imax"0") lt 1` THEN DEFINE SYMBOL imax 1
+IF `($isize"0") lt 1` THEN DEFINE SYMBOL isize 1
+IF `($jmin"0") lt 1` THEN DEFINE SYMBOL jmin 1
+IF `($jmax"0") lt 1` THEN DEFINE SYMBOL jmax 1
+IF `($jsize"0") lt 1` THEN DEFINE SYMBOL jsize 1
+IF `($kmin"0") lt 1` THEN DEFINE SYMBOL kmin 1
+IF `($kmax"0") lt 1` THEN DEFINE SYMBOL kmax 1
+IF `($ksize"0") lt 1` THEN DEFINE SYMBOL ksize 1
+IF `($lmin"0") lt 1` THEN DEFINE SYMBOL lmin 1
+IF `($lmax"0") lt 1` THEN DEFINE SYMBOL lmax 1
+IF `($lsize"0") lt 1` THEN DEFINE SYMBOL lsize 1
 CANCEL REGION/X
 
 LET size = ($isize)*($jsize)*($ksize)*($lsize)
@@ -119,11 +172,14 @@ LET jchunk = ($jsize) ! dflt size = full span
 LET kchunk = ($ksize)
 LET lchunk = INT(max_size/size * ($lsize))
 
-! if mode interpolate is desired
+! IF mode interpolate is desired
 IF ($ferret_interpolate_data%0|false>0|true>1|1|0|*>1%) THEN SET MODE INTERPOLATE 
 
 ! the default is set under 1/4 of Ferret's memory allowing for LET definitions 
-LET max_size = ($MAX_LIST_SIZE"1000000")  ! use this for debugging, too
+
+LET use_size = 1000000*($ferret_memory)/4.
+LET use_size = `use_size/100`
+LET max_size = ($MAX_LIST_SIZE"`use_size`")  ! use this for debugging, too
 
 IF `size LE max_size` THEN
 
@@ -131,14 +187,12 @@ IF `size LE max_size` THEN
    !     This special case is not strictly necessary -- the logic for listing
    !     large files also works for small ... but with some overhead
 
-   ! if a duplicate variable name is assigned for netcdf listings, change the name before listing 
-!!   IF `($data_dup_varname%0|*>1%) EQ 0` THEN DEFINE SYMBOL data_dup_varname ($data_var)
+   ! IF a duplicate variable name is assigned for netcdf listings, change the name before listing 
    IF `($data_dup_varname%0|*>1%) GT 0` THEN
-!      LET ($ferret_list_var)_($data_dup_varname) = ($ferret_list_var)
-      LET ($data_dup_varname) = ($ferret_list_var)
-!      DEFINE SYMBOL var_path = `($ferret_list_var),ret=dsetpath`
+      DEFINE SYMBOL data_dup_varname = ($data_var)
+!      DEFINE SYMBOL var_path = `($ferret_list_var),RETURN=dsetpath`
       SET VAR/TITLE="($data_title)" ($data_dup_varname)
-      SET VAR/UNITS="`($ferret_list_var),RET=UNITS`" ($data_dup_varname)
+      SET VAR/UNITS="`($ferret_list_var),RETURN=UNITS`" ($data_dup_varname)
 
       DEFINE ATTRIBUTE/OUTPUT ($data_var).history = "($data_var_history)($data_var_transform)"
       DEFINE ATTRIBUTE/OUTPUT ($data_dup_varname).history = "($data_var_history)($data_var_transform)"
@@ -165,7 +219,7 @@ ELSE
    CAN REGION
 
    ! determine how to break the listing into small chunks
-   ! chunk along L axis. If still too big then along K axis, too. If still ...
+   ! chunk along L axis. IF still too big THEN along K axis, too. IF still ...
    IF `lchunk EQ 0` THEN
      LET lchunk = 1
      LET kchunk =  INT(max_size/(size/($lsize)) * ($ksize))
@@ -183,20 +237,21 @@ ELSE
    LET ltop = MIN(l+lchunk-1, ($lmax) )
 
    IF ($ferret_format"0|cdf>1|*>0") THEN
-     ! if a duplicate variable name is assigned for netcdf listings, change the name before listing
+     ! IF a duplicate variable name is assigned for netcdf listings, change the name before listing
      
-!!      IF `($data_dup_varname%0|*>1%) EQ 0` THEN DEFINE SYMBOL data_dup_varname ($data_var)
       IF `($data_dup_varname%0|*>1%) GT 0` THEN
-!        LET ($ferret_list_var)_($data_dup_varname) = ($ferret_list_var)
         LET ($data_dup_varname) = ($ferret_list_var)
-!        DEF SYM var_path = `($ferret_list_var),ret=dsetpath`
+        DEFINE SYMBOL data_dup_varname =  ($data_var)  ! the limits min,max,chunk determine the range
+!        DEF SYM var_path = `($ferret_list_var),RETURN=dsetpath`
         SET VAR/TITLE="($data_title)" ($data_dup_varname)
-        SET VAR/UNITS="`($ferret_list_var),RET=UNITS`" ($data_dup_varname)
+        SET VAR/UNITS="`($ferret_list_var),RETURN=UNITS`" ($data_dup_varname)
 
      ! ... netCDF output in chunks
         REPEAT/L=($lmin):($lmax):`lchunk` REPEAT/K=($kmin):($kmax):`kchunk` REPEAT/J=($jmin):($jmax):`jchunk` (LIST/APPEND/FILE/($frmt)/J=`j`:`jtop`/K=`k`:`ktop`/L=`l`:`ltop`/JLIMITS=($jmin):($jmax)/KLIMITS=($kmin):($kmax)/LLIMITS=($lmin):($lmax) ($data_dup_varname); CANC MEM/ALL)
      ELSE
      ! ... netCDF output in chunks
+
+        DEFINE SYMBOL ferret_list_var =  ($data_var)  ! the limits min,max,chunk determine the range
 
         REPEAT/L=($lmin):($lmax):`lchunk` REPEAT/K=($kmin):($kmax):`kchunk` REPEAT/J=($jmin):($jmax):`jchunk` (LIST/APPEND/FILE/($frmt)/J=`j`:`jtop`/K=`k`:`ktop`/L=`l`:`ltop`/JLIMITS=($jmin):($jmax)/KLIMITS=($kmin):($kmax)/LLIMITS=($lmin):($lmax) ($ferret_list_var); CANC MEM/ALL)
      ENDIF
