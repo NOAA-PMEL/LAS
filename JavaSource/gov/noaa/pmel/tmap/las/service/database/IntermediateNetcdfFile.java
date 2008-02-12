@@ -1,6 +1,7 @@
 package gov.noaa.pmel.tmap.las.service.database;
 
 import gov.noaa.pmel.tmap.las.exception.LASException;
+import gov.noaa.pmel.tmap.las.exception.LASRowLimitException;
 import gov.noaa.pmel.tmap.las.jdom.LASBackendRequest;
 
 import java.io.IOException;
@@ -10,8 +11,8 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
 
-import org.apache.log4j.Logger;
 import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.format.DateTimeFormat;
@@ -54,8 +55,26 @@ public class IntermediateNetcdfFile {
         boolean hasResults = resultSet.last();
         int indexSize = resultSet.getRow();
         resultSet.beforeFirst();
-        
         ArrayList<Dimension> dimList = new ArrayList<Dimension>();
+        String row_limit_property = lasBackendRequest.getDatabaseProperty("row_limit");
+        if ( row_limit_property != null && !row_limit_property.equals("") ) {
+        	int row_limit = Integer.valueOf(row_limit_property).intValue();
+        	if ( indexSize > row_limit ) {
+        		Dimension index = netcdfFile.addDimension("index", 1);
+                dimList.add(index);
+                String time_name = lasBackendRequest.getDatabaseProperty("time");
+                netcdfFile.addVariable(time_name, DataType.DOUBLE, dimList);
+                ArrayDouble.D1 data = new ArrayDouble.D1(1);
+                Double d = new Double("-9999.");
+                data.set(0, d);
+                netcdfFile.addGlobalAttribute("query_result", "Request resulted in "+indexSize+" rows which exceeds the allowed limit of "+row_limit+" rows.");
+                netcdfFile.create();
+                netcdfFile.write(time_name, data);
+        		throw new LASRowLimitException("Request resulted in "+indexSize+" rows which exceeds the allowed limit of "+row_limit+" rows.");
+        	}
+        }
+        
+        
         
         if ( !hasResults ) {
             // No results found.  Fix up a minimal file and return.
@@ -66,6 +85,7 @@ public class IntermediateNetcdfFile {
             ArrayDouble.D1 data = new ArrayDouble.D1(1);
             Double d = new Double("-9999.");
             data.set(0, d);
+            netcdfFile.addGlobalAttribute("query_result", "No data found to match this request.");
             netcdfFile.create();
             netcdfFile.write(time_name, data);
             return;
