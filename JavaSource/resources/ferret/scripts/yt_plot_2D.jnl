@@ -115,7 +115,7 @@ IF ($plot_type"0|FILL>1|*>0) THEN DEFINE SYMBOL shade_underlay = TRUE
    LET fill_var = ($ferret_plot_var_noregion)
    DEFINE SYMBOL qualifiers = ($qualifiers)/HLIM=`t[gt=($ferret_plot_base_var_noregion),t="($region_t_lo)"]`:`t[gt=($ferret_plot_base_var_noregion),t="($region_t_hi)"]`
    DEFINE SYMBOL qualifiers = ($qualifiers)/VLIM=($limits_y)
-   DEFINE SYMBOL ferret_var_0 = fill_var
+   DEFINE SYMBOL ferret_var_0 = fill_var[($region_y_plus),($region_t_plus)]
    IF ($region_x"0|*>1") THEN DEFINE SYMBOL ferret_var_0 = fill_var[($region_y_plus),($region_t_plus),($region_x)]
    IF ($region_z"0|*>1") THEN DEFINE SYMBOL ferret_var_0 = fill_var[($region_y_plus),($region_t_plus),($region_z)]
    IF ($region_xz"0|*>1") THEN DEFINE SYMBOL ferret_var_0 = fill_var[($region_y_plus),($region_t_plus),($region_xz)]
