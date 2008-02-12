@@ -94,15 +94,7 @@ ENDIF ! 8
 
 ! Apply to the variable on the requested region
 
-IF ($ferret_plot_var"0|*>1") THEN 
-   LET pvar = ($ferret_plot_var)
-ELSE
-   EXIT/SCRIPT  ! for insitu plots may not have a plot_var
-ENDIF
-
-IF ($ferret_plot_var"0|sampled_var>1|*>0) THEN LET pvar = ($ferret_plot_var)
-
-! IF ($do_curvi_xy_and_hybrid_z"0") THEN LET pvar = plot_var
+IF `($ferret_plot_var"0|*>1") EQ 0` THEN EXIT/SCRIPT  !e.g. for insitu plots may not have a plot_var
 
 ! When its a curvi plot, base the levels on the
 ! variable masked by the coordinates in the region.
@@ -130,7 +122,15 @@ IF ($native_curvilinear_xy"0") THEN
 ! ??
    IF ($do_curvi_xy_and_hybrid_z"0") THEN LET pvar = plot_var* maskx* masky
 
+ELSE
+
+   LET pvar = ($ferret_plot_var)
+
 ENDIF
+
+IF ($ferret_plot_var"0|sampled_var>1|*>0) THEN LET pvar = ($ferret_plot_var)
+
+! IF ($do_curvi_xy_and_hybrid_z"0") THEN LET pvar = plot_var
 
 DEFINE SYMBOL have_pvar = 1
 
