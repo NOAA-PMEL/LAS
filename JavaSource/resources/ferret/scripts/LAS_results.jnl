@@ -5,6 +5,7 @@
 ! $Date: 2006/07/13 18:08:18 $
 ! 3/30/2007 ACM When writing the map_scale.xml file, first list the urls separately;
 !               long URLs can make the Ferret command too long.
+! 2/11/2008 ACM Add DATA_MIN, DATA_MAX and DATA_EXISTS to the map scale file for 2D plots. 
 
 !
 ! LAS_results.jnl creates the result files. 
