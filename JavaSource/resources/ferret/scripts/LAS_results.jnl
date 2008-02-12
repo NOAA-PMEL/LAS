@@ -136,14 +136,14 @@ IF ($result_map_scale_filename%0|*>1%) THEN
 * Find the data min, max.  If all data was bad, send blank strings to the output.
 
       LET pplus_default_zmin = 1.E38  ! PPLUS initializes zmin = 1.E38 and zmax = -1.E38
-      IF `($ppl$zmin) EQ pplus_default_zmin` THEN 
+      IF `($data_plotted_min) EQ pplus_default_zmin` THEN 
          DEFINE SYMBOL DATA_EXISTS = 0
          CANCEL SYMBOL DATA_MIN
          CANCEL SYMBOL DATA_MAX
       ELSE
          DEFINE SYMBOL DATA_EXISTS = 1
-         DEFINE SYMBOL DATA_MIN = ($ppl$zmin)
-         DEFINE SYMBOL DATA_MAX = ($ppl$zmax)
+         DEFINE SYMBOL DATA_MIN = ($data_plotted_min)
+         DEFINE SYMBOL DATA_MAX = ($data_plotted_max)
       ENDIF
 
       LET syms_vals = {"($AX_HORIZ)", "($AX_HORIZ_POSTV)", "($AX_VERT)", "($AX_VERT_POSTV)",\
