@@ -92,7 +92,13 @@ LET pvar = ($ferret_xyz_var)
 IF ($ferret_plot_var"0|sampled_var>1|*>0) THEN LET pvar = ($ferret_plot_base_var)[region_xyz]
 IF ($do_curvi_xy_and_hybrid_z"0") THEN LET pvar = plot_var
 
-IF ($native_curvilinear_xy"0") THEN LET pvar = ($ferret_plot_base_var)
+IF ($native_curvilinear_xy"0") THEN 
+   LET pvar = \
+   ($data_var)[d=($data_num),i=($clon_imin):($clon_imax),j=($clat_jmin):($clat_jmax)]
+   IF ($region_z"0|*>1") THEN LET pvar = \
+      ($data_var)[d=($data_num),i=($clon_imin):($clon_imax),\
+       j=($clat_jmin):($clat_jmax),($region_z)]
+ENDIF       
 
 DEFINE SYMBOL have_pvar = 1
 
@@ -168,9 +174,23 @@ IF ($native_curvilinear_xy"0") THEN
    IF `($clat_jmax)-($clat_jmin) GT 50` THEN \
       LET strd_ydel = `INT( (($clat_jmax)-($clat_jmin))/10 )`
 
+   LET tsize  `pvar,RETURN=lsize`
+   IF `tsize GT 30` THEN 
+! This when the incoming t region is the region over which to animate...
+!     LET strd_lo = `L[gt=pvar,t="($region_t_lo)"]`
+!     LET strd_hi = `L[gt=pvar,t="($region_t_hi)"]`
+     LET strd_lo = 1
+     LET strd_hi = tsize
+     LET strd_del = `(strd_hi-strd_lo)/10`
+     DEFINE SYMBOL index_strides = L=`strd_lo`:`strd_hi`:`INT(strd_del)`
+   ENDIF
+
    LET pvar = \
     ($data_var)[d=($data_num),i=($clon_imin):($clon_imax):`strd_xdel`,\
-       j=($clat_jmin):($clat_jmax):`strd_ydel`,($region_zt)]
+       j=($clat_jmin):($clat_jmax):`strd_ydel`]
+   IF ($region_z"0|*>1") THEN LET pvar = \
+    ($data_var)[d=($data_num),i=($clon_imin):($clon_imax):`strd_xdel`,\
+       j=($clat_jmin):($clat_jmax):`strd_ydel`,($region_z)]
 ELSE 
    
    IF ($xstride"0|1>0|*>1") THEN
@@ -212,12 +232,16 @@ IF ($zstride"0|1>0|*>1") THEN
    ENDIF
 ENDIF
 
+
 IF ($tstride"0|1>0|*>1") THEN 
    LET tsize  `pvar,RETURN=lsize`
    IF `tsize GT 50` THEN 
      IF ($index_strides"0|*>1") THEN 
-        LET strd_lo = `L[gt=pvar,t=($region_t_lo)]`
-        LET strd_hi = `L[gt=pvar,t=($region_t_hi)]`
+! This when the incoming t region is the region over which to animate...
+!        LET strd_lo = `L[gt=pvar,t="($region_t_lo)"]`
+!        LET strd_hi = `L[gt=pvar,t="($region_t_hi)"]`
+        LET strd_lo = 1
+        LET strd_hi = tsize
         LET strd_del = `(strd_hi-strd_lo)/10`
         DEFINE SYMBOL index_strides = ($index_strides),`strd_lo`:`strd_hi`:`INT(strd_del)`
      ELSE
