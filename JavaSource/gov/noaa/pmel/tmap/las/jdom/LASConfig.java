@@ -1845,6 +1845,7 @@ public class LASConfig extends LASDocument {
 	        for (Iterator opIt = opElements.iterator(); opIt.hasNext(); ) {
 	            boolean grid_type_match = false;
 	            boolean intervals_match = false;
+	            boolean degenerate_match = false;
 	            Element operation = (Element) opIt.next();
 	            Element region = operation.getChild("region");
 	            Element grid_types = operation.getChild("grid_types");
@@ -1864,12 +1865,16 @@ public class LASConfig extends LASDocument {
 	                        intervals_match = true;
 	                    }
 	                }
+	                Element degenerate = region.getChild("degenerate");
+	                if ( degenerate != null && view.equals("d") ) {
+	                	degenerate_match = true;
+	                }
 	                boolean private_op = false;
 	                String private_attr = operation.getAttributeValue("private");
 	                if ( private_attr != null && private_attr.equals("true") ) {
 	                    private_op = true;
 	                }
-	                if (grid_type_match && intervals_match && !private_op) {
+	                if (grid_type_match && (intervals_match||degenerate_match) && !private_op) {
 	                    Operation op = new Operation(operation);
 	                    matchingOperations.add(op);
 	                }
