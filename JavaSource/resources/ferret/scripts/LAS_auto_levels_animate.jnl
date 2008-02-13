@@ -224,7 +224,7 @@ IF `stride_for_speed GT 1` THEN ! 30
    IF `($undo_t"0") GT 0` THEN CANCEL AXIS/STRIDE `pvar,RETURN=taxis`
 ENDIF ! 30
 
-IF `($stat_ngood"0") EQ 0` THEN EXIT_SCRIPT
+IF `($stat_ngood"0") EQ 0` THEN EXIT/SCRIPT
 
 ! Compute rounded-off levels with the PPL %RANGE command.
 
