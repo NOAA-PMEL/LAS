@@ -1465,9 +1465,11 @@ public class LASConfig extends LASDocument {
                 String type = axisE.getAttributeValue("type");
                 if ( type.equals("x") || type.equals("y") || type.equals("z") ) {
                     axes_list.add(axisE);
-                } else {
+                } else if (type.equals("t") ) {
                     addTimeAxisAttributes(axisE);
                     axes_list.add(axisE);
+                } else if ( type.equals("d") ) {
+                	axes_list.add(axisE);
                 }
             }
         }
