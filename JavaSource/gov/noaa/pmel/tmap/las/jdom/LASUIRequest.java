@@ -145,7 +145,14 @@ public class LASUIRequest extends LASDocument {
     public String getOperationXPath() {
         return this.getRootElement().getChild("link").getAttributeValue("match");
     }
-    
+    public String getOperation() {
+    	String operationXPath = getOperationXPath();
+    	if ( operationXPath.contains("@ID") ) {
+    		return operationXPath.substring(operationXPath.indexOf("'")+1, operationXPath.lastIndexOf("'"));
+    	} else {
+    	    return operationXPath.substring(operationXPath.indexOf("/lasdata/operations/")+21, operationXPath.length());
+    	}
+    }
     public String getSessionID() {
         String sessionID = this.getRootElement().getAttributeValue("SessionID");
         if (sessionID == null) {
