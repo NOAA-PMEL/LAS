@@ -23,26 +23,44 @@ IF `STRLEN("($varshape)") EQ 2` THEN
    LET idim = STRINDEX("($pseudo_coord)", "($dim)")
    DEFINE SYMBOL indx = `SUBSTRING ("($pseudo_index)", idim, 1)`
 
-   LET ilo = ($indx)[g($dim)=ferretvar,($dim)="($region_($dim)_lo)"]
-   LET ihi = ($indx)[g($dim)=ferretvar,($dim)="($region_($dim)_hi)"]
-
    LET is_mod = 0
    IF `STRINDEX ("($dim)", "X") GT 0 OR STRINDEX ("($dim)", "T") GT 0` THEN
       DEFINE SYMBOL modax = "`($data_var), RETURN=($dim)mod`"
       IF `STRCMP(($modax), " ") NE 0` THEN LET is_mod = 1
    ENDIF
 
-   LET ilo = `ilo - 1`
-   LET ihi = `ihi + 1`
+! See if the region limits are within the axis limits: for convenience
+! datasets may be configured as y=-90:90 when really they are slightly less...
 
-   LET axsiz = `($data_var),RETURN=($indx)size`
    IF `is_mod EQ 0` THEN 
-      LET ilo = `MAX(1,ilo)`
-      LET ihi = `MIN(axsiz,ihi)`
+      LET axlo = ($dim)boxlo[g($dim)=ferretvar,($indx)=1]
+      LET axsiz = `ferretvar,return=($indx)size`
+      LET axhi = ($dim)boxhi[g($dim)=ferretvar,($indx)=`axsiz`]
+
+      LET nlo = 1
+      IF `($region_($dim)_lo) GT axlo` THEN \
+         LET nlo = ($indx)[g($dim)=ferretvar,($dim)="($region_($dim)_lo)"]
+      LET nhi = axsiz
+      IF `($region_($dim)_hi) LT axhi` THEN \
+         LET nhi = ($indx)[g($dim)=ferretvar,($dim)="($region_($dim)_hi)"]
+   
+      LET nlo = `nlo - 1`
+      LET nhi = `nhi + 1`
+ 
+      LET axsiz = `($data_var),RETURN=($indx)size`
+      LET nlo = `MAX(1,nlo)`
+      LET nhi = `MIN(axsiz,nhi)`
    ENDIF
 
-   LET alo = ($dim)[g($dim)=ferretvar,($indx)=`ilo`]
-   LET ahi = ($dim)[g($dim)=ferretvar,($indx)=`ihi`]
+   IF `is_mod` THEN   ! modulo, so no such problems
+      LET nlo = ($indx)[g($dim)=ferretvar,($dim)="($region_($dim)_lo)"]
+      LET nhi = ($indx)[g($dim)=ferretvar,($dim)="($region_($dim)_hi)"]
+      LET nlo = `nlo - 1`
+      LET nhi = `nhi + 1`
+   ENDIF
+
+   LET alo = ($dim)[g($dim)=ferretvar,($indx)=`nlo`]
+   LET ahi = ($dim)[g($dim)=ferretvar,($indx)=`nhi`]
 
    DEFINE SYMBOL region_($dim)_plus = ($dim)=`alo`:`ahi`
 
@@ -53,27 +71,41 @@ IF `STRLEN("($varshape)") EQ 2` THEN
    LET idim = STRINDEX("($pseudo_coord)", "($dim)")
    DEFINE SYMBOL indx = `SUBSTRING ("($pseudo_index)", idim, 1)`
 
-   LET ilo = ($indx)[g($dim)=ferretvar,($dim)="($region_($dim)_lo)"]
-   LET ihi = ($indx)[g($dim)=ferretvar,($dim)="($region_($dim)_hi)"]
-
    LET is_mod = 0
    IF `STRINDEX ("($dim)", "X") GT 0 OR STRINDEX ("($dim)", "T") GT 0` THEN
       DEFINE SYMBOL modax = "`($data_var), RETURN=($dim)mod`"
       IF `STRCMP(($modax), " ") NE 0` THEN LET is_mod = 1
    ENDIF
 
-   LET ilo = `ilo - 1`
-   LET ihi = `ihi + 1`
-
-   LET axsiz = `($data_var),RETURN=($indx)size`
    IF `is_mod EQ 0` THEN 
-      LET ilo = `MAX(1,ilo)`
-      LET ihi = `MIN(axsiz,ihi)`
+      LET axlo = ($dim)boxlo[g($dim)=ferretvar,($indx)=1]
+      LET axsiz = `ferretvar,return=($indx)size`
+      LET axhi = ($dim)boxhi[g($dim)=ferretvar,($indx)=`axsiz`]
+
+      LET nlo = 1
+      IF `($region_($dim)_lo) GT axlo` THEN \
+         LET nlo = ($indx)[g($dim)=ferretvar,($dim)="($region_($dim)_lo)"]
+      LET nhi = axsiz
+      IF `($region_($dim)_hi) LT axhi` THEN \
+         LET nhi = ($indx)[g($dim)=ferretvar,($dim)="($region_($dim)_hi)"]
+   
+      LET nlo = `nlo - 1`
+      LET nhi = `nhi + 1`
+ 
+      LET axsiz = `($data_var),RETURN=($indx)size`
+      LET nlo = `MAX(1,nlo)`
+      LET nhi = `MIN(axsiz,nhi)`
    ENDIF
 
-   LET alo = ($dim)[g($dim)=ferretvar,($indx)=`ilo`]
-   LET ahi = ($dim)[g($dim)=ferretvar,($indx)=`ihi`]
+   IF `is_mod` THEN  ! modulo, so no such problems
+      LET nlo = ($indx)[g($dim)=ferretvar,($dim)="($region_($dim)_lo)"]
+      LET nhi = ($indx)[g($dim)=ferretvar,($dim)="($region_($dim)_hi)"]
+      LET nlo = `nlo - 1`
+      LET nhi = `nhi + 1`
+   ENDIF
 
+   LET alo = ($dim)[g($dim)=ferretvar,($indx)=`nlo`]
+   LET ahi = ($dim)[g($dim)=ferretvar,($indx)=`nhi`]
    DEFINE SYMBOL region_($dim)_plus = ($dim)=`alo`:`ahi`
 
 ENDIF
