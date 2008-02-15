@@ -4,7 +4,7 @@
    </operation>
    <operation name="Desktop application data access scripts"
         ID="Gen_Scripts" output_template="scripts"
-        service_action="Convert_to_Index" order="0600">
+        service_action="Convert_to_Index" order="0600" category="file">
         <service>ferret</service>
         <response ID="ConvertResp">
             <result type="index" ID="index" file_suffix=".xml"/>
@@ -32,7 +32,7 @@
         </grid_types>
         <optiondef IDREF="Options_gen_script"/>
        </operation>
-       <operation name="Overlay plot" ID="Overlay_Plot_2D" output_template="output" service_action="Overlay_Plot_2D" order="0200" private="true">
+       <operation name="Overlay plot" ID="Overlay_Plot_2D" output_template="output" service_action="Overlay_Plot_2D" order="0200" private="true" category="visualization" default="true" isZoomable="true">
           <service>ferret</service>
           <response ID="PlotResp">
              <result type="image" ID="plot_image" streamable="true" mime_type="image/png" file_suffix=".gif" />
@@ -56,7 +56,7 @@ streamable="true" mime_type="application/postscript"/> -->
           </grid_types>
           <optiondef IDREF="Options_2D"/>
     </operation>
-    <operation name="Difference plot" ID="Compare_Plot" output_template="output" service_action="Compare_Plot" order="0201" regrid_prn="true" private="true">
+    <operation name="Difference plot" ID="Compare_Plot" output_template="output" service_action="Compare_Plot" order="0201" regrid_prn="true" private="true" category="visualization" isZoomable="true">
           <service>ferret</service>
           <response ID="PlotResp">
              <result type="image" ID="plot_image" streamable="true" mime_type="image/png" file_suffix=".gif"/>
@@ -80,7 +80,7 @@ streamable="true" mime_type="application/postscript"/> -->
           <optiondef IDREF="Options_Compare"/>
     </operation>
     <operation name="Adjacent plots (GIF only)" ID="SidebySide_Plot_2D"
-        output_template="side_by_side" service_action="SideBySide" order="0202">
+        output_template="side_by_side" service_action="SideBySide" order="0202" category="visualization" isZoomable="true">
         <operation name="2D Plot" ID="Side1" output_template="output"
             service_action="Side1">
             <service>ferret</service>
@@ -123,7 +123,7 @@ streamable="true" mime_type="application/postscript"/> -->
         </operation>
     </operation>
 
-    <operation name="Line plot comparison" ID="Plot_1D_SlideSorter" output_template="SlideSorter" service_action="" order="0801">
+    <operation name="Line plot comparison" ID="Plot_1D_SlideSorter" output_template="SlideSorter" service_action="" order="0801" category="visualization">
           <service>template</service>
           <region>
             <intervals name="x" />
@@ -136,7 +136,7 @@ streamable="true" mime_type="application/postscript"/> -->
           </grid_types>
     </operation>
 
-    <operation name="Line plot" ID="Plot_1D" output_template="output" service_action="Plot_1D" order="0102">
+    <operation name="Line plot" ID="Plot_1D" output_template="output" service_action="Plot_1D" order="0102" category="visualization" isZoomable="true">
           <service>ferret</service>
           <response ID="PlotResp">
              <result type="image" ID="plot_image" streamable="true" mime_type="image/png" file_suffix=".gif"/>
@@ -158,7 +158,7 @@ streamable="true" mime_type="application/postscript"/> -->
           <optiondef IDREF="Options_1D"/>
     </operation>
 
-    <operation name="Color plot comparison" ID="Plot_2D_XY_SlideSorter" output_template="SlideSorter" service_action="">
+    <operation name="Color plot comparison" ID="Plot_2D_XY_SlideSorter" output_template="SlideSorter" service_action="" category="visualization">
         <service>template</service>
         <region>
             <intervals name="xy" />
@@ -169,7 +169,7 @@ streamable="true" mime_type="application/postscript"/> -->
     </operation>
 
     <operation name="Color plot" ID="Plot_2D_XY"
-        output_template="output" service_action="Plot_2D_XY" order="0100">
+        output_template="output" service_action="Plot_2D_XY" order="0100" category="visualization" default="true" isZoomable="true">
         <service>ferret</service>
         <response ID="PlotResp">
             <result type="image" ID="plot_image" streamable="true"
@@ -192,7 +192,7 @@ streamable="true" mime_type="application/postscript"/> -->
 
 <!-- Operations for xy map - just a map, no dataset or variable other than topo -->
     <operation name="xy map" ID="xy_map"
-        output_template="output" service_action="xy_map" private="true" order="9999">
+        output_template="output" service_action="xy_map" private="true" order="9999" isZoomable="true">
         <service>ferret</service>
         <response ID="PlotResp">
             <result type="image" ID="plot_image" streamable="true"
@@ -215,7 +215,7 @@ streamable="true" mime_type="application/postscript"/> -->
 
 <!-- Animation on browser (fast response) [public]-->
     <!-- animate XY plots -->
-    <operation name="Animation" ID="Animation_2D_XY" output_template="output_animation" service_action="Data_Extract_Frames" order="9999">
+    <operation name="Animation" ID="Animation_2D_XY" output_template="output_animation" service_action="Data_Extract_Frames" order="9999" category="animation" default="true">
           <service>ferret</service>
           <response ID="Data_Extract_Frames_Response">
               <result type="xml" ID="ferret_listing" streamable="true" mime_type="text/xml" file_suffix=".xml"/>
@@ -232,7 +232,7 @@ streamable="true" mime_type="application/postscript"/> -->
     </operation>
 
     <!-- animate XZ or YZ plots -->
-    <operation name="Animation" ID="Animation_2D" output_template="output_animation" service_action="Data_Extract_Frames" order="9999">
+    <operation name="Animation" ID="Animation_2D" output_template="output_animation" service_action="Data_Extract_Frames" order="9999" category="animation">
           <service>ferret</service>
           <response ID="Data_Extract_Frames_Response">
               <result type="xml" ID="ferret_listing" streamable="true" mime_type="text/xml" file_suffix=".xml"/>
@@ -251,7 +251,7 @@ streamable="true" mime_type="application/postscript"/> -->
     </operation>
     
     <!-- animate X, Y, or Z plots -->
-    <operation name="Animation" ID="Animation_1D" output_template="output_animation" service_action="Data_Extract_Frames" order="9999">
+    <operation name="Animation" ID="Animation_1D" output_template="output_animation" service_action="Data_Extract_Frames" order="9999" category="animation">
           <service>ferret</service>
           <response ID="Data_Extract_Frames_Response">
               <result type="xml" ID="ferret_listing" streamable="true" mime_type="text/xml" file_suffix=".xml"/>
@@ -275,7 +275,7 @@ streamable="true" mime_type="application/postscript"/> -->
     <!-- BEGIN: dynamic overlay on Google Earth -->
     <!-- for non-vector plots [public]-->
     <operation name="Plot to Google Earth" ID="Plot_GE_Overlay"  mime_type="application/vnd.google-earth.kml+xml"
-        output_template="output_GE_overlay" service_action="Plot_2D_GE" >
+        output_template="output_GE_overlay" service_action="Plot_2D_GE" category="virtual_globe" default="true">
         <service>ferret</service>
         <response ID="PlotResp">
                 <result type="debug" ID="debug" file_suffix=".txt"/>
@@ -291,7 +291,7 @@ streamable="true" mime_type="application/postscript"/> -->
     </operation>
     <!-- for vector plots [private]; only visible on V6 UI-->
     <operation name="Vector Plot to Google Earth" ID="Vector_GE_Overlay"  mime_type="application/vnd.google-earth.kml+xml"
-        output_template="output_GE_overlay" service_action="Plot_vector_GE" private="true">
+        output_template="output_GE_overlay" service_action="Plot_vector_GE" private="true" category="virtual_globe">
         <service>ferret</service>
         <response ID="PlotResp">
                 <result type="debug" ID="debug" file_suffix=".txt"/>
@@ -309,7 +309,7 @@ streamable="true" mime_type="application/postscript"/> -->
 
     <!-- Begin: static overlay -->
     <!-- overlay kml for non-vector plots [private]; it is used by the dynamic overlay-->
-    <operation name="Plot to Google Earth (static)" ID="Plot_GE_kml" mime_type="application/vnd.google-earth.kml+xml" output_template="output_GE" private="true">
+    <operation name="Plot to Google Earth (static)" ID="Plot_GE_kml" mime_type="application/vnd.google-earth.kml+xml" output_template="output_GE" private="true" category="virtual_globe">
       <operation name="Plot_2D_GE" ID="Plot_for_GE" service_action="Plot_2D_GE">
         <response ID="PlotResp">
                         <result type="image" ID="plot_image" streamable="true" mime_type="image/png" file_suffix=".gif"/>
@@ -343,7 +343,7 @@ streamable="true" mime_type="application/postscript"/> -->
     </operation>
 
     <!-- overlay kml for vector plots [private]; it is used by the dynamic overlay-->
-    <operation name="Plot to Google Earth (static)" ID="Vector_GE_kml" mime_type="application/vnd.google-earth.kml+xml" output_template="output_GE" private="true">
+    <operation name="Plot to Google Earth (static)" ID="Vector_GE_kml" mime_type="application/vnd.google-earth.kml+xml" output_template="output_GE" private="true" category="virtual_globe">
       <operation name="Plot_vector_GE" ID="Vector_for_GE" service_action="Plot_vector_GE">
         <response ID="PlotResp">
           <result type="image" ID="plot_image" streamable="true" mime_type="image/png" file_suffix=".gif"/>
@@ -378,7 +378,7 @@ streamable="true" mime_type="application/postscript"/> -->
 
     <!-- BEGIN: grid points on Google Earth [public] -->
     <!-- place mark kml for grid points -->
-    <operation name="Time Series/Vertical Profiles from Google Earth" ID="Grid_GE_kml" mime_type="application/vnd.google-earth.kml+xml" output_template="output_GE">
+    <operation name="Time Series/Vertical Profiles from Google Earth" ID="Grid_GE_kml" mime_type="application/vnd.google-earth.kml+xml" output_template="output_GE" category="virtual_globe">
       <operation name="Data_Extract_Grid" ID="Grid_for_GE" service_action="Data_Extract_Grid">
         <response ID="Data_Extract_Grid_Response">
           <result type="text" ID="ferret_listing" streamable="true" mime_type="text/plain" file_suffix=".txt"/>
@@ -408,7 +408,7 @@ streamable="true" mime_type="application/postscript"/> -->
     <!-- END: grid on Google Earth -->
 
     <!-- Google Earth: 1D plot [private]-->
-    <operation name="1D Plot" ID="Plot_1D_GE" output_template="output_response" service_action="Plot_1D" private="true" order="0704">
+    <operation name="1D Plot" ID="Plot_1D_GE" output_template="output_response" service_action="Plot_1D" private="true" order="0704" category="visualization">
           <service>ferret</service>
           <response ID="PlotResp">
              <result type="image" ID="plot_image" streamable="true" mime_type="image/png" file_suffix=".gif"/>
@@ -432,7 +432,7 @@ streamable="true" mime_type="application/postscript"/> -->
 
     <!-- Google Earth: extract grid locations used by placemarks KML [private]-->
     <operation name="Grid locations" ID="Data_Extract_Grid"
-        output_template="output_response" service_action="Data_Extract_Grid" private="true" order="9999">
+        output_template="output_response" service_action="Data_Extract_Grid" private="true" order="9999" category="virtual_globe">
         <service>ferret</service>
         <response ID="Data_Extract_Grid_Response">
                 <result type="text" ID="ferret_listing" streamable="true"
@@ -464,7 +464,7 @@ streamable="true" mime_type="application/postscript"/> -->
 
     <!-- Google Earth: animation kml for xyt view [private] -->
     <operation name="Google Earth Animation" ID="Google_Earth_Animation"
-        output_template="output_GE_animation" service_action="Data_Extract_Frames" private="true" order="9999">
+        output_template="output_GE_animation" service_action="Data_Extract_Frames" private="true" order="9999" category="virtual_globe">
         <service>ferret</service>
         <response ID="Data_Extract_Frames_Response">
                 <result type="xml" ID="ferret_listing" streamable="true"
@@ -514,7 +514,7 @@ streamable="true" mime_type="application/postscript"/> -->
     </operation>
 <!-- End of operation for WMS -->
 
-    <operation name="Color plot comparison" ID="Plot_2D_SlideSorter" output_template="SlideSorter" service_action="">
+    <operation name="Color plot comparison" ID="Plot_2D_SlideSorter" output_template="SlideSorter" service_action="" category="visualization">
         <service>template</service>
         <region>
             <!--  xy has its own operation -->
@@ -530,7 +530,7 @@ streamable="true" mime_type="application/postscript"/> -->
     </operation>
 
     <operation name="Color plot" ID="Plot_2D" output_template="output"
-        service_action="Plot_2D" order="0101">
+        service_action="Plot_2D" order="0101" category="visualization" isZoomable="true">
         <service>ferret</service>
         <response ID="PlotResp">
             <result type="image" ID="plot_image" streamable="true"
@@ -556,7 +556,7 @@ streamable="true" mime_type="application/postscript"/> -->
         <optiondef IDREF="Options_2D_image_contour"/>
     </operation>
     <operation name="Vector plot" ID="Plot_vector"
-        output_template="output" service_action="Plot_vector" order="0103" private="true">
+        output_template="output" service_action="Plot_vector" order="0103" private="true" category="visualization" isZoomable="true">
         <service>ferret</service>
         <response ID="PlotResp">
             <result type="image" ID="plot_image" streamable="true"
@@ -585,7 +585,7 @@ streamable="true" mime_type="application/postscript"/> -->
     <operation name="Table of difference values (text)" 
         ID="Compare_Data_Extract"
         output_template="table" 
-        service_action="Compare_Data_Extract" private="true" order="0300">
+        service_action="Compare_Data_Extract" private="true" order="0300" category="table" default="true">
         <service>ferret</service>
         <response ID="Data_Extract_Response">
             <result type="text" ID="ferret_listing" streamable="true"
@@ -616,7 +616,7 @@ streamable="true" mime_type="application/postscript"/> -->
     </operation>
     <operation name="NetCDF difference file"
         ID="Compare_Data_netCDF" output_template="netcdf"
-        service_action="Compare_Data_Extract_netCDF" order="0500" private="true">
+        service_action="Compare_Data_Extract_netCDF" order="0500" private="true" category="file">
         <service>ferret</service>
         <response ID="Data_Extract_netCDF_Response">
             <result type="netcdf" ID="ferret_listing" file_suffix=".nc"/>
@@ -646,7 +646,7 @@ streamable="true" mime_type="application/postscript"/> -->
     </operation>
     <operation name="ASCII difference file"
         ID="Compare_Data_Extract_File" output_template="ascii"
-        service_action="Compare_Data_Extract_File" order="0400" private="true">
+        service_action="Compare_Data_Extract_File" order="0400" private="true" category="file" default="true">
         <service>ferret</service>
         <response ID="Data_Extract_File_Response">
             <result type="ascii" ID="ferret_listing" streamable="true"
@@ -677,7 +677,7 @@ streamable="true" mime_type="application/postscript"/> -->
     </operation>
     <!-- End of Data Extract operations for differences. -->
     <operation name="Table of values (text)" ID="Data_Extract"
-        output_template="table" service_action="Data_Extract" order="0300">
+        output_template="table" service_action="Data_Extract" order="0300" category="table" default="true">
         <service>ferret</service>
         <response ID="Data_Extract_Response">
             <result type="text" ID="ferret_listing" streamable="true"
@@ -709,7 +709,7 @@ streamable="true" mime_type="application/postscript"/> -->
     </operation>
     <operation name="NetCDF file"
         ID="Data_Extract_netCDF" output_template="netcdf"
-        service_action="Data_Extract_netCDF" order="0500">
+        service_action="Data_Extract_netCDF" order="0500" category="file">
         <service>ferret</service>
         <response ID="Data_Extract_netCDF_Response">
             <result type="netcdf" ID="ferret_listing" file_suffix=".nc"/>
@@ -740,7 +740,7 @@ streamable="true" mime_type="application/postscript"/> -->
     </operation>
     <operation name="ASCII file"
         ID="Data_Extract_File" output_template="ascii"
-        service_action="Data_Extract_File" order="0400">
+        service_action="Data_Extract_File" order="0400" category="file" default="true">
         <service>ferret</service>
         <response ID="Data_Extract_File_Response">
             <result type="ascii" ID="ferret_listing" streamable="true"
@@ -772,7 +772,7 @@ streamable="true" mime_type="application/postscript"/> -->
     </operation>
     <operation name="ArcView gridded"
         ID="Data_Extract_ArcView" output_template="arcview"
-        service_action="Data_Extract_ArcView" order="0800">
+        service_action="Data_Extract_ArcView" order="0800" category="file">
         <service>ferret</service>
         <response ID="Data_Extract_File_Response">
             <result type="arc" ID="ferret_listing" file_suffix=".asc"/>
@@ -786,21 +786,21 @@ streamable="true" mime_type="application/postscript"/> -->
         </grid_types>
         <optiondef IDREF="Options_Data"/>
     </operation>
-    <operation name="Database Extraction" ID="DBExtract" output_template="dbnetcdf" service_action="sql" order="0501">
+    <operation name="Database Extraction" ID="DBExtract" output_template="dbnetcdf" service_action="sql" order="0501" category="file">
        <response ID="DBExtractResponse">
           <result type="debug" ID="db_debug" file_suffix=".txt"/>
           <result type="netCDF" ID="netcdf" file_suffix=".nc"/>
        </response>
        <service>database</service>
     </operation>
-    <operation name="Table of values (text)" ID="DBExtractRowset" output_template="webrowset" service_action="sql" order="0501">
+    <operation name="Table of values (text)" ID="DBExtractRowset" output_template="webrowset" service_action="sql" order="0501" category="table">
        <response ID="DBExtractRowsetResponse">
           <result type="debug" ID="db_debug" file_suffix=".txt"/>
           <result type="webrowset" ID="webrowset" file_suffix=".xml"/>
        </response>
        <service>database</service>
     </operation>
-    <operation name="Location Plot" ID="Insitu_extract_location_plot" output_template="output" order="0104">
+    <operation name="Location Plot" ID="Insitu_extract_location_plot" output_template="output" order="0104" category="visualization">
           <operation name="Database Extraction" ID="DBExtract" output_template="ascii" service_action="sql">
                <response ID="DBExtractResponse">
                     <result type="debug" ID="db_debug" file_suffix=".txt"/>
@@ -852,7 +852,7 @@ streamable="true" mime_type="application/postscript"/> -->
         </grid_types>
     </operation>
     <operation name="Location and Value Plot"
-        ID="Insitu_extract_location_value_plot" output_template="output" order="0105">
+        ID="Insitu_extract_location_value_plot" output_template="output" order="0105" category="visualization">
         <operation name="Database Extraction" ID="DBExtract"
             output_template="ascii" service_action="sql">
             <response ID="DBExtractResponse">
@@ -909,7 +909,7 @@ streamable="true" mime_type="application/postscript"/> -->
             <grid_type name="scattered" />
         </grid_types>
     </operation>
-    <operation name="DRDS Extraction" output_template="netcdf" ID="DRDSExtract" service_action="drds" order="0502">
+    <operation name="DRDS Extraction" output_template="netcdf" ID="DRDSExtract" service_action="drds" order="0502" category="file">
         <response ID="DBExtractResponse">
             <result type="debug" ID="db_debug" file_suffix=".txt"/>
             <result type="netCDF" ID="netcdf" file_suffix=".nc"/>
@@ -926,7 +926,7 @@ streamable="true" mime_type="application/postscript"/> -->
         <service>drds</service>
     </operation>
     <operation name="Extract DRDS Data and Plot Location and Value"
-        ID="DRDS_extract_location_value_plot" output_template="output" order="0106">
+        ID="DRDS_extract_location_value_plot" output_template="output" order="0106" category="visualization">
         <operation name="Database Extraction" ID="DRDSExtract"
             service_action="drds">
             <response ID="DBExtractResponse">
@@ -986,7 +986,7 @@ streamable="true" mime_type="application/postscript"/> -->
         </grid_types>
     </operation>
     <operation name="Extract DRDS Data and Plot Location"
-        ID="DRDS_extract_location_plot" output_template="output" order="0108">
+        ID="DRDS_extract_location_plot" output_template="output" order="0108" category="visualization">
         <operation name="Database Extraction" ID="DRDSExtract"
             service_action="drds">
             <response ID="DBExtractResponse">
@@ -1046,7 +1046,7 @@ streamable="true" mime_type="application/postscript"/> -->
         </grid_types>
     </operation>
     <operation name="Extract DRDS data and property_depth plot"
-        ID="DRDS_Property_Depth" output_template="output">
+        ID="DRDS_Property_Depth" output_template="output" category="visualization">
         <operation name="Database Extraction" ID="DRDSExtract"
             service_action="drds">
             <response ID="DBExtractResponse">
@@ -1109,7 +1109,7 @@ streamable="true" mime_type="application/postscript"/> -->
     <!--  End of DRDS Operations -->
     <!-- Beginning of Dapper Operations -->
         <operation name="Dapper Extraction" output_template="netcdf" ID="DapperExtract" service_action="dapper" order="0503">
-        <response ID="DBExtractResponse">
+        <response ID="DBExtractResponse" category="file">
             <result type="debug" ID="db_debug" file_suffix=".txt"/>
             <result type="netCDF" ID="netcdf" file_suffix=".nc" />
             <result type="cancel" ID="cancel" file_suffix=".txt" />
@@ -1125,7 +1125,7 @@ streamable="true" mime_type="application/postscript"/> -->
         <service>dapper</service>
     </operation>
     <operation name="Extract Dapper Data and Plot Location"
-        ID="Dapper_extract_location_plot" output_template="output" order="0110">
+        ID="Dapper_extract_location_plot" output_template="output" order="0110" category="visualization">
         <operation name="Database Extraction" ID="DapperExtract"
             service_action="dapper">
             <response ID="DBExtractResponse">
@@ -1145,7 +1145,7 @@ streamable="true" mime_type="application/postscript"/> -->
         </operation>
         <operation chained="true" name="Dapper location plot"
             ID="Plot_Dapper_XY_locations" output_template="output"
-            service_action="Plot_insitu_XY_locations">
+            service_action="Plot_insitu_XY_locations" category="visualization">
             <args>
                 <arg chained="true" type="variable" index="1"
                     operation="DapperExtract" result="netcdf" file_suffix=".nc"/>
@@ -1185,7 +1185,7 @@ streamable="true" mime_type="application/postscript"/> -->
         </grid_types>
     </operation>
     <operation name="Extract Dapper Data and Time Series Plot"
-        ID="Dapper_extract_time_series_plot" output_template="output" order="0140">
+        ID="Dapper_extract_time_series_plot" output_template="output" order="0140" category="visualization">
         <operation name="Database Extraction" ID="DapperExtract"
             service_action="dapper">
             <response ID="DBExtractResponse">
@@ -1205,7 +1205,7 @@ streamable="true" mime_type="application/postscript"/> -->
         </operation>
         <operation chained="true" name="Dapper time series plot"
             ID="Plot_Dapper_Time_Series" output_template="output"
-            service_action="dapper_stack_line">
+            service_action="dapper_stack_line" category="visualization">
             <args>
                 <arg chained="true" type="variable" index="1"
                     operation="DapperExtract" result="netcdf" file_suffix=".nc"/>
@@ -1257,7 +1257,7 @@ streamable="true" mime_type="application/postscript"/> -->
 
 
 <!-- Begin: interactive 2d XY plot additions -->
-    <operation name="Color plot" ID="XY_2D_zoom" output_template="newImageInfo" service_action="Plot_2D_XY" private="true">
+    <operation name="Color plot" ID="XY_2D_zoom" output_template="newImageInfo" service_action="Plot_2D_XY" isZoomable="true" private="true" category="visualization">
           <service>ferret</service>
           <response ID="PlotResp">
              <result type="image" ID="plot_image" streamable="true" mime_type="image/png"/>
@@ -1275,7 +1275,7 @@ streamable="true" mime_type="application/postscript"/> -->
           </grid_types>
 
     </operation>
-    <operation name="Interactive color plot" ID="XY_zoomable_image" output_template="zoom_2D_XY" service_action="Plot_2D_XY">
+    <operation name="Interactive color plot" ID="XY_zoomable_image" isZoomable="true" output_template="zoom_2D_XY" service_action="Plot_2D_XY" category="visualization">
           <service>ferret</service>
           <response ID="PlotResp">
              <result type="image" ID="plot_image" streamable="true" mime_type="image/png"/>
@@ -1297,7 +1297,7 @@ streamable="true" mime_type="application/postscript"/> -->
 <!-- End: interactive 2d XY plot additions -->
 
 <!-- Begin: interactive plot additions -->
-    <operation name="2D Plot" ID="Zoom_2D" output_template="newImageInfo" service_action="Plot_2D">
+    <operation name="2D Plot" ID="Zoom_2D" output_template="newImageInfo" service_action="Plot_2D" isZoomable="true">
           <service>ferret</service>
           <response ID="PlotResp">
              <result type="image" ID="plot_image" streamable="true" mime_type="image/png"/>
@@ -1308,7 +1308,7 @@ streamable="true" mime_type="application/postscript"/> -->
              <result type="cancel" ID="cancel"/>
           </response>
     </operation>
-    <operation name="2D Zoom" ID="Zoomable_image" output_template="zoom_2D" service_action="Plot_2D">
+    <operation name="2D Zoom" ID="Zoomable_image" output_template="zoom_2D" service_action="Plot_2D" category="visualization" isZoomable="true">
           <service>ferret</service>
           <response ID="PlotResp">
              <result type="image" ID="plot_image" streamable="true" mime_type="image/png"/>
