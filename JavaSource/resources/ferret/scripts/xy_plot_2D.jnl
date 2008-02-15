@@ -110,6 +110,11 @@ DEFINE SYMBOL plot_type =($ferret_contour_style"FILL|default>FILL|raster>SHADE|c
 DEFINE SYMBOL shade_underlay = FALSE
 IF ($plot_type"0|FILL>1|*>0) THEN DEFINE SYMBOL shade_underlay = TRUE
 
+! For a SHADE plot in curvilinear coordinates we may want the /MODULO qualifier
+IF `($ferret_curvi_quals"0|*>1") AND ($plot_type"0|SHADE>1|*>0)` THEN 
+   IF ($ferret_lon_modulo"1|1|0|yes>1|no>0|*>0") THEN  DEFINE SYMBOL qualifiers = ($quals)/MODULO
+ENDIF
+
 ! When doing the FILL over SHADE, the plot around the edges shows wierd effects - the shade
 ! showing but the fill stops short.  Use /HLIM and /VLIM to get the exact region requested,
 ! and request the plot variable for the SHADE command on a +1 cell size larger region.
