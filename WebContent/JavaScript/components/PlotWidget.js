@@ -70,6 +70,8 @@ function PlotWidget(Plot) {
   this.pixelToUserX = PlotWidget_pixelToUserX;
   this.pixelToUserY = PlotWidget_pixelToUserY;
 
+  this.showSelectionDiv = PlotWidget_showSelectionDiv;
+
   // Initialization
 
 /**
@@ -264,7 +266,7 @@ function PlotWidget_render(element_id,type) {
   SelectionDiv.style.border = border_style;
   SelectionDiv.style.backgroundColor = this.selectionBackgroundColor;
   SelectionDiv.style.opacity = this.selectionOpacity;
-  SelectionDiv.style.visibility = 'visible';
+  SelectionDiv.style.visibility = 'hidden';
   SelectionDiv.onmousedown = PlotWidget_mouseDown;
   SelectionDiv.onmousemove = PlotWidget_mouseMove;
   SelectionDiv.onmouseup = PlotWidget_mouseUp;
@@ -367,6 +369,15 @@ function PlotWidget_show() {
   node.style.visibility = 'visible';
 // TODO:  Show all child nodes.
   this.visible = 1;
+}
+
+/**
+ * Sets the Widget SelectionDiv visibility to 'visible'.
+ */
+function PlotWidget_showSelectionDiv() {
+  var id_text = this.element_id + '_SelectionDiv';
+  var SelectionDiv = document.getElementById(id_text);
+  SelectionDiv.style.visibility = 'visible';
 }
 
 /**
@@ -483,6 +494,7 @@ function PlotWidget_mouseMove(e) {
     // Now resize the Selection DIV 
     PW.resizeSelection(pos_X,pos_Y);
     PW.mouseDrag = 1;
+    PW.showSelectionDiv();
   }
 }
 
