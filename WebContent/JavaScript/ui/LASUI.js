@@ -18,7 +18,8 @@ function LASUI () {
 		"getGrid" : {"url" : "getGrid.do"},
 		"getViews" : {"url" : "getViews.do"},
 		"getOperations" : {"url" : "getOperations.do"},
-		"getOptions" : {"url" : "getOptions.do"}
+		"getOptions" : {"url" : "getOptions.do"},
+		"getMetadata" : {"url" : "getMetadata.do"}
 	};
 
 	//application state
@@ -174,70 +175,9 @@ LASUI.prototype.showInfo = function (evt) {
 	var node = args[1];
 	var i = args[2];
 	if(node.category)
-		if(node.category.getChild(i))
-			if(node.category.getChild(i).properties) {
-			var infobox = document.createElement("DIV");
-			infobox.className = "LASMetadataDIVNode"; 
-			infobox.style.left = "150pt";
-			infobox.style.top = "150pt";
-			var cancel = document.createElement("INPUT");
-			cancel.type = "submit";
-			this.toggleUIMask('');
-			//cancel.className = "LASCancelButton";
-			cancel.value = "Close";
-			cancel.onclick = this.genericHandler.LASBind(this,"arguments[2].parentNode.removeChild(arguments[2]);this.toggleUIMask('none');",infobox);
-			infobox.appendChild(cancel);
-			var property_group=[];
-			if(!node.category.getChild(i).properties.property_group.length)
-				property_group[0] = node.category.getChild(i).properties.property_group;
-			else
-				property_group = node.category.getChild(i).properties.property_group;
-			for(var n in property_group) {
-				var group = property_group[n];
-				var table = document.createElement("table");
-				
-				table.className = "LASMetadataTableNode";
-				var tbody = document.createElement("tbody");
-				var title = document.createElement("td");
-				var tr = document.createElement("tr");
-				title.innerHTML = "<b>Property group " + group.type + "</b>";
-					//title.colSpan =(group.property.length-1);
-				tr.appendChild(title);
-				tbody.appendChild(tr);
-				var tr = document.createElement("tr");
-				var	 td = document.createElement("td");
-				td.innerHTML = "<b>Property name</b>";
-				tr.appendChild(td);
-				var property =[];
-				if(!group.property.length)
-					property[0] = group.property;
-				else
-					property = group.property;
-				for(var i=0;i<property.length;i++) {
-					var	 td = document.createElement("td");
-					td.innerHTML = property[i].name;
-					tr.appendChild(td);
-				}
-				tbody.appendChild(tr);
-				var tr = document.createElement("tr");
-				var	 td = document.createElement("td");
-				td.innerHTML = "<b>Property value</b>";
-				tr.appendChild(td);
-				for(var i=0;i<property.length;i++) {
-					var	 td = document.createElement("td");
-					td.innerHTML = property[i].value;
-					tr.appendChild(td);
-				}
-				tbody.appendChild(tr);
-			
-				if (table) {
-					table.appendChild(tbody);
-					infobox.appendChild(table);
-				}
-			}
-			if(infobox)
-				document.body.appendChild(infobox);
-		}
+		if(node.category.getChildID(i))
+			window.open(this.hrefs.getMetadata.url + '?dsid=' + node.category.getChildID(i));
+		
 }
 /**
  * Sub method to load a UI category or variable tree node from a json response
@@ -299,16 +239,16 @@ LASUI.prototype.createCategoryTreeNode = function (node, i, id) {
 	td2.innerHTML = node.category.getChildName(i);
 	td2.className = "LASTreeTableCell";
 	td2.style.textAlign  = "left";
-	//var td3 = document.createElement("TD");
-	//node.children[i].A = document.createElement("A");
-	//node.children[i].A.innerHTML = "<img src='images/icon_info.gif'>";
-	//node.children[i].A.onclick = "window.open()";this.showInfo.LASBind(this,node,i);
-	//td3.appendChild(node.children[i].A);
-	//td3.className = "LASTreeTableCell";
-	//td3.width="12pt";	
+	var td3 = document.createElement("TD");
+	node.children[i].A = document.createElement("A");
+	node.children[i].A.innerHTML = "<img src='images/icon_info.gif'>";
+	node.children[i].A.onclick = this.showInfo.LASBind(this,node,i);
+	td3.appendChild(node.children[i].A);
+	td3.className = "LASTreeTableCell";
+	td3.width="12pt";	
 	tr.appendChild(td1);
 	tr.appendChild(td2);
-	//tr.appendChild(td3);
+	tr.appendChild(td3);
 	tbody.appendChild(tr);
 	table.appendChild(tbody);
 	node.children[i].LINode.appendChild(table);
@@ -363,18 +303,18 @@ LASUI.prototype.createVariableTreeNode = function (node, i) {
 	td2.align = "left";
 	td2.className = "LASTreeTableCell";
 	
-   var td3 = document.createElement("TD");
-	td3.align = "right";
-	td3.className = "LASTreeTableCell";
-   td3.width="12px";
-   node.children[i].A = document.createElement("A");
-	node.children[i].A.innerHTML = "<img src='images/icon_info.gif'>";
-	node.children[i].A.onclick = this.showInfo.LASBind(this,node,i);
-	td3.appendChild(node.children[i].A);
+ //  var td3 = document.createElement("TD");
+//	td3.align = "right";
+//	td3.className = "LASTreeTableCell";
+  // td3.width="12px";
+   //node.children[i].A = document.createElement("A");
+	//node.children[i].A.innerHTML = "<img src='images/icon_info.gif'>";
+	//node.children[i].A.onclick = this.showInfo.LASBind(this,node,i);
+	//td3.appendChild(node.children[i].A);
 	
 	tr.appendChild(td1);
 	tr.appendChild(td2);
-	tr.appendChild(td3);
+//	tr.appendChild(td3);
 	tbody.appendChild(tr);
 	table.appendChild(tbody);	
 	node.children[i].LINode.appendChild(table);
@@ -804,7 +744,7 @@ LASUI.prototype.setDefaultProductMenu = function () {
 	var defaultProduct = null;
 	for (var type in this.products)
 		for(var product in this.products[type])
-			if(this.refs.views.views.getViewByID(this.products[type][product].view)) {
+			if(this.refs.views.views.getViewByID(this.products[type][product].view) || type == "Download Data") {
 				if(!this.refs.operations.children)
 					this.refs.operations.children = {};
 				if(!this.refs.operations.children[type])
@@ -814,9 +754,12 @@ LASUI.prototype.setDefaultProductMenu = function () {
 					var defaultProduct = this.products[type][product];
 					var defaultProductName = product;				
 				}				
-				if(this.state.operation == this.products[type][product].id && this.state.view == this.products[type][product].view) {
+				if(this.state.operation == this.products[type][product].id /*&& this.state.view == this.products[type][product].view*/ ) {
 					setDefault = false;
-					this.refs.operations.children[product].radio.checked = true;
+					if( type != "Download Data")
+						this.refs.operations.children[product].radio.checked = true;
+					else
+						this.refs.operations.children[type].radio.checked = true;
 					this.setOperation(this,this.products[type][product].id,this.products[type][product].view,this.products[type][product].optiondef);				
 				}
 			}
@@ -836,25 +779,65 @@ LASUI.prototype.setProductTypeNode = function(type) {
 	this.refs.operations.children[type].title.innerHTML = "<b>" + type + "</b>";
 	this.refs.operations.children[type].LINode.className = "LASPlotCategory";
 	this.refs.operations.children[type].LINode.appendChild(this.refs.operations.children[type].title);
+	//this.refs.operations.children[type].LINode.appendChild(this.refs.operations.children[type].ULNode);
 	this.refs.operations.ULNode.appendChild(this.refs.operations.children[type].LINode);
+	if(type=="Download Data") {
+		this.refs.operations.children[type].SELECTNode = document.createElement("SELECT");
+		this.refs.operations.children[type].radio = document.createElement("INPUT");
+		this.refs.operations.children[type].SELECTNode.onchange = function (evt) {this.options[this.selectedIndex].onselect();};
+		var label = document.createElement("LI");
+		label.className="LASPlotType";
+		this.refs.operations.children[type].radio.type = "radio";
+		this.refs.operations.children[type].radio.className = "LASRadioInputNode";
+		this.refs.operations.children[type].radio.name = "product";
+		function selectDownload () {
+			arguments[1].onchange();
+		}
+		selectDownload.LASBind = function(object) {
+			var __method = this;
+			var args = [];	
+			for (var i = 0, length = arguments.length; i < length; i++)
+      				args.push(arguments[i]);	
+			var object = args.shift();
+			return function(event) {
+				return __method.apply(object, [event || window.event].concat(args));
+			}
+		}
+		this.refs.operations.children[type].radio.onclick = selectDownload.LASBind(this,this.refs.operations.children[type].SELECTNode);
+		label.appendChild(this.refs.operations.children[type].radio);
+		label.appendChild(this.refs.operations.children[type].SELECTNode);
+		this.refs.operations.ULNode.appendChild(label);
+	}
+}
+LASUI.prototype.downloadData = function() {
+
 }
 LASUI.prototype.setProductNode = function(type, product) {
-	
-	this.refs.operations.children[product] = {};
-	this.refs.operations.children[product].LINode = document.createElement("LI");
-	this.refs.operations.children[product].LINode.className = "LASPlotType";
-	this.refs.operations.children[product].title = document.createElement("TEXT");
-	this.refs.operations.children[product].title.innerHTML =  product;
-	this.refs.operations.children[product].radio = document.createElement("INPUT");
-	this.refs.operations.children[product].radio.type = "radio";
-	this.refs.operations.children[product].radio.name = "product";
-	this.refs.operations.children[product].radio.className = "LASRadioInputNode";
-	this.refs.operations.children[product].radio.value = product.id;
-	this.refs.operations.children[product].radio.onselect = this.setOperation.LASBind(this,this.products[type][product].id,this.products[type][product].view,this.products[type][product].optiondef );
-	this.refs.operations.children[product].radio.onclick = this.setOperation.LASBind(this,this.products[type][product].id,this.products[type][product].view,this.products[type][product].optiondef);	
-	this.refs.operations.children[product].LINode.appendChild(this.refs.operations.children[product].radio);	
-	this.refs.operations.children[product].LINode.appendChild(this.refs.operations.children[product].title);
-	this.refs.operations.ULNode.appendChild(this.refs.operations.children[product].LINode);
+	if(type!="Download Data") {
+		this.refs.operations.children[product] = {};
+		this.refs.operations.children[product].LINode = document.createElement("LI");
+		this.refs.operations.children[product].LINode.className = "LASPlotType";
+		this.refs.operations.children[product].title = document.createElement("TEXT");
+		this.refs.operations.children[product].title.innerHTML =  product;
+		this.refs.operations.children[product].radio = document.createElement("INPUT");
+		this.refs.operations.children[product].radio.type = "radio";
+		this.refs.operations.children[product].radio.name = "product";
+		this.refs.operations.children[product].radio.className = "LASRadioInputNode";
+		this.refs.operations.children[product].radio.value = product.id;
+		this.refs.operations.children[product].radio.onselect = this.setOperation.LASBind(this,this.products[type][product].id,this.products[type][product].view,this.products[type][product].optiondef );
+		this.refs.operations.children[product].radio.onclick = this.setOperation.LASBind(this,this.products[type][product].id,this.products[type][product].view,this.products[type][product].optiondef);	
+		this.refs.operations.children[product].LINode.appendChild(this.refs.operations.children[product].radio);	
+		this.refs.operations.children[product].LINode.appendChild(this.refs.operations.children[product].title);
+		this.refs.operations.ULNode.appendChild(this.refs.operations.children[product].LINode);
+	} else {
+		this.refs.operations.children[product] = {};
+		this.refs.operations.children[product].OPTIONNode = document.createElement("OPTION");
+		this.refs.operations.children[product].OPTIONNode.innerHTML =  product;
+		this.refs.operations.children[product].OPTIONNode.value = product.id;
+		this.refs.operations.children[product].OPTIONNode.onselect = this.setOperation.LASBind(this,this.products[type][product].id,this.products[type][product].view,this.products[type][product].optiondef);
+		this.refs.operations.children[product].OPTIONNode.onclick = this.setOperation.LASBind(this,this.products[type][product].id,this.products[type][product].view,this.products[type][product].optiondef);	
+		this.refs.operations.children[type].SELECTNode.appendChild(this.refs.operations.children[product].OPTIONNode);	
+	}
 }
 LASUI.prototype.onPlotLoad = function () {
 	if(document.getElementById(this.anchors.output).contentWindow.myMapWidget) {
