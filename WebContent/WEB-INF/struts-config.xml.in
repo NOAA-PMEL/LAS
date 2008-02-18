@@ -31,6 +31,7 @@
           <action name="constrain" path="/MyInitConstrain" scope="session" type="gov.noaa.pmel.tmap.las.ui.InitConstrainAction">
         <forward name="constrain" path="/myconstrain.jsp" />
           </action>
+          <action path="/getMetadata" type="gov.noaa.pmel.tmap.las.ui.getMetadata"/>
           <action path="/getViews" type="gov.noaa.pmel.tmap.las.ui.getViews" />
           <action path="/getGrid" type="gov.noaa.pmel.tmap.las.ui.getGrid" />
           <action path="/getOperations" type="gov.noaa.pmel.tmap.las.ui.getOperations" />

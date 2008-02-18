@@ -145,14 +145,7 @@ public class LASUIRequest extends LASDocument {
     public String getOperationXPath() {
         return this.getRootElement().getChild("link").getAttributeValue("match");
     }
-    public String getOperation() {
-    	String operationXPath = getOperationXPath();
-    	if ( operationXPath.contains("@ID") ) {
-    		return operationXPath.substring(operationXPath.indexOf("'")+1, operationXPath.lastIndexOf("'"));
-    	} else {
-    	    return operationXPath.substring(operationXPath.indexOf("/lasdata/operations/")+21, operationXPath.length());
-    	}
-    }
+    
     public String getSessionID() {
         String sessionID = this.getRootElement().getAttributeValue("SessionID");
         if (sessionID == null) {
@@ -340,16 +333,20 @@ public class LASUIRequest extends LASDocument {
     	ArrayList<String> vars = getVariables();
     	for (Iterator varIt = vars.iterator(); varIt.hasNext();) {
     		String varXPath = (String) varIt.next();
-    		if ( varXPath.contains("variables") ) {
-    			int isrt = varXPath.indexOf("/lasdata/datasets/");
-    			int iend = varXPath.indexOf("/variables/");			
-    			ids.add(varXPath.substring(isrt+18, iend));
+    		if (varXPath.contains("ID") ) {
+    			ids.add(varXPath.substring(varXPath.indexOf("[@ID='")+6, varXPath.indexOf("']")));
     		} else {
-    			// Assume it's a data set path and add it
-    			if ( varXPath.contains("datasets") ) {
+    			if ( varXPath.contains("variables") ) {
     				int isrt = varXPath.indexOf("/lasdata/datasets/");
-    				int iend = varXPath.length();
+    				int iend = varXPath.indexOf("/variables/");			
     				ids.add(varXPath.substring(isrt+18, iend));
+    			} else {
+    				// Assume it's a data set path and add it
+    				if ( varXPath.contains("datasets") ) {
+    					int isrt = varXPath.indexOf("/lasdata/datasets/");
+    					int iend = varXPath.length();
+    					ids.add(varXPath.substring(isrt+18, iend));
+    				}
     			}
     		}
     	}
