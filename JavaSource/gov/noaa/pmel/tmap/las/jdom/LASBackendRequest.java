@@ -671,7 +671,7 @@ public class LASBackendRequest extends LASDocument {
         return variables;
     }
     /**
-     * Returns an SQL formatted string containing the list of variable names separated by commas.
+     * Returns an SQL formatted string containing the list of variable names separated by commas with each variable surrounded by an IFNULL construct.
      * @return variablesString SQL formatted string
      */
     public String getVariablesAsStringWithIFNULL() throws LASException {
