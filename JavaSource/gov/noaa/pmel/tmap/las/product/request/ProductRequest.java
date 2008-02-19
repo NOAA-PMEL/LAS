@@ -293,14 +293,14 @@ public class ProductRequest {
                             String current_url = lasConfig.getDataObjectURL(varXPath);
                             String current_var = lasConfig.getVariableName(varXPath);
                             String current_title = lasConfig.getVariableTitle(varXPath);
-                            
+                            String current_ftds_url = lasConfig.getFTDSURL(varXPath);
                             String current_dsID = lasConfig.getVariableByXPath(varXPath).getDSID();
                             String current_gridID = lasConfig.getGrid(varXPath).getID();
                             
-                            if ( !datasetList.contains(current_dsID) ) {
-                            	datasetList.add(current_dsID);
+                            if ( !datasetList.contains(current_ftds_url) ) {
+                            	datasetList.add(current_ftds_url);
                             } 
-                            int dataset_number = datasetList.indexOf(current_dsID)+1;
+                            int dataset_number = datasetList.indexOf(current_ftds_url)+1;
 
                             // Neither is the easiest
                             if ( !regrid && !do_analysis ) {                               
