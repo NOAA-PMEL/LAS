@@ -100,15 +100,7 @@
 		}
 		function init () {
 			
-			LAS.onSetVariable=function() {
-				document.getElementById('categories').style.display='none';
-				this.toggleUIMask('none');		
-				var categories = this.state.categorynames[0];
-				for(var i=1;i<this.state.categorynames.length;i++)
-					categories += ' / ' + this.state.categorynames[i];
-				var variables = this.state.variables[this.state.dataset].name;
-				document.getElementById('breadcrumb').innerHTML = '<b>' + categories + ' : ' + variables + '</b>'; 			
-			}
+			
 			LAS.initUI();		
 		}
 		</script>

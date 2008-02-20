@@ -361,6 +361,15 @@ LASUI.prototype.getCategory = function (parentNode, i) {
 	} //else*/
 		//parentNode.children[i].ULNode.style.display="none";
 }
+LASUI.prototype.onSetVariable = function() {
+				document.getElementById('categories').style.display='none';
+				this.toggleUIMask('none');		
+				var categories = this.state.categorynames[0];
+				for(var i=1;i<this.state.categorynames.length;i++)
+					categories += ' / ' + this.state.categorynames[i];
+				var variables = this.state.variables[this.state.dataset].name;
+				document.getElementById('breadcrumb').innerHTML = '<a class="LASLink" onclick="window.open(\'getMetadata.do?dsid='+this.state.dataset+'\')"><img src="images/icon_info.gif"></a>&nbsp;<b>' + categories + ' : ' + variables + '</b>'; 			
+}
 /**
  * Event handler for category selection, bind to category DOM object events. 
  * @param {object} evt The event object
@@ -1583,13 +1592,27 @@ LASUI.prototype.setOptionTRNode = function (id,TBODYNode) {
 		TBODYNode.appendChild(obj.TRNode.cloneNode(true));	
 	}
 }
-LASUI.prototype.showOptionInfo = function() {
+LASUI.prototype.showOptionInfo = function(evt) {
 	var div = document.createElement("DIV");
-	div.innerHTML = arguments[1];
+	var close = document.createElement("INPUT");
+	var center = document.createElement("CENTER");
+
+	close.type = "submit";
+	close.onclick = this.hideOptionInfo.LASBind(this,div);
+	close.name = "Close";
+	close.value = "Close";
+	div.innerHTML += arguments[1];
 	div.className = "LASPopupDIVNode";
-	document.body.appendChild(div);
-	this.showUIMask();
+	div.style.left = evt.clientLeft + 20;
+	div.style.top = evt.clientTop + 20;
 	
+	center.appendChild(close);
+	div.appendChild(center);
+	document.body.appendChild(div);
+}
+LASUI.prototype.hideOptionInfo = function () {
+	var div = arguments[1];
+	div.parentNode.removeChild(div);
 }
 /**
  * Event handler to respond to option changes
