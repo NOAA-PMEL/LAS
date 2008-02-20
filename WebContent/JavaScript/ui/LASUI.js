@@ -1561,9 +1561,10 @@ LASUI.prototype.setOptionTRNode = function (id,TBODYNode) {
 		var A = document.createElement("A");
 		A.innerHTML = "<img src='images/icon_info.gif'>";
 		A.onclick = this.showOptionInfo.LASBind(this,this.refs.options.cache[id].help);
-		
+		TD3.appendChild(A);
 		this.refs.options.cache[id].TRNode.appendChild(TD1);	
 		this.refs.options.cache[id].TRNode.appendChild(TD2);
+		this.refs.options.cache[id].TRNode.appendChild(TD3);
 	} 	
 
 	if(TBODYNode == this.refs.options.ULNode.TBODYNode)	{
