@@ -1557,6 +1557,10 @@ LASUI.prototype.setOptionTRNode = function (id,TBODYNode) {
 			this.refs.options.cache[id].INPUTNode.className="LASTextInputNode";
 			TD2.appendChild(this.refs.options.cache[id].INPUTNode);
 		}
+		var TD3 = document.createElement("TD");		
+		var A = document.createElement("A");
+		A.innerHTML = "<img src='images/icon_info.gif'>";
+		A.onclick = this.showOptionInfo.LASBind(this,this.refs.options.cache[id].help);
 		
 		this.refs.options.cache[id].TRNode.appendChild(TD1);	
 		this.refs.options.cache[id].TRNode.appendChild(TD2);
@@ -1577,6 +1581,14 @@ LASUI.prototype.setOptionTRNode = function (id,TBODYNode) {
 			obj.INPUTNode.onchange = this.setOption.LASBind(this,id,"externalproperties",obj);
 		TBODYNode.appendChild(obj.TRNode.cloneNode(true));	
 	}
+}
+LASUI.prototype.showOptionInfo = function() {
+	var div = document.createElement("DIV");
+	div.innerHTML = arguments[1];
+	div.className = "LASPopupDIVNode;
+	document.body.appendChild(div);
+	this.showUIMask();
+	
 }
 /**
  * Event handler to respond to option changes
