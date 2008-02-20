@@ -176,7 +176,10 @@ LASUI.prototype.showInfo = function (evt) {
 	var i = args[2];
 	if(node.category)
 		if(node.category.getChildID(i))
-			window.open(this.hrefs.getMetadata.url + '?dsid=' + node.category.getChildID(i));
+			if(node.category.getChildChildrenType(i)=="variables")
+				window.open(this.hrefs.getMetadata.url + '?dsid=' + node.category.getChildID(i));
+			else
+				window.open(this.hrefs.getMetadata.url + '?catid=' + node.category.getChildID(i));
 		
 }
 /**
@@ -239,16 +242,18 @@ LASUI.prototype.createCategoryTreeNode = function (node, i, id) {
 	td2.innerHTML = node.category.getChildName(i);
 	td2.className = "LASTreeTableCell";
 	td2.style.textAlign  = "left";
-	var td3 = document.createElement("TD");
-	node.children[i].A = document.createElement("A");
-	node.children[i].A.innerHTML = "<img src='images/icon_info.gif'>";
-	node.children[i].A.onclick = this.showInfo.LASBind(this,node,i);
-	td3.appendChild(node.children[i].A);
-	td3.className = "LASTreeTableCell";
-	td3.width="12pt";	
 	tr.appendChild(td1);
 	tr.appendChild(td2);
-	tr.appendChild(td3);
+	if(node.category.getChildChildrenType(i)=="variables") {
+		var td3 = document.createElement("TD");
+		node.children[i].A = document.createElement("A");
+		node.children[i].A.innerHTML = "<img src='images/icon_info.gif'>";
+		node.children[i].A.onclick = this.showInfo.LASBind(this,node,i);
+		td3.appendChild(node.children[i].A);
+		td3.className = "LASTreeTableCell";
+		td3.width="12pt";	
+		tr.appendChild(td3);
+	}
 	tbody.appendChild(tr);
 	table.appendChild(tbody);
 	node.children[i].LINode.appendChild(table);
