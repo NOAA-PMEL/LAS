@@ -1585,7 +1585,7 @@ LASUI.prototype.setOptionTRNode = function (id,TBODYNode) {
 LASUI.prototype.showOptionInfo = function() {
 	var div = document.createElement("DIV");
 	div.innerHTML = arguments[1];
-	div.className = "LASPopupDIVNode;
+	div.className = "LASPopupDIVNode";
 	document.body.appendChild(div);
 	this.showUIMask();
 	
