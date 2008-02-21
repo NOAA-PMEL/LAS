@@ -123,8 +123,11 @@ IF `($data_num) EQ 1` THEN
    IF ($ferret_contour_levels"0|*>1") THEN DEFINE SYMBOL input_contour_levels = 1
    IF ($ferret_fill_levels"0|*>1") THEN DEFINE SYMBOL input_fill_levels = 1
 
-   IF `STRLEN("($ferret_view)") EQ 2 AND STRINDEX("($operation_ID)", "Plot") GT 0` THEN
-   IF `STRINDEX("($op)", "ANIMATION") EQ 0` THEN GO LAS_auto_levels  ! animation levels done elsewhere
+   IF `STRLEN("($ferret_view)") EQ 2 AND STRINDEX("($operation_ID)", "Plot") GT 0` THEN 
+      IF `STRINDEX("($op)", "ANIMATION") EQ 0` THEN GO LAS_auto_levels  ! animation levels done elsewhere
+   ENDIF
+   IF `STRLEN("($ferret_view)") EQ 2 AND STRINDEX("($operation_ID)", "zoom") GT 0` THEN GO LAS_auto_levels
+
 ENDIF
 
 ! End of $RCSfile ------------LAS_initialize_variable.jnl--------------------------
