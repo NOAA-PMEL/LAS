@@ -59,6 +59,25 @@ GO LAS_auto_levels_animate
 
 !for animation of 1D plots
 
+! If the user gave dependent axis scaling, 
+! remove any surrounding parentheses
+
+IF ($ferret_dep_axis_scale"0|*>1") THEN
+
+   IF `STRINDEX("($ferret_dep_axis_scale)", "(") GT 0` THEN
+      LET paren = `STRINDEX("($ferret_dep_axis_scale)", "(")`
+      LET slen = `STRLEN("($ferret_dep_axis_scale)")`
+      DEFINE SYMBOL ferret_dep_axis_scale = `SUBSTRING("($ferret_dep_axis_scale)", paren+1, slen-1)`
+     
+      LET paren = `STRINDEX("($ferret_dep_axis_scale)", ")")`
+      LET slen = `STRLEN("($ferret_dep_axis_scale)")`
+      DEFINE SYMBOL ferret_dep_axis_scale = `SUBSTRING("($ferret_dep_axis_scale)", 1, slen-1)`
+   ENDIF
+ENDIF
+
+! If dependent axis scale was not set by the user, determine a
+! consistent scale to use
+
 IF `($ferret_dep_axis_scale"1|*>0")` THEN
     LOAD the_var
     LET vmin = the_var[x=@min,y=@min,z=@min,t=@min]

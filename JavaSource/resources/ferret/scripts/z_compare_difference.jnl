@@ -104,9 +104,22 @@ GO LAS_set_diff_labels ($fview)
 ! Open the window, apply size, scale options
 GO LAS_open_window
 
-! If the user gave dependent axis scaling, check for third argument and add it if needed.
+! If the user gave dependent axis scaling, 
+! 1) remove any surrounding parentheses
+! 2) check for third argument and add it if needed.
 
 IF ($ferret_dep_axis_scale"0|*>1") THEN
+
+  IF `STRINDEX("($ferret_dep_axis_scale)", "(") GT 0` THEN
+     LET paren = `STRINDEX("($ferret_dep_axis_scale)", "(")`
+     LET slen = `STRLEN("($ferret_dep_axis_scale)")`
+     DEFINE SYMBOL ferret_dep_axis_scale = `SUBSTRING("($ferret_dep_axis_scale)", paren+1, slen-1)`
+     
+     LET paren = `STRINDEX("($ferret_dep_axis_scale)", ")")`
+     LET slen = `STRLEN("($ferret_dep_axis_scale)")`
+     DEFINE SYMBOL ferret_dep_axis_scale = `SUBSTRING("($ferret_dep_axis_scale)", 1, slen-1)`
+  ENDIF
+
   LET slen = STRLEN("($ferret_dep_axis_scale)")
   LET nc = 0
   REPEAT/RANGE=2:`slen`/NAME=m (let c = `m`; \
