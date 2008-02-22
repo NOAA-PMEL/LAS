@@ -231,6 +231,33 @@ streamable="true" mime_type="application/postscript"/> -->
           <optionsdef IDREF="Options_2D_image_contour_animation_xy"/>
     </operation>
 
+    <!-- used for extracting time frames only -->
+    <operation name="AnimationFrames" ID="Animation_Frames_XY" output_template="output_frames" service_action="Data_Extract_Frames" order="9999" category="animation" default="true">
+        <service>ferret</service>
+        <response ID="Data_Extract_Frames_Response">
+            <result type="xml" ID="ferret_listing" streamable="true" mime_type="text/xml" file_suffix=".xml"/>
+            <result type="debug" ID="debug" file_suffix=".txt"/>
+        </response>
+        <region>
+            <intervals name="xyt" />
+            <intervals name="xy" />
+            <intervals name="xzt" />
+            <intervals name="yzt" />
+            <intervals name="xz" />
+            <intervals name="yz" />
+            <intervals name="xt" />
+            <intervals name="yt" />
+            <intervals name="zt" />
+            <intervals name="x" />
+            <intervals name="y" />
+            <intervals name="z" />
+        </region>
+        <grid_types>
+            <grid_type name="regular" />
+        </grid_types>
+        <optionsdef IDREF="Options_2D_image_contour_animation_xy"/>
+    </operation>
+
     <!-- animate XZ or YZ plots -->
     <operation name="Animation" ID="Animation_2D" output_template="output_animation" service_action="Data_Extract_Frames" order="9999" category="animation">
           <service>ferret</service>
