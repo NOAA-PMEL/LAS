@@ -63,7 +63,7 @@ public class GenerateTabledapXml {
         //  "table": {
         //    "columnNames": ["griddap Access", "tabledap Access", "Title", "Institution", "Summary", "Info", "Background Info", "ID"],
         //    "rows": [
-        //      ["", "http://coastwatch.pfel.noaa.gov/erddap/tabledap/csc_mwfs/wt", "Buoy Data (Water Temperature) from the NOAA CSC microWFS", "NOAA CSC", "[Normally, the summary describes the dataset. Here, it describes \nthe server.] \nThe mission of the NOAA CSC Data Transport Laboratory (DTL) is to \nsupport the employment of data transport technologies that are \ncompatible with Ocean.US Data Management and Communications (DMAC) \nguidance at the local and regional levels. This is accomplished \nthrough the identification, evaluation, and documentation of \nrelevant data transport technology candidates. In following that \nmission, the DTL is exploring the use of the Open Geospatial \nConsortium (OGC) Web Feature Service (WFS) and the Geography \nMarkup Language (GML) Simple Feature Profile to transport in-situ \ntime series data.", "http://www.csc.noaa.gov/DTL/dtl_proj4_gmlsfp_wfs.html", "csc_mwfs/wt"],
+        //      ["", "http://coastwatch.pfel.noaa.gov/erddap/tabledap/cscWT", "Buoy Data (Water Temperature) from the NOAA CSC microWFS", "NOAA CSC", "[Normally, the summary describes the dataset. Here, it describes \nthe server.] \nThe mission of the NOAA CSC Data Transport Laboratory (DTL) is to \nsupport the employment of data transport technologies that are \ncompatible with Ocean.US Data Management and Communications (DMAC) \nguidance at the local and regional levels. This is accomplished \nthrough the identification, evaluation, and documentation of \nrelevant data transport technology candidates. In following that \nmission, the DTL is exploring the use of the Open Geospatial \nConsortium (OGC) Web Feature Service (WFS) and the Geography \nMarkup Language (GML) Simple Feature Profile to transport in-situ \ntime series data.", "http://www.csc.noaa.gov/DTL/dtl_proj4_gmlsfp_wfs.html", "cscWT"],
         Table datasetsTable = new Table();
         String jsonDatasets = SSR.getUrlResponseString(serverUrl + "index.json");
         String2.log("\njsonDatasets=" + jsonDatasets);
@@ -83,7 +83,7 @@ public class GenerateTabledapXml {
         int backgroundCol = datasetsTable.findColumnNumber("Background Info");
         if (backgroundCol < 0)
             throw new Exception("'Background Info'" + notFound);
-        int idCol = datasetsTable.findColumnNumber("ID");
+        int idCol = datasetsTable.findColumnNumber("Dataset ID");
         if (idCol < 0)
             throw new Exception("'ID'" + notFound);
 
@@ -99,7 +99,6 @@ public class GenerateTabledapXml {
         for (int dsRow = 0; dsRow < nDatasets; dsRow++) {
             //get the info table
             String id = datasetsTable.getStringData(idCol, dsRow);
-            String idForLAS = String2.replaceAll(id, '/', '_');  //serverID + "_" + 
             String title = datasetsTable.getStringData(titleCol, dsRow);
             String access = datasetsTable.getStringData(accessCol, dsRow);
             String info = datasetsTable.getStringData(infoCol, dsRow);
@@ -108,7 +107,7 @@ public class GenerateTabledapXml {
             Table infoTable = new Table();
             infoTable.readErddapInfo(info);
             writer.write(
-                "  <" + idForLAS + "\n" +
+                "  <" + id + "\n" +
                 "    name = \"" + title + "\"\n" +
                 "    url = \"" + serverUrl + "\"\n" +
                 "    doc = \"" + background + "\">\n" +  
@@ -120,7 +119,7 @@ public class GenerateTabledapXml {
                 "        <server>" + serverName + "</server>\n" + //???
                 "        <id>" + id + "</id>\n" +
                 "        <title>" + title + "</title>\n");  //???how differ from 'name' above
-            gridsSB.append("  <" + idForLAS + "_grid>\n");
+            gridsSB.append("  <" + id + "_grid>\n");
             int col = infoTable.findColumnNumber("longitude");
             if (col >= 0) {
                 PrimitiveArray pa = infoTable.columnAttributes(col).get("actual_range");
@@ -129,7 +128,7 @@ public class GenerateTabledapXml {
                     "        <longitude>longitude</longitude>\n" +
                     "        <lon_domain>" + domain + "</lon_domain>\n");
                 if (pa != null && pa.size() == 2) {
-                    gridsSB.append("    <link match=\"/lasdata/axes/" + idForLAS + "_X\"/>\n");
+                    gridsSB.append("    <link match=\"/lasdata/axes/" + id + "_X\"/>\n");
                     double dFirst = pa.getDouble(0);
                     double dLast  = pa.getDouble(1);
                     if (!Double.isNaN(dFirst) && !Double.isNaN(dLast)) {
@@ -137,9 +136,9 @@ public class GenerateTabledapXml {
                         int last =  Math2.roundToInt(Math.ceil( dLast));
                         if (first != last) {
                             axesSB.append(
-                                "  <" + idForLAS + "_X type=\"x\" units=\"degrees_east\">\n" +
+                                "  <" + id + "_X type=\"x\" units=\"degrees_east\">\n" +
                                 "    <arange start=\"" + first + "\" step=\"0.1\" size=\"" + ((last - first)*10 + 1) + "\"/>\n" +
-                                "  </" + idForLAS + "_X>\n");
+                                "  </" + id + "_X>\n");
                         }
                     }
                 }
@@ -150,7 +149,7 @@ public class GenerateTabledapXml {
                 writer.write(
                 "        <latitude>latitude</latitude>\n");
                 if (pa != null && pa.size() == 2) {
-                    gridsSB.append("    <link match=\"/lasdata/axes/" + idForLAS + "_Y\"/>\n");
+                    gridsSB.append("    <link match=\"/lasdata/axes/" + id + "_Y\"/>\n");
                     double dFirst = pa.getDouble(0);
                     double dLast  = pa.getDouble(1);
                     if (!Double.isNaN(dFirst) && !Double.isNaN(dLast)) {
@@ -158,9 +157,9 @@ public class GenerateTabledapXml {
                         int last =  Math2.roundToInt(Math.ceil( dLast));
                         if (first != last) {
                             axesSB.append(
-                                "  <" + idForLAS + "_Y type=\"y\" units=\"degrees_north\">\n" +
+                                "  <" + id + "_Y type=\"y\" units=\"degrees_north\">\n" +
                                 "    <arange start=\"" + first + "\" step=\"0.1\" size=\"" + ((last - first)*10 + 1) + "\"/>\n" +
-                                "  </" + idForLAS + "_Y>\n");
+                                "  </" + id + "_Y>\n");
                         }
                     }
                 }
@@ -173,7 +172,7 @@ public class GenerateTabledapXml {
                 "        <altitude_units>meters</altitude_units>\n" +
                 "        <positive>up</positive>\n");
                 if (pa != null && pa.size() == 2) {
-                    gridsSB.append("    <link match=\"/lasdata/axes/" + idForLAS + "_Z\"/>\n");
+                    gridsSB.append("    <link match=\"/lasdata/axes/" + id + "_Z\"/>\n");
                     double dFirst = pa.getDouble(0);
                     double dLast  = pa.getDouble(1);
                     if (!Double.isNaN(dFirst) && !Double.isNaN(dLast)) {
@@ -181,9 +180,9 @@ public class GenerateTabledapXml {
                         int last =  Math2.roundToInt(Math.ceil( dLast));
                         if (first != last) {
                             axesSB.append(
-                                "  <" + idForLAS + "_Z type=\"z\" units=\"meters\">\n" +
+                                "  <" + id + "_Z type=\"z\" units=\"meters\">\n" +
                                 "    <arange start=\"" + first + "\" step=\"1\" size=\"" + (last - first + 1) + "\"/>\n" +
-                                "  </" + idForLAS + "_Z>\n");
+                                "  </" + id + "_Z>\n");
                         }
                     }
                 }
@@ -196,7 +195,7 @@ public class GenerateTabledapXml {
                 "        <time_units>sec since 1970-01-01T00:00:00Z</time_units>\n" +
                 "        <time_type>double</time_type>\n");
                 if (pa != null && pa.size() == 2) {
-                    gridsSB.append("    <link match=\"/lasdata/axes/" + idForLAS + "_T\"/>\n");
+                    gridsSB.append("    <link match=\"/lasdata/axes/" + id + "_T\"/>\n");
                     double dFirst = pa.getDouble(0);
                     double dLast  = pa.getDouble(1);
                     if (Double.isNaN(dLast))
@@ -206,10 +205,10 @@ public class GenerateTabledapXml {
                         long last =  Math.round(Math.ceil( dLast  / 3600));
                         if (first != last) {
                             axesSB.append(
-                                "  <" + idForLAS + "_T type=\"t\" units=\"hour\">\n" + 
+                                "  <" + id + "_T type=\"t\" units=\"hour\">\n" + 
                                 "    <arange start=\"" + Calendar2.epochSecondsToIsoStringSpace(first * 3600) + 
                                     "\" step=\"1\" size=\"" + (last - first + 1) + "\"/>\n" + 
-                                "  </" + idForLAS + "_T>\n");
+                                "  </" + id + "_T>\n");
                         }
                     }
                 }
@@ -224,7 +223,7 @@ public class GenerateTabledapXml {
                 "      </product_server>\n" +
                 "    </properties>\n" +
                 "    <variables>\n");
-            gridsSB.append("  </" + idForLAS + "_grid>\n");
+            gridsSB.append("  </" + id + "_grid>\n");
 
             //write the info for the non-LonLatAltTime variables
             for (col = 0; col < infoTable.nColumns(); col++) {
@@ -241,12 +240,12 @@ public class GenerateTabledapXml {
                     "      <" + colName + 
                         (units == null? "" : " units=\"" + units + "\"") +
                         " name=\"" + longName + "\" url=\"#" + colName + "\">\n" +  
-                    "        <link match=\"/lasdata/grids/" + idForLAS + "_grid\"/>\n" +  
+                    "        <link match=\"/lasdata/grids/" + id + "_grid\"/>\n" +  
                     "      </" + colName + ">\n");
             }
             writer.write(
                 "    </variables>\n" +
-                "  </" + idForLAS + ">\n");
+                "  </" + id + ">\n");
         }
 
         writer.write("</datasets>\n");

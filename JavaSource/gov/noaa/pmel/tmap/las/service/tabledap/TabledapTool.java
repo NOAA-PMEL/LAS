@@ -267,7 +267,7 @@ public class TabledapTool extends TemplateTool {
             //    data.getColumn(altCol).scaleAddOffset(-1, 0); //altitude -> depth (metadata changed below)
             //}
             data.globalAttributes().set("Conventions", "LAS Intermediate netCDF File, Unidata Observation Dataset v1.0");
-log.debug("first up-to-100 rows found (raw): " + data.toString("rows", 100));
+            //log.debug("first up-to-100 rows found (raw): " + data.toString("rows", 100));
 
             //setActualRangeAndBoundingBox
             //(since attributes and data were grabbed via opendap, raw bounding box is for entire dataset)
