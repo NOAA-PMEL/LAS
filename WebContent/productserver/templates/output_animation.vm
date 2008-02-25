@@ -88,18 +88,19 @@ var initImg;
 // = "$las_response.getResult("plot_image")";
 
 var initView = initReq.getProperty('ferret','view');
-var dsId   = "$dsID";                                      //dataset ID
-var varId  = "$varID";                                     //variable ID
+var initStep = initReq.getProperty('ferret','time_step');//initial time step 
+var dsId   = "$dsID";                              //dataset ID
+var varId  = "$varID";                             //variable ID
 var varIDs = new Array();
 var varNames = new Array();
 var numVars;
 
-var tLo    = Grid.getLo('t');                              //low end of time grid
-var tHi    = Grid.getHi('t');                              //high end of time grid
-var tUnits = Grid.getUnits('t');                           //units of time grid
+var tLo    = Grid.getLo('t');                      //low end of time grid
+var tHi    = Grid.getHi('t');                      //high end of time grid
+var tUnits = Grid.getUnits('t');                   //units of time grid
 var tRenderFmt= Grid.getRenderFormat('t');
 
-var DW;                                                    //date widget
+var DW;                                            //date widget
  
 //=== variables for initializing animation
 var xmlDoc; // the xml doc that contains individual time frames and color scales
@@ -108,6 +109,7 @@ var fillLevels;
 var contourLevels;
 var depAxisScale;
 var hasT;
+var timeInterval; //animation time interval
 
 //=== variables for animation controls
 var hasError;                       // has LAS error
@@ -145,15 +147,36 @@ function doSubmit(){
     animationDisableButtons();
     stop();//stop animation in case it's running
 
-    //show the waiting icon
-    document.getElementById("wait").style.visibility="";
+    if(validateTimeInterval()){
+        //show the waiting icon
+        document.getElementById("wait").style.visibility="";
+    
+        //turn off animation editor
+        doCancel();
 
-    //turn off animation editor
-    doCancel();
+        var theReq = updateLASRequest();
+        makeAnimationFramesRequest(theReq);
+        setTimeout("startAnimation();", 300);
+    }else{
+        alert("Please enter a positive integer for time step.");
+    }    
+}
 
-    var theReq = updateLASRequest();
-    makeAnimationFramesRequest(theReq);
-    setTimeout("startAnimation();", 300);    
+function validateTimeInterval(){
+    ti = document.getElementById('timeStep').value;
+    if(isNaN(ti)){ 
+        return false;
+    }else if(ti==""){
+        //if(initStep != null){
+        //    timeInterval = initStep;
+        //}else{
+        timeInterval = 1;
+        //}
+        return true;
+    }else{
+        timeInterval = ti;
+        return true;
+    }
 }
 
 /*
@@ -193,12 +216,14 @@ function startAnimation(){
  * update the initial LAS UI request
  */
 function updateLASRequest(){
+
     var req = new LASRequest(initReq_xml);
     var theView = req.getProperty('ferret','view');
     //remove color levels before compute a new one
     //initReq.setProperty('ferret','contour_levels','');
     //initReq.setProperty('ferret','fill_levels','');
     //initReq.setProperty('ferret','dep_axis_scale','');
+    req.setProperty('ferret','time_step',timeInterval);
 
     //set time to user selected range 
     req.setRange('t', DW.getDate1_Ferret(), DW.getDate2_Ferret());
@@ -366,40 +391,6 @@ function animation_start(){
     }
 }
 
-/*
-        var node = document.getElementById("lasResponse");
-
-        //remove old content
-        children = node.childNodes;
-        num_children = children.length;
-        for(var i=num_children-1;i>=0;i--){
-            var child = children[i];
-            if(child){
-                node.removeChild(child);
-            }
-        }
-       
-        //show the error message
-        var CC_div = document.createElement('div');
-        CC_div.setAttribute('class','CCell_las_message');
-        node.appendChild(CC_div);
-        //var text = LASResponse.getResult('las_message').content;
-        var textNode = document.createTextNode(lasMessage);
-        CC_div.appendChild(textNode);
-
-        //show the debug URL
-        CC_div = document.createElement('div');
-        CC_div.setAttribute('class','CCell_error_link');
-        node.appendChild(CC_div);
-        var error_link = document.createElement('a');
-        error_link.href = debugURL;
-        textNode = document.createTextNode('More details about this error.');
-        //CC_div.setAttribute('style', 'font-size:16px;');
-        error_link.appendChild(textNode);
-        CC_div.appendChild(error_link);
-    }
-} 
-*/
 
 /*
  * show error messsage and link to debug file
@@ -991,17 +982,17 @@ function hideLoading(){
  */
 function launch() 
 {
-    animationDisableButtons();                             //disable the animation control buttons
-    importXML(xmlURL);                                      //load the xml file of time frames
-    animationInit();                                       //init animation
-    var plotReq =  animate_makeFirstLASRequest(theTimes[0]);//create the request for the first LAS plot
-    showLoading();                                          //show 'Stop Download' button 
-    sendLASRequest(plotReq,0);                              //send the request
+    animationDisableButtons();    //disable the animation control buttons
+    importXML(xmlURL);            //load the xml file of time frames
+    animationInit();              //init animation
+    var plotReq =  animate_makeFirstLASRequest(theTimes[0]);
+    showLoading();                //show 'Stop Download' button 
+    sendLASRequest(plotReq,0);    //send the request
 
     if(hasError == 0){
-        animation_status = 1;                               //turn on play mode
+        animation_status = 1;     //turn on play mode
         current_image = first_image;
-        document.animation.src = theImages[0].src;          //display the plot
+        document.animation.src = theImages[0].src;    //display the plot
         change_mode(document.control_form.play_mode_selection.selectedIndex);
     }
 }
@@ -1041,10 +1032,15 @@ function doEdit(){
     var editorContent = "&nbsp;<b>Select Time Range:</b>";
     editorContent += "<br><div id='DateWidgetRange' ></div><br>"; 
     //editorContent += "<br><div id='DateWidgetStart' ></div><br>";
-    editorContent += "<div id=\"SelectVariable\"></div><br>";
-    //<label for=\"vars\">&nbsp;<b>Select Variable:</b> </label><br>";
-    //editorContent += "&nbsp;<select name=\"vars\" onChange=\"updateVariable(this)\" id=\"variables\">";
-    //editorContent += "</select></div><br>"
+    //editorContent += "<div id=\"SelectVariable\"></div><br>";
+    if(initStep != null){
+        editorContent += "&nbsp;<b>Time Step:&nbsp;</b><input type=\"text\" id=\"timeStep\" value=\""+initStep+"\" size=\"4\"> ("+tUnits +")<br>";
+    }else{
+        editorContent += "&nbsp;<b>Time Step:&nbsp;</b><input type=\"text\" id=\"timeStep\" size=\"4\"> ("+tUnits+")<br>";
+    }
+
+    //editorContent += "&nbsp;<FORM name=\"timeStep_form\"><input type=\"text\" id=\"timeStep\" size=\"4\"></FORM><br> ";
+    editorContent += "<br><div id=\"SelectVariable\"></div><br>";
     editorContent += "&nbsp;<input type=\"button\" name=\"start_loading\" value=\"Submit\" size=\"6\" onClick=\"doSubmit()\">";
     editorContent += "&nbsp;<input type=\"button\" name=\"editor_cancel\" value=\"Cancel\" size=\"6\" onClick=\"doCancel()\">";
 
