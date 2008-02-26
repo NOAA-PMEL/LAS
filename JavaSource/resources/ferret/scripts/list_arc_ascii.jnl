@@ -24,6 +24,33 @@ ENDIF
 GO LAS_initialize_region 0
 GO LAS_initialize_data 0
 
+IF ($do_curvi_xy) THEN
+  DEFINE SYMBOL error_status = ERROR
+  DEFINE SYMBOL error_type VARIABLES
+  DEFINE SYMBOL error_action = running Ferret scripts for ($operation_ID) arc_ascii
+  DEFINE SYMBOL error_string "arcView gridded output cannot be created. The arcView format cannot represent the curvlinear coordinate system of this dataset."  
+  MESSAGE/ERROR **ERROR ($error_string)
+  EXIT/PROGRAM
+ENDIF 
+
+IF ($do_hybrid_z) THEN
+  DEFINE SYMBOL error_status = ERROR
+  DEFINE SYMBOL error_type VARIABLES
+  DEFINE SYMBOL error_action = running Ferret scripts for ($operation_ID) arc_ascii
+  DEFINE SYMBOL error_string "arcView gridded output cannot be created. The arcView format cannot represent the Hybrid-Z coordinate system of this dataset."
+  MESSAGE/ERROR **ERROR ($error_string)
+  EXIT/PROGRAM
+ENDIF 
+
+IF ($do_curvi_xy_and_hybrid_z) THEN
+  DEFINE SYMBOL error_status = ERROR
+  DEFINE SYMBOL error_type VARIABLES
+  DEFINE SYMBOL error_action = running Ferret scripts for ($operation_ID) arc_ascii
+  DEFINE SYMBOL error_string "arcView gridded output cannot be created. The arcView format cannot represent the curvlinear coordinate system of this dataset."  
+  MESSAGE/ERROR **ERROR ($error_string)
+  EXIT/PROGRAM
+ENDIF 
+
 ! Here is the variable we will list out, with the region specified.
 DEFINE SYMBOL ferret_list_var = ($ferret_plot_var)
 
