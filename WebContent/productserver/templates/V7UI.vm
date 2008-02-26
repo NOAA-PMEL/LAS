@@ -34,16 +34,17 @@
 					"Latitude-depth" : {"view" : "yz", "class" : "visualization", "id" : "Plot_2D", "optiondef" : "Options_2D_image_contour"}										
 				},
 				"Hofmuller Plots" : {
-					"Longitude-time" : {"view" : "xt", "class" : "visualization", "id" : "2D_Zoom", "optiondef" : "Options_2D_image_contour"},
-					"Latitude-time" : {"view" : "yt", "class" : "visualization", "id" : "Plot_2D", "optiondef" : "Options_2D_image_contour"},
-					"Depth-time" : {"view" : "zt", "class" : "visualization", "id" : "Plot_2D", "optiondef" : "Options_2D_image_contour"}													
+					"Longitude-time" : {"view" : "xt", "class" : "visualization", "id" : "XY_zoomable_image", "optiondef" : "Options_2D_image_contour"},
+					"Latitude-time" : {"view" : "yt", "class" : "visualization", "id" : "XY_zoomable_image", "optiondef" : "Options_2D_image_contour"},
+					"Depth-time" : {"view" : "zt", "class" : "visualization", "id" : "XY_zoomable_image", "optiondef" : "Options_2D_image_contour"}													
 				},
+				"Point Data" : {"Single Value" : {"view" : "","class" : "visualization", "id" : "Data_Extract", "optiondef" : "Options_Data"}},
 				"Download Data" : {
 					"Table of values" : {"view" : "xyzt", "class" : "download", "id" : "Data_Extract", "optiondef" : "Options_Data"},
 					"ARC GIS" : {"view" : "xy", "class" : "download", "id" : "Data_Extract_ArcView", "optiondef" : ""},
 					"ASCII File" : {"view" : "xyzt", "class" : "download", "id" : "Data_Extract_File", "optiondef" : "Options_Data_file"},
 					"netCDF File" : {"view" : "xyzt", "class" : "download", "id" : "Data_Extract_netCDF", "optiondef" : "Options_Data"},
-					"Desktop application data access scripts" : {"view" : "xyzt", "class" : "download", "id" : "Gen_Scripts", "optiondef" : "Options_gen_script"}	
+					"Scripts" : {"view" : "xyzt", "class" : "download", "id" : "Gen_Scripts", "optiondef" : "Options_gen_script"}	
 					
 				}
 			};
@@ -128,13 +129,6 @@
 			<INPUT class="LASProductButton" width="100%" disabled="true" ID="Plot to Google Earth" value="Google Earth" type="button">
 			<INPUT class="LASProductButton" width="100%" disabled="true" ID="Table of values (text)" value="Show Values" type="button">
 		</span>
-		<select id="exportMenu" onchange="this.options[0].selected=true;" name="Export to">
-               		<option>Download as...</option>
-                	<option ID="ArcView gridded">Arc GIS</option>
-                	<option ID="ASCII file" >ASCII File</option>
-			<option ID="NetCDF file" >NetCDF File</option>
-                	<option ID="Desktop application data access scripts">Desktop Application</option>
-		</select>
 		<br>
 #if ($request.getParameter('hideCon'))
 		<a id ="showC" class="LASLink" style="float:right;" alt="Show the plot controls pane" onmouseover="window.status='Hide the constraints pane';" onmouseout="window.status=''"   style="display:none;cursor:pointer;float:right;"  onclick="document.getElementById('constraints').style.display='';this.style.display='none';LAS.refs.XYSelect.rubberBand.style.display='';LAS.refs.XYSelect.rubberBand_c.style.display='';LAS.refs.XYSelect.updatePixelExtents();"><b>Show constraints</b></a>
@@ -152,13 +146,35 @@
 					<td width="23px" valign="top"><img id="wait" style="visibility:hidden;" src="JavaScript/components/mozilla_blu.gif">&nbsp;</td>
 					<td width="150px" class="LASPlotTypeContainer" align="left" valign="center">
 						<div id="plotType"></div>
+						<div id="downloadType"></div>
 					</td>
-					<td class="LASZTContainer" align="center" style="width:400px;padding:3pt;">
+					<td class="LASZTContainer" align="center" style="width:400px;padding:3pt;"><div id="XYZTControls" style="display:none;">
 						<div id="Date"></div>
-						<div id="DateAnalysis" style="display:none"><input id="ave_t" onclick="LAS.setAnalysis(t,'ave')" type="checkbox">Average</div>
 						<div id="Depth"></div>
-						<div id="DepthAnalysis" style="display:none"><input id="ave_z" onclick="LAS.setAnalysis(t,'ave')" type="checkbox">Average</div>
 						<div id="DataConstraints"></div>
+						<br>
+						<a class="LASLink" value=false onclick="if(!LAS.refs.analysis.enabled){LAS.showAnalysis();this.innerHTML='Hide Analysis Options';}else{LAS.hideAnalysis();this.innerHTML='Show Analysis Options';}">Show Analysis Options</a>						
+						<div id="analysis" style="display:none;">
+							<strong>Analysis Type : </strong><select id="analysis_type" name="analysis_type">
+							<option selected="" value="">None</option>
+							<option value="ave">Average</option>
+							<option value="min">Minimum</option>
+							<option value="max">Maximum</option>
+							<option value="sum">Sum</option>
+							<option value="var">Variance</option>
+							</select><br>						
+							<strong>Apply to axes : </strong>
+									<span id="x_axis_select"><b>X</b>&nbsp;<input name="axis_select" id="x_axis_chk" value="x" type="checkbox"></span>
+	 	          						<span id="y_axis_select"><b>Y</b>&nbsp;<input name="axis_select" id="y_axis_chk" value="y" type="checkbox"></span>
+									<span id="z_axis_select"><b>Z</b>&nbsp;<input name="axis_select" id="z_axis_chk" value="z" type="checkbox"></span>
+	 	 	          					<span id="t_axis_select"><b>T</b>&nbsp;<input name="axis_select" id="t_axis_chk" value="t" type="checkbox"></span>
+							<br>
+							<strong>Mask : </strong>
+								  <b>None</b><input name="mask" checked="checked" value="n" type="radio">
+							          <b>Ocean</b><input name="mask" value="o" type="radio">
+							          <b>Land</b><input name="mask" value="l" type="radio">
+							
+						</div></div>
 					</td>
 					<td width="400px" align=right border=0>
 						<table id="map"><tbody>
@@ -178,6 +194,8 @@
 		#parse( "/productserver/templates/V7UIFooter.vm") 
 		<div id="debug" style="border:1pt solid black;position:absolute;top:200px;left:150px;display:none;"></div>
 		<div id="plotOptions" style="border:1pt solid #99cccc;background-color:white;z-index:6;position:absolute;top:200px;left:150px;display:none;"></div>
+		<div id="downloadOptions" style="border:1pt solid #99cccc;background-color:white;z-index:6;position:absolute;top:200px;left:150px;display:none;"></div>
+		<div id="externalOptions" style="border:1pt solid #99cccc;background-color:white;z-index:6;position:absolute;top:200px;left:150px;display:none;"></div>
 	</body>
 </html>
 
