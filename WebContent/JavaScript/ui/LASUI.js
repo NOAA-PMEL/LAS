@@ -1395,7 +1395,7 @@ LASUI.prototype.makeRequest = function (type) {
 
 		this.request.addRegion();
 		//do the analysis, if required.
-		if(this.refs.analysis.enabled) {
+		if(this.refs.analysis.enabled && this.state.analysis.name) {
 			var Analysis = {"label" : this.state.analysis.name + ' ' + this.state.variables[this.state.dataset].name, "axis" : []};
 			for(var axis_id in this.state.analysis.axes) {
 				var Axis= {"type" : axis_id, "op" : this.state.analysis.type};
@@ -1428,7 +1428,7 @@ LASUI.prototype.makeRequest = function (type) {
 				}
 				
 			}
-			if(Analysis)			
+			if(Analysis && this.state.analysis.name !="None")			
 				this.request.setAnalysis(0,Analysis);
 		}
 
