@@ -1429,7 +1429,7 @@ LASUI.prototype.makeRequest = function (type) {
 				
 			}
 			if(Analysis)			
-				this.request.setAnalysis(0,AnalysisArray);
+				this.request.setAnalysis(0,Analysis);
 		}
 
 		for(var d=0;d<this.state.grid.response.grid.axis.length;d++) 
