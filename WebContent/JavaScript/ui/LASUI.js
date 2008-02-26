@@ -1396,39 +1396,40 @@ LASUI.prototype.makeRequest = function (type) {
 		this.request.addRegion();
 		//do the analysis, if required.
 		if(this.refs.analysis.enabled) {
-			var AnalysisArray = {"label" : this.state.dataset + '_' + this.state.variable + '_' + this.state.analysis.type, "axis" : []};
-			for(var axis in this.state.analysis.axes) {
-				var Analysis = {"type" : axis, "op" : this.state.analysis.type};
-				if(this.state.grid.hasAxis(axis)){
+			var Analysis = {"label" : this.state.analysis.name + ' ' + this.state.variables[this.state.dataset].name, "axis" : []};
+			for(var axis_id in this.state.analysis.axes) {
+				var Axis= {"type" : axis_id, "op" : this.state.analysis.type};
+				if(this.state.grid.hasAxis(axis_id)){
 					var Analysis = {"type" : axis, "op" : this.state.analysis.type};
 					switch(axis) {
 						case 'x' : 
-							Analysis.lo=this.refs.XYSelect.extents.selection.grid.x.min;
-							Analysis.hi =this.refs.XYSelect.extents.selection.grid.x.max;
+							Axis.lo=this.refs.XYSelect.extents.selection.grid.x.min;
+							Axis.hi =this.refs.XYSelect.extents.selection.grid.x.max;
 							break;
 						case 'y' : 
-						 	Analysis.lo=this.refs.XYSelect.extents.selection.grid.y.min;
-							Analysis.hi=this.refs.XYSelect.extents.selection.grid.y.max; 
+						 	Axis.lo=this.refs.XYSelect.extents.selection.grid.y.min;
+							Axis.hi=this.refs.XYSelect.extents.selection.grid.y.max; 
 							break;
 							case 't' : 
 							if(this.state.grid.hasMenu('t')){
-								Analysis.lo=this.refs.DW[0].value;
-								Analysis.hi=this.refs.DW[1].value; 
+								Axis.lo=this.refs.DW[0].value;
+								Axis.hi=this.refs.DW[1].value; 
 							} else {
-								Analysis.lo=this.refs.DW.getDate1_Ferret();
-								Analysis.hi=this.refs.DW.getDate2_Ferret();
+								Axis.lo=this.refs.DW.getDate1_Ferret();
+								Axis.hi=this.refs.DW.getDate2_Ferret();
 							}
 							break;
 						case 'z' :
-							Analysis.lo=this.refs.DepthWidget[this.refs.DepthWidget.widgetType][0].value;
-							Analysis.hi=this.refs.DepthWidget[this.refs.DepthWidget.widgetType][1].value; 						
+							Axis.lo=this.refs.DepthWidget[this.refs.DepthWidget.widgetType][0].value;
+							Axis.hi=this.refs.DepthWidget[this.refs.DepthWidget.widgetType][1].value; 						
 							break;
 					} 
-					AnalysisArray.axis.push(Analysis);
+					Analysis.axis.push(Axis);
 				}
 				
-			}			
-			this.request.setAnalysis(0,AnalysisArray);
+			}
+			if(Analysis)			
+				this.request.setAnalysis(0,AnalysisArray);
 		}
 
 		for(var d=0;d<this.state.grid.response.grid.axis.length;d++) 
@@ -1990,6 +1991,7 @@ LASUI.prototype.hideAnalysis = function () {
 }
 LASUI.prototype.selectAnalysisType = function (evt) {
 	this.state.analysis.type = evt.target.options[evt.target.selectedIndex].value;
+	this.state.analysis.name = evt.target.options[evt.target.selectedIndex].innerHTML;
 }
 LASUI.prototype.selectAnalysisAxis = function (evt) {
 	if(evt.target.checked==true)	{
