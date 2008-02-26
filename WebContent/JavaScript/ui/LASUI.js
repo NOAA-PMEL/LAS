@@ -1400,7 +1400,7 @@ LASUI.prototype.makeRequest = function (type) {
 			for(var axis_id in this.state.analysis.axes) {
 				var Axis= {"type" : axis_id, "op" : this.state.analysis.type};
 				if(this.state.grid.hasAxis(axis_id)){
-					var Analysis = {"type" : axis_id, "op" : this.state.analysis.type};
+					var Axis = {"type" : axis_id, "op" : this.state.analysis.type};
 					switch(axis_id) {
 						case 'x' : 
 							Axis.lo=this.refs.XYSelect.extents.selection.grid.x.min;
