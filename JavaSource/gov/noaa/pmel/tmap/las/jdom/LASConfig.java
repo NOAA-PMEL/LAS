@@ -603,9 +603,16 @@ public class LASConfig extends LASDocument {
                 List datasets = child.getChildren();
                 for (Iterator dsIt = datasets.iterator(); dsIt.hasNext();) {
                     Element dataset = (Element) dsIt.next();
-                    // Any other elements mixed in with the variables
-                    // that we need to ignore?
-                    if ( !dataset.getName().equals("properties") ) {
+                    /*
+                     * Rather than look for the element we want we have to ignore the elements
+                     * we don't want (since the "dataset" element names are random.
+                     * If there are other names that must be ignored, the must be
+                     * added here and below...
+                     */
+                    
+                    if ( !dataset.getName().equals("properties") &&
+                    	 !dataset.getName().equals("documentation") &&
+                    	 !dataset.getName().equals("contributor")) {
                         String ID = dataset.getName();
                         dataset.setName("dataset");
                         dataset.setAttribute("ID", ID);
@@ -614,11 +621,15 @@ public class LASConfig extends LASDocument {
                         List variablesParents = dataset.getChildren();
                         for (Iterator varsIt = variablesParents.iterator(); varsIt.hasNext();) {
                             Element variablesElement = (Element) varsIt.next();
-                            if ( !variablesElement.getName().equals("properties")) {
+                            if ( !variablesElement.getName().equals("properties") &&
+                            	 !variablesElement.getName().equals("documentation") &&
+                            	 !variablesElement.getName().equals("contributor") ) {
                                 List variables = variablesElement.getChildren();
                                 for (Iterator varIt = variables.iterator(); varIt.hasNext();) {
                                     Element var = (Element) varIt.next();
-                                    if (!var.getName().equals("properties")) {
+                                    if ( !var.getName().equals("properties") &&
+                                    	 !var.getName().equals("documentation") &&
+                                    	 !var.getName().equals("contributor")) {
                                         String VID = var.getName();
                                         var.setName("variable");
                                         var.setAttribute("ID", VID);
@@ -634,15 +645,15 @@ public class LASConfig extends LASDocument {
                                         if (vprops != null) {
                                             vprops.setContent(LASDocument.convertProperties(vprops));
                                         }
-                                    } else {
+                                    } else if ( var.getName().equals("properties") ){
                                         var.setContent(LASDocument.convertProperties(var));
                                     }
                                 }
-                            } else {
+                            } else if ( variablesElement.getName().equals("properties") ) {
                                 variablesElement.setContent(LASDocument.convertProperties(variablesElement));
                             }
                         }
-                    } else {
+                    } else if ( dataset.getName().equals("properties") ) {
                         dataset.setContent(LASDocument.convertProperties(dataset));
                     }
                 }
@@ -694,7 +705,7 @@ public class LASConfig extends LASDocument {
                 				log.warn("Converted <v>Jan</v> syntax to <v label=\"Jan\">15-Jan</v> syntax for axis "+AID);
                 			}
                 		}
-                	} else {
+                	} else if ( axis.getName().equals("properties")) {
                         axis.setContent(LASDocument.convertProperties(axis));
                     }
                 }
@@ -1232,13 +1243,16 @@ public class LASConfig extends LASDocument {
             ds_novars.setName("category");
             /*
              * Since we don't want all the children (the variables, composites, etc.)
-             * we'll remove every things that's not properties.
+             * we'll remove every things that's not properties.  However, we will
+             * keep the contributor and documentation elements.
              */
             List children = ds_novars.getChildren();
             ArrayList<String> remove = new ArrayList<String>();
             for (Iterator childIt = children.iterator(); childIt.hasNext();) {
                 Element child = (Element) childIt.next();
-                if (!child.getName().equals("properties")) {
+                if (!child.getName().equals("properties") && 
+                    !child.getName().equals("documentation") && 
+                    !child.getName().equals("contributor") ) {
                     remove.add(child.getName());                  
                 }
             }     
@@ -1631,8 +1645,7 @@ public class LASConfig extends LASDocument {
 	    Element datasetPropsE = dsE.getParentElement().getParentElement().getChild("properties");
 	    // Same as above, plus the parent of the particular dataset tag is <datasets> and
 	    // the parent of that is <lasdata>
-	    Element globalPropsE = dsE.getParentElement().getParentElement().
-	    getParentElement().getParentElement().getChild("properties");
+	    Element globalPropsE = dsE.getParentElement().getParentElement().getParentElement().getParentElement().getChild("properties");
 	    
 	    
 	    HashMap<String, HashMap<String, String>> propertyGroups = new HashMap<String, HashMap<String, String>>();

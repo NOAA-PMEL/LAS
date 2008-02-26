@@ -142,6 +142,9 @@ public class Util {
 		}
 		List children = element.getChildren();
 		if ( children.size() > 0 ) {
+			if ( element.getTextTrim().length() > 0 ) { 
+				json.accumulate("content", element.getTextTrim() );
+			}
 			for (Iterator childIt = children.iterator(); childIt.hasNext();) {
 				Element child = (Element) childIt.next();
 				if ( asArrays.contains(child.getName())) {
