@@ -34,9 +34,9 @@
 					"Latitude-depth" : {"view" : "yz", "class" : "visualization", "id" : "Plot_2D", "optiondef" : "Options_2D_image_contour"}										
 				},
 				"Hofmuller Plots" : {
-					"Longitude-time" : {"view" : "xt", "class" : "visualization", "id" : "XY_zoomable_image", "optiondef" : "Options_2D_image_contour"},
-					"Latitude-time" : {"view" : "yt", "class" : "visualization", "id" : "XY_zoomable_image", "optiondef" : "Options_2D_image_contour"},
-					"Depth-time" : {"view" : "zt", "class" : "visualization", "id" : "XY_zoomable_image", "optiondef" : "Options_2D_image_contour"}													
+					"Longitude-time" : {"view" : "xt", "class" : "visualization", "id" : "Plot_2D", "optiondef" : "Options_2D_image_contour"},
+					"Latitude-time" : {"view" : "yt", "class" : "visualization", "id" : "Plot_2D", "optiondef" : "Options_2D_image_contour"},
+					"Depth-time" : {"view" : "zt", "class" : "visualization", "id" : "Plot_2D", "optiondef" : "Options_2D_image_contour"}													
 				},
 				"Point Data" : {"Single Value" : {"view" : "","class" : "visualization", "id" : "Data_Extract", "optiondef" : "Options_Data"}},
 				"Download Data" : {
@@ -153,7 +153,7 @@
 						<div id="Depth"></div>
 						<div id="DataConstraints"></div>
 						<br>
-						<a class="LASLink" value=false onclick="if(!LAS.refs.analysis.enabled){LAS.showAnalysis();this.innerHTML='Hide Analysis Options';}else{LAS.hideAnalysis();this.innerHTML='Show Analysis Options';}">Show Analysis Options</a>						
+						<strong>Analysis Mode : </strong><a class="LASLink" value=false onclick="if(!LAS.refs.analysis.enabled){LAS.showAnalysis();this.innerHTML='ON';}else{LAS.hideAnalysis();this.innerHTML='OFF';}">OFF</a>						
 						<div id="analysis" style="display:none;">
 							<strong>Analysis Type : </strong><select id="analysis_type" name="analysis_type">
 							<option selected="" value="">None</option>
@@ -164,16 +164,16 @@
 							<option value="var">Variance</option>
 							</select><br>						
 							<strong>Apply to axes : </strong>
-									<span id="x_axis_select"><b>X</b>&nbsp;<input name="axis_select" id="x_axis_chk" value="x" type="checkbox"></span>
-	 	          						<span id="y_axis_select"><b>Y</b>&nbsp;<input name="axis_select" id="y_axis_chk" value="y" type="checkbox"></span>
-									<span id="z_axis_select"><b>Z</b>&nbsp;<input name="axis_select" id="z_axis_chk" value="z" type="checkbox"></span>
-	 	 	          					<span id="t_axis_select"><b>T</b>&nbsp;<input name="axis_select" id="t_axis_chk" value="t" type="checkbox"></span>
+									<span id="x_axis_select"><b>X</b>&nbsp;<input name="axis_select" id="x_axis_chk" value="x" type="radio"></span>
+	 	          						<span id="y_axis_select"><b>Y</b>&nbsp;<input name="axis_select" id="y_axis_chk" value="y" type="radio"></span>
+									<span id="z_axis_select"><b>Z</b>&nbsp;<input name="axis_select" id="z_axis_chk" value="z" type="radio"></span>
+	 	 	          					<span id="t_axis_select"><b>T</b>&nbsp;<input name="axis_select" id="t_axis_chk" value="t" type="radio"></span>
 							<br>
-							<strong>Mask : </strong>
+							<!--<strong>Mask : </strong>
 								  <b>None</b><input name="mask" checked="checked" value="n" type="radio">
 							          <b>Ocean</b><input name="mask" value="o" type="radio">
 							          <b>Land</b><input name="mask" value="l" type="radio">
-							
+							-->
 						</div></div>
 					</td>
 					<td width="400px" align=right border=0>
