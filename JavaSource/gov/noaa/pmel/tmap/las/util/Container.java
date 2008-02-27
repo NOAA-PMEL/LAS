@@ -1,6 +1,6 @@
 package gov.noaa.pmel.tmap.las.util;
 
-import gov.noaa.pmel.tmap.las.ui.Util;
+import gov.noaa.pmel.tmap.las.filter.DocumentationFilter;
 
 import java.io.StringWriter;
 import java.util.ArrayList;
@@ -10,6 +10,7 @@ import java.util.List;
 
 import org.jdom.Attribute;
 import org.jdom.Element;
+import org.jdom.filter.Filter;
 import org.jdom.output.Format;
 import org.jdom.output.XMLOutputter;
 import org.json.JSONException;
@@ -170,4 +171,27 @@ public class Container {
     public JSONObject toJSON() throws JSONException {
         return XML.toJSONObject(toXML());
     }
+    public boolean hasDocumentation() {
+    	
+		Filter filter = new DocumentationFilter();
+		Iterator docIt = element.getDescendants(filter);
+		Element documentation = (Element) docIt.next();
+		
+		if ( documentation != null ) { 
+			return true;
+		}
+		
+		return false;
+	}
+	public Documentation getDocumentation () {
+		Filter filter = new DocumentationFilter();
+		Iterator docIt = element.getDescendants(filter);
+		Element documentation = (Element) docIt.next();
+		
+		if ( documentation != null ) { 
+			return new Documentation(documentation);
+		}
+		
+		return null;
+	}
 }

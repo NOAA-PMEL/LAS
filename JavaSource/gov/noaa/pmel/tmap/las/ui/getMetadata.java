@@ -21,10 +21,15 @@ public class getMetadata extends LASAction {
 			throws Exception {
 		String dsid = request.getParameter("dsid");
 		String catitem = request.getParameter("catitem");
+		String opendap = request.getParameter("opendap");
 		if ( catitem != null ) dsid = catitem;
 		LASUIRequest ui_request = new LASUIRequest();
 		ui_request.addVariable(dsid, "dummy");
-		ui_request.setOperation("Metadata");
+		if ( opendap != null ) {
+		   ui_request.setOperation("MetadataURLs");
+		} else {
+			ui_request.setOperation("Metadata");
+		}
 		return new ActionForward("/ProductServer.do?xml="+ui_request.toEncodedURLString());
 	}
 

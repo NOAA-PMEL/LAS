@@ -1350,9 +1350,13 @@ streamable="true" mime_type="application/postscript"/> -->
 <!-- End: interactive 2d plot additions -->
 
 <!--  Create a Metadata operation to replace the metadata action managed by the old UI. -->
+<!--  This one shows only summeary and contact information with the variables and their ranges. -->
    <operation name="Metadata" ID="Metadata" output_template="metadata" service_action="" private="true">
           <service>template</service>
     </operation>
-
+<!-- This one show all of the above with the OPeNDAP access URLs. -->
+    <operation name="MetadataURLs" ID="MetadataURLs" output_template="metadata_opendap" service_action="" private="true">
+          <service>template</service>
+    </operation>
 
 </operations>

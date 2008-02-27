@@ -56,9 +56,10 @@
       #set($taxis = $grid.getTime())
       #set($colspan = $colspan+2)
    #end
-   <a href="getMetadata.do?dsid=$dsID&opendap=true">See the URLs</a> to access these data via <a href="http://opendap.org">OPeNDAP</a><br><br>
+   <a href="getMetadata.do?dsid=$dsID">Hide the OPeNDAP URLs</a><br><br>
    <table border="1" cellpadding="4">
-   <tr><th bgcolor="#dddddd">Name</th>
+   <tr><th rowspan="2" bgcolor="#dddddd">Name</th><th bgcolor="#c0cbe7" colspan="$colspan">The URL to access these data via <a href="http://opendap.org">OPeNDAP</a></th></tr>
+   <tr>
    #foreach ($axis in $axes)
       <th> $axis.type - Range</th>
    #end
@@ -71,6 +72,14 @@
       <tr>
          #set($grid = $las_config.getGrid($dsID, $var.ID))
          <td rowspan="2" bgcolor="#dddddd">$var.name</td>
+         <td colspan="$colspan" bgcolor="#c0cbe7">
+         
+         LAS F-TDS URL:&nbsp;<a href="${las_config.getFTDSURL($dsID, $varID)}.html">$las_config.getFTDSURL($dsID, $varID)</a>
+         #if ( "$las_config.getDataAccessURL($dsID, $varID, false)" !=  "${las_config.getFTDSURL($dsID, $varID)}" &&
+                $las_config.getDataAccessURL($dsID, $varID, false).startsWith("http") )
+                <br>Original OPeNDAP URL:&nbsp;<a href="${las_config.getDataAccessURL($dsID, $varID, false)}.html">$las_config.getDataAccessURL($dsID, $varID, false)</a>
+         #end
+         </td>
       </tr>
       <tr>
       #foreach ($axis in $axes)
