@@ -18,6 +18,35 @@
       (<a href="$dataset.doc">More info...</a>)
    #end
    </h2>
+   #if ( $dataset.hasDocumentation() ) 
+      #set($docu = $dataset.documentation)
+      <b>Summary:</b><br>
+      <p>
+      $docu.summary
+      </p>
+      #set($contacts = $docu.contacts)
+      #if ( $contacts.size() > 0 ) 
+      <b>Contacts:</b><br>
+      #end
+      #foreach ($cont in $contacts)
+      <ul>
+      <li><a href="$cont.URL">$cont.name</a></li>
+      #if ( $cont.email != "" || $cont.role != "" )
+         <ul>
+      #end
+      #if ( $cont.role != "" ) 
+         <li>Role: $cont.role</li>
+      #end
+      #if ( $cont.email != "" ) 
+         <li>Email: <a href="mailto:$cont.email">$cont.email</a></li>
+      #end
+      #if ( $cont.email != "" || $cont.role != "" )
+         </ul>
+      #end
+      </ul>
+      #end
+   #end
+   <hr>
    #set($variables = $las_config.getVariables($dsID))
    #set($varID = $variables.get(0).getID())
    #set($grid = $las_config.getGrid($dsID, $varID))
