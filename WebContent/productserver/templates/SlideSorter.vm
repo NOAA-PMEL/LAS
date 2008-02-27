@@ -521,6 +521,7 @@ function _MapScale_parseError(e) {
  *
  */
 function autoScale() {
+  // Get the global_min and global_max
   numRows = LSS.numRows;
   numCols = LSS.numCols;
   global_min = 999999.0;
@@ -535,12 +536,58 @@ function autoScale() {
       }
     }
   }
-// TODO:  hueristic to get nice countour levels
-  var min = Math.floor(global_min);
-  var max = Math.ceil(global_max);
-  var levels = Math.floor((max-min)/20);
-  fill_levels = '(' + min + ',' + max + ',' + levels + ')';
-  alert('fill_levels = ' + fill_levels);
+
+  // Algorithm from range.F subroutine in Ferret source code
+
+  var umin = global_min;
+  var umax = global_max;
+  var nints = 20;
+
+  var temp = (umax - umin) / nints;
+  if (temp == 0.0) {
+    temp = umax;
+  }
+
+  var nt = Math.floor(Math.log(temp) / Math.LN10);
+  if (temp < 1.0) {
+    nt = nt - 1;
+  }
+  var pow = Math.pow(10,nt);
+  temp = temp / pow;
+
+  var dint = 10.0 * pow;
+  if (temp < Math.SQRT2) {
+    dint = pow;
+  } else {
+    if (temp < Math.sqrt(10.0)) {
+      dint = 2.0 * pow;
+    } else {
+      if (temp < Math.sqrt(50.0)) {
+        dint = 5.0 * pow;
+      }
+    }
+  }
+
+  var fm = umin / dint;
+  var m = Math.floor(fm);
+  if (m < 0) {
+    m = m - 1;
+  }
+  var uminr = Math.round(1000000 * dint * m) / 1000000;
+    
+  fm = umax / dint;
+  m = Math.floor(fm);
+  if (m > 0) {
+    m = m + 1;
+  }
+  var umaxr = Math.round(1000000 * dint * m) / 1000000;
+  
+  // END OF FERRET ALGORITHM
+
+  // Only use 4 significant digits
+
+  // Modify the optionTextField and submit the request
+  fill_levels = '(' + uminr + ',' + umaxr + ',' + dint + ')';
   document.getElementById('LSS_optionTextField').value = fill_levels;
   applyOptions();
 }
