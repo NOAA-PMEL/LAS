@@ -51,50 +51,47 @@
 #set($varID = $las_request.variableIDs.get(0)) 
 #set($grid = $las_config.getGrid($dsID,$varID)) 
 #set($grid_JSON = $grid.toJSON().toString()) 
-
 var gridJSON = '$grid_JSON'; 
-
-// First, make sure we can parse the gridJSON object 
+//parse the gridJSON object 
 var Grid; 
 var JSONObject; 
-try { 
-     var JSONObject = gridJSON.parseJSON(); 
-     
-} catch(e) { 
-     alert('Error parsing gridJSON as JSON.'); 
-     //return; 
+try{ 
+    var JSONObject = gridJSON.parseJSON(); 
+}catch(e){ 
+    alert('Error parsing gridJSON as JSON.'); 
 } 
-  
-try { 
-     Grid = new LASGrid(JSONObject); 
-} catch(e) { 
-     // TODO:  Create Error Cell with this text? 
-     alert(e); 
-     //return; 
+try{ 
+    Grid = new LASGrid(JSONObject); 
+}catch(e){ 
+    alert(e); 
 } 
+
+//=== get variable IDs and names for the dataset
+#set($variables = $las_config.getVariables($dsID))
+#set($varNums = $variables.size())
+var varIDs    = new Array();
+var varNames  = new Array();
+var numVars    = "$varNums";
+//velocityCount start from 1
+#foreach($v in $variables)
+    varIDs[$velocityCount] = "$v.ID";
+    varNames[$velocityCount] = "$v.Name";
+#end
 
 //=== XML returned from LAS for animation
 animation_xml = "$las_response.getResultAsJavaScriptSafeString("ferret_listing")";
 las_animation = new LASAnimation(animation_xml);
 var xmlURL = "$las_response.getResult("ferret_listing")";
-//alert(xmlURL);
 
 //===============================================//
 //            Global variables                   //
 //===============================================//
 var initReq_xml = "$las_request.toJavaScriptSafeString()"; //initial LAS request
 var initReq = new LASRequest(initReq_xml);
-var initImg;
-// = "$las_response.getResult("plot_image")";
-
 var initView = initReq.getProperty('ferret','view');
 var initStep = initReq.getProperty('ferret','time_step');//initial time step 
-var dsId   = "$dsID";                              //dataset ID
-var varId  = "$varID";                             //variable ID
-var varIDs = new Array();
-var varNames = new Array();
-var numVars;
-
+var dsId   = "$dsID";                              //initial dataset ID
+var varId  = "$varID";                             //initial variable ID
 var tLo    = Grid.getLo('t');                      //low end of time grid
 var tHi    = Grid.getHi('t');                      //high end of time grid
 var tUnits = Grid.getUnits('t');                   //units of time grid
@@ -219,10 +216,6 @@ function updateLASRequest(){
 
     var req = new LASRequest(initReq_xml);
     var theView = req.getProperty('ferret','view');
-    //remove color levels before compute a new one
-    //initReq.setProperty('ferret','contour_levels','');
-    //initReq.setProperty('ferret','fill_levels','');
-    //initReq.setProperty('ferret','dep_axis_scale','');
     req.setProperty('ferret','time_step',timeInterval);
 
     //set time to user selected range 
@@ -434,7 +427,7 @@ function showError(Response){
 //==================================================//
 
 /*
- * get the variables of a dataset
+ * get the variables of a dataset -----not useful
  */
 function getVariables(){
     //initReq.setProperty('las','output_type','json');
@@ -453,7 +446,7 @@ function getVariables(){
 }
 
 /* 
- * handle the reponse for getVariables.do
+ * handle the reponse for getVariables.do ----not useful
  */
 function handleGetVariablesResponse(LASResponseText){    
     var JSONObject = LASResponseText.parseJSON();    
@@ -472,8 +465,10 @@ function showVariables(){
      varsHTML  = "";
      varsHTML += "<label for=\"vars\">&nbsp;<b>Select Variable:</b> </label><br>";
      varsHTML += "&nbsp;<select name=\"vars\" onChange=\"updateVariable(this)\" id=\"variables\">";
-     for(i=0;i<numVars;i++){
+     for(i=1;i<=numVars;i++){
+         //alert(varNames[i]);
          varsHTML += "<option value=\" "+i+"\">"+varNames[i]+"</option>";
+         //varsHTML += "<option value=\" "+i+"\">"+varIDs[i]+"</option>";
      }
      varsHTML += "</select>";
      document.getElementById("SelectVariable").innerHTML = varsHTML;
@@ -483,7 +478,7 @@ function showVariables(){
  * update variable ID, varId
  */
 function updateVariable(theSelect){
-    theIndex = theSelect.selectedIndex;
+    theIndex = theSelect.selectedIndex+1;
     //varName = theSelect.options[theIndex].value;
 /*
     for(i=0;i<numVars;i++){
@@ -1047,10 +1042,11 @@ function doEdit(){
     animationEditor.innerHTML = editorContent;
 
     genDateWidget();
-    getVariables();
+    //getVariables();
+    showVariables();
 
     //reset varID to the 1st var
-    varId = varIDs[0];
+    varId = varIDs[1];
 }
 
 //===> writes the interface into the code where you want it
