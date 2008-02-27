@@ -21,4 +21,7 @@ public class Dataset extends Container implements DatasetInterface {
     public String getXPath() {
         return "/lasdata/datasets/dataset@[ID='"+getID()+"']";
     }
+    public String getDoc() {
+    	return element.getAttributeValue("doc");
+    }
 }
