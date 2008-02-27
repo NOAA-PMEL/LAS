@@ -40,7 +40,7 @@ function LASUI () {
 		"embed" : true,
 		"xybox" : {},
 		"categorynames" : [],
-		"analysis" : {"type":null,"axes":[]}
+		"analysis" : {"type":null,"axes":{}}
 	};
 					
 	//DOM anchor ids.
@@ -116,9 +116,10 @@ LASUI.prototype.initUI = function (anchorId)
 				"z":{"DOMNode" : document.getElementById("z_axis_select"),"checkbox" : document.getElementById("z_axis_chk")},
 				"t":{"DOMNode" : document.getElementById("t_axis_select"),"checkbox" : document.getElementById("t_axis_chk")}
 				};
-	for(var a in this.refs.analysis.axes)
-		this.refs.analysis.axes[a].checkbox.onclick = this.selectAnalysisAxis.LASBind(this,a);
-	
+	for(var a in this.refs.analysis.axes) {
+		//this.refs.analysis.axes[a].checkbox.onclick = this.selectAnalysisAxis.LASBind(this,a);
+		this.refs.analysis.axes[a].checkbox.onchange = this.selectAnalysisAxis.LASBind(this,a);
+	}
 	this.refs.analysis.type.select.onchange = this.selectAnalysisType.LASBind(this);
 
 
@@ -653,8 +654,7 @@ if(!type)
 				view += a;
 			else {
 				this.refs.analysis.axes[a].checkbox.checked = false;
-				var evt = {"target" : {"checked":false}};
-				this.refs.analysis.axes[a].checkbox.onclick(evt);	
+				this.refs.analysis.axes[a].checkbox.onchange({"target" : {"checked":false}},a);	
 			}
 	this.state.view.widgets = view;
 	
@@ -1342,7 +1342,7 @@ LASUI.prototype.initTConstraint = function (mode,reset) {
 }
 LASUI.prototype.showUpdateLink = function (){
 	try	{
-		if(!this.updating&&this.state.view.plot!=""&&this.refs.XYSelect.enabled&&this.state.dataset!=null&&this.state.variables[this.state.dataset]!=null&&this.state.variable&&this.state.view.plot!=null&&this.state.operation.plot!=null) 
+		if(!this.updating&&this.refs.XYSelect.enabled&&this.state.dataset!=null&&this.state.variables[this.state.dataset]!=null&&this.state.variable&&this.state.view.plot!=null&&this.state.operation.plot!=null) 
 		document.getElementById('update').style.backgroundColor='gold';
 	else
 		document.getElementById('update').style.backgroundColor='';
@@ -1383,7 +1383,9 @@ LASUI.prototype.makeRequest = function (type) {
 				this.request.setProperty(this.state.properties[type][p].type, p, escape(this.state.properties[type][p].value));
 				uioptions[this.state.properties[type][p].type] = {p : escape(this.state.properties[type][p].value)};
 			}
-		this.request.setProperty("ferret","view",this.state.view[type]);
+		var view = this.state.view[type];
+		//if(view=="") view = "d";
+		this.request.setProperty("ferret","view",view);
 		this.uirequest+="&options=" +  escape(JSON.stringify(uioptions));
 	
 		this.request.removeRegion();
@@ -1428,7 +1430,7 @@ LASUI.prototype.makeRequest = function (type) {
 				}
 				
 			}
-			if(Analysis && this.state.analysis.name !="None")			
+			if(Analysis.axis.length>0 && this.state.analysis.name !="None")			
 				this.request.setAnalysis(0,Analysis);
 		}
 
@@ -1992,22 +1994,49 @@ LASUI.prototype.hideAnalysis = function () {
 LASUI.prototype.selectAnalysisType = function (evt) {
 	this.state.analysis.type = evt.target.options[evt.target.selectedIndex].value;
 	this.state.analysis.name = evt.target.options[evt.target.selectedIndex].innerHTML;
+	var e = {"target" : {"checked":true}}			
+	for(var a in this.state.analysis.axes)
+		if(this.state.grid.hasAxis(a)) 
+			this.selectAnalysisAxis(e,a);			
+	
+	if(this.autoupdate)
+		this.makeRequest();
+	else
+		this.showUpdateLink();
 }
 LASUI.prototype.selectAnalysisAxis = function (evt) {
 	if(evt.target.checked==true)	{
-		if(this.state.view.widgets.indexOf(arguments[1])<0)			
-			this.state.view.widgets+=arguments[1];
+		//turn the analysis axis on
 		this.state.analysis.axes[arguments[1]] = this.refs.analysis.type.select.value;
-		if(this.state.view.plot.indexOf(arguments[1])>=0)
+		if(this.refs.analysis.axes[arguments[1]].checkbox.type == "radio")
+			for(var a in this.state.analysis.axes)
+				if(a!=arguments[1])
+					this.selectAnalysisAxis({"target":{"checked":false}},a);
+
+		if(this.state.view.widgets.indexOf(arguments[1])<0&&this.state.analysis.type && this.state.analysis.name != "None")			
+			this.state.view.widgets+=arguments[1];
+		
+		if(this.state.view.plot.indexOf(arguments[1])>=0&&this.state.analysis.type && this.state.analysis.name != "None")
 			this.setVisualization(this.state.view.plot.substr(0,this.state.view.plot.indexOf(arguments[1]))+this.state.view.plot.substr(this.state.view.plot.indexOf(arguments[1])+1,this.state.view.plot.length));
 		
 	} else {
-		if(this.state.view.widgets.indexOf(arguments[1])>=0&&this.state.view.plot.indexOf(arguments[1])<0)			
+		//turning the analysis axis off
+		//remove the analysis axis from the widget view
+		if(this.state.view.widgets.indexOf(arguments[1])>=0)//&&this.state.view.plot.indexOf(arguments[1])<0)			
 			this.state.view.widgets=this.state.view.widgets.substr(0,this.state.view.widgets.indexOf(arguments[1]))+this.state.view.widgets.substr(this.state.view.widgets.indexOf(arguments[1])+1,this.state.view.widgets.length);
-		if(this.state.analysis.axes[arguments[1]])
+		//remove the axis from teh analysis state object
+		if(this.state.analysis.axes[arguments[1]]||this.state.analysis.axes[arguments[1]]=="")
 			delete this.state.analysis.axes[arguments[1]];
 	}
-	this.updateConstraints(this.state.view.widgets);
+	if(this.state.analysis.type && this.state.analysis.name != "None")
+		this.updateConstraints(this.state.view.widgets);
+	else
+		this.updateConstraints(this.state.view.plot);
+	
+	if(this.autoupdate)
+		this.makeRequest();
+	else
+		this.showUpdateLink();
 					
 }
 LASUI.prototype.setVisualization = function (view) {
