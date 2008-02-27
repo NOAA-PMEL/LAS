@@ -168,32 +168,26 @@ public final class ProductServerAction extends LASAction {
            if (  lasRequest.getProperty("las", "debug") != null &&
                 !lasRequest.getProperty("las", "debug").equals("") ) {
               debug = lasRequest.getProperty("las", "debug");
-           } else {
-              if ( ancestor.getLevel() == null ) {
-                 debug = "info";
-              }
-              else {
-                 debug = ancestor.getLevel().toString();
-              }
-           }
+           } 
         }
-
-        debug = debug.toLowerCase();
-        if ( debug.equals("true") || debug.equals("debug") ) {
-            debug = "debug";
+ 
+        String log_level = request.getParameter("log_level");
+        
+        if ( log_level.equalsIgnoreCase("debug") ) {
             ancestor.setLevel(Level.DEBUG);
-        } else if ( debug.equals("info") ) {
+        } else if ( log_level.equalsIgnoreCase("info") ) {
             ancestor.setLevel(Level.INFO);
-        } else if ( debug.equals("warn") ) {
+        } else if ( log_level.equalsIgnoreCase("warn") ) {
             ancestor.setLevel(Level.WARN);
-        } else if ( debug.equals("error") ) {
+        } else if ( log_level.equalsIgnoreCase("error") ) {
             ancestor.setLevel(Level.ERROR);
-        } else if ( debug.equals("fatal") ) {
+        } else if ( log_level.equalsIgnoreCase("fatal") ) {
             ancestor.setLevel(Level.FATAL);
         } else {
             ancestor.setLevel(Level.INFO);
         }
 
+        if ( debug.equalsIgnoreCase("true") ) debug = "debug";
         request.setAttribute("debug", debug);
         
         // Report logging level only for "debug" and "trace" levels.
