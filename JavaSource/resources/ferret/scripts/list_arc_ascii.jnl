@@ -102,7 +102,7 @@ LET jend `j[gy=expr,y=($region_y_hi)]`
 ! size of grid
 LET Ni = `($ferret_list_var),RETURN=isize`
 LET Nj = `($ferret_list_var),RETURN=jsize`
-pause
+
 ! lower cell bounds arrays
 LET xbounds = xboxlo[gx=expr]
 LET ybounds = yboxlo[gy=expr]
@@ -202,15 +202,9 @@ LIST/FILE/NOHEAD/APPEND/FORMAT="(A)" aout
 LET aout = "nrows `Nj`"
 LIST/FILE/NOHEAD/APPEND/FORMAT="(A)" aout
 
-! These values if written with a simple LIST/FORMAT, result in
-! lines with blanks at the end. 
-
-! LIST/FILE/NOHEAD/APPEND/FORMAT="('xllcorner',1PG15.7)" xlo
-! LIST/FILE/NOHEAD/APPEND/FORMAT="('yllcorner',1PG15.7)" ylo
-! LIST/FILE/NOHEAD/APPEND/FORMAT="('cellsize',1PG15.7)"  cell_size
-! LIST/FILE/NOHEAD/APPEND/FORMAT="('nodata',1PG15.7)"   nodata
-
-! Do them with string variables instead. 
+! Create header lines. List the missing-value flag
+! from the file, using the same formatting as will be
+! used to list the data.
 
 SET LIST/PREC=9
 LET aout = "xllcorner `xlo`"
@@ -221,9 +215,7 @@ LIST/FILE/NOHEAD/APPEND/FORMAT="(A)" aout
 LET aout = "cellsize `cell_size`"
 LIST/FILE/NOHEAD/APPEND/FORMAT="(A)" aout
 
-!LIST/FILE/NOHEAD/APPEND/FORMAT="('nodata_value',1PG15.7)"  nodata
-LET aout = "nodata_value `nodata`"
-LIST/FILE/NOHEAD/APPEND/FORMAT="(A)" aout
+LIST/FILE/NOHEAD/APPEND/FORMAT="('nodata_value',1PG15.7)"  nodata
 
 ! List the data to the file, with northernmost data first.
 
