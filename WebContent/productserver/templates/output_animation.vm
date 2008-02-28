@@ -1182,30 +1182,29 @@ function genAnimationUI()
     document.write("</div>");
 
   }else{
-   //interface for a single plot when there is no time axis in a dataset
-        //no time axis in the dataset, so just a single plot
-        document.write(" <h2>Animation not available for this dataset!</h2> ");
-        //initReq.setOperation('Plot_2D_XY');
-        var initView = initReq.getProperty('ferret','view');
+      //interface for a single plot when there is no time axis in a dataset
+      //no time axis in the dataset, so just a single plot
+      document.write(" <h2>Animation is not available for this dataset!</h2> ");
+      var initView = initReq.getProperty('ferret','view');
 
-        //for animation on XY view
-        if(initView == 'xy' || initView == 'yx'){
-            initReq.setOperation('Plot_2D_XY');
-        };
+      //for animation on XY view
+      if(initView=='xy' || initView=='yx' ){
+          initReq.setOperation('Plot_2D_XY');
+      };
 
-        //for animation on XZ view
-        if(initView == 'xz' || initView == 'zx'){
-            initReq.setOperation('Plot_2D');
-        };
+      //for animation on XZ or YZ view
+      if(initView=='xz' || initView=='zx' || initView=='yz' || initView=='zy'){
+          initReq.setOperation('Plot_2D');
+      };
 
-        //for animation on YZ view
-        if(initView == 'yz' || initView == 'zy'){
-            initReq.setOperation('Plot_2D');
-        };
+      //for animation on X, Y, or Z view
+      if(initView == 'x' || initView == 'y' ||initView == 'z'){
+          initReq.setOperation('Plot_1D');
+      };
 
-        var prefix = 'ProductServer.do?stream=true&stream_ID=plot_image&xml=';
-        var plot_src = prefix + escape(initReq.getXMLText());
-        document.write(" <IMG NAME=\"plot\" SRC=",plot_src," alt=\"plot_image\">");
+      var prefix = 'ProductServer.do?stream=true&stream_ID=plot_image&xml=';
+      var plot_src = prefix + escape(initReq.getXMLText());
+      document.write(" <IMG NAME=\"plot\" SRC=",plot_src," alt=\"plot_image\">");
   }
 };
 
