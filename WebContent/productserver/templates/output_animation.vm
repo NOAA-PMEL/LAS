@@ -83,6 +83,11 @@ animation_xml = "$las_response.getResultAsJavaScriptSafeString("ferret_listing")
 las_animation = new LASAnimation(animation_xml);
 var xmlURL = "$las_response.getResult("ferret_listing")";
 
+var hasT;
+
+//importXML(xmlURL);            //load the xml file of time frames
+//animationInit();              //init animation
+
 //===============================================//
 //            Global variables                   //
 //===============================================//
@@ -92,12 +97,20 @@ var initView = initReq.getProperty('ferret','view');
 var initStep = initReq.getProperty('ferret','time_step');//initial time step 
 var dsId   = "$dsID";                              //initial dataset ID
 var varId  = "$varID";                             //initial variable ID
+
+/*
+if(hasT==1){
 var tLo    = Grid.getLo('t');                      //low end of time grid
 var tHi    = Grid.getHi('t');                      //high end of time grid
 var tUnits = Grid.getUnits('t');                   //units of time grid
-var tRenderFmt= Grid.getRenderFormat('t');
+var tDisplayType = Grid.getDisplayType('t');
+var tRenderFmt = Grid.getRenderFormat('t');
+}
+*/
 
 var DW;                                            //date widget
+var MW1;  //menu widget for starting time
+var MW2;  //menu widget for ending time
  
 //=== variables for initializing animation
 var xmlDoc; // the xml doc that contains individual time frames and color scales
@@ -105,7 +118,6 @@ var theTimes = new Array();
 var fillLevels;
 var contourLevels;
 var depAxisScale;
-var hasT;
 var timeInterval; //animation time interval
 
 //=== variables for animation controls
@@ -130,6 +142,17 @@ var first_image;
 var last_image;
 
 var ready;
+
+importXML(xmlURL);            //load the xml file of time frames
+animationInit();              //init animation
+
+if(hasT==1){
+var tLo    = Grid.getLo('t');                      //low end of time grid
+var tHi    = Grid.getHi('t');                      //high end of time grid
+var tUnits = Grid.getUnits('t');                   //units of time grid
+var tDisplayType = Grid.getDisplayType('t');
+var tRenderFmt = Grid.getRenderFormat('t');
+}
 
 //================================================//
 //         functions for the submit button        //
@@ -219,8 +242,12 @@ function updateLASRequest(){
     req.setProperty('ferret','time_step',timeInterval);
 
     //set time to user selected range 
-    req.setRange('t', DW.getDate1_Ferret(), DW.getDate2_Ferret());
-    //initReq.setRange('t', DW.getDate1_Ferret());
+    if(tDisplayType == 'widget'){
+        req.setRange('t', DW.getDate1_Ferret(), DW.getDate2_Ferret());
+    }else if(tDisplayType == 'menu'){
+        req.setRange('t', MW1.getValue(), MW2.getValue());
+    }
+//initReq.setRange('t', DW.getDate1_Ferret());
     if(theView == 'xy' || theView == 'yx' || theView == 'xyt' || theView == 'yxt'){
         req.setProperty('ferret', 'view', 'xyt');
     }else if(theView == 'xz' || theView == 'zx' || theView == 'xzt' || theView == 'zxt'){
@@ -977,9 +1004,13 @@ function hideLoading(){
  */
 function launch() 
 {
-    animationDisableButtons();    //disable the animation control buttons
-    importXML(xmlURL);            //load the xml file of time frames
-    animationInit();              //init animation
+    //animationDisableButtons();    //disable the animation control buttons
+    //importXML(xmlURL);            //load the xml file of time frames
+    //animationInit();              //init animation
+
+    if(hasT==1){
+        animationDisableButtons();    //disable the animation control buttons
+    
     var plotReq =  animate_makeFirstLASRequest(theTimes[0]);
     showLoading();                //show 'Stop Download' button 
     sendLASRequest(plotReq,0);    //send the request
@@ -990,23 +1021,47 @@ function launch()
         document.animation.src = theImages[0].src;    //display the plot
         change_mode(document.control_form.play_mode_selection.selectedIndex);
     }
+    }
 }
 
 /*
  * generate date widget for the animation editor
  */
 function genDateWidget(){
+/*
     DW = new DateWidget(tLo, tHi);
     if(tRenderFmt == '' && tUnits == "month"){
         DW.render('DateWidgetRange', 'M', 'M');
     }else{
         DW.render('DateWidgetRange', tRenderFmt, tRenderFmt);
     }
-/*
+    alert(Grid.getDisplayType('t'));
+ 
     menu = Grid.getMenu('t');
-    MW = new MenuWidget(menu);
-    MW.render('DateWidgetStart');
+    if(menu != null){
+        MW1 = new MenuWidget(menu);
+        MW1.render('DateWidgetStart');
+        MW2 = new MenuWidget(menu);
+        MW2.render('DateWidgetEnd');
+    }
 */
+    if(tDisplayType == 'menu'){
+        menu = Grid.getMenu('t');
+        if(menu != null){
+            MW1 = new MenuWidget(menu);
+            MW1.render('DateWidgetStart');
+            MW2 = new MenuWidget(menu);
+            MW2.render('DateWidgetEnd');
+            MW2.setValueByIndex(menu.length-1);
+        }
+    }else if(tDisplayType == 'widget'){
+        DW = new DateWidget(tLo, tHi);
+        if(tRenderFmt == '' && tUnits == "month"){
+            DW.render('DateWidgetRange', 'M', 'M');
+        }else{
+            DW.render('DateWidgetRange', tRenderFmt, tRenderFmt);
+        }
+    }
 }
 
 /*
@@ -1025,8 +1080,12 @@ function doEdit(){
     imagesControls.style.opacity='.50';
 
     var editorContent = "&nbsp;<b>Select Time Range:</b>";
-    editorContent += "<br><div id='DateWidgetRange' ></div><br>"; 
-    //editorContent += "<br><div id='DateWidgetStart' ></div><br>";
+    if(tDisplayType == 'widget'){
+        editorContent += "<br><div id='DateWidgetRange' ></div><br>";
+    }else if(tDisplayType == 'menu'){ 
+        editorContent += "<br><div id='DateWidgetStart' ></div>";
+        editorContent += "<div id='DateWidgetEnd' ></div><br>";
+    }
     //editorContent += "<div id=\"SelectVariable\"></div><br>";
     if(initStep != null){
         editorContent += "&nbsp;<b>Time Step:&nbsp;</b><input type=\"text\" id=\"timeStep\" value=\""+initStep+"\" size=\"4\"> ("+tUnits +")<br>";
@@ -1052,7 +1111,8 @@ function doEdit(){
 //===> writes the interface into the code where you want it
 function genAnimationUI()
 {
-    //interface for animation
+  //interface for animation
+  if(hasT==1){
     document.write("<fieldset style=\"border:2px solid grey;\">");
     document.write(" <legend><FONT size=+3><b>LAS Animation</b></FONT></legend>");
     document.write("  <div>");
@@ -1120,6 +1180,33 @@ function genAnimationUI()
     document.write(" </FORM> ");
     document.write("</div>");
     document.write("</div>");
+
+  }else{
+   //interface for a single plot when there is no time axis in a dataset
+        //no time axis in the dataset, so just a single plot
+        document.write(" <h2>Animation not available for this dataset!</h2> ");
+        //initReq.setOperation('Plot_2D_XY');
+        var initView = initReq.getProperty('ferret','view');
+
+        //for animation on XY view
+        if(initView == 'xy' || initView == 'yx'){
+            initReq.setOperation('Plot_2D_XY');
+        };
+
+        //for animation on XZ view
+        if(initView == 'xz' || initView == 'zx'){
+            initReq.setOperation('Plot_2D');
+        };
+
+        //for animation on YZ view
+        if(initView == 'yz' || initView == 'zy'){
+            initReq.setOperation('Plot_2D');
+        };
+
+        var prefix = 'ProductServer.do?stream=true&stream_ID=plot_image&xml=';
+        var plot_src = prefix + escape(initReq.getXMLText());
+        document.write(" <IMG NAME=\"plot\" SRC=",plot_src," alt=\"plot_image\">");
+  }
 };
 
 </SCRIPT>
