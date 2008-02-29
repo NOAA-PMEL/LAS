@@ -2043,10 +2043,11 @@ LASUI.prototype.setVisualization = function (d) {
 	for(var t in this.products)
 		for (var p in this.products[t])
 			if(this.products[t][p].view.indexOf(d)<0)
-				if(this.refs.operations.plot.children[p].radio){ 
-					this.refs.operations.plot.children[p].radio.checked = true;
-					this.refs.operations.plot.children[p].radio.onclick();
-				}	
+				if(this.refs.operations.plot.children[p])
+					if(this.refs.operations.plot.children[p].radio){ 
+						this.refs.operations.plot.children[p].radio.checked = true;
+						this.refs.operations.plot.children[p].radio.onclick();
+					}	
 }
 /**
  * Method to collapse a tree node
