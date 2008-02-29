@@ -594,12 +594,12 @@ function LASReq_setAnalysis(index,A) {
   var variableNode = this.getVariableNodeByIndex(index);
   var nodeXML = '<analysis label=\"' + A.label + '\"></analysis>';
   var AnalysisNode = this.DOM.createXMLNode(nodeXML);
-  this.DOM = this.DOM.insertNodeInto(variableNode,AnalysisNode);
   for (i=0;i<A.axis.length;i++) {
     var nodeXML = '<axis type=\"' + A.axis[i].type + '\" lo=\"' + A.axis[i].lo + '\" hi=\"' + A.axis[i].hi + '\" op=\"' + A.axis[i].op + '\"/>';
     var AxisNode = this.DOM.createXMLNode(nodeXML);
-    this.DOM = this.DOM.insertNodeInto(AnalysisNode,AxisNode);
+    AnalysisNode.addElement(AxisNode);    
   }
+  this.DOM = this.DOM.insertNodeInto(variableNode,AnalysisNode);
 }
 
 /**
