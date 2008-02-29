@@ -2017,7 +2017,7 @@ LASUI.prototype.selectAnalysisAxis = function (evt) {
 			this.state.view.widgets+=arguments[1];
 		
 		if(this.state.view.plot.indexOf(arguments[1])>=0&&this.state.analysis.type && this.state.analysis.name != "None")
-			this.setVisualization(this.state.view.plot.substr(0,this.state.view.plot.indexOf(arguments[1]))+this.state.view.plot.substr(this.state.view.plot.indexOf(arguments[1])+1,this.state.view.plot.length));
+			this.setVisualization(arguments[1]);//this.state.view.plot.substr(0,this.state.view.plot.indexOf(arguments[1]))+this.state.view.plot.substr(this.state.view.plot.indexOf(arguments[1])+1,this.state.view.plot.length));
 		
 	} else {
 		//turning the analysis axis off
@@ -2039,10 +2039,10 @@ LASUI.prototype.selectAnalysisAxis = function (evt) {
 		this.showUpdateLink();
 					
 }
-LASUI.prototype.setVisualization = function (view) {
+LASUI.prototype.setVisualization = function (d) {
 	for(var t in this.products)
 		for (var p in this.products[t])
-			if(this.products[t][p].view==view)
+			if(this.products[t][p].view.indexOf(d)<0)
 				if(this.refs.operations.plot.children[p].radio){ 
 					this.refs.operations.plot.children[p].radio.checked = true;
 					this.refs.operations.plot.children[p].radio.onclick();
