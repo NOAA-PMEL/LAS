@@ -94,7 +94,7 @@
 				'autoupdate' : false,	
 #end
 #if ($request.getParameter('options')!="")
-				'options' : $request.getParameter('options')
+				'options' : $request.getParameter('options')checkbox
 #else
 				'options' :{}				
 #end
@@ -164,10 +164,10 @@
 							<option value="var">Variance</option>
 							</select><br>						
 							<strong>Apply to axes : </strong>
-									<span id="x_axis_select"><b>X</b>&nbsp;<input name="axis_select" id="x_axis_chk" value="x" type="radio"></span>
-	 	          						<span id="y_axis_select"><b>Y</b>&nbsp;<input name="axis_select" id="y_axis_chk" value="y" type="radio"></span>
-									<span id="z_axis_select"><b>Z</b>&nbsp;<input name="axis_select" id="z_axis_chk" value="z" type="radio"></span>
-	 	 	          					<span id="t_axis_select"><b>T</b>&nbsp;<input name="axis_select" id="t_axis_chk" value="t" type="radio"></span>
+									<span id="x_axis_select"><b>X</b>&nbsp;<input name="axis_select" id="x_axis_chk" value="x" type="checkbox"></span>
+	 	          						<span id="y_axis_select"><b>Y</b>&nbsp;<input name="axis_select" id="y_axis_chk" value="y" type="checkbox"></span>
+									<span id="z_axis_select"><b>Z</b>&nbsp;<input name="axis_select" id="z_axis_chk" value="z" type="checkbox"></span>
+	 	 	          					<span id="t_axis_select"><b>T</b>&nbsp;<input name="axis_select" id="t_axis_chk" value="t" type="checkbox"></span>
 							<br>
 							<!--<strong>Mask : </strong>
 								  <b>None</b><input name="mask" checked="checked" value="n" type="radio">
