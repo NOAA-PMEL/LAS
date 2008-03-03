@@ -255,6 +255,8 @@ public class KMLTool extends TemplateTool  {
         String varID="";
         String gridLon="";
         String gridLat="";
+        String xstride="";
+        String ystride="";
         HashMap<String, String> initLASReq = new HashMap<String, String>();
         File lasReqInfoFile = new File(las_req_info_file);
         
@@ -311,6 +313,15 @@ public class KMLTool extends TemplateTool  {
 
             Element refElement = lasReqInfo.getElementByXPath("/las_req_info/ferret_use_ref_map");
             if(refElement != null){initLASReq.put("ferret_use_ref_map", refElement.getText());}
+            
+            //xstride
+            Element xstElement = lasReqInfo.getElementByXPath("/las_req_info/x_stride");
+            if(xstElement != null){xstride = xstElement.getText();} 
+            
+
+            //ystride
+            Element ystElement = lasReqInfo.getElementByXPath("/las_req_info/y_stride");
+            if(ystElement != null){ystride = ystElement.getText();}
 
             if(dsIntervals.contains("z")){
                 //get Z range
@@ -391,6 +402,8 @@ public class KMLTool extends TemplateTool  {
         //for creating the <LookAt> tag in KML
         context.put("gridLon",checkLon(gridLon));
         context.put("gridLat",gridLat);
+        context.put("xstride",xstride);
+        context.put("ystride",ystride);
 
         context.put("allPlacemarks", allPlacemarks);
 
