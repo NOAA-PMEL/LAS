@@ -26,6 +26,11 @@ IF ($error_status"0|*>1") THEN
   EXIT/PROGRAM
 ENDIF
  
+!striding
+!GO LAS_set_strides_GE
+!DEFINE SYMBOL xstride = 4;
+!DEFINE SYMBOL ystride = 4;
+
 ! Decode format argument
 ! ACM NOTE: The slashes mess up parsing in the DEFINE SYMBOL if we do them all at once.
 ! ferret_format may be asc, txt, or cdf
@@ -35,8 +40,8 @@ CANCEL SYMBOL frmt
 !SET LIST/FILE="($result_ferret_listing_filename)"
 SET LIST/FILE="($result_las_request_info_filename)"
 
-   LET llon = X[GX=($ferret_list_var), X=($region_x_lo):($region_x_hi)] + 0*Y[GY=($ferret_list_var),Y=($region_y_lo):($region_y_hi)]
-   LET llat = 0*X[GX=($ferret_list_var),X=($region_x_lo):($region_x_hi)] + Y[GY=($ferret_list_var),Y=($region_y_lo):($region_y_hi)]
+   LET llon = X[GX=($ferret_list_var), X=($region_x_lo):($region_x_hi):($xstride)] + 0*Y[GY=($ferret_list_var),Y=($region_y_lo):($region_y_hi):($ystride)]
+   LET llat = 0*X[GX=($ferret_list_var),X=($region_x_lo):($region_x_hi):($xstride)] + Y[GY=($ferret_list_var),Y=($region_y_lo):($region_y_hi):($ystride)]
 
 !   LIST/NOHEADER/NOROWHEADER/APPEND/FILE  XSEQUENCE(llon), XSEQUENCE(llat)
 
@@ -54,23 +59,33 @@ SET LIST/FILE="($result_las_request_info_filename)"
 !ENDIF
 
 IF ($data_0_intervals"|xy>1|*>0") THEN
-  LET xytvar = ($ferret_list_var)
-  LET mask =  IF xytvar GT 0 THEN 1
+! LET xytvar = ($ferret_list_var)
+![X=($region_x_lo):($region_x_hi):2]
+  DEFINE SYMBOL tmp = ($data_var)[d=($data_num),X=($region_x_lo):($region_x_hi):($xstride),Y=($region_y_lo):($region_y_hi):($ystride)]
+  LET xyvar = ($tmp) 
+  LET mask =  IF xyvar GT -9000 THEN 1
 ENDIF
 
 IF ($data_0_intervals"|xyt>1|*>0") THEN
-  LET xytvar = ($ferret_list_var)
+!  LET xytvar = ($ferret_list_var)
+!  LET xytvar = ($ferret_list_var)[X=($region_x_lo):($region_x_hi):2]
+  DEFINE SYMBOL tmp = ($data_var)[d=($data_num),X=($region_x_lo):($region_x_hi):($xstride),Y=($region_y_lo):($region_y_hi):($ystride),T="($region_t_lo)":"($region_t_hi)"]
+  LET xytvar = ($tmp)
   LET mask =  IF xytvar[T=@NGD] GT 0 THEN 1
 ENDIF
 
 IF ($data_0_intervals"|xyz>1|*>0") THEN
-  LET xyzvar = ($ferret_list_var)
+!  LET xyzvar = ($ferret_list_var)
+  DEFINE SYMBOL tmp = ($data_var)[d=($data_num),X=($region_x_lo):($region_x_hi):($xstride),Y=($region_y_lo):($region_y_hi):($ystride),Z=($region_z_lo):($region_z_hi)]
+  LET xyzvar = ($tmp)
   LET mask =  IF xyzvar[Z=@NGD] GT 0 THEN 1
 ENDIF
 
 IF ($data_0_intervals"|xyzt>1|*>0") THEN
-  LET xyzvar = ($ferret_list_var)
-  LET mask =  IF xyzvar[Z=@NGD,T=@NGD] GT 0 THEN 1
+!  LET xyzvar = ($ferret_list_var)
+  DEFINE SYMBOL tmp = ($data_var)[d=($data_num),X=($region_x_lo):($region_x_hi):($xstride),Y=($region_y_lo):($region_y_hi):($ystride),Z=($region_z_lo):($region_z_hi),T="($region_t_lo)":"($region_t_hi)"]
+  LET xyztvar = ($tmp)
+  LET mask =  IF xyztvar[Z=@NGD,T=@NGD] GT 0 THEN 1
 ENDIF
 
 LET llon_list = XSEQUENCE(llon*mask)
@@ -242,12 +257,27 @@ IF ($ferret_use_ref_map"0|*>1") THEN
     list/nohead/format=("<ferret_use_ref_map>",($fmt),"</ferret_use_ref_map>")/FILE/append useRefMap
 ENDIF
 
+!===============================
+! output xstride and ystride
+!===============================
+!IF ($ferret_use_ref_map"0|*>1") THEN
+    LET xst = "($xstride)"
+    define variable len = STRLEN(xst)
+    define symbol fmt = A`len`
+    list/nohead/format=("<x_stride>",($fmt),"</x_stride>")/FILE/append xst
+!ENDIF
+
+    LET yst = "($ystride)"
+    define variable len = STRLEN(yst)
+    define symbol fmt = A`len`
+    list/nohead/format=("<y_stride>",($fmt),"</y_stride>")/FILE/append yst
+
 !=========================
 ! output z and/or t ranges
 !=========================
 DEFINE SYMBOL max_tpoints 21   ! should be an odd number
 
-!XYTi dataset
+!XYT dataset
 IF ($data_0_intervals"|xyt>1|*>0") THEN
     DEFINE SYMBOL nt `($ferret_plot_var),return=lsize`   ! no. of time points requested
     IF `($nt) eq 1` THEN
@@ -369,7 +399,7 @@ IF ($data_0_intervals"|xyzt>1|*>0") THEN
     LET f = "<z_region>"
     list/norowhead/nohead/format=(A10)/FILE/append f
 
-  !LET zlo = "($region_0_z_lo)"
+    !LET zlo = "($region_0_z_lo)"
     define variable len = STRLEN(zlo)
     define symbol fmt = A`len`
     list/nohead/format=("<z_lo>",($fmt),"</z_lo>")/FILE/append zlo
@@ -385,12 +415,12 @@ IF ($data_0_intervals"|xyzt>1|*>0") THEN
     LET f = "<t_region>"
     list/norowhead/nohead/format=(A10)/FILE/append f
   
-  !LET tlo = "($region_0_t_lo)"
+    !LET tlo = "($region_0_t_lo)"
     define variable len = STRLEN(tlo)
     define symbol fmt = A`len`
     list/nohead/format=("<t_lo>",($fmt),"</t_lo>")/FILE/append tlo
 
-  !LET thi = "($region_0_t_hi)"
+    !LET thi = "($region_0_t_hi)"
     define variable len = STRLEN(thi)
     define symbol fmt = A`len`
     list/nohead/format=("<t_hi>",($fmt),"</t_hi>")/FILE/append thi
