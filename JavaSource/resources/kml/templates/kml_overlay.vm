@@ -2,7 +2,7 @@
 <kml xmlns="http://earth.google.com/kml/2.1">
     <Folder>
       <GroundOverlay>
-         <description>Overlay LAS plots on Google Earth</description>
+         <description> strided $map_scale.getXStride() in x and $map_scale.getYStride() in y</description>
          <name>LAS Plot</name>
          <LookAt>
                <longitude>$longitude_center</longitude>
