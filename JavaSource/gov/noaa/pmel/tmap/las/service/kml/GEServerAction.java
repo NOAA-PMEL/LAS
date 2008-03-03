@@ -165,8 +165,11 @@ public final class GEServerAction extends Action {
         boolean isDynamic = isDynamic(request);
 
         String requestURL ="";
+        String placemarkRequestURL ="";
+
         String kmlString ="";
         String serverURL = getServerURL(request)+"/ProductServer.do";
+     
 
         try{
 
@@ -190,8 +193,12 @@ public final class GEServerAction extends Action {
             }else if(op.contains("Vector_GE_Overlay")){
                 lasUIRequest.changeOperation("Vector_GE_kml");
             }
-            //build the request
+            //build the request for plot overlay
             requestURL = serverURL+"?xml="+lasUIRequest.toEncodedURLString();
+
+            //build the request for placemarks
+            lasUIRequest.changeOperation("Grid_GE_kml");
+            placemarkRequestURL = serverURL+"?xml="+lasUIRequest.toEncodedURLString();
 
         } catch (Exception e){
             log.info("error while building LAS Request: " + e.toString());
@@ -202,9 +209,18 @@ public final class GEServerAction extends Action {
                      +"<kml xmlns=\"http://earth.google.com/kml/2.1\">"
                      +"<Folder>"
                      +"<NetworkLink>"
+                     +"<name>Plot</name>"
                      +"<Link>"
                      +"<href>"
                      +requestURL
+                     +"</href>"
+                     +"</Link>"
+                     +"</NetworkLink>"
+                     +"<NetworkLink>"
+                     +"<name>Grid Points</name>"
+                     +"<Link>"
+                     +"<href>"
+                     +placemarkRequestURL
                      +"</href>"
                      +"</Link>"
                      +"</NetworkLink>"
