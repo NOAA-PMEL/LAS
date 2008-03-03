@@ -31,7 +31,7 @@ IF ($ferret_stride_quality_factor"0|0.0>1|*>0") THEN LET maxpix = 700  ! best(sl
 ! if the nominal number of points looks like it will be large.
 
 !limit number of points in X (for place mark operation)
-IF `STRINDEX( "($operation_ID)", "Grid" ) NE 0` THEN LET maxpix = 150
+!IF `STRINDEX( "($operation_ID)", "Grid" ) NE 0` THEN LET maxpix = 150
 
 IF ($region_x_lo"0|*>1") THEN 
     LET xx = x[gx=($data_var)[d=($data_num)]]
@@ -46,8 +46,8 @@ IF ($region_x_lo"0|*>1") THEN
     ENDIF
 ENDIF
 
-!limit number of points in Y (for place mark operation)
-IF `STRINDEX( "($operation_ID)", "Grid" ) NE 0` THEN LET maxpix = 100
+!limit number of points in Y (for place mark operation) 
+!IF `STRINDEX( "($operation_ID)", "Grid" ) NE 0` THEN LET maxpix = 100
 
 IF ($region_y_lo"0|*>1") THEN 
     LET yy = y[gy=($data_var)[d=($data_num)]]
