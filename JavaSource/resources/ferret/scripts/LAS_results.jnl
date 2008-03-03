@@ -46,6 +46,9 @@ IF ($result_map_scale_filename%0|*>1%) THEN
    LET syms_vals = {"($DATA_1_VAR)"}
    LIST/APPEND/FILE="($result_map_scale_filename)"/NOHEAD/NOROWLAB syms_names, syms_vals
 
+   IF `($xstride"0|*>1) EQ 0` THEN DEFINE SYMBOL xstride = 1 
+   IF `($ystride"0|*>1) EQ 0` THEN DEFINE SYMBOL ystride = 1
+
 ! assume we are running Ferret v5.81_ with /NOROWLAB qualifier on LIST command
    LIST/APPEND/FILE="($result_map_scale_filename)"/NOHEAD/NOROWLAB syms_names, syms_vals
 
@@ -58,7 +61,8 @@ IF ($result_map_scale_filename%0|*>1%) THEN
       "PPL$XLEN","PPL$YLEN",\
       "XAXIS_MIN","XAXIS_MAX",\
       "YAXIS_MIN","YAXIS_MAX",\
-      "VP_TOP_MARGIN","VP_RT_MARGIN"}
+      "VP_TOP_MARGIN","VP_RT_MARGIN",\
+      "XSTRIDE","YSTRIDE"}
    LET syms_vals = {\
       "($PPL$XMIN)", "($PPL$XMAX)", \
       "($PPL$YMIN)", "($PPL$YMAX)", \
@@ -68,7 +72,8 @@ IF ($result_map_scale_filename%0|*>1%) THEN
       "($PPL$XLEN)", "($PPL$YLEN)",\
       "($XAXIS_MIN)", "($XAXIS_MAX)",\
       "($YAXIS_MIN)", "($YAXIS_MAX)",\
-      "($VP_TOP_MARGIN)","($VP_RT_MARGIN)"}
+      "($VP_TOP_MARGIN)","($VP_RT_MARGIN)",\
+      "($xstride)","($ystride)"}
 
    IF `($XAXIS_MIN"0|*>1) EQ 0 OR ($YAXIS_MIN"0|*>1) EQ 0 ` THEN LET syms_vals = {\
       "($PPL$XMIN)", "($PPL$XMAX)", \
@@ -79,7 +84,8 @@ IF ($result_map_scale_filename%0|*>1%) THEN
       "($PPL$XLEN)", "($PPL$YLEN)",\
       "($PPL$XMIN1)", "($PPL$XMAX1)", \
       "($PPL$YMIN1)", "($PPL$YMAX1)", \
-      "($VP_TOP_MARGIN)","($VP_RT_MARGIN)"}
+      "($VP_TOP_MARGIN)","($VP_RT_MARGIN)",\
+      "($xstride)","($ystride)"}
 
 ! assume we are running Ferret v5.81 or higher with /NOROWLAB qualifier on LIST command
    LIST/APPEND/FILE="($result_map_scale_filename)"/NOHEAD/NOROWLAB syms_names, syms_vals
