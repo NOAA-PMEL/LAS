@@ -11,9 +11,8 @@
       <heading>0</heading>    
       <altitudeMode>relativeToGround</altitudeMode>  
     </LookAt>
-    <name>
-    $dsID($varID)
-    </name>
+    <description> strided $xstride in x and $ystride in y</description>
+    <name> Placemarks </name>
 #foreach ($placemark in $allPlacemarks)
     $placemark.toString()
 #end
