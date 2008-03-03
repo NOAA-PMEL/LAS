@@ -189,6 +189,18 @@ public class LASMapScale extends LASDocument {
             data_exists = Integer.valueOf(s1).intValue();
         }
 
+        int xStride  = 0;
+        s1 = scale.get("XSTRIDE");
+        if ( s1 != null ) {
+            xStride = Integer.valueOf(s1).intValue();
+        }
+
+        int yStride  = 0;
+        s1 = scale.get("YSTRIDE");
+        if ( s1 != null ) {
+            yStride = Integer.valueOf(s1).intValue();
+        }
+
         Element map_scaleE = new Element("map_scale");
         this.setRootElement(map_scaleE);
         map_scaleE.addContent(makeElement("x_pixels_per_inch", xppi));
@@ -212,7 +224,8 @@ public class LASMapScale extends LASDocument {
         map_scaleE.addContent(makeElement("data_min", data_min));
         map_scaleE.addContent(makeElement("data_max", data_max));
         map_scaleE.addContent(makeElement("data_exists", data_exists));
-        
+        map_scaleE.addContent(makeElement("xstride", scale.get("XSTRIDE")));
+        map_scaleE.addContent(makeElement("ystride", scale.get("YSTRIDE")));
         
     }
     
@@ -297,4 +310,11 @@ public class LASMapScale extends LASDocument {
     public String getData_exists() {
     	return this.getRootElement().getChildText("data_exists");
     }
+    public String getXStride() {
+        return this.getRootElement().getChildText("xstride");
+    }
+    public String getYStride() {
+        return this.getRootElement().getChildText("ystride");
+    }
+
 }
