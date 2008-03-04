@@ -30,6 +30,7 @@ IF `STRLEN("($ferret_view)") NE 2` THEN EXIT/SCRIPT
 IF `STRINDEX("($op)", "VECTOR") GT 0` THEN EXIT/SCRIPT
 
 IF `STRINDEX("($op)", "PLOT") EQ 0 AND \
+  STRINDEX ("($op)", "POLY") EQ 0 AND \
   STRINDEX ("($op)", "ZOOM") EQ 0` THEN EXIT/SCRIPT
 
 ! Levels for animations set in LAS_auto_levels_animate, 
@@ -255,6 +256,7 @@ ENDIF ! 29
 
 DEFINE SYMBOL stat_ngood= 0
 STAT ($ppvar)
+IF `($stat_ngood"0") EQ 0` THEN EXIT/SCRIPT
 
 ! Undo the striding. Other striding may be set elsewhere
 
@@ -264,9 +266,6 @@ IF `stride_for_speed GT 1` THEN  ! 30
    IF `($undo_z"0") GT 0` THEN CANCEL AXIS/STRIDE `pvar,RETURN=zaxis`
    IF `($undo_t"0") GT 0` THEN CANCEL AXIS/STRIDE `pvar,RETURN=taxis`
 ENDIF ! 30
-
-sh sym stat*
-IF `($stat_ngood"0") EQ 0` THEN EXIT/SCRIPT
 
 ! Compute rounded-off levels with the PPL %RANGE command.
 
