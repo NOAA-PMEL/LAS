@@ -172,19 +172,23 @@ public final class ProductServerAction extends LASAction {
         }
  
         String log_level = request.getParameter("log_level");
+
+        if ( log_level != null ) {
         
-        if ( log_level.equalsIgnoreCase("debug") ) {
-            ancestor.setLevel(Level.DEBUG);
-        } else if ( log_level.equalsIgnoreCase("info") ) {
-            ancestor.setLevel(Level.INFO);
-        } else if ( log_level.equalsIgnoreCase("warn") ) {
-            ancestor.setLevel(Level.WARN);
-        } else if ( log_level.equalsIgnoreCase("error") ) {
-            ancestor.setLevel(Level.ERROR);
-        } else if ( log_level.equalsIgnoreCase("fatal") ) {
-            ancestor.setLevel(Level.FATAL);
-        } else {
-            ancestor.setLevel(Level.INFO);
+            if ( log_level.equalsIgnoreCase("debug") ) {
+                ancestor.setLevel(Level.DEBUG);
+            } else if ( log_level.equalsIgnoreCase("info") ) {
+                ancestor.setLevel(Level.INFO);
+            } else if ( log_level.equalsIgnoreCase("warn") ) {
+                ancestor.setLevel(Level.WARN);
+            } else if ( log_level.equalsIgnoreCase("error") ) {
+                ancestor.setLevel(Level.ERROR);
+            } else if ( log_level.equalsIgnoreCase("fatal") ) {
+                ancestor.setLevel(Level.FATAL);
+            } else {
+                ancestor.setLevel(Level.INFO);
+            }
+
         }
 
         if ( debug.equalsIgnoreCase("true") ) debug = "debug";
