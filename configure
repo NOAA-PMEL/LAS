@@ -64,6 +64,8 @@ perlloc="$execloc"
 
 until [ "$answer" == "yes" -o "$answer" == "no" ]
 do
+echo "This script will configure LAS and the new Version 7.0 UI."  
+echo "If you want you can install the old version 6.x UI at the same time."
 echo -n "Do you want to install the old LAS version 6.x user interface (yes or no)? "
 read answer
 done
