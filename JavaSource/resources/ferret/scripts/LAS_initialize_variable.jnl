@@ -6,7 +6,9 @@
 ! $Date: 2007/29/2007
 ! ACM 4/2007 apply ferret_expression2 to second plot of comparisons.
 ! ACM 8/2007 Call LAS_auto_levels to set up auto contour/fill levels.
-
+! 3/2008 ACM Use SHADE/TRIM for shade underlays of FILL plots (Ferret v6.1),
+!            so no need to call LAS_define_region_plus_1.jnl
+!
 ! this is the second part of LAS_initialize_data.jnl
 
 ! Define the plot variable. For comparison plots, we want to save the dataset number
@@ -67,10 +69,6 @@ IF ($ferret_expression"0|*>1") THEN GO LAS_expression
 
 ! Apply any transforms that may have been specified.
 GO LAS_transforms ($variables_initialized"0|*>1")
-
-! When doing 2D plots, we want the plot region +1 grid cell on all sides, 
-! for shade-under-fill.
-GO LAS_define_region_plus_1
 
 ! Get any DEFINE VARIABLE analysis definitions
 ! This renames the data variable, and so redefines the symbol data_var
