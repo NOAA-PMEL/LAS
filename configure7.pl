@@ -549,6 +549,80 @@ EOF
 
     print "\n\n";
 
+    createScripts();
+
+    print "You must restart your Tomcat server.\n";
+    print "We've created some scripts to help you do that.  See: stopserver.sh, startserver.sh and rebootserver.sh\n";
+
+    print "\n\n";
+    my $app = $LasConfig{appname};
+    print "Your user interface to LAS is at: http://$servlet_root_url/$app/getUI.do\n";
+
+sub createScripts {
+
+my $jakarta_home = $LasConfig{jakarta_home};
+my $java_home = dirname(dirname($java));
+my $workdir = $LasConfig{uipath};
+my $removeWork = $jakarta_home."/work/Catalina/localhost".$workdir;
+
+open SCRIPT_OUT, ">startserver.sh" or die "Can't open startserver.sh";
+print SCRIPT_OUT <<EOL;
+#!/bin/sh
+JAVA_HOME="$java_home"
+JAVA_OPTS="-Djava.awt.headless=true -Xmx256M -Xms256M"
+CATALINA_PID="$LasConfig{webapps}/UI_PID"
+CATALINA_HOME="$LasConfig{jakarta_home}"
+export JAVA_HOME JAVA_OPTS CLASSPATH CATALINA_PID CATALINA_HOME
+rm -rf $removeWork
+exec $jakarta_home/bin/catalina.sh start
+EOL
+my $mode = 0755;
+close SCRIPT_OUT;
+chmod $mode,"startserver.sh";
+
+open SCRIPT_OUT, ">stopserver.sh" or die "Can't open stopserver.sh";
+print SCRIPT_OUT <<EOL2;
+#!/bin/sh
+JAVA_HOME="$java_home"
+JAVA_OPTS="-Djava.awt.headless=true -Xmx256M -Xms256M"
+CATALINA_PID="$LasConfig{webapps}/UI_PID"
+CATALINA_HOME="$LasConfig{jakarta_home}"
+export JAVA_HOME JAVA_OPTS CLASSPATH CATALINA_PID CATALINA_HOME
+exec $jakarta_home/bin/catalina.sh stop
+EOL2
+
+close SCRIPT_OUT;
+chmod $mode,"stopserver.sh";
+
+open SCRIPT_OUT, ">rebootserver.sh" or die "Can't open rebootserver.sh";
+print SCRIPT_OUT <<EOL3;
+#! /bin/sh
+#
+
+# Attempt to shutdown the server gracefully.
+$ENV{PWD}/stopserver.sh
+
+# Wait to let things shutdown.
+sleep 5
+
+# Check to see if it is still running.
+ps `cat $LasConfig{webapps}/UI_PID`
+STATUS=$?
+ if [ \$STATUS -eq 0 ] ; then
+     # LAS UI did not shutdown ok.  Kill it.
+     kill -9 `cat $LasConfig{webapps}/UI_PID`
+ else
+     # LAS UI shutdown ok.
+     continue
+ fi
+
+# Start the server again.  Answer the question 'yes' if necessary.
+$ENV{PWD}/startserver.sh
+EOL3
+
+close SCRIPT_OUT;
+chmod $mode,"rebootserver.sh";
+}
 
 sub getExecutable {
     my ($file) = @_;
