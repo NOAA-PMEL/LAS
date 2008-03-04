@@ -172,14 +172,20 @@ LET stride_for_speed = `INT( 1+ ((var_size/memsize))/ndims )`
 
 ! If axes are not already strided, apply simple striding which
 ! we will undo later.
+
 IF `stride_for_speed GT 1` THEN ! 13
 
-   IF `($xstride"0|*>1") EQ 0` THEN ! 14
+   LET sampled_in_x = STRCMP("`pvar,RETURN=xaxis`", "SAMPLE_XLON") EQ 0 OR\
+                     STRCMP("`pvar,RETURN=xaxis`", "SAMPLE_X") EQ 0
+   LET sampled_in_y = STRCMP("`pvar,RETURN=yaxis`", "SAMPLE_YLAT") EQ 0 OR\
+                      STRCMP("`pvar,RETURN=yaxis`", "SAMPLE_Y") EQ 0
+
+   IF `($xstride"0|*>1") EQ 0 AND sampled_in_x EQ 0` THEN ! 14
      SET AXIS/STRIDE=`stride_for_speed` `pvar,RETURN=xaxis`
      DEFINE SYMBOL undo_x = 1
    ENDIF ! 14
 
-   IF `($ystride"0|*>1") EQ 0` THEN  ! 15
+   IF `($ystride"0|*>1") EQ 0 AND sampled_in_y EQ 0` THEN  ! 15
      SET AXIS/STRIDE=`stride_for_speed` `pvar,RETURN=yaxis`
      DEFINE SYMBOL undo_y = 1
    ENDIF ! 15
@@ -243,7 +249,6 @@ IF ($tstride"0|1>0|*>1") THEN  ! 26
 ENDIF ! 26
 
 ENDIF ! region syms dont apply to native curv grid directly
-
 
 IF ($index_strides"0|*>1") THEN  ! 29
    DEFINE SYMBOL ppvar = pvar[($index_strides)]
