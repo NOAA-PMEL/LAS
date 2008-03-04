@@ -453,6 +453,7 @@ EOF
 }
 
 
+if ( getYesOrNo("Do you want to install the example configuration") ) {
     my @sample_in = ();
     my @sample_out = ();
 
@@ -543,6 +544,7 @@ EOF
           }
        }
     }
+ }
 
     print "Building servlet war file.\n";
     system("ant deploy");
