@@ -10,6 +10,7 @@
 ! 3/29/2007 ACM Fix logic interpreting contents of ferret_interpolate_data 
 ! 7/15/2007 ACM Add lines to remove labels when a degenerate 2D plot is made 
 !               This happens when the region chosen is smaller than a grid cell.
+! 3/2008 ACM Use SHADE/TRIM for shade underlays of FILL plots (Ferret v6.1)
 
 
 ! xz_plot_2D.jnl creates an XZ plot for use with the Back End Server
@@ -106,18 +107,6 @@ DEFINE SYMBOL plot_type =($ferret_contour_style"FILL|default>FILL|raster>SHADE|c
 DEFINE SYMBOL shade_underlay = FALSE
 IF ($plot_type"0|FILL>1|*>0) THEN DEFINE SYMBOL shade_underlay = TRUE
 
-! When doing the FILL over SHADE, the plot around the edges shows wierd effects - the shade
-! showing but the fill stops short.  Use /HLIM and /VLIM to get the exact region requested,
-! and request the plot variable for the SHADE command on a +1 cell size larger region.
-
-   LET fill_var = ($ferret_plot_var_noregion)
-   DEFINE SYMBOL qualifiers = ($qualifiers)/HLIM=($limits_x)
-   DEFINE SYMBOL qualifiers = ($qualifiers)/VLIM=($limits_z)
-   DEFINE SYMBOL ferret_var_0 = fill_var[($region_x_plus),($region_z_plus)]
-   IF ($region_y"0|*>1") THEN DEFINE SYMBOL ferret_var_0 = fill_var[($region_x_plus),($region_z_plus),($region_y)]
-   IF ($region_t"0|*>1") THEN DEFINE SYMBOL ferret_var_0 = fill_var[($region_x_plus),($region_z_plus),($region_t)]
-   IF ($region_zt"0|*>1") THEN DEFINE SYMBOL ferret_var_0 = fill_var[($region_x_plus),($region_z_plus),($region_yt)]
-
 ! Set the URL label for the first dataset.
 GO LAS_url_label 0
 
@@ -158,7 +147,7 @@ ENDIF
 
 IF `($data_count"0") EQ 1` THEN
    IF ($shade_underlay) THEN 
-      SHADE($qualifiers)/TITLE="($ferret_plot_title)"/SET ($ferret_var_0)
+      SHADE($qualifiers)/TRIM/TITLE="($ferret_plot_title)"/SET ($ferret_var_0)
          IF ($xform_dms"0|*>1") THEN PPL XFOR (($xform_dms))
          IF ($yform_dms"0|*>1") THEN PPL YFOR (($yform_dms))
          IF ($axlab_command"0|*>1") THEN PPL ($axlab_command)

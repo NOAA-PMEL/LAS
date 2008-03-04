@@ -7,6 +7,7 @@
 !           in degenerate plot into LAS_initialize_data.jnl rather than in the 
 !           individual plot scripts.
 ! 3/29/2007 ACM Fix logic interpreting contents of ferret_interpolate_data 
+! 3/2008 ACM Use SHADE/TRIM for shade underlays of FILL plots (Ferret v6.1)
 
 ! yt_compare_difference.jnl creates an YT plot for use with the 
 ! Back End Server code that sits behind a Live Access Server (LAS). 
@@ -157,23 +158,6 @@ DEFINE SYMBOL plot_type =($ferret_contour_style"FILL|default>FILL|raster>SHADE|c
 DEFINE SYMBOL shade_underlay = FALSE
 IF ($plot_type"0|FILL>1|*>0) THEN DEFINE SYMBOL shade_underlay = TRUE
 
-! When doing the FILL over SHADE, the plot around the edges shows wierd effects - the shade
-! showing but the fill stops short.  Use /HLIM and /VLIM to get the exact region requested,
-! and request the plot variable for the SHADE command on a +1 cell size larger region.
-
-LET ferret_diff_var = ($ferret_var_0) - ($ferret_var_1)
-DEFINE SYMBOL qualifiers = ($qualifiers)/HLIM=($limits_t)
-DEFINE SYMBOL qualifiers = ($qualifiers)/VLIM=($limits_y)
-IF ($region_x"0|*>1") THEN DEFINE SYMBOL ferret_diff_var = \
-       ferret_var_0_noregion[($region_y_plus),($region_t_plus),($region_0_x)] - \
-       ferret_var_1_noregion[($region_y_plus),($region_t_plus),($region_1_x)]
-IF ($region_z"0|*>1") THEN DEFINE SYMBOL ferret_diff_var = \
-      ferret_var_0_noregion[($region_y_plus),($region_t_plus),($region_0_z)] - \
-      ferret_var_1_noregion[($region_y_plus),($region_t_plus),($region_1_z)]
-IF ($region_xz"0|*>1") THEN DEFINE SYMBOL ferret_diff_var = \
-      ferret_var_0_noregion[($region_y_plus),($region_t_plus),($region_0_xz)] - \
-      ferret_var_1_noregion[($region_y_plus),($region_t_plus),($region_1_xz)] 
-
 ! Set up for degrees-minutes-seconds labels on independent variable axis
 ! If this was not requested, the script just returns.
 
@@ -181,7 +165,7 @@ IF ($ferret_deg_min_sec"0|false>0|*>1") THEN GO LAS_set_deg_min_sec.jnl
 
 ! Draw the plot
 IF ($shade_underlay) THEN 
-   SHADE($qualifiers)/TITLE="($ferret_plot_title)"/SET ($ferret_diff_var)
+   SHADE($qualifiers)/TRIM/TITLE="($ferret_plot_title)"/SET ($ferret_diff_var)
       IF ($xform_dms"0|*>1") THEN PPL XFOR (($xform_dms))
       IF ($yform_dms"0|*>1") THEN PPL YFOR (($yform_dms))
       IF ($axlab_command"0|*>1") THEN PPL ($axlab_command)
