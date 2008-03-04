@@ -2,6 +2,8 @@
 
 ! curvi_sample_slice.jnl
 ! 3/07 ACM
+! 3/08 ACM limit the range of the sampling variable in z and/or t if
+!          a region is given in those directions.
 
 ! Description: define variables for a line of constant Latitude or Longitude 
 ! of a curvilinear data set.
@@ -51,15 +53,15 @@ IF `yslice GT 0` THEN
 
       IF ($region_t"0|*>1") THEN LET sample_var = y[gy=sample_ylat] + \
          x[gx=sample_x,x=($region_x_lo)] + \
-         t[gt=fer_plot_var]
+         t[gt=fer_plot_var,($region_t)]
 
       IF ($region_z"0|*>1") THEN LET sample_var = y[gy=sample_ylat] + \
         x[gx=sample_x,x=($region_x_lo)] + \
-         z[gz=fer_plot_var]+t[gt=fer_plot_var]
+         z[gz=fer_plot_var,($region_z)]+t[gt=fer_plot_var]
          
       IF `($region_t"0|*>1") + ($region_z"0|*>1") EQ 2` THEN LET sample_var = y[gy=sample_ylat] + \
          x[gx=sample_x,x=($region_x_lo)] + \
-         z[gz=fer_plot_var] + t[gt=fer_plot_var]
+         z[gz=fer_plot_var,($region_z)] + t[gt=fer_plot_var,($region_t)]
 
       LET sampled_var = RESHAPE(fer_plot_var, sample_var)
 
@@ -72,7 +74,7 @@ IF `yslice GT 0` THEN
 
       IF ($region_t"0|*>1") THEN LET sample_var = y[gy=sample_ylat] + \
          x[gx=sample_x,x=($region_x_lo)]  + \
-         z[gz=fer_plot_var]+t[gt=fer_plot_var]
+         z[gz=fer_plot_var]+t[gt=fer_plot_var,($region_t)]
 
       LET sampled_var = RESHAPE(fer_plot_var, sample_var)
 
@@ -85,7 +87,7 @@ IF `yslice GT 0` THEN
 
       IF ($region_z"0|*>1") THEN LET sample_var = y[gy=sample_ylat] + \
          x[gx=sample_x,x=($region_x_lo)]  + \
-         z[gz=fer_plot_var]+t[gt=fer_plot_var]
+         z[gz=fer_plot_var,($region_z)]+t[gt=fer_plot_var]
 
       LET sampled_var = RESHAPE(fer_plot_var, sample_var)
 
@@ -123,15 +125,15 @@ IF `xslice GT 0` THEN
 
       IF ($region_t"0|*>1") THEN LET sample_var = x[gx=sample_xlon] + \
          y[gy=sample_y,y=($region_y_lo)]  + \
-         t[gt=fer_plot_var]
+         t[gt=fer_plot_var,($region_t)]
 
       IF ($region_z"0|*>1") THEN LET sample_var = x[gx=sample_xlon] + \
          y[gy=sample_y,y=($region_y_lo)]  + \
-         z[gz=fer_plot_var]
+         z[gz=fer_plot_var,($region_z)]
          
       IF `($region_t"0|*>1") + ($region_z"0|*>1") EQ 2` THEN LET sample_var = x[gx=sample_xlon] + \
          y[gy=sample_y,y=($region_y_lo)]  + \
-         z[gz=fer_plot_var] + t[gt=fer_plot_var]
+         z[gz=fer_plot_var,($region_z)] + t[gt=fer_plot_var,($region_t)]
 
       LET sampled_var = RESHAPE(fer_plot_var, sample_var)
 
@@ -144,7 +146,7 @@ IF `xslice GT 0` THEN
 
       IF ($region_t"0|*>1") THEN LET sample_var = x[gx=sample_xlon] + \
          y[gy=sample_y,y=($region_y_lo)]  + \
-         z[gz=fer_plot_var]+t[gt=fer_plot_var]
+         z[gz=fer_plot_var]+t[gt=fer_plot_var,($region_t)]
 
       LET sampled_var = RESHAPE(fer_plot_var, sample_var)
 
@@ -157,7 +159,7 @@ IF `xslice GT 0` THEN
 
       IF ($region_z"0|*>1") THEN LET sample_var = x[gx=sample_xlon] + \
          y[gy=sample_y,y=($region_y_lo)]  + \
-         z[gz=fer_plot_var]+t[gt=fer_plot_var]
+         z[gz=fer_plot_var,($region_z)]+t[gt=fer_plot_var]
 
       LET sampled_var = RESHAPE(fer_plot_var, sample_var)
 
@@ -223,7 +225,7 @@ IF `tslice GT 0` THEN
          
    IF ($region_z"0|*>1") THEN LET sample_var = x[gx=sample_x,x=($region_x_lo)] + \
          y[gy=sample_y,y=($region_y_lo)]  + \
-         t[gt=fer_plot_var] + z[gz=fer_plot_var]
+         t[gt=fer_plot_var] + z[gz=fer_plot_var,($region_z)]
 
    LET sampled_var = RESHAPE(fer_plot_var, sample_var)
 
@@ -255,7 +257,7 @@ IF `zslice GT 0` THEN
          
    IF ($region_t"0|*>1") THEN LET sample_var = x[gx=sample_x,x=($region_x_lo)] + \
          y[gy=sample_y,y=($region_y_lo)]  + \
-         t[gt=fer_plot_var] + z[gz=fer_plot_var]
+         t[gt=fer_plot_var,($region_t)] + z[gz=fer_plot_var]
 
    LET sampled_var = RESHAPE(fer_plot_var, sample_var)
 
@@ -270,3 +272,6 @@ IF ($expr3"0|*>1") THEN
    DEFINE SYMBOL ferret_plot_var ($expr1)sampled_var($expr3)sampled_var($expr4)
    DEFINE SYMBOL ferret_plot_title "($expr1) ($data_title) ($expr3) ($data_title) ($expr4)"
 ENDIF
+
+! End of file ------------curvi_nrst_slice.jnl--------------------------
+
