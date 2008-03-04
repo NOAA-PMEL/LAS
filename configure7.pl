@@ -1,0 +1,635 @@
+#
+# LAS configuration
+#
+my $PERLBIN = shift;
+#
+# Extra Perl goodies needed for this script.
+#
+use File::Basename;   # fileparse(), basename(), dirname()
+use File::Copy;       # cp()
+use File::Path;       # mkpath()
+
+
+#
+# Ferret environment variable names
+#
+my @EnvVars = qw(FER_DIR FER_DESCR FER_DATA FER_GRIDS FER_PALETTE
+                 FER_GO PLOTFONTS FER_EXTERNAL_FUNCTIONS DODS_CONF);
+
+print "\n\nConfiguring V7.0 User Interface...\nIf you want to install the in-situ examples make sure you've loaded the sample data.\nSee the installation instructions at: http://ferret.pmel.noaa.gov/LAS/documentation/installer-documentation/installation/ for details.\n\n";
+#
+# Make sure Ferret environment variable has been set up
+#   
+
+if (! $ENV{FER_DIR} ){
+    print <<EOF; 
+  Your FERRET environment has not been properly set up.
+  (The environment variable FER_DIR is not defined)
+
+  Have you executed "source your_system_path/ferret_paths" ?
+  You need to do this before configuring LAS.
+EOF
+    exit 1;
+}
+
+#
+# Check for appropriate Java virtual machine
+#
+
+my ($java, $autojava);
+$autojava = $LasConfig{java};
+if (! $autojava){
+    $autojava = getExecutable('java');
+}
+while (! $java){
+    print "Location of java executable: [$autojava] ";
+    $java = <STDIN>;
+    chomp($java);
+    $java = $autojava if ! $java;
+    if (! -x $java){
+        print "$java is not an executable file\n";
+        $java = undef;
+    } else {
+        print "Verifying Java version...\n";
+        my $isJava = 0;
+        open STATUS, "$java -version 2>&1|"
+            or die "Can't run $java";
+        my $line;
+        while(<STATUS>){
+            if (/^java/){
+                $line = $_;
+                last;
+            }
+        }
+        close STATUS;
+        if (defined $line){
+            my @pieces = split(' ', $line);
+            my $vstring = $pieces[$#pieces];
+            $vstring =~ s/\"//g;
+            my ($major,$minor) = split(/\./, $vstring);
+            if ($major < 2 && $minor < 4){
+                print "Java version is $vstring. Must have at least 1.4\n";
+            } else {
+                $isJava = 1;
+            }
+        }
+        if (! $isJava){
+            print "\n$java is not the Java program or not the right version\n\n";
+            $java = undef;
+        }
+    }
+}
+$LasConfig{java} = $java;
+print "You have a valid version of Java.\n\n";
+
+#
+# Search for Ferret, make sure it is correct version
+#
+
+$ENV{PATH} = $ENV{PATH} . ":/usr/local/ferret/bin/";
+my ($ferret, $autoferret);
+$autoferret = $LasConfig{ferret};
+if (! $autoferret){
+    $autoferret = getExecutable('ferret');
+}
+while (! $ferret){
+    print "\nLocation of ferret executable: [$autoferret] ";
+    $ferret = <STDIN>;
+    chomp($ferret);
+    $ferret = $autoferret if ! $ferret;
+    if (! -x $ferret){
+        print "$ferret is not an executable file\n";
+        $ferret = undef;
+    } else {
+        print "Verifying Ferret version. This might take a few minutes...\n";
+        my $isFerret = 0;
+        my $testres = `echo exit | $ferret -nojnl`;
+        my @lines = split /^/m, $testres;
+        my $ferretVersion = "6.07";
+        foreach my $line (@lines){
+            my @words = split(/\s+/,$line);
+            if ($words[1] =~ /Version|FERRET/){
+                $words[2] =~ s/^v//;
+                my $version = $words[2];
+                if ($version < $ferretVersion){
+                    print "\nYou need to upgrade Ferret.\n";
+                    print "You need at least version $ferretVersion.\n\n";
+                    exit 1;
+                } else {
+                    $isFerret = 1;
+                }
+
+            }
+        }
+        if (! $isFerret){
+            print "\n$ferret is not the Ferret program\n\n";
+            $ferret = undef;
+        }
+    }
+}
+$LasConfig{ferret} = $ferret;
+print "You have a valid version of Ferret.\n\n";
+
+#
+# Get the path to access the LAS UI
+#
+$autopathname = $LasConfig{uipath};
+$autopathname = "/las" if ! $autopathname;
+print "\nYou must now specify the path name the Web client will use\n";
+print "when accessing LAS. Unless you have more than one version of LAS\n";
+print "installed, the default of $autopathname should be fine\n";
+
+while (! $pathname){
+    print "Enter path name for LAS: [$autopathname] ";
+    $pathname = <STDIN>;
+    chomp($pathname);
+    $pathname = $autopathname if ! $pathname;
+    if ($pathname !~ /^\//){
+        print "Path name must begin with a '/'\n";
+        undef $pathname;
+    }
+    $pathname =~ s/[\/]+$//g;
+    my $count = split('\/', $pathname);
+    if ($count > 2){
+        print "Path name can only be one level deep (i.e. /las ok, /las/foo not)\n";
+        undef $pathname;
+    }
+}
+$LasConfig{uipath} = $pathname;
+print "\n\n";
+#
+# Set up servlet in existing tomcat distribution:
+#
+
+$LasConfig{jakarta_home} = "/usr/local/tomcat" if !defined($LasConfig{jakarta_home});
+
+my $jakarta_home = $LasConfig{jakarta_home};
+my $different_Tomcat = $jakarta_home eq "las_servlet/jakarta" ? 1 : 0;
+
+# NOTE:  There are no 'auto_' settings for the servlet ports
+# NOTE:  'servlet_shutdown_port' and 'servlet_connector_port' don't seem to be used 
+my ($servlet_port, $autoservlet_port);
+my ($servlet_shutdown_port, $autoservlet_shutdown_port);
+my ($servlet_connector_port, $autoservlet_connector_port);
+$jakarta_home = getAnswer("Full path of Tomcat JAKARTA_HOME directory where you would like to deploy the servlet", $jakarta_home);
+$LasConfig{jakarta_home} = $jakarta_home;
+$LasConfig{webapps}="$jakarta_home/webapps";
+my $appname = $LasConfig{uipath};
+$appname =~ s/\///g;
+$LasConfig{appname} = $appname;
+
+print "\n\n";
+
+$autoservlet_port = $LasConfig{servlet_port};
+while (!$servlet_port){
+    $servlet_port = getAnswer("Which HTTP port does the Tomcat server use",
+                                       $autoservlet_port);
+    $LasConfig{servlet_port} = $servlet_port;
+}
+
+print "\n\n";
+
+my $hstn = `hostname`;
+chomp $hstn;
+my $tomcat_hostname;
+my $autotomcathostname = $LasConfig{tomcat_hostname};
+if (! $autotomcathostname){
+    ($autotomcathostname) = gethostbyname $hstn;
+    chomp $autotomcathostname;
+}
+
+while (! $tomcat_hostname){
+    print "Enter the full domain name of the Tomcat Server (do not include the port number): [$autotomcathostname] ";
+    $tomcat_hostname = <STDIN>;
+    chomp $tomcat_hostname;
+    $tomcat_hostname = $autotomcathostname if ! $tomcat_hostname;
+    if ($tomcat_hostname !~ /\./){
+        print "You must enter a full domain name\n";
+        $tomcat_hostname = undef;
+    }
+}
+$LasConfig{tomcat_hostname} = $tomcat_hostname;
+
+print "\n\n";
+#
+# Get a title for the LAS
+#
+my $title;
+my $autotitle = $LasConfig{title};
+print "\nPlease provide a title for your LAS.\n";
+print "This title will appear in the upper left hand corner of the LAS interface.\n";
+while (! $title){
+    print "Enter a title for the LAS server: [$autotitle] ";
+    $title = <STDIN>;
+    chomp($title);
+    $title = $autotitle if ! $title;
+}
+
+$LasConfig{title} = $title;
+print "\n\n";
+#   
+# Get an email address(es) for the LAS administrator(s)
+#
+my $email;
+my $autoemail = $LasConfig{email};
+print "\nProvide email address(es) for the administrator(s).\n";
+    
+    print "Enter a blank separated list email address(es): [$autoemail] ";
+    $email = <STDIN>;
+    chomp($email);
+    $email = $autoemail if ! $email;
+
+$LasConfig{email} = $email;
+print "\n\n";
+
+$LasConfig{proxy} = $proxy;
+
+my $autoproxy = $LasConfig{proxy};
+if (! $autoproxy){
+   $autoproxy = "yes";
+}
+
+while (! $proxy){
+    print "Do you plan to use a proxy pass or connector from the HTTP server to the tomcat server (recommended; instructions below): [$autoproxy] ";
+    $proxy = <STDIN>;
+    chomp $proxy;
+    $proxy = $autoproxy if ! $proxy;
+    if ($proxy ne "yes" && $proxy ne "no") {
+        print "You must answer 'yes' or 'no'.\n";
+        $proxy = undef;
+    }
+}
+$LasConfig{proxy} = $proxy;
+
+print "\n\n";
+
+my $servlet_root_url="";
+if ($LasConfig{proxy} eq "yes") {
+    #
+    # Get the hostname of the LAS server
+    #
+    my $hostname;
+    my $hn = `hostname`;
+    chomp $hn;
+    my $autohostname = $LasConfig{hostname};
+    if (! $autohostname){
+        ($autohostname) = gethostbyname $hn;
+        chomp $autohostname;
+    }
+    while (! $hostname){
+        print "Enter the full domain name of the HTTP server that will be used as the proxy: [$autohostname] ";
+        $hostname = <STDIN>;
+        chomp $hostname;
+        $hostname = $autohostname if ! $hostname;
+        if ($hostname !~ /\./){
+            print "You must enter a full domain name\n";
+            $hostname = undef;
+        }
+    }
+
+    $servlet_root_url = $LasConfig{hostname};
+} else {
+    $servlet_root_url = $LasConfig{tomcat_hostname} . ":" . $servlet_port;
+}
+# Get info about the TDS installation.
+#
+# Get the temp dir.
+#
+my $tds_temp;
+my $autotds_temp = $LasConfig{tds_temp};
+$autotds_temp = $ENV{PWD}."/conf/server/temp" if ! $autotds_temp;
+
+print "The TDS you installed will be used by LAS to regrid data as needed to make comparisons.\n";
+print "During this process the Ferret IOSP will write lots of temporary files.\n";
+
+    print "Enter a directory path for F-TDS temporary files: [$autotds_temp] ";
+    $tds_temp = <STDIN>;
+    chomp($tds_temp);
+    $tds_temp = $autotds_temp if ! $tds_temp;
+
+if ( !(-d $tds_temp) ) {
+   &File::Path::mkpath($tds_temp);
+   print "Creating the $tds_temp directory.\n";
+}
+
+print "\n\n";
+
+$LasConfig{tds_temp} = $tds_temp;
+
+# Get the data dir.
+my $autotds_data = $LasConfig{tds_data};
+$autotds_data = $ENV{PWD}."/conf/server/data" if ! $autotds_data;
+
+print "In the installation installation instructions you were asked to configure TDS\n";
+print "with a datascan directory to be used by LAS.\n";
+
+    print "Enter the directory path you configured for LAS F-TDS data files: [$autotds_data] ";
+    $tds_data = <STDIN>;
+    chomp($tds_data);
+    $tds_data = $autotds_data if ! $tds_data;
+
+if ( !(-d $tds_data) ) {
+   &File::Path::mkpath($tds_data);
+   print "Creating the $tds_data directory.\n";
+}
+   $LasConfig{tds_data} = $tds_data;
+
+# Make the dynamic data dir.
+my $tds_dynadata = $tds_data."/dynamic";
+
+if ( !(-d $tds_dynadata) ) {
+   &File::Path::mkpath($tds_dynadata);
+   print "Creating the $tds_dynadata directory for the dynamic data for user defined variables and comparison regridding.\n\n";
+}
+   $LasConfig{tds_dynadata} = $tds_dynadata;
+
+# End of TDS info.
+
+
+#
+# Scripts to edit
+#
+
+my @Scripts = qw(build.xml
+                 bin/initialize_check.sh
+                 conf/example/sample_las.xml
+                 conf/example/sample_ui.xml
+                 conf/example/sample_insitu_las.xml
+                 conf/example/sample_insitu_ui.xml
+                 conf/example/productserver.xml
+                 JavaSource/resources/ferret/FerretBackendConfig.xml.base
+                 JavaSource/resources/kml/KMLBackendConfig.xml
+                 JavaSource/resources/database/DatabaseBackendConfig.xml
+                 WebContent/WEB-INF/struts-config.xml
+                 WebContent/WEB-INF/web.xml
+                 WebContent/TestLinks.html
+                 test/LASTest/las_test_config.xml
+                 );
+my $mode = 0644;
+foreach my $script (@Scripts){
+    my $template = "$script.in";
+    open INSCRIPT, $template or die "Can't open template file $template";
+    if (-f $script){
+        chmod $mode, '$script';
+    }
+    open OUTSCRIPT, ">$script" or die "Can't create output file $script";
+    my $cust_name = $LasConfig{custom_name};
+    my $cname;
+    $cname = qq(src="$cust_name/custom.js") if $cust_name;
+    my $cplinclude = "";
+    $cplinclude = "$cust_name" if $cust_name;
+    my $java_home = dirname(dirname($java));
+    while (<INSCRIPT>){
+        s/\@JAKARTA_HOME\@/$jakarta_home/g;
+        s/\@JAVA_HOME\@/$java_home/g;
+        s/\@FERRET\@/$LasConfig{ferret}/g;
+        s/\@OUTPUT_ALIAS\@/$LasConfig{output_alias}/g;
+        s/\@UIPATH\@/$LasConfig{uipath}/g;
+        s/\@APPNAME\@/$LasConfig{appname}/g;
+        s/\@SERVERHOST\@/$LasConfig{hostname}/g;
+        s/\@TOMCATHOST\@/$LasConfig{tomcat_hostname}/g;
+        s/\@PROXY\@/$LasConfig{proxy}/g;
+        s/\@JSINCLUDE\@/$cname/g;
+        s/\@CUSTOM_PERL_INCLUDE\@/$cplinclude/g;
+        s/\@DB_HOST\@/$host/g;
+        s/\@SERVLET_PORT\@/$servlet_port/g;
+        s/\@SERVLET_SHUTDOWN_PORT\@/$servlet_shutdown_port/g;
+        s/\@SERVLET_CONNECTOR_PORT\@/$servlet_connector_port/g;
+        s/\@SERVLET_ROOT_URL\@/$servlet_root_url/g;
+        s/\@MODULES_LIST\@/$modules_list/g;
+        s/\@TITLE\@/$LasConfig{title}/g;
+        s/\@ADMIN_EMAIL\@/$LasConfig{email}/g;
+        s/\@WEBAPPS\@/$LasConfig{webapps}/g;
+        s/\@TDS_DATA\@/$LasConfig{tds_data}/g;
+        s/\@TDS_DYNADATA\@/$LasConfig{tds_dynadata}/g;
+        s/\@TDS_TEMP\@/$LasConfig{tds_temp}/g;
+        s/\@PWD\@/$ENV{PWD}/g;
+        print OUTSCRIPT $_;
+    }
+    close INSCRIPT;
+    close OUTSCRIPT;
+    chmod $mode, '$script';
+}
+
+
+
+#
+# Set up Ferret paths
+#
+
+$ferretConfig = "JavaSource/resources/ferret/FerretBackendConfig.xml";
+
+print <<EOF;
+
+Now setting up the Ferret environment variables for the server...
+If you want to change them, edit 'JavaSource/resources/ferret/FerretBackendConfig.xml'
+
+
+EOF
+
+if (-f "JavaSource/resources/ferret/FerretBackendConfig.xml"){
+    print "You already have a config file for your Ferret backend environment.\n";
+    
+
+    if ( getYesOrNo("Do you want to use this file") ) {
+    } else {
+print <<EOF;
+
+Creating a  new 'JavaSource/resources/ferret/FerretBackendConfig.xml'
+based on your current environment variable settings.  
+
+The current file has been saved in: JavaSource/resources/ferret/FerretBackendConfig.xml.old
+
+EOF
+       system("mv $ferretConfig $ferretConfig.old");
+       copy ("$ferretConfig.base","$ferretConfig") or
+       die "Could not get FerretBackendConfig.xml initialization file";
+       printENV($ferretConfig, @EnvVars);
+    }
+} else {
+       copy("$ferretConfig.base","$ferretConfig") or
+       die "Could not get FerretBackendConfig.xml initialization file";
+       printENV($ferretConfig, @EnvVars);
+}
+
+
+    my @sample_in = ();
+    my @sample_out = ();
+
+    my @insitu_in = ();
+    my @insitu_out = ();
+
+    $sample_in[0] = "conf/example/sample_las.xml";
+    $sample_out[0] = "conf/server/las.xml";
+    $sample_in[1] = "conf/example/productserver.xml";
+    $sample_out[1] = "conf/server/productserver.xml";
+    $sample_in[2] = "conf/example/operationsV7.xml";
+    $sample_out[2] = "conf/server/operationsV7.xml";
+    $sample_in[3] = "conf/example/sample_ui.xml";
+    $sample_out[3]= "conf/server/ui.xml";
+    $sample_in[4] = "xml/perl/coads.xml";
+    $sample_out[4] = "conf/server/coads.xml";
+    $sample_in[5] = "conf/example/DODS_IRI_NOAA_NCEP_EMC_CMB_Pac_ocean.xml";
+    $sample_out[5] = "conf/server/DODS_IRI_NOAA_NCEP_EMC_CMB_Pac_ocean.xml";
+    $sample_in[6] = "xml/perl/levitus.xml";
+    $sample_out[6] = "conf/server/levitus.xml";
+    $sample_in[7] = "conf/example/ocean_atlas_subset.xml";
+    $sample_out[7] = "conf/server/ocean_atlas_subset.xml";
+    $insitu_in[0] = "conf/example/insitu_demo_1.xml";
+    $insitu_out[0] = "conf/server/insitu_demo_1.xml";
+    $insitu_in[1] = "conf/example/insitu_demo_2.xml";
+    $insitu_out[1] = "conf/server/insitu_demo_2.xml";
+    $insitu_in[2] = "conf/example/insitu_demo_ui.xml";
+    $insitu_out[2] = "conf/server/insitu_demo_ui.xml";
+    $insitu_in[3] = "conf/example/insitu_ui.xml";
+    $insitu_out[3] = "conf/server/insitu_ui.xml";
+    $insitu_in[4] = "conf/example/insitu_options.xml";
+    $insitu_out[4] = "conf/server/insitu_options.xml";
+
+    # Overwrite gridded only las.xml and ui.xml for insitu demo.
+    $insitu_in[5] = "conf/example/sample_insitu_las.xml";
+    $insitu_out[5] = "conf/server/las.xml";
+    $insitu_in[6] = "conf/example/sample_insitu_ui.xml";
+    $insitu_out[6] = "conf/server/ui.xml";
+    $insitu_in[7] = "conf/example/nwioos_hake98.xml";
+    $insitu_out[7] = "conf/server/nwioos_hake98.xml";
+    $insitu_in[8] = "conf/example/pfeg.xml";
+    $insitu_out[8] = "conf/server/pfeg.xml";
+
+
+    my $insitu = 0;
+       if (getYesOrNo("Are the sample in-situ datasets loaded into your mySQL database")) {
+          $insitu=1;
+       }
+
+    for ( my $i = 0; $i <= $#sample_in; $i++ ) {
+       if ( -f $sample_out[$i] ) {
+           print "You already have this XML configuration file for your\n";
+           print "product server in $sample_out[$i].\n";
+           if (! getYesOrNo("Overwrite this file", 1)){
+              print "I will not generate a sample configuration\n";
+              return;
+          }
+       }
+       if (-f $sample_out[$i] && !unlink $sample_out[$i]){
+           print "Couldn't delete $sample_out[$i]\n"; return;
+       }
+       if (!copy($sample_in[$i], $sample_out[$i])){
+           print "Couldn't copy $sample_in[$i] to $sample_out[$i]\n";
+           return;
+       }
+    }
+    if (!copy("WebContent/luis/web/levitus_monthly.html","WebContent/docs/levitus_monthly.html")){
+       print "Couldn't copy levitus_monthly.html.\n";
+    }
+    if ($insitu) {
+       for ( my $i = 0; $i <= $#insitu_in; $i++ ) {
+          if ( -f $insitu_out[$i] && 
+                 !$insitu_out[$i] =~ "/las.xml" &&
+                 !$insitu_out[$i] =~ "/ui.xml" ) {
+              print "You already have this XML configuration file for your\n";
+              print "product server in $insitu_out[$i].\n";
+              if (! getYesOrNo("Overwrite this file", 1)){
+                 print "I will not generate a sample configuration\n";
+                 return;
+             }
+          }
+          if (-f $insitu_out[$i] && !unlink $insitu_out[$i]){
+              print "Couldn't delete $insitu_out[$i]\n"; return;
+          }
+          if (!copy($insitu_in[$i], $insitu_out[$i])){
+              print "Couldn't copy $insitu_in[$i] to $insitu_out[$i]\n";
+              return;
+          }
+       }
+    }
+
+    print "Building servlet war file.\n";
+    system("ant deploy");
+
+    print "\n\n";
+
+
+sub getExecutable {
+    my ($file) = @_;
+    foreach my $path (split ':',$ENV{PATH}){
+        my $checkfile = "$path/$file";
+        if (-x "$checkfile"){
+            return $checkfile;
+        }
+    }
+    "";
+}
+sub getAnswer($$) {
+    my ($mess, $default) = @_;
+    print "$mess: [$default] ";
+    my $answer = <STDIN>;
+    chomp($answer);
+    $answer = $default if ! $answer;
+    return $answer;
+}
+    sub getYesOrNo {
+        my $prompt = shift;
+        my $useNo = shift;
+        my $default = $useNo ? "no" : "yes";
+        print "$prompt? [$default] ";
+        my $ans = <STDIN>; 
+        chomp($ans);
+        $ans = $default if ! $ans;
+        if ($ans !~ /^[yY]/){
+            return 0;
+        }
+        return 1; 
+    }    
+
+sub trim($)
+{
+        my $string = shift;
+        $string =~ s/^\s+//;
+        $string =~ s/\s+$//;
+        return $string;
+}
+
+sub printENV($ferretConfig, @EnvVars) {
+       open CONFIGFILE, ">>$ferretConfig"
+           or die "Couldn't open config file $ferretConfig";
+
+        print CONFIGFILE '    <environment>',"\n";
+        foreach my $var (@EnvVars){
+            $ENV{$var} = ". " . $ENV{$var} if $var !~ /PLOTFONT/;
+            if ($var =~ /FER_GO|FER_PALETTE/){
+                $ENV{$var} = "scripts jnls jnls/insitu jnls/section " . $ENV{$var};
+                $ENV{$var} = $LasConfig{custom_name} . " " . $ENV{$var}
+                    if $LasConfig{custom_name};
+            } elsif ($var =~ /FER_DATA/){
+                $ENV{$var} = "./data " . $ENV{$var};
+            } elsif ($var =~ /FER_DESCR/){
+                $ENV{$var} = "des " . $ENV{$var};
+            } elsif ($var =~ /DODS_CONF/){
+                $ENV{$var} = "dods/.dodsrc";
+            }
+
+            my @values = split(' ',$ENV{$var});
+
+            # Trim so ". " and "." match
+            foreach my $value (@values) {
+               $value = trim($value);
+            }
+
+            #Extract unique entries, see perl FAQ
+            undef %saw;
+            @saw{@values} = ();
+            @out = sort keys %saw;  # remove sort if undesired
+    
+            print CONFIGFILE '        <variable>',"\n";
+            print CONFIGFILE '            <name>',$var,'</name>',"\n";
+            foreach my $value (@out) {
+               $value = trim($value);
+               print CONFIGFILE '             <value>',$value,'</value>',"\n";
+            }
+            print CONFIGFILE '        </variable>',"\n";
+        }
+        print CONFIGFILE '    </environment>',"\n";
+        print CONFIGFILE '</ferret>',"\n";
+        close CONFIGFILE;
+     }
