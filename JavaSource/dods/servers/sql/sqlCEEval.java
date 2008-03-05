@@ -227,9 +227,9 @@ public class sqlCEEval extends CEEvaluator implements ExprParserConstants {
         String distinct = "";
         LinkedList uClauses = new LinkedList();
 
-        Enumeration enum = getClauses();
-        while (enum.hasMoreElements()) {
-            Clause c = (Clause) enum.nextElement();
+        Enumeration enm = getClauses();
+        while (enm.hasMoreElements()) {
+            Clause c = (Clause) enm.nextElement();
             if (c instanceof BoolFunctionClause) {
 
 
@@ -276,12 +276,12 @@ public class sqlCEEval extends CEEvaluator implements ExprParserConstants {
 
 
         String constraint = null;
-        Enumeration enum = getClauses();
+        Enumeration enm = getClauses();
         LinkedList toBePurged = new LinkedList();
 
-        while (enum.hasMoreElements()) {
+        while (enm.hasMoreElements()) {
 
-            Clause c = (Clause) enum.nextElement();
+            Clause c = (Clause) enm.nextElement();
 
             String s = convertClauseToSQL(c, useDatasetName);
 
