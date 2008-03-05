@@ -453,7 +453,7 @@ EOF
 }
 
 
-if ( getYesOrNo("Do you want to install the example configuration") ) {
+if ( getYesOrNo("Do you want to install the example data set configuration") ) {
     my @sample_in = ();
     my @sample_out = ();
 
@@ -552,6 +552,13 @@ if ( getYesOrNo("Do you want to install the example configuration") ) {
     print "\n\n";
 
     createScripts();
+
+    print "You can test your F-TDS setup by running the LASTest suite.\n";
+    print "To run the tests run these commands.\n";
+    print "cd test/LASTest\n";
+    print "ant lastest -Df=1\n";
+
+    print "\n\n";
 
     print "You must restart your Tomcat server.\n";
     print "We've created some scripts to help you do that.  See: stopserver.sh, startserver.sh and rebootserver.sh\n";
