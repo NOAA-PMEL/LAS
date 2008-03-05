@@ -51,6 +51,8 @@ function LASUI () {
 		"date" : "date",
 		"depth" : "depth",
 		"header" : "header",
+		"breadcrumb" : "breadcrumb",
+		"variables" : "variables",
 		"inputs" : {
 			"maxX" : "input_maxX",
 			"maxY" : "input_maxY",
@@ -181,9 +183,12 @@ LASUI.prototype.setCategoryTreeNode = function (strJson, node, id) {
 
 
 	var response = eval("(" + strJson + ")");	
-	node.category = new LASGetCategoriesResponse(response);					
+	node.category = new LASGetCategoriesResponse(response);	
+				
 	if(node.category.getCategoryType()=="category")
 		node.children=[];
+	
+
 	for(var i=0; i<node.category.getCategorySize();i++)
 		this.setCategoryTreeSubNode(node, i,id);		
 	this.expand(node);
@@ -288,6 +293,20 @@ LASUI.prototype.createCategoryTreeNode = function (node, i, id) {
 	if(this.refs.categories[node.category.getChild(i).ID]||node.category.getChild(i).ID==this.state.dataset)
 		this.selectCategory(null,node,i);
 }
+LASUI.prototype.createVariableOptionNode = function (node, i) {	
+	var OPTIONNode = document.createElement("OPTION");
+	OPTIONNode.innerHTML = node.category.getChildName(i);
+	OPTIONNode.id = "OPTION_" + node.category.getChildID(i);
+	OPTIONNode.onselect=this.setVariable.LASBind(this, node, i);
+	document.getElementById(this.anchors.variables).appendChild(OPTIONNode);
+	document.getElementById(this.anchors.variables).onchange = function (evt) {this.options[this.selectedIndex].onselect({"target" : {"selected" :true}});}
+	if(this.state.variables && this.state.dataset)
+		if(this.state.variables[this.state.dataset])
+				if(this.state.variable==node.category.getChildID(i)||this.state.variables[this.state.dataset]==node.category.getChild(i)){ 
+					OPTIONNode.selected=true;
+				}
+
+}
 /**
  * Sub method to create variable tree node and add it to the DOM
  *  parameters: 
@@ -297,7 +316,8 @@ LASUI.prototype.createCategoryTreeNode = function (node, i, id) {
 LASUI.prototype.createVariableTreeNode = function (node, i) {	
 	if(!node.children)
 		node.children=[];
-	node.children[i] = {};
+	if(!node.children[i])
+		node.children[i] = {};
 	node.children[i].LINode = document.createElement("LI");
 	node.children[i].LINode.style.listStyleType = "none";
 	node.children[i].LINode.style.listStyleImage = "none";
@@ -314,7 +334,7 @@ LASUI.prototype.createVariableTreeNode = function (node, i) {
 	node.children[i].className = "LASRadioInputNode";
 	node.children[i].INPUTNode.onclick=this.setVariable.LASBind(this, node, i);
 	node.children[i].INPUTNode.id = node.category.getChildID(i);
-		
+			
 	var table = document.createElement("TABLE");	
 	table.width="100%";
 	var tbody = document.createElement("TBODY");
@@ -389,8 +409,11 @@ LASUI.prototype.onSetVariable = function() {
 				var categories = this.state.categorynames[0];
 				for(var i=1;i<this.state.categorynames.length;i++)
 					categories += ' / ' + this.state.categorynames[i];
-				var variables = this.state.variables[this.state.dataset].name;
-				document.getElementById('breadcrumb').innerHTML = '<a class="LASLink" onclick="window.open(\'getMetadata.do?dsid='+this.state.dataset+'\')"><img src="images/icon_info.gif"></a>&nbsp;<b>' + categories + ' : ' + variables + '</b>'; 	
+				//var variables = this.state.variables[this.state.dataset].name;
+				
+				document.getElementById(this.anchors.breadcrumb).innerHTML = '<a class="LASLink" onclick="window.open(\'getMetadata.do?dsid='+this.state.dataset+'\')"><img src="images/icon_info.gif"></a>&nbsp;<b>' + categories + ' : <select id="variables"/></b>'; 	
+								
+				
 				if(this.refs.analysis.enabled) {
 					this.hideAnalysis();
 					this.showAnalysis();
@@ -407,7 +430,8 @@ LASUI.prototype.onSetVariable = function() {
 LASUI.prototype.selectCategory = function (evt) {
 	var args = arguments;
 	var parentNode = args[1];
-	var i = args[2];		
+	var i = args[2];
+
 	if(!parentNode.children[i].isExpanded) {
 		if(parentNode == this.refs.categories) {
 			this.state.categories = {};
@@ -416,8 +440,9 @@ LASUI.prototype.selectCategory = function (evt) {
 		for(var c=0;c< parentNode.children.length;c++)
 			this.collapse(parentNode.children[c]);
 		this.expand(parentNode.children[i]);	//expand the category if it has been selected 
-		if(parentNode.category.getChildChildrenType(i)=="variables")
+		if(parentNode.category.getChildChildrenType(i)=="variables") 
 			this.setDataset(parentNode.category.getChildDatasetID(i));
+			
 		if(parentNode == this.refs.categories)			
 			this.state.categorynames = [];
 		this.state.categorynames.push(parentNode.category.getChildName(i));
@@ -432,7 +457,7 @@ LASUI.prototype.selectCategory = function (evt) {
 		req.onreadystatechange = this.AJAXhandler.LASBind(this, req, "this.setCategoryTreeNode(req.responseText,args[3].children[args[4]],args[3].category.getChild(args[4]));", parentNode, i);
 		req.open("GET", this.hrefs.getCategories.url + "?catid=" + parentNode.category.getChildID(i));
 		req.send(null);
-	} 
+	}		
 }
 /**
  *Event handler for variable selection, bind to variable DOM object events. 
@@ -447,17 +472,26 @@ LASUI.prototype.setVariable = function (evt) {
 	var dataset = args[1];
 	var i = args[2];
 
-	if(evt.target) 			
-		var loadVariable = evt.target.checked;
-	else if (evt.srcElement)
-		var loadVariable = evt.srcElement.checked;
+	if(evt.target){ 
+		if(evt.target.checked)			
+			var loadVariable = evt.target.checked;
+		if(evt.target.selected)
+			var loadVariable = evt.target.selected;
+	}
+	else if (evt.srcElement){ 
+		if(evt.target.checked)			
+			var loadVariable = evt.srcElement.checked;
+		if(evt.target.selected)
+			var loadVariable = evt.srcElement.selected;
+	}
 	else if(args.length>3)
 		var loadVariable = args[3];
 	var datasetID = dataset.category.getDatasetID();
 	var variableID = dataset.category.getChildID(i);
 	var variable = dataset.category.getChild(i);
 	var variableLINode = dataset.children[i].LINode;
-		
+	var variableINPUTNode = dataset.children[i].INPUTNode;
+	variableINPUTNode.checked = loadVariable;	
 	if (loadVariable) {			
 		//start an array of selected variables for this dataset if we havent already
 		if(typeof this.state.variables[datasetID] != 'object') 
@@ -479,6 +513,10 @@ LASUI.prototype.setVariable = function (evt) {
 		}		 		
 	if(this.onSetVariable)
 		this.onSetVariable();
+	
+	for(var i=0;i<dataset.children.length;i++)
+		this.createVariableOptionNode(dataset,i);
+
 }
 /**
  * Method to set the active dataset and call getGrid if appropriate
