@@ -238,12 +238,12 @@ ENDIF ! 23
 IF ($tstride"0|1>0|*>1") THEN  ! 26
    LET tsize  `pvar,RETURN=lsize`
    IF `tsize GT 50` THEN  ! 27
+   let strd_lo = `L[gt=pvar,t="($region_t_lo)"]`
+   let strd_hi = `L[gt=pvar,t="($region_t_hi)"]`
      IF ($index_strides"0|*>1") THEN  ! 28
-        let strd_lo = `L[gt=pvar,t=($region_t_lo)]`
-        let strd_hi = `L[gt=pvar,t=($region_t_hi)]`
         DEFINE SYMBOL index_strides = ($index_strides),`strd_lo`:`strd_hi`:`INT(tsize/10)`
      ELSE
-        DEFINE SYMBOL  index_strides = `strd_lo`:`strd_hi`:`INT(tsize/10)`
+        DEFINE SYMBOL  index_strides = L=`strd_lo`:`strd_hi`:`INT(tsize/10)`
      ENDIF ! 28
    ENDIF ! 27
 ENDIF ! 26
