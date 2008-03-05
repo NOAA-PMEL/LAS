@@ -52,7 +52,7 @@ IF `STRINDEX( "($operation_ID)", "Plot" ) EQ 0 AND STRINDEX( "($operation_ID)", 
          SET AXIS/STRIDE=($stride_for_mem) `pvar,RETURN=zaxis`
          DEFINE SYMBOL add_to_title = ($add_to_title) Stride ($stride_for_mem) in Z
       ENDIF
-      IF `($region_t_range"0") GT 0` THEN 
+      IF `($region_t"0") GT 0` THEN 
          SET AXIS/STRIDE=($stride_for_mem) `pvar,RETURN=taxis`
          DEFINE SYMBOL add_to_title = ($add_to_title) Stride ($stride_for_mem) in T
       ENDIF
@@ -192,7 +192,7 @@ IF `STRLEN("($ferret_view)") EQ 1` THEN
       LET nz = zz[k=@ngd]
       LET pixsize = `MAX(pixsize, nz)`
    ENDIF
-   IF `($region_t_range"0|*>1") GT 0` THEN     
+   IF `($region_t"0|*>1") GT 0` THEN     
       LET tt = t[gt=($data_var)[d=($data_num)],($region_t)]
       LET nt = `tt[l=@ngd]`
       stat tt
@@ -222,7 +222,7 @@ IF `STRLEN("($ferret_view)") EQ 1` THEN
          ENDIF
       ENDIF
 
-      IF ($region_t_range"0|0|*>1") THEN  
+      IF ($region_t"0|0|*>1") THEN  
          IF `nt GT maxpix` THEN 
             DEFINE SYMBOL tstride = `2*INT((nt/maxpix)+1)`
             IF `($tstride"0") GT 1` THEN SET AXIS/STRIDE=($tstride) `($data_var)[d=($data_num)],RETURN=taxis`
