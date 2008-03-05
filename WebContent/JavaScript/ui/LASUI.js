@@ -1004,7 +1004,7 @@ LASUI.prototype.updateConstraints = function (view) {
 				switch(this.state.grid.response.grid.axis[d].type) {
 					case 'z' : this.refs.DepthWidget[this.refs.DepthWidget.widgetType][1].disabled = true; break;
 					case 't' : if(this.refs.DW.widgetType)
-							this.refs.DW[1].disable('hi');
+							this.refs.DW.disable('hi');
 						  else
 							this.refs.DW[1].disabled = true;
 							 break;
@@ -1013,7 +1013,7 @@ LASUI.prototype.updateConstraints = function (view) {
 				switch(this.state.grid.response.grid.axis[d].type) {
 					case 'z' : this.refs.DepthWidget[this.refs.DepthWidget.widgetType][1].disabled = false; break;
 					case 't' : if(this.refs.DW.widgetType)
-							this.refs.DW[1].enable('hi');
+							this.refs.DW.enable('hi');
 						  else
 							this.refs.DW[1].disabled = false;
 							 break;
@@ -1950,7 +1950,7 @@ LASUI.prototype.showAnalysis = function () {
 				case 't': if(!this.refs.DW.widgetType) 
 						this.refs.DW[1].disabled = true;
 					  else	    
-						this.refs.DW.disable('hi')
+						this.refs.DW.disable('hi');
 					  break;
 			
 			} 
@@ -1960,7 +1960,7 @@ switch(this.state.grid.response.grid.axis[d].type.toLowerCase()) {
 				case 't': if(!this.refs.DW.widgetType) 
 						this.refs.DW[1].disabled = false;
 					  else	    
-						this.refs.DW.enable('hi')
+						this.refs.DW.enable('hi');
 					  break;
 			
 			}

@@ -884,24 +884,50 @@ function DateWidget_setOffsetMinutes(min) {
 /**
  * Disables all Select objects in the Widget.
  */
-function DateWidget_disable() {
+function DateWidget_disable(hilo) {
   var node = document.getElementById(this.element_id);
   var select_nodes = node.getElementsByTagName('select');
-  for (var i=0; i<select_nodes.length; i++) {
-    select_nodes[i].disabled = 1;
-  }
+  for (var i=0; i<select_nodes.length; i++) 
+  	switch(hilo) {
+		case 'hi' :
+			if(select_nodes[i].id[select_nodes[i].id.length-1]=='2')
+				select_nodes[i].disabled= 1;
+			else
+
+			break;
+		case 'lo' :
+			if(select_nodes[i].id[select_nodes[i].id.length-1]=='1')
+				select_nodes[i].disabled= 1;
+			break;
+		default :    
+			select_nodes[i].disabled = 1;
+  		
+	}  
   this.disabled = 1;
 }
 
 /**
  * Enables all Select objects in the Widget.
  */
-function DateWidget_enable() {
+function DateWidget_enable(hilo) {
   var node = document.getElementById(this.element_id);
   var select_nodes = node.getElementsByTagName('select');
-  for (var i=0; i<select_nodes.length; i++) {
-    select_nodes[i].disabled = 0;
-  }
+  for (var i=0; i<select_nodes.length; i++) 
+	switch(hilo) {
+		case 'hi' :
+			if(select_nodes[i].id[select_nodes[i].id.length-1]=='2')
+				select_nodes[i].disabled= 0;
+			else
+
+			break;
+		case 'lo' :
+			if(select_nodes[i].id[select_nodes[i].id.length-1]=='1')
+				select_nodes[i].disabled= 0;
+			break;
+		default :    
+			select_nodes[i].disabled = 0;
+  		
+	}
   this.disabled = 0;
 }
 
