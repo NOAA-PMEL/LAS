@@ -109,10 +109,10 @@ public class sqlSeq extends SDSequence {
         if (_Debug) System.out.println("\nReading row " + rowCount + " of Sequence \"" + getName() + "\" from " + datasetName + ":");
 
 
-        Enumeration enum = this.getVariables();
+        Enumeration enm = this.getVariables();
 
-        while (enum.hasMoreElements()) {
-            ServerMethods sm = (ServerMethods) enum.nextElement();
+        while (enm.hasMoreElements()) {
+            ServerMethods sm = (ServerMethods) enm.nextElement();
             //System.out.println("Reading variable: "+((BaseType)sm).getName());
             if (sm.isProject()) {
                 sm.read(datasetName, specialO);
