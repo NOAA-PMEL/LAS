@@ -234,7 +234,11 @@ IF `($clon_imin) GE ($clon_imax)` THEN
 ENDIF
 
 ! For modulo curvilinear plots, need the whole range of I regardless
+DEFINE SYMBOL clon_imin_computed ($clon_imin)
+DEFINE SYMBOL clon_imax_computed ($clon_imax)
+
 DEFINE SYMBOL clon_imin 1
 DEFINE SYMBOL clon_imax `($ferret_curvi_coord_lon)[j=1,x=@NGD]`
 
 ! End of get_curv_coord_bbox.jnl ------------------------------------------------------
+
