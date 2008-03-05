@@ -180,12 +180,12 @@ IF `stride_for_speed GT 1` THEN ! 13
    LET sampled_in_y = STRCMP("`pvar,RETURN=yaxis`", "SAMPLE_YLAT") EQ 0 OR\
                       STRCMP("`pvar,RETURN=yaxis`", "SAMPLE_Y") EQ 0
 
-   IF `($xstride"0|*>1") EQ 0 AND sampled_in_x EQ 0` THEN ! 14
+   IF `($xstride"0|*>1") EQ 0 AND sampled_in_x EQ 0 AND ($no_native_strides_xy"0|*>1") NE 1` THEN ! 14
      SET AXIS/STRIDE=`stride_for_speed` `pvar,RETURN=xaxis`
      DEFINE SYMBOL undo_x = 1
    ENDIF ! 14
 
-   IF `($ystride"0|*>1") EQ 0 AND sampled_in_y EQ 0` THEN  ! 15
+   IF `($ystride"0|*>1") EQ 0 AND sampled_in_y EQ 0 AND ($no_native_strides_xy"0|*>1") NE 1` THEN  ! 15
      SET AXIS/STRIDE=`stride_for_speed` `pvar,RETURN=yaxis`
      DEFINE SYMBOL undo_y = 1
    ENDIF ! 15
