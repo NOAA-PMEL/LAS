@@ -1,4 +1,5 @@
-
+! LAS_set_strides_curvilinear.jnl
+!
 ! From the region and the grid we can define striding. When there's going to be
 ! a transformation or something, then this might be better someplace else, or
 ! might be undone by the transform script.
@@ -109,7 +110,7 @@ IF `STRLEN("($ferret_view)") EQ 2` THEN
 
    ELIF `($ferret_curvi_coord_lat"0|*>1") AND (STRINDEX("($ferret_view)", "x") + STRINDEX("($ferret_view)", "y") GT 0) ` THEN
 
-        IF `(STRINDEX("($ferret_view)", "x") GT 0)` THEN 
+!        IF `(STRINDEX("($ferret_view)", "x") GT 0)` THEN 
            LET xx = x[gx=($data_var)[d=($data_num)]]
            LET nx = xx[i=@ngd]
            LET x_pct = ($region_x_range)/360
@@ -122,9 +123,9 @@ IF `STRLEN("($ferret_view)") EQ 2` THEN
            ENDIF
            IF `($xstride"0") GT 1` THEN SET AXIS/STRIDE=($xstride) `($data_var)[d=($data_num)],RETURN=xaxis`
 
-        ENDIF
+!        ENDIF
   
-        IF `(STRINDEX("($ferret_view)", "y") GT 0)` THEN 
+!        IF `(STRINDEX("($ferret_view)", "y") GT 0)` THEN 
            LET yy = y[gy=($data_var)[d=($data_num)]]
            LET ny = yy[j=@ngd]
            LET y_pct = ($region_y_range)/180
@@ -137,7 +138,7 @@ IF `STRLEN("($ferret_view)") EQ 2` THEN
            ENDIF
            IF `($ystride"0") GT 1` THEN SET AXIS/STRIDE=($ystride) `($data_var)[d=($data_num)],RETURN=yaxis`
 
-        ENDIF
+!        ENDIF
   
         IF ($region_z_lo"0|*>1") THEN 
            LET zz = z[gz=($data_var)[d=($data_num)],($region_z)]
@@ -273,7 +274,4 @@ IF `($xstride"0|1>0|*>1") + ($ystride"0|1>0|*>1") + ($zstride"0|1>0|*>1") + ($ts
 
 ENDIF
 
-
-! End of $RCSfile ------------LAS_set_strides.jnl--------------------------
-
-
+! End of $RCSfile ------------LAS_set_strides_curvilinear.jnl--------------------------
