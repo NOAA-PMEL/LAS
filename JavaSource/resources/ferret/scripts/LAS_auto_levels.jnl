@@ -123,9 +123,11 @@ IF ($native_curvilinear_xy"0") THEN
    IF ($do_curvi_xy_and_hybrid_z"0") THEN LET pvar = plot_var* maskx* masky
 
 ELSE
-
-   LET pvar = ($ferret_plot_var)
-
+   IF `($do_hybrid_z"0") + ($do_curvi_xy_and_hybrid_z"0") GT 0`  THEN
+      LET pvar = ($ferret_plot_base_var)
+   ELSE
+      LET pvar = ($ferret_plot_var)
+   ENDIF
 ENDIF
 
 IF ($ferret_plot_var"0|sampled_var>1|*>0) THEN LET pvar = ($ferret_plot_var)
@@ -163,6 +165,8 @@ IF ($ferret_diff_var"0|*>1") THEN  ! 10
    LET pvar = ($ferret_diff_var)
 
 ENDIF ! 10
+
+IF ($DO_TRANS_1_SEAS_PER_YEAR) THEN LET pvar = ($FERRET_PLOT_BASE_VAR)
 
 LET var_size = ABS( `pvar,RETURN=size`)
 DEFINE SYMBOL var_dim = `pvar,RETURN=shape`
@@ -238,8 +242,11 @@ ENDIF ! 23
 IF ($tstride"0|1>0|*>1") THEN  ! 26
    LET tsize  `pvar,RETURN=lsize`
    IF `tsize GT 50` THEN  ! 27
-   let strd_lo = `L[gt=pvar,t="($region_t_lo)"]`
-   let strd_hi = `L[gt=pvar,t="($region_t_hi)"]`
+!   let strd_lo = `L[gt=pvar,t="($region_t_lo)"]`
+!   let strd_hi = `L[gt=pvar,t="($region_t_hi)"]`
+   let strd_lo = 1
+   let tt = t[gt=pvar]
+   let strd_hi = `tt,return=lsize`
      IF ($index_strides"0|*>1") THEN  ! 28
         DEFINE SYMBOL index_strides = ($index_strides),`strd_lo`:`strd_hi`:`INT(tsize/10)`
      ELSE

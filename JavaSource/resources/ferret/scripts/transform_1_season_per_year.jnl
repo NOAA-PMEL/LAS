@@ -54,6 +54,7 @@ LET season_length = ($ferret_season_length)
 
 ! The dataset, region and plot variable have already been initialized
 LET S($num)_the_plot_var = ($ferret_t_var)
+IF `season_length EQ 1` THEN LET S($num)_the_plot_var = ($ferret_plot_var)
 LET S($num)_the_plot_var_noregion = ($ferret_plot_var_noregion)
 
 ! If we have averaged over T then cant do this. Return a message.
