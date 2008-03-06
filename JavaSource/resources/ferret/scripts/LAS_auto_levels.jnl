@@ -166,7 +166,7 @@ IF ($ferret_diff_var"0|*>1") THEN  ! 10
 
 ENDIF ! 10
 
-IF ($DO_TRANS_1_SEAS_PER_YEAR) THEN LET pvar = ($FERRET_PLOT_BASE_VAR)
+IF ($do_trans_1_seas_per_year"0") THEN LET pvar = ($FERRET_PLOT_BASE_VAR)
 
 LET var_size = ABS( `pvar,RETURN=size`)
 DEFINE SYMBOL var_dim = `pvar,RETURN=shape`
