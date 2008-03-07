@@ -6,6 +6,8 @@
 ! pixel size. 
 ! ACM 8/312/2007 Do not issue the SET AXIS/STRIDE= command if the stride is 1
 !                This partially works around TRAC #224.
+! ACM 3/2008  If the transform-to-1-season per year has been set then do not 
+!             stride in t
 
 ! TODO: When there's going to be a transformation or something, then these 
 ! calculations may not be sufficient. Might be better done by the transform script.
@@ -153,7 +155,7 @@ ELSE
       IF `($zstride) GT 1` THEN SET AXIS/STRIDE=($zstride) `($data_var)[d=($data_num)],RETURN=zaxis`
    ENDIF
         
-   IF ($region_t"0|0|*>1") THEN     
+   IF `($region_t"0|0|*>1") AND ( ($DO_TRANS_1_SEAS_PER_YEAR"0") EQ 0) ` THEN     
       LET nt = tt[l=@ngd]
       LET tt = t[gt=($data_var)[d=($data_num)],($region_t)]
       LET pixsize = `MAX(pixsize, nt)`      
@@ -218,7 +220,7 @@ IF `STRLEN("($ferret_view)") EQ 1` THEN
          ENDIF
       ENDIF
 
-      IF ($region_t"0|0|*>1") THEN  
+      IF `($region_t"0|0|*>1") AND ( ($DO_TRANS_1_SEAS_PER_YEAR"0") EQ 0) ` THEN  
          IF `nt GT maxpix` THEN 
             DEFINE SYMBOL tstride = `2*INT((nt/maxpix)+1)`
             IF `($tstride) GT 1` THEN SET AXIS/STRIDE=($tstride) `($data_var)[d=($data_num)],RETURN=taxis`
