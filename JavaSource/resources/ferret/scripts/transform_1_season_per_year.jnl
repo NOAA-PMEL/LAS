@@ -27,19 +27,24 @@
 ! Check input symbols
 ! The script can handle any season length between 1 and 12, but limit it here to 1, 3, 5
 
-! The lhs constraint contains Season_length_1, Season_length_3, or Season_length_5
-LET ipos = STRLEN("($constraint_0_lhs)")
+! The lhs constraint contains Season_length_1, Season_length_3, Season_length_5, ..., Season_length_11
+LET ilen = STRLEN("($constraint_0_lhs)")
+LET ipos = STRRINDEX("($constraint_0_lhs)", "_") + 1
+
 DEFINE SYMBOL ferret_season_length = `SUBSTRING("($constraint_0_lhs)", ipos, 1)`
+IF `ilen GT ipos` THEN DEFINE SYMBOL ferret_season_length = `SUBSTRING("($constraint_0_lhs)", ipos, 2)`
 
 ! The rhs constraint contains a month number 1 through 12.
 DEFINE SYMBOL ferret_season_center = ($constraint_0_rhs)
 
 DEFINE SYMBOL num ($1"0")
 
-IF `($ferret_season_length"0|1>1|3>1|5>1|*>0") EQ 0` THEN 
+!IF `($ferret_season_length"0|1>1|3>1|5>1|*>0") EQ 0` THEN 
+IF `($ferret_season_length"0|1>1|3>1|5>1|7>1|9>1|11>1|*>0") EQ 0` THEN 
   DEFINE SYMBOL error_status = ERROR
   DEFINE SYMBOL error_type = TRANSFORM
-  DEFINE SYMBOL error_string = Season Length = ($ferret_season_length). Must be 1, 3, or 5
+!  DEFINE SYMBOL error_string = Season Length = ($ferret_season_length). Must be 1, 3, or 5
+  DEFINE SYMBOL error_string = Season Length = ($ferret_season_length). Must be odd, between 1 and 11
   EXIT/SCRIPT
 ENDIF 
 
