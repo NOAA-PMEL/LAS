@@ -21,8 +21,8 @@ DEFINE SYMBOL curv_coord_bbox_done = 1
 
 ! If the whole grid is specified, we are done.
 
-LET xlodiff =  ABS(($curv_lon_min) - ($region_x_lo) )
-LET xhidiff =  ABS(($curv_lon_max) - ($region_x_hi) )
+LET xlodiff =  ABS(($ferret_curv_lon_min) - ($region_x_lo) )
+LET xhidiff =  ABS(($ferret_curv_lon_max) - ($region_x_hi) )
 
 IF `ABS((xlodiff) -  (xhidiff)) LT 0.2` THEN
    LET clon_imin = 1
