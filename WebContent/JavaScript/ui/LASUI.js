@@ -2147,9 +2147,17 @@ LASUI.prototype.selectAnalysisAxis = function (evt) {
 		try {axes =evt.target.value;}
 		catch (e) {axes = ""};
 	}
+	//turn all axes off
+	for(var a in this.state.analysis.axes) {
+			//remove the analysis axis from the widget view
+			if(this.state.view.widgets.indexOf(a)>=0)//&&this.state.view.plot.indexOf(arguments[1])<0)			
+				this.state.view.widgets=this.state.view.widgets.substr(0,this.state.view.widgets.indexOf(a))+this.state.view.widgets.substr(this.state.view.widgets.indexOf(a)+1,this.state.view.widgets.length);
+	}
+	this.state.analysis.axes = {};
+
 	if(arguments[2]==true||evt)
 	{
-
+		
 		var changeVis= false;
 		//turn the analysis axis on
 		for(var i=0; i< axes.length; i++) {
@@ -2166,14 +2174,7 @@ LASUI.prototype.selectAnalysisAxis = function (evt) {
 		
 	} else {
 		//turning the analysis axis off
-		for(var i=0; i< axes.length; i++) {
-			//remove the analysis axis from the widget view
-			if(this.state.view.widgets.indexOf(axes[i])>=0)//&&this.state.view.plot.indexOf(arguments[1])<0)			
-				this.state.view.widgets=this.state.view.widgets.substr(0,this.state.view.widgets.indexOf(axes[i]))+this.state.view.widgets.substr(this.state.view.widgets.indexOf(axes[i])+1,this.state.view.widgets.length);
-			//remove the axis from teh analysis state object
-			if(this.state.analysis.axes[axes[i]]||this.state.analysis.axes[axes[i]]=="")
-				delete this.state.analysis.axes[axes[i]];
-		}
+
 	}
 	if(this.state.analysis.type && this.state.analysis.name != "None")
 		this.updateConstraints(this.state.view.widgets);
