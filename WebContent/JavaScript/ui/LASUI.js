@@ -2131,7 +2131,7 @@ LASUI.prototype.selectAnalysisType = function (evt) {
 		this.selectAnalysisAxis(null,"xy", true);
 	else
 		for(var a in this.state.analysis.axes)
-			if(this.state.grid.hasAxis(a)&& a!="x" && a!="y") 
+			if(this.state.grid.hasAxis(a)) 
 				this.selectAnalysisAxis(null,a, true);			
 	
 
