@@ -155,20 +155,22 @@
 						<br>
 						<strong>Analysis Mode : </strong><a class="LASLink" value=false onclick="if(!LAS.refs.analysis.enabled){LAS.showAnalysis();this.innerHTML='ON';}else{LAS.hideAnalysis();this.innerHTML='OFF';}">OFF</a>						
 						<div id="analysis" style="display:none;">
-							<strong>Analysis Type : </strong><select id="analysis_type" name="analysis_type">
-							<option selected="" value="">None</option>
-							<option value="ave">Average</option>
-							<option value="min">Minimum</option>
-							<option value="max">Maximum</option>
-							<option value="sum">Sum</option>
-							<option value="var">Variance</option>
-							</select><br>						
-							<strong>Apply to axes : </strong>
-									<span id="x_axis_select"><b>X</b>&nbsp;<input name="axis_select" id="x_axis_chk" value="x" type="checkbox"></span>
-	 	          						<span id="y_axis_select"><b>Y</b>&nbsp;<input name="axis_select" id="y_axis_chk" value="y" type="checkbox"></span>
-									<span id="z_axis_select"><b>Z</b>&nbsp;<input name="axis_select" id="z_axis_chk" value="z" type="checkbox"></span>
-	 	 	          					<span id="t_axis_select"><b>T</b>&nbsp;<input name="axis_select" id="t_axis_chk" value="t" type="checkbox"></span>
-							<br>
+							<select id="analysis_op" name="analysis_op">
+								<option selected="" value="">Select Analysis</option>
+								<option value="ave">Average</option>
+								<option value="min">Minimum</option>
+								<option value="max">Maximum</option>
+								<option value="sum">Sum</option>
+								<option value="var">Variance</option>
+							</select> across 						
+							<select id="analysis_axes">
+									<option value="">Region Type</option>
+									<option id="xy_analysis" value="xy">Area</option>
+									<option id="x_analysis" value="x">Longitude</option>
+	 	          						<option id="y_analysis" value="y">Latitude</option>
+									<option id="z_analysis" value="z">Depth</option>
+	 	 	          					<option id="t_analysis" value="t">Time</option>
+							</select>
 							<!--<strong>Mask : </strong>
 								  <b>None</b><input name="mask" checked="checked" value="n" type="radio">
 							          <b>Ocean</b><input name="mask" value="o" type="radio">
