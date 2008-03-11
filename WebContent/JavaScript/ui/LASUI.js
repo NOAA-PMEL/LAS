@@ -938,7 +938,7 @@ LASUI.prototype.setDefaultProductMenu = function () {
 			if(this.refs.views.views.getViewByID(this.products[type][product].view) || type == "Download Data" || this.products[type][product].view == "") {
 				if(!this.refs.operations.plot.children)
 					this.refs.operations.plot.children = {};
-				if(!this.refs.operations.plot.children[type]&&!this.refs.operations.download.children[type])
+				if(!this.refs.operations.plot.children[type]&&!this.refs.operations.download.SELECTNode)
 					this.setProductTypeNode(type);
 				this.setProductNode(type, product);
 				if(defaultPlotProduct == null && type != "Download Data"){
@@ -960,6 +960,7 @@ LASUI.prototype.setDefaultProductMenu = function () {
 					this.setDownloadOperation(this,this.products[type][product].id,this.products[type][product].view,this.products[type][product].optiondef);								
 				}
 			}
+	
 	if(setPlotDefault) {
 		this.setOperation(this,defaultPlotProduct.id,defaultPlotProduct.view,defaultPlotProduct.optiondef);
 		this.refs.operations.plot.children[defaultPlotProductName].radio.checked = true;
@@ -977,24 +978,25 @@ LASUI.prototype.setDefaultProductMenu = function () {
 LASUI.prototype.setProductTypeNode = function(type) {
 
 	if(type=="Download Data") {
-		this.refs.operations.download.children[type] = {};
-		this.refs.operations.download.children[type].LINode = document.createElement("LI");
-		this.refs.operations.download.children[type].title = document.createElement("TEXT");
-		this.refs.operations.download.children[type].title.innerHTML = "<b>" + type + "</b>";
-		this.refs.operations.download.children[type].LINode.className = "LASPlotCategory";
-		this.refs.operations.download.children[type].LINode.appendChild(this.refs.operations.download.children[type].title);	
-		this.refs.operations.download.DOMNode.appendChild(this.refs.operations.download.children[type].LINode);
-		this.refs.operations.download.children[type].SELECTNode = document.createElement("SELECT");
+		var title = document.createElement("DIV");
+		title.innerHTML = "<b>" + type + "</b>";
+		this.refs.operations.download.DOMNode.className = "LASPlotCategory";
+		this.refs.operations.download.DOMNode.appendChild(title);	;
+		this.refs.operations.download.SELECTNode = document.createElement("SELECT");
 		var format = document.createElement("OPTION");
 		format.innerHTML = "Select format...";
-		this.refs.operations.download.children[type].SELECTNode.appendChild(format); 
-				
+		this.refs.operations.download.SELECTNode.appendChild(format); 
 		//this.refs.operations.plot.children[type].radio = document.createElement("INPUT");
-		this.refs.operations.download.children[type].SELECTNode.onchange = function (evt) {this.options[this.selectedIndex].onselect();};
+		this.refs.operations.download.SELECTNode.onchange = function (evt) {this.options[this.selectedIndex].onselect();};
 		var label = document.createElement("LI");
 		label.className="LASPlotType";
-		label.appendChild(this.refs.operations.download.children[type].SELECTNode);
+		label.appendChild(this.refs.operations.download.SELECTNode);
 		this.refs.operations.download.DOMNode.appendChild(label);
+		this.refs.operations.download.INPUTNode = document.createElement("INPUT");
+		this.refs.operations.download.INPUTNode.type = "button"
+		this.refs.operations.download.INPUTNode.value = "Download";
+		this.refs.operations.download.INPUTNode.onclick = this.makeRequest.LASBind(this,"download");	
+		this.refs.operations.download.DOMNode.appendChild(this.refs.operations.download.INPUTNode);
 	} else 
 		if(type!="Point Data") {
 			this.refs.operations.plot.children[type] = {};
@@ -1025,8 +1027,8 @@ LASUI.prototype.setProductNode = function(type, product) {
 		this.refs.operations.plot.children[product].radio.name = "product";
 		this.refs.operations.plot.children[product].radio.className = "LASRadioInputNode";
 		this.refs.operations.plot.children[product].radio.value = product.id;
-		this.refs.operations.plot.children[product].radio.onselect = this.setOperation.LASBind(this,this.products[type][product].id,this.products[type][product].view,this.products[type][product].optiondef );
-		this.refs.operations.plot.children[product].radio.onclick = this.setOperation.LASBind(this,this.products[type][product].id,this.products[type][product].view,this.products[type][product].optiondef);	
+		this.refs.operations.plot.children[product].radio.onselect = this.setOperation.LASBind(this,this.products[type][product].id,this.products[type][product].view,this.products[type][product].optiondef,"plot" );
+		this.refs.operations.plot.children[product].radio.onclick = this.setOperation.LASBind(this,this.products[type][product].id,this.products[type][product].view,this.products[type][product].optiondef,"plot");	
 		this.refs.operations.plot.children[product].LINode.appendChild(this.refs.operations.plot.children[product].radio);	
 		this.refs.operations.plot.children[product].LINode.appendChild(this.refs.operations.plot.children[product].title);
 		this.refs.operations.plot.DOMNode.appendChild(this.refs.operations.plot.children[product].LINode);
@@ -1037,7 +1039,7 @@ LASUI.prototype.setProductNode = function(type, product) {
 		this.refs.operations.download.children[product].OPTIONNode.value = product.id;
 		this.refs.operations.download.children[product].OPTIONNode.onselect = this.setDownloadOperation.LASBind(this,this.products[type][product].id,this.products[type][product].view,this.products[type][product].optiondef);
 		//this.refs.operations.plot.children[product].OPTIONNode.onclick = this.setOperation.LASBind(this,this.products[type][product].id,this.products[type][product].view,this.products[type][product].optiondef);	
-		this.refs.operations.download.children[type].SELECTNode.appendChild(this.refs.operations.download.children[product].OPTIONNode);	
+		this.refs.operations.download.SELECTNode.appendChild(this.refs.operations.download.children[product].OPTIONNode);	
 	}
 }
 LASUI.prototype.onPlotLoad = function () {
@@ -1458,7 +1460,12 @@ LASUI.prototype.showUpdateLink = function (){
 	} 
 	catch (err){ 
 		document.getElementById('update').style.backgroundColor='';	
-}	}		
+}	}	
+
+LASUI.prototype.makeDownloadRequest = function (){
+
+}
+		
 /**
  * Put together and submit an LAS request
  */
