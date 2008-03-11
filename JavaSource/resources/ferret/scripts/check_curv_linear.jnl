@@ -79,7 +79,7 @@ IF `lon_is_const EQ 1` THEN
       DEFINE SYMBOL clon_imax `new_imax`
    ENDIF
 show sym cl*
-pause
+
 
 ENDIF
 
@@ -103,14 +103,14 @@ IF  `lat_is_const EQ 1` THEN
    IF `new_jmax EQ 0` THEN LET new_jmax = `new_jmin`
    IF `new_jmax EQ new_jmin` THEN LET new_jmax = `new_jmin`
    IF `new_jmax EQ new_jmin+1` THEN LET new_jmax = `new_jmin`
-   !pause
+   
    
    DEFINE SYMBOL clat_jmin `new_jmin`
    DEFINE SYMBOL clat_jmax `new_jmax`
-!pause
+
 ENDIF
 show symbol cl*
 
-pause
+
 set mode/last verify
 
