@@ -4,7 +4,7 @@
 ! 3/07 ACM
 ! 3/08 ACM limit the range of the sampling variable in z and/or t if
 !          a region is given in those directions.
-pause
+
 ! Description: define variables for a line of constant Latitude or Longitude 
 ! of a curvilinear data set.
 ! This script assumes 
