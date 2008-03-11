@@ -2,7 +2,7 @@ package gov.noaa.pmel.tmap.las.util;
 
 
 
-public class NameValuePair {
+public class NameValuePair  implements Comparable<NameValuePair> {
     
     private String name;
     private String value;
@@ -36,4 +36,7 @@ public class NameValuePair {
     public void setValue(String value) {
         this.value = value;
     }
+	public int compareTo(NameValuePair o) {
+		return getName().compareTo(o.getName());
+	}
 }
