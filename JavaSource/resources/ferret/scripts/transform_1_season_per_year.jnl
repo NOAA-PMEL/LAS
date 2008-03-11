@@ -201,7 +201,8 @@ ELSE
    LET S($num)_weight_sum = S($num)_weights2D[GT=timeax_years@SUM]
    LET S($num)_seas_per_year = S($num)_sum/S($num)_weight_sum 
 
-   DEFINE SYMBOL ferret_plot_var S($num)_seas_per_year[($region_xyz),($region_t)]
+   DEFINE SYMBOL ferret_plot_var S($num)_seas_per_year[($region_t)]
+   IF ($region_xyz"0|*>1}) THEN DEFINE SYMBOL ferret_plot_var S($num)_seas_per_year[($region_xyz),($region_t)]
    IF ($ferret_expand_time"0|*>1) THEN \
       DEFINE SYMBOL ferret_plot_var S($num)_seas_per_year[($region_xyz),($region_t)]
    DEFINE SYMBOL ferret_plot_var_noregion S($num)_seas_per_year[($region_t)]
