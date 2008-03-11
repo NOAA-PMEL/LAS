@@ -4,6 +4,7 @@
 package gov.noaa.pmel.tmap.las.util;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -20,11 +21,6 @@ public class DataConstraint extends Container implements DataConstraintInterface
 	 */
 	public DataConstraint(Element element) {
 		super(element);
-		// TODO Auto-generated constructor stub
-	}
-
-	public ArrayList<NameValuePair> getLhs() {
-		return getPairs("lhs");
 	}
 	private ArrayList<NameValuePair> getPairs(String position) {
 		List menus = element.getChildren("menu");
@@ -46,11 +42,28 @@ public class DataConstraint extends Container implements DataConstraintInterface
 		}
 		return pairs;
 	}
-
+	public ArrayList<NameValuePair> getLhs() {
+		return getPairs("lhs");
+	}
 	public ArrayList<NameValuePair> getOps() {
 		return getPairs("ops");
 	}
 	public ArrayList<NameValuePair> getRhs() {
         return getPairs("rhs");
+	}
+	public ArrayList<NameValuePair> getLhsSorted() {
+		ArrayList<NameValuePair> pairs = getPairs("lhs");
+		Collections.sort(pairs);
+		return pairs;
+	}
+	public ArrayList<NameValuePair> getOpsSorted() {
+		ArrayList<NameValuePair> pairs = getPairs("ops");
+		Collections.sort(pairs);
+		return pairs;
+	}
+	public ArrayList<NameValuePair> getRhsSorted() {
+		ArrayList<NameValuePair> pairs = getPairs("rhs");
+		Collections.sort(pairs);
+        return pairs;
 	}
 }
