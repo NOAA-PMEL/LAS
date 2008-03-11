@@ -1279,10 +1279,12 @@ MapWidget.prototype.updateSelectionGridYMin = function (v) {
 		this.setSelectionGridYMin(v);	
 	}
 
-	if (this.view==this.g_point || this.view == this.g_hLine)
+	if (this.view==this.g_point || this.view == this.g_hLine) {
 		this.setSelectionPixYMax(Y);
 		this.setSelectionPixYMin(Y);
-
+		this.setSelectionGridYMax(v);
+		this.setSelectionGridYMin(v);	
+	}
 
 	this.displayBox(true);
 	this.displayCentralBox(true);
