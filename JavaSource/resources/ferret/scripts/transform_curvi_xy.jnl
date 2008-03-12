@@ -63,7 +63,6 @@ IF `($constraint_0_lhs"0|Curv_to_Rect_Regridding>1|*>0")` THEN
 
 ELSE
 
-
 !!!!!!!!!!!
 
 ! Special setup, if a latitude has been specified such that the grid

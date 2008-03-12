@@ -5,7 +5,7 @@
 ! might be undone by the transform script.
 
 show symbol operation_id
-IF `STRINDEX( "($operation_ID)", "Plot" ) EQ 0 AND STRINDEX( "($operation_ID)", "zoom" ) EQ 0` THEN EXIT/SCRIPT
+IF `STRINDEX( "($operation_ID)", "Plot" ) EQ 0 AND STRINDEX( "($operation_ID)", "zoom" ) EQ 0 AND STRINDEX( "($operation_ID)", "Anim" ) EQ 0` THEN EXIT/SCRIPT
 
 ! If striding has already been set (e.g. for the other vector component) then exit
 IF `($xstride"0|1>0|*>1") + ($ystride"0|1>0|*>1") + ($zstride"0|1>0|*>1") + ($tstride"0|1>0|*>1") GT 0` THEN EXIT/SCRIPT
@@ -23,7 +23,6 @@ IF `($ferret_google_plot"0|*>1")` THEN
     IF ($ferret_stride_quality_factor"0|0.0>1|*>0") THEN LET maxpix = 700  ! best(slow)
 !LET  maxpix = `2*maxpix`
 ENDIF
-
 ! Step 1  ---------------------------------------------------------------------
 ! Determine striding based on the memory allocation
 
@@ -41,19 +40,19 @@ DEFINE SYMBOL stride_for_mem = `INT( 1+ varsiz/(.5*($memsize)) )`
 
 IF `STRINDEX( "($operation_ID)", "Plot" ) EQ 0 AND STRINDEX( "($operation_ID)", "zoom" ) EQ 0` THEN
    IF `($stride_for_mem"0") GT 1` THEN
-      IF `($region_x_range"0") GT 0` THEN 
+      IF `($region_x_range"0|*>1") GT 0` THEN 
          SET AXIS/STRIDE=($stride_for_mem) `pvar,RETURN=xaxis`
          DEFINE SYMBOL add_to_title = Stride ($stride_for_mem) in X
       ENDIF
-      IF `($region_y_range"0") GT 0` THEN 
+      IF `($region_y_range"0|*>1") GT 0` THEN 
          SET AXIS/STRIDE=($stride_for_mem) `pvar,RETURN=yaxis`
          DEFINE SYMBOL add_to_title = ($add_to_title) Stride ($stride_for_mem) in Y
       ENDIF
-      IF `($region_z_range"0") GT 0` THEN 
+      IF `($region_z_range"0|*>1") GT 0` THEN 
          SET AXIS/STRIDE=($stride_for_mem) `pvar,RETURN=zaxis`
          DEFINE SYMBOL add_to_title = ($add_to_title) Stride ($stride_for_mem) in Z
       ENDIF
-      IF `($region_t"0") GT 0` THEN 
+      IF `($region_t"0|*>1") GT 0` THEN 
          SET AXIS/STRIDE=($stride_for_mem) `pvar,RETURN=taxis`
          DEFINE SYMBOL add_to_title = ($add_to_title) Stride ($stride_for_mem) in T
       ENDIF
@@ -152,7 +151,7 @@ IF `STRLEN("($ferret_view)") EQ 2` THEN
            IF `($zstride"0") GT 1` THEN SET AXIS/STRIDE=($zstride) `($data_var)[d=($data_num)],RETURN=zaxis`
 
         ENDIF
-        
+   
         IF ($region_t_lo"0|*>1") THEN     
            LET tt = t[gt=($data_var)[d=($data_num)],($region_t)]
            LET nt = `tt[l=@ngd]`
@@ -239,7 +238,7 @@ ENDIF ! 1D plots
 LET need_comma = 0
 IF `($xstride"0|1>0|*>1") + ($ystride"0|1>0|*>1") + ($zstride"0|1>0|*>1") + ($tstride"0|1>0|*>1") GT 0` THEN
 
-   DEFINE SYMBOL n_left_labels = `($n_left_labels"0")+1`
+   DEFINE SYMBOL n_left_labels = `($n_left_labels"0|*>1")+1`
    DEFINE SYMBOL upper_left_($n_left_labels) = Strided 
 
    IF `($xstride"0|1>0|*>1")` THEN 
