@@ -221,6 +221,9 @@ ELSE
       DEFINE SYMBOL ferret_plot_var S($num)_seas_per_year[($region_t)]
    DEFINE SYMBOL ferret_plot_var_noregion S($num)_seas_per_year[($region_t)]
 
+! When there is just one time, then it may be outside the range of the
+! new time axis. If so return missing data at that time.
+
    IF ($single_time"0|*>1") THEN
       LET mytbox = tboxlo[gt=S($num)_seas_per_year,L=1]
 
@@ -245,4 +248,4 @@ ELSE
 ENDIF  ! Season length longer than 1
 
 ! End of $RCSfile ------------transform_1_season_per_year.jnl-------------------------------
-pause
+
