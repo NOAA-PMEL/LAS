@@ -16,10 +16,17 @@
 IF ($region_z"0|*>1") THEN DEFINE SYMBOL region_sample = ,($region_z)
 IF ($region_t"0|*>1") THEN DEFINE SYMBOL region_sample = ,($region_t)
 IF ($region_zt"0|*>1") THEN DEFINE SYMBOL region_sample = ,($region_zt)
+IF `STRINDEX("($OPERATION_ID)", "Animation") GT 0` THEN 
+   DEFINE SYMBOL its_animate = 1
+   CANCEL SYMBOL region_sample
+   IF ($region_z"0|*>1") THEN DEFINE SYMBOL region_sample = ,($region_z)
+ENDIF
 
 ! default value; may be redefined in this script
 LET sampled_var = ($ferret_plot_var)
+sh sym ferret_plot_var
 IF ($ferret_view"|zt>1|*>0") THEN LET sampled_var = ($data_var)[d=($data_num)($region_sample)]
+IF ($its_animate"0|*>1") THEN LET sampled_var = ($ferret_xyz_var)
 
 ! Call CURV_RANGE to get the I,J range for the requested output rectangle
 
