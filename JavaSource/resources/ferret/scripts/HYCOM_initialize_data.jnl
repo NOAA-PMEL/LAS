@@ -14,12 +14,12 @@ SET DATA ($data_url)
 ! Pre-set these so the script doesnt have to take the time to do this...
 ! If the data had valid_range for the curvilinear coords we could use that.
 
-DEFINE SYMBOL curv_lon_min = 74.12
-DEFINE SYMBOL curv_lon_max = 434.12
+DEFINE SYMBOL ferret_curv_lon_min = 74.12
+DEFINE SYMBOL ferret_curv_lon_max = 434.12
 
-DEFINE SYMBOL linear_lat_max = 47.0  ! for < 47 degrees, the grid is rectilinear
-DEFINE SYMBOL linear_lat_indx = 2172 ! for j < 2172, the grid is rectilinear. If this 
-                                     ! is not known the script will compute it.
+DEFINE SYMBOL ferret_linear_lat_max = 47.0  ! for < 47 degrees, the grid is rectilinear
+DEFINE SYMBOL ferret_linear_lat_indx = 2172 ! for j < 2172, the grid is rectilinear. If this 
+                                            ! is not known the script will compute it.
 
 ! End of HYCOM_initialize_data.jnl  ------------------------------------------------------
 
