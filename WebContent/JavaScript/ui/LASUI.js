@@ -1551,23 +1551,24 @@ LASUI.prototype.makeRequest = function (type) {
 		}
 
 		for(var d=0;d<this.state.grid.response.grid.axis.length;d++) 
-			switch(this.state.grid.response.grid.axis[d].type) {
-				case 'x' : 
-					this.request.addRange('x',this.refs.XYSelect.extents.selection.grid.x.min,this.refs.XYSelect.extents.selection.grid.x.max); 
-					this.uirequest+="&x=" + escape("{ 'min' : " + this.refs.XYSelect.extents.selection.grid.x.min + ", 'max' : " + this.refs.XYSelect.extents.selection.grid.x.max + "}"); 
-					this.uirequest+="&viewx="+escape("{ 'min' : " + this.refs.XYSelect.extents.data.grid.x.min + ", 'max' : " + this.refs.XYSelect.extents.data.grid.x.max + "}"); 
+			if(!(this.refs.analysis.enabled && this.state.analysis.name && this.state.analysis.axes[this.state.grid.response.grid.axis[d].type]))
+				switch(this.state.grid.response.grid.axis[d].type) {
+					case 'x' : 
+						this.request.addRange('x',this.refs.XYSelect.extents.selection.grid.x.min,this.refs.XYSelect.extents.selection.grid.x.max); 
+						this.uirequest+="&x=" + escape("{ 'min' : " + this.refs.XYSelect.extents.selection.grid.x.min + ", 'max' : " + this.refs.XYSelect.extents.selection.grid.x.max + "}"); 
+						this.uirequest+="&viewx="+escape("{ 'min' : " + this.refs.XYSelect.extents.data.grid.x.min + ", 'max' : " + this.refs.XYSelect.extents.data.grid.x.max + "}"); 
 
-					break;
-				case 'y' : 
-				 	this.request.addRange('y',this.refs.XYSelect.extents.selection.grid.y.min,this.refs.XYSelect.extents.selection.grid.y.max); 
-				 	this.uirequest+="&y="+escape("{ 'min' : " + this.refs.XYSelect.extents.selection.grid.y.min + ", 'max' : " + this.refs.XYSelect.extents.selection.grid.y.max + "}"); 
-				 	this.uirequest+="&viewy="+escape("{ 'min' : " + this.refs.XYSelect.extents.data.grid.y.min + ", 'max' : " + this.refs.XYSelect.extents.data.grid.y.max + "}"); 
-					break;
-				case 't' : 
-					if(this.state.view[type].indexOf('t')>=0||this.state.variables[this.state.dataset].grid_type=="scattered") 
-						if(this.state.grid.hasMenu('t')){
-							this.request.addRange('t',this.refs.DW[0].value,this.refs.DW[1].value); 
-							this.uirequest+="&t="+escape("{ 'min' : '" + this.refs.DW[0].value+ "', 'max' : '" + this.refs.DW[1].value + "'}");					
+						break;
+					case 'y' : 
+					 	this.request.addRange('y',this.refs.XYSelect.extents.selection.grid.y.min,this.refs.XYSelect.extents.selection.grid.y.max); 
+					 	this.uirequest+="&y="+escape("{ 'min' : " + this.refs.XYSelect.extents.selection.grid.y.min + ", 'max' : " + this.refs.XYSelect.extents.selection.grid.y.max + "}"); 
+					 	this.uirequest+="&viewy="+escape("{ 'min' : " + this.refs.XYSelect.extents.data.grid.y.min + ", 'max' : " + this.refs.XYSelect.extents.data.grid.y.max + "}"); 
+						break;
+					case 't' : 
+						if(this.state.view[type].indexOf('t')>=0||this.state.variables[this.state.dataset].grid_type=="scattered") 
+							if(this.state.grid.hasMenu('t')){
+								this.request.addRange('t',this.refs.DW[0].value,this.refs.DW[1].value); 
+								this.uirequest+="&t="+escape("{ 'min' : '" + this.refs.DW[0].value+ "', 'max' : '" + this.refs.DW[1].value + "'}");					
 						} else {
 							this.request.addRange('t',this.refs.DW.getDate1_Ferret(),this.refs.DW.getDate2_Ferret());
 							this.uirequest+="&t="+escape("{ 'min' : '" + this.refs.DW.getDate1_Ferret()+ "', 'max' : '" + this.refs.DW.getDate2_Ferret()+ "'}");
@@ -2199,9 +2200,16 @@ LASUI.prototype.selectAnalysisAxis = function (evt) {
 LASUI.prototype.setVisualization = function (d) {
 	
 	var stop = false;
+	if(this.state.view.plot.indexOf(d)>=0)
+		var bestView = this.state.view.plot.substr(0,this.state.view.plot.indexOf(d)) + this.state.view.plot.substr(this.state.view.plot.indexOf(d)+d.length,this.state.view.plot.length);
+	if(bestView == "")
+		for(var i in this.state.grid.response.grid.axis)
+			if(d.indexOf(this.state.grid.response.grid.axis[i].type)<0)
+				bestView=this.state.grid.response.grid.axis[i].type;
+
 	for(var t in this.products)
 		for (var p in this.products[t])
-			if(this.products[t][p].view.indexOf(d)<0 && !stop)
+			if(this.products[t][p].view==bestView  && !stop)
 				if(this.refs.operations.plot.children[p])
 					if(this.refs.operations.plot.children[p].radio){ 
 						this.refs.operations.plot.children[p].radio.checked = true;
