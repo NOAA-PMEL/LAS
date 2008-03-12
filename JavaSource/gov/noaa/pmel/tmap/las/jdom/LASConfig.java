@@ -806,11 +806,31 @@ public class LASConfig extends LASDocument {
 			Element constraint = (Element) consIt.next();
 			
 		    String type = constraint.getAttributeValue("type");
+		    String name = constraint.getAttributeValue("name");
+		    String ID = constraint.getAttributeValue("ID");
 		    if ( type.equals("variable") ) {
-		    	constraints.add(getVariableConstraint(dsID, varID));
+		    	DataConstraint vc = getVariableConstraint(dsID, varID);
+		    	
+		    	if ( name != null ) {
+		    	    vc.setName(name);
+		    	} else {
+		    		vc.setName("variable");
+		    	}
+		    	
+		    	if ( ID != null ) {
+		    		vc.setID(ID);
+		    	}
+		    	constraints.add(vc);
 		    } else {
 		    	// Build the constraint...
 		    	Element full_constraint = new Element("constraint");
+		    	if ( name != null ) {
+		    	    full_constraint.setAttribute("name", name);
+		    	}
+		    	if ( ID != null ) {
+		    		full_constraint.setAttribute("ID", ID);
+		    	}
+		    	full_constraint.setAttribute("type", "menu");
 		    	// First copy the attributes...
 		    	List attrs = constraint.getAttributes();
 		    	for (Iterator attIt = attrs.iterator(); attIt.hasNext();) {

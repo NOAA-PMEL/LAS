@@ -66,4 +66,7 @@ public class DataConstraint extends Container implements DataConstraintInterface
 		Collections.sort(pairs);
         return pairs;
 	}
+	public String getType() {
+		return element.getAttributeValue("type");
+	}
 }
