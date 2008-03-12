@@ -117,7 +117,8 @@ IF ($native_curvilinear_xy"0") THEN
    let masky1 = IF ($ferret_curvi_coord_lat)[d=($data_num)] LT ($region_y_hi) THEN 1
    let masky =  IF ($ferret_curvi_coord_lat)[d=($data_num)] GT ($region_y_lo) THEN masky1
    LET pvar = ($data_var)[d=($data_num)]* maskx* masky
-   IF ($region_zt"0|*>1") THEN LET pvar = ($data_var)[d=($data_num),($region_zt)]* maskx* masky
+   IF ($region_zt"0|*>1") THEN LET pvar = \
+    ($data_var)[d=($data_num),($region_zt)]* maskx* masky
 
 ! ??
    IF ($do_curvi_xy_and_hybrid_z"0") THEN LET pvar = plot_var* maskx* masky
@@ -126,6 +127,7 @@ ELSE
    IF `($do_hybrid_z"0") + ($do_curvi_xy_and_hybrid_z"0") GT 0`  THEN
       LET pvar = ($ferret_plot_base_var)
    ELSE
+      LET pvar = ($ferret_xyz_var)   ! WHY!?
       LET pvar = ($ferret_plot_var)
    ENDIF
 ENDIF
@@ -166,7 +168,7 @@ IF ($ferret_diff_var"0|*>1") THEN  ! 10
 
 ENDIF ! 10
 
-IF ($do_trans_1_seas_per_year"0") THEN LET pvar = ($FERRET_PLOT_BASE_VAR)
+!IF ($do_trans_1_seas_per_year"0") THEN LET pvar = ($FERRET_PLOT_BASE_VAR)
 
 LET var_size = ABS( `pvar,RETURN=size`)
 DEFINE SYMBOL var_dim = `pvar,RETURN=shape`
