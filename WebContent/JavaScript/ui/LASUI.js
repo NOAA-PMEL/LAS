@@ -422,7 +422,11 @@ LASUI.prototype.onSetVariable = function() {
 				if(this.refs.analysis.enabled) {
 					this.hideAnalysis();
 					this.showAnalysis();
-				}									
+				}		
+				if(this.autoupdate)
+					this.makeRequest('plot');
+				else
+					this.showUpdateLink();							
 }
 /**
  * Event handler for category selection, bind to category DOM object events. 
@@ -472,57 +476,7 @@ LASUI.prototype.selectCategory = function (evt) {
  * 					dataset -- a LASGetCategoriesReponse dataset object<br> 
  * 					i -- index the variable within the category or dataset   
  */ 
-LASUI.prototype.setVariable = function (evt) {
-	var args = arguments
-	var dataset = args[1];
-	var i = args[2];
 
-	if(evt.target){ 
-		if(evt.target.checked)			
-			var loadVariable = evt.target.checked;
-		if(evt.target.selected)
-			var loadVariable = evt.target.selected;
-	}
-	else if (evt.srcElement){ 
-		if(evt.target.checked)			
-			var loadVariable = evt.srcElement.checked;
-		if(evt.target.selected)
-			var loadVariable = evt.srcElement.selected;
-	}
-	else if(args.length>3)
-		var loadVariable = args[3];
-	var datasetID = dataset.category.getDatasetID();
-	var variableID = dataset.category.getChildID(i);
-	var variable = dataset.category.getChild(i);
-	var variableLINode = dataset.children[i].LINode;
-	var variableINPUTNode = dataset.children[i].INPUTNode;
-	variableINPUTNode.checked = loadVariable;	
-	if (loadVariable) {			
-		//start an array of selected variables for this dataset if we havent already
-		if(typeof this.state.variables[datasetID] != 'object') 
-			this.state.variables[datasetID] = [];
-			
-		this.state.variables[datasetID] = variable; 
-						
-		//get all the other data for this dataset/variable combo
-		this.state.dataset = datasetID;
-		this.state.variable = variableID;
-		this.getGrid(datasetID,variableID);
-		this.getDataConstraints(datasetID,variableID);
-		this.getViews(datasetID,variableID);
-
-	}	else {
-			if (typeof this.state.variables[datasetID] == 'object')
-				delete(this.state.variables[datasetID]=null);
-			this.state.variable ="";
-		}		 		
-	if(this.onSetVariable)
-		this.onSetVariable();
-	
-	for(var i=0;i<dataset.children.length;i++)
-		this.createVariableOptionNode(dataset,i);
-
-}
 LASUI.prototype.setVariable = function (evt) {
 	var args = arguments
 	var dataset = args[1];
@@ -926,9 +880,10 @@ LASUI.prototype.setViews = function (strJson) {
 LASUI.prototype.setDefaultProductMenu = function () {
 	this.refs.operations.plot.DOMNode.innerHTML = "";
 	this.refs.operations.download.DOMNode.innerHTML = "";
+		
 	for(var type in this.refs.operations)	
 		this.refs.operations[type].children ={};
-
+	delete this.refs.operations.download.SELECTNode;
 	var setPlotDefault = "true";
 	var setDownloadDefault = "true";
 	var defaultPlotProduct = null;
@@ -938,7 +893,7 @@ LASUI.prototype.setDefaultProductMenu = function () {
 			if(this.refs.views.views.getViewByID(this.products[type][product].view) || type == "Download Data" || this.products[type][product].view == "") {
 				if(!this.refs.operations.plot.children)
 					this.refs.operations.plot.children = {};
-				if(!this.refs.operations.plot.children[type]&&!this.refs.operations.download.SELECTNode)
+				if((!this.refs.operations.plot.children[type]&&type!="Download Data")||(!this.refs.operations.download.SELECTNode&&type=="Download Data"))
 					this.setProductTypeNode(type);
 				this.setProductNode(type, product);
 				if(defaultPlotProduct == null && type != "Download Data"){
