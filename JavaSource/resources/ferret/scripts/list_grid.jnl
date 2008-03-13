@@ -26,11 +26,6 @@ IF ($error_status"0|*>1") THEN
   EXIT/PROGRAM
 ENDIF
  
-!striding
-!GO LAS_set_strides_GE
-!DEFINE SYMBOL xstride = 4;
-!DEFINE SYMBOL ystride = 4;
-
 ! Decode format argument
 ! ACM NOTE: The slashes mess up parsing in the DEFINE SYMBOL if we do them all at once.
 ! ferret_format may be asc, txt, or cdf
@@ -40,8 +35,11 @@ CANCEL SYMBOL frmt
 !SET LIST/FILE="($result_ferret_listing_filename)"
 SET LIST/FILE="($result_las_request_info_filename)"
 
-   LET llon = X[GX=($ferret_list_var), X=($region_x_lo):($region_x_hi):($xstride)] + 0*Y[GY=($ferret_list_var),Y=($region_y_lo):($region_y_hi):($ystride)]
-   LET llat = 0*X[GX=($ferret_list_var),X=($region_x_lo):($region_x_hi):($xstride)] + Y[GY=($ferret_list_var),Y=($region_y_lo):($region_y_hi):($ystride)]
+   LET llon = X[GX=($ferret_list_var), X=($region_x_lo):($region_x_hi):($xstride_coord)] + 0*Y[GY=($ferret_list_var),Y=($region_y_lo):($region_y_hi):($ystride_coord)]
+!   LET llon = X[GX=($ferret_list_var), X=($region_x_lo):($region_x_hi)] + 0*Y[GY=($ferret_list_var),Y=($region_y_lo):($region_y_hi)]
+
+   LET llat = 0*X[GX=($ferret_list_var),X=($region_x_lo):($region_x_hi):($xstride_coord)] + Y[GY=($ferret_list_var),Y=($region_y_lo):($region_y_hi):($ystride_coord)]
+!   LET llat = 0*X[GX=($ferret_list_var),X=($region_x_lo):($region_x_hi)] + Y[GY=($ferret_list_var),Y=($region_y_lo):($region_y_hi)]
 
 !   LIST/NOHEADER/NOROWHEADER/APPEND/FILE  XSEQUENCE(llon), XSEQUENCE(llat)
 
@@ -61,7 +59,7 @@ SET LIST/FILE="($result_las_request_info_filename)"
 IF ($data_0_intervals"|xy>1|*>0") THEN
 ! LET xytvar = ($ferret_list_var)
 ![X=($region_x_lo):($region_x_hi):2]
-  DEFINE SYMBOL tmp = ($data_var)[d=($data_num),X=($region_x_lo):($region_x_hi):($xstride),Y=($region_y_lo):($region_y_hi):($ystride)]
+  DEFINE SYMBOL tmp = ($data_var)[d=($data_num),X=($region_x_lo):($region_x_hi):($xstride_coord),Y=($region_y_lo):($region_y_hi):($ystride_coord)]
   LET xyvar = ($tmp) 
   LET mask =  IF xyvar GT -9000 THEN 1
 ENDIF
@@ -69,21 +67,21 @@ ENDIF
 IF ($data_0_intervals"|xyt>1|*>0") THEN
 !  LET xytvar = ($ferret_list_var)
 !  LET xytvar = ($ferret_list_var)[X=($region_x_lo):($region_x_hi):2]
-  DEFINE SYMBOL tmp = ($data_var)[d=($data_num),X=($region_x_lo):($region_x_hi):($xstride),Y=($region_y_lo):($region_y_hi):($ystride),T="($region_t_lo)":"($region_t_hi)"]
+  DEFINE SYMBOL tmp = ($data_var)[d=($data_num),X=($region_x_lo):($region_x_hi):($xstride_coord),Y=($region_y_lo):($region_y_hi):($ystride_coord),T="($region_t_lo)":"($region_t_hi)"]
   LET xytvar = ($tmp)
   LET mask =  IF xytvar[T=@NGD] GT 0 THEN 1
 ENDIF
 
 IF ($data_0_intervals"|xyz>1|*>0") THEN
 !  LET xyzvar = ($ferret_list_var)
-  DEFINE SYMBOL tmp = ($data_var)[d=($data_num),X=($region_x_lo):($region_x_hi):($xstride),Y=($region_y_lo):($region_y_hi):($ystride),Z=($region_z_lo):($region_z_hi)]
+  DEFINE SYMBOL tmp = ($data_var)[d=($data_num),X=($region_x_lo):($region_x_hi):($xstride_coord),Y=($region_y_lo):($region_y_hi):($ystride_coord),Z=($region_z_lo):($region_z_hi)]
   LET xyzvar = ($tmp)
   LET mask =  IF xyzvar[Z=@NGD] GT 0 THEN 1
 ENDIF
 
 IF ($data_0_intervals"|xyzt>1|*>0") THEN
 !  LET xyzvar = ($ferret_list_var)
-  DEFINE SYMBOL tmp = ($data_var)[d=($data_num),X=($region_x_lo):($region_x_hi):($xstride),Y=($region_y_lo):($region_y_hi):($ystride),Z=($region_z_lo):($region_z_hi),T="($region_t_lo)":"($region_t_hi)"]
+  DEFINE SYMBOL tmp = ($data_var)[d=($data_num),X=($region_x_lo):($region_x_hi):($xstride_coord),Y=($region_y_lo):($region_y_hi):($ystride_coord),Z=($region_z_lo):($region_z_hi),T="($region_t_lo)":"($region_t_hi)"]
   LET xyztvar = ($tmp)
   LET mask =  IF xyztvar[Z=@NGD,T=@NGD] GT 0 THEN 1
 ENDIF
