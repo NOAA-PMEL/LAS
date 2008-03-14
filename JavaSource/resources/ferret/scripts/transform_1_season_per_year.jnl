@@ -85,7 +85,7 @@ LET first_month_data = TAX_MONTH(tt[L=1], tt)
 LET first_month_selected = TAX_MONTH(tt[L=`n1`], tt)
 
 DEFINE SYMBOL loffset = `($ferret_season_center) - ( 1+INT(season_length/2) ) - (first_month_data-1)`
-IF `($loffset) LT 0` THEN 
+IF `n1+($loffset) LT 0` THEN 
    DEFINE SYMBOL loffset = `($loffset) + 12`
    DEFINE SYMBOL offset_year_1 = 1
 ENDIF
@@ -151,7 +151,6 @@ ELSE
       LET endbracket = STRRINDEX("($ferret_xyz_var)", "]") - 1
       LET theplotvar = "`SUBSTRING("($ferret_xyz_var)", 1, endbracket)`"
       LET S($num)_the_plot_var = `theplotvar`,L=`L1`:`nn`]
-      
       DEFINE SYMBOL n_left_labels = `($n_left_labels"0")+1`
       DEFINE SYMBOL upper_left_($n_left_labels) = "(Data centered nearest ($mon1))"
       DEFINE SYMBOL single_time = 1
@@ -217,8 +216,8 @@ ELSE
    LET S($num)_weight_sum = S($num)_weights2D[GT=timeax_years@SUM]
    LET S($num)_seas_per_year = S($num)_sum/S($num)_weight_sum 
 
-   IF ($ferret_expand_time"0|*>1) THEN \
-      DEFINE SYMBOL ferret_plot_var S($num)_seas_per_year[($region_t)]
+   DEFINE SYMBOL ferret_plot_var S($num)_seas_per_year
+   IF ($single_time"0|*>1") THEN DEFINE SYMBOL ferret_plot_var S($num)_seas_per_year[($region_t)]
    DEFINE SYMBOL ferret_plot_var_noregion S($num)_seas_per_year[($region_t)]
 
 ! When there is just one time, then it may be outside the range of the
@@ -232,9 +231,9 @@ ELSE
          0*S($num)_the_plot_var[t="($region_t_lo)"]
       ENDIF
 
-      LET tt = t[gt=timeax_years]
-      LET ntt = `tt,return=Lsize`
-      LET box_hi = TBOXHI[GT=S($num)_seas_per_year,L=`ntt`]
+      LET ttyr = t[gt=timeax_years]
+      LET nttyr = `ttyr,return=Lsize`
+      LET box_hi = TBOXHI[GT=S($num)_seas_per_year,L=`nttyr`]
       IF `T[GT=S0_the_plot_var,T="($region_t_hi)"] GT box_hi` THEN 
       DEFINE SYMBOL ferret_plot_var = `S($num)_the_plot_var,RETURN=bad` + \
          0*S($num)_the_plot_var[t="($region_t_hi)"]
