@@ -52,6 +52,8 @@ var data_maxima = [[-999999,-999999,-999999,-999999,-999999,-999999],
                    [-999999,-999999,-999999,-999999,-999999,-999999],
                    [-999999,-999999,-999999,-999999,-999999,-999999]];
 
+var oldAnomalyMode = 0;
+
 function initializeLASSlideSorter() {
   // NOTE:  Req must be defined before LSS because the LSS object uses the Req
   // NOTE:  object in createLASRequest() when the LSS object is initialized.
@@ -289,6 +291,13 @@ function createLASRequest(AA) {
 // TODO:  Need to query the SlideSorter to determine the view instead of
 // TODO:  of having it always set to the view of the original request.
   LASReq.setProperty('ferret','view',view);
+
+// If we are switching from one mode to another we need to remove any 
+// previously defined contour levels/scaling.
+  if (oldAnomalyMode != AA.anomalyMode) {
+    document.getElementById('LSS_optionTextField').value = '';
+    oldAnomalyMode = AA.anomalyMode;
+  }
 
 // Set the contour levels/scaling if defined
   var user_option =  document.getElementById('LSS_optionTextField').value;
@@ -528,11 +537,13 @@ function autoScale() {
   global_max = -999999.0;
   for (var row=0; row<numRows; row++) {
     for (var col=0; col<numCols; col++) {
-      if (data_minima[row][col] < global_min) {
-        global_min = data_minima[row][col];
-      }
-      if (data_maxima[row][col] > global_max) {
-        global_max = data_maxima[row][col];
+      if ( LSS.anomalyMode == 0 || (LSS.anomalyMode == 1 && row+col != 0) ) {
+        if (data_minima[row][col] < global_min) {
+          global_min = data_minima[row][col];
+        }
+        if (data_maxima[row][col] > global_max) {
+          global_max = data_maxima[row][col];
+        }
       }
     }
   }
