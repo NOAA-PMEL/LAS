@@ -2,10 +2,10 @@
 				<TR>
 				
     <TD bgcolor="#ffffff" align="center"><img height="70px" src="JavaScript/ui/LASlogo.jpg"></TD>  			
-    <TD bgcolor="#99CCCC" valign="bottom" cellpadding="5px"><p><font  color="#ffffff" size="5"><b>$las_config.getTitle()</b></font></p>
+    <TD bgcolor="#EE7600" valign="bottom" cellpadding="5px"><p><font  color="#ffffff" style="font-outline:1" size="5"><b>$las_config.getTitle()</b></font></p>
 <p><b><font size=1><a href="doc/las_v7_ui_introduction.html" target="_new" class="LASLink">HELP WITH LAS</a>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="LASLink" onmouseover="window.status='Link to this plot';" onmouseout="window.status=''"   class="LASLink" onclick="prompt('Bookmark this link to save the current application state.','http://' + document.location.host + document.location.pathname + '?' + LAS.uirequest)">Link to this page</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="$server_config.getFTDSBase()" target="_new" class="LASLink">OPeNDAP (F-TDS) / THREDDS</a></font></TD>
 				
-    <TD bgcolor="#99CCCC" align="right" valign="top" width="26%"><font color="white">Armstrong&nbsp;1.1&nbsp;<br>
+    <TD bgcolor="#EE7600" align="right" valign="top" width="26%"><font color="white">Armstrong&nbsp;1.1&nbsp;<br>
       V7&nbsp;Beta&nbsp;UI&nbsp;</font></TD>
 					</TR></TABLE>

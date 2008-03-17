@@ -47,7 +47,7 @@ font-weight: bold;
 	opacity : 0.50;
 }
 .LASLink {
-	color : #436976;
+	color : #5c731e;
 	text-decoration : underline;
 	cursor : pointer;
 	font-weight: bold;
@@ -145,7 +145,7 @@ font-weight: bold;
 	top:100px;
 	background-color : white;
 	border : 2pt solid black;
-	border-color: #99cccc;
+	border-color: #5c731e;
 	padding : 8pt;
 	margin : 8pt;
 	z-index : 6;

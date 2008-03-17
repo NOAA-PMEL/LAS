@@ -136,7 +136,7 @@ streamable="true" mime_type="application/postscript"/> -->
           </grid_types>
     </operation>
 
-    <operation name="Line plot" ID="Plot_1D" output_template="output" service_action="Plot_1D" order="0102" category="visualization" isZoomable="true">
+    <operation name="Line plot" ID="Plot_1D" output_template="output" service_action="Plot_1D" order="0102" category="visualization" default="true" isZoomable="true">
           <service>ferret</service>
           <response ID="PlotResp">
              <result type="image" ID="plot_image" streamable="true" mime_type="image/png" file_suffix=".gif"/>
@@ -556,7 +556,7 @@ streamable="true" mime_type="application/postscript"/> -->
         </grid_types>
     </operation>
 
-    <operation name="Color plot" ID="Plot_2D" output_template="output"
+    <operation name="Color plot" ID="Plot_2D" default="true" output_template="output"
         service_action="Plot_2D" order="0101" category="visualization" isZoomable="true">
         <service>ferret</service>
         <response ID="PlotResp">
