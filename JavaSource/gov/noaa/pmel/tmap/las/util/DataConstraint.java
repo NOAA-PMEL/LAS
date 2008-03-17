@@ -69,4 +69,8 @@ public class DataConstraint extends Container implements DataConstraintInterface
 	public String getType() {
 		return element.getAttributeValue("type");
 	}
+        public String getId() {
+                return element.getAttributeValue("ID");
+        }
+
 }
