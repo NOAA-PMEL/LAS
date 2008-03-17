@@ -246,7 +246,6 @@ ELSE
    DEFINE SYMBOL data_var_transform = , (($ferret_season_length)-month ave, Centered ($mon1))
 
 ENDIF  ! Season length longer than 1
-pause
 
 ! End of $RCSfile ------------transform_1_season_per_year.jnl-------------------------------
 
