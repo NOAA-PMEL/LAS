@@ -8,6 +8,7 @@
 !           in degenerate plot into LAS_initialize_data.jnl rather than in the 
 !           individual plot scripts.
 ! 3/29/2007 ACM Fix logic interpreting contents of ferret_interpolate_data 
+! 3/17/2008 ACM Add /FLOWLINE[/DENSITY] options and also line color and thickness
 !
 ! xy_vector_plot.jnl creates an XY vector plot for use with the Back End Server
 ! code that sits behind a Live Access Server (LAS). 
@@ -74,6 +75,23 @@ IF ($ferret_use_graticules"1|0|*>1) THEN
   SET MODE GRATICULE:(DASH,COLOR=black)
 ENDIF
 
+! Set up for degrees-minutes-seconds labels on axes with units of degrees
+
+IF ($ferret_deg_min_sec"0|false>0|*>1") THEN GO LAS_set_deg_min_sec.jnl
+
+! Vector style arrow (default) or flowline
+
+IF `($ferret_vector_style"0|default>0|1|*>0") GT 0` THEN  
+   DEFINE SYMBOL qualifiers = ($qualifiers)/FLOWLINE
+   IF `($ferret_land_type"0|contour>1|*>0") EQ 1` THEN DEFINE SYMBOL ferret_land_arg = thick
+ENDIF
+
+! Vector density for flowline plots
+
+IF `($ferret_vector_density"0|*>1") GT 0` THEN  
+   DEFINE SYMBOL qualifiers = ($qualifiers)/DENSITY=($ferret_vector_density)
+ENDIF
+
 ! Vector length scale
 
 IF `($ferret_vector_length"0") GT 0` THEN  
@@ -105,9 +123,17 @@ IF ($ferret_vector_skip"0|*>1") THEN
 
 ENDIF
 
-! Set up for degrees-minutes-seconds labels on axes with units of degrees
+! Line color
 
-IF ($ferret_deg_min_sec"0|false>0|*>1") THEN GO LAS_set_deg_min_sec.jnl
+IF `($ferret_line_color%0|default>0|*>1%)` THEN
+  DEFINE SYMBOL qualifiers = ($qualifiers)/COLOR=($ferret_line_color%0|default>black|red|blue|green|lightblue|purple|*>black%)
+ENDIF
+
+! line thickness
+
+IF `($ferret_line_thickness%0|default>1|*>1%)` THEN
+   DEFINE SYMBOL qualifiers = ($qualifiers)($ferret_line_thickness%/THICK=1|default>/THICK=1|1>/THICK=1|2>/THICK=2|3>/THICK=3|*>/THICK=1%)
+ENDIF
 
 ! Do the plot. On VECTOR/SET the /XSKIP and /YSKIP are ignored. 
 
@@ -147,9 +173,10 @@ ELSE
    VECTOR/OVER/NOLAB($qualifiers)/TITLE="($ferret_plot_title)" ($ferret_vector_1), ($ferret_vector_2)
 
    ENDIF
-   DEFINE SYMBOL n_left_labels = `($n_left_labels"0")+1`
-   DEFINE SYMBOL upper_left_($n_left_labels) = Automatic vector xskip,yskip 
-
+   IF `($ferret_vector_style"1|default>1|*>0") GT 0` THEN  
+      DEFINE SYMBOL n_left_labels = `($n_left_labels"0")+1`
+      DEFINE SYMBOL upper_left_($n_left_labels) = Automatic vector xskip,yskip 
+   ENDIF
 ENDIF
 
 LABEL/NOUSER `($ppl$xlen)/2`, `($ppl$ylen)+1.2`, 0, 0, 0.12, "LAS 7.+/Ferret ($FERRET_VERSION)     NOAA/PMEL"
@@ -175,9 +202,9 @@ IF ($ferret_land_type"1|none>0|contour>0|filled>1|default>1|*>0") THEN
   GO LAS_fland 
 ELIF ($ferret_land_type"0|none>0|contour>1|filled>0|*>0") THEN
   IF `( ($region_x_range"360") LT 60) OR ( ($region_y_range) LT 30)` THEN
-     GO land_detail
+     GO land_detail ($ferret_land_arg)
   ELSE
-     GO land 
+     GO land  ($ferret_land_arg)
   ENDIF
 ENDIF
 
