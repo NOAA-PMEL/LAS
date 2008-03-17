@@ -567,6 +567,26 @@ Detailed info is available in the Ferret User\'s Guide.
     </option>
   </optiondef>
 
+  <optiondef name="vector_style">
+    <option>
+      <help>Vectors can be viewed arrows, or as flowlines: a pathline integration of a 2-dimensional instantaneous flow field. For flowline vectors you may specify the density, for arrows you may specify vector length scale and skip factors to control thinning.
+      </help>
+      <title>Vector style</title>
+      <menu type="options" name="vector_style">
+        <item values="default">Arrow</item>
+        <item values="1">Flowline</item>
+      </menu>    </option>
+  </optiondef>
+  
+  <optiondef name="vector_density">
+    <option>
+      <help>For flowline-style vectors, the density, expressed as an integer.
+      </help>
+      <title>Vector flowline density</title>
+      <textfield name="vector_density"/>
+    </option>
+  </optiondef>
+
 <!-- Script Options -->
 
   <optiondef name="gen_script_option">
@@ -633,8 +653,8 @@ i.e. 48 - start time: 24 hours before selected timestep
   <optiondef name="Options_1D_Animation" inherit="#Options_Default_Animation,#time_step,#line_or_sym,#line_color,#line_thickness,#dep_axis_scale"/>
 
   <!-- Vector plots NOTE THERE SHOULD BE A SEPARATE Options_Vector_XY -->
-  <optiondef name="Options_Vector" inherit="#Options_Default,#set_aspect,#land_type,#vector_skip,#vector_length"/>
-  <optiondef name="Options_Vector_GE" inherit="#expression,#interpolate_data,#use_graticules,#deg_min_sec,#set_aspect,#land_type,#vector_skip,#vector_length"/>
+  <optiondef name="Options_Vector" inherit="#Options_Default,#set_aspect,#land_type,#line_color,#line_thickness,#vector_style,#vector_skip,#vector_length,#vector_density"/>
+  <optiondef name="Options_Vector_GE" inherit="#expression,#interpolate_data,#use_graticules,#deg_min_sec,#set_aspect,#land_type,#line_color,#line_thickness,#vector_style,#vector_skip,#vector_length,#vector_density"/>
   <!-- 2 dimensional plots -->
   <optiondef name="Options_2D" inherit="#Options_Default,#palette"/>
 
