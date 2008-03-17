@@ -123,6 +123,10 @@ IF ($ferret_vector_skip"0|*>1") THEN
 
 ENDIF
 
+! Set up for degrees-minutes-seconds labels on axes with units of degrees
+
+IF ($ferret_deg_min_sec"0|false>0|*>1") THEN GO LAS_set_deg_min_sec.jnl
+
 ! Line color
 
 IF `($ferret_line_color%0|default>0|*>1%)` THEN
@@ -161,8 +165,10 @@ IF ($ferret_vector_skip"0") THEN
 
    ENDIF
 
-   DEFINE SYMBOL n_left_labels = `($n_left_labels"0")+1`
-   DEFINE SYMBOL upper_left_($n_left_labels) = Vector xskip=`xs`,yskip=`ys` 
+   IF `($ferret_vector_style"1|default>1|*>0") GT 0` THEN  
+      DEFINE SYMBOL n_left_labels = `($n_left_labels"0")+1`
+      DEFINE SYMBOL upper_left_($n_left_labels) = Vector xskip=`xs`,yskip=`ys`
+   ENDIF
 
 ELSE
    IF ($native_curvilinear_xy"0") THEN 
