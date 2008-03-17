@@ -84,6 +84,8 @@ function LASRequest(xml) {
   this.addVariableConstraint = LASReq_addVariableConstraint;
   //this.removeConstraint = LASReq_removeConstraints ??
   this.removeConstraints = LASReq_removeConstraints;
+  this.getTextConstraints = LASReq_getTextConstraints;
+  this.getVariableConstraints = LASReq_getVariableConstraints;
 
   // NOTE:  Do we need to support a get/setAnalysis(dataset,variable) method?
   this.setAnalysis = LASReq_setAnalysis;
@@ -492,6 +494,80 @@ function LASReq_addTextConstraint(variable,operator,value) {
   var nodeXML = '<constraint type=\"text\"><v>' + variable + '</v><v>' + operator + '</v><v>' + value + '</v></constraint>';
   var newNode = this.DOM.createXMLNode(nodeXML);
   this.DOM = this.DOM.insertNodeInto(argsNode,newNode);
+}
+
+function LASReq_getTextConstraints() {
+    var textConstraints = new Array();
+/*
+    tc1 ={"name":"subsampling",
+          "op":"=",
+          "value":"data_24hourly"
+    }
+
+    tc2 ={"name":"month",
+          "op":"=",
+          "value":"3"
+    }
+
+    textConstraints[0]=tc1;
+    textConstraints[1]=tc2;
+*/
+    var argsNode = this.DOM.selectNode("/args");
+    var constraintNodes = argsNode.getElements('constraint');
+    var j=0;
+    for (i=0;i<constraintNodes.length;i++) {
+        constraintType = new String(constraintNodes[i].getAttribute("type"));
+        //alert(constraintType);
+        if(constraintType == "text"){
+            var vNodes = constraintNodes[i].getElements('v');
+            //alert(vNodes[0].getText());
+            tc={"name":vNodes[0].getText(),
+                "op":vNodes[1].getText(),
+                "value":vNodes[2].getText()
+               }
+            textConstraints[j++]=tc;
+        }
+    }
+    return textConstraints;
+}
+
+function LASReq_getVariableConstraints() {
+    var variableConstraints = new Array();
+    /*
+      vc ={"dsID":"NDP_088",
+           "varID":"pressure_atm",
+           "op":"lt",
+           "value":"1000"
+          };
+     */
+
+    var argsNode = this.DOM.selectNode("/args");
+    var constraintNodes = argsNode.getElements('constraint');
+    var j=0;
+    for (i=0;i<constraintNodes.length;i++) {
+        constraintType = new String(constraintNodes[i].getAttribute("type"));
+        //alert(constraintType);
+        if(constraintType == "variable"){
+            var the_link = constraintNodes[i].getElements('link');
+            var matchString = new String(the_link[0].getAttribute("match"));
+            var pieces = matchString.split('/');
+            var the_dsID = pieces[3];
+            var the_varID = pieces[5];
+            //alert(the_dsID+"/"+the_varID);
+            var the_op = constraintNodes[i].getAttribute("op");
+            var vNodes = constraintNodes[i].getElements('v');
+            var the_value = vNodes[0].getText();
+
+            vc={"dsID":the_dsID, 
+                "varID":the_varID,
+                "op":the_op,
+                "value":the_value
+               };
+            variableConstraints[j++]=vc;
+
+        }
+    }
+    return variableConstraints;
 }
 
 /**
