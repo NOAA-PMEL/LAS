@@ -125,9 +125,10 @@ IF ($native_curvilinear_xy"0") THEN
 
 ELSE
    IF `($do_hybrid_z"0") + ($do_curvi_xy_and_hybrid_z"0") GT 0`  THEN
-      LET pvar = ($ferret_plot_base_var)
+!      LET pvar = ($ferret_plot_base_var)
+      LET pvar = ($ferret_plot_var)
    ELSE
-      LET pvar = ($ferret_xyz_var)   ! WHY!?
+!      LET pvar = ($ferret_xyz_var)
       LET pvar = ($ferret_plot_var)
    ENDIF
 ENDIF
