@@ -6,8 +6,10 @@
 ! 3/7/2007: ACM. Put code to check that the region was not too small, resulting 
 !           in degenerate plot into LAS_initialize_data.jnl rather than in the 
 !           individual plot scripts.
-! 3/29/2007 ACM Fix logic interpreting contents of ferret_interpolate_data 
 
+! 3/29/2007 ACM Fix logic interpreting contents of ferret_interpolate_data 
+! 3/17/2008 ACM Add /FLOWLINE[/DENSITY] options and also line color and thickness
+!
 ! yz_vector_plot.jnl creates a YZ vector plot for use with the Back End Server
 ! code that sits behind a Live Access Server (LAS). 
 !
@@ -77,6 +79,31 @@ ENDIF
 
 IF ($ferret_deg_min_sec"0|false>0|*>1") THEN GO LAS_set_deg_min_sec.jnl
 
+! Vector style arrow (default) or flowline
+
+IF `($ferret_vector_style"0|default>0|1|*>0") GT 0` THEN  
+   DEFINE SYMBOL qualifiers = ($qualifiers)/FLOWLINE
+   IF `($ferret_land_type"0|contour>1|*>0") EQ 1` THEN DEFINE SYMBOL ferret_land_arg = thick
+ENDIF
+
+! Vector density for flowline plots
+
+IF `($ferret_vector_density"0|*>1") GT 0` THEN  
+   DEFINE SYMBOL qualifiers = ($qualifiers)/DENSITY=($ferret_vector_density)
+ENDIF
+
+! Line color
+
+IF `($ferret_line_color%0|default>0|*>1%)` THEN
+  DEFINE SYMBOL qualifiers = ($qualifiers)/COLOR=($ferret_line_color%0|default>black|red|blue|green|lightblue|purple|*>black%)
+ENDIF
+
+! line thickness
+
+IF `($ferret_line_thickness%0|default>1|*>1%)` THEN
+   DEFINE SYMBOL qualifiers = ($qualifiers)($ferret_line_thickness%/THICK=1|default>/THICK=1|1>/THICK=1|2>/THICK=2|3>/THICK=3|*>/THICK=1%)
+ENDIF
+
 ! Do the plot
 ! Do a shade underlay if deg-min labelling is requested, then we dont have
 ! to do VECTOR/SET which ignores the automatic skip 
@@ -92,14 +119,18 @@ IF ($ferret_vector_skip"0") THEN
    VECTOR/OVER/NOLAB($qualifiers)/TITLE="($ferret_plot_title)"/XSKIP=`xs`/YSKIP=`ys` \
        ($ferret_vector_1), ($ferret_vector_2)
 
-   DEFINE SYMBOL n_left_labels = `($n_left_labels"0")+1`
-   DEFINE SYMBOL upper_left_($n_left_labels) = Vector xskip=`xs`,yskip=`ys` 
+   IF `($ferret_vector_style"1|default>1|*>0") GT 0` THEN  
+      DEFINE SYMBOL n_left_labels = `($n_left_labels"0")+1`
+      DEFINE SYMBOL upper_left_($n_left_labels) = Vector xskip=`xs`,yskip=`ys`
+   ENDIF
 
 ELSE
    VECTOR/OVER/NOLAB($qualifiers)/TITLE="($ferret_plot_title)" ($ferret_vector_1), ($ferret_vector_2)
 
-   DEFINE SYMBOL n_left_labels = `($n_left_labels"0")+1`
-   DEFINE SYMBOL upper_left_($n_left_labels) = Automatic vector xskip,yskip 
+   IF `($ferret_vector_style"1|default>1|*>0") GT 0` THEN  
+      DEFINE SYMBOL n_left_labels = `($n_left_labels"0")+1`
+      DEFINE SYMBOL upper_left_($n_left_labels) = Automatic vector xskip,yskip 
+   ENDIF
 
 ENDIF
 
