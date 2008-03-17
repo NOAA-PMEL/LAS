@@ -551,7 +551,7 @@ Detailed info is available in the Ferret User\'s Guide.
 
   <optiondef name="vector_skip">
     <option>
-      <help>Enter two numbers: m,n Ferret draws every nth vector along two coordinate directions beginning with the first vector requested. By default, Ferret thins vectors to achieve a clear plot; this option gives you control over the thinning; every mth vector in the horizontal direction, every nth in the vertical.
+      <help>For arrow-style vectors. Enter two numbers: m,n Ferret draws every nth vector along two coordinate directions beginning with the first vector requested. By default, Ferret thins vectors to achieve a clear plot; this option gives you control over the thinning; every mth vector in the horizontal direction, every nth in the vertical.
       </help>
       <title>Vector xskip,yskip</title>
       <textfield name="vector_skip"/>
@@ -560,7 +560,7 @@ Detailed info is available in the Ferret User\'s Guide.
   
   <optiondef name="vector_length">
     <option>
-      <help> This associates the value with the standard vector length, normally one half inch.
+      <help>For arrow-style vectors. This associates the value with the standard vector length, normally one half inch.
       </help>
       <title>Vector length scale</title>
       <textfield name="vector_length"/>
@@ -569,7 +569,7 @@ Detailed info is available in the Ferret User\'s Guide.
 
   <optiondef name="vector_style">
     <option>
-      <help>Vectors can be viewed arrows, or as flowlines: a pathline integration of a 2-dimensional instantaneous flow field. For flowline vectors you may specify the density, for arrows you may specify vector length scale and skip factors to control thinning.
+      <help>Vectors can be rendered as arrows, or as flowlines: a pathline integration of a 2-dimensional instantaneous flow field. For flowline vectors you may specify the density, for arrows you may specify vector length scale and skip factors to control thinning.
       </help>
       <title>Vector style</title>
       <menu type="options" name="vector_style">
@@ -580,7 +580,7 @@ Detailed info is available in the Ferret User\'s Guide.
   
   <optiondef name="vector_density">
     <option>
-      <help>For flowline-style vectors, the density, expressed as an integer.
+      <help>For flowline-style vectors, the density of lines, expressed as an integer.
       </help>
       <title>Vector flowline density</title>
       <textfield name="vector_density"/>
