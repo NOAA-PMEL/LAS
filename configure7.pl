@@ -9,6 +9,13 @@ use File::Basename;   # fileparse(), basename(), dirname()
 use File::Copy;       # cp()
 use File::Path;       # mkpath()
 
+#
+# Read previous configure results if they exist.
+# 
+my $configp = "config7.results";
+if (-f $configp){
+    do $configp;
+}
 
 #
 # Ferret environment variable names
@@ -476,6 +483,9 @@ if ( getYesOrNo("Do you want to install the example data set configuration") ) {
     $sample_out[6] = "conf/server/levitus.xml";
     $sample_in[7] = "conf/example/ocean_atlas_subset.xml";
     $sample_out[7] = "conf/server/ocean_atlas_subset.xml";
+    $sample_in[8] = "conf/example/options.xml";
+    $sample_out[8] = "conf/server/options.xml";
+
     $insitu_in[0] = "conf/example/insitu_demo_1.xml";
     $insitu_out[0] = "conf/server/insitu_demo_1.xml";
     $insitu_in[1] = "conf/example/insitu_demo_2.xml";
@@ -566,6 +576,37 @@ if ( getYesOrNo("Do you want to install the example data set configuration") ) {
     print "\n\n";
     my $app = $LasConfig{appname};
     print "Your user interface to LAS is at: http://$servlet_root_url/$app/getUI.do\n";
+
+
+#
+# Save configuration
+#
+
+if (!&saveConfig){
+    print <<EOF;
+
+Couldn't save configuration results. The next time you run the
+configuration script, you will have to reenter all of the
+configuration data.
+
+EOF
+}
+
+
+
+
+sub saveConfig {
+    my $status = open CONFIG, ">$configp";
+    if (! $status){
+        print "\nCan't write $configp file\nIf you rerun the configuration, you will have to reenter all of the configuration parameters.\n";
+        return 0;
+    }
+    foreach my $key (keys %LasConfig){
+        print CONFIG '$LasConfig{',$key,'} = \'',$LasConfig{$key},"';\n";
+    }
+    print CONFIG "1;\n";
+    close CONFIG;
+}
 
 sub createScripts {
 
