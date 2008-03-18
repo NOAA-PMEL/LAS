@@ -363,7 +363,7 @@ href="constrain_compare?var=$item.getLink()"#end
       <tr> 
         <td valign=top>
         #if($comparison_mode == "")
-          $form.checkbox("variables","$item.Link")
+          $form.radio("variables","$item.Link")
         #else
           $form.radio("variables","$item.Link")
         #end
@@ -398,7 +398,7 @@ href="constrain_compare?var=$item.getLink()"#end
       <tr> 
         <td valign=top>
         #if($comparison_mode == "")
-          $form.checkbox("variables","$item.Link")
+          $form.radio("variables","$item.Link")
         #else
           $form.radio("variables","$item.Link")
         #end
