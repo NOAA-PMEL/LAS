@@ -100,7 +100,8 @@ IF `($ferret_plot_var"0|*>1") EQ 0` THEN EXIT/SCRIPT  !e.g. for insitu plots may
 ! variable masked by the coordinates in the region.
 
 IF ($native_curvilinear_xy"0") THEN
-   STAT ($ferret_curvi_coord_lon)
+   STAT ($ferret_curvi_coord_lon)[j=($clat_jmin):($clat_jmax)]
+
    LET xreg_lo = ($region_x_lo)
    LET xreg_hi = ($region_x_hi)
    IF `xreg_hi LT ($stat_min)` THEN
@@ -112,10 +113,10 @@ IF ($native_curvilinear_xy"0") THEN
       LET xreg_hi = `xreg_hi - 360`
    ENDIF
    
-   let maskx1 = IF ($ferret_curvi_coord_lon)[d=($data_num)] LT `xreg_hi` THEN 1
-   let maskx =  IF ($ferret_curvi_coord_lon)[d=($data_num)] GE `xreg_lo` THEN maskx1
-   let masky1 = IF ($ferret_curvi_coord_lat)[d=($data_num)] LT ($region_y_hi) THEN 1
-   let masky =  IF ($ferret_curvi_coord_lat)[d=($data_num)] GT ($region_y_lo) THEN masky1
+   LET maskx1 = IF ($ferret_curvi_coord_lon)[d=($data_num)] LT `xreg_hi` THEN 1
+   LET maskx =  IF ($ferret_curvi_coord_lon)[d=($data_num)] GE `xreg_lo` THEN maskx1
+   LET masky1 = IF ($ferret_curvi_coord_lat)[d=($data_num)] LT ($region_y_hi) THEN 1
+   LET masky =  IF ($ferret_curvi_coord_lat)[d=($data_num)] GT ($region_y_lo) THEN masky1
    LET pvar = ($data_var)[d=($data_num)]* maskx* masky
    IF ($region_zt"0|*>1") THEN LET pvar = \
     ($data_var)[d=($data_num),($region_zt)]* maskx* masky
@@ -142,7 +143,7 @@ DEFINE SYMBOL have_pvar = 1
 ! cannot do native striding if this is a descriptor dataset. In that case
 ! just set the number of levels
 
-DEFINE SYMBOL check_for_des =  `pvar,return=dsetpath`
+DEFINE SYMBOL check_for_des =  `($data_var)[d=($data_num)],return=dsetpath`
 IF `STRINDEX("($check_for_des)", ".des") GT 0` THEN ! 9
    IF `($input_contour_levels"0|0|1") EQ 0` THEN \
    DEFINE SYMBOL ferret_fill_levels = ($num_fine_levels"30")
@@ -165,14 +166,26 @@ IF ($ferret_diff_var"0|*>1") THEN  ! 10
       DEFINE SYMBOL ferret_fill_levels = 20c
       DEFINE SYMBOL ferret_center_levels = 1
    ENDIF ! 12
-   LET pvar = ($ferret_diff_var)
+   
+   IF ($native_curvilinear_xy"0|*>1") THEN 
+      LET pvar = ( ($ferret_plot_base_var_0)  - ($FERRET_PLOT_BASE_VAR_1))
+   ELSE
+      LET pvar = ($ferret_diff_var)
+   ENDIF
 
 ENDIF ! 10
 
 !IF ($do_trans_1_seas_per_year"0") THEN LET pvar = ($FERRET_PLOT_BASE_VAR)
 
-LET var_size = ABS( `pvar,RETURN=size`)
-DEFINE SYMBOL var_dim = `pvar,RETURN=shape`
+IF ($native_curvilinear_xy"0") THEN
+  LET nvar = ($data_var)[d=($data_num),($region_zt)]
+  LET var_size = ABS( `nvar,RETURN=size`)
+  DEFINE SYMBOL var_dim = `nvar,RETURN=shape`
+ELSE
+   LET var_size = ABS( `pvar,RETURN=size`)
+   DEFINE SYMBOL var_dim = `pvar,RETURN=shape`
+ENDIF
+
 LET ndims = STRLEN("($var_dim)")
 
 LET stride_for_speed = `INT( 1+ ((var_size/memsize))/ndims )`
@@ -210,8 +223,8 @@ IF `($native_curvilinear_xy"0") EQ 0` THEN  ! region syms dont apply to native c
 IF ($xstride"0|1>0|*>1") THEN  ! 17
    LET xsize  `pvar,RETURN=isize`
    IF `xsize GT 50` THEN ! 18
-     let strd_lo = `i[gx=pvar,x=($region_x_lo)]`
-     let strd_hi = `i[gx=pvar,x=($region_x_hi)]`
+     LET strd_lo = `i[gx=pvar,x=($region_x_lo)]`
+     LET strd_hi = `i[gx=pvar,x=($region_x_hi)]`
      DEFINE SYMBOL index_strides = i=`strd_lo`:`strd_hi`:`INT(xsize/10)`
    ENDIF ! 18
 ENDIF ! 17
@@ -219,8 +232,8 @@ ENDIF ! 17
 IF ($ystride"0|1>0|*>1") THEN  ! 19
    LET ysize  `pvar,RETURN=jsize`
    IF `ysize GT 50` THEN  ! 20
-     let strd_lo = `j[gy=pvar,y=($region_y_lo)]`
-     let strd_hi = `j[gy=pvar,y=($region_y_hi)]`
+     LET strd_lo = `j[gy=pvar,y=($region_y_lo)]`
+     LET strd_hi = `j[gy=pvar,y=($region_y_hi)]`
      IF ($index_strides"0|*>1") THEN  ! 21
         DEFINE SYMBOL index_strides = ($index_strides),j=`strd_lo`:`strd_hi`:`INT(ysize/10)`
      ELSE
@@ -232,8 +245,8 @@ ENDIF ! 19
 IF ($zstride"0|1>0|*>1") THEN  ! 23
    LET zsize  `pvar,RETURN=ksize`
    IF `zsize GT 50` THEN  ! 24
-     let strd_lo = `k[gz=pvar,z=($region_z_lo)]`
-     let strd_hi = `k[gz=pvar,z=($region_z_hi)]`
+     LET strd_lo = `k[gz=pvar,z=($region_z_lo)]`
+     LET strd_hi = `k[gz=pvar,z=($region_z_hi)]`
      IF ($index_strides"0|*>1") THEN  ! 25
         DEFINE SYMBOL index_strides = ($index_strides),k=`strd_lo`:`strd_hi`:`INT(zsize/10)`
      ELSE
@@ -245,11 +258,11 @@ ENDIF ! 23
 IF ($tstride"0|1>0|*>1") THEN  ! 26
    LET tsize  `pvar,RETURN=lsize`
    IF `tsize GT 50` THEN  ! 27
-!   let strd_lo = `L[gt=pvar,t="($region_t_lo)"]`
-!   let strd_hi = `L[gt=pvar,t="($region_t_hi)"]`
-   let strd_lo = 1
-   let tt = t[gt=pvar]
-   let strd_hi = `tt,return=lsize`
+!   LET strd_lo = `L[gt=pvar,t="($region_t_lo)"]`
+!   LET strd_hi = `L[gt=pvar,t="($region_t_hi)"]`
+   LET strd_lo = 1
+   LET tt = t[gt=pvar]
+   LET strd_hi = `tt,return=lsize`
      IF ($index_strides"0|*>1") THEN  ! 28
         DEFINE SYMBOL index_strides = ($index_strides),`strd_lo`:`strd_hi`:`INT(tsize/10)`
      ELSE
@@ -265,6 +278,8 @@ IF ($index_strides"0|*>1") THEN  ! 29
 ELSE
    DEFINE SYMBOL ppvar = pvar
 ENDIF ! 29
+
+IF ($native_curvilinear_xy"0") THEN DEFINE SYMBOL ppvar = pvar
 
 ! Execute the stat command to load symbols with the variables
 ! mean, max, min, std.
