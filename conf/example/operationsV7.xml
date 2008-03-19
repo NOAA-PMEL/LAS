@@ -212,7 +212,7 @@ streamable="true" mime_type="application/postscript"/> -->
         <grid_types>
             <grid_type name="regular" />
         </grid_types>
-        <optionsdef IDREF="Options_2D_image_contour_xy_7"/>
+        <optiondef IDREF="Options_2D_image_contour_xy_7"/>
     </operation>
 
 <!-- Animation on browser (fast response) [public]-->
@@ -230,7 +230,7 @@ streamable="true" mime_type="application/postscript"/> -->
           <grid_types>
             <grid_type name="regular" />
           </grid_types>
-          <optionsdef IDREF="Options_2D_image_contour_animation_xy_7"/>
+          <optiondef IDREF="Options_2D_image_contour_animation_xy"/>
     </operation>
 
     <!-- used for extracting time frames only -->
@@ -257,7 +257,7 @@ streamable="true" mime_type="application/postscript"/> -->
         <grid_types>
             <grid_type name="regular" />
         </grid_types>
-        <optionsdef IDREF="Options_2D_image_contour_animation_xy"/>
+        <optiondef IDREF="Options_2D_image_contour_animation_xy"/>
     </operation>
 
     <!-- animate XZ or YZ plots -->
@@ -276,7 +276,7 @@ streamable="true" mime_type="application/postscript"/> -->
           <grid_types>
             <grid_type name="regular" />
           </grid_types>
-          <optionsdef IDREF="Options_2D_image_contour_animation"/>
+          <optiondef IDREF="Options_2D_image_contour_animation"/>
     </operation>
     
     <!-- animate X, Y, or Z plots -->
@@ -297,7 +297,7 @@ streamable="true" mime_type="application/postscript"/> -->
           <grid_types>
             <grid_type name="regular" />
           </grid_types>
-          <optionsdef IDREF="Options_1D_Animation"/>
+          <optiondef IDREF="Options_1D_Animation"/>
     </operation>
 
 <!-- Operations for Google Earth -->
@@ -316,7 +316,7 @@ streamable="true" mime_type="application/postscript"/> -->
         <grid_types>
                 <grid_type name="regular" />
         </grid_types>
-        <optionsdef IDREF="Options_2D_image_contour_xy_GE"/>
+        <optiondef IDREF="Options_2D_image_contour_xy_GE"/>
     </operation>
     <!-- for vector plots [private]; only visible on V6 UI-->
     <operation name="Vector Plot to Google Earth" ID="Vector_GE_Overlay"  mime_type="application/vnd.google-earth.kml+xml"
@@ -332,7 +332,7 @@ streamable="true" mime_type="application/postscript"/> -->
         <grid_types>
                 <grid_type name="regular" />
         </grid_types>
-        <optionsdef IDREF="Options_Vector_GE"/>
+        <optiondef IDREF="Options_Vector_GE"/>
     </operation>
     <!-- END: dynamic overlay on Google Earth -->
 
@@ -368,7 +368,7 @@ streamable="true" mime_type="application/postscript"/> -->
         <grid_types>
                 <grid_type name="regular" />
         </grid_types>
-        <optionsdef IDREF="Options_2D_image_contour_xy_GE"/>
+        <optiondef IDREF="Options_2D_image_contour_xy_GE"/>
     </operation>
 
     <!-- overlay kml for vector plots [private]; it is used by the dynamic overlay-->
@@ -400,7 +400,7 @@ streamable="true" mime_type="application/postscript"/> -->
       <grid_types>
         <grid_type name="regular" />
       </grid_types>
-      <optionsdef IDREF="Options_Vector_GE"/>
+      <optiondef IDREF="Options_Vector_GE"/>
     </operation>
 
     <!-- END: static overlay -->
@@ -456,7 +456,7 @@ streamable="true" mime_type="application/postscript"/> -->
           <grid_types>
                 <grid_type name="regular" />
           </grid_types>
-          <optionsdef IDREF="Options_1D_7"/>
+          <optiondef IDREF="Options_1D_7"/>
     </operation>
 
     <!-- Google Earth: extract grid locations used by placemarks KML [private]-->
@@ -488,7 +488,7 @@ streamable="true" mime_type="application/postscript"/> -->
         <grid_types>
                 <grid_type name="regular" />
         </grid_types>
-        <optionsdef IDREF="Options_Data"/>
+        <optiondef IDREF="Options_Data"/>
     </operation>
 
     <!-- Google Earth: animation kml for xyt view [private] -->
@@ -506,7 +506,7 @@ streamable="true" mime_type="application/postscript"/> -->
         <grid_types>
                 <grid_type name="regular" />
         </grid_types>
-        <optionsdef IDREF="Options_Data"/>
+        <optiondef IDREF="Options_Data"/>
     </operation>
 
 <!-- End of operations for Google Earth -->
@@ -539,7 +539,7 @@ streamable="true" mime_type="application/postscript"/> -->
         <grid_types>
             <grid_type name="regular" />
         </grid_types>
-        <optionsdef IDREF="Options_2D_image_contour_xy_7"/>
+        <optiondef IDREF="Options_2D_image_contour_xy_7"/>
     </operation>
 <!-- End of operation for WMS -->
 
