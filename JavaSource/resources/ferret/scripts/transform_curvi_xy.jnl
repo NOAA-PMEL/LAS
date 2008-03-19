@@ -59,9 +59,12 @@ IF `($constraint_0_lhs"0|Curv_to_Rect_Regridding>1|*>0")` THEN
    IF ($region_t"0|*>1") THEN DEFINE SYMBOL reg_zt ($region_t)
    IF ($region_z"0|*>1") THEN DEFINE SYMBOL reg_zt ($region_z)
    IF ($region_zt"0|*>1") THEN DEFINE SYMBOL reg_zt ($region_zt)
+   IF ($region_($which_var)_zt"0|*>1") THEN DEFINE SYMBOL reg_zt ($region_($which_var)_zt)
+   
    GO transform_curv_to_rect.jnl
 
 ELSE
+
 
 !!!!!!!!!!!
 
@@ -72,107 +75,37 @@ ELSE
 ! If it is, then redefine the axes and proceed as if it is a rectilinear grid. Otherwise
 ! call LAS_set_strides_curvilinear.jnl
 
+
 ! If this is a vector plot, do this only once, on the first vector component
 IF ` ($operation_ID"0|Plot_vector>1|*>0") AND ($num) GT 0` THEN EXIT/SCRIPT
 
-IF `($ferret_linear_lat_max"0")` THEN
-IF `($ferret_linear_lat_max"0") AND (($region_y_hi"0")  LT ($ferret_linear_lat_max))` THEN 
+IF `($ferret_linear_coords_file"0|*>1")` THEN
 
-   ! All numbers in the following comments are for the HYCOM dataset before
-   ! any native striding that has been done by LAS_set_strides_curvilinear.jnl
-   ! Given as an example only.
-   !
-   ! The global hycom grid is linear in y< 47 degrees; which corresponds to 
-   ! j <= 2172.  
-   ! The script sets these constants, ($ferret_linear_lat_max) and if known
-   ! ($ferret_linear_lat_indx) = 2172. If index is not known, compute it below.
-   !
-   ! Define a new y axis with the latitudes from the hycom grid for y <= 47 and 
-   ! any meaningless numbers above that.
-   !
-   ! Define a new x axis with longitudes taken from anywhere below j=2172
-   !
-   ! When the operation is in a region below y=47 we can just REDEFINE THE AXES
-   ! and carry on as if its not a curvilienar grid.
-   
-   LET ny = `($data_var),return=jsize`
-   LET nx = `($data_var),return=isize`
-   ! The above are incorrect if axes were strided (!)
 
-   LET xx = x[gx=($data_var)]
-   LET yy = y[gy=($data_var)]
-   LET nx = `xx,return=isize`
-   LET ny = `yy,return=jsize`
+   IF `($ferret_linear_lat_max"0|*>1") AND (($region_y_hi"0")  LT ($ferret_linear_lat_max))` THEN 
    
-   ! Find where latitude crosses 47 degrees, if not given and if the y axis
-   ! is not strided by a previous call to LAS_set_strides_curvilinear.jnl
-   
-   ! Kludge allows us to work with subsets of this data.
-   IF ($ferret_linear_lat_indx"0|*>1") THEN 
-      IF `ny LT ($ferret_linear_lat_indx)` THEN CANCEL SYMBOL ferret_linear_lat_indx
-   ENDIF
+! If we have a precomputed set of new axes, and if we are in the linear portion of
+! the grid, then redefine the axes.
+      SET DATA "($ferret_linear_coords_file)"
+      CANCEL DATA "($ferret_linear_coords_file)"
 
-   IF `($ferret_linear_lat_indx"0|*>1") AND ( ($ystride"0") EQ 0 )` THEN
-      LET jloc = ($ferret_linear_lat_indx)
+      DEFINE AXIS/UNITS=degrees/modulo `($data_var),RETURN=xaxis` = x[gx=HYCOM_lon_axis]
+      DEFINE AXIS/UNITS=degrees `($data_var),RETURN=yaxis` = y[gy=HYCOM_lat_axis]
+
+! Now we no longer need to deal with this data as being on a curvilinear grid
+
+      CANCEL SYMBOL ferret_curvi_coord_lon
+      CANCEL SYMBOL ferret_curvi_coord_lat
+      CANCEL SYMBOL DEFINE SYMBOL do_curvi_xy = 0
+      CANCEL SYMBOL do_curvi_xy_and_hybrid_z = 0
+   
+      ! Because we have redefined the axes we cant set native strides
+      DEFINE SYMBOL no_native_strides_xy = 1
+
+   
    ELSE
-      LET jloc = 0
-   
-      cancel mode verify
-      LET int1 = `INT(ny/10)`
-      REPEAT/RANGE=1:`ny`:`int1`/NAME=n (\
-      LET lat_first = ($ferret_curvi_coord_lat)[d=($data_num),i=`INT(nx/2)`,j=`n`];\
-      IF `($ferret_linear_lat_max) LT lat_first` THEN LET jloc = `n-1`;\
-      IF `jloc NE 0` THEN EXIT/LOOP)
-   
-      LET jloc_1 = `jloc`
-      LET jloc = 0
-      REPEAT/RANGE=`jloc_1-50`:`jloc_1+50`:5/NAME=n (\
-         LET lat_first = ($ferret_curvi_coord_lat)[d=($data_num),i=`INT(nx/2)`,j=`n`];\
-         IF `($ferret_linear_lat_max) LT lat_first` THEN LET jloc = `n-1`;\
-         IF `jloc NE 0` THEN EXIT/LOOP)
-   
-      LET jloc_1 = `jloc`
-      LET jloc = 0
-      REPEAT/RANGE=`jloc_1-5`:`jloc_1+5`:1/NAME=n (\
-         LET lat_first = ($ferret_curvi_coord_lat)[d=($data_num),i=`INT(nx/2)`,j=`n`];\
-         IF `($ferret_linear_lat_max) LT lat_first` THEN LET jloc = `n-1`;\
-         IF `jloc NE 0` THEN EXIT/LOOP)
-      set mode/last verify
+      GO LAS_set_strides_curvilinear.jnl
    ENDIF
-   
-   ! Define a new y axis.
-   
-   ! A variable containing the longitudes up to J=`jloc`
-   LET mask1 = IF J[GY=latitude] LE `jloc` THEN latitude[i=`INT(nx/2)`] ELSE 0
-   
-   ! Create a list of the correct total length (3298) and with values larger than
-   ! the `jloc`th value above.
-   
-   DEFINE AXIS/NPOINTS=`ny`/Y=-86:90/UNITS="`latitude[d=1],RETURN=units`" lin_north
-   
-   LET const = mask1[j=`jloc`]  - Y[GY=lin_north,j=`jloc`] ! to make the axis monotonic
-   LET mask2 = IF J[GY=lin_north] GT `jloc` THEN Y[GY=lin_north] + `const` ELSE 0
-   
-   !! Define new axes and a variable with the old data assinged to these, e.g.
-   ! DEFINE AXIS/Y/UNITS="`latitude[D=1],RETURN=units`" merged_y =  YSEQUENCE(mask1) + YSEQUENCE(mask2)
-   ! DEFINE AXIS/X/UNITS="`longitude,RETURN=units`" lin_east = longitude[j=`INT(ny/2)`]
-   ! LET temp_lin = ($data_var)[GX=lin_east@asn,GY=merged_y@asn]
-   
-   ! Or even faster if we are just in this region anyway, redefine the input axes.
-   
-   LET new_y_coordinates = YSEQUENCE(mask1) + YSEQUENCE(mask2)
-   DEFINE AXIS/Y/UNITS="`($ferret_curvi_coord_lat)[d=1],RETURN=units`" '`($ferret_curvi_coord_lat),RETURN=yaxis`' = new_y_coordinates
-   DEFINE AXIS/X/MODULO/UNITS="`($ferret_curvi_coord_lon),RETURN=units`" '`($ferret_curvi_coord_lat),RETURN=xaxis`' = ($ferret_curvi_coord_lon)[J=`INT(ny/4)`]
-
-   ! Now we no longer need to deal with this data as being on a curvilinear grid
-   CANCEL SYMBOL ferret_curvi_coord_lon
-   CANCEL SYMBOL ferret_curvi_coord_lat
-   CANCEL SYMBOL DEFINE SYMBOL do_curvi_xy = 0
-   CANCEL SYMBOL do_curvi_xy_and_hybrid_z = 0
-   
-   ! Because we have redefined the axes we cant set native strides
-   DEFINE SYMBOL no_native_strides_xy = 1
-ENDIF
 
 ELSE
 
@@ -197,6 +130,7 @@ IF `($ferret_curvi_coord_lon"0|*>1") EQ 0` THEN EXIT/SCRIPT
         DEFINE SYMBOL native_curvilinear_xy = 1
 
         ! Get the range of I,J needed to grab the region. Use it to define the plot or output variable.
+        
         GO get_curv_coord_bbox
 
         ! Remove this  and uncomment the above to set index range by region
@@ -213,21 +147,25 @@ IF `($ferret_curvi_coord_lon"0|*>1") EQ 0` THEN EXIT/SCRIPT
         LET/d=($data_num) plot_var = ($data_var)[d=($data_num),i=($clon_imin):($clon_imax),j=($clat_jmin):($clat_jmax)]
         IF ($region_zt"0|*>1") THEN LET/d=($data_num) plot_var = \
         ($data_var)[d=($data_num),i=($clon_imin):($clon_imax),j=($clat_jmin):($clat_jmax),($region_zt)]
+        IF ($region_($which_var)_zt"0|*>1") THEN LET/d=($data_num) plot_var = \
+        ($data_var)[d=($data_num),i=($clon_imin):($clon_imax),j=($clat_jmin):($clat_jmax),($region_($which_var)_zt)]
 
         DEFINE SYMBOL ferret_plot_base_var = \ ($data_var)[d=($data_num),i=($clon_imin):($clon_imax),j=($clat_jmin):($clat_jmax)]
         IF ($region_zt"0|*>1") THEN DEFINE SYMBOL ferret_plot_base_var = \
         ($data_var)[d=($data_num),i=($clon_imin):($clon_imax),j=($clat_jmin):($clat_jmax),($region_zt)]
+        IF ($region_($which_var)_zt"0|*>1") THEN DEFINE SYMBOL ferret_plot_base_var = \
+        ($data_var)[d=($data_num),i=($clon_imin):($clon_imax),j=($clat_jmin):($clat_jmax),($region_($which_var)_zt)]
 
         DEFINE SYMBOL ferret_plot_base_var_($which_var) ($ferret_plot_base_var)
 
-        DEFINE SYMBOL ferret_plot_var ($expr1)plot_var($expr2), xcoord, ycoord
-        IF ($region_zt"0|*>1") THEN DEFINE SYMBOL ferret_plot_var ($expr1)plot_var($expr2), xcoord, ycoord
+        DEFINE SYMBOL ferret_plot_var ($expr1)plot_var[d=($data_num)]($expr2), xcoord, ycoord
+        IF ($region_zt"0|*>1") THEN DEFINE SYMBOL ferret_plot_var ($expr1)plot_var[d=($data_num)]($expr2), xcoord, ycoord
         DEFINE SYMBOL ferret_plot_title "($expr1)($data_title)($expr2) ($data_units) Native Curvilinear Plot"
 
         IF ($expr3"0|*>1") THEN
-           DEFINE SYMBOL ferret_plot_var ($expr1)plot_var($expr3)plot_var($expr4), xcoord, ycoord
+           DEFINE SYMBOL ferret_plot_var ($expr1)plot_var[d=($data_num)]($expr3)plot_var[d=($data_num)]($expr4), xcoord, ycoord
            IF ($region_zt"0|*>1") THEN DEFINE SYMBOL ferret_plot_var \
-             ($expr1)plot_var($expr3)plot_var($expr4), xcoord, ycoord
+             ($expr1)plot_var[d=($data_num)]($expr3)plot_var[d=($data_num)]($expr4), xcoord, ycoord
            DEFINE SYMBOL ferret_plot_title "($expr1)($data_title)($expr3)($data_title)($expr4) ($data_units) Native Curvilinear Plot"
         ENDIF
 
