@@ -730,7 +730,7 @@ sub printENV($ferretConfig, @EnvVars) {
             } elsif ($var =~ /FER_DESCR/){
                 $ENV{$var} = "des " . $ENV{$var};
             } elsif ($var =~ /DODS_CONF/){
-                $ENV{$var} = "dods/.dodsrc";
+                $ENV{$var} = "$ENV{PWD}/conf/server/dods/.dodsrc";
             }
 
             my @values = split(' ',$ENV{$var});
