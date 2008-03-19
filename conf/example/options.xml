@@ -551,7 +551,7 @@ Detailed info is available in the Ferret User\'s Guide.
 
   <optiondef name="vector_skip">
     <option>
-      <help>For arrow-style vectors. Enter two numbers: m,n Ferret draws every nth vector along two coordinate directions beginning with the first vector requested. By default, Ferret thins vectors to achieve a clear plot; this option gives you control over the thinning; every mth vector in the horizontal direction, every nth in the vertical.
+      <help>Enter two numbers: m,n Ferret draws every nth vector along two coordinate directions beginning with the first vector requested. By default, Ferret thins vectors to achieve a clear plot; this option gives you control over the thinning; every mth vector in the horizontal direction, every nth in the vertical.
       </help>
       <title>Vector xskip,yskip</title>
       <textfield name="vector_skip"/>
@@ -560,30 +560,10 @@ Detailed info is available in the Ferret User\'s Guide.
   
   <optiondef name="vector_length">
     <option>
-      <help>For arrow-style vectors. This associates the value with the standard vector length, normally one half inch.
+      <help> This associates the value with the standard vector length, normally one half inch.
       </help>
       <title>Vector length scale</title>
       <textfield name="vector_length"/>
-    </option>
-  </optiondef>
-
-  <optiondef name="vector_style">
-    <option>
-      <help>Vectors can be rendered as arrows, or as flowlines: a pathline integration of a 2-dimensional instantaneous flow field. For flowline vectors you may specify the density, for arrows you may specify vector length scale and skip factors to control thinning.
-      </help>
-      <title>Vector style</title>
-      <menu type="options" name="vector_style">
-        <item values="default">Arrow</item>
-        <item values="1">Flowline</item>
-      </menu>    </option>
-  </optiondef>
-  
-  <optiondef name="vector_density">
-    <option>
-      <help>For flowline-style vectors, the density of lines, expressed as an integer.
-      </help>
-      <title>Vector flowline density</title>
-      <textfield name="vector_density"/>
     </option>
   </optiondef>
 
@@ -646,27 +626,35 @@ i.e. 48 - start time: 24 hours before selected timestep
 
   <!-- Graphical products --> 
   <optiondef name="Options_Default" inherit="#expression,#interpolate_data,#image_format,#size,#use_ref_map,#use_graticules,#margins,#deg_min_sec"/>
+  <!-- Eliminate the ref map -->
+  <optiondef name="Options_Default_7" inherit="#expression,#interpolate_data,#image_format,#size,#use_graticules,#margins,#deg_min_sec"/>
   <optiondef name="Options_Default_Animation" inherit="#expression,#interpolate_data,#size,#use_graticules,#margins,#deg_min_sec"/>
 
   <!-- 1-dimensional plots -->
   <optiondef name="Options_1D" inherit="#Options_Default,#line_or_sym,#line_color,#line_thickness,#dep_axis_scale"/>
+  <optiondef name="Options_1D_7" inherit="#Options_Default_7,#line_or_sym,#line_color,#line_thickness,#dep_axis_scale"/>
   <optiondef name="Options_1D_Animation" inherit="#Options_Default_Animation,#time_step,#line_or_sym,#line_color,#line_thickness,#dep_axis_scale"/>
 
   <!-- Vector plots NOTE THERE SHOULD BE A SEPARATE Options_Vector_XY -->
-  <optiondef name="Options_Vector" inherit="#Options_Default,#set_aspect,#land_type,#line_color,#line_thickness,#vector_style,#vector_skip,#vector_length,#vector_density"/>
-  <optiondef name="Options_Vector_GE" inherit="#expression,#interpolate_data,#use_graticules,#deg_min_sec,#set_aspect,#land_type,#line_color,#line_thickness,#vector_style,#vector_skip,#vector_length,#vector_density"/>
+  <optiondef name="Options_Vector" inherit="#Options_Default,#set_aspect,#land_type,#vector_skip,#vector_length"/>
+  <optiondef name="Options_Vector_7" inherit="#Options_Default_7,#set_aspect,#land_type,#vector_skip,#vector_length"/>
+  <optiondef name="Options_Vector_GE" inherit="#expression,#interpolate_data,#use_graticules,#deg_min_sec,#set_aspect,#land_type,#vector_skip,#vector_length"/>
   <!-- 2 dimensional plots -->
   <optiondef name="Options_2D" inherit="#Options_Default,#palette"/>
+  <optiondef name="Options_2D_7" inherit="#Options_Default_7,#palette"/>
 
   <!-- 2-dimensional plots with Show Contours -->
   <optiondef name="Options_2D_contour" inherit="#Options_2D,#contour_style,#fill_levels,#contour_levels,#mark_grid"/>
+  <optiondef name="Options_2D_contour_7" inherit="#Options_2D_7,#contour_style,#fill_levels,#contour_levels,#mark_grid"/>
 
   <!-- 2-dimensional plots with image formatting and contours -->
   <optiondef name="Options_2D_image_contour" inherit="#Options_2D_contour"/>
+  <optiondef name="Options_2D_image_contour_7" inherit="#Options_2D_contour_7"/>
 
   <!--  'set_aspect' reserved for XY plots only -->
   <!--  'land_type' reserved for XY plots only -->
   <optiondef name="Options_2D_image_contour_xy" inherit="#Options_2D_image_contour,#set_aspect,#land_type"/>
+  <optiondef name="Options_2D_image_contour_xy_7" inherit="#Options_2D_image_contour_7,#set_aspect,#land_type"/>
 
   <!-- 2-dimensional plots for animation (no image format and reference map)-->
   <optiondef name="Options_2D_animation" inherit="#expression,#interpolate_data,#size,#use_graticules,#margins,#deg_min_sec,#palette,#time_step"/>

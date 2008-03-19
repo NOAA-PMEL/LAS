@@ -54,7 +54,7 @@ streamable="true" mime_type="application/postscript"/> -->
           <grid_types>
            <grid_type name="regular"/>
           </grid_types>
-          <optiondef IDREF="Options_2D"/>
+          <optiondef IDREF="Options_2D_7"/>
     </operation>
     <operation name="Difference plot" ID="Compare_Plot" output_template="output" service_action="Compare_Plot" order="0201" regrid_prn="true" private="true" category="visualization" isZoomable="true">
           <service>ferret</service>
@@ -134,6 +134,7 @@ streamable="true" mime_type="application/postscript"/> -->
           <grid_types>
             <grid_type name="regular" />
           </grid_types>
+	  <optiondef IDREF="Options_1D"/>
     </operation>
 
     <operation name="Line plot" ID="Plot_1D" output_template="output" service_action="Plot_1D" order="0102" category="visualization" default="true" isZoomable="true">
@@ -155,7 +156,7 @@ streamable="true" mime_type="application/postscript"/> -->
           <grid_types>
             <grid_type name="regular" />
           </grid_types>
-          <optiondef IDREF="Options_1D"/>
+          <optiondef IDREF="Options_1D_7"/>
     </operation>
 
     <operation name="Comparison" ID="Plot_2D_XY_SlideSorter" output_template="SlideSorter" service_action="" category="visualization">
@@ -166,10 +167,11 @@ streamable="true" mime_type="application/postscript"/> -->
         <grid_types>
             <grid_type name="regular" />
         </grid_types>
+	<optiondef IDREF="Options_2D_image_contour_xy"/>
     </operation>
 
     <operation name="Color plot" ID="Plot_2D_XY"
-        output_template="output" service_action="Plot_2D_XY" order="0100" category="visualization" default="true" isZoomable="true">
+        output_template="output" service_action="Plot_2D_XY" order="0100" category="visualization"  isZoomable="true">
         <service>ferret</service>
         <response ID="PlotResp">
             <result type="image" ID="plot_image" streamable="true"
@@ -187,7 +189,7 @@ streamable="true" mime_type="application/postscript"/> -->
         <grid_types>
             <grid_type name="regular" />
         </grid_types>
-        <optiondef IDREF="Options_2D_image_contour_xy"/>
+        <optiondef IDREF="Options_2D_image_contour_xy_7"/>
     </operation>
 
 <!-- Operations for xy map - just a map, no dataset or variable other than topo -->
@@ -210,7 +212,7 @@ streamable="true" mime_type="application/postscript"/> -->
         <grid_types>
             <grid_type name="regular" />
         </grid_types>
-        <optionsdef IDREF="Options_2D_image_contour_xy"/>
+        <optionsdef IDREF="Options_2D_image_contour_xy_7"/>
     </operation>
 
 <!-- Animation on browser (fast response) [public]-->
@@ -228,7 +230,7 @@ streamable="true" mime_type="application/postscript"/> -->
           <grid_types>
             <grid_type name="regular" />
           </grid_types>
-          <optionsdef IDREF="Options_2D_image_contour_animation_xy"/>
+          <optionsdef IDREF="Options_2D_image_contour_animation_xy_7"/>
     </operation>
 
     <!-- used for extracting time frames only -->
@@ -454,7 +456,7 @@ streamable="true" mime_type="application/postscript"/> -->
           <grid_types>
                 <grid_type name="regular" />
           </grid_types>
-          <optionsdef IDREF="Options_1D"/>
+          <optionsdef IDREF="Options_1D_7"/>
     </operation>
 
     <!-- Google Earth: extract grid locations used by placemarks KML [private]-->
@@ -537,7 +539,7 @@ streamable="true" mime_type="application/postscript"/> -->
         <grid_types>
             <grid_type name="regular" />
         </grid_types>
-        <optionsdef IDREF="Options_2D_image_contour_xy"/>
+        <optionsdef IDREF="Options_2D_image_contour_xy_7"/>
     </operation>
 <!-- End of operation for WMS -->
 
@@ -554,6 +556,7 @@ streamable="true" mime_type="application/postscript"/> -->
         <grid_types>
             <grid_type name="regular" />
         </grid_types>
+	<optiondef IDREF="Options_2D_image_contour"/>
     </operation>
 
     <operation name="Color plot" ID="Plot_2D" default="true" output_template="output"
@@ -580,7 +583,7 @@ streamable="true" mime_type="application/postscript"/> -->
         <grid_types>
             <grid_type name="regular" />
         </grid_types>
-        <optiondef IDREF="Options_2D_image_contour"/>
+        <optiondef IDREF="Options_2D_image_contour_7"/>
     </operation>
     <operation name="Vector plot" ID="Plot_vector"
         output_template="output" service_action="Plot_vector" order="0103" private="true" category="visualization" isZoomable="true">
@@ -606,7 +609,7 @@ streamable="true" mime_type="application/postscript"/> -->
         <grid_types>
             <grid_type name="regular" />
         </grid_types>
-        <optiondef IDREF="Options_Vector"/>
+        <optiondef IDREF="Options_Vector_7"/>
     </operation>
     <!-- Data extract operations for difference of two variables.  -->
     <operation name="Table of difference values (text)" 
@@ -1013,7 +1016,7 @@ streamable="true" mime_type="application/postscript"/> -->
         </grid_types>
     </operation>
     <operation name="Extract DRDS Data and Plot Location"
-        ID="DRDS_extract_location_plot" output_template="output" order="0108" category="visualization">
+        ID="DRDS_extract_location_plot" output_template="output" order="0108" category="visualization" default="true">
         <operation name="Database Extraction" ID="DRDSExtract"
             service_action="drds">
             <response ID="DBExtractResponse">
@@ -1270,7 +1273,7 @@ streamable="true" mime_type="application/postscript"/> -->
         <grid_types>
             <grid_type name="scattered" />
         </grid_types>
-        <optiondef IDREF="Options_1D"/>
+        <optiondef IDREF="Options_1D_7"/>
     </operation>
     <operation name="Process Template" ID="Template" output_template="direct_output" private="true" order="9999">
         <service>template</service>
@@ -1284,7 +1287,7 @@ streamable="true" mime_type="application/postscript"/> -->
 
 
 <!-- Begin: interactive 2d XY plot additions -->
-    <operation name="Color plot" ID="XY_2D_zoom" output_template="newImageInfo" service_action="Plot_2D_XY" isZoomable="true" private="true" category="visualization">
+    <operation name="Color plot" ID="XY_2D_zoom" output_template="newImageInfo" service_action="Plot_2D_XY" default="true" isZoomable="true" private="true" category="visualization">
           <service>ferret</service>
           <response ID="PlotResp">
              <result type="image" ID="plot_image" streamable="true" mime_type="image/png"/>
@@ -1318,7 +1321,7 @@ streamable="true" mime_type="application/postscript"/> -->
           <grid_types>
              <grid_type name="regular"/>
           </grid_types>
-         <optiondef IDREF="Options_2D_image_contour_xy"/>
+         <optiondef IDREF="Options_2D_image_contour_xy_7"/>
     </operation>
 
 <!-- End: interactive 2d XY plot additions -->
