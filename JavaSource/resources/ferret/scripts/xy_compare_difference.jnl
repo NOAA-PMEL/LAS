@@ -121,6 +121,13 @@ GO LAS_open_window
 ! Get levels based on ferret_diff_var
 GO LAS_auto_levels
 
+! Build up the plot qualifiers
+
+! Curvilinear plots may have more qualifiers. 
+IF ($ferret_curvi_quals"0|*>1") THEN
+  DEFINE SYMBOL qualifiers = ($qualifiers)/($ferret_curvi_quals)
+ENDIF
+
 !ACM note: All color plots use $ferret_fill_levels. Contour plots use $ferret_contour_levels.
 
 IF ($ferret_contour_style"0|contour_lines>1|*>0") THEN
@@ -143,6 +150,7 @@ ENDIF
 
 DEFINE SYMBOL qualifiers = ($qualifiers)/PALETTE=($ferret_palette"rainbow|default>rainbow|*>*)
 
+
 ! Do the plot (SHADE or CONTOUR)
 !
 !ACM note: restore more types. Filled should be FILL plot; RASTER should be shade.
@@ -156,6 +164,11 @@ DEFINE SYMBOL plot_type =($ferret_contour_style"FILL|default>FILL|raster>SHADE|c
 DEFINE SYMBOL shade_underlay = FALSE
 IF ($plot_type"0|FILL>1|*>0) THEN DEFINE SYMBOL shade_underlay = TRUE
 
+! For a SHADE plot in curvilinear coordinates we may want the /MODULO qualifier
+IF `($ferret_curvi_quals"0|*>1") AND ($plot_type"0|SHADE>1|*>0)` THEN 
+   IF ($ferret_lon_modulo"1|1|0|yes>1|no>0|*>0") THEN  DEFINE SYMBOL qualifiers = ($qualifiers)/MODULO
+ENDIF
+
 ! Set up for degrees-minutes-seconds labels on independent variable axis
 ! If this was not requested, the script just returns.
 
@@ -163,6 +176,7 @@ IF ($ferret_deg_min_sec"0|false>0|*>1") THEN GO LAS_set_deg_min_sec.jnl
 
 ! Draw the plot
 IF ($shade_underlay) THEN 
+
    SHADE($qualifiers)/TRIM/TITLE="($ferret_plot_title)"/SET ($ferret_diff_var)
       IF ($xform_dms"0|*>1") THEN PPL XFOR (($xform_dms))
       IF ($yform_dms"0|*>1") THEN PPL YFOR (($yform_dms))
