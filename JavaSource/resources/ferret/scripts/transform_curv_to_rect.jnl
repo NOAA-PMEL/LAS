@@ -32,21 +32,52 @@ ENDIF
 
 DEFINE SYMBOL cf_map_var = ($ferret_curvi_coord_mapvar)
 SET DATA ($cf_map_url)
-DEFINE SYMBOL mapfile_num = `($cf_map_var),return=dsetnum`
+SET AXIS/MODULO/UNITS=degrees `($cf_map_var),RETURN=xaxis`
+SET AXIS/UNITS=degrees `($cf_map_var),RETURN=yaxis`
+DEFINE SYMBOL mapfile_num = `($cf_map_var),RETURN=dsetnum`
 
 ! regrid, applying region information last
 
+! The HYCOM data needs a special function to regrid to rectilinear grid.
+DEFINE SYMBOL regrid_fcn = CURV_TO_RECT
+IF ($ferret_curvi_coord_mapfcn"0|*>1") THEN DEFINE SYMBOL regrid_fcn = ($ferret_curvi_coord_mapfcn)
+
 LET the_var_curv = ($data_var)
 
-! DEFINE SYMBOL the_var_title = "`($data_var)[d=($data_num)],return=title`"
-! DEFINE SYMBOL the_var_units = "`($data_var)[d=($data_num)],return=units`"
+! DEFINE SYMBOL the_var_title = "`($data_var)[d=($data_num)],RETURN=title`"
+! DEFINE SYMBOL the_var_units = "`($data_var)[d=($data_num)],RETURN=units`"
 
-LET the_var_rect = CURV_TO_RECT(the_var_curv[d=($data_num)],($cf_map_var)[d=($mapfile_num)])
+LET the_var_rect = ($regrid_fcn)(the_var_curv[d=($data_num)],($cf_map_var)[d=($mapfile_num)])
+
 IF ($reg_zt"0|*>1)) THEN \
- LET the_var_rect = CURV_TO_RECT(the_var_curv[d=($data_num),($reg_zt)],($cf_map_var)[d=($mapfile_num)])
+  LET the_var_rect = ($regrid_fcn)(the_var_curv[d=($data_num),($reg_zt)],($cf_map_var)[d=($mapfile_num)])
+
+LET nx = `map[d=($mapfile_num),J=1,K=1,L=1,X=@NGD]`
+LET ny = `map[d=($mapfile_num),I=1,K=1,L=1,Y=@NGD]`
+
+DEFINE SYMBOL xlo = `($region_x_lo)-360`
+DEFINE SYMBOL xhi = `($region_x_hi)-360`
+
+LET imin = `i[gx=map,x=($xlo)] - 1`
+LET imax = `i[gx=map,x=($xhi)] + 1`
+LET jmin = `MAX(1, j[gy=map,y=($region_y_lo)] - 1)`
+LET jmax = `MIN(ny, j[gy=map, y=($region_y_hi)] + 1)`
+
+GO get_curv_coord_bbox
+
+SET DATA "($cf_map_url)"
+SET AXIS/MODULO/UNITS=degrees `($cf_map_var),RETURN=xaxis`
+SET AXIS/UNITS=degrees `($cf_map_var),RETURN=yaxis`
+DEFINE SYMBOL mapfile_num = `($cf_map_var),return=dsetnum`
+
+LET the_var_rect = ($regrid_fcn)(\
+       the_var_curv[d=($data_num),($reg_zt),I=($clon_imin):($clon_imax),J=($clat_jmin):($clat_jmax)],\
+      ($cf_map_var)[d=($mapfile_num),I=`imin`:`imax`,J=`jmin`:`jmax`] )
+
 load the_var_rect
 
 LET the_var_rect_region = the_var_rect[($region_full)]
+LET the_var_rect_region = the_var_rect
 
 DEFINE SYMBOL ferret_plot_var ($expr1)the_var_rect_region($expr2)
 
