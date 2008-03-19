@@ -33,8 +33,25 @@ DEFINE SYMBOL memsize = ($FERRET_MEMORY"6.4")* 1.e6
 LET pvar = ($data_var)[d=($data_num)]
 IF ($region_zt"0|*>1") THEN LET pvar = ($data_var)[d=($data_num),($region_zt)]
 
+
 LET varsiz `pvar,RETURN=size`
-DEFINE SYMBOL stride_for_mem = `INT( 1+ varsiz/(.5*($memsize)) )`
+
+! If its a slice in x or y account for that
+IF `($region_x_range"1|0|*>1") EQ 0 AND ($region_y_range"1|0|*>1") EQ 0` THEN
+   LET pvar = ($data_var)[d=($data_num),($region_zt),i=1`1,j=1]
+   LET varsiz = MIN(`varsiz`, `pvar,RETURN=size`)
+
+ELIF `($region_x_range"1|0|*>1") EQ 0` THEN 
+   LET pvar = ($data_var)[d=($data_num),($region_zt),i=1]
+   LET varsiz = MIN(`varsiz`, `pvar,RETURN=size`)
+
+ELIF `($region_y_range"1|0|*>1") EQ 0` THEN 
+   LET pvar = ($data_var)[d=($data_num),($region_zt),j=1]
+   LET varsiz = MIN(`varsiz`, `pvar,RETURN=size`)
+
+ENDIF
+
+DEFINE SYMBOL stride_for_mem = `INT( 1+ varsiz/(.1*($memsize)) )`
 
 ! If not a graphics product, apply the strides
 
