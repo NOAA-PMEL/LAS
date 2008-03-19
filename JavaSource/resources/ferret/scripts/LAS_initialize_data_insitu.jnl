@@ -77,8 +77,10 @@ LET its_keyword = `STRINDEX ("($data_x_var)", "'") GT 0`
 IF `its_keyword` THEN
    DEFINE SYMBOL data_x_var  `UPCASE("($data_x_var)")`
    LET data_num = `($data_x_var) ,return=dsetnum`
+   DEFINE SYMBOL data_num = `($data_x_var) ,return=dsetnum`
 ELSE
    LET data_num = `($data_x_var) ,return=dsetnum`
+   DEFINE SYMBOL data_num = `($data_x_var) ,return=dsetnum`
 !   SET VAR/TITLE="Eastward Velocity" 'x'[d=`data_num`]
 ENDIF
 
