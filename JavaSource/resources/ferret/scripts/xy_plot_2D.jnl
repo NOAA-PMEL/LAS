@@ -114,7 +114,7 @@ IF ($plot_type"0|FILL>1|*>0) THEN DEFINE SYMBOL shade_underlay = TRUE
 
 ! For a SHADE plot in curvilinear coordinates we may want the /MODULO qualifier
 IF `($ferret_curvi_quals"0|*>1") AND ($plot_type"0|SHADE>1|*>0)` THEN 
-   IF ($ferret_lon_modulo"1|1|0|yes>1|no>0|*>0") THEN  DEFINE SYMBOL qualifiers = ($quals)/MODULO
+   IF ($ferret_lon_modulo"1|1|0|yes>1|no>0|*>0") THEN  DEFINE SYMBOL qualifiers = ($qualifiers)/MODULO
 ENDIF
 
 ! Set the URL label for the first dataset.
@@ -157,12 +157,11 @@ ENDIF
 
 IF `($data_count"0") EQ 1` THEN
    IF ($shade_underlay) THEN 
-      DEFINE SYMBOL quals = ($qualifiers)
       IF ($ferret_curvi_quals"0|*>1") THEN 
-         IF ($ferret_lon_modulo"1|1|0|yes>1|no>0|*>0") THEN  DEFINE SYMBOL quals = ($quals)/MODULO
+         IF ($ferret_lon_modulo"1|1|0|yes>1|no>0|*>0") THEN  DEFINE SYMBOL qualifiers = ($qualifiers)/MODULO
       ENDIF
 
-      SHADE($quals)/TRIM/TITLE="($ferret_plot_title)"/SET ($ferret_var_0)
+      SHADE($qualifiers)/TRIM/TITLE="($ferret_plot_title)"/SET ($ferret_var_0)
          IF ($xform_dms"0|*>1") THEN PPL XFOR (($xform_dms))
          IF ($yform_dms"0|*>1") THEN PPL YFOR (($yform_dms))
          IF ($axlab_command"0|*>1") THEN PPL ($axlab_command)
