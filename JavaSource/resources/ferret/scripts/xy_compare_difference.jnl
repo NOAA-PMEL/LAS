@@ -99,6 +99,10 @@ ENDIF
 
 DEFINE SYMBOL ferret_diff_var = ($ferret_var_0) - ($ferret_var_1)
 
+IF ($native_curvilinear_xy"0|*>1") THEN \
+  DEFINE SYMBOL ferret_diff_var = ( ($ferret_plot_base_var_0)  - ($ferret_plot_base_var_1)), xcoord, ycoord
+
+
 ! Set the title, and the labels for the upper left listing the locations
 ! and time in directions normal to the plot, and in the upper right listing
 ! urls if dataset are opendap.
