@@ -30,6 +30,8 @@ ELSE
   IF ($constraint_0_rhs"0|5|*>0) THEN DEFINE SYMBOL cf_map_url \"($ferret_curvi_coord_map5file)\"
 ENDIF
 
+IF ($ferret_curvi_coord_mapfile"0|*>1") THEN   DEFINE SYMBOL cf_map_url \"($ferret_curvi_coord_mapfile)\"
+
 DEFINE SYMBOL cf_map_var = ($ferret_curvi_coord_mapvar)
 SET DATA ($cf_map_url)
 SET AXIS/MODULO/UNITS=degrees `($cf_map_var),RETURN=xaxis`
