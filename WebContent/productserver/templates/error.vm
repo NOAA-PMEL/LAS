@@ -28,9 +28,9 @@ site administrator.
 <a href="$las_response.getResult("debug")">More details about this error.</a>
 #end
 <hr>
-<pre>
 #parse("/productserver/templates/revision.vm")
 Server at Revision r${revision}
+<pre>
 $las_response.getResult("exception_message")
 </pre>
 #else
