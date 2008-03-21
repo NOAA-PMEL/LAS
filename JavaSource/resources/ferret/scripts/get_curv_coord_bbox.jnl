@@ -65,9 +65,7 @@ sh sym cf_map*
 ! Check to see if curvi_coord_map file is defined. If more than one is defined,
 ! use the one with the finest grid size.
 
-IF ($ferret_curvi_coord_mapfile"0|*>1") THEN 
-   DEFINE SYMBOL cf_map_url "($ferret_curvi_coord_mapfile)"
-ENDIF
+IF ($ferret_curvi_coord_mapfile"0|*>1") THEN   DEFINE SYMBOL cf_map_url \"($ferret_curvi_coord_mapfile)\"
 
 REPEAT/RANGE=10:1:-1/name=nmap (DEFINE SYMBOL mapfile ferret_curvi_coord_map`nmap`file ;\
    IF ($($mapfile)"0|*>1") THEN DEFINE SYMBOL cf_map_url "($mapfile)" )
@@ -78,6 +76,8 @@ IF `($ferret_curvi_coord_lat"0|*>1") AND (($xstride"0|*>1") OR ($xstride"0|*>1")
 IF ($cf_map_url"0|*>1") THEN  ! If we have a map file, use it.
 
    DEFINE SYMBOL cf_map_url "($ferret_curvi_coord_map2file)"
+   IF ($ferret_curvi_coord_mapfile"0|*>1") THEN   DEFINE SYMBOL cf_map_url ($ferret_curvi_coord_mapfile)
+
    DEFINE SYMBOL cf_map_var = ($ferret_curvi_coord_mapvar)
    SET DATA/SAVE
    SET DATA "($cf_map_url)"
@@ -145,13 +145,11 @@ IF ($cf_map_url"0|*>1") THEN  ! If we have a map file, use it.
       DEFINE SYMBOL clon_imax `box_longitude,RETURN=isize`
    ENDIF
 
-
    CAN DATA ($mapfile_num)
    SET DATA/RESTORE
 
    EXIT/SCRIPT
 ENDIF  ! if we have a map 
-
 LET kludge = 1
 
 IF `kludge LT 1` THEN
