@@ -71,6 +71,11 @@ IF ($ferret_plot_key"0|0|nokey>0|*>1") THEN
   DEFINE SYMBOL qualifiers = ($qualifiers)/NOKEY
 ENDIF
 
+! Curvilinear plots may have more qualifiers. 
+IF ($ferret_curvi_quals"0|*>1") THEN
+  DEFINE SYMBOL qualifiers = ($qualifiers)/($ferret_curvi_quals)
+ENDIF
+
 IF ($ferret_use_graticules"1|0|*>1) THEN
   SET MODE GRATICULE:(DASH,COLOR=black)
 ENDIF
