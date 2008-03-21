@@ -224,6 +224,20 @@ ENDIF
 
 DEFINE SYMBOL region_full = ($region_xyzt)
 
+
+! For sampling from a curvilinear variable, save the region definitions with
+! the variable number.
+IF ($region_x"0|*>1") THEN DEFINE SYMBOL region_($num)_x = ($region_x)
+IF ($region_y"0|*>1") THEN DEFINE SYMBOL region_($num)_y = ($region_y)
+IF ($region_z"0|*>1") THEN DEFINE SYMBOL region_($num)_z = ($region_z)
+IF ($region_t"0|*>1") THEN DEFINE SYMBOL region_($num)_t = ($region_t)
+IF ($region_xt"0|*>1") THEN DEFINE SYMBOL region_($num)_xt = ($region_xt)
+IF ($region_xy"0|*>1") THEN DEFINE SYMBOL region_($num)_xy = ($region_xy)
+IF ($region_xz"0|*>1") THEN DEFINE SYMBOL region_($num)_xz = ($region_xz)
+IF ($region_yt"0|*>1") THEN DEFINE SYMBOL region_($num)_yt = ($region_yt)
+IF ($region_yz"0|*>1") THEN DEFINE SYMBOL region_($num)_yz = ($region_yz)
+IF ($region_zt"0|*>1") THEN DEFINE SYMBOL region_($num)_zt = ($region_zt)
+
 ! If no regions have been defined then we have an error.
 
 IF ($region_full"1|*>0")  THEN
@@ -234,4 +248,3 @@ IF ($region_full"1|*>0")  THEN
 ENDIF
 
 ! End of LAS_initialize_region.jnl ------------------------------------------------------
-
