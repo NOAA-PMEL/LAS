@@ -27,9 +27,7 @@ DEFINE SYMBOL fview = `UPCASE("($ferret_view)")`
 ! initialization needed for this dataset.
 !
 GO LAS_initialize_region 0
-IF ($region_x"0|*>1") THEN DEFINE SYMBOL region_0_x = ($region_x)
-IF ($region_y"0|*>1") THEN DEFINE SYMBOL region_0_y = ($region_y)
-IF ($region_xy"0|*>1") THEN DEFINE SYMBOL region_0_xy = ($region_xy)
+
 GO LAS_initialize_data 0
 
 ! Check for errors (They often occur during dataset initialization.)
@@ -69,9 +67,7 @@ ENDIF
 CANCEL SYMBOL ferret_expression 
 
 GO LAS_initialize_region 1
-IF ($region_x"0|*>1") THEN DEFINE SYMBOL region_1_x = ($region_x)
-IF ($region_y"0|*>1") THEN DEFINE SYMBOL region_1_y = ($region_y)
-IF ($region_xy"0|*>1") THEN DEFINE SYMBOL region_1_xy = ($region_xy)
+
 GO LAS_initialize_data  1 
 
 ! Check for errors 
@@ -203,28 +199,10 @@ LABEL/NOUSER `($ppl$xlen)/2`, `($ppl$ylen)+1.2`, 0, 0, 0.12, "LAS 7.+/Ferret ($F
 
 ! Put the labels for time/location in the upper left
 
-LET labdel = 0.2
-LET labyloc = `($ppl$ylen) + labdel*($n_left_labels) `
-LET labsiz = 0.1
+! For comparison plots get rid of the long ugly URL labels at the upper right.
+DEFINE SYMBOL n_right_labels = 0
 
-LABEL/NOUSER 0, `labyloc`, -1, 0.0, `labsiz`, ($upper_left_1)
-LET labyloc = `labyloc - labdel`
-IF `($n_left_labels) GT 1` THEN LABEL/NOUSER 0, `labyloc`, -1, 0.0, `labsiz`, ($upper_left_2)
-
-! Put any URL labels in the upper right
-
-IF `($n_right_labels) GT 0` THEN
-   LET labxloc = `($ppl$xlen)`
-   LET labdel = 0.2
-   LET labsiz = 0.1
-   LET labyloc = `($ppl$ylen) + labdel*($n_left_labels) `  ! start with loc of left-side labels
-   LET labyloc = `labyloc + labdel*($n_right_labels)`
-
-   LABEL/NOUSER `labxloc`, `labyloc`, 1, 0.0, `labsiz`, ($upper_right_1)
-   LET labyloc = `labyloc - labdel`
-   IF `STRINDEX("($upper_right_1)", "<NL>") GT 0` THEN LET labyloc = `labyloc - labdel`
-   IF `($n_right_labels) GT 1` THEN LABEL/NOUSER `labxloc`, `labyloc`, 1, 0.0, `labsiz`, @P2($upper_right_2)
-ENDIF 
+GO labels_above_plot
 
 IF ($ferret_contour_style"0|default>0|color_filled_plus_lines>1|raster_plus_lines>1|*>0") THEN
   IF ($ferret_contour_levels"0|*>1") THEN DEFINE SYMBOL levsym =  /LEVELS=($ferret_contour_levels)
