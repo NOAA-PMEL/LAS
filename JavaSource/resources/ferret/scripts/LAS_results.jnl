@@ -96,7 +96,7 @@ IF ($result_map_scale_filename%0|*>1%) THEN
 ! TODO: Question - do we want a line for a possible positive= attribute to always
 !       be written or only when that attribute exists??
 
-   IF `STRLEN("($ferret_view)") EQ 2` THEN 
+   IF ($ax_horiz"0|*>1") THEN 
       LET syms_names = {"AX_HORIZ", "AX_HORIZ_POSTV", "AX_VERT", "AX_VERT_POSTV", \
       "DATA_EXISTS", "DATA_MIN", "DATA_MAX"}
 
