@@ -7,7 +7,11 @@
   <property name="dist.war"       value="${jakarta.home}/webapps/${app.name}.war"/>
   <property name="build.compiler.emacs" value="true"/>
 
-  <target name="prepare">
+  <target name="revision">
+     <exec executable="./bin/revision.csh" failifexecutionfails="false"/>
+  </target>
+
+  <target name="prepare" depends="revision">
      <mkdir dir="WebContent/WEB-INF/classes"/>
      <mkdir dir="WebContent/docs"/>
      <copy todir="WebContent/WEB-INF/classes">        

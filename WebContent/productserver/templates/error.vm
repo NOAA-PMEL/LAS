@@ -29,6 +29,8 @@ site administrator.
 #end
 <hr>
 <pre>
+#parse("/productserver/templates/revision.vm")
+Server at Revision r${revision}
 $las_response.getResult("exception_message")
 </pre>
 #else
