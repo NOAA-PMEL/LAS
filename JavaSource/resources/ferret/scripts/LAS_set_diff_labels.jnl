@@ -84,7 +84,7 @@ ENDIF
 IF `STRINDEX("($plotshape)", "T") EQ 0` THEN   
    IF ($region_0_t_lo"0|*>1") THEN 
       DEFINE SYMBOL n_left_labels = `($n_left_labels)+1`
-      DEFINE SYMBOL upper_left_($n_left_labels) = "Time(1): ($region_0_t_lo) @P2TIME(2): ($region_1_t_lo)"
+      DEFINE SYMBOL upper_left_($n_left_labels) = "Time(1): ($region_0_t_lo) @P2Time(2): ($region_1_t_lo)"
    ELIF ($region_1_t_lo"0|*>1") THEN 
       DEFINE SYMBOL n_left_labels = `($n_left_labels)+1`
       DEFINE SYMBOL upper_left_($n_left_labels) = "TIME(2): ($region_1_t_lo)"
