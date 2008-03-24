@@ -29,6 +29,15 @@ IF ($do_hybrid_z"0|0|1|*>1") THEN EXIT/SCRIPT
 
 DEFINE SYMBOL memsize = ($FERRET_MEMORY"6.4")* 1.e6
 
+
+! cannot do native striding if this is a descriptor dataset.
+
+DEFINE SYMBOL check_for_des =  `($data_var)[d=($data_num)],return=dsetpath`
+IF `STRINDEX("($check_for_des)", ".des") GT 0` THEN 
+pause
+EXIT/SCRIPT
+endif
+
 DEFINE SYMBOL nvars = ($data_count)
 
 ! If ($data_count) larger than 1 add the size of the variables.
