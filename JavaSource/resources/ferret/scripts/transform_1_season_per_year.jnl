@@ -96,6 +96,26 @@ LET months = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oc
 DEFINE SYMBOL mon1 = `months[I=($ferret_season_center)]`
 CAN VAR months
 
+! When there is just one time requested and if the time falls before the 
+! start of the averaging interval, return the first possible average.
+IF `nn EQ n1` THEN
+   IF `first_month_selected LT ($ferret_season_center)` THEN 
+      LET L1 = `($ferret_season_center) - ( 1+INT(season_length/2) )`
+      LET L2 = `L1 + season_length - 1`
+      IF `L1 LT 1` THEN LET L1 = 1
+      DEFINE SYMBOL ferret_plot_var = S($num)_the_plot_var[L=`L1`:`L2`@ave]
+      
+      
+      DEFINE SYMBOL ferret_plot_title \
+        ($ferret_plot_title) (($ferret_season_length)-month ave, Centered ($mon1))
+      DEFINE SYMBOL data_var_transform = \
+        , (($ferret_season_length)-month ave, Centered ($mon1))
+      DEFINE SYMBOL n_left_labels = `($n_left_labels"0")+1`
+      DEFINE SYMBOL upper_left_($n_left_labels) = "(Data centered nearest ($mon1))"
+      EXIT/SCRIPT
+   ENDIF
+ENDIF
+
 ! If the season length is 1, we just need to set up some striding.
 
 IF `season_length EQ 1` THEN
@@ -220,26 +240,6 @@ ELSE
    DEFINE SYMBOL ferret_plot_var S($num)_seas_per_year
    IF ($single_time"0|*>1") THEN DEFINE SYMBOL ferret_plot_var S($num)_seas_per_year[($region_t)]
    DEFINE SYMBOL ferret_plot_var_noregion S($num)_seas_per_year[($region_t)]
-
-! When there is just one time, then it may be outside the range of the
-! new time axis. If so return missing data at that time.
-
-   IF ($single_time"0|*>1") THEN
-      LET mytbox = tboxlo[gt=S($num)_seas_per_year,L=1]
-
-      IF `T[GT=S0_the_plot_var,T="($region_t_lo)"] LT TBOXLO[GT=S($num)_seas_per_year,L=1]` THEN 
-      DEFINE SYMBOL ferret_plot_var = `S($num)_the_plot_var,RETURN=bad` + \
-         0*S($num)_the_plot_var[t="($region_t_lo)"]
-      ENDIF
-
-      LET ttyr = t[gt=timeax_years]
-      LET nttyr = `ttyr,return=Lsize`
-      LET box_hi = TBOXHI[GT=S($num)_seas_per_year,L=`nttyr`]
-      IF `T[GT=S0_the_plot_var,T="($region_t_hi)"] GT box_hi` THEN 
-      DEFINE SYMBOL ferret_plot_var = `S($num)_the_plot_var,RETURN=bad` + \
-         0*S($num)_the_plot_var[t="($region_t_hi)"]
-      ENDIF 
-   ENDIF
 
 ! Add information to the title
    DEFINE SYMBOL ferret_plot_title ($ferret_plot_title) (($ferret_season_length)-month ave, Centered ($mon1))
