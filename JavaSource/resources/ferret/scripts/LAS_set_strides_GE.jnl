@@ -8,6 +8,13 @@
 ! See LAS_set_strides_curvilinear for first cut on dealing with strides and curvi data.
 IF ($ferret_curvi_coord_lat"0|0|*>1") THEN EXIT/SCRIPT
 
+
+! cannot do native striding if this is a descriptor dataset. 
+
+DEFINE SYMBOL check_for_des =  `($data_var)[d=($data_num)],return=dsetpath`
+IF `STRINDEX("($check_for_des)", ".des") GT 0` THEN EXIT/SCRIPT
+
+
 !show symbol operation_id
 IF `STRINDEX( "($operation_ID)", "GE" ) EQ 0` THEN EXIT/SCRIPT
 
