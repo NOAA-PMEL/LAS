@@ -219,19 +219,20 @@ LET f = "<frames>"
 list/norowhead/nohead/format=(A8)/FILE/append f
 
 !====>output time frames
-define symbol first_time = `tax_datestring(t[gt=($ferret_list_var),L=1], t[gt=($ferret_list_var)], "seconds")`
+let tvar = ($ferret_list_var)
+define symbol first_time = `tax_datestring(t[gt=tvar,L=1], t[gt=tvar], "seconds")`
 let nlen = strlen ("($first_time)")
 
 IF ($ferret_time_step"1|*>0") THEN
-    list/norowhead/nohead/format=("<frame>",A`nlen`,"</frame>")/FILE/append tax_datestring(t[gt=($ferret_list_var),L=($lmin):($lmax)], t[gt=($ferret_list_var)], "seconds")
+    list/norowhead/nohead/format=("<frame>",A`nlen`,"</frame>")/FILE/append tax_datestring(t[gt=tvar,L=($lmin):($lmax)], t[gt=tvar], "seconds")
 ELSE
-    list/norowhead/nohead/format=("<frame>",A`nlen`,"</frame>")/FILE/append tax_datestring(t[gt=($ferret_list_var),L=($lmin):($lmax):($ferret_time_step)], t[gt=($ferret_list_var)], "seconds")
+    list/norowhead/nohead/format=("<frame>",A`nlen`,"</frame>")/FILE/append tax_datestring(t[gt=tvar,L=($lmin):($lmax):($ferret_time_step)], t[gt=tvar], "seconds")
 ENDIF
 
 LET f = "</frames>"
 list/norowhead/nohead/format=(A9)/FILE/append f
 
-DEFINE SYMBOL time_units = `tax_units(t[gt=($ferret_list_var),L=1])`
+DEFINE SYMBOL time_units = `tax_units(tvar)`
 
 !---------------------
 ! time unit in months
