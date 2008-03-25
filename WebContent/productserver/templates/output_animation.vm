@@ -66,6 +66,8 @@ try{
     alert(e); 
 } 
 
+//alert(Grid.getDelta('t'));
+
 //=== get variable IDs and names for the dataset
 #set($variables = $las_config.getVariables($dsID))
 #set($varNums = $variables.size())
@@ -83,7 +85,7 @@ animation_xml = "$las_response.getResultAsJavaScriptSafeString("ferret_listing")
 las_animation = new LASAnimation(animation_xml);
 var xmlURL = "$las_response.getResult("ferret_listing")";
 
-var hasT;
+//var hasT;
 
 //importXML(xmlURL);            //load the xml file of time frames
 //animationInit();              //init animation
@@ -98,16 +100,6 @@ var initStep = initReq.getProperty('ferret','time_step');//initial time step
 var dsId   = "$dsID";                              //initial dataset ID
 var varId  = "$varID";                             //initial variable ID
 
-/*
-if(hasT==1){
-var tLo    = Grid.getLo('t');                      //low end of time grid
-var tHi    = Grid.getHi('t');                      //high end of time grid
-var tUnits = Grid.getUnits('t');                   //units of time grid
-var tDisplayType = Grid.getDisplayType('t');
-var tRenderFmt = Grid.getRenderFormat('t');
-}
-*/
-
 var DW;                                            //date widget
 var MW1;  //menu widget for starting time
 var MW2;  //menu widget for ending time
@@ -121,7 +113,6 @@ var depAxisScale;
 var timeInterval; //animation time interval
 
 //=== variables for animation controls
-var hasError;                       // has LAS error
 var lasMessage;                     // message in LAS response
 var debugURL;                       // debug URL of LAS
 var speed;                          // animation speed (frames/second)
@@ -135,23 +126,34 @@ var current_image;                  // index of current image
 var timeID;                         // ID for timeOut
 var animation_status;               // 0-stopped, 1-playing
 var play_mode;                      // 0-play once, 1-loop
-var loading;                        // 0-not loading, 1-loading
+var isLoading;                      // flag for check if it's in loading status
 var start_image;                    // image number when delT was changed
 var delT;                           // time inetrval
 var first_image;
 var last_image;
 
 var ready;
+var animationStartTimeID;
 
 importXML(xmlURL);            //load the xml file of time frames
 animationInit();              //init animation
 
-if(hasT==1){
-var tLo    = Grid.getLo('t');                      //low end of time grid
-var tHi    = Grid.getHi('t');                      //high end of time grid
-var tUnits = Grid.getUnits('t');                   //units of time grid
-var tDisplayType = Grid.getDisplayType('t');
-var tRenderFmt = Grid.getRenderFormat('t');
+if(Grid.hasAxis('t')){
+    var tLo    = Grid.getLo('t');                      //low end of time grid
+    var tHi    = Grid.getHi('t');                      //high end of time grid
+    var tUnits = Grid.getUnits('t');                   //units of time grid
+    var tDelta = Grid.getDelta('t');
+    var tDisplayType = Grid.getDisplayType('t');
+    var tRenderFmt = Grid.getRenderFormat('t');
+    var reqTLo;
+    var reqTHi;
+    var viewHasT = false;
+    //check if initial request has time range
+    if(initView.indexOf('t') > 0){
+        viewHasT = true;
+        reqTLo = initReq.getRangeLo('t');
+        reqTHi = initReq.getRangeHi('t');
+    }
 }
 
 //================================================//
@@ -164,19 +166,23 @@ var tRenderFmt = Grid.getRenderFormat('t');
 function doSubmit(){
     ready=false;
     hideLoading();
-    animationDisableButtons();
-    stop();//stop animation in case it's running
+    animate_disableButtons();
+    animate_stop();//stop animation in case it's running
 
     if(validateTimeInterval()){
         //show the waiting icon
         document.getElementById("wait").style.visibility="";
     
         //turn off animation editor
-        doCancel();
+        //doCancel();
 
         var theReq = updateLASRequest();
-        makeAnimationFramesRequest(theReq);
-        setTimeout("startAnimation();", 300);
+
+        //turn off animation editor
+        doCancel();
+
+        makeFramesRequest(theReq);
+        animationStartTimeID = setTimeout("startAnimation();", 300);
     }else{
         alert("Please enter a positive integer for time step.");
     }    
@@ -211,15 +217,9 @@ function doCancel(){
 
 function showImagesControls(){
     var imagesControls = document.getElementById("images_controls");
-    //imagesControls.setAttribute('style','position:relative;z-index:1;');
-    //imagesControls.setAttribute('style','position:relative;text-align:center;');
     imagesControls.style.filter='alpha(Opacity=100);';
     imagesControls.style.opacity='1.0';
     
-}
-
-function doAnimation(){
-    makeAnimationFramesRequest();
 }
 
 function startAnimation(){
@@ -227,6 +227,7 @@ function startAnimation(){
         document.getElementById("wait").style.visibility="hidden";
         showLoading();
         animation_start();
+        clearTimeout(animationStartTimeID);
     }else{
         setTimeout("startAnimation();", 500);
     }
@@ -240,14 +241,19 @@ function updateLASRequest(){
     var req = new LASRequest(initReq_xml);
     var theView = req.getProperty('ferret','view');
     req.setProperty('ferret','time_step',timeInterval);
+    initStep = timeInterval;
 
     //set time to user selected range 
     if(tDisplayType == 'widget'){
         req.setRange('t', DW.getDate1_Ferret(), DW.getDate2_Ferret());
+        reqTLo = DW.getDate1();
+        reqTHi = DW.getDate2();
     }else if(tDisplayType == 'menu'){
         req.setRange('t', MW1.getValue(), MW2.getValue());
+        reqTLo = MW1.getValue();
+        reqTHi = MW2.getValue();
     }
-//initReq.setRange('t', DW.getDate1_Ferret());
+
     if(theView == 'xy' || theView == 'yx' || theView == 'xyt' || theView == 'yxt'){
         req.setProperty('ferret', 'view', 'xyt');
     }else if(theView == 'xz' || theView == 'zx' || theView == 'xzt' || theView == 'zxt'){
@@ -262,17 +268,19 @@ function updateLASRequest(){
         req.setProperty('ferret', 'view', 'zt');
     }
 
-    req.setOperation('Animation_Frames_XY');
+    viewHasT = true;
 
-    //req.setVariable(dsId, varId);//not working
+    req.setOperation('Animation_Frames_XY');
+    varId = getSelectedVariable();
     req.replaceVariable(dsId,varId);
+
     return req;
 }
 
 /*
  * compute color scale and extract time frames for the selected time range
  */
-function makeAnimationFramesRequest(theReq){
+function makeFramesRequest(theReq){
     theReq.setProperty('las','output_type','json');
     var prefix = 'ProductServer.do?xml=';
     var url = prefix+escape(theReq.getXMLText());
@@ -283,7 +291,7 @@ function makeAnimationFramesRequest(theReq){
     xmlhttp.open('GET', url, true);
     xmlhttp.onreadystatechange = function(){
         if(xmlhttp.readyState == 4){
-            handleAnimationFramesResponse(xmlhttp.responseText);
+            handleFramesResponse(xmlhttp.responseText);
         }
     }
     xmlhttp.send(null);
@@ -293,7 +301,7 @@ function makeAnimationFramesRequest(theReq){
  * handle the response for computing color scale and time frames 
  * for the selected time range
  */
-function handleAnimationFramesResponse(LASResponseText){
+function handleFramesResponse(LASResponseText){
     //parse the LASResponse
     var Response;
    
@@ -318,8 +326,8 @@ function handleAnimationFramesResponse(LASResponseText){
     }else{
         var listing = Response.getResult("ferret_listing");
         importXML(listing.url);
-        ready = true;
         animationInit();
+        ready = true;
     }
 }
 
@@ -349,7 +357,7 @@ function animationInit(){
     fillLevels    = xmlDoc.getElementsByTagName("fill_levels")[0].childNodes[0].nodeValue;
     contourLevels = xmlDoc.getElementsByTagName("contour_levels")[0].childNodes[0].nodeValue;
     depAxisScale  = xmlDoc.getElementsByTagName("dep_axis_scale")[0].childNodes[0].nodeValue;
-    hasT          = xmlDoc.getElementsByTagName("hasT")[0].childNodes[0].nodeValue;
+    //hasT          = xmlDoc.getElementsByTagName("hasT")[0].childNodes[0].nodeValue;
     //units          = xmlDoc.getElementsByTagName("units")[0].childNodes[0].nodeValue;
 
     var n = xmlDoc.getElementsByTagName("frame").length;
@@ -359,8 +367,6 @@ function animationInit(){
 
     first_image = 0;
     last_image  = n-1;
-
-    hasError = 0;
 
     for (var i = first_image; i <= last_image; i++){
         firstTimeLoad[i] = 1;
@@ -377,7 +383,7 @@ function animationInit(){
     timeID        = null;
     animation_status = 0;
     play_mode     = 1;
-    loading       = 1;
+    isLoading     = true;
     start_image   = 0;
 
     //make sure the first image number is not bigger than the last image number
@@ -393,27 +399,13 @@ function animationInit(){
  * start animation
  */
 function animation_start(){
-
     //load the first image
     animate_loadNextImages(0,0);
-
-    //no error in making LAS request
-    if(hasError == 0){
-
-        //turn on play mode
-        animation_status = 1;
-        current_image = first_image;
-
-        document.animation.src = theImages[current_image].src;
-
-        //document.control_form.frame_nr.value = current_image+1;
-        change_mode(document.control_form.play_mode_selection.selectedIndex);
-    }
 }
 
 
 /*
- * show error messsage and link to debug file
+ * show error messsage and the link to debug file
  */
 function showError(Response){
     var lasMessage = Response.getResult('las_message').content;
@@ -444,7 +436,6 @@ function showError(Response){
     var error_link = document.createElement('a');
     error_link.href = debugURL;
     textNode = document.createTextNode('More details about this error.');
-    //CC_div.setAttribute('style', 'font-size:16px;');
     error_link.appendChild(textNode);
     CC_div.appendChild(error_link);
 }
@@ -489,16 +480,20 @@ function handleGetVariablesResponse(LASResponseText){
  * populate the variable selection menu
  */
 function showVariables(){
-     varsHTML  = "";
-     varsHTML += "<label for=\"vars\">&nbsp;<b>Select Variable:</b> </label><br>";
-     varsHTML += "&nbsp;<select name=\"vars\" onChange=\"updateVariable(this)\" id=\"variables\">";
-     for(i=1;i<=numVars;i++){
-         //alert(varNames[i]);
-         varsHTML += "<option value=\" "+i+"\">"+varNames[i]+"</option>";
+    varsHTML  = "";
+    varsHTML += "<label for=\"vars\">&nbsp;<b>Select Variable:</b> </label><br>";
+     //varsHTML += "&nbsp;<select name=\"vars\" onChange=\"updateVariable(this)\" id=\"variables\">";
+    varsHTML += "&nbsp;<select name=\"vars\"  id=\"variables\">";
+    for(i=0;i<numVars;i++){
+         if(varId == varIDs[i+1]){
+             varsHTML += "<option selected value=\" "+i+"\">"+varNames[i+1]+"</option>";
+         }else{ 
+             varsHTML += "<option value=\" "+i+"\">"+varNames[i+1]+"</option>";
+         }
          //varsHTML += "<option value=\" "+i+"\">"+varIDs[i]+"</option>";
-     }
-     varsHTML += "</select>";
-     document.getElementById("SelectVariable").innerHTML = varsHTML;
+    }
+    varsHTML += "</select>";
+    document.getElementById("SelectVariable").innerHTML = varsHTML;
 }
 
 /*
@@ -506,16 +501,16 @@ function showVariables(){
  */
 function updateVariable(theSelect){
     theIndex = theSelect.selectedIndex+1;
-    //varName = theSelect.options[theIndex].value;
-/*
-    for(i=0;i<numVars;i++){
-        alert(varNames[i]);
-        if(varName == varNames[i]){
-            break;
-        }
-    }
-*/
     varId = varIDs[theIndex];
+}
+
+/*
+ * get the selected variable
+ */
+function getSelectedVariable() {
+    var Select= document.getElementById('variables');
+    selectedVariable = Select.selectedIndex+1;
+    return varIDs[selectedVariable];
 }
 
 //======================================================//
@@ -525,7 +520,7 @@ function updateVariable(theSelect){
 /*
  * enable the control buttons
  */
-function animationEnableButtons(){
+function animate_enableButtons(){
     document.control_form.play_mode_selection.disabled = false;
     document.control_form.first_img_button.disabled    = false;
     document.control_form.prev_img_button.disabled     = false;
@@ -535,14 +530,12 @@ function animationEnableButtons(){
     document.control_form.last_img_button.disabled     = false;
     document.control_form.decre_speed.disabled         = false;
     document.control_form.incre_speed.disabled         = false;
-    //document.control_form.decre_delT.disabled          = false;
-    //document.control_form.incre_delT.disabled          = false;
 }
 
 /*
  * disable the control buttons
  */
-function animationDisableButtons(){
+function animate_disableButtons(){
     document.control_form.play_mode_selection.disabled = true;
     document.control_form.first_img_button.disabled    = true;
     document.control_form.prev_img_button.disabled     = true;
@@ -552,8 +545,6 @@ function animationDisableButtons(){
     document.control_form.last_img_button.disabled     = true;
     document.control_form.decre_speed.disabled         = true;
     document.control_form.incre_speed.disabled         = true;
-    //document.control_form.decre_delT.disabled          = true;
-    //document.control_form.incre_delT.disabled          = true;
 }
 
 //=====================================================//
@@ -561,20 +552,21 @@ function animationDisableButtons(){
 //=====================================================//
 
 /* 
- * load the next image 
+ * load the next image only when it's in loading status 
  */
 function animate_loadNextImage(currentImg){
-  if(loading == 1){
+  if(isLoading){
       //start animation after loading all images
       if(currentImg == last_image){
-          loading = 0;
-          //document.ani_form.halt_loading.disabled=true;
+          isLoading = false; //all images were loaded
+          //alert("halt loading");
           hideLoading();
-          animationEnableButtons();
+          animate_enableButtons();
           animate_fwd();
       }else{
           animate_loadNextImages(currentImg+1,currentImg+1);
-          go2next(currentImg+1);
+          //handleLASResponse will go to next image
+          //go2next(currentImg+1);
       }
   }
 }
@@ -618,17 +610,13 @@ function sendLASRequest(lasReq,i){
     lasReq.setProperty('las','output_type','json');
     var prefix = lasReq.prefix;
     var url = prefix+escape(lasReq.getXMLText());
-
     var xmlhttp = new XMLHttpRequest();
-
-    //wait for response
-    xmlhttp.open('GET', url, false);
+    xmlhttp.open('GET', url, true);//asynchronized request
     xmlhttp.onreadystatechange = function(){
         if(xmlhttp.readyState == 4){
             handleLASResponse(xmlhttp.responseText,i);
         }
     }
-
     xmlhttp.send(null);
 }
 
@@ -636,7 +624,6 @@ function sendLASRequest(lasReq,i){
  * precess the LASResponse
  */
 function handleLASResponse(LASResponseText, i){
-
     //parse the LASResponse
     var Response;
     try{
@@ -654,17 +641,17 @@ function handleLASResponse(LASResponseText, i){
     }
 
     if(Response.isError()){
-        hasError = 1;
         showError(Response);
     }else{
-        //showPlot(Response,i);
-        var imgURL = Response.getImageURL();
-        theImages[i] = new Image();
-        theImages[i].src =  imgURL;
-        imagesLoaded[i] = 1;
+        animation_status = 1;
+        current_image    = i;
+        theImages[i]     = new Image();
+        theImages[i].src = Response.getImageURL();
+        imagesLoaded[i]  = 1;
+
         document.control_form.frame_nr.value=i+1;
-        //document.ani_form.loading_nr.value=i+1;
-        //document.getElementById("loading_nr").value=i+1;
+        document.animation.src = theImages[i].src;    //display the plot
+        change_mode(document.control_form.play_mode_selection.selectedIndex);
     }
 }
 
@@ -675,15 +662,8 @@ function animate_makeFirstLASRequest(timePoint) {
 
     //check the type of view and change view for the new request
     var initView = initReq.getProperty('ferret','view');
-
     var thisReq = initReq;
-
     thisReq.replaceVariable(dsId,varId);
-
-    //get the fill_levels computed from the whole domain (e.g. xyt range)
-    //var fillLevels = las_animation.getFillLevels();
-    //var contourLevels = las_animation.getContourLevels();
-    //var depAxisScale = las_animation.getDepAxisScale();
 
     //for XY view
     if(initView == 'xy' || initView == 'yx'){
@@ -893,9 +873,9 @@ function compute_first(){
 }
 
 //===> stop the animation
-function stop()
+function animate_stop()
 {
-    if(loading == 0){
+    if(!isLoading){
         if (animation_status == 1) clearTimeout(timeID);
         animation_status = 0;
     }
@@ -904,7 +884,7 @@ function stop()
 //===> play forward
 function fwd()
 {
-    stop();
+    animate_stop();
     animation_status = 1;
     animate_fwd();
 }
@@ -923,8 +903,8 @@ function go2next(number)
 function go2image(number)
 {
     //only when it's not loading, jump to the image
-    if(loading == 0){
-        stop();
+    if(!isLoading){
+        animate_stop();
         if (number > last_image) number = last_image;
         if (number < first_image) number = first_image;
         current_image = number;
@@ -950,11 +930,10 @@ function change_mode(mode)
  * stop loading LAS plots and start animation
  */
 function haltLoading(){
-    loading = 0;
+    isLoading = false;
     last_image = getLastImgIndex();
-    //document.ani_form.halt_loading.disabled=true;
     hideLoading();
-    animationEnableButtons();
+    animate_enableButtons();
     animate_fwd();
 }
 
@@ -974,53 +953,37 @@ function getLastImgIndex(){
  * show the stop download button
  */
 function showLoading(){
-    //downloadingHTML  = "Download <input type=\"text\" name=\"loading_nr\" value=\"0\" size=\"3\"> frames<br>";
-/*
-    downloadingHTML = "<input type=\"button\" name=\"halt_loading\" value=\"Stop Download\" onClick=\"haltLoading()\" >";
-    downloadingHTML += " Download <input type=\"text\" name=\"loading_nr\" value=\"0\" > frames";
-    document.getElementById("downloading").innerHTML = downloadingHTML;
-*/
-    stopLoadingHTML = "<input type=\"button\" name=\"halt_loading\" value=\"Stop Download\" onClick=\"haltLoading()\" >";
+    stopLoadingHTML  = "<input type=\"button\" name=\"halt_loading\" value=\"Stop Download\" onClick=\"haltLoading()\" >";
+    stopLoadingHTML += "<IMG src='JavaScript/components/mozilla_blu.gif' />";
     document.getElementById("stopLoading").innerHTML = stopLoadingHTML;
-
-    //loadingNumHTML = " Download <input type=\"text\" id=\"loading_nr\" value=\"0\" size=\"4\" > frames";
-    //document.getElementById("loadingNum").innerHTML = loadingNumHTML;
 }
 
 /*
  * hide the stop download button
  */
 function hideLoading(){
-    //document.getElementById("downloading").innerHTML = "";
     document.getElementById("stopLoading").innerHTML = "";
-    document.getElementById("loadingNum").innerHTML = "";
 }
 
 //=====================================================//
 // function for creating and launching the animation UI 
 //=====================================================//
+
 /*
- * sets everything once the whole page and the images are loaded (onLoad handler in <body>)
+ * load the first image
  */
 function launch() 
 {
-    //animationDisableButtons();    //disable the animation control buttons
-    //importXML(xmlURL);            //load the xml file of time frames
-    //animationInit();              //init animation
-
-    if(hasT==1){
-        animationDisableButtons();    //disable the animation control buttons
-    
-    var plotReq =  animate_makeFirstLASRequest(theTimes[0]);
-    showLoading();                //show 'Stop Download' button 
-    sendLASRequest(plotReq,0);    //send the request
-
-    if(hasError == 0){
-        animation_status = 1;     //turn on play mode
-        current_image = first_image;
-        document.animation.src = theImages[0].src;    //display the plot
-        change_mode(document.control_form.play_mode_selection.selectedIndex);
-    }
+    if(Grid.hasAxis('t')){
+      if(viewHasT){
+        animate_disableButtons();//disable the animation control buttons
+        var plotReq =  animate_makeFirstLASRequest(theTimes[0]); //LAS request string for the first time step
+        showLoading(); //show 'Stop Download' button 
+        sendLASRequest(plotReq,0); //send the LAS request for the first time step
+        //document.animation.src = "JavaScript/components/mozilla_blu.gif"; //show waiting image
+      }else{
+        doEdit();
+      }
     }
 }
 
@@ -1028,13 +991,18 @@ function launch()
  * generate date widget for the animation editor
  */
 function genDateWidget(){
+
 /*
     DW = new DateWidget(tLo, tHi);
     if(tRenderFmt == '' && tUnits == "month"){
+        alert("date widget");
         DW.render('DateWidgetRange', 'M', 'M');
     }else{
         DW.render('DateWidgetRange', tRenderFmt, tRenderFmt);
     }
+*/
+
+/*
     alert(Grid.getDisplayType('t'));
  
     menu = Grid.getMenu('t');
@@ -1045,22 +1013,67 @@ function genDateWidget(){
         MW2.render('DateWidgetEnd');
     }
 */
+
     if(tDisplayType == 'menu'){
         menu = Grid.getMenu('t');
         if(menu != null){
             MW1 = new MenuWidget(menu);
             MW1.render('DateWidgetStart');
+            if(reqTLo != null && viewHasT) {
+                MW1.setValue(reqTLo);
+            }else{
+                MW1.setValueByIndex(0);
+                //MW1.setValue(theTimes[0]);
+            }
+
             MW2 = new MenuWidget(menu);
             MW2.render('DateWidgetEnd');
-            MW2.setValueByIndex(menu.length-1);
+            //MW2.setValueByIndex(menu.length-1);
+            if(reqTHi != null && viewHasT) 
+            {
+                MW2.setValue(reqTHi);
+            }else{
+                MW2.setValueByIndex(menu.length-1);
+                //MW2.setValue(theTimes[theTimes.length-1]);
+            }
         }
+
     }else if(tDisplayType == 'widget'){
-        DW = new DateWidget(tLo, tHi);
+
+        if(tRenderFmt == 'YMDT'){
+            if(tUnits == 'hour'){ 
+                DW = new DateWidget(tLo, tHi, 60*tDelta);
+            }
+            if(tUnits == 'minute'){
+                DW = new DateWidget(tLo, tHi, tDelta);
+            }
+        }else{
+            DW = new DateWidget(tLo, tHi);
+        }
+        //DW = new DateWidget("1980-01-15 00:00:00", "2005-01-15 00:00:00");
+        //alert(DW.parseDate(tLo,43200*12));
+        //alert(tRenderFmt);
+        //alert(tDelta);
+        
         if(tRenderFmt == '' && tUnits == "month"){
             DW.render('DateWidgetRange', 'M', 'M');
         }else{
             DW.render('DateWidgetRange', tRenderFmt, tRenderFmt);
         }
+
+        if(reqTLo != null && viewHasT){
+            DW.setValue(reqTLo, 1);
+        }
+
+        if(reqTHi != null && viewHasT){
+            //alert(reqTHi);
+            DW.setValue(reqTHi, 2);
+        }
+
+        //alert(DW.getAllDates()[25]);
+        //alert(document.getElementById("DW_Year1").options.length);
+        //alert(document.getElementById("DW_Month1").options.length);
+        //alert(DW.parse(tLo,14400));
     }
 }
 
@@ -1071,12 +1084,8 @@ function doEdit(){
     var animationEditor = document.getElementById("animate_editor");
     var imagesControls  = document.getElementById("images_controls");
 
-    //animationEditor.setAttribute('style','position:relative;top:-500;left:250;width:500px;background-color:#CCCCCC;color:red;z-index:2;');
-    //animationEditor.setAttribute('style','position:absolute;top:100px;left:100px;width:500px;background-color:#CCCCCC;z-index:6;');
     animationEditor.style.display='';
-    //imagesControls.setAttribute('style','position:relative;z-index:1;filter:alpha(Opacity=50);-moz-opacity:.50;opacity:.50;');
     imagesControls.style.filter='alpha(Opacity=50);';
-    //imagesControls.style.-moz-opacity='.50';
     imagesControls.style.opacity='.50';
 
     var editorContent = "&nbsp;<b>Select Time Range:</b>";
@@ -1086,33 +1095,28 @@ function doEdit(){
         editorContent += "<br><div id='DateWidgetStart' ></div>";
         editorContent += "<div id='DateWidgetEnd' ></div><br>";
     }
-    //editorContent += "<div id=\"SelectVariable\"></div><br>";
     if(initStep != null){
-        editorContent += "&nbsp;<b>Time Step:&nbsp;</b><input type=\"text\" id=\"timeStep\" value=\""+initStep+"\" size=\"4\"> ("+tUnits +")<br>";
+      editorContent += "&nbsp;<b>Time Step:&nbsp;</b><input type='text' id='timeStep' value=\""+initStep+"\" size=\"4\"> ("+tUnits +")<br>";
     }else{
-        editorContent += "&nbsp;<b>Time Step:&nbsp;</b><input type=\"text\" id=\"timeStep\" size=\"4\"> ("+tUnits+")<br>";
+      editorContent += "&nbsp;<b>Time Step:&nbsp;</b><input type='text' id='timeStep' value='1' size='4'> ("+tUnits+")<br>";
     }
-
-    //editorContent += "&nbsp;<FORM name=\"timeStep_form\"><input type=\"text\" id=\"timeStep\" size=\"4\"></FORM><br> ";
     editorContent += "<br><div id=\"SelectVariable\"></div><br>";
     editorContent += "&nbsp;<input type=\"button\" name=\"start_loading\" value=\"Submit\" size=\"6\" onClick=\"doSubmit()\">";
     editorContent += "&nbsp;<input type=\"button\" name=\"editor_cancel\" value=\"Cancel\" size=\"6\" onClick=\"doCancel()\">";
-
     animationEditor.innerHTML = editorContent;
 
     genDateWidget();
-    //getVariables();
     showVariables();
-
-    //reset varID to the 1st var
-    varId = varIDs[1];
+    varId = varIDs[1]; //reset varID to the 1st var
 }
 
-//===> writes the interface into the code where you want it
+/*
+ * write the animation interface
+ */
 function genAnimationUI()
 {
   //interface for animation
-  if(hasT==1){
+  if(Grid.hasAxis('t')){
     document.write("<fieldset style=\"border:2px solid grey;\">");
     document.write(" <legend><FONT size=+3><b>LAS Animation</b></FONT></legend>");
     document.write("  <div>");
@@ -1123,12 +1127,7 @@ function genAnimationUI()
     document.write("      <img id=\"wait\" style=\"visibility:hidden;\" src=\"JavaScript\/components\/mozilla_blu.gif\">");
     document.write("     </td>");
     document.write("     <td id=\"stopLoading\">");
-    
-    //document.write("      <form name=\"ani_form\" id=\"downloading\" >");
-    //document.write("      </form>");
     document.write("     </td>");
-    document.write("     <td id=\"loadingNum\">");
-    document.write("     </td>")
     document.write("    </tr>");
     document.write("   </table>");
     document.write("  </div>");
@@ -1138,20 +1137,18 @@ function genAnimationUI()
     //animation editor
     document.write("<div style=\"border:2pt solid black; border-color: #99cccc;position:absolute;top:150px;left:100px;display:none;width:500px;background-color:#CCCCCC;z-index:2;\" id=\"animate_editor\"></div>");
 
-    //=== animation images and controls
+    //animation images and controls
     document.write("<div id=\"images_controls\" style=\"position:absolute;z-index:1;text-align:center;\">");
 
     //images
-    //document.write("<table style=\"border:10px groove #3366FF;text-align:right;margin: 0 auto;\">");
     document.write("<table style=\"border:10px groove #3366FF;text-align:center;margin: 0 auto;\">");
-    document.write(" <tr>");
-    document.write("  <td id=\"lasResponse\">");
-    document.write("   <IMG NAME=\"animation\" id=\"las_image\" onLoad=\"animate_loadNextImage(current_image)\" ALT=\"LAS Plot\">");
-    document.write("  </td>");
-    document.write(" </tr>");
+    document.write("<tr>");
+    document.write("<td id=\"lasResponse\">");
+    document.write("<IMG NAME=\"animation\" id=\"las_image\" onLoad=\"animate_loadNextImage(current_image)\" ALT=\"LAS Plot\">");
+    document.write("</td>");
+    document.write("</tr>");
     document.write("</table>");
 
-    //controls       
     document.write("<br>");
     document.write("<div style=\"text-align:center;\" >");
     document.write(" <FORM  Method=POST Name=\"control_form\"> ");
@@ -1162,7 +1159,7 @@ function genAnimationUI()
     document.write("&nbsp; &nbsp; &nbsp; ");
     document.write(" <INPUT TYPE=\"button\" name=\"first_img_button\" Value=\" |< \" onClick=\"go2image(first_image)\"> ");
     document.write(" <INPUT TYPE=\"button\" name=\"prev_img_button\" Value=\" -1 \" onClick=\"go2image(--current_image)\"> ");
-    document.write(" <INPUT  TYPE=\"button\" class=\"stop\" name=\"stop_button\" Value=\" STOP \" onClick=\"stop()\"> ");
+    document.write(" <INPUT  TYPE=\"button\" class=\"stop\" name=\"stop_button\" Value=\" STOP \" onClick=\"animate_stop()\"> ");
     document.write(" <INPUT TYPE=\"button\" class=\"play\" name=\"play_button\" Value=\" PLAY \" onClick=\"fwd()\"> ");
     document.write(" <INPUT TYPE=\"button\" name=\"next_img_button\" Value=\" +1 \" onClick=\"go2image(++current_image)\"> ");
     document.write(" <INPUT TYPE=\"button\" name=\"last_img_button\" Value=\" >| \" onClick=\"go2image(last_image)\"> ");
