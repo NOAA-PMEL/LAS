@@ -8,7 +8,7 @@
   <property name="build.compiler.emacs" value="true"/>
 
   <target name="revision">
-     <exec executable="./bin/revision.csh" failifexecutionfails="false"/>
+     <exec executable="./bin/revision.sh" failifexecutionfails="false"/>
   </target>
 
   <target name="prepare" depends="revision">
