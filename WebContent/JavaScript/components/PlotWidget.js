@@ -266,6 +266,7 @@ function PlotWidget_render(element_id,type) {
   SelectionDiv.style.border = border_style;
   SelectionDiv.style.backgroundColor = this.selectionBackgroundColor;
   SelectionDiv.style.opacity = this.selectionOpacity;
+  SelectionDiv.style.filter = 'alpha(opacity='+this.selectionOpacity*100+')';
   SelectionDiv.style.visibility = 'hidden';
   SelectionDiv.onmousedown = PlotWidget_mouseDown;
   SelectionDiv.onmousemove = PlotWidget_mouseMove;
@@ -412,6 +413,8 @@ function PlotWidget_setCallback(callback) {
  * @param e mouseDown event
  */
 function PlotWidget_mouseDown(e) {
+  if (!e) e = window.event;  // IE event model
+
   // Cross-browser discovery of the event target
   // By Stuart Landridge in "DHTML Utopia ..."
   var target;
@@ -458,6 +461,8 @@ function PlotWidget_mouseDown(e) {
  * @param e mouseMove event
  */
 function PlotWidget_mouseMove(e) {
+  if (!e) e = window.event;  // IE event model
+
   // Cross-browser discovery of the event target
   // By Stuart Landridge in "DHTML Utopia ..."
   var target;
@@ -504,6 +509,8 @@ function PlotWidget_mouseMove(e) {
  * @param e mouseUp event
  */
 function PlotWidget_mouseUp(e) {
+  if (!e) e = window.event;  // IE event model
+
   // Cross-browser discovery of the event target
   // By Stuart Landridge in "DHTML Utopia ..."
   var target;
