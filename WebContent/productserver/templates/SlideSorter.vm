@@ -204,6 +204,8 @@ function initializeLASSlideSorter() {
         LSSInitObject["t"].data = new Object();
         LSSInitObject["t"].data.lo = Grid.getLo('t');
         LSSInitObject["t"].data.hi = Grid.getHi('t');
+        LSSInitObject["t"].data.tUnits = Grid.getUnits('t'); //units of time axis
+        LSSInitObject["t"].data.tDelta = Grid.getDelta('t'); //step of time axis
       }
     }
   }
