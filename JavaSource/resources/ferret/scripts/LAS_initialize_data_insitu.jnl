@@ -32,6 +32,34 @@ ELSE
   DEFINE SYMBOL data_url \"($data_($num)_url)\"
 ENDIF
 
+! SET DATA and check for errors
+
+SET DATA ($data_url)
+
+! TODO:  Use new error features in Ferret to turn off STDERR and check
+! TODO:  for Ferret error symbols to see if the SET DATA command actually worked.
+
+IF ($fer_last_error"0|*>1") THEN
+  DEFINE SYMBOL error_status = ERROR
+  DEFINE SYMBOL error_type = DATA
+  DEFINE SYMBOL error_string = The ($data_x_var) source file -- ($data_url) did not open successfully.
+  EXIT/SCRIPT
+ENDIF
+
+! See if the dataset has been marked empty.
+
+GO LAS_test_for_empty_data_file
+
+IF ($data_file_is_empty"0") THEN 
+   LET/BAD=99 data_x_bad = 99
+   LET/BAD=99 data_y_bad = 99
+   DEFINE SYMBOL data_x_var = data_x_bad
+   DEFINE SYMBOL data_y_var = data_y_bad
+   pause
+   EXIT/SCRIPT
+ENDIF
+
+
 ! The x and y locations for insitu plots
 ! ACM note: These are assumed to be in the same dataset, along
 !           with data_($num)_var if it exists, but we could
@@ -43,29 +71,38 @@ DEFINE SYMBOL data_y_var ($data_($num)_y_var)
 ! The variable at the x and y locations
 
 IF ($data_($num)_var"0|1|*>1) THEN DEFINE SYMBOL data_var ($data_($num)_var)
-IF ($data_($num)_title"0|1|*>1) THEN DEFINE SYMBOL data_title ($data_($num)_title)
+!IF ($data_($num)_units"0|*>1") THEN 
+!   DEFINE SYMBOL data_units (($data_($num)_units))
+!   DEFINE SYMBOL data_units "(($data_($num)_units))"
+!   IF `STRINDEX("($data_units)", "((") GT 0` THEN \
+!     DEFINE SYMBOL data_units ($data_($num)_units)
+!ENDIF
 
-IF ($data_($num)_units"0|*>1") THEN 
-   DEFINE SYMBOL data_units (($data_($num)_units))
-   IF `STRINDEX("($data_units)", "((") GT 0` THEN \
-     DEFINE SYMBOL data_units ($data_($num)_units)
+
+! Be sure units and title are defined.
+! If units are not defined, try to get units from the data variable.
+! If the variable in the file has no units, leave data_units symbol undefined.
+ 
+IF ($data_var"0|*>1") THEN
+   LET anames = ($data_var).attnames
+   IF `IS_ELEMENT_OF_STR (anames, "units") OR IS_ELEMENT_OF_STR (anames, "UNITS")` THEN
+      DEFINE SYMBOL data_var_units `($data_var),RETURN=units`123   ! check for empty units string.
+      IF `STRLEN("($data_var_units)" ) EQ 3` THEN
+      CANCEL SYMBOL data_var_units
+      ELSE
+         DEFINE SYMBOL data_var_units `($data_var),RETURN=units`
+         DEFINE SYMBOL data_units (`($data_var),RETURN=units`)
+      ENDIF
+   ENDIF
 ENDIF
+
+IF ($data_($num)_title"0|1|*>1) THEN 
+   DEFINE SYMBOL data_title ($data_($num)_title) 
+   IF ($data_units"0|*>1") THEN DEFINE SYMBOL data_title ($data_($num)_title) ($data_units)
+ENDIF
+pause
 
 DEFINE SYMBOL ferret_plot_title ($data_title)
-
-! TODO:  Use new error features in Ferret to turn off STDERR and check
-! TODO:  for Ferret error symbols to see if the SET DATA command actually worked.
-
-! SET DATA and check for errors
-
-SET DATA ($data_url)
-
-IF ($fer_last_error"0|*>1") THEN
-  DEFINE SYMBOL error_status = ERROR
-  DEFINE SYMBOL error_type = DATA
-  DEFINE SYMBOL error_string = The ($data_x_var) source file -- ($data_url) did not open successfully.
-  EXIT/SCRIPT
-ENDIF
 
 ! If the database returned a name for the variable which is a reserverd Ferret 
 ! keyword, then it is in the symbol enclosed in single quotes. 
