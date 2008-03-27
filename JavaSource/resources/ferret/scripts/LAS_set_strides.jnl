@@ -72,12 +72,13 @@ IF `STRINDEX( "($operation_ID)", "Plot" ) EQ 0` THEN
          SET AXIS/STRIDE=($stride_for_mem) `pvar,RETURN=zaxis`
          DEFINE SYMBOL add_to_title = ($add_to_title) Stride ($stride_for_mem) in Z
       ENDIF
-      IF `($region_t"0") GT 0` THEN 
+      IF `STRINDEX( "($operation_ID)", "Animation" ) EQ 0` THEN
+        IF `($region_t"0|*>1") GT 0` THEN
          SET AXIS/STRIDE=($stride_for_mem) `pvar,RETURN=taxis`
          DEFINE SYMBOL add_to_title = ($add_to_title) Stride ($stride_for_mem) in T
+        ENDIF
       ENDIF
       SET VAR/TITLE="($ferret_plot_title) ($add_to_title)" ($ferret_plot_var) 
-
    ENDIF
    EXIT/SCRIPT
 ENDIF
