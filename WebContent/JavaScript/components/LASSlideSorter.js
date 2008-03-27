@@ -504,7 +504,18 @@ function LASSlideSorter_createGlobalWidgets() {
           if (Menu.initial_value) { Widget.setValue(Menu.initial_value); }
           break;
         case 'dateWidget':
-          Widget = new DateWidget(Menu.data.lo, Menu.data.hi);
+          if(Menu.render_format.indexOf('T') > 0){
+            if(Menu.data.tUnits == 'hour'){
+                Widget = new DateWidget( Menu.data.lo,  Menu.data.hi, 60*(Menu.data.tDelta));
+            }
+            if(Menu.data.tUnits == 'minute'){
+                Widget = new DateWidget( Menu.data.lo,  Menu.data.hi, Menu.data.tDelta);
+            }
+          }else{
+            Widget = new DateWidget(Menu.data.lo,  Menu.data.hi);
+          }
+
+          //Widget = new DateWidget(Menu.data.lo, Menu.data.hi);
           if (Menu.render_format) {
             Widget.render(basicWidgetCell_id,Menu.render_format);
           } else {
@@ -566,7 +577,18 @@ function LASSlideSorter_createCellWidgets(chosenMenuName) {
           if (Menu.initial_value) { Widget.setValue(Menu.initial_value); }
           break;
         case 'dateWidget':
-          Widget = new DateWidget(Menu.data.lo, Menu.data.hi);
+          if(Menu.render_format.indexOf('T') > 0){
+            if(Menu.data.tUnits == 'hour'){
+                Widget = new DateWidget( Menu.data.lo,  Menu.data.hi, 60*(Menu.data.tDelta));
+            }
+            if(Menu.data.tUnits == 'minute'){
+                Widget = new DateWidget( Menu.data.lo,  Menu.data.hi, Menu.data.tDelta);
+            }
+          }else{
+            Widget = new DateWidget(Menu.data.lo,  Menu.data.hi);
+          }
+
+          //Widget = new DateWidget(Menu.data.lo, Menu.data.hi);
           if (Menu.render_format) {
             Widget.render(widget_id,Menu.render_format);
           } else {
