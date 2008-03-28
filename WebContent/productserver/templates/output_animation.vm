@@ -153,6 +153,8 @@ if(Grid.hasAxis('t')){
         viewHasT = true;
         reqTLo = initReq.getRangeLo('t');
         reqTHi = initReq.getRangeHi('t');
+    }else{
+        reqTLo = initReq.getRangeLo('t');
     }
 }
 
@@ -164,6 +166,9 @@ if(Grid.hasAxis('t')){
  * function for the submit button
  */
 function doSubmit(){
+    //enable the New button
+    //document.getElementById('newButton').disabled=false;
+
     ready=false;
     hideLoading();
     animate_disableButtons();
@@ -173,13 +178,10 @@ function doSubmit(){
         //show the waiting icon
         document.getElementById("wait").style.visibility="";
     
-        //turn off animation editor
-        //doCancel();
-
         var theReq = updateLASRequest();
 
         //turn off animation editor
-        doCancel();
+        turnOffEditor();
 
         makeFramesRequest(theReq);
         animationStartTimeID = setTimeout("startAnimation();", 300);
@@ -209,6 +211,12 @@ function validateTimeInterval(){
  * turn off animation editor and show image controls
  */
 function doCancel(){
+    //enable the New button
+    document.getElementById('newButton').disabled=false;
+    turnOffEditor();
+}
+
+function turnOffEditor(){
     var animationEditor = document.getElementById("animate_editor");
     animationEditor.style.display="none";
     animationEditor.innerHTML ="";
@@ -224,6 +232,9 @@ function showImagesControls(){
 
 function startAnimation(){
     if(ready){
+        //enable the New button
+        //document.getElementById('newButton').disabled=false;
+
         document.getElementById("wait").style.visibility="hidden";
         showLoading();
         animation_start();
@@ -559,8 +570,9 @@ function animate_loadNextImage(currentImg){
       //start animation after loading all images
       if(currentImg == last_image){
           isLoading = false; //all images were loaded
-          //alert("halt loading");
-          hideLoading();
+          //enable the New button
+          document.getElementById('newButton').disabled=false;
+          hideLoading(); //hide the 'Stop Dowload' button
           animate_enableButtons();
           animate_fwd();
       }else{
@@ -933,6 +945,8 @@ function haltLoading(){
     isLoading = false;
     last_image = getLastImgIndex();
     hideLoading();
+    //enable the New button
+    document.getElementById('newButton').disabled=false;
     animate_enableButtons();
     animate_fwd();
 }
@@ -975,15 +989,22 @@ function hideLoading(){
 function launch() 
 {
     if(Grid.hasAxis('t')){
-      if(viewHasT){
-        animate_disableButtons();//disable the animation control buttons
-        var plotReq =  animate_makeFirstLASRequest(theTimes[0]); //LAS request string for the first time step
-        showLoading(); //show 'Stop Download' button 
-        sendLASRequest(plotReq,0); //send the LAS request for the first time step
+        //if the view has time range; start animation immediately
+        if(viewHasT){
+            animate_disableButtons();//disable the animation control buttons
+            var plotReq =  animate_makeFirstLASRequest(theTimes[0]); //LAS request string for the first time step
+            showLoading(); //show 'Stop Download' button 
+            sendLASRequest(plotReq,0); //send the LAS request for the first time step
         //document.animation.src = "JavaScript/components/mozilla_blu.gif"; //show waiting image
-      }else{
-        doEdit();
-      }
+        }else{
+            isLoading = false;
+            animate_disableButtons();//disable the animation control buttons
+            var plotReq =  animate_makeFirstLASRequest(reqTLo); //LAS request string for the first time step
+            //showLoading(); //show 'Stop Download' button
+            sendLASRequest(plotReq,0); //send the LAS request for the first time step
+            //show the animation editor
+            doEdit();
+        }
     }
 }
 
@@ -1019,7 +1040,8 @@ function genDateWidget(){
         if(menu != null){
             MW1 = new MenuWidget(menu);
             MW1.render('DateWidgetStart');
-            if(reqTLo != null && viewHasT) {
+            //if(reqTLo != null && viewHasT) {
+            if(reqTLo != null){
                 MW1.setValue(reqTLo);
             }else{
                 MW1.setValueByIndex(0);
@@ -1061,7 +1083,8 @@ function genDateWidget(){
             DW.render('DateWidgetRange', tRenderFmt, tRenderFmt);
         }
 
-        if(reqTLo != null && viewHasT){
+        //if(reqTLo != null && viewHasT){
+        if(reqTLo != null){
             DW.setValue(reqTLo, 1);
         }
 
@@ -1069,11 +1092,6 @@ function genDateWidget(){
             //alert(reqTHi);
             DW.setValue(reqTHi, 2);
         }
-
-        //alert(DW.getAllDates()[25]);
-        //alert(document.getElementById("DW_Year1").options.length);
-        //alert(document.getElementById("DW_Month1").options.length);
-        //alert(DW.parse(tLo,14400));
     }
 }
 
@@ -1081,14 +1099,19 @@ function genDateWidget(){
  * pop up editor for creating a new animation
  */
 function doEdit(){
+
+    //disable the New button
+    document.getElementById('newButton').disabled=true;
+
     var animationEditor = document.getElementById("animate_editor");
     var imagesControls  = document.getElementById("images_controls");
 
     animationEditor.style.display='';
-    imagesControls.style.filter='alpha(Opacity=50);';
-    imagesControls.style.opacity='.50';
+    imagesControls.style.filter='alpha(Opacity=40);';
+    imagesControls.style.opacity='.40';
 
-    var editorContent = "&nbsp;<b>Select Time Range:</b>";
+    var editorContent = "&nbsp;<b><font size='4'>Select time range to start animation</font></b><br><br>";
+    editorContent += "&nbsp;<b>Time Range:</b>";
     if(tDisplayType == 'widget'){
         editorContent += "<br><div id='DateWidgetRange' ></div><br>";
     }else if(tDisplayType == 'menu'){ 
@@ -1123,7 +1146,7 @@ function genAnimationUI()
     document.write("   <table style=\"margin: 6px;\">");
     document.write("    <tr>");
     document.write("     <td>");
-    document.write("      <input type=\"button\" name=\"editing\" value=\"New ...\" onClick=\"doEdit()\">");
+    document.write("      <input type=\"button\" name=\"editing\" id='newButton' value=\"New ...\" onClick=\"doEdit()\">");
     document.write("      <img id=\"wait\" style=\"visibility:hidden;\" src=\"JavaScript\/components\/mozilla_blu.gif\">");
     document.write("     </td>");
     document.write("     <td id=\"stopLoading\">");
@@ -1135,7 +1158,8 @@ function genAnimationUI()
     document.write("<br>");
 
     //animation editor
-    document.write("<div style=\"border:2pt solid black; border-color: #99cccc;position:absolute;top:150px;left:100px;display:none;width:500px;background-color:#CCCCCC;z-index:2;\" id=\"animate_editor\"></div>");
+    //document.write("<div style=\"border:2pt solid black; border-color: #99cccc;position:absolute;top:150px;left:100px;display:none;width:500px;background-color:#CCCCCC;z-index:2;\" id=\"animate_editor\"></div>");
+    document.write("<div style=\"border:2pt solid black; filter: alpha(Opacity=80); opacity: .80;border-color: #99cccc;position:absolute;top:150px;left:50px;display:none;background-color:#CCCCCC;z-index:2;\" id=\"animate_editor\"></div>");
 
     //animation images and controls
     document.write("<div id=\"images_controls\" style=\"position:absolute;z-index:1;text-align:center;\">");
