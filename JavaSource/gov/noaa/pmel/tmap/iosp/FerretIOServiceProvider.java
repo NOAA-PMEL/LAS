@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.jdom.Document;
 import org.jdom.Element;
@@ -230,28 +231,50 @@ public class FerretIOServiceProvider implements IOServiceProvider {
                 Variable coord = new Variable(ncfile, null, null, name);
                 coord.setDimensions(dims);
                 coord.setDataType(DataType.DOUBLE);
-                List attributes = axisE.getChildren();
+                // See comment about attributes below...
                 coord.addAttribute(new Attribute("dataset", axis_datasets.get(name)));
-                for (Iterator attIt = attributes.iterator(); attIt.hasNext();) {
-                    Element attribute = (Element) attIt.next();
-                    log.debug("adding attribute: "+attribute.getName()+" "+attribute.getTextNormalize());
-                    if ( !attribute.getName().equals("length") && 
-                            !attribute.getName().equals("start") && 
-                            !attribute.getName().equals("end")) {
+                List attributeElements = axisE.getChildren("attribute");
+                if ( attributeElements != null && attributeElements.size() > 1 ) {
+                	for (Iterator attIt = attributeElements.iterator(); attIt
+							.hasNext();) {
+						Element attribute = (Element) attIt.next();
+						String value = attribute.getAttributeValue("value");
+						String aname = attribute.getAttributeValue("name");
 
-                        String value = attribute.getTextNormalize();
-                        String aname = attribute.getName();
-                        
-                        if ( aname.equals("direction") ) {
-                            directions.put(name, value);
-                        }
-                        try {
-                           double dvalue = Double.valueOf(value).doubleValue();
-                           coord.addAttribute(new Attribute(aname, new Double(dvalue)));
-                        } catch (NumberFormatException nfe) {
-                           coord.addAttribute(new Attribute(attribute.getName(), attribute.getTextNormalize()));
-                        }
-                    }
+            			if ( aname.equals("direction") ) {
+            				directions.put(name, value);
+            			}
+            			try {
+            				double dvalue = Double.valueOf(value).doubleValue();
+            				coord.addAttribute(new Attribute(aname, new Double(dvalue)));
+            			} catch (NumberFormatException nfe) {
+            				coord.addAttribute(new Attribute(attribute.getName(), attribute.getTextNormalize()));
+            			}
+					}
+
+                } else {
+                	List attributes = axisE.getChildren();
+                	for (Iterator attIt = attributes.iterator(); attIt.hasNext();) {
+                		Element attribute = (Element) attIt.next();
+                		log.debug("adding attribute: "+attribute.getName()+" "+attribute.getTextNormalize());
+                		if ( !attribute.getName().equals("length") && 
+                				!attribute.getName().equals("start") && 
+                				!attribute.getName().equals("end")) {
+
+                			String value = attribute.getTextNormalize();
+                			String aname = attribute.getName();
+
+                			if ( aname.equals("direction") ) {
+                				directions.put(name, value);
+                			}
+                			try {
+                				double dvalue = Double.valueOf(value).doubleValue();
+                				coord.addAttribute(new Attribute(aname, new Double(dvalue)));
+                			} catch (NumberFormatException nfe) {
+                				coord.addAttribute(new Attribute(attribute.getName(), attribute.getTextNormalize()));
+                			}
+                		}
+                	}
                 }
                 ncfile.addVariable(null, coord);
             }
@@ -311,29 +334,49 @@ public class FerretIOServiceProvider implements IOServiceProvider {
                 dataVar.setDimensions(varDims);
                 dataVar.setDataType(DataType.FLOAT);
                 dataVar.addAttribute(new Attribute("dataset", dsname));
-                List attributes = var.getChildren();
                 /* 
-                 * The netCDF attributes are listed as XML elements.
-                 * Confusing...
+                 * Fixed at of Ferret V6.1.1.  Code deals with either...  See below...
+                 *          The netCDF attributes are listed as XML elements.
+                 *          Confusing...
                  */
+                List attributeElements = var.getChildren("attribute");
                 dataVar.addAttribute(new Attribute("direction", direction));
-                boolean abstract_grid = false;
-                for (Iterator attIt = attributes.iterator(); attIt.hasNext();) {
-                    Element attribute = (Element) attIt.next();
-                    if ( !attribute.getName().equals("grid") ) {
-                        String value = attribute.getTextNormalize();
-                        String aname = attribute.getName();
-                        try {
-                            float fvalue = Float.valueOf(value).floatValue();
-                            dataVar.addAttribute(new Attribute(aname, new Float(fvalue)));
-                        } catch (NumberFormatException nfe) {
-                            dataVar.addAttribute(new Attribute(aname, attribute.getTextNormalize()));
-                        }
-                    } else {
-                      if ( attribute.getAttributeValue("name").equals("ABSTRACT") ) {
-                         abstract_grid = true;
-                      }
-                    }
+            	boolean abstract_grid = false;
+                if ( attributeElements != null && attributeElements.size() > 1 ) {
+                	for (Iterator attIt = attributeElements.iterator(); attIt.hasNext();) {
+						Element attribute = (Element) attIt.next();
+						String aname = attribute.getAttributeValue("name");
+						String value = attribute.getAttributeValue("value");
+						try {
+            				float fvalue = Float.valueOf(value).floatValue();
+            				dataVar.addAttribute(new Attribute(aname, new Float(fvalue)));
+            			} catch (NumberFormatException nfe) {
+            				dataVar.addAttribute(new Attribute(aname, value));
+            			}
+					}
+                	Element grid = var.getChild("grid");
+                	if ( grid.getAttributeValue("name").equals("ABSTRACT") ) {
+                		abstract_grid = true;
+                	}
+                } else {
+                	List attributes = var.getChildren();
+                	for (Iterator attIt = attributes.iterator(); attIt.hasNext();) {
+                		Element attribute = (Element) attIt.next();
+                		if ( !attribute.getName().equals("grid") ) {
+                			String value = attribute.getTextNormalize();
+                			String aname = attribute.getName();
+                			try {
+                				float fvalue = Float.valueOf(value).floatValue();
+                				dataVar.addAttribute(new Attribute(aname, new Float(fvalue)));
+                			} catch (NumberFormatException nfe) {
+                				dataVar.addAttribute(new Attribute(aname, value));
+                			}
+                		} else {
+                			if ( attribute.getAttributeValue("name").equals("ABSTRACT") ) {
+                				abstract_grid = true;
+                			}
+                		}
+                	}
                 }
                 dataVar.addAttribute(new Attribute("virtual", "true"));
                 String def = var.getAttributeValue("def");
@@ -375,19 +418,56 @@ public class FerretIOServiceProvider implements IOServiceProvider {
                     dataVar.setDimensions(varDims);
                     dataVar.addAttribute(new Attribute("direction", direction));
                     dataVar.setDataType(DataType.FLOAT);
-                    List attributes = var.getChildren();
-                    for (Iterator attIt = attributes.iterator(); attIt.hasNext();) {
-                        Element attribute = (Element) attIt.next();
-                        if ( !attribute.getName().equals("grid") ) {
-                            String value = attribute.getTextNormalize();
-                            String aname = attribute.getName();
-                            try {
-                                float fvalue = Float.valueOf(value).floatValue();
-                                dataVar.addAttribute(new Attribute(aname, new Float(fvalue)));
-                            } catch (NumberFormatException nfe) {
-                                dataVar.addAttribute(new Attribute(aname, attribute.getTextNormalize()));
-                            }
-                        }
+                    /*
+                     * Old Ferrets write attributes like this:
+                     * <var name="SITE_NETCODE">
+                     *     <long_name>Contributing radar site network affiliation code</long_name>
+                     *     <_FillValue>-1.000000E+34</_FillValue>
+                     *     <missing_value>-1.000000E+34</missing_value>
+                     *     <ferret_datatype>STRING</ferret_datatype>
+                     *     <infile_datatype>CHAR</infile_datatype>
+                     *     
+                     *     ....
+                     *     
+                     * New Ferrets (v6.1.1+) write them like this:
+                     * 
+                     * <var name="SITE_NETCODE">
+                     *    <attribute name="long_name" value="Contributing radar site network affiliation code" />
+                     *    <attribute name="_FillValue" value="-1.000000E+34" />
+                     *    <attribute name="missing_value" value="-1.000000E+34" />
+                     *    <attribute name="ferret_datatype" value="STRING" />
+                     *    <attribute name="infile_datatype" value="CHAR />
+                     * 
+                     * Try the new way first...
+                     */
+                    List attributeElements = var.getChildren("attribute");
+                    if ( attributeElements != null && attributeElements.size() > 0 ) {
+                    	for (Iterator attIt = attributeElements.iterator(); attIt.hasNext();) {
+                    		Element attribute = (Element) attIt.next();
+                    		String value = attribute.getAttributeValue("value");
+                			String aname = attribute.getAttributeValue("name");
+                			try {
+                				float fvalue = Float.valueOf(value).floatValue();
+                				dataVar.addAttribute(new Attribute(aname, new Float(fvalue)));
+                			} catch (NumberFormatException nfe) {
+                				dataVar.addAttribute(new Attribute(aname, value));
+                			}
+                    	}
+                    } else {
+                    	List attributes = var.getChildren();
+                    	for (Iterator attIt = attributes.iterator(); attIt.hasNext();) {
+                    		Element attribute = (Element) attIt.next();
+                    		if ( !attribute.getName().equals("grid") ) {
+                    			String value = attribute.getTextNormalize();
+                    			String aname = attribute.getName();
+                    			try {
+                    				float fvalue = Float.valueOf(value).floatValue();
+                    				dataVar.addAttribute(new Attribute(aname, new Float(fvalue)));
+                    			} catch (NumberFormatException nfe) {
+                    				dataVar.addAttribute(new Attribute(aname, value));
+                    			}
+                    		}
+                    	}
                     }
                     dataVar.addAttribute(new Attribute("dataset", dataset_name));
                     ncfile.addVariable(null, dataVar);
@@ -576,6 +656,7 @@ public class FerretIOServiceProvider implements IOServiceProvider {
         //String expr = 		"_expr_{levitus_climatology}{let airt_regrid=airt[d=1,t=\"15-Jan\":\"15-Dec\"@ave];let temp_regrid=temp[d=2,gxy=airt_regrid[d=1]]}";
         String inner = "http://porter.pmel.noaa.gov:8920/thredds/dodsC/las/levitus_climatology_cdf/coads_climatology_cdf.jnl";
         String ninner = "";
+        log.setLevel(Level.DEBUG);
         try {
 			ninner = URLEncoder.encode(inner, "UTF-8");
 		} catch (UnsupportedEncodingException e1) {
@@ -583,13 +664,14 @@ public class FerretIOServiceProvider implements IOServiceProvider {
 			e1.printStackTrace();
 		}
         String expr = 		"_expr_{"+ninner+"}{let temp_1_regrid=temp[d=1,z=5.00:75.00@ave];let sst_2_regrid=sst[d=2,t=\"15-Jan\":\"15-Mar\"@ave];let sst_2_regrid_2_regrid=sst_2_regrid[d=2,gxy=temp_1_regrid[d=1]]}";
+        
         try {
 			filename = filename + URLEncoder.encode(expr, "UTF-8");
 		} catch (UnsupportedEncodingException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
+		filename = "http://strider.weathertopconsulting.com:8880/thredds/dodsC/las/id-2c2b44e493/data_ocean_atlas_subset.jnl";
         NetcdfDataset ncd = null;
         if ( filename.startsWith("http")) {
         	System.out.println(filename);
@@ -612,7 +694,7 @@ public class FerretIOServiceProvider implements IOServiceProvider {
                    vars.append(v.getName());
                 } 
             }
-            NCdump.print(ncd, System.out, true, true, false, true, vars.toString(), null);
+            //NCdump.print(ncd, System.out, true, true, false, true, vars.toString(), null);
             for (Iterator vIt = variables.iterator(); vIt.hasNext();) {
                 Variable v = (Variable) vIt.next();
                 if ( v.getCoordinateDimension() == null) {
