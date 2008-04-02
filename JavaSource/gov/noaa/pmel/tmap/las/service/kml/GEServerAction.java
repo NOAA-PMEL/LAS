@@ -37,6 +37,7 @@ import gov.noaa.pmel.tmap.las.jdom.LASUIRequest;
 import gov.noaa.pmel.tmap.las.jdom.ServerConfig;
 import gov.noaa.pmel.tmap.las.product.request.ProductRequest;
 import gov.noaa.pmel.tmap.las.service.ProductWebService;
+import gov.noaa.pmel.tmap.las.product.server.LASConfigPlugIn;
 
 import org.apache.struts.action.Action;
 import org.apache.struts.action.ActionForm;
@@ -45,12 +46,15 @@ import org.apache.struts.action.ActionMapping;
 
 import org.apache.log4j.Logger;
 
+import org.jdom.JDOMException;
 /**
  *@author Jing Yang Li
  *
  */
 public final class GEServerAction extends Action {
     private static Logger log = Logger.getLogger(GEServerAction.class);
+
+    //LASConfig lasConfig = (LASConfig)servlet.getServletContext().getAttribute(LASConfigPlugIn.LAS_CONFIG_KEY);
 
     public ActionForward execute(ActionMapping mapping,
             ActionForm form,
@@ -60,12 +64,14 @@ public final class GEServerAction extends Action {
 
         //log.info("entering GEServerAction");
 
+        LASConfig lasConfig = (LASConfig)servlet.getServletContext().getAttribute(LASConfigPlugIn.LAS_CONFIG_KEY);
+
         //use Google Earth Mime type
         response.setContentType("application/keyhole");
         PrintWriter out = response.getWriter();
 
         //create the ground overlay KML for a single plot
-        String kmlString = genPlotOverlayKML(request);
+        String kmlString = genPlotOverlayKML(request,lasConfig);
 
         //return back the KML string
         if( (kmlString != "") && (kmlString != null)){
@@ -148,7 +154,7 @@ public final class GEServerAction extends Action {
                 bbox[1] = Float.parseFloat(coParts[1]);
                 bbox[3] = Float.parseFloat(coParts[3]);
              }catch(NumberFormatException e){
-                log.info("error while process BBOX from Google Earth: " + e.toString());
+                log.error("Error in processing BBOX from Google Earth: " + e.toString());
                 return null;
             }
         return bbox;
@@ -158,7 +164,7 @@ public final class GEServerAction extends Action {
     * Generate a KML file for a XY plot; it is just a ground overlay
     * @param request The HttpServletRequest
     */
-    public String genPlotOverlayKML(HttpServletRequest request)
+    public String genPlotOverlayKML(HttpServletRequest request, LASConfig lasConfig)
         throws ServletException, IOException 
     {
         LASUIRequest lasUIRequest = getLASUIRequest(request);
@@ -168,8 +174,7 @@ public final class GEServerAction extends Action {
         String placemarkRequestURL ="";
 
         String kmlString ="";
-        String serverURL = getServerURL(request)+"/ProductServer.do";
-     
+        String serverURL = getServerURL(lasConfig);
 
         try{
 
@@ -235,19 +240,17 @@ public final class GEServerAction extends Action {
     * @param request the HttpServletRequest
     * @return serverURL URL of the LAS product server
     */
-    private String getServerURL(HttpServletRequest request)
+    private String getServerURL(LASConfig lasConfig)
     throws ServletException, IOException
     {
-        String name = request.getServerName();
-        int port = request.getServerPort();
-        String contextPath = request.getContextPath();
-        String ports;
-        if ( port != 80 ) {
-           ports = ":"+String.valueOf(port);
-        } else {
-           ports = "";
+        String serverURL="";
+
+        try {
+            serverURL = lasConfig.getServerURL();
+        } catch (JDOMException e) {
+            log.error("Eror getting product server URL");
         }
-        String serverURL = "http://"+name+ports+contextPath;
+
         return serverURL;
     }
 }
