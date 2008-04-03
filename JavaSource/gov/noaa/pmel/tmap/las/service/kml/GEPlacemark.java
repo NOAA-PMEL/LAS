@@ -137,7 +137,7 @@ public class GEPlacemark{
         setIconStyle();
         setDescription();
 
-        kmlString = "<Placemark>";
+        kmlString = "<Placemark><visibility>0</visibility>";
 
         if(description != ""){
             kmlString = kmlString + description;
