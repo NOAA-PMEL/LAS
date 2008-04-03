@@ -2,6 +2,7 @@
 <kml xmlns="http://earth.google.com/kml/2.1">
   <Folder>
     <name>$las_request.getDatasetName(): $las_request.getVarName()</name>
+    <open>1</open>
 #if( $las_request.getProperty("ferret", "ge_overlay_style")=="dynamic" )
     <description>dynamic overlay</description>
     <NetworkLink>
@@ -21,6 +22,7 @@
 #else
     <description>static overlay</description>
     <NetworkLink>
+      <open>1</open>
       <Link>
         <href>$server_base_url/GEServer.do?xml=$las_request.toEncodedURLString()</href>
         <viewRefreshMode>onRequest</viewRefreshMode>
