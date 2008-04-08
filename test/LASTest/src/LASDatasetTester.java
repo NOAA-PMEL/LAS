@@ -147,8 +147,10 @@ public class LASDatasetTester{
 
                 //test FTDS URLs
                 String ftdsURL= las_config.getDataAccessURL(varpath, true);
-                //System.out.println("F-TDS URL: "+ftdsURL);
-                getDDS(ftdsURL);
+                
+                if(ftdsURL != null && ! ftdsURL.equals("") && ftdsURL.contains("http")){ 
+                    getDDS(ftdsURL);
+                }
             }
         } catch (Exception e){
             e.printStackTrace();
