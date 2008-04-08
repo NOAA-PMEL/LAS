@@ -129,10 +129,18 @@ IF `($nt) eq 1` THEN
         DEFINE SYMBOL lmin `MAX(L0-hafmax,1)`
         DEFINE SYMBOL lmax `MIN(L0+hafmax,maxL)`
      ENDIF
-     !SET REGION/T="`($data_var)[L=($lmin)],return=TSTART`":"`($data_var)[L=($lmax)],return=TEND`"
-     DEFINE SYMBOL region_t = T="`($data_var)[L=($lmin)],return=TSTART`":"`($data_var)[L=($lmax)],return=TEND`"
-     DEFINE SYMBOL region_xyzt = ($region_xyz),($region_t)
-     DEFINE SYMBOL region_full = ($region_xyzt)
+
+     IF ($region_t"0|*>1") THEN
+        !SET REGION/T="`($data_var)[L=($lmin)],return=TSTART`":"`($data_var)[L=($lmax)],return=TEND`"
+        DEFINE SYMBOL region_t = T="`($data_var)[L=($lmin)],return=TSTART`":"`($data_var)[L=($lmax)],return=TEND`"
+        DEFINE SYMBOL region_xyzt = ($region_xyz),($region_t)
+        DEFINE SYMBOL region_full = ($region_xyzt)
+     ELSE
+        MESSAGE/ERROR **ERROR  Cannot animate this variable. It has no time variation.
+        EXIT/PROGRAM
+     ENDIF
+
+     ENDIF
      IF ($native_curvilinear_xy"0") THEN 
         DEFINE SYMBOL ferret_plot_var = ($data_var)[d=($data_num),($region_full)], xcoord, ycoord
      ELSE
