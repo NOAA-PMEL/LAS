@@ -191,29 +191,33 @@ public class LASDatasetTester{
 
         }catch (MalformedURLException e){
             //java.net.MalformedURLException - if the URL given to the constructor has an error
-            System.out.println("the URL given to the constructor has an error");
+            System.out.println("The URL given to the constructor has an error.");
             //e.printStackTrace();
             System.out.println(e.getMessage());
 
         }catch (IOException e){
             //java.io.IOException - if an error connecting to the remote server
-            System.out.println("an error occurs when connecting to the remote server");
+            System.out.println("An error occurs when connecting to the remote server.");
             System.out.println(e.getMessage());
 
         }catch (ParseException e){
             //dods.dap.parser.ParseException - if the DDS parser returned an error
-            System.out.println("the DDS parser returned an error");
+            System.out.println("The DDS parser returned an error.");
             System.out.println(e.getMessage());
 
         }catch (DDSException e){
             //dods.dap.DDSException - on an error constructing the DDS
-            System.out.println("an error occurs when constructing the DDS");
+            System.out.println("An error occurs when constructing the DDS.");
             System.out.println(e.getErrorMessage());
 
         }catch (DODSException e){
             //dods.dap.DODSException - if an error returned by the remote server
-            System.out.println("an error returned by the remote server");
+            System.out.println("An error was returned by the remote server.");
             System.out.println(e.getErrorMessage());
+        }catch (Exception e){
+            System.out.println("An error occurs when connecting to the data server.");
+            e.printStackTrace();
         }
+
     }
 }
