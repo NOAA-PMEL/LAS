@@ -60,27 +60,28 @@ ENDIF
 ! So, find the m,n corresponding to the output grid location of the corners of our region
 ! and get the map indices 
 
-sh sym cf_map*
 
 ! Check to see if curvi_coord_map file is defined. If more than one is defined,
 ! use the one with the finest grid size.
 
-IF ($ferret_curvi_coord_mapfile"0|*>1") THEN   DEFINE SYMBOL cf_map_url \"($ferret_curvi_coord_mapfile)\"
+IF ($ferret_curvi_coord_mapfile"0|*>1") THEN   DEFINE SYMBOL box_cf_map_url \"($ferret_curvi_coord_mapfile)\"
 
 REPEAT/RANGE=10:1:-1/name=nmap (DEFINE SYMBOL mapfile ferret_curvi_coord_map`nmap`file ;\
-   IF ($($mapfile)"0|*>1") THEN DEFINE SYMBOL cf_map_url "($mapfile)" )
+   IF ($($mapfile)"0|*>1") THEN DEFINE SYMBOL box_cf_map_url "($($mapfile))" )
 
-IF `($ferret_curvi_coord_lat"0|*>1") AND (($xstride"0|*>1") OR ($xstride"0|*>1"))` THEN \
-  CANCEL SYMBOL cf_map_url
+!IF `($ferret_curvi_coord_lat"0|*>1") AND (($xstride"0|*>1") OR ($ystride"0|*>1"))` THEN \
+   CANCEL SYMBOL box_cf_map_url
+IF `($ferret_curvi_coord_lat"0|*>1") AND (($xstride"0|*>1") OR ($ystride"0|*>1"))` THEN \
+   CANCEL SYMBOL box_cf_map_url
 
-IF ($cf_map_url"0|*>1") THEN  ! If we have a map file, use it.
 
-   DEFINE SYMBOL cf_map_url "($ferret_curvi_coord_map2file)"
-   IF ($ferret_curvi_coord_mapfile"0|*>1") THEN   DEFINE SYMBOL cf_map_url ($ferret_curvi_coord_mapfile)
+show symbol box_cf_map_url
+
+IF ($box_cf_map_url"0|*>1") THEN  ! If we have a map file, use it.
 
    DEFINE SYMBOL cf_map_var = ($ferret_curvi_coord_mapvar)
    SET DATA/SAVE
-   SET DATA "($cf_map_url)"
+   SET DATA "($box_cf_map_url)"
    SET AXIS/MODULO/UNITS=degrees `($cf_map_var),RETURN=xaxis`
    SET AXIS/UNITS=degrees `($cf_map_var),RETURN=yaxis`
    DEFINE SYMBOL mapfile_num = `($cf_map_var),RETURN=dsetnum`
@@ -147,7 +148,7 @@ IF ($cf_map_url"0|*>1") THEN  ! If we have a map file, use it.
 
    CAN DATA ($mapfile_num)
    SET DATA/RESTORE
-
+   
    EXIT/SCRIPT
 ENDIF  ! if we have a map 
 LET kludge = 1

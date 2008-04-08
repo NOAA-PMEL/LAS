@@ -168,6 +168,8 @@ IF `($data_count"0") EQ 1` THEN
          IF ($axlab_command"0|*>1") THEN PPL ($axlab_command)
          IF ($axtic_command"0|*>1") THEN PPL ($axtic_command)
          IF ($axlen_command"0|*>1") THEN PPL ($axlen_command)
+         if `($unlab_t"0|*>1") AND ($labnum_t "0|*>1")` THEN go unlabel ($labnum_t)
+         if `($unlab_t"0|*>1") AND ($labnum_t "0|*>1")` THEN go unlabel ($labnum_t)
          if ($labnum_dset"0|*>1") THEN go unlabel ($labnum_dset)
          if ($labnum_datitl"0|*>1") THEN go unlabel ($labnum_datitl)
          if ($labnum_dods"0|*>1") THEN go unlabel ($labnum_dods)
@@ -181,13 +183,15 @@ IF `($data_count"0") EQ 1` THEN
          IF ($axlab_command"0|*>1") THEN PPL ($axlab_command)
          IF ($axtic_command"0|*>1") THEN PPL ($axtic_command)
          IF ($axlen_command"0|*>1") THEN PPL ($axlen_command)
+         if `($unlab_t"0|*>1") AND ($labnum_t "0|*>1")` THEN go unlabel ($labnum_t)
+         if `($unlab_t"0|*>1") AND ($labnum_t "0|*>1")` THEN go unlabel ($labnum_t)
          if ($labnum_dset"0|*>1") THEN go unlabel ($labnum_dset)
          if ($labnum_datitl"0|*>1") THEN go unlabel ($labnum_datitl)
          if ($labnum_dods"0|*>1") THEN go unlabel ($labnum_dods)
          ppl list labels
       PPL ($plot_type)
    ENDIF
-   
+pause 
 ! One of the results is the data min and max. Save those here.
    DEFINE SYMBOL data_plotted_min = ($ppl$zmin)
    DEFINE SYMBOL data_plotted_max = ($ppl$zmax)
@@ -219,8 +223,9 @@ ELIF  `($data_count"0") EQ 2` THEN
       IF ($xform_dms"0|*>1") THEN PPL XFOR (($xform_dms))
       IF ($yform_dms"0|*>1") THEN PPL YFOR (($yform_dms))
       IF `($labnum_z%0|*>1%)` THEN GO unlabel ($labnum_z)
-      IF `($labnum_t%0|*>1%)` THEN GO unlabel ($labnum_t)
-      IF `($labnum_dset%0|*>1%)` THEN GO unlabel ($labnum_dset)
+      if `($unlab_t"0|*>1") AND ($labnum_t "0|*>1")` THEN go unlabel ($labnum_t)
+      if `($unlab_t"0|*>1") AND ($labnum_t "0|*>1")` THEN go unlabel ($labnum_t)
+      if ($labnum_dset"0|*>1") THEN go unlabel ($labnum_dset)
       IF `($labnum_datitl%0|*>1%)` THEN GO unlabel ($labnum_datitl)
       IF `($labnum_dods%0|*>1%)` THEN GO unlabel ($labnum_dods)
       IF `($title_size%0|*>1%)` THEN PPL LABSET ($title_size)
