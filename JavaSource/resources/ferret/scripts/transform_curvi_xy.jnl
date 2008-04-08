@@ -77,10 +77,11 @@ ELSE
 
 
 ! If this is a vector plot, do this only once, on the first vector component
-IF ` ($operation_ID"0|Plot_vector>1|*>0") AND ($num) GT 0` THEN EXIT/SCRIPT
 
-IF `($ferret_linear_coords_file"0|*>1")` THEN
+DEFINE SYMBOL check_linear = 1
+IF ` ($operation_ID"0|Plot_vector>1|*>0") AND ($num) GT 0` THEN DEFINE SYMBOL check_linear = 0
 
+IF `($ferret_linear_coords_file"0|*>1") AND ($check_linear)` THEN
 
    IF `($ferret_linear_lat_max"0|*>1") AND (($region_y_hi"0")  LT ($ferret_linear_lat_max))` THEN 
    
@@ -207,4 +208,3 @@ IF `($ferret_curvi_coord_lon"0|*>1") EQ 0` THEN EXIT/SCRIPT
 ENDIF  ! native curvilinear plots or slices.
 
 ! End of $RCSfile ------------transform_curvi_xy.jnl-------------------------------
-
