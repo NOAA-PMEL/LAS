@@ -40,25 +40,25 @@ IF `STRINDEX("($op)", "ANIMATION") GT 0`  THEN EXIT/SCRIPT
 ! If its a compare plot, and if the ($ferret_diff_var) is not yet defined, 
 ! just return.
 
-IF `($ferret_diff_var"1|*>0") AND STRINDEX("($op)", "COMPARE_PLOT") NE 0` THEN ! 1
+IF `($ferret_diff_var"1|*>0") AND STRINDEX("($op)", "COMPARE_PLOT") NE 0` THEN
    EXIT/SCRIPT
-ENDIF !1 
+ENDIF 
 
 DEFINE SYMBOL ferret_center_levels ($ferret_center_levels"0|1|TRUE>1|*>0")
 
 ! If levels were requested but not centered ones, just return.
 
 LET nc = 0
-IF ($input_fill_levels"0") THEN ! 2
+IF ($input_fill_levels"0") THEN
    DEFINE SYMBOL up_fill_levels = `UPCASE("($ferret_fill_levels)")`
    LET nc = `STRINDEX("($up_fill_levels)", "C")`
    DEFINE SYMBOL ferret_center_levels = `nc GT 0`
-   IF `nc EQ 0` THEN ! 3
+   IF `nc EQ 0` THEN
       IF `($ferret_contour_levels"0|*>1") EQ 0` THEN \
         DEFINE SYMBOL ferret_contour_levels ($ferret_fill_levels)
       EXIT/SCRIPT
-   ENDIF ! 3
- ENDIF ! 2
+   ENDIF
+ ENDIF
 
 ! See if centered levels were requested, either by setting the symbol ferret_center_levels
 ! or with a contour_levels or fill_levels that is centered.
@@ -66,31 +66,30 @@ IF ($input_fill_levels"0") THEN ! 2
 ! If contour levels requested with levels of nC, e.g. 20C, then get the value to
 ! set num_fine_levels in the %RANGE command below
 
-IF ($ferret_contour_levels"0|*>1") THEN ! 4
+IF ($ferret_contour_levels"0|*>1") THEN
    DEFINE SYMBOL up_contour_levels = `UPCASE("($ferret_contour_levels)")`
    LET nc = `STRINDEX("($up_contour_levels)", "C")`
    DEFINE SYMBOL ferret_center_levels = `nc GT 0`
-   IF `nc GT 0` THEN ! 5
+   IF `nc GT 0` THEN
       LET slen = STRLEN ("($up_fill_levels)") 
       IF `slen GT 1` THEN DEFINE SYMBOL num_fine_levels = `SUBSTRING ("($up_fill_levels)", 1, slen-1)`
-   ENDIF ! 5
-ENDIF ! 4
+   ENDIF
+ENDIF
 
-IF ($ferret_fill_levels"0|*>1") THEN ! 6
+IF ($ferret_fill_levels"0|*>1") THEN
    DEFINE SYMBOL up_fill_levels = `UPCASE("($ferret_fill_levels)")`
    LET nc = `STRINDEX("($up_fill_levels)", "C")`
    DEFINE SYMBOL ferret_center_levels = `nc GT 0`
-   IF `nc GT 0` THEN  ! 7
+   IF `nc GT 0` THEN 
       LET slen = STRLEN ("($up_fill_levels)") 
       IF `slen GT 1` THEN DEFINE SYMBOL num_fine_levels = `SUBSTRING ("($up_fill_levels)", 1, slen-1)`
-   ENDIF ! 7
-ENDIF ! 6
-!! PUNT
+   ENDIF
+ENDIF
 
 ! If levels other than centered were already given, exit
-IF `nc EQ 0` THEN ! 8
+IF `nc EQ 0` THEN
   IF `($ferret_fill_levels"0|*>1") OR ($ferret_contour_levels"0|*>1")` THEN EXIT/SCRIPT
-ENDIF ! 8
+ENDIF
 
 ! Apply to the variable on the requested region
 
@@ -144,28 +143,28 @@ DEFINE SYMBOL have_pvar = 1
 ! just set the number of levels
 
 DEFINE SYMBOL check_for_des =  `($data_var)[d=($data_num)],return=dsetpath`
-IF `STRINDEX("($check_for_des)", ".des") GT 0` THEN ! 9
+IF `STRINDEX("($check_for_des)", ".des") GT 0` THEN
    IF `($input_contour_levels"0|0|1") EQ 0` THEN \
    DEFINE SYMBOL ferret_fill_levels = ($num_fine_levels"30")
    IF `($input_contour_levels"0|0|1") EQ 0` THEN \
    DEFINE SYMBOL ferret_contour_levels = ($num_fine_levels"30")
    EXIT/SCRIPT
-ENDIF ! 9
+ENDIF
 
 ! If the ferret_diff_var has been defined, use it.
 ! When no levels are defined, use centered ones.
-IF ($ferret_diff_var"0|*>1") THEN  ! 10
-   IF `($input_contour_levels"0|0|1") EQ 0` THEN  ! 11
+IF ($ferret_diff_var"0|*>1") THEN 
+   IF `($input_contour_levels"0|0|1") EQ 0` THEN 
       CANCEL SYMBOL ferret_contour_levels
       DEFINE SYMBOL ferret_contour_levels = 20c
       DEFINE SYMBOL ferret_center_levels = 1
-   ENDIF ! 11
+   ENDIF
 
-   IF `($input_fill_levels"0|0|1") EQ 0` THEN ! 12
+   IF `($input_fill_levels"0|0|1") EQ 0` THEN
       CANCEL SYMBOL ferret_fill_levels
       DEFINE SYMBOL ferret_fill_levels = 20c
       DEFINE SYMBOL ferret_center_levels = 1
-   ENDIF ! 12
+   ENDIF
    
    IF ($native_curvilinear_xy"0|*>1") THEN 
       LET pvar = ( ($ferret_plot_base_var_0)  - ($FERRET_PLOT_BASE_VAR_1))
@@ -173,7 +172,7 @@ IF ($ferret_diff_var"0|*>1") THEN  ! 10
       LET pvar = ($ferret_diff_var)
    ENDIF
 
-ENDIF ! 10
+ENDIF
 
 !IF ($do_trans_1_seas_per_year"0") THEN LET pvar = ($FERRET_PLOT_BASE_VAR)
 
@@ -193,93 +192,103 @@ LET stride_for_speed = `INT( 1+ ((var_size/memsize))/ndims )`
 ! If axes are not already strided, apply simple striding which
 ! we will undo later.
 
-IF `stride_for_speed GT 1` THEN ! 13
+LET sampled_in_x = 0
+LET sampled_in_y = 0
 
+IF `stride_for_speed GT 1` THEN
    LET sampled_in_x = STRCMP("`pvar,RETURN=xaxis`", "SAMPLE_XLON") EQ 0 OR\
                      STRCMP("`pvar,RETURN=xaxis`", "SAMPLE_X") EQ 0
    LET sampled_in_y = STRCMP("`pvar,RETURN=yaxis`", "SAMPLE_YLAT") EQ 0 OR\
-                      STRCMP("`pvar,RETURN=yaxis`", "SAMPLE_Y") EQ 0
+                     STRCMP("`pvar,RETURN=yaxis`", "SAMPLE_Y") EQ 0
+ENDIF
 
-   IF `($xstride"0|*>1") EQ 0 AND sampled_in_x EQ 0 AND ($no_native_strides_xy"0|*>1") NE 1` THEN ! 14
-     SET AXIS/STRIDE=`stride_for_speed` `pvar,RETURN=xaxis`
-     DEFINE SYMBOL undo_x = 1
-   ENDIF ! 14
+IF `($xstride"0|*>1") EQ 0 AND sampled_in_x EQ 0 AND \
+      ($no_native_strides_xy"0|*>1") NE 1 AND \
+      ($region_x"0|*>1") AND stride_for_speed GT 1` THEN
+   SET AXIS/STRIDE=`stride_for_speed` `pvar,RETURN=xaxis`
+   DEFINE SYMBOL undo_x = 1
+ENDIF
 
-   IF `($ystride"0|*>1") EQ 0 AND sampled_in_y EQ 0 AND ($no_native_strides_xy"0|*>1") NE 1` THEN  ! 15
-     SET AXIS/STRIDE=`stride_for_speed` `pvar,RETURN=yaxis`
-     DEFINE SYMBOL undo_y = 1
-   ENDIF ! 15
+IF `($ystride"0|*>1") EQ 0 AND sampled_in_y EQ 0 AND \
+      ($no_native_strides_xy"0|*>1") NE 1 AND \
+      ($region_y"0|*>1") AND stride_for_speed GT 1` THEN
+   SET AXIS/STRIDE=`stride_for_speed` `pvar,RETURN=yaxis`
+   DEFINE SYMBOL undo_y = 1
+ENDIF
 
-   IF `($tstride"0|*>1") EQ 0` THEN  ! 16
-     SET AXIS/STRIDE=`stride_for_speed` `pvar,RETURN=taxis`
-     DEFINE SYMBOL undo_t = 1
-   ENDIF ! 16
-
-ENDIF ! 13
+IF `($tstride"0|*>1") EQ 0 AND ($region_t"0|*>1") AND \
+      stride_for_speed GT 1` THEN
+   SET AXIS/STRIDE=`stride_for_speed` `pvar,RETURN=taxis`
+   DEFINE SYMBOL undo_t = 1
+ENDIF
 
 ! If already strided, do index strides.
 IF `($native_curvilinear_xy"0") EQ 0` THEN  ! region syms dont apply to native curv grid directly
 
-IF ($xstride"0|1>0|*>1") THEN  ! 17
+IF ($xstride"0|1>0|*>1") THEN
    LET xsize  `pvar,RETURN=isize`
-   IF `xsize GT 50` THEN ! 18
+   IF `xsize GT 50` THEN
      LET strd_lo = `i[gx=pvar,x=($region_x_lo)]`
      LET strd_hi = `i[gx=pvar,x=($region_x_hi)]`
      DEFINE SYMBOL index_strides = i=`strd_lo`:`strd_hi`:`INT(xsize/10)`
-   ENDIF ! 18
-ENDIF ! 17
+   ENDIF
+ENDIF
 
-IF ($ystride"0|1>0|*>1") THEN  ! 19
+IF ($ystride"0|1>0|*>1") THEN
    LET ysize  `pvar,RETURN=jsize`
-   IF `ysize GT 50` THEN  ! 20
+   IF `ysize GT 50` THEN
      LET strd_lo = `j[gy=pvar,y=($region_y_lo)]`
      LET strd_hi = `j[gy=pvar,y=($region_y_hi)]`
-     IF ($index_strides"0|*>1") THEN  ! 21
+     IF ($index_strides"0|*>1") THEN
         DEFINE SYMBOL index_strides = ($index_strides),j=`strd_lo`:`strd_hi`:`INT(ysize/10)`
      ELSE
         DEFINE SYMBOL index_strides = j=`strd_lo`:`strd_hi`:`INT(ysize/10)`
-     ENDIF ! 21
-   ENDIF ! 20
-ENDIF ! 19
+     ENDIF
+   ENDIF
+ENDIF
 
-IF ($zstride"0|1>0|*>1") THEN  ! 23
+IF ($zstride"0|1>0|*>1") THEN
    LET zsize  `pvar,RETURN=ksize`
-   IF `zsize GT 50` THEN  ! 24
+   IF `zsize GT 50` THEN 
      LET strd_lo = `k[gz=pvar,z=($region_z_lo)]`
      LET strd_hi = `k[gz=pvar,z=($region_z_hi)]`
-     IF ($index_strides"0|*>1") THEN  ! 25
+     IF ($index_strides"0|*>1") THEN
         DEFINE SYMBOL index_strides = ($index_strides),k=`strd_lo`:`strd_hi`:`INT(zsize/10)`
      ELSE
         DEFINE SYMBOL index_strides = k=`strd_lo`:`strd_hi`:`INT(zsize/10)`
-     ENDIF ! 25
-   ENDIF ! 24
-ENDIF ! 23
+     ENDIF
+   ENDIF
+ENDIF
 
-IF ($tstride"0|1>0|*>1") THEN  ! 26
+IF ($tstride"0|1>0|*>1") THEN
    LET tsize  `pvar,RETURN=lsize`
-   IF `tsize GT 50` THEN  ! 27
+   IF `tsize GT 50` THEN
 !   LET strd_lo = `L[gt=pvar,t="($region_t_lo)"]`
 !   LET strd_hi = `L[gt=pvar,t="($region_t_hi)"]`
    LET strd_lo = 1
    LET tt = t[gt=pvar]
    LET strd_hi = `tt,return=lsize`
-     IF ($index_strides"0|*>1") THEN  ! 28
-        DEFINE SYMBOL index_strides = ($index_strides),`strd_lo`:`strd_hi`:`INT(tsize/10)`
+     IF ($index_strides"0|*>1") THEN
+        DEFINE SYMBOL index_strides = ($index_strides),L=`strd_lo`:`strd_hi`:`INT(tsize/10)`
      ELSE
         DEFINE SYMBOL  index_strides = L=`strd_lo`:`strd_hi`:`INT(tsize/10)`
-     ENDIF ! 28
-   ENDIF ! 27
-ENDIF ! 26
+     ENDIF
+   ENDIF
+ENDIF
 
 ENDIF ! region syms dont apply to native curv grid directly
 
-IF ($index_strides"0|*>1") THEN  ! 29
+IF ($index_strides"0|*>1") THEN
    DEFINE SYMBOL ppvar = pvar[($index_strides)]
 ELSE
    DEFINE SYMBOL ppvar = pvar
-ENDIF ! 29
+ENDIF
 
 IF ($native_curvilinear_xy"0") THEN DEFINE SYMBOL ppvar = pvar
+
+! IF ($ferret_var_autolevels_0"0|*>1") THEN DEFINE SYMBOL ppvar = ($ferret_var_autolevels_0)
+! IF `($data_count"0") GT 1` THEN DEFINE SYMBOL ppvar = \
+!    ($ferret_var_autolevels_0) - ($ferret_var_autolevels_1)
 
 ! Execute the stat command to load symbols with the variables
 ! mean, max, min, std.
@@ -288,14 +297,38 @@ DEFINE SYMBOL stat_ngood= 0
 STAT ($ppvar)
 IF `($stat_ngood"0") EQ 0` THEN EXIT/SCRIPT
 
+! If the data values are so big we cant compute stats correctly, just
+! set nominal levels and exit
+
+IF `STRINDEX("($stat_std)", "too big") GT 0 OR \
+  STRINDEX("($stat_mean)", "too big") GT 0 OR \
+  STRINDEX("($stat_min)", "too big") GT 0 OR \
+  STRINDEX("($stat_max)", "too big") GT 0 OR \
+  STRINDEX("($stat_std)", "Inf") GT 0 OR \
+  STRINDEX("($stat_mean)", "Inf") GT 0 OR \
+  STRINDEX("($stat_min)", "Inf") GT 0 OR \
+  STRINDEX("($stat_max)", "Inf") GT 0` THEN 
+
+   IF `($input_contour_levels"0|0|1") EQ 0` THEN 
+      DEFINE SYMBOL ferret_fill_levels = 40
+      IF ($ferret_center_levels) THEN DEFINE SYMBOL ferret_fill_levels = 40c
+   ENDIF
+      IF `($input_contour_levels"0|0|1") EQ 0` THEN 
+      DEFINE SYMBOL ferret_contour_levels = 40
+      IF ($ferret_center_levels) THEN DEFINE SYMBOL ferret_contour_levels = 40c
+   ENDIF
+
+   EXIT/SCRIPT
+ENDIF
+
 ! Undo the striding. Other striding may be set elsewhere
 
-IF `stride_for_speed GT 1` THEN  ! 30
+IF `stride_for_speed GT 1` THEN
    IF `($undo_x"0") GT 0` THEN CANCEL AXIS/STRIDE `pvar,RETURN=xaxis`
    IF `($undo_y"0") GT 0` THEN CANCEL AXIS/STRIDE `pvar,RETURN=yaxis`
    IF `($undo_z"0") GT 0` THEN CANCEL AXIS/STRIDE `pvar,RETURN=zaxis`
    IF `($undo_t"0") GT 0` THEN CANCEL AXIS/STRIDE `pvar,RETURN=taxis`
-ENDIF ! 30
+ENDIF
 
 ! Compute rounded-off levels with the PPL %RANGE command.
 
@@ -319,19 +352,19 @@ DEFINE SYMBOL half_num_coarse_levels = `($num_coarse_levels)/2`
 LET nstd = 2*($stat_std)
 LET nstd = 1*($stat_std)
 
-IF ($stat_mean"bad>1|bad>1|*>0") THEN  ! 31
+IF ($stat_mean"bad>1|bad>1|*>0") THEN
   DEFINE SYMBOL error_string "The ($data_var)[d=($data_num)] variable has no valid data"
   MESSAGE/ERROR **ERROR ($error_string)
   EXIT/PROGRAM
-ENDIF ! 31
+ENDIF
 
 ! Use the statistics above to actually compute the levels
 
-IF ($ferret_center_levels) THEN ! 32
+IF ($ferret_center_levels) THEN
    GO LAS_centered_levels
 ELSE
    GO LAS_non_centered_levels
-ENDIF ! 32
+ENDIF
 
 ! Use these levels to reset ferret_contour_levels and ferret_fill_levels 
 
@@ -341,4 +374,3 @@ IF `($input_contour_levels"0|0|1") EQ 0` THEN \
    DEFINE SYMBOL ferret_contour_levels = ($ferret_auto_lines)
 
 ! End of file ------------LAS_auto_levels.jnl--------------------------
-

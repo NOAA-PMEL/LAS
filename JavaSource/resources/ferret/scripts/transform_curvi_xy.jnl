@@ -79,6 +79,8 @@ ELSE
 ! If this is a vector plot, do this only once, on the first vector component
 IF ` ($operation_ID"0|Plot_vector>1|*>0") AND ($num) GT 0` THEN EXIT/SCRIPT
 
+show symbol FERRET_LINEAR_COORDS_FILE
+pause
 IF `($ferret_linear_coords_file"0|*>1")` THEN
 
 
@@ -112,7 +114,7 @@ ELSE
    GO LAS_set_strides_curvilinear.jnl
 
 ENDIF
-
+pause
 !!!!!!!!!!!
 
 IF `($ferret_curvi_coord_lon"0|*>1") EQ 0` THEN EXIT/SCRIPT

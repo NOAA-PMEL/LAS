@@ -20,13 +20,15 @@
 ! ACM NOTE: The slashes mess up parsing in the DEFINE SYMBOL if we do them all at once.
 ! ferret_format may be asc, txt, or cdf
 
+show symbol frmt
+show symbol ferret_format
 CANCEL SYMBOL frmt 
 DEFINE SYMBOL frmt ($frmt)/($ferret_format%format=cdf|txt>heading|cdf>format=cdf|asc>width=1024|%)
 
 IF ($ferret_format%0|asc>1|*>0) THEN
   DEFINE SYMBOL frmt ($frmt)/format=(5G12.5)
   
-  IF ($ferret_data_format"0|tsv>1|csv>1|asc>1|*>0") THEN DEFINE SYMBOL frmt ($frmt) = ($frmt)/($ferret_data_format"|tsv>format=tab|csv>format=comma|asc>heading=enhanced")
+  IF ($ferret_data_format"0|tsv>1|csv>1|asc>1|*>0") THEN DEFINE SYMBOL frmt ($frmt) = ($frmt)/($ferret_data_format"0|tsv>format=tab|csv>format=comma|asc>heading=enhanced")
 
 ENDIF
 

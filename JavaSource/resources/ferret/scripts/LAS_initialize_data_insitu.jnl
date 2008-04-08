@@ -55,7 +55,6 @@ IF ($data_file_is_empty"0") THEN
    LET/BAD=99 data_y_bad = 99
    DEFINE SYMBOL data_x_var = data_x_bad
    DEFINE SYMBOL data_y_var = data_y_bad
-   pause
    EXIT/SCRIPT
 ENDIF
 
@@ -78,7 +77,6 @@ IF ($data_($num)_var"0|1|*>1) THEN DEFINE SYMBOL data_var ($data_($num)_var)
 !     DEFINE SYMBOL data_units ($data_($num)_units)
 !ENDIF
 
-
 ! Be sure units and title are defined.
 ! If units are not defined, try to get units from the data variable.
 ! If the variable in the file has no units, leave data_units symbol undefined.
@@ -100,7 +98,6 @@ IF ($data_($num)_title"0|1|*>1) THEN
    DEFINE SYMBOL data_title ($data_($num)_title) 
    IF ($data_units"0|*>1") THEN DEFINE SYMBOL data_title ($data_($num)_title) ($data_units)
 ENDIF
-pause
 
 DEFINE SYMBOL ferret_plot_title ($data_title)
 
