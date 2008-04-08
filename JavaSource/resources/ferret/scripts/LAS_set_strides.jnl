@@ -60,25 +60,26 @@ ENDIF
 
 IF `STRINDEX( "($operation_ID)", "Plot" ) EQ 0` THEN
    IF `($stride_for_mem"0") GT 1` THEN
-      IF `($region_x_range"0") GT 0 AND ($no_native_strides_xy"0|*>1") NE 1` THEN 
+      IF `($region_x_range"0|*>1") GT 0 AND ($no_native_strides_xy"0|*>1") NE 1` THEN 
          SET AXIS/STRIDE=($stride_for_mem) `pvar,RETURN=xaxis`
          DEFINE SYMBOL add_to_title = Stride ($stride_for_mem) in X
       ENDIF
-      IF `($region_y_range"0") GT 0 AND ($no_native_strides_xy"0|*>1") NE 1` THEN 
+      IF `($region_y_range"0|*>1") GT 0 AND ($no_native_strides_xy"0|*>1") NE 1` THEN 
          SET AXIS/STRIDE=($stride_for_mem) `pvar,RETURN=yaxis`
          DEFINE SYMBOL add_to_title = ($add_to_title) Stride ($stride_for_mem) in Y
       ENDIF
-      IF `($region_z_range"0") GT 0` THEN 
+      IF `($region_z_range"0|*>1") GT 0` THEN 
          SET AXIS/STRIDE=($stride_for_mem) `pvar,RETURN=zaxis`
          DEFINE SYMBOL add_to_title = ($add_to_title) Stride ($stride_for_mem) in Z
       ENDIF
+      
       IF `STRINDEX( "($operation_ID)", "Animation" ) EQ 0` THEN
-        IF `($region_t"0|*>1") GT 0` THEN
+      IF `($region_t"0|*>1") GT 0` THEN 
          SET AXIS/STRIDE=($stride_for_mem) `pvar,RETURN=taxis`
          DEFINE SYMBOL add_to_title = ($add_to_title) Stride ($stride_for_mem) in T
-        ENDIF
       ENDIF
       SET VAR/TITLE="($ferret_plot_title) ($add_to_title)" ($ferret_plot_var) 
+
    ENDIF
    EXIT/SCRIPT
 ENDIF
