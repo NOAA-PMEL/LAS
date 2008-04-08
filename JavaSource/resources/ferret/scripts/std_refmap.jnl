@@ -61,6 +61,9 @@ DEFINE SYMBOL refmap_type $5%box|xline|yline|box|point|%
 DEFINE SYMBOL refmap_xcompress $7%0%
 DEFINE SYMBOL refmap_ycompress $8%0%
 
+! init the land mask data set
+set data etopo$6"20|0>20|1>20|2>20|3>20|4>20|5>05|*>20"
+
 ! The choice of graticule from the procuct image should not spill over into the ref map.
 CANCEL MODE GRATICULE
 
@@ -88,20 +91,50 @@ ELSE				 ! "point"
 ! original statement: define region/dy=-45:45/dx=-60:60 band
 
 !  Addition for tseries and zprofile (only other case)
-   IF ($pt_orient"0|tseries>1|*>0") THEN    ! ELSE IF "tseries"
+   IF ($ferret_view"0|t>1|*>0") THEN    ! ELSE IF "tseries"
       DEFINE SYMBOL yspan = 20	! plot 20 deg. above/below point
-
       DEFINE SYMBOL xspan = `1.0 * (($PPL$XLEN)/($PPL$YLEN)) * ($yspan)`
-      define region/default/dy=-($yspan):($yspan)/dx=-($xspan):($xspan) band
-   ELSE		! if "zprofile"
-      DEFINE SYMBOL yspan = 60	! plot 60 deg. each side of point
 
+      DEFINE SYMBOL yspan = 40	! plot 40 deg. above/below point
+      DEFINE SYMBOL xspan = `1.5 * (($PPL$XLEN)/($PPL$YLEN)) * ($yspan)`
+
+      define region/default/dy=-($yspan):($yspan)/dx=-($xspan):($xspan) band
+
+   ELSE		! if z profile  (Why was this set to do a larger region than for a time series?
+      DEFINE SYMBOL yspan = 60	! plot 60 deg. each side of point
       DEFINE SYMBOL xspan = `2 * (($PPL$XLEN)/($PPL$YLEN)) * ($yspan)`
+      
+      DEFINE SYMBOL yspan = 40	! plot 40 deg. above/below point
+      DEFINE SYMBOL xspan = `1.5 * (($PPL$XLEN)/($PPL$YLEN)) * ($yspan)`
       define region/default/dy=-($yspan):($yspan)/dx=-($xspan):($xspan) band
    ENDIF
 ENDIF
-! init the land mask data set
-set data etopo$6"60|0>60|1>40|2>20|3>20|4>20|5>20|*>60" ! => needs to be checked out
+
+!c!! If there is a symbol set to expand the reference map, then check
+!c!! how much land is in the region chosen by the above logic. If its 
+!c!! less than a threshold, then expand the region in steps of 10 deg
+!c!! in x and 5 in y until the percent land is over that threshold
+!c!
+!c! DEFINE SYMBOL ferret_expand_refmap = 1
+!c!
+!c!IF ($ferret_expand_refmap"0|*>1") THEN
+!c!
+!c!   LET threshold = 0.03
+!c!   LET mask = IF rose GT 0 THEN rose
+!c!   SET REGION/@band
+!c!   LET mask = IF rose GT 0 THEN rose
+!c!   LET gooddat = mask[x=@NGD,y=@NGD]
+!c!   LET alldat = rose[x=@NGD,y=@NGD]
+!c!   LET pct = gooddat/alldat
+!c!
+!c!   IF `pct LT threshold` THEN 
+!c!      REPEAT/RANGE=1:5/NAME=m (\
+!c!         DEFINE REGION/DEFAULT/DY=-5:5/DX=-10:10 band; \
+!c!         SET REGION/@band; \
+!c!         IF `pct GT threshold` THEN EXIT/LOOP) )
+!c!   ENDIF
+!c!ENDIF
+
 ! draw gray shaded continents
 ! known potential bug: if X region begins at, say, 0E then magnification 3
 !	or greater results in negative modulo subscripts
@@ -131,7 +164,7 @@ ENDIF
 
 ! some clean up now to assist with repeated testing
 cancel region band
-can data etopo$6"60|0>60|1>40|2>20|3>20|4>20|5>20|*>60" ! => needs to be checked out
+can data etopo$6"20|0>20|1>20|2>20|3>20|4>20|5>05|*>20"
 
 ! draw a thick red region marker on the reference map
 let refmap_xrng = IF i EQ 1 THEN refmap_xmin ELSE refmap_xmax
