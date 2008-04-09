@@ -44,7 +44,7 @@ import org.joda.time.DateTime;
 import org.joda.time.Period;
 
 /**
- * This is the suite for testing LAS installations
+ * This class tests the responses form a LAS product server
  * @author Jing Yang Li
  *
  */
@@ -56,6 +56,9 @@ public class LASResponseTester{
     private LASTestOptions lto;
 
     //public LASResponseTester(LASConfig config, LASDocument operations, LASDocument options, LASTestOptions l){
+    /**
+     * Constructor
+     */
     public LASResponseTester(LASConfig config, LASDocument operations, LASTestOptions l){
         las_config = config;
         las_operationsV7 = operations;
@@ -110,6 +113,11 @@ public class LASResponseTester{
         }
     }
 
+    /**
+     * Test the LAS response for a variable
+     * @param dsE the dataset element
+     * @param theVar the variable to test
+     */
     public void varLASRequest(Element dsE, Variable theVar){
     	String dsID = dsE.getAttributeValue("ID");
         String dsName = dsE.getAttributeValue("name");
@@ -129,89 +137,132 @@ public class LASResponseTester{
                 dsURL = tmp[0];
             }
 
-            boolean isAvailable = true;
+            boolean isAvailable = false;
             //check if a remote dataset is available
-            if(dsURL != null && dsURL.contains("http")){
-                isAvailable = isAvailable(dsURL);
+
+            if(dsURL == null && dsURL == ""){
+                System.out.println("The dataset URL is not valid.");
             }
 
-            if(isAvailable){
-        	if( (userds == null) || ((userds != null)&&(dsURL.contains(userds))) ){ 
-        		System.out.println("---- Dataset Name: "+ dsName);
-        		System.out.println("     -- Dataset  URL: "+ dsURL);           
-        		System.out.println("        Variable: "+ theVar.getName());
+            //check if a dataset is available
+/*
+            if( userds == null || userds==""){
+                if(dsURL.contains("http")){
+                    isAvailable = isAvailable(dsURL); //remote dataset
+                }else{
+                    isAvailable = true; //local dataset
+                }
+            }else{
+                if(dsURL.contains(userds)){
+                    isAvailable = isAvailable(dsURL);
+                }
+            }
+*/
+            //if(isAvailable){
+            if( userds == null || userds=="" || dsURL.contains(userds) ){
+                System.out.println("---- Dataset Name: "+ dsName);
+        	System.out.println("     -- Dataset  URL: "+ dsURL);   
+
+                if(dsURL.contains("http")){
+                    isAvailable = isAvailable(dsURL); //remote dataset
+                }else{
+                    isAvailable = true; //local dataset
+                }
+
+                if(isAvailable){        
+        	    System.out.println("        Variable: "+ theVar.getName());
    
             
-        		boolean hasZ = las_config.hasZ(varpath);            
-        		boolean hasT = las_config.hasT(dsID, varID);
+        	    boolean hasZ = las_config.hasZ(varpath);            
+        	    boolean hasT = las_config.hasT(dsID, varID);
             
-        		String v = lto.getView();
+        	String v = lto.getView();
                    
-        		//by default, test each view           
-        		if(v == null || v.equals("")){                
-        			//1D plots                
-        			System.out.print("         -- test x line plot: ");                
-        			makeLASRequest("x", dsID, varID);                    
-        			System.out.print("         -- test y line plot: ");
-        			makeLASRequest("y", dsID, varID);                
-        			if(hasZ){                    
-        				System.out.print("         -- test z line plot: ");                    
-        				makeLASRequest("z", dsID, varID);                
-        			}
+        	//by default, test each view           
+        	if(v == null || v.equals("")){                
+
+        	    //1D plots                
+        	    System.out.print("         -- test x line plot: ");                
+        	    makeLASRequest("x", dsID, varID);                    
+        	    System.out.print("         -- test y line plot: ");
+        	    makeLASRequest("y", dsID, varID);                
+        	    if(hasZ){                    
+        		System.out.print("         -- test z line plot: ");                    
+        		makeLASRequest("z", dsID, varID);                
+        	    }
+              
+        	    if(hasT){                
+        		System.out.print("         -- test time series: ");
+        		makeLASRequest("t", dsID, varID);
+        	    }
                 
-        			if(hasT){                
-        				System.out.print("         -- test time series: ");
-        				makeLASRequest("t", dsID, varID);
-        			}
+        	    //2D plots                
+        	    System.out.print("         -- test XY 2D  plot: ");
+        	    makeLASRequest("xy", dsID, varID);                
+        	    if(hasZ){                
+        	        System.out.print("         -- test XZ 2D  plot: ");
+        		makeLASRequest("xz", dsID, varID);      
+        				
+        		System.out.print("         -- test YZ 2D  plot: ");
+        		makeLASRequest("yz", dsID, varID);
+        				
+        		if(hasT){
+        		    System.out.print("         -- test ZT 2D  plot: ");
+        		    makeLASRequest("zt", dsID, varID);
+        		}
+        	    }
                 
-        			//2D plots                
-        			System.out.print("         -- test XY 2D  plot: ");
-        			makeLASRequest("xy", dsID, varID);                
-        			if(hasZ){                
-        				System.out.print("         -- test XZ 2D  plot: ");
-        				makeLASRequest("xz", dsID, varID);      
-        				
-        				System.out.print("         -- test YZ 2D  plot: ");
-        				makeLASRequest("yz", dsID, varID);
-        				
-        				if(hasT){
-        				    System.out.print("         -- test ZT 2D  plot: ");
-        				    makeLASRequest("zt", dsID, varID);
-        				}
-        			}
-                
-        			if(hasT){                
-        				System.out.print("         -- test XT 2D  plot: ");
-        				makeLASRequest("xt", dsID, varID);
-        				
-        				System.out.print("         -- test YT 2D  plot: ");
-        				makeLASRequest("yt", dsID, varID);       				
-        			}            
-        		}else{
-        	
-        			//only make request for the plot defined by command-line parameter
-    	        
-        			if( v.contains("z") && (!hasZ) ){
-        				System.out.println("       -- No Z axis!");
-        			}else if( v.contains("t") && (!hasT) ){    	    	
-        				System.out.println("       -- No T axis!");
-        			}else{               	            	    
-        				System.out.print("        -- test "+v+" plot: ");
-        				makeLASRequest(v, dsID, varID);                
-        			}            
-        		}        	
-        	}        
+                    if(hasT){                
+        		System.out.print("         -- test XT 2D  plot: ");
+        		makeLASRequest("xt", dsID, varID);
+        		System.out.print("         -- test YT 2D  plot: ");
+        		makeLASRequest("yt", dsID, varID);       				
+        	    }
+            
+        	    }else{ 
+                	
+        	    //only make request for the plot defined by command-line parameter
+        	    if( v.contains("z") && (!hasZ) ){
+        		System.out.println("       -- No Z axis!");
+        	    }else if( v.contains("t") && (!hasT) ){    	    	
+        		System.out.println("       -- No T axis!");
+        	    }else{               	            	    
+        		System.out.print("        -- test "+v+" plot: ");
+        		makeLASRequest(v, dsID, varID);                
+        	    }            
+        	    }
+                }else{
+                    System.out.println("        ******** WARNING ******** The dataset is not available");
+                }
+                System.out.println("");
+            }	    
+          /*    
             }else{
-                System.out.println("remote dataset: "+dsURL+" is not available");
+                if( userds == null || userds==""){
+                    System.out.println("---- Dataset Name: "+ dsName);
+                    System.out.println("     -- Dataset  URL: "+ dsURL);
+                    System.out.println("        ******** WARNING ******** The dataset is not available");
+                }else{
+                    if(dsURL.contains(userds)){
+                        System.out.println("---- Dataset Name: "+ dsName);
+                        System.out.println("     -- Dataset  URL: "+ dsURL);
+                        System.out.println("     ******** WARNING ******** The dataset is not available");
+                    }
+                }
             }
+           */
         } catch (Exception e){
             e.printStackTrace();
         }
     }
     
+    /**
+     * Check if a dataset with the given URL is available
+     * @param url the URL of the dataset
+     * @return isAvailable
+     */
     public boolean isAvailable(String url) throws Exception{
-        boolean isAvailable = true;
-
+        boolean isAvailable = false;
         try{
             DConnect dc = new DConnect(url);
             DDS mydds = dc.getDDS();
@@ -221,28 +272,26 @@ public class LASResponseTester{
             }else{
                 isAvailable = false;
             }
-
         }catch (MalformedURLException e){
             //java.net.MalformedURLException - if the URL given to the constructor has an error
-            //System.out.println("the URL given to the constructor has an error");
             isAvailable = false;
         }catch (IOException e){
             //java.io.IOException - if an error connecting to the remote server
-            //System.out.println("an error occurs when connecting to the remote server");
             isAvailable = false;
         }catch (ParseException e){
             //dods.dap.parser.ParseException - if the DDS parser returned an error
-            //System.out.println("the DDS parser returned an error");
             isAvailable = false;
         }catch (DDSException e){
             //dods.dap.DDSException - on an error constructing the DDS
-            //System.out.println("an error occurs when constructing the DDS");
             isAvailable = false;
         }catch (DODSException e){
             //dods.dap.DODSException - if an error returned by the remote server
-            //System.out.println("an error returned by the remote server");
+            isAvailable = false;
+        }catch (Exception e){
+            //e.printStackTrace(); 
             isAvailable = false;
         }
+
         return isAvailable;
     }    
     /**
@@ -287,13 +336,15 @@ public class LASResponseTester{
                 int size = sbuf.length();
             
                 if(sbuf.toString().contains("error")){
-                    System.out.println("              ---------- An ERROR occurred");
-                    //print part of the error message
-                    if(size <= 3000 || lto.isVerbose()){
+                    String debugFile = extractDebugFile(sbuf.toString());
+                    System.out.println("              ---------- ERROR !!!");
+                    if(debugFile !=null && debugFile !=""){
+                        System.out.println("        The debug file is "+ debugFile);
+                    }
+                    //print the whole error message
+                    if(lto.isVerbose() || debugFile == null || debugFile == ""){
                  	System.out.println(sbuf.toString());
-                    } else{
-                	System.out.println(sbuf.substring(0,3000));
-                    }                
+                    } 
                     inProgress = false;
                     if(lto.exitFirst()){System.exit(0);}
                 }else if(sbuf.toString().contains("Progress") || sbuf.toString().contains("progress")){
@@ -303,10 +354,12 @@ public class LASResponseTester{
                     System.out.println(sbuf.toString());
                 }else{//correct response (hope so!)
                     inProgress = false;
-                    System.out.println("              ---------- WELL DONE!");
+                    System.out.println("              ---------- PASS!");
                 }
-            }catch (IOException e){
+            }catch (Exception e){
                 System.out.println("error in making request to product server");
+                e.printStackTrace();
+                break;
             }
         }
         //if the request was sent more than 3 times; kill it
@@ -325,7 +378,23 @@ public class LASResponseTester{
         }
     }
 
-     /**
+    /**
+    * Extract the debug file from the error message
+    * @param errMsg the error message returned from LAS
+    */
+    private String extractDebugFile(String errMsg){
+        //System.out.println(errMsg);
+        String debugFile="";
+        int i1 = errMsg.indexOf("debug.txt");
+        if(i1 > 0){
+            String s1 = errMsg.substring(0,i1+9);
+            int i2 = s1.lastIndexOf("http");
+            if(i2>0){debugFile = s1.substring(i2);}
+        } 
+        return debugFile;
+    }
+
+    /**
      * Build a LASUIRequest for 1D and 2D plots
      * @param viewtype view type of the plot
      * @param dsID dataset ID
@@ -464,7 +533,7 @@ public class LASResponseTester{
                 String tFormat = ldf.getDateFormat();
 
                 DateTimeFormatter fmt = DateTimeFormat.forPattern(tFormat).withZone(DateTimeZone.UTC);
-	            DateTimeFormatter ferretfmt = DateTimeFormat.forPattern("dd-MMM-yyyy HH:mm:ss").withZone(DateTimeZone.UTC);
+	        DateTimeFormatter ferretfmt = DateTimeFormat.forPattern("dd-MMM-yyyy HH:mm:ss").withZone(DateTimeZone.UTC);
 
                 lodt = fmt.parseDateTime(tLo);   
                 tLo = lodt.toString(ferretfmt);
@@ -612,7 +681,7 @@ public class LASResponseTester{
     /**
      * Get URL of product server, which is specfied in las.xml
      * @param las_config JDOM object LASConfig for this installation
-     *
+     * @return productServerURL
      */
     public String getProductServerURL(LASConfig las_config){
         String productServerURL = null;
