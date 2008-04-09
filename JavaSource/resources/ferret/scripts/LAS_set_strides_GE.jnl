@@ -44,11 +44,18 @@ ENDIF
 ! if the nominal number of points looks like it will be large.
 
 IF ($region_x_lo"0|*>1") THEN 
+
+    cancel mode long
+    cancel mode lat
+
+    LET x_range = `($data_var),return=xend` - `($data_var),return=xstart`
+
     LET xx = x[gx=($data_var)[d=($data_num)]]
     LET nx = xx[i=@ngd]
-    LET x_pct = ($region_x_range)/360
+!   LET x_pct = ($region_x_range)/360
+    LET x_pct = ($region_x_range)/x_range
     LET pixsize = `nx*x_pct`
-!         LET pixsize = `MAX(pixsize, nx)`
+    LET pixsize = `MIN(pixsize, nx)`
 
     DEFINE SYMBOL xstride = `INT((pixsize/maxpix)+1)`
 !    IF `pixsize GT maxpix` THEN 
@@ -58,7 +65,8 @@ IF ($region_x_lo"0|*>1") THEN
     ENDIF
 
     IF `STRINDEX( "($operation_ID)", "Grid" ) NE 0` THEN
-       DEFINE SYMBOL xstride_coord = `360*($xstride)/nx`
+       !DEFINE SYMBOL xstride_coord = `360*($xstride)/nx`
+       DEFINE SYMBOL xstride_coord = `x_range*($xstride)/nx`
     ENDIF
 
 ENDIF
@@ -67,11 +75,17 @@ ENDIF
 !IF `STRINDEX( "($operation_ID)", "Grid" ) NE 0` THEN LET maxpix = 100
 
 IF ($region_y_lo"0|*>1") THEN 
+    cancel mode long
+    cancel mode lat
+
+    LET y_range = `($data_var),return=yend` - `($data_var),return=ystart`
+
     LET yy = y[gy=($data_var)[d=($data_num)]]
     LET ny = yy[j=@ngd]
-    LET y_pct = ($region_y_range)/180
+!    LET y_pct = ($region_y_range)/180
+    LET y_pct = ($region_y_range)/y_range
     LET pixsize = `ny*y_pct`
-!         LET pixsize = `MAX(pixsize, ny)`
+    LET pixsize = `MIN(pixsize, ny)`
 
     DEFINE SYMBOL ystride = `INT((pixsize/maxpix)+1)`
 !    IF `pixsize GT maxpix` THEN
@@ -82,7 +96,7 @@ IF ($region_y_lo"0|*>1") THEN
 
     !ystride is latitude value for place mark
     IF `STRINDEX( "($operation_ID)", "Grid" ) NE 0` THEN
-       DEFINE SYMBOL ystride_coord = `180*($ystride)/ny`
+       DEFINE SYMBOL ystride_coord = `y_range*($ystride)/ny`
     ENDIF
 ENDIF
 
