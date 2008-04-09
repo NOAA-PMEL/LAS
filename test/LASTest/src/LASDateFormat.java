@@ -99,6 +99,8 @@ public class LASDateFormat{
                     }
 	    }else if( (date.length() == 14) && (!date.contains("-")) ){
 	            timeFormat = "yyyyMMddhhmmss";
+            }else if( (date.length() == 16) && (date.contains("-")) ){
+                    timeFormat = "yyyy-MM-dd HH:mm";
 	    }else if(date.length() == 17){
 	        	timeFormat = "yyyy-M-d HH:mm:ss";   
 	    }else if(date.length() == 18){
