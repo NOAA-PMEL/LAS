@@ -93,16 +93,16 @@ SET LIST/FILE="($result_ferret_listing_filename)"
 
 DEFINE SYMBOL hasT = 1
 
-!-----------------------------------------
+!--------------------------------------------
 ! compute time range for animation on XY view 
-!-----------------------------------------
+!--------------------------------------------
 !- only a single time ponit was selected
-!- or, there is not time axis at all
+!- or, there is no time axis at all
 
 ! max_tpoints is the arbitrary size limit of the time range
 ! 21 might be a good value for an animation
 ! 251 might be a good value for a time series plot
-DEFINE SYMBOL max_tpoints 21   ! should be an odd number
+DEFINE SYMBOL max_tpoints 7   ! should be an odd number
 
 ! Determine a new time range if just a single point requested
 IF ($native_curvilinear_xy"0") THEN 
@@ -136,17 +136,16 @@ IF `($nt) eq 1` THEN
         DEFINE SYMBOL region_xyzt = ($region_xyz),($region_t)
         DEFINE SYMBOL region_full = ($region_xyzt)
      ELSE
-        MESSAGE/ERROR **ERROR  Cannot animate this variable. It has no time variation.
-        EXIT/PROGRAM
+        !MESSAGE/ERROR **ERROR  Cannot animate this variable. It has no time variation.
+        !EXIT/PROGRAM
+        ! Let the animation throwing a message "Animation is not available for this dataset!"
      ENDIF
 
-     ENDIF
      IF ($native_curvilinear_xy"0") THEN 
         DEFINE SYMBOL ferret_plot_var = ($data_var)[d=($data_num),($region_full)], xcoord, ycoord
      ELSE
         DEFINE SYMBOL ferret_plot_var = ($data_var)[d=($data_num),($region_full)]
      ENDIF
-
 
 ENDIF
 
@@ -156,6 +155,9 @@ ELSE
    DEFINE SYMBOL ferret_list_var = ($ferret_plot_var)
 ENDIF
 
+!start and end time of animation (either computed or specified by a user)
+!DEFINE SYMBOL tLo = `($data_var)[L=($lmin)],return=TSTART`
+!DEFINE SYMBOL tHi = `($data_var)[L=($lmax)],return=TEND`
 
 !----------------------------------------
 ! start writing to the file
@@ -222,46 +224,30 @@ list/norowhead/nohead/format=(A`nlen`)/FILE/append a
 LET f = "</hasT>"
 list/norowhead/nohead/format=(A7)/FILE/append f
 
+IF `($hasT) eq 1` THEN
+!------------------------------
 ! ouput individual time points
-LET f = "<frames>"
-list/norowhead/nohead/format=(A8)/FILE/append f
+!------------------------------
+  LET f = "<frames>"
+  list/norowhead/nohead/format=(A8)/FILE/append f
 
-!====>output time frames
-let tvar = ($ferret_list_var)
-define symbol first_time = `tax_datestring(t[gt=tvar,L=1], t[gt=tvar], "seconds")`
-let nlen = strlen ("($first_time)")
+  !====>output time frames
+  let tvar = ($ferret_list_var)
+  define symbol first_time = `tax_datestring(t[gt=tvar,L=1], t[gt=tvar], "seconds")`
+  let nlen = strlen ("($first_time)")
 
-IF ($ferret_time_step"1|*>0") THEN
+  IF ($ferret_time_step"1|*>0") THEN
     list/norowhead/nohead/format=("<frame>",A`nlen`,"</frame>")/FILE/append tax_datestring(t[gt=tvar,L=($lmin):($lmax)], t[gt=tvar], "seconds")
-ELSE
+  ELSE
     list/norowhead/nohead/format=("<frame>",A`nlen`,"</frame>")/FILE/append tax_datestring(t[gt=tvar,L=($lmin):($lmax):($ferret_time_step)], t[gt=tvar], "seconds")
+  ENDIF
+
+  LET f = "</frames>"
+  list/norowhead/nohead/format=(A9)/FILE/append f
+
+  LET f = "<units>seconds</units>"
+  list/norowhead/nohead/format=(A22)/FILE/append f
 ENDIF
-
-LET f = "</frames>"
-list/norowhead/nohead/format=(A9)/FILE/append f
-
-DEFINE SYMBOL time_units = `tax_units(tvar)`
-
-!---------------------
-! time unit in months
-!--------------------
-!IF `strcmp("($time_units)", "2629746") EQ 0` THEN
-!    LET f = "<units>months</units>"
-!    list/norowhead/nohead/format=(A21)/FILE/append f
-!------------------
-!time unit in years
-!------------------
-!ELIF `strcmp("($time_units)", "31536000") EQ 0` THEN
-!    LET f = "<units>years</units>"
-!    list/norowhead/nohead/format=(A20)/FILE/append f
-!--------------------
-!time unit in seconds
-!--------------------
-!ELSE
-    LET f = "<units>seconds</units>"
-    list/norowhead/nohead/format=(A22)/FILE/append f
-!ENDIF
 
 LET framesEnd = "</lasAnimation>"
 list/nohead/format=(A15)/FILE/append framesEnd
-
