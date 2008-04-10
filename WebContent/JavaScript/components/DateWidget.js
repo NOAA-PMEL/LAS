@@ -29,6 +29,7 @@
  *
  * @author Jonathan Callahan
  * @version $Revision: 1137 $
+ * jli: Fix a bug in selectDay(DayMenu) that fails to set hh:mm  (2008-4-9) 
  */
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1238,7 +1239,6 @@ function DateWidget_flash(Menu) {
  * @param YearMenu document select object for year
  */
 function DateWidget_selectYear(YearMenu) {
-
   var monthNames = new Array('Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec');
   var monthVals = new Array('01','02','03','04','05','06','07','08','09','10','11','12');
 
@@ -1479,7 +1479,6 @@ function DateWidget_selectMonth(MonthMenu) {
  * @param DayMenu document select object for day
  */
 function DateWidget_selectDay(DayMenu) {
-
   var currentYear;
   var currentMonth;
   var currentDay;
@@ -1501,12 +1500,15 @@ function DateWidget_selectDay(DayMenu) {
     currentYear = this.year1;
     currentMonth = this.month1;
     currentDay = this.day1;
+/* 
     currentTime = (currentYear == this.year2 && 
                    currentMonth == this.month2 && 
                    currentDay == this.day2 &&
                    this.hour1 > this.hour2) ? 
                    this.hour2 + ':' + this.minute2 :
                    this.hour1 + ':' + this.minute1;
+*/
+    currentTime = this.hour1 + ':' + this.minute1;
   } else {
     this.day2 = currentDay;
     TimeMenu = this.Time2;
@@ -1514,12 +1516,15 @@ function DateWidget_selectDay(DayMenu) {
     currentYear = this.year2;
     currentMonth = this.month2;
     currentDay = this.day2;
+/* 
     currentTime = (currentYear == this.year1 && 
                    currentMonth == this.month1 && 
                    currentDay == this.day1 &&
                    this.hour1 > this.hour2) ? 
                    this.hour1 + ':' + this.minute1 :
                    this.hour2 + ':' + this.minute2;
+*/  
+    currentTime = this.hour2 + ':' + this.minute2;
   }
   var loMinute = this.offsetMinutes;
   var hiMinute = 1440;
@@ -1548,7 +1553,9 @@ function DateWidget_selectDay(DayMenu) {
         time = this.twoDigit(hr) + ":" + this.twoDigit(min);
         options[i]=new Option(time,time);
         //this.addEvent(options[i], 'click', this.optionClick, false);
-        if (time == currentTime) {
+        // if (time == currentTime) { this line fails
+        var tmp = String(currentTime).split(":");
+        if(tmp[0]==hr && tmp[1]==min){
           options[i].selected = true;
         }
         minutes = Number(minutes) + Number(this.deltaMinutes);
