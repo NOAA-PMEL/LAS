@@ -133,17 +133,15 @@ IF ($region_z"0|*>1") THEN
    ENDIF
 ENDIF  ! region_z
 
-IF ($region_t"0|*>1") THEN
-   IF `($region_t_range"0|0|*>1") GT 0` THEN
-      LET the_coords = t[gt=($ferret_list_var)]
-      DEFINE SYMBOL lmin `the_coords,RETURN=lstart`
-      DEFINE SYMBOL lmax `the_coords,RETURN=lend`
-      DEFINE SYMBOL lsize `the_coords,RETURN=lsize`
-   ELSE  ! range is 0
-      DEFINE SYMBOL lmin 1
-      DEFINE SYMBOL lmax 1
-      DEFINE SYMBOL lsize 1
-   ENDIF
+IF ($region_t_lo"0|*>1") THEN
+   LET the_coords = t[gt=($ferret_list_var)]
+   DEFINE SYMBOL lmin `the_coords[t="($region_t_lo)"]`
+   DEFINE SYMBOL lmax `the_coords[t="($region_t_hi)"]`
+   DEFINE SYMBOL lsize `($lmax)-($lmin)`
+ELSE  ! no time range
+   DEFINE SYMBOL lmin 1
+   DEFINE SYMBOL lmax 1
+   DEFINE SYMBOL lsize 1
 ENDIF  ! region_t
 
 ! RETURN=*start returns 0 IF the axis is an undefined axis
@@ -176,8 +174,8 @@ LET lchunk = INT(max_size/size * ($lsize))
 IF ($ferret_interpolate_data%0|false>0|true>1|1|0|*>1%) THEN SET MODE INTERPOLATE 
 
 ! the default is set under 1/4 of Ferret's memory allowing for LET definitions 
-
-LET use_size = 1000000*($ferret_memory)/4.
+DEFINE SYMBOL memsize = ($FERRET_MEMORY"6.4")* 1.e6
+LET use_size = 1000000*($memsize)/4.
 LET use_size = `use_size/100`
 LET max_size = ($MAX_LIST_SIZE"`use_size`")  ! use this for debugging, too
 
