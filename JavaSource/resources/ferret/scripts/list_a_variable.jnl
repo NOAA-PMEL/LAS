@@ -78,25 +78,33 @@ SET DATA/RESTORE
 ! to index space.
 
 IF ($region_x"0|*>1") THEN
-   IF `($region_y_range"0|0|*>1") GT 0` THEN
-      LET the_coords = x[gx=($ferret_list_var)]
-      DEFINE SYMBOL user_istart `the_coords,RETURN=istart`
-      DEFINE SYMBOL user_iend `the_coords,RETURN=iend`
+   IF `($region_x_range"0|0|*>1") GT 0` THEN
+      LET the_indices = I[gx=($data_var)]
+      DEFINE SYMBOL user_istart `the_indices[x=($region_x_lo)]`
+      DEFINE SYMBOL user_iend `the_indices[x=($region_x_hi)]`
+      DEFINE SYMBOL user_isize `($user_iend)-($user_istart)`
       CANCEL REGION/X
-      DEFINE SYMBOL data_isize `the_coords,RETURN=isize`
-      IF `($user_iend) - ($user_istart) + 1 - ($data_isize) GT 0` THEN
+      DEFINE SYMBOL data_isize `($data_var),RETURN=isize`
+      IF `($user_isize) + 1 - ($data_isize) GT 0` THEN
          DEFINE SYMBOL new_iend `($user_iend) - 1`
+         DEFINE SYMBOL region_($var_num)_x_hi = `x[gx=($data_var),i=($new_iend)] `
+
+        ! Redefine the region and data symbols with this new upper X bound
+        GO LAS_initialize_region ($var_num)
+        GO LAS_initialize_data ($var_num)
+
+        ! Here is the variable we will list out, with the region specified.
+        DEFINE SYMBOL ferret_list_var = ($ferret_plot_var)
+ 
       ELSE 
          DEFINE SYMBOL new_iend `($user_iend)`
       ENDIF
-      SET REGION/I=($user_istart):($new_iend)
 
 ! Now get the start, stop and size information
 
-     DEFINE SYMBOL imin `the_coords,RETURN=istart`
-     DEFINE SYMBOL iend `the_coords,RETURN=iend`
-     DEFINE SYMBOL isize `the_coords,RETURN=isize`
-
+     DEFINE SYMBOL imin ($user_istart)
+     DEFINE SYMBOL imax ($new_iend)
+     DEFINE SYMBOL isize `($imax)-($imin)`
    ELSE  ! range is 0
       DEFINE SYMBOL imin 1
       DEFINE SYMBOL imax 1
@@ -109,10 +117,10 @@ ENDIF  ! region_x
 
 IF ($region_y"0|*>1") THEN
    IF `($region_y_range"0|0|*>1") GT 0` THEN
-      LET the_coords = y[gy=($ferret_list_var)]
-      DEFINE SYMBOL jmin `the_coords,RETURN=jstart`
-      DEFINE SYMBOL jmax `the_coords,RETURN=jend`
-      DEFINE SYMBOL jsize `the_coords,RETURN=jsize`
+      LET the_indices = j[gy=($data_var)]
+      DEFINE SYMBOL jmin `the_indices[y="($region_y_lo)"]`
+      DEFINE SYMBOL jmax `the_indices[y="($region_y_hi)"]`
+      DEFINE SYMBOL jsize `($jmax)-($jmin)`
    ELSE  ! range is 0
       DEFINE SYMBOL jmin 1
       DEFINE SYMBOL jmax 1
@@ -122,10 +130,10 @@ ENDIF  ! region_y
 
 IF ($region_z"0|*>1") THEN
    IF `($region_z_range"0|0|*>1") GT 0` THEN
-      LET the_coords = z[gz=($ferret_list_var)]
-      DEFINE SYMBOL kmin `the_coords,RETURN=kstart`
-      DEFINE SYMBOL kmax `the_coords,RETURN=kend`
-      DEFINE SYMBOL ksize `the_coords,RETURN=ksize`
+      LET the_indices = K[gz=($data_var)]
+      DEFINE SYMBOL kmin `the_indices[z=($region_z_lo)]`
+      DEFINE SYMBOL kmax `the_indices[z=($region_z_hi)]`
+      DEFINE SYMBOL ksize `($kmax)-($kmin)`
    ELSE  ! range is 0
       DEFINE SYMBOL kmin 1
       DEFINE SYMBOL kmax 1 
@@ -134,9 +142,9 @@ IF ($region_z"0|*>1") THEN
 ENDIF  ! region_z
 
 IF ($region_t_lo"0|*>1") THEN
-   LET the_coords = t[gt=($ferret_list_var)]
-   DEFINE SYMBOL lmin `the_coords[t="($region_t_lo)"]`
-   DEFINE SYMBOL lmax `the_coords[t="($region_t_hi)"]`
+   LET the_indices = L[gt=($data_var)]
+   DEFINE SYMBOL lmin `the_indices[t="($region_t_lo)"]`
+   DEFINE SYMBOL lmax `the_indices[t="($region_t_hi)"]`
    DEFINE SYMBOL lsize `($lmax)-($lmin)`
 ELSE  ! no time range
    DEFINE SYMBOL lmin 1
@@ -161,7 +169,6 @@ IF `($ksize"0") lt 1` THEN DEFINE SYMBOL ksize 1
 IF `($lmin"0") lt 1` THEN DEFINE SYMBOL lmin 1
 IF `($lmax"0") lt 1` THEN DEFINE SYMBOL lmax 1
 IF `($lsize"0") lt 1` THEN DEFINE SYMBOL lsize 1
-CANCEL REGION/X
 
 LET size = ($isize)*($jsize)*($ksize)*($lsize)
 
@@ -175,7 +182,7 @@ IF ($ferret_interpolate_data%0|false>0|true>1|1|0|*>1%) THEN SET MODE INTERPOLAT
 
 ! the default is set under 1/4 of Ferret's memory allowing for LET definitions 
 DEFINE SYMBOL memsize = ($FERRET_MEMORY"6.4")* 1.e6
-LET use_size = 1000000*($memsize)/4.
+LET use_size = ($memsize)/4.
 LET use_size = `use_size/100`
 LET max_size = ($MAX_LIST_SIZE"`use_size`")  ! use this for debugging, too
 
@@ -247,11 +254,21 @@ ELSE
      ! ... netCDF output in chunks
         REPEAT/L=($lmin):($lmax):`lchunk` REPEAT/K=($kmin):($kmax):`kchunk` REPEAT/J=($jmin):($jmax):`jchunk` (LIST/APPEND/FILE/($frmt)/J=`j`:`jtop`/K=`k`:`ktop`/L=`l`:`ltop`/JLIMITS=($jmin):($jmax)/KLIMITS=($kmin):($kmax)/LLIMITS=($lmin):($lmax) ($data_dup_varname); CANC MEM/ALL)
      ELSE
+
      ! ... netCDF output in chunks
+        ! the limits min,max,chunk determine the range
 
-        DEFINE SYMBOL ferret_list_var =  ($data_var)  ! the limits min,max,chunk determine the range
+        DEFINE SYMBOL ferret_list_var = ($ferret_plot_var_noregion)  
 
-        REPEAT/L=($lmin):($lmax):`lchunk` REPEAT/K=($kmin):($kmax):`kchunk` REPEAT/J=($jmin):($jmax):`jchunk` (LIST/APPEND/FILE/($frmt)/J=`j`:`jtop`/K=`k`:`ktop`/L=`l`:`ltop`/JLIMITS=($jmin):($jmax)/KLIMITS=($kmin):($kmax)/LLIMITS=($lmin):($lmax) ($ferret_list_var); CANC MEM/ALL)
+     ! ... if an expression was applied then keep the title and give the output var a new name.
+
+        IF ($ferret_expression"0|*>1") THEN 
+           LET/TITLE="($ferret_plot_title)"/UNITS="`($ferret_list_var),RETURN=UNITS`" ($data_var)_expr = ($ferret_plot_var_noregion)  
+           
+           REPEAT/L=($lmin):($lmax):`lchunk` REPEAT/K=($kmin):($kmax):`kchunk` REPEAT/J=($jmin):($jmax):`jchunk` (LIST/APPEND/FILE/($frmt)/J=`j`:`jtop`/K=`k`:`ktop`/L=`l`:`ltop`/JLIMITS=($jmin):($jmax)/KLIMITS=($kmin):($kmax)/LLIMITS=($lmin):($lmax) ($data_var)_expr; CANC MEM/ALL)
+        ELSE
+           REPEAT/L=($lmin):($lmax):`lchunk` REPEAT/K=($kmin):($kmax):`kchunk` REPEAT/J=($jmin):($jmax):`jchunk` (LIST/APPEND/FILE/($frmt)/J=`j`:`jtop`/K=`k`:`ktop`/L=`l`:`ltop`/JLIMITS=($jmin):($jmax)/KLIMITS=($kmin):($kmax)/LLIMITS=($lmin):($lmax) ($ferret_list_var); CANC MEM/ALL)
+        ENDIF
      ENDIF
 
    ELSE
