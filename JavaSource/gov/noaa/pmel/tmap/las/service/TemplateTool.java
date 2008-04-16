@@ -1,15 +1,29 @@
 package gov.noaa.pmel.tmap.las.service;
 
 import gov.noaa.pmel.tmap.las.exception.LASException;
+import gov.noaa.pmel.tmap.las.jdom.LASBackendConfig;
+import gov.noaa.pmel.tmap.las.jdom.LASBackendRequest;
+import gov.noaa.pmel.tmap.las.util.Message;
+
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintWriter;
+import java.io.StringReader;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 
-import org.apache.log4j.Logger;
 import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.tools.view.XMLToolboxManager;
 
@@ -94,5 +108,88 @@ public class TemplateTool extends Tool {
 
     public void setToolboxContext(Map toolboxContext) {
         this.toolboxContext = toolboxContext;
+    }
+    public String findMessage(String stderr, LASBackendConfig config) throws IOException {
+        ArrayList<Message> messages = config.getMessages();
+        if ( messages == null || messages.size() == 0 ) {
+            return stderr;
+        } else {
+            // Loop through each line of the stderr output and see if one of the keys matches.
+            BufferedReader stderr_reader = new BufferedReader(new StringReader(stderr));
+            String line = stderr_reader.readLine().trim();
+            while ( line != null ) {    
+                for (Iterator messIt = messages.iterator(); messIt.hasNext();) {
+                    Message message = (Message) messIt.next();
+                    if ( message.getType().equals("startsWith")) {
+                        if ( line.startsWith(message.getKey())) {
+                            String text = message.getText();
+                            if ( text != null && text.length() > 0 ) {
+                                return text;
+                            }
+                        }
+                    } else if ( message.getType().equals("contains") ) {
+                        if ( line.contains(message.getKey())) {
+                            String text = message.getText();
+                            if ( text != null && text.length() > 0 ) {
+                                return text;
+                            }
+                        }
+                    } else if ( message.getType().equals("bracket") ) {
+                        String key = message.getKey();
+                        if ( line.contains(key)) {
+                            return stderr.substring(stderr.indexOf(key)+key.length(), stderr.lastIndexOf(key));
+                        }
+                    }
+                }
+                line = stderr_reader.readLine();
+            }
+        }
+        return stderr;
+    }
+    public String readMergedTemplate(File file) throws IOException {
+    	BufferedReader reader = null;
+    	FileReader f = new FileReader(file);
+    	reader = new BufferedReader(f);
+
+    	StringBuffer contents = new StringBuffer("");
+    	if (reader != null) {
+
+    		String line = reader.readLine();
+    		while ( line != null ) {
+    			contents = contents.append(line.trim());
+    			if ( line.endsWith(";")) {
+    				break;
+    			}
+    			line = reader.readLine();
+    		}
+
+    	}
+    	return contents.toString();
+    }
+    protected void mergeCommandTemplate (LASBackendRequest lasBackendRequest, File jnlFile, String template) throws LASException, Exception {
+        PrintWriter templateWriter = null;
+        try {
+            templateWriter = new PrintWriter(new FileOutputStream(jnlFile));
+        }
+        catch(Exception e) {
+            throw new LASException(e.toString());
+        }
+        
+        // Set up the Velocity Context
+        VelocityContext context = new VelocityContext(getToolboxContext());
+        
+        // Take all the information passed to the backend and
+        // make the giant symbol collection to be handed to Ferret.
+        
+        HashMap<String, String> symbols = lasBackendRequest.getFerretSymbols();
+        
+        context.put("symbols", symbols);   
+        context.put("las_backendrequest", lasBackendRequest);
+        // Guaranteed to be set by the Product Server
+        log.info("Velocity resource path: "+ve.getProperty("file.resource.loader.path"));
+        ve.mergeTemplate(template,"ISO-8859-1", context, templateWriter);
+        templateWriter.flush();
+        templateWriter.close();
+        
     }
 }

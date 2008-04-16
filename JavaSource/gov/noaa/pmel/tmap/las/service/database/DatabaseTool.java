@@ -120,7 +120,8 @@ public class DatabaseTool extends TemplateTool {
             return lasBackendResponse;
         }
         try {
-            createSQL(lasBackendRequest, sqlFile);
+        	String sql = lasBackendRequest.getProperty("operation","service_action") + ".vm";
+            mergeCommandTemplate(lasBackendRequest, sqlFile, sql);
         } catch (Exception e) {
             lasBackendResponse.setError("Could not create SQL command file: ", e);
             return lasBackendResponse;
@@ -136,29 +137,12 @@ public class DatabaseTool extends TemplateTool {
         Connection con = null;
         Statement stmt = null;
         ResultSet rset = null;
-        BufferedReader sqlReader = null;
-        try {
-            FileReader f = new FileReader(sqlFile);
-            sqlReader = new BufferedReader(f);
-        } catch (FileNotFoundException e) {
-            lasBackendResponse.setError("SQL template not found: " + e.toString());
-            return lasBackendResponse;
-        }
         String statement = "";
-        if (sqlReader != null) {
-            try {
-                String line = sqlReader.readLine();
-                while ( line != null ) {
-                    statement = statement + " " + line.trim();
-                    if ( line.endsWith(";")) {
-                        break;
-                    }
-                    line = sqlReader.readLine();
-                }
-            } catch (IOException e) {
-                lasBackendResponse.setError("Unable to read line from SQL file ", e);
-                return lasBackendResponse;
-            }
+        try {
+        	statement = readMergedTemplate(sqlFile);
+        } catch (IOException e ) {
+        	lasBackendResponse.setError("Unable to read line from SQL file ", e);
+        	return lasBackendResponse;
         }
         log.debug("Statement ready: "+statement);
         if (lasBackendRequest.isCanceled()) {
@@ -330,28 +314,4 @@ public class DatabaseTool extends TemplateTool {
         // Fill up the variables with the data.
         
     }
-
-    protected void createSQL(LASBackendRequest lasBackendRequest, File sqlFile) throws Exception  {
-               
-        PrintWriter sqlPrintWriter = null;
-        sqlPrintWriter = new PrintWriter(new FileOutputStream(sqlFile));
-                
-        // Set up the Velocity Context
-        VelocityContext context = new VelocityContext(getToolboxContext());
-        
-        context.put("las_backendrequest", lasBackendRequest);
-        
-        // Guaranteed to be set by the Product Server
-        String sql = lasBackendRequest.getProperty("operation","service_action") + ".vm";
-        
-        log.debug("Merging sql to: " + sqlFile + " using " + sql); //debug
-        ve.mergeTemplate(sql, "ISO-8859-1", context,
-                sqlPrintWriter);
-        log.debug("Script template merged.");
-        
-        sqlPrintWriter.flush();
-        sqlPrintWriter.close();
-    }
-
-    
 }
