@@ -1,0 +1,31 @@
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! $RCSfile: LAS_fland.jnl,v $
+! $Revision: 1.1 $
+! 
+! $Author: ansley $
+! $Date: 2006/07/06 17:54:11 $
+!
+! LAS_fland.jnl automatically adjusts the resolution
+!
+! $1 = ignore the user specified resolution
+! $2 = palette
+
+define symbol fland_palette ($2"gray")
+
+let lon_range = `($region_X_hi) - ($region_X_lo)`
+let lat_range = `($region_Y_hi) - ($region_Y_lo)`
+let fland_area = `(lon_range * lat_range) / (360 * 180)`
+IF `fland_area LT 0.04` THEN
+  define symbol fland_resolution 05
+ELIF `fland_area LT 0.1` THEN
+  define symbol fland_resolution 20
+ELIF `fland_area LT 0.2` THEN
+  define symbol fland_resolution 40
+ELSE
+  define symbol fland_resolution 60
+ENDIF
+
+go fland ($fland_resolution) ($fland_palette)
+
+! End of $RCSfile: LAS_fland.jnl,v $ -----------------------------------------------------
+

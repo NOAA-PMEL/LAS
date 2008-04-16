@@ -1,0 +1,228 @@
+!\cancel mode verify
+! list_arc_ascii.jnl - create Arcinfo GIS output of regular grids
+! Ansley Manke 6/2007, based on old LAS script arc_ascii.jnl
+! 8/ 9/2007 ACM Check that just one variable has been chosen.
+!       TODO    Find out if Arc-ascii allows for multi-variable files and
+!               if so how is that organized.
+!
+! Description: create Arcinfo GIS output of regular grids
+
+! Usage: GO list_arc_ascii 
+
+! Define symbols associated with the region and data and perform any
+! initialization needed for this dataset.
+
+IF `($data_count"0|1|*>0") NE 1` THEN
+  DEFINE SYMBOL error_status = ERROR
+  DEFINE SYMBOL error_type VARIABLES
+  DEFINE SYMBOL error_action = running Ferret scripts for ($operation_ID) arc_ascii
+  DEFINE SYMBOL error_string "This product is designed for single-variable output only. Choose 1 variable."
+  MESSAGE/ERROR **ERROR ($error_string)
+  EXIT/PROGRAM
+ENDIF
+
+GO LAS_initialize_region 0
+GO LAS_initialize_data 0
+
+IF ($do_curvi_xy) THEN
+  DEFINE SYMBOL error_status = ERROR
+  DEFINE SYMBOL error_type VARIABLES
+  DEFINE SYMBOL error_action = running Ferret scripts for ($operation_ID) arc_ascii
+  DEFINE SYMBOL error_string "arcView gridded output cannot be created. The arcView format cannot represent the curvlinear coordinate system of this dataset."  
+  MESSAGE/ERROR **ERROR ($error_string)
+  EXIT/PROGRAM
+ENDIF 
+
+IF ($do_hybrid_z) THEN
+  DEFINE SYMBOL error_status = ERROR
+  DEFINE SYMBOL error_type VARIABLES
+  DEFINE SYMBOL error_action = running Ferret scripts for ($operation_ID) arc_ascii
+  DEFINE SYMBOL error_string "arcView gridded output cannot be created. The arcView format cannot represent the Hybrid-Z coordinate system of this dataset."
+  MESSAGE/ERROR **ERROR ($error_string)
+  EXIT/PROGRAM
+ENDIF 
+
+IF ($do_curvi_xy_and_hybrid_z) THEN
+  DEFINE SYMBOL error_status = ERROR
+  DEFINE SYMBOL error_type VARIABLES
+  DEFINE SYMBOL error_action = running Ferret scripts for ($operation_ID) arc_ascii
+  DEFINE SYMBOL error_string "arcView gridded output cannot be created. The arcView format cannot represent the curvlinear coordinate system of this dataset."  
+  MESSAGE/ERROR **ERROR ($error_string)
+  EXIT/PROGRAM
+ENDIF 
+
+! Here is the variable we will list out, with the region specified.
+DEFINE SYMBOL ferret_list_var = ($ferret_plot_var)
+
+SET LIST/FILE="($result_ferret_listing_filename)"
+LET expr_var = ($ferret_plot_var_noregion)
+LET expr = expr_var[($region_x)]
+IF ($region_zt"0|*>1") THEN LET expr = expr_var[($region_x),($region_zt)]
+
+! This script is only applicable to the XY plane
+
+     ! Ferret v6.04+ will write a block of XML to std error if the symbol
+     ! LAS_errmsg_list has been set. In it, put a set of properties and
+     ! related symbol names; Ferret checks those symbol values and
+     ! writes properties for the error.
+
+
+DEFINE SYMBOL varshape `($ferret_list_var),RETURN=shape`
+IF ($varshape"1|XY>0|*>1") THEN
+  DEFINE SYMBOL error_status = ERROR
+  DEFINE SYMBOL error_type REGION
+  DEFINE SYMBOL error_action = running Ferret scripts for ($operation_ID) arc_ascii
+  DEFINE SYMBOL error_string "Region is ($varshape): you can only obtain GIS output for XY maps"
+  MESSAGE/ERROR **ERROR ($error_string)
+  EXIT/PROGRAM
+ENDIF
+
+! SCRIPT IS ONLY APPLICABLE WHERE X and Y spacings are equal
+! size of grid cells
+LET xcell_size = XBOX[gx=expr,X=($region_x_lo)]
+LET ycell_size = YBOX[gy=expr,Y=($region_y_lo)]
+
+LET cell_size = (xcell_size+ycell_size)/2
+
+IF `ABS(xcell_size-ycell_size)/(xcell_size+ycell_size) GT 1E-6` THEN
+  DEFINE SYMBOL error_status = ERROR
+  DEFINE SYMBOL error_action = running Ferret scripts for ($operation_ID) arc_ascii
+  DEFINE SYMBOL error_string "Cell sizes in X and Y differ: `xcell_size`, `ycell_size`. You can only obtain GIS output for equally-spaced XY maps"
+  MESSAGE/ERROR **ERROR ($error_string)
+  EXIT/PROGRAM
+ENDIF
+
+! Subscript limits in XY plane
+LET istart `i[gx=expr,x=($region_x_lo)]`
+LET iend `i[gx=expr,x=($region_x_hi)]`
+
+LET jstart `j[gy=expr,y=($region_y_lo)]`
+LET jend `j[gy=expr,y=($region_y_hi)]`
+
+! size of grid
+LET Ni = `($ferret_list_var),RETURN=isize`
+LET Nj = `($ferret_list_var),RETURN=jsize`
+
+! lower cell bounds arrays
+LET xbounds = xboxlo[gx=expr]
+LET ybounds = yboxlo[gy=expr]
+
+! size of grid cells
+LET xcell_size = XBOX[gx=expr,X=($region_x_lo)]
+LET ycell_size = YBOX[gy=expr,Y=($region_y_lo)]
+
+LET cell_size = (xcell_size+ycell_size)/2
+! Check for regularly-spaced data
+CANCEL MODE LAT
+CANCEL MODE LON
+LET del = XBOX[GX=expr,X=($region_x_lo)]
+LET reg = 1
+IF `Ni GT 2` THEN
+   REPEAT/NAME=m/RANGE=`istart+1`:`iend` \
+    (LET reg = XBOX[gx=expr,i=`m`] EQ del; IF `reg EQ 0` THEN EXIT/LOOP ) 
+ENDIF
+IF `reg EQ 0` THEN
+  DEFINE SYMBOL error_status = ERROR
+  DEFINE SYMBOL error_action = running Ferret scripts for ($operation_ID) arc_ascii
+  DEFINE SYMBOL error_string "Cells are not regularly-spaced: you can only obtain GIS output for equally-spaced XY maps"
+  MESSAGE/ERROR **ERROR ($error_string)
+  EXIT/PROGRAM
+ENDIF
+
+IF `Nj GT 2` THEN
+   REPEAT/NAME=m/RANGE=`jstart+1`:`jend` \
+    ( LET reg = YBOX[gy=expr,j=`m`] EQ del; IF `reg EQ 0` THEN EXIT/LOOP ) 
+ENDIF
+IF `reg EQ 0` THEN
+  DEFINE SYMBOL error_status = ERROR
+  DEFINE SYMBOL error_action = running Ferret scripts for ($operation_ID) arc_ascii
+  DEFINE SYMBOL error_string "Cells are not regularly-spaced: you can only obtain GIS output for equally-spaced XY maps"
+  MESSAGE/ERROR **ERROR ($error_string)
+  EXIT/PROGRAM
+ENDIF
+
+! Check again whether X and Y spacings are equal; the test at the start of the script 
+! tested only the first delta-x and delta-y
+LET xcell_size = XBOX[gx=expr,X=($region_x_lo)]
+LET ycell_size = YBOX[gy=expr,Y=($region_y_lo)]
+
+LET cell_size = (xcell_size+ycell_size)/2
+
+IF `ABS(xcell_size-ycell_size)/(xcell_size+ycell_size) GT 1E-6` THEN
+  DEFINE SYMBOL error_status = ERROR
+  DEFINE SYMBOL error_action = running Ferret scripts for ($operation_ID) arc_ascii
+  DEFINE SYMBOL error_string "Cell sizes in X and Y differ: `xcell_size`, `ycell_size`. You can only obtain GIS output for equally-spaced XY maps"
+  MESSAGE/ERROR **ERROR ($error_string)
+  EXIT/PROGRAM
+ENDIF
+
+
+! lower cell bounds of grid
+! Make sure West long is < 0, change both hi & lo if xlo is > 180
+LET slon = xbounds[i=`istart`]
+IF `slon GT 180` THEN
+  LET xlo = xbounds[x=($region_x_lo)] - 360
+ELSE
+  LET xlo = xbounds[x=($region_x_lo)]
+ENDIF
+LET ylo = ybounds[y=($region_y_lo)]
+list xlo, ylo
+
+! If the region_x_lo is at a cell boundary, return that boundary as the lower cell limit.
+LET cell_diff = ABS(xlo-($region_x_lo))
+IF `(ABS(cell_diff - xcell_size)/xcell_size) LT 1.e-5` THEN LET xlo = `xlo + xcell_size`
+
+LET cell_diff = ABS(ylo-($region_y_lo))
+IF `(ABS(cell_diff - xcell_size)/xcell_size) LT 1.e-5` THEN LET ylo = `ylo + ycell_size`
+
+SET MODE/LAST LAT
+SET MODE/LAST LON
+
+! make a heading as in this example
+!	ncols 180
+!	nrows 359
+!	xllcorner -89.54166   !!?? corner or center ??
+!	yllcorner 0.4583334
+!	cellsize 1.
+!       nodata -9.9999998E+33
+
+! Get the bad-value, and set the bad-value of THIS variable to 
+! a different value (so it can be evaluated below when it is used)
+
+LET nodata = `expr,RETURN=bad`
+LET mybad = -1*(`expr,RETURN=bad`)
+IF `mybad EQ 0` THEN LET mybad = 1.
+SET VAR/BAD=`mybad` nodata
+
+! ncols and nrows need to be integer
+! LIST/FILE/NOHEAD/APPEND/FORMAT="('ncols',1PG15.7)" Ni
+! LIST/FILE/NOHEAD/APPEND/FORMAT="('nrows',1PG15.7)" Nj
+LET aout = "ncols `Ni`"
+LIST/FILE/NOHEAD/APPEND/FORMAT="(A)" aout
+LET aout = "nrows `Nj`"
+LIST/FILE/NOHEAD/APPEND/FORMAT="(A)" aout
+
+! Create header lines. List the missing-value flag
+! from the file, using the same formatting as will be
+! used to list the data.
+
+SET LIST/PREC=9
+LET aout = "xllcorner `xlo`"
+LIST/FILE/NOHEAD/APPEND/FORMAT="(A)" aout
+LET aout = "yllcorner `ylo`"
+LIST/FILE/NOHEAD/APPEND/FORMAT="(A)" aout
+
+LET aout = "cellsize `cell_size`"
+LIST/FILE/NOHEAD/APPEND/FORMAT="(A)" aout
+
+LIST/FILE/NOHEAD/APPEND/FORMAT="('nodata_value',1PG15.7)"  nodata
+
+! List the data to the file, with northernmost data first.
+
+LET yy = y[gy=expr]
+REPEAT/NAME=m/RANGE=`jend`:`jstart`:-1 \
+  (LET this_y = yy[j=`m`];\
+   LIST/APPEND/FILE/NOHEAD/NOROWHEAD/FORMAT="(1PG15.7)" expr[y=`this_y`])
+
+SET MODE/LAST VERIFY
+

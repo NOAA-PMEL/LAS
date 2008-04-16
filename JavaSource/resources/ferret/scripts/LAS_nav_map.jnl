@@ -1,0 +1,84 @@
+! LAS_nav_map.jnl
+! ACM 8/11/2006
+
+! Create a navigation map. 
+! This script assumes symbols have been defined to set the region for the map,
+! the size of the map image, and the name of the map image file and
+! a map scale file. 
+
+! These are the symbols, with example values. I assume in practice
+! these will come from the server.
+! We can also use other settings as in the product scripts, 
+! to add graticules, set different levels or palette, and so on.
+
+! 8/27/2007 ACM Prettier palette and choice of Levels 
+
+DEFINE SYMBOL ferret_nav_x_lo "20"
+DEFINE SYMBOL ferret_nav_x_hi "380"
+DEFINE SYMBOL ferret_nav_y_lo "-90"
+DEFINE SYMBOL ferret_nav_y_hi "90"
+
+DEFINE SYMBOL ferret_nav_size "0.2"
+
+DEFINE SYMBOL result_use_nav_map "1"
+DEFINE SYMBOL result_nav_map_filename "./nav_map.gif"
+DEFINE SYMBOL result_nav_map_scale_filename "./nav_map_scale.xml"
+
+! ------------------
+! start of the LAS_nav_map.jnl commands:
+
+! access the data
+
+SET DATA etopo20
+DEFINE SYMBOL nav_aspect = `(($ferret_nav_y_hi)-(($ferret_nav_y_lo)))/(($ferret_nav_x_hi)-(($ferret_nav_x_lo)))`
+
+! Set up the window. Make a viewport with no margins.
+
+SET WIND/SIZE=($ferret_nav_size)/ASPECT=($nav_aspect):AXES
+DEFINE VIEW/AXES/XLIM=0:1/YLIM=0:1 nav_noax
+SET VIEW nav_noax
+
+! Set up plot qualifiers
+! DEFINE SYMBOL nav_levels = "(-10500,-5500,5000)(-5500,0,500)(0,2000,250)(2000,5000,1000)"
+! SHADE/NOKEY/NOAXIS/NOLAB/PALETTE=dark_land_sea/LEV=($nav_levels) rose
+DEFINE SYMBOL nav_levels = "(-inf)(-6000,-1000,500)(-1000,-100,100)(-100,100,10)(100,1000,100)(1000,5000,500)(inf)"
+SHADE/NOKEY/NOAXIS/NOLAB/PALETTE=etop_values/LEV=($nav_levels) rose
+
+! Save results
+
+! Result nav_map is a gif image. Save to result_nav_map_filename
+
+IF  ($result_use_nav_map%0|*>1%) THEN 
+  FRAME/FORMAT=gif/FILE="($result_nav_map_filename)"
+ENDIF
+
+IF ($result_nav_map_scale_filename%0|*>1%) THEN 
+   LET syms_names = {\
+     "DATA_0_URL", "DATA_0_VAR", \
+     "DATA_1_URL", "DATA_1_VAR", \
+     "PPL$XMIN", "PPL$XMAX", \
+      "PPL$YMIN", "PPL$YMAX",\
+      "PPL$XPIXEL", "PPL$YPIXEL",\
+      "PPL$WIDTH", "PPL$HEIGHT",\
+      "PPL$XORG","PPL$YORG",\
+      "PPL$XLEN","PPL$YLEN",\
+      "XAXIS_MIN","XAXIS_MAX",\
+      "YAXIS_MIN","YAXIS_MAX",\
+      "VP_TOP_MARGIN","VP_RT_MARGIN"}
+   LET syms_vals = {\
+      "($DATA_0_URL)", "($DATA_0_VAR)", \
+      "($DATA_1_URL)", "($DATA_1_VAR)", \
+      "($PPL$XMIN)", "($PPL$XMAX)", \
+      "($PPL$YMIN)", "($PPL$YMAX)", \
+      "($PPL$XPIXEL)", "($PPL$YPIXEL)",\
+      "($PPL$WIDTH)", "($PPL$HEIGHT)",\
+      "($PPL$XORG)", "($PPL$YORG)",\
+      "($PPL$XLEN)", "($PPL$YLEN)",\
+      "($XAXIS_MIN)", "($XAXIS_MAX)",\
+      "($YAXIS_MIN)", "($YAXIS_MAX)",\
+      "($VP_TOP_MARGIN)","($VP_RT_MARGIN)"}
+
+! assume we are running Ferret v5.81+ with /NOROWLAB qualifier on LIST command
+   LIST/CLOBBER/FILE="($result_nav_map_scale_filename%0|*)"/NOHEAD/NOROWLAB syms_names, syms_vals
+
+ENDIF

@@ -1,0 +1,20 @@
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!
+! $Author: rhs $
+!
+! Always make 2D plots without borders or axes.
+
+DEFINE SYMBOL ferret_margins = 0
+! going to defined all of these separately :)
+! go Plot_2D
+
+IF ($ferret_view"|xy>1|*>0") THEN
+
+   !! Make a plot in XY...
+   DEFINE SYMBOL ferret_margins = 0
+   go xy_plot_2D
+
+ELSE
+  say " **ERROR: Attempt to make a plot in ($ferret_view) with 2D plot script."
+ENDIF

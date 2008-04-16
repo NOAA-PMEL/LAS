@@ -1,0 +1,197 @@
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! 
+! $Author: rhs $
+!
+! Compare_Plot.jnl decides which script to call to make a
+! difference plot.
+! In the "old" LAS UI all difference plot has the same options and other
+! UI characteristics regardless of the dimension so it's easier
+! to have one script like this to drive all the others.
+! In the new UI it's likely we'll define one operation per
+! dimension.
+!
+
+DEFINE SYMBOL ferret_palette ($ferret_palette"light_centered|default>light_centered|*>($ferret_palette))
+
+IF ($ferret_view"|xt>1|*>0") THEN
+
+   ! region 1 needs to inherit its view axes values from region 0
+
+      IF ($region_0_x_lo"0|*>1") THEN
+         DEFINE SYMBOL region_1_x_lo ($region_0_x_lo)
+      ENDIF
+      IF ($region_0_x_hi"0|*>1") THEN
+         DEFINE SYMBOL region_1_x_hi ($region_0_x_hi)
+      ENDIF
+      IF ($region_0_t_lo"0|*>1") THEN
+         DEFINE SYMBOL region_1_t_lo ($region_0_t_lo)
+      ENDIF
+      IF ($region_0_t_hi"0|*>1") THEN
+         DEFINE SYMBOL region_1_t_hi ($region_0_t_hi)
+      ENDIF
+
+   !! Make a plot in XT...
+   go xt_compare_difference
+
+ELIF ($ferret_view"|xy>1|*>0") THEN
+
+   ! region 1 needs to inherit its view axes values from region 0
+
+      IF ($region_0_x_lo"0|*>1") THEN
+         DEFINE SYMBOL region_1_x_lo ($region_0_x_lo)
+      ENDIF
+      IF ($region_0_x_hi"0|*>1") THEN
+         DEFINE SYMBOL region_1_x_hi ($region_0_x_hi)
+      ENDIF
+      IF ($region_0_y_lo"0|*>1") THEN
+         DEFINE SYMBOL region_1_y_lo ($region_0_y_lo)
+      ENDIF
+      IF ($region_0_y_hi"0|*>1") THEN
+         DEFINE SYMBOL region_1_y_hi ($region_0_y_hi)
+      ENDIF
+
+   !! Make a plot in XY...
+   go xy_compare_difference
+
+ELIF ($ferret_view"|xz>1|*>0") THEN
+
+   ! region 1 needs to inherit its view axes values from region 0
+
+      IF ($region_0_x_lo"0|*>1") THEN
+         DEFINE SYMBOL region_1_x_lo ($region_0_x_lo)
+      ENDIF
+      IF ($region_0_x_hi"0|*>1") THEN
+         DEFINE SYMBOL region_1_x_hi ($region_0_x_hi)
+      ENDIF
+      IF ($region_0_z_lo"0|*>1") THEN
+         DEFINE SYMBOL region_1_z_lo ($region_0_z_lo)
+      ENDIF
+      IF ($region_0_z_hi"0|*>1") THEN
+         DEFINE SYMBOL region_1_z_hi ($region_0_z_hi)
+      ENDIF
+
+
+   !! Make a plot in XZ...
+   go xz_compare_difference
+
+ELIF ($ferret_view"|yt>1|*>0") THEN
+
+   ! region 1 needs to inherit its view axes values from region 0
+
+      IF ($region_0_y_lo"0|*>1") THEN
+         DEFINE SYMBOL region_1_y_lo ($region_0_y_lo)
+      ENDIF
+      IF ($region_0_y_hi"0|*>1") THEN
+         DEFINE SYMBOL region_1_y_hi ($region_0_y_hi)
+      ENDIF
+      IF ($region_0_t_lo"0|*>1") THEN
+         DEFINE SYMBOL region_1_t_lo ($region_0_t_lo)
+      ENDIF
+      IF ($region_0_t_hi"0|*>1") THEN
+         DEFINE SYMBOL region_1_t_hi ($region_0_t_hi)
+      ENDIF
+
+   !! Make a plot in YT...
+   go yt_compare_difference
+
+ELIF ($ferret_view"|yz>1|*>0") THEN
+
+   ! region 1 needs to inherit its view axes values from region 0
+
+      IF ($region_0_y_lo"0|*>1") THEN
+         DEFINE SYMBOL region_1_y_lo ($region_0_y_lo)
+      ENDIF
+      IF ($region_0_y_hi"0|*>1") THEN
+         DEFINE SYMBOL region_1_y_hi ($region_0_y_hi)
+      ENDIF
+      IF ($region_0_z_lo"0|*>1") THEN
+         DEFINE SYMBOL region_1_z_lo ($region_0_z_lo)
+      ENDIF
+      IF ($region_0_z_hi"0|*>1") THEN
+         DEFINE SYMBOL region_1_z_hi ($region_0_z_hi)
+      ENDIF
+
+   !! Make a plot in YZ...
+   go yz_compare_difference
+
+ELIF ($ferret_view"|zt>1|*>0") THEN
+
+   ! region 1 needs to inherit its view axes values from region 0
+
+      IF ($region_0_z_lo"0|*>1") THEN
+         DEFINE SYMBOL region_1_z_lo ($region_0_z_lo)
+      ENDIF
+      IF ($region_0_z_hi"0|*>1") THEN
+         DEFINE SYMBOL region_1_z_hi ($region_0_z_hi)
+      ENDIF
+      IF ($region_0_t_lo"0|*>1") THEN
+         DEFINE SYMBOL region_1_t_lo ($region_0_t_lo)
+      ENDIF
+      IF ($region_0_t_hi"0|*>1") THEN
+         DEFINE SYMBOL region_1_t_hi ($region_0_t_hi)
+      ENDIF
+
+   !! Make a plot in ZT...
+   go zt_compare_difference
+
+ELIF ($ferret_view"|x>1|*>0") THEN
+
+   ! region 1 needs to inherit its view axes values from region 0
+
+      IF ($region_0_x_lo"0|*>1") THEN
+         DEFINE SYMBOL region_1_x_lo ($region_0_x_lo)
+      ENDIF
+      IF ($region_0_x_hi"0|*>1") THEN
+         DEFINE SYMBOL region_1_x_hi ($region_0_x_hi)
+      ENDIF
+
+   !! Make a plot in X...
+   go x_compare_difference
+
+ELIF ($ferret_view"|y>1|*>0") THEN
+
+   ! region 1 needs to inherit its view axes values from region 0
+
+      IF ($region_0_y_lo"0|*>1") THEN
+         DEFINE SYMBOL region_1_y_lo ($region_0_y_lo)
+      ENDIF
+      IF ($region_0_y_hi"0|*>1") THEN
+         DEFINE SYMBOL region_1_y_hi ($region_0_y_hi)
+      ENDIF
+
+   !! Make a plot in Y...
+   go y_compare_difference
+
+ELIF ($ferret_view"|z>1|*>0") THEN
+
+   ! region 1 needs to inherit its view axes values from region 0
+
+      IF ($region_0_z_lo"0|*>1") THEN
+         DEFINE SYMBOL region_1_z_lo ($region_0_z_lo)
+      ENDIF
+      IF ($region_0_z_hi"0|*>1") THEN
+         DEFINE SYMBOL region_1_z_hi ($region_0_z_hi)
+      ENDIF
+
+   !! Make a plot in Z...
+   go z_compare_difference
+
+ELIF ($ferret_view"|t>1|*>0") THEN
+
+   ! region 1 needs to inherit its view axes values from region 0
+
+      IF ($region_0_t_lo"0|*>1") THEN
+         DEFINE SYMBOL region_1_t_lo ($region_0_t_lo)
+      ENDIF
+      IF ($region_0_t_hi"0|*>1") THEN
+         DEFINE SYMBOL region_1_t_hi ($region_0_t_hi)
+      ENDIF
+
+   !! Make a plot in T...
+   go t_compare_difference
+
+
+
+ELSE
+  say " **ERROR: Attempt to make a plot in ($ferret_view) with this plot script.  Only x, y, z, t, xy, xt, xz, yt, yz, and zt are allowed"
+ENDIF
