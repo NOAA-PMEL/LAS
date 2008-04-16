@@ -1,7 +1,0 @@
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! 
-! $Author: acm $
-!
-! Call the script that does the work; property-depth insitu plot.
-
-GO pz_insitu_plot
