@@ -1,8 +1,0 @@
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! 
-!
-! Plot_prop_prop.jnl calls the property-property plot script.
-!
-go prop_prop_plot.jnl
-
-
