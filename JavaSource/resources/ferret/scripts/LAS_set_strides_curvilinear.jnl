@@ -62,7 +62,9 @@ DEFINE SYMBOL stride_for_mem = `INT( 1+ varsiz/(.1*($memsize)) )`
 
 ! If not a graphics product, apply the strides
 
-IF `STRINDEX( "($operation_ID)", "Plot" ) EQ 0 AND STRINDEX( "($operation_ID)", "zoom" ) EQ 0` THEN
+IF `STRINDEX( "($operation_ID)", "Plot" ) EQ 0 AND \
+    STRINDEX( "($operation_ID)", "zoom" ) EQ 0 AND \
+    STRINDEX( "($operation_ID)", "Anim" ) EQ 0` THEN
    IF `($stride_for_mem"0") GT 1` THEN
       IF `($region_x_range"0|*>1") GT 0` THEN 
          SET AXIS/STRIDE=($stride_for_mem) `pvar,RETURN=xaxis`
