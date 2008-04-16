@@ -2,6 +2,7 @@ package gov.noaa.pmel.tmap.las.service.ferret;
 
 import gov.noaa.pmel.tmap.las.exception.LASException;
 import gov.noaa.pmel.tmap.las.jdom.JDOMUtils;
+import gov.noaa.pmel.tmap.las.jdom.LASBackendConfig;
 import gov.noaa.pmel.tmap.las.jdom.LASBackendRequest;
 import gov.noaa.pmel.tmap.las.jdom.LASBackendResponse;
 import gov.noaa.pmel.tmap.las.jdom.LASFerretBackendConfig;
@@ -123,7 +124,7 @@ public class FerretTool extends TemplateTool{
         
         log.debug("Creating Ferret journal file.");
         
-        createPlotJournal(lasBackendRequest, jnlFile, "launch.vm" );
+        mergeCommandTemplate(lasBackendRequest, jnlFile, "launch.vm" );
         
         log.debug("Finished creating Ferret journal file.");
         
@@ -230,7 +231,7 @@ public class FerretTool extends TemplateTool{
             log.debug("stdout: "+output);
             String error_message = "An error occurred creating your product.";
             try {
-                error_message = findMessage(stderr);
+                error_message = findMessage(stderr, lasFerretBackendConfig);
             } catch (Exception e) {
             	
             		// Go on with a generic error message.
@@ -256,69 +257,8 @@ public class FerretTool extends TemplateTool{
         
         return lasBackendResponse;
     }
-    private String findMessage(String stderr) throws IOException {
-        ArrayList<Message> messages = lasFerretBackendConfig.getMessages();
-        if ( messages == null || messages.size() == 0 ) {
-            return stderr;
-        } else {
-            // Loop through each line of the stderr output and see if one of the keys matches.
-            BufferedReader stderr_reader = new BufferedReader(new StringReader(stderr));
-            String line = stderr_reader.readLine().trim();
-            while ( line != null ) {    
-                for (Iterator messIt = messages.iterator(); messIt.hasNext();) {
-                    Message message = (Message) messIt.next();
-                    if ( message.getType().equals("startsWith")) {
-                        if ( line.startsWith(message.getKey())) {
-                            String text = message.getText();
-                            if ( text != null && text.length() > 0 ) {
-                                return text;
-                            }
-                        }
-                    } else if ( message.getType().equals("contains") ) {
-                        if ( line.contains(message.getKey())) {
-                            String text = message.getText();
-                            if ( text != null && text.length() > 0 ) {
-                                return text;
-                            }
-                        }
-                    } else if ( message.getType().equals("bracket") ) {
-                        String key = message.getKey();
-                        if ( line.contains(key)) {
-                            return stderr.substring(stderr.indexOf(key)+key.length(), stderr.lastIndexOf(key));
-                        }
-                    }
-                }
-                line = stderr_reader.readLine();
-            }
-        }
-        return stderr;
-    }
 
-    protected void createPlotJournal(LASBackendRequest lasBackendRequest, File jnlFile, String template) throws LASException, Exception {
-        PrintWriter jnlWriter = null;
-        try {
-            jnlWriter = new PrintWriter(new FileOutputStream(jnlFile));
-        }
-        catch(Exception e) {
-            throw new LASException(e.toString());
-        }
-        
-        // Set up the Velocity Context
-        VelocityContext context = new VelocityContext(getToolboxContext());
-        
-        // Take all the information passed to the backend and
-        // make the giant symbol collection to be handed to Ferret.
-        
-        HashMap<String, String> symbols = lasBackendRequest.getFerretSymbols();
-        
-        context.put("symbols", symbols);   
-        // Guaranteed to be set by the Product Server
-        log.info("Velocity resource path: "+ve.getProperty("file.resource.loader.path"));
-        ve.mergeTemplate(template,"ISO-8859-1", context, jnlWriter);
-        jnlWriter.flush();
-        jnlWriter.close();
-        
-    }
+  
     public Task task(RuntimeEnvironment runTimeEnv, String[] args, File cancel, long timeLimit) throws Exception {
         //String[] errors = { "**ERROR", " **ERROR"," **TMAP ERR", "STOP -script mode", "Segmentation fault", "No such", " **netCDF error", "**netCDF error"};
         
@@ -349,7 +289,7 @@ public class FerretTool extends TemplateTool{
 
         boolean useNice = lasFerretBackendConfig.getUseNice();
         String interpreter = lasFerretBackendConfig.getInterpreter();
-        String ferretBinary = lasFerretBackendConfig.getFerret();
+        String ferretBinary = lasFerretBackendConfig.getExecutable();
         int offset = (useNice) ? 1 : 0;
         if ( (interpreter != null && !interpreter.equals("")) ) {
             offset = offset + 1;
