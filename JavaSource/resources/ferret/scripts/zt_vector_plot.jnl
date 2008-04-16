@@ -1,0 +1,169 @@
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! $RCSfile: zt_plot_2D.jnl,v $
+! 
+! $Author: ansley $
+! $Date: 2006/10/05 $
+!
+! 3/7/2007: ACM. Put code to check that the region was not too small, resulting 
+!           in degenerate plot into LAS_initialize_data.jnl rather than in the 
+!           individual plot scripts.
+
+! 3/29/2007 ACM Fix logic interpreting contents of ferret_interpolate_data 
+! 3/17/2008 ACM Add /FLOWLINE[/DENSITY] options and also line color and thickness
+!
+!
+! zt_vector_plot.jnl creates a ZT vector plot for use with the Back End Server
+! code that sits behind a Live Access Server (LAS). 
+!
+! NOTE:  This code handles overlays but not differencing.
+!
+! Set any Ferret modes
+!
+! NOTE:  Should we support any of the following Ferrt modes?
+! NOTE:    ASCII_FONT, CALENDAR, DEPTH_LABEL, LABELS, LATIT_LABEL, LONG_LABEL 
+
+IF ($ferret_interpolate_data%0|false>0|true>1|1|0|*>1%) THEN SET MODE INTERPOLATE
+
+DEFINE SYMBOL fview = `UPCASE("($ferret_view)")`
+
+! Define symbols associated with the regiogn and data and perform any
+! initialization needed for this dataset.
+!
+! NOTE:  Adding support for a 'base layer' variable would mean passing
+! NOTE:  some other argument.  For now, though, we always use 'data_0'
+! NOTE:  for the base layer and region.
+
+GO LAS_initialize_region 0
+GO LAS_initialize_data 0
+DEFINE SYMBOL ferret_vector_1 ($ferret_plot_var)
+DEFINE SYMBOL ferret_plot_title_1 "($data_title) ($data_units)"
+
+GO LAS_initialize_data 1
+DEFINE SYMBOL ferret_vector_2 ($ferret_plot_var)
+DEFINE SYMBOL ferret_plot_title "($ferret_plot_title_1), ($data_title) ($data_units)"
+
+
+! Check for errors (They often occur during dataset initialization.)
+
+IF ($error_status"0|*>1") THEN
+  MESSAGE/ERROR **ERROR ($error_string)
+  EXIT/PROGRAM
+ENDIF
+
+! Check whether the region is too small; reduces to a single grid point.
+! (Region is a point)
+GO LAS_check_2d_region
+
+! Check for errors 
+IF ($error_status"0|ERROR>1") THEN
+  MESSAGE/ERROR ($error_string)
+  EXIT/PROGRAM
+ENDIF
+
+! Open the window, apply size, scale options
+GO LAS_open_window
+
+! TODO:  Should the creation of the ($qualifiers) symbol for standard
+! TODO:  2D plots be separated out in a separate script called:
+! TODO:    LAS_2D_plot_qualifiers.jnl
+!
+! Build up the plot qualifiers
+
+IF ($ferret_plot_key"0|0|nokey>0|*>1") THEN
+  DEFINE SYMBOL qualifiers = ($qualifiers)/NOKEY
+ENDIF
+
+! TODO:  For time plots, either the configurer or the script might want to turn on 
+! TODO:  graticules at the small tic marks.  /GRATICULE=(DASH)="small, large"
+
+IF ($ferret_use_graticules"1|0|*>1) THEN
+  SET MODE GRATICULE:(DASH,COLOR=black)
+ENDIF
+
+! Set up for degrees-minutes-seconds labels on axes with units of degrees
+
+IF ($ferret_deg_min_sec"0|false>0|*>1") THEN GO LAS_set_deg_min_sec.jnl
+
+! Vector style arrow (default) or flowline
+
+IF `($ferret_vector_style"0|default>0|1|*>0") GT 0` THEN  
+   DEFINE SYMBOL qualifiers = ($qualifiers)/FLOWLINE
+   IF `($ferret_land_type"0|contour>1|*>0") EQ 1` THEN DEFINE SYMBOL ferret_land_arg = thick
+ENDIF
+
+! Vector density for flowline plots
+
+IF `($ferret_vector_density"0|*>1") GT 0` THEN  
+   DEFINE SYMBOL qualifiers = ($qualifiers)/DENSITY=($ferret_vector_density)
+ENDIF
+
+! Line color
+
+IF `($ferret_line_color%0|default>0|*>1%)` THEN
+  DEFINE SYMBOL qualifiers = ($qualifiers)/COLOR=($ferret_line_color%0|default>black|red|blue|green|lightblue|purple|*>black%)
+ENDIF
+
+! line thickness
+
+IF `($ferret_line_thickness%0|default>1|*>1%)` THEN
+   DEFINE SYMBOL qualifiers = ($qualifiers)($ferret_line_thickness%/THICK=1|default>/THICK=1|1>/THICK=1|2>/THICK=2|3>/THICK=3|*>/THICK=1%)
+ENDIF
+
+! Do the plot
+
+! Do a shade underlay if deg-min labelling is requested, then we dont have
+! to do VECTOR/SET which ignores the automatic skip 
+
+SHADE/pal=white/nokey/TITLE="($ferret_plot_title)"/SET  ($ferret_vector_1)
+   IF ($xform_dms"0|*>1") THEN PPL XFOR (($xform_dms))
+   IF ($yform_dms"0|*>1") THEN PPL YFOR (($yform_dms))
+PPL SHADE
+
+! use XSKIP and YSKIP if given
+IF ($ferret_vector_skip"0") THEN
+
+   VECTOR/OVER/NOLAB($qualifiers)/TITLE="($ferret_plot_title)"/XSKIP=`xs`/YSKIP=`ys` \
+       ($ferret_vector_1), ($ferret_vector_2)
+
+   IF `($ferret_vector_style"1|default>1|*>0") GT 0` THEN  
+      DEFINE SYMBOL n_left_labels = `($n_left_labels"0")+1`
+      DEFINE SYMBOL upper_left_($n_left_labels) = Vector xskip=`xs`,yskip=`ys`
+   ENDIF
+
+ELSE
+   VECTOR/OVER/NOLAB($qualifiers)/TITLE="($ferret_plot_title)" ($ferret_vector_1), ($ferret_vector_2)
+
+   IF `($ferret_vector_style"1|default>1|*>0") GT 0` THEN  
+      DEFINE SYMBOL n_left_labels = `($n_left_labels"0")+1`
+      DEFINE SYMBOL upper_left_($n_left_labels) = Automatic vector xskip,yskip 
+   ENDIF
+
+ENDIF
+
+LABEL/NOUSER `($ppl$xlen)/2`, `($ppl$ylen)+1.2`, 0, 0, 0.12, "LAS 7.+/Ferret ($FERRET_VERSION)     NOAA/PMEL"
+IF ($needs_url"0|*>1") THEN \
+LABEL/NOUSER `($ppl$xlen)*.33`, `($ppl$ylen)+1.`, -1, 0, 0.10, "DATA SET: @AS($data_var_url)"
+
+! Overlay additional data 
+
+! TODO:  Support user options for contour overlays:  color, labeling, ...
+
+IF `($data_count"0") GT 1` THEN
+
+REPEAT/range=2:`($data_count)-1`/NAME=m (  \
+  GO LAS_initialize_region `m` ;  \
+  GO LAS_initialize_data  `m` ; \
+  DEFINE SYMBOL qualifiers_over = /LINE=`m` ;\
+  CONTOUR/OVER($qualifiers_over) ($ferret_plot_var) \
+)
+
+! Mark grid points. Options are no, subsample (tests if subsampling needed)
+! or all to force marking all points.
+
+IF ($ferret_mark_grid"0|no>0|all>1|subsample>1|*>0") THEN GO mark_grid
+
+! Save the results
+GO LAS_results point
+
+! End of $RCSfile -----------------------------------------------------
+

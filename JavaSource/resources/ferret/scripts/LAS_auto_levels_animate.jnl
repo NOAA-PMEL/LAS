@@ -1,0 +1,345 @@
+! LAS_auto_levels_animate.jnl
+! ACM 8/22/2007
+
+! acm 9/11/07 If its a descriptor file Ferret wont allow striding. 
+!             check for that case and just set num levels.
+
+! Based on a variables value over its entire range, set strides
+! if needed to quickly get stats on the variable. Use this to set levels.
+
+! Argument: the variable to use in setting the levels.
+
+! The symbol ferret_center_levels, if set to 1, forces the levels
+! to be 2 std above and below zero. Otherwise use 2 std above 
+! and below the data mean
+
+! This script should be done BEFORE any other striding is done.
+! It operates on the variable on its entire native unstrided grid.
+
+! input_fill_levels and input_contour_levels are symbols that are defined in 
+! LAS_initialize_variable.jnl, telling whether settings for levels were
+! made 
+
+! Determine striding for speed in operating the STAT command
+LET memsize = 0.5* 1.e6
+
+! Make sure its a 2D plot operation.
+
+DEFINE SYMBOL op = `UPCASE("($operation_ID)")`
+
+!IF `($ferret_view"|xy>1|*>0") NE 1` THEN EXIT/SCRIPT
+IF `STRINDEX("($op)", "VECTOR") GT 0` THEN EXIT/SCRIPT
+
+IF `STRINDEX("($op)", "ANIMATION") EQ 0` THEN EXIT/SCRIPT
+
+! NOTE: animations have not been implemented for difference plots.
+! If its a compare plot, and if the ($ferret_diff_var) is not yet defined, 
+! just return.
+
+IF `($ferret_diff_var"1|*>0") AND STRINDEX("($op)", "COMPARE_PLOT") NE 0` THEN 
+   EXIT/SCRIPT
+ENDIF 
+
+DEFINE SYMBOL ferret_center_levels ($ferret_center_levels"0|1|TRUE>1|*>0")
+
+! If levels were requested but not centered ones, just return.
+IF ($input_fill_levels"0") THEN 
+   DEFINE SYMBOL up_fill_levels = `UPCASE("($ferret_fill_levels)")`
+   LET nc = `STRINDEX("($up_fill_levels)", "C")`
+   DEFINE SYMBOL ferret_center_levels = `nc GT 0`
+   IF `nc EQ 0` THEN 
+      IF `($ferret_contour_levels"0|*>1") EQ 0` THEN \
+        DEFINE SYMBOL ferret_contour_levels ($ferret_fill_levels)     
+      EXIT/SCRIPT
+   ENDIF
+ENDIF
+
+! See if centered levels were requested, either by setting the symbol ferret_center_levels
+! or with a contour_levels or fill_levels that is centered.
+
+! If contour levels requested with levels of nC, e.g. 20C, then get the value to
+! set num_fine_levels in the %RANGE command below
+
+LET nc = 0
+IF ($ferret_contour_levels"0|*>1") THEN
+   DEFINE SYMBOL up_contour_levels = `UPCASE("($ferret_contour_levels)")`
+   LET nc = `STRINDEX("($up_contour_levels)", "C")`
+   DEFINE SYMBOL ferret_center_levels = `nc GT 0`
+   IF `nc GT 0` THEN
+      LET slen = STRLEN ("($up_fill_levels)") 
+      IF `slen GT 1` THEN DEFINE SYMBOL num_fine_levels = `SUBSTRING ("($up_fill_levels)", 1, slen-1)`
+   ENDIF
+ENDIF
+IF ($ferret_fill_levels"0|*>1") THEN
+   DEFINE SYMBOL up_fill_levels = `UPCASE("($ferret_fill_levels)")`
+   LET nc = `STRINDEX("($up_fill_levels)", "C")`
+   DEFINE SYMBOL ferret_center_levels = `nc GT 0`
+   IF `nc GT 0` THEN
+      LET slen = STRLEN ("($up_fill_levels)") 
+      IF `slen GT 1` THEN DEFINE SYMBOL num_fine_levels = `SUBSTRING ("($up_fill_levels)", 1, slen-1)`
+   ENDIF
+ENDIF
+!! PUNT
+
+! If levels other than centered were already given, exit
+IF `nc EQ 0` THEN
+  IF `($ferret_fill_levels"0|*>1") OR ($ferret_contour_levels"0|*>1")` THEN EXIT/SCRIPT
+ENDIF
+
+! Apply to the variable on the requested region in x, y, z and all time.
+
+IF `($ferret_plot_var"0|*>1") EQ 0` THEN EXIT/SCRIPT  !e.g. for insitu plots may not have a plot_var
+
+LET pvar = ($ferret_xyz_var)
+
+! Apply to the variable on the requested region
+! When its a curvi plot, base the levels on the
+! variable masked by the coordinates in the region.
+
+IF ($native_curvilinear_xy"0") THEN
+   STAT ($ferret_curvi_coord_lon)
+   LET xreg_lo = ($region_x_lo)
+   LET xreg_hi = ($region_x_hi)
+   IF `xreg_hi LT ($stat_min)` THEN
+      LET xreg_lo = `xreg_lo + 360`
+      LET xreg_hi = `xreg_hi + 360`
+   ENDIF
+   IF `xreg_lo GT ($stat_max)` THEN
+      LET xreg_lo = `xreg_lo - 360`
+      LET xreg_hi = `xreg_hi - 360`
+   ENDIF
+   
+   let maskx1 = IF ($ferret_curvi_coord_lon)[d=($data_num)] LT `xreg_hi` THEN 1
+   let maskx =  IF ($ferret_curvi_coord_lon)[d=($data_num)] GE `xreg_lo` THEN maskx1
+   let masky1 = IF ($ferret_curvi_coord_lat)[d=($data_num)] LT ($region_y_hi) THEN 1
+   let masky =  IF ($ferret_curvi_coord_lat)[d=($data_num)] GT ($region_y_lo) THEN masky1
+   LET pvar = ($data_var)[d=($data_num)]* maskx* masky
+   IF ($region_z"0|*>1") THEN LET pvar = ($data_var)[d=($data_num),($region_z)]* maskx* masky
+
+ELSE
+   IF `($do_hybrid_z"0") + ($do_curvi_xy_and_hybrid_z"0") GT 0`  THEN
+      LET pvar = ($ferret_plot_base_var)
+   ELSE
+      LET pvar = ($ferret_plot_var)
+   ENDIF
+ENDIF
+
+IF ($ferret_plot_var"0|sampled_var>1|*>0) THEN LET pvar = ($ferret_plot_var)
+
+! IF ($do_curvi_xy_and_hybrid_z"0") THEN LET pvar = plot_var
+
+DEFINE SYMBOL have_pvar = 1
+
+! cannot do native striding if this is a descriptor dataset. In that case
+! just set the number of levels
+
+DEFINE SYMBOL check_for_des =  `pvar,RETURN=dsetpath`
+IF `STRINDEX("($check_for_des)", ".des") GT 0` THEN
+   IF `($input_contour_levels"0|0|1") EQ 0` THEN \
+     DEFINE SYMBOL ferret_fill_levels = ($num_fine_levels"30")
+   IF `($input_contour_levels"0|0|1") EQ 0` THEN \
+     DEFINE SYMBOL ferret_contour_levels = ($num_fine_levels"30")
+   EXIT/SCRIPT
+ENDIF
+
+! If the ferret_diff_var has been defined, use it.
+! When no levels are defined, use centered ones.
+
+IF ($ferret_diff_var"0|*>1") THEN 
+
+   IF `($input_contour_levels"0|0|1") EQ 0` THEN 
+      CANCEL SYMBOL ferret_contour_levels
+      DEFINE SYMBOL ferret_contour_levels = 20c
+      DEFINE SYMBOL ferret_center_levels = 1
+   ENDIF
+
+   IF `($input_fill_levels"0|0|1") EQ 0` THEN 
+      CANCEL SYMBOL ferret_fill_levels
+      DEFINE SYMBOL ferret_fill_levels = 20c
+      DEFINE SYMBOL ferret_center_levels = 1
+   ENDIF
+   LET pvar = ($ferret_diff_var)
+
+ENDIF
+
+LET var_size = ABS( `pvar,RETURN=size`)
+DEFINE SYMBOL var_dim = `pvar,RETURN=shape`
+LET ndims = STRLEN("($var_dim)")
+
+LET stride_for_speed = `INT( 1+ ((var_size/memsize))/ndims )`
+
+! If axes are not already strided, apply simple striding which
+! we will undo later.
+
+IF `stride_for_speed GT 1 AND ( ($native_curvilinear_xy"0") EQ 0 ) ` THEN
+   LET sz = `pvar,RETURN=isize`
+   IF `($xstride"0|*>1") EQ 0 AND sz GT 50` THEN
+     SET AXIS/STRIDE=`stride_for_speed` `pvar,RETURN=xaxis`
+     DEFINE SYMBOL undo_x = 1
+   ENDIF
+
+   LET sz = `pvar,RETURN=jsize`
+   IF `($ystride"0|*>1") EQ 0 AND sz GT 50` THEN 
+     SET AXIS/STRIDE=`stride_for_speed` `pvar,RETURN=yaxis`
+     DEFINE SYMBOL undo_y = 1
+   ENDIF
+
+   LET sz = `pvar,RETURN=lsize`
+   IF `($tstride"0|*>1") EQ 0 AND sz GT 50` THEN 
+     SET AXIS/STRIDE=`stride_for_speed` `pvar,RETURN=taxis`
+     DEFINE SYMBOL undo_t = 1
+   ENDIF
+
+ENDIF
+
+! If already strided, do index strides.
+
+IF ($native_curvilinear_xy"0") THEN
+   LET strd_xdel = 1
+   IF `($clon_imax)-($clon_imin) GT 50` THEN \
+      LET strd_xdel = `INT( (($clon_imax)-($clon_imin))/10 )`
+   LET strd_ydel = 1
+   IF `($clat_jmax)-($clat_jmin) GT 50` THEN \
+      LET strd_ydel = `INT( (($clat_jmax)-($clat_jmin))/10 )`
+
+   LET tsize  `pvar,RETURN=lsize`
+   IF `tsize GT 30` THEN 
+! This when the incoming t region is the region over which to animate...
+!     LET strd_lo = `L[gt=pvar,t="($region_t_lo)"]`
+!     LET strd_hi = `L[gt=pvar,t="($region_t_hi)"]`
+     LET strd_lo = 1
+     LET strd_hi = tsize
+     LET strd_del = `(strd_hi-strd_lo)/10`
+     DEFINE SYMBOL index_strides = L=`strd_lo`:`strd_hi`:`INT(strd_del)`
+   ENDIF
+
+   LET pvar = \
+    ($data_var)[d=($data_num),i=($clon_imin):($clon_imax):`strd_xdel`,\
+       j=($clat_jmin):($clat_jmax):`strd_ydel`]
+   IF ($region_z"0|*>1") THEN LET pvar = \
+    ($data_var)[d=($data_num),i=($clon_imin):($clon_imax):`strd_xdel`,\
+       j=($clat_jmin):($clat_jmax):`strd_ydel`,($region_z)]
+ELSE 
+   
+   IF ($xstride"0|1>0|*>1") THEN
+      LET xsize  `pvar,RETURN=isize`
+      IF `xsize GT 50` THEN
+        LET strd_lo = `i[gx=pvar,x=($region_x_lo)]`
+        LET strd_hi = `i[gx=pvar,x=($region_x_hi)]`
+        LET strd_del = `(strd_hi-strd_lo)/10`
+        DEFINE SYMBOL index_strides = i=`strd_lo`:`strd_hi`:`INT(strd_del)`
+      ENDIF
+   ENDIF
+   
+   IF ($ystride"0|1>0|*>1") THEN
+      LET ysize  `pvar,RETURN=jsize`
+      IF `ysize GT 50` THEN 
+        LET strd_lo = `j[gy=pvar,y=($region_y_lo)]`
+        LET strd_hi = `j[gy=pvar,y=($region_y_hi)]`
+        LET strd_del = `(strd_hi-strd_lo)/10`
+        IF ($index_strides"0|*>1") THEN 
+           DEFINE SYMBOL index_strides = ($index_strides),j=`strd_lo`:`strd_hi`:`INT(strd_del)`
+        ELSE
+           DEFINE SYMBOL index_strides = j=`strd_lo`:`strd_hi`:`INT(strd_del)`
+        ENDIF
+      ENDIF
+   ENDIF
+ENDIF 
+
+IF ($zstride"0|1>0|*>1") THEN 
+   LET zsize  `pvar,RETURN=ksize`
+   IF `zsize GT 50` THEN 
+     LET strd_lo = `k[gz=pvar,z=($region_z_lo)]`
+     LET strd_hi = `k[gz=pvar,z=($region_z_hi)]`
+     LET strd_del = `(strd_hi-strd_lo)/10`
+     IF ($index_strides"0|*>1") THEN 
+        DEFINE SYMBOL index_strides = ($index_strides),k=`strd_lo`:`strd_hi`:`INT(strd_del)`
+     ELSE
+        DEFINE SYMBOL index_strides = k=`strd_lo`:`strd_hi`:`INT(strd_del)`
+     ENDIF
+   ENDIF
+ENDIF
+
+
+IF ($tstride"0|1>0|*>1") THEN 
+   LET tsize  `pvar,RETURN=lsize`
+   IF `tsize GT 50` THEN 
+     IF ($index_strides"0|*>1") THEN 
+! This when the incoming t region is the region over which to animate...
+!        LET strd_lo = `L[gt=pvar,t="($region_t_lo)"]`
+!        LET strd_hi = `L[gt=pvar,t="($region_t_hi)"]`
+        LET strd_lo = 1
+        LET strd_hi = tsize
+        LET strd_del = `(strd_hi-strd_lo)/10`
+        DEFINE SYMBOL index_strides = ($index_strides),`strd_lo`:`strd_hi`:`INT(strd_del)`
+     ELSE
+        DEFINE SYMBOL  index_strides = `strd_lo`:`strd_hi`:`INT(strd_del)`
+     ENDIF
+   ENDIF
+ENDIF
+
+IF ($index_strides"0|*>1") THEN 
+   DEFINE SYMBOL ppvar = pvar[($index_strides)]
+ELSE
+   DEFINE SYMBOL ppvar = pvar
+ENDIF
+
+! Execute the stat command to load symbols with the variables
+! mean, max, min, std.
+
+STAT ($ppvar)
+
+! Undo the striding. Other striding may be set elsewhere
+
+IF `stride_for_speed GT 1` THEN
+   IF `($undo_x"0") GT 0` THEN CANCEL AXIS/STRIDE `pvar,RETURN=xaxis`
+   IF `($undo_y"0") GT 0` THEN CANCEL AXIS/STRIDE `pvar,RETURN=yaxis`
+   IF `($undo_z"0") GT 0` THEN CANCEL AXIS/STRIDE `pvar,RETURN=zaxis`
+   IF `($undo_t"0") GT 0` THEN CANCEL AXIS/STRIDE `pvar,RETURN=taxis`
+ENDIF
+
+IF `($stat_ngood"0") EQ 0` THEN EXIT/SCRIPT
+
+! Compute rounded-off levels with the PPL %RANGE command.
+
+!!!  Suggestions from Hankin
+! Determine contour levels to use such that a fine density of levels is used within +/- 1 std dev
+! and a coarse density is used out to +/- 2 std dev.
+! The ratio of densities is density_factor = fine/coarse.
+
+LET density_factor = 4
+! fraction_that_are_fine = density_factor/(1+density_factor)
+
+! This can happen if the data is a constant value...
+IF `($stat_min) EQ ($stat_max)` THEN EXIT/SCRIPT
+
+DEFINE SYMBOL num_fine_levels = `(density_factor/(1+density_factor)) * ($num_contour_levels"30")`
+DEFINE SYMBOL num_coarse_levels =  `($num_contour_levels"30") - ($num_fine_levels)`
+DEFINE SYMBOL half_num_coarse_levels = `($num_coarse_levels)/2`
+
+! Compute rounded-off levels with the PPL %RANGE command.
+
+LET nstd = 2*($stat_std)
+LET nstd = 1*($stat_std)
+
+IF ($stat_mean"bad>1|bad>1|*>0") THEN 
+  DEFINE SYMBOL error_string "The ($data_var)[d=($data_num)] variable has no valid data"
+  MESSAGE/ERROR **ERROR ($error_string)
+  EXIT/PROGRAM
+ENDIF
+
+IF ($ferret_center_levels) THEN 
+   GO LAS_centered_levels
+ELSE
+   GO LAS_non_centered_levels
+ENDIF
+
+! Use these levels to reset ferret_contour_levels and ferret_fill_levels 
+
+IF `($input_contour_levels"0|0|1") EQ 0` THEN \
+   DEFINE SYMBOL ferret_fill_levels = ($ferret_auto_levels)
+IF `($input_contour_levels"0|0|1") EQ 0` THEN \
+   DEFINE SYMBOL ferret_contour_levels = ($ferret_auto_lines)
+
+! End of file ------------LAS_auto_levels_animate.jnl--------------------------
+
