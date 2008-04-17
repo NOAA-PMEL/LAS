@@ -42,7 +42,9 @@ public class RuntimeEnvironment implements Cloneable{
     /** Returns an array of the current environment variables
      */
     public String[]  getEnv(){
-        
+        if ( parameters == null ) {
+        	return null;
+        }
         int size = parameters.size();
         int i=0;
         String [] envp = new String[size];

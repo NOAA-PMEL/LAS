@@ -1,0 +1,9 @@
+<html>
+<!-- LAS SERVER OK -->
+<head>
+<title>LAS Output -- $las_config.getTitle()</title>
+</head>
+<body>
+Dummy netcdf files is <a href="$las_response.getResult("netcdf")">here.</a>
+</body>
+</html>

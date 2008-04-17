@@ -70,10 +70,10 @@ public class FregridTool extends TemplateTool {
 		lasFregridBackendConfig.setBaseDir(getResourcePath(lasFregridBackendConfig.getBaseDir()));
 		HashMap<String, String> envMap = lasFregridBackendConfig.getEnvironment();
 		RuntimeEnvironment runTimeEnv = new RuntimeEnvironment();
-                // Set any environment variables that were included in the config.
-                if ( envMap != null) {
-		    runTimeEnv.setParameters(envMap);
-                }
+		// Set any environment variables that were included in the config.
+		if ( envMap != null) {
+			runTimeEnv.setParameters(envMap);
+		}
 
 
 
@@ -244,7 +244,7 @@ public class FregridTool extends TemplateTool {
 		for (int i = 0; i < args.length; i++) {
 			cmd[offset + i] = args[i];
 		}
-
+		
 		String env[] = runTimeEnv.getEnv();
 
 		File workDirFile = null;
