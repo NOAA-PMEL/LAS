@@ -1361,7 +1361,7 @@ streamable="true" mime_type="application/postscript"/> -->
     <operation name="MetadataURLs" ID="MetadataURLs" output_template="metadata_opendap" service_action="" private="true">
           <service>template</service>
 </operation>
-    <operation name="Regrid" ID="Fregrid" service_action="launch">
+    <operation name="Regrid" ID="Fregrid" service_action="launch" output_template="fregrid">
         <response ID="FregridResponse">
             <result type="debug" ID="db_debug" file_suffix=".txt"/>
             <result type="netCDF" ID="netcdf" file_suffix=".nc"/>
