@@ -8,6 +8,7 @@
 		<service name="obis" url="http://@SERVLET_ROOT_URL@/@APPNAME@/services/LASObisBackend" method="getProduct"/>
 		<service name="iobis" url="http://@SERVLET_ROOT_URL@/@APPNAME@/services/LASIobisBackend" method="getProduct"/>
 		<service name="kml" url="http://@SERVLET_ROOT_URL@/@APPNAME@/services/LASKMLBackend" method="mapScaleToKML"/>
+		<service name="fregrid" url="http://@SERVLET_ROOT_URL@/@APPNAME@/services/LASFregridBackend" method="getProduct"/>
                 <service name="local" method="getTHREDDS" url="local"/>
 	</servers>
         <smtp host="localhost"/>

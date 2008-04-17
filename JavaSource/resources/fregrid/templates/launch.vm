@@ -1,0 +1,3 @@
+#set ($varid = $las_backendrequest.getVariables().get(0))
+#set ($netcdf = $las_backendrequest.getResultAsFile("netcdf"))
+${varid}_file $netcdf
