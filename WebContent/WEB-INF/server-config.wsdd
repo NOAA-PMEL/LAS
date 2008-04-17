@@ -66,6 +66,11 @@
   <parameter name="className" value="gov.noaa.pmel.tmap.las.service.kml.KMLBackendService"/>
   <parameter name="scope" value="Application"/>
  </service>
+  <service name="LASFregridBackend" provider="java:RPC">
+  <parameter name="allowedMethods" value="*"/>
+  <parameter name="className" value="gov.noaa.pmel.tmap.las.service.fregrid.FregridBackendService"/>
+  <parameter name="scope" value="Application"/>
+ </service>
  <transport name="http">
   <requestFlow>
    <handler type="URLMapper"/>

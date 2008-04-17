@@ -1360,6 +1360,21 @@ streamable="true" mime_type="application/postscript"/> -->
 <!-- This one show all of the above with the OPeNDAP access URLs. -->
     <operation name="MetadataURLs" ID="MetadataURLs" output_template="metadata_opendap" service_action="" private="true">
           <service>template</service>
+</operation>
+    <operation name="Regrid" ID="Fregrid" service_action="launch">
+        <response ID="FregridResponse">
+            <result type="debug" ID="db_debug" file_suffix=".txt"/>
+            <result type="netCDF" ID="netcdf" file_suffix=".nc"/>
+            <result type="cancel" ID="cancel" file_suffix=".txt"/>
+        </response>
+        <properties>
+            <property_group type="backend_request">
+                <property>
+                    <name>exclude</name>
+                    <value>ferret</value>
+                </property>
+            </property_group>
+        </properties>
+        <service>fregrid</service>
     </operation>
-
 </operations>
