@@ -176,7 +176,7 @@ public class ProductServerRunner  extends Thread  {
                         backendRequestDocument.runRemote();
                     }
                 } catch (LASException e) {
-                    setError(session, "Product request cannot service for sub-opertaion of ID="+key, e.toString());
+                    setError(session, "Product request cannot find service URL for sub-opertaion of ID="+key, e.toString()+"in productserver.xml.");
                     break;
                 }
 
