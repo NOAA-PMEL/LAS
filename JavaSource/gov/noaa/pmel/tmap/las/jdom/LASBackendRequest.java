@@ -665,7 +665,7 @@ public class LASBackendRequest extends LASDocument {
             Element variable = (Element) varIt.next();
             variables = variables+variable.getAttributeValue("var");
             if (varIt.hasNext()) {
-                variables = variables + ", ";
+                variables = variables + ",";
             }
         }
         return variables;

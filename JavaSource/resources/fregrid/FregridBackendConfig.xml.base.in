@@ -32,4 +32,10 @@
                 An error occurred in the service that was creating your product.
               </text>
            </message>
+           <message type="startsWith" level="error">
+              <key>FATAL</key>
+              <text>
+                An error occurred in the service that was creating your product.
+              </text>
+           </message>
     </messages>
