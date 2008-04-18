@@ -1,6 +1,6 @@
 <application>
 	<invoker base_dir="resources/fregrid"
-                 executable="/home/porter/ansley/gridspec/tools_20071113/bin/fregrid"
+                 executable="/home/porter/rhs/gridspec/tools_20071113/bin/fregrid"
                  time_limit="200" template_dir="templates" 
                  output_dir="/home/rhs/tomcat/webapps/baker/output"
                  http_base_url="http://strider.weathertopconsulting.com:8880/baker/output"
@@ -32,5 +32,17 @@
                 An error occurred in the service that was creating your product.
               </text>
            </message>
+           <message type="startsWith" level="error">
+              <key>FATAL</key>
+              <text>
+                An error occurred in the service that was creating your product.
+              </text>
+           </message>
     </messages>
+ <environment>
+        <variable>
+            <name>NPES</name>
+             <value>1</value>
+        </variable>
+</environment>
 </application>
