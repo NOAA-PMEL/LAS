@@ -315,7 +315,6 @@ function makeFramesRequest(theReq){
 function handleFramesResponse(LASResponseText){
     //parse the LASResponse
     var Response;
-   
     try{
         var JSONObject = LASResponseText.parseJSON();
         
@@ -323,7 +322,6 @@ function handleFramesResponse(LASResponseText){
         alert('Error parsing LASRespnse:' + e);
         return;
     }
-
     try{
         Response = new LASResponse(JSONObject);
     }catch(e){
@@ -331,7 +329,6 @@ function handleFramesResponse(LASResponseText){
         alert("error");
         return;
     }
-
     if(Response.isError()){
         showError(Response);    
     }else{
@@ -680,10 +677,11 @@ function animate_makeFirstLASRequest(timePoint) {
     //for XY view
     if(initView == 'xy' || initView == 'yx'){
         thisReq.setOperation('Plot_2D_XY');
-        if(fillLevels != null){
+        if(fillLevels != null && fillLevels != "" && fillLevels != "\n"){
+            alert(fillLevels);
             thisReq.setProperty('ferret','fill_levels', fillLevels);
         };
-        if(contourLevels != null){
+        if(contourLevels != null && fillLevels != "" && fillLevels != "\n"){
             thisReq.setProperty('ferret','contour_levels', contourLevels);
         };
     };
@@ -691,10 +689,10 @@ function animate_makeFirstLASRequest(timePoint) {
     //for XZ view
     if(initView == 'xz' || initView == 'zx'){
         thisReq.setOperation('Plot_2D');
-        if(fillLevels != null){
+        if(fillLevels != null && fillLevels != "" && fillLevels != "\n"){
             thisReq.setProperty('ferret','fill_levels', fillLevels);
         };
-        if(contourLevels != null){
+        if(contourLevels != null && fillLevels != "" && fillLevels != "\n"){
             thisReq.setProperty('ferret','contour_levels', contourLevels);
         };
     };
@@ -702,10 +700,10 @@ function animate_makeFirstLASRequest(timePoint) {
     //for YZ view
     if(initView == 'yz' || initView == 'zy'){
         thisReq.setOperation('Plot_2D');
-        if(fillLevels != null){
+        if(fillLevels != null && fillLevels != "" && fillLevels != "\n"){
             thisReq.setProperty('ferret','fill_levels', fillLevels);
         };
-        if(contourLevels != null){
+        if(contourLevels != null && fillLevels != "" && fillLevels != "\n"){
             thisReq.setProperty('ferret','contour_levels', contourLevels);
         };
     };
@@ -714,7 +712,7 @@ function animate_makeFirstLASRequest(timePoint) {
     if(initView == 'xt' || initView == 'tx'){
         thisReq.setOperation('Plot_1D');
         thisReq.setProperty('ferret','view','x');
-        if(depAxisScale != null){
+        if(depAxisScale != null && depAxisScale != "" && depAxisScale != "\n"){
             thisReq.setProperty('ferret','dep_axis_scale', depAxisScale);
         };
     };
@@ -723,7 +721,7 @@ function animate_makeFirstLASRequest(timePoint) {
     if(initView == 'yt' || initView == 'ty'){
         thisReq.setOperation('Plot_1D');
         thisReq.setProperty('ferret','view','y');
-        if(depAxisScale != null){
+        if(depAxisScale != null && depAxisScale != "" && depAxisScale != "\n"){
             thisReq.setProperty('ferret','dep_axis_scale', depAxisScale);
         };
     };
@@ -732,7 +730,7 @@ function animate_makeFirstLASRequest(timePoint) {
     if(initView == 'zt' || initView == 'tz'){
         thisReq.setOperation('Plot_1D');
         thisReq.setProperty('ferret','view','z');
-        if(depAxisScale != null){
+        if(depAxisScale != null && depAxisScale != "" && depAxisScale != "\n"){
             thisReq.setProperty('ferret','dep_axis_scale', depAxisScale);
         };
     };
@@ -741,7 +739,7 @@ function animate_makeFirstLASRequest(timePoint) {
     if(initView == 'x'){
         thisReq.setOperation('Plot_1D');
         thisReq.setProperty('ferret','view','x');
-        if(depAxisScale != null){
+        if(depAxisScale != null && depAxisScale != "" && depAxisScale != "\n"){
             thisReq.setProperty('ferret','dep_axis_scale', depAxisScale);
         };
     };
@@ -750,7 +748,7 @@ function animate_makeFirstLASRequest(timePoint) {
     if(initView == 'y'){
         thisReq.setOperation('Plot_1D');
         thisReq.setProperty('ferret','view','y');
-        if(depAxisScale != null){
+        if(depAxisScale != null && depAxisScale != "" && depAxisScale != "\n"){
             thisReq.setProperty('ferret','dep_axis_scale', depAxisScale);
         };
     };
@@ -759,7 +757,7 @@ function animate_makeFirstLASRequest(timePoint) {
     if(initView == 'z'){
         thisReq.setOperation('Plot_1D');
         thisReq.setProperty('ferret','view','z');
-        if(depAxisScale != null){
+        if(depAxisScale != null && depAxisScale != "" && depAxisScale != "\n"){
            thisReq.setProperty('ferret','dep_axis_scale', depAxisScale);
         };
     };
@@ -768,10 +766,10 @@ function animate_makeFirstLASRequest(timePoint) {
     if(initView == 'xyt' || initView == 'yxt'){
         thisReq.setOperation('Plot_2D_XY');
         thisReq.setProperty('ferret','view','xy');
-        if(fillLevels != null){
+        if(fillLevels != null && fillLevels != "" && fillLevels != "\n"){
             thisReq.setProperty('ferret','fill_levels', fillLevels);
         };
-        if(contourLevels != null){
+        if(contourLevels != null && fillLevels != "" && fillLevels != "\n"){
             thisReq.setProperty('ferret','contour_levels', contourLevels);
         };
     };
@@ -780,10 +778,10 @@ function animate_makeFirstLASRequest(timePoint) {
     if(initView == 'xzt' || initView == 'zxt'){
         thisReq.setOperation('Plot_2D');
         thisReq.setProperty('ferret','view','xz');
-        if(fillLevels != null){
+        if(fillLevels != null && fillLevels != "" && fillLevels != "\n"){
             thisReq.setProperty('ferret','fill_levels', fillLevels);
         };
-        if(contourLevels != null){
+        if(contourLevels != null && fillLevels != "" && fillLevels != "\n"){
             thisReq.setProperty('ferret','contour_levels', contourLevels);
         };
     };
@@ -792,10 +790,10 @@ function animate_makeFirstLASRequest(timePoint) {
     if(initView == 'yzt' || initView == 'zyt'){
         thisReq.setOperation('Plot_2D');
         thisReq.setProperty('ferret','view','yz');
-        if(fillLevels != null){
+        if(fillLevels != null && fillLevels != "" && fillLevels != "\n"){
             thisReq.setProperty('ferret','fill_levels', fillLevels);
         };
-        if(contourLevels != null){
+        if(contourLevels != null && fillLevels != "" && fillLevels != "\n"){
             thisReq.setProperty('ferret','contour_levels', contourLevels);
         };
     };
