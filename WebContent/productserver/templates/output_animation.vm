@@ -678,7 +678,6 @@ function animate_makeFirstLASRequest(timePoint) {
     if(initView == 'xy' || initView == 'yx'){
         thisReq.setOperation('Plot_2D_XY');
         if(fillLevels != null && fillLevels != "" && fillLevels != "\n"){
-            alert(fillLevels);
             thisReq.setProperty('ferret','fill_levels', fillLevels);
         };
         if(contourLevels != null && fillLevels != "" && fillLevels != "\n"){
