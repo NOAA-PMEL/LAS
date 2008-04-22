@@ -4,6 +4,10 @@
 ! Date: 3/2007 
 ! 3/29/2007 ACM Fix logic interpreting contents of ferret_interpolate_data 
 !
+! 22-Apr-2008 If there is a transformation, write a new attribute, transform_history
+!             Previously tried to append to the existing history attribute but if that
+!             contained special characters such as ; Ferret had parsing problems.
+!
 ! List a variable with its curviliear coordinate data to a netCDF file.
 ! Based on list_data.jnl
 
@@ -31,17 +35,20 @@ IF ($region_zt"0|*>1) THEN DEFINE SYMBOL ferret_list_var ($data_var)[d=($data_nu
 SET DATA/SAVE
 SET DATA ($data_num)
 LET attlist = ($data_var).attnames
-CANCEL SYMBOL data_var_history
-IF `IS_ELEMENT_OF_STR(attlist, "history") GT 0` THEN \
-   DEFINE SYMBOL data_var_history = `($data_var).history `
-DEFINE ATTRIBUTE/OUTPUT ($data_var).history = "($data_var_history)($data_var_transform)"
 
-IF `($data_var_history"0|*>1")+($data_var_transform"0|*>1") GT 0` THEN 
-   DEFINE SYMBOL var_history  "History: ($data_var_history)($data_var_transform)"
-   LET var_hist = "($var_history)"
+IF `IS_ELEMENT_OF_STR(attlist, "history") GT 0` THEN 
+   SET ATTRIBUTE/OUTPUT ($data_var).history
+ENDIF
+
+IF ($data_var_transform"0|*>1") THEN 
+    DEFINE attribute ($data_var).transform_history  "($data_var)($data_var_transform)"
+    SET ATTRIBUTE/OUTPUT ($data_var).transform_history
+    DEFINE SYMBOL var_history ($data_var)($data_var_transform)"
+    LET var_hist = "($var_history)"
+    SET VAR/TITLE="($data_title)($data_var_transform)" ($data_var)
 ENDIF
 SET DATA/RESTORE
-
+SET DATA ($data_num)
 
 ! Define an attribute containing the names of the curvilinear coordinate varibles
 
@@ -110,7 +117,7 @@ LIST/APPEND/FILE/($frmt) ($ferret_list_xcoords)
 LIST/APPEND/FILE/($frmt) ($ferret_list_ycoords)
 
 !SET DATA ($data_num)
-SET VAR/TITLE="($data_title)" ($data_var)
+SET VAR/TITLE="($data_title)($data_var_transform)" ($data_var)
 SET ATTRIBUTE/OUTPUT ($data_var).coordinates 
 
 IF `size LE max_size` THEN
@@ -158,3 +165,5 @@ ELSE
    REPEAT/L=($lmin):($lmax):`lchunk` REPEAT/K=($kmin):($kmax):`kchunk` REPEAT/J=($clat_jmin):($clat_jmax):`jchunk` (LIST/APPEND/FILE/($frmt)/J=`j`:`jtop`/K=`k`:`ktop`/L=`l`:`ltop`/JLIMITS=($clat_jmin):($clat_jmax)/KLIMITS=($kmin):($kmax)/LLIMITS=($lmin):($lmax) ($ferret_list_var); CANC MEM/ALL)
 
 ENDIF
+
+! End of script ---------- list_a_variable.jnl----------------------------
