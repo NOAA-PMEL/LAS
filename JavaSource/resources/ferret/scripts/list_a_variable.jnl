@@ -4,6 +4,11 @@
 ! Author: ansley 
 ! Date: 2007/09/08 
 !
+! 22-Apr-2008 If there is a transformation, write a new attribute, transform_history
+!             Previously tried to append to the existing history attribute but if that
+!             contained special characters such as ; Ferret had parsing problems.
+!             Also changes to output of transformed variables.
+!
 ! Called by list_data.jnl Initialize and write a single variable, appending 
 ! it to the ascii or netCDF output file.
 ! Argument is the variable number, 0, 1, ...
@@ -19,8 +24,10 @@ GO LAS_initialize_region ($var_num)
 GO LAS_initialize_data ($var_num)
 
 ! Here is the variable we will list out, with the region specified.
-DEFINE SYMBOL ferret_list_var = ($ferret_plot_var)
- 
+IF `($ferret_list_var"0|*>1") NE 1` THEN DEFINE SYMBOL ferret_list_var = ($ferret_plot_var)
+SHOW SYMBOL ferret_list_var
+SHOW SYMBOL data_dup_varname
+
 IF ($ferret_format%|txt>1|*>0) THEN
   DEFINE SYMBOL frmt ($frmt)/width=1024
 ENDIF
@@ -42,7 +49,6 @@ ENDIF
 ! write out the data on a rectlinear grid.
 
 LET its_curvi = `( ($ferret_curvi_coord_lat"0|*>1) + STRINDEX("($ferret_view)", "xy") ) GT 1`
-
 ! If user requested regridding to rectilinear grid, then proceed 
 ! as for non-curvilinear data
 
@@ -59,17 +65,26 @@ ENDIF
 SET DATA/SAVE
 SET DATA ($data_num)
 LET attlist = ($data_var).attnames
-CANCEL SYMBOL data_var_history
-IF `IS_ELEMENT_OF_STR(attlist, "history") GT 0` THEN \
-   DEFINE SYMBOL data_var_history = `($data_var).history `
-DEFINE ATTRIBUTE/OUTPUT ($data_var).history = "($data_var_history)($data_var_transform)"
 
-IF `($data_var_history"0|*>1")+($data_var_transform"0|*>1") GT 0` THEN 
-   DEFINE SYMBOL var_history  "History: ($data_var_history)($data_var_transform)"
-   LET var_hist = "($var_history)"
+IF ($data_var_transform"0|*>1") THEN 
+    DEFINE attribute ($ferret_list_var).transform_history  "($data_var)($data_var_transform)"
+    SET ATTRIBUTE/OUTPUT ($ferret_list_var).transform_history
+    DEFINE SYMBOL var_history ($ferret_list_var)($data_var_transform)
+    LET var_hist = "($var_history)"
+    SET VAR/TITLE="($ferret_list_var)($data_var_transform)" ($ferret_list_var)
+    IF ($data_dup_varname"0|*>1") THEN
+       DEFINE attribute ($ferret_list_var).transform_history  "($data_var)($data_var_transform)"
+       SET ATTRIBUTE/OUTPUT ($ferret_list_var).transform_history
+    ENDIF
+    IF ($data_dup_varname"0|*>1") THEN
+       DEFINE attribute ($ferret_list_var).transform_history  "($data_var)($data_var_transform)"
+       SET ATTRIBUTE/OUTPUT ($ferret_list_var).transform_history
+    ENDIF
 ENDIF
-
 SET DATA/RESTORE
+pause
+SET DATA/RESTORE
+SET data ($data_num)
 
 ! For requests that encompass 360 deg of longitude Ferret returns N points if
 ! the range boundaries lie exactly on grid cell boundaries and N+1 points 
@@ -79,7 +94,7 @@ SET DATA/RESTORE
 
 IF ($region_x"0|*>1") THEN
    IF `($region_y_range"0|0|*>1") GT 0` THEN
-      LET the_coords = x[gx=($ferret_list_var)]
+      LET the_coords = x[gx=($data_var),($region_x)]
       DEFINE SYMBOL user_istart `the_coords,RETURN=istart`
       DEFINE SYMBOL user_iend `the_coords,RETURN=iend`
       CANCEL REGION/X
@@ -109,7 +124,7 @@ ENDIF  ! region_x
 
 IF ($region_y"0|*>1") THEN
    IF `($region_y_range"0|0|*>1") GT 0` THEN
-      LET the_coords = y[gy=($ferret_list_var)]
+      LET the_coords = y[gy=($data_var),($region_y)]
       DEFINE SYMBOL jmin `the_coords,RETURN=jstart`
       DEFINE SYMBOL jmax `the_coords,RETURN=jend`
       DEFINE SYMBOL jsize `the_coords,RETURN=jsize`
@@ -122,7 +137,7 @@ ENDIF  ! region_y
 
 IF ($region_z"0|*>1") THEN
    IF `($region_z_range"0|0|*>1") GT 0` THEN
-      LET the_coords = z[gz=($ferret_list_var)]
+      LET the_coords = z[gz=($data_var),($region_z)]
       DEFINE SYMBOL kmin `the_coords,RETURN=kstart`
       DEFINE SYMBOL kmax `the_coords,RETURN=kend`
       DEFINE SYMBOL ksize `the_coords,RETURN=ksize`
@@ -134,16 +149,10 @@ IF ($region_z"0|*>1") THEN
 ENDIF  ! region_z
 
 IF ($region_t"0|*>1") THEN
-   IF `($region_t_range"0|0|*>1") GT 0` THEN
-      LET the_coords = t[gt=($ferret_list_var)]
+      LET the_coords = t[gt=($data_var),($region_t)]
       DEFINE SYMBOL lmin `the_coords,RETURN=lstart`
       DEFINE SYMBOL lmax `the_coords,RETURN=lend`
       DEFINE SYMBOL lsize `the_coords,RETURN=lsize`
-   ELSE  ! range is 0
-      DEFINE SYMBOL lmin 1
-      DEFINE SYMBOL lmax 1
-      DEFINE SYMBOL lsize 1
-   ENDIF
 ENDIF  ! region_t
 
 ! RETURN=*start returns 0 IF the axis is an undefined axis
@@ -188,15 +197,12 @@ IF `size LE max_size` THEN
    !     large files also works for small ... but with some overhead
 
    ! IF a duplicate variable name is assigned for netcdf listings, change the name before listing 
-   IF `($data_dup_varname%0|*>1%) GT 0` THEN
-      DEFINE SYMBOL data_dup_varname = ($data_var)
-!      DEFINE SYMBOL var_path = `($ferret_list_var),RETURN=dsetpath`
-      SET VAR/TITLE="($data_title)" ($data_dup_varname)
-      SET VAR/UNITS="`($ferret_list_var),RETURN=UNITS`" ($data_dup_varname)
+   show symbol data_dup_varname
 
-      DEFINE ATTRIBUTE/OUTPUT ($data_var).history = "($data_var_history)($data_var_transform)"
-      DEFINE ATTRIBUTE/OUTPUT ($data_dup_varname).history = "($data_var_history)($data_var_transform)"
-      DEFINE ATTRIBUTE/OUTPUT ($data_dup_varname).description = "($data_var_history)($data_var_transform)"
+   IF `($data_dup_varname%0|*>1%) GT 0` THEN
+      SET VAR/TITLE="($data_title)($data_var_transform)" ($data_dup_varname)[d=($data_num)]
+      SET VAR/UNITS="($data_units)" ($data_dup_varname)
+      SET ATTRIBUTE/OUTPUT ($data_dup_varname).history
 
       IF `($ferret_format"0|asc>1|*>0") + ($ferret_format"0|txt>1|*>0") GT 0` THEN
          IF ($var_history"0|*>1") THEN LIST/APPEND/NOHEAD/FORMAT=(A)/FILE="($result_ferret_listing_filename)" var_hist
@@ -241,18 +247,27 @@ ELSE
      
       IF `($data_dup_varname%0|*>1%) GT 0` THEN
         LET ($data_dup_varname) = ($ferret_list_var)
-        DEFINE SYMBOL data_dup_varname =  ($data_var)  ! the limits min,max,chunk determine the range
-!        DEF SYM var_path = `($ferret_list_var),RETURN=dsetpath`
-        SET VAR/TITLE="($data_title)" ($data_dup_varname)
-        SET VAR/UNITS="`($ferret_list_var),RETURN=UNITS`" ($data_dup_varname)
+!        DEFINE SYMBOL data_dup_varname =  ($data_var)  ! the limits min,max,chunk determine the range
+        SET VAR/TITLE="($data_title)($data_var_transform)" ($data_dup_varname)
+        SET VAR/UNITS="($data_units)" ($data_dup_varname)
 
+        IF `STRINDEX("($ferret_list_var)", "the_var_rect") GT 0` THEN
+           LET ($data_dup_varname) = ($ferret_list_var_no_zt)
+           DEFINE SYMBOL ferret_list_var = ($data_dup_varname)
+           SET VAR/TITLE="($data_title)($data_var_transform)" ($data_dup_varname)
+           SET VAR/UNITS="($data_units)" ($data_dup_varname)
+           
+           DEFINE attribute ($data_dup_varname).transform_history  "($data_var)($data_var_transform)"
+           SET ATTRIBUTE/OUTPUT ($data_dup_varname).transform_history
+
+           REPEAT/L=($lmin):($lmax):`lchunk` REPEAT/K=($kmin):($kmax):`kchunk`  (LIST/APPEND/FILE/($frmt)/K=`k`:`ktop`/L=`l`:`ltop`/KLIMITS=($kmin):($kmax)/LLIMITS=($lmin):($lmax) ($ferret_list_var); CANC MEM/ALL)
+        ELSE
      ! ... netCDF output in chunks
         REPEAT/L=($lmin):($lmax):`lchunk` REPEAT/K=($kmin):($kmax):`kchunk` REPEAT/J=($jmin):($jmax):`jchunk` (LIST/APPEND/FILE/($frmt)/J=`j`:`jtop`/K=`k`:`ktop`/L=`l`:`ltop`/JLIMITS=($jmin):($jmax)/KLIMITS=($kmin):($kmax)/LLIMITS=($lmin):($lmax) ($data_dup_varname); CANC MEM/ALL)
      ELSE
      ! ... netCDF output in chunks
 
-        DEFINE SYMBOL ferret_list_var =  ($data_var)  ! the limits min,max,chunk determine the range
-
+!        DEFINE SYMBOL ferret_list_var =  ($data_var)  ! the limits min,max,chunk determine the range
         REPEAT/L=($lmin):($lmax):`lchunk` REPEAT/K=($kmin):($kmax):`kchunk` REPEAT/J=($jmin):($jmax):`jchunk` (LIST/APPEND/FILE/($frmt)/J=`j`:`jtop`/K=`k`:`ktop`/L=`l`:`ltop`/JLIMITS=($jmin):($jmax)/KLIMITS=($kmin):($kmax)/LLIMITS=($lmin):($lmax) ($ferret_list_var); CANC MEM/ALL)
      ENDIF
 
@@ -272,3 +287,5 @@ ELSE
    set region save
 
 ENDIF
+
+! End of script ---------- list_a_variable.jnl----------------------------
