@@ -22,21 +22,22 @@ set mode ver:always
 !
 ! set curvilinear mapping dataset
 
-IF ($cf_map_($num)_chained"0|1|*>1) THEN
-  DEFINE SYMBOL cf_map_url \"($ferret_curvi_coord_map2file)\"
-  IF ($constraint_0_rhs"0|5|*>0) THEN DEFINE SYMBOL cf_map_url \"($ferret_curvi_coord_map5file)\"
-ELSE
-  DEFINE SYMBOL cf_map_url \"($ferret_curvi_coord_map2file)\"
-  IF ($constraint_0_rhs"0|5|*>0) THEN DEFINE SYMBOL cf_map_url \"($ferret_curvi_coord_map5file)\"
-ENDIF
-
 IF ($ferret_curvi_coord_mapfile"0|*>1") THEN   DEFINE SYMBOL cf_map_url \"($ferret_curvi_coord_mapfile)\"
 
+IF ($cf_map_($num)_chained"0|1|*>1) THEN
+  DEFINE SYMBOL cf_map_url \"($ferret_curvi_coord_map2file)\"
+  IF ($constraint_0_rhs"0|*>1) THEN DEFINE SYMBOL cf_map_url \"($ferret_curvi_coord_map($constraint_0_rhs)file)\"
+ELSE
+  DEFINE SYMBOL cf_map_url ($ferret_curvi_coord_map2file)
+  IF ($constraint_0_rhs"0|*>1) THEN DEFINE SYMBOL cf_map_url \"($ferret_curvi_coord_map($constraint_0_rhs)file)\"
+ENDIF
+
 DEFINE SYMBOL cf_map_var = ($ferret_curvi_coord_mapvar)
-SET DATA ($cf_map_url)
+USE ($cf_map_url)
 SET AXIS/MODULO/UNITS=degrees `($cf_map_var),RETURN=xaxis`
 SET AXIS/UNITS=degrees `($cf_map_var),RETURN=yaxis`
 DEFINE SYMBOL mapfile_num = `($cf_map_var),RETURN=dsetnum`
+
 
 ! regrid, applying region information last
 
@@ -49,10 +50,11 @@ LET the_var_curv = ($data_var)
 ! DEFINE SYMBOL the_var_title = "`($data_var)[d=($data_num)],RETURN=title`"
 ! DEFINE SYMBOL the_var_units = "`($data_var)[d=($data_num)],RETURN=units`"
 
-LET the_var_rect = ($regrid_fcn)(the_var_curv[d=($data_num)],($cf_map_var)[d=($mapfile_num)])
+LET the_var_rect = ($regrid_fcn)(($data_var)[d=($data_num)],($cf_map_var)[d=($mapfile_num)])
+LET the_var_rect_no_zt = ($regrid_fcn)(($data_var)[d=($data_num)],($cf_map_var)[d=($mapfile_num)])
 
 IF ($reg_zt"0|*>1)) THEN \
-  LET the_var_rect = ($regrid_fcn)(the_var_curv[d=($data_num),($reg_zt)],($cf_map_var)[d=($mapfile_num)])
+  LET the_var_rect = ($regrid_fcn)(($data_var)[d=($data_num),($reg_zt)],($cf_map_var)[d=($mapfile_num)])
 
 LET nx = `map[d=($mapfile_num),J=1,K=1,L=1,X=@NGD]`
 LET ny = `map[d=($mapfile_num),I=1,K=1,L=1,Y=@NGD]`
@@ -60,28 +62,43 @@ LET ny = `map[d=($mapfile_num),I=1,K=1,L=1,Y=@NGD]`
 DEFINE SYMBOL xlo = `($region_x_lo)-360`
 DEFINE SYMBOL xhi = `($region_x_hi)-360`
 
-LET imin = `i[gx=map,x=($xlo)] - 1`
-LET imax = `i[gx=map,x=($xhi)] + 1`
-LET jmin = `MAX(1, j[gy=map,y=($region_y_lo)] - 1)`
-LET jmax = `MIN(ny, j[gy=map, y=($region_y_hi)] + 1)`
+LET mapimin = `i[gx=map,x=($xlo)] - 1`
+LET mapimax = `i[gx=map,x=($xhi)] + 1`
 
+LET yy = y[gy=map]
+LET ymaphi = MIN(`yy[y=@max]`,($region_y_hi))
+LET ymaplo = MAX(`yy[y=@min]`,($region_y_lo))
+
+LET mapjmin = MAX(1, j[gy=map, y=`ymaplo`] - 1)
+LET mapjmax = MIN(ny, j[gy=map, y=`ymaphi`] + 1)
+
+USE ($data_num)
 GO get_curv_coord_bbox
 
-SET DATA "($cf_map_url)"
+USE ($cf_map_url)
 SET AXIS/MODULO/UNITS=degrees `($cf_map_var),RETURN=xaxis`
 SET AXIS/UNITS=degrees `($cf_map_var),RETURN=yaxis`
 DEFINE SYMBOL mapfile_num = `($cf_map_var),return=dsetnum`
 
 LET the_var_rect = ($regrid_fcn)(\
-       the_var_curv[d=($data_num),($reg_zt),I=($clon_imin):($clon_imax),J=($clat_jmin):($clat_jmax)],\
-      ($cf_map_var)[d=($mapfile_num),I=`imin`:`imax`,J=`jmin`:`jmax`] )
+       ($data_var)[d=($data_num),($reg_zt),I=($clon_imin):($clon_imax),J=($clat_jmin):($clat_jmax)],\
+      ($cf_map_var)[d=($mapfile_num),I=`mapimin`:`mapimax`,J=`mapjmin`:`mapjmax`] )
+LET the_var_rect_no_zt = ($regrid_fcn)(\
+       ($data_var)[d=($data_num),I=($clon_imin):($clon_imax),J=($clat_jmin):($clat_jmax)],\
+      ($cf_map_var)[d=($mapfile_num),I=`mapimin`:`mapimax`,J=`mapjmin`:`mapjmax`] )
 
-load the_var_rect
-
-LET the_var_rect_region = the_var_rect[($region_full)]
 LET the_var_rect_region = the_var_rect
+IF `STRCMP("($ferret_view)", "xy") EQ 0` THEN 
+   LET the_var_rect_region = the_var_rect
+   LET the_var_rect_region_no_zt = the_var_rect_no_zt
+ELSE
+   IF `STRINDEX("($ferret_view)", "x") GT 0` THEN LET the_var_rect_region = the_var_rect[($region_y)]
+   IF `STRINDEX("($ferret_view)", "y") GT 0` THEN LET the_var_rect_region = the_var_rect[($region_x)]
+ENDIF
 
 DEFINE SYMBOL ferret_plot_var ($expr1)the_var_rect_region($expr2)
+DEFINE SYMBOL ferret_list_var ($expr1)the_var_rect($expr2)
+DEFINE SYMBOL ferret_list_var_no_zt ($expr1)the_var_rect_no_zt($expr2)
 
 DEFINE SYMBOL ferret_plot_base_var ($ferret_plot_var)
 
@@ -91,5 +108,7 @@ IF ($expr3"0|*>1") THEN
    DEFINE SYMBOL ferret_plot_var ($expr1)the_var_rect_region($expr3)the_var_rect_region($expr4)
    DEFINE SYMBOL ferret_plot_title ($expr1) ($data_title) ($expr3) ($data_title) ($expr4) ($data_units) Regridded to ($constraint_0_rhs)@IM09@AC Grid
 ENDIF
+
+
 
 ! End of $RCSfile ---------- transform_curv_to_rect.jnl----------------------------
