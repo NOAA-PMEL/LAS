@@ -261,7 +261,7 @@ public class FerretConfig extends IOSPDocument {
     public String getFerret() {
         Element invoker = this.getRootElement().getChild("invoker");
         if ( invoker != null ) {
-            String ferret_bin = invoker.getAttributeValue("ferret_bin");
+            String ferret_bin = invoker.getAttributeValue("executable");
             if ( ferret_bin != null ) {
                return ferret_bin;
             }

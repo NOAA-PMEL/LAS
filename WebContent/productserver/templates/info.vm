@@ -24,5 +24,19 @@
 #end ##if local service
 #end ## service loop
 </table>
+<h3>Subversion Info:</h3>
+<pre>
+Path: .
+URL: file:///home/porter/tmap/svn/repos/baker/trunk
+Repository Root: file:///home/porter/tmap/svn/repos
+Repository UUID: fdbf22ae-c210-0410-be80-ca943da6b8f8
+Revision: 2903
+Node Kind: directory
+Schedule: normal
+Last Changed Author: ansley
+Last Changed Rev: 2898
+Last Changed Date: 2008-04-22 09:37:28 -0700 (Tue, 22 Apr 2008)
+
+</pre>
 </body>
 </html>

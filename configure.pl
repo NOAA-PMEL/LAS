@@ -1738,7 +1738,7 @@ sub printENV($ferretConfig, @EnvVars) {
             print CONFIGFILE '        </variable>',"\n";
         }
         print CONFIGFILE '    </environment>',"\n";
-        print CONFIGFILE '</ferret>',"\n";
+        print CONFIGFILE '</application>',"\n";
         close CONFIGFILE;
      }
 
