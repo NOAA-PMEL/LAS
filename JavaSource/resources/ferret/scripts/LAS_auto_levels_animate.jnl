@@ -43,6 +43,8 @@ ENDIF
 DEFINE SYMBOL ferret_center_levels ($ferret_center_levels"0|1|TRUE>1|*>0")
 
 ! If levels were requested but not centered ones, just return.
+
+LET nc = 0
 IF ($input_fill_levels"0") THEN 
    DEFINE SYMBOL up_fill_levels = `UPCASE("($ferret_fill_levels)")`
    LET nc = `STRINDEX("($up_fill_levels)", "C")`
@@ -60,7 +62,6 @@ ENDIF
 ! If contour levels requested with levels of nC, e.g. 20C, then get the value to
 ! set num_fine_levels in the %RANGE command below
 
-LET nc = 0
 IF ($ferret_contour_levels"0|*>1") THEN
    DEFINE SYMBOL up_contour_levels = `UPCASE("($ferret_contour_levels)")`
    LET nc = `STRINDEX("($up_contour_levels)", "C")`
@@ -79,7 +80,6 @@ IF ($ferret_fill_levels"0|*>1") THEN
       IF `slen GT 1` THEN DEFINE SYMBOL num_fine_levels = `SUBSTRING ("($up_fill_levels)", 1, slen-1)`
    ENDIF
 ENDIF
-!! PUNT
 
 ! If levels other than centered were already given, exit
 IF `nc EQ 0` THEN
@@ -97,7 +97,12 @@ LET pvar = ($ferret_xyz_var)
 ! variable masked by the coordinates in the region.
 
 IF ($native_curvilinear_xy"0") THEN
-   STAT ($ferret_curvi_coord_lon)
+   IF ($clat_jmin"0|*>1") THEN 
+      STAT ($ferret_curvi_coord_lon)[j=($clat_jmin):($clat_jmax)]
+   ELSE
+      STAT ($ferret_curvi_coord_lon)
+   ENDIF
+
    LET xreg_lo = ($region_x_lo)
    LET xreg_hi = ($region_x_hi)
    IF `xreg_hi LT ($stat_min)` THEN
@@ -133,7 +138,7 @@ DEFINE SYMBOL have_pvar = 1
 ! cannot do native striding if this is a descriptor dataset. In that case
 ! just set the number of levels
 
-DEFINE SYMBOL check_for_des =  `pvar,RETURN=dsetpath`
+DEFINE SYMBOL check_for_des =  `($data_var)[d=($data_num)],return=dsetpath`
 IF `STRINDEX("($check_for_des)", ".des") GT 0` THEN
    IF `($input_contour_levels"0|0|1") EQ 0` THEN \
      DEFINE SYMBOL ferret_fill_levels = ($num_fine_levels"30")
@@ -171,25 +176,28 @@ LET stride_for_speed = `INT( 1+ ((var_size/memsize))/ndims )`
 ! If axes are not already strided, apply simple striding which
 ! we will undo later.
 
-IF `stride_for_speed GT 1 AND ( ($native_curvilinear_xy"0") EQ 0 ) ` THEN
-   LET sz = `pvar,RETURN=isize`
-   IF `($xstride"0|*>1") EQ 0 AND sz GT 50` THEN
-     SET AXIS/STRIDE=`stride_for_speed` `pvar,RETURN=xaxis`
-     DEFINE SYMBOL undo_x = 1
-   ENDIF
+LET sampled_in_x = 0
+LET sampled_in_y = 0
 
-   LET sz = `pvar,RETURN=jsize`
-   IF `($ystride"0|*>1") EQ 0 AND sz GT 50` THEN 
-     SET AXIS/STRIDE=`stride_for_speed` `pvar,RETURN=yaxis`
-     DEFINE SYMBOL undo_y = 1
-   ENDIF
+IF `stride_for_speed GT 1` THEN
+   LET sampled_in_x = STRCMP("`pvar,RETURN=xaxis`", "SAMPLE_XLON") EQ 0 OR\
+                     STRCMP("`pvar,RETURN=xaxis`", "SAMPLE_X") EQ 0
+   LET sampled_in_y = STRCMP("`pvar,RETURN=yaxis`", "SAMPLE_YLAT") EQ 0 OR\
+                     STRCMP("`pvar,RETURN=yaxis`", "SAMPLE_Y") EQ 0
+ENDIF
 
-   LET sz = `pvar,RETURN=lsize`
-   IF `($tstride"0|*>1") EQ 0 AND sz GT 50` THEN 
-     SET AXIS/STRIDE=`stride_for_speed` `pvar,RETURN=taxis`
-     DEFINE SYMBOL undo_t = 1
-   ENDIF
+IF `($xstride"0|*>1") EQ 0 AND sampled_in_x EQ 0 AND \
+      ($no_native_strides_xy"0|*>1") NE 1 AND \
+      ($region_x"0|*>1") AND stride_for_speed GT 1` THEN
+   SET AXIS/STRIDE=`stride_for_speed` `pvar,RETURN=xaxis`
+   DEFINE SYMBOL undo_x = 1
+ENDIF
 
+IF `($ystride"0|*>1") EQ 0 AND sampled_in_y EQ 0 AND \
+      ($no_native_strides_xy"0|*>1") NE 1 AND \
+      ($region_y"0|*>1") AND stride_for_speed GT 1` THEN
+   SET AXIS/STRIDE=`stride_for_speed` `pvar,RETURN=yaxis`
+   DEFINE SYMBOL undo_y = 1
 ENDIF
 
 ! If already strided, do index strides.
@@ -224,8 +232,9 @@ ELSE
    IF ($xstride"0|1>0|*>1") THEN
       LET xsize  `pvar,RETURN=isize`
       IF `xsize GT 50` THEN
-        LET strd_lo = `i[gx=pvar,x=($region_x_lo)]`
-        LET strd_hi = `i[gx=pvar,x=($region_x_hi)]`
+        let xx = x[gx=pvar]
+        LET strd_lo = `i[gx=xx,x=@min]`
+        LET strd_hi = `i[gx=xx,x=@max]`
         LET strd_del = `(strd_hi-strd_lo)/10`
         DEFINE SYMBOL index_strides = i=`strd_lo`:`strd_hi`:`INT(strd_del)`
       ENDIF
@@ -234,8 +243,9 @@ ELSE
    IF ($ystride"0|1>0|*>1") THEN
       LET ysize  `pvar,RETURN=jsize`
       IF `ysize GT 50` THEN 
-        LET strd_lo = `j[gy=pvar,y=($region_y_lo)]`
-        LET strd_hi = `j[gy=pvar,y=($region_y_hi)]`
+        let yy = y[gy=pvar]
+        LET strd_lo = `j[gy=yy,y=@min]`
+        LET strd_hi = `j[gy=yy,y=@max]`
         LET strd_del = `(strd_hi-strd_lo)/10`
         IF ($index_strides"0|*>1") THEN 
            DEFINE SYMBOL index_strides = ($index_strides),j=`strd_lo`:`strd_hi`:`INT(strd_del)`
@@ -249,8 +259,9 @@ ENDIF
 IF ($zstride"0|1>0|*>1") THEN 
    LET zsize  `pvar,RETURN=ksize`
    IF `zsize GT 50` THEN 
-     LET strd_lo = `k[gz=pvar,z=($region_z_lo)]`
-     LET strd_hi = `k[gz=pvar,z=($region_z_hi)]`
+     let zz = z[gz=pvar]
+     LET strd_lo = `k[gz=zz,z=@min]`
+     LET strd_hi = `k[gz=zz,z=@max]`
      LET strd_del = `(strd_hi-strd_lo)/10`
      IF ($index_strides"0|*>1") THEN 
         DEFINE SYMBOL index_strides = ($index_strides),k=`strd_lo`:`strd_hi`:`INT(strd_del)`
@@ -298,6 +309,39 @@ IF `stride_for_speed GT 1` THEN
    IF `($undo_t"0") GT 0` THEN CANCEL AXIS/STRIDE `pvar,RETURN=taxis`
 ENDIF
 
+! If the data values are so big we cant compute stats correctly, just
+! set nominal levels and exit
+
+IF `STRINDEX("($stat_std)", "too big") GT 0 OR \
+  STRINDEX("($stat_mean)", "too big") GT 0 OR \
+  STRINDEX("($stat_min)", "too big") GT 0 OR \
+  STRINDEX("($stat_max)", "too big") GT 0 OR \
+  STRINDEX("($stat_std)", "Inf") GT 0 OR \
+  STRINDEX("($stat_mean)", "Inf") GT 0 OR \
+  STRINDEX("($stat_min)", "Inf") GT 0 OR \
+  STRINDEX("($stat_max)", "Inf") GT 0` THEN 
+
+   IF `($input_fill_levels"0|0|1") EQ 0` THEN 
+      DEFINE SYMBOL ferret_fill_levels = 40
+      IF ($ferret_center_levels) THEN DEFINE SYMBOL ferret_fill_levels = 40c
+   ENDIF
+   IF `($input_contour_levels"0|0|1") EQ 0` THEN 
+      DEFINE SYMBOL ferret_contour_levels = 40
+      IF ($ferret_center_levels) THEN DEFINE SYMBOL ferret_contour_levels = 40c
+   ENDIF
+
+   EXIT/SCRIPT
+ENDIF
+
+! Undo the striding. Other striding may be set elsewhere
+
+IF `stride_for_speed GT 1` THEN
+   IF `($undo_x"0") GT 0` THEN CANCEL AXIS/STRIDE `pvar,RETURN=xaxis`
+   IF `($undo_y"0") GT 0` THEN CANCEL AXIS/STRIDE `pvar,RETURN=yaxis`
+   IF `($undo_z"0") GT 0` THEN CANCEL AXIS/STRIDE `pvar,RETURN=zaxis`
+   IF `($undo_t"0") GT 0` THEN CANCEL AXIS/STRIDE `pvar,RETURN=taxis`
+ENDIF
+
 IF `($stat_ngood"0") EQ 0` THEN EXIT/SCRIPT
 
 ! Compute rounded-off levels with the PPL %RANGE command.
@@ -327,6 +371,8 @@ IF ($stat_mean"bad>1|bad>1|*>0") THEN
   MESSAGE/ERROR **ERROR ($error_string)
   EXIT/PROGRAM
 ENDIF
+
+! Use the statistics above to actually compute the levels
 
 IF ($ferret_center_levels) THEN 
    GO LAS_centered_levels

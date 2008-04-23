@@ -95,33 +95,24 @@ ENDIF
 
 IF `($ferret_plot_var"0|*>1") EQ 0` THEN EXIT/SCRIPT  !e.g. for insitu plots may not have a plot_var
 
-! When its a curvi plot, base the levels on the
-! variable masked by the coordinates in the region.
+! When its a curvi plot, base the levels on the variable using coordinates 
+! in the region. Use Further striding to make this operation fast.
 
-IF ($native_curvilinear_xy"0") THEN
-   STAT ($ferret_curvi_coord_lon)[j=($clat_jmin):($clat_jmax)]
-
-   LET xreg_lo = ($region_x_lo)
-   LET xreg_hi = ($region_x_hi)
-   IF `xreg_hi LT ($stat_min)` THEN
-      LET xreg_lo = `xreg_lo + 360`
-      LET xreg_hi = `xreg_hi + 360`
-   ENDIF
-   IF `xreg_lo GT ($stat_max)` THEN
-      LET xreg_lo = `xreg_lo - 360`
-      LET xreg_hi = `xreg_hi - 360`
-   ENDIF
-   
-   LET maskx1 = IF ($ferret_curvi_coord_lon)[d=($data_num)] LT `xreg_hi` THEN 1
-   LET maskx =  IF ($ferret_curvi_coord_lon)[d=($data_num)] GE `xreg_lo` THEN maskx1
-   LET masky1 = IF ($ferret_curvi_coord_lat)[d=($data_num)] LT ($region_y_hi) THEN 1
-   LET masky =  IF ($ferret_curvi_coord_lat)[d=($data_num)] GT ($region_y_lo) THEN masky1
-   LET pvar = ($data_var)[d=($data_num)]* maskx* masky
+sho sym native_curvilinear_xy
+show sym region_sample
+IF `($native_curvilinear_xy"0") OR ($region_sample"0|*>1")` THEN
+   LET istr_lev = 1
+   IF `($clon_imax) - ($clon_imin) GT 100` THEN LET istr_lev = `INT((($clon_imax) - ($clon_imin))/10)`
+   LET jstr_lev = 1
+   IF `($clat_jmax) - ($clat_jmin) GT 100` THEN LET jstr_lev = `INT((($clat_jmax) - ($clat_jmin))/10)`
+   LET pvar = \
+    ($data_var)[d=($data_num),i=($clon_imin):($clon_imax):`istr_lev`,j=($clat_jmin):($clat_jmax):`jstr_lev`]
    IF ($region_zt"0|*>1") THEN LET pvar = \
-    ($data_var)[d=($data_num),($region_zt)]* maskx* masky
+    ($data_var)[d=($data_num),i=($clon_imin):($clon_imax):`istr_lev`,j=($clat_jmin):($clat_jmax):`jstr_lev`,($region_zt)]
 
 ! ??
-   IF ($do_curvi_xy_and_hybrid_z"0") THEN LET pvar = plot_var* maskx* masky
+   IF ($do_curvi_xy_and_hybrid_z"0") THEN LET pvar = \
+    ($data_var)[d=($data_num),i=($clon_imin):($clon_imax):`istr_lev`,j=($clat_jmin):($clat_jmax):`jstr_lev`,($region_zt)]
 
 ELSE
    IF `($do_hybrid_z"0") + ($do_curvi_xy_and_hybrid_z"0") GT 0`  THEN
@@ -130,12 +121,15 @@ ELSE
    ELSE
 !      LET pvar = ($ferret_xyz_var)
       LET pvar = ($ferret_plot_var)
+      IF ($set_ndx_strides"0|*>1") THEN LET pvar = ($data_var)[d=($data_num),($region_xyzt)]
    ENDIF
 ENDIF
 
-IF ($ferret_plot_var"0|sampled_var>1|*>0) THEN LET pvar = ($ferret_plot_var)
+!IF ($ferret_plot_var"0|sampled_var>1|*>0) THEN LET pvar = ($ferret_plot_var)
 
 ! IF ($do_curvi_xy_and_hybrid_z"0") THEN LET pvar = plot_var
+
+show var pvar
 
 DEFINE SYMBOL have_pvar = 1
 
@@ -143,13 +137,13 @@ DEFINE SYMBOL have_pvar = 1
 ! just set the number of levels
 
 DEFINE SYMBOL check_for_des =  `($data_var)[d=($data_num)],return=dsetpath`
-IF `STRINDEX("($check_for_des)", ".des") GT 0` THEN
-   IF `($input_contour_levels"0|0|1") EQ 0` THEN \
-   DEFINE SYMBOL ferret_fill_levels = ($num_fine_levels"30")
-   IF `($input_contour_levels"0|0|1") EQ 0` THEN \
-   DEFINE SYMBOL ferret_contour_levels = ($num_fine_levels"30")
-   EXIT/SCRIPT
-ENDIF
+IF `STRINDEX("($check_for_des)", ".des") GT 0` THEN DEFINE SYMBOL no_native_strides = 1
+!   IF `($input_contour_levels"0|0|1") EQ 0` THEN \
+!   DEFINE SYMBOL ferret_fill_levels = ($num_fine_levels"30")
+!   IF `($input_contour_levels"0|0|1") EQ 0` THEN \
+!   DEFINE SYMBOL ferret_contour_levels = ($num_fine_levels"30")
+!   EXIT/SCRIPT
+!ENDIF
 
 ! If the ferret_diff_var has been defined, use it.
 ! When no levels are defined, use centered ones.
@@ -176,14 +170,8 @@ ENDIF
 
 !IF ($do_trans_1_seas_per_year"0") THEN LET pvar = ($FERRET_PLOT_BASE_VAR)
 
-IF ($native_curvilinear_xy"0") THEN
-  LET nvar = ($data_var)[d=($data_num),($region_zt)]
-  LET var_size = ABS( `nvar,RETURN=size`)
-  DEFINE SYMBOL var_dim = `nvar,RETURN=shape`
-ELSE
-   LET var_size = ABS( `pvar,RETURN=size`)
-   DEFINE SYMBOL var_dim = `pvar,RETURN=shape`
-ENDIF
+LET var_size = ABS( `pvar,RETURN=size`)
+DEFINE SYMBOL var_dim = `pvar,RETURN=shape`
 
 LET ndims = STRLEN("($var_dim)")
 
@@ -202,21 +190,23 @@ IF `stride_for_speed GT 1` THEN
                      STRCMP("`pvar,RETURN=yaxis`", "SAMPLE_Y") EQ 0
 ENDIF
 
-IF `($xstride"0|*>1") EQ 0 AND sampled_in_x EQ 0 AND \
+LET sampled_in_x_or_y = sampled_in_x + sampled_in_y
+show symbol no_native_strides
+IF `($xstride"0|*>1") EQ 0 AND sampled_in_x_or_y EQ 0 AND \
       ($no_native_strides_xy"0|*>1") NE 1 AND \
       ($region_x"0|*>1") AND stride_for_speed GT 1` THEN
    SET AXIS/STRIDE=`stride_for_speed` `pvar,RETURN=xaxis`
    DEFINE SYMBOL undo_x = 1
 ENDIF
 
-IF `($ystride"0|*>1") EQ 0 AND sampled_in_y EQ 0 AND \
+IF `($ystride"0|*>1") EQ 0 AND sampled_in_x_or_y EQ 0 AND \
       ($no_native_strides_xy"0|*>1") NE 1 AND \
       ($region_y"0|*>1") AND stride_for_speed GT 1` THEN
    SET AXIS/STRIDE=`stride_for_speed` `pvar,RETURN=yaxis`
    DEFINE SYMBOL undo_y = 1
 ENDIF
 
-IF `($tstride"0|*>1") EQ 0 AND ($region_t"0|*>1") AND \
+IF `($tstride"0|*>1") EQ 0 AND ($region_t"0|*>1") AND sampled_in_x_or_y EQ 0 AND \
       stride_for_speed GT 1` THEN
    SET AXIS/STRIDE=`stride_for_speed` `pvar,RETURN=taxis`
    DEFINE SYMBOL undo_t = 1
@@ -225,16 +215,18 @@ ENDIF
 ! If already strided, do index strides.
 IF `($native_curvilinear_xy"0") EQ 0` THEN  ! region syms dont apply to native curv grid directly
 
-IF ($xstride"0|1>0|*>1") THEN
+IF `($xstride"0|1>0|*>1") OR ($no_native_strides_xy"0|*>1")` THEN
    LET xsize  `pvar,RETURN=isize`
    IF `xsize GT 50` THEN
      LET strd_lo = `i[gx=pvar,x=($region_x_lo)]`
      LET strd_hi = `i[gx=pvar,x=($region_x_hi)]`
      DEFINE SYMBOL index_strides = i=`strd_lo`:`strd_hi`:`INT(xsize/10)`
+   ELSE
+      IF `($region_sample"0|*>1") EQ 0` THEN DEFINE SYMBOL  index_strides = ($region_x)
    ENDIF
 ENDIF
 
-IF ($ystride"0|1>0|*>1") THEN
+IF `($ystride"0|1>0|*>1") OR ($no_native_strides_xy"0|*>1")` THEN
    LET ysize  `pvar,RETURN=jsize`
    IF `ysize GT 50` THEN
      LET strd_lo = `j[gy=pvar,y=($region_y_lo)]`
@@ -244,10 +236,16 @@ IF ($ystride"0|1>0|*>1") THEN
      ELSE
         DEFINE SYMBOL index_strides = j=`strd_lo`:`strd_hi`:`INT(ysize/10)`
      ENDIF
+   ELSE
+      IF ($index_strides"0|*>1") THEN
+         DEFINE SYMBOL index_strides = ($index_strides),($region_y)
+      ELSE
+         IF `($region_sample"0|*>1") EQ 0` THEN DEFINE SYMBOL  index_strides = ($region_y)
+      ENDIF
    ENDIF
 ENDIF
 
-IF ($zstride"0|1>0|*>1") THEN
+IF `($zstride"0|1>0|*>1") OR ($no_native_strides_xy"0|*>1")` THEN
    LET zsize  `pvar,RETURN=ksize`
    IF `zsize GT 50` THEN 
      LET strd_lo = `k[gz=pvar,z=($region_z_lo)]`
@@ -257,33 +255,45 @@ IF ($zstride"0|1>0|*>1") THEN
      ELSE
         DEFINE SYMBOL index_strides = k=`strd_lo`:`strd_hi`:`INT(zsize/10)`
      ENDIF
+   ELSE
+      IF ($index_strides"0|*>1") THEN
+         DEFINE SYMBOL index_strides = ($index_strides),($region_z)
+      ELSE
+         DEFINE SYMBOL  index_strides = ($region_z)
+      ENDIF
    ENDIF
 ENDIF
 
-IF ($tstride"0|1>0|*>1") THEN
+IF `($tstride"0|1>0|*>1") OR ($no_native_strides_xy"0|*>1")` THEN
    LET tsize  `pvar,RETURN=lsize`
    IF `tsize GT 50` THEN
-!   LET strd_lo = `L[gt=pvar,t="($region_t_lo)"]`
-!   LET strd_hi = `L[gt=pvar,t="($region_t_hi)"]`
-   LET strd_lo = 1
-   LET tt = t[gt=pvar]
-   LET strd_hi = `tt,return=lsize`
-     IF ($index_strides"0|*>1") THEN
-        DEFINE SYMBOL index_strides = ($index_strides),L=`strd_lo`:`strd_hi`:`INT(tsize/10)`
-     ELSE
-        DEFINE SYMBOL  index_strides = L=`strd_lo`:`strd_hi`:`INT(tsize/10)`
-     ENDIF
+      LET strd_lo = 1
+      LET tt = t[gt=pvar]
+      LET strd_hi = `tt,return=lsize`
+      LET strd_lo = `L[gt=pvar,t="($region_t_lo)"]`
+      LET strd_hi = `L[gt=pvar,t="($region_t_hi)"]`
+
+      IF ($index_strides"0|*>1") THEN
+         DEFINE SYMBOL index_strides = ($index_strides),L=`strd_lo`:`strd_hi`:`INT(tsize/10)`
+      ELSE
+         DEFINE SYMBOL  index_strides = L=`strd_lo`:`strd_hi`:`INT(tsize/10)`
+      ENDIF
+   ELSE
+      IF ($index_strides"0|*>1") THEN
+         DEFINE SYMBOL index_strides = ($index_strides),($region_t)
+      ELSE
+         DEFINE SYMBOL  index_strides = ($region_t)
+      ENDIF
    ENDIF
 ENDIF
 
 ENDIF ! region syms dont apply to native curv grid directly
 
 IF ($index_strides"0|*>1") THEN
-   DEFINE SYMBOL ppvar = pvar[($index_strides)]
+   DEFINE SYMBOL ppvar = ($data_var)[d=($data_num),($index_strides)]
 ELSE
    DEFINE SYMBOL ppvar = pvar
 ENDIF
-
 IF ($native_curvilinear_xy"0") THEN DEFINE SYMBOL ppvar = pvar
 
 ! IF ($ferret_var_autolevels_0"0|*>1") THEN DEFINE SYMBOL ppvar = ($ferret_var_autolevels_0)
@@ -295,6 +305,16 @@ IF ($native_curvilinear_xy"0") THEN DEFINE SYMBOL ppvar = pvar
 
 DEFINE SYMBOL stat_ngood= 0
 STAT ($ppvar)
+
+! Undo the striding. Other striding may be set elsewhere
+
+IF `stride_for_speed GT 1` THEN
+   IF `($undo_x"0") GT 0` THEN CANCEL AXIS/STRIDE `pvar,RETURN=xaxis`
+   IF `($undo_y"0") GT 0` THEN CANCEL AXIS/STRIDE `pvar,RETURN=yaxis`
+   IF `($undo_z"0") GT 0` THEN CANCEL AXIS/STRIDE `pvar,RETURN=zaxis`
+   IF `($undo_t"0") GT 0` THEN CANCEL AXIS/STRIDE `pvar,RETURN=taxis`
+ENDIF
+
 IF `($stat_ngood"0") EQ 0` THEN EXIT/SCRIPT
 
 ! If the data values are so big we cant compute stats correctly, just
@@ -309,11 +329,11 @@ IF `STRINDEX("($stat_std)", "too big") GT 0 OR \
   STRINDEX("($stat_min)", "Inf") GT 0 OR \
   STRINDEX("($stat_max)", "Inf") GT 0` THEN 
 
-   IF `($input_contour_levels"0|0|1") EQ 0` THEN 
+   IF `($input_fill_levels"0|0|1") EQ 0` THEN 
       DEFINE SYMBOL ferret_fill_levels = 40
       IF ($ferret_center_levels) THEN DEFINE SYMBOL ferret_fill_levels = 40c
    ENDIF
-      IF `($input_contour_levels"0|0|1") EQ 0` THEN 
+   IF `($input_contour_levels"0|0|1") EQ 0` THEN 
       DEFINE SYMBOL ferret_contour_levels = 40
       IF ($ferret_center_levels) THEN DEFINE SYMBOL ferret_contour_levels = 40c
    ENDIF
@@ -321,14 +341,6 @@ IF `STRINDEX("($stat_std)", "too big") GT 0 OR \
    EXIT/SCRIPT
 ENDIF
 
-! Undo the striding. Other striding may be set elsewhere
-
-IF `stride_for_speed GT 1` THEN
-   IF `($undo_x"0") GT 0` THEN CANCEL AXIS/STRIDE `pvar,RETURN=xaxis`
-   IF `($undo_y"0") GT 0` THEN CANCEL AXIS/STRIDE `pvar,RETURN=yaxis`
-   IF `($undo_z"0") GT 0` THEN CANCEL AXIS/STRIDE `pvar,RETURN=zaxis`
-   IF `($undo_t"0") GT 0` THEN CANCEL AXIS/STRIDE `pvar,RETURN=taxis`
-ENDIF
 
 ! Compute rounded-off levels with the PPL %RANGE command.
 
