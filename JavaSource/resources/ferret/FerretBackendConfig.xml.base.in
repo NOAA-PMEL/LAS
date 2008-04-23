@@ -1,6 +1,6 @@
-<ferret>
+<application>
 	<invoker base_dir="resources/ferret"
-                 ferret_bin="@FERRET@"
+                 executable="@FERRET@"
                  time_limit="200" template_dir="templates" 
                  output_dir="@WEBAPPS@/@APPNAME@/output"
                  http_base_url = "http://@SERVLET_ROOT_URL@/@APPNAME@/output"
