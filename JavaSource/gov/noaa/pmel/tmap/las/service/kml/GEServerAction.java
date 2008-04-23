@@ -22,10 +22,9 @@ import java.net.URLDecoder;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.regex.Pattern;
-
+import java.util.ArrayList;
 import java.net.*;
 import java.io.*;
-
 import java.util.Date;
 
 import gov.noaa.pmel.tmap.las.jdom.JDOMUtils;
@@ -43,9 +42,7 @@ import org.apache.struts.action.Action;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
-
 import org.apache.log4j.Logger;
-
 import org.jdom.JDOMException;
 /**
  *@author Jing Yang Li
@@ -110,6 +107,7 @@ public final class GEServerAction extends Action {
     /**
      * Check the GE overlay style
      * @param request The HttpServletRequest
+     * @return lasUIRequest the LAS UI request
      */
     private LASUIRequest getLASUIRequest(HttpServletRequest request)
         throws ServletException, IOException
@@ -126,7 +124,8 @@ public final class GEServerAction extends Action {
 
     /**
      * Retrieve the BBOX coming from Google Earth
-     * @param request The HttpServletRequest
+     * @param request the HttpServletRequest
+     * @return bbox the bounding box
      */
     private float[] getBBOX(HttpServletRequest request)
         throws ServletException, IOException 
@@ -161,8 +160,11 @@ public final class GEServerAction extends Action {
     }
 
     /**
-    * Generate a KML file for a XY plot; it is just a ground overlay
-    * @param request The HttpServletRequest
+    * Generate a KML file for a XY plot as ground overlay 
+    * and grid points as place marks
+    * @param request the HttpServletRequest
+    * @param lasConfig the LASConfig object for this LAS server
+    * @return kmlString the KML String
     */
     public String genPlotOverlayKML(HttpServletRequest request, LASConfig lasConfig)
         throws ServletException, IOException 
@@ -177,10 +179,21 @@ public final class GEServerAction extends Action {
         String serverURL = getServerURL(lasConfig);
 
         try{
-
             //update XY range for dynamic overlay
             if(isDynamic){
                 float[] bbox = getBBOX(request);
+
+                //make sure latitudes are inside the data's range
+                ArrayList vars = lasUIRequest.getVariables();
+                String yHi = lasConfig.getHi("y",vars.get(0).toString());//dataset's max y 
+                String yLo = lasConfig.getLo("y",vars.get(0).toString());//dataset's min y
+                float fHi = Float.valueOf(yHi.trim()).floatValue();
+                float fLo = Float.valueOf(yLo.trim()).floatValue();
+                //System.out.println("bbox[1]="+bbox[1]+"; bbox[3]="+bbox[3]);
+                if(bbox[1] < fLo){ bbox[1]=fLo;}
+                if(bbox[3] > fHi){ bbox[3]=fHi;}
+                //System.out.println("bbox[1]="+bbox[1]+"; bbox[3]="+bbox[3]);
+
                 Float minlon = new Float(bbox[0]);
                 Float maxlon = new Float(bbox[2]);
                 Float minlat = new Float(bbox[1]);
@@ -195,15 +208,26 @@ public final class GEServerAction extends Action {
             String op = lasUIRequest.getOperationXPath();
             if(op.contains("Plot_GE_Overlay")){
                 lasUIRequest.changeOperation("Plot_GE_kml");
+
+                //build the request for plot overlay
+                requestURL = serverURL+"?xml="+lasUIRequest.toEncodedURLString();
+    
+                //build the request for placemarks
+                lasUIRequest.changeOperation("Grid_GE_kml");
+                placemarkRequestURL = serverURL+"?xml="+lasUIRequest.toEncodedURLString();
+
             }else if(op.contains("Vector_GE_Overlay")){
                 lasUIRequest.changeOperation("Vector_GE_kml");
+                //build the request for plot overlay
+                requestURL = serverURL+"?xml="+lasUIRequest.toEncodedURLString();
+                //NO placemarks for vector plot overlay....
             }
             //build the request for plot overlay
-            requestURL = serverURL+"?xml="+lasUIRequest.toEncodedURLString();
+            //requestURL = serverURL+"?xml="+lasUIRequest.toEncodedURLString();
 
             //build the request for placemarks
-            lasUIRequest.changeOperation("Grid_GE_kml");
-            placemarkRequestURL = serverURL+"?xml="+lasUIRequest.toEncodedURLString();
+            //lasUIRequest.changeOperation("Grid_GE_kml");
+            //placemarkRequestURL = serverURL+"?xml="+lasUIRequest.toEncodedURLString();
 
         } catch (Exception e){
             log.info("error while building LAS Request: " + e.toString());
@@ -220,17 +244,19 @@ public final class GEServerAction extends Action {
                      +requestURL
                      +"</href>"
                      +"</Link>"
-                     +"</NetworkLink>"
-                     +"<NetworkLink>"
+                     +"</NetworkLink>";
+             if(placemarkRequestURL != ""){
+                 kmlString += "<NetworkLink>"
                      +"<name>Grid Points</name>"
                      +"<Link>"
                      +"<href>"
                      +placemarkRequestURL
                      +"</href>"
                      +"</Link>"
-                     +"</NetworkLink>"
-                     +"</Folder>"
-                     +"</kml>";
+                     +"</NetworkLink>";
+             }
+             kmlString += "</Folder>"
+                          +"</kml>";
          }
          return kmlString;
     }
@@ -244,13 +270,11 @@ public final class GEServerAction extends Action {
     throws ServletException, IOException
     {
         String serverURL="";
-
         try {
             serverURL = lasConfig.getServerURL();
         } catch (JDOMException e) {
             log.error("Eror getting product server URL");
         }
-
         return serverURL;
     }
 }
