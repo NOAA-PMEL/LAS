@@ -82,8 +82,7 @@ IF ($data_var_transform"0|*>1") THEN
     ENDIF
 ENDIF
 SET DATA/RESTORE
-pause
-SET DATA/RESTORE
+
 SET data ($data_num)
 
 ! For requests that encompass 360 deg of longitude Ferret returns N points if
@@ -261,9 +260,11 @@ ELSE
            SET ATTRIBUTE/OUTPUT ($data_dup_varname).transform_history
 
            REPEAT/L=($lmin):($lmax):`lchunk` REPEAT/K=($kmin):($kmax):`kchunk`  (LIST/APPEND/FILE/($frmt)/K=`k`:`ktop`/L=`l`:`ltop`/KLIMITS=($kmin):($kmax)/LLIMITS=($lmin):($lmax) ($ferret_list_var); CANC MEM/ALL)
+
         ELSE
      ! ... netCDF output in chunks
-        REPEAT/L=($lmin):($lmax):`lchunk` REPEAT/K=($kmin):($kmax):`kchunk` REPEAT/J=($jmin):($jmax):`jchunk` (LIST/APPEND/FILE/($frmt)/J=`j`:`jtop`/K=`k`:`ktop`/L=`l`:`ltop`/JLIMITS=($jmin):($jmax)/KLIMITS=($kmin):($kmax)/LLIMITS=($lmin):($lmax) ($data_dup_varname); CANC MEM/ALL)
+           REPEAT/L=($lmin):($lmax):`lchunk` REPEAT/K=($kmin):($kmax):`kchunk` REPEAT/J=($jmin):($jmax):`jchunk` (LIST/APPEND/FILE/($frmt)/J=`j`:`jtop`/K=`k`:`ktop`/L=`l`:`ltop`/JLIMITS=($jmin):($jmax)/KLIMITS=($kmin):($kmax)/LLIMITS=($lmin):($lmax) ($data_dup_varname); CANC MEM/ALL)
+        ENDIF
      ELSE
      ! ... netCDF output in chunks
 
