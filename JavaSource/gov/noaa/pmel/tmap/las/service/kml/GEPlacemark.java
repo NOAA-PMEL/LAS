@@ -16,6 +16,7 @@ import org.apache.log4j.Logger;
 
 /*
  * A single Google Earth placemark
+ * @author Jing Yang Li
  */
 public class GEPlacemark{
 
@@ -66,6 +67,10 @@ public class GEPlacemark{
         init();
         checkPointLon();
         makeKMLString();
+    }
+
+    public GEPlacemark(String plon, String plat){
+        makeKMLErrorString(plon,plat);
     }
 
     private void init(){
@@ -151,6 +156,28 @@ public class GEPlacemark{
                     + "<coordinates>"+point_lon+","+point_lat+","+"0</coordinates>"
                     + "</Point>"
                     + "</Placemark>";
+    }
+
+    /**
+     * make a placemark that shows error messages
+     */
+    private void makeKMLErrorString(String plon, String plat){
+        kmlString   = "<Style id=\"bigblue\">";
+        kmlString  += "<BalloonStyle><displayMode>default</displayMode></BalloonStyle></Style>";
+
+        kmlString  += "<Placemark><visibility>0</visibility><open>1</open>";
+        description = "<description>"
+                      + "<![CDATA["
+                      + "<b>No valid grid points in current view</b><br/>]]>"
+                      + "</description>";
+
+        kmlString  += description;
+
+        kmlString  += "<Point>"
+                      + "<coordinates>"+plon+","+plat+",0</coordinates>"
+                      + "</Point>"
+                      + "<styleUrl>#bigblue</styleUrl>"
+                      + "</Placemark>";
     }
 
     /**
@@ -241,6 +268,9 @@ public class GEPlacemark{
                       + "</description>";
     }
 
+    /**
+     * Create the URL that makes LAS 1D plot
+     */
     private String make1DPlotRequest(String ferret1DView, String z_lo, String z_hi, String t_lo, String t_hi )
     throws IOException{
 
