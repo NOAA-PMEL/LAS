@@ -115,6 +115,7 @@ public class KMLTool extends TemplateTool  {
     }
 
     public LASBackendResponse run( LASBackendRequest lasBackendRequest) throws Exception {
+        //System.out.println("entering run");
         VelocityContext context = new VelocityContext(getToolboxContext());
         Properties p = new Properties();
         InputStream is;
@@ -152,6 +153,7 @@ public class KMLTool extends TemplateTool  {
         String kml = lasBackendRequest.getServiceAction();
         //make overlay KML
         if (kml.contains("overlay")){
+            //System.out.println("do overlay?");
             lasBackendResponse = makeOverlayKML(lasBackendRequest, context);
         }
 
@@ -189,10 +191,10 @@ public class KMLTool extends TemplateTool  {
         }
         float xll = Float.valueOf(map_scale.getXAxisLowerLeft()).floatValue();
         float xur = Float.valueOf(map_scale.getXAxisUpperRight()).floatValue();
-        float xmid = (xur - xll)/2.0f;
+        float xmid = (xur + xll)/2.0f;
         float yll = Float.valueOf(map_scale.getYAxisLowerLeft()).floatValue();
         float yur = Float.valueOf(map_scale.getYAxisUpperRight()).floatValue();
-        float ymid = (yur-yll)/2.0f;
+        float ymid = (yur + yll)/2.0f;
         context.put("longitude_center", xmid);
         context.put("latitude_center", ymid);
         context.put("las_response", lasBackendResponse);
@@ -240,10 +242,11 @@ public class KMLTool extends TemplateTool  {
         String output = lasBackendRequest.getResultAsFile("kml");
         String baseURL = kmlBackendConfig.getHttpBaseURL();
 
+        //get the files written by the Ferret backend service (last step of the compound operation)
         String ferret_listing_file = lasBackendRequest.getChainedDataFile("ferret_listing");
         String las_req_info_file = lasBackendRequest.getChainedDataFile("las_request_info");
 
-        //get the kml template
+        //get file name of the KML template
         String kml = lasBackendRequest.getServiceAction();
         if (!kml.endsWith(".vm")) {
             kml = kml+".vm";
@@ -257,13 +260,16 @@ public class KMLTool extends TemplateTool  {
         String gridLat="";
         String xstride="";
         String ystride="";
+        String xLowerLeft="";
+        String yLowerLeft="";
+        String xUpperRight="";
+        String yUpperRight="";
+
         HashMap<String, String> initLASReq = new HashMap<String, String>();
         File lasReqInfoFile = new File(las_req_info_file);
         
         try{
             JDOMUtils.XML2JDOM(lasReqInfoFile,lasReqInfo);
-
-            //HashMap<String, String> initLASReq = new HashMap<String, String>();
 
             Element dsIDElement = lasReqInfo.getElementByXPath("/las_req_info/dataset_id");
             dsID = dsIDElement.getText();
@@ -317,11 +323,26 @@ public class KMLTool extends TemplateTool  {
             //xstride
             Element xstElement = lasReqInfo.getElementByXPath("/las_req_info/x_stride");
             if(xstElement != null){xstride = xstElement.getText();} 
-            
 
             //ystride
             Element ystElement = lasReqInfo.getElementByXPath("/las_req_info/y_stride");
             if(ystElement != null){ystride = ystElement.getText();}
+
+            //xLowerLeft
+            Element xllElement = lasReqInfo.getElementByXPath("/las_req_info/x_axis_lower_left");
+            if(xllElement != null){xLowerLeft = xllElement.getText();}
+            
+            //yLowerLeft
+            Element yllElement = lasReqInfo.getElementByXPath("/las_req_info/y_axis_lower_left");
+            if(yllElement != null){yLowerLeft = yllElement.getText();}
+
+            //xUpperRight
+            Element xurElement = lasReqInfo.getElementByXPath("/las_req_info/x_axis_upper_right");
+            if(xurElement != null){xUpperRight = xurElement.getText();}
+
+            //xUpperRight
+            Element yurElement = lasReqInfo.getElementByXPath("/las_req_info/y_axis_upper_right");
+            if(yurElement != null){yUpperRight = yurElement.getText();}
 
             if(dsIntervals.contains("z")){
                 //get Z range
@@ -374,16 +395,44 @@ public class KMLTool extends TemplateTool  {
 
             // dis.available() returns 0 if the file does not have more lines.
             while (dis.available() != 0) {
-                // this statement reads the line from the file and print it to
-                // the console.
                 String gridPair = dis.readLine();
-                gridPair = gridPair.trim();
-                Pattern p = Pattern.compile("\\s");
-                String[] gp = gridPair.split(p.pattern());
-                gridLon = gp[0];
-                gridLat = gp[gp.length-1]; 
-                GEPlacemark pl = new GEPlacemark(gridLat,gridLon,initLASReq,lasBackendRequest,baseURL);
-                allPlacemarks.add(pl);
+                GEPlacemark pl;
+
+                // check if the file content is valid; when there is no valid grid points
+                // Ferret writes ***** to the file that is supposed to contain the list of grid points
+                if(!gridPair.contains("*")){
+                    gridPair = gridPair.trim();
+                    Pattern p = Pattern.compile("\\s");
+                    String[] gp = gridPair.split(p.pattern());
+                    gridLon = gp[0];
+                    gridLat = gp[gp.length-1]; 
+
+                    //create a placemark for this grid point
+                    pl = new GEPlacemark(gridLat,gridLon,initLASReq,lasBackendRequest,baseURL);
+                    allPlacemarks.add(pl);
+
+                    //for creating the <LookAt> tag in KML
+                    context.put("gridLon",checkLon(gridLon));
+                    context.put("gridLat",gridLat);
+
+                }else{
+                    float xll = Float.valueOf(xLowerLeft).floatValue();
+                    float yll = Float.valueOf(yLowerLeft).floatValue();
+                    float xur = Float.valueOf(xUpperRight).floatValue();
+                    float yur = Float.valueOf(yUpperRight).floatValue();
+                    float xc = (xll+xur)/2.0f;
+                    float yc = (yll+yur)/2.0f;
+
+                    //create a placemark at the center of the view, which show error message
+                    pl = new GEPlacemark(Float.toString(xc),Float.toString(yc));
+                    allPlacemarks.add(pl);
+
+                    //for creating the <LookAt> tag in KML
+                    context.put("gridLon",Float.toString(xc));
+                    context.put("gridLat",Float.toString(yc));
+
+                    break;
+                }
             }
             fis.close();
             bis.close();
@@ -393,18 +442,15 @@ public class KMLTool extends TemplateTool  {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
+        } catch (Exception e){
+            log.info("noplacemarks");
         }
     
         //output to velocity context
         context.put("dsID",dsID);
         context.put("varID",varID);
-
-        //for creating the <LookAt> tag in KML
-        context.put("gridLon",checkLon(gridLon));
-        context.put("gridLat",gridLat);
         context.put("xstride",xstride);
         context.put("ystride",ystride);
-
         context.put("allPlacemarks", allPlacemarks);
 
         log.info("finish creating allPlacemarks");
