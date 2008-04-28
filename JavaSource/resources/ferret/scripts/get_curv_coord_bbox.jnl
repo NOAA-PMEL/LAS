@@ -44,7 +44,6 @@ IF ($ferret_curv_lon_min"0|*>1") THEN
    ENDIF  
 ENDIF
 
-
 ! If there is a precomputed mapping file for curvilinear-to-rectilinear regridding,
 ! then the task is easy.
 ! See http://ferret.pmel.noaa.gov/FERRET_17sep07/FAQ/custom_plots/subsetting_curvi_data.html
@@ -60,27 +59,24 @@ ENDIF
 ! So, find the m,n corresponding to the output grid location of the corners of our region
 ! and get the map indices 
 
-sh sym cf_map*
 
 ! Check to see if curvi_coord_map file is defined. If more than one is defined,
 ! use the one with the finest grid size.
 
-IF ($ferret_curvi_coord_mapfile"0|*>1") THEN   DEFINE SYMBOL cf_map_url \"($ferret_curvi_coord_mapfile)\"
+IF ($ferret_curvi_coord_mapfile"0|*>1") THEN   DEFINE SYMBOL box_cf_map_url \"($ferret_curvi_coord_mapfile)\"
 
 REPEAT/RANGE=10:1:-1/name=nmap (DEFINE SYMBOL mapfile ferret_curvi_coord_map`nmap`file ;\
-   IF ($($mapfile)"0|*>1") THEN DEFINE SYMBOL cf_map_url "($mapfile)" )
+   IF ($($mapfile)"0|*>1") THEN DEFINE SYMBOL box_cf_map_url "($($mapfile))" )
 
-IF `($ferret_curvi_coord_lat"0|*>1") AND (($xstride"0|*>1") OR ($xstride"0|*>1"))` THEN \
-  CANCEL SYMBOL cf_map_url
+! Punt if we have already strided (to be fixed...)
+IF `($ferret_curvi_coord_lat"0|*>1") AND (($xstride"0|*>1") OR ($ystride"0|*>1"))` THEN \
+   CANCEL SYMBOL box_cf_map_url
 
-IF ($cf_map_url"0|*>1") THEN  ! If we have a map file, use it.
-
-   DEFINE SYMBOL cf_map_url "($ferret_curvi_coord_map2file)"
-   IF ($ferret_curvi_coord_mapfile"0|*>1") THEN   DEFINE SYMBOL cf_map_url ($ferret_curvi_coord_mapfile)
+IF ($box_cf_map_url"0|*>1") THEN  ! If we have a map file, use it.
 
    DEFINE SYMBOL cf_map_var = ($ferret_curvi_coord_mapvar)
    SET DATA/SAVE
-   SET DATA "($cf_map_url)"
+   SET DATA "($box_cf_map_url)"
    SET AXIS/MODULO/UNITS=degrees `($cf_map_var),RETURN=xaxis`
    SET AXIS/UNITS=degrees `($cf_map_var),RETURN=yaxis`
    DEFINE SYMBOL mapfile_num = `($cf_map_var),RETURN=dsetnum`
@@ -95,9 +91,20 @@ IF ($cf_map_url"0|*>1") THEN  ! If we have a map file, use it.
 
    ! Push the coordinate outwards by 1
    ! IF x coords are not modulo, need to do the following for x too.
+! 
+!   LET jmin = `MAX(1, j[gy=map,y=($region_y_lo)] - 1)`
+!   LET jmax = `MIN(ny, j[gy=map, y=($region_y_hi)] + 1)`
 
-   LET jmin = `MAX(1, j[gy=map,y=($region_y_lo)] - 1)`
-   LET jmax = `MIN(ny, j[gy=map, y=($region_y_hi)] + 1)`
+   LET yy = yboxlo[gy=map]
+   LET ylo = yy[j=1]
+   LET ylo = MAX(`ylo`, ($region_y_lo))
+
+   LET yy = yboxhi[gy=map]
+   LET yhi = yy[j=`ny`]
+   LET yhi = MIN(`yhi`, ($region_y_hi))
+
+   LET jmin = MAX(1, j[gy=map,y=`ylo`] - 1)
+   LET jmax = MIN(ny, j[gy=map, y=`yhi`] + 1)
 
 ! Look at the values along the line i=imin, return the outer index for imin 
    LET aa = map[I=`imin`, K=@MIN, L=2]
@@ -131,9 +138,9 @@ IF ($cf_map_url"0|*>1") THEN  ! If we have a map file, use it.
       DEFINE SYMBOL clon_imax `box_longitude,RETURN=isize`
    ENDIF
 
-! See if we have captured the X region and if not go to the entire range if
+! See if we have captured the X region and if not go to the entire range )if
 ! the requested region is where things are really curvi, and if the branch 
-! cut is also in the vicinity, then the box found above may still miss the mark.
+! cut is also in the vicinity, then the box found above may still miss the mark).
 
    LET xmin = `MIN(($ferret_curvi_coord_lon)[d=($data_num),i=($clon_imin),j=($clat_jmin)], \
           ($ferret_curvi_coord_lon)[d=($data_num),i=($clon_imin),j=($clat_jmax)] ) `
@@ -147,7 +154,7 @@ IF ($cf_map_url"0|*>1") THEN  ! If we have a map file, use it.
 
    CAN DATA ($mapfile_num)
    SET DATA/RESTORE
-
+   
    EXIT/SCRIPT
 ENDIF  ! if we have a map 
 LET kludge = 1
@@ -157,9 +164,11 @@ IF `kludge LT 1` THEN
    LET  box_latitude = ($ferret_curvi_coord_lat)[d=($data_num)]
 
 ELSE
-! TODO: VERY KLUDGY way of getting a subset of the data to do this on, 
+
+! When there is no index map, make a coarse map file. Here is a 
+! VERY KLUDGY way of getting a subset of the data to do this on, 
 ! otherwise its very slow...
-!
+
    LET nx = `($ferret_curvi_coord_lon)[d=($data_num),j=1,x=@ngd]`
    LET ny = `($ferret_curvi_coord_lon)[d=($data_num),i=1,y=@ngd]`
 
@@ -246,4 +255,5 @@ DEFINE SYMBOL clon_imin 1
 DEFINE SYMBOL clon_imax `($ferret_curvi_coord_lon)[j=1,x=@NGD]`
 
 ! End of get_curv_coord_bbox.jnl ------------------------------------------------------
+
 
