@@ -10,6 +10,11 @@
 !                Question: should the longitude/ latitude coordinates or other 
 !                informatino about the curvilinear grid be listed in the xml file?
 !
+! 4/28/2008 ACM refer always to ($data_var)[d=($data_num)] as there
+!           may be other datasets open, e.g. for transformed variables.
+! 4/28/2008 ACM Define tvar, used for getting time axis information, as
+!           just t[gt=var] so that it isn't a huge variable to load in tax_datestring.
+!
 ! list_frames.jnl creates a listing in XML format for animation
 ! Assumes symbol ferret_listing is the output file.
 ! The listing file includes: 
@@ -59,6 +64,9 @@ GO LAS_auto_levels_animate
 
 !for animation of 1D plots
 
+DEFINE SYMBOL ndim = STRLEN("($ferret_view)")
+
+IF `($ndim) EQ 1` THEN
 ! If the user gave dependent axis scaling, 
 ! remove any surrounding parentheses
 
@@ -88,6 +96,7 @@ IF `($ferret_dep_axis_scale"1|*>0")` THEN
     DEFINE SYMBOL delta ($PPL$RANGE_INC)
     DEFINE SYMBOL ferret_dep_axis_scale ($PPL$RANGE_LOW),($PPL$RANGE_HIGH),($PPL$RANGE_INC)
 ENDIF
+ENDIF  ! ndim = 1
 
 SET LIST/FILE="($result_ferret_listing_filename)"
 
@@ -120,7 +129,7 @@ IF `($nt) eq 1` THEN
     ENDIF
 
     !  CANCEL REGION/T
-    LET maxL = `($data_var),return=lsize`   ! no. of time points total
+    LET maxL = `($data_var)[d=($data_num)],return=lsize`   ! no. of time points total
     LET hafmax = `INT(($max_tpoints)/2)`
     IF `maxL LE ($max_tpoints)` THEN
         DEFINE SYMBOL lmin 1
@@ -131,8 +140,8 @@ IF `($nt) eq 1` THEN
      ENDIF
 
      IF ($region_t"0|*>1") THEN
-        !SET REGION/T="`($data_var)[L=($lmin)],return=TSTART`":"`($data_var)[L=($lmax)],return=TEND`"
-        DEFINE SYMBOL region_t = T="`($data_var)[L=($lmin)],return=TSTART`":"`($data_var)[L=($lmax)],return=TEND`"
+        !SET REGION/T="`($data_var)[d=($data_num),L=($lmin)],return=TSTART`":"`($data_var)[d=($data_num),L=($lmax)],return=TEND`"
+        DEFINE SYMBOL region_t = T="`($data_var)[d=($data_num),L=($lmin)],return=TSTART`":"`($data_var)[d=($data_num),L=($lmax)],return=TEND`"
         DEFINE SYMBOL region_xyzt = ($region_xyz),($region_t)
         DEFINE SYMBOL region_full = ($region_xyzt)
      ELSE
@@ -140,11 +149,10 @@ IF `($nt) eq 1` THEN
         EXIT/PROGRAM
      ENDIF
 
-     ENDIF
      IF ($native_curvilinear_xy"0") THEN 
-        DEFINE SYMBOL ferret_plot_var = ($data_var)[d=($data_num),($region_full)], xcoord, ycoord
+        DEFINE SYMBOL ferret_plot_var = ($data_var)[d=($data_num),d=($data_num),($region_full)], xcoord, ycoord
      ELSE
-        DEFINE SYMBOL ferret_plot_var = ($data_var)[d=($data_num),($region_full)]
+        DEFINE SYMBOL ferret_plot_var = ($data_var)[d=($data_num),d=($data_num),($region_full)]
      ENDIF
 
 
@@ -227,7 +235,7 @@ LET f = "<frames>"
 list/norowhead/nohead/format=(A8)/FILE/append f
 
 !====>output time frames
-let tvar = ($ferret_list_var)
+let tvar = t[gt=($ferret_list_var)]
 define symbol first_time = `tax_datestring(t[gt=tvar,L=1], t[gt=tvar], "seconds")`
 let nlen = strlen ("($first_time)")
 
