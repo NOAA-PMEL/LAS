@@ -4,6 +4,8 @@
 ! 
 ! $Author: Jing $
 ! $Date: 2007/07/24 
+! 4/28/2008 ACM refer always to ($data_var)[d=($data_num)] as there
+!           may be other datasets open, e.g. for transformed variables.
 !
 !
 ! list_grid.jnl creates a listing (in XML format) of grid point locations
@@ -302,7 +304,7 @@ ENDIF
         DEFINE SYMBOL nt `($ferret_plot_var),return=lsize`   ! no. of time points requested
         IF `($nt) eq 1` THEN
             LET L0 = `($ferret_plot_var),return=lstart`
-            LET maxL = `($data_var),return=lsize`   ! no. of time points total
+            LET maxL = `($data_var)[d=($data_num),return=lsize`   ! no. of time points total
             LET hafmax = `INT(($max_tpoints)/2)`
 
             IF `maxL LE ($max_tpoints)` THEN
@@ -313,8 +315,8 @@ ENDIF
                 DEFINE SYMBOL lmax `MIN(L0+hafmax,maxL)`
             ENDIF
 
-            LET tlo = "`($data_var)[L=($lmin)],return=TSTART`"
-            LET thi = "`($data_var)[L=($lmax)],return=TEND`"
+            LET tlo = "`($data_var)[d=($data_num),L=($lmin)],return=TSTART`"
+            LET thi = "`($data_var)[d=($data_num),L=($lmax)],return=TEND`"
  
         ELSE
             LET tlo = "($region_0_t_lo)"
@@ -345,8 +347,8 @@ ENDIF
             LET maxK = `($data_var),return=ksize`            ! no. of depth points total
             DEFINE SYMBOL kmin 1
             DEFINE SYMBOL kmax `maxK`
-            LET zlo = "`($data_var)[K=($kmin)],return=ZSTART`"
-            LET zhi = "`($data_var)[K=($kmax)],return=ZEND`"
+            LET zlo = "`($data_var)[d=($data_num),K=($kmin)],return=ZSTART`"
+            LET zhi = "`($data_var)[d=($data_num),K=($kmax)],return=ZEND`"
         ELSE                                                 ! XYZ view being selected
             LET zlo = "($region_0_z_lo)"
             LET zhi = "($region_0_z_hi)"
@@ -388,8 +390,8 @@ ENDIF
             LET maxK = `($data_var),return=ksize`            ! no. of depth points total
             DEFINE SYMBOL kmin 1
             DEFINE SYMBOL kmax `maxK`
-            LET zlo = "`($data_var)[K=($kmin)],return=ZSTART`"
-            LET zhi = "`($data_var)[K=($kmax)],return=ZEND`"
+            LET zlo = "`($data_var)[d=($data_num),K=($kmin)],return=ZSTART`"
+            LET zhi = "`($data_var)[d=($data_num),K=($kmax)],return=ZEND`"
 
             ! compute range of T with maximum size of 21
             !user selected T is in the middle if # of total time points >= 21
@@ -405,8 +407,8 @@ ENDIF
                 DEFINE SYMBOL lmax `MIN(L0+hafmax,maxL)`
             ENDIF
 
-            LET tlo = "`($data_var)[L=($lmin)],return=TSTART`"
-            LET thi = "`($data_var)[L=($lmax)],return=TEND`"
+            LET tlo = "`($data_var)[d=($data_num),L=($lmin)],return=TSTART`"
+            LET thi = "`($data_var)[d=($data_num),L=($lmax)],return=TEND`"
 
         ELSE                                ! either XYZ or XYT view being selected
             LET zlo = "($region_0_z_lo)"
