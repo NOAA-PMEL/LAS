@@ -11,7 +11,6 @@
 ! 3/29/2007 ACM Fix logic interpreting contents of ferret_interpolate_data 
 ! 7/15/2007 ACM Add lines to remove labels when a degenerate 2D plot is made 
 !               This happens when the region chosen is smaller than a grid cell.
-! 2/15/2008 ACM For a SHADE plot in curvilinear coordinates we may want the /MODULO qualifier
 ! 3/2008 ACM Use SHADE/TRIM for shade underlays of FILL plots (Ferret v6.1)
 
 ! XY_plot.jnl creates an XY plot for use with the Back End Server
@@ -111,12 +110,6 @@ DEFINE SYMBOL plot_type =($ferret_contour_style"FILL|default>FILL|raster>SHADE|c
 ! For all FILL plots, we will first do a SHADE underlay to get the plot to draw all the way to the edges.
 DEFINE SYMBOL shade_underlay = FALSE
 IF ($plot_type"0|FILL>1|*>0) THEN DEFINE SYMBOL shade_underlay = TRUE
-
-! For a SHADE plot in curvilinear coordinates we may want the /MODULO qualifier
-! IF `($ferret_curvi_quals"0|*>1") AND ($plot_type"0|SHADE>1|*>0)` THEN 
-IF ($ferret_curvi_quals"0|*>1") THEN 
-   IF ($ferret_lon_modulo"1|1|0|yes>1|no>0|*>0") THEN  DEFINE SYMBOL qualifiers = ($qualifiers)/MODULO
-ENDIF
 
 ! Set the URL label for the first dataset.
 GO LAS_url_label 0
