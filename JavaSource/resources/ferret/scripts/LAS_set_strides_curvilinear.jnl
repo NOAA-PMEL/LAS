@@ -39,13 +39,17 @@ DEFINE SYMBOL memsize = ($FERRET_MEMORY"6.4")* 1.e6
 !LET pvar = ($ferret_plot_var) 
 LET pvar = ($data_var)[d=($data_num)]
 IF ($region_zt"0|*>1") THEN LET pvar = ($data_var)[d=($data_num),($region_zt)]
-
+IF ($clon_imin"0|*>1") THEN 
+   LET pvar = ($data_var)[d=($data_num),i=($clon_imin):($clon_imax),j=($clat_jmin):($clat_jmax)]
+   IF ($region_zt"0|*>1") THEN \
+      LET pvar = ($data_var)[d=($data_num),i=($clon_imin):($clon_imax),j=($clat_jmin):($clat_jmax),($region_zt)]
+ENDIF
 
 LET varsiz `pvar,RETURN=size`
 
 ! If its a slice in x or y account for that
 IF `($region_x_range"1|0|*>1") EQ 0 AND ($region_y_range"1|0|*>1") EQ 0` THEN
-   LET pvar = ($data_var)[d=($data_num),($region_zt),i=1`1,j=1]
+   LET pvar = ($data_var)[d=($data_num),($region_zt),i=1,j=1]
    LET varsiz = MIN(`varsiz`, `pvar,RETURN=size`)
 
 ELIF `($region_x_range"1|0|*>1") EQ 0` THEN 
@@ -112,7 +116,14 @@ IF `STRLEN("($ferret_view)") EQ 2` THEN
 !         IF `pixsize GT maxpix` THEN DEFINE SYMBOL xstride = `INT((pixsize/maxpix)+1)`
          IF `2*pixsize GT maxpix` THEN DEFINE SYMBOL xstride = `2*INT((pixsize/maxpix)+1)`
          DEFINE SYMBOL xstride = `MAX(($xstride"1"), ($stride_for_mem"1"))`
-         IF `($xstride"0") GT 1` THEN SET AXIS/STRIDE=($xstride) `($data_var)[d=($data_num)],RETURN=xaxis`
+         IF `($xstride"0") GT 1` THEN 
+            LET rem = ( (($clon_imin)/($xstride)) - int(($clon_imin)/($xstride)) )* ($xstride)
+            DEFINE SYMBOL xoff = /OFFSET=`($xstride) - rem`
+            IF `rem EQ 0` THEN CANCEL SYMBOL xoff 
+            SET AXIS/STRIDE=($xstride)($xoff) `($data_var)[d=($data_num)],RETURN=xaxis`
+            DEFINE SYMBOL clon_imin = `INT(($clon_imin)/($xstride))`
+            DEFINE SYMBOL clon_imax = `INT(($clon_imax)/($xstride))`
+         ENDIF
 
       ENDIF
 
@@ -127,7 +138,15 @@ IF `STRLEN("($ferret_view)") EQ 2` THEN
 !         IF `pixsize GT maxpix` THEN DEFINE SYMBOL ystride = `2*INT((pixsize/maxpix)+1)`
          IF `2*pixsize GT maxpix` THEN DEFINE SYMBOL ystride = `2*INT((pixsize/maxpix)+1)`
          DEFINE SYMBOL ystride = `MAX(($ystride"1"), ($stride_for_mem"1"))`
-         IF `($ystride"0") GT 1` THEN SET AXIS/STRIDE=($ystride) `($data_var)[d=($data_num)],RETURN=yaxis`
+
+         IF `($ystride"0") GT 1` THEN 
+            LET rem = ( (($clat_jmin)/($ystride)) - int(($clat_jmin)/($ystride)) )* ($ystride)
+            DEFINE SYMBOL yoff = /OFFSET=`($ystride) - rem`
+            IF `rem EQ 0` THEN CANCEL SYMBOL yoff 
+            SET AXIS/STRIDE=($ystride)($yoff) `($data_var)[d=($data_num)],RETURN=yaxis`
+            DEFINE SYMBOL clat_jmin = `INT(($clat_jmin)/($ystride))`
+            DEFINE SYMBOL clat_jmax = `INT(($clat_jmax)/($ystride))`
+         ENDIF
 
       ENDIF
 
@@ -146,7 +165,15 @@ IF `STRLEN("($ferret_view)") EQ 2` THEN
               DEFINE SYMBOL xstride = `INT((pixsize/maxpix)+1)`
               DEFINE SYMBOL xstride = `MAX(($xstride"1"), ($stride_for_mem"1"))`
            ENDIF
-           IF `($xstride"0") GT 1` THEN SET AXIS/STRIDE=($xstride) `($data_var)[d=($data_num)],RETURN=xaxis`
+           IF `($xstride"0") GT 1` THEN 
+              LET rem = ( (($clon_imin)/($xstride)) - int(($clon_imin)/($xstride)) )* ($xstride)
+              DEFINE SYMBOL xoff = /OFFSET=`($xstride) - rem`
+              IF `rem EQ 0` THEN CANCEL SYMBOL xoff 
+              SET AXIS/STRIDE=($xstride)($xoff) `($data_var)[d=($data_num)],RETURN=xaxis`
+              DEFINE SYMBOL clon_imin = `INT(($clon_imin)/($xstride))`
+              DEFINE SYMBOL clon_imax = `INT(($clon_imax)/($xstride))`
+
+           ENDIF
 
 !        ENDIF
   
@@ -161,10 +188,17 @@ IF `STRLEN("($ferret_view)") EQ 2` THEN
               DEFINE SYMBOL ystride = `INT((pixsize/maxpix)+1)`
               DEFINE SYMBOL ystride = `MAX(($ystride"1"), ($stride_for_mem"1"))`
            ENDIF
-           IF `($ystride"0") GT 1` THEN SET AXIS/STRIDE=($ystride) `($data_var)[d=($data_num)],RETURN=yaxis`
+
+           IF `($ystride"0") GT 1` THEN 
+              DEFINE SYMBOL yoff = /OFFSET=`($ystride) - rem`
+              IF `rem EQ 0` THEN CANCEL SYMBOL yoff 
+              SET AXIS/STRIDE=($ystride)($yoff) `($data_var)[d=($data_num)],RETURN=yaxis`
+              DEFINE SYMBOL clat_jmin = `INT(($clat_jmin)/($ystride))`
+              DEFINE SYMBOL clat_jmax = `INT(($clat_jmax)/($ystride))`
+           ENDIF
 
 !        ENDIF
-  
+
         IF ($region_z_lo"0|*>1") THEN 
            LET zz = z[gz=($data_var)[d=($data_num)],($region_z)]
            LET nz = zz[k=@ngd]
@@ -194,70 +228,6 @@ IF `STRLEN("($ferret_view)") EQ 2` THEN
 
    ENDIF ! xy or not
 ENDIF  ! 2D plots
-
-! For 1D plots
-IF `STRLEN("($ferret_view)") EQ 1` THEN
-   LET pixsize = 1
-   IF `($region_x_range"0|*>1") GT 0` THEN 
-      LET xx = x[gx=($data_var)[d=($data_num)]]
-      LET nx = xx[i=@ngd]
-      LET x_pct = ($region_x_range)/360
-      LET pixsize = `nx*x_pct`
-!      LET pixsize = `MAX(pixsize, nx)`  ! comment this out to set strides by region
-   ENDIF
-
-   IF `($region_y_range"0|*>1") GT 0` THEN 
-      LET yy = y[gy=($data_var)[d=($data_num)]]
-      LET ny = yy[j=@ngd]
-      LET y_pct = ($region_y_range)/180
-      LET pixsize = `ny*y_pct`
-!      LET pixsize = `MAX(pixsize, ny)`  ! comment this out to set strides by region
-   ENDIF
-   IF ($region_z_lo"0|*>1") THEN 
-      LET zz = z[gz=($data_var)[d=($data_num)],($region_z)]
-      LET nz = zz[k=@ngd]
-      LET pixsize = `MAX(pixsize, nz)`
-   ENDIF
-   IF `($region_t"0|*>1") GT 0` THEN     
-      LET tt = t[gt=($data_var)[d=($data_num)],($region_t)]
-      LET nt = `tt[l=@ngd]`
-      stat tt
-      LET pixsize = `MAX(pixsize, nt)`
-   ENDIF
-   
-   IF `pixsize GT maxpix` THEN
-
-      IF ($region_x_range"0|0|*>1") THEN 
-         IF `nx GT maxpix` THEN 
-            DEFINE SYMBOL xstride = `2*INT((nx/maxpix)+1)`
-            IF `($xstride"0") GT 1` THEN SET AXIS/STRIDE=($xstride) `($data_var)[d=($data_num)],RETURN=xaxis`
-         ENDIF
-      ENDIF
-
-      IF ($region_y_range"0|0|*>1") THEN 
-         IF `ny GT maxpix` THEN 
-            DEFINE SYMBOL ystride = `2*INT((ny/maxpix)+1)`
-            IF `($ystride"0") GT 1` THEN SET AXIS/STRIDE=($ystride) `($data_var)[d=($data_num)],RETURN=yaxis`
-         ENDIF
-      ENDIF
-
-      IF ($region_z_range"0|0|*>1") THEN  
-         IF `nz GT maxpix` THEN 
-            DEFINE SYMBOL zstride = `2*INT((nz/maxpix)+1)
-            IF `($zstride"0") GT 1` THEN SET AXIS/STRIDE=($zstride) `($data_var)[d=($data_num)],RETURN=zaxis`
-         ENDIF
-      ENDIF
-
-      IF ($region_t"0|0|*>1") THEN  
-         IF `nt GT maxpix` THEN 
-            DEFINE SYMBOL tstride = `2*INT((nt/maxpix)+1)`
-            IF `($tstride"0") GT 1` THEN SET AXIS/STRIDE=($tstride) `($data_var)[d=($data_num)],RETURN=taxis`
-         ENDIF
-      ENDIF
-
-   ENDIF
-
-ENDIF ! 1D plots
 
 ! Add a label about the striding at the upper left.
 
