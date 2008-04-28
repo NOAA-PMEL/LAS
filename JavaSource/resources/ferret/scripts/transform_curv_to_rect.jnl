@@ -64,6 +64,7 @@ DEFINE SYMBOL xhi = `($region_x_hi)-360`
 
 LET mapimin = `i[gx=map,x=($xlo)] - 1`
 LET mapimax = `i[gx=map,x=($xhi)] + 1`
+IF `mapimax - mapimin GT nx` THEN LET mapimax = `nx-mapimax`
 
 LET yy = y[gy=map]
 LET ymaphi = MIN(`yy[y=@max]`,($region_y_hi))
@@ -81,13 +82,69 @@ SET AXIS/UNITS=degrees `($cf_map_var),RETURN=yaxis`
 DEFINE SYMBOL mapfile_num = `($cf_map_var),return=dsetnum`
 
 LET the_var_rect = ($regrid_fcn)(\
-       ($data_var)[d=($data_num),($reg_zt),I=($clon_imin):($clon_imax),J=($clat_jmin):($clat_jmax)],\
-      ($cf_map_var)[d=($mapfile_num),I=`mapimin`:`mapimax`,J=`mapjmin`:`mapjmax`] )
+ ($data_var)[d=($data_num),($reg_zt)], ($cf_map_var)[d=($mapfile_num),($region_xy)] )
 LET the_var_rect_no_zt = ($regrid_fcn)(\
-       ($data_var)[d=($data_num),I=($clon_imin):($clon_imax),J=($clat_jmin):($clat_jmax)],\
-      ($cf_map_var)[d=($mapfile_num),I=`mapimin`:`mapimax`,J=`mapjmin`:`mapjmax`] )
+ ($data_var)[d=($data_num)], ($cf_map_var)[d=($mapfile_num),($region_xy)] )
 
-LET the_var_rect_region = the_var_rect
+LET the_var_rect = ($regrid_fcn)(\
+ ($data_var)[d=($data_num),($reg_zt),I=($clon_imin):($clon_imax),J=($clat_jmin):($clat_jmax)], ($cf_map_var)[d=($mapfile_num),($region_xy)] )
+LET the_var_rect_no_zt = ($regrid_fcn)(\
+ ($data_var)[d=($data_num),I=($clon_imin):($clon_imax),J=($clat_jmin):($clat_jmax)], ($cf_map_var)[d=($mapfile_num),($region_xy)] )
+
+! Check that we have enough memory for the data variable and map function.
+
+LET nz = 1
+LET nt =1
+IF ($region_z"0|*>1") THEN
+   LET kk = K[gz=($data_var)[d=($num)]]
+   LET nz = kk[z=($region_z_hi)] - kk[z=($region_z_lo)] + 1
+ENDIF
+IF ($region_t"0|*>1") THEN
+   LET ll = L[gt=($data_var)[d=($num)]]
+   LET nt = ll[t="($region_t_hi)"] - ll[t="($region_t_lo)"] + 1
+ENDIF
+IF `STRINDEX("($operation_name)", "ANIMATION") NE 0` THEN LET nz = 1
+IF `STRINDEX("($operation_name)", "ANIMATION") NE 0` THEN LET nt = 1
+
+LET nmem = `nz*nt* (($clon_imax)-($clon_imin)+1 ) * ( ($clat_jmax)-($clat_jmin)+1 ) `
+
+IF ($ferret_curvi_coord_mapfcn"0|curv_to_rect_fsu>1|*>0") THEN 
+   LET nmem = `nmem + 3*(mapimax-mapimin+1)*(mapjmax-mapjmin+1)`
+ELSE 
+   LET nmem = `nmem + 12*(mapimax-mapimin+1)*(mapjmax-mapjmin+1)`
+ENDIF
+
+DEFINE SYMBOL error_string "error allocating enough memory for curvilinear gridding"
+DEFINE SYMBOL memsize = ($FERRET_MEMORY"6.4")* 1.e6
+IF `nmem GT ($memsize)` THEN SET MEM/SIZ=`nmem/1.e6`
+
+! Check for errors 
+IF ($error_status"0|ERROR>1") THEN
+  MESSAGE/ERROR ($error_string)
+  EXIT/PROGRAM
+ENDIF
+
+CANCEL SYMBOL error_string 
+
+! LET the_var_rect = ($regrid_fcn)(\
+!         ($data_var)[d=($data_num),($reg_zt),I=($clon_imin):($clon_imax),J=($clat_jmin):($clat_jmax)],\
+!        ($cf_map_var)[d=($mapfile_num)] )
+! LET the_var_rect_no_zt = ($regrid_fcn)(\
+!         ($data_var)[d=($data_num),I=($clon_imin):($clon_imax),J=($clat_jmin):($clat_jmax)],\
+!        ($cf_map_var)[d=($mapfile_num)] )
+      
+! IF ($region_x_lo"0|*>1") THEN DEFINE SYMBOL ferret_curvi_quals \   
+!     ($ferret_curvi_quals)/HLIM=($region_x_lo):($region_x_hi)
+! IF ($region_y_lo"0|*>1") THEN DEFINE SYMBOL ferret_curvi_quals \   
+!     ($ferret_curvi_quals)/VLIM=($region_y_lo):($region_y_hi)
+
+! for the auto-levels scripts, we will use just the data field, subsetted but not regridded.
+DEFINE SYMBOL auto_lev_var = ($data_var)[d=($data_num),($reg_zt),I=($clon_imin):($clon_imax),J=($clat_jmin):($clat_jmax)]
+DEFINE SYMBOL auto_lev_var_no_z = ($data_var)[d=($data_num),I=($clon_imin):($clon_imax),J=($clat_jmin):($clat_jmax)]
+IF ($region_z"0|*>1") THEN \ 
+  DEFINE SYMBOL auto_lev_var_no_z = ($data_var)[d=($data_num),I=($clon_imin):($clon_imax),J=($clat_jmin):($clat_jmax),($region_z)]
+DEFINE SYMBOL auto_lev_var_no_zt = ($data_var)[d=($data_num),I=($clon_imin):($clon_imax),J=($clat_jmin):($clat_jmax)]
+
 IF `STRCMP("($ferret_view)", "xy") EQ 0` THEN 
    LET the_var_rect_region = the_var_rect
    LET the_var_rect_region_no_zt = the_var_rect_no_zt
@@ -97,6 +154,9 @@ ELSE
 ENDIF
 
 DEFINE SYMBOL ferret_plot_var ($expr1)the_var_rect_region($expr2)
+show sym ferret_plot_var
+show var the_var_rect_region
+
 DEFINE SYMBOL ferret_list_var ($expr1)the_var_rect($expr2)
 DEFINE SYMBOL ferret_list_var_no_zt ($expr1)the_var_rect_no_zt($expr2)
 
