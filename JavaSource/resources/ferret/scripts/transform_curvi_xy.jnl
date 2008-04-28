@@ -62,8 +62,9 @@ IF `($constraint_0_lhs"0|Curv_to_Rect_Regridding>1|*>0")` THEN
    IF ($region_($which_var)_zt"0|*>1") THEN DEFINE SYMBOL reg_zt ($region_($which_var)_zt)
    
    GO transform_curv_to_rect.jnl
+   EXIT/SCRIPT
+ENDIF
 
-ELSE
 
 
 !!!!!!!!!!!
@@ -97,114 +98,100 @@ IF `($ferret_linear_coords_file"0|*>1") AND ($check_linear)` THEN
 
       CANCEL SYMBOL ferret_curvi_coord_lon
       CANCEL SYMBOL ferret_curvi_coord_lat
-      CANCEL SYMBOL DEFINE SYMBOL do_curvi_xy = 0
-      CANCEL SYMBOL do_curvi_xy_and_hybrid_z = 0
+      DEFINE SYMBOL do_curvi_xy = 0
+      DEFINE SYMBOL do_curvi_xy_and_hybrid_z = 0
    
-      ! Because we have redefined the axes we cant set native strides
+! Because we have redefined the axes we cant set native strides
       DEFINE SYMBOL no_native_strides_xy = 1
-
+      EXIT/SCRIPT
    
    ELSE
+   
+! Get the range of I,J needed to grab the region. Use it to define the plot or output variable.
+        
+      GO get_curv_coord_bbox.jnl
       GO LAS_set_strides_curvilinear.jnl
    ENDIF
 
 ELSE
-
+   
+   GO get_curv_coord_bbox.jnl
    GO LAS_set_strides_curvilinear.jnl
 
 ENDIF
 
 !!!!!!!!!!!
 
-IF `($ferret_curvi_coord_lon"0|*>1") EQ 0` THEN EXIT/SCRIPT
-
-
 ! Set up native curvilinear plots
-   LET/TITLE="Longitude"/units=degrees xcoord = ($ferret_curvi_coord_lon)[d=($data_num)]
-   LET/TITLE="Latitude"/units=degrees  ycoord = ($ferret_curvi_coord_lat)[d=($data_num)]
+LET/TITLE="Longitude"/units=degrees xcoord = ($ferret_curvi_coord_lon)[d=($data_num)]
+LET/TITLE="Latitude"/units=degrees  ycoord = ($ferret_curvi_coord_lat)[d=($data_num)]
 
 !   Native plot in XY
 
-   IF ($ferret_view"|xy>1|*>0") THEN
+IF ($ferret_view"|xy>1|*>0") THEN
 
-     IF `($constraint_0_lhs"1|Curv_to_Rect_Regridding>0|*>1")` THEN  ! Do this setup if NOT curv-to-rect regridding
-        DEFINE SYMBOL native_curvilinear_xy = 1
+   DEFINE SYMBOL native_curvilinear_xy = 1
 
-        ! Get the range of I,J needed to grab the region. Use it to define the plot or output variable.
-        
-        GO get_curv_coord_bbox
+! Get the range of I,J needed to grab the region. Use it to define the plot or output variable.
 
-        ! Remove this  and uncomment the above to set index range by region
-!c        DEFINE SYMBOl clon_imin = 1
-!c        DEFINE SYMBOl clon_imax = `($ferret_curvi_coord_lon)[d=($data_num),j=1,x=@ngd]`
-!c        DEFINE SYMBOl clat_jmin = 1
-!c        DEFINE SYMBOl clat_jmax = `($ferret_curvi_coord_lon)[d=($data_num),i=1,y=@ngd]`
-        
-        LET/TITLE="Longitude"/units=degrees xcoord = \
+   LET/TITLE="Longitude"/units=degrees xcoord = \
           ($ferret_curvi_coord_lon)[d=($data_num),i=($clon_imin):($clon_imax),j=($clat_jmin):($clat_jmax)]
-        LET/TITLE="Latitude"/units=degrees  ycoord = \ 
+   LET/TITLE="Latitude"/units=degrees  ycoord = \ 
           ($ferret_curvi_coord_lat)[d=($data_num),i=($clon_imin):($clon_imax),j=($clat_jmin):($clat_jmax)]
 
-        LET/d=($data_num) plot_var = ($data_var)[d=($data_num),i=($clon_imin):($clon_imax),j=($clat_jmin):($clat_jmax)]
-        IF ($region_zt"0|*>1") THEN LET/d=($data_num) plot_var = \
+   LET/d=($data_num) plot_var = ($data_var)[d=($data_num),i=($clon_imin):($clon_imax),j=($clat_jmin):($clat_jmax)]
+   IF ($region_zt"0|*>1") THEN LET/d=($data_num) plot_var = \
         ($data_var)[d=($data_num),i=($clon_imin):($clon_imax),j=($clat_jmin):($clat_jmax),($region_zt)]
-        IF ($region_($which_var)_zt"0|*>1") THEN LET/d=($data_num) plot_var = \
+   IF ($region_($which_var)_zt"0|*>1") THEN LET/d=($data_num) plot_var = \
         ($data_var)[d=($data_num),i=($clon_imin):($clon_imax),j=($clat_jmin):($clat_jmax),($region_($which_var)_zt)]
 
-        DEFINE SYMBOL ferret_plot_base_var = \ ($data_var)[d=($data_num),i=($clon_imin):($clon_imax),j=($clat_jmin):($clat_jmax)]
-        IF ($region_zt"0|*>1") THEN DEFINE SYMBOL ferret_plot_base_var = \
+   DEFINE SYMBOL ferret_plot_base_var = \ ($data_var)[d=($data_num),i=($clon_imin):($clon_imax),j=($clat_jmin):($clat_jmax)]
+   IF ($region_zt"0|*>1") THEN DEFINE SYMBOL ferret_plot_base_var = \
         ($data_var)[d=($data_num),i=($clon_imin):($clon_imax),j=($clat_jmin):($clat_jmax),($region_zt)]
-        IF ($region_($which_var)_zt"0|*>1") THEN DEFINE SYMBOL ferret_plot_base_var = \
+   IF ($region_($which_var)_zt"0|*>1") THEN DEFINE SYMBOL ferret_plot_base_var = \
         ($data_var)[d=($data_num),i=($clon_imin):($clon_imax),j=($clat_jmin):($clat_jmax),($region_($which_var)_zt)]
 
-        DEFINE SYMBOL ferret_plot_base_var_($which_var) ($ferret_plot_base_var)
+   DEFINE SYMBOL ferret_plot_base_var_($which_var) ($ferret_plot_base_var)
 
-        DEFINE SYMBOL ferret_plot_var ($expr1)plot_var[d=($data_num)]($expr2), xcoord, ycoord
-        IF ($region_zt"0|*>1") THEN DEFINE SYMBOL ferret_plot_var ($expr1)plot_var[d=($data_num)]($expr2), xcoord, ycoord
-        DEFINE SYMBOL ferret_plot_title "($expr1)($data_title)($expr2) ($data_units) Native Curvilinear Plot"
+   DEFINE SYMBOL ferret_plot_var ($expr1)plot_var[d=($data_num)]($expr2), xcoord, ycoord
+   IF ($region_zt"0|*>1") THEN DEFINE SYMBOL ferret_plot_var ($expr1)plot_var[d=($data_num)]($expr2), xcoord, ycoord
+   DEFINE SYMBOL ferret_plot_title "($expr1)($data_title)($expr2) ($data_units) Native Curvilinear Plot"
 
-        IF ($expr3"0|*>1") THEN
-           DEFINE SYMBOL ferret_plot_var ($expr1)plot_var[d=($data_num)]($expr3)plot_var[d=($data_num)]($expr4), xcoord, ycoord
-           IF ($region_zt"0|*>1") THEN DEFINE SYMBOL ferret_plot_var \
+   IF ($expr3"0|*>1") THEN
+      DEFINE SYMBOL ferret_plot_var ($expr1)plot_var[d=($data_num)]($expr3)plot_var[d=($data_num)]($expr4), xcoord, ycoord
+      IF ($region_zt"0|*>1") THEN DEFINE SYMBOL ferret_plot_var \
              ($expr1)plot_var[d=($data_num)]($expr3)plot_var[d=($data_num)]($expr4), xcoord, ycoord
-           DEFINE SYMBOL ferret_plot_title "($expr1)($data_title)($expr3)($data_title)($expr4) ($data_units) Native Curvilinear Plot"
-        ENDIF
+      DEFINE SYMBOL ferret_plot_title "($expr1)($data_title)($expr3)($data_title)($expr4) ($data_units) Native Curvilinear Plot"
+   ENDIF
 
-! If not striding for region, then always use these, and comment out the commands just below.
-        IF ($region_x_lo"0|*>1") THEN DEFINE SYMBOL ferret_curvi_quals \   
-          ($ferret_curvi_quals)/HLIM=($region_x_lo):($region_x_hi)
-        IF ($region_y_lo"0|*>1") THEN DEFINE SYMBOL ferret_curvi_quals \   
-          ($ferret_curvi_quals)/VLIM=($region_y_lo):($region_y_hi)
+! If not striding for region, then always use these
+   IF ($region_x_lo"0|*>1") THEN DEFINE SYMBOL ferret_curvi_quals \   
+       ($ferret_curvi_quals)/HLIM=($region_x_lo):($region_x_hi)
+   IF ($region_y_lo"0|*>1") THEN DEFINE SYMBOL ferret_curvi_quals \   
+       ($ferret_curvi_quals)/VLIM=($region_y_lo):($region_y_hi)
 
-!cc        IF ($region_z"0|*>1") THEN DEFINE SYMBOL ferret_curvi_quals  \   
-!cc          ($ferret_curvi_quals)/($region_z)
-!cc        IF ($region_t"0|*>1") THEN DEFINE SYMBOL ferret_curvi_quals  \   
-!cc          ($ferret_curvi_quals)/($region_t)
-        CANCEL SYMBOL ferret_use_graticule
+! Use /HLIM and /VLIM to get the correct plot axes, and if the 
+! longitudes are in a different modulo branch than requested add /MODULO
 
-        IF ($ferret_lon_modulo"1|1|0|yes>1|no>0|*>0") THEN 
-           IF ($region_x_lo"0|*>1") THEN DEFINE SYMBOL ferret_curvi_quals \   
-             ($ferret_curvi_quals)/HLIM=($region_x_lo):($region_x_hi)
-! A bug in FILL/MODULO for curvilinear data makes the plot fail for some data
-!        IF ($ferret_lon_modulo"1|1|0|yes>1|no>0|*>0") THEN 
-!           DEFINE SYMBOL ferret_curvi_quals ($ferret_curvi_quals)/MODULO
-        ENDIF
-
-     ENDIF  ! setup for NOT curv-to-rect regridding
+   IF ($ferret_lon_modulo"1|1|0|yes>1|no>0|*>0") THEN 
+      IF ($region_x_lo"0|*>1") THEN \
+          DEFINE SYMBOL ferret_curvi_quals ($ferret_curvi_quals)/HLIM=($region_x_lo):($region_x_hi)
+      LET outside = `xcoord[x=@min,y=@min] GT ($region_x_lo)` + `xcoord[x=@max,y=@max] LT ($region_x_hi)`
+      IF `($ferret_lon_modulo"1|1|0|yes>1|no>0|*>0") AND outside GT 0` THEN \
+          DEFINE SYMBOL ferret_curvi_quals ($ferret_curvi_quals)/MODULO
+   ENDIF
 
 ! Or set up for native slices: Sample in the X and Y directions of the slice
 
-   ELIF `STRLEN ("($ferret_view)") LE 2` THEN
+ELIF `STRLEN ("($ferret_view)") LE 2` THEN
 
-     IF ($ferret_interpolate_data%0|false>0|true>1|1|0|*>1%) THEN 
-        GO curvi_sample_slice.jnl
-        DEFINE SYMBOL data_var_transform = , Interpolated from Curvilinear coordinates
-     ELSE
-        GO curvi_nrst_slice.jnl
-     ENDIF
-
+   IF ($ferret_interpolate_data%0|false>0|true>1|1|0|*>1%) THEN 
+      GO curvi_sample_slice.jnl
+      DEFINE SYMBOL data_var_transform = , Interpolated from Curvilinear coordinates
+   ELSE
+      GO curvi_nrst_slice.jnl
    ENDIF
 
-ENDIF  ! native curvilinear plots or slices.
+ENDIF
 
 ! End of $RCSfile ------------transform_curvi_xy.jnl-------------------------------
