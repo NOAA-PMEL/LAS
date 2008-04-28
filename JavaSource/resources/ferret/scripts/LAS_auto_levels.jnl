@@ -122,31 +122,18 @@ ELSE
 !      LET pvar = ($ferret_xyz_var)
       LET pvar = ($ferret_plot_var)
       IF ($set_ndx_strides"0|*>1") THEN LET pvar = ($data_var)[d=($data_num),($region_xyzt)]
+      IF ($auto_lev_var"0|*>1") THEN LET pvar = ($auto_lev_var)
    ENDIF
 ENDIF
 
 !IF ($ferret_plot_var"0|sampled_var>1|*>0) THEN LET pvar = ($ferret_plot_var)
 
+IF ($ferret_plot_var"0|sampled_var>1|*>0) THEN LET pvar = ($ferret_plot_var)
+
 ! IF ($do_curvi_xy_and_hybrid_z"0") THEN LET pvar = plot_var
 
-show var pvar
-
-DEFINE SYMBOL have_pvar = 1
-
-! cannot do native striding if this is a descriptor dataset. In that case
-! just set the number of levels
-
-DEFINE SYMBOL check_for_des =  `($data_var)[d=($data_num)],return=dsetpath`
-IF `STRINDEX("($check_for_des)", ".des") GT 0` THEN DEFINE SYMBOL no_native_strides = 1
-!   IF `($input_contour_levels"0|0|1") EQ 0` THEN \
-!   DEFINE SYMBOL ferret_fill_levels = ($num_fine_levels"30")
-!   IF `($input_contour_levels"0|0|1") EQ 0` THEN \
-!   DEFINE SYMBOL ferret_contour_levels = ($num_fine_levels"30")
-!   EXIT/SCRIPT
-!ENDIF
-
 ! If the ferret_diff_var has been defined, use it.
-! When no levels are defined, use centered ones.
+! When no levels are defined, use centered ones for a diff variable
 IF ($ferret_diff_var"0|*>1") THEN 
    IF `($input_contour_levels"0|0|1") EQ 0` THEN 
       CANCEL SYMBOL ferret_contour_levels
@@ -190,27 +177,7 @@ IF `stride_for_speed GT 1` THEN
                      STRCMP("`pvar,RETURN=yaxis`", "SAMPLE_Y") EQ 0
 ENDIF
 
-LET sampled_in_x_or_y = sampled_in_x + sampled_in_y
-show symbol no_native_strides
-IF `($xstride"0|*>1") EQ 0 AND sampled_in_x_or_y EQ 0 AND \
-      ($no_native_strides_xy"0|*>1") NE 1 AND \
-      ($region_x"0|*>1") AND stride_for_speed GT 1` THEN
-   SET AXIS/STRIDE=`stride_for_speed` `pvar,RETURN=xaxis`
-   DEFINE SYMBOL undo_x = 1
-ENDIF
-
-IF `($ystride"0|*>1") EQ 0 AND sampled_in_x_or_y EQ 0 AND \
-      ($no_native_strides_xy"0|*>1") NE 1 AND \
-      ($region_y"0|*>1") AND stride_for_speed GT 1` THEN
-   SET AXIS/STRIDE=`stride_for_speed` `pvar,RETURN=yaxis`
-   DEFINE SYMBOL undo_y = 1
-ENDIF
-
-IF `($tstride"0|*>1") EQ 0 AND ($region_t"0|*>1") AND sampled_in_x_or_y EQ 0 AND \
-      stride_for_speed GT 1` THEN
-   SET AXIS/STRIDE=`stride_for_speed` `pvar,RETURN=taxis`
-   DEFINE SYMBOL undo_t = 1
-ENDIF
+IF ($regrid_fcn"0|*>1") THEN DEFINE SYMBOL no_native_strides_xy = 1
 
 ! If already strided, do index strides.
 IF `($native_curvilinear_xy"0") EQ 0` THEN  ! region syms dont apply to native curv grid directly
@@ -218,8 +185,13 @@ IF `($native_curvilinear_xy"0") EQ 0` THEN  ! region syms dont apply to native c
 IF `($xstride"0|1>0|*>1") OR ($no_native_strides_xy"0|*>1")` THEN
    LET xsize  `pvar,RETURN=isize`
    IF `xsize GT 50` THEN
-     LET strd_lo = `i[gx=pvar,x=($region_x_lo)]`
-     LET strd_hi = `i[gx=pvar,x=($region_x_hi)]`
+     IF ($clon_imin"0|*>1") THEN 
+        LET strd_lo = `i[gx=pvar,i=($clon_imin)]`
+        LET strd_hi = `i[gx=pvar,i=($clon_imax)]`
+     ELSE
+        LET strd_lo = `i[gx=pvar,x=($region_x_lo)]`
+        LET strd_hi = `i[gx=pvar,x=($region_x_hi)]`
+     ENDIF
      DEFINE SYMBOL index_strides = i=`strd_lo`:`strd_hi`:`INT(xsize/10)`
    ELSE
       IF `($region_sample"0|*>1") EQ 0` THEN DEFINE SYMBOL  index_strides = ($region_x)
@@ -229,8 +201,13 @@ ENDIF
 IF `($ystride"0|1>0|*>1") OR ($no_native_strides_xy"0|*>1")` THEN
    LET ysize  `pvar,RETURN=jsize`
    IF `ysize GT 50` THEN
-     LET strd_lo = `j[gy=pvar,y=($region_y_lo)]`
-     LET strd_hi = `j[gy=pvar,y=($region_y_hi)]`
+     IF ($clat_jmin"0|*>1") THEN 
+        LET strd_lo = `j[gx=pvar,j=($clat_jmin)]`
+        LET strd_hi = `j[gx=pvar,j=($clat_jmax)]`
+     ELSE
+        LET strd_lo = `j[gy=pvar,y=($region_y_lo)]`
+        LET strd_hi = `j[gy=pvar,y=($region_y_hi)]`
+     ENDIF
      IF ($index_strides"0|*>1") THEN
         DEFINE SYMBOL index_strides = ($index_strides),j=`strd_lo`:`strd_hi`:`INT(ysize/10)`
      ELSE
@@ -238,9 +215,9 @@ IF `($ystride"0|1>0|*>1") OR ($no_native_strides_xy"0|*>1")` THEN
      ENDIF
    ELSE
       IF ($index_strides"0|*>1") THEN
-         DEFINE SYMBOL index_strides = ($index_strides),($region_y)
+         IF ($region_y"0|*>1") THEN DEFINE SYMBOL index_strides = ($index_strides),($region_y)
       ELSE
-         IF `($region_sample"0|*>1") EQ 0` THEN DEFINE SYMBOL  index_strides = ($region_y)
+         IF `($region_sample"0|*>1") EQ 0 AND ($region_y"0|*>1")` THEN DEFINE SYMBOL  index_strides = ($region_y)
       ENDIF
    ENDIF
 ENDIF
@@ -257,9 +234,9 @@ IF `($zstride"0|1>0|*>1") OR ($no_native_strides_xy"0|*>1")` THEN
      ENDIF
    ELSE
       IF ($index_strides"0|*>1") THEN
-         DEFINE SYMBOL index_strides = ($index_strides),($region_z)
+         IF ($region_z"0|*>1") THEN DEFINE SYMBOL index_strides = ($index_strides),($region_z)
       ELSE
-         DEFINE SYMBOL  index_strides = ($region_z)
+         IF ($region_z"0|*>1") THEN DEFINE SYMBOL index_strides = ($region_z)
       ENDIF
    ENDIF
 ENDIF
@@ -280,9 +257,9 @@ IF `($tstride"0|1>0|*>1") OR ($no_native_strides_xy"0|*>1")` THEN
       ENDIF
    ELSE
       IF ($index_strides"0|*>1") THEN
-         DEFINE SYMBOL index_strides = ($index_strides),($region_t)
+         IF ($region_t"0|*>1") THEN DEFINE SYMBOL index_strides = ($index_strides),($region_t)
       ELSE
-         DEFINE SYMBOL  index_strides = ($region_t)
+         IF ($region_t"0|*>1") THEN DEFINE SYMBOL  index_strides = ($region_t)
       ENDIF
    ENDIF
 ENDIF
@@ -305,15 +282,6 @@ IF ($native_curvilinear_xy"0") THEN DEFINE SYMBOL ppvar = pvar
 
 DEFINE SYMBOL stat_ngood= 0
 STAT ($ppvar)
-
-! Undo the striding. Other striding may be set elsewhere
-
-IF `stride_for_speed GT 1` THEN
-   IF `($undo_x"0") GT 0` THEN CANCEL AXIS/STRIDE `pvar,RETURN=xaxis`
-   IF `($undo_y"0") GT 0` THEN CANCEL AXIS/STRIDE `pvar,RETURN=yaxis`
-   IF `($undo_z"0") GT 0` THEN CANCEL AXIS/STRIDE `pvar,RETURN=zaxis`
-   IF `($undo_t"0") GT 0` THEN CANCEL AXIS/STRIDE `pvar,RETURN=taxis`
-ENDIF
 
 IF `($stat_ngood"0") EQ 0` THEN EXIT/SCRIPT
 
@@ -364,7 +332,7 @@ DEFINE SYMBOL half_num_coarse_levels = `($num_coarse_levels)/2`
 LET nstd = 2*($stat_std)
 LET nstd = 1*($stat_std)
 
-IF ($stat_mean"bad>1|bad>1|*>0") THEN
+IF ($stat_mean"1|bad>1|*>0") THEN
   DEFINE SYMBOL error_string "The ($data_var)[d=($data_num)] variable has no valid data"
   MESSAGE/ERROR **ERROR ($error_string)
   EXIT/PROGRAM
