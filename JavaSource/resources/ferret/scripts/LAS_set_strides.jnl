@@ -36,7 +36,7 @@ DEFINE SYMBOL memsize = ($FERRET_MEMORY"6.4")* 1.e6
 ! this case set up index strides.
 
 DEFINE SYMBOL no_native = 0
-DEFINE SYMBOL check_for_des =  `($data_var)[d=($data_num)],return=dsetpath`
+DEFINE SYMBOL check_for_des =  `($data_var)[d=($data_num)],RETURN=dsetpath`
 IF `STRINDEX("($check_for_des)", ".des") GT 0 OR ($no_native_strides_xy"0|*>1")` THEN 
    DEFINE SYMBOL no_native = 1
    LET pvar = ($data_var)[d=($data_num),($region_xyzt)]
@@ -72,30 +72,7 @@ ENDIF
 IF `STRINDEX( "($operation_ID)", "Plot" ) EQ 0 AND \
     STRINDEX( "($operation_ID)", "zoom" ) EQ 0 AND \
     STRINDEX( "($operation_ID)", "Anim" ) EQ 0` THEN
-   IF `($stride_for_mem"0") GT 1` THEN
-      IF `($region_x_range"0|*>1") GT 0` THEN
-         IF ($no_native_strides_xy"0|*>1") NE 1` THEN 
-         SET AXIS/STRIDE=($stride_for_mem) `pvar,RETURN=xaxis`
-         ELSE
-         DEFINE SYMBOL add_to_title = Stride ($stride_for_mem) in X
-      ENDIF
-      IF `($region_y_range"0|*>1") GT 0 AND ($no_native_strides_xy"0|*>1") NE 1` THEN 
-         SET AXIS/STRIDE=($stride_for_mem) `pvar,RETURN=yaxis`
-         DEFINE SYMBOL add_to_title = ($add_to_title) Stride ($stride_for_mem) in Y
-      ENDIF
-      IF `($region_z_range"0|*>1") GT 0` THEN 
-         SET AXIS/STRIDE=($stride_for_mem) `pvar,RETURN=zaxis`
-         DEFINE SYMBOL add_to_title = ($add_to_title) Stride ($stride_for_mem) in Z
-      ENDIF
-      
-      IF `STRINDEX( "($operation_ID)", "Animation" ) EQ 0` THEN
-      IF `($region_t"0|*>1") GT 0` THEN 
-         SET AXIS/STRIDE=($stride_for_mem) `pvar,RETURN=taxis`
-         DEFINE SYMBOL add_to_title = ($add_to_title) Stride ($stride_for_mem) in T
-      ENDIF
-      SET VAR/TITLE="($ferret_plot_title) ($add_to_title)" ($ferret_plot_var) 
-
-   ENDIF
+   GO LAS_set_strides_for_mem
    EXIT/SCRIPT
 ENDIF
 
@@ -117,9 +94,17 @@ IF `($region_x_range"0|0|*>1") AND ($no_native_strides_xy"0|*>1") NE 1` THEN
 
    IF `pixsize GT maxpix` THEN DEFINE SYMBOL xstride = `INT((pixsize/maxpix)+1)`
    DEFINE SYMBOL xstride = `MAX(($xstride"1"), ($stride_for_mem"1"))`
-   IF `($xstride) GT 1` THEN SET AXIS/STRIDE=($xstride) `($data_var)[d=($data_num)],RETURN=xaxis`
-ENDIF
 
+
+! Check whether X axis is modulo. check_modulo_factor.jnl checks whether the
+! axis is modulo and if so, whether the stride is a factor of the lentgh of 
+! the axis, resetting it if possible to retain the modulo character of the axis.
+
+   GO check_modulo_factor x 
+   IF `($xstride) GT 1` THEN SET AXIS/STRIDE=($xstride) `($data_var)[d=($data_num)],RETURN=xaxis`
+  
+ENDIF
+pause 
 IF `($region_y_range"0|0|*>1") AND ($no_native_strides_xy"0|*>1") NE 1` THEN 
    LET yy = y[gy=($data_var)[d=($data_num),($region_y)]]
    LET pixsize = yy[j=@ngd]
@@ -143,6 +128,12 @@ IF `($region_t"0|0|*>1") AND ( ($DO_TRANS_1_SEAS_PER_YEAR"0") EQ 0) AND \
    LET pixsize = `tt[L=@ngd]`      
    DEFINE SYMBOL tstride = `INT((pixsize/maxpix)+1)`
    DEFINE SYMBOL tstride = `MAX(($tstride"1"), ($stride_for_mem"1"))`
+
+! Check whether T axis is modulo. check_modulo_factor.jnl checks whether the
+! axis is modulo and if so, whether the stride is a factor of the lentgh of 
+! the axis, resetting it if possible to retain the modulo character of the axis.
+
+   GO check_modulo_factor t
    IF `($tstride) GT 1` THEN SET AXIS/STRIDE=($tstride) `($data_var)[d=($data_num)],RETURN=taxis`
 ENDIF
 

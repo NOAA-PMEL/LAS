@@ -1,0 +1,33 @@
+! check_modulo_factor.jnl
+! Check whether stride is an integer factor of the axis length
+! and attempt to reset it if not.
+
+! Argument is axis direction: x or t
+
+DEFINE SYMBOL dir = `UPCASE("$1")`
+IF `($($dir)stride) LE 1` THEN EXIT/SCRIPT
+
+DEFINE SYMBOL indx = i
+IF `STRCMP("($dir)", "T") EQ 0` THEN  DEFINE SYMBOL indx = l
+
+! Check whether axis is modulo
+DEFINE SYMBOL var_mod = "`($data_var),RETURN=($dir)mod`"  
+IF  `STRCMP (" ", ($var_mod)) EQ 0` THEN
+   CANCEL SYMBOL FER_LAST_ERROR
+
+ELSE
+! Reset the computed stride if necessary to make sure stride is an integer 
+! factor of axis length, else it loses its modulo property 
+
+   LET nn = `($data_var)[d=($data_num)],RETURN=($indx)size`
+   LET del = INT(($($dir)stride)/2)
+   REPEAT/RANGE=1:`($($dir)stride)+del`/NAME=m \
+        (LET nstride = `($($dir)stride)+m`; IF `MOD(nn,nstride) EQ 0` THEN EXIT/LOOP; \
+         LET nstride = `($($dir)stride)-m`; IF `MOD(nn,nstride) EQ 0` THEN EXIT/LOOP)
+
+   IF `MOD(nn,($($dir)stride)) NE 0` THEN DEFINE SYMBOL error_string = "may not be able to do modulo operations in ($dir)"
+   
+   DEFINE SYMBOL ($dir)stride = `nstride`
+ENDIF
+
+! End of $RCSfile ------------check_modulo_factor.jnl--------------------------
