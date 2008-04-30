@@ -69,8 +69,10 @@ IF ($ferret_contour_levels"0|*>1") THEN
    IF `nc GT 0` THEN
       LET slen = STRLEN ("($up_fill_levels)") 
       IF `slen GT 1` THEN DEFINE SYMBOL num_fine_levels = `SUBSTRING ("($up_fill_levels)", 1, slen-1)`
+      CANCEL SYMBOL input_contour_levels  ! we will redefine the levels in this script
    ENDIF
 ENDIF
+
 IF ($ferret_fill_levels"0|*>1") THEN
    DEFINE SYMBOL up_fill_levels = `UPCASE("($ferret_fill_levels)")`
    LET nc = `STRINDEX("($up_fill_levels)", "C")`
@@ -78,6 +80,7 @@ IF ($ferret_fill_levels"0|*>1") THEN
    IF `nc GT 0` THEN
       LET slen = STRLEN ("($up_fill_levels)") 
       IF `slen GT 1` THEN DEFINE SYMBOL num_fine_levels = `SUBSTRING ("($up_fill_levels)", 1, slen-1)`
+      CANCEL SYMBOL input_fill_levels  ! we will redefine the levels in this script
    ENDIF
 ENDIF
 
@@ -153,10 +156,11 @@ ENDIF
 
 IF ($regrid_fcn"0|*>1") THEN DEFINE SYMBOL no_native_strides_xy = 1
 
-! If already strided, do index strides.
+! If already strided, dont do index strides.
 IF `($native_curvilinear_xy"0") EQ 0` THEN  ! region syms dont apply to native curv grid directly
 
-IF `($xstride"0|1>0|*>1") OR ($no_native_strides_xy"0|*>1")` THEN
+!IF `($xstride"0|1>0|*>1") OR ($no_native_strides_xy"0|*>1")` THEN
+IF `($xstride"1|1>0|*>0") OR ($no_native_strides_xy"0|*>1")` THEN
    LET xsize  `pvar,RETURN=isize`
    IF `xsize GT 50` THEN
      IF ($clon_imin"0|*>1") THEN 
@@ -172,7 +176,8 @@ IF `($xstride"0|1>0|*>1") OR ($no_native_strides_xy"0|*>1")` THEN
    ENDIF
 ENDIF
 
-IF `($ystride"0|1>0|*>1") OR ($no_native_strides_xy"0|*>1")` THEN
+!IF `($ystride"0|1>0|*>1") OR ($no_native_strides_xy"0|*>1")` THEN
+IF `($ystride"1|1>0|*>0") OR ($no_native_strides_xy"0|*>1")` THEN
    LET ysize  `pvar,RETURN=jsize`
    IF `ysize GT 50` THEN
      IF ($clat_jmin"0|*>1") THEN 
@@ -196,7 +201,8 @@ IF `($ystride"0|1>0|*>1") OR ($no_native_strides_xy"0|*>1")` THEN
    ENDIF
 ENDIF
 
-IF `($zstride"0|1>0|*>1") OR ($no_native_strides_xy"0|*>1")` THEN
+!IF `($zstride"0|1>0|*>1") OR ($no_native_strides_xy"0|*>1")` THEN
+IF `($zstride"1|1>0|*>0") OR ($no_native_strides_xy"0|*>1")` THEN
    LET zsize  `pvar,RETURN=ksize`
    IF `zsize GT 50` THEN 
      LET strd_lo = `k[gz=pvar,z=($region_z_lo)]`
@@ -216,6 +222,7 @@ IF `($zstride"0|1>0|*>1") OR ($no_native_strides_xy"0|*>1")` THEN
 ENDIF
 
 IF `($tstride"0|1>0|*>1") OR ($no_native_strides_xy"0|*>1")` THEN
+IF `($tstride"1|1>0|*>0") OR ($no_native_strides_xy"0|*>1")` THEN
    LET tsize  `pvar,RETURN=lsize`
    IF `tsize GT 50` THEN 
 
