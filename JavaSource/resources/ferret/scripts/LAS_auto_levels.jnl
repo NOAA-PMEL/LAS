@@ -46,35 +46,34 @@ ENDIF
 
 DEFINE SYMBOL ferret_center_levels ($ferret_center_levels"0|1|TRUE>1|*>0")
 
-! If levels were requested but not centered ones, just return.
-
-LET nc = 0
-IF ($input_fill_levels"0") THEN
-   DEFINE SYMBOL up_fill_levels = `UPCASE("($ferret_fill_levels)")`
-   LET nc = `STRINDEX("($up_fill_levels)", "C")`
-   DEFINE SYMBOL ferret_center_levels = `nc GT 0`
-   IF `nc EQ 0` THEN
-      IF `($ferret_contour_levels"0|*>1") EQ 0` THEN \
-        DEFINE SYMBOL ferret_contour_levels ($ferret_fill_levels)
-      EXIT/SCRIPT
-   ENDIF
- ENDIF
-
 ! See if centered levels were requested, either by setting the symbol ferret_center_levels
 ! or with a contour_levels or fill_levels that is centered.
 
 ! If contour levels requested with levels of nC, e.g. 20C, then get the value to
 ! set num_fine_levels in the %RANGE command below
 
+! In general if other levels spec is given, return. However if it is a simple number, 
+! use that to set the number of fine levels.
+
 IF ($ferret_contour_levels"0|*>1") THEN
    DEFINE SYMBOL up_contour_levels = `UPCASE("($ferret_contour_levels)")`
    LET nc = `STRINDEX("($up_contour_levels)", "C")`
    DEFINE SYMBOL ferret_center_levels = `nc GT 0`
    IF `nc GT 0` THEN
-      LET slen = STRLEN ("($up_fill_levels)") 
-      IF `slen GT 1` THEN DEFINE SYMBOL num_fine_levels = `SUBSTRING ("($up_fill_levels)", 1, slen-1)`
+      LET slen = STRLEN ("($up_contour_levels)") 
+      IF `slen GT 1` THEN DEFINE SYMBOL num_fine_levels = `SUBSTRING ("($up_contour_levels)", 1, slen-1)`
+      IF `slen GT 1` THEN DEFINE SYMBOL num_fine_levels_contour = ($num_fine_levels)
       CANCEL SYMBOL input_contour_levels  ! we will redefine the levels in this script
    ENDIF
+   LET other = `STRINDEX("($up_contour_levels)", "D")` + \
+      `STRINDEX("($up_contour_levels)", "(")`+ \
+      `STRINDEX("($up_contour_levels)", ".")`
+   IF `nc EQ 0 AND other EQ 0` THEN 
+      DEFINE SYMBOL num_fine_levels = ($ferret_contour_levels) ! How to test that this is just a number??
+      DEFINE SYMBOL num_fine_levels_contour = ($num_fine_levels)
+      CANCEL SYMBOL input_contour_levels  ! we will redefine the levels in this script
+   ENDIF
+   IF `nc EQ 0 AND other NE 0` THEN  EXIT/SCRIPT
 ENDIF
 
 IF ($ferret_fill_levels"0|*>1") THEN
@@ -86,11 +85,14 @@ IF ($ferret_fill_levels"0|*>1") THEN
       IF `slen GT 1` THEN DEFINE SYMBOL num_fine_levels = `SUBSTRING ("($up_fill_levels)", 1, slen-1)`
       CANCEL SYMBOL input_fill_levels  ! we will redefine the levels in this script
    ENDIF
-ENDIF
-
-! If levels other than centered were already given, exit
-IF `nc EQ 0` THEN
-  IF `($ferret_fill_levels"0|*>1") OR ($ferret_contour_levels"0|*>1")` THEN EXIT/SCRIPT
+   LET other = `STRINDEX("($ferret_fill_levels)", "D")` + \
+      `STRINDEX("($ferret_fill_levels)", "(")`+ \
+      `STRINDEX("($ferret_fill_levels)", ".")`
+   IF `nc EQ 0 AND other EQ 0` THEN 
+      DEFINE SYMBOL num_fine_levels = ($ferret_fill_levels)  ! How to test that this is just a number??
+      CANCEL SYMBOL input_fill_levels  ! we will redefine the levels in this script
+   ENDIF
+   IF `nc EQ 0 AND other NE 0` THEN  EXIT/SCRIPT
 ENDIF
 
 ! Apply to the variable on the requested region
@@ -109,7 +111,6 @@ IF `($native_curvilinear_xy"0") OR ($region_sample"0|*>1")` THEN
     ($data_var)[d=($data_num),i=($clon_imin):($clon_imax):`istr_lev`,j=($clat_jmin):($clat_jmax):`jstr_lev`]
    IF ($region_zt"0|*>1") THEN LET pvar = \
     ($data_var)[d=($data_num),i=($clon_imin):($clon_imax):`istr_lev`,j=($clat_jmin):($clat_jmax):`jstr_lev`,($region_zt)]
-
 ! ??
    IF ($do_curvi_xy_and_hybrid_z"0") THEN LET pvar = \
     ($data_var)[d=($data_num),i=($clon_imin):($clon_imax):`istr_lev`,j=($clat_jmin):($clat_jmax):`jstr_lev`,($region_zt)]
@@ -224,8 +225,7 @@ IF `($ystride"1|1>0|*>0") OR ($no_native_strides_xy"0|*>1")` THEN
    ENDIF
 ENDIF
 
-!IF `($zstride"0|1>0|*>1") OR ($no_native_strides_xy"0|*>1")` THEN
-IF `($zstride"1|1>0|*>0") OR ($no_native_strides_xy"0|*>1")` THEN
+IF `($zstride"0|1>0|*>1") OR ($no_native_strides_xy"0|*>1")` THEN
    LET zsize  `pvar,RETURN=ksize`
    IF `zsize GT 50` THEN 
      LET strd_lo = `k[gz=pvar,z=($region_z_lo)]`
@@ -245,7 +245,6 @@ IF `($zstride"1|1>0|*>0") OR ($no_native_strides_xy"0|*>1")` THEN
 ENDIF
 
 IF `($tstride"0|1>0|*>1") OR ($no_native_strides_xy"0|*>1")` THEN
-IF `($tstride"1|1>0|*>0") OR ($no_native_strides_xy"0|*>1")` THEN
    LET tsize  `pvar,RETURN=lsize`
    IF `tsize GT 50` THEN
       LET strd_lo = 1
@@ -270,11 +269,15 @@ ENDIF
 
 ENDIF ! region syms dont apply to native curv grid directly
 
+IF `STRINDEX("($data_($num)_grid_type)","scattered") GT 0` THEN CANCEL SYMBOL index_strides
+
 IF ($index_strides"0|*>1") THEN
    DEFINE SYMBOL ppvar = ($data_var)[d=($data_num),($index_strides)]
 ELSE
    DEFINE SYMBOL ppvar = pvar
 ENDIF
+show symbol index_strides
+
 IF ($native_curvilinear_xy"0") THEN DEFINE SYMBOL ppvar = pvar
 
 ! IF ($ferret_var_autolevels_0"0|*>1") THEN DEFINE SYMBOL ppvar = ($ferret_var_autolevels_0)
@@ -286,7 +289,6 @@ IF ($native_curvilinear_xy"0") THEN DEFINE SYMBOL ppvar = pvar
 
 DEFINE SYMBOL stat_ngood= 0
 STAT ($ppvar)
-
 IF `($stat_ngood"0") EQ 0` THEN EXIT/SCRIPT
 
 ! If the data values are so big we cant compute stats correctly, just
@@ -327,8 +329,9 @@ LET density_factor = 4
 ! This can happen if the data is a constant value...
 IF `($stat_min) EQ ($stat_max)` THEN EXIT/SCRIPT
 
-DEFINE SYMBOL num_fine_levels = `(density_factor/(1+density_factor)) * ($num_contour_levels"30")`
+IF `($num_fine_levels"0|*>1") EQ 0` THEN DEFINE SYMBOL num_fine_levels = `(density_factor/(1+density_factor)) * ($num_contour_levels"30")`
 DEFINE SYMBOL num_coarse_levels =  `($num_contour_levels"30") - ($num_fine_levels)`
+IF `($num_coarse_levels) LT 0` THEN DEFINE SYMBOL num_coarse_levels = 2
 DEFINE SYMBOL half_num_coarse_levels = `($num_coarse_levels)/2`
 
 ! Compute rounded-off levels with the PPL %RANGE command.
