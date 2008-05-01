@@ -17,10 +17,12 @@ IF `STRINDEX("($data_$1_url)","http") NE 0` THEN
 
    DEFINE SYMBOL n_right_labels = `($n_right_labels)+1`
    DEFINE SYMBOL upper_right_($n_right_labels) = DODS URL: ($data_$1_urlpath)
-   DEFINE SYMBOL upper_right_text_($n_right_labels) = DODS URL($data_$1_urlpath)
+   DEFINE SYMBOL upper_right_text_($n_right_labels) = DODS URL ($data_$1_urlpath)
 ELSE
    DEFINE SYMBOL n_right_labels = `($n_right_labels)+1`
    DEFINE SYMBOL upper_right_($n_right_labels) = DATA SET: `($data_var)[d=($data_num)],RETURN=dset`
+   DEFINE SYMBOL upper_right_($n_right_labels) = DATA SET: ($data_$1_url)
+   DEFINE SYMBOL upper_right_text_($n_right_labels) = DATA SET: ($data_$1_url)
 ENDIF
 
 ! If its really long, split into multiple lines at the location of a slash.
