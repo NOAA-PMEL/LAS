@@ -23,11 +23,19 @@ ELSE
    LET del = INT(($($dir)stride)/2)
    REPEAT/RANGE=1:`($($dir)stride)+del`/NAME=m \
         (LET nstride = `($($dir)stride)+m`; IF `MOD(nn,nstride) EQ 0` THEN EXIT/LOOP; \
-         LET nstride = `($($dir)stride)-m`; IF `MOD(nn,nstride) EQ 0` THEN EXIT/LOOP)
+         LET nstride = `($($dir)stride)-m`; IF `MOD(nn,nstride) EQ 0` THEN EXIT/LOOP; \
+         IF `nstride LE ($stride_for_mem)` THEN EXIT/LOOP)
 
-   IF `MOD(nn,($($dir)stride)) NE 0` THEN DEFINE SYMBOL error_string = "may not be able to do modulo operations in ($dir)"
-   
-   DEFINE SYMBOL ($dir)stride = `nstride`
+! If we found a stride value that is an integer factor of the axis length, 
+! redefine the stride value. 
+
+   IF `MOD(nn,nstride) EQ 0` THEN 
+      DEFINE SYMBOL ($dir)stride = `nstride`
+   ELSE
+      DEFINE SYMBOL error_string = "Because of striding (subsampling) on axis of length `nn`, cannot do do modulo operations in ($dir)"
+           DEFINE SYMBOL qualifiers = ($qualifiers)/HLIM=`($region_x_lo)`:`($region_x_hi)`
+
+   ENDIF
 ENDIF
 
 ! End of $RCSfile ------------check_modulo_factor.jnl--------------------------
