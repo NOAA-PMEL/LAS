@@ -132,7 +132,14 @@
         </menu>
         <menu type="ops" name="Ops_StdVec">
             <item values="Plot_vector,vector,2">Vector plot</item>
+        </menu>
+        <menu type="ops" name="Ops_StdVec_XY">
+            <item values="Plot_vector,vector,2">Vector plot</item>
             <item values="Vector_GE_Overlay,html,20">Plot to Google Earth</item>
+            <item values="Animation_2D_XY_vector,txt,2">Animation</item>
+        </menu>
+        <menu type="ops" name="Ops_StdVec_XYT">
+            <item values="Animation_2D_XY_vector,txt,2">Animation</item>
         </menu>
         <menu type="views" name="Views_StdVec">
             <ifitem view="xy" values="xy">Longitude-Latitude map (xy)</ifitem>
@@ -141,6 +148,7 @@
             <ifitem view="yz" values="yz">Latitude-depth sections (yz)</ifitem>
             <ifitem view="yt" values="yt">Latitude-time hofmoeller (yt)</ifitem>
             <ifitem view="zt" values="zt">Depth-time hofmoeller (zt)</ifitem>
+            <ifitem view="xyt" values="xyt" >xyt volume</ifitem>
         </menu>
         <menu type="views" name="Views_Std">
             <ifitem view="xy" values="xy">Longitude-Latitude map (xy)</ifitem>
@@ -263,6 +271,7 @@
             <ifoptions op="Plot_GE_kml" href="#Options_2D_image_contour_xy_GE"/>
             <ifoptions op="Data_Extract_Grid" href="#Options_Data"/>
             <ifoptions op="Animation_2D_XY" href="#Options_2D_image_contour_animation_xy"/>
+            <ifoptions op="Animation_2D_XY_vector" href="#Options_Vector"/>
             <ifoptions op="Animation_2D" href="#Options_2D_image_contour_animation"/> 
             <ifoptions op="Animation_1D" href="#Options_1D_Animation"/>
             <ifoptions op="XY_zoomable_image" href="#Options_2D_image_contour_xy"/>
@@ -299,7 +308,9 @@
             <menu href="#Views_Std"/>
         </map>
         <map type="ops" name="VecOperations">
-            <ifmenu view="xy,xz,xt,yz,yt,zt" href="#Ops_StdVec"/>
+            <ifmenu view="xz,xt,yz,yt,zt" href="#Ops_StdVec"/>
+            <ifmenu view="xy" href="#Ops_StdVec_XY"/>
+            <ifmenu view="xyt" href="#Ops_StdVec_XYT"/>
         </map>
         <map type="views" name="VecViews">
             <menu href="#Views_StdVec"/>
