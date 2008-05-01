@@ -5,10 +5,19 @@
 ! stat_min, stat_max, stat_mean, stat_std
 
 ! Adjust if the data values are not naturally centered near 0
+! If num_fine_levels_contour has been set, use it to set how many
+! contour levels per color level. Never more contours than colors
+! on a contour-over-colors plot.
 
 LET twostd = 2*nstd
 LET absmin = ABS( ($stat_min) )
 LET absmax = ABS( ($stat_max) )
+
+LET lines_to_levels = 2
+IF ($num_fine_levels_contour"0|*>1") THEN 
+   LET lines_to_levels = INT( ($num_fine_levels)/($num_fine_levels_contour) )
+   IF `lines_to_levels LT 1` THEN LET lines_to_levels = 1
+ENDIF
 
 ! Compute rounded-off levels with the PPL %RANGE command.
 
@@ -34,9 +43,9 @@ IF `($stat_min) LT ($coarse_lo)  OR  ($stat_max) GT ($coarse_hi)` THEN
    DEFINE SYMBOL ferret_auto_levels = (-inf)(($coarse_lo),($fine_lo),($coarse_delta))\
 (($fine_lo),($fine_hi),($fine_inc))\
 (($fine_hi),($coarse_hi),($coarse_delta))(inf)
-   DEFINE SYMBOL ferret_auto_lines =(-inf)(($coarse_lo),($fine_lo),`2*($coarse_delta)`)\
-(($fine_lo),($fine_hi),`2*($fine_inc)`)\
-(($fine_hi),($coarse_hi),`2*($coarse_delta)`)(inf)
+   DEFINE SYMBOL ferret_auto_lines =(-inf)(($coarse_lo),($fine_lo),`lines_to_levels*($coarse_delta)`)\
+(($fine_lo),($fine_hi),`lines_to_levels*($fine_inc)`)\
+(($fine_hi),($coarse_hi),`lines_to_levels*($coarse_delta)`)(inf)
 EXIT/SCRIPT
 
 ELSE
@@ -54,9 +63,9 @@ ELSE
       DEFINE SYMBOL ferret_auto_levels = (-inf)(($lowest_lev),($fine_lo),($coarse_delta))\
 (($fine_lo),($fine_hi),($fine_inc))\
 (($fine_hi),($highest_lev),($coarse_delta))(inf)
-      DEFINE SYMBOL ferret_auto_lines = (-inf)(($lowest_lev),($fine_lo),`2*($coarse_delta)`)\
-(($fine_lo),($fine_hi),`2*($fine_inc)`)\
-(($fine_hi),($highest_lev),`2*($coarse_delta)`)(inf)
+      DEFINE SYMBOL ferret_auto_lines = (-inf)(($lowest_lev),($fine_lo),`lines_to_levels*($coarse_delta)`)\
+(($fine_lo),($fine_hi),`lines_to_levels*($fine_inc)`)\
+(($fine_hi),($highest_lev),`lines_to_levels*($coarse_delta)`)(inf)
 
    ENDIF
 

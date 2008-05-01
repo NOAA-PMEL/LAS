@@ -5,7 +5,17 @@
 ! stat_min, stat_max, stat_mean, stat_std
 ! Levels not constrained to be centered
 
+! If num_fine_levels_contour has been set, use it to set how many
+! contour levels per color level. Never more contours than colors
+! on a contour-over-colors plot.
+
 PPL %RANGE `($stat_mean)-nstd`, `($stat_mean)+nstd`, ($num_fine_levels)
+
+LET lines_to_levels = 2
+IF ($num_fine_levels_contour"0|*>1") THEN 
+   LET lines_to_levels = INT( ($num_fine_levels)/($num_fine_levels_contour) )
+   IF `lines_to_levels LT 1` THEN LET lines_to_levels = 1
+ENDIF
 
 DEFINE SYMBOL fine_lo = `MAX(($ppl$range_low), ($stat_min) )`
 DEFINE SYMBOL fine_hi = `MIN(($ppl$range_high), ($stat_max) )`
@@ -32,21 +42,21 @@ IF `($stat_min) LT ($coarse_lo)` THEN
 (-inf)(($coarse_lo),($fine_lo),($coarse_delta))\
 (($fine_lo),($fine_hi),($fine_inc))
    DEFINE SYMBOL ferret_auto_lines = \
-(-inf)(($coarse_lo),($fine_lo),`2*($coarse_delta)`)\
-(($fine_lo),($fine_hi),`2*($fine_inc)`)
+(-inf)(($coarse_lo),($fine_lo),`lines_to_levels*($coarse_delta)`)\
+(($fine_lo),($fine_hi),`lines_to_levels*($fine_inc)`)
 ELSE
    IF `($fine_lo) - ($lowest_lev) GT ($coarse_delta)` THEN
       DEFINE SYMBOL ferret_auto_levels = \
 (-inf)(($lowest_lev),($fine_lo),($coarse_delta))\
 (($fine_lo),($fine_hi),($fine_inc))
       DEFINE SYMBOL ferret_auto_lines = \
-(-inf)(($lowest_lev),($fine_lo),`2*($coarse_delta)`)\
-(($fine_lo),($fine_hi),`2*($fine_inc)`)
+(-inf)(($lowest_lev),($fine_lo),`lines_to_levels*($coarse_delta)`)\
+(($fine_lo),($fine_hi),`lines_to_levels*($fine_inc)`)
    ELSE
       DEFINE SYMBOL ferret_auto_levels = \
 (-inf)(($fine_lo),($fine_hi),($fine_inc))
       DEFINE SYMBOL ferret_auto_lines = \
-(-inf)(($fine_lo),($fine_hi),`2*($fine_inc)`)
+(-inf)(($fine_lo),($fine_hi),`lines_to_levels*($fine_inc)`)
    ENDIF
 
 ENDIF
@@ -55,14 +65,14 @@ IF `($stat_max) GT ($coarse_hi)` THEN
    DEFINE SYMBOL ferret_auto_levels = \
 ($ferret_auto_levels)(($fine_hi),($coarse_hi),($coarse_delta))(inf)
    DEFINE SYMBOL ferret_auto_lines = \
-($ferret_auto_lines)(($fine_hi),($coarse_hi),`2*($coarse_delta)`)(inf)
+($ferret_auto_lines)(($fine_hi),($coarse_hi),`lines_to_levels*($coarse_delta)`)(inf)
 
 ELSE
    IF `($highest_lev) - ($fine_hi) GT ($coarse_delta)` THEN 
       DEFINE SYMBOL ferret_auto_levels = \
 ($ferret_auto_levels)(($fine_hi),($highest_lev),($coarse_delta))(inf)
       DEFINE SYMBOL ferret_auto_lines = \
-($ferret_auto_lines)(($fine_hi),($highest_lev),`2*($coarse_delta)`)(inf)
+($ferret_auto_lines)(($fine_hi),($highest_lev),`lines_to_levels*($coarse_delta)`)(inf)
    ELSE
       DEFINE SYMBOL ferret_auto_levels = ($ferret_auto_levels)(inf)
       DEFINE SYMBOL ferret_auto_lines = ($ferret_auto_lines)(inf)
