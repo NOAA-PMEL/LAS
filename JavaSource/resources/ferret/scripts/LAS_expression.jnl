@@ -65,26 +65,7 @@ ENDIF
 ! Define upper-right labels with the url; the URL is not plotted automatically when the var is
 ! (the same thing may be done in transform scripts or in differencing setup; that is ok
 
-DEFINE SYMBOL n_right_labels = 0
-IF `STRINDEX("($data_0_url)","http") NE 0` THEN
-
-   LET last_slash_0 = `STRRINDEX("($data_0_url)", "/")`
-   IF `last_slash_0 GT 0` THEN
-      DEFINE SYMBOL data_0_urlpath = `SUBSTRING("($data_0_url)", 0, last_slash_0)`
-   ELSE
-      DEFINE SYMBOL data_0_urlpath = ($data_0_url)
-   ENDIF
-
-   DEFINE SYMBOL n_right_labels = `($n_right_labels)+1`
-   DEFINE SYMBOL upper_right_($n_right_labels) = "DODS URL: @AC($data_0_urlpath)/"
-   IF `last_slash_0 EQ 0` THEN \
-      DEFINE SYMBOL upper_right_($n_right_labels) = "DODS URL: @AC($data_0_urlpath)"
-
-   DEFINE SYMBOL upper_right_text_($n_right_labels) = DODS URL($data_0_urlpath)
-
-ELSE
-   DEFINE SYMBOL n_right_labels = `($n_right_labels)+1`
-   DEFINE SYMBOL upper_right_($n_right_labels) = DATA SET: @AC`($data_var)[d=($data_num)],RETURN=dset`
-ENDIF
+GO LAS_url_label ($num)
 
 ! End of $RCSfile ------------LAS_expression.jnl--------------------------
+pause
