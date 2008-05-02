@@ -111,7 +111,7 @@ DEFINE SYMBOL hasT = 1
 ! max_tpoints is the arbitrary size limit of the time range
 ! 21 might be a good value for an animation
 ! 251 might be a good value for a time series plot
-DEFINE SYMBOL max_tpoints 21   ! should be an odd number
+!DEFINE SYMBOL max_tpoints 7   ! should be an odd number
 
 ! Determine a new time range if just a single point requested
 IF ($native_curvilinear_xy"0") THEN 
@@ -129,15 +129,18 @@ IF `($nt) eq 1` THEN
     ENDIF
 
     !  CANCEL REGION/T
-    LET maxL = `($data_var)[d=($data_num)],return=lsize`   ! no. of time points total
-    LET hafmax = `INT(($max_tpoints)/2)`
-    IF `maxL LE ($max_tpoints)` THEN
-        DEFINE SYMBOL lmin 1
-        DEFINE SYMBOL lmax `maxL`
-     ELSE
-        DEFINE SYMBOL lmin `MAX(L0-hafmax,1)`
-        DEFINE SYMBOL lmax `MIN(L0+hafmax,maxL)`
-     ENDIF
+    !LET maxL = `($data_var),return=lsize`   ! no. of time points total
+    !LET hafmax = `INT(($max_tpoints)/2)`
+    !IF `maxL LE ($max_tpoints)` THEN
+    !    DEFINE SYMBOL lmin 1
+    !    DEFINE SYMBOL lmax `maxL`
+    ! ELSE
+    !    DEFINE SYMBOL lmin `MAX(L0-hafmax,1)`
+    !    DEFINE SYMBOL lmax `MIN(L0+hafmax,maxL)`
+    ! ENDIF
+
+    DEFINE SYMBOL lmin `L0`
+    DEFINE SYMBOL lmax `L0`
 
      IF ($region_t"0|*>1") THEN
         !SET REGION/T="`($data_var)[d=($data_num),L=($lmin)],return=TSTART`":"`($data_var)[d=($data_num),L=($lmax)],return=TEND`"
