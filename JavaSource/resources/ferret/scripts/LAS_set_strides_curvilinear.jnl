@@ -121,8 +121,8 @@ IF `STRLEN("($ferret_view)") EQ 2` THEN
             DEFINE SYMBOL xoff = /OFFSET=`($xstride) - rem`
             IF `rem EQ 0` THEN CANCEL SYMBOL xoff 
             SET AXIS/STRIDE=($xstride)($xoff) `($data_var)[d=($data_num)],RETURN=xaxis`
-            DEFINE SYMBOL clon_imin = `INT(($clon_imin)/($xstride))`
-            DEFINE SYMBOL clon_imax = `INT(($clon_imax)/($xstride))`
+            DEFINE SYMBOL clon_imin = `MAX(1, INT(($clon_imin)/($xstride)) )`
+            DEFINE SYMBOL clon_imax = `MIN (nx, INT(($clon_imax)/($xstride)) )`
          ENDIF
 
       ENDIF
@@ -144,8 +144,8 @@ IF `STRLEN("($ferret_view)") EQ 2` THEN
             DEFINE SYMBOL yoff = /OFFSET=`($ystride) - rem`
             IF `rem EQ 0` THEN CANCEL SYMBOL yoff 
             SET AXIS/STRIDE=($ystride)($yoff) `($data_var)[d=($data_num)],RETURN=yaxis`
-            DEFINE SYMBOL clat_jmin = `INT(($clat_jmin)/($ystride))`
-            DEFINE SYMBOL clat_jmax = `INT(($clat_jmax)/($ystride))`
+            DEFINE SYMBOL clat_jmin = `MAX(1, INT(($clat_jmin)/($ystride)) )`
+            DEFINE SYMBOL clat_jmax = `MIN(ny, INT(($clat_jmax)/($ystride)) )`
          ENDIF
 
       ENDIF
