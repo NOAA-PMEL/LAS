@@ -66,11 +66,12 @@ GO LAS_auto_levels_animate
 
 DEFINE SYMBOL ndim = STRLEN("($ferret_view)")
 
-IF `($ndim) EQ 1` THEN
+!x, xt, y, yt, z, or zt view
+IF `(($ndim) EQ 1) OR ( (($ndim) EQ 2) AND (STRINDEX("($ferret_view)", "t") GT 0) )` THEN
 ! If the user gave dependent axis scaling, 
 ! remove any surrounding parentheses
 
-IF ($ferret_dep_axis_scale"0|*>1") THEN
+ IF ($ferret_dep_axis_scale"0|*>1") THEN
 
    IF `STRINDEX("($ferret_dep_axis_scale)", "(") GT 0` THEN
       LET paren = `STRINDEX("($ferret_dep_axis_scale)", "(")`
@@ -81,12 +82,12 @@ IF ($ferret_dep_axis_scale"0|*>1") THEN
       LET slen = `STRLEN("($ferret_dep_axis_scale)")`
       DEFINE SYMBOL ferret_dep_axis_scale = `SUBSTRING("($ferret_dep_axis_scale)", 1, slen-1)`
    ENDIF
-ENDIF
+ ENDIF
 
 ! If dependent axis scale was not set by the user, determine a
 ! consistent scale to use
 
-IF `($ferret_dep_axis_scale"1|*>0")` THEN
+ IF `($ferret_dep_axis_scale"1|*>0")` THEN
     LOAD the_var
     LET vmin = the_var[x=@min,y=@min,z=@min,t=@min]
     LET vmax = the_var[x=@max,y=@max,z=@max,t=@max]
@@ -95,7 +96,7 @@ IF `($ferret_dep_axis_scale"1|*>0")` THEN
     DEFINE SYMBOL hi_lim ($PPL$RANGE_HIGH)
     DEFINE SYMBOL delta ($PPL$RANGE_INC)
     DEFINE SYMBOL ferret_dep_axis_scale ($PPL$RANGE_LOW),($PPL$RANGE_HIGH),($PPL$RANGE_INC)
-ENDIF
+ ENDIF
 ENDIF  ! ndim = 1
 
 SET LIST/FILE="($result_ferret_listing_filename)"
