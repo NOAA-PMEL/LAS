@@ -217,11 +217,38 @@ public class FerretIOServiceProvider implements IOServiceProvider {
         HashMap<String, String> directions = new HashMap<String, String>(); 
         for (Iterator axisIt = axes.iterator(); axisIt.hasNext();) {
             Element axisE = (Element) axisIt.next();
-            Element length = axisE.getChild("length");
+            // Collect all the attributes in a HashMap
+            List attributeElements = axisE.getChildren("attribute");
+            HashMap<String, String> attribute_hash = new HashMap<String, String>();
+            if ( attributeElements != null && attributeElements.size() > 1 ) {
+            	for (Iterator attIt = attributeElements.iterator(); attIt
+						.hasNext();) {
+					Element attribute = (Element) attIt.next();
+					String value = attribute.getAttributeValue("value");
+					String aname = attribute.getAttributeValue("name");
+					attribute_hash.put(aname, value);
+				}
+
+            } else {
+            	List attributes = axisE.getChildren();
+            	for (Iterator attIt = attributes.iterator(); attIt.hasNext();) {
+            		Element attribute = (Element) attIt.next();
+            		log.debug("adding attribute: "+attribute.getName()+" "+attribute.getTextNormalize());
+            		if ( !attribute.getName().equals("length") && 
+            				!attribute.getName().equals("start") && 
+            				!attribute.getName().equals("end")) {
+
+            			String value = attribute.getTextNormalize();
+            			String aname = attribute.getName();
+            			attribute_hash.put(aname, value);
+            		}
+            	}
+            }
+            String length = attribute_hash.get("length");
             String name = axisE.getAttributeValue("name");
             log.debug("Working on axis: "+name);
             if ( length != null ) {
-                String dimS = length.getTextNormalize();
+                String dimS = length.trim();
                 Dimension dim = new Dimension(name, Integer.valueOf(dimS).intValue(), true);
                 log.debug("New dim with size: "+dim.getLength());
                 List<Dimension> dims = new ArrayList<Dimension>();
@@ -233,13 +260,13 @@ public class FerretIOServiceProvider implements IOServiceProvider {
                 coord.setDataType(DataType.DOUBLE);
                 // See comment about attributes below...
                 coord.addAttribute(new Attribute("dataset", axis_datasets.get(name)));
-                List attributeElements = axisE.getChildren("attribute");
-                if ( attributeElements != null && attributeElements.size() > 1 ) {
-                	for (Iterator attIt = attributeElements.iterator(); attIt
+                
+                if ( attribute_hash != null && attribute_hash.size() > 1 ) {
+                	for (Iterator attIt = attribute_hash.keySet().iterator(); attIt
 							.hasNext();) {
-						Element attribute = (Element) attIt.next();
-						String value = attribute.getAttributeValue("value");
-						String aname = attribute.getAttributeValue("name");
+						String aname = (String) attIt.next();
+						String value = attribute_hash.get(aname).trim();
+						
 
             			if ( aname.equals("direction") ) {
             				directions.put(name, value);
@@ -248,33 +275,10 @@ public class FerretIOServiceProvider implements IOServiceProvider {
             				double dvalue = Double.valueOf(value).doubleValue();
             				coord.addAttribute(new Attribute(aname, new Double(dvalue)));
             			} catch (NumberFormatException nfe) {
-            				coord.addAttribute(new Attribute(attribute.getName(), attribute.getTextNormalize()));
+            				coord.addAttribute(new Attribute(aname, value));
             			}
 					}
 
-                } else {
-                	List attributes = axisE.getChildren();
-                	for (Iterator attIt = attributes.iterator(); attIt.hasNext();) {
-                		Element attribute = (Element) attIt.next();
-                		log.debug("adding attribute: "+attribute.getName()+" "+attribute.getTextNormalize());
-                		if ( !attribute.getName().equals("length") && 
-                				!attribute.getName().equals("start") && 
-                				!attribute.getName().equals("end")) {
-
-                			String value = attribute.getTextNormalize();
-                			String aname = attribute.getName();
-
-                			if ( aname.equals("direction") ) {
-                				directions.put(name, value);
-                			}
-                			try {
-                				double dvalue = Double.valueOf(value).doubleValue();
-                				coord.addAttribute(new Attribute(aname, new Double(dvalue)));
-                			} catch (NumberFormatException nfe) {
-                				coord.addAttribute(new Attribute(attribute.getName(), attribute.getTextNormalize()));
-                			}
-                		}
-                	}
                 }
                 ncfile.addVariable(null, coord);
             }
@@ -399,6 +403,7 @@ public class FerretIOServiceProvider implements IOServiceProvider {
                 Element var = (Element) varIt.next();
                 String name = var.getAttributeValue("name");
                 if ( !globalNames.contains(name)) {
+                	// Name conflicts should handled in the Ferret script that defines the dataset.
                     Variable dataVar = new Variable(ncfile, null, null, name);
                     List var_axes = var.getChild("grid").getChild("axes").getChildren();
                     ArrayList<Dimension> varDims = new ArrayList<Dimension>();
@@ -408,7 +413,7 @@ public class FerretIOServiceProvider implements IOServiceProvider {
                         String axisName = axis.getTextNormalize();
                         for (Iterator dimIt = allDims.iterator(); dimIt.hasNext();) {
                             Dimension dim = (Dimension) dimIt.next();
-                            if ( dim.getName().equals(axisName) ) {
+                            if ( dim.getName().equals(axisName) ) { 
                                 varDims.add(dim);
                                 direction = direction + directions.get(dim.getName());
                             }
