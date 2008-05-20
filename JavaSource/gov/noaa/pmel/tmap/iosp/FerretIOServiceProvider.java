@@ -234,14 +234,9 @@ public class FerretIOServiceProvider implements IOServiceProvider {
             	for (Iterator attIt = attributes.iterator(); attIt.hasNext();) {
             		Element attribute = (Element) attIt.next();
             		log.debug("adding attribute: "+attribute.getName()+" "+attribute.getTextNormalize());
-            		if ( !attribute.getName().equals("length") && 
-            				!attribute.getName().equals("start") && 
-            				!attribute.getName().equals("end")) {
-
-            			String value = attribute.getTextNormalize();
-            			String aname = attribute.getName();
-            			attribute_hash.put(aname, value);
-            		}
+            		String value = attribute.getTextNormalize();
+            		String aname = attribute.getName();
+            		attribute_hash.put(aname, value);
             	}
             }
             String length = attribute_hash.get("length");
