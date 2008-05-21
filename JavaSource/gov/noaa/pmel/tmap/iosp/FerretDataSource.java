@@ -69,7 +69,13 @@ public class FerretDataSource implements DatasetSource {
                 }
             }
             if ( !expressions.get(1).trim().equals("") ) {
-                String [] cmds = expressions.get(1).split("_cr_");
+                String expr_two =  expressions.get(1);
+                String [] cmds;
+                if ( expr_two.contains("_cr_") ) {
+                    cmds = expressions.get(1).split("_cr_");
+                } else {
+                    cmds = expressions.get(1).split(";");
+                }
                 for ( int i = 0; i < cmds.length; i++ ) {
                 	if ( !FerretCommands.containsForbiddenCommand(cmds[i])) {
                        jnl.append(cmds[i]+"\n");
