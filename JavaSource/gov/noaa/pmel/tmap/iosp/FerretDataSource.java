@@ -64,12 +64,12 @@ public class FerretDataSource implements DatasetSource {
             if ( !expressions.get(0).trim().equals("") ) {
                 String[] urls = expressions.get(0).split(",");
                 for ( int i = 0; i < urls.length; i++ ) { 
-                	String dataURL = URLDecoder.decode(urls[i], "UTF-8");
+                    String dataURL = URLDecoder.decode(urls[i], "UTF-8");
                     jnl.append("use \""+dataURL+"\"\n");
                 }
             }
             if ( !expressions.get(1).trim().equals("") ) {
-                String [] cmds = expressions.get(1).split(";");
+                String [] cmds = expressions.get(1).split("_cr_");
                 for ( int i = 0; i < cmds.length; i++ ) {
                 	if ( !FerretCommands.containsForbiddenCommand(cmds[i])) {
                        jnl.append(cmds[i]+"\n");
