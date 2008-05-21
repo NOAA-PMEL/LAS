@@ -343,7 +343,7 @@ public class ProductRequest {
                                         	String g = "g"+view;
                                         	if (gridTo.isAnalysis()) {
                                         		StringBuffer jnl = gridTo.getJnl();
-                                        		jnl.append(";let "+var+"_"+var_count+"_regrid="+var+"[d="+dataset_number+","+g+"="+gridTo.getVar()+"[d=1]]}");
+                                        		jnl.append("_cr_let "+var+"_"+var_count+"_regrid="+var+"[d="+dataset_number+","+g+"="+gridTo.getVar()+"[d=1]]}");
                                         		// Get the original URL for the gridTo data set and append the new combined analysis and regrid URL.
                                         		String expr = URLEncoder.encode("_expr_{"+encoded+"}{"+jnl.toString(), "UTF-8");
                                         		String comboURL = lasConfig.getFTDSURL(gridTo.getVarXPath())+expr;                                       			
@@ -396,7 +396,7 @@ public class ProductRequest {
                                     		var = data.getAttributeValue("var");
                                     		String revar = var+"_"+var_count+"_regrid";
                                     		data.setAttribute("var", revar);
-                                    		analysis_jnl.append(";let "+revar+"="+var+"[d="+dataset_number+","+g+"="+gridTo.getVar()+"[d=1]]}");
+                                    		analysis_jnl.append("_cr_let "+revar+"="+var+"[d="+dataset_number+","+g+"="+gridTo.getVar()+"[d=1]]}");
                                     		// Get the original URL for the gridTo data set and append the new combined analysis and regrid URL.
                                     		String expr = URLEncoder.encode("_expr_{"+encoded+"}{"+analysis_jnl.toString(), "UTF-8");
                                     		String comboURL = lasConfig.getFTDSURL(gridTo.getVarXPath())+expr;                                       			
@@ -406,7 +406,7 @@ public class ProductRequest {
                                     		gridTo.setURL(gridTo.getData().getAttributeValue("url"));
                                     	} else {    
                                     		var = data.getAttributeValue("var");
-                                    		jnl.append(";let "+var+"_"+var_count+"_regrid="+var+"[d="+dataset_number+","+g+"="+gridTo.getVar()+"[d=1]]");
+                                    		jnl.append("_cr_let "+var+"_"+var_count+"_regrid="+var+"[d="+dataset_number+","+g+"="+gridTo.getVar()+"[d=1]]");
                                     		expression = URLEncoder.encode("_expr_{"+encoded+"}"+"{"+jnl.toString()+"}", "UTF-8");
                                     		data.setAttribute("url", gridTo.getURL()+expression);
                                     		data.setAttribute("var", var+"_"+var_count+"_regrid");
@@ -766,15 +766,15 @@ public class ProductRequest {
             }
             jnl.append("set data etopo"+resolution+";");
             // Maybe we can skip this since we know how many datasets are open?
-            jnl.append("let land_dsetnum = `rose,return=dsetnum`;");
-            jnl.append("let rose_on_grid = rose[d=`land_dsetnum`,gxy="+var+"[d="+var_count+"]];");
+            jnl.append("let land_dsetnum = `rose,return=dsetnum`_cr_");
+            jnl.append("let rose_on_grid = rose[d=`land_dsetnum`,gxy="+var+"[d="+var_count+"]]_cr_");
             if (land_mask != null) {
-                jnl.append("let analysis_mask = if rose_on_grid lt 0 then 1;");
+                jnl.append("let analysis_mask = if rose_on_grid lt 0 then 1_cr_");
             } else if ( ocean_mask != null) {
-                jnl.append("let analysis_mask = if rose_on_grid gt 0 then 1;");           
+                jnl.append("let analysis_mask = if rose_on_grid gt 0 then 1_cr_");           
             }
-            jnl.append("let masked_"+var+"="+var+"[d="+var_count+"]*analysis_mask;");
-            jnl.append("let "+var+"_"+var_count+"_regrid=masked_"+var+"[d="+dset+grid+"];");
+            jnl.append("let masked_"+var+"="+var+"[d="+var_count+"]*analysis_mask_cr_");
+            jnl.append("let "+var+"_"+var_count+"_regrid=masked_"+var+"[d="+dset+grid+"]_cr_");
         } else {
             jnl.append("let "+var+"_"+var_count+"_regrid="+var+"[d="+dset+grid+"]");
         }
