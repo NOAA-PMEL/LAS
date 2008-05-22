@@ -1,0 +1,22 @@
+! LAS_setup_strides_GE
+
+! Set maxpix for Google Earth plots
+
+IF `STRINDEX( "($operation_ID)", "GE" ) EQ 0` THEN EXIT/SCRIPT
+
+!for plot
+LET maxpix = 200  ! default
+IF ($ferret_stride_quality_factor"0|1.0>1|*>0") THEN LET maxpix = 200  ! draft(fast)
+IF ($ferret_stride_quality_factor"0|0.5>1|*>0") THEN LET maxpix = 500  ! medium
+IF ($ferret_stride_quality_factor"0|0.0>1|*>0") THEN LET maxpix = 700  ! best(slow)
+
+!limit number of points (for place mark operation)
+IF `STRINDEX( "($operation_ID)", "Grid" ) NE 0` THEN
+  LET maxpix = 10  ! default 
+  IF ($ferret_stride_quality_factor"0|1.0>1|*>0") THEN LET maxpix = 10 ! draft(fast)
+  IF ($ferret_stride_quality_factor"0|0.5>1|*>0") THEN LET maxpix = 20  ! medium
+  IF ($ferret_stride_quality_factor"0|0.0>1|*>0") THEN LET maxpix = 30  ! best(slow)
+ENDIF
+
+! End of $RCSfile ------------LAS_setup_strides_GE.jnl--------------------------
+
