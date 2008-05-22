@@ -27,7 +27,33 @@ ELIF ($ferret_view"|xy>1|*>0") THEN
    !always use large size for plots on GE
    DEFINE SYMBOL ferret_size = 0.8333
 
-   IF `STRINDEX( "($operation_ID)", "Plot_for_GE" ) NE 0` THEN
+
+   LET its_GE = `STRINDEX( "($operation_ID)", "Plot_for_GE" ) NE 0 OR \
+      STRINDEX( "($operation_ID)", "Plot_GE_Overlay" ) NE 0` 
+   IF `its_GE` THEN
+
+! For Google Earth plots, check y region:
+! check if region_y_hi > dataset_y_max; if so, reset region_y_hi to dataset_y_max 
+! check if region_y_lo < dataset_y_min; if so, reset region_y_lo to dataset_y_min 
+
+! Do not do this if the data are on a curvilinear grid - in that case keep the 
+! region information from the User Interface
+
+      IF `($ferret_curvi_coord_lat"0|*>1") EQ 0` THEN
+
+!  We need to have the region and data symbols so initialize these.
+!  The product script will run these again with the new y region settings.
+          GO LAS_initialize_region 0
+          GO LAS_initialize_data 0
+
+          LET yy = yboxhi[gy=($data_var)[d=($data_num)]]
+          LET yhi = `yy[y=@max]`
+          LET yy = yboxlo[gy=($data_var)[d=($data_num)]]
+          LET ylo = `yy[y=@min]`
+          IF `($region_y_hi) GT yhi` THEN DEFINE SYMBOL region_0_y_hi = `yhi`
+          IF `($region_y_lo) LT ylo` THEN DEFINE SYMBOL region_0_y_lo = `ylo`
+       ENDIF
+
        go xy_plot_2D
    ENDIF
 
