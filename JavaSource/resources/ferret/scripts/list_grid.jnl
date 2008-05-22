@@ -15,6 +15,9 @@
 ! DEFINE SYMBOLs associated with the regiogn and data and perform any
 ! initialization needed for this dataset.
 
+!define this symbol so that LAS_setup_strides_GE will execute
+DEFINE SYMBOL ferret_google_plot = 1
+
 GO LAS_initialize_region 0
 GO LAS_initialize_data 0
 
@@ -37,10 +40,20 @@ CANCEL SYMBOL frmt
 !SET LIST/FILE="($result_ferret_listing_filename)"
 SET LIST/FILE="($result_las_request_info_filename)"
 
+IF `($xstride_coord"0|*>1) EQ 0` THEN 
+   LET llon = X[GX=($ferret_list_var), X=($region_x_lo):($region_x_hi):1] + 0*Y[GY=($ferret_list_var),Y=($region_y_lo):($region_y_hi):1]
+ELSE
    LET llon = X[GX=($ferret_list_var), X=($region_x_lo):($region_x_hi):($xstride_coord)] + 0*Y[GY=($ferret_list_var),Y=($region_y_lo):($region_y_hi):($ystride_coord)]
+ENDIF
+
 !   LET llon = X[GX=($ferret_list_var), X=($region_x_lo):($region_x_hi)] + 0*Y[GY=($ferret_list_var),Y=($region_y_lo):($region_y_hi)]
 
-   LET llat = 0*X[GX=($ferret_list_var),X=($region_x_lo):($region_x_hi):($xstride_coord)] + Y[GY=($ferret_list_var),Y=($region_y_lo):($region_y_hi):($ystride_coord)]
+IF `($ystride_coord"0|*>1) EQ 0` THEN
+   LET llat = 0*X[GX=($ferret_list_var),X=($region_x_lo):($region_x_hi):1] + Y[GY=($ferret_list_var),Y=($region_y_lo):($region_y_hi):1]
+ELSE
+   LET llat = 0*X[GX=($ferret_list_var),X=($region_x_lo):($region_x_hi):($ystride_coord)] + Y[GY=($ferret_list_var),Y=($region_y_lo):($region_y_hi):($ystride_coord)]
+ENDIF
+
 !   LET llat = 0*X[GX=($ferret_list_var),X=($region_x_lo):($region_x_hi)] + Y[GY=($ferret_list_var),Y=($region_y_lo):($region_y_hi)]
 
 !   LIST/NOHEADER/NOROWHEADER/APPEND/FILE  XSEQUENCE(llon), XSEQUENCE(llat)
@@ -61,7 +74,11 @@ SET LIST/FILE="($result_las_request_info_filename)"
 IF ($data_0_intervals"|xy>1|*>0") THEN
 ! LET xytvar = ($ferret_list_var)
 ![X=($region_x_lo):($region_x_hi):2]
-  DEFINE SYMBOL tmp = ($data_var)[d=($data_num),X=($region_x_lo):($region_x_hi):($xstride_coord),Y=($region_y_lo):($region_y_hi):($ystride_coord)]
+  IF `($xstride_coord"0|*>1) EQ 0` THEN
+    DEFINE SYMBOL tmp = ($data_var)[d=($data_num),X=($region_x_lo):($region_x_hi):1,Y=($region_y_lo):($region_y_hi):1]
+  ELSE
+    DEFINE SYMBOL tmp = ($data_var)[d=($data_num),X=($region_x_lo):($region_x_hi):($xstride_coord),Y=($region_y_lo):($region_y_hi):($ystride_coord)]
+  ENDIF
   LET xyvar = ($tmp) 
   LET mask =  IF xyvar GT -9000 THEN 1
 ENDIF
@@ -69,21 +86,33 @@ ENDIF
 IF ($data_0_intervals"|xyt>1|*>0") THEN
 !  LET xytvar = ($ferret_list_var)
 !  LET xytvar = ($ferret_list_var)[X=($region_x_lo):($region_x_hi):2]
-  DEFINE SYMBOL tmp = ($data_var)[d=($data_num),X=($region_x_lo):($region_x_hi):($xstride_coord),Y=($region_y_lo):($region_y_hi):($ystride_coord),T="($region_t_lo)":"($region_t_hi)"]
+  IF `($xstride_coord"0|*>1) EQ 0` THEN
+    DEFINE SYMBOL tmp = ($data_var)[d=($data_num),X=($region_x_lo):($region_x_hi):1,Y=($region_y_lo):($region_y_hi):1,T="($region_t_lo)":"($region_t_hi)"]
+  ELSE
+    DEFINE SYMBOL tmp = ($data_var)[d=($data_num),X=($region_x_lo):($region_x_hi):($xstride_coord),Y=($region_y_lo):($region_y_hi):($ystride_coord),T="($region_t_lo)":"($region_t_hi)"]
+  ENDIF
   LET xytvar = ($tmp)
   LET mask =  IF xytvar[T=@NGD] GT 0 THEN 1
 ENDIF
 
 IF ($data_0_intervals"|xyz>1|*>0") THEN
 !  LET xyzvar = ($ferret_list_var)
-  DEFINE SYMBOL tmp = ($data_var)[d=($data_num),X=($region_x_lo):($region_x_hi):($xstride_coord),Y=($region_y_lo):($region_y_hi):($ystride_coord),Z=($region_z_lo):($region_z_hi)]
+  IF `($xstride_coord"0|*>1) EQ 0` THEN
+    DEFINE SYMBOL tmp = ($data_var)[d=($data_num),X=($region_x_lo):($region_x_hi):1,Y=($region_y_lo):($region_y_hi):1,Z=($region_z_lo):($region_z_hi)]
+  ELSE
+    DEFINE SYMBOL tmp = ($data_var)[d=($data_num),X=($region_x_lo):($region_x_hi):($xstride_coord),Y=($region_y_lo):($region_y_hi):($ystride_coord),Z=($region_z_lo):($region_z_hi)]
+  ENDIF
   LET xyzvar = ($tmp)
   LET mask =  IF xyzvar[Z=@NGD] GT 0 THEN 1
 ENDIF
 
 IF ($data_0_intervals"|xyzt>1|*>0") THEN
 !  LET xyzvar = ($ferret_list_var)
-  DEFINE SYMBOL tmp = ($data_var)[d=($data_num),X=($region_x_lo):($region_x_hi):($xstride_coord),Y=($region_y_lo):($region_y_hi):($ystride_coord),Z=($region_z_lo):($region_z_hi),T="($region_t_lo)":"($region_t_hi)"]
+  IF `($xstride_coord"0|*>1) EQ 0` THEN
+      DEFINE SYMBOL tmp = ($data_var)[d=($data_num),X=($region_x_lo):($region_x_hi):1,Y=($region_y_lo):($region_y_hi):1,Z=($region_z_lo):($region_z_hi),T="($region_t_lo)":"($region_t_hi)"]
+  ELSE
+      DEFINE SYMBOL tmp = ($data_var)[d=($data_num),X=($region_x_lo):($region_x_hi):($xstride_coord),Y=($region_y_lo):($region_y_hi):($ystride_coord),Z=($region_z_lo):($region_z_hi),T="($region_t_lo)":"($region_t_hi)"]
+  ENDIF
   LET xyztvar = ($tmp)
   LET mask =  IF xyztvar[Z=@NGD,T=@NGD] GT 0 THEN 1
 ENDIF
@@ -304,7 +333,7 @@ ENDIF
         DEFINE SYMBOL nt `($ferret_plot_var),return=lsize`   ! no. of time points requested
         IF `($nt) eq 1` THEN
             LET L0 = `($ferret_plot_var),return=lstart`
-            LET maxL = `($data_var)[d=($data_num),return=lsize`   ! no. of time points total
+            LET maxL = `($data_var)[d=($data_num)],return=lsize`   ! no. of time points total
             LET hafmax = `INT(($max_tpoints)/2)`
 
             IF `maxL LE ($max_tpoints)` THEN
@@ -395,7 +424,9 @@ ENDIF
 
             ! compute range of T with maximum size of 21
             !user selected T is in the middle if # of total time points >= 21
-            LET L0 = `($ferret_plot_var),return=lstart`
+            !LET L0 = `($ferret_plot_var),return=lstart`
+!jli test
+            LET L0 = `($data_var),return=lstart`
             LET maxL = `($data_var),return=lsize`            ! no. of time points total
             LET hafmax = `INT(($max_tpoints)/2)`
         
