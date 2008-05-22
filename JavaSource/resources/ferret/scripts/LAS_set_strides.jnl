@@ -20,6 +20,7 @@
 IF `STRINDEX( "($operation_ID)", "Data_Extract_netCDF" ) NE 0` THEN EXIT/SCRIPT
 
 ! See LAS_set_strides_curvilinear for first cut on dealing with strides and curvi data.
+! If it is a native curvilinear plot then LAS_set_strides_curvilinear has been called.
 IF ($ferret_curvi_coord_lat"0|0|*>1") THEN EXIT/SCRIPT
 
 ! Hybrid Z not dealt with here...
@@ -86,7 +87,7 @@ IF ($ferret_size"0|0.25>1|*>0")    THEN LET maxpix = 500  ! medium
 IF ($ferret_size"0|0.5>1|*>0")     THEN LET maxpix = 600  ! default
 IF ($ferret_size"0|0.8333>1|*>0")  THEN LET maxpix = 700  ! large
 
-IF `($ferret_google_plot"0|0|*>1")` THEN LET  maxpix = `2*maxpix`
+IF ($ferret_google_plot"0|*>1") THEN GO LAS_setup_strides_GE
 
 IF `($region_x_range"0|0|*>1") AND ($no_native_strides_xy"0|*>1") NE 1` THEN 
    LET xx = x[gx=($data_var)[d=($data_num),($region_x)]]
@@ -185,5 +186,13 @@ IF `($xstride"0|1>0|*>1") + ($ystride"0|1>0|*>1") + ($zstride"0|1>0|*>1") + ($ts
    ENDIF
 
 ENDIF
+
+! Set this for list_grid
+IF ($ferret_google_plot"0|*>1") THEN
+    IF `STRINDEX( "($operation_ID)", "Grid" ) NE 0` THEN
+       DEFINE SYMBOL xstride_coord = `360*($xstride)/nx`
+    ENDIF
+ENDIF
+
 
 ! End of $RCSfile ------------LAS_set_strides.jnl--------------------------
