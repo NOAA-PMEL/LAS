@@ -169,15 +169,16 @@ IF ($ferret_view"|xy>1|*>0") THEN
        ($ferret_curvi_quals)/HLIM=($region_x_lo):($region_x_hi)
    IF ($region_y_lo"0|*>1") THEN DEFINE SYMBOL ferret_curvi_quals \   
        ($ferret_curvi_quals)/VLIM=($region_y_lo):($region_y_hi)
+
 ! Use /HLIM and /VLIM to get the correct plot axes, and if the 
 ! longitudes are in a different modulo branch than requested add /MODULO
 
-   IF `($ferret_lon_modulo"1|1|0|yes>1|no>0|*>0") AND \
-       ($operation_ID"0|Plot_vector>1|*>0") NE 1` THEN 
+   LET its_vector =  STRINDEX("($operation_ID)", "vector") NE 0
+   IF ($ferret_lon_modulo"1|1|0|yes>1|no>0|*>0") THEN 
       IF ($region_x_lo"0|*>1") THEN \
           DEFINE SYMBOL ferret_curvi_quals ($ferret_curvi_quals)/HLIM=($region_x_lo):($region_x_hi)
       LET outside = `xcoord[x=@min,y=@min] GT ($region_x_lo)` + `xcoord[x=@max,y=@max] LT ($region_x_hi)`
-      IF `($ferret_lon_modulo"1|1|0|yes>1|no>0|*>0") AND outside GT 0` THEN \
+      IF `($ferret_lon_modulo"1|1|0|yes>1|no>0|*>0") AND outside GT 0 AND its_vector EQ 0` THEN \
           DEFINE SYMBOL ferret_curvi_quals ($ferret_curvi_quals)/MODULO
    ENDIF
 
