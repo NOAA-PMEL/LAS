@@ -10,13 +10,8 @@
 DEFINE SYMBOL check_for_des =  `($data_var)[d=($data_num)],return=dsetpath`
 IF `STRINDEX("($check_for_des)", ".des") GT 0` THEN EXIT/SCRIPT
 
-
-show symbol operation_id
-IF `STRINDEX( "($operation_ID)", "Plot" ) EQ 0 AND STRINDEX( "($operation_ID)", "zoom" ) EQ 0 AND STRINDEX( "($operation_ID)", "Anim" ) EQ 0` THEN EXIT/SCRIPT
-
 ! If striding has already been set (e.g. for the other vector component) then exit
 IF `($xstride"0|1>0|*>1") + ($ystride"0|1>0|*>1") + ($zstride"0|1>0|*>1") + ($tstride"0|1>0|*>1") GT 0` THEN EXIT/SCRIPT
-
 
 LET maxpix = 600  ! default
 IF ($ferret_size"0|0.06667>1|*>0") THEN LET maxpix = 300  ! small
@@ -71,7 +66,9 @@ DEFINE SYMBOL stride_for_mem = `INT( 1+ varsiz/(.1*($memsize)) )`
 
 IF `STRINDEX( "($operation_ID)", "Plot" ) EQ 0 AND \
     STRINDEX( "($operation_ID)", "zoom" ) EQ 0 AND \
-    STRINDEX( "($operation_ID)", "Anim" ) EQ 0` THEN
+    STRINDEX( "($operation_ID)", "Anim" ) EQ 0 AND \
+    ($ferret_google_plot"0|*>1") EQ 0` THEN
+
    IF `($stride_for_mem"0") GT 1` THEN
       IF `($region_x_range"0|*>1") GT 0` THEN 
          SET AXIS/STRIDE=($stride_for_mem) `pvar,RETURN=xaxis`
@@ -281,11 +278,14 @@ IF `($xstride"0|1>0|*>1") + ($ystride"0|1>0|*>1") + ($zstride"0|1>0|*>1") + ($ts
 
 ENDIF
 
-! Set this for list_grid
-IF ($ferret_google_plot"0|*>1") THEN
-    IF `STRINDEX( "($operation_ID)", "Grid" ) NE 0` THEN
-       DEFINE SYMBOL xstride_coord = `360*($xstride)/nx`
-    ENDIF
+
+! Set this for Google Earth placemarks (see list_grid)
+IF `STRINDEX( "($operation_ID)", "Grid" ) NE 0` THEN
+   DEFINE SYMBOL xstride_coord = `360/nx`
+   DEFINE SYMBOL ystride_coord = `180/ny`
+   IF `($xstride"0") GT 1` THEN DEFINE SYMBOL xstride_coord = `360*($xstride)/nx`
+   IF `($ystride"0") GT 1` THEN DEFINE SYMBOL ystride_coord = `180*($ystride)/ny`
 ENDIF
 
 ! End of $RCSfile ------------LAS_set_strides_curvilinear.jnl--------------------------
+pause
