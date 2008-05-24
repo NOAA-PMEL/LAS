@@ -14,6 +14,8 @@
 		<table border="1">
 			<tr>
 				<th>
+				</th>
+				<th>
 					Operation
 				</th>
 				<th>
@@ -22,6 +24,11 @@
 			</tr>
 			#foreach ($job in $operations) #set($index = $velocityCount - 1)
 			<tr>
+                                <td>
+                                      #if ( $status.get($index).contains("*") )
+                                        <img src="JavaScript/components/mozilla_blu.gif" alt="Spinner"/>
+                                      #end
+                                </td>
 				<td>
 					$job
 				</td>
