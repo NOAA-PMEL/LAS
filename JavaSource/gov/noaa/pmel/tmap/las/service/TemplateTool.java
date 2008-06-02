@@ -156,7 +156,7 @@ public class TemplateTool extends Tool {
 
     		String line = reader.readLine();
     		while ( line != null ) {
-    			contents = contents.append(line.trim());
+    			contents = contents.append(line.trim()+" ");
     			if ( line.endsWith(";")) {
     				break;
     			}
