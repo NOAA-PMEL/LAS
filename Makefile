@@ -12,6 +12,7 @@ clean-ant:
 clean-noant:
 	rm -rf velocity.log
 	rm -rf config.results
+	rm -rf config7.results
 	rm -rf bin/las_ui_check.sh
 	rm -rf bin/initialize_check.sh
 	rm -rf conf/example/LAS_Config.pl
@@ -34,6 +35,7 @@ clean-noant:
 	rm -rf WebContent/WEB-INF/web.xml
 	rm -rf xml/perl/genLas.pl
 	rm -rf build.xml
+	rm -rf test/LASTest/las_test_config.xml
 
 .PHONY: clean 
 clean: clean-ant clean-noant
