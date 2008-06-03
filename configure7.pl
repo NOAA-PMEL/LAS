@@ -293,7 +293,7 @@ if ($LasConfig{proxy} eq "yes") {
             $hostname = undef;
         }
     }
-
+    $LasConfig{hostname} = $hostname;
     $servlet_root_url = $LasConfig{hostname};
 } else {
     $servlet_root_url = $LasConfig{tomcat_hostname} . ":" . $servlet_port;
@@ -754,6 +754,6 @@ sub printENV($ferretConfig, @EnvVars) {
             print CONFIGFILE '        </variable>',"\n";
         }
         print CONFIGFILE '    </environment>',"\n";
-        print CONFIGFILE '</application>',"\n";
+        print CONFIGFILE '</ferret>',"\n";
         close CONFIGFILE;
      }
