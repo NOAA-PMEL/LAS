@@ -177,7 +177,10 @@ IF ($ferret_view"|xy>1|*>0") THEN
    IF ($ferret_lon_modulo"1|1|0|yes>1|no>0|*>0") THEN 
       IF ($region_x_lo"0|*>1") THEN \
           DEFINE SYMBOL ferret_curvi_quals ($ferret_curvi_quals)/HLIM=($region_x_lo):($region_x_hi)
-      LET outside = `xcoord[x=@min,y=@min] GT ($region_x_lo)` + `xcoord[x=@max,y=@max] LT ($region_x_hi)`
+      LET outside = 0
+      LET xc1 = xcoord[i=1]
+      LET xcn = xcoord[i=`nx`]
+      LET outside = `xc1[x=@min,y=@min] GT ($region_x_lo)` + `xcn[x=@max,y=@max] LT ($region_x_hi)`
       IF `($ferret_lon_modulo"1|1|0|yes>1|no>0|*>0") AND outside GT 0 AND its_vector EQ 0` THEN \
           DEFINE SYMBOL ferret_curvi_quals ($ferret_curvi_quals)/MODULO
    ENDIF
@@ -192,6 +195,10 @@ ELIF `STRLEN ("($ferret_view)") LE 2` THEN
    ELSE
       GO curvi_nrst_slice.jnl
    ENDIF
+
+ELIF `STRLEN ("($ferret_view)") GT 2 AND STRINDEX("($ferret_view)", "xy") GT 0` THEN  ! google placemarks
+
+   DEFINE SYMBOL native_curvilinear_xy = 1
 
 ENDIF
 
