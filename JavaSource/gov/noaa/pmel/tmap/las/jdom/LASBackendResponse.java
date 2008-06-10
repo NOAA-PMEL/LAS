@@ -552,6 +552,7 @@ public class LASBackendResponse extends LASDocument {
     /**
      * Set an error for this response, which will remove all other results.
      * @param message the message for the error being set.
+     * @deprecated
      */
     public void setError(String message) {       
         Element backend_response = getRootElement();

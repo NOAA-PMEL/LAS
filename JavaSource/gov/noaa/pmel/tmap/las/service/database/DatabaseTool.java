@@ -56,7 +56,7 @@ public class DatabaseTool extends TemplateTool {
         LASBackendResponse lasBackendResponse = new LASBackendResponse();
                 
         if (lasBackendRequest.isCanceled()) {
-            lasBackendResponse.setError("Request canceled.");
+            lasBackendResponse.setError("Request canceled", "Request canceled.");
             log.info("Request cancelled:"+lasBackendRequest.toCompactString());
             return lasBackendResponse;
         }
@@ -69,7 +69,7 @@ public class DatabaseTool extends TemplateTool {
         }
         log.debug("got db name: "+db_name); //debug
         if ( db_name == null || db_name.equals("")) {
-            lasBackendResponse.setError("Request does not contain a valid db_name property.");
+            lasBackendResponse.setError("Database backend configuration error.", "Request does not contain a valid db_name property.");
             return lasBackendResponse;
         }
         
@@ -78,12 +78,12 @@ public class DatabaseTool extends TemplateTool {
         try {
             driver = databaseBackendConfig.getDriver(db_name);
         } catch (Exception e) {
-            lasBackendResponse.setError("Could not get database driver: " + e.toString());
+            lasBackendResponse.setError("Could not get database driver: ", e);
             return lasBackendResponse;
         }
         log.debug("Got driver class: "+driver); //debug
         if ( driver.equals("")) {
-            lasBackendResponse.setError("Database configuration does not have a database driver attribute.");
+            lasBackendResponse.setError("Database backend configuration error.", "Database configuration does not have a database driver attribute.");
             return lasBackendResponse;
         }
         
@@ -109,7 +109,7 @@ public class DatabaseTool extends TemplateTool {
             if ( template_dir != null ) {
                 sqlFile = new File(template_dir+"sql.sql");
             } else {
-                lasBackendResponse.setError("Could not find SQL template directory.");
+                lasBackendResponse.setError("Database backend service errror.", "Could not find SQL template directory.");
                 return lasBackendResponse;
             }
         }
@@ -128,7 +128,7 @@ public class DatabaseTool extends TemplateTool {
         }
         log.debug("Created sqlFile"); //debug
         if (lasBackendRequest.isCanceled()) {
-            lasBackendResponse.setError("Request canceled.");
+            lasBackendResponse.setError("Request canceled", "Request canceled.");
             log.info("Request cancelled:"+lasBackendRequest.toCompactString());
             return lasBackendResponse;
         }
@@ -146,7 +146,7 @@ public class DatabaseTool extends TemplateTool {
         }
         log.debug("Statement ready: "+statement);
         if (lasBackendRequest.isCanceled()) {
-            lasBackendResponse.setError("Request canceled.");
+            lasBackendResponse.setError("Request canceled", "Request canceled.");
             log.info("Request cancelled:"+lasBackendRequest.toCompactString());
             return lasBackendResponse;
         }
@@ -189,7 +189,7 @@ public class DatabaseTool extends TemplateTool {
             return lasBackendResponse;
         }
         if (lasBackendRequest.isCanceled()) {
-            lasBackendResponse.setError("Request canceled.");
+            lasBackendResponse.setError("Request canceled", "Request canceled.");
             log.info("Request cancelled:"+lasBackendRequest.toCompactString());
             return lasBackendResponse;
         }
@@ -198,7 +198,7 @@ public class DatabaseTool extends TemplateTool {
         netcdfFilename = lasBackendRequest.getResultAsFile("netcdf");
         log.debug("Got netcdf filename: "+ netcdfFilename); // debug
         if (lasBackendRequest.isCanceled()) {
-            lasBackendResponse.setError("Request canceled.");
+            lasBackendResponse.setError("Request canceled","Request canceled.");
             log.info("Request cancelled:"+lasBackendRequest.toCompactString());
             return lasBackendResponse;
         }
