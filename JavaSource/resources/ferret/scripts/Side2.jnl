@@ -41,11 +41,9 @@
    DEFINE SYMBOL data_0_points ($data_1_points)
    DEFINE SYMBOL data_0_title ($data_1_title)
    DEFINE SYMBOL data_0_units ($data_1_units)
-   DEFINE SYMBOL data_0_url ($data_1_url)
+   DEFINE SYMBOL data_0_url "($data_1_url)"
    DEFINE SYMBOL data_0_var ($data_1_var)
    DEFINE SYMBOL data_0_xpath ($data_1_xpath)
-
-
 
    ! Replace region_0 with any items defined in region_1
    ! This syntax:
