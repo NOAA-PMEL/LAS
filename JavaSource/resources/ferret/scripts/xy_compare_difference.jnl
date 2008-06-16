@@ -104,6 +104,7 @@ IF ($native_curvilinear_xy"0|*>1") THEN \
 ! urls if dataset are opendap.
 
 GO LAS_set_diff_labels ($fview)
+DEFINE SYMBOL ferret_plot_title ($ferret_diff_title)
 
 ! Open the window, apply size, scale options
 GO LAS_open_window
@@ -185,6 +186,7 @@ IF ($shade_underlay) THEN
       if ($labnum_dset"0|*>1") THEN go unlabel ($labnum_dset)
       if ($labnum_datitl"0|*>1") THEN go unlabel ($labnum_datitl)
       if ($labnum_dods"0|*>1") THEN go unlabel ($labnum_dods)
+      IF `($title_size%0|*>1%)` THEN PPL LABSET ($title_size)
    PPL SHADE
    IF `($LEV_NUM"0") GT 245/2` THEN PPL SHASET RESET
    ($plot_type)($qualifiers)/OVER/NOLAB ($ferret_diff_var)
@@ -200,6 +202,7 @@ ELSE
       if ($labnum_dset"0|*>1") THEN go unlabel ($labnum_dset)
       if ($labnum_datitl"0|*>1") THEN go unlabel ($labnum_datitl)
       if ($labnum_dods"0|*>1") THEN go unlabel ($labnum_dods)
+      IF `($title_size%0|*>1%)` THEN PPL LABSET ($title_size)
    PPL ($plot_type)
 ENDIF
    
@@ -215,7 +218,7 @@ LABEL/NOUSER `($ppl$xlen)/2`, `($ppl$ylen)+1.2`, 0, 0, 0.12, "LAS 7.+/Ferret ($F
 DEFINE SYMBOL n_right_labels = 0
 
 GO labels_above_plot
-
+pause
 IF ($ferret_contour_style"0|default>0|color_filled_plus_lines>1|raster_plus_lines>1|*>0") THEN
   IF ($ferret_contour_levels"0|*>1") THEN DEFINE SYMBOL levsym =  /LEVELS=($ferret_contour_levels)
   CONTOUR/OVER/NOLAB($levsym) ($ferret_diff_var)
