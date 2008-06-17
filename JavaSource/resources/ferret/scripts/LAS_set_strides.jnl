@@ -98,10 +98,8 @@ IF `($region_x_range"0|0|*>1") AND ($no_native_strides_xy"0|*>1") NE 1` THEN
      ENDIF
    ENDIF
 
-   LET xx = x[gx=($data_var)[d=($data_num),($region_x)]]   
-   SET REGION/($region_x)  ! SET REGION else the next line gets the whole axis
-   LET pixsize = `xx[i=@ngd]`
-   CANCEL REGION/X
+   LET xx = x[gx=($data_var)[d=($data_num)]]   
+   LET pixsize = `xx[($region_x)@ngd]`
 
    IF `pixsize GT maxpix` THEN DEFINE SYMBOL xstride = `INT((pixsize/maxpix)+1)`
    DEFINE SYMBOL xstride = `MAX(($xstride"1"), ($stride_for_mem"1"))`
@@ -124,10 +122,8 @@ IF `($region_y_range"0|0|*>1") AND ($no_native_strides_xy"0|*>1") NE 1` THEN
      ENDIF
    ENDIF
 
-   LET yy = y[gy=($data_var)[d=($data_num),($region_y)]]
-   SET REGION/($region_y)  ! SET REGION else the next line gets the whole axis
-   LET pixsize = `yy[j=@ngd]`
-   CANCEL REGION/Y
+   LET yy = y[gy=($data_var)[d=($data_num)]]
+   LET pixsize = `yy[($region_y)@ngd]`
 
    IF `pixsize GT maxpix` THEN DEFINE SYMBOL ystride = `2*INT((pixsize/maxpix)+1)`
    DEFINE SYMBOL ystride = `MAX(($ystride"1"), ($stride_for_mem"1"))`
@@ -135,10 +131,8 @@ IF `($region_y_range"0|0|*>1") AND ($no_native_strides_xy"0|*>1") NE 1` THEN
 ENDIF
 
 IF ($region_z_range"0|0|*>1") THEN 
-   LET zz = z[gz=($data_var)[d=($data_num),($region_z)]]
-   SET REGION/($region_z)  ! SET REGION else the next line gets the whole axis
-   LET pixsize = `zz[k=@ngd]`
-   CANCEL REGION/Z
+   LET zz = z[gz=($data_var)[d=($data_num)]]
+   LET pixsize = `zz[($region_z)@ngd]`
 
    IF `pixsize GT maxpix` THEN DEFINE SYMBOL zstride = `INT((pixsize/maxpix)+1)`
    DEFINE SYMBOL zstride = `MAX(($zstride"1"), ($stride_for_mem"1"))`
@@ -148,10 +142,8 @@ ENDIF
 LET trange = STRCMP("($region_t_lo%0%)", "($region_t_hi%1%)")
 IF `($region_t"0|0|*>1") AND ( ($DO_TRANS_1_SEAS_PER_YEAR"0") EQ 0) AND \
     trange NE 0` THEN
-   LET tt = t[gt=($data_var)[d=($data_num),($region_t)]]
-   SET REGION/($region_t)  ! SET REGION else the next line gets the whole axis
-   LET pixsize = `tt[L=@ngd]`      
-   CANCEL REGION/T
+   LET tt = t[gt=($data_var)[d=($data_num)]]
+   LET pixsize = `tt[($region_t)@ngd]`      
    DEFINE SYMBOL tstride = `INT((pixsize/maxpix)+1)`
    DEFINE SYMBOL tstride = `MAX(($tstride"1"), ($stride_for_mem"1"))`
 
