@@ -130,10 +130,16 @@ IF ($ferret_size"0|0.5>1|*>0")     THEN LET maxpix = 600  ! default
 IF ($ferret_size"0|0.8333>1|*>0")  THEN LET maxpix = 700  ! large
 
 IF `($ferret_google_plot"0|0|*>1")` THEN LET  maxpix = `2*maxpix`
+IF ($ferret_google_plot"0|*>1") THEN GO LAS_setup_strides_GE
 
 IF `($region_x_range"0|0|*>1")` THEN 
-   LET xx = x[gx=($data_var)[d=($data_num)]]
-   LET pixsize = `xx[($region_x)@ngd]`
+   LET xx = x[gx=($data_var)[d=($data_num)]]  
+   LET pixsize = `xx[($region_x)@ngd]` 
+   IF ($ferret_google_plot"0|*>1") THEN
+     IF `STRINDEX( "($operation_ID)", "Grid" ) NE 0` THEN
+       LET nx = `xx[($region_x)@ngd]` !total no. of grid points in x axis, will be used by the Google Earth placemarks
+     ENDIF
+   ENDIF
 
    IF `pixsize GT maxpix` THEN DEFINE SYMBOL xstride = `INT((pixsize/maxpix)+1)`
    DEFINE SYMBOL xstride = `MAX(($xstride"1"), ($stride_for_mem"1"))`
@@ -152,6 +158,11 @@ ENDIF
 IF `($region_y_range"0|0|*>1")` THEN 
    LET yy = y[gy=($data_var)[d=($data_num)]]
    LET pixsize = `yy[($region_y)@ngd]`
+   IF ($ferret_google_plot"0|*>1") THEN
+     IF `STRINDEX( "($operation_ID)", "Grid" ) NE 0` THEN
+       LET ny = `yy[($region_y)@ngd]` !total no. of grid points in y axis, will be used by the Google Earth placemarks
+     ENDIF
+   ENDIF
 
    IF `pixsize GT maxpix` THEN DEFINE SYMBOL ystride = `2*INT((pixsize/maxpix)+1)`
    DEFINE SYMBOL ystride = `MAX(($ystride"1"), ($stride_for_mem"1"))`
@@ -281,6 +292,16 @@ IF `($xstride"0|1>0|*>1") + ($ystride"0|1>0|*>1") + ($zstride"0|1>0|*>1") + ($ts
          ($upper_left_($n_left_labels)) ($tstride) in T
       LET need_comma = 1
    ENDIF
+
+ENDIF
+
+! Set this for list_grid
+IF ($ferret_google_plot"0|*>1") THEN
+
+    IF `STRINDEX( "($operation_ID)", "Grid" ) NE 0` THEN
+       DEFINE SYMBOL xstride_coord = `INT(360*($xstride"1")/nx)`
+       DEFINE SYMBOL ystride_coord = `INT(180*($ystride"1")/ny)`
+    ENDIF
 
 ENDIF
 
