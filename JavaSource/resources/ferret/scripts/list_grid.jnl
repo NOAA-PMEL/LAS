@@ -43,19 +43,21 @@ CANCEL SYMBOL frmt
 !SET LIST/FILE="($result_ferret_listing_filename)"
 SET LIST/FILE="($result_las_request_info_filename)"
 
+LET lons = X[GX=($ferret_list_var)] + 0*Y[GY=($ferret_list_var)]
 IF `($xstride_coord"0|*>1)` THEN 
-   LET llon = X[GX=($ferret_list_var), X=($region_x_lo):($region_x_hi):($xstride_coord)] + 0*Y[GY=($ferret_list_var),Y=($region_y_lo):($region_y_hi):($ystride_coord)]
+   LET llon = lons[X=($region_x_lo):($region_x_hi):($xstride_coord),Y=($region_y_lo):($region_y_hi):($ystride_coord)]
 ELSE
-   LET llon = X[GX=($ferret_list_var), X=($region_x_lo):($region_x_hi)] + 0*Y[GY=($ferret_list_var),Y=($region_y_lo):($region_y_hi)]
+   LET llon = lons[X=($region_x_lo):($region_x_hi),Y=($region_y_lo):($region_y_hi)]
 ENDIF
 
 IF ($native_curvilinear_xy"0") THEN \
    LET llon =  ($ferret_curvi_coord_lon)[d=($data_num)]  
 
+LET lats = 0*X[GX=($ferret_list_var)] + Y[GY=($ferret_list_var)]
 IF `($ystride_coord"0|*>1)` THEN   
-   LET llat = 0*X[GX=($ferret_list_var),X=($region_x_lo):($region_x_hi):($ystride_coord)] + Y[GY=($ferret_list_var),Y=($region_y_lo):($region_y_hi):($ystride_coord)]
+   LET llat = lats[X=($region_x_lo):($region_x_hi):($xstride_coord),Y=($region_y_lo):($region_y_hi):($ystride_coord)]
 ELSE
-   LET llat = 0*X[GX=($ferret_list_var),X=($region_x_lo):($region_x_hi)] + Y[GY=($ferret_list_var),Y=($region_y_lo):($region_y_hi)]
+   LET llat = lats[X=($region_x_lo):($region_x_hi),Y=($region_y_lo):($region_y_hi)]
 ENDIF
 
 IF ($native_curvilinear_xy"0") THEN \
