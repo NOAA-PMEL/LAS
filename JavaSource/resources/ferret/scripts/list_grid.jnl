@@ -43,25 +43,51 @@ CANCEL SYMBOL frmt
 !SET LIST/FILE="($result_ferret_listing_filename)"
 SET LIST/FILE="($result_las_request_info_filename)"
 
-LET lons = X[GX=($ferret_list_var)] + 0*Y[GY=($ferret_list_var)]
-IF `($xstride_coord"0|*>1)` THEN 
-   LET llon = lons[X=($region_x_lo):($region_x_hi):($xstride_coord),Y=($region_y_lo):($region_y_hi):($ystride_coord)]
-ELSE
-   LET llon = lons[X=($region_x_lo):($region_x_hi),Y=($region_y_lo):($region_y_hi)]
-ENDIF
+! Do more striding for placemark locations. Assure that there are 2 points in
+! each direction.
 
-IF ($native_curvilinear_xy"0") THEN \
-   LET llon =  ($ferret_curvi_coord_lon)[d=($data_num)]  
+LET lons = X[GX=($ferret_list_var)] + 0*Y[GY=($ferret_list_var)]
+IF ($xstride_coord"0|*>1) THEN 
+   LET llon = lons[X=($region_x_lo):($region_x_hi):($xstride_coord),Y=($region_y_lo):($region_y_hi):($ystride_coord)]
+   LET numpts = `llon[Y=($region_y_lo),x=@ngd]`
+   IF `numpts LE 1` THEN 
+      DEFINE SYMBOL xstride_coord = `INT(($xstride_coord)/2)`
+      LET llon = lons[X=($region_x_lo):($region_x_hi):($xstride_coord),Y=($region_y_lo):($region_y_hi)]
+      LET numpts = `llon[Y=($region_y_lo),x=@ngd]`
+      IF `numpts LE 1` THEN 
+         DEFINE SYMBOL xstride_coord = `INT(($xstride_coord)/3)`
+         LET llon = lons[X=($region_x_lo):($region_x_hi):($xstride_coord),Y=($region_y_lo):($region_y_hi)]
+         LET numpts = `llon[Y=($region_y_lo),x=@ngd]`
+      ENDIF
+   ENDIF
+ENDIF
 
 LET lats = 0*X[GX=($ferret_list_var)] + Y[GY=($ferret_list_var)]
-IF `($ystride_coord"0|*>1)` THEN   
-   LET llat = lats[X=($region_x_lo):($region_x_hi):($xstride_coord),Y=($region_y_lo):($region_y_hi):($ystride_coord)]
-ELSE
-   LET llat = lats[X=($region_x_lo):($region_x_hi),Y=($region_y_lo):($region_y_hi)]
+IF ($ystride_coord"0|*>1) THEN   
+   LET llat = lats[X=($region_x_lo):($region_x_hi),Y=($region_y_lo):($region_y_hi):($ystride_coord)]
+   LET numpts = `llat[X=($region_x_lo),y=@ngd]`
+   IF `numpts LE 1` THEN 
+      DEFINE SYMBOL ystride_coord = `INT(($ystride_coord)/2)`
+      LET llat = lats[X=($region_x_lo):($region_x_hi),Y=($region_y_lo):($region_y_hi):($ystride_coord)]
+      LET numpts = `llat[X=($region_x_lo),y=@ngd]`
+      IF `numpts LE 1` THEN
+         DEFINE SYMBOL ystride_coord = `INT(($ystride_coord)/2)`
+         LET llat = lats[X=($region_x_lo):($region_x_hi),Y=($region_y_lo):($region_y_hi):($ystride_coord)]
+         LET numpts = `llat[X=($region_x_lo),y=@ngd]`
+      ENDIF
+   ENDIF
 ENDIF
 
-IF ($native_curvilinear_xy"0") THEN \
+IF ($xstride_coord"0|*>1) THEN DEFINE SYMBOL do_xstride_coord = :($xstride_coord)
+IF ($ystride_coord"0|*>1) THEN DEFINE SYMBOL do_ystride_coord = :($ystride_coord)
+LET llon = lons[X=($region_x_lo):($region_x_hi)($do_xstride_coord),Y=($region_y_lo):($region_y_hi)($do_ystride_coord)]
+LET llat = lats[X=($region_x_lo):($region_x_hi)($do_xstride_coord),Y=($region_y_lo):($region_y_hi)($do_ystride_coord)]
+
+
+IF ($native_curvilinear_xy"0") THEN 
+   LET llon = ($ferret_curvi_coord_lon)[d=($data_num)]  
    LET llat = ($ferret_curvi_coord_lat)[d=($data_num)]
+ENDIF
 
 ! mask is 1 where ferret_list_var is valid, and missing otherwise.
 
@@ -495,5 +521,6 @@ list/norowhead/nohead/format=(A15)/FILE/append f
 !====================================
 
     SET LIST/FILE="($result_ferret_listing_filename)"
+
     LIST/I=1/NOHEADER/NOROWHEADER/CLOBBER/FORMAT=(f7.2, f7.2)/FILE  COMPRESSI(llon_list), COMPRESSI(llat_list)
     LIST/I=2:`ngood`/NOHEADER/NOROWHEADER/APPEND/FORMAT=(f7.2, f7.2)/FILE  COMPRESSI(llon_list), COMPRESSI(llat_list)
