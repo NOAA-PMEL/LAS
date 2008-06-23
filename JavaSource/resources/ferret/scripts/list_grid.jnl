@@ -26,6 +26,7 @@ GO LAS_initialize_data 0
 
 ! Here is the variable we will list out, with the region specified.
 DEFINE SYMBOL ferret_list_var = ($ferret_plot_var)
+    IF ($native_curvilinear_xy"0|*>1") THEN DEFINE SYMBOL ferret_list_var ($ferret_plot_base_var)
 
 ! Check for errors (They often occur during dataset initialization.)
 
@@ -46,48 +47,55 @@ SET LIST/FILE="($result_las_request_info_filename)"
 ! Do more striding for placemark locations. Assure that there are 2 points in
 ! each direction.
 
-LET lons = X[GX=($ferret_list_var)] + 0*Y[GY=($ferret_list_var)]
-IF ($xstride_coord"0|*>1) THEN 
-   LET llon = lons[X=($region_x_lo):($region_x_hi):($xstride_coord),Y=($region_y_lo):($region_y_hi):($ystride_coord)]
-   LET numpts = `llon[Y=($region_y_lo),x=@ngd]`
-   IF `numpts LE 1` THEN 
-      DEFINE SYMBOL xstride_coord = `INT(($xstride_coord)/2)`
-      LET llon = lons[X=($region_x_lo):($region_x_hi):($xstride_coord),Y=($region_y_lo):($region_y_hi)]
+IF ($native_curvilinear_xy"0") THEN 
+   LET lons = ($ferret_curvi_coord_lon)[d=($data_num)]  
+   LET lats = ($ferret_curvi_coord_lat)[d=($data_num)]
+   LET llon = \
+     lons[i=($clon_imin):($clon_imax),J=($clat_jmin):($clat_jmax)]
+   LET llat = \
+     lats[i=($clon_imin):($clon_imax),J=($clat_jmin):($clat_jmax)]
+ELSE
+   
+   LET lons = X[GX=($ferret_list_var)] + 0*Y[GY=($ferret_list_var)]
+   IF ($xstride_coord"0|*>1) THEN 
+      LET llon = lons[X=($region_x_lo):($region_x_hi):($xstride_coord),Y=($region_y_lo):($region_y_hi):($ystride_coord)]
       LET numpts = `llon[Y=($region_y_lo),x=@ngd]`
       IF `numpts LE 1` THEN 
-         DEFINE SYMBOL xstride_coord = `INT(($xstride_coord)/3)`
+         DEFINE SYMBOL xstride_coord = `INT(($xstride_coord)/2)`
          LET llon = lons[X=($region_x_lo):($region_x_hi):($xstride_coord),Y=($region_y_lo):($region_y_hi)]
          LET numpts = `llon[Y=($region_y_lo),x=@ngd]`
+         IF `numpts LE 1` THEN 
+            DEFINE SYMBOL xstride_coord = `INT(($xstride_coord)/3)`
+            LET llon = lons[X=($region_x_lo):($region_x_hi):($xstride_coord),Y=($region_y_lo):($region_y_hi)]
+            LET numpts = `llon[Y=($region_y_lo),x=@ngd]`
+         ENDIF
       ENDIF
    ENDIF
-ENDIF
-
-LET lats = 0*X[GX=($ferret_list_var)] + Y[GY=($ferret_list_var)]
-IF ($ystride_coord"0|*>1) THEN   
-   LET llat = lats[X=($region_x_lo):($region_x_hi),Y=($region_y_lo):($region_y_hi):($ystride_coord)]
-   LET numpts = `llat[X=($region_x_lo),y=@ngd]`
-   IF `numpts LE 1` THEN 
-      DEFINE SYMBOL ystride_coord = `INT(($ystride_coord)/2)`
+   
+   LET lats = 0*X[GX=($ferret_list_var)] + Y[GY=($ferret_list_var)]
+   IF ($ystride_coord"0|*>1) THEN   
       LET llat = lats[X=($region_x_lo):($region_x_hi),Y=($region_y_lo):($region_y_hi):($ystride_coord)]
+   
       LET numpts = `llat[X=($region_x_lo),y=@ngd]`
-      IF `numpts LE 1` THEN
+      IF `numpts LE 1` THEN 
          DEFINE SYMBOL ystride_coord = `INT(($ystride_coord)/2)`
          LET llat = lats[X=($region_x_lo):($region_x_hi),Y=($region_y_lo):($region_y_hi):($ystride_coord)]
          LET numpts = `llat[X=($region_x_lo),y=@ngd]`
+         IF `numpts LE 1` THEN
+            DEFINE SYMBOL ystride_coord = `INT(($ystride_coord)/2)`
+            LET llat = lats[X=($region_x_lo):($region_x_hi),Y=($region_y_lo):($region_y_hi):($ystride_coord)]
+            LET numpts = `llat[X=($region_x_lo),y=@ngd]`
+         ENDIF
       ENDIF
    ENDIF
-ENDIF
+   
+   
+   IF ($xstride_coord"0|*>1) THEN DEFINE SYMBOL do_xstride_coord = :($xstride_coord)
+   IF ($ystride_coord"0|*>1) THEN DEFINE SYMBOL do_ystride_coord = :($ystride_coord)
+   LET llon = lons[X=($region_x_lo):($region_x_hi)($do_xstride_coord),Y=($region_y_lo):($region_y_hi)($do_ystride_coord)]
+   LET llat = lats[X=($region_x_lo):($region_x_hi)($do_xstride_coord),Y=($region_y_lo):($region_y_hi)($do_ystride_coord)]
 
-IF ($xstride_coord"0|*>1) THEN DEFINE SYMBOL do_xstride_coord = :($xstride_coord)
-IF ($ystride_coord"0|*>1) THEN DEFINE SYMBOL do_ystride_coord = :($ystride_coord)
-LET llon = lons[X=($region_x_lo):($region_x_hi)($do_xstride_coord),Y=($region_y_lo):($region_y_hi)($do_ystride_coord)]
-LET llat = lats[X=($region_x_lo):($region_x_hi)($do_xstride_coord),Y=($region_y_lo):($region_y_hi)($do_ystride_coord)]
-
-
-IF ($native_curvilinear_xy"0") THEN 
-   LET llon = ($ferret_curvi_coord_lon)[d=($data_num)]  
-   LET llat = ($ferret_curvi_coord_lat)[d=($data_num)]
-ENDIF
+ENDIF  ! native_curvi_xy
 
 ! mask is 1 where ferret_list_var is valid, and missing otherwise.
 
@@ -152,6 +160,7 @@ LET llon_list = XSEQUENCE(llon*mask)
 LET llat_list = XSEQUENCE(llat*mask)
 
 LET ngood = llon_list[x=@ngd]
+
 
 !==================================================
 ! output info about the LAS request and the dataset
@@ -361,9 +370,9 @@ ENDIF
 
     !XYT dataset
     IF ($data_0_intervals"|xyt>1|*>0") THEN
-        DEFINE SYMBOL nt `($ferret_plot_var),return=lsize`   ! no. of time points requested
+        DEFINE SYMBOL nt `($ferret_list_var),return=lsize`   ! no. of time points requested
         IF `($nt) eq 1` THEN
-            LET L0 = `($ferret_plot_var),return=lstart`
+            LET L0 = `($ferret_list_var),return=lstart`
             LET maxL = `($data_var)[d=($data_num)],return=lsize`   ! no. of time points total
             LET hafmax = `INT(($max_tpoints)/2)`
 
@@ -401,7 +410,7 @@ ENDIF
     !XYZ dataset
     IF ($data_0_intervals"|xyz>1|*>0") THEN
 
-        DEFINE SYMBOL nz `($ferret_plot_var),return=ksize`   ! no. of depth points requested
+        DEFINE SYMBOL nz `($ferret_list_var),return=ksize`   ! no. of depth points requested
     
         IF `($nz) eq 1` THEN                                 ! XY view being selected
             LET maxK = `($data_var),return=ksize`            ! no. of depth points total
@@ -455,7 +464,7 @@ ENDIF
 
             ! compute range of T with maximum size of 21
             !user selected T is in the middle if # of total time points >= 21
-            !LET L0 = `($ferret_plot_var),return=lstart`
+            !LET L0 = `($ferret_list_var),return=lstart`
 !jli test
             LET L0 = `($data_var),return=lstart`
             LET maxL = `($data_var),return=lsize`            ! no. of time points total

@@ -106,6 +106,8 @@ ENDIF
 LET xx = x[gx=($data_var)[d=($data_num)]]
 LET nx = xx[i=@ngd]
 
+LET nx_orig = `nx`
+
 ! For 2D plots
 
 IF `STRLEN("($ferret_view)") EQ 2` THEN
@@ -143,7 +145,7 @@ IF `STRLEN("($ferret_view)") EQ 2` THEN
       ENDIF
 
       LET yy = y[gy=($data_var)[d=($data_num)]]
-      LET ny = yy[j=@ngd]
+      LET ny = yy[j=@ngd]; LET ny_orig = `ny`
       LET y_pct = ($region_y_range)/180
       LET pixsize = `ny*y_pct`
 
@@ -348,9 +350,11 @@ ENDIF
 ! Set this for list_grid
 
 IF ($ferret_google_plot"0|*>1") THEN
-    IF `STRINDEX( "($operation_ID)", "Grid" ) NE 0` THEN
-       DEFINE SYMBOL xstride_coord = `360*($xstride"1")/nx`
-    ENDIF
+   IF `STRINDEX( "($operation_ID)", "Grid" ) NE 0` THEN
+      DEFINE SYMBOL xstride_coord = `360*($xstride"1")/nx_orig`
+      DEFINE SYMBOL ystride_coord = `INT(180*($ystride"1")/ny_orig)`
+   ENDIF
 ENDIF
 
 ! End of $RCSfile ------------LAS_set_strides_curvilinear.jnl--------------------------
+
