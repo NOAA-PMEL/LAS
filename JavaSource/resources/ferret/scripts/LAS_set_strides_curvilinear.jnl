@@ -253,7 +253,10 @@ ENDIF  ! 2D plots
 
 IF `STRLEN("($ferret_view)") EQ 3 AND STRINDEX("($ferret_view)", "xy") GT 0` THEN
 
-! Curvilinear and XY region. Apply the (very coarse) striding.
+! curvilinear grid? Get percentage of total that the region represents, see
+! if the number of points looks like it will be large.
+
+! Curvilinear and XY plot
 
    IF `($ferret_curvi_coord_lat"0|*>1")` THEN 
    
@@ -261,16 +264,11 @@ IF `STRLEN("($ferret_view)") EQ 3 AND STRINDEX("($ferret_view)", "xy") GT 0` THE
       LET nx = xx[i=@ngd]
       LET x_pct = ($region_x_range)/360
       LET pixsize = `nx*x_pct`
+!         LET pixsize = `MAX(pixsize, nx)`  ! comment this out to set strides by region
 
+!         IF `pixsize GT maxpix` THEN DEFINE SYMBOL xstride = `INT((pixsize/maxpix)+1)`
       IF `pixsize GT maxpix` THEN DEFINE SYMBOL xstride = `2*INT((pixsize/maxpix)+1)`
       DEFINE SYMBOL xstride = `MAX(($xstride"1"), ($stride_for_mem"1"))`
-
-! Check whether X axis is modulo. check_modulo_factor.jnl checks whether the
-! axis is modulo and if so, whether the stride is a factor of the lentgh of 
-! the axis, resetting it if possible to retain the modulo character of the axis.
-
-      GO check_modulo_factor x 
-
       IF `($xstride"0") GT 1` THEN 
          LET rem = ( (($clon_imin)/($xstride)) - int(($clon_imin)/($xstride)) )* ($xstride)
          DEFINE SYMBOL xoff = /OFFSET=`($xstride) - rem`
@@ -287,6 +285,9 @@ IF `STRLEN("($ferret_view)") EQ 3 AND STRINDEX("($ferret_view)", "xy") GT 0` THE
       LET y_pct = ($region_y_range)/180
       LET pixsize = `ny*y_pct`
 
+!         LET pixsize = `MAX(pixsize, ny)`  ! comment this out to set strides by region
+
+!         IF `pixsize GT maxpix` THEN DEFINE SYMBOL ystride = `2*INT((pixsize/maxpix)+1)`
       IF `2*pixsize GT maxpix` THEN DEFINE SYMBOL ystride = `2*INT((pixsize/maxpix)+1)`
       DEFINE SYMBOL ystride = `MAX(($ystride"1"), ($stride_for_mem"1"))`
 
@@ -347,12 +348,9 @@ ENDIF
 ! Set this for list_grid
 
 IF ($ferret_google_plot"0|*>1") THEN
-   IF `STRINDEX( "($operation_ID)", "Grid" ) NE 0` THEN
-      DEFINE SYMBOL xstride_coord = `360/nx`
-      DEFINE SYMBOL ystride_coord = `180/ny`
-      IF `($xstride"0") GT 1` THEN DEFINE SYMBOL xstride_coord = `360*($xstride)/nx`
-      IF `($ystride"0") GT 1` THEN DEFINE SYMBOL ystride_coord = `180*($ystride)/ny`
-   ENDIF
+    IF `STRINDEX( "($operation_ID)", "Grid" ) NE 0` THEN
+       DEFINE SYMBOL xstride_coord = `360*($xstride"1")/nx`
+    ENDIF
 ENDIF
 
 ! End of $RCSfile ------------LAS_set_strides_curvilinear.jnl--------------------------
