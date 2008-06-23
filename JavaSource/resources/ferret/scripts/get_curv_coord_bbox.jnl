@@ -73,7 +73,9 @@ IF ($box_cf_map_url"0|*>1") THEN  ! If we have a map file, use it.
 
    DEFINE SYMBOL cf_map_var = ($ferret_curvi_coord_mapvar)
    SET DATA/SAVE
-   SET DATA "($box_cf_map_url)"
+
+! Remove the extra set of double quotes. box_cf_map_url is already defined with quotes, above.
+   SET DATA ($box_cf_map_url)
    SET AXIS/MODULO/UNITS=degrees `($cf_map_var),RETURN=xaxis`
    SET AXIS/UNITS=degrees `($cf_map_var),RETURN=yaxis`
    DEFINE SYMBOL mapfile_num = `($cf_map_var),RETURN=dsetnum`
