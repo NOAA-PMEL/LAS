@@ -178,9 +178,9 @@ IF ($ferret_view"|xy>1|*>0") THEN
       IF ($region_x_lo"0|*>1") THEN \
           DEFINE SYMBOL ferret_curvi_quals ($ferret_curvi_quals)/HLIM=($region_x_lo):($region_x_hi)
       LET outside = 0
-      LET xc1 = xcoord[i=1]
-      LET xcn = xcoord[i=`nx`]
-      LET outside = `xc1[x=@min,y=@min] GT ($region_x_lo)` + `xcn[x=@max,y=@max] LT ($region_x_hi)`
+      LET xc1 = xcoord[i=($clon_imin)]
+      LET xcn = xcoord[i=($clon_imax)]
+      LET outside = `xc1[y=@min] GT ($region_x_lo)` + `xcn[y=@max] LT ($region_x_hi)`
       IF `($ferret_lon_modulo"1|1|0|yes>1|no>0|*>0") AND outside GT 0 AND its_vector EQ 0` THEN \
           DEFINE SYMBOL ferret_curvi_quals ($ferret_curvi_quals)/MODULO
    ENDIF
