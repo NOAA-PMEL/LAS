@@ -233,7 +233,7 @@ IF `STRLEN("($ferret_view)") EQ 2` THEN
 
         ENDIF
    
-        IF ($region_t_lo"0|*>1") THEN     
+        IF `($region_t_lo"0|*>1") AND STRINDEX("($operation_ID)", "Animation_Frames") EQ 0 `  THEN     
            LET tt = t[gt=($data_var)[d=($data_num)],($region_t)]
            LET nt = `tt[l=@ngd]`
            stat tt
