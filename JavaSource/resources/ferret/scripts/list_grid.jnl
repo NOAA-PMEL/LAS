@@ -27,10 +27,6 @@ GO LAS_initialize_data 0
 ! Here is the variable we will list out, with the region specified.
 DEFINE SYMBOL ferret_list_var = ($ferret_plot_var)
     IF ($native_curvilinear_xy"0|*>1") THEN DEFINE SYMBOL ferret_list_var ($ferret_plot_base_var)
-sh sym ferret_plot_base_var
-sh sym ferret_list_var
-sh sym stride*
-pause
 
 ! Check for errors (They often occur during dataset initialization.)
 
