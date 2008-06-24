@@ -89,10 +89,12 @@ IF `($ferret_linear_coords_file"0|*>1") AND ($check_linear)` THEN
 ! If we have a precomputed set of new axes, and if we are in the linear portion of
 ! the grid, then redefine the axes.
       SET DATA "($ferret_linear_coords_file)"
+      DEFINE SYMBOL xaxunits = `(HYCOM_lon_axis).units`
+      DEFINE SYMBOL yaxunits = `(HYCOM_lat_axis).units`
       CANCEL DATA "($ferret_linear_coords_file)"
 
-      DEFINE AXIS/UNITS=degrees/modulo `($data_var),RETURN=xaxis` = x[gx=HYCOM_lon_axis]
-      DEFINE AXIS/UNITS=degrees `($data_var),RETURN=yaxis` = y[gy=HYCOM_lat_axis]
+      DEFINE AXIS/X/UNITS="($xaxunits)"/modulo `($data_var),RETURN=xaxis` = x[gx=HYCOM_lon_axis]
+      DEFINE AXIS/Y/UNITS="($yaxunits)" `($data_var),RETURN=yaxis` = y[gy=HYCOM_lat_axis]
 
 ! Now we no longer need to deal with this data as being on a curvilinear grid
 
