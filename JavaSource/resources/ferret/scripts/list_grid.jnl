@@ -27,6 +27,10 @@ GO LAS_initialize_data 0
 ! Here is the variable we will list out, with the region specified.
 DEFINE SYMBOL ferret_list_var = ($ferret_plot_var)
     IF ($native_curvilinear_xy"0|*>1") THEN DEFINE SYMBOL ferret_list_var ($ferret_plot_base_var)
+sh sym ferret_plot_base_var
+sh sym ferret_list_var
+sh sym stride*
+pause
 
 ! Check for errors (They often occur during dataset initialization.)
 
@@ -386,7 +390,7 @@ ENDIF
 
             LET tlo = "`($data_var)[d=($data_num),L=($lmin)],return=TSTART`"
             LET thi = "`($data_var)[d=($data_num),L=($lmax)],return=TEND`"
- 
+
         ELSE
             LET tlo = "($region_0_t_lo)"
             LET thi = "($region_0_t_hi)"
@@ -405,6 +409,7 @@ ENDIF
 
         LET f = "</t_region>"
         list/norowhead/nohead/format=(A11)/FILE/append f
+
     ENDIF
 
     !XYZ dataset
@@ -462,24 +467,29 @@ ENDIF
             LET zlo = "`($data_var)[d=($data_num),K=($kmin)],return=ZSTART`"
             LET zhi = "`($data_var)[d=($data_num),K=($kmax)],return=ZEND`"
 
-            ! compute range of T with maximum size of 21
-            !user selected T is in the middle if # of total time points >= 21
-            !LET L0 = `($ferret_list_var),return=lstart`
-!jli test
-            LET L0 = `($data_var),return=lstart`
-            LET maxL = `($data_var),return=lsize`            ! no. of time points total
-            LET hafmax = `INT(($max_tpoints)/2)`
-        
-            IF `maxL LE ($max_tpoints)` THEN
-                DEFINE SYMBOL lmin 1
-                DEFINE SYMBOL lmax `maxL`
-            ELSE
-                DEFINE SYMBOL lmin `MAX(L0-hafmax,1)`
-                DEFINE SYMBOL lmax `MIN(L0+hafmax,maxL)`
-            ENDIF
+            ! compute range of T in the same way as done in the XYT case
 
-            LET tlo = "`($data_var)[d=($data_num),L=($lmin)],return=TSTART`"
-            LET thi = "`($data_var)[d=($data_num),L=($lmax)],return=TEND`"
+            DEFINE SYMBOL nt `($ferret_list_var),return=lsize`   ! no. of time points requested
+            IF `($nt) eq 1` THEN
+                LET L0 = `($ferret_list_var),return=lstart`
+                LET maxL = `($data_var)[d=($data_num)],return=lsize`   ! no. of time points total
+                LET hafmax = `INT(($max_tpoints)/2)`
+
+                IF `maxL LE ($max_tpoints)` THEN
+                    DEFINE SYMBOL lmin 1
+                    DEFINE SYMBOL lmax `maxL`
+                ELSE
+                    DEFINE SYMBOL lmin `MAX(L0-hafmax,1)`
+                    DEFINE SYMBOL lmax `MIN(L0+hafmax,maxL)`
+                ENDIF
+
+                LET tlo = "`($data_var)[d=($data_num),L=($lmin)],return=TSTART`"
+                LET thi = "`($data_var)[d=($data_num),L=($lmax)],return=TEND`"
+
+            ELSE
+                LET tlo = "($region_0_t_lo)"
+                LET thi = "($region_0_t_hi)"
+            ENDIF
 
         ELSE                                ! either XYZ or XYT view being selected
             LET zlo = "($region_0_z_lo)"
@@ -519,6 +529,7 @@ ENDIF
 
         LET f = "</t_region>"
         list/norowhead/nohead/format=(A11)/FILE/append f
+
     ENDIF
 
 LET f = "</las_req_info>"
