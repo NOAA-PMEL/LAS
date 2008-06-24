@@ -25,7 +25,7 @@ IF ($ferret_curvi_coord_lat"0|0|*>1") THEN EXIT/SCRIPT
 
 ! Hybrid Z not dealt with here...
 
-IF ($do_hybrid_z"0|0|1|*>1") THEN EXIT/SCRIPT 
+IF ($do_hybrid_z"0|0|1|*>1") THEN  EXIT/SCRIPT 
 
 ! ---------------------------------------------------------------------
 ! Determine striding based on the memory allocation
@@ -46,7 +46,7 @@ IF `STRINDEX("($check_for_des)", ".des") GT 0 OR ($no_native_strides_xy"0|*>1")`
 
    IF ($set_ndx_strides"0|*>1") THEN \
    DEFINE SYMBOL ferret_plot_var = ($data_var)[d=($data_num),($set_ndx_strides)]
-
+   
    EXIT/SCRIPT
 ENDIF
 
@@ -74,6 +74,7 @@ IF `STRINDEX( "($operation_ID)", "Plot" ) EQ 0 AND \
     STRINDEX( "($operation_ID)", "zoom" ) EQ 0 AND \
     STRINDEX( "($operation_ID)", "Anim" ) EQ 0` THEN
    GO LAS_set_strides_for_mem
+   
    EXIT/SCRIPT
 ENDIF
 
@@ -135,10 +136,12 @@ IF ($region_z_range"0|0|*>1") THEN
    DEFINE SYMBOL zstride = `MAX(($zstride"1"), ($stride_for_mem"1"))`
    IF `($zstride) GT 1` THEN SET AXIS/STRIDE=($zstride) `($data_var)[d=($data_num)],RETURN=zaxis`
 ENDIF
-       
+
+! If this is an animation then the time step is controlled by that. Do not do
+! striding in time.
 LET trange = STRCMP("($region_t_lo%0%)", "($region_t_hi%1%)")
 IF `($region_t"0|0|*>1") AND ( ($DO_TRANS_1_SEAS_PER_YEAR"0") EQ 0) AND \
-    trange NE 0` THEN
+    trange NE 0 AND STRINDEX("($operation_ID)", "Animation_Frames") EQ 0 ` THEN
    LET tt = t[gt=($data_var)[d=($data_num)]]
    LET pixsize = `tt[($region_t)@ngd]`      
    DEFINE SYMBOL tstride = `INT((pixsize/maxpix)+1)`
