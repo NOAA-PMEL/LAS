@@ -156,7 +156,6 @@ IF `stride_for_speed GT 1` THEN
    LET sampled_in_y = STRCMP("`pvar,RETURN=yaxis`", "SAMPLE_YLAT") EQ 0 OR\
                      STRCMP("`pvar,RETURN=yaxis`", "SAMPLE_Y") EQ 0
 ENDIF
-
 IF ($regrid_fcn"0|*>1") THEN DEFINE SYMBOL no_native_strides_xy = 1
 
 ! If already strided, dont do index strides.
@@ -168,8 +167,9 @@ IF ($data_x_var"0|*>1") THEN
    LET max_size = 10000  ! striding on in-situ data
 ENDIF
 
-IF `($native_curvilinear_xy"0") EQ 0` THEN  ! region syms dont apply to native curv grid directly
+sh sym native_curvilinear_xy
 
+IF `($native_curvilinear_xy"0") EQ 0` THEN  ! region syms dont apply to native curv grid directly
 !IF `($xstride"0|1>0|*>1") OR ($no_native_strides_xy"0|*>1")` THEN
 IF `($xstride"1|1>0|*>0") OR ($no_native_strides_xy"0|*>1")` THEN
    LET xsize  `pvar,RETURN=isize`
@@ -257,31 +257,40 @@ ELSE
       ENDIF
 ENDIF
 
-IF `($tstride"0|1>0|*>1") OR ($no_native_strides_xy"0|*>1")` THEN
-   LET tsize  `pvar,RETURN=lsize`
-   IF `tsize GT max_size` THEN 
-
-      LET strd_lo = 1
-      LET tt = t[gt=pvar]
-      LET strd_hi = `tt,return=lsize`
-! Would be this if the incoming t region were the region over which to animate...
-!      LET strd_lo = `L[gt=pvar,t="($region_t_lo)"]`
-!      LET strd_hi = `L[gt=pvar,t="($region_t_hi)"]`
-      LET strd_lo = 1
-      LET strd_hi = `tsize`
-      LET strd_del = `INT(tsize/10)`
-
-      IF ($index_strides"0|*>1") THEN
-         IF ($region_t"0|*>1") THEN DEFINE SYMBOL index_strides = ($index_strides),L=`strd_lo`:`strd_hi`:`strd_del`
-      ELSE
-         IF ($region_t"0|*>1") THEN DEFINE SYMBOL  index_strides = L=`strd_lo`:`strd_hi`:`strd_del`
-      ENDIF
-   ENDIF
-
-ENDIF
-
 ENDIF ! region syms dont apply to native curv grid directly
 
+IF ($index_strides"0|*>1") THEN 
+   DEFINE SYMBOL ppvar = ($data_var)[d=($data_num),($index_strides)]
+ELSE
+   DEFINE SYMBOL ppvar = pvar
+ENDIF
+
+! tstride was not set in LAS_set_stride. Now we are using the whole t region.
+IF `($tstride"0|1>0|*>1") EQ 0` THEN 
+   LET tsize  `($ppvar),RETURN=lsize`   
+
+   LET strd_lo = 1
+   LET tt = t[gt=($ppvar)]
+   LET strd_hi = `tt,return=lsize`
+
+! If the incoming t region is the region over which to animate...
+   LET strd_lo = `L[gt=($ppvar),t="($region_t_lo)"]`
+   LET strd_hi = `L[gt=($ppvar),t="($region_t_hi)"]`
+   LET tsize = `strd_hi - strd_lo + 1`
+
+   LET strd_del = 1
+   IF `tsize GT max_size` THEN 
+      LET strd_del = `INT(tsize/10)`
+      IF `strd_del LE 2` THEN LET strd_del = `INT(tsize/5)`
+   ENDIF 
+
+   IF ($index_strides"0|*>1") THEN
+      IF ($region_t"0|*>1") THEN DEFINE SYMBOL index_strides = ($index_strides),L=`strd_lo`:`strd_hi`:`strd_del`
+   ELSE
+      IF ($region_t"0|*>1") THEN DEFINE SYMBOL  index_strides = L=`strd_lo`:`strd_hi`:`strd_del`
+   ENDIF
+ENDIF
+pause
 IF `STRINDEX("($data_($num)_grid_type)","scattered") GT 0` THEN CANCEL SYMBOL index_strides
 
 IF ($index_strides"0|*>1") THEN 
@@ -296,6 +305,7 @@ IF ($native_curvilinear_xy"0") THEN DEFINE SYMBOL ppvar = pvar
 
 DEFINE SYMBOL stat_ngood= 0
 STAT ($ppvar)
+
 IF `($stat_ngood"0") EQ 0` THEN EXIT/SCRIPT
 
 ! If the data values are so big we cant compute stats correctly, just
