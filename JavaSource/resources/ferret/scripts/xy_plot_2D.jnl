@@ -166,7 +166,8 @@ IF `($data_count"0") EQ 1` THEN
          if ($labnum_dods"0|*>1") THEN go unlabel ($labnum_dods)
       PPL SHADE
       IF `($LEV_NUM"0") GT 245/2` THEN PPL SHASET RESET
-      ($plot_type)($qualifiers)/OVER/NOLAB ($ferret_var_0)
+      IF ($ferret_palette"0|*>1) THEN palette ($ferret_palette)
+      ($plot_type)/LEV/OVER/NOLAB ($ferret_var_0)
    ELSE
       ($plot_type)($qualifiers)/TITLE="($ferret_plot_title)"/SET ($ferret_var_0)
          IF ($xform_dms"0|*>1") THEN PPL XFOR (($xform_dms))
@@ -180,7 +181,7 @@ IF `($data_count"0") EQ 1` THEN
          ppl list labels
       PPL ($plot_type)
    ENDIF
-   
+
 ! One of the results is the data min and max. Save those here.
    DEFINE SYMBOL data_plotted_min = ($ppl$zmin)
    DEFINE SYMBOL data_plotted_max = ($ppl$zmax)
