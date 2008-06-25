@@ -60,32 +60,27 @@ ELSE
    IF ($xstride_coord"0|*>1) THEN 
       LET llon = lons[X=($region_x_lo):($region_x_hi):($xstride_coord),Y=($region_y_lo):($region_y_hi):($ystride_coord)]
       LET numpts = `llon[Y=($region_y_lo),x=@ngd]`
-      IF `numpts LE 1` THEN 
-         DEFINE SYMBOL xstride_coord = `INT(($xstride_coord)/2)`
-         LET llon = lons[X=($region_x_lo):($region_x_hi):($xstride_coord),Y=($region_y_lo):($region_y_hi)]
-         LET numpts = `llon[Y=($region_y_lo),x=@ngd]`
-         IF `numpts LE 1` THEN 
-            DEFINE SYMBOL xstride_coord = `INT(($xstride_coord)/3)`
-            LET llon = lons[X=($region_x_lo):($region_x_hi):($xstride_coord),Y=($region_y_lo):($region_y_hi)]
-            LET numpts = `llon[Y=($region_y_lo),x=@ngd]`
-         ENDIF
+      IF `numpts LE 5` THEN 
+         REPEAT/RANGE=2:5 (DEFINE SYMBOL xstride_coord = `INT(($xstride_coord)/2)`;\
+         LET llon = lons[X=($region_x_lo):($region_x_hi):($xstride_coord),Y=($region_y_lo):($region_y_hi)];\
+         LET numpts = `llon[Y=($region_y_lo),x=@ngd]`;\
+         IF `numpts GE 5` THEN EXIT/LOOP)
+
       ENDIF
    ENDIF
-   
+
    LET lats = 0*X[GX=($ferret_list_var)] + Y[GY=($ferret_list_var)]
    IF ($ystride_coord"0|*>1) THEN   
       LET llat = lats[X=($region_x_lo):($region_x_hi),Y=($region_y_lo):($region_y_hi):($ystride_coord)]
    
       LET numpts = `llat[X=($region_x_lo),y=@ngd]`
-      IF `numpts LE 1` THEN 
-         DEFINE SYMBOL ystride_coord = `INT(($ystride_coord)/2)`
-         LET llat = lats[X=($region_x_lo):($region_x_hi),Y=($region_y_lo):($region_y_hi):($ystride_coord)]
-         LET numpts = `llat[X=($region_x_lo),y=@ngd]`
-         IF `numpts LE 1` THEN
-            DEFINE SYMBOL ystride_coord = `INT(($ystride_coord)/2)`
-            LET llat = lats[X=($region_x_lo):($region_x_hi),Y=($region_y_lo):($region_y_hi):($ystride_coord)]
-            LET numpts = `llat[X=($region_x_lo),y=@ngd]`
-         ENDIF
+      IF `numpts LE 5` THEN 
+      
+         REPEAT/RANGE=2:5 (DEFINE SYMBOL ystride_coord = `INT(($ystride_coord)/2)`;\
+         LET llat = lats[X=($region_x_lo):($region_x_hi),Y=($region_y_lo):($region_y_hi):($ystride_coord)];\
+         LET numpts = `llat[X=($region_x_lo),y=@ngd]`;\
+         IF `numpts GE 5` THEN EXIT/LOOP)
+
       ENDIF
    ENDIF
    
@@ -94,7 +89,6 @@ ELSE
    IF ($ystride_coord"0|*>1) THEN DEFINE SYMBOL do_ystride_coord = :($ystride_coord)
    LET llon = lons[X=($region_x_lo):($region_x_hi)($do_xstride_coord),Y=($region_y_lo):($region_y_hi)($do_ystride_coord)]
    LET llat = lats[X=($region_x_lo):($region_x_hi)($do_xstride_coord),Y=($region_y_lo):($region_y_hi)($do_ystride_coord)]
-
 ENDIF  ! native_curvi_xy
 
 ! mask is 1 where ferret_list_var is valid, and missing otherwise.
