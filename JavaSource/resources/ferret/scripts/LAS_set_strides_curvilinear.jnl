@@ -136,7 +136,7 @@ IF `STRLEN("($ferret_view)") EQ 2` THEN
          GO check_modulo_factor x 
 
          LET rem = ( (($clon_imin)/($xstride)) - int(($clon_imin)/($xstride)) )* ($xstride)
-         DEFINE SYMBOL xoff = /OFFSET=`($xstride) - rem`
+         DEFINE SYMBOL xoff = /OFFSET=`INT(($xstride) - rem)`
          IF `rem EQ 0` THEN CANCEL SYMBOL xoff 
          SET AXIS/STRIDE=($xstride)($xoff) `($data_var)[d=($data_num)],RETURN=xaxis`
          DEFINE SYMBOL clon_imin = `MAX(1, INT(($clon_imin)/($xstride)) )`
@@ -157,7 +157,7 @@ IF `STRLEN("($ferret_view)") EQ 2` THEN
 
       IF `($ystride"0") GT 1` THEN 
          LET rem = ( (($clat_jmin)/($ystride)) - int(($clat_jmin)/($ystride)) )* ($ystride)
-         DEFINE SYMBOL yoff = /OFFSET=`($ystride) - rem`
+         DEFINE SYMBOL yoff = /OFFSET=`INT(($ystride) - rem)`
          IF `rem EQ 0` THEN CANCEL SYMBOL yoff 
          SET AXIS/STRIDE=($ystride)($yoff) `($data_var)[d=($data_num)],RETURN=yaxis`
          DEFINE SYMBOL clat_jmin = `MAX(1, INT(($clat_jmin)/($ystride)) )`
