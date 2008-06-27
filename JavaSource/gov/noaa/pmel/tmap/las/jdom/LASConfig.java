@@ -9,7 +9,12 @@
  */
 package gov.noaa.pmel.tmap.las.jdom;
 
+import gov.noaa.pmel.tmap.las.client.CategorySerializable;
+import gov.noaa.pmel.tmap.las.client.DatasetSerializable;
+import gov.noaa.pmel.tmap.las.client.RPCException;
+import gov.noaa.pmel.tmap.las.client.VariableSerializable;
 import gov.noaa.pmel.tmap.las.exception.LASException;
+import gov.noaa.pmel.tmap.las.filter.AttributeFilter;
 import gov.noaa.pmel.tmap.las.filter.CategoryFilter;
 import gov.noaa.pmel.tmap.las.ui.state.StateNameValueList;
 import gov.noaa.pmel.tmap.las.ui.state.TimeSelector;
@@ -26,18 +31,18 @@ import gov.noaa.pmel.tmap.las.util.TimeAxis;
 import gov.noaa.pmel.tmap.las.util.Variable;
 import gov.noaa.pmel.tmap.las.util.View;
 
-import java.io.IOException;
 import java.io.File;
-import java.io.PrintWriter;
 import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.log4j.Logger;
 import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import org.jdom.Attribute;
 import org.jdom.Element;
 import org.jdom.JDOMException;
@@ -922,6 +927,39 @@ public class LASConfig extends LASDocument {
     	constraint.addContent(menu);
     	
     	return new DataConstraint(constraint);
+    }
+    public CategorySerializable[] getCategorySerializable(ArrayList<Category> categories) throws LASException, JDOMException {
+    	CategorySerializable[] cats = new CategorySerializable[categories.size()];
+    	int i=0;
+    	for (Iterator catIt = categories.iterator(); catIt.hasNext();) {
+    		Category cat = (Category) catIt.next();
+    		CategorySerializable wireCat = cat.getCategorySerializable();
+    		if ( wireCat.hasMultipleDatasets() ) {
+    			DatasetSerializable[] ds = wireCat.getDatasetSerializableArray();
+    			for (int j = 0; j < ds.length; j++) {
+					VariableSerializable[] wireVars = ds[j].getVariablesSerializable();
+					for (int k = 0; k < wireVars.length; k++) {
+    					VariableSerializable var = wireVars[k];
+    					Grid grid = getGrid(var.getDSID(), var.getID());
+    					var.setGrid(grid.getGridSerializable());
+    				}
+				}
+
+    		} else {
+    			if ( wireCat.isVariableChildren() ) {
+    				VariableSerializable[] wireVars = wireCat.getDatasetSerializable().getVariablesSerializable();
+    				for (int j = 0; j < wireVars.length; j++) {
+    					VariableSerializable var = wireVars[j];
+    					Grid grid = getGrid(var.getDSID(), var.getID());
+    					var.setGrid(grid.getGridSerializable());
+    				}
+    			}
+    		}
+    		cats[i] = wireCat;
+
+    		i++;
+    	}
+    	return cats;
     }
     /**
      * Get the categories directly below this id.  If the id is null get the top.
@@ -3117,5 +3155,36 @@ public class LASConfig extends LASDocument {
 	       this.getRootElement().addContent(output_dir);
 	   }
 	   output_dir.setText(dir);
+	}
+	
+	public ArrayList<Category> getTimeSeriesDatasets() {
+		ArrayList<Category> time_series = new ArrayList<Category>();
+		AttributeFilter filter = new AttributeFilter("group_type", "time_series");
+		Iterator dsIt= getRootElement().getDescendants(filter);
+		HashMap<String, ArrayList<Dataset>> time_series_groups = new HashMap<String, ArrayList<Dataset>>();
+		while (dsIt.hasNext()) {
+			Element dataset = (Element)((Element) dsIt.next()).clone();
+			String ts_id = dataset.getAttributeValue("group_id");
+			ArrayList<Dataset> members = time_series_groups.get(ts_id);
+			if ( members == null) {
+				members = new ArrayList<Dataset>();
+				time_series_groups.put(ts_id, members);
+			}
+			members.add(new Dataset(dataset));
+		}
+		for (Iterator gIt = time_series_groups.keySet().iterator(); gIt.hasNext();) {
+			String group = (String) gIt.next();
+			ArrayList<Dataset> members = time_series_groups.get(group);
+			Element category = new Element("category");
+			category.setAttribute("id", group);
+			for (Iterator memIt = members.iterator(); memIt.hasNext();) {
+				Dataset member = (Dataset) memIt.next();
+				category.addContent(member.getElement());
+				category.setAttribute("name", member.getAttributeValue("group_name"));
+				category.setAttribute("ID", member.getAttributeValue("group_id"));
+			}
+			time_series.add(new Category(category));
+		}
+		return time_series;
 	}
 }

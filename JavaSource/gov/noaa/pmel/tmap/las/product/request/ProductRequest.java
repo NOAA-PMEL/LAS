@@ -143,6 +143,7 @@ public class ProductRequest {
         addProperty(mergedProperties, "operation", "ID", operation.getAttributeValue("ID"));
         boolean regrid = false;
         String regrid_prop = operation.getAttributeValue("regrid_prn");
+        String rename_regrid = "";
         if ( regrid_prop != null && regrid_prop.equalsIgnoreCase("true") ) {
             regrid = true;
         }
@@ -325,6 +326,7 @@ public class ProductRequest {
                                     gridTo.setVar(lasConfig.getVariableName(varXPath));
                                     gridTo.setVarXPath(varXPath);
                                     gridTo.setDsID(lasConfig.getDatasetAttributes(varXPath).get("ID"));
+                                    rename_regrid = gridTo.getVar()+"_d1";
                                     data.setAttribute("var",gridTo.getVar());
                                     data.setAttribute("title", lasConfig.getVariableTitle(varXPath));
                                     gridTo.setData(data);
@@ -351,8 +353,12 @@ public class ProductRequest {
                                         		// Retroactively set the gridTo data URL to be the same.  This means that both URL will use the same cache area in F-TDS.
                                         		gridTo.getData().setAttribute("url", comboURL);
                                         		gridTo.setURL(gridTo.getData().getAttributeValue("url"));
-                                        	} else {                                        		
-                                                expression = URLEncoder.encode("_expr_{"+encoded+"}{let "+var+"_"+var_count+"_regrid="+var+"[d="+dataset_number+","+g+"="+gridTo.getVar()+"[d=1]]}", "UTF-8");
+                                        	} else {    
+                                        		StringBuffer jnl = gridTo.getJnl();
+                                        		jnl.append("set var/name="+rename_regrid+" "+gridTo.getVar());
+                                        		gridTo.setVar(rename_regrid);
+                                                jnl.append("let "+var+"_"+var_count+"_regrid="+var+"[d="+dataset_number+","+g+"="+gridTo.getVar()+"[d=1]]");
+                                                expression = URLEncoder.encode("_expr_{"+encoded+"}{"+jnl.toString()+"}", "UTF-8");
                                                 data.setAttribute("url", gridTo.getURL()+expression);
                                         	}
                                         } catch (UnsupportedEncodingException e) {
@@ -376,7 +382,9 @@ public class ProductRequest {
                                 if ( dataObjectsE.getChildren("data").size() <= 0 ) {
                                 	gridTo.setJnl(jnl);
                                     gridTo.setURL(data.getAttributeValue("url"));
-                                    gridTo.setVar(lasConfig.getVariableName(varXPath)+"_"+var_count+"_regrid");                                   
+                                    // This is the variable name that gets constructed in setAnalysis
+                                    String ovar = lasConfig.getVariableName(varXPath)+"_d1_"+var_count+"_regrid";
+                                    gridTo.setVar(ovar);                                   
                                     gridTo.setGridID(lasConfig.getGrid(varXPath).getID());
                                     gridTo.setVarXPath(varXPath);
                                     gridTo.setDsID(lasConfig.getDatasetAttributes(varXPath).get("ID"));
@@ -666,11 +674,23 @@ public class ProductRequest {
     	if ( !regrid ) {
     		dset = 1;
     	}
-    	
-    	String var = lasConfig.getVariableName(varXPath);
-        
+    	String var;
+    	String org_var;
+    	StringBuffer jnl = new StringBuffer();
+    	if ( dset == 1) {
+    		if ( !regrid ) {
+    			var = lasConfig.getVariableName(varXPath);
+    			org_var = var;
+    		} else {
+    			org_var = lasConfig.getVariableName(varXPath);
+    			var = org_var+"_d1";
+    			jnl.append("set var/name="+var+" "+org_var+"[d="+dset+"]");
+    		}
+    	} else {
+    		var = lasConfig.getVariableName(varXPath);
+    	}
         String key = JDOMUtils.MD5Encode(varXPath);
-        StringBuffer jnl = new StringBuffer();
+        
         
         List axes = analysis.getChildren("axis");
         String grid = "";

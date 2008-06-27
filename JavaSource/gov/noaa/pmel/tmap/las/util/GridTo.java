@@ -21,6 +21,7 @@ public class GridTo {
         this.data = null;
         this.isAnalysis = false;
         this.gridID = "";
+        this.jnl = new StringBuffer("");
        
 	}
 	/**

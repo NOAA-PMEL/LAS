@@ -1,5 +1,7 @@
 package gov.noaa.pmel.tmap.las.util;
 
+import gov.noaa.pmel.tmap.las.client.CategorySerializable;
+import gov.noaa.pmel.tmap.las.exception.LASException;
 import gov.noaa.pmel.tmap.las.filter.DocumentationFilter;
 
 import java.io.StringWriter;
@@ -7,6 +9,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.jdom.Attribute;
 import org.jdom.Element;
@@ -57,7 +60,11 @@ public class Container {
     }
     public HashMap<String, ArrayList<NameValuePair>> getProperties() {
         HashMap<String, ArrayList<NameValuePair>> properties = new HashMap<String, ArrayList<NameValuePair>>();
-        List propGroups = element.getChild("properties").getChildren("property_group");
+        Element propsElement = element.getChild("properties");
+        List propGroups = new ArrayList();
+        if ( propsElement != null ) {
+        	propGroups = propsElement.getChildren("property_group");
+        }
         for (Iterator propGroupIt = propGroups.iterator(); propGroupIt.hasNext();) {
             ArrayList<NameValuePair> propGroup = new ArrayList<NameValuePair>();
             Element propGroupE = (Element) propGroupIt.next();
@@ -128,6 +135,15 @@ public class Container {
         }
         return "";
     }
+    public Map<String, String> getAttributesAsMap() {
+    	Map<String, String> attributes = new HashMap<String, String>();
+		ArrayList<NameValuePair> attrs = getAttributes();
+		for (Iterator attrIt = attrs.iterator(); attrIt.hasNext();) {
+			NameValuePair attr = (NameValuePair) attrIt.next();
+			attributes.put(attr.getName(), attr.getValue());
+		}
+		return attributes;
+    }
     public void setAttribute(String name, String value) {
         element.setAttribute(name, value);
     }
@@ -194,4 +210,21 @@ public class Container {
 		
 		return null;
 	}
+	 public Map<String, Map<String, String>> getPropertiesAsMap() {
+	    	Map<String, Map<String, String>> properties = new HashMap<String, Map<String, String>>();
+			HashMap<String, ArrayList<NameValuePair>> cat_properites = getProperties();
+			if ( cat_properites != null ) {
+				for (Iterator propGroupIt = cat_properites.keySet().iterator(); propGroupIt.hasNext();) {
+					Map<String, String> group = new HashMap<String, String>();
+					String prop_group_name = (String) propGroupIt.next();
+					ArrayList<NameValuePair> props = cat_properites.get(prop_group_name);
+					for (Iterator propsIt = props.iterator(); propsIt.hasNext();) {
+						NameValuePair p = (NameValuePair) propsIt.next();
+						group.put(p.getName(), p.getValue());
+						properties.put(prop_group_name, group);
+					}
+				}
+			}
+			return properties;
+	    }
 }
