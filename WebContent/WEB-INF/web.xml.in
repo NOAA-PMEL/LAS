@@ -187,7 +187,10 @@
 			<param-value>80</param-value>
 		</init-param>
 	</servlet>
-
+	<servlet-mapping>
+	    <servlet-name>RPCServlet</servlet-name>
+	    <url-pattern>/gov.noaa.pmel.tmap.las.TimeSeries/rpc</url-pattern>
+	</servlet-mapping>
 	<servlet-mapping>
 		<servlet-name>WMSLegnendServlet</servlet-name>
 		<url-pattern>/wms_legend</url-pattern>
