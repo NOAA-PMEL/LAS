@@ -200,7 +200,9 @@ function LASReq_addPropertyGroup(group) {
 function LASReq_removePropertyGroup(group) {
   var nodePath = '/properties/' + group;
   var propertyGroupNode = this.DOM.selectNode(nodePath);
-  this.DOM = this.DOM.removeNodeFromTree(propertyGroupNode);
+  if ( propertyGroupNode ) {
+      this.DOM = this.DOM.removeNodeFromTree(propertyGroupNode);
+  }
 }
 
 ////////////////////////////////////////////////////////////
@@ -287,7 +289,9 @@ function LASReq_addProperty(group,property,value) {
 function LASReq_removeProperty(group,property) {
   var nodePath = '/properties/' + group + '/' + property;
   var propertyNode = this.DOM.selectNode(nodePath);
-  this.DOM = this.DOM.removeNodeFromTree(propertyNode);
+  if ( propertyNode ) {
+      this.DOM = this.DOM.removeNodeFromTree(propertyNode);
+  }
 }
 
 ////////////////////////////////////////////////////////////
