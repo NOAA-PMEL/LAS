@@ -3,6 +3,8 @@
  */
 package gov.noaa.pmel.tmap.las.util;
 
+import gov.noaa.pmel.tmap.las.client.VariableSerializable;
+
 import org.jdom.Element;
 
 /**
@@ -12,10 +14,16 @@ import org.jdom.Element;
 public class Variable extends Container implements VariableInterface {
     
     String dsid;
+    String DSName;
     
     public Variable(Element variable, String dsid) {
         super(variable);
         this.dsid = dsid;
+    }
+    public Variable(Element variable, String dsid, String DSName) {
+        super(variable);
+        this.dsid = dsid;
+        this.DSName = DSName;
     }
     /* (non-Javadoc)
      * @see gov.noaa.pmel.tmap.las.util.VariableInterface#getXPath()
@@ -63,4 +71,38 @@ public class Variable extends Container implements VariableInterface {
     	return uni;
     	//return element.getAttributeValue("units");
     }
+    public VariableSerializable getVariableSerializable() {
+    	VariableSerializable variableSerializable = new VariableSerializable();
+    	variableSerializable.setName(getName());
+    	variableSerializable.setID(getID());
+    	variableSerializable.setDSID(getDSID());
+    	variableSerializable.setDSName(getDSName());
+    	variableSerializable.setAttributes(getAttributesAsMap());
+    	variableSerializable.setProperties(getPropertiesAsMap());
+    	return variableSerializable;
+    }
+	/**
+	 * @return the dsid
+	 */
+	public String getDsid() {
+		return dsid;
+	}
+	/**
+	 * @return the dSName
+	 */
+	public String getDSName() {
+		return DSName;
+	}
+	/**
+	 * @param dsid the dsid to set
+	 */
+	public void setDsid(String dsid) {
+		this.dsid = dsid;
+	}
+	/**
+	 * @param name the dSName to set
+	 */
+	public void setDSName(String name) {
+		DSName = name;
+	}
 }

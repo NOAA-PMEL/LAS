@@ -33,6 +33,8 @@
  */
 package gov.noaa.pmel.tmap.las.util;
 
+import gov.noaa.pmel.tmap.las.client.OperationSerializable;
+import gov.noaa.pmel.tmap.las.client.OptionSerializable;
 import gov.noaa.pmel.tmap.las.ui.Util;
 
 import java.util.ArrayList;
@@ -79,5 +81,32 @@ public class Operation extends Container implements OperationInterface {
         ArrayList<String> asArrays = new ArrayList<String>();
         asArrays.add("operation");
         return Util.toJSON(element, asArrays);
+    }
+    public OperationSerializable getOperationSerializable() {
+    	OperationSerializable operationSerializable = new OperationSerializable();
+    	operationSerializable.setName(getName());
+    	operationSerializable.setID(getID());
+    	operationSerializable.setAttributes(getAttributesAsMap());
+    	operationSerializable.setProperties(getPropertiesAsMap());
+    	operationSerializable.setOptions(getOptionsSerializable());
+    	operationSerializable.setViews(getViews());
+    	return operationSerializable;
+    }
+    public OptionSerializable[] getOptionsSerializable() {
+    	ArrayList<Option> optionContainers = getOptions();
+    	OptionSerializable[] options = new OptionSerializable[optionContainers.size()];
+    	for (int i = 0; i < options.length; i++) {
+			options[i] = optionContainers.get(i).getOptionSerializable();
+		}  
+    	return options;
+    }
+    public List<String> getViews() {
+    	List<String> views = new ArrayList<String>();
+    	List intervals = element.getChild("region").getChildren("intervals");
+    	for (Iterator intervalIt = intervals.iterator(); intervalIt.hasNext();) {
+			Element intervalsElement = (Element) intervalIt.next();
+			views.add(intervalsElement.getAttributeValue("name"));
+		}
+    	return views;
     }
 }

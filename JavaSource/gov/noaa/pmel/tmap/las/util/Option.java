@@ -33,11 +33,14 @@
  */
 package gov.noaa.pmel.tmap.las.util;
 
+import gov.noaa.pmel.tmap.las.client.OptionSerializable;
 import gov.noaa.pmel.tmap.las.ui.Util;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.jdom.Element;
 import org.json.JSONException;
@@ -58,28 +61,37 @@ public class Option extends Container implements OptionInterface {
      * @see gov.noaa.pmel.tmap.las.util.OptionInterface#getHelp()
      */
     public String getHelp() {
-        return element.getAttributeValue("help");
+        return element.getChildTextNormalize("help");
     }
 
     /* (non-Javadoc)
      * @see gov.noaa.pmel.tmap.las.util.OptionInterface#setHelp(java.lang.String)
      */
     public void setHelp(String help) {
-        element.setAttribute("help", help);
+    	Element helpE = element.getChild("help");
+    	if ( helpE == null ) {
+    		helpE = new Element("help");
+    		element.addContent(helpE);
+    	}
+    	helpE.setText(help);
     }
 
     /* (non-Javadoc)
      * @see gov.noaa.pmel.tmap.las.util.OptionInterface#getMenu()
      */
     public ArrayList<NameValuePair> getMenu() {
-        ArrayList<NameValuePair> menu = new ArrayList<NameValuePair>();
-        List items = element.getChild("menu").getChildren("item");
-        for (Iterator itemsIt = items.iterator(); itemsIt.hasNext();) {
-            Element item = (Element) itemsIt.next();
-            menu.add(new NameValuePair(item.getChildText("name"), item.getChildText("value")));
-        }
-        
-        return menu;
+    	ArrayList<NameValuePair> menu = new ArrayList<NameValuePair>();
+    	Element menuElement = element.getChild("menu");
+    	if ( menuElement != null ) {
+    		List items = element.getChild("menu").getChildren("item");
+    		if ( items != null && items.size() > 0 ) {
+    			for (Iterator itemsIt = items.iterator(); itemsIt.hasNext();) {
+    				Element item = (Element) itemsIt.next();
+    				menu.add(new NameValuePair(item.getTextNormalize(), item.getAttributeValue("values")));
+    			}
+    		}
+    	}
+    	return menu;
     }
 
     /* (non-Javadoc)
@@ -106,33 +118,78 @@ public class Option extends Container implements OptionInterface {
      * @see gov.noaa.pmel.tmap.las.util.OptionInterface#getTitle()
      */
     public String getTitle() {
-        return element.getAttributeValue("title");
+        return element.getChildTextNormalize("title");
     }
 
     /* (non-Javadoc)
      * @see gov.noaa.pmel.tmap.las.util.OptionInterface#setTitle(java.lang.String)
      */
     public void setTitle(String title) {
-        element.setAttribute("title", title);
+    	Element titleE = element.getChild("title");
+    	if ( titleE == null ) {
+    		titleE = new Element("title");
+    		element.addContent(titleE);
+    	}
+        titleE.setText(title);
     }
 
     /* (non-Javadoc)
      * @see gov.noaa.pmel.tmap.las.util.OptionInterface#getType()
      */
     public String getType() {
-        return element.getAttributeValue("type");
+    	if ( getMenu().size() > 0 ) {
+    		return "menu";
+    	} else { 
+    		return "textfield";
+    	}
     }
-
-    /* (non-Javadoc)
-     * @see gov.noaa.pmel.tmap.las.util.OptionInterface#setType(java.lang.String)
-     */
+    
+    public String getTextField() {
+    	Element textfield = element.getChild("textfield");
+    	if ( textfield != null ) {
+    		return textfield.getAttributeValue("name");
+    	} else {
+    		return null;
+    	}
+    }
+    
     public void setType(String type) {
-        element.setAttribute("type", type);
+    	// a no-op.  Really?
+    }
+    public String getName() {
+    	if ( getType().equals("menu") ) {
+    		return element.getChild("menu").getAttributeValue("name");
+    	} else {
+    		return element.getChild("textfield").getAttributeValue("name");
+    	}
     }
     public JSONObject toJSON() throws JSONException {
         ArrayList<String> asArrays = new ArrayList<String>();
         asArrays.add("option");
         return Util.toJSON(element, asArrays);
     }
-
+    public OptionSerializable getOptionSerializable() {
+		OptionSerializable os = new OptionSerializable();
+		os.setHelp(getHelp());
+		os.setType(getType());
+		if ( getMenu() != null && getMenu().size() > 0 ) {
+		    os.setMenu(getMenuAsMap());
+		} else if ( getTextField() != null ) {
+			os.setTextField(getTextField());
+		}
+		os.setTitle(getTitle());
+		os.setName(getName());
+		os.setAttributes(getAttributesAsMap());
+		os.setProperties(getPropertiesAsMap());
+		return os;
+	}
+    public Map<String, String> getMenuAsMap() {
+    	Map<String, String> menu = new HashMap<String, String>();
+    	ArrayList menuItems = getMenu();
+    	for (Iterator menuIt = menuItems.iterator(); menuIt.hasNext();) {
+			NameValuePair item = (NameValuePair) menuIt.next();
+			menu.put(item.getName(), item.getValue());
+		}
+    	return menu;
+    }
 }

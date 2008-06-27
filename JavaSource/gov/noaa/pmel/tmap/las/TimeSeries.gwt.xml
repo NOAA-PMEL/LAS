@@ -1,0 +1,26 @@
+<module>
+
+      <!-- Inherit the core Web Toolkit stuff.                        -->
+      <inherits name='com.google.gwt.user.User'/>
+	
+      <!-- Inherit the default GWT style sheet.  You can change       -->
+      <!-- the theme of your GWT application by uncommenting          -->
+      <!-- any one of the following lines.                            -->
+      <inherits name='com.google.gwt.user.theme.standard.Standard'/>
+      <!-- <inherits name="com.google.gwt.user.theme.chrome.Chrome"/> -->
+      <!-- <inherits name="com.google.gwt.user.theme.dark.Dark"/>     -->
+      
+      
+
+      <!-- Other module inherits                                      -->
+      <inherits name="com.google.gwt.maps.GoogleMaps" />
+      <script src="http://maps.google.com/maps?file=api&amp;v=2.x&amp;key=ABQIAAAAQd8QHM5bG96kv_FdbP2d_xTg3JrA53tnuuEXhHbNujhDPNiVUhQoOZ0saXCA5A_Y3F0I90EmP
+mTTxw"/>
+
+      <!-- Specify the app entry point class.                         -->
+      <entry-point class='gov.noaa.pmel.tmap.las.client.TimeSeries'/>
+    
+      <!-- Specify the application specific style sheet.              -->
+      <stylesheet src='TimeSeries.css' />
+	
+</module>

@@ -1,9 +1,13 @@
 package gov.noaa.pmel.tmap.las.util;
 
+import gov.noaa.pmel.tmap.las.client.AxisSerializable;
+
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.jdom.Attribute;
 import org.jdom.Element;
@@ -105,4 +109,24 @@ public class Axis extends Container implements AxisInterface {
     		return (String) getVerticies().get(0).getValue();
     	}
     }
+    public AxisSerializable getAxisSerializable() {
+		AxisSerializable a = new AxisSerializable();
+		a.setID(getID());
+		a.setHi(getHi());
+		a.setID(getID());
+		a.setLo(getLo());
+		a.setName(getName());
+		if (hasV()) {
+			Map v = new HashMap();
+			ArrayList<NameValuePair> vlist = getVerticies();
+			for (int i = 0; i < vlist.size(); i++) {
+				NameValuePair p = vlist.get(i);
+				v.put(p.getName(), p.getValue());
+			}
+			a.setV(v);
+		} else {
+			a.setArangeSerializable(getArange().getArangeSerializable());
+		}
+		return a;
+	}
 }
