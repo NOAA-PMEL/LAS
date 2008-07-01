@@ -20,7 +20,9 @@ import org.jdom.filter.Filter;
 public class AttributeFilter implements Filter {
     String name;
     String value;
-	public AttributeFilter(String name, String value) {
+    String element_name;
+	public AttributeFilter(String element_name, String name, String value) {
+		this.element_name = element_name;
 		this.name = name;
 		this.value = value;
 	}
@@ -34,14 +36,16 @@ public class AttributeFilter implements Filter {
 		} else {
 			return false;
 		}
-        String att = element.getAttributeValue(name);
-		if (att != null && att.equals(value)) {
-			return true;
-		}
-		else {
+		if ( element.getName().equals(element_name) ) {
+			String att = element.getAttributeValue(name);
+			if (att != null && att.equals(value)) {
+				return true;
+			}
+			else {
+				return false;
+			}
+		} else {
 			return false;
 		}
-
 	}
-
 }

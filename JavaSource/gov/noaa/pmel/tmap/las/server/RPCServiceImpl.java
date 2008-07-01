@@ -30,10 +30,10 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
 	 * 
 	 */
 	public CategorySerializable[] getTimeSeries() throws RPCException {
-		LASConfig lasConfig = (LASConfig) getServletContext().getAttribute(LASConfigPlugIn.LAS_CONFIG_KEY);
-		ArrayList<Category> categories = lasConfig.getTimeSeriesDatasets();
+		LASConfig lasConfig = (LASConfig) getServletContext().getAttribute(LASConfigPlugIn.LAS_CONFIG_KEY);		
 		CategorySerializable[] cats;
 		try {
+			ArrayList<Category> categories = lasConfig.getTimeSeriesDatasets();
 			cats = lasConfig.getCategorySerializable(categories);
 		} catch (LASException e) {
 			throw new RPCException(e.getMessage());
