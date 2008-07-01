@@ -56,6 +56,7 @@ public class CheckBoxPanel extends Composite {
     	scroll.add(box_layout);
     	layout.add(scroll);
     	layout.add(button_layout);
+    	hideButtons();
 		initWidget(layout);
 	}
 	public boolean isFirst() {
@@ -82,6 +83,7 @@ public class CheckBoxPanel extends Composite {
 				box.addClickListener(listener);
 				box.addClickListener(new ClickListener() {
 					public void onClick(Widget box) {
+						showButtons();
 						setFirst(false);
 					}
 				});
@@ -108,5 +110,11 @@ public class CheckBoxPanel extends Composite {
 			}
 		}
 		return ids;
+	}
+	public void showButtons() {
+		button_layout.setVisible(true);
+	}
+	public void hideButtons() {
+		button_layout.setVisible(false);
 	}
 }

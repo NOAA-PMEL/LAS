@@ -3157,34 +3157,107 @@ public class LASConfig extends LASDocument {
 	   output_dir.setText(dir);
 	}
 	
-	public ArrayList<Category> getTimeSeriesDatasets() {
+	public ArrayList<Category> getTimeSeriesDatasets() throws LASException {
 		ArrayList<Category> time_series = new ArrayList<Category>();
-		AttributeFilter filter = new AttributeFilter("group_type", "time_series");
-		Iterator dsIt= getRootElement().getDescendants(filter);
-		HashMap<String, ArrayList<Dataset>> time_series_groups = new HashMap<String, ArrayList<Dataset>>();
-		while (dsIt.hasNext()) {
-			Element dataset = (Element)((Element) dsIt.next()).clone();
-			String ts_id = dataset.getAttributeValue("group_id");
-			ArrayList<Dataset> members = time_series_groups.get(ts_id);
-			if ( members == null) {
-				members = new ArrayList<Dataset>();
-				time_series_groups.put(ts_id, members);
+		if (hasCategories()) {
+			AttributeFilter attribute_filter = new AttributeFilter("category", "group_type", "time_series");
+			Iterator catIt = getRootElement().getDescendants(attribute_filter);
+			while( catIt.hasNext() ) {
+				Element category = (Element) ((Element)catIt.next()).clone();
+				Element category_container = new Element("category");
+                List attributes = category.getAttributes();
+                for (Iterator attrIt = attributes.iterator(); attrIt.hasNext();) {
+                    Attribute attr = (Attribute) attrIt.next();
+                    category_container.setAttribute(attr.getName(), attr.getValue());
+                }
+                List filters = category.getChildren("filter");
+                for (Iterator filterIt = filters.iterator(); filterIt.hasNext();) {
+					Element filter = (Element) filterIt.next();
+					List<Dataset> group_list = getDatasets(filter);
+					for (Iterator groupIt = group_list.iterator(); groupIt
+							.hasNext();) {
+						Dataset dataset = (Dataset) groupIt.next();
+						category_container.addContent(dataset.getElement());
+					}
+				}
+                time_series.add(new Category(category_container));
 			}
-			members.add(new Dataset(dataset));
-		}
-		for (Iterator gIt = time_series_groups.keySet().iterator(); gIt.hasNext();) {
-			String group = (String) gIt.next();
-			ArrayList<Dataset> members = time_series_groups.get(group);
-			Element category = new Element("category");
-			category.setAttribute("id", group);
-			for (Iterator memIt = members.iterator(); memIt.hasNext();) {
-				Dataset member = (Dataset) memIt.next();
-				category.addContent(member.getElement());
-				category.setAttribute("name", member.getAttributeValue("group_name"));
-				category.setAttribute("ID", member.getAttributeValue("group_id"));
+		} else {
+			AttributeFilter filter = new AttributeFilter("dataset", "group_type", "time_series");
+			Iterator dsIt= getRootElement().getDescendants(filter);
+			HashMap<String, ArrayList<Dataset>> time_series_groups = new HashMap<String, ArrayList<Dataset>>();
+			while (dsIt.hasNext()) {
+				Element dataset = (Element)((Element) dsIt.next()).clone();
+				String ts_id = dataset.getAttributeValue("group_id");
+				ArrayList<Dataset> members = time_series_groups.get(ts_id);
+				if ( members == null) {
+					members = new ArrayList<Dataset>();
+					time_series_groups.put(ts_id, members);
+				}
+				members.add(new Dataset(dataset));
 			}
-			time_series.add(new Category(category));
+			for (Iterator gIt = time_series_groups.keySet().iterator(); gIt.hasNext();) {
+				String group = (String) gIt.next();
+				ArrayList<Dataset> members = time_series_groups.get(group);
+				Element category = new Element("category");
+				category.setAttribute("id", group);
+				for (Iterator memIt = members.iterator(); memIt.hasNext();) {
+					Dataset member = (Dataset) memIt.next();
+					category.addContent(member.getElement());
+					category.setAttribute("name", member.getAttributeValue("group_name"));
+					category.setAttribute("ID", member.getAttributeValue("group_id"));
+				}
+				time_series.add(new Category(category));
+			}
 		}
 		return time_series;
+	}
+	/**
+     * Extract data sets based on a &lt;filter&gt; element from the config, used for group_type="time_series" and group_type="ensemble" categories. 
+     * @param filter A category filter element to be used to select variables from the configuration.
+     * @return the data set that matches the filter
+	 * @throws LASException 
+     */
+    private List<Dataset> getDatasets(Element filter) throws LASException {
+        List<Dataset> container_datasets = new ArrayList<Dataset>();
+        String action = filter.getAttributeValue("action");
+
+        String name_contains = filter.getAttributeValue("contains");
+        String name_equals = filter.getAttributeValue("equals");
+        String tag_contains = filter.getAttributeValue("contains-tag");
+        String tag_equals = filter.getAttributeValue("equals-tag");
+        
+        if ( action.equals("apply-dataset") ) {
+
+            List datasets = getRootElement().getChildren("datasets");
+            
+            for (Iterator datasetsIt = datasets.iterator(); datasetsIt.hasNext();) {
+                Element datasetsE = (Element) datasetsIt.next();
+                List memberDatasets = datasetsE.getChildren("dataset");
+                for (Iterator memberDSIt = memberDatasets.iterator(); memberDSIt.hasNext();) {
+                    Element dataset = (Element) memberDSIt.next();
+                    Element container_dataset_element = (Element) dataset.clone();
+                    String name = dataset.getAttributeValue("name");
+                    String ID = dataset.getAttributeValue("ID");
+                    if ( (name_contains != null && name.contains(name_contains)) ||
+                         (name_equals != null && name.equals(name_equals)) ||
+                         (tag_contains != null && ID.contains(tag_contains)) ||
+                         (tag_equals != null && ID.equals(tag_equals)) ) {
+                        container_datasets.add(new Dataset(container_dataset_element));
+                    }
+                }
+            }
+        } else if ( action.equals("apply-variable") ) {
+        	throw new LASException("Should not try to filter groups using an 'apply-variable' filter.");
+        }
+        return container_datasets;
+    }
+	public boolean hasCategories() {
+		List tops = getRootElement().getChildren("las_categories");
+		if ( tops != null && tops.size() > 0 ) {
+			return true;
+		} else {
+			return false;
+		}
 	}
 }

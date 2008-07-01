@@ -41,12 +41,8 @@ import com.google.gwt.user.client.ui.Widget;
 public class TimeSeries implements EntryPoint {
 	private static class TimeSeriesComposite extends Composite implements ClickListener {
 		RPCServiceAsync rpcService;
-		Grid top = new Grid(1,2);
-		Label label = new Label("Select a time series collection: ");
 		ListBox timeSeriesList = new ListBox();
-		VerticalPanel layout = new VerticalPanel();
-		TimeSeriesMap timeSeriesMap = new TimeSeriesMap("Click a marker: ");
-		Grid layout_grid = new Grid(1,2);
+		TimeSeriesMap timeSeriesMap = new TimeSeriesMap();
 		LASDateWidget start_date;
 		CheckBoxPanel variables = new CheckBoxPanel(this);
 		LASDateWidget dates;
@@ -58,6 +54,8 @@ public class TimeSeries implements EntryPoint {
 		CategorySerializable cat;
 		LASRequestWrapper lasRequest =  new LASRequestWrapper("<?xml version=\"1.0\"?><lasRequest package=\"\" href=\"file:las.xml\"><link match=\"/lasdata/operations/operation[@ID='Plot_2D_XY']\" /><properties><ferret><image_format>default</image_format></ferret></properties><args><link match=\"/lasdata/datasets/coads_climatology_cdf/variables/airt\" /><region><range low=\"-180.0\" type=\"x\" high=\"180.0\" /><range low=\"-89.0\" type=\"y\" high=\"89.0\" /><point v=\"15-Jan\" type=\"t\" /></region></args></lasRequest>");
 		Map<String, String> options_state;
+		Label z_label = new Label("Select a z-value:");
+		Label dates_label = new Label("Select a date range:");
 		public static final String PLOT_BUTTON_NAME = "Plot";
 		public static final String PLOT_OPTIONS_BUTTON_NAME = "Plot Options";
 		
@@ -71,6 +69,7 @@ public class TimeSeries implements EntryPoint {
 					timeSeriesMap.update(categories.get(id));
 					variables.setVisible(false);
 					dates.hide();
+					dates_label.setVisible(false);
 					output.setVisible(false);
 					z.setVisible(false);
 				}
@@ -82,20 +81,23 @@ public class TimeSeries implements EntryPoint {
 			rpcService.getTimeSeries(timeSeriesCallback);
 			lasRequest.removeVariables();
 			timeSeriesMap.addMapClickHandler(mapClick);
-			top.setWidget(0, 0, label);
-			top.setWidget(0, 1, timeSeriesList);
-			layout.add(top);
+			RootPanel.get("timeseries_collection_listbox").add(timeSeriesList);
 			variables.setVisible(false);
-			layout_grid.setWidget(0, 0, timeSeriesMap);
-			layout_grid.setWidget(0, 1, variables);
-			layout.add(layout_grid);
+			RootPanel.get("map").add(timeSeriesMap);
+			RootPanel.get("variables").add(variables);
 			z.setVisible(false);
-			layout.add(z);
-			initWidget(layout);
+			RootPanel.get("z").add(z);
+			RootPanel.get("z_label").add(z_label);
+			z_label.setVisible(false);
+			z_label.setStyleName("small-banner");
 			dates = dates.init("1990-01-01", "2000-01-01", 0, 0, 0, 0);
 			dates.render("dates", "YMDT", "YMDT");
+			RootPanel.get("dates_label").add(dates_label);
 			dates.hide();
+			dates_label.setVisible(false);
+			dates_label.setStyleName("small-banner");
 			RootPanel.get("output").add(output);
+			this.setElement(RootPanel.get().getElement());
 		}
 		AsyncCallback timeSeriesCallback = new AsyncCallback() {
 
@@ -131,7 +133,10 @@ public class TimeSeries implements EntryPoint {
 					String gridID = timeSeriesMap.getCurrentGridID();
 					showVariables(gridID, marker);
 					dates.hide();
+					dates_label.setVisible(false);
+					variables.hideButtons();
 					z.setVisible(false);
+					z_label.setVisible(false);
 					variables.setFirst(true);
 					output.setVisible(false);
 				}
@@ -146,6 +151,7 @@ public class TimeSeries implements EntryPoint {
 				dates = dates.init(lo, hi, 0, 0, 0, 0);
 				dates.render("dates", "YMDT", "YMDT");
 				dates.show();
+				dates_label.setVisible(true);
 				AxisSerializable zAxis = cat.getVariable(varID).getGrid().getZAxis();
 				if ( zAxis != null ) {
 					z.clear();
@@ -167,6 +173,7 @@ public class TimeSeries implements EntryPoint {
 						}
 					}
 					z.setVisible(true);
+					z_label.setVisible(true);
 				}
 			}
 		}
@@ -305,7 +312,9 @@ public class TimeSeries implements EntryPoint {
 	 */
 	public void onModuleLoad() {
 		TimeSeriesComposite tsc = new TimeSeriesComposite();
+		/*
 		Panel map_area = RootPanel.get("map");
 		map_area.add(tsc);
+		*/
 	}
 }

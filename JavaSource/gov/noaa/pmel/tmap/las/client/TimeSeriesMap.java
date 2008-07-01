@@ -24,10 +24,10 @@ import com.google.gwt.maps.client.overlay.MarkerOptions;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.ClickListener;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.Grid;
+import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.FlexTable.FlexCellFormatter;
 
 /**
  * @author rhs
@@ -35,11 +35,10 @@ import com.google.gwt.user.client.ui.Widget;
  */
 public class TimeSeriesMap extends Composite {
 	MapWidget map;
-	Label label = new Label();
 	Button reset = new Button("Reset Map");
-	Grid layout_grid = new Grid(1,2);
+	FlexTable layout_grid = new FlexTable();
 	CategorySerializable cat;
-	VerticalPanel layout = new VerticalPanel();
+	Label select = new Label("Select a marker on the map:");
 	String currentGridID;
 	LatLng sw;
 	LatLng ne;
@@ -48,17 +47,20 @@ public class TimeSeriesMap extends Composite {
 	/**
 	 * 
 	 */
-	public TimeSeriesMap(String text) {
+	public TimeSeriesMap() {
 		map = new MapWidget(new LatLng(0.0, 0.0), 1);
 		map.setSize("520px", "350px");
 		map.addControl(new LargeMapControl());
 		map.addControl(new MapTypeControl());
-		label.setText(text);
-		layout.add(label);
-		layout.add(map);
-		layout.add(reset);
+		layout_grid.setWidget(0, 0, reset);
+		layout_grid.setWidget(0, 1, select);
+		FlexCellFormatter formatter = layout_grid.getFlexCellFormatter();
+		formatter.addStyleName(0, 1, "right-small-banner");
+		select.addStyleName("right-small-banner");
+		layout_grid.setWidget(1, 0, map);
+		formatter.setColSpan(1, 0, 2);
 		reset.addClickListener(resetListener);
-		initWidget(layout);
+		initWidget(layout_grid);
 	}
 	public void update(CategorySerializable categorySerializable) {
 		cat = categorySerializable;
