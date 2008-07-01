@@ -25,14 +25,11 @@ import com.google.gwt.user.client.ui.ChangeListener;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.ClickListener;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
-import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.RootPanel;
-import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
@@ -173,6 +170,11 @@ public class TimeSeries implements EntryPoint {
 						}
 					}
 					z.setVisible(true);
+					if ( zAxis.getAttributes().get("label") != null && !zAxis.getAttributes().get("label").equals("")) {
+					     z_label.setText(zAxis.getAttributes().get("label")+" ("+zAxis.getAttributes().get("units")+"):");
+					} else {
+						z_label.setText("Depth or height ("+zAxis.getAttributes().get("units")+"):");
+					}
 					z_label.setVisible(true);
 				}
 			}
