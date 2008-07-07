@@ -187,6 +187,10 @@
 			<param-value>80</param-value>
 		</init-param>
 	</servlet>
+        <servlet>
+            <servlet-name>RPCServlet</servlet-name>
+            <servlet-class>gov.noaa.pmel.tmap.las.server.RPCServiceImpl</servlet-class>
+        </servlet>
 	<servlet-mapping>
 	    <servlet-name>RPCServlet</servlet-name>
 	    <url-pattern>/gov.noaa.pmel.tmap.las.TimeSeries/rpc</url-pattern>
