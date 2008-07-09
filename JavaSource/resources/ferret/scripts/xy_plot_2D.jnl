@@ -152,10 +152,10 @@ ENDIF
 IF `($data_count"0") EQ 1` THEN
    IF ($shade_underlay) THEN 
       IF ($ferret_curvi_quals"0|*>1") THEN 
-         IF ($ferret_lon_modulo"1|1|0|yes>1|no>0|*>0") THEN  DEFINE SYMBOL qualifiers = ($qualifiers)/MODULO
+         IF ($ferret_lon_modulo"1|1|0|yes>1|no>0|*>0") THEN  DEFINE SYMBOL shade_qualifiers = /MODULO
       ENDIF
 
-      SHADE($qualifiers)/TRIM/TITLE="($ferret_plot_title)"/SET ($ferret_var_0)
+      SHADE($qualifiers)($shade_qualifiers)/TRIM/TITLE="($ferret_plot_title)"/SET ($ferret_var_0)
          IF ($xform_dms"0|*>1") THEN PPL XFOR (($xform_dms))
          IF ($yform_dms"0|*>1") THEN PPL YFOR (($yform_dms))
          IF ($axlab_command"0|*>1") THEN PPL ($axlab_command)
@@ -166,9 +166,14 @@ IF `($data_count"0") EQ 1` THEN
          if ($labnum_dods"0|*>1") THEN go unlabel ($labnum_dods)
       PPL SHADE
       IF `($LEV_NUM"0") GT 245/2` THEN PPL SHASET RESET
-      IF ($ferret_palette"0|*>1) THEN palette ($ferret_palette)
-      ($plot_type)/LEV/OVER/NOLAB ($ferret_var_0)
+      
+      ($plot_type)($qualifiers)/OVER/NOLAB ($ferret_var_0)
    ELSE
+   
+      IF ($ferret_curvi_quals"0|*>1") THEN 
+         IF `($ferret_lon_modulo"1|1|0|yes>1|no>0|*>0") AND ($plot_type"0|SHADE>1|*>0")` THEN  DEFINE SYMBOL qualifiers = ($qualifiers)/MODULO
+      ENDIF
+
       ($plot_type)($qualifiers)/TITLE="($ferret_plot_title)"/SET ($ferret_var_0)
          IF ($xform_dms"0|*>1") THEN PPL XFOR (($xform_dms))
          IF ($yform_dms"0|*>1") THEN PPL YFOR (($yform_dms))
