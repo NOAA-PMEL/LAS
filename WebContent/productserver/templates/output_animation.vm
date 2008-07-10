@@ -355,7 +355,10 @@
   function animationInit(){
       fillLevels    = xmlDoc.getElementsByTagName("fill_levels")[0].childNodes[0].nodeValue;
       contourLevels = xmlDoc.getElementsByTagName("contour_levels")[0].childNodes[0].nodeValue;
-      depAxisScale  = xmlDoc.getElementsByTagName("dep_axis_scale")[0].childNodes[0].nodeValue;
+      //depAxisScale  = xmlDoc.getElementsByTagName("dep_axis_scale")[0].childNodes[0].nodeValue;
+      if(xmlDoc.getElementsByTagName("dep_axis_scale")[0].childNodes[0]!=null){
+        depAxisScale  = xmlDoc.getElementsByTagName("dep_axis_scale")[0].childNodes[0].nodeValue;
+      }
 
       var n = xmlDoc.getElementsByTagName("frame").length;
       for(i=0;i<n;i++){
