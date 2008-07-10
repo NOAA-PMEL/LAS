@@ -218,7 +218,7 @@ LABEL/NOUSER `($ppl$xlen)/2`, `($ppl$ylen)+1.2`, 0, 0, 0.12, "LAS 7.+/Ferret ($F
 DEFINE SYMBOL n_right_labels = 0
 
 GO labels_above_plot
-pause
+
 IF ($ferret_contour_style"0|default>0|color_filled_plus_lines>1|raster_plus_lines>1|*>0") THEN
   IF ($ferret_contour_levels"0|*>1") THEN DEFINE SYMBOL levsym =  /LEVELS=($ferret_contour_levels)
   CONTOUR/OVER/NOLAB($levsym) ($ferret_diff_var)

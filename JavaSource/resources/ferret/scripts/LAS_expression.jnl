@@ -68,4 +68,3 @@ ENDIF
 GO LAS_url_label ($num)
 
 ! End of $RCSfile ------------LAS_expression.jnl--------------------------
-pause
