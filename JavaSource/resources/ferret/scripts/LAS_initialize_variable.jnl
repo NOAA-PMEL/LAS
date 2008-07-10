@@ -8,7 +8,8 @@
 ! ACM 8/2007 Call LAS_auto_levels to set up auto contour/fill levels.
 ! 3/2008 ACM Use SHADE/TRIM for shade underlays of FILL plots (Ferret v6.1),
 !            so no need to call LAS_define_region_plus_1.jnl
-!
+! 10-Jul-2008 ACM Define ferret_x_var, needed for listing data to files
+
 ! this is the second part of LAS_initialize_data.jnl
 
 ! Define the plot variable. For comparison plots, we want to save the dataset number
@@ -52,6 +53,10 @@ DEFINE SYMBOL ferret_plot_base_var_noregion = ($data_var)[d=($data_num)]
 
 DEFINE SYMBOL ferret_xyz_var = ($data_var)[d=($data_num),($region_xyz)]
 DEFINE SYMBOL ferret_t_var = ($data_var)[d=($data_num),($region_t)]
+
+! ferret_x_var needed for listing data to files
+DEFINE SYMBOL ferret_x_var = ($data_var)[d=($data_num),($region_x)]
+IF `($region_x"0|*>1) EQ 0` THEN DEFINE SYMBOL ferret_x_var = ($data_var)[d=($data_num)]
 
 ! Apply the expression in ferret_expression. $ represents the variable.
 
