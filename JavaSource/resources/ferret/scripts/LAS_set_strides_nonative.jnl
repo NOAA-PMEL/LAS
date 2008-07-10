@@ -12,6 +12,8 @@
 ! ---------------------------------------------------------------------
 ! Determine striding based on the memory allocation
 
+! 10-Jul-2008 ACM  Fixes for Google Earth placemark strides
+
 DEFINE SYMBOL memsize = ($FERRET_MEMORY"6.4")* 1.e6
 
 ! Cannot do native striding if this is a descriptor dataset, or if it is
@@ -42,7 +44,8 @@ ENDIF
 
 IF `STRINDEX( "($operation_ID)", "Plot" ) EQ 0 AND \
     STRINDEX( "($operation_ID)", "zoom" ) EQ 0 AND \
-    STRINDEX( "($operation_ID)", "Anim" ) EQ 0` THEN
+    STRINDEX( "($operation_ID)", "Anim" ) EQ 0 AND \
+    STRINDEX( "($operation_ID)", "Grid_for_GE" ) EQ 0` THEN
    IF `($stride_for_mem"0") GT 1` THEN
    
       IF `($region_x_range"0|*>1") GT 0` THEN
