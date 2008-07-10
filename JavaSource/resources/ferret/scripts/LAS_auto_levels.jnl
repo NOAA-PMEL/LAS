@@ -126,7 +126,6 @@ ELSE
       IF ($auto_lev_var"0|*>1") THEN LET pvar = ($auto_lev_var)
    ENDIF
 ENDIF
-
 !IF ($ferret_plot_var"0|sampled_var>1|*>0) THEN LET pvar = ($ferret_plot_var)
 
 IF ($ferret_plot_var"0|sampled_var>1|*>0) THEN LET pvar = ($ferret_plot_var)
@@ -149,14 +148,13 @@ IF ($ferret_diff_var"0|*>1") THEN
    ENDIF
    
    IF ($native_curvilinear_xy"0|*>1") THEN 
-      LET pvar = ( ($ferret_plot_base_var_0)  - ($FERRET_PLOT_BASE_VAR_1))
+      LET pvar = ( ($ferret_plot_base_var_0)  - ($ferret_plot_base_var_1))
    ELSE
       LET pvar = ($ferret_diff_var)
    ENDIF
 
 ENDIF
 
-!IF ($do_trans_1_seas_per_year"0") THEN LET pvar = ($FERRET_PLOT_BASE_VAR)
 
 LET var_size = ABS( `pvar,RETURN=size`)
 DEFINE SYMBOL var_dim = `pvar,RETURN=shape`
@@ -282,6 +280,7 @@ IF `($tstride"0|1>0|*>1") OR ($no_native_strides_xy"0|*>1")` THEN
 ENDIF
 
 ENDIF ! region syms dont apply to native curv grid or to insitu data directly
+IF ($do_trans_1_seas_per_year"0|*>1") THEN CANCEL SYMBOL index_strides
 
 IF `($index_strides"0|*>1") AND ($ferret_diff_var"0|*>1") EQ 0` THEN
    DEFINE SYMBOL ppvar = ($data_var)[d=($data_num),($index_strides)]
@@ -300,6 +299,7 @@ IF ($native_curvilinear_xy"0") THEN DEFINE SYMBOL ppvar = pvar
 
 DEFINE SYMBOL stat_ngood= 0
 STAT ($ppvar)
+
 IF `($stat_ngood"0") EQ 0` THEN EXIT/SCRIPT
 
 ! If the data values are so big we cant compute stats correctly, just
