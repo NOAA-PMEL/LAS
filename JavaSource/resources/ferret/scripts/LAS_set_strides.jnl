@@ -11,13 +11,14 @@
 ! ACM 4/2008  For descriptor data or for data whose axes are replaced cant
 !             do native strides. In these cases set up index strides with
 !             a call to LAS_set_strides_nonative
+! 10-Jul-2008 ACM  Fixes for Google Earth placemark strides
 
 ! TODO: When there's going to be a transformation or something, then these 
 ! calculations may not be sufficient. Might be better done by the transform script.
 
 ! If the operation is writing a netCDF file, that is done in chunks. Do not use strides
 
-IF `STRINDEX( "($operation_ID)", "Data_Extract_netCDF" ) NE 0` THEN EXIT/SCRIPT
+IF `STRINDEX( "($operation_ID)", "Data_Extract" ) NE 0` THEN EXIT/SCRIPT
 
 ! See LAS_set_strides_curvilinear for first cut on dealing with strides and curvi data.
 ! If it is a native curvilinear plot then LAS_set_strides_curvilinear has been called.
@@ -72,14 +73,15 @@ ENDIF
 
 IF `STRINDEX( "($operation_ID)", "Plot" ) EQ 0 AND \
     STRINDEX( "($operation_ID)", "zoom" ) EQ 0 AND \
-    STRINDEX( "($operation_ID)", "Anim" ) EQ 0` THEN
+    STRINDEX( "($operation_ID)", "Anim" ) EQ 0 AND \
+    STRINDEX( "($operation_ID)", "Grid_for_GE" ) EQ 0` THEN
    GO LAS_set_strides_for_mem
    
    EXIT/SCRIPT
 ENDIF
 
 ! ---------------------------------------------------------------------
-! Now for graphics products, do striding by pixel size, often larger stride than
+! Now for graphics or GE products, do striding by pixel size, often larger stride than
 ! needed to fit in Ferret memory
 
 LET maxpix = 600  ! default
