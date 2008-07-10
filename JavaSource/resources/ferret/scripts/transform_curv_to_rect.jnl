@@ -22,6 +22,10 @@ set mode ver:always
 !
 ! set curvilinear mapping dataset
 
+! 10-Jul-2008 ACM Define the_var_rect with the regions that are available; if there
+!             is no region_zt then dont try to use it
+
+
 IF ($ferret_curvi_coord_mapfile"0|*>1") THEN   DEFINE SYMBOL cf_map_url \"($ferret_curvi_coord_mapfile)\"
 
 IF ($cf_map_($num)_chained"0|1|*>1) THEN
@@ -87,6 +91,8 @@ LET the_var_rect_no_zt = ($regrid_fcn)(\
  ($data_var)[d=($data_num)], ($cf_map_var)[d=($mapfile_num),($region_xy)] )
 
 LET the_var_rect = ($regrid_fcn)(\
+ ($data_var)[d=($data_num),I=($clon_imin):($clon_imax),J=($clat_jmin):($clat_jmax)], ($cf_map_var)[d=($mapfile_num),($region_xy)] )
+IF ($reg_zt"0|*>1)) THEN LET the_var_rect = ($regrid_fcn)(\
  ($data_var)[d=($data_num),($reg_zt),I=($clon_imin):($clon_imax),J=($clat_jmin):($clat_jmax)], ($cf_map_var)[d=($mapfile_num),($region_xy)] )
 LET the_var_rect_no_zt = ($regrid_fcn)(\
  ($data_var)[d=($data_num),I=($clon_imin):($clon_imax),J=($clat_jmin):($clat_jmax)], ($cf_map_var)[d=($mapfile_num),($region_xy)] )
@@ -139,7 +145,9 @@ CANCEL SYMBOL error_string
 !     ($ferret_curvi_quals)/VLIM=($region_y_lo):($region_y_hi)
 
 ! for the auto-levels scripts, we will use just the data field, subsetted but not regridded.
-DEFINE SYMBOL auto_lev_var = ($data_var)[d=($data_num),($reg_zt),I=($clon_imin):($clon_imax),J=($clat_jmin):($clat_jmax)]
+DEFINE SYMBOL auto_lev_var = ($data_var)[d=($data_num),I=($clon_imin):($clon_imax),J=($clat_jmin):($clat_jmax)]
+IF ($reg_zt"0|*>1") THEN DEFINE SYMBOL auto_lev_var = ($data_var)[d=($data_num),($reg_zt),I=($clon_imin):($clon_imax),J=($clat_jmin):($clat_jmax)]
+
 DEFINE SYMBOL auto_lev_var_no_z = ($data_var)[d=($data_num),I=($clon_imin):($clon_imax),J=($clat_jmin):($clat_jmax)]
 IF ($region_z"0|*>1") THEN \ 
   DEFINE SYMBOL auto_lev_var_no_z = ($data_var)[d=($data_num),I=($clon_imin):($clon_imax),J=($clat_jmin):($clat_jmax),($region_z)]
@@ -154,8 +162,6 @@ ELSE
 ENDIF
 
 DEFINE SYMBOL ferret_plot_var ($expr1)the_var_rect_region($expr2)
-show sym ferret_plot_var
-show var the_var_rect_region
 
 DEFINE SYMBOL ferret_list_var ($expr1)the_var_rect($expr2)
 DEFINE SYMBOL ferret_list_var_no_zt ($expr1)the_var_rect_no_zt($expr2)
