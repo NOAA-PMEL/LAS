@@ -290,7 +290,7 @@ IF `($tstride"0|1>0|*>1") EQ 0` THEN
       IF ($region_t"0|*>1") THEN DEFINE SYMBOL  index_strides = L=`strd_lo`:`strd_hi`:`strd_del`
    ENDIF
 ENDIF
-pause
+
 IF `STRINDEX("($data_($num)_grid_type)","scattered") GT 0` THEN CANCEL SYMBOL index_strides
 
 IF ($index_strides"0|*>1") THEN 
