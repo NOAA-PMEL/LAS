@@ -12,6 +12,7 @@
 ! 7/15/2007 ACM Add lines to remove labels when a degenerate 2D plot is made 
 !               This happens when the region chosen is smaller than a grid cell.
 ! 3/2008 ACM Use SHADE/TRIM for shade underlays of FILL plots (Ferret v6.1)
+! 3/2008 ACM For native curvilinear plots use MODULO qualifier only on SHADE plots
 
 ! XY_plot.jnl creates an XY plot for use with the Back End Server
 ! code that sits behind a Live Access Server (LAS). 
