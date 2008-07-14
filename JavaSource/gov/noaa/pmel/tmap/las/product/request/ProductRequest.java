@@ -23,6 +23,10 @@ import java.util.Set;
 import org.jdom.Attribute;
 import org.jdom.Element;
 import org.jdom.JDOMException;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.apache.log4j.Logger;
 import org.apache.log4j.LogManager;
 
@@ -174,6 +178,7 @@ public class ProductRequest {
 
         Element argsE = lasRequest.getRootElement().getChild("args");
         Element dataObjectsE = new Element("dataObjects");
+        // TODO Most of this logic belongs in LASRequest.  :-)
         ArrayList<String> datasetList = new ArrayList<String>();
         if ( argsE != null ) {
             List args = argsE.getChildren();		    
@@ -478,6 +483,51 @@ public class ProductRequest {
                             String type = range.getAttribute("type").getValue();
                             String low = range.getAttribute("low").getValue();
                             String high = range.getAttribute("high").getValue();
+                            
+                            /*
+                             * Allow ranges of the form:
+                             * 
+                             * Last three days...
+                             * "today" is midnight.
+                             * <range type="t" high="today" low="259200000"/>
+                             * Last half day...
+                             * "now" is right now including hours, minutes and seconds
+                             * <range type="t" high="now" low="43200000"/>
+                             * 
+                             * And into the future, for completeness.
+                             * 
+                             * Today plus 3 days
+                             * <range type="t" high="259200000" low="today"/>
+                             * Now, plus half a day
+                             * <range type="t" high="43200000" low="now"/>
+                             */
+                            if ( high.equalsIgnoreCase("today") ) {
+                            	DateTime today = new DateTime();
+                            	DateTimeFormatter short_fmt = DateTimeFormat.forPattern("dd-MMM-yyyy").withZone(DateTimeZone.UTC);
+                            	high = short_fmt.print(today);
+                            	DateTime before = new DateTime(today.minusMillis(Integer.valueOf(low).intValue()));
+                            	low = short_fmt.print(before);
+                            } else if ( high.equalsIgnoreCase("now") ) {
+                            	DateTime now = new DateTime();
+                                DateTimeFormatter long_fmt = DateTimeFormat.forPattern("dd-MMM-yyyy HH:mm:ss").withZone(DateTimeZone.UTC);
+                                high = long_fmt.print(now);
+                                DateTime before = new DateTime(now.minusMillis(Integer.valueOf(low).intValue()));
+                                low = long_fmt.print(before);
+                            }
+                            if ( low.equalsIgnoreCase("today") ) {
+                            	DateTime today = new DateTime();
+                            	DateTimeFormatter short_fmt = DateTimeFormat.forPattern("dd-MMM-yyyy").withZone(DateTimeZone.UTC);
+                            	low = short_fmt.print(today);
+                            	DateTime after = new DateTime(today.plusMillis(Integer.valueOf(high).intValue()));
+                            	high = short_fmt.print(after);
+                            } else if ( low.equalsIgnoreCase("now") ) {
+                            	DateTime today = new DateTime();
+                            	DateTimeFormatter long_fmt = DateTimeFormat.forPattern("dd-MMM-yyyy HH:mm:ss").withZone(DateTimeZone.UTC);
+                            	low = long_fmt.print(today);
+                            	DateTime after = new DateTime(today.plusMillis(Integer.valueOf(high).intValue()));
+                            	high = long_fmt.print(after);
+                            }
+                            
                             Element lo = new Element(type+"_lo");
                             lo.setText(low);
                             region.addContent(lo);
