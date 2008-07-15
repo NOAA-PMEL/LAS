@@ -23,7 +23,7 @@ ELIF ($ferret_view"|xy>1|*>0") THEN
 
    LET its_GE = `STRINDEX( "($operation_ID)", "Vector_for_GE" ) NE 0 OR \
       STRINDEX( "($operation_ID)", "Vector_GE_Overlay" ) NE 0` 
-   IF    IF `its_GE` THEN
+   IF `its_GE` THEN
        go xy_vector_plot
    ENDIF
 
