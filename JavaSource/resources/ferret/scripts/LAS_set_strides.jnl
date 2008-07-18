@@ -111,8 +111,11 @@ IF `($region_x_range"0|0|*>1") AND ($no_native_strides_xy"0|*>1") NE 1` THEN
 ! the axis, resetting it if possible to retain the modulo character of the axis.
 
    GO check_modulo_factor x 
-   IF `($xstride) GT 1` THEN SET AXIS/STRIDE=($xstride) `($data_var)[d=($data_num)],RETURN=xaxis`
-  
+   DEFINE SYMBOL axname = `($data_var)[d=($data_num)],RETURN=xaxis` 
+   IF `($xstride) GT 1 AND `($axis_stride_($axname)"0") EQ 0` THEN 
+      SET AXIS/STRIDE=($xstride) ($axname)
+      DEFINE SYMBOL axis_stride_($axname) = ($xstride)
+   ENDIF
 ENDIF
 
 IF `($region_y_range"0|0|*>1") AND ($no_native_strides_xy"0|*>1") NE 1` THEN 
@@ -127,7 +130,11 @@ IF `($region_y_range"0|0|*>1") AND ($no_native_strides_xy"0|*>1") NE 1` THEN
 
    IF `pixsize GT maxpix` THEN DEFINE SYMBOL ystride = `2*INT((pixsize/maxpix)+1)`
    DEFINE SYMBOL ystride = `MAX(($ystride"1"), ($stride_for_mem"1"))`
-   IF `($ystride) GT 1` THEN SET AXIS/STRIDE=($ystride) `($data_var)[d=($data_num)],RETURN=yaxis`
+   DEFINE SYMBOL axname = `($data_var)[d=($data_num)],RETURN=yaxis` 
+   IF `($ystride) GT 1 AND `($axis_stride_($axname)"0") EQ 0` THEN 
+      SET AXIS/STRIDE=($ystride) ($axname)
+      DEFINE SYMBOL axis_stride_($axname) = ($ystride)
+   ENDIF
 ENDIF
 
 IF ($region_z_range"0|0|*>1") THEN 
@@ -136,7 +143,11 @@ IF ($region_z_range"0|0|*>1") THEN
 
    IF `pixsize GT maxpix` THEN DEFINE SYMBOL zstride = `INT((pixsize/maxpix)+1)`
    DEFINE SYMBOL zstride = `MAX(($zstride"1"), ($stride_for_mem"1"))`
-   IF `($zstride) GT 1` THEN SET AXIS/STRIDE=($zstride) `($data_var)[d=($data_num)],RETURN=zaxis`
+   DEFINE SYMBOL axname = `($data_var)[d=($data_num)],RETURN=zaxis` 
+   IF `($zstride) GT 1 AND `($axis_stride_($axname)"0") EQ 0` THEN 
+      SET AXIS/STRIDE=($zstride) ($axname)
+      DEFINE SYMBOL axis_stride_($axname) = ($zstride)
+   ENDIF
 ENDIF
 
 ! If this is an animation then the time step is controlled by that. Do not do
@@ -154,7 +165,11 @@ IF `($region_t"0|0|*>1") AND ( ($DO_TRANS_1_SEAS_PER_YEAR"0") EQ 0) AND \
 ! the axis, resetting it if possible to retain the modulo character of the axis.
 
    GO check_modulo_factor t
-   IF `($tstride) GT 1` THEN SET AXIS/STRIDE=($tstride) `($data_var)[d=($data_num)],RETURN=taxis`
+   DEFINE SYMBOL axname = `($data_var)[d=($data_num)],RETURN=yaxis` 
+   IF `($tstride) GT 1 AND `($axis_stride_($axname)"0") EQ 0` THEN 
+      SET AXIS/STRIDE=($tstride) ($axname)
+      DEFINE SYMBOL axis_stride_($axname) = ($tstride)
+   ENDIF
 ENDIF
 
 ! Add a label about the striding at the upper left.
