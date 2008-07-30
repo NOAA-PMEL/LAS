@@ -49,7 +49,7 @@ public class TimeSeries implements EntryPoint {
 		OptionsWidget options_widget;
 		HashMap<String, CategorySerializable> categories = new HashMap<String, CategorySerializable>();
 		CategorySerializable cat;
-		LASRequestWrapper lasRequest =  new LASRequestWrapper("<?xml version=\"1.0\"?><lasRequest package=\"\" href=\"file:las.xml\"><link match=\"/lasdata/operations/operation[@ID='Plot_2D_XY']\" /><properties><ferret><image_format>default</image_format></ferret></properties><args><link match=\"/lasdata/datasets/coads_climatology_cdf/variables/airt\" /><region><range low=\"-180.0\" type=\"x\" high=\"180.0\" /><range low=\"-89.0\" type=\"y\" high=\"89.0\" /><point v=\"15-Jan\" type=\"t\" /></region></args></lasRequest>");
+		LASRequestWrapper lasRequest =  new LASRequestWrapper();
 		Map<String, String> options_state;
 		Label z_label = new Label("Select a z-value:");
 		Label dates_label = new Label("Select a date range:");
@@ -73,8 +73,12 @@ public class TimeSeries implements EntryPoint {
 			});
 			rpcService = (RPCServiceAsync) GWT.create(RPCService.class);
 			ServiceDefTarget endpoint = (ServiceDefTarget) rpcService;
-			String moduleRelativeURL = GWT.getModuleBaseURL() + "rpc";
-			endpoint.setServiceEntryPoint(moduleRelativeURL);
+			String moduleRelativeURL = GWT.getModuleBaseURL();
+            String moduleName = GWT.getModuleName();
+			moduleRelativeURL = moduleRelativeURL.substring(0,moduleRelativeURL.indexOf(moduleName)-1);
+			moduleRelativeURL = moduleRelativeURL.substring(0,moduleRelativeURL.lastIndexOf("/")+1);
+			String rpcURL = moduleRelativeURL + "rpc";
+			endpoint.setServiceEntryPoint(rpcURL);
 			rpcService.getTimeSeries(timeSeriesCallback);
 			lasRequest.removeVariables();
 			timeSeriesMap.addMapClickHandler(mapClick);
@@ -99,8 +103,11 @@ public class TimeSeries implements EntryPoint {
 		AsyncCallback timeSeriesCallback = new AsyncCallback() {
 
 			public void onFailure(Throwable caught) {
-				Window.alert("Error getting time series data sets.  Message: "+caught.getMessage());
-
+			    HTML out = new HTML();
+			    PopupPanel p = new PopupPanel();
+			    p.add(out);
+			    out.setHTML("<H1>Error getting time series data sets.  Message:"+caught.getMessage());
+			    p.show();
 			}
 
 			public void onSuccess(Object result) {
@@ -272,7 +279,7 @@ public class TimeSeries implements EntryPoint {
 					lasRequest.addProperty("ferret", "view", "t");
 					lasRequest.addProperty("ferret", "image_format", "gif");
 
-					String url = "http://localhost:8880/baker/ProductServer.do?xml="+URL.encode(lasRequest.getXMLText());
+					String url = "http://strider:8880/baker/ProductServer.do?xml="+URL.encode(lasRequest.getXMLText());
 					RequestBuilder sendRequest = new RequestBuilder(RequestBuilder.GET, url);
 					try {
 						sendRequest.sendRequest(null, lasRequestCallback);
