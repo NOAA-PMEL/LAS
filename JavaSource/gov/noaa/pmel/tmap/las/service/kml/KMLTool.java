@@ -29,7 +29,7 @@
  * INDIRECT OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER
  * RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF
  * CONTRACT, NEGLIGENCE OR OTHER TORTUOUS ACTION, ARISING OUT OF OR IN
- * CONNECTION WITH THE ACCESS, USE OR PERFORMANCE OF THIS SOFTWARE 
+ * CONNECTION WITH THE ACCESS, USE OR PERFORMANCE OF THIS SOFTWARE
  */
 package gov.noaa.pmel.tmap.las.service.kml;
 
@@ -72,27 +72,27 @@ import org.jdom.Document;
 import org.jdom.Element;
 
 import java.util.Iterator;
+
+import ucar.nc2.NetcdfFile;
+import ucar.nc2.*;
+
 /**
- * @author Roland Schweitzer
- *
- */
-/**
- * @author Roland Schweitzer
+ * @author Roland Schweitzer and Jing Y. Li
  *
  */
 public class KMLTool extends TemplateTool  {
-    
+
     final Logger log = LogManager.getLogger(KMLTool.class.getName());
     LASKMLBackendConfig kmlBackendConfig;
 
     /**
-     * @throws IOException 
-     * 
+     * @throws IOException
+     *
      */
     public KMLTool() throws LASException, IOException {
-        
+
         super("kml", "KMLBackendConfig.xml");
-        
+
         kmlBackendConfig = new LASKMLBackendConfig();
 
         try {
@@ -131,7 +131,7 @@ public class KMLTool extends TemplateTool  {
             }
         } else {
             p.load(is);
-        }  
+        }
         if ( p.getProperty("file.resource.loader.path") == null ) {
             if ( template != null ) {
                 // Can't find properties file.  Set where we look for templates.
@@ -148,7 +148,7 @@ public class KMLTool extends TemplateTool  {
             throw new LASException("Cannot initialize the velocity engine.");
         }
         ve.init();
-    
+
         LASBackendResponse lasBackendResponse = new LASBackendResponse();
         String kml = lasBackendRequest.getServiceAction();
         //make overlay KML
@@ -232,8 +232,11 @@ public class KMLTool extends TemplateTool  {
         kmlWriter.close();
         lasBackendResponse.addResponseFromRequest(lasBackendRequest);
         return lasBackendResponse;
-    } 
+    }
 
+    /**
+      * make place marks for either regular gridded data or insitu data
+      */
     private LASBackendResponse makePlacemarksKML(LASBackendRequest lasBackendRequest,VelocityContext context)
     throws Exception {
         log.info("enter makePlacemarksKML");
@@ -252,205 +255,37 @@ public class KMLTool extends TemplateTool  {
             kml = kml+".vm";
         }
 
-        ArrayList allPlacemarks = new ArrayList(43000);
-        LASDocument lasReqInfo = new LASDocument();
-        String dsID="";
-        String varID="";
-        String gridLon="";
-        String gridLat="";
-        String xstride="";
-        String ystride="";
-        String xLowerLeft="";
-        String yLowerLeft="";
-        String xUpperRight="";
-        String yUpperRight="";
+        boolean isInsitu = false;
+        if(kml.contains("insitu") || kml.contains("osmc") || kml.contains("OSMC")){
+			isInsitu=true;
+		}
 
+        ArrayList allPlacemarks;
         HashMap<String, String> initLASReq = new HashMap<String, String>();
-        File lasReqInfoFile = new File(las_req_info_file);
-        
-        try{
-            JDOMUtils.XML2JDOM(lasReqInfoFile,lasReqInfo);
 
-            Element dsIDElement = lasReqInfo.getElementByXPath("/las_req_info/dataset_id");
-            dsID = dsIDElement.getText();
-            Element varIDElement = lasReqInfo.getElementByXPath("/las_req_info/variable_id");
-            varID = varIDElement.getText();
-            Element viewElement = lasReqInfo.getElementByXPath("/las_req_info/ferret_view");
-            String view = viewElement.getText();
-            Element dsIntervalsElement = lasReqInfo.getElementByXPath("/las_req_info/data_intervals");
-            String dsIntervals = dsIntervalsElement.getText();
-            initLASReq.put("dsID", dsID);
-            initLASReq.put("varID", varID);
-            initLASReq.put("ferret_view", view);
-            initLASReq.put("dsIntervals", dsIntervals);
+        LASPlacemarks lps;
 
-            Element dmsElement = lasReqInfo.getElementByXPath("/las_req_info/ferret_deg_min_sec");
-            if(dmsElement != null){initLASReq.put("ferret_deg_min_sec", dmsElement.getText());}
+        //osmc
+        if(kml.contains("osmc") || kml.contains("OSMC") ){
+			initLASReq = LASReqInfoOSMC.getLASReqInfo(las_req_info_file);
+	        lps = new LASOSMCPlacemarks(ferret_listing_file, initLASReq, baseURL);
+	    }else{
+			//regular grid
+			initLASReq = LASReqInfoRegular.getLASReqInfo(las_req_info_file);
+	        lps = new LASRegularPlacemarks(ferret_listing_file, initLASReq, baseURL);
+	    }
 
-            Element dasElement = lasReqInfo.getElementByXPath("/las_req_info/ferret_dep_axis_scale");
-            if(dasElement != null){initLASReq.put("ferret_dep_axis_scale", dasElement.getText());}
+        allPlacemarks = lps.getPlacemarks();
 
-            Element expElement = lasReqInfo.getElementByXPath("/las_req_info/ferret_expression");
-            if(expElement != null){initLASReq.put("ferret_expression", expElement.getText());}
-
-            Element typElement = lasReqInfo.getElementByXPath("/las_req_info/ferret_fill_type");
-            if(typElement != null){initLASReq.put("ferret_fill_type", typElement.getText());}
- 
-            Element inpElement = lasReqInfo.getElementByXPath("/las_req_info/ferret_interpolate_data");
-            if(inpElement != null){initLASReq.put("ferret_interpolate_data", inpElement.getText());}
-
-            Element colElement = lasReqInfo.getElementByXPath("/las_req_info/ferret_line_color");
-            if(colElement != null){initLASReq.put("ferret_line_color", colElement.getText());}
-
-            Element symElement = lasReqInfo.getElementByXPath("/las_req_info/ferret_line_or_sym");
-            if(symElement != null){initLASReq.put("ferret_line_or_sym", symElement.getText());}
-
-            Element thkElement = lasReqInfo.getElementByXPath("/las_req_info/ferret_line_thickness");
-            if(thkElement != null){initLASReq.put("ferret_line_thickness", thkElement.getText());}
-
-            Element mrgElement = lasReqInfo.getElementByXPath("/las_req_info/ferret_margins");
-            if(mrgElement != null){initLASReq.put("ferret_margins", mrgElement.getText());}
-
-            Element sizElement = lasReqInfo.getElementByXPath("/las_req_info/ferret_size");
-            if(sizElement != null){initLASReq.put("ferret_size", sizElement.getText());}
-
-            Element grtElement = lasReqInfo.getElementByXPath("/las_req_info/ferret_use_graticules");
-            if(grtElement != null){initLASReq.put("ferret_use_graticules", grtElement.getText());}
-
-            Element refElement = lasReqInfo.getElementByXPath("/las_req_info/ferret_use_ref_map");
-            if(refElement != null){initLASReq.put("ferret_use_ref_map", refElement.getText());}
-            
-            //xstride
-            Element xstElement = lasReqInfo.getElementByXPath("/las_req_info/x_stride");
-            if(xstElement != null){xstride = xstElement.getText();} 
-
-            //ystride
-            Element ystElement = lasReqInfo.getElementByXPath("/las_req_info/y_stride");
-            if(ystElement != null){ystride = ystElement.getText();}
-
-            //xLowerLeft
-            Element xllElement = lasReqInfo.getElementByXPath("/las_req_info/x_axis_lower_left");
-            if(xllElement != null){xLowerLeft = xllElement.getText();}
-            
-            //yLowerLeft
-            Element yllElement = lasReqInfo.getElementByXPath("/las_req_info/y_axis_lower_left");
-            if(yllElement != null){yLowerLeft = yllElement.getText();}
-
-            //xUpperRight
-            Element xurElement = lasReqInfo.getElementByXPath("/las_req_info/x_axis_upper_right");
-            if(xurElement != null){xUpperRight = xurElement.getText();}
-
-            //xUpperRight
-            Element yurElement = lasReqInfo.getElementByXPath("/las_req_info/y_axis_upper_right");
-            if(yurElement != null){yUpperRight = yurElement.getText();}
-
-            if(dsIntervals.contains("z")){
-                //get Z range
-                Element zElement = lasReqInfo.getElementByXPath("/las_req_info/z_region");
-                Element zloElement = zElement.getChild("z_lo");
-                String zlo  = zloElement.getText();
-                Element zhiElement = zElement.getChild("z_hi");
-                String zhi  = zhiElement.getText();
-                initLASReq.put("zlo", zlo);
-                initLASReq.put("zhi", zhi);
-
-                //get user selected Z if there is one (dataset is XYZT and ferret_view is XY)
-                Element usrzElement = lasReqInfo.getElementByXPath("/las_req_info/z_user");
-                if(usrzElement != null){initLASReq.put("z_user", usrzElement.getText());}
-            }
-       
-            if(dsIntervals.contains("t")){
-                //get t range
-                Element tElement = lasReqInfo.getElementByXPath("/las_req_info/t_region");
-                Element tloElement = tElement.getChild("t_lo");
-                String tlo  = tloElement.getText();
-                Element thiElement = tElement.getChild("t_hi");
-                String thi  = thiElement.getText();
-                initLASReq.put("tlo", tlo);
-                initLASReq.put("thi", thi);
-                
-                //get user selected t if there is one (dataset is XYZT and ferret_view is XY)
-                Element usrtElement = lasReqInfo.getElementByXPath("/las_req_info/t_user");
-                if(usrtElement != null){
-                    initLASReq.put("t_user", usrtElement.getText());
-                }
-            }
-
-        } catch (Exception e){
-            log.info("error while reading las request info: " + e.toString());
-        }
-
-        //read grid points and create a placemark KML String for each
-        File gridListFile = new File(ferret_listing_file);
-        FileInputStream fis = null;
-        BufferedInputStream bis = null;
-        DataInputStream dis = null;
-
-        try {
-            fis = new FileInputStream(gridListFile);
-
-            // Here BufferedInputStream is added for fast reading.
-            bis = new BufferedInputStream(fis);
-            dis = new DataInputStream(bis);
-
-            // dis.available() returns 0 if the file does not have more lines.
-            while (dis.available() != 0) {
-                String gridPair = dis.readLine();
-                GEPlacemark pl;
-
-                // check if the file content is valid; when there is no valid grid points
-                // Ferret writes ***** to the file that is supposed to contain the list of grid points
-                if(!gridPair.contains("*")){
-                    gridPair = gridPair.trim();
-                    Pattern p = Pattern.compile("\\s");
-                    String[] gp = gridPair.split(p.pattern());
-                    gridLon = gp[0];
-                    gridLat = gp[gp.length-1]; 
-
-                    //create a placemark for this grid point
-                    pl = new GEPlacemark(gridLat,gridLon,initLASReq,lasBackendRequest,baseURL);
-                    allPlacemarks.add(pl);
-
-                    //for creating the <LookAt> tag in KML
-                    context.put("gridLon",checkLon(gridLon));
-                    context.put("gridLat",gridLat);
-
-                }else{
-                    float xll = Float.valueOf(xLowerLeft).floatValue();
-                    float yll = Float.valueOf(yLowerLeft).floatValue();
-                    float xur = Float.valueOf(xUpperRight).floatValue();
-                    float yur = Float.valueOf(yUpperRight).floatValue();
-                    float xc = (xll+xur)/2.0f;
-                    float yc = (yll+yur)/2.0f;
-
-                    //create a placemark at the center of the view, which show error message
-                    pl = new GEPlacemark(Float.toString(xc),Float.toString(yc));
-                    allPlacemarks.add(pl);
-
-                    //for creating the <LookAt> tag in KML
-                    context.put("gridLon",Float.toString(xc));
-                    context.put("gridLat",Float.toString(yc));
-
-                    break;
-                }
-            }
-            fis.close();
-            bis.close();
-            dis.close();
-
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (Exception e){
-            log.info("noplacemarks");
-        }
-    
         //output to velocity context
-        context.put("dsID",dsID);
-        context.put("varID",varID);
-        context.put("xstride",xstride);
-        context.put("ystride",ystride);
+        context.put("gridLon",lps.getLookAtLon());
+        context.put("gridLat",lps.getLookAtLat());
+        context.put("dsID",initLASReq.get("dsID"));
+        context.put("varID",initLASReq.get("varID"));
+        if(!isInsitu){
+            context.put("xstride",initLASReq.get("xstride"));
+            context.put("ystride",initLASReq.get("ystride"));
+        }
         context.put("allPlacemarks", allPlacemarks);
 
         log.info("finish creating allPlacemarks");
@@ -458,8 +293,7 @@ public class KMLTool extends TemplateTool  {
         PrintWriter kmlWriter = null;
         try {
             kmlWriter = new PrintWriter(new FileOutputStream(new File(output)));
-        }
-        catch(Exception e) {
+        }catch(Exception e) {
             // We need to package these and send them back to the UI.
         }
         ve.mergeTemplate(kml,"ISO-8859-1", context, kmlWriter);
@@ -468,33 +302,4 @@ public class KMLTool extends TemplateTool  {
 
         return lasBackendResponse;
     }
-
-    /**
-     * check longitude and convert it to be in [-180,180]
-     */
-    private String checkLon(String point_lon){
-        double glon = Double.parseDouble(point_lon);
-        if(glon > 180.0){
-            double glon360 = glon % 360.0;
-            //west
-            if(glon360 > 180.0){
-                point_lon = Double.toString(glon360-360.0);
-            //east
-            }else{
-                point_lon = Double.toString(glon360);
-            }
-        }
-        if(glon < -180.0){
-            double glon360 = glon % 360.0;
-            //east
-            if(glon360 < -180.0){
-                point_lon = Double.toString(glon360+360.0);
-            //west
-            }else{
-                point_lon = Double.toString(glon360);
-            }
-        }
-        return point_lon;
-    }
-
 }
