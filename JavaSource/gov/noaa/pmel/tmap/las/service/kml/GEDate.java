@@ -11,14 +11,15 @@ import org.joda.time.Period;
  */
 public class GEDate{
 
-    String geDateString;
 
+/*
     public GEDate(String date,String resolution){
         geDateString=null;
         makeGEDate(date, resolution);
     }
-
-    private void makeGEDate(String date, String resolution){
+*/
+    public static String toGEDate(String date, String resolution){
+        String geDateString="";
 
         if(date.length() == 8){
             //date is in format of MMM-yyyy
@@ -63,7 +64,21 @@ public class GEDate{
             }
         }
 
-        
+        if(date.length() == 20){
+		    //date is in format of dd-MMM-yyyy
+            String ferretFormat = "dd-MMM-yyyy HH:mm:ss";
+            DateTimeFormatter ferretFMT = DateTimeFormat.forPattern(ferretFormat).withZone(DateTimeZone.UTC);
+
+            //parse ferret date
+            DateTime ferretDT = ferretFMT.parseDateTime(date);
+
+	        if(resolution.equalsIgnoreCase("seconds")){
+	            DateTimeFormatter geFMT = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss").withZone(DateTimeZone.UTC);
+	            //convert to GE date string
+                geDateString = ferretDT.toString(geFMT);
+		    }
+		}
+
         if(date.length() == 14){
             String tmp[]=date.split(" ");
             //no year for climatology, e.g., coads_climatology
@@ -81,10 +96,12 @@ public class GEDate{
             }
         }
 
-    }
-
-    public String toString(){
         return geDateString;
     }
 
+/*
+    public String toString(){
+        return geDateString;
+    }
+*/
 }
