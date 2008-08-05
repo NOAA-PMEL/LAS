@@ -1394,4 +1394,54 @@ streamable="true" mime_type="application/postscript"/> -->
         </properties>
         <service>fregrid</service>
     </operation>
+
+    <!-- placemarks for OSMC -->
+    <operation name="OSMC placemarks" ID="OSMC_placemarks" mime_type="application/vnd.google-earth.kml+xml" output_template="output_GE" category="virtual_globe">
+          <operation name="Database Extraction" ID="DBExtract_new" service_action="osmc_new_query">
+               <response ID="DBExtractResponse">
+                    <result type="debug" ID="db_debug" file_suffix=".txt"/>
+                    <result type="netCDF" ID="netcdf" file_suffix=".nc"/>
+               </response>
+               <service>database</service>
+               <properties>
+                  <property_group type="backend_request">
+                     <property>
+                        <name>exclude</name>
+                        <value>ferret</value>
+                     </property>
+                  </property_group>
+               </properties>
+          </operation>
+          <operation chained="true" name="OSMC_Data_Extract_Grid" ID="OSMC_Grid_for_GE" service_action="Data_Extract_Grid_OSMC">
+            <args>
+              <arg chained="true" type="variable" index="1" operation="DBExtract_new" result="netcdf"/>
+              <arg type="region" index="1" ID="in-situ-Region"/>
+            </args>
+            <response ID="OSMC_Data_Extract_Grid_Response">
+              <result type="text" ID="ferret_listing" streamable="true" mime_type="text/plain" file_suffix=".txt"/>
+              <result type="text" ID="las_request_info" streamable="true" mime_type="text/plain" file_suffix=".txt"/>
+              <result type="debug" ID="insitu_grid_debug" file_suffix=".txt"/>
+            </response>
+            <service>ferret</service>
+          </operation>
+          <operation chained="true" name="Make KML File" ID="kml" service_action="kml_placemarks_osmc">
+            <args>
+              <arg chained="true" type="text" operation="OSMC_Grid_for_GE" result="ferret_listing" />
+              <arg chained="true" type="text" operation="OSMC_Grid_for_GE" result="las_request_info" />
+            </args>
+            <response ID="KMLResp" type="HTML" index="1">
+              <result type="kml" ID="kml" streamable="true" mime_type="application/vnd.google-earth.kml+xml" file_suffix=".kml"/>
+            </response>
+            <service>kml</service>
+          </operation>
+          <region>
+          <region>
+            <intervals name="xy" />
+          </region>
+          <grid_types>
+            <grid_type name="scattered" />
+          </grid_types>
+    </operation>
+    <!--end: placemarks for OSMC -->
+
 </operations>
