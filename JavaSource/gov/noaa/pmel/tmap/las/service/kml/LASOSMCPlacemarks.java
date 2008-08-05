@@ -325,11 +325,11 @@ public class LASOSMCPlacemarks implements LASPlacemarks{
 
 
         double lonDouble = Double.parseDouble(lon);
-        String lon1 = Double.toString(lonDouble - 0.01);
-        String lon2 = Double.toString(lonDouble + 0.01);
+        String lon1 = Double.toString(lonDouble - 0.5);
+        String lon2 = Double.toString(lonDouble + 0.5);
         double latDouble = Double.parseDouble(lat);
-        String lat1 = Double.toString(latDouble - 0.01);
-        String lat2 = Double.toString(latDouble + 0.01);
+        String lat1 = Double.toString(latDouble - 0.5);
+        String lat2 = Double.toString(latDouble + 0.5);
 
         String[] xp = new String[] {lon1, lon2};
         String[] yp = new String[] {lat1, lat2};
