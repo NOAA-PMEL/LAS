@@ -325,11 +325,15 @@ public class LASOSMCPlacemarks implements LASPlacemarks{
 
 
         double lonDouble = Double.parseDouble(lon);
-        String lon1 = Double.toString(lonDouble - 0.5);
-        String lon2 = Double.toString(lonDouble + 0.5);
+        //String lon1 = Double.toString(lonDouble - 0.5);
+        //String lon2 = Double.toString(lonDouble + 0.5);
+        String lon1 = Double.toString(-180.0);
+        String lon2 = Double.toString(180.0);
         double latDouble = Double.parseDouble(lat);
-        String lat1 = Double.toString(latDouble - 0.5);
-        String lat2 = Double.toString(latDouble + 0.5);
+        //String lat1 = Double.toString(latDouble - 0.5);
+        //String lat2 = Double.toString(latDouble + 0.5);
+        String lat1 = Double.toString(-90.0);
+        String lat2 = Double.toString(89.0);
 
         String[] xp = new String[] {lon1, lon2};
         String[] yp = new String[] {lat1, lat2};
@@ -353,8 +357,8 @@ public class LASOSMCPlacemarks implements LASPlacemarks{
         region.put("points", points);//must do this even points is empty
         region.put("intervals",intervals);
         lasUIRequest.setRegion(region);
-        lasUIRequest.setProperty("ferret", "view", "xy");
-        lasUIRequest.setProperty("ferret", "format", "text");
+        //lasUIRequest.setProperty("ferret", "view", "xy");
+        //lasUIRequest.setProperty("ferret", "format", "text");
         //lasUIRequest.setProperty("ferret", "use_ref_map", "true");
         //lasUIRequest.setProperty("constraint","type","SHIPS (GENERIC)");
 
