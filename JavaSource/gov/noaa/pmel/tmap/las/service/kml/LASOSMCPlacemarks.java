@@ -198,7 +198,7 @@ public class LASOSMCPlacemarks implements LASPlacemarks{
                     gridLon = location[0];
                     gridLat = location[1];
 
-                    OSMCInsituPoint pt = new OSMCInsituPoint(gridLon,gridLat);
+                    OSMCInsituPoint pt = new OSMCInsituPoint(gridLat,gridLon);
 
                     //time
                     pt.setTime(gp[1]);
