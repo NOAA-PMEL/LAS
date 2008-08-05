@@ -1435,7 +1435,6 @@ streamable="true" mime_type="application/postscript"/> -->
             <service>kml</service>
           </operation>
           <region>
-          <region>
             <intervals name="xy" />
           </region>
           <grid_types>
