@@ -393,4 +393,27 @@ public class LASUIRequest extends LASDocument {
         }
     }
 
+    //jing
+    /**
+     * Add a constraint
+     */
+    public void addTextConstraint(String lhs, String ope, String rhs) {
+        Element args = getRootElement().getChild("args");
+        if ( args == null ) {
+            args = new Element("args");
+            getRootElement().addContent(args);
+        }
+        Element constraint = new Element("constraint");
+        constraint.setAttribute("type", "text");
+        Element lhsE = new Element("v");
+        lhsE.setText(lhs);
+        Element opeE = new Element("v");
+        opeE.setText(ope);
+        Element rhsE = new Element("v");
+        rhsE.setText(rhs);
+        constraint.addContent(lhsE);
+        constraint.addContent(opeE);
+        constraint.addContent(rhsE);
+        args.addContent(constraint);
+    }
 }
