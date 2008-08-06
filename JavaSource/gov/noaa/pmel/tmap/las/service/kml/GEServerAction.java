@@ -51,16 +51,13 @@ import org.jdom.JDOMException;
 public final class GEServerAction extends Action {
     private static Logger log = Logger.getLogger(GEServerAction.class);
 
-    //LASConfig lasConfig = (LASConfig)servlet.getServletContext().getAttribute(LASConfigPlugIn.LAS_CONFIG_KEY);
-
     public ActionForward execute(ActionMapping mapping,
             ActionForm form,
             HttpServletRequest request,
             HttpServletResponse response) 
     throws ServletException, IOException{
 
-        //log.info("entering GEServerAction");
-
+        log.info("entering GEServerAction");
         LASConfig lasConfig = (LASConfig)servlet.getServletContext().getAttribute(LASConfigPlugIn.LAS_CONFIG_KEY);
 
         //use Google Earth Mime type
@@ -77,7 +74,6 @@ public final class GEServerAction extends Action {
             //should ouput an error message to GE
             log.info("error while generting the plot kml");
         }
-
         return null;
     }
 
@@ -189,10 +185,8 @@ public final class GEServerAction extends Action {
                 String yLo = lasConfig.getLo("y",vars.get(0).toString());//dataset's min y
                 float fHi = Float.valueOf(yHi.trim()).floatValue();
                 float fLo = Float.valueOf(yLo.trim()).floatValue();
-                //System.out.println("bbox[1]="+bbox[1]+"; bbox[3]="+bbox[3]);
                 if(bbox[1] < fLo){ bbox[1]=fLo;}
                 if(bbox[3] > fHi){ bbox[3]=fHi;}
-                //System.out.println("bbox[1]="+bbox[1]+"; bbox[3]="+bbox[3]);
 
                 Float minlon = new Float(bbox[0]);
                 Float maxlon = new Float(bbox[2]);
@@ -208,27 +202,16 @@ public final class GEServerAction extends Action {
             String op = lasUIRequest.getOperationXPath();
             if(op.contains("Plot_GE_Overlay")){
                 lasUIRequest.changeOperation("Plot_GE_kml");
-
                 //build the request for plot overlay
                 requestURL = serverURL+"?xml="+lasUIRequest.toEncodedURLString();
-    
                 //build the request for placemarks
                 lasUIRequest.changeOperation("Grid_GE_kml");
                 placemarkRequestURL = serverURL+"?xml="+lasUIRequest.toEncodedURLString();
-
             }else if(op.contains("Vector_GE_Overlay")){
                 lasUIRequest.changeOperation("Vector_GE_kml");
                 //build the request for plot overlay
                 requestURL = serverURL+"?xml="+lasUIRequest.toEncodedURLString();
-                //NO placemarks for vector plot overlay....
             }
-            //build the request for plot overlay
-            //requestURL = serverURL+"?xml="+lasUIRequest.toEncodedURLString();
-
-            //build the request for placemarks
-            //lasUIRequest.changeOperation("Grid_GE_kml");
-            //placemarkRequestURL = serverURL+"?xml="+lasUIRequest.toEncodedURLString();
-
         } catch (Exception e){
             log.info("error while building LAS Request: " + e.toString());
         }
