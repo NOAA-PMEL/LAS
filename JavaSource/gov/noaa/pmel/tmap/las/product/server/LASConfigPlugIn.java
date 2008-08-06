@@ -200,7 +200,7 @@ public class LASConfigPlugIn implements PlugIn {
             try {
                 cache.loadCacheFromStore(cacheFile);
             } catch (Exception e) {
-                // TODO Log cache file store not set and go on.
+               log.warn("Cache file not loaded: "+e.toString());
             }
         }
 
@@ -350,11 +350,14 @@ public class LASConfigPlugIn implements PlugIn {
        context.setAttribute(LAS_CONFIG_KEY, lasConfig);   
     }
     public void destroy() {
-        
-        // ???? Factory.getContinuationsManager().destroy();
-        
-        context.removeAttribute(LAS_CONFIG_KEY);
-        context = null;
-        
+
+    	Cache cache = (Cache) context.getAttribute(ServerConfigPlugIn.CACHE_KEY);
+    	ServerConfig serverConfig = (ServerConfig)context.getAttribute(ServerConfigPlugIn.SERVER_CONFIG_KEY);
+    	try {
+    		cache.saveCacheToStore(serverConfig.getCacheFile());
+    	} catch (LASException e) {
+    		log.error(e.toString());
+    	}
+
     }
 }

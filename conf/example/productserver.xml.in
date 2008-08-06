@@ -1,5 +1,5 @@
 <backend>
-	<cache size="10000" file="cache"/>
+	<cache size="10000" file="@JAKARTA_HOME@/webapps/@APPNAME@/output/cache.obj"/>
 	<servers>
 		<service name="ferret" url="http://@SERVLET_ROOT_URL@/@APPNAME@/services/LASFerretBackend" method="getProduct"/>
 		<service name="database" url="http://@SERVLET_ROOT_URL@/@APPNAME@/services/LASDatabaseBackend" method="getProduct"/>
