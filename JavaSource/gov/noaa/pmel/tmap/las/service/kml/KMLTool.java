@@ -256,7 +256,7 @@ public class KMLTool extends TemplateTool  {
         }
 
         boolean isInsitu = false;
-        if(kml.contains("insitu") || kml.contains("osmc") || kml.contains("OSMC")){
+        if(kml.contains("insitu") || kml.contains("osmc")){
 			isInsitu=true;
 		}
 
@@ -266,7 +266,7 @@ public class KMLTool extends TemplateTool  {
         LASPlacemarks lps;
 
         //osmc
-        if(kml.contains("osmc") || kml.contains("OSMC") ){
+        if(kml.contains("osmc")){
 			initLASReq = LASReqInfoOSMC.getLASReqInfo(las_req_info_file);
 	        lps = new LASOSMCPlacemarks(ferret_listing_file, initLASReq, baseURL);
 	    }else{
@@ -281,7 +281,12 @@ public class KMLTool extends TemplateTool  {
         context.put("gridLon",lps.getLookAtLon());
         context.put("gridLat",lps.getLookAtLat());
         context.put("dsID",initLASReq.get("dsID"));
-        context.put("varID",initLASReq.get("varID"));
+        //if(kml.contains("osmc") && (initLASReq.get("varID")).equalsIgnoreCase("ID")){
+		//	log.info("all parameters");
+	    //    context.put("varID","all parameters");
+		//}else{
+            context.put("varID",initLASReq.get("varID"));
+	    //}
         if(!isInsitu){
             context.put("xstride",initLASReq.get("xstride"));
             context.put("ystride",initLASReq.get("ystride"));
