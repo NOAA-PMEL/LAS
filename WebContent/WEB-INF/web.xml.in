@@ -221,11 +221,11 @@
 	</mime-mapping>
 
   <!-- ++++++++++ Setup security restrictions ++++++++++ -->
-  <! --   This set up can be used in conjunction with any https access
-     --   you have configured for TDS.  If you want to use your own
-     --   LAS specific https access set up, mimic these configuration changes
-     --   and configure in your own users and roles in the tomcat config.
-  -->
+  <!--   This set up can be used in conjunction with any https access
+    --   you have configured for TDS.  If you want to use your own
+    --   LAS specific https access set up, mimic these configuration changes
+    --   and configure in your own users and roles in the tomcat config.
+    -->
   <!-- Default is to not allow DELETE, PUT, POST -->
   <security-constraint>
     <web-resource-collection>
