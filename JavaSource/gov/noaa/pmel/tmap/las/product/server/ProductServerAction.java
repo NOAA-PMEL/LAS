@@ -32,6 +32,7 @@ import java.util.HashSet;
 
 import javax.imageio.ImageIO;
 import javax.servlet.ServletOutputStream;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.sql.rowset.WebRowSet;
@@ -41,7 +42,6 @@ import oracle.jdbc.rowset.OracleWebRowSet;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
-import org.apache.struts.action.Action;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
@@ -95,7 +95,11 @@ public final class ProductServerAction extends LASAction {
             logerror(request, "No product server URL defined.", "Check las.xml operations element...");
             return mapping.findForward("error");
         }
-        
+        // See if the server is being reinitialized.  If so, stop.
+        String lock = (String) servlet.getServletContext().getAttribute("lock");
+        if ( lock != null && lock.equals("true") ) {
+        	return mapping.findForward("maintenance");
+        }
         // Get the request from the query parameter.
         String requestXML = request.getParameter("xml");
         log.debug("Processing request xml="+requestXML);
@@ -110,6 +114,18 @@ public final class ProductServerAction extends LASAction {
         }
         
         String JSESSIONID = request.getParameter("JSESSIONID");
+        if ( JSESSIONID == null ) {
+        	// From the new UI, get the cookie.
+        	Cookie cookies[] = request.getCookies();
+        	for (int i = 0; i < cookies.length; i++) {
+				String name = cookies[i].getName();
+				String value = cookies[i].getValue();
+				if ( name.equals("JSESSIONID") ) {
+					JSESSIONID = value;
+				}
+			}
+        	
+        }
         String email=null;
         if (progress != null) {
            email = progress.getEmail();
@@ -239,7 +255,9 @@ public final class ProductServerAction extends LASAction {
         // The only way to share jobs is if the cache is being used.
         // If it's not in the cache, then you can't guarantee it will
         // still be around for the second job.
+        
         if ( productServerRunner != null ) {
+        	
             synchronized(productServerRunner) {
                 
                 if ( email != null ) {
@@ -380,7 +398,13 @@ public final class ProductServerAction extends LASAction {
                 productServerRunner.setJESSIONID(JSESSIONID);
             }
             productServerRunner.start();
-            
+            if ( sessions == null && JSESSIONID != null && !JSESSIONID.equals("")) {
+                sessions = new HashSet<String>();
+                sessions.add(JSESSIONID);
+                servlet.getServletContext().setAttribute("sessions_"+productRequest.getCacheKey(), sessions);
+                request.setAttribute("JSESSIONID", JSESSIONID);
+            }
+            servlet.getServletContext().setAttribute("runner_"+productRequest.getCacheKey(), productServerRunner);
             synchronized(productServerRunner) {
                 try {
                     long timeout = productServerRunner.getProgressTimeout()*1000;
@@ -403,13 +427,8 @@ public final class ProductServerAction extends LASAction {
                     // setup the progress page
                     productServerRunner.setBatch(true);
                     log.debug("Timeout reached.");
-                    if ( sessions == null && JSESSIONID != null && !JSESSIONID.equals("")) {
-                        sessions = new HashSet<String>();
-                        sessions.add(JSESSIONID);
-                        servlet.getServletContext().setAttribute("sessions_"+productRequest.getCacheKey(), sessions);
-                        request.setAttribute("JSESSIONID", JSESSIONID);
-                    }
-                    servlet.getServletContext().setAttribute("runner_"+productRequest.getCacheKey(), productServerRunner);
+                    
+                    
                     request.setAttribute("server_url", serverURL);
                     request.setAttribute("status", productServerRunner.getStatus());
                     request.setAttribute("cache", productRequest.getUseCache());
