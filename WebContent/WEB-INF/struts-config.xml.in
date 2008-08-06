@@ -14,6 +14,7 @@
 			<forward name="error"
 				path="/productserver/templates/error.vm" redirect="false" />
 			<forward name="batch_error" path="/productserver/templates/batch_error.vm" redirect="false"/>
+			<forward name="maintenance" path="/productserver/templates/maintenance.vm" redirect="false"/>
 			<forward name="progress" 
 			    path="/productserver/templates/progress.vm" redirect="false"/>
 			<forward name="info" path="/productserver/templates/info.vm" redirect="false"/>

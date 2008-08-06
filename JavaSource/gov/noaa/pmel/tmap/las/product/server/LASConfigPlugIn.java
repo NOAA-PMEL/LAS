@@ -25,6 +25,7 @@ import org.apache.log4j.LogManager;
 
 public class LASConfigPlugIn implements PlugIn {
     
+	/* These are Java objects that contain these configuration pieces. */
     /**  Servlet context key server config is stored under */
     public final static String LAS_CONFIG_KEY = "las_config";
 
@@ -33,6 +34,15 @@ public class LASConfigPlugIn implements PlugIn {
 
     /**  Servlet context key server config is stored under */
     public final static String CACHE_KEY = "cache";
+    
+    /* 
+     * These are the files names from which these configuration objects are derived. 
+     * The file names are used by the reinit method.
+     */
+    public final static String LAS_CONFIG_FILENAME_KEY = "las_config_filename";
+    public final static String LAS_SERVER_CONFIG_FILENAME_KEY = "server_config_filename";
+    public final static String LAS_OPERATIONS_CONFIG_FILENAME_KEY = "operations_config_filename";
+    public final static String LAS_UI_CONFIG_FILENAME_KEY = "ui_config_filename";
     
     private static Logger log = LogManager.getLogger(LASConfigPlugIn.class.getName());
     
@@ -98,25 +108,75 @@ public class LASConfigPlugIn implements PlugIn {
     public void init(ActionServlet servlet, ModuleConfig config)
     throws ServletException {
         
-        ServletContext context = servlet.getServletContext();
+        context = servlet.getServletContext();
         
         if ((configFileName == null || configFileName.length() == 0)) {
             throw new ServletException("No LAS configuration file specified.");
+        } else {
+        	// Store in the servlet context for use by reinit method
+        	context.setAttribute(LAS_CONFIG_FILENAME_KEY, configFileName);
         }
         
-        File configFile = new File(configFileName);
+        /* Set up the serverConfig for this server. */
+
+        if ((serverConfigFileName == null || serverConfigFileName.length() == 0)) {
+            throw new ServletException("No server configuration file specified.");
+        } else {
+        	// Store in the servlet context for use by the reinit method
+        	context.setAttribute(LAS_SERVER_CONFIG_FILENAME_KEY, serverConfigFileName);
+        }
+
+        if (v7OperationsFileName == null || v7OperationsFileName.length() == 0) {
+            throw new ServletException("No v7 operations file specified.");
+        } else {
+        	// Store in the servlet context for use by the reinit method
+        	context.setAttribute(LAS_OPERATIONS_CONFIG_FILENAME_KEY, v7OperationsFileName);
+        }
+        
+        if (lasUIFileName == null || lasUIFileName.length() == 0) {
+            throw new ServletException("No ui.xml file specified.");
+        } else {
+        	// Store in the servlet context for use by the reinit method
+        	context.setAttribute(LAS_UI_CONFIG_FILENAME_KEY, lasUIFileName);
+        }
+        
+        go_init();
+    }
+    public void reinit(ServletContext reinitContext) throws ServletException {
+    	context = reinitContext;
+    	configFileName = (String) reinitContext.getAttribute(LAS_CONFIG_FILENAME_KEY);
+    	serverConfigFileName = (String) reinitContext.getAttribute(LAS_SERVER_CONFIG_FILENAME_KEY);
+    	v7OperationsFileName = (String) reinitContext.getAttribute(LAS_OPERATIONS_CONFIG_FILENAME_KEY);
+    	lasUIFileName = (String) reinitContext.getAttribute(LAS_UI_CONFIG_FILENAME_KEY);
+    	
+    	if ((configFileName == null || configFileName.length() == 0)) {
+            throw new ServletException("No LAS configuration file specified.");
+        }
+        
+        /* Set up the serverConfig for this server. */
+
+        if ((serverConfigFileName == null || serverConfigFileName.length() == 0)) {
+            throw new ServletException("No server configuration file specified.");
+        }
+
+        if (v7OperationsFileName == null || v7OperationsFileName.length() == 0) {
+            throw new ServletException("No v7 operations file specified.");
+        }
+        
+        if (lasUIFileName == null || lasUIFileName.length() == 0) {
+            throw new ServletException("No ui.xml file specified.");
+        }
+    	go_init();
+    }
+    public void go_init() {
+
+    	File configFile = new File(configFileName);
         LASConfig lasConfig = new LASConfig();
         
         try {
             JDOMUtils.XML2JDOM(configFile, lasConfig);
         } catch (Exception e) {
             log.error("Could not parse the las config file "+configFileName);
-        }
-
-        /* Set up the serverConfig for this server. */
-
-        if ((serverConfigFileName == null || serverConfigFileName.length() == 0)) {
-            throw new ServletException("No server configuration file specified.");
         }
 
         File serverConfigFile = new File(serverConfigFileName);
@@ -152,10 +212,6 @@ public class LASConfigPlugIn implements PlugIn {
         boolean seven = false;
         if ( version != null && version.contains("7.")) {
             seven = true;
-        }
-        
-        if (v7OperationsFileName == null || v7OperationsFileName.length() == 0) {
-            throw new ServletException("No v7 operations file specified.");
         }
         
         File v7OperationsFile = new File(v7OperationsFileName);
@@ -211,9 +267,6 @@ public class LASConfigPlugIn implements PlugIn {
             log.error("Could not add F-TDS URLs to data configuration. "+e.toString());
         }
         
-        if (lasUIFileName == null || lasUIFileName.length() == 0) {
-            throw new ServletException("No ui.xml file specified.");
-        }
         
         File lasUIFile = new File(lasUIFileName);
         LASDocument lasUIDoc = new LASDocument();
@@ -294,9 +347,8 @@ public class LASConfigPlugIn implements PlugIn {
         } catch (Exception e) {
             log.error("Cannot write out new Version 7.0 las.xml file.", e);
         }
-       context.setAttribute(LAS_CONFIG_KEY, lasConfig);       
+       context.setAttribute(LAS_CONFIG_KEY, lasConfig);   
     }
-    
     public void destroy() {
         
         // ???? Factory.getContinuationsManager().destroy();
