@@ -219,4 +219,106 @@
 		<extension>xsd</extension>
 		<mime-type>text/xml</mime-type>
 	</mime-mapping>
+
+  <!-- ++++++++++ Setup security restrictions ++++++++++ -->
+  <! --   This set up can be used in conjunction with any https access
+     --   you have configured for TDS.  If you want to use your own
+     --   LAS specific https access set up, mimic these configuration changes
+     --   and configure in your own users and roles in the tomcat config.
+  -->
+  <!-- Default is to not allow DELETE, PUT, POST -->
+  <security-constraint>
+    <web-resource-collection>
+      <web-resource-name>not allowed</web-resource-name>
+      <url-pattern>/*</url-pattern>
+      <http-method>DELETE</http-method>
+      <http-method>PUT</http-method>
+      <!-- http-method>POST</http-method -->
+    </web-resource-collection>
+    <auth-constraint/>
+  </security-constraint>
+
+  <!-- This allows "remote configuration":
+    /thredds/debug gives access to various debug and status info.
+    ThreddsDefault servlet aliases /thredds/root/ to "{tomcat_home}/webapps/thredds/"
+    ThreddsDefault servlet aliases /thredds/dataDir/path to "dirLocation/" where path is mapped to dirLocation through a
+      datasetRoot or datasetScan element in the catalog. -->
+  <security-constraint>
+    <web-resource-collection>
+      <web-resource-name>sensitive read access</web-resource-name>
+      <url-pattern>/ReInit.do</url-pattern>
+      <http-method>GET</http-method>
+    </web-resource-collection>
+    <auth-constraint>
+      <role-name>tdsConfig</role-name>
+    </auth-constraint>
+    <user-data-constraint>
+      <transport-guarantee>CONFIDENTIAL</transport-guarantee>
+    </user-data-constraint>
+  </security-constraint>
+
+  <!-- ThreddsDefault servlet aliases /thredds/content/ to "{tomcat_home}/content/thredds/"   -->
+  <security-constraint>
+    <web-resource-collection>
+      <web-resource-name>sensitive read and write access</web-resource-name>
+      <url-pattern>/content/*</url-pattern>
+      <http-method>GET</http-method>
+      <http-method>PUT</http-method>
+    </web-resource-collection>
+    <auth-constraint>
+      <role-name>tdsConfig</role-name>
+    </auth-constraint>
+    <user-data-constraint>
+      <transport-guarantee>CONFIDENTIAL</transport-guarantee>
+    </user-data-constraint>
+  </security-constraint>
+
+  <!-- Setup security restrictions on THREDDS server HTTP POST capabilities in CatalogGen. -->
+  <security-constraint>
+    <web-resource-collection>
+      <web-resource-name>cataloggen configuration</web-resource-name>
+      <url-pattern>/cataloggen/admin/*</url-pattern>
+      <http-method>GET</http-method>
+      <http-method>POST</http-method>
+    </web-resource-collection>
+    <auth-constraint>
+      <role-name>tdsConfig</role-name>
+    </auth-constraint>
+    <user-data-constraint>
+      <transport-guarantee>CONFIDENTIAL</transport-guarantee>
+    </user-data-constraint>
+  </security-constraint>
+
+  <!-- default restricted access uses DIGEST, but not HTTPS -->
+  <security-constraint>
+    <web-resource-collection>
+      <web-resource-name>restricted access datasets</web-resource-name>
+      <url-pattern>/restrictedAccess/*</url-pattern>
+      <http-method>GET</http-method>
+    </web-resource-collection>
+    <auth-constraint>
+      <role-name>restrictedDatasetUser</role-name>
+    </auth-constraint>
+    <user-data-constraint>
+      <transport-guarantee>CONFIDENTIAL</transport-guarantee>
+    </user-data-constraint>
+  </security-constraint>
+
+  <!-- can only have one login-config for extire context. -->
+  <login-config>
+    <auth-method>BASIC</auth-method>
+    <realm-name>THREDDS Data Server</realm-name>
+  </login-config>
+
+  <!-- Define security roles. -->
+  <security-role>
+    <description>The configuration role allows users to configure the THREDDS server.</description>
+    <role-name>tdsConfig</role-name>
+  </security-role>
+
+  <security-role>
+    <description>User who can access restricted datasets.</description>
+    <role-name>restrictedDatasetUser</role-name>
+  </security-role>
+
 </web-app>
