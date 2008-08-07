@@ -493,9 +493,9 @@ function LASReq_replaceVariable(dataset,variable,data_ID) {
  * @see #addVariableConstraint
  * @see #removeConstraints
  */
-function LASReq_addTextConstraint(variable,operator,value) {
+function LASReq_addTextConstraint(variable,operator,value, id) {
   var argsNode = this.DOM.selectNode("/args");
-  var nodeXML = '<constraint type=\"text\"><v>' + variable + '</v><v>' + operator + '</v><v>' + value + '</v></constraint>';
+  var nodeXML = '<constraint id=\"'+id+'\"type=\"text\"><v>' + variable + '</v><v>' + operator + '</v><v>' + value + '</v></constraint>';
   var newNode = this.DOM.createXMLNode(nodeXML);
   this.DOM = this.DOM.insertNodeInto(argsNode,newNode);
 }
@@ -521,14 +521,19 @@ function LASReq_getTextConstraints() {
     var j=0;
     for (i=0;i<constraintNodes.length;i++) {
         constraintType = new String(constraintNodes[i].getAttribute("type"));
-        //alert(constraintType);
+	if(constraintNodes[i].getAttribute("id"))
+		var constraintID = constraintNodes[i].getAttribute("id");
+        else
+		var constraintID = "";
+       //alert(constraintType);
         if(constraintType == "text"){
             var vNodes = constraintNodes[i].getElements('v');
             //alert(vNodes[0].getText());
             tc={"name":vNodes[0].getText(),
                 "op":vNodes[1].getText(),
-                "value":vNodes[2].getText()
-               }
+                "value":vNodes[2].getText(),
+            	"id" : constraintID  
+	    }
             textConstraints[j++]=tc;
         }
     }
@@ -550,7 +555,11 @@ function LASReq_getVariableConstraints() {
     var j=0;
     for (i=0;i<constraintNodes.length;i++) {
         constraintType = new String(constraintNodes[i].getAttribute("type"));
-        //alert(constraintType);
+	if(constraintNodes[i].getAttribute("id"))
+		var constraintID = constraintNodes[i].getAttribute("id");
+        else
+		var constraintID = "";
+	//alert(constraintType);
         if(constraintType == "variable"){
             var the_link = constraintNodes[i].getElements('link');
             var matchString = new String(the_link[0].getAttribute("match"));
@@ -565,7 +574,8 @@ function LASReq_getVariableConstraints() {
             vc={"dsID":the_dsID, 
                 "varID":the_varID,
                 "op":the_op,
-                "value":the_value
+                "value":the_value,
+		"id" : constraintID
                };
             variableConstraints[j++]=vc;
 
@@ -584,10 +594,10 @@ function LASReq_getVariableConstraints() {
  * @see #addTextConstraint
  * @see #removeConstraints
  */
-function LASReq_addVariableConstraint(dataset,variable,operator,value) {
+function LASReq_addVariableConstraint(dataset,variable,operator,value, id) {
   var argsNode = this.DOM.selectNode("/args");
   var linkXML = '<link match=\"/lasdata/datasets/' + dataset + '/variables/' + variable + '\"/>';
-  var nodeXML = '<constraint type=\"variable\" op=\"' + operator + '\">' + linkXML + '<v>' + value + '</v></constraint>';
+  var nodeXML = '<constraint id=\"'+ id + '\" type=\"variable\" op=\"' + operator + '\">' + linkXML + '<v>' + value + '</v></constraint>';
   var newNode = this.DOM.createXMLNode(nodeXML);
   this.DOM = this.DOM.insertNodeInto(argsNode,newNode);
 }
