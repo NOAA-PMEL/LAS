@@ -42,6 +42,7 @@
           <action path="/getDataConstraints" type="gov.noaa.pmel.tmap.las.ui.getDataConstraints" />
           <action path="/GEServer" type="gov.noaa.pmel.tmap.las.service.kml.GEServerAction"/>
 	  <action path="/getUI" type="org.apache.struts.actions.ForwardAction" parameter="/productserver/templates/V7UI.vm"/>
+          <action path="/ReInit" type="gov.noaa.pmel.tmap.las.ui.ReInit" />
 	</action-mappings>
 	<plug-in
 		className="gov.noaa.pmel.tmap.las.product.server.LASConfigPlugIn">
