@@ -68,7 +68,6 @@ font-weight: bold;
 .LASTreeLINode {
 	list-style-type : none;
 	padding :0;
-	margin : -2pt;
 	margin-right : 0;   
 }
 .LASPlotCategory { 
@@ -78,7 +77,7 @@ font-weight: bold;
 	margin-top:20;
 	padding-top: 20;
 	list-style-type : none;
-	margin-left:-6pt;
+	margin-left:2pt;
 	padding-left:0pt;
 	margin-bottom:0;
 	padding-bottom:0;
@@ -87,7 +86,7 @@ font-weight: bold;
 	line-height: 1.5em;
 	list-style-type : none;
 	padding :0;
-	margin-left : -5pt;
+	margin-left : 2pt;
 	margin-right : 0;	
 }
 
