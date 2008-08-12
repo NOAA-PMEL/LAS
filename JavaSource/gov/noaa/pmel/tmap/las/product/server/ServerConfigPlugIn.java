@@ -68,13 +68,15 @@ public class ServerConfigPlugIn implements PlugIn {
         context.setAttribute(SERVER_CONFIG_KEY, serverConfig);
         
         // Create the Cache
-        Cache cache = new Cache(serverConfig.getCacheSize());
+        Cache cache = new Cache(serverConfig.getCacheSize(), serverConfig.getCacheMaxBytes());
         
         // Read the Cache if it exists
         File cacheFile = serverConfig.getCacheFile();
         if ( cacheFile != null) {
             try {
                 cache.loadCacheFromStore(cacheFile);
+                cache.setCacheSize(serverConfig.getCacheSize());
+                cache.setMaxBytes(serverConfig.getCacheMaxBytes());
             } catch (Exception e) {
                 // TODO Log cache file store not set and go on.
             }

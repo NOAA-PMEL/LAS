@@ -6,6 +6,7 @@
         <form-beans>
            <form-bean name="constrain" type="gov.noaa.pmel.tmap.las.ui.ConstrainForm"/>
            <form-bean name="progress" type="gov.noaa.pmel.tmap.las.product.server.ProgressForm"/>
+           <form-bean name="cacheForm" type="gov.noaa.pmel.tmap.las.ui.CacheForm"/>
         </form-beans>
 	<action-mappings>
 		<action path="/ProductServer"
@@ -41,8 +42,14 @@
           <action path="/getRegions" type="gov.noaa.pmel.tmap.las.ui.getRegions" />
           <action path="/getDataConstraints" type="gov.noaa.pmel.tmap.las.ui.getDataConstraints" />
           <action path="/GEServer" type="gov.noaa.pmel.tmap.las.service.kml.GEServerAction"/>
-	  <action path="/getUI" type="org.apache.struts.actions.ForwardAction" parameter="/productserver/templates/V7UI.vm"/>
-          <action path="/ReInit" type="gov.noaa.pmel.tmap.las.ui.ReInit" />
+	      <action path="/getUI" type="org.apache.struts.actions.ForwardAction" parameter="/productserver/templates/V7UI.vm"/>
+	      <action path="/admin" type="org.apache.struts.actions.ForwardAction" parameter="/productserver/templates/admin.vm"/>
+          <action path="/ReInit" type="gov.noaa.pmel.tmap.las.ui.ReInit">
+              <forward name="reinit" path="/productserver/templates/reinit.vm"/>
+          </action>
+          <action path="/CacheManager" name="cacheForm" type="gov.noaa.pmel.tmap.las.ui.CacheManager">
+              <forward name="cache" path="/productserver/templates/cache.vm"/>
+          </action>
 	</action-mappings>
 	<plug-in
 		className="gov.noaa.pmel.tmap.las.product.server.LASConfigPlugIn">

@@ -107,6 +107,7 @@ public class ProductServerRunner  extends Thread  {
         // Check the cache.
         boolean globalUseCache = productRequest.getUseCache();
         String compoundResponseFileName = lasConfig.getOutputDir()+File.separator+productRequest.getCacheKey()+"_response.xml";
+        String requestFileName = lasConfig.getOutputDir()+File.separator+productRequest.getCacheKey()+"_request.xml";
         File compoundResponseFile = null;
         boolean hit = false;
         if (globalUseCache) {           
@@ -353,6 +354,7 @@ public class ProductServerRunner  extends Thread  {
         String responseFileName = lasConfig.getOutputDir()+File.separator+productCacheKey+"_response.xml";
         if ( productRequest.getUseCache() && !previous_batch_error && ((!batch && !error) || batch) ) {
             cache.addToCache(compoundResponse, responseFileName);
+            cache.addDocToCache(productRequest.getLasRequest(), requestFileName);
         }
 
         stillWorking=false;

@@ -13,6 +13,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
@@ -336,6 +337,26 @@ public class LASBackendResponse extends LASDocument {
             }
         }
         return files;
+    }
+    /**
+     * Get a HashSet of unique cache keys associated with this response.
+     * 
+     */
+    public HashSet<String> getCacheKeys() {
+    	HashSet<String> keys = new HashSet<String>();
+    	List responses = this.getRootElement().getChildren("response");
+        for (Iterator respIt = responses.iterator(); respIt.hasNext();) {
+            Element resp = (Element) respIt.next();
+            List results = resp.getChildren("result");
+            for (Iterator resIt = results.iterator(); resIt.hasNext();) {
+                Element result = (Element) resIt.next();
+                String type = result.getAttributeValue("type");
+                if (!type.equals("error")) {   
+                    keys.add(result.getAttributeValue("key"));
+                }       
+            }
+        }
+        return keys;
     }
     /**
      * Get the full path name of a result by ID
