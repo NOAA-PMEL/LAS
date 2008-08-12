@@ -9,9 +9,8 @@
 			@import "css/UX/metallic/metallicGrn.css";
 		</style>
 	</head>
-
-<body onload="init()">
-		#parse ("/productserver/templates/V7UIHeader.vm")
+<body>
+#parse ("/productserver/templates/V7UIHeader.vm")
 <h3>This is the $!title LAS Product Server (Revision: $revision)</h3>
 #if ( $institution.name != "" && $institution.url != "" )
 <h4>Run by the <a href="$institution.url">$institution.name.</a></h4>
@@ -31,8 +30,6 @@
 <tr><td>$service.getName()</td><td><a href="$service.getValue()">$service.getValue()</a></td></tr>
 #end ##if local service
 #end ## service loop
+#parse("/productserver/templates/svn.vm")
 </table>
-
 #parse( "/productserver/templates/V7UIFooter.vm") 
-
-
