@@ -248,6 +248,8 @@
     <web-resource-collection>
       <web-resource-name>sensitive read access</web-resource-name>
       <url-pattern>/ReInit.do</url-pattern>
+      <url-pattern>/admin.do</url-pattern>
+      <url-pattern>/CacheManager.do</url-pattern>
       <http-method>GET</http-method>
     </web-resource-collection>
     <auth-constraint>
