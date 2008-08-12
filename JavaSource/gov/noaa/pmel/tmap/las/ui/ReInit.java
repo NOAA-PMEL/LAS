@@ -62,7 +62,7 @@ public class ReInit extends Action {
 
 		}
 		context.removeAttribute("lock");
-		return new ActionForward("/productserver/templates/reinit.vm");
+		return mapping.findForward("reinit");
 	}
 
 }

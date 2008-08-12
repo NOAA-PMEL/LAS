@@ -192,7 +192,7 @@ public class LASConfigPlugIn implements PlugIn {
         context.setAttribute(SERVER_CONFIG_KEY, serverConfig);
 
         // Create the Cache
-        Cache cache = new Cache(serverConfig.getCacheSize());
+        Cache cache = new Cache(serverConfig.getCacheSize(), serverConfig.getCacheMaxBytes());
 
         // Read the Cache if it exists
         File cacheFile = serverConfig.getCacheFile();

@@ -1,0 +1,24 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html debug="true">
+	<head>
+		<title>$las_config.getTitle()</title>
+		
+		<style media="all" type="text/css">
+			@import "JavaScript/ui/LASUI.css";
+			@import "css/UX/metallic/metallicGrn.css";
+		</style>
+	</head>
+	<body onload="init()">
+		#parse ("/productserver/templates/V7UIHeader.vm")
+		    <h1>Administrative tasks:</h1>
+		    <ul>
+		         <li><a href="ProductServer.do">Server information</a></li>
+                 <li><a href="ReInit.do">Re-initialize the server to install new configuration</a></li>
+                 <li><a href="CacheManager.do">Manage the cache</a></li>
+            </ul>
+		#parse( "/productserver/templates/V7UIFooter.vm") 
+	</body>
+</html>
+
+
+

@@ -141,4 +141,20 @@ public class ServerConfig extends LASDocument {
         }
         return "";
     }
+    public long getCacheMaxBytes() {
+    	Element cache = this.getRootElement().getChild("cache");
+    	if ( cache != null ) {
+    		String size = cache.getAttributeValue("bytes");
+    		if (size != null) {
+    			if ( size.toLowerCase().contains("mb")) {
+    				size = size.substring(0, size.toLowerCase().indexOf("mb"));
+    				return Long.valueOf(size).longValue() * (long)(Math.pow(2, 20));  // number of megabytes * 1 megabyte :-)
+    			}
+    			return Long.valueOf(size).longValue();
+    		} else {
+    			return 500*(long)(Math.pow(2, 20));
+    		}
+    	}
+    	return 500*(long)(Math.pow(2, 20));
+    }
 }
