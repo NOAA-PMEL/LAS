@@ -193,7 +193,7 @@
         </servlet>
 	<servlet-mapping>
 	    <servlet-name>RPCServlet</servlet-name>
-	    <url-pattern>/gov.noaa.pmel.tmap.las.TimeSeries/rpc</url-pattern>
+	    <url-pattern>/rpc</url-pattern>
 	</servlet-mapping>
 	<servlet-mapping>
 		<servlet-name>WMSLegnendServlet</servlet-name>
