@@ -185,7 +185,12 @@ function initializeLASSlideSorter() {
       LSSInitObject["z"].title = 'Depth';
       LSSInitObject["z"].initial_value = ReqImg.getRangeLo('z');
       LSSInitObject["z"].type = 'menuWidget';
-      LSSInitObject["z"].data = Grid.getMenu('z');
+      if(Grid.hasMenu('z'))
+         LSSInitObject["z"].data = Grid.getMenu('z');
+      else if (Grid.hasArange('z'))
+         for (var v = Grid.getLo('z'); v <=  Grid.getHi('z') ; v+= Grid.getDelta('z'))
+            LSSInitObject["t"].data.push({v : v});
+
     }
   }
 
