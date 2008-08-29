@@ -187,10 +187,11 @@ function initializeLASSlideSorter() {
       LSSInitObject["z"].type = 'menuWidget';
       if(Grid.hasMenu('z'))
          LSSInitObject["z"].data = Grid.getMenu('z');
-      else if (Grid.hasArange('z'))
-         for (var v = Grid.getLo('z'); v <=  Grid.getHi('z') ; v+= Grid.getDelta('z'))
-            LSSInitObject["t"].data.push({v : v});
-
+      else if (Grid.hasArange('z')) {
+	 LSSInitObject["z"].data = [];
+         for (var v = parseFloat(Grid.getLo('z')); v <=  parseFloat(Grid.getHi('z')) ; v += parseFloat(Grid.getDelta('z'))) 
+            LSSInitObject["z"].data.push([v, v]);
+	}
     }
   }
 
