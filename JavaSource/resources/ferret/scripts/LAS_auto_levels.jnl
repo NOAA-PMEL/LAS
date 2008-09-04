@@ -31,7 +31,7 @@ IF `STRINDEX("($op)", "VECTOR") GT 0` THEN EXIT/SCRIPT
 
 IF `STRINDEX("($op)", "PLOT") EQ 0 AND \
   STRINDEX ("($op)", "POLY") EQ 0 AND \
-  STRINDEX ("($op)", "ZOOM") EQ 0 \
+  STRINDEX ("($op)", "ZOOM") EQ 0 AND \
   STRINDEX ("($op)", "CRUISE_SUMMARY") EQ 0` THEN EXIT/SCRIPT
 
 ! Levels for animations set in LAS_auto_levels_animate, 
