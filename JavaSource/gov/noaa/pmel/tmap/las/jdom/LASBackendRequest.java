@@ -1625,8 +1625,13 @@ public class LASBackendRequest extends LASDocument {
      */
 	public boolean removeProperty(String group, String property) throws LASException {
 		Element groupE = findPropertyGroup(group);
-		Element propE = findProperty(groupE, property);
-		boolean remove = groupE.removeContent(propE);
-		return remove;
+                if(groupE != null){ 
+		    Element propE = findProperty(groupE, property);
+                    if(propE != null){ 
+		        boolean remove = groupE.removeContent(propE);
+		        return remove;
+                    }
+                }
+                return false;
 	}
 }
