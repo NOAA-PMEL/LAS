@@ -147,7 +147,7 @@ public class ProductRequest {
         addProperty(mergedProperties, "operation", "ID", operation.getAttributeValue("ID"));
         boolean regrid = false;
         String regrid_prop = operation.getAttributeValue("regrid_prn");
-        String rename_regrid = "";
+        
         if ( regrid_prop != null && regrid_prop.equalsIgnoreCase("true") ) {
             regrid = true;
         }
@@ -331,7 +331,6 @@ public class ProductRequest {
                                     gridTo.setVar(lasConfig.getVariableName(varXPath));
                                     gridTo.setVarXPath(varXPath);
                                     gridTo.setDsID(lasConfig.getDatasetAttributes(varXPath).get("ID"));
-                                    rename_regrid = gridTo.getVar()+"_d1";
                                     data.setAttribute("var",gridTo.getVar());
                                     data.setAttribute("title", lasConfig.getVariableTitle(varXPath));
                                     gridTo.setData(data);
@@ -360,8 +359,7 @@ public class ProductRequest {
                                         		gridTo.setURL(gridTo.getData().getAttributeValue("url"));
                                         	} else {    
                                         		StringBuffer jnl = gridTo.getJnl();
-                                        		jnl.append("set var/name="+rename_regrid+" "+gridTo.getVar());
-                                        		gridTo.setVar(rename_regrid);
+                                        		gridTo.setVar(gridTo.getVar());
                                                 jnl.append("let "+var+"_"+var_count+"_regrid="+var+"[d="+dataset_number+","+g+"="+gridTo.getVar()+"[d=1]]");
                                                 expression = URLEncoder.encode("_expr_{"+encoded+"}{"+jnl.toString()+"}", "UTF-8");
                                                 data.setAttribute("url", gridTo.getURL()+expression);
@@ -388,7 +386,7 @@ public class ProductRequest {
                                 	gridTo.setJnl(jnl);
                                     gridTo.setURL(data.getAttributeValue("url"));
                                     // This is the variable name that gets constructed in setAnalysis
-                                    String ovar = lasConfig.getVariableName(varXPath)+"_d1_"+var_count+"_regrid";
+                                    String ovar = lasConfig.getVariableName(varXPath)+var_count+"_regrid";
                                     gridTo.setVar(ovar);                                   
                                     gridTo.setGridID(lasConfig.getGrid(varXPath).getID());
                                     gridTo.setVarXPath(varXPath);
@@ -683,6 +681,7 @@ public class ProductRequest {
                     result.setAttribute("file", outputFileName);
                 }
                 result.setAttribute("index", String.valueOf(index));
+                result.setAttribute("key", key);
                 index++;
             }
             // Automatically add an RSS Feed result.  This is keyed to the entire request, not the individual requests.
@@ -691,6 +690,7 @@ public class ProductRequest {
             feed.setAttribute("ID", "rss");
             String feedFile = outputDir + File.separator + cacheKey+ "_rss.rss";
             feed.setAttribute("file", feedFile);
+            feed.setAttribute("key", cacheKey);
             backendResponse.addContent(feed);
         }
 
@@ -725,20 +725,10 @@ public class ProductRequest {
     		dset = 1;
     	}
     	String var;
-    	String org_var;
     	StringBuffer jnl = new StringBuffer();
-    	if ( dset == 1) {
-    		if ( !regrid ) {
-    			var = lasConfig.getVariableName(varXPath);
-    			org_var = var;
-    		} else {
-    			org_var = lasConfig.getVariableName(varXPath);
-    			var = org_var+"_d1";
-    			jnl.append("set var/name="+var+" "+org_var+"[d="+dset+"]");
-    		}
-    	} else {
-    		var = lasConfig.getVariableName(varXPath);
-    	}
+    	
+    	var = lasConfig.getVariableName(varXPath);
+    	
         String key = JDOMUtils.MD5Encode(varXPath);
         
         
