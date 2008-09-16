@@ -43,6 +43,11 @@ DEFINE SYMBOL ferret_plot_var ($expr1)($data_var)[d=($data_num),($region_full)](
 DEFINE SYMBOL ferret_plot_var_noregion ($expr1)($data_var)[d=($data_num)]($expr2)
 DEFINE SYMBOL ferret_plot_title ($expr1) ($data_title) ($expr2)
 
+
+DEFINE SYMBOL ferret_xyz_var = ($expr1)($data_var)[d=($data_num),($region_xyz)]($expr2)
+DEFINE SYMBOL ferret_t_var = ($expr1)($data_var)[d=($data_num),($region_t)]($expr2)
+
+
 ! This works except if the expression has spaces around the $ characters.
 ! Otherwise Ferret seems to be looking for script arguments.
 
@@ -58,6 +63,9 @@ IF `esecond GT 0` THEN
 
    DEFINE SYMBOL ferret_plot_var ($expr1)($data_var)[d=($data_num),($region_full)]($expr3)($data_var)[d=($data_num),($region_full)]($expr4)
    DEFINE SYMBOL ferret_plot_var_noregion ($expr1)($data_var)[d=($data_num),($region_full)]($expr3)($data_var)[d=($data_num)]($expr4)
+
+   DEFINE SYMBOL ferret_xyz_var = ($expr1)($data_var)[d=($data_num),($region_xyz)]($expr3)[d=($data_num),($region_xyz)]($expr4)
+   DEFINE SYMBOL ferret_t_var = ($expr1)($data_var)[d=($data_num),($region_t)]($expr3)[d=($data_num),($region_t)]($expr4)
 
    DEFINE SYMBOL ferret_plot_title ($expr1) ($data_title) ($expr3) ($data_title) ($expr4)
 ENDIF
