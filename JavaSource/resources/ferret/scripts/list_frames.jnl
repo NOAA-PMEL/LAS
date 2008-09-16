@@ -239,7 +239,8 @@ LET f = "<frames>"
 list/norowhead/nohead/format=(A8)/FILE/append f
 
 !====>output time frames
-let tvar = t[gt=($ferret_list_var)]
+let lvar = ($ferret_list_var)  ! if ferret_list_var contains an expression, cant just do t[gt=($ferret_list_var)]
+let tvar = t[gt=lvar]
 define symbol first_time = `tax_datestring(t[gt=tvar,L=1], t[gt=tvar], "seconds")`
 let nlen = strlen ("($first_time)")
 
