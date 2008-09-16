@@ -13,6 +13,10 @@
 LET labdel = 0.2
 LET labsiz = 0.1
 
+sh sym n_left_labels
+sh sym n_right_labels
+DEFINE SYMBOL num_labels = `MAX(($n_left_labels"0"), ($n_right_labels"0"))`
+
 ! Put the location labels in the upper left.
 ! If the script LAS_check_2d_region has set a label notifying us that
 !  the requested retion was too small, make that label larger.
@@ -27,25 +31,31 @@ IF ($n_left_labels"0|*>1") THEN
    LET labyloc = `($ppl$ylen) + labdel*($n_left_labels"1") `
 
    IF ($region_small_1"0|*>1") THEN 
-      LET labsiz = 0.16
-      LET labyloc = `($ppl$ylen) + 0.5*labdel*($n_left_labels"1")`
+      LET labsiz = 0.12
+      LET labyloc = `($ppl$ylen) + (($num_labels)+2)* labdel`
    ENDIF
-   LABEL/NOUSER 0, `labyloc`, -1, 0.0, `labsiz`, ($upper_left_1)
+   LABEL/NOUSER 0, `labyloc`, -1, 0, `labsiz`, ($upper_left_1)
    LET labyloc = `($ppl$ylen) + labdel*($n_left_labels"1") `
 
    LET labyloc = `labyloc - labdel`
    LET labsiz = 0.1
 
-   IF `($n_left_labels) GT 1` THEN 
-      IF ($region_small_2"0|*>1") THEN LET labsiz = 0.16
-      LABEL/NOUSER 0, `labyloc`, -1, 0.0, `labsiz`, ($upper_left_2)
+   IF `($n_left_labels) GT 1` THEN
+      IF ($region_small_2"0|*>1") THEN 
+         LET labsiz = 0.12
+         LET labyloc = `($ppl$ylen) + (($num_labels)+2)* labdel`
+      ENDIF
+      LABEL/NOUSER 0, `labyloc`, -1, 0, `labsiz`, ($upper_left_2)
       LET labsiz = 0.1
       LET labyloc = `labyloc - labdel`
    ENDIF
 
    IF `($n_left_labels) GT 2` THEN
-      IF ($region_small_3"0|*>1") THEN LET labsiz = 0.16
-      LABEL/NOUSER 0, `labyloc`, -1, 0.0, `labsiz`, ($upper_left_3)
+      IF ($region_small_3"0|*>1") THEN 
+         LET labsiz = 0.12
+         LET labyloc = `($ppl$ylen) + (($num_labels)+2)* labdel`
+      ENDIF
+      LABEL/NOUSER 0, `labyloc`, -1, 0, `labsiz`, ($upper_left_3)
       LET labsiz = 0.1
       LET labyloc = `labyloc - labdel`
    ENDIF
