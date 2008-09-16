@@ -27,9 +27,14 @@ DEFINE SYMBOL fine_lo = ($ppl$range_low)
 DEFINE SYMBOL fine_hi = ($ppl$range_high)
 DEFINE SYMBOL fine_inc = ($ppl$range_inc)
 
+DEFINE SYMBOL lines_fine_inc = `lines_to_levels*($fine_inc)`
+
 DEFINE SYMBOL coarse_delta = `($fine_inc)*density_factor`
 DEFINE SYMBOL coarse_lo = `($fine_lo) - ($half_num_coarse_levels) * ($coarse_delta)`
 DEFINE SYMBOL coarse_hi = `($fine_hi) + ($half_num_coarse_levels) * ($coarse_delta)`
+
+DEFINE SYMBOL lines_coarse_delta = `lines_to_levels*($coarse_delta)`
+IF `STRINDEX("($lines_coarse_delta)", "+") GT 0` THEN GO remove_plus_exponent lines_coarse_delta ($lines_coarse_delta)
 
 IF `( ($stat_min) GE ($coarse_lo) ) OR ( ($stat_max) LE ($coarse_hi)) ` THEN
    PPL %RANGE `($stat_min)`, `($stat_max)`, `2*($num_coarse_levels)`
@@ -37,42 +42,63 @@ IF `( ($stat_min) GE ($coarse_lo) ) OR ( ($stat_max) LE ($coarse_hi)) ` THEN
    DEFINE SYMBOL highest_lev = ($ppl$range_high)
 ENDIF
 
+! Remove plus in exponent
+! if levels symbols have exponents with + in them, then that + is
+! lost in the animation sequence and Ferret chokes on levels symbols
+! containing a blank when it goes to make the plots for frames.
+IF ($remove_plus"0") THEN
+   IF `STRINDEX("($fine_lo)", "+") GT 0` THEN GO remove_plus_exponent fine_lo ($fine_lo)
+   IF `STRINDEX("($fine_hi)", "+") GT 0` THEN GO remove_plus_exponent fine_hi ($fine_hi)
+   IF `STRINDEX("($fine_inc)", "+") GT 0` THEN GO remove_plus_exponent fine_inc ($fine_inc)
+   IF `STRINDEX("($coarse_lo)", "+") GT 0` THEN GO remove_plus_exponent coarse_lo ($coarse_lo)
+   IF `STRINDEX("($coarse_hi)", "+") GT 0` THEN GO remove_plus_exponent coarse_hi ($coarse_hi)
+   IF `STRINDEX("($coarse_delta)", "+") GT 0` THEN GO remove_plus_exponent coarse_delta ($coarse_delta)
+   IF `STRINDEX("($lowest_lev)", "+") GT 0` THEN GO remove_plus_exponent lowest_lev ($lowest_lev)
+   IF `STRINDEX("($highest_lev)", "+") GT 0` THEN GO remove_plus_exponent highest_lev ($highest_lev)
+   IF `STRINDEX("($lines_fine_inc)", "+") GT 0` THEN GO remove_plus_exponent lines_fine_inc ($lines_fine_inc)
+   IF `STRINDEX("($lines_coarse_delta)", "+") GT 0` THEN GO remove_plus_exponent lines_coarse_delta ($lines_coarse_delta)
+ENDIF
+
 IF `($stat_min) LT ($coarse_lo)` THEN
+
    DEFINE SYMBOL ferret_auto_levels = \
 (-inf)(($coarse_lo),($fine_lo),($coarse_delta))\
 (($fine_lo),($fine_hi),($fine_inc))
+
    DEFINE SYMBOL ferret_auto_lines = \
-(-inf)(($coarse_lo),($fine_lo),`lines_to_levels*($coarse_delta)`)\
-(($fine_lo),($fine_hi),`lines_to_levels*($fine_inc)`)
+(-inf)(($coarse_lo),($fine_lo),`($lines_coarse_delta)`)\
+(($fine_lo),($fine_hi),($lines_fine_inc))
 ELSE
    IF `($fine_lo) - ($lowest_lev) GT ($coarse_delta)` THEN
       DEFINE SYMBOL ferret_auto_levels = \
 (-inf)(($lowest_lev),($fine_lo),($coarse_delta))\
 (($fine_lo),($fine_hi),($fine_inc))
       DEFINE SYMBOL ferret_auto_lines = \
-(-inf)(($lowest_lev),($fine_lo),`lines_to_levels*($coarse_delta)`)\
-(($fine_lo),($fine_hi),`lines_to_levels*($fine_inc)`)
+(-inf)(($lowest_lev),($fine_lo),($lines_coarse_delta))\
+(($fine_lo),($fine_hi),($lines_fine_inc))
    ELSE
       DEFINE SYMBOL ferret_auto_levels = \
 (-inf)(($fine_lo),($fine_hi),($fine_inc))
       DEFINE SYMBOL ferret_auto_lines = \
-(-inf)(($fine_lo),($fine_hi),`lines_to_levels*($fine_inc)`)
+(-inf)(($fine_lo),($fine_hi),($lines_fine_inc))
    ENDIF
 
 ENDIF
 
 IF `($stat_max) GT ($coarse_hi)` THEN
+
    DEFINE SYMBOL ferret_auto_levels = \
 ($ferret_auto_levels)(($fine_hi),($coarse_hi),($coarse_delta))(inf)
    DEFINE SYMBOL ferret_auto_lines = \
-($ferret_auto_lines)(($fine_hi),($coarse_hi),`lines_to_levels*($coarse_delta)`)(inf)
+($ferret_auto_lines)(($fine_hi),($coarse_hi),($lines_coarse_delta))(inf)
 
 ELSE
    IF `($highest_lev) - ($fine_hi) GT ($coarse_delta)` THEN 
+
       DEFINE SYMBOL ferret_auto_levels = \
 ($ferret_auto_levels)(($fine_hi),($highest_lev),($coarse_delta))(inf)
       DEFINE SYMBOL ferret_auto_lines = \
-($ferret_auto_lines)(($fine_hi),($highest_lev),`lines_to_levels*($coarse_delta)`)(inf)
+($ferret_auto_lines)(($fine_hi),($highest_lev),($lines_coarse_delta))(inf)
    ELSE
       DEFINE SYMBOL ferret_auto_levels = ($ferret_auto_levels)(inf)
       DEFINE SYMBOL ferret_auto_lines = ($ferret_auto_lines)(inf)
@@ -100,3 +126,7 @@ IF `STRINDEX("($ferret_auto_lines)", "(inf)") GT 0` THEN
 ENDIF
 
 ! End of file ------------LAS_non_centered_levels.jnl--------------------------
+
+sh sym ferret_auto_levels
+sh sym ferret_auto_lines
+pause
