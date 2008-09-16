@@ -101,7 +101,7 @@ DEFINE SYMBOL variables_initialized `1 + ($variables_initialized"0")`
 ! TODO: script works only for rectangular data so far...
 
 ! (check for Google Earth plots is inside LAS_set_strides)
-GO LAS_set_strides.jnl
+IF `($num)+1 EQ ($data_count)` THEN GO LAS_set_strides.jnl
 
 ! IF contour and fill levels havent been set in the configuration or
 ! the user interface, set levels based on the variable after it is strided and its region set.
