@@ -30,8 +30,8 @@ IF `($do_curvi_xy_and_hybrid_z)` THEN EXIT/SCRIPT
 IF `($do_curvi_xy"0") OR ($do_hybrid_z"0") OR ($do_curvi_xy_and_hybrid_z)` THEN EXIT/SCRIPT
 
 ! If doing a slice of a curvilinear variable then note that RETURN=shape is not
-! always correct for these variables (dont exit, test works for some cases)
-! IF `STRINDEX ("($ferret_plot_var)", "sampled_var") GT 0` THEN EXIT/SCRIPT
+! always correct for these variables 
+! IF `STRINDEX ("($ferret_plot_var)", "sampled_var") GT 0` THEN EXIT/SCRIPT !(dont exit, test works for some cases)
 
 LET/D=($data_num) the_plot_var = ($ferret_plot_var)
 LOAD the_plot_var
@@ -64,7 +64,7 @@ IF `STRCMP("($varshape)", "POINT") EQ 0` THEN
  SET WINDOW/ASPECT = 1
 
    DEFINE SYMBOL n_left_labels = `($n_left_labels"0")+1`
-   DEFINE SYMBOL upper_left_($n_left_labels"0") = @CR@P2[The requested region is smaller than 1 grid cell]
+   DEFINE SYMBOL upper_left_($n_left_labels"0") = @CR[The requested region is smaller than 1 grid cell]
    DEFINE SYMBOL region_small_($n_left_labels"0") = yes
 
    IF `STRINDEX("($viewshape)", "X") GT 0` THEN
@@ -239,7 +239,7 @@ IF `STRINDEX("($viewshape)", "XY") GT 0` THEN
       DEFINE SYMBOL axlen_command AXLEN,2
       
       DEFINE SYMBOL n_left_labels = `($n_left_labels"0")+1`
-      DEFINE SYMBOL upper_left_($n_left_labels"0") = @CR@P2[The requested X region is smaller than 1 grid cell]
+      DEFINE SYMBOL upper_left_($n_left_labels"0") = @CR[The requested X region is smaller than 1 grid cell]
       
       DEFINE SYMBOL region_small_($n_left_labels"0") = yes
 
@@ -263,7 +263,7 @@ IF `STRINDEX("($viewshape)", "XY") GT 0` THEN
       DEFINE SYMBOL axlen_command AXLEN,,2
       
       DEFINE SYMBOL n_left_labels = `($n_left_labels"0")+1`
-      DEFINE SYMBOL upper_left_($n_left_labels"0") = @CR@P2[The requested Y region is smaller than 1 grid cell]
+      DEFINE SYMBOL upper_left_($n_left_labels"0") = @CR[The requested Y region is smaller than 1 grid cell]
       DEFINE SYMBOL region_small_($n_left_labels"0") = yes
    ENDIF
 
@@ -290,7 +290,7 @@ IF `STRINDEX("($viewshape)", "XZ") GT 0` THEN
       DEFINE SYMBOL axlen_command AXLEN,2
       
       DEFINE SYMBOL n_left_labels = `($n_left_labels"0")+1`
-      DEFINE SYMBOL upper_left_($n_left_labels"0") = @CR@P2[The requested X region is smaller than 1 grid cell]
+      DEFINE SYMBOL upper_left_($n_left_labels"0") = @CR[The requested X region is smaller than 1 grid cell]
       DEFINE SYMBOL region_small_($n_left_labels"0") = yes
 
    ENDIF
@@ -313,7 +313,7 @@ IF `STRINDEX("($viewshape)", "XZ") GT 0` THEN
       DEFINE SYMBOL axlen_command AXLEN,,2
       
       DEFINE SYMBOL n_left_labels = `($n_left_labels"0")+1`
-      DEFINE SYMBOL upper_left_($n_left_labels"0") = @CR@P2[The requested Z region is smaller than 1 grid cell]
+      DEFINE SYMBOL upper_left_($n_left_labels"0") = @CR[The requested Z region is smaller than 1 grid cell]
       DEFINE SYMBOL region_small_($n_left_labels"0") = yes
    ENDIF
 
@@ -340,7 +340,7 @@ IF `STRINDEX("($viewshape)", "XT") GT 0` THEN
       DEFINE SYMBOL axlen_command AXLEN,2
       
       DEFINE SYMBOL n_left_labels = `($n_left_labels"0")+1`
-      DEFINE SYMBOL upper_left_($n_left_labels"0") = @CR@P2[The requested X region is smaller than 1 grid cell]
+      DEFINE SYMBOL upper_left_($n_left_labels"0") = @CR[The requested X region is smaller than 1 grid cell]
       DEFINE SYMBOL region_small_($n_left_labels"0") = yes
 
    ENDIF
@@ -368,7 +368,7 @@ IF `STRINDEX("($viewshape)", "XT") GT 0` THEN
       DEFINE SYMBOL axtype_command TXTYPE,yr,mon 
       
       DEFINE SYMBOL n_left_labels = `($n_left_labels"0")+1`
-      DEFINE SYMBOL upper_left_($n_left_labels"0") = @CR@P2[The requested T region is smaller than 1 grid cell]
+      DEFINE SYMBOL upper_left_($n_left_labels"0") = @CR[The requested T region is smaller than 1 grid cell]
       DEFINE SYMBOL region_small_($n_left_labels"0") = yes
    ENDIF
 
@@ -396,7 +396,7 @@ IF `STRINDEX("($viewshape)", "YZ") GT 0` THEN
       DEFINE SYMBOL axlen_command AXLEN,2
       
       DEFINE SYMBOL n_left_labels = `($n_left_labels"0")+1`
-      DEFINE SYMBOL upper_left_($n_left_labels"0") = @CR@P2[The requested Y region is smaller than 1 grid cell]
+      DEFINE SYMBOL upper_left_($n_left_labels"0") = @CR[The requested Y region is smaller than 1 grid cell]
       DEFINE SYMBOL region_small_($n_left_labels"0") = yes
 
    ENDIF
@@ -419,7 +419,7 @@ IF `STRINDEX("($viewshape)", "YZ") GT 0` THEN
       DEFINE SYMBOL axlen_command AXLEN,,2
       
       DEFINE SYMBOL n_left_labels = `($n_left_labels"0")+1`
-      DEFINE SYMBOL upper_left_($n_left_labels"0") = @CR@P2[The requested Z region is smaller than 1 grid cell]
+      DEFINE SYMBOL upper_left_($n_left_labels"0") = @CR[The requested Z region is smaller than 1 grid cell]
       DEFINE SYMBOL region_small_($n_left_labels"0") = yes
    ENDIF
 message GO MARGINS for YZ
@@ -447,7 +447,7 @@ IF `STRINDEX("($viewshape)", "YT") GT 0` THEN
       DEFINE SYMBOL axlen_command AXLEN,,2
       
       DEFINE SYMBOL n_left_labels = `($n_left_labels"0")+1`
-      DEFINE SYMBOL upper_left_($n_left_labels"0") = @CR@P2[The requested Y region is smaller than 1 grid cell]
+      DEFINE SYMBOL upper_left_($n_left_labels"0") = @CR[The requested Y region is smaller than 1 grid cell]
       DEFINE SYMBOL region_small_($n_left_labels"0") = yes
 
    ENDIF
@@ -476,7 +476,7 @@ IF `STRINDEX("($viewshape)", "YT") GT 0` THEN
       DEFINE SYMBOL axtype_command TXTYPE,yr,mon 
       
       DEFINE SYMBOL n_left_labels = `($n_left_labels"0")+1`
-      DEFINE SYMBOL upper_left_($n_left_labels"0") = @CR@P2[The requested T region is smaller than 1 grid cell]
+      DEFINE SYMBOL upper_left_($n_left_labels"0") = @CR[The requested T region is smaller than 1 grid cell]
       DEFINE SYMBOL region_small_($n_left_labels"0") = yes
    ENDIF
 
@@ -503,7 +503,7 @@ IF `STRINDEX("($viewshape)", "ZT") GT 0` THEN
       DEFINE SYMBOL axlen_command AXLEN,2
       
       DEFINE SYMBOL n_left_labels = `($n_left_labels"0")+1`
-      DEFINE SYMBOL upper_left_($n_left_labels"0") = @CR@P2[The requested Z region is smaller than 1 grid cell]
+      DEFINE SYMBOL upper_left_($n_left_labels"0") = @CR[The requested Z region is smaller than 1 grid cell]
       DEFINE SYMBOL region_small_($n_left_labels"0") = yes
 
    ENDIF
@@ -532,7 +532,7 @@ IF `STRINDEX("($viewshape)", "ZT") GT 0` THEN
       DEFINE SYMBOL axtype_command TXTYPE,yr,mon 
       
       DEFINE SYMBOL n_left_labels = `($n_left_labels"0")+1`
-      DEFINE SYMBOL upper_left_($n_left_labels"0") = @CR@P2[The requested T region is smaller than 1 grid cell]
+      DEFINE SYMBOL upper_left_($n_left_labels"0") = @CR[The requested T region is smaller than 1 grid cell]
       DEFINE SYMBOL region_small_($n_left_labels"0") = yes
    ENDIF
 
