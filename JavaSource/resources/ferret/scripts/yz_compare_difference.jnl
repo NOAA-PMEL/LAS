@@ -37,9 +37,6 @@ IF ($error_status"0|*>1") THEN
   EXIT/PROGRAM
 ENDIF
 
-! Check whether the region is too small to make a 2D plot on this grid.
-GO LAS_check_2d_region
-
 ! Check for errors 
 IF ($error_status"0|ERROR>1") THEN
   MESSAGE/ERROR ($error_string)
@@ -68,6 +65,9 @@ CANCEL SYMBOL ferret_expression
 GO LAS_initialize_region 1
 
 GO LAS_initialize_data 1 
+
+! Check whether the region is too small to make a 2D plot on this grid.
+GO LAS_check_2d_region
 
 ! Check for errors 
 
