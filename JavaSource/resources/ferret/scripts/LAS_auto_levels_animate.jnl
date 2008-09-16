@@ -174,6 +174,8 @@ sh sym native_curvilinear_xy
 
 IF `($native_curvilinear_xy"0") EQ 0 AND ($its_insitu"0") NE 1` THEN  
 
+
+LET indx_strd_used = 0
 IF `($xstride"1|1>0|*>0") OR ($no_native_strides_xy"0|*>1")` THEN
    LET xsize  `pvar,RETURN=isize`
    IF `xsize GT max_size` THEN
@@ -188,6 +190,7 @@ IF `($xstride"1|1>0|*>0") OR ($no_native_strides_xy"0|*>1")` THEN
         LET strd_hi = `i[gx=pvar,x=($region_x_hi)]`
      ENDIF
      DEFINE SYMBOL index_strides = i=`strd_lo`:`strd_hi`:`INT(xsize/10)`
+     LET indx_strd_used = 1
    ELSE
       IF `($region_sample"0|*>1") EQ 0` THEN DEFINE SYMBOL  index_strides = ($region_x)
    ENDIF
@@ -209,6 +212,7 @@ IF `($ystride"1|1>0|*>0") OR ($no_native_strides_xy"0|*>1")` THEN
         LET strd_lo = `j[gy=pvar,y=($region_y_lo)]`
         LET strd_hi = `j[gy=pvar,y=($region_y_hi)]`
      ENDIF
+     LET indx_strd_used = 1
      IF ($index_strides"0|*>1") THEN
         DEFINE SYMBOL index_strides = ($index_strides),j=`strd_lo`:`strd_hi`:`INT(ysize/10)`
      ELSE
@@ -239,6 +243,7 @@ IF `($zstride"0|1>0|*>1") OR ($no_native_strides_xy"0|*>1")` THEN
    IF `zsize GT max_size` THEN 
      LET strd_lo = `k[gz=pvar,z=($region_z_lo)]`
      LET strd_hi = `k[gz=pvar,z=($region_z_hi)]`
+     LET indx_strd_used = 1
      IF ($index_strides"0|*>1") THEN
         DEFINE SYMBOL index_strides = ($index_strides),k=`strd_lo`:`strd_hi`:`INT(zsize/10)`
      ELSE
@@ -262,8 +267,12 @@ ENDIF
 
 ENDIF ! region syms dont apply to native curv grid directly
 
+IF `indx_strd_used EQ 0` THEN CANCEL SYMBOL index_strides
+
 IF ($index_strides"0|*>1") THEN 
    DEFINE SYMBOL ppvar = ($data_var)[d=($data_num),($index_strides)]
+   LET anim_stridevar = ($ferret_plot_var_noregion)
+   DEFINE SYMBOL ppvar = anim_stridevar[($index_strides)]
 ELSE
    DEFINE SYMBOL ppvar = pvar
 ENDIF
@@ -273,7 +282,9 @@ IF `($tstride"0|1>0|*>1") EQ 0` THEN
    LET tsize  `($ppvar),RETURN=lsize`   
 
    LET strd_lo = 1
-   LET tt = t[gt=($ppvar)]
+   LET anim_timevar = ($ppvar)
+   LET tt = t[gt=anim_timevar]
+
    LET strd_hi = `tt,return=lsize`
 
 ! If the incoming t region is the region over which to animate...
@@ -287,6 +298,7 @@ IF `($tstride"0|1>0|*>1") EQ 0` THEN
       IF `strd_del LE 2` THEN LET strd_del = `INT(tsize/5)`
    ENDIF 
 
+   LET indx_strd_used = 1
    IF ($index_strides"0|*>1") THEN
       IF ($region_t"0|*>1") THEN DEFINE SYMBOL index_strides = ($index_strides),L=`strd_lo`:`strd_hi`:`strd_del`
    ELSE
@@ -295,12 +307,16 @@ IF `($tstride"0|1>0|*>1") EQ 0` THEN
 ENDIF
 
 IF `STRINDEX("($data_($num)_grid_type)","scattered") GT 0` THEN CANCEL SYMBOL index_strides
+IF `indx_strd_used EQ 0` THEN CANCEL SYMBOL index_strides
 
 IF ($index_strides"0|*>1") THEN 
    DEFINE SYMBOL ppvar = ($data_var)[d=($data_num),($index_strides)]
+   LET anim_stridevar = ($ferret_plot_var_noregion)
+   DEFINE SYMBOL ppvar = anim_stridevar[($index_strides)]
 ELSE
    DEFINE SYMBOL ppvar = pvar
 ENDIF
+
 IF ($native_curvilinear_xy"0") THEN DEFINE SYMBOL ppvar = pvar
 
 ! Execute the stat command to load symbols with the variables
@@ -365,6 +381,7 @@ ENDIF
 
 ! Use the statistics above to actually compute the levels
 
+DEFINE SYMBOL remove_plus = 1
 IF ($ferret_center_levels) THEN 
    GO LAS_centered_levels
 ELSE
@@ -379,4 +396,4 @@ IF `($input_contour_levels"0|0|1") EQ 0` THEN \
    DEFINE SYMBOL ferret_contour_levels = ($ferret_auto_lines)
 
 ! End of file ------------LAS_auto_levels_animate.jnl--------------------------
-
+pause
