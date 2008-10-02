@@ -19,7 +19,7 @@
            <lon_domain>0:360</lon_domain>
            <time_units>msec since 1970-01-01 00:00:00</time_units>
            <longitude>location.LON</longitude>
-           <db_name>NOAA Time Series</db_name>
+           <db_name>ndbcMet</db_name>
            <db_server>PFEG Server</db_server>
            <time_type>double</time_type>
            <db_type>dapper</db_type>
