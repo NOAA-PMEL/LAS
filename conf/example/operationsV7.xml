@@ -631,6 +631,7 @@ streamable="true" mime_type="application/postscript"/> -->
     <!-- Data extract operations for difference of two variables.  -->
     <operation name="Table of difference values (text)" 
         ID="Compare_Data_Extract"
+        regrid_prn="true"
         output_template="table" 
         service_action="Compare_Data_Extract" private="true" order="0300" category="table" default="true">
         <service>ferret</service>
@@ -663,6 +664,7 @@ streamable="true" mime_type="application/postscript"/> -->
     </operation>
     <operation name="NetCDF difference file"
         ID="Compare_Data_netCDF" output_template="netcdf"
+        regrid_prn="true"
         service_action="Compare_Data_Extract_netCDF" order="0500" private="true" category="file">
         <service>ferret</service>
         <response ID="Data_Extract_netCDF_Response">
@@ -693,6 +695,7 @@ streamable="true" mime_type="application/postscript"/> -->
     </operation>
     <operation name="ASCII difference file"
         ID="Compare_Data_Extract_File" output_template="ascii"
+        regrid_prn="true"
         service_action="Compare_Data_Extract_File" order="0400" private="true" category="file" default="true">
         <service>ferret</service>
         <response ID="Data_Extract_File_Response">
