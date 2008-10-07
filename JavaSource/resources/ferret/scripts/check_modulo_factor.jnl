@@ -11,7 +11,8 @@ DEFINE SYMBOL indx = i
 IF `STRCMP("($dir)", "T") EQ 0` THEN  DEFINE SYMBOL indx = l
 
 ! Check whether axis is modulo
-DEFINE SYMBOL var_mod = `($data_var)[d=($data_num)],RETURN=($dir)mod`
+DEFINE SYMBOL var_mod = "`($data_var)[d=($data_num)],RETURN=($dir)mod` "
+IF  `STRCMP (" ", ($var_mod)) EQ 0` THEN CANCEL SYMBOL var_mod
 
 ! See if it is subspan modulo - if so we dont have to worry about losing
 ! modulo property with striding. 
@@ -20,7 +21,7 @@ LET xaxlen = `($data_var),RETURN=xend` -  `($data_var),RETURN=xstart`
 SET MODE/LAST LONG_LABEL
 IF `xaxlen LT ($var_mod"0")` THEN DEFINE SYMBOL var_mod " "    ! its subspan modulo
 
-IF  `STRCMP (" ", "($var_mod)") EQ 0` THEN
+IF  `STRCMP (" ", ($var_mod)) EQ 0` THEN
    CANCEL SYMBOL FER_LAST_ERROR
 
 ELSE
@@ -41,8 +42,8 @@ ELSE
    IF `MOD(nn,nstride) EQ 0` THEN EXIT/SCRIPT
 
    DEFINE SYMBOL error_string = "Because of striding (subsampling) on axis of length `nn`, cannot do do modulo operations in ($dir)"
-   DEFINE SYMBOL qualifiers = ($qualifiers)/HLIM=`($region_x_lo)`:`($region_x_hi)`
 
 ENDIF
 
 ! End of $RCSfile ------------check_modulo_factor.jnl--------------------------
+
