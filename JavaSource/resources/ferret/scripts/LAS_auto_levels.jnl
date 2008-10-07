@@ -60,7 +60,6 @@ IF ($ferret_contour_levels"0|*>1") THEN
    PPL AXNMTC 0,0 ! Turn on PPL so we can do the edit to remove any spaces (can occur in animations)
    PPL SET nospaces $EDIT (ferret_contour_levels, COLLAPSE)
    DEFINE SYMBOL ferret_contour_levels = ($nospaces)
-   pause
 
    DEFINE SYMBOL up_contour_levels = `UPCASE("($ferret_contour_levels)")`
    LET nc = `STRINDEX("($up_contour_levels)", "C")`
@@ -87,10 +86,9 @@ IF ($ferret_fill_levels"0|*>1") THEN
    PPL AXNMTC 0,0 ! Turn on PPL so we can do the edit to remove any spaces (can occur in animations)
    PPL SET nospaces $EDIT (ferret_fill_levels, COLLAPSE)
    DEFINE SYMBOL ferret_fill_levels = ($nospaces)
-   pause
 
    DEFINE SYMBOL up_fill_levels = `UPCASE("($ferret_fill_levels)")`
-   DEFINE SYMBOL ferret_fill_levels = PPL 
+   DEFINE SYMBOL ferret_fill_levels = ($up_fill_levels) 
    LET nc = `STRINDEX("($up_fill_levels)", "C")`
    DEFINE SYMBOL ferret_center_levels = `nc GT 0`
    IF `nc GT 0` THEN 
@@ -99,8 +97,9 @@ IF ($ferret_fill_levels"0|*>1") THEN
       CANCEL SYMBOL input_fill_levels  ! we will redefine the levels in this script
    ENDIF
    LET other = `STRINDEX("($ferret_fill_levels)", "D")` + \
-      `STRINDEX("($ferret_fill_levels)", "(")`+ \
+      `STRINDEX("($ferret_fill_levels)", ",")`+ \
       `STRINDEX("($ferret_fill_levels)", ".")`
+
    IF `nc EQ 0 AND other EQ 0` THEN 
       DEFINE SYMBOL num_fine_levels = ($ferret_fill_levels)  ! How to test that this is just a number??
       CANCEL SYMBOL input_fill_levels  ! we will redefine the levels in this script
@@ -113,42 +112,25 @@ ENDIF
 IF `($ferret_plot_var"0|*>1") EQ 0` THEN EXIT/SCRIPT  !e.g. for insitu plots may not have a plot_var
 
 ! When its a curvi plot, base the levels on the variable using coordinates 
-! in the region. Use further striding to make this operation fast.
+! in the region. 
 
 IF `($native_curvilinear_xy"0") OR ($region_sample"0|*>1")` THEN
-   LET istr_lev = 1
-   IF `($clon_imax) - ($clon_imin) GT 100` THEN LET istr_lev = `INT((($clon_imax) - ($clon_imin))/10)`
-   LET jstr_lev = 1
-   IF `($clat_jmax) - ($clat_jmin) GT 100` THEN LET jstr_lev = `INT((($clat_jmax) - ($clat_jmin))/10)`
-   let istr_lev = 1; let jstr_lev=1  ! dont do index striding !!! 
-   sh sym *strid*
    LET pvar = \
-    ($data_var)[d=($data_num),i=($clon_imin):($clon_imax):`istr_lev`,j=($clat_jmin):($clat_jmax):`jstr_lev`]
+    ($data_var)[d=($data_num),i=($clon_imin):($clon_imax),j=($clat_jmin):($clat_jmax)]
    IF ($region_zt"0|*>1") THEN LET pvar = \
-    ($data_var)[d=($data_num),i=($clon_imin):($clon_imax):`istr_lev`,j=($clat_jmin):($clat_jmax):`jstr_lev`,($region_zt)]
-! ??
-   IF ($do_curvi_xy_and_hybrid_z"0") THEN LET pvar = \
-    ($data_var)[d=($data_num),i=($clon_imin):($clon_imax):`istr_lev`,j=($clat_jmin):($clat_jmax):`jstr_lev`,($region_zt)]
-
+    ($data_var)[d=($data_num),i=($clon_imin):($clon_imax),j=($clat_jmin):($clat_jmax),($region_zt)]
 ELSE
-   IF `($do_hybrid_z"0") + ($do_curvi_xy_and_hybrid_z"0") GT 0`  THEN
-!      LET pvar = ($ferret_plot_base_var)
-      LET pvar = ($ferret_plot_var)
-   ELSE
-!      LET pvar = ($ferret_xyz_var)
-      LET pvar = ($ferret_plot_var)
-      IF ($set_ndx_strides"0|*>1") THEN LET pvar = ($data_var)[d=($data_num),($region_xyzt)]
-      IF ($auto_lev_var"0|*>1") THEN LET pvar = ($auto_lev_var)
-   ENDIF
+   LET pvar = ($ferret_plot_var)
+   IF ($set_ndx_strides"0|*>1") THEN LET pvar = ($data_var)[d=($data_num),($region_xyzt)]
+   IF ($auto_lev_var"0|*>1") THEN LET pvar = ($auto_lev_var)
 ENDIF
-!IF ($ferret_plot_var"0|sampled_var>1|*>0) THEN LET pvar = ($ferret_plot_var)
 
 IF ($ferret_plot_var"0|sampled_var>1|*>0) THEN LET pvar = ($ferret_plot_var)
 
-! IF ($do_curvi_xy_and_hybrid_z"0") THEN LET pvar = plot_var
 
 ! If the ferret_diff_var has been defined, use it.
 ! When no levels are defined, use centered ones for a diff variable
+
 IF ($ferret_diff_var"0|*>1") THEN 
    IF `($input_contour_levels"0|0|1") EQ 0` THEN 
       CANCEL SYMBOL ferret_contour_levels
@@ -161,6 +143,7 @@ IF ($ferret_diff_var"0|*>1") THEN
       DEFINE SYMBOL ferret_fill_levels = 20c
       DEFINE SYMBOL ferret_center_levels = 1
    ENDIF
+
    
    IF ($native_curvilinear_xy"0|*>1") THEN 
       LET pvar = ( ($ferret_plot_base_var_0)  - ($ferret_plot_base_var_1))
@@ -169,7 +152,6 @@ IF ($ferret_diff_var"0|*>1") THEN
    ENDIF
 
 ENDIF
-
 
 LET var_size = ABS( `pvar,RETURN=size`)
 DEFINE SYMBOL var_dim = `pvar,RETURN=shape`
@@ -205,10 +187,9 @@ IF ($native_curvilinear_xy"0") THEN DEFINE SYMBOL ppvar = pvar
 ! mean, max, min, std.
 
 DEFINE SYMBOL stat_ngood= 0
-sh sym ppvar
-sh var pvar
-pause
-set mem/siz=400
+set mode ignore_error
+SET MEM/SIZ=400
+set mode/last ignore_error
 STAT ($ppvar)
 
 IF `($stat_ngood"0") EQ 0` THEN EXIT/SCRIPT
