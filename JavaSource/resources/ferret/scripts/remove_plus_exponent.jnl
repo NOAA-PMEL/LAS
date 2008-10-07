@@ -19,4 +19,4 @@ DEFINE SYMBOL s1 = `SUBSTRING ("($expon_symbol)", 1, loc-1)`
 DEFINE SYMBOL s2 = `SUBSTRING ("($expon_symbol)", loc+1, slen)`
 DEFINE SYMBOL ($name) = ($s1)($s2)
 
-pause
+
