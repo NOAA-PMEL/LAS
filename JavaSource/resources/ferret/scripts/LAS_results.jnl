@@ -104,9 +104,9 @@ IF ($result_map_scale_filename%0|*>1%) THEN
          LET the_plot_var = pvar  ! from LAS_auto_levels
       ELSE
          IF ($native_curvilinear_xy"0|*>1") THEN 
-            LET the_plot_var = ($ferret_plot_base_var)
+            LET the_plot_var = ($ferret_plot_base_var_noregion)
          ELIF ($do_hybrid_z"0|*>1") THEN
-            LET the_plot_var = ($ferret_plot_base_var)
+            LET the_plot_var = ($ferret_plot_base_var_noregion)
          ELIF ($native_Z_plot"0|*>1") THEN
             LET the_plot_var = ($ferret_var_0)
          ELIF ($ferret_plot_var"0|*>1") THEN
