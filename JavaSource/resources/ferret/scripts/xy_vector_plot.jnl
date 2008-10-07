@@ -73,7 +73,7 @@ ENDIF
 
 ! Curvilinear plots may have more qualifiers. 
 IF ($ferret_curvi_quals"0|*>1") THEN
-  DEFINE SYMBOL qualifiers = ($qualifiers)/($ferret_curvi_quals)
+  DEFINE SYMBOL qualifiers = ($qualifiers)($ferret_curvi_quals)
 ENDIF
 
 IF ($ferret_use_graticules"1|0|*>1) THEN
