@@ -809,7 +809,7 @@ LASUI.prototype.setOperationList = function (strJson) {
 
 		}
 	
-	if(setDefaultVis==true) {
+	if(setDefaultVis==true && defaultVis) {
 		this.state.operation.plot = defaultVis;
 		this.makeRequest({},"plot");
 	}
