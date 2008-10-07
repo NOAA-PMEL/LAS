@@ -95,6 +95,3 @@ ENDIF
 
 ! End of file ------------LAS_centered_levels.jnl--------------------------
 
-sh sym ferret_auto_levels
-sh sym ferret_auto_lines
-pause
