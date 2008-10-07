@@ -1,18 +1,22 @@
 ! Mark grid points. Options are no, subsample (tests if subsampling needed)
 ! or all to force marking all points. 
 
+! 7-Oct-2008 Make the sets of the xpts and ypts (in whatever direction)
+!            based on the coordinates in the chosen region and with 
+!            striding applied.
+
 
 !  XY view
 
 IF ($ferret_view"|xy>1|*>0") THEN
    IF ($native_curvilinear_xy"0") THEN 
-      LET xpts = xcoord
-      LET ypts = ycoord
+      LET xpts = xcoord[i=($clon_imin):($clon_imax),j=($clat_jmin):($clat_jmax)]
+      LET ypts = ycoord[i=($clon_imin):($clon_imax),j=($clat_jmin):($clat_jmax)]
       LET mvar = xcoord  ! for modulo-ing below
    ELSE
       LET mvar = ($ferret_plot_var)
-      LET xpts =   X[GX=mvar] + 0*Y[GY=mvar]
-      LET ypts = 0*X[GX=mvar] +   Y[GY=mvar]
+      LET xpts =   X[GX=mvar,($region_0_x)] + 0*Y[GY=mvar,($region_0_y)]
+      LET ypts = 0*X[GX=mvar,($region_0_x)] +   Y[GY=mvar,($region_0_y)]
    ENDIF
 
    LET mark_xmin = `xpts[x=@min,y=@min]`
@@ -70,8 +74,8 @@ IF ($ferret_view"|xz>1|*>0") THEN
       LET mvar = ($FERRET_PLOT_BASE_VAR)
    ELSE
       LET mvar = ($ferret_plot_var)
-      LET xpts =   X[GX=mvar] + 0*Z[GZ=mvar]
-      LET zpts = 0*X[GX=mvar] +   Z[GZ=mvar]
+      LET xpts =   X[GX=mvar,($region_0_x)] + 0*Z[GZ=mvar,($region_0_z)]
+      LET zpts = 0*X[GX=mvar,($region_0_x)] +   Z[GZ=mvar,($region_0_z)]
    ENDIF
    
    LET mark_xmin = `xpts[x=@min,z=@min]`
@@ -133,9 +137,8 @@ ENDIF
 
 IF ($ferret_view"|xt>1|*>0") THEN
    LET mvar = ($ferret_plot_var)
-   LET xpts =   X[GX=mvar] + 0*T[GT=mvar]
-   LET tpts = 0*X[GX=mvar] + \
-                T[GT=mvar]
+   LET xpts =   X[GX=mvar,($region_0_x)] + 0*T[GT=mvar,($region_0_t)]
+   LET tpts = 0*X[GX=mvar,($region_0_x)] +   T[GT=mvar,($region_0_t)]
 
    LET mark_xmin = `xpts[x=@min,t=@min]`
    LET mark_xmax = `xpts[x=@max,t=@max]`
@@ -187,8 +190,8 @@ IF ($ferret_view"|yz>1|*>0") THEN
       LET zpts = zval
    ELSE
       LET mvar = ($ferret_plot_var)
-      LET ypts =   Y[GY=mvar] + 0*Z[GZ=mvar]
-      LET zpts = 0*Y[GY=mvar] +   Z[GZ=mvar]
+      LET ypts =   Y[GY=mvar,($region_0_y)] + 0*Z[GZ=mvar,($region_0_z)]
+      LET zpts = 0*Y[GY=mvar,($region_0_y)] +   Z[GZ=mvar,($region_0_z)]
    ENDIF
    
    LET mark_ymin = `ypts[y=@min,z=@min]`
@@ -242,8 +245,8 @@ ENDIF
 
 IF ($ferret_view"|yt>1|*>0") THEN
    LET mvar = ($ferret_plot_var)
-   LET ypts =   Y[GY=mvar] + 0*T[GT=mvar]
-   LET tpts = 0*Y[GY=mvar] +   T[GT=mvar]
+   LET ypts =   Y[GY=mvar,($region_0_y)] + 0*T[GT=mvar,($region_0_t)]
+   LET tpts = 0*Y[GY=mvar,($region_0_y)] +   T[GT=mvar,($region_0_t)]
    
    LET mark_ymin = `ypts[y=@min,t=@min]`
    LET mark_ymax = `ypts[y=@max,t=@max]`
@@ -291,8 +294,8 @@ IF ($ferret_view"|zt>1|*>0") THEN
       LET tpts = tval
    ELSE
       LET mvar = ($ferret_plot_var)
-      LET zpts =   Z[GZ=mvar] + 0*T[GT=mvar]
-      LET tpts = 0*Z[GZ=mvar] + T[GT=mvar]
+      LET zpts =   Z[GZ=mvar,($region_0_z)] + 0*T[GT=mvar,($region_0_t)]
+      LET tpts = 0*Z[GZ=mvar,($region_0_t)] + T[GT=mvar,($region_0_t)]
    ENDIF
 
 
