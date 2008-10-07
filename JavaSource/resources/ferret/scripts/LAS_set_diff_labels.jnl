@@ -27,6 +27,11 @@ DEFINE SYMBOL ferret_diff_title = \
 @AC($ferret_title_0) from ($data_0_dataset_name)(1) \
 <NL> -  @P2($ferret_title_1)) from ($data_1_dataset_name)(2)
 
+! For data listings, a title without formatting information.
+DEFINE SYMBOL ferret_diff_list_title = \
+($ferret_title_0) from ($data_0_dataset_name) \
+ - ($ferret_title_1)) from ($data_1_dataset_name)
+
 IF `STRLEN("($ferret_diff_title)") GT 150` THEN
 
   DEFINE SYMBOL lab_0 = ($ferret_title_0) from ($data_0_dataset_name)(1)
