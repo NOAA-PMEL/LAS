@@ -114,10 +114,6 @@ IF `STRCMP("($varshape)", "POINT") EQ 0` THEN
    ENDIF
 
    IF `STRINDEX("($viewshape)", "XY") GT 0` THEN
-      IF `STRCMP("($region_x_lo)", "($region_x_hi)") NE 0` THEN DEFINE SYMBOL qualifiers = \
-       ($qualifiers)/HLIM=`($region_x_lo)`:`($region_x_hi)`
-      IF `STRCMP("($region_y_lo)", "($region_y_hi)") NE 0` THEN DEFINE SYMBOL qualifiers = \
-       ($qualifiers)/VLIM=`($region_y_lo)`:`($region_y_hi)`
       IF ($region_zt"0|*>1") THEN 
          DEFINE SYMBOL ferret_plot_var = the_plot_var_noregion[I=`ilo`:`ihi`,J=`jlo`:`jhi`($data_analysis_expr),($region_zt)]
       ELSE
@@ -126,10 +122,6 @@ IF `STRCMP("($varshape)", "POINT") EQ 0` THEN
    ENDIF
 
    IF `STRINDEX("($viewshape)", "XZ") GT 0` THEN
-      IF `STRCMP("($region_x_lo)", "($region_x_hi)") NE 0` THEN DEFINE SYMBOL qualifiers = \
-       ($qualifiers)/HLIM=`($region_x_lo)`:`($region_x_hi)`
-      IF `STRCMP("($region_z_lo)", "($region_z_hi)") NE 0` THEN DEFINE SYMBOL qualifiers = \
-       ($qualifiers /VLIM=`($region_z_lo)`:`($region_z_hi)`
       IF ($region_yt"0|*>1") THEN
          DEFINE SYMBOL ferret_plot_var = the_plot_var_noregion[I=`ilo`:`ihi`,K=`klo`:`khi`($data_analysis_expr),($region_yt)]
       ELSE
@@ -138,10 +130,6 @@ IF `STRCMP("($varshape)", "POINT") EQ 0` THEN
    ENDIF
 
    IF `STRINDEX("($viewshape)", "XT") GT 0` THEN
-      IF `STRCMP("($region_x_lo)", "($region_x_hi)") NE 0` THEN DEFINE SYMBOL qualifiers = \
-       ($qualifiers)/HLIM=`($region_x_lo)`:`($region_x_hi)`
-      IF `STRCMP("($region_t_lo)", "($region_t_hi)") NE 0` THEN DEFINE SYMBOL qualifiers = \
-       ($qualifiers)/VLIM="($region_t_lo)":"($region_t_hi)"
       IF ($region_yz"0|*>1") THEN
          DEFINE SYMBOL ferret_plot_var = the_plot_var_noregion[I=`ilo`:`ihi`,L=`llo`:`lhi`($data_analysis_expr),($region_yz)]
       ELSE
@@ -152,23 +140,14 @@ IF `STRCMP("($varshape)", "POINT") EQ 0` THEN
    ENDIF
 
    IF `STRINDEX("($viewshape)", "YZ") GT 0` THEN
-      IF `STRCMP("($region_y_lo)", "($region_y_hi)") NE 0` THEN DEFINE SYMBOL qualifiers = \
-       ($qualifiers)/HLIM=`($region_y_lo)`:`($region_y_hi)`
-      IF `STRCMP("($region_z_lo)", "($region_z_hi)") NE 0` THEN DEFINE SYMBOL qualifiers = \
-       ($qualifiers)/VLIM=`($region_z_lo)`:`($region_z_hi)`
       IF ($region_xt"0|*>1") THEN
          DEFINE SYMBOL ferret_plot_var = the_plot_var_noregion[J=`jlo`:`jhi`,K=`klo`:`khi`($data_analysis_expr),($region_xt)]
       ELSE
          DEFINE SYMBOL ferret_plot_var = the_plot_var_noregion[J=`jlo`:`jhi`,K=`klo`:`khi`($data_analysis_expr)]
       ENDIF
-message shouldnt get here.....      
    ENDIF
 
    IF `STRINDEX("($viewshape)", "YT") GT 0` THEN
-      IF `STRCMP("($region_t_lo)", "($region_t_hi)") NE 0` THEN DEFINE SYMBOL qualifiers = \
-       ($qualifiers)/HLIM="($region_t_lo)":"($region_t_hi)"
-      IF `STRCMP("($region_y_lo)", "($region_y_hi)") NE 0` THEN DEFINE SYMBOL qualifiers = \
-       ($qualifiers)/VLIM=`($region_y_lo)`:`($region_y_hi)`
       IF ($region_xz"0|*>1") THEN
          DEFINE SYMBOL ferret_plot_var = the_plot_var_noregion[J=`jlo`:`jhi`,L=`llo`:`lhi`($data_analysis_expr),($region_xz)]
       ELSE
@@ -179,10 +158,6 @@ message shouldnt get here.....
    ENDIF
 
    IF `STRINDEX("($viewshape)", "ZT") GT 0` THEN
-      IF `STRCMP("($region_t_lo)", "($region_t_hi)") NE 0` THEN DEFINE SYMBOL qualifiers = \
-       ($qualifiers)/HLIM="($region_t_lo)":"($region_t_hi)"
-      IF `STRCMP("($region_z_lo)", "($region_z_hi)") NE 0` THEN DEFINE SYMBOL qualifiers = \
-       ($qualifiers)/VLIM=`($region_z_lo)`:`($region_z_hi)`
       IF ($region_xy"0|*>1") THEN
          DEFINE SYMBOL ferret_plot_var = the_plot_var_noregion[K=`klo`:`khi`L=`llo`:`lhi`($data_analysis_expr),($region_xy)]
       ELSE
@@ -219,13 +194,9 @@ DEFINE SYMBOL ferret_contour_style  = raster
 DEFINE SYMBOL ferret_size = 0.4
 DEFINE SYMBOL tnmlab_command TXNMTC,0
 
-
 IF `STRINDEX("($viewshape)", "XY") GT 0` THEN
    IF ($varshape"0|Y>1|*>0") THEN 
       LET addx = xbox[gx=the_plot_var,x=($region_x_lo)]
-      IF `STRCMP("($region_x_lo)", "($region_x_hi)") NE 0` THEN DEFINE SYMBOL qualifiers = \
-       ($qualifiers)/HLIM=`($region_x_lo)`:`($region_x_hi)`
-
       IF ($region_zt"0|*>1") THEN
          DEFINE SYMBOL ferret_plot_var = the_plot_var_noregion[ \
          X=`($region_x_lo)-addx`:`($region_x_hi)+addx`($data_analysis_expr),($region_y),($region_zt)]
@@ -247,8 +218,10 @@ IF `STRINDEX("($viewshape)", "XY") GT 0` THEN
 
    IF ($varshape"0|X>1|*>0") THEN 
       LET addy = ybox[gy=the_plot_var,y=($region_y_lo)]
-      IF `STRCMP("($region_y_lo)", "($region_y_hi)") NE 0` THEN DEFINE SYMBOL qualifiers = \
-        ($qualifiers)/VLIM=`($region_y_lo)`:`($region_y_hi)`
+      IF `STRCMP("($region_y_lo)", "($region_y_hi)") NE 0 AND \
+          (STRINDEX("($ferret_curvi_quals%0%)", "VLIM") EQ 0)`THEN \
+             DEFINE SYMBOL qualifiers = \
+             ($qualifiers)/VLIM=`($region_y_lo)`:`($region_y_hi)`
 
       IF ($region_zt"0|*>1") THEN
          DEFINE SYMBOL ferret_plot_var = the_plot_var_noregion[ \
@@ -274,9 +247,6 @@ ENDIF !XY
 IF `STRINDEX("($viewshape)", "XZ") GT 0` THEN
    IF ($varshape"0|Z>1|*>0") THEN 
       LET addx = xbox[gx=the_plot_var,x=($region_x_lo)]
-      IF `STRCMP("($region_x_lo)", "($region_x_hi)") NE 0` THEN DEFINE SYMBOL qualifiers = \
-        ($qualifiers)/HLIM=`($region_x_lo)`:`($region_x_hi)`
-
       IF ($region_yt"0|*>1") THEN
          DEFINE SYMBOL ferret_plot_var = the_plot_var_noregion[ \
          X=`($region_x_lo)-addx`:`($region_x_hi)+addx`($data_analysis_expr),($region_z),($region_yt)]
@@ -297,8 +267,10 @@ IF `STRINDEX("($viewshape)", "XZ") GT 0` THEN
 
    IF ($varshape"0|X>1|*>0") THEN 
       LET addz = zbox[gz=the_plot_var,z=($region_z_lo)]
-      IF `STRCMP("($region_z_lo)", "($region_z_hi)") NE 0` THEN DEFINE SYMBOL qualifiers = \
-        ($qualifiers)/VLIM=`($region_z_lo)`:`($region_z_hi)`
+      IF `STRCMP("($region_z_lo)", "($region_z_hi)") NE 0 AND \
+          (STRINDEX("($ferret_curvi_quals%0%)", "VLIM") EQ 0)`THEN \
+             DEFINE SYMBOL qualifiers = \
+             ($qualifiers)/VLIM=`($region_z_lo)`:`($region_z_hi)`
 
       IF ($region_yt"0|*>1") THEN 
          DEFINE SYMBOL ferret_plot_var = the_plot_var_noregion[ \
@@ -324,9 +296,6 @@ ENDIF ! xz
 IF `STRINDEX("($viewshape)", "XT") GT 0` THEN
    IF ($varshape"0|T>1|*>0") THEN 
       LET addx = xbox[gx=the_plot_var,x=($region_x_lo)]
-      IF `STRCMP("($region_x_lo)", "($region_x_hi)") NE 0` THEN DEFINE SYMBOL qualifiers = \
-        ($qualifiers)/HLIM=`($region_x_lo)`:`($region_x_hi)`
-
       IF ($region_yz"0|*>1") THEN 
          DEFINE SYMBOL ferret_plot_var = the_plot_var_noregion[ \
          X=`($region_x_lo)-addx`:`($region_x_hi)+addx`($data_analysis_expr),($region_t),($region_yz)]
@@ -350,8 +319,10 @@ IF `STRINDEX("($viewshape)", "XT") GT 0` THEN
       LET tt = T[GT=($data_var),d=($data_num)]
       LET tlo = `TT[T=($region_t_lo)@ITP]`
       LET thi = `TT[T=($region_t_hi)@ITP]`
-      IF `STRCMP("($region_t_lo)", "($region_t_hi)") NE 0` THEN DEFINE SYMBOL qualifiers = \
-        ($qualifiers)/VLIM=`tlo`:`thi`
+      IF `STRCMP("($region_t_lo)", "($region_t_hi)") NE 0 AND \
+          (STRINDEX("($ferret_curvi_quals%0%)", "VLIM") EQ 0)`THEN \
+             DEFINE SYMBOL qualifiers = \
+             ($qualifiers)/VLIM=`tlo`:`thi`
 
       IF ($region_yz"0|*>1") THEN
          DEFINE SYMBOL ferret_plot_var = the_plot_var_noregion[ \
@@ -380,9 +351,6 @@ IF `STRINDEX("($viewshape)", "YZ") GT 0` THEN
 
    IF ($varshape"0|Z>1|*>0") THEN 
       LET addy = ybox[gy=the_plot_var,y=($region_y_lo)]
-      IF `STRCMP("($region_y_lo)", "($region_y_hi)") NE 0` THEN DEFINE SYMBOL qualifiers = \
-        ($qualifiers)/HLIM=`($region_y_lo)`:`($region_y_hi)`
-
       IF ($region_xt"0|*>1") THEN
          DEFINE SYMBOL ferret_plot_var = the_plot_var_noregion[ \
          Y=`($region_y_lo)-addy`:`($region_y_hi)+addy`($data_analysis_expr),($region_z),($region_xt)]
@@ -403,8 +371,10 @@ IF `STRINDEX("($viewshape)", "YZ") GT 0` THEN
 
    IF ($varshape"0|Y>1|*>0") THEN 
       LET addz = zbox[gz=the_plot_var,z=($region_z_lo)]
-      IF `STRCMP("($region_z_lo)", "($region_z_hi)") NE 0` THEN DEFINE SYMBOL qualifiers = \
-        ($qualifiers)/VLIM=`($region_z_lo)`:`($region_z_hi)`
+      IF `STRCMP("($region_z_lo)", "($region_z_hi)") NE 0 AND \
+          (STRINDEX("($ferret_curvi_quals%0%)", "VLIM") EQ 0)`THEN \
+             DEFINE SYMBOL qualifiers = \
+             ($qualifiers)/VLIM=`($region_z_lo)`:`($region_z_hi)`
 
       IF ($region_xt"0|*>1") THEN
          DEFINE SYMBOL ferret_plot_var = the_plot_var_noregion[ \
@@ -431,8 +401,10 @@ ENDIF ! YZ
 IF `STRINDEX("($viewshape)", "YT") GT 0` THEN
    IF ($varshape"0|T>1|*>0") THEN 
       LET addy = ybox[gy=the_plot_var,y=($region_y_lo)]
-      IF `STRCMP("($region_y_lo)", "($region_y_hi)") NE 0` THEN DEFINE SYMBOL qualifiers = \
-        ($qualifiers)/VLIM=`($region_y_lo)`:`($region_y_hi)`
+      IF `STRCMP("($region_y_lo)", "($region_y_hi)") NE 0 AND \
+          (STRINDEX("($ferret_curvi_quals%0%)", "VLIM") EQ 0)`THEN \
+             DEFINE SYMBOL qualifiers = \
+             ($qualifiers)/VLIM=`($region_y_lo)`:`($region_y_hi)`
 
       IF ($region_xz"0|*>1") THEN
          DEFINE SYMBOL ferret_plot_var = the_plot_var_noregion[ \
@@ -458,9 +430,6 @@ IF `STRINDEX("($viewshape)", "YT") GT 0` THEN
       LET tt = T[GT=($data_var),d=($data_num)]
       LET tlo = `TT[T=($region_t_lo)@ITP]`
       LET thi = `TT[T=($region_t_hi)@ITP]`
-      IF `STRCMP("($region_t_lo)", "($region_t_hi)") NE 0` THEN DEFINE SYMBOL qualifiers = \
-        ($qualifiers)/HLIM=`tlo`:`thi`
-
       IF ($region_xz"0|*>1") THEN 
          DEFINE SYMBOL ferret_plot_var = the_plot_var_noregion[ \
          T=`tlo-addt`:`thi+addt`($data_analysis_expr),($region_y),($region_xz)]
@@ -487,8 +456,10 @@ ENDIF ! YT
 IF `STRINDEX("($viewshape)", "ZT") GT 0` THEN
    IF ($varshape"0|T>1|*>0") THEN 
       LET addz = zbox[gz=the_plot_var,z=($region_z_lo)]
-      IF `STRCMP("($region_z_lo)", "($region_z_hi)") NE 0` THEN DEFINE SYMBOL qualifiers = \
-        ($qualifiers)/VLIM=`($region_z_lo)`:`($region_z_hi)`
+      IF `STRCMP("($region_z_lo)", "($region_z_hi)") NE 0 AND \
+          (STRINDEX("($ferret_curvi_quals%0%)", "VLIM") EQ 0)`THEN \
+             DEFINE SYMBOL qualifiers = \
+             ($qualifiers)/VLIM=`($region_z_lo)`:`($region_z_hi)`
 
       IF ($region_xy"0|*>1") THEN
          DEFINE SYMBOL ferret_plot_var = the_plot_var_noregion[ \
@@ -514,9 +485,6 @@ IF `STRINDEX("($viewshape)", "ZT") GT 0` THEN
       LET tt = T[GT=($data_var),d=($data_num)]
       LET tlo = `TT[T=($region_t_lo)@ITP]`
       LET thi = `TT[T=($region_t_hi)@ITP]`
-      IF `STRCMP("($region_t_lo)", "($region_t_hi)") NE 0` THEN DEFINE SYMBOL qualifiers = \
-        ($qualifiers)/HLIM=`tlo`:`thi`
-
       IF ($region_xy"0|*>1") THEN 
          DEFINE SYMBOL ferret_plot_var = the_plot_var_noregion[ \
          T=`tlo-addt`:`thi+addt`($data_analysis_expr),($region_z),($region_xy)]
