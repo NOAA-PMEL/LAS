@@ -108,7 +108,13 @@ IF `($num)+1 EQ ($data_count)` THEN GO LAS_set_strides.jnl
 
 ! to set non-native strides for dataset 1 on a difference plot.
 IF `($no_native_strides_xy"0|*>1") AND ($set_ndx_strides"0|*>1") EQ 0` THEN \
-  GO LAS_set_strides.jnl  
+!  GO LAS_set_strides.jnl  
+
+   IF `STRINDEX( "($operation_ID)", "GE" ) NE 0` THEN
+      GO LAS_set_strides_GE
+   ELSE
+      GO LAS_set_strides
+   ENDIF
 
 ! IF contour and fill levels havent been set in the configuration or
 ! the user interface, set levels based on the variable after it is strided and its region set.
