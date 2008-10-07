@@ -282,6 +282,47 @@
       return req;
   }
 
+  function getNewHTTPObject()
+{
+        var xmlhttp;
+
+        /** Special IE only code ... */
+        /*@cc_on
+          @if (@_jscript_version >= 5)
+              try
+              {
+                  xmlhttp = new ActiveXObject("Msxml2.XMLHTTP");
+              }
+              catch (e)
+              {
+                  try
+                  {
+                      xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
+                  }
+                  catch (E)
+                  {
+                      xmlhttp = false;
+                  }
+             }
+          @else
+             xmlhttp = false;
+        @end @*/
+
+        /** Every other browser on the planet */
+        if (!xmlhttp && typeof XMLHttpRequest != 'undefined')
+        {
+            try
+            {
+                xmlhttp = new XMLHttpRequest();
+            }
+            catch (e)
+            {
+                xmlhttp = false;
+            }
+        }
+
+        return xmlhttp;
+}
   /**
    * compute color scale and extract time frames for the selected time range
    */
@@ -290,6 +331,12 @@
       var prefix = 'ProductServer.do?xml=';
       var url = prefix+escape(theReq.getXMLText());
       var xmlhttp = new XMLHttpRequest();
+      //var xmlhttp = getNewHTTPObject();
+      
+      if (xmlhttp==null){
+          alert("Your Browser does not support AJAX");
+          return;
+      }
       //wait for response
       xmlhttp.open('GET', url, true);
       xmlhttp.onreadystatechange = function(){
@@ -353,11 +400,16 @@
    * initialize variables for animation
    */
   function animationInit(){
-      fillLevels    = xmlDoc.getElementsByTagName("fill_levels")[0].childNodes[0].nodeValue;
-      contourLevels = xmlDoc.getElementsByTagName("contour_levels")[0].childNodes[0].nodeValue;
-      //depAxisScale  = xmlDoc.getElementsByTagName("dep_axis_scale")[0].childNodes[0].nodeValue;
+      //fillLevels    = xmlDoc.getElementsByTagName("fill_levels")[0].childNodes[0].nodeValue;
+      //contourLevels = xmlDoc.getElementsByTagName("contour_levels")[0].childNodes[0].nodeValue;
+      if(xmlDoc.getElementsByTagName("fill_levels")[0].childNodes[0] != null){
+          fillLevels    = xmlDoc.getElementsByTagName("fill_levels")[0].childNodes[0].nodeValue;
+      }
+      if(xmlDoc.getElementsByTagName("contour_levels")[0].childNodes[0] != null){
+          contourLevels = xmlDoc.getElementsByTagName("contour_levels")[0].childNodes[0].nodeValue;
+      }
       if(xmlDoc.getElementsByTagName("dep_axis_scale")[0].childNodes[0]!=null){
-        depAxisScale  = xmlDoc.getElementsByTagName("dep_axis_scale")[0].childNodes[0].nodeValue;
+          depAxisScale  = xmlDoc.getElementsByTagName("dep_axis_scale")[0].childNodes[0].nodeValue;
       }
 
       var n = xmlDoc.getElementsByTagName("frame").length;
@@ -661,7 +713,7 @@
         }else{
             thisReq.setOperation('Plot_2D_XY');
 
-            if(fillLevels != null && fillLevels != "" && fillLevels != "\n"){
+            if(fillLevels != null && fillLevels != "" && fillLevels != "\n" && fillLevels != 0){
                 thisReq.setProperty('ferret','fill_levels', fillLevels);
             }
 
@@ -674,7 +726,7 @@
       //for XZ view
       if(initView == 'xz' || initView == 'zx'){
           thisReq.setOperation('Plot_2D');
-          if(fillLevels != null && fillLevels != "" && fillLevels != "\n"){
+          if(fillLevels != null && fillLevels != "" && fillLevels != "\n" && fillLevels != 0){
               thisReq.setProperty('ferret','fill_levels', fillLevels);
           }
           if(contourLevels != null && contourLevels != "" && contourLevels != "\n"){
@@ -685,7 +737,7 @@
       //for YZ view
       if(initView == 'yz' || initView == 'zy'){
           thisReq.setOperation('Plot_2D');
-          if(fillLevels != null && fillLevels != "" && fillLevels != "\n"){
+          if(fillLevels != null && fillLevels != "" && fillLevels != "\n" && fillLevels != 0){
               thisReq.setProperty('ferret','fill_levels', fillLevels);
           }
           if(contourLevels != null && contourLevels != "" && contourLevels != "\n"){
@@ -755,7 +807,7 @@
           }else{
               thisReq.setOperation('Plot_2D_XY');
               thisReq.setProperty('ferret','view','xy');
-              if(fillLevels != null && fillLevels != "" && fillLevels != "\n"){
+              if(fillLevels != null && fillLevels != "" && fillLevels != "\n" && fillLevels != 0){
                   thisReq.setProperty('ferret','fill_levels', fillLevels);
               }
               if(contourLevels != null && contourLevels != "" && contourLevels != "\n"){
@@ -768,7 +820,7 @@
       if(initView == 'xzt' || initView == 'zxt'){
           thisReq.setOperation('Plot_2D');
           thisReq.setProperty('ferret','view','xz');
-          if(fillLevels != null && fillLevels != "" && fillLevels != "\n"){
+          if(fillLevels != null && fillLevels != "" && fillLevels != "\n" && fillLevels != 0){
               thisReq.setProperty('ferret','fill_levels', fillLevels);
           }
           if(contourLevels != null && contourLevels != "" && contourLevels != "\n"){
@@ -780,7 +832,7 @@
       if(initView == 'yzt' || initView == 'zyt'){
           thisReq.setOperation('Plot_2D');
           thisReq.setProperty('ferret','view','yz');
-          if(fillLevels != null && fillLevels != "" && fillLevels != "\n"){
+          if(fillLevels != null && fillLevels != "" && fillLevels != "\n" && fillLevels != 0){
               thisReq.setProperty('ferret','fill_levels', fillLevels);
           }
           if(contourLevels != null && contourLevels != "" && contourLevels != "\n"){
