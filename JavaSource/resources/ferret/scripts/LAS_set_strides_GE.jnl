@@ -32,10 +32,18 @@ IF ($ferret_stride_quality_factor"0|0.0>1|*>0") THEN LET maxpix = 700  ! best(sl
 
 !limit number of points (for place mark operation)
 IF `STRINDEX( "($operation_ID)", "Grid" ) NE 0` THEN
-  LET maxpix = 10  ! default 
-  IF ($ferret_stride_quality_factor"0|1.0>1|*>0") THEN LET maxpix = 10 ! draft(fast)
-  IF ($ferret_stride_quality_factor"0|0.5>1|*>0") THEN LET maxpix = 20  ! medium
-  IF ($ferret_stride_quality_factor"0|0.0>1|*>0") THEN LET maxpix = 30  ! best(slow)
+  LET xycoord = 10  ! default 
+
+  !jli 
+  !for xycoord=10: 
+  !    36 placemarks in x for range of 360, i.e., 1 placemark per 10 degrees
+  !    18 placemarks in y for range of 180
+  !    for sub-regions, increase the number of placemarks proportionaly
+  !    for example, if the x range is 180, make 1 placemark per 5 degrees
+
+  IF ($ferret_stride_quality_factor"0|1.0>1|*>0") THEN LET xycoord = 10 ! draft(fast)
+  IF ($ferret_stride_quality_factor"0|0.5>1|*>0") THEN LET xycoord = 6  ! medium
+  IF ($ferret_stride_quality_factor"0|0.0>1|*>0") THEN LET xycoord = 2  ! best(slow)
 ENDIF
 
 ! For 2D plots
@@ -44,13 +52,21 @@ ENDIF
 ! if the nominal number of points looks like it will be large.
 
 IF ($region_x_lo"0|*>1") THEN 
+
+    cancel mode long
+    cancel mode lat
+
+    LET x_range = `($data_var),return=xend` - `($data_var),return=xstart`
+
     LET xx = x[gx=($data_var)[d=($data_num)]]
     LET nx = xx[i=@ngd]
-    LET x_pct = ($region_x_range)/360
+!   LET x_pct = ($region_x_range)/360
+    LET x_pct = ($region_x_range)/x_range !x range of request over data's x range
     LET pixsize = `nx*x_pct`
-!         LET pixsize = `MAX(pixsize, nx)`
+    LET pixsize = `MIN(pixsize, nx)`
 
     DEFINE SYMBOL xstride = `INT((pixsize/maxpix)+1)`
+
 !    IF `pixsize GT maxpix` THEN 
     IF `pixsize GT maxpix AND STRINDEX( "($operation_ID)", "Grid" ) EQ 0` THEN
        DEFINE SYMBOL xstride = `INT((pixsize/maxpix)+1)`
@@ -58,7 +74,21 @@ IF ($region_x_lo"0|*>1") THEN
     ENDIF
 
     IF `STRINDEX( "($operation_ID)", "Grid" ) NE 0` THEN
-       DEFINE SYMBOL xstride_coord = `360*($xstride)/nx`
+       !DEFINE SYMBOL xstride_coord = `360*($xstride)/nx`
+
+!       DEFINE SYMBOL xstride_coord = `x_range*($xstride)/nx`
+
+        DEFINE SYMBOL data_xcoord = `x_range/nx`               ! data's grid resolution in x
+
+        IF `($region_x_range) LT 180` THEN
+            DEFINE SYMBOL xstride_coord = `INT(x_pct*xycoord)` ! stride value in x
+        ELSE
+            DEFINE SYMBOL xstride_coord = `INT(1*xycoord)`     ! for range >= 180, use the same stride value
+        ENDIF
+
+        IF `($xstride_coord) LT ($data_xcoord)` THEN           ! stride value >= data resolution
+           DEFINE SYMBOL xstride_coord = `($data_xcoord)`
+        ENDIF
     ENDIF
 
 ENDIF
@@ -67,22 +97,36 @@ ENDIF
 !IF `STRINDEX( "($operation_ID)", "Grid" ) NE 0` THEN LET maxpix = 100
 
 IF ($region_y_lo"0|*>1") THEN 
+    cancel mode long
+    cancel mode lat
+
+    LET y_range = `($data_var),return=yend` - `($data_var),return=ystart`
+
     LET yy = y[gy=($data_var)[d=($data_num)]]
     LET ny = yy[j=@ngd]
-    LET y_pct = ($region_y_range)/180
+!    LET y_pct = ($region_y_range)/180
+    LET y_pct = ($region_y_range)/y_range
     LET pixsize = `ny*y_pct`
-!         LET pixsize = `MAX(pixsize, ny)`
+    LET pixsize = `MIN(pixsize, ny)`
 
     DEFINE SYMBOL ystride = `INT((pixsize/maxpix)+1)`
+  
 !    IF `pixsize GT maxpix` THEN
     IF `pixsize GT maxpix AND STRINDEX( "($operation_ID)", "Grid" ) EQ 0` THEN 
        DEFINE SYMBOL ystride = `INT((pixsize/maxpix)+1)`
        IF `($ystride) GT 1` THEN SET AXIS/STRIDE=($ystride) `($data_var)[d=($data_num)],return=yaxis`
     ENDIF
 
-    !ystride is latitude value for place mark
     IF `STRINDEX( "($operation_ID)", "Grid" ) NE 0` THEN
-       DEFINE SYMBOL ystride_coord = `180*($ystride)/ny`
+!      DEFINE SYMBOL ystride_coord = `y_range*($ystride)/ny`
+!      DEFINE SYMBOL ystride_coord =  `INT((y_pct*xycoord)+1)`
+ 
+       DEFINE SYMBOL data_ycoord = `y_range/nx`              ! data's grid resolution in x
+       DEFINE SYMBOL ystride_coord = `INT(y_pct*xycoord)`   ! stride value in y
+           
+       IF `($ystride_coord) LT ($data_ycoord)` THEN         ! stride value >= data resolution
+           DEFINE SYMBOL ystride_coord = `($data_ycoord)`
+       ENDIF
     ENDIF
 ENDIF
 
