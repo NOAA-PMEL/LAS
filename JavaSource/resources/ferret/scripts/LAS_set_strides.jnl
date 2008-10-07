@@ -90,7 +90,7 @@ IF ($ferret_size"0|0.25>1|*>0")    THEN LET maxpix = 500  ! medium
 IF ($ferret_size"0|0.5>1|*>0")     THEN LET maxpix = 600  ! default
 IF ($ferret_size"0|0.8333>1|*>0")  THEN LET maxpix = 700  ! large
 
-IF ($ferret_google_plot"0|*>1") THEN GO LAS_setup_strides_GE
+!IF ($ferret_google_plot"0|*>1") THEN GO LAS_setup_strides_GE
 
 IF `($region_x_range"0|0|*>1") AND ($no_native_strides_xy"0|*>1") NE 1` THEN 
 
@@ -221,11 +221,11 @@ IF `($xstride"0|1>0|*>1") + ($ystride"0|1>0|*>1") + ($zstride"0|1>0|*>1") + ($ts
 ENDIF
 
 ! Set this for list_grid
-IF ($ferret_google_plot"0|*>1") THEN
-    IF `STRINDEX( "($operation_ID)", "Grid" ) NE 0` THEN
-       DEFINE SYMBOL xstride_coord = `INT(360*($xstride"1")/nx)`
-       DEFINE SYMBOL ystride_coord = `INT(180*($ystride"1")/ny)`
-    ENDIF
-ENDIF
+!IF ($ferret_google_plot"0|*>1") THEN
+!    IF `STRINDEX( "($operation_ID)", "Grid" ) NE 0` THEN
+!       DEFINE SYMBOL xstride_coord = `INT(360*($xstride"1")/nx)`
+!       DEFINE SYMBOL ystride_coord = `INT(180*($ystride"1")/ny)`
+!    ENDIF
+!ENDIF
 
 ! End of $RCSfile ------------LAS_set_strides.jnl--------------------------
