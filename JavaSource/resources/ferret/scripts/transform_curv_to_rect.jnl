@@ -132,18 +132,6 @@ ENDIF
 
 CANCEL SYMBOL error_string 
 
-! LET the_var_rect = ($regrid_fcn)(\
-!         ($data_var)[d=($data_num),($reg_zt),I=($clon_imin):($clon_imax),J=($clat_jmin):($clat_jmax)],\
-!        ($cf_map_var)[d=($mapfile_num)] )
-! LET the_var_rect_no_zt = ($regrid_fcn)(\
-!         ($data_var)[d=($data_num),I=($clon_imin):($clon_imax),J=($clat_jmin):($clat_jmax)],\
-!        ($cf_map_var)[d=($mapfile_num)] )
-      
-! IF ($region_x_lo"0|*>1") THEN DEFINE SYMBOL ferret_curvi_quals \   
-!     ($ferret_curvi_quals)/HLIM=($region_x_lo):($region_x_hi)
-! IF ($region_y_lo"0|*>1") THEN DEFINE SYMBOL ferret_curvi_quals \   
-!     ($ferret_curvi_quals)/VLIM=($region_y_lo):($region_y_hi)
-
 ! for the auto-levels scripts, we will use just the data field, subsetted but not regridded.
 DEFINE SYMBOL auto_lev_var = ($data_var)[d=($data_num),I=($clon_imin):($clon_imax),J=($clat_jmin):($clat_jmax)]
 IF ($reg_zt"0|*>1") THEN DEFINE SYMBOL auto_lev_var = ($data_var)[d=($data_num),($reg_zt),I=($clon_imin):($clon_imax),J=($clat_jmin):($clat_jmax)]
