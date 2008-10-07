@@ -309,4 +309,7 @@ IF ($ferret_google_plot"0|*>1") THEN
 
 ENDIF
 
+IF `($num"0|*>1") EQ 0` THEN \
+ DEFINE SYMBOL set_ndx_strides_0 =  ($set_ndx_strides)
+
 ! End of $RCSfile ------------ LAS_set_strides_nonative.jnl--------------------------
