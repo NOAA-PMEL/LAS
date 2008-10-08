@@ -9,15 +9,15 @@
 function LASUI () {
 	// references for everything the UI builds
 	this.refs = {
-		"plot" : {}, 
-		"DW" : {"widgetType" : null}, 
-		"DepthWidget" : {"widgetType":null}, 
+		"plot" : {},
+		"DW" : {"widgetType" : null},
+		"DepthWidget" : {"widgetType":null},
 		"analysis" : {"enabled":false},
 		"options": {"plot" :{},"download":{},"external":{}},
 		"operations": {"plot" :{},"download":{},"external":{}}
 
 	};
-		
+
 	// server side resource urls
 	this.hrefs = {
 		"getProduct"  : {"url" : "ProductServer.do"},
@@ -32,7 +32,7 @@ function LASUI () {
 
 	//application state
 	this.state = {
-		"dataset" : null, 
+		"dataset" : null,
 		"variables" : {},
 		"operation" : {"plot" :null,"download":null,"external":null},
 		"properties" : {"plot" :[],"download":[],"external":[]},
@@ -42,7 +42,7 @@ function LASUI () {
 		"categorynames" : [],
 		"analysis" : {"type":null,"axes":{}}
 	};
-					
+
 	//DOM anchor ids.
 	this.anchors = {
 		"tree" : "tree",
@@ -60,19 +60,19 @@ function LASUI () {
 			"minY" : "input_minY"
 		 },
 		"analysis" : "analysis"
-	} 
-							
-	this.request = new LASRequest();
-			
-	this.autoupdate=false;	
+	}
 
-	for(var f in this)	
+	this.request = new LASRequest();
+
+	this.autoupdate=false;
+
+	for(var f in this)
 		if(typeof this[f] == "function")
 			this[f].LASBind = function(object) {
 		var __method = this;
-		var args = [];	
+		var args = [];
 		for (var i = 0, length = arguments.length; i < length; i++)
-      			args.push(arguments[i]);	
+      			args.push(arguments[i]);
 		var object = args.shift();
 		return function(event) {
 			return __method.apply(object, [event || window.event].concat(args));
@@ -96,8 +96,8 @@ LASUI.prototype.initUI = function (anchorId)
 		this.state.view.plot = this.params.view;
 		//this.state.xybox = eval("("+unescape(this.params.bbox)+")");
 		this.autoupdate = this.params.autoupdate;
-			
-	}	
+
+	}
 		this.UIMask = document.createElement("DIV");
 	this.UIMask.className = "LASUIMask";
 	this.toggleUIMask('none');
@@ -105,7 +105,7 @@ LASUI.prototype.initUI = function (anchorId)
 	this.firstload=true;
 	if(!this.updating)if(this.autoupdate)
 		this.submitOnLoad = true;
-	else	
+	else
 		this.submitOnLoad = false;
 	this.submitOnLoad=true;
 
@@ -124,7 +124,7 @@ LASUI.prototype.initUI = function (anchorId)
 				"z": document.getElementById("z_analysis"),
 				"t": document.getElementById("t_analysis")
 				};
-	
+
 	//for(var a in this.refs.analysis.axes) {
 		//this.refs.analysis.axes[a].checkbox.onclick = this.selectAnalysisAxis.LASBind(this,a);
 		this.refs.analysis.type.axes.onchange = this.selectAnalysisAxis.LASBind(this,null,true);
@@ -139,28 +139,28 @@ LASUI.prototype.initUI = function (anchorId)
    	this.refs.inputs.maxX.onchange = this.setMaxX.LASBind(this);
 	this.refs.inputs.maxY.onchange = this.setMaxY.LASBind(this);
 	this.refs.inputs.minX.onchange = this.setMinX.LASBind(this);
-	this.refs.inputs.minY.onchange = this.setMinY.LASBind(this);				
+	this.refs.inputs.minY.onchange = this.setMinY.LASBind(this);
 	//inititialize the map widget
 	this.initMap('MapWidget');
 
 	if(document.getElementById("categories")) {
 		this.refs.categories = {};
-		
+
 		this.refs.categories.LINode = document.getElementById("categories");
 		this.refs.categories.title = document.createElement("SPAN");
 		this.refs.categories.title.innerHTML = "Select a dataset category.";
-		this.refs.categories.title.className = "LASTreeTitleNode"; 		
+		this.refs.categories.title.className = "LASTreeTitleNode";
 		this.refs.categories.ULNode= document.createElement("UL");
-		this.refs.categories.ULNode.className = "LASTreeULNode";		
+		this.refs.categories.ULNode.className = "LASTreeULNode";
 		this.refs.categories.LINode.appendChild(this.refs.categories.title);
 		this.refs.categories.LINode.appendChild(this.refs.categories.ULNode);
 		this.refs.categories.isExpanded = true;
-		
+
 		if(!document.all)
 			var req = new XMLHttpRequest(this);
 		else
-			var req = new ActiveXObject("Microsoft.XMLHTTP"); 
-		
+			var req = new ActiveXObject("Microsoft.XMLHTTP");
+
 		req.onreadystatechange = this.AJAXhandler.LASBind(this, req, "this.setCategoryTreeNode(req.responseText,this.refs.categories,'categories');");
 		req.open("GET", this.hrefs.getCategories.url);
 		req.send(null);
@@ -177,7 +177,7 @@ LASUI.prototype.AJAXhandler = function  (app) {
 		var req = args[1];
 		var callback = args[2];
 
-		if(req.readyState == 4 && req.status == 200) 
+		if(req.readyState == 4 && req.status == 200)
 			eval(callback);
 	}
 
@@ -190,15 +190,15 @@ LASUI.prototype.AJAXhandler = function  (app) {
 LASUI.prototype.setCategoryTreeNode = function (strJson, node, id) {
 
 
-	var response = eval("(" + strJson + ")");	
-	node.category = new LASGetCategoriesResponse(response);	
-				
+	var response = eval("(" + strJson + ")");
+	node.category = new LASGetCategoriesResponse(response);
+
 	if(node.category.getCategoryType()=="category")
 		node.children=[];
-	
+
 
 	for(var i=0; i<node.category.getCategorySize();i++)
-		this.setCategoryTreeSubNode(node, i,id);		
+		this.setCategoryTreeSubNode(node, i,id);
 	this.expand(node);
 }
 /**
@@ -214,18 +214,18 @@ LASUI.prototype.showInfo = function (evt) {
 				window.open(this.hrefs.getMetadata.url + '?dsid=' + node.category.getChildID(i));
 			else
 				window.open(this.hrefs.getMetadata.url + '?catid=' + node.category.getChildID(i));
-		
+
 }
 /**
  * Sub method to load a UI category or variable tree node from a json response
  * @param {string} node parent node in this.refs
- * @param {integer} i index of the childnode to be set 
+ * @param {integer} i index of the childnode to be set
  * @param {string} id a category id
  */
-LASUI.prototype.setCategoryTreeSubNode = function (node, i, id) {		
+LASUI.prototype.setCategoryTreeSubNode = function (node, i, id) {
 	switch(node.category.getCategoryType()) {
 		case "category":
-			this.createCategoryTreeNode(node,i,id); 
+			this.createCategoryTreeNode(node,i,id);
 			break;
 		case "dataset":
 			this.createVariableTreeNode(node,i);
@@ -235,14 +235,14 @@ LASUI.prototype.setCategoryTreeSubNode = function (node, i, id) {
 /**
  * Sub method to create category tree node and add it to the DOM
  * @param {object} node parent node in this.refs
- * @param {integer} i index of the childnode to be set 
+ * @param {integer} i index of the childnode to be set
  * @param {string} id a category id
  */
-LASUI.prototype.createCategoryTreeNode = function (node, i, id) {	
+LASUI.prototype.createCategoryTreeNode = function (node, i, id) {
 	if(node==this.refs.categories && node.category.getChildChildrenType(i)=="variables")
 		this.refs.categories.title.innerHTML="Datasets";
 	node.children[i] = {};
-	node.children[i].LINode = document.createElement("LI"); 	
+	node.children[i].LINode = document.createElement("LI");
 	node.children[i].LINode.className = "LASTreeLINode";
 
 	node.children[i].IMGNode =  document.createElement("IMG");
@@ -253,7 +253,7 @@ LASUI.prototype.createCategoryTreeNode = function (node, i, id) {
 	node.children[i].isExpanded = false;
 
 	node.children[i].ULNode = document.createElement("ul");
-	
+
 	var table = document.createElement("TABLE");
 
 	table.className = "LASTreeTableNode";
@@ -269,7 +269,7 @@ LASUI.prototype.createCategoryTreeNode = function (node, i, id) {
 	td1.style.verticalAlign="top";
 	td1.width="12px";
 	td1.appendChild(node.children[i].IMGNode);
-	td1.className = "LASTreeTableCell";	
+	td1.className = "LASTreeTableCell";
 	var td2 = document.createElement("TD");
 	td2.style.verticalAlign = "top";
 	td2.onclick = this.selectCategory.LASBind(this, node, i);
@@ -285,23 +285,23 @@ LASUI.prototype.createCategoryTreeNode = function (node, i, id) {
 		node.children[i].A.onclick = this.showInfo.LASBind(this,node,i);
 		td3.appendChild(node.children[i].A);
 		td3.className = "LASTreeTableCell";
-		td3.width="12pt";	
+		td3.width="12pt";
 		tr.appendChild(td3);
 	}
 	tbody.appendChild(tr);
 	table.appendChild(tbody);
 	node.children[i].LINode.appendChild(table);
 	node.children[i].LINode.appendChild(node.children[i].ULNode);
-	//do not add categories that do not have children 
+	//do not add categories that do not have children
 	if((node.category.getChildChildrenType(i) == "variables" && node.category.getChild(i).children_dsid)||node.category.getChildChildrenType(i) != "variables")
-		node.ULNode.appendChild(node.children[i].LINode);		
-	//if(node.category.getChildType(i)=='dataset' && node.category.getChildID(i)==this.state.dataset) 
-	//	this.getCategory(node, i);		
+		node.ULNode.appendChild(node.children[i].LINode);
+	//if(node.category.getChildType(i)=='dataset' && node.category.getChildID(i)==this.state.dataset)
+	//	this.getCategory(node, i);
 
 	if(this.refs.categories[node.category.getChild(i).ID]||node.category.getChild(i).ID==this.state.dataset)
 		this.selectCategory(null,node,i);
 }
-LASUI.prototype.createVariableOptionNode = function (node, i) {	
+LASUI.prototype.createVariableOptionNode = function (node, i) {
 	var OPTIONNode = document.createElement("OPTION");
 	OPTIONNode.innerHTML = node.category.getChildName(i);
 	OPTIONNode.id = "OPTION_" + node.category.getChildID(i);
@@ -311,18 +311,18 @@ LASUI.prototype.createVariableOptionNode = function (node, i) {
 	document.getElementById(this.anchors.variables).onchange = function (evt) {this.options[this.selectedIndex].onselect({"target" : {"selected" :true}})}
 	if(this.state.variables && this.state.dataset)
 		if(this.state.variables[this.state.dataset])
-				if(this.state.variable==node.category.getChildID(i)||this.state.variables[this.state.dataset]==node.category.getChild(i)){ 
+				if(this.state.variable==node.category.getChildID(i)||this.state.variables[this.state.dataset]==node.category.getChild(i)){
 					OPTIONNode.selected=true;
 				}
 
 }
 /**
  * Sub method to create variable tree node and add it to the DOM
- *  parameters: 
+ *  parameters:
  *  @param {object} node parent node in this.refs
- *  @param {integer} i index of the variable node within the category/dataset 
+ *  @param {integer} i index of the variable node within the category/dataset
  */
-LASUI.prototype.createVariableTreeNode = function (node, i) {	
+LASUI.prototype.createVariableTreeNode = function (node, i) {
 	if(!node.children)
 		node.children=[];
 	if(!node.children[i])
@@ -343,21 +343,21 @@ LASUI.prototype.createVariableTreeNode = function (node, i) {
 	node.children[i].className = "LASRadioInputNode";
 	node.children[i].INPUTNode.onclick=this.setVariable.LASBind(this, node, i);
 	node.children[i].INPUTNode.id = node.category.getChildID(i);
-			
-	var table = document.createElement("TABLE");	
+
+	var table = document.createElement("TABLE");
 	table.width="100%";
 	var tbody = document.createElement("TBODY");
 	var tr = document.createElement("TR");
-	
+
 	var td1 = document.createElement("TD");
 	td1.appendChild(node.children[i].INPUTNode);
-	td1.className = "LASTreeTableCell";	
+	td1.className = "LASTreeTableCell";
 	td1.width="12pt";
 	var td2 = document.createElement("TD");
 	td2.innerHTML= node.category.getChildName(i);
 	td2.align = "left";
 	td2.className = "LASTreeTableCell";
-	
+
  //  var td3 = document.createElement("TD");
 //	td3.align = "right";
 //	td3.className = "LASTreeTableCell";
@@ -366,43 +366,43 @@ LASUI.prototype.createVariableTreeNode = function (node, i) {
 	//node.children[i].A.innerHTML = "<img src='images/icon_info.gif'>";
 	//node.children[i].A.onclick = this.showInfo.LASBind(this,node,i);
 	//td3.appendChild(node.children[i].A);
-	
+
 	tr.appendChild(td1);
 	tr.appendChild(td2);
 //	tr.appendChild(td3);
 	tbody.appendChild(tr);
-	table.appendChild(tbody);	
+	table.appendChild(tbody);
 	node.children[i].LINode.appendChild(table);
-	
+
 	if(this.state.variables && this.state.dataset)
 		if(this.state.variables[this.state.dataset])
-				if(this.state.variable==node.category.getChildID(i)||this.state.variables[this.state.dataset]==node.category.getChild(i)){ 
+				if(this.state.variable==node.category.getChildID(i)||this.state.variables[this.state.dataset]==node.category.getChild(i)){
 					this.setVariable({}, node, i, true);
 					node.children[i].INPUTNode.checked=true;
 				}
 	node.ULNode.appendChild(node.children[i].LINode);
 }
-/** 
+/**
  * Method to query the server for a category
  * @param {object} node parent node in this.refs
- * @param {integer} i index of the child category to retrieve 
+ * @param {integer} i index of the child category to retrieve
  */
 LASUI.prototype.getCategory = function (parentNode, i) {
 	if(!parentNode.children[i].category) {
-		
+
 				if(!document.all)
 			var req = new XMLHttpRequest(this);
 		else
-			var req = new ActiveXObject("Microsoft.XMLHTTP"); 
+			var req = new ActiveXObject("Microsoft.XMLHTTP");
 		req.onreadystatechange = this.AJAXhandler.LASBind(this, req, "this.setCategoryTreeNode(req.responseText,args[3].children[args[4]],args[3].category.getChild(args[4]));", parentNode, i);
 		req.open("GET", this.hrefs.getCategories.url + "?catid=" + parentNode.category.getChildID(i));
 		req.send(null);
 
-	} 
+	}
 /*	if(parentNode.children[i].ULNode.style.display=="none") {
 		for(var c=0;c< parentNode.children.length;c++)
 			parentNode.children[c].ULNode.style.display="none";
-		parentNode.children[i].ULNode.style.display="";	//expand the category if it has been selected 
+		parentNode.children[i].ULNode.style.display="";	//expand the category if it has been selected
 		if(parentNode.children[i].category) //if the category is a dataset set it as the selected dataset
 			if(parentNode.children[i].category.getCategoryType()=="dataset")
 			{
@@ -413,22 +413,22 @@ LASUI.prototype.getCategory = function (parentNode, i) {
 }
 LASUI.prototype.onSetVariable = function() {
 				document.getElementById('categories').style.display='none';
-				this.toggleUIMask('none');		
+				this.toggleUIMask('none');
 				var categories = this.state.categorynames[0];
 				for(var i=1;i<this.state.categorynames.length;i++)
 					categories += ' / ' + this.state.categorynames[i];
 				//var variables = this.state.variables[this.state.dataset].name;
-				
-				document.getElementById(this.anchors.breadcrumb).innerHTML = '<a class="LASLink" onclick="window.open(\'getMetadata.do?dsid='+this.state.dataset+'\')"><img src="images/icon_info.gif"></a>&nbsp;<b>' + categories + ' : <select id="variables"/></b>'; 	
-								
-				
+
+				document.getElementById(this.anchors.breadcrumb).innerHTML = '<a class="LASLink" onclick="window.open(\'getMetadata.do?dsid='+this.state.dataset+'\')"><img src="images/icon_info.gif"></a>&nbsp;<b>' + categories + ' : <select id="variables"/></b>';
+
+
 				if(this.state.variables[this.state.dataset].grid_type!="scattered"){
 
 					if(this.refs.analysis.enabled) {
 						this.hideAnalysis();
 						this.showAnalysis();
-						
-					} 
+
+					}
 					document.getElementById("Analysis").style.display="";
 				} else {
 					document.getElementById("Analysis").style.display="none";
@@ -438,16 +438,16 @@ LASUI.prototype.onSetVariable = function() {
 				if(!this.updating)if(this.autoupdate)
 					this.makeRequest({},'plot');
 				else
-					this.showUpdateLink();							
+					this.showUpdateLink();
 }
 /**
- * Event handler for category selection, bind to category DOM object events. 
+ * Event handler for category selection, bind to category DOM object events.
  * @param {object} evt The event object
- * @param {object} arguments arguments added using function.prototype.LASBind<br> 
+ * @param {object} arguments arguments added using function.prototype.LASBind<br>
  *					this -- the context this function is run in<br>
  *					parentNode -- parent node in this.refs<br>
  *					i -- index of the category within the parentNode
- */ 
+ */
 LASUI.prototype.selectCategory = function (evt) {
 	var args = arguments;
 	var parentNode = args[1];
@@ -456,26 +456,26 @@ LASUI.prototype.selectCategory = function (evt) {
 	if(!parentNode.children[i].isExpanded) {
 		if(parentNode == this.refs.categories) {
 			this.state.categories = {};
-			this.state.categories[parentNode.category.getChild(i).ID]={};		
+			this.state.categories[parentNode.category.getChild(i).ID]={};
 		}
 		for(var c=0;c< parentNode.children.length;c++) {
 			this.collapse(parentNode.children[c]);
 			for(var b=0; b<this.state.categorynames.length;b++)
 				if(this.state.categorynames[b]==parentNode.category.getChildName(c))
-					this.state.categorynames.splice(b,this.state.categorynames.length-b);		
+					this.state.categorynames.splice(b,this.state.categorynames.length-b);
 		}
-		this.expand(parentNode.children[i]);	//expand the category if it has been selected 
-		if(parentNode.category.getChildChildrenType(i)=="variables") 
+		this.expand(parentNode.children[i]);	//expand the category if it has been selected
+		if(parentNode.category.getChildChildrenType(i)=="variables")
 			this.setDataset(parentNode.category.getChildDatasetID(i));
-			
-		if(parentNode == this.refs.categories)			
+
+		if(parentNode == this.refs.categories)
 			this.state.categorynames = [];
 		this.state.categorynames.push(parentNode.category.getChildName(i));
 	} else	{
 		this.collapse(parentNode.children[i]);
 		for(var c=0; c<this.state.categorynames.length;c++)
 			if(this.state.categorynames[c]==parentNode.category.getChildName(i))
-				this.state.categorynames.splice(c,this.state.categorynames.length-c);						
+				this.state.categorynames.splice(c,this.state.categorynames.length-c);
 
 	}
 	if(!parentNode.children[i].category) {
@@ -483,41 +483,41 @@ LASUI.prototype.selectCategory = function (evt) {
 				if(!document.all)
 			var req = new XMLHttpRequest(this);
 		else
-			var req = new ActiveXObject("Microsoft.XMLHTTP"); 
+			var req = new ActiveXObject("Microsoft.XMLHTTP");
 		req.onreadystatechange = this.AJAXhandler.LASBind(this, req, "this.setCategoryTreeNode(req.responseText,args[3].children[args[4]],args[3].category.getChild(args[4]));", parentNode, i);
 		req.open("GET", this.hrefs.getCategories.url + "?catid=" + parentNode.category.getChildID(i));
 		req.send(null);
-	}		
+	}
 }
 /**
- *Event handler for variable selection, bind to variable DOM object events. 
+ *Event handler for variable selection, bind to variable DOM object events.
  *@param {object} evt The event object
- *@param {object} arguments Arguments added using function.prototype.LASBind<br> 
+ *@param {object} arguments Arguments added using function.prototype.LASBind<br>
  *						this -- context setVariable is being run in<br>
- * 					dataset -- a LASGetCategoriesReponse dataset object<br> 
- * 					i -- index the variable within the category or dataset   
- */ 
+ * 					dataset -- a LASGetCategoriesReponse dataset object<br>
+ * 					i -- index the variable within the category or dataset
+ */
 
 LASUI.prototype.setVariable = function (evt) {
 	var args = arguments
 	var dataset = args[1];
 	var i = args[2];
 
-	if(evt.target){ 
-		if(evt.target.checked)			
+	if(evt.target){
+		if(evt.target.checked)
 			var loadVariable = evt.target.checked;
 		if(evt.target.selected)
 			var loadVariable = evt.target.selected;
 	}
-	else if (evt.srcElement){ 
-		if(evt.srcElement.checked)			
+	else if (evt.srcElement){
+		if(evt.srcElement.checked)
 			var loadVariable = evt.srcElement.checked;
 		if(evt.srcElement.selected)
 			var loadVariable = evt.srcElement.selected;
 	}
 	else if(args.length>3)
 		var loadVariable = args[3];
-	
+
 	if(args.length>4)
 		var switchVar = args[4]; // dont do the following AJAX calls
 	var datasetID = dataset.category.getDatasetID();
@@ -525,21 +525,21 @@ LASUI.prototype.setVariable = function (evt) {
 	var variable = dataset.category.getChild(i);
 	var variableLINode = dataset.children[i].LINode;
 	var variableINPUTNode = dataset.children[i].INPUTNode;
-	variableINPUTNode.checked = loadVariable;	
-	if (loadVariable) {			
+	variableINPUTNode.checked = loadVariable;
+	if (loadVariable) {
 		//start an array of selected variables for this dataset if we havent already
-		if(typeof this.state.variables[datasetID] != 'object') 
+		if(typeof this.state.variables[datasetID] != 'object')
 			this.state.variables[datasetID] = [];
-			
-		this.state.variables[datasetID] = variable; 
-					
+
+		this.state.variables[datasetID] = variable;
+
 		//get all the other data for this dataset/variable combo
 		this.state.dataset = datasetID;
 		this.state.variable = variableID;
 		if(!switchVar) {
 			this.getGrid(datasetID,variableID);
 			this.getDataConstraints(datasetID,variableID);
-			//this.getOperations(datasetID,variableID);//,this.state.view.plot);				
+			//this.getOperations(datasetID,variableID);//,this.state.view.plot);
 			this.getViews(datasetID,variableID);
 		}
 
@@ -547,18 +547,18 @@ LASUI.prototype.setVariable = function (evt) {
 			if (typeof this.state.variables[datasetID] == 'object')
 				delete(this.state.variables[datasetID]=null);
 			this.state.variable ="";
-		}		 		
+		}
 	if(this.onSetVariable)
 		this.onSetVariable();
-	
+
 	for(var i=0;i<dataset.children.length;i++)
 		this.createVariableOptionNode(dataset,i);
 
 }
 /**
  * Method to set the active dataset and call getGrid if appropriate
- * @params {string} dataset A dataset id 
- */ 
+ * @params {string} dataset A dataset id
+ */
 LASUI.prototype.setDataset = function (dataset) {
 	this.state.dataset = dataset;
 	this.state.newgrid = true;
@@ -572,13 +572,13 @@ LASUI.prototype.setDataset = function (dataset) {
  * Method to query the server for a category
  * @param {string} dataset The selected dataset id
  * @param {string} variable The selected variable id
- *	@param {string} view The selected view id 
- */	
+ *	@param {string} view The selected view id
+ */
 LASUI.prototype.getDataConstraints = function (dataset, variable) {
 		if(!document.all)
 			var req = new XMLHttpRequest(this);
 		else
-			var req = new ActiveXObject("Microsoft.XMLHTTP"); 
+			var req = new ActiveXObject("Microsoft.XMLHTTP");
 		req.onreadystatechange = this.AJAXhandler.LASBind(this, req, "this.setDataConstraints(req.responseText);");
 		req.open("GET", this.hrefs.getDataConstraints.url + '?dsid=' + dataset + '&varid=' + variable);
 		req.send(null);
@@ -587,8 +587,8 @@ LASUI.prototype.getDataConstraints = function (dataset, variable) {
  * Method to query the server for a category
  * @param {string} dataset The selected dataset id
  * @param {string} variable The selected variable id
- *	@param {string} view The selected view id 
- */	
+ *	@param {string} view The selected view id
+ */
 LASUI.prototype.setDataConstraints = function (strJson) {
 	if(strJson) {
 		var response = eval("(" + strJson + ")");
@@ -608,23 +608,23 @@ LASUI.prototype.setDataConstraints = function (strJson) {
 				this.state.constraints.constraint = [];
 				this.state.constraints.constraint[0]= temp;
 			}*/
-		
+
 			this.refs.constraints = [];
 		for(var c=0;c<this.state.constraints.constraint.length;c++) {
 			var constraint = {};
 			var DIVNode = document.createElement("DIV");
 			constraint.apply = document.createElement("INPUT");
 			constraint.apply.type="checkbox";
-			DIVNode.appendChild(constraint.apply);	
+			DIVNode.appendChild(constraint.apply);
 			if(this.state.constraints.constraint[c].constraint.menu.content) {
 				var temp =this.state.constraints.constraint[c].constraint.menu;
 				this.state.constraints.constraint[c].constraint.menu = [];
 				this.state.constraints.constraint[c].constraint.menu[0] = temp
-			}		
+			}
 			for(var m=0;m < this.state.constraints.constraint[c].constraint.menu.length;m++) {
 				//if(this.state.constraints.constraint[c].constraint.menu[m]) {
-					eval('constraint.' + this.state.constraints.constraint[c].constraint.menu[m].position + ' = document.createElement("SELECT")');		
-				
+					eval('constraint.' + this.state.constraints.constraint[c].constraint.menu[m].position + ' = document.createElement("SELECT")');
+
 					if(this.state.constraints.constraint[c].constraint.menu[m].item.content) {
 						var temp =this.state.constraints.constraint[c].constraint.menu[m].item;
 						this.state.constraints.constraint[c].constraint.menu[m].item = [];
@@ -636,8 +636,8 @@ LASUI.prototype.setDataConstraints = function (strJson) {
 						option.innerHTML = this.state.constraints.constraint[c].constraint.menu[m].item[i].content;
 						eval('constraint.' + this.state.constraints.constraint[c].constraint.menu[m].position + '.appendChild(option)');
 					}
-				//}				
-			} 
+				//}
+			}
 			if(constraint.lhs)DIVNode.appendChild(constraint.lhs);
 			if(constraint.ops)DIVNode.appendChild(constraint.ops);
 			if(constraint.rhs)
@@ -652,7 +652,7 @@ LASUI.prototype.setDataConstraints = function (strJson) {
 			this.refs.constraints.push(constraint);
 
 		}
-		}			
+		}
 	}
 }
 
@@ -660,19 +660,19 @@ LASUI.prototype.setDataConstraints = function (strJson) {
  * Method to query the server for the available operations
  * @param {string} dataset The selected dataset id
  * @param {string} variable The selected variable id
- *	@param {string} view The selected view id 
- */	
+ *	@param {string} view The selected view id
+ */
 LASUI.prototype.getOperations = function (dataset, variable, view) {
 
 		if(!document.all)
 			var req = new XMLHttpRequest(this);
 		else
-			var req = new ActiveXObject("Microsoft.XMLHTTP"); 
+			var req = new ActiveXObject("Microsoft.XMLHTTP");
 
 		if(view) {
 			var viewStr = '&view=' + view;
 			req.onreadystatechange = this.AJAXhandler.LASBind(this, req, "this.setOperationList(req.responseText);");
-		
+
 		} else {
 			return;
 			var	 viewStr = "";
@@ -681,8 +681,8 @@ LASUI.prototype.getOperations = function (dataset, variable, view) {
 
 		req.open("GET", this.hrefs.getOperations.url + '?dsid=' + dataset + '&varid=' + variable + viewStr);
 		req.send(null);
-		
-		
+
+
 }/**
  *	Event handler to set the operation
  *	@param {object} evt The event object
@@ -697,23 +697,23 @@ LASUI.prototype.setDownloadOperation = function (evt) {
 
 	this.state.operation.download=id;
 	this.refs.options.download.DOMNode.innerHTML="";
-	
+
 	var view = args[2];
-	var optiondef = args[3];	
-	this.state.view.download = view;	
-	this.updateConstraints(view);	
-	
+	var optiondef = args[3];
+	this.state.view.download = view;
+	this.updateConstraints(view);
+
 	if(optiondef) {
-		var cancel = document.createElement("INPUT");		
+		var cancel = document.createElement("INPUT");
 		cancel.type = "submit";
 		cancel.value=	"Close";
 		cancel.className = "LASSubmitInputNode";
 		cancel.onclick = this.genericHandler.LASBind(this,"this.refs.options.download.DOMNode.style.display='none';this.toggleUIMask('none');");
-		this.refs.options.download.DOMNode.innerHTML = "";		
+		this.refs.options.download.DOMNode.innerHTML = "";
 		this.refs.options.download.DOMNode.appendChild(cancel);
 		this.getOptions(optiondef, this.refs.options.download.DOMNode,"download");
 	}
-	
+
 }
 /**
  *	Event handler to set the operation
@@ -731,10 +731,10 @@ LASUI.prototype.setOperation = function (evt) {
 		type="plot";
 	this.state.operation[type]=id;
 	this.refs.options[type].DOMNode.innerHTML="";
-	
+
 	var view = args[2];
 
-	this.state.view[type] = view;	
+	this.state.view[type] = view;
 	if(this.refs.analysis.enabled)
 		for(var a in this.state.analysis.axes)
 			if(view.indexOf(a)<0){
@@ -743,33 +743,33 @@ LASUI.prototype.setOperation = function (evt) {
 			}
 			else {
 				this.refs.analysis.axes[a].selected = false;
-				if(a=="x"||a=="y")				
+				if(a=="x"||a=="y")
 					this.refs.analysis.axes["xy"].selected = false;
-				delete this.state.analysis.axes[a];	
+				delete this.state.analysis.axes[a];
 			}
 	this.state.view.widgets = view;
-	
-	this.updateConstraints();	
-	
+
+	this.updateConstraints();
+
 	if(optiondef) {
-		var cancel = document.createElement("INPUT");		
+		var cancel = document.createElement("INPUT");
 		cancel.type = "submit";
 		cancel.value=	"Close";
 		cancel.className = "LASSubmitInputNode";
 		cancel.onclick = this.genericHandler.LASBind(this,"this.refs.options.plot.DOMNode.style.display='none';this.toggleUIMask('none');");
-		this.refs.options.plot.DOMNode.innerHTML = "";		
+		this.refs.options.plot.DOMNode.innerHTML = "";
 		this.refs.options.plot.DOMNode.appendChild(cancel);
 		this.getOptions(optiondef, this.refs.options.plot.DOMNode,"plot");
 	}
-	
-	this.getOperations(this.state.dataset,this.state.variables[this.state.dataset].ID,this.state.view.plot);	
-	
+
+	this.getOperations(this.state.dataset,this.state.variables[this.state.dataset].ID,this.state.view.plot);
+
 	if (this.autoupdate)
 		this.makeRequest();
 	else
 		this.showUpdateLink();
 
-}	
+}
 LASUI.prototype.genericHandler = function (evt) {
 	if(arguments[1])
 		eval(arguments[1]);
@@ -777,13 +777,13 @@ LASUI.prototype.genericHandler = function (evt) {
 /**
  *  Method to populate the list of avialable operations from a json response from the server
  *  @param {string} strJson A json string compatibe with the LASGetOperationsResponse class
- */	
+ */
 LASUI.prototype.setOperationList = function (strJson) {
-	
+
 	var response = eval("(" + strJson + ")");
 	var setDefault = true;
 	this.state.operations = new LASGetOperationsResponse(response);
-	if(!this.refs.operations.external.DIVNode) {	
+	if(!this.refs.operations.external.DIVNode) {
 		this.refs.operations.external.DIVNode= document.createElement('DIV');
 		this.refs.operations.external.DIVNode.className='LASPopupDIVNode';
 		this.refs.operations.external.DIVNode.style.display="none";
@@ -796,19 +796,19 @@ LASUI.prototype.setOperationList = function (strJson) {
 
 	document.body.appendChild(this.refs.operations.external.DIVNode);
 	var setDefaultVis = true;
-	if(!this.state.operations.response.operations.error) 
+	if(!this.state.operations.response.operations.error)
 		for(var i=0;i<this.state.operations.getOperationCount();i++) {
-			this.setOperationNode(this.state.operations.getOperationID(i), this.state.operations.getOperationName(i));	
+			this.setOperationNode(this.state.operations.getOperationID(i), this.state.operations.getOperationName(i));
 			if(this.state.operations.getOperation(i).category == "visualization")
-			 	if(this.state.operations.getOperation(i)["default"] == "true") {					
+			 	if(this.state.operations.getOperation(i)["default"] == "true") {
 					this.state.operation.plot = this.state.operations.getOperationID(i);
 					setDefaultVis = false;
 					this.makeRequest({},"plot");
-				} else 
+				} else
 					var defaultVis = this.state.operations.getOperationID(i);
 
 		}
-	
+
 	if(setDefaultVis==true && defaultVis) {
 		this.state.operation.plot = defaultVis;
 		this.makeRequest({},"plot");
@@ -824,7 +824,7 @@ LASUI.prototype.setOperationList = function (strJson) {
 LASUI.prototype.setOperationNode = function (id, name) {
 
 	var button = document.getElementById(name);
-	if(button) { 	
+	if(button) {
 		button.style.visibility = "visible";
 		button.onclick=this.doProductIconClick.LASBind(this, id);
 	}
@@ -834,7 +834,7 @@ LASUI.prototype.doProductIconClick = function (evt) {
 	var id = args[1];
 
 	this.state.operation.external = id;
-	this.state.view.external = this.state.view.plot; 
+	this.state.view.external = this.state.view.plot;
 	this.toggleUIMask('');
 	this.refs.operations.external.DIVNode.innerHTML = "";
 
@@ -848,51 +848,51 @@ LASUI.prototype.doProductIconClick = function (evt) {
 	cancel.value="Close";
 	cancel.className = "LASSubmitInputNode";
 	cancel.onclick = this.genericHandler.LASBind(this, "this.refs.operations.external.DIVNode.style.display='none';this.toggleUIMask('none')");
-	
+
 	this.refs.operations.external.DIVNode.appendChild(submit);
 	this.refs.operations.external.DIVNode.appendChild(cancel);
 	if(this.state.operations.getOperationByID(id))
 		if(this.state.operations.getOperationByID(id).optiondef)
-			this.getOptions(this.state.operations.getOperationByID(id).optiondef.IDREF, this.refs.operations.external.DIVNode,"external");	
-		else {		
+			this.getOptions(this.state.operations.getOperationByID(id).optiondef.IDREF, this.refs.operations.external.DIVNode,"external");
+		else {
 			this.refs.operations.external.DIVNode.style.display='none';
-			this.toggleUIMask('none');		
-			this.makeRequest({},'external'); 
+			this.toggleUIMask('none');
+			this.makeRequest({},'external');
 			return;
-		}	
+		}
 	try {
-	if(!this.refs.options.external.options.response.options.status == "error") {	
-		this.toggleUIMask('none');		
-		this.makeRequest({},'external'); 
+	if(!this.refs.options.external.options.response.options.status == "error") {
+		this.toggleUIMask('none');
+		this.makeRequest({},'external');
 	} else
 		this.refs.operations.external.DIVNode.style.display="";
 	} catch (e)
 		{
-		this.toggleUIMask('none');		
-		this.makeRequest({},'external'); 
+		this.toggleUIMask('none');
+		this.makeRequest({},'external');
 	}
-}	
+}
 /**
  * Method to query the server for the available grids
  * @param {string} dataset A dataset id
- * @param {string} variable A variable id within the dataset 
+ * @param {string} variable A variable id within the dataset
  */
 LASUI.prototype.getGrid = function (dataset, variable) {
 			if(!document.all)
 			var req = new XMLHttpRequest(this);
 		else
-			var req = new ActiveXObject("Microsoft.XMLHTTP"); 
+			var req = new ActiveXObject("Microsoft.XMLHTTP");
 		req.onreadystatechange = this.AJAXhandler.LASBind(this, req, "this.setGrid(req.responseText);");
 		req.open("GET",  this.hrefs.getGrid.url + '?dsid=' + dataset + '&varid=' + variable);
 		req.send(null);
-			
 
-	
+
+
 }
-/** 
+/**
  * Method to evaluate a getGrid response and call getViews
  * @param {string} strJson A json string compatible with LASGetGridResponse.js
- */	
+ */
 LASUI.prototype.setGrid = function (strJson) {
 	if(strJson=="") {
 		alert("This dataset is currently unavailable.");
@@ -901,9 +901,9 @@ LASUI.prototype.setGrid = function (strJson) {
 	eval("var response = (" + strJson + ")");
 	if(this.state.grid)
 		this.state.lastgrid = this.clone(this.state.grid);
-	
-		
-			
+
+
+
 	this.state.grid = new LASGetGridResponse(response);
 	if(!this.state.lastgrid)
 		this.state.lastgrid = this.clone(this.state.grid);
@@ -912,22 +912,22 @@ LASUI.prototype.setGrid = function (strJson) {
 /**
  * Method to query the server for a list of allowed views
  * @param {string} dataset A dataset id
- * @param {string} variable A variable id 
+ * @param {string} variable A variable id
  */
-LASUI.prototype.getViews = function (dataset,variable) {	
+LASUI.prototype.getViews = function (dataset,variable) {
 				if(!document.all)
 			var req = new XMLHttpRequest(this);
 		else
-			var req = new ActiveXObject("Microsoft.XMLHTTP"); 
+			var req = new ActiveXObject("Microsoft.XMLHTTP");
 		req.onreadystatechange = this.AJAXhandler.LASBind(this, req, "this.setViews(req.responseText);");
 		req.open("GET", this.hrefs.getViews.url + '?dsid=' + dataset + '&varid=' +variable);
 		req.send(null);
-	
+
 }
 /**
  * Update the views list with the allowed views
  * @param {string} strJson A string compatible with LASGetViewsResposne.js
- */	
+ */
 LASUI.prototype.setViews = function (strJson) {
 	//clear the current view list and state
 	var response = eval("(" + strJson + ")");
@@ -939,8 +939,8 @@ LASUI.prototype.setViews = function (strJson) {
 LASUI.prototype.setDefaultProductMenu = function () {
 	this.refs.operations.plot.DOMNode.innerHTML = "";
 	this.refs.operations.download.DOMNode.innerHTML = "";
-		
-	for(var type in this.refs.operations)	
+
+	for(var type in this.refs.operations)
 		this.refs.operations[type].children ={};
 	delete this.refs.operations.download.SELECTNode;
 	var setPlotDefault = "true";
@@ -957,24 +957,24 @@ LASUI.prototype.setDefaultProductMenu = function () {
 				this.setProductNode(type, product);
 				if(defaultPlotProduct == null && type != "Download Data"){
 					var defaultPlotProduct = this.products[type][product];
-					var defaultPlotProductName = product;				
+					var defaultPlotProductName = product;
 				}
 				if(defaultDownloadProduct == null && type == "Download Data"){
 					var defaultDownloadProduct = this.products[type][product];
-					var defaultDownloadProductName = product;				
-				}				
+					var defaultDownloadProductName = product;
+				}
 				if(this.state.operation.plot == this.products[type][product].id && type != "Download Data" && this.state.view.plot == this.products[type][product].view) {
 					setPlotDefault = false;
 					this.refs.operations.plot.children[product].radio.checked = true;
-					this.setOperation(this,this.products[type][product].id,this.products[type][product].view,this.products[type][product].optiondef);								
+					this.setOperation(this,this.products[type][product].id,this.products[type][product].view,this.products[type][product].optiondef);
 				}
 				if(this.state.operation.download == this.products[type][product].id && type == "Download Data"/*&& this.state.view.plot == this.products[type][product].view*/ ) {
 					setDownloadDefault = false;
 					//this.refs.operations.download.children[product].DOMNode.selected = true;
-					this.setDownloadOperation(this,this.products[type][product].id,this.products[type][product].view,this.products[type][product].optiondef);								
+					this.setDownloadOperation(this,this.products[type][product].id,this.products[type][product].view,this.products[type][product].optiondef);
 				}
 			}
-	
+
 	if(setPlotDefault) {
 		this.setOperation(this,defaultPlotProduct.id,defaultPlotProduct.view,defaultPlotProduct.optiondef);
 		this.refs.operations.plot.children[defaultPlotProductName].radio.checked = true;
@@ -1001,22 +1001,22 @@ LASUI.prototype.setProductTypeNode = function(type) {
 		this.refs.operations.download.SELECTNode.style.top = "-3px";
 		var format = document.createElement("OPTION");
 		format.innerHTML = "Select format...";
-		this.refs.operations.download.SELECTNode.appendChild(format); 
+		this.refs.operations.download.SELECTNode.appendChild(format);
 		this.refs.operations.download.SELECTNode.onchange = function (evt) {this.options[this.selectedIndex].onselect()};
 		this.refs.operations.download.SELECTNode.style.position="relative";
 		//this.refs.operations.download.SELECTNode.style.top="4px";
-		
+
 		//var label = document.createElement("LI");
 		//label.className="LASPlotType";
 		//label.appendChild(this.refs.operations.download.SELECTNode);
 		this.refs.operations.download.INPUTNode = document.createElement("SPAN");
 		this.refs.operations.download.INPUTNode.className = "top_link"
 		this.refs.operations.download.INPUTNode.innerHTML = "Download Data";
-		this.refs.operations.download.INPUTNode.onclick = this.makeRequest.LASBind(this,"download");	
+		this.refs.operations.download.INPUTNode.onclick = this.makeRequest.LASBind(this,"download");
 		this.refs.operations.download.DOMNode.appendChild(this.refs.operations.download.INPUTNode);
 		this.refs.operations.download.DOMNode.appendChild(document.createTextNode('\u00a0'));
 		this.refs.operations.download.DOMNode.appendChild(this.refs.operations.download.SELECTNode);
-	} else 
+	} else
 		if(type!="Point Data") {
 			this.refs.operations.plot.children[type] = {};
 			this.refs.operations.plot.children[type].LINode = document.createElement("LI");
@@ -1047,8 +1047,8 @@ LASUI.prototype.setProductNode = function(type, product) {
 		this.refs.operations.plot.children[product].radio.className = "LASRadioInputNode";
 		this.refs.operations.plot.children[product].radio.value = product.id;
 		this.refs.operations.plot.children[product].radio.onselect = this.setOperation.LASBind(this,this.products[type][product].id,this.products[type][product].view,this.products[type][product].optiondef,"plot" );
-		this.refs.operations.plot.children[product].radio.onclick = this.setOperation.LASBind(this,this.products[type][product].id,this.products[type][product].view,this.products[type][product].optiondef,"plot");	
-		this.refs.operations.plot.children[product].LINode.appendChild(this.refs.operations.plot.children[product].radio);	
+		this.refs.operations.plot.children[product].radio.onclick = this.setOperation.LASBind(this,this.products[type][product].id,this.products[type][product].view,this.products[type][product].optiondef,"plot");
+		this.refs.operations.plot.children[product].LINode.appendChild(this.refs.operations.plot.children[product].radio);
 		this.refs.operations.plot.children[product].LINode.appendChild(this.refs.operations.plot.children[product].title);
 		this.refs.operations.plot.DOMNode.appendChild(this.refs.operations.plot.children[product].LINode);
 	} else {
@@ -1057,8 +1057,8 @@ LASUI.prototype.setProductNode = function(type, product) {
 		this.refs.operations.download.children[product].OPTIONNode.innerHTML =  product;
 		this.refs.operations.download.children[product].OPTIONNode.value = product.id;
 		this.refs.operations.download.children[product].OPTIONNode.onselect = this.setDownloadOperation.LASBind(this,this.products[type][product].id,this.products[type][product].view,this.products[type][product].optiondef);
-		//this.refs.operations.plot.children[product].OPTIONNode.onclick = this.setOperation.LASBind(this,this.products[type][product].id,this.products[type][product].view,this.products[type][product].optiondef);	
-		this.refs.operations.download.SELECTNode.appendChild(this.refs.operations.download.children[product].OPTIONNode);	
+		//this.refs.operations.plot.children[product].OPTIONNode.onclick = this.setOperation.LASBind(this,this.products[type][product].id,this.products[type][product].view,this.products[type][product].optiondef);
+		this.refs.operations.download.SELECTNode.appendChild(this.refs.operations.download.children[product].OPTIONNode);
 	}
 }
 LASUI.prototype.onPlotLoad = function () {
@@ -1068,9 +1068,12 @@ LASUI.prototype.onPlotLoad = function () {
 		document.getElementById(this.anchors.output).contentWindow.onPlotLoad = this.onPlotLoad.LASBind(this);
 	} else
 		this.refs.plot = {};
-	document.getElementById("wait").style.visibility="hidden";
-	document.getElementById("wait_msg").style.display="none";
-	document.getElementById('output').style.display = '';
+	if(document.getElementById("wait"))
+		document.getElementById("wait").style.visibility="hidden";
+	if(document.getElementById("wait_msg"))
+		document.getElementById("wait_msg").style.display="none";
+	if(document.getElementById('output'))
+		document.getElementById('output').style.display = '';
 
 }
 
@@ -1085,52 +1088,52 @@ LASUI.prototype.onFirstPlotLoad = function () {
 }
 /**
  * Update the 4D Constraints selectors
- */	
+ */
 LASUI.prototype.updateConstraints = function (view) {
 	if(view==null&& view !="")
 		var view = this.state.view.widgets;
 	else
 		this.state.view.widgets = view;
-	this.updating = true;			
+	this.updating = true;
 	document.getElementById("Date").innerHTML = "";
 	document.getElementById("Depth").innerHTML = "";
-	
+
 	if(this.state.grid.getAxis('x') || this.state.grid.getAxis('y')) {
-		if(!this.refs.XYSelect.enabled)  			
+		if(!this.refs.XYSelect.enabled)
 			this.refs.XYSelect.enable();
 	}
 	var reset=false;
-				
+
 	if(this.state.lastgrid) {
 		if(this.state.grid.response.grid.ID!=this.state.lastgrid.response.grid.ID)
 			reset=true;
 	}
 	if(!this.initialized)
 		reset=true;
-		
-	if(view.indexOf('x')>=0&&view.indexOf('y')>=0) 
+
+	if(view.indexOf('x')>=0&&view.indexOf('y')>=0)
 		this.initXYSelect("xy",reset);
-	else if(view.indexOf('x')>=0&&view.indexOf('y')<0) 
-		this.initXYSelect("x",reset);	
-	else if(view.indexOf('x')<0&&view.indexOf('y')>=0) 
-		this.initXYSelect("y",reset); 
-	else if(view.indexOf('x')<0&&view.indexOf('y')<0) 
+	else if(view.indexOf('x')>=0&&view.indexOf('y')<0)
+		this.initXYSelect("x",reset);
+	else if(view.indexOf('x')<0&&view.indexOf('y')>=0)
+		this.initXYSelect("y",reset);
+	else if(view.indexOf('x')<0&&view.indexOf('y')<0)
 		this.initXYSelect("point",reset);
-	
-	for(var d=0;d<this.state.grid.response.grid.axis.length;d++) 
-		if(view.indexOf(this.state.grid.response.grid.axis[d].type) < 0) 
+
+	for(var d=0;d<this.state.grid.response.grid.axis.length;d++)
+		if(view.indexOf(this.state.grid.response.grid.axis[d].type) < 0)
 			if(this.state.variables[this.state.dataset].grid_type!="scattered"&&!this.refs.analysis.enabled)
 				eval("this.init" + this.state.grid.response.grid.axis[d].type.toUpperCase() + "Constraint('point',reset)");
 			else
-				eval("this.init" + this.state.grid.response.grid.axis[d].type.toUpperCase() + "Constraint('range',reset)");					
+				eval("this.init" + this.state.grid.response.grid.axis[d].type.toUpperCase() + "Constraint('range',reset)");
 		else
-			eval("this.init" + this.state.grid.response.grid.axis[d].type.toUpperCase() + "Constraint('range',reset)");	
-	
+			eval("this.init" + this.state.grid.response.grid.axis[d].type.toUpperCase() + "Constraint('range',reset)");
+
 	this.refs.XYSelect.updatePixelExtents();
 	this.updating = false;
 	if(this.refs.analysis.enabled)
-		for(var d=0;d<this.state.grid.response.grid.axis.length;d++) 
-			if(view.indexOf(this.state.grid.response.grid.axis[d].type) < 0) 
+		for(var d=0;d<this.state.grid.response.grid.axis.length;d++)
+			if(view.indexOf(this.state.grid.response.grid.axis[d].type) < 0)
 				switch(this.state.grid.response.grid.axis[d].type) {
 					case 'z' : this.refs.DepthWidget[this.refs.DepthWidget.widgetType][1].disabled = true; break;
 					case 't' : if(this.refs.DW.widgetType)
@@ -1147,24 +1150,24 @@ LASUI.prototype.updateConstraints = function (view) {
 						  else
 							this.refs.DW[1].disabled = false;
 							 break;
-				}				
-		
-	
+				}
+
+
 	this.initialized=true;
 }
 /**
  * Initialize the XY select widget to the grid
  */
 LASUI.prototype.initXYSelect = function (mode, reset) {
-	if(!this.products) 
-		document.getElementById("XYRegionType").style.display = "";	
+	if(!this.products)
+		document.getElementById("XYRegionType").style.display = "";
 	if(this.refs.XYSelect && this.state.view.plot && this.state.dataset && this.state.variables)
 		this.refs.XYSelect.enable();
 	if(this.state.grid.getAxis('x') && this.state.grid.getAxis('y') && mode)
 	 {
 		var grid = {"x": {"min" : 0, "max" :0}, "y" : {"min" :0, "max" : 0}};
 
-		if(this.refs.plot.extents) 
+		if(this.refs.plot.extents)
 			var sel = this.refs.plot.extents.selection.grid;
 		else
 			var sel = {"x" : {"min" : this.refs.XYSelect.getSelectionGridXMin(),
@@ -1174,14 +1177,14 @@ LASUI.prototype.initXYSelect = function (mode, reset) {
 					 "max" : this.refs.XYSelect.getSelectionGridYMax()
 					}
 			}
-			
-		if(reset==true ) {		
+
+		if(reset==true ) {
 			if(this.state.grid.hasArange('x')||this.state.grid.hasMenu('x')) {
 				grid.x.min = parseFloat(this.state.grid.getLo('x'))-0.5;
 				grid.x.max = parseFloat(this.state.grid.getHi('x'))+0.5;
-			} 
-			
-			if(this.state.grid.hasArange('y')||this.state.grid.hasMenu('y')) 
+			}
+
+			if(this.state.grid.hasArange('y')||this.state.grid.hasMenu('y'))
 			{
 				grid.y.min = parseFloat(this.state.grid.getLo('y'))-0.5;
 				grid.y.max = parseFloat(this.state.grid.getHi('y'))+0.5;
@@ -1192,7 +1195,7 @@ LASUI.prototype.initXYSelect = function (mode, reset) {
 					},
 				 "y" : {"min" : this.refs.XYSelect.getPlotGridYMin(),
 					 "max" : this.refs.XYSelect.getPlotGridYMax()
-					}				
+					}
 				}
 
 		if (sel.x.min>grid.x.min&&sel.x.min<grid.x.max && this.firstload!=true) {
@@ -1202,7 +1205,7 @@ LASUI.prototype.initXYSelect = function (mode, reset) {
 						sel.x.min=sel.x.min-this.state.xybox.width/2;
 					else
 						sel.x.min=grid.x.min;
-					if(sel.x.max+this.state.xybox.width/2 < grid.x.max)	
+					if(sel.x.max+this.state.xybox.width/2 < grid.x.max)
  						sel.x.max=sel.x.max+this.state.xybox.width/2;
 					else
 						sel.x.max=grid.x.max;
@@ -1221,14 +1224,14 @@ LASUI.prototype.initXYSelect = function (mode, reset) {
 						sel.x.min=sel.x.min-this.state.xybox.width/2;
 					else
 						sel.x.min=grid.x.min;
-					if(sel.x.max+this.state.xybox.width/2 < grid.x.max)	
+					if(sel.x.max+this.state.xybox.width/2 < grid.x.max)
  						sel.x.max=sel.x.max+this.state.xybox.width/2;
 					else
 						sel.x.max=grid.x.max;
 				} else {
 					sel.x.min=grid.x.min;
  					sel.x.max=grid.x.max;
-				}		
+				}
 			}
 		} else
 			sel.x.max=grid.x.max;
@@ -1240,14 +1243,14 @@ LASUI.prototype.initXYSelect = function (mode, reset) {
 						sel.y.min=sel.y.min-this.state.xybox.height/2;
 					else
 						sel.y.min=grid.y.min;
-					if(sel.y.max+this.state.xybox.height/2 < grid.y.max)	
+					if(sel.y.max+this.state.xybox.height/2 < grid.y.max)
  						sel.y.max=sel.y.max+this.state.xybox.height/2;
 					else
 						sel.y.max=grid.y.max;
 				} else {
 					sel.y.min=grid.y.min;
 	 				sel.y.max=grid.y.max;
-				}			
+				}
 			}
 		} else
 			sel.y.min=grid.y.min;
@@ -1259,77 +1262,77 @@ LASUI.prototype.initXYSelect = function (mode, reset) {
 						sel.y.min=sel.y.min-this.state.xybox.height/2;
 					else
 						sel.y.min=grid.y.min;
-					if(sel.y.max+this.state.xybox.height/2 < grid.y.max)	
+					if(sel.y.max+this.state.xybox.height/2 < grid.y.max)
  						sel.y.max=sel.y.max+this.state.xybox.height/2;
 					else
 						sel.y.max=grid.y.max;
-				} else {				
+				} else {
 					sel.y.min=grid.y.min;
  					sel.y.max=grid.y.max;
-				}			
+				}
 			}
 		} else
 			sel.y.max=grid.y.max;
 
-		this.refs.XYSelect.zoomOnBBox(grid);		
+		this.refs.XYSelect.zoomOnBBox(grid);
 		if(reset==true) {
 			this.refs.XYSelect.setDataGridBBox(grid);
-			this.refs.XYSelect.setSelectionGridBBox(grid);		
+			this.refs.XYSelect.setSelectionGridBBox(grid);
 		}
-				
+
 		if(this.state.newgrid)
-			this.refs.XYSelect.setSelectionGridBBox(grid);	
+			this.refs.XYSelect.setSelectionGridBBox(grid);
 		else
 			this.refs.XYSelect.setSelectionGridBBox(sel);
-		delete(this.state.newgrid);					
+		delete(this.state.newgrid);
 		if(this.submitOnLoad && this.params){
-			var bbox = {};			
-			if(this.params.x)				
+			var bbox = {};
+			if(this.params.x)
 				bbox.x = this.params.x;
-			if(this.params.y)				
+			if(this.params.y)
 				bbox.y = this.params.y;
-			this.refs.XYSelect.setSelectionGridBBox(sel);	
-				
+			this.refs.XYSelect.setSelectionGridBBox(sel);
+
 		}
-		
+
 		if(this.submitOnLoad && this.params){
-			if(this.params.viewx)				
+			if(this.params.viewx)
 				bbox.x = this.params.viewx;
-			if(this.params.viewy)				
+			if(this.params.viewy)
 				bbox.y = this.params.viewy;
 		}
 		//this.refs.XYSelect.zoomOnBBox(bbox);
-		//save some params in case we return		
+		//save some params in case we return
 		if(sel.x.min!=sel.x.max)
 			this.state.xybox.width=(sel.x.max-sel.x.min);
 		if(sel.y.min!=sel.y.max)
 			this.state.xybox.height=(sel.y.max-sel.y.min);
-						
-		
+
+
 		this.refs.XYSelect.setView(mode);
-		
+
 	}
-		
+
 }
 /**
  * Initialize an X grid control
  * @param {string} mode The axis mode. "range" or "point"
  */
-LASUI.prototype.initXConstraint = function (mode) {		
+LASUI.prototype.initXConstraint = function (mode) {
 }
 /**
  * Initialize an Y grid control
  * @param {string} mode The axis mode. "range" or "point"
  */
-LASUI.prototype.initYConstraint = function (mode) {		
+LASUI.prototype.initYConstraint = function (mode) {
 }
 /**
  * Initialize an Z grid control
  * @param {string} mode The axis mode. "range" or "point"
  */
-LASUI.prototype.initZConstraint = function (mode, reset) {	
+LASUI.prototype.initZConstraint = function (mode, reset) {
 	document.getElementById("Depth").innerHTML="";
-	if(this.state.grid.hasMenu('z')) 	
+	if(this.state.grid.hasMenu('z'))
 		if (reset || this.refs.DepthWidget.widgetType != "menu") {
 			this.refs.DepthWidget.menu = [document.createElement("SELECT"),document.createElement("SELECT")];
 			this.refs.DepthWidget.widgetType = "menu";
@@ -1345,7 +1348,7 @@ LASUI.prototype.initZConstraint = function (mode, reset) {
 						_opt.selected=true;
 					this.refs.DepthWidget[this.refs.DepthWidget.widgetType][m].appendChild(_opt);
 				}
-				this.refs.DepthWidget[this.refs.DepthWidget.widgetType][m].className = "LASSelectNode";				
+				this.refs.DepthWidget[this.refs.DepthWidget.widgetType][m].className = "LASSelectNode";
 				this.refs.DepthWidget[this.refs.DepthWidget.widgetType][m].onchange=this.handleDepthRangeChange.LASBind(this);
 			}
 		}
@@ -1364,13 +1367,13 @@ LASUI.prototype.initZConstraint = function (mode, reset) {
 						_opt.selected=true;
 					if(m==0 && v == this.state.grid.getLo('z'))
 						_opt.selected=true;
-					this.refs.DepthWidget[this.refs.DepthWidget.widgetType][m].appendChild(_opt);				
+					this.refs.DepthWidget[this.refs.DepthWidget.widgetType][m].appendChild(_opt);
 				}
 				this.refs.DepthWidget[this.refs.DepthWidget.widgetType][m].onchange=this.handleDepthRangeChange.LASBind(this);
 			}
 		}
 	switch (mode) {
-			case 'range':		
+			case 'range':
 				var depth_label2 =document.createElement("STRONG");
 				depth_label2.innerHTML = "Minimum Depth (" + this.state.grid.getAxis('z').units +") : ";
 				document.getElementById("Depth").appendChild(depth_label2);
@@ -1385,12 +1388,12 @@ LASUI.prototype.initZConstraint = function (mode, reset) {
 			case 'point':
 				var depth_label = document.createElement("STRONG");
 				depth_label.innerHTML="Depth (" + this.state.grid.getAxis('z').units + ") : ";
-				document.getElementById("Depth").appendChild(depth_label);	
+				document.getElementById("Depth").appendChild(depth_label);
 				document.getElementById("Depth").appendChild(this.refs.DepthWidget[this.refs.DepthWidget.widgetType][0]);
 				document.getElementById("Depth").style.display="";
 				break;
 	}
-	if(!this.updating&&this.autoupdate) 
+	if(!this.updating&&this.autoupdate)
 		this.makeRequest();
 	else
 		this.showUpdateLink();
@@ -1403,11 +1406,11 @@ LASUI.prototype.initZConstraint = function (mode, reset) {
 LASUI.prototype.initTConstraint = function (mode,reset) {
 	document.getElementById("Date").style.display="";
 	switch(this.state.grid.getDisplayType('t')) {
-		case "widget":	
+		case "widget":
 			if(reset || !this.refs.DW)
 				if(reset || this.refs.DW.widgetType != "DateWidget")	{
 					document.getElementById("Date").innerHTML="";
-					this.refs.DW = new DateWidget(this.state.grid.getLo('t'),this.state.grid.getHi('t')); 
+					this.refs.DW = new DateWidget(this.state.grid.getLo('t'),this.state.grid.getHi('t'));
 					this.refs.DW.callback = this.handleDateRangeChange.LASBind(this);
 				}
 
@@ -1423,17 +1426,17 @@ LASUI.prototype.initTConstraint = function (mode,reset) {
 
 
 			switch(mode) {
-				case 'range': 	
-					document.getElementById("Date").innerHTML="<table><tbody><tr><td><table><tbody><tr><td><strong>Start Date :</strong></td></tr><tr><td><strong>End Date :</strong></tr></tbody></table></td><td id='DWAnchor'></td></tr></tbody></table>";						
+				case 'range':
+					document.getElementById("Date").innerHTML="<table><tbody><tr><td><table><tbody><tr><td><strong>Start Date :</strong></td></tr><tr><td><strong>End Date :</strong></tr></tbody></table></td><td id='DWAnchor'></td></tr></tbody></table>";
 					this.refs.DW.render("DWAnchor", DWDisplay, DWDisplay);
 					break;
 				case 'point':
-					document.getElementById("Date").innerHTML="<table><tbody><tr><td><table><tbody><tr><td><strong>Date :</strong></td><td id='DWAnchor'></td></tr></tbody></table>";						
+					document.getElementById("Date").innerHTML="<table><tbody><tr><td><table><tbody><tr><td><strong>Date :</strong></td><td id='DWAnchor'></td></tr></tbody></table>";
 					this.refs.DW.render("Date", DWDisplay);
 					break;
-			}	
+			}
 			break;
-		case "menu": 
+		case "menu":
 			if(reset || !this.refs.DW)
 				if(reset || this.refs.DW[0].tagName != "SELECT")	{
 					this.refs.DW = [document.createElement("SELECT"),document.createElement("SELECT")];
@@ -1442,7 +1445,7 @@ LASUI.prototype.initTConstraint = function (mode,reset) {
 						this.refs.DW[m].className = "LASSelectNode";
 						for(var v=0;v<this.state.grid.getMenu('t').length;v++) {
 							var _opt = document.createElement("OPTION");
-							_opt.value = this.state.grid.getMenu('t')[v][1];				
+							_opt.value = this.state.grid.getMenu('t')[v][1];
 							_opt.className = "LASOptionNode";
 							_opt.innerHTML=this.state.grid.getMenu('t')[v][0];
 							if(m==1 && v >= this.state.grid.getMenu('t').length-1)
@@ -1455,7 +1458,7 @@ LASUI.prototype.initTConstraint = function (mode,reset) {
 				}
 			switch(mode) {
 				case 'range':
-					document.getElementById("Date").innerHTML="<strong>Start Date : </strong>";	
+					document.getElementById("Date").innerHTML="<strong>Start Date : </strong>";
 					document.getElementById("Date").appendChild(this.refs.DW[0]);
 					document.getElementById("Date").appendChild(document.createElement("BR"));
 					var label = document.createElement("STRONG");
@@ -1466,37 +1469,37 @@ LASUI.prototype.initTConstraint = function (mode,reset) {
 				case 'point':
 					var date_label = document.createElement("STRONG");
 					date_label.innerHTML = "Date : ";
-					document.getElementById("Date").appendChild(date_label);	
+					document.getElementById("Date").appendChild(date_label);
 					document.getElementById("Date").appendChild(this.refs.DW[0]);
 					break;
 			}
 			break;
-	 }		
+	 }
 
-	
-	 
-	 		if(!this.updating&&this.autoupdate) 
-				this.makeRequest();		
+
+
+	 		if(!this.updating&&this.autoupdate)
+				this.makeRequest();
 			else
 				this.showUpdateLink();
 
 }
 LASUI.prototype.showUpdateLink = function (){
-	this.refs.XYSelect.updatePixelExtents();	
+	this.refs.XYSelect.updatePixelExtents();
 	try	{
-		if(!this.updating&&this.refs.XYSelect.enabled&&this.state.dataset!=null&&this.state.variables[this.state.dataset]!=null&&this.state.variable&&this.state.view.plot!=null&&this.state.operation.plot!=null) 
+		if(!this.updating&&this.refs.XYSelect.enabled&&this.state.dataset!=null&&this.state.variables[this.state.dataset]!=null&&this.state.variable&&this.state.view.plot!=null&&this.state.operation.plot!=null)
 		document.getElementById('update').style.color='orange';
 	else
 		document.getElementById('update').style.color='';
-	} 
-	catch (err){ 
-		document.getElementById('update').style.color='';	
-}	}	
+	}
+	catch (err){
+		document.getElementById('update').style.color='';
+}	}
 
 LASUI.prototype.makeDownloadRequest = function (){
 
 }
-		
+
 /**
  * Put together and submit an LAS request
  */
@@ -1507,27 +1510,27 @@ LASUI.prototype.makeRequest = function (evt, type) {
 		this.request = null;
 		this.uirequest = '';
 		this.request = new LASRequest('');
-		
+
 		this.request.removeVariables();
-		this.request.removeConstraints();		
-		
+		this.request.removeConstraints();
+
 
 		if(this.state.dataset==null) {alert("Please select a dataset and variables."); return;}
 		if(this.state.variables[this.state.dataset]==null) {alert("Please select variables in the selected dataset."); return;}
 		if(this.state.variables[this.state.dataset].length==0) {alert("Please select variables in the selected dataset."); return;}
 		//if(this.state.view[type]==null) {alert("Please select a view."); return;}
 		if(this.state.operation[type]==null) {alert("Please select a file format to download."); return;}
-			
+
 		//add the operation
 		this.request.setOperation(this.state.operation[type]);
 		this.uirequest+="dsid=" + this.state.dataset;
 		this.uirequest+="&varid=" + this.state.variable;
 		this.uirequest+='&plot=' + this.state.operation[type];
 		//this.uirequest.setProperty('ui','state',JSON.stringify(this.state));
-		var uioptions = '';			
+		var uioptions = '';
 		//set the options
-		for(var p in this.state.properties[type])	
-			if((typeof this.state.properties[type][p] != "function") && (typeof this.state.properties[type][p] == "object")) { 
+		for(var p in this.state.properties[type])
+			if((typeof this.state.properties[type][p] != "function") && (typeof this.state.properties[type][p] == "object")) {
 				this.request.setProperty(this.state.properties[type][p].type, p, escape(this.state.properties[type][p].value));
 				uioptions[this.state.properties[type][p].type] = {p : escape(this.state.properties[type][p].value)};
 			}
@@ -1535,13 +1538,13 @@ LASUI.prototype.makeRequest = function (evt, type) {
 		//if(view=="") view = "d";
 		this.request.setProperty("ferret","view",view);
 		// punted to V7 Release this.uirequest+="&options=" +  escape(JSON.stringify(uioptions));
-	
+
 		this.request.removeRegion();
-	
+
 		//add the variables
-		
+
 		this.request.setVariable(this.state.dataset, this.state.variable);
-		
+
 
 
 		this.request.addRegion();
@@ -1553,18 +1556,18 @@ LASUI.prototype.makeRequest = function (evt, type) {
 				if(this.state.grid.hasAxis(axis_id)){
 					var Axis = {"type" : axis_id, "op" : this.state.analysis.type};
 					switch(axis_id) {
-						case 'x' : 
+						case 'x' :
 							Axis.lo=this.refs.XYSelect.extents.selection.grid.x.min;
 							Axis.hi =this.refs.XYSelect.extents.selection.grid.x.max;
 							break;
-						case 'y' : 
+						case 'y' :
 						 	Axis.lo=this.refs.XYSelect.extents.selection.grid.y.min;
-							Axis.hi=this.refs.XYSelect.extents.selection.grid.y.max; 
+							Axis.hi=this.refs.XYSelect.extents.selection.grid.y.max;
 							break;
-							case 't' : 
+							case 't' :
 							if(this.state.grid.hasMenu('t')){
 								Axis.lo=this.refs.DW[0].value;
-								Axis.hi=this.refs.DW[1].value; 
+								Axis.hi=this.refs.DW[1].value;
 							} else {
 								Axis.lo=this.refs.DW.getDate1_Ferret();
 								Axis.hi=this.refs.DW.getDate2_Ferret();
@@ -1572,51 +1575,51 @@ LASUI.prototype.makeRequest = function (evt, type) {
 							break;
 						case 'z' :
 							Axis.lo=this.refs.DepthWidget[this.refs.DepthWidget.widgetType][0].value;
-							Axis.hi=this.refs.DepthWidget[this.refs.DepthWidget.widgetType][1].value; 						
+							Axis.hi=this.refs.DepthWidget[this.refs.DepthWidget.widgetType][1].value;
 							break;
-					} 
+					}
 					Analysis.axis.push(Axis);
 				}
-				
+
 			}
-			if(Analysis.axis.length>0 && this.state.analysis.name !="None")			
+			if(Analysis.axis.length>0 && this.state.analysis.name !="None")
 				this.request.setAnalysis(0,Analysis);
 		}
 
-		for(var d=0;d<this.state.grid.response.grid.axis.length;d++) 
+		for(var d=0;d<this.state.grid.response.grid.axis.length;d++)
 			if(!(this.refs.analysis.enabled && this.state.analysis.name && this.state.analysis.axes[this.state.grid.response.grid.axis[d].type]))
 				switch(this.state.grid.response.grid.axis[d].type) {
-					case 'x' : 
-						if(this.state.view[type].indexOf('x')>=0||this.state.variables[this.state.dataset].grid_type=="scattered") 
-							this.request.addRange('x',this.refs.XYSelect.extents.selection.grid.x.min,this.refs.XYSelect.extents.selection.grid.x.max); 
+					case 'x' :
+						if(this.state.view[type].indexOf('x')>=0||this.state.variables[this.state.dataset].grid_type=="scattered")
+							this.request.addRange('x',this.refs.XYSelect.extents.selection.grid.x.min,this.refs.XYSelect.extents.selection.grid.x.max);
 						else
-							this.request.addRange('x',(this.refs.XYSelect.extents.selection.grid.x.min+this.refs.XYSelect.extents.selection.grid.x.max)/2,(this.refs.XYSelect.extents.selection.grid.x.min+this.refs.XYSelect.extents.selection.grid.x.max)/2); 
-						this.uirequest+="&x=" + escape("{ 'min' : " + this.refs.XYSelect.extents.selection.grid.x.min + ", 'max' : " + this.refs.XYSelect.extents.selection.grid.x.max + "}"); 
-						this.uirequest+="&viewx="+escape("{ 'min' : " + this.refs.XYSelect.extents.data.grid.x.min + ", 'max' : " + this.refs.XYSelect.extents.data.grid.x.max + "}"); 
+							this.request.addRange('x',(this.refs.XYSelect.extents.selection.grid.x.min+this.refs.XYSelect.extents.selection.grid.x.max)/2,(this.refs.XYSelect.extents.selection.grid.x.min+this.refs.XYSelect.extents.selection.grid.x.max)/2);
+						this.uirequest+="&x=" + escape("{ 'min' : " + this.refs.XYSelect.extents.selection.grid.x.min + ", 'max' : " + this.refs.XYSelect.extents.selection.grid.x.max + "}");
+						this.uirequest+="&viewx="+escape("{ 'min' : " + this.refs.XYSelect.extents.data.grid.x.min + ", 'max' : " + this.refs.XYSelect.extents.data.grid.x.max + "}");
 
 						break;
-					case 'y' : 
-						if(this.state.view[type].indexOf('y')>=0||this.state.variables[this.state.dataset].grid_type=="scattered") 
-							this.request.addRange('y',this.refs.XYSelect.extents.selection.grid.y.min,this.refs.XYSelect.extents.selection.grid.y.max); 
+					case 'y' :
+						if(this.state.view[type].indexOf('y')>=0||this.state.variables[this.state.dataset].grid_type=="scattered")
+							this.request.addRange('y',this.refs.XYSelect.extents.selection.grid.y.min,this.refs.XYSelect.extents.selection.grid.y.max);
 						else
-							this.request.addRange('y',(this.refs.XYSelect.extents.selection.grid.y.min+this.refs.XYSelect.extents.selection.grid.y.max/2),(this.refs.XYSelect.extents.selection.grid.y.min+this.refs.XYSelect.extents.selection.grid.y.max/2)); 
-												 	
-						this.uirequest+="&y="+escape("{ 'min' : " + this.refs.XYSelect.extents.selection.grid.y.min + ", 'max' : " + this.refs.XYSelect.extents.selection.grid.y.max + "}"); 
-					 	this.uirequest+="&viewy="+escape("{ 'min' : " + this.refs.XYSelect.extents.data.grid.y.min + ", 'max' : " + this.refs.XYSelect.extents.data.grid.y.max + "}"); 
+							this.request.addRange('y',(this.refs.XYSelect.extents.selection.grid.y.min+this.refs.XYSelect.extents.selection.grid.y.max/2),(this.refs.XYSelect.extents.selection.grid.y.min+this.refs.XYSelect.extents.selection.grid.y.max/2));
+
+						this.uirequest+="&y="+escape("{ 'min' : " + this.refs.XYSelect.extents.selection.grid.y.min + ", 'max' : " + this.refs.XYSelect.extents.selection.grid.y.max + "}");
+					 	this.uirequest+="&viewy="+escape("{ 'min' : " + this.refs.XYSelect.extents.data.grid.y.min + ", 'max' : " + this.refs.XYSelect.extents.data.grid.y.max + "}");
 						break;
-					case 't' : 
-						if(this.state.view[type].indexOf('t')>=0||this.state.variables[this.state.dataset].grid_type=="scattered") 
+					case 't' :
+						if(this.state.view[type].indexOf('t')>=0||this.state.variables[this.state.dataset].grid_type=="scattered")
 							if(this.state.grid.hasMenu('t')){
-								this.request.addRange('t',this.refs.DW[0].value,this.refs.DW[1].value); 
-								this.uirequest+="&t="+escape("{ 'min' : '" + this.refs.DW[0].value+ "', 'max' : '" + this.refs.DW[1].value + "'}");					
+								this.request.addRange('t',this.refs.DW[0].value,this.refs.DW[1].value);
+								this.uirequest+="&t="+escape("{ 'min' : '" + this.refs.DW[0].value+ "', 'max' : '" + this.refs.DW[1].value + "'}");
 						} else {
 							this.request.addRange('t',this.refs.DW.getDate1_Ferret(),this.refs.DW.getDate2_Ferret());
 							this.uirequest+="&t="+escape("{ 'min' : '" + this.refs.DW.getDate1_Ferret()+ "', 'max' : '" + this.refs.DW.getDate2_Ferret()+ "'}");
 						}
 					else
 						if(this.state.grid.hasMenu('t')){
-							this.request.addRange('t',this.refs.DW[0].value); 
-							this.uirequest+="&t=" + escape("{ 'min' : '" + this.refs.DW[0].value+ "', 'max' : '" + this.refs.DW[0].value + "'}");	
+							this.request.addRange('t',this.refs.DW[0].value);
+							this.uirequest+="&t=" + escape("{ 'min' : '" + this.refs.DW[0].value+ "', 'max' : '" + this.refs.DW[0].value + "'}");
 						}
 						else {
 							this.request.addRange('t',this.refs.DW.getDate1_Ferret());
@@ -1625,16 +1628,16 @@ LASUI.prototype.makeRequest = function (evt, type) {
 					break;
 				case 'z' :
 					if(this.state.view[type].indexOf('z')>=0||this.state.variables[this.state.dataset].grid_type=="scattered") {
-							this.request.addRange('z',this.refs.DepthWidget[this.refs.DepthWidget.widgetType][0].value,this.refs.DepthWidget[this.refs.DepthWidget.widgetType][1].value); 
-							this.uirequest+="&z=" + escape("{ 'min' : '" + this.refs.DepthWidget[this.refs.DepthWidget.widgetType][0].value+ "', 'max' : '" + this.refs.DepthWidget[this.refs.DepthWidget.widgetType][1].value + "'}");		
+							this.request.addRange('z',this.refs.DepthWidget[this.refs.DepthWidget.widgetType][0].value,this.refs.DepthWidget[this.refs.DepthWidget.widgetType][1].value);
+							this.uirequest+="&z=" + escape("{ 'min' : '" + this.refs.DepthWidget[this.refs.DepthWidget.widgetType][0].value+ "', 'max' : '" + this.refs.DepthWidget[this.refs.DepthWidget.widgetType][1].value + "'}");
 						}
 						else {
-							this.request.addRange('z',this.refs.DepthWidget[this.refs.DepthWidget.widgetType][0].value); 
-							this.uirequest+="&z=" + escape("{ 'min' : '" + this.refs.DepthWidget[this.refs.DepthWidget.widgetType][0].value+ "', 'max' : '" + this.refs.DepthWidget[this.refs.DepthWidget.widgetType][1].value + "'}");					
-						}						
+							this.request.addRange('z',this.refs.DepthWidget[this.refs.DepthWidget.widgetType][0].value);
+							this.uirequest+="&z=" + escape("{ 'min' : '" + this.refs.DepthWidget[this.refs.DepthWidget.widgetType][0].value+ "', 'max' : '" + this.refs.DepthWidget[this.refs.DepthWidget.widgetType][1].value + "'}");
+						}
 					break;
 			}
-		if(this.refs.constraints)		
+		if(this.refs.constraints)
 		for(var c=0; c<this.refs.constraints.length;c++){
 			if(this.refs.constraints[c].apply.checked)
 			switch(this.refs.constraints[c].type) {
@@ -1651,7 +1654,7 @@ LASUI.prototype.makeRequest = function (evt, type) {
 		//this.uirequest+="&catid=" + escape(JSON.stringify(this.state.categories));
 
 		//prompt('ui req', this.uirequest.getXMLText());
-		
+
 		if(this.state.embed && type == "plot"){
 			if(document.getElementById("wait"))
 				document.getElementById("wait").style.visibility="visible";
@@ -1660,41 +1663,41 @@ LASUI.prototype.makeRequest = function (evt, type) {
 			document.getElementById('output').style.display = "none";
 			if (this.firstload==true) document.getElementById(this.anchors.output).onload = this.onFirstPlotLoad.LASBind(this);
 			document.getElementById('output').src = (this.hrefs.getProduct.url + '?xml=' + escape(this.request.getXMLText()));
-			
-			//alert((this.hrefs.getProduct.url + '?xml=' + escape(this.request.getXMLText())));	
+
+			//alert((this.hrefs.getProduct.url + '?xml=' + escape(this.request.getXMLText())));
 		} else
 			window.open(this.hrefs.getProduct.url + '?xml=' +  escape(this.request.getXMLText()));
 	}
-	
+
 	this.updating = true;
 	this.refs.XYSelect.updatePixelExtents();
-	this.updating = false;	
+	this.updating = false;
 	document.getElementById('update').style.color='';
-	
+
 }
 /**
  * Method to query the server for an options object and pass json response to setOptionList
  * @param {string} optiondef Id of the option set to query the server for.
- */	
+ */
 LASUI.prototype.getOptions = function (optiondef, DOMNode, type) {
 
 			if(!document.all)
 			var req = new XMLHttpRequest(this);
 		else
-			var req = new ActiveXObject("Microsoft.XMLHTTP"); 
+			var req = new ActiveXObject("Microsoft.XMLHTTP");
 	req.onreadystatechange = this.AJAXhandler.LASBind(this, req, "this.setOptionList(req.responseText,args[3],args[4]);",DOMNode,type);
 	req.open("GET", this.hrefs.getOptions.url + '?opid=' + optiondef);
 	req.send(null);
-	
+
 
 }
 /**
- * Method to create an option list in the tree and add it to the DOM 
+ * Method to create an option list in the tree and add it to the DOM
  * @param {object} strJson A json response compatible with LASGetOptionsResponse.js
- */	
+ */
 LASUI.prototype.setOptionList = function (strJson,DOMNode,type) {
- 
-	
+
+
 
 	var table = document.createElement("TABLE");
 	table.style.margin = "-4pt";
@@ -1705,24 +1708,24 @@ LASUI.prototype.setOptionList = function (strJson,DOMNode,type) {
 	table.appendChild(DOMNode.TBODYNode);
 	DOMNode.appendChild(table);
 
-	var response = eval("(" + strJson + ")");		
+	var response = eval("(" + strJson + ")");
 
 	var setDefault = true;
-	this.state.properties[type] = [];		
+	this.state.properties[type] = [];
 	this.refs.options[type].options = new LASGetOptionsResponse(response);
 	var ct = this.refs.options[type].options.getOptionCount();
-	if(ct) 
+	if(ct)
 		for(var i=0;i<ct;i++) {
-			this.setOptionTRNode(this.refs.options[type].options.getOptionID(i),DOMNode.TBODYNode,type);	
-			
+			this.setOptionTRNode(this.refs.options[type].options.getOptionID(i),DOMNode.TBODYNode,type);
+
 			/*switch(this.refs.options[type].options.getOptionType(i)) {
-				case "menu" : 
-					if(DOMNode == this.refs.options.plot.DOMNode)			 
+				case "menu" :
+					if(DOMNode == this.refs.options.plot.DOMNode)
 						this.state.properties.plot[this.refs.options[type].options.getOptionID(i)]={"type":"ferret", "value": this.refs.options[type].options.getOption(i).menu.item[0].values};
 					else {
 						this.state.properties[type][this.refs.options[type].options.getOptionID(i)]={"type":"ferret", "value": this.refs.options[type].options.getOption(i).menu.item[0].values};
-						   DOMNode.style.display="";					
-					}					
+						   DOMNode.style.display="";
+					}
 					break;
 				case "text":
 					if(DOMNode == this.refs.options.plot.DOMNode)
@@ -1730,7 +1733,7 @@ LASUI.prototype.setOptionList = function (strJson,DOMNode,type) {
 					else {
 						this.state.properties[type][this.refs.options[type].options.getOptionID(i)]={"type":"ferret", "value":""};
 						   DOMNode.style.display="";
-					}					
+					}
 					break;
 			}*/
 		}
@@ -1739,24 +1742,24 @@ LASUI.prototype.setOptionList = function (strJson,DOMNode,type) {
 			this.makeRequest();
 		else
 			this.showUpdateLink();
-	
+
 		this.submitOnLoad = false;
 	}
 
-	
+
 }
-/** 
+/**
  * Method to create an option tree node and add it to the DOM
- * @param {string} id An option id	
+ * @param {string} id An option id
  */
 LASUI.prototype.setOptionTRNode = function (id,TBODYNode,type) {
 	if(!this.refs.options.cache)
-		this.refs.options.cache = {};	
+		this.refs.options.cache = {};
 	if(!this.refs.options.cache[id])
 	{
 		this.refs.options.cache[id] =  this.refs.options[type].options.getOptionByID(id);
 
-		this.refs.options.cache[id].TRNode = document.createElement("TR");	
+		this.refs.options.cache[id].TRNode = document.createElement("TR");
 		this.refs.options.cache[id].TD1 = document.createElement("TD");
 		this.refs.options.cache[id].TD1.width="45%";
 		this.refs.options.cache[id].TD1.innerHTML =this.refs.options.cache[id].title
@@ -1772,57 +1775,57 @@ LASUI.prototype.setOptionTRNode = function (id,TBODYNode,type) {
      			this.refs.options.cache[id].SELECTNode.appendChild(option);
      		}
 			this.refs.options.cache[id].TD2.appendChild(this.refs.options.cache[id].SELECTNode);
-		} else {			
+		} else {
 			this.refs.options.cache[id].INPUTNode = document.createElement("INPUT");
 			this.refs.options.cache[id].INPUTNode.type = "text";
 			this.refs.options.cache[id].INPUTNode.className="LASTextInputNode";
 			this.refs.options.cache[id].TD2.appendChild(this.refs.options.cache[id].INPUTNode);
 		}
-		this.refs.options.cache[id].TD3 = document.createElement("TD");		
+		this.refs.options.cache[id].TD3 = document.createElement("TD");
 		this.refs.options.cache[id].A = document.createElement("A");
 		this.refs.options.cache[id].A.innerHTML = "<img src='images/icon_info.gif'>";
 		this.refs.options.cache[id].A.onclick = this.showOptionInfo.LASBind(this,this.refs.options.cache[id].help);
 		this.refs.options.cache[id].TD3.appendChild(this.refs.options.cache[id].A);
-		this.refs.options.cache[id].TRNode.appendChild(this.refs.options.cache[id].TD1);	
+		this.refs.options.cache[id].TRNode.appendChild(this.refs.options.cache[id].TD1);
 		this.refs.options.cache[id].TRNode.appendChild(this.refs.options.cache[id].TD2);
 		this.refs.options.cache[id].TRNode.appendChild(this.refs.options.cache[id].TD3);
 
-	} 	
+	}
 
 //cache everything in the plot, clone for others
-		if(type=="plot") {			
-			if(this.refs.options.cache[id].SELECTNode)		
+		if(type=="plot") {
+			if(this.refs.options.cache[id].SELECTNode)
 				this.refs.options.cache[id].SELECTNode.onchange = this.setOption.LASBind(this,id,"plot", this.refs.options.cache[id]);
 			if(this.refs.options.cache[id].INPUTNode)
 				this.refs.options.cache[id].INPUTNode.onchange = this.setOption.LASBind(this,id,"plot", this.refs.options.cache[id]);
 			TBODYNode.appendChild(this.refs.options.cache[id].TRNode);
 		} else {
-			var clone = this.clone(this.refs.options.cache[id]);			
-			
+			var clone = this.clone(this.refs.options.cache[id]);
+
 			clone.TD2.innerHTML="";
-			
-			if(clone.SELECTNode) {		
+
+			if(clone.SELECTNode) {
 				clone.SELECTNode.onchange = this.setOption.LASBind(this,id, type, clone);
 				clone.SELECTNode.selectedIndex = this.refs.options.cache[id].SELECTNode.selectedIndex;
 				clone.SELECTNode.onchange({"target": clone.SELECTNode},id, type, clone);
-				clone.TD2.appendChild(clone.SELECTNode);			
+				clone.TD2.appendChild(clone.SELECTNode);
 			}
 			if(clone.INPUTNode) {
 				clone.INPUTNode.onchange = this.setOption.LASBind(this,id, type, clone);
 				clone.INPUTNode.value = this.refs.options.cache[id].INPUTNode.value;
 				clone.INPUTNode.onchange({"target": clone.INPUTNode},id, type, clone);
-				clone.TD2.appendChild(clone.INPUTNode);	
+				clone.TD2.appendChild(clone.INPUTNode);
 			}
-			clone.TRNode.innerHTML = "";		
-	
-			clone.TRNode.appendChild(clone.TD1);	
+			clone.TRNode.innerHTML = "";
+
+			clone.TRNode.appendChild(clone.TD1);
 			clone.TRNode.appendChild(clone.TD2);
-			clone.TRNode.appendChild(clone.TD3);			
+			clone.TRNode.appendChild(clone.TD3);
 			TBODYNode.appendChild(clone.TRNode);
 		}
-		
+
 			//first time, add it to the product
-	
+
 }
 LASUI.prototype.showOptionInfo = function(evt) {
 	var div = document.createElement("DIV");
@@ -1837,7 +1840,7 @@ LASUI.prototype.showOptionInfo = function(evt) {
 	div.className = "LASPopupDIVNode";
 	div.style.left = evt.clientLeft + 20;
 	div.style.top = evt.clientTop + 20;
-	
+
 	center.appendChild(close);
 	div.appendChild(center);
 	document.body.appendChild(div);
@@ -1860,11 +1863,11 @@ LASUI.prototype.setOption = function (evt) {
 		this.state.properties[args[2]][id]={"type" : "ferret", "value" : evt.target.options[evt.target.selectedIndex].value};
 	else
 		this.state.properties[args[2]][id]={"type" : "ferret", "value" : evt.target.value};
-	
+
 	if(args[2]=="plot")
 		if(!this.updating)if(this.autoupdate)
 			this.makeRequest();
-		else		
+		else
 			this.showUpdateLink();
 }
 /**
@@ -1873,7 +1876,7 @@ LASUI.prototype.setOption = function (evt) {
  * @param {object} mapid The id of the map container object in the DOM
  */
 LASUI.prototype.initMap = function (mapid) {
-  
+
   var args = {
   				  'DOMNode' : document.getElementById(mapid),
   				  'ondraw' : this.displayCoords.LASBind(this),
@@ -1899,7 +1902,7 @@ LASUI.prototype.initMap = function (mapid) {
   				  			}
   				  		}
   				  	}
-  				 };				  
+  				 };
   	var req = new LASRequest();
   	req.removeVariables();
   	req.removeRegion();
@@ -1909,11 +1912,11 @@ LASUI.prototype.initMap = function (mapid) {
 	args.img.src = this.hrefs.getProduct.url + "?xml=" + escape(req.getXMLText()) + "&stream=true&stream_ID=plot_image";
   	this.refs.XYSelect = new MapWidget(args);
   	this.refs.XYSelect.disable();
-  
+
 }
 /**
  * Method to update the xy constraints textboxes
- *	@param {object} XYSelect A MapWidget object	
+ *	@param {object} XYSelect A MapWidget object
  */
 LASUI.prototype.displayCoords = function (XYSelect) {
 	this.refs.inputs.minY.value=XYSelect.getSelectionGridYMin();
@@ -1923,40 +1926,40 @@ LASUI.prototype.displayCoords = function (XYSelect) {
 }
 /**
  * Event handler for the min X constraint textbox
- * @param {object} evt The event object		
+ * @param {object} evt The event object
  */
 LASUI.prototype.setMinX = function (evt) {
 	this.refs.XYSelect.updateSelectionGridXMin(this.refs.inputs.minX.value);
 }
 /**
  * Event handler for the max X constraint textbox
- * @param {object} evt The event object		
+ * @param {object} evt The event object
  */
 LASUI.prototype.setMaxX = function (evt) {
 	this.refs.XYSelect.updateSelectionGridXMax(this.refs.inputs.maxX.value);
 }
 /**
  * Event handler for the min Y constraint textbox
- * @param {object} evt The event object		
+ * @param {object} evt The event object
  */
 LASUI.prototype.setMinY = function (evt) {
 	this.refs.XYSelect.updateSelectionGridYMin(this.refs.inputs.minY.value);
 }
 /**
  * Event handler for the max Y constraint textbox
- * @param {object} evt The event object			
+ * @param {object} evt The event object
  */
 LASUI.prototype.setMaxY = function (evt) {
 	this.refs.XYSelect.updateSelectionGridYMax(this.refs.inputs.maxY.value);
 }
 /**
  * Event handler to be attached to the MapWidget onafterdraw function
- * @param {object} evt The event object		
+ * @param {object} evt The event object
  */
 LASUI.prototype.onafterdraw = function (evt) {
-	
+
 	if(!this.updating)if(this.autoupdate) {
-		
+
 		this.makeRequest();
 	}	else
 		this.showUpdateLink();
@@ -1967,21 +1970,21 @@ LASUI.prototype.onafterdraw = function (evt) {
  * @param {object} evt The event object
  */
 LASUI.prototype.handleDepthRangeChange = function (evt) {
-	
+
 	if(!this.updating)if(this.autoupdate) {
-		
+
 		this.makeRequest();
-				
+
 	}	else
 		this.showUpdateLink();
 
 }
 /**
  * Event handler called on depth widget/menu changes
- * @param {object} evt The event object		
+ * @param {object} evt The event object
  */
 LASUI.prototype.handleDepthChange = function (evt) {
-	
+
 	if(!this.updating)if(this.autoupdate)
 		this.makeRequest();
 	else
@@ -1990,10 +1993,10 @@ LASUI.prototype.handleDepthChange = function (evt) {
 }
 /**
  * Event handler called on date range widget/menu changes
- * @params {object} evt The event object		
+ * @params {object} evt The event object
  */
 LASUI.prototype.handleDateRangeChange = function (evt) {
-	
+
 	if(!this.updating)if(this.autoupdate)
 		this.makeRequest();
 	else
@@ -2002,10 +2005,10 @@ LASUI.prototype.handleDateRangeChange = function (evt) {
 }
 /**
  * Event handler called on date widget/menu changes
- * @params {object} evt The event object		
+ * @params {object} evt The event object
  */
 LASUI.prototype.handleDateChange = function (evt) {
-		
+
 	if(!this.updating)if(this.autoupdate)
 		this.makeRequest();
 	else
@@ -2016,8 +2019,8 @@ LASUI.prototype.handleDateChange = function (evt) {
  * Event handler to collapse all root nodes in the tree
  * @param {object} evt The event object
  * @param {object} arguments Arguements added with function.prototype.LASBind<br>
- * 	this -- the LASUI context<br> 
- *		node -- tree nod reference in this.refs	
+ * 	this -- the LASUI context<br>
+ *		node -- tree nod reference in this.refs
  */
 LASUI.prototype.collapseRootNodes = function (evt) {
 	var args = arguments;
@@ -2040,36 +2043,36 @@ LASUI.prototype.showAnalysis = function () {
 	//this.initXYSelect('xy',reset)
 	for(var a in this.refs.analysis.axes)
 		this.refs.analysis.axes[a].style.display="none";
-	//turn on the "area" analysis switch	
+	//turn on the "area" analysis switch
 	if(this.state.grid.hasAxis('x')&&this.state.grid.hasAxis('y'))
 		this.refs.analysis.axes.xy.style.display="";
 	//turn on the other axes switches
 	for(var d=0;d<this.state.grid.response.grid.axis.length;d++) {
 		eval("this.init" + this.state.grid.response.grid.axis[d].type.toUpperCase() + "Constraint('range',reset)");
 		this.refs.analysis.axes[this.state.grid.response.grid.axis[d].type.toLowerCase()].style.display="";
-		
+
 
 		if(this.state.view.plot.indexOf(this.state.grid.response.grid.axis[d].type.toLowerCase())<0&&!this.state.analysis.axes[this.state.grid.response.grid.axis[d].type.toLowerCase()]) {
 			switch(this.state.grid.response.grid.axis[d].type.toLowerCase()) {
 				case 'z': this.refs.DepthWidget[this.refs.DepthWidget.widgetType][1].disabled = true; break;
-				case 't': if(!this.refs.DW.widgetType) 
+				case 't': if(!this.refs.DW.widgetType)
 						this.refs.DW[1].disabled = true;
-					  else	    
+					  else
 						this.refs.DW.disable('hi');
 					  break;
-			
-			} 
+
+			}
 		} else {
 switch(this.state.grid.response.grid.axis[d].type.toLowerCase()) {
 				case 'z': this.refs.DepthWidget[this.refs.DepthWidget.widgetType][1].disabled = false; break;
-				case 't': if(!this.refs.DW.widgetType) 
+				case 't': if(!this.refs.DW.widgetType)
 						this.refs.DW[1].disabled = false;
-					  else	    
+					  else
 						this.refs.DW.enable('hi');
 					  break;
-			
+
 			}
-		} 
+		}
 	}
 
 	document.getElementById(this.anchors.analysis).style.display="";
@@ -2085,29 +2088,29 @@ switch(this.state.grid.response.grid.axis[d].type.toLowerCase()) {
 }
 LASUI.prototype.hideAnalysis = function () {
 
-	
+
 
 	this.refs.analysis.enabled = false;
 	var reset = false;
 
-	if(!this.state.operations.response.operations.error&&this.state.grid.hasAxis('t')) 
-		for(var i=0;i<this.state.operations.getOperationCount();i++) 
+	if(!this.state.operations.response.operations.error&&this.state.grid.hasAxis('t'))
+		for(var i=0;i<this.state.operations.getOperationCount();i++)
 			if(this.state.operations.getOperationName(i)=="Animation")
 				document.getElementById('Animation').style.visibility="visible";
 
 	document.getElementById(this.anchors.analysis).style.display="none";
-	for(var d=0;d<this.state.grid.response.grid.axis.length;d++) 
-		if(this.state.view.plot.indexOf(this.state.grid.response.grid.axis[d].type.toLowerCase())<0) 
+	for(var d=0;d<this.state.grid.response.grid.axis.length;d++)
+		if(this.state.view.plot.indexOf(this.state.grid.response.grid.axis[d].type.toLowerCase())<0)
 			switch(this.state.grid.response.grid.axis[d].type.toLowerCase()) {
 				case 'x': break;
 				case 'y': break;
 				case 'z': this.refs.DepthWidget[this.refs.DepthWidget.widgetType][1].disabled = false; break;
-				case 't': if(!this.refs.DW.widgetType) 
+				case 't': if(!this.refs.DW.widgetType)
 						this.refs.DW[1].disabled = false;
-					  else	    
+					  else
 						this.refs.DW.enable('hi')
 					  break;
-			
+
 			}
 
 
@@ -2116,7 +2119,7 @@ LASUI.prototype.hideAnalysis = function () {
 	if(!this.updating)if(this.autoupdate)
 		this.makeRequest();
 	else
-		this.showUpdateLink();	
+		this.showUpdateLink();
 }
 LASUI.prototype.selectAnalysisType = function (evt) {
 	if(evt) {
@@ -2124,20 +2127,20 @@ LASUI.prototype.selectAnalysisType = function (evt) {
 			var DOMNode = evt.target
 		else if (evt.srcElement)
 			var DOMNode = evt.srcElement;
-		
+
 
 		this.state.analysis.type = DOMNode.options[DOMNode.selectedIndex].value;
-		this.state.analysis.name = DOMNode.options[DOMNode.selectedIndex].innerHTML;			
-	} 
+		this.state.analysis.name = DOMNode.options[DOMNode.selectedIndex].innerHTML;
+	}
 
-	
+
 	if(this.state.analysis.axes.x && this.state.analysis.axes.y)
 		this.selectAnalysisAxis(null,"xy", true);
 	else
 		for(var a in this.state.analysis.axes)
-			if(this.state.grid.hasAxis(a)) 
-				this.selectAnalysisAxis(null,a, true);			
-	
+			if(this.state.grid.hasAxis(a))
+				this.selectAnalysisAxis(null,a, true);
+
 
 
 	if(!this.updating)if(this.autoupdate)
@@ -2154,14 +2157,14 @@ LASUI.prototype.selectAnalysisAxis = function (evt) {
 	//turn all axes off
 	for(var a in this.state.analysis.axes) {
 			//remove the analysis axis from the widget view
-			if(this.state.view.widgets.indexOf(a)>=0)//&&this.state.view.plot.indexOf(arguments[1])<0)			
+			if(this.state.view.widgets.indexOf(a)>=0)//&&this.state.view.plot.indexOf(arguments[1])<0)
 				this.state.view.widgets=this.state.view.widgets.substr(0,this.state.view.widgets.indexOf(a))+this.state.view.widgets.substr(this.state.view.widgets.indexOf(a)+1,this.state.view.widgets.length);
 	}
 	this.state.analysis.axes = {};
 
 	if(arguments[2]==true||evt)
 	{
-		
+
 		var changeVis= false;
 		//turn the analysis axis on
 		for(var i=0; i< axes.length; i++) {
@@ -2169,13 +2172,13 @@ LASUI.prototype.selectAnalysisAxis = function (evt) {
 			//
 			if(this.state.view.plot.indexOf(axes[i])>=0&&this.state.analysis.type && this.state.analysis.name != "None")
 				changeVis = true;
-			
-			if(this.state.view.widgets.indexOf(axes[i])<0&&this.state.analysis.type && this.state.analysis.name != "None")			
-				this.state.view.widgets+=axes[i];
-		}	
-	
 
-		
+			if(this.state.view.widgets.indexOf(axes[i])<0&&this.state.analysis.type && this.state.analysis.name != "None")
+				this.state.view.widgets+=axes[i];
+		}
+
+
+
 	} else {
 		//turning the analysis axis off
 
@@ -2191,10 +2194,10 @@ LASUI.prototype.selectAnalysisAxis = function (evt) {
 		this.makeRequest();
 	else
 		this.showUpdateLink();
-					
+
 }
 LASUI.prototype.setVisualization = function (d) {
-	
+
 	var stop = false;
 	var bestView = "";
 	if(this.state.view.plot.indexOf(d)>=0)
@@ -2209,15 +2212,15 @@ LASUI.prototype.setVisualization = function (d) {
 		for (var p in this.products[t])
 			if(this.products[t][p].view==bestView  && !stop)
 				if(this.refs.operations.plot.children[p])
-					if(this.refs.operations.plot.children[p].radio){ 
+					if(this.refs.operations.plot.children[p].radio){
 						this.refs.operations.plot.children[p].radio.checked = true;
 						this.refs.operations.plot.children[p].radio.onclick();
 						stop = true;
 					}
-	
-			
+
+
 	this.refs.analysis.axes[d].selected="true";
-}	
+}
 /**
  * Method to collapse a tree node
  * @param {object} obj Object reference in this.refs
@@ -2244,7 +2247,7 @@ LASUI.prototype.clone = function (obj) {
 		return obj.cloneNode(true);
 
 	var myclone = new Object();
-	
+
 	for(var i in obj)
 		myclone[i] = this.clone(obj[i]);
 	return myclone;
