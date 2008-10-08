@@ -25,6 +25,23 @@ height: 100%;
 .top_link_title:hover {
      color:red; /* background:  url(grn_1.gif) no-repeat;*/
 }
+.top_link_update {
+	display:block; 
+	float:left; 
+	color:#FBDE11; 
+	text-decoration:none; 
+	font-size:11px; 
+	font-weight:bold; 
+	padding:2px 2px 2px 4px;
+	cursor:pointer;
+       background:#5c5cff;
+       border: groove ;
+       margin-top:-2px;
+}
+.top_link_update:hover {
+     color:red; 
+     background:#000000;
+}
 
 
 .top_link_left {
@@ -47,6 +64,7 @@ height: 100%;
 	text-decoration:none; 
 	font-size:12px; 
 	font-weight:bold; 
+        margin-top: 2px;
 	margin-right:2px; 	font-weight: bold; ; cursor:pointer;;
 }
 .top_link:hover {color:red;  /* background:  url(grn_1.gif) no-repeat; */}
