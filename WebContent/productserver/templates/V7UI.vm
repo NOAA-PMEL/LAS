@@ -134,14 +134,14 @@
 		<div style="display:none" class="LASPopupDIVNode" id="categories"></div>
 		<table height="100%" width="100%"><tbody><tr><td height="55px">
 		#parse ("/productserver/templates/V7UIHeader.vm")
-		<div id="nav_bg" style="width:100%;background-color:#454DAB;overflow:hidden;padding-top:4pt;padding-bottom:6pt;">
+		<div id="nav_bg" style="width:100%;background-color:#454DAB;overflow:hidden;padding-top:4pt;padding-bottom:3pt;">
 			<div id="nav" style="position:relative;height:100%;width:100%;">
 		#if ($request.getParameter('hideCat'))
 		#else
 			<span class="top_link" width="100%" type="button" onclick="document.getElementById('startmsg').innerHTML=''; if(document.getElementById('categories').style.display=='none'){document.getElementById('categories').style.display='';LAS.toggleUIMask('')} else {document.getElementById('categories').style.display='none'; LAS.toggleUIMask('none');}">Choose dataset & variable&nbsp;</span>
 				
 		#end	
-			<span  class="top_link" id="update" onclick="LAS.makeRequest();">Update Plot&nbsp;</span><!--<INPUT type="checkbox" #if($request.getParameter('auto')) checked #end  onmousemove="window.status='Check to automatically update the plot.';" onmouseout="window.status='';" onclick="LAS.autoupdate=this.checked;if(LAS.autoupdate)LAS.makeRequest();">-->
+			<span  class="top_link_update" id="update" onclick="LAS.makeRequest();">Update Plot&nbsp;</span><!--<INPUT type="checkbox" #if($request.getParameter('auto')) checked #end  onmousemove="window.status='Check to automatically update the plot.';" onmouseout="window.status='';" onclick="LAS.autoupdate=this.checked;if(LAS.autoupdate)LAS.makeRequest();">-->
 			<span  class="top_link" onclick="if(LAS.refs.options.plot.options){LAS.toggleUIMask('');document.getElementById('plotOptions').style.display='';}">Set plot options&nbsp;</span>
 			<span id="productButtons">
 				<span class="top_link" style="visibility:hidden" ID="Animation">Animate&nbsp;</span>
