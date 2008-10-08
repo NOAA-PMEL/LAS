@@ -6,7 +6,7 @@
 				        #if ($!profile == "timeseries")
 				        LAS&nbsp;Time&nbsp;Series&nbsp;UI&nbsp;(Beta)
 				        #else
-						<a class="top_link_title" href="http://porter.pmel.noaa.gov:8680/bakerTrunk/ProductServer.do" target="_new">About&nbsp;LAS</a>
+						<a class="top_link_title" href="./ProductServer.do" target="_new">About&nbsp;LAS</a>
 						#end
 					</span>
 				
