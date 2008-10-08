@@ -219,7 +219,7 @@ IF `STRINDEX("($viewshape)", "XY") GT 0` THEN
    IF ($varshape"0|X>1|*>0") THEN 
       LET addy = ybox[gy=the_plot_var,y=($region_y_lo)]
       IF `STRCMP("($region_y_lo)", "($region_y_hi)") NE 0 AND \
-          (STRINDEX("($ferret_curvi_quals%0%)", "VLIM") EQ 0)`THEN \
+          (STRINDEX("($ferret_curvi_quals%0%)", "VLIM") EQ 0)` THEN \
              DEFINE SYMBOL qualifiers = \
              ($qualifiers)/VLIM=`($region_y_lo)`:`($region_y_hi)`
 
@@ -268,7 +268,7 @@ IF `STRINDEX("($viewshape)", "XZ") GT 0` THEN
    IF ($varshape"0|X>1|*>0") THEN 
       LET addz = zbox[gz=the_plot_var,z=($region_z_lo)]
       IF `STRCMP("($region_z_lo)", "($region_z_hi)") NE 0 AND \
-          (STRINDEX("($ferret_curvi_quals%0%)", "VLIM") EQ 0)`THEN \
+          (STRINDEX("($ferret_curvi_quals%0%)", "VLIM") EQ 0)` THEN \
              DEFINE SYMBOL qualifiers = \
              ($qualifiers)/VLIM=`($region_z_lo)`:`($region_z_hi)`
 
@@ -320,7 +320,7 @@ IF `STRINDEX("($viewshape)", "XT") GT 0` THEN
       LET tlo = `TT[T=($region_t_lo)@ITP]`
       LET thi = `TT[T=($region_t_hi)@ITP]`
       IF `STRCMP("($region_t_lo)", "($region_t_hi)") NE 0 AND \
-          (STRINDEX("($ferret_curvi_quals%0%)", "VLIM") EQ 0)`THEN \
+          (STRINDEX("($ferret_curvi_quals%0%)", "VLIM") EQ 0)` THEN \
              DEFINE SYMBOL qualifiers = \
              ($qualifiers)/VLIM=`tlo`:`thi`
 
@@ -372,7 +372,7 @@ IF `STRINDEX("($viewshape)", "YZ") GT 0` THEN
    IF ($varshape"0|Y>1|*>0") THEN 
       LET addz = zbox[gz=the_plot_var,z=($region_z_lo)]
       IF `STRCMP("($region_z_lo)", "($region_z_hi)") NE 0 AND \
-          (STRINDEX("($ferret_curvi_quals%0%)", "VLIM") EQ 0)`THEN \
+          (STRINDEX("($ferret_curvi_quals%0%)", "VLIM") EQ 0)` THEN \
              DEFINE SYMBOL qualifiers = \
              ($qualifiers)/VLIM=`($region_z_lo)`:`($region_z_hi)`
 
@@ -402,7 +402,7 @@ IF `STRINDEX("($viewshape)", "YT") GT 0` THEN
    IF ($varshape"0|T>1|*>0") THEN 
       LET addy = ybox[gy=the_plot_var,y=($region_y_lo)]
       IF `STRCMP("($region_y_lo)", "($region_y_hi)") NE 0 AND \
-          (STRINDEX("($ferret_curvi_quals%0%)", "VLIM") EQ 0)`THEN \
+          (STRINDEX("($ferret_curvi_quals%0%)", "VLIM") EQ 0)` THEN \
              DEFINE SYMBOL qualifiers = \
              ($qualifiers)/VLIM=`($region_y_lo)`:`($region_y_hi)`
 
@@ -457,7 +457,7 @@ IF `STRINDEX("($viewshape)", "ZT") GT 0` THEN
    IF ($varshape"0|T>1|*>0") THEN 
       LET addz = zbox[gz=the_plot_var,z=($region_z_lo)]
       IF `STRCMP("($region_z_lo)", "($region_z_hi)") NE 0 AND \
-          (STRINDEX("($ferret_curvi_quals%0%)", "VLIM") EQ 0)`THEN \
+          (STRINDEX("($ferret_curvi_quals%0%)", "VLIM") EQ 0)` THEN \
              DEFINE SYMBOL qualifiers = \
              ($qualifiers)/VLIM=`($region_z_lo)`:`($region_z_hi)`
 
