@@ -134,7 +134,7 @@
 		<div style="display:none" class="LASPopupDIVNode" id="categories"></div>
 		<table height="100%" width="100%"><tbody><tr><td height="55px">
 		#parse ("/productserver/templates/V7UIHeader.vm")
-		<div id="nav_bg" style="width:100%;background-color:DarkSeaGreen;overflow:hidden;padding-top:4pt;padding-bottom:6pt;">
+		<div id="nav_bg" style="width:100%;background-color:#454DAB;overflow:hidden;padding-top:4pt;padding-bottom:6pt;">
 			<div id="nav" style="position:relative;height:100%;width:100%;">
 		#if ($request.getParameter('hideCat'))
 		#else
@@ -151,7 +151,7 @@
 			
 			<span style="position:absolute;right:0px;top:0px;height:38px;vertical-align:center;" id="downloadType"></div>				
 		</div>
-		<img id="wait" style="visibility:hidden;float:right;" src="JavaScript/components/mozilla_blu.gif"><span style="float:leftt;" id="breadcrumb">Please select a variable.</span><br>
+		<img id="wait" style="visibility:hidden;float:right;" src="JavaScript/components/mozilla_blu.gif"><span style="float:left;" id="breadcrumb">Please select a variable.</span><br>
 		<tr><td><table height="100%"><tbody><tr>		
 			<td id="constraints" valign="top" width="215px" height="100%" style="border: 1px solid #5c731e">
 				<div id="MapWidget" style="border:1px solid black;" ><div style="position:absolute;z-index:4;text-align:center"><img src="images/north-mini.png" onmousedown="LAS.refs.XYSelect.panPlot(0,10);"><br><img src="images/west-mini.png" onmousedown="LAS.refs.XYSelect.panPlot(-20,0);"><img src="images/east-mini.png" onmousedown="LAS.refs.XYSelect.panPlot(20,0);"><br><img src="images/south-mini.png" onmousedown="LAS.refs.XYSelect.panPlot(0,-10);"><br><img src="images/zoom-plus-mini.png" onclick="LAS.refs.XYSelect.zoom(2);"><br><img src="images/zoom-minus-mini.png"  onclick="LAS.refs.XYSelect.zoom(-1)"></div></div>
