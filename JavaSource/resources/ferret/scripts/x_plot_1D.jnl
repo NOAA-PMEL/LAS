@@ -181,7 +181,7 @@ ELSE
    GO LAS_url_label 0
 ENDIF
 
-LABEL/NOUSER `($ppl$xlen)/2`, `($ppl$ylen)+1.2`, 0, 0, 0.12, "LAS 7.+/Ferret ($FERRET_VERSION)     NOAA/PMEL"
+! LABEL/NOUSER `($ppl$xlen)/2`, `($ppl$ylen)+1.2`, 0, 0, 0.12, "LAS 7.+/Ferret ($FERRET_VERSION)     NOAA/PMEL"
 
 ! Add labels at the top for the location of overlaid lines
 ! and for URLs if they exist  

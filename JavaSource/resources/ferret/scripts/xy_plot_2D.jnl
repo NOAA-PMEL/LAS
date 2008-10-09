@@ -254,8 +254,8 @@ ENDIF
 !   CONTOUR/OVER($qualifiers_over) ($ferret_plot_var) \
 ! )
 
-! Overall header at the very top
-LABEL/NOUSER `($ppl$xlen)/2`, `($ppl$ylen)+1.2`, 0, 0, 0.12, "LAS 7.+/Ferret ($FERRET_VERSION)     NOAA/PMEL"
+! Overall header at the very top (commented out for V7UI space -- 10/08)
+! LABEL/NOUSER `($ppl$xlen)/2`, `($ppl$ylen)+1.2`, 0, 0, 0.12, "LAS 7.+/Ferret ($FERRET_VERSION)     NOAA/PMEL"
 
 ! Add labels at the top for the location of overlaid lines
 ! and for URLs if they exist  

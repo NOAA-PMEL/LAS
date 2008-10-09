@@ -306,12 +306,14 @@ LASUI.prototype.createVariableOptionNode = function (node, i) {
 	OPTIONNode.innerHTML = node.category.getChildName(i);
 	OPTIONNode.id = "OPTION_" + node.category.getChildID(i);
 	OPTIONNode.onselect=this.setVariable.LASBind(this, node, i, true, true);
+
 	document.getElementById(this.anchors.variables).appendChild(OPTIONNode);
 
 	document.getElementById(this.anchors.variables).onchange = function (evt) {this.options[this.selectedIndex].onselect({"target" : {"selected" :true}})}
 	if(this.state.variables && this.state.dataset)
 		if(this.state.variables[this.state.dataset])
 				if(this.state.variable==node.category.getChildID(i)||this.state.variables[this.state.dataset]==node.category.getChild(i)){
+					if(OPTIONNode.selected)
 					OPTIONNode.selected=true;
 				}
 
@@ -418,8 +420,21 @@ LASUI.prototype.onSetVariable = function() {
 				for(var i=1;i<this.state.categorynames.length;i++)
 					categories += ' / ' + this.state.categorynames[i];
 				//var variables = this.state.variables[this.state.dataset].name;
+				var info = document.createElement("IMG");
+				info.onclick = "window.open(\'getMetadata.do?dsid="+this.state.dataset+"\')";
+				info.src = "images/icon_info.gif";
+				var varlist = document.createElement("SELECT");
+				varlist.id="variables";
+				var cats = document.createElement("TEXT");
+				cats.innerHTML= categories;
+				while (document.getElementById(this.anchors.breadcrumb).firstChild) {
+				  document.getElementById(this.anchors.breadcrumb).removeChild(document.getElementById(this.anchors.breadcrumb).firstChild);
+				}
+				document.getElementById(this.anchors.breadcrumb).appendChild(info);
+				document.getElementById(this.anchors.breadcrumb).appendChild(cats);
 
-				document.getElementById(this.anchors.breadcrumb).innerHTML = '<a class="LASLink" onclick="window.open(\'getMetadata.do?dsid='+this.state.dataset+'\')"><img src="images/icon_info.gif"></a>&nbsp;<b>' + categories + ' : <select id="variables"/></b>';
+
+				document.getElementById(this.anchors.breadcrumb).appendChild(varlist);
 
 
 				if(this.state.variables[this.state.dataset].grid_type!="scattered"){
