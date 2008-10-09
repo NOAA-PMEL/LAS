@@ -352,6 +352,7 @@
    * for the selected time range
    */
   function handleFramesResponse(LASResponseText){
+      //alert("handleFramesResponse");
       //parse the LASResponse
       var Response;
       try{
@@ -368,10 +369,13 @@
           return;
       }
       if(Response.isError()){
+          alert("error response for extracting frames");
           showError(Response);    
       }else{
           var listing = Response.getResult("ferret_listing");
+          //alert("before importXML");
           importXML(listing.url);
+          //alert("after importXML");
           animationInit();
           ready = true;
       }
@@ -383,17 +387,29 @@
   function importXML(xml)
   {
       //for Firfox etc.
-      if (document.implementation && document.implementation.createDocument){
-          xmlDoc = document.implementation.createDocument("", "", null);	
+      //if (document.implementation && document.implementation.createDocument){
+      //    alert("firefox");
+      //    xmlDoc = document.implementation.createDocument("", "", null);	
+      
+      //test safari.....it seems working for Firfox,and IE too
+      if(window.XMLHttpRequest) {
+          //alert("safari");
+          var d = new XMLHttpRequest();
+	  d.open("GET", xml, false);
+	  d.send(null);
+	  xmlDoc=d.responseXML;
       //for IE
       }else if(window.ActiveXObject){
           xmlDoc = new ActiveXObject("Microsoft.XMLDOM");	
+          xmlDoc.async=false;
+          xmlDoc.load(xml);
+
       }else{
           alert('Your browser can\'t handle this script');
 	  return;
       }
-      xmlDoc.async=false;
-      xmlDoc.load(xml);
+    //  xmlDoc.async=false;
+    //  xmlDoc.load(xml);
   }
 
   /**
