@@ -13,10 +13,10 @@
 </head>
 
 <body onload="initializeLASRequest(); loadMap()">
-	<div style="height:20px;">
+	<div style="position:absolute;top:0px;left:0px">
+	<font style="float:right" id="zoomInfo" name="zoomInfo" color="red">Click and drag to zoom in.</font>
 	<a class="LASLink" onclick="window.open(document.location)">Open plot in a new window</a>&nbsp;			
-	<a id="zoom_button" name="zoom_button" class="LASLink" onclick="submitZoomOutXML()">Zoom back.</a>&nbsp;	<img id="waiting" src="JavaScript/components/mozilla_blu.gif">&nbsp;	 	<font id="zoomInfo" name="zoomInfo" color="red">Click and drag to zoom in.</font>
-	</div>	
+	<a id="zoom_button" name="zoom_button" class="LASLink" onclick="submitZoomOutXML()">Zoom back.</a>&nbsp;	<img id="waiting" src="JavaScript/components/mozilla_blu.gif">&nbsp;	 	</div>	
   	<div id="img_body" name="img_body"></div>
 </body>
 
@@ -63,7 +63,7 @@ var axisHi = "";
 *     request -- the product server request string
 */
 function evalMyRequest (request) {
-              document.getElementById('waiting').style["display"]="";
+             document.getElementById('waiting').style["display"]="";
               var bindArgs = {                           url: request,
                        mimetype: "text/plain",
                        preventCache:true,
