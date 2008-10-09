@@ -1,7 +1,5 @@
 ! Write whatever header we want onto a plot, across the top.
 ! 
 
-! Overall header at the very top
-
 ! LABEL/NOUSER `($ppl$xlen)/2`, `($ppl$ylen)+1.2`, 0, 0, 0.12, "LAS 7.+/Ferret ($FERRET_VERSION)     NOAA/PMEL"
 
