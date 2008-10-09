@@ -48,6 +48,7 @@
    #end
    <hr>
    #set($variables = $las_config.getVariables($dsID))
+#if ( $variables.size() > 0 ) 
    #set($varID = $variables.get(0).getID())
    #set($grid = $las_config.getGrid($dsID, $varID))
    #set($axes = $grid.getAxes())
@@ -56,7 +57,9 @@
       #set($taxis = $grid.getTime())
       #set($colspan = $colspan+2)
    #end
+   #if ( ${las_config.getFTDSURL($dsID, $varID)} != "" )
    <a href="getMetadata.do?dsid=$dsID&opendap=true">See the URLs</a> to access these data via <a href="http://opendap.org">OPeNDAP</a><br><br>
+   #end
    <table border="1" cellpadding="4">
    <tr><th bgcolor="#dddddd">Name</th>
    #foreach ($axis in $axes)
@@ -84,7 +87,7 @@
       </tr>
    #end
    
-   
+#end   
    </table>
 
 #end ## foreach dsID
