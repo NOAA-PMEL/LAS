@@ -191,13 +191,11 @@ public class Container {
     	
 		Filter filter = new DocumentationFilter();
 		Iterator docIt = element.getDescendants(filter);
-		Element documentation = (Element) docIt.next();
-		
-		if ( documentation != null ) { 
+		if ( docIt.hasNext() ) {
 			return true;
+		} else {
+			return false;
 		}
-		
-		return false;
 	}
 	public Documentation getDocumentation () {
 		Filter filter = new DocumentationFilter();
