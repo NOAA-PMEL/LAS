@@ -134,7 +134,7 @@
 	</head>
 	<body onload="init();this.height=document.innerHeight;">
 		<div style="display:none" class="LASPopupDIVNode" id="categories"></div>
-		<table height="100%" width="100%"><tbody><tr><td height="55px">
+		<table height="100%" width="100%"><tbody><tr><td valign="top" height="55px">
 		#parse ("/productserver/templates/V7UIHeader.vm")
 		<div id="nav_bg" style="width:100%;background-color:#454DAB;overflow:hidden;padding-top:4pt;padding-bottom:3pt;">
 			<div id="nav" style="position:relative;height:100%;width:100%;">
@@ -154,7 +154,7 @@
 			<span style="position:absolute;right:0px;top:0px;height:38px;vertical-align:center;" id="downloadType"></div>				
 		</div>
 		<img id="wait" style="visibility:hidden;float:right;" src="JavaScript/components/mozilla_blu.gif"><a style="float:right;" onclick="window.open(document.getElementById('output').src)" class="LASLink">Open plot in a new window</a><span style="float:left;" id="breadcrumb">Please select a variable.</span><br>
-		<tr><td><table height="100%"><tbody><tr>		
+		<tr><td valign="top"><table height="100%"><tbody><tr>		
 			<td id="constraints" valign="top" width="215px" height="100%" style="border: 1px solid #5c731e">
 				<div id="MapWidget" style="border:1px solid black;" ><div style="position:absolute;z-index:4;text-align:center"><img src="images/north-mini.png" onmousedown="LAS.refs.XYSelect.panPlot(0,10);"><br><img src="images/west-mini.png" onmousedown="LAS.refs.XYSelect.panPlot(-20,0);"><img src="images/east-mini.png" onmousedown="LAS.refs.XYSelect.panPlot(20,0);"><br><img src="images/south-mini.png" onmousedown="LAS.refs.XYSelect.panPlot(0,-10);"><br><img src="images/zoom-plus-mini.png" onclick="LAS.refs.XYSelect.zoom(2);"><br><img src="images/zoom-minus-mini.png"  onclick="LAS.refs.XYSelect.zoom(-1)"></div></div>
 				<center><strong>Max&nbsp;Lat</strong><input size=3  id="input_maxY" type="text" value="90.0"><br>
@@ -196,7 +196,7 @@
 					#end
 				</div>
 				<div style="display:none;margin:20pt;padding:20pt;" id="wait_msg"><H3>Product loading...</H3></div>
-				<iframe id="output" onload="this.height='100%';LAS.onPlotLoad();" width="100%" height="100%" frameborder=0></iframe>			
+				<iframe style="min-height:500px;" id="output" onload="this.height='100%';LAS.onPlotLoad();" width="100%" height="100%" frameborder=0></iframe>			
 			</td>
 			</tr></tbody>
 		</table></td></tr><tr><td height="22px">
