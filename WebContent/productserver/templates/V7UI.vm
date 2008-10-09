@@ -145,10 +145,10 @@ margin:0 auto; /* for the rest */
 			<div id="nav" style="position:relative;height:100%;width:100%;">
 		#if ($request.getParameter('hideCat'))
 		#else
-			<span class="top_link" width="100%" type="button" onclick="document.getElementById('startmsg').innerHTML=''; if(document.getElementById('categories').style.display=='none'){document.getElementById('categories').style.display='';LAS.toggleUIMask('')} else {document.getElementById('categories').style.display='none'; LAS.toggleUIMask('none');}">Choose dataset & variable&nbsp;</span>
+			<span class="top_link" width="100%" type="button" onclick="document.getElementById('startmsg').innerHTML=''; if(document.getElementById('categories').style.display=='none'){document.getElementById('categories').style.display='';LAS.toggleUIMask('')} else {document.getElementById('categories').style.display='none'; LAS.toggleUIMask('none');}">Choose dataset&nbsp;</span>
 				
 		#end	
-			<span  class="top_link_update" id="update" onclick="LAS.makeRequest();">Update Plot&nbsp;</span><!--<INPUT type="checkbox" #if($request.getParameter('auto')) checked #end  onmousemove="window.status='Check to automatically update the plot.';" onmouseout="window.status='';" onclick="LAS.autoupdate=this.checked;if(LAS.autoupdate)LAS.makeRequest();">-->
+			<span  class="top_link" id="update" onclick="LAS.makeRequest();">Update Plot&nbsp;</span><!--<INPUT type="checkbox" #if($request.getParameter('auto')) checked #end  onmousemove="window.status='Check to automatically update the plot.';" onmouseout="window.status='';" onclick="LAS.autoupdate=this.checked;if(LAS.autoupdate)LAS.makeRequest();">-->
 			<span  class="top_link" onclick="if(LAS.refs.options.plot.options){LAS.toggleUIMask('');document.getElementById('plotOptions').style.display='';}">Set plot options&nbsp;</span>
 			<span id="productButtons">
 				<span class="top_link" style="visibility:hidden" ID="Animation">Animate&nbsp;</span>
@@ -158,7 +158,7 @@ margin:0 auto; /* for the rest */
 			
 			<span style="position:absolute;right:0px;top:0px;height:38px;vertical-align:center;" id="downloadType"></div>				
 		</div>
-		<img id="wait" style="visibility:hidden;float:right;" src="JavaScript/components/mozilla_blu.gif"><span style="float:left;" id="breadcrumb">Please select a variable.</span><br>
+		<img id="wait" style="visibility:hidden;float:right;" src="JavaScript/components/mozilla_blu.gif"><span style="float:left;" id="breadcrumb"></span><br>
 		</td></tr><tr><td valign="top"><table height="100%"><tbody><tr>		
 			<td id="constraints" valign="top" width="215px" height="100%" style="border: 1px solid #5c731e">
 				<div id="MapWidget" style="border:1px solid black;" ><div style="position:absolute;z-index:4;text-align:center"><img src="images/north-mini.png" onmousedown="LAS.refs.XYSelect.panPlot(0,10);"><br><img src="images/west-mini.png" onmousedown="LAS.refs.XYSelect.panPlot(-20,0);"><img src="images/east-mini.png" onmousedown="LAS.refs.XYSelect.panPlot(20,0);"><br><img src="images/south-mini.png" onmousedown="LAS.refs.XYSelect.panPlot(0,-10);"><br><img src="images/zoom-plus-mini.png" onclick="LAS.refs.XYSelect.zoom(2);"><br><img src="images/zoom-minus-mini.png"  onclick="LAS.refs.XYSelect.zoom(-1)"></div></div>
