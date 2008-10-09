@@ -181,8 +181,6 @@ ELSE
    GO LAS_url_label 0
 ENDIF
 
-! LABEL/NOUSER `($ppl$xlen)/2`, `($ppl$ylen)+1.2`, 0, 0, 0.12, "LAS 7.+/Ferret ($FERRET_VERSION)     NOAA/PMEL"
-
 ! Add labels at the top for the location of overlaid lines
 ! and for URLs if they exist  
 
@@ -220,6 +218,9 @@ ELSE
    IF `($n_right_labels"0") GT 0` THEN GO labels_above_plot
 
 ENDIF
+
+! Overall header at the very top
+GO LAS_ferret_las_version_header
 
 ! Save the results
 GO LAS_results xline

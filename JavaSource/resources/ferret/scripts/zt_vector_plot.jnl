@@ -140,7 +140,8 @@ ELSE
 
 ENDIF
 
-LABEL/NOUSER `($ppl$xlen)/2`, `($ppl$ylen)+1.2`, 0, 0, 0.12, "LAS 7.+/Ferret ($FERRET_VERSION)     NOAA/PMEL"
+! Overall header at the very top
+GO LAS_ferret_las_version_header
 IF ($needs_url"0|*>1") THEN \
 LABEL/NOUSER `($ppl$xlen)*.33`, `($ppl$ylen)+1.`, -1, 0, 0.10, "DATA SET: @AS($data_var_url)"
 

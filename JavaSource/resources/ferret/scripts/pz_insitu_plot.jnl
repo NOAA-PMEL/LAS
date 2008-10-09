@@ -70,8 +70,6 @@ GO polymark ($poly_command) ($data_p_var) ($data_z_var) " " ($ferret_poly_shape"
 
 LABEL/NOUSER `($ppl$xlen)/2`, `-1*($ppl$yorg)/1.5`, 0, 0, 0.14, @AC($ferret_plot_title)
 
-LABEL/NOUSER `($ppl$xlen)/2`, `($ppl$ylen)+1.2`, 0, 0, 0.12, "LAS 7.+/Ferret ($FERRET_VERSION)     NOAA/PMEL"
-
 IF ($needs_url"0|*>1") THEN \
 LABEL/NOUSER `($ppl$xlen)*.33`, `($ppl$ylen)+1.`, -1, 0, 0.10, "DATA SET: @AS($data_var_url)"
 
@@ -137,6 +135,9 @@ IF `($pstride"0") GT 0` THEN
 
    LABEL/NOUSER `labxloc`, `labyloc`, 1, 0.0, `labsiz`, @P2@AC($p_npts) points subsampled at every ($pstride) point
 ENDIF 
+
+! Overall header at the very top
+GO LAS_ferret_las_version_header
 
 ! Save the results
 

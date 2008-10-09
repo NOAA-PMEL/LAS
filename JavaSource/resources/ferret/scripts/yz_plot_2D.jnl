@@ -228,7 +228,7 @@ ENDIF
 ! )
 
 ! Overall header at the very top
-LABEL/NOUSER `($ppl$xlen)/2`, `($ppl$ylen)+1.2`, 0, 0, 0.12, "LAS 7.+/Ferret ($FERRET_VERSION)     NOAA/PMEL"
+GO LAS_ferret_las_version_header
 
 ! Add labels at the top for the location of any overlaid lines
 ! or hybrid z native plots and for URLs if labels have been defined

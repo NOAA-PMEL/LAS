@@ -120,7 +120,8 @@ PPL PLOT
 GO LAS_url_label 0
 IF `($n_right_labels"0") GT 0` THEN GO labels_above_plot
 
-LABEL/NOUSER `($ppl$xlen)/2`, `($ppl$ylen)+1.2`, 0, 0, 0.12, "LAS 7.+/Ferret ($FERRET_VERSION)     NOAA/PMEL"
+! Overall header at the very top
+GO LAS_ferret_las_version_header
 
 ! Save the results
 

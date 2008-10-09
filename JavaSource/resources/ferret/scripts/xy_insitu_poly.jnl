@@ -97,6 +97,9 @@ IF `data_xmin GT ($region_x_hi)` THEN
    ENDIF
 ENDIF
 
+! Overall header at the very top
+GO LAS_ferret_las_version_header
+
 ! Save the results
 
 GO LAS_results box
