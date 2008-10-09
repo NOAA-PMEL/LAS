@@ -25,10 +25,10 @@ height: 100%;
 .top_link_title:hover {
      color:red; /* background:  url(grn_1.gif) no-repeat;*/
 }
-.top_link_update {
+.top_link {
 	display:block; 
 	float:left; 
-	color:#FBDE11; 
+	color:#FFFFFF; 
 	text-decoration:none; 
 	font-size:11px; 
 	font-weight:bold; 
@@ -36,11 +36,12 @@ height: 100%;
 	cursor:pointer;
        background:#5c5cff;
        border: groove ;
-       margin-top:-2px;
+       margin-right:2px;
+       margin-left:2px
 }
-.top_link_update:hover {
-     color:red; 
-     background:#000000;
+.top_link:hover {
+     color:#FBDE11; 
+     background:#454DAB;
 }
 
 
@@ -56,7 +57,7 @@ height: 100%;
 }
 .top_link_left:hover {color:red;  /* background:  url(grn_1.gif) no-repeat; */}
 
-.top_link {
+/*  .top_link {
 	display:block; 
 	float:left;  
 	padding:0 0 0 12px;
@@ -68,4 +69,4 @@ height: 100%;
 	margin-right:2px; 	font-weight: bold; ; cursor:pointer;;
 }
 .top_link:hover {color:red;  /* background:  url(grn_1.gif) no-repeat; */}
-
+ */
