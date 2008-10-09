@@ -148,7 +148,7 @@ LASUI.prototype.initUI = function (anchorId)
 
 		this.refs.categories.LINode = document.getElementById("categories");
 		this.refs.categories.title = document.createElement("SPAN");
-		this.refs.categories.title.innerHTML = "Select a dataset category.";
+		this.refs.categories.title.appendChild(document.createTextNode("Select a dataset category."));
 		this.refs.categories.title.className = "LASTreeTitleNode";
 		this.refs.categories.ULNode= document.createElement("UL");
 		this.refs.categories.ULNode.className = "LASTreeULNode";
@@ -273,7 +273,7 @@ LASUI.prototype.createCategoryTreeNode = function (node, i, id) {
 	var td2 = document.createElement("TD");
 	td2.style.verticalAlign = "top";
 	td2.onclick = this.selectCategory.LASBind(this, node, i);
-	td2.innerHTML = node.category.getChildName(i);
+	td2.appendChild(document.createTextNode(node.category.getChildName(i)));
 	td2.className = "LASTreeTableCell";
 	td2.style.textAlign  = "left";
 	tr.appendChild(td1);
@@ -281,7 +281,9 @@ LASUI.prototype.createCategoryTreeNode = function (node, i, id) {
 	if(node.category.getChildChildrenType(i)=="variables") {
 		var td3 = document.createElement("TD");
 		node.children[i].A = document.createElement("A");
-		node.children[i].A.innerHTML = "<img src='images/icon_info.gif'>";
+		var img = document.createElement("img");
+		img.src="images/icon_info.gif";
+		node.children[i].A.appendChild(img);
 		node.children[i].A.onclick = this.showInfo.LASBind(this,node,i);
 		td3.appendChild(node.children[i].A);
 		td3.className = "LASTreeTableCell";
@@ -358,19 +360,8 @@ LASUI.prototype.createVariableTreeNode = function (node, i) {
 	td2.innerHTML= node.category.getChildName(i);
 	td2.align = "left";
 	td2.className = "LASTreeTableCell";
-
- //  var td3 = document.createElement("TD");
-//	td3.align = "right";
-//	td3.className = "LASTreeTableCell";
-  // td3.width="12px";
-   //node.children[i].A = document.createElement("A");
-	//node.children[i].A.innerHTML = "<img src='images/icon_info.gif'>";
-	//node.children[i].A.onclick = this.showInfo.LASBind(this,node,i);
-	//td3.appendChild(node.children[i].A);
-
 	tr.appendChild(td1);
 	tr.appendChild(td2);
-//	tr.appendChild(td3);
 	tbody.appendChild(tr);
 	table.appendChild(tbody);
 	node.children[i].LINode.appendChild(table);
@@ -724,7 +715,8 @@ LASUI.prototype.setDownloadOperation = function (evt) {
 		cancel.value=	"Close";
 		cancel.className = "LASSubmitInputNode";
 		cancel.onclick = this.genericHandler.LASBind(this,"this.refs.options.download.DOMNode.style.display='none';this.toggleUIMask('none');");
-		this.refs.options.download.DOMNode.innerHTML = "";
+		while(this.refs.options.download.DOMNode.firstChild)
+			this.refs.options.download.DOMNode.removeChild(this.refs.options.download.DOMNode.firstChild);
 		this.refs.options.download.DOMNode.appendChild(cancel);
 		this.getOptions(optiondef, this.refs.options.download.DOMNode,"download");
 	}
@@ -772,7 +764,8 @@ LASUI.prototype.setOperation = function (evt) {
 		cancel.value=	"Close";
 		cancel.className = "LASSubmitInputNode";
 		cancel.onclick = this.genericHandler.LASBind(this,"this.refs.options.plot.DOMNode.style.display='none';this.toggleUIMask('none');");
-		this.refs.options.plot.DOMNode.innerHTML = "";
+		while(this.refs.options.plot.DOMNode.firstChild)
+			this.refs.options.plot.DOMNode.removeChild(this.refs.options.plot.DOMNode.firstChild);
 		this.refs.options.plot.DOMNode.appendChild(cancel);
 		this.getOptions(optiondef, this.refs.options.plot.DOMNode,"plot");
 	}
@@ -851,7 +844,8 @@ LASUI.prototype.doProductIconClick = function (evt) {
 	this.state.operation.external = id;
 	this.state.view.external = this.state.view.plot;
 	this.toggleUIMask('');
-	this.refs.operations.external.DIVNode.innerHTML = "";
+	while(this.refs.operations.external.DIVNode.firstChild)
+		this.refs.operations.external.DIVNode.removeChild(this.refs.operations.external.DIVNode.firstChild);
 
 	var submit = document.createElement("INPUT");
 	var cancel = document.createElement("INPUT");
@@ -952,8 +946,10 @@ LASUI.prototype.setViews = function (strJson) {
 	this.setDefaultProductMenu();
 }
 LASUI.prototype.setDefaultProductMenu = function () {
-	this.refs.operations.plot.DOMNode.innerHTML = "";
-	this.refs.operations.download.DOMNode.innerHTML = "";
+	while(this.refs.operations.plot.DOMNode.firstChild)
+		this.refs.operations.plot.DOMNode.removeChild(this.refs.operations.plot.DOMNode.firstChild);
+	while(this.refs.operations.download.DOMNode.firstChild)
+		this.refs.operations.download.DOMNode.removeChild(this.refs.operations.download.DOMNode.firstChild);
 
 	for(var type in this.refs.operations)
 		this.refs.operations[type].children ={};
@@ -1015,7 +1011,7 @@ LASUI.prototype.setProductTypeNode = function(type) {
 		this.refs.operations.download.SELECTNode.style.position = "relative";
 		this.refs.operations.download.SELECTNode.style.top = "-3px";
 		var format = document.createElement("option");
-		format.appendChild(document.createTextNode("Select format..."));
+		format.appendChild(document.createTextNode("Select format.."));
 		this.refs.operations.download.SELECTNode.appendChild(format);
 		this.refs.operations.download.SELECTNode.onchange = function (evt) {this.options[this.selectedIndex].onselect()};
 		this.refs.operations.download.SELECTNode.style.position="relative";
@@ -1026,7 +1022,7 @@ LASUI.prototype.setProductTypeNode = function(type) {
 		//label.appendChild(this.refs.operations.download.SELECTNode);
 		this.refs.operations.download.INPUTNode = document.createElement("SPAN");
 		this.refs.operations.download.INPUTNode.className = "top_link"
-		this.refs.operations.download.INPUTNode.innerHTML = "Download Data";
+		this.refs.operations.download.INPUTNode.appendChild(document.createTextNode("Download Data"));
 		this.refs.operations.download.INPUTNode.onclick = this.makeRequest.LASBind(this,"download");
 		this.refs.operations.download.DOMNode.appendChild(this.refs.operations.download.INPUTNode);
 		this.refs.operations.download.DOMNode.appendChild(document.createTextNode('\u00a0'));
@@ -1054,8 +1050,7 @@ LASUI.prototype.setProductNode = function(type, product) {
 		this.refs.operations.plot.children[product].LINode.className = "LASPlotType";
 		if(this.products[type][product].view.length==0)
 			this.refs.operations.plot.children[product].LINode.style.display = "none";
-		this.refs.operations.plot.children[product].title = document.createElement("TEXT");
-		this.refs.operations.plot.children[product].title.innerHTML =  product;
+		this.refs.operations.plot.children[product].title = document.createTextNode(product);
 		this.refs.operations.plot.children[product].radio = document.createElement("INPUT");
 		this.refs.operations.plot.children[product].radio.type = "radio";
 		this.refs.operations.plot.children[product].radio.name = "product";
@@ -1113,8 +1108,11 @@ LASUI.prototype.updateConstraints = function (view) {
 	else
 		this.state.view.widgets = view;
 	this.updating = true;
-	document.getElementById("Date").innerHTML = "";
-	document.getElementById("Depth").innerHTML = "";
+	while(document.getElementById("Date").firstChild)
+		document.getElementById("Date").removeChild(document.getElementById("Date").firstChild);
+	while(document.getElementById("Depth").firstChild)
+		document.getElementById("Depth").removeChild(document.getElementById("Depth").firstChild);
+		
 	
 	if(this.state.grid.getAxis('x') || this.state.grid.getAxis('y')) {
 		if(!this.refs.XYSelect.enabled)
@@ -1398,19 +1396,19 @@ LASUI.prototype.initZConstraint = function (mode, reset) {
 	switch (mode) {
 			case 'range':
 				var depth_label2 =document.createElement("STRONG");
-				depth_label2.innerHTML = "Minimum Depth (" + this.state.grid.getAxis('z').units +") : ";
+				depth_label2.appendChild(document.createTextNode("Minimum Depth (" + this.state.grid.getAxis('z').units +") : "));
 				document.getElementById("Depth").appendChild(depth_label2);
 				document.getElementById("Depth").appendChild(this.refs.DepthWidget[this.refs.DepthWidget.widgetType][0]);
 				document.getElementById("Depth").appendChild(document.createElement("BR"));
 				var depth_label3 =document.createElement("STRONG");
-				depth_label3.innerHTML = "Maximum Depth (" + this.state.grid.getAxis('z').units +") : ";
+				depth_label3.appendChild(document.createTextNode("Maximum Depth (" + this.state.grid.getAxis('z').units +") : "));
 				document.getElementById("Depth").appendChild(depth_label3);
 				document.getElementById("Depth").appendChild(this.refs.DepthWidget[this.refs.DepthWidget.widgetType][1]);
 				document.getElementById("Depth").style.display="";
 				break;
 			case 'point':
 				var depth_label = document.createElement("STRONG");
-				depth_label.innerHTML="Depth (" + this.state.grid.getAxis('z').units + ") : ";
+				depth_label.appendChild(document.createTextNode("Depth (" + this.state.grid.getAxis('z').units + ") : "));
 				document.getElementById("Depth").appendChild(depth_label);
 				document.getElementById("Depth").appendChild(this.refs.DepthWidget[this.refs.DepthWidget.widgetType][0]);
 				document.getElementById("Depth").style.display="";
@@ -1494,7 +1492,7 @@ LASUI.prototype.initTConstraint = function (mode,reset) {
 					break;
 				case 'point':
 					var date_label = document.createElement("STRONG");
-					date_label.innerHTML = "Date : ";
+					date_label.appendChild(document.createTextNode("Date : "));
 					document.getElementById("Date").appendChild(date_label);
 					document.getElementById("Date").appendChild(this.refs.DW[0]);
 					break;
@@ -1790,7 +1788,7 @@ LASUI.prototype.setOptionTRNode = function (id,TBODYNode,type) {
 		this.refs.options.cache[id].TRNode = document.createElement("TR");
 		this.refs.options.cache[id].TD1 = document.createElement("TD");
 		this.refs.options.cache[id].TD1.width="45%";
-		this.refs.options.cache[id].TD1.innerHTML =this.refs.options.cache[id].title
+		this.refs.options.cache[id].TD1.appendChild(document.createTextNode(this.refs.options.cache[id].title));
 		this.refs.options.cache[id].TD2 = document.createElement("TD");
 		if(this.refs.options.cache[id].menu) {
 			this.refs.options.cache[id].SELECTNode = document.createElement("SELECT");
@@ -1811,7 +1809,9 @@ LASUI.prototype.setOptionTRNode = function (id,TBODYNode,type) {
 		}
 		this.refs.options.cache[id].TD3 = document.createElement("TD");
 		this.refs.options.cache[id].A = document.createElement("A");
-		this.refs.options.cache[id].A.innerHTML = "<img src='images/icon_info.gif'>";
+		var img = document.createElement("img");
+		img.src="images/icon_info.gif";
+		this.refs.options.cache[id].A.appendChild(img);
 		this.refs.options.cache[id].A.onclick = this.showOptionInfo.LASBind(this,this.refs.options.cache[id].help);
 		this.refs.options.cache[id].TD3.appendChild(this.refs.options.cache[id].A);
 		this.refs.options.cache[id].TRNode.appendChild(this.refs.options.cache[id].TD1);
@@ -1844,7 +1844,8 @@ LASUI.prototype.setOptionTRNode = function (id,TBODYNode,type) {
 				clone.INPUTNode.onchange({"target": clone.INPUTNode},id, type, clone);
 				clone.TD2.appendChild(clone.INPUTNode);
 			}
-			clone.TRNode.innerHTML = "";
+			while(clone.TRNode.firstChild)
+				clone.TRNode.removeChild(clone.TRNode.firstChild);
 
 			clone.TRNode.appendChild(clone.TD1);
 			clone.TRNode.appendChild(clone.TD2);
