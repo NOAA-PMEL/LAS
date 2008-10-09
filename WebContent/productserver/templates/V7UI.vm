@@ -197,7 +197,7 @@ margin:0 auto; /* for the rest */
 				<div id="startmsg">
 					#if ($request.getParameter('dsid')!='' && $request.getParameter('varid')!='')
 					#else
-						<h1>To begin, click the "Choose Dataset and Variable" button.</h1>
+						<h1>To begin, click the "Choose Dataset" button.</h1>
 					#end
 				</div>
 				<div style="display:none;margin:20pt;padding:20pt;" id="wait_msg"><H3>Product loading...</H3></div>
