@@ -85,29 +85,48 @@ public class LASReqInfoRegular{
             Element refElement = lasReqInfo.getElementByXPath("/las_req_info/ferret_use_ref_map");
             if(refElement != null){initLASReq.put("ferret_use_ref_map", refElement.getText());}
 
+         
+            //stride values for plot
             //xstride
             Element xstElement = lasReqInfo.getElementByXPath("/las_req_info/x_stride");
-            if(xstElement != null){xstride = xstElement.getText();}
-
+            if(xstElement != null){
+                xstride = xstElement.getText();
+                initLASReq.put("xstride",xstride);
+            }
             //ystride
             Element ystElement = lasReqInfo.getElementByXPath("/las_req_info/y_stride");
-            if(ystElement != null){ystride = ystElement.getText();}
+            if(ystElement != null){
+                ystride = ystElement.getText();
+                initLASReq.put("ystride",ystride);
+            }
+
+            //stride values for GE placemarks
+            //xstride_coord
+            Element xstcoordElement = lasReqInfo.getElementByXPath("/las_req_info/xstride_coord");
+            if(xstcoordElement != null){
+                initLASReq.put("xstride_coord",xstcoordElement.getText());
+            }
+            //ystride_coord
+            Element ystcoordElement = lasReqInfo.getElementByXPath("/las_req_info/ystride_coord");
+            if(xstcoordElement != null){
+                initLASReq.put("ystride_coord",ystcoordElement.getText());
+            }
 
             //xLowerLeft
             Element xllElement = lasReqInfo.getElementByXPath("/las_req_info/x_axis_lower_left");
-            if(xllElement != null){xLowerLeft = xllElement.getText();}
+            if(xllElement != null){initLASReq.put("xLowerLeft",xllElement.getText());}
 
             //yLowerLeft
             Element yllElement = lasReqInfo.getElementByXPath("/las_req_info/y_axis_lower_left");
-            if(yllElement != null){yLowerLeft = yllElement.getText();}
+            if(yllElement != null){initLASReq.put("yLowerLeft",yllElement.getText());}
 
             //xUpperRight
             Element xurElement = lasReqInfo.getElementByXPath("/las_req_info/x_axis_upper_right");
-            if(xurElement != null){xUpperRight = xurElement.getText();}
+            if(xurElement != null){initLASReq.put("xUpperRight",xurElement.getText());}
 
             //xUpperRight
             Element yurElement = lasReqInfo.getElementByXPath("/las_req_info/y_axis_upper_right");
-            if(yurElement != null){yUpperRight = yurElement.getText();}
+            if(yurElement != null){initLASReq.put("yUpperRight",yurElement.getText());}
 
             if(dsIntervals.contains("z")){
                 //get Z range
