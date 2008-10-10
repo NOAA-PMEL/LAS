@@ -321,9 +321,10 @@ ENDIF
         list/nohead/format=("<ferret_use_ref_map>",($fmt),"</ferret_use_ref_map>")/FILE/append useRefMap
     ENDIF
 
-!===========================
+!===============================
 ! output xstride and ystride
-!===========================
+! stride values (index) for plot
+!===============================
     LET xst = "($xstride)"
     define variable len = STRLEN(xst)
     define symbol fmt = A`len`
@@ -333,6 +334,20 @@ ENDIF
     define variable len = STRLEN(yst)
     define symbol fmt = A`len`
     list/nohead/format=("<y_stride>",($fmt),"</y_stride>")/FILE/append yst
+
+!==============================================
+! output xstride_coord and ystride_coord
+! stride values (corrdinates) for GE placemarks
+!==============================================
+    LET xstcoord = "($xstride_coord)"
+    define variable len = STRLEN(xstcoord)
+    define symbol fmt = A`len`
+    list/nohead/format=("<xstride_coord>",($fmt),"</xstride_coord>")/FILE/append xstcoord
+
+    LET ystcoord = "($ystride_coord)"
+    define variable len = STRLEN(ystcoord)
+    define symbol fmt = A`len`
+    list/nohead/format=("<ystride_coord>",($fmt),"</ystride_coord>")/FILE/append ystcoord
 
 !======================
 ! output x and y region
