@@ -117,14 +117,15 @@ public final class ProductServerAction extends LASAction {
         if ( JSESSIONID == null ) {
         	// From the new UI, get the cookie.
         	Cookie cookies[] = request.getCookies();
-        	for (int i = 0; i < cookies.length; i++) {
-				String name = cookies[i].getName();
-				String value = cookies[i].getValue();
-				if ( name.equals("JSESSIONID") ) {
-					JSESSIONID = value;
-				}
-			}
-        	
+        	if ( cookies != null ) {
+        		for (int i = 0; i < cookies.length; i++) {
+        			String name = cookies[i].getName();
+        			String value = cookies[i].getValue();
+        			if ( name.equals("JSESSIONID") ) {
+        				JSESSIONID = value;
+        			}
+        		}
+        	}
         }
         String email=null;
         if (progress != null) {
@@ -132,8 +133,10 @@ public final class ProductServerAction extends LASAction {
         }
         
         if ( email == null ) {
-            email = "Comma separated list of emails.";
-            progress.setEmail(email);
+        	email = "Comma separated list of emails.";
+        	if ( progress != null ) {
+        		progress.setEmail(email);
+        	}
         }
         
         if ( (requestXML == null || requestXML.equals("")) ) {
