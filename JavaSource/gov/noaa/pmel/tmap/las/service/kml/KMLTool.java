@@ -288,8 +288,11 @@ public class KMLTool extends TemplateTool  {
             context.put("varID",initLASReq.get("varID"));
 	    //}
         if(!isInsitu){
+            //System.out.println("xstride value is "+initLASReq.get("xstride"));
             context.put("xstride",initLASReq.get("xstride"));
             context.put("ystride",initLASReq.get("ystride"));
+            context.put("xstride_coord",initLASReq.get("xstride_coord"));
+            context.put("ystride_coord",initLASReq.get("ystride_coord"));
         }
         context.put("allPlacemarks", allPlacemarks);
 
