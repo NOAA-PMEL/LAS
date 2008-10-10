@@ -39,6 +39,13 @@ public class Category extends Container implements CategoryInterface {
 		}
 		return false;
 	}
+	public Dataset getDataset() {
+		if ( hasVariableChildren() ) {
+			return new Dataset(element.getChild("dataset"));
+		} else {
+			return null;
+		}
+	}
 	public JSONObject toJSON() throws JSONException {
 		ArrayList<String> asArrays = new ArrayList<String>();
 		//asArrays.add("dataset");
