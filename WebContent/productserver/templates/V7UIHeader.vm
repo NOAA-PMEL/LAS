@@ -19,7 +19,7 @@
 		</tr>
                 <tr>
 		<TD bgcolor="#5c5cff" width="75%" valign="top" align="left">
-			<div style="position:relative;height:33px;margin-right:0px;margin-left:0px;border-bottom:1pt solid #FFFFFC">
+			<div style="position:relative;height:33px;width:100%;margin-right:0px;margin-left:0px;border-bottom:1pt solid #FFFFFC">
 		<span  style="color:Black;position:relative;left:10px;top:0px;height:35px;font-weight:bold;font-size:18pt;position:absolute;">$las_config.getTitle()</span>
 		<span  style="color:Black;position:relative;left:12px;top:0px;height:35px;font-weight:bold;font-size:18pt;position:absolute;">$las_config.getTitle()</span>
 		<span  style="color:Black;position:relative;left:10px;top:2px;height:35px;font-weight:bold;font-size:18pt;position:absolute;">$las_config.getTitle()</span>
@@ -29,6 +29,9 @@
 			</div>
 		</TD>
 	        <td bgcolor="#5c5cff"  style="align:right;border-bottom:1pt solid #FFFFFC">
+<!-- ****KOB Use Classic LAS link currently just points to the V6 UI home page of the LAS installation.  Will need to modify with dataset and 
+                variable info when I get that  -->
+                                 <a class="top_link_left" href="./servlets/dataset">Use classic LAS</a><br>
 		                 <a class="top_link_left"  onmouseover="window.status='Link to this plot';" onmouseout="window.status=''"   class="LASLink" onclick="prompt('Clicking OK will save this link to your list of bookmarks.\nThis will save the current application state so that you may return to this point\nat any time in the future.','http://' + document.location.host + document.location.pathname + '?' + LAS.uirequest)">Link to this page</a>
 		</td>
 	</TR><TBODY>
