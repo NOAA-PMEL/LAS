@@ -21,26 +21,34 @@ DEFINE SYMBOL data_($num)_num = `($data_var),RETURN=dsetnum`
 ! Be sure units and title are defined.
 ! If units are not defined, try to get units from the data variable.
 ! If the variable in the file has no units, leave data_units symbol undefined.
- 
-LET anames = ($data_var).attnames
-IF `IS_ELEMENT_OF_STR (anames, "units") OR IS_ELEMENT_OF_STR (anames, "UNITS")` THEN
-   DEFINE SYMBOL data_var_units `($data_var),RETURN=units`123   ! check for empty units string.
-   IF `STRLEN("($data_var_units)" ) EQ 3` THEN
-      CANCEL SYMBOL data_var_units
-   ELSE
-      DEFINE SYMBOL data_var_units `($data_var),RETURN=units`
-      DEFINE SYMBOL data_units (`($data_var),RETURN=units`)
+
+! data_units should have been defined in LAS_initialize_dataset
+
+IF ($data_units"0|*>1") THEN
+   DEFINE SYMBOL has_units = 1
+ELSE
+   LET anames = ($data_var).attnames
+   IF `IS_ELEMENT_OF_STR (anames, "units") OR IS_ELEMENT_OF_STR (anames, "UNITS")` THEN
+      DEFINE SYMBOL data_var_units `($data_var),RETURN=units`123   ! check for empty units string.
+      IF `STRLEN("($data_var_units)" ) EQ 3` THEN
+         CANCEL SYMBOL data_var_units
+      ELSE
+         DEFINE SYMBOL data_var_units `($data_var),RETURN=units`
+         DEFINE SYMBOL data_units (`($data_var),RETURN=units`)
+      ENDIF
    ENDIF
 ENDIF
 
 DEFINE SYMBOL ferret_plot_title "($data_title) ($data_units)"
 
 IF `($data_title"0|*>1") EQ 0` THEN
-  LET has_units = STRCMP (" ", "`($data_var),return=units`")
-  LET has_units = `has_units OR ($data_units"0|*>1")`
-  IF `has_units NE 0` THEN \
+  IF `($has_units"0|*>1) EQ 0` THEN 
+     SYMBOL has_units = STRCMP (" ", "`($data_var),return=units`")
+     SYMBOL has_units = `($has_units) OR ($data_units"0|*>1")`
+  ENDIF
+  IF ($has_units"0|*>1) THEN \
   DEFINE SYMBOL ferret_plot_title "($data_var) ($data_units)"
-  CANCEL VARIABLE has_units
+  CANCEL SYMBOL has_units
 ENDIF
 
 DEFINE SYMBOL ferret_plot_var = ($data_var)[d=($data_num),($region_full)]
