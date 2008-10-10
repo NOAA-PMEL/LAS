@@ -7,19 +7,36 @@
 
 #set($dataset = $las_config.getDataset($dsIDs.get(0)))
 
+#if ( "$!dataset" == "" ) 
+   
+      #set($catlist = $las_config.getCategories($dsIDs.get(0)))
+      #set($dataset = $catlist.get(0).getDataset())
+   
+#end
+
+
+
 <title>LAS Info for $dataset.name</title>
-</head>
+</head> 
+
 <body bgcolor="white">
 
 #foreach ($dsID in $dsIDs)
-   #set($dataset = $las_config.getDataset($dsID))
-   <h2>$dataset.name
-   #if ( $dataset.doc != "null" && $dataset.doc != "" )
-      (<a href="$dataset.doc">More info...</a>)
+   #set($dset = $las_config.getDataset($dsID))
+   #set($did = $dsID)
+
+   #if ( "$!dset" == "" ) 
+      #set($catlist = $las_config.getCategories($dsIDs.get(0)))
+      #set($dset = $catlist.get(0).getDataset())
+      #set($did = $dataset.getID())
+   #end
+   <h2>$dset.name
+   #if ( $dset.doc != "null" && $dset.doc != "" )
+      (<a href="$dset.doc">More info...</a>)
    #end
    </h2>
-   #if ( $dataset.hasDocumentation() ) 
-      #set($docu = $dataset.documentation)
+   #if ( $dset.hasDocumentation() ) 
+      #set($docu = $dset.documentation)
       <b>Summary:</b><br>
       <p>
       $docu.summary
@@ -47,18 +64,18 @@
       #end
    #end
    <hr>
-   #set($variables = $las_config.getVariables($dsID))
+   #set($variables = $las_config.getVariables($did))
 #if ( $variables.size() > 0 ) 
    #set($varID = $variables.get(0).getID())
-   #set($grid = $las_config.getGrid($dsID, $varID))
+   #set($grid = $las_config.getGrid($did, $varID))
    #set($axes = $grid.getAxes())
    #set($colspan = $axes.size())
    #if ( $grid.hasAxis("t") ) 
       #set($taxis = $grid.getTime())
       #set($colspan = $colspan+2)
    #end
-   #if ( ${las_config.getFTDSURL($dsID, $varID)} != "" )
-   <a href="getMetadata.do?dsid=$dsID&opendap=true">See the URLs</a> to access these data via <a href="http://opendap.org">OPeNDAP</a><br><br>
+   #if ( ${las_config.getFTDSURL($did, $varID)} != "" )
+   <a href="getMetadata.do?dsid=$did&opendap=true">See the URLs</a> to access these data via <a href="http://opendap.org">OPeNDAP</a><br><br>
    #end
    <table border="1" cellpadding="4">
    <tr><th bgcolor="#dddddd">Name</th>
@@ -72,7 +89,7 @@
    </tr>
    #foreach( $var in $variables) 
       <tr>
-         #set($grid = $las_config.getGrid($dsID, $var.ID))
+         #set($grid = $las_config.getGrid($did, $var.ID))
          <td rowspan="2" bgcolor="#dddddd">$var.name</td>
       </tr>
       <tr>
