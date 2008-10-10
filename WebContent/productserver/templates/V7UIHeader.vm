@@ -13,8 +13,8 @@
 			</div>
 		</TD>  			
                 <td bgcolor="#5c5cff" align="right" >
-		   <a class="top_link_left"  href="doc/las_v7_ui_introduction.html" target="_new">HELP WITH LAS</a><br>
-	           <a class="top_link_left"  href="http://ferret.pmel.noaa.gov/thredds/dodsC/NVODS/" target="_new">OPeNDAP (F-TDS) / THREDDS</a> 
+		   <a class="top_link_left"  href="doc/las_v7_ui_introduction.html" target="_new">Introduction to LAS v7</a><br>
+	           <a class="top_link_left"  href="$server_config.getFTDSBase()" target="_new">OPeNDAP (F-TDS) / THREDDS</a> 
 		</td>
 		</tr>
                 <tr>
@@ -31,7 +31,7 @@
 	        <td bgcolor="#5c5cff"  style="align:right;border-bottom:1pt solid #FFFFFC">
 <!-- ****KOB Use Classic LAS link currently just points to the V6 UI home page of the LAS installation.  Will need to modify with dataset and 
                 variable info when I get that  -->
-                                 <a class="top_link_left" href="./servlets/dataset">Use classic LAS</a><br>
+                                 <a id="V6" class="top_link_left" href="./servlets/dataset">Use classic LAS</a><br>
 		                 <a class="top_link_left"  onmouseover="window.status='Link to this plot';" onmouseout="window.status=''"   class="LASLink" onclick="prompt('Clicking OK will save this link to your list of bookmarks.\nThis will save the current application state so that you may return to this point\nat any time in the future.','http://' + document.location.host + document.location.pathname + '?' + LAS.uirequest)">Link to this page</a>
 		</td>
 	</TR><TBODY>
