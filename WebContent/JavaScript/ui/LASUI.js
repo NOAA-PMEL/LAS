@@ -304,20 +304,20 @@ LASUI.prototype.createCategoryTreeNode = function (node, i, id) {
 		this.selectCategory(null,node,i);
 }
 LASUI.prototype.createVariableOptionNode = function (node, i) {
-	var OPTIONNode = document.createElement("option");
-	OPTIONNode.appendChild(document.createTextNode(node.category.getChildName(i)));
-	OPTIONNode.id = "OPTION_" + node.category.getChildID(i);
-	OPTIONNode.onselect=this.setVariable.LASBind(this, node, i, true, true);
-	document.getElementById(this.anchors.variables).appendChild(OPTIONNode);
 	
 	document.getElementById(this.anchors.variables).onchange = function (evt) {this.options[this.selectedIndex].onselect({"target" : {"selected" :true}})}
 	if(this.state.variables && this.state.dataset)
 		if(this.state.variables[this.state.dataset])
-				if(this.state.variable==node.category.getChildID(i)||this.state.variables[this.state.dataset]==node.category.getChild(i)){
-					if(OPTIONNode.selected)
-					OPTIONNode.selected=true;
-				}
-
+				if(this.state.variable==node.category.getChildID(i)||this.state.variables[this.state.dataset]==node.category.getChild(i))
+					var selected = true;
+				else
+					var selected = false;
+	
+	var OPTIONNode = new Option(node.category.getChildName(i),node.category.getChildID(i),false,selected);
+	OPTIONNode.onselect = this.setVariable.LASBind(this, node, i, true, true);
+	OPTIONNode.id = "OPTION_" + node.category.getChildID(i);
+	document.getElementById(this.anchors.variables).options[document.getElementById(this.anchors.variables).length] = OPTIONNode;
+	
 }
 /**
  * Sub method to create variable tree node and add it to the DOM
@@ -440,7 +440,7 @@ LASUI.prototype.onSetVariable = function() {
 					document.getElementById("Analysis").style.display="none";
 					this.refs.analysis.enabled = false;
 				}
-
+				document.getElementById("V6").href="servlets/datasets?dsid=" + this.state.dataset + "&" + this.state.variable;
 				if(!this.updating)if(this.autoupdate)
 					this.makeRequest({},'plot');
 				else
@@ -448,7 +448,7 @@ LASUI.prototype.onSetVariable = function() {
 }
 /**
  * Event handler for category selection, bind to category DOM object events.
- * @param {object} evt The event object
+ * @param {object} evt The event objectselect
  * @param {object} arguments arguments added using function.prototype.LASBind<br>
  *					this -- the context this function is run in<br>
  *					parentNode -- parent node in this.refs<br>
@@ -508,7 +508,6 @@ LASUI.prototype.setVariable = function (evt) {
 	var args = arguments
 	var dataset = args[1];
 	var i = args[2];
-
 	if(evt.target){
 		if(evt.target.checked)
 			var loadVariable = evt.target.checked;
@@ -533,11 +532,14 @@ LASUI.prototype.setVariable = function (evt) {
 	var variableINPUTNode = dataset.children[i].INPUTNode;
 	variableINPUTNode.checked = loadVariable;
 	if (loadVariable) {
+	
 		//start an array of selected variables for this dataset if we havent already
 		if(typeof this.state.variables[datasetID] != 'object')
 			this.state.variables[datasetID] = [];
 
 		this.state.variables[datasetID] = variable;
+		//if(document.getElementById("OPTION_"+variable))
+		//	document.getElementById("OPTION_"+variable).selected =true;
 
 		//get all the other data for this dataset/variable combo
 		this.state.dataset = datasetID;
@@ -706,8 +708,8 @@ LASUI.prototype.setDownloadOperation = function (evt) {
 
 	var view = args[2];
 	var optiondef = args[3];
-	this.state.view.download = view;
-	this.updateConstraints(view);
+	this.state.view.download = this.state.view.plot;//just use the plot for the sprint
+	//this.updateConstraints(view);
 
 	if(optiondef) {
 		var cancel = document.createElement("INPUT");
@@ -736,6 +738,14 @@ LASUI.prototype.setOperation = function (evt) {
 	var type = args[4];
 	if(!type)
 		type="plot";
+		
+	//for ie radio button bug	
+ 	if(type=="plot"&&document.all&&evt.srcElement) {
+ 		for(var t in this.refs.operations.plot.children)
+ 			if(this.refs.operations.plot.children[t].radio)
+ 				this.refs.operations.plot.children[t].radio.checked=false;
+		evt.srcElement.checked=true; 		
+	}
 	this.state.operation[type]=id;
 	this.refs.options[type].DOMNode.innerHTML="";
 
@@ -799,9 +809,13 @@ LASUI.prototype.setOperationList = function (strJson) {
 	//disable all nodes first
 	for(var row=0;row<document.getElementById("productButtons").childNodes.length;row++)
 		for(var cell=0;cell<document.getElementById("productButtons").childNodes[row].childNodes.length;cell++)
-			if(document.getElementById("productButtons").childNodes[row].childNodes[cell].style)
-				document.getElementById("productButtons").childNodes[row].childNodes[cell].style.visibility="hidden";
+			try {
+					document.getElementById("productButtons").childNodes[row].style.visibility="hidden";
+				} catch (e) {}
 
+	for(var o in this.refs.operations.download.children)
+		this.refs.operations.download.children[o].OPTIONNode.disabled=true;
+	
 	document.body.appendChild(this.refs.operations.external.DIVNode);
 	var setDefaultVis = true;
 	if(!this.state.operations.response.operations.error)
@@ -814,7 +828,6 @@ LASUI.prototype.setOperationList = function (strJson) {
 					this.makeRequest({},"plot");
 				} else
 					var defaultVis = this.state.operations.getOperationID(i);
-
 		}
 
 	if(setDefaultVis==true && defaultVis) {
@@ -835,6 +848,10 @@ LASUI.prototype.setOperationNode = function (id, name) {
 	if(button) {
 		button.style.visibility = "visible";
 		button.onclick=this.doProductIconClick.LASBind(this, id);
+	}
+	var option = document.getElementById("OPTION_DOWNLOAD_" + id);
+	if(option) {
+		option.disabled=false;
 	}
 }
 LASUI.prototype.doProductIconClick = function (evt) {
@@ -976,7 +993,7 @@ LASUI.prototype.setDefaultProductMenu = function () {
 				}
 				if(this.state.operation.plot == this.products[type][product].id && type != "Download Data" && this.state.view.plot == this.products[type][product].view) {
 					setPlotDefault = false;
-					this.refs.operations.plot.children[product].radio.checked = true;
+					this.refs.operations.plot.children[product].radio.checked = "checked";
 					this.setOperation(this,this.products[type][product].id,this.products[type][product].view,this.products[type][product].optiondef);
 				}
 				if(this.state.operation.download == this.products[type][product].id && type == "Download Data"/*&& this.state.view.plot == this.products[type][product].view*/ ) {
@@ -988,7 +1005,7 @@ LASUI.prototype.setDefaultProductMenu = function () {
 
 	if(setPlotDefault) {
 		this.setOperation(this,defaultPlotProduct.id,defaultPlotProduct.view,defaultPlotProduct.optiondef);
-		this.refs.operations.plot.children[defaultPlotProductName].radio.checked = true;
+		this.refs.operations.plot.children[defaultPlotProductName].radio.checked = "checked";
 
 	}/*
 	if(setDownloadDefault) {
@@ -1064,8 +1081,9 @@ LASUI.prototype.setProductNode = function(type, product) {
 	} else {
 		this.refs.operations.download.children[product] = {};
 		this.refs.operations.download.children[product].OPTIONNode = document.createElement("option");
+		this.refs.operations.download.children[product].OPTIONNode.id ="OPTION_DOWNLOAD_" +  this.products[type][product].id;
 		this.refs.operations.download.children[product].OPTIONNode.appendChild(document.createTextNode(product));
-		this.refs.operations.download.children[product].OPTIONNode.value = product.id;
+		this.refs.operations.download.children[product].OPTIONNode.value = this.products[type][product].id;
 		this.refs.operations.download.children[product].OPTIONNode.onselect = this.setDownloadOperation.LASBind(this,this.products[type][product].id,this.products[type][product].view,this.products[type][product].optiondef);
 		//this.refs.operations.plot.children[product].OPTIONNode.onclick = this.setOperation.LASBind(this,this.products[type][product].id,this.products[type][product].view,this.products[type][product].optiondef);
 		this.refs.operations.download.SELECTNode.appendChild(this.refs.operations.download.children[product].OPTIONNode);
@@ -1536,7 +1554,9 @@ LASUI.prototype.makeRequest = function (evt, type) {
 		this.request = null;
 		this.uirequest = '';
 		this.request = new LASRequest('');
-
+		this.state.view.download=this.state.view.plot;
+		this.state.view.external=this.state.view.plot;		
+		
 		this.request.removeVariables();
 		this.request.removeConstraints();
 
@@ -2242,7 +2262,7 @@ LASUI.prototype.setVisualization = function (d) {
 			if(this.products[t][p].view==bestView  && !stop)
 				if(this.refs.operations.plot.children[p])
 					if(this.refs.operations.plot.children[p].radio){
-						this.refs.operations.plot.children[p].radio.checked = true;
+						this.refs.operations.plot.children[p].radio.checked = "checked";
 						this.refs.operations.plot.children[p].radio.onclick();
 						stop = true;
 					}

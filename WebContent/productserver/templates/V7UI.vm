@@ -110,8 +110,6 @@
 #end
 		}
 		function init () {
-			
-			
 			LAS.initUI();		
 		}
 		</script>
@@ -121,53 +119,76 @@
 			body {
 				height : 100%; 
 				width:100%; 
-				min-width:800px;
-				margin-right:auto;	
-				margin-left:auto;
-				margin-top:0px;
-				margin-bottom:auto;
+				margin-right:5px;	
+				margin-left:5px;
+				margin-top:5px;
+				margin-bottom:5px;
 			}
 			#main {
-				max-width:1080px;
+				width:1024px;
 			};
 			body, html {
 			height: 100%;
+		}
+		#constraints {
+			height:600px;
+			border: 1px solid #5c731e;
+			float:left;
+		}
+		#wrapper {
+			overflow: hidden;
+			display:block;
+			white-space:nowrap;
+		}
+		#output {
+			text-align:left;
+			width: 800px;
+			height:610px;
+		}
+		#wait_msg {
+			text-align:left;
+			width: 809px;
+			height:600px;
+		}
+		#message_bar {
+			height:20pt;
+			border-bottom:1pt solid black;
 		}
 		</style>
 	</head>
 	<body onload="init();this.height=document.innerHeight;">
 		<div style="display:none" class="LASPopupDIVNode" id="categories"></div>
-	<table height="100%" width="1024px"><tbody><tr><td>
-		#parse ("/productserver/templates/V7UIHeader.vm")
-		<div id="nav_bg" style="width:100%;background-color:#454DAB;overflow:hidden;padding-top:4pt;padding-bottom:3pt;">
-			<div id="nav" style="position:relative;height:100%;width:100%;">
-		#if ($request.getParameter('hideCat'))
-		#else
-			<span class="top_link" width="100%" type="button" onclick="document.getElementById('startmsg').innerHTML=''; if(document.getElementById('categories').style.display=='none'){document.getElementById('categories').style.display='';LAS.toggleUIMask('')} else {document.getElementById('categories').style.display='none'; LAS.toggleUIMask('none');}">Choose dataset&nbsp;</span>
-				
-		#end	
-			<span  class="top_link" id="update" onclick="LAS.makeRequest();">Update Plot&nbsp;&nbsp<INPUT style="margin-bottom:-2pt;margin-right:-2pt;padding-left:2pt;margin-left:-2pt;padding-right:2pt;padding-bottom:2pt;margin-top:-1pt" type="checkbox" #if($request.getParameter('auto')) checked #end  onmousemove="window.status='Check to automatically update the plot.';" onmouseout="window.status='';" onclick="LAS.autoupdate=this.checked;if(LAS.autoupdate)LAS.makeRequest();"></span>
-			<span  class="top_link" onclick="if(LAS.refs.options.plot.options){LAS.toggleUIMask('');document.getElementById('plotOptions').style.display='';}">Set plot options&nbsp;</span>
-			<span id="productButtons">
-				<span class="top_link" style="visibility:hidden" ID="Animation">Animate&nbsp;</span>
-				<span class="top_link" style="visibility:hidden" ID="Comparison">Compare&nbsp;</span>							
-				<span class="top_link" style="visibility:hidden" ID="Plot to Google Earth">Google Earth&nbsp;</span>
-			</span>
-			
-			<span style="position:absolute;right:0px;top:0px;height:38px;vertical-align:center;" id="downloadType"></span>				
-		</div></div>
-		<img id="wait" style="visibility:hidden;float:right;" src="JavaScript/components/mozilla_blu.gif"><span id="breadcrumb"></span><br>
-	</td></tr><tr><td height="100%">
-		<table height="100%"><tbody><tr>		
-			<td id="constraints" valign="top" halign="left" width="215px" height="100%" style="border: 1px solid #5c731e">
-				<div id="MapWidget" style="border:1px solid black;" ><div style="position:absolute;z-index:4;text-align:center"><!--<img src="images/north-mini.png" onmousedown="LAS.refs.XYSelect.panPlot(0,10);"><br>--><img src="images/west-mini.png" onmousedown="LAS.refs.XYSelect.panPlot(-20,0);"><img src="images/east-mini.png" onmousedown="LAS.refs.XYSelect.panPlot(20,0);"><!--<br><img src="images/south-mini.png" onmousedown="LAS.refs.XYSelect.panPlot(0,-10);"><br><img src="images/zoom-plus-mini.png" onclick="LAS.refs.XYSelect.zoom(2);"><br><img src="images/zoom-minus-mini.png"  onclick="LAS.refs.XYSelect.zoom(-1)">--></div></div>
-				<center><strong>Max&nbsp;Lat</strong><input size=3  id="input_maxY" type="text" value="90.0"><br>
-				<strong>Min&nbsp;Lon</strong><input size=3 id="input_minX" value="-180.0">&nbsp;<strong>Max&nbsp;Lon</strong><input value="180.0" size=3 id="input_maxX"><br>
-				<strong>Min&nbsp;Lat</strong><input id="input_minY" size=3 type="text" value="-90.0"></center>
-				<div id="plotType"></div>
-				<div id="Date"></div>
-				<div id="Depth"></div><br>
-				<div id="Analysis"  style="display:none;">							
+		<div id="main">
+			#parse ("/productserver/templates/V7UIHeader.vm")
+			<div id="nav_bg" style="width:100%;background-color:#454DAB;overflow:hidden;padding-top:4pt;padding-bottom:3pt;">
+				<div id="nav" style="position:relative;height:100%;width:100%;">
+				#if ($request.getParameter('hideCat'))
+				#else
+					<span class="top_link" width="100%" type="button" onclick="if(document.getElementById('categories').style.display=='none'){document.getElementById('categories').style.display='';LAS.toggleUIMask('')} else {document.getElementById('categories').style.display='none'; LAS.toggleUIMask('none');}">Choose dataset&nbsp;</span>		
+					#end	
+					<span  class="top_link" id="update" onclick="LAS.makeRequest();">Update Plot&nbsp;&nbsp<INPUT style="margin-bottom:-2pt;margin-right:-2pt;padding-left:2pt;margin-left:-2pt;padding-right:2pt;padding-bottom:2pt;margin-top:-1pt" type="checkbox" #if($request.getParameter('auto')) checked #end  onmousemove="window.status='Check to automatically update the plot.';" onmouseout="window.status='';" onclick="LAS.autoupdate=this.checked;if(LAS.autoupdate)LAS.makeRequest();"></span>
+					<span  class="top_link" onclick="if(LAS.refs.options.plot.options){LAS.toggleUIMask('');document.getElementById('plotOptions').style.display='';}">Set plot options&nbsp;</span>
+					<span id="productButtons">
+						<span class="top_link" style="visibility:hidden" ID="Animation">Animate&nbsp;</span>
+						<span class="top_link" style="visibility:hidden" ID="Comparison">Compare&nbsp;</span>							
+						<span class="top_link" style="visibility:hidden" ID="Plot to Google Earth">Google Earth&nbsp;</span>
+					</span>
+					<span style="position:absolute;right:0px;top:0px;height:38px;vertical-align:center;" id="downloadType"></span>				
+				</div>
+			</div>
+			<div id="message_bar"><img id="wait" style="visibility:hidden;float:right;margin:2pt;padding:2pt;" src="JavaScript/components/mozilla_blu.gif"><span id="breadcrumb"></span></div>
+			<div id="wrapper">
+				<div id="constraints">
+					<div id="MapWidget" style="border:1px solid black;" ><div style="position:absolute;z-index:4;text-align:center"><!--<img src="images/north-mini.png" onmousedown="LAS.refs.XYSelect.panPlot(0,10);"><br>--><img src="images/west-mini.png" onmousedown="LAS.refs.XYSelect.panPlot(-20,0);"><img src="images/east-mini.png" onmousedown="LAS.refs.XYSelect.panPlot(20,0);"><!--<br><img src="images/south-mini.png" onmousedown="LAS.refs.XYSelect.panPlot(0,-10);"><br><img src="images/zoom-plus-mini.png" onclick="LAS.refs.XYSelect.zoom(2);"><br><img src="images/zoom-minus-mini.png"  onclick="LAS.refs.XYSelect.zoom(-1)">--></div></div>
+						<strong>
+						Latitude range <input size=3  id="input_maxY" type="text" value="90.0">&nbsp;:&nbsp;<input id="input_minY" size=3 type="text" value="-90.0"><br>
+						Longitude range <input size=3 id="input_minX" value="-180.0">&nbsp;:&nbsp;<input value="180.0" size=3 id="input_maxX">
+						</strong>
+					
+					<div id="plotType"></div>
+					<div id="Date"></div>
+						<div id="Depth"></div><br>
+					<div id="Analysis"  style="display:none;">							
 						<a class="LASLink" value=false onclick="if(!LAS.refs.analysis.enabled){LAS.showAnalysis();this.innerHTML='Remove analysis';}else{LAS.hideAnalysis();this.innerHTML='Apply analysis';}">Apply analysis</a>
 						<div id="analysis" style="display:none;">
 							<strong>Analysis type</strong><br>
@@ -184,29 +205,19 @@
 								<option value="">None</option>
 								<option id="xy_analysis" value="xy">Area</option>
 								<option id="x_analysis" value="x">Longitude</option>
-					          		<option id="y_analysis" value="y">Latitude</option>
+							        <option id="y_analysis" value="y">Latitude</option>
 								<option id="z_analysis" value="z">Depth</option>
-					 	      		<option id="t_analysis" value="t">Time</option>
+							 	<option id="t_analysis" value="t">Time</option>
 							</select>
 						</div>
+					</div>
+					<div id="DataConstraints"></div>					
 				</div>
-				<div id="DataConstraints"></div>					
-			</td>
-			<td width="100%" height="100%" valign="top" halign="left">
-				<div id="startmsg">
-					#if ($request.getParameter('dsid')!='' && $request.getParameter('varid')!='')
-					#else
-						
-					#end
-				</div>
-				<div style="display:none;margin:20pt;padding:20pt;" id="wait_msg"><H3>Product loading...</H3></div>
-				<iframe src="start.html" scrolling="no" id="output" onload="this.height='100%';LAS.onPlotLoad();" width="100%" height="100%" frameborder=0></iframe>			
-			</td>
-			</tr></tbody>
-		</table>
-	</td></tr><tr><td>	
-		#parse( "/productserver/templates/V7UIFooter.vm") 
-	</td></tr></tbody></table>
+				<div id="wait_msg">Please wait while the plot loads...</div>
+				<iframe width="100%" height="100%" src="start.html" id="output" onload="LAS.onPlotLoad();" frameborder=0></iframe>			
+			</div>
+			#parse( "/productserver/templates/V7UIFooter.vm") 
+		</div>
 		<div id="debug" style="border:1pt solid black;position:absolute;top:200px;left:150px;display:none;"></div>
 		<div id="plotOptions" class="LASPopupDIVNode" style="display:none;"></div>
 		<div id="downloadOptions" class="LASPopupDIVNode" style="display:none;"></div>
