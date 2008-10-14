@@ -452,9 +452,9 @@ LASUI.prototype.onSetVariable = function() {
 						this.showAnalysis();
 
 					}
-					document.getElementById("Analysis").style.display="";
+					document.getElementById("analysisWrapper").style.display="";
 				} else {
-					document.getElementById("Analysis").style.display="none";
+					document.getElementById("analysisWrapper").style.display="none";
 					this.refs.analysis.enabled = false;
 				}
 				if(this.state.variables[this.state.dataset])
@@ -1032,10 +1032,6 @@ LASUI.prototype.setDefaultProductMenu = function () {
 LASUI.prototype.setProductTypeNode = function(type) {
 
 	if(type=="Download Data") {
-//		var title = document.createElement("b");
-//		title.innerHTML = type;
-//		this.refs.operations.download.DOMNode.style.color="#FFFFCC";
-//		this.refs.operations.download.DOMNode.appendChild(title);	;
 		this.refs.operations.download.SELECTNode = document.createElement("SELECT");
 		this.refs.operations.download.SELECTNode.style.position = "relative";
 		this.refs.operations.download.SELECTNode.style.top = "-3px";
@@ -1044,11 +1040,6 @@ LASUI.prototype.setProductTypeNode = function(type) {
 		this.refs.operations.download.SELECTNode.appendChild(format);
 		this.refs.operations.download.SELECTNode.onchange = function (evt) {this.options[this.selectedIndex].onselect()};
 		this.refs.operations.download.SELECTNode.style.position="relative";
-		//this.refs.operations.download.SELECTNode.style.top="4px";
-
-		//var label = document.createElement("LI");
-		//label.className="LASPlotType";
-		//label.appendChild(this.refs.operations.download.SELECTNode);
 		this.refs.operations.download.INPUTNode = document.createElement("SPAN");
 		this.refs.operations.download.INPUTNode.className = "top_link"
 		this.refs.operations.download.INPUTNode.appendChild(document.createTextNode("Download Data"));
@@ -1065,7 +1056,6 @@ LASUI.prototype.setProductTypeNode = function(type) {
 			this.refs.operations.plot.children[type].title.innerHTML = "<b>" + type + "</b>";
 			this.refs.operations.plot.children[type].LINode.className = "LASPlotCategory";
 			this.refs.operations.plot.children[type].LINode.appendChild(this.refs.operations.plot.children[type].title);
-		//this.refs.operations.plot.children[type].LINode.appendChild(this.refs.operations.plot.children[type].ULNode);
 			this.refs.operations.plot.DOMNode.appendChild(this.refs.operations.plot.children[type].LINode);
 		}
 }
@@ -1397,7 +1387,8 @@ LASUI.prototype.initYConstraint = function (mode) {
  * @param {string} mode The axis mode. "range" or "point"
  */
 LASUI.prototype.initZConstraint = function (mode, reset) {
-	document.getElementById("Depth").innerHTML="";
+	while(document.getElementById("Depth").firstChild)
+		document.getElementById("Depth").removeChild(document.getElementById("Depth").firstChild);
 	if(this.state.grid.hasMenu('z'))
 		if (reset || this.refs.DepthWidget.widgetType != "menu") {
 			this.refs.DepthWidget.menu = [document.createElement("SELECT"),document.createElement("SELECT")];
@@ -1407,7 +1398,7 @@ LASUI.prototype.initZConstraint = function (mode, reset) {
 					var _opt = document.createElement("OPTION");
 					_opt.value = this.state.grid.getMenu('z')[v][1];
 					_opt.className = "LASOptionNode";
-					_opt.innerHTML=this.state.grid.getMenu('z')[v][0];
+					_opt.appendChild(document.createTextNode(this.state.grid.getMenu('z')[v][0]));
 					if(m==1 && v >= this.state.grid.getMenu('z').length-1)
 						_opt.selected=true;
 					if(m==0 && v == 0)
@@ -1480,7 +1471,8 @@ LASUI.prototype.initTConstraint = function (mode,reset) {
 		case "widget":
 			if(reset || !this.refs.DW)
 				if(reset || this.refs.DW.widgetType != "DateWidget")	{
-					document.getElementById("Date").innerHTML="";
+					while(document.getElementById("Date").firstChild)
+							document.getElementById("Date").removeChild(document.getElementById("Date").firstChild);
 					this.refs.DW = new DateWidget(this.state.grid.getLo('t'),this.state.grid.getHi('t'));
 					this.refs.DW.callback = this.handleDateRangeChange.LASBind(this);
 				}
@@ -1532,12 +1524,14 @@ LASUI.prototype.initTConstraint = function (mode,reset) {
 
 			switch(mode) {
 				case 'range':
-					document.getElementById("Date").innerHTML="<strong>Start Date : </strong>";
+					var date_label = document.createElement("STRONG");
+					date_label.appendChild(document.createTextNode("Start Date : "));
+					document.getElementById("Date").appendChild(date_label);
 					document.getElementById("Date").appendChild(this.refs.DW[0]);
 					document.getElementById("Date").appendChild(document.createElement("BR"));
 					var label = document.createElement("STRONG");
+					label.appendChild(document.createTextNode("End Date : "));
 					document.getElementById("Date").appendChild(label);
-					label.innerHTML="<strong>End Date : </strong>";
 					document.getElementById("Date").appendChild(this.refs.DW[1]);
 					break;
 				case 'point':
@@ -2136,7 +2130,6 @@ LASUI.prototype.showAnalysis = function () {
 	this.refs.analysis.enabled = true;
 	var reset=false;
 	document.getElementById('Animation').style.visibility='hidden';
-	//this.initXYSelect('xy',reset)
 	for(var a in this.refs.analysis.axes)
 		this.refs.analysis.axes[a].style.display="none";
 	//turn on the "area" analysis switch
@@ -2170,7 +2163,6 @@ switch(this.state.grid.response.grid.axis[d].type.toLowerCase()) {
 			}
 		}
 	}
-
 	document.getElementById(this.anchors.analysis).style.display="";
 	if(this.state.analysis.axes.x&&this.state.analysis.axes.y)
 		this.selectAnalysisAxis(null,"xy",true);
@@ -2227,6 +2219,7 @@ LASUI.prototype.selectAnalysisType = function (evt) {
 
 		this.state.analysis.type = DOMNode.options[DOMNode.selectedIndex].value;
 		this.state.analysis.name = DOMNode.options[DOMNode.selectedIndex].innerHTML;
+
 	}
 
 
@@ -2246,9 +2239,13 @@ LASUI.prototype.selectAnalysisType = function (evt) {
 }
 LASUI.prototype.selectAnalysisAxis = function (evt) {
 	var axes =arguments[1];
-	if(axes=={}|| axes==null){
+	if(axes=="" || axes == {} || axes==null){
 		try {axes =evt.target.value;}
 		catch (e) {axes = ""};
+	}
+	if(axes=="" || axes == {} || axes==null){
+			try {axes =evt.srcElement.value;}
+			catch (e) {axes = ""};
 	}
 	//turn all axes off
 	for(var a in this.state.analysis.axes) {
@@ -2265,7 +2262,7 @@ LASUI.prototype.selectAnalysisAxis = function (evt) {
 		//turn the analysis axis on
 		for(var i=0; i< axes.length; i++) {
 			this.state.analysis.axes[axes[i]] = true;//this.refs.analysis.type.op.value;
-			//
+
 			if(this.state.view.plot.indexOf(axes[i])>=0&&this.state.analysis.type && this.state.analysis.name != "None")
 				changeVis = true;
 
@@ -2283,6 +2280,8 @@ LASUI.prototype.selectAnalysisAxis = function (evt) {
 		this.updateConstraints(this.state.view.widgets);
 	else
 		this.updateConstraints(this.state.view.plot);
+
+
 	if(changeVis)
 		this.setVisualization(axes);
 
@@ -2293,7 +2292,7 @@ LASUI.prototype.selectAnalysisAxis = function (evt) {
 
 }
 LASUI.prototype.setVisualization = function (d) {
-
+	alert(d);
 	var stop = false;
 	var bestView = "";
 	if(this.state.view.plot.indexOf(d)>=0)
@@ -2309,7 +2308,7 @@ LASUI.prototype.setVisualization = function (d) {
 			if(this.products[t][p].view==bestView  && !stop)
 				if(this.refs.operations.plot.children[p])
 					if(this.refs.operations.plot.children[p].radio){
-						this.refs.operations.plot.children[p].radio.checked = "checked";
+						this.refs.operations.plot.children[p].radio.checked = true;
 						this.refs.operations.plot.children[p].radio.onclick();
 						stop = true;
 					}
