@@ -186,7 +186,7 @@
 					<div id="plotType"></div>
 					<div id="Date"></div>
 						<div id="Depth"></div><br>
-					<div id="Analysis"  style="display:none;">							
+					<div id="analysisWrapper"  style="display:none;">							
 						<a class="LASLink" value=false onclick="if(!LAS.refs.analysis.enabled){LAS.showAnalysis();this.innerHTML='Remove analysis';}else{LAS.hideAnalysis();this.innerHTML='Apply analysis';}">Apply analysis</a>
 						<div id="analysis" style="display:none;">
 							<strong>Analysis type</strong><br>
@@ -198,7 +198,7 @@
 								<option value="sum">Sum</option>
 								<option value="var">Variance</option>
 							</select><br>
-							<strong>Analysis region type</strong>						
+							<strong>Analysis region type</strong><br>						
 							<select id="analysis_axes">
 								<option value="">None</option>
 								<option id="xy_analysis" value="xy">Area</option>
