@@ -363,8 +363,8 @@ public final class ProductServerAction extends LASAction {
                         
                         if ( timeout > 0 ) {
                             // Timeout set in the request.
-                            // Wait a couple of seconds, not the full timeout.
-                            productServerRunner.join(2000);
+                            long to = Math.max(timeout, 20000);
+                            productServerRunner.join(to);
                         } else {
                             // No time out set.  Very unlikely, but possible if a new request wants the same
                             // product without an assoicated session.
