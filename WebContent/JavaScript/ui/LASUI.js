@@ -757,13 +757,16 @@ LASUI.prototype.setOperation = function (evt) {
 	var type = args[4];
 	if(!type)
 		type="plot";
-
 	//for ie radio button bug
  	if(type=="plot"&&document.all&&evt.srcElement) {
+
  		for(var t in this.refs.operations.plot.children)
- 			if(this.refs.operations.plot.children[t].radio)
+ 			if(this.refs.operations.plot.children[t].radio) {
  				this.refs.operations.plot.children[t].radio.checked=false;
-		evt.srcElement.checked=true;
+		}
+
+			evt.srcElement.checked=true;
+
 	}
 	this.state.operation[type]=id;
 	this.refs.options[type].DOMNode.innerHTML="";
@@ -1005,7 +1008,7 @@ LASUI.prototype.setDefaultProductMenu = function () {
 				}
 				if(this.state.operation.plot == this.products[type][product].id && type != "Download Data" && this.state.view.plot == this.products[type][product].view) {
 					setPlotDefault = false;
-					this.refs.operations.plot.children[product].radio.checked = "checked";
+					this.refs.operations.plot.children[product].radio.checked = true;
 					this.setOperation(this,this.products[type][product].id,this.products[type][product].view,this.products[type][product].optiondef);
 				}
 				if(this.state.operation.download == this.products[type][product].id && type == "Download Data"/*&& this.state.view.plot == this.products[type][product].view*/ ) {
@@ -1017,7 +1020,7 @@ LASUI.prototype.setDefaultProductMenu = function () {
 
 	if(setPlotDefault) {
 		this.setOperation(this,defaultPlotProduct.id,defaultPlotProduct.view,defaultPlotProduct.optiondef);
-		this.refs.operations.plot.children[defaultPlotProductName].radio.checked = "checked";
+		this.refs.operations.plot.children[defaultPlotProductName].radio.checked = true;
 
 	}/*
 	if(setDownloadDefault) {
@@ -1045,7 +1048,7 @@ LASUI.prototype.setProductTypeNode = function(type) {
 		this.refs.operations.download.INPUTNode.appendChild(document.createTextNode("Download Data"));
 		this.refs.operations.download.INPUTNode.onclick = this.makeRequest.LASBind(this,"download");
 		this.refs.operations.download.DOMNode.appendChild(this.refs.operations.download.INPUTNode);
-		this.refs.operations.download.DOMNode.appendChild(document.createTextNode('\u00a0'));
+		//this.refs.operations.download.DOMNode.appendChild(document.createTextNode('\u00a0'));
 		this.refs.operations.download.DOMNode.appendChild(this.refs.operations.download.SELECTNode);
 	} else
 		if(type!="Point Data") {
@@ -2261,26 +2264,23 @@ LASUI.prototype.selectAnalysisAxis = function (evt) {
 		var changeVis= false;
 		//turn the analysis axis on
 		for(var i=0; i< axes.length; i++) {
-			this.state.analysis.axes[axes[i]] = true;//this.refs.analysis.type.op.value;
-
-			if(this.state.view.plot.indexOf(axes[i])>=0&&this.state.analysis.type && this.state.analysis.name != "None")
+			this.state.analysis.axes[axes.charAt(i)] = true;//this.refs.analysis.type.op.value;
+			if(this.state.view.plot.indexOf(axes.charAt(i))>=0&&this.state.analysis.type && this.state.analysis.name != "None")
 				changeVis = true;
 
-			if(this.state.view.widgets.indexOf(axes[i])<0&&this.state.analysis.type && this.state.analysis.name != "None")
-				this.state.view.widgets+=axes[i];
+			if(this.state.view.widgets.indexOf(axes.charAt(i))<0&&this.state.analysis.type && this.state.analysis.name != "None")
+				this.state.view.widgets+=axes.charAt(i);
 		}
 
 
 
 	} else {
 		//turning the analysis axis off
-
 	}
 	if(this.state.analysis.type && this.state.analysis.name != "None")
 		this.updateConstraints(this.state.view.widgets);
 	else
 		this.updateConstraints(this.state.view.plot);
-
 
 	if(changeVis)
 		this.setVisualization(axes);
@@ -2292,16 +2292,16 @@ LASUI.prototype.selectAnalysisAxis = function (evt) {
 
 }
 LASUI.prototype.setVisualization = function (d) {
-	alert(d);
+
 	var stop = false;
 	var bestView = "";
 	if(this.state.view.plot.indexOf(d)>=0)
 		 bestView = this.state.view.plot.substr(0,this.state.view.plot.indexOf(d)) + this.state.view.plot.substr(this.state.view.plot.indexOf(d)+d.length,this.state.view.plot.length);
+
 	if(bestView == "")
 		for(var i in this.state.grid.response.grid.axis)
 			if(d.indexOf(this.state.grid.response.grid.axis[i].type)<0)
 				bestView=this.state.grid.response.grid.axis[i].type;
-
 
 	for(var t in this.products)
 		for (var p in this.products[t])
@@ -2309,12 +2309,12 @@ LASUI.prototype.setVisualization = function (d) {
 				if(this.refs.operations.plot.children[p])
 					if(this.refs.operations.plot.children[p].radio){
 						this.refs.operations.plot.children[p].radio.checked = true;
-						this.refs.operations.plot.children[p].radio.onclick();
+						this.refs.operations.plot.children[p].radio.onclick({"srcElement" : this.refs.operations.plot.children[p].radio});
 						stop = true;
 					}
 
 
-	this.refs.analysis.axes[d].selected="true";
+	this.refs.analysis.axes[d].selected=true;
 }
 /**
  * Method to collapse a tree node
