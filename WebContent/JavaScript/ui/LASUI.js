@@ -222,7 +222,7 @@ LASUI.prototype.showInfo = function (evt) {
 	if(node.category)
 		if(node.category.getChildID(i))
 			if(node.category.getChildChildrenType(i)=="variables")
-				window.open(this.hrefs.data.url + '?dsid=' + node.category.getChildID(i));
+				window.open(this.hrefs.getMetadata.url + '?dsid=' + node.category.getChildID(i));
 			else
 				window.open(this.hrefs.getMetadata.url + '?catid=' + node.category.getChildID(i));
 
@@ -1103,10 +1103,18 @@ LASUI.prototype.setProductNode = function(type, product) {
 	}
 }
 LASUI.prototype.onPlotLoad = function () {
-	if(document.getElementById(this.anchors.output).contentWindow.myMapWidget) {
-		this.refs.plot = document.getElementById(this.anchors.output).contentWindow.myMapWidget;
+
+	if(document.getElementById(this.anchors.output).contentWindow)
+		var iframeDOM = document.getElementById(this.anchors.output).contentWindow;
+	else if (document.getElementById(this.anchors.output).contentDocument)
+		var iframeDOM = document.getElementById(this.anchors.output).contentDocument;
+	else
+		var iframeDOM = null;
+
+	if(iframeDOM.myMapWidget) {
+		this.refs.plot = iframeDOM.myMapWidget;
 		this.updateConstraints();
-		document.getElementById(this.anchors.output).contentWindow.onPlotLoad = this.onPlotLoad.LASBind(this);
+		iframeDOM.onPlotLoad = this.onPlotLoad.LASBind(this);
 	} else
 		this.refs.plot = {};
 	if(document.getElementById("wait"))
@@ -1120,7 +1128,19 @@ LASUI.prototype.onPlotLoad = function () {
 
 LASUI.prototype.onFirstPlotLoad = function () {
 	this.firstload =false;
-	document.getElementById(this.anchors.output).contentWindow.onPlotLoad = this.onPlotLoad.LASBind(this);
+	if(document.getElementById(this.anchors.output).contentWindow)
+		var iframeDOM = document.getElementById(this.anchors.output).contentWindow;
+	else if (document.getElementById(this.anchors.output).contentDocument)
+		var iframeDOM = document.getElementById(this.anchors.output).contentDocument;
+	else
+		var iframeDOM = null;
+
+	if(iframeDOM)
+		iframeDOM.onPlotLoad = this.onPlotLoad.LASBind(this);
+    if(iframeDOM.myMapWidget)
+    	this.refs.plot = iframeDOM.myMapWidget;
+    else
+    	this.refs.plot = {};
 	document.getElementById(this.anchors.output).onload = this.onPlotLoad.LASBind(this);
 	document.getElementById("wait").style.visibility="hidden";
 	document.getElementById("wait_msg").style.display="none";
