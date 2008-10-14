@@ -147,6 +147,13 @@ LASUI.prototype.initUI = function (anchorId)
 		this.refs.categories = {};
 
 		this.refs.categories.LINode = document.getElementById("categories");
+		var cancel = document.createElement("INPUT");
+		cancel.type = "submit";
+		cancel.value=	"Close";
+		cancel.className = "LASSubmitInputNode";
+		cancel.onclick = this.genericHandler.LASBind(this,"this.hideCategories()");
+		this.refs.categories.LINode.appendChild(cancel);
+		this.refs.categories.LINode.appendChild(document.createElement("BR"));
 		this.refs.categories.title = document.createElement("SPAN");
 		this.refs.categories.title.appendChild(document.createTextNode("Select a dataset category."));
 		this.refs.categories.title.className = "LASTreeTitleNode";
@@ -166,6 +173,10 @@ LASUI.prototype.initUI = function (anchorId)
 		req.send(null);
 	}
 
+}
+LASUI.prototype.hideCategories = function() {
+	this.refs.categories.LINode.style.display="none";
+	this.toggleUIMask('none');
 }
 LASUI.prototype.toggleUIMask = function(display) {
 	this.UIMask.style.height=(document.body.offsetHeight+100)+'px';
@@ -314,7 +325,7 @@ LASUI.prototype.createVariableOptionNode = function (node, i) {
 					var selected = false;
 	
 	var OPTIONNode = new Option(node.category.getChildName(i),node.category.getChildID(i),false,selected);
-	OPTIONNode.onselect = this.setVariable.LASBind(this, node, i, true, true);
+	OPTIONNode.onselect = this.setVariable.LASBind(this, node, i, true);
 	OPTIONNode.id = "OPTION_" + node.category.getChildID(i);
 	document.getElementById(this.anchors.variables).options[document.getElementById(this.anchors.variables).length] = OPTIONNode;
 	
@@ -440,7 +451,9 @@ LASUI.prototype.onSetVariable = function() {
 					document.getElementById("Analysis").style.display="none";
 					this.refs.analysis.enabled = false;
 				}
-				document.getElementById("V6").href="servlets/datasets?dsid=" + this.state.dataset + "&" + this.state.variable;
+				if(this.state.variables[this.state.dataset])
+					var varname = this.state.variables[this.state.dataset].name
+				document.getElementById("V6").href="servlets/datasets?dset=" + escape(categories) + "/" + escape(varname);
 				if(!this.updating)if(this.autoupdate)
 					this.makeRequest({},'plot');
 				else
@@ -768,17 +781,9 @@ LASUI.prototype.setOperation = function (evt) {
 
 	this.updateConstraints();
 
-	if(optiondef) {
-		var cancel = document.createElement("INPUT");
-		cancel.type = "submit";
-		cancel.value=	"Close";
-		cancel.className = "LASSubmitInputNode";
-		cancel.onclick = this.genericHandler.LASBind(this,"this.refs.options.plot.DOMNode.style.display='none';this.toggleUIMask('none');");
-		while(this.refs.options.plot.DOMNode.firstChild)
-			this.refs.options.plot.DOMNode.removeChild(this.refs.options.plot.DOMNode.firstChild);
-		this.refs.options.plot.DOMNode.appendChild(cancel);
-		this.getOptions(optiondef, this.refs.options.plot.DOMNode,"plot");
-	}
+	if(optiondef) 
+		this.getOptions(optiondef, this.refs.options.plot.DOMNode,"plot",false);
+	
 
 	this.getOperations(this.state.dataset,this.state.variables[this.state.dataset].ID,this.state.view.plot);
 
@@ -788,6 +793,7 @@ LASUI.prototype.setOperation = function (evt) {
 		this.showUpdateLink();
 
 }
+
 LASUI.prototype.genericHandler = function (evt) {
 	if(arguments[1])
 		eval(arguments[1]);
@@ -1725,13 +1731,29 @@ LASUI.prototype.makeRequest = function (evt, type) {
  * Method to query the server for an options object and pass json response to setOptionList
  * @param {string} optiondef Id of the option set to query the server for.
  */
-LASUI.prototype.getOptions = function (optiondef, DOMNode, type) {
+LASUI.prototype.getOptions = function (optiondef, DOMNode, type, reset) {
 
+	var cancel = document.createElement("INPUT");
+	cancel.type = "submit";
+	cancel.value=	"Close";
+	cancel.className = "LASSubmitInputNode";
+	cancel.onclick = this.genericHandler.LASBind(this,"this.hideOptions('"+ type+ "')");
+		var reset = document.createElement("INPUT");
+		reset.type = "submit";
+		reset.onclick =  this.genericHandler.LASBind(this,"this.resetOptions('" +type + "')");
+		reset.name = "Reset";
+		reset.value = "Reset";
+
+		while(this.refs.options[type].DOMNode.firstChild)
+			this.refs.options[type].DOMNode.removeChild(this.refs.options[type].DOMNode.firstChild);
+		this.refs.options[type].DOMNode.appendChild(reset);
+		this.refs.options[type].DOMNode.appendChild(cancel);
+		
 			if(!document.all)
 			var req = new XMLHttpRequest(this);
 		else
 			var req = new ActiveXObject("Microsoft.XMLHTTP");
-	req.onreadystatechange = this.AJAXhandler.LASBind(this, req, "this.setOptionList(req.responseText,args[3],args[4]);",DOMNode,type);
+	req.onreadystatechange = this.AJAXhandler.LASBind(this, req, "this.setOptionList(req.responseText,args[3],args[4],args[5]);",DOMNode,type,reset);
 	req.open("GET", this.hrefs.getOptions.url + '?opid=' + optiondef);
 	req.send(null);
 
@@ -1741,7 +1763,7 @@ LASUI.prototype.getOptions = function (optiondef, DOMNode, type) {
  * Method to create an option list in the tree and add it to the DOM
  * @param {object} strJson A json response compatible with LASGetOptionsResponse.js
  */
-LASUI.prototype.setOptionList = function (strJson,DOMNode,type) {
+LASUI.prototype.setOptionList = function (strJson,DOMNode,type,reset) {
 
 
 
@@ -1750,8 +1772,8 @@ LASUI.prototype.setOptionList = function (strJson,DOMNode,type) {
 	table.style.marginLeft = "6pt";
 	table.cellpadding = "0";
 	table.cellspacing = "0";
-	DOMNode.TBODYNode = document.createElement("TBODY");
-	table.appendChild(DOMNode.TBODYNode);
+	var tbody = document.createElement("TBODY");
+	table.appendChild(tbody);
 	DOMNode.appendChild(table);
 
 	var response = eval("(" + strJson + ")");
@@ -1761,28 +1783,8 @@ LASUI.prototype.setOptionList = function (strJson,DOMNode,type) {
 	this.refs.options[type].options = new LASGetOptionsResponse(response);
 	var ct = this.refs.options[type].options.getOptionCount();
 	if(ct)
-		for(var i=0;i<ct;i++) {
-			this.setOptionTRNode(this.refs.options[type].options.getOptionID(i),DOMNode.TBODYNode,type);
-
-			/*switch(this.refs.options[type].options.getOptionType(i)) {
-				case "menu" :
-					if(DOMNode == this.refs.options.plot.DOMNode)
-						this.state.properties.plot[this.refs.options[type].options.getOptionID(i)]={"type":"ferret", "value": this.refs.options[type].options.getOption(i).menu.item[0].values};
-					else {
-						this.state.properties[type][this.refs.options[type].options.getOptionID(i)]={"type":"ferret", "value": this.refs.options[type].options.getOption(i).menu.item[0].values};
-						   DOMNode.style.display="";
-					}
-					break;
-				case "text":
-					if(DOMNode == this.refs.options.plot.DOMNode)
-						this.state.properties.plot[this.refs.options[type].options.getOptionID(i)]={"type":"ferret", "value":""};
-					else {
-						this.state.properties[type][this.refs.options[type].options.getOptionID(i)]={"type":"ferret", "value":""};
-						   DOMNode.style.display="";
-					}
-					break;
-			}*/
-		}
+		for(var i=0;i<ct;i++) 
+			this.setOptionTRNode(this.refs.options[type].options.getOptionID(i),tbody,type,reset);
 	if(type=="plot"){
 		if(this.autoupdate || this.submitOnLoad)
 			this.makeRequest();
@@ -1798,10 +1800,10 @@ LASUI.prototype.setOptionList = function (strJson,DOMNode,type) {
  * Method to create an option tree node and add it to the DOM
  * @param {string} id An option id
  */
-LASUI.prototype.setOptionTRNode = function (id,TBODYNode,type) {
+LASUI.prototype.setOptionTRNode = function (id,TBODYNode,type,reset) {
 	if(!this.refs.options.cache)
 		this.refs.options.cache = {};
-	if(!this.refs.options.cache[id])
+	if(!this.refs.options.cache[id]||reset)
 	{
 		this.refs.options.cache[id] =  this.refs.options[type].options.getOptionByID(id);
 
@@ -1876,21 +1878,40 @@ LASUI.prototype.setOptionTRNode = function (id,TBODYNode,type) {
 			//first time, add it to the product
 
 }
+LASUI.prototype.showOptions = function(type)  {
+	if(this.refs.options[type].options){
+		this.toggleUIMask('');
+		document.getElementById(type + 'Options').style.display='';
+	}
+}
+LASUI.prototype.hideOptions= function(type)  {
+	this.refs.options[type].DOMNode.style.display='none';
+	this.toggleUIMask('none');
+}
+LASUI.prototype.resetOptions= function(type)  {
+	while(this.refs.options[type].DOMNode.firstChild)
+		this.refs.options[type].DOMNode.removeChild(this.refs.options[type].DOMNode.firstChild);
+	this.getOptions(this.state.operations.getOperationByID(this.state.operation[type]).optiondef.IDREF, this.refs.options[type].DOMNode,type,true, true);
+	this.showOptions(type);
+}
 LASUI.prototype.showOptionInfo = function(evt) {
 	var div = document.createElement("DIV");
 	var close = document.createElement("INPUT");
 	var center = document.createElement("CENTER");
-
+	
+	
 	close.type = "submit";
 	close.onclick = this.hideOptionInfo.LASBind(this,div);
 	close.name = "Close";
 	close.value = "Close";
+	
 	div.innerHTML += arguments[1];
 	div.className = "LASPopupDIVNode";
 	div.style.left = evt.clientLeft + 20;
 	div.style.top = evt.clientTop + 20;
 
 	center.appendChild(close);
+	
 	div.appendChild(center);
 	document.body.appendChild(div);
 }
