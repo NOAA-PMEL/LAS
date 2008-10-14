@@ -1487,7 +1487,7 @@ LASUI.prototype.initTConstraint = function (mode,reset) {
 					DWDisplay += "D";
 				if(this.state.grid.getAxis('t').yearNeeded=="true")
 					DWDisplay += "Y";
-				if(this.state.grid.getAxis('t').hourNeeded=="true")
+				if(this.state.grid.getAxis('t').hourNeeded=="true"||this.state.grid.getAxis('t').hoursNeeded=="true")
 					DWDisplay += "T";
 
 
