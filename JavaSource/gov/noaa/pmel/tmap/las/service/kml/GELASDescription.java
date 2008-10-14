@@ -59,7 +59,7 @@ public class GELASDescription{
     //LASBackendRequest lasBackendRequest;
 
     //public GELASDescription(String lat, String lon, HashMap<String, String> initLAS, LASBackendRequest lasBackendReq, String baseURL){
-    public GELASDescription(String lat, String lon, HashMap<String, String> initLAS,String baseURL){
+    public GELASDescription(String lon, String lat, HashMap<String, String> initLAS,String baseURL){
 
         point_lat   = lat;
         point_lon   = lon;
