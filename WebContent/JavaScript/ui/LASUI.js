@@ -222,7 +222,7 @@ LASUI.prototype.showInfo = function (evt) {
 	if(node.category)
 		if(node.category.getChildID(i))
 			if(node.category.getChildChildrenType(i)=="variables")
-				window.open(this.hrefs.getMetadata.url + '?dsid=' + node.category.getChildID(i));
+				window.open(this.hrefs.data.url + '?dsid=' + node.category.getChildID(i));
 			else
 				window.open(this.hrefs.getMetadata.url + '?catid=' + node.category.getChildID(i));
 
@@ -315,7 +315,7 @@ LASUI.prototype.createCategoryTreeNode = function (node, i, id) {
 		this.selectCategory(null,node,i);
 }
 LASUI.prototype.createVariableOptionNode = function (node, i) {
-	
+
 	document.getElementById(this.anchors.variables).onchange = function (evt) {this.options[this.selectedIndex].onselect({"target" : {"selected" :true}})}
 	if(this.state.variables && this.state.dataset)
 		if(this.state.variables[this.state.dataset])
@@ -323,12 +323,12 @@ LASUI.prototype.createVariableOptionNode = function (node, i) {
 					var selected = true;
 				else
 					var selected = false;
-	
+
 	var OPTIONNode = new Option(node.category.getChildName(i),node.category.getChildID(i),false,selected);
 	OPTIONNode.onselect = this.setVariable.LASBind(this, node, i, true);
 	OPTIONNode.id = "OPTION_" + node.category.getChildID(i);
 	document.getElementById(this.anchors.variables).options[document.getElementById(this.anchors.variables).length] = OPTIONNode;
-	
+
 }
 /**
  * Sub method to create variable tree node and add it to the DOM
@@ -415,6 +415,12 @@ LASUI.prototype.getCategory = function (parentNode, i) {
 		//parentNode.children[i].ULNode.style.display="none";
 }
 LASUI.prototype.onSetVariable = function() {
+				document.getElementById('output').style.visibility="hidden";
+				if(document.getElementById("wait"))
+					document.getElementById("wait").style.visibility="";
+				if(document.getElementById("wait_msg"))
+				document.getElementById("wait_msg").style.display="";
+				if(document.getElementById('categories'))
 				document.getElementById('categories').style.display='none';
 				this.toggleUIMask('none');
 				var categories = this.state.categorynames[0];
@@ -545,7 +551,7 @@ LASUI.prototype.setVariable = function (evt) {
 	var variableINPUTNode = dataset.children[i].INPUTNode;
 	variableINPUTNode.checked = loadVariable;
 	if (loadVariable) {
-	
+
 		//start an array of selected variables for this dataset if we havent already
 		if(typeof this.state.variables[datasetID] != 'object')
 			this.state.variables[datasetID] = [];
@@ -751,13 +757,13 @@ LASUI.prototype.setOperation = function (evt) {
 	var type = args[4];
 	if(!type)
 		type="plot";
-		
-	//for ie radio button bug	
+
+	//for ie radio button bug
  	if(type=="plot"&&document.all&&evt.srcElement) {
  		for(var t in this.refs.operations.plot.children)
  			if(this.refs.operations.plot.children[t].radio)
  				this.refs.operations.plot.children[t].radio.checked=false;
-		evt.srcElement.checked=true; 		
+		evt.srcElement.checked=true;
 	}
 	this.state.operation[type]=id;
 	this.refs.options[type].DOMNode.innerHTML="";
@@ -781,9 +787,9 @@ LASUI.prototype.setOperation = function (evt) {
 
 	this.updateConstraints();
 
-	if(optiondef) 
+	if(optiondef)
 		this.getOptions(optiondef, this.refs.options.plot.DOMNode,"plot",false);
-	
+
 
 	this.getOperations(this.state.dataset,this.state.variables[this.state.dataset].ID,this.state.view.plot);
 
@@ -821,14 +827,14 @@ LASUI.prototype.setOperationList = function (strJson) {
 
 	for(var o in this.refs.operations.download.children)
 		this.refs.operations.download.children[o].OPTIONNode.disabled=true;
-	
+
 	document.body.appendChild(this.refs.operations.external.DIVNode);
 	var setDefaultVis = true;
 	if(!this.state.operations.response.operations.error)
 		for(var i=0;i<this.state.operations.getOperationCount();i++) {
 			this.setOperationNode(this.state.operations.getOperationID(i), this.state.operations.getOperationName(i));
 			if(this.state.operations.getOperation(i).category == "visualization")
-			 	if(this.state.operations.getOperation(i)["default"] == "true") {
+			 	if(this.state.operations.getOperation(i)["default"]=="true") {
 					this.state.operation.plot = this.state.operations.getOperationID(i);
 					setDefaultVis = false;
 					this.makeRequest({},"plot");
@@ -1093,7 +1099,7 @@ LASUI.prototype.setProductNode = function(type, product) {
 		this.refs.operations.download.children[product].OPTIONNode.onselect = this.setDownloadOperation.LASBind(this,this.products[type][product].id,this.products[type][product].view,this.products[type][product].optiondef);
 		//this.refs.operations.plot.children[product].OPTIONNode.onclick = this.setOperation.LASBind(this,this.products[type][product].id,this.products[type][product].view,this.products[type][product].optiondef);
 		this.refs.operations.download.SELECTNode.appendChild(this.refs.operations.download.children[product].OPTIONNode);
-		
+
 	}
 }
 LASUI.prototype.onPlotLoad = function () {
@@ -1108,7 +1114,7 @@ LASUI.prototype.onPlotLoad = function () {
 	if(document.getElementById("wait_msg"))
 		document.getElementById("wait_msg").style.display="none";
 	if(document.getElementById('output'))
-		document.getElementById('output').style.display = '';
+		document.getElementById("output").style.visibility="visible";
 
 }
 
@@ -1118,17 +1124,17 @@ LASUI.prototype.onFirstPlotLoad = function () {
 	document.getElementById(this.anchors.output).onload = this.onPlotLoad.LASBind(this);
 	document.getElementById("wait").style.visibility="hidden";
 	document.getElementById("wait_msg").style.display="none";
-	document.getElementById('output').style.display = '';
+	document.getElementById('output').style.visibility="visible";
 
 }
 /**
  * Update the 4D Constraints selectors
  */
 LASUI.prototype.updateConstraints = function (view) {
-	if(!this.state.grid) 
+	if(!this.state.grid)
 		return;
 	if(view==null&& view !="")
-		var view = this.state.view.widgets;
+		view = this.state.view.widgets;
 	else
 		this.state.view.widgets = view;
 	this.updating = true;
@@ -1136,8 +1142,8 @@ LASUI.prototype.updateConstraints = function (view) {
 		document.getElementById("Date").removeChild(document.getElementById("Date").firstChild);
 	while(document.getElementById("Depth").firstChild)
 		document.getElementById("Depth").removeChild(document.getElementById("Depth").firstChild);
-		
-	
+
+
 	if(this.state.grid.getAxis('x') || this.state.grid.getAxis('y')) {
 		if(!this.refs.XYSelect.enabled)
 			this.refs.XYSelect.enable();
@@ -1386,9 +1392,9 @@ LASUI.prototype.initZConstraint = function (mode, reset) {
 						_opt.selected=true;
 					if(m==0 && v == 0)
 						_opt.selected=true;
-					
+
 					this.refs.DepthWidget[this.refs.DepthWidget.widgetType][m].appendChild(_opt);
-					
+
 				}
 				this.refs.DepthWidget[this.refs.DepthWidget.widgetType][m].className = "LASSelectNode";
 				this.refs.DepthWidget[this.refs.DepthWidget.widgetType][m].onchange=this.handleDepthRangeChange.LASBind(this);
@@ -1409,10 +1415,10 @@ LASUI.prototype.initZConstraint = function (mode, reset) {
 						_opt.selected=true;
 					if(m==0 && v == this.state.grid.getLo('z'))
 						_opt.selected=true;
-					
-					
+
+
 					this.refs.DepthWidget[this.refs.DepthWidget.widgetType][m].appendChild(_opt);
-					
+
 				}
 				this.refs.DepthWidget[this.refs.DepthWidget.widgetType][m].onchange=this.handleDepthRangeChange.LASBind(this);
 			}
@@ -1497,13 +1503,13 @@ LASUI.prototype.initTConstraint = function (mode,reset) {
 								_opt.selected=true;
 							if(m==0 && v == 0)
 								_opt.selected=true;
-							
+
 							 this.refs.DW[m].appendChild(_opt);
-							 
+
 						}
 					}
 				}
-				
+
 			switch(mode) {
 				case 'range':
 					document.getElementById("Date").innerHTML="<strong>Start Date : </strong>";
@@ -1561,8 +1567,8 @@ LASUI.prototype.makeRequest = function (evt, type) {
 		this.uirequest = '';
 		this.request = new LASRequest('');
 		this.state.view.download=this.state.view.plot;
-		this.state.view.external=this.state.view.plot;		
-		
+		this.state.view.external=this.state.view.plot;
+
 		this.request.removeVariables();
 		this.request.removeConstraints();
 
@@ -1598,7 +1604,7 @@ LASUI.prototype.makeRequest = function (evt, type) {
 		this.request.setVariable(this.state.dataset, this.state.variable);
 
 
-		
+
 		this.request.addRegion();
 		//do the analysis, if required.
 		if(this.refs.analysis.enabled && this.state.analysis.name) {
@@ -1712,7 +1718,7 @@ LASUI.prototype.makeRequest = function (evt, type) {
 				document.getElementById("wait").style.visibility="visible";
 			if(document.getElementById("wait_msg"))
 				document.getElementById("wait_msg").style.display="";
-			document.getElementById('output').style.display = "none";
+			document.getElementById('output').style.visibility="hidden";
 			if (this.firstload==true) document.getElementById(this.anchors.output).onload = this.onFirstPlotLoad.LASBind(this);
 			document.getElementById('output').src = (this.hrefs.getProduct.url + '?xml=' + escape(this.request.getXMLText()));
 
@@ -1748,7 +1754,7 @@ LASUI.prototype.getOptions = function (optiondef, DOMNode, type, reset) {
 			this.refs.options[type].DOMNode.removeChild(this.refs.options[type].DOMNode.firstChild);
 		this.refs.options[type].DOMNode.appendChild(reset);
 		this.refs.options[type].DOMNode.appendChild(cancel);
-		
+
 			if(!document.all)
 			var req = new XMLHttpRequest(this);
 		else
@@ -1783,7 +1789,7 @@ LASUI.prototype.setOptionList = function (strJson,DOMNode,type,reset) {
 	this.refs.options[type].options = new LASGetOptionsResponse(response);
 	var ct = this.refs.options[type].options.getOptionCount();
 	if(ct)
-		for(var i=0;i<ct;i++) 
+		for(var i=0;i<ct;i++)
 			this.setOptionTRNode(this.refs.options[type].options.getOptionID(i),tbody,type,reset);
 	if(type=="plot"){
 		if(this.autoupdate || this.submitOnLoad)
@@ -1898,20 +1904,20 @@ LASUI.prototype.showOptionInfo = function(evt) {
 	var div = document.createElement("DIV");
 	var close = document.createElement("INPUT");
 	var center = document.createElement("CENTER");
-	
-	
+
+
 	close.type = "submit";
 	close.onclick = this.hideOptionInfo.LASBind(this,div);
 	close.name = "Close";
 	close.value = "Close";
-	
+
 	div.innerHTML += arguments[1];
 	div.className = "LASPopupDIVNode";
 	div.style.left = evt.clientLeft + 20;
 	div.style.top = evt.clientTop + 20;
 
 	center.appendChild(close);
-	
+
 	div.appendChild(center);
 	document.body.appendChild(div);
 }

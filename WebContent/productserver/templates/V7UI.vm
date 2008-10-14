@@ -47,8 +47,6 @@
 					"ARC GIS" : {"view" : "xy", "class" : "download", "id" : "Data_Extract_ArcView", "optiondef" : ""},
 					"ASCII File" : {"view" : "xyzt", "class" : "download", "id" : "Data_Extract_File", "optiondef" : "Options_Data_file"},
 					"netCDF File" : {"view" : "xyzt", "class" : "download", "id" : "Data_Extract_netCDF", "optiondef" : "Options_Data"},
-					"ASCII File" : {"view" : "xyzt", "class" : "download", "id" : "Data_Extract_File", "optiondef" : "Options_Data_file"},
-					"netCDF File" : {"view" : "xyzt", "class" : "download", "id" : "Data_Extract_netCDF", "optiondef" : "Options_Data"},
 					"Scripts" : {"view" : "xyzt", "class" : "download", "id" : "Gen_Scripts", "optiondef" : "Options_gen_script"}	
 					
 				}
