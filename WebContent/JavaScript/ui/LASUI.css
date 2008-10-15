@@ -144,7 +144,7 @@ font-weight: bold;
 	top:50px;
 	max-height:600px;
 	max-width:700px;
-	overflow:scroll;
+	overflow:auto;
 	background-color : white;
 	border : 2pt solid black;
 	border-color: #5c731e;
@@ -156,7 +156,7 @@ font-weight: bold;
 .LASConstraintsPane {
 	width:225px;
 	height:600px;
-	overflow:scroll;
+	overflow:auto;
 }
 .LASTitleTextNode {
 	font-family:arial;
