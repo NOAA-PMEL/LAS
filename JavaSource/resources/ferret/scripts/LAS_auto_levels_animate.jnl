@@ -236,7 +236,7 @@ IF `indx_strd_used EQ 0` THEN CANCEL SYMBOL index_strides
 IF ($index_strides"0|*>1") THEN 
    DEFINE SYMBOL ppvar = ($data_var)[d=($data_num),($index_strides)]
    LET anim_stridevar = ($ferret_plot_var_noregion)
-   DEFINE SYMBOL ppvar = anim_stridevar[($index_strides)]
+   DEFINE SYMBOL ppvar = anim_stridevar[($region_xyz),($index_strides)]
 ELSE
    DEFINE SYMBOL ppvar = pvar
 ENDIF
@@ -276,7 +276,8 @@ IF `indx_strd_used EQ 0` THEN CANCEL SYMBOL index_strides
 IF ($index_strides"0|*>1") THEN 
    DEFINE SYMBOL ppvar = ($data_var)[d=($data_num),($index_strides)]
    LET anim_stridevar = ($ferret_plot_var_noregion)
-   DEFINE SYMBOL ppvar = anim_stridevar[($index_strides)]
+   DEFINE SYMBOL ppvar = anim_stridevar[($region_xyz),($index_strides)]
+
 ELSE
    DEFINE SYMBOL ppvar = pvar
 ENDIF
