@@ -1122,7 +1122,9 @@ LASUI.prototype.onPlotLoad = function () {
 
 LASUI.prototype.onFirstPlotLoad = function () {
 	this.firstload =false;
-	if(document.getElementById(this.anchors.output).contentWindow)
+	document.getElementById(this.anchors.output).onload = this.onPlotLoad.LASBind(this);
+	this.onPlotLoad();
+	/*if(document.getElementById(this.anchors.output).contentWindow)
 		var iframeDOM = document.getElementById(this.anchors.output).contentWindow;
 	else if (document.getElementById(this.anchors.output).contentDocument)
 		var iframeDOM = document.getElementById(this.anchors.output).contentDocument;
@@ -1131,14 +1133,19 @@ LASUI.prototype.onFirstPlotLoad = function () {
 
 	if(iframeDOM)
 		iframeDOM.onPlotLoad = this.onPlotLoad.LASBind(this);
-    if(iframeDOM.myMapWidget)
+
+   if(iframeDOM.myMapWidget)
     	this.refs.plot = iframeDOM.myMapWidget;
     else
     	this.refs.plot = {};
+
 	document.getElementById(this.anchors.output).onload = this.onPlotLoad.LASBind(this);
-	document.getElementById("wait").style.visibility="hidden";
-	document.getElementById("wait_msg").style.display="none";
-	document.getElementById('output').style.visibility="visible";
+	if(document.getElementById("wait"))
+		document.getElementById("wait").style.visibility="hidden";
+	if(document.getElementById("wait_msg"))
+		document.getElementById("wait_msg").style.display="none";
+	if(document.getElementById('output'))
+		document.getElementById("output").style.visibility="visible";*/
 
 }
 /**
@@ -1471,12 +1478,13 @@ LASUI.prototype.initZConstraint = function (mode, reset) {
  */
 LASUI.prototype.initTConstraint = function (mode,reset) {
 	document.getElementById("Date").style.display="";
+	while(document.getElementById("Date").firstChild)
+							document.getElementById("Date").removeChild(document.getElementById("Date").firstChild);
+
 	switch(this.state.grid.getDisplayType('t')) {
 		case "widget":
 			if(reset || !this.refs.DW)
 				if(reset || this.refs.DW.widgetType != "DateWidget")	{
-					while(document.getElementById("Date").firstChild)
-							document.getElementById("Date").removeChild(document.getElementById("Date").firstChild);
 					this.refs.DW = new DateWidget(this.state.grid.getLo('t'),this.state.grid.getHi('t'));
 					this.refs.DW.callback = this.handleDateRangeChange.LASBind(this);
 				}
@@ -1499,7 +1507,7 @@ LASUI.prototype.initTConstraint = function (mode,reset) {
 					break;
 				case 'point':
 					document.getElementById("Date").innerHTML="<table><tbody><tr><td><table><tbody><tr><td><strong>Date :</strong></td><td id='DWAnchor'></td></tr></tbody></table>";
-					this.refs.DW.render("Date", DWDisplay);
+					this.refs.DW.render("DWAnchor", DWDisplay);
 					break;
 			}
 			break;
@@ -1936,8 +1944,8 @@ LASUI.prototype.showOptionInfo = function(evt) {
 
 	div.innerHTML += arguments[1];
 	div.className = "LASPopupDIVNode";
-	div.style.left = evt.clientLeft + 20;
-	div.style.top = evt.clientTop + 20;
+	//div.style.left = evt.clientLeft + 20;
+	//div.style.top = evt.clientTop + 20;
 
 	center.appendChild(close);
 
@@ -1958,10 +1966,17 @@ LASUI.prototype.hideOptionInfo = function () {
 LASUI.prototype.setOption = function (evt) {
 	var args = arguments;
 	var id = args[1];
-	if(args[3].SELECTNode)
-		this.state.properties[args[2]][id]={"type" : "ferret", "value" : evt.target.options[evt.target.selectedIndex].value};
+	if(evt.target)
+		var node = evt.target;
+	else if(evt.srcElement)
+		var node = evt.srcElement;
 	else
-		this.state.properties[args[2]][id]={"type" : "ferret", "value" : evt.target.value};
+		return;
+
+	if(args[3].SELECTNode)
+		this.state.properties[args[2]][id]={"type" : "ferret", "value" : node.options[node.selectedIndex].value};
+	else
+		this.state.properties[args[2]][id]={"type" : "ferret", "value" : node.value};
 
 	if(args[2]=="plot")
 		if(!this.updating)if(this.autoupdate)
