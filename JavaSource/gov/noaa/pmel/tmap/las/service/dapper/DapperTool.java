@@ -124,14 +124,14 @@ public class DapperTool extends TemplateTool {
             if (dapperBackendRequest.isCancelRequest()) {           
                 lasBackendResponse.setError("Dapper backend request canceled.");
                 causeOfError = "Dapper backendRequest failed to cancel request: ";
-                File cancel = new File(dapperBackendRequest.getResult("cancel"));
+                File cancel = new File(dapperBackendRequest.getResultAsFile("cancel"));
                 cancel.createNewFile();
                 log.info("Dapper backend request canceled: " + dapperBackendRequest.toCompactString());
                 return lasBackendResponse;
             }
 
             //has the request been canceled (method 2)?    
-            String cancelFileName = dapperBackendRequest.getResult("cancel");
+            String cancelFileName = dapperBackendRequest.getResultAsFile("cancel");
             File cancel = null;
             if (cancelFileName != null && !cancelFileName.equals("")) {
                 causeOfError = "Unable to create cancelFileName=" + cancelFileName + ": ";
