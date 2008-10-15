@@ -790,11 +790,11 @@ LASUI.prototype.setOperation = function (evt) {
 
 	this.updateConstraints();
 
-	if(optiondef)
-		this.getOptions(optiondef, this.refs.options.plot.DOMNode,"plot",false);
 
 
 	this.getOperations(this.state.dataset,this.state.variables[this.state.dataset].ID,this.state.view.plot);
+if(optiondef)
+		this.getOptions(optiondef, this.refs.options.plot.DOMNode,"plot",false);
 
 	if (this.autoupdate)
 		this.makeRequest();
@@ -893,15 +893,16 @@ LASUI.prototype.doProductIconClick = function (evt) {
 	this.refs.operations.external.DIVNode.appendChild(submit);
 	this.refs.operations.external.DIVNode.appendChild(cancel);
 	if(this.state.operations.getOperationByID(id))
-		if(this.state.operations.getOperationByID(id).optiondef)
+		if(this.state.operations.getOperationByID(id).optiondef) {
 			this.getOptions(this.state.operations.getOperationByID(id).optiondef.IDREF, this.refs.operations.external.DIVNode,"external");
-		else {
+			this.refs.operations.external.DIVNode.style.display="";
+		} else {
 			this.refs.operations.external.DIVNode.style.display='none';
 			this.toggleUIMask('none');
 			this.makeRequest({},'external');
 			return;
 		}
-	try {
+	/*try {
 	if(!this.refs.options.external.options.response.options.status == "error") {
 		this.toggleUIMask('none');
 		this.makeRequest({},'external');
@@ -911,7 +912,7 @@ LASUI.prototype.doProductIconClick = function (evt) {
 		{
 		this.toggleUIMask('none');
 		this.makeRequest({},'external');
-	}
+	}*/
 }
 /**
  * Method to query the server for the available grids
@@ -1766,9 +1767,16 @@ LASUI.prototype.getOptions = function (optiondef, DOMNode, type, reset) {
 		reset.onclick =  this.genericHandler.LASBind(this,"this.resetOptions('" +type + "')");
 		reset.name = "Reset";
 		reset.value = "Reset";
-
-		while(this.refs.options[type].DOMNode.firstChild)
+				while(this.refs.options[type].DOMNode.firstChild)
 			this.refs.options[type].DOMNode.removeChild(this.refs.options[type].DOMNode.firstChild);
+	/*	if(this.state.operations)
+			if(this.state.operations.getOperationByID(this.state.operation[type])){
+			var label = document.createElement("STRONG");
+			label.appendChild(document.createTextNode("Set " + this.state.operations.getOperationByID(this.state.operation[type]).name + " options."));
+			this.refs.options[type].DOMNode.appendChild(label);
+			this.refs.options[type].DOMNode.appendChild(document.createElement("BR"));
+	}*/
+		//this.refs.options[type].DOMNode.appendChild(reset);
 		this.refs.options[type].DOMNode.appendChild(reset);
 		this.refs.options[type].DOMNode.appendChild(cancel);
 
@@ -1809,15 +1817,13 @@ LASUI.prototype.setOptionList = function (strJson,DOMNode,type,reset) {
 		for(var i=0;i<ct;i++)
 			this.setOptionTRNode(this.refs.options[type].options.getOptionID(i),tbody,type,reset);
 	if(type=="plot"){
-		if(this.autoupdate || this.submitOnLoad)
+	if(this.autoupdate || this.submitOnLoad)
 			this.makeRequest();
-		else
+	else
 			this.showUpdateLink();
 
 		this.submitOnLoad = false;
 	}
-
-
 }
 /**
  * Method to create an option tree node and add it to the DOM
