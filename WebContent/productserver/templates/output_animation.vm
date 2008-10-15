@@ -1176,11 +1176,11 @@
       }
 
       if(initStep != null){
-          editorContent += "&nbsp;<b>Skip every&nbsp;</b><input type='text' id='timeStep'" + 
-                           " value='"+initStep+"' size='4'>frames<br>";
+          editorContent += "&nbsp;<b>Plot every&nbsp;</b><input type='text' id='timeStep'" + 
+                           " value='"+initStep+"' size='4'><b>th frame</b><br>";
       }else{
-          editorContent += "&nbsp;<b>Skip every&nbsp;</b><input type='text' id='timeStep'" + 
-                           " value='1' size='4'>frames<br>";
+          editorContent += "&nbsp;<b>Plot every&nbsp;</b><input type='text' id='timeStep'" + 
+                           " value='1' size='4'><b>th frame</b><br>";
       }
 
       editorContent += "<br><div id='SelectVariable'></div><br>" +
