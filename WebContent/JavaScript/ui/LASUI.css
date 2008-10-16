@@ -35,6 +35,10 @@ font-size: 85%;
 border-bottom: none;
 font-weight: bold;
 }
+.LASAnalysis {
+	padding:5pt;
+	margin:5pt;
+}
 .LASUIMask {
 	position:absolute;
 	top:0pt;

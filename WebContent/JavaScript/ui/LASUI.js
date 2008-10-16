@@ -428,7 +428,7 @@ LASUI.prototype.onSetVariable = function() {
 					categories += ' / ' + this.state.categorynames[i];
 				//var variables = this.state.variables[this.state.dataset].name;
 				var info = document.createElement("IMG");
-				info.onclick = "window.open(\'getMetadata.do?dsid="+this.state.dataset+"\')";
+				info.onclick = "function() {window.open('getMetadata.do?dsid="+this.state.dataset+"\')}";
 				info.src = "images/icon_info.gif";
 				var varlist = document.createElement("SELECT");
 				varlist.id="variables";
@@ -460,10 +460,6 @@ LASUI.prototype.onSetVariable = function() {
 				if(this.state.variables[this.state.dataset])
 					var varname = this.state.variables[this.state.dataset].name
 				document.getElementById("V6").href="servlets/datasets?dset=" + escape(categories) + "/" + escape(varname);
-				if(!this.updating)if(this.autoupdate)
-					this.makeRequest({},'plot');
-				else
-					this.showUpdateLink();
 }
 /**
  * Event handler for category selection, bind to category DOM object events.
@@ -542,8 +538,8 @@ LASUI.prototype.setVariable = function (evt) {
 	else if(args.length>3)
 		var loadVariable = args[3];
 
-	if(args.length>4)
-		var switchVar = args[4]; // dont do the following AJAX calls
+	//if(args.length>4)
+	//	var switchVar = args[4]; // dont do the following AJAX calls
 	var datasetID = dataset.category.getDatasetID();
 	var variableID = dataset.category.getChildID(i);
 	var variable = dataset.category.getChild(i);
@@ -551,24 +547,21 @@ LASUI.prototype.setVariable = function (evt) {
 	var variableINPUTNode = dataset.children[i].INPUTNode;
 	variableINPUTNode.checked = loadVariable;
 	if (loadVariable) {
-
+		this.updating =true;
 		//start an array of selected variables for this dataset if we havent already
 		if(typeof this.state.variables[datasetID] != 'object')
 			this.state.variables[datasetID] = [];
 
 		this.state.variables[datasetID] = variable;
-		//if(document.getElementById("OPTION_"+variable))
-		//	document.getElementById("OPTION_"+variable).selected =true;
 
 		//get all the other data for this dataset/variable combo
 		this.state.dataset = datasetID;
 		this.state.variable = variableID;
-		if(!switchVar) {
-			this.getGrid(datasetID,variableID);
-			this.getDataConstraints(datasetID,variableID);
-			//this.getOperations(datasetID,variableID);//,this.state.view.plot);
-			this.getViews(datasetID,variableID);
-		}
+		this.getGrid(datasetID,variableID);
+		this.getDataConstraints(datasetID,variableID);
+		//this.getOperations(datasetID,variableID);//,this.state.view.plot);
+		this.getViews(datasetID,variableID);
+
 
 	}	else {
 			if (typeof this.state.variables[datasetID] == 'object')
@@ -1111,19 +1104,22 @@ LASUI.prototype.onPlotLoad = function () {
 		iframeDOM.onPlotLoad = this.onPlotLoad.LASBind(this);
 	} else
 		this.refs.plot = {};
+
 	if(document.getElementById("wait"))
 		document.getElementById("wait").style.visibility="hidden";
 	if(document.getElementById("wait_msg"))
 		document.getElementById("wait_msg").style.display="none";
-	if(document.getElementById('output'))
+	if(document.getElementById('output')) {
 		document.getElementById("output").style.visibility="visible";
 
+	}
 }
 
 LASUI.prototype.onFirstPlotLoad = function () {
 	this.firstload =false;
 	document.getElementById(this.anchors.output).onload = this.onPlotLoad.LASBind(this);
 	this.onPlotLoad();
+
 	/*if(document.getElementById(this.anchors.output).contentWindow)
 		var iframeDOM = document.getElementById(this.anchors.output).contentWindow;
 	else if (document.getElementById(this.anchors.output).contentDocument)
