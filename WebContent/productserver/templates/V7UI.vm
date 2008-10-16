@@ -130,13 +130,15 @@
 		}
 		#constraints {
 			height:600px;
+			width: 224px;
 			border: 1px solid #5c731e;
 			float:left;
 		}
 		#wrapper {
 			overflow: hidden;
 			display:block;
-			white-space:nowrap;
+			height:600px;
+			width:1024px;
 		}
 		#output {
 			text-align:left;
@@ -145,7 +147,7 @@
 		}
 		#wait_msg {
 			text-align:left;
-			width: 809px;
+			width: 800px;
 			height:600px;
 		}
 		#message_bar {
@@ -175,8 +177,8 @@
 				</div>
 			</div>
 			<div id="message_bar"><img id="wait" style="visibility:hidden;float:right;margin:2pt;padding:2pt;" src="JavaScript/components/mozilla_blu.gif"><span id="breadcrumb"></span></div>
-			<div id="wrapper">
-				<div id="constraints">
+			<table height="600px" width="1024px"><tbody><tr><td valign="top">
+				<div id="constraints" class="LASConstraintsPane">
 					<div id="MapWidget" style="border:1px solid black;" ><div style="position:absolute;z-index:4;text-align:center"><!--<img src="images/north-mini.png" onmousedown="LAS.refs.XYSelect.panPlot(0,10);"><br>--><img src="images/west-mini.png" onmousedown="LAS.refs.XYSelect.panPlot(-20,0);"><img src="images/east-mini.png" onmousedown="LAS.refs.XYSelect.panPlot(20,0);"><!--<br><img src="images/south-mini.png" onmousedown="LAS.refs.XYSelect.panPlot(0,-10);"><br><img src="images/zoom-plus-mini.png" onclick="LAS.refs.XYSelect.zoom(2);"><br><img src="images/zoom-minus-mini.png"  onclick="LAS.refs.XYSelect.zoom(-1)">--></div></div>
 						<strong>
 						Latitude range <input size=3  id="input_maxY" type="text" value="90.0">&nbsp;:&nbsp;<input id="input_minY" size=3 type="text" value="-90.0"><br>
@@ -186,7 +188,7 @@
 					<div id="plotType"></div>
 					<div id="Date"></div>
 						<div id="Depth"></div><br>
-					<div id="analysisWrapper"  style="display:none;">							
+					<div id="analysisWrapper"  class="LASAnalysis">							
 						<a class="LASLink" value=false onclick="if(!LAS.refs.analysis.enabled){LAS.showAnalysis();this.innerHTML='Remove analysis';}else{LAS.hideAnalysis();this.innerHTML='Apply analysis';}">Apply analysis</a>
 						<div id="analysis" style="display:none;">
 							<strong>Analysis type</strong><br>
@@ -210,10 +212,10 @@
 						</div>
 					</div>
 					<div id="DataConstraints"></div>					
-				</div>
+				</div></td><td>
 				<div id="wait_msg">Please wait while the plot loads...</div>
 				<iframe width="100%" height="100%" src="start.html" id="output" onload="LAS.onPlotLoad();" frameborder=0></iframe>			
-			</div>
+			</td></tr></tbody></table>
 			#parse( "/productserver/templates/V7UIFooter.vm") 
 		</div>
 		<div id="debug" style="border:1pt solid black;position:absolute;top:200px;left:150px;display:none;"></div>
