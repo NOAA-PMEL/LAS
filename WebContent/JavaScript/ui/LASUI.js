@@ -89,25 +89,28 @@ LASUI.prototype.initUI = function (anchorId)
 
 	if((this.params.dsid||this.params.catid)&&this.params.varid) {
 		this.state.dataset = this.params.dsid;
+		this.state.lastDataset = "";
+		this.state.lastVariable = "";
 		this.state.variable = this.params.varid;
 		this.state.operation.plot = this.params.plot;
 		this.state.view.plot = this.params.view;
 		//this.state.xybox = eval("("+unescape(this.params.bbox)+")");
 		
 		this.autoupdate = this.params.autoupdate;
+		if((this.state.dataset||this.params.catid)&&this.state.variable)
+			this.submitOnLoad=true;
+		else
+			this.submitOnLoad=false;
 
-	}
+	} else
+		this.submitOnLoad =false;
 	this.state.xybox ={};
 		this.UIMask = document.createElement("DIV");
 	this.UIMask.className = "LASUIMask";
 	this.toggleUIMask('none');
 	document.body.appendChild(this.UIMask);
 	this.firstload=true;
-	if(!this.updating)if(this.autoupdate)
-		this.submitOnLoad = true;
-	else
-		this.submitOnLoad = false;
-	this.submitOnLoad=true;
+
 
 	this.refs.operations.plot.DOMNode = document.getElementById("plotType");
 	this.refs.operations.download.DOMNode = document.getElementById("downloadType");
@@ -582,6 +585,9 @@ LASUI.prototype.setVariable = function (evt) {
 	this.state.datasets[datasetID] = dataset.category;
 		
 	//get all the other data for this dataset/variable combo
+	this.state.lastVariable = this.state.variable;
+	this.state.lastDataset = this.state.dataset;
+
 	this.state.dataset = datasetID;
 	this.state.variable = variableID;
 	this.getGrid(datasetID,variableID);
@@ -1152,7 +1158,7 @@ LASUI.prototype.updateConstraints = function (view) {
 	var reset=false;
 
 	if(this.state.lastgrid) {
-		if(this.state.grid.response.grid.ID!=this.state.lastgrid.response.grid.ID&&(this.state.lastDataset!=this.state.dataset||this.state.lastVariable!=this.state.variable))
+		if(this.state.grid.response.grid.ID!=this.state.lastgrid.response.grid.ID||(this.state.lastDataset!=this.state.dataset||this.state.lastVariable!=this.state.variable))
 			reset=true;
 	}
 	if(!this.initialized)
