@@ -1548,11 +1548,13 @@ LASUI.prototype.initTConstraint = function (mode,reset) {
 }
 LASUI.prototype.showUpdateLink = function (){
 	document.getElementById('update').style.color='orange';
+	document.getElementById('update').style.visibility='visible';
+	document.getElementById('plotOptionsButton').style.visibility='visible';
 	if(document.getElementById("wait"))
 		document.getElementById("wait").style.visibility="hidden";
-		if(document.getElementById("wait_msg"))
-			document.getElementById("wait_msg").style.display="none";
-		if(document.getElementById('output'))
+	if(document.getElementById("wait_msg"))
+		document.getElementById("wait_msg").style.display="none";
+	if(document.getElementById('output'))
 		document.getElementById("output").style.visibility="visible";
 
 
@@ -1571,6 +1573,9 @@ LASUI.prototype.makeRequest = function (evt, type) {
 	if(!this.updating) {
 		document.getElementById('output').height="100%";
 		document.getElementById('output').width="100%";
+		document.getElementById('update').style.visibility='visible';
+		document.getElementById('plotOptionsButton').style.visibility='visible';
+
 		this.request = null;
 		this.uirequest = '';
 		this.request = new LASRequest('');
