@@ -526,8 +526,8 @@ LASUI.prototype.selectCategory = function (evt) {
 					this.state.categorynames.splice(b,this.state.categorynames.length-b);
 		}
 		this.expand(parentNode.children[i]);	//expand the category if it has been selected
-		if(parentNode.category.getChildChildrenType(i)=="variables")
-			this.setDataset(parentNode.category.getChildDatasetID(i));
+		//if(parentNode.category.getChildChildrenType(i)=="variables")
+		//	this.setDataset(parentNode.category.getChildDatasetID(i));
 
 		if(parentNode == this.refs.categories)
 			this.state.categorynames = [];
@@ -587,7 +587,7 @@ LASUI.prototype.setVariable = function (evt) {
 LASUI.prototype.setDataset = function (dataset) {
 	this.state.dataset = dataset;
 	this.state.newgrid = true;
-	if(this.state.variable) {
+	if(this.state.datasets[this.state.dataset].getChildByID(this.state.variable)) {
 		this.getGrid(dataset, this.state.variable);
 	}
 	if(this.onSetDataset)
