@@ -173,7 +173,7 @@ LASUI.prototype.initUI = function (anchorId)
 		req.send(null);
 	}
 	
-	if((this.state.dataset||this.params.catid)&&this.state.variable) {
+	if((this.state.dataset!=""||this.params.catid!="")&&this.state.variable!="") {
 		
 		if(this.params.catid)
 			var catid=this.params.catid;		
@@ -190,7 +190,11 @@ LASUI.prototype.initUI = function (anchorId)
 }
 LASUI.prototype.setInitialVariable = function(strJson) {
 	var response = eval("(" + strJson + ")");
+	if(response.categories)
+	if(response.categories.status)
+	if(response.categories.status=="ok") {
 	var category = new LASGetCategoriesResponse(response);
+	
 	this.state.dataset = category.getDatasetID();
 	this.state.datasets[this.state.dataset] = category;
 	this.getGrid(this.state.dataset,this.state.variable);
@@ -219,7 +223,7 @@ LASUI.prototype.setInitialVariable = function(strJson) {
 		OPTIONNode.id = "OPTION_" + category.getChildID(i);
 		document.getElementById(this.anchors.variables).options[document.getElementById(this.anchors.variables).length] = OPTIONNode;
 	}
-
+}
 }
 LASUI.prototype.getMetadata = function (evt) {
 	window.open(this.hrefs.getMetadata.url + '?dsid=' + this.state.dataset);
@@ -465,9 +469,15 @@ LASUI.prototype.onSetVariable = function() {
 		if(document.getElementById('categories'))
 			document.getElementById('categories').style.display='none';
 		this.toggleUIMask('none');
-		var categories = this.state.categorynames[0];
-		for(var i=1;i<this.state.categorynames.length;i++)
-			categories += ' / ' + this.state.categorynames[i];
+		if(this.state.categorynames)
+		if(this.state.categorynames.length>0) {
+			var categories = this.state.categorynames[0];
+			for(var i=1;i<this.state.categorynames.length;i++)
+				categories += ' / ' + this.state.categorynames[i];
+		}
+		else
+			var categories = this.state.datasets[this.state.dataset].getDatasetName();
+		
 		var info = document.createElement("IMG");
 		info.onclick = this.getMetadata.LASBind(this);
 		info.src = "images/icon_info.gif";
@@ -1869,7 +1879,7 @@ LASUI.prototype.setOptionTRNode = function (id,TBODYNode,type,reset) {
 
 			clone.TRNode.appendChild(clone.TD1);
 			clone.TRNode.appendChild(clone.TD2);
-			clone.TRNode.appendChild(clone.TD3);
+			clone.TRNode.appendChild(this.refs.options.cache[id].TD3);
 			TBODYNode.appendChild(clone.TRNode);
 		}
 
