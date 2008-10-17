@@ -707,16 +707,9 @@ LASUI.prototype.getOperations = function (dataset, variable, view) {
 		if(view) {
 			var viewStr = '&view=' + view;
 			req.onreadystatechange = this.AJAXhandler.LASBind(this, req, "this.setOperationList(req.responseText);");
-
-		} else {
-			return;
-			var	 viewStr = "";
-			req.onreadystatechange = this.AJAXhandler.LASBind(this, req, "this.setVisualiztions(req.responseText);");
+			req.open("GET", this.hrefs.getOperations.url + '?dsid=' + dataset + '&varid=' + variable + viewStr);
+			req.send(null);
 		}
-
-		req.open("GET", this.hrefs.getOperations.url + '?dsid=' + dataset + '&varid=' + variable + viewStr);
-		req.send(null);
-
 
 }/**
  *	Event handler to set the operation
@@ -776,6 +769,9 @@ LASUI.prototype.setOperation = function (evt) {
 			evt.srcElement.checked=true;
 
 	}
+	
+	this.state.lastVariable = this.state.variable;
+	this.state.lastDataset = this.state.dataset;
 	this.state.operation[type]=id;
 	this.refs.options[type].DOMNode.innerHTML="";
 
@@ -797,14 +793,11 @@ LASUI.prototype.setOperation = function (evt) {
 	this.state.view.widgets = view;
 
 	this.updateConstraints();
-
-
-
+	
 	this.getOperations(this.state.dataset,this.state.variable,this.state.view.plot);
-if(optiondef)
+	if(optiondef)
 		this.getOptions(optiondef, this.refs.options.plot.DOMNode,"plot",false);
-
-}
+	}
 
 LASUI.prototype.genericHandler = function (evt) {
 	if(arguments[1])
@@ -1159,7 +1152,7 @@ LASUI.prototype.updateConstraints = function (view) {
 	var reset=false;
 
 	if(this.state.lastgrid) {
-		if(this.state.grid.response.grid.ID!=this.state.lastgrid.response.grid.ID)
+		if(this.state.grid.response.grid.ID!=this.state.lastgrid.response.grid.ID&&(this.state.lastDataset!=this.state.dataset||this.state.lastVariable!=this.state.variable))
 			reset=true;
 	}
 	if(!this.initialized)
