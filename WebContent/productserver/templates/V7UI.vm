@@ -166,8 +166,8 @@
 				#else
 					<span class="top_link" width="100%" type="button" onclick="if(document.getElementById('categories').style.display=='none'){document.getElementById('categories').style.display='';LAS.toggleUIMask('')} else {document.getElementById('categories').style.display='none'; LAS.toggleUIMask('none');}">Choose dataset&nbsp;</span>		
 					#end	
-					<span  class="top_link" id="update" onclick="LAS.makeRequest();">Update Plot&nbsp;&nbsp<INPUT style="margin-bottom:-2pt;margin-right:-2pt;padding-left:2pt;margin-left:-2pt;padding-right:2pt;padding-bottom:2pt;margin-top:-1pt" type="checkbox" #if($request.getParameter('auto')) checked #end  onmousemove="window.status='Check to automatically update the plot.';" onmouseout="window.status='';" onclick="LAS.autoupdate=this.checked;if(LAS.autoupdate)LAS.makeRequest();"></span>
-					<span  class="top_link" onclick="if(LAS.refs.options.plot.options){LAS.toggleUIMask('');document.getElementById('plotOptions').style.display='';}">Set plot options&nbsp;</span>
+					<span  class="top_link" style="visibility:hidden" id="update" onclick="LAS.makeRequest();">Update Plot&nbsp;&nbsp<INPUT style="margin-bottom:-2pt;margin-right:-2pt;padding-left:2pt;margin-left:-2pt;padding-right:2pt;padding-bottom:2pt;margin-top:-1pt" type="checkbox" #if($request.getParameter('auto')) checked #end  onmousemove="window.status='Check to automatically update the plot.';" onmouseout="window.status='';" onclick="LAS.autoupdate=this.checked;if(LAS.autoupdate)LAS.makeRequest();"></span>
+					<span  class="top_link" style="visibility:hidden" id="plotOptionsButton" onclick="if(LAS.refs.options.plot.options){LAS.toggleUIMask('');document.getElementById('plotOptions').style.display='';}">Set plot options&nbsp;</span>
 					<span id="productButtons">
 						<span class="top_link" style="visibility:hidden" ID="Animation">Animate&nbsp;</span>
 						<span class="top_link" style="visibility:hidden" ID="Comparison">Compare&nbsp;</span>							
