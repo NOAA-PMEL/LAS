@@ -19,7 +19,7 @@
 		</tr>
                 <tr>
 		<TD bgcolor="#5c5cff" width="75%" valign="top" align="left">
-			<div style="position:relative;height:33px;width:100%;margin-right:0px;margin-left:0px;border-bottom:1pt solid #FFFFFC">
+			<div style="position:relative;height:33px;overflow:hidden;width:100%;margin-right:0px;margin-left:0px;border-bottom:1pt solid #FFFFFC">
 		<span  style="color:Black;position:relative;left:10px;top:0px;height:35px;font-weight:bold;font-size:18pt;position:absolute;">$las_config.getTitle()</span>
 		<span  style="color:Black;position:relative;left:12px;top:0px;height:35px;font-weight:bold;font-size:18pt;position:absolute;">$las_config.getTitle()</span>
 		<span  style="color:Black;position:relative;left:10px;top:2px;height:35px;font-weight:bold;font-size:18pt;position:absolute;">$las_config.getTitle()</span>
