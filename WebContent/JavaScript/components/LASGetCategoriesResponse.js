@@ -17,7 +17,9 @@ function LASGetCategoriesResponse(JSONObject) {
   this.getChildrenType = LASGetCategoriesResponse_getChildrenType;  //what kind of children does the category have (dataset, variable, or category)?
   this.getChildID =  LASGetCategoriesResponse_getChildID;  //the ID of the child
   this.getChildDatasetID =  LASGetCategoriesResponse_getChildDatasetID;  //the ID of the child
+  this.getDatasetName =  LASGetCategoriesResponse_getDatasetName;  //the ID of the child
   this.getChildType =  LASGetCategoriesResponse_getChildType;  //the type of the child
+  this.getChildByID =  LASGetCategoriesResponse_getChildByID;  //the type of the child
   this.getChildChildrenType = LASGetCategoriesResponse_getChildChildrenType;  //what kind of children (dataset, variable, or category)?
   this.getChildName = LASGetCategoriesResponse_getChildName;  //what is the name of this child category?
 }
@@ -61,6 +63,18 @@ function LASGetCategoriesResponse_getDatasetID() {
 	else
 		return "category";
 }
+/**
+ * Returns the string type of the root category.
+ * @return value if the categories object has properties.
+ * @type String or Boolean
+ */
+function LASGetCategoriesResponse_getDatasetName() {
+	if(this.getCategoryType() == "dataset")
+		return this.response.categories.category[0].dataset.name;
+	else
+		return "category";
+}
+
 /**
  * Returns Integar length of the category children.
  * @return value if this.response.categories[this.getCategoryType()] exists, else returns Boolean false
@@ -146,7 +160,6 @@ function LASGetCategoriesResponse_getChildDatasetID(i) {
   if(this.getChild(i).children_dsid) return this.getChild(i).children_dsid;
 }
 
-
 /**
  * Returns the ID of the child referenced by the i parameter
  * @param {integer} index of the child
@@ -156,3 +169,14 @@ function LASGetCategoriesResponse_getChildDatasetID(i) {
 function LASGetCategoriesResponse_getChildName(i) {
   if(this.getChild(i).ID) return this.getChild(i).name;
 }
+/**
+ * Returns the ID of the child referenced by the i parameter
+ * @param {integer} index of the child
+ * @return string id of child
+ * @type string
+ */
+function LASGetCategoriesResponse_getChildByID(ID) {
+  for(var i=0;i<this.getCategorySize();i++)
+  	if(this.getChildID(i)==ID)
+  		return this.getChild(i);
+}
