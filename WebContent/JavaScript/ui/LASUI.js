@@ -95,9 +95,9 @@ LASUI.prototype.initUI = function (anchorId)
 		this.state.operation.plot = this.params.plot;
 		this.state.view.plot = this.params.view;
 		//this.state.xybox = eval("("+unescape(this.params.bbox)+")");
-		
+
 		this.autoupdate = this.params.autoupdate;
-		if((this.state.dataset||this.params.catid)&&this.state.variable)
+		if((this.state.dataset!=""||this.params.catid!="")&&this.state.variable!="")
 			this.submitOnLoad=true;
 		else
 			this.submitOnLoad=false;
@@ -110,8 +110,7 @@ LASUI.prototype.initUI = function (anchorId)
 	this.toggleUIMask('none');
 	document.body.appendChild(this.UIMask);
 	this.firstload=true;
-
-
+	this.expired=false;
 	this.refs.operations.plot.DOMNode = document.getElementById("plotType");
 	this.refs.operations.download.DOMNode = document.getElementById("downloadType");
 	this.refs.options.plot.DOMNode = document.getElementById("plotOptions");
@@ -175,11 +174,11 @@ LASUI.prototype.initUI = function (anchorId)
 		req.open("GET", this.hrefs.getCategories.url);
 		req.send(null);
 	}
-	
+
 	if((this.state.dataset!=""||this.params.catid!="")&&this.state.variable!="") {
-		
+
 		if(this.params.catid)
-			var catid=this.params.catid;		
+			var catid=this.params.catid;
 		else
 			var catid=this.state.dataset;
 		if(!document.all)
@@ -197,20 +196,20 @@ LASUI.prototype.setInitialVariable = function(strJson) {
 	if(response.categories.status)
 	if(response.categories.status=="ok") {
 	var category = new LASGetCategoriesResponse(response);
-	
+
 	this.state.dataset = category.getDatasetID();
 	this.state.datasets[this.state.dataset] = category;
 	this.getGrid(this.state.dataset,this.state.variable);
-	this.getDataConstraints(this.state.dataset,this.state.variable);		
-	
+	this.getDataConstraints(this.state.dataset,this.state.variable);
+
 	var info = document.createElement("IMG");
 	info.onclick = this.getMetadata.LASBind(this);
 	info.src = "images/icon_info.gif";
 	var varlist = document.createElement("SELECT");
 	varlist.id="variables";
 	if(document.getElementById(this.anchors.breadcrumb)) {
-		while (document.getElementById(this.anchors.breadcrumb).firstChild) 
-			document.getElementById(this.anchors.breadcrumb).removeChild(document.getElementById(this.anchors.breadcrumb).firstChild);		
+		while (document.getElementById(this.anchors.breadcrumb).firstChild)
+			document.getElementById(this.anchors.breadcrumb).removeChild(document.getElementById(this.anchors.breadcrumb).firstChild);
 		document.getElementById(this.anchors.breadcrumb).appendChild(info);
 		document.getElementById(this.anchors.breadcrumb).appendChild(document.createTextNode(category.getDatasetName()));
 		document.getElementById(this.anchors.breadcrumb).appendChild(varlist);
@@ -432,10 +431,10 @@ LASUI.prototype.createVariableTreeNode = function (node, i) {
 	table.appendChild(tbody);
 	node.children[i].LINode.appendChild(table);
 
-	
+
 	if(this.state.variable==node.category.getChildID(i))
 		node.children[i].INPUTNode.checked=true;
-	
+
 	node.ULNode.appendChild(node.children[i].LINode);
 }
 /**
@@ -480,7 +479,7 @@ LASUI.prototype.onSetVariable = function() {
 		}
 		else
 			var categories = this.state.datasets[this.state.dataset].getDatasetName();
-		
+
 		var info = document.createElement("IMG");
 		info.onclick = this.getMetadata.LASBind(this);
 		info.src = "images/icon_info.gif";
@@ -489,9 +488,9 @@ LASUI.prototype.onSetVariable = function() {
 		var cats = document.createElement("TEXT");
 		cats.innerHTML= categories;
 		if(document.getElementById(this.anchors.breadcrumb)) {
-			while (document.getElementById(this.anchors.breadcrumb).firstChild) 
+			while (document.getElementById(this.anchors.breadcrumb).firstChild)
 			  document.getElementById(this.anchors.breadcrumb).removeChild(document.getElementById(this.anchors.breadcrumb).firstChild);
-		
+
 			document.getElementById(this.anchors.breadcrumb).appendChild(info);
 			document.getElementById(this.anchors.breadcrumb).appendChild(cats);
 			document.getElementById(this.anchors.breadcrumb).appendChild(varlist);
@@ -580,10 +579,10 @@ LASUI.prototype.setVariable = function (evt) {
 	var datasetID = dataset.category.getDatasetID();
 	var variableID = dataset.category.getChildID(i);
 	var variable = dataset.category.getChild(i);
-	
+
 	//start an array of selected variables for this datasetthis.state.datasets[this.state.dataset] if we havent already
 	this.state.datasets[datasetID] = dataset.category;
-		
+
 	//get all the other data for this dataset/variable combo
 	this.state.lastVariable = this.state.variable;
 	this.state.lastDataset = this.state.dataset;
@@ -775,7 +774,7 @@ LASUI.prototype.setOperation = function (evt) {
 			evt.srcElement.checked=true;
 
 	}
-	
+
 	this.state.lastVariable = this.state.variable;
 	this.state.lastDataset = this.state.dataset;
 	this.state.operation[type]=id;
@@ -799,7 +798,7 @@ LASUI.prototype.setOperation = function (evt) {
 	this.state.view.widgets = view;
 
 	this.updateConstraints();
-	
+
 	this.getOperations(this.state.dataset,this.state.variable,this.state.view.plot);
 	if(optiondef)
 		this.getOptions(optiondef, this.refs.options.plot.DOMNode,"plot",false);
@@ -1044,8 +1043,8 @@ LASUI.prototype.setProductTypeNode = function(type) {
 
 	if(type=="Download Data") {
 		this.refs.operations.download.SELECTNode = document.createElement("SELECT");
-		this.refs.operations.download.SELECTNode.style.position = "relative";
-		this.refs.operations.download.SELECTNode.style.top = "-3px";
+		//this.refs.operations.download.SELECTNode.style.position = "relative";
+		this.refs.operations.download.SELECTNode.style.marginTop = "2pt";
 		var format = document.createElement("option");
 		format.appendChild(document.createTextNode("Select format.."));
 		this.refs.operations.download.SELECTNode.appendChild(format);
@@ -1211,7 +1210,7 @@ LASUI.prototype.updateConstraints = function (view) {
 	if(this.autoupdate||this.submitOnLoad){
 			this.submitOnLoad =false;
 			this.makeRequest();
-	
+
 	}else
 		this.showUpdateLink();
 	this.updating = false;
@@ -1553,6 +1552,7 @@ LASUI.prototype.initTConstraint = function (mode,reset) {
 
 }
 LASUI.prototype.showUpdateLink = function (){
+	this.expired = true;
 	document.getElementById('update').style.color='orange';
 	document.getElementById('update').style.visibility='visible';
 	document.getElementById('plotOptionsButton').style.visibility='visible';
@@ -1565,7 +1565,16 @@ LASUI.prototype.showUpdateLink = function (){
 
 
 }
+LASUI.prototype.toggleAutoUpdate = function (e, toggle) {
 
+	this.autoupdate = toggle;
+
+	if(this.autoupdate&&this.expired)
+		this.makeRequest();
+	var e = e||event;/* get IE event ( not passed ) */
+    e.stopPropagation? e.stopPropagation() : e.cancelBubble = true;
+	return false;
+}
 LASUI.prototype.makeDownloadRequest = function (){
 
 }
@@ -1612,7 +1621,7 @@ LASUI.prototype.makeRequest = function (evt, type) {
 		var view = this.state.view[type];
 		//if(view=="") view = "d";
 		this.request.setProperty("ferret","view",view);
-		
+
 		this.request.removeRegion();
 
 		//add the variables
