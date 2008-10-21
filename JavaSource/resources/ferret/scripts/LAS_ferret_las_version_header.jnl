@@ -6,9 +6,9 @@
 ! the LAS version in the symbol ferret_las_version
 
 IF `($ferret_las_version"0|*>1") EQ 0` THEN \
-   DEFINE SYMBOL ferret_las_version = LAS 7.
+   DEFINE SYMBOL ferret_las_version = 7.
 
-DEFINE SYMBOL las_ferret_header_label = "($ferret_las_version)+/Ferret ($FERRET_VERSION)     NOAA/PMEL"
+DEFINE SYMBOL las_ferret_header_label = "LAS ($ferret_las_version)+/Ferret ($FERRET_VERSION)     NOAA/PMEL"
 
 LABEL/NOUSER `($ppl$xlen)/2`, `($ppl$ylen)+1.2`, 0, 0, 0.12, ($las_ferret_header_label)
 
