@@ -1,6 +1,14 @@
-! LAS_ferret_las_version_header.jnl
 ! Write whatever header we want onto a plot, across the top.
+! 
 
+! Overall header at the very top.
+! TODO: ACM 10/21/08 When we have this set up, pass in a label for
+! the LAS version in the symbol ferret_las_version
 
-! LABEL/NOUSER `($ppl$xlen)/2`, `($ppl$ylen)+1.2`, 0, 0, 0.12, "LAS 7.+/Ferret ($FERRET_VERSION)     NOAA/PMEL"
+IF `($ferret_las_version"0|*>1") EQ 0` THEN \
+   DEFINE SYMBOL ferret_las_version = LAS 7.
+
+DEFINE SYMBOL las_ferret_header_label = "($ferret_las_version)+/Ferret ($FERRET_VERSION)     NOAA/PMEL"
+
+LABEL/NOUSER `($ppl$xlen)/2`, `($ppl$ylen)+1.2`, 0, 0, 0.12, ($las_ferret_header_label)
 
