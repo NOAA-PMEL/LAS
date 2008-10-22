@@ -17,7 +17,19 @@
 
 DEFINE SYMBOL data_num = `($data_var),RETURN=dsetnum`
 DEFINE SYMBOL data_($num)_num = `($data_var),RETURN=dsetnum`
- 
+
+! HACK:
+! If there is a ferret_definition in the data variable (some analysis operation)
+! then replace data_var with that. Causes us to need fewer F-TDS operations
+
+LET attlist = ($data_var).attnames
+
+IF `IS_ELEMENT_OF_STR (attlist, "ferret_definition") GT 0 AND\
+    ($ferret_curvi_coord_lon"0|*>1")` THEN
+   LET data_var_definition = `($data_var).ferret_definition`
+   DEFINE SYMBOL data_var = data_var_definition
+ENDIF
+
 ! Be sure units and title are defined.
 ! If units are not defined, try to get units from the data variable.
 ! If the variable in the file has no units, leave data_units symbol undefined.
