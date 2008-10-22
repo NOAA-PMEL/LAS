@@ -18,6 +18,8 @@
 ! After this script is run, the value of the Ferret symbol $fer_last_error contains 
 ! an error string if an unexpected error was encountered.
 
+set mem/siz=100
+
 ! Save the dataset number of the current dataset
 SET DATA/SAVE
 
