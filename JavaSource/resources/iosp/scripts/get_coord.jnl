@@ -17,6 +17,8 @@
 ! After this script is run, the value of the Ferret symbol $fer_last_error contains 
 ! an error string if an unexpected error was encountered.
 
+set mem/siz=100
+
 ! Save the dataset number of the current dataset
 SET DATA/SAVE
 
@@ -28,6 +30,7 @@ SET DATA "($2)"
 LET lo_index_1 = $5"1"
 LET hi_index_1 = $6"1"
 LET stride_1 = $7"1"
+
 
 ! The axis name may be a pseudo-variable X,Y,Z,T (or I,J,K,L ?)
 ! If so then we cant use the syntax LET coords = x[gx=$3]
