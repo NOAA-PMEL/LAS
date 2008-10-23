@@ -131,15 +131,12 @@ IF ($data_x_var"0|*>1") THEN
    LET max_size = 10000  ! striding on in-situ data
 ENDIF
 
-sh sym native_curvilinear_xy
-
 ! region syms dont apply to native curv grid directly
 ! region syms also dont apply to insitu data (they are just on an abstract axis)
 
+LET indx_strd_used = 0
 IF `($native_curvilinear_xy"0") EQ 0 AND ($its_insitu"0") NE 1` THEN  
 
-
-LET indx_strd_used = 0
 IF `($xstride"1|1>0|*>0") OR ($no_native_strides_xy"0|*>1")` THEN
    LET xsize  `pvar,RETURN=isize`
    IF `xsize GT max_size` THEN
@@ -277,9 +274,25 @@ IF ($index_strides"0|*>1") THEN
    DEFINE SYMBOL ppvar = ($data_var)[d=($data_num),($index_strides)]
    LET anim_stridevar = ($ferret_plot_var_noregion)
    DEFINE SYMBOL ppvar = anim_stridevar[($region_xyz),($index_strides)]
+   IF `($native_curvilinear_xy"0") OR ($region_sample"0|*>1")` THEN
+      LET pvar = \
+      ($data_var)[d=($data_num),i=($clon_imin):($clon_imax),j=($clat_jmin):($clat_jmax),\
+      ($index_strides)]
 
+      IF ($region_z"0|*>1") THEN  LET pvar = \
+      ($data_var)[d=($data_num),i=($clon_imin):($clon_imax),j=($clat_jmin):($clat_jmax),\
+      ($region_z),($index_strides)]
+   ENDIF
 ELSE
    DEFINE SYMBOL ppvar = pvar
+   IF `($native_curvilinear_xy"0") OR ($region_sample"0|*>1")` THEN
+      LET pvar = \
+      ($data_var)[d=($data_num),i=($clon_imin):($clon_imax),j=($clat_jmin):($clat_jmax)]
+
+      IF ($region_z"0|*>1") THEN  LET pvar = \
+      ($data_var)[d=($data_num),i=($clon_imin):($clon_imax),j=($clat_jmin):($clat_jmax),\
+      ($region_z)]
+   ENDIF
 ENDIF
 
 IF ($native_curvilinear_xy"0") THEN DEFINE SYMBOL ppvar = pvar
