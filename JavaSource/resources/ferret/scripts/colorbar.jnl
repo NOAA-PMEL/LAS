@@ -58,7 +58,7 @@ IF  ($PPL$RANGE_LOW"0|*>1") THEN LET blank_var = IF the_var THEN ( ($PPL$RANGE_L
 DEFINE SYMBOL colorbar_quals \
   NOAXES/NOLABELS/LEVELS=($ferret_fill_levels)/PALETTE=($ferret_palette"rainbow|default>rainbow|*>*)
 IF ($ferret_curvi_quals"0|*>1") THEN \
-  DEFINE SYMBOL colorbar_quals = ($colorbar_quals)/($ferret_curvi_quals)
+  DEFINE SYMBOL colorbar_quals = ($colorbar_quals)($ferret_curvi_quals)
 
 
 SHADE/SET/($colorbar_quals) blank_var
