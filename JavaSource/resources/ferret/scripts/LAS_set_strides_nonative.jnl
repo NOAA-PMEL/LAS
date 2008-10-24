@@ -134,7 +134,6 @@ IF ($ferret_size"0|0.5>1|*>0")     THEN LET maxpix = 600  ! default
 IF ($ferret_size"0|0.8333>1|*>0")  THEN LET maxpix = 700  ! large
 
 IF `($ferret_google_plot"0|0|*>1")` THEN LET  maxpix = `2*maxpix`
-IF ($ferret_google_plot"0|*>1") THEN GO LAS_setup_strides_GE
 
 IF `($region_x_range"0|0|*>1")` THEN 
    LET xx = x[gx=($data_var)[d=($data_num)]]  
