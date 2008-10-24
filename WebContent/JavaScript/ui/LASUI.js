@@ -788,8 +788,6 @@ LASUI.prototype.setOperation = function (evt) {
 
 	}
 
-	this.state.lastVariable = this.state.variable;
-	this.state.lastDataset = this.state.dataset;
 	this.state.operation[type]=id;
 	this.refs.options[type].DOMNode.innerHTML="";
 
@@ -811,6 +809,8 @@ LASUI.prototype.setOperation = function (evt) {
 	this.state.view.widgets = view;
 
 	this.updateConstraints();
+	this.state.lastVariable = this.state.variable;
+	this.state.lastDataset = this.state.dataset;
 
 	this.getOperations(this.state.dataset,this.state.variable,this.state.view.plot);
 	if(optiondef)
@@ -1147,6 +1147,9 @@ LASUI.prototype.updateConstraints = function (view) {
 		if(this.state.grid.response.grid.ID!=this.state.lastgrid.response.grid.ID||(this.state.lastDataset!=this.state.dataset||this.state.lastVariable!=this.state.variable))
 			reset=true;
 	}
+	this.resetSelectionBox =false;
+	if(this.state.lastDataset!=this.state.dataset)
+		this.resetSelectionBox=true;
 	if(!this.initialized)
 		reset=true;
 
@@ -1247,7 +1250,7 @@ LASUI.prototype.initXYSelect = function (mode, reset) {
 					}
 				}
 
-		if (sel.x.min>grid.x.min&&sel.x.min<grid.x.max && this.firstload!=true) {
+		if (sel.x.min>grid.x.min&&sel.x.min<grid.x.max && this.firstload!=true && !this.resetSelectionBox) {
 			if(sel.x.min == sel.x.max&&mode!='y'&&mode!='point') {
 				if(this.state.xybox.width) {
 					if(sel.x.min-this.state.xybox.width/2 > grid.x.min)
