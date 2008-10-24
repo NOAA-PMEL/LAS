@@ -742,13 +742,24 @@ LASUI.prototype.setDownloadOperation = function (evt) {
 
 }
 LASUI.prototype.doDownload = function () {
+	if(!this.state.operation.download||this.refs.operations.download.SELECTNode.selectedIndex==0) {
+		alert("Please choose a file format to download.");
+		return;
+	}
 	
-	if(this.state.optiondefs.download != "") { 
-		this.toggleUIMask('');
-		this.refs.options.download.DOMNode.style.display="";
-		this.getOptions(this.state.optiondefs.download, "download", true);
-	} else
-		this.makeRequest({},"download");			
+	if(document.getElementById("OPTION_DOWNLOAD_"+this.state.operation.download).disabled) {
+		alert("The " + document.getElementById("OPTION_DOWNLOAD_"+this.state.operation.download).innerHTML + " download format is not compatible with the current plot view. Please choose another plot view, or another download format.");
+		return;
+	}
+	
+	
+		if(this.state.optiondefs.download != "") { 
+			this.toggleUIMask('');
+			this.refs.options.download.DOMNode.style.display="";
+			this.getOptions(this.state.optiondefs.download, "download", true);
+		} else
+			this.makeRequest({},"download");			
+	
 }
 
 /**
@@ -867,7 +878,7 @@ LASUI.prototype.setOperationNode = function (id, name) {
 	}
 	var option = document.getElementById("OPTION_DOWNLOAD_" + id);
 	if(option) {
-		option.disabled=false;
+		option.disabled="";
 	}
 }
 LASUI.prototype.doProductIconClick = function (evt) {
