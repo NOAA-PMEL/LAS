@@ -1,0 +1,103 @@
+! LAS_set_GE_placemarks.jnl
+
+! Set up for GE placemarks; called by 
+! list_grid. 
+
+! compute stride value for Google Earth placemarks, these values are 
+! different from the strides for memory management or plot size. 
+! The xycoord is set in LAS_setup_strides_GE.jnl
+
+GO LAS_setup_strides_GE
+
+LET x_range = 360   ! world coord range in x
+LET y_range = 180   ! world coord range in y
+
+CANCEL MODE long
+CANCEL MODE lat
+
+! First rectilinear case 
+IF `($native_curvilinear_xy"0|*>1") EQ 0` THEN
+
+  IF ($region_x_lo"0|*>1") THEN
+
+    LET x_pct = ($region_x_range)/x_range       ! selected range over global range
+
+    ! data's native resolution in x
+    DEFINE SYMBOL data_xcoord = `xbox[gx=($data_var),x=($region_x_lo)]`
+    DEFINE SYMBOL data_xcoord = `xbox[gx=($data_var),I=2]`
+
+    IF `($region_x_range) LT 180` THEN
+        DEFINE SYMBOL xstride_coord = `INT(x_pct*xycoord)` ! stride value in x
+    ELSE
+        DEFINE SYMBOL xstride_coord = `INT(1*xycoord)`     ! for range >= 180, use the same stride value
+    ENDIF
+
+    ! make sure xstride_coord is not less than the data's native resolution
+    IF `($xstride_coord) LT ($data_xcoord)` THEN \
+       DEFINE SYMBOL xstride_coord = `($data_xcoord)`
+  ENDIF
+
+  IF ($region_y_lo"0|*>1") THEN
+
+    LET y_pct = ($region_y_range)/y_range    ! selected range over global range
+            
+    ! data's native resolution in y
+    DEFINE SYMBOL data_ycoord = `ybox[gy=($data_var),y=($region_y_lo)]`
+    DEFINE SYMBOL data_ycoord = `ybox[gy=($data_var),J=2]`
+
+    DEFINE SYMBOL ystride_coord = `INT(y_pct*xycoord)`   ! stride value in y
+
+    ! make sure ystride_coord is not less than the data's native resolution
+    IF `($ystride_coord) LT ($data_ycoord)` THEN \
+        DEFINE SYMBOL ystride_coord = `($data_ycoord)`
+
+  ENDIF
+
+ELSE  ! curvilinear
+
+! For native curvilinear plots the strides are index strides.
+! compute stride value for Google Earth placemarks, these values are different 
+! from the strides for plot. The xycoord was set in LAS_setup_strides_GE.jnl
+
+  IF ($region_x_lo"0|*>1") THEN
+			! world coord range in x
+    LET x_pct = ($region_x_range)/x_range       ! selected range over global range
+
+    ! data's  nominal resolution in x
+    DEFINE SYMBOL data_xcoord = `($region_x_range)/(($clon_imax) - ($clon_imin))`
+
+    IF `($region_x_range) LT 180` THEN
+        DEFINE SYMBOL xstride_coord = `INT(x_pct*xycoord/($data_xcoord))` ! stride value in x
+    ELSE
+        DEFINE SYMBOL xstride_coord = `INT(1*xycoord/($data_xcoord))`     ! for range >= 180, use the same stride value
+    ENDIF
+
+    ! make sure index stride xstride_coord is at least 1
+    IF `($xstride_coord) LT 1` THEN DEFINE SYMBOL xstride_coord = 1
+
+  ENDIF
+
+  IF ($region_y_lo"0|*>1") THEN
+
+    LET y_pct = ($region_y_range)/y_range       ! selected range over global range
+
+    ! data's  nominal resolution in y
+    DEFINE SYMBOL data_ycoord = `($region_y_range)/(($clat_jmax) - ($clat_jmin))`
+
+    DEFINE SYMBOL ystride_coord = `INT(y_pct*xycoord/($data_ycoord))`   ! stride value in y
+
+    ! make sure index stride ystride_coord is at least 1
+    IF `($ystride_coord) LT 1` THEN DEFINE SYMBOL ystride_coord = 1
+
+  ENDIF
+
+ENDIF
+
+! Cleanup
+SET MODE/LAST long
+SET MODE/LAST lat
+
+EXIT
+
+! End of $RCSfile ------------LAS_set_GE_placemarks.jnl--------------------------
+
