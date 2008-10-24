@@ -12,10 +12,6 @@ IF ($ferret_stride_quality_factor"0|0.0>1|*>0") THEN LET maxpix = 700  ! best(sl
 
 !limit number of points (for place mark operation)
 IF `STRINDEX( "($operation_ID)", "Grid" ) NE 0` THEN
-!  LET maxpix = 10  ! default 
-!  IF ($ferret_stride_quality_factor"0|1.0>1|*>0") THEN LET maxpix = 10 ! draft(fast)
-!  IF ($ferret_stride_quality_factor"0|0.5>1|*>0") THEN LET maxpix = 20  ! medium
-!  IF ($ferret_stride_quality_factor"0|0.0>1|*>0") THEN LET maxpix = 30  ! best(slow)
 
   !xycoord: stride value for placemarks, i.e., 1 placemark per xycoord degrees
   LET xycoord = 10  ! default

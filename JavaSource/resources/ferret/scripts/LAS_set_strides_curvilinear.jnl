@@ -33,8 +33,6 @@ IF `($ferret_google_plot"0|*>1")` THEN
 !LET  maxpix = `2*maxpix`
 ENDIF
 
-IF `($ferret_google_plot"0|*>1")` THEN GO LAS_setup_strides_GE
-
 ! Step 1  ---------------------------------------------------------------------
 ! Determine striding based on the memory allocation
 
@@ -361,15 +359,6 @@ IF `($xstride"0|1>0|*>1") + ($ystride"0|1>0|*>1") + ($zstride"0|1>0|*>1") + ($ts
       LET need_comma = 1
    ENDIF
 
-ENDIF
-
-! Set this for list_grid
-
-IF ($ferret_google_plot"0|*>1") THEN
-   IF `STRINDEX( "($operation_ID)", "Grid" ) NE 0` THEN
-      DEFINE SYMBOL xstride_coord = `360*($xstride"1")/nx_orig`
-      DEFINE SYMBOL ystride_coord = `INT(180*($ystride"1")/ny_orig)`
-   ENDIF
 ENDIF
 
 ! End of $RCSfile ------------LAS_set_strides_curvilinear.jnl--------------------------
