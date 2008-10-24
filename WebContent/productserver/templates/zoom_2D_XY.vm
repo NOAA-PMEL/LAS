@@ -67,7 +67,7 @@ function evalMyRequest (request) {
               var bindArgs = {                           url: request,
                        mimetype: "text/plain",
                        preventCache:true,
-                       error: function(type,error) {alert('Zoom Error: ' +error.type + ' ' + error.message);},
+                       error: function(type,error) {submitXML()},
                        load: function(type,data,event) {eval2(data);}
                 };
                var request = dojo.io.bind(bindArgs);
