@@ -159,8 +159,9 @@ font-weight: bold;
 }
 .LASConstraintsPane {
 	width:225px;
-	height:600px;
-	overflow:auto;
+	overflow-x:auto;
+	overflow-y:hide;
+	
 }
 .LASTitleTextNode {
 	font-family:arial;

@@ -1970,11 +1970,13 @@ LASUI.prototype.setOption = function (evt) {
 
 }
 LASUI.prototype.setChangedOptions = function (type) {
-	//for(var type in this.state.newproperties)
-		for(var id in this.state.newproperties[type])
-			this.state.properties[type][id]=this.state.newproperties[type][id];
+	var ct = 0;	
+	for(var id in this.state.newproperties[type]) {
+		this.state.properties[type][id]=this.state.newproperties[type][id];
+		ct++;	
+	}
 	
-	if(!this.updating&&type=="plot"&&this.state.newproperties.plot.length>0)
+	if(!this.updating&&type=="plot"&&ct>0)
 		if(this.autoupdate)
 			this.makeRequest();
 		else
