@@ -177,8 +177,8 @@
 				</div>
 			</div>
 			<div id="message_bar"><img id="wait" style="visibility:hidden;float:right;margin:2pt;padding:2pt;" src="JavaScript/components/mozilla_blu.gif"><span id="breadcrumb"></span></div>
-			<table height="600px" width="1024px"><tbody><tr><td valign="top">
-				<div id="constraints" class="LASConstraintsPane">
+			<table height="600px" width="1024px"><tbody><tr><td valign="top" border=1>
+				<div id="constraints" class="LASConstraintsPane" style="visibility:hidden;">
 					<div id="MapWidget" style="border:1px solid black;" ><div style="position:absolute;z-index:4;text-align:center"><!--<img src="images/north-mini.png" onmousedown="LAS.refs.XYSelect.panPlot(0,10);"><br>--><img src="images/west-mini.png" onmousedown="LAS.refs.XYSelect.panPlot(-20,0);"><img src="images/east-mini.png" onmousedown="LAS.refs.XYSelect.panPlot(20,0);"><!--<br><img src="images/south-mini.png" onmousedown="LAS.refs.XYSelect.panPlot(0,-10);"><br><img src="images/zoom-plus-mini.png" onclick="LAS.refs.XYSelect.zoom(2);"><br><img src="images/zoom-minus-mini.png"  onclick="LAS.refs.XYSelect.zoom(-1)">--></div></div>
 						<strong>
 						Latitude range <input size=3  id="input_minY" type="text" value="-90.0">&nbsp;:&nbsp;<input id="input_maxY" size=3 type="text" value="90.0"><br>
@@ -187,7 +187,7 @@
 					
 					<div id="plotType"></div>
 					<div id="Date"></div>
-						<div id="Depth"></div><br>
+					<div id="Depth"></div>
 					<div id="analysisWrapper"  class="LASAnalysis">							
 						<a class="LASLink" value=false onclick="if(!LAS.refs.analysis.enabled){LAS.showAnalysis();this.innerHTML='Remove analysis';}else{LAS.hideAnalysis();this.innerHTML='Apply analysis';}">Apply analysis</a>
 						<div id="analysis" style="display:none;">
@@ -214,7 +214,12 @@
 					<div id="DataConstraints"></div>					
 				</div></td><td>
 				<div id="wait_msg">Please wait while the plot loads...</div>
-				<iframe width="100%" height="100%" src="start.html" id="output" name="output" onload="LAS.onPlotLoad();" frameborder=0></iframe>			
+				<iframe width="100%" height="100%" 
+					#if($request.getParameter('catid')) 
+					#else
+						src="start.html" 
+					#end 
+					id="output" name="output" onload="LAS.onPlotLoad();" frameborder=0></iframe>			
 			</td></tr></tbody></table>
 			#parse( "/productserver/templates/V7UIFooter.vm") 
 		</div>
