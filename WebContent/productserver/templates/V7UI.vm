@@ -129,7 +129,7 @@
 			height: 100%;
 		}
 		#constraints {
-			height:600px;
+			height:650px;
 			width: 224px;
 			border: 1px solid #5c731e;
 			float:left;
@@ -137,18 +137,18 @@
 		#wrapper {
 			overflow: hidden;
 			display:block;
-			height:600px;
+			height:650px;
 			width:1024px;
 		}
 		#output {
 			text-align:left;
 			width: 800px;
-			height:610px;
+			height:660px;
 		}
 		#wait_msg {
 			text-align:left;
 			width: 800px;
-			height:600px;
+			height:660px;
 		}
 		#message_bar {
 			height:20pt;
