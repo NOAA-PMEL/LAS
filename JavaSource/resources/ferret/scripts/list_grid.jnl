@@ -18,23 +18,36 @@
 ! DEFINE SYMBOLs associated with the regiogn and data and perform any
 ! initialization needed for this dataset.
 
-!define this symbol so that LAS_setup_strides_GE will execute
+!define this symbol so that Google earth settings will be made.
 DEFINE SYMBOL ferret_google_plot = 1
 
 GO LAS_initialize_region 0
 GO LAS_initialize_data 0
-
-! Here is the variable we will list out, with the region specified.
-DEFINE SYMBOL ferret_list_var = ($ferret_plot_var)
-    IF ($native_curvilinear_xy"0|*>1") THEN DEFINE SYMBOL ferret_list_var ($ferret_plot_base_var)
-
 ! Check for errors (They often occur during dataset initialization.)
 
 IF ($error_status"0|*>1") THEN
   MESSAGE/ERROR **ERROR ($error_string)
   EXIT/PROGRAM
 ENDIF
- 
+
+! Here is the variable we will list out, with the region specified.
+DEFINE SYMBOL ferret_list_var = ($ferret_plot_var)
+    IF ($native_curvilinear_xy"0|*>1") THEN DEFINE SYMBOL ferret_list_var ($ferret_plot_base_var)
+
+! Set up the resolution of the placemarks
+GO LAS_set_GE_placemarks
+
+IF ($xstride_coord"0|*>1") THEN 
+  DEFINE SYMBOL xstride_coord = `MAX(1, INT(0.5 + ($xstride_coord)) )`
+ELSE 
+  DEFINE SYMBOL xstride_coord = 1
+ENDIF
+IF ($ystride_coord"0|*>1") THEN 
+  DEFINE SYMBOL ystride_coord = `MAX(1, INT(0.5 + ($ystride_coord)) )`
+ELSE 
+  DEFINE SYMBOL ystride_coord = 1
+ENDIF
+
 ! Decode format argument
 ! ACM NOTE: The slashes mess up parsing in the DEFINE SYMBOL if we do them all at once.
 ! ferret_format may be asc, txt, or cdf
@@ -51,42 +64,19 @@ IF ($native_curvilinear_xy"0") THEN
    LET lons = ($ferret_curvi_coord_lon)[d=($data_num)]  
    LET lats = ($ferret_curvi_coord_lat)[d=($data_num)]
    LET llon = \
-     lons[i=($clon_imin):($clon_imax),J=($clat_jmin):($clat_jmax)]
+     lons[i=($clon_imin):($clon_imax):($xstride_coord),J=($clat_jmin):($clat_jmax):($ystride_coord)]
    LET llat = \
-     lats[i=($clon_imin):($clon_imax),J=($clat_jmin):($clat_jmax)]
+     lats[i=($clon_imin):($clon_imax):($xstride_coord),J=($clat_jmin):($clat_jmax):($ystride_coord)]
 ELSE
    
    LET lons = X[GX=($ferret_list_var)] + 0*Y[GY=($ferret_list_var)]
-   IF ($xstride_coord"0|*>1) THEN 
-      LET llon = lons[X=($region_x_lo):($region_x_hi):($xstride_coord),Y=($region_y_lo):($region_y_hi):($ystride_coord)]
-
-!      LET numpts = `llon[Y=($region_y_lo),x=@ngd]`
-!      IF `numpts LE 5` THEN 
-!         REPEAT/RANGE=2:5 (DEFINE SYMBOL xstride_coord = `INT(($xstride_coord)/2)`;\
-!         LET llon = lons[X=($region_x_lo):($region_x_hi):($xstride_coord),Y=($region_y_lo):($region_y_hi)];\
-!         LET numpts = `llon[Y=($region_y_lo),x=@ngd]`;\
-!         IF `numpts GE 5` THEN EXIT/LOOP)
-!      ENDIF
-
-   ENDIF
+   LET llon = lons[X=($region_x_lo):($region_x_hi):($xstride_coord),Y=($region_y_lo):($region_y_hi):($ystride_coord)]
 
    LET lats = 0*X[GX=($ferret_list_var)] + Y[GY=($ferret_list_var)]
-   IF ($ystride_coord"0|*>1) THEN   
-      LET llat = lats[X=($region_x_lo):($region_x_hi):($xstride_coord),Y=($region_y_lo):($region_y_hi):($ystride_coord)]
-   
-!      LET numpts = `llat[X=($region_x_lo),y=@ngd]`
-!      IF `numpts LE 5` THEN 
-!         REPEAT/RANGE=2:5 (DEFINE SYMBOL ystride_coord = `INT(($ystride_coord)/2)`;\
-!         LET llat = lats[X=($region_x_lo):($region_x_hi),Y=($region_y_lo):($region_y_hi):($ystride_coord)];\
-!         LET numpts = `llat[X=($region_x_lo),y=@ngd]`;\
-!         IF `numpts GE 5` THEN EXIT/LOOP)
-!      ENDIF
-
-   ENDIF
-   
-   
-   IF ($xstride_coord"0|*>1) THEN DEFINE SYMBOL do_xstride_coord = :($xstride_coord)
-   IF ($ystride_coord"0|*>1) THEN DEFINE SYMBOL do_ystride_coord = :($ystride_coord)
+   LET llat = lats[X=($region_x_lo):($region_x_hi):($xstride_coord),Y=($region_y_lo):($region_y_hi):($ystride_coord)]
+    
+   DEFINE SYMBOL do_xstride_coord = :($xstride_coord)
+   DEFINE SYMBOL do_ystride_coord = :($ystride_coord)
    LET llon = lons[X=($region_x_lo):($region_x_hi)($do_xstride_coord),Y=($region_y_lo):($region_y_hi)($do_ystride_coord)]
    LET llat = lats[X=($region_x_lo):($region_x_hi)($do_xstride_coord),Y=($region_y_lo):($region_y_hi)($do_ystride_coord)]
 ENDIF  ! native_curvi_xy
@@ -95,57 +85,53 @@ ENDIF  ! native_curvi_xy
 
 IF ($data_0_intervals"|xy>1|*>0") THEN
 
-  IF `($xstride_coord"0|*>1) EQ 0` THEN
-    DEFINE SYMBOL tmp = ($data_var)[d=($data_num),X=($region_x_lo):($region_x_hi),Y=($region_y_lo):($region_y_hi)]
-  ELSE
-    DEFINE SYMBOL tmp = ($data_var)[d=($data_num),X=($region_x_lo):($region_x_hi):($xstride_coord),Y=($region_y_lo):($region_y_hi):($ystride_coord)]
-  ENDIF
+  DEFINE SYMBOL tmp = ($data_var)[d=($data_num),\
+   X=($region_x_lo):($region_x_hi):($xstride_coord),Y=($region_y_lo):($region_y_hi):($ystride_coord)]
   IF ($native_curvilinear_xy"0") THEN \
-    DEFINE SYMBOL tmp = ($data_var)[d=($data_num),i=($clon_imin):($clon_imax),j=($clat_jmin):($clat_jmax)]
+    DEFINE SYMBOL tmp = ($data_var)[d=($data_num),\
+    i=($clon_imin):($clon_imax):($xstride_coord,j=($clat_jmin):($clat_jmax):($ystride_coord)]
 
   LET xyvar = ($tmp) 
   LET mask =  IF xyvar GT -9000 THEN 1
 ENDIF
 
 IF ($data_0_intervals"|xyt>1|*>0") THEN
-!  LET xytvar = ($ferret_list_var)
-!  LET xytvar = ($ferret_list_var)[X=($region_x_lo):($region_x_hi):2]
-  IF `($xstride_coord"0|*>1) EQ 0` THEN
-    DEFINE SYMBOL tmp = ($data_var)[d=($data_num),X=($region_x_lo):($region_x_hi),Y=($region_y_lo):($region_y_hi),T="($region_t_lo)":"($region_t_hi)"]
-  ELSE
-    DEFINE SYMBOL tmp = ($data_var)[d=($data_num),X=($region_x_lo):($region_x_hi):($xstride_coord),Y=($region_y_lo):($region_y_hi):($ystride_coord),T="($region_t_lo)":"($region_t_hi)"]
-  ENDIF
+
+  DEFINE SYMBOL tmp = ($data_var)[d=($data_num),\
+    X=($region_x_lo):($region_x_hi):($xstride_coord),Y=($region_y_lo):($region_y_hi):($ystride_coord),\
+    T="($region_t_lo)":"($region_t_hi)"]
   
   IF ($native_curvilinear_xy"0") THEN \
-    DEFINE SYMBOL tmp = ($data_var)[d=($data_num),i=($clon_imin):($clon_imax),j=($clat_jmin):($clat_jmax),T="($region_t_lo)":"($region_t_hi)"]
+    DEFINE SYMBOL tmp = ($data_var)[d=($data_num),\
+       i=($clon_imin):($clon_imax):($xstride_coord),j=($clat_jmin):($clat_jmax):($ystride_coord),\
+       T="($region_t_lo)":"($region_t_hi)"]
 
   LET xytvar = ($tmp)
   LET mask =  IF xytvar[T=@NGD] GT 0 THEN 1
 ENDIF
 
 IF ($data_0_intervals"|xyz>1|*>0") THEN
-!  LET xyzvar = ($ferret_list_var)
-  IF `($xstride_coord"0|*>1) EQ 0` THEN
-    DEFINE SYMBOL tmp = ($data_var)[d=($data_num),X=($region_x_lo):($region_x_hi),Y=($region_y_lo):($region_y_hi),Z=($region_z_lo):($region_z_hi)]
-  ELSE
-    DEFINE SYMBOL tmp = ($data_var)[d=($data_num),X=($region_x_lo):($region_x_hi):($xstride_coord),Y=($region_y_lo):($region_y_hi):($ystride_coord),Z=($region_z_lo):($region_z_hi)]
-  ENDIF
+  DEFINE SYMBOL tmp = ($data_var)[d=($data_num),\
+  X=($region_x_lo):($region_x_hi):($xstride_coord),Y=($region_y_lo):($region_y_hi):($ystride_coord),\
+  Z=($region_z_lo):($region_z_hi)]
+
   IF ($native_curvilinear_xy"0") THEN \
-    DEFINE SYMBOL tmp = ($data_var)[d=($data_num),i=($clon_imin):($clon_imax),j=($clat_jmin):($clat_jmax),Z=($region_z_lo):($region_z_hi)]
+    DEFINE SYMBOL tmp = ($data_var)[d=($data_num),\
+    i=($clon_imin):($clon_imax):($xstride_coord),j=($clat_jmin):($clat_jmax):($ystride_coord),\
+    Z=($region_z_lo):($region_z_hi)]
 
   LET xyzvar = ($tmp)
   LET mask =  IF xyzvar[Z=@NGD] GT 0 THEN 1
 ENDIF
 
 IF ($data_0_intervals"|xyzt>1|*>0") THEN
-!  LET xyzvar = ($ferret_list_var)
-  IF `($xstride_coord"0|*>1) EQ 0` THEN
-      DEFINE SYMBOL tmp = ($data_var)[d=($data_num),X=($region_x_lo):($region_x_hi),Y=($region_y_lo):($region_y_hi),Z=($region_z_lo):($region_z_hi),T="($region_t_lo)":"($region_t_hi)"]
-  ELSE
-      DEFINE SYMBOL tmp = ($data_var)[d=($data_num),X=($region_x_lo):($region_x_hi):($xstride_coord),Y=($region_y_lo):($region_y_hi):($ystride_coord),Z=($region_z_lo):($region_z_hi),T="($region_t_lo)":"($region_t_hi)"]
-  ENDIF
+  DEFINE SYMBOL tmp = ($data_var)[d=($data_num),\
+  X=($region_x_lo):($region_x_hi):($xstride_coord),Y=($region_y_lo):($region_y_hi):($ystride_coord),\
+  Z=($region_z_lo):($region_z_hi),T="($region_t_lo)":"($region_t_hi)"]
   IF ($native_curvilinear_xy"0") THEN \
-    DEFINE SYMBOL tmp = ($data_var)[d=($data_num),i=($clon_imin):($clon_imax),j=($clat_jmin):($clat_jmax),Z=($region_z_lo):($region_z_hi),T="($region_t_lo)":"($region_t_hi)"]
+    DEFINE SYMBOL tmp = ($data_var)[d=($data_num),\
+    i=($clon_imin):($clon_imax):($xstride_coord),j=($clat_jmin):($clat_jmax):($ystride_coord),\
+    Z=($region_z_lo):($region_z_hi),T="($region_t_lo)":"($region_t_hi)"]
   LET xyztvar = ($tmp)
   LET mask =  IF xyztvar[Z=@NGD,T=@NGD] GT 0 THEN 1
 ENDIF
@@ -154,7 +140,6 @@ LET llon_list = XSEQUENCE(llon*mask)
 LET llat_list = XSEQUENCE(llat*mask)
 
 LET ngood = llon_list[x=@ngd]
-
 
 !==================================================
 ! output info about the LAS request and the dataset
@@ -549,3 +534,4 @@ list/norowhead/nohead/format=(A15)/FILE/append f
 
     LIST/I=1/NOHEADER/NOROWHEADER/CLOBBER/FORMAT=(f7.2, f7.2)/FILE  COMPRESSI(llon_list), COMPRESSI(llat_list)
     LIST/I=2:`ngood`/NOHEADER/NOROWHEADER/APPEND/FORMAT=(f7.2, f7.2)/FILE  COMPRESSI(llon_list), COMPRESSI(llat_list)
+
