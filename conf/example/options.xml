@@ -359,9 +359,11 @@ Choices are:
 &lt;ul>&lt;li>&lt;b>(0,100,10)&lt;/b>  Bands of color starting at 0, ending at 100, with an interval of 10
 &lt;li>&lt;b>25&lt;/b> Draw 25 lines 
 &lt;li>&lt;b>10C&lt;/b> Draw 10 lines centered at 0 
+&lt;li>&lt;b>(-inf)(-10,10,0.25)(inf)&lt;/b> Bands of color between -10 and 10 with an additional color at each end of the spectrum representing all values below (-inf) or above (inf)
 &lt;li>&lt;b>(-100)(-10,10,0.25)(100)&lt;/b> Bands of color between -10 and 10 with a additional bands for all outlying values up to +/- 100.
 &lt;/ul> 
-Detailed info is available in the Ferret User\'s Guide.
+Detailed info is available in the Ferret User\'s Guide., see Levels at  
+http://ferret.pmel.noaa.gov/Ferret/documentation/users-guide/customizing-plots/CONTOURING#_VPINDEXENTRY_853
       </help>
       <title>Color fill levels</title>
       <textfield name="fill_levels"/>
@@ -375,8 +377,9 @@ Detailed info is available in the Ferret User\'s Guide.
 &lt;li>&lt;b>25&lt;/b> Draw 25 lines 
 &lt;li>&lt;b>10C&lt;/b> Draw 10 lines centered at 0 
 &lt;/ul> 
-Detailed info is available in the Ferret User\'s Guide.
-      </help>
+Detailed info is available in the Ferret User\'s Guide., see Levels at  
+http://ferret.pmel.noaa.gov/Ferret/documentation/users-guide/customizing-plots/CONTOURING#_VPINDEXENTRY_853
+</help>
       <title>Contour levels</title>
       <textfield name="contour_levels"/>
     </option>
@@ -471,7 +474,8 @@ creates two plots in one column.
 &lt;li>&lt;b>25&lt;/b> Draw 25 lines 
 &lt;li>&lt;b>10C&lt;/b> Draw 10 lines centered at 0 
 &lt;/ul> 
-Detailed info is available in the Ferret User\'s Guide.
+Detailed info is available in the Ferret User\'s Guide., see Levels at  
+http://ferret.pmel.noaa.gov/Ferret/documentation/users-guide/customizing-plots/CONTOURING#_VPINDEXENTRY_853
       </help>
       <title>Contour levels (2nd variable) </title>
       <textfield name="contour_levels2"/>
@@ -485,7 +489,8 @@ Detailed info is available in the Ferret User\'s Guide.
 &lt;li>&lt;b>25&lt;/b> Draw 25 lines 
 &lt;li>&lt;b>10C&lt;/b> Draw 10 lines centered at 0 
 &lt;/ul> 
-Detailed info is available in the Ferret User\'s Guide.
+Detailed info is available in the Ferret User\'s Guide., see Levels at  
+http://ferret.pmel.noaa.gov/Ferret/documentation/users-guide/customizing-plots/CONTOURING#_VPINDEXENTRY_853
       </help>
       <title>Color fill levels (2nd variable)</title>
       <textfield name="fill_levels2"/>
