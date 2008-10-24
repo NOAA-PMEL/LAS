@@ -1289,7 +1289,8 @@ MapWidget.prototype.updateSelectionGridYMin = function (v) {
 	this.displayBox(true);
 	this.displayCentralBox(true);
 	
-	this.ondraw(this);
+	if (this.ondraw) this.ondraw(this);
+	if (this.onafterdraw) this.onafterdraw(this);	
 
 }
 
@@ -1327,7 +1328,9 @@ MapWidget.prototype.updateSelectionGridYMax = function (v) {
 	this.displayBox(true);
 	this.displayCentralBox(true);
 	
-	this.ondraw(this);
+	if (this.ondraw) this.ondraw(this);
+	if (this.onafterdraw) this.onafterdraw(this);	
+
 }
 
 //update the selection region max x grid and pixel coordinates for a given grid coordinate v
@@ -1368,7 +1371,8 @@ MapWidget.prototype.updateSelectionGridXMax = function (v) {
 	this.displayBox(true);
 	this.displayCentralBox(true);
 	
-	this.ondraw(this);
+	if (this.ondraw) this.ondraw(this);
+	if (this.onafterdraw) this.onafterdraw(this);	
 }
 MapWidget.prototype.updateSelectionGridXMin = function (v) {
 	this.X0 = null;

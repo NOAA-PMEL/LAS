@@ -36,6 +36,8 @@ function LASUI () {
 		"datasets" : {},
 		"operation" : {"plot" :null,"download":null,"external":null},
 		"properties" : {"plot" :[],"download":[],"external":[]},
+		"optiondefs" : {"plot" : "", "download" : "", "external" : ""},
+		"newproperties" : {"plot" :[],"download":[],"external":[]},
 		"view" :  {"plot" :null,"download":null,"external":null,"widgets":null},
 		"embed" : true,
 		"xybox" : {},
@@ -467,7 +469,7 @@ LASUI.prototype.getCategory = function (parentNode, i) {
 		//parentNode.children[i].ULNode.style.display="none";
 }
 LASUI.prototype.onSetVariable = function() {
-		//document.getElementById('output').style.visibility="hidden";
+		document.getElementById('constraints').style.visibility="visible";
 		if(document.getElementById('categories'))
 			document.getElementById('categories').style.display='none';
 		this.toggleUIMask('none');
@@ -729,26 +731,26 @@ LASUI.prototype.setDownloadOperation = function (evt) {
 	var optiondef = args[2];
 
 	this.state.operation.download=id;
-	this.refs.options.download.DOMNode.innerHTML="";
-
+	this.state.optiondefs.download =optiondef;
+	
 	var view = args[2];
 	var optiondef = args[3];
 	this.state.view.download = this.state.view.plot;//just use the plot for the sprint
-	//this.updateConstraints(view);
 
-	if(optiondef) {
-		var cancel = document.createElement("INPUT");
-		cancel.type = "submit";
-		cancel.value=	"Close";
-		cancel.className = "LASSubmitInputNode";
-		cancel.onclick = this.genericHandler.LASBind(this,"this.refs.options.download.DOMNode.style.display='none';this.toggleUIMask('none');");
-		while(this.refs.options.download.DOMNode.firstChild)
-			this.refs.options.download.DOMNode.removeChild(this.refs.options.download.DOMNode.firstChild);
-		this.refs.options.download.DOMNode.appendChild(cancel);
-		this.getOptions(optiondef, this.refs.options.download.DOMNode,"download");
-	}
+	
+	
 
 }
+LASUI.prototype.doDownload = function () {
+	
+	if(this.state.optiondefs.download != "") { 
+		this.toggleUIMask('');
+		this.refs.options.download.DOMNode.style.display="";
+		this.getOptions(this.state.optiondefs.download, "download", true);
+	} else
+		this.makeRequest({},"download");			
+}
+
 /**
  *	Event handler to set the operation
  *	@param {object} evt The event object
@@ -801,7 +803,7 @@ LASUI.prototype.setOperation = function (evt) {
 
 	this.getOperations(this.state.dataset,this.state.variable,this.state.view.plot);
 	if(optiondef)
-		this.getOptions(optiondef, this.refs.options.plot.DOMNode,"plot",false);
+		this.getOptions(optiondef, "plot",false);
 	}
 
 LASUI.prototype.genericHandler = function (evt) {
@@ -817,11 +819,11 @@ LASUI.prototype.setOperationList = function (strJson) {
 	var response = eval("(" + strJson + ")");
 	var setDefault = true;
 	this.state.operations = new LASGetOperationsResponse(response);
-	if(!this.refs.operations.external.DIVNode) {
-		this.refs.operations.external.DIVNode= document.createElement('DIV');
-		this.refs.operations.external.DIVNode.className='LASPopupDIVNode';
-		this.refs.operations.external.DIVNode.style.display="none";
-	}
+	//if(!this.refs.options.external.DOMNode) {
+	//	this.refs.options.external.DOMNode= document.createElement('DIV');
+	//	this.refs.options.external.DOMNode.className='LASPopupDIVNode';
+	//	this.refs.options.external.DOMNode.style.display="none";
+	//}
 	//disable all nodes first
 	for(var row=0;row<document.getElementById("productButtons").childNodes.length;row++)
 		for(var cell=0;cell<document.getElementById("productButtons").childNodes[row].childNodes.length;cell++)
@@ -832,7 +834,7 @@ LASUI.prototype.setOperationList = function (strJson) {
 	for(var o in this.refs.operations.download.children)
 		this.refs.operations.download.children[o].OPTIONNode.disabled=true;
 
-	document.body.appendChild(this.refs.operations.external.DIVNode);
+	//document.body.appendChild(this.refs.options.external.DOMNode);
 	var setDefaultVis = true;
 	if(!this.state.operations.response.operations.error)
 		for(var i=0;i<this.state.operations.getOperationCount();i++) {
@@ -875,43 +877,17 @@ LASUI.prototype.doProductIconClick = function (evt) {
 	this.state.operation.external = id;
 	this.state.view.external = this.state.view.plot;
 	this.toggleUIMask('');
-	while(this.refs.operations.external.DIVNode.firstChild)
-		this.refs.operations.external.DIVNode.removeChild(this.refs.operations.external.DIVNode.firstChild);
 
-	var submit = document.createElement("INPUT");
-	var cancel = document.createElement("INPUT");
-	submit.type = "submit";
-	submit.value = "Submit";
-	submit.className = "LASSubmitInputNode";
-	submit.onclick = this.genericHandler.LASBind(this, "this.refs.operations.external.DIVNode.style.display='none'; this.makeRequest({},'external');this.toggleUIMask('none')");
-	cancel.type = "submit";
-	cancel.value="Close";
-	cancel.className = "LASSubmitInputNode";
-	cancel.onclick = this.genericHandler.LASBind(this, "this.refs.operations.external.DIVNode.style.display='none';this.toggleUIMask('none')");
-
-	this.refs.operations.external.DIVNode.appendChild(submit);
-	this.refs.operations.external.DIVNode.appendChild(cancel);
 	if(this.state.operations.getOperationByID(id))
 		if(this.state.operations.getOperationByID(id).optiondef) {
-			this.getOptions(this.state.operations.getOperationByID(id).optiondef.IDREF, this.refs.operations.external.DIVNode,"external");
-			this.refs.operations.external.DIVNode.style.display="";
+			this.getOptions(this.state.operations.getOperationByID(id).optiondef.IDREF, "external", true);
+			this.refs.options.external.DOMNode.style.display="";
 		} else {
-			this.refs.operations.external.DIVNode.style.display='none';
+			this.refs.options.external.DOMNode.style.display='none';
 			this.toggleUIMask('none');
 			this.makeRequest({},'external');
 			return;
 		}
-	/*try {
-	if(!this.refs.options.external.options.response.options.status == "error") {
-		this.toggleUIMask('none');
-		this.makeRequest({},'external');
-	} else
-		this.refs.operations.external.DIVNode.style.display="";
-	} catch (e)
-		{
-		this.toggleUIMask('none');
-		this.makeRequest({},'external');
-	}*/
 }
 /**
  * Method to query the server for the available grids
@@ -1020,7 +996,7 @@ LASUI.prototype.setDefaultProductMenu = function () {
 				if(this.state.operation.download == this.products[type][product].id && type == "Download Data"/*&& this.state.view.plot == this.products[type][product].view*/ ) {
 					setDownloadDefault = false;
 					//this.refs.operations.download.children[product].DOMNode.selected = true;
-					this.setDownloadOperation(this,this.products[type][product].id,this.products[type][product].view,this.products[type][product].optiondef);
+					this.setDownloadOperation(this.products[type][product].id,this.products[type][product].optiondef);
 				}
 			}
 	}
@@ -1053,7 +1029,7 @@ LASUI.prototype.setProductTypeNode = function(type) {
 		this.refs.operations.download.INPUTNode = document.createElement("SPAN");
 		this.refs.operations.download.INPUTNode.className = "top_link"
 		this.refs.operations.download.INPUTNode.appendChild(document.createTextNode("Download Data"));
-		this.refs.operations.download.INPUTNode.onclick = this.makeRequest.LASBind(this,"download");
+		this.refs.operations.download.INPUTNode.onclick = this.doDownload.LASBind(this);
 		this.refs.operations.download.DOMNode.appendChild(this.refs.operations.download.INPUTNode);
 		//this.refs.operations.download.DOMNode.appendChild(document.createTextNode('\u00a0'));
 		this.refs.operations.download.DOMNode.appendChild(this.refs.operations.download.SELECTNode);
@@ -1096,7 +1072,7 @@ LASUI.prototype.setProductNode = function(type, product) {
 		this.refs.operations.download.children[product].OPTIONNode.id ="OPTION_DOWNLOAD_" +  this.products[type][product].id;
 		this.refs.operations.download.children[product].OPTIONNode.appendChild(document.createTextNode(product));
 		this.refs.operations.download.children[product].OPTIONNode.value = this.products[type][product].id;
-		this.refs.operations.download.children[product].OPTIONNode.onselect = this.setDownloadOperation.LASBind(this,this.products[type][product].id,this.products[type][product].view,this.products[type][product].optiondef);
+		this.refs.operations.download.children[product].OPTIONNode.onselect = this.setDownloadOperation.LASBind(this,this.products[type][product].id,this.products[type][product].optiondef);
 		//this.refs.operations.plot.children[product].OPTIONNode.onclick = this.setOperation.LASBind(this,this.products[type][product].id,this.products[type][product].view,this.products[type][product].optiondef);
 		this.refs.operations.download.SELECTNode.appendChild(this.refs.operations.download.children[product].OPTIONNode);
 
@@ -1754,20 +1730,30 @@ LASUI.prototype.makeRequest = function (evt, type) {
  * Method to query the server for an options object and pass json response to setOptionList
  * @param {string} optiondef Id of the option set to query the server for.
  */
-LASUI.prototype.getOptions = function (optiondef, DOMNode, type, reset) {
+LASUI.prototype.getOptions = function (optiondef, type, reset) {
 
+	var submit = document.createElement("INPUT");
 	var cancel = document.createElement("INPUT");
+
+	submit.type = "submit";
+	submit.value=	"OK";
+	submit.className = "LASSubmitInputNode";
+	var strHandler = "this.setChangedOptions('"+ type+ "');this.hideOptions('"+ type+ "')";
+	if(type!="plot")
+		strHandler += ";this.makeRequest({},'"+type+"')"
+	submit.onclick = this.genericHandler.LASBind(this,strHandler);
+
 	cancel.type = "submit";
-	cancel.value=	"Close";
+	cancel.value=	"Cancel";
 	cancel.className = "LASSubmitInputNode";
-	cancel.onclick = this.genericHandler.LASBind(this,"this.hideOptions('"+ type+ "')");
-		var reset = document.createElement("INPUT");
-		reset.type = "submit";
-		reset.onclick =  this.genericHandler.LASBind(this,"this.resetOptions('" +type + "')");
-		reset.name = "Reset";
-		reset.value = "Reset";
-				while(this.refs.options[type].DOMNode.firstChild)
-			this.refs.options[type].DOMNode.removeChild(this.refs.options[type].DOMNode.firstChild);
+	cancel.onclick = this.genericHandler.LASBind(this,"this.cancelChangedOptions('"+ type+ "');this.hideOptions('"+ type+ "')");
+	var reset = document.createElement("INPUT");
+	reset.type = "submit";
+	reset.onclick =  this.genericHandler.LASBind(this,"this.resetOptions('" +type + "')");
+	reset.name = "Reset";
+	reset.value = "Reset";
+	while(this.refs.options[type].DOMNode.firstChild)
+		this.refs.options[type].DOMNode.removeChild(this.refs.options[type].DOMNode.firstChild);
 	/*	if(this.state.operations)
 			if(this.state.operations.getOperationByID(this.state.operation[type])){
 			var label = document.createElement("STRONG");
@@ -1775,15 +1761,15 @@ LASUI.prototype.getOptions = function (optiondef, DOMNode, type, reset) {
 			this.refs.options[type].DOMNode.appendChild(label);
 			this.refs.options[type].DOMNode.appendChild(document.createElement("BR"));
 	}*/
-		//this.refs.options[type].DOMNode.appendChild(reset);
-		this.refs.options[type].DOMNode.appendChild(reset);
-		this.refs.options[type].DOMNode.appendChild(cancel);
+	this.refs.options[type].DOMNode.appendChild(submit);
+	this.refs.options[type].DOMNode.appendChild(reset);
+	this.refs.options[type].DOMNode.appendChild(cancel);
 
 			if(!document.all)
 			var req = new XMLHttpRequest(this);
 		else
 			var req = new ActiveXObject("Microsoft.XMLHTTP");
-	req.onreadystatechange = this.AJAXhandler.LASBind(this, req, "this.setOptionList(req.responseText,args[3],args[4],args[5]);",DOMNode,type,reset);
+	req.onreadystatechange = this.AJAXhandler.LASBind(this, req, "this.setOptionList(req.responseText,args[3],args[4],args[5]);",this.refs.options[type].DOMNode,type,reset);
 	req.open("GET", this.hrefs.getOptions.url + '?opid=' + optiondef);
 	req.send(null);
 
@@ -1836,15 +1822,19 @@ LASUI.prototype.setOptionTRNode = function (id,TBODYNode,type,reset) {
 		if(this.refs.options.cache[id].menu) {
 			this.refs.options.cache[id].SELECTNode = document.createElement("SELECT");
 			this.refs.options.cache[id].SELECTNode.setAttribute('name', id);
+  			if(!this.state.properties[type][id])
+  				this.state.properties[type][id] = {"type" : "ferret", "value" : this.refs.options.cache[id].menu.item[0].values};
   			for (var i=0;i<this.refs.options.cache[id].menu.item.length;i++) {
-   			var option = document.createElement("OPTION");
-     			option.value=this.refs.options.cache[id].menu.item[i].values;
-     			option.appendChild(document.createTextNode(this.refs.options.cache[id].menu.item[i].content));
-    			//code branch for add() method differences between IE and FF
-     			this.refs.options.cache[id].SELECTNode.appendChild(option);
-     		}
+   				var option = document.createElement("OPTION");
+     				option.value=this.refs.options.cache[id].menu.item[i].values;
+     				option.appendChild(document.createTextNode(this.refs.options.cache[id].menu.item[i].content));
+    				//code branch for add() method differences between IE and FF
+     				this.refs.options.cache[id].SELECTNode.appendChild(option);
+     			}
 			this.refs.options.cache[id].TD2.appendChild(this.refs.options.cache[id].SELECTNode);
 		} else {
+			if(!this.state.properties[type][id])
+  				this.state.properties[type][id] = {"type" : "ferret", "value" : ""};
 			this.refs.options.cache[id].INPUTNode = document.createElement("INPUT");
 			this.refs.options.cache[id].INPUTNode.type = "text";
 			this.refs.options.cache[id].INPUTNode.className="LASTextInputNode";
@@ -1908,33 +1898,36 @@ LASUI.prototype.showOptions = function(type)  {
 LASUI.prototype.hideOptions= function(type)  {
 	this.refs.options[type].DOMNode.style.display='none';
 	this.toggleUIMask('none');
+
+
 }
 LASUI.prototype.resetOptions= function(type)  {
 	while(this.refs.options[type].DOMNode.firstChild)
 		this.refs.options[type].DOMNode.removeChild(this.refs.options[type].DOMNode.firstChild);
-	this.getOptions(this.state.operations.getOperationByID(this.state.operation[type]).optiondef.IDREF, this.refs.options[type].DOMNode,type,true, true);
+
+	this.getOptions(this.state.operations.getOperationByID(this.state.operation[type]).optiondef.IDREF, type,true);
 	this.showOptions(type);
+
 }
 LASUI.prototype.showOptionInfo = function(evt) {
-	var div = document.createElement("DIV");
+	if(this.optionInfo) 
+		if(this.optionInfo.parentNode)
+			this.optionInfo.parentNode.removeChild(this.optionInfo);
+	
+	this.optionInfo = document.createElement("DIV");
+	document.body.appendChild(this.optionInfo);
+	this.optionInfo.className = "LASPopupDIVNode";
+	this.optionInfo.style.left = (this.optionInfo.offsetLeft + 3) + "px";
+	this.optionInfo.style.top =(this.optionInfo.offsetTop + 3) + "px";
 	var close = document.createElement("INPUT");
 	var center = document.createElement("CENTER");
-
-
 	close.type = "submit";
-	close.onclick = this.hideOptionInfo.LASBind(this,div);
+	close.onclick = this.hideOptionInfo.LASBind(this,this.optionInfo);
 	close.name = "Close";
 	close.value = "Close";
-
-	div.innerHTML += arguments[1];
-	div.className = "LASPopupDIVNode";
-	//div.style.left = evt.clientLeft + 20;
-	//div.style.top = evt.clientTop + 20;
-
+	this.optionInfo.innerHTML += arguments[1];
 	center.appendChild(close);
-
-	div.appendChild(center);
-	document.body.appendChild(div);
+	this.optionInfo.appendChild(center);
 }
 LASUI.prototype.hideOptionInfo = function () {
 	var div = arguments[1];
@@ -1957,16 +1950,42 @@ LASUI.prototype.setOption = function (evt) {
 	else
 		return;
 
-	if(args[3].SELECTNode)
-		this.state.properties[args[2]][id]={"type" : "ferret", "value" : node.options[node.selectedIndex].value};
-	else
-		this.state.properties[args[2]][id]={"type" : "ferret", "value" : node.value};
 
-	if(args[2]=="plot")
-		if(!this.updating)if(this.autoupdate)
+
+	if(args[3].SELECTNode)
+		this.state.newproperties[args[2]][id]={"type" : "ferret", "value" : node.options[node.selectedIndex].value};
+	else
+		this.state.newproperties[args[2]][id]={"type" : "ferret", "value" : node.value};
+
+}
+LASUI.prototype.setChangedOptions = function (type) {
+	//for(var type in this.state.newproperties)
+		for(var id in this.state.newproperties[type])
+			this.state.properties[type][id]=this.state.newproperties[type][id];
+	
+	if(!this.updating&&type=="plot"&&this.state.newproperties.plot.length>0)
+		if(this.autoupdate)
 			this.makeRequest();
 		else
 			this.showUpdateLink();
+	this.state.newproperties = {"plot":[],"external":[],"download":[]};
+	
+}
+LASUI.prototype.cancelChangedOptions = function () {
+	for(var type in this.state.newproperties)
+		for(var id in this.state.newproperties[type]) {
+			if(this.refs.options.cache[id]&&this.state.properties[type][id]) {
+				if(this.refs.options.cache[id].SELECTNode) {
+					for(var i=0; i< this.refs.options.cache[id].SELECTNode.length;i++)
+							if(this.refs.options.cache[id].SELECTNode.options[i].value==this.state.properties[type][id].value) {
+								this.refs.options.cache[id].SELECTNode.selectedIndex = i;
+								this.refs.options.cache[id].SELECTNode.options[i].selected = true;
+							}
+				} else
+					if(this.refs.options.cache[id].INPUTNode)
+						this.refs.options.cache[id].INPUTNode.value = this.state.properties[type][id].value;
+			}
+		}	
 }
 /**
  * initMap()
@@ -2056,10 +2075,10 @@ LASUI.prototype.setMaxY = function (evt) {
  */
 LASUI.prototype.onafterdraw = function (evt) {
 
-	if(!this.updating)if(this.autoupdate) {
-
-		this.makeRequest();
-	}	else
+	if(!this.updating)
+		if(this.autoupdate) {
+			this.makeRequest();
+		} else
 		this.showUpdateLink();
 
 }
