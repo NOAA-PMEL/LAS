@@ -90,7 +90,6 @@ IF ($ferret_size"0|0.25>1|*>0")    THEN LET maxpix = 500  ! medium
 IF ($ferret_size"0|0.5>1|*>0")     THEN LET maxpix = 600  ! default
 IF ($ferret_size"0|0.8333>1|*>0")  THEN LET maxpix = 700  ! large
 
-IF ($ferret_google_plot"0|*>1") THEN GO LAS_setup_strides_GE
 
 IF `($region_x_range"0|0|*>1") AND ($no_native_strides_xy"0|*>1") NE 1` THEN 
 
@@ -217,62 +216,6 @@ IF `($xstride"0|1>0|*>1") + ($ystride"0|1>0|*>1") + ($zstride"0|1>0|*>1") + ($ts
          ($upper_left_($n_left_labels)) ($tstride) in T
       LET need_comma = 1
    ENDIF
-
-ENDIF
-
-! Set this for list_grid, GE placemarks
-IF ($ferret_google_plot"0|*>1") THEN
-
-  IF `STRINDEX( "($operation_ID)", "Grid" ) NE 0` THEN
-
-!       DEFINE SYMBOL xstride_coord = `INT(360*($xstride"1")/nx)`
-!       DEFINE SYMBOL ystride_coord = `INT(180*($ystride"1")/ny)`
-!    ENDIF
-
-! compute stride value for Google Earth placemarks, these values are different from the strides for plot
-! the xycoord was set in LAS_setup_strides_GE.jnl
-  IF ($region_x_lo"0|*>1") THEN
-    cancel mode long
-    cancel mode lat
-
-    LET x_range = `($data_var),return=xend` - `($data_var),return=xstart` ! data range in x
-    LET x_pct = ($region_x_range)/x_range                                 ! selected range over data range
-
-    ! data's native resolution in x
-    DEFINE SYMBOL data_xcoord = `xbox[gx=($data_var),x=($region_x_lo)]`
-
-    IF `($region_x_range) LT 180` THEN
-        DEFINE SYMBOL xstride_coord = `INT(x_pct*xycoord)` ! stride value in x
-    ELSE
-        DEFINE SYMBOL xstride_coord = `INT(1*xycoord)`     ! for range >= 180, use the same stride value
-    ENDIF
-
-    ! make sure xstride_coord is not less than the data's native resolution
-    IF `($xstride_coord) LT ($data_xcoord)` THEN           ! stride value >= data resolution
-       DEFINE SYMBOL xstride_coord = `($data_xcoord)`
-    ENDIF
-
-  ENDIF
-
-  IF ($region_y_lo"0|*>1") THEN
-    cancel mode long
-    cancel mode lat
-
-    LET y_range = `($data_var),return=yend` - `($data_var),return=ystart` ! data range in y
-    LET y_pct = ($region_y_range)/y_range                                 ! selected range over data range
-
-            
-    ! data's native resolution in y
-    DEFINE SYMBOL data_ycoord = `ybox[gy=($data_var),y=($region_y_lo)]`
-
-    DEFINE SYMBOL ystride_coord = `INT(y_pct*xycoord)`   ! stride value in y
-
-    ! make sure ystride_coord is not less than the data's native resolution
-    IF `($ystride_coord) LT ($data_ycoord)` THEN         
-        DEFINE SYMBOL ystride_coord = `($data_ycoord)`
-    ENDIF
-
-  ENDIF
 
 ENDIF
 
