@@ -134,6 +134,21 @@ while (! $ferret){
         }
     }
 }
+
+# Make a dummy properties file so the redirect filter can start
+my $classesDir = "WebContent/WEB-INF/classes";
+if ( ! -d $classesDir ) {
+    mkdir $classesDir, 0755 or die "Can't create directory $classesDir: $!\n";
+    print "Created a directory for the webapp classes and resources.\n\n";
+}
+## Write out the initial copy of the las.properties file.
+## genLas.pl will read this and add some stuff it needs.
+    open OUT,">$classesDir/las.properties" or die "Can't open $classesDir/las.properties'";
+    print OUT "las.db.host=dummy_value\n";
+    print OUT "las.db.user=dummy_value\n";
+    print OUT "las.db.password=dummy_value\n";
+    print OUT "las.db.dbase=dummy_value\n";
+
 $LasConfig{ferret} = $ferret;
 print "You have a valid version of Ferret.\n\n";
 
