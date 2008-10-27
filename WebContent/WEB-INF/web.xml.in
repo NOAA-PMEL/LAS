@@ -54,6 +54,21 @@
 		<url-pattern>/servlets/*</url-pattern>
 	</filter-mapping>
 	
+	<filter-mapping>
+		<filter-name>ExceptionFilter</filter-name>
+		<url-pattern>/v6/*</url-pattern>
+	</filter-mapping>
+
+	<filter-mapping>
+		<filter-name>SessionFilter</filter-name>
+		<url-pattern>/v6/*</url-pattern>
+	</filter-mapping>
+
+	<filter-mapping>
+		<filter-name>FormFilter</filter-name>
+		<url-pattern>/v6/*</url-pattern>
+	</filter-mapping>
+	
 	<servlet>
 		<servlet-name>AxisServlet</servlet-name>
 		<servlet-class>
@@ -205,6 +220,11 @@
 		<servlet-name>TemplateServlet</servlet-name>
 		<url-pattern>/servlets/*</url-pattern>
 	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>TemplateServlet</servlet-name>
+		<url-pattern>/v6/*</url-pattern>
+	</servlet-mapping>
+	
 
 	<!-- currently the W3C havent settled on a media type for WSDL;
 		http://www.w3.org/TR/2003/WD-wsdl12-20030303/#ietf-draft
