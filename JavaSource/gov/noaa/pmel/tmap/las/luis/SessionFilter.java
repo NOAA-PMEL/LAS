@@ -26,6 +26,10 @@ public class SessionFilter implements Filter {
            throws ServletException, IOException{
     try {
       TemplateSession session = Utils.getSession(req);
+      String req_url = req.getServletPath();
+      if ( req_url.contains("servlets") ) {
+    	  resp.sendRedirect("../getUI.do");
+      }
       SessionTemplateContext sessionCtx = session.getSessionContext();
       Vector datasets = sessionCtx.getDatasets();
 
