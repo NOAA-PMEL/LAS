@@ -23,6 +23,7 @@ DEFINE SYMBOL ferret_google_plot = 1
 
 GO LAS_initialize_region 0
 GO LAS_initialize_data 0
+
 ! Check for errors (They often occur during dataset initialization.)
 
 IF ($error_status"0|*>1") THEN
@@ -89,7 +90,7 @@ IF ($data_0_intervals"|xy>1|*>0") THEN
    X=($region_x_lo):($region_x_hi):($xstride_coord),Y=($region_y_lo):($region_y_hi):($ystride_coord)]
   IF ($native_curvilinear_xy"0") THEN \
     DEFINE SYMBOL tmp = ($data_var)[d=($data_num),\
-    i=($clon_imin):($clon_imax):($xstride_coord,j=($clat_jmin):($clat_jmax):($ystride_coord)]
+    i=($clon_imin):($clon_imax):($xstride_coord),j=($clat_jmin):($clat_jmax):($ystride_coord)]
 
   LET xyvar = ($tmp) 
   LET mask =  IF xyvar GT -9000 THEN 1
