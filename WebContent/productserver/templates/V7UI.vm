@@ -182,9 +182,9 @@
 					<div id="MapWidget" style="border:1px solid black;" ><div style="position:absolute;z-index:4;text-align:center"><!--<img src="images/north-mini.png" onmousedown="LAS.refs.XYSelect.panPlot(0,10);"><br>--><img src="images/west-mini.png" onmousedown="LAS.refs.XYSelect.panPlot(-20,0);"><img src="images/east-mini.png" onmousedown="LAS.refs.XYSelect.panPlot(20,0);"><!--<br><img src="images/south-mini.png" onmousedown="LAS.refs.XYSelect.panPlot(0,-10);"><br><img src="images/zoom-plus-mini.png" onclick="LAS.refs.XYSelect.zoom(2);"><br><img src="images/zoom-minus-mini.png"  onclick="LAS.refs.XYSelect.zoom(-1)">--></div></div>
 						<strong>
 						Latitude range <input size=3  id="input_minY" type="text" value="-90.0">&nbsp;:&nbsp;<input id="input_maxY" size=3 type="text" value="90.0"><br>
-						Longitude range <input size=3 id="input_minX" value="-180.0">&nbsp;:&nbsp;<input value="180.0" size=3 id="input_maxX">
-						</strong>
-					
+						Longitude range <input size=3 id="input_minX" value="-180.0">&nbsp;:&nbsp;<input value="180.0" size=3 id="input_maxX"><br>
+						<!--<span class="LASLink" onclick="LAS.resetConstraints=true;LAS.updateConstraints()">Reset Map</span>-->
+						</strong>					
 					<div id="plotType"></div>
 					<div id="Date"></div>
 					<div id="Depth"></div>
