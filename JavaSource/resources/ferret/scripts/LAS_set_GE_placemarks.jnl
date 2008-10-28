@@ -108,11 +108,6 @@ ELSE  ! curvilinear
     IF `($ystride_coord) LT 1` THEN DEFINE SYMBOL ystride_coord = 1
 
   ENDIF
-!   IF `INT(0.5+($data_xcoord)/($data_ycoord)) EQ 2` THEN 
-!      DEFINE SYMBOL ystride_coord = 0.5*($xstride_coord)
-!      IF `($ystride_coord) LT 1` THEN DEFINE SYMBOL ystride_coord = 1
-!   ENDIF
-
 
 ENDIF
 
