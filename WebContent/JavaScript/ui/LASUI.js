@@ -98,7 +98,7 @@ LASUI.prototype.initUI = function (anchorId)
 		this.state.operation.plot = this.params.plot;
 		this.state.view.plot = this.params.view;
 		//this.state.xybox = eval("("+unescape(this.params.bbox)+")");
-
+		
 		this.autoupdate = this.params.autoupdate;
 		if((this.state.dataset!=""||this.params.catid!="")&&this.state.variable!="")
 			this.submitOnLoad=true;
@@ -108,6 +108,7 @@ LASUI.prototype.initUI = function (anchorId)
 	} else
 		this.submitOnLoad =false;
 	this.state.xybox ={};
+	this.fullXYExtent=true;
 		this.UIMask = document.createElement("DIV");
 	this.UIMask.className = "LASUIMask";
 	this.toggleUIMask('none');
@@ -1142,27 +1143,33 @@ LASUI.prototype.updateConstraints = function (view) {
 			this.refs.XYSelect.enable();
 	}
 	var reset=false;
-
-	//if(this.state.lastgrid) {
-	//	if(this.state.grid.response.grid.ID!=this.state.lastgrid.response.grid.ID||(this.state.lastDataset!=this.state.dataset||this.state.lastVariable!=this.state.variable))
-	//		reset=true;
-	//}
-	this.resetSelectionBox =false;
-	if(this.state.lastDataset!=this.state.dataset) {
-		reset =true;
-		this.resetSelectionBox=true;
+	var resetXY=false;
+	if(this.state.lastgrid) {
+		if(this.state.grid.response.grid.ID!=this.state.lastgrid.response.grid.ID)
+			reset=true;
 	}
+	if(this.refs.XYSelect.extents.data.grid != this.refs.XYSelect.extents.selection.grid)
+		this.fullXYExtent=false;
+	
+	if((this.state.lastDataset!=this.state.dataset&&this.fullXYExtent)||this.fullXYExtent||this.resetXY||!this.initialized) {
+		var resetXY =true;
+		this.resetXY = false;
+	}
+	
+	if(this.state.lastDataset!=this.state.dataset)
+		var reset=true;
+	
 	if(!this.initialized)
 		reset=true;
 
 	if(view.indexOf('x')>=0&&view.indexOf('y')>=0)
-		this.initXYSelect("xy",reset);
+		this.initXYSelect("xy",resetXY);
 	else if(view.indexOf('x')>=0&&view.indexOf('y')<0)
-		this.initXYSelect("x",reset);
+		this.initXYSelect("x",resetXY);
 	else if(view.indexOf('x')<0&&view.indexOf('y')>=0)
-		this.initXYSelect("y",reset);
+		this.initXYSelect("y",resetXY);
 	else if(view.indexOf('x')<0&&view.indexOf('y')<0)
-		this.initXYSelect("point",reset);
+		this.initXYSelect("point",resetXY);
 
 	for(var d=0;d<this.state.grid.response.grid.axis.length;d++)
 		if(view.indexOf(this.state.grid.response.grid.axis[d].type) < 0)
@@ -1376,7 +1383,7 @@ LASUI.prototype.initXYSelect = function (mode, reset) {
 		if(sel.y.min!=sel.y.max)
 			this.state.xybox.height=(sel.y.max-sel.y.min);
 
-
+		
 		this.refs.XYSelect.setView(mode);
 
 	}
@@ -2112,7 +2119,11 @@ LASUI.prototype.setMaxY = function (evt) {
  * @param {object} evt The event object
  */
 LASUI.prototype.onafterdraw = function (evt) {
-
+	if(this.refs.XYSelect.extents.data.grid != this.refs.XYSelect.extents.selection.grid)
+		this.fullXYExtent=false;
+	else
+		this.fullXYExtent=true;
+					
 	if(!this.updating)
 		if(this.autoupdate) {
 			this.makeRequest();
