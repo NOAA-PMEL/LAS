@@ -141,6 +141,9 @@ if ( ! -d $classesDir ) {
     mkdir $classesDir, 0755 or die "Can't create directory $classesDir: $!\n";
     print "Created a directory for the webapp classes and resources.\n\n";
 }
+copy ("WebContent/productserver/templates/V7UIHeader_noclassic.vm","WebContent/productserver/templates/V7UIHeader.vm");
+copy ("WebContent/index_noclassic.html","WebContent/index.html");
+
 ## Write out the initial copy of the las.properties file.
 ## genLas.pl will read this and add some stuff it needs.
     open OUT,">$classesDir/las.properties" or die "Can't open $classesDir/las.properties'";
@@ -590,7 +593,7 @@ if ( getYesOrNo("Do you want to install the example data set configuration") ) {
 
     print "\n\n";
     my $app = $LasConfig{appname};
-    print "Your user interface to LAS is at: http://$servlet_root_url/$app/getUI.do\n";
+    print "Your user interface to LAS is at: http://$servlet_root_url/$app/\n";
 
 
 #
