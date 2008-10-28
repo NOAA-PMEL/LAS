@@ -28,7 +28,7 @@ public class SessionFilter implements Filter {
       TemplateSession session = Utils.getSession(req);
       String req_url = req.getServletPath();
       if ( req_url.contains("servlets") ) {
-    	  resp.sendRedirect("../getUI.do");
+    	  resp.sendRedirect("../");
       }
       SessionTemplateContext sessionCtx = session.getSessionContext();
       Vector datasets = sessionCtx.getDatasets();
