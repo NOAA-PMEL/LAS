@@ -15,11 +15,6 @@ CANCEL MODE lat
 
 IF ($region_x_lo"0|*>1") THEN
 
-   ! data's native resolution in x (the first dx may be 
-   ! too large if this is a subspan modulo axis, so look at I=2)
-   DEFINE SYMBOL data_xcoord = `xbox[gx=($data_var),x=($region_x_lo)]`
-   DEFINE SYMBOL data_xcoord = `xbox[gx=($data_var),I=2]`
-
    DEFINE SYMBOL xstride_coord = `INT(xycoord)`
    LET min_pl = MIN(3, `INT(($region_x_range)/10)`)
    IF `(($region_x_range) LT 90) AND \
