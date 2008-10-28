@@ -188,7 +188,7 @@
 					<div id="plotType"></div>
 					<div id="Date"></div>
 					<div id="Depth"></div>
-					<div id="analysisWrapper"  class="LASAnalysis">							
+					<div id="analysisWrapper"  class="LASAnalysis" style="display:none">							
 						<a class="LASLink" value=false onclick="if(!LAS.refs.analysis.enabled){LAS.showAnalysis();this.innerHTML='Remove analysis';}else{LAS.hideAnalysis();this.innerHTML='Apply analysis';}">Apply analysis</a>
 						<div id="analysis" style="display:none;">
 							<strong>Analysis type</strong><br>
