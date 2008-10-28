@@ -6,6 +6,8 @@ import java.lang.String;
 import java.util.Iterator;
 import java.io.IOException;
 import java.util.Enumeration;
+import java.util.MissingResourceException;
+import java.util.ResourceBundle;
 import java.util.Vector;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -25,6 +27,16 @@ public class SessionFilter implements Filter {
            HttpServletResponse resp)
            throws ServletException, IOException{
     try {
+    	ResourceBundle bundle = null;
+    	try {
+    		bundle = ResourceBundle.getBundle("las");
+    		String host = (String) bundle.getObject("las.db.host");
+    		if ( host != null && host.equals("dummy_value") ) {
+    			resp.sendRedirect("../");
+    		}
+    	} catch (MissingResourceException e) {
+    		
+    	}
       TemplateSession session = Utils.getSession(req);
       String req_url = req.getServletPath();
       if ( req_url.contains("servlets") ) {
