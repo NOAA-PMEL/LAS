@@ -91,6 +91,7 @@ LASUI.prototype.initUI = function (anchorId)
 
 	if((this.params.dsid||this.params.catid)&&this.params.varid) {
 		this.state.dataset = this.params.dsid;
+		this.state.catid = this.params.catid;
 		this.state.lastDataset = "";
 		this.state.lastVariable = "";
 		this.state.variable = this.params.varid;
@@ -179,8 +180,10 @@ LASUI.prototype.initUI = function (anchorId)
 
 	if((this.state.dataset!=""||this.params.catid!="")&&this.state.variable!="") {
 
-		if(this.params.catid)
+		if(this.params.catid) {
 			var catid=this.params.catid;
+			
+		}
 		else
 			var catid=this.state.dataset;
 		if(!document.all)
@@ -562,6 +565,7 @@ LASUI.prototype.selectCategory = function (evt) {
 		req.onreadystatechange = this.AJAXhandler.LASBind(this, req, "this.setCategoryTreeNode(req.responseText,args[3].children[args[4]],args[3].category.getChild(args[4]));", parentNode, i);
 		req.open("GET", this.hrefs.getCategories.url + "?catid=" + parentNode.category.getChildID(i));
 		req.send(null);
+		this.state.catid=parentNode.category.getChildID(i);
 	}
 }
 /**
@@ -1600,15 +1604,18 @@ LASUI.prototype.makeRequest = function (evt, type) {
 		//add the operation
 		this.request.setOperation(this.state.operation[type]);
 		this.uirequest+="dsid=" + this.state.dataset;
+		this.uirequest+="&catid=" + this.state.catid;
 		this.uirequest+="&varid=" + this.state.variable;
-		this.uirequest+='&plot=' + this.state.operation[type];
+		this.uirequest+='&plot=' + this.state.operation.plot;
+		this.uirequest+='&view=' + this.state.view.plot;
+		
 		//this.uirequest.setProperty('ui','state',JSON.stringify(this.state));
 		var uioptions = '';
 		//set the options
 		for(var p in this.state.properties[type])
 			if((typeof this.state.properties[type][p] != "function") && (typeof this.state.properties[type][p] == "object")) {
 				this.request.setProperty(this.state.properties[type][p].type, p, escape(this.state.properties[type][p].value));
-				uioptions[this.state.properties[type][p].type] = {p : escape(this.state.properties[type][p].value)};
+				//uioptions[this.state.properties.plot[p].type] = {p : escape(this.state.properties[type][p].value)};
 			}
 		var view = this.state.view[type];
 		//if(view=="") view = "d";
@@ -1669,8 +1676,8 @@ LASUI.prototype.makeRequest = function (evt, type) {
 							this.request.addRange('x',this.refs.XYSelect.extents.selection.grid.x.min,this.refs.XYSelect.extents.selection.grid.x.max);
 						else
 							this.request.addRange('x',(this.refs.XYSelect.extents.selection.grid.x.min+this.refs.XYSelect.extents.selection.grid.x.max)/2,(this.refs.XYSelect.extents.selection.grid.x.min+this.refs.XYSelect.extents.selection.grid.x.max)/2);
-						this.uirequest+="&x=" + escape("{ 'min' : " + this.refs.XYSelect.extents.selection.grid.x.min + ", 'max' : " + this.refs.XYSelect.extents.selection.grid.x.max + "}");
-						this.uirequest+="&viewx="+escape("{ 'min' : " + this.refs.XYSelect.extents.data.grid.x.min + ", 'max' : " + this.refs.XYSelect.extents.data.grid.x.max + "}");
+						//this.uirequest+="&x=" + escape("{ 'min' : " + this.refs.XYSelect.extents.selection.grid.x.min + ", 'max' : " + this.refs.XYSelect.extents.selection.grid.x.max + "}");
+						//this.uirequest+="&viewx="+escape("{ 'min' : " + this.refs.XYSelect.extents.data.grid.x.min + ", 'max' : " + this.refs.XYSelect.extents.data.grid.x.max + "}");
 
 						break;
 					case 'y' :
@@ -1679,8 +1686,8 @@ LASUI.prototype.makeRequest = function (evt, type) {
 						else
 							this.request.addRange('y',(this.refs.XYSelect.extents.selection.grid.y.min+this.refs.XYSelect.extents.selection.grid.y.max/2),(this.refs.XYSelect.extents.selection.grid.y.min+this.refs.XYSelect.extents.selection.grid.y.max/2));
 
-						this.uirequest+="&y="+escape("{ 'min' : " + this.refs.XYSelect.extents.selection.grid.y.min + ", 'max' : " + this.refs.XYSelect.extents.selection.grid.y.max + "}");
-					 	this.uirequest+="&viewy="+escape("{ 'min' : " + this.refs.XYSelect.extents.data.grid.y.min + ", 'max' : " + this.refs.XYSelect.extents.data.grid.y.max + "}");
+						//this.uirequest+="&y="+escape("{ 'min' : " + this.refs.XYSelect.extents.selection.grid.y.min + ", 'max' : " + this.refs.XYSelect.extents.selection.grid.y.max + "}");
+					 	//this.uirequest+="&viewy="+escape("{ 'min' : " + this.refs.XYSelect.extents.data.grid.y.min + ", 'max' : " + this.refs.XYSelect.extents.data.grid.y.max + "}");
 						break;
 					case 't' :
 						if(this.state.view[type].indexOf('t')>=0||this.state.datasets[this.state.dataset].getChildByID(this.state.variable).grid_type=="scattered")
@@ -1694,21 +1701,21 @@ LASUI.prototype.makeRequest = function (evt, type) {
 					else
 						if(this.state.grid.hasMenu('t')){
 							this.request.addRange('t',this.refs.DW[0].value);
-							this.uirequest+="&t=" + escape("{ 'min' : '" + this.refs.DW[0].value+ "', 'max' : '" + this.refs.DW[0].value + "'}");
+						//	this.uirequest+="&t=" + escape("{ 'min' : '" + this.refs.DW[0].value+ "', 'max' : '" + this.refs.DW[0].value + "'}");
 						}
 						else {
 							this.request.addRange('t',this.refs.DW.getDate1_Ferret());
-							this.uirequest+="&t=" + escape("{ 'min' : '" + this.refs.DW.getDate1_Ferret()+ "', 'max' : '" + this.refs.DW.getDate1_Ferret()+ "'}");
+						//	this.uirequest+="&t=" + escape("{ 'min' : '" + this.refs.DW.getDate1_Ferret()+ "', 'max' : '" + this.refs.DW.getDate1_Ferret()+ "'}");
 						}
 					break;
 				case 'z' :
 					if(this.state.view[type].indexOf('z')>=0||this.state.datasets[this.state.dataset].getChildByID(this.state.variable).grid_type=="scattered") {
 							this.request.addRange('z',this.refs.DepthWidget[this.refs.DepthWidget.widgetType][0].value,this.refs.DepthWidget[this.refs.DepthWidget.widgetType][1].value);
-							this.uirequest+="&z=" + escape("{ 'min' : '" + this.refs.DepthWidget[this.refs.DepthWidget.widgetType][0].value+ "', 'max' : '" + this.refs.DepthWidget[this.refs.DepthWidget.widgetType][1].value + "'}");
+						//	this.uirequest+="&z=" + escape("{ 'min' : '" + this.refs.DepthWidget[this.refs.DepthWidget.widgetType][0].value+ "', 'max' : '" + this.refs.DepthWidget[this.refs.DepthWidget.widgetType][1].value + "'}");
 						}
 						else {
 							this.request.addRange('z',this.refs.DepthWidget[this.refs.DepthWidget.widgetType][0].value);
-							this.uirequest+="&z=" + escape("{ 'min' : '" + this.refs.DepthWidget[this.refs.DepthWidget.widgetType][0].value+ "', 'max' : '" + this.refs.DepthWidget[this.refs.DepthWidget.widgetType][1].value + "'}");
+						//	this.uirequest+="&z=" + escape("{ 'min' : '" + this.refs.DepthWidget[this.refs.DepthWidget.widgetType][0].value+ "', 'max' : '" + this.refs.DepthWidget[this.refs.DepthWidget.widgetType][1].value + "'}");
 						}
 					break;
 			}
