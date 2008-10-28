@@ -1,0 +1,35 @@
+<TABLE CELLPADDING="0" CELLSPACING="0" BORDER="0" WIDTH="100%">
+	<TBODY><TR>
+		<TD bgcolor="#5c5cff"  height="10px" width="280px" align="left">
+			<div style="position: relative; width: 280px; height: 10px;margin-right:2px">
+				<a href="http://ferret.pmel.noaa.gov/LAS/" target="_new"><span class="top_link_title">Live Access Server</span></a><span style="position: absolute; top: 0px; left: 150px; font-size:7pt; color:#FFFFFC;">
+				        #if ($!profile == "timeseries")
+				        LAS&nbsp;Time&nbsp;Series&nbsp;UI&nbsp;(Beta)
+				        #else
+						<a class="top_link_title" href="./ProductServer.do" target="_new">About&nbsp;LAS</a>
+						#end
+					</span>
+				
+			</div>
+		</TD>  			
+                <td bgcolor="#5c5cff" align="right" >
+		   <a class="top_link_left"  href="doc/las_v7_ui_introduction.html" target="_new">Introduction to LAS v7</a><br>
+	           <a class="top_link_left"  href="$server_config.getFTDSBase()" target="_new">OPeNDAP (F-TDS) / THREDDS</a> 
+		</td>
+		</tr>
+                <tr>
+		<TD bgcolor="#5c5cff" width="75%" valign="top" align="left">
+			<div style="position:relative;height:33px;overflow:hidden;width:100%;margin-right:0px;margin-left:0px;border-bottom:1pt solid #FFFFFC">
+		<span  style="color:Black;position:relative;left:10px;top:0px;height:35px;font-weight:bold;font-size:18pt;position:absolute;">$las_config.getTitle()</span>
+		<span  style="color:Black;position:relative;left:12px;top:0px;height:35px;font-weight:bold;font-size:18pt;position:absolute;">$las_config.getTitle()</span>
+		<span  style="color:Black;position:relative;left:10px;top:2px;height:35px;font-weight:bold;font-size:18pt;position:absolute;">$las_config.getTitle()</span>
+		<span  style="color:Black;position:relative;left:12px;top:2px;height:35px;font-weight:bold;font-size:18pt;position:absolute;">$las_config.getTitle()</span>
+		<span  style="color:#FFFFFC;position:relative;left:11px;top:1px;height:35px;font-weight:bold;font-size:18pt;position:absolute;">$las_config.getTitle()</span>
+					
+			</div>
+		</TD>
+	        <td bgcolor="#5c5cff"  style="align:right;border-bottom:1pt solid #FFFFFC">
+		                 <a class="top_link_left"  onmouseover="window.status='Link to this plot';" onmouseout="window.status=''"   class="LASLink" onclick="prompt('Clicking OK will save this link to your list of bookmarks.\nThis will save the current application state so that you may return to this point\nat any time in the future.','http://' + document.location.host + document.location.pathname + '?' + LAS.uirequest)">Link to this page</a>
+		</td>
+	</TR><TBODY>
+</TABLE>

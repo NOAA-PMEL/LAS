@@ -1139,8 +1139,9 @@ EOF
 
 
 my $app = $LasConfig{appname};
-print "Your V7.0 user interface to LAS is at: http://$servlet_root_url/$app/getUI.do\n";
-print "Your old V6.x user interface to LAS is at: http://$servlet_root_url/$app/servlets/dataset\n";
+print "Your V7.0 user interface to LAS is at: http://$servlet_root_url/$app/\n";
+print "Your old V6.x user interface to LAS is at: http://$servlet_root_url/$app/v6/dataset\n";
+print "Bookmarks and links of the form: http://$servlet_root_url/$app/servlets/dataset are redirectd to the V7 UI.\n";
 print "You can run our suite of Selenium tests on you installation.  Instructions are here: http://ferret.pmel.noaa.gov/LAS/documentation/installer-documentation/test-las-using-selenium/running-the-selenium-tests\n\n";
 
 print "You can test your F-TDS setup by running the LASTest suite.\n";
