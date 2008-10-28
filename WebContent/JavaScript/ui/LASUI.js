@@ -1143,10 +1143,10 @@ LASUI.prototype.updateConstraints = function (view) {
 	}
 	var reset=false;
 
-	if(this.state.lastgrid) {
-		if(this.state.grid.response.grid.ID!=this.state.lastgrid.response.grid.ID||(this.state.lastDataset!=this.state.dataset||this.state.lastVariable!=this.state.variable))
-			reset=true;
-	}
+	//if(this.state.lastgrid) {
+	//	if(this.state.grid.response.grid.ID!=this.state.lastgrid.response.grid.ID||(this.state.lastDataset!=this.state.dataset||this.state.lastVariable!=this.state.variable))
+	//		reset=true;
+	//}
 	this.resetSelectionBox =false;
 	if(this.state.lastDataset!=this.state.dataset) {
 		reset =true;
@@ -1218,9 +1218,19 @@ LASUI.prototype.initXYSelect = function (mode, reset) {
 	if(this.state.grid.getAxis('x') && this.state.grid.getAxis('y') && mode)
 	 {
 		var grid = {"x": {"min" : 0, "max" :0}, "y" : {"min" :0, "max" : 0}};
+		
+		if(document.all) { 
+			//alert('foo');
+			this.refs.plot = window.frames["output"].document;
+			var str ="";
+			for(var i in this.refs.plot)
+				str+= i + ",";
+			alert(str);			
+		}
 
 		if(this.refs.plot.extents) {
 			var sel = this.refs.plot.extents.selection.grid;
+			
 			//alert(this.refs.plot.extents.selection.grid.x.min + ' & ' + sel.x.min + ' ' + reset);
 		}
 		else {
