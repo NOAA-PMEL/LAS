@@ -585,10 +585,6 @@ LASUI.prototype.setVariable = function (evt) {
 	//start an array of selected variables for this datasetthis.state.datasets[this.state.dataset] if we havent already
 	this.state.datasets[datasetID] = dataset.category;
 
-	//get all the other data for this dataset/variable combo
-	this.state.lastVariable = this.state.variable;
-	this.state.lastDataset = this.state.dataset;
-
 	this.state.dataset = datasetID;
 	this.state.variable = variableID;
 	this.getGrid(datasetID,variableID);
@@ -732,13 +728,13 @@ LASUI.prototype.setDownloadOperation = function (evt) {
 
 	this.state.operation.download=id;
 	this.state.optiondefs.download =optiondef;
-	
+
 	var view = args[2];
 	var optiondef = args[3];
 	this.state.view.download = this.state.view.plot;//just use the plot for the sprint
 
-	
-	
+
+
 
 }
 LASUI.prototype.doDownload = function () {
@@ -746,20 +742,20 @@ LASUI.prototype.doDownload = function () {
 		alert("Please choose a file format to download.");
 		return;
 	}
-	
+
 	if(document.getElementById("OPTION_DOWNLOAD_"+this.state.operation.download).disabled) {
 		alert("The " + document.getElementById("OPTION_DOWNLOAD_"+this.state.operation.download).innerHTML + " download format is not compatible with the current plot view. Please choose another plot view, or another download format.");
 		return;
 	}
-	
-	
-		if(this.state.optiondefs.download != "") { 
+
+
+		if(this.state.optiondefs.download != "") {
 			this.toggleUIMask('');
 			this.refs.options.download.DOMNode.style.display="";
 			this.getOptions(this.state.optiondefs.download, "download", true);
 		} else
-			this.makeRequest({},"download");			
-	
+			this.makeRequest({},"download");
+
 }
 
 /**
@@ -1148,8 +1144,10 @@ LASUI.prototype.updateConstraints = function (view) {
 			reset=true;
 	}
 	this.resetSelectionBox =false;
-	if(this.state.lastDataset!=this.state.dataset)
+	if(this.state.lastDataset!=this.state.dataset) {
+		reset =true;
 		this.resetSelectionBox=true;
+	}
 	if(!this.initialized)
 		reset=true;
 
@@ -1220,8 +1218,8 @@ LASUI.prototype.initXYSelect = function (mode, reset) {
 		if(this.refs.plot.extents) {
 			var sel = this.refs.plot.extents.selection.grid;
 			//alert(this.refs.plot.extents.selection.grid.x.min + ' & ' + sel.x.min + ' ' + reset);
-	}
-		else
+		}
+		else {
 			var sel = {"x" : {"min" : this.refs.XYSelect.getSelectionGridXMin(),
 					 "max" : this.refs.XYSelect.getSelectionGridXMax()
 					},
@@ -1229,6 +1227,7 @@ LASUI.prototype.initXYSelect = function (mode, reset) {
 					 "max" : this.refs.XYSelect.getSelectionGridYMax()
 					}
 			}
+		}
 
 		if(reset) {
 			if(this.state.grid.hasArange('x')||this.state.grid.hasMenu('x')) {
@@ -1241,6 +1240,7 @@ LASUI.prototype.initXYSelect = function (mode, reset) {
 				grid.y.min = parseFloat(this.state.grid.getLo('y'))-0.5;
 				grid.y.max = parseFloat(this.state.grid.getHi('y'))+0.5;
 			}
+				sel = grid;
 		} else
 			grid = {"x" : {"min" : this.refs.XYSelect.getPlotGridXMin(),
 					 "max" : this.refs.XYSelect.getPlotGridXMax()
@@ -1250,7 +1250,9 @@ LASUI.prototype.initXYSelect = function (mode, reset) {
 					}
 				}
 
-		if (sel.x.min>grid.x.min&&sel.x.min<grid.x.max && this.firstload!=true && !this.resetSelectionBox) {
+
+
+		if (sel.x.min>grid.x.min&&sel.x.min<grid.x.max && this.firstload!=true) {
 			if(sel.x.min == sel.x.max&&mode!='y'&&mode!='point') {
 				if(this.state.xybox.width) {
 					if(sel.x.min-this.state.xybox.width/2 > grid.x.min)
@@ -1737,6 +1739,9 @@ LASUI.prototype.makeRequest = function (evt, type) {
 	this.updating = true;
 	this.refs.XYSelect.updatePixelExtents();
 	this.updating = false;
+	//get all the other data for this dataset/variable combo
+	this.state.lastVariable = this.state.variable;
+	this.state.lastDataset = this.state.dataset;
 	document.getElementById('update').style.color='';
 
 }
@@ -1924,10 +1929,10 @@ LASUI.prototype.resetOptions= function(type)  {
 
 }
 LASUI.prototype.showOptionInfo = function(evt) {
-	if(this.optionInfo) 
+	if(this.optionInfo)
 		if(this.optionInfo.parentNode)
 			this.optionInfo.parentNode.removeChild(this.optionInfo);
-	
+
 	this.optionInfo = document.createElement("DIV");
 	document.body.appendChild(this.optionInfo);
 	this.optionInfo.className = "LASPopupDIVNode";
@@ -1973,19 +1978,19 @@ LASUI.prototype.setOption = function (evt) {
 
 }
 LASUI.prototype.setChangedOptions = function (type) {
-	var ct = 0;	
+	var ct = 0;
 	for(var id in this.state.newproperties[type]) {
 		this.state.properties[type][id]=this.state.newproperties[type][id];
-		ct++;	
+		ct++;
 	}
-	
+
 	if(!this.updating&&type=="plot"&&ct>0)
 		if(this.autoupdate)
 			this.makeRequest();
 		else
 			this.showUpdateLink();
 	this.state.newproperties = {"plot":[],"external":[],"download":[]};
-	
+
 }
 LASUI.prototype.cancelChangedOptions = function () {
 	for(var type in this.state.newproperties)
@@ -2001,7 +2006,7 @@ LASUI.prototype.cancelChangedOptions = function () {
 					if(this.refs.options.cache[id].INPUTNode)
 						this.refs.options.cache[id].INPUTNode.value = this.state.properties[type][id].value;
 			}
-		}	
+		}
 }
 /**
  * initMap()
