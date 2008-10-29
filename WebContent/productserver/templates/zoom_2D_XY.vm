@@ -99,17 +99,18 @@ var args = {
                            'height' :$las_map_scale.getYImageSize(),
                            'extent' : {                                       //coordinate extent of the image being passed
                                'x' : {
-                                   'min' : $las_map_scale.getXAxisLowerLeft(),
-                                   'max' : $las_map_scale.getXAxisUpperRight()
+                                   'min' : $las_map_scale.getXAxisLowerLeft()-1,
+                                   'max' : $las_map_scale.getXAxisUpperRight()+1,
                                },
                                'y' : {
-                                   'min' : $las_map_scale.getYAxisLowerLeft(),
-                                   'max' : $las_map_scale.getYAxisUpperRight()
+                                   'min' : $las_map_scale.getYAxisLowerLeft()-1,
+                                   'max' : $las_map_scale.getYAxisUpperRight()+1
                                }
                            }
                        }
                   };
 myMapWidget = new MapWidget(args);
+
 }
 
 
