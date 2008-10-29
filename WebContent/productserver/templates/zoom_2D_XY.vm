@@ -100,7 +100,7 @@ var args = {
                            'extent' : {                                       //coordinate extent of the image being passed
                                'x' : {
                                    'min' : $las_map_scale.getXAxisLowerLeft()-1,
-                                   'max' : $las_map_scale.getXAxisUpperRight()+1,
+                                   'max' : $las_map_scale.getXAxisUpperRight()+1
                                },
                                'y' : {
                                    'min' : $las_map_scale.getYAxisLowerLeft()-1,
@@ -108,8 +108,8 @@ var args = {
                                }
                            }
                        }
-                  };
-myMapWidget = new MapWidget(args);
+                  }
+		myMapWidget = new MapWidget(args);
 
 }
 
