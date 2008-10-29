@@ -98,7 +98,7 @@ LASUI.prototype.initUI = function (anchorId)
 		this.state.operation.plot = this.params.plot;
 		this.state.view.plot = this.params.view;
 		//this.state.xybox = eval("("+unescape(this.params.bbox)+")");
-		
+
 		this.autoupdate = this.params.autoupdate;
 		if((this.state.dataset!=""||this.params.catid!="")&&this.state.variable!="")
 			this.submitOnLoad=true;
@@ -183,7 +183,7 @@ LASUI.prototype.initUI = function (anchorId)
 
 		if(this.params.catid) {
 			var catid=this.params.catid;
-			
+
 		}
 		else
 			var catid=this.state.dataset;
@@ -1126,7 +1126,7 @@ LASUI.prototype.roundGrid = function(grid) {
 	outgrid.x.min = Math.round(grid.x.min*1000)/1000;
 	outgrid.x.max = Math.round(grid.x.max*1000)/1000;
 	outgrid.y.min = Math.round(grid.y.min*1000)/1000;
-	outgrid.y.max = Math.round(grid.y.max*1000)/1000;	
+	outgrid.y.max = Math.round(grid.y.max*1000)/1000;
 	return(outgrid);
 }
 /**
@@ -1156,22 +1156,22 @@ LASUI.prototype.updateConstraints = function (view) {
 		if(this.state.grid.response.grid.ID!=this.state.lastgrid.response.grid.ID)
 			reset=true;
 	}
-	
-		
-	
-	
+
+
+
+
 	if(this.roundGrid(this.refs.XYSelect.extents.data.grid) != this.roundGrid(this.refs.XYSelect.extents.selection.grid))
 		this.fullXYExtent=false;
-	
+
 	if((this.state.lastDataset!=this.state.dataset&&this.fullXYExtent)||this.fullXYExtent||this.resetXY||!this.initialized) {
 		var resetXY =true;
 		this.resetXY = false;
 	}
 
-	
+
 	if(this.state.lastDataset!=this.state.dataset)
 		var reset=true;
-	
+
 	if(!this.initialized)
 		reset=true;
 
@@ -1194,8 +1194,8 @@ LASUI.prototype.updateConstraints = function (view) {
 			eval("this.init" + this.state.grid.response.grid.axis[d].type.toUpperCase() + "Constraint('range',reset)");
 	//this.updating = true;
 	this.refs.XYSelect.updatePixelExtents();
-	
-	
+
+
 	if(this.refs.analysis.enabled)
 		for(var d=0;d<this.state.grid.response.grid.axis.length;d++)
 			if(view.indexOf(this.state.grid.response.grid.axis[d].type) < 0)
@@ -1219,14 +1219,14 @@ LASUI.prototype.updateConstraints = function (view) {
 
 
 	this.initialized=true;
-	if(!this.updating) 
+	if(!this.updating)
 		if(this.autoupdate||this.submitOnLoad){
 			this.submitOnLoad =false;
 			this.makeRequest();
 
 		} else
 			this.showUpdateLink();
-	
+
 	this.updating = false;
 }
 /**
@@ -1240,20 +1240,20 @@ LASUI.prototype.initXYSelect = function (mode, reset) {
 	if(this.state.grid.getAxis('x') && this.state.grid.getAxis('y') && mode)
 	 {
 		var grid = {"x": {"min" : 0, "max" :0}, "y" : {"min" :0, "max" : 0}};
-	
-		
-		/*if(document.all) { 
+
+
+		/*if(document.all) {
 			//alert('foo');
 			this.refs.plot = window.frames["output"].document;
 			var str ="";
 			for(var i in this.refs.plot)
 				str+= i + ",";
-			alert(str);			
+			alert(str);
 		}*/
 
 		if(this.refs.plot.extents) {
 			var sel = this.refs.plot.extents.selection.grid;
-			
+
 			//alert(this.refs.plot.extents.selection.grid.x.min + ' & ' + sel.x.min + ' ' + reset);
 		}
 		else {
@@ -1265,13 +1265,13 @@ LASUI.prototype.initXYSelect = function (mode, reset) {
 					}
 			}
 		}
-		
+
 		var resetGrid=false;
 		if(this.state.lastgrid) {
 			if(this.state.grid.response.grid.ID!=this.state.lastgrid.response.grid.ID)
 			resetGrid=true;
 		}
-			
+
 		if(reset||resetGrid) {
 			if(this.state.grid.hasArange('x')||this.state.grid.hasMenu('x')) {
 				grid.x.min = parseFloat(this.state.grid.getLo('x'));
@@ -1291,13 +1291,18 @@ LASUI.prototype.initXYSelect = function (mode, reset) {
 					 "max" : this.refs.XYSelect.getPlotGridYMax()
 					}
 				}
+		var selgrid = this.roundGrid(this.refs.XYSelect.extents.selection.grid)
+		var datagrid = this.roundGrid(grid);
 
-		if(reset||(this.refs.XYSelect.extents.selection.grid.x.min<this.state.grid.getLo('x')||this.refs.XYSelect.extents.selection.grid.x.min>this.state.grid.getHi('x')) 
-	  ||(this.refs.XYSelect.extents.selection.grid.x.max>this.state.grid.getHi('x')||this.refs.XYSelect.extents.selection.grid.x.max<this.state.grid.getLo('x'))
-	  ||(this.refs.XYSelect.extents.selection.grid.y.min<this.state.grid.getLo('y')||this.refs.XYSelect.extents.selection.grid.y.min>this.state.grid.getHi('y'))
-	  ||(this.refs.XYSelect.extents.selection.grid.y.max>this.state.grid.getHi('y')||this.refs.XYSelect.extents.selection.grid.y.max<this.state.grid.getLo('y')))
+		if(reset||(
+			(selgrid.x.min<datagrid.x.min||selgrid.x.min>datagrid.x.max)||
+			(selgrid.x.max>datagrid.x.max||selgrid.x.max<datagrid.x.min)||
+			(selgrid.y.min<datagrid.y.min||selgrid.y.min>datagrid.y.max)||
+			(selgrid.y.max>datagrid.y.max||selgrid.y.max<datagrid.y.min)
+			)
+		   )
 			sel = grid;
-			
+
 
 		if (sel.x.min>grid.x.min&&sel.x.min<grid.x.max && this.firstload!=true) {
 			if(sel.x.min == sel.x.max&&mode!='y'&&mode!='point') {
@@ -1378,7 +1383,7 @@ LASUI.prototype.initXYSelect = function (mode, reset) {
 		this.refs.XYSelect.zoomOnBBox(grid);
 		this.refs.XYSelect.setDataGridBBox(grid);
 		if(reset==true) {
-			
+
 			this.refs.XYSelect.setSelectionGridBBox(grid);
 		}
 
@@ -1410,9 +1415,9 @@ LASUI.prototype.initXYSelect = function (mode, reset) {
 		if(sel.y.min!=sel.y.max)
 			this.state.xybox.height=(sel.y.max-sel.y.min);
 
-		
+
 		this.refs.XYSelect.setView(mode);
-		
+
 	}
 	this.refs.XYSelect.updatePixelExtents();
 }
@@ -1608,7 +1613,7 @@ LASUI.prototype.showUpdateLink = function (){
 LASUI.prototype.toggleAutoUpdate = function (e, toggle) {
 
 	this.autoupdate = toggle;
-	
+
 	if(this.autoupdate&&this.expired)
 		this.makeRequest();
 	var e = e||event;/* get IE event ( not passed ) */
@@ -1652,7 +1657,7 @@ LASUI.prototype.makeRequest = function (evt, type) {
 		this.uirequest+="&varid=" + this.state.variable;
 		this.uirequest+='&plot=' + this.state.operation.plot;
 		this.uirequest+='&view=' + this.state.view.plot;
-		
+
 		//this.uirequest.setProperty('ui','state',JSON.stringify(this.state));
 		var uioptions = '';
 		//set the options
@@ -2151,7 +2156,7 @@ LASUI.prototype.onafterdraw = function (evt) {
 		this.fullXYExtent=false;
 	else
 		this.fullXYExtent=true;
-					
+
 	if(!this.updating)
 		if(this.autoupdate) {
 			this.makeRequest();
