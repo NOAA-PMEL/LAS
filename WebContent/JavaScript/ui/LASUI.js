@@ -1294,13 +1294,15 @@ LASUI.prototype.initXYSelect = function (mode, reset) {
 		var selgrid = this.roundGrid(this.refs.XYSelect.extents.selection.grid)
 		var datagrid = this.roundGrid(grid);
 
-		if(reset||(
-			(selgrid.x.min<datagrid.x.min||selgrid.x.min>datagrid.x.max)||
-			(selgrid.x.max>datagrid.x.max||selgrid.x.max<datagrid.x.min)||
-			(selgrid.y.min<datagrid.y.min||selgrid.y.min>datagrid.y.max)||
-			(selgrid.y.max>datagrid.y.max||selgrid.y.max<datagrid.y.min)
-			)
-		   )
+		if(reset)//||)
+
+		//(
+			//(selgrid.x.min<datagrid.x.min||selgrid.x.min>datagrid.x.max)||
+			//(selgrid.x.max>datagrid.x.max||selgrid.x.max<datagrid.x.min)||
+			//(selgrid.y.min<datagrid.y.min||selgrid.y.min>datagrid.y.max)||
+			//(selgrid.y.max>datagrid.y.max||selgrid.y.max<datagrid.y.min)
+			//)
+		   //)
 			sel = grid;
 
 
