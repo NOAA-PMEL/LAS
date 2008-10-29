@@ -1,3 +1,5 @@
+<!-- NOTE TO INSTALLERS -->
+<!-- CONFIGURE DEAFULT DATASET AND VARIABLE AT LINE #70 IN THIS FILE -->
 <html>
 <head>
 <script type="text/javascript">
@@ -65,6 +67,10 @@ if(typeof navigator.__ice_version!="undefined"){exclude=1;ie4=0;}
 
 
 if(ie6||(ns6&&saf)||(ns6&&mz7)) 
+// CHANGE THE FOLLOWING LINE TO CONFIGURE A DEFAULT DATASET AND VARIABLE AT STARTUP
+// USE THE CATEGORY ID OF THE DATASET DESIRED, NOT THE DATASET ID
+// EXAMPLE:
+// document.location='getUI.do?catid=7387BAEA4E950F770B32C23837B69690&varid=sst'; 
 	document.location='getUI.do';
 else
 	document.location='v6/dataset';
