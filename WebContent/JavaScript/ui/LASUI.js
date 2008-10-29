@@ -1242,14 +1242,14 @@ LASUI.prototype.initXYSelect = function (mode, reset) {
 		var grid = {"x": {"min" : 0, "max" :0}, "y" : {"min" :0, "max" : 0}};
 	
 		
-		if(document.all) { 
+		/*if(document.all) { 
 			//alert('foo');
 			this.refs.plot = window.frames["output"].document;
 			var str ="";
 			for(var i in this.refs.plot)
 				str+= i + ",";
 			alert(str);			
-		}
+		}*/
 
 		if(this.refs.plot.extents) {
 			var sel = this.refs.plot.extents.selection.grid;
