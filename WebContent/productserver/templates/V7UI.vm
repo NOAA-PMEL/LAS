@@ -183,7 +183,7 @@
 						<strong>
 						Latitude range <input size=3  id="input_minY" type="text" value="-90.0">&nbsp;:&nbsp;<input id="input_maxY" size=3 type="text" value="90.0"><br>
 						Longitude range <input size=3 id="input_minX" value="-180.0">&nbsp;:&nbsp;<input value="180.0" size=3 id="input_maxX"><br>
-						<!--<span class="LASLink" onclick="LAS.resetConstraints=true;LAS.updateConstraints()">Reset Map</span>-->
+						<span class="LASLink" onclick="LAS.resetXY=true;LAS.updateConstraints()">Reset Map</span>
 						</strong>					
 					<div id="plotType"></div>
 					<div id="Date"></div>
