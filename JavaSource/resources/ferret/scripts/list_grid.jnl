@@ -132,9 +132,17 @@ IF ($data_0_intervals"|xyzt>1|*>0") THEN
   IF ($native_curvilinear_xy"0") THEN \
     DEFINE SYMBOL tmp = ($data_var)[d=($data_num),\
     i=($clon_imin):($clon_imax):($xstride_coord),j=($clat_jmin):($clat_jmax):($ystride_coord),\
-    Z=($region_z_lo):($region_z_hi),T="($region_t_lo)":"($region_t_hi)"]
+    ($region_zt)]
   LET xyztvar = ($tmp)
-  LET mask =  IF xyztvar[Z=@NGD,T=@NGD] GT 0 THEN 1
+  IF `($region_z"0|*>1") AND ($region_t"0|*>1")` THEN 
+     LET mask = IF xyztvar[Z=@NGD,T=@NGD] GT 0 THEN 1
+  ELIF ($region_z"0|*>1") THEN
+     LET mask = IF xyztvar[Z=@NGD] GT 0 THEN 1
+  ELIF ($region_t"0|*>1") THEN 
+     LET mask = IF xyztvar[T=@NGD] GT 0 THEN 1
+  ELSE
+     LET mask = 1
+  ENDIF
 ENDIF
 
 LET llon_list = XSEQUENCE(llon*mask)
