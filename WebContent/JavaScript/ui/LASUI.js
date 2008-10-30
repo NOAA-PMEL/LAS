@@ -1294,7 +1294,7 @@ LASUI.prototype.initXYSelect = function (mode, reset) {
 		var selgrid = this.roundGrid(this.refs.XYSelect.extents.selection.grid)
 		var datagrid = this.roundGrid(grid);
 
-		if(reset)//||)
+		if(reset||selgrid.x.max-selgrid.x.min >350)
 
 		//(
 			//(selgrid.x.min<datagrid.x.min||selgrid.x.min>datagrid.x.max)||
@@ -1794,9 +1794,9 @@ LASUI.prototype.makeRequest = function (evt, type) {
 			window.open(this.hrefs.getProduct.url + '?xml=' +  escape(this.request.getXMLText()));
 	}
 
-	//this.updating = true;
+	if(this.updating)
 	this.refs.XYSelect.updatePixelExtents();
-	//this.updating= false;
+	this.updating =false;
 	//get all the other data for this dataset/variable combo
 	this.state.lastVariable = this.state.variable;
 	this.state.lastDataset = this.state.dataset;
