@@ -516,7 +516,7 @@ LASUI.prototype.onSetVariable = function() {
 				document.getElementById("analysisWrapper").style.display="none";
 				this.refs.analysis.enabled = false;
 			}
-			document.getElementById("V6").href="servlets/datasets?dset=" + escape(categories + "/" + varObj.name);
+			document.getElementById("V6").href="servlets/datasets?dset=" + this.urlencode(categories + "/" + varObj.name);
 		}
 }
 /**
@@ -1665,7 +1665,7 @@ LASUI.prototype.makeRequest = function (evt, type) {
 		//set the options
 		for(var p in this.state.properties[type])
 			if((typeof this.state.properties[type][p] != "function") && (typeof this.state.properties[type][p] == "object")) {
-				this.request.setProperty(this.state.properties[type][p].type, p, escape(this.state.properties[type][p].value));
+				this.request.setProperty(this.state.properties[type][p].type, p, this.urlencode(this.state.properties[type][p].value));
 				//uioptions[this.state.properties.plot[p].type] = {p : escape(this.state.properties[type][p].value)};
 			}
 		var view = this.state.view[type];
@@ -1744,10 +1744,10 @@ LASUI.prototype.makeRequest = function (evt, type) {
 						if(this.state.view[type].indexOf('t')>=0||this.state.datasets[this.state.dataset].getChildByID(this.state.variable).grid_type=="scattered")
 							if(this.state.grid.hasMenu('t')){
 								this.request.addRange('t',this.refs.DW[0].value,this.refs.DW[1].value);
-								this.uirequest+="&t="+escape("{ 'min' : '" + this.refs.DW[0].value+ "', 'max' : '" + this.refs.DW[1].value + "'}");
+								//this.uirequest+="&t="+escape("{ 'min' : '" + this.refs.DW[0].value+ "', 'max' : '" + this.refs.DW[1].value + "'}");
 						} else {
 							this.request.addRange('t',this.refs.DW.getDate1_Ferret(),this.refs.DW.getDate2_Ferret());
-							this.uirequest+="&t="+escape("{ 'min' : '" + this.refs.DW.getDate1_Ferret()+ "', 'max' : '" + this.refs.DW.getDate2_Ferret()+ "'}");
+							//this.uirequest+="&t="+escape("{ 'min' : '" + this.refs.DW.getDate1_Ferret()+ "', 'max' : '" + this.refs.DW.getDate2_Ferret()+ "'}");
 						}
 					else
 						if(this.state.grid.hasMenu('t')){
@@ -1775,10 +1775,10 @@ LASUI.prototype.makeRequest = function (evt, type) {
 			if(this.refs.constraints[c].apply.checked)
 			switch(this.refs.constraints[c].type) {
 				case 'text' :
-					this.request.addTextConstraint(escape(this.refs.constraints[c].lhs.value),escape(this.refs.constraints[c].ops.value),escape(this.refs.constraints[c].rhs.value));
+					this.request.addTextConstraint(this.urlencode(this.refs.constraints[c].lhs.value),this.urlencode(this.refs.constraints[c].ops.value),this.urlencode(this.refs.constraints[c].rhs.value));
 				break;
 				case 'variable' :
-					this.request.addVariableConstraint(escape(this.state.dataset), escape(this.refs.constraints[c].lhs.value),escape(this.refs.constraints[c].ops.value),escape(this.refs.constraints[c].rhs.value));
+					this.request.addVariableConstraint(this.urlencode(this.state.dataset), this.urlencode(this.refs.constraints[c].lhs.value),this.urlencode(this.refs.constraints[c].ops.value),this.urlencode(this.refs.constraints[c].rhs.value));
 				break;
 			}
 		}
@@ -1789,9 +1789,9 @@ LASUI.prototype.makeRequest = function (evt, type) {
 				document.getElementById("wait_msg").style.display="";
 			document.getElementById('output').style.visibility="hidden";
 			if (this.firstload==true) document.getElementById(this.anchors.output).onload = this.onFirstPlotLoad.LASBind(this);
-			document.getElementById('output').src = (this.hrefs.getProduct.url + '?xml=' + escape(this.request.getXMLText()));
+			document.getElementById('output').src = (this.hrefs.getProduct.url + '?xml=' + this.urlencode(this.request.getXMLText()));
 		} else
-			window.open(this.hrefs.getProduct.url + '?xml=' +  escape(this.request.getXMLText()));
+			window.open(this.hrefs.getProduct.url + '?xml=' +  this.urlencode(this.request.getXMLText()));
 	}
 
 	if(this.updating)
@@ -2106,7 +2106,7 @@ LASUI.prototype.initMap = function (mapid) {
 	req.setOperation("xy_map");
 	req.setRange("x",-180,180);
 	req.setRange("y",-90,90);
-	args.img.src = this.hrefs.getProduct.url + "?xml=" + escape(req.getXMLText()) + "&stream=true&stream_ID=plot_image";
+	args.img.src = this.hrefs.getProduct.url + "?xml=" + this.urlencode(req.getXMLText()) + "&stream=true&stream_ID=plot_image";
   	this.refs.XYSelect = new MapWidget(args);
   	this.refs.XYSelect.disable();
 
@@ -2441,3 +2441,45 @@ LASUI.prototype.clone = function (obj) {
 		myclone[i] = this.clone(obj[i]);
 	return myclone;
  }
+LASUI.prototype.urlencode = function ( str ) {
+    // http://kevin.vanzonneveld.net
+    // +   original by: Philip Peterson
+    // +   improved by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
+    // +      input by: AJ
+    // +   improved by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
+    // %          note: info on what encoding functions to use from: http://xkr.us/articles/javascript/encode-compare/
+    // *     example 1: urlencode('Kevin van Zonneveld!');
+    // *     returns 1: 'Kevin+van+Zonneveld%21'
+    // *     example 2: urlencode('http://kevin.vanzonneveld.net/');
+    // *     returns 2: 'http%3A%2F%2Fkevin.vanzonneveld.net%2F'
+    // *     example 3: urlencode('http://www.google.nl/search?q=php.js&ie=utf-8&oe=utf-8&aq=t&rls=com.ubuntu:en-US:unofficial&client=firefox-a');
+    // *     returns 3: 'http%3A%2F%2Fwww.google.nl%2Fsearch%3Fq%3Dphp.js%26ie%3Dutf-8%26oe%3Dutf-8%26aq%3Dt%26rls%3Dcom.ubuntu%3Aen-US%3Aunofficial%26client%3Dfirefox-a'
+
+    var histogram = {}, histogram_r = {}, code = 0, tmp_arr = [];
+    var ret = str.toString();
+
+    var replacer = function(search, replace, str) {
+        var tmp_arr = [];
+        tmp_arr = str.split(search);
+        return tmp_arr.join(replace);
+    };
+
+    // The histogram is identical to the one in urldecode.
+    histogram['!']   = '%21';
+    histogram['%20'] = '+';
+
+    // Begin with encodeURIComponent, which most resembles PHP's encoding functions
+    ret = encodeURIComponent(ret);
+
+    for (search in histogram) {
+        replace = histogram[search];
+        ret = replacer(search, replace, ret) // Custom replace. No regexing
+    }
+
+    // Uppercase for full PHP compatibility
+    return ret.replace(/(\%([a-z0-9]{2}))/g, function(full, m1, m2) {
+        return "%"+m2.toUpperCase();
+    });
+
+    return ret;
+}
