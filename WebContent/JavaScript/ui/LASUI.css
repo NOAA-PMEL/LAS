@@ -159,6 +159,7 @@ font-weight: bold;
 }
 .LASConstraintsPane {
 	width:225px;
+	height:490px;
 	overflow-x:auto;
 	overflow-y:hide;
 	
