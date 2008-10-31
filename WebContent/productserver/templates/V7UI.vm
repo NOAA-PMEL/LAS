@@ -180,39 +180,40 @@
 			<table height="600px" width="1024px"><tbody><tr><td valign="top" border=1>
 				<div id="constraints">
 					<div id="MapWidget" style="border:1px solid black;" ><div style="position:absolute;z-index:4;text-align:center"><!--<img src="images/north-mini.png" onmousedown="LAS.refs.XYSelect.panPlot(0,10);"><br>--><img src="images/west-mini.png" onmousedown="LAS.refs.XYSelect.panPlot(-20,0);"><img src="images/east-mini.png" onmousedown="LAS.refs.XYSelect.panPlot(20,0);"><!--<br><img src="images/south-mini.png" onmousedown="LAS.refs.XYSelect.panPlot(0,-10);"><br><img src="images/zoom-plus-mini.png" onclick="LAS.refs.XYSelect.zoom(2);"><br><img src="images/zoom-minus-mini.png"  onclick="LAS.refs.XYSelect.zoom(-1)">--></div></div>
-						<strong>
+					<strong>
 						Latitude range <input size=3  id="input_minY" type="text" value="-90.0">&nbsp;:&nbsp;<input id="input_maxY" size=3 type="text" value="90.0"><br>
 						Longitude range <input size=3 id="input_minX" value="-180.0">&nbsp;:&nbsp;<input value="180.0" size=3 id="input_maxX"><br>
 						<span class="LASLink" onclick="LAS.resetXY=true;LAS.updateConstraints()">Reset Map</span>
-						</strong>
-				<div id="constraintsScroll"  class="LASConstraintsPane">
-					<div id="plotType"></div>
-					<div id="Date"></div>
-					<div id="Depth"></div>
-					<div id="analysisWrapper"  class="LASAnalysis" style="display:none">							
-						<a class="LASLink" value=false onclick="if(!LAS.refs.analysis.enabled){LAS.showAnalysis();this.innerHTML='Remove analysis';}else{LAS.hideAnalysis();this.innerHTML='Apply analysis';}">Apply analysis</a>
-						<div id="analysis" style="display:none;">
-							<strong>Analysis type</strong><br>
-							<select id="analysis_op" name="analysis_op">
-								<option selected="" value="">None</option>
-								<option value="ave">Average</option>
-								<option value="min">Minimum</option>
-								<option value="max">Maximum</option>
-								<option value="sum">Sum</option>
-								<option value="var">Variance</option>
-							</select><br>
-							<strong>Analysis region type</strong><br>						
-							<select id="analysis_axes">
-								<option value="">None</option>
-								<option id="xy_analysis" value="xy">Area</option>
-								<option id="x_analysis" value="x">Longitude</option>
-							        <option id="y_analysis" value="y">Latitude</option>
-								<option id="z_analysis" value="z">Depth</option>
-							 	<option id="t_analysis" value="t">Time</option>
-							</select>
+					</strong>
+					<div id="constraintsScroll"  class="LASConstraintsPane">
+						<div id="plotType"></div>
+						<div id="Date"></div>
+						<div id="Depth"></div>
+						<div id="analysisWrapper"  class="LASAnalysis" style="display:none">							
+							<a class="LASLink" value=false onclick="if(!LAS.refs.analysis.enabled){LAS.showAnalysis();this.innerHTML='Remove analysis';}else{LAS.hideAnalysis();this.innerHTML='Apply analysis';}">Apply analysis</a>
+							<div id="analysis" style="display:none;">
+								<strong>Analysis type</strong><br>
+								<select id="analysis_op" name="analysis_op">
+									<option selected="" value="">None</option>
+									<option value="ave">Average</option>
+									<option value="min">Minimum</option>
+									<option value="max">Maximum</option>
+									<option value="sum">Sum</option>
+									<option value="var">Variance</option>
+								</select><br>
+								<strong>Analysis region type</strong><br>						
+								<select id="analysis_axes">
+									<option value="">None</option>
+									<option id="xy_analysis" value="xy">Area</option>
+									<option id="x_analysis" value="x">Longitude</option>
+								        <option id="y_analysis" value="y">Latitude</option>
+									<option id="z_analysis" value="z">Depth</option>
+								 	<option id="t_analysis" value="t">Time</option>
+								</select>
+							</div>
 						</div>
-					</div>
-					<div id="DataConstraints"></div></div>					
+						<div id="DataConstraints"></div>
+					</div>					
 				</div></td><td>
 				<div id="wait_msg">Please wait while the plot loads...</div>
 				<iframe width="100%" height="100%" 
