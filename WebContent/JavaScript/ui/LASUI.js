@@ -231,6 +231,21 @@ LASUI.prototype.setInitialVariable = function(strJson) {
 		OPTIONNode.id = "OPTION_" + category.getChildID(i);
 		document.getElementById(this.anchors.variables).options[document.getElementById(this.anchors.variables).length] = OPTIONNode;
 	}
+
+	var varObj = this.state.datasets[this.state.dataset].getChildByID(this.state.variable);
+	if(varObj) {
+				if(varObj.grid_type!="scattered"){
+					if(this.refs.analysis.enabled) {
+						this.hideAnalysis();
+						this.showAnalysis();
+					}
+					document.getElementById("analysisWrapper").style.display="";
+				} else {
+					document.getElementById("analysisWrapper").style.display="none";
+					this.refs.analysis.enabled = false;
+				}
+				//document.getElementById("V6").href="servlets/datasets?dset=" + this.urlencode(categories + "/" + varObj.name);
+		}
 }
 }
 LASUI.prototype.getMetadata = function (evt) {
@@ -511,7 +526,7 @@ LASUI.prototype.onSetVariable = function() {
 					this.hideAnalysis();
 					this.showAnalysis();
 				}
-				document.getElementById("analysisWrapper").style.display="";
+
 			} else {
 				document.getElementById("analysisWrapper").style.display="none";
 				this.refs.analysis.enabled = false;
@@ -1160,12 +1175,10 @@ LASUI.prototype.updateConstraints = function (view) {
 
 
 
-	if(this.roundGrid(this.refs.XYSelect.extents.data.grid) != this.roundGrid(this.refs.XYSelect.extents.selection.grid))
-		this.fullXYExtent=false;
-
-	if((this.state.lastDataset!=this.state.dataset&&this.fullXYExtent)||this.fullXYExtent||this.resetXY||!this.initialized) {
+	if(this.state.lastDataset!=this.state.dataset) {//&&this.state.selectGlobal)||this.state.selectGlobal||this.resetXY||!this.initialized) {
 		var resetXY =true;
 		this.resetXY = false;
+		this.state.selectGlobal = false;
 	}
 
 
@@ -1272,37 +1285,17 @@ LASUI.prototype.initXYSelect = function (mode, reset) {
 			resetGrid=true;
 		}
 
-		if(reset||resetGrid) {
-			if(this.state.grid.hasArange('x')||this.state.grid.hasMenu('x')) {
+		if(this.state.grid.hasArange('x')||this.state.grid.hasMenu('x')) {
 				grid.x.min = parseFloat(this.state.grid.getLo('x'));
 				grid.x.max = parseFloat(this.state.grid.getHi('x'));
 			}
 
-			if(this.state.grid.hasArange('y')||this.state.grid.hasMenu('y'))
-			{
-				grid.y.min = parseFloat(this.state.grid.getLo('y'));
-				grid.y.max = parseFloat(this.state.grid.getHi('y'));
-			}
-		} else
-			grid = {"x" : {"min" : this.refs.XYSelect.getPlotGridXMin(),
-					 "max" : this.refs.XYSelect.getPlotGridXMax()
-					},
-				 "y" : {"min" : this.refs.XYSelect.getPlotGridYMin(),
-					 "max" : this.refs.XYSelect.getPlotGridYMax()
-					}
-				}
-		var selgrid = this.roundGrid(this.refs.XYSelect.extents.selection.grid)
-		var datagrid = this.roundGrid(grid);
+		if(this.state.grid.hasArange('y')||this.state.grid.hasMenu('y')) {
+			grid.y.min = parseFloat(this.state.grid.getLo('y'));
+			grid.y.max = parseFloat(this.state.grid.getHi('y'));
+		}
 
-		if(reset||selgrid.x.max-selgrid.x.min >350)
-
-		//(
-			//(selgrid.x.min<datagrid.x.min||selgrid.x.min>datagrid.x.max)||
-			//(selgrid.x.max>datagrid.x.max||selgrid.x.max<datagrid.x.min)||
-			//(selgrid.y.min<datagrid.y.min||selgrid.y.min>datagrid.y.max)||
-			//(selgrid.y.max>datagrid.y.max||selgrid.y.max<datagrid.y.min)
-			//)
-		   //)
+		if(reset)
 			sel = grid;
 
 
@@ -1382,7 +1375,12 @@ LASUI.prototype.initXYSelect = function (mode, reset) {
 		} else
 			sel.y.max=grid.y.max;
 
-		this.refs.XYSelect.zoomOnBBox(grid);
+		if((grid.x.max-grid.x.min) < 3 || (grid.y.max-grid.y.min) < 3)
+			var zoomgrid = {"x" : {"min" : (grid.x.min-180),"max" : (grid.x.min+180)}, "y" : {"min": -90, "max" :90}}
+		else
+			var zoomgrid = grid;
+
+		this.refs.XYSelect.zoomOnBBox(zoomgrid);
 		this.refs.XYSelect.setDataGridBBox(grid);
 		if(reset==true) {
 
@@ -1800,6 +1798,17 @@ LASUI.prototype.makeRequest = function (evt, type) {
 	//get all the other data for this dataset/variable combo
 	this.state.lastVariable = this.state.variable;
 	this.state.lastDataset = this.state.dataset;
+	this.state.selectGlobal=false;
+
+	if(this.state.grid.hasAxis('x')&&this.state.grid.hasAxis('y'))
+	if(
+		Math.abs((this.refs.XYSelect.extents.selection.grid.x.max-this.refs.XYSelect.extents.selection.grid.x.min)-(this.state.grid.getHi("x") - this.state.grid.getLo("x")))<10&&
+		Math.abs((this.refs.XYSelect.extents.selection.grid.y.max-this.refs.XYSelect.extents.selection.grid.y.min)-(this.state.grid.getHi("y") - this.state.grid.getLo("y")))<5
+
+	)
+		this.state.selectGlobal=true;
+
+
 	this.expired=false;
 	document.getElementById('update').style.color='';
 
