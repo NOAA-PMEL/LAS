@@ -298,7 +298,7 @@ public class SessionFilter implements Filter {
        // Set UI Version ui_version
        String ui_version = sessionCtx.getUiVersion();
        if (ui_version == null) {
-          ui_version = "LAS Armstrong 1.1";
+          ui_version = "LAS v6 UI/LAS v7.0";
        }
        sessionCtx.setUiVersion(ui_version);
 
