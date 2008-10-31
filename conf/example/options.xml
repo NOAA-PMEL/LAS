@@ -287,7 +287,7 @@ at the edges of the plot (WMS-style plots). By default margins are shown.
         <item values="ocean_temp">ocean temperature (by-value)</item>
         <item values="land_sea_values">topography/bathymetry (by-value)</item>
         <item values="etop_values">ocean/terrestrial elevation (by-value)</item>
-        <item values="light_bottom">light bottom (by-value)</item>
+        <item values="light_bottom">light bottom</item>
         <item values="light_centered">anomaly</item>
         <item values="land_sea">topography/bathymetry</item>
         <item values="dark_land_sea">dark topography/bathymetry</item>
