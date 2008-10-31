@@ -48,7 +48,8 @@ public class TimeSeriesMap extends Composite {
 	 * 
 	 */
 	public TimeSeriesMap() {
-		map = new MapWidget(new LatLng(0.0, 0.0), 1);
+		LatLng center = LatLng.newInstance(0.0, 0.0);
+		map = new MapWidget(center, 1);
 		map.setSize("520px", "350px");
 		map.addControl(new LargeMapControl());
 		map.addControl(new MapTypeControl());
@@ -110,9 +111,9 @@ public class TimeSeriesMap extends Composite {
 				if ( y > ne_lat ) ne_lat = y;
 				if ( x < sw_lon ) sw_lon = x;
 				if ( x > ne_lon ) ne_lon = x;
-				MarkerOptions options = new MarkerOptions();
+				MarkerOptions options = MarkerOptions.newInstance();
 				options.setTitle(key);
-				Marker marker = new Marker(new LatLng(y, x), options);
+				Marker marker = new Marker(LatLng.newInstance(y, x), options);
 				final String gridID = grid.getID();
 				marker.addMarkerClickHandler(new MarkerClickHandler() {
 					String id = gridID;
@@ -129,11 +130,11 @@ public class TimeSeriesMap extends Composite {
 
 		double center_x = sw_lon + ((ne_lon - sw_lon)/2.0);
 		double center_y = sw_lat + ((ne_lat - sw_lat)/2.0);
-		sw = new LatLng(sw_lat, sw_lon);
-		ne = new LatLng(ne_lat, ne_lon);
-		LatLngBounds bounds = new LatLngBounds(sw, ne);
+		sw = LatLng.newInstance(sw_lat, sw_lon);
+		ne = LatLng.newInstance(ne_lat, ne_lon);
+		LatLngBounds bounds = LatLngBounds.newInstance(sw, ne);
 		default_zoom = map.getBoundsZoomLevel(bounds);
-        default_center = new LatLng(center_y, center_x);
+        default_center = LatLng.newInstance(center_y, center_x);
 		map.setCenter(default_center, default_zoom);
 
 	}

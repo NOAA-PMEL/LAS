@@ -9,13 +9,21 @@
  */
 package gov.noaa.pmel.tmap.las.jdom;
 
+import gov.noaa.pmel.tmap.addxml.AxisBean;
+import gov.noaa.pmel.tmap.addxml.CategoryBean;
+import gov.noaa.pmel.tmap.addxml.DatasetBean;
+import gov.noaa.pmel.tmap.addxml.DatasetsGridsAxesBean;
+import gov.noaa.pmel.tmap.addxml.FilterBean;
+import gov.noaa.pmel.tmap.addxml.GridBean;
+import gov.noaa.pmel.tmap.addxml.addXML;
 import gov.noaa.pmel.tmap.las.client.CategorySerializable;
 import gov.noaa.pmel.tmap.las.client.DatasetSerializable;
-import gov.noaa.pmel.tmap.las.client.RPCException;
 import gov.noaa.pmel.tmap.las.client.VariableSerializable;
 import gov.noaa.pmel.tmap.las.exception.LASException;
 import gov.noaa.pmel.tmap.las.filter.AttributeFilter;
 import gov.noaa.pmel.tmap.las.filter.CategoryFilter;
+import gov.noaa.pmel.tmap.las.filter.EmptySrcDatasetFilter;
+import gov.noaa.pmel.tmap.las.product.server.Cache;
 import gov.noaa.pmel.tmap.las.ui.state.StateNameValueList;
 import gov.noaa.pmel.tmap.las.ui.state.TimeSelector;
 import gov.noaa.pmel.tmap.las.util.Category;
@@ -40,18 +48,28 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Vector;
 
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.jdom.Attribute;
+import org.jdom.Content;
 import org.jdom.Element;
 import org.jdom.JDOMException;
 import org.jdom.xpath.XPath;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
+import org.joda.time.Interval;
 import org.joda.time.Period;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
+
+import thredds.catalog.InvCatalog;
+import thredds.catalog.InvCatalogFactory;
+import thredds.catalog.InvDataset;
+import ucar.nc2.NetcdfFile;
+import ucar.nc2.dataset.NetcdfDataset;
+import ucar.nc2.dods.DODSNetcdfFile;
 
 /**
  * This class is the JDOM instantiation of the "las.xml" file and any entities it references (data stubs and operationsV7.xml).
@@ -1416,7 +1434,9 @@ public class LASConfig extends LASDocument {
         } else if ( varURL == null && dsURL == null ) {
             url = null;
         }
-
+        if (url.startsWith("file:///")) {
+            url = url.substring(7, url.length());
+        }
         if (url.startsWith("file://")) {
             url = url.substring(6, url.length());
         }
@@ -1706,24 +1726,8 @@ public class LASConfig extends LASDocument {
 	    Element globalPropsE = dsE.getParentElement().getParentElement().getParentElement().getParentElement().getChild("properties");
 	    
 	    
-	    HashMap<String, HashMap<String, String>> propertyGroups = new HashMap<String, HashMap<String, String>>();
-	    if (globalPropsE != null) {               
-	        // All children should be elements of the form <property_group type="name">
-	        List propGroups = globalPropsE.getChildren();                
-	        for (Iterator pgIt = propGroups.iterator(); pgIt.hasNext();) {
-	            Element propGroupE = (Element) pgIt.next();
-	            // All children should be elements of the form <property><name>thename</name><value>thevalue</value></property>
-	            List props = propGroupE.getChildren();
-	            HashMap<String, String> property = new HashMap<String, String>();
-	            for (Iterator propIt = props.iterator(); propIt.hasNext();) {
-	                Element prop = (Element) propIt.next();
-	                String propName = prop.getChildTextNormalize("name");
-	                String propValue = prop.getChildTextNormalize("value");
-	                property.put(propName, propValue);
-	            }
-	            propertyGroups.put(propGroupE.getAttributeValue("type"), property);
-	        }
-	    }
+	    HashMap<String, HashMap<String, String>> propertyGroups = propertiesToHashMap(globalPropsE);
+	    
 	    // If the group already exists any properties from this element
 	    // replace the properites from the "global" properties.
 	    if (datasetPropsE != null) {
@@ -1750,7 +1754,8 @@ public class LASConfig extends LASDocument {
 	            propertyGroups.put(propGroupE.getAttributeValue("type"), group);
 	        }
 	    }
-	    
+	    // The loop that follows is a merging action which is different from propertiesToHashMap (which is used above and when processing
+	    // netCDF and THREDDS data sources directly).
 	    if (variablePropsE != null) {
 	        List propGroups = variablePropsE.getChildren();
 	        for (Iterator pgIt = propGroups.iterator(); pgIt.hasNext();) {
@@ -1801,6 +1806,33 @@ public class LASConfig extends LASDocument {
 	    }
 	    
 	    return properties;
+	}
+	
+	/**
+	 * Helper method to convert a "new" style properties element into a HashMap of property group hashes.
+	 * @param properties
+	 * @return
+	 */
+	private HashMap<String, HashMap<String, String>> propertiesToHashMap(Element properties) {
+		HashMap<String, HashMap<String, String>> propertyGroups = new HashMap<String, HashMap<String, String>>();
+	    if (properties != null) {               
+	        // All children should be elements of the form <property_group type="name">
+	        List propGroups = properties.getChildren();                
+	        for (Iterator pgIt = propGroups.iterator(); pgIt.hasNext();) {
+	            Element propGroupE = (Element) pgIt.next();
+	            // All children should be elements of the form <property><name>thename</name><value>thevalue</value></property>
+	            List props = propGroupE.getChildren();
+	            HashMap<String, String> property = new HashMap<String, String>();
+	            for (Iterator propIt = props.iterator(); propIt.hasNext();) {
+	                Element prop = (Element) propIt.next();
+	                String propName = prop.getChildTextNormalize("name");
+	                String propValue = prop.getChildTextNormalize("value");
+	                property.put(propName, propValue);
+	            }
+	            propertyGroups.put(propGroupE.getAttributeValue("type"), property);
+	        }
+	    }
+	    return propertyGroups;
 	}
     /**
      * !! temporarily busted for V7 XML -- Returns the merged properties for a particular (maybe this should be private)
@@ -3258,6 +3290,469 @@ public class LASConfig extends LASDocument {
 			return true;
 		} else {
 			return false;
+		}
+	}
+	/**
+	 * Help application to extract the addXML properties as a map
+	 * The proprerites group element.
+	 * The resulting HashMap
+	 */
+	private HashMap<String, String> addXMLProperties(Element properties) {
+		
+		HashMap<String, String> addXMLproperties = new HashMap<String, String>();
+		
+		List groups = convertProperties(properties);
+		
+		
+		for (Iterator grpIt = groups.iterator(); grpIt.hasNext();) {
+			Element group = (Element) grpIt.next();
+			if (group.getAttributeValue("type").equals("addXML")) {
+				List props = group.getChildren("property");
+				for (Iterator propIt = props.iterator(); propIt
+						.hasNext();) {
+					Element prop = (Element) propIt.next();
+					String name = prop.getChildText("name");
+					String value = prop.getChildText("value");
+					addXMLproperties.put(name, value);
+				}
+			}
+		}
+		return addXMLproperties;
+	}
+	/**
+	 * Create or update LAS metadata directly from a netCDF or THREDDS data source.
+	 * @param update
+	 * @param cache
+	 * @return
+	 * @throws IOException
+	 * @throws JDOMException
+	 */
+	public long addXML(boolean update, Cache cache) throws IOException, JDOMException {
+		
+		DateTimeFormatter df = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
+		DateTimeFormatter ymd = DateTimeFormat.forPattern("yyyy-MM-dd");
+		ArrayList<Element> src_datasets = new ArrayList<Element>();
+		ArrayList<Element> src_grids = new ArrayList<Element>();
+		ArrayList<Element> src_axes = new ArrayList<Element>();
+		long nextUpdate = 999999999999999999l;
+		HashMap<String, ArrayList<Element>> ds_children = new HashMap<String, ArrayList<Element>>();
+		ArrayList<CategoryBean> categoryList = new ArrayList<CategoryBean>();
+		if ( update ) {
+			// Recreate only those XML stubs that are out of date.
+			List datasets = getRootElement().getChildren("datasets");
+			for (Iterator datasetsIt = datasets.iterator(); datasetsIt.hasNext();) {
+				Element datasetsE = (Element) datasetsIt.next();
+				Element dsetsE = new Element("datasets");
+				List ds_list = datasetsE.getChildren("dataset");
+				for (Iterator dsIt = ds_list.iterator(); dsIt.hasNext();) {
+					Element dataset = (Element) dsIt.next();
+					String src = dataset.getAttributeValue("src");
+					String src_type = dataset.getAttributeValue("src_type");
+					String update_time = dataset.getAttributeValue("update_time");
+					String update_interval = dataset.getAttributeValue("update_interval");
+					
+					/* property edits for addXML configuration... */
+					HashMap<String, String> addXMLprops = new HashMap<String, String>();
+					Element properties = dataset.getChild("properties");
+					if ( properties != null ) {
+						addXMLprops = addXMLProperties(properties);
+					}
+					
+					if (src != null && src_type != null ) {
+						String src_key = JDOMUtils.MD5Encode(src);
+						String ds_filename = getOutputDir()+File.separator+"las_datasets_"+src_key+".xml";
+						String grids_filename = getOutputDir()+File.separator+"las_grids_"+src_key+".xml";
+						String axes_filename = getOutputDir()+File.separator+"las_axes_"+src_key+".xml";
+						
+						boolean reconstruct = false;
+						if ( update_time != null && update_interval != null ) {
+							
+							File ds_file = cache.getFile(ds_filename, Cache.GET_CACHE);
+							if ( ds_file != null ) {
+								LASDocument ds_doc = new LASDocument();
+								JDOMUtils.XML2JDOM(ds_file, ds_doc);
+								String expires_att = dataset.getAttributeValue("expires");
+								DateTime expires = df.parseDateTime(expires_att);
+								if ( expires.isBeforeNow() ) {
+									Vector<DatasetsGridsAxesBean> dgabs = updateSrc(src, src_type, update_time, update_interval, addXMLprops);
+									for (Iterator dgabsIt = dgabs.iterator(); dgabsIt.hasNext();) {
+										DatasetsGridsAxesBean dgab = (DatasetsGridsAxesBean) dgabsIt.next();
+										long n = addSrc(dgab, dsetsE, dataset, src_datasets, src_grids, src_axes, ds_children, cache, src_key);
+										nextUpdate = Math.min(n, nextUpdate);
+										if ( src_type.equalsIgnoreCase("netCDF") ) {
+											if ( addXMLprops.get("categories") != null && addXMLprops.get("categories").equalsIgnoreCase("true") ) {
+												categoryList.addAll(makeCategories(dgab));	
+											}
+										}
+									}
+									if ( src_type.equalsIgnoreCase("THREDDS") && addXMLprops.get("categories") != null && addXMLprops.get("categories").equalsIgnoreCase("true") ) {
+										categoryList.addAll(makeCategoriesFromTHREDDS(src));
+									}
+								} else {
+									// reconstruct src from ds, grid and axes file 
+									reconstruct = true;
+								}
+							}
+						} else {
+							// Build from the parts, if available or build from the src.
+							reconstruct = true;
+						}
+						if ( reconstruct ) {
+							File ds_file = cache.getFile(ds_filename, Cache.GET_CACHE);
+							File grids_file = cache.getFile(grids_filename, Cache.GET_CACHE);
+							File axes_file = cache.getFile(axes_filename, Cache.GET_CACHE);
+							if ( ds_file.exists() && grids_file.exists() && axes_file.exists() ) {
+								LASDocument ds_doc = new LASDocument();
+								LASDocument grids_doc = new LASDocument();
+								LASDocument axes_doc = new LASDocument();
+								JDOMUtils.XML2JDOM(ds_file, ds_doc);
+								JDOMUtils.XML2JDOM(grids_file, grids_doc);
+								JDOMUtils.XML2JDOM(axes_file, axes_doc);
+								
+								getRootElement().addContent((Element) ds_doc.getRootElement().clone());
+								getRootElement().addContent((Element) grids_doc.getRootElement().clone());
+								getRootElement().addContent((Element) axes_doc.getRootElement().clone());
+								
+								
+							} else {
+								Vector<DatasetsGridsAxesBean> dgabs = updateSrc(src, src_type, update_time, update_interval, addXMLprops);
+								for (Iterator dgabsIt = dgabs.iterator(); dgabsIt.hasNext();) {
+									DatasetsGridsAxesBean dgab = (DatasetsGridsAxesBean) dgabsIt.next();
+									long n = addSrc(dgab, dsetsE, dataset, src_datasets, src_grids, src_axes, ds_children, cache, src_key);
+									nextUpdate = Math.min(n, nextUpdate);
+									if ( src_type.equalsIgnoreCase("netCDF") ) {
+										if ( addXMLprops.get("categories") != null && addXMLprops.get("categories").equalsIgnoreCase("true") ) {
+											categoryList.addAll(makeCategories(dgab));	
+										}
+									}
+								}
+								if ( src_type.equalsIgnoreCase("THREDDS") && addXMLprops.get("categories") != null && addXMLprops.get("categories").equalsIgnoreCase("true") ) {
+									categoryList.addAll(makeCategoriesFromTHREDDS(src));
+								}
+							}
+						}
+					}
+				}
+			}
+		} else {
+			// Since we're looping the XML we have accumulate new content (like these categories) and add it
+			// outside the loop.
+			
+			// Create all the XML stubs if they are not in the cache or if they are out of date.
+			List datasets = getRootElement().getChildren("datasets");
+			for (Iterator datasetsIt = datasets.iterator(); datasetsIt.hasNext();) {
+				Element datasetsE = (Element) datasetsIt.next();
+				Element dsetsE = new Element("datasets");
+				List ds_list = datasetsE.getChildren("dataset");
+				for (Iterator dsIt = ds_list.iterator(); dsIt.hasNext();) {
+					Element dataset = (Element) dsIt.next();
+					String src = dataset.getAttributeValue("src");
+					String src_type = dataset.getAttributeValue("src_type");
+					String update_time = dataset.getAttributeValue("update_time");
+					String update_interval = dataset.getAttributeValue("update_interval");
+					Element properties = dataset.getChild("properties");
+					HashMap<String, String> addXMLprops = new HashMap<String, String>();
+					if ( properties != null ) {
+					    addXMLprops = addXMLProperties(properties);
+					}
+					if (src != null && src_type != null) {
+						String src_key = JDOMUtils.MD5Encode(src);
+						Vector<DatasetsGridsAxesBean> dgabs = updateSrc(src, src_type, update_time, update_interval, addXMLprops);
+						for (Iterator dgabsIt = dgabs.iterator(); dgabsIt.hasNext();) {
+							DatasetsGridsAxesBean dgab = (DatasetsGridsAxesBean) dgabsIt.next();
+							long n = addSrc(dgab, dsetsE, dataset, src_datasets, src_grids, src_axes, ds_children, cache, src_key);
+	                        nextUpdate = Math.min(n, nextUpdate);
+	                        if ( src_type.equalsIgnoreCase("netCDF") ) {
+								if ( addXMLprops.get("categories") != null && addXMLprops.get("categories").equalsIgnoreCase("true") ) {
+									categoryList.addAll(makeCategories(dgab));	
+								}
+							}
+						}
+						if ( src_type.equalsIgnoreCase("THREDDS") && addXMLprops.get("categories") != null && addXMLprops.get("categories").equalsIgnoreCase("true") ) {
+							categoryList.addAll(makeCategoriesFromTHREDDS(src));
+						}
+					}
+				}
+			}
+		}	
+		EmptySrcDatasetFilter src_dataset_filter = new EmptySrcDatasetFilter();
+		List remove_datasets = getRootElement().getChildren("datasets");
+		for (Iterator datasetsIt = remove_datasets.iterator(); datasetsIt.hasNext();) {
+			Element datasetsE = (Element) datasetsIt.next();
+			datasetsE.removeContent(src_dataset_filter);
+		}
+		
+		for (Iterator src_dsIt = src_datasets.iterator(); src_dsIt.hasNext();) {
+			Element ds = (Element) src_dsIt.next();
+			List dsets = ds.getChildren();
+			for (Iterator dsetsIt = dsets.iterator(); dsetsIt.hasNext();) {
+				Element d = (Element) dsetsIt.next();
+				ArrayList<Element> children = ds_children.get(d.getName());
+				if ( children != null && children.size() > 0 ) {
+					for (Iterator childIt = children.iterator(); childIt.hasNext();) {
+						Content child = (Content) childIt.next();
+						d.addContent((Content)child.clone());
+					}
+				}
+			}
+		}
+		// Only add if you found something to add...
+		if (src_datasets.size() > 0 ) {
+			getRootElement().addContent(src_datasets);
+		}
+		if ( src_grids.size() > 0 ) {
+			getRootElement().addContent(src_grids);
+		}
+		if ( src_axes.size() > 0 ) {
+			getRootElement().addContent(src_axes);
+		}
+		if ( src_datasets.size() > 0 ) {
+			getRootElement().removeContent(src_dataset_filter);
+		}
+		if ( categoryList.size() > 0 ) {
+			addCategories(categoryList);
+		}
+		return nextUpdate;
+		
+	}
+	/**
+	 * Makes and adds categories from a DatasetsGridsAxesBean probably from a single netCDF data source.
+	 * @param dgab
+	 */
+	public ArrayList<CategoryBean> makeCategories(DatasetsGridsAxesBean dgab) {
+		ArrayList<CategoryBean> categories = new ArrayList<CategoryBean>();
+		Vector dsbeans = dgab.getDatasets();
+		for (Iterator dsbIt = dsbeans.iterator(); dsbIt.hasNext();) {
+			DatasetBean dsb = (DatasetBean) dsbIt.next();
+			CategoryBean cat = new CategoryBean();
+			cat.setName(dsb.getName());												
+			FilterBean filter = new FilterBean();
+			filter.setAction("apply-dataset");
+			filter.setContainstag(dsb.getElement());
+			cat.addFilter(filter);
+			categories.add(cat);
+		}
+		return categories;
+	}
+	/**
+	 * Reads a THREDDS catalog and makes the categories to match the catalog.
+	 * @param src
+	 */
+	public ArrayList<CategoryBean> makeCategoriesFromTHREDDS(String src) {
+		InvCatalogFactory factory = new InvCatalogFactory("default", false);
+		InvCatalog catalog = (InvCatalog) factory.readXML(src);
+		CategoryBean top = new CategoryBean();
+		String topName = catalog.getName();
+		if (topName != null) {
+			top.setName(catalog.getName());
+		}
+		else {
+			top.setName(catalog.getUriString());
+		}
+
+		Vector categories = new Vector();
+		List ThreddsDatasets = catalog.getDatasets();
+		Iterator di = ThreddsDatasets.iterator();
+		while (di.hasNext()) {
+			InvDataset ThreddsDataset = (InvDataset) di.next();
+			if (ThreddsDataset.hasNestedDatasets()) {
+				// Don't need any optins, use the static method.
+				CategoryBean cb = addXML.processCategories(ThreddsDataset);
+				categories.add(cb);
+			}
+		}
+		top.setCategories(categories);
+		ArrayList<CategoryBean> one = new ArrayList<CategoryBean>();
+		one.add(top);
+		return one;
+	}
+	public long addSrc(DatasetsGridsAxesBean dgab, Element dsetsE, Element dataset, ArrayList<Element> src_datasets, ArrayList<Element> src_grids, ArrayList<Element> src_axes, HashMap<String, ArrayList<Element>> ds_children, Cache cache, String src_key) throws UnsupportedEncodingException {
+		long nextUpdate = 999999999999999999l;
+		Vector<DatasetBean> ds_beans = dgab.getDatasets();
+		for (Iterator dsbIt = ds_beans.iterator(); dsbIt.hasNext();) {
+			DatasetBean dsb = (DatasetBean) dsbIt.next();
+			if ( dsb.getNextUpdate() > 0 && dsb.getNextUpdate() < nextUpdate ) {
+				nextUpdate = dsb.getNextUpdate();
+			}
+			Element datasetFromSrc = dsb.toXml();
+			List attributes = dataset.getAttributes();
+			for (Iterator attrIt = attributes.iterator(); attrIt.hasNext();) {
+				Attribute attr = (Attribute) attrIt.next();
+				String name = attr.getName();
+				String value = attr.getValue();
+				datasetFromSrc.setAttribute(name, value);
+			}
+			// save in a hash and add at the very end.  Grrrr.
+			ArrayList<Element> kids = new ArrayList<Element>();
+			for (Iterator children = dataset.getChildren("properties").iterator(); children.hasNext();) {
+				Element child = (Element) children.next();
+				kids.add(child);
+			}
+			ds_children.put(dsb.getElement(), kids);
+			
+			dsetsE.addContent(datasetFromSrc);
+			if ( !src_datasets.contains(dsetsE) ) {
+			    src_datasets.add(dsetsE);
+			}
+		}
+		
+		Vector<GridBean> g_beans = dgab.getGrids();
+		Element grids = new Element("grids");
+		for (Iterator gbIt = g_beans.iterator(); gbIt.hasNext();) {
+			GridBean gb = (GridBean) gbIt.next();
+			grids.addContent(gb.toXml());
+		}
+		src_grids.add(grids);
+		
+		Vector<AxisBean> a_beans = dgab.getAxes();
+		Element axes = new Element("axes");
+		for (Iterator abIt = a_beans.iterator(); abIt.hasNext();) {
+			AxisBean ab = (AxisBean) abIt.next();
+			axes.addContent(ab.toXml());
+		}
+		src_axes.add(axes);
+		
+		org.jdom.Document doc = addXML.createXMLfromDatasetsGridsAxesBean(dgab);
+		String ds_filename = getOutputDir()+File.separator+"las_datasets_"+src_key+".xml";
+		String grids_filename = getOutputDir()+File.separator+"las_grids_"+src_key+".xml";
+		String axes_filename = getOutputDir()+File.separator+"las_axes_"+src_key+".xml";
+		Element dsE = (Element) doc.getRootElement().getChild("datasets").clone();
+		cache.addDocToCache(new LASDocument(dsE), ds_filename);
+		Element gE = (Element) doc.getRootElement().getChild("grids").clone();
+		cache.addDocToCache(new LASDocument(gE), grids_filename);
+		Element aE = (Element) doc.getRootElement().getChild("axes").clone();
+		cache.addDocToCache(new LASDocument(aE), axes_filename);
+		return nextUpdate;
+	}
+	public Vector<DatasetsGridsAxesBean> updateSrc(String src, String src_type, String update_time, String update_interval, HashMap<String, String> options) {
+		DateTimeFormatter df = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
+		DateTimeFormatter ymd = DateTimeFormat.forPattern("yyyy-MM-dd");
+		DatasetsGridsAxesBean dgab = null;
+		addXML myAddXML = new addXML();
+		myAddXML.setOptions(options);
+		Vector<DatasetsGridsAxesBean> beans = new Vector<DatasetsGridsAxesBean>();
+		if ( src_type.equalsIgnoreCase("netcdf") ) {
+			
+			try {
+				//String url = DODSNetcdfFile.canonicalURL(src);
+				NetcdfDataset ncds = NetcdfDataset.openDataset(src);
+				dgab = myAddXML.createBeansFromNetcdfDataset(ncds, src, false, null);
+				ncds.close();
+			} catch (IOException e) {
+				log.error("Unable to create config for:" + src);
+			}
+			
+			String created = null;
+			String expires = null;
+			long next_update = -1;
+			if ( update_time != null && update_interval != null ) {
+				try {							
+					DateTime nt = new DateTime();
+					created = df.print(nt);
+					
+					String expire_time = ymd.print(nt) + " " + update_time+":00";
+					if ( update_interval.toLowerCase().contains("milli") ||
+						 update_interval.toLowerCase().contains("sec") ||
+						 update_interval.toLowerCase().contains("min") ||
+						 update_interval.toLowerCase().contains("hour") ||
+						 update_interval.toLowerCase().contains("day") ||
+						 update_interval.toLowerCase().contains("week") ) {
+						String[] interval = update_interval.split(" ");
+						int n = Integer.valueOf(interval[0]).intValue();
+						String units = interval[1];
+						int millis = n;
+						if ( units.toLowerCase().contains("milli") ) {
+							millis = n;
+						} else if ( units.toLowerCase().contains("sec") ) {
+							millis = n*1000;
+						} else if ( units.toLowerCase().contains("min") ) {
+							millis = n*60*1000;
+						} else if ( units.toLowerCase().contains("hour") ) {
+							millis = n*60*60*1000;
+						} else if ( units.toLowerCase().contains("day") ) {
+							millis = n*24*60*60*1000;
+						} else if ( units.toLowerCase().contains("week") ) {
+							millis = n*7*24*60*60*1000;
+						}
+						Period p = new Period(0, 0, 0, millis);
+						DateTime start_dt = df.parseDateTime(expire_time);
+						DateTime expires_dt = start_dt.plus(p);
+						// Insure that the expires date is in the future.
+						while (expires_dt.isBefore(nt) ) {
+							expires_dt = expires_dt.plus(p);
+						}
+						expires = df.print(expires_dt);
+						
+						if ( start_dt.isAfter(nt) ) {
+							next_update = expires_dt.getMillis()-start_dt.getMillis();
+						} else {
+							next_update = expires_dt.getMillis()-nt.getMillis();
+						}
+						
+					}
+				} catch (Exception e) {
+                    log.error("Unable to set update creation update times");
+				}
+				Vector<DatasetBean> ds_beans = dgab.getDatasets();
+				for (Iterator dsbIt = ds_beans.iterator(); dsbIt.hasNext();) {
+					DatasetBean dsb = (DatasetBean) dsbIt.next();
+					dsb.setUpdate_interval(update_interval);
+					dsb.setUpdate_time(update_time);
+					dsb.setCreated(created);
+					dsb.setExpires(expires);
+					dsb.setNextUpdate(next_update);
+				}
+			}
+			beans.add(dgab);
+		} else if ( src_type.equalsIgnoreCase("THREDDS") ) {
+			InvCatalogFactory factory = new InvCatalogFactory("default", false);
+			InvCatalog catalog = (InvCatalog) factory.readXML(src);
+			CategoryBean top = new CategoryBean();
+			String topName = catalog.getName();
+			if (topName != null) {
+				top.setName(catalog.getName());
+			}
+			else {
+				top.setName(catalog.getUriString());
+			}
+			
+			Vector CategoryBeans = new Vector();
+
+			List ThreddsDatasets = catalog.getDatasets();
+			Iterator di = ThreddsDatasets.iterator();
+			while (di.hasNext()) {
+				InvDataset ThreddsDataset = (InvDataset) di.next();
+				if (ThreddsDataset.hasNestedDatasets()) {
+					CategoryBean cb = myAddXML.processCategories(ThreddsDataset);
+					CategoryBeans.add(cb);
+				}
+			}
+
+			ThreddsDatasets = catalog.getDatasets();
+			di = ThreddsDatasets.iterator();
+			while (di.hasNext()) {
+				InvDataset ThreddsDataset = (InvDataset) di.next();
+				beans.addAll(myAddXML.processDatasets(ThreddsDataset));
+			}			
+		}
+		return beans;
+	}
+	/**
+	 * Adds the contents of a category bean from addXML to the config, creating the las_categories element if necessary.
+	 * @param cat the category bean to be added.
+	 */
+	public void addCategories(ArrayList<CategoryBean> cats) {
+		Element las_categoriesE = getRootElement().getChild("las_categories");
+		if ( las_categoriesE == null ) {
+			las_categoriesE = new Element("las_categories");
+			getRootElement().addContent(las_categoriesE);
+		}
+		for (Iterator catIt = cats.iterator(); catIt.hasNext();) {
+			CategoryBean cat = (CategoryBean) catIt.next();
+			Element catE = cat.toXml();
+			if ( catE != null ) {
+			    las_categoriesE.addContent(catE);
+			}
 		}
 	}
 }
