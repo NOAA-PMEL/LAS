@@ -1175,7 +1175,7 @@ LASUI.prototype.updateConstraints = function (view) {
 
 
 
-	if(this.state.lastDataset!=this.state.dataset) {//&&this.state.selectGlobal)||this.state.selectGlobal||this.resetXY||!this.initialized) {
+	if(this.state.lastDataset!=this.state.dataset||this.resetXY) {//&&this.state.selectGlobal)||this.state.selectGlobal||this.resetXY||!this.initialized) {
 		var resetXY =true;
 		this.resetXY = false;
 		this.state.selectGlobal = false;
