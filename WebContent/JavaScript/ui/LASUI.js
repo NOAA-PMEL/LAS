@@ -526,7 +526,7 @@ LASUI.prototype.onSetVariable = function() {
 					this.hideAnalysis();
 					this.showAnalysis();
 				}
-
+				document.getElementById("analysisWrapper").style.display="";
 			} else {
 				document.getElementById("analysisWrapper").style.display="none";
 				this.refs.analysis.enabled = false;
