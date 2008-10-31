@@ -23,11 +23,6 @@ public class DatasetWidget extends Tree implements TreeListener {
 		Object u = item.getUserObject();
 		if ( u instanceof VariableSerializable ) {
 			VariableSerializable v = (VariableSerializable) u;
-			String varID = v.getName();
-			String dsID = v.getDSID();
-			String varName = v.getName();
-			String dsName = v.getDSName();
-            nativeHook(dsID, dsName, varID, varName);
 		}
 	}
 
@@ -58,12 +53,12 @@ public class DatasetWidget extends Tree implements TreeListener {
 					String name = cat.getName();
 					TreeItem item = new TreeItem();
 					item.addItem("Loading...");
+					item.addItem("from server.");
 					item.setText(name);
 					item.setUserObject(cat);
 					addItem(item);
 				}
 			} else {
-				currentlySelected.removeItems();
 				for (int i = 0; i < cats.length; i++) {
 					CategorySerializable cat = cats[i];
 					if ( cat.isCategoryChildren() ) {
@@ -77,8 +72,11 @@ public class DatasetWidget extends Tree implements TreeListener {
 						// Must have variable children and there should be only 1, but we're not checking :-)
 						DatasetSerializable ds = cat.getDatasetSerializable();
 						VariableSerializable[] vars = ds.getVariablesSerializable();
-						for (int j = 0; j < vars.length; j++) {
-							TreeItem item = new TreeItem();
+						TreeItem item = currentlySelected.getChild(0);
+						item.setText(vars[0].getName());
+						item.setUserObject(vars[0]);
+						for (int j = 1; j < vars.length; j++) {
+							item = new TreeItem();
 							item.setText(vars[j].getName());
 							item.setUserObject(vars[j]);
 							currentlySelected.addItem(item);
@@ -92,13 +90,13 @@ public class DatasetWidget extends Tree implements TreeListener {
 			Window.alert("Messed up with "+caught.getMessage());
 		}
 	};
-	// Work around for focus on tree in scroll panel scrolling to the top bug.  #369
+	/* Work around for focus on tree in scroll panel scrolling to the top bug.  #369
 	public void onBrowserEvent(Event event) {
 		if (DOM.eventGetType(event) == Event.ONCLICK) return;
 		super.onBrowserEvent(event);
 	}
-	public native static void nativeHook(String dsID, String dsName, String varID, String varName) /*-{
-	     $wnd.variableSelected(dsID, dsName, varID, varName);
-	}-*/;
-	
+	*/
+	public Object getCurrentlySelected() {
+		return currentlySelected.getUserObject();
+	}
 }

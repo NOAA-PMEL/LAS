@@ -45,7 +45,10 @@ public class LASDocument extends Document {
          setContent(doc.cloneContent());
     }
     
-    public Element getElementByXPath(String xpathValue) throws JDOMException {
+    public LASDocument(Element dsE) {
+		super(dsE);
+	}
+	public Element getElementByXPath(String xpathValue) throws JDOMException {
         // E.g. xpathValue="/lasdata/operations/operation[@ID='Plot']"
         Object jdomO = this;
         XPath xpath = XPath.newInstance(xpathValue);

@@ -36,8 +36,8 @@ import com.google.gwt.user.client.ui.Widget;
  * Entry point classes define <code>onModuleLoad()</code>.
  */
 public class TimeSeries implements EntryPoint {
-	private static class TimeSeriesComposite extends Composite implements ClickListener {
-		RPCServiceAsync rpcService;
+	private static class TimeSeriesComposite extends LASEntryPoint implements ClickListener {
+		
 		ListBox timeSeriesList = new ListBox();
 		TimeSeriesMap timeSeriesMap = new TimeSeriesMap();
 		LASDateWidget start_date;
@@ -58,6 +58,7 @@ public class TimeSeries implements EntryPoint {
 		
 		public TimeSeriesComposite () {
 			// Set up the RPC service for getting LAS metadata
+			super.onModuleLoad();
 			timeSeriesList.addChangeListener( new ChangeListener() {
 				public void onChange(Widget sender) {
 					int index = timeSeriesList.getSelectedIndex();
@@ -71,14 +72,7 @@ public class TimeSeries implements EntryPoint {
 					z.setVisible(false);
 				}
 			});
-			rpcService = (RPCServiceAsync) GWT.create(RPCService.class);
-			ServiceDefTarget endpoint = (ServiceDefTarget) rpcService;
-			String moduleRelativeURL = GWT.getModuleBaseURL();
-            String moduleName = GWT.getModuleName();
-			moduleRelativeURL = moduleRelativeURL.substring(0,moduleRelativeURL.indexOf(moduleName)-1);
-			moduleRelativeURL = moduleRelativeURL.substring(0,moduleRelativeURL.lastIndexOf("/")+1);
-			String rpcURL = moduleRelativeURL + "rpc";
-			endpoint.setServiceEntryPoint(rpcURL);
+			
 			rpcService.getTimeSeries(timeSeriesCallback);
 			lasRequest.removeVariables();
 			timeSeriesMap.addMapClickHandler(mapClick);
@@ -98,7 +92,7 @@ public class TimeSeries implements EntryPoint {
 			dates_label.setVisible(false);
 			dates_label.setStyleName("small-banner");
 			RootPanel.get("output").add(output);
-			this.setElement(RootPanel.get().getElement());
+			//this.setElement(RootPanel.get().getElement());
 		}
 		AsyncCallback timeSeriesCallback = new AsyncCallback() {
 
@@ -279,13 +273,16 @@ public class TimeSeries implements EntryPoint {
 					lasRequest.addProperty("ferret", "view", "t");
 					lasRequest.addProperty("ferret", "image_format", "gif");
 
-					String url = "http://strider:8880/baker/ProductServer.do?xml="+URL.encode(lasRequest.getXMLText());
+					String url = productServer+"?xml="+URL.encode(lasRequest.getXMLText());
+					/*
 					RequestBuilder sendRequest = new RequestBuilder(RequestBuilder.GET, url);
 					try {
 						sendRequest.sendRequest(null, lasRequestCallback);
 					} catch (RequestException e) {
 						output.setHTML(e.toString());
 					}
+					*/
+					Window.open(url,"data","resizable=yes,scrollbars=yes,status=yes"); 
 				} else if ( button_name.equals(PLOT_OPTIONS_BUTTON_NAME) ) {
 					if ( options_widget == null ) {
                         options_widget = new OptionsWidget(this);
@@ -320,6 +317,7 @@ public class TimeSeries implements EntryPoint {
 	 * This is the entry point method.
 	 */
 	public void onModuleLoad() {
+		
 		TimeSeriesComposite tsc = new TimeSeriesComposite();
 		/*
 		Panel map_area = RootPanel.get("map");

@@ -6,6 +6,7 @@ import com.google.gwt.user.client.rpc.ServiceDefTarget;
 
 public class LASEntryPoint implements EntryPoint {
     RPCServiceAsync rpcService;
+    String productServer;
     public void onModuleLoad() {
         rpcService = (RPCServiceAsync) GWT.create(RPCService.class);
         ServiceDefTarget endpoint = (ServiceDefTarget) rpcService;
@@ -15,5 +16,6 @@ public class LASEntryPoint implements EntryPoint {
         moduleRelativeURL = moduleRelativeURL.substring(0,moduleRelativeURL.lastIndexOf("/")+1);
         String rpcURL = moduleRelativeURL + "rpc";
         endpoint.setServiceEntryPoint(rpcURL);
+        productServer = moduleRelativeURL + "ProductServer.do";
     }
 }

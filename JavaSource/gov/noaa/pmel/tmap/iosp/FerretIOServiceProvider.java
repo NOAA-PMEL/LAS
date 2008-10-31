@@ -56,10 +56,7 @@ import ucar.unidata.io.RandomAccessFile;
  */
 public class FerretIOServiceProvider implements IOServiceProvider {
     static private Logger log = Logger.getLogger(FerretIOServiceProvider.class.getName());
-    private ucar.nc2.NetcdfFile ncds;
-    private String jnl;
-    private String cacheKey;
-    private FerretTool tool;
+    RandomAccessFile raf;
     static private final long maxHeader = 512;
     
     /**
@@ -67,15 +64,7 @@ public class FerretIOServiceProvider implements IOServiceProvider {
      *
      */
     public FerretIOServiceProvider () {
-        super();
-        
-        try {
-            tool = new FerretTool();
-        } catch (Exception e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        
+        super();      
     }
 
     /* (non-Javadoc)
@@ -125,6 +114,13 @@ public class FerretIOServiceProvider implements IOServiceProvider {
      */
     public void open(RandomAccessFile raf, NetcdfFile ncfile,
             CancelTask cancelTask) throws IOException {
+        this.raf = raf;
+    	FerretTool tool;
+		try {
+			tool = new FerretTool();
+		} catch (Exception e) {
+			throw new IOException(e.toString());
+		}
         log.debug("Opening " + raf.getLocation());
         raf.seek(0);
         StringReader sr;
@@ -144,7 +140,7 @@ public class FerretIOServiceProvider implements IOServiceProvider {
 
         // Run the FerretTool to make the XML.
 
-        jnl = null;
+        String jnl = null;
 
         StringBuffer inJnl = new StringBuffer();
 
@@ -160,7 +156,7 @@ public class FerretIOServiceProvider implements IOServiceProvider {
         }
         jnl = inJnl.toString();
 
-        cacheKey = JDOMUtils.MD5Encode(jnl);           
+        String cacheKey = JDOMUtils.MD5Encode(jnl);           
         String xmlHeader = null;
         try {
             xmlHeader = tool.run_header("header.jnl", jnl, cacheKey);
@@ -476,8 +472,6 @@ public class FerretIOServiceProvider implements IOServiceProvider {
         }
         ncfile.addAttribute(null, new Attribute("Conventions", "COARDS"));
         
-        ncds = ncfile;
-
         log.debug("parsing complete.");
 
         int nothing = 0;
@@ -489,6 +483,12 @@ public class FerretIOServiceProvider implements IOServiceProvider {
      */
     public Array readData(Variable v2, List section) throws IOException,
     InvalidRangeException {
+    	FerretTool tool;
+		try {
+			tool = new FerretTool();
+		} catch (Exception e) {
+			throw new IOException(e.toString());
+		}
         Array a=null;
         log.debug("Entering read for "+v2.getName()+" and "+section.size()+" ranges.");
 
@@ -513,6 +513,33 @@ public class FerretIOServiceProvider implements IOServiceProvider {
             readname = "COORDS";
             isCoordinateVariable = true;
         }
+
+        String jnl = null;
+
+        StringBuffer inJnl = new StringBuffer();
+        raf.seek(0);
+        StringReader sr;
+        try {
+            byte[] b = new byte[(int)raf.length()];
+            raf.read(b);
+            sr = new StringReader(new String(b));
+        } catch (IOException e) {
+            log.debug("IO Exception reading the random access file.");
+            throw e;
+        }
+        BufferedReader jnlBuffReader = new BufferedReader(sr);
+        try {
+            String line = jnlBuffReader.readLine();
+
+            while (line != null) {
+                inJnl.append(line+"\n");
+                line = jnlBuffReader.readLine();
+            }
+        } catch (IOException e) {
+        }
+        jnl = inJnl.toString();
+
+        String cacheKey = JDOMUtils.MD5Encode(jnl);   
         String filename = tool.getTempDir()+cacheKey+File.separator+"data_"+varname+"_"+Range.makeSectionSpec(section)+".nc";
 
         // Simplest form of caching is that the exact file we need already exists.
@@ -730,7 +757,11 @@ public class FerretIOServiceProvider implements IOServiceProvider {
         }
 
     public String getDataDir() {
-        return tool.getDataDir();
+        try {
+			return new FerretTool().getDataDir();
+		} catch (Exception e) {
+			return "";
+		}
     }
 
 }

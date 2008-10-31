@@ -9,8 +9,10 @@ import gov.noaa.pmel.tmap.las.exception.LASException;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Timer;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -140,7 +142,7 @@ public class LASConfigPlugIn implements PlugIn {
         	context.setAttribute(LAS_UI_CONFIG_FILENAME_KEY, lasUIFileName);
         }
         
-        go_init();
+        go_init(false);
     }
     public void reinit(ServletContext reinitContext) throws ServletException {
     	context = reinitContext;
@@ -166,9 +168,9 @@ public class LASConfigPlugIn implements PlugIn {
         if (lasUIFileName == null || lasUIFileName.length() == 0) {
             throw new ServletException("No ui.xml file specified.");
         }
-    	go_init();
+    	go_init(true);
     }
-    public void go_init() {
+    public void go_init(boolean reinit) {
 
     	File configFile = new File(configFileName);
         LASConfig lasConfig = new LASConfig();
@@ -190,23 +192,25 @@ public class LASConfigPlugIn implements PlugIn {
         }
 
         context.setAttribute(SERVER_CONFIG_KEY, serverConfig);
-
-        // Create the Cache
-        Cache cache = new Cache(serverConfig.getCacheSize(), serverConfig.getCacheMaxBytes());
-
-        // Read the Cache if it exists
-        File cacheFile = serverConfig.getCacheFile();
-        if ( cacheFile != null) {
-            try {
-                cache.loadCacheFromStore(cacheFile);
-            } catch (Exception e) {
-               log.warn("Cache file not loaded: "+e.toString());
-            }
-        }
-
-        // Store the cache in the context.
-        context.setAttribute(CACHE_KEY, cache);
         
+        // The cache is emptied and reinitialized in a separate task so it gets created in the init and left alone in a reinit.
+        if (!reinit) {
+        	// Create the Cache
+        	Cache cache = new Cache(serverConfig.getCacheSize(), serverConfig.getCacheMaxBytes());
+
+        	// Read the Cache if it exists
+        	File cacheFile = serverConfig.getCacheFile();
+        	if ( cacheFile != null) {
+        		try {
+        			cache.loadCacheFromStore(cacheFile);
+        		} catch (Exception e) {
+        			log.warn("Cache file not loaded: "+e.toString());
+        		}
+        	}
+
+        	// Store the cache in the context.
+        	context.setAttribute(CACHE_KEY, cache);
+        }
         Element root = lasConfig.getRootElement();
         String version = root.getAttributeValue("version");
         boolean seven = false;
@@ -234,6 +238,23 @@ public class LASConfigPlugIn implements PlugIn {
         if ( lasConfig.getOutputDir() == null ) {
             lasConfig.setOutputDir(context.getRealPath("/")+"output");
         }
+        
+        // Create XML stubs from THREDDS or netCDF input.
+        Cache cache = (Cache) context.getAttribute(CACHE_KEY);
+        try {
+			long next = lasConfig.addXML(reinit, cache);
+			if ( next < 999999999999999999l ) {
+			    UpdateTask update = new UpdateTask(context);
+			    Timer updateTimer = new Timer();
+			    updateTimer.schedule(update, next);
+			}
+		} catch (UnsupportedEncodingException e) {
+			log.error("Could not add the referencd dataset by addXML.", e);
+		} catch (IOException e) {
+			log.error("Could not add the referencd dataset by addXML.", e);
+		} catch (JDOMException e) {
+			log.error("Could not add the referencd dataset by addXML.", e);
+		}
         
         if ( !seven ) {
             lasConfig.convertToSeven();
@@ -360,4 +381,68 @@ public class LASConfigPlugIn implements PlugIn {
     	}
 
     }
+
+	public void update(ServletContext context) throws ServletException, JDOMException {
+		this.context = context;
+		configFileName = (String) context.getAttribute(LAS_CONFIG_FILENAME_KEY);
+    	
+    	if ((configFileName == null || configFileName.length() == 0)) {
+            throw new ServletException("No LAS configuration file specified.");
+        }
+        
+    	File configFile = new File(configFileName);
+        LASConfig updatedLASConfig = new LASConfig();
+        
+        try {
+            JDOMUtils.XML2JDOM(configFile, updatedLASConfig);
+        } catch (Exception e) {
+            log.error("Could not parse the las config file "+configFileName);
+        }
+        Element root = updatedLASConfig.getRootElement();
+        String version = root.getAttributeValue("version");
+        boolean seven = false;
+        if ( version != null && version.contains("7.")) {
+            seven = true;
+        }
+        if ( !seven ) {
+            updatedLASConfig.convertToSeven();
+        }
+        
+        updatedLASConfig.mergeProperites();
+        
+        try {
+            updatedLASConfig.addIntervalsAndPoints();        
+        } catch (Exception e) {
+            log.error("Could not add the intervals and points attributes to variables in this LAS configuration.", e);
+        }
+        
+        try {
+            updatedLASConfig.addGridType();
+        } catch (Exception e) {
+            log.error("Could not add the grid_type to variables in this LAS configuration.", e);
+        }
+        List datasets = updatedLASConfig.getRootElement().getChildren("datasets");
+        List grids = updatedLASConfig.getRootElement().getChildren("grids");
+        List axes = updatedLASConfig.getRootElement().getChildren("axes");
+        
+        LASConfig lasConfig = (LASConfig) context.getAttribute(LAS_CONFIG_KEY);
+        lasConfig.getRootElement().removeChildren("datasets");
+        lasConfig.getRootElement().removeChildren("axes");
+        lasConfig.getRootElement().removeChildren("grids");
+        
+        for (Iterator dsIt = datasets.iterator(); dsIt.hasNext();) {
+			Element datasetsE = (Element) dsIt.next();
+			lasConfig.getRootElement().addContent((Element) datasetsE.clone());
+		}
+        
+        for (Iterator gridsId = grids.iterator(); gridsId.hasNext();) {
+			Element gridsE = (Element) gridsId.next();
+			lasConfig.getRootElement().addContent((Element) gridsE.clone());
+		}
+        
+        for (Iterator axesIt = axes.iterator(); axesIt.hasNext();) {
+			Element axesE = (Element) axesIt.next();
+			lasConfig.getRootElement().addContent((Element) axesE.clone());
+		}
+	}
 }
