@@ -206,5 +206,32 @@
      <delete dir="WebContent/WEB-INF/classes/resources" />
      <delete file="${app.name}.war"/>
   </target>
-
+  <!-- Targets for addXML -->
+  <property name="addxml-src" value="JavaSource"/>
+  <property name="addxml-build" value="build"/>
+  <property name="addxml-dist" value="dist"/>
+  <target name="addxml-init">
+    <tstamp/>
+    <mkdir dir="${addxml-build}"/>
+  </target>
+  <target name="addxml-compile" depends="addxml-init">
+    <copy file="${addxml-src}/gov/noaa/pmel/tmap/addxml/log4j.xml" tofile="${addxml-build}/log4j.xml"/>
+    <unjar src="WebContent/WEB-INF/lib/joda-time-1.5.2.jar" dest="${addxml-build}"/>
+    <unjar src="lib/JSAP_1.03a.jar" dest="${addxml-build}"/>
+    <unjar src="lib/toolsUI-2.2.20.jar" dest="${addxml-build}"/>
+    <javac srcdir="${addxml-src}/gov/noaa/pmel/tmap/addxml:${addxml-src}/org/joda" destdir="${addxml-build}">
+      <classpath>
+        <fileset id="addxml-libs" dir="WebContent/WEB-INF/lib">
+          <include name="**/*.jar"/>
+        </fileset>
+      </classpath>
+    </javac>
+  </target>
+  <target name="addxml-dist" depends="addxml-compile">
+    <mkdir dir="${addxml-dist}/lib"/>
+    <jar jarfile="${addxml-dist}/lib/addXML.jar" basedir="${addxml-build}"/>
+  </target>
+  <target name="addxml-clean">
+    <delete dir="${addxml-build}"/>
+  </target>
 </project>
