@@ -377,6 +377,7 @@ if ( !(-d $tds_dynadata) ) {
 
 my @Scripts = qw(build.xml
                  bin/initialize_check.sh
+                 bin/addXML.sh
                  conf/example/sample_las.xml
                  conf/example/sample_ui.xml
                  conf/example/sample_insitu_las.xml
