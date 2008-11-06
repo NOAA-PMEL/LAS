@@ -21,8 +21,10 @@ ELIF `fland_area LT 0.1` THEN
   define symbol fland_resolution 20
 ELIF `fland_area LT 0.2` THEN
   define symbol fland_resolution 40
+  define symbol fland_resolution 20
 ELSE
   define symbol fland_resolution 60
+  define symbol fland_resolution 20
 ENDIF
 
 go fland ($fland_resolution) ($fland_palette)
