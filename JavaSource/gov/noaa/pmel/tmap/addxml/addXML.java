@@ -1888,10 +1888,26 @@ static private AxisBean makeGeoAxis(CoordinateAxis1D axis, String type, String i
 	  esg = false;
   }
   public void setOptions(HashMap<String, String> options) {
-	  String forceAxisOption = options.get("forceAxis");
+	  forceAxes.put("x", new Boolean(false));
+	  forceAxes.put("y", new Boolean(false));
+	  forceAxes.put("z", new Boolean(false));
+	  forceAxes.put("t", new Boolean(false));
+	  String forceAxisOption = options.get("force");
+	  if ( forceAxisOption != null && !forceAxisOption.equals("") ) {
+		  String ax[] = forceAxisOption.split(",");
+	      for (int a = 0; a < ax.length; a++) {
+	        if (ax[a].equals("x") || ax[a].equals("y") ||
+	            ax[a].equals("z") || ax[a].equals("t")) {
+	          forceAxes.put(ax[a], new Boolean(true));
+	        }
+	        else {
+	          // Ignore unknown axes.
+	        }
+	      }
+	  }
 
 	  String titleOption = options.get("title");
-	  if ( titleOption != null && !title.equals("") ) {
+	  if ( titleOption != null && !titleOption.equals("") ) {
 		  title = titleOption;
 	  } 
 
