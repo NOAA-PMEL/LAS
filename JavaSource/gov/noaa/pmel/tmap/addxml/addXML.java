@@ -1404,11 +1404,12 @@ public class addXML {
 		  unitsString = unitsString.substring(0, unitsString.length()-1).trim();
 	  }
 
-	  double t[] = axis.getCoordValues();
+	  
 
 	  // Units string is one of the bogus "day", "month", etc and there
 	  // is no time_origin attribute so just dump it out as <v> elements.
 	  if (useV) {
+		  double t[] = axis.getCoordValues();
 		  // In this case do not attempt to decode the time elements
 		  axisbean.setUnits(unitsString);
 		  axisbean.setArange(null);
@@ -1451,11 +1452,14 @@ public class addXML {
 		  chrono = AllLeapChronology.getInstance(DateTimeZone.UTC);
 	  }
 
-	  if (t.length >= 2) {
+	  if (axis.getSize() >= 2.) {
 		  if (irregular || !axis.isRegular()) {
 			  fmt = DateTimeFormat.forPattern(patterns[4]);
-			  DateTime jodaDate1 = makeDate(t[0], dateUnit, chrono);
-			  DateTime jodaDate2 = makeDate(t[t.length-1], dateUnit, chrono);
+			  int length = (int) axis.getSize();
+			  double t0 = axis.getCoordValue(0);
+			  double t1 = axis.getCoordValue(length-1);
+			  DateTime jodaDate1 = makeDate(t0, dateUnit, chrono);
+			  DateTime jodaDate2 = makeDate(t1, dateUnit, chrono);
 			  Duration duration = new Duration(jodaDate1, jodaDate2);
 			  Period period = duration.toPeriod();
 			  Hours hours = period.toStandardHours();
@@ -1471,8 +1475,10 @@ public class addXML {
 		  } else {
 			  //Date date1 = dateUnit.makeDate(t[0]);
 			  //Date date2 = dateUnit.makeDate(t[1]);
-			  DateTime jodaDate1 = makeDate(t[0], dateUnit, chrono);
-			  DateTime jodaDate2 = makeDate(t[1], dateUnit, chrono);
+			  double t0 = axis.getCoordValue(0);
+			  double t1 = axis.getCoordValue(1);
+			  DateTime jodaDate1 = makeDate(t0, dateUnit, chrono);
+			  DateTime jodaDate2 = makeDate(t1, dateUnit, chrono);
 			  Period period =
 				  new Period(jodaDate1.withZone(DateTimeZone.UTC),
 						  jodaDate2.withZone(DateTimeZone.UTC));
@@ -1537,6 +1543,7 @@ public class addXML {
 					  System.out.println("Too many periods: " + periods);
 					  //Try just dumping out the formatted times
 					  axisbean.setArange(null);
+					  double t[] = axis.getCoordValues();
 					  String ts[] = new String[t.length];
 					  // We don't know what these times look like.  Use a format with everything.
 					  if (fmt == null ) {
@@ -1573,6 +1580,7 @@ public class addXML {
 				  // Layout the time axis using "v" elements.
 
 				  axisbean.setArange(null);
+				  double t[] = axis.getCoordValues();
 				  String ts[] = new String[t.length];
 				  for (int i = 0; i < t.length; i++) {
 					  DateTime dt = makeDate(t[i], dateUnit, chrono);
@@ -1588,7 +1596,8 @@ public class addXML {
 		  // We have no idea what this single time point looks like so,
 		  // format it for all year, month, day, hours, minutes, seconds
 		  fmt = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
-		  DateTime jodaDate1 = makeDate(t[0], dateUnit, chrono);
+		  double t0 = axis.getCoordValue(0);
+		  DateTime jodaDate1 = makeDate(t0, dateUnit, chrono);
 		  arange.setSize("1");
 		  arange.setStep("1");
 		  arange.setStart(fmt.print(jodaDate1));
