@@ -36,6 +36,7 @@
 	    <item values="Data_Extract_File,asc,20">ASCII file</item>
 	    <item values="Gen_Scripts,html,20">Desktop application data access scripts</item>
             <item values="Animation_1D,txt,2">Animation</item>
+            <item values="Interactive_Download,txt,20">Interactive Download</item>
 	</menu>
         <menu type="ops" name="Ops_Std1D_t">
             <item values="Plot_1D,line,2">Line plot</item>
@@ -44,6 +45,7 @@
             <item values="Data_Extract_netCDF,cdf,20">NetCDF file</item>
             <item values="Data_Extract_File,asc,20">ASCII file</item>
             <item values="Gen_Scripts,html,20">Desktop application data access scripts</item>
+            <item values="Interactive_Download,txt,20">Interactive Download</item>
         </menu>
 	<menu type="ops" name="Ops_Std2D">
 	    <item values="Plot_2D,shade,2">Color plot</item>
@@ -54,6 +56,7 @@
 	    <item values="Zoomable_image,html,20">Interactive Color plot</item>
 	    <item values="Gen_Scripts,html,20">Desktop application data access scripts</item>
             <item values="Animation_2D,txt,2">Animation</item>
+            <item values="Interactive_Download,txt,20">Interactive Download</item>
 	</menu>
         <menu type="ops" name="Ops_Std2D_t">
             <item values="Plot_2D,shade,2">Color plot</item>
@@ -64,6 +67,7 @@
 	    <item values="Zoomable_image,html,20">Interactive Color plot</item>
             <item values="Gen_Scripts,html,20">Desktop application data access scripts</item>
             <item values="Animation_1D,txt,2">Animation</item>
+            <item values="Interactive_Download,txt,20">Interactive Download</item>
         </menu>
 	<menu type="ops" name="Ops_Std2D_xy">
 	    <item values="Plot_2D_XY,shade,2">Color plot</item>
@@ -76,6 +80,7 @@
 	    <item values="XY_zoomable_image,html,20">Interactive Color plot</item>
             <item values="Plot_GE_Overlay,html,2">Plot to Google Earth</item>
             <item values="Animation_2D_XY,txt,2">Animation</item>
+            <item values="Interactive_Download,txt,20">Interactive Download</item>
 	</menu>
         <menu type="ops" name="Ops_Std3D_xyt">
             <item values="Data_Extract,txt,20">Table of values (text)</item>
@@ -84,6 +89,7 @@
             <item values="Gen_Scripts,html,20">Desktop application data access scripts</item>
             <item values="Grid_GE_kml,txt,1">Time Series from Google Earth</item>
             <item values="Animation_2D_XY,txt,2">Animation</item>
+            <item values="Interactive_Download,txt,20">Interactive Download</item>
         </menu>
         <menu type="ops" name="Ops_Std3D_xyz">
             <item values="Data_Extract,txt,20">Table of values (text)</item>
@@ -91,6 +97,7 @@
             <item values="Data_Extract_File,asc,20">ASCII file</item>
             <item values="Gen_Scripts,html,20">Desktop application data access scripts</item>
             <item values="Grid_GE_kml,txt,1">Vertical Profiles from Google Earth</item>
+            <item values="Interactive_Download,txt,20">Interactive Download</item>
         </menu>
 	<menu type="ops" name="Ops_Std3D">
 	    <item values="Data_Extract,txt,20">Table of values (text)</item>
@@ -98,12 +105,14 @@
 	    <item values="Data_Extract_File,asc,20">ASCII file</item>
 	    <item values="Gen_Scripts,html,20">Desktop application data access scripts</item>
             <item values="Animation_2D,txt,2">Animation</item>
+            <item values="Interactive_Download,txt,20">Interactive Download</item>
 	</menu>
 	<menu type="ops" name="Ops_Std4D">
 	    <item values="Data_Extract,txt,20">Table of values (text)</item>
 	    <item values="Data_Extract_netCDF,cdf,20">NetCDF file</item>
 	    <item values="Data_Extract_File,asc,20">ASCII file</item>
 	    <item values="Gen_Scripts,html,20">Desktop application data access scripts</item>
+            <item values="Interactive_Download,txt,20">Interactive Download</item>
 	</menu>
         <menu type="ops" name="Ops_StdVec">
             <item values="Plot_vector,vector,2">Vector plot</item>
