@@ -726,6 +726,40 @@ streamable="true" mime_type="application/postscript"/> -->
         <optiondef IDREF="Options_Data_file"/>
     </operation>
     <!-- End of Data Extract operations for differences. -->
+
+    <!-- Begin: interactive download -->
+    <operation name="Interactive Download" ID="Interactive_Download"
+        output_template="interactive_download" service_action="Data_Download" order="0300" category="table" default="true">
+        <service>ferret</service>
+        <response ID="Data_Download_Response">
+            <result type="text" ID="ferret_listing" streamable="true"
+                mime_type="text/plain" />
+            <result type="debug" ID="debug" file_suffix=".txt"/>
+        </response>
+        <region>
+            <intervals name="x" />
+            <intervals name="y" />
+            <intervals name="z" />
+            <intervals name="t" />
+            <intervals name="xy" />
+            <intervals name="xz" />
+            <intervals name="xt" />
+            <intervals name="yz" />
+            <intervals name="yt" />
+            <intervals name="zt" />
+            <intervals name="xyz" />
+            <intervals name="xyt" />
+            <intervals name="xzt" />
+            <intervals name="yzt" />
+            <intervals name="xyzt" />
+            <degenerate/>
+        </region>
+        <grid_types>
+            <grid_type name="regular" />
+        </grid_types>
+        <optiondef IDREF="Options_Data"/>
+    </operation>
+    <!-- End: interactive download -->
     <operation name="Table of values (text)" ID="Data_Extract"
         output_template="table" service_action="Data_Extract" order="0300" category="table" default="true">
         <service>ferret</service>
