@@ -27,10 +27,7 @@ public class SessionFilter implements Filter {
            HttpServletResponse resp)
            throws ServletException, IOException{
     try {
-    	
       TemplateSession session = Utils.getSession(req);
-      
-      
       SessionTemplateContext sessionCtx = session.getSessionContext();
       Vector datasets = sessionCtx.getDatasets();
 
@@ -381,25 +378,25 @@ public class SessionFilter implements Filter {
 
   boolean checkSession(HttpServletRequest req, HttpServletResponse resp)
     throws ServletException, IOException{
-	  ResourceBundle bundle = null;
-  	try {
-  		bundle = ResourceBundle.getBundle("las");
-  		String host = (String) bundle.getObject("las.db.host");
-  		if ( host != null && host.equals("dummy_value") ) {
-  			resp.sendRedirect("../");
-  			return false;
-  		}
-  	} catch (MissingResourceException e) {
-  		resp.sendRedirect("../");
-			return false;
-  	}
-  	String req_url = req.getServletPath();
-  	if ( req_url.contains("servlets") ) {
-  	  resp.sendRedirect("../");
-  	  return false;
-    }
-  	
-  	
+
+    	ResourceBundle bundle = null;
+    	try {
+    		bundle = ResourceBundle.getBundle("las");
+    		String host = (String) bundle.getObject("las.db.host");
+    		if ( host != null && host.equals("dummy_value") ) {
+    			resp.sendRedirect("../");
+                        return false;
+    		}
+    	} catch (MissingResourceException e) {
+    			resp.sendRedirect("../");
+                        return false;
+    	}
+      String req_url = req.getServletPath();
+      if ( req_url.contains("servlets") ) {
+    	  resp.sendRedirect("../");
+          return false;
+      }
+
     if (isExcludedUrl(req)){
       setupTemplateContext(req);
       return true;
