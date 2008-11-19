@@ -41,7 +41,7 @@
 					"Latitude-time" : {"view" : "yt", "class" : "visualization", "id" : "Plot_2D", "optiondef" : "Options_2D_image_contour"},
 					"Depth-time" : {"view" : "zt", "class" : "visualization", "id" : "Plot_2D", "optiondef" : "Options_2D_image_contour"}													
 				},
-				"Point Data" : {"Single Value" : {"view" : "","class" : "visualization", "id" : "Data_Extract", "optiondef" : "Options_Data"}},
+				"Point Data" : {"Single Value" : {"view" : "","class" : "visualization", "id" : "Data_Extract", "optiondef" : "Options_Data"}}/*,
 				"Download Data" : {
 					"Table of values" : {"view" : "xyzt", "class" : "download", "id" : "Data_Extract", "optiondef" : "Options_Data"},
 					"ARC GIS" : {"view" : "xy", "class" : "download", "id" : "Data_Extract_ArcView", "optiondef" : ""},
@@ -49,7 +49,7 @@
 					"netCDF File" : {"view" : "xyzt", "class" : "download", "id" : "Data_Extract_netCDF", "optiondef" : "Options_Data"},
 					"Scripts" : {"view" : "xyzt", "class" : "download", "id" : "Gen_Scripts", "optiondef" : "Options_gen_script"}	
 					
-				}
+				}*/
 			};
 			LAS.params = {
 #if ($request.getParameter('state')!="")
@@ -168,10 +168,13 @@
 					#end	
 					<span  class="top_link" style="visibility:hidden" id="update" onclick="LAS.makeRequest();">Update Plot&nbsp;&nbsp<INPUT style="margin-bottom:-2pt;margin-right:-2pt;padding-left:2pt;margin-left:-2pt;padding-right:2pt;padding-bottom:2pt;margin-top:-1pt" type="checkbox" #if($request.getParameter('auto')) checked #end  onmousemove="window.status='Check to automatically update the plot.';" onmouseout="window.status='';" onclick="LAS.toggleAutoUpdate(event,this.checked)"></span>
 					<span  class="top_link" style="visibility:hidden" id="plotOptionsButton" onclick="if(LAS.refs.options.plot.options){LAS.toggleUIMask('');document.getElementById('plotOptions').style.display='';}">Set plot options&nbsp;</span>
-					<span id="productButtons">
+					<span width="100%" id="productButtons">
 						<span class="top_link" style="visibility:hidden" ID="Animation">Animate&nbsp;</span>
 						<span class="top_link" style="visibility:hidden" ID="Comparison">Compare&nbsp;</span>							
 						<span class="top_link" style="visibility:hidden" ID="Plot to Google Earth">Google Earth&nbsp;</span>
+						<span class="top_link" style="visibility:hidden" ID="Table of values (text)">Show Values&nbsp;</span>
+						<span class="top_link" style="visibility:hidden" ID="Desktop application data access scripts">Export to Desktop Application&nbsp;</span>
+						<span class="top_link" style="visibility:hidden; right:0px" id="Interactive Download">Save As ...</span>									
 					</span>
 					<span style="position:absolute;right:0px;top:0px;height:38px;vertical-align:center;" id="downloadType"></span>				
 				</div>
