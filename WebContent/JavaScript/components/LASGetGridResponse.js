@@ -208,7 +208,13 @@ function LASGetGridResponse_getLo(axis) {
     if (this.hasMenu(axis)) { // <v> array
       value = this.getAxis(axis_lc).v[0];
     } else { // <arange ...>
-   	  value = this.getAxis(axis_lc).arange.start;
+      var start = Number(this.getAxis(axis_lc).arange.start);
+      var size = Number(this.getAxis(axis_lc).arange.size);
+      var step = Number(this.getAxis(axis_lc).arange.step);
+      if(step<0)
+         value = start + (size-1) * step;
+      else
+	 value = start;
     }
   }
   return value;
@@ -237,7 +243,10 @@ function LASGetGridResponse_getHi(axis) {
       var start = Number(this.getAxis(axis_lc).arange.start);
       var size = Number(this.getAxis(axis_lc).arange.size);
       var step = Number(this.getAxis(axis_lc).arange.step);
-      value = start + (size-1) * step;
+      if(step<0)
+         value=start; 
+      else  
+         value = start + (size-1) * step;
     }
   }
   return value;
