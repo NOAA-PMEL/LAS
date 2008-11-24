@@ -11,23 +11,29 @@ import com.google.gwt.user.client.ui.Widget;
 public class ResetControl extends CustomControl {
     LatLng mCenter;
     int mZoom;
+    Button resetButton;
 	public ResetControl (ControlPosition position, LatLng center, int zoom) {
 		super(position);
 		mCenter = center;
 		mZoom = zoom;
 	}
+	
 	@Override
 	protected Widget initialize(final MapWidget map) {
-		Button resetButton = new Button("Reset");
+		resetButton = new Button("Reset");
+		resetButton.addStyleName("map-button");
+		/*
 		resetButton.addClickListener(new ClickListener() {
 			public void onClick(Widget sender) {
 				map.setCenter(mCenter);
 				map.setZoomLevel(mZoom);
+				
 			}
 		});
+		*/
 		return resetButton;
 	}
-
+    
 	@Override
 	public boolean isSelectable() {
 		// TODO Auto-generated method stub
@@ -36,26 +42,28 @@ public class ResetControl extends CustomControl {
 	/**
 	 * @return the mCenter
 	 */
-	public LatLng getMCenter() {
+	public LatLng getCenter() {
 		return mCenter;
 	}
 	/**
 	 * @return the mZoom
 	 */
-	public int getMZoom() {
+	public int getZoom() {
 		return mZoom;
 	}
 	/**
 	 * @param center the mCenter to set
 	 */
-	public void setMCenter(LatLng center) {
+	public void setCenter(LatLng center) {
 		mCenter = center;
 	}
 	/**
 	 * @param zoom the mZoom to set
 	 */
-	public void setMZoom(int zoom) {
+	public void setZoom(int zoom) {
 		mZoom = zoom;
 	}
-
+    public void addClickListener(ClickListener listener) {
+    	resetButton.addClickListener(listener);
+    }
 }

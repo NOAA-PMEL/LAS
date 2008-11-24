@@ -47,39 +47,40 @@ public class DatasetWidget extends Tree implements TreeListener {
 	AsyncCallback categoryCallback = new AsyncCallback() {
 		public void onSuccess(Object result) {
 			CategorySerializable[] cats = (CategorySerializable[]) result;
-			if ( currentlySelected == null ) {
-				for (int i = 0; i < cats.length; i++) {
-					CategorySerializable cat = cats[i];
-					String name = cat.getName();
-					TreeItem item = new TreeItem();
-					item.addItem("Loading...");
-					item.addItem("from server.");
-					item.setText(name);
-					item.setUserObject(cat);
-					addItem(item);
-				}
-			} else {
-				for (int i = 0; i < cats.length; i++) {
-					CategorySerializable cat = cats[i];
-					if ( cat.isCategoryChildren() ) {
+			if ( cats != null && cats.length > 0 ) {
+				if ( currentlySelected == null ) {
+					for (int i = 0; i < cats.length; i++) {
+						CategorySerializable cat = cats[i];
 						String name = cat.getName();
 						TreeItem item = new TreeItem();
 						item.addItem("Loading...");
 						item.setText(name);
 						item.setUserObject(cat);
-						currentlySelected.addItem(item);
-					} else {
-						// Must have variable children and there should be only 1, but we're not checking :-)
-						DatasetSerializable ds = cat.getDatasetSerializable();
-						VariableSerializable[] vars = ds.getVariablesSerializable();
-						TreeItem item = currentlySelected.getChild(0);
-						item.setText(vars[0].getName());
-						item.setUserObject(vars[0]);
-						for (int j = 1; j < vars.length; j++) {
-							item = new TreeItem();
-							item.setText(vars[j].getName());
-							item.setUserObject(vars[j]);
+						addItem(item);
+					}
+				} else {
+					for (int i = 0; i < cats.length; i++) {
+						CategorySerializable cat = cats[i];
+						if ( cat.isCategoryChildren() ) {
+							String name = cat.getName();
+							TreeItem item = new TreeItem();
+							item.addItem("Loading...");
+							item.setText(name);
+							item.setUserObject(cat);
 							currentlySelected.addItem(item);
+						} else {
+							// Must have variable children and there should be only 1, but we're not checking :-)
+							DatasetSerializable ds = cat.getDatasetSerializable();
+							VariableSerializable[] vars = ds.getVariablesSerializable();
+							TreeItem item = currentlySelected.getChild(0);
+							item.setText(vars[0].getName());
+							item.setUserObject(vars[0]);
+							for (int j = 1; j < vars.length; j++) {
+								item = new TreeItem();
+								item.setText(vars[j].getName());
+								item.setUserObject(vars[j]);
+								currentlySelected.addItem(item);
+							}
 						}
 					}
 				}
