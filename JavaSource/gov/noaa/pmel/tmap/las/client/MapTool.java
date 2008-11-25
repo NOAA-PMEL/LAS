@@ -3,6 +3,7 @@ package gov.noaa.pmel.tmap.las.client;
 import java.util.ArrayList;
 import java.util.Iterator;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.event.MarkerDragHandler;
 import com.google.gwt.maps.client.geom.LatLng;
@@ -33,7 +34,7 @@ public class MapTool {
 	Marker neMarker;
 	Marker ne_seMarker;
 	Marker seMarker;
-	Marker se_swMarker;
+	Marker sw_seMarker;
 	Marker centerMarker;
 	ArrayList<Marker> markers;
 	MapWidget mMap;
@@ -50,6 +51,12 @@ public class MapTool {
 		this.type = type;
 		this.markers = new ArrayList<Marker>();
 		
+		String moduleRelativeURL = GWT.getModuleBaseURL();
+        String moduleName = GWT.getModuleName();
+        moduleRelativeURL = moduleRelativeURL.substring(0,moduleRelativeURL.indexOf(moduleName)-1);
+        moduleRelativeURL = moduleRelativeURL.substring(0,moduleRelativeURL.lastIndexOf("/")+1);
+        String imageURL = moduleRelativeURL + "images/";
+		
 		if ( type.equals("xy") ) {
 			polygonPoints = new LatLng[5];
 			polygonPoints[0] = LatLng.newInstance(currentBounds.getSouthWest().getLatitude(), currentBounds.getSouthWest().getLongitude());
@@ -64,7 +71,7 @@ public class MapTool {
 			Icon sw_icon = Icon.newInstance();
 			sw_icon.setIconSize(Size.newInstance(12, 12));
 			sw_icon.setIconAnchor(Point.newInstance(5, 5));
-			sw_icon.setImageURL("http://localhost:8880/baker/images/edit_square.png");
+			sw_icon.setImageURL(imageURL+"edit_square.png");
 			MarkerOptions sw_options = MarkerOptions.newInstance();
 	        sw_options.setIcon(sw_icon);
 			sw_options.setDraggable(true);
@@ -78,7 +85,7 @@ public class MapTool {
 			Icon sw_nw_icon = Icon.newInstance();
 			sw_nw_icon.setIconSize(Size.newInstance(12, 12));
 			sw_nw_icon.setIconAnchor(Point.newInstance(5, 5));
-			sw_nw_icon.setImageURL("http://localhost:8880/baker/images/edit_square.png");
+			sw_nw_icon.setImageURL(imageURL+"edit_square.png");
 			MarkerOptions sw_nw_options = MarkerOptions.newInstance();
 	        sw_nw_options.setIcon(sw_nw_icon);
 	        sw_nw_options.setDraggable(true);
@@ -92,7 +99,7 @@ public class MapTool {
 			Icon nw_icon = Icon.newInstance();
 			nw_icon.setIconSize(Size.newInstance(12, 12));
 			nw_icon.setIconAnchor(Point.newInstance(5, 5));
-			nw_icon.setImageURL("http://localhost:8880/baker/images/edit_square.png");
+			nw_icon.setImageURL(imageURL+"edit_square.png");
 			MarkerOptions nw_options = MarkerOptions.newInstance();
 			nw_options.setIcon(nw_icon);
 			nw_options.setDraggable(true);
@@ -106,7 +113,7 @@ public class MapTool {
 			Icon nw_ne_icon = Icon.newInstance();
 			nw_ne_icon.setIconSize(Size.newInstance(12, 12));
 			nw_ne_icon.setIconAnchor(Point.newInstance(5, 5));
-			nw_ne_icon.setImageURL("http://localhost:8880/baker/images/edit_square.png");
+			nw_ne_icon.setImageURL(imageURL+"edit_square.png");
 			MarkerOptions nw_ne_options = MarkerOptions.newInstance();
 			nw_ne_options.setIcon(nw_ne_icon);
 			nw_ne_options.setDraggable(true);
@@ -114,12 +121,13 @@ public class MapTool {
 			nw_ne_options.setBouncy(false);
 			nw_ne_options.setTitle("nw_ne");
 			nw_neMarker = new Marker(LatLng.newInstance(currentBounds.getNorthEast().getLatitude(), center.getLongitude()), nw_ne_options);
+			nw_neMarker.addMarkerDragHandler(markerDragHandler);
 			markers.add(nw_neMarker);
 			
 			Icon ne_icon = Icon.newInstance();
 			ne_icon.setIconSize(Size.newInstance(12, 12));
 			ne_icon.setIconAnchor(Point.newInstance(5, 5));
-			ne_icon.setImageURL("http://localhost:8880/baker/images/edit_square.png");
+			ne_icon.setImageURL(imageURL+"edit_square.png");
 			MarkerOptions ne_options = MarkerOptions.newInstance();
 			ne_options.setIcon(ne_icon);
 			ne_options.setDraggable(true);
@@ -127,12 +135,13 @@ public class MapTool {
 			ne_options.setBouncy(false);
 			ne_options.setTitle("ne");
 			neMarker = new Marker(currentBounds.getNorthEast(), ne_options);
+			neMarker.addMarkerDragHandler(markerDragHandler);
 			markers.add(neMarker);
 			
 			Icon ne_se_icon = Icon.newInstance();
 			ne_se_icon.setIconSize(Size.newInstance(12, 12));
 			ne_se_icon.setIconAnchor(Point.newInstance(5, 5));
-			ne_se_icon.setImageURL("http://localhost:8880/baker/images/edit_square.png");
+			ne_se_icon.setImageURL(imageURL+"edit_square.png");
 			MarkerOptions ne_se_options = MarkerOptions.newInstance();
 			ne_se_options.setIcon(ne_se_icon);
 			ne_se_options.setDraggable(true);
@@ -140,12 +149,13 @@ public class MapTool {
 			ne_se_options.setBouncy(false);
 			ne_se_options.setTitle("ne_se");
 			ne_seMarker = new Marker(LatLng.newInstance(center.getLatitude(), currentBounds.getNorthEast().getLongitude()), ne_se_options);
+			ne_seMarker.addMarkerDragHandler(markerDragHandler);
 			markers.add(ne_seMarker);
 			
 			Icon se_icon = Icon.newInstance();
 			se_icon.setIconSize(Size.newInstance(12, 12));
 			se_icon.setIconAnchor(Point.newInstance(5, 5));
-			se_icon.setImageURL("http://localhost:8880/baker/images/edit_square.png");
+			se_icon.setImageURL(imageURL+"edit_square.png");
 			MarkerOptions se_options = MarkerOptions.newInstance();
 			se_options.setIcon(se_icon);
 			se_options.setDraggable(true);
@@ -153,25 +163,27 @@ public class MapTool {
 			se_options.setBouncy(false);
 			se_options.setTitle("se");
 			seMarker = new Marker(LatLng.newInstance(currentBounds.getSouthWest().getLatitude(), currentBounds.getNorthEast().getLongitude()), se_options);
+			seMarker.addMarkerDragHandler(markerDragHandler);
 			markers.add(seMarker);
 			
-			Icon se_sw_icon = Icon.newInstance();
-			se_sw_icon.setIconSize(Size.newInstance(12, 12));
-			se_sw_icon.setIconAnchor(Point.newInstance(5, 5));
-			se_sw_icon.setImageURL("http://localhost:8880/baker/images/edit_square.png");
-			MarkerOptions se_sw_options = MarkerOptions.newInstance();
-			se_sw_options.setIcon(se_sw_icon);
-			se_sw_options.setDraggable(true);
-			se_sw_options.setDragCrossMove(true);
-			se_sw_options.setBouncy(false);
-			se_sw_options.setTitle("se_sw");
-			se_swMarker = new Marker(LatLng.newInstance(currentBounds.getSouthWest().getLatitude(), center.getLongitude()), se_sw_options);
-			markers.add(se_swMarker);
+			Icon sw_se_icon = Icon.newInstance();
+			sw_se_icon.setIconSize(Size.newInstance(12, 12));
+			sw_se_icon.setIconAnchor(Point.newInstance(5, 5));
+			sw_se_icon.setImageURL(imageURL+"edit_square.png");
+			MarkerOptions sw_se_options = MarkerOptions.newInstance();
+			sw_se_options.setIcon(sw_se_icon);
+			sw_se_options.setDraggable(true);
+			sw_se_options.setDragCrossMove(true);
+			sw_se_options.setBouncy(false);
+			sw_se_options.setTitle("sw_se");
+			sw_seMarker = new Marker(LatLng.newInstance(currentBounds.getSouthWest().getLatitude(), center.getLongitude()), sw_se_options);
+			sw_seMarker.addMarkerDragHandler(markerDragHandler);
+			markers.add(sw_seMarker);
 			
 			Icon center_icon = Icon.newInstance();
 			center_icon.setIconSize(Size.newInstance(12, 12));
 			center_icon.setIconAnchor(Point.newInstance(5, 5));
-			center_icon.setImageURL("http://localhost:8880/baker/images/edit_square.png");
+			center_icon.setImageURL(imageURL+"edit_square.png");
 			MarkerOptions center_options = MarkerOptions.newInstance();
 			center_options.setIcon(center_icon);
 			center_options.setDraggable(true);
@@ -179,6 +191,7 @@ public class MapTool {
 			center_options.setBouncy(false);
 			center_options.setTitle("center");
 			centerMarker = new Marker(currentBounds.getCenter(), center_options);
+			centerMarker.addMarkerDragHandler(markerDragHandler);
 			markers.add(centerMarker);
 		}
 		
@@ -186,176 +199,205 @@ public class MapTool {
 	MarkerDragHandler markerDragHandler = new MarkerDragHandler() {
 		public void onDrag(MarkerDragEvent event) {
 			Marker marker = event.getSender();
+			String title = marker.getTitle();
 			LatLng markerLocation = marker.getLatLng();
 			double markerLon = markerLocation.getLongitude();
+			double markerLat = markerLocation.getLatitude();
 			while ( markerLon < 0.0 ) {
 				markerLon = markerLon + 360.;
 			}
-			double westBoundsLon = dataBounds.getSouthWest().getLongitude();
-			while ( westBoundsLon < 0.0 ) {
-				westBoundsLon = westBoundsLon + 360.;
+			double westBoundsLon;
+			double eastBoundsLon;
+			double southBoundsLat;
+			double northBoundsLat;
+			LatLng sw = polygon.getBounds().getSouthWest();
+            LatLng ne = polygon.getBounds().getNorthEast();
+			if ( title.equals("sw") ) {
+				// The south west marker's movements are bounded by the south west data bounds and the north east rectangle bounds.
+				westBoundsLon = dataBounds.getSouthWest().getLongitude();
+				eastBoundsLon = ne.getLongitude();
+				southBoundsLat = dataBounds.getSouthWest().getLatitude();
+				northBoundsLat = ne.getLatitude();
+				while ( westBoundsLon < 0.0 ) {
+					westBoundsLon = westBoundsLon + 360.;
+				}
+				while (eastBoundsLon < 0.0 ) {
+					eastBoundsLon = eastBoundsLon + 360.;
+				}
+				if ( markerLon >= eastBoundsLon ) {
+					markerLon = eastBoundsLon;
+				}
+				if ( markerLon <= westBoundsLon ) {
+					markerLon = westBoundsLon;
+				}
+				if (markerLat <= southBoundsLat ) {
+					markerLat = southBoundsLat;
+				}
+				if ( markerLat >= northBoundsLat ) {
+					markerLat = northBoundsLat;
+				}
+				sw = LatLng.newInstance(markerLat, markerLon);
+			} else if ( title.equals("sw_nw") )  {
+				// The west line marker's movements abound bounded by it's current latitude and the west data bounds and the east
+				// rectangle bounds.
+				markerLat = polygon.getBounds().getCenter().getLatitude();
+				westBoundsLon = dataBounds.getSouthWest().getLongitude();
+				eastBoundsLon = ne.getLongitude();
+				while ( westBoundsLon < 0.0 ) {
+					westBoundsLon = westBoundsLon + 360.;
+				}
+				while (eastBoundsLon < 0.0 ) {
+					eastBoundsLon = eastBoundsLon + 360.;
+				}
+				if ( markerLon >= eastBoundsLon ) {
+					markerLon = eastBoundsLon;
+				}
+				if ( markerLon <= westBoundsLon ) {
+					markerLon = westBoundsLon;
+				}
+				sw = LatLng.newInstance(sw.getLatitude(), markerLon);
+			} else if ( title.equals("nw") ) {
+				// The north west corner is bounded by the west and north data bounds and the south east rectangle corner.
+				northBoundsLat = dataBounds.getNorthEast().getLatitude();
+				southBoundsLat = sw.getLatitude();
+				westBoundsLon = dataBounds.getSouthWest().getLongitude();
+				eastBoundsLon = ne.getLongitude();
+				while ( westBoundsLon < 0.0 ) {
+					westBoundsLon = westBoundsLon + 360.;
+				}
+				while (eastBoundsLon < 0.0 ) {
+					eastBoundsLon = eastBoundsLon + 360.;
+				}
+				if ( markerLon >= eastBoundsLon ) {
+					markerLon = eastBoundsLon;
+				}
+				if ( markerLon <= westBoundsLon ) {
+					markerLon = westBoundsLon;
+				}
+				if (markerLat <= southBoundsLat ) {
+					markerLat = southBoundsLat;
+				}
+				if ( markerLat >= northBoundsLat ) {
+					markerLat = northBoundsLat;
+				}
+				sw = LatLng.newInstance(sw.getLatitude(), markerLon);
+				ne = LatLng.newInstance(markerLat, ne.getLongitude());
+		    } else if ( title.equals("nw_ne") ) { 
+				southBoundsLat = sw.getLatitude();
+				northBoundsLat = dataBounds.getNorthEast().getLatitude();
+				markerLon = polygon.getBounds().getCenter().getLongitude();
+				if (markerLat <= southBoundsLat ) {
+					markerLat = southBoundsLat;
+				}
+				if ( markerLat >= northBoundsLat ) {
+					markerLat = northBoundsLat;
+				}
+				ne = LatLng.newInstance(markerLat, ne.getLongitude());
+			} else if ( title.equals("ne") ) {
+				northBoundsLat = dataBounds.getNorthEast().getLatitude();
+				southBoundsLat = sw.getLatitude();
+				westBoundsLon = sw.getLongitude();
+				eastBoundsLon = dataBounds.getNorthEast().getLongitude();
+				while ( westBoundsLon < 0.0 ) {
+					westBoundsLon = westBoundsLon + 360.;
+				}
+				while (eastBoundsLon < 0.0 ) {
+					eastBoundsLon = eastBoundsLon + 360.;
+				}
+				if ( markerLon >= eastBoundsLon ) {
+					markerLon = eastBoundsLon;
+				}
+				if ( markerLon <= westBoundsLon ) {
+					markerLon = westBoundsLon;
+				}
+				if (markerLat <= southBoundsLat ) {
+					markerLat = southBoundsLat;
+				}
+				if ( markerLat >= northBoundsLat ) {
+					markerLat = northBoundsLat;
+				}
+				ne = LatLng.newInstance(markerLat, markerLon);
+			} else if ( title.equals("ne_se") ) {
+				markerLat = polygon.getBounds().getCenter().getLatitude();
+				westBoundsLon = sw.getLongitude();
+				eastBoundsLon = dataBounds.getNorthEast().getLongitude();
+				while ( westBoundsLon < 0.0 ) {
+					westBoundsLon = westBoundsLon + 360.;
+				}
+				while (eastBoundsLon < 0.0 ) {
+					eastBoundsLon = eastBoundsLon + 360.;
+				}
+				if ( markerLon >= eastBoundsLon ) {
+					markerLon = eastBoundsLon;
+				}
+				if ( markerLon <= westBoundsLon ) {
+					markerLon = westBoundsLon;
+				}
+				ne = LatLng.newInstance(ne.getLatitude(), markerLon);
+			} else if ( title.equals("se") ) {
+				northBoundsLat = ne.getLatitude();
+				southBoundsLat = dataBounds.getSouthWest().getLatitude();
+				westBoundsLon = sw.getLongitude();
+				eastBoundsLon = dataBounds.getNorthEast().getLongitude();
+				while ( westBoundsLon < 0.0 ) {
+					westBoundsLon = westBoundsLon + 360.;
+				}
+				while (eastBoundsLon < 0.0 ) {
+					eastBoundsLon = eastBoundsLon + 360.;
+				}
+				if ( markerLon >= eastBoundsLon ) {
+					markerLon = eastBoundsLon;
+				}
+				if ( markerLon <= westBoundsLon ) {
+					markerLon = westBoundsLon;
+				}
+				if (markerLat <= southBoundsLat ) {
+					markerLat = southBoundsLat;
+				}
+				if ( markerLat >= northBoundsLat ) {
+					markerLat = northBoundsLat;
+				}
+				ne = LatLng.newInstance(ne.getLatitude(), markerLon);
+				sw = LatLng.newInstance(markerLat, sw.getLongitude());
+			} else if ( title.equals("sw_se") ) {
+				southBoundsLat = dataBounds.getSouthWest().getLatitude();
+				northBoundsLat = ne.getLatitude();
+				markerLon = polygon.getBounds().getCenter().getLongitude();
+				if (markerLat <= southBoundsLat ) {
+					markerLat = southBoundsLat;
+				}
+				if ( markerLat >= northBoundsLat ) {
+					markerLat = northBoundsLat;
+				}
+				sw = LatLng.newInstance(markerLat, sw.getLongitude());
+			} else if ( title.equals("center") ) {
+				westBoundsLon = dataBounds.getSouthWest().getLongitude() + polygon.getBounds().toSpan().getLongitude()/2.;
+				eastBoundsLon = dataBounds.getNorthEast().getLongitude() - polygon.getBounds().toSpan().getLongitude()/2.;
+				southBoundsLat = dataBounds.getSouthWest().getLatitude() + polygon.getBounds().toSpan().getLatitude()/2.;
+				northBoundsLat = dataBounds.getNorthEast().getLatitude() - polygon.getBounds().toSpan().getLatitude()/2.;
+				
+				while ( westBoundsLon < 0.0 ) {
+					westBoundsLon = westBoundsLon + 360.;
+				}
+				while (eastBoundsLon < 0.0 ) {
+					eastBoundsLon = eastBoundsLon + 360.;
+				}
+				if ( markerLat >= northBoundsLat ) {
+					markerLat = northBoundsLat;
+				}
+				if ( markerLat <= southBoundsLat ) {
+					markerLat = southBoundsLat;
+				}
+				if ( markerLon >= eastBoundsLon ) {
+					markerLon = eastBoundsLon;
+				}
+				if ( markerLon <= westBoundsLon ) {
+					markerLon = westBoundsLon;
+				}
+				sw = LatLng.newInstance(markerLat - polygon.getBounds().toSpan().getLatitude()/2., markerLon - polygon.getBounds().toSpan().getLongitude()/2.0);
+				ne = LatLng.newInstance(markerLat + polygon.getBounds().toSpan().getLatitude()/2., markerLon + polygon.getBounds().toSpan().getLongitude()/2.0);
 			}
-			double eastBoundsLon = dataBounds.getNorthEast().getLongitude();
-			while (eastBoundsLon < 0.0 ) {
-				eastBoundsLon = eastBoundsLon + 360.;
-			}
-			double resetLon = markerLon;
-			boolean reset = false;
-			double markerLat = markerLocation.getLatitude();
-			double southBoundsLat = dataBounds.getSouthWest().getLatitude();
-			double northBoundsLat = dataBounds.getNorthEast().getLatitude();
-			double resetLat = markerLat;
-			LatLng sw = null;
-			LatLng ne = null;
-             String title = marker.getTitle();
-			
-             if ( title.equals("sw") ) {
-            	 if ( !dataBounds.containsLatLng(markerLocation) )  {
-            		 if ( markerLon <= westBoundsLon ) {
-            			 reset = true;
-            			 resetLon = westBoundsLon;
-            		 }
-            		 if ( markerLat <= southBoundsLat ) {
-            			 reset = true;
-            			 resetLat = southBoundsLat;
-            		 }
-            		 if ( markerLon > eastBoundsLon ) {
-            			 reset = true;
-            			 resetLon = eastBoundsLon;
-            		 }
-            		 if ( markerLat > northBoundsLat ) {
-            			 reset = true;
-            			 resetLat = northBoundsLat;
-            		 }
-            		 if (reset) {
-            			 marker.setLatLng(LatLng.newInstance(resetLat, resetLon));
-            		 }
-            	 }
 
-            	 // This was the SW corner.  Is it still?
-            	 double old_ne_lat = polygonPoints[2].getLatitude();
-            	 double old_ne_lon = polygonPoints[2].getLongitude();
-            	 while ( old_ne_lon <= 0. ) {
-            		 old_ne_lon = old_ne_lon + 360.;
-            	 }
-            	 if ( resetLat > old_ne_lat && resetLon > old_ne_lon ) {
-            		 ne = LatLng.newInstance(resetLat, resetLon);
-            		 sw = LatLng.newInstance(old_ne_lat, old_ne_lon);
-            	 } else if ( resetLat <= old_ne_lat && resetLon <= old_ne_lon ) {
-            		 ne = LatLng.newInstance(old_ne_lat, old_ne_lon);
-            		 sw = LatLng.newInstance(resetLat, resetLon);
-            	 } else if ( resetLat > old_ne_lat && resetLon <= old_ne_lon ) {
-            		 ne = LatLng.newInstance(resetLat, old_ne_lon);
-            		 sw = LatLng.newInstance(old_ne_lat, resetLon);
-            	 } else {
-            		 ne = LatLng.newInstance(old_ne_lat, resetLon);
-            		 sw = LatLng.newInstance(resetLat, old_ne_lon);
-            	 }
-
-             } else if (title.equals("sw_nw") ) {
-            	 reset = true;
-            	 resetLat = polygon.getBounds().getCenter().getLatitude();
-            	 if ( markerLon <= westBoundsLon ) {
-        			 reset = true;
-        			 resetLon = westBoundsLon;
-        		 }
-            	 if ( markerLon > eastBoundsLon ) {
-        			 reset = true;
-        			 resetLon = eastBoundsLon;
-        		 }
-            	 if ( reset ) {
-            		 marker.setLatLng(LatLng.newInstance(resetLat, resetLon));
-            	 }
-            	 
-            	 double old_ne_lon = polygonPoints[2].getLongitude();
-            	 while ( old_ne_lon <= 0. ) {
-            		 old_ne_lon = old_ne_lon + 360.;
-            	 }
-            	 
-            	 double old_sw_lon = polygonPoints[0].getLongitude();
-            	 while ( old_sw_lon <= 0.0 ) {
-            		 old_sw_lon = old_sw_lon + 360.;
-            	 }
-            	 if ( resetLon <= old_ne_lon ) {
-            		 ne = polygonPoints[2];
-            		 sw = LatLng.newInstance(polygonPoints[0].getLatitude(), resetLon);
-            	 } else {
-            		 ne = LatLng.newInstance(polygonPoints[1].getLatitude(), resetLon);
-            		 sw = polygonPoints[3];
-            	 }
-             } else if ( title.equals("nw") ) {
-            	 if ( !dataBounds.containsLatLng(markerLocation) )  {
-            		 if ( markerLon <= westBoundsLon ) {
-            			 reset = true;
-            			 resetLon = westBoundsLon;
-            		 }
-            		 if ( markerLat <= southBoundsLat ) {
-            			 reset = true;
-            			 resetLat = southBoundsLat;
-            		 }
-            		 if ( markerLon > eastBoundsLon ) {
-            			 reset = true;
-            			 resetLon = eastBoundsLon;
-            		 }
-            		 if ( markerLat > northBoundsLat ) {
-            			 reset = true;
-            			 resetLat = northBoundsLat;
-            		 }
-            		 if (reset) {
-            			 marker.setLatLng(LatLng.newInstance(resetLat, resetLon));
-            		 }
-            	 }
-            	 LatLng old_sw = polygonPoints[0];
-            	 LatLng old_ne = polygonPoints[2];
-            	 
-            	 double old_se_lat = polygonPoints[3].getLatitude();
-            	 double old_se_lon = polygonPoints[3].getLongitude();
-            	 while ( old_se_lon <= 0. ) {
-            		 old_se_lon = old_se_lon + 360.;
-            	 }
-            	 if ( resetLat <= old_se_lat && resetLon > old_se_lon ) {
-            		 ne = old_sw;
-            		 sw = LatLng.newInstance(resetLat, old_ne.getLongitude());
-            	 } else if ( resetLat <= old_se_lat && resetLon <= old_se_lon ) {
-            		 ne = LatLng.newInstance(old_se_lat, old_ne.getLongitude());
-            		 sw = LatLng.newInstance(resetLat, resetLon);
-            	 } else if ( resetLat > old_se_lat && resetLon <= old_se_lon ) {
-            		 ne = LatLng.newInstance(resetLat, old_ne.getLongitude());
-            		 sw = LatLng.newInstance(old_sw.getLatitude(), resetLon);
-            	 } else {
-            		 ne = LatLng.newInstance(resetLat, resetLon);
-            		 sw = LatLng.newInstance(old_se_lat, old_se_lon);
-            	 }
-            	 
-             } else if ( title.equals("nw_ne") ) {
-            	 reset = true;
-            	 resetLon = polygon.getBounds().getCenter().getLongitude();
-            	 if ( markerLat <= southBoundsLat ) {
-        			 reset = true;
-        			 resetLat = southBoundsLat;
-        		 }
-            	 if ( markerLat > northBoundsLat ) {
-        			 reset = true;
-        			 resetLat = northBoundsLat;
-        		 }
-            	 if ( reset ) {
-            		 marker.setLatLng(LatLng.newInstance(resetLat, resetLon));
-            	 }
-            	 
-            	 double old_ne_lat = polygonPoints[2].getLatitude();
-            	 double old_sw_lat = polygonPoints[0].getLatitude();
-            	 
-            	 // TODO FIX THIS.
-            	 
-            	 if ( resetLat <= old_sw_lat ) {
-            		 //ne
-            		 //sw = LatLng.newInstance(polygonPoints[0].getLatitude(), resetLon);
-            	 } else {
-            		 //ne = LatLng.newInstance(polygonPoints[1].getLatitude(), resetLon);
-            		 //sw = polygonPoints[3];
-            	 }
-             }
-			
 			mMap.removeOverlay(polygon);
 			polygonPoints[0] = LatLng.newInstance(sw.getLatitude(), sw.getLongitude());
 			polygonPoints[1] = LatLng.newInstance(ne.getLatitude(), sw.getLongitude());
@@ -364,16 +406,16 @@ public class MapTool {
 			polygonPoints[4] = LatLng.newInstance(sw.getLatitude(), sw.getLongitude());
 			polygon = new Polygon(polygonPoints, strokeColor, strokeWeight, strokeOpacity, fillColor, fillOpacity);
 			mMap.addOverlay(polygon);
-			LatLngBounds dataBounds = polygon.getBounds();
+			LatLngBounds rectBounds = polygon.getBounds();
 			swMarker.setLatLng(LatLng.newInstance(sw.getLatitude(), sw.getLongitude()));
-			sw_nwMarker.setLatLng(LatLng.newInstance(dataBounds.getCenter().getLatitude(), sw.getLongitude()));
+			sw_nwMarker.setLatLng(LatLng.newInstance(rectBounds.getCenter().getLatitude(), sw.getLongitude()));
 			nwMarker.setLatLng(LatLng.newInstance(ne.getLatitude(), sw.getLongitude()));
-			nw_neMarker.setLatLng(LatLng.newInstance(ne.getLatitude(), dataBounds.getCenter().getLongitude()));
+			nw_neMarker.setLatLng(LatLng.newInstance(ne.getLatitude(), rectBounds.getCenter().getLongitude()));
 			neMarker.setLatLng(LatLng.newInstance(ne.getLatitude(), ne.getLongitude()));
-			ne_seMarker.setLatLng(LatLng.newInstance(dataBounds.getCenter().getLatitude(), ne.getLongitude()));
+			ne_seMarker.setLatLng(LatLng.newInstance(rectBounds.getCenter().getLatitude(), ne.getLongitude()));
 			seMarker.setLatLng(LatLng.newInstance(sw.getLatitude(), ne.getLongitude()));
-			se_swMarker.setLatLng(LatLng.newInstance(sw.getLatitude(), dataBounds.getCenter().getLongitude()));
-			centerMarker.setLatLng(dataBounds.getCenter());
+			sw_seMarker.setLatLng(LatLng.newInstance(sw.getLatitude(), rectBounds.getCenter().getLongitude()));
+			centerMarker.setLatLng(rectBounds.getCenter());
 		}
 	};
 	public void setVisible(boolean visible) {
@@ -441,7 +483,7 @@ public class MapTool {
 		neMarker.setLatLng(ne);
 		ne_seMarker.setLatLng(LatLng.newInstance(center.getLatitude(), ne.getLongitude()));
 		seMarker.setLatLng(LatLng.newInstance(sw.getLatitude(), ne.getLongitude()));
-		se_swMarker.setLatLng(LatLng.newInstance(sw.getLatitude(), center.getLongitude()));
+		sw_seMarker.setLatLng(LatLng.newInstance(sw.getLatitude(), center.getLongitude()));
 		centerMarker.setLatLng(center);
 	}
 	/**

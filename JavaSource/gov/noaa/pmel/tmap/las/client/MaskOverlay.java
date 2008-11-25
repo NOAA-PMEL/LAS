@@ -44,7 +44,6 @@ public class MaskOverlay extends Overlay {
     	
     	LatLng sw = mDataBounds.getSouthWest();
     	LatLng ne = mDataBounds.getNorthEast();
-    	
     	polyList = new ArrayList<Polygon>();	
     	// Only mask if the west boundary of the map is west of the west boundary of the data.  Got it?
     	double maplongitude = map_sw.getLongitude();
@@ -102,7 +101,7 @@ public class MaskOverlay extends Overlay {
 		mMap = map;
 		for (Iterator polyIt = polyList.iterator(); polyIt.hasNext();) {
 			Polygon poly = (Polygon) polyIt.next();
-			map.addOverlay(poly);
+			mMap.addOverlay(poly);
 		}
 
 	}
@@ -115,11 +114,12 @@ public class MaskOverlay extends Overlay {
 
 	@Override
 	protected void remove() {
-		for (Iterator polyIt = polyList.iterator(); polyIt.hasNext();) {
-			Polygon poly = (Polygon) polyIt.next();
-			mMap.removeOverlay(poly);
+		if (polyList != null ) {
+			for (Iterator polyIt = polyList.iterator(); polyIt.hasNext();) {
+				Polygon poly = (Polygon) polyIt.next();
+				mMap.removeOverlay(poly);
+			}
 		}
-
 	}
 
 }

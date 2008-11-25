@@ -25,7 +25,7 @@ public class MapPolygon {
     	this.interiorColor = interiorColor;
     	this.interiorOpacity = interiorOpacity;
     	this.polyList = new ArrayList<Polygon>();
-
+        
     	if ( sw.getLongitude() > ne.getLongitude() ) {
 
     		LatLng[] westBounds = new LatLng[4];
