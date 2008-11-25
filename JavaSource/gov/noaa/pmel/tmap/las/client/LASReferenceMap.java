@@ -16,12 +16,13 @@ import com.google.gwt.maps.client.event.MapDragStartHandler;
 import com.google.gwt.maps.client.event.MapZoomEndHandler;
 import com.google.gwt.maps.client.geom.LatLng;
 import com.google.gwt.maps.client.geom.LatLngBounds;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.ClickListener;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 
 public class LASReferenceMap extends Composite {
-	MaskOverlay maskOverlay;
+	MaskOverlay maskOverlay = null;
 	SelectControl selectControl;
 	ResetControl resetControl;
 	MapWidget mMap;
@@ -45,6 +46,7 @@ public class LASReferenceMap extends Composite {
 	boolean set_north_center = true;
 	boolean set_west_center = true;
 	boolean set_east_center = true;
+	String gridID = null;
 	/**
 	 * Construct an LASReference map centered and zoomed with the width and height specified in pixels.
 	 * @param center
@@ -70,19 +72,11 @@ public class LASReferenceMap extends Composite {
 				set_east_center = true;
 				set_west_center = true;
 				mMap.setDraggable(true);
-				if (maskOverlay != null ) {
-				    mMap.removeOverlay(maskOverlay);
-				}
-				LatLngBounds mapBounds = mMap.getBounds();
-				// If the data region does not contain the entire map, mask the region.
-				if ( !dataBounds.containsBounds(mapBounds) ) {
-					maskOverlay = new MaskOverlay(mapBounds, dataBounds, "#666666", 1, 0.75, "#666666", 0.75);
-					mMap.addOverlay(maskOverlay);
-				}	
-				// If back at the original zoom, center the map and trun off dragging.
+				
+				// If back at original zoom, center the map and turn off dragging.
 				if ( event.getNewZoomLevel() == mZoom ) {
 					mMap.setDraggable(false);
-					mMap.setCenter(initial_map_center);
+					//mMap.setCenter(initial_map_center);
 				}
 			}
     	});
@@ -96,6 +90,7 @@ public class LASReferenceMap extends Composite {
     	mMap.addMapDragEndHandler(new MapDragEndHandler() {
 
 			public void onDragEnd(MapDragEndEvent event) {
+				
 				if ( maskOverlay != null ) {
 				    mMap.removeOverlay(maskOverlay);
 				}
@@ -104,6 +99,7 @@ public class LASReferenceMap extends Composite {
 					maskOverlay = new MaskOverlay(mapBounds, dataBounds, "#666666", 1, 0.75, "#666666", 0.75);
 					mMap.addOverlay(maskOverlay);
 				}
+				
 			}
     	});
     	
@@ -213,7 +209,7 @@ public class LASReferenceMap extends Composite {
     	mWidth = width;
     	mHeight = height;
 		mMap.setSize(String.valueOf(mWidth)+"px", String.valueOf(mHeight)+"px");
-		selectControl = new SelectControl(new ControlPosition(ControlAnchor.TOP_RIGHT, 65 ,30));
+		selectControl = new SelectControl(new ControlPosition(ControlAnchor.TOP_RIGHT, 10 ,60));
 		if ( mHeight > 350 ) {
 		    mMap.addControl(new LargeMapControl());
 		} else {
@@ -230,6 +226,12 @@ public class LASReferenceMap extends Composite {
     	mMap.addControl(control);
     }
 	public void zoomToGrid(GridSerializable grid) {
+		gridID = grid.getID();
+		if (maskOverlay != null ) {
+        	mMap.removeOverlay(maskOverlay);
+        }
+		selectControl.clearOverlays();
+		selectControl.setGridID(grid.getID());
 		/*
 		 * if a rectangle has a line along a latitude that crosses the
 		 * anti-meridian, you have to draw the rectangle in two pieces
@@ -245,6 +247,14 @@ public class LASReferenceMap extends Composite {
 		dataBounds = LatLngBounds.newInstance(sw, ne);
 		selectControl.setDataBounds(dataBounds);
 		int zoom = mMap.getBoundsZoomLevel(dataBounds);
+
+
+		mMap.setZoomLevel(zoom);
+		mMap.setCenter(dataBounds.getCenter());
+		resetControl.setCenter(dataBounds.getCenter());
+		resetControl.setZoom(zoom);
+		resetControl.setGridID(grid.getID());
+
 		MapType[] types = mMap.getMapTypes();
 		for (int i = 0; i < types.length; i++) {
 			MapTypeOptions options = new MapTypeOptions();
@@ -253,20 +263,12 @@ public class LASReferenceMap extends Composite {
 			mMap.removeMapType(types[i]);
 			mMap.addMapType(mapType);
 		}
-		mMap.setZoomLevel(zoom);
-		mMap.setCenter(dataBounds.getCenter());
-		resetControl.setCenter(dataBounds.getCenter());
-		resetControl.setZoom(zoom);
-        if (maskOverlay != null ) {
-        	mMap.removeOverlay(maskOverlay);
-        }
-		
 		LatLngBounds mapBounds = mMap.getBounds();
-		
+
 		maskOverlay = new MaskOverlay(mapBounds, dataBounds, "#666666", 1, 0.75, "#666666", 0.75);
 		mMap.addOverlay(maskOverlay);
 		mMap.setDraggable(false);
-		
+
 		LatLng map_sw = mMap.getBounds().getSouthWest();
 		double map_south = map_sw.getLatitude();
 		double map_west = sw.getLongitude();
@@ -285,23 +287,34 @@ public class LASReferenceMap extends Composite {
 		
 		initial_map_center = mMap.getCenter();
 		
+		// For some reason the map does not get set correctly for some data sets.
+		// This hack forces it to reconsider...
+		for ( int i = 0; i < 3; i++) {
+		    reset();
+		}
 		
 	}
 	ClickListener click = new ClickListener() {
 		public void onClick(Widget sender) {
-			int zoom = mMap.getBoundsZoomLevel(dataBounds);
-			mMap.setZoomLevel(zoom);
-			mMap.setCenter(dataBounds.getCenter());
-			if (maskOverlay != null ) {
-				mMap.removeOverlay(maskOverlay);
+			if ( gridID == null ) {
+				Window.alert("Please select a data set and variable.");
+			} else {
+				for ( int i = 0; i < 3; i++) {
+					reset();
+				}
 			}
-			LatLngBounds mapBounds = mMap.getBounds();
-			// If the data region does not contain the entire map, mask the region.
-			if ( !dataBounds.containsBounds(mapBounds) ) {
-				maskOverlay = new MaskOverlay(mapBounds, dataBounds, "#666666", 1, 0.75, "#666666", 0.75);
-				mMap.addOverlay(maskOverlay);
-			}
-			mMap.setDraggable(false);
 		}
 	};
+	private void reset() {
+		int zoom = mMap.getBoundsZoomLevel(dataBounds);
+		if ( maskOverlay != null ) {
+			mMap.removeOverlay(maskOverlay);
+		}
+		maskOverlay = new MaskOverlay(mMap.getBounds(), dataBounds, "#666666", 1, 0.75, "#666666", 0.75);
+		mMap.addOverlay(maskOverlay);
+		mMap.setDraggable(false);
+		mMap.setZoomLevel(zoom);
+		mMap.setCenter(dataBounds.getCenter());
+		mMap.setDraggable(false);
+	}
 }

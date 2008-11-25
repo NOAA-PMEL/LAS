@@ -12,6 +12,7 @@ public class ResetControl extends CustomControl {
     LatLng mCenter;
     int mZoom;
     Button resetButton;
+    String gridID;
 	public ResetControl (ControlPosition position, LatLng center, int zoom) {
 		super(position);
 		mCenter = center;
@@ -66,4 +67,8 @@ public class ResetControl extends CustomControl {
     public void addClickListener(ClickListener listener) {
     	resetButton.addClickListener(listener);
     }
+
+	public void setGridID(String id) {
+		gridID = id;
+	}
 }
