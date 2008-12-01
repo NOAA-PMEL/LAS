@@ -171,11 +171,23 @@ IF `stride_for_speed GT 1` THEN
                      STRCMP("`pvar,RETURN=xaxis`", "SAMPLE_X") EQ 0
    LET sampled_in_y = STRCMP("`pvar,RETURN=yaxis`", "SAMPLE_YLAT") EQ 0 OR\
                      STRCMP("`pvar,RETURN=yaxis`", "SAMPLE_Y") EQ 0
+   IF `sampled_in_x + sampled_in_y EQ 0` THEN
+      LET nxsize = `pvar,return=isize` 
+      LET nysize = `pvar,return=jsize`
+      IF ($clon_imin"0>*>1") THEN let nxsize = `($clon_imax) - ($clon_imin)+1`
+      IF ($clat_jmin"0>*>1") THEN let nysize = `($clat_jmax) - ($clat_jmin)+1`
+      IF `nxsize GT 600` THEN
+         DEFINE SYMBOL nx_stride = `INT(nxsize/50)`
+	 SET AXIS/STRIDE=($nx_stride) `pvar,RETURN=xaxis`
+      ENDIF
+      IF `nysize GT 600` THEN
+         DEFINE SYMBOL ny_stride = `INT(nysize/50)`
+	 SET AXIS/STRIDE=($ny_stride) `pvar,RETURN=yaxis`
+      ENDIF
+   ENDIF
 ENDIF
 
-
- DEFINE SYMBOL ppvar = pvar
-
+DEFINE SYMBOL ppvar = pvar
 
 IF ($native_curvilinear_xy"0") THEN DEFINE SYMBOL ppvar = pvar
 
@@ -187,10 +199,11 @@ IF ($native_curvilinear_xy"0") THEN DEFINE SYMBOL ppvar = pvar
 ! mean, max, min, std.
 
 DEFINE SYMBOL stat_ngood= 0
-set mode ignore_error
-SET MEM/SIZ=400
-set mode/last ignore_error
+
 STAT ($ppvar)
+
+IF ($nx_stride"0|*>1) THEN CANCEL AXIS/STRIDE `pvar,RETURN=xaxis`
+IF ($ny_stride"0|*>1) THEN CANCEL AXIS/STRIDE `pvar,RETURN=yaxis`
 
 IF `($stat_ngood"0") EQ 0` THEN EXIT/SCRIPT
 
