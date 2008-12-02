@@ -73,12 +73,9 @@ IF ($result_map_scale_filename%0|*>1%) THEN
    IF ($region_0_x_lo_orig"0|*>1") THEN
       IF `($region_0_x_lo_orig) - ($XAXIS_MIN) LT (-350)` THEN 
          DEFINE SYMBOL xaxlo = `($XAXIS_MIN) - 360`
+         DEFINE SYMBOL xaxhi = `($XAXIS_MAX) - 360`
       ELIF `($region_0_x_lo_orig) - ($XAXIS_MIN) GT   350 ` THEN 
          DEFINE SYMBOL xaxlo = `($XAXIS_MIN) + 360`
-      ENDIF
-      IF `($region_0_x_hi_orig) - ($XAXIS_MAX) LT (-350)` THEN 
-         DEFINE SYMBOL xaxhi = `($XAXIS_MAX) - 360`
-      ELIF  `($region_0_x_hi_orig) - ($XAXIS_MAX) GT   350 ` THEN 
          DEFINE SYMBOL xaxhi = `($XAXIS_MAX) + 360`
       ENDIF
    ENDIF
