@@ -63,6 +63,26 @@ IF ($result_map_scale_filename%0|*>1%) THEN
       "YAXIS_MIN","YAXIS_MAX",\
       "VP_TOP_MARGIN","VP_RT_MARGIN",\
       "XSTRIDE","YSTRIDE"}
+
+! For curvilienar grids, region_0_x_lo and region_0_x_hi may
+! have been changed to another modulo longitude branch. If so
+! then the x axis min and max need to be reset.
+
+   DEFINE SYMBOL xaxlo = ($XAXIS_MIN)
+   DEFINE SYMBOL xaxhi = ($XAXIS_MAX)
+   IF ($region_0_x_lo_orig"0|*>1") THEN
+      IF `($region_0_x_lo_orig) - ($XAXIS_MIN) LT (-350)` THEN 
+         DEFINE SYMBOL xaxlo = `($XAXIS_MIN) - 360`
+      ELIF `($region_0_x_lo_orig) - ($XAXIS_MIN) GT   350 ` THEN 
+         DEFINE SYMBOL xaxlo = `($XAXIS_MIN) + 360`
+      ENDIF
+      IF `($region_0_x_hi_orig) - ($XAXIS_MAX) LT (-350)` THEN 
+         DEFINE SYMBOL xaxhi = `($XAXIS_MAX) - 360`
+      ELIF  `($region_0_x_hi_orig) - ($XAXIS_MAX) GT   350 ` THEN 
+         DEFINE SYMBOL xaxhi = `($XAXIS_MAX) + 360`
+      ENDIF
+   ENDIF
+
    LET syms_vals = {\
       "($PPL$XMIN)", "($PPL$XMAX)", \
       "($PPL$YMIN)", "($PPL$YMAX)", \
@@ -70,7 +90,7 @@ IF ($result_map_scale_filename%0|*>1%) THEN
       "($PPL$WIDTH)", "($PPL$HEIGHT)",\
       "($PPL$XORG)", "($PPL$YORG)",\
       "($PPL$XLEN)", "($PPL$YLEN)",\
-      "($XAXIS_MIN)", "($XAXIS_MAX)",\
+      "($xaxlo)", "($xaxhi)",\
       "($YAXIS_MIN)", "($YAXIS_MAX)",\
       "($VP_TOP_MARGIN)","($VP_RT_MARGIN)",\
       "($xstride)","($ystride)"}
