@@ -3164,7 +3164,7 @@ public class LASConfig extends LASDocument {
             if ( ID == null ) {
                 String name = category.getAttributeValue("name");
                 try {
-                    ID = JDOMUtils.MD5Encode(name);
+                    ID = JDOMUtils.MD5Encode(name+String.valueOf(Math.random()));
                 } catch (UnsupportedEncodingException e) {
                     ID = String.valueOf(Math.random());
                 }
