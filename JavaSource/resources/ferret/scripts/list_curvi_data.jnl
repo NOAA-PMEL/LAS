@@ -162,7 +162,7 @@ ELSE
    ENDIF
 
      ! ... netCDF output in chunks
-   REPEAT/L=($lmin):($lmax):`lchunk` REPEAT/K=($kmin):($kmax):`kchunk` REPEAT/J=($clat_jmin):($clat_jmax):`jchunk` (LIST/APPEND/FILE/($frmt)/J=`j`:`jtop`/K=`k`:`ktop`/L=`l`:`ltop`/JLIMITS=($clat_jmin):($clat_jmax)/KLIMITS=($kmin):($kmax)/LLIMITS=($lmin):($lmax) ($ferret_list_var); CANC MEM/ALL)
+   REPEAT/L=($lmin):($lmax):`lchunk` REPEAT/K=($kmin):($kmax):`kchunk` REPEAT/J=($clat_jmin):($clat_jmax):`jchunk` (LIST/APPEND/FILE/($frmt)/J=`j`:`jtop`/K=`k`:`ktop`/L=`l`:`ltop`/JLIMITS=($clat_jmin):($clat_jmax)/KLIMITS=($kmin):($kmax)/LLIMITS=($lmin):($lmax)/I=($clon_imin):($clon_imax) ($ferret_list_var); CANC MEM/ALL)
 
 ENDIF
 
