@@ -3,6 +3,7 @@ package gov.noaa.pmel.tmap.las.client;
 import java.util.ArrayList;
 
 import com.google.gwt.maps.client.geom.LatLng;
+import com.google.gwt.maps.client.geom.LatLngBounds;
 import com.google.gwt.maps.client.overlay.Polygon;
 
 public class MapPolygon {
@@ -25,7 +26,7 @@ public class MapPolygon {
     	this.interiorColor = interiorColor;
     	this.interiorOpacity = interiorOpacity;
     	this.polyList = new ArrayList<Polygon>();
-        
+        /*
     	if ( sw.getLongitude() > ne.getLongitude() ) {
 
     		LatLng[] westBounds = new LatLng[4];
@@ -54,6 +55,21 @@ public class MapPolygon {
 			Polygon poly = new Polygon(bounds, outlineColor, outlineWeight, outlineOpacity, interiorColor, interiorOpacity);
     		polyList.add(poly);
     	}
+    	*/
+    	LatLngBounds bounds = LatLngBounds.newInstance(sw, ne);
+    	LatLng center = bounds.getCenter();
+    	LatLng[] boundingPolygon = new LatLng[9];
+		boundingPolygon[0] = LatLng.newInstance(sw.getLatitude(), sw.getLongitude());
+		boundingPolygon[1] = LatLng.newInstance(center.getLatitude(), sw.getLongitude());
+		boundingPolygon[2] = LatLng.newInstance(ne.getLatitude(), sw.getLongitude());
+		boundingPolygon[3] = LatLng.newInstance(ne.getLatitude(), center.getLongitude());
+		boundingPolygon[4] = LatLng.newInstance(ne.getLatitude(), ne.getLongitude());
+		boundingPolygon[5] = LatLng.newInstance(center.getLatitude(), ne.getLongitude());
+		boundingPolygon[6] = LatLng.newInstance(sw.getLatitude(), ne.getLongitude());
+		boundingPolygon[7] = LatLng.newInstance(sw.getLatitude(), center.getLongitude());
+		boundingPolygon[8] = LatLng.newInstance(sw.getLatitude(), sw.getLongitude());
+		Polygon poly = new Polygon(boundingPolygon, outlineColor, outlineWeight, outlineOpacity, interiorColor, interiorOpacity);
+		polyList.add(poly);
     }
 
 	/**

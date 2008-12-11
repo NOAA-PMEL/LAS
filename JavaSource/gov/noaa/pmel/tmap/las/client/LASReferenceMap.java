@@ -1,5 +1,6 @@
 package gov.noaa.pmel.tmap.las.client;
 
+import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.maps.client.MapType;
 import com.google.gwt.maps.client.MapTypeOptions;
 import com.google.gwt.maps.client.MapWidget;
@@ -8,7 +9,6 @@ import com.google.gwt.maps.client.control.ControlAnchor;
 import com.google.gwt.maps.client.control.ControlPosition;
 import com.google.gwt.maps.client.control.LargeMapControl;
 import com.google.gwt.maps.client.control.MapTypeControl;
-import com.google.gwt.maps.client.control.MenuMapTypeControl;
 import com.google.gwt.maps.client.control.SmallMapControl;
 import com.google.gwt.maps.client.event.MapDragEndHandler;
 import com.google.gwt.maps.client.event.MapDragHandler;
@@ -19,17 +19,23 @@ import com.google.gwt.maps.client.geom.LatLngBounds;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.ClickListener;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.Grid;
+import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 
 public class LASReferenceMap extends Composite {
 	MaskOverlay maskOverlay = null;
 	SelectControl selectControl;
 	ResetControl resetControl;
+	
 	MapWidget mMap;
 	LatLng mSouthWestCorner;
 	LatLng mNorthEastCorner;
 	LatLng mCenter;
 	LatLngBounds dataBounds;
+	
 	int mZoom;
 	int mWidth;   // Width in pixels 
 	int mHeight;  // Height in pixels
@@ -46,7 +52,11 @@ public class LASReferenceMap extends Composite {
 	boolean set_north_center = true;
 	boolean set_west_center = true;
 	boolean set_east_center = true;
+	boolean modulo = false;
+	
 	String gridID = null;
+	
+	
 	/**
 	 * Construct an LASReference map centered and zoomed with the width and height specified in pixels.
 	 * @param center
@@ -58,8 +68,7 @@ public class LASReferenceMap extends Composite {
     	
     	mCenter = center;
     	mZoom = zoom;
-    	mMap = new MapWidget(mCenter, mZoom);
-    	
+    	mMap = new MapWidget(mCenter, mZoom);    	
     	mMap.addMapZoomEndHandler(new MapZoomEndHandler() {
 
 			public void onZoomEnd(MapZoomEndEvent event) {
@@ -95,8 +104,8 @@ public class LASReferenceMap extends Composite {
 				    mMap.removeOverlay(maskOverlay);
 				}
 				LatLngBounds mapBounds = mMap.getBounds();
-				if ( !dataBounds.containsBounds(mapBounds) ) {
-					maskOverlay = new MaskOverlay(mapBounds, dataBounds, "#666666", 1, 0.75, "#666666", 0.75);
+				if ( !dataBounds.containsBounds(mapBounds) && !modulo ) {
+					maskOverlay = new MaskOverlay(mapBounds, dataBounds, "#666666", 1, 0.75, "#666666", 0.75, modulo);
 					mMap.addOverlay(maskOverlay);
 				}
 				
@@ -227,6 +236,9 @@ public class LASReferenceMap extends Composite {
     }
 	public void zoomToGrid(GridSerializable grid) {
 		gridID = grid.getID();
+		modulo = false;
+		double delta = Math.abs(Double.valueOf(grid.getXAxis().getArangeSerializable().getStep()));
+		
 		if (maskOverlay != null ) {
         	mMap.removeOverlay(maskOverlay);
         }
@@ -241,11 +253,21 @@ public class LASReferenceMap extends Composite {
 		
 		double grid_south = Double.valueOf(grid.getYAxis().getLo());
 		double grid_north = Double.valueOf(grid.getYAxis().getHi());
-		
+		if ( grid_south < -88.5 ) {
+			grid_south = -88.5;
+		}
+		if ( grid_north > 88.5 ) {
+			grid_north = 88.5;
+		}
 		LatLng sw = LatLng.newInstance(grid_south, grid_west);
 		LatLng ne = LatLng.newInstance(grid_north, grid_east);
+		
+		
 		dataBounds = LatLngBounds.newInstance(sw, ne);
-		selectControl.setDataBounds(dataBounds);
+		if ( dataBounds.isFullLongitude() || dataBounds.toSpan().getLongitude() + delta >= 360.0 ) {
+			modulo = true;
+		}
+		selectControl.setDataBounds(dataBounds, modulo);
 		int zoom = mMap.getBoundsZoomLevel(dataBounds);
 
 
@@ -264,11 +286,10 @@ public class LASReferenceMap extends Composite {
 			mMap.addMapType(mapType);
 		}
 		LatLngBounds mapBounds = mMap.getBounds();
-
-		maskOverlay = new MaskOverlay(mapBounds, dataBounds, "#666666", 1, 0.75, "#666666", 0.75);
+		LatLng span = mapBounds.toSpan();
+		maskOverlay = new MaskOverlay(mapBounds, dataBounds, "#666666", 1, 0.75, "#666666", 0.75, modulo);
 		mMap.addOverlay(maskOverlay);
 		mMap.setDraggable(false);
-
 		LatLng map_sw = mMap.getBounds().getSouthWest();
 		double map_south = map_sw.getLatitude();
 		double map_west = sw.getLongitude();
@@ -310,11 +331,17 @@ public class LASReferenceMap extends Composite {
 		if ( maskOverlay != null ) {
 			mMap.removeOverlay(maskOverlay);
 		}
-		maskOverlay = new MaskOverlay(mMap.getBounds(), dataBounds, "#666666", 1, 0.75, "#666666", 0.75);
-		mMap.addOverlay(maskOverlay);
-		mMap.setDraggable(false);
+		if ( !modulo ) {
+		   maskOverlay = new MaskOverlay(mMap.getBounds(), dataBounds, "#666666", 1, 0.75, "#666666", 0.75, modulo);
+		   mMap.addOverlay(maskOverlay);
+		   mMap.setDraggable(false);
+		}
 		mMap.setZoomLevel(zoom);
 		mMap.setCenter(dataBounds.getCenter());
-		mMap.setDraggable(false);
+		if ( modulo ) {
+			mMap.setDraggable(true);
+		} else {
+			mMap.setDraggable(false);
+		}	
 	}
 }
