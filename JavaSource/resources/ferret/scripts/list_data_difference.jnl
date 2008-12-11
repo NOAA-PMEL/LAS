@@ -142,6 +142,10 @@ if `($lmin) lt 1` then DEFINE SYMBOL lmin 1
 if `($lmax) lt 1` then DEFINE SYMBOL lmax 1
 CANCEL REGION/X
 
+! the default is set under 1/4 of Ferret's memory allowing for LET definitions 
+LET max_size = ($MAX_LIST_SIZE"1000000")  ! use this for debugging, too
+
+! Size of the data variable 
 LET size = ($isize)*($jsize)*($ksize)*($lsize)
 
 ! default chunk sizes
@@ -151,9 +155,6 @@ LET lchunk = INT(max_size/size * ($lsize))
 
 ! if mode interpolate is desired
 IF ($ferret_interpolate_data%0|false>0|true>1|1|0|*>1%) THEN SET MODE INTERPOLATE 
-
-! the default is set under 1/4 of Ferret's memory allowing for LET definitions 
-LET max_size = ($MAX_LIST_SIZE"1000000")  ! use this for debugging, too
 
 IF `size LE max_size` THEN
 

@@ -68,13 +68,16 @@ IF ($data_var_transform"0|*>1") THEN
     LET var_hist = "($var_history)"
     SET VAR/TITLE="($ferret_list_var)($data_var_transform)" ($ferret_list_var)
     IF ($data_dup_varname"0|*>1") THEN
-       DEFINE attribute ($ferret_list_var).transform_history  "($data_var)($data_var_transform)"
-       SET ATTRIBUTE/OUTPUT ($ferret_list_var).transform_history
+
+        LET ($data_dup_varname) = ($ferret_list_var)
+!        DEFINE SYMBOL data_dup_varname =  ($data_var)  ! the limits min,max,chunk determine the range
+        SET VAR/TITLE="($data_title)($data_var_transform)" ($data_dup_varname)
+        SET VAR/UNITS="($data_units)" ($data_dup_varname)
+
+       DEFINE attribute ($data_dup_varname).transform_history  "($data_var)($data_var_transform)"
+       SET ATTRIBUTE/OUTPUT ($data_dup_varname).transform_history
     ENDIF
-    IF ($data_dup_varname"0|*>1") THEN
-       DEFINE attribute ($ferret_list_var).transform_history  "($data_var)($data_var_transform)"
-       SET ATTRIBUTE/OUTPUT ($ferret_list_var).transform_history
-    ENDIF
+
 ENDIF
 SET DATA/RESTORE
 
@@ -168,6 +171,11 @@ IF `($lmax"0") lt 1` THEN DEFINE SYMBOL lmax 1
 IF `($lsize"0") lt 1` THEN DEFINE SYMBOL lsize 1
 CANCEL REGION/X
 
+! the default is set under 1/4 of Ferret's memory allowing for LET definitions 
+LET use_size = 1000000*($ferret_memory)/4.
+LET max_size = ($MAX_LIST_SIZE"`use_size`")  ! use this for debugging, too
+
+! Size of the data variable 
 LET size = ($isize)*($jsize)*($ksize)*($lsize)
 
 ! default chunk sizes
@@ -178,11 +186,6 @@ LET lchunk = INT(max_size/size * ($lsize))
 ! IF mode interpolate is desired
 IF ($ferret_interpolate_data%0|false>0|true>1|1|0|*>1%) THEN SET MODE INTERPOLATE 
 
-! the default is set under 1/4 of Ferret's memory allowing for LET definitions 
-
-LET use_size = 1000000*($ferret_memory)/4.
-LET max_size = ($MAX_LIST_SIZE"`use_size`")  ! use this for debugging, too
-
 IF `size LE max_size` THEN
 
    ! ... list in one big chunk
@@ -192,8 +195,10 @@ IF `size LE max_size` THEN
    ! IF a duplicate variable name is assigned for netcdf listings, change the name before listing 
 
    IF `($data_dup_varname%0|*>1%) GT 0` THEN
-      LET/TITLE="($data_title)($data_var_transform)"/d=($data_num) ($data_dup_varname) = ($ferret_plot_var)
+
+      LET ($data_dup_varname) = ($ferret_list_var)
       SET VAR/UNITS="($data_units)" ($data_dup_varname)
+      SET VAR/TITLE="($data_title)" ($data_dup_varname)
 
       IF `($ferret_format"0|asc>1|*>0") + ($ferret_format"0|txt>1|*>0") GT 0` THEN
          IF ($var_history"0|*>1") THEN LIST/APPEND/NOHEAD/FORMAT=(A)/FILE="($result_ferret_listing_filename)" var_hist
@@ -207,7 +212,8 @@ IF `size LE max_size` THEN
          IF ($var_history"0|*>1") THEN LIST/APPEND/NOHEAD/FORMAT=(A)/FILE="($result_ferret_listing_filename)" var_hist
       ENDIF
 
-      LIST/APPEND/FILE/($frmt) ($ferret_list_var)
+      LET/TITLE="($data_title)($data_var_transform)"/d=($data_num) ($ferret_plot_var) = ($ferret_list_var)
+      LIST/APPEND/FILE/($frmt) ($ferret_plot_var)
 
    ENDIF
 
@@ -259,7 +265,6 @@ ELSE
         ENDIF
      ELSE
      ! ... netCDF output in chunks
-
         REPEAT/L=($lmin):($lmax):`lchunk` REPEAT/K=($kmin):($kmax):`kchunk` REPEAT/J=($jmin):($jmax):`jchunk` (LIST/APPEND/FILE/($frmt)/J=`j`:`jtop`/K=`k`:`ktop`/L=`l`:`ltop`/JLIMITS=($jmin):($jmax)/KLIMITS=($kmin):($kmax)/LLIMITS=($lmin):($lmax) ($ferret_x_var); CANC MEM/ALL)
      ENDIF
 
@@ -276,7 +281,7 @@ ELSE
 
      REPEAT/L=($lmin):($lmax):`lchunk` REPEAT/K=($kmin):($kmax):`kchunk` REPEAT/J=($jmin):($jmax):`jchunk` (LIST/APPEND/FILE/($frmt)/J=`j`:`jtop`/K=`k`:`ktop`/L=`l`:`ltop` ($ferret_x_var); CANC MEM/ALL)
    ENDIF
-   set region save
+   SET REGION save
 
 ENDIF
 
