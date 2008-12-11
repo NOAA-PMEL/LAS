@@ -90,6 +90,9 @@ IF `($kmax) LT 1` THEN DEFINE SYMBOL kmax 1
 IF `($lmin) LT 1` THEN DEFINE SYMBOL lmin 1
 IF `($lmax) LT 1` THEN DEFINE SYMBOL lmax 1
 
+! the default is set under 1/4 of Ferret's memory allowing for LET definitions 
+LET max_size = ($MAX_LIST_SIZE"1000000")  ! use this for debugging, too
+
 ! Size of the data variable 
 LET size = ($isize)*($jsize)*($ksize)*($lsize) 
 
@@ -100,9 +103,6 @@ LET lchunk = INT(max_size/size * ($lsize))
 
 ! if mode interpolate is desired
 IF ($ferret_interpolate_data%0|false>0|true>1|1|0|*>1%) THEN SET MODE INTERPOLATE 
-
-! the default is set under 1/4 of Ferret's memory allowing for LET definitions 
-LET max_size = ($MAX_LIST_SIZE"1000000")  ! use this for debugging, too
 
 ! First write the curvilinear coordinates
 
