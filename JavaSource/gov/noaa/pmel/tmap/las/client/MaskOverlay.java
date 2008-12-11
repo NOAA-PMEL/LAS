@@ -23,13 +23,15 @@ public class MaskOverlay extends Overlay {
     String interiorColor;
     double interiorOpacity;
     ArrayList<Polygon> polyList;
+    boolean modulo;
     public MaskOverlay(LatLngBounds mapBounds, 
     	               LatLngBounds dataBounds, 
     	               String outlineColor, 
     	               int outlineWeight, 
     	               double outlineOpacity, 
     	               String interiorColor, 
-    	               double interiorOpacity) {
+    	               double interiorOpacity,
+    	               boolean modulo) {
     	
     	mMapBounds = mapBounds;
     	mDataBounds = dataBounds;
@@ -38,9 +40,11 @@ public class MaskOverlay extends Overlay {
     	this.outlineOpacity = outlineOpacity;
     	this.interiorColor = interiorColor;
     	this.interiorOpacity = interiorOpacity;
+    	this.modulo = modulo;
     	
     	LatLng map_sw = mMapBounds.getSouthWest(); 	
     	LatLng map_ne = mMapBounds.getNorthEast();
+    	LatLng center = mMapBounds.getCenter();
     	
     	LatLng sw = mDataBounds.getSouthWest();
     	LatLng ne = mDataBounds.getNorthEast();
@@ -48,17 +52,25 @@ public class MaskOverlay extends Overlay {
     	// Only mask if the west boundary of the map is west of the west boundary of the data.  Got it?
     	double maplongitude = map_sw.getLongitude();
     	double datalongitude = sw.getLongitude();
+    	double centerlongitude = center.getLongitude();
     	while ( maplongitude <= 0.0 ) {
     		maplongitude = maplongitude + 360.;
     	}
     	while (datalongitude <= 0.0 ) {
     		datalongitude = datalongitude + 360.;
     	}
-    	if ( maplongitude <= datalongitude ) {
-    	    mLeftPolygon = new MapPolygon(map_sw, LatLng.newInstance(map_ne.getLatitude(), sw.getLongitude()),  outlineColor, outlineWeight, outlineOpacity, interiorColor, interiorOpacity);
-    	    for (Iterator polyIt = mLeftPolygon.getPolyList().iterator(); polyIt.hasNext();) {
-    			Polygon poly = (Polygon) polyIt.next();
-    			polyList.add(poly);
+    	while ( centerlongitude < 0.0 ) {
+    		centerlongitude = centerlongitude + 360.;
+    	}
+    	if ( modulo ) {
+    		mLeftPolygon = new MapPolygon(map_sw, LatLng.newInstance(map_ne.getLatitude(), centerlongitude - 180), outlineColor, outlineWeight, outlineOpacity, interiorColor, interiorOpacity);
+    	} else {
+    		if ( maplongitude <= datalongitude ) {
+    			mLeftPolygon = new MapPolygon(map_sw, LatLng.newInstance(map_ne.getLatitude(), sw.getLongitude()),  outlineColor, outlineWeight, outlineOpacity, interiorColor, interiorOpacity);
+    			for (Iterator polyIt = mLeftPolygon.getPolyList().iterator(); polyIt.hasNext();) {
+    				Polygon poly = (Polygon) polyIt.next();
+    				polyList.add(poly);
+    			}
     		}
     	}
     	mTopPolygon = new MapPolygon(LatLng.newInstance(ne.getLatitude(), sw.getLongitude()), LatLng.newInstance(map_ne.getLatitude(), ne.getLongitude()), outlineColor, outlineWeight, outlineOpacity, interiorColor, interiorOpacity);
