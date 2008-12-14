@@ -1733,7 +1733,7 @@ LASUI.prototype.makeRequest = function (evt, type) {
 						if(this.state.view[type].indexOf('y')>=0||this.state.datasets[this.state.dataset].getChildByID(this.state.variable).grid_type=="scattered")
 							this.request.addRange('y',this.refs.XYSelect.extents.selection.grid.y.min,this.refs.XYSelect.extents.selection.grid.y.max);
 						else
-							this.request.addRange('y',(this.refs.XYSelect.extents.selection.grid.y.min+this.refs.XYSelect.extents.selection.grid.y.max/2),(this.refs.XYSelect.extents.selection.grid.y.min+this.refs.XYSelect.extents.selection.grid.y.max/2));
+							this.request.addRange('y',(this.refs.XYSelect.extents.selection.grid.y.min+this.refs.XYSelect.extents.selection.grid.y.max)/2,(this.refs.XYSelect.extents.selection.grid.y.min+this.refs.XYSelect.extents.selection.grid.y.max)/2);
 
 						//this.uirequest+="&y="+escape("{ 'min' : " + this.refs.XYSelect.extents.selection.grid.y.min + ", 'max' : " + this.refs.XYSelect.extents.selection.grid.y.max + "}");
 					 	//this.uirequest+="&viewy="+escape("{ 'min' : " + this.refs.XYSelect.extents.data.grid.y.min + ", 'max' : " + this.refs.XYSelect.extents.data.grid.y.max + "}");
