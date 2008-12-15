@@ -212,8 +212,8 @@ IF `size LE max_size` THEN
          IF ($var_history"0|*>1") THEN LIST/APPEND/NOHEAD/FORMAT=(A)/FILE="($result_ferret_listing_filename)" var_hist
       ENDIF
 
-      LET/TITLE="($data_title)($data_var_transform)"/d=($data_num) ($ferret_plot_var) = ($ferret_list_var)
-      LIST/APPEND/FILE/($frmt) ($ferret_plot_var)
+      LET/TITLE="($data_title)($data_var_transform)"/d=($data_num) f_plot_var = ($ferret_list_var)
+      LIST/APPEND/FILE/($frmt) f_plot_var
 
    ENDIF
 
