@@ -2934,7 +2934,7 @@ public class LASConfig extends LASDocument {
         }
         return getElementByXPath(xpathValue).getAttributeValue("name");
     }
-    public ArrayList<View> getViewsByDatasetAndVariable(String dsID, String varID) throws JDOMException {
+    public ArrayList<View> getViewsByDatasetAndVariable(String dsID, String varID) throws JDOMException, LASException {
         String variableXPath = "/lasdata/datasets/dataset[@ID='"+dsID+"']/variables/variable[@ID='"+varID+"']";
         String ui_default = "";
         
@@ -2974,6 +2974,13 @@ public class LASConfig extends LASDocument {
                 }
                 
             }
+        }
+        if ( views.size() <= 0 ) {
+        	String message = "No views found for dsID="+dsID+" and varID="+varID+".";
+        	if ( ui_default != null && !ui_default.equals("") ) {
+        		message = message + "  UI Default is "+ui_default+". Confirm UI Default definition XML is included in ui.xml.";
+        	}
+        	throw new LASException(message);
         }
         return views;
     }
