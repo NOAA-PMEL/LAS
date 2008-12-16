@@ -54,6 +54,7 @@ import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.jdom.Attribute;
 import org.jdom.Content;
+import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.JDOMException;
 import org.jdom.xpath.XPath;
@@ -736,7 +737,7 @@ public class LASConfig extends LASDocument {
                 child.setContent(LASDocument.convertProperties(child));
             } else if ( child.getName().equalsIgnoreCase("las_categories") ) {
                 List categories = child.getChildren("category"); 
-                setID(categories);                     
+                setIDs(categories);                     
             }
 
         }
@@ -3164,14 +3165,15 @@ public class LASConfig extends LASDocument {
             }
         }
     }
-    private void setID(List categories) {
+    private void setIDs(List categories) {
         for (Iterator catIt = categories.iterator(); catIt.hasNext();) {
             Element category = (Element) catIt.next();
             String ID = category.getAttributeValue("ID");
             if ( ID == null ) {
                 String name = category.getAttributeValue("name");
                 try {
-                    ID = JDOMUtils.MD5Encode(name+String.valueOf(Math.random()));
+                	String parents = getParentNames(category);
+                    ID = JDOMUtils.MD5Encode(name + parents);
                 } catch (UnsupportedEncodingException e) {
                     ID = String.valueOf(Math.random());
                 }
@@ -3179,9 +3181,22 @@ public class LASConfig extends LASDocument {
             }   
             List subcategories = category.getChildren("category");
             if ( subcategories.size() > 0 ) {
-                setID(subcategories);
+                setIDs(subcategories);
             }
         }
+    }
+    private String getParentNames(Element category) {
+    	Object parent = category.getParent();
+    	if ( parent instanceof Element ) {
+    		Element rent = (Element) parent;
+    		if ( rent.getName().equals("category") ) {
+    		    return rent.getAttributeValue("name") + getParentNames(rent);
+    		} else {
+    			return "";
+    		}
+    	} else {
+    		return "";
+    	}
     }
     /**
 	 * Helper method to set the output directory if need be
