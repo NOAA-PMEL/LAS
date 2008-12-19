@@ -182,14 +182,14 @@ IF `($region_y_range"0|0|*>1")` THEN
       IF `($set_ndx_strides"0|*>1") AND ($region_y"0|*>1")` THEN
          DEFINE SYMBOL set_ndx_strides = ($set_ndx_strides),($region_y)
       ELSE
-         DEFINE SYMBOL set_ndx_strides = ($region_y)
+         IF ($region_y"0|*>1") THEN DEFINE SYMBOL set_ndx_strides = ($region_y)
       ENDIF
    ENDIF
 ELSE
    IF `($set_ndx_strides"0|*>1") AND ($region_y"0|*>1")` THEN
       DEFINE SYMBOL set_ndx_strides = ($set_ndx_strides),($region_y)
    ELSE
-      DEFINE SYMBOL set_ndx_strides = ($region_y)
+      IF ($region_y"0|*>1") THEN DEFINE SYMBOL set_ndx_strides = ($region_y)
    ENDIF
 ENDIF
 
