@@ -7,11 +7,14 @@
 
 ! cannot do native striding if this is a descriptor dataset. 
 
-DEFINE SYMBOL check_for_des =  `($data_var)[d=($data_num)],return=dsetpath`
+IF ($data_var_only"=|*>1") THEN 
+   DEFINE SYMBOL check_for_des =  `($data_var_only)[d=($data_num)],RETURN=dsetpath`
+ELSE
+   DEFINE SYMBOL check_for_des =  `($data_var)[d=($data_num)],RETURN=dsetpath`
+ENDIF
+
 IF `STRINDEX("($check_for_des)", ".des") GT 0` THEN EXIT/SCRIPT
 
-
-show symbol operation_id
 IF `STRINDEX( "($operation_ID)", "Plot" ) EQ 0 AND \
 STRINDEX( "($operation_ID)", "zoom" ) EQ 0 AND \
 STRINDEX( "($operation_ID)", "Anim" ) EQ 0 AND \
@@ -27,9 +30,10 @@ IF ($ferret_size"0|0.5>1|*>0")     THEN LET maxpix = 600  ! default
 IF ($ferret_size"0|0.8333>1|*>0")  THEN LET maxpix = 700  ! large
 
 IF `($ferret_google_plot"0|*>1")` THEN 
-    IF ($ferret_stride_quality_factor"0|1.0>1|*>0") THEN LET maxpix = 700    ! draft(fast)
-    IF ($ferret_stride_quality_factor"0|0.5>1|*>0") THEN LET maxpix = 1000   ! medium
-    IF ($ferret_stride_quality_factor"0|0.0>1|*>0") THEN LET maxpix = 1400   ! best(slow)
+    IF ($ferret_stride_quality_factor"0|1.0>1|*>0") THEN LET maxpix = 200  ! draft(fast)
+    IF ($ferret_stride_quality_factor"0|0.5>1|*>0") THEN LET maxpix = 500  ! medium
+    IF ($ferret_stride_quality_factor"0|0.0>1|*>0") THEN LET maxpix = 700  ! best(slow)
+!LET  maxpix = `2*maxpix`
 ENDIF
 
 ! Step 1  ---------------------------------------------------------------------
@@ -39,27 +43,33 @@ DEFINE SYMBOL memsize = ($FERRET_MEMORY"6.4")* 1.e6
 
 ! If ($data_count) larger than 1 add the size of the variables.
 !LET pvar = ($ferret_plot_var) 
-LET pvar = ($data_var)[d=($data_num)]
-IF ($region_zt"0|*>1") THEN LET pvar = ($data_var)[d=($data_num),($region_zt)]
+LET pvar = ($expr1)($data_var)[d=($data_num)]($expr2)
+IF ($region_zt"0|*>1") THEN LET pvar = ($expr1)($data_var)[d=($data_num),($region_zt)]($expr2)
 IF ($clon_imin"0|*>1") THEN 
-   LET pvar = ($data_var)[d=($data_num),i=($clon_imin):($clon_imax),j=($clat_jmin):($clat_jmax)]
+   LET pvar = ($expr1)($data_var)[d=($data_num),i=($clon_imin):($clon_imax),j=($clat_jmin):($clat_jmax)]($expr2)
    IF ($region_zt"0|*>1") THEN \
-      LET pvar = ($data_var)[d=($data_num),i=($clon_imin):($clon_imax),j=($clat_jmin):($clat_jmax),($region_zt)]
-ENDIF
+      LET pvar = ($expr1)($data_var)[d=($data_num),i=($clon_imin):($clon_imax),j=($clat_jmin):($clat_jmax),($region_zt)]($expr2)
+   IF ($ferret_season_length"0|*>1") THEN
+      LET pvar = ($expr1)S($num)_the_plot_var_zt[i=($clon_imin):($clon_imax),j=($clat_jmin):($clat_jmax)]($expr2)
 
+   ENDIF
+ENDIF
 LET varsiz `pvar,RETURN=size`
 
 ! If its a slice in x or y account for that
 IF `($region_x_range"1|0|*>1") EQ 0 AND ($region_y_range"1|0|*>1") EQ 0` THEN
-   LET pvar = ($data_var)[d=($data_num),($region_zt),i=1,j=1]
+   LET pvar = ($expr1)($data_var)[d=($data_num),i=1,j=1]($expr2)
+   IF ($region_zt"0|*>1") THEN LET pvar = ($expr1)($data_var)[d=($data_num),($region_zt),i=1,j=1]($expr2)
    LET varsiz = MIN(`varsiz`, `pvar,RETURN=size`)
 
 ELIF `($region_x_range"1|0|*>1") EQ 0` THEN 
-   LET pvar = ($data_var)[d=($data_num),($region_zt),i=1]
+   LET pvar = ($expr1)($data_var)[d=($data_num),i=1]
+   IF ($region_zt"0|*>1") THEN LET pvar = ($expr1)($data_var)[d=($data_num),($region_zt),i=1]($expr2)
    LET varsiz = MIN(`varsiz`, `pvar,RETURN=size`)
 
 ELIF `($region_y_range"1|0|*>1") EQ 0` THEN 
-   LET pvar = ($data_var)[d=($data_num),($region_zt),j=1]
+   LET pvar = ($expr1)($data_var)[d=($data_num),j=1]($expr2)
+   IF ($region_zt"0|*>1") THEN LET pvar = ($expr1)($data_var)[d=($data_num),($region_zt),j=1]($expr2)
    LET varsiz = MIN(`varsiz`, `pvar,RETURN=size`)
 
 ENDIF
@@ -99,9 +109,13 @@ ENDIF
 ! Now for graphics products, do striding by pixel size, often larger stride than
 ! needed to fit in Ferret memory
 
-
-LET xx = x[gx=($data_var)[d=($data_num)]]
-LET nx = xx[i=@ngd]
+LET nx = 1
+IF ($clon_imin"0|*>1") THEN
+   LET nx = ($clon_imax) - ($clon_imin)
+ELSE
+   LET xx = x[gx=($data_var)[d=($data_num)]]
+   LET nx = xx[i=@ngd]
+ENDIF
 
 LET nx_orig = `nx`
 

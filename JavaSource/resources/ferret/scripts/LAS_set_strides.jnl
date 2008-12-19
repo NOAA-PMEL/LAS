@@ -38,19 +38,31 @@ DEFINE SYMBOL memsize = ($FERRET_MEMORY"6.4")* 1.e6
 ! this case set up index strides.
 
 DEFINE SYMBOL no_native = 0
-DEFINE SYMBOL check_for_des =  `($data_var)[d=($data_num)],RETURN=dsetpath`
+IF ($data_var_only"=|*>1") THEN 
+   DEFINE SYMBOL check_for_des =  `($data_var_only)[d=($data_num)],RETURN=dsetpath`
+ELSE
+   DEFINE SYMBOL check_for_des =  `($data_var)[d=($data_num)],RETURN=dsetpath`
+ENDIF
+
+!IF `($analysis_def"0|*>1") EQ 0` THEN 
 IF `STRINDEX("($check_for_des)", ".des") GT 0 OR ($no_native_strides_xy"0|*>1")` THEN 
    DEFINE SYMBOL no_native = 1
    LET pvar = ($data_var)[d=($data_num),($region_xyzt)]
 
    GO LAS_set_strides_nonative.jnl
 
-   IF ($set_ndx_strides"0|*>1") THEN \
-   DEFINE SYMBOL ferret_plot_var = ($data_var)[d=($data_num),($set_ndx_strides)]
+   IF ($set_ndx_strides"0|*>1") THEN 
+      DEFINE SYMBOL ferret_plot_var = ($expr1)($data_var)[d=($data_num),($set_ndx_strides)]($expr2)
+   ENDIF
+
+   IF ($analysis_def"0|*>1") THEN
+      LET analysis_plot_var = ($data_var_only)[d=($data_num),($set_ndx_strides)]
+      DEFINE SYMBOL ferret_plot_var = ($expr1)analysis_plot_var($analysis_def)($expr2)
+   ENDIF
    
    EXIT/SCRIPT
 ENDIF
-
+!ENDIF
 DEFINE SYMBOL nvars = ($data_count)
 
 ! If ($data_count) larger than 1 add the size of the variables.
@@ -90,6 +102,21 @@ IF ($ferret_size"0|0.25>1|*>0")    THEN LET maxpix = 500  ! medium
 IF ($ferret_size"0|0.5>1|*>0")     THEN LET maxpix = 600  ! default
 IF ($ferret_size"0|0.8333>1|*>0")  THEN LET maxpix = 700  ! large
 
+sh sym region_0_x_range
+sh sym region_x_range
+sh sym region_0_y_range
+sh sym region_y_range
+
+IF `($region_x_range"0|*>1") EQ 0` THEN
+   DEFINE SYMBOL no_region_x_range = 1
+   IF ($region_($num)_x_range"0|*>1") THEN\
+     DEFINE SYMBOL region_x_range = ($region_($num)_x_range) 
+ENDIF
+IF `($region_y_range"0|*>1") EQ 0` THEN
+   DEFINE SYMBOL no_region_y_range = 1
+   IF ($region_($num)_y_range"0|*>1") THEN\
+     DEFINE SYMBOL region_y_range = ($region_($num)_y_range) 
+ENDIF
 
 IF `($region_x_range"0|0|*>1") AND ($no_native_strides_xy"0|*>1") NE 1` THEN 
 
@@ -117,6 +144,8 @@ IF `($region_x_range"0|0|*>1") AND ($no_native_strides_xy"0|*>1") NE 1` THEN
          DEFINE SYMBOL axis_stride_($axname) = ($xstride)
       ENDIF
    ENDIF
+
+   IF ($SYMBOL no_region_x_range"0|*>1") THEN CANCEL SYMBOL region_x_range
 ENDIF
 
 IF `($region_y_range"0|0|*>1") AND ($no_native_strides_xy"0|*>1") NE 1` THEN 
@@ -138,6 +167,7 @@ IF `($region_y_range"0|0|*>1") AND ($no_native_strides_xy"0|*>1") NE 1` THEN
          DEFINE SYMBOL axis_stride_($axname) = ($ystride)
       ENDIF
    ENDIF
+   IF ($SYMBOL no_region_y_range"0|*>1") THEN CANCEL SYMBOL region_y_range
 ENDIF
 
 IF ($region_z_range"0|0|*>1") THEN 
@@ -220,3 +250,4 @@ IF `($xstride"0|1>0|*>1") + ($ystride"0|1>0|*>1") + ($zstride"0|1>0|*>1") + ($ts
 ENDIF
 
 ! End of $RCSfile ------------LAS_set_strides.jnl--------------------------
+

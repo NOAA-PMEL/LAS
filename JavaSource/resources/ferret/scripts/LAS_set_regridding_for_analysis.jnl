@@ -1,0 +1,32 @@
+! LAS_set_regridding_for_analysis.jnl
+
+! When x and/or y analysis is requested for data on a curvilinear grid,
+! and if the region is in the curvilienar portion of the grid, then first
+! do a curvi-to-rectilinear regridding.
+
+
+LET dummy_x = STRINDEX("($analysis_def)", "X=")
+LET dummy_y = STRINDEX("($analysis_def)", "Y=")
+IF `dummy_x GT 0 OR dummy_y GT 0` THEN
+
+   IF `($ferret_linear_lat_max"0|*>1") AND \
+   (($region_($num)_y_hi"0") GT ($ferret_linear_lat_max)) AND \
+   ($constraint_0_lhs"0|Curv_to_Rect_Regridding>1|*>0") EQ 0` THEN
+
+   DEFINE SYMBOL constraint_0_lhs = Curv_to_Rect_Regridding
+
+! Could set to regrid to a coarser grid for large regions...
+!      DEFINE SYMBOL constraint_0_op = eq   
+!      DEFINE SYMBOL constraint_0_rhs = 008  ! If undefined, will use ($ferret_curvi_coord_mapfile)
+!
+!      IF `( ($region_($num)_x_range) + ($region_($num)_x_range) ) GT (180+90)` THEN
+!         IF ($ferret_curvi_coord_map2file"0|*>1") then 
+!             DEFINE SYMBOL constraint_0_op = eq   
+!             DEFINE SYMBOL constraint_0_rhs = 2
+!         ENDIF
+!      ENDIF
+  
+   ENDIF
+ENDIF 
+
+
