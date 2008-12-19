@@ -125,6 +125,8 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
 			throw new RPCException(e.getMessage());
 		} catch (RPCException e) {
 			throw new RPCException(e.getMessage());
+		} catch (LASException e) {
+			throw new RPCException(e.getMessage());
 		}
 
 		return wireOps;
