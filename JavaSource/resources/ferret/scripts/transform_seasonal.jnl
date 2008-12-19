@@ -101,8 +101,8 @@ LET the_var_tseas = ($ferret_plot_var)
 LET the_var_tseas_noregion = ($ferret_plot_var_noregion)
 
 LET tt = t[gt=the_var_tseas]
-LET year1 = tax_year (tt[t=($region_t_lo)], tt)
-LET month1 = tax_month(tt[t=($region_t_lo)], tt)
+LET year1 = tax_year (tt[t="($region_t_lo)"], tt)
+LET month1 = tax_month(tt[t="($region_t_lo)"], tt)
 
 IF `($constraint_0_rhs"0|FMA>1|*>0")` THEN 
    IF `month1 LT 2` THEN LET year1 = `year1 - 1`
@@ -113,7 +113,7 @@ DEFINE SYMBOL time_org = "16-Jan-`year1` 12:00"
 ! Get the last year of the time series, then
 ! num_years = lastyear-firstyear+1 
 
-LET yearend = TAX_YEAR(tt[T=($region_t_hi)], tt)
+LET yearend = TAX_YEAR(tt[T="($region_t_hi)"], tt)
 LET nmonths = (yearend - year1 + 1) * 12
 
 ! Define the seasonal time axis
