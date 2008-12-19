@@ -115,8 +115,8 @@ IF `STRINDEX( "($operation_ID)", "Plot" ) EQ 0 AND \
          ENDIF
    
          IF ($set_ndx_strides"0|*>1") THEN \
-         DEFINE SYMBOL ferret_plot_var = ($data_var)[d=($data_num),($set_ndx_strides)]
-   
+         DEFINE SYMBOL ferret_plot_var = ($expr1)($data_var)[d=($data_num),($set_ndx_strides)]($expr2)
+
       ENDIF
    ENDIF  !stride_for_mem
 
@@ -182,14 +182,14 @@ IF `($region_y_range"0|0|*>1")` THEN
       IF `($set_ndx_strides"0|*>1") AND ($region_y"0|*>1")` THEN
          DEFINE SYMBOL set_ndx_strides = ($set_ndx_strides),($region_y)
       ELSE
-         IF ($region_y"0|*>1") THEN DEFINE SYMBOL set_ndx_strides = ($region_y)
+         DEFINE SYMBOL set_ndx_strides = ($region_y)
       ENDIF
    ENDIF
 ELSE
    IF `($set_ndx_strides"0|*>1") AND ($region_y"0|*>1")` THEN
       DEFINE SYMBOL set_ndx_strides = ($set_ndx_strides),($region_y)
    ELSE
-      IF ($region_y"0|*>1") THEN DEFINE SYMBOL set_ndx_strides = ($region_y)
+      DEFINE SYMBOL set_ndx_strides = ($region_y)
    ENDIF
 ENDIF
 
