@@ -185,7 +185,7 @@ IF `STRLEN("($ferret_view)") EQ 2` THEN
 
    ELIF `($ferret_curvi_coord_lat"0|*>1") AND (STRINDEX("($ferret_view)", "x") + STRINDEX("($ferret_view)", "y") GT 0) ` THEN
 
-!        IF `(STRINDEX("($ferret_view)", "x") GT 0)` THEN 
+        IF `(STRINDEX("($ferret_view)", "x") GT 0)` THEN 
            LET xx = x[gx=($data_var)[d=($data_num)]]
            LET nx = xx[i=@ngd]
            LET x_pct = ($region_x_range)/360
@@ -212,9 +212,9 @@ IF `STRLEN("($ferret_view)") EQ 2` THEN
 
            ENDIF
 
-!        ENDIF
+        ENDIF
   
-!        IF `(STRINDEX("($ferret_view)", "y") GT 0)` THEN 
+        IF `(STRINDEX("($ferret_view)", "y") GT 0)` THEN 
            LET yy = y[gy=($data_var)[d=($data_num)]]
            LET ny = yy[j=@ngd]
            LET y_pct = ($region_y_range)/180
@@ -234,7 +234,7 @@ IF `STRLEN("($ferret_view)") EQ 2` THEN
               DEFINE SYMBOL clat_jmax = `INT(($clat_jmax)/($ystride))`
            ENDIF
 
-!        ENDIF
+        ENDIF
 
         IF ($region_z_lo"0|*>1") THEN 
            LET zz = z[gz=($data_var)[d=($data_num)],($region_z)]
