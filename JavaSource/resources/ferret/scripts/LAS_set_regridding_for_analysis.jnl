@@ -4,7 +4,6 @@
 ! and if the region is in the curvilienar portion of the grid, then first
 ! do a curvi-to-rectilinear regridding.
 
-
 LET dummy_x = STRINDEX("($analysis_def)", "X=")
 LET dummy_y = STRINDEX("($analysis_def)", "Y=")
 IF `dummy_x GT 0 OR dummy_y GT 0` THEN
@@ -14,6 +13,11 @@ IF `dummy_x GT 0 OR dummy_y GT 0` THEN
    ($constraint_0_lhs"0|Curv_to_Rect_Regridding>1|*>0") EQ 0` THEN
 
    DEFINE SYMBOL constraint_0_lhs = Curv_to_Rect_Regridding
+
+IF `($ferret_curvi_coord_mapfile"0") EQ 0` THEN
+  IF ($ferret_curvi_coord_map2file"0|*>1") THEN DEFINE SYMBOL ferret_curvi_coord_mapfile = ($ferret_curvi_coord_map2file)
+  IF ($ferret_curvi_coord_map1file"0|*>1") THEN DEFINE SYMBOL ferret_curvi_coord_mapfile = ($ferret_curvi_coord_map1file)
+ENDIF
 
 ! Could set to regrid to a coarser grid for large regions...
 !      DEFINE SYMBOL constraint_0_op = eq   
