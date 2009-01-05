@@ -37,11 +37,12 @@ ELSE
 ENDIF
 
 ! Remove single quotes around a units string
-IF `STRINDEX("($data_($num)_units)", "'") EQ 1` THEN 
+IF `STRINDEX("($data_($num)_units)", "'") GT 0` THEN 
    LET s1 = `STRINDEX("($data_($num)_units)", "'")`
    LET s2 = `STRRINDEX("($data_($num)_units)", "'")`
    DEFINE SYMBOL data_var_units `SUBSTRING("($data_($num)_units)", s1+1, s2-s1-1)`
-   DEFINE SYMBOL data_units (($data_var_units))
+   DEFINE SYMBOL data_units ($data_var_units)
+   DEFINE SYMBOL data_($num)_units ($data_var_units)
 ENDIF
 
 IF ($data_($num)_var"0|*>1") THEN DEFINE SYMBOL data_var ($data_($num)_var)
