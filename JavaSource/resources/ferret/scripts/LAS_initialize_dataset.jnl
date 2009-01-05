@@ -36,6 +36,14 @@ ELSE
   DEFINE SYMBOL data_url \"($data_($num)_url)\"
 ENDIF
 
+! Remove single quotes around a units string
+IF `STRINDEX("($data_($num)_units)", "'") EQ 1` THEN 
+   LET s1 = `STRINDEX("($data_($num)_units)", "'")`
+   LET s2 = `STRRINDEX("($data_($num)_units)", "'")`
+   DEFINE SYMBOL data_var_units `SUBSTRING("($data_($num)_units)", s1+1, s2-s1-1)`
+   DEFINE SYMBOL data_units (($data_var_units))
+ENDIF
+
 IF ($data_($num)_var"0|*>1") THEN DEFINE SYMBOL data_var ($data_($num)_var)
 IF ($data_($num)_units"0|*>1") THEN 
    DEFINE SYMBOL data_units (($data_($num)_units))
