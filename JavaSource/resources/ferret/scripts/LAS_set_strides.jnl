@@ -118,7 +118,9 @@ IF `($region_y_range"0|*>1") EQ 0` THEN
      DEFINE SYMBOL region_y_range = ($region_($num)_y_range) 
 ENDIF
 
-IF `($region_x_range"0|0|*>1") AND ($no_native_strides_xy"0|*>1") NE 1` THEN 
+IF `($region_x_range"0|0|*>1") AND \
+    ($no_native_strides_xy"0|*>1") NE 1 AND \
+    ($region_x"0|0|*>1")` THEN 
 
    LET xx = x[gx=($data_var)[d=($data_num)]]  
    LET pixsize = `xx[($region_x)@ngd]` 
@@ -148,7 +150,9 @@ IF `($region_x_range"0|0|*>1") AND ($no_native_strides_xy"0|*>1") NE 1` THEN
    IF ($SYMBOL no_region_x_range"0|*>1") THEN CANCEL SYMBOL region_x_range
 ENDIF
 
-IF `($region_y_range"0|0|*>1") AND ($no_native_strides_xy"0|*>1") NE 1` THEN 
+IF `($region_y_range"0|0|*>1") AND \
+    ($no_native_strides_xy"0|*>1") NE 1 AND \
+    ($region_y"0|0|*>1")` THEN 
 
    LET yy = y[gy=($data_var)[d=($data_num)]]
    LET pixsize = `yy[($region_y)@ngd]`
@@ -170,7 +174,8 @@ IF `($region_y_range"0|0|*>1") AND ($no_native_strides_xy"0|*>1") NE 1` THEN
    IF ($SYMBOL no_region_y_range"0|*>1") THEN CANCEL SYMBOL region_y_range
 ENDIF
 
-IF ($region_z_range"0|0|*>1") THEN 
+IF `($region_z_range"0|0|*>1") AND \
+    ($region_z"0|0|*>1")` THEN 
    LET zz = z[gz=($data_var)[d=($data_num)]]
    LET pixsize = `zz[($region_z)@ngd]`
 
