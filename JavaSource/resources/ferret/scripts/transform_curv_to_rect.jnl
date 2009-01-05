@@ -64,16 +64,16 @@ IF ($reg_zt"0|*>1)) THEN \
 LET nx = `map[d=($mapfile_num),J=1,K=1,L=1,X=@NGD]`
 LET ny = `map[d=($mapfile_num),I=1,K=1,L=1,Y=@NGD]`
 
-DEFINE SYMBOL xlo = `($region_x_lo)-360`
-DEFINE SYMBOL xhi = `($region_x_hi)-360`
+DEFINE SYMBOL xlo = `($region_x_lo"($region_0_x_lo)")-360`
+DEFINE SYMBOL xhi = `($region_x_hi"($region_0_x_hi)")-360`
 
 LET mapimin = `i[gx=map,x=($xlo)] - 1`
 LET mapimax = `i[gx=map,x=($xhi)] + 1`
 IF `mapimax - mapimin GT nx` THEN LET mapimax = `nx-mapimax`
 
 LET yy = y[gy=map]
-LET ymaphi = MIN(`yy[y=@max]`,($region_y_hi))
-LET ymaplo = MAX(`yy[y=@min]`,($region_y_lo))
+LET ymaphi = MIN(`yy[y=@max]`,($region_y_hi"($region_0_y_hi)"))
+LET ymaplo = MAX(`yy[y=@min]`,($region_y_lo"($region_0_y_lo)"))
 
 LET mapjmin = MAX(1, j[gy=map, y=`ymaplo`] - 1)
 LET mapjmax = MIN(ny, j[gy=map, y=`ymaphi`] + 1)
