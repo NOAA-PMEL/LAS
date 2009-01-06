@@ -14,7 +14,7 @@ IF `dummy_x GT 0 OR dummy_y GT 0` THEN
 
    DEFINE SYMBOL constraint_0_lhs = Curv_to_Rect_Regridding
 
-IF `($ferret_curvi_coord_mapfile"0") EQ 0` THEN
+IF `($ferret_curvi_coord_mapfile"0|*>1") EQ 0` THEN
   IF ($ferret_curvi_coord_map2file"0|*>1") THEN DEFINE SYMBOL ferret_curvi_coord_mapfile = ($ferret_curvi_coord_map2file)
   IF ($ferret_curvi_coord_map1file"0|*>1") THEN DEFINE SYMBOL ferret_curvi_coord_mapfile = ($ferret_curvi_coord_map1file)
 ENDIF
