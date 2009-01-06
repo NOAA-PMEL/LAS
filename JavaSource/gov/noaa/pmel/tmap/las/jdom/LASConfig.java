@@ -1897,8 +1897,21 @@ public class LASConfig extends LASDocument {
 					// TODO handle distinctions for comparison mode
 
 					String ifmenu_view = ifmenu.getAttributeValue("view");
+					
 					if ( ifmenu_view != null ) {
-						if (ifmenu_view.equals(view)) {
+						boolean match = false;
+						// This attribute can be a comma separated list...
+						if (ifmenu_view.contains(",") ) {
+							String[] theviews = ifmenu_view.split(",");
+							for (int i = 0; i < theviews.length; i++) {
+								if ( theviews[i].equals(view) ) {
+									match = true;
+								}
+							}
+						} else {
+							match = ifmenu_view.equals(view);
+						}
+						if (match) {
 							String ops_menu_ref = ifmenu
 							.getAttributeValue("href");
 
