@@ -1116,7 +1116,9 @@ LASUI.prototype.onPlotLoad = function () {
 	if(iframeDOM.myMapWidget) {
 		this.refs.plot = iframeDOM.myMapWidget;
 		this.updating=true;
-		this.updateConstraints();
+		//TODO use product request instead of javascript in IFrame
+		this.initXYSelect();	
+	//this.updateConstraints();
 		iframeDOM.onPlotLoad = this.onPlotLoad.LASBind(this);
 	} else
 		this.refs.plot = {};
