@@ -74,8 +74,9 @@ IF ` ($operation_ID"0|Plot_vector>1|*>0") AND ($num) GT 0` THEN DEFINE SYMBOL ch
 ! and if the region is in the curvilienar portion of the grid, then first
 ! do a curvi-to-rectilinear regridding.
 
-IF `($ferret_linear_coords_file"0|*>1") AND ($check_linear) AND \
-    ($analysis_def"0|*>1") ` THEN 
+!!IF `($ferret_linear_coords_file"0|*>1") AND ($check_linear) AND \
+
+IF `($check_linear) AND ($analysis_def"0|*>1")` THEN 
       GO LAS_set_x_y_analysis.jnl
       GO LAS_set_regridding_for_analysis
 ENDIF
