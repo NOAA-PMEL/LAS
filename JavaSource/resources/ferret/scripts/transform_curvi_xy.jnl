@@ -165,7 +165,7 @@ ELSE
    
    GO get_curv_coord_bbox.jnl
 
-   IF ($analysis_def) THEN
+   IF ($analysis_def"0|*>1") THEN
       GO LAS_set_x_y_analysis.jnl
       GO LAS_set_regridding_for_analysis
 
