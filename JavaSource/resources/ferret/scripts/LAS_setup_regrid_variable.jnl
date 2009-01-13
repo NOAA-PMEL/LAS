@@ -10,9 +10,11 @@ ENDIF
 
 LET its_x_analysis = STRINDEX("($data_($num)_title)", "x=") 
 LET its_y_analysis = STRINDEX("($data_($num)_title)", "y=")
-IF `its_x_analysis EQ 0 AND its_y_analysis EQ 0` THEN
-  EXIT/SCRIPT
-ENDIF
+LET its_z_analysis = STRINDEX("($data_($num)_title)", "z=")
+LET its_t_analysis = STRINDEX("($data_($num)_title)", "t=")
+! IF `its_x_analysis EQ 0 AND its_y_analysis EQ 0` THEN
+!   EXIT/SCRIPT
+! ENDIF
 
 IF `STRINDEX("($data_var)", "_1_regrid") GT 0` THEN
    LET nnx = `STRINDEX("($data_var)", "_1_regrid")`
@@ -49,8 +51,11 @@ IF `STRINDEX("($data_var)", "_1_regrid") GT 0` THEN
 
    LET its_x_analysis = STRINDEX("($analysis_def)", "x=") 
    LET its_y_analysis = STRINDEX("($analysis_def)", "y=")
+   LET its_z_analysis = STRINDEX("($analysis_def)", "z=") 
+   LET its_t_analysis = STRINDEX("($analysis_def)", "t=")
    list/nohead its_x_analysis, its_y_analysis
    let its_analysis = 0
+
    IF `its_x_analysis GT 0 AND its_y_analysis GT 0` THEN 
       LET dummy = STRINDEX("($analysis_def)", "@")
       LET its_x_analysis = `dummy`
@@ -70,6 +75,7 @@ IF `STRINDEX("($data_var)", "_1_regrid") GT 0` THEN
       DEFINE SYMBOL x_an = `dummy`
       DEFINE SYMBOL analysis_def = ($brkt1)X=($x_an)($brkt2)
       let its_analysis = `its_analysis + 1`
+
    ELIF `its_y_analysis GT 0` THEN 
       LET dummy = STRRINDEX("($analysis_def)", "@")
       LET its_y_analysis = `dummy`
@@ -77,7 +83,24 @@ IF `STRINDEX("($data_var)", "_1_regrid") GT 0` THEN
       DEFINE SYMBOL y_an = `dummy`
       DEFINE SYMBOL analysis_def = ($brkt1)Y=($y_an)($brkt2)
       let its_analysis = `its_analysis + 1`
+
+   ELIF `its_z_analysis GT 0` THEN 
+      LET dummy = STRRINDEX("($analysis_def)", "@")
+      LET its_z_analysis = `dummy`
+      LET dummy = SUBSTRING("($analysis_def)", its_z_analysis, 4)
+      DEFINE SYMBOL z_an = `dummy`
+      DEFINE SYMBOL analysis_def = ($brkt1)Z=($z_an)($brkt2)
+      let its_analysis = `its_analysis + 1`
+
+   ELIF `its_t_analysis GT 0` THEN 
+      LET dummy = STRRINDEX("($analysis_def)", "@")
+      LET its_y_analysis = `dummy`
+      LET dummy = SUBSTRING("($analysis_def)", its_t_analysis, 4)
+      DEFINE SYMBOL t_an = `dummy`
+      DEFINE SYMBOL analysis_def = ($brkt1)T=($t_an)($brkt2)
+      let its_analysis = `its_analysis + 1`
    ENDIF
+   
    IF `its_analysis EQ 0` THEN CANCEL SYMBOL analysis_def
 
    DEFINE SYMBOL data_num = `($data_var_only),RETURN=dsetnum`
