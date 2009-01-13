@@ -9,10 +9,14 @@ LET dummy_y = STRINDEX("($analysis_def)", "Y=")
 IF `dummy_x GT 0 OR dummy_y GT 0` THEN
 
    IF `($ferret_linear_lat_max"0|*>1") AND \
-   (($region_($num)_y_hi"0") GT ($ferret_linear_lat_max)) AND \
+   (($region_($num)_y_hi"0") GT ($ferret_linear_lat_max"0")) AND \
    ($constraint_0_lhs"0|Curv_to_Rect_Regridding>1|*>0") EQ 0` THEN
+      DEFINE SYMBOL constraint_0_lhs = Curv_to_Rect_Regridding
+   ENDIF
 
-   DEFINE SYMBOL constraint_0_lhs = Curv_to_Rect_Regridding
+   IF `($ferret_linear_lat_max"1|*>0") ` THEN
+      DEFINE SYMBOL constraint_0_lhs = Curv_to_Rect_Regridding
+   ENDIF
 
 IF `($ferret_curvi_coord_mapfile"0|*>1") EQ 0` THEN
   IF ($ferret_curvi_coord_map2file"0|*>1") THEN DEFINE SYMBOL ferret_curvi_coord_mapfile = ($ferret_curvi_coord_map2file)
