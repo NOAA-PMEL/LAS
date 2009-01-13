@@ -76,7 +76,7 @@ IF ` ($operation_ID"0|Plot_vector>1|*>0") AND ($num) GT 0` THEN DEFINE SYMBOL ch
 
 !!IF `($ferret_linear_coords_file"0|*>1") AND ($check_linear) AND \
 
-IF `($check_linear) AND ($analysis_def"0|*>1")` THEN 
+IF `($check_linear) AND ($analysis_def"0|*>1") ` THEN 
       GO LAS_set_x_y_analysis.jnl
       GO LAS_set_regridding_for_analysis
 ENDIF
@@ -164,6 +164,26 @@ ELSE
    ! set box and strides for curvi
    
    GO get_curv_coord_bbox.jnl
+
+   IF ($analysis_def) THEN
+      GO LAS_set_x_y_analysis.jnl
+      GO LAS_set_regridding_for_analysis
+
+      
+      ! curvilinear to rectilinear regridding
+
+      IF `($constraint_0_lhs"0|Curv_to_Rect_Regridding>1|*>0")` THEN
+         IF ($region_t"0|*>1") THEN DEFINE SYMBOL reg_zt ($region_t)
+         IF ($region_z"0|*>1") THEN DEFINE SYMBOL reg_zt ($region_z)
+         IF ($region_zt"0|*>1") THEN DEFINE SYMBOL reg_zt ($region_zt)
+         IF ($region_($which_var)_zt"0|*>1") THEN DEFINE SYMBOL reg_zt ($region_($which_var)_zt)
+   
+         GO transform_curv_to_rect.jnl
+         EXIT/SCRIPT
+      ENDIF
+
+   ENDIF
+
    GO LAS_set_strides_curvilinear.jnl
 
 ENDIF
