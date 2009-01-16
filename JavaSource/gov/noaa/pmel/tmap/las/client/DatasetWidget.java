@@ -63,11 +63,18 @@ public class DatasetWidget extends Tree implements TreeListener {
 						CategorySerializable cat = cats[i];
 						if ( cat.isCategoryChildren() ) {
 							String name = cat.getName();
-							TreeItem item = new TreeItem();
+							TreeItem item;
+							if ( i == 0 ) {
+							    item = currentlySelected.getChild(0);
+							} else {
+								item = new TreeItem();
+							}
 							item.addItem("Loading...");
 							item.setText(name);
 							item.setUserObject(cat);
-							currentlySelected.addItem(item);
+							if ( i > 0 ) {
+								currentlySelected.addItem(item);
+							}
 						} else {
 							// Must have variable children and there should be only 1, but we're not checking :-)
 							DatasetSerializable ds = cat.getDatasetSerializable();

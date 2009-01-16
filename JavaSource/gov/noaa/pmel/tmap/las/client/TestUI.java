@@ -14,12 +14,10 @@ import com.google.gwt.user.client.ui.Widget;
 
 public class TestUI extends LASEntryPoint {
 	PopupPanel mDatasetPanel;
-	ScrollPanel scrollPanel;
 	DatasetWidget dsWidget;
 	LASReferenceMap mMap;
 	public void onModuleLoad() {
 		super.onModuleLoad();
-		scrollPanel = new ScrollPanel();
 		dsWidget = new DatasetWidget();
 		dsWidget.addTreeListener(new TreeListener() {
 
@@ -38,8 +36,8 @@ public class TestUI extends LASEntryPoint {
 			}
 			
 		});
-		scrollPanel.add(dsWidget);
-		mDatasetPanel = new PopupPanel(true);
+		
+		mDatasetPanel = new PopupPanel(false);
 		
 		Grid popupGrid = new Grid(2, 1);		
 		Button chooseDataset = new Button("Choose a Dataset");
@@ -61,7 +59,7 @@ public class TestUI extends LASEntryPoint {
         dsWidget.init(rpcService);
         RootPanel.get("refmap").add(mMap);
         popupGrid.setWidget(0, 0, close);
-        popupGrid.setWidget(1, 0, scrollPanel);
+        popupGrid.setWidget(1, 0, dsWidget);
         mDatasetPanel.add(popupGrid);
         RootPanel.get("datasets").add(chooseDataset);
 	}

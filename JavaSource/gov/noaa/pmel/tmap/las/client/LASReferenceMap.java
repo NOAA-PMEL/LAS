@@ -207,7 +207,7 @@ public class LASReferenceMap extends Composite {
 				}
 				
 				if ( recenter ) {
-					LatLng center = LatLng.newInstance(nlat, nlon);
+					LatLng center = LatLng.newInstance(nlat, nlon, true);
 					mMap.setCenter(center);
 				}
 				
@@ -225,7 +225,7 @@ public class LASReferenceMap extends Composite {
 			 mMap.addControl(new SmallMapControl());
 		}
 		mMap.addControl(new MapTypeControl());
-		resetControl = new ResetControl(new ControlPosition(ControlAnchor.TOP_RIGHT, 10 ,30), LatLng.newInstance(0.0, 0.0), 1);
+		resetControl = new ResetControl(new ControlPosition(ControlAnchor.TOP_RIGHT, 10 ,30), LatLng.newInstance(0.0, 0.0, true), 1);
 		mMap.addControl(resetControl);
 		resetControl.addClickListener(click);
 		addControl(selectControl);
@@ -259,15 +259,16 @@ public class LASReferenceMap extends Composite {
 		if ( grid_north > 88.5 ) {
 			grid_north = 88.5;
 		}
-		LatLng sw = LatLng.newInstance(grid_south, grid_west);
-		LatLng ne = LatLng.newInstance(grid_north, grid_east);
+		LatLng sw = LatLng.newInstance(grid_south, grid_west, true);
+		LatLng ne = LatLng.newInstance(grid_north, grid_east, true);
 		
 		
 		dataBounds = LatLngBounds.newInstance(sw, ne);
-		if ( dataBounds.isFullLongitude() || dataBounds.toSpan().getLongitude() + delta >= 360.0 ) {
+		double lon_span = dataBounds.toSpan().getLongitude();
+		if ( dataBounds.isFullLongitude() || lon_span + 2.*delta >= 360.0 ) {
 			modulo = true;
 		}
-		selectControl.setDataBounds(dataBounds, modulo);
+		selectControl.setDataBounds(sw, ne, modulo, delta);
 		int zoom = mMap.getBoundsZoomLevel(dataBounds);
 
 

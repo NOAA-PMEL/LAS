@@ -9,6 +9,7 @@ import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.control.ControlPosition;
 import com.google.gwt.maps.client.control.Control.CustomControl;
 import com.google.gwt.maps.client.event.MapMouseMoveHandler;
+import com.google.gwt.maps.client.event.MarkerDragEndHandler;
 import com.google.gwt.maps.client.event.MarkerDragHandler;
 import com.google.gwt.maps.client.event.MarkerMouseDownHandler;
 import com.google.gwt.maps.client.event.MarkerMouseUpHandler;
@@ -38,7 +39,10 @@ public class SelectControl extends CustomControl {
 	private MarkerOptions mOptions;
 	private Icon mIcon;
 	boolean mDraw = false;
-	private LatLngBounds dataBounds;
+	private LatLng dataSW;
+	private LatLng dataNE;
+	private LatLng rectSW;
+	private LatLng rectNE;
 	private Grid controls;
 	private String gridID = null;
 	private boolean modulo;
@@ -50,6 +54,10 @@ public class SelectControl extends CustomControl {
 	Label latLabel;
 	NumberFormat latFormat;
 	NumberFormat lonFormat;
+
+	double span;
+	double delta;
+	
 	private static final String boxWidth = "45px";
 	public SelectControl (ControlPosition position) {
 		super(position);
@@ -82,7 +90,7 @@ public class SelectControl extends CustomControl {
 		mMap = map;
 		controls = new Grid(8,1);
 		LatLngBounds bounds = LatLngBounds.newInstance(LatLng.newInstance(0.0, 0.0), LatLng.newInstance(0.0, 0.0));
-		mSelection = new MapTool(mMap, dataBounds, bounds,"xy", false);
+		mSelection = new MapTool(mMap, LatLng.newInstance(0.0, 0.0), LatLng.newInstance(0.0, 0.0), LatLng.newInstance(0.0, 0.0), LatLng.newInstance(0.0, 0.0),"xy", false);
 		mIcon = Icon.newInstance();
 		mIcon.setIconSize(Size.newInstance(20, 20));
 		mIcon.setIconAnchor(Point.newInstance(10, 10));
@@ -104,7 +112,7 @@ public class SelectControl extends CustomControl {
 					Marker marker = (Marker) markerIt.next();
 					mMap.removeOverlay(marker);
 				}
-				mSelection = new MapTool(mMap, dataBounds, bounds, "xy", modulo);	
+				mSelection = new MapTool(mMap, dataSW, dataNE, rectSW, rectNE, "xy", modulo);	
 				mSelection.setClick(click);
 				mMap.addOverlay(mSelection.getPolygon());
 				setText();
@@ -123,7 +131,7 @@ public class SelectControl extends CustomControl {
 				mDrawMarker.setVisible(false);
 	            mMap.removeMapMouseMoveHandler(mouseMove);
 	            mDraw = false;
-	            mMap.setDraggable(true);
+	            mMap.setDraggable(false); // was true
 	            mSelection.setEditingEnabled(true);
 			}
 			
@@ -167,7 +175,7 @@ public class SelectControl extends CustomControl {
 				} else {
 					mSelection.setEditingEnabled(false);
 					mMap.removeOverlay(mSelection.getPolygon());
-					mSelection = new MapTool(mMap, dataBounds, dataBounds, "xy", modulo);
+					mSelection = new MapTool(mMap, dataSW, dataNE, dataSW, dataNE, "xy", modulo);
 					mMap.addOverlay(mSelection.getPolygon());
 					setText();
 					for (Iterator markerIt = mSelection.getMarkers().iterator(); markerIt.hasNext();) {
@@ -194,6 +202,7 @@ public class SelectControl extends CustomControl {
 
 		public void onMouseMove(MapMouseMoveEvent event) {
 			LatLng position = event.getLatLng();
+			LatLngBounds dataBounds = LatLngBounds.newInstance(dataSW, dataNE);
 			if ( dataBounds.containsLatLng(position)) {
 				mDrawMarker.setVisible(true);
 				mDrawMarker.setLatLng(position);
@@ -220,21 +229,20 @@ public class SelectControl extends CustomControl {
     public boolean isDown() {
     	return mSelect.isDown();
     }
-	/**
-	 * @return the dataBounds
-	 */
-	public LatLngBounds getDataBounds() {
-		return dataBounds;
-	}
+	
 	/**
 	 * @param dataBounds the dataBounds to set
 	 */
-	public void setDataBounds(LatLngBounds dBounds, boolean modulo) {
+	public void setDataBounds(LatLng sw, LatLng ne, boolean modulo, double delta) {
+		
 		mSelection.setEditingEnabled(false);
 		mMap.removeOverlay(mSelection.getPolygon());
-		this.dataBounds = dBounds;
+		dataSW = sw;
+		dataNE = ne;
+		rectSW = sw;
+		rectNE = ne;
 		this.modulo = modulo;
-		mSelection = new MapTool(mMap, dataBounds, dataBounds, "xy", modulo);
+		mSelection = new MapTool(mMap, sw, ne, sw, ne, "xy", modulo);
 		mMap.addOverlay(mSelection.getPolygon());
 		setText();
 		for (Iterator markerIt = mSelection.getMarkers().iterator(); markerIt.hasNext();) {
@@ -243,6 +251,9 @@ public class SelectControl extends CustomControl {
 		}
 		mSelection.setEditingEnabled(true);
 		mSelection.setVisible(true);	
+		LatLngBounds dataBounds = LatLngBounds.newInstance(dataSW, dataNE);
+		span = dataBounds.toSpan().getLongitude();
+		this.delta = delta;
 	}
 	public void setText() {	
 		LatLng swPolyCorner = mSelection.getSouthWest();
@@ -257,14 +268,14 @@ public class SelectControl extends CustomControl {
 		while ( elon < 0.0 ) {
 			elon = elon + 360;
 		}
-		String wlon_f = lonFormat.format(wlon);
-		String elon_f = lonFormat.format(elon);
-		//if ( wlon > elon || wlon_f.equals(elon_f) ) {
-		if ( wlon_f.equals(elon_f) ) {
-			elon = elon + 360.0;
-			elon_f = lonFormat.format(elon);
+		
+		if ( elon < wlon ) {
+			elon = elon + 360.;
 		}
 		
+		String wlon_f = lonFormat.format(wlon);
+		String elon_f = lonFormat.format(elon);
+        
 		westLon.setText(wlon_f);
 		eastLon.setText(elon_f);
 	}
@@ -285,8 +296,10 @@ public class SelectControl extends CustomControl {
 		String type;
 		LatLng[] polygonPoints;
 		Polygon polygon;
-		LatLngBounds dataBounds;
-		LatLngBounds currentBounds;
+		LatLng dataSW;
+		LatLng dataNE;
+		LatLng rectSW;
+		LatLng rectNE;
 		LatLng click;
 		String strokeColor = "#FF0000";
 		int strokeWeight = 3;
@@ -310,11 +323,13 @@ public class SelectControl extends CustomControl {
 		 * @param bounds
 		 * @param type
 		 */
-		public MapTool(MapWidget map, LatLngBounds dBounds, LatLngBounds selectedBounds, String type, boolean modulo) {
+		public MapTool(MapWidget map, LatLng sw_in, LatLng ne_in, LatLng rectSW, LatLng rectNE, String type, boolean modulo) {
 			
 			this.mMap = map;
-			this.dataBounds = dBounds;
-			this.currentBounds = selectedBounds;
+			this.dataSW = sw_in;
+			this.dataNE = ne_in;
+		    this.rectSW = rectSW;
+		    this.rectNE = rectNE;
 			this.type = type;
 			this.markers = new ArrayList<Marker>();
 			this.modulo = modulo;
@@ -326,12 +341,37 @@ public class SelectControl extends CustomControl {
 	        String imageURL = moduleRelativeURL + "images/";
 			
 			if ( type.equals("xy") ) {
-
-				LatLng center = selectedBounds.getCenter();
+             
+				LatLng center = LatLngBounds.newInstance(rectSW, rectNE).getCenter();
+				// Build the 8 LatLng instances, starting with the SW corner and enforce the constraint that the
+				// East longitude always be greater than the West longitude and that the instances not be scaled.
+				double center_lon = center.getLongitude();
+				if ( center_lon < 0 ) {
+					center_lon = center_lon + 360;
+				}
+				// SW corner...
+				LatLng sw = sw_in;
+				// West side...
+				LatLng sw_nw = LatLng.newInstance(center.getLatitude(), rectSW.getLongitude(), true);
+				// NW corner...
+				LatLng nw = LatLng.newInstance(rectNE.getLatitude(), rectSW.getLongitude(), true);
+				// North side...
+				LatLng nw_ne = LatLng.newInstance(rectNE.getLatitude(), center_lon, true);
+				// NE corner...
+				LatLng ne = ne_in;
+				double east_lon = ne.getLongitude();
+				
+				ne = LatLng.newInstance(ne.getLatitude(), east_lon, true);
+				// East side...
+				LatLng ne_se = LatLng.newInstance(center.getLatitude(), east_lon, true);
+				// SE corner...
+				LatLng se = LatLng.newInstance(rectSW.getLatitude(), east_lon, true);
+				// South side...
+				LatLng sw_se = LatLng.newInstance(rectSW.getLatitude(), center_lon, true);
 				
 				Icon sw_icon = Icon.newInstance();
 				sw_icon.setIconSize(Size.newInstance(12, 12));
-				sw_icon.setIconAnchor(Point.newInstance(5, 5));
+				sw_icon.setIconAnchor(Point.newInstance(5, 5)); 
 				sw_icon.setImageURL(imageURL+"edit_square.png");
 				MarkerOptions sw_options = MarkerOptions.newInstance();
 		        sw_options.setIcon(sw_icon);
@@ -339,7 +379,7 @@ public class SelectControl extends CustomControl {
 				sw_options.setDragCrossMove(true);
 				sw_options.setBouncy(false);
 				sw_options.setTitle("sw");
-				swMarker = new Marker(selectedBounds.getSouthWest(), sw_options);
+				swMarker = new Marker(rectSW, sw_options);
 				markers.add(swMarker);
 				
 				Icon sw_nw_icon = Icon.newInstance();
@@ -352,7 +392,7 @@ public class SelectControl extends CustomControl {
 		        sw_nw_options.setDragCrossMove(true);
 		        sw_nw_options.setBouncy(false);
 		        sw_nw_options.setTitle("sw_nw");
-				sw_nwMarker = new Marker(LatLng.newInstance(center.getLatitude(), currentBounds.getSouthWest().getLongitude()), sw_nw_options);
+				sw_nwMarker = new Marker(sw_nw, sw_nw_options);
 				markers.add(sw_nwMarker);
 				
 				Icon nw_icon = Icon.newInstance();
@@ -365,7 +405,7 @@ public class SelectControl extends CustomControl {
 				nw_options.setDragCrossMove(true);
 				nw_options.setBouncy(false);
 				nw_options.setTitle("nw");
-				nwMarker = new Marker(LatLng.newInstance(currentBounds.getNorthEast().getLatitude(), currentBounds.getSouthWest().getLongitude()), nw_options);
+				nwMarker = new Marker(nw, nw_options);
 				markers.add(nwMarker);
 				
 				Icon nw_ne_icon = Icon.newInstance();
@@ -378,7 +418,7 @@ public class SelectControl extends CustomControl {
 				nw_ne_options.setDragCrossMove(true);
 				nw_ne_options.setBouncy(false);
 				nw_ne_options.setTitle("nw_ne");
-				nw_neMarker = new Marker(LatLng.newInstance(currentBounds.getNorthEast().getLatitude(), center.getLongitude()), nw_ne_options);
+				nw_neMarker = new Marker(nw_ne, nw_ne_options);
 				markers.add(nw_neMarker);
 				
 				Icon ne_icon = Icon.newInstance();
@@ -391,7 +431,7 @@ public class SelectControl extends CustomControl {
 				ne_options.setDragCrossMove(true);
 				ne_options.setBouncy(false);
 				ne_options.setTitle("ne");
-				neMarker = new Marker(currentBounds.getNorthEast(), ne_options);
+				neMarker = new Marker(ne, ne_options);
 				markers.add(neMarker);
 				
 				Icon ne_se_icon = Icon.newInstance();
@@ -404,7 +444,7 @@ public class SelectControl extends CustomControl {
 				ne_se_options.setDragCrossMove(true);
 				ne_se_options.setBouncy(false);
 				ne_se_options.setTitle("ne_se");
-				ne_seMarker = new Marker(LatLng.newInstance(center.getLatitude(), currentBounds.getNorthEast().getLongitude()), ne_se_options);
+				ne_seMarker = new Marker(ne_se, ne_se_options);
 				markers.add(ne_seMarker);
 				
 				Icon se_icon = Icon.newInstance();
@@ -417,7 +457,7 @@ public class SelectControl extends CustomControl {
 				se_options.setDragCrossMove(true);
 				se_options.setBouncy(false);
 				se_options.setTitle("se");
-				seMarker = new Marker(LatLng.newInstance(currentBounds.getSouthWest().getLatitude(), currentBounds.getNorthEast().getLongitude()), se_options);
+				seMarker = new Marker(se, se_options);
 				markers.add(seMarker);
 				
 				Icon sw_se_icon = Icon.newInstance();
@@ -430,7 +470,7 @@ public class SelectControl extends CustomControl {
 				sw_se_options.setDragCrossMove(true);
 				sw_se_options.setBouncy(false);
 				sw_se_options.setTitle("sw_se");
-				sw_seMarker = new Marker(LatLng.newInstance(currentBounds.getSouthWest().getLatitude(), center.getLongitude()), sw_se_options);
+				sw_seMarker = new Marker(sw_se, sw_se_options);
 				markers.add(sw_seMarker);
 				
 				Icon center_icon = Icon.newInstance();
@@ -443,20 +483,20 @@ public class SelectControl extends CustomControl {
 				center_options.setDragCrossMove(true);
 				center_options.setBouncy(false);
 				center_options.setTitle("center");
-				centerMarker = new Marker(currentBounds.getCenter(), center_options);
+				centerMarker = new Marker(center, center_options);
 				markers.add(centerMarker);
 				
 				
 				polygonPoints = new LatLng[9];
-				polygonPoints[0] = LatLng.newInstance(currentBounds.getSouthWest().getLatitude(), currentBounds.getSouthWest().getLongitude());
-				polygonPoints[1] = LatLng.newInstance(center.getLatitude(), currentBounds.getSouthWest().getLongitude());
-				polygonPoints[2] = LatLng.newInstance(currentBounds.getNorthEast().getLatitude(), currentBounds.getSouthWest().getLongitude());
-				polygonPoints[3] = LatLng.newInstance(currentBounds.getNorthEast().getLatitude(), center.getLongitude());
-				polygonPoints[4] = LatLng.newInstance(currentBounds.getNorthEast().getLatitude(), currentBounds.getNorthEast().getLongitude());
-				polygonPoints[5] = LatLng.newInstance(center.getLatitude(), currentBounds.getNorthEast().getLongitude());
-				polygonPoints[6] = LatLng.newInstance(currentBounds.getSouthWest().getLatitude(), currentBounds.getNorthEast().getLongitude());
-				polygonPoints[7] = LatLng.newInstance(currentBounds.getSouthWest().getLatitude(), center.getLongitude());
-				polygonPoints[8] = LatLng.newInstance(currentBounds.getSouthWest().getLatitude(), currentBounds.getSouthWest().getLongitude());
+				polygonPoints[0] = sw;
+				polygonPoints[1] = sw_nw;
+				polygonPoints[2] = nw;
+				polygonPoints[3] = nw_ne;
+				polygonPoints[4] = ne;
+				polygonPoints[5] = ne_se;
+				polygonPoints[6] = se;
+				polygonPoints[7] = sw_se;
+				polygonPoints[8] = sw;
 				polygon = new Polygon(polygonPoints, strokeColor, strokeWeight, strokeOpacity, fillColor, fillOpacity);	
 			    addDragHandlers(markerDragHandler);
 			}
@@ -491,28 +531,58 @@ public class SelectControl extends CustomControl {
 			double posLat = position.getLatitude();
 			double clickLon = click.getLongitude();
 			double clickLat = click.getLatitude();
+			// TODO WTF?!
 			while ( posLon <= 360. ) {
 				posLon = posLon + 360.;
 			}
 			while ( clickLon <= 360. ) {
 				clickLon = clickLon + 360.;
 			}
-			LatLng sw;
-			LatLng ne;
+			// TODO EOWTF?!
+			
+			double west_lon;
+			double east_lon;
+			double north_lat;
+			double south_lat;
 			if ( posLat > clickLat && posLon > clickLon ) {
-				ne = position;
-				sw = click;
+				
+				east_lon = posLon;
+				north_lat = posLat;
+				
+				west_lon = clickLon;
+				south_lat = clickLat;
+				
 			} else if ( posLat <= clickLat && posLon <= clickLon ) {
-				ne = click;
-				sw = position;
+				
+				east_lon = clickLon;
+				north_lat = clickLat;
+				
+				west_lon = posLon;
+				south_lat = posLat;
+				
 			} else if ( posLat > clickLat && posLon <= clickLon ) {
-				ne = LatLng.newInstance(posLat, clickLon);
-				sw = LatLng.newInstance(clickLat, posLon);
+				
+				east_lon = clickLon;
+				north_lat = posLat;
+				
+				west_lon = posLon;
+				south_lat = clickLat;
+				
 			} else {
-				ne = LatLng.newInstance(clickLat, posLon);
-				sw = LatLng.newInstance(posLat, clickLon);
+				
+				east_lon = posLon;
+				north_lat = clickLat;
+				
+				west_lon = clickLon;
+				south_lat = posLat;
+
 			}
 			
+			if ( west_lon > east_lon ) {
+				east_lon = east_lon + 360.;
+			}
+			LatLng sw = LatLng.newInstance(south_lat, west_lon, true);
+			LatLng ne = LatLng.newInstance(north_lat, east_lon, true);
 			LatLngBounds rectBounds = LatLngBounds.newInstance(sw, ne);
 			polygonPoints[0] = LatLng.newInstance(sw.getLatitude(), sw.getLongitude());
 			polygonPoints[1] = LatLng.newInstance(rectBounds.getCenter().getLatitude(), sw.getLongitude());
@@ -526,14 +596,18 @@ public class SelectControl extends CustomControl {
 			polygon = new Polygon(polygonPoints, strokeColor, strokeWeight, strokeOpacity, fillColor, fillOpacity);
 			LatLngBounds bounds = polygon.getBounds();
 			LatLng center = bounds.getCenter();
+			double center_lon = center.getLongitude();
+			if ( center_lon < 0.0 ) {
+				center_lon = center_lon + 360.;
+			}
 			swMarker.setLatLng(sw);
 			sw_nwMarker.setLatLng(LatLng.newInstance(center.getLatitude(), sw.getLongitude()));
 			nwMarker.setLatLng(LatLng.newInstance(ne.getLatitude(), sw.getLongitude()));
-			nw_neMarker.setLatLng(LatLng.newInstance(ne.getLatitude(), center.getLongitude()));
+			nw_neMarker.setLatLng(LatLng.newInstance(ne.getLatitude(), center_lon));
 			neMarker.setLatLng(ne);
 			ne_seMarker.setLatLng(LatLng.newInstance(center.getLatitude(), ne.getLongitude()));
 			seMarker.setLatLng(LatLng.newInstance(sw.getLatitude(), ne.getLongitude()));
-			sw_seMarker.setLatLng(LatLng.newInstance(sw.getLatitude(), center.getLongitude()));
+			sw_seMarker.setLatLng(LatLng.newInstance(sw.getLatitude(), center_lon));
 			centerMarker.setLatLng(center);
 		}
 		/**
@@ -628,74 +702,130 @@ public class SelectControl extends CustomControl {
 			sw_seMarker.addMarkerDragHandler(markerDragHandler);
 			centerMarker.addMarkerDragHandler(markerDragHandler);
 		}
+		public void addDragEndHandlers(MarkerDragEndHandler markerDragHandler) {
+			swMarker.addMarkerDragEndHandler(markerDragHandler);
+			sw_nwMarker.addMarkerDragEndHandler(markerDragHandler);
+			nwMarker.addMarkerDragEndHandler(markerDragHandler);
+			nw_neMarker.addMarkerDragEndHandler(markerDragHandler);
+			neMarker.addMarkerDragEndHandler(markerDragHandler);
+			ne_seMarker.addMarkerDragEndHandler(markerDragHandler);
+			seMarker.addMarkerDragEndHandler(markerDragHandler);
+			sw_seMarker.addMarkerDragEndHandler(markerDragHandler);
+			centerMarker.addMarkerDragEndHandler(markerDragHandler);
+		}
+		public void addMarkerMouseUpHandler(MarkerMouseUpHandler markerMouseUpHandler) {
+			swMarker.addMarkerMouseUpHandler(markerMouseUpHandler);
+			sw_nwMarker.addMarkerMouseUpHandler(markerMouseUpHandler);
+			nwMarker.addMarkerMouseUpHandler(markerMouseUpHandler);
+			nw_neMarker.addMarkerMouseUpHandler(markerMouseUpHandler);
+			neMarker.addMarkerMouseUpHandler(markerMouseUpHandler);
+			ne_seMarker.addMarkerMouseUpHandler(markerMouseUpHandler);
+			seMarker.addMarkerMouseUpHandler(markerMouseUpHandler);
+			sw_seMarker.addMarkerMouseUpHandler(markerMouseUpHandler);
+			centerMarker.addMarkerMouseUpHandler(markerMouseUpHandler);
+		}
+		
 		MarkerDragHandler markerDragHandler = new MarkerDragHandler() {
 			public void onDrag(MarkerDragEvent event) {
+				LatLngBounds dataBounds = LatLngBounds.newInstance(dataSW, dataNE);
+				mMap.setCenter(dataBounds.getCenter());
 				Marker marker = event.getSender();
 				String title = marker.getTitle();
 				LatLng markerLocation = marker.getLatLng();
 				double markerLon = markerLocation.getLongitude();
 				double markerLat = markerLocation.getLatitude();
-				while ( markerLon < 0.0 ) {
-					markerLon = markerLon + 360.;
-				}
+				
 				double westBoundsLon;
 				double eastBoundsLon;
 				double southBoundsLat;
 				double northBoundsLat;
-				LatLng sw = polygon.getBounds().getSouthWest();
-	            LatLng ne = polygon.getBounds().getNorthEast();
+				
+				double south_lat = polygonPoints[0].getLatitude();
+				double west_lon = polygonPoints[0].getLongitude();
+				while ( west_lon < 0.0 ) {
+					west_lon = west_lon + 360.;
+				}
+	           
+	            double north_lat = polygonPoints[4].getLatitude();
+	            double east_lon = polygonPoints[4].getLongitude();
+	            while ( east_lon < 0.0 ) {
+	            	east_lon = east_lon + 360.;
+	            }
+	            
 	            LatLng center = mMap.getCenter();
         		double center_lon = center.getLongitude();
-        		if ( title.equals("sw") ) {
-        			// The south west marker's movements are bounded by the south west data bounds and the north east rectangle bounds.
-
-        			southBoundsLat = dataBounds.getSouthWest().getLatitude();
-        			northBoundsLat = ne.getLatitude();
-        			// If modulo, limit to -180 to 180 from the center of the map.
-        			if ( modulo ) {
-        				if ( center_lon < 0.0 ) {
-        					center_lon = center_lon + 360.;
-        				}
-        				westBoundsLon = center_lon - 180.;
-        				eastBoundsLon = center_lon + 180.;
-        			} else {
-        				westBoundsLon = dataBounds.getSouthWest().getLongitude();
-        				eastBoundsLon = ne.getLongitude();
-        			}
-        			while ( westBoundsLon < 0.0 ) {
-        				westBoundsLon = westBoundsLon + 360.;
-        			}
-        			while (eastBoundsLon < 0.0 ) {
-        				eastBoundsLon = eastBoundsLon + 360.;
-        			}
-
-        			if ( markerLon >= eastBoundsLon ) {
-        				markerLon = eastBoundsLon;
-        			}
-        			if ( markerLon <= westBoundsLon ) {
-        				markerLon = westBoundsLon;
-        			}
-
-        			if (markerLat <= southBoundsLat ) {
-        				markerLat = southBoundsLat;
-        			}
-        			if ( markerLat >= northBoundsLat ) {
-        				markerLat = northBoundsLat;
-        			}
-        			sw = LatLng.newInstance(markerLat, markerLon);
-        		} else if ( title.equals("sw_nw") )  {
-        			// The west line marker's movements abound bounded by it's current latitude and the west data bounds and the east
+        		
+				double globalWestBoundsLon = center_lon - (span/2.0);
+				while ( globalWestBoundsLon <= 0.0 ) {
+					globalWestBoundsLon = globalWestBoundsLon + 360.;
+				}
+				double globalEastBoundsLon = center_lon + (span/2.0);
+				while ( globalEastBoundsLon <= 0.0 ) {
+					globalEastBoundsLon = globalEastBoundsLon + 360.;
+				}
+				if ( modulo || east_lon > 180. ) {
+					while ( markerLon < 0.0 ) {
+						markerLon = markerLon + 360.;
+					}
+				}
+				
+				if ( title.equals("sw") ) {
+					// The south west marker's movements are bounded by the south west data bounds and the north east rectangle bounds.
+					if ( modulo ) {
+						if ( east_lon < west_lon ) {
+							east_lon = east_lon + 360.;
+						}
+					}
+					southBoundsLat = dataSW.getLatitude();
+					northBoundsLat = north_lat;
+					
+					if ( modulo ) {
+						westBoundsLon = globalWestBoundsLon;
+						eastBoundsLon = east_lon;
+					} else {
+						westBoundsLon = dataSW.getLongitude();
+						eastBoundsLon = east_lon;
+					}
+					while ( westBoundsLon < 0.0 ) {
+						westBoundsLon = westBoundsLon + 360.;
+					}
+					while (eastBoundsLon < 0.0 ) {
+						eastBoundsLon = eastBoundsLon + 360.;
+					}
+					if ( modulo ) {
+						if ( markerLon >= 0.0 &&  markerLon <= globalWestBoundsLon ) {
+							markerLon = markerLon + 360;
+						}
+					}
+					if ( markerLon >= eastBoundsLon ) {
+						markerLon = eastBoundsLon;
+					}
+					if ( markerLon <= westBoundsLon ) {
+						markerLon = westBoundsLon;
+					}
+					if (markerLat < southBoundsLat ) {
+						markerLat = southBoundsLat;
+					}
+					if ( markerLat >= northBoundsLat ) {
+						markerLat = northBoundsLat;
+					}
+					south_lat = markerLat;
+					west_lon = markerLon;
+				} else if ( title.equals("sw_nw") )  {
+        			// The west line marker's movements are bounded by it's current latitude and the west data bounds and the east
         			// rectangle bounds.
+					if ( modulo ) {
+						if ( east_lon < west_lon ) {
+							east_lon = east_lon + 360.;
+						}
+					}
         			markerLat = polygon.getBounds().getCenter().getLatitude();
         			if ( modulo ) {
-        				if ( center_lon < 0.0 ) {
-        					center_lon = center_lon + 360.;
-        				}
-        				westBoundsLon = center_lon - 180.;
-        				eastBoundsLon = center_lon + 180.;
+        				westBoundsLon = globalWestBoundsLon;
+        				eastBoundsLon = east_lon;
         			} else {
-        				westBoundsLon = dataBounds.getSouthWest().getLongitude();
-        				eastBoundsLon = ne.getLongitude();
+        				westBoundsLon = dataSW.getLongitude();
+        				eastBoundsLon = east_lon;
         			}
         			while ( westBoundsLon < 0.0 ) {
         				westBoundsLon = westBoundsLon + 360.;
@@ -703,27 +833,33 @@ public class SelectControl extends CustomControl {
         			while (eastBoundsLon < 0.0 ) {
         				eastBoundsLon = eastBoundsLon + 360.;
         			}
+        			if ( modulo ) {
+						if ( markerLon >= 0.0 &&  markerLon <= globalWestBoundsLon ) {
+							markerLon = markerLon + 360;
+						}
+					}
         			if ( markerLon >= eastBoundsLon ) {
-        				markerLon = eastBoundsLon;
+						markerLon = eastBoundsLon;
         			}
         			if ( markerLon <= westBoundsLon ) {
-        				markerLon = westBoundsLon;
+						markerLon = westBoundsLon;
         			}
-
-        			sw = LatLng.newInstance(sw.getLatitude(), markerLon);
+        			west_lon = markerLon;
         		} else if ( title.equals("nw") ) {
         			// The north west corner is bounded by the west and north data bounds and the south east rectangle corner.
-        			northBoundsLat = dataBounds.getNorthEast().getLatitude();
-        			southBoundsLat = sw.getLatitude();
         			if ( modulo ) {
-        				if ( center_lon < 0.0 ) {
-        					center_lon = center_lon + 360.;
+        				if ( east_lon < west_lon ) {
+        					east_lon = east_lon + 360.;
         				}
-        				westBoundsLon = center_lon - 180.;
-        				eastBoundsLon = center_lon + 180.;
+        			}
+        			northBoundsLat = dataNE.getLatitude();
+        			southBoundsLat = south_lat;
+        			if ( modulo ) {
+        				westBoundsLon = globalWestBoundsLon;
+        				eastBoundsLon = east_lon;
         			} else {
-        				westBoundsLon = dataBounds.getSouthWest().getLongitude();
-        				eastBoundsLon = ne.getLongitude();
+        				westBoundsLon = dataSW.getLongitude();
+        				eastBoundsLon = east_lon;
         			}
         			while ( westBoundsLon < 0.0 ) {
         				westBoundsLon = westBoundsLon + 360.;
@@ -731,43 +867,45 @@ public class SelectControl extends CustomControl {
         			while (eastBoundsLon < 0.0 ) {
         				eastBoundsLon = eastBoundsLon + 360.;
         			}
+        			if ( modulo ) {
+						if ( markerLon >= 0.0 &&  markerLon <= globalWestBoundsLon ) {
+							markerLon = markerLon + 360;
+						}
+					}
         			if ( markerLon >= eastBoundsLon ) {
         				markerLon = eastBoundsLon;
-        			}
+					}
         			if ( markerLon <= westBoundsLon ) {
-        				markerLon = westBoundsLon;
+						markerLon = westBoundsLon;
         			}
         			if (markerLat <= southBoundsLat ) {
-        				markerLat = southBoundsLat;
+						markerLat = southBoundsLat;
         			}
         			if ( markerLat >= northBoundsLat ) {
-        				markerLat = northBoundsLat;
+						markerLat = northBoundsLat;
         			}
-        			sw = LatLng.newInstance(sw.getLatitude(), markerLon);
-        			ne = LatLng.newInstance(markerLat, ne.getLongitude());
+        			west_lon = markerLon;
+        			north_lat = markerLat;
         		} else if ( title.equals("nw_ne") ) { 
-        			southBoundsLat = sw.getLatitude();
-        			northBoundsLat = dataBounds.getNorthEast().getLatitude();
+        			southBoundsLat = south_lat;
+        			northBoundsLat = dataNE.getLatitude();
         			markerLon = polygon.getBounds().getCenter().getLongitude();
         			if (markerLat <= southBoundsLat ) {
-        				markerLat = southBoundsLat;
+						markerLat = southBoundsLat;
         			}
-        			if ( markerLat >= northBoundsLat ) {
-        				markerLat = northBoundsLat;
+        			if ( markerLat >= northBoundsLat  ) {
+						markerLat = northBoundsLat;
         			}
-        			ne = LatLng.newInstance(markerLat, ne.getLongitude());
+        			north_lat = markerLat;
         		} else if ( title.equals("ne") ) {
-        			northBoundsLat = dataBounds.getNorthEast().getLatitude();
-        			southBoundsLat = sw.getLatitude();
+        			northBoundsLat = dataNE.getLatitude();
+        			southBoundsLat = south_lat;
         			if ( modulo ) {
-        				if ( center_lon < 0.0 ) {
-        					center_lon = center_lon + 360.;
-        				}
-        				westBoundsLon = center_lon - 180.;
-        				eastBoundsLon = center_lon + 180.;
+        				westBoundsLon = globalWestBoundsLon;
+        				eastBoundsLon = globalEastBoundsLon;
         			} else {
-        				westBoundsLon = sw.getLongitude();
-        				eastBoundsLon = dataBounds.getNorthEast().getLongitude();
+        				westBoundsLon = west_lon;
+        				eastBoundsLon = dataNE.getLongitude();
         			}
         			while ( westBoundsLon < 0.0 ) {
         				westBoundsLon = westBoundsLon + 360.;
@@ -776,29 +914,31 @@ public class SelectControl extends CustomControl {
         				eastBoundsLon = eastBoundsLon + 360.;
         			}
         			if ( markerLon >= eastBoundsLon ) {
-        				markerLon = eastBoundsLon;
+						markerLon = eastBoundsLon;
         			}
         			if ( markerLon <= westBoundsLon ) {
-        				markerLon = westBoundsLon;
+						markerLon = westBoundsLon;
         			}
         			if (markerLat <= southBoundsLat ) {
-        				markerLat = southBoundsLat;
+						markerLat = southBoundsLat;
         			}
         			if ( markerLat >= northBoundsLat ) {
-        				markerLat = northBoundsLat;
+						markerLat = northBoundsLat;
         			}
-        			ne = LatLng.newInstance(markerLat, markerLon);
+        			east_lon = markerLon;
+        			north_lat = markerLat;
         		} else if ( title.equals("ne_se") ) {
         			markerLat = polygon.getBounds().getCenter().getLatitude();
         			if ( modulo ) {
-        				if ( center_lon < 0.0 ) {
-        					center_lon = center_lon + 360.;
+        				//westBoundsLon = globalWestBoundsLon;
+        				westBoundsLon = west_lon;
+        				eastBoundsLon = globalEastBoundsLon;
+        				if ( markerLon < globalWestBoundsLon ) {
+        					markerLon = markerLon + 360.;
         				}
-        				westBoundsLon = center_lon - 180.;
-        				eastBoundsLon = center_lon + 180.;
         			} else {
-        				westBoundsLon = sw.getLongitude();
-        				eastBoundsLon = dataBounds.getNorthEast().getLongitude();
+        				westBoundsLon = west_lon;
+        				eastBoundsLon = dataNE.getLongitude();
         			}
         			while ( westBoundsLon < 0.0 ) {
         				westBoundsLon = westBoundsLon + 360.;
@@ -807,25 +947,18 @@ public class SelectControl extends CustomControl {
         				eastBoundsLon = eastBoundsLon + 360.;
         			}
         			if ( markerLon >= eastBoundsLon ) {
-        				markerLon = eastBoundsLon;
+						markerLon = eastBoundsLon;
         			}
-        			if ( markerLon <= westBoundsLon ) {
-        				markerLon = westBoundsLon;
-        			}
-
-        			ne = LatLng.newInstance(ne.getLatitude(), markerLon);
+        			east_lon = markerLon;
         		} else if ( title.equals("se") ) {
-        			northBoundsLat = ne.getLatitude();
-        			southBoundsLat = dataBounds.getSouthWest().getLatitude();
+        			northBoundsLat = north_lat;
+        			southBoundsLat = dataSW.getLatitude();
         			if ( modulo ) {
-        				if ( center_lon < 0.0 ) {
-        					center_lon = center_lon + 360.;
-        				}
-        				westBoundsLon = center_lon - 180.;
-        				eastBoundsLon = center_lon + 180.;
+        				westBoundsLon = globalWestBoundsLon;
+        				eastBoundsLon = globalEastBoundsLon;
         			} else {
-        				westBoundsLon = sw.getLongitude();
-        				eastBoundsLon = dataBounds.getNorthEast().getLongitude();
+        				westBoundsLon = west_lon;
+        				eastBoundsLon = dataNE.getLongitude();
         			}
         			while ( westBoundsLon < 0.0 ) {
         				westBoundsLon = westBoundsLon + 360.;
@@ -834,43 +967,40 @@ public class SelectControl extends CustomControl {
         				eastBoundsLon = eastBoundsLon + 360.;
         			}
         			if ( markerLon >= eastBoundsLon ) {
-        				markerLon = eastBoundsLon;
+						markerLon = eastBoundsLon;
         			}
         			if ( markerLon <= westBoundsLon ) {
-        				markerLon = westBoundsLon;
+						markerLon = westBoundsLon;
         			}
         			if (markerLat <= southBoundsLat ) {
-        				markerLat = southBoundsLat;
+						markerLat = southBoundsLat;
         			}
         			if ( markerLat >= northBoundsLat ) {
-        				markerLat = northBoundsLat;
+						markerLat = northBoundsLat;
         			}
-        			ne = LatLng.newInstance(ne.getLatitude(), markerLon);
-        			sw = LatLng.newInstance(markerLat, sw.getLongitude());
+        			east_lon = markerLon;
+        			south_lat = markerLat;
         		} else if ( title.equals("sw_se") ) {
-        			southBoundsLat = dataBounds.getSouthWest().getLatitude();
-        			northBoundsLat = ne.getLatitude();
+        			southBoundsLat = dataSW.getLatitude();
+        			northBoundsLat = north_lat;
         			markerLon = polygon.getBounds().getCenter().getLongitude();
         			if (markerLat <= southBoundsLat ) {
-        				markerLat = southBoundsLat;
+						markerLat = southBoundsLat;
         			}
         			if ( markerLat >= northBoundsLat ) {
-        				markerLat = northBoundsLat;
+						markerLat = northBoundsLat;
         			}
-        			sw = LatLng.newInstance(markerLat, sw.getLongitude());
+        			south_lat = markerLat;
         		} else if ( title.equals("center") ) {
 
-        			southBoundsLat = dataBounds.getSouthWest().getLatitude() + polygon.getBounds().toSpan().getLatitude()/2.;
-        			northBoundsLat = dataBounds.getNorthEast().getLatitude() - polygon.getBounds().toSpan().getLatitude()/2.;
+        			southBoundsLat = dataSW.getLatitude() + polygon.getBounds().toSpan().getLatitude()/2.;
+        			northBoundsLat = dataNE.getLatitude() - polygon.getBounds().toSpan().getLatitude()/2.;
         			if ( modulo ) {
-        				if ( center_lon < 0.0 ) {
-        					center_lon = center_lon + 360.;
-        				}
-        				westBoundsLon = center_lon - 180.;
-        				eastBoundsLon = center_lon + 180.;
+        				westBoundsLon = globalWestBoundsLon;
+        				eastBoundsLon = globalEastBoundsLon;
         			} else {
-        				westBoundsLon = dataBounds.getSouthWest().getLongitude() + polygon.getBounds().toSpan().getLongitude()/2.;
-        				eastBoundsLon = dataBounds.getNorthEast().getLongitude() - polygon.getBounds().toSpan().getLongitude()/2.;
+        				westBoundsLon = dataSW.getLongitude() + polygon.getBounds().toSpan().getLongitude()/2.;
+        				eastBoundsLon = dataNE.getLongitude() - polygon.getBounds().toSpan().getLongitude()/2.;
         			}
         			while ( westBoundsLon < 0.0 ) {
         				westBoundsLon = westBoundsLon + 360.;
@@ -879,23 +1009,32 @@ public class SelectControl extends CustomControl {
         				eastBoundsLon = eastBoundsLon + 360.;
         			}
         			if ( markerLon >= eastBoundsLon ) {
-        				markerLon = eastBoundsLon;
+						markerLon = eastBoundsLon;
         			}
         			if ( markerLon <= westBoundsLon ) {
-        				markerLon = westBoundsLon;
+						markerLon = westBoundsLon;
         			}
 
         			if ( markerLat >= northBoundsLat ) {
-        				markerLat = northBoundsLat;
+						markerLat = northBoundsLat;
         			}
         			if ( markerLat <= southBoundsLat ) {
-        				markerLat = southBoundsLat;
+						markerLat = southBoundsLat;
         			}
-
-        			sw = LatLng.newInstance(markerLat - polygon.getBounds().toSpan().getLatitude()/2., markerLon - polygon.getBounds().toSpan().getLongitude()/2.0);
-        			ne = LatLng.newInstance(markerLat + polygon.getBounds().toSpan().getLatitude()/2., markerLon + polygon.getBounds().toSpan().getLongitude()/2.0);
+        			south_lat = markerLat - polygon.getBounds().toSpan().getLatitude()/2.;
+                    west_lon = markerLon - polygon.getBounds().toSpan().getLongitude()/2.0;
+        			north_lat = markerLat + polygon.getBounds().toSpan().getLatitude()/2.;
+        			east_lon = markerLon + polygon.getBounds().toSpan().getLongitude()/2.0;
         		}
-
+                while ( west_lon < 0.0 ) {
+                	west_lon = west_lon + 360.;
+                }	
+                while ( east_lon < 0.0 ) {
+                	east_lon = east_lon + 360.;
+                }
+                
+                LatLng sw = LatLng.newInstance(south_lat, west_lon, true);
+                LatLng ne = LatLng.newInstance(north_lat, east_lon, true);
 	            mMap.removeOverlay(polygon);
 				LatLngBounds rectBounds = LatLngBounds.newInstance(sw, ne);
 				polygonPoints[0] = LatLng.newInstance(sw.getLatitude(), sw.getLongitude());
@@ -920,6 +1059,7 @@ public class SelectControl extends CustomControl {
 				sw_seMarker.setLatLng(LatLng.newInstance(sw.getLatitude(), rectBounds.getCenter().getLongitude()));
 				centerMarker.setLatLng(rectBounds.getCenter());
 				setText();
+				mMap.setCenter(dataBounds.getCenter());
 			}
 		};
 	}
