@@ -59,15 +59,15 @@ public class MapPolygon {
     	LatLngBounds bounds = LatLngBounds.newInstance(sw, ne);
     	LatLng center = bounds.getCenter();
     	LatLng[] boundingPolygon = new LatLng[9];
-		boundingPolygon[0] = LatLng.newInstance(sw.getLatitude(), sw.getLongitude());
-		boundingPolygon[1] = LatLng.newInstance(center.getLatitude(), sw.getLongitude());
-		boundingPolygon[2] = LatLng.newInstance(ne.getLatitude(), sw.getLongitude());
-		boundingPolygon[3] = LatLng.newInstance(ne.getLatitude(), center.getLongitude());
-		boundingPolygon[4] = LatLng.newInstance(ne.getLatitude(), ne.getLongitude());
-		boundingPolygon[5] = LatLng.newInstance(center.getLatitude(), ne.getLongitude());
-		boundingPolygon[6] = LatLng.newInstance(sw.getLatitude(), ne.getLongitude());
-		boundingPolygon[7] = LatLng.newInstance(sw.getLatitude(), center.getLongitude());
-		boundingPolygon[8] = LatLng.newInstance(sw.getLatitude(), sw.getLongitude());
+		boundingPolygon[0] = LatLng.newInstance(sw.getLatitude(), sw.getLongitude(), true);
+		boundingPolygon[1] = LatLng.newInstance(center.getLatitude(), sw.getLongitude(), true);
+		boundingPolygon[2] = LatLng.newInstance(ne.getLatitude(), sw.getLongitude(), true);
+		boundingPolygon[3] = LatLng.newInstance(ne.getLatitude(), center.getLongitude(), true);
+		boundingPolygon[4] = LatLng.newInstance(ne.getLatitude(), ne.getLongitude(), true);
+		boundingPolygon[5] = LatLng.newInstance(center.getLatitude(), ne.getLongitude(), true);
+		boundingPolygon[6] = LatLng.newInstance(sw.getLatitude(), ne.getLongitude(), true);
+		boundingPolygon[7] = LatLng.newInstance(sw.getLatitude(), center.getLongitude(), true);
+		boundingPolygon[8] = LatLng.newInstance(sw.getLatitude(), sw.getLongitude(), true);
 		Polygon poly = new Polygon(boundingPolygon, outlineColor, outlineWeight, outlineOpacity, interiorColor, interiorOpacity);
 		polyList.add(poly);
     }
