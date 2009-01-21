@@ -123,102 +123,102 @@ public class LASReferenceMap extends Composite {
              * 
              * This is done by checking the distance of the data area from the corner of the map.
              */
-			public void onDrag(MapDragEvent event) {
-				
-				LatLngBounds mapBounds = mMap.getBounds();
-		        double nlat = mapBounds.getCenter().getLatitude();
-		        double nlon = mapBounds.getCenter().getLongitude();
-				LatLng sw = dataBounds.getSouthWest();
-				double data_south = sw.getLatitude();
-				double data_west = sw.getLongitude();
-				while ( data_west <= 0.0 ) {
-					data_west = data_west + 360.;
-				}
-				
-				LatLng ne = dataBounds.getNorthEast();
-				double data_north = ne.getLatitude();
-				double data_east = ne.getLongitude();
-				while ( data_east <= 0.0 ) {
-					data_east = data_east + 360.;
-				}
-				
-				LatLng map_sw = mapBounds.getSouthWest();
-				double map_south = map_sw.getLatitude();
-				double map_west = map_sw.getLongitude();
-				while( map_west <= 0.0 ) {
-					map_west = map_west + 360.;
-				}
-				
-				LatLng map_ne = mapBounds.getNorthEast();
-				double map_north = map_ne.getLatitude();
-				double map_east = map_ne.getLongitude();
-				while ( map_east <= 0.0 ) {
-					map_east = map_east + 360.;
-				}
-				
-				boolean recenter = false;;
-				if ( data_south < map_south ) {
-					
-					// Top of the data area is below the map.  Limit how far it goes down.
-					if ( data_north < map_north && (Math.abs(map_north - data_north) > current_margin_y) ) {
-					    recenter = true;
-					    if ( set_north_center ) {
-					        north_center = nlat;
-					        set_north_center = false;
-					    }
-					    nlat = north_center;
-					}
-				} else if ( data_north > map_north ) {
-					
-					// The bottom of the data area is above the map.  Limit how far it goes up.
-					if ( data_south > map_south && (Math.abs(data_south - map_south) > current_margin_y) ) {
-						recenter = true;
-						if ( set_south_center ) {
-							south_center = nlat;
-							set_south_center = false;
-						}
-						nlat = south_center;
-					}
-				} else {
-					// The entire data area is visible on the map.  Do nothing for now.
-					
-				}
-				
-				
-				if ( data_east > map_east ) {
-					
-					// The western grey boundary is growing.  Limit its growth.
-					if ( data_west > map_west && (Math.abs(data_west - map_west) > current_margin_x) ) {
-						recenter = true;
-						if ( set_west_center ) {
-							west_center = nlon;
-							set_west_center = false;
-						}
-						nlon = west_center;
-					}
-				} else if ( data_west < map_west ) {
-					
-					if ( data_east < map_east && (Math.abs(map_east - data_east) > current_margin_x ) ) {
-						recenter = true;
-						if ( set_east_center ) {
-							east_center = nlon;
-							set_east_center = false;
-						}
-						nlon = east_center;
-					}
-				} else {
-					// Entire data area is visible.  Do nothing for now.
-					
-				}
-				
-				if ( recenter ) {
-					LatLng center = LatLng.newInstance(nlat, nlon);
-					mMap.setCenter(center);
-				}
-				
-				
-			}
-    		
+    		public void onDrag(MapDragEvent event) {
+    			if ( !modulo ) {
+    				LatLngBounds mapBounds = mMap.getBounds();
+    				double nlat = mapBounds.getCenter().getLatitude();
+    				double nlon = mapBounds.getCenter().getLongitude();
+    				LatLng sw = dataBounds.getSouthWest();
+    				double data_south = sw.getLatitude();
+    				double data_west = sw.getLongitude();
+    				while ( data_west <= 0.0 ) {
+    					data_west = data_west + 360.;
+    				}
+
+    				LatLng ne = dataBounds.getNorthEast();
+    				double data_north = ne.getLatitude();
+    				double data_east = ne.getLongitude();
+    				while ( data_east <= 0.0 ) {
+    					data_east = data_east + 360.;
+    				}
+
+    				LatLng map_sw = mapBounds.getSouthWest();
+    				double map_south = map_sw.getLatitude();
+    				double map_west = map_sw.getLongitude();
+    				while( map_west <= 0.0 ) {
+    					map_west = map_west + 360.;
+    				}
+
+    				LatLng map_ne = mapBounds.getNorthEast();
+    				double map_north = map_ne.getLatitude();
+    				double map_east = map_ne.getLongitude();
+    				while ( map_east <= 0.0 ) {
+    					map_east = map_east + 360.;
+    				}
+
+    				boolean recenter = false;;
+    				if ( data_south < map_south ) {
+
+    					// Top of the data area is below the map.  Limit how far it goes down.
+    					if ( data_north < map_north && (Math.abs(map_north - data_north) > current_margin_y) ) {
+    						recenter = true;
+    						if ( set_north_center ) {
+    							north_center = nlat;
+    							set_north_center = false;
+    						}
+    						nlat = north_center;
+    					}
+    				} else if ( data_north > map_north ) {
+
+    					// The bottom of the data area is above the map.  Limit how far it goes up.
+    					if ( data_south > map_south && (Math.abs(data_south - map_south) > current_margin_y) ) {
+    						recenter = true;
+    						if ( set_south_center ) {
+    							south_center = nlat;
+    							set_south_center = false;
+    						}
+    						nlat = south_center;
+    					}
+    				} else {
+    					// The entire data area is visible on the map.  Do nothing for now.
+
+    				}
+
+
+    				if ( data_east > map_east ) {
+
+    					// The western grey boundary is growing.  Limit its growth.
+    					if ( data_west > map_west && (Math.abs(data_west - map_west) > current_margin_x) ) {
+    						recenter = true;
+    						if ( set_west_center ) {
+    							west_center = nlon;
+    							set_west_center = false;
+    						}
+    						nlon = west_center;
+    					}
+    				} else if ( data_west < map_west ) {
+
+    					if ( data_east < map_east && (Math.abs(map_east - data_east) > current_margin_x ) ) {
+    						recenter = true;
+    						if ( set_east_center ) {
+    							east_center = nlon;
+    							set_east_center = false;
+    						}
+    						nlon = east_center;
+    					}
+    				} else {
+    					// Entire data area is visible.  Do nothing for now.
+
+    				}
+
+    				if ( recenter ) {
+    					LatLng center = LatLng.newInstance(nlat, nlon);
+    					mMap.setCenter(center);
+    				}
+    			}
+
+    		}
+
     	});
     	mWidth = width;
     	mHeight = height;
