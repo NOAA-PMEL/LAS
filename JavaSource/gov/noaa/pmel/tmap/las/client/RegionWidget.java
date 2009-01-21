@@ -81,9 +81,11 @@ public class RegionWidget extends ListBox {
 				while ( trys < 3 ) {
 					if ( mMap.getDataBounds().containsBounds(region) ) {
 						mMap.setSelectionBounds(region);
-						int zoom = mMap.getBoundsZoomLevel(region);
-						mMap.setZoom(zoom);
-						mMap.setCenter(region.getCenter());
+						if ( mMap.isModulo() ) {
+							int zoom = mMap.getBoundsZoomLevel(region);
+							mMap.setZoom(zoom);
+							mMap.setCenter(region.getCenter());
+						}
 						changed = true;
 						break;
 					} else {
