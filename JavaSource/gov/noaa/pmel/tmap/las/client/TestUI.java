@@ -1,7 +1,10 @@
 package gov.noaa.pmel.tmap.las.client;
 
 import com.google.gwt.maps.client.geom.LatLng;
+import com.google.gwt.maps.client.geom.LatLngBounds;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.ChangeListener;
 import com.google.gwt.user.client.ui.ClickListener;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.PopupPanel;
@@ -16,9 +19,11 @@ public class TestUI extends LASEntryPoint {
 	PopupPanel mDatasetPanel;
 	DatasetWidget dsWidget;
 	LASReferenceMap mMap;
+	RegionWidget regions;
 	public void onModuleLoad() {
 		super.onModuleLoad();
 		dsWidget = new DatasetWidget();
+		
 		dsWidget.addTreeListener(new TreeListener() {
 
 			public void onTreeItemSelected(TreeItem item) {
@@ -26,6 +31,7 @@ public class TestUI extends LASEntryPoint {
 				if ( u instanceof VariableSerializable ) {
 					VariableSerializable v = (VariableSerializable) u;
 					mMap.zoomToGrid(v.getGrid());
+					regions.setSelectedIndex(0);
 					mDatasetPanel.hide();
 				}
 				
@@ -55,15 +61,14 @@ public class TestUI extends LASEntryPoint {
 			}
 		});
 		mMap = new LASReferenceMap(LatLng.newInstance(0.0, 0.0), 1, 720, 360);
-		
+		regions = new RegionWidget(mMap);
         dsWidget.init(rpcService);
         RootPanel.get("refmap").add(mMap);
         popupGrid.setWidget(0, 0, close);
         popupGrid.setWidget(1, 0, dsWidget);
         mDatasetPanel.add(popupGrid);
         RootPanel.get("datasets").add(chooseDataset);
+        RootPanel.get("regions").add(regions);
 	}
 	
-	
-
 }

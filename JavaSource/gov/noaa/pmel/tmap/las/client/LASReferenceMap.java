@@ -1,5 +1,7 @@
 package gov.noaa.pmel.tmap.las.client;
 
+import gov.noaa.pmel.tmap.las.client.SelectControl.MapTool;
+
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.maps.client.MapType;
 import com.google.gwt.maps.client.MapTypeOptions;
@@ -17,6 +19,7 @@ import com.google.gwt.maps.client.event.MapZoomEndHandler;
 import com.google.gwt.maps.client.geom.LatLng;
 import com.google.gwt.maps.client.geom.LatLngBounds;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.ClickListener;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -29,6 +32,7 @@ public class LASReferenceMap extends Composite {
 	MaskOverlay maskOverlay = null;
 	SelectControl selectControl;
 	ResetControl resetControl;
+	RotateControl rotateControl;
 	
 	MapWidget mMap;
 	LatLng mSouthWestCorner;
@@ -48,6 +52,7 @@ public class LASReferenceMap extends Composite {
 	double north_center;
 	double west_center;
 	double east_center;
+	double delta;
 	boolean set_south_center = true;
 	boolean set_north_center = true;
 	boolean set_west_center = true;
@@ -207,7 +212,7 @@ public class LASReferenceMap extends Composite {
 				}
 				
 				if ( recenter ) {
-					LatLng center = LatLng.newInstance(nlat, nlon, true);
+					LatLng center = LatLng.newInstance(nlat, nlon);
 					mMap.setCenter(center);
 				}
 				
@@ -225,9 +230,11 @@ public class LASReferenceMap extends Composite {
 			 mMap.addControl(new SmallMapControl());
 		}
 		mMap.addControl(new MapTypeControl());
-		resetControl = new ResetControl(new ControlPosition(ControlAnchor.TOP_RIGHT, 10 ,30), LatLng.newInstance(0.0, 0.0, true), 1);
+		resetControl = new ResetControl(new ControlPosition(ControlAnchor.TOP_RIGHT, 10 ,30), LatLng.newInstance(0.0, 0.0), 1);
 		mMap.addControl(resetControl);
 		resetControl.addClickListener(click);
+		rotateControl = new RotateControl(new ControlPosition(ControlAnchor.TOP_RIGHT, 10 ,290));
+		
 		addControl(selectControl);
 		initWidget(mMap);
     }
@@ -237,7 +244,7 @@ public class LASReferenceMap extends Composite {
 	public void zoomToGrid(GridSerializable grid) {
 		gridID = grid.getID();
 		modulo = false;
-		double delta = Math.abs(Double.valueOf(grid.getXAxis().getArangeSerializable().getStep()));
+		delta = Math.abs(Double.valueOf(grid.getXAxis().getArangeSerializable().getStep()));
 		
 		if (maskOverlay != null ) {
         	mMap.removeOverlay(maskOverlay);
@@ -259,8 +266,8 @@ public class LASReferenceMap extends Composite {
 		if ( grid_north > 88.5 ) {
 			grid_north = 88.5;
 		}
-		LatLng sw = LatLng.newInstance(grid_south, grid_west, true);
-		LatLng ne = LatLng.newInstance(grid_north, grid_east, true);
+		LatLng sw = LatLng.newInstance(grid_south, grid_west);
+		LatLng ne = LatLng.newInstance(grid_north, grid_east);
 		
 		
 		dataBounds = LatLngBounds.newInstance(sw, ne);
@@ -271,6 +278,12 @@ public class LASReferenceMap extends Composite {
 		selectControl.setDataBounds(sw, ne, modulo, delta);
 		int zoom = mMap.getBoundsZoomLevel(dataBounds);
 
+		if ( modulo ) {
+			mMap.addControl(rotateControl);
+			rotateControl.addClickListener(rotate);
+		} else {
+			mMap.removeControl(rotateControl);
+		}
 
 		mMap.setZoomLevel(zoom);
 		mMap.setCenter(dataBounds.getCenter());
@@ -327,6 +340,51 @@ public class LASReferenceMap extends Composite {
 			}
 		}
 	};
+	ClickListener rotate = new ClickListener() {
+
+		public void onClick(Widget sender) {
+			if ( sender.getTitle().equals("Rotate west") ) {
+				rotateWest();				
+			} else if ( sender.getTitle().equals("Rotate east") ) {
+				rotateEast();
+			}	
+		}
+	};
+	public void rotateWest() {
+		LatLngBounds selection = selectControl.getSelectionBounds();
+		
+		LatLng c_ne = dataBounds.getNorthEast();
+		double east = c_ne.getLongitude() - 90.;
+		LatLng c_sw = dataBounds.getSouthWest();
+		double west = c_sw.getLongitude() - 90.;
+		dataBounds = LatLngBounds.newInstance(LatLng.newInstance(c_sw.getLatitude(), west), LatLng.newInstance(c_ne.getLatitude(), east));
+		selectControl.setDataBounds(dataBounds.getSouthWest(), dataBounds.getNorthEast(), modulo, delta);
+		
+		double center_lon = mMap.getCenter().getLongitude() - 90.;
+		double center_lat = mMap.getCenter().getLatitude();
+		LatLng n_center = LatLng.newInstance(center_lat, center_lon);
+		mMap.setCenter(n_center);
+		if ( dataBounds.containsBounds(selection) ) {
+		    selectControl.setSelectionBounds(selection);
+		}
+	}
+	public void rotateEast() {
+		LatLngBounds selection = selectControl.getSelectionBounds();
+		LatLng c_ne = dataBounds.getNorthEast();
+		double east = c_ne.getLongitude() + 90.;
+		LatLng c_sw = dataBounds.getSouthWest();
+		double west = c_sw.getLongitude() + 90.;
+		dataBounds = LatLngBounds.newInstance(LatLng.newInstance(c_sw.getLatitude(), west), LatLng.newInstance(c_ne.getLatitude(), east));
+		selectControl.setDataBounds(dataBounds.getSouthWest(), dataBounds.getNorthEast(), modulo, delta);
+		
+		double center_lon = mMap.getCenter().getLongitude() + 90.;
+		double center_lat = mMap.getCenter().getLatitude();
+		LatLng n_center = LatLng.newInstance(center_lat, center_lon);
+		mMap.setCenter(n_center);
+		if ( dataBounds.containsBounds(selection) ) {
+			selectControl.setSelectionBounds(selection);
+		}
+	}
 	private void reset() {
 		int zoom = mMap.getBoundsZoomLevel(dataBounds);
 		if ( maskOverlay != null ) {
@@ -340,9 +398,27 @@ public class LASReferenceMap extends Composite {
 		mMap.setZoomLevel(zoom);
 		mMap.setCenter(dataBounds.getCenter());
 		if ( modulo ) {
-			mMap.setDraggable(true);
+			mMap.setDraggable(false);
 		} else {
 			mMap.setDraggable(false);
 		}	
+	}
+	public boolean isModulo() {
+		return modulo;
+	}
+	public void setSelectionBounds(LatLngBounds bounds) {
+		selectControl.setSelectionBounds(bounds);
+	}
+	public LatLngBounds getDataBounds() {
+		return selectControl.getDataBounds();
+	}
+	public int getBoundsZoomLevel(LatLngBounds region) {
+		return mMap.getBoundsZoomLevel(region);
+	}
+	public void setZoom(int zoom) {
+		mMap.setZoomLevel(zoom);
+	}
+	public void setCenter(LatLng center) {
+		mMap.setCenter(center);
 	}
 }

@@ -63,17 +63,17 @@ public class MaskOverlay extends Overlay {
     		centerlongitude = centerlongitude + 360.;
     	}
     	if ( modulo ) {
-    		mLeftPolygon = new MapPolygon(map_sw, LatLng.newInstance(map_ne.getLatitude(), centerlongitude - 180, true), outlineColor, outlineWeight, outlineOpacity, interiorColor, interiorOpacity);
+    		mLeftPolygon = new MapPolygon(map_sw, LatLng.newInstance(map_ne.getLatitude(), centerlongitude - 180), outlineColor, outlineWeight, outlineOpacity, interiorColor, interiorOpacity);
     	} else {
     		if ( maplongitude <= datalongitude ) {
-    			mLeftPolygon = new MapPolygon(map_sw, LatLng.newInstance(map_ne.getLatitude(), sw.getLongitude(), true),  outlineColor, outlineWeight, outlineOpacity, interiorColor, interiorOpacity);
+    			mLeftPolygon = new MapPolygon(map_sw, LatLng.newInstance(map_ne.getLatitude(), sw.getLongitude()),  outlineColor, outlineWeight, outlineOpacity, interiorColor, interiorOpacity);
     			for (Iterator polyIt = mLeftPolygon.getPolyList().iterator(); polyIt.hasNext();) {
     				Polygon poly = (Polygon) polyIt.next();
     				polyList.add(poly);
     			}
     		}
     	}
-    	mTopPolygon = new MapPolygon(LatLng.newInstance(ne.getLatitude(), sw.getLongitude()), LatLng.newInstance(map_ne.getLatitude(), ne.getLongitude(), true), outlineColor, outlineWeight, outlineOpacity, interiorColor, interiorOpacity);
+    	mTopPolygon = new MapPolygon(LatLng.newInstance(ne.getLatitude(), sw.getLongitude()), LatLng.newInstance(map_ne.getLatitude(), ne.getLongitude()), outlineColor, outlineWeight, outlineOpacity, interiorColor, interiorOpacity);
     	for (Iterator polyIt = mTopPolygon.getPolyList().iterator(); polyIt.hasNext();) {
 			Polygon poly = (Polygon) polyIt.next();
 			polyList.add(poly);
@@ -88,13 +88,13 @@ public class MaskOverlay extends Overlay {
     		datalongitude = datalongitude + 360.;
     	}
     	if ( datalongitude <= maplongitude ) {
-    	    mRightPolygon = new MapPolygon(LatLng.newInstance(map_sw.getLatitude(), ne.getLongitude(), true), map_ne,  outlineColor, outlineWeight, outlineOpacity, interiorColor, interiorOpacity);
+    	    mRightPolygon = new MapPolygon(LatLng.newInstance(map_sw.getLatitude(), ne.getLongitude()), map_ne,  outlineColor, outlineWeight, outlineOpacity, interiorColor, interiorOpacity);
     	    for (Iterator polyIt = mRightPolygon.getPolyList().iterator(); polyIt.hasNext();) {
     			Polygon poly = (Polygon) polyIt.next();
     			polyList.add(poly);
     		}
     	}
-    	mBottomPolygon = new MapPolygon(LatLng.newInstance(map_sw.getLatitude(), sw.getLongitude(), true), LatLng.newInstance(sw.getLatitude(), ne.getLongitude()), outlineColor, outlineWeight, outlineOpacity, interiorColor, interiorOpacity);
+    	mBottomPolygon = new MapPolygon(LatLng.newInstance(map_sw.getLatitude(), sw.getLongitude()), LatLng.newInstance(sw.getLatitude(), ne.getLongitude()), outlineColor, outlineWeight, outlineOpacity, interiorColor, interiorOpacity);
     	for (Iterator polyIt = mBottomPolygon.getPolyList().iterator(); polyIt.hasNext();) {
 			Polygon poly = (Polygon) polyIt.next();
 			polyList.add(poly);
