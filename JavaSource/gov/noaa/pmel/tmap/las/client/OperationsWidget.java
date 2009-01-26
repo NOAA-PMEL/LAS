@@ -3,14 +3,12 @@ package gov.noaa.pmel.tmap.las.client;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
-import com.google.gwt.user.client.DOM;
-import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.ClickListener;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.RadioButton;
 import com.google.gwt.user.client.ui.StackPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -44,6 +42,8 @@ public class OperationsWidget extends StackPanel {
 		
 		hofmullerPlots.add(new Label("Select a variable..."));
 		add(hofmullerPlots, "Hofmuller Plots");
+		
+		setWidth("240px");
 	}
 	public void setOperations(RPCServiceAsync rpcService, String view, String dsID, String varID, OperationsMenu menu) {
 		this.opService = rpcService;
@@ -65,42 +65,47 @@ public class OperationsWidget extends StackPanel {
 					for (Iterator viewIt = views.iterator(); viewIt.hasNext();) {
 						String view = (String) viewIt.next();
 						if ( !op.getName().contains("omparison") ) {
-							if ( view.equals("xy") ) {
-								if (!hasXYMap) {
-									xyMap.clear();
-									hasXYMap = true;
+							Map<String, String> attrs = op.getAttributes();
+							if ( attrs != null && attrs.containsKey("default")) {
+								if ( view.equals("xy") ) {	
+									if (!hasXYMap) {
+										xyMap.clear();
+										hasXYMap = true;
+									}
+									OperationButton button = new OperationButton("op", op.getName()+" in "+view);
+									button.setOperation(op);
+									button.addClickListener(buttonListener);
+									button.setChecked(true);
+									currentOp = button.getOperation();
+									xyMap.add(button);
+								} else if ( view.equals("x") || view.equals("y") || view.equals("z") || view.equals("t") ) {
+									if ( !hasLinePlots ) {
+										linePlots.clear();
+										hasLinePlots = true;
+									}
+									OperationButton button = new OperationButton("op", op.getName()+" in "+view);
+									button.setOperation(op);
+									button.addClickListener(buttonListener);
+									linePlots.add(button);
+								} else if ( view.equals("xz") || view.equals("yz") ) {
+									if ( !hasSectionPlots ) {
+										sectionPlots.clear();
+										hasSectionPlots = true;
+									}
+									OperationButton button = new OperationButton("op", op.getName()+" in "+view);
+									button.setOperation(op);
+									button.addClickListener(buttonListener);
+									sectionPlots.add(button);
+								} else if ( view.equals("xt") || view.equals("yt") || view.equals("zt") ) {
+									if ( !hasHofmullerPlots ) {
+										hofmullerPlots.clear();
+										hasSectionPlots = true;
+									}
+									OperationButton button = new OperationButton("op", op.getName()+" in "+view);
+									button.setOperation(op);
+									button.addClickListener(buttonListener);
+									hofmullerPlots.add(button);
 								}
-								OperationButton button = new OperationButton("op", op.getName()+" in "+view);
-								button.setOperation(op);
-								button.addClickListener(buttonListener);
-								xyMap.add(button);
-							} else if ( view.equals("x") || view.equals("y") || view.equals("z") || view.equals("t") ) {
-								if ( !hasLinePlots ) {
-									linePlots.clear();
-									hasLinePlots = true;
-								}
-								OperationButton button = new OperationButton("op", op.getName()+" in "+view);
-								button.setOperation(op);
-								button.addClickListener(buttonListener);
-								linePlots.add(button);
-							} else if ( view.equals("xz") || view.equals("yz") ) {
-								if ( !hasSectionPlots ) {
-									sectionPlots.clear();
-									hasSectionPlots = true;
-								}
-								OperationButton button = new OperationButton("op", op.getName()+" in "+view);
-								button.setOperation(op);
-								button.addClickListener(buttonListener);
-								sectionPlots.add(button);
-							} else if ( view.equals("xt") || view.equals("yt") || view.equals("zt") ) {
-								if ( !hasHofmullerPlots ) {
-									hofmullerPlots.clear();
-									hasSectionPlots = true;
-								}
-								OperationButton button = new OperationButton("op", op.getName()+" in "+view);
-								button.setOperation(op);
-								button.addClickListener(buttonListener);
-								hofmullerPlots.add(button);
 							}
 						}
 					}

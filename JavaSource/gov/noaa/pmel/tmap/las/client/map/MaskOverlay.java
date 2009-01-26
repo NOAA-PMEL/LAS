@@ -1,4 +1,4 @@
-package gov.noaa.pmel.tmap.las.client;
+package gov.noaa.pmel.tmap.las.client.map;
 
 import java.util.ArrayList;
 import java.util.Iterator;
