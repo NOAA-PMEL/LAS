@@ -1,4 +1,4 @@
-package gov.noaa.pmel.tmap.las.client;
+package gov.noaa.pmel.tmap.las.client.map;
 
 import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.control.ControlPosition;
@@ -19,10 +19,6 @@ public class RotateControl extends CustomControl {
 	
 	public RotateControl (ControlPosition position) {
 		super(position);
-        
-	}
-	@Override
-	protected Widget initialize(MapWidget map) {
 		control = new Grid(1,3);
 		left = new Button("<-");
 		left.setTitle("Rotate west");
@@ -32,6 +28,9 @@ public class RotateControl extends CustomControl {
         control.setWidget(0, 0, left);
         control.setWidget(0, 1, label);
         control.setWidget(0, 2, right);
+	}
+	@Override
+	protected Widget initialize(MapWidget map) {		
         return control;
 	}
 
@@ -44,4 +43,7 @@ public class RotateControl extends CustomControl {
     	left.addClickListener(listener);
     	right.addClickListener(listener);
     }
+	public void setVisible(boolean visible) {
+		control.setVisible(visible);
+	}
 }

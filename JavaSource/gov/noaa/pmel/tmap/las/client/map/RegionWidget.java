@@ -1,4 +1,4 @@
-package gov.noaa.pmel.tmap.las.client;
+package gov.noaa.pmel.tmap.las.client.map;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -28,11 +28,11 @@ import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.Widget;
  
 public class RegionWidget extends ListBox {
-	LASReferenceMap mMap;
+	ReferenceMap refMap;
     Map<String, LatLngBounds> regions = new HashMap<String, LatLngBounds>();
-    public RegionWidget(LASReferenceMap map) {
+    public RegionWidget(ReferenceMap map) {
     	super();
-    	mMap = map;
+    	refMap = map;
     	addItem("Select region", "none");
     	regions.put("africa", LatLngBounds.newInstance(LatLng.newInstance(-40, -20), LatLng.newInstance(40, 60)));
     	addItem("Africa", "africa");
@@ -79,18 +79,19 @@ public class RegionWidget extends ListBox {
 			if ( region != null ) {
 				int trys = 0;
 				while ( trys < 3 ) {
-					if ( mMap.getDataBounds().containsBounds(region) ) {
-						mMap.setSelectionBounds(region);
-						if ( mMap.isModulo() ) {
-							int zoom = mMap.getBoundsZoomLevel(region);
-							mMap.setZoom(zoom);
-							mMap.setCenter(region.getCenter());
+					if ( refMap.getDataBounds().containsBounds(region) ) {
+						
+						if ( refMap.isModulo() ) {
+							int zoom = refMap.getBoundsZoomLevel(region);
+							refMap.setZoom(zoom);
+							refMap.setCenter(region.getCenter());
 						}
+						refMap.setSelectionBounds(region, true);
 						changed = true;
 						break;
 					} else {
-						if ( mMap.isModulo() ){
-							mMap.rotateEast();
+						if ( refMap.isModulo() ){
+							refMap.rotateEast();
 						} else {
 							break;
 						}
