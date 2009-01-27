@@ -143,9 +143,7 @@ public class SelectWidget extends Composite {
 			} else {
 				if (mSelect.isDown()) {
 					mMap.addMapMouseMoveHandler(mouseMove);
-					mMap.setDraggable(false);
 				} else {	          
-					mMap.setDraggable(true);
 					mDrawMarker.setVisible(false);
 					mMap.removeMapMouseMoveHandler(mouseMove);		           
 				}
