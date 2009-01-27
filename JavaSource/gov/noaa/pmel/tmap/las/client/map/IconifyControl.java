@@ -23,13 +23,13 @@ public class IconifyControl extends CustomControl {
 			public void onClick(Widget sender) {
 				if ( iconify.getText().equals("-") ) {
 					mMap.setSize("240px", "120px");
-					int zoom = mMap.getBoundsZoomLevel(refMap.selectControl.getSelectionBounds());
+					int zoom = mMap.getBoundsZoomLevel(refMap.selectWidget.getSelectionBounds());
 					mMap.setZoomLevel(zoom);
 					refMap.hideControls();
 					iconify.setText("+");
 				} else {
 				    refMap.resetSize();
-					int zoom = mMap.getBoundsZoomLevel(refMap.selectControl.getSelectionBounds());
+					int zoom = mMap.getBoundsZoomLevel(refMap.selectWidget.getSelectionBounds());
 					mMap.setZoomLevel(zoom);
 					refMap.showControls();
 					iconify.setText("-");

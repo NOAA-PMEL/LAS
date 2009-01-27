@@ -10,14 +10,26 @@ import com.google.gwt.user.client.ui.MenuBar;
 import com.google.gwt.user.client.ui.MenuItem;
 
 public class OperationsMenu extends MenuBar {
+	MenuItem chooseDataset; 
+	MenuItem updatePlot;
+	Command datasetCommand;
+	Command updatePlotCommand;
 	MenuBar animationMenu = new MenuBar(true);
 	MenuBar compareMenu = new MenuBar(true);
 	MenuBar googleEarthMenu = new MenuBar(true);
 	boolean hasComparison = false;
 	boolean hasAnimation = false;
 	boolean hasGoogleEarth = false;
-	public OperationsMenu() {
+	public OperationsMenu(Command datasetCommand, Command updatePlotCommand) {
 		super();
+		addStyleName("las-MenuBar");
+		setAnimationEnabled(false);
+		this.datasetCommand = datasetCommand;
+		this.updatePlotCommand = updatePlotCommand;
+		chooseDataset = new MenuItem("Choose Dataset", datasetCommand);
+		updatePlot = new MenuItem("Update Plot", updatePlotCommand);
+		addItem(chooseDataset);
+		addItem(updatePlot);
 		animationMenu.setVisible(false);
 		compareMenu.setVisible(false);
 		googleEarthMenu.setVisible(false);

@@ -3,9 +3,11 @@ package gov.noaa.pmel.tmap.las.client;
 import java.util.Iterator;
 import java.util.Map;
 
+import visad.PlotDigits;
+
 import gov.noaa.pmel.tmap.las.client.map.ReferenceMap;
 import gov.noaa.pmel.tmap.las.client.map.RegionWidget;
-import gov.noaa.pmel.tmap.las.client.map.SelectControl;
+import gov.noaa.pmel.tmap.las.client.map.SelectWidget;
 
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestBuilder;
@@ -15,6 +17,7 @@ import com.google.gwt.http.client.Response;
 import com.google.gwt.http.client.URL;
 import com.google.gwt.maps.client.geom.LatLng;
 import com.google.gwt.maps.client.geom.LatLngBounds;
+import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.ChangeListener;
@@ -36,7 +39,7 @@ public class TestUI extends LASEntryPoint {
 	PopupPanel mDatasetPanel;
 	DatasetWidget dsWidget;
 	ReferenceMap refMap;
-	RegionWidget regions;
+	Label datasetLabel;
 	OperationsWidget operationsWidget;
 	OperationsMenu operationsMenu;
 	LASRequestWrapper lasRequest = new LASRequestWrapper();
@@ -46,13 +49,13 @@ public class TestUI extends LASEntryPoint {
 	Label z_label;
 	Grid datasetAndPlotButtons;
 	Grid popupGrid;
-	Button chooseDataset;
 	Button plot;
 	Grid zAndZlabel;
 	Button close;
 	public void onModuleLoad() {
 		super.onModuleLoad();
 		lasRequest.removeVariables();
+		datasetLabel = new Label("Select a data set...");
 		output = new HTML("<h3>Select a variable and push the \"Update plot\" button.  :-)</h3>");
 		dates = dates.init("1990-01-01", "2000-01-01", 0, 0, 0, 0);
 		dates.render("dates", "YMDT", "YMDT");
@@ -82,10 +85,11 @@ public class TestUI extends LASEntryPoint {
 					LatLngBounds bounds = LatLngBounds.newInstance(LatLng.newInstance(grid_south, grid_west), LatLng.newInstance(grid_north, grid_east));
 					
 					refMap.setDataBounds(bounds, delta, true);
-					regions.setSelectedIndex(0);
+					refMap.getRegionWidget().setSelectedIndex(0);
 					mDatasetPanel.hide();
 					operationsWidget.setOperations(rpcService, null, selectedVariable.getDSID(), selectedVariable.getID(), operationsMenu);
 					showDateWidgets();
+					datasetLabel.setText(selectedVariable.getDSName()+": "+selectedVariable.getName());
 				}		
 			}
 			public void onTreeItemStateChanged(TreeItem item) {
@@ -96,61 +100,66 @@ public class TestUI extends LASEntryPoint {
 		});
 		
 		operationsWidget = new OperationsWidget();
-		operationsMenu = new OperationsMenu();
+		operationsMenu = new OperationsMenu(datasetCommand, plotCommand);
 		mDatasetPanel = new PopupPanel(false);
 		
 		popupGrid = new Grid(2, 1);		
-		chooseDataset = new Button("Choose a Dataset");
-		plot = new Button("Update plot");
-		plot.addClickListener(plotListener);
-		chooseDataset.addClickListener(new ClickListener() {
-			public void onClick(Widget sender) {
-				mDatasetPanel.setPopupPosition(sender.getAbsoluteLeft(), sender.getAbsoluteTop());
-				mDatasetPanel.show();			
-			}
-			
-		});
+		
 		close = new Button("close");
 		close.addClickListener(new ClickListener() {
 			public void onClick(Widget sender) {
 				mDatasetPanel.hide();			
 			}
 		});
-		refMap = new ReferenceMap(LatLng.newInstance(0.0, 0.0), 1, 720, 360);
-		regions = new RegionWidget(refMap);
+		refMap = new ReferenceMap(LatLng.newInstance(0.0, 0.0), 1, 370, 360);
+		
         dsWidget.init(rpcService);
         RootPanel.get("refmap").add(refMap);
         popupGrid.setWidget(0, 0, close);
         popupGrid.setWidget(1, 0, dsWidget);
         mDatasetPanel.add(popupGrid);
-        datasetAndPlotButtons = new Grid(1,2);
-        datasetAndPlotButtons.setWidget(0, 0, chooseDataset);
-        datasetAndPlotButtons.setWidget(0, 1, plot);
-        RootPanel.get("datasets").add(datasetAndPlotButtons);
-        RootPanel.get("regions").add(regions);
         RootPanel.get("operations").add(operationsWidget);
         RootPanel.get("operations_menu").add(operationsMenu);
+        RootPanel.get("dataset_info").add(datasetLabel);
         RootPanel.get("plot").add(output);
         RootPanel.get("z").add(zAndZlabel);
 	}
-	ClickListener plotListener = new ClickListener() {
+	Command datasetCommand = new Command() {
 
-		public void onClick(Widget sender) {
+		public void execute() {
+			
+			mDatasetPanel.setPopupPosition(operationsMenu.getAbsoluteLeft(), operationsMenu.getAbsoluteTop());
+			mDatasetPanel.show();	
+		}
+		
+	};
+	Command plotCommand = new Command() {
+
+		public void execute() {
 			output.setHTML("<img src=\"../JavaScript/components/mozilla_blu.gif\" alt=\"Spinner\"/>");
 			lasRequest.removeRegion(0);
 			lasRequest.removeVariables();
 			lasRequest.removePropertyGroup("ferret");
 			lasRequest.addVariable(selectedVariable.getDSID(), selectedVariable.getID());
 			OperationSerializable op = operationsWidget.getCurrentOp();
+			String view = operationsWidget.getCurrentView();
 			lasRequest.setOperation(op.getID(), "v7");
-			//TODO How do you get the view from the state?
-			lasRequest.setProperty("ferret", "view", "xy");
+			lasRequest.setProperty("ferret", "view", view);
+			
 			if ( selectedVariable.getGrid().getTAxis() != null ) {
-			    lasRequest.setRange("t", dates.getDate1_Ferret(), dates.getDate1_Ferret(), 0);
+				if ( view.contains("t") ) {
+					lasRequest.setRange("t", dates.getDate1_Ferret(), dates.getDate2_Ferret(), 0);
+				} else {
+					lasRequest.setRange("t", dates.getDate1_Ferret(), dates.getDate1_Ferret(), 0);
+				}			    
 			}
 			
-			lasRequest.setRange("x", refMap.getXlo(), refMap.getXhi(), 0);
-			lasRequest.setRange("y", refMap.getYlo(), refMap.getYhi(), 0);
+			if ( view.contains("x") ) {
+			   lasRequest.setRange("x", refMap.getXlo(), refMap.getXhi(), 0);
+			}
+			if ( view.contains("y") ) {
+			    lasRequest.setRange("y", refMap.getYlo(), refMap.getYhi(), 0);
+			}
 			if ( z.isVisible() ) {
 				lasRequest.setRange("z", z.getValue(z.getSelectedIndex()), z.getValue(z.getSelectedIndex()), 0);
 			}

@@ -26,6 +26,7 @@ public class OperationsWidget extends StackPanel {
 	boolean hasHofmullerPlots = false;
 	OperationSerializable[] ops;
 	OperationSerializable currentOp;
+	String currentView;
 	/**
 	 * Set up the StackPanel and the associated RPC.
 	 */
@@ -43,7 +44,7 @@ public class OperationsWidget extends StackPanel {
 		hofmullerPlots.add(new Label("Select a variable..."));
 		add(hofmullerPlots, "Hofmuller Plots");
 		
-		setWidth("240px");
+		setWidth("360px");
 	}
 	public void setOperations(RPCServiceAsync rpcService, String view, String dsID, String varID, OperationsMenu menu) {
 		this.opService = rpcService;
@@ -77,6 +78,7 @@ public class OperationsWidget extends StackPanel {
 									button.addClickListener(buttonListener);
 									button.setChecked(true);
 									currentOp = button.getOperation();
+									currentView = "xy";
 									xyMap.add(button);
 								} else if ( view.equals("x") || view.equals("y") || view.equals("z") || view.equals("t") ) {
 									if ( !hasLinePlots ) {
@@ -84,6 +86,7 @@ public class OperationsWidget extends StackPanel {
 										hasLinePlots = true;
 									}
 									OperationButton button = new OperationButton("op", op.getName()+" in "+view);
+									button.setView(view);
 									button.setOperation(op);
 									button.addClickListener(buttonListener);
 									linePlots.add(button);
@@ -94,6 +97,7 @@ public class OperationsWidget extends StackPanel {
 									}
 									OperationButton button = new OperationButton("op", op.getName()+" in "+view);
 									button.setOperation(op);
+									button.setView(view);
 									button.addClickListener(buttonListener);
 									sectionPlots.add(button);
 								} else if ( view.equals("xt") || view.equals("yt") || view.equals("zt") ) {
@@ -102,6 +106,7 @@ public class OperationsWidget extends StackPanel {
 										hasSectionPlots = true;
 									}
 									OperationButton button = new OperationButton("op", op.getName()+" in "+view);
+									button.setView(view);
 									button.setOperation(op);
 									button.addClickListener(buttonListener);
 									hofmullerPlots.add(button);
@@ -118,11 +123,12 @@ public class OperationsWidget extends StackPanel {
 			public void onClick(Widget sender) {
 				OperationButton button = (OperationButton) sender;
 				currentOp = button.getOperation();
+				currentView = button.getView();
 			}
         	
         };
 		public void onFailure(Throwable caught) {
-			Window.alert("Messed up with "+caught.getMessage());
+			// TODO Alert users...
 		}
 	};
 	public OperationSerializable[] getOperationsSerializable() {
@@ -130,5 +136,8 @@ public class OperationsWidget extends StackPanel {
 	}
 	public OperationSerializable getCurrentOp() {
 		return currentOp;
+	}
+	public String getCurrentView() {
+		return currentView;
 	}
 }
