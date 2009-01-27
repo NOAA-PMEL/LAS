@@ -24,13 +24,16 @@ import com.google.gwt.maps.client.overlay.Polygon;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.ClickListener;
+import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Grid;
+import com.google.gwt.user.client.ui.HasVerticalAlignment;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.ToggleButton;
 import com.google.gwt.user.client.ui.Widget;
 
-public class SelectControl extends CustomControl {
+public class SelectWidget extends Composite {
 	private MapWidget mMap;
 	private ReferenceMap refMap;
 	private LatLngBounds dataBounds;
@@ -41,51 +44,24 @@ public class SelectControl extends CustomControl {
 	private MarkerOptions mOptions;
 	private Icon mIcon;
 	boolean mDraw = false;
-	private Grid controls;
-	private boolean modulo;
-	TextBox southLat;
-	TextBox northLat;
-	TextBox westLon;
-	TextBox eastLon;
-	Label lonLabel;
-	Label latLabel;
-	NumberFormat latFormat;
-	NumberFormat lonFormat;
-
+	private HorizontalPanel controls;
+	private LatLonWidget textWidget = null;
 	double span;
 	double delta;
-
-	private static final String boxWidth = "70px";
-	public SelectControl (ControlPosition position, ReferenceMap refMap) {
-		super(position);
+    LatLng lastGoodPosition;
+	
+	public SelectWidget (ReferenceMap refMap) {
 		this.refMap = refMap;
-	}
-	@Override
-	protected Widget initialize(final MapWidget map) {
+	
 		String moduleRelativeURL = GWT.getModuleBaseURL();
 		String moduleName = GWT.getModuleName();
 		moduleRelativeURL = moduleRelativeURL.substring(0,moduleRelativeURL.indexOf(moduleName)-1);
 		moduleRelativeURL = moduleRelativeURL.substring(0,moduleRelativeURL.lastIndexOf("/")+1);
 		String imageURL = moduleRelativeURL + "images/";
-		latLabel = new Label("Lat:");
-		lonLabel = new Label("Lon:");
-
-		southLat = new TextBox();
-		northLat = new TextBox();
-
-		southLat.setWidth(boxWidth);
-		northLat.setWidth(boxWidth);
-
-		eastLon = new TextBox();
-		westLon = new TextBox();
-
-		eastLon.setWidth(boxWidth);
-		westLon.setWidth(boxWidth);
-
-		latFormat = NumberFormat.getFormat("###.##");
-		lonFormat = NumberFormat.getFormat("####.##");
-		mMap = map;
-		controls = new Grid(8,1);
+		
+		mMap = refMap.getMapWidget();
+		controls = new HorizontalPanel();
+		controls.setVerticalAlignment(HasVerticalAlignment.ALIGN_BOTTOM);
 		this.dataBounds = LatLngBounds.newInstance(LatLng.newInstance(0.0, 0.0), LatLng.newInstance(0.0, 0.0));
 		mSelection = new MapTool(dataBounds, dataBounds, "xy", false);
 		mIcon = Icon.newInstance();
@@ -102,7 +78,11 @@ public class SelectControl extends CustomControl {
 			public void onMouseDown(MarkerMouseDownEvent event) {
 				mDraw = true;
 				LatLng click = mDrawMarker.getLatLng();
+				mSelection.setClick(click);
+				lastGoodPosition = click;
 				LatLngBounds bounds = LatLngBounds.newInstance(click, click);
+				setSelectionBounds(bounds, false);
+				/*
 				mSelection.setEditingEnabled(false);
 				mMap.removeOverlay(mSelection.getPolygon());
 				for (Iterator markerIt = mSelection.getMarkers().iterator(); markerIt.hasNext();) {
@@ -118,42 +98,26 @@ public class SelectControl extends CustomControl {
 					mMap.addOverlay(marker);
 				}
 				mSelection.setEditingEnabled(true);
-				mSelection.setVisible(true);	
+				mSelection.setVisible(true);
+				*/	
 			}
 		});
 		mDrawMarker.addMarkerMouseUpHandler(new MarkerMouseUpHandler() {
 
 			public void onMouseUp(MarkerMouseUpEvent event) {
+				// Do nothing???!!!!
 				mSelect.setDown(false);
 				mDrawMarker.setVisible(false);
 				mMap.removeMapMouseMoveHandler(mouseMove);
 				mDraw = false;
-				mMap.setDraggable(true);
 				mSelection.setEditingEnabled(true);
 			}
 
 		});
 		mSelect = new ToggleButton("Select");
 		mSelect.addStyleName("map-button");
-		mSelect.addClickListener(new ClickListener() {
-			public void onClick(Widget sender) {
-				if ( refMap.getDataBounds() == null ) {
-					Window.alert("Please select a data set and variable.");
-					mSelect.setDown(false);
-				} else {
-					if (mSelect.isDown()) {
-						mSelection.setEditingEnabled(false);
-						mMap.removeOverlay(mSelection.getPolygon());
-						mMap.setDraggable(false);
-						mMap.addMapMouseMoveHandler(mouseMove);
-						mDrawMarker.setVisible(true);
-					} else {	          
-						mDrawMarker.setVisible(false);
-						//mMap.removeMapMouseMoveHandler(mouseMove);		           
-					}
-				}
-			}
-		});
+		mSelect.addClickListener(selectListener);
+				
 		mMap.addOverlay(mDrawMarker);
 		mDrawMarker.setVisible(false);
 		mMap.addOverlay(mSelection.getPolygon());
@@ -164,56 +128,64 @@ public class SelectControl extends CustomControl {
 		}
 		mSelection.setEditingEnabled(false);
 		selectAll = new Button("Select All");
-		selectAll.addClickListener(new ClickListener() {
-
-			public void onClick(Widget sender) {
-				if ( refMap.getDataBounds() == null ) {
-					Window.alert("Please select a data set and variable.");
-				} else {
-					setSelectionBounds(refMap.getDataBounds(), false);
+		selectAll.addStyleName("map-button");
+		selectAll.addClickListener(selectAllListener);
+		controls.add(mSelect);
+		controls.add(selectAll);
+		
+		initWidget(controls);
+	}
+	ClickListener selectListener = new ClickListener() {
+		public void onClick(Widget sender) {
+			if ( refMap.getDataBounds() == null ) {
+				Window.alert("Please select a data set and variable.");
+				mSelect.setDown(false);
+			} else {
+				if (mSelect.isDown()) {
+					mMap.addMapMouseMoveHandler(mouseMove);
+					mMap.setDraggable(false);
+				} else {	          
+					mMap.setDraggable(true);
+					mDrawMarker.setVisible(false);
+					mMap.removeMapMouseMoveHandler(mouseMove);		           
 				}
 			}
+		}
+	};
+	ClickListener selectAllListener = new ClickListener() {
 
-		});
-		controls.setWidget(0, 0, mSelect);
-		controls.setWidget(1, 0, selectAll);
-		controls.setWidget(2, 0, latLabel);
-		controls.setWidget(3, 0, northLat);
-		controls.setWidget(4, 0, southLat);
-		controls.setWidget(5, 0, lonLabel);
-		controls.setWidget(6, 0, westLon);
-		controls.setWidget(7, 0, eastLon);
-		return controls;
-	}
+		public void onClick(Widget sender) {
+			if ( refMap.getDataBounds() == null ) {
+				Window.alert("Please select a data set and variable.");
+			} else {
+				setSelectionBounds(refMap.getDataBounds(), false);
+			}
+		}
+
+	};
 	MapMouseMoveHandler mouseMove = new MapMouseMoveHandler() {
 
 		public void onMouseMove(MapMouseMoveEvent event) {
 			LatLng position = event.getLatLng();
-			LatLngBounds dataBounds = refMap.getDataBounds();
-			if ( dataBounds.containsLatLng(position)) {
+			if ( dataBounds.containsLatLng(position) && mDraw) {
 				mDrawMarker.setVisible(true);
 				mDrawMarker.setLatLng(position);
-				if ( mDraw ) {
-					mSelection.setEditingEnabled(false);
-					mMap.removeOverlay(mSelection.getPolygon());
-					mSelection.update(position);
-					mMap.addOverlay(mSelection.getPolygon());
-					setText();
-					mSelection.setEditingEnabled(true);
-					mSelection.setVisible(true);	
-				}
-			} else {
+				mSelection.update(position);
+				setText();
+			} else if ( !dataBounds.containsLatLng(position) && mDraw ){
+				mDrawMarker.setVisible(false);
+				mDrawMarker.setLatLng(lastGoodPosition);
+				mMap.setCenter(mSelection.selectionCenter);
+			} else if ( dataBounds.containsLatLng(position) && !mDraw ) {
+				mDrawMarker.setVisible(true);
+				mDrawMarker.setLatLng(position);
+			} else if ( !dataBounds.containsLatLng(position) && !mDraw ) {
 				mDrawMarker.setVisible(false);
 			}
 		}
 
 	};
 
-	@Override
-	public boolean isSelectable() {
-		// TODO Auto-generated method stub
-		return false;
-	}
 	public boolean isDown() {
 		return mSelect.isDown();
 	}
@@ -223,44 +195,10 @@ public class SelectControl extends CustomControl {
 	}
 
 	public void setText() {	
-		LatLng swPolyCorner = mSelection.getSelectionBounds().getSouthWest();
-		LatLng nePolyCorner = mSelection.getSelectionBounds().getNorthEast();
-		double slat = swPolyCorner.getLatitude();
-		String slat_f;
-		if ( slat <= 0.0 ) {
-			slat_f = latFormat.format(Math.abs(slat))+" S";
-		} else {
-			slat_f = latFormat.format(slat)+" N";
+		if ( textWidget != null ) {
+			textWidget.setText(mSelection.getSelectionBounds());
+		
 		}
-		southLat.setText(slat_f);
-		double nlat = nePolyCorner.getLatitude();
-		String nlat_f;
-		if ( nlat <= 0.0 ) {
-			nlat_f = latFormat.format(Math.abs(nlat))+" S";
-		} else {
-			nlat_f = latFormat.format(nlat)+" N";
-		}
-		northLat.setText(nlat_f);
-		double wlon = swPolyCorner.getLongitude();
-		double elon = nePolyCorner.getLongitude();
-		String wlon_f;
-		String elon_f;
-		if ( wlon < 0.0 ) {
-			wlon = wlon + 180.;
-			wlon_f = lonFormat.format(wlon)+" W";
-		} else {
-			wlon_f = lonFormat.format(wlon)+" E";
-		}
-		if ( elon < 0.0 ) {
-			elon = elon + 180;
-			elon_f = lonFormat.format(elon)+" W";
-		} else {
-			elon_f = lonFormat.format(elon)+" E";
-		}
-
-
-		westLon.setText(wlon_f);
-		eastLon.setText(elon_f);
 	}
 	public void clearOverlays() {
 		if ( mSelection != null ) {
@@ -316,7 +254,7 @@ public class SelectControl extends CustomControl {
 			this.type = type;
 			this.markers = new ArrayList<Marker>();
 			this.modulo = modulo;
-			SelectControl.this.dataBounds = dataBounds;
+			SelectWidget.this.dataBounds = dataBounds;
 			this.selectionBounds = selectionBounds;
 			this.selectionCenter = dataBounds.getCenter();
 			
@@ -504,59 +442,32 @@ public class SelectControl extends CustomControl {
 			double posLat = position.getLatitude();
 			double clickLon = click.getLongitude();
 			double clickLat = click.getLatitude();
-
-			while ( posLon <= 360. ) {
-				posLon = posLon + 360.;
-			}
-			while ( clickLon <= 360. ) {
-				clickLon = clickLon + 360.;
-			}
-
-			double west_lon;
-			double east_lon;
-			double north_lat;
-			double south_lat;
-			if ( posLat > clickLat && posLon > clickLon ) {
-
-				east_lon = posLon;
-				north_lat = posLat;
-
-				west_lon = clickLon;
-				south_lat = clickLat;
-
-			} else if ( posLat <= clickLat && posLon <= clickLon ) {
-
-				east_lon = clickLon;
-				north_lat = clickLat;
-
-				west_lon = posLon;
-				south_lat = posLat;
-
-			} else if ( posLat > clickLat && posLon <= clickLon ) {
-
-				east_lon = clickLon;
-				north_lat = posLat;
-
-				west_lon = posLon;
-				south_lat = clickLat;
-
-			} else {
-
-				east_lon = posLon;
-				north_lat = clickLat;
-
-				west_lon = clickLon;
-				south_lat = posLat;
-
-			}
-
-			if ( west_lon > east_lon ) {
-				east_lon = east_lon + 360.;
-			}
-			LatLng sw = LatLng.newInstance(south_lat, west_lon);
-			LatLng ne = LatLng.newInstance(north_lat, east_lon);
-			LatLngBounds rectBounds = LatLngBounds.newInstance(sw, ne);
-			setSelectionBounds(rectBounds, false);
+			double elon = dataBounds.getNorthEast().getLongitude();
+			double slat = dataBounds.getSouthWest().getLatitude();
+			double nlat = dataBounds.getNorthEast().getLatitude();
+			double wlon = dataBounds.getSouthWest().getLongitude();
+			LatLngBounds dragBoxSouthWest = LatLngBounds.newInstance(dataBounds.getSouthWest(), click);
+			LatLngBounds dragBoxNorthEast = LatLngBounds.newInstance(click, dataBounds.getNorthEast());
+			LatLngBounds dragBoxSouthEast = LatLngBounds.newInstance(LatLng.newInstance(slat, clickLon), LatLng.newInstance(clickLat, elon));
+			LatLngBounds dragBoxNorthWest = LatLngBounds.newInstance(LatLng.newInstance(clickLat, wlon), LatLng.newInstance(nlat, clickLon));
+			LatLngBounds rectBounds;
+			if ( dragBoxNorthEast.containsLatLng(position) ) {
+				rectBounds = LatLngBounds.newInstance(click, position);
+				setSelectionBounds(rectBounds, false);
+				lastGoodPosition = position;
+			} else if ( dragBoxSouthWest.containsLatLng(position) ) {
+			    rectBounds = LatLngBounds.newInstance(position, click);
+				setSelectionBounds(rectBounds, false);
+				lastGoodPosition = position;
+			} else if ( dragBoxSouthEast.containsLatLng(position) ) {
+				rectBounds = LatLngBounds.newInstance(LatLng.newInstance(posLat, clickLon), LatLng.newInstance(clickLat, posLon));
+			    setSelectionBounds(rectBounds, false);
+			    lastGoodPosition = position;
+			} else if ( dragBoxNorthWest.containsLatLng(position) ) {
+				rectBounds = LatLngBounds.newInstance(LatLng.newInstance(clickLat, posLon), LatLng.newInstance(posLat, clickLon));
+				setSelectionBounds(rectBounds, false);
+				lastGoodPosition = position;
+			} 
 		}
 		/**
 		 * @param click the click to set
@@ -611,7 +522,7 @@ public class SelectControl extends CustomControl {
 				Marker marker = event.getSender();
 				String title = marker.getTitle();
 				LatLng markerLocation = marker.getLatLng();
-				LatLngBounds containmentBounds = SelectControl.this.dataBounds;
+				LatLngBounds containmentBounds = SelectWidget.this.dataBounds;
 
 				LatLng sw = containmentBounds.getSouthWest();
 				LatLng ne = containmentBounds.getNorthEast();
@@ -720,7 +631,7 @@ public class SelectControl extends CustomControl {
 			}
 		};
         public void initSelectionBounds(LatLngBounds dataBounds, LatLngBounds selectionBounds, LatLng center) {
-        	SelectControl.this.dataBounds = dataBounds;
+        	SelectWidget.this.dataBounds = dataBounds;
         	setSelectionBounds(selectionBounds, false);
         	this.selectionCenter = center;
         }
@@ -770,5 +681,9 @@ public class SelectControl extends CustomControl {
 	}
 	public void setVisible(boolean visible) {
 		controls.setVisible(visible);
+	}
+
+	public void setLatLngWidget(LatLonWidget textWidget) {
+		this.textWidget = textWidget;
 	};		
 }

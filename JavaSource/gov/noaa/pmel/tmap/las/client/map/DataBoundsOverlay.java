@@ -7,7 +7,7 @@ import com.google.gwt.maps.client.overlay.Polygon;
 public class DataBoundsOverlay {
 	LatLng[] polygonPoints;
 	Polygon polygon;
-	String strokeColor = "#000000";
+	String strokeColor = "#FFFFFF";
 	int strokeWeight = 4;
 	float strokeOpacity = 1.0f;
 	String fillColor = "#FFFFFF";

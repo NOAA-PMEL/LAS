@@ -5,39 +5,34 @@ import com.google.gwt.maps.client.control.ControlPosition;
 import com.google.gwt.maps.client.control.Control.CustomControl;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.ClickListener;
+import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Grid;
+import com.google.gwt.user.client.ui.HasVerticalAlignment;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 
-public class RotateControl extends CustomControl {
+public class RotateWidget extends Composite {
 	
 	Button left;
-	Label label;
 	Button right;
-	Grid control;
+	HorizontalPanel control;
 	
-	public RotateControl (ControlPosition position) {
-		super(position);
-		control = new Grid(1,3);
+	public RotateWidget () {
+		control = new HorizontalPanel();
+		control.setVerticalAlignment(HasVerticalAlignment.ALIGN_BOTTOM);
 		left = new Button("<-");
+		left.addStyleName("map-button");
 		left.setTitle("Rotate west");
-        label = new Label("Rotate 90\u00B0");
+        //label = new Label("Rotate 90\u00B0");
         right = new Button("->");
+        right.addStyleName("map-button");
         right.setTitle("Rotate east");
-        control.setWidget(0, 0, left);
-        control.setWidget(0, 1, label);
-        control.setWidget(0, 2, right);
-	}
-	@Override
-	protected Widget initialize(MapWidget map) {		
-        return control;
-	}
-
-	@Override
-	public boolean isSelectable() {
-		// TODO Auto-generated method stub
-		return false;
+        control.add(left);
+        //control.setWidget(0, 1, label);
+        control.add(right);
+        initWidget(control);
 	}
 	public void addClickListener(ClickListener listener) {
     	left.addClickListener(listener);

@@ -20,20 +20,29 @@ import com.google.gwt.maps.client.geom.LatLngBounds;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.ClickListener;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.DockPanel;
+import com.google.gwt.user.client.ui.HasVerticalAlignment;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.DockPanel.DockLayoutConstant;
+import com.google.gwt.user.client.ui.HasVerticalAlignment.VerticalAlignmentConstant;
 
 public class ReferenceMap extends Composite {
+	DockPanel panel;
+	HorizontalPanel topControls;
+	HorizontalPanel bottomControls;
 	MaskOverlay maskOverlay = null;
 	DataBoundsOverlay dataBoundsOverlay = null;
-	SelectControl selectControl;
-	ResetControl resetControl;
-	RotateControl rotateControl;
+	SelectWidget selectWidget;
+	LatLonWidget textWidget;
+	ResetWidget resetWidget;
+	RotateWidget rotateWidget;
 	IconifyControl iconifyControl;
 	SmallMapControl smallMapControl = null;
 	LargeMapControl largeMapControl = null;
 	MapTypeControl mapTypeControl;
 	MapWidget mMap;
-	
+	RegionWidget regionWidget;
 	LatLng mCenter;
 	LatLngBounds dataBounds = LatLngBounds.newInstance(LatLng.newInstance(0.0, 0.0), LatLng.newInstance(0.0, 0.0));
 	
@@ -64,7 +73,11 @@ public class ReferenceMap extends Composite {
 	 * @param height
 	 */
 	public ReferenceMap (LatLng center, int zoom, int width, int height) {
-
+        panel = new DockPanel();
+        topControls = new HorizontalPanel();
+        topControls.setVerticalAlignment(HasVerticalAlignment.ALIGN_BOTTOM);
+        bottomControls = new HorizontalPanel();
+        bottomControls.setVerticalAlignment(HasVerticalAlignment.ALIGN_BOTTOM);
 		mCenter = center;
 		mZoom = zoom;
 		mMap = new MapWidget(mCenter, mZoom);    	
@@ -80,39 +93,48 @@ public class ReferenceMap extends Composite {
 		mWidth = width;
 		mHeight = height;
 		mMap.setSize(String.valueOf(mWidth)+"px", String.valueOf(mHeight)+"px");
-		selectControl = new SelectControl(new ControlPosition(ControlAnchor.TOP_RIGHT, 10 ,60), this);
-		if ( mHeight > 350 ) {
+		selectWidget = new SelectWidget(this);
+		textWidget = new LatLonWidget();
+		selectWidget.setLatLngWidget(textWidget);
+		if ( mHeight >9999 ) {
 			largeMapControl = new LargeMapControl();
 			mMap.addControl(largeMapControl);
 		} else {
 			smallMapControl = new SmallMapControl();
 			mMap.addControl(smallMapControl);
 		}
-		mapTypeControl = new MapTypeControl();
-		mMap.addControl(mapTypeControl);
-		resetControl = new ResetControl(new ControlPosition(ControlAnchor.TOP_RIGHT, 35 ,30), LatLng.newInstance(0.0, 0.0), 1);
-		mMap.addControl(resetControl);
-		resetControl.addClickListener(click);
-		rotateControl = new RotateControl(new ControlPosition(ControlAnchor.TOP_RIGHT, 10 ,290));
-		mMap.addControl(rotateControl);
-		rotateControl.setVisible(false);
+		mMap.setCurrentMapType(MapType.getHybridMap());
+		regionWidget = new RegionWidget(this);
+		resetWidget = new ResetWidget(this.mMap);
+		rotateWidget = new RotateWidget();
+		rotateWidget.addClickListener(rotate);
+		
+		rotateWidget.setVisible(false);
 		mMap.addMapDragEndHandler(new MapDragEndHandler() {
 			public void onDragEnd(MapDragEndEvent event) {
-				if ( selectControl.getSelectionBounds().containsLatLng(mMap.getCenter()) ) {
-				    selectControl.setSelectionCenter(mMap.getCenter());
+				if ( selectWidget.getSelectionBounds().containsLatLng(mMap.getCenter()) ) {
+				    selectWidget.setSelectionCenter(mMap.getCenter());
 				}
 			}		
-		});		
-		addControl(selectControl);		
+		});			
 		iconifyControl = new IconifyControl(new ControlPosition(ControlAnchor.TOP_RIGHT, 10, 30), this);
 		addControl(iconifyControl);
-		initWidget(mMap);
+		topControls.add(regionWidget);
+		topControls.add(selectWidget);
+		topControls.add(resetWidget);
+		topControls.add(rotateWidget);
+		bottomControls.add(textWidget);
+		panel.add(topControls, DockPanel.NORTH);
+		panel.add(bottomControls, DockPanel.SOUTH);
+		panel.add(mMap, DockPanel.CENTER);
+		initWidget(panel);
     }
     public void addControl(Control control) {
     	mMap.addControl(control);
     }
     public void setDataBounds(LatLngBounds dataBounds, double delta, boolean selection) {
     	modulo = false;
+    	resetWidget.setDataBounds(dataBounds);
     	this.dataBounds = dataBounds;
     	double lon_span = dataBounds.toSpan().getLongitude();
 		if ( dataBounds.isFullLongitude() || lon_span + 2.*delta >= 360.0 ) {
@@ -126,31 +148,20 @@ public class ReferenceMap extends Composite {
     		}
     		dataBoundsOverlay = new DataBoundsOverlay(dataBounds);
     		mMap.addOverlay(dataBoundsOverlay.getPolygon());
-    		selectControl.initSelectionBounds(dataBounds, dataBounds, dataBounds.getCenter());
-    		selectControl.setEditingEnabled(true);
+    		selectWidget.initSelectionBounds(dataBounds, dataBounds, dataBounds.getCenter());
+    		selectWidget.setEditingEnabled(true);
     		int zoom = mMap.getBoundsZoomLevel(dataBounds);
     		mMap.setZoomLevel(zoom);
     		mMap.setCenter(dataBounds.getCenter());
-    		resetControl.setSelectionBounds(dataBounds);  	  		
+    		resetWidget.setSelectionBounds(dataBounds);  	  		
     	}
     	if ( modulo ) {
-			rotateControl.setVisible(true);
+			rotateWidget.setVisible(true);
 		} else {
-			rotateControl.setVisible(false);
+			rotateWidget.setVisible(false);
 		}
     }
 	
-	ClickListener click = new ClickListener() {
-		public void onClick(Widget sender) {
-			if ( dataBounds == null ) {
-				Window.alert("Please select a data set and variable.");
-			} else {
-				for ( int i = 0; i < 3; i++) {
-					reset();
-				}
-			}
-		}
-	};
 	ClickListener rotate = new ClickListener() {
 
 		public void onClick(Widget sender) {
@@ -178,15 +189,13 @@ public class ReferenceMap extends Composite {
 		setDataBounds(dataBounds, delta, true);
 	}
 	private void reset() {
-		int zoom = mMap.getBoundsZoomLevel(dataBounds);
-		mMap.setZoomLevel(zoom);
-		mMap.setCenter(dataBounds.getCenter());
+		
 	}
 	public boolean isModulo() {
 		return modulo;
 	}
 	public void setSelectionBounds(LatLngBounds bounds, boolean recenter) {
-		selectControl.setSelectionBounds(bounds, recenter);
+		selectWidget.setSelectionBounds(bounds, recenter);
 	}
 	
 	public LatLngBounds getDataBounds() {
@@ -205,14 +214,14 @@ public class ReferenceMap extends Composite {
 		mMap.setCenter(center);
 	}
 	public void hideControls() {
-		if ( selectControl != null ) {
-			selectControl.setVisible(false);
+		if ( selectWidget != null ) {
+			selectWidget.setVisible(false);
 		}
-		if ( resetControl != null ) {
-			resetControl.setVisible(false);
+		if ( resetWidget != null ) {
+			resetWidget.setVisible(false);
 		}
-		if ( rotateControl != null ) {
-			rotateControl.setVisible(false);
+		if ( rotateWidget != null ) {
+			rotateWidget.setVisible(false);
 		}
 		if ( largeMapControl != null ) {
 			mMap.removeControl(largeMapControl);
@@ -225,14 +234,14 @@ public class ReferenceMap extends Composite {
 		}
 	}
 	public void showControls() {
-		if ( selectControl != null ) {
-			selectControl.setVisible(true);
+		if ( selectWidget != null ) {
+			selectWidget.setVisible(true);
 		}
-		if ( resetControl != null ) {
-			resetControl.setVisible(true);
+		if ( resetWidget != null ) {
+			resetWidget.setVisible(true);
 		}
-		if ( rotateControl != null ) {
-			rotateControl.setVisible(true);
+		if ( rotateWidget != null ) {
+			rotateWidget.setVisible(true);
 		}
 		if ( largeMapControl != null ) {
 			mMap.addControl(largeMapControl);
@@ -248,25 +257,27 @@ public class ReferenceMap extends Composite {
 		mMap.setSize(String.valueOf(mWidth)+"px", String.valueOf(mHeight)+"px");		
 	}
 	public String getXlo() {
-		double xwest = selectControl.getSelectionBounds().getSouthWest().getLongitude();
+		double xwest = selectWidget.getSelectionBounds().getSouthWest().getLongitude();
 		if ( xwest < 0.0 ) {
 			xwest = xwest + 360.;
 		}
 		return String.valueOf(xwest);
 	}
 	public String getXhi() {
-		double xwest = selectControl.getSelectionBounds().getSouthWest().getLongitude();
-		double xeast = selectControl.getSelectionBounds().getNorthEast().getLongitude();
+		double xwest = selectWidget.getSelectionBounds().getSouthWest().getLongitude();
+		double xeast = selectWidget.getSelectionBounds().getNorthEast().getLongitude();
 		if ( xeast <= 0.0 || xeast < xwest ) {
 			xeast = xeast + 360.;
 		}
 		return String.valueOf(xeast);
 	}
 	public String getYlo() {
-		return String.valueOf(selectControl.getSelectionBounds().getSouthWest().getLatitude());
+		return String.valueOf(selectWidget.getSelectionBounds().getSouthWest().getLatitude());
 	}
 	public String getYhi() {
-		return String.valueOf(selectControl.getSelectionBounds().getNorthEast().getLatitude());
+		return String.valueOf(selectWidget.getSelectionBounds().getNorthEast().getLatitude());
 	}
-	
+	public RegionWidget getRegionWidget() {
+		return regionWidget;
+	}
 }

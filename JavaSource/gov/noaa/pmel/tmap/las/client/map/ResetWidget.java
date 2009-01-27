@@ -1,48 +1,37 @@
 package gov.noaa.pmel.tmap.las.client.map;
 
 import com.google.gwt.maps.client.MapWidget;
-import com.google.gwt.maps.client.control.ControlPosition;
-import com.google.gwt.maps.client.control.Control.CustomControl;
 import com.google.gwt.maps.client.geom.LatLng;
 import com.google.gwt.maps.client.geom.LatLngBounds;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.ClickListener;
+import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 
-public class ResetControl extends CustomControl {
+public class ResetWidget extends Composite {
     LatLng mCenter;
     int mZoom;
     Button resetButton;
-    String gridID;
+    LatLngBounds dataBounds;
 	private MapWidget mMap;
-	public ResetControl (ControlPosition position, LatLng center, int zoom) {
-		super(position);
-		mCenter = center;
-		mZoom = zoom;
+	public ResetWidget (MapWidget map) {
+		this.mMap = map;
+		this.resetButton = new Button("Reset");
+		this.resetButton.addStyleName("map-button");
+		this.resetButton.addClickListener(click);
+		initWidget(resetButton);
 	}
-	
-	@Override
-	protected Widget initialize(final MapWidget map) {
-		mMap = map;
-		resetButton = new Button("Reset");
-		resetButton.addStyleName("map-button");
-		/*
-		resetButton.addClickListener(new ClickListener() {
-			public void onClick(Widget sender) {
-				map.setCenter(mCenter);
-				map.setZoomLevel(mZoom);
-				
+	ClickListener click = new ClickListener() {
+		public void onClick(Widget sender) {
+			if ( dataBounds == null ) {
+				Window.alert("Please select a variable.");
 			}
-		});
-		*/
-		return resetButton;
-	}
-    
-	@Override
-	public boolean isSelectable() {
-		// TODO Auto-generated method stub
-		return false;
-	}
+			int zoom = mMap.getBoundsZoomLevel(dataBounds);
+			mMap.setZoomLevel(zoom);
+			mMap.setCenter(dataBounds.getCenter());	
+		}
+	};
 	/**
 	 * @return the mCenter
 	 */
@@ -70,11 +59,6 @@ public class ResetControl extends CustomControl {
     public void addClickListener(ClickListener listener) {
     	resetButton.addClickListener(listener);
     }
-
-	public void setGridID(String id) {
-		gridID = id;
-	}
-
 	public void setSelectionBounds(LatLngBounds dataBounds) {
 		
 		setCenter(dataBounds.getCenter());
@@ -83,5 +67,9 @@ public class ResetControl extends CustomControl {
 	}
 	public void setVisible(boolean visible) {
 		resetButton.setVisible(visible);
+	}
+	public void setDataBounds(LatLngBounds dataBounds) {
+		this.dataBounds = dataBounds;
+		
 	}
 }
