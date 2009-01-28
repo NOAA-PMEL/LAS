@@ -164,6 +164,10 @@ IF `($data_count"0") GT 1` THEN
    PPL PLOT
    GO LAS_url_label `($data_count)-1`
 ELSE
+   DEFINE SYMBOL split_title = ($ferret_title_0)
+   GO LAS_split_title
+   DEFINE SYMBOL ferret_title_0 = ($split_title)
+
    PLOT($qualifiers)/NOKEY/SET/TITLE="($ferret_title_0)" ($plot_arg)
       IF ($xform_dms"0|*>1") THEN PPL XFOR (($xform_dms))
       IF `($ferret_dep_axis_scale"0|*>1")` THEN PPL XAXIS ($ferret_dep_axis_scale)
