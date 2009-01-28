@@ -142,6 +142,10 @@ ENDIF
 ! If there is just one variable, draw the plot and we are done
 
 IF `($data_count"0") EQ 1` THEN
+   DEFINE SYMBOL split_title = ($ferret_plot_title)
+   GO LAS_split_title
+   DEFINE SYMBOL ferret_plot_title = ($split_title)
+
    IF ($shade_underlay) THEN 
       SHADE($qualifiers)/TRIM/TITLE="($ferret_plot_title)"/SET ($ferret_var_0)
          IF ($axlab_command"0|*>1") THEN PPL ($axlab_command)
