@@ -82,6 +82,7 @@ public class SelectWidget extends Composite {
 				lastGoodPosition = click;
 				LatLngBounds bounds = LatLngBounds.newInstance(click, click);
 				setSelectionBounds(bounds, false);
+				mMap.setDraggable(false);
 				/*
 				mSelection.setEditingEnabled(false);
 				mMap.removeOverlay(mSelection.getPolygon());
@@ -102,18 +103,8 @@ public class SelectWidget extends Composite {
 				*/	
 			}
 		});
-		mDrawMarker.addMarkerMouseUpHandler(new MarkerMouseUpHandler() {
-
-			public void onMouseUp(MarkerMouseUpEvent event) {
-				// Do nothing???!!!!
-				mSelect.setDown(false);
-				mDrawMarker.setVisible(false);
-				mMap.removeMapMouseMoveHandler(mouseMove);
-				mDraw = false;
-				mSelection.setEditingEnabled(true);
-			}
-
-		});
+		mDrawMarker.addMarkerMouseUpHandler(markerMouseUpHandler);
+		
 		mSelect = new ToggleButton("Select");
 		mSelect.addStyleName("map-button");
 		mSelect.addClickListener(selectListener);
@@ -135,6 +126,22 @@ public class SelectWidget extends Composite {
 		
 		initWidget(controls);
 	}
+	MarkerMouseUpHandler markerMouseUpHandler = new MarkerMouseUpHandler() {
+
+		public void onMouseUp(MarkerMouseUpEvent event) {
+			if ( mMap.getZoomLevel() == refMap.getZoom() && refMap.isModulo() ) {
+				mMap.setDraggable(false);
+			} else {
+			    mMap.setDraggable(true);
+			}
+			mSelect.setDown(false);
+			mDrawMarker.setVisible(false);
+			mMap.removeMapMouseMoveHandler(mouseMove);
+			mDraw = false;
+			mSelection.setEditingEnabled(true);
+		}
+
+	};
 	ClickListener selectListener = new ClickListener() {
 		public void onClick(Widget sender) {
 			if ( refMap.getDataBounds() == null ) {
@@ -173,7 +180,7 @@ public class SelectWidget extends Composite {
 			} else if ( !dataBounds.containsLatLng(position) && mDraw ){
 				mDrawMarker.setVisible(false);
 				mDrawMarker.setLatLng(lastGoodPosition);
-				mMap.setCenter(mSelection.selectionCenter);
+				//mMap.setCenter(mSelection.selectionCenter);
 			} else if ( dataBounds.containsLatLng(position) && !mDraw ) {
 				mDrawMarker.setVisible(true);
 				mDrawMarker.setLatLng(position);
@@ -515,8 +522,9 @@ public class SelectWidget extends Composite {
 
 		MarkerDragHandler markerDragHandler = new MarkerDragHandler() {
 			public void onDrag(MarkerDragEvent event) {
-                
-				mMap.setCenter(selectionCenter);
+                if ( mMap.getZoomLevel() == refMap.getZoom() ) {
+				    mMap.setCenter(dataBounds.getCenter());
+                }
 				Marker marker = event.getSender();
 				String title = marker.getTitle();
 				LatLng markerLocation = marker.getLatLng();
@@ -585,9 +593,12 @@ public class SelectWidget extends Composite {
 						double elon = markerLocation.getLongitude() + lon_span/2.0;
 						LatLngBounds rectBounds = LatLngBounds.newInstance(LatLng.newInstance(slat, wlon), LatLng.newInstance(nlat, elon));
 						setSelectionBounds(rectBounds, false);
-						mMap.setCenter(selectionCenter);
+						if ( mMap.getZoomLevel() == refMap.getZoom() ) {
+						    mMap.setCenter(dataBounds.getCenter());
+						}
+						lastGoodPosition = rectBounds.getCenter();
 					} else {
-						centerMarker.setLatLng(mSelection.getSelectionBounds().getCenter());
+						centerMarker.setLatLng(lastGoodPosition);
 					}
 					
 				} else {
@@ -603,7 +614,10 @@ public class SelectWidget extends Composite {
 						*/
 						LatLngBounds rectBounds = LatLngBounds.newInstance(sw, ne);
 						setSelectionBounds(rectBounds, false);
-						mMap.setCenter(selectionCenter);
+						// Always leave the map in the data center when it's at the initial zoom level.
+						if ( mMap.getZoomLevel() == refMap.getZoom() ) {
+						    mMap.setCenter(dataBounds.getCenter());
+						} 
 					} else {
 						if ( title.equals("sw") ) {
 							swMarker.setLatLng(mSelection.getSelectionBounds().getSouthWest());
@@ -621,9 +635,7 @@ public class SelectWidget extends Composite {
 							seMarker.setLatLng(LatLng.newInstance(mSelection.getSelectionBounds().getSouthWest().getLatitude(), mSelection.getSelectionBounds().getNorthEast().getLongitude()));
 						} else if ( title.equals("sw_se") ) {
                             sw_seMarker.setLatLng(LatLng.newInstance(mSelection.getSelectionBounds().getSouthWest().getLatitude(), mSelection.getSelectionBounds().getCenter().getLongitude()));
-						} else if ( title.equals("center") ) {
-
-						}
+						} 
 					}
 				}
 			}
