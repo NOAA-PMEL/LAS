@@ -49,8 +49,6 @@ public class ReferenceMap extends Composite {
 	int mZoom;
 	int mWidth;   // Width in pixels 
 	int mHeight;  // Height in pixels
-	double current_margin_x;
-	double current_margin_y;
 	double margin_x;
 	double margin_y;
 	LatLng initial_map_center;
@@ -84,10 +82,16 @@ public class ReferenceMap extends Composite {
 		mMap.addMapZoomEndHandler(new MapZoomEndHandler() {
 
 			public void onZoomEnd(MapZoomEndEvent event) {
-				int zoom_factor = (event.getNewZoomLevel() - mZoom) + 1;
-				double denominator = Double.valueOf(zoom_factor).doubleValue()*2.0;
-				current_margin_x = margin_x/denominator;
-				current_margin_y = margin_y/denominator;
+				int nzoom = event.getNewZoomLevel();
+				if ( nzoom == mZoom ) {
+					mMap.setDraggable(false);
+					mMap.setCenter(dataBounds.getCenter());
+				} else if ( nzoom > mZoom ){
+					mMap.setDraggable(true);
+				} else {
+					mMap.setDraggable(false);
+				}
+				
 			}
 		});
 		mWidth = width;
@@ -139,6 +143,7 @@ public class ReferenceMap extends Composite {
     	double lon_span = dataBounds.toSpan().getLongitude();
 		if ( dataBounds.isFullLongitude() || lon_span + 2.*delta >= 360.0 ) {
 			modulo = true;
+			mMap.setDraggable(false);
 		}
     	this.delta = delta;
     	// Set data selection rectangle to the data bounds
@@ -150,8 +155,8 @@ public class ReferenceMap extends Composite {
     		mMap.addOverlay(dataBoundsOverlay.getPolygon());
     		selectWidget.initSelectionBounds(dataBounds, dataBounds, dataBounds.getCenter());
     		selectWidget.setEditingEnabled(true);
-    		int zoom = mMap.getBoundsZoomLevel(dataBounds);
-    		mMap.setZoomLevel(zoom);
+    		mZoom = mMap.getBoundsZoomLevel(dataBounds);
+    		mMap.setZoomLevel(mZoom);
     		mMap.setCenter(dataBounds.getCenter());
     		resetWidget.setSelectionBounds(dataBounds);  	  		
     	}
@@ -279,5 +284,8 @@ public class ReferenceMap extends Composite {
 	}
 	public RegionWidget getRegionWidget() {
 		return regionWidget;
+	}
+	public int getZoom() {
+		return mZoom;
 	}
 }
