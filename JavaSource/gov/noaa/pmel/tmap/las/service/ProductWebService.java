@@ -65,7 +65,14 @@ public class ProductWebService extends ProductService {
             call.addParameter( "lasBackendRequest", org.apache.axis.encoding.XMLType.XSD_STRING, ParameterMode.IN );
             call.addParameter( "outputFileName", org.apache.axis.encoding.XMLType.XSD_STRING, ParameterMode.IN );
             call.setReturnType( org.apache.axis.encoding.XMLType.XSD_STRING );
-
+            // TODO set this time out value to be larger than the backend product time out...
+            
+            long t = lasBackendRequest.getProductTimeout();
+            if ( t > timeout ) {
+            	call.setTimeout((int)t*1000 + (int)t/10);
+            } else {
+               call.setTimeout(timeout*1000);
+            }
             try {
                 responseXML = (String) call.invoke( new Object[] {lasBackendRequest.toString(), outputFileName} );
             } catch (RemoteException e) {
