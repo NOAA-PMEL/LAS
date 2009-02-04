@@ -1150,12 +1150,18 @@ public class LASBackendRequest extends LASDocument {
      * @param time the formatted time string
      * @param time_units the UDUNITS-style units string
      * @return the double value representing the time
+     * @throws Exception 
      */
-    public double getDatabaseTimeAsDouble(String time, String time_units) {
+    public double getDatabaseTimeAsDouble(String time, String time_units) throws LASException {
         
         DateTimeFormatter short_fmt = DateTimeFormat.forPattern("dd-MMM-yyyy").withZone(DateTimeZone.UTC);
         DateTimeFormatter long_fmt = DateTimeFormat.forPattern("dd-MMM-yyyy HH:mm:ss").withZone(DateTimeZone.UTC);
-        DateUnit dateUnit = (DateUnit) SimpleUnit.factory(time_units);
+        DateUnit dateUnit;
+		try {
+			dateUnit = new DateUnit(time_units);
+		} catch (Exception e) {
+			throw new LASException(e.toString());
+		}
         
      
         DateTime dt;
@@ -1454,7 +1460,7 @@ public class LASBackendRequest extends LASDocument {
             List properties = group.getChildren("property");
             for (Iterator pIt = properties.iterator(); pIt.hasNext();) {
                 Element property = (Element) pIt.next();
-                if (property.getChildTextTrim("name").equals("product_timeout")) {
+                if (property.getChildTextTrim("name").equals("ps_timeout")) {
                     String timeoutString = property.getChildTextTrim("value");
                     long time = Long.valueOf(timeoutString).longValue();
                     if ( time > timeout ) {
