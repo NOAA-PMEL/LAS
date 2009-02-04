@@ -30,7 +30,7 @@ public class ProductService {
     protected String serverURL;
     protected String methodName;
     protected String outputFileName;
-    
+    protected int timeout = 120;
     protected String responseXML;
     public VelocityEngine ve = new VelocityEngine();
     Map toolboxContext;
@@ -119,5 +119,8 @@ public class ProductService {
     }
     public Map getToolboxContext() {
         return toolboxContext;
+    }
+    public void setTimeout(int t) {
+    	timeout = t;
     }
 }
