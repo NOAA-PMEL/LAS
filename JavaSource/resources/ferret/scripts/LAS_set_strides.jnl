@@ -18,7 +18,8 @@
 
 ! If the operation is writing a netCDF file, that is done in chunks. Do not use strides
 
-IF `STRINDEX( "($operation_ID)", "Data_Extract" ) NE 0` THEN EXIT/SCRIPT
+IF `(STRINDEX( "($operation_ID)", "Data_Extract" ) NE 0) AND \
+    (STRINDEX( "($result_ferret_listing_type)", "netcdf" ) NE 0)` THEN EXIT/SCRIPT
 
 ! See LAS_set_strides_curvilinear for first cut on dealing with strides and curvi data.
 ! If it is a native curvilinear plot then LAS_set_strides_curvilinear has been called.
