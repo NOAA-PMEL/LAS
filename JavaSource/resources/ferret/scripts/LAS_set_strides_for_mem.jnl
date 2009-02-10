@@ -1,10 +1,9 @@
 !LAS_set_strides_for_mem.jnl
 ! Called by LAS_set_strides.jnl
 
-
 IF `($stride_for_mem"0") GT 1` THEN
    IF `($region_x_range"0|*>1") GT 0` THEN
-      IF ($no_native_strides_xy"0|*>1") NE 1` THEN 
+      IF `($no_native_strides_xy"0|*>1") NE 1` THEN 
       SET AXIS/STRIDE=($stride_for_mem) `pvar,RETURN=xaxis`
       ELSE
       DEFINE SYMBOL add_to_title = Stride ($stride_for_mem) in X
