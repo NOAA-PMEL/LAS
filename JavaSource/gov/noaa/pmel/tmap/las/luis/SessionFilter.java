@@ -378,8 +378,13 @@ public class SessionFilter implements Filter {
 
   boolean checkSession(HttpServletRequest req, HttpServletResponse resp)
     throws ServletException, IOException{
-
-    	ResourceBundle bundle = null;
+	  
+	   if (isExcludedUrl(req)){
+	      setupTemplateContext(req);
+	      return true;
+	    }
+    	
+	    ResourceBundle bundle = null;
     	try {
     		bundle = ResourceBundle.getBundle("las");
     		String host = (String) bundle.getObject("las.db.host");
@@ -396,11 +401,6 @@ public class SessionFilter implements Filter {
     	  resp.sendRedirect("../");
           return false;
       }
-
-    if (isExcludedUrl(req)){
-      setupTemplateContext(req);
-      return true;
-    }
 
     if (needsFakeContext(req)){
 
