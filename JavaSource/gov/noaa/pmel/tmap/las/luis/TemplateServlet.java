@@ -173,11 +173,11 @@ public class TemplateServlet extends VelocityServlet
 			   req.getRequestURI());
 	  } else {
             String path = req.getContextPath() + req.getServletPath();
-            if ( path.indexOf("servlets") > 0 ) {
+            if ( path.indexOf("v6") > 0 ) {
                resp.sendRedirect(path + "/dataset");
             }
             else {
-               resp.sendRedirect(path + "/servlets/dataset");
+               resp.sendRedirect(path + "/v6/dataset");
             }
 	  }
 	  return null;
