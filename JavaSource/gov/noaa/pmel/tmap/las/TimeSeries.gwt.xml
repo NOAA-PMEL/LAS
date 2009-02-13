@@ -14,6 +14,7 @@
 
       <!-- Other module inherits                                      -->
       <inherits name="com.google.gwt.maps.GoogleMaps" />
+      <inherits name="com.google.gwt.xml.XML" />
       <script src="http://maps.google.com/maps?file=api&amp;v=2.x&amp;key=ABQIAAAAQd8QHM5bG96kv_FdbP2d_xTg3JrA53tnuuEXhHbNujhDPNiVUhQoOZ0saXCA5A_Y3F0I90EmP
 mTTxw"/>
 
