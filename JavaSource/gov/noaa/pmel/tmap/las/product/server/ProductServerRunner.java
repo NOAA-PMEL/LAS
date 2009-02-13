@@ -235,8 +235,10 @@ public class ProductServerRunner  extends Thread  {
                             setError(session, "Error parsing the XML response file from the cache.", e.toString());
                             break;
                         }
-                    }
-                    isHit = cache.cacheHit(lasResponse);
+                        isHit = cache.cacheHit(lasResponse);
+                    } else {
+                    	isHit = false;
+                    }                
                 } else {
                     log.debug("Cache use is \"off\" for this request.");
                     isHit = false;
@@ -330,7 +332,7 @@ public class ProductServerRunner  extends Thread  {
                     log.info("Request cancelled:"+backendRequestDocument.toCompactString());
                     break;
                 }
-                if ( !isHit && !hit) {
+                if ( !hit ) {
                     // Not a cache hit so add response.  Otherwise the response is complete.
                     compoundResponse.merge(lasResponse);
                 }
@@ -353,8 +355,13 @@ public class ProductServerRunner  extends Thread  {
         String productCacheKey = productRequest.getCacheKey();
         String responseFileName = lasConfig.getOutputDir()+File.separator+productCacheKey+"_response.xml";
         if ( productRequest.getUseCache() && !previous_batch_error && ((!batch && !error) || batch) ) {
-            cache.addToCache(compoundResponse, responseFileName);
-            cache.addDocToCache(productRequest.getLasRequest(), requestFileName);
+        	synchronized (cache) {    
+        		if ( !hit ) {
+        			// If there was no "global" cache hit, this must be recorded.  Otherwise, it came out of the cache.
+                    cache.addToCache(compoundResponse, responseFileName);
+                    cache.addDocToCache(productRequest.getLasRequest(), requestFileName);
+        		}
+        	}
         }
 
         stillWorking=false;

@@ -248,13 +248,13 @@ public class Cache extends LinkedHashMap<String, File> implements Serializable{
     
     public void addToCache(LASBackendResponse lasResponse, String cacheFileName) {   
         if (lasResponse != null) {
+        	boolean hasResults = false;
             Element responseRoot = lasResponse.getRootElement();
             List responses = responseRoot.getChildren();
             for (Iterator respIt = responses.iterator(); respIt.hasNext();) {
                 Element responseE = (Element) respIt.next();
                 List results = responseE.getChildren("result");
                 String resultFileName = "";
-                File responseCacheFile = new File(cacheFileName);
                 for (Iterator rIt = results.iterator(); rIt.hasNext();) {
                     Element result = (Element) rIt.next();
                     if (!result.getAttributeValue("type").equals("error")) {
@@ -264,16 +264,16 @@ public class Cache extends LinkedHashMap<String, File> implements Serializable{
                         if (!resultFileName.startsWith("http://")) {
                             File resultFile = new File(resultFileName);
                             if ( resultFile.exists() ) {
+                            	hasResults = true;
                                 this.addFile(resultFileName, resultFile);
                             }
                         }
                     }
-                    lasResponse.write(responseCacheFile);
-                    currentBytes = currentBytes + responseCacheFile.length();
-                    this.addFile(cacheFileName, responseCacheFile);
-
                 }
-            }    
+            }
+            if ( hasResults ) {
+                addDocToCache(lasResponse, cacheFileName);
+            }
         }
     }
     public void addDocToCache ( LASDocument doc, String cacheFileName) {
