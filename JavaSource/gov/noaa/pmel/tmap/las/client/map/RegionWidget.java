@@ -75,19 +75,29 @@ public class RegionWidget extends ListBox {
     ChangeListener regionChange = new ChangeListener() {
 		public void onChange(Widget sender) {
 			LatLngBounds region = getBounds();
-			boolean changed = false;
+			
 			if ( region != null ) {
 				int trys = 0;
 				while ( trys < 3 ) {
 					if ( refMap.getDataBounds().containsBounds(region) ) {
-						
+						// TODO.. Make this work just like the change when setting the center in the center widget for a modulo axis.
 						if ( refMap.isModulo() ) {
 							int zoom = refMap.getBoundsZoomLevel(region);
-							refMap.setZoom(zoom);
+							LatLngBounds dBounds = refMap.getDataBounds();
+							double nlat = dBounds.getNorthEast().getLatitude();
+							double slat = dBounds.getSouthWest().getLatitude();
+							double clon = region.getCenter().getLongitude();
+							double wlon = clon - 180;
+							double elon = clon + 179;
+							LatLng sw = LatLng.newInstance(slat, wlon);
+							LatLng ne = LatLng.newInstance(nlat, elon);
+							LatLngBounds bounds = LatLngBounds.newInstance(sw, ne);
+							refMap.setDataBounds(bounds, refMap.getDelta(), true);
 							refMap.setCenter(region.getCenter());
+							refMap.setZoom(zoom);
 						}
-						refMap.setSelectionBounds(region, true);
-						changed = true;
+						refMap.setSelectionBounds(region, true, true);
+						
 						break;
 					} else {
 						if ( refMap.isModulo() ){
@@ -99,9 +109,9 @@ public class RegionWidget extends ListBox {
 					}		
 				}
 			}
-			if ( !changed ) {
-				setSelectedIndex(0);
-			}
+			
+			setSelectedIndex(0);
+			
 		}	
 	};
 }

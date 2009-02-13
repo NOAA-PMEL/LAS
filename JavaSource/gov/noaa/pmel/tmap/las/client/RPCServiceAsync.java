@@ -2,7 +2,7 @@ package gov.noaa.pmel.tmap.las.client;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
-interface RPCServiceAsync {
+public interface RPCServiceAsync {
 	public void getCategories(String id, AsyncCallback categoryCallback);
     public void getGrid(String dsid, String varid, AsyncCallback gridCallback);
     public void getOperations(String view, String dsid, String varid, AsyncCallback opCallback);

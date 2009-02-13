@@ -111,6 +111,7 @@ public class Axis extends Container implements AxisInterface {
     }
     public AxisSerializable getAxisSerializable() {
 		AxisSerializable a = new AxisSerializable();
+		a.setType(getType());
 		a.setID(getID());
 		a.setHi(getHi());
 		a.setID(getID());
@@ -118,13 +119,16 @@ public class Axis extends Container implements AxisInterface {
 		a.setName(getName());
 		a.setAttributes(getAttributesAsMap());
 		if (hasV()) {
-			Map v = new HashMap();
 			ArrayList<NameValuePair> vlist = getVerticies();
+			String[] names = new String[vlist.size()];
+			String[] values = new String[vlist.size()];
 			for (int i = 0; i < vlist.size(); i++) {
 				NameValuePair p = vlist.get(i);
-				v.put(p.getName(), p.getValue());
+				names[i] = p.getName();
+				values[i] = p.getValue();
 			}
-			a.setV(v);
+			a.setNames(names);
+			a.setValues(values);
 		} else {
 			a.setArangeSerializable(getArange().getArangeSerializable());
 		}

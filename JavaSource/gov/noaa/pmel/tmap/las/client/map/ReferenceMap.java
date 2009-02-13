@@ -1,51 +1,52 @@
 package gov.noaa.pmel.tmap.las.client.map;
 
-import gov.noaa.pmel.tmap.las.client.GridSerializable;
-
+import com.google.gwt.maps.client.Copyright;
+import com.google.gwt.maps.client.CopyrightCollection;
 import com.google.gwt.maps.client.MapType;
-import com.google.gwt.maps.client.MapTypeOptions;
 import com.google.gwt.maps.client.MapWidget;
+import com.google.gwt.maps.client.TileLayer;
 import com.google.gwt.maps.client.control.Control;
 import com.google.gwt.maps.client.control.ControlAnchor;
 import com.google.gwt.maps.client.control.ControlPosition;
 import com.google.gwt.maps.client.control.LargeMapControl;
 import com.google.gwt.maps.client.control.MapTypeControl;
 import com.google.gwt.maps.client.control.SmallMapControl;
+import com.google.gwt.maps.client.control.SmallZoomControl;
 import com.google.gwt.maps.client.event.MapDragEndHandler;
-import com.google.gwt.maps.client.event.MapDragHandler;
-import com.google.gwt.maps.client.event.MapDragStartHandler;
+import com.google.gwt.maps.client.event.MapMouseOutHandler;
 import com.google.gwt.maps.client.event.MapZoomEndHandler;
 import com.google.gwt.maps.client.geom.LatLng;
 import com.google.gwt.maps.client.geom.LatLngBounds;
-import com.google.gwt.user.client.Window;
+import com.google.gwt.maps.client.geom.Point;
+import com.google.gwt.maps.client.overlay.GroundOverlay;
+import com.google.gwt.maps.client.overlay.TileLayerOverlay;
 import com.google.gwt.user.client.ui.ClickListener;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.DockPanel;
+import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.user.client.ui.DockPanel.DockLayoutConstant;
-import com.google.gwt.user.client.ui.HasVerticalAlignment.VerticalAlignmentConstant;
 
 public class ReferenceMap extends Composite {
 	DockPanel panel;
-	HorizontalPanel topControls;
+	Grid topControls;
 	HorizontalPanel bottomControls;
 	MaskOverlay maskOverlay = null;
 	DataBoundsOverlay dataBoundsOverlay = null;
 	SelectWidget selectWidget;
 	LatLonWidget textWidget;
 	ResetWidget resetWidget;
-	RotateWidget rotateWidget;
-	IconifyControl iconifyControl;
-	SmallMapControl smallMapControl = null;
-	LargeMapControl largeMapControl = null;
+//	RotateWidget rotateWidget;
+	CenterWidget centerWidget;
+//	IconifyControl iconifyControl;
+	SmallZoomControl smallZoomControl;
 	MapTypeControl mapTypeControl;
 	MapWidget mMap;
 	RegionWidget regionWidget;
 	LatLng mCenter;
 	LatLngBounds dataBounds = LatLngBounds.newInstance(LatLng.newInstance(0.0, 0.0), LatLng.newInstance(0.0, 0.0));
-	
+	LatLngBounds moduloBounds = LatLngBounds.newInstance(LatLng.newInstance(0.0, 0.0), LatLng.newInstance(0.0, 0.0));
 	int mZoom;
 	int mWidth;   // Width in pixels 
 	int mHeight;  // Height in pixels
@@ -60,8 +61,12 @@ public class ReferenceMap extends Composite {
 	boolean haveData = false;
 	boolean modulo = false;
 	
+	LatLng modulo_center;
+	
 	String gridID = null;
 	
+	GroundOverlay topOverlay;
+	GroundOverlay bottomOverlay;
 	
 	/**
 	 * Construct an LASReference map centered and zoomed with the width and height specified in pixels.
@@ -72,8 +77,7 @@ public class ReferenceMap extends Composite {
 	 */
 	public ReferenceMap (LatLng center, int zoom, int width, int height) {
         panel = new DockPanel();
-        topControls = new HorizontalPanel();
-        topControls.setVerticalAlignment(HasVerticalAlignment.ALIGN_BOTTOM);
+        topControls = new Grid(2,2);
         bottomControls = new HorizontalPanel();
         bottomControls.setVerticalAlignment(HasVerticalAlignment.ALIGN_BOTTOM);
 		mCenter = center;
@@ -85,7 +89,6 @@ public class ReferenceMap extends Composite {
 				int nzoom = event.getNewZoomLevel();
 				if ( nzoom == mZoom ) {
 					mMap.setDraggable(false);
-					mMap.setCenter(dataBounds.getCenter());
 				} else if ( nzoom > mZoom ){
 					mMap.setDraggable(true);
 				} else {
@@ -100,20 +103,16 @@ public class ReferenceMap extends Composite {
 		selectWidget = new SelectWidget(this);
 		textWidget = new LatLonWidget();
 		selectWidget.setLatLngWidget(textWidget);
-		if ( mHeight >9999 ) {
-			largeMapControl = new LargeMapControl();
-			mMap.addControl(largeMapControl);
-		} else {
-			smallMapControl = new SmallMapControl();
-			mMap.addControl(smallMapControl);
-		}
+		smallZoomControl = new SmallZoomControl();
+		mMap.addControl(smallZoomControl);
 		mMap.setCurrentMapType(MapType.getHybridMap());
 		regionWidget = new RegionWidget(this);
-		resetWidget = new ResetWidget(this.mMap);
-		rotateWidget = new RotateWidget();
-		rotateWidget.addClickListener(rotate);
-		
-		rotateWidget.setVisible(false);
+		resetWidget = new ResetWidget(this);
+//		rotateWidget = new RotateWidget();
+//		rotateWidget.addClickListener(rotate);
+//		rotateWidget.setVisible(false);
+		centerWidget = new CenterWidget(this);
+		centerWidget.setVisible(false);
 		mMap.addMapDragEndHandler(new MapDragEndHandler() {
 			public void onDragEnd(MapDragEndEvent event) {
 				if ( selectWidget.getSelectionBounds().containsLatLng(mMap.getCenter()) ) {
@@ -121,24 +120,47 @@ public class ReferenceMap extends Composite {
 				}
 			}		
 		});			
-		iconifyControl = new IconifyControl(new ControlPosition(ControlAnchor.TOP_RIGHT, 10, 30), this);
-		addControl(iconifyControl);
-		topControls.add(regionWidget);
-		topControls.add(selectWidget);
-		topControls.add(resetWidget);
-		topControls.add(rotateWidget);
+		
+//		iconifyControl = new IconifyControl(new ControlPosition(ControlAnchor.TOP_RIGHT, 10, 30), this);
+//		addControl(iconifyControl);
+		topControls.setWidget(0, 0, regionWidget);
+		topControls.setWidget(0, 1, selectWidget);
+		topControls.setWidget(1, 0, centerWidget);
+		topControls.setWidget(1, 1, resetWidget);
+//      topControls.add(rotateWidget);
 		bottomControls.add(textWidget);
 		panel.add(topControls, DockPanel.NORTH);
 		panel.add(bottomControls, DockPanel.SOUTH);
 		panel.add(mMap, DockPanel.CENTER);
+		
 		initWidget(panel);
     }
     public void addControl(Control control) {
     	mMap.addControl(control);
     }
+    /**
+     * Initializes the data bounds and sets the reset widget to return to these bounds when clicked.
+     *
+     * @param dataBounds
+     * @param delta
+     * @param selection
+     */
+    public void initDataBounds(LatLngBounds dataBounds, double delta, boolean selection) {
+    	setDataBounds(dataBounds, delta, true);
+		getResetWidget().setDataBounds(dataBounds);
+		getResetWidget().setSelectionBounds(dataBounds);
+		getRegionWidget().setSelectedIndex(0);
+    }
+    /**
+     * Sets the data bounds, but leaves the reset values to their initial values.
+     * @param dataBounds
+     * @param delta
+     * @param selection
+     */
     public void setDataBounds(LatLngBounds dataBounds, double delta, boolean selection) {
     	modulo = false;
-    	resetWidget.setDataBounds(dataBounds);
+    	removeTopAndBottom();
+    	centerWidget.setData(dataBounds.getCenter());
     	this.dataBounds = dataBounds;
     	double lon_span = dataBounds.toSpan().getLongitude();
 		if ( dataBounds.isFullLongitude() || lon_span + 2.*delta >= 360.0 ) {
@@ -152,18 +174,26 @@ public class ReferenceMap extends Composite {
     			mMap.removeOverlay(dataBoundsOverlay.getPolygon());
     		}
     		dataBoundsOverlay = new DataBoundsOverlay(dataBounds);
-    		mMap.addOverlay(dataBoundsOverlay.getPolygon());
-    		selectWidget.initSelectionBounds(dataBounds, dataBounds, dataBounds.getCenter());
-    		selectWidget.setEditingEnabled(true);
+    		if ( !modulo ) {
+    		   mMap.addOverlay(dataBoundsOverlay.getPolygon());
+    		}
+    		if ( modulo ) {
+    		    selectWidget.initSelectionBounds(dataBounds, dataBounds, dataBounds.getCenter(), false);
+    		} else {
+    			selectWidget.initSelectionBounds(dataBounds, dataBounds, dataBounds.getCenter(), true);
+    		}
+//    		selectWidget.setEditingEnabled(true);
     		mZoom = mMap.getBoundsZoomLevel(dataBounds);
     		mMap.setZoomLevel(mZoom);
     		mMap.setCenter(dataBounds.getCenter());
-    		resetWidget.setSelectionBounds(dataBounds);  	  		
+    		if ( mZoom == 0 ) {
+    			addTopAndBottom();
+    		}
     	}
     	if ( modulo ) {
-			rotateWidget.setVisible(true);
+			centerWidget.setVisible(true);
 		} else {
-			rotateWidget.setVisible(false);
+			centerWidget.setVisible(false);
 		}
     }
 	
@@ -199,8 +229,8 @@ public class ReferenceMap extends Composite {
 	public boolean isModulo() {
 		return modulo;
 	}
-	public void setSelectionBounds(LatLngBounds bounds, boolean recenter) {
-		selectWidget.setSelectionBounds(bounds, recenter);
+	public void setSelectionBounds(LatLngBounds bounds, boolean recenter, boolean show) {
+		selectWidget.setSelectionBounds(bounds, recenter, show);
 	}
 	
 	public LatLngBounds getDataBounds() {
@@ -225,14 +255,14 @@ public class ReferenceMap extends Composite {
 		if ( resetWidget != null ) {
 			resetWidget.setVisible(false);
 		}
-		if ( rotateWidget != null ) {
-			rotateWidget.setVisible(false);
+//		if ( rotateWidget != null ) {
+//			rotateWidget.setVisible(false);
+//		}
+		if ( centerWidget != null ) {
+			centerWidget.setVisible(false);
 		}
-		if ( largeMapControl != null ) {
-			mMap.removeControl(largeMapControl);
-		}
-		if ( smallMapControl != null ) {
-			mMap.removeControl(smallMapControl);
+		if ( smallZoomControl != null ) {
+			mMap.removeControl(smallZoomControl);
 		}		
 		if ( mapTypeControl != null ) {
 			mMap.removeControl(mapTypeControl);
@@ -245,14 +275,14 @@ public class ReferenceMap extends Composite {
 		if ( resetWidget != null ) {
 			resetWidget.setVisible(true);
 		}
-		if ( rotateWidget != null ) {
-			rotateWidget.setVisible(true);
+//		if ( rotateWidget != null ) {
+//			rotateWidget.setVisible(true);
+//		}
+		if ( centerWidget != null ) {
+			centerWidget.setVisible(true);
 		}
-		if ( largeMapControl != null ) {
-			mMap.addControl(largeMapControl);
-		}
-		if ( smallMapControl != null ) {
-			mMap.addControl(smallMapControl);
+		if ( smallZoomControl != null ) {
+			mMap.addControl(smallZoomControl);
 		}		
 		if ( mapTypeControl != null ) {
 			mMap.addControl(mapTypeControl);
@@ -262,19 +292,22 @@ public class ReferenceMap extends Composite {
 		mMap.setSize(String.valueOf(mWidth)+"px", String.valueOf(mHeight)+"px");		
 	}
 	public String getXlo() {
+		
+		//return selectWidget.getXlo();
+		
 		double xwest = selectWidget.getSelectionBounds().getSouthWest().getLongitude();
-		if ( xwest < 0.0 ) {
-			xwest = xwest + 360.;
-		}
 		return String.valueOf(xwest);
+		
 	}
 	public String getXhi() {
+		
 		double xwest = selectWidget.getSelectionBounds().getSouthWest().getLongitude();
 		double xeast = selectWidget.getSelectionBounds().getNorthEast().getLongitude();
-		if ( xeast <= 0.0 || xeast < xwest ) {
+		if ( xeast < xwest ) {
 			xeast = xeast + 360.;
 		}
 		return String.valueOf(xeast);
+		
 	}
 	public String getYlo() {
 		return String.valueOf(selectWidget.getSelectionBounds().getSouthWest().getLatitude());
@@ -287,5 +320,29 @@ public class ReferenceMap extends Composite {
 	}
 	public int getZoom() {
 		return mZoom;
+	}
+	public double getDelta() {
+		return delta;
+	}
+	public ResetWidget getResetWidget() {
+		return resetWidget;
+	}
+	public void addTopAndBottom() {
+		double wlon = dataBounds.getSouthWest().getLongitude();
+		double elon = dataBounds.getNorthEast().getLongitude();
+		if ( elon < wlon ) {
+			elon = elon + 360.;
+		}
+		
+		LatLngBounds topBounds = LatLngBounds.newInstance(LatLng.newInstance(85., wlon), LatLng.newInstance(90., elon));
+        topOverlay = new GroundOverlay("http://localhost:8880/baker/images/top.png", topBounds);
+        mMap.addOverlay(topOverlay);
+        LatLngBounds bottomBounds = LatLngBounds.newInstance(LatLng.newInstance(-90., dataBounds.getSouthWest().getLongitude()), LatLng.newInstance(-85., dataBounds.getNorthEast().getLongitude()));
+        bottomOverlay = new GroundOverlay("http://localhost:8880/baker/images/top.png", bottomBounds);
+        mMap.addOverlay(bottomOverlay);
+	}
+	public void removeTopAndBottom() {
+		if ( topOverlay != null ) mMap.removeOverlay(topOverlay);
+		if ( bottomOverlay != null ) mMap.removeOverlay(bottomOverlay);
 	}
 }

@@ -22,6 +22,7 @@ public class LASDateWidget extends JavaScriptObject {
 	}-*/;
 	public final native void alert() /*-{ this.alert(); }-*/;
 	public final native void render(String id, String menu_set_1, String menu_set_2) /*-{ this.render(id, menu_set_1, menu_set_2); }-*/;
+	public final native void renderToNode(JavaScriptObject node, String menu_set_1, String menu_set_2) /*-{this.renderToNode(node, menu_set_1, menu_set_2); }-*/;
 	public final native String getDateHi() /*-{ return this.getDateHi(); }-*/;
 	public final native String getDateLo() /*-{ return this.getDateLo(); }-*/;
 	public final native String getDate1_Ferret() /*-{ return this.getDate1_Ferret(); }-*/;

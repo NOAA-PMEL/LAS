@@ -11,7 +11,9 @@ public class AxisSerializable extends Serializable implements IsSerializable {
 	String hi;
 	String lo;
 	ArangeSerializable arange;
-	Map<String, String> v;
+	String label;
+	String[] names;
+	String[] values;
 	
 	/**
 	 * @return the type
@@ -51,22 +53,10 @@ public class AxisSerializable extends Serializable implements IsSerializable {
 		this.lo = lo;
 	}
 	/**
-	 * @param v the v to set
-	 */
-	public void setV(Map<String, String> v) {
-		this.v = v;
-	}
-	/**
 	 * @return the id
 	 */
 	public String getID() {
 		return ID;
-	}
-	/**
-	 * @return the v
-	 */
-	public Map<String, String> getV() {
-		return v;
 	}
 	/**
 	 * @param id the id to set
@@ -81,4 +71,23 @@ public class AxisSerializable extends Serializable implements IsSerializable {
 	public void setArangeSerializable(ArangeSerializable arange) {
 		this.arange = arange;
 	}
+	public String getLabel() {
+		return label;
+	}
+	public void setLabel(String label) {
+		this.label = label;
+	}
+	public String[] getNames() {
+		return names;
+	}
+	public void setNames(String[] names) {
+		this.names = names;
+	}
+	public String[] getValues() {
+		return values;
+	}
+	public void setValues(String[] values) {
+		this.values = values;
+	}
+	
 }

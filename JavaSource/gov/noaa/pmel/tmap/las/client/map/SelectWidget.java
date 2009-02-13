@@ -4,10 +4,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.maps.client.MapWidget;
-import com.google.gwt.maps.client.control.ControlPosition;
-import com.google.gwt.maps.client.control.Control.CustomControl;
 import com.google.gwt.maps.client.event.MapMouseMoveHandler;
 import com.google.gwt.maps.client.event.MarkerDragEndHandler;
 import com.google.gwt.maps.client.event.MarkerDragHandler;
@@ -25,11 +22,8 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.ClickListener;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.ToggleButton;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -72,37 +66,10 @@ public class SelectWidget extends Composite {
 		mOptions.setIcon(mIcon);
 		mOptions.setDraggable(true);
 		mOptions.setDragCrossMove(true);
+		mOptions.setAutoPan(false);
 		mDrawMarker = new Marker(LatLng.newInstance(0.0, 0.0), mOptions);
 		mSelection.setVisible(false);
-		mDrawMarker.addMarkerMouseDownHandler(new MarkerMouseDownHandler() {
-			public void onMouseDown(MarkerMouseDownEvent event) {
-				mDraw = true;
-				LatLng click = mDrawMarker.getLatLng();
-				mSelection.setClick(click);
-				lastGoodPosition = click;
-				LatLngBounds bounds = LatLngBounds.newInstance(click, click);
-				setSelectionBounds(bounds, false);
-				mMap.setDraggable(false);
-				/*
-				mSelection.setEditingEnabled(false);
-				mMap.removeOverlay(mSelection.getPolygon());
-				for (Iterator markerIt = mSelection.getMarkers().iterator(); markerIt.hasNext();) {
-					Marker marker = (Marker) markerIt.next();
-					mMap.removeOverlay(marker);
-				}
-				mSelection = new MapTool(dataBounds, bounds, "xy", modulo);	
-				mSelection.setClick(click);
-				mMap.addOverlay(mSelection.getPolygon());
-				setText();
-				for (Iterator markerIt = mSelection.getMarkers().iterator(); markerIt.hasNext();) {
-					Marker marker = (Marker) markerIt.next();
-					mMap.addOverlay(marker);
-				}
-				mSelection.setEditingEnabled(true);
-				mSelection.setVisible(true);
-				*/	
-			}
-		});
+		mDrawMarker.addMarkerMouseDownHandler(markerMouseDownHandler);
 		mDrawMarker.addMarkerMouseUpHandler(markerMouseUpHandler);
 		
 		mSelect = new ToggleButton("Select");
@@ -126,11 +93,41 @@ public class SelectWidget extends Composite {
 		
 		initWidget(controls);
 	}
+	MarkerMouseDownHandler markerMouseDownHandler = new MarkerMouseDownHandler() {
+		public void onMouseDown(MarkerMouseDownEvent event) {
+			mDraw = true;
+			LatLng click = mDrawMarker.getLatLng();
+			mSelection.setClick(click);
+			lastGoodPosition = click;
+			LatLngBounds bounds = LatLngBounds.newInstance(click, click);
+			setSelectionBounds(bounds, false, true);
+			mMap.setDraggable(false);
+			/*
+			mSelection.setEditingEnabled(false);
+			mMap.removeOverlay(mSelection.getPolygon());
+			for (Iterator markerIt = mSelection.getMarkers().iterator(); markerIt.hasNext();) {
+				Marker marker = (Marker) markerIt.next();
+				mMap.removeOverlay(marker);
+			}
+			mSelection = new MapTool(dataBounds, bounds, "xy", modulo);	
+			mSelection.setClick(click);
+			mMap.addOverlay(mSelection.getPolygon());
+			setText();
+			for (Iterator markerIt = mSelection.getMarkers().iterator(); markerIt.hasNext();) {
+				Marker marker = (Marker) markerIt.next();
+				mMap.addOverlay(marker);
+			}
+			mSelection.setEditingEnabled(true);
+			mSelection.setVisible(true);
+			*/	
+		}
+	};
 	MarkerMouseUpHandler markerMouseUpHandler = new MarkerMouseUpHandler() {
 
 		public void onMouseUp(MarkerMouseUpEvent event) {
 			if ( mMap.getZoomLevel() == refMap.getZoom() && refMap.isModulo() ) {
 				mMap.setDraggable(false);
+//				refMap.setCenter(dataBounds.getCenter());
 			} else {
 			    mMap.setDraggable(true);
 			}
@@ -163,7 +160,11 @@ public class SelectWidget extends Composite {
 			if ( refMap.getDataBounds() == null ) {
 				Window.alert("Please select a data set and variable.");
 			} else {
-				setSelectionBounds(refMap.getDataBounds(), false);
+				if ( refMap.isModulo() ) {
+					setSelectionBounds(refMap.getDataBounds(), false, false);
+				} else {
+				    setSelectionBounds(refMap.getDataBounds(), false, true);
+				}
 			}
 		}
 
@@ -171,6 +172,7 @@ public class SelectWidget extends Composite {
 	MapMouseMoveHandler mouseMove = new MapMouseMoveHandler() {
 
 		public void onMouseMove(MapMouseMoveEvent event) {
+			refMap.getMapWidget().setDraggable(false);
 			LatLng position = event.getLatLng();
 			if ( dataBounds.containsLatLng(position) && mDraw) {
 				mDrawMarker.setVisible(true);
@@ -180,7 +182,7 @@ public class SelectWidget extends Composite {
 			} else if ( !dataBounds.containsLatLng(position) && mDraw ){
 				mDrawMarker.setVisible(false);
 				mDrawMarker.setLatLng(lastGoodPosition);
-				//mMap.setCenter(mSelection.selectionCenter);
+				mSelection.update(lastGoodPosition);
 			} else if ( dataBounds.containsLatLng(position) && !mDraw ) {
 				mDrawMarker.setVisible(true);
 				mDrawMarker.setLatLng(position);
@@ -215,11 +217,11 @@ public class SelectWidget extends Composite {
 		}
 
 	}
-	public void setSelectionBounds(LatLngBounds selectionBounds, boolean recenter) {
-		mSelection.setSelectionBounds(selectionBounds, recenter);
+	public void setSelectionBounds(LatLngBounds selectionBounds, boolean recenter, boolean show) {
+		mSelection.setSelectionBounds(selectionBounds, recenter, show);
 	}
-	public void initSelectionBounds(LatLngBounds dataBounds, LatLngBounds selectionBounds, LatLng center) {
-		mSelection.initSelectionBounds(dataBounds, selectionBounds, center);
+	public void initSelectionBounds(LatLngBounds dataBounds, LatLngBounds selectionBounds, LatLng center, boolean show) {
+		mSelection.initSelectionBounds(dataBounds, selectionBounds, center, show);
 	}
 	public LatLngBounds getSelectionBounds() {
 		return mSelection.getSelectionBounds();
@@ -289,6 +291,7 @@ public class SelectWidget extends Composite {
 				sw_options.setIcon(sw_icon);
 				sw_options.setDraggable(true);
 				sw_options.setDragCrossMove(true);
+				sw_options.setAutoPan(false);
 				sw_options.setBouncy(false);
 				sw_options.setTitle("sw");
 				swMarker = new Marker(sw, sw_options);
@@ -302,6 +305,7 @@ public class SelectWidget extends Composite {
 				sw_nw_options.setIcon(sw_nw_icon);
 				sw_nw_options.setDraggable(true);
 				sw_nw_options.setDragCrossMove(true);
+				sw_nw_options.setAutoPan(false);
 				sw_nw_options.setBouncy(false);
 				sw_nw_options.setTitle("sw_nw");
 				sw_nwMarker = new Marker(sw_nw, sw_nw_options);
@@ -315,6 +319,7 @@ public class SelectWidget extends Composite {
 				nw_options.setIcon(nw_icon);
 				nw_options.setDraggable(true);
 				nw_options.setDragCrossMove(true);
+				nw_options.setAutoPan(false);
 				nw_options.setBouncy(false);
 				nw_options.setTitle("nw");
 				nwMarker = new Marker(nw, nw_options);
@@ -328,6 +333,7 @@ public class SelectWidget extends Composite {
 				nw_ne_options.setIcon(nw_ne_icon);
 				nw_ne_options.setDraggable(true);
 				nw_ne_options.setDragCrossMove(true);
+				nw_ne_options.setAutoPan(false);
 				nw_ne_options.setBouncy(false);
 				nw_ne_options.setTitle("nw_ne");
 				nw_neMarker = new Marker(nw_ne, nw_ne_options);
@@ -341,6 +347,7 @@ public class SelectWidget extends Composite {
 				ne_options.setIcon(ne_icon);
 				ne_options.setDraggable(true);
 				ne_options.setDragCrossMove(true);
+				ne_options.setAutoPan(false);
 				ne_options.setBouncy(false);
 				ne_options.setTitle("ne");
 				neMarker = new Marker(ne, ne_options);
@@ -354,6 +361,7 @@ public class SelectWidget extends Composite {
 				ne_se_options.setIcon(ne_se_icon);
 				ne_se_options.setDraggable(true);
 				ne_se_options.setDragCrossMove(true);
+				ne_se_options.setAutoPan(false);
 				ne_se_options.setBouncy(false);
 				ne_se_options.setTitle("ne_se");
 				ne_seMarker = new Marker(ne_se, ne_se_options);
@@ -367,6 +375,7 @@ public class SelectWidget extends Composite {
 				se_options.setIcon(se_icon);
 				se_options.setDraggable(true);
 				se_options.setDragCrossMove(true);
+				se_options.setAutoPan(false);
 				se_options.setBouncy(false);
 				se_options.setTitle("se");
 				seMarker = new Marker(se, se_options);
@@ -380,6 +389,7 @@ public class SelectWidget extends Composite {
 				sw_se_options.setIcon(sw_se_icon);
 				sw_se_options.setDraggable(true);
 				sw_se_options.setDragCrossMove(true);
+				sw_se_options.setAutoPan(false);
 				sw_se_options.setBouncy(false);
 				sw_se_options.setTitle("sw_se");
 				sw_seMarker = new Marker(sw_se, sw_se_options);
@@ -393,6 +403,7 @@ public class SelectWidget extends Composite {
 				center_options.setIcon(center_icon);
 				center_options.setDraggable(true);
 				center_options.setDragCrossMove(true);
+				center_options.setAutoPan(false);
 				center_options.setBouncy(false);
 				center_options.setTitle("center");
 				centerMarker = new Marker(center, center_options);
@@ -458,19 +469,19 @@ public class SelectWidget extends Composite {
 			LatLngBounds rectBounds;
 			if ( dragBoxNorthEast.containsLatLng(position) ) {
 				rectBounds = LatLngBounds.newInstance(click, position);
-				setSelectionBounds(rectBounds, false);
+				setSelectionBounds(rectBounds, false, true);
 				lastGoodPosition = position;
 			} else if ( dragBoxSouthWest.containsLatLng(position) ) {
 			    rectBounds = LatLngBounds.newInstance(position, click);
-				setSelectionBounds(rectBounds, false);
+				setSelectionBounds(rectBounds, false, true);
 				lastGoodPosition = position;
 			} else if ( dragBoxSouthEast.containsLatLng(position) ) {
 				rectBounds = LatLngBounds.newInstance(LatLng.newInstance(posLat, clickLon), LatLng.newInstance(clickLat, posLon));
-			    setSelectionBounds(rectBounds, false);
+			    setSelectionBounds(rectBounds, false, true);
 			    lastGoodPosition = position;
 			} else if ( dragBoxNorthWest.containsLatLng(position) ) {
 				rectBounds = LatLngBounds.newInstance(LatLng.newInstance(clickLat, posLon), LatLng.newInstance(posLat, clickLon));
-				setSelectionBounds(rectBounds, false);
+				setSelectionBounds(rectBounds, false, true);
 				lastGoodPosition = position;
 			} 
 		}
@@ -522,12 +533,10 @@ public class SelectWidget extends Composite {
 
 		MarkerDragHandler markerDragHandler = new MarkerDragHandler() {
 			public void onDrag(MarkerDragEvent event) {
-                if ( mMap.getZoomLevel() == refMap.getZoom() ) {
-				    mMap.setCenter(dataBounds.getCenter());
-                }
 				Marker marker = event.getSender();
 				String title = marker.getTitle();
 				LatLng markerLocation = marker.getLatLng();
+				
 				LatLngBounds containmentBounds = SelectWidget.this.dataBounds;
 
 				LatLng sw = containmentBounds.getSouthWest();
@@ -536,19 +545,19 @@ public class SelectWidget extends Composite {
 					// The south west marker's movements are bounded by the south west data bounds and the north east rectangle bounds.
 					containmentBounds = LatLngBounds.newInstance(dataBounds.getSouthWest(), mSelection.getSelectionBounds().getNorthEast());
 					// If it's still in the containment, the new selection is this:
-				    sw = markerLocation;
-				    ne = mSelection.getSelectionBounds().getNorthEast();
+					sw = markerLocation;
+					ne = mSelection.getSelectionBounds().getNorthEast();
 				} else if ( title.equals("sw_nw") )  {
 					containmentBounds = LatLngBounds.newInstance(LatLng.newInstance(dataBounds.getSouthWest().getLatitude(), dataBounds.getSouthWest().getLongitude()), LatLng.newInstance(dataBounds.getNorthEast().getLatitude(), mSelection.getSelectionBounds().getNorthEast().getLongitude()));
 					sw = LatLng.newInstance(mSelection.getSelectionBounds().getSouthWest().getLatitude(), markerLocation.getLongitude());
 					ne = LatLng.newInstance(mSelection.getSelectionBounds().getNorthEast().getLatitude(), mSelection.getSelectionBounds().getNorthEast().getLongitude());
 				} else if ( title.equals("nw") ) {
 					LatLng swBound = LatLng.newInstance(mSelection.getSelectionBounds().getSouthWest().getLatitude(), dataBounds.getSouthWest().getLongitude());
-				    LatLng neBound = LatLng.newInstance(dataBounds.getNorthEast().getLatitude(), mSelection.getSelectionBounds().getNorthEast().getLongitude());
-				    containmentBounds = LatLngBounds.newInstance(swBound, neBound);
-				    // If accepted the new selection bounds are:
-				    sw = LatLng.newInstance(mSelection.getSelectionBounds().getSouthWest().getLatitude(), markerLocation.getLongitude());
-				    ne = LatLng.newInstance(markerLocation.getLatitude(), mSelection.getSelectionBounds().getNorthEast().getLongitude());
+					LatLng neBound = LatLng.newInstance(dataBounds.getNorthEast().getLatitude(), mSelection.getSelectionBounds().getNorthEast().getLongitude());
+					containmentBounds = LatLngBounds.newInstance(swBound, neBound);
+					// If accepted the new selection bounds are:
+					sw = LatLng.newInstance(mSelection.getSelectionBounds().getSouthWest().getLatitude(), markerLocation.getLongitude());
+					ne = LatLng.newInstance(markerLocation.getLatitude(), mSelection.getSelectionBounds().getNorthEast().getLongitude());
 				} else if ( title.equals("nw_ne") ) { 
 					LatLng swBound = LatLng.newInstance(mSelection.getSelectionBounds().getSouthWest().getLatitude(), dataBounds.getSouthWest().getLongitude());
 					containmentBounds = LatLngBounds.newInstance(swBound, dataBounds.getNorthEast());
@@ -560,26 +569,26 @@ public class SelectWidget extends Composite {
 					ne = markerLocation;
 				} else if ( title.equals("ne_se") ) {
 					LatLng swBound = LatLng.newInstance(dataBounds.getSouthWest().getLatitude(), mSelection.getSelectionBounds().getSouthWest().getLongitude());
-                    containmentBounds = LatLngBounds.newInstance(swBound, dataBounds.getNorthEast());
-                    sw = mSelection.getSelectionBounds().getSouthWest();
-                    ne = LatLng.newInstance(mSelection.getSelectionBounds().getNorthEast().getLatitude(), markerLocation.getLongitude());
+					containmentBounds = LatLngBounds.newInstance(swBound, dataBounds.getNorthEast());
+					sw = mSelection.getSelectionBounds().getSouthWest();
+					ne = LatLng.newInstance(mSelection.getSelectionBounds().getNorthEast().getLatitude(), markerLocation.getLongitude());
 				} else if ( title.equals("se") ) {
 					LatLng swBound = LatLng.newInstance(dataBounds.getSouthWest().getLatitude(), mSelection.getSelectionBounds().getSouthWest().getLongitude());
 					LatLng neBound = LatLng.newInstance(mSelection.getSelectionBounds().getNorthEast().getLatitude(), dataBounds.getNorthEast().getLongitude());
-				    containmentBounds = LatLngBounds.newInstance(swBound, neBound);
-				    sw = LatLng.newInstance(markerLocation.getLatitude(), mSelection.getSelectionBounds().getSouthWest().getLongitude());
-				    ne = LatLng.newInstance(mSelection.getSelectionBounds().getNorthEast().getLatitude(), markerLocation.getLongitude());
+					containmentBounds = LatLngBounds.newInstance(swBound, neBound);
+					sw = LatLng.newInstance(markerLocation.getLatitude(), mSelection.getSelectionBounds().getSouthWest().getLongitude());
+					ne = LatLng.newInstance(mSelection.getSelectionBounds().getNorthEast().getLatitude(), markerLocation.getLongitude());
 				} else if ( title.equals("sw_se") ) {
 					containmentBounds = LatLngBounds.newInstance(dataBounds.getSouthWest(), LatLng.newInstance(mSelection.getSelectionBounds().getNorthEast().getLatitude(), dataBounds.getNorthEast().getLongitude()));
-				    sw = LatLng.newInstance(markerLocation.getLatitude(), mSelection.getSelectionBounds().getSouthWest().getLongitude());
+					sw = LatLng.newInstance(markerLocation.getLatitude(), mSelection.getSelectionBounds().getSouthWest().getLongitude());
 					ne = mSelection.getSelectionBounds().getNorthEast();
 				} else if ( title.equals("center") ) {
 					LatLng span = mSelection.getSelectionBounds().toSpan();
 					double lat_span = span.getLatitude();
 					double lon_span = span.getLongitude();
 					LatLng swBound = LatLng.newInstance(dataBounds.getSouthWest().getLatitude()+lat_span/2.0, dataBounds.getSouthWest().getLongitude()+lon_span/2.0);
-				    LatLng neBound = LatLng.newInstance(dataBounds.getNorthEast().getLatitude()-lat_span/2.0, dataBounds.getNorthEast().getLongitude()-lon_span/2.0);
-				    containmentBounds = LatLngBounds.newInstance(swBound, neBound);
+					LatLng neBound = LatLng.newInstance(dataBounds.getNorthEast().getLatitude()-lat_span/2.0, dataBounds.getNorthEast().getLongitude()-lon_span/2.0);
+					containmentBounds = LatLngBounds.newInstance(swBound, neBound);
 				}
 
 				if ( title.equals("center") ) {
@@ -592,32 +601,20 @@ public class SelectWidget extends Composite {
 						double wlon = markerLocation.getLongitude() - lon_span/2.0;
 						double elon = markerLocation.getLongitude() + lon_span/2.0;
 						LatLngBounds rectBounds = LatLngBounds.newInstance(LatLng.newInstance(slat, wlon), LatLng.newInstance(nlat, elon));
-						setSelectionBounds(rectBounds, false);
+						setSelectionBounds(rectBounds, false, true);
 						if ( mMap.getZoomLevel() == refMap.getZoom() ) {
-						    mMap.setCenter(dataBounds.getCenter());
+							mMap.setCenter(dataBounds.getCenter());
 						}
 						lastGoodPosition = rectBounds.getCenter();
 					} else {
 						centerMarker.setLatLng(lastGoodPosition);
 					}
-					
+
 				} else {
 					if ( containmentBounds.containsLatLng(markerLocation)) {
-						/*
-						if ( title.equals("sw_nw") ) {
-							sw_nwMarker.setLatLng(LatLng.newInstance(mSelection.getSelectionBounds().getCenter().getLatitude(), markerLocation.getLongitude()));
-						} else if ( title.equals("nw_ne") ) {
-							nw_neMarker.setLatLng(LatLng.newInstance(markerLocation.getLatitude(), mSelection.getSelectionBounds().getCenter().getLongitude()));
-						} else if ( title.equals("ne_se") ) {
-							ne_seMarker.setLatLng(LatLng.newInstance(mSelection.getSelectionBounds().getCenter().getLatitude(), markerLocation.getLongitude()));
-						}
-						*/
 						LatLngBounds rectBounds = LatLngBounds.newInstance(sw, ne);
-						setSelectionBounds(rectBounds, false);
-						// Always leave the map in the data center when it's at the initial zoom level.
-						if ( mMap.getZoomLevel() == refMap.getZoom() ) {
-						    mMap.setCenter(dataBounds.getCenter());
-						} 
+						setSelectionBounds(rectBounds, false, true);
+						
 					} else {
 						if ( title.equals("sw") ) {
 							swMarker.setLatLng(mSelection.getSelectionBounds().getSouthWest());
@@ -634,18 +631,18 @@ public class SelectWidget extends Composite {
 						} else if ( title.equals("se") ) {
 							seMarker.setLatLng(LatLng.newInstance(mSelection.getSelectionBounds().getSouthWest().getLatitude(), mSelection.getSelectionBounds().getNorthEast().getLongitude()));
 						} else if ( title.equals("sw_se") ) {
-                            sw_seMarker.setLatLng(LatLng.newInstance(mSelection.getSelectionBounds().getSouthWest().getLatitude(), mSelection.getSelectionBounds().getCenter().getLongitude()));
+							sw_seMarker.setLatLng(LatLng.newInstance(mSelection.getSelectionBounds().getSouthWest().getLatitude(), mSelection.getSelectionBounds().getCenter().getLongitude()));
 						} 
 					}
 				}
 			}
 		};
-        public void initSelectionBounds(LatLngBounds dataBounds, LatLngBounds selectionBounds, LatLng center) {
+        public void initSelectionBounds(LatLngBounds dataBounds, LatLngBounds selectionBounds, LatLng center, boolean show) {
         	SelectWidget.this.dataBounds = dataBounds;
-        	setSelectionBounds(selectionBounds, false);
+        	setSelectionBounds(selectionBounds, false, show);
         	this.selectionCenter = center;
         }
-		public void setSelectionBounds(LatLngBounds rectBounds, boolean recenter) {
+		public void setSelectionBounds(LatLngBounds rectBounds, boolean recenter, boolean show) {
 			this.selectionBounds = rectBounds;
 			if ( recenter ) {
 				this.selectionCenter = rectBounds.getCenter();
@@ -670,8 +667,9 @@ public class SelectWidget extends Composite {
 			polygonPoints[7] = LatLng.newInstance(sw.getLatitude(), rectBounds.getCenter().getLongitude());
 			polygonPoints[8] = LatLng.newInstance(sw.getLatitude(), sw.getLongitude());
 			polygon = new Polygon(polygonPoints, strokeColor, strokeWeight, strokeOpacity, fillColor, fillOpacity);
-			mMap.addOverlay(polygon);
-
+			if ( show ) {
+			    mMap.addOverlay(polygon);
+			}
 			swMarker.setLatLng(LatLng.newInstance(sw.getLatitude(), sw.getLongitude()));
 			sw_nwMarker.setLatLng(LatLng.newInstance(rectBounds.getCenter().getLatitude(), sw.getLongitude()));
 			nwMarker.setLatLng(LatLng.newInstance(ne.getLatitude(), sw.getLongitude()));
@@ -681,6 +679,11 @@ public class SelectWidget extends Composite {
 			seMarker.setLatLng(LatLng.newInstance(sw.getLatitude(), ne.getLongitude()));
 			sw_seMarker.setLatLng(LatLng.newInstance(sw.getLatitude(), rectBounds.getCenter().getLongitude()));
 			centerMarker.setLatLng(rectBounds.getCenter());
+			if ( show ) {
+				setEditingEnabled(true);
+			} else {
+			    setEditingEnabled(false);
+			}
 			setText();
 
 		}
@@ -695,5 +698,13 @@ public class SelectWidget extends Composite {
 
 	public void setLatLngWidget(LatLonWidget textWidget) {
 		this.textWidget = textWidget;
+	}
+
+	public String getXhi() {
+		return textWidget.getXhi();
+	}
+
+	public String getXlo() {
+		return textWidget.getXlo();
 	};		
 }

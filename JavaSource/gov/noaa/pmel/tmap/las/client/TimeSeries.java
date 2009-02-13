@@ -153,12 +153,11 @@ public class TimeSeries implements EntryPoint {
 				AxisSerializable zAxis = cat.getVariable(varID).getGrid().getZAxis();
 				if ( zAxis != null ) {
 					z.clear();
-					if (zAxis.getV() != null) {
-						Map<String, String> v = zAxis.getV();
-						for (Iterator vIt = v.keySet().iterator(); vIt.hasNext();) {
-							String key = (String) vIt.next();
-							String value = v.get(key);
-							z.addItem(key, value);
+					if (zAxis.getNames() != null) {
+						String[] names = zAxis.getNames();
+						String[] values = zAxis.getValues();
+						for (int i=0; i<names.length; i++) {
+							z.addItem(names[i], values[i]);
 						}
 					} else {
 						ArangeSerializable a = zAxis.getArangeSerializable();
@@ -225,8 +224,8 @@ public class TimeSeries implements EntryPoint {
 				Button button = (Button) widget;
 				String button_name = button.getText();
 				if ( button_name.equals(PLOT_BUTTON_NAME)) {
-					output.setHTML("<img src=\"../JavaScript/components/mozilla_blu.gif\" alt=\"Spinner\"/>");
-					output.setVisible(true);
+//					output.setHTML("<img src=\"../JavaScript/components/mozilla_blu.gif\" alt=\"Spinner\"/>");
+//					output.setVisible(true);
 					lasRequest.removeRegion(0);
 					lasRequest.removeVariables();
 					lasRequest.removePropertyGroup("ferret");
