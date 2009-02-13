@@ -63,6 +63,7 @@ function DateWidget(lo,hi,deltaMinutes,offsetMinutes,add_sub_1,add_sub_2) {
 
   this.setCallback = DateWidget_setCallback;
   this.render = DateWidget_render;
+  this.renderToNode = DateWidget_renderToNode;
   this.disable = DateWidget_disable;
   this.enable = DateWidget_enable;
   this.show = DateWidget_show;
@@ -294,6 +295,256 @@ function DateWidget(lo,hi,deltaMinutes,offsetMinutes,add_sub_1,add_sub_2) {
 
 }
 
+/**
+ * Creates the table of menus associated with the DateWidget.
+ * <p>
+ * Any children of element_id will be removed and replaced with a set of menus from the
+ * following collection:  [Y]ear, [M]onth, [D]ay, [T]ime.  The order in which these are
+ * specified determiens the order in which they appear in the interface.
+ * <p>
+ * If menu_set_2 is omitted, only a single set of menus will appear.
+ * @param {string} element_id 'id' attribute of the element into which the menus are inserted.
+ * @param {string} menu_set_1 one or more of the characters 'YMDT', in any order, specifying
+ *                 which menus will be shown for Date1
+ * @param {string} menu_set_1 one or more of the characters 'YMDT', in any order, specifying
+ *                 which menus will be shown for Date2
+ */
+function DateWidget_renderToNode(node,menu_set_1,menu_set_2) {
+  this.node = node;
+  this.menu_set_1 = menu_set_1;
+  this.menu_set_2 = menu_set_2;
+    var children = node.childNodes;
+  var num_children = children.length;
+
+  // Remove any children of this widget
+  // NOTE:  Start removing children from the end.  Otherwise, what was
+  // NOTE:  children[1]  becomes children[0] when children[0] is removed.
+  for (var i=num_children-1; i>=0; i--) {
+    var child = children[i];
+    if (child) {
+      node.removeChild(child);
+    }
+  }
+
+  // Create up to 8 Select objects
+  var Text1, Year1, Month1, Day1, Time1;
+  var Text2, Year2, Month2, Day2, Time2;
+  var climatology_1 = 0;
+  var climatology_2 = 0;
+
+  // Test the 'menu_set_1/2' strings for required widgets
+  // Create required Select objects with the appropriate 'id' 
+  // Give each Select object a reference to the DateWidget
+  // Give the DateWidget a reference to each Select object
+
+  if (!menu_set_1) {
+    error_msg = "DateWidget ERROR:  render: menu_set_1 must be defined and  must contain only characters from \"YMDT\"";
+    throw(error_msg);
+  }
+
+  // TODO:  Create the 'id' attribute from this.element_id + "_Year1" etc. 
+  // TODO:  instead of just "DW_Year1" etc.
+
+  // The Year, Month, Day and Time widgets are always created so that initialization
+  // along the path: "Year -> Month -> Day" can procede as usual.  The formatting
+  // specified inthe menu_set only determines whether they are visible or not.
+  Year1 = document.createElement('select');
+  Year1.setAttribute('id','DW_Year1'); 
+  Year1.widget = this;
+  this.Year1 = Year1;
+  if (menu_set_1.indexOf('Y') < 0) {
+    this.Year1.style.display = 'none';
+    climatology_1 = 1;
+    this.climatology = 1;
+
+    text1 = document.createTextNode('Climatology:  ');
+    Text1 = document.createElement('span');
+    Text1.setAttribute('id','DW_Text1'); 
+    Text1.appendChild(text1);
+    Text1.widget = this;
+    this.Text1 = Text1;
+  }
+
+  Month1 = document.createElement('select');
+  Month1.setAttribute('id','DW_Month1'); 
+  Month1.widget = this;
+  this.Month1 = Month1;
+  if (menu_set_1.indexOf('M') < 0) {
+    this.Month1.style.display = 'none';
+  }
+
+  Day1 = document.createElement('select');
+  Day1.setAttribute('id','DW_Day1'); 
+  Day1.widget = this;
+  this.Day1 = Day1;
+  if (menu_set_1.indexOf('D') < 0) {
+    this.Day1.style.display = 'none';
+  }
+
+  Time1 = document.createElement('select');
+  Time1.setAttribute('id','DW_Time1'); 
+  Time1.widget = this;
+  this.Time1 = Time1;
+  if (menu_set_1.indexOf('T') < 0) {
+    this.Time1.style.display = 'none';
+  }
+
+  if (menu_set_2) {
+    Year2 = document.createElement('select');
+    Year2.setAttribute('id','DW_Year2'); 
+    Year2.widget = this;
+    this.Year2 = Year2;
+    if (menu_set_2.indexOf('Y') < 0) {
+      this.Year2.style.display = 'none';
+      climatology_2 = 1;
+
+      text2 = document.createTextNode('Climatology:  ');
+      Text2 = document.createElement('span');
+      Text2.setAttribute('id','DW_Text2'); 
+      Text2.appendChild(text2);
+      Text2.widget = this;
+      this.Text2 = Text2;
+    }
+
+    Month2 = document.createElement('select');
+    Month2.setAttribute('id','DW_Month2'); 
+    Month2.widget = this;
+    this.Month2 = Month2;
+    if (menu_set_2.indexOf('M') < 0) {
+      this.Month2.style.display = 'none';
+    }
+
+    Day2 = document.createElement('select');
+    Day2.setAttribute('id','DW_Day2'); 
+    Day2.widget = this;
+    this.Day2 = Day2;
+    if (menu_set_2.indexOf('D') < 0) {
+      this.Day2.style.display = 'none';
+    }
+
+    Time2 = document.createElement('select');
+    Time2.setAttribute('id','DW_Time2'); 
+    Time2.widget = this;
+    this.Time2 = Time2;
+    if (menu_set_2.indexOf('T') < 0) {
+      this.Time2.style.display = 'none';
+    }
+
+    if (climatology_1 != climatology_2) {
+      error_msg = "DateWidget ERROR:  render: menu_set_1 \"" + menu_set_1 + "\" and menu_set_2 \"" + menu_set_2 +
+                  "\" must both include or both exclude the \"Y\" flag in the menu_set" ;
+      throw(error_msg);
+    }
+  }
+
+  // Create the table that holds the menus
+
+  var DW_table, DW_tr1, DW_td1, DW_tr2, DW_td2;
+
+  DW_table = document.createElement('table');
+  DW_table.setAttribute('id', 'DW_table');
+  DW_tbody = document.createElement('tbody');
+  DW_tbody.setAttribute('id', 'DW_tbody');
+  DW_tr1 = document.createElement('tr');
+  DW_tr1.setAttribute('id', 'DW_tr1');
+  DW_td1 = document.createElement('td');
+  DW_td1.setAttribute('id', 'DW_td1');
+  DW_table.appendChild(DW_tbody);
+  DW_tbody.appendChild(DW_tr1);
+  DW_tr1.appendChild(DW_td1);
+
+  // Create the first DateWidget
+  // Add the hidden menus first, then order the visible ones as per formatting instructions
+  if (Year1.style.display == 'none') {
+    DW_td1.appendChild(Year1);
+    DW_td1.appendChild(Text1);
+  }
+  if (Month1.style.display == 'none') {
+    DW_td1.appendChild(Month1);
+  }
+  if (Day1.style.display == 'none') {
+    DW_td1.appendChild(Day1);
+  }
+  if (Time1.style.display == 'none') {
+    DW_td1.appendChild(Time1);
+  }
+  for (i=0; i<menu_set_1.length; i++) {
+    switch (menu_set_1.charAt(i)) {
+      case 'Y':
+        DW_td1.appendChild(Year1);
+        break;
+      case 'M':
+        DW_td1.appendChild(Month1);
+        break;
+      case 'D':
+        DW_td1.appendChild(Day1);
+        break;
+      case 'T':
+        DW_td1.appendChild(Time1);
+        break;
+      default:
+        error_msg = "DateWidget ERROR:  render: menu_set \"" + menu_set_1 + "\" must contain only characters from \"YMDT\"";
+        throw(error_msg);
+        break;
+    }
+  }
+
+  if (menu_set_2) {
+    // Add a second row to the table
+    DW_tr2 = document.createElement('tr');
+    DW_tr2.setAttribute('id', 'DW_tr2');
+    DW_td2 = document.createElement('td');
+    DW_td2.setAttribute('id', 'DW_td2');
+    DW_tbody.appendChild(DW_tr2);
+    DW_tr2.appendChild(DW_td2);
+
+    // Add the hidden menus first, then order the visible ones as per formatting instructions
+    if (Year2.style.display == 'none') {
+      DW_td2.appendChild(Year2);
+      DW_td2.appendChild(Text2);
+    }
+    if (Month2.style.display == 'none') {
+      DW_td2.appendChild(Month2);
+    }
+    if (Day2.style.display == 'none') {
+      DW_td2.appendChild(Day2);
+    }
+    if (Time2.style.display == 'none') {
+      DW_td2.appendChild(Time2);
+    }
+    // Create the second DateWidget
+    for (i=0; i<menu_set_2.length; i++) {
+      switch (menu_set_2.charAt(i)) {
+        case 'Y':
+          DW_td2.appendChild(Year2);
+          break;
+        case 'M':
+          DW_td2.appendChild(Month2);
+          break;
+        case 'D':
+          DW_td2.appendChild(Day2);
+          break;
+        case 'T':
+          DW_td2.appendChild(Time2);
+          break;
+        default:
+          error_msg = "DateWidget ERROR:  render: menu_set \"" + menu_set_2 + "\" must contain only characters from \"YMDT\"";
+          throw(error_msg);
+          break;
+      }
+    }
+  }
+
+  node.appendChild(DW_table);
+
+  this.initializeYearMenu(Year1);
+  if (menu_set_2) {
+    this.initializeYearMenu(Year2);
+  }
+ 
+  this.visible = 1;
+
+}
 /**
  * Creates the table of menus associated with the DateWidget.
  * <p>
