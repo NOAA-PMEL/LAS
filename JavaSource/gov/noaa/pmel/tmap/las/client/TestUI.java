@@ -78,6 +78,8 @@ public class TestUI extends LASEntryPoint {
 					LatLngBounds bounds = LatLngBounds.newInstance(LatLng.newInstance(grid_south, grid_west), LatLng.newInstance(grid_north, grid_east));
 					
 					refMap.setDataBounds(bounds, delta, true);
+					refMap.getResetWidget().setDataBounds(bounds);
+					refMap.getResetWidget().setSelectionBounds(bounds);
 					refMap.getRegionWidget().setSelectedIndex(0);
 					mDatasetPanel.hide();
 					operationsWidget.setOperations(rpcService, null, selectedVariable.getDSID(), selectedVariable.getID(), operationsMenu);
@@ -104,7 +106,7 @@ public class TestUI extends LASEntryPoint {
 				mDatasetPanel.hide();			
 			}
 		});
-		refMap = new ReferenceMap(LatLng.newInstance(0.0, 0.0), 1, 370, 360);
+		refMap = new ReferenceMap(LatLng.newInstance(0.0, 0.0), 1, 256, 360);
 		
         dsWidget.init(rpcService);
         RootPanel.get("refmap").add(refMap);
@@ -193,12 +195,11 @@ public class TestUI extends LASEntryPoint {
 		AxisSerializable zAxis = selectedVariable.getGrid().getZAxis();
 		if ( zAxis != null ) {
 			z.clear();
-			if (zAxis.getV() != null) {
-				Map<String, String> v = zAxis.getV();
-				for (Iterator vIt = v.keySet().iterator(); vIt.hasNext();) {
-					String key = (String) vIt.next();
-					String value = v.get(key);
-					z.addItem(key, value);
+			if (zAxis.getNames() != null) {
+				String names[] = zAxis.getNames();
+				String values[] = zAxis.getValues();
+				for (int i=0; i<names.length;i++) {
+					z.addItem(names[i], values[i]);
 				}
 			} else {
 				ArangeSerializable a = zAxis.getArangeSerializable();

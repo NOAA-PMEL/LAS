@@ -7,7 +7,7 @@ public class GridSerializable implements IsSerializable {
 	AxisSerializable xAxis;
 	AxisSerializable yAxis;
 	AxisSerializable zAxis;
-	AxisSerializable tAxis;
+	TimeAxisSerializable tAxis;
 	/**
 	 * @return the xAxis
 	 */
@@ -29,7 +29,7 @@ public class GridSerializable implements IsSerializable {
 	/**
 	 * @return the tAxis
 	 */
-	public AxisSerializable getTAxis() {
+	public TimeAxisSerializable getTAxis() {
 		return tAxis;
 	}
 	/**
@@ -53,7 +53,7 @@ public class GridSerializable implements IsSerializable {
 	/**
 	 * @param axis the tAxis to set
 	 */
-	public void setTAxis(AxisSerializable axis) {
+	public void setTAxis(TimeAxisSerializable axis) {
 		tAxis = axis;
 	}
 	/**
@@ -67,5 +67,19 @@ public class GridSerializable implements IsSerializable {
 	 */
 	public void setID(String id) {
 		this.ID = id;
+	}
+	
+	public AxisSerializable getAxis(String type) {
+		if ( type.equals("t") ) {
+			return tAxis;
+		} else if ( type.equals("z") ) {
+			return zAxis;
+		} else if ( type.equals("y") ) {
+			return yAxis;
+		} else if ( type.equals("x") ) {
+			return xAxis;
+		} else {
+			return null;
+		}
 	}
 }

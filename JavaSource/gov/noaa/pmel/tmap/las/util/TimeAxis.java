@@ -3,6 +3,12 @@
  */
 package gov.noaa.pmel.tmap.las.util;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+
+import gov.noaa.pmel.tmap.las.client.AxisSerializable;
+import gov.noaa.pmel.tmap.las.client.TimeAxisSerializable;
+
 import org.jdom.Element;
 
 /**
@@ -14,6 +20,13 @@ public class TimeAxis extends Axis implements TimeAxisInterface {
     
     public TimeAxis(Element element) {
         super(element);
+    }
+    
+    /* (non-Javadoc)
+     * @see gov.noaa.pmel.tmap.las.util.TimeAxisInterface#isDayNeeded()
+     */
+    public boolean isClimatology() {
+        return Boolean.valueOf(element.getAttributeValue("climatology")).booleanValue();
     }
     /* (non-Javadoc)
      * @see gov.noaa.pmel.tmap.las.util.TimeAxisInterface#isDayNeeded()
@@ -89,7 +102,11 @@ public class TimeAxis extends Axis implements TimeAxisInterface {
      * @see gov.noaa.pmel.tmap.las.util.TimeAxisInterface#getMinuteInterval()
      */
     public double getMinuteInterval() {
-        return Double.valueOf(element.getAttributeValue("minuteInterval")).doubleValue();
+    	if ( element.getAttributeValue("minuteInterval") != null && !element.getAttributeValue("minuteInterval").equals("")) {
+           return Double.valueOf(element.getAttributeValue("minuteInterval")).doubleValue();
+        } else {
+        	return 0.0;
+        }
     }
 
     /* (non-Javadoc)
@@ -127,5 +144,40 @@ public class TimeAxis extends Axis implements TimeAxisInterface {
         element.setAttribute("yearNeeded", String.valueOf(yearNeeded));
     }
     
+    public TimeAxisSerializable getTimeAxisSerializable() {
+    	TimeAxisSerializable t = new TimeAxisSerializable();
+    	t.setType(getType());
+		t.setID(getID());
+		t.setHi(getHi());
+		t.setID(getID());
+		t.setLo(getLo());
+		t.setName(getName());
+		t.setAttributes(getAttributesAsMap());
+		
+		if ( getVerticies() != null && getVerticies().size() > 0) {
+			t.setWidget_type("menu");
+			ArrayList<NameValuePair> v = getVerticies();
+			String[] names = new String[v.size()];
+			String[] values = new String[v.size()];
+			int i=0;
+			for (Iterator vIt = v.iterator(); vIt.hasNext();) {
+				NameValuePair pair = (NameValuePair) vIt.next();
+				names[i] = pair.getName();
+				values[i] = pair.getValue();
+				i++;
+			}
+			t.setNames(names);
+			t.setValues(values);
+		} else {
+			t.setWidget_type("widget");
+			t.setYearNeeded(isYearNeeded());
+			t.setMonthNeeded(isMonthNeeded());
+			t.setDayNeeded(isDayNeeded());
+			t.setHourNeeded(isHourNeeded());
+			t.setMinuteInterval(getMinuteInterval());
+			t.setClimatology(isClimatology());
+		}
+    	return t;
+    }
     
 }

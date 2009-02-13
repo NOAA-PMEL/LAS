@@ -13,10 +13,10 @@ public class ResetWidget extends Composite {
     LatLng mCenter;
     int mZoom;
     Button resetButton;
-    LatLngBounds dataBounds;
-	private MapWidget mMap;
-	public ResetWidget (MapWidget map) {
-		this.mMap = map;
+    private LatLngBounds dataBounds;
+	private ReferenceMap refMap;
+	public ResetWidget (ReferenceMap map) {
+		this.refMap = map;
 		this.resetButton = new Button("Reset");
 		this.resetButton.addStyleName("map-button");
 		this.resetButton.addClickListener(click);
@@ -26,10 +26,10 @@ public class ResetWidget extends Composite {
 		public void onClick(Widget sender) {
 			if ( dataBounds == null ) {
 				Window.alert("Please select a variable.");
+			} else {
+			    reset();
 			}
-			int zoom = mMap.getBoundsZoomLevel(dataBounds);
-			mMap.setZoomLevel(zoom);
-			mMap.setCenter(dataBounds.getCenter());	
+			
 		}
 	};
 	/**
@@ -62,7 +62,7 @@ public class ResetWidget extends Composite {
 	public void setSelectionBounds(LatLngBounds dataBounds) {
 		
 		setCenter(dataBounds.getCenter());
-		setZoom(mMap.getBoundsZoomLevel(dataBounds));
+		setZoom(refMap.getBoundsZoomLevel(dataBounds));
 		
 	}
 	public void setVisible(boolean visible) {
@@ -71,5 +71,11 @@ public class ResetWidget extends Composite {
 	public void setDataBounds(LatLngBounds dataBounds) {
 		this.dataBounds = dataBounds;
 		
+	}
+	public LatLngBounds getDataBounds() {
+		return this.dataBounds;
+	}
+	public void reset() {
+		refMap.setDataBounds(dataBounds, refMap.getDelta(), true);
 	}
 }

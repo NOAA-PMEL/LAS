@@ -4,6 +4,7 @@ import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.maps.client.geom.LatLng;
 import com.google.gwt.maps.client.geom.LatLngBounds;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
@@ -16,13 +17,13 @@ public class LatLonWidget extends Composite {
 	TextBox eastLon;
 	Label lonLabel;
 	Label latLabel;
-	HorizontalPanel panel;
+	Grid panel;
 	NumberFormat latFormat;
 	NumberFormat lonFormat;
 	private static final String boxWidth = "70px";
 	public LatLonWidget() {
-		panel = new HorizontalPanel();
-		panel.setVerticalAlignment(HasVerticalAlignment.ALIGN_BOTTOM);
+		panel = new Grid(2,4);
+		
 		latLabel = new Label("Lat:");
 		lonLabel = new Label("Lon:");
 
@@ -38,12 +39,12 @@ public class LatLonWidget extends Composite {
 		eastLon.setWidth(boxWidth);
 		westLon.setWidth(boxWidth);
       
-		panel.add(latLabel);
-		panel.add(northLat);
-		panel.add(southLat);
-		panel.add(lonLabel);
-		panel.add(eastLon);
-		panel.add(westLon);
+		panel.setWidget(0, 0, latLabel);
+		panel.setWidget(0, 1, northLat);
+		panel.setWidget(1, 1, southLat);
+		panel.setWidget(0, 2, lonLabel);
+		panel.setWidget(0, 3, eastLon);
+		panel.setWidget(1, 3, westLon);
 		latFormat = NumberFormat.getFormat("###.##");
 		lonFormat = NumberFormat.getFormat("####.##");
 		initWidget(panel);
@@ -88,5 +89,11 @@ public class LatLonWidget extends Composite {
 		westLon.setText(wlon_f);
 		eastLon.setText(elon_f);
 		
+	}
+	public String getXhi() {
+		return eastLon.getText();
+	}
+	public String getXlo() {
+		return westLon.getText();
 	}
 }

@@ -5,6 +5,7 @@ package gov.noaa.pmel.tmap.las.util;
 
 import gov.noaa.pmel.tmap.las.client.AxisSerializable;
 import gov.noaa.pmel.tmap.las.client.GridSerializable;
+import gov.noaa.pmel.tmap.las.client.TimeAxisSerializable;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -201,8 +202,8 @@ public class Grid extends Container implements Cloneable, GridInterface {
 			AxisSerializable a = getAxis("z").getAxisSerializable();
 			g.setZAxis(a);
 		}
-		if ( hasT() ) {
-			AxisSerializable a = getTime().getAxisSerializable();
+		if ( hasT() ) {			
+			TimeAxisSerializable a = getTime().getTimeAxisSerializable();
 			g.setTAxis(a);
 		}
 		return g;
