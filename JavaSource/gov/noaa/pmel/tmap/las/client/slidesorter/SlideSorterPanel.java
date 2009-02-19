@@ -1,17 +1,12 @@
 package gov.noaa.pmel.tmap.las.client.slidesorter;
 //TODO handle error and batch responses...
-import java.util.Iterator;
-import java.util.List;
-
-import gov.noaa.pmel.tmap.las.client.ArangeSerializable;
 import gov.noaa.pmel.tmap.las.client.AxisSerializable;
-import gov.noaa.pmel.tmap.las.client.AxisWidget;
 import gov.noaa.pmel.tmap.las.client.DatasetButton;
-import gov.noaa.pmel.tmap.las.client.LASDateWidget;
 import gov.noaa.pmel.tmap.las.client.LASRequestWrapper;
 import gov.noaa.pmel.tmap.las.client.RPCServiceAsync;
-import gov.noaa.pmel.tmap.las.client.TimeAxisSerializable;
 import gov.noaa.pmel.tmap.las.client.VariableSerializable;
+
+import java.util.List;
 
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestBuilder;
@@ -19,15 +14,11 @@ import com.google.gwt.http.client.RequestCallback;
 import com.google.gwt.http.client.RequestException;
 import com.google.gwt.http.client.Response;
 import com.google.gwt.http.client.URL;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.ChangeListener;
-import com.google.gwt.user.client.ui.ClickListener;
-import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.FocusPanel;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.Image;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.TreeItem;
@@ -48,6 +39,13 @@ public class SlideSorterPanel extends SlideSorterComposite {
 	
 	/* The base widget used to layout the other widgets.  A single column of three rows. */
 	Grid grid;
+	
+	/* The top bar of widgets... */
+	HorizontalPanel top;
+	
+	/* The current data set and variable.  */
+	Label datasetLabel;
+	
 	/* The top widget.  A data set/variable selector button hooked to a data set widget tree.  */
 	DatasetButton datasetButton;
 		
@@ -89,9 +87,8 @@ public class SlideSorterPanel extends SlideSorterComposite {
 	
 	/**
 	 * Builds a SlideSorter panel with a default plot for the variable.  See {@code}SlideSorter(LASRequest) if you want more options on the initial plot.
-	 
 	 */
-	public SlideSorterPanel(List<AxisSerializable> axes, String dsid, String varid, String op, String compareAxis, String view, String productServer, RPCServiceAsync rpcService) {
+	public SlideSorterPanel(List<AxisSerializable> axes, String ds_name, String var_name, String dsid, String varid, String op, String compareAxis, String view, String productServer, RPCServiceAsync rpcService) {
 		super(axes);
 		this.dsid = dsid;
 		this.varid = varid;
@@ -109,7 +106,15 @@ public class SlideSorterPanel extends SlideSorterComposite {
 		grid.addStyleName("regularBackground");
 		datasetButton = new DatasetButton(rpcService);
 		datasetButton.addTreeListener(datasetTreeListener);
-		grid.setWidget(0, 0, datasetButton);
+		
+		datasetLabel = new Label(ds_name+": "+var_name, true);
+		
+		top = new HorizontalPanel();
+		
+		top.add(datasetButton);
+		top.add(datasetLabel);
+		
+		grid.setWidget(0, 0, top);
 		plot = new HTML();
 		plot.setHTML("<img src=\"../JavaScript/components/mozilla_blu.gif\" alt=\"Spinner\"/>");
 		grid.setWidget(1, 0, plot);
@@ -131,7 +136,6 @@ public class SlideSorterPanel extends SlideSorterComposite {
 			}
 		}
 		
-		grid.setWidget(0, 0, datasetButton);
 		grid.setWidget(1, 0, plot);
 		initWidget(grid);
 	}
@@ -216,7 +220,6 @@ public class SlideSorterPanel extends SlideSorterComposite {
 		}
 
 		public void onResponseReceived(Request request, Response response) {
-			spin.hide();
 			String doc = response.getText();
 			doc = doc.replaceAll("\n", "");
 			StringBuilder html = new StringBuilder();
@@ -238,6 +241,7 @@ public class SlideSorterPanel extends SlideSorterComposite {
 					}
 				}
 			}
+			spin.hide();
 			plot.setHTML(html.toString());
 		}
 	};

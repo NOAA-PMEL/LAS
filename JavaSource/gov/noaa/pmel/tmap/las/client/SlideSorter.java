@@ -2,7 +2,6 @@ package gov.noaa.pmel.tmap.las.client;
 
 import gov.noaa.pmel.tmap.las.client.map.MapButton;
 import gov.noaa.pmel.tmap.las.client.slidesorter.SlideSorterPanel;
-import gov.noaa.pmel.tmap.las.client.slidesorter.TimeWidget;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -254,10 +253,10 @@ public class SlideSorter extends LASEntryPoint {
 							LatLngBounds bounds = LatLngBounds.newInstance(LatLng.newInstance(grid_south, grid_west), LatLng.newInstance(grid_north, grid_east));
 							mapButton.getRefMap().initDataBounds(bounds, delta, true);
 							
-							SlideSorterPanel sp1 = new SlideSorterPanel(axes, vars[i].getDSID(), vars[i].getID(), op, compareAxis, view, productServer, rpcService);
+							SlideSorterPanel sp1 = new SlideSorterPanel(axes, vars[i].getDSName(), vars[i].getName(), vars[i].getDSID(), vars[i].getID(), op, compareAxis, view, productServer, rpcService);
 							slides.setWidget(0, 0, sp1);
 							panels.add(sp1);
-							SlideSorterPanel sp2 = new SlideSorterPanel(axes, vars[i].getDSID(), vars[i].getID(), op, compareAxis, view, productServer, rpcService);
+							SlideSorterPanel sp2 = new SlideSorterPanel(axes, vars[i].getDSName(), vars[i].getName(), vars[i].getDSID(), vars[i].getID(), op, compareAxis, view, productServer, rpcService);
 							slides.setWidget(0, 1, sp2);
 							panels.add(sp2);
 							update(false);
