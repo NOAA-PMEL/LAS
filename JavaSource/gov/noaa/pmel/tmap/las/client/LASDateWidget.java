@@ -22,13 +22,19 @@ public class LASDateWidget extends JavaScriptObject {
 	}-*/;
 	public final native void alert() /*-{ this.alert(); }-*/;
 	public final native void render(String id, String menu_set_1, String menu_set_2) /*-{ this.render(id, menu_set_1, menu_set_2); }-*/;
+	public final native void render(String id, String menu_set_1) /*-{ this.render(id, menu_set_1); }-*/;
 	public final native void renderToNode(JavaScriptObject node, String menu_set_1, String menu_set_2) /*-{this.renderToNode(node, menu_set_1, menu_set_2); }-*/;
+	public final native void renderToNode(JavaScriptObject node, String menu_set_1) /*-{this.renderToNode(node, menu_set_1); }-*/;
 	public final native String getDateHi() /*-{ return this.getDateHi(); }-*/;
 	public final native String getDateLo() /*-{ return this.getDateLo(); }-*/;
 	public final native String getDate1_Ferret() /*-{ return this.getDate1_Ferret(); }-*/;
 	public final native String getDate2_Ferret() /*-{ return this.getDate2_Ferret(); }-*/;
 	public final native void setDate1(String date, int add_sub) /*-{ this.setDate1(date, add_sub); }-*/;
 	public final native void setDate2(String date, int add_sub) /*-{ this.setDate2(date, add_sub); }-*/;
+	public final native void enable(String hilo) /*-{ this.enable(hilo); }-*/;
+	public final native void enableNode(String hilo) /*-{ this.enableNode(hilo); }-*/;
+	public final native void disable(String hilo) /*-{ this.disable(hilo); }-*/;
+	public final native void disableNode(String hilo) /*-{ this.disableNode(hilo); }-*/;
 	public final native void hide() /*-{ this.hide(); }-*/;
 	public final native void show() /*-{ this.show(); }-*/;
 	protected LASDateWidget() {

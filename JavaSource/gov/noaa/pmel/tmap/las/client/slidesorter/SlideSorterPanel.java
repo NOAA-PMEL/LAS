@@ -10,7 +10,6 @@ import gov.noaa.pmel.tmap.las.client.DatasetButton;
 import gov.noaa.pmel.tmap.las.client.LASDateWidget;
 import gov.noaa.pmel.tmap.las.client.LASRequestWrapper;
 import gov.noaa.pmel.tmap.las.client.RPCServiceAsync;
-import gov.noaa.pmel.tmap.las.client.SlideSorterComposite;
 import gov.noaa.pmel.tmap.las.client.TimeAxisSerializable;
 import gov.noaa.pmel.tmap.las.client.VariableSerializable;
 
@@ -28,6 +27,8 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FocusPanel;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.Image;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.TreeItem;
 import com.google.gwt.user.client.ui.TreeListener;
@@ -49,10 +50,7 @@ public class SlideSorterPanel extends SlideSorterComposite {
 	Grid grid;
 	/* The top widget.  A data set/variable selector button hooked to a data set widget tree.  */
 	DatasetButton datasetButton;
-	
-	/* An empty Widget into which the LASDateWidgets will be rendered, if date widgets are required. */
-	FocusPanel datePanel;
-	
+		
 	/* Since I don't know how to register for events on the LASDateWidget, I'll do it myself, by listening on the datePanel. */
 	boolean firstClick = true;
 	String firstValue;
@@ -107,27 +105,34 @@ public class SlideSorterPanel extends SlideSorterComposite {
 		spin.add(spinImage);
 		
 		grid = new Grid(3, 1);
+		
 		grid.addStyleName("regularBackground");
 		datasetButton = new DatasetButton(rpcService);
 		datasetButton.addTreeListener(datasetTreeListener);
-		datePanel = new FocusPanel();
-		datePanel.addClickListener(datePanelClickListener);
-		plot = new HTML();
 		grid.setWidget(0, 0, datasetButton);
+		plot = new HTML();
 		plot.setHTML("<img src=\"../JavaScript/components/mozilla_blu.gif\" alt=\"Spinner\"/>");
-		grid.setWidget(1,0,plot);
+		grid.setWidget(1, 0, plot);
 		if ( hasDateWidget() || hasDateMenu() ) {
 			if ( hasDateMenu() ) {
 				dateMenu.addChangeListener(comparisonAxisChangeListener);
-			} else {	
-				dateWidget.renderToNode(datePanel.getElement(), getRenderString(), null);
-			}
+				if ( compareAxis.equals("t") ) grid.setWidget(2,0,dateMenu);
+				grid.setWidget(2, 0, dateMenu);
+			} else {
+				dateWidget.addChangeListener(comparisonAxisChangeListener);
+				if ( compareAxis.equals("t") ) grid.setWidget(2,0,dateWidget);
+				grid.setWidget(2, 0, dateWidget);
+			}			
 		} 
 		if ( hasXYZMenu() ) {
 			xyzMenu.addChangeListener(comparisonAxisChangeListener);
-			grid.setWidget(2, 0, xyzMenu);
+			if ( !compareAxis.equals("t") ) {
+			    grid.setWidget(2, 0, xyzMenu);
+			}
 		}
-		switchCompareAxis(compareAxis);
+		
+		grid.setWidget(0, 0, datasetButton);
+		grid.setWidget(1, 0, plot);
 		initWidget(grid);
 	}
 	public void switchCompareAxis(String compareAxis) {
@@ -136,7 +141,7 @@ public class SlideSorterPanel extends SlideSorterComposite {
 			if ( hasDateMenu() ) {
 				grid.setWidget(2, 0, dateMenu);
 			} else {
-				grid.setWidget(2, 0, datePanel);
+				grid.setWidget(2, 0, dateWidget);
 			}
 		} else {
 			grid.setWidget(2, 0, xyzMenu);
@@ -150,7 +155,6 @@ public class SlideSorterPanel extends SlideSorterComposite {
 		this.view1hi = view1hi;
 		this.view2lo = view2lo;
 		this.view2hi = view2hi;
-		
 		if (popup) {
 			spin.setPopupPosition(plot.getAbsoluteLeft(), plot.getAbsoluteTop());
 			spin.show();
@@ -173,7 +177,7 @@ public class SlideSorterPanel extends SlideSorterComposite {
 			if ( hasDateMenu() ) {
 				lasRequest.setRange("t", dateMenu.getSelectedValue(), dateMenu.getSelectedValue(), 0);
 			} else if ( hasDateWidget() ) {
-				lasRequest.setRange("t", dateWidget.getDate1_Ferret(), dateWidget.getDate1_Ferret(), 0);
+				lasRequest.setRange("t", dateWidget.getFerretDateLo(), dateWidget.getFerretDateLo(), 0);
 			}
 		}
 
@@ -191,7 +195,7 @@ public class SlideSorterPanel extends SlideSorterComposite {
 		if ( fixedAxis.equals("z") ) {
 		    // Use the supplied value
 			lasRequest.setRange("z", fixedAxisValue, fixedAxisValue, 0);
-		} else {
+		} else if ( !fixedAxis.equals("none") ) {
 			// Get if from the menu
 			lasRequest.setRange("z", xyzMenu.getSelectedValue(), xyzMenu.getSelectedValue(), 0);
 		}
@@ -222,7 +226,7 @@ public class SlideSorterPanel extends SlideSorterComposite {
 				if ( results.item(n) instanceof Element ) {
 					Element result = (Element) results.item(n);
 					if ( result.getAttribute("type").equals("image") ) {
-						html.append("<a target=\"_blank\" href=\""+result.getAttribute("url")+"\"><img height=\"100%\" width=\"100%\" src=\""+result.getAttribute("url")+"\" alt=\"Plot Image\"/></a>");
+					    html.append("<a target=\"_blank\" href=\""+result.getAttribute("url")+"\"><img height=\"100%\" width=\"100%\" src=\""+result.getAttribute("url")+"\" alt=\"Plot Image\"/></a>");
 					} else if ( result.getAttribute("type").equals("error") ) {
 						if ( result.getAttribute("ID").equals("las_message") ) {
 							Node text = result.getFirstChild();
@@ -243,25 +247,7 @@ public class SlideSorterPanel extends SlideSorterComposite {
 		}
 		
 	};
-	// TODO The date panel should be called dateWidget and should be in the super class...
-	ClickListener datePanelClickListener = new ClickListener() {
-
-		public void onClick(Widget sender) {
-			if ( firstClick ) {
-				firstClick = !firstClick;
-				firstValue = dateWidget.getDate1_Ferret();
-			} else {
-				firstClick = !firstClick;
-				String currentValue = dateWidget.getDate1_Ferret();
-				// The value changed, refresh the plots.
-				if ( !currentValue.equals(firstValue)) {
-					refreshPlot(fixedAxis, fixedAxisValue, view1lo, view1hi, view2lo, view2hi, true);
-				}
-			}
-			
-		}
-		
-	};
+	
 	TreeListener datasetTreeListener = new TreeListener() {
 
 		public void onTreeItemSelected(TreeItem item) {

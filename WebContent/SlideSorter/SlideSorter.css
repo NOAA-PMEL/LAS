@@ -193,6 +193,12 @@ body {
 /*
  * Elements identified by class (begin with '.')
  */
+.red {
+	color: #F44;
+}
+.black {
+	color: #000;
+}
 
 .regularBackground {
   background-color: #ACE;
