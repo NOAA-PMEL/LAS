@@ -1,13 +1,21 @@
-package gov.noaa.pmel.tmap.las.client;
+package gov.noaa.pmel.tmap.las.client.slidesorter;
+
+import gov.noaa.pmel.tmap.las.client.ArangeSerializable;
+import gov.noaa.pmel.tmap.las.client.AxisSerializable;
+import gov.noaa.pmel.tmap.las.client.AxisWidget;
+import gov.noaa.pmel.tmap.las.client.DateTimeWidget;
+import gov.noaa.pmel.tmap.las.client.LASDateWidget;
+import gov.noaa.pmel.tmap.las.client.TimeAxisSerializable;
 
 import java.util.Iterator;
 import java.util.List;
 
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RadioButton;
 /**
  * 
- * This object holds the menus that control the specification of the orthogonal axis that belongs to the panel.  A SlideSorter
+ * This object holds the menus that control the specification of the orthogonal axis that belongs to the panel.  A SlideSorterOld
  * UI element might need two of these axes (one for dates and one for a xyz axis) to completely specify the choices for the orthogonal axes.
  * 
  * There are 3 different ways an orthogonal axis might be specified:
@@ -21,7 +29,7 @@ import com.google.gwt.user.client.ui.RadioButton;
  */
 
 public class SlideSorterComposite extends Composite {
-	public LASDateWidget dateWidget;
+	public DateTimeWidget dateWidget;
 	public AxisWidget dateMenu;
 	public AxisWidget xyzMenu;
 	boolean hasDateWidget = false;
@@ -49,7 +57,7 @@ public class SlideSorterComposite extends Composite {
 					if ( tAxis.isHourNeeded() ) {
 						interval = tAxis.getMinuteInterval();
 					}
-					dateWidget = dateWidget.init(lo, hi, (int) interval, 0, 0, 0);
+					dateWidget = new DateTimeWidget(tAxis, 0, 0, false);
 					renderString = tAxis.getRenderString();
 					hasDateWidget = true;
 				}

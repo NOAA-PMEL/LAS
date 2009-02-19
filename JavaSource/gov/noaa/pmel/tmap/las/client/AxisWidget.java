@@ -13,6 +13,35 @@ public class AxisWidget extends Composite {
 	String label;
     ListBox axis;
     NumberFormat format = NumberFormat.getFormat("###.##");
+    public AxisWidget(AxisSerializable ax) {
+    	if ( ax.getNames() != null && ax.getNames().length > 0) {
+    		this.type = ax.getType();
+        	axis = new ListBox();
+        	axis.setName(type);
+        	String[] names = ax.getNames();
+        	String[] values = ax.getValues();
+        	for (int i=0; i < names.length; i++) {
+    			axis.addItem(names[i], values[i]);
+    		}
+        	axis.setSelectedIndex(0);
+        	initWidget(axis);
+    	} else {
+    		this.type = ax.getType();
+        	axis = new ListBox();
+        	axis.setName(type);
+        	ArangeSerializable arange = ax.getArangeSerializable();
+        	int size = Integer.valueOf(arange.getSize());
+        	double start = Double.valueOf(arange.getStart());
+        	double step = Double.valueOf(arange.getStep());
+        	for ( int i=0; i < size; i++ ) {
+        		double value = start + i*step;
+        		String v = format.format(value);
+        		axis.addItem(v);
+        	}
+        	axis.setSelectedIndex(0);
+        	initWidget(axis);
+    	}
+    }
     public AxisWidget(String type, double start, double step, int size) {
     	this.type = type;
     	axis = new ListBox();
