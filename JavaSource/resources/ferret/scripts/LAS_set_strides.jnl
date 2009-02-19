@@ -39,7 +39,7 @@ DEFINE SYMBOL memsize = ($FERRET_MEMORY"6.4")* 1.e6
 ! this case set up index strides.
 
 DEFINE SYMBOL no_native = 0
-IF ($data_var_only"=|*>1") THEN 
+IF ($data_var_only"0|*>1") THEN 
    DEFINE SYMBOL check_for_des =  `($data_var_only)[d=($data_num)],RETURN=dsetpath`
 ELSE
    DEFINE SYMBOL check_for_des =  `($data_var)[d=($data_num)],RETURN=dsetpath`
