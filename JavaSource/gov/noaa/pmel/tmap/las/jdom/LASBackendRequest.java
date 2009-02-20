@@ -15,6 +15,7 @@ import gov.noaa.pmel.tmap.las.util.Constraint;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -22,6 +23,8 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.jdom.Attribute;
+import org.jdom.Content;
+import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.JDOMException;
 import org.joda.time.DateTime;
@@ -1640,4 +1643,67 @@ public class LASBackendRequest extends LASDocument {
                 }
                 return false;
 	}
+	public String getKey(Element operation) {
+		List<String> excludeGroups = new ArrayList<String>();
+		LASDocument doc = (LASDocument) this.clone();
+		try {
+			Element properties = operation.getChild("properties");
+	        if ( properties != null ) {
+	            List groups = properties.getChildren("property_group");
+	            for (Iterator propIt = groups.iterator(); propIt.hasNext();) {
+	                Element group = (Element) propIt.next();
+	                String type = group.getAttributeValue("type");
+	                if ( type.equals("backend_request")) {
+	                    List bk_req_props = group.getChildren("property");
+	                    for (Iterator bk_reqIt = bk_req_props.iterator(); bk_reqIt.hasNext();) {
+	                        Element bk_req_prop = (Element) bk_reqIt.next();
+	                        String name = bk_req_prop.getChildTextNormalize("name");
+	                        String value = bk_req_prop.getChildTextNormalize("value");
+	                        if ( name.equals("exclude")) {
+	                            String[] excludes = value.split(",");
+	                            for (int i = 0; i < excludes.length; i++) {
+	                                excludeGroups.add(excludes[i]);
+	                            }
+	                        }
+	                    }
+	                }
+	            }
+	        }
+	        
+	        if (excludeGroups.contains("variables") ) {
+	            boolean removed = doc.getRootElement().removeChildren("dataObjects");
+	        }
+			return JDOMUtils.MD5Encode(doc.toString());
+		} catch (UnsupportedEncodingException e) {
+			return String.valueOf(Math.random());
+		}
+	}
+	public void removePropertyExcludedGroups(Element operation) {
+        Element properties = operation.getChild("properties");
+        if ( properties != null ) {
+            List groups = properties.getChildren("property_group");
+            for (Iterator propIt = groups.iterator(); propIt.hasNext();) {
+                Element group = (Element) propIt.next();
+                String type = group.getAttributeValue("type");
+                if ( type.equals("backend_request")) {
+                    List bk_req_props = group.getChildren("property");
+                    for (Iterator bk_reqIt = bk_req_props.iterator(); bk_reqIt.hasNext();) {
+                        Element bk_req_prop = (Element) bk_reqIt.next();
+                        String name = bk_req_prop.getChildTextNormalize("name");
+                        String value = bk_req_prop.getChildTextNormalize("value");
+                        if ( name.equals("exclude")) {
+                            String[] excludes = value.split(",");
+                            for (int i = 0; i < excludes.length; i++) {
+                                boolean removed = this.removePropertyGroup(excludes[i].trim());
+                                if ( !removed ) {
+                                    log.warn("Attempt to remove property group "+excludes[i]+" from backend request failed.");
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+    }
 }

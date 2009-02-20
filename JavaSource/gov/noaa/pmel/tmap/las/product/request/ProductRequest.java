@@ -639,7 +639,7 @@ public class ProductRequest {
         // Check to see if there are any property groups that were listed in an
         // "backend_request", "exclude" property for this operation and therefore should be 
         // removed from this request.  
-        removePropertyExcludedGroups(operation, backendRequestDocument);
+        backendRequestDocument.removePropertyExcludedGroups(operation);
         
         // If this is an analysis or comparison with re-grid operation, we need to remove the init_script property.
         if ( do_analysis || regrid ) {
@@ -647,7 +647,8 @@ public class ProductRequest {
         }
 
         // Compute the cache key as the document exists now without the key in the document.
-        String key = JDOMUtils.MD5Encode(backendRequestDocument.toString());
+        String key = backendRequestDocument.getKey(operation);
+        
         cacheKeys.add(key);
 
         // Add the SESSIONID after making the cache key to it doesn't pollute the key.
@@ -865,34 +866,7 @@ public class ProductRequest {
     }
 
 
-    private void removePropertyExcludedGroups(Element operation, LASBackendRequest backendRequestDocument) {
-        Element properties = operation.getChild("properties");
-        if ( properties != null ) {
-            List groups = properties.getChildren("property_group");
-            for (Iterator propIt = groups.iterator(); propIt.hasNext();) {
-                Element group = (Element) propIt.next();
-                String type = group.getAttributeValue("type");
-                if ( type.equals("backend_request")) {
-                    List bk_req_props = group.getChildren("property");
-                    for (Iterator bk_reqIt = bk_req_props.iterator(); bk_reqIt.hasNext();) {
-                        Element bk_req_prop = (Element) bk_reqIt.next();
-                        String name = bk_req_prop.getChildTextNormalize("name");
-                        String value = bk_req_prop.getChildTextNormalize("value");
-                        if ( name.equals("exclude")) {
-                            String[] excludes = value.split(",");
-                            for (int i = 0; i < excludes.length; i++) {
-                                boolean removed = backendRequestDocument.removePropertyGroup(excludes[i].trim());
-                                if ( !removed ) {
-                                    log.warn("Attempt to remove property group "+excludes[i]+" from backend request failed.");
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-    }
+    
 
 
     /**
