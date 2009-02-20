@@ -180,6 +180,18 @@ public class DatabaseTool extends TemplateTool {
             con =  DriverManager.getConnection(connectionURL, user, password);
             stmt = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
                     ResultSet.CONCUR_READ_ONLY);
+            String fetch_size = lasBackendRequest.getDatabaseProperty("fetch_size");
+            int f = 0;
+            if ( fetch_size != null && !fetch_size.equals("") ) {
+            	try {
+					f = Integer.valueOf(fetch_size);
+				} catch (RuntimeException e) {
+					f = 0;
+				}
+            }
+ 	
+            stmt.setFetchSize(f);
+            
             log.debug("executeQuery: "+statement);
             rset = stmt.executeQuery(statement);
             log.debug("Done with query.");
