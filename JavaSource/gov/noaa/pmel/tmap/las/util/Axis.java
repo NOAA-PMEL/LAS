@@ -1,6 +1,6 @@
 package gov.noaa.pmel.tmap.las.util;
 
-import gov.noaa.pmel.tmap.las.client.AxisSerializable;
+import gov.noaa.pmel.tmap.las.client.serializable.AxisSerializable;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;

@@ -1,6 +1,6 @@
 package gov.noaa.pmel.tmap.las.util;
 
-import gov.noaa.pmel.tmap.las.client.ArangeSerializable;
+import gov.noaa.pmel.tmap.las.client.serializable.ArangeSerializable;
 
 import org.jdom.Element;
 

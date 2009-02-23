@@ -3,9 +3,9 @@
  */
 package gov.noaa.pmel.tmap.las.util;
 
-import gov.noaa.pmel.tmap.las.client.AxisSerializable;
-import gov.noaa.pmel.tmap.las.client.GridSerializable;
-import gov.noaa.pmel.tmap.las.client.TimeAxisSerializable;
+import gov.noaa.pmel.tmap.las.client.serializable.AxisSerializable;
+import gov.noaa.pmel.tmap.las.client.serializable.GridSerializable;
+import gov.noaa.pmel.tmap.las.client.serializable.TimeAxisSerializable;
 
 import java.util.ArrayList;
 import java.util.Iterator;

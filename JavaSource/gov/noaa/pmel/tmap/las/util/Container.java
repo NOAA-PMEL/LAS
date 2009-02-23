@@ -1,6 +1,6 @@
 package gov.noaa.pmel.tmap.las.util;
 
-import gov.noaa.pmel.tmap.las.client.CategorySerializable;
+import gov.noaa.pmel.tmap.las.client.serializable.CategorySerializable;
 import gov.noaa.pmel.tmap.las.exception.LASException;
 import gov.noaa.pmel.tmap.las.filter.DocumentationFilter;
 
