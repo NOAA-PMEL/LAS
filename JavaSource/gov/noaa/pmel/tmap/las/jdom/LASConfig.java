@@ -16,9 +16,9 @@ import gov.noaa.pmel.tmap.addxml.DatasetsGridsAxesBean;
 import gov.noaa.pmel.tmap.addxml.FilterBean;
 import gov.noaa.pmel.tmap.addxml.GridBean;
 import gov.noaa.pmel.tmap.addxml.addXML;
-import gov.noaa.pmel.tmap.las.client.CategorySerializable;
-import gov.noaa.pmel.tmap.las.client.DatasetSerializable;
-import gov.noaa.pmel.tmap.las.client.VariableSerializable;
+import gov.noaa.pmel.tmap.las.client.serializable.CategorySerializable;
+import gov.noaa.pmel.tmap.las.client.serializable.DatasetSerializable;
+import gov.noaa.pmel.tmap.las.client.serializable.VariableSerializable;
 import gov.noaa.pmel.tmap.las.exception.LASException;
 import gov.noaa.pmel.tmap.las.filter.AttributeFilter;
 import gov.noaa.pmel.tmap.las.filter.CategoryFilter;
@@ -3410,9 +3410,11 @@ public class LASConfig extends LASDocument {
 								DateTime expires = df.parseDateTime(expires_att);
 								if ( expires.isBeforeNow() ) {
 									Vector<DatasetsGridsAxesBean> dgabs = updateSrc(src, src_type, update_time, update_interval, addXMLprops);
+									int src_index = 1;
 									for (Iterator dgabsIt = dgabs.iterator(); dgabsIt.hasNext();) {
 										DatasetsGridsAxesBean dgab = (DatasetsGridsAxesBean) dgabsIt.next();
-										long n = addSrc(dgab, dsetsE, dataset, src_datasets, src_grids, src_axes, ds_children, cache, src_key);
+										long n = addSrc(dgab, src_index, dsetsE, dataset, src_datasets, src_grids, src_axes, ds_children, cache, src_key);
+										src_index++;
 										nextUpdate = Math.min(n, nextUpdate);
 										if ( src_type.equalsIgnoreCase("netCDF") ) {
 											if ( addXMLprops.get("categories") != null && addXMLprops.get("categories").equalsIgnoreCase("true") ) {
@@ -3451,9 +3453,11 @@ public class LASConfig extends LASDocument {
 								
 							} else {
 								Vector<DatasetsGridsAxesBean> dgabs = updateSrc(src, src_type, update_time, update_interval, addXMLprops);
+								int src_index = 1;
 								for (Iterator dgabsIt = dgabs.iterator(); dgabsIt.hasNext();) {
 									DatasetsGridsAxesBean dgab = (DatasetsGridsAxesBean) dgabsIt.next();
-									long n = addSrc(dgab, dsetsE, dataset, src_datasets, src_grids, src_axes, ds_children, cache, src_key);
+									long n = addSrc(dgab, src_index, dsetsE, dataset, src_datasets, src_grids, src_axes, ds_children, cache, src_key);
+									src_index++;
 									nextUpdate = Math.min(n, nextUpdate);
 									if ( src_type.equalsIgnoreCase("netCDF") ) {
 										if ( addXMLprops.get("categories") != null && addXMLprops.get("categories").equalsIgnoreCase("true") ) {
@@ -3493,9 +3497,11 @@ public class LASConfig extends LASDocument {
 					if (src != null && src_type != null) {
 						String src_key = JDOMUtils.MD5Encode(src);
 						Vector<DatasetsGridsAxesBean> dgabs = updateSrc(src, src_type, update_time, update_interval, addXMLprops);
+						int src_index = 1;
 						for (Iterator dgabsIt = dgabs.iterator(); dgabsIt.hasNext();) {
 							DatasetsGridsAxesBean dgab = (DatasetsGridsAxesBean) dgabsIt.next();
-							long n = addSrc(dgab, dsetsE, dataset, src_datasets, src_grids, src_axes, ds_children, cache, src_key);
+							long n = addSrc(dgab, src_index, dsetsE, dataset, src_datasets, src_grids, src_axes, ds_children, cache, src_key);
+							src_index++;
 	                        nextUpdate = Math.min(n, nextUpdate);
 	                        if ( src_type.equalsIgnoreCase("netCDF") ) {
 								if ( addXMLprops.get("categories") != null && addXMLprops.get("categories").equalsIgnoreCase("true") ) {
@@ -3601,7 +3607,7 @@ public class LASConfig extends LASDocument {
 		one.add(top);
 		return one;
 	}
-	public long addSrc(DatasetsGridsAxesBean dgab, Element dsetsE, Element dataset, ArrayList<Element> src_datasets, ArrayList<Element> src_grids, ArrayList<Element> src_axes, HashMap<String, ArrayList<Element>> ds_children, Cache cache, String src_key) throws UnsupportedEncodingException {
+	public long addSrc(DatasetsGridsAxesBean dgab, int src_index, Element dsetsE, Element dataset, ArrayList<Element> src_datasets, ArrayList<Element> src_grids, ArrayList<Element> src_axes, HashMap<String, ArrayList<Element>> ds_children, Cache cache, String src_key) throws UnsupportedEncodingException {
 		long nextUpdate = 999999999999999999l;
 		Vector<DatasetBean> ds_beans = dgab.getDatasets();
 		for (Iterator dsbIt = ds_beans.iterator(); dsbIt.hasNext();) {
@@ -3648,9 +3654,9 @@ public class LASConfig extends LASDocument {
 		src_axes.add(axes);
 		
 		org.jdom.Document doc = addXML.createXMLfromDatasetsGridsAxesBean(dgab);
-		String ds_filename = getOutputDir()+File.separator+"las_datasets_"+src_key+".xml";
-		String grids_filename = getOutputDir()+File.separator+"las_grids_"+src_key+".xml";
-		String axes_filename = getOutputDir()+File.separator+"las_axes_"+src_key+".xml";
+		String ds_filename = getOutputDir()+File.separator+"las_datasets_"+src_key+"_"+src_index+".xml";
+		String grids_filename = getOutputDir()+File.separator+"las_grids_"+src_key+"_"+src_index+".xml";
+		String axes_filename = getOutputDir()+File.separator+"las_axes_"+src_key+"_"+src_index+".xml";
 		Element dsE = (Element) doc.getRootElement().getChild("datasets").clone();
 		cache.addDocToCache(new LASDocument(dsE), ds_filename);
 		Element gE = (Element) doc.getRootElement().getChild("grids").clone();
