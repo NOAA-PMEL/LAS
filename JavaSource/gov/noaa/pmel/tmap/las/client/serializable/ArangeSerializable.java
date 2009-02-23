@@ -1,4 +1,4 @@
-package gov.noaa.pmel.tmap.las.client;
+package gov.noaa.pmel.tmap.las.client.serializable;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 

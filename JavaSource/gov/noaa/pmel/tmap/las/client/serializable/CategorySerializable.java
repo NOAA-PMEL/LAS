@@ -7,7 +7,8 @@
  * Administration should the software be included by the recipient as an
  * element in other product development. 
  */
-package gov.noaa.pmel.tmap.las.client;
+package gov.noaa.pmel.tmap.las.client.serializable;
+
 
 
 import java.util.Iterator;

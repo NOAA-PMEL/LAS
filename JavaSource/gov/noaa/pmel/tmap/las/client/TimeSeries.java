@@ -1,5 +1,16 @@
 package gov.noaa.pmel.tmap.las.client;
 
+import gov.noaa.pmel.tmap.las.client.laswidget.LASDateWidget;
+import gov.noaa.pmel.tmap.las.client.laswidget.LASRequestWrapper;
+import gov.noaa.pmel.tmap.las.client.laswidget.OptionsWidget;
+import gov.noaa.pmel.tmap.las.client.serializable.ArangeSerializable;
+import gov.noaa.pmel.tmap.las.client.serializable.AxisSerializable;
+import gov.noaa.pmel.tmap.las.client.serializable.CategorySerializable;
+import gov.noaa.pmel.tmap.las.client.serializable.DatasetSerializable;
+import gov.noaa.pmel.tmap.las.client.serializable.GridSerializable;
+import gov.noaa.pmel.tmap.las.client.serializable.TimeAxisSerializable;
+import gov.noaa.pmel.tmap.las.client.serializable.VariableSerializable;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -143,10 +154,11 @@ public class TimeSeries implements EntryPoint {
 		};
 		public void showDateWidgets(String varID) {
 			if (variables.isFirst() ) {
-				AxisSerializable tAxis = cat.getVariable(varID).getGrid().getTAxis();
+				TimeAxisSerializable tAxis = cat.getVariable(varID).getGrid().getTAxis();
 				String hi = tAxis.getHi();
 				String lo = tAxis.getLo();
-				dates = dates.init(lo, hi, 0, 0, 0, 0);
+				int delta = (int) tAxis.getMinuteInterval();
+				dates = dates.init(lo, hi, delta, 0, 0, 0);
 				dates.render("dates", "YMDT", "YMDT");
 				dates.show();
 				dates_label.setVisible(true);

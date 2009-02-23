@@ -1,5 +1,7 @@
 package gov.noaa.pmel.tmap.las.client;
 
+import gov.noaa.pmel.tmap.las.client.serializable.GridSerializable;
+
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
 public class ClientGrid {
