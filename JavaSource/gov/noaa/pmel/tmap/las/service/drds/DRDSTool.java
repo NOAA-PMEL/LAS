@@ -278,7 +278,13 @@ public class DRDSTool extends TemplateTool {
             
             // Make our own empty netCDF file if no results were returned
             if ( data.nRows() == 0 ) {
-                NetcdfFileWriteable netcdfFile = NetcdfFileWriteable.createNew(netcdfFilename, false);
+                NetcdfFileWriteable netcdfFile;
+				try {
+					netcdfFile = NetcdfFileWriteable.createNew(netcdfFilename, false);
+				} catch (IOException e) {
+					lasBackendResponse.setError("Could not convert the data source to a netCDF file", e);
+	                return lasBackendResponse;
+				}
                 ArrayList<Dimension> dimList = new ArrayList<Dimension>();
                 Dimension index = netcdfFile.addDimension("index", 1);
                 dimList.add(index);
@@ -379,12 +385,14 @@ public class DRDSTool extends TemplateTool {
         if ( depth != null && depth.contains(".") ) {
             depth = depth.substring(depth.indexOf(".")+1, depth.length());
         }
-        String missing = lasBackendRequest.getDatabaseProperty("missing");
-        if ( missing == null || missing.equals("") ) {
-            throw new LASException("missing database property not found.");
-        }
+        double missing=Double.valueOf(miss_string).doubleValue();
         // The Ferret formatted time_origin.
-        DateUnit dateUnit = (DateUnit) SimpleUnit.factory(time_units);
+        DateUnit dateUnit;
+		try {
+			dateUnit = new DateUnit(time_units);
+		} catch (Exception e) {
+			throw new LASException(e.toString());
+		}
         DateTimeFormatter fmt = DateTimeFormat.forPattern("dd-MMM-yyyy HH:mm:ss");
         DateTime dt = new DateTime(dateUnit.getDateOrigin().getTime());
         String time_origin = fmt.withZone(DateTimeZone.UTC).print(dt);
@@ -394,6 +402,7 @@ public class DRDSTool extends TemplateTool {
        
     	for(int i=0; i<data.nColumns(); i++) {
     		String col_name = data.getColumnName(i);
+    		data.columnAttributes(i).set("missing", missing);
     		if ( col_name.equals(longitude)) {
     			data.columnAttributes(i).set("units", "degrees_east");
     			data.columnAttributes(i).set("long_name", "Longitude");
@@ -420,7 +429,12 @@ public class DRDSTool extends TemplateTool {
                 // First if nessecary encode times into a column of UDUNITS time (instead of ISO ASCII Strings)
                 if (time_type.equalsIgnoreCase("string") ) {
                     DateTimeFormatter convert_fmt = DateTimeFormat.forPattern(time_format).withZone(DateTimeZone.UTC);
-                    DateUnit convert_unit = (DateUnit) SimpleUnit.factory(time_units);
+                    DateUnit convert_unit;
+					try {
+						convert_unit = new DateUnit(time_units);
+					} catch (Exception e) {
+						throw new LASException(e.toString());
+					}
                     StringArray sa = (StringArray)data.getColumn(i);
                     DoubleArray da = new DoubleArray(sa.size(), false);
                     for (int row = 0; row < sa.size(); row++) {
@@ -436,7 +450,7 @@ public class DRDSTool extends TemplateTool {
                         da.add(timed);
                     }
                     data.setColumn(i, da); 
-                }
+                } 
                 
                 // Add the enhanced metadata.
     			data.columnAttributes(i).set("units", time_units);

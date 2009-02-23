@@ -309,7 +309,7 @@ public class DapperTool extends TemplateTool {
         String timeUnits   = dapperBackendRequest.getRequiredDatabaseProperty("time_units");
  
         // The Ferret formatted time_origin.
-        DateUnit dateUnit = (DateUnit)SimpleUnit.factory(timeUnits);
+        DateUnit dateUnit = new DateUnit(timeUnits);
         DateTimeFormatter fmt = DateTimeFormat.forPattern("dd-MMM-yyyy HH:mm:ss");
         DateTime dt = new DateTime(dateUnit.getDateOrigin().getTime());
         String time_origin = fmt.withZone(DateTimeZone.UTC).print(dt);
