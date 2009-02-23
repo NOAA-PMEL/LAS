@@ -1,6 +1,11 @@
 package gov.noaa.pmel.tmap.las.client;
 
 
+import gov.noaa.pmel.tmap.las.client.serializable.CategorySerializable;
+import gov.noaa.pmel.tmap.las.client.serializable.GridSerializable;
+import gov.noaa.pmel.tmap.las.client.serializable.OperationSerializable;
+import gov.noaa.pmel.tmap.las.client.serializable.OptionSerializable;
+
 import com.google.gwt.user.client.rpc.RemoteService;
 
 public interface RPCService extends RemoteService {

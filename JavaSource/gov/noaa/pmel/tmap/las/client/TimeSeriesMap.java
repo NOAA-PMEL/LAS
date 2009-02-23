@@ -9,6 +9,12 @@
  */
 package gov.noaa.pmel.tmap.las.client;
 
+import gov.noaa.pmel.tmap.las.client.serializable.AxisSerializable;
+import gov.noaa.pmel.tmap.las.client.serializable.CategorySerializable;
+import gov.noaa.pmel.tmap.las.client.serializable.DatasetSerializable;
+import gov.noaa.pmel.tmap.las.client.serializable.GridSerializable;
+import gov.noaa.pmel.tmap.las.client.serializable.VariableSerializable;
+
 import java.util.HashMap;
 import java.util.Iterator;
 

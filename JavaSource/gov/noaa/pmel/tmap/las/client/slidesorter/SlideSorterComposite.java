@@ -1,11 +1,11 @@
 package gov.noaa.pmel.tmap.las.client.slidesorter;
 
-import gov.noaa.pmel.tmap.las.client.ArangeSerializable;
-import gov.noaa.pmel.tmap.las.client.AxisSerializable;
-import gov.noaa.pmel.tmap.las.client.AxisWidget;
-import gov.noaa.pmel.tmap.las.client.DateTimeWidget;
-import gov.noaa.pmel.tmap.las.client.LASDateWidget;
-import gov.noaa.pmel.tmap.las.client.TimeAxisSerializable;
+import gov.noaa.pmel.tmap.las.client.laswidget.AxisWidget;
+import gov.noaa.pmel.tmap.las.client.laswidget.DateTimeWidget;
+import gov.noaa.pmel.tmap.las.client.laswidget.LASDateWidget;
+import gov.noaa.pmel.tmap.las.client.serializable.ArangeSerializable;
+import gov.noaa.pmel.tmap.las.client.serializable.AxisSerializable;
+import gov.noaa.pmel.tmap.las.client.serializable.TimeAxisSerializable;
 
 import java.util.Iterator;
 import java.util.List;

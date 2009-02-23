@@ -1,10 +1,10 @@
 package gov.noaa.pmel.tmap.las.client.slidesorter;
 //TODO handle error and batch responses...
-import gov.noaa.pmel.tmap.las.client.AxisSerializable;
-import gov.noaa.pmel.tmap.las.client.DatasetButton;
-import gov.noaa.pmel.tmap.las.client.LASRequestWrapper;
 import gov.noaa.pmel.tmap.las.client.RPCServiceAsync;
-import gov.noaa.pmel.tmap.las.client.VariableSerializable;
+import gov.noaa.pmel.tmap.las.client.laswidget.DatasetButton;
+import gov.noaa.pmel.tmap.las.client.laswidget.LASRequestWrapper;
+import gov.noaa.pmel.tmap.las.client.serializable.AxisSerializable;
+import gov.noaa.pmel.tmap.las.client.serializable.VariableSerializable;
 
 import java.util.List;
 

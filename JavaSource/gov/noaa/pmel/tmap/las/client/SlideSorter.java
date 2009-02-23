@@ -1,6 +1,14 @@
 package gov.noaa.pmel.tmap.las.client;
 
-import gov.noaa.pmel.tmap.las.client.map.MapButton;
+import gov.noaa.pmel.tmap.las.client.laswidget.AxisWidget;
+import gov.noaa.pmel.tmap.las.client.laswidget.DateTimeWidget;
+import gov.noaa.pmel.tmap.las.client.map.SettingsButton;
+import gov.noaa.pmel.tmap.las.client.serializable.AxisSerializable;
+import gov.noaa.pmel.tmap.las.client.serializable.CategorySerializable;
+import gov.noaa.pmel.tmap.las.client.serializable.DatasetSerializable;
+import gov.noaa.pmel.tmap.las.client.serializable.GridSerializable;
+import gov.noaa.pmel.tmap.las.client.serializable.TimeAxisSerializable;
+import gov.noaa.pmel.tmap.las.client.serializable.VariableSerializable;
 import gov.noaa.pmel.tmap.las.client.slidesorter.SlideSorterPanel;
 
 import java.util.ArrayList;
@@ -94,7 +102,7 @@ public class SlideSorter extends LASEntryPoint {
 	/*
 	 * A map behind a button for region selection.
 	 */
-	MapButton mapButton;
+	SettingsButton settingsButton;
 	
 	/*
 	 * (non-Javadoc)
@@ -125,9 +133,9 @@ public class SlideSorter extends LASEntryPoint {
 			rpcService.getCategories(dsid, initSlideSorter);
 		}
 		
-		mapButton = new MapButton(LatLng.newInstance(0.0, 0.0), 1, 256, 360);
-		mapButton.addClickListener(closeClick);
-		header.setWidget(0, 3, mapButton);
+		settingsButton = new SettingsButton(LatLng.newInstance(0.0, 0.0), 1, 256, 360);
+		settingsButton.addClickListener(closeClick);
+		header.setWidget(0, 3, settingsButton);
 		
 		RootPanel.get("header").add(header);
 		RootPanel.get("slides").add(slides);
@@ -251,8 +259,8 @@ public class SlideSorter extends LASEntryPoint {
 							double delta = Math.abs(Double.valueOf(ds_grid.getXAxis().getArangeSerializable().getStep()));
 							
 							LatLngBounds bounds = LatLngBounds.newInstance(LatLng.newInstance(grid_south, grid_west), LatLng.newInstance(grid_north, grid_east));
-							mapButton.getRefMap().initDataBounds(bounds, delta, true);
-							
+							settingsButton.getRefMap().initDataBounds(bounds, delta, true);
+							settingsButton.setOperations(rpcService, null, vars[i].getDSID(), vars[i].getID(), null);
 							SlideSorterPanel sp1 = new SlideSorterPanel(axes, vars[i].getDSName(), vars[i].getName(), vars[i].getDSID(), vars[i].getID(), op, compareAxis, view, productServer, rpcService);
 							slides.setWidget(0, 0, sp1);
 							panels.add(sp1);
@@ -317,10 +325,10 @@ public class SlideSorter extends LASEntryPoint {
 		}   	
     };
     public void update(boolean switchAxis) {
-    	String view1lo = mapButton.getRefMap().getXlo();
-    	String view1hi = mapButton.getRefMap().getXhi();
-    	String view2lo = mapButton.getRefMap().getYlo();
-    	String view2hi = mapButton.getRefMap().getYhi();
+    	String view1lo = settingsButton.getRefMap().getXlo();
+    	String view1hi = settingsButton.getRefMap().getXhi();
+    	String view2lo = settingsButton.getRefMap().getYlo();
+    	String view2hi = settingsButton.getRefMap().getYhi();
     	
     	String fixedAxisValue = "";
     	if ( fixedAxis.equals("t") ) {

@@ -1,5 +1,7 @@
 package gov.noaa.pmel.tmap.las.client;
 
+import gov.noaa.pmel.tmap.las.client.serializable.OperationSerializable;
+
 import java.util.Iterator;
 import java.util.List;
 

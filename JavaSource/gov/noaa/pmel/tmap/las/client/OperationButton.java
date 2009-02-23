@@ -1,5 +1,7 @@
 package gov.noaa.pmel.tmap.las.client;
 
+import gov.noaa.pmel.tmap.las.client.serializable.OperationSerializable;
+
 import com.google.gwt.user.client.ui.RadioButton;
 
 public class OperationButton extends RadioButton {

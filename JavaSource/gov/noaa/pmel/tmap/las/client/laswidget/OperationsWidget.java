@@ -1,5 +1,10 @@
-package gov.noaa.pmel.tmap.las.client;
+package gov.noaa.pmel.tmap.las.client.laswidget;
 
+
+import gov.noaa.pmel.tmap.las.client.OperationButton;
+import gov.noaa.pmel.tmap.las.client.OperationsMenu;
+import gov.noaa.pmel.tmap.las.client.RPCServiceAsync;
+import gov.noaa.pmel.tmap.las.client.serializable.OperationSerializable;
 
 import java.util.Iterator;
 import java.util.List;
@@ -27,6 +32,7 @@ public class OperationsWidget extends StackPanel {
 	OperationSerializable[] ops;
 	OperationSerializable currentOp;
 	String currentView;
+
 	/**
 	 * Set up the StackPanel and the associated RPC.
 	 */
@@ -39,12 +45,11 @@ public class OperationsWidget extends StackPanel {
 		add(linePlots, "Line Plots");
 		
 		sectionPlots.add(new Label("Select a variable..."));
-		add(sectionPlots, "Section Plots");
+		add(sectionPlots, "Vertical Section Plots");
 		
 		hofmullerPlots.add(new Label("Select a variable..."));
 		add(hofmullerPlots, "Hofmuller Plots");
 		
-		setWidth("360px");
 	}
 	public void setOperations(RPCServiceAsync rpcService, String view, String dsID, String varID, OperationsMenu menu) {
 		this.opService = rpcService;
@@ -73,7 +78,7 @@ public class OperationsWidget extends StackPanel {
 										xyMap.clear();
 										hasXYMap = true;
 									}
-									OperationButton button = new OperationButton("op", op.getName()+" in "+view);
+									OperationButton button = new OperationButton("op", "Latitude-Longitude");
 									button.setOperation(op);
 									button.addClickListener(buttonListener);
 									button.setChecked(true);
@@ -85,7 +90,18 @@ public class OperationsWidget extends StackPanel {
 										linePlots.clear();
 										hasLinePlots = true;
 									}
-									OperationButton button = new OperationButton("op", op.getName()+" in "+view);
+									OperationButton button;
+									if ( view.equals("x") ) {
+										button = new OperationButton("op", "Longitude");
+									} else if ( view.equals("y") ) {
+										button = new OperationButton("op", "Latitude");
+									} else if ( view.equals("z") ) {
+										// TODO, get the grid and initialize from the grid so you have the z-axis label.
+										button = new OperationButton("op", "Z");
+									} else {
+										button = new OperationButton("op", "Time");
+									}
+									
 									button.setView(view);
 									button.setOperation(op);
 									button.addClickListener(buttonListener);
@@ -95,7 +111,13 @@ public class OperationsWidget extends StackPanel {
 										sectionPlots.clear();
 										hasSectionPlots = true;
 									}
-									OperationButton button = new OperationButton("op", op.getName()+" in "+view);
+									OperationButton button;
+									if ( view.equals("xz") ) {
+										button = new OperationButton("op", "Longitude-z");
+									} else {
+										button = new OperationButton("op", "Latitude-z");
+									}
+									
 									button.setOperation(op);
 									button.setView(view);
 									button.addClickListener(buttonListener);
@@ -103,9 +125,16 @@ public class OperationsWidget extends StackPanel {
 								} else if ( view.equals("xt") || view.equals("yt") || view.equals("zt") ) {
 									if ( !hasHofmullerPlots ) {
 										hofmullerPlots.clear();
-										hasSectionPlots = true;
+										hasHofmullerPlots = true;
 									}
-									OperationButton button = new OperationButton("op", op.getName()+" in "+view);
+									OperationButton button;
+									if ( view.equals("xt") ) {
+									    button = new OperationButton("op", "Longitude-time");
+									} else if (view.equals("yt") ) {
+										button = new OperationButton("op", "Latitude-time");
+									} else {
+										button = new OperationButton("op", "Z-time");
+									}
 									button.setView(view);
 									button.setOperation(op);
 									button.addClickListener(buttonListener);

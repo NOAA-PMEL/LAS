@@ -1,4 +1,7 @@
-package gov.noaa.pmel.tmap.las.client;
+package gov.noaa.pmel.tmap.las.client.laswidget;
+
+import gov.noaa.pmel.tmap.las.client.serializable.ArangeSerializable;
+import gov.noaa.pmel.tmap.las.client.serializable.AxisSerializable;
 
 import java.util.Iterator;
 import java.util.Map;

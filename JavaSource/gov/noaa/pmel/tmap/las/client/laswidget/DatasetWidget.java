@@ -1,5 +1,10 @@
-package gov.noaa.pmel.tmap.las.client;
+package gov.noaa.pmel.tmap.las.client.laswidget;
 
+
+import gov.noaa.pmel.tmap.las.client.RPCServiceAsync;
+import gov.noaa.pmel.tmap.las.client.serializable.CategorySerializable;
+import gov.noaa.pmel.tmap.las.client.serializable.DatasetSerializable;
+import gov.noaa.pmel.tmap.las.client.serializable.VariableSerializable;
 
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;

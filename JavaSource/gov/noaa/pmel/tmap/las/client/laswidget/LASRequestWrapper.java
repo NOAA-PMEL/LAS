@@ -1,4 +1,4 @@
-package gov.noaa.pmel.tmap.las.client;
+package gov.noaa.pmel.tmap.las.client.laswidget;
 
 import com.google.gwt.core.client.JavaScriptObject;
 

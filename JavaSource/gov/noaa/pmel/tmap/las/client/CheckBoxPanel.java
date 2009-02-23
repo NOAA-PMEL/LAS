@@ -9,6 +9,8 @@
  */
 package gov.noaa.pmel.tmap.las.client;
 
+import gov.noaa.pmel.tmap.las.client.serializable.VariableSerializable;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;

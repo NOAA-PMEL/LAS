@@ -1,4 +1,6 @@
-package gov.noaa.pmel.tmap.las.client;
+package gov.noaa.pmel.tmap.las.client.laswidget;
+
+import gov.noaa.pmel.tmap.las.client.serializable.TimeAxisSerializable;
 
 import java.util.Date;
 
