@@ -45,9 +45,13 @@ public class IntermediateNetcdfFile {
     protected NetcdfFileWriteable netcdfFile = null;
     protected boolean has_cruise_id = false;
     
-    public IntermediateNetcdfFile (String filename, boolean fill) {
+    public IntermediateNetcdfFile (String filename, boolean fill) throws LASException {
         log.debug("Create new empty netCDF file.");
-        netcdfFile = NetcdfFileWriteable.createNew(filename, fill);
+        try {
+			netcdfFile = NetcdfFileWriteable.createNew(filename, fill);
+		} catch (IOException e) {
+			throw new LASException(e.toString());
+		}
     }
     public void create(ResultSet resultSet, LASBackendRequest lasBackendRequest) throws SQLException, IOException, InvalidRangeException, LASException {
 
@@ -99,7 +103,12 @@ public class IntermediateNetcdfFile {
             throw new LASException("time_format database property not found.");
         }
         // The Ferret formatted time_origin.
-        DateUnit dateUnit = (DateUnit) SimpleUnit.factory(time_units);
+        DateUnit dateUnit;
+		try {
+			dateUnit = new DateUnit(time_units);
+		} catch (Exception e) {
+			throw new LASException(e.toString());
+		}
         DateTimeFormatter fmt = DateTimeFormat.forPattern("dd-MMM-yyyy HH:mm:ss");
         DateTime dt = new DateTime(dateUnit.getDateOrigin().getTime());
         String time_origin = fmt.withZone(DateTimeZone.UTC).print(dt);
@@ -458,7 +467,12 @@ public class IntermediateNetcdfFile {
         
         int index = 0;
         DateTimeFormatter fmt = DateTimeFormat.forPattern(time_format).withZone(DateTimeZone.UTC);
-        DateUnit dateUnit = (DateUnit) SimpleUnit.factory(time_units);
+        DateUnit dateUnit;
+		try {
+			dateUnit = new DateUnit(time_units);
+		} catch (Exception e) {
+			throw new LASException(e.toString());
+		}
         double geospatial_lat_min =  9999.0;
         double geospatial_lat_max = -9999.0;
         double geospatial_lon_min =  9999.0;
