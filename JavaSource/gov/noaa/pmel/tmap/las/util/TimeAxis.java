@@ -6,8 +6,8 @@ package gov.noaa.pmel.tmap.las.util;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-import gov.noaa.pmel.tmap.las.client.AxisSerializable;
-import gov.noaa.pmel.tmap.las.client.TimeAxisSerializable;
+import gov.noaa.pmel.tmap.las.client.serializable.AxisSerializable;
+import gov.noaa.pmel.tmap.las.client.serializable.TimeAxisSerializable;
 
 import org.jdom.Element;
 

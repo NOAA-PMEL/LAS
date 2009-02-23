@@ -33,8 +33,8 @@
  */
 package gov.noaa.pmel.tmap.las.util;
 
-import gov.noaa.pmel.tmap.las.client.OperationSerializable;
-import gov.noaa.pmel.tmap.las.client.OptionSerializable;
+import gov.noaa.pmel.tmap.las.client.serializable.OperationSerializable;
+import gov.noaa.pmel.tmap.las.client.serializable.OptionSerializable;
 import gov.noaa.pmel.tmap.las.ui.Util;
 
 import java.util.ArrayList;

@@ -3,7 +3,7 @@
  */
 package gov.noaa.pmel.tmap.las.util;
 
-import gov.noaa.pmel.tmap.las.client.VariableSerializable;
+import gov.noaa.pmel.tmap.las.client.serializable.VariableSerializable;
 
 import java.util.ArrayList;
 import java.util.Iterator;
