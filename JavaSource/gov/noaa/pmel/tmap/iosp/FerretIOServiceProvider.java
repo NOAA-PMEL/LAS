@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.nio.channels.WritableByteChannel;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -31,13 +32,16 @@ import ucar.ma2.DataType;
 import ucar.ma2.IndexIterator;
 import ucar.ma2.InvalidRangeException;
 import ucar.ma2.Range;
+import ucar.ma2.Section;
 import ucar.nc2.Attribute;
 import ucar.nc2.Dimension;
-import ucar.nc2.IOServiceProvider;
+
 import ucar.nc2.NCdump;
 import ucar.nc2.NetcdfFile;
+import ucar.nc2.ParsedSectionSpec;
 import ucar.nc2.Variable;
 import ucar.nc2.dataset.NetcdfDataset;
+import ucar.nc2.iosp.IOServiceProvider;
 import ucar.nc2.util.CancelTask;
 import ucar.unidata.io.RandomAccessFile;
 
@@ -478,11 +482,8 @@ public class FerretIOServiceProvider implements IOServiceProvider {
         nothing++;
     }
 
-    /* (non-Javadoc)
-     * @see ucar.nc2.IOServiceProvider#readData(ucar.nc2.Variable, java.util.List)
-     */
-    public Array readData(Variable v2, List section) throws IOException,
-    InvalidRangeException {
+    public Array readData(Variable v2, Section section) throws IOException,
+	InvalidRangeException {
     	FerretTool tool;
 		try {
 			tool = new FerretTool();
@@ -490,11 +491,15 @@ public class FerretIOServiceProvider implements IOServiceProvider {
 			throw new IOException(e.toString());
 		}
         Array a=null;
-        log.debug("Entering read for "+v2.getName()+" and "+section.size()+" ranges.");
+        log.debug("Entering read for "+v2.getName()+" and "+section.getRank()+" ranges.");
 
         String varname = v2.getName();
         String readname = v2.getName();
-        Dimension dim = v2.getCoordinateDimension();
+        boolean isCoordinateVariable = false;
+        if( v2.isCoordinateVariable() ) {
+        	readname = "COORDS";
+        	isCoordinateVariable = true;
+        }
         Attribute dataset_attr = v2.findAttribute("dataset");
         String dataset="";
         if ( dataset_attr != null ) {
@@ -506,12 +511,6 @@ public class FerretIOServiceProvider implements IOServiceProvider {
         Attribute direction_attr = v2.findAttribute("direction");
         if ( direction_attr != null ) {
             direction = direction_attr.getStringValue();
-        }
-        
-        boolean isCoordinateVariable = false;
-        if ( dim != null ) {               
-            readname = "COORDS";
-            isCoordinateVariable = true;
         }
 
         String jnl = null;
@@ -540,7 +539,7 @@ public class FerretIOServiceProvider implements IOServiceProvider {
         jnl = inJnl.toString();
 
         String cacheKey = JDOMUtils.MD5Encode(jnl);   
-        String filename = tool.getTempDir()+cacheKey+File.separator+"data_"+varname+"_"+Range.makeSectionSpec(section)+".nc";
+        String filename = tool.getTempDir()+cacheKey+File.separator+"data_"+varname+"_"+section.toString()+".nc";
 
         // Simplest form of caching is that the exact file we need already exists.
 
@@ -557,18 +556,18 @@ public class FerretIOServiceProvider implements IOServiceProvider {
                     indx = new StringBuffer("go get_datavar \""+filename+"\" "+"\""+dataset+"\" "+varname+" "+direction+" ");
                 }
                 // This is the get_data order XYZT
-                ArrayList ferret_section = new ArrayList(section);
-                Collections.reverse(ferret_section);
+                Section ferret_section = new Section(section);
+                
 
-                for (Iterator rangeIt = ferret_section.iterator(); rangeIt.hasNext();) {
-                    Range range = (Range) rangeIt.next();
+                for (int s = ferret_section.getRank() - 1; s >= 0 ; s--) {
+                    Range range = (Range) ferret_section.getRange(s);
                     int start = range.first()+1;
                     int end = range.last()+1;
                     indx.append(start+" "+end+" "+range.stride()+" ");
                 }
 
                 // This is the C and Java data order (TZYX).
-                for (Iterator rangeIt = section.iterator(); rangeIt.hasNext();) {
+                for (Iterator rangeIt = section.getRanges().iterator(); rangeIt.hasNext();) {
                     Range range = (Range) rangeIt.next();
                     Range newrange = new Range(0, range.length()-1, 1);
                     newsection.add(newrange);
@@ -589,7 +588,7 @@ public class FerretIOServiceProvider implements IOServiceProvider {
                 */
         } else { // if the file exists drop through to here...
             log.debug("Cache hit on: "+filename);
-            for (Iterator rangeIt = section.iterator(); rangeIt.hasNext();) {
+            for (Iterator rangeIt = section.getRanges().iterator(); rangeIt.hasNext();) {
                 Range range = (Range) rangeIt.next();
                 Range newrange = new Range(0, range.length()-1, 1);
                 newsection.add(newrange);
@@ -716,7 +715,7 @@ public class FerretIOServiceProvider implements IOServiceProvider {
             StringBuffer vars = new StringBuffer();
             for (Iterator vIt = variables.iterator(); vIt.hasNext();) {
                 Variable v = (Variable) vIt.next();
-                if ( v.getCoordinateDimension() != null) {
+                if ( v.isCoordinateVariable() ) {
                    if ( vars.length() > 0 ) vars.append(";");
                    vars.append(v.getName());
                 } 
@@ -724,7 +723,7 @@ public class FerretIOServiceProvider implements IOServiceProvider {
             //NCdump.print(ncd, System.out, true, true, false, true, vars.toString(), null);
             for (Iterator vIt = variables.iterator(); vIt.hasNext();) {
                 Variable v = (Variable) vIt.next();
-                if ( v.getCoordinateDimension() == null) {
+                if ( v.isCoordinateVariable() ) {
                     log.debug("reading "+v.getName());
                     int[] shape = v.getShape();
                     int[] origin = new int[shape.length];
@@ -763,5 +762,22 @@ public class FerretIOServiceProvider implements IOServiceProvider {
 			return "";
 		}
     }
+
+	public Array readSection(ParsedSectionSpec arg0) throws IOException,
+			InvalidRangeException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public long readToByteChannel(Variable arg0, Section arg1,
+			WritableByteChannel arg2) throws IOException, InvalidRangeException {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	public Object sendIospMessage(Object arg0) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
 }
