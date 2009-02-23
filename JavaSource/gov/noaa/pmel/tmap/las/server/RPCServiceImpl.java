@@ -1,12 +1,12 @@
 package gov.noaa.pmel.tmap.las.server;
 
 
-import gov.noaa.pmel.tmap.las.client.CategorySerializable;
-import gov.noaa.pmel.tmap.las.client.GridSerializable;
-import gov.noaa.pmel.tmap.las.client.OperationSerializable;
-import gov.noaa.pmel.tmap.las.client.OptionSerializable;
 import gov.noaa.pmel.tmap.las.client.RPCException;
 import gov.noaa.pmel.tmap.las.client.RPCService;
+import gov.noaa.pmel.tmap.las.client.serializable.CategorySerializable;
+import gov.noaa.pmel.tmap.las.client.serializable.GridSerializable;
+import gov.noaa.pmel.tmap.las.client.serializable.OperationSerializable;
+import gov.noaa.pmel.tmap.las.client.serializable.OptionSerializable;
 import gov.noaa.pmel.tmap.las.exception.LASException;
 import gov.noaa.pmel.tmap.las.jdom.LASConfig;
 import gov.noaa.pmel.tmap.las.product.server.LASConfigPlugIn;
