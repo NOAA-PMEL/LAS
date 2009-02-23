@@ -1,10 +1,10 @@
 package gov.noaa.pmel.tmap.las.rpc;
 
 
-import gov.noaa.pmel.tmap.las.client.CategorySerializable;
-import gov.noaa.pmel.tmap.las.client.GridSerializable;
-import gov.noaa.pmel.tmap.las.client.OperationSerializable;
-import gov.noaa.pmel.tmap.las.client.OptionSerializable;
+import gov.noaa.pmel.tmap.las.client.serializable.CategorySerializable;
+import gov.noaa.pmel.tmap.las.client.serializable.GridSerializable;
+import gov.noaa.pmel.tmap.las.client.serializable.OperationSerializable;
+import gov.noaa.pmel.tmap.las.client.serializable.OptionSerializable;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 
