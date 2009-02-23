@@ -81,9 +81,7 @@ import thredds.catalog.InvDocumentation;
 import thredds.catalog.ServiceType;
 import thredds.catalog.ThreddsMetadata.GeospatialCoverage;
 import thredds.catalog.ThreddsMetadata.Range;
-import thredds.datatype.DateRange;
-import thredds.datatype.DateType;
-import thredds.datatype.TimeDuration;
+
 import ucar.nc2.Attribute;
 import ucar.nc2.dataset.CoordinateAxis;
 import ucar.nc2.dataset.CoordinateAxis1D;
@@ -94,8 +92,11 @@ import ucar.nc2.dt.GridDatatype;
 import ucar.nc2.dt.grid.GeoGrid;
 import ucar.nc2.dt.grid.GridCoordSys;
 import ucar.nc2.dt.grid.GridDataset;
+import ucar.nc2.units.DateRange;
+import ucar.nc2.units.DateType;
 import ucar.nc2.units.DateUnit;
 import ucar.nc2.units.SimpleUnit;
+import ucar.nc2.units.TimeDuration;
 import ucar.unidata.geoloc.ProjectionImpl;
 import ucar.unidata.geoloc.projection.LambertConformal;
 import ucar.unidata.geoloc.projection.LatLonProjection;
@@ -252,7 +253,7 @@ public class addXML {
     }
     
     // Register the credentials provider.
-    ucar.nc2.dataset.HttpClientManager.init(provider_obj,"addXML-" + version_string);	
+//    ucar.nc2.dataset.HttpClientManager.init(provider_obj,"addXML-" + version_string);	
   
     int total = data.length + thredds.length;
     if (!oneDataset && total > 1) {
@@ -494,8 +495,10 @@ public class addXML {
           outputXML(ofile, grids, true);
           Element axes = lasdata.getChild("axes");
           outputXML(ofile, axes, true);
-          Element categories = lasdata.getChild("las_categories");
-          outputXML(ofile, categories, true);
+          if ( category ) {
+              Element categories = lasdata.getChild("las_categories");
+              outputXML(ofile, categories, true);
+          }
         }
       }
     }
@@ -533,7 +536,7 @@ public class addXML {
     if (type.equals("thredds")) {
       InvCatalogFactory factory = new InvCatalogFactory("default", false);
       InvCatalog catalog = (InvCatalog) factory.readXML(data);
-      StringBuffer buff = new StringBuffer();
+      StringBuilder buff = new StringBuilder();
       boolean show = false;
       if (verbose) {
         show = true;
@@ -880,6 +883,7 @@ public class addXML {
 	  UniqueVector GridBeans = new UniqueVector();
 	  UniqueVector AxisBeans = new UniqueVector();
 
+	 
 
 	  if (verbose) {
 		  System.out.println("Processing ESG THREDDS dataset: " + threddsDataset.getFullName() + "with id: "+threddsDataset.getID());
@@ -888,10 +892,13 @@ public class addXML {
 	  dataset.setName(threddsDataset.getFullName());
 	  dataset.setElement(threddsDataset.getID());
 
+	  List variables = threddsDataset.getVariables();
+	  for (Iterator varIt = variables.iterator(); varIt.hasNext();) {
+		Object var = (Object) varIt.next();
+	  }
 
 	  GeospatialCoverage coverage = threddsDataset.getGeospatialCoverage();
 	  DateRange dateRange = threddsDataset.getTimeCoverage();
-	  List variables = threddsDataset.getVariables();
 
 
 	  if (coverage != null ) {
@@ -900,22 +907,24 @@ public class addXML {
 		  double xsize = coverage.getLonExtent();
 		  double xresolution = coverage.getLonResolution();
 		  double xstart = coverage.getLonStart();
+		  String xunits = coverage.getLonUnits();
 
-		  if ( xsize == 0.0 || xresolution == 0.0 || xstart == 0.0 ||
-			   Double.isNaN(xsize) || Double.isNaN(xresolution) || Double.isNaN(xstart)) {
+		  if ( Double.isNaN(xsize) || Double.isNaN(xresolution) || Double.isNaN(xstart)) {
 			  quit = true;
 		  }
 		  double ysize = coverage.getLatExtent();
 		  double yresolution = coverage.getLatResolution();
 		  double ystart = coverage.getLatStart();
-		  if ( ysize == 0.0 || yresolution == 0.0 || ystart == 0.0 ||
-			   Double.isNaN(ysize) || Double.isNaN(yresolution) || Double.isNaN(ystart)) {
+		  String yunits = coverage.getLatUnits();
+		  if ( Double.isNaN(ysize) || Double.isNaN(yresolution) || Double.isNaN(ystart) ) {
 	          quit = true;
 		  }
 		  if (!quit) {
 			  // Get the X Axis information...
 			  AxisBean xAxis = new AxisBean();
 			  xAxis.setElement(threddsDataset.getID()+"-x-axis");
+			  xAxis.setType("x");
+			  xAxis.setUnits(xunits);
 			  int xsizei = (int)(xsize/xresolution);
 			  ArangeBean xr = new ArangeBean();
 			  xr.setSize(String.valueOf(xsizei));
@@ -927,7 +936,8 @@ public class addXML {
 			  // Get the Y Axis information...
 			  AxisBean yAxis = new AxisBean();
 			  yAxis.setElement(threddsDataset.getID()+"-y-axis");
-
+              yAxis.setType("y");
+              yAxis.setUnits(yunits);
 			  int ysizei = (int)(ysize/yresolution);
 			  ArangeBean yr = new ArangeBean();
 			  yr.setSize(String.valueOf(ysizei));
@@ -942,6 +952,9 @@ public class addXML {
 				  zAxis.setElement(threddsDataset.getID()+"-z-axis");
 				  double zsize = z.getSize();
 				  double zresolution = z.getResolution();
+				  String zunits = z.getUnits();
+				  zAxis.setType("z");
+				  zAxis.setUnits(zunits);
 				  ArangeBean zr = new ArangeBean();
 				  int zsizei = (int)(zsize/zresolution);
 				  zr.setSize(String.valueOf(zsizei));
@@ -953,9 +966,23 @@ public class addXML {
 			  }
 
 			  DateType tstart = dateRange.getStart();
+			  DateType tend = dateRange.getEnd();
 			  TimeDuration deltat = dateRange.getResolution();
-			  TimeDuration total_time = dateRange.getDuration();
-
+			  
+			  AxisBean tAxis = new AxisBean();
+			  tAxis.setElement(threddsDataset.getID()+"-t-axis");
+			  tAxis.setType("t");
+			  tAxis.setUnits(deltat.getTimeUnit().getUnitString());
+			  ArangeBean tr = new ArangeBean();
+			  tr.setStart(tstart.toDateTimeString());
+			  tr.setStep(String.valueOf(deltat.getValue()));
+			  
+			  TimeDuration total = dateRange.getDuration();
+			  int size = (int)(total.getValueInSeconds()/deltat.getValueInSeconds());
+			  tr.setSize(String.valueOf(size));
+			  tAxis.setArange(tr);
+			  AxisBeans.add(tAxis);
+			  
 			  dgab.setAxes(AxisBeans);
 		  } else {
 			  return null;
@@ -1429,7 +1456,13 @@ public class addXML {
 			  System.err.println("Cannot parse supplied time format.  Will determine format instead.");
 		  }
 	  }
-	  DateUnit dateUnit = (DateUnit) SimpleUnit.factory(unitsString);
+	  DateUnit dateUnit = null;
+	  try {
+		  dateUnit = new DateUnit(unitsString);
+	  } catch (Exception e) {
+
+		  System.err.println("Cannot parse units string.");
+	  }
 
 	  if (dateUnit == null) {
 		  System.out.println("Not a date Unit String: " + unitsString);
