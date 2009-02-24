@@ -19,8 +19,13 @@ LET allvars = ..varnames
 
 DEFINE SYMBOL data_var_only = `UPCASE("($data_var)")`
 
-IF  `( IS_ELEMENT_OF_STR(allvars, "($data_var)") ) OR \
-     ( IS_ELEMENT_OF_STR(allvars, "($data_var_only)") )` THEN 
+LET nvars = ..nvars
+LET is_var = 0
+REPEAT/RANGE=1:`nvars`/NAME=m ( LET ivar = UPCASE(allvars[i=`m`]); \
+  DEFINE SYMBOL ivar = `ivar`; \ 
+  IF `STRINDEX("($ivar)", "($data_var_only)" ) GT 0` THEN LET is_var = 1)
+
+IF  `is_var GT 0` THEN 
 
    DEFINE SYMBOL data_num = `($data_var),RETURN=dsetnum`
    DEFINE SYMBOL data_($num)_num = `($data_var),RETURN=dsetnum`
