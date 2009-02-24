@@ -95,6 +95,7 @@
        <classes dir="WebContent/WEB-INF/classes" includes="**"/>
        <fileset dir="WebContent">
           <include name="examples/**"/>
+          <include name="TimeSeries/**"/>
           <include name="classes/**"/>
           <include name="productserver/**"/>
           <include name="fds/**"/>
