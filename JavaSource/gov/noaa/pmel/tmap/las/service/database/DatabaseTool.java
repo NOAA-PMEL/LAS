@@ -195,7 +195,7 @@ public class DatabaseTool extends TemplateTool {
             log.debug("executeQuery: "+statement);
             rset = stmt.executeQuery(statement);
             log.debug("Done with query.");
-            rset.beforeFirst();
+            
         } catch (Exception e) {
             lasBackendResponse.setError("Database access failed: "+statement+" ",e);
             return lasBackendResponse;
