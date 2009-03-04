@@ -3,83 +3,98 @@
 	<head>
 		<meta http-equiv="Content-Type"
 			content="text/html; charset=ISO-8859-1">
-	    <META HTTP-EQUIV="Refresh" CONTENT="30">
+	    <META HTTP-EQUIV="Refresh" CONTENT="3">
 		<title>LAS Progress Report</title>
 		<link rel="alternate" type="application/rss+xml" title="RSS Feed" href="$feed">
+              <style type="text/css">
+                .tableBorderDark {
+	          border: double;
+                }
+                .titleText {
+                	font-family: Arial, Helvetica, sans-serif;
+                	font-size: 18px;
+                	font-weight: bolder;
+                	letter-spacing: 0.08em;
+                	text-align: left;
+                }
+                .textInstructions {
+                	font-family: Arial, Helvetica, sans-serif;
+                	font-size: 14px;
+                	font-style: normal;
+                	font-weight: bolder;
+                	font-variant: small-caps;
+                	text-decoration: none;
+                	background-color: #FAFBF4;
+                	display: compact;
+                	letter-spacing: normal;
+                	border: thin none;
+                	list-style-position: inside;
+                	list-style-type: none;
+                	cursor: hand;
+                }
+                .textChoices {
+                	font-family: Arial, Helvetica, sans-serif;
+                	font-size: 12px;
+                	font-weight: normal;
+                }
+              </style>
 	</head>
 	<body>
-		<h3>
-			LAS is working on your request.
-		</h3>
-		<table border="1">
+		<table border="0">
 			<tr>
-				<th>
-				</th>
-				<th>
-					Operation
-				</th>
-				<th>
-					Status
-				</th>
 			</tr>
 			#foreach ($job in $operations) #set($index = $velocityCount - 1)
 			<tr>
-                                <td>
-                                      #if ( $status.get($index).contains("*") )
-                                        <img src="JavaScript/components/mozilla_blu.gif" alt="Spinner"/>
-                                      #end
+                                <td class="titleText">
+		                   <a href="http://ferret.pmel.noaa.gov/LAS" target="_new">Live Access Server</a> has been working on your request for:
                                 </td>
-				<td>
-					$job
-				</td>
-				<td>
-                                      #if ( $status.get($index).contains("*") )
-					$status.get($index) (Each refresh adds *'s to the current step.)
-                                      #else
-					$status.get($index)
-                                      #end
-				</td>
-			</tr>
+                        </tr>
+                </table><br>
+                <table  class="tableBorderDark"  width="50%">
+                              <tr>
+                                <td align="center">
+                                        #if ( $status.get($index).contains("seconds") )
+                                         <img src="JavaScript/components/mozilla_blu.gif" alt="Spinner"/>
+					<font color="red" size="+2">&nbsp;&nbsp;$status.get($index)&nbsp;&nbsp;</font>
+                                         <img src="JavaScript/components/mozilla_blu.gif" alt="Spinner"/>
+                                        #end
+                                </td>
+                             <tr>
+                 </table>
 			#end
-		</table>
-		<br>
-		You can monitor the progress of your request by doing one of the
-		following:
-		<br>
-		<ol>
-			<li>
-				Keep your browser open to this page (it will refresh automatically every 30 seconds).
-			</li>
-			## Cache must be on for closing browser window and returning to work.
-			#if ( "$cache" == "true" )
-			<li>
-				Bookmark this page.&nbsp; When you return you will either get this
-				page again or the finished product when it is ready.
-			</li>
-			<li>
-				Enter your email address to receive notification when the request is
-				finished.
-			</li>
+                <table   width="90%">
+                        <tr>
+			  <td>
+	  		    <br>
+			      ## Cache must be on for closing browser window and returning to work.
+			      #if ( "$cache" == "true" )		
+		                 <span class="textInstructions">You can wait until your request has been completed, or we can </span>	
+                          </td>
+                        </tr>
+                        <tr>
+			  <td>
+			      <span class="textInstructions">
+				notify you via email when the request has finished:
+			      </span>
+                           </td>
+                        </tr>
+                </table>
 			<form name="progress"
 				action="$server_url?xml=$las_request.toEncodedURLString()&amp;JSESSIONID=$JSESSIONID"
 				method="POST">
-				<INPUT TYPE="SUBMIT" NAME="embutton" value="Request E-Mail Notification">
-				<INPUT TYPE="text" name="email" size="50" value="$progress.email">
+				<INPUT TYPE="text" name="email" size="50" value="Enter email address">
+				<INPUT style="background-color:#c6e3c6;" TYPE="SUBMIT" NAME="embutton" value="Request E-Mail Notification">
+
 			</form>
-			#if ( "$!emails" != "" && "$!emails" != "[]" ) 
-            When this product is finished LAS will send email to these addresses: $emails.
-            #end
-			<li>
-				Subscribe to the <a href="$feed">RSS feed</a>.&nbsp; The Feed title will change
-				indicate when the request has finished.
-				<br>
-			</li>
+			  #if ( "$!emails" != "" && "$!emails" != "[]" ) 
+                            <span class="textChoices">When this product is finished LAS will send email to these addresses: $emails. </span><br><br><br>
+                          #end
+
 			#end
-		</ol>
 		<form
 			action="$server_url?xml=$las_request.toEncodedURLString()&cancel=Cancel&JSESSIONID=$JSESSIONID"
-			method="POST">
-			<INPUT TYPE="SUBMIT" NAME="cancel" VALUE="Cancel">
+			method="POST"><span class="textInstructions">Cancel this request:
+			<INPUT style="background-color:#E78273;" TYPE="SUBMIT" NAME="cancel" VALUE="Cancel"></span>
 		</form>
 	</body>
 </html>
