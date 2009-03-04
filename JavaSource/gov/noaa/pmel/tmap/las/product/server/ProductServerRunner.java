@@ -151,8 +151,10 @@ public class ProductServerRunner  extends Thread  {
             // ProductService class to access the appropriate WebService. 
 
             ArrayList requestXMLList = productRequest.getRequestXML();
+	    // *kob* 3/2009 - move the start definition outside of loop so that it maintains the timing for the
+	    //                complete product generation, not for each individual operation
+            start = System.currentTimeMillis();
             for(int index = 0; index < requestXMLList.size(); index++ ) {
-            	start = System.currentTimeMillis();
                 int request = index+1;
                 log.debug("Processing request "+request+" of " + requestXMLList.size());
 
@@ -593,7 +595,9 @@ public class ProductServerRunner  extends Thread  {
                     statusOp = currentOp;
                     runningDots = "***";
                 }
-                status.add(i, "has been running for "+time+" seconds "+runningDots);
+		// status.add(i, "has been running for "+time+" seconds "+runningDots);
+                // *kob*  Simplify timing message to only include the actual seconds LAS has been running 
+                status.add(i, time+" seconds ");
             } else {
                 status.add(i, "pending");
             }
@@ -650,3 +654,4 @@ public class ProductServerRunner  extends Thread  {
     }
     
 }
+
