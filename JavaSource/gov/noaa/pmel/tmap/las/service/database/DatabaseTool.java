@@ -20,6 +20,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.util.HashMap;
 
 import javax.sql.rowset.WebRowSet;
 
@@ -324,6 +325,35 @@ public class DatabaseTool extends TemplateTool {
         log.debug("created netcdf file"); //debug
         
         // Fill up the variables with the data.
+        
+    }
+    protected void mergeCommandTemplate (LASBackendRequest lasBackendRequest, File jnlFile, String template) throws LASException, Exception {
+        PrintWriter templateWriter = null;
+        try {
+            templateWriter = new PrintWriter(new FileOutputStream(jnlFile));
+        }
+        catch(Exception e) {
+            throw new LASException(e.toString());
+        }
+        
+        // Set up the Velocity Context
+        VelocityContext context = new VelocityContext(getToolboxContext());
+        
+        // Take all the information passed to the backend and
+        // make the giant symbol collection to be handed to Ferret.
+        
+        
+        if ( lasBackendRequest.getProperty("database", "name").toLowerCase().contains("socat") ) {
+        	Socat socat = new Socat();
+        	context.put("socat", socat);
+        }
+         
+        context.put("las_backendrequest", lasBackendRequest);
+        // Guaranteed to be set by the Product Server
+        log.info("Velocity resource path: "+ve.getProperty("file.resource.loader.path"));
+        ve.mergeTemplate(template,"ISO-8859-1", context, templateWriter);
+        templateWriter.flush();
+        templateWriter.close();
         
     }
 }
