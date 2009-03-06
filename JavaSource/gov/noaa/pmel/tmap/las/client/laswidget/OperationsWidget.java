@@ -50,6 +50,8 @@ public class OperationsWidget extends StackPanel {
 		hofmullerPlots.add(new Label("Select a variable..."));
 		add(hofmullerPlots, "Hofmuller Plots");
 		
+		setHeight("200px");
+		
 	}
 	public void setOperations(RPCServiceAsync rpcService, String view, String dsID, String varID, OperationsMenu menu) {
 		this.opService = rpcService;
@@ -145,7 +147,9 @@ public class OperationsWidget extends StackPanel {
 					}
 				}
 			}
-			menu.setMenus(ops);
+			if ( menu != null ) {
+			    menu.setMenus(ops);
+			}
 		}
         ClickListener buttonListener = new ClickListener() {
 

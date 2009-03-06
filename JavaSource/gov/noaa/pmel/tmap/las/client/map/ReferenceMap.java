@@ -20,6 +20,7 @@ import com.google.gwt.maps.client.geom.LatLngBounds;
 import com.google.gwt.maps.client.geom.Point;
 import com.google.gwt.maps.client.overlay.GroundOverlay;
 import com.google.gwt.maps.client.overlay.TileLayerOverlay;
+import com.google.gwt.user.client.ui.ChangeListener;
 import com.google.gwt.user.client.ui.ClickListener;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.DockPanel;
@@ -344,5 +345,17 @@ public class ReferenceMap extends Composite {
 	public void removeTopAndBottom() {
 		if ( topOverlay != null ) mMap.removeOverlay(topOverlay);
 		if ( bottomOverlay != null ) mMap.removeOverlay(bottomOverlay);
+	}
+	public void setLatLon(String xlo, String xhi, String ylo, String yhi) {
+		LatLng sw = LatLng.newInstance(Double.valueOf(ylo), Double.valueOf(xlo));
+		LatLng ne = LatLng.newInstance(Double.valueOf(yhi), Double.valueOf(xhi));
+		LatLngBounds bounds = LatLngBounds.newInstance(sw, ne);
+		setSelectionBounds(bounds, true, true);
+	}
+	public void addRegionChangeListener(ChangeListener listener) {
+		regionWidget.addChangeListener(listener);
+	}
+	public void setRegion(int i, String region) {
+		regionWidget.setRegion(i, region);	
 	}
 }

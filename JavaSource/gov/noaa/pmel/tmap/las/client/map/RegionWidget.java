@@ -62,6 +62,13 @@ public class RegionWidget extends ListBox {
     	addItem("South Pacific", "south pacific");
     	addChangeListener(regionChange);
     }
+    public void setRegion(int i, String name) {
+    	LatLngBounds region = null;
+    	if ( i >= 1 && getItemText(i).equals(name) ) {
+    		region = regions.get(getValue(i));
+    		setToRegion(region);
+    	}	
+    }
     public LatLngBounds getBounds() {
     	LatLngBounds region = null;
     	if ( getSelectedIndex() >= 1 ) {
@@ -72,46 +79,45 @@ public class RegionWidget extends ListBox {
     	}
     	return region;
     }
+    public void setToRegion(LatLngBounds region) {
+    	if ( region != null ) {
+			int trys = 0;
+			while ( trys < 3 ) {
+				if ( refMap.getDataBounds().containsBounds(region) ) {
+					
+					if ( refMap.isModulo() ) {
+						int zoom = refMap.getBoundsZoomLevel(region);
+						LatLngBounds dBounds = refMap.getDataBounds();
+						double nlat = dBounds.getNorthEast().getLatitude();
+						double slat = dBounds.getSouthWest().getLatitude();
+						double clon = region.getCenter().getLongitude();
+						double wlon = clon - 180;
+						double elon = clon + 179;
+						LatLng sw = LatLng.newInstance(slat, wlon);
+						LatLng ne = LatLng.newInstance(nlat, elon);
+						LatLngBounds bounds = LatLngBounds.newInstance(sw, ne);
+						refMap.setDataBounds(bounds, refMap.getDelta(), true);
+						refMap.setCenter(region.getCenter());
+						refMap.setZoom(zoom);
+					}
+					refMap.setSelectionBounds(region, true, true);
+					
+					break;
+				} else {
+					if ( refMap.isModulo() ){
+						refMap.rotateEast();
+					} else {
+						break;
+					}
+					trys++;
+				}		
+			}
+		}
+    }
     ChangeListener regionChange = new ChangeListener() {
 		public void onChange(Widget sender) {
 			LatLngBounds region = getBounds();
-			
-			if ( region != null ) {
-				int trys = 0;
-				while ( trys < 3 ) {
-					if ( refMap.getDataBounds().containsBounds(region) ) {
-						// TODO.. Make this work just like the change when setting the center in the center widget for a modulo axis.
-						if ( refMap.isModulo() ) {
-							int zoom = refMap.getBoundsZoomLevel(region);
-							LatLngBounds dBounds = refMap.getDataBounds();
-							double nlat = dBounds.getNorthEast().getLatitude();
-							double slat = dBounds.getSouthWest().getLatitude();
-							double clon = region.getCenter().getLongitude();
-							double wlon = clon - 180;
-							double elon = clon + 179;
-							LatLng sw = LatLng.newInstance(slat, wlon);
-							LatLng ne = LatLng.newInstance(nlat, elon);
-							LatLngBounds bounds = LatLngBounds.newInstance(sw, ne);
-							refMap.setDataBounds(bounds, refMap.getDelta(), true);
-							refMap.setCenter(region.getCenter());
-							refMap.setZoom(zoom);
-						}
-						refMap.setSelectionBounds(region, true, true);
-						
-						break;
-					} else {
-						if ( refMap.isModulo() ){
-							refMap.rotateEast();
-						} else {
-							break;
-						}
-						trys++;
-					}		
-				}
-			}
-			
-			setSelectedIndex(0);
-			
+			setToRegion(region);
 		}	
 	};
 }
