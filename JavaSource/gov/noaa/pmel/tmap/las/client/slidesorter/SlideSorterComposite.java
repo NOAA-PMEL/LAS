@@ -57,7 +57,7 @@ public class SlideSorterComposite extends Composite {
 					if ( tAxis.isHourNeeded() ) {
 						interval = tAxis.getMinuteInterval();
 					}
-					dateWidget = new DateTimeWidget(tAxis, 0, 0, false);
+					dateWidget = new DateTimeWidget(tAxis, false);
 					renderString = tAxis.getRenderString();
 					hasDateWidget = true;
 				}

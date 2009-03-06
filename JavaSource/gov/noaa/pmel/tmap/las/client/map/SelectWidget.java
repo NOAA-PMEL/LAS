@@ -646,6 +646,7 @@ public class SelectWidget extends Composite {
 			this.selectionBounds = rectBounds;
 			if ( recenter ) {
 				this.selectionCenter = rectBounds.getCenter();
+				refMap.setCenter(rectBounds.getCenter());
 			}
 			
 			LatLng sw = rectBounds.getSouthWest();

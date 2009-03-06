@@ -16,6 +16,8 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 public class DateTimeWidget extends Composite {
 	DateTimeFormat longForm = DateTimeFormat.getFormat("yyyy-MM-dd HH:mm:ss");
 	DateTimeFormat shortForm = DateTimeFormat.getFormat("yyyy-MM-dd");
+	DateTimeFormat shortFerretForm = DateTimeFormat.getFormat("dd-MMM-yyyy");
+	DateTimeFormat longFerretForm = DateTimeFormat.getFormat("dd-MMM-yyyy HH:mm:ss");
 	Date lo;
 	Date hi;
 
@@ -43,27 +45,46 @@ public class DateTimeWidget extends Composite {
 	boolean hasHour = false;
 
 	boolean climatology;
+	boolean range;
+	
+	boolean isMenu = false;
 
 	private static final String[] MONTHS = {"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"};
 
 	//public DateTimeWidget(String lo_date, String hi_date, int deltaMinutes, int minuteOffset, String render, boolean range, boolean climatology) {
-	public DateTimeWidget(TimeAxisSerializable tAxis, int deltaMinutes, int minuteOffset, boolean range) {
-
+	public DateTimeWidget(TimeAxisSerializable tAxis, boolean range) {
+        init(tAxis, range);
+		initWidget(dateTimeWidget);
+	}
+	public DateTimeWidget() {
+		initWidget(dateTimeWidget);
+	}
+	public void init(TimeAxisSerializable tAxis, boolean range) {
+		lo_year.clear();
+		lo_month.clear();
+		lo_day.clear();
+		lo_hour.clear();
+		hi_year.clear();
+		hi_month.clear();
+		hi_day.clear();
+		hi_hour.clear();
+		this.range = range;
 		if (tAxis.getNames() != null && tAxis.getNames().length > 0 ) {
+			isMenu = true;
 			String[] names = tAxis.getNames();
 			String[] values = tAxis.getValues();
 			for(int i = 0; i < names.length; i++ ) {
-				lo_year.addItem(names[i], values[i]);
-				hi_year.addItem(names[i], values[i]);
-				lo_flow.add(lo_year);
+				lo_day.addItem(names[i], values[i]);
+				hi_day.addItem(names[i], values[i]);
+				lo_flow.add(lo_day);
 				if ( range ) {
-					hi_flow.add(hi_year);
+					hi_flow.add(hi_day);
 				}
 			}
 
-			hasYear = true;
+			hasYear = false;
 			hasMonth = false;
-			hasDay = false;
+			hasDay = true;
 			hasHour = false;
 		} else {
 			String lo_date = tAxis.getLo();
@@ -142,7 +163,6 @@ public class DateTimeWidget extends Composite {
 		} else {
 			dateTimeWidget.add(lo_flow);
 		}
-		initWidget(dateTimeWidget);
 	}
 	private void lo_days(Date d, ListBox day) {
 		int start = lo.getDay();
@@ -211,6 +231,17 @@ public class DateTimeWidget extends Composite {
 		hi_hour.setEnabled(b);
 	}
 
+	public void setVisible(boolean b) {
+		lo_year.setVisible(b);
+		lo_month.setVisible(b);
+		lo_day.setVisible(b);
+		lo_hour.setVisible(b);
+
+		hi_year.setVisible(b);
+		hi_month.setVisible(b);
+		hi_day.setVisible(b);
+		hi_hour.setVisible(b);
+	}
 	public String getFerretDateLo() {
 		StringBuffer date = new StringBuffer();
 		if ( hasDay ) {
@@ -237,26 +268,28 @@ public class DateTimeWidget extends Composite {
 
 	public String getFerretDateHi() {
 		StringBuffer date = new StringBuffer();
-		if ( hasDay ) {
-			date.append(hi_day.getValue(hi_day.getSelectedIndex()));
-		} else {
+		if ( range ) {
+			if ( hasDay ) {
+				date.append(hi_day.getValue(hi_day.getSelectedIndex()));
+			} else {
+				if ( hasMonth ) {
+					date.append("15");
+				}
+			}
 			if ( hasMonth ) {
-				date.append("15");
+				date.append("-"+hi_month.getValue(hi_month.getSelectedIndex()));
 			}
-		}
-		if ( hasMonth ) {
-			date.append("-"+hi_month.getValue(hi_month.getSelectedIndex()));
-		}
-		if ( climatology ) {
-			date.append("0001");              
+			if ( climatology ) {
+				date.append("0001");              
+			} else {
+				if ( hasYear ) {
+					date.append("-"+hi_year.getValue(hi_year.getSelectedIndex()));
+				}
+			}
+            return date.toString();
 		} else {
-			if ( hasYear ) {
-				date.append("-"+hi_year.getValue(hi_year.getSelectedIndex()));
-			}
+			return getFerretDateLo();
 		}
-
-
-		return date.toString();
 	}
 	public void addChangeListener(ChangeListener change) {
 		lo_year.addChangeListener(change);
@@ -268,5 +301,52 @@ public class DateTimeWidget extends Composite {
 		hi_month.addChangeListener(change);
 		hi_day.addChangeListener(change);
 		hi_hour.addChangeListener(change);
+	}
+	public void setLo(String tlo) {
+		// TODO what about hours????
+		if ( isMenu ) {
+			for(int d = 0; d < lo_day.getItemCount(); d++) {
+				String value = lo_day.getValue(d);
+				if ( value.equals(tlo) ) {
+					lo_day.setSelectedIndex(d);
+				}
+			}
+		} else {
+			Date lo;
+			if ( tlo.length() == 11 ) {
+				lo = shortFerretForm.parse(tlo);
+			} else {
+				lo = longFerretForm.parse(tlo);
+			}
+			if ( hasDay ) {
+				String day = String.valueOf(lo.getDay());
+				for(int d = 0; d < lo_day.getItemCount(); d++) {
+					String value = lo_day.getValue(d);
+					if ( value.equals(day) ) {
+						lo_day.setSelectedIndex(d);
+					}
+				}
+			} 
+			if ( hasMonth ) {
+				String month = MONTHS[lo.getMonth()];
+				for ( int m = 0; m < lo_month.getItemCount(); m++ ) {
+					String value = lo_month.getValue(m);
+					if ( value.equals(month) ) {
+						lo_month.setSelectedIndex(m);
+					}
+				}
+
+			}
+			if ( hasYear ) {
+				String year = String.valueOf(lo.getYear() + 1900);
+				for ( int y = 0; y < lo_year.getItemCount(); y++ ) {
+					String value = lo_year.getValue(y);
+					if ( value.equals(year) ) {
+						lo_year.setSelectedIndex(y);
+					}
+				}
+			}
+
+		}
 	}
 }
