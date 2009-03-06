@@ -43,24 +43,24 @@
 		<table border="0">
 			<tr>
 			</tr>
-			#foreach ($job in $operations) #set($index = $velocityCount - 1)
 			<tr>
                                 <td class="titleText">
 		                   <a href="http://ferret.pmel.noaa.gov/LAS" target="_new">Live Access Server</a> has been working on your request for:
                                 </td>
                         </tr>
                 </table><br>
-                <table  class="tableBorderDark"  width="50%">
+			#foreach ($job in $operations) #set($index = $velocityCount - 1)
+                            #if ( $status.get($index).contains("seconds") )
+                             <table  class="tableBorderDark"  width="50%">
                               <tr>
                                 <td align="center">
-                                        #if ( $status.get($index).contains("seconds") )
                                          <img src="JavaScript/components/mozilla_blu.gif" alt="Spinner"/>
 					<font color="red" size="+2">&nbsp;&nbsp;$status.get($index)&nbsp;&nbsp;</font>
                                          <img src="JavaScript/components/mozilla_blu.gif" alt="Spinner"/>
-                                        #end
                                 </td>
-                             <tr>
-                 </table>
+                              <tr>
+                             </table>
+                           #end
 			#end
                 <table   width="90%">
                         <tr>
