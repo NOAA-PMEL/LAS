@@ -64,6 +64,9 @@ public class LASBackendRequest extends LASDocument {
         Element cancel = this.getRootElement().getChild("cancel");
         if ( cancel != null ) {
             String cancelFileName = getResultAsFile("cancel");
+            if ( cancelFileName == null || cancelFileName.equals("") ) {
+            	throw new IOException("Operation was not configured to allow it to be canceled.  No cancel result defined.  Operation not canceled.");
+            }
             File cancelFile = new File(cancelFileName);
             cancelFile.createNewFile();
             return true;
