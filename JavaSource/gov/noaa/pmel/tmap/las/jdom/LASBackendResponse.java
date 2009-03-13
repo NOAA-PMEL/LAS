@@ -727,11 +727,7 @@ public class LASBackendResponse extends LASDocument {
         Element result_exception = new Element("result");
         result_exception.setAttribute("ID", "exception_message");
         result_exception.setAttribute("type", "error");
-        StringBuffer trace_buffer = new StringBuffer();
-        trace_buffer.append(e.toString()+"\n");
-        StackTraceElement[] trace = e.getStackTrace();
-        trace_buffer.append(trace[0].toString());
-        result_exception.setText(trace_buffer.toString());
+        result_exception.setText(e.getMessage());
         response.addContent(result_exception);
         setDate(response);
         
