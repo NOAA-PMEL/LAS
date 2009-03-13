@@ -3,7 +3,7 @@
 	<head>
 		<meta http-equiv="Content-Type"
 			content="text/html; charset=ISO-8859-1">
-	    <META HTTP-EQUIV="Refresh" CONTENT="3">
+	        <meta http-equiv="refresh" URL="$server_url?xml=$las_request.toEncodedURLString()&amp;JSESSIONID=$JSESSIONID">
 		<title>LAS Progress Report</title>
 		<link rel="alternate" type="application/rss+xml" title="RSS Feed" href="$feed">
               <style type="text/css">
@@ -38,8 +38,29 @@
                 	font-weight: normal;
                 }
               </style>
+             <script type="text/javascript" language="javascript">
+
+                  var myRefresh;
+                  function stopRefresh() {
+                      window.clearTimeout(myRefresh);
+                  }
+                  function startRefresh() {
+                      if (window.setTimeout && window.location && window.location.reload)
+                      myRefresh = window.setTimeout("window.location.reload(true)", 3000);
+                  }
+               </script>
+
 	</head>
 	<body>
+      #if ( "$!emails" != "" && "$!emails" != "[]" ) 
+                <span class="textInstructions">Thank you!</span><br>
+                <span class="textChoices">When this product is finished LAS will send email to these addresses: $emails. </span><br><br><br>
+		<form
+			action="$server_url?xml=$las_request.toEncodedURLString()&cancel=Cancel&JSESSIONID=$JSESSIONID"
+			method="POST"><span class="textInstructions">You may still cancel this request:
+			<INPUT style="background-color:#E78273;" TYPE="SUBMIT" NAME="cancel" VALUE="Cancel"></span>
+		</form>
+      #else      
 		<table border="0">
 			<tr>
 			</tr>
@@ -79,16 +100,13 @@
                            </td>
                         </tr>
                 </table>
-			<form name="progress"
+			<form name="progress" id="progress"
 				action="$server_url?xml=$las_request.toEncodedURLString()&amp;JSESSIONID=$JSESSIONID"
 				method="POST">
-				<INPUT TYPE="text" name="email" size="50" value="Enter email address">
+				<INPUT TYPE="text" id="email" name="email" size="50" onfocus="stopRefresh()" onblur="startRefresh()" value="Enter email address">
 				<INPUT style="background-color:#c6e3c6;" TYPE="SUBMIT" NAME="embutton" value="Request E-Mail Notification">
 
 			</form>
-			  #if ( "$!emails" != "" && "$!emails" != "[]" ) 
-                            <span class="textChoices">When this product is finished LAS will send email to these addresses: $emails. </span><br><br><br>
-                          #end
 
 			#end
 		<form
@@ -96,5 +114,9 @@
 			method="POST"><span class="textInstructions">Cancel this request:
 			<INPUT style="background-color:#E78273;" TYPE="SUBMIT" NAME="cancel" VALUE="Cancel"></span>
 		</form>
+        <script language="javascript" type="text/javascript">
+	        startRefresh();
+        </script>         
+#end  
 	</body>
 </html>
