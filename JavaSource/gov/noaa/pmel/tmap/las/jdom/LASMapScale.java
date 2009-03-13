@@ -289,6 +289,18 @@ public class LASMapScale extends LASDocument {
     public String getYAxisUpperRight() {
         return this.getRootElement().getChildTextTrim("y_axis_upper_right");
     }
+    public double getXAxisLowerLeftAsDouble() {
+        return Double.valueOf(this.getRootElement().getChildTextTrim("x_axis_lower_left")).doubleValue();
+    }
+    public double getYAxisLowerLeftAsDouble() {
+        return Double.valueOf(this.getRootElement().getChildTextTrim("y_axis_lower_left")).doubleValue();
+    }
+    public double getXAxisUpperRightAsDouble() {
+        return Double.valueOf(this.getRootElement().getChildTextTrim("x_axis_upper_right")).doubleValue();
+    }
+    public double getYAxisUpperRightAsDouble() {
+        return Double.valueOf(this.getRootElement().getChildTextTrim("y_axis_upper_right")).doubleValue();
+    }
     public String getAxis_horizontal() {
     	return this.getRootElement().getChildText("axis_horizontal");
     }
