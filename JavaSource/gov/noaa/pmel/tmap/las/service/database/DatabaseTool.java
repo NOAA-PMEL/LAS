@@ -221,7 +221,7 @@ public class DatabaseTool extends TemplateTool {
                makeNetCDF(netcdfFilename, rset, lasBackendRequest);
             } catch (Exception e) {
             	if ( e instanceof LASRowLimitException ) {
-            		lasBackendResponse.setError("Row limit exceeded.", e);
+            		lasBackendResponse.setError("The data you asked for exceeds the allowed limits.   Please try again with a smaller request.", e);
             	} else {
                     lasBackendResponse.setError("Unable to make intermediate netCDF file.", e);
             	}
