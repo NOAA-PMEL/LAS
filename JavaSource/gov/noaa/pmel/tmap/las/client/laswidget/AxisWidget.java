@@ -9,37 +9,76 @@ import java.util.Map;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.client.ui.ChangeListener;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
+import com.google.gwt.user.client.ui.VerticalPanel;
 
 public class AxisWidget extends Composite {
 	String type;
-	String label;
-    ListBox axis =  new ListBox();
+	Label lo_label = new Label();
+	Label lo_label_range = new Label();
+	Label hi_label_range = new Label();
+    ListBox lo_axis = new ListBox();
+    ListBox hi_axis = new ListBox();
+    HorizontalPanel lo_layout = new HorizontalPanel();
+    HorizontalPanel hi_layout = new HorizontalPanel();
+    VerticalPanel layout = new VerticalPanel();
     NumberFormat format = NumberFormat.getFormat("###.##");
+    boolean range;
     public AxisWidget(AxisSerializable ax) {
     	    init(ax);
-        	initWidget(axis); 	
+        	initWidget(layout); 	
+    }
+    public void init(AxisSerializable ax, boolean range) {
+    	this.range = range;
+    	initialize(ax);
     }
     public void init(AxisSerializable ax) {
-    	axis.clear();
+    	this.range = false;
+    	initialize(ax);
+    }
+    private void initialize(AxisSerializable ax) {
+    	lo_axis.clear();
+    	hi_axis.clear();
+    	
+    	String units = ax.getUnits();
     	if ( ax.getLabel() != null && !ax.getLabel().equals("") ) {
-    		label = ax.getLabel();
+    		if ( units != null && !units.equals("") ) {
+    			lo_label_range.setText("Start "+ax.getLabel()+":");
+    			hi_label_range.setText("End "+ax.getLabel()+":");
+    			lo_label.setText(ax.getLabel()+":");
+    		} else {
+    			lo_label_range.setText("Start "+ax.getLabel()+"("+units+"):");
+    			hi_label_range.setText("End "+ax.getLabel()+"("+units+"):");
+    			lo_label.setText(ax.getLabel()+"("+units+"):");
+    		}
     	} else {
-    		label = "z";
+    		if ( units != null && !units.equals("") ) {
+    			lo_label_range.setText("Start Z ("+units+"): ");
+    			hi_label_range.setText("End Z ("+units+"): ");
+    			lo_label.setText("Z ("+units+"): ");
+    		} else {
+    			lo_label_range.setText("Start Z:");
+    			hi_label_range.setText("End Z:");
+    			lo_label.setText("Z:");
+    		}
     	}
     	
     	if ( ax.getNames() != null && ax.getNames().length > 0) {
     		this.type = ax.getType();
-        	axis.setName(type);
+        	lo_axis.setName(type);
         	String[] names = ax.getNames();
         	String[] values = ax.getValues();
         	for (int i=0; i < names.length; i++) {
-    			axis.addItem(names[i], values[i]);
+    			lo_axis.addItem(names[i], values[i]);
+    			hi_axis.addItem(names[i], values[i]);
     		}
-        	axis.setSelectedIndex(0);
+        	lo_axis.setSelectedIndex(0);
+        	hi_axis.setSelectedIndex(0);
     	} else {
     		this.type = ax.getType();
-        	axis.setName(type);
+        	lo_axis.setName(type);
         	ArangeSerializable arange = ax.getArangeSerializable();
         	int size = Integer.valueOf(arange.getSize());
         	double start = Double.valueOf(arange.getStart());
@@ -47,65 +86,70 @@ public class AxisWidget extends Composite {
         	for ( int i=0; i < size; i++ ) {
         		double value = start + i*step;
         		String v = format.format(value);
-        		axis.addItem(v);
+        		lo_axis.addItem(v);
+        		hi_axis.addItem(v);
         	}
-        	axis.setSelectedIndex(0);
+        	lo_axis.setSelectedIndex(0);
+        	hi_axis.setSelectedIndex(0);
     	}
+    	load_layout();
     }
-    public AxisWidget(String type, double start, double step, int size) {
-    	this.type = type;
-    	axis.setName(type);
-    	for ( int i=0; i < size; i++ ) {
-    		double value = start + i*step;
-    		String v = format.format(value);
-    		axis.addItem(v);
+    private void load_layout() {
+    	lo_layout.clear();
+    	hi_layout.clear();
+    	layout.clear();
+    	if ( range ) {
+    		lo_layout.add(lo_label_range);
+    	    lo_layout.add(lo_axis);
+    	    hi_layout.add(hi_label_range);
+    	    hi_layout.add(hi_axis);
+    	    layout.add(lo_layout);
+    	    layout.add(hi_layout);
+    	} else {
+    	    lo_layout.add(lo_label);
+    	    lo_layout.add(lo_axis);
+    	    layout.add(lo_layout);
     	}
-    	axis.setSelectedIndex(0);
-    	initWidget(axis);
-    }
-    
-    public AxisWidget(String type, String[] names, String[] values) {
-    	this.type = type;
-    	axis.setName(type);
-    	for (int i=0; i < names.length; i++) {
-			axis.addItem(names[i], values[i]);
-		}
-    	axis.setSelectedIndex(0);
-    	initWidget(axis);
     }
     public AxisWidget() {
-		initWidget(axis);
+		initWidget(layout);
 	}
 	public int getSelectedIndex() {
-    	return axis.getSelectedIndex();
+    	return lo_axis.getSelectedIndex();
     }
     public String getValue(int i) {
-    	return axis.getValue(i);
+    	return lo_axis.getValue(i);
     }
 
 	public void addChangeListener(ChangeListener listener) {
-		axis.addChangeListener(listener);	
+		lo_axis.addChangeListener(listener);	
+		hi_axis.addChangeListener(listener);
 	}
 
 	public void setEnabled(boolean b) {
-		axis.setEnabled(b);
+		lo_axis.setEnabled(b);
 	}
 
-	public String getSelectedValue() {
-		return getValue(getSelectedIndex());
+	public String getLo() {
+		return lo_axis.getValue(lo_axis.getSelectedIndex());
 	}
-	public String getLabel() {
-		return label;
+	public String getHi() {
+		return hi_axis.getValue(hi_axis.getSelectedIndex());
 	}
+	
 	public String getType() {
 		return this.type;
 	}
 	public void setLo(String lo) {
-		for(int i=0; i < axis.getItemCount(); i++) {
-			String value = axis.getValue(i);
+		for(int i=0; i < lo_axis.getItemCount(); i++) {
+			String value = lo_axis.getValue(i);
 			if ( lo.equals(value) ) {
-				axis.setSelectedIndex(i);
+				lo_axis.setSelectedIndex(i);
 			}
 		}
+	}
+	public void setRange(boolean b) {
+		range = b;
+		load_layout();
 	}
 }

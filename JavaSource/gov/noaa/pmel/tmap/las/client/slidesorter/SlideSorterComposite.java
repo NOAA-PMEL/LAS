@@ -47,7 +47,7 @@ public class SlideSorterComposite extends Composite {
 				if ( tAxis.getNames() != null && tAxis.getNames().length > 0 ) {
 					String[] names = tAxis.getNames();
 					String[] values = tAxis.getValues();
-					dateMenu =  new AxisWidget("t", names, values);
+					dateMenu =  new AxisWidget(tAxis);
 					hasDateMenu = true;
 				} else {	
 					String hi = tAxis.getHi();
@@ -66,10 +66,10 @@ public class SlideSorterComposite extends Composite {
 				if ( a.getNames() != null ) {
 					String[] names = a.getNames();
 					String[] values = a.getValues();
-					xyzMenu =  new AxisWidget(type, names, values);
+					xyzMenu =  new AxisWidget(a);
 				} else {	
 					ArangeSerializable arange = a.getArangeSerializable();
-					xyzMenu =  new AxisWidget(type, Double.valueOf(arange.getStart()), Double.valueOf(arange.getStep()), Integer.valueOf(arange.getSize()));
+					xyzMenu =  new AxisWidget(a);
 				}
 				hasXYZMenu = true;
 				String label = a.getLabel();

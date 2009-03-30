@@ -117,6 +117,7 @@ public class Axis extends Container implements AxisInterface {
 		a.setID(getID());
 		a.setLo(getLo());
 		a.setName(getName());
+		a.setUnits(getAttributesAsMap().get("units"));
 		a.setAttributes(getAttributesAsMap());
 		if (hasV()) {
 			ArrayList<NameValuePair> vlist = getVerticies();

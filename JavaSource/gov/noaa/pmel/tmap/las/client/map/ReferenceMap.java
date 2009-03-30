@@ -1,25 +1,14 @@
 package gov.noaa.pmel.tmap.las.client.map;
 
-import com.google.gwt.maps.client.Copyright;
-import com.google.gwt.maps.client.CopyrightCollection;
 import com.google.gwt.maps.client.MapType;
 import com.google.gwt.maps.client.MapWidget;
-import com.google.gwt.maps.client.TileLayer;
 import com.google.gwt.maps.client.control.Control;
-import com.google.gwt.maps.client.control.ControlAnchor;
-import com.google.gwt.maps.client.control.ControlPosition;
-import com.google.gwt.maps.client.control.LargeMapControl;
 import com.google.gwt.maps.client.control.MapTypeControl;
-import com.google.gwt.maps.client.control.SmallMapControl;
 import com.google.gwt.maps.client.control.SmallZoomControl;
-import com.google.gwt.maps.client.event.MapDragEndHandler;
-import com.google.gwt.maps.client.event.MapMouseOutHandler;
 import com.google.gwt.maps.client.event.MapZoomEndHandler;
 import com.google.gwt.maps.client.geom.LatLng;
 import com.google.gwt.maps.client.geom.LatLngBounds;
-import com.google.gwt.maps.client.geom.Point;
 import com.google.gwt.maps.client.overlay.GroundOverlay;
-import com.google.gwt.maps.client.overlay.TileLayerOverlay;
 import com.google.gwt.user.client.ui.ChangeListener;
 import com.google.gwt.user.client.ui.ClickListener;
 import com.google.gwt.user.client.ui.Composite;
@@ -114,6 +103,7 @@ public class ReferenceMap extends Composite {
 //		rotateWidget.setVisible(false);
 		centerWidget = new CenterWidget(this);
 		centerWidget.setVisible(false);
+		/* I think this is taken care of re-centering the entire data bounds for modulo axes in other code.
 		mMap.addMapDragEndHandler(new MapDragEndHandler() {
 			public void onDragEnd(MapDragEndEvent event) {
 				if ( selectWidget.getSelectionBounds().containsLatLng(mMap.getCenter()) ) {
@@ -121,7 +111,7 @@ public class ReferenceMap extends Composite {
 				}
 			}		
 		});			
-		
+		*/
 //		iconifyControl = new IconifyControl(new ControlPosition(ControlAnchor.TOP_RIGHT, 10, 30), this);
 //		addControl(iconifyControl);
 		topControls.setWidget(0, 0, regionWidget);
@@ -179,9 +169,9 @@ public class ReferenceMap extends Composite {
     		   mMap.addOverlay(dataBoundsOverlay.getPolygon());
     		}
     		if ( modulo ) {
-    		    selectWidget.initSelectionBounds(dataBounds, dataBounds, dataBounds.getCenter(), false);
+    		    selectWidget.initSelectionBounds(dataBounds, dataBounds, false);
     		} else {
-    			selectWidget.initSelectionBounds(dataBounds, dataBounds, dataBounds.getCenter(), true);
+    			selectWidget.initSelectionBounds(dataBounds, dataBounds, true);
     		}
 //    		selectWidget.setEditingEnabled(true);
     		mZoom = mMap.getBoundsZoomLevel(dataBounds);
@@ -223,9 +213,6 @@ public class ReferenceMap extends Composite {
 		double west = c_sw.getLongitude() + 90.;
 		dataBounds = LatLngBounds.newInstance(LatLng.newInstance(c_sw.getLatitude(), west), LatLng.newInstance(c_ne.getLatitude(), east));
 		setDataBounds(dataBounds, delta, true);
-	}
-	private void reset() {
-		
 	}
 	public boolean isModulo() {
 		return modulo;
@@ -292,30 +279,50 @@ public class ReferenceMap extends Composite {
 	public void resetSize() {
 		mMap.setSize(String.valueOf(mWidth)+"px", String.valueOf(mHeight)+"px");		
 	}
-	public String getXlo() {
+	public String getXloFormatted() {
 		
-		//return selectWidget.getXlo();
-		
-		double xwest = selectWidget.getSelectionBounds().getSouthWest().getLongitude();
-		return String.valueOf(xwest);
+		return selectWidget.getXloFormatted();
 		
 	}
-	public String getXhi() {
+	public String getXhiFormatted() {
 		
+		return selectWidget.getXhiFormatted();
+		
+		/*
 		double xwest = selectWidget.getSelectionBounds().getSouthWest().getLongitude();
 		double xeast = selectWidget.getSelectionBounds().getNorthEast().getLongitude();
 		if ( xeast < xwest ) {
 			xeast = xeast + 360.;
 		}
 		return String.valueOf(xeast);
+		*/
 		
 	}
-	public String getYlo() {
-		return String.valueOf(selectWidget.getSelectionBounds().getSouthWest().getLatitude());
+	public String getYloFormatted() {
+		return selectWidget.getYloFormatted();
 	}
-	public String getYhi() {
-		return String.valueOf(selectWidget.getSelectionBounds().getNorthEast().getLatitude());
+	public String getYhiFormatted() {
+		return selectWidget.getYhiFormatted();
 	}
+	
+	public double getXlo() {
+		return selectWidget.getXlo();
+	}
+	public double getXhi() {
+		double xwest = selectWidget.getXlo();
+		double xeast = selectWidget.getXhi();
+		if ( xeast < xwest ) {
+			xeast = xeast + 360.;
+		}
+		return xeast;
+	}
+	public double getYhi() {
+		return selectWidget.getYhi();
+	}
+	public double getYlo() {
+		return selectWidget.getYlo();
+	}
+	
 	public RegionWidget getRegionWidget() {
 		return regionWidget;
 	}
@@ -357,5 +364,8 @@ public class ReferenceMap extends Composite {
 	}
 	public void setRegion(int i, String region) {
 		regionWidget.setRegion(i, region);	
+	}
+	public void setToolType(String view) {
+		selectWidget.setToolType(view);
 	}
 }

@@ -44,6 +44,24 @@ public class OptionsWidget extends VerticalPanel {
 	Button cancel = new Button("Cancel");
 	Grid layout_grid = new Grid(1,2);
 	List<Widget> widgets = new ArrayList<Widget>();
+	public OptionsWidget() {
+		layout_grid.setWidget(0, 0, ok);
+		layout_grid.setWidget(0, 1, cancel);
+	}
+	public OptionsWidget(RPCServiceAsync rpcService, String opID) {
+		layout_grid.setWidget(0, 0, ok);
+		layout_grid.setWidget(0, 1, cancel);
+		this.optionsService = rpcService;
+		optionsService.getOptionsByOperationID(opID, optionsCallback);	
+	}
+	public OptionsWidget(RPCServiceAsync rpcService, String operationID, ClickListener okListener, ClickListener cancelListener) {
+		layout_grid.setWidget(0, 0, ok);
+		layout_grid.setWidget(0, 1, cancel);
+		ok.addClickListener(okListener);
+		cancel.addClickListener(cancelListener);
+		this.optionsService = rpcService;
+		optionsService.getOptionsByOperationID(operationID, optionsCallback);	
+	}
 	public OptionsWidget(ClickListener listener) {
 		ok.addClickListener(listener);
 		cancel.addClickListener(listener);
@@ -123,6 +141,9 @@ public class OptionsWidget extends VerticalPanel {
 				if ( value != null && !value.equals("") ) {
 					t.setText(value);
 				}
+				if ( value != null && value.equals("reset") ) {
+					t.setText("");
+				}
 			} else if ( w instanceof ListBox ) {
 				ListBox l = (ListBox) w;
 				String value = state.get(l.getName());
@@ -153,5 +174,8 @@ public class OptionsWidget extends VerticalPanel {
 			}
 		}
 		return state;
+	}
+	public void addOkClickListner(ClickListener optionsOkListener) {
+		ok.addClickListener(optionsOkListener);
 	}
 }

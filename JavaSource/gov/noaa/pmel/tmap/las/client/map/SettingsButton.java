@@ -2,6 +2,7 @@ package gov.noaa.pmel.tmap.las.client.map;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import gov.noaa.pmel.tmap.las.client.OperationsMenu;
 import gov.noaa.pmel.tmap.las.client.RPCServiceAsync;
@@ -9,17 +10,23 @@ import gov.noaa.pmel.tmap.las.client.laswidget.AxisWidget;
 import gov.noaa.pmel.tmap.las.client.laswidget.DatasetButton;
 import gov.noaa.pmel.tmap.las.client.laswidget.DateTimeWidget;
 import gov.noaa.pmel.tmap.las.client.laswidget.OperationsWidget;
+import gov.noaa.pmel.tmap.las.client.laswidget.OptionsButton;
+import gov.noaa.pmel.tmap.las.client.serializable.AxisSerializable;
+import gov.noaa.pmel.tmap.las.client.serializable.OperationSerializable;
 
 import com.google.gwt.maps.client.geom.LatLng;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.ClickListener;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PopupPanel;
+import com.google.gwt.user.client.ui.RadioButton;
 import com.google.gwt.user.client.ui.TreeListener;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -32,29 +39,28 @@ public class SettingsButton extends Composite {
 	VerticalPanel leftInteriorPanel;
 	VerticalPanel rightInteriorPanel;
 	HorizontalPanel buttonFlow;
+	HorizontalPanel datasetAndOptions;
 	OperationsWidget operations;
 	Button closeButton;
 	Button applyButton;
-	Button cancelButton;
 	ReferenceMap refMap;
-	Label dateTimeLabel = new Label("Select a date/time:");
-	DateTimeWidget dateTimeWidget = new DateTimeWidget();
-	Label zLabel = new Label("z");
-	AxisWidget zAxisWidget = new AxisWidget();
-	CheckBox apply = new CheckBox("Use setting for this panel.");
 	DatasetButton datasetButton;
-	int popupTop;
-	int popupLeft;
-	
-	public SettingsButton (LatLng center, int zoom, int xpix, int ypix, String panelID, RPCServiceAsync rpcService) {
-		settingsButton = new Button ("Panel Settings");
-		settingsButton.addClickListener(settingsButtonClick);
+	OptionsButton optionsButton;
+	String operationID;
+	boolean usePanel = false;
+	public SettingsButton (String title, LatLng center, int zoom, int xpix, int ypix, String panelID, String operationID, RPCServiceAsync rpcService) {
+		this.operationID = operationID;
 		
+		settingsButton = new Button (title);
+		settingsButton.addClickListener(settingsButtonClick);
+
 		datasetButton = new DatasetButton(rpcService);
 		
+		optionsButton = new OptionsButton(rpcService, operationID);
 		
 		interiorPanel = new HorizontalPanel();
         mainPanel = new VerticalPanel();
+       
 		settingsDialog = new DialogBox(false, false);
 		settingsDialog.setText("Set Region and Plot Options for "+panelID+" ... [Drag Me]");
 		leftInteriorPanel = new VerticalPanel();
@@ -66,19 +72,19 @@ public class SettingsButton extends Composite {
 		applyButton = new Button("Apply");
 		applyButton.setTitle("Apply changes to "+panelID);
 		applyButton.addStyleName("blackBorder");
-		/*
-		cancelButton = new Button("Cancel");
-		cancelButton.addClickListener(closeClick);
-		*/
-		
+		applyButton.addClickListener(applyClick);
+
 		buttonFlow = new HorizontalPanel();
 		buttonFlow.add(closeButton);
 		buttonFlow.add(applyButton);
-		//buttonFlow.add(cancelButton);
-
-		leftInteriorPanel.add(buttonFlow);
-	    leftInteriorPanel.add(datasetButton);
+		
+		datasetAndOptions = new HorizontalPanel();
+		datasetAndOptions.add(datasetButton);
+		datasetAndOptions.add(optionsButton);
+		
+	    leftInteriorPanel.add(datasetAndOptions);
 		operations = new OperationsWidget();
+		operations.addClickListener(operationsClickListener);
 		leftInteriorPanel.add(operations);
 		
 		interiorPanel.add(leftInteriorPanel);
@@ -87,12 +93,9 @@ public class SettingsButton extends Composite {
 		rightInteriorPanel.add(refMap);
 		
 		interiorPanel.add(rightInteriorPanel);
-
-		mainPanel.add(apply);
+		mainPanel.add(buttonFlow);
 		mainPanel.add(interiorPanel);
 		settingsDialog.add(mainPanel);
-		popupLeft = settingsButton.getAbsoluteLeft();
-		popupTop = settingsButton.getAbsoluteTop();
 		initWidget(settingsButton);	
 	}
 	public void addClickListener(ClickListener listener) {
@@ -109,6 +112,11 @@ public class SettingsButton extends Composite {
 			settingsDialog.hide();
 		}
 	};
+	ClickListener applyClick  = new ClickListener() {
+		public void onClick(Widget sender) {
+			usePanel = true;
+		}	
+	};
 	public void addCloseClickListener(ClickListener close) {
 		closeButton.addClickListener(close);
 	}
@@ -121,45 +129,45 @@ public class SettingsButton extends Composite {
 	public void setOperations(RPCServiceAsync rpcService, String view, String dsID, String varID, OperationsMenu menu) {
 		operations.setOperations(rpcService, view, dsID, varID, menu);
 	}
-	public void setDateTimeWidget(DateTimeWidget t) {
-		this.dateTimeWidget = t;
-		leftInteriorPanel.add(dateTimeLabel);
-		leftInteriorPanel.add(dateTimeWidget);
-	}
-	public void setZAxis(AxisWidget z) {
-		this.zAxisWidget = z;
-		zLabel.setText("Select "+z.getLabel()+" value: ");
-		leftInteriorPanel.add(zLabel);
-		leftInteriorPanel.add(zAxisWidget);
-	}
-	public DateTimeWidget getDateWidget() {
-		return dateTimeWidget;
-	}
-	public AxisWidget getZWidget() {
-		return zAxisWidget;
-	}
-	
 	public void setLatLon(String xlo, String xhi, String ylo, String yhi) {
 		refMap.setLatLon(xlo, xhi, ylo, yhi);
-	}
-	public CheckBox getApply() {
-		return apply;
 	}
 	public void addDatasetTreeListener (TreeListener datasetTreeListener) {
 	    datasetButton.addTreeListener(datasetTreeListener);
 	}
-	public void removeAxes() {
-		if ( dateTimeLabel != null ) {
-			leftInteriorPanel.remove(dateTimeLabel);
+	public boolean isUsePanelSettings() {
+		return usePanel;
+	}
+	public void setUsePanel(boolean b) {
+		usePanel = b;
+	}
+	public boolean usePanel() {
+		return usePanel;
+	}
+	public void addOptionsOkClickListener(ClickListener listener) {
+		optionsButton.addOkClickListener(listener);
+	}
+	public Map<String, String> getOptions() {
+		return optionsButton.getState();
+	}
+	public OperationSerializable getCurrentOp() {
+		return operations.getCurrentOp();
+	}
+	public String getCurrentOperationView() {
+		return operations.getCurrentView();
+	}
+	public void setToolType(String view) {
+		refMap.setToolType(view);
+	}
+	public ClickListener operationsClickListener = new ClickListener() {
+		public void onClick(Widget sender) {
+			refMap.setToolType(getCurrentOperationView());		
 		}
-		if ( dateTimeWidget != null ) {
-			leftInteriorPanel.remove(dateTimeWidget);
-		}
-		if ( zLabel != null ) {
-			leftInteriorPanel.remove(zLabel);
-		}
-		if ( zAxisWidget != null ) {
-			leftInteriorPanel.remove(zAxisWidget);
-		}		
+	};
+	public OperationsWidget getOperationsWidget() {
+		return operations;
+	}
+	public void addOperationClickListener(ClickListener operationsClickListener) {
+		operations.addClickListener(operationsClickListener);
 	}
 }

@@ -131,6 +131,28 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
 
 		return wireOps;
 	}
+	public OptionSerializable[] getOptionsByOperationID(String operationID) throws RPCException {
+		LASConfig lasConfig = (LASConfig) getServletContext().getAttribute(LASConfigPlugIn.LAS_CONFIG_KEY);
+		ArrayList<Option> options;
+		OptionSerializable[] wireOptions;
+		try {
+			options = lasConfig.getOptionsByOperationID(operationID);
+		} catch (JDOMException e) {
+			throw new RPCException(e.getMessage());
+		}
+		int i=0;
+		if ( options != null ) {
+			wireOptions = new OptionSerializable[options.size()];
+		    for (Iterator optionIt = options.iterator(); optionIt.hasNext();) {
+				Option option = (Option) optionIt.next();
+				wireOptions[i] = option.getOptionSerializable();
+			    i++;
+		    }
+		    return wireOptions;
+		} else {
+			return null;
+		}
+	}
 	public OptionSerializable[] getOptions(String opid) throws RPCException {
 		LASConfig lasConfig = (LASConfig) getServletContext().getAttribute(LASConfigPlugIn.LAS_CONFIG_KEY);
 		ArrayList<Option> options;

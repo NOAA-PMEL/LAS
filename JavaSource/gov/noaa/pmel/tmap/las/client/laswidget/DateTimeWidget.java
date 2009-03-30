@@ -10,17 +10,29 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.ChangeListener;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
 public class DateTimeWidget extends Composite {
+	
 	DateTimeFormat longForm = DateTimeFormat.getFormat("yyyy-MM-dd HH:mm:ss");
 	DateTimeFormat shortForm = DateTimeFormat.getFormat("yyyy-MM-dd");
 	DateTimeFormat shortFerretForm = DateTimeFormat.getFormat("dd-MMM-yyyy");
 	DateTimeFormat longFerretForm = DateTimeFormat.getFormat("dd-MMM-yyyy HH:mm:ss");
 	Date lo;
 	Date hi;
-
+    
+	Label dt_label = new Label("Date/Time: ");
+	Label d_label = new Label("Date: ");
+	
+	Label dt_label_lo_range = new Label("Start date/Time: ");
+	Label d_label_lo_range = new Label("Start date: ");
+	
+	Label dt_label_hi_range = new Label("End date/Time: ");
+	Label d_label_hi_range = new Label("End date: ");
+	
 	ListBox lo_year = new ListBox();
 	ListBox lo_month = new ListBox();
 	ListBox lo_day = new ListBox();
@@ -31,8 +43,8 @@ public class DateTimeWidget extends Composite {
 	ListBox hi_day = new ListBox();
 	ListBox hi_hour = new ListBox();
 
-	FlowPanel lo_flow = new FlowPanel();
-	FlowPanel hi_flow = new FlowPanel();
+	HorizontalPanel lo_flow = new HorizontalPanel();
+	HorizontalPanel hi_flow = new HorizontalPanel();
 
 	VerticalPanel dateTimeWidget = new VerticalPanel();
 
@@ -48,6 +60,8 @@ public class DateTimeWidget extends Composite {
 	boolean range;
 	
 	boolean isMenu = false;
+	
+	String render;
 
 	private static final String[] MONTHS = {"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"};
 
@@ -60,28 +74,33 @@ public class DateTimeWidget extends Composite {
 		initWidget(dateTimeWidget);
 	}
 	public void init(TimeAxisSerializable tAxis, boolean range) {
+		lo_flow.addStyleName("las-vertical-align-center");
+		hi_flow.addStyleName("las-vertical-align-center");
 		lo_year.clear();
 		lo_month.clear();
 		lo_day.clear();
 		lo_hour.clear();
+		lo_flow.clear();
 		hi_year.clear();
 		hi_month.clear();
 		hi_day.clear();
 		hi_hour.clear();
+		hi_flow.clear();
+		hasYear = false;
+		hasMonth = false;
+		hasDay = false;
+		hasHour = false;
+		isMenu = false;
 		this.range = range;
 		if (tAxis.getNames() != null && tAxis.getNames().length > 0 ) {
+			
 			isMenu = true;
 			String[] names = tAxis.getNames();
 			String[] values = tAxis.getValues();
 			for(int i = 0; i < names.length; i++ ) {
 				lo_day.addItem(names[i], values[i]);
 				hi_day.addItem(names[i], values[i]);
-				lo_flow.add(lo_day);
-				if ( range ) {
-					hi_flow.add(hi_day);
-				}
 			}
-
 			hasYear = false;
 			hasMonth = false;
 			hasDay = true;
@@ -89,7 +108,7 @@ public class DateTimeWidget extends Composite {
 		} else {
 			String lo_date = tAxis.getLo();
 			String hi_date = tAxis.getHi();
-			String render = tAxis.getRenderString();
+			this.render = tAxis.getRenderString();
 			this.climatology = tAxis.isClimatology();
 
 			try {
@@ -104,27 +123,52 @@ public class DateTimeWidget extends Composite {
 
 			try {
 				hi = longForm.parse(hi_date);
-			} catch (IllegalArgumentException e) {
+			} catch (IllegalArgumentException ex1) {
 				try {
 					hi = shortForm.parse(hi_date);
-				} catch (IllegalArgumentException e1) {
+				} catch (IllegalArgumentException ex2) {
 					Window.alert("Date parsing failed for "+hi_date);
 				}
 			}
-
+		}
+		years(lo, hi, lo_year);
+		years(lo, hi, hi_year);
+		lo_months(lo, lo_month);
+		hi_months(hi, hi_month);
+		lo_days(lo, lo_day);
+		hi_days(hi, hi_day);
+		loadWidget();
+	}
+	private void loadWidget() {
+		lo_flow.clear();
+		hi_flow.clear();
+		dateTimeWidget.clear();
+		if ( isMenu ) {
 			if ( range ) {
-				years(lo, hi, lo_year);
-				years(lo, hi, hi_year);
-				lo_months(lo, lo_month);
-				hi_months(hi, hi_month);
-				lo_days(lo, lo_day);
-				hi_days(hi, hi_day);
+				lo_flow.add(d_label_lo_range);
+				lo_flow.add(lo_day);
+				hi_flow.add(d_label_hi_range);
+				hi_flow.add(hi_day);
 			} else {
-				years(lo, hi, lo_year);
-				lo_months(lo, lo_month);
-				lo_days(lo, lo_day);
+			    lo_flow.add(d_label);
+			    lo_flow.add(lo_day);
 			}
-
+		} else {
+			if ( render.contains("T") || render.contains("t") ) {
+				if ( range ) {
+					lo_flow.add(dt_label_lo_range);
+					hi_flow.add(dt_label_hi_range);
+				} else {
+				    lo_flow.add(dt_label);
+				}
+			} else {
+				if ( range ) {
+					lo_flow.add(d_label_lo_range);
+					hi_flow.add(d_label_hi_range);
+				} else {
+				    lo_flow.add(d_label);
+				}
+			}
 			if ( render.contains("Y") || render.contains("y") ) {
 				if ( range ) {
 					lo_flow.add(lo_year);
@@ -154,14 +198,27 @@ public class DateTimeWidget extends Composite {
 				}
 				hasDay = true;
 			}
-
-
 		}
 		if ( range ) {
 			dateTimeWidget.add(lo_flow);
 			dateTimeWidget.add(hi_flow);
 		} else {
 			dateTimeWidget.add(lo_flow);
+		}
+	}
+	public void setRange(boolean b) {
+		if ( b ) {
+			// Want range, not currently range do something.
+			if ( !range ) {
+				range = b;
+				loadWidget();
+			}
+		} else {
+			// Don't want range.  Currently range, do something.
+			if ( range ) {
+				range = b;
+				loadWidget();
+			}
 		}
 	}
 	private void lo_days(Date d, ListBox day) {
@@ -207,7 +264,7 @@ public class DateTimeWidget extends Composite {
 	}
 	private void hi_months(Date d, ListBox month) {
 		int end = hi.getMonth();
-		for ( int m = 0; m < end; m++ ) {
+		for ( int m = 0; m <= end; m++ ) {
 			month.addItem(MONTHS[m], MONTHS[m]);
 		}
 	}
@@ -268,28 +325,26 @@ public class DateTimeWidget extends Composite {
 
 	public String getFerretDateHi() {
 		StringBuffer date = new StringBuffer();
-		if ( range ) {
-			if ( hasDay ) {
-				date.append(hi_day.getValue(hi_day.getSelectedIndex()));
-			} else {
-				if ( hasMonth ) {
-					date.append("15");
-				}
-			}
-			if ( hasMonth ) {
-				date.append("-"+hi_month.getValue(hi_month.getSelectedIndex()));
-			}
-			if ( climatology ) {
-				date.append("0001");              
-			} else {
-				if ( hasYear ) {
-					date.append("-"+hi_year.getValue(hi_year.getSelectedIndex()));
-				}
-			}
-            return date.toString();
+		if ( hasDay ) {
+			date.append(hi_day.getValue(hi_day.getSelectedIndex()));
 		} else {
-			return getFerretDateLo();
+			if ( hasMonth ) {
+				date.append("15");
+			}
 		}
+		if ( hasMonth ) {
+			date.append("-"+hi_month.getValue(hi_month.getSelectedIndex()));
+		}
+
+		if ( climatology ) {
+			date.append("-0001");   
+		} else {
+			if ( hasYear ) {
+				date.append("-"+hi_year.getValue(hi_year.getSelectedIndex()));
+			}
+		}
+
+		return date.toString();
 	}
 	public void addChangeListener(ChangeListener change) {
 		lo_year.addChangeListener(change);

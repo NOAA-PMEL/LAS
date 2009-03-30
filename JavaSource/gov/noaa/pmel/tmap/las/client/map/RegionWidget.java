@@ -113,6 +113,7 @@ public class RegionWidget extends ListBox {
 				}		
 			}
 		}
+    	setSelectedIndex(0);
     }
     ChangeListener regionChange = new ChangeListener() {
 		public void onChange(Widget sender) {

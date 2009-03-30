@@ -11,6 +11,10 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
 
 public class LatLonWidget extends Composite {
+	double xlo;
+	double xhi;
+	double ylo;
+	double yhi;
 	TextBox southLat;
 	TextBox northLat;
 	TextBox westLon;
@@ -52,37 +56,36 @@ public class LatLonWidget extends Composite {
 	public void setText(LatLngBounds selectionBounds) {
 		LatLng swPolyCorner = selectionBounds.getSouthWest();
 		LatLng nePolyCorner = selectionBounds.getNorthEast();
-		double slat = swPolyCorner.getLatitude();
+		ylo = swPolyCorner.getLatitude();
 		String slat_f;
-		if ( slat <= 0.0 ) {
-			slat_f = latFormat.format(Math.abs(slat))+" S";
+		if ( ylo <= 0.0 ) {
+			slat_f = latFormat.format(Math.abs(ylo))+" S";
 		} else {
-			slat_f = latFormat.format(slat)+" N";
+			slat_f = latFormat.format(ylo)+" N";
 		}
 		southLat.setText(slat_f);
-		double nlat = nePolyCorner.getLatitude();
+		
+		yhi = nePolyCorner.getLatitude();
 		String nlat_f;
-		if ( nlat <= 0.0 ) {
-			nlat_f = latFormat.format(Math.abs(nlat))+" S";
+		if ( yhi <= 0.0 ) {
+			nlat_f = latFormat.format(Math.abs(yhi))+" S";
 		} else {
-			nlat_f = latFormat.format(nlat)+" N";
+			nlat_f = latFormat.format(yhi)+" N";
 		}
 		northLat.setText(nlat_f);
-		double wlon = swPolyCorner.getLongitude();
-		double elon = nePolyCorner.getLongitude();
+		xlo = swPolyCorner.getLongitude();
+		xhi = nePolyCorner.getLongitude();
 		String wlon_f;
 		String elon_f;
-		if ( wlon < 0.0 ) {
-			wlon = wlon + 180.;
-			wlon_f = lonFormat.format(wlon)+" W";
+		if ( xlo < 0.0 ) {
+			wlon_f = lonFormat.format(xlo + 180.)+" W";
 		} else {
-			wlon_f = lonFormat.format(wlon)+" E";
+			wlon_f = lonFormat.format(xlo)+" E";
 		}
-		if ( elon < 0.0 ) {
-			elon = elon + 180;
-			elon_f = lonFormat.format(elon)+" W";
+		if ( xhi < 0.0 ) {
+			elon_f = lonFormat.format(xhi + 180.)+" W";
 		} else {
-			elon_f = lonFormat.format(elon)+" E";
+			elon_f = lonFormat.format(xhi)+" E";
 		}
 
 
@@ -90,10 +93,28 @@ public class LatLonWidget extends Composite {
 		eastLon.setText(elon_f);
 		
 	}
-	public String getXhi() {
+	public String getXhiFormatted() {
 		return eastLon.getText();
 	}
-	public String getXlo() {
+	public String getXloFormatted() {
 		return westLon.getText();
+	}
+	public String getYloFormatted() {
+		return southLat.getText();
+	}
+	public String getYhiFormatted() {
+		return northLat.getText();
+	}
+	public double getXhi() {
+		return xhi;
+	}
+	public double getXlo() {
+		return xlo;
+	}
+	public double getYhi() {
+		return yhi;
+	}
+	public double getYlo() {
+		return ylo;
 	}
 }

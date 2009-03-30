@@ -6,6 +6,7 @@ import gov.noaa.pmel.tmap.las.client.OperationsMenu;
 import gov.noaa.pmel.tmap.las.client.RPCServiceAsync;
 import gov.noaa.pmel.tmap.las.client.serializable.OperationSerializable;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -32,7 +33,8 @@ public class OperationsWidget extends StackPanel {
 	OperationSerializable[] ops;
 	OperationSerializable currentOp;
 	String currentView;
-
+    ArrayList<OperationButton> buttons = new ArrayList<OperationButton>();
+    ArrayList<ClickListener> clicks = new ArrayList<ClickListener>();
 	/**
 	 * Set up the StackPanel and the associated RPC.
 	 */
@@ -65,6 +67,7 @@ public class OperationsWidget extends StackPanel {
 			hasSectionPlots = false;
 			hasXYMap = false;
 			ops = (OperationSerializable[]) result;
+			buttons.clear();
 			for (int i = 0; i < ops.length; i++) {
 				OperationSerializable op = ops[i];
 				String category = op.getAttributes().get("category");
@@ -81,9 +84,11 @@ public class OperationsWidget extends StackPanel {
 										hasXYMap = true;
 									}
 									OperationButton button = new OperationButton("op", "Latitude-Longitude");
+									button.setView(view);
 									button.setOperation(op);
 									button.addClickListener(buttonListener);
 									button.setChecked(true);
+									buttons.add(button);
 									currentOp = button.getOperation();
 									currentView = "xy";
 									xyMap.add(button);
@@ -107,6 +112,7 @@ public class OperationsWidget extends StackPanel {
 									button.setView(view);
 									button.setOperation(op);
 									button.addClickListener(buttonListener);
+									buttons.add(button);
 									linePlots.add(button);
 								} else if ( view.equals("xz") || view.equals("yz") ) {
 									if ( !hasSectionPlots ) {
@@ -123,6 +129,7 @@ public class OperationsWidget extends StackPanel {
 									button.setOperation(op);
 									button.setView(view);
 									button.addClickListener(buttonListener);
+									buttons.add(button);
 									sectionPlots.add(button);
 								} else if ( view.equals("xt") || view.equals("yt") || view.equals("zt") ) {
 									if ( !hasHofmullerPlots ) {
@@ -140,6 +147,7 @@ public class OperationsWidget extends StackPanel {
 									button.setView(view);
 									button.setOperation(op);
 									button.addClickListener(buttonListener);
+									buttons.add(button);
 									hofmullerPlots.add(button);
 								}
 							}
@@ -149,6 +157,10 @@ public class OperationsWidget extends StackPanel {
 			}
 			if ( menu != null ) {
 			    menu.setMenus(ops);
+			}
+			for (Iterator clickIt = clicks.iterator(); clickIt.hasNext();) {
+				ClickListener click = (ClickListener) clickIt.next();
+				addClickListener(click);
 			}
 		}
         ClickListener buttonListener = new ClickListener() {
@@ -172,5 +184,14 @@ public class OperationsWidget extends StackPanel {
 	}
 	public String getCurrentView() {
 		return currentView;
+	}
+	public void addClickListener(ClickListener operationsClickListener) {
+		if ( !clicks.contains(operationsClickListener) ) {
+			clicks.add(operationsClickListener);
+		}
+		for (Iterator buttonIt = buttons.iterator(); buttonIt.hasNext();) {
+			OperationButton button = (OperationButton) buttonIt.next();
+			button.addClickListener(operationsClickListener);
+		}
 	}
 }

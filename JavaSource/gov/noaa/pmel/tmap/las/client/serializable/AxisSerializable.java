@@ -13,6 +13,7 @@ public class AxisSerializable extends Serializable implements IsSerializable {
 	String lo;
 	ArangeSerializable arange;
 	String label;
+	String units;
 	String[] names;
 	String[] values;
 	
@@ -89,6 +90,12 @@ public class AxisSerializable extends Serializable implements IsSerializable {
 	}
 	public void setValues(String[] values) {
 		this.values = values;
+	}
+	public String getUnits() {
+		return units;
+	}
+	public void setUnits(String units) {
+		this.units = units;
 	}
 	
 }

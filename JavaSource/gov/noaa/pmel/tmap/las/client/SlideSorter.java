@@ -3,7 +3,9 @@ package gov.noaa.pmel.tmap.las.client;
 import gov.noaa.pmel.tmap.las.client.laswidget.AxisWidget;
 import gov.noaa.pmel.tmap.las.client.laswidget.DatasetButton;
 import gov.noaa.pmel.tmap.las.client.laswidget.DateTimeWidget;
+import gov.noaa.pmel.tmap.las.client.laswidget.OptionsButton;
 import gov.noaa.pmel.tmap.las.client.map.MapButton;
+import gov.noaa.pmel.tmap.las.client.map.SettingsButton;
 import gov.noaa.pmel.tmap.las.client.serializable.AxisSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.CategorySerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.DatasetSerializable;
@@ -13,6 +15,7 @@ import gov.noaa.pmel.tmap.las.client.serializable.VariableSerializable;
 import gov.noaa.pmel.tmap.las.client.slidesorter.SlideSorterPanel;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +32,7 @@ import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.RadioButton;
 import com.google.gwt.user.client.ui.RootPanel;
+import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.ToggleButton;
 import com.google.gwt.user.client.ui.TreeItem;
 import com.google.gwt.user.client.ui.TreeListener;
@@ -133,19 +137,26 @@ public class SlideSorter extends LASEntryPoint {
 	HorizontalPanel xyzPanel = new HorizontalPanel();
 	
 	/*
-	 * An XY selector.
+	 * A settings panel for the entire Slide Sorter.
 	 */
-	MapButton mapButton;
-	
-	/*
-	 * Button to change the current data set and variable in the slideSorter.
-	 */
-	DatasetButton datasetButton;
+	SettingsButton settingsButton;
 	
 	/*
 	 * The currently selected variable.
 	 */
 	VariableSerializable var;
+	
+	/*
+	 * Global min and max for setting contour levels.
+	 */
+	double globalMin =  999999999.;
+	double globalMax = -999999999.;
+	
+	/*
+	 * Button to set the contour levels automatically.
+	 */
+	ToggleButton autoContourButton;
+	TextBox autoContourTextBox;
 	
 	/*
 	 * (non-Javadoc)
@@ -166,18 +177,22 @@ public class SlideSorter extends LASEntryPoint {
 		
 		
 		slides = new Grid(1,2);
-		header = new Grid(1, 5);
+		header = new Grid(1, 8);
 		
-		differenceButton = new ToggleButton("Go to Difference Mode");
+		differenceButton = new ToggleButton("Difference Mode");
 		differenceButton.addClickListener(differencesClick);
 		header.setWidget(0, 0, differenceButton);
 		
-		mapButton = new MapButton(LatLng.newInstance(0.0, 0.0), 0, 256, 360, "Header");
+		settingsButton = new SettingsButton("Settings", LatLng.newInstance(0.0, 0.0), 0, 256, 360, "Slide Sorter", op, rpcService);
 		
-		datasetButton = new DatasetButton(rpcService);
-		datasetButton.addTreeListener(datasetTreeListener);
-		
-		header.setWidget(0, 4, datasetButton);
+		settingsButton.addDatasetTreeListener(datasetTreeListener);
+		settingsButton.addOptionsOkClickListener(optionsOkListener);
+				
+		autoContourButton = new ToggleButton("Auto Set Contour Levels");
+		autoContourButton.addClickListener(autoContour);
+		header.setWidget(0, 6, autoContourButton);
+		autoContourTextBox = new TextBox();
+		header.setWidget(0, 7, autoContourTextBox);
 		
 		// Initialize the widgets to be used...
 		if ( dsid != null && vid != null & op != null && view != null) {
@@ -243,6 +258,7 @@ public class SlideSorter extends LASEntryPoint {
 		ortho.clear();
 		datePanel.clear();
 		xyzPanel.clear();
+		settingsButton.setOperations(rpcService, null, var.getDSID(), var.getID(), null);
 		if ( view.equals("xy") ) {
 			// If the plot view is XY set up the map for selecting the region in all panels.
 			// TODO Still need this for other views but with parameters to set the map selector tool.
@@ -256,9 +272,9 @@ public class SlideSorter extends LASEntryPoint {
 			double delta = Math.abs(Double.valueOf(ds_grid.getXAxis().getArangeSerializable().getStep()));
 
 			LatLngBounds bounds = LatLngBounds.newInstance(LatLng.newInstance(grid_south, grid_west), LatLng.newInstance(grid_north, grid_east));
-			mapButton.getRefMap().initDataBounds(bounds, delta, true);
-			mapButton.addApplyClickListener(mapButtonApplyListener);
-			header.setWidget(0, 3, mapButton);
+			settingsButton.getRefMap().initDataBounds(bounds, delta, true);
+			settingsButton.addApplyClickListener(settingsButtonApplyListener);
+			header.setWidget(0, 3, settingsButton);
 		}
 		// Examine the variable axes and determine which are orthogonal to the view. 
 
@@ -307,11 +323,8 @@ public class SlideSorter extends LASEntryPoint {
 						dateWidget.setEnabled(true);
 						fixedAxis = "t";
 					}
-					dateButtonNotSelected = axis.getLabel();
-					if ( dateButtonNotSelected == null || dateButtonNotSelected.equals("") ) {
-						dateButtonNotSelected = "Time ";
-						dateButtonSelected = "Comparison Axis: " + dateButtonNotSelected;
-					}
+					dateButtonNotSelected = " ";
+					dateButtonSelected = "Comparison Axis--";
 					dateButton = new RadioButton("compare", dateButtonNotSelected);
 					dateButton.addClickListener(compareAxisChangeListener);
 					if ( compareAxis.equals("t") ) {
@@ -328,11 +341,8 @@ public class SlideSorter extends LASEntryPoint {
 				} else {
 					AxisSerializable axis = var.getGrid().getAxis(type);
 					axes.add(axis);
-					xyzButtonNotSelected = axis.getLabel();
-					if ( xyzButtonNotSelected == null || xyzButtonNotSelected.equals("") ) {
-						xyzButtonNotSelected = type.toUpperCase()+" ";
-						xyzButtonSelected = "Comparison Axis: " + xyzButtonNotSelected;
-					}
+					xyzButtonNotSelected = " ";
+					xyzButtonSelected = "Comparison Axis--";					
 					xyzButton = new RadioButton("compare", xyzButtonSelected);
 					xyzButton.addClickListener(compareAxisChangeListener);
 					xyzWidget = new AxisWidget(axis);
@@ -360,16 +370,16 @@ public class SlideSorter extends LASEntryPoint {
 			}
 			int width = Window.getClientWidth();
 			int pwidth = (width-rightPad)/2;
-			SlideSorterPanel sp1 = new SlideSorterPanel("Panel 1", var, ortho, op, compareAxis, fixedAxis, view, productServer, rpcService);
-			sp1.addCloseListener(applyClick);
-			sp1.addApplyListener(applyClick);
+			SlideSorterPanel sp1 = new SlideSorterPanel("Panel 1", var, ortho, op, compareAxis, fixedAxis, view, productServer, false, rpcService);
+			sp1.addRevertListener(panelApplyButtonClick);
+			sp1.addApplyListener(panelApplyButtonClick);
 			slides.setWidget(0, 0, sp1);
 			sp1.setPanelWidth(pwidth);
 			sp1.addCompareAxisChangeListener(compareAxisMenuChangeListener);
 			panels.add(sp1);
-			SlideSorterPanel sp2 = new SlideSorterPanel("Panel 2", var, ortho, op, compareAxis, fixedAxis, view, productServer, rpcService);
-			sp2.addCloseListener(applyClick);
-			sp2.addApplyListener(applyClick);
+			SlideSorterPanel sp2 = new SlideSorterPanel("Panel 2", var, ortho, op, compareAxis, fixedAxis, view, productServer, false, rpcService);
+			sp2.addRevertListener(panelApplyButtonClick);
+			sp2.addApplyListener(panelApplyButtonClick);
 			//sp2.addRegionChangeListener(regionChange);
 			slides.setWidget(0, 1, sp2);
 			sp2.setPanelWidth(pwidth);
@@ -384,17 +394,16 @@ public class SlideSorter extends LASEntryPoint {
 				String temp = compareAxis;
 				compareAxis = fixedAxis;
 				fixedAxis = temp;
-				RadioButton b = (RadioButton) sender;
-				String type = b.getText();
+				
 				String fixedAxisValue = "";
-				if ( type.toLowerCase().contains("time") ) {
+				if ( compareAxis.equals("t") ) {
 					dateWidget.setEnabled(false);
 					dateButton.setStyleName("red");
 					dateButton.setText(dateButtonSelected);
 					xyzWidget.setEnabled(true);
 					xyzButton.setStyleName("black");
 					xyzButton.setText(xyzButtonNotSelected);
-					fixedAxisValue = xyzWidget.getSelectedValue();
+					fixedAxisValue = xyzWidget.getLo();
 				}  else {
 					dateWidget.setEnabled(true);
 					dateButton.setStyleName("black");
@@ -417,14 +426,16 @@ public class SlideSorter extends LASEntryPoint {
     };
     private void refresh(boolean switchAxis) {
     	if ( differenceButton.isDown() ) {
-			differenceButton.setText("Return to Normal Mode");
-			differenceButton.setTitle("Return to Normal Mode");
+    		if ( autoContourButton.isDown() ) {
+    			autoContourButton.setDown(false);
+    			autoContourTextBox.setText("");
+    		}
 			SlideSorterPanel comparePanel = null;
 			for (Iterator panelIt = panels.iterator(); panelIt.hasNext();) {
 				SlideSorterPanel panel = (SlideSorterPanel) panelIt.next();
 				if ( panel.getID().contains("Panel 1") ) {
 					comparePanel = panel;
-					panel.refreshPlot(switchAxis, true);	
+					panel.refreshPlot(settingsButton.getOptions(), switchAxis, true);	
 				}
 			}
 			if ( comparePanel != null ) {
@@ -440,37 +451,49 @@ public class SlideSorter extends LASEntryPoint {
 						String tlo = "";
 						String thi = "";
 						if ( view.contains("x") ) {
-							xlo = mapButton.getRefMap().getXlo();
-							xhi = mapButton.getRefMap().getXhi();
+							xlo = String.valueOf(settingsButton.getRefMap().getXlo());
+							xhi = String.valueOf(settingsButton.getRefMap().getXhi());
 						}
 						if ( view.contains("y") ) {
-							ylo = mapButton.getRefMap().getYlo();
-							yhi = mapButton.getRefMap().getYhi();
+							ylo = String.valueOf(settingsButton.getRefMap().getYlo());
+							yhi = String.valueOf(settingsButton.getRefMap().getYhi());
 						}
 						if ( fixedAxis.equals("t") ) {
 							tlo = dateWidget.getFerretDateLo();
 							thi = dateWidget.getFerretDateHi();
 						} else {
-							tlo = comparePanel.getTlo();
-							thi = comparePanel.getThi();
+							if ( comparePanel.getVariable().getGrid().getAxis("t") != null ) {
+							    tlo = comparePanel.getTlo();
+							    thi = comparePanel.getThi();
+							}
 						}
 						if ( fixedAxis.equals("z") ) {
-							zlo = xyzWidget.getSelectedValue();
-							zhi = xyzWidget.getSelectedValue();
+							zlo = xyzWidget.getLo();
+							zhi = xyzWidget.getHi();
 						} else {
-							zlo = comparePanel.getZlo();
-							zhi = comparePanel.getZhi();
+							if ( comparePanel.getVariable().getGrid().getAxis("z") != null ) {
+							    zlo = comparePanel.getZlo();
+							    zhi = comparePanel.getZhi();
+							}
 						}
-						panel.computeDifference(switchAxis, comparePanel.getVariable(), view, xlo, xhi, ylo, yhi, zlo, zhi, tlo, thi);
+						panel.computeDifference(settingsButton.getOptions(), switchAxis, comparePanel.getVariable(), view, xlo, xhi, ylo, yhi, zlo, zhi, tlo, thi);
 					}
 				}
 			}
 		} else {
-			differenceButton.setText("Go to Difference Mode");
-			differenceButton.setTitle("Go to Difference Mode");
+			// Get the current state of the options...
+			Map<String, String> temp_state = new HashMap<String, String>(settingsButton.getOptions());
+			if ( autoContourButton.isDown() ) {
+				// If the auto button is down, it wins...
+				autoScale();
+				temp_state.put("fill_levels", autoContourTextBox.getText());
+			} else {
+				// If it's not down, the current options value will be used.
+				autoContourTextBox.setText("");
+			}
 			for (Iterator panelIt = panels.iterator(); panelIt.hasNext();) {
 	    		SlideSorterPanel panel = (SlideSorterPanel) panelIt.next();
-	    		panel.refreshPlot(switchAxis, true);
+	    		panel.refreshPlot(temp_state, switchAxis, true);
 			}
 		}
     }
@@ -512,18 +535,28 @@ public class SlideSorter extends LASEntryPoint {
 		}		
 	};
 	*/
-    ClickListener mapButtonApplyListener = new ClickListener() {
+    ClickListener settingsButtonApplyListener = new ClickListener() {
     	public void onClick(Widget sender) {
+    		// Check to see if the operation changed.  If so, change the tool.
+    		String op_id = settingsButton.getCurrentOp().getID();
+    		String op_view = settingsButton.getCurrentOperationView();
+    		if ( !op_id.equals(op) && !op_view.equals(view) ) {
+    			op = op_id;
+    			view = settingsButton.getCurrentOperationView();
+    		}
+    		settingsButton.setToolType(view);
+    		// Update the plot based on the new settings first by moving the map settings
+    		// to all the panels that are under slide sorter control, the refresh (which handles the options).
     		for (Iterator panelIt = panels.iterator(); panelIt.hasNext();) {
     			SlideSorterPanel panel = (SlideSorterPanel) panelIt.next();
     			if (!panel.isUsePanelSettings()) {
-    				panel.setLatLon(mapButton.getRefMap().getXlo(), mapButton.getRefMap().getXhi(), mapButton.getRefMap().getYlo(), mapButton.getRefMap().getYhi());
+    				panel.setLatLon(String.valueOf(settingsButton.getRefMap().getXlo()), String.valueOf(settingsButton.getRefMap().getXhi()), String.valueOf(settingsButton.getRefMap().getYlo()), String.valueOf(settingsButton.getRefMap().getYhi()));
     			}
     		}
     		refresh(false);
     	}
     };
-    ClickListener applyClick = new ClickListener() {
+    ClickListener panelApplyButtonClick = new ClickListener() {
     	public void onClick(Widget sender) {
     		String title = sender.getTitle();
     		for (Iterator panelIt = panels.iterator(); panelIt.hasNext();) {
@@ -540,9 +573,9 @@ public class SlideSorter extends LASEntryPoint {
     					if ( fixedAxis.equals("t") ) {
     						panel.setAxisValue("t", dateWidget.getFerretDateLo());
     					} else if ( fixedAxis.equals("z") ) {
-    						panel.setAxisValue("z", xyzWidget.getSelectedValue());
+    						panel.setAxisValue("z", xyzWidget.getLo());
     					}
-    					panel.setLatLon(mapButton.getRefMap().getXlo(), mapButton.getRefMap().getXhi(), mapButton.getRefMap().getYlo(), mapButton.getRefMap().getYhi());
+        				panel.setLatLon(String.valueOf(settingsButton.getRefMap().getXlo()), String.valueOf(settingsButton.getRefMap().getXhi()), String.valueOf(settingsButton.getRefMap().getYlo()), String.valueOf(settingsButton.getRefMap().getYhi()));
     				}
     			}
     		}
@@ -573,7 +606,7 @@ public class SlideSorter extends LASEntryPoint {
 				}
 			} else if ( fixedAxis.equals("z") ) {
 	    		
-	    		String value = xyzWidget.getSelectedValue();
+	    		String value = xyzWidget.getLo();
 	    		for (Iterator panelIt = panels.iterator(); panelIt.hasNext();) {
 		    		SlideSorterPanel panel = (SlideSorterPanel) panelIt.next();
 		    		if ( !panel.isUsePanelSettings() ) {
@@ -584,4 +617,81 @@ public class SlideSorter extends LASEntryPoint {
 			refresh(false);
 		}   	
     };
+    ClickListener optionsOkListener = new ClickListener() {
+		public void onClick(Widget sender) {
+			refresh(false);
+		}
+    };
+    ClickListener autoContour = new ClickListener() {
+		public void onClick(Widget sender) {
+			
+			refresh(false);
+		}	
+    };
+    private void autoScale() {
+
+    	for (Iterator panelIt = panels.iterator(); panelIt.hasNext();) {
+    		SlideSorterPanel panel = (SlideSorterPanel) panelIt.next();
+    		if ( !differenceButton.isDown() || (differenceButton.isDown() && !panel.getID().toLowerCase().contains("panel 1")))
+    			if ( panel.getMin() < globalMin ) {
+    				globalMin = panel.getMin();
+    			}
+    		if ( panel.getMax() > globalMax ) {
+    			globalMax = panel.getMax();
+    		}
+    	}
+
+    	// Algorithm from range.F subroutine in Ferret source code
+
+    	double umin = globalMin;
+    	double umax = globalMax;
+    	int nints = 20;
+
+    	double temp = (umax - umin) / nints;
+    	if (temp <= 0.0000000001) {
+    		temp = umax;
+    	}
+
+    	double nt = Math.floor(Math.log(temp) / Math.log(10.));
+    	if (temp < 1.0) {
+    		nt = nt - 1;
+    	}
+    	double pow = Math.pow(10,nt);
+    	temp = temp / pow;
+
+    	double dint = 10.0 * pow;
+    	if (temp < Math.sqrt(2.0)) {
+    		dint = pow;
+    	} else {
+    		if (temp < Math.sqrt(10.0)) {
+    			dint = 2.0 * pow;
+    		} else {
+    			if (temp < Math.sqrt(50.0)) {
+    				dint = 5.0 * pow;
+    			}
+    		}
+    	}
+
+    	double fm = umin / dint;
+    	double m = Math.floor(fm);
+    	if (m < 0) {
+    		m = m - 1;
+    	}
+    	double uminr = Math.round(1000000 * dint * m) / 1000000;
+
+    	fm = umax / dint;
+    	m = Math.floor(fm);
+    	if (m > 0) {
+    		m = m + 1;
+    	}
+    	double umaxr = Math.round(1000000 * dint * m) / 1000000;
+
+    	// END OF FERRET ALGORITHM
+
+    	// Only use 4 significant digits
+
+    	// Modify the optionTextField and submit the request
+    	String fill_levels = "(" + uminr + "," + umaxr + "," + dint + ")";
+    	autoContourTextBox.setText(fill_levels);
+    }
 }
