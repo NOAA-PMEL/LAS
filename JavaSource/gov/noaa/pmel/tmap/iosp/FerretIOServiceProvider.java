@@ -75,8 +75,7 @@ public class FerretIOServiceProvider implements IOServiceProvider {
      * @see ucar.nc2.IOServiceProvider#close()
      */
     public void close() throws IOException {
-        // TODO Auto-generated method stub
-
+        raf.close();
     }
 
     /* (non-Javadoc)
