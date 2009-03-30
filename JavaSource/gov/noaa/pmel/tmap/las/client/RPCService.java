@@ -16,5 +16,6 @@ public interface RPCService extends RemoteService {
 	public GridSerializable getGrid(String dsID, String varID) throws RPCException;
 	public OperationSerializable[] getOperations(String view, String dsID, String varID) throws RPCException;
 	public OptionSerializable[] getOptions(String opid) throws RPCException;
+	public OptionSerializable[] getOptionsByOperationID(String operationid) throws RPCException;
 	public CategorySerializable[] getTimeSeries() throws RPCException;
 }

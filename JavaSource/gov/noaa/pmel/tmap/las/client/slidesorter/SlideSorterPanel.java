@@ -1,16 +1,21 @@
 package gov.noaa.pmel.tmap.las.client.slidesorter;
 //TODO handle error and batch responses...
+import gov.noaa.pmel.tmap.las.client.OperationButton;
 import gov.noaa.pmel.tmap.las.client.RPCServiceAsync;
 import gov.noaa.pmel.tmap.las.client.laswidget.AxisWidget;
 import gov.noaa.pmel.tmap.las.client.laswidget.DatasetButton;
 import gov.noaa.pmel.tmap.las.client.laswidget.DateTimeWidget;
 import gov.noaa.pmel.tmap.las.client.laswidget.LASRequestWrapper;
+import gov.noaa.pmel.tmap.las.client.laswidget.TandZWidgets;
 import gov.noaa.pmel.tmap.las.client.map.SettingsButton;
+import gov.noaa.pmel.tmap.las.client.map.SelectWidget.XYMapTool;
 import gov.noaa.pmel.tmap.las.client.serializable.AxisSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.GridSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.VariableSerializable;
 
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestBuilder;
@@ -21,6 +26,7 @@ import com.google.gwt.http.client.URL;
 import com.google.gwt.maps.client.geom.LatLng;
 import com.google.gwt.maps.client.geom.LatLngBounds;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.ChangeListener;
 import com.google.gwt.user.client.ui.ClickListener;
 import com.google.gwt.user.client.ui.Composite;
@@ -53,6 +59,9 @@ public class SlideSorterPanel extends Composite {
 	/* The top bar of widgets... */
 	HorizontalPanel top;
 	
+	/* A widget to return panel to the slide sorter control */
+	Button revert = new Button("Cancel Panel Settings");
+	
 	/* The current data set and variable.  */
 	Label datasetLabel;
 	
@@ -67,9 +76,14 @@ public class SlideSorterPanel extends Composite {
 	List<String> ortho;
 	
 	/*
-	 * A a button that pops up a panel for region selection, orthogonal axis selection and maybe plot options.
+	 * A a button that pops up a panel for region selection, operation and (still to be implmented) plot options.
 	 */
 	SettingsButton settingsButton;
+	
+	/*
+	 * A widget that keeps track of the orthogonal axes for this panel.  When in using panel settings it's displayed on the bottom of the panel.
+	 */
+	TandZWidgets tandzWidgets = new TandZWidgets();
 	
 	/* The initialization parameters from the URL that kicked off this slide sorter.  NO NEEDED since we're keeping the variable around.*/
 
@@ -89,11 +103,7 @@ public class SlideSorterPanel extends Composite {
 	// Some widgets to show when a panel is being refreshed.
 	PopupPanel spin;
 	HTML spinImage;
-	
-	/* A label for when the panel is using "Panel Settings" */
 	 
-	Label panelSettings = new Label("(Using panel settings.)");
-	
 	// The view will have at most two axes,  these hold the ranges for those axes.
 	String xlo;
 	String xhi;
@@ -104,12 +114,23 @@ public class SlideSorterPanel extends Composite {
 	String ID;
 	
 	RPCServiceAsync rpcService;
+	
+	// Some information to control the size of the image as the browser window changes size.
 	int pwidth;
+	
+	double image_h = 631.;
+	double image_w = 998.;
+	
+	double min;
+	double max;
+	
+	// Switch for "single panel mode".  If only one panel being used, do not display the "Revert" button.
+	boolean singlePanel;
 	
 	/**
 	 * Builds a SlideSorter panel with a default plot for the variable.  See {@code}SlideSorter(LASRequest) if you want more options on the initial plot.
 	 */
-	public SlideSorterPanel(String id, VariableSerializable var, List<String>ortho, String op, String compareAxis, String fixedAxis, String view, String productServer, RPCServiceAsync rpcService) {
+	public SlideSorterPanel(String id, VariableSerializable var, List<String>ortho, String op, String compareAxis, String fixedAxis, String view, String productServer, boolean single, RPCServiceAsync rpcService) {
 		this.ID = id;
 		this.op = op;
 		this.productServer = productServer;
@@ -117,9 +138,12 @@ public class SlideSorterPanel extends Composite {
 		this.compareAxis = compareAxis;
 		this.fixedAxis = fixedAxis;
 		this.var = var;
+		this.singlePanel = single;
 		this.rpcService = rpcService;
 		dateTimeWidget.addChangeListener(comparisonAxisChangeListener);
 		zAxisWidget.addChangeListener(comparisonAxisChangeListener);
+		tandzWidgets.addTChangeListener(panelAxisChangeListener);
+		tandzWidgets.addZChangeListener(panelAxisChangeListener);
 		spin = new PopupPanel();
 		spinImage = new HTML("<img src=\"../JavaScript/components/mozilla_blu.gif\" alt=\"Spinner\"/>");
 		spin.add(spinImage);
@@ -130,10 +154,15 @@ public class SlideSorterPanel extends Composite {
 		datasetLabel = new Label();
 		
 		top = new HorizontalPanel();
-		settingsButton = new SettingsButton(LatLng.newInstance(0.0, 0.0), 1, 256, 360, ID, rpcService);
+		settingsButton = new SettingsButton("Panel Settings", LatLng.newInstance(0.0, 0.0), 1, 256, 360, ID, op, rpcService);
 		settingsButton.addApplyClickListener(updateOnClick);
 		settingsButton.addCloseClickListener(closeClick);
 		settingsButton.addDatasetTreeListener(datasetTreeListener);
+		settingsButton.addOptionsOkClickListener(optionsOkListener);
+		settingsButton.addOperationClickListener(operationsClickListener);
+		revert.addClickListener(revertListener);
+		revert.setTitle("Cancel Panel Settings for "+ID);
+		
 		top.add(datasetLabel);
 		top.add(settingsButton);
 		
@@ -145,6 +174,8 @@ public class SlideSorterPanel extends Composite {
 		init();	
 	}
 	public void init() {
+	    min =  999999999.;
+	    max = -999999999.;
 		datasetLabel.setText(var.getDSName()+": "+var.getName());
 		GridSerializable ds_grid = var.getGrid();
 		double grid_west = Double.valueOf(ds_grid.getXAxis().getLo());
@@ -158,11 +189,13 @@ public class SlideSorterPanel extends Composite {
 		LatLngBounds bounds = LatLngBounds.newInstance(LatLng.newInstance(grid_south, grid_west), LatLng.newInstance(grid_north, grid_east));
 		settingsButton.getRefMap().initDataBounds(bounds, delta, true);
 		settingsButton.setOperations(rpcService, null, var.getDSID(), var.getID(), null);
-		settingsButton.removeAxes();
+		tandzWidgets.removeAxes();
+		settingsButton.setUsePanel(false);
 		if ( ds_grid.getTAxis() != null ) {
 			 dateTimeWidget.init(ds_grid.getTAxis(), false);
 			 dateTimeWidget.setVisible(true);
-			 settingsButton.getDateWidget().init(ds_grid.getTAxis(), false);
+			 tandzWidgets.getDateWidget().init(ds_grid.getTAxis(), false);
+			 tandzWidgets.addAxis("t");
 			 if ( compareAxis.equals("t") ) {
 				 grid.setWidget(2, 0, dateTimeWidget);
 			 }
@@ -170,7 +203,8 @@ public class SlideSorterPanel extends Composite {
 		if ( ds_grid.getZAxis() != null ) {
 			zAxisWidget.init(ds_grid.getZAxis());
 			zAxisWidget.setVisible(true);
-			settingsButton.getZWidget().init(ds_grid.getZAxis());
+			tandzWidgets.getZWidget().init(ds_grid.getZAxis());
+			tandzWidgets.addAxis("z");
 			if ( compareAxis.equals("z") ) {
 				grid.setWidget(2, 0, zAxisWidget);
 			}
@@ -181,20 +215,20 @@ public class SlideSorterPanel extends Composite {
 		compareAxis = fixedAxis;
 		fixedAxis = temp;
 		if ( compareAxis.equals("t") ) {
-			String tlo = settingsButton.getDateWidget().getFerretDateLo();
+			String tlo = tandzWidgets.getDateWidget().getFerretDateLo();
 			dateTimeWidget.setLo(tlo);
 			grid.setWidget(2, 0, dateTimeWidget);
 		} else {
-			String zlo = settingsButton.getZWidget().getSelectedValue();
+			String zlo = tandzWidgets.getZWidget().getLo();
 			zAxisWidget.setLo(zlo);
 			grid.setWidget(2, 0, zAxisWidget);
 		}
 		if ( isUsePanelSettings() ) {
-			grid.setWidget(2, 0, panelSettings);
+			grid.setWidget(2, 0, tandzWidgets);
 		}
 	}
 	// The SliderSorter needs to pass in which axis it is controlling and the value it should have...
-	public void refreshPlot(boolean switchAxis, boolean popup) {
+	public void refreshPlot(Map<String, String> options, boolean switchAxis, boolean popup) {
 		if (switchAxis) {
 			switchAxis();
 		}
@@ -214,31 +248,44 @@ public class SlideSorterPanel extends Composite {
 		lasRequest.setProperty("ferret", "size", ".8333");
 
 		if ( var.getGrid().getTAxis() != null ) {
-            lasRequest.setRange("t", settingsButton.getDateWidget().getFerretDateLo(), settingsButton.getDateWidget().getFerretDateHi(), 0);
+            lasRequest.setRange("t", tandzWidgets.getDateWidget().getFerretDateLo(), tandzWidgets.getDateWidget().getFerretDateHi(), 0);
 		}
 		
-
-
-		// TODO -- All of these should first check to see if the axis is in the view.  If it is, get the value from the axis on the grid,
-		// or get it from the request that was passed in.
-		xlo = settingsButton.getRefMap().getXlo();
-    	xhi = settingsButton.getRefMap().getXhi();
-    	ylo = settingsButton.getRefMap().getYlo();
-    	yhi = settingsButton.getRefMap().getYhi();
+		xlo = String.valueOf(settingsButton.getRefMap().getXlo());
+    	xhi = String.valueOf(settingsButton.getRefMap().getXhi());
+    	ylo = String.valueOf(settingsButton.getRefMap().getYlo());
+    	yhi = String.valueOf(settingsButton.getRefMap().getYhi());
     	
-		//TODO Then if it's not in the view, get the value from the menu or from the fixed value.
-		if ( view.contains("x") ) {
-			lasRequest.setRange("x", xlo, xhi, 0);
-		}
-		if ( view.contains("y") ) {
-			lasRequest.setRange("y", ylo, yhi, 0);
-		}
+    	lasRequest.setRange("x", xlo, xhi, 0);
+		lasRequest.setRange("y", ylo, yhi, 0);
 		
 		if ( var.getGrid().getZAxis() != null ) {
-			lasRequest.setRange("z", settingsButton.getZWidget().getSelectedValue(), settingsButton.getZWidget().getSelectedValue(), 0);
+			lasRequest.setRange("z", tandzWidgets.getZWidget().getLo(), tandzWidgets.getZWidget().getHi(), 0);
 		}
 		lasRequest.addProperty("ferret", "image_format", "gif");
 		lasRequest.addProperty("las", "output_type", "xml");
+		if ( settingsButton.isUsePanelSettings() ) {
+			// Use panel options if they exist.
+			Map<String, String> panelOptions = settingsButton.getOptions();
+			for (Iterator opIt = panelOptions.keySet().iterator(); opIt.hasNext();) {
+				String key = (String) opIt.next();
+				String value = panelOptions.get(key);
+				if ( !value.toLowerCase().equals("default") && !value.equals("") ) {
+					lasRequest.addProperty("ferret", key, value);
+				}
+			}
+		} else {
+			// Use Slide Sorter settings if they exist.
+			if ( options != null ) {
+				for (Iterator opIt = options.keySet().iterator(); opIt.hasNext();) {
+					String key = (String) opIt.next();
+					String value = options.get(key);
+					if ( !value.toLowerCase().equals("default") && !value.equals("") ) {
+						lasRequest.addProperty("ferret", key, value);
+					}
+				}
+			}
+		}
 		String url = productServer+"?xml="+URL.encode(lasRequest.getXMLText());
 		RequestBuilder sendRequest = new RequestBuilder(RequestBuilder.GET, url);
 		try {
@@ -247,6 +294,67 @@ public class SlideSorterPanel extends Composite {
 			HTML error = new HTML(e.toString());
 			grid.setWidget(1, 0, error);
 		}
+	}
+	public ChangeListener panelAxisChangeListener = new ChangeListener() {
+		public void onChange(Widget sender) {
+			refreshPlot(null, false, true);
+			
+		}
+	};
+	private RequestCallback mapScaleCallBack = new RequestCallback() {
+
+		public void onError(Request request, Throwable exception) {
+			// Don't care.  Just use information we have.
+		}
+
+		public void onResponseReceived(Request request, Response response) {
+			// Get the image scale information.
+			String doc = response.getText();
+			if ( !doc.contains("<?xml") ) {
+				// Don't care.  Just don't crash.
+			} else {
+				doc = doc.replaceAll("\n", "");
+				Document responseXML = XMLParser.parse(doc);
+				String w = getElementValue("x_image_size", responseXML);
+				if ( w != null ) {
+					image_w = Double.valueOf(w);
+				}
+				
+				String h = getElementValue("y_image_size", responseXML);
+				if ( h != null ) {
+					image_h = Double.valueOf(h);
+				}
+				
+				setImageWidth();
+				
+				// Also set the min and max for the data in this panel.
+				String mn = getElementValue("data_min", responseXML);
+				if ( mn != null ) {
+					min = Double.valueOf(mn);
+				}
+				
+				String mx = getElementValue("data_max", responseXML);
+				if ( mx != null ) {
+					max = Double.valueOf(mx);
+				}
+				
+			}	
+		}		
+	};
+	private String getElementValue(String element, Document doc) {
+		NodeList results_y = doc.getElementsByTagName(element);
+		String value = null;
+		for(int n=0; n<results_y.getLength();n++) {
+			if ( results_y.item(n) instanceof Element ) {
+				Element result = (Element) results_y.item(n);
+				Node text = result.getFirstChild();
+				if ( text instanceof Text ) {
+					Text t = (Text) text;
+					value = t.getData();
+				}
+			}
+		}
+		return value;
 	}
 	private RequestCallback lasRequestCallback = new RequestCallback() {
 		public void onError(Request request, Throwable exception) {
@@ -282,9 +390,17 @@ public class SlideSorterPanel extends Composite {
 								
 							});
 							image.setWidth(pwidth+"px");
-							int h = (int) ((631./998.)*Double.valueOf(pwidth));
+							int h = (int) ((image_h/image_w)*Double.valueOf(pwidth));
 							image.setHeight(h+"px");
 							grid.setWidget(1, 0 , image);
+						} else if ( result.getAttribute("type").equals("map_scale") )  {
+							final String ms_url = result.getAttribute("url");
+						    RequestBuilder mapScaleRequest = new RequestBuilder(RequestBuilder.GET, ms_url);
+						    try {
+								mapScaleRequest.sendRequest(null, mapScaleCallBack);
+							} catch (RequestException e) {
+								// Don't care.  Just go with the information we have.
+							}
 						} else if ( result.getAttribute("type").equals("error") ) {
 							if ( result.getAttribute("ID").equals("las_message") ) {
 								Node text = result.getFirstChild();
@@ -304,9 +420,9 @@ public class SlideSorterPanel extends Composite {
 	ChangeListener comparisonAxisChangeListener = new ChangeListener() {
 		public void onChange(Widget sender) {
 			if ( compareAxis.equals("t") ) {
-				settingsButton.getDateWidget().setLo(dateTimeWidget.getFerretDateLo());
+				tandzWidgets.getDateWidget().setLo(dateTimeWidget.getFerretDateLo());
 			} else {
-				settingsButton.getZWidget().setLo(zAxisWidget.getSelectedValue());
+				tandzWidgets.getZWidget().setLo(zAxisWidget.getLo());
 			}
 		}
 	};
@@ -322,6 +438,8 @@ public class SlideSorterPanel extends Composite {
 				var = (VariableSerializable) v;
 				datasetLabel.setText(var.getDSName()+": "+var.getName());
 				init();
+				SlideSorterPanel.this.refreshPlot(null, false, true);
+				settingsButton.setUsePanel(true);
 			}
 		}
 
@@ -340,38 +458,44 @@ public class SlideSorterPanel extends Composite {
 	}
 	ClickListener updateOnClick = new ClickListener() {
 		public void onClick(Widget sender) {
-	    	if (settingsButton.getApply().isChecked() ) {
-	    	    setCompareAxisVisible(false);
+	    	if (settingsButton.usePanel()) {
 	    	    grid.addStyleName("panelSettingsColor");
-	    	    grid.setWidget(2, 0, panelSettings);
+	    	    grid.setWidget(2, 0, tandzWidgets);
+	            setCompareAxisVisible(false);
 	    	} else {
-	    		setCompareAxisVisible(true);
 	    		grid.setStyleName("regularBackground");
 	    		grid.setWidget(2, 0, getCompareWidget());
+	    		setCompareAxisVisible(true);
 	    	}	
 		}
 	};
 	ClickListener closeClick = new ClickListener() {
 		public void onClick(Widget sender) {
-			
-	    	if (settingsButton.getApply().isChecked() ) {
-	    		setCompareAxisVisible(false);
-	    		grid.addStyleName("panelSettingsColor");
-	    		grid.setWidget(2, 0, panelSettings);
-	    	} else {
-	    		setCompareAxisVisible(true);
-	    		grid.setWidget(2, 0, getCompareWidget());
-	    		if ( compareAxis.equals("t") ) {
-	    			setAxisValue("t", dateTimeWidget.getFerretDateLo());
-	    		} else if ( compareAxis.equals("z") ) {
-	    			setAxisValue("z", zAxisWidget.getSelectedValue());
-	    		}
-	    		grid.setStyleName("regularBackground");
-	    		refreshPlot(false, true);
-	    	}
-	    		
+			setPanelMode();
 		}
 	};
+	private void setPanelMode() {
+		if (settingsButton.usePanel() ) {
+    		grid.addStyleName("panelSettingsColor");
+    		grid.setWidget(2, 0, tandzWidgets);
+    		setCompareAxisVisible(false);
+    		if ( !singlePanel ) {
+    		   top.add(revert);
+    		}
+    	} else {
+    		grid.setWidget(2, 0, getCompareWidget());
+    		if ( compareAxis.equals("t") ) {
+    			setAxisValue("t", dateTimeWidget.getFerretDateLo());
+    		} else if ( compareAxis.equals("z") ) {
+    			setAxisValue("z", zAxisWidget.getLo());
+    		}
+    		setCompareAxisVisible(true);
+    		grid.setStyleName("regularBackground");
+    		if ( !singlePanel ) {
+    		   top.remove(revert);
+    		}
+    	}	
+	}
 	private Widget getCompareWidget() {
 		if ( compareAxis.equals("t") ) {
 			 return dateTimeWidget;
@@ -410,56 +534,69 @@ public class SlideSorterPanel extends Composite {
 	}
 
 	public String getThi() {
-		return settingsButton.getDateWidget().getFerretDateHi();
+		return tandzWidgets.getDateWidget().getFerretDateHi();
 	}
 	public String getTlo() {
-		return settingsButton.getDateWidget().getFerretDateLo();
+		return tandzWidgets.getDateWidget().getFerretDateLo();
 	}
 
 	public String getZhi() {
-		//TODO Z CAN BE A RANGE!!
-		return settingsButton.getZWidget().getSelectedValue();
+		return tandzWidgets.getZWidget().getHi();
 	}
 	public String getZlo() {
-		return settingsButton.getZWidget().getSelectedValue();
+		return tandzWidgets.getZWidget().getLo();
 	}
 
-	public String getYhi() {
+	public String getYhiFormatted() {
+		return settingsButton.getRefMap().getYhiFormatted();
+	}
+	public String getYloFormatted() {
+		return settingsButton.getRefMap().getYloFormatted();
+	}
+	public String getXhiFormatted() {
+		return settingsButton.getRefMap().getXhiFormatted();
+	}
+	public String getXloFormatted() {
+		return settingsButton.getRefMap().getXloFormatted();
+	}
+	
+	public double getYhi() {
 		return settingsButton.getRefMap().getYhi();
 	}
-	public String getYlo() {
+	public double getYlo() {
 		return settingsButton.getRefMap().getYlo();
 	}
-	public String getXhi() {
+	public double getXhi() {
 		return settingsButton.getRefMap().getXhi();
 	}
-	public String getXlo() {
+	public double getXlo() {
 		return settingsButton.getRefMap().getXlo();
 	}
 
 	public void setT(String tlo, String thi) {
-		settingsButton.getDateWidget().setLo(tlo);
+		tandzWidgets.getDateWidget().setLo(tlo);
 		// TODO also set the hi value
-		//mapButton.getDateWidget().setHi(thi);		
 	}
 
 	public void setZ(String zlo, String zhi) {
-		settingsButton.getZWidget().setLo(zlo);
+		tandzWidgets.getZWidget().setLo(zlo);
 		// TODO also set hi if it's a range
-		// mapButton.getZWidget().setHi(zhi);
 	}
 
 	public void setLatLon(String xlo, String xhi, String ylo, String yhi) {
 		settingsButton.setLatLon(xlo, xhi, ylo, yhi);
 		
 	}
-	
-	public void setPanelWidth(int width) {
-		pwidth = width;
+	public void setImageWidth() {
 		Widget w = grid.getWidget(1, 0);
-		int h = (int) ((631./998.)*Double.valueOf(pwidth));
-		w.setWidth(width+"px");
+		int h = (int) ((image_h/image_w)*Double.valueOf(pwidth));
+		w.setWidth(pwidth+"px");
 		w.setHeight(h+"px");
+	}
+	public void setPanelWidth(int width) {
+		int max = (int) image_w;
+		pwidth = Math.min(width,  max);
+		setImageWidth();	
 	}
 	public void addRegionChangeListener(ChangeListener listener) {
 		settingsButton.getRefMap().addRegionChangeListener(listener);
@@ -468,20 +605,24 @@ public class SlideSorterPanel extends Composite {
 	public void setAxisValue(String axis, String value) {
 		//TODO what if it's a range?
 		if ( axis.equals("z") ) {
-		    settingsButton.getZWidget().setLo(value);
+		    tandzWidgets.getZWidget().setLo(value);
 		} else {
-			settingsButton.getDateWidget().setLo(value);
+			tandzWidgets.getDateWidget().setLo(value);
 		}
 		
 	}
 
 	public boolean isUsePanelSettings() {
-		return settingsButton.getApply().isChecked();
+		return settingsButton.isUsePanelSettings();
+	}
+	public void usePanel(boolean b) {
+		settingsButton.setUsePanel(b);
+		setPanelMode();
 	}
 	public VariableSerializable getVariable() {
 		return var;
 	}
-	public void computeDifference(boolean switchAxis, VariableSerializable variable, String view,
+	public void computeDifference(Map<String, String> options, boolean switchAxis, VariableSerializable variable, String view,
 			String xlo_in, String xhi_in, String ylo_in, String yhi_in, String zlo_in,
 			String zhi_in, String tlo_in, String thi_in) {
 		if (switchAxis) {
@@ -499,7 +640,8 @@ public class SlideSorterPanel extends Composite {
 		// Add the variable in the upper left panel
 		lasRequest.addVariable(variable.getDSID(), variable.getID());
 		
-		// From the current slidesoter is this comment.
+		// From the current slide sorter is this comment:
+		//
 		// Need to add a dummy variable here because the addRegion/AddVariable
 		// methods of LASRequest.js will not always add at the end of the <args>
 		// node list when there are duplicate <link ...> or <region ...> nodes.
@@ -507,6 +649,7 @@ public class SlideSorterPanel extends Composite {
 		// the end.  Then we just replace 'DUMMY'.
 		// All this is necessary because order is important in comparison 
 		// requests.
+		//
 		// mimic this action here....
         
 		// For the first variable set the region according to the values passed in...
@@ -533,22 +676,22 @@ public class SlideSorterPanel extends Composite {
 		if ( isUsePanelSettings() ) {
 			if ( !view.contains("x") ) {
 				if ( var.getGrid().getXAxis() != null ) {
-					lasRequest.setRange("x", settingsButton.getRefMap().getXlo(), settingsButton.getRefMap().getXhi(), 1);
+					lasRequest.setRange("x", String.valueOf(settingsButton.getRefMap().getXlo()), String.valueOf(settingsButton.getRefMap().getXhi()), 1);
 				}
 			}
 			if ( !view.contains("y") ) {
 				if ( var.getGrid().getYAxis() != null ) {
-					lasRequest.setRange("y", settingsButton.getRefMap().getYlo(), settingsButton.getRefMap().getYhi(), 1);
+					lasRequest.setRange("y", String.valueOf(settingsButton.getRefMap().getYlo()), String.valueOf(settingsButton.getRefMap().getYhi()), 1);
 				}
 			}
 			if ( !view.contains("z") ) {
 				if ( var.getGrid().getZAxis() != null ) {
-					lasRequest.setRange("z", settingsButton.getZWidget().getSelectedValue(), settingsButton.getZWidget().getSelectedValue(), 1);
+					lasRequest.setRange("z", tandzWidgets.getZWidget().getLo(), tandzWidgets.getZWidget().getHi(), 1);
 				}
 			}
 			if ( !view.contains("t") ) {
 				if ( var.getGrid().getTAxis() != null ) {
-					lasRequest.setRange("t", settingsButton.getDateWidget().getFerretDateLo(), settingsButton.getDateWidget().getFerretDateHi(), 1);
+					lasRequest.setRange("t", tandzWidgets.getDateWidget().getFerretDateLo(), tandzWidgets.getDateWidget().getFerretDateHi(), 1);
 				}
 			}
 		} else {
@@ -574,10 +717,12 @@ public class SlideSorterPanel extends Composite {
 				if ( var.getGrid().getZAxis() != null ) {
 					if ( compareAxis.equals("z") ) {
 						// Use the panel's compare axis widget.
-						lasRequest.setRange("z", zAxisWidget.getSelectedValue(), zAxisWidget.getSelectedValue(), 1);
+						lasRequest.setRange("z", zAxisWidget.getLo(), zAxisWidget.getHi(), 1);
 					} else {
-						//Use the fixed axis in the slide sorter (the passed in value).
-						lasRequest.setRange("z", zlo_in, zhi_in, 1);
+						//Use the fixed axis in the slide sorter (the passed in value) if it applies to this data set.
+						if ( !zlo_in.equals("") && !zhi_in.equals("") ) {
+						    lasRequest.setRange("z", zlo_in, zhi_in, 1);
+						}
 					}				
 				}
 				if ( !view.contains("t") ) {
@@ -586,8 +731,10 @@ public class SlideSorterPanel extends Composite {
 							// Use the panel's compare axis widget.
 							lasRequest.setRange("t", dateTimeWidget.getFerretDateLo(), dateTimeWidget.getFerretDateHi(), 1);
 						} else {
-							//Use the fixed axis in the slide sorter (the passed in value).
-							lasRequest.setRange("t", tlo_in, thi_in, 1);
+							//Use the fixed axis in the slide sorter (the passed in value) if it applies to this data set.
+							if ( !tlo_in.equals("") && !thi_in.equals("") ) {
+							    lasRequest.setRange("t", tlo_in, thi_in, 1);
+							}
 						}	
 					}
 				}
@@ -595,6 +742,30 @@ public class SlideSorterPanel extends Composite {
 		}
 		lasRequest.addProperty("ferret", "image_format", "gif");
 		lasRequest.addProperty("las", "output_type", "xml");
+		if ( settingsButton.isUsePanelSettings() ) {
+			// Use the panel options.
+			Map<String, String> panelOptions = settingsButton.getOptions();
+			if ( panelOptions != null ) {
+				for (Iterator opIt = panelOptions.keySet().iterator(); opIt.hasNext();) {
+					String key = (String) opIt.next();
+					String value = panelOptions.get(key);
+					if ( !value.toLowerCase().equals("default") && !value.equals("") ) {
+						lasRequest.addProperty("ferret", key, value);
+					}
+				}
+			}
+		} else {
+			// Use the global options.
+			if ( options != null ) {
+				for (Iterator opIt = options.keySet().iterator(); opIt.hasNext();) {
+					String key = (String) opIt.next();
+					String value = options.get(key);
+					if ( !value.toLowerCase().equals("default") && !value.equals("") ) {
+						lasRequest.addProperty("ferret", key, value);
+					}
+				}
+			}
+		}
 		String url = productServer+"?xml="+URL.encode(lasRequest.getXMLText());
 		RequestBuilder sendRequest = new RequestBuilder(RequestBuilder.GET, url);
 		try {
@@ -608,4 +779,64 @@ public class SlideSorterPanel extends Composite {
 		dateTimeWidget.addChangeListener(compareAxisChangeListener);
 		zAxisWidget.addChangeListener(compareAxisChangeListener);
 	}
+	public double getMin() {
+		return min;
+	}
+	public double getMax() {
+		return max;
+	}
+	public ClickListener revertListener = new ClickListener() {
+		public void onClick(Widget sender) {
+			settingsButton.setUsePanel(false);
+			setPanelMode();
+		}
+	};
+
+	public void addRevertListener(ClickListener listener) {
+		revert.addClickListener(listener);
+	}
+	public ClickListener optionsOkListener = new ClickListener() {
+		public void onClick(Widget sender) {
+			settingsButton.setUsePanel(true);
+			setPanelMode();
+		}
+	};
+	public ClickListener operationsClickListener = new ClickListener() {
+		public void onClick(Widget sender) {
+			if ( sender instanceof OperationButton ) {
+				OperationButton o = (OperationButton) sender;
+				// TODO -- don't have to keep track of these separately in this class.  Just use the settings button values...
+				view = settingsButton.getCurrentOperationView();
+				op = settingsButton.getCurrentOp().getID();
+				String view = settingsButton.getOperationsWidget().getCurrentView();
+				if ( isUsePanelSettings() || singlePanel ) {
+					if ( view.contains("t") ) {
+						tandzWidgets.setRange("t", true);
+					} else {
+						tandzWidgets.setRange("t", false);
+					}
+					if ( view.contains("z") ) {
+						tandzWidgets.setRange("z", true);
+					} else {
+						tandzWidgets.setRange("z", false);
+					}
+				} else {
+					if ( compareAxis.equals("t") ) {
+						if ( view.contains("t") ) {
+						   dateTimeWidget.setRange(true);
+						} else {
+							dateTimeWidget.setRange(false);
+						}
+					}
+					if ( compareAxis.equals("z") ) {
+					    if ( view.contains("z") ) {
+					    	zAxisWidget.setRange(true);
+					    } else {
+					    	zAxisWidget.setRange(false);
+					    }
+					}
+				}
+			}
+		}	
+	};
 }
