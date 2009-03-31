@@ -101,6 +101,121 @@ public class LASUIRequest extends LASDocument {
         }
         args.addContent(regionE);
     }
+    private String getRangeValueHelper(int index, String type, String extreme) {
+        String value = "";
+    	Element args = getRootElement().getChild("args");
+		if ( args == null ) {
+			return value;
+		} else {
+			List regions = args.getChildren("region");
+			if ( regions.size() <= 0 ) {
+				return value;
+			} else {
+				Element region = (Element) regions.get(index);
+				List points = region.getChildren("point");
+				for (Iterator ptIt = points.iterator(); ptIt.hasNext();) {
+					Element point = (Element) ptIt.next();
+					String ptype = point.getAttributeValue("type");
+					if ( ptype.equals(type) ) {
+						value = point.getAttributeValue("v");
+						if ( value != null ) {
+							return value;
+						} else {
+							return "";
+						}
+					}
+				}
+				List ranges = region.getChildren("range");
+				for (Iterator iterator = ranges.iterator(); iterator.hasNext();) {
+					Element range = (Element) iterator.next();
+					String rtype = range.getAttributeValue("type");
+					if ( rtype.equals(type) ) {
+						value = range.getAttributeValue(extreme);
+						if ( value != null ) {
+							return value;
+						} else {
+							return "";
+						}
+					}
+				}
+			}
+		}
+		return value;
+    }
+    private String getRangeValue(int index, String type, String extreme) {
+    	String value = "";
+    	if ( index > 1 ) {
+            value = getRangeValueHelper(0, type, extreme);
+            if ( value != null ) {
+            	return value;
+            } else {
+            	value = getRangeValueHelper(1, type, extreme);
+            	if ( value != null ) {
+            		return value;
+            	}
+            }
+    		return value;
+    	} else {
+            return getRangeValueHelper(index, type, extreme);		
+    	}
+    }
+    public String getXlo(int index) {
+    	index = index - 1;
+    	return getRangeValue(index, "x", "low");
+    }
+    public String getXlo() {
+    	return getRangeValue(0, "x", "low");
+    }
+    public String getXhi(int index) {
+    	index = index - 1;
+    	return getRangeValue(index, "x", "high");
+    }
+    public String getXhi() {
+    	return getRangeValue(0, "x", "high");
+    }
+    public String getYlo(int index) {
+    	index = index - 1;
+    	return getRangeValue(index, "y", "low");
+    }
+    public String getYlo() {
+    	return getRangeValue(0, "y", "low");
+    }
+    public String getYhi(int index) {
+    	index = index - 1;
+    	return getRangeValue(index, "y", "high");
+    }
+    public String getYhi() {
+    	return getRangeValue(0, "y", "high");
+    }
+    public String getZlo(int index) {
+    	index = index - 1;
+    	return getRangeValue(index, "z", "low");
+    }
+    public String getZlo() {
+    	return getRangeValue(0, "z", "low");
+    }
+    public String getZhi(int index) {
+    	index = index - 1;
+    	return getRangeValue(index, "z", "high");
+    }
+    public String getZhi() {
+    	return getRangeValue(0, "z", "high");
+    }
+    public String getTlo(int index) {
+    	index = index - 1;
+        return getRangeValue(index, "t", "low");	
+    }
+    public String getTlo() {
+    	return getRangeValue(0, "t", "low");
+    }
+    public String getThi(int index) {
+    	index = index - 1;
+    	return getRangeValue(index, "t", "high");
+    }
+    public String getThi() {
+    	return getRangeValue(0, "t", "high");
+    }
+    
     /**
      * Sets the operation for this request.
      * @param ID The operation ID to be used
