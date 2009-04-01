@@ -111,6 +111,9 @@ public class LASUIRequest extends LASDocument {
 			if ( regions.size() <= 0 ) {
 				return value;
 			} else {
+				if ( index > 0 && regions.size() == 1 ) {
+					return value;
+				}
 				Element region = (Element) regions.get(index);
 				List points = region.getChildren("point");
 				for (Iterator ptIt = points.iterator(); ptIt.hasNext();) {
@@ -144,12 +147,12 @@ public class LASUIRequest extends LASDocument {
     }
     private String getRangeValue(int index, String type, String extreme) {
     	String value = "";
-    	if ( index > 1 ) {
-            value = getRangeValueHelper(0, type, extreme);
-            if ( value != null ) {
+    	if ( index > 0 ) {
+            value = getRangeValueHelper(1, type, extreme);
+            if ( value != null && !value.equals("") ) {
             	return value;
             } else {
-            	value = getRangeValueHelper(1, type, extreme);
+            	value = getRangeValueHelper(0, type, extreme);
             	if ( value != null ) {
             		return value;
             	}
