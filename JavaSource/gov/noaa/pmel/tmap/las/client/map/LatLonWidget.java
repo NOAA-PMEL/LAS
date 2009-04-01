@@ -78,12 +78,12 @@ public class LatLonWidget extends Composite {
 		String wlon_f;
 		String elon_f;
 		if ( xlo < 0.0 ) {
-			wlon_f = lonFormat.format(xlo + 180.)+" W";
+			wlon_f = lonFormat.format(Math.abs(xlo))+" W";
 		} else {
 			wlon_f = lonFormat.format(xlo)+" E";
 		}
 		if ( xhi < 0.0 ) {
-			elon_f = lonFormat.format(xhi + 180.)+" W";
+			elon_f = lonFormat.format(Math.abs(xhi))+" W";
 		} else {
 			elon_f = lonFormat.format(xhi)+" E";
 		}
