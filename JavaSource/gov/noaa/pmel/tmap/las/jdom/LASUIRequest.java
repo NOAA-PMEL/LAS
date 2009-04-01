@@ -101,13 +101,8 @@ public class LASUIRequest extends LASDocument {
         }
         args.addContent(regionE);
     }
-    private String getRangeValueHelper(int index, String type, String extreme) {
-        String value = "";
-    	Element args = getRootElement().getChild("args");
-		if ( args == null ) {
-			return value;
-		} else {
-			List regions = args.getChildren("region");
+    private String getRangeValueHelper(int index, String type, String extreme, List regions) {
+            String value = "";
 			if ( regions.size() <= 0 ) {
 				return value;
 			} else {
@@ -142,24 +137,33 @@ public class LASUIRequest extends LASDocument {
 					}
 				}
 			}
-		}
+		
 		return value;
     }
     private String getRangeValue(int index, String type, String extreme) {
     	String value = "";
-    	if ( index > 0 ) {
-            value = getRangeValueHelper(1, type, extreme);
-            if ( value != null && !value.equals("") ) {
-            	return value;
-            } else {
-            	value = getRangeValueHelper(0, type, extreme);
-            	if ( value != null ) {
-            		return value;
-            	}
-            }
+    	Element args = getRootElement().getChild("args");
+    	if ( args == null ) {
     		return value;
     	} else {
-            return getRangeValueHelper(index, type, extreme);		
+    		List regions = args.getChildren("region");
+    		if ( regions.size() - 1 < index ) {
+    			return value;
+    		}
+    		if ( index > 0 ) {
+    			value = getRangeValueHelper(1, type, extreme, regions);
+    			if ( value != null && !value.equals("") ) {
+    				return value;
+    			} else {
+    				value = getRangeValueHelper(0, type, extreme, regions);
+    				if ( value != null ) {
+    					return value;
+    				}
+    			}
+    			return value;
+    		} else {
+    			return getRangeValueHelper(index, type, extreme, regions);		
+    		}
     	}
     }
     public String getXlo(int index) {
@@ -176,7 +180,7 @@ public class LASUIRequest extends LASDocument {
     public String getXhi() {
     	return getRangeValue(0, "x", "high");
     }
-    public String getYlo(int index) {
+    public String getYlo(int index) {	
     	index = index - 1;
     	return getRangeValue(index, "y", "low");
     }
