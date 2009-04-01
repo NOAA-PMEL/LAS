@@ -324,27 +324,31 @@ public class DateTimeWidget extends Composite {
 	}
 
 	public String getFerretDateHi() {
-		StringBuffer date = new StringBuffer();
-		if ( hasDay ) {
-			date.append(hi_day.getValue(hi_day.getSelectedIndex()));
-		} else {
+		if ( range ) {
+			StringBuffer date = new StringBuffer();
+			if ( hasDay ) {
+				date.append(hi_day.getValue(hi_day.getSelectedIndex()));
+			} else {
+				if ( hasMonth ) {
+					date.append("15");
+				}
+			}
 			if ( hasMonth ) {
-				date.append("15");
+				date.append("-"+hi_month.getValue(hi_month.getSelectedIndex()));
 			}
-		}
-		if ( hasMonth ) {
-			date.append("-"+hi_month.getValue(hi_month.getSelectedIndex()));
-		}
 
-		if ( climatology ) {
-			date.append("-0001");   
+			if ( climatology ) {
+				date.append("-0001");   
+			} else {
+				if ( hasYear ) {
+					date.append("-"+hi_year.getValue(hi_year.getSelectedIndex()));
+				}
+			}
+
+			return date.toString();
 		} else {
-			if ( hasYear ) {
-				date.append("-"+hi_year.getValue(hi_year.getSelectedIndex()));
-			}
+			return getFerretDateLo();
 		}
-
-		return date.toString();
 	}
 	public void addChangeListener(ChangeListener change) {
 		lo_year.addChangeListener(change);

@@ -248,7 +248,7 @@ public class SlideSorterPanel extends Composite {
 		lasRequest.setProperty("ferret", "size", ".8333");
 
 		if ( var.getGrid().getTAxis() != null ) {
-            lasRequest.setRange("t", tandzWidgets.getDateWidget().getFerretDateLo(), tandzWidgets.getDateWidget().getFerretDateHi(), 0);
+			lasRequest.setRange("t", tandzWidgets.getDateWidget().getFerretDateLo(), tandzWidgets.getDateWidget().getFerretDateHi(), 0);
 		}
 		
 		xlo = String.valueOf(settingsButton.getRefMap().getXlo());

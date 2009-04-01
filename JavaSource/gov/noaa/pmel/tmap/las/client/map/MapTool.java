@@ -3,6 +3,7 @@ package gov.noaa.pmel.tmap.las.client.map;
 import java.util.ArrayList;
 import java.util.Iterator;
 
+import com.google.gwt.maps.client.event.MapMouseMoveHandler;
 import com.google.gwt.maps.client.event.MarkerDragEndHandler;
 import com.google.gwt.maps.client.event.MarkerDragHandler;
 import com.google.gwt.maps.client.event.MarkerMouseUpHandler;
@@ -19,15 +20,7 @@ public abstract class MapTool {
 	float strokeOpacity = 1.0f;
 	String fillColor = "#FF0000";
 	float fillOpacity = 0.0f;
-	Marker swMarker;
-	Marker sw_nwMarker;
-	Marker nwMarker;
-	Marker nw_neMarker;
-	Marker neMarker;
-	Marker ne_seMarker;
-	Marker seMarker;
-	Marker sw_seMarker;
-	Marker centerMarker;
+	
 	ArrayList<Marker> markers = new ArrayList<Marker>();
 	
 	public abstract void clearOverlays();
@@ -40,6 +33,10 @@ public abstract class MapTool {
 	 * @return the polygon
 	 */
 	public abstract ArrayList<Overlay> getOverlays();
+	
+	public abstract Marker getDrawMarker();
+	
+	public abstract MapMouseMoveHandler getMouseMove();
 
 	public void setEditingEnabled(boolean b) {
 		for (Iterator markerIt = markers.iterator(); markerIt.hasNext();) {
