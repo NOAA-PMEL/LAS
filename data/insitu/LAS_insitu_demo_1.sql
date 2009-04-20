@@ -1,9 +1,3 @@
--- MySQL dump 8.23
---
--- Host: localhost    Database: LAS_insitu_demo
----------------------------------------------------------
--- Server version	3.23.58
-
 --
 -- Current Database: LAS_insitu_demo
 --
