@@ -64,6 +64,7 @@ import org.joda.time.Duration;
 import org.joda.time.DurationFieldType;
 import org.joda.time.Hours;
 import org.joda.time.Period;
+import org.joda.time.chrono.All360Chronology;
 import org.joda.time.chrono.AllLeapChronology;
 import org.joda.time.chrono.GJChronology;
 import org.joda.time.chrono.GregorianChronology;
@@ -1483,6 +1484,8 @@ public class addXML {
 		  chrono = JulianChronology.getInstance(DateTimeZone.UTC);
 	  } else if ( calendar.equals("all_leap") || calendar.equals("366_day") ) {
 		  chrono = AllLeapChronology.getInstance(DateTimeZone.UTC);
+	  } else if ( calendar.equals("360_day") ) {  /* aggiunto da lele */
+ 		  chrono = All360Chronology.getInstance(DateTimeZone.UTC);
 	  }
 
 	  if (axis.getSize() >= 2.) {
