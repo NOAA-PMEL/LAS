@@ -349,7 +349,7 @@ public class ProductRequest {
                                         	String g = "g"+view;
                                         	if (gridTo.isAnalysis()) {
                                         		StringBuffer jnl = gridTo.getJnl();
-                                        		jnl.append("_cr_let "+var+"_"+var_count+"_regrid="+var+"[d="+dataset_number+","+g+"="+gridTo.getVar()+"[d=1]]}");
+                                        		jnl.append("_cr_let "+var+"_"+var_count+"_regrid="+var+"_2[d="+dataset_number+","+g+"="+gridTo.getVar()+"[d=1]]}");
                                         		// Get the original URL for the gridTo data set and append the new combined analysis and regrid URL.
                                         		String expr = URLEncoder.encode("_expr_{"+encoded+"}{"+jnl.toString(), "UTF-8");
                                         		String comboURL = lasConfig.getFTDSURL(gridTo.getVarXPath())+expr;                                       			
@@ -360,7 +360,7 @@ public class ProductRequest {
                                         	} else {    
                                         		StringBuffer jnl = gridTo.getJnl();
                                         		gridTo.setVar(gridTo.getVar());
-                                                jnl.append("let "+var+"_"+var_count+"_regrid="+var+"[d="+dataset_number+","+g+"="+gridTo.getVar()+"[d=1]]");
+                                                jnl.append("let "+var+"_"+var_count+"_regrid="+var+"_2[d="+dataset_number+","+g+"="+gridTo.getVar()+"[d=1]]");
                                                 expression = URLEncoder.encode("_expr_{"+encoded+"}{"+jnl.toString()+"}", "UTF-8");
                                                 data.setAttribute("url", gridTo.getURL()+expression);
                                         	}
@@ -407,7 +407,7 @@ public class ProductRequest {
                                     		var = data.getAttributeValue("var");
                                     		String revar = var+"_"+var_count+"_regrid";
                                     		data.setAttribute("var", revar);
-                                    		analysis_jnl.append("_cr_let "+revar+"="+var+"[d="+dataset_number+","+g+"="+gridTo.getVar()+"[d=1]]}");
+                                    		analysis_jnl.append("_cr_let "+revar+"="+var+"_2[d="+dataset_number+","+g+"="+gridTo.getVar()+"[d=1]]}");
                                     		// Get the original URL for the gridTo data set and append the new combined analysis and regrid URL.
                                     		String expr = URLEncoder.encode("_expr_{"+encoded+"}{"+analysis_jnl.toString(), "UTF-8");
                                     		String comboURL = lasConfig.getFTDSURL(gridTo.getVarXPath())+expr;                                       			
@@ -417,7 +417,7 @@ public class ProductRequest {
                                     		gridTo.setURL(gridTo.getData().getAttributeValue("url"));
                                     	} else {    
                                     		var = data.getAttributeValue("var");
-                                    		jnl.append("_cr_let "+var+"_"+var_count+"_regrid="+var+"[d="+dataset_number+","+g+"="+gridTo.getVar()+"[d=1]]");
+                                    		jnl.append("_cr_let "+var+"_"+var_count+"_regrid="+var+"_2[d="+dataset_number+","+g+"="+gridTo.getVar()+"[d=1]]");
                                     		expression = URLEncoder.encode("_expr_{"+encoded+"}"+"{"+jnl.toString()+"}", "UTF-8");
                                     		data.setAttribute("url", gridTo.getURL()+expression);
                                     		data.setAttribute("var", var+"_"+var_count+"_regrid");
@@ -834,10 +834,10 @@ public class ProductRequest {
             } else if ( ocean_mask != null) {
                 jnl.append("let analysis_mask = if rose_on_grid gt 0 then 1_cr_");           
             }
-            jnl.append("let masked_"+var+"="+var+"[d="+var_count+"]*analysis_mask_cr_");
-            jnl.append("let "+var+"_"+var_count+"_regrid=masked_"+var+"[d="+dset+grid+"]_cr_");
+            jnl.append("let masked_"+var+"="+var+"_2[d="+var_count+"]*analysis_mask_cr_");
+            jnl.append("let "+var+"_"+var_count+"_regrid=masked_"+var+"_2[d="+dset+grid+"]_cr_");
         } else {
-            jnl.append("let "+var+"_"+var_count+"_regrid="+var+"[d="+dset+grid+"]");
+            jnl.append("let "+var+"_"+var_count+"_regrid="+var+"_2[d="+dset+grid+"]");
         }
 
         String fdsURL = lasConfig.getFTDSURL(varXPath);

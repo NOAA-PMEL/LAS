@@ -64,8 +64,9 @@ public class FerretDataSource implements DatasetSource {
             if ( !expressions.get(0).trim().equals("") ) {
                 String[] urls = expressions.get(0).split(",");
                 for ( int i = 0; i < urls.length; i++ ) { 
-                    String dataURL = URLDecoder.decode(urls[i], "UTF-8");
-                    jnl.append("use \""+dataURL+"\"\n");
+                	String dataURL = URLDecoder.decode(urls[i], "UTF-8");
+                	int ds = i + 2;
+                	jnl.append("go open_and_rename \""+dataURL+"\" \"_"+ds+"\"\n");
                 }
             }
             if ( !expressions.get(1).trim().equals("") ) {
@@ -87,7 +88,8 @@ public class FerretDataSource implements DatasetSource {
                 String[] urls = expressions.get(0).split(",");
                 for ( int i = 0; i < urls.length; i++ ) {
                 	String dataURL = URLDecoder.decode(urls[i], "UTF-8");
-                    jnl.append("use \""+dataURL+"\"\n");
+                	int ds = i + 2;
+                	jnl.append("go open_and_rename \""+dataURL+"\" \"_"+ds+"\"\n");
                 }
             }
         } else if ( expressions.size() == 0 ) {
