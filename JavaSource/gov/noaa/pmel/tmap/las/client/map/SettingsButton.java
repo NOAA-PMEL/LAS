@@ -13,6 +13,7 @@ import gov.noaa.pmel.tmap.las.client.laswidget.OperationsWidget;
 import gov.noaa.pmel.tmap.las.client.laswidget.OptionsButton;
 import gov.noaa.pmel.tmap.las.client.serializable.AxisSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.OperationSerializable;
+import gov.noaa.pmel.tmap.las.client.serializable.VariableSerializable;
 
 import com.google.gwt.maps.client.geom.LatLng;
 import com.google.gwt.user.client.Window;
@@ -27,6 +28,7 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.RadioButton;
+import com.google.gwt.user.client.ui.TreeItem;
 import com.google.gwt.user.client.ui.TreeListener;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -48,9 +50,10 @@ public class SettingsButton extends Composite {
 	OptionsButton optionsButton;
 	String operationID;
 	boolean usePanel = false;
+	RPCServiceAsync rpcService;
 	public SettingsButton (String title, LatLng center, int zoom, int xpix, int ypix, String panelID, String operationID, RPCServiceAsync rpcService) {
 		this.operationID = operationID;
-		
+		this.rpcService = rpcService;
 		settingsButton = new Button (title);
 		settingsButton.addClickListener(settingsButtonClick);
 
@@ -169,5 +172,8 @@ public class SettingsButton extends Composite {
 	}
 	public void addOperationClickListener(ClickListener operationsClickListener) {
 		operations.addClickListener(operationsClickListener);
+	}
+	public void setOperation(String id, String view) {
+		operations.setOperation(id, view);		
 	}
 }

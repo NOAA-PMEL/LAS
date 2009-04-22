@@ -1,10 +1,7 @@
 package gov.noaa.pmel.tmap.las.client;
 
 import gov.noaa.pmel.tmap.las.client.laswidget.AxisWidget;
-import gov.noaa.pmel.tmap.las.client.laswidget.DatasetButton;
 import gov.noaa.pmel.tmap.las.client.laswidget.DateTimeWidget;
-import gov.noaa.pmel.tmap.las.client.laswidget.OptionsButton;
-import gov.noaa.pmel.tmap.las.client.map.MapButton;
 import gov.noaa.pmel.tmap.las.client.map.SettingsButton;
 import gov.noaa.pmel.tmap.las.client.serializable.AxisSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.CategorySerializable;
@@ -25,7 +22,6 @@ import com.google.gwt.maps.client.geom.LatLngBounds;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.WindowResizeListener;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.ChangeListener;
 import com.google.gwt.user.client.ui.ClickListener;
 import com.google.gwt.user.client.ui.Grid;
@@ -187,6 +183,7 @@ public class SlideSorter extends LASEntryPoint {
 		
 		settingsButton.addDatasetTreeListener(datasetTreeListener);
 		settingsButton.addOptionsOkClickListener(optionsOkListener);
+		settingsButton.addOperationClickListener(operationsClickListener);
 				
 		autoContourButton = new ToggleButton("Auto Set Contour Levels");
 		autoContourButton.addClickListener(autoContour);
@@ -258,7 +255,7 @@ public class SlideSorter extends LASEntryPoint {
 		ortho.clear();
 		datePanel.clear();
 		xyzPanel.clear();
-		settingsButton.setOperations(rpcService, null, var.getDSID(), var.getID(), null);
+		settingsButton.setOperations(rpcService, var.getIntervals(), var.getDSID(), var.getID(), null);
 		if ( view.equals("xy") ) {
 			// If the plot view is XY set up the map for selecting the region in all panels.
 			// TODO Still need this for other views but with parameters to set the map selector tool.
@@ -346,7 +343,6 @@ public class SlideSorter extends LASEntryPoint {
 					xyzButton = new RadioButton("compare", xyzButtonSelected);
 					xyzButton.addClickListener(compareAxisChangeListener);
 					xyzWidget = new AxisWidget(axis);
-					
 					xyzWidget.addChangeListener(fixedAxisMenuChange);
 					if ( compareAxis.equals(type) ) {
 						xyzButton.addStyleName("red");
@@ -394,34 +390,48 @@ public class SlideSorter extends LASEntryPoint {
 				String temp = compareAxis;
 				compareAxis = fixedAxis;
 				fixedAxis = temp;
-				
-				String fixedAxisValue = "";
+				boolean fixed_axis_range = false;
+				String fixedAxisLoValue = "";
+				String fixedAxisHiValue = "";
 				if ( compareAxis.equals("t") ) {
+					dateWidget.setRange(false);
 					dateWidget.setEnabled(false);
 					dateButton.setStyleName("red");
 					dateButton.setText(dateButtonSelected);
 					xyzWidget.setEnabled(true);
+					xyzWidget.setRange(view.contains("z"));
 					xyzButton.setStyleName("black");
 					xyzButton.setText(xyzButtonNotSelected);
-					fixedAxisValue = xyzWidget.getLo();
+					fixedAxisLoValue = xyzWidget.getLo();
+					fixedAxisHiValue = xyzWidget.getHi();
+					fixed_axis_range = xyzWidget.isRange();
 				}  else {
 					dateWidget.setEnabled(true);
+					dateWidget.setRange(view.contains("t"));
 					dateButton.setStyleName("black");
 					dateButton.setText(dateButtonNotSelected);
+					xyzWidget.setRange(false);
 					xyzWidget.setEnabled(false);
 					xyzButton.setStyleName("red");
 					xyzButton.setText(xyzButtonSelected);
-					fixedAxisValue = dateWidget.getFerretDateLo();
+					fixedAxisLoValue = dateWidget.getFerretDateLo();
+					fixedAxisHiValue = dateWidget.getFerretDateHi();
+					fixed_axis_range = dateWidget.isRange();
 				}
 				// Set the value of the fixed axis in all the panels under slide sorter control.
 				for (Iterator panelIt = panels.iterator(); panelIt.hasNext();) {
 		    		SlideSorterPanel panel = (SlideSorterPanel) panelIt.next();
 		    		if ( !panel.isUsePanelSettings() ) {
-		    			panel.setAxisValue(fixedAxis, fixedAxisValue);
+		    			if ( fixed_axis_range ) {
+		    				panel.setParentAxisRangeValues(fixedAxis, fixedAxisLoValue, fixedAxisHiValue);
+		    			} else {
+		    			    panel.setParentAxisValue(fixedAxis, fixedAxisLoValue);
+		    			}
 		    		}
 				}
 				refresh(true);
-			}			
+			}		
+			differenceButton.setEnabled(!view.contains(compareAxis));
 		}			
     };
     private void refresh(boolean switchAxis) {
@@ -450,14 +460,13 @@ public class SlideSorter extends LASEntryPoint {
 						String zhi = "";
 						String tlo = "";
 						String thi = "";
-						if ( view.contains("x") ) {
-							xlo = String.valueOf(settingsButton.getRefMap().getXlo());
-							xhi = String.valueOf(settingsButton.getRefMap().getXhi());
-						}
-						if ( view.contains("y") ) {
-							ylo = String.valueOf(settingsButton.getRefMap().getYlo());
-							yhi = String.valueOf(settingsButton.getRefMap().getYhi());
-						}
+                        // Always get values from the map.  They may get replaced with the panel settings.
+						xlo = String.valueOf(settingsButton.getRefMap().getXlo());
+						xhi = String.valueOf(settingsButton.getRefMap().getXhi());
+
+						ylo = String.valueOf(settingsButton.getRefMap().getYlo());
+						yhi = String.valueOf(settingsButton.getRefMap().getYhi());
+
 						if ( fixedAxis.equals("t") ) {
 							tlo = dateWidget.getFerretDateLo();
 							thi = dateWidget.getFerretDateHi();
@@ -563,7 +572,7 @@ public class SlideSorter extends LASEntryPoint {
     			SlideSorterPanel panel = (SlideSorterPanel) panelIt.next();
     			if (title.contains(panel.getID())) {
     				// See if the panel settings are not being used on this panel, if not
-    				// reset the fixed axis and the lat/lon region to the slide sorter value.
+    				// reset the fixed axis, the lat/lon region and the operation to the slide sorter value.
     				if ( !panel.isUsePanelSettings() ) {
     					VariableSerializable v = panel.getVariable();
     					if ( !v.getID().equals(var.getID()) || !v.getDSID().equals(var.getDSID() ) ) {
@@ -571,11 +580,12 @@ public class SlideSorter extends LASEntryPoint {
     						panel.init();
     					} 
     					if ( fixedAxis.equals("t") ) {
-    						panel.setAxisValue("t", dateWidget.getFerretDateLo());
+    						panel.setParentAxisValue("t", dateWidget.getFerretDateLo());
     					} else if ( fixedAxis.equals("z") ) {
-    						panel.setAxisValue("z", xyzWidget.getLo());
+    						panel.setParentAxisValue("z", xyzWidget.getLo());
     					}
         				panel.setLatLon(String.valueOf(settingsButton.getRefMap().getXlo()), String.valueOf(settingsButton.getRefMap().getXhi()), String.valueOf(settingsButton.getRefMap().getYlo()), String.valueOf(settingsButton.getRefMap().getYhi()));
+    				    panel.setOperation(op, view);
     				}
     			}
     		}
@@ -601,16 +611,21 @@ public class SlideSorter extends LASEntryPoint {
 				for (Iterator panelIt = panels.iterator(); panelIt.hasNext();) {
 		    		SlideSorterPanel panel = (SlideSorterPanel) panelIt.next();
 		    		if ( !panel.isUsePanelSettings() ) {
-		    		    panel.setAxisValue("t", value);
+		    		    panel.setParentAxisValue("t", value);
 		    		}
 				}
 			} else if ( fixedAxis.equals("z") ) {
 	    		
-	    		String value = xyzWidget.getLo();
+	    		String lo_value = xyzWidget.getLo();
+	    		String hi_value = xyzWidget.getHi();
 	    		for (Iterator panelIt = panels.iterator(); panelIt.hasNext();) {
 		    		SlideSorterPanel panel = (SlideSorterPanel) panelIt.next();
 		    		if ( !panel.isUsePanelSettings() ) {
-		    		    panel.setAxisValue("z", value);
+		    			if ( xyzWidget.isRange() ) {
+		    				panel.setParentAxisRangeValues("z", lo_value, hi_value);
+		    			} else {
+		    		        panel.setParentAxisValue("z", lo_value);
+		    			}
 		    		}
 				}
 	    	}
@@ -694,4 +709,53 @@ public class SlideSorter extends LASEntryPoint {
     	String fill_levels = "(" + uminr + "," + umaxr + "," + dint + ")";
     	autoContourTextBox.setText(fill_levels);
     }
+    public ClickListener operationsClickListener = new ClickListener() {
+		public void onClick(Widget sender) {
+			if ( sender instanceof OperationButton ) {
+				OperationButton o = (OperationButton) sender;
+			    view = settingsButton.getOperationsWidget().getCurrentView();
+			    op = settingsButton.getCurrentOp().getID();
+                // Turn off the difference button when the compare axis is a range.			    
+                differenceButton.setEnabled(!view.contains(compareAxis));
+				if ( view.length() !=  2 ) {
+					autoContourTextBox.setText("");
+					autoContourButton.setDown(false);
+					autoContourButton.setEnabled(false);
+				} else {
+					autoContourButton.setEnabled(true);
+				}
+				// Set the current fixed menu to a range if necessary.
+				if ( view.contains(fixedAxis) ) {
+					if ( fixedAxis.equals("t") ) {
+						dateWidget.setRange(true);
+					} else if ( fixedAxis.equals("z") ) {
+						xyzWidget.setRange(true);
+					}
+				} else {
+					if ( fixedAxis.equals("t") ) {
+						dateWidget.setRange(false);
+					} else if ( fixedAxis.equals("z") ) {
+						xyzWidget.setRange(false);
+					}
+				}
+				
+				// Set the orthogonal axes to a range in each panel.
+				for (Iterator panelsIt = panels.iterator(); panelsIt.hasNext();) {
+					SlideSorterPanel panel = (SlideSorterPanel) panelsIt.next();
+					panel.setOperation(op, view);
+					if ( view.contains("t") ) {
+					   panel.setParentAxisRange("t", true);
+					} else {
+						panel.setParentAxisRange("t", false);
+					}
+					if ( view.contains("z") ) {
+						panel.setParentAxisRange("z", true);
+					} else {
+						panel.setParentAxisRange("z", false);
+					}
+				}
+				
+			}
+		}	
+	};
 }

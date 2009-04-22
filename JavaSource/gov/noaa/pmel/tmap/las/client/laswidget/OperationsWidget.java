@@ -35,6 +35,7 @@ public class OperationsWidget extends StackPanel {
 	String currentView;
     ArrayList<OperationButton> buttons = new ArrayList<OperationButton>();
     ArrayList<ClickListener> clicks = new ArrayList<ClickListener>();
+    String intervals;
 	/**
 	 * Set up the StackPanel and the associated RPC.
 	 */
@@ -55,106 +56,20 @@ public class OperationsWidget extends StackPanel {
 		setHeight("200px");
 		
 	}
-	public void setOperations(RPCServiceAsync rpcService, String view, String dsID, String varID, OperationsMenu menu) {
+	public void setOperations(RPCServiceAsync rpcService, String intervals, String dsID, String varID, OperationsMenu menu) {
 		this.opService = rpcService;
 		this.menu = menu;
-		opService.getOperations(view, dsID, varID, operationsCallback);	
+		this.intervals = intervals;
+		if ( ops != null ) {
+			setOps();
+		}  else {
+			opService.getOperations(null, dsID, varID, operationsCallback);	
+		}
 	}
 	AsyncCallback operationsCallback = new AsyncCallback() {
 		public void onSuccess(Object result) {
-			hasHofmullerPlots = false;
-			hasLinePlots = false;
-			hasSectionPlots = false;
-			hasXYMap = false;
 			ops = (OperationSerializable[]) result;
-			buttons.clear();
-			for (int i = 0; i < ops.length; i++) {
-				OperationSerializable op = ops[i];
-				String category = op.getAttributes().get("category");
-				if ( category.equals("visualization")) {
-					List<String> views = op.getViews();
-					for (Iterator viewIt = views.iterator(); viewIt.hasNext();) {
-						String view = (String) viewIt.next();
-						if ( !op.getName().contains("omparison") ) {
-							Map<String, String> attrs = op.getAttributes();
-							if ( attrs != null && attrs.containsKey("default")) {
-								if ( view.equals("xy") ) {	
-									if (!hasXYMap) {
-										xyMap.clear();
-										hasXYMap = true;
-									}
-									OperationButton button = new OperationButton("op", "Latitude-Longitude");
-									button.setView(view);
-									button.setOperation(op);
-									button.addClickListener(buttonListener);
-									button.setChecked(true);
-									buttons.add(button);
-									currentOp = button.getOperation();
-									currentView = "xy";
-									xyMap.add(button);
-								} else if ( view.equals("x") || view.equals("y") || view.equals("z") || view.equals("t") ) {
-									if ( !hasLinePlots ) {
-										linePlots.clear();
-										hasLinePlots = true;
-									}
-									OperationButton button;
-									if ( view.equals("x") ) {
-										button = new OperationButton("op", "Longitude");
-									} else if ( view.equals("y") ) {
-										button = new OperationButton("op", "Latitude");
-									} else if ( view.equals("z") ) {
-										// TODO, get the grid and initialize from the grid so you have the z-axis label.
-										button = new OperationButton("op", "Z");
-									} else {
-										button = new OperationButton("op", "Time");
-									}
-									
-									button.setView(view);
-									button.setOperation(op);
-									button.addClickListener(buttonListener);
-									buttons.add(button);
-									linePlots.add(button);
-								} else if ( view.equals("xz") || view.equals("yz") ) {
-									if ( !hasSectionPlots ) {
-										sectionPlots.clear();
-										hasSectionPlots = true;
-									}
-									OperationButton button;
-									if ( view.equals("xz") ) {
-										button = new OperationButton("op", "Longitude-z");
-									} else {
-										button = new OperationButton("op", "Latitude-z");
-									}
-									
-									button.setOperation(op);
-									button.setView(view);
-									button.addClickListener(buttonListener);
-									buttons.add(button);
-									sectionPlots.add(button);
-								} else if ( view.equals("xt") || view.equals("yt") || view.equals("zt") ) {
-									if ( !hasHofmullerPlots ) {
-										hofmullerPlots.clear();
-										hasHofmullerPlots = true;
-									}
-									OperationButton button;
-									if ( view.equals("xt") ) {
-									    button = new OperationButton("op", "Longitude-time");
-									} else if (view.equals("yt") ) {
-										button = new OperationButton("op", "Latitude-time");
-									} else {
-										button = new OperationButton("op", "Z-time");
-									}
-									button.setView(view);
-									button.setOperation(op);
-									button.addClickListener(buttonListener);
-									buttons.add(button);
-									hofmullerPlots.add(button);
-								}
-							}
-						}
-					}
-				}
-			}
+			setOps();
 			if ( menu != null ) {
 			    menu.setMenus(ops);
 			}
@@ -163,19 +78,122 @@ public class OperationsWidget extends StackPanel {
 				addClickListener(click);
 			}
 		}
-        ClickListener buttonListener = new ClickListener() {
-
-			public void onClick(Widget sender) {
-				OperationButton button = (OperationButton) sender;
-				currentOp = button.getOperation();
-				currentView = button.getView();
-			}
-        	
-        };
 		public void onFailure(Throwable caught) {
 			// TODO Alert users...
 		}
 	};
+	ClickListener buttonListener = new ClickListener() {
+
+		public void onClick(Widget sender) {
+			OperationButton button = (OperationButton) sender;
+			currentOp = button.getOperation();
+			currentView = button.getView();
+		}
+    	
+    };
+	
+	public void setOps() {
+		hasHofmullerPlots = false;
+		hasLinePlots = false;
+		hasSectionPlots = false;
+		hasXYMap = false;
+		
+		buttons.clear();
+		xyMap.clear();
+		linePlots.clear();
+		sectionPlots.clear();
+		hofmullerPlots.clear();
+		for (int i = 0; i < ops.length; i++) {
+			OperationSerializable op = ops[i];
+			String category = op.getAttributes().get("category");
+			if ( category.equals("visualization")) {
+				List<String> views = op.getViews();
+				for (Iterator viewIt = views.iterator(); viewIt.hasNext();) {
+					String view = (String) viewIt.next();
+					if ( !op.getName().contains("omparison") ) {
+						Map<String, String> attrs = op.getAttributes();
+						if ( attrs != null && attrs.containsKey("default")) {
+							if ( view.equals("xy") && intervals.contains("xy")) {	
+								if (!hasXYMap) {
+									xyMap.clear();
+									hasXYMap = true;
+								}
+								OperationButton button = new OperationButton("op", "Latitude-Longitude");
+								button.setView(view);
+								button.setOperation(op);
+								button.addClickListener(buttonListener);
+								button.setChecked(true);
+								buttons.add(button);
+								currentOp = button.getOperation();
+								currentView = "xy";
+								xyMap.add(button);
+							} else if ( (view.equals("x") && intervals.contains("x")) || (view.equals("y") && intervals.contains("y")) || (view.equals("z") && intervals.contains("z")) || (view.equals("t") && intervals.contains("t")) ) {
+								if ( !hasLinePlots ) {
+									linePlots.clear();
+									hasLinePlots = true;
+								}
+								OperationButton button;
+								if ( view.equals("x") ) {
+									button = new OperationButton("op", "Longitude");
+								} else if ( view.equals("y") ) {
+									button = new OperationButton("op", "Latitude");
+								} else if ( view.equals("z") ) {
+									// TODO, get the grid and initialize from the grid so you have the z-axis label.
+									button = new OperationButton("op", "Z");
+								} else {
+									button = new OperationButton("op", "Time");
+								}
+								
+								button.setView(view);
+								button.setOperation(op);
+								button.addClickListener(buttonListener);
+								buttons.add(button);
+								linePlots.add(button);
+							} else if ( (view.equals("xz") && intervals.contains("x") && intervals.contains("z") )|| 
+									    (view.equals("yz") && intervals.contains("y") && intervals.contains("z") )) {
+								if ( !hasSectionPlots ) {
+									sectionPlots.clear();
+									hasSectionPlots = true;
+								}
+								OperationButton button;
+								if ( view.equals("xz") ) {
+									button = new OperationButton("op", "Longitude-z");
+								} else {
+									button = new OperationButton("op", "Latitude-z");
+								}
+								
+								button.setOperation(op);
+								button.setView(view);
+								button.addClickListener(buttonListener);
+								buttons.add(button);
+								sectionPlots.add(button);
+							} else if ( (view.equals("xt") && intervals.contains("x") && intervals.contains("t") ) || 
+									    (view.equals("yt") && intervals.contains("y") && intervals.contains("t") ) || 
+									    (view.equals("zt") && intervals.contains("z") && intervals.contains("t") ) ) {
+								if ( !hasHofmullerPlots ) {
+									hofmullerPlots.clear();
+									hasHofmullerPlots = true;
+								}
+								OperationButton button;
+								if ( view.equals("xt") ) {
+								    button = new OperationButton("op", "Longitude-time");
+								} else if (view.equals("yt") ) {
+									button = new OperationButton("op", "Latitude-time");
+								} else {
+									button = new OperationButton("op", "Z-time");
+								}
+								button.setView(view);
+								button.setOperation(op);
+								button.addClickListener(buttonListener);
+								buttons.add(button);
+								hofmullerPlots.add(button);
+							}
+						}
+					}
+				}
+			}
+		}
+	}
 	public OperationSerializable[] getOperationsSerializable() {
 		return ops;
 	}
@@ -193,5 +211,18 @@ public class OperationsWidget extends StackPanel {
 			OperationButton button = (OperationButton) buttonIt.next();
 			button.addClickListener(operationsClickListener);
 		}
+	}
+	public void setOperation(String id, String view) {
+		for (Iterator buttonId = buttons.iterator(); buttonId.hasNext();) {
+			OperationButton button = (OperationButton) buttonId.next();
+			if ( button.getOperation().getID().equals(id) && button.getView().equals(view) ) {
+				button.setChecked(true);
+				currentOp = button.getOperation();
+				currentView = button.getView();
+			} else {
+				button.setChecked(false);
+			}
+		}
+		
 	}
 }
