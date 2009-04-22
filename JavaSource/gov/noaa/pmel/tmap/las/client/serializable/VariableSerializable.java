@@ -66,5 +66,8 @@ public class VariableSerializable extends Serializable implements IsSerializable
 	public void setGrid(GridSerializable grid) {
 		this.grid = grid;
 	}
-
+	
+	public String getIntervals() {
+		return attributes.get("intervals");
+	}
 }

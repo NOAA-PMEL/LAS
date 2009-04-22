@@ -13,6 +13,7 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.user.client.ui.Widget;
 
 public class AxisWidget extends Composite {
 	String type;
@@ -41,7 +42,8 @@ public class AxisWidget extends Composite {
     private void initialize(AxisSerializable ax) {
     	lo_axis.clear();
     	hi_axis.clear();
-    	
+    	lo_axis.addChangeListener(loAxisChangeListener);
+    	hi_axis.addChangeListener(hiAxisChangeListener);
     	String units = ax.getUnits();
     	if ( ax.getLabel() != null && !ax.getLabel().equals("") ) {
     		if ( units != null && !units.equals("") ) {
@@ -75,7 +77,7 @@ public class AxisWidget extends Composite {
     			hi_axis.addItem(names[i], values[i]);
     		}
         	lo_axis.setSelectedIndex(0);
-        	hi_axis.setSelectedIndex(0);
+        	hi_axis.setSelectedIndex(names.length - 1);
     	} else {
     		this.type = ax.getType();
         	lo_axis.setName(type);
@@ -90,7 +92,7 @@ public class AxisWidget extends Composite {
         		hi_axis.addItem(v);
         	}
         	lo_axis.setSelectedIndex(0);
-        	hi_axis.setSelectedIndex(0);
+        	hi_axis.setSelectedIndex(hi_axis.getItemCount() - 1);
     	}
     	load_layout();
     }
@@ -134,7 +136,11 @@ public class AxisWidget extends Composite {
 		return lo_axis.getValue(lo_axis.getSelectedIndex());
 	}
 	public String getHi() {
-		return hi_axis.getValue(hi_axis.getSelectedIndex());
+		if ( range ) {
+			return hi_axis.getValue(hi_axis.getSelectedIndex());
+		} else {
+			return getLo();
+		}	
 	}
 	
 	public String getType() {
@@ -147,9 +153,50 @@ public class AxisWidget extends Composite {
 				lo_axis.setSelectedIndex(i);
 			}
 		}
+	    checkOrderLo();	
+	}
+	public void setHi(String hi) {
+		for(int i=0; i < hi_axis.getItemCount(); i++) {
+			String value = hi_axis.getValue(i);
+			if ( hi.equals(value) ) {
+				hi_axis.setSelectedIndex(i);
+			}
+		}
+		checkOrderHi();
 	}
 	public void setRange(boolean b) {
 		range = b;
 		load_layout();
 	}
+	public boolean isRange() {
+		return range;
+	}
+	public void checkOrderLo() {
+		if ( hi_axis.getSelectedIndex() < lo_axis.getSelectedIndex() ) {
+			if ( lo_axis.getSelectedIndex() < lo_axis.getItemCount() - 2) {
+				hi_axis.setSelectedIndex(lo_axis.getSelectedIndex() + 1);
+			} else {
+		    	hi_axis.setSelectedIndex(lo_axis.getSelectedIndex());
+			}
+		}		
+	}
+	public void checkOrderHi() {
+		if ( hi_axis.getSelectedIndex() < lo_axis.getSelectedIndex() ) {
+			if ( hi_axis.getSelectedIndex() > 1 ) {
+				lo_axis.setSelectedIndex(hi_axis.getSelectedIndex() - 1);
+			} else {
+			    lo_axis.setSelectedIndex(hi_axis.getSelectedIndex());
+			}
+		}
+	}
+	public ChangeListener loAxisChangeListener = new ChangeListener() {
+		public void onChange(Widget sender) {
+			checkOrderLo();	
+		}
+	};
+	public ChangeListener hiAxisChangeListener = new ChangeListener() {
+		public void onChange(Widget sender) {
+			checkOrderHi();
+		}
+	};
 }

@@ -37,7 +37,6 @@ public class SelectWidget extends Composite {
 	private ToggleButton mSelect;
 	private MapTool mapTool;
 	
-	private Icon mIcon;
 	private HorizontalPanel controls;
 	private LatLonWidget textWidget = null;
 	double span;
@@ -51,6 +50,7 @@ public class SelectWidget extends Composite {
 
 		mSelect = new ToggleButton("Select");
 		mSelect.addStyleName("map-button");
+		mSelect.addClickListener(selectListener);
 		
 		String moduleRelativeURL = GWT.getModuleBaseURL();
 		String moduleName = GWT.getModuleName();
@@ -73,10 +73,6 @@ public class SelectWidget extends Composite {
 		}
 		mapTool.setEditingEnabled(false);
 		// different tool types above...
-		mIcon = Icon.newInstance();
-		mIcon.setIconSize(Size.newInstance(20, 20));
-		mIcon.setIconAnchor(Point.newInstance(10, 10));
-		mIcon.setImageURL(imageURL+"crosshairs.png");
 		
 		selectAll = new Button("Select All");
 		selectAll.addStyleName("map-button");
@@ -183,6 +179,8 @@ public class SelectWidget extends Composite {
 	
 	public void setToolType(String tool) {
 		mapTool.clearOverlays();
+		selectAll.setEnabled(true);
+	    mSelect.setEnabled(true);
 		if ( tool.equals("xy") ) {
 			mapTool = new XYMapTool(dataBounds, mapTool.getSelectionBounds());
 			for (Iterator oIt = mapTool.getOverlays().iterator(); oIt.hasNext();) {
@@ -191,6 +189,12 @@ public class SelectWidget extends Composite {
 			}
 		} else if ( tool.equals("yz") || tool.equals("yt") || tool.equals("y") ) {
 			mapTool = new YMapTool(dataBounds, mapTool.getSelectionBounds());
+			for (Iterator oIt = mapTool.getOverlays().iterator(); oIt.hasNext();) {
+				Overlay o = (Overlay) oIt.next();
+				refMap.getMapWidget().addOverlay(o);
+			}
+		} else if ( tool.equals("xz") || tool.equals("xt") || tool.equals("x") ) {
+			mapTool = new XMapTool(dataBounds, mapTool.getSelectionBounds());
 			for (Iterator oIt = mapTool.getOverlays().iterator(); oIt.hasNext();) {
 				Overlay o = (Overlay) oIt.next();
 				refMap.getMapWidget().addOverlay(o);
@@ -230,11 +234,23 @@ public class SelectWidget extends Composite {
             
 			markers.clear();
 			
+
+			String moduleRelativeURL = GWT.getModuleBaseURL();
+			String moduleName = GWT.getModuleName();
+			moduleRelativeURL = moduleRelativeURL.substring(0,moduleRelativeURL.indexOf(moduleName)-1);
+			moduleRelativeURL = moduleRelativeURL.substring(0,moduleRelativeURL.lastIndexOf("/")+1);
+			String imageURL = moduleRelativeURL + "images/";
+			
 			SelectWidget.this.dataBounds = dataBounds;
 			this.selectionBounds = selectionBounds;
 
+			Icon xyicon = Icon.newInstance();
+			xyicon.setIconSize(Size.newInstance(20, 20));
+			xyicon.setIconAnchor(Point.newInstance(10, 10));
+			xyicon.setImageURL(imageURL+"crosshairs.png");
+			
 			MarkerOptions options = MarkerOptions.newInstance();
-			options.setIcon(mIcon);
+			options.setIcon(xyicon);
 			options.setDraggable(true);
 			options.setDragCrossMove(true);
 			options.setAutoPan(false);
@@ -246,11 +262,6 @@ public class SelectWidget extends Composite {
 			mMap.addOverlay(mXYDrawMarker);
 			mXYDrawMarker.setVisible(false);
 			
-			String moduleRelativeURL = GWT.getModuleBaseURL();
-			String moduleName = GWT.getModuleName();
-			moduleRelativeURL = moduleRelativeURL.substring(0,moduleRelativeURL.indexOf(moduleName)-1);
-			moduleRelativeURL = moduleRelativeURL.substring(0,moduleRelativeURL.lastIndexOf("/")+1);
-			String imageURL = moduleRelativeURL + "images/";
 
 			// Set the selection to the data bounds initially.
 			LatLng sw = selectionBounds.getSouthWest();
@@ -401,7 +412,6 @@ public class SelectWidget extends Composite {
 			polygonPoints[8] = sw;
 			polygon = new Polygon(polygonPoints, strokeColor, strokeWeight, strokeOpacity, fillColor, fillOpacity);	
 			addDragHandlers(markerDragHandler);
-			mSelect.addClickListener(selectListener);
 			initSelectionBounds(dataBounds, selectionBounds, false);
 		}
 		MarkerMouseDownHandler markerMouseDownHandler = new MarkerMouseDownHandler() {
@@ -729,9 +739,14 @@ public class SelectWidget extends Composite {
 			moduleRelativeURL = moduleRelativeURL.substring(0,moduleRelativeURL.indexOf(moduleName)-1);
 			moduleRelativeURL = moduleRelativeURL.substring(0,moduleRelativeURL.lastIndexOf("/")+1);
 			String imageURL = moduleRelativeURL + "images/";
+
+			Icon yicon = Icon.newInstance();
+			yicon.setIconSize(Size.newInstance(20, 20));
+			yicon.setIconAnchor(Point.newInstance(10, 10));
+			yicon.setImageURL(imageURL+"crosshairs.png");
 			
 			MarkerOptions mOptions = MarkerOptions.newInstance();
-			mOptions.setIcon(mIcon);
+			mOptions.setIcon(yicon);
 			mOptions.setDraggable(true);
 			mOptions.setDragCrossMove(true);
 			mOptions.setAutoPan(false);
@@ -832,9 +847,10 @@ public class SelectWidget extends Composite {
 		MapMouseMoveHandler mouseMove = new MapMouseMoveHandler() {
 			public void onMouseMove(MapMouseMoveEvent event) {
 				refMap.getMapWidget().setDraggable(false);
-				// Let the latitude vary, but keep the longitude fixed at the click location.
-				LatLng position = LatLng.newInstance(event.getLatLng().getLatitude(), click.getLongitude());
+				LatLng position = event.getLatLng();
 				if ( mDraw ) {
+					// Let the latitude vary, but keep the longitude fixed at the click location.
+					position = LatLng.newInstance(event.getLatLng().getLatitude(), click.getLongitude());
 					LatLng update_position;
 					if ( dataBounds.containsLatLng(position) ) {
 						mYDrawMarker.setVisible(true);
@@ -915,7 +931,6 @@ public class SelectWidget extends Composite {
 						
 						// Make the longitude span as wide as twice the narrowest 
 						// distance from the marker to the data boundary.
-						LatLngBounds.newInstance(dataBounds.getSouthWest(), markerLocation);
 						
 						double west_side = LatLngBounds.newInstance(dataBounds.getSouthWest(), markerLocation).toSpan().getLongitude();
 						double east_side = LatLngBounds.newInstance(markerLocation, dataBounds.getNorthEast()).toSpan().getLongitude();
@@ -995,6 +1010,8 @@ public class SelectWidget extends Composite {
 		}
 		@Override
 		public void setSelectionBounds(LatLngBounds rectBounds,	boolean recenter, boolean show) {
+			// Always show this widget.
+			show = true;
 			this.selectionBounds = rectBounds;
 			if ( recenter ) {
 				refMap.setCenter(rectBounds.getCenter());
@@ -1037,11 +1054,352 @@ public class SelectWidget extends Composite {
 			
 		}
 	}
+
+	public class XMapTool extends MapTool {
+		LatLng polylinePoints[] = new LatLng[3];
+		Polyline polyline;
+		Marker mYDrawMarker;
+		boolean mDraw = false;
+		Marker eMarker;
+		Marker cMarker;
+		Marker wMarker;
+		public XMapTool (LatLngBounds dataBounds, LatLngBounds selectionBounds) {
+
+			SelectWidget.this.dataBounds = dataBounds;
+			this.selectionBounds = selectionBounds;
+			
+			LatLng w = LatLng.newInstance(selectionBounds.getCenter().getLatitude(), selectionBounds.getSouthWest().getLongitude());
+			LatLng c = selectionBounds.getCenter();
+			LatLng e = LatLng.newInstance(selectionBounds.getCenter().getLatitude(), selectionBounds.getNorthEast().getLongitude());
+			markers.clear();
+			String moduleRelativeURL = GWT.getModuleBaseURL();
+			String moduleName = GWT.getModuleName();
+			moduleRelativeURL = moduleRelativeURL.substring(0,moduleRelativeURL.indexOf(moduleName)-1);
+			moduleRelativeURL = moduleRelativeURL.substring(0,moduleRelativeURL.lastIndexOf("/")+1);
+			String imageURL = moduleRelativeURL + "images/";
+
+			Icon yicon = Icon.newInstance();
+			yicon.setIconSize(Size.newInstance(20, 20));
+			yicon.setIconAnchor(Point.newInstance(10, 10));
+			yicon.setImageURL(imageURL+"crosshairs.png");
+			
+			MarkerOptions mOptions = MarkerOptions.newInstance();
+			mOptions.setIcon(yicon);
+			mOptions.setDraggable(true);
+			mOptions.setDragCrossMove(true);
+			mOptions.setAutoPan(false);
+			mYDrawMarker = new Marker(LatLng.newInstance(0.0, 0.0), mOptions);
+			
+			mYDrawMarker.addMarkerMouseDownHandler(markerMouseDownHandler);
+			mYDrawMarker.addMarkerMouseUpHandler(markerMouseUpHandler);
+			
+			mMap.addOverlay(mYDrawMarker);
+			mYDrawMarker.setVisible(false);
+			
+			Icon w_icon = Icon.newInstance();
+			w_icon.setIconSize(Size.newInstance(12, 12));
+			w_icon.setIconAnchor(Point.newInstance(5, 5)); 
+			w_icon.setImageURL(imageURL+"edit_square.png");
+			MarkerOptions w_options = MarkerOptions.newInstance();
+			w_options.setIcon(w_icon);
+			w_options.setDraggable(true);
+			w_options.setDragCrossMove(true);
+			w_options.setAutoPan(false);
+			w_options.setBouncy(false);
+			w_options.setTitle("w");
+			wMarker = new Marker(w, w_options);
+			markers.add(wMarker);
+			
+			Icon c_icon = Icon.newInstance();
+			c_icon.setIconSize(Size.newInstance(12, 12));
+			c_icon.setIconAnchor(Point.newInstance(5, 5)); 
+			c_icon.setImageURL(imageURL+"edit_square.png");
+			MarkerOptions c_options = MarkerOptions.newInstance();
+			c_options.setIcon(c_icon);
+			c_options.setDraggable(true);
+			c_options.setDragCrossMove(true);
+			c_options.setAutoPan(false);
+			c_options.setBouncy(false);
+			c_options.setTitle("c");
+			cMarker = new Marker(c, c_options);
+			markers.add(cMarker);
+			
+			Icon e_icon = Icon.newInstance();
+			e_icon.setIconSize(Size.newInstance(12, 12));
+			e_icon.setIconAnchor(Point.newInstance(5, 5)); 
+			e_icon.setImageURL(imageURL+"edit_square.png");
+			MarkerOptions e_options = MarkerOptions.newInstance();
+			e_options.setIcon(e_icon);
+			e_options.setDraggable(true);
+			e_options.setDragCrossMove(true);
+			e_options.setAutoPan(false);
+			e_options.setBouncy(false);
+			e_options.setTitle("e");
+			eMarker = new Marker(e, e_options);
+			markers.add(eMarker);
+			
+			addDragHandlers(markerDragHandler);
+			
+			polylinePoints[0] = e;
+			polylinePoints[1] = c;
+			polylinePoints[2] = w;
+			
+			polyline = new Polyline(polylinePoints, strokeColor, strokeWeight, strokeOpacity);
+			
+			initSelectionBounds(dataBounds, selectionBounds, true);
+        }
+		@Override
+		public void clearOverlays() {
+			if ( polyline != null ) {
+				mMap.removeOverlay(polyline);
+			}
+			for (Iterator markerIt = markers.iterator(); markerIt.hasNext();) {
+				Marker marker = (Marker) markerIt.next();
+				mMap.removeOverlay(marker);
+			}
+		}
+
+		@Override
+		public Marker getDrawMarker() {
+			return mYDrawMarker;
+		}
+
+		@Override
+		public MapMouseMoveHandler getMouseMove() {
+			return mouseMove;
+		}
+
+		@Override
+		public ArrayList<Overlay> getOverlays() {
+			ArrayList<Overlay> o = new ArrayList<Overlay>();
+			o.add(polyline);
+			o.addAll(markers);
+			return o;
+		}
+
+		@Override
+		public void initSelectionBounds(LatLngBounds dataBounds, LatLngBounds selectionBounds, boolean show) {
+			SelectWidget.this.dataBounds = dataBounds;
+			setSelectionBounds(selectionBounds, false, show);
+		}
+
+		@Override
+		public void setSelectionBounds(LatLngBounds rectBounds, boolean recenter, boolean show) {
+			// Always show this widget.
+			show = true;
+			this.selectionBounds = rectBounds;
+			if ( recenter ) {
+				refMap.setCenter(rectBounds.getCenter());
+			}
+			
+			LatLng sw = rectBounds.getSouthWest();
+			if ( sw.getLatitude() < bottomTrim) {
+				sw = LatLng.newInstance(bottomTrim, sw.getLongitude());
+			}
+			LatLng ne = rectBounds.getNorthEast();
+			if ( ne.getLatitude() > topTrim ) {
+				ne = LatLng.newInstance(topTrim, ne.getLongitude());
+			}
+			mMap.removeOverlay(polyline);
+			
+			polylinePoints[0] = LatLng.newInstance(rectBounds.getCenter().getLatitude(), sw.getLongitude());
+			polylinePoints[1] = LatLng.newInstance(rectBounds.getCenter().getLatitude(), rectBounds.getCenter().getLongitude());
+			polylinePoints[2] = LatLng.newInstance(rectBounds.getCenter().getLatitude(), ne.getLongitude());
+			
+			polyline = new Polyline(polylinePoints, strokeColor, strokeWeight, strokeOpacity);
+			if ( show ) {
+			    mMap.addOverlay(polyline);
+			}
+			wMarker.setLatLng(LatLng.newInstance(rectBounds.getCenter().getLatitude(), sw.getLongitude()));
+			eMarker.setLatLng(LatLng.newInstance(rectBounds.getCenter().getLatitude(), ne.getLongitude()));
+			cMarker.setLatLng(rectBounds.getCenter());
+			if ( show ) {
+				setEditingEnabled(true);
+			} else {
+			    setEditingEnabled(false);
+			}
+			// Set my own text values.
+			LatLng swText = LatLng.newInstance(rectBounds.getCenter().getLatitude(), sw.getLongitude());
+			LatLng neText = LatLng.newInstance(rectBounds.getCenter().getLatitude(), ne.getLongitude());
+			textWidget.setText(LatLngBounds.newInstance(swText, neText));
+			
+		}
+
+		@Override
+		public void setVisible(boolean visible) {
+			// TODO Auto-generated method stub
+			
+		}
+		MarkerDragHandler markerDragHandler = new MarkerDragHandler() {
+			public void onDrag(MarkerDragEvent event) {
+				
+				Marker marker = event.getSender();
+				String title = marker.getTitle();
+				LatLng markerLocation = marker.getLatLng();
+				
+				LatLngBounds containmentBounds = SelectWidget.this.dataBounds;
+
+				LatLng sw = containmentBounds.getSouthWest();
+				LatLng ne = containmentBounds.getNorthEast();
+				
+				if ( title.equals("w") ) {
+					// The west marker's movements are bounded by the west data bounds and the east selection rectangle bounds.
+					containmentBounds = LatLngBounds.newInstance(dataBounds.getSouthWest(), selectionBounds.getNorthEast());
+					// If it's still in the containment, the new selection is this:
+					sw = LatLng.newInstance(selectionBounds.getSouthWest().getLatitude(), markerLocation.getLongitude());
+					ne = selectionBounds.getNorthEast();
+				} else if ( title.equals("e") ) {
+					containmentBounds = LatLngBounds.newInstance(selectionBounds.getSouthWest(), dataBounds.getNorthEast());
+					sw = selectionBounds.getSouthWest();
+					ne = LatLng.newInstance(selectionBounds.getNorthEast().getLatitude(), markerLocation.getLongitude());
+				} else if ( title.equals("c") ) {
+					containmentBounds = dataBounds;
+				}
+
+				if ( title.equals("c") ) {
+					// You can always drag the center anywhere in the data region.
+					if ( containmentBounds.containsLatLng(markerLocation) ) {
+						
+						double lon_span =  selectionBounds.toSpan().getLongitude();
+						
+						double elon = markerLocation.getLongitude() + lon_span/2.0;;
+						double wlon = markerLocation.getLongitude() - lon_span/2.0;
+						
+						// New location of the east marker.
+						LatLng em = LatLng.newInstance(markerLocation.getLatitude(), elon);
+						// New location of the west marker.
+						LatLng wm = LatLng.newInstance(markerLocation.getLatitude(), wlon);
+						
+						// Contain the east marker between the center marker and the east edge.
+						LatLngBounds eastContainment = LatLngBounds.newInstance(LatLng.newInstance(dataBounds.getSouthWest().getLatitude(), markerLocation.getLongitude()), dataBounds.getNorthEast());
+						if ( !eastContainment.containsLatLng(em) ) {
+							elon = dataBounds.getNorthEast().getLongitude();
+						}
+						// Contain the west marker between the west boundary and the center.
+						LatLngBounds westContainment = LatLngBounds.newInstance(dataBounds.getSouthWest(), LatLng.newInstance(dataBounds.getNorthEast().getLatitude(), markerLocation.getLongitude()));
+						if ( !westContainment.containsLatLng(wm) ) {
+							wlon = dataBounds.getSouthWest().getLongitude();
+						}
+						
+						// Make the latitude span as wide as twice the narrowest 
+						// distance from the marker to the data boundary.
+						
+						double south_side = LatLngBounds.newInstance(dataBounds.getSouthWest(), markerLocation).toSpan().getLatitude();
+						double north_side = LatLngBounds.newInstance(markerLocation, dataBounds.getNorthEast()).toSpan().getLatitude();
+						
+						double slat = markerLocation.getLatitude() - Math.min(south_side, north_side);
+						double nlat = markerLocation.getLatitude() + Math.min(south_side, north_side);
+						LatLngBounds rectBounds = LatLngBounds.newInstance(LatLng.newInstance(slat, wlon), LatLng.newInstance(nlat, elon));
+						setSelectionBounds(rectBounds, false, true);
+						if ( mMap.getZoomLevel() == refMap.getZoom() ) {
+							mMap.setCenter(dataBounds.getCenter());
+						}
+						lastGoodPosition = rectBounds.getCenter();
+					} else {
+						cMarker.setLatLng(lastGoodPosition);
+					}
+
+				} else {
+					// We have this containment bounds so that the east and west markers cannot cross.
+					if ( containmentBounds.containsLatLng(markerLocation)) {
+						LatLngBounds rectBounds = LatLngBounds.newInstance(sw, ne);
+						setSelectionBounds(rectBounds, false, true);
+						
+					} else {
+						if ( title.equals("w") ) {
+							wMarker.setLatLng(LatLng.newInstance(selectionBounds.getCenter().getLatitude(), selectionBounds.getSouthWest().getLongitude()));
+						} else if ( title.equals("e") )  {
+							eMarker.setLatLng(LatLng.newInstance(selectionBounds.getCenter().getLatitude(), selectionBounds.getNorthEast().getLongitude()));
+						} 
+					}
+				}
+				
+			}	
+		};
+		/**
+		 * A custom mouse down handler to set the click location and prepare to draw the selection.
+		 */
+		MarkerMouseDownHandler markerMouseDownHandler = new MarkerMouseDownHandler() {
+			public void onMouseDown(MarkerMouseDownEvent event) {
+				mDraw = true;
+				LatLng click = mYDrawMarker.getLatLng();
+				mapTool.setClick(click);
+				lastGoodPosition = click;
+				LatLngBounds bounds = LatLngBounds.newInstance(click, click);
+				setSelectionBounds(bounds, false, true);
+				mMap.setDraggable(false);
+			}		
+		};
+		/**
+		 * Handle the mouse up event on the selection marker when the user is finished dragging out a vertical selection.
+		 */
+		MarkerMouseUpHandler markerMouseUpHandler = new MarkerMouseUpHandler() {
+			public void onMouseUp(MarkerMouseUpEvent event) {
+				if ( mMap.getZoomLevel() == refMap.getZoom() && refMap.isModulo() ) {
+					mMap.setDraggable(false);
+//					refMap.setCenter(dataBounds.getCenter());
+				} else {
+				    mMap.setDraggable(true);
+				}
+				mSelect.setDown(false);
+				mYDrawMarker.setVisible(false);
+				mMap.removeMapMouseMoveHandler(mouseMove);
+				mDraw = false;
+				mapTool.setEditingEnabled(true);
+				
+			}
+		};
+		MapMouseMoveHandler mouseMove = new MapMouseMoveHandler() {
+			public void onMouseMove(MapMouseMoveEvent event) {
+				refMap.getMapWidget().setDraggable(false);
+				LatLng position = event.getLatLng();
+				if ( mDraw ) {
+					// Let the longitude vary, but keep the latitude fixed at the click location.
+					position = LatLng.newInstance(click.getLatitude(), event.getLatLng().getLongitude());
+					LatLng update_position;
+					if ( dataBounds.containsLatLng(position) ) {
+						mYDrawMarker.setVisible(true);
+						mYDrawMarker.setLatLng(position);
+						update_position = position;
+					} else {
+						mYDrawMarker.setVisible(false);
+						mYDrawMarker.setLatLng(lastGoodPosition);
+						update_position = lastGoodPosition;
+					}
+					
+					LatLngBounds dragBoxWest = LatLngBounds.newInstance(dataBounds.getSouthWest(), click);
+					LatLngBounds dragBoxEast = LatLngBounds.newInstance(click, dataBounds.getNorthEast());
+					LatLngBounds rectBounds;
+					if ( dragBoxEast.containsLatLng(update_position) ) {
+						rectBounds = LatLngBounds.newInstance(click, update_position);
+						setSelectionBounds(rectBounds, false, true);
+						lastGoodPosition = update_position;
+					} else if ( dragBoxWest.containsLatLng(update_position) ) {
+					    rectBounds = LatLngBounds.newInstance(update_position, click);
+						setSelectionBounds(rectBounds, false, true);
+						lastGoodPosition = update_position;
+					} 
+					if ( dataBounds.containsLatLng(position) ) {
+						setText();
+					}
+				} else {
+					if ( dataBounds.containsLatLng(position) ) {
+						mYDrawMarker.setVisible(true);
+						mYDrawMarker.setLatLng(position);
+					} else {
+						mYDrawMarker.setVisible(false);
+					}
+				}
+			}
+		};
+	}
+	
 	public class PTMapTool extends MapTool {
 		
 		Marker centerMarker;
 		public PTMapTool(LatLngBounds dataBounds, LatLngBounds selectionBounds) {
-			
+			mSelect.setEnabled(false);
+			selectAll.setEnabled(false);
 			SelectWidget.this.dataBounds = dataBounds;
 			this.selectionBounds = selectionBounds;
 			markers.clear();
@@ -1154,6 +1512,7 @@ public class SelectWidget extends Composite {
 			} else {
 			    setEditingEnabled(false);
 			}
+			textWidget.setText(rectBounds);
 		}
 		@Override
 		public void setVisible(boolean visible) {
@@ -1168,9 +1527,4 @@ public class SelectWidget extends Composite {
 			return null;
 		}
 	}
-	
-	public class XMapTool {
-		
-	}
-
 }
