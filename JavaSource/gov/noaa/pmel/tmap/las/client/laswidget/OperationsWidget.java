@@ -73,10 +73,6 @@ public class OperationsWidget extends StackPanel {
 			if ( menu != null ) {
 			    menu.setMenus(ops);
 			}
-			for (Iterator clickIt = clicks.iterator(); clickIt.hasNext();) {
-				ClickListener click = (ClickListener) clickIt.next();
-				addClickListener(click);
-			}
 		}
 		public void onFailure(Throwable caught) {
 			// TODO Alert users...
@@ -113,7 +109,7 @@ public class OperationsWidget extends StackPanel {
 					if ( !op.getName().contains("omparison") ) {
 						Map<String, String> attrs = op.getAttributes();
 						if ( attrs != null && attrs.containsKey("default")) {
-							if ( view.equals("xy") && intervals.contains("xy")) {	
+							if ( view.equals("xy") && (intervals.contains("x") && intervals.contains("y"))) {	
 								if (!hasXYMap) {
 									xyMap.clear();
 									hasXYMap = true;
@@ -192,6 +188,10 @@ public class OperationsWidget extends StackPanel {
 					}
 				}
 			}
+		}
+		for (Iterator clickIt = clicks.iterator(); clickIt.hasNext();) {
+			ClickListener click = (ClickListener) clickIt.next();
+			addClickListener(click);
 		}
 	}
 	public OperationSerializable[] getOperationsSerializable() {
