@@ -140,7 +140,9 @@ public class TestUI extends LASEntryPoint {
 			ortho.clear();
 			int width = Window.getClientWidth();
 			int pwidth = (width-rightPad);
-			panel = new SlideSorterPanel("LAS", var, ortho, op, "t", "z", view, productServer, true, rpcService);
+			panel = new SlideSorterPanel("LAS", false, op, view, productServer, true, rpcService);
+			panel.setVariable(var);
+			panel.init();
 			panel.addCompareAxisChangeListener(onAxisChange);
 			RootPanel.get("panel").add(panel);
 			panel.setPanelWidth(pwidth);
