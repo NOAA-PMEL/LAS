@@ -33,6 +33,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
@@ -40,6 +41,7 @@ import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.TreeItem;
 import com.google.gwt.user.client.ui.TreeListener;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.HasVerticalAlignment.VerticalAlignmentConstant;
 import com.google.gwt.xml.client.Document;
 import com.google.gwt.xml.client.Element;
 import com.google.gwt.xml.client.Node;
@@ -78,8 +80,6 @@ public class SlideSorterPanel extends Composite {
 	String compareAxis;
 	String fixedAxis;
 	String fixedAxisValue;
-	// List of all axes orthogonal to the view.  Should be a max of 2.
-	List<String> ortho;
 	
 	/*
 	 * A a button that pops up a panel for region selection, operation and (still to be implmented) plot options.
@@ -135,23 +135,32 @@ public class SlideSorterPanel extends Composite {
 	// Switch for "single panel mode".  If only one panel being used, do not display the "Revert" button.
 	boolean singlePanel;
 	
+	// Switch for the first panel in a multi-panel gallery.  Controls all other panels.
+	boolean comparePanel = false;
+	
+	// Keep track of the auto contour levels from the gallery.
+	String fill_levels;
+	
+	// True if a new data set has been selected.  This allows the dataset change to be delayed until the "Apply" button is pressed.
+	boolean changeDataset = false;
+	
+	// The new variable.
+	VariableSerializable nvar;
+	
 	/**
 	 * Builds a SlideSorter panel with a default plot for the variable.  See {@code}SlideSorter(LASRequest) if you want more options on the initial plot.
 	 */
-	public SlideSorterPanel(String id, VariableSerializable var, List<String>ortho, String op, String compareAxis, String fixedAxis, String view, String productServer, boolean single, RPCServiceAsync rpcService) {
+	public SlideSorterPanel(String id, boolean comparePanel, String op, String view, String productServer, boolean single, RPCServiceAsync rpcService) {
 		this.ID = id;
+		this.comparePanel = comparePanel;
 		this.productServer = productServer;
-		this.compareAxis = compareAxis;
-		this.fixedAxis = fixedAxis;
-		this.var = var;
 		this.singlePanel = single;
 		this.rpcService = rpcService;
 		this.op = op;
 		this.view = view;
 		dateTimeWidget.addChangeListener(comparisonAxisChangeListener);
 		zAxisWidget.addChangeListener(comparisonAxisChangeListener);
-		tandzWidgets.addTChangeListener(panelAxisChangeListener);
-		tandzWidgets.addZChangeListener(panelAxisChangeListener);
+		
 		spin = new PopupPanel();
 		spinImage = new HTML("<img src=\"../JavaScript/components/mozilla_blu.gif\" alt=\"Spinner\"/>");
 		spin.add(spinImage);
@@ -174,13 +183,17 @@ public class SlideSorterPanel extends Composite {
 		messagePanel.add(messageGrid);
 		
 		grid = new Grid(3, 1);
-		
 		grid.setStyleName("regularBackground");
+		grid.getCellFormatter().setHeight(0, 0, "60px");
 		datasetLabel = new Label();
 		
 		top = new HorizontalPanel();
-		settingsButton = new SettingsButton("Panel Settings", LatLng.newInstance(0.0, 0.0), 1, 256, 360, ID, op, rpcService);
-		settingsButton.addApplyClickListener(updateOnClick);
+		top.setSpacing(15);
+		top.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
+		
+		String title = id+" Settings";
+		settingsButton = new SettingsButton(title, LatLng.newInstance(0.0, 0.0), 1, 256, 360, ID, op, rpcService);
+		settingsButton.addApplyClickListener(applyPanelClick);
 		settingsButton.addCloseClickListener(closeClick);
 		settingsButton.addDatasetTreeListener(datasetTreeListener);
 		settingsButton.addOptionsOkClickListener(optionsOkListener);
@@ -189,14 +202,18 @@ public class SlideSorterPanel extends Composite {
 		revert.setTitle("Cancel Panel Settings for "+ID);
 		
 		top.add(datasetLabel);
-		top.add(settingsButton);
+		if ( comparePanel ) {
+			Label gs = new Label("(Use Gallery Settings)");
+			top.add(gs);
+		} else {
+		    top.add(settingsButton);
+		} 
 		
 		grid.setWidget(0, 0, top);
 		HTML plot = new HTML();
 		plot.setHTML("<img src=\"../JavaScript/components/mozilla_blu.gif\" alt=\"Spinner\"/>");
 		grid.setWidget(1, 0, plot);
-		initWidget(grid);
-		init();	
+		initWidget(grid);	
 	}
 	public void init() {
 	    min =  999999999.;
@@ -216,6 +233,15 @@ public class SlideSorterPanel extends Composite {
 		settingsButton.setOperations(rpcService, var.getIntervals(), var.getDSID(), var.getID(), null);
 		tandzWidgets.removeAxes();
 		settingsButton.setUsePanel(false);
+		if ( ds_grid.getTAxis() != null ) {
+			compareAxis = "t";
+			if ( ds_grid.getZAxis() != null ) {
+				fixedAxis = "z";
+			}
+		} else if ( ds_grid.getZAxis() != null ) {
+			compareAxis = "z";
+			fixedAxis = "none";
+		}
 		if ( ds_grid.getTAxis() != null ) {
 			 dateTimeWidget.init(ds_grid.getTAxis(), false);
 			 dateTimeWidget.setVisible(true);
@@ -308,7 +334,7 @@ public class SlideSorterPanel extends Composite {
 				}
 			}
 		} else {
-			// Use Slide Sorter settings if they exist.
+			// Use Gallery Settings if they have been set.
 			if ( options != null ) {
 				for (Iterator opIt = options.keySet().iterator(); opIt.hasNext();) {
 					String key = (String) opIt.next();
@@ -317,8 +343,13 @@ public class SlideSorterPanel extends Composite {
 						lasRequest.addProperty("ferret", key, value);
 					}
 				}
-			}
+			}			
 		}
+		// Now force in the auto contour settings if it exists.
+		if ( fill_levels != null && !fill_levels.equals("") ) {
+			lasRequest.addProperty("ferret", "fill_levels", fill_levels);
+		}
+		lasRequest.setProperty("las", "ui_timeout", "10");
 		String url = productServer+"?xml="+URL.encode(lasRequest.getXMLText());
 		RequestBuilder sendRequest = new RequestBuilder(RequestBuilder.GET, url);
 		try {
@@ -328,12 +359,7 @@ public class SlideSorterPanel extends Composite {
 			grid.setWidget(1, 0, error);
 		}
 	}
-	public ChangeListener panelAxisChangeListener = new ChangeListener() {
-		public void onChange(Widget sender) {
-			refreshPlot(null, false, true);
-			
-		}
-	};
+	
 	private RequestCallback mapScaleCallBack = new RequestCallback() {
 
 		public void onError(Request request, Throwable exception) {
@@ -404,7 +430,7 @@ public class SlideSorterPanel extends Composite {
 				HTML result = new HTML(doc);
 				grid.setWidget(1, 0, result);
 			} else {
-				doc = doc.replaceAll("\n", "");
+				doc = doc.replaceAll("\n", "").trim();
 				Document responseXML = XMLParser.parse(doc);
 				NodeList results = responseXML.getElementsByTagName("result");
 				for(int n=0; n<results.getLength();n++) {
@@ -443,6 +469,19 @@ public class SlideSorterPanel extends Composite {
 									grid.setWidget(1, 0, error);
 								}
 							}
+						} else if ( result.getAttribute("type").equals("batch") ) {
+							String elapsed_time = result.getAttribute("elapsed_time");
+							HTML batch = new HTML(spinImage.getHTML()+"<br><br>Your request "+elapsed_time+".<br>This panel will refresh automatically.<br><br>");
+							grid.setWidget(1, 0, batch);
+							lasRequest.setProperty("las", "ui_timeout", "3");
+							String url = productServer+"?xml="+URL.encode(lasRequest.getXMLText());
+							RequestBuilder sendRequest = new RequestBuilder(RequestBuilder.GET, url);
+							try {
+								sendRequest.sendRequest(null, lasRequestCallback);
+							} catch (RequestException e) {
+								HTML error = new HTML(e.toString());
+								grid.setWidget(1, 0, error);
+							}
 						}
 					}
 				}
@@ -467,12 +506,8 @@ public class SlideSorterPanel extends Composite {
 		public void onTreeItemSelected(TreeItem item) {
 			Object v = item.getUserObject();
 			if ( v instanceof VariableSerializable ) {
-				grid.setStyleName("panelSettingsColor");
-				var = (VariableSerializable) v;
-				datasetLabel.setText(var.getDSName()+": "+var.getName());
-				init();
-				SlideSorterPanel.this.refreshPlot(null, false, true);
-				settingsButton.setUsePanel(true);
+				nvar = (VariableSerializable) v;
+				changeDataset = true;
 			}
 		}
 
@@ -484,22 +519,28 @@ public class SlideSorterPanel extends Composite {
 	};
 	public void setVariable(VariableSerializable v) {
 		var = v;
-		datasetLabel.setText(var.getDSName()+": "+var.getName());
 	}
 	public void setCompareAxis(String axis) {
 		compareAxis = axis;
 	}
-	ClickListener updateOnClick = new ClickListener() {
+	ClickListener applyPanelClick = new ClickListener() {
 		public void onClick(Widget sender) {
-	    	if (settingsButton.usePanel()) {
-	    	    grid.addStyleName("panelSettingsColor");
-	    	    grid.setWidget(2, 0, tandzWidgets);
-	            setCompareAxisVisible(false);
-	    	} else {
-	    		grid.setStyleName("regularBackground");
-	    		grid.setWidget(2, 0, getCompareWidget());
-	    		setCompareAxisVisible(true);
-	    	}	
+			if (changeDataset) {			
+				var = nvar;
+				datasetLabel.setText(var.getDSName()+": "+var.getName());
+				settingsButton.setUsePanel(true);
+				changeDataset = false;
+				init();
+			}
+			if (settingsButton.usePanel()) {
+				grid.setStyleName("panelSettingsColor");
+				grid.setWidget(2, 0, tandzWidgets);
+				setCompareAxisVisible(false);
+			} else {
+				grid.setStyleName("regularBackground");
+				grid.setWidget(2, 0, getCompareWidget());
+				setCompareAxisVisible(true);
+			}	
 		}
 	};
 	ClickListener closeClick = new ClickListener() {
@@ -678,13 +719,16 @@ public class SlideSorterPanel extends Composite {
 	public VariableSerializable getVariable() {
 		return var;
 	}
-	public void computeDifference(Map<String, String> options, boolean switchAxis, VariableSerializable variable, String view,
+	public void computeDifference(Map<String, String> options, boolean switchAxis, VariableSerializable variable, String view_in, 
 			String xlo_in, String xhi_in, String ylo_in, String yhi_in, String zlo_in,
 			String zhi_in, String tlo_in, String thi_in) {
+		
 		if (switchAxis) {
 			switchAxis();
 		}
-		if ( !view.equals(settingsButton.getOperationsWidget().getCurrentView()) ) {
+		
+		
+		if ( !view_in.equals(settingsButton.getOperationsWidget().getCurrentView()) ) {
 			messagePanel.setPopupPosition(grid.getWidget(1, 0).getAbsoluteLeft()+15, grid.getWidget(1,0).getAbsoluteTop()+15);
 			messagePanel.show();
 			return;
@@ -828,6 +872,7 @@ public class SlideSorterPanel extends Composite {
 				}
 			}
 		}
+		lasRequest.setProperty("las", "ui_timeout", "20");
 		String url = productServer+"?xml="+URL.encode(lasRequest.getXMLText());
 		RequestBuilder sendRequest = new RequestBuilder(RequestBuilder.GET, url);
 		try {
@@ -922,5 +967,26 @@ public class SlideSorterPanel extends Composite {
 		op = settingsButton.getCurrentOp().getID();
 		view = settingsButton.getCurrentOperationView();
 		settingsButton.setToolType(view);
+	}
+	
+	
+	public void addZChangeListner(ChangeListener zChangeListener) {
+		tandzWidgets.addZChangeListener(zChangeListener);
+	}
+	
+	public void addTChangeListner(ChangeListener tChangeListener) {
+		tandzWidgets.addTChangeListener(tChangeListener);
+	}
+	public void addSettingsButtonListener(ClickListener clickListener) {
+		settingsButton.addClickListener(clickListener);
+	}
+	public void setFillLevels(String fill_levels) {
+		this.fill_levels = fill_levels;
+	}
+	public String getCurrentOperationView() {
+		return settingsButton.getCurrentOperationView();
+	}
+	public void setPanelColor(String style) {
+		grid.setStyleName(style);
 	}
 }
