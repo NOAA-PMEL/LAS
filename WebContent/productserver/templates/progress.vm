@@ -1,3 +1,12 @@
+#if ($las_request.getProperty("las", "output_type") == 'xml')
+#foreach ($job in $operations)
+    #set($index = $velocityCount - 1)
+    #if ( $status.get($index).contains("seconds") )
+       #set($elapsed_time = $status.get($index) )
+    #end
+#end
+<?xml version="1.0" encoding="UTF-8"?><backend_response><response ID="Batch"><date></date><result type="batch" ID="elapsed_time" elapsed_time="$elapsed_time.substring(0,$elapsed_time.indexOf(" *"))" index="0" /></response></backend_response>
+#else
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
 	<head>
@@ -120,3 +129,4 @@
 #end  
 	</body>
 </html>
+#end
