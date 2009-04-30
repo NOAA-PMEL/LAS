@@ -1,5 +1,5 @@
 package gov.noaa.pmel.tmap.las.client.slidesorter;
-//TODO handle error and batch responses...
+
 import gov.noaa.pmel.tmap.las.client.OperationButton;
 import gov.noaa.pmel.tmap.las.client.RPCServiceAsync;
 import gov.noaa.pmel.tmap.las.client.laswidget.AxisWidget;
@@ -471,7 +471,7 @@ public class SlideSorterPanel extends Composite {
 							}
 						} else if ( result.getAttribute("type").equals("batch") ) {
 							String elapsed_time = result.getAttribute("elapsed_time");
-							HTML batch = new HTML(spinImage.getHTML()+"<br><br>Your request "+elapsed_time+".<br>This panel will refresh automatically.<br><br>");
+							HTML batch = new HTML(spinImage.getHTML()+"<br><br>Your request has been processing for "+elapsed_time+" seconds.<br>This panel will refresh automatically.<br><br>");
 							grid.setWidget(1, 0, batch);
 							lasRequest.setProperty("las", "ui_timeout", "3");
 							String url = productServer+"?xml="+URL.encode(lasRequest.getXMLText());
