@@ -388,6 +388,8 @@ public final class ProductServerAction extends LASAction {
                         request.setAttribute("cache", productRequest.getUseCache());
                         request.setAttribute("emails", productServerRunner.getEmails().toString());
                         request.setAttribute("feed", productServerRunner.getCurrentBackendRequest().getResult("rss"));
+                        request.setAttribute("seconds", productServerRunner.getSeconds());
+                        request.setAttribute("date", productServerRunner.getDate());
                         log.debug("Returning progress page.");
                         return mapping.findForward("progress");
                     }
@@ -437,6 +439,8 @@ public final class ProductServerAction extends LASAction {
                     request.setAttribute("cache", productRequest.getUseCache());
                     request.setAttribute("operations", productRequest.getOperationNames());
                     request.setAttribute("feed", productServerRunner.getCurrentBackendRequest().getResult("rss"));
+                    request.setAttribute("seconds", productServerRunner.getSeconds());
+                    request.setAttribute("date", productServerRunner.getDate());
                     log.debug("Returning progress page.");
                     return mapping.findForward("progress");
                     
