@@ -184,7 +184,7 @@ public class SlideSorterPanel extends Composite {
 		
 		grid = new Grid(3, 1);
 		grid.setStyleName("regularBackground");
-		grid.getCellFormatter().setHeight(0, 0, "60px");
+		grid.getCellFormatter().setHeight(0, 0, "90px");
 		datasetLabel = new Label();
 		
 		top = new HorizontalPanel();

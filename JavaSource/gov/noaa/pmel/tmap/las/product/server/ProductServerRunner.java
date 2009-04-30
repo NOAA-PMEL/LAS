@@ -623,7 +623,10 @@ public class ProductServerRunner  extends Thread  {
         LASBackendRequest request = (LASBackendRequest) productRequest.getRequestXML().get(currentOp);
         return request.getProgressTimeout();
     }
-
+ 
+    public LASBackendRequest getCurrentRequest() throws LASException {
+    	return (LASBackendRequest) productRequest.getRequestXML().get(currentOp);
+    }
     public HashSet<String> getEmails() {
         return emails;
     }

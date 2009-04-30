@@ -70,7 +70,7 @@ public class ProductRequest {
     public ProductRequest(LASConfig lasConfig, LASUIRequest lasRequest, String debug, String JSESSIONID) throws LASException, UnsupportedEncodingException, JDOMException {
         this.lasRequest = lasRequest;
 
-        this.cacheKey = JDOMUtils.MD5Encode(lasRequest.toString());
+        this.cacheKey = lasRequest.getKey();
         this.operationElement = lasConfig.getElementByXPath(lasRequest.getOperationXPath());
         if ( operationElement == null ) {
             throw new LASException ("No operation "+lasRequest.getOperationXPath()+" found.");

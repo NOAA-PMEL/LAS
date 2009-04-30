@@ -360,14 +360,21 @@ public final class ProductServerAction extends LASAction {
                         productServerRunner.setBatch(true);
                         
                         long timeout = productServerRunner.getProgressTimeout()*1000;
-                        
+                        long ui_timeout = Long.valueOf(lasRequest.getProperty("product_server", "ui_timeout"));
+                        if ( ui_timeout > 0 ) {
+                        	ui_timeout = ui_timeout*1000;
+                        	timeout = Math.min(ui_timeout, timeout);
+                        }
                         if ( timeout > 0 ) {
+                        	
                             // Timeout set in the request.
                             long to = Math.min(timeout, 20000);
+                            log.info("Joining thread with timeout of "+to);
                             productServerRunner.join(to);
                         } else {
                             // No time out set.  Very unlikely, but possible if a new request wants the same
                             // product without an assoicated session.
+                        	log.info("Joining thread with no timeout value set");
                             productServerRunner.join();
                         }                        
                     } catch (Exception e) {
@@ -413,13 +420,15 @@ public final class ProductServerAction extends LASAction {
             synchronized(productServerRunner) {
                 try {
                     long timeout = productServerRunner.getProgressTimeout()*1000;
-                    log.debug("Starting ProductServerRunner thread with timeout="+timeout);
+                    log.info("Starting ProductServerRunner thread with timeout="+timeout);
+                    log.info(productServerRunner.getCurrentBackendRequest().toString());
                     if ( timeout > 0 && JSESSIONID != null && !JSESSIONID.equals("") ) {
                         // Timeout set in the request.
                         // Wait until timeout elapses then send progress page.
                         productServerRunner.join(timeout);
                     } else {
                         // No time out set or no session id.  Wait forever.
+                    	log.info("Starting thread with no progress timeout limit.");
                         productServerRunner.join();
                     }   
                 } catch (Exception e) {

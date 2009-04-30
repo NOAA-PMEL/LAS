@@ -38,7 +38,7 @@ public class OptionsButton extends Composite {
     ClickListener openClick = new ClickListener() {
 		public void onClick(Widget sender) {
 			state = options.getState();
-			optionsDialog.setPopupPosition(optionsButton.getAbsoluteLeft() - 300, optionsButton.getAbsoluteTop());
+			optionsDialog.setPopupPosition(optionsButton.getAbsoluteLeft() - 300, optionsButton.getAbsoluteTop()-60);
 			optionsDialog.show();
 		}
     };

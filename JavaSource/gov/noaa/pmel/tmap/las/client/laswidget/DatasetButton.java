@@ -25,7 +25,7 @@ public class DatasetButton extends Composite {
 		choose = new Button("Data Set");
 		choose.addClickListener(new ClickListener() {
 			public void onClick(Widget sender) {
-				datasetPanel.setPopupPosition(choose.getAbsoluteLeft(), choose.getAbsoluteTop());
+				datasetPanel.setPopupPosition(choose.getAbsoluteLeft(), choose.getAbsoluteTop()-60);
 				datasetPanel.show();
 			}
 		});
