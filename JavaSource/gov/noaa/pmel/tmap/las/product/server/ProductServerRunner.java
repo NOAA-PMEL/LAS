@@ -67,6 +67,7 @@ public class ProductServerRunner  extends Thread  {
     protected boolean error;
     protected boolean previous_batch_error;
     protected long start;
+    protected long current_start;
 
     private static Logger log = LogManager.getLogger(ProductServerRunner.class.getName());
     public ProductServerRunner (ProductRequest productRequest, LASConfig lasConfig, ServerConfig serverConfig, HttpServletRequest request, ActionMapping mapping, Cache cache) {
@@ -157,6 +158,7 @@ public class ProductServerRunner  extends Thread  {
 	    //                complete product generation, not for each individual operation
             start = System.currentTimeMillis();
             for(int index = 0; index < requestXMLList.size(); index++ ) {
+            	current_start = System.currentTimeMillis();
                 int request = index+1;
                 log.debug("Processing request "+request+" of " + requestXMLList.size());
 
@@ -586,7 +588,7 @@ public class ProductServerRunner  extends Thread  {
 
     public ArrayList getStatus() {
         ArrayList<String> status = new ArrayList<String>();
-        long time = (System.currentTimeMillis() - start) / 1000;
+        long time = (System.currentTimeMillis() - current_start) / 1000;
         for (int i = 0; i<productRequest.getRequestXML().size(); i++ ) {
             if ( i < currentOp ) {
                 status.add(i, "done");
