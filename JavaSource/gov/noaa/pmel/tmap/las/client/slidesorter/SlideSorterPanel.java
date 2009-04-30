@@ -349,7 +349,7 @@ public class SlideSorterPanel extends Composite {
 		if ( fill_levels != null && !fill_levels.equals("") ) {
 			lasRequest.addProperty("ferret", "fill_levels", fill_levels);
 		}
-		lasRequest.setProperty("las", "ui_timeout", "10");
+		lasRequest.setProperty("product_server", "ui_timeout", "10");
 		String url = productServer+"?xml="+URL.encode(lasRequest.getXMLText());
 		RequestBuilder sendRequest = new RequestBuilder(RequestBuilder.GET, url);
 		try {
@@ -473,7 +473,7 @@ public class SlideSorterPanel extends Composite {
 							String elapsed_time = result.getAttribute("elapsed_time");
 							HTML batch = new HTML(spinImage.getHTML()+"<br><br>Your request has been processing for "+elapsed_time+" seconds.<br>This panel will refresh automatically.<br><br>");
 							grid.setWidget(1, 0, batch);
-							lasRequest.setProperty("las", "ui_timeout", "3");
+							lasRequest.setProperty("product_server", "ui_timeout", "3");
 							String url = productServer+"?xml="+URL.encode(lasRequest.getXMLText());
 							RequestBuilder sendRequest = new RequestBuilder(RequestBuilder.GET, url);
 							try {
@@ -872,7 +872,7 @@ public class SlideSorterPanel extends Composite {
 				}
 			}
 		}
-		lasRequest.setProperty("las", "ui_timeout", "20");
+		lasRequest.setProperty("product_server", "ui_timeout", "20");
 		String url = productServer+"?xml="+URL.encode(lasRequest.getXMLText());
 		RequestBuilder sendRequest = new RequestBuilder(RequestBuilder.GET, url);
 		try {
