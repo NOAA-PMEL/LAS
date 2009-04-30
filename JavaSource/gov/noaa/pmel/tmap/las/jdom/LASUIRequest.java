@@ -5,6 +5,7 @@ package gov.noaa.pmel.tmap.las.jdom;
 
 import gov.noaa.pmel.tmap.las.ui.state.OptionBean;
 
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -302,7 +303,7 @@ public class LASUIRequest extends LASDocument {
     }
 
     public Element getProperties() {
-       return this.getRootElement().getChild("properties");
+       return getRootElement().getChild("properties");
     }
     public String getProperty(String group_name, String property_name) {
         String value = "";
@@ -538,4 +539,14 @@ public class LASUIRequest extends LASDocument {
         constraint.addContent(rhsE);
         args.addContent(constraint);
     }
+	public String getKey() {
+		try {
+			LASUIRequest doc = (LASUIRequest) this.clone();
+			Element props = doc.getProperties();
+			props.removeChildren("product_server");
+			return JDOMUtils.MD5Encode(doc.toString());
+		} catch (UnsupportedEncodingException e) {
+			return String.valueOf(Math.random());
+		}
+	}
 }

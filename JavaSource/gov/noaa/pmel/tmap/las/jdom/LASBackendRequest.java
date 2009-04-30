@@ -1648,7 +1648,7 @@ public class LASBackendRequest extends LASDocument {
 	}
 	public String getKey(Element operation) {
 		List<String> excludeGroups = new ArrayList<String>();
-		LASDocument doc = (LASDocument) this.clone();
+		LASBackendRequest doc = (LASBackendRequest) this.clone();
 		try {
 			Element properties = operation.getChild("properties");
 	        if ( properties != null ) {
@@ -1672,7 +1672,7 @@ public class LASBackendRequest extends LASDocument {
 	                }
 	            }
 	        }
-	        
+	        doc.removePropertyGroup("product_server");
 	        if (excludeGroups.contains("variables") ) {
 	            boolean removed = doc.getRootElement().removeChildren("dataObjects");
 	        }
@@ -1682,10 +1682,6 @@ public class LASBackendRequest extends LASDocument {
 		}
 	}
 	public void removePropertyExcludedGroups(Element operation) {
-		boolean removed = this.removePropertyGroup("product_server");
-        if ( !removed ) {
-            log.warn("Attempt to remove property group product_server from backend request failed.");
-        }
         Element properties = operation.getChild("properties");
         if ( properties != null ) {
             List groups = properties.getChildren("property_group");
@@ -1701,7 +1697,7 @@ public class LASBackendRequest extends LASDocument {
                         if ( name.equals("exclude")) {
                             String[] excludes = value.split(",");
                             for (int i = 0; i < excludes.length; i++) {
-                                removed = this.removePropertyGroup(excludes[i].trim());
+                                boolean removed = this.removePropertyGroup(excludes[i].trim());
                                 if ( !removed ) {
                                     log.warn("Attempt to remove property group "+excludes[i]+" from backend request failed.");
                                 }
