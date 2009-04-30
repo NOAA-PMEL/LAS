@@ -178,7 +178,7 @@ public class SlideSorter extends LASEntryPoint {
 		view = parameters.get("view").get(0);
 		
 		
-		slides = new Grid(1,2);
+		slides = new Grid(2,2);
 		header = new Grid(1, 8);
 		
 		ztGrid = new FlexTable();
@@ -292,6 +292,7 @@ public class SlideSorter extends LASEntryPoint {
 		sp1.addZChangeListner(axisMenuChangeListener);
 		sp1.addTChangeListner(axisMenuChangeListener);
 		panels.add(sp1);
+		
 		SlideSorterPanel sp2 = new SlideSorterPanel("Panel 1", false, op, view, productServer, false, rpcService);
 		sp2.addRevertListener(panelApplyButtonClick);
 		sp2.addApplyListener(panelApplyButtonClick);
@@ -302,11 +303,38 @@ public class SlideSorter extends LASEntryPoint {
 		sp2.addZChangeListner(axisMenuChangeListener);
 		sp2.addTChangeListner(axisMenuChangeListener);		
 		panels.add(sp2);
+		
+		SlideSorterPanel sp3 = new SlideSorterPanel("Panel 2", false, op, view, productServer, false, rpcService);
+		sp3.addRevertListener(panelApplyButtonClick);
+		sp3.addApplyListener(panelApplyButtonClick);
+		//sp2.addRegionChangeListener(regionChange);
+		slides.setWidget(1, 0, sp3);
+		sp3.setPanelWidth(pwidth);
+		sp3.addCompareAxisChangeListener(axisMenuChangeListener);
+		sp3.addZChangeListner(axisMenuChangeListener);
+		sp3.addTChangeListner(axisMenuChangeListener);		
+		panels.add(sp3);
+		
+		SlideSorterPanel sp4 = new SlideSorterPanel("Panel 3", false, op, view, productServer, false, rpcService);
+		sp4.addRevertListener(panelApplyButtonClick);
+		sp4.addApplyListener(panelApplyButtonClick);
+		//sp2.addRegionChangeListener(regionChange);
+		slides.setWidget(1, 1, sp4);
+		sp4.setPanelWidth(pwidth);
+		sp4.addCompareAxisChangeListener(axisMenuChangeListener);
+		sp4.addZChangeListner(axisMenuChangeListener);
+		sp4.addTChangeListner(axisMenuChangeListener);		
+		panels.add(sp4);
 
 		sp1.setVariable(var);
 		sp1.init();
 		sp2.setVariable(var);
         sp2.init();
+        sp3.setVariable(var);
+        sp3.init();
+        sp4.setVariable(var);
+        sp4.init();
+        
 		init();
 
 	}
