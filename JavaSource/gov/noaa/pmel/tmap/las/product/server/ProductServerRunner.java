@@ -14,6 +14,8 @@ import gov.noaa.pmel.tmap.las.service.ProductWebService;
 import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Method;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
@@ -603,6 +605,15 @@ public class ProductServerRunner  extends Thread  {
             }
         }
         return status;
+    }
+    
+    public long getSeconds() {
+    	return (System.currentTimeMillis() - start) / 1000;
+    }
+    
+    public String getDate() {
+    	DateFormat longFerretForm = new SimpleDateFormat("dd-MMM-yyyy HH:mm:ss");
+    	return longFerretForm.format(new Date());
     }
 
     public long getProgressTimeout() throws LASException {
