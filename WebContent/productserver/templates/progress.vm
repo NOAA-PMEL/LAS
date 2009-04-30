@@ -73,19 +73,15 @@
                                 </td>
                         </tr>
                 </table><br>
-			#foreach ($job in $operations) #set($index = $velocityCount - 1)
-                            #if ( $status.get($index).contains("seconds") )
-                             <table  class="tableBorderDark"  width="50%">
+			                 <table  class="tableBorderDark"  width="50%">
                               <tr>
                                 <td align="center">
                                          <img src="JavaScript/components/mozilla_blu.gif" alt="Spinner"/>
-					<font color="red" size="+2">&nbsp;&nbsp;$status.get($index)&nbsp;&nbsp;</font>
+					<font color="red" size="+2">&nbsp;&nbsp;$seconds&nbsp;&nbsp;</font>
                                          <img src="JavaScript/components/mozilla_blu.gif" alt="Spinner"/>
                                 </td>
                               <tr>
                              </table>
-                           #end
-			#end
                 <table   width="90%">
                         <tr>
 			  <td>
