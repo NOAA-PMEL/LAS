@@ -144,9 +144,6 @@ public class SettingsButton extends Composite {
 	public void setUsePanel(boolean b) {
 		usePanel = b;
 	}
-	public boolean usePanel() {
-		return usePanel;
-	}
 	public void addOptionsOkClickListener(ClickListener listener) {
 		optionsButton.addOkClickListener(listener);
 	}

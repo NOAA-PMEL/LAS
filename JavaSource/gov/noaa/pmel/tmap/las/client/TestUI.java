@@ -142,12 +142,11 @@ public class TestUI extends LASEntryPoint {
 			int pwidth = (width-rightPad);
 			panel = new SlideSorterPanel("LAS", false, op, view, productServer, true, rpcService);
 			panel.setVariable(var);
-			panel.init();
+			panel.init(true);
 			panel.addCompareAxisChangeListener(onAxisChange);
 			RootPanel.get("panel").add(panel);
 			panel.setPanelWidth(pwidth);
 			panel.addApplyListener(panelApply);
-			panel.usePanel(true);
 			panel.refreshPlot(null, false, false);
 		}
 	}

@@ -215,7 +215,7 @@ public class SlideSorterPanel extends Composite {
 		grid.setWidget(1, 0, plot);
 		initWidget(grid);	
 	}
-	public void init() {
+	public void init(boolean usePanel) {
 	    min =  999999999.;
 	    max = -999999999.;
 		datasetLabel.setText(var.getDSName()+": "+var.getName());
@@ -232,7 +232,7 @@ public class SlideSorterPanel extends Composite {
 		settingsButton.getRefMap().initDataBounds(bounds, delta, true);
 		settingsButton.setOperations(rpcService, var.getIntervals(), var.getDSID(), var.getID(), null);
 		tandzWidgets.removeAxes();
-		settingsButton.setUsePanel(false);
+		settingsButton.setUsePanel(usePanel);
 		if ( ds_grid.getTAxis() != null ) {
 			compareAxis = "t";
 			if ( ds_grid.getZAxis() != null ) {
@@ -528,11 +528,11 @@ public class SlideSorterPanel extends Composite {
 			if (changeDataset) {			
 				var = nvar;
 				datasetLabel.setText(var.getDSName()+": "+var.getName());
-				settingsButton.setUsePanel(true);
+				usePanel(true);
 				changeDataset = false;
-				init();
+				init(true);
 			}
-			if (settingsButton.usePanel()) {
+			if (settingsButton.isUsePanelSettings()) {
 				grid.setStyleName("panelSettingsColor");
 				grid.setWidget(2, 0, tandzWidgets);
 				setCompareAxisVisible(false);
@@ -549,7 +549,7 @@ public class SlideSorterPanel extends Composite {
 		}
 	};
 	private void setPanelMode() {
-		if (settingsButton.usePanel() ) {
+		if (settingsButton.isUsePanelSettings() ) {
     		grid.addStyleName("panelSettingsColor");
     		grid.setWidget(2, 0, tandzWidgets);
     		setCompareAxisVisible(false);

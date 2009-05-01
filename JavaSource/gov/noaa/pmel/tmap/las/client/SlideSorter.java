@@ -327,13 +327,13 @@ public class SlideSorter extends LASEntryPoint {
 		panels.add(sp4);
 
 		sp1.setVariable(var);
-		sp1.init();
+		sp1.init(false);
 		sp2.setVariable(var);
-        sp2.init();
+        sp2.init(false);
         sp3.setVariable(var);
-        sp3.init();
+        sp3.init(false);
         sp4.setVariable(var);
-        sp4.init();
+        sp4.init(false);
         
 		init();
 
@@ -597,7 +597,7 @@ public class SlideSorter extends LASEntryPoint {
         			panel.setVariable(var);
         			// Send in the ortho axis to allow these to be build and displayed in the panel
         			
-        			panel.init();
+        			panel.init(false);
         			if ( fixedAxis.equals("t") ) {
 						panel.setParentAxisValue("t", dateWidget.getFerretDateLo());
 					} else if ( fixedAxis.equals("z") ) {
@@ -637,7 +637,7 @@ public class SlideSorter extends LASEntryPoint {
     					VariableSerializable v = panel.getVariable();
     					if ( !v.getID().equals(var.getID()) || !v.getDSID().equals(var.getDSID() ) ) {
     						panel.setVariable(var);
-    						panel.init();
+    						panel.init(false);
     					} 
     					if ( fixedAxis.equals("t") ) {
     						panel.setParentAxisValue("t", dateWidget.getFerretDateLo());
