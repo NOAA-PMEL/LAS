@@ -58,9 +58,11 @@ ENDIF
 ! TODO: When we get to listing comparisions, will need to decide what to
 !       do, list global attrs of both files?
 
+IF `($ferret_version) GT 6.19` THEN
 IF `STRINDEX( "($result_ferret_listing_type)", "netcdf" ) NE 0` THEN
    DEFINE ATT/OUTPUT ..FERRET_comment = "File written via LAS. Attributes are inherited from originating dataset"
    SET ATT/OUTPUT=all .
+ENDIF
 ENDIF
 
 ! Set up a history attribute for the variable, and a text variable with
