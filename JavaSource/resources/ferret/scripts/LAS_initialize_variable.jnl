@@ -21,8 +21,8 @@ DEFINE SYMBOL data_var_only = `UPCASE("($data_var)")`
 
 LET nvars = ..nvars
 LET is_var = 0
-REPEAT/RANGE=1:`nvars`/NAME=m ( LET ivar = UPCASE(allvars[i=`m`]); \
-  DEFINE SYMBOL ivar = `ivar`; \ 
+REPEAT/RANGE=1:`nvars`/NAME=m ( LET avar =allvars[i=`m`]; list avar; \
+  DEFINE SYMBOL ivar = `UPCASE(avar)`; \ 
   IF `STRINDEX("($ivar)", "($data_var_only)" ) GT 0` THEN LET is_var = 1)
 
 IF  `is_var GT 0` THEN 
