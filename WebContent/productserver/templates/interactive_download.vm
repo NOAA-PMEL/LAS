@@ -108,6 +108,7 @@
     fmt += " <OPTION SELECTED VALUE=0>NetCDF ";
     fmt += " <OPTION VALUE=1>ASCII ";
     fmt += " <OPTION VALUE=1>arcGrid ";
+    fmt += " <OPTION VALUE=2>ShapeFile ";
     fmt += " </SELECT><br><br>";
     document.getElementById("format").innerHTML = fmt;
   }
@@ -151,9 +152,17 @@
   function setDataFormat(index){
     dataFormat = index;
     //reset date and depth widget
-    getWidgetState();    
-    if(dataHasT){genDateWidget();}
-    if(dataHasZ){genDepthWidget();}
+    getWidgetState(); 
+    if ( index == 3) {
+      document.getElementById('DateWidgetRange').style.visibility="hidden";
+      document.getElementById('DepthWidgetStart').style.visibility="hidden";
+      if (document.getElementById('DepthWidgetEnd')) {
+         document.getElementById('DepthWidgetEnd').style.visibility="hidden";
+      }
+    } else {
+      if(dataHasT){genDateWidget();}
+      if(dataHasZ){genDepthWidget();}
+    }
   }
 
   function getWidgetState(){
@@ -227,7 +236,7 @@
     }
 
     //arcGrid: only for xy map
-    if(dataFormat == 2){req.setProperty('ferret', 'view', 'xy');}
+    if(dataFormat == 2 || dataFormat == 3){req.setProperty('ferret', 'view', 'xy');}
 
     //set output format for ascii, 'tsv' for tab seperated
     if(dataFormat == 1){
@@ -235,12 +244,14 @@
     }
 
     //set operation
-    if(dataFormat == 0){
+    if(dataFormat == 0) {
       req.setOperation('Data_Extract_netCDF');
     }else if(dataFormat == 1){
       req.setOperation('Data_Extract_File');
     }else if(dataFormat == 2){
       req.setOperation('Data_Extract_ArcView');
+    }else if(dataFormat == 3){
+      req.setOperation('Shape_File');
     }
 
     return req;

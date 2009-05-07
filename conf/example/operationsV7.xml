@@ -1479,5 +1479,40 @@ streamable="true" mime_type="application/postscript"/> -->
           </grid_types>
     </operation>
     <!--end: placemarks for OSMC -->
-
+    <operation ID="Shape_File" output_template="output_shape_file"
+    	category="file">
+    	<operation name="NetCDF file" ID="Data_Extract_netCDF"
+    		output_template="netcdf" service_action="Data_Extract_netCDF"
+    		order="0500" category="file">
+    		<service>ferret</service>
+    		<response ID="Data_Extract_netCDF_Response">
+    			<result type="netcdf" ID="ferret_listing" file_suffix=".nc" />
+    			<result type="debug" ID="debug" file_suffix=".txt" />
+    		</response>
+    		<region>
+    			<intervals name="xy" />
+    		</region>
+    		<grid_types>
+    			<grid_type name="regular" />
+    		</grid_types>
+    		<optiondef IDREF="Options_Data" />
+    	</operation>
+    	<operation chained="true" name="Make Shape File"
+    		ID="Make_Shape_file" service_action="shape_file">
+    		<args>
+    			<arg chained="true" type="variable" index="1" operation="Data_Extract_netCDF" result="ferret_listing" file_suffix=".nc" />
+    		</args>
+    		<response ID="Shape_File_Resp" type="HTML" index="1">
+    			<result type="dir" ID="dir" streamable="false"
+    				file_suffix=".dir" />
+    		</response>
+    		<service>shape</service>
+    	</operation>
+    	<region>
+    		<intervals name="xy" />
+    	</region>
+    	<grid_types>
+    		<grid_type name="regular" />
+    	</grid_types>
+    </operation>
 </operations>

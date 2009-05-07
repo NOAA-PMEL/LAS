@@ -360,7 +360,11 @@ public final class ProductServerAction extends LASAction {
                         productServerRunner.setBatch(true);
                         
                         long timeout = productServerRunner.getProgressTimeout()*1000;
-                        long ui_timeout = Long.valueOf(lasRequest.getProperty("product_server", "ui_timeout"));
+                        String ui_timeout_string = lasRequest.getProperty("product_server", "ui_timeout");
+                        long ui_timeout = -999;
+                        if ( ui_timeout_string != null && !ui_timeout_string.equals("") ) {
+                        	 ui_timeout = Long.valueOf(ui_timeout_string);
+                        }
                         if ( ui_timeout > 0 ) {
                         	ui_timeout = ui_timeout*1000;
                         	timeout = Math.min(ui_timeout, timeout);
@@ -421,7 +425,6 @@ public final class ProductServerAction extends LASAction {
                 try {
                     long timeout = productServerRunner.getProgressTimeout()*1000;
                     log.info("Starting ProductServerRunner thread with timeout="+timeout);
-                    log.info(productServerRunner.getCurrentBackendRequest().toString());
                     if ( timeout > 0 && JSESSIONID != null && !JSESSIONID.equals("") ) {
                         // Timeout set in the request.
                         // Wait until timeout elapses then send progress page.
