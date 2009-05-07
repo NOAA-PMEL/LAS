@@ -60,11 +60,11 @@ public class ShapeFileTool extends TemplateTool {
 			lasBackendResponse.setError("Job canceled");
 			return lasBackendResponse;
 		}
-        File shapeDir = new File(lasBackendRequest.getResultAsFile("dir"));
-        if ( !shapeDir.exists() ) {
-        	shapeDir.mkdir();
-        }
-        HashMap symbols = lasBackendRequest.getFerretSymbols();
+		File shapeDir = new File(lasBackendRequest.getResultAsFile("dir"));
+		if ( !shapeDir.exists() ) {
+			shapeDir.mkdir();
+		}
+		HashMap symbols = lasBackendRequest.getFerretSymbols();
 		String url = (String) symbols.get("data_0_url");
 		String var = ((String) symbols.get("data_0_var")).toUpperCase();
 		File cancel = lasBackendRequest.getCancelFile();
@@ -74,14 +74,18 @@ public class ShapeFileTool extends TemplateTool {
 		shapeTask.run();
 		String output = shapeTask.getOutput();
 		String stderr = shapeTask.getStderr();
-		lasBackendResponse.addResponseFromRequest(lasBackendRequest);
+		String dbf = lasBackendRequest.getResultAsFile("dbf");
+		String shp = lasBackendRequest.getResultAsFile("shp");
+		String shx = lasBackendRequest.getResultAsFile("shx");
+		String zip = lasBackendRequest.getResultAsFile("zip");
+
 		if ( shapeTask.getHasError() ) {
 			String errorMessage = shapeTask.getErrorMessage();
 			log.debug("Error message: "+errorMessage);
 			log.debug("stderr: "+stderr);
 			log.debug("stdout: "+output);
 			String error_message = "An error occurred creating your product.";
-			
+
 			lasBackendResponse.setError("las_message", error_message);
 			try {
 				lasBackendResponse.addError("exception_message", stderr+"\n"+output);
@@ -92,42 +96,67 @@ public class ShapeFileTool extends TemplateTool {
 		} else {
 			// Make a zip of the three output files. 
 			// These are the files to include in the ZIP file
-		    String[] filenames = new String[]{var+".dbf", var+".shp", var+".shx"};
-		    
-		    // Create a buffer for reading the files
-		    byte[] buf = new byte[1024];
-		    
-		    try {
-		        // Create the ZIP file
-		        String outFilename = dir+File.separator+var+".zip";
-		        ZipOutputStream out = new ZipOutputStream(new FileOutputStream(outFilename));
-		    
-		        // Compress the files
-		        for (int i=0; i<filenames.length; i++) {
-		            FileInputStream in = new FileInputStream(dir+File.separator+filenames[i]);
-		    
-		            // Add ZIP entry to output stream. 
-		            String basename = (new File(dir)).getName();
-		            out.putNextEntry(new ZipEntry(basename+File.separator+filenames[i]));
-		    
-		            // Transfer bytes from the file to the ZIP file
-		            int len;
-		            while ((len = in.read(buf)) > 0) {
-		                out.write(buf, 0, len);
-		            }
-		    
-		            // Complete the entry
-		            out.closeEntry();
-		            in.close();
-		        }
-		    
-		        // Complete the ZIP file
-		        out.close();
-		    } catch (IOException e) {
-		    	throw new LASException(e.getMessage());
-		    }
-            
+			String[] filenames = new String[]{var+".dbf", var+".shp", var+".shx"};
+
+			// Create a buffer for reading the files
+			byte[] buf = new byte[1024];
+
+			try {
+				// Create the ZIP file
+
+				ZipOutputStream out = new ZipOutputStream(new FileOutputStream(zip));
+
+				// Compress the files
+				for (int i=0; i<filenames.length; i++) {
+					FileInputStream in = new FileInputStream(dir+File.separator+filenames[i]);
+
+					// Add ZIP entry to output stream. 
+					String basename = (new File(dir)).getName();
+					out.putNextEntry(new ZipEntry(basename+File.separator+filenames[i]));
+
+					// Transfer bytes from the file to the ZIP file
+					int len;
+					while ((len = in.read(buf)) > 0) {
+						out.write(buf, 0, len);
+					}
+
+					// Complete the entry
+					out.closeEntry();
+					in.close();
+				}
+
+				// Complete the ZIP file
+				out.close();
+
+				// Move the files to their output names.
+				String outdir = dir.substring(0, dir.indexOf("output/")+6);
+				File odir = new File(outdir);
+				for (int i=0; i<filenames.length; i++) {
+					File f = new File(dir+File.separator+filenames[i]);
+					String mvfile = null;
+					if ( filenames[i].contains("dbf") ) {
+						mvfile = dbf;
+					} else if ( filenames[i].contains("shp") ) {
+						mvfile = shp;
+					} else if ( filenames[i].contains("shx") ) {
+						mvfile = shx;
+					}
+					boolean move = false;
+					if ( mvfile != null) {
+						move = f.renameTo(new File(mvfile));
+					}
+					if ( !move ) {
+						throw new LASException("Unable to move output files.");
+					}
+				}
+				// Remove the now empty output directory...
+				File otdir = new File(dir);
+				otdir.delete();
+			} catch (IOException e) {
+				throw new LASException(e.getMessage());
+			}          
 		}
+		lasBackendResponse.addResponseFromRequest(lasBackendRequest);
 		return lasBackendResponse;
 	}
 	public Task task(RuntimeEnvironment runTimeEnv, File cancel, long timeLimit, String url, String var, String dir) throws Exception {
@@ -162,7 +191,7 @@ public class ShapeFileTool extends TemplateTool {
 		} else if ( (interpreter != null && !interpreter.equals("")) && !useNice) {
 			cmd[0] = interpreter;
 		}
-		
+
 		String x = null;
 		String y = null;
 		NetcdfDataset ncd = null;
@@ -187,7 +216,7 @@ public class ShapeFileTool extends TemplateTool {
 				throw new LASException("Could not close the subset netCDF file.");
 			}
 		}
-		
+
 		if ( x == null || y == null ) {
 			throw new LASException("Could not read the coordinate axes names from the subset file.");
 		}
