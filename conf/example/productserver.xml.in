@@ -2,6 +2,7 @@
 	<cache size="1500" bytes="1024Mb" file="@JAKARTA_HOME@/webapps/@APPNAME@/output/cache.obj"/>
 	<servers>
 		<service name="ferret" url="http://@SERVLET_ROOT_URL@/@APPNAME@/services/LASFerretBackend" method="getProduct"/>
+		<service name="shape" url="http://@SERVLET_ROOT_URL@/@APPNAME@/services/LASShapeFileBackend" method="getProduct"/>
 		<service name="database" url="http://@SERVLET_ROOT_URL@/@APPNAME@/services/LASDatabaseBackend" method="getProduct"/>
 		<service name="drds" url="http://@SERVLET_ROOT_URL@/@APPNAME@/services/LASDRDSBackend" method="getProduct"/>
 		<service name="dapper" url="http://@SERVLET_ROOT_URL@/@APPNAME@/services/LASDapperBackend" method="getProduct"/>
