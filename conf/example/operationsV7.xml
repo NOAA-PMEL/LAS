@@ -1503,8 +1503,11 @@ streamable="true" mime_type="application/postscript"/> -->
     			<arg chained="true" type="variable" index="1" operation="Data_Extract_netCDF" result="ferret_listing" file_suffix=".nc" />
     		</args>
     		<response ID="Shape_File_Resp" type="HTML" index="1">
-    			<result type="dir" ID="dir" streamable="false"
-    				file_suffix=".dir" />
+    			<result type="dir" ID="dir" streamable="false" file_suffix=".dir" />
+    			<result type="dbf" ID="dbf" streamable="false" file_suffix=".dbf" />
+    			<result type="shp" ID="shp" streamable="false" file_suffix=".shp" />
+    			<result type="shx" ID="shx" streamable="false" file_suffix=".shx" />
+    			<result type="zip" ID="zip" streamable="false" file_suffix=".zip" />
     		</response>
     		<service>shape</service>
     	</operation>

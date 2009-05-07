@@ -485,7 +485,8 @@ public class LASUIRequest extends LASDocument {
     	return ids;
     }
     /**
-     * Get name of the variable used by this request
+     * Get name of the variable used by this request -- This gets the ID not the variable name!
+     * @deprecated
      */
     public String getVarName() {
         String dataLink = this.getRootElement().getChild("args").getChild("link").getAttributeValue("match");

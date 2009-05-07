@@ -13,16 +13,15 @@ $las_response.toString()
 <!-- LAS SERVER OK -->
 <head>
 <title>LAS Output -- $las_config.getTitle()</title>
-#set($use_ref_map=$las_request.getProperty("ferret", "use_ref_map"))
-#set($image_format=$las_request.getProperty("ferret", "image_format"))
+
 <table>
   <tr>    
       <td>
          <ol>
-            <li><a href="${las_response.getResult("dir")}/${las_request.getVarName().toUpperCase()}.dbf">The dbf file.</a>
-            <li><a href="${las_response.getResult("dir")}/${las_request.getVarName().toUpperCase()}.shp">The shp file.</a>
-            <li><a href="${las_response.getResult("dir")}/${las_request.getVarName().toUpperCase()}.shx">The shx file.</a>
-            <li><a href="${las_response.getResult("dir")}/${las_request.getVarName().toUpperCase()}.zip">A ZIP file with all three of the above.</a>
+            <li><a href="${las_response.getResult("dbf")}">The dbf file.</a>
+            <li><a href="${las_response.getResult("shp")}">The shp file.</a>
+            <li><a href="${las_response.getResult("shx")}">The shx file.</a>
+            <li><a href="${las_response.getResult("zip")}">A ZIP file with all three of the above.</a>
          </ol>
       </td>
   </tr>
