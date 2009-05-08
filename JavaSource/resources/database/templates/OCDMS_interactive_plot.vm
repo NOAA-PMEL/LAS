@@ -76,7 +76,7 @@
    #set ($propsubquery = $prop_var)
 #end
 
-SELECT ${table}.metadata_ID as cruise_ID, subsample, $lat,$lon, IFNULL($subquery,$missing) AS $var
+SELECT cruise_ID, subsample, $lat,$lon, IFNULL($subquery,$missing) AS $var
 FROM $table
 LEFT JOIN metadata ON 
 ${table}.metadata_ID = metadata.metadata_ID
