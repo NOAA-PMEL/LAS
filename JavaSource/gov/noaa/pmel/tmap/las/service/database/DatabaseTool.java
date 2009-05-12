@@ -40,6 +40,7 @@ public class DatabaseTool extends TemplateTool {
     LASDatabaseBackendConfig databaseBackendConfig;
     
     final Logger log = LogManager.getLogger(DatabaseTool.class.getName());
+    int ti = 0;
     public DatabaseTool() throws LASException, IOException {
        
         super("database", "DatabaseBackendConfig.xml");
@@ -55,12 +56,13 @@ public class DatabaseTool extends TemplateTool {
     
     public LASBackendResponse run(LASBackendRequest lasBackendRequest) {
         LASBackendResponse lasBackendResponse = new LASBackendResponse();
-                
+        ti = 0;   
         if (lasBackendRequest.isCanceled()) {
             lasBackendResponse.setError("Request canceled", "Request canceled.");
             log.info("Request cancelled:"+lasBackendRequest.toCompactString());
             return lasBackendResponse;
         }
+        log.debug("Timing "+ti+" : "+lasBackendRequest.getResultAsFile("db_debug")+": Reading database properties.");
         String db_name;
         try {
             db_name = lasBackendRequest.getDatabaseProperty("db_name");
@@ -73,8 +75,9 @@ public class DatabaseTool extends TemplateTool {
             lasBackendResponse.setError("Database backend configuration error.", "Request does not contain a valid db_name property.");
             return lasBackendResponse;
         }
-        
-        
+        log.debug("Timing "+ti+" : "+lasBackendRequest.getResultAsFile("db_debug")+": Finished reading database properties.");
+        ti++;
+        log.debug("Timing "+ti+" : "+lasBackendRequest.getResultAsFile("db_debug")+": Loading database driver.");
         String driver;
         try {
             driver = databaseBackendConfig.getDriver(db_name);
@@ -96,9 +99,11 @@ public class DatabaseTool extends TemplateTool {
             lasBackendResponse.setError("Could load database driver class: ", e);
             return lasBackendResponse;
         }
+        log.debug("Timing "+ti+" : "+lasBackendRequest.getResultAsFile("db_debug")+": Finished loading database driver.");
+        ti++;
         log.debug("Got instance of driver."); //debug
         File sqlFile;
-        
+        log.debug("Timing "+ti+" : "+lasBackendRequest.getResultAsFile("db_debug")+": Merging database template.");
         // If defined use the debug file name as the place to build the sql statements.
         String sqlFileName = lasBackendRequest.getResultAsFile("db_debug");
         if ( sqlFileName != "" ) {
@@ -133,7 +138,9 @@ public class DatabaseTool extends TemplateTool {
             log.info("Request cancelled:"+lasBackendRequest.toCompactString());
             return lasBackendResponse;
         }
-        
+        log.debug("Timing "+ti+" : "+lasBackendRequest.getResultAsFile("db_debug")+": Finished merging database template.");
+        ti++;
+        log.debug("Timing "+ti+" : "+lasBackendRequest.getResultAsFile("db_debug")+": Reading database template.");
         log.debug("preparing to read sql file"); //debug
         Connection con = null;
         Statement stmt = null;
@@ -151,6 +158,9 @@ public class DatabaseTool extends TemplateTool {
             log.info("Request cancelled:"+lasBackendRequest.toCompactString());
             return lasBackendResponse;
         }
+        log.debug("Timing "+ti+" : "+lasBackendRequest.getResultAsFile("db_debug")+": Finished reading database template.");
+        ti++;
+        
         String user;
         try {
             user = databaseBackendConfig.getUser(db_name);
@@ -178,9 +188,15 @@ public class DatabaseTool extends TemplateTool {
         log.debug("Connecting to datbase: "+connectionURL);
         
         try {
+        	log.debug("Timing "+ti+" : "+lasBackendRequest.getResultAsFile("db_debug")+": Getting database connection.");
             con =  DriverManager.getConnection(connectionURL, user, password);
+            log.debug("Timing "+ti+" : "+lasBackendRequest.getResultAsFile("db_debug")+": Finished getting database connection.");
+            ti++;
+            log.debug("Timing "+ti+" : "+lasBackendRequest.getResultAsFile("db_debug")+": Creating database statement.");
             stmt = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
                     ResultSet.CONCUR_READ_ONLY);
+            log.debug("Timing "+ti+" : "+lasBackendRequest.getResultAsFile("db_debug")+": Finished creating database statement.");
+            ti++;
             String fetch_size = lasBackendRequest.getDatabaseProperty("fetch_size");
             int f = 0;
             if ( fetch_size != null && !fetch_size.equals("") ) {
@@ -193,10 +209,10 @@ public class DatabaseTool extends TemplateTool {
  	
             stmt.setFetchSize(f);
             
-            log.debug("executeQuery: "+statement);
+            log.debug("Timing "+ti+" : "+lasBackendRequest.getResultAsFile("db_debug")+": Executing database query.");
             rset = stmt.executeQuery(statement);
-            log.debug("Done with query.");
-            
+            log.debug("Timing "+ti+" : "+lasBackendRequest.getResultAsFile("db_debug")+": Finished executing database query.");
+            ti++;
         } catch (Exception e) {
             lasBackendResponse.setError("Database access failed: "+statement+" ",e);
             return lasBackendResponse;
@@ -239,7 +255,7 @@ public class DatabaseTool extends TemplateTool {
         String ncmlFilename = lasBackendRequest.getResultAsFile("ncml");
         log.debug("got ncml filename: "+ncmlFilename); // debug
         if (ncmlFilename != null && !ncmlFilename.equals("") ) {
-            
+        	log.debug("Timing "+ti+" : "+lasBackendRequest.getResultAsFile("db_debug")+": Making ncml file.");
             try {
                 NetcdfFile ncfile = NetcdfFile.open(netcdfFilename);
                 log.debug("opened ncml file"); // debug
@@ -255,12 +271,17 @@ public class DatabaseTool extends TemplateTool {
                     return lasBackendResponse;
                 }
             }
+            log.debug("Timing "+ti+" : "+lasBackendRequest.getResultAsFile("db_debug")+": Finished making ncml file.");
+            ti++;
         }
+        
+        
         
         String xmlFilename = lasBackendRequest.getResultAsFile("webrowset");
         log.debug("got xml filename: "+xmlFilename); // debug
         
         if ( xmlFilename != null && !xmlFilename.equals("")) {
+        	log.debug("Timing "+ti+" : "+lasBackendRequest.getResultAsFile("db_debug")+": Makeing webrowset file.");
             try {
                 WebRowSet webrowset;
                 if ( driver.contains("oracle") ) {
@@ -276,6 +297,8 @@ public class DatabaseTool extends TemplateTool {
                 lasBackendResponse.setError("Unable to create  XML file: ", e);
                 return lasBackendResponse;
             }
+            log.debug("Timing "+ti+" : "+lasBackendRequest.getResultAsFile("db_debug")+": Finished makeing webrowset file.");
+            ti++;
         }
         log.debug("finished with xml file");
         try { rset.close(); } catch(Exception e) { }
@@ -303,13 +326,19 @@ public class DatabaseTool extends TemplateTool {
         IntermediateNetcdfFile netcdf = null;
         
         try {
-            netcdf = new IntermediateNetcdfFile(netcdfFilename, false);               
+        	log.debug("Timing "+ti+" : "+lasBackendRequest.getResultAsFile("db_debug")+": Constructing empty netCDF file.");
+            netcdf = new IntermediateNetcdfFile(netcdfFilename, false);        
+            log.debug("Timing "+ti+" : "+lasBackendRequest.getResultAsFile("db_debug")+": Finished constructing empty netCDF file.");
+            ti++;
         } catch (Exception e) {
             throw new Exception("Error creating empty netCDF file and checking for results: "+e.toString());
         }
         
         try {
+        	log.debug("Timing "+ti+" : "+lasBackendRequest.getResultAsFile("db_debug")+": Filling netCDF file.");
             netcdf.create(rset, lasBackendRequest);
+            log.debug("Timing "+ti+" : "+lasBackendRequest.getResultAsFile("db_debug")+": Finished filling netCDF file.");
+            ti++;
         } catch (Exception e) {
         	if ( e instanceof LASRowLimitException ) {
                 throw e;
