@@ -3,13 +3,16 @@ package gov.noaa.pmel.tmap.las.client.map;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.maps.client.geom.LatLng;
 import com.google.gwt.maps.client.geom.LatLngBounds;
+import com.google.gwt.user.client.ui.ChangeListener;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Grid;
-import com.google.gwt.user.client.ui.HasVerticalAlignment;
-import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
-
+/**
+ * A widget that displays the N and S latitude and E and W longitude of the current selection.
+ * @author rhs
+ *
+ */
 public class LatLonWidget extends Composite {
 	double xlo;
 	double xhi;
@@ -25,6 +28,9 @@ public class LatLonWidget extends Composite {
 	NumberFormat latFormat;
 	NumberFormat lonFormat;
 	private static final String boxWidth = "70px";
+	/**
+	 * Constructs an empty widget.
+	 */
 	public LatLonWidget() {
 		panel = new Grid(2,4);
 		
@@ -53,6 +59,10 @@ public class LatLonWidget extends Composite {
 		lonFormat = NumberFormat.getFormat("####.##");
 		initWidget(panel);
 	}
+	/**
+	 * Sets the values of the N and S latitude and the E and W longitude, use a degenerate bounds when the tool type is a line or point.
+	 * @param selectionBounds
+	 */
 	public void setText(LatLngBounds selectionBounds) {
 		LatLng swPolyCorner = selectionBounds.getSouthWest();
 		LatLng nePolyCorner = selectionBounds.getNorthEast();
@@ -93,28 +103,88 @@ public class LatLonWidget extends Composite {
 		eastLon.setText(elon_f);
 		
 	}
+	/**
+	 * Get the East longitude value as a String formatted to 2 decimal places.
+	 * @return xhi The current East longitude as a String formatted to 2 decimal places.
+	 */
 	public String getXhiFormatted() {
 		return eastLon.getText();
 	}
+	/**
+	 * Get the West longitude value as a String formatted to 2 decimal places.
+	 * @return xlo The current West longitude as a String formatted to 2 decimal places.
+	 */
 	public String getXloFormatted() {
 		return westLon.getText();
 	}
+	/**
+	 * Get the South latitude value as a String formatted to 2 decimal places.
+	 * @return ylo The current South latitude as a String formatted to 2 decimal places.
+	 */
 	public String getYloFormatted() {
 		return southLat.getText();
 	}
+	/**
+	 * Get the North latitude value as a String formatted to 2 decimal places.
+	 * @return yhi The North latitude as a String formatted to 2 decimal places.
+	 */
 	public String getYhiFormatted() {
 		return northLat.getText();
 	}
+	/**
+	 * Get the current east longitude.
+	 * @return xhi the current east longitude
+	 */
 	public double getXhi() {
 		return xhi;
 	}
+	/**
+	 * Get the current west longitude
+	 * @return xlo the current west longitude
+	 */
 	public double getXlo() {
 		return xlo;
 	}
+	/**
+	 * Get the current north latitude
+	 * @return yhi the current north latitude
+	 */
 	public double getYhi() {
 		return yhi;
 	}
+	/**
+	 * Get the current south latitude
+	 * @return ylo the current south latitude
+	 */
 	public double getYlo() {
 		return ylo;
+	}
+	/**
+	 * Adds a listener to the south latitude TextBox.  Supplied by the ReferenceMap so it can update all the other widgets when the value changes.
+	 * @param southChangeListener the listener for the south latitude TextBox
+	 */
+	public void addSouthChangeListener(ChangeListener southChangeListener) {
+		southLat.addChangeListener(southChangeListener);
+	}
+	/**
+	 * Adds a listener to the north latitude TextBox.  Supplied by the ReferenceMap so it can update all the other widgets when the value changes.
+	 * @param northChangeListener the listener for the north latitude TextBox
+	 */
+	public void addNorthChangeListener(ChangeListener northChangeListener) {
+		northLat.addChangeListener(northChangeListener);
+	}
+	/**
+	 * Adds a listener to the east longitude TextBox.  Supplied by the ReferenceMap so it can update all the other widgets when the value changes.
+	 * @param eastChangeListener the listener for the east longitude TextBox
+	 */
+	public void addEastChangeListener(ChangeListener eastChangeListener) {
+		eastLon.addChangeListener(eastChangeListener);
+	}
+	/**
+	 * Adds a listener to the west longitude TextBox.  Supplied by the ReferenceMap so it can update all the other widgets when the value changes.
+	 * @param westChangeListener the listener for the west longitude TextBox
+	 */
+	public void addWestChangeListener(ChangeListener westChangeListener) {
+		westLon.addChangeListener(westChangeListener);
 	}
 }
