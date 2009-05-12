@@ -1,6 +1,5 @@
 package gov.noaa.pmel.tmap.las.client.map;
 
-import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.geom.LatLng;
 import com.google.gwt.maps.client.geom.LatLngBounds;
 import com.google.gwt.user.client.ui.Button;
@@ -10,10 +9,15 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.PopupPanel;
-import com.google.gwt.user.client.ui.RadioButton;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
-
+/**
+ * A widgets that "rotates" the maps so it is centered at 0, 180 or where ever the current data selection is centered.  It should only be
+ * active when the longitude range spans the globe.  The definition of spans is that the east most longitude value is within "delta"
+ * of the west most longitude.  The delta value is supplied to the reference map when the data bounds are set.
+ * @author rhs
+ *
+ */
 public class CenterWidget extends Composite {
 	LatLng zero;
 	LatLng one_eighty;
@@ -31,6 +35,11 @@ public class CenterWidget extends Composite {
 	Button setCenter;
 	
 	ReferenceMap refMap;
+	
+	/**
+	 * Constructs a widget, the value for centering on the data must be supplied via a @see #setData(LatLng) call. 
+	 * @param map
+	 */
     public CenterWidget(ReferenceMap map) {
     	
     	this.data = LatLng.newInstance(0.0, 0.0);
@@ -46,10 +55,6 @@ public class CenterWidget extends Composite {
     	
     	layout = new Grid(3, 2);
     	
-    	lonText = new TextBox();
-    	lonText.setText("Enter lon");
-    	lonText.addChangeListener(textChangeListener);
-    	
     	zeroButton = new Button("Center at 0");
     	zeroButton.addStyleName("las-centerButton");
     	zeroButton.addClickListener(buttonListener);
@@ -59,23 +64,20 @@ public class CenterWidget extends Composite {
     	dataButton = new Button("Center on data");
     	dataButton.addStyleName("las-centerButton");
     	dataButton.addClickListener(buttonListener);
-    	/*
-    	userButton = new Button("Enter a longitude for center");
-    	*/
+    	
     	layout.setWidget(0, 0, zeroButton);
         layout.setWidget(1, 0, oneEightyButton);
         layout.setWidget(2, 0, dataButton);
-        /*
-        layout.setWidget(3, 0, userButton);
-        layout.setWidget(3, 1, lonText);
-    	*/
+       
         popPanel.add(layout);
     	
     	initWidget(setCenter);
     	
     	
     }
-    
+    /**
+     * Pops up the panel for the centering widget.
+     */
     ClickListener setCenterButtonListener = new ClickListener() {
 
 		public void onClick(Widget sender) {
@@ -84,7 +86,9 @@ public class CenterWidget extends Composite {
 		}
     	
     };
-    
+    /**
+     * Listens for clicks on the centering buttons and rotates the map accordingly.
+     */
     ClickListener buttonListener = new ClickListener() {
 
 		public void onClick(Widget sender) {
@@ -111,51 +115,17 @@ public class CenterWidget extends Composite {
 				LatLngBounds bounds = LatLngBounds.newInstance(sw, ne);
 				refMap.setDataBounds(bounds, refMap.getDelta(), true);
 			} else if ( text.contains("on data") ) {
-				refMap.setDataBounds(refMap.getResetWidget().getDataBounds(), refMap.getDelta(), true);
+				refMap.setDataBounds(refMap.getDataBounds(), refMap.getDelta(), true);
 			}
 			popPanel.hide();
 		}
     	
     };
-    ChangeListener textChangeListener = new ChangeListener() {
-		public void onChange(Widget sender) {
-			TextBox t = (TextBox) sender;
-			double lon = Double.valueOf(t.getText());
-			//TODO clean input, then convert to lon.
-			refMap.setCenter(LatLng.newInstance(data.getLatitude(), lon));
-			popPanel.hide();
-		}	
-    };
-    ChangeListener menuChangeListener = new ChangeListener() {
-		public void onChange(Widget sender) {
-			ListBox l = (ListBox) sender;
-			String value = l.getValue(l.getSelectedIndex());
-			if ( value.equals("0.0") ) {
-				refMap.setCenter(LatLng.newInstance(data.getLatitude(), 0.0));
-				LatLngBounds dBounds = refMap.getDataBounds();
-				double nlat = dBounds.getNorthEast().getLatitude();
-				double slat = dBounds.getSouthWest().getLatitude();
-				double wlon = -180;
-				double elon = 180;
-				LatLng sw = LatLng.newInstance(slat, wlon);
-				LatLng ne = LatLng.newInstance(nlat, elon);
-				refMap.setDataBounds(LatLngBounds.newInstance(sw, ne), refMap.getDelta(), false);
-			} else if ( value.equals("180.0") ) {
-				refMap.setCenter(LatLng.newInstance(data.getLatitude(), 180.0));
-			} else if ( value.equals("data")) {
-				refMap.setCenter(data);
-			} else {
-//				lonEntry.setPopupPosition(centers.getAbsoluteLeft(), centers.getAbsoluteLeft());
-//				lonEntry.show();
-			}
-		}   
-    };
-    public void setUser(double lon) {
-    	this.user = LatLng.newInstance(data.getLatitude(), lon);
-    }
+    /**
+     * Sets the location of the center of the current data range to allow centering on that location (handy if different from 0 or 180).
+     * @param data
+     */
     public void setData(LatLng data) {
     	this.data = data;
-    	this.zero = LatLng.newInstance(data.getLatitude(), 0.0);
-    	this.one_eighty = LatLng.newInstance(data.getLatitude(), 180.);
     }
 }

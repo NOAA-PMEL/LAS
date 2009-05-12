@@ -3,7 +3,11 @@ package gov.noaa.pmel.tmap.las.client.map;
 import com.google.gwt.maps.client.geom.LatLng;
 import com.google.gwt.maps.client.geom.LatLngBounds;
 import com.google.gwt.maps.client.overlay.Polygon;
-
+/**
+ * Overlay which marks the location of the current valid data area on the map (only used when not global in longitude).
+ * @author rhs
+ *
+ */
 public class DataBoundsOverlay {
 	LatLng[] polygonPoints;
 	Polygon polygon;
@@ -13,6 +17,10 @@ public class DataBoundsOverlay {
 	String fillColor = "#FFFFFF";
 	float fillOpacity = 0.0f;
 	double offset = .45;
+	/**
+	 * Constructs the overlay (a white polygon by default) to outline the current valid data area.
+	 * @param dataBounds
+	 */
 	public DataBoundsOverlay (LatLngBounds dataBounds) {
 		polygonPoints = new LatLng[9];
 		LatLng sw = dataBounds.getSouthWest();
@@ -34,10 +42,11 @@ public class DataBoundsOverlay {
 		polygonPoints[8] = LatLng.newInstance(sw.getLatitude()-offset, sw.getLongitude()-offset);
 		polygon = new Polygon(polygonPoints, strokeColor, strokeWeight, strokeOpacity, fillColor, fillOpacity);
 	}
+	/**
+	 * Gets the current overlay polygon that outlines the valid data region.
+	 * @return polygon the overlay the defines the valid data area 
+	 */
 	public Polygon getPolygon() {
 		return polygon;
-	}
-	public void setPolygon(Polygon polygon) {
-		this.polygon = polygon;
 	}
 }

@@ -2,7 +2,6 @@ package gov.noaa.pmel.tmap.las.client.laswidget;
 
 
 import gov.noaa.pmel.tmap.las.client.OperationButton;
-import gov.noaa.pmel.tmap.las.client.OperationsMenu;
 import gov.noaa.pmel.tmap.las.client.RPCServiceAsync;
 import gov.noaa.pmel.tmap.las.client.serializable.OperationSerializable;
 
@@ -11,7 +10,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.ClickListener;
 import com.google.gwt.user.client.ui.Label;

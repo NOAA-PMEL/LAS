@@ -28,7 +28,11 @@ import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.ToggleButton;
 import com.google.gwt.user.client.ui.Widget;
-
+/**
+ * A widget that allows a click, hold and drag selection on the reference map.
+ * @author rhs
+ *
+ */
 public class SelectWidget extends Composite {
 	private MapWidget mMap;
 	private ReferenceMap refMap;
@@ -44,12 +48,17 @@ public class SelectWidget extends Composite {
     LatLng lastGoodPosition;
     private static double topTrim = 88.5;
     private static double bottomTrim = -88.5;
-   
+    
+    private String toolType = "xy";
+    /**
+     * Constructs a selectWidget
+     * @param refMap the reference map to which the widget is attached
+     */   
 	public SelectWidget (ReferenceMap refMap) {
 		this.refMap = refMap;
 
 		mSelect = new ToggleButton("Select");
-		mSelect.addStyleName("map-button");
+		
 		mSelect.addClickListener(selectListener);
 		
 		String moduleRelativeURL = GWT.getModuleBaseURL();
@@ -74,15 +83,17 @@ public class SelectWidget extends Composite {
 		mapTool.setEditingEnabled(false);
 		// different tool types above...
 		
-		selectAll = new Button("Select All");
-		selectAll.addStyleName("map-button");
+		selectAll = new Button("All");
+		
 		selectAll.addClickListener(selectAllListener);
 		controls.add(mSelect);
 		controls.add(selectAll);
 		
 		initWidget(controls);
 	}
-	
+	/**
+	 * Listens for clicks on the "select all" button.
+	 */
 	ClickListener selectAllListener = new ClickListener() {
 
 		public void onClick(Widget sender) {
@@ -98,6 +109,9 @@ public class SelectWidget extends Composite {
 		}
 
 	};
+	/**
+	 * The listener that sets up the drag listeners and the custom pointer when the select button is down and removes them when it is up.
+	 */
 	ClickListener selectListener = new ClickListener() {
 		public void onClick(Widget sender) {
 			if ( refMap.getDataBounds() == null ) {
@@ -119,64 +133,129 @@ public class SelectWidget extends Composite {
 			}
 		}
 	};
-
+    /**
+     * A convenience method for determining if the "Select" button is down
+     * @return whether the button is down
+     */
 	public boolean isDown() {
 		return mSelect.isDown();
 	}
-
+    /**
+     * A convenience methods that requests the current map tool to show or hide the grab handles
+     * @param b
+     */
 	public void setEditingEnabled(boolean b) {
 		mapTool.setEditingEnabled(b);	
 	}
-
+    /**
+     * A convenience method to set the LatLonWidget text to the current selection bounds
+     */
 	public void setText() {	
 		if ( textWidget != null ) {
 			textWidget.setText(mapTool.getSelectionBounds());
 		}
 	}
+	/**
+	 * A convenience method to clear the overlays from the current map tool.
+	 */
 	public void clearOverlays() {
 		mapTool.clearOverlays();
 	}
+	/**
+	 * A convenience method to set the current selection bounds
+	 * @param selectionBounds the bounds to set
+	 * @param recenter whether to re-center the map on the new selection
+	 * @param show whether to show the current selection polygon
+	 */
 	public void setSelectionBounds(LatLngBounds selectionBounds, boolean recenter, boolean show) {
 		mapTool.setSelectionBounds(selectionBounds, recenter, show);
 	}
+	/**
+	 * A convenience method to initialize the data bounds and selection bounds
+	 * @param dataBounds the valid data region
+	 * @param selectionBounds the current selection (often initially the same as the dataBounds, but not required)
+	 * @param show whether to show the outline of the current selection
+	 */
 	public void initSelectionBounds(LatLngBounds dataBounds, LatLngBounds selectionBounds, boolean show) {
 		mapTool.initSelectionBounds(dataBounds, selectionBounds, show);
 	}
+	/**
+	 * Sets whether the controls are visible
+	 */
 	public void setVisible(boolean visible) {
 		controls.setVisible(visible);
 	}
-
+    /**
+     * Set which LatLonWidget to user for updates of the seleciton lat/lon text
+     * @param textWidget
+     */
 	public void setLatLngWidget(LatLonWidget textWidget) {
 		this.textWidget = textWidget;
 	}
-
+    /**
+     * Convenience method for getting the current east longitude
+     * @return xhi the current east longitude formatted to 2 decimal places
+     */
 	public String getXhiFormatted() {
 		return textWidget.getXhiFormatted();
 	}
-
+    /**
+     * Convenience method for getting the current west longitude
+     * @return xlo the current west longitude formatted to 2 decimal places
+     */
 	public String getXloFormatted() {
 		return textWidget.getXloFormatted();
 	}
+	/**
+	 * Convenience method for getting the current south latitude
+	 * @return ylo the current south latitude formatted to 2 decimal places
+	 */
 	public String getYloFormatted() {
 		return textWidget.getYloFormatted();
 	}
+	/**
+	 * Convenience method for getting the current north latitude
+	 * @return yhi the current north latitude formatted to 2 decimal places
+	 */
 	public String getYhiFormatted() {
 		return textWidget.getYhiFormatted();
 	}
-    
+    /**
+     * Convenience method for getting the current east longitude
+     * @return xhi the current east longitude
+     */
 	public double getXhi() {
 		return textWidget.getXhi();
 	}
+	/**
+	 * Convenience method for getting the current west longitude
+	 * @return xlo the current west longitude
+	 */
 	public double getXlo() {
 		return textWidget.getXlo();
 	}
+	/**
+	 * Convenience method for getting the current north latitude
+	 * @return yhi the current north latitude
+	 */
 	public double getYhi() {
 		return textWidget.getYhi();
 	}
+	/**
+	 * Convenience methods for getting the north latitude
+	 * @return yhi the current north latitude
+	 */
 	public double getYlo() {
 		return textWidget.getYlo();
 	}
-	
+	/**
+	 * Sets the current selection tool type.  In our application we have data define in lat/long/depth or height and time.  Thus a view,
+	 * is the current data slice where lat and lon are either zero, one or two of the dimensions in the current slice.  The thus a tool
+	 * view of yt means the slice is a range in latitude and time so the map needs to select a fixed line of longitude over a range
+	 * of latitudes.  Got it?  Look at the example.  You will probably want to use one of "xy", "x", "y" or "pt" (a special case for
+	 * a point on the map).
+	 * @param tool
+	 */
 	public void setToolType(String tool) {
 		mapTool.clearOverlays();
 		selectAll.setEnabled(true);
@@ -186,31 +265,51 @@ public class SelectWidget extends Composite {
 			for (Iterator oIt = mapTool.getOverlays().iterator(); oIt.hasNext();) {
 				Overlay o = (Overlay) oIt.next();
 				refMap.getMapWidget().addOverlay(o);
+				toolType = "xy";
 			}
 		} else if ( tool.equals("yz") || tool.equals("yt") || tool.equals("y") ) {
 			mapTool = new YMapTool(dataBounds, mapTool.getSelectionBounds());
 			for (Iterator oIt = mapTool.getOverlays().iterator(); oIt.hasNext();) {
 				Overlay o = (Overlay) oIt.next();
 				refMap.getMapWidget().addOverlay(o);
+				toolType = "y";
 			}
 		} else if ( tool.equals("xz") || tool.equals("xt") || tool.equals("x") ) {
 			mapTool = new XMapTool(dataBounds, mapTool.getSelectionBounds());
 			for (Iterator oIt = mapTool.getOverlays().iterator(); oIt.hasNext();) {
 				Overlay o = (Overlay) oIt.next();
 				refMap.getMapWidget().addOverlay(o);
+				toolType = "x";
 			}
-	    } else if ( tool.equals("t") || tool.equals("z") || tool.equals("zt") ) {
+	    } else if ( tool.equals("t") || tool.equals("z") || tool.equals("zt") || tool.equals("pt") ) {
 			mapTool = new PTMapTool(dataBounds, mapTool.getSelectionBounds());
 			for (Iterator oIt = mapTool.getOverlays().iterator(); oIt.hasNext();) {
 				Overlay o = (Overlay) oIt.next();
 				refMap.getMapWidget().addOverlay(o);
+				toolType = "pt";
 			}
 		}
 	}
+	/**
+	 * Gets the current tool setting.
+	 * @return toolType the current tool type.
+	 */
+	public String getToolType() {
+		return toolType;
+	}
+	/**
+	 * A convenience method for getting the current selection bounds.
+	 * @return selectionBounds the current selection bounds.
+	 */
 	public LatLngBounds getSelectionBounds() {
 		return mapTool.getSelectionBounds();
 	}
-	
+	/**
+	 * A class that handles selecting the an lat/lon rectangle on the map.  It has a drag handle at each corner, in the mid-points of
+	 * the sides and in the center.
+	 * @author rhs
+	 *
+	 */
 	public class XYMapTool extends MapTool {
 		LatLng[] polygonPoints;
 		Polygon polygon;
@@ -227,8 +326,8 @@ public class SelectWidget extends Composite {
 		Marker centerMarker;
 		/**
 		 * Construct a marker tool with the default colors, weights and opacities.
-		 * @param bounds
-		 * @param type
+		 * @param dataBounds the valid data region
+		 * @param selectionBounds the current selection (can be same as data bounds)
 		 */
 		public XYMapTool(LatLngBounds dataBounds, LatLngBounds selectionBounds) {
             
@@ -238,8 +337,8 @@ public class SelectWidget extends Composite {
 			String moduleRelativeURL = GWT.getModuleBaseURL();
 			String moduleName = GWT.getModuleName();
 			moduleRelativeURL = moduleRelativeURL.substring(0,moduleRelativeURL.indexOf(moduleName)-1);
-			moduleRelativeURL = moduleRelativeURL.substring(0,moduleRelativeURL.lastIndexOf("/")+1);
-			String imageURL = moduleRelativeURL + "images/";
+//			moduleRelativeURL = moduleRelativeURL.substring(0,moduleRelativeURL.lastIndexOf("/")+1);
+			String imageURL = moduleRelativeURL + "/images/";
 			
 			SelectWidget.this.dataBounds = dataBounds;
 			this.selectionBounds = selectionBounds;
@@ -414,6 +513,9 @@ public class SelectWidget extends Composite {
 			addDragHandlers(markerDragHandler);
 			initSelectionBounds(dataBounds, selectionBounds, false);
 		}
+		/**
+		 * Handle a click on the map.
+		 */
 		MarkerMouseDownHandler markerMouseDownHandler = new MarkerMouseDownHandler() {
 			public void onMouseDown(MarkerMouseDownEvent event) {
 				mDraw = true;
@@ -426,7 +528,9 @@ public class SelectWidget extends Composite {
 			}
 		};
 		
-		
+		/**
+		 * Handle the mouse up on any of the markers.
+		 */
 		MarkerMouseUpHandler markerMouseUpHandler = new MarkerMouseUpHandler() {
 
 			public void onMouseUp(MarkerMouseUpEvent event) {
@@ -444,6 +548,10 @@ public class SelectWidget extends Composite {
 			}
 
 		};
+		/**
+		 * Handle the mouse move for drawing a selection.  When drawing is on draw the markers and rectangle if the mouse
+		 * is in the data bounds, otherwise stop the marker at the last know good position
+		 */
 		MapMouseMoveHandler mouseMove = new MapMouseMoveHandler() {
 			public void onMouseMove(MapMouseMoveEvent event) {
 				refMap.getMapWidget().setDraggable(false);
@@ -502,15 +610,21 @@ public class SelectWidget extends Composite {
 				}
 			}
 		};
-		
+		/**
+		 * Gets the mousemove handler for this tool type
+		 */
 		public MapMouseMoveHandler getMouseMove() {
 			return mouseMove;
 		}
-		
+		/**
+		 * Gets the draw marker for this tool type.
+		 */
 		public Marker getDrawMarker() {
 			return mXYDrawMarker;
 		}
-		
+		/**
+		 * Clear the overlays for this tool type (the polygon and the markers in this case).
+		 */
 		public void clearOverlays() {
 			if ( polygon != null ) {
 				mMap.removeOverlay(polygon);
@@ -520,16 +634,22 @@ public class SelectWidget extends Composite {
 				mMap.removeOverlay(marker);
 			}
 		}
-
+        /**
+         * Set whether the polygon can be seen.
+         */
 		public void setVisible(boolean visible) {
 			polygon.setVisible(visible);		
 		}
 		/**
+		 * Gets the current selection as a Polygon Overlay
 		 * @return the polygon
 		 */
 		public Polygon getPolygon() {
 			return polygon;
 		}
+		/**
+		 * Set whether the drag handles are visible.
+		 */
 		public void setEditingEnabled(boolean b) {
 			for (Iterator markerIt = markers.iterator(); markerIt.hasNext();) {
 				Marker marker = (Marker) markerIt.next();
@@ -537,6 +657,7 @@ public class SelectWidget extends Composite {
 			}
 		}
 		/**
+		 * Gets the drag handles
 		 * @return the markers
 		 */
 		public ArrayList<Marker> getMarkers() {
@@ -544,15 +665,25 @@ public class SelectWidget extends Composite {
 		}
 
 		/**
+		 * Set the LatLng location of the map click
 		 * @param click the click to set
 		 */
 		public void setClick(LatLng click) {
 			this.click = click;
 		}
-
+        /**
+         * Get the array of LatLng points that is being used to construct the polygon
+         * @return points the array of points that make up this overlay polygon
+         */
 		public LatLng[] getPolygonPoints() {
 			return polygonPoints;
 		}
+		/**
+		 * Handle a drag on any one of the markers.  The markers can move between the data bounds that is to 
+		 * the outside of the selection rectangle at the marker position and the corner of the selection bounds
+		 * that is on the "inside" of that marker position.  For example, the south west marker's movements are bounded
+		 * by the south west data bounds and the north east rectangle bounds.
+		 */
 		MarkerDragHandler markerDragHandler = new MarkerDragHandler() {
 			public void onDrag(MarkerDragEvent event) {
 				Marker marker = event.getSender();
@@ -659,10 +790,18 @@ public class SelectWidget extends Composite {
 				}
 			}
 		};
+		/**
+		 * Set up the selection limits and the initial selection for this tool.
+		 */
         public void initSelectionBounds(LatLngBounds dataBounds, LatLngBounds selectionBounds, boolean show) {
         	SelectWidget.this.dataBounds = dataBounds;
         	setSelectionBounds(selectionBounds, false, show);
-        }
+        } 
+        /**
+         * Set the current selection.  The polygon drawn for this tool has 8 line segments (since it includes
+         * the mid-points of the line) this eliminates the ambiguity of when direction the loop should go to
+         * close the polygon.
+         */
 		public void setSelectionBounds(LatLngBounds rectBounds, boolean recenter, boolean show) {
 			this.selectionBounds = rectBounds;
 			if ( recenter ) {
@@ -716,6 +855,11 @@ public class SelectWidget extends Composite {
 			return o;
 		}
 	}
+	/**
+	 * A tool that selects a line of longitude over a range of latitudes (a vertical line).
+	 * @author rhs
+	 *
+	 */
 	public class YMapTool extends MapTool {
 		Marker nMarker;
 		Marker cMarker;
@@ -724,7 +868,11 @@ public class SelectWidget extends Composite {
 		Polyline polyline;
 		Marker mYDrawMarker;
 		boolean mDraw = false;
-		
+		/**
+		 * Construct a Y tool with the line at the longitude center of the passed in selection bounds.
+		 * @param dataBounds
+		 * @param selectionBounds
+		 */
 		public YMapTool (LatLngBounds dataBounds, LatLngBounds selectionBounds) {
 			
 			SelectWidget.this.dataBounds = dataBounds;
@@ -737,8 +885,8 @@ public class SelectWidget extends Composite {
 			String moduleRelativeURL = GWT.getModuleBaseURL();
 			String moduleName = GWT.getModuleName();
 			moduleRelativeURL = moduleRelativeURL.substring(0,moduleRelativeURL.indexOf(moduleName)-1);
-			moduleRelativeURL = moduleRelativeURL.substring(0,moduleRelativeURL.lastIndexOf("/")+1);
-			String imageURL = moduleRelativeURL + "images/";
+			//moduleRelativeURL = moduleRelativeURL.substring(0,moduleRelativeURL.lastIndexOf("/")+1);
+			String imageURL = moduleRelativeURL + "/images/";
 
 			Icon yicon = Icon.newInstance();
 			yicon.setIconSize(Size.newInstance(20, 20));
@@ -843,7 +991,9 @@ public class SelectWidget extends Composite {
 				
 			}
 		};
-		
+		/**
+		 * Similar the the XY tool except that the longitude remains fixed at the click location and the latitude drags.
+		 */
 		MapMouseMoveHandler mouseMove = new MapMouseMoveHandler() {
 			public void onMouseMove(MapMouseMoveEvent event) {
 				refMap.getMapWidget().setDraggable(false);
@@ -887,7 +1037,10 @@ public class SelectWidget extends Composite {
 				}
 			}
 		};
-		
+		/**
+		 * Handle marker drags for one of the 3 markers.  The center marker can move anywhere in the data bounds.
+		 * The vertical selection will shrink to accommodate the move.  We might re-think that choice.
+		 */
 		MarkerDragHandler markerDragHandler = new MarkerDragHandler() {
 			public void onDrag(MarkerDragEvent event) {
 				
@@ -996,6 +1149,10 @@ public class SelectWidget extends Composite {
 				mMap.removeOverlay(marker);
 			}
 		}
+		/*
+		 * (non-Javadoc)
+		 * @see com.weathertopconsulting.refmap.client.MapTool#getOverlays()
+		 */
 		@Override
 		public ArrayList<Overlay> getOverlays() {
 			ArrayList<Overlay> o = new ArrayList<Overlay>();
@@ -1003,11 +1160,19 @@ public class SelectWidget extends Composite {
 			o.addAll(markers);
 			return o;
 		}
+		/*
+		 * (non-Javadoc)
+		 * @see com.weathertopconsulting.refmap.client.MapTool#initSelectionBounds(com.google.gwt.maps.client.geom.LatLngBounds, com.google.gwt.maps.client.geom.LatLngBounds, boolean)
+		 */
 		@Override
 		public void initSelectionBounds(LatLngBounds dataBounds, LatLngBounds selectionBounds, boolean show) {
 			SelectWidget.this.dataBounds = dataBounds;
         	setSelectionBounds(selectionBounds, false, show);
 		}
+		/*
+		 * (non-Javadoc)
+		 * @see com.weathertopconsulting.refmap.client.MapTool#setSelectionBounds(com.google.gwt.maps.client.geom.LatLngBounds, boolean, boolean)
+		 */
 		@Override
 		public void setSelectionBounds(LatLngBounds rectBounds,	boolean recenter, boolean show) {
 			// Always show this widget.
@@ -1048,13 +1213,20 @@ public class SelectWidget extends Composite {
 			textWidget.setText(LatLngBounds.newInstance(swText, neText));
 			
 		}
+		/*
+		 * I guess we never use this.
+		 */
 		@Override
 		public void setVisible(boolean visible) {
 			// TODO Auto-generated method stub
 			
 		}
 	}
-
+    /**
+     * Draw a line at a fixed latitude over a range of longitudes (a horizontal line).
+     * @author rhs
+     *
+     */
 	public class XMapTool extends MapTool {
 		LatLng polylinePoints[] = new LatLng[3];
 		Polyline polyline;
@@ -1075,8 +1247,8 @@ public class SelectWidget extends Composite {
 			String moduleRelativeURL = GWT.getModuleBaseURL();
 			String moduleName = GWT.getModuleName();
 			moduleRelativeURL = moduleRelativeURL.substring(0,moduleRelativeURL.indexOf(moduleName)-1);
-			moduleRelativeURL = moduleRelativeURL.substring(0,moduleRelativeURL.lastIndexOf("/")+1);
-			String imageURL = moduleRelativeURL + "images/";
+			//moduleRelativeURL = moduleRelativeURL.substring(0,moduleRelativeURL.lastIndexOf("/")+1);
+			String imageURL = moduleRelativeURL + "/images/";
 
 			Icon yicon = Icon.newInstance();
 			yicon.setIconSize(Size.newInstance(20, 20));
@@ -1148,6 +1320,10 @@ public class SelectWidget extends Composite {
 			
 			initSelectionBounds(dataBounds, selectionBounds, true);
         }
+		/*
+		 * (non-Javadoc)
+		 * @see com.weathertopconsulting.refmap.client.MapTool#clearOverlays()
+		 */
 		@Override
 		public void clearOverlays() {
 			if ( polyline != null ) {
@@ -1158,17 +1334,26 @@ public class SelectWidget extends Composite {
 				mMap.removeOverlay(marker);
 			}
 		}
-
+        /*
+         * (non-Javadoc)
+         * @see com.weathertopconsulting.refmap.client.MapTool#getDrawMarker()
+         */
 		@Override
 		public Marker getDrawMarker() {
 			return mYDrawMarker;
 		}
-
+        /*
+         * (non-Javadoc)
+         * @see com.weathertopconsulting.refmap.client.MapTool#getMouseMove()
+         */
 		@Override
 		public MapMouseMoveHandler getMouseMove() {
 			return mouseMove;
 		}
-
+        /*
+         * (non-Javadoc)
+         * @see com.weathertopconsulting.refmap.client.MapTool#getOverlays()
+         */
 		@Override
 		public ArrayList<Overlay> getOverlays() {
 			ArrayList<Overlay> o = new ArrayList<Overlay>();
@@ -1176,13 +1361,19 @@ public class SelectWidget extends Composite {
 			o.addAll(markers);
 			return o;
 		}
-
+        /*
+         * (non-Javadoc)
+         * @see com.weathertopconsulting.refmap.client.MapTool#initSelectionBounds(com.google.gwt.maps.client.geom.LatLngBounds, com.google.gwt.maps.client.geom.LatLngBounds, boolean)
+         */
 		@Override
 		public void initSelectionBounds(LatLngBounds dataBounds, LatLngBounds selectionBounds, boolean show) {
 			SelectWidget.this.dataBounds = dataBounds;
 			setSelectionBounds(selectionBounds, false, show);
 		}
-
+        /*
+         * (non-Javadoc)
+         * @see com.weathertopconsulting.refmap.client.MapTool#setSelectionBounds(com.google.gwt.maps.client.geom.LatLngBounds, boolean, boolean)
+         */
 		@Override
 		public void setSelectionBounds(LatLngBounds rectBounds, boolean recenter, boolean show) {
 			// Always show this widget.
@@ -1224,12 +1415,19 @@ public class SelectWidget extends Composite {
 			textWidget.setText(LatLngBounds.newInstance(swText, neText));
 			
 		}
-
+        /*
+         * (non-Javadoc)
+         * @see com.weathertopconsulting.refmap.client.MapTool#setVisible(boolean)
+         */
 		@Override
 		public void setVisible(boolean visible) {
 			// TODO Auto-generated method stub
 			
 		}
+		/**
+		 * Handle a drag of any of the three markers.  The center marker can drag anywhere in the data bounds, the line actually will shrink
+		 * to accommodate the move.
+		 */
 		MarkerDragHandler markerDragHandler = new MarkerDragHandler() {
 			public void onDrag(MarkerDragEvent event) {
 				
@@ -1349,6 +1547,9 @@ public class SelectWidget extends Composite {
 				
 			}
 		};
+		/**
+		 * The mouse move handler for drawing the selection.
+		 */
 		MapMouseMoveHandler mouseMove = new MapMouseMoveHandler() {
 			public void onMouseMove(MapMouseMoveEvent event) {
 				refMap.getMapWidget().setDraggable(false);
@@ -1393,10 +1594,20 @@ public class SelectWidget extends Composite {
 			}
 		};
 	}
-	
+	/**
+	 * A point on the map.  You can drag it around, but you can't push select and position a new one (I don't know why exactly, but
+	 * for right now you can't).
+	 * @author rhs
+	 *
+	 */
 	public class PTMapTool extends MapTool {
 		
 		Marker centerMarker;
+		/**
+		 * Construct a point tool confined to move within the data bounds.
+		 * @param dataBounds
+		 * @param selectionBounds
+		 */
 		public PTMapTool(LatLngBounds dataBounds, LatLngBounds selectionBounds) {
 			mSelect.setEnabled(false);
 			selectAll.setEnabled(false);
@@ -1424,6 +1635,9 @@ public class SelectWidget extends Composite {
 			markers.add(centerMarker);
 			textWidget.setText(LatLngBounds.newInstance(selectionBounds.getCenter(), selectionBounds.getCenter()));
 		}
+		/**
+		 * Make the selection as the biggest box that will fit and then re-center on the point when it's done dragging.
+		 */
 		MarkerDragEndHandler markerDragEndHandler = new MarkerDragEndHandler() {
 			public void onDragEnd(MarkerDragEndEvent event) {
 				Marker marker = event.getSender();
@@ -1458,6 +1672,10 @@ public class SelectWidget extends Composite {
 				setSelectionBounds(LatLngBounds.newInstance(sw, ne), true, true);
 			}	
 		};
+		/**
+		 * Handle a drag of the point marker (just make sure it's in the data range and if now leave it in
+		 * its last known good position.
+		 */
 		MarkerDragHandler markerDragHandler = new MarkerDragHandler() {
 			public void onDrag(MarkerDragEvent event) {
 				Marker marker = event.getSender();
@@ -1471,7 +1689,14 @@ public class SelectWidget extends Composite {
 			}	
 		};
 		
-		
+		/*
+		 * 
+		 * (non-Javadoc)
+		 * @see com.weathertopconsulting.refmap.client.MapTool#clearOverlays()
+		 */
+		/**
+		 * Removes the only overlay (the point).
+		 */
 		@Override
 		public void clearOverlays() {
 			for (Iterator mkIt = markers.iterator(); mkIt.hasNext();) {
@@ -1479,16 +1704,28 @@ public class SelectWidget extends Composite {
 				mMap.removeOverlay(m);
 			}
 		}
+		/*
+		 * (non-Javadoc)
+		 * @see com.weathertopconsulting.refmap.client.MapTool#getOverlays()
+		 */
 		@Override
 		public ArrayList<Overlay> getOverlays() {
 			return new ArrayList<Overlay>(markers);
 		}
+		/*
+		 * (non-Javadoc)
+		 * @see com.weathertopconsulting.refmap.client.MapTool#initSelectionBounds(com.google.gwt.maps.client.geom.LatLngBounds, com.google.gwt.maps.client.geom.LatLngBounds, boolean)
+		 */
 		@Override
 		public void initSelectionBounds(LatLngBounds dataBounds, LatLngBounds selectionBounds, boolean show) {
 			SelectWidget.this.dataBounds = dataBounds;
 			this.selectionBounds = selectionBounds;
 			setSelectionBounds(selectionBounds, false, show);
 		}
+		/*
+		 * (non-Javadoc)
+		 * @see com.weathertopconsulting.refmap.client.MapTool#setSelectionBounds(com.google.gwt.maps.client.geom.LatLngBounds, boolean, boolean)
+		 */
 		@Override
 		public void setSelectionBounds(LatLngBounds rectBounds,	boolean recenter, boolean show) {
 			this.selectionBounds = rectBounds;
@@ -1512,16 +1749,28 @@ public class SelectWidget extends Composite {
 			} else {
 			    setEditingEnabled(false);
 			}
-			textWidget.setText(rectBounds);
+			textWidget.setText(LatLngBounds.newInstance(selectionBounds.getCenter(), selectionBounds.getCenter()));
 		}
+		/*
+		 * (non-Javadoc)
+		 * @see com.weathertopconsulting.refmap.client.MapTool#setVisible(boolean)
+		 */
 		@Override
 		public void setVisible(boolean visible) {
 			centerMarker.setVisible(visible);
 		}
+		/*
+		 * (non-Javadoc)
+		 * @see com.weathertopconsulting.refmap.client.MapTool#getDrawMarker()
+		 */
 		@Override
 		public Marker getDrawMarker() {
 			return null;
 		}
+		/*
+		 * (non-Javadoc)
+		 * @see com.weathertopconsulting.refmap.client.MapTool#getMouseMove()
+		 */
 		@Override
 		public MapMouseMoveHandler getMouseMove() {
 			return null;
