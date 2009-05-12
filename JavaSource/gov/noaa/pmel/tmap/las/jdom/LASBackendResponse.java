@@ -483,6 +483,28 @@ public class LASBackendResponse extends LASDocument {
         return transformedRowset.toString();
     }
     /**
+     * Get the contents of an XML file transformed by an XSLT stylesheet.
+     *
+     * @param PATH          the full i local path of the file you want to transform
+     * @param stylesheet  the name of the stylesheet (in resources/productserver/stylesheets) that will be used to transform the XML
+     * @return            a String with the result of the XSLT transformation
+     * @throws JDOMException
+     * @throws IOException
+     */
+    public String getFileTransformedByXSL(String PATH, String stylesheet) throws IOException, JDOMException {
+        if ( !stylesheet.endsWith(".xsl")) {
+            stylesheet = stylesheet+".xsl";
+        }
+        String xslFile = JDOMUtils.getResourcePath(this, "resources/productserver/stylesheets/"+stylesheet);
+        XSLTransformer transformer = new XSLTransformer(xslFile);
+        LASDocument rowset = new LASDocument();
+        JDOMUtils.XML2JDOM(new File(PATH), rowset);
+        LASDocument transformedRowset = new LASDocument(transformer.transform(rowset));
+        return transformedRowset.toString();
+    }
+
+
+    /**
      * A convenience method that is equivalent to getResultTransformedByXSL(ID, "webrowsetToTable")
      * @param ID         the ID of the result you want to transform
      * @return           a String with the result of the transform
