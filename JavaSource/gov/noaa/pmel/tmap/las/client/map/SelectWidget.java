@@ -1,5 +1,7 @@
 package gov.noaa.pmel.tmap.las.client.map;
 
+import gov.noaa.pmel.tmap.las.client.laswidget.Util;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 
@@ -50,22 +52,18 @@ public class SelectWidget extends Composite {
     private static double bottomTrim = -88.5;
     
     private String toolType = "xy";
+    
+    String imageURL;
     /**
      * Constructs a selectWidget
      * @param refMap the reference map to which the widget is attached
      */   
 	public SelectWidget (ReferenceMap refMap) {
 		this.refMap = refMap;
-
+        imageURL = Util.getImageURL();
 		mSelect = new ToggleButton("Select");
 		
 		mSelect.addClickListener(selectListener);
-		
-		String moduleRelativeURL = GWT.getModuleBaseURL();
-		String moduleName = GWT.getModuleName();
-		moduleRelativeURL = moduleRelativeURL.substring(0,moduleRelativeURL.indexOf(moduleName)-1);
-		moduleRelativeURL = moduleRelativeURL.substring(0,moduleRelativeURL.lastIndexOf("/")+1);
-		String imageURL = moduleRelativeURL + "images/";
 		
 		mMap = refMap.getMapWidget();
 		controls = new HorizontalPanel();
@@ -332,14 +330,7 @@ public class SelectWidget extends Composite {
 		public XYMapTool(LatLngBounds dataBounds, LatLngBounds selectionBounds) {
             
 			markers.clear();
-			
-
-			String moduleRelativeURL = GWT.getModuleBaseURL();
-			String moduleName = GWT.getModuleName();
-			moduleRelativeURL = moduleRelativeURL.substring(0,moduleRelativeURL.indexOf(moduleName)-1);
-//			moduleRelativeURL = moduleRelativeURL.substring(0,moduleRelativeURL.lastIndexOf("/")+1);
-			String imageURL = moduleRelativeURL + "/images/";
-			
+							
 			SelectWidget.this.dataBounds = dataBounds;
 			this.selectionBounds = selectionBounds;
 
@@ -882,12 +873,7 @@ public class SelectWidget extends Composite {
 			LatLng c = selectionBounds.getCenter();
 			LatLng n = LatLng.newInstance(selectionBounds.getNorthEast().getLatitude(), selectionBounds.getCenter().getLongitude());
 			markers.clear();
-			String moduleRelativeURL = GWT.getModuleBaseURL();
-			String moduleName = GWT.getModuleName();
-			moduleRelativeURL = moduleRelativeURL.substring(0,moduleRelativeURL.indexOf(moduleName)-1);
-			//moduleRelativeURL = moduleRelativeURL.substring(0,moduleRelativeURL.lastIndexOf("/")+1);
-			String imageURL = moduleRelativeURL + "/images/";
-
+			
 			Icon yicon = Icon.newInstance();
 			yicon.setIconSize(Size.newInstance(20, 20));
 			yicon.setIconAnchor(Point.newInstance(10, 10));
@@ -1244,12 +1230,7 @@ public class SelectWidget extends Composite {
 			LatLng c = selectionBounds.getCenter();
 			LatLng e = LatLng.newInstance(selectionBounds.getCenter().getLatitude(), selectionBounds.getNorthEast().getLongitude());
 			markers.clear();
-			String moduleRelativeURL = GWT.getModuleBaseURL();
-			String moduleName = GWT.getModuleName();
-			moduleRelativeURL = moduleRelativeURL.substring(0,moduleRelativeURL.indexOf(moduleName)-1);
-			//moduleRelativeURL = moduleRelativeURL.substring(0,moduleRelativeURL.lastIndexOf("/")+1);
-			String imageURL = moduleRelativeURL + "/images/";
-
+			
 			Icon yicon = Icon.newInstance();
 			yicon.setIconSize(Size.newInstance(20, 20));
 			yicon.setIconAnchor(Point.newInstance(10, 10));
@@ -1614,14 +1595,6 @@ public class SelectWidget extends Composite {
 			SelectWidget.this.dataBounds = dataBounds;
 			this.selectionBounds = selectionBounds;
 			markers.clear();
-			
-			/* Used for getting the custom marker icons.  Not used for a point marker.
-			String moduleRelativeURL = GWT.getModuleBaseURL();
-			String moduleName = GWT.getModuleName();
-			moduleRelativeURL = moduleRelativeURL.substring(0,moduleRelativeURL.indexOf(moduleName)-1);
-			moduleRelativeURL = moduleRelativeURL.substring(0,moduleRelativeURL.lastIndexOf("/")+1);
-			String imageURL = moduleRelativeURL + "images/";
-			*/
 			
 			MarkerOptions center_options = MarkerOptions.newInstance();
 			center_options.setDraggable(true);

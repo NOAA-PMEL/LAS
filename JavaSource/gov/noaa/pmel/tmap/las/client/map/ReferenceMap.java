@@ -1,5 +1,7 @@
 package gov.noaa.pmel.tmap.las.client.map;
 
+import gov.noaa.pmel.tmap.las.client.laswidget.Util;
+
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.maps.client.MapType;
 import com.google.gwt.maps.client.MapWidget;
@@ -361,12 +363,12 @@ public class ReferenceMap extends Composite {
 		if ( elon < wlon ) {
 			elon = elon + 360.;
 		}
-		
+		String imageURL = Util.getImageURL();
 		LatLngBounds topBounds = LatLngBounds.newInstance(LatLng.newInstance(85., wlon), LatLng.newInstance(90., elon));
-        topOverlay = new GroundOverlay("http://localhost:8880/baker/images/top.png", topBounds);
+        topOverlay = new GroundOverlay(imageURL+"top.png", topBounds);
         mMap.addOverlay(topOverlay);
         LatLngBounds bottomBounds = LatLngBounds.newInstance(LatLng.newInstance(-90., dataBounds.getSouthWest().getLongitude()), LatLng.newInstance(-85., dataBounds.getNorthEast().getLongitude()));
-        bottomOverlay = new GroundOverlay("http://localhost:8880/baker/images/top.png", bottomBounds);
+        bottomOverlay = new GroundOverlay(imageURL+"top.png", bottomBounds);
         mMap.addOverlay(bottomOverlay);
 	}
 	public void removeTopAndBottom() {
