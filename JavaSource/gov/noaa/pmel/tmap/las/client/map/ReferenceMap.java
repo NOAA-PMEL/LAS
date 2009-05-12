@@ -426,7 +426,6 @@ public class ReferenceMap extends Composite {
 	 */
 	public ChangeListener southChangeListener = new ChangeListener() {
 
-		@Override
 		public void onChange(Widget sender) {
 			TextBox tb = (TextBox) sender;
 			double ylo = getYlo();
@@ -498,7 +497,6 @@ public class ReferenceMap extends Composite {
 	 */
 	public ChangeListener northChangeListener = new ChangeListener() {
 
-		@Override
 		public void onChange(Widget sender) {
 			TextBox tb = (TextBox) sender;
 			double ylo = getYlo();
@@ -557,7 +555,6 @@ public class ReferenceMap extends Composite {
 	 */
 	public ChangeListener westChangeListener = new ChangeListener() {
 
-		@Override
 		public void onChange(Widget sender) {
 			TextBox tb = (TextBox) sender;
 			double xlo = getXlo();
@@ -615,8 +612,7 @@ public class ReferenceMap extends Composite {
 	 * A listener that will handle change events when the user types text into the TextBox with the east longitude value.
 	 */
 	public ChangeListener eastChangeListener = new ChangeListener() {
-
-		@Override
+		
 		public void onChange(Widget sender) {
 			TextBox tb = (TextBox) sender;
 			double xlo = getXlo();
@@ -668,6 +664,7 @@ public class ReferenceMap extends Composite {
 				LatLngBounds sBounds = LatLngBounds.newInstance(sw, ne);
 				selectWidget.setSelectionBounds(sBounds, false, true);
 			}
+			
 		}
 	};
 }
