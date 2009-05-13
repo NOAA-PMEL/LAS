@@ -15,6 +15,13 @@
 		         <li><a href="ProductServer.do">Server information</a></li>
                  <li><a href="ReInit.do">Re-initialize the server to install new configuration</a></li>
                  <li><a href="CacheManager.do">Manage the cache</a></li>
+                 <li><style="bold">Set the Product Server Logging Level</li>
+                 <ul>
+                     <li><a href="ProductServer.do?log_level=debug">DEBUG - write the most information possible to logs and outputs.</a></li>
+                     <li><a href="ProductServer.do?log_level=info">INFO - include only a few informational messages.</a></li>
+                     <li><a href="ProductServer.do?log_level=warn">WARN - only warn about potential problems.</a></li>
+                     <li><a href="ProductServer.do?log_level=fatal">FATAL - be silent except for fatal errors.</a></li>
+                 </ul>
             </ul>
 		#parse( "/productserver/templates/V7UIFooter.vm") 
 	</body>

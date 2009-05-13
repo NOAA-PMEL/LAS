@@ -30,6 +30,8 @@
 <tr><td>$service.getName()</td><td><a href="$service.getValue()">$service.getValue()</a></td></tr>
 #end ##if local service
 #end ## service loop
-#parse("/productserver/templates/svn.vm")
 </table>
+#parse("/productserver/templates/svn.vm")
+Log level: $!log_level
+
 #parse( "/productserver/templates/V7UIFooter.vm") 
