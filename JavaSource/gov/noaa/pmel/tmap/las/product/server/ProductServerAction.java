@@ -214,6 +214,7 @@ public final class ProductServerAction extends LASAction {
 
         if ( debug.equalsIgnoreCase("true") ) {
         	request.setAttribute("debug", "true");
+        	lasRequest.setProperty("product_server","use_cache", "false");
         	lasRequest.setProperty("las", "debug", "true");
         } else {
         	request.setAttribute("debug", "false");
