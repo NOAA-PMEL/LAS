@@ -24,7 +24,7 @@ $error
         </iframe>
       </td>
   </tr>
-  #if ( $debug=="trace" || $debug=="debug" ) 
+  #if ( $debug=="true" || $debug=="debug" ) 
   <tr>
      <th>Debug Output (including symbols from the request).</th>
   </tr>

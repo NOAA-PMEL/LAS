@@ -23,7 +23,7 @@ site administrator.
 <a href="mailto:$institution.getContact()?subject=LAS Error&body=Type message and paste the URL here.">Click here to send email to the site administrator.</a>
 #end
 <hr>
-#if ( $debug=="trace" || $debug=="debug" )
+#if ( $debug=="true" || $debug=="debug" )
 #if ( $las_response.getResult("debug") != "" )
 <a href="$las_response.getResult("debug")">More details about this error.</a>
 #end

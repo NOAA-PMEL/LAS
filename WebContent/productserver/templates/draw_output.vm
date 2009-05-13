@@ -84,7 +84,7 @@ Request String: $las_request.toJavaScriptSafeString();
            </table>
       </td>
   </tr>
-  #if ( $debug=="trace" || $debug=="debug" ) 
+  #if ( $debug=="true" || $debug=="debug" ) 
     <tr>
      <td colspan="2">STDOUT/STDERR</td>
   </tr>
