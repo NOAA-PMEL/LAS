@@ -210,8 +210,14 @@ public final class ProductServerAction extends LASAction {
 
         }
 
-        if ( debug.equalsIgnoreCase("true") ) debug = "debug";
-        request.setAttribute("debug", debug);
+        if ( debug.equalsIgnoreCase("true") ) {
+        	debug = "debug";
+        	request.setAttribute("debug", debug);
+        	lasRequest.setProperty("las", "debug", debug);
+        } else {
+        	request.setAttribute("debug", "false");
+        	lasRequest.setProperty("las", "debug", "false");
+        }
         
         // Report logging level only for "debug" and "trace" levels.
         log.debug("Logging set to " + log.getEffectiveLevel().toString() + " for "+log.getName());
