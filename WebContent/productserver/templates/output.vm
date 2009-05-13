@@ -36,7 +36,7 @@ $las_response.toString()
       </td>
   </tr>
   #end
-  #if ( $debug=="trace" || $debug=="debug" ) 
+  #if ( $debug=="true" || $debug=="debug" ) 
   <tr>
      <td colspan="2">STDOUT/STDERR</td>
   </tr>

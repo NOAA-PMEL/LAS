@@ -213,9 +213,8 @@ public final class ProductServerAction extends LASAction {
         
 
         if ( debug.equalsIgnoreCase("true") ) {
-        	debug = "debug";
-        	request.setAttribute("debug", debug);
-        	lasRequest.setProperty("las", "debug", debug);
+        	request.setAttribute("debug", "true");
+        	lasRequest.setProperty("las", "debug", "true");
         } else {
         	request.setAttribute("debug", "false");
         	lasRequest.setProperty("las", "debug", "false");

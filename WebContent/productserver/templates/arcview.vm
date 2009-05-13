@@ -22,7 +22,7 @@ $error
         <a href="$las_response.getResult('ferret_listing')">Your ArcView file.</a>
       </td>
   </tr>
-  #if ($debug == "trace" || $debug=="debug")
+  #if ($debug == "true" || $debug=="debug")
   <tr>
      <th>Debug Output (including symbols from the request).</th>
   </tr>

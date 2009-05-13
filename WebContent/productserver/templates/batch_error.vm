@@ -17,7 +17,7 @@ $las_response.toString()
 <hr>
 <a href="ProductServer.do?xml=$las_request.toEncodedURLString()">The URL of this product.</a>
 <hr>
-#if ( $debug=="trace" || $debug=="debug" )
+#if ( $debug=="true" || $debug=="debug" )
 #if ( $las_response.getResult("debug") != "" )
 <a href="$las_response.getResult("debug")">More details about this error.</a>
 #end
