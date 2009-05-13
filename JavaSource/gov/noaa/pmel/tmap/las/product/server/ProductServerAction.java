@@ -139,10 +139,30 @@ public final class ProductServerAction extends LASAction {
         	}
         }
         
+        String log_level = request.getParameter("log_level");
+        Logger ancestor = Logger.getLogger("gov.noaa.pmel.tmap");
+        if ( log_level != null ) {
+        
+            if ( log_level.equalsIgnoreCase("debug") ) {
+                ancestor.setLevel(Level.DEBUG);
+            } else if ( log_level.equalsIgnoreCase("info") ) {
+                ancestor.setLevel(Level.INFO);
+            } else if ( log_level.equalsIgnoreCase("warn") ) {
+                ancestor.setLevel(Level.WARN);
+            } else if ( log_level.equalsIgnoreCase("error") ) {
+                ancestor.setLevel(Level.ERROR);
+            } else if ( log_level.equalsIgnoreCase("fatal") ) {
+                ancestor.setLevel(Level.FATAL);
+            } else {
+                ancestor.setLevel(Level.INFO);
+            }
+
+        }
         if ( (requestXML == null || requestXML.equals("")) ) {
             try {
                 request.setAttribute("title", lasConfig.getTitle());
                 request.setAttribute("services", serverConfig.getServiceNamesAndURLs());
+                request.setAttribute("log_level", log.getEffectiveLevel().toString());
             }
             catch (Exception e) {
                 logerror(request, "Error creating info page..", e);
@@ -177,7 +197,7 @@ public final class ProductServerAction extends LASAction {
         // Get the debug level from the query or request property.
         
         String debug = request.getParameter("debug");
-        Logger ancestor = Logger.getLogger("gov.noaa.pmel.tmap");
+       
         
         if ( debug == null ) {
             debug = lasConfig.getGlobalPropertyValue("las", "debug");
@@ -190,25 +210,7 @@ public final class ProductServerAction extends LASAction {
            } 
         }
  
-        String log_level = request.getParameter("log_level");
-
-        if ( log_level != null ) {
         
-            if ( log_level.equalsIgnoreCase("debug") ) {
-                ancestor.setLevel(Level.DEBUG);
-            } else if ( log_level.equalsIgnoreCase("info") ) {
-                ancestor.setLevel(Level.INFO);
-            } else if ( log_level.equalsIgnoreCase("warn") ) {
-                ancestor.setLevel(Level.WARN);
-            } else if ( log_level.equalsIgnoreCase("error") ) {
-                ancestor.setLevel(Level.ERROR);
-            } else if ( log_level.equalsIgnoreCase("fatal") ) {
-                ancestor.setLevel(Level.FATAL);
-            } else {
-                ancestor.setLevel(Level.INFO);
-            }
-
-        }
 
         if ( debug.equalsIgnoreCase("true") ) {
         	debug = "debug";
