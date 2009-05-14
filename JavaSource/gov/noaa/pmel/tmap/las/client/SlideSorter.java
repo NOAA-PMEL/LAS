@@ -30,6 +30,7 @@ import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.RadioButton;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.TextBox;
@@ -171,6 +172,13 @@ public class SlideSorter extends LASEntryPoint {
 	boolean panelHeaderHidden;
 	
 	/*
+	 * Image size control.
+	 */
+	ListBox imageSize;
+	Label imageSizeLabel = new Label("Image zoom: ");
+	int pwidth = 0;
+	
+	/*
 	 * (non-Javadoc)
 	 * @see gov.noaa.pmel.tmap.las.client.LASEntryPoint#onModuleLoad()
 	 */
@@ -189,7 +197,7 @@ public class SlideSorter extends LASEntryPoint {
 		
 		
 		slides = new Grid(2,2);
-		header = new Grid(1, 9);
+		header = new Grid(1, 10);
 		
 		ztGrid = new FlexTable();
 		varyAxis = new Label("Select Axis to Vary in Panels");
@@ -239,9 +247,42 @@ public class SlideSorter extends LASEntryPoint {
 		autoContourButton = new ToggleButton("Auto Set Color Fill Levels for Gallery");
 		autoContourButton.setTitle("Set consistent contour levels for all panels.");
 		autoContourButton.addClickListener(autoContour);
-		header.setWidget(0, 7, autoContourButton);
+		header.setWidget(0, 4, autoContourButton);
 		autoContourTextBox = new TextBox();
-		header.setWidget(0, 8, autoContourTextBox);
+		header.setWidget(0, 5, autoContourTextBox);
+		
+		imageSize = new ListBox();
+		imageSize.addItem("Auto", "auto");
+		imageSize.addItem("100%", "100");
+		imageSize.addItem(" 90%", "90");
+		imageSize.addItem(" 80%", "80");
+		imageSize.addItem(" 70%", "70");
+		imageSize.addItem(" 60%", "60");
+		imageSize.addItem(" 50%", "50");
+		imageSize.addItem(" 40%", "40");
+		imageSize.addItem(" 30%", "30");
+		
+		imageSize.addChangeListener(new ChangeListener() {
+			public void onChange(Widget sender) {
+				String value = imageSize.getValue(imageSize.getSelectedIndex());
+				if ( !value.equals("auto") ) {
+					for (Iterator panelIt = panels.iterator(); panelIt.hasNext();) {
+						SlideSorterPanel panel = (SlideSorterPanel) panelIt.next();
+						panel.setImageSize(Integer.valueOf(value).intValue());
+					}
+				} else {
+					if ( pwidth == 0 ) {
+						pwidth = 400;
+					}
+					for (Iterator panelIt = panels.iterator(); panelIt.hasNext();) {
+						SlideSorterPanel panel = (SlideSorterPanel) panelIt.next();
+						panel.setPanelWidth(pwidth);
+					}
+				}
+			}		
+		});
+		header.setWidget(0, 6, imageSizeLabel);
+		header.setWidget(0, 7, imageSize);
 		
 		// Initialize the widgets to be used...
 		if ( dsid != null && vid != null & op != null && view != null) {
@@ -301,10 +342,12 @@ public class SlideSorter extends LASEntryPoint {
 	};
 	public WindowResizeListener windowResizeListener = new WindowResizeListener() {
 		public void onWindowResized(int width, int height) {
-			int pwidth = (width-rightPad)/2;
-			for (Iterator panelIt = panels.iterator(); panelIt.hasNext();) {
-	    		SlideSorterPanel panel = (SlideSorterPanel) panelIt.next();
-	    		panel.setPanelWidth(pwidth);
+			pwidth = (width-rightPad)/2;
+			if ( imageSize.getValue(imageSize.getSelectedIndex()).equals("auto") ) {
+				for (Iterator panelIt = panels.iterator(); panelIt.hasNext();) {
+					SlideSorterPanel panel = (SlideSorterPanel) panelIt.next();
+					panel.setPanelWidth(pwidth);
+				}
 			}
 		}
 	};
@@ -316,7 +359,7 @@ public class SlideSorter extends LASEntryPoint {
 		panels.clear();
 
 		settingsButton.addApplyClickListener(settingsButtonApplyListener);
-		header.setWidget(0, 4, settingsButton);
+		header.setWidget(0, 3, settingsButton);
 
 
 		int width = Window.getClientWidth();

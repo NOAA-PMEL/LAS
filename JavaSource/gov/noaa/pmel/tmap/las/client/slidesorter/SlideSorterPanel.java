@@ -129,6 +129,9 @@ public class SlideSorterPanel extends Composite {
 	double image_h = 631.;
 	double image_w = 998.;
 	
+	int fixedZoom;
+	boolean autoZoom = true;;
+	
 	double min;
 	double max;
 	
@@ -450,10 +453,16 @@ public class SlideSorterPanel extends Composite {
 								}
 								
 							});
-							image.setWidth(pwidth+"px");
-							int h = (int) ((image_h/image_w)*Double.valueOf(pwidth));
-							image.setHeight(h+"px");
 							grid.setWidget(1, 0 , image);
+							setImageWidth();
+//							if ( autoZoom ) {
+//								image.setWidth(pwidth+"px");
+//								int h = (int) ((image_h/image_w)*Double.valueOf(pwidth));
+//								image.setHeight(h+"px");
+//							} else {
+//								setImageSize(fixedZoom);
+//							}
+							
 						} else if ( result.getAttribute("type").equals("map_scale") )  {
 							final String ms_url = result.getAttribute("url");
 						    RequestBuilder mapScaleRequest = new RequestBuilder(RequestBuilder.GET, ms_url);
@@ -663,21 +672,35 @@ public class SlideSorterPanel extends Composite {
 		settingsButton.setLatLon(xlo, xhi, ylo, yhi);
 		
 	}
+	public void setImageSize(int percent) {
+		fixedZoom = percent;
+		double factor = percent/100.;
+		Widget p = grid.getWidget(1, 0);
+		int w = (int)(Double.valueOf(image_w).doubleValue()*factor);
+		int h = (int)(Double.valueOf(image_h).doubleValue()*factor);
+		p.setWidth(w+"px");
+		p.setHeight(h+"px");
+		autoZoom = false;
+	}
 	public void setImageWidth() {
 		Widget w = grid.getWidget(1, 0);
-		
-		if ( pwidth < image_w ) {
-			// If the panel is less than the image, shrink the image.
-			int h = (int) ((image_h/image_w)*Double.valueOf(pwidth));
-			w.setWidth(pwidth+"px");
-			w.setHeight(h+"px");
+		if ( autoZoom ) {
+			if ( pwidth < image_w ) {
+				// If the panel is less than the image, shrink the image.
+				int h = (int) ((image_h/image_w)*Double.valueOf(pwidth));
+				w.setWidth(pwidth+"px");
+				w.setHeight(h+"px");
+			} else {
+				// Just use the exact image size.
+				w.setWidth(image_w+"px");
+				w.setHeight(image_h+"px");
+			}
 		} else {
-			// Just use the exact image size.
-			w.setWidth(image_w+"px");
-			w.setHeight(image_h+"px");
+			setImageSize(fixedZoom);
 		}
 	}
 	public void setPanelWidth(int width) {
+		autoZoom = true;
 		int max = (int) image_w;
 		pwidth = Math.min(width,  max);
 		setImageWidth();	
