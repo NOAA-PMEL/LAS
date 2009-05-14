@@ -2,6 +2,7 @@ package gov.noaa.pmel.tmap.las.client;
 
 import gov.noaa.pmel.tmap.las.client.laswidget.AxisWidget;
 import gov.noaa.pmel.tmap.las.client.laswidget.DateTimeWidget;
+import gov.noaa.pmel.tmap.las.client.laswidget.Util;
 import gov.noaa.pmel.tmap.las.client.map.SettingsButton;
 import gov.noaa.pmel.tmap.las.client.serializable.AxisSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.CategorySerializable;
@@ -27,6 +28,7 @@ import com.google.gwt.user.client.ui.ClickListener;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RadioButton;
 import com.google.gwt.user.client.ui.RootPanel;
@@ -159,6 +161,14 @@ public class SlideSorter extends LASEntryPoint {
 	 */
 	VariableSerializable nvar;
 	boolean changeDataset = false;
+	String tridown;
+	String triright;
+	
+	/*
+	 * Button for showing and hiding the panel headers.
+	 */
+	Image showHide;
+	boolean panelHeaderHidden;
 	
 	/*
 	 * (non-Javadoc)
@@ -179,7 +189,7 @@ public class SlideSorter extends LASEntryPoint {
 		
 		
 		slides = new Grid(2,2);
-		header = new Grid(1, 8);
+		header = new Grid(1, 9);
 		
 		ztGrid = new FlexTable();
 		varyAxis = new Label("Select Axis to Vary in Panels");
@@ -187,23 +197,51 @@ public class SlideSorter extends LASEntryPoint {
 		ztGrid.setWidget(0, 0, varyAxis);
 		ztGrid.getFlexCellFormatter().setColSpan(0, 0, 2);
 		ztGrid.addStyleName("LSS_middle");
-		header.setWidget(0, 1, ztGrid);
+		header.setWidget(0, 2, ztGrid);
 		
+		panelHeaderHidden = false;
+		tridown = Util.getImageURL()+"tri-down.png";
+		triright = Util.getImageURL()+"tri-right.png";
+		showHide = new Image(tridown);
+		header.setWidget(0, 0, showHide);
+		showHide.addClickListener(new ClickListener() {
+
+			public void onClick(Widget sender) {
+				if ( panelHeaderHidden ) {
+					for (Iterator panelIt = panels.iterator(); panelIt.hasNext();) {
+			    		SlideSorterPanel panel = (SlideSorterPanel) panelIt.next();
+			    		panel.show();
+					}
+					showHide.setUrl(tridown);
+				} else {
+					for (Iterator panelIt = panels.iterator(); panelIt.hasNext();) {
+			    		SlideSorterPanel panel = (SlideSorterPanel) panelIt.next();
+			    		panel.hide();
+					}
+					showHide.setUrl(triright);
+				}
+				panelHeaderHidden = !panelHeaderHidden;
+			}
+			
+		});
+		showHide.setTitle("Show/Hide Panel Headers");
 		differenceButton = new ToggleButton("Difference Mode");
+		differenceButton.setTitle("Toggle Difference Mode");
 		differenceButton.addClickListener(differencesClick);
-		header.setWidget(0, 0, differenceButton);
+		header.setWidget(0, 1, differenceButton);
 		
 		settingsButton = new SettingsButton("Gallery Settings", LatLng.newInstance(0.0, 0.0), 0, 256, 360, "Slide Sorter", op, rpcService);
-		
+		settingsButton.setTitle("Settings for all panels.");
 		settingsButton.addDatasetTreeListener(datasetTreeListener);
 		settingsButton.addOptionsOkClickListener(optionsOkListener);
 		settingsButton.addOperationClickListener(operationsClickListener);
 				
 		autoContourButton = new ToggleButton("Auto Set Color Fill Levels for Gallery");
+		autoContourButton.setTitle("Set consistent contour levels for all panels.");
 		autoContourButton.addClickListener(autoContour);
-		header.setWidget(0, 6, autoContourButton);
+		header.setWidget(0, 7, autoContourButton);
 		autoContourTextBox = new TextBox();
-		header.setWidget(0, 7, autoContourTextBox);
+		header.setWidget(0, 8, autoContourTextBox);
 		
 		// Initialize the widgets to be used...
 		if ( dsid != null && vid != null & op != null && view != null) {
@@ -278,7 +316,7 @@ public class SlideSorter extends LASEntryPoint {
 		panels.clear();
 
 		settingsButton.addApplyClickListener(settingsButtonApplyListener);
-		header.setWidget(0, 3, settingsButton);
+		header.setWidget(0, 4, settingsButton);
 
 
 		int width = Window.getClientWidth();

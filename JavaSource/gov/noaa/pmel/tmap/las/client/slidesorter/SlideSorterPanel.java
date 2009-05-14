@@ -214,6 +214,8 @@ public class SlideSorterPanel extends Composite {
 		plot.setHTML("<img src=\"../JavaScript/components/mozilla_blu.gif\" alt=\"Spinner\"/>");
 		grid.setWidget(1, 0, plot);
 		initWidget(grid);	
+		
+		
 	}
 	public void init(boolean usePanel) {
 	    min =  999999999.;
@@ -988,5 +990,13 @@ public class SlideSorterPanel extends Composite {
 	}
 	public void setPanelColor(String style) {
 		grid.setStyleName(style);
+	}
+	public void hide() {
+		top.setVisible(false);
+		grid.getCellFormatter().setHeight(0, 0, "1px");
+	}
+	public void show() {
+		top.setVisible(true);
+		grid.getCellFormatter().setHeight(0, 0, "90px");
 	}
 }
