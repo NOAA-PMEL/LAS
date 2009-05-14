@@ -93,7 +93,7 @@ public class SlideSorter extends LASEntryPoint {
 	/*
 	 * Padding on the right side of the browser frame...
 	 */
-	int rightPad = 15;
+	int rightPad = 35;
 	
 	/*
 	 * A DateTimeWidget to globally control the time.
