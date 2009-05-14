@@ -652,7 +652,7 @@ public class ReferenceMap extends Composite {
 			}
 			if ( selectWidget.getToolType().equals("xy") || selectWidget.getToolType().equals("x") ) {
 				if ( xhi < xlo ) {
-					xhi = xlo;
+					xhi = xhi + 360;
 				}
 				LatLng ne = LatLng.newInstance(selectWidget.getSelectionBounds().getNorthEast().getLatitude(), xhi);
 				LatLngBounds sBounds = LatLngBounds.newInstance(selectWidget.getSelectionBounds().getSouthWest(), ne);
