@@ -21,10 +21,10 @@ import com.google.gwt.user.client.ui.Widget;
 
 public class DateTimeWidget extends Composite {
 	
-	DateTimeFormat longForm = DateTimeFormat.getFormat("yyyy-MM-dd HH:mm:ss");
+	DateTimeFormat longForm = DateTimeFormat.getFormat("yyyy-MM-dd HH:mm");
 	DateTimeFormat shortForm = DateTimeFormat.getFormat("yyyy-MM-dd");
 	DateTimeFormat shortFerretForm = DateTimeFormat.getFormat("dd-MMM-yyyy");
-	DateTimeFormat longFerretForm = DateTimeFormat.getFormat("dd-MMM-yyyy HH:mm:ss");
+	DateTimeFormat longFerretForm = DateTimeFormat.getFormat("dd-MMM-yyyy HH:mm");
 	
 	Date lo;
 	Date hi;
@@ -41,20 +41,17 @@ public class DateTimeWidget extends Composite {
 	ListBox lo_year = new ListBox();
 	ListBox lo_month = new ListBox();
 	ListBox lo_day = new ListBox();
-	ListBox lo_hour = new ListBox();
+	HourListBox lo_hour = new HourListBox();
 
 	ListBox hi_year = new ListBox();
 	ListBox hi_month = new ListBox();
 	ListBox hi_day = new ListBox();
-	ListBox hi_hour = new ListBox();
+	HourListBox hi_hour = new HourListBox();
 
 	HorizontalPanel lo_flow = new HorizontalPanel();
 	HorizontalPanel hi_flow = new HorizontalPanel();
 
 	VerticalPanel dateTimeWidget = new VerticalPanel();
-
-	NumberFormat four_digits = NumberFormat.getFormat("####");
-	NumberFormat two_digits = NumberFormat.getFormat("##");
 
 	boolean hasYear = false;
 	boolean hasMonth = false;
@@ -70,6 +67,8 @@ public class DateTimeWidget extends Composite {
 	
 	String lo_date;
 	String hi_date;
+	
+	int delta;
 
 	private static final List<String> MONTHS = new ArrayList<String>(Arrays.asList("Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"));
 	
@@ -127,17 +126,17 @@ public class DateTimeWidget extends Composite {
 		lo_year.addChangeListener(loYearListener);
 		lo_month.addChangeListener(loMonthListener);
 		lo_day.addChangeListener(loDayListener);
-		lo_hour.addChangeListener(loDayListener);
+		lo_hour.addChangeListener(loHourListener);
 		
 		hi_year.addChangeListener(hiYearListener);
 		hi_month.addChangeListener(hiMonthListener);
 		hi_day.addChangeListener(hiDayListener);
-		hi_hour.addChangeListener(hiDayListener);
+		hi_hour.addChangeListener(hiHourListener);
 	}
-	public void init(String lo_date, String hi_date, String render, boolean climo) {
+	public void init(String lo_date, String hi_date, int delta, String render, boolean climo) {
 		this.render = render;
 		this.climatology = climo;
-
+        this.delta = delta;
 		try {
 			lo = longForm.parse(lo_date);
 		} catch (IllegalArgumentException e) {
@@ -145,6 +144,7 @@ public class DateTimeWidget extends Composite {
 				lo = shortForm.parse(lo_date);
 			} catch (IllegalArgumentException e1) {
 				Window.alert("Date parsing failed for "+lo_date);
+				return;
 			}
 		}
 
@@ -155,6 +155,7 @@ public class DateTimeWidget extends Composite {
 				hi = shortForm.parse(hi_date);
 			} catch (IllegalArgumentException ex2) {
 				Window.alert("Date parsing failed for "+hi_date);
+				return;
 			}
 		}
 
@@ -164,10 +165,39 @@ public class DateTimeWidget extends Composite {
 		months(hi_month, hi.getYear()+1900);
 		days(lo_day, lo.getYear()+1900, lo.getMonth());
 		days(hi_day, hi.getYear()+1900, hi.getMonth());
+	    hours(lo_hour, lo.getHours(), lo.getMinutes(), 24, 0);
+		hours(hi_hour, 0, 0, hi.getHours(), lo.getMinutes());
 		hi_year.setSelectedIndex(hi_year.getItemCount() - 1);
 		hi_month.setSelectedIndex(hi_month.getItemCount() - 1);
 		hi_day.setSelectedIndex(hi_day.getItemCount() - 1);
 		loadWidget();
+	}
+	/**
+	 * 
+	 * @param hours
+	 * @param start_hour
+	 * @param start_minute
+	 * @param end_hour
+	 * @param end_minute
+	 * @param delta
+	 */
+	private void hours(HourListBox hours, int start_hour, int start_minute, int end_hour, int end_minute) {
+		hours.clear();
+		if ( delta < 0 ) {
+            hours.addItem("00:00", "00:00");
+		} else {
+			int current = start_hour*60 + start_minute;
+			int end = end_hour*60 + end_minute;
+			while ( current < end ) {
+				int hr = (int) Math.floor(current/60);
+				int min = current - hr*60;
+				hours.addItem(hr, min);
+				current = current + delta;
+			}
+		}
+	}
+	public void init(String lo_date, String hi_date, String render, boolean climo) {
+		init(lo_date, hi_date, -1, render, climo);
 	}
 	private void loadWidget() {
 		lo_flow.clear();
@@ -184,7 +214,7 @@ public class DateTimeWidget extends Composite {
 			    lo_flow.add(lo_day);
 			}
 		} else {
-			if ( render.contains("T") || render.contains("t") ) {
+			if ( render.toLowerCase().contains("t") ) {
 				if ( range ) {
 					lo_flow.add(dt_label_lo_range);
 					hi_flow.add(dt_label_hi_range);
@@ -199,7 +229,7 @@ public class DateTimeWidget extends Composite {
 				    lo_flow.add(d_label);
 				}
 			}
-			if ( render.contains("Y") || render.contains("y") ) {
+			if ( render.toLowerCase().contains("y") ) {
 				if ( range ) {
 					lo_flow.add(lo_year);
 					hi_flow.add(hi_year);
@@ -209,7 +239,7 @@ public class DateTimeWidget extends Composite {
 				hasYear = true;
 			}
 
-			if ( render.contains("M") || render.contains("m") ) {
+			if ( render.toLowerCase().contains("m") ) {
 				if ( range ) {
 					lo_flow.add(lo_month);
 					hi_flow.add(hi_month);
@@ -219,7 +249,7 @@ public class DateTimeWidget extends Composite {
 				hasMonth = true;
 			}
 
-			if ( render.contains("D") || render.contains("d") ) {
+			if ( render.toLowerCase().contains("d") ) {
 				if ( range ) {
 					lo_flow.add(lo_day);
 					hi_flow.add(hi_day);
@@ -227,6 +257,15 @@ public class DateTimeWidget extends Composite {
 					lo_flow.add(lo_day);
 				}
 				hasDay = true;
+			}
+			if ( render.toLowerCase().contains("t") ) {
+				if ( range ) {
+					lo_flow.add(lo_hour);
+					hi_flow.add(hi_hour);
+				} else {
+					lo_flow.add(lo_hour);
+				}
+				hasHour = true;
 			}
 		}
 		
@@ -274,16 +313,10 @@ public class DateTimeWidget extends Composite {
 			end = hi.getDate();
 		}
 		for ( int i = start; i <= end; i++) {
-			day.addItem(format_two(i), format_two(i));
+			day.addItem(Util.format_two(i), Util.format_two(i));
 		}
 	}
-	private String format_two(int i) {
-		if ( i < 10 ) {
-			return "0"+i;
-		} else {
-			return String.valueOf(i);
-		}
-	}
+	
 	private int maxDays(int year, int month) {
 		if ( month == 0 || month == 2 || month == 4 || month == 6 || month == 7 || month == 9 || month == 11) {
 			return 31;
@@ -326,7 +359,7 @@ public class DateTimeWidget extends Composite {
 		int start = lo.getYear() + 1900;
 		int end = hi.getYear() + 1900;
 		for ( int y = start; y <= end; y++ ) {
-			year.addItem(four_digits.format(y), four_digits.format(y));
+			year.addItem(Util.format_four(y), Util.format_four(y));
 		}
 	}
 	public void setEnabled(boolean b) {
@@ -372,7 +405,9 @@ public class DateTimeWidget extends Composite {
 				date.append("-"+lo_year.getValue(lo_year.getSelectedIndex()));
 			}
 		}
-
+        if ( hasHour ) {
+        	date.append(" "+lo_hour.getValue(lo_hour.getSelectedIndex()));
+        }
 		return date.toString();
 	}
 
@@ -397,7 +432,9 @@ public class DateTimeWidget extends Composite {
 					date.append("-"+hi_year.getValue(hi_year.getSelectedIndex()));
 				}
 			}
-
+            if ( hasHour ) {
+            	date.append(" "+hi_hour.getValue(hi_hour.getSelectedIndex()));
+            }
 			return date.toString();
 		} else {
 			return getFerretDateLo();
@@ -415,7 +452,7 @@ public class DateTimeWidget extends Composite {
 		hi_hour.addChangeListener(change);
 	}
 	public void setLo(String tlo) {
-		// TODO what about hours????
+		
 		if ( isMenu ) {
 			for(int d = 0; d < lo_day.getItemCount(); d++) {
 				String value = lo_day.getValue(d);
@@ -431,7 +468,7 @@ public class DateTimeWidget extends Composite {
 				lo = longFerretForm.parse(tlo);
 			}
 			if ( hasDay ) {
-				String day = String.valueOf(lo.getDay());
+				String day = String.valueOf(lo.getDate());
 				for(int d = 0; d < lo_day.getItemCount(); d++) {
 					String value = lo_day.getValue(d);
 					if ( value.equals(day) ) {
@@ -462,7 +499,7 @@ public class DateTimeWidget extends Composite {
 		}
 	}
 	public void setHi(String thi) {
-		// TODO what about hours????
+		
 		if ( isMenu ) {
 			for(int d = 0; d < hi_day.getItemCount(); d++) {
 				String value = hi_day.getValue(d);
@@ -478,7 +515,7 @@ public class DateTimeWidget extends Composite {
 				hi = longFerretForm.parse(thi);
 			}
 			if ( hasDay ) {
-				String day = String.valueOf(hi.getDay());
+				String day = String.valueOf(hi.getDate());
 				for(int d = 0; d < hi_day.getItemCount(); d++) {
 					String value = hi_day.getValue(d);
 					if ( value.equals(day) ) {
@@ -509,7 +546,7 @@ public class DateTimeWidget extends Composite {
 		}
 	}
 
-	private void loadAndSetMonthDay(ListBox month_list, ListBox day_list, int year, int month, int day) {
+	private void loadAndSetMonthDayHour(ListBox month_list, ListBox day_list, HourListBox hour_list, int year, int month, int day, int hour, int min) {
 		// Load the valid months for this year.
 		months(month_list, year);
 
@@ -532,10 +569,10 @@ public class DateTimeWidget extends Composite {
 			}
 		}
 		
-		loadAndSetDay(day_list, year, MONTHS.indexOf(month_list.getValue(month_list.getSelectedIndex())), day);	
+		loadAndSetDayHour(day_list, hour_list, year, MONTHS.indexOf(month_list.getValue(month_list.getSelectedIndex())), day, hour, min);	
 	}
 	
-	public void loadAndSetDay(ListBox day_list, int year, int month, int day) {
+	public void loadAndSetDayHour(ListBox day_list, HourListBox hour_list, int year, int month, int day, int hour, int min) {
 		// Load the valid days for this month (which as set above) and year.
 		days(day_list, year, month);
 
@@ -547,10 +584,33 @@ public class DateTimeWidget extends Composite {
 
 			for (int i = 0; i < day_list.getItemCount(); i++) {
 				String v = day_list.getValue(i);
-				if ( v.equals(format_two(day)) ) {
+				if ( v.equals(Util.format_two(day)) ) {
 					day_list.setSelectedIndex(i);
 				}
 			}
+		}
+		
+		loadAndSetHour(hour_list, year, month, Integer.valueOf(day_list.getValue(day_list.getSelectedIndex())).intValue(), hour, min);
+		
+	}
+	public void loadAndSetHour(HourListBox hour_list, int year, int month, int day, int hour, int min) {
+		int start_year = lo.getYear() + 1900;
+		int start_month = lo.getMonth();
+		int start_day = lo.getDate();
+		int start_hour = lo.getHours();
+		int start_min = lo.getMinutes();
+		
+		int end_year = hi.getYear() + 1900;
+		int end_month = hi.getMonth();
+		int end_day = hi.getDate();
+		int end_hour = hi.getHours();
+		int end_min = hi.getMinutes();
+		if ( start_year == year && start_month == month && start_day == day ) {
+			hours(hour_list, start_hour, start_min, 24, 0);
+		} else if ( end_year == year && end_month == month && end_day == day ) {
+			hours(hour_list, 0, 0, end_hour, end_min);
+		} else {
+			hours(hour_list, 0, 0, 24, 0);
 		}
 	}
 	private void checkRangeEndYear() {
@@ -574,7 +634,7 @@ public class DateTimeWidget extends Composite {
 		if ( clo.after(chi) ) {
 			int year = Integer.valueOf(lo_year.getValue(lo_year.getSelectedIndex()));
 			hi_year.setSelectedIndex(lo_year.getSelectedIndex());
-			loadAndSetMonthDay(hi_month, hi_day, year, MONTHS.indexOf(hi_month.getValue(hi_month.getSelectedIndex())), Integer.valueOf(hi_day.getValue(hi_day.getSelectedIndex())).intValue());
+			loadAndSetMonthDayHour(hi_month, hi_day, hi_hour, year, MONTHS.indexOf(hi_month.getValue(hi_month.getSelectedIndex())), Integer.valueOf(hi_day.getValue(hi_day.getSelectedIndex())).intValue(), hi_hour.getHour(), hi_hour.getMin());
 			checkRangeEndMonth();
 		}
 		
@@ -600,7 +660,9 @@ public class DateTimeWidget extends Composite {
 			int month = MONTHS.indexOf(lo_month.getValue(lo_month.getSelectedIndex()));
 			int day = Integer.valueOf(hi_day.getValue(hi_day.getSelectedIndex()));
 			hi_month.setSelectedIndex(lo_month.getSelectedIndex());
-			loadAndSetDay(hi_day, ny, month, day);
+			int hour = hi_hour.getHour();
+			int min = hi_hour.getMin();
+			loadAndSetDayHour(hi_day, hi_hour, ny, month, day, hour, min);
 			checkRangeEndDay();
 		}
 	}
@@ -622,6 +684,27 @@ public class DateTimeWidget extends Composite {
 		}
 		if ( clo.after(chi) ) {
 			hi_day.setSelectedIndex(lo_day.getSelectedIndex());
+			checkRangeEndHour();
+		}
+	}
+	private void checkRangeEndHour() {
+		String current_lo = getFerretDateLo();
+		String current_hi = getFerretDateHi();
+		
+		Date clo;
+		if ( current_lo.length() == 11 ) {
+			clo = shortFerretForm.parse(current_lo);
+	    } else {
+	    	clo = longFerretForm.parse(current_lo);
+	    }
+		Date chi;
+		if ( current_hi.length() == 11 ) {
+		   chi = shortFerretForm.parse(current_hi);
+		} else {
+			chi = longFerretForm.parse(current_hi);
+		}
+		if ( clo.after(chi) ) {
+			hi_hour.setSelectedIndex(lo_hour.getSelectedIndex());
 		}
 	}
 	private void checkRangeStartYear() {
@@ -687,6 +770,27 @@ public class DateTimeWidget extends Composite {
 		}
 		if ( clo.after(chi) ) {
 			lo_day.setSelectedIndex(hi_day.getSelectedIndex());
+			checkRangeStartHour();
+		}
+	}
+	public void checkRangeStartHour() {
+		String current_lo = getFerretDateLo();
+		String current_hi = getFerretDateHi();
+		
+		Date clo; 
+	    if ( current_lo.length() == 11 ) {
+			clo = shortFerretForm.parse(current_lo);
+	    } else {
+	    	clo = longFerretForm.parse(current_lo);
+	    }
+		Date chi;
+		if ( current_hi.length() == 11 ) {
+		   chi = shortFerretForm.parse(current_hi);
+		} else {
+			chi = longFerretForm.parse(current_hi);
+		}
+		if ( clo.after(chi) ) {
+			lo_hour.setSelectedIndex(hi_hour.getSelectedIndex());
 		}
 	}
 	public ChangeListener loYearListener = new ChangeListener() {
@@ -694,7 +798,9 @@ public class DateTimeWidget extends Composite {
 			int year = Integer.valueOf(lo_year.getValue(lo_year.getSelectedIndex())).intValue();
 			int month = MONTHS.indexOf(lo_month.getValue(lo_month.getSelectedIndex()));
 			int day = Integer.valueOf(lo_day.getValue(lo_day.getSelectedIndex())).intValue();
-			loadAndSetMonthDay(lo_month, lo_day, year, month, day);
+			int hour = lo_hour.getHour();
+			int min = lo_hour.getMin();
+			loadAndSetMonthDayHour(lo_month, lo_day, lo_hour, year, month, day, hour, min);
 			checkRangeEndYear();
 		}
 	};
@@ -703,13 +809,26 @@ public class DateTimeWidget extends Composite {
 			int year = Integer.valueOf(lo_year.getValue(lo_year.getSelectedIndex())).intValue();
 			int month = MONTHS.indexOf(lo_month.getValue(lo_month.getSelectedIndex()));
 			int day = Integer.valueOf(lo_day.getValue(lo_day.getSelectedIndex())).intValue();
-			loadAndSetDay(lo_day, year, month, day);
+			int hour = lo_hour.getHour();
+			int min = lo_hour.getMin();
+			loadAndSetDayHour(lo_day, lo_hour, year, month, day, hour, min);
 			checkRangeEndMonth();
 		}	
 	};
 	public ChangeListener loDayListener = new ChangeListener() {
 		public void onChange(Widget sender) {
+			int year = Integer.valueOf(lo_year.getValue(lo_year.getSelectedIndex())).intValue();
+			int month = MONTHS.indexOf(lo_month.getValue(lo_month.getSelectedIndex()));
+			int day = Integer.valueOf(lo_day.getValue(lo_day.getSelectedIndex())).intValue();
+			int hour = lo_hour.getHour();
+			int min = lo_hour.getMin();
+			loadAndSetHour(lo_hour, year, month, day, hour, min);
 			checkRangeEndDay();
+		}
+	};
+	public ChangeListener loHourListener = new ChangeListener() {
+		public void onChange(Widget sender) {
+			checkRangeEndHour();
 		}
 	};
 	public ChangeListener hiYearListener = new ChangeListener() {
@@ -717,7 +836,9 @@ public class DateTimeWidget extends Composite {
 			int year = Integer.valueOf(hi_year.getValue(hi_year.getSelectedIndex())).intValue();
 			int month = MONTHS.indexOf(hi_month.getValue(hi_month.getSelectedIndex()));
 			int day = Integer.valueOf(hi_day.getValue(hi_day.getSelectedIndex())).intValue();
-			loadAndSetMonthDay(hi_month, hi_day, year, month, day);
+			int hour = hi_hour.getHour();
+			int min = hi_hour.getMin();
+			loadAndSetMonthDayHour(hi_month, hi_day, hi_hour, year, month, day, hour, min);
 			checkRangeStartYear();
 		}
 	};
@@ -726,61 +847,26 @@ public class DateTimeWidget extends Composite {
 			int year = Integer.valueOf(hi_year.getValue(hi_year.getSelectedIndex())).intValue();
 			int month = MONTHS.indexOf(hi_month.getValue(hi_month.getSelectedIndex()));
 			int day = Integer.valueOf(hi_day.getValue(hi_day.getSelectedIndex())).intValue();
-			loadAndSetDay(hi_day, year, month, day);
+			int hour = hi_hour.getHour();
+			int	min = hi_hour.getMin();  
+			loadAndSetDayHour(hi_day, hi_hour, year, month, day, hour, min);
 			checkRangeStartMonth();
 		}	
 	};
 	public ChangeListener hiDayListener = new ChangeListener() {
 		public void onChange(Widget sender) {
+			int year = Integer.valueOf(hi_year.getValue(hi_year.getSelectedIndex())).intValue();
+			int month = MONTHS.indexOf(hi_month.getValue(hi_month.getSelectedIndex()));
+			int day = Integer.valueOf(hi_day.getValue(hi_day.getSelectedIndex())).intValue();
+			int hour = hi_hour.getHour();
+			int	min = hi_hour.getMin();  
+			loadAndSetHour(hi_hour, year, month, day, hour, min);
 			checkRangeStartDay();
 		}
 	};
-//	public ChangeListener loListener = new ChangeListener() {
-//		public void onChange(Widget sender) {
-//			/*
-//			 *  When one of the widgets that makes up a date changes, two things must be true.
-//			 *     1. All widgets must show all and only valid selections based on the new value.
-//			 *     2. The end date has to be greater than or equal to the start date.
-//			 */
-//			String current_lo = getFerretDateLo();
-//			String current_hi = getFerretDateHi();
-//			
-//			Date clo = shortFerretForm.parse(current_lo);
-//			Date chi = shortFerretForm.parse(current_hi);
-//			
-//			if ( clo.after(chi) ) {
-//				setHi(shortFerretForm.format(clo));
-//			}
-//		}
-//	};	
-//	public ChangeListener hiListener = new ChangeListener() {
-//		public void onChange(Widget sender) {
-//			/*
-//			 *  When one of the widgets that makes up a date changes, two things must be true.
-//			 *     1. All widgets must show all and only valid selections based on the new value.
-//			 *     2. The end date has to be greater than or equal to the start date.
-//			 */
-//			
-//			String current_lo = getFerretDateLo();
-//			String current_hi = getFerretDateHi();
-//			
-//			Date clo; 
-//		    if ( current_lo.length() == 11 ) {
-//				clo = shortFerretForm.parse(current_lo);
-//		    } else {
-//		    	clo = longFerretForm.parse(current_lo);
-//		    }
-//			Date chi;
-//			if ( current_hi.length() == 11 ) {
-//			   chi = shortFerretForm.parse(current_hi);
-//			} else {
-//				chi = longFerretForm.parse(current_hi);
-//			}
-//			
-//			if ( clo.after(chi) ) {
-//				setLo(shortForm.format(chi));
-//			}
-//			
-//		}
-//	};	
+	public ChangeListener hiHourListener = new ChangeListener() {
+		public void onChange(Widget sender) {
+			checkRangeStartHour();
+		}
+	};
 }
