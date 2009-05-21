@@ -1039,7 +1039,7 @@ function DateWidget_getDate1_Ferret() {
   var month1 = (this.month1 == '00') ? '' : '-' + monthNames[Number(this.month1)-1];
   var day1 = (this.day1 == '00') ? '' : this.day1;
   var time1 = (this.Time1) ? ' ' + this.twoDigit(this.hour1) + ':' + this.twoDigit(this.minute1) + ':' + this.twoDigit(this.second1) : '';
-  var message = day1 + month1 + '-' + this.fourDigit(this.year1) + time1;
+  var message = day1 + month1 + '-' + this.fourDigit(this.year1);// + time1;
   return message;
 }
 
@@ -1055,7 +1055,8 @@ function DateWidget_getDate2_Ferret() {
   var month2 = (this.month2 == '00') ? '' : '-' + monthNames[Number(this.month2)-1];
   var day2 = (this.day2 == '00') ? '' : this.day2;
   var time2 = (this.Time2) ? ' ' + this.twoDigit(this.hour2) + ':' + this.twoDigit(this.minute2) + ':' + this.twoDigit(this.second2) : '';
-  var message = (this.Year2) ? day2 + month2 + '-' + this.fourDigit(this.year2) + time2 : '';
+  //var message = (this.Year2) ? day2 + month2 + '-' + this.fourDigit(this.year2) + time2 : '';
+  var message = day2 + month2 + '-' + this.fourDigit(this.year2);
   return message;
 }
 
