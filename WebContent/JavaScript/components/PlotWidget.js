@@ -212,7 +212,13 @@ function PlotWidget_render(element_id,type) {
   Img.onmousedown = PlotWidget_mouseDown;
   Img.onmousemove = PlotWidget_mouseMove;
   Img.onmouseup = PlotWidget_mouseUp;
-  // //Img.onmouseout = PlotWidget_mouseUp;
+  Img.ondrag = "return false;" 
+  Img.GALLERYIMG = "no";
+// IE
+document.ondragstart = function(e) {
+  return false;
+}
+ // //Img.onmouseout = PlotWidget_mouseUp;
   Container.appendChild(Img);
   
 // Now that the <img> has been appended it should have a position.
@@ -276,8 +282,8 @@ function PlotWidget_render(element_id,type) {
   var border_width = Number(this.selectionBorderWidth.replace(/px/,''));
   var top = this.img_pix_top + this.Plot.pix_top + 'px';
   var left = this.img_pix_left + this.Plot.pix_left + 'px';
-  var width = this.Plot.pix_width - border_width - 1 + 'px';
-  var height = this.Plot.pix_height - border_width + 'px';
+  var width = "0px";// this.Plot.pix_width - border_width - 1 + 'px';
+  var height = "0px";//this.Plot.pix_height - border_width + 'px';
 
   SelectionDiv.style.top = top;
   SelectionDiv.style.left = left;
@@ -295,10 +301,10 @@ function PlotWidget_render(element_id,type) {
   DisableDiv.style.visibility = 'hidden';
   Container.appendChild(DisableDiv);
 
-  var top = this.img_pix_top + this.Plot.pix_top + 'px';
-  var left = this.img_pix_left + this.Plot.pix_left + 'px';
-  var width = this.Plot.pix_width - 2 * border_width + 'px';
-  var height = this.Plot.pix_height - 2 * border_width + 'px';
+  var top =  Math.abs(this.img_pix_top + this.Plot.pix_top) + 'px';
+  var left =  Math.abs(this.img_pix_left + this.Plot.pix_left) + 'px';
+  var width = Math.abs(this.Plot.pix_width - 2 * border_width) + 'px';
+  var height =  Math.abs(this.Plot.pix_height - 2 * border_width) + 'px';
 
   DisableDiv.style.top = top;
   DisableDiv.style.left = left;
@@ -414,6 +420,12 @@ function PlotWidget_setCallback(callback) {
  */
 function PlotWidget_mouseDown(e) {
   if (!e) e = window.event;  // IE event model
+ if(e.preventDefault)
+ {
+  e.preventDefault();
+ } else  if (event.stopPropagation) event.stopPropagation(); // DOM Level 2
+    else event.cancelBubble = true;
+
 
   // Cross-browser discovery of the event target
   // By Stuart Landridge in "DHTML Utopia ..."
@@ -428,6 +440,8 @@ function PlotWidget_mouseDown(e) {
   }
 
   var PW = target.widget;
+  PW.SelectionDiv.style.width = "0px";
+  PW.SelectionDiv.style.height = "0px";
   var pos_X = PW.EventPosX(e);
   var pos_Y = PW.EventPosY(e);
   if (pos_X > PW.plot_pix_left) {
@@ -462,6 +476,12 @@ function PlotWidget_mouseDown(e) {
  */
 function PlotWidget_mouseMove(e) {
   if (!e) e = window.event;  // IE event model
+ if(e.preventDefault)
+ {
+  e.preventDefault();
+ } else  if (event.stopPropagation) event.stopPropagation(); // DOM Level 2
+    else event.cancelBubble = true;
+
 
   // Cross-browser discovery of the event target
   // By Stuart Landridge in "DHTML Utopia ..."
@@ -510,6 +530,12 @@ function PlotWidget_mouseMove(e) {
  */
 function PlotWidget_mouseUp(e) {
   if (!e) e = window.event;  // IE event model
+ if(e.preventDefault)
+ {
+  e.preventDefault();
+ } else  if (event.stopPropagation) event.stopPropagation(); // DOM Level 2
+    else event.cancelBubble = true;
+
 
   // Cross-browser discovery of the event target
   // By Stuart Landridge in "DHTML Utopia ..."
@@ -569,8 +595,8 @@ function PlotWidget_resizeSelection(x,y) {
 
   var top = this.userDrag_pix_top + 'px';
   var left = this.userDrag_pix_left + 'px';
-  var width = this.userDrag_pix_width - border_width - 1 + 'px';
-  var height = this.userDrag_pix_height - border_width + 'px';
+  var width =  Math.abs(this.userDrag_pix_width - border_width - 1) + 'px';
+  var height =  Math.abs(this.userDrag_pix_height - border_width) + 'px';
 
   this.SelectionDiv.style.top = top;
   this.SelectionDiv.style.left = left;
@@ -585,6 +611,12 @@ function PlotWidget_resizeSelection(x,y) {
  * @return x horizontal position of this event relative to the browser
  */
 function PlotWidget_EventPosX(e) {
+  if(e.preventDefault)
+ {
+  e.preventDefault();
+ } else if (event.stopPropagation) event.stopPropagation(); // DOM Level 2
+    else event.cancelBubble = true;
+
   var pix_x;
   if (e.pageX) {
     pix_x = e.pageX;
@@ -605,7 +637,13 @@ function PlotWidget_EventPosX(e) {
  * @return y horizontal position of this event relative to the browser
  */
 function PlotWidget_EventPosY(e) {
-  var pix_y;
+ if(e.preventDefault)
+ {
+  e.preventDefault();
+ } else  if (event.stopPropagation) event.stopPropagation(); // DOM Level 2
+    else event.cancelBubble = true; 
+ 
+ var pix_y;
   if (e.pageY) {
     pix_y = e.pageY;
   } else if (e.clientY) {
