@@ -42,6 +42,7 @@ public class RequestInputFilter implements Filter {
 		"log_level",
 		"opendap",
 		"opid",
+		"plot",
 		"reinit", 
 		"REQUEST", 
 		"stream",
@@ -67,8 +68,9 @@ public class RequestInputFilter implements Filter {
     	"dsid",
     	"JSESSIONID",
 		"opid",
+		"plot",
 		"stream_ID", 
-		"varid",
+		"varid"
     };
 	
     private final static Set<String> LAS_ID_PARAMETERS = new HashSet<String>(Arrays.asList(lp));
