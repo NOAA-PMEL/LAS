@@ -21,10 +21,12 @@ import com.google.gwt.user.client.ui.Widget;
 
 public class DateTimeWidget extends Composite {
 	
-	DateTimeFormat longForm = DateTimeFormat.getFormat("yyyy-MM-dd HH:mm");
-	DateTimeFormat shortForm = DateTimeFormat.getFormat("yyyy-MM-dd");
-	DateTimeFormat shortFerretForm = DateTimeFormat.getFormat("dd-MMM-yyyy");
-	DateTimeFormat longFerretForm = DateTimeFormat.getFormat("dd-MMM-yyyy HH:mm");
+	private static final DateTimeFormat longForm = DateTimeFormat.getFormat("yyyy-MM-dd HH:mm:ss");
+	private static final DateTimeFormat mediumForm = DateTimeFormat.getFormat("yyyy-MM-dd HH:mm");
+	private static final DateTimeFormat shortForm = DateTimeFormat.getFormat("yyyy-MM-dd");
+	private static final DateTimeFormat shortFerretForm = DateTimeFormat.getFormat("dd-MMM-yyyy");
+	private static final DateTimeFormat mediumFerretForm = DateTimeFormat.getFormat("dd-MMM-yyyy HH:mm"); 
+	private static final DateTimeFormat longFerretForm = DateTimeFormat.getFormat("dd-MMM-yyyy HH:mm:ss"); 
 	
 	Date lo;
 	Date hi;
@@ -137,28 +139,8 @@ public class DateTimeWidget extends Composite {
 		this.render = render;
 		this.climatology = climo;
         this.delta = delta;
-		try {
-			lo = longForm.parse(lo_date);
-		} catch (IllegalArgumentException e) {
-			try {
-				lo = shortForm.parse(lo_date);
-			} catch (IllegalArgumentException e1) {
-				Window.alert("Date parsing failed for "+lo_date);
-				return;
-			}
-		}
-
-		try {
-			hi = longForm.parse(hi_date);
-		} catch (IllegalArgumentException ex1) {
-			try {
-				hi = shortForm.parse(hi_date);
-			} catch (IllegalArgumentException ex2) {
-				Window.alert("Date parsing failed for "+hi_date);
-				return;
-			}
-		}
-
+        lo = parseDate(lo_date);
+        hi = parseDate(hi_date);
 		years(lo, hi, lo_year);
 		years(lo, hi, hi_year);
 		months(lo_month, lo.getYear()+1900);
@@ -461,12 +443,8 @@ public class DateTimeWidget extends Composite {
 				}
 			}
 		} else {
-			Date lo;
-			if ( tlo.length() == 11 ) {
-				lo = shortFerretForm.parse(tlo);
-			} else {
-				lo = longFerretForm.parse(tlo);
-			}
+			Date lo = parseFerretDate(tlo);
+			
 			if ( hasDay ) {
 				String day = String.valueOf(lo.getDate());
 				for(int d = 0; d < lo_day.getItemCount(); d++) {
@@ -508,12 +486,8 @@ public class DateTimeWidget extends Composite {
 				}
 			}
 		} else {
-			Date hi;
-			if ( thi.length() == 11 ) {
-				hi = shortFerretForm.parse(thi);
-			} else {
-				hi = longFerretForm.parse(thi);
-			}
+			Date hi = parseFerretDate(thi);
+			
 			if ( hasDay ) {
 				String day = String.valueOf(hi.getDate());
 				for(int d = 0; d < hi_day.getItemCount(); d++) {
@@ -617,18 +591,8 @@ public class DateTimeWidget extends Composite {
 		String current_lo = getFerretDateLo();
 		String current_hi = getFerretDateHi();
 		
-		Date clo; 
-	    if ( current_lo.length() == 11 ) {
-			clo = shortFerretForm.parse(current_lo);
-	    } else {
-	    	clo = longFerretForm.parse(current_lo);
-	    }
-		Date chi;
-		if ( current_hi.length() == 11 ) {
-		   chi = shortFerretForm.parse(current_hi);
-		} else {
-			chi = longFerretForm.parse(current_hi);
-		}
+		Date clo = parseFerretDate(current_lo);
+		Date chi = parseFerretDate(current_hi);
 		
 		// Set the hi year to the lo year and check the month...
 		if ( clo.after(chi) ) {
@@ -643,18 +607,9 @@ public class DateTimeWidget extends Composite {
 		String current_lo = getFerretDateLo();
 		String current_hi = getFerretDateHi();
 		
-		Date clo; 
-	    if ( current_lo.length() == 11 ) {
-			clo = shortFerretForm.parse(current_lo);
-	    } else {
-	    	clo = longFerretForm.parse(current_lo);
-	    }
-		Date chi;
-		if ( current_hi.length() == 11 ) {
-		   chi = shortFerretForm.parse(current_hi);
-		} else {
-			chi = longFerretForm.parse(current_hi);
-		}
+		Date clo = parseFerretDate(current_lo);
+		Date chi = parseFerretDate(current_hi);
+		
 		if ( clo.after(chi) ) {
 			int ny = Integer.valueOf(hi_year.getValue(hi_year.getSelectedIndex()));
 			int month = MONTHS.indexOf(lo_month.getValue(lo_month.getSelectedIndex()));
@@ -670,18 +625,9 @@ public class DateTimeWidget extends Composite {
 		String current_lo = getFerretDateLo();
 		String current_hi = getFerretDateHi();
 		
-		Date clo; 
-	    if ( current_lo.length() == 11 ) {
-			clo = shortFerretForm.parse(current_lo);
-	    } else {
-	    	clo = longFerretForm.parse(current_lo);
-	    }
-		Date chi;
-		if ( current_hi.length() == 11 ) {
-		   chi = shortFerretForm.parse(current_hi);
-		} else {
-			chi = longFerretForm.parse(current_hi);
-		}
+		Date clo = parseFerretDate(current_lo);
+		Date chi = parseFerretDate(current_hi);
+		
 		if ( clo.after(chi) ) {
 			hi_day.setSelectedIndex(lo_day.getSelectedIndex());
 			checkRangeEndHour();
@@ -691,18 +637,9 @@ public class DateTimeWidget extends Composite {
 		String current_lo = getFerretDateLo();
 		String current_hi = getFerretDateHi();
 		
-		Date clo;
-		if ( current_lo.length() == 11 ) {
-			clo = shortFerretForm.parse(current_lo);
-	    } else {
-	    	clo = longFerretForm.parse(current_lo);
-	    }
-		Date chi;
-		if ( current_hi.length() == 11 ) {
-		   chi = shortFerretForm.parse(current_hi);
-		} else {
-			chi = longFerretForm.parse(current_hi);
-		}
+		Date clo = parseFerretDate(current_lo);
+		Date chi = parseFerretDate(current_hi);
+		
 		if ( clo.after(chi) ) {
 			hi_hour.setSelectedIndex(lo_hour.getSelectedIndex());
 		}
@@ -711,18 +648,8 @@ public class DateTimeWidget extends Composite {
 		String current_lo = getFerretDateLo();
 		String current_hi = getFerretDateHi();
 		
-		Date clo; 
-	    if ( current_lo.length() == 11 ) {
-			clo = shortFerretForm.parse(current_lo);
-	    } else {
-	    	clo = longFerretForm.parse(current_lo);
-	    }
-		Date chi;
-		if ( current_hi.length() == 11 ) {
-		   chi = shortFerretForm.parse(current_hi);
-		} else {
-			chi = longFerretForm.parse(current_hi);
-		}
+		Date clo = parseFerretDate(current_lo);
+		Date chi = parseFerretDate(current_hi);
 		
 		// Set the hi year to the lo year and check the month...
 		if ( clo.after(chi) ) {
@@ -735,18 +662,9 @@ public class DateTimeWidget extends Composite {
 		String current_lo = getFerretDateLo();
 		String current_hi = getFerretDateHi();
 		
-		Date clo; 
-	    if ( current_lo.length() == 11 ) {
-			clo = shortFerretForm.parse(current_lo);
-	    } else {
-	    	clo = longFerretForm.parse(current_lo);
-	    }
-		Date chi;
-		if ( current_hi.length() == 11 ) {
-		   chi = shortFerretForm.parse(current_hi);
-		} else {
-			chi = longFerretForm.parse(current_hi);
-		}
+		Date clo = parseFerretDate(current_lo);
+		Date chi = parseFerretDate(current_hi);
+
 		if ( clo.after(chi) ) {
 			lo_month.setSelectedIndex(hi_month.getSelectedIndex());
 			checkRangeStartDay();
@@ -756,18 +674,9 @@ public class DateTimeWidget extends Composite {
 		String current_lo = getFerretDateLo();
 		String current_hi = getFerretDateHi();
 		
-		Date clo; 
-	    if ( current_lo.length() == 11 ) {
-			clo = shortFerretForm.parse(current_lo);
-	    } else {
-	    	clo = longFerretForm.parse(current_lo);
-	    }
-		Date chi;
-		if ( current_hi.length() == 11 ) {
-		   chi = shortFerretForm.parse(current_hi);
-		} else {
-			chi = longFerretForm.parse(current_hi);
-		}
+		Date clo = parseFerretDate(current_lo);
+		Date chi = parseFerretDate(current_hi);
+		
 		if ( clo.after(chi) ) {
 			lo_day.setSelectedIndex(hi_day.getSelectedIndex());
 			checkRangeStartHour();
@@ -777,18 +686,9 @@ public class DateTimeWidget extends Composite {
 		String current_lo = getFerretDateLo();
 		String current_hi = getFerretDateHi();
 		
-		Date clo; 
-	    if ( current_lo.length() == 11 ) {
-			clo = shortFerretForm.parse(current_lo);
-	    } else {
-	    	clo = longFerretForm.parse(current_lo);
-	    }
-		Date chi;
-		if ( current_hi.length() == 11 ) {
-		   chi = shortFerretForm.parse(current_hi);
-		} else {
-			chi = longFerretForm.parse(current_hi);
-		}
+		Date clo = parseFerretDate(current_lo);
+		Date chi = parseFerretDate(current_hi);
+		
 		if ( clo.after(chi) ) {
 			lo_hour.setSelectedIndex(hi_hour.getSelectedIndex());
 		}
@@ -869,4 +769,43 @@ public class DateTimeWidget extends Composite {
 			checkRangeStartHour();
 		}
 	};
+	/**
+	 * Helper method to parse ferret dates.
+	 * @param date_string of the form 1998-Jan-15, 1983-Jan-30 12:32 or 1998-Apr-01 12:11:03
+	 * @return Date for the parse date
+	 */
+	private static Date parseFerretDate(String date_string) {
+		Date date;
+		if ( date_string.length() == 11 ) {
+			date = shortFerretForm.parse(date_string);
+		} else if ( date_string.length() == 17 ) {
+			date = mediumFerretForm.parse(date_string);
+		} else {
+			date = longFerretForm.parse(date_string);
+		}
+		return date;
+	}
+	/**
+	 * Helper method to parse date strings
+	 * @param date_string of the form 1998-11-05, 1998-12-31 11:02 or 1923-11-14 04:13:21
+	 * @return
+	 */
+	private static Date parseDate(String date_string) {
+		Date date;
+		 try {
+	        	date = longForm.parse(date_string);
+	        } catch (IllegalArgumentException e) {
+	        	try {
+	        		 date = mediumForm.parse(date_string);
+	        	} catch (IllegalArgumentException e1) {
+	        		try{
+	        			date = shortForm.parse(date_string);
+	        		} catch (IllegalArgumentException e2) {
+	        			date = null;
+	        			Window.alert("Date parsing failed for "+date_string);
+	        		}
+	        	}
+	        }
+		return date;
+	}
 }
