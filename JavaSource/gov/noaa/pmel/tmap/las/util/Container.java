@@ -2,7 +2,7 @@ package gov.noaa.pmel.tmap.las.util;
 
 import gov.noaa.pmel.tmap.las.client.serializable.CategorySerializable;
 import gov.noaa.pmel.tmap.las.exception.LASException;
-import gov.noaa.pmel.tmap.las.filter.DocumentationFilter;
+import gov.noaa.pmel.tmap.las.jdom.filter.DocumentationFilter;
 
 import java.io.StringWriter;
 import java.util.ArrayList;

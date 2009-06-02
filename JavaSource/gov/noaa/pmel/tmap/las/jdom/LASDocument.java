@@ -4,8 +4,8 @@
 package gov.noaa.pmel.tmap.las.jdom;
 
 import gov.noaa.pmel.tmap.las.exception.LASException;
-import gov.noaa.pmel.tmap.las.filter.FindPropertyFilter;
-import gov.noaa.pmel.tmap.las.filter.FindPropertyGroupFilter;
+import gov.noaa.pmel.tmap.las.jdom.filter.FindPropertyFilter;
+import gov.noaa.pmel.tmap.las.jdom.filter.FindPropertyGroupFilter;
 
 import java.io.File;
 import java.io.FileWriter;

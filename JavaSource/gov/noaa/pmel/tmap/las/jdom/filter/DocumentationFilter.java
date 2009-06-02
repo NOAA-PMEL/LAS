@@ -7,7 +7,7 @@
  * Administration should the software be included by the recipient as an
  * element in other product development. 
  */
-package gov.noaa.pmel.tmap.las.filter;
+package gov.noaa.pmel.tmap.las.jdom.filter;
 
 import org.jdom.Element;
 import org.jdom.filter.Filter;
@@ -17,14 +17,12 @@ import org.jdom.filter.Filter;
  * @author rhs
  *
  */
-public class CategoryFilter implements Filter {
-    String ID;
+public class DocumentationFilter implements Filter {
     /**
-     * A constructor to build a filter for a particular ID.
-     * @param id the desired category ID.
+     * A constructor to build a filter
      */
-    public CategoryFilter(String id) {
-        ID = id;
+    public DocumentationFilter() {
+        super();
     }
     /**
      * This is the required matches method that returns true if an Object should be selected by the filter.
@@ -38,13 +36,8 @@ public class CategoryFilter implements Filter {
             return false;
         }
         
-        if (element.getName().equals("category")) {
-            if (element.getAttributeValue("ID").equals(ID)) {
-                return true;
-            }
-            else {
-                return false;
-            }
+        if (element.getName().equals("documentation")) {
+            return true;
         } else {
             return false;
         }

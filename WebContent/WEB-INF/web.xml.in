@@ -68,7 +68,16 @@
 		<filter-name>FormFilter</filter-name>
 		<url-pattern>/v6/*</url-pattern>
 	</filter-mapping>
-	
+	<!--  Apply an input filter every LAS request via the Struts Action class servlet. -->
+    <filter>
+        <filter-name>RequestInputFilter</filter-name>
+        <filter-class>gov.noaa.pmel.tmap.las.filter.RequestInputFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>RequestInputFilter</filter-name>
+        <servlet-name>action</servlet-name>
+     </filter-mapping>
+     <!-- End of LAS input validation filters -->
 	<servlet>
 		<servlet-name>AxisServlet</servlet-name>
 		<servlet-class>

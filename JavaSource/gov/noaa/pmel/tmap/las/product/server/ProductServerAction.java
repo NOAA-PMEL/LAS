@@ -180,19 +180,8 @@ public final class ProductServerAction extends LASAction {
             return mapping.findForward("error");
         }
         
-        // Create a lasRequest object.
-        LASUIRequest lasRequest = new LASUIRequest();
-        try {
-            JDOMUtils.XML2JDOM(requestXML, lasRequest);
-            // Always set the request XML JDOM object in the request servlet context
-            // so it can be used in any output template including the error template.
-            request.setAttribute("las_request", lasRequest);
-            request.setAttribute("server_base_url", serverBaseURL);
-
-        } catch (Exception e) {
-            logerror(request, "Error parsing the request XML. ", e);
-            return mapping.findForward("error");
-        }
+        // Get the lasRequest object from the request.  It was placed there by the RequestInputFilter.
+        LASUIRequest lasRequest = (LASUIRequest) request.getAttribute("las_request");
 
         // Get the debug level from the query or request property.
         

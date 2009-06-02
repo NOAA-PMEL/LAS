@@ -37,13 +37,13 @@ import org.apache.struts.action.ActionMapping;
  */
 public class LASAction extends Action {
 	private static Logger log = LogManager.getLogger(LASAction.class.getName());
-	   protected void logerror(HttpServletRequest request) {
+	   public static void logerror(HttpServletRequest request) {
 	        LASBackendResponse error = (LASBackendResponse) request.getSession().getAttribute("las_response");
 	        log.error(error.getResult("las_message"));
 	        log.error(error.getResult("exception_message"));
 	    }
 	    
-	    protected void logerror(HttpServletRequest request, String las_message, String exception_message) {
+	    public static void logerror(HttpServletRequest request, String las_message, String exception_message) {
 	        LASBackendResponse lasBackendResponse = new LASBackendResponse();
 	        lasBackendResponse.setError("las_message", las_message);
 	        lasBackendResponse.addError("exception_message", exception_message);
@@ -52,7 +52,7 @@ public class LASAction extends Action {
 	        log.error(exception_message);         
 	    }
 	    
-	    protected void logerror(HttpServletRequest request, String las_message, Exception e) {
+	    public static void logerror(HttpServletRequest request, String las_message, Exception e) {
 	        LASBackendResponse lasBackendResponse = new LASBackendResponse();
 	        lasBackendResponse.setError("las_message", las_message);
 	        lasBackendResponse.addError("exception_message", e.toString());
