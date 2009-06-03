@@ -8,6 +8,14 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 public class OperationSerializable extends Serializable implements IsSerializable {
 	OptionSerializable[] options;
 	List<String> views;
+    String optionsID;
+	public String getOptionsID() {
+		return optionsID;
+	}
+
+	public void setOptionsID(String optionsID) {
+		this.optionsID = optionsID;
+	}
 
 	/**
 	 * @return the views

@@ -3,6 +3,7 @@ package gov.noaa.pmel.tmap.las.client.laswidget;
 import java.util.Map;
 
 import gov.noaa.pmel.tmap.las.client.RPCServiceAsync;
+import gov.noaa.pmel.tmap.las.client.serializable.OptionSerializable;
 
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.ClickListener;
@@ -51,5 +52,11 @@ public class OptionsButton extends Composite {
 	public void setState(Map<String, String> state) {
 		options.restore(state);
 		this.state = options.getState();
+	}
+	public void setOptions(OptionSerializable[] opt) {
+		options.setOptions(opt);
+	}
+	public void setOptions(String id) {
+		options.setOptions(id);
 	}
 }

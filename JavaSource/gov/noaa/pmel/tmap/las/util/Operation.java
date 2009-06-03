@@ -77,6 +77,18 @@ public class Operation extends Container implements OperationInterface {
             element.addContent(option.getElement());
         }
     }
+    public String getOptionsID() {
+    	Element operation = getElement();
+    	Element optiondef = null;
+    	if ( operation != null ) {
+    	    optiondef = operation.getChild("optiondef");
+    	}
+    	if ( optiondef != null ) {
+    	    return optiondef.getAttributeValue("IDREF");
+    	} else {
+    		return "";
+    	}
+    }
     public JSONObject toJSON() throws JSONException {
         ArrayList<String> asArrays = new ArrayList<String>();
         asArrays.add("operation");
@@ -90,6 +102,7 @@ public class Operation extends Container implements OperationInterface {
     	operationSerializable.setProperties(getPropertiesAsMap());
     	operationSerializable.setOptions(getOptionsSerializable());
     	operationSerializable.setViews(getViews());
+    	operationSerializable.setOptionsID(getOptionsID());
     	return operationSerializable;
     }
     public OptionSerializable[] getOptionsSerializable() {

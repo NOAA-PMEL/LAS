@@ -70,63 +70,19 @@ public class OptionsWidget extends VerticalPanel {
 	}
 	public void setOptions(RPCServiceAsync rpcService, String opID) {
 		this.optionsService = rpcService;
-		optionsService.getOptions(opID, optionsCallback);	
+		
+	}
+	public void setOptions(String id) {
+		if ( id != null && !id.equals("") ) {
+		    optionsService.getOptions(id, optionsCallback);
+		}
 	}
 	AsyncCallback optionsCallback = new AsyncCallback() {
 		public void onSuccess(Object result) {
 			options = (OptionSerializable[]) result;
 			clear();
-			for (int i = 0; i < options.length; i++) {
-				OptionSerializable opt = options[i];
-				Button help = new Button("help");
-				final String help_html = opt.getHelp();
-				help.addClickListener(new ClickListener() {
-
-					public void onClick(Widget help) {
-						PopupPanel helpup = new PopupPanel(true);
-						HTML html = new HTML();
-						html.setHTML(help_html);
-						helpup.add(html);
-						helpup.center();
-					}
-					
-				});
-				Grid option_layout = new Grid(1,2);
-				option_layout.setWidget(0, 0, help);
-				
-				if ( opt.getType().equals("textfield") ) {
-					Grid box = new Grid(1,2);
-					Label label = new Label(opt.getTitle());
-					TextBox textbox = new TextBox();
-					textbox.setName(opt.getName());
-					box.setWidget(0, 0, label);
-					box.setWidget(0, 1, textbox);	
-					widgets.add(textbox);
-					option_layout.setWidget(0, 1, box);
-				} else {
-					Label label = new Label(opt.getTitle());
-					ListBox menu = new ListBox();
-					Grid box = new Grid(1,2);
-					Map<String, String> items = opt.getMenu();
-					Vector keys = new Vector(items.keySet());
-					keys.remove("default");
-					keys.remove("Default");
-					Collections.sort(keys);
-					menu.addItem("Default", "default");
-					for (Iterator itemIt = keys.iterator(); itemIt.hasNext();) {
-						String name = (String) itemIt.next();
-						String value = (String) items.get(name);
-						menu.addItem(name, value);
-					}
-					menu.setName(opt.getName());
-					box.setWidget(0, 0, label);
-					box.setWidget(0, 1, menu);
-					widgets.add(menu);
-					option_layout.setWidget(0, 1, box);
-				}
-				add(option_layout);
-			}
-			add(layout_grid);
+			setOptions(options);
+			
 		}
 		public void onFailure(Throwable e) {
 			Window.alert(e.toString());
@@ -177,5 +133,59 @@ public class OptionsWidget extends VerticalPanel {
 	}
 	public void addOkClickListner(ClickListener optionsOkListener) {
 		ok.addClickListener(optionsOkListener);
+	}
+	public void setOptions(OptionSerializable[] op) {
+		options = op;
+		for (int i = 0; i < options.length; i++) {
+			OptionSerializable opt = op[i];
+			Button help = new Button("help");
+			final String help_html = opt.getHelp();
+			help.addClickListener(new ClickListener() {
+
+				public void onClick(Widget help) {
+					PopupPanel helpup = new PopupPanel(true);
+					HTML html = new HTML();
+					html.setHTML(help_html);
+					helpup.add(html);
+					helpup.center();
+				}
+				
+			});
+			Grid option_layout = new Grid(1,2);
+			option_layout.setWidget(0, 0, help);
+			
+			if ( opt.getType().equals("textfield") ) {
+				Grid box = new Grid(1,2);
+				Label label = new Label(opt.getTitle());
+				TextBox textbox = new TextBox();
+				textbox.setName(opt.getName());
+				box.setWidget(0, 0, label);
+				box.setWidget(0, 1, textbox);	
+				widgets.add(textbox);
+				option_layout.setWidget(0, 1, box);
+			} else {
+				Label label = new Label(opt.getTitle());
+				ListBox menu = new ListBox();
+				Grid box = new Grid(1,2);
+				Map<String, String> items = opt.getMenu();
+				Vector keys = new Vector(items.keySet());
+				keys.remove("default");
+				keys.remove("Default");
+				Collections.sort(keys);
+				menu.addItem("Default", "default");
+				for (Iterator itemIt = keys.iterator(); itemIt.hasNext();) {
+					String name = (String) itemIt.next();
+					String value = (String) items.get(name);
+					menu.addItem(name, value);
+				}
+				menu.setName(opt.getName());
+				box.setWidget(0, 0, label);
+				box.setWidget(0, 1, menu);
+				widgets.add(menu);
+				option_layout.setWidget(0, 1, box);
+			}
+			add(option_layout);
+		}
+		add(layout_grid);	
 	}
 }
