@@ -28,6 +28,45 @@ import org.apache.log4j.Logger;
 
 public class RequestInputFilter implements Filter {
     private static Logger log = LogManager.getLogger(RequestInputFilter.class.getName());
+    /*
+     * For the record these values could have been passed in via parameters in the web.xml...
+     * 
+     * If this proves to be too difficult to maintain we can move them there...
+     * 
+     * Start by defining groups of parameters...
+     *   <init-param>
+     *      <param-name>boolean</param-name>
+     *      <param-value>'cancel,debug,stream'</param-value>
+     *   </init-param>
+     *   <init-param>
+     *       <param-name>id</param-name>
+     *       <param-value>catitem,dsid,JSESSIONID,opid,plot,stream_ID,varid</param-value>
+     *   </init-param>
+     *   <init-param>
+     *       <param-name>BBOX</param-name>
+     *       <param-value>BBOX</param-name>
+     *   </init-param>
+     *   
+     *   
+     *   then by convention we would use a regular expression to evaluate the parameter if we found a foo_regex to associate with a
+     *   group of parameters.
+     *   <init-param>
+     *       <param-name>id_regex</param-name>
+     *       <param-value>[A-Za-z0-9._-]</param-value>
+     *   </init-param>
+     *   
+     *   or by convention we could use a list to enumerate the possible values
+     *   
+     *   <init-param>
+     *       <param-name>boolean_values</param-name>
+     *       <param-value>true,false</param-value>
+     *   </init-param>
+     *   
+     *   the xml parameter would be a special case.
+     *   
+     *   Seems more trouble than it's worth at the moment...
+     *
+     */
     // All LAS query parameters.
     private final static String[] p = {
     	"BBOX", 
