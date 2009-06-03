@@ -247,7 +247,7 @@ streamable="true" mime_type="application/postscript"/> -->
           <grid_types>
             <grid_type name="regular" />
           </grid_types>
-          <optionsdef IDREF="Options_Vector"/>
+          <optiondef IDREF="Options_Vector"/>
     </operation>
 
     <!-- used for extracting time frames only -->
