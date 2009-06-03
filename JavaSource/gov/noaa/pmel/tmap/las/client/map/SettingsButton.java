@@ -162,6 +162,7 @@ public class SettingsButton extends Composite {
 	public ClickListener operationsClickListener = new ClickListener() {
 		public void onClick(Widget sender) {
 			refMap.setToolType(getCurrentOperationView());		
+			optionsButton.setOptions(getCurrentOp().getOptionsID());
 		}
 	};
 	public OperationsWidget getOperationsWidget() {
