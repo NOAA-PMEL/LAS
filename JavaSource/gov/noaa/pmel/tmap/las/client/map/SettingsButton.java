@@ -129,8 +129,8 @@ public class SettingsButton extends Composite {
 	public ReferenceMap getRefMap() {
 		return refMap;
 	}
-	public void setOperations(RPCServiceAsync rpcService, String view, String dsID, String varID, OperationsMenu menu) {
-		operations.setOperations(rpcService, view, dsID, varID, menu);
+	public void setOperations(RPCServiceAsync rpcService, String intervals, String dsID, String varID, String opID, String view, OperationsMenu menu) {
+		operations.setOperations(rpcService, intervals, dsID, varID, opID, view, menu);
 	}
 	public void setLatLon(String xlo, String xhi, String ylo, String yhi) {
 		refMap.setLatLon(xlo, xhi, ylo, yhi);

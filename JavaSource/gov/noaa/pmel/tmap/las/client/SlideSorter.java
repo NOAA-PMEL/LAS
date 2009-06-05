@@ -20,6 +20,8 @@ import java.util.Map;
 
 import com.google.gwt.maps.client.geom.LatLng;
 import com.google.gwt.maps.client.geom.LatLngBounds;
+import com.google.gwt.user.client.History;
+import com.google.gwt.user.client.HistoryListener;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.WindowResizeListener;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -27,10 +29,12 @@ import com.google.gwt.user.client.ui.ChangeListener;
 import com.google.gwt.user.client.ui.ClickListener;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.Grid;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
+import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.RadioButton;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.TextBox;
@@ -44,7 +48,7 @@ import com.google.gwt.user.client.ui.Widget;
  * @author rhs
  *
  */
-public class SlideSorter extends LASEntryPoint {
+public class SlideSorter extends LASEntryPoint implements HistoryListener {
 
 	/*
 	 * These are the four pieces of information required
@@ -54,6 +58,17 @@ public class SlideSorter extends LASEntryPoint {
 	String vid;
 	String view;
 	String op;
+	/*
+	 * These are optional parameters that can be used to set the xyzt ranges for the initial plot in the panels.
+	 */
+	String xlo;
+	String xhi;
+	String ylo;
+	String yhi;
+	String zlo;
+	String zhi;
+	String tlo;
+	String thi;
 	
 	/*
 	 * Keep track of the axes orthogonal to the view.
@@ -186,15 +201,23 @@ public class SlideSorter extends LASEntryPoint {
 	public void onModuleLoad() {
 		super.onModuleLoad();
 		
-		ortho = new ArrayList<String>();
-        Map<String, List<String>> parameters = Window.Location.getParameterMap();
+		ortho = new ArrayList<String>(); 
 		
-		dsid = parameters.get("dsid").get(0);
-		vid = parameters.get("vid").get(0);
+		dsid = getParameterString("dsid");
+		vid = getParameterString("vid");
 		//TODO If the operation is null, get the default operation (the map or plot; left nav) for this view.
-		op = parameters.get("opid").get(0);
-		view = parameters.get("view").get(0);
-		
+		op = getParameterString("opid");
+		view = getParameterString("view");
+
+        // This may have come from a running LAS and it might want to set up the xyzt ranges for the plots in the panels.
+		xlo = getParameterString("xlo");
+		xhi = getParameterString("xhi");
+		ylo = getParameterString("ylo");
+		yhi = getParameterString("yhi");
+		zlo = getParameterString("zlo");
+		zhi = getParameterString("zhi");
+		tlo = getParameterString("tlo");
+		thi = getParameterString("thi");
 		
 		slides = new Grid(2,2);
 		header = new Grid(1, 10);
@@ -294,6 +317,15 @@ public class SlideSorter extends LASEntryPoint {
 		RootPanel.get("header").add(header);
 		RootPanel.get("slides").add(slides);
 		Window.addWindowResizeListener(windowResizeListener);
+		History.addHistoryListener(this);
+	}
+	private static String getParameterString(String name) {
+		Map<String, List<String>> parameters = Window.Location.getParameterMap();			
+		List param = parameters.get(name);
+		if ( param != null ) {
+			return (String) param.get(0);
+		}
+		return null;
 	}
 	TreeListener datasetTreeListener = new TreeListener() {
 
@@ -333,7 +365,6 @@ public class SlideSorter extends LASEntryPoint {
 					}
 				}
 				initPanels();
-				refresh(false);
 			}
 		}
 		public void onFailure(Throwable caught) {
@@ -415,13 +446,108 @@ public class SlideSorter extends LASEntryPoint {
         sp3.init(false);
         sp4.setVariable(var);
         sp4.init(false);
-        
+       
 		init();
+		
+		if ( compareAxis.equals("t") && tlo != null && !tlo.equals("") ) {
+			// If "t" is the compare axis, then set it to the passed in values in the panels
+			for (Iterator panelIt = panels.iterator(); panelIt.hasNext();) {
+				SlideSorterPanel panel = (SlideSorterPanel) panelIt.next();
+				if (dateWidget.isRange() ) {
+					if ( thi != null && !thi.equals("") ) {
+						panel.setParentAxisRange("t", true);
+						panel.setParentAxisRangeValues("t", tlo, thi);
+					}
+				} else {
+				    panel.setParentAxisValue("t", tlo);
+				}
+			}
+			// and in the currently hidden fixed axis widget
+			if ( dateWidget.isRange() ) {
+				dateWidget.setLo(tlo);
+				dateWidget.setHi(thi);
+			} else {
+				dateWidget.setLo(tlo);
+			}
+			
+			
+			// And if z exists, it will be the fixed axis so it also needs to be set.
+			if ( fixedAxis.equals("z") ) {
+				// Set the z axis in the gallery
+				if ( xyzWidget.isRange() ) {
+					if ( zlo != null && !zlo.equals("") && zhi != null && !zhi.equals("") ) {
+						xyzWidget.setLo(zlo);
+						xyzWidget.setHi(zhi);
+						// Pass the settings down to the panels
+						for (Iterator panelIt = panels.iterator(); panelIt.hasNext();) {
+							SlideSorterPanel panel = (SlideSorterPanel) panelIt.next();
+							panel.setParentAxisRange("z", true);
+							panel.setParentAxisRangeValues("z", zlo, zhi);
+						}
+					}
+				} else {
+					if ( zlo != null && !zlo.equals("") ) {
+						xyzWidget.setLo(zlo);
+						for (Iterator panelIt = panels.iterator(); panelIt.hasNext();) {
+							SlideSorterPanel panel = (SlideSorterPanel) panelIt.next();
+							panel.setParentAxisValue("z", zlo);
+						}
+					}
+				}
 
+			}
+			
+		} else if ( compareAxis.equals("z") && zlo != null && !zlo.equals("") ) {
+			// Same if z is the compare axis.
+			for (Iterator panelIt = panels.iterator(); panelIt.hasNext();) {
+				SlideSorterPanel panel = (SlideSorterPanel) panelIt.next();
+				if ( xyzWidget.isRange() ) {
+					 panel.setParentAxisRangeValues("z", zlo, zhi);
+				} else {
+				    panel.setParentAxisValue("z", zlo);
+				}
+			}
+			if ( xyzWidget.isRange() ) {
+				xyzWidget.setLo(zlo);
+				xyzWidget.setHi(zhi);
+			} else {
+				xyzWidget.setLo(zlo);
+			}
+			
+			if ( fixedAxis.equals("t") ) {
+				if ( dateWidget.isRange() ) {
+					if ( tlo != null && !tlo.equals("") && thi != null && !thi.equals("") ) {
+						dateWidget.setLo(tlo);
+						dateWidget.setHi(thi);
+						for (Iterator panelIt = panels.iterator(); panelIt.hasNext();) {
+							SlideSorterPanel panel = (SlideSorterPanel) panelIt.next();
+							panel.setParentAxisRangeValues("t", tlo, thi);
+						}
+					}
+				} else {
+					if ( tlo != null && !tlo.equals("") ) {
+					    dateWidget.setLo(tlo);	
+					}
+					for (Iterator panelIt = panels.iterator(); panelIt.hasNext();) {
+						SlideSorterPanel panel = (SlideSorterPanel) panelIt.next();
+						panel.setParentAxisValue("t", tlo);
+					}
+				}
+			}
+		}
+		if ( xlo != null && !xlo.equals("") && xhi != null && !xhi.equals("") && 
+			 ylo != null && !ylo.equals("") && yhi != null && !yhi.equals("") ) {
+			settingsButton.setLatLon(xlo, xhi, ylo, yhi);
+			for (Iterator panelIt = panels.iterator(); panelIt.hasNext();) {
+				SlideSorterPanel panel = (SlideSorterPanel) panelIt.next();
+				panel.setLatLon(xlo, xhi, ylo, yhi);
+			}
+		}
+		refresh(false);
 	}
     public boolean init() {
-
-    	settingsButton.setOperations(rpcService, var.getIntervals(), var.getDSID(), var.getID(), null);
+    	
+    	settingsButton.setOperations(rpcService, var.getIntervals(), var.getDSID(), var.getID(), op, view, null);
 		GridSerializable ds_grid = var.getGrid();
 		double grid_west = Double.valueOf(ds_grid.getXAxis().getLo());
 		double grid_east = Double.valueOf(ds_grid.getXAxis().getHi());
@@ -470,6 +596,7 @@ public class SlideSorter extends LASEntryPoint {
 					
 					dateWidget = new DateTimeWidget(axis, false);
 					dateWidget.addChangeListener(fixedAxisMenuChange);
+					if (view.contains("t")) dateWidget.setRange(true);
 					if ( compareAxis.equals("t") ) {
 						dateWidget.setEnabled(false);
 					} else {
@@ -491,6 +618,7 @@ public class SlideSorter extends LASEntryPoint {
 					xyzButton.addClickListener(compareAxisChangeListener);
 					xyzWidget = new AxisWidget(axis);
 					xyzWidget.addChangeListener(fixedAxisMenuChange);
+					if ( view.contains("z") ) xyzWidget.setRange(true);
 					if ( compareAxis.equals(type) ) {
 						xyzButton.setChecked(true);
 						xyzWidget.setEnabled(false);
@@ -746,6 +874,7 @@ public class SlideSorter extends LASEntryPoint {
     };
     public ChangeListener axisMenuChangeListener = new ChangeListener() {
 		public void onChange(Widget sender) {
+			History.newItem("fixedAxis: date change: "+sender.getTitle(), false);
 			refresh(false);
 		}
     };
@@ -858,50 +987,65 @@ public class SlideSorter extends LASEntryPoint {
     public ClickListener operationsClickListener = new ClickListener() {
 		public void onClick(Widget sender) {
 			if ( sender instanceof OperationButton ) {
-				OperationButton o = (OperationButton) sender;
-			    view = settingsButton.getOperationsWidget().getCurrentView();
-			    op = settingsButton.getCurrentOp().getID();
-                // Turn off the difference button when the compare axis is a range.			    
-                differenceButton.setEnabled(!view.contains(compareAxis));
-				if ( view.length() !=  2 ) {
-					autoContourTextBox.setText("");
-					autoContourButton.setDown(false);
-					autoContourButton.setEnabled(false);
-				} else {
-					autoContourButton.setEnabled(true);
-				}
-				// Set the current fixed menu to a range if necessary.
-				if ( view.contains(fixedAxis) ) {
-					if ( fixedAxis.equals("t") ) {
-						dateWidget.setRange(true);
-					} else if ( fixedAxis.equals("z") ) {
-						xyzWidget.setRange(true);
-					}
-				} else {
-					if ( fixedAxis.equals("t") ) {
-						dateWidget.setRange(false);
-					} else if ( fixedAxis.equals("z") ) {
-						xyzWidget.setRange(false);
-					}
-				}
-				
-				// Set the orthogonal axes to a range in each panel.
-				for (Iterator panelsIt = panels.iterator(); panelsIt.hasNext();) {
-					SlideSorterPanel panel = (SlideSorterPanel) panelsIt.next();
-					panel.setOperation(op, view);
-					if ( view.contains("t") ) {
-					   panel.setParentAxisRange("t", true);
-					} else {
-						panel.setParentAxisRange("t", false);
-					}
-					if ( view.contains("z") ) {
-						panel.setParentAxisRange("z", true);
-					} else {
-						panel.setParentAxisRange("z", false);
-					}
-				}
-				
+				setupMenusForOperationChange();
 			}
-		}	
+		}
 	};
+
+	private void setupMenusForOperationChange() {
+		view = settingsButton.getOperationsWidget().getCurrentView();
+	    op = settingsButton.getCurrentOp().getID();
+        // Turn off the difference button when the compare axis is a range.			    
+        differenceButton.setEnabled(!view.contains(compareAxis));
+		if ( view.length() !=  2 ) {
+			autoContourTextBox.setText("");
+			autoContourButton.setDown(false);
+			autoContourButton.setEnabled(false);
+		} else {
+			autoContourButton.setEnabled(true);
+		}
+		// Set the current fixed menu to a range if necessary.
+		if ( view.contains(fixedAxis) ) {
+			if ( fixedAxis.equals("t") ) {
+				dateWidget.setRange(true);
+			} else if ( fixedAxis.equals("z") ) {
+				xyzWidget.setRange(true);
+			}
+		} else {
+			if ( fixedAxis.equals("t") ) {
+				dateWidget.setRange(false);
+			} else if ( fixedAxis.equals("z") ) {
+				xyzWidget.setRange(false);
+			}
+		}
+		
+		// Set the orthogonal axes to a range in each panel.
+		for (Iterator panelsIt = panels.iterator(); panelsIt.hasNext();) {
+			SlideSorterPanel panel = (SlideSorterPanel) panelsIt.next();
+			panel.setOperation(op, view);
+			if ( view.contains("t") ) {
+			   panel.setParentAxisRange("t", true);
+			} else {
+				panel.setParentAxisRange("t", false);
+			}
+			if ( view.contains("z") ) {
+				panel.setParentAxisRange("z", true);
+			} else {
+				panel.setParentAxisRange("z", false);
+			}
+		}
+		
+	}	
+	public void onHistoryChanged(String historyToken) {
+		PopupPanel panel = new PopupPanel(true);
+		panel.setPopupPosition(showHide.getAbsoluteLeft()+100, showHide.getAbsoluteTop()+250);
+		HTML message = new HTML("The Google Web Tool Kit has a very fancy mechanism for managing the browser history. " +
+				"<p>I just haven't started using those features yet.  So for now we'll just pretend this never happened. " +
+				"<p> If you want to start over hit the browser's refresh button." +
+				"<p><p>Click outside this box and I won't bother you anymore.  Until you hit forward or back again." +
+				"<p><p><p>For my benefit the history token send with this change was: "+historyToken);
+		panel.add(message);	
+		panel.show();
+		
+	}
 }

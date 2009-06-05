@@ -235,7 +235,7 @@ public class SlideSorterPanel extends Composite {
 		
 		LatLngBounds bounds = LatLngBounds.newInstance(LatLng.newInstance(grid_south, grid_west), LatLng.newInstance(grid_north, grid_east));
 		settingsButton.getRefMap().initDataBounds(bounds, delta, true);
-		settingsButton.setOperations(rpcService, var.getIntervals(), var.getDSID(), var.getID(), null);
+		settingsButton.setOperations(rpcService, var.getIntervals(), var.getDSID(), var.getID(), op, view, null);
 		tandzWidgets.removeAxes();
 		settingsButton.setUsePanel(usePanel);
 		if ( ds_grid.getTAxis() != null ) {

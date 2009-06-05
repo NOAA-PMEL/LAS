@@ -1918,8 +1918,7 @@ public class LASConfig extends LASDocument {
 							Element menu = getElementByXPath("/lasdata/lasui/menus/menu[@name='"
 									+ ops_menu_ref.substring(1) + "']");
 							List ops = menu.getChildren("item");
-							for (Iterator opsIt = ops.iterator(); opsIt
-							.hasNext();) {
+							for (Iterator opsIt = ops.iterator(); opsIt.hasNext();) {
 								Element item = (Element) opsIt.next();
 								String value = item.getAttributeValue("values");
 								/* This is pulling out information that was designed to be the values
@@ -1928,8 +1927,7 @@ public class LASConfig extends LASDocument {
 								 * Therefore there's a lot of splitting and spitting to get the job done.
 								 * TODO we should re-think the XML at some point...  Soon?
 								 */
-								String opID = value.substring(0, value
-										.indexOf(","));
+								String opID = value.substring(0, value.indexOf(","));
 								Element opE = getElementByXPath("/lasdata/operations/operation[@ID='"
 										+ opID + "']");
 								if ( opE != null ) {
