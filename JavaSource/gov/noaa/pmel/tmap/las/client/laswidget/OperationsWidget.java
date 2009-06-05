@@ -34,6 +34,8 @@ public class OperationsWidget extends StackPanel {
     ArrayList<OperationButton> buttons = new ArrayList<OperationButton>();
     ArrayList<ClickListener> clicks = new ArrayList<ClickListener>();
     String intervals;
+    String initialOp;
+    String initialView;
 	/**
 	 * Set up the StackPanel and the associated RPC.
 	 */
@@ -54,10 +56,12 @@ public class OperationsWidget extends StackPanel {
 		setHeight("200px");
 		
 	}
-	public void setOperations(RPCServiceAsync rpcService, String intervals, String dsID, String varID, OperationsMenu menu) {
+	public void setOperations(RPCServiceAsync rpcService, String intervals, String dsID, String varID, String opID, String view, OperationsMenu menu) {
 		this.opService = rpcService;
 		this.menu = menu;
 		this.intervals = intervals;
+		this.initialOp = opID;
+		this.initialView = view;
 		if ( ops != null ) {
 			setOps();
 		}  else {
@@ -190,6 +194,9 @@ public class OperationsWidget extends StackPanel {
 		for (Iterator clickIt = clicks.iterator(); clickIt.hasNext();) {
 			ClickListener click = (ClickListener) clickIt.next();
 			addClickListener(click);
+		}
+		if ( initialOp != null && initialView != null ) {
+			setOperation(initialOp, initialView);
 		}
 	}
 	public OperationSerializable[] getOperationsSerializable() {

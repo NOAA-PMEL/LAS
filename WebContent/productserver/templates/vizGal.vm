@@ -1,0 +1,47 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- LAS SERVER OK -->
+#set($op="Plot_2D_XY")
+#if($las_request.getOperation().equals("Plot_2D_XY_SlideSorter"))
+    #set($op="Plot_2D_XY")
+ #end
+#if ($las_request.getOperation().equals("Plot_2D_SlideSorter"))
+    #set($op="Plot_2D")
+ #end
+ #if ($las_request.getOperation().equals("Plot_1D_SlideSorter"))
+    #set($op="Plot_1D")
+ #end
+ #set($region="")
+ #if ($las_request.getXlo() != "" && $las_request.getXlo() != "null")
+    #set($region=$region+"&xlo="+$las_request.getXlo())
+ #end
+ #if ($las_request.getXhi() != "" && $las_request.getXhi() != "null")
+    #set($region=$region+"&xhi="+$las_request.getXhi())
+ #end
+  #if ($las_request.getYlo() != "" && $las_request.getYlo() != "null")
+    #set($region=$region+"&ylo="+$las_request.getYlo())
+ #end
+ #if ($las_request.getYhi() != "" && $las_request.getYhi() != "null")
+    #set($region=$region+"&yhi="+$las_request.getYhi())
+ #end
+ #if ($las_request.getZlo() != "" && $las_request.getZlo() != "null")
+    #set($region=$region+"&zlo="+$las_request.getZlo())
+ #end
+ #if ($las_request.getZhi() != "" && $las_request.getZhi() != "null")
+    #set($region=$region+"&zhi="+$las_request.getZhi())
+ #end
+ #if ($las_request.getTlo() != "" && $las_request.getTlo() != "null")
+    #set($region=$region+"&tlo="+$las_request.getTlo())
+ #end
+ #if ($las_request.getThi() != "" && $las_request.getThi() != "null")
+    #set($region=$region+"&thi="+$las_request.getThi())
+ #end
+<head>
+
+<title>LAS Output -- $las_config.getTitle()</title>
+<META http-equiv="refresh" content="0;URL=SlideSorter/SlideSorter.html?dsid=$las_request.datasetIDs.get(0)&vid=$las_request.variableIDs.get(0)&opid=$op&view=$las_request.getProperty("ferret","view")$region"> 
+</head>
+<body>
+</body>
+</html>
+

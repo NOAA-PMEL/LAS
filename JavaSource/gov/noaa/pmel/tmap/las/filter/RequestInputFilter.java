@@ -65,6 +65,11 @@ public class RequestInputFilter implements Filter {
      *   the xml parameter would be a special case.
      *   
      *   Seems more trouble than it's worth at the moment...
+     *   
+     *   For now any parameter should go in the "p" list.
+     *   Any to be evaluated as a boolean with values of "true" or "false" should go in the pb list.
+     *   Any to be evaluated to see if it is a valid LAS ID (only contains numbers, letters, . _ and - should to in the lp list.
+     *   Anything else is a special case.
      *
      */
     // All LAS query parameters.
