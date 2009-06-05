@@ -16,7 +16,18 @@
 			org.apache.axis.transport.http.AxisHTTPSessionListener
 		</listener-class>
 	</listener>
+<!--  Apply an input filter every LAS request via the Struts Action class servlet. -->
+  <filter>
+    <filter-name>RequestInputFilter</filter-name>
+    <filter-class>gov.noaa.pmel.tmap.las.filter.RequestInputFilter</filter-class>
+  </filter>
 
+  
+<filter-mapping>
+    <filter-name>RequestInputFilter</filter-name>
+    <servlet-name>action</servlet-name>
+  </filter-mapping>
+<!-- End of LAS input filters -->
 	<filter>
 		<filter-name>ExceptionFilter</filter-name>
 		<filter-class>
