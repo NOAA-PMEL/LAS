@@ -172,17 +172,32 @@ public final class ProductServerAction extends LASAction {
             return mapping.findForward("info"); 
         }
         
-        try {
-            String temp = URLDecoder.decode(requestXML, "UTF-8");
-            requestXML = temp;
-        } catch (UnsupportedEncodingException e) {
-            logerror(request, "Error decoding the XML request query string.", e);
-            return mapping.findForward("error");
-        }
-        
+       
         // Get the lasRequest object from the request.  It was placed there by the RequestInputFilter.
         LASUIRequest lasRequest = (LASUIRequest) request.getAttribute("las_request");
 
+        // If it wasn't built in the filter try to build it here
+        if (lasRequest == null && (requestXML != null && !requestXML.equals("")) ) {
+        	try {
+        		String temp = URLDecoder.decode(requestXML, "UTF-8");
+        		requestXML = temp;
+        	} catch (UnsupportedEncodingException e) {
+        		LASAction.logerror(request, "Error decoding the XML request query string.", e);
+        		return mapping.findForward("error");
+        	}
+
+        	// Create a lasRequest object.
+        	lasRequest = new LASUIRequest();
+        	try {
+        		JDOMUtils.XML2JDOM(requestXML, lasRequest);
+        		// Set the lasRequest object in the HttpServletRequest so the product server does not have to rebuild it.
+        		request.setAttribute("las_request", lasRequest);
+        	} catch (Exception e) {
+        		LASAction.logerror(request, "Error parsing the request XML. ", e);
+        		return mapping.findForward("error");
+        	}
+        }
+        
         // Get the debug level from the query or request property.
         
         String debug = request.getParameter("debug");
