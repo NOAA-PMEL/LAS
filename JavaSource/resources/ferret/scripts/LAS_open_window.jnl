@@ -28,4 +28,11 @@ IF `($ferret_margins"1|0|1|false>0|true>1") EQ 0` THEN
    IF `STRLEN("($ferret_view)") LT 2` THEN DEFINE SYMBOL qualifiers = ($qualifiers)/NOYADJUST
 !   DEFINE SYMBOL qualifiers ($qualifiers)/NOAXES
 
+ELSE
+! For 2D plots, make room for the colorbar labels which sometimes get cut off.
+   IF `STRLEN("($ferret_view)") EQ 2` THEN 
+      DEFINE VIEW/X=0:0.95/Y=0:1 xspace
+      SET VIEW xspace
+   ENDIF
+
 ENDIF
