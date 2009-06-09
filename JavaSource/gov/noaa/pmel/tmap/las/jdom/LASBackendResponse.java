@@ -10,12 +10,19 @@
 package gov.noaa.pmel.tmap.las.jdom;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+
+import javax.sql.rowset.WebRowSet;
+
+import oracle.jdbc.rowset.OracleWebRowSet;
 
 import org.jdom.Document;
 import org.jdom.Element;
@@ -27,6 +34,8 @@ import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
 import org.json.JSONException;
 import org.json.XML;
+
+import com.sun.rowset.WebRowSetImpl;
 
 /**
  * This class is the container for the response from the backend service.
@@ -503,6 +512,32 @@ public class LASBackendResponse extends LASDocument {
         return transformedRowset.toString();
     }
 
+ 
+    
+    /**
+     * Returns a WebRowSet implementation to match the database type for a given id
+     * @param ID  -- the result id of the webrowset.  It had better be a result of type webrowset
+     * @param db_type  -- the database implementation, either "mysql" or "oracle"
+     * @return -- the webrowset object
+     * @throws SQLException
+     * @throws FileNotFoundException
+     * @throws IOException
+     */
+    public WebRowSet getResultAsWebRowSet(String ID, String db_type) throws SQLException, FileNotFoundException, IOException {
+    	WebRowSet rowset;
+    	
+    	if ( db_type.equals("oracle") ) {
+    		rowset = new OracleWebRowSet();
+    		System.setProperty("javax.xml.parsers.SAXParserFactory","com.sun.org.apache.xerces.internal.jaxp.SAXParserFactoryImpl");
+    	} else {
+    		rowset = new WebRowSetImpl();
+    	}
+        if ( getResultElement(ID).getAttributeValue("type").equals("webrowset") ) {
+    	   rowset.readXml(new FileInputStream(new File(getResultAsFile(ID))));
+        }
+
+    	return rowset;
+    }
 
     /**
      * A convenience method that is equivalent to getResultTransformedByXSL(ID, "webrowsetToTable")
