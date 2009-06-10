@@ -77,7 +77,7 @@
                               <tr>
                                 <td align="center">
                                          <img src="JavaScript/components/mozilla_blu.gif" alt="Spinner"/>
-					<font color="red" size="+2">&nbsp;&nbsp;$seconds&nbsp;&nbsp;</font>
+					<font color="red" size="+2">&nbsp;&nbsp;$seconds&nbsp;seconds&nbsp;&nbsp;</font>
                                          <img src="JavaScript/components/mozilla_blu.gif" alt="Spinner"/>
                                 </td>
                               <tr>
