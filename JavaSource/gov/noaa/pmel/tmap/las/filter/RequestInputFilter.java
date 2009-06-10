@@ -122,13 +122,11 @@ public class RequestInputFilter implements Filter {
     // Match 4 floating point numbers separated by a comma
     private final static Pattern BBOX_PATTERN = Pattern.compile("[-+]?[0-9]*\\.?[0-9]+,[-+]?[0-9]*\\.?[0-9]+,[-+]?[0-9]*\\.?[0-9]+,[-+]?[0-9]*\\.?[0-9]+");
     
-	@Override
 	public void destroy() {
 		// TODO Auto-generated method stub
 
 	}
 
-	@Override
 	public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
 		 if ( ! ( servletRequest instanceof HttpServletRequest ) )
 		    {
@@ -209,7 +207,6 @@ public class RequestInputFilter implements Filter {
 		    filterChain.doFilter( servletRequest, servletResponse );
 		    return;
 	}
-	@Override
 	public void init(FilterConfig arg0) throws ServletException {
 		
 	}
