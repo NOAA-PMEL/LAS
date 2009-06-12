@@ -337,9 +337,12 @@ public class LASUIRequest extends LASDocument {
                 group = new Element(group_name);
                 properties.addContent(group);
             }
-            Element nameE = new Element(name);
-            nameE.setText(value);
-            group.addContent(nameE);
+            Element nameE = group.getChild(name);
+            if ( nameE == null ) {
+                nameE = new Element(name);
+                group.addContent(nameE);
+            }
+            nameE.setText(value);     
     }
 
     /**
