@@ -13,6 +13,7 @@ import gov.noaa.pmel.tmap.las.jdom.LASRegionIndex;
 import gov.noaa.pmel.tmap.las.jdom.LASUIRequest;
 import gov.noaa.pmel.tmap.las.jdom.ServerConfig;
 import gov.noaa.pmel.tmap.las.product.request.ProductRequest;
+import gov.noaa.pmel.tmap.las.service.ProductLocalService;
 import gov.noaa.pmel.tmap.las.service.ProductWebService;
 import gov.noaa.pmel.tmap.las.util.Institution;
 
@@ -24,6 +25,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLDecoder;
@@ -110,7 +113,7 @@ public final class ProductServerAction extends LASAction {
         String cancelParam = request.getParameter("cancel");
         boolean cancel = false;
         if ( cancelParam != null ) {
-            cancel = cancelParam.equals("Cancel");
+            cancel = cancelParam.equals("true");
         }
         
         String JSESSIONID = request.getParameter("JSESSIONID");
@@ -314,27 +317,84 @@ public final class ProductServerAction extends LASAction {
                         }
                     
                     log.debug("Job canceled.  Send cancel request to backend service.");
-                    ProductWebService productWebService;
+                    ProductWebService productWebService = null;
+                    ProductLocalService productLocalService = null;
                     try {
-                        productWebService = new ProductWebService(backendRequestDocument, 
-                                backendServerURL, 
-                                methodName, 
-                                productCacheKey);
+                    	if ( !backendServerURL.equals("local")) {
+                    		productWebService = new ProductWebService(backendRequestDocument, 
+                    				backendServerURL, 
+                    				methodName, 
+                    				productCacheKey);
+                    	} else {
+                    		productLocalService = new ProductLocalService(
+                                    backendRequestDocument, backendServerURL,
+                                    methodName, productCacheKey);
+                            /*
+                             * The gobbledygook below is the code necessary to invoke a method in a class when
+                             * the name of the method is a variable (we know the class it's productLocalService).  
+                             * The result if methodName="getTHREDDS" is to invoke the following:
+                             * productLocalService.getTHREDDS(lasBackendRequest, lasConfig, serverConfig);
+                             * 
+                             * Add the time out tester here.  Could use a bit more generality.
+                             */
+                            Object[] oargs = null;
+                            Method method = null;
+                            if ( methodName.equals("getTHREDDS")) {
+                            	Class[] args = new Class[3];
+                            	args[0] = backendRequestDocument.getClass();
+                            	args[1] = lasConfig.getClass();
+                            	args[2] = serverConfig.getClass();
+                            	method = productLocalService.getClass().getMethod(methodName, args);
+                            	oargs = new Object[3];
+                            	oargs[0] = backendRequestDocument;
+                            	oargs[1] = lasConfig;
+                            	oargs[2] = serverConfig;
+                            	
+                            } else if ( methodName.equals("fiveMinutes") ) {
+                            	Class[] args = new Class[1];
+                            	args[0] = backendRequestDocument.getClass();
+                            	method = productLocalService.getClass().getMethod(methodName, args);
+                            	oargs = new Object[1];
+                            	oargs[0] = backendRequestDocument;
+                            }
+                            if (method != null ) {
+                               method.invoke(productLocalService, oargs);
+                            }   
+                    	}
                     } catch (LASException e) {
                         logerror(request, "Error building Web service request for "+ methodName , e);
                         return mapping.findForward("error");
                     } catch (IOException e) {
                         logerror(request, "Error building Web service request for "+ methodName , e);
                         return mapping.findForward("error");
-                    }
+                    } catch (SecurityException e) {
+                    	logerror(request, "Error building Local service request for "+ methodName , e);
+                        return mapping.findForward("error");
+					} catch (NoSuchMethodException e) {
+						logerror(request, "Error building Local service request for "+ methodName , e);
+                        return mapping.findForward("error");
+					} catch (IllegalArgumentException e) {
+						logerror(request, "Error running Local service request for "+ methodName , e);
+                        return mapping.findForward("error");
+					} catch (IllegalAccessException e) {
+						logerror(request, "Error running Local service request for "+ methodName , e);
+                        return mapping.findForward("error");
+					} catch (InvocationTargetException e) {
+						logerror(request, "Error running Local service request for "+ methodName , e);
+                        return mapping.findForward("error");
+					}
                     String responseXML="";
                     LASBackendResponse lasResponse = new LASBackendResponse();
                     try {
-                        productWebService.run();
-                        responseXML = productWebService.getResponseXML();
+                    	if ( !backendServerURL.equals("local") ) {
+                    		productWebService.run();
+                    		responseXML = productWebService.getResponseXML();
+                    	} else {
+                    		responseXML = productLocalService.getResponseXML();
+                    	}
                     } catch (Exception e) {
-                        logerror(request, "Error was returned from the backend server.", e);
-                        return mapping.findForward("error");
+                    	logerror(request, "Error was returned from the backend server.", e);
+                    	return mapping.findForward("error");
                     }
                     log.debug("Finished canceling request.");
                     
@@ -384,7 +444,7 @@ public final class ProductServerAction extends LASAction {
                         if ( timeout > 0 ) {
                         	
                             // Timeout set in the request.
-                            long to = Math.min(timeout, 20000);
+                            long to = Math.min(timeout, 2);
                             log.info("Joining thread with timeout of "+to);
                             productServerRunner.join(to);
                         } else {

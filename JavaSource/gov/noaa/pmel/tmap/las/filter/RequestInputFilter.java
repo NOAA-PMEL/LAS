@@ -75,14 +75,20 @@ public class RequestInputFilter implements Filter {
     // All LAS query parameters.
     private final static String[] p = {
     	"BBOX", 
-    	"cancel", 
+    	"cancel",
+    	"cancel_button",
     	"catid", 
     	"catitem", 
+    	"clean",
+    	"cleanbutton",
+    	"cleands",
     	"debug",
     	"dsid",
     	"email",
+    	"embutton",
     	"format",
     	"JSESSIONID",
+    	"key",
 		"log_level",
 		"opendap",
 		"opid",
@@ -105,7 +111,7 @@ public class RequestInputFilter implements Filter {
     };
     private final static Set<String> LAS_BOOLEAN_PARAMETERS = new HashSet<String>(Arrays.asList(bp));
     
-    // Every parameter that accepts an LAS ID
+    // Every parameter that accepts an LAS ID (just letters, numbers, -, ., _  (cancel_button has value Cancel.  This will filter code in that button
     private static final String[] lp = {
     	"catid", 
     	"catitem", 
@@ -114,6 +120,7 @@ public class RequestInputFilter implements Filter {
 		"opid",
 		"plot",
 		"stream_ID", 
+		"cancel_button",
 		"varid"
     };
 	
@@ -217,11 +224,11 @@ public class RequestInputFilter implements Filter {
 		}
 		if ( value.length > 1 ) return false;
 		
-		if ( !value[0].equals("debug") && 
-			 !value[0].equals("info") && 
-			 !value[0].equals("warn") && 
-			 !value[0].equals("error") && 
-			 !value[0].equals("fatal")
+		if ( !value[0].trim().toLowerCase().equals("debug") && 
+			 !value[0].trim().toLowerCase().equals("info") && 
+			 !value[0].trim().toLowerCase().equals("warn") && 
+			 !value[0].trim().toLowerCase().equals("error") &&
+			 !value[0].trim().toLowerCase().equals("fatal")
 			 ) return false;
 		return true;
 	}

@@ -4,6 +4,7 @@
 package gov.noaa.pmel.tmap.las.service;
 
 import gov.noaa.pmel.tmap.las.exception.LASException;
+import gov.noaa.pmel.tmap.las.jdom.JDOMUtils;
 import gov.noaa.pmel.tmap.las.jdom.LASBackendRequest;
 import gov.noaa.pmel.tmap.las.jdom.LASBackendResponse;
 import gov.noaa.pmel.tmap.las.jdom.LASConfig;
@@ -171,5 +172,49 @@ public class ProductLocalService extends ProductService {
         return;
  
     }
-
+    public void fiveMinutes(LASBackendRequest lasBackendRequest) throws JDOMException, IOException, Exception {
+         
+        LASBackendResponse lasBackendResponse = new LASBackendResponse();
+        
+        
+        String cancel = lasBackendRequest.getResultAsFile("cancel");
+        File cf = null;
+        if ( cancel != null && !cancel.equals("") ) {
+            cf = new File(cancel);
+        }
+        
+        // If it's the cancel job, set the file and return.
+        if ( lasBackendRequest.isCancelRequest() && cf != null ) {
+            lasBackendResponse.setError("Java backend request canceled.");
+           
+            try {
+                cf.createNewFile();
+            } catch (Exception e) {
+                lasBackendResponse.setError("fiveMinutes backend failed to cancel request. ", e);
+            }
+            log.info("Java backend request canceled: "+lasBackendRequest.toCompactString());
+            setResponseXML(lasBackendResponse.toString());
+            return;
+        }
+        // If it's not the cancel job, sleep for 30 then look for the cancel job.  Repeat for 5 minutes.
+        for ( int i = 0; i < 10; i++ ) {
+            try {
+                Thread.currentThread().sleep(1000*30);
+            } catch (InterruptedException e) {
+                lasBackendResponse.setError("fiveMinutes had trouble sleeping. ", e);
+            }
+            if ( cf != null & cf.exists() ) {
+                lasBackendResponse.setError("Java backend request canceled.", "Returning cancel response.");
+                if ( !cf.delete() ) {
+                    lasBackendResponse.setError("Could not remove cancel file.", "Remove from cache");
+                }
+                setResponseXML(lasBackendResponse.toString());
+                return;
+            }
+        }
+        
+        lasBackendResponse.addResponseFromRequest(lasBackendRequest);
+        setResponseXML(lasBackendResponse.toString());
+        return;    
+    }
 }

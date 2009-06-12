@@ -270,18 +270,32 @@ public class ProductServerRunner  extends Thread  {
                              * the name of the method is a variable (we know the class it's productLocalService).  
                              * The result if methodName="getTHREDDS" is to invoke the following:
                              * productLocalService.getTHREDDS(lasBackendRequest, lasConfig, serverConfig);
+                             * 
+                             * Add the time out tester here.  Could use a bit more generality.
                              */
-                            
-                            Class[] args = new Class[3];
-                            args[0] = backendRequestDocument.getClass();
-                            args[1] = lasConfig.getClass();
-                            args[2] = serverConfig.getClass();
-                            Method method = productLocalService.getClass().getMethod(methodName, args);
-                            Object[] oargs = new Object[3];
-                            oargs[0] = backendRequestDocument;
-                            oargs[1] = lasConfig;
-                            oargs[2] = serverConfig;
-                            method.invoke(productLocalService, oargs);
+                            Object[] oargs = null;
+                            Method method = null;
+                            if ( methodName.equals("getTHREDDS")) {
+                            	Class[] args = new Class[3];
+                            	args[0] = backendRequestDocument.getClass();
+                            	args[1] = lasConfig.getClass();
+                            	args[2] = serverConfig.getClass();
+                            	method = productLocalService.getClass().getMethod(methodName, args);
+                            	oargs = new Object[3];
+                            	oargs[0] = backendRequestDocument;
+                            	oargs[1] = lasConfig;
+                            	oargs[2] = serverConfig;
+                            	
+                            } else if ( methodName.equals("fiveMinutes") ) {
+                            	Class[] args = new Class[1];
+                            	args[0] = backendRequestDocument.getClass();
+                            	method = productLocalService.getClass().getMethod(methodName, args);
+                            	oargs = new Object[1];
+                            	oargs[0] = backendRequestDocument;
+                            }
+                            if (method != null ) {
+                               method.invoke(productLocalService, oargs);
+                            }
                             
                             
                             responseXML = productLocalService.getResponseXML();
