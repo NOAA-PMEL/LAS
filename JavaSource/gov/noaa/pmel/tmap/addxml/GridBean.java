@@ -18,28 +18,49 @@ import org.jdom.Element;
  * @version 1.0
  */
 public class GridBean extends LasBean{
-  private Vector axes;
+	private Vector axes;
 
-  public GridBean() {
-  }
+	public GridBean() {
+	}
 
-  public void setAxes(Vector axes) {
-    this.axes = axes;
-  }
+	public void setAxes(Vector axes) {
+		this.axes = axes;
+	}
 
-  public Vector getAxes() {
-    return axes;
-  }
+	public Vector getAxes() {
+		return axes;
+	}
 
-  public Element toXml() {
-    Element grid = new Element(this.getElement());
-    Iterator ait = axes.iterator();
-    while (ait.hasNext()) {
-      AxisBean ab = (AxisBean)ait.next();
-      Element link = new Element("link");
-      link.setAttribute("match","/lasdata/axes/"+ab.getElement());
-      grid.addContent(link);
-    }
-    return grid;
-  }
+	public Element toXml() {
+		Element grid = new Element(this.getElement());
+		Iterator ait = axes.iterator();
+		while (ait.hasNext()) {
+			AxisBean ab = (AxisBean)ait.next();
+			Element link = new Element("link");
+			link.setAttribute("match","/lasdata/axes/"+ab.getElement());
+			grid.addContent(link);
+		}
+		return grid;
+	}
+
+	@Override
+	public boolean equals(LasBean bean) {
+		GridBean b;
+		if ( !(bean instanceof GridBean) ) {
+			return false;
+		} else {
+			b = (GridBean) bean;
+		}
+		boolean match = true;
+		for (Iterator axesIt = axes.iterator(); axesIt.hasNext();) {
+			AxisBean a = (AxisBean) axesIt.next();
+			boolean amatch = false;
+			for (Iterator bAxesIt = b.getAxes().iterator(); bAxesIt.hasNext();) {
+				AxisBean baxis = (AxisBean) bAxesIt.next();
+				if ( a.equals(baxis) ) amatch = true;
+			}
+			match = match && amatch;
+		}
+		return match;
+	}
 }
