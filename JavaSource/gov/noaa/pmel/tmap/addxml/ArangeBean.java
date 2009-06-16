@@ -48,4 +48,18 @@ public class ArangeBean extends LasBean {
   public String toString() {
      return "start="+start+" step="+step+" size="+size;
   }
+
+@Override
+public boolean equals(LasBean bean) {
+	ArangeBean b = null;
+	if ( !( bean instanceof ArangeBean ) ) {
+		return false;
+	} else { 
+		b = (ArangeBean) bean;
+	}
+	if ( !size.equals(b.getSize() )) return false;
+	if ( !step.equals(b.getStep() )) return false;
+	if ( !start.equals(b.getStart() )) return false;
+	return true;
+}
 }

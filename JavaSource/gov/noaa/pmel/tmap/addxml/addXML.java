@@ -35,6 +35,8 @@ package gov.noaa.pmel.tmap.addxml;
  */
 
 // Standard Java stuff.
+import gov.noaa.pmel.tmap.las.ui.getGrid;
+
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -42,6 +44,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -49,6 +52,8 @@ import java.util.Locale;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import org.jdom.Comment;
 import org.jdom.DocType;
 import org.jdom.Document;
@@ -60,10 +65,14 @@ import org.jdom.output.XMLOutputter;
 import org.joda.time.Chronology;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
+import org.joda.time.Days;
 import org.joda.time.Duration;
 import org.joda.time.DurationFieldType;
 import org.joda.time.Hours;
+import org.joda.time.Months;
 import org.joda.time.Period;
+import org.joda.time.PeriodType;
+import org.joda.time.Years;
 import org.joda.time.chrono.All360Chronology;
 import org.joda.time.chrono.AllLeapChronology;
 import org.joda.time.chrono.GJChronology;
@@ -82,6 +91,9 @@ import thredds.catalog.InvDocumentation;
 import thredds.catalog.ServiceType;
 import thredds.catalog.ThreddsMetadata.GeospatialCoverage;
 import thredds.catalog.ThreddsMetadata.Range;
+import thredds.catalog.ThreddsMetadata.Variable;
+import thredds.catalog.ThreddsMetadata.Variables;
+import thredds.catalog2.ThreddsMetadata;
 
 import ucar.nc2.Attribute;
 import ucar.nc2.dataset.CoordinateAxis;
@@ -118,7 +130,11 @@ import com.martiansoftware.jsap.JSAPResult;
  * @version 1.5
  */
 public class addXML {
-
+  private static Logger log = LogManager.getLogger(addXML.class.getName());
+  private static final String patterns[] = {
+			  "yyyy", "yyyy-MM-dd", "yyyy-MM-dd", "yyyy-MM-dd",
+			  "yyyy-MM-dd HH:mm:ss", "yyyy-MM-ddTHH:mm:ss",
+			  "yyyy-MM-dd HH:mm:ss", "yyyy-MM-dd HH:mm:ss"};
   private static boolean verbose;
   private static int fileCount;
   private static HashMap forceAxes = new HashMap();
@@ -126,6 +142,7 @@ public class addXML {
   private static String version_string = "1.6.0.0";
   private static String global_title_attribute;
   private static String format;
+  private static DateTimeFormatter fmt;
   private static String units_format;
   private static String group_type;
   private static String group_name;
@@ -141,7 +158,7 @@ public class addXML {
       jbInit();
     }
     catch (Exception ex) {
-      ex.printStackTrace();
+     log.error(ex.getMessage());
     }
   }
 
@@ -182,7 +199,7 @@ public class addXML {
           forceAxes.put(ax[a], new Boolean(true));
         }
         else {
-          System.err.println("Ignoring axis " + ax[a] +
+          log.error("Ignoring axis " + ax[a] +
                              " on the --arange option. Unknown axis.  Must be x,y,z or t.");
         }
       }
@@ -197,7 +214,7 @@ public class addXML {
             group_type = grp[g];
         }
         else {
-          System.err.println("Ignoring group with type " + grp[g] +
+          log.error("Ignoring group with type " + grp[g] +
                              " on the --group_type option. Must be ensemble or time_series.");
         }
       }
@@ -230,8 +247,8 @@ public class addXML {
     	try{
     		provider_class = loader.loadClass(provider);
     	}catch(ClassNotFoundException ee){
-    		System.out.println("Error loading authentication credentials provider class.");
-    		System.out.println(ee);
+    		log.error("Error loading authentication credentials provider class.");
+    		log.error(ee);
     		System.exit(1);
     	}
     	
@@ -239,8 +256,8 @@ public class addXML {
     	try{
     		provider_obj = (LASCredentialsProvider)provider_class.newInstance();
     	}catch(Exception ee){
-    		System.out.println("Error creating authentication credentials provider object.");
-    		System.out.println(ee);
+    		log.error("Error creating authentication credentials provider object.");
+    		log.error(ee);
     		System.exit(1);
     	}
     }
@@ -288,20 +305,20 @@ public class addXML {
     }
 
     if (version) {
-      System.out.println("Version: " + version_string);
+      log.error("Version: " + version_string);
     }
 
     if (data.length == 0 && thredds.length == 0) {
-      System.err.println("");
-      System.err.println("You must specify either");
-      System.err.println("\ta THREDDS catalog with the -t option or ");
-      System.err.println("\ta netCDF data source with the -n option.");
-      System.err.println("");
-      System.err.print("Usage: addXML.sh ");
-      System.err.print(command_parser.getUsage());
-      System.err.println("");
-      System.err.println("");
-      System.err.print(command_parser.getHelp());
+      log.error("");
+      log.error("You must specify either");
+      log.error("\ta THREDDS catalog with the -t option or ");
+      log.error("\ta netCDF data source with the -n option.");
+      log.error("");
+      log.error("Usage: addXML.sh ");
+      log.error(command_parser.getUsage());
+      log.error("");
+      log.error("");
+      log.error(command_parser.getHelp());
       System.exit(1);
     }
 
@@ -315,11 +332,11 @@ public class addXML {
       }
       // Failed to read input XML.  Go on without it.
       catch (IOException ex) {
-        System.out.println(ex.getMessage());
+        log.error(ex.getMessage());
         inputLasDoc = null;
       }
       catch (JDOMException ex) {
-        System.out.println(ex.getMessage());
+        log.error(ex.getMessage());
         inputLasDoc = null;
       }
     }
@@ -337,7 +354,7 @@ public class addXML {
         ncds.close();
       }
       catch (IOException e) {
-        System.out.println("IO error = " + e);
+        log.error("IO error = " + e);
       }
       Vector db = (Vector) dgab.getDatasets();
       if (db != null && db.size() > 0) {
@@ -505,13 +522,13 @@ public class addXML {
     }
 
     if (numThredds == 0 && numNetcdf == 0) {
-      System.err.println("");
-      System.err.println("No grids were found in the input data sets.");
-      System.err.println(
+      log.error("");
+      log.error("No grids were found in the input data sets.");
+      log.error(
           "Check to see if the OPeNDAP servers being referenced are running.");
-      System.err.println(
+      log.error(
           "Verify that the netCDF files referenced are COARDS or CF compliant.");
-      System.err.println("");
+      log.error("");
     }
 
     if (inputLasDoc != null) {
@@ -543,7 +560,7 @@ public class addXML {
         show = true;
       }
       if (!catalog.check(buff, show)) {
-        System.out.println("Invalid catalog <" + data + ">\n" + buff.toString());
+        log.error("Invalid catalog <" + data + ">\n" + buff.toString());
       }
       else {
         return createXMLfromTHREDDSCatalog(catalog);
@@ -560,7 +577,7 @@ public class addXML {
       url = new URL(data);
          }
          catch (MalformedURLException ex) {
-      System.out.println(ex.getMessage()+" "+data);
+      log.error(ex.getMessage()+" "+data);
          }
          CatalogGen catGen = new CatalogGen(url);
          StringBuffer log = new StringBuffer();
@@ -648,7 +665,7 @@ public class addXML {
         countString = String.valueOf(fileCount);
       }
       else {
-        System.err.println("No more that 999 data sets to process.  Please.");
+        log.error("No more that 999 data sets to process.  Please.");
         System.exit(1);
       }
     }
@@ -850,9 +867,9 @@ public class addXML {
       String url = access.getStandardUrlName();
       try {
     	  if ( esg ) {
-    		  if ( url.endsWith("aggregation") ) {
+    		  if ( url.contains("aggregation") ) {
     			  // Try to get metadata from the catalog.
-    			  dgab = createBeansFromThreddsMetadata(ThreddsDataset);
+    			  dgab = createBeansFromThreddsMetadata(ThreddsDataset, url);
     			  if ( dgab == null ) {
     				  // Else open the aggregation and get it from there
     				  String dods = url.replaceAll("http", "dods");
@@ -870,130 +887,314 @@ public class addXML {
       }
       catch (IOException e) {
         dgab.setError(e.getMessage());
-        System.out.println("IO error = " + e.getMessage());
+        log.error("IO error = " + e.getMessage());
       }
 
     return dgab;
   }
 
   private static DatasetsGridsAxesBean createBeansFromThreddsMetadata(
-		  InvDataset threddsDataset) {
+		  InvDataset threddsDataset, String url) {
 	  DatasetsGridsAxesBean dgab = new DatasetsGridsAxesBean();
 	  Vector DatasetBeans = new Vector();
 	  DatasetBean dataset = new DatasetBean();
 	  UniqueVector GridBeans = new UniqueVector();
 	  UniqueVector AxisBeans = new UniqueVector();
 
-	 
-
 	  if (verbose) {
-		  System.out.println("Processing ESG THREDDS dataset: " + threddsDataset.getFullName() + "with id: "+threddsDataset.getID());
+		  log.info("Processing ESG THREDDS dataset: " + threddsDataset.getFullName() + "with id: "+threddsDataset.getID());
 	  }
 
 	  dataset.setName(threddsDataset.getFullName());
 	  dataset.setElement(threddsDataset.getID());
+	  dataset.setVersion(version_string);
+	  dataset.setCreator(addXML.class.getName());
+	  dataset.setCreated((new DateTime()).toString());
+	  dataset.setUrl(url);
+	  List<Variables> variables = threddsDataset.getVariables();
+	  if (variables.size() > 0 ) {
+		  for (Iterator varlistIt = variables.iterator(); varlistIt.hasNext();) {
+			  Variables vars_container = (Variables) varlistIt.next();
+			  List<Variable> vars = vars_container.getVariableList();
+			  if ( vars.size() > 0 ) {
+				  for (Iterator varIt = vars.iterator(); varIt.hasNext();) {
+					  Variable variable = (Variable) varIt.next();
 
-	  List variables = threddsDataset.getVariables();
-	  for (Iterator varIt = variables.iterator(); varIt.hasNext();) {
-		Object var = (Object) varIt.next();
-	  }
+					  VariableBean las_var = new VariableBean();
+					  las_var.setElement(threddsDataset.getID()+"-"+variable.getName());
+					  las_var.setName(variable.getName());
+					  las_var.setUnits(variable.getUnits());
+					  las_var.setUrl("#"+variable.getName());
 
-	  GeospatialCoverage coverage = threddsDataset.getGeospatialCoverage();
-	  DateRange dateRange = threddsDataset.getTimeCoverage();
+					  GeospatialCoverage coverage = threddsDataset.getGeospatialCoverage();
+					  DateRange dateRange = threddsDataset.getTimeCoverage();
+
+					  StringBuilder grid_name = new StringBuilder(threddsDataset.getID()+"-grid");
+					  if (coverage != null ) {
+
+						  boolean readX = false;
+						  boolean readY = false;
+
+						  double xsize = coverage.getLonExtent();
+						  double xresolution = coverage.getLonResolution();
+						  double xstart = coverage.getLonStart();
+						  String xunits = coverage.getLonUnits();
+
+						  if ( Double.isNaN(xsize) || Double.isNaN(xstart)) {
+							  readX = true;
+						  }
+						  if ( Double.isNaN(xresolution) ) {
+							  // We're going to pretend it is 1-degree data for purposes of the LAS UI.
+							  xresolution = 1.0;
+						  }
+						  double ysize = coverage.getLatExtent();
+						  double yresolution = coverage.getLatResolution();
+						  double ystart = coverage.getLatStart();
+						  String yunits = coverage.getLatUnits();
+						  if ( Double.isNaN(ysize) || Double.isNaN(ystart) ) {
+							  readY = true;
+						  }
+						  if ( Double.isNaN(yresolution) ) {
+							  // We're going to pretend it is 1-degree data for purposes of the LAS UI.
+							  yresolution = 1.0;
+						  }
+						  boolean hasZ = false;
+						  boolean readZ = false;
+						  String zvalues = null;
+						  Range z = coverage.getUpDownRange();
+						  if ( z != null ) {	
+							  hasZ = true;
+							  double zsize = z.getSize();
+							  double zresolution = z.getResolution();
+							  double zstart = z.getStart();
+							  zvalues = threddsDataset.findProperty("zvalues");
+							  if ( ( Double.isNaN(zsize) || Double.isNaN(zresolution) || Double.isNaN(zstart) ) &&
+									  zvalues == null ) {
+								  readZ = true;
+							  }
+						  }
+						  // One of these axes is not sufficiently specified in the metadata so prepare read the data out of the aggregation.
+						  NetcdfDataset ncds = null;
+						  GridDataset gridsDs = null;
+						  GridCoordSys gcs = null;
+						  if ( readX || readY || readZ ) {
+							  String dods = url.replaceAll("http", "dods");
+
+							  try {
+								  ncds = ucar.nc2.dataset.NetcdfDataset.openDataset(dods);
+								  gridsDs = new GridDataset(ncds);
+								  if ( ncds != null ) {
+									  ncds.close();
+								  }
+
+							  } catch (IOException e) {
+								  log.error("unable to read netcdf data set.");
+								  return null;
+							  }
+							  GridDatatype geogrid = gridsDs.findGridDatatype(variable.getName());
+							  gcs = (GridCoordSys) geogrid.getCoordinateSystem();
+						  }
+						  String elementName = threddsDataset.getID()+"-x-axis";
+						  AxisBean xAxis = new AxisBean();
+						  if ( readX && ncds != null && gridsDs != null ) {
+							  CoordinateAxis x = gcs.getXHorizAxis();
+							  if ( x instanceof CoordinateAxis1D ) {
+								  CoordinateAxis1D x_1d = (CoordinateAxis1D) gcs.getXHorizAxis();
+								  xAxis = makeGeoAxis(x_1d, "x", elementName);
+							  } else {
+								  CoordinateAxis2D x_2d = (CoordinateAxis2D) gcs.getXHorizAxis();
+								  xAxis = makeGeoAxisFrom2D(x_2d, "x", elementName);
+								  las_var.setProperty("ferret", "curvi_coord_lon", x.getName());
+								  las_var.setProperty("ferret", "curv_lon_min", String.valueOf(x.getMinValue()));
+								  las_var.setProperty("ferret", "curv_lon_max", String.valueOf(x.getMaxValue()));
+							  }							  
+						  } else {
+							  // Get the X Axis information...
+							  xAxis.setElement(elementName);
+							  grid_name.append("-x-axis");
+							  xAxis.setType("x");
+							  xAxis.setUnits(xunits);
+							  int xsizei = (int)(xsize/xresolution);
+							  ArangeBean xr = new ArangeBean();
+							  xr.setSize(String.valueOf(xsizei));
+							  xr.setStep(String.valueOf(xresolution));
+							  xr.setStart(String.valueOf(xstart));
+							  xAxis.setArange(xr);
+
+						  }
+						  if ( !AxisBeans.contains(xAxis) ) {
+							  AxisBeans.add(xAxis);
+						  } else {
+							  xAxis.setElement(AxisBeans.getMatchingID(xAxis));
+						  }
+						  elementName = threddsDataset.getID()+"-y-axis";
+						  AxisBean yAxis = new AxisBean();
+						  if ( readY ) {
+							  CoordinateAxis y = gcs.getYHorizAxis();
+							  if ( y instanceof CoordinateAxis1D ) {
+								  CoordinateAxis1D y_1d = (CoordinateAxis1D) gcs.getYHorizAxis();
+								  yAxis = makeGeoAxis(y_1d, "y", elementName);
+							  } else {
+								  CoordinateAxis2D y_2d = (CoordinateAxis2D) gcs.getYHorizAxis();
+								  yAxis = makeGeoAxisFrom2D(y_2d, "y", elementName);
+								  las_var.setProperty("ferret", "curvi_coord_lat", y.getName());
+							  }
+						  } else {
+							  // Get the Y Axis information...
+							  yAxis.setElement(elementName);
+							  grid_name.append("-y-axis");
+							  yAxis.setType("y");
+							  yAxis.setUnits(yunits);
+							  int ysizei = (int)(ysize/yresolution);
+							  ArangeBean yr = new ArangeBean();
+							  yr.setSize(String.valueOf(ysizei));
+							  yr.setStep(String.valueOf(yresolution));
+							  yr.setStart(String.valueOf(ystart));
+							  yAxis.setArange(yr);
+						  }
+						  if ( !AxisBeans.contains(yAxis) ) {
+							  AxisBeans.add(yAxis);
+						  } else {
+							  yAxis.setElement(AxisBeans.getMatchingID(yAxis));
+						  }
+						  elementName = threddsDataset.getID()+"-z-axis";
+						  AxisBean zAxis = new AxisBean();
+						  if ( hasZ ) {
+							  if ( readZ ) {
+								  CoordinateAxis1D z_1d = gcs.getVerticalAxis();
+								  zAxis = makeGeoAxis(z_1d, "z", elementName);
+							  } else if ( zvalues != null ) {
+								  zAxis.setElement(elementName);
+								  String zunits = z.getUnits();
+								  zAxis.setType("z");
+								  zAxis.setUnits(zunits);
+								  zvalues = zvalues.trim().replaceAll("\\s+", "");
+								  String[] v = zvalues.split(",");
+								  zAxis.setV(v);
+							  } else {
+								  zAxis.setElement(elementName);
+								  grid_name.append("-z-axis");
+								  double zsize = z.getSize();
+								  double zresolution = z.getResolution();
+								  double zstart = z.getStart();
+								  if ( !Double.isNaN(zsize) && !Double.isNaN(zresolution) && !Double.isNaN(zstart) ) {
+									  String zunits = z.getUnits();
+									  zAxis.setType("z");
+									  zAxis.setUnits(zunits);
+									  ArangeBean zr = new ArangeBean();
+									  int zsizei = (int)(zsize/zresolution);
+									  zr.setSize(String.valueOf(zsizei));
+									  zr.setStep(String.valueOf(zresolution));
+									  zr.setStart(String.valueOf(zstart));
+									  zAxis.setArange(zr);
+									  
+								  } 
+							  }
+							  if ( !AxisBeans.contains(zAxis) ) {
+								  AxisBeans.add(zAxis);
+							  } else {
+								  zAxis.setElement(AxisBeans.getMatchingID(zAxis));
+							  }
+						  }
+						  String time_delta = threddsDataset.findProperty("time_delta");
+						  String calendar = threddsDataset.findProperty("calendar");
+
+						  String[] time_parts = time_delta.split("\\s+");
+						  String tdelta = time_parts[0];
+						  String tunits = time_parts[1];
+
+						  // Use this chronology and the UTC Time Zone
+						  Chronology chrono = GJChronology.getInstance(DateTimeZone.UTC);
+
+						  // If calendar attribute is set, use appropriate Chronology.
+						  if (calendar.equals("proleptic_gregorian") ) {
+							  chrono = GregorianChronology.getInstance(DateTimeZone.UTC);
+						  } else if (calendar.equals("noleap") || calendar.equals("365_day") ) {
+							  chrono = NoLeapChronology.getInstance(DateTimeZone.UTC);
+						  } else if (calendar.equals("julian") ) {
+							  chrono = JulianChronology.getInstance(DateTimeZone.UTC);
+						  } else if ( calendar.equals("all_leap") || calendar.equals("366_day") ) {
+							  chrono = AllLeapChronology.getInstance(DateTimeZone.UTC);
+						  } else if ( calendar.equals("360_day") ) {  /* aggiunto da lele */
+							  chrono = All360Chronology.getInstance(DateTimeZone.UTC);
+						  }
+
+						  String tstart = trimUnidataDateTimeString(dateRange.getStart());
+						  String tend = trimUnidataDateTimeString(dateRange.getEnd());
+						  DateTimeFormatter f = DateTimeFormat.forPattern("yyyy-MM-dd 00:00:00").withChronology(chrono);
+						  DateTime s = f.parseDateTime(tstart).withChronology(chrono);
+						  DateTime e = f.parseDateTime(tend).withChronology(chrono);
+						  Months mm = Months.monthsBetween(s, e);
+						  int nm = mm.getMonths();
+						  int size = 0;
+						  if ( tunits.trim().toLowerCase().contains("year") ) {
+							  s = s.dayOfMonth().withMinimumValue();
+							  e = e.dayOfMonth().withMaximumValue();
+							  Years y = Years.yearsBetween(s, e);
+							  size = y.getValue(0);
+						  } else if ( tunits.trim().toLowerCase().contains("month") ) {
+							  s = s.dayOfMonth().withMinimumValue();
+							  e = e.dayOfMonth().withMaximumValue();
+							  Months m = Months.monthsBetween(s, e);
+							  size = m.getMonths();
+						  } else if ( tunits.trim().toLowerCase().contains("day") ) {
+							  Days d = Days.daysBetween(s, e);
+							  size = d.getValue(0);
+						  } else if ( tunits.trim().toLowerCase().contains("hour") ) {
+							  Hours h = Hours.hoursBetween(s, e);
+							  size = h.getValue(0);
+						  }
+						  AxisBean tAxis = new AxisBean();
+						  tAxis.setElement(threddsDataset.getID()+"-t-axis");
+						  grid_name.append("-t-axis");
+						  tAxis.setType("t");
+						  tAxis.setUnits(tunits);
+						  ArangeBean tr = new ArangeBean();
+						  tr.setStart(tstart);
+						  tr.setStep(tdelta);
+						  tr.setSize(String.valueOf(size));
+						  tAxis.setArange(tr);
+						  if ( !AxisBeans.contains(tAxis) ) {
+							  AxisBeans.addUnique(tAxis);
+						  } else {
+							  tAxis.setElement(AxisBeans.getMatchingID(tAxis));
+						  }
+
+						  dgab.setAxes(AxisBeans);
+						  GridBean grid = new GridBean();
+						  grid.setElement(grid_name.toString());
+						  grid.setAxes(AxisBeans);
+						  if ( !GridBeans.contains(grid) ) {
+							  GridBeans.add(grid);
+						  } else {
+							  grid.setElement(GridBeans.getMatchingID(grid));
+						  }
 
 
-	  if (coverage != null ) {
-		  boolean quit = false;
 
-		  double xsize = coverage.getLonExtent();
-		  double xresolution = coverage.getLonResolution();
-		  double xstart = coverage.getLonStart();
-		  String xunits = coverage.getLonUnits();
+						  las_var.setGrid(grid);
+						  dataset.addVariable(las_var);
 
-		  if ( Double.isNaN(xsize) || Double.isNaN(xresolution) || Double.isNaN(xstart)) {
-			  quit = true;
-		  }
-		  double ysize = coverage.getLatExtent();
-		  double yresolution = coverage.getLatResolution();
-		  double ystart = coverage.getLatStart();
-		  String yunits = coverage.getLatUnits();
-		  if ( Double.isNaN(ysize) || Double.isNaN(yresolution) || Double.isNaN(ystart) ) {
-	          quit = true;
-		  }
-		  if (!quit) {
-			  // Get the X Axis information...
-			  AxisBean xAxis = new AxisBean();
-			  xAxis.setElement(threddsDataset.getID()+"-x-axis");
-			  xAxis.setType("x");
-			  xAxis.setUnits(xunits);
-			  int xsizei = (int)(xsize/xresolution);
-			  ArangeBean xr = new ArangeBean();
-			  xr.setSize(String.valueOf(xsizei));
-			  xr.setStep(String.valueOf(xresolution));
-			  xr.setStart(String.valueOf(xstart));
-			  xAxis.setArange(xr);
-			  AxisBeans.add(xAxis);
-
-			  // Get the Y Axis information...
-			  AxisBean yAxis = new AxisBean();
-			  yAxis.setElement(threddsDataset.getID()+"-y-axis");
-              yAxis.setType("y");
-              yAxis.setUnits(yunits);
-			  int ysizei = (int)(ysize/yresolution);
-			  ArangeBean yr = new ArangeBean();
-			  yr.setSize(String.valueOf(ysizei));
-			  yr.setStep(String.valueOf(yresolution));
-			  yr.setStart(String.valueOf(ystart));
-			  yAxis.setArange(yr);
-			  AxisBeans.add(yAxis);
-
-			  Range z = coverage.getUpDownRange();
-			  if ( z != null ) {
-				  AxisBean zAxis = new AxisBean();
-				  zAxis.setElement(threddsDataset.getID()+"-z-axis");
-				  double zsize = z.getSize();
-				  double zresolution = z.getResolution();
-				  String zunits = z.getUnits();
-				  zAxis.setType("z");
-				  zAxis.setUnits(zunits);
-				  ArangeBean zr = new ArangeBean();
-				  int zsizei = (int)(zsize/zresolution);
-				  zr.setSize(String.valueOf(zsizei));
-				  zr.setStep(String.valueOf(zresolution));
-				  zr.setStart(String.valueOf(z.getStart()));
-				  zAxis.setArange(zr);
-				  AxisBeans.add(zAxis);
-
+					  } // coverage != null
+				  } // for variables;
+				  DatasetBeans.add(dataset);
+			  } else { // vars > 0
+				  return null;
 			  }
-
-			  DateType tstart = dateRange.getStart();
-			  DateType tend = dateRange.getEnd();
-			  TimeDuration deltat = dateRange.getResolution();
-			  
-			  AxisBean tAxis = new AxisBean();
-			  tAxis.setElement(threddsDataset.getID()+"-t-axis");
-			  tAxis.setType("t");
-			  tAxis.setUnits(deltat.getTimeUnit().getUnitString());
-			  ArangeBean tr = new ArangeBean();
-			  tr.setStart(tstart.toDateTimeString());
-			  tr.setStep(String.valueOf(deltat.getValue()));
-			  
-			  TimeDuration total = dateRange.getDuration();
-			  int size = (int)(total.getValueInSeconds()/deltat.getValueInSeconds());
-			  tr.setSize(String.valueOf(size));
-			  tAxis.setArange(tr);
-			  AxisBeans.add(tAxis);
-			  
-			  dgab.setAxes(AxisBeans);
-		  } else {
-			  return null;
-		  }
-	  } else {
+		  }// for outer variables container iterator
+	  } else { // outer variables list
 		  return null;
 	  }
+	  dgab.setGrids(GridBeans);
+	  dgab.setAxes(AxisBeans);
+	  dgab.setDatasets(DatasetBeans);
 	  return dgab;
   }
-
+  public static String trimUnidataDateTimeString(DateType d) {
+	  String dt = d.toDateTimeString();
+	  if ( dt.endsWith("Z") ) return dt.substring(0, dt.length() - 1);
+	  return dt;
+  }
 /**
    * processCategories
    *
@@ -1037,7 +1238,7 @@ public class addXML {
 				url = access.getStandardUrlName();
 			}
 		}
-    	if ( access != null && ((esg && url.endsWith("aggregation")) || !esg ) ) {
+    	if ( access != null && ((esg && url.contains("aggregation")) || !esg ) ) {
     		// Make the filter.
     		FilterBean filter = new FilterBean();
     		filter.setAction("apply-dataset");
@@ -1096,7 +1297,7 @@ public class addXML {
     dataset.setCreator(addXML.class.getName());
 
     if (verbose) {
-      System.out.println("Processing netCDF dataset: " + url);
+      log.error("Processing netCDF dataset: " + url);
     }
     
     String name = null;
@@ -1153,7 +1354,7 @@ public class addXML {
     if (grids.size() == 0) {
       dataset.setComment(
           "This data source has no lat/lon grids that follow a known convention.");
-      System.err.println("File parsed.  No Lat/Lon grids found.");
+      log.error("File parsed.  No Lat/Lon grids found.");
     }
     for (int i = 0; i < grids.size(); i++) {
       /*
@@ -1202,12 +1403,12 @@ public class addXML {
       }
       grid_name = grid_name + "-" + xAxis.getShortName();
       if (verbose) {
-        System.out.println("\t Variable: " + geogrid.getName());
-        System.out.print("\t\t Longitude axis: ");
+        log.error("\t Variable: " + geogrid.getName());
+        log.error("\t\t Longitude axis: ");
       }
       GridAxisBeans.addUnique(xaxis);
       if (verbose) {
-        System.out.println(xaxis.toString());
+        log.error(xaxis.toString());
       }
       
       CoordinateAxis yAxis = gcs.getYHorizAxis();
@@ -1223,29 +1424,29 @@ public class addXML {
       
       grid_name = grid_name + "-" + yAxis.getShortName();
       if (verbose) {
-        System.out.print("\t\t Latitude axis: ");
+        log.error("\t\t Latitude axis: ");
       }
       
       GridAxisBeans.addUnique(yaxis);
       if (verbose) {
-        System.out.println(yaxis.toString());
+        log.error(yaxis.toString());
       }
       if (gcs.hasVerticalAxis()) {
         CoordinateAxis1D zAxis = gcs.getVerticalAxis();
         grid_name = grid_name + "-" + zAxis.getShortName();
         if (verbose) {
-          System.out.print("\t\t Vertical axis: ");
+          log.error("\t\t Vertical axis: ");
         }
         AxisBean zaxis = makeGeoAxis(zAxis, "z", elementName);
         GridAxisBeans.addUnique(zaxis);
         if (verbose) {
-          System.out.println(zaxis.toString());
+          log.error(zaxis.toString());
         }
 
       }
       else {
         if (verbose) {
-          System.out.println("\t\t No vertical axis");
+          log.error("\t\t No vertical axis");
         }
       }
 
@@ -1254,16 +1455,16 @@ public class addXML {
       if (tAxis != null) {
         grid_name = grid_name + "-" + tAxis.getShortName();
         if (verbose) {
-          System.out.print("\t\t Time axis: ");
+          log.error("\t\t Time axis: ");
         }
         AxisBean taxis = makeTimeAxis(tAxis, elementName);
         GridAxisBeans.addUnique(taxis);
         if (verbose) {
-          System.out.println(taxis.toString());
+          log.error(taxis.toString());
         }
       }
       else {
-        System.out.println("\t\t No time axis");
+        log.error("\t\t No time axis");
       }
 
       grid.setElement(grid_name + "-" + elementName);
@@ -1274,13 +1475,13 @@ public class addXML {
 
       if (verbose) {
         if (proj instanceof LatLonProjection) {
-          System.out.println("\t\t Grid has LatLonProjection.");
+          log.error("\t\t Grid has LatLonProjection.");
         }
         else if (proj instanceof LambertConformal) {
-          System.out.println("\t\t Grid has Lambert Conformal projection...");
+          log.error("\t\t Grid has Lambert Conformal projection...");
         }
         else {
-          System.out.println("\t\t Grid has unknown projection...");
+          log.error("\t\t Grid has unknown projection...");
         }
       }
 
@@ -1380,10 +1581,7 @@ public class addXML {
 
 	  // LAS only understands time units of: 'year', 'month', 'day', and 'hour'
 
-	  String patterns[] = {
-			  "yyyy", "yyyy-MM-dd", "yyyy-MM-dd", "yyyy-MM-dd",
-			  "yyyy-MM-dd HH:mm:ss", "yyyy-MM-dd HH:mm:ss",
-			  "yyyy-MM-dd HH:mm:ss", "yyyy-MM-dd HH:mm:ss"};
+	  
 	  String type = "t";
 	  AxisBean axisbean = new AxisBean();
 	  axisbean.setType(type);
@@ -1448,13 +1646,13 @@ public class addXML {
 		  axisbean.setV(ts);
 		  return axisbean;
 	  }
-	  DateTimeFormatter fmt = null;
+	 
 	  if ( format != null ) {
 		  try {
 			  fmt = DateTimeFormat.forPattern(format);
 		  } catch(IllegalArgumentException e) {
 			  fmt = null;
-			  System.err.println("Cannot parse supplied time format.  Will determine format instead.");
+			  log.error("Cannot parse supplied time format.  Will determine format instead.");
 		  }
 	  }
 	  DateUnit dateUnit = null;
@@ -1462,11 +1660,11 @@ public class addXML {
 		  dateUnit = new DateUnit(unitsString);
 	  } catch (Exception e) {
 
-		  System.err.println("Cannot parse units string.");
+		  log.error("Cannot parse units string.");
 	  }
 
 	  if (dateUnit == null) {
-		  System.out.println("Not a date Unit String: " + unitsString);
+		  log.error("Not a date Unit String: " + unitsString);
 	  }
 
 	  // This is the Joda Time Chronology that cooresponds to the
@@ -1524,12 +1722,11 @@ public class addXML {
 			  // two dates.
 
 			  // Only one should be greater than 0.
+            
 			  int numPeriods = 0;
 			  String periods = "";
 			  int values[] = period.getValues();
 			  DurationFieldType types[] = period.getFieldTypes();
-			  
-
 			  for (int i = 0; i < values.length; i++) {
 				  if (values[i] > 0) {
 					  numPeriods++;
@@ -1549,12 +1746,13 @@ public class addXML {
 						  step = step * 7;
 					  }
 					  axisbean.setUnits(typeName);
-					  arange.setStep(String.valueOf(step));
+					  arange.setStep(String.valueOf(step)); 
 				  }
 			  }
 
-			  if (numPeriods > 1) {
 
+			  if (numPeriods > 1) {
+                  
 				  // This is special code to deal with climatology files that define
 				  // the time axis in the "middle" of the month.  Since there is no
 				  // "middle" of months (but there is certainly always a
@@ -1576,7 +1774,7 @@ public class addXML {
 					  arange.setStep(String.valueOf(step));
 
 				  } else {
-					  System.out.println("Too many periods: " + periods);
+					  log.error("Too many periods: " + periods);
 					  //Try just dumping out the formatted times
 					  axisbean.setArange(null);
 					  double t[] = axis.getCoordValues();
@@ -1646,7 +1844,7 @@ public class addXML {
 	  return axisbean;
   }
 
-  private static DateTime makeDate(double d, DateUnit dateUnit, Chronology chrono) {
+private static DateTime makeDate(double d, DateUnit dateUnit, Chronology chrono) {
       // Extract the bits and pieces from the dataUnit
       String pstring = dateUnit.getTimeUnitString().toLowerCase();
       int years = 0;
@@ -1689,7 +1887,7 @@ public class addXML {
       } else if ( pstring.contains("milli") ) {
           millis = Double.valueOf(d).intValue();
       } else {
-          System.err.println("Could not figure out the base time interval for this units string. "+pstring+" does not appear to be year, month, week, day, hour, minute, second or milliseconds.");
+          log.error("Could not figure out the base time interval for this units string. "+pstring+" does not appear to be year, month, week, day, hour, minute, second or milliseconds.");
       }
       
       DateTime origin = getOrigin(dateUnit, chrono);
@@ -1725,17 +1923,17 @@ static private DateTime getOrigin(DateUnit dateUnit, Chronology chrono) {
             try {
                 origin = chrono_fmt_iso.parseDateTime(origin_string).withChronology(GregorianChronology.getInstanceUTC());
             } catch ( UnsupportedOperationException  uoe2) {
-                System.err.println("Could not parse "+origin_string+" with yyyy-MM-dd'T'HH:mm:ss.SSSZ or yyyy-MM-dd HH:mm:ss.  Use -f option to give format of time string.");
+                log.error("Could not parse "+origin_string+" with yyyy-MM-dd'T'HH:mm:ss.SSSZ or yyyy-MM-dd HH:mm:ss.  Use -f option to give format of time string.");
             } catch (IllegalArgumentException iae2 ) {
-                System.err.println("Could not parse "+origin_string+" with yyyy-MM-dd'T'HH:mm:ss.SSSZ or yyyy-MM-dd HH:mm:ss.  Use -f option to give format of time string.");
+                log.error("Could not parse "+origin_string+" with yyyy-MM-dd'T'HH:mm:ss.SSSZ or yyyy-MM-dd HH:mm:ss.  Use -f option to give format of time string.");
             }
         } catch (IllegalArgumentException iae ) {
             try {
                 origin = chrono_fmt_iso.parseDateTime(origin_string).withChronology(chrono);
             } catch ( UnsupportedOperationException  uoe2) {
-                System.err.println("Could not parse "+origin_string+" with yyyy-MM-dd'T'HH:mm:ss.SSSZ or yyyy-MM-dd HH:mm:ss");
+                log.error("Could not parse "+origin_string+" with yyyy-MM-dd'T'HH:mm:ss.SSSZ or yyyy-MM-dd HH:mm:ss");
             } catch (IllegalArgumentException iae2 ) {
-                System.err.println("Could not parse "+origin_string+" with yyyy-MM-dd'T'HH:mm:ss.SSSZ or yyyy-MM-dd HH:mm:ss");
+                log.error("Could not parse "+origin_string+" with yyyy-MM-dd'T'HH:mm:ss.SSSZ or yyyy-MM-dd HH:mm:ss");
             }
         }
     }
@@ -1868,8 +2066,7 @@ static private AxisBean makeGeoAxis(CoordinateAxis1D axis, String type, String i
       xmlout.close();
     }
     catch (java.io.IOException e) {
-      System.out.println(e.getMessage());
-      e.printStackTrace();
+      log.error(e.getMessage());
     }
   }
 
@@ -1887,8 +2084,7 @@ static private AxisBean makeGeoAxis(CoordinateAxis1D axis, String type, String i
       xmlout.close();
     }
     catch (java.io.IOException e) {
-      System.out.println(e.getMessage());
-      e.printStackTrace();
+      log.error(e.getMessage());
     }
   }
   private static String encodeID (String in) {
@@ -1902,7 +2098,7 @@ static private AxisBean makeGeoAxis(CoordinateAxis1D axis, String type, String i
 	          hexEncode(result).substring(result.length / 2, result.length);
 	    }
 	    catch (NoSuchAlgorithmException e) {
-	      System.out.println("Cannot create SHA-1 hash." + e.getMessage());
+	      log.error("Cannot create SHA-1 hash." + e.getMessage());
 	      encoding = "id-12345";
 	    }
 	    return encoding;
@@ -2002,5 +2198,5 @@ static private AxisBean makeGeoAxis(CoordinateAxis1D axis, String type, String i
 		  esg = Boolean.valueOf(esgOption).booleanValue();
 	  }
   }
-
+  
 } // end of class

@@ -13,7 +13,7 @@ package gov.noaa.pmel.tmap.addxml;
  * @author RHS
  * @version 1.0
  */
-public class LasBean {
+public abstract class LasBean {
   private String element;
   public LasBean() {
   }
@@ -25,4 +25,6 @@ public class LasBean {
   public String getElement() {
     return element;
   }
+  
+  public abstract boolean equals(LasBean bean);
 }
