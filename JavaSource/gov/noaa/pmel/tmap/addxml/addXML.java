@@ -35,7 +35,6 @@ package gov.noaa.pmel.tmap.addxml;
  */
 
 // Standard Java stuff.
-import gov.noaa.pmel.tmap.las.ui.getGrid;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -52,8 +51,6 @@ import java.util.Locale;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
 import org.jdom.Comment;
 import org.jdom.DocType;
 import org.jdom.Document;
@@ -130,7 +127,6 @@ import com.martiansoftware.jsap.JSAPResult;
  * @version 1.5
  */
 public class addXML {
-  private static Logger log = LogManager.getLogger(addXML.class.getName());
   private static final String patterns[] = {
 			  "yyyy", "yyyy-MM-dd", "yyyy-MM-dd", "yyyy-MM-dd",
 			  "yyyy-MM-dd HH:mm:ss", "yyyy-MM-ddTHH:mm:ss",
@@ -248,7 +244,7 @@ public class addXML {
     		provider_class = loader.loadClass(provider);
     	}catch(ClassNotFoundException ee){
     		log.error("Error loading authentication credentials provider class.");
-    		log.error(ee);
+    		log.error(ee.getMessage());
     		System.exit(1);
     	}
     	
@@ -257,7 +253,7 @@ public class addXML {
     		provider_obj = (LASCredentialsProvider)provider_class.newInstance();
     	}catch(Exception ee){
     		log.error("Error creating authentication credentials provider object.");
-    		log.error(ee);
+    		log.error(ee.getMessage());
     		System.exit(1);
     	}
     }
@@ -925,6 +921,7 @@ public class addXML {
 					  las_var.setName(variable.getName());
 					  las_var.setUnits(variable.getUnits());
 					  las_var.setUrl("#"+variable.getName());
+		                          log.info("Processing ESG THREDDS variable: " + variable.getName());
 
 					  GeospatialCoverage coverage = threddsDataset.getGeospatialCoverage();
 					  DateRange dateRange = threddsDataset.getTimeCoverage();
@@ -997,6 +994,7 @@ public class addXML {
 						  String elementName = threddsDataset.getID()+"-x-axis";
 						  AxisBean xAxis = new AxisBean();
 						  if ( readX && ncds != null && gridsDs != null ) {
+		                                          log.info("Reading X "+elementName);
 							  CoordinateAxis x = gcs.getXHorizAxis();
 							  if ( x instanceof CoordinateAxis1D ) {
 								  CoordinateAxis1D x_1d = (CoordinateAxis1D) gcs.getXHorizAxis();
@@ -1010,6 +1008,7 @@ public class addXML {
 							  }							  
 						  } else {
 							  // Get the X Axis information...
+		                                          log.info("Loading X from metadata: "+elementName);
 							  xAxis.setElement(elementName);
 							  grid_name.append("-x-axis");
 							  xAxis.setType("x");
@@ -1030,6 +1029,7 @@ public class addXML {
 						  elementName = threddsDataset.getID()+"-y-axis";
 						  AxisBean yAxis = new AxisBean();
 						  if ( readY ) {
+		                                          log.info("Reading Y "+elementName);
 							  CoordinateAxis y = gcs.getYHorizAxis();
 							  if ( y instanceof CoordinateAxis1D ) {
 								  CoordinateAxis1D y_1d = (CoordinateAxis1D) gcs.getYHorizAxis();
@@ -1040,6 +1040,7 @@ public class addXML {
 								  las_var.setProperty("ferret", "curvi_coord_lat", y.getName());
 							  }
 						  } else {
+		                                          log.info("Loading Y from metadata: "+elementName);
 							  // Get the Y Axis information...
 							  yAxis.setElement(elementName);
 							  grid_name.append("-y-axis");
@@ -1061,9 +1062,11 @@ public class addXML {
 						  AxisBean zAxis = new AxisBean();
 						  if ( hasZ ) {
 							  if ( readZ ) {
+		                                                  log.info("Reading Z "+elementName);
 								  CoordinateAxis1D z_1d = gcs.getVerticalAxis();
 								  zAxis = makeGeoAxis(z_1d, "z", elementName);
 							  } else if ( zvalues != null ) {
+		                                                  log.info("Loading Z from property metadata: "+elementName);
 								  zAxis.setElement(elementName);
 								  String zunits = z.getUnits();
 								  zAxis.setType("z");
@@ -1072,6 +1075,7 @@ public class addXML {
 								  String[] v = zvalues.split(",");
 								  zAxis.setV(v);
 							  } else {
+		                                                  log.info("Loading Z without property metadata: "+elementName);
 								  zAxis.setElement(elementName);
 								  grid_name.append("-z-axis");
 								  double zsize = z.getSize();
@@ -1144,6 +1148,7 @@ public class addXML {
 							  Hours h = Hours.hoursBetween(s, e);
 							  size = h.getValue(0);
 						  }
+		                                  log.info("Loading T from metadata: "+elementName);
 						  AxisBean tAxis = new AxisBean();
 						  tAxis.setElement(threddsDataset.getID()+"-t-axis");
 						  grid_name.append("-t-axis");
@@ -1687,7 +1692,9 @@ public class addXML {
 	  }
 
 	  if (axis.getSize() >= 2.) {
-		  if (irregular || !axis.isRegular()) {
+		  //if (irregular || !axis.isRegular()) {
+		  if (false) {
+                          log.info("Time axis is irregular");
 			  fmt = DateTimeFormat.forPattern(patterns[4]);
 			  int length = (int) axis.getSize();
 			  double t0 = axis.getCoordValue(0);
@@ -1713,16 +1720,44 @@ public class addXML {
 			  double t1 = axis.getCoordValue(1);
 			  DateTime jodaDate1 = makeDate(t0, dateUnit, chrono);
 			  DateTime jodaDate2 = makeDate(t1, dateUnit, chrono);
+                          int step = 0;
 			  Period period =
 				  new Period(jodaDate1.withZone(DateTimeZone.UTC),
 						  jodaDate2.withZone(DateTimeZone.UTC));
+						  if ( unitsString.trim().toLowerCase().contains("year") ) {
+							  jodaDate1 = jodaDate1.dayOfMonth().withMinimumValue();
+							  jodaDate2 = jodaDate2.dayOfMonth().withMaximumValue();
+							  Years y = Years.yearsBetween(jodaDate1, jodaDate2);
+							  step = y.getValue(0);
+					                  axisbean.setUnits("year");
+						  } else if ( unitsString.trim().toLowerCase().contains("month") ) {
+							  jodaDate1 = jodaDate1.dayOfMonth().withMinimumValue();
+							  jodaDate2 = jodaDate2.dayOfMonth().withMaximumValue();
+							  Months m = Months.monthsBetween(jodaDate1, jodaDate2);
+							  step = m.getMonths();
+					                  axisbean.setUnits("month");
+						  } else if ( unitsString.trim().toLowerCase().contains("day") ) {
+							  Days d = Days.daysBetween(jodaDate1, jodaDate2);
+							  step = d.getValue(0);
+					                  axisbean.setUnits("day");
+						  } else if ( unitsString.trim().toLowerCase().contains("hour") ) {
+							  Hours h = Hours.hoursBetween(jodaDate1, jodaDate2);
+							  step = h.getValue(0);
+					                  axisbean.setUnits("hour");
+						  }
+					  arange.setStep(String.valueOf(step)); 
+					  arange.setSize(String.valueOf(axis.getSize())); 
+			                  fmt = DateTimeFormat.forPattern(patterns[4]);
+			                  arange.setStart(fmt.print(jodaDate1.withZone(DateTimeZone.UTC)));
 
+				  axisbean.setArange(arange);
 			  // Returns the number of years, months, weeks, days,
 			  // hours, minutes, seconds, and millis between these
 			  // two dates.
 
 			  // Only one should be greater than 0.
             
+/*
 			  int numPeriods = 0;
 			  String periods = "";
 			  int values[] = period.getValues();
@@ -1749,6 +1784,8 @@ public class addXML {
 					  arange.setStep(String.valueOf(step)); 
 				  }
 			  }
+
+                          
 
 
 			  if (numPeriods > 1) {
@@ -1791,7 +1828,6 @@ public class addXML {
 
 				  }
 			  }
-
 			  Boolean forceAxis = (Boolean) forceAxes.get("t");
 			  if ( (axis.isRegular() || axisbean.getUnits().equals("month")) ||
 					  forceAxis.booleanValue()) {
@@ -1800,7 +1836,6 @@ public class addXML {
 				  // to the isRegular() test, so we need special code for
 				  // months.
 
-				  //TODO Check to make sure that if it's months it really is regular. */
 
 				  // This format should work.  LAS will drop the "day" if it's not needed.
 				  if (fmt == null ) {
@@ -1823,6 +1858,7 @@ public class addXML {
 				  axisbean.setV(ts);
 
 			  }
+                          */
 		  }
 	  }
 	  else {
