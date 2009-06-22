@@ -172,7 +172,7 @@ public class LAS_JSAP
     .setDefault("false")
     .setLongFlag("irregular");
 
-    version.setHelp("Treat time axis as a long irregular axis and make give it an <arange> of whole hours.");
+    version.setHelp("Treat time axis as irregular axis and make give it an <arange> of whole hours.  Typically used for high-frequncey sesnor data.");
     
     FlaggedOption groupname = new FlaggedOption("groupname")
   	.setStringParser(new StringStringParser())
