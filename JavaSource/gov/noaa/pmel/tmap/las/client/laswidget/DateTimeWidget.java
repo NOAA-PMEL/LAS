@@ -13,11 +13,13 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.ChangeListener;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.HTMLTable.CellFormatter;
 
 public class DateTimeWidget extends Composite {
 	
@@ -49,11 +51,8 @@ public class DateTimeWidget extends Composite {
 	ListBox hi_month = new ListBox();
 	ListBox hi_day = new ListBox();
 	HourListBox hi_hour = new HourListBox();
-
-	HorizontalPanel lo_flow = new HorizontalPanel();
-	HorizontalPanel hi_flow = new HorizontalPanel();
-
-	VerticalPanel dateTimeWidget = new VerticalPanel();
+    
+	Grid dateTimeWidget = new Grid(2, 5);
 
 	boolean hasYear = false;
 	boolean hasMonth = false;
@@ -85,10 +84,7 @@ public class DateTimeWidget extends Composite {
 		initWidget(dateTimeWidget);
 	}
 	public void init(TimeAxisSerializable tAxis, boolean range) {
-		lo_flow.addStyleName("las-vertical-align-center");
-		hi_flow.addStyleName("las-vertical-align-center");
-		lo_flow.clear();
-		hi_flow.clear();
+		dateTimeWidget.clear();
 		hasYear = false;
 		hasMonth = false;
 		hasDay = false;
@@ -182,80 +178,56 @@ public class DateTimeWidget extends Composite {
 		init(lo_date, hi_date, -1, render, climo);
 	}
 	private void loadWidget() {
-		lo_flow.clear();
-		hi_flow.clear();
 		dateTimeWidget.clear();
 		if ( isMenu ) {
-			if ( range ) {
-				lo_flow.add(d_label_lo_range);
-				lo_flow.add(lo_day);
-				hi_flow.add(d_label_hi_range);
-				hi_flow.add(hi_day);
-			} else {
-			    lo_flow.add(d_label);
-			    lo_flow.add(lo_day);
-			}
+			dateTimeWidget.setWidget(0, 0, d_label_lo_range);
+			dateTimeWidget.setWidget(0, 1, lo_day);
+			dateTimeWidget.setWidget(1, 0, d_label_hi_range);
+			dateTimeWidget.setWidget(1, 1, hi_day);
 		} else {
 			if ( render.toLowerCase().contains("t") ) {
-				if ( range ) {
-					lo_flow.add(dt_label_lo_range);
-					hi_flow.add(dt_label_hi_range);
-				} else {
-				    lo_flow.add(dt_label);
-				}
+				dateTimeWidget.setWidget(0, 0, dt_label_lo_range);
+				dateTimeWidget.setWidget(1, 0, dt_label_hi_range);
+
 			} else {
-				if ( range ) {
-					lo_flow.add(d_label_lo_range);
-					hi_flow.add(d_label_hi_range);
-				} else {
-				    lo_flow.add(d_label);
-				}
+				dateTimeWidget.setWidget(0, 0, d_label_lo_range);
+				dateTimeWidget.setWidget(1, 0, d_label_hi_range);
 			}
+			
 			if ( render.toLowerCase().contains("y") ) {
-				if ( range ) {
-					lo_flow.add(lo_year);
-					hi_flow.add(hi_year);
-				} else {
-					lo_flow.add(lo_year);
-				}
+				dateTimeWidget.setWidget(0, 1, lo_year);
+				dateTimeWidget.setWidget(1, 1, hi_year);
 				hasYear = true;
 			}
-
+			
 			if ( render.toLowerCase().contains("m") ) {
-				if ( range ) {
-					lo_flow.add(lo_month);
-					hi_flow.add(hi_month);
-				} else {
-					lo_flow.add(lo_month);
-				}
+				dateTimeWidget.setWidget(0, 2, lo_month);
+				dateTimeWidget.setWidget(1, 2, hi_month);
 				hasMonth = true;
 			}
-
+			
 			if ( render.toLowerCase().contains("d") ) {
-				if ( range ) {
-					lo_flow.add(lo_day);
-					hi_flow.add(hi_day);
-				} else {
-					lo_flow.add(lo_day);
-				}
+				dateTimeWidget.setWidget(0, 3, lo_day);
+				dateTimeWidget.setWidget(1, 3, hi_day);
 				hasDay = true;
 			}
+			
 			if ( render.toLowerCase().contains("t") ) {
-				if ( range ) {
-					lo_flow.add(lo_hour);
-					hi_flow.add(hi_hour);
-				} else {
-					lo_flow.add(lo_hour);
-				}
+				dateTimeWidget.setWidget(0, 4, lo_hour);
+				dateTimeWidget.setWidget(1, 4, hi_hour);
 				hasHour = true;
 			}
+			
 		}
-		
+		CellFormatter cellFormatter = dateTimeWidget.getCellFormatter();
 		if ( range ) {
-			dateTimeWidget.add(lo_flow);
-			dateTimeWidget.add(hi_flow);
+			for ( int i = 0; i < 5; i++ ) {
+				cellFormatter.setVisible(1, i, true);
+			}
 		} else {
-			dateTimeWidget.add(lo_flow);
+			for ( int i = 0; i < 5; i++ ) {
+				cellFormatter.setVisible(1, i, false);
+			}
 		}
 	}
 	public void setRange(boolean b) {
@@ -263,13 +235,19 @@ public class DateTimeWidget extends Composite {
 			// Want range, not currently range do something.
 			if ( !range ) {
 				range = b;
-				loadWidget();
+				CellFormatter cellFormatter = dateTimeWidget.getCellFormatter();
+				for ( int i = 0; i < 5; i++ ) {
+					cellFormatter.setVisible(1, i, true);
+				}
 			}
 		} else {
 			// Don't want range.  Currently range, do something.
 			if ( range ) {
 				range = b;
-				loadWidget();
+				CellFormatter cellFormatter = dateTimeWidget.getCellFormatter();
+				for ( int i = 0; i < 5; i++ ) {
+					cellFormatter.setVisible(1, i, false);
+				}
 			}
 		}
 	}
