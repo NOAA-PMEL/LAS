@@ -314,7 +314,15 @@ public class SlideSorter extends LASEntryPoint implements HistoryListener {
 					}
 				} else {
 					if ( pwidth == 0 ) {
-						pwidth = 400;
+						int win = Window.getClientWidth();
+						if ( panelHeaderHidden ) {
+							pwidth = (win - rightPad)/2;
+						} else {
+						    pwidth = (win-(rightPad+controlsWidth))/2;
+						}
+						if ( pwidth <= 0 ) {
+						    pwidth = 400;
+						}
 					}
 					for (Iterator panelIt = panels.iterator(); panelIt.hasNext();) {
 						SlideSorterPanel panel = (SlideSorterPanel) panelIt.next();
@@ -428,8 +436,15 @@ public class SlideSorter extends LASEntryPoint implements HistoryListener {
 
 		settingsControls.addApplyClickListener(settingsButtonApplyListener);
 		// FYI Column 3 of the header used to contain the gallery settings button.
-		int width = Window.getClientWidth();
-		int pwidth = (width-rightPad)/2;
+		int win = Window.getClientWidth();
+		if ( panelHeaderHidden ) {
+			pwidth = (win - rightPad)/2;
+		} else {
+		    pwidth = (win-(rightPad+controlsWidth))/2;
+		}
+		if ( pwidth <= 0 ) {
+		    pwidth = 400;
+		}
 		SlideSorterPanel sp1 = new SlideSorterPanel("Panel 0", true, op, view, productServer, false, rpcService);
 		sp1.addRevertListener(panelApplyButtonClick);
 		sp1.addApplyListener(panelApplyButtonClick);
