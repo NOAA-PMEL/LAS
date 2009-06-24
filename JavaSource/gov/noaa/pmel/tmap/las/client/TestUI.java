@@ -8,7 +8,6 @@ import java.util.Map;
 import gov.noaa.pmel.tmap.las.client.laswidget.LASRequestWrapper;
 import gov.noaa.pmel.tmap.las.client.laswidget.OperationsMenu;
 import gov.noaa.pmel.tmap.las.client.laswidget.TandZWidgets;
-import gov.noaa.pmel.tmap.las.client.map.SettingsButton;
 import gov.noaa.pmel.tmap.las.client.serializable.ArangeSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.AxisSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.CategorySerializable;

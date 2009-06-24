@@ -53,7 +53,7 @@ public class OperationsWidget extends StackPanel {
 		hofmullerPlots.add(new Label("Select a variable..."));
 		add(hofmullerPlots, "Hofmuller Plots");
 		
-		setHeight("200px");
+		setSize("256px", "200px");
 		
 	}
 	public void setOperations(RPCServiceAsync rpcService, String intervals, String dsID, String varID, String opID, String view, OperationsMenu menu) {

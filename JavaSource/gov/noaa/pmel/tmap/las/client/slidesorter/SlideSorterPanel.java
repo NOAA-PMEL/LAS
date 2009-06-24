@@ -7,7 +7,7 @@ import gov.noaa.pmel.tmap.las.client.laswidget.DatasetButton;
 import gov.noaa.pmel.tmap.las.client.laswidget.DateTimeWidget;
 import gov.noaa.pmel.tmap.las.client.laswidget.LASRequestWrapper;
 import gov.noaa.pmel.tmap.las.client.laswidget.TandZWidgets;
-import gov.noaa.pmel.tmap.las.client.map.SettingsButton;
+import gov.noaa.pmel.tmap.las.client.map.SettingsWidget;
 import gov.noaa.pmel.tmap.las.client.map.SelectWidget.XYMapTool;
 import gov.noaa.pmel.tmap.las.client.serializable.AxisSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.GridSerializable;
@@ -84,7 +84,7 @@ public class SlideSorterPanel extends Composite {
 	/*
 	 * A a button that pops up a panel for region selection, operation and (still to be implmented) plot options.
 	 */
-	SettingsButton settingsButton;
+	SettingsWidget settingsButton;
 	
 	/*
 	 * A widget that keeps track of the orthogonal axes for this panel.  When in using panel settings it's displayed on the bottom of the panel.
@@ -195,7 +195,7 @@ public class SlideSorterPanel extends Composite {
 		top.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
 		
 		String title = id+" Settings";
-		settingsButton = new SettingsButton(title, LatLng.newInstance(0.0, 0.0), 1, 256, 360, ID, op, rpcService);
+		settingsButton = new SettingsWidget(title, LatLng.newInstance(0.0, 0.0), 1, 256, 360, ID, op, rpcService, "button");
 		settingsButton.addApplyClickListener(applyPanelClick);
 		settingsButton.addCloseClickListener(closeClick);
 		settingsButton.addDatasetTreeListener(datasetTreeListener);

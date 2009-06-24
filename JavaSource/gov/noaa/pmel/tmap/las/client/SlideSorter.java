@@ -3,7 +3,7 @@ package gov.noaa.pmel.tmap.las.client;
 import gov.noaa.pmel.tmap.las.client.laswidget.AxisWidget;
 import gov.noaa.pmel.tmap.las.client.laswidget.DateTimeWidget;
 import gov.noaa.pmel.tmap.las.client.laswidget.Util;
-import gov.noaa.pmel.tmap.las.client.map.SettingsButton;
+import gov.noaa.pmel.tmap.las.client.map.SettingsWidget;
 import gov.noaa.pmel.tmap.las.client.serializable.AxisSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.CategorySerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.DatasetSerializable;
@@ -30,6 +30,8 @@ import com.google.gwt.user.client.ui.ClickListener;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HasHorizontalAlignment;
+import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
@@ -42,6 +44,7 @@ import com.google.gwt.user.client.ui.ToggleButton;
 import com.google.gwt.user.client.ui.TreeItem;
 import com.google.gwt.user.client.ui.TreeListener;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.HTMLTable.CellFormatter;
 
 /**
  * A UI widget with one or more panels containing an LAS product with widgets to interact with the specifications of the products.
@@ -96,6 +99,12 @@ public class SlideSorter extends LASEntryPoint implements HistoryListener {
 	Grid slides;
 	
 	/*
+	 * The container for the slides and controls.
+	 */
+	Grid mainPanel;
+	CellFormatter cellFormatter;
+	
+	/*
 	 * Button to make slide sorter compute differences
 	 */
 	ToggleButton differenceButton;
@@ -109,6 +118,10 @@ public class SlideSorter extends LASEntryPoint implements HistoryListener {
 	 * Padding on the right side of the browser frame...
 	 */
 	int rightPad = 35;
+	/*
+	 * Fixed size of the left control panel
+	 */
+	int controlsWidth = 260;
 	
 	/*
 	 * A DateTimeWidget to globally control the time.
@@ -143,7 +156,7 @@ public class SlideSorter extends LASEntryPoint implements HistoryListener {
 	/*
 	 * A settings panel for the entire Slide Sorter.
 	 */
-	SettingsButton settingsButton;
+	SettingsWidget settingsControls;
 	
 	/*
 	 * The currently selected variable.
@@ -243,13 +256,19 @@ public class SlideSorter extends LASEntryPoint implements HistoryListener {
 			    		SlideSorterPanel panel = (SlideSorterPanel) panelIt.next();
 			    		panel.show();
 					}
+					cellFormatter.setVisible(0, 0, true);
 					showHide.setUrl(tridown);
+					pwidth = pwidth - controlsWidth/2;
+					resize();
 				} else {
 					for (Iterator panelIt = panels.iterator(); panelIt.hasNext();) {
 			    		SlideSorterPanel panel = (SlideSorterPanel) panelIt.next();
 			    		panel.hide();
 					}
+					cellFormatter.setVisible(0, 0, false);
 					showHide.setUrl(triright);
+					pwidth = pwidth + controlsWidth/2;
+					resize();
 				}
 				panelHeaderHidden = !panelHeaderHidden;
 			}
@@ -261,11 +280,11 @@ public class SlideSorter extends LASEntryPoint implements HistoryListener {
 		differenceButton.addClickListener(differencesClick);
 		header.setWidget(0, 1, differenceButton);
 		
-		settingsButton = new SettingsButton("Gallery Settings", LatLng.newInstance(0.0, 0.0), 0, 256, 360, "Slide Sorter", op, rpcService);
-		settingsButton.setTitle("Settings for all panels.");
-		settingsButton.addDatasetTreeListener(datasetTreeListener);
-		settingsButton.addOptionsOkClickListener(optionsOkListener);
-		settingsButton.addOperationClickListener(operationsClickListener);
+		settingsControls = new SettingsWidget("Gallery Settings", LatLng.newInstance(0.0, 0.0), 0, 256, 360, "Slide Sorter", op, rpcService, "panel");
+		settingsControls.setTitle("Settings for all panels.");
+		settingsControls.addDatasetTreeListener(datasetTreeListener);
+		settingsControls.addOptionsOkClickListener(optionsOkListener);
+		settingsControls.addOperationClickListener(operationsClickListener);
 				
 		autoContourButton = new ToggleButton("Auto Set Color Fill Levels for Gallery");
 		autoContourButton.setTitle("Set consistent contour levels for all panels.");
@@ -314,8 +333,19 @@ public class SlideSorter extends LASEntryPoint implements HistoryListener {
 			rpcService.getCategories(dsid, initSlideSorter);
 		}
 		
+		
+		mainPanel = new Grid(1, 2);
+		mainPanel.setWidget(0,0,settingsControls);
+		mainPanel.setWidget(0,1, slides);
+		cellFormatter = mainPanel.getCellFormatter();
+		// Float the controls and the panels to the top of their respective cells
+		cellFormatter.setVerticalAlignment(0, 0, HasVerticalAlignment.ALIGN_TOP);
+		cellFormatter.setVerticalAlignment(0, 1, HasVerticalAlignment.ALIGN_TOP);
+		cellFormatter.setWidth(0, 0 ,controlsWidth+"px");
+		
 		RootPanel.get("header").add(header);
-		RootPanel.get("slides").add(slides);
+		RootPanel.get("slides").add(mainPanel);
+		
 		Window.addWindowResizeListener(windowResizeListener);
 		History.addHistoryListener(this);
 	}
@@ -373,15 +403,22 @@ public class SlideSorter extends LASEntryPoint implements HistoryListener {
 	};
 	public WindowResizeListener windowResizeListener = new WindowResizeListener() {
 		public void onWindowResized(int width, int height) {
-			pwidth = (width-rightPad)/2;
-			if ( imageSize.getValue(imageSize.getSelectedIndex()).equals("auto") ) {
-				for (Iterator panelIt = panels.iterator(); panelIt.hasNext();) {
-					SlideSorterPanel panel = (SlideSorterPanel) panelIt.next();
-					panel.setPanelWidth(pwidth);
-				}
+			if ( panelHeaderHidden ) {
+				pwidth = (width - rightPad)/2;
+			} else {
+			    pwidth = (width-(rightPad+controlsWidth))/2;
 			}
+			resize();
 		}
 	};
+	public void resize() {
+		if ( imageSize.getValue(imageSize.getSelectedIndex()).equals("auto") ) {
+			for (Iterator panelIt = panels.iterator(); panelIt.hasNext();) {
+				SlideSorterPanel panel = (SlideSorterPanel) panelIt.next();
+				panel.setPanelWidth(pwidth);
+			}
+		}
+	}
 	private void initPanels() {
 
 		ortho.clear();
@@ -389,10 +426,8 @@ public class SlideSorter extends LASEntryPoint implements HistoryListener {
 		xyzPanel.clear();
 		panels.clear();
 
-		settingsButton.addApplyClickListener(settingsButtonApplyListener);
-		header.setWidget(0, 3, settingsButton);
-
-
+		settingsControls.addApplyClickListener(settingsButtonApplyListener);
+		// FYI Column 3 of the header used to contain the gallery settings button.
 		int width = Window.getClientWidth();
 		int pwidth = (width-rightPad)/2;
 		SlideSorterPanel sp1 = new SlideSorterPanel("Panel 0", true, op, view, productServer, false, rpcService);
@@ -537,7 +572,7 @@ public class SlideSorter extends LASEntryPoint implements HistoryListener {
 		}
 		if ( xlo != null && !xlo.equals("") && xhi != null && !xhi.equals("") && 
 			 ylo != null && !ylo.equals("") && yhi != null && !yhi.equals("") ) {
-			settingsButton.setLatLon(xlo, xhi, ylo, yhi);
+			settingsControls.setLatLon(xlo, xhi, ylo, yhi);
 			for (Iterator panelIt = panels.iterator(); panelIt.hasNext();) {
 				SlideSorterPanel panel = (SlideSorterPanel) panelIt.next();
 				panel.setLatLon(xlo, xhi, ylo, yhi);
@@ -547,7 +582,7 @@ public class SlideSorter extends LASEntryPoint implements HistoryListener {
 	}
     public boolean init() {
     	
-    	settingsButton.setOperations(rpcService, var.getIntervals(), var.getDSID(), var.getID(), op, view, null);
+    	settingsControls.setOperations(rpcService, var.getIntervals(), var.getDSID(), var.getID(), op, view, null);
 		GridSerializable ds_grid = var.getGrid();
 		double grid_west = Double.valueOf(ds_grid.getXAxis().getLo());
 		double grid_east = Double.valueOf(ds_grid.getXAxis().getHi());
@@ -558,7 +593,7 @@ public class SlideSorter extends LASEntryPoint implements HistoryListener {
 		double delta = Math.abs(Double.valueOf(ds_grid.getXAxis().getArangeSerializable().getStep()));
 
 		LatLngBounds bounds = LatLngBounds.newInstance(LatLng.newInstance(grid_south, grid_west), LatLng.newInstance(grid_north, grid_east));
-		settingsButton.getRefMap().initDataBounds(bounds, delta, true);
+		settingsControls.getRefMap().initDataBounds(bounds, delta, true);
 		
     	ortho.clear();
     	if ( datePanel != null ) {
@@ -691,7 +726,7 @@ public class SlideSorter extends LASEntryPoint implements HistoryListener {
 				SlideSorterPanel panel = (SlideSorterPanel) panelIt.next();
 				if ( panel.getID().contains("Panel 0") ) {
 					comparePanel = panel;
-					panel.refreshPlot(settingsButton.getOptions(), switchAxis, true);	
+					panel.refreshPlot(settingsControls.getOptions(), switchAxis, true);	
 				}
 			}
 			if ( comparePanel != null ) {
@@ -707,11 +742,11 @@ public class SlideSorter extends LASEntryPoint implements HistoryListener {
 						String tlo = "";
 						String thi = "";
                         // Always get values from the map.  They may get replaced with the panel settings.
-						xlo = String.valueOf(settingsButton.getRefMap().getXlo());
-						xhi = String.valueOf(settingsButton.getRefMap().getXhi());
+						xlo = String.valueOf(settingsControls.getRefMap().getXlo());
+						xhi = String.valueOf(settingsControls.getRefMap().getXhi());
 
-						ylo = String.valueOf(settingsButton.getRefMap().getYlo());
-						yhi = String.valueOf(settingsButton.getRefMap().getYhi());
+						ylo = String.valueOf(settingsControls.getRefMap().getYlo());
+						yhi = String.valueOf(settingsControls.getRefMap().getYhi());
 
 						if ( fixedAxis.equals("t") ) {
 							tlo = dateWidget.getFerretDateLo();
@@ -731,13 +766,13 @@ public class SlideSorter extends LASEntryPoint implements HistoryListener {
 							    zhi = comparePanel.getZhi();
 							}
 						}
-						panel.computeDifference(settingsButton.getOptions(), switchAxis, comparePanel.getVariable(), settingsButton.getCurrentOperationView(), xlo, xhi, ylo, yhi, zlo, zhi, tlo, thi);
+						panel.computeDifference(settingsControls.getOptions(), switchAxis, comparePanel.getVariable(), settingsControls.getCurrentOperationView(), xlo, xhi, ylo, yhi, zlo, zhi, tlo, thi);
 					}
 				}
 			}
 		} else {
 			// Get the current state of the options...
-			Map<String, String> temp_state = new HashMap<String, String>(settingsButton.getOptions());
+			Map<String, String> temp_state = new HashMap<String, String>(settingsControls.getOptions());
 			if ( autoContourButton.isDown() ) {
 				// If the auto button is down, it wins...
 				autoScale();
@@ -816,19 +851,19 @@ public class SlideSorter extends LASEntryPoint implements HistoryListener {
     		}
     		
     		// Check to see if the operation changed.  If so, change the tool.
-    		String op_id = settingsButton.getCurrentOp().getID();
-    		String op_view = settingsButton.getCurrentOperationView();
+    		String op_id = settingsControls.getCurrentOp().getID();
+    		String op_view = settingsControls.getCurrentOperationView();
     		if ( !op_id.equals(op) && !op_view.equals(view) ) {
     			op = op_id;
     			view = op_view;
     		}
-    		settingsButton.setToolType(view);
+    		settingsControls.setToolType(view);
     		// Update the plot based on the new settings first by moving the map settings
     		// to all the panels that are under slide sorter control, the refresh (which handles the options).
     		for (Iterator panelIt = panels.iterator(); panelIt.hasNext();) {
     			SlideSorterPanel panel = (SlideSorterPanel) panelIt.next();
     			if (!panel.isUsePanelSettings()) {
-    				panel.setLatLon(String.valueOf(settingsButton.getRefMap().getXlo()), String.valueOf(settingsButton.getRefMap().getXhi()), String.valueOf(settingsButton.getRefMap().getYlo()), String.valueOf(settingsButton.getRefMap().getYhi()));
+    				panel.setLatLon(String.valueOf(settingsControls.getRefMap().getXlo()), String.valueOf(settingsControls.getRefMap().getXhi()), String.valueOf(settingsControls.getRefMap().getYlo()), String.valueOf(settingsControls.getRefMap().getYhi()));
     			}
     		}
     		refresh(false);
@@ -853,10 +888,10 @@ public class SlideSorter extends LASEntryPoint implements HistoryListener {
     					} else if ( fixedAxis.equals("z") ) {
     						panel.setParentAxisValue("z", xyzWidget.getLo());
     					}
-        				panel.setLatLon(String.valueOf(settingsButton.getRefMap().getXlo()), String.valueOf(settingsButton.getRefMap().getXhi()), String.valueOf(settingsButton.getRefMap().getYlo()), String.valueOf(settingsButton.getRefMap().getYhi()));
+        				panel.setLatLon(String.valueOf(settingsControls.getRefMap().getXlo()), String.valueOf(settingsControls.getRefMap().getXhi()), String.valueOf(settingsControls.getRefMap().getYlo()), String.valueOf(settingsControls.getRefMap().getYhi()));
     				    panel.setOperation(op, view);
     				}
-    				if ( !panel.getCurrentOperationView().equals(settingsButton.getCurrentOperationView()) ) {
+    				if ( !panel.getCurrentOperationView().equals(settingsControls.getCurrentOperationView()) ) {
     					differenceButton.setDown(false);
     					differenceButton.setEnabled(false);
     				} else {
@@ -993,8 +1028,8 @@ public class SlideSorter extends LASEntryPoint implements HistoryListener {
 	};
 
 	private void setupMenusForOperationChange() {
-		view = settingsButton.getOperationsWidget().getCurrentView();
-	    op = settingsButton.getCurrentOp().getID();
+		view = settingsControls.getOperationsWidget().getCurrentView();
+	    op = settingsControls.getCurrentOp().getID();
         // Turn off the difference button when the compare axis is a range.			    
         differenceButton.setEnabled(!view.contains(compareAxis));
 		if ( view.length() !=  2 ) {
