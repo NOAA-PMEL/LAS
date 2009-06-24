@@ -51,6 +51,8 @@ import java.util.Locale;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import org.jdom.Comment;
 import org.jdom.DocType;
 import org.jdom.Document;
@@ -127,6 +129,7 @@ import com.martiansoftware.jsap.JSAPResult;
  * @version 1.5
  */
 public class addXML {
+	private static final Logger log = LogManager.getLogger(addXML.class);
 	private static final String patterns[] = {
 		"yyyy", "yyyy-MM-dd", "yyyy-MM-dd", "yyyy-MM-dd",
 		"yyyy-MM-dd HH:mm:ss", "yyyy-MM-ddTHH:mm:ss",
