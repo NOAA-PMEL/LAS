@@ -715,15 +715,24 @@ public class DateTimeWidget extends Composite {
 			checkRangeEndMonth();
 		}	
 	};
+	// The loDayListener and hiDayListener are the only ones that should fire when the Widget contains a menu.
 	public ChangeListener loDayListener = new ChangeListener() {
 		public void onChange(Widget sender) {
-			int year = Integer.valueOf(lo_year.getValue(lo_year.getSelectedIndex())).intValue();
-			int month = MONTHS.indexOf(lo_month.getValue(lo_month.getSelectedIndex()));
-			int day = Integer.valueOf(lo_day.getValue(lo_day.getSelectedIndex())).intValue();
-			int hour = lo_hour.getHour();
-			int min = lo_hour.getMin();
-			loadAndSetHour(lo_hour, year, month, day, hour, min);
-			checkRangeEndDay();
+			if ( isMenu ) {
+				int lo_i = lo_day.getSelectedIndex();
+				int hi_i = hi_day.getSelectedIndex();
+				if ( lo_i > hi_i ) {
+					hi_day.setSelectedIndex(lo_i);
+				}
+			} else {
+				int year = Integer.valueOf(lo_year.getValue(lo_year.getSelectedIndex())).intValue();
+				int month = MONTHS.indexOf(lo_month.getValue(lo_month.getSelectedIndex()));
+				int day = Integer.valueOf(lo_day.getValue(lo_day.getSelectedIndex())).intValue();
+				int hour = lo_hour.getHour();
+				int min = lo_hour.getMin();
+				loadAndSetHour(lo_hour, year, month, day, hour, min);
+				checkRangeEndDay();
+			} 
 		}
 	};
 	public ChangeListener loHourListener = new ChangeListener() {
@@ -755,6 +764,13 @@ public class DateTimeWidget extends Composite {
 	};
 	public ChangeListener hiDayListener = new ChangeListener() {
 		public void onChange(Widget sender) {
+			if ( isMenu ) {
+				int lo_i = lo_day.getSelectedIndex();
+				int hi_i = hi_day.getSelectedIndex();
+				if ( lo_i > hi_i ) {
+					lo_day.setSelectedIndex(hi_i);
+				}
+			} else {
 			int year = Integer.valueOf(hi_year.getValue(hi_year.getSelectedIndex())).intValue();
 			int month = MONTHS.indexOf(hi_month.getValue(hi_month.getSelectedIndex()));
 			int day = Integer.valueOf(hi_day.getValue(hi_day.getSelectedIndex())).intValue();
@@ -762,6 +778,7 @@ public class DateTimeWidget extends Composite {
 			int	min = hi_hour.getMin();  
 			loadAndSetHour(hi_hour, year, month, day, hour, min);
 			checkRangeStartDay();
+			}
 		}
 	};
 	public ChangeListener hiHourListener = new ChangeListener() {
