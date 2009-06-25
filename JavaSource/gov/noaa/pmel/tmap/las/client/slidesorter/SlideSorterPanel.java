@@ -698,6 +698,9 @@ public class SlideSorterPanel extends Composite {
 		} else {
 			setImageSize(fixedZoom);
 		}
+		if ( spin.isVisible() ) {
+			spin.setPopupPosition(w.getAbsoluteLeft(), w.getAbsoluteTop());
+		}
 	}
 	public void setPanelWidth(int width) {
 		autoZoom = true;
