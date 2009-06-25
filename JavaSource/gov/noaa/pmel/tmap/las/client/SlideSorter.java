@@ -847,6 +847,9 @@ public class SlideSorter extends LASEntryPoint implements HistoryListener {
     			changeDataset = false;
     			differenceButton.setEnabled(true);
     			differenceButton.setDown(false);
+    			// Since we are changing data sets, use Plot_2D_XY and xy as the operation.
+    			op = "Plot_2D_XY";
+    			view = "xy";
     			// Figure out the compare and fixed axis
     			init();
     			for (Iterator panelIt = panels.iterator(); panelIt.hasNext();) {
