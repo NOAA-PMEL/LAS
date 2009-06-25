@@ -25,20 +25,27 @@
    doc="http://iridl.ldeo.columbia.edu/SOURCES/.NOAA/.NCEP/.EMC/.CMB/.Pacific/.monthly/" url="http://iridl.ldeo.columbia.edu/SOURCES/.NOAA/.NCEP/.EMC/.CMB/.Pacific/.monthly/dods">
    <variables>
         <IRI-H name="Sea Level Anomaly monthly mean" units="cm" url="#H" >
-             <link match="/lasdata/grids/IRI-grid-lon21-lat22-level23-time44"/>
+             <link match="/lasdata/grids/IRI-grid-lon21-lat22-time44"/>
          </IRI-H>
          <IRI-D20eq name="Depth of 20C monthly mean" units="m" url="#D20eq" >
-             <link match="/lasdata/grids/IRI-grid-lon21-lat22-level23-time44"/>
+             <link match="/lasdata/grids/IRI-grid-lon21-lat22-time44"/>
          </IRI-D20eq>
          <IRI-taux2034 name="E-W Stress monthly mean" units="dyne/cm**2" url="#taux" >
-             <link match="/lasdata/grids/IRI-grid-lon21-lat22-level23-time44"/>
+             <link match="/lasdata/grids/IRI-grid-lon21-lat22-time44"/>
          </IRI-taux2034>
          <IRI-tauy2036 name="N-S Stress monthly mean" units="dyne/cm**2" url="#tauy" >
-             <link match="/lasdata/grids/IRI-grid-lon21-lat22-level23-time44"/>
+             <link match="/lasdata/grids/IRI-grid-lon21-lat22-time44"/>
          </IRI-tauy2036>
       </variables>
   </NOAA_NCEP_EMC_CMB_Ocean_Analysis>
  </datasets>
+ <grids>
+  <IRI-grid-lon21-lat22-time44>
+     <link match="/lasdata/axes/IRI-lon21"/>
+     <link match="/lasdata/axes/IRI-lat22"/>
+     <link match="/lasdata/axes/IRI-time44"/>
+  </IRI-grid-lon21-lat22-time44>
+ </grids>
  <grids>
   <IRI-grid-lon21-lat22-level23-time44>
      <link match="/lasdata/axes/IRI-lon21"/>
