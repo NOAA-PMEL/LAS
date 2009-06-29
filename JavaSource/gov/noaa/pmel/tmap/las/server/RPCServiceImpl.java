@@ -7,6 +7,7 @@ import gov.noaa.pmel.tmap.las.client.serializable.CategorySerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.GridSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.OperationSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.OptionSerializable;
+import gov.noaa.pmel.tmap.las.client.serializable.VariableSerializable;
 import gov.noaa.pmel.tmap.las.exception.LASException;
 import gov.noaa.pmel.tmap.las.jdom.LASConfig;
 import gov.noaa.pmel.tmap.las.product.server.LASConfigPlugIn;
@@ -14,6 +15,7 @@ import gov.noaa.pmel.tmap.las.util.Category;
 import gov.noaa.pmel.tmap.las.util.Grid;
 import gov.noaa.pmel.tmap.las.util.Operation;
 import gov.noaa.pmel.tmap.las.util.Option;
+import gov.noaa.pmel.tmap.las.util.Variable;
 import gov.noaa.pmel.tmap.las.util.View;
 
 import java.util.ArrayList;
@@ -41,6 +43,30 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
 			throw new RPCException(e.getMessage());
 		}
 		return cats;
+	}
+	public VariableSerializable[] getVariables(String id) throws RPCException {
+		LASConfig lasConfig = (LASConfig) getServletContext().getAttribute(LASConfigPlugIn.LAS_CONFIG_KEY); 
+		ArrayList<Variable> variables = new ArrayList<Variable>();
+		try {
+			variables = lasConfig.getVariables(id);
+		} catch (JDOMException e) {
+			throw new RPCException(e.getMessage());
+		}
+		VariableSerializable[] wire_vars = new VariableSerializable[variables.size()];
+		for (int i = 0; i < variables.size(); i++ ) {
+			Variable variable = variables.get(i);
+			wire_vars[i] = variable.getVariableSerializable();
+			try {
+				Grid grid = lasConfig.getGrid(variable.getXPath());
+				wire_vars[i].setGrid(grid.getGridSerializable());
+			} catch (JDOMException e) {
+				throw new RPCException(e.getMessage());
+			} catch (LASException e) {
+				throw new RPCException(e.getMessage());
+			}
+			
+		}
+		return wire_vars;
 	}
 	public CategorySerializable[] getCategories(String id) throws RPCException {
 		LASConfig lasConfig = (LASConfig) getServletContext().getAttribute(LASConfigPlugIn.LAS_CONFIG_KEY); 

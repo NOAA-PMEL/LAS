@@ -2891,7 +2891,7 @@ public class LASConfig extends LASDocument {
                 List vars = variablesElement.getChildren("variable");
                 for (Iterator varIt = vars.iterator(); varIt.hasNext();) {
                     Element variable = (Element) varIt.next();
-                    Variable var = new Variable(variable, dsID);
+                    Variable var = new Variable(variable, dsID, dataset.getAttributeValue("name"));
                     variables.add(var);
                 }
             }

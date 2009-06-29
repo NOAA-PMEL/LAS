@@ -160,6 +160,15 @@ public class ReferenceMap extends Composite {
      * @param selection
      */
     public void initDataBounds(LatLngBounds dataBounds, double delta, boolean selection) {
+    	double east = dataBounds.getNorthEast().getLongitude();
+    	double north = dataBounds.getNorthEast().getLatitude();
+    	double west = dataBounds.getSouthWest().getLongitude();
+    	double south = dataBounds.getSouthWest().getLatitude();
+    	// Special kludge to get a full globe on a data set that repeats at 0 and 360.
+    	if ( Math.abs(east - 0.0) < .0001 && Math.abs(west - 0.0) <= 0.0001 ) {
+    		east = 359.;
+    		dataBounds = LatLngBounds.newInstance(LatLng.newInstance(south, west), LatLng.newInstance(north, east));
+    	}
     	setDataBounds(dataBounds, delta, true);
 		getResetWidget().setSelectionBounds(dataBounds);
 		getRegionWidget().setSelectedIndex(0);
@@ -385,7 +394,18 @@ public class ReferenceMap extends Composite {
 	public void setLatLon(String xlo, String xhi, String ylo, String yhi) {
 		LatLng sw = LatLng.newInstance(Double.valueOf(ylo), Double.valueOf(xlo));
 		LatLng ne = LatLng.newInstance(Double.valueOf(yhi), Double.valueOf(xhi));
-		LatLngBounds bounds = LatLngBounds.newInstance(sw, ne);
+		// Special kludge for data that has a duplicate point at 0 and 360.
+		double north = ne.getLatitude();
+		double east = ne.getLongitude();
+		double south = sw.getLatitude();
+		double west = sw.getLongitude();
+		LatLngBounds bounds;
+		if ( Math.abs(east - 0.0) < .0001 && Math.abs(west - 0.0) <= 0.0001 ) {
+			east = 359.;
+			bounds = LatLngBounds.newInstance(LatLng.newInstance(south, west), LatLng.newInstance(north, east));
+		} else {
+			bounds = LatLngBounds.newInstance(sw, ne);
+		}
 		setSelectionBounds(bounds, true, true);
 	}
 	/**

@@ -338,7 +338,7 @@ public class SlideSorter extends LASEntryPoint implements HistoryListener {
 		if ( dsid != null && vid != null & op != null && view != null) {
 			// If the proper information was sent to the widget, pull down the variable definition
 			// and initialize the slide sorter with this Ajax call.
-			rpcService.getCategories(dsid, initSlideSorter);
+			rpcService.getVariables(dsid, initSlideSorter);
 		}
 		
 		
@@ -388,22 +388,13 @@ public class SlideSorter extends LASEntryPoint implements HistoryListener {
 	};
 	AsyncCallback initSlideSorter = new AsyncCallback() {
 		public void onSuccess(Object result) {
-			CategorySerializable[] cats = (CategorySerializable[]) result;
-			if ( cats != null && cats.length > 1 ) {
-				Window.alert("Multiple categories found.");
-			} else {
-				if ( cats[0].isVariableChildren() ) {
-					DatasetSerializable ds = cats[0].getDatasetSerializable();
-					VariableSerializable[] vars = ds.getVariablesSerializable();
-
-					for (int i=0; i < vars.length; i++ ) {
-						if ( vars[i].getID().equals(vid) ) {
-							var = vars[i];
-						}
-					}
+			VariableSerializable[] vars = (VariableSerializable[]) result;
+			for (int i=0; i < vars.length; i++ ) {
+				if ( vars[i].getID().equals(vid) ) {
+					var = vars[i];
 				}
-				initPanels();
 			}
+			initPanels();
 		}
 		public void onFailure(Throwable caught) {
 			Window.alert("Failed to initalizes SlideSorter."+caught.toString());
