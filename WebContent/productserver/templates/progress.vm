@@ -59,9 +59,9 @@
                 <span class="textInstructions">Thank you!</span><br>
                 <span class="textChoices">When this product is finished LAS will send email to these addresses: $emails. </span><br><br><br>
 		<form
-			action="$server_url?xml=$las_request.toEncodedURLString()&cancel=Cancel&JSESSIONID=$JSESSIONID"
+			action="$server_url?xml=$las_request.toEncodedURLString()&cancel=true&JSESSIONID=$JSESSIONID"
 			method="POST"><span class="textInstructions">You may still cancel this request:
-			<INPUT style="background-color:#E78273;" TYPE="SUBMIT" NAME="cancel" VALUE="Cancel"></span>
+			<INPUT style="background-color:#E78273;" TYPE="SUBMIT" NAME="cancel_button" VALUE="Cancel"></span>
 		</form>
       #else      
 		<table border="0">
@@ -109,9 +109,9 @@
 
 			#end
 		<form
-			action="$server_url?xml=$las_request.toEncodedURLString()&cancel=Cancel&JSESSIONID=$JSESSIONID"
+			action="$server_url?xml=$las_request.toEncodedURLString()&cancel=true&JSESSIONID=$JSESSIONID"
 			method="POST"><span class="textInstructions">Cancel this request:
-			<INPUT style="background-color:#E78273;" TYPE="SUBMIT" NAME="cancel" VALUE="Cancel"></span>
+			<INPUT style="background-color:#E78273;" TYPE="SUBMIT" NAME="cancel_button" VALUE="Cancel"></span>
 		</form>
         <script language="javascript" type="text/javascript">
 	        startRefresh();
