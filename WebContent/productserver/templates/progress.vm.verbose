@@ -77,9 +77,9 @@
 			#end
 		</ol>
 		<form
-			action="$server_url?xml=$las_request.toEncodedURLString()&cancel=Cancel&JSESSIONID=$JSESSIONID"
+			action="$server_url?xml=$las_request.toEncodedURLString()&cancel=true&JSESSIONID=$JSESSIONID"
 			method="POST">
-			<INPUT TYPE="SUBMIT" NAME="cancel" VALUE="Cancel">
+			<INPUT TYPE="SUBMIT" NAME="cancel" VALUE="true">
 		</form>
 	</body>
 </html>
