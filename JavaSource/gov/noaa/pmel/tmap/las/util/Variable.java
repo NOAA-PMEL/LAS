@@ -29,7 +29,7 @@ public class Variable extends Container implements VariableInterface {
      * @see gov.noaa.pmel.tmap.las.util.VariableInterface#getXPath()
      */
     public String getXPath() {
-        return "/lasdata/datasets/dataset@[ID='"+dsid+"']/variables/variable@[ID='"+getID()+"']";
+        return "/lasdata/datasets/dataset[@ID='"+dsid+"']/variables/variable[@ID='"+getID()+"']";
     }
     /* (non-Javadoc)
      * @see gov.noaa.pmel.tmap.las.util.VariableInterface#getDSID()
