@@ -45,8 +45,7 @@ public class DatasetButton extends Composite {
 					selectedVariable = (VariableSerializable) u;
 					dataset_name.setText(selectedVariable.getDSName());
 					variable_name.setText(selectedVariable.getName());
-					// Don't hide on select.  Wait for close.
-					// datasetPanel.hide();
+					datasetPanel.hide();
 				}		
 			}
 			public void onTreeItemStateChanged(TreeItem item) {
