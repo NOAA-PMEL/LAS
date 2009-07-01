@@ -22,6 +22,8 @@
 ! Determine striding for speed in operating the STAT command
 LET memsize = 0.5* 1.e6
 
+IF `($FERRET_VERSION"0") GE 6.2` THEN KEYMARK 1  ! annotate plot keys with the min and max
+
 ! Make sure its a 2D plot operation.
 
 DEFINE SYMBOL op = `UPCASE("($operation_ID)")`
@@ -73,6 +75,7 @@ IF ($ferret_contour_levels"0|*>1") THEN
    LET other = `STRINDEX("($up_contour_levels)", "D")` + \
       `STRINDEX("($up_contour_levels)", "(")`+ \
       `STRINDEX("($up_contour_levels)", ".")`
+
    IF `nc EQ 0 AND other EQ 0` THEN 
       DEFINE SYMBOL num_fine_levels = ($ferret_contour_levels) ! How to test that this is just a number??
       DEFINE SYMBOL num_fine_levels_contour = ($num_fine_levels)
@@ -98,6 +101,7 @@ IF ($ferret_fill_levels"0|*>1") THEN
    ENDIF
    LET other = `STRINDEX("($ferret_fill_levels)", "D")` + \
       `STRINDEX("($ferret_fill_levels)", ",")`+ \
+      `STRINDEX("($ferret_fill_levels)", "(")`+ \
       `STRINDEX("($ferret_fill_levels)", ".")`
 
    IF `nc EQ 0 AND other EQ 0` THEN 
