@@ -9,7 +9,6 @@
 ! contour levels per color level. Never more contours than colors
 ! on a contour-over-colors plot.
 
-
 PPL %RANGE `($stat_mean)-nstd`, `($stat_mean)+nstd`, ($num_fine_levels)
 
 LET lines_to_levels = 2
@@ -43,73 +42,6 @@ IF `( ($stat_min) GE ($coarse_lo) ) OR ( ($stat_max) LE ($coarse_hi)) ` THEN
    DEFINE SYMBOL highest_lev = ($ppl$range_high)
 ENDIF
 
-! Require that if there is (-inf) there is also (inf) and vice versa
-! unless the data min or max lies inside the computed levels.
-! In that case, chop off the levels at the right location and do 
-! not have open levels on that end.
-
-DEFINE SYMBOL matching_inf = 1
-DEFINE SYMBOL lower_inf = (-inf)
-DEFINE SYMBOL upper_inf = (inf)
-
-IF `($stat_min) GT ($coarse_lo)` THEN
-
-   LET alev = ($coarse_lo)
-   REPEAT/RANGE=1:($num_coarse_levels)/NAME=ilev (\
-      IF `($stat_min) LT alev` THEN EXIT/LOOP;\
-      LET alev = `alev + ($coarse_delta)` )
-   DEFINE SYMBOL coarse_lo = `alev`
-   IF `($stat_min) LT ($coarse_lo)` THEN DEFINE SYMBOL coarse_lo = `($coarse_lo) - ($coarse_delta)`
-
-   CANCEL SYMBOL lower_inf
-   DEFINE SYMBOL matching_inf = 0
-
-   IF `($coarse_lo) GT ($fine_lo)` THEN
-      CANCEL SYMBOL coarse_lo
-      LET alev = ($fine_lo)
-      REPEAT/RANGE=1:($num_fine_levels)/NAME=ilev (\
-      IF `($stat_min) GE alev` THEN EXIT/LOOP;\
-      LET alev = `alev + ($fine_inc)` )
-
-      LET fine_lo = `alev`
-      IF `($stat_min) LT ($fine_lo)` THEN DEFINE SYMBOL fine_lo = `($fine_lo) - ($fine_inc)`
-      IF `($fine_lo) LT ($fine_hi)` THEN
-         CANCEL SYMBOL fine_lo
-	 DEFINE SYMBOL fine_hi = `alev`
-      ENDIF
-   ENDIF
-
-   IF `($coarse_lo"0|*>1") GE ($fine_lo"0|*>1")` THEN CANCEL SYMBOL coarse_lo 
-
-ENDIF
-
-IF `($stat_max) LT ($coarse_hi)` THEN
-
-   LET alev = ($fine_hi)
-   REPEAT/RANGE=1:($num_coarse_levels)/NAME=ilev (\
-      IF `($stat_max) LE alev` THEN EXIT/LOOP;\
-      LET alev = `alev + ($coarse_delta)` )
-   DEFINE SYMBOL coarse_hi = `alev`
-   
-   IF `($stat_max) GT ($coarse_hi)` THEN DEFINE SYMBOL coarse_hi = `($coarse_hi) + ($coarse_delta)`
-
-   CANCEL SYMBOL upper_inf
-
-   DEFINE SYMBOL matching_inf = 0
-
-   IF `($coarse_hi) LT ($fine_hi)` THEN
-      CANCEL SYMBOL coarse_hi
-      LET alev = ($fine_lo)
-      REPEAT/RANGE=1:($num_fine_levels)/NAME=ilev (\
-      IF `($stat_min) LE alev` THEN EXIT/LOOP;\
-      LET alev = `alev + ($fine_inc)` )
-      DEFINE SYMBOL fine_hi = `alev`
-   ENDIF
-
-   IF `($coarse_hi"0|*>1") LE ($fine_hi"0|*>1")` THEN CANCEL SYMBOL coarse_hi 
-
-ENDIF
-
 ! Remove plus in exponent
 ! if levels symbols have exponents with + in them, then that + is
 ! lost in the animation sequence and Ferret chokes on levels symbols
@@ -127,55 +59,70 @@ IF ($remove_plus"0") THEN
    IF `STRINDEX("($lines_coarse_delta)", "+") GT 0` THEN GO remove_plus_exponent lines_coarse_delta ($lines_coarse_delta)
 ENDIF
 
-IF ($coarse_lo"0|*>1") THEN
+IF `($stat_min) LT ($coarse_lo)` THEN
 
    DEFINE SYMBOL ferret_auto_levels = \
-($lower_inf)(($coarse_lo),($fine_lo),($coarse_delta))\
+(-inf)(($coarse_lo),($fine_lo),($coarse_delta))\
 (($fine_lo),($fine_hi),($fine_inc))
 
    DEFINE SYMBOL ferret_auto_lines = \
-($lower_inf)(($coarse_lo),($fine_lo),`($lines_coarse_delta)`)\
+(-inf)(($coarse_lo),($fine_lo),`($lines_coarse_delta)`)\
 (($fine_lo),($fine_hi),($lines_fine_inc))
 ELSE
-
-   IF ($fine_lo"0|*>1") THEN
-      DEFINE SYMBOL ferret_auto_levels = (($fine_lo),($fine_hi),($fine_inc))
-      DEFINE SYMBOL ferret_auto_lines = (($fine_lo),($fine_hi),($lines_fine_inc))
+   IF `($fine_lo) - ($lowest_lev) GT ($coarse_delta)` THEN
+      DEFINE SYMBOL ferret_auto_levels = \
+(-inf)(($lowest_lev),($fine_lo),($coarse_delta))\
+(($fine_lo),($fine_hi),($fine_inc))
+      DEFINE SYMBOL ferret_auto_lines = \
+(-inf)(($lowest_lev),($fine_lo),($lines_coarse_delta))\
+(($fine_lo),($fine_hi),($lines_fine_inc))
+   ELSE
+      DEFINE SYMBOL ferret_auto_levels = \
+(-inf)(($fine_lo),($fine_hi),($fine_inc))
+      DEFINE SYMBOL ferret_auto_lines = \
+(-inf)(($fine_lo),($fine_hi),($lines_fine_inc))
    ENDIF
 
 ENDIF
 
-IF ($coarse_hi"0|*>1") THEN
+IF `($stat_max) GT ($coarse_hi)` THEN
 
    DEFINE SYMBOL ferret_auto_levels = \
-($ferret_auto_levels)(($fine_hi),($coarse_hi),($coarse_delta))($upper_inf)
+($ferret_auto_levels)(($fine_hi),($coarse_hi),($coarse_delta))(inf)
    DEFINE SYMBOL ferret_auto_lines = \
-($ferret_auto_lines)(($fine_hi),($coarse_hi),($lines_coarse_delta))($upper_inf)
+($ferret_auto_lines)(($fine_hi),($coarse_hi),($lines_coarse_delta))(inf)
 
+ELSE
+   IF `($highest_lev) - ($fine_hi) GT ($coarse_delta)` THEN 
+
+      DEFINE SYMBOL ferret_auto_levels = \
+($ferret_auto_levels)(($fine_hi),($highest_lev),($coarse_delta))(inf)
+      DEFINE SYMBOL ferret_auto_lines = \
+($ferret_auto_lines)(($fine_hi),($highest_lev),($lines_coarse_delta))(inf)
+   ELSE
+      DEFINE SYMBOL ferret_auto_levels = ($ferret_auto_levels)(inf)
+      DEFINE SYMBOL ferret_auto_lines = ($ferret_auto_lines)(inf)
+   ENDIF
 ENDIF
 
 ! Require that if there is (-inf) there is also (inf) and vice versa
-IF ($matching_inf) THEN
 
-   IF `STRINDEX("($ferret_auto_levels)", "(-inf)") GT 0` THEN
-      IF `STRINDEX("($ferret_auto_levels)", "(inf)") EQ 0` THEN \
-         DEFINE SYMBOL ferret_auto_levels = ($ferret_auto_levels)(inf)
-   ENDIF
-   IF `STRINDEX("($ferret_auto_lines)", "(-inf)") GT 0` THEN
-      IF `STRINDEX("($ferret_auto_lines)", "(inf)") EQ 0` THEN \
-         DEFINE SYMBOL ferret_auto_lines = ($ferret_auto_lines)(inf)
-   ENDIF
-
-   IF `STRINDEX("($ferret_auto_levels)", "(inf)") GT 0` THEN
-      IF `STRINDEX("($ferret_auto_levels)", "(-inf)") EQ 0` THEN \
-         DEFINE SYMBOL ferret_auto_levels = (-inf)($ferret_auto_levels)
-   ENDIF
-   IF `STRINDEX("($ferret_auto_lines)", "(inf)") GT 0` THEN
-      IF `STRINDEX("($ferret_auto_lines)", "(-inf)") EQ 0` THEN \
-         DEFINE SYMBOL ferret_auto_lines = (-inf)($ferret_auto_lines)
-   ENDIF
-
+IF `STRINDEX("($ferret_auto_levels)", "(-inf)") GT 0` THEN
+   IF `STRINDEX("($ferret_auto_levels)", "(inf)") EQ 0` THEN \
+      DEFINE SYMBOL ferret_auto_levels = ($ferret_auto_levels)(inf)
+ENDIF
+IF `STRINDEX("($ferret_auto_lines)", "(-inf)") GT 0` THEN
+   IF `STRINDEX("($ferret_auto_lines)", "(inf)") EQ 0` THEN \
+      DEFINE SYMBOL ferret_auto_lines = ($ferret_auto_lines)(inf)
+ENDIF
+      
+IF `STRINDEX("($ferret_auto_levels)", "(inf)") GT 0` THEN
+   IF `STRINDEX("($ferret_auto_levels)", "(-inf)") EQ 0` THEN \
+      DEFINE SYMBOL ferret_auto_levels = (-inf)($ferret_auto_levels)
+ENDIF
+IF `STRINDEX("($ferret_auto_lines)", "(inf)") GT 0` THEN
+   IF `STRINDEX("($ferret_auto_lines)", "(-inf)") EQ 0` THEN \
+      DEFINE SYMBOL ferret_auto_lines = (-inf)($ferret_auto_lines)
 ENDIF
 
 ! End of file ------------LAS_non_centered_levels.jnl--------------------------
-
