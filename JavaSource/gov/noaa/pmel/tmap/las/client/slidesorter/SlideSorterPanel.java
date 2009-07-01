@@ -3,18 +3,14 @@ package gov.noaa.pmel.tmap.las.client.slidesorter;
 import gov.noaa.pmel.tmap.las.client.OperationButton;
 import gov.noaa.pmel.tmap.las.client.RPCServiceAsync;
 import gov.noaa.pmel.tmap.las.client.laswidget.AxisWidget;
-import gov.noaa.pmel.tmap.las.client.laswidget.DatasetButton;
 import gov.noaa.pmel.tmap.las.client.laswidget.DateTimeWidget;
 import gov.noaa.pmel.tmap.las.client.laswidget.LASRequestWrapper;
 import gov.noaa.pmel.tmap.las.client.laswidget.TandZWidgets;
 import gov.noaa.pmel.tmap.las.client.map.SettingsWidget;
-import gov.noaa.pmel.tmap.las.client.map.SelectWidget.XYMapTool;
-import gov.noaa.pmel.tmap.las.client.serializable.AxisSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.GridSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.VariableSerializable;
 
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 
 import com.google.gwt.http.client.Request;
@@ -30,7 +26,6 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.ChangeListener;
 import com.google.gwt.user.client.ui.ClickListener;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
@@ -41,7 +36,6 @@ import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.TreeItem;
 import com.google.gwt.user.client.ui.TreeListener;
 import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.user.client.ui.HasVerticalAlignment.VerticalAlignmentConstant;
 import com.google.gwt.xml.client.Document;
 import com.google.gwt.xml.client.Element;
 import com.google.gwt.xml.client.Node;
@@ -476,8 +470,26 @@ public class SlideSorterPanel extends Composite {
 								Node text = result.getFirstChild();
 								if ( text instanceof Text ) {
 									Text t = (Text) text;
-									HTML error = new HTML(t.getData());
+									HTML error = new HTML(t.getData().toString().trim());
 									grid.setWidget(1, 0, error);
+									Button retry = new Button("Retry");
+									retry.addClickListener(new ClickListener() {
+										public void onClick(Widget sender) {
+											// Put the selection widget back in place...
+											grid.setWidget(2, 0, getCompareWidget());
+											// Just send the same request again to see if it works the second time.
+											String url = productServer+"?xml="+URL.encode(lasRequest.getXMLText());
+											RequestBuilder sendRequest = new RequestBuilder(RequestBuilder.GET, url);
+											try {
+												sendRequest.sendRequest(null, lasRequestCallback);
+											} catch (RequestException e) {
+												HTML error = new HTML(e.toString());
+												grid.setWidget(1, 0, error);
+											}
+										}
+										
+									});
+									grid.setWidget(2, 0, retry);
 								}
 							}
 						} else if ( result.getAttribute("type").equals("batch") ) {
