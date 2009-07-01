@@ -23,10 +23,23 @@ ENDIF
 
 IF `($stat_min) GT 0 AND ($stat_max) GT 0` THEN
    PPL %RANGE `-1*twostd`, `twostd`, ($num_fine_levels)
+   IF `twostd LT ($stat_min)` THEN 
+      LET hi = `($stat_max)-nstd`
+      LET lo = -1*hi
+      PPL %RANGE `lo`, `hi`, ($num_fine_levels)
+   ENDIF
 ELIF `absmin GT twostd OR absmax GT twostd` THEN 
    PPL %RANGE `-1*twostd`, `twostd`, ($num_fine_levels)
 ELSE
    PPL %RANGE `-1*nstd`, `nstd`, ($num_fine_levels)
+ENDIF
+
+IF `($stat_min) LT 0 AND ($stat_max) LT 0` THEN
+   IF `-1*twostd GT ($stat_min)` THEN 
+      LET lo = `($stat_min)+0.5*nstd`
+      LET hi = -1*lo
+      PPL %RANGE `lo`, `hi`, ($num_fine_levels)
+   ENDIF
 ENDIF
 
 DEFINE SYMBOL fine_lo = ($ppl$range_low) 
