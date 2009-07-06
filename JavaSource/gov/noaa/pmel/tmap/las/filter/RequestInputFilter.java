@@ -83,6 +83,7 @@ public class RequestInputFilter implements Filter {
     	"cleanbutton",
     	"cleands",
     	"debug",
+        "dojo.preventCache",
     	"dsid",
     	"email",
     	"embutton",
@@ -300,6 +301,10 @@ public class RequestInputFilter implements Filter {
 	// LAS ID "^[A-Za-z0-9._-]"
     private boolean validateParameters(HttpServletRequest request) {
     	Set<String> parameters = request.getParameterMap().keySet();
+               for (Iterator pIt = parameters.iterator(); pIt.hasNext();) {
+			String name = (String) pIt.next();
+			log.debug("Found parameter: "+name);
+		}
     	return LAS_PARAMETERS.containsAll(parameters);
     }
     private boolean validBooleanValues(HttpServletRequest request) {
