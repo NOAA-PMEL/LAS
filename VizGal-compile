@@ -1,0 +1,3 @@
+#!/bin/sh
+APPDIR=`dirname $0`;
+java  -Xmx256M -cp "$APPDIR/JavaSource:$APPDIR/bin:/home/rhs/gwt-maps/gwt-maps.jar:/home/rhs/gwt/gwt-user.jar:/home/rhs/gwt/gwt-dev-linux.jar" com.google.gwt.dev.Compiler -war "$APPDIR/WebContent/VizGal" "$@" gov.noaa.pmel.tmap.las.VizGal;
