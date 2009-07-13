@@ -91,3 +91,11 @@ img {
     background-color            :   #fff;
 }
 
+.las-centerButton {
+	width						: 170px;
+	padding						:	0px;
+}
+.las-buttonPanel {
+	padding						:	0px;
+}
+

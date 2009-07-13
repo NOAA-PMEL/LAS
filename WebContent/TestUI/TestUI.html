@@ -27,7 +27,8 @@
     <script type="text/javascript" language="javascript" src="../JavaScript/components/LASRequest.js"></script>
     <script type="text/javascript" language="javascript" src="../JavaScript/components/xmldom.js"></script>
     <script type="text/javascript" language="javascript" src="gov.noaa.pmel.tmap.las.TestUI/gov.noaa.pmel.tmap.las.TestUI.nocache.js"></script>
-    <script src="http://maps.google.com/maps?file=api&amp;v=2.x&amp;key=ABQIAAAAQd8QHM5bG96kv_FdbP2d_xTg3JrA53tnuuEXhHbNujhDPNiVUhQoOZ0saXCA5A_Y3F0I90EmPmTTxw"/>
+    <script src="http://maps.google.com/maps?file=api&amp;v=2&amp;key=ABQIAAAAQd8QHM5bG96kv_FdbP2d_xTCqQI3Sj7hqI6Uh8C-ytlVpmJc8xS3dXHdpRVUOyawacVodlU95YCvWg"
+      type="text/javascript"></script>
     <link rel="stylesheet" href="TestUI.css" type="text/css">
   </head>
 
@@ -40,30 +41,29 @@
     <!--#include virtual="productserver/templates/V7UIHeader.vm" -->
     <!-- OPTIONAL: include this if you want history support -->
     <iframe src="javascript:''" id="__gwt_historyFrame" tabIndex='-1' style="position:absolute;width:0;height:0;border:0"></iframe>
-   <div class="banner" align="center">LAS Interactive Reference Map<div>
+   <div class="banner" align="center">LAS<div>
 				<table align="left">
 					<tr>
-						<td colspan="2" id="operations_menu" />
+						<td id="menu" />
 					</tr>
 					<tr>
-						<td width="30%" id="dataset_info" />
-						<td id="plot" rowspan="3" />
+						<td id="panel" />	
+				    </tr>
+				</table>
+				<table>
+					<tr>
+						<td colspan="3">
+							<div id="map"></div>
+						</td>
 					</tr>
 					<tr>
-						<td id="refmap"></td>
-					</tr>
-					<tr>
-					 <td>
-						<table>
-							<tr>
-								<td id="dates"></td>
-								<td id="z"></td>
-							</tr>
-						</table>
 						<td>
-					</tr>
-					<tr>
-						<td id="operations" valign="top" />
+							<div id="scale"></div>
+						</td>
+						<td />
+						<td align="right">
+							<div id="position"></div>
+						</td>
 					</tr>
 				</table>
 				<!-- #include FILE="../productserver/templates/V7UIFooter.vm" -->
