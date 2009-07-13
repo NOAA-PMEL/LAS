@@ -39,7 +39,7 @@
 <head>
 
 <title>LAS Output -- $las_config.getTitle()</title>
-<META http-equiv="refresh" content="0;URL=SlideSorter/SlideSorter.html?dsid=$las_request.datasetIDs.get(0)&vid=$las_request.variableIDs.get(0)&opid=$op&view=$las_request.getProperty("ferret","view")$region"> 
+<META http-equiv="refresh" content="0;URL=VizGal/VizGal.html?dsid=$las_request.datasetIDs.get(0)&vid=$las_request.variableIDs.get(0)&opid=$op&view=$las_request.getProperty("ferret","view")$region"> 
 </head>
 <body>
 </body>
