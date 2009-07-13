@@ -59,4 +59,7 @@ public class OptionsButton extends Composite {
 	public void setOptions(String id) {
 		options.setOptions(id);
 	}
+	public void setOptions(String id, Map<String, String> state) {
+		options.setOptions(id, state);
+	}
 }

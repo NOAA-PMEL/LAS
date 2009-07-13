@@ -1,32 +1,18 @@
 package gov.noaa.pmel.tmap.las.client;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
-import gov.noaa.pmel.tmap.las.client.laswidget.LASRequestWrapper;
 import gov.noaa.pmel.tmap.las.client.laswidget.OperationsMenu;
-import gov.noaa.pmel.tmap.las.client.laswidget.TandZWidgets;
-import gov.noaa.pmel.tmap.las.client.serializable.ArangeSerializable;
-import gov.noaa.pmel.tmap.las.client.serializable.AxisSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.CategorySerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.DatasetSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.GridSerializable;
-import gov.noaa.pmel.tmap.las.client.serializable.OperationSerializable;
-import gov.noaa.pmel.tmap.las.client.serializable.TimeAxisSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.VariableSerializable;
-import gov.noaa.pmel.tmap.las.client.slidesorter.SlideSorterPanel;
+import gov.noaa.pmel.tmap.las.client.vizgal.VizGalPanel;
 
-import com.google.gwt.http.client.Request;
-import com.google.gwt.http.client.RequestBuilder;
-import com.google.gwt.http.client.RequestCallback;
-import com.google.gwt.http.client.RequestException;
-import com.google.gwt.http.client.Response;
-import com.google.gwt.http.client.URL;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 import com.google.gwt.maps.client.geom.LatLng;
 import com.google.gwt.maps.client.geom.LatLngBounds;
-import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.WindowResizeListener;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -41,8 +27,89 @@ import com.google.gwt.user.client.ui.Widget;
 
 
 public class TestUI extends LASEntryPoint {
+	/*
+	private MapWidget mapWidget;
+	private Map map;
+	private WMS wmsLayer;
+	private Markers markers;
+	private Popup popup;
+	public void onModuleLoad() {
+		super.onModuleLoad();
+		MapOptions mapOptions = new MapOptions();
+		mapOptions.setControls(new JObjectArray(new JSObject[] {}));
+		mapOptions.setNumZoomLevels(16);
+		mapOptions.setProjection("EPSG:4326");
+
+		// let's create map widget and map objects
+		mapWidget = new MapWidget("350px", "350px", mapOptions);
+		map = mapWidget.getMap();
+		markers = new Markers("marker layer");
+		
+		WMSParams wmsParams = new WMSParams();
+		wmsParams.setFormat("image/png");
+		wmsParams.setLayers("tiger-ny");
+		wmsParams.setStyles("");
+		wmsParams.setMaxExtent(new Bounds(-74.047185, 40.679648, -73.907005, 40.882078));
+
+		wmsLayer = new WMS("WMS Layer", "http://localhost:8080/geoserver/wms", wmsParams);
+
+		// let's add layers and controls to map
+		map.addLayers(new Layer[] {wmsLayer, markers});
+
+		map.addControl(new PanZoomBar(RootPanel.get("nav").getElement()));
+		map.addControl(new MousePosition(RootPanel.get("position").getElement()));
+		map.addControl(new Scale(RootPanel.get("scale").getElement()));
+		map.addControl(new MouseToolbar());
+		map.addControl(new LayerSwitcher());
+		
+		LonLat center = new LonLat(-73.99, 40.73);
+		map.setCenter(center, 13);
+
+		// add marker
+		Size size = new Size(10,17);
+		Pixel offset = new Pixel(-5, -17);
+		Icon icon = new Icon("img/marker.png", size, offset);
+		Marker marker = new Marker(center, icon);
+		markers.addMarker(marker);
+		marker.getEvents().register("mouseover", marker, new EventHandler() {
+			public void onHandle(JSObject source, JSObject[] param) {
+				Marker marker = Marker.narrowToMarker(source);
+				if (popup != null) {
+					map.removePopup(popup);
+				}
+
+				popup = new AnchoredBubble("marker-info",
+						marker.getLonLat(),
+						new Size(120,80),
+						"<p>You moved near " + marker.getLonLat().lon() + " : " + marker.getLonLat().lat() + "</p>" ,
+						new Icon("", new Size(0,0), new Pixel(0,0)),
+						true);
+			map.addPopup(popup);
+
+			}
+		});
+
+		// register mouse out event
+		marker.getEvents().register("mouseout", marker, new EventHandler() {
+			public void onHandle(JSObject source, JSObject[] param) {
+				Marker marker = Marker.narrowToMarker(source);
+				if (popup != null) {
+					map.removePopup(popup);
+				}
+			}
+		});
+
+		DockPanel dockPanel = new DockPanel();
+		dockPanel.add(mapWidget, DockPanel.CENTER);
+		dockPanel.setBorderWidth(1);
+		RootPanel.get("map").add(dockPanel);
+
+		
+	}
+	*/
+	
 	HTML output;
-	SlideSorterPanel panel;
+	VizGalPanel panel;
 	Grid layout = new Grid(2, 1);
 	OperationsMenu operationsMenu;
 	String dsid;
@@ -91,7 +158,7 @@ public class TestUI extends LASEntryPoint {
 			}
 		}
 		public void onFailure(Throwable caught) {
-			Window.alert("Failed to initalizes SlideSorter."+caught.toString());
+			Window.alert("Failed to initalizes VizGal."+caught.toString());
 		}
 	};
 	private void initPanel() {
@@ -140,7 +207,7 @@ public class TestUI extends LASEntryPoint {
 			ortho.clear();
 			int width = Window.getClientWidth();
 			int pwidth = (width-rightPad);
-			panel = new SlideSorterPanel("LAS", false, op, view, productServer, true, rpcService);
+			panel = new VizGalPanel("LAS", false, op, view, productServer, true, rpcService);
 			panel.setVariable(var);
 			panel.init(true);
 			panel.addCompareAxisChangeListener(onAxisChange);
@@ -183,4 +250,5 @@ public class TestUI extends LASEntryPoint {
 			panel.refreshPlot(null, false, true);	
 		}
 	};
+	
 }

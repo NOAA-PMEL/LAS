@@ -1,5 +1,6 @@
 package gov.noaa.pmel.tmap.las.client.map;
 
+import gov.noaa.pmel.tmap.las.client.DateWidgetTest;
 import gov.noaa.pmel.tmap.las.client.RPCServiceAsync;
 import gov.noaa.pmel.tmap.las.client.laswidget.DatasetButton;
 import gov.noaa.pmel.tmap.las.client.laswidget.OperationsMenu;
@@ -7,6 +8,8 @@ import gov.noaa.pmel.tmap.las.client.laswidget.OperationsWidget;
 import gov.noaa.pmel.tmap.las.client.laswidget.OptionsButton;
 import gov.noaa.pmel.tmap.las.client.serializable.OperationSerializable;
 
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 import com.google.gwt.maps.client.geom.LatLng;
@@ -204,4 +207,28 @@ public class SettingsWidget extends Composite {
 			settingsDialog.show();			
 		}		
 	};
+
+	public String getHistoryToken() {
+		StringBuilder token = new StringBuilder();
+		token.append(";xlo="+getRefMap().getXlo());
+		token.append(";xhi="+getRefMap().getXhi());
+		token.append(";ylo="+getRefMap().getYlo());
+		token.append(";yhi="+getRefMap().getYhi());
+		token.append(";operation_id="+getCurrentOp().getID());
+		token.append(";view="+getCurrentOperationView());
+		Map<String, String> options = getOptions();
+		for (Iterator opIt = options.keySet().iterator(); opIt.hasNext();) {
+			String name = (String) opIt.next();
+			String value = options.get(name);
+			token.append(";ferret_"+name+"="+value);
+		}		
+		return token.toString();
+	}
+	public void setFromHistoryToken(Map<String, String> tokenMap, Map<String, String> optionsMap) {
+		setOperation(tokenMap.get("operation_id"), tokenMap.get("view"));
+		setLatLon(tokenMap.get("xlo"), tokenMap.get("xhi"), tokenMap.get("ylo"), tokenMap.get("yhi"));
+		if ( optionsMap.size() > 1 ) {
+			optionsButton.setOptions(tokenMap.get("operations_id"), optionsMap);
+		}
+	}
 }
