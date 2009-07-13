@@ -1,4 +1,4 @@
-package gov.noaa.pmel.tmap.las.client.slidesorter;
+package gov.noaa.pmel.tmap.las.client.vizgal;
 
 import gov.noaa.pmel.tmap.las.client.OperationButton;
 import gov.noaa.pmel.tmap.las.client.RPCServiceAsync;
@@ -10,6 +10,7 @@ import gov.noaa.pmel.tmap.las.client.map.SettingsWidget;
 import gov.noaa.pmel.tmap.las.client.serializable.GridSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.VariableSerializable;
 
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -47,7 +48,7 @@ import com.google.gwt.xml.client.XMLParser;
  * @author rhs
  *
  */
-public class SlideSorterPanel extends Composite {
+public class VizGalPanel extends Composite {
 	
 	/* A message window when the plot cannot be made... */
 	PopupPanel messagePanel;
@@ -126,8 +127,8 @@ public class SlideSorterPanel extends Composite {
 	int fixedZoom;
 	boolean autoZoom = true;;
 	
-	double min;
-	double max;
+	double min = 99999999.;
+	double max = -99999999.;
 	
 	// Switch for "single panel mode".  If only one panel being used, do not display the "Revert" button.
 	boolean singlePanel;
@@ -145,9 +146,9 @@ public class SlideSorterPanel extends Composite {
 	VariableSerializable nvar;
 	
 	/**
-	 * Builds a SlideSorter panel with a default plot for the variable.  See {@code}SlideSorter(LASRequest) if you want more options on the initial plot.
+	 * Builds a VizGal panel with a default plot for the variable.  See {@code}VizGal(LASRequest) if you want more options on the initial plot.
 	 */
-	public SlideSorterPanel(String id, boolean comparePanel, String op, String view, String productServer, boolean single, RPCServiceAsync rpcService) {
+	public VizGalPanel(String id, boolean comparePanel, String op, String view, String productServer, boolean single, RPCServiceAsync rpcService) {
 		this.ID = id;
 		this.comparePanel = comparePanel;
 		this.productServer = productServer;
@@ -1036,5 +1037,49 @@ public class SlideSorterPanel extends Composite {
 	public void show() {
 		top.setVisible(true);
 		grid.getCellFormatter().setHeight(0, 0, "90px");
+	}
+	public String getHistoryToken() {
+		StringBuilder token = new StringBuilder();
+		token.append("usePanelSettings="+settingsButton.isUsePanelSettings());
+		if ( compareAxis.equals("t") ) {
+			token.append(";compareAxis=t;compareAxisLo="+dateTimeWidget.getFerretDateLo()+";compareAxisHi="+dateTimeWidget.getFerretDateHi());
+		} else if ( compareAxis.equals("z") ) {
+			token.append(";compareAxis=z;compareAxisLo="+zAxisWidget.getLo()+";compareAxisHi="+zAxisWidget.getHi());
+		}
+		// If the panel is controlling itself, we need it's settings.  Otherwise they get pushed from the gallery to the panel.
+		if ( isUsePanelSettings() ) {
+			token.append(settingsButton.getHistoryToken());
+			token.append(";dsid="+var.getDSID());
+			token.append(";varid="+var.getID());
+		}
+
+		return token.toString();
+	}
+	public void setFromHistoryToken(String token) {
+		String[] tokens = token.split(";");
+		Map<String, String> optionsMap = new HashMap<String, String>();
+		Map<String, String> tokenMap = new HashMap<String, String>();
+		for (int i = 0; i < tokens.length; i++) {
+			String[] parts= tokens[i].split("=");
+			String name = parts[0];
+			String value = parts[1];
+			if ( name.contains("ferret_") ) {
+				name = name.substring(name.indexOf("ferret_")+7, name.length());
+				optionsMap.put(name, value);
+			} else {
+				tokenMap.put(name, value);
+			}
+		}
+		// Do the panel stuff here.
+		if (tokenMap.get("compareAxis").equals("t") ) {
+			dateTimeWidget.setLo(tokenMap.get("compareAxisLo"));
+			dateTimeWidget.setHi(tokenMap.get("compareAxisHi"));
+		} else {
+			zAxisWidget.setLo(tokenMap.get("compareAxisLo"));
+			zAxisWidget.setHi(tokenMap.get("compareAxisHi"));
+		}
+		// Do the part that is stored in the settings widget.
+		
+		settingsButton.setFromHistoryToken(tokenMap, optionsMap);
 	}
 }

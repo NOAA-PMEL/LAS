@@ -10,7 +10,7 @@ import gov.noaa.pmel.tmap.las.client.serializable.DatasetSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.GridSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.TimeAxisSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.VariableSerializable;
-import gov.noaa.pmel.tmap.las.client.slidesorter.SlideSorterPanel;
+import gov.noaa.pmel.tmap.las.client.vizgal.VizGalPanel;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -18,6 +18,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.maps.client.geom.LatLng;
 import com.google.gwt.maps.client.geom.LatLngBounds;
 import com.google.gwt.user.client.History;
@@ -51,8 +55,14 @@ import com.google.gwt.user.client.ui.HTMLTable.CellFormatter;
  * @author rhs
  *
  */
-public class SlideSorter extends LASEntryPoint implements HistoryListener {
+public class VizGal extends LASEntryPoint {
 
+	/*
+	 * This is a hack for right now, but we are going to define two default operations.
+	 */
+	String default_regular_op = "Plot_2D_XY";
+	String default_scattered_op = "Insitu_extract_location_value_plot";
+	
 	/*
 	 * These are the four pieces of information required
 	 * to initialize a SlideSorterOld
@@ -112,7 +122,7 @@ public class SlideSorter extends LASEntryPoint implements HistoryListener {
 	/*
 	 * The panels in this slide sorter.
 	 */
-	List<SlideSorterPanel> panels = new ArrayList<SlideSorterPanel>();
+	List<VizGalPanel> panels = new ArrayList<VizGalPanel>();
 	
 	/*
 	 * Padding on the right side of the browser frame...
@@ -162,6 +172,10 @@ public class SlideSorter extends LASEntryPoint implements HistoryListener {
 	 * The currently selected variable.
 	 */
 	VariableSerializable var;
+	/*
+	 * The initial variable for when we run off the top off the history stack.
+	 */
+	VariableSerializable initial_var;
 	
 	/*
 	 * Global min and max for setting contour levels.
@@ -248,32 +262,14 @@ public class SlideSorter extends LASEntryPoint implements HistoryListener {
 		triright = Util.getImageURL()+"tri-right.png";
 		showHide = new Image(tridown);
 		header.setWidget(0, 0, showHide);
-		showHide.addClickListener(new ClickListener() {
-
-			public void onClick(Widget sender) {
-				if ( panelHeaderHidden ) {
-					for (Iterator panelIt = panels.iterator(); panelIt.hasNext();) {
-			    		SlideSorterPanel panel = (SlideSorterPanel) panelIt.next();
-			    		panel.show();
-					}
-					cellFormatter.setVisible(0, 0, true);
-					showHide.setUrl(tridown);
-					pwidth = pwidth - controlsWidth/2;
-					resize();
-				} else {
-					for (Iterator panelIt = panels.iterator(); panelIt.hasNext();) {
-			    		SlideSorterPanel panel = (SlideSorterPanel) panelIt.next();
-			    		panel.hide();
-					}
-					cellFormatter.setVisible(0, 0, false);
-					showHide.setUrl(triright);
-					pwidth = pwidth + controlsWidth/2;
-					resize();
-				}
-				panelHeaderHidden = !panelHeaderHidden;
-			}
-			
+		showHide.addClickHandler(new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
+				// Handle the change by passing in the current state.
+				handlePanelShowHide();				
+			}			
 		});
+		
 		showHide.setTitle("Show/Hide Panel Headers");
 		differenceButton = new ToggleButton("Difference Mode");
 		differenceButton.setTitle("Toggle Difference Mode");
@@ -309,7 +305,7 @@ public class SlideSorter extends LASEntryPoint implements HistoryListener {
 				String value = imageSize.getValue(imageSize.getSelectedIndex());
 				if ( !value.equals("auto") ) {
 					for (Iterator panelIt = panels.iterator(); panelIt.hasNext();) {
-						SlideSorterPanel panel = (SlideSorterPanel) panelIt.next();
+						VizGalPanel panel = (VizGalPanel) panelIt.next();
 						panel.setImageSize(Integer.valueOf(value).intValue());
 					}
 				} else {
@@ -325,7 +321,7 @@ public class SlideSorter extends LASEntryPoint implements HistoryListener {
 						}
 					}
 					for (Iterator panelIt = panels.iterator(); panelIt.hasNext();) {
-						SlideSorterPanel panel = (SlideSorterPanel) panelIt.next();
+						VizGalPanel panel = (VizGalPanel) panelIt.next();
 						panel.setPanelWidth(pwidth);
 					}
 				}
@@ -355,7 +351,35 @@ public class SlideSorter extends LASEntryPoint implements HistoryListener {
 		RootPanel.get("slides").add(mainPanel);
 		
 		Window.addWindowResizeListener(windowResizeListener);
-		History.addHistoryListener(this);
+		History.addValueChangeHandler(new ValueChangeHandler<String>() {
+			public void onValueChange(ValueChangeEvent<String> event) {
+				String historyToken = event.getValue();
+				popHistory(historyToken);
+			}
+		});
+	}
+	public void handlePanelShowHide() {
+		if ( panelHeaderHidden ) {
+			for (Iterator panelIt = panels.iterator(); panelIt.hasNext();) {
+	    		VizGalPanel panel = (VizGalPanel) panelIt.next();
+	    		panel.show();
+			}
+			cellFormatter.setVisible(0, 0, true);
+			showHide.setUrl(tridown);
+			pwidth = pwidth - controlsWidth/2;
+			resize();
+		} else {
+			for (Iterator panelIt = panels.iterator(); panelIt.hasNext();) {
+	    		VizGalPanel panel = (VizGalPanel) panelIt.next();
+	    		panel.hide();
+			}
+			cellFormatter.setVisible(0, 0, false);
+			showHide.setUrl(triright);
+			pwidth = pwidth + controlsWidth/2;
+			resize();
+		}
+		panelHeaderHidden = !panelHeaderHidden;
+		pushHistory();
 	}
 	private static String getParameterString(String name) {
 		Map<String, List<String>> parameters = Window.Location.getParameterMap();			
@@ -371,12 +395,15 @@ public class SlideSorter extends LASEntryPoint implements HistoryListener {
 			Object v = item.getUserObject();
 			if ( v instanceof VariableSerializable ) {
 				nvar = (VariableSerializable) v;
+				changeDataset = true;
+				/*
 				if ( nvar.getAttributes().get("grid_type").equals("regular") ) {
 					changeDataset = true;
 				} else {
 					nvar = var;
 					Window.alert("visGal cannot work with scattered data at this time.");
 				}
+				*/
 			}
 		}
 
@@ -392,12 +419,13 @@ public class SlideSorter extends LASEntryPoint implements HistoryListener {
 			for (int i=0; i < vars.length; i++ ) {
 				if ( vars[i].getID().equals(vid) ) {
 					var = vars[i];
+					initial_var = var;
 				}
 			}
 			initPanels();
 		}
 		public void onFailure(Throwable caught) {
-			Window.alert("Failed to initalizes SlideSorter."+caught.toString());
+			Window.alert("Failed to initalizes VizGal."+caught.toString());
 		}
 	};
 	public WindowResizeListener windowResizeListener = new WindowResizeListener() {
@@ -413,7 +441,7 @@ public class SlideSorter extends LASEntryPoint implements HistoryListener {
 	public void resize() {
 		if ( imageSize.getValue(imageSize.getSelectedIndex()).equals("auto") ) {
 			for (Iterator panelIt = panels.iterator(); panelIt.hasNext();) {
-				SlideSorterPanel panel = (SlideSorterPanel) panelIt.next();
+				VizGalPanel panel = (VizGalPanel) panelIt.next();
 				panel.setPanelWidth(pwidth);
 			}
 		}
@@ -436,47 +464,47 @@ public class SlideSorter extends LASEntryPoint implements HistoryListener {
 		if ( pwidth <= 0 ) {
 		    pwidth = 400;
 		}
-		SlideSorterPanel sp1 = new SlideSorterPanel("Panel 0", true, op, view, productServer, false, rpcService);
+		VizGalPanel sp1 = new VizGalPanel("Panel 0", true, op, view, productServer, false, rpcService);
 		sp1.addRevertListener(panelApplyButtonClick);
 		sp1.addApplyListener(panelApplyButtonClick);
 		slides.setWidget(0, 0, sp1);
 		sp1.setPanelWidth(pwidth);
-		sp1.addCompareAxisChangeListener(axisMenuChangeListener);
-		sp1.addZChangeListner(axisMenuChangeListener);
-		sp1.addTChangeListner(axisMenuChangeListener);
+		sp1.addCompareAxisChangeListener(panelAxisMenuChange);
+		sp1.addZChangeListner(panelAxisMenuChange);
+		sp1.addTChangeListner(panelAxisMenuChange);
 		panels.add(sp1);
 		
-		SlideSorterPanel sp2 = new SlideSorterPanel("Panel 1", false, op, view, productServer, false, rpcService);
+		VizGalPanel sp2 = new VizGalPanel("Panel 1", false, op, view, productServer, false, rpcService);
 		sp2.addRevertListener(panelApplyButtonClick);
 		sp2.addApplyListener(panelApplyButtonClick);
 		//sp2.addRegionChangeListener(regionChange);
 		slides.setWidget(0, 1, sp2);
 		sp2.setPanelWidth(pwidth);
-		sp2.addCompareAxisChangeListener(axisMenuChangeListener);
-		sp2.addZChangeListner(axisMenuChangeListener);
-		sp2.addTChangeListner(axisMenuChangeListener);		
+		sp2.addCompareAxisChangeListener(panelAxisMenuChange);
+		sp2.addZChangeListner(panelAxisMenuChange);
+		sp2.addTChangeListner(panelAxisMenuChange);		
 		panels.add(sp2);
 		
-		SlideSorterPanel sp3 = new SlideSorterPanel("Panel 2", false, op, view, productServer, false, rpcService);
+		VizGalPanel sp3 = new VizGalPanel("Panel 2", false, op, view, productServer, false, rpcService);
 		sp3.addRevertListener(panelApplyButtonClick);
 		sp3.addApplyListener(panelApplyButtonClick);
 		//sp2.addRegionChangeListener(regionChange);
 		slides.setWidget(1, 0, sp3);
 		sp3.setPanelWidth(pwidth);
-		sp3.addCompareAxisChangeListener(axisMenuChangeListener);
-		sp3.addZChangeListner(axisMenuChangeListener);
-		sp3.addTChangeListner(axisMenuChangeListener);		
+		sp3.addCompareAxisChangeListener(panelAxisMenuChange);
+		sp3.addZChangeListner(panelAxisMenuChange);
+		sp3.addTChangeListner(panelAxisMenuChange);		
 		panels.add(sp3);
 		
-		SlideSorterPanel sp4 = new SlideSorterPanel("Panel 3", false, op, view, productServer, false, rpcService);
+		VizGalPanel sp4 = new VizGalPanel("Panel 3", false, op, view, productServer, false, rpcService);
 		sp4.addRevertListener(panelApplyButtonClick);
 		sp4.addApplyListener(panelApplyButtonClick);
 		//sp2.addRegionChangeListener(regionChange);
 		slides.setWidget(1, 1, sp4);
 		sp4.setPanelWidth(pwidth);
-		sp4.addCompareAxisChangeListener(axisMenuChangeListener);
-		sp4.addZChangeListner(axisMenuChangeListener);
-		sp4.addTChangeListner(axisMenuChangeListener);		
+		sp4.addCompareAxisChangeListener(panelAxisMenuChange);
+		sp4.addZChangeListner(panelAxisMenuChange);
+		sp4.addTChangeListner(panelAxisMenuChange);		
 		panels.add(sp4);
 
 		sp1.setVariable(var);
@@ -493,7 +521,7 @@ public class SlideSorter extends LASEntryPoint implements HistoryListener {
 		if ( compareAxis.equals("t") && tlo != null && !tlo.equals("") ) {
 			// If "t" is the compare axis, then set it to the passed in values in the panels
 			for (Iterator panelIt = panels.iterator(); panelIt.hasNext();) {
-				SlideSorterPanel panel = (SlideSorterPanel) panelIt.next();
+				VizGalPanel panel = (VizGalPanel) panelIt.next();
 				if (dateWidget.isRange() ) {
 					if ( thi != null && !thi.equals("") ) {
 						panel.setParentAxisRange("t", true);
@@ -521,7 +549,7 @@ public class SlideSorter extends LASEntryPoint implements HistoryListener {
 						xyzWidget.setHi(zhi);
 						// Pass the settings down to the panels
 						for (Iterator panelIt = panels.iterator(); panelIt.hasNext();) {
-							SlideSorterPanel panel = (SlideSorterPanel) panelIt.next();
+							VizGalPanel panel = (VizGalPanel) panelIt.next();
 							panel.setParentAxisRange("z", true);
 							panel.setParentAxisRangeValues("z", zlo, zhi);
 						}
@@ -530,7 +558,7 @@ public class SlideSorter extends LASEntryPoint implements HistoryListener {
 					if ( zlo != null && !zlo.equals("") ) {
 						xyzWidget.setLo(zlo);
 						for (Iterator panelIt = panels.iterator(); panelIt.hasNext();) {
-							SlideSorterPanel panel = (SlideSorterPanel) panelIt.next();
+							VizGalPanel panel = (VizGalPanel) panelIt.next();
 							panel.setParentAxisValue("z", zlo);
 						}
 					}
@@ -541,7 +569,7 @@ public class SlideSorter extends LASEntryPoint implements HistoryListener {
 		} else if ( compareAxis.equals("z") && zlo != null && !zlo.equals("") ) {
 			// Same if z is the compare axis.
 			for (Iterator panelIt = panels.iterator(); panelIt.hasNext();) {
-				SlideSorterPanel panel = (SlideSorterPanel) panelIt.next();
+				VizGalPanel panel = (VizGalPanel) panelIt.next();
 				if ( xyzWidget.isRange() ) {
 					 panel.setParentAxisRangeValues("z", zlo, zhi);
 				} else {
@@ -561,7 +589,7 @@ public class SlideSorter extends LASEntryPoint implements HistoryListener {
 						dateWidget.setLo(tlo);
 						dateWidget.setHi(thi);
 						for (Iterator panelIt = panels.iterator(); panelIt.hasNext();) {
-							SlideSorterPanel panel = (SlideSorterPanel) panelIt.next();
+							VizGalPanel panel = (VizGalPanel) panelIt.next();
 							panel.setParentAxisRangeValues("t", tlo, thi);
 						}
 					}
@@ -570,7 +598,7 @@ public class SlideSorter extends LASEntryPoint implements HistoryListener {
 					    dateWidget.setLo(tlo);	
 					}
 					for (Iterator panelIt = panels.iterator(); panelIt.hasNext();) {
-						SlideSorterPanel panel = (SlideSorterPanel) panelIt.next();
+						VizGalPanel panel = (VizGalPanel) panelIt.next();
 						panel.setParentAxisValue("t", tlo);
 					}
 				}
@@ -580,14 +608,17 @@ public class SlideSorter extends LASEntryPoint implements HistoryListener {
 			 ylo != null && !ylo.equals("") && yhi != null && !yhi.equals("") ) {
 			settingsControls.setLatLon(xlo, xhi, ylo, yhi);
 			for (Iterator panelIt = panels.iterator(); panelIt.hasNext();) {
-				SlideSorterPanel panel = (SlideSorterPanel) panelIt.next();
+				VizGalPanel panel = (VizGalPanel) panelIt.next();
 				panel.setLatLon(xlo, xhi, ylo, yhi);
 			}
 		}
-		refresh(false);
+		refresh(false, true);
 	}
     public boolean init() {
     	
+    	// This will load up the operations panels and select the radio button for the op id that is passed in...
+    	// Initially the default operation is passed in in the query string.  For subsequent initializations
+    	// the value gets set to the default operation for the data type.
     	settingsControls.setOperations(rpcService, var.getIntervals(), var.getDSID(), var.getID(), op, view, null);
 		GridSerializable ds_grid = var.getGrid();
 		double grid_west = Double.valueOf(ds_grid.getXAxis().getLo());
@@ -707,7 +738,7 @@ public class SlideSorter extends LASEntryPoint implements HistoryListener {
 				}
 				// Set the value of the fixed axis in all the panels under slide sorter control.
 				for (Iterator panelIt = panels.iterator(); panelIt.hasNext();) {
-		    		SlideSorterPanel panel = (SlideSorterPanel) panelIt.next();
+		    		VizGalPanel panel = (VizGalPanel) panelIt.next();
 		    		if ( !panel.isUsePanelSettings() ) {
 		    			if ( fixed_axis_range ) {
 		    				panel.setParentAxisRangeValues(fixedAxis, fixedAxisLoValue, fixedAxisHiValue);
@@ -716,20 +747,21 @@ public class SlideSorter extends LASEntryPoint implements HistoryListener {
 		    			}
 		    		}
 				}
-				refresh(true);
+				refresh(true, true);
 			}		
 			differenceButton.setEnabled(!view.contains(compareAxis));
 		}			
     };
-    private void refresh(boolean switchAxis) {
+    private void refresh(boolean switchAxis, boolean history) {
+    	
     	if ( differenceButton.isDown() ) {
     		if ( autoContourButton.isDown() ) {
     			autoContourButton.setDown(false);
     			autoContourTextBox.setText("");
     		}
-			SlideSorterPanel comparePanel = null;
+			VizGalPanel comparePanel = null;
 			for (Iterator panelIt = panels.iterator(); panelIt.hasNext();) {
-				SlideSorterPanel panel = (SlideSorterPanel) panelIt.next();
+				VizGalPanel panel = (VizGalPanel) panelIt.next();
 				if ( panel.getID().contains("Panel 0") ) {
 					comparePanel = panel;
 					panel.refreshPlot(settingsControls.getOptions(), switchAxis, true);	
@@ -737,7 +769,7 @@ public class SlideSorter extends LASEntryPoint implements HistoryListener {
 			}
 			if ( comparePanel != null ) {
 				for (Iterator panelIt = panels.iterator(); panelIt.hasNext();) {
-					SlideSorterPanel panel = (SlideSorterPanel) panelIt.next();
+					VizGalPanel panel = (VizGalPanel) panelIt.next();
 					if ( !panel.getID().equals(comparePanel.getID()) ) {
 						String xlo = "";
 						String xhi = "";
@@ -787,11 +819,14 @@ public class SlideSorter extends LASEntryPoint implements HistoryListener {
 				autoContourTextBox.setText("");
 			}
 			for (Iterator panelIt = panels.iterator(); panelIt.hasNext();) {
-	    		SlideSorterPanel panel = (SlideSorterPanel) panelIt.next();
+	    		VizGalPanel panel = (VizGalPanel) panelIt.next();
 	    		panel.setFillLevels(autoContourTextBox.getText());
 	    		panel.refreshPlot(temp_state, switchAxis, true);
 			}
 		}
+    	if ( history ) {
+    		pushHistory();
+    	}
     }
     /*
      * A region change in the panel is now only going to be applied to the panel.
@@ -831,32 +866,60 @@ public class SlideSorter extends LASEntryPoint implements HistoryListener {
 		}		
 	};
 	*/
+    /**
+     * A little helper method to change data sets.
+     */
+    public void changeDataset() {
+    	var = nvar;
+		changeDataset = false;
+		differenceButton.setEnabled(true);
+		differenceButton.setDown(false);
+		
+		
+		// Since we are changing data sets, go to the default plot and view.
+		
+		// TODO Maybe we can derive the default operations from the data set during the init(), but it would require an asynchronous request
+		// to know the default operation for the new dataset and variable...
+		if ( nvar.getAttributes().get("grid_type").equals("regular") ) {
+			op = "XY_zoomable_image";
+		} else {
+			op = "Insitu_extract_location_value_plot";
+		}
+		view = "xy";
+
+		
+		// Figure out the compare and fixed axis
+		init();
+		for (Iterator panelIt = panels.iterator(); panelIt.hasNext();) {
+			VizGalPanel panel = (VizGalPanel) panelIt.next();
+			panel.setPanelColor("regularBackground");
+			panel.setOperation(op, view);
+			panel.setVariable(var);
+			// Send in the ortho axis to allow these to be build and displayed in the panel
+			
+			panel.init(false);
+			if ( fixedAxis.equals("t") ) {
+				panel.setParentAxisValue("t", dateWidget.getFerretDateLo());
+			} else if ( fixedAxis.equals("z") ) {
+				panel.setParentAxisValue("z", xyzWidget.getLo());
+			}
+		}
+    }
+    /**
+     * A helper methods that moves the current state of the map widget to the panels.
+     */
+    private void setMapRanges() {
+    	for (Iterator panelIt = panels.iterator(); panelIt.hasNext();) {
+			VizGalPanel panel = (VizGalPanel) panelIt.next();
+			if (!panel.isUsePanelSettings()) {
+				panel.setLatLon(String.valueOf(settingsControls.getRefMap().getXlo()), String.valueOf(settingsControls.getRefMap().getXhi()), String.valueOf(settingsControls.getRefMap().getYlo()), String.valueOf(settingsControls.getRefMap().getYhi()));
+			}
+		}
+    }
     ClickListener settingsButtonApplyListener = new ClickListener() {
     	public void onClick(Widget sender) {
     		if ( changeDataset ) {
-    			var = nvar;
-    			changeDataset = false;
-    			differenceButton.setEnabled(true);
-    			differenceButton.setDown(false);
-    			// Since we are changing data sets, use Plot_2D_XY and xy as the operation.
-    			op = "Plot_2D_XY";
-    			view = "xy";
-    			// Figure out the compare and fixed axis
-    			init();
-    			for (Iterator panelIt = panels.iterator(); panelIt.hasNext();) {
-        			SlideSorterPanel panel = (SlideSorterPanel) panelIt.next();
-        			panel.setPanelColor("regularBackground");
-        			panel.setOperation(op, view);
-        			panel.setVariable(var);
-        			// Send in the ortho axis to allow these to be build and displayed in the panel
-        			
-        			panel.init(false);
-        			if ( fixedAxis.equals("t") ) {
-						panel.setParentAxisValue("t", dateWidget.getFerretDateLo());
-					} else if ( fixedAxis.equals("z") ) {
-						panel.setParentAxisValue("z", xyzWidget.getLo());
-					}
-        		}
+    			changeDataset();			
     		}
     		
     		// Check to see if the operation changed.  If so, change the tool.
@@ -869,20 +932,15 @@ public class SlideSorter extends LASEntryPoint implements HistoryListener {
     		settingsControls.setToolType(view);
     		// Update the plot based on the new settings first by moving the map settings
     		// to all the panels that are under slide sorter control, the refresh (which handles the options).
-    		for (Iterator panelIt = panels.iterator(); panelIt.hasNext();) {
-    			SlideSorterPanel panel = (SlideSorterPanel) panelIt.next();
-    			if (!panel.isUsePanelSettings()) {
-    				panel.setLatLon(String.valueOf(settingsControls.getRefMap().getXlo()), String.valueOf(settingsControls.getRefMap().getXhi()), String.valueOf(settingsControls.getRefMap().getYlo()), String.valueOf(settingsControls.getRefMap().getYhi()));
-    			}
-    		}
-    		refresh(false);
+    		setMapRanges();
+    		refresh(false, true);
     	}
     };
     ClickListener panelApplyButtonClick = new ClickListener() {
     	public void onClick(Widget sender) {
     		String title = sender.getTitle();
     		for (Iterator panelIt = panels.iterator(); panelIt.hasNext();) {
-    			SlideSorterPanel panel = (SlideSorterPanel) panelIt.next();
+    			VizGalPanel panel = (VizGalPanel) panelIt.next();
     			if (title.contains(panel.getID())) {
     				// See if the panel settings are not being used on this panel, if not
     				// reset the fixed axis, the lat/lon region and the operation to the slide sorter value.
@@ -908,64 +966,88 @@ public class SlideSorter extends LASEntryPoint implements HistoryListener {
     				}
     			}
     		}
-    		refresh(false);
+    		refresh(false, true);
     	}
     };
     ClickListener differencesClick = new ClickListener() {
     	public void onClick(Widget sender) {
-    		refresh(false);	
+    		refresh(false, true);	
     	}
     };
-    public ChangeListener axisMenuChangeListener = new ChangeListener() {
-		public void onChange(Widget sender) {
-			History.newItem("fixedAxis: date change: "+sender.getTitle(), false);
-			refresh(false);
-		}
+    public ChangeListener panelAxisMenuChange = new ChangeListener() {
+    	public void onChange(Widget sender) {
+    		refresh(false, true);
+    	}
     };
 	public ChangeListener fixedAxisMenuChange = new ChangeListener() {
 		public void onChange(Widget sender) {
-			
+			String lo_value = null;
+			String hi_value = null;
+			boolean range = false;
 			if ( fixedAxis.equals("t") ) {
-				
-				String value = dateWidget.getFerretDateLo();
-				for (Iterator panelIt = panels.iterator(); panelIt.hasNext();) {
-		    		SlideSorterPanel panel = (SlideSorterPanel) panelIt.next();
-		    		if ( !panel.isUsePanelSettings() ) {
-		    		    panel.setParentAxisValue("t", value);
-		    		}
-				}
+				lo_value = dateWidget.getFerretDateLo();
+				hi_value = dateWidget.getFerretDateHi();
+				range = dateWidget.isRange();
 			} else if ( fixedAxis.equals("z") ) {
-	    		
-	    		String lo_value = xyzWidget.getLo();
-	    		String hi_value = xyzWidget.getHi();
-	    		for (Iterator panelIt = panels.iterator(); panelIt.hasNext();) {
-		    		SlideSorterPanel panel = (SlideSorterPanel) panelIt.next();
-		    		if ( !panel.isUsePanelSettings() ) {
-		    			if ( xyzWidget.isRange() ) {
-		    				panel.setParentAxisRangeValues("z", lo_value, hi_value);
-		    			} else {
-		    		        panel.setParentAxisValue("z", lo_value);
-		    			}
-		    		}
-				}
+	    		lo_value = xyzWidget.getLo();
+	    		hi_value = xyzWidget.getHi();
+	    		range = xyzWidget.isRange();
 	    	}
-			refresh(false);
+			setParentAxis(fixedAxis, lo_value, hi_value, range, false);
+			refresh(false, true);
 		}   	
     };
+    /**
+     * Helper method to set the values of the axes in the panels that correspond to the fixed axis in the gallery.
+     * @param axis - the axis to set, either z or t.
+     * @param lo - the lo value to set
+     * @param hi - the hi value to set (will be equal to lo if not a range, it doesn't get used if not a range)
+     * @param range - whether the widget is showing a range of values
+     * @param set_local - whether to set the value of the gallery settings widget (in response to a history event)
+     */
+    private void setParentAxis(String axis, String lo, String hi, boolean range, boolean set_local) {
+    	if ( set_local ) {
+    		if ( axis.equals("t") ) {
+    			if ( range ) {
+    				dateWidget.setLo(lo);
+    				dateWidget.setHi(hi);
+    			} else {
+    				dateWidget.setLo(lo);
+    			}	
+    		} else if ( axis.equals("z") ) {
+    			if ( range ) {
+    				xyzWidget.setLo(lo);
+    				xyzWidget.setHi(hi);
+    			} else {
+    				xyzWidget.setLo(lo);
+    			}
+    		}
+    	}
+    	for (Iterator panelIt = panels.iterator(); panelIt.hasNext();) {
+    		VizGalPanel panel = (VizGalPanel) panelIt.next();
+    		if ( !panel.isUsePanelSettings() ) {
+    			if ( range ) {
+    				panel.setParentAxisRangeValues(axis, lo, hi);
+    			} else {
+    				panel.setParentAxisValue(axis, lo);
+    			}
+    		}
+    	}
+    }
     ClickListener optionsOkListener = new ClickListener() {
 		public void onClick(Widget sender) {
-			refresh(false);
+			refresh(false, true);
 		}
     };
     ClickListener autoContour = new ClickListener() {
 		public void onClick(Widget sender) {
-			refresh(false);
+			refresh(false, true);
 		}	
     };
     private void autoScale() {
 
         // Use the values from the "compare panel" to set the auto contour levels.
-    	SlideSorterPanel panel = panels.get(0);
+    	VizGalPanel panel = panels.get(0);
 
     	if ( panel.getMin() < globalMin ) {
     		globalMin = panel.getMin();
@@ -1065,7 +1147,7 @@ public class SlideSorter extends LASEntryPoint implements HistoryListener {
 		
 		// Set the orthogonal axes to a range in each panel.
 		for (Iterator panelsIt = panels.iterator(); panelsIt.hasNext();) {
-			SlideSorterPanel panel = (SlideSorterPanel) panelsIt.next();
+			VizGalPanel panel = (VizGalPanel) panelsIt.next();
 			panel.setOperation(op, view);
 			if ( view.contains("t") ) {
 			   panel.setParentAxisRange("t", true);
@@ -1080,16 +1162,140 @@ public class SlideSorter extends LASEntryPoint implements HistoryListener {
 		}
 		
 	}	
-	public void onHistoryChanged(String historyToken) {
-		PopupPanel panel = new PopupPanel(true);
-		panel.setPopupPosition(showHide.getAbsoluteLeft()+100, showHide.getAbsoluteTop()+250);
-		HTML message = new HTML("The Google Web Tool Kit has a very fancy mechanism for managing the browser history. " +
-				"<p>I just haven't started using those features yet.  So for now we'll just pretend this never happened. " +
-				"<p> If you want to start over hit the browser's refresh button." +
-				"<p><p>Click outside this box and I won't bother you anymore.  Until you hit forward or back again." +
-				"<p><p><p>For my benefit the history token send with this change was: "+historyToken);
-		panel.add(message);	
-		panel.show();
+	private void pushHistory() {
+		// First token collection is the gallery settings (mostly in the header of the UI)
+		StringBuilder historyToken = new StringBuilder();
+		historyToken.append("panelHeaderHidden="+panelHeaderHidden);
+		historyToken.append(";differences="+differenceButton.isDown());
+		historyToken.append(";compareAxis="+compareAxis);
+		historyToken.append(";fixedAxis="+fixedAxis);
+		if ( fixedAxis.equals("t") ) {
+			historyToken.append(";fixedAxisLo="+dateWidget.getFerretDateLo());
+			historyToken.append(";fixedAxisHi="+dateWidget.getFerretDateHi());
+		} else if ( fixedAxis.equals("z") ) {
+			historyToken.append(";fixedAxisLo="+xyzWidget.getLo());
+			historyToken.append(";fixedAxisHi="+xyzWidget.getHi());
+		}
+		historyToken.append(";autoContour="+autoContourButton.isDown());
+		if ( panels.get(0).getMin() < 99999999. ) {
+		    historyToken.append(";globalMin="+panels.get(0).getMin());
+		}
+		if ( panels.get(0).getMax() > -99999999. ) {
+		    historyToken.append(";globalMax="+panels.get(0).getMax());
+		}
+		historyToken.append(";dsid="+var.getDSID());
+		historyToken.append(";varid="+var.getID());
+		// The next N tokens are the states of the individual panels.
+		for (Iterator panelIt = panels.iterator(); panelIt.hasNext();) {
+			VizGalPanel panel = (VizGalPanel) panelIt.next();
+			historyToken.append("token"+panel.getHistoryToken());
+		}
 		
+		History.newItem(historyToken.toString(), false);
+	}
+	private void popHistory(String historyToken) {
+		if ( historyToken.equals("") ) {
+			var = initial_var;
+			initPanels();
+		} else {
+			// First split out the panel history
+			String[] settings = historyToken.split("token");
+
+			// Set the panels
+			/*
+			 * 
+			 * Things that have to be reconciled:
+			 * 		was the panel in "panel mode"
+			 * 			if yes:	reinitialize the panel to the ds and var in the history token then set its state
+			 * 			if no:	is the ds and var the same as the current ds and var
+			 * 					if yes: set the state
+			 * 					if no:	reinitialize with ds and var, then set the state
+			 */
+			
+			// Check to see if the the variable is the same as before and that no panels are in usePanel mode.
+			// This variable will be true if the settings only apply to the gallery state and not the variable
+			// or panels in usePanelMode
+			boolean galleryOnly = true;
+			
+			// Panel 0 is the gallery panel...
+			for (int t = 1; t < panels.size(); t++) {
+				
+				VizGalPanel panel = panels.get(t);
+				galleryOnly = galleryOnly && !panel.isUsePanelSettings();
+			}
+			
+
+
+			// Process everything that applies to the gallery
+
+			boolean switch_axis = false;
+			HashMap<String, String> tokenMap = Util.getTokenMap(settings[0]);
+			if ( tokenMap.containsKey("panelHeaderHidden") ) {
+				boolean new_panelHeaderHidden = Boolean.valueOf(tokenMap.get("panelHeaderHidden")).booleanValue();
+				if ( new_panelHeaderHidden != panelHeaderHidden ) {
+					// If the new state should be different, handle it.  Otherwise ignore it.
+					handlePanelShowHide();
+				}
+			}
+			if ( tokenMap.containsKey("differences") ) {
+				boolean new_difference = Boolean.valueOf(tokenMap.get("differences")).booleanValue();
+				if ( new_difference != differenceButton.isDown() ) {
+					differenceButton.setDown(new_difference);
+				}
+			} 
+			if ( tokenMap.containsKey("fixedAxis") && tokenMap.containsKey("fixedAxisLo") && tokenMap.containsKey("fixedAxisHi") ) {
+				String new_fixedAxis = tokenMap.get("fixedAxis");
+				if ( !new_fixedAxis.equals(fixedAxis) ) {
+					switch_axis = true;
+					// You have to manually set the correct radio button since there was not button push to change to this state.
+				}
+				if ( new_fixedAxis.equals("t") ) {
+					xyzButton.setValue(true);
+					xyzWidget.setEnabled(false);
+					dateButton.setValue(false);
+					dateWidget.setEnabled(true);
+					dateWidget.setLo(tokenMap.get("fixedAxisLo"));
+					dateWidget.setHi(tokenMap.get("fixedAxisHi"));
+				} else if ( new_fixedAxis.equals("z") ) {
+					dateButton.setValue(true);
+					dateWidget.setEnabled(false);
+					xyzButton.setValue(false);
+					xyzWidget.setEnabled(true);
+					xyzWidget.setLo(tokenMap.get("fixedAxisLo"));
+					xyzWidget.setHi(tokenMap.get("fixedAxisHi"));
+				}
+			}
+			if ( tokenMap.containsKey("autoContour") ) {
+				boolean new_autoContour = Boolean.valueOf(tokenMap.get("autoContour")).booleanValue();
+				if ( new_autoContour != autoContourButton.isDown() ) {
+					autoContourButton.setDown(new_autoContour);
+				}
+			}
+			if ( tokenMap.containsKey("globalMin") ) {
+				globalMin = Double.valueOf(tokenMap.get("globalMin")).doubleValue();
+			}
+			if ( tokenMap.containsKey("globalMax") ) {
+				globalMax = Double.valueOf(tokenMap.get("globalMax")).doubleValue();
+			}
+
+			
+			
+			
+			refresh(switch_axis, false);
+			// If necessary restore panels in usePanelSettings mode...
+			/*
+			for (int t = 1; t < panels.size(); t++) {
+				HashMap<String, String> tokenMap = Util.getTokenMap(settings[t]);
+				HashMap<String, String> optionsMap = Util.getOptionsMap(settings[t]);
+				// If this history token has a panel that is using it's own settings, update witht the token.
+				if ( tokenMap.get("usePanelSettings").equals("true") ) { 
+					panel.setFromHistoryToken(settings[t]);
+				} else {
+					// If not force the ds and var from the gallery to the panel, then set from the compareAxis hi and lo from the token
+				}
+				t++;
+			}
+			*/
+		}
 	}
 }

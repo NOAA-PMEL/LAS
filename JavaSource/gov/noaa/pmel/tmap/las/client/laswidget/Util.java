@@ -1,8 +1,36 @@
 package gov.noaa.pmel.tmap.las.client.laswidget;
 
+import java.util.HashMap;
+
 import com.google.gwt.core.client.GWT;
 
 public class Util {
+	public static HashMap<String, String> getTokenMap(String token) {
+		String[] tokens = token.split(";");
+		HashMap<String, String> tokenMap = new HashMap<String, String>();
+		for( int i=0; i < tokens.length; i++ ) {
+			String[] parts = tokens[i].split("=");
+			String name = parts[0];
+			String value = parts[1];
+			if ( !value.contains("ferret_") ) {
+			    tokenMap.put(name, value);
+			}
+		}
+		return tokenMap;
+	}
+	public static HashMap<String, String> getOptionsMap(String token) {
+		String[] tokens = token.split(";");
+		HashMap<String, String> optionsMap = new HashMap<String, String>();
+		for( int i=0; i < tokens.length; i++ ) {
+			String[] parts = tokens[i].split("=");
+			String name = parts[0];
+			String value = parts[1];
+			if ( value.contains("ferret_") ) {
+			    optionsMap.put(name, value);
+			}
+		}
+		return optionsMap;
+	}
 	public static String getImageURL() {
 		String moduleRelativeURL = GWT.getModuleBaseURL();
 		String moduleName = GWT.getModuleName();

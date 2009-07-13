@@ -44,6 +44,7 @@ public class OptionsWidget extends VerticalPanel {
 	Button cancel = new Button("Cancel");
 	Grid layout_grid = new Grid(1,2);
 	List<Widget> widgets = new ArrayList<Widget>();
+	Map<String, String> callbackState = null;
 	public OptionsWidget() {
 		layout_grid.setWidget(0, 0, ok);
 		layout_grid.setWidget(0, 1, cancel);
@@ -73,6 +74,13 @@ public class OptionsWidget extends VerticalPanel {
 		
 	}
 	public void setOptions(String id) {
+		callbackState = null;
+		if ( id != null && !id.equals("") ) {
+		    optionsService.getOptions(id, optionsCallback);
+		}
+	}
+	public void setOptions(String id, Map<String, String> options ) {
+		callbackState = options;
 		if ( id != null && !id.equals("") ) {
 		    optionsService.getOptions(id, optionsCallback);
 		}
@@ -82,7 +90,9 @@ public class OptionsWidget extends VerticalPanel {
 			options = (OptionSerializable[]) result;
 			clear();
 			setOptions(options);
-			
+			if ( callbackState != null ) {
+				restore(callbackState);
+			}
 		}
 		public void onFailure(Throwable e) {
 			Window.alert(e.toString());
