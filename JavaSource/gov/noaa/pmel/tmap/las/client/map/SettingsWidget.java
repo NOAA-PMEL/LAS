@@ -1,6 +1,5 @@
 package gov.noaa.pmel.tmap.las.client.map;
 
-import gov.noaa.pmel.tmap.las.client.DateWidgetTest;
 import gov.noaa.pmel.tmap.las.client.RPCServiceAsync;
 import gov.noaa.pmel.tmap.las.client.laswidget.DatasetButton;
 import gov.noaa.pmel.tmap.las.client.laswidget.OperationsMenu;
@@ -8,7 +7,6 @@ import gov.noaa.pmel.tmap.las.client.laswidget.OperationsWidget;
 import gov.noaa.pmel.tmap.las.client.laswidget.OptionsButton;
 import gov.noaa.pmel.tmap.las.client.serializable.OperationSerializable;
 
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -25,7 +23,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 public class SettingsWidget extends Composite {
-	
+
 	String layout;
 	/*
 	 * Objects common to any layout.
@@ -41,23 +39,23 @@ public class SettingsWidget extends Composite {
 	protected String operationID;
 	boolean usePanel = false;
 	protected RPCServiceAsync rpcService;
-	
+
 	/*
 	 * Objects specific to the button layout
 	 */
-	
+
 	protected Button settingsButton;
 	protected DialogBox settingsDialog;
 	protected VerticalPanel mainPanel;
 	protected HorizontalPanel interiorPanel;
 	protected VerticalPanel leftInteriorPanel;
 	protected VerticalPanel rightInteriorPanel;
-	
+
 	/*
 	 * Objects specific to the vertical panel layout
 	 */
 	Grid vertical = new Grid(5,1);
-	
+
 	public SettingsWidget(String title, LatLng center, int zoom, int xpix, int ypix, String panelID, String operationID, RPCServiceAsync rpcService, String layout) {
 		this.operationID = operationID;
 		this.rpcService = rpcService;
@@ -72,8 +70,12 @@ public class SettingsWidget extends Composite {
 		closeAndApply = new HorizontalPanel();
 		closeAndApply.add(closeButton);
 		closeAndApply.add(applyButton);
-        datasetButton = new DatasetButton(rpcService);
-		optionsButton = new OptionsButton(rpcService, operationID);
+		datasetButton = new DatasetButton(rpcService);
+		if ( layout.equals("button") ) {
+		    optionsButton = new OptionsButton(rpcService, operationID, 300);
+		} else {
+			optionsButton = new OptionsButton(rpcService, operationID, 0);
+		}
 		datasetAndOptions = new HorizontalPanel();
 		datasetAndOptions.add(datasetButton);
 		datasetAndOptions.add(optionsButton);
@@ -84,13 +86,13 @@ public class SettingsWidget extends Composite {
 			settingsButton = new Button (title);
 			settingsButton.addClickListener(settingsButtonClick);
 			interiorPanel = new HorizontalPanel();
-	        mainPanel = new VerticalPanel();
-	       
+			mainPanel = new VerticalPanel();
+
 			settingsDialog = new DialogBox(false, false);
 			settingsDialog.setText("Set Region and Plot Options for "+panelID+" ... [Drag Me]");
 			leftInteriorPanel = new VerticalPanel();
-	        rightInteriorPanel = new VerticalPanel();
-		    leftInteriorPanel.add(datasetAndOptions);
+			rightInteriorPanel = new VerticalPanel();
+			leftInteriorPanel.add(datasetAndOptions);
 			leftInteriorPanel.add(operations);
 			interiorPanel.add(leftInteriorPanel);
 			rightInteriorPanel.add(refMap);
@@ -102,11 +104,11 @@ public class SettingsWidget extends Composite {
 		} else {
 			vertical.setWidget(0, 0, new Label(title));
 			vertical.setWidget(1, 0, applyButton);
-		    vertical.setWidget(2, 0, datasetAndOptions);
-		    vertical.setWidget(3, 0, refMap);
-		    vertical.setWidget(4, 0, operations);
-		    vertical.setWidth("256px");
-		    initWidget(vertical);
+			vertical.setWidget(2, 0, datasetAndOptions);
+			vertical.setWidget(3, 0, refMap);
+			vertical.setWidget(4, 0, operations);
+			vertical.setWidth("256px");
+			initWidget(vertical);
 		}
 
 	}
@@ -115,18 +117,18 @@ public class SettingsWidget extends Composite {
 		closeButton.addClickListener(listener);
 	}
 
-	
+
 	protected ClickListener applyClick = new ClickListener() {
-			public void onClick(Widget sender) {
-				usePanel = true;
-			}	
-		};
+		public void onClick(Widget sender) {
+			usePanel = true;
+		}	
+	};
 	public ClickListener operationsClickListener = new ClickListener() {
-			public void onClick(Widget sender) {
-				refMap.setToolType(getCurrentOperationView());		
-				optionsButton.setOptions(getCurrentOp().getOptionsID());
-			}
-		};
+		public void onClick(Widget sender) {
+			refMap.setToolType(getCurrentOperationView());		
+			optionsButton.setOptions(getCurrentOp().getOptionsID());
+		}
+	};
 
 	public void addCloseClickListener(ClickListener close) {
 		closeButton.addClickListener(close);
@@ -142,15 +144,15 @@ public class SettingsWidget extends Composite {
 
 	public void setOperations(RPCServiceAsync rpcService, String intervals, String dsID,
 			String varID, String opID, String view, OperationsMenu menu) {
-				operations.setOperations(rpcService, intervals, dsID, varID, opID, view, menu);
-			}
+		operations.setOperations(rpcService, intervals, dsID, varID, opID, view, menu);
+	}
 
 	public void setLatLon(String xlo, String xhi, String ylo, String yhi) {
 		refMap.setLatLon(xlo, xhi, ylo, yhi);
 	}
 
 	public void addDatasetTreeListener(TreeListener datasetTreeListener) {
-	    datasetButton.addTreeListener(datasetTreeListener);
+		datasetButton.addTreeListener(datasetTreeListener);
 	}
 
 	public boolean isUsePanelSettings() {
@@ -195,7 +197,7 @@ public class SettingsWidget extends Composite {
 	protected ClickListener closeClick = new ClickListener() {
 		public void onClick(Widget sender) {
 			if ( layout.equals("button") ) {
-			   settingsDialog.hide();
+				settingsDialog.hide();
 			} else {
 				// Do something else with the panel layout
 			}
@@ -214,21 +216,25 @@ public class SettingsWidget extends Composite {
 		token.append(";xhi="+getRefMap().getXhi());
 		token.append(";ylo="+getRefMap().getYlo());
 		token.append(";yhi="+getRefMap().getYhi());
-		token.append(";operation_id="+getCurrentOp().getID());
-		token.append(";view="+getCurrentOperationView());
+		if ( getCurrentOp() != null ) {
+			token.append(";operation_id="+getCurrentOp().getID());
+			token.append(";view="+getCurrentOperationView());
+		}
 		Map<String, String> options = getOptions();
 		for (Iterator opIt = options.keySet().iterator(); opIt.hasNext();) {
 			String name = (String) opIt.next();
 			String value = options.get(name);
-			token.append(";ferret_"+name+"="+value);
+			if ( !value.equalsIgnoreCase("default") ) {
+				token.append(";ferret_"+name+"="+value);
+			}
 		}		
 		return token.toString();
 	}
 	public void setFromHistoryToken(Map<String, String> tokenMap, Map<String, String> optionsMap) {
 		setOperation(tokenMap.get("operation_id"), tokenMap.get("view"));
 		setLatLon(tokenMap.get("xlo"), tokenMap.get("xhi"), tokenMap.get("ylo"), tokenMap.get("yhi"));
-		if ( optionsMap.size() > 1 ) {
-			optionsButton.setOptions(tokenMap.get("operations_id"), optionsMap);
+		if ( optionsMap.size() >= 1 ) {
+			optionsButton.setState(optionsMap);
 		}
 	}
 }
