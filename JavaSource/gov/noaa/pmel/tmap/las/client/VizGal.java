@@ -666,7 +666,7 @@ public class VizGal extends LASEntryPoint {
 				panel.setLatLon(xlo, xhi, ylo, yhi);
 			}
 		}
-		refresh(false, true);
+		refresh(false, false);
 	}
 	public boolean init() {
 
