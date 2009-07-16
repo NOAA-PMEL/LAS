@@ -25,8 +25,8 @@ public class Util {
 			String[] parts = tokens[i].split("=");
 			String name = parts[0];
 			String value = parts[1];
-			if ( value.contains("ferret_") ) {
-			    optionsMap.put(name, value);
+			if ( name.contains("ferret_") ) {
+			    optionsMap.put(name.substring(7, name.length()), value);
 			}
 		}
 		return optionsMap;

@@ -16,7 +16,9 @@ public class OptionsButton extends Composite {
 	DialogBox optionsDialog = new DialogBox(false);
 	OptionsWidget options;
 	Map<String, String> state;
-    public OptionsButton (RPCServiceAsync optionsService, String opid) {
+	int offset;
+    public OptionsButton (RPCServiceAsync optionsService, String opid, int offset) {
+    	this.offset = offset;
     	options = new OptionsWidget(optionsService, opid, okClick, cancelClick);
     	optionsButton.addClickListener(openClick);
     	optionsDialog.add(options);
@@ -39,7 +41,7 @@ public class OptionsButton extends Composite {
     ClickListener openClick = new ClickListener() {
 		public void onClick(Widget sender) {
 			state = options.getState();
-			optionsDialog.setPopupPosition(optionsButton.getAbsoluteLeft() - 300, optionsButton.getAbsoluteTop()-60);
+			optionsDialog.setPopupPosition(optionsButton.getAbsoluteLeft() - offset, optionsButton.getAbsoluteTop()-60);
 			optionsDialog.show();
 		}
     };
