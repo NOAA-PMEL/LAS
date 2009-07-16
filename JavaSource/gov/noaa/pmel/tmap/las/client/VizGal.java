@@ -221,10 +221,9 @@ public class VizGal extends LASEntryPoint {
 	int pwidth = 0;
 	
 	/*
-	 * Keep the supplied history token until vizGal is initialized, then fire the history.
+	 * Keep if a history token is attached to an initial URL,  keep it and apply it after the VizGal has initialized.
 	 */
-	boolean lockHistory = true;
-	boolean fireHistory = false;
+	
 	String initialHistory;
 	
 	/*
@@ -257,6 +256,8 @@ public class VizGal extends LASEntryPoint {
 		zhi = getParameterString("zhi");
 		tlo = getParameterString("tlo");
 		thi = getParameterString("thi");
+		
+		initialHistory = getAnchor();
 		
 		// Hard-coded 4 panel display.
 		// TODO make the gallery size changeable somehow...
@@ -384,15 +385,11 @@ public class VizGal extends LASEntryPoint {
 		History.addValueChangeHandler(new ValueChangeHandler<String>() {
 			public void onValueChange(ValueChangeEvent<String> event) {
 				String historyToken = event.getValue();
-				if ( !lockHistory ) {
-				   popHistory(historyToken);
-				} else {
-					initialHistory = historyToken;
-					fireHistory = true;
-				}
+				popHistory(historyToken);
 			}
 		});
 	}
+	
 	public void handlePanelShowHide() {
 		if ( panelHeaderHidden ) {
 			for (Iterator panelIt = panels.iterator(); panelIt.hasNext();) {
@@ -423,6 +420,10 @@ public class VizGal extends LASEntryPoint {
 			return (String) param.get(0);
 		}
 		return null;
+	}
+	private String getAnchor() {
+		String url = Window.Location.getHref();
+		return url.substring(url.indexOf("#")+1, url.length());
 	}
 	TreeListener datasetTreeListener = new TreeListener() {
 
@@ -458,10 +459,8 @@ public class VizGal extends LASEntryPoint {
 				}
 			}
 			initPanels();
-			lockHistory = false;
-			if (fireHistory) {
-				fireHistory = false;
-				applyHistory(Util.getTokenMap(initialHistory));
+			if (initialHistory != null && !initialHistory.equals("") ) {
+				popHistory(initialHistory);
 			}
 		}
 		public void onFailure(Throwable caught) {

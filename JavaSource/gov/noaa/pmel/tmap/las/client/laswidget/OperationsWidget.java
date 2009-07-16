@@ -62,6 +62,7 @@ public class OperationsWidget extends StackPanel {
 		this.intervals = intervals;
 		this.initialOp = opID;
 		this.initialView = view;
+		this.currentView = initialView;
 		if ( ops != null ) {
 			setOps();
 		}  else {
