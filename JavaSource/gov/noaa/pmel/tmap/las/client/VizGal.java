@@ -422,7 +422,12 @@ public class VizGal extends LASEntryPoint {
 	}
 	private String getAnchor() {
 		String url = Window.Location.getHref();
-		return url.substring(url.indexOf("#")+1, url.length());
+		if ( url.contains("#") ) {
+			return url.substring(url.indexOf("#")+1, url.length());
+		} else {
+			return "";
+		}
+		
 	}
 	TreeListener datasetTreeListener = new TreeListener() {
 

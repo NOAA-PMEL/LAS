@@ -121,6 +121,11 @@ public class SettingsWidget extends Composite {
 	protected ClickListener applyClick = new ClickListener() {
 		public void onClick(Widget sender) {
 			usePanel = true;
+			if ( layout.equals("button") ) {
+				settingsDialog.hide();
+			} else {
+				// Do something else with the panel layout
+			}
 		}	
 	};
 	public ClickListener operationsClickListener = new ClickListener() {

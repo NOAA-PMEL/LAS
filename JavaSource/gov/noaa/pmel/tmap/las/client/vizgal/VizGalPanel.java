@@ -27,6 +27,7 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.ChangeListener;
 import com.google.gwt.user.client.ui.ClickListener;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
@@ -57,10 +58,10 @@ public class VizGalPanel extends Composite {
 	HTML message;
 
 	/* The base widget used to layout the other widgets.  A single column of three rows. */
-	Grid grid;
+	FlexTable grid;
 
 	/* The top bar of widgets... */
-	HorizontalPanel top;
+	Grid top;
 
 	/* A widget to return panel to the slide sorter control */
 	Button revert = new Button("Cancel Panel Settings");
@@ -144,6 +145,9 @@ public class VizGalPanel extends Composite {
 
 	// The new variable.
 	VariableSerializable nvar;
+	
+	// The height in pixels of the panel header
+	String panelHeader = "75px";
 
 	/**
 	 * Builds a VizGal panel with a default plot for the variable.  See {@code}VizGal(LASRequest) if you want more options on the initial plot.
@@ -180,16 +184,14 @@ public class VizGalPanel extends Composite {
 
 		messagePanel.add(messageGrid);
 
-		grid = new Grid(3, 1);
+		grid = new FlexTable();
 		grid.setStyleName("regularBackground");
-		grid.getCellFormatter().setHeight(0, 0, "90px");
+		//grid.getCellFormatter().setHeight(0, 0, panelHeader);
 		datasetLabel = new Label();
 
-		top = new HorizontalPanel();
-		top.setSpacing(15);
-		top.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
+		top = new Grid(1,2);
 
-		String title = id+" Settings";
+		String title = "Settings";
 		settingsButton = new SettingsWidget(title, LatLng.newInstance(0.0, 0.0), 1, 256, 360, ID, op, rpcService, "button");
 		settingsButton.addApplyClickListener(applyPanelClick);
 		settingsButton.addCloseClickListener(closeClick);
@@ -199,12 +201,17 @@ public class VizGalPanel extends Composite {
 		revert.addClickListener(revertListener);
 		revert.setTitle("Cancel Panel Settings for "+ID);
 
-		top.add(datasetLabel);
+		top.setWidget(0, 0, datasetLabel);
+		//top.getCellFormatter().setWordWrap(0, 0, false);
+		top.getColumnFormatter().setWidth(0, "80%");
+		top.getCellFormatter().setHeight(0, 0, "30px");
+		top.getColumnFormatter().addStyleName(1, "las-align-right");
+		
 		if ( comparePanel ) {
-			Label gs = new Label("(Use Gallery Settings)");
-			top.add(gs);
+			Label gs = new Label("(See left)");
+			top.setWidget(0, 1, gs);
 		} else {
-			top.add(settingsButton);
+			top.setWidget(0, 1, settingsButton);
 		} 
 
 		grid.setWidget(0, 0, top);
@@ -448,6 +455,7 @@ public class VizGalPanel extends Composite {
 								}
 
 							});
+							image.setTitle("  Click to Enlarge.  Images will size with browser.");
 							grid.setWidget(1, 0 , image);
 							setImageWidth();
 //							if ( autoZoom ) {
@@ -1036,7 +1044,7 @@ public class VizGalPanel extends Composite {
 	}
 	public void show() {
 		top.setVisible(true);
-		grid.getCellFormatter().setHeight(0, 0, "90px");
+		//grid.getCellFormatter().setHeight(0, 0, "90px");
 	}
 	public String getHistoryToken() {
 		StringBuilder token = new StringBuilder();
