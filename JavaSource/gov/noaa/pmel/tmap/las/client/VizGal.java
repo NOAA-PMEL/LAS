@@ -459,9 +459,6 @@ public class VizGal extends LASEntryPoint {
 				}
 			}
 			initPanels();
-			if (initialHistory != null && !initialHistory.equals("") ) {
-				popHistory(initialHistory);
-			}
 		}
 		public void onFailure(Throwable caught) {
 			Window.alert("Failed to initalizes VizGal."+caught.toString());
@@ -665,6 +662,24 @@ public class VizGal extends LASEntryPoint {
 				VizGalPanel panel = (VizGalPanel) panelIt.next();
 				panel.setLatLon(xlo, xhi, ylo, yhi);
 			}
+		}
+		
+		// Apply the initial history here...  Then refresh.  :-)
+		if (initialHistory != null && !initialHistory.equals("") ) {
+			String[] settings = initialHistory.split("token");
+			HashMap<String, String> tokenMap = Util.getTokenMap(settings[0]);
+			applyHistory(tokenMap);
+
+
+			for (int t = 0; t < panels.size(); t++) {
+				HashMap<String, String> panelTokenMap = Util.getTokenMap(settings[t+1]);
+				HashMap<String, String> optionsMap = Util.getOptionsMap(settings[t+1]);
+				if ( t == 0 ) {
+					settingsControls.setFromHistoryToken(panelTokenMap, optionsMap);
+				}
+				panels.get(t).setFromHistoryToken(panelTokenMap, optionsMap);
+			}
+
 		}
 		refresh(false, false);
 	}
