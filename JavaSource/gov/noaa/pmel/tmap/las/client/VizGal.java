@@ -282,7 +282,6 @@ public class VizGal extends LASEntryPoint {
 		showHide = new Image(tridown);
 		header.setWidget(0, 0, showHide);
 		showHide.addClickHandler(new ClickHandler() {
-			@Override
 			public void onClick(ClickEvent event) {
 				// Handle the change by passing in the current state.
 				handlePanelShowHide();				
