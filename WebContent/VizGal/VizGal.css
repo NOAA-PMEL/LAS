@@ -123,6 +123,13 @@ body {
 	text-align: center;
 }
 
+.blueBorder {
+	border: 2px;
+	color: blue;
+	padding: 4px;
+	text-align: center;
+}
+
 .LSS_Table .LSS_banner {
   color: #579;
   font-family: Verdana, Arial, Helvetica, sans-serif;
