@@ -17,6 +17,7 @@ import org.apache.velocity.tools.view.servlet.VelocityViewServlet;
  */
 public class LASVelocityViewServlet extends VelocityViewServlet {
     protected void setContentType(javax.servlet.http.HttpServletRequest request, javax.servlet.http.HttpServletResponse response) {
+    	response.setHeader("X-XSS-Protection", "0");
         String las_mime_type = (String) request.getAttribute("las_mime_type");
         if ( las_mime_type != null && !las_mime_type.equals("") ) {
             // Set it to default values to get the default encoding.
