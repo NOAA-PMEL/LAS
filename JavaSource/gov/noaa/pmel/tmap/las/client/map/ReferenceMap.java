@@ -172,6 +172,7 @@ public class ReferenceMap extends Composite {
     	setDataBounds(dataBounds, delta, true);
 		getResetWidget().setSelectionBounds(dataBounds);
 		getRegionWidget().setSelectedIndex(0);
+		centerWidget.setData(dataBounds);
     }
     /**
      * Sets the data bounds, but leaves the reset values to their initial values.
@@ -182,7 +183,6 @@ public class ReferenceMap extends Composite {
     public void setDataBounds(LatLngBounds dataBounds, double delta, boolean selection) {
     	modulo = false;
     	removeTopAndBottom();
-    	centerWidget.setData(dataBounds.getCenter());
     	this.dataBounds = dataBounds;
     	double lon_span = dataBounds.toSpan().getLongitude();
 		if ( dataBounds.isFullLongitude() || lon_span + 2.*delta >= 360.0 ) {
