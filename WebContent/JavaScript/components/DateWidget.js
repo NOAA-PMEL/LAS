@@ -1300,12 +1300,12 @@ function DateWidget_parseDate(dateString,add_sub) {
         if (Safari_year != in_year) {
           if (in_year > 8000) { in_year -= 8000 } // convert back to original for error message
           error_msg = 'Browser Issue!  Some browsers, eg Safari, only support years within the restricted range of "1902" to "2037".  Incoming year is "' + in_year + '".';
-          throw(error_msg);
+          //throw(error_msg);
         }
 
       } else {
         error_msg = 'DateWidget ERROR:  parseDate: bad date "' + dateString + '"';
-        throw(error_msg);
+        //throw(error_msg);
       }
 
        
@@ -1562,11 +1562,14 @@ function DateWidget_selectYear(YearMenu) {
             options[0].selected = true;
            } else {
             var i = hiMonth - loMonth;
-            options[i].selected = true;
+            if(options[i]) {
+		options[i].selected = true; }
            }
         } else {
           var i = currentMonth - loMonth;
-          options[i].selected = true;
+          if(options[i]) {
+		options[i].selected = true;
+		}
         }
       }
     }
