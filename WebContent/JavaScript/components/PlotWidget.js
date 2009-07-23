@@ -9,7 +9,6 @@
  * <pre>
  *   Plot : {
  *     "src": image source,
- *     "pix_top": pixel position of the top edge of the plot area
  *     "pix_left": pixel positoin of the top edge of the plot area
  *     "pix_width": width in pixels of the plot area
  *     "pix_height": height in pixels of the plot area
@@ -623,8 +622,8 @@ function PlotWidget_EventPosX(e) {
   } else if (e.clientX) {
     pix_x = e.clientX;
     // NOTE:  This is supposed to be an isIE test.  User browser sniffing if this doesn't work.
-    if (document.body.scrollLeft != 0) {
-      pix_x += document.body.scrollLeft;
+    if (document.documentElement.scrollLeft != 0) {
+      pix_x += document.documentElement.scrollLeft;
     }
   }
   return pix_x;
@@ -649,8 +648,9 @@ function PlotWidget_EventPosY(e) {
   } else if (e.clientY) {
     pix_y = e.clientY;
     // NOTE:  This is supposed to be an isIE test.  User browser sniffing if this doesn't work.
-    if (document.body.scrollTop != 0) {
-      pix_y += document.body.scrollTop;
+	
+    if (document.documentElement.scrollTop != 0) {
+      pix_y += document.documentElement.scrollTop;
     }
   }
   return pix_y;
