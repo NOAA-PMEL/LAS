@@ -1,5 +1,7 @@
 package gov.noaa.pmel.tmap.las.client.map;
 
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.maps.client.geom.LatLng;
 import com.google.gwt.maps.client.geom.LatLngBounds;
 import com.google.gwt.user.client.ui.Button;
@@ -18,22 +20,9 @@ import com.google.gwt.user.client.ui.Widget;
  * @author rhs
  *
  */
-public class CenterWidget extends Composite {
-	LatLng zero;
-	LatLng one_eighty;
-	LatLng data;
-	LatLng user;
-	Button zeroButton;
-	Button oneEightyButton;
-	Button dataButton;
-	Button userButton;
-	
-	PopupPanel popPanel;
-	Grid layout;
-	TextBox lonText;
-	
-	Button setCenter;
-	
+public class CenterWidget extends ListBox {
+
+	LatLngBounds data;	
 	ReferenceMap refMap;
 	
 	/**
@@ -41,59 +30,23 @@ public class CenterWidget extends Composite {
 	 * @param map
 	 */
     public CenterWidget(ReferenceMap map) {
-    	
-    	this.data = LatLng.newInstance(0.0, 0.0);
-    	this.zero = LatLng.newInstance(data.getLatitude(), 0.0);
-    	this.one_eighty = LatLng.newInstance(data.getLatitude(), 180.);
-    	this.user = data;
+ 
         this.refMap = map;
-    	
-        setCenter = new Button("Set Center");
-        setCenter.addClickListener(setCenterButtonListener);
-        
-    	popPanel = new PopupPanel();
-    	
-    	layout = new Grid(3, 2);
-    	
-    	zeroButton = new Button("Center at 0");
-    	zeroButton.addStyleName("las-centerButton");
-    	zeroButton.addClickListener(buttonListener);
-    	oneEightyButton = new Button("Center at 180");
-    	oneEightyButton.addStyleName("las-centerButton");
-    	oneEightyButton.addClickListener(buttonListener);
-    	dataButton = new Button("Center on data");
-    	dataButton.addStyleName("las-centerButton");
-    	dataButton.addClickListener(buttonListener);
-    	
-    	layout.setWidget(0, 0, zeroButton);
-        layout.setWidget(1, 0, oneEightyButton);
-        layout.setWidget(2, 0, dataButton);
-       
-        popPanel.add(layout);
-    	
-    	initWidget(setCenter);
-    	
-    	
+        this.data = map.getDataBounds();
+        addItem("Set center", "Set center");
+        addItem("Center at 0", "at 0");
+        addItem("Center at 180", "at 180");
+        addItem("Center on the data", "at data");
+        addChangeHandler(changeHandler);
     }
+   
     /**
-     * Pops up the panel for the centering widget.
+     * Listens for changes on the centering buttons and rotates the map accordingly.
      */
-    ClickListener setCenterButtonListener = new ClickListener() {
-
-		public void onClick(Widget sender) {
-			popPanel.setPopupPosition(setCenter.getAbsoluteLeft(), setCenter.getAbsoluteTop());
-			popPanel.show();
-		}
-    	
-    };
-    /**
-     * Listens for clicks on the centering buttons and rotates the map accordingly.
-     */
-    ClickListener buttonListener = new ClickListener() {
-
-		public void onClick(Widget sender) {
-			Button r = (Button) sender;
-			String text = r.getText();
+    ChangeHandler changeHandler = new ChangeHandler() {
+    	@Override
+		public void onChange(ChangeEvent event) {
+			String text = getValue(getSelectedIndex());
 			if ( text.contains("at 0") ) {
 				LatLngBounds dBounds = refMap.getDataBounds();
 				double nlat = dBounds.getNorthEast().getLatitude();
@@ -114,18 +67,17 @@ public class CenterWidget extends Composite {
 				LatLng ne = LatLng.newInstance(nlat, elon);
 				LatLngBounds bounds = LatLngBounds.newInstance(sw, ne);
 				refMap.setDataBounds(bounds, refMap.getDelta(), true);
-			} else if ( text.contains("on data") ) {
-				refMap.setDataBounds(refMap.getDataBounds(), refMap.getDelta(), true);
+			} else if ( text.contains("data") ) {
+				refMap.setDataBounds(data, refMap.getDelta(), true);
 			}
-			popPanel.hide();
+			setSelectedIndex(0);
 		}
-    	
     };
     /**
      * Sets the location of the center of the current data range to allow centering on that location (handy if different from 0 or 180).
      * @param data
      */
-    public void setData(LatLng data) {
+    public void setData(LatLngBounds data) {
     	this.data = data;
     }
 }
