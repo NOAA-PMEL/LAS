@@ -1249,7 +1249,7 @@ public class SelectWidget extends Composite {
 		LatLng polylinePoints[] = new LatLng[3];
 		Polyline polyline;
 		Polyline shadow;
-		Marker mYDrawMarker;
+		Marker mXDrawMarker;
 		boolean mDraw = false;
 		Marker eMarker;
 		Marker cMarker;
@@ -1274,13 +1274,13 @@ public class SelectWidget extends Composite {
 			mOptions.setDraggable(true);
 			mOptions.setDragCrossMove(true);
 			mOptions.setAutoPan(false);
-			mYDrawMarker = new Marker(LatLng.newInstance(0.0, 0.0), mOptions);
+			mXDrawMarker = new Marker(LatLng.newInstance(0.0, 0.0), mOptions);
 			
-			mYDrawMarker.addMarkerMouseDownHandler(markerMouseDownHandler);
-			mYDrawMarker.addMarkerMouseUpHandler(markerMouseUpHandler);
+			mXDrawMarker.addMarkerMouseDownHandler(markerMouseDownHandler);
+			mXDrawMarker.addMarkerMouseUpHandler(markerMouseUpHandler);
 			
-			mMap.addOverlay(mYDrawMarker);
-			mYDrawMarker.setVisible(false);
+			mMap.addOverlay(mXDrawMarker);
+			mXDrawMarker.setVisible(false);
 			
 			Icon w_icon = Icon.newInstance();
 			w_icon.setIconSize(Size.newInstance(12, 12));
@@ -1354,7 +1354,7 @@ public class SelectWidget extends Composite {
          */
 		@Override
 		public Marker getDrawMarker() {
-			return mYDrawMarker;
+			return mXDrawMarker;
 		}
         /*
          * (non-Javadoc)
@@ -1535,7 +1535,7 @@ public class SelectWidget extends Composite {
 			public void onMouseDown(MarkerMouseDownEvent event) {
 				shadow = new Polyline(polylinePoints, shadowColor, strokeWeight, strokeOpacity);
 				mDraw = true;
-				LatLng click = mYDrawMarker.getLatLng();
+				LatLng click = mXDrawMarker.getLatLng();
 				mapTool.setClick(click);
 				lastGoodPosition = click;
 				LatLngBounds bounds = LatLngBounds.newInstance(click, click);
@@ -1559,7 +1559,7 @@ public class SelectWidget extends Composite {
 				}
 				if ( allowEditing ) {
 					mSelect.setDown(false);
-					mYDrawMarker.setVisible(false);
+					mXDrawMarker.setVisible(false);
 					mMap.removeMapMouseMoveHandler(mouseMove);
 				}
 				mDraw = false;
@@ -1583,12 +1583,12 @@ public class SelectWidget extends Composite {
 					position = LatLng.newInstance(click.getLatitude(), event.getLatLng().getLongitude());
 					LatLng update_position;
 					if ( dataBounds.containsLatLng(position) ) {
-						mYDrawMarker.setVisible(true);
-						mYDrawMarker.setLatLng(position);
+						mXDrawMarker.setVisible(true);
+						mXDrawMarker.setLatLng(position);
 						update_position = position;
 					} else {
-						mYDrawMarker.setVisible(false);
-						mYDrawMarker.setLatLng(lastGoodPosition);
+						mXDrawMarker.setVisible(false);
+						mXDrawMarker.setLatLng(lastGoodPosition);
 						update_position = lastGoodPosition;
 					}
 					
@@ -1609,10 +1609,10 @@ public class SelectWidget extends Composite {
 					}
 				} else {
 					if ( dataBounds.containsLatLng(position) ) {
-						mYDrawMarker.setVisible(true);
-						mYDrawMarker.setLatLng(position);
+						mXDrawMarker.setVisible(true);
+						mXDrawMarker.setLatLng(position);
 					} else {
-						mYDrawMarker.setVisible(false);
+						mXDrawMarker.setVisible(false);
 					}
 				}
 			}
@@ -1790,6 +1790,13 @@ public class SelectWidget extends Composite {
 		@Override
 		public MapMouseMoveHandler getMouseMove() {
 			return null;
+		}
+	}
+	public void turnOffSelectButton() {
+		if ( !allowEditing ) {
+			mSelect.setDown(false);
+			mapTool.getDrawMarker().setVisible(false);
+			mMap.removeMapMouseMoveHandler(mapTool.getMouseMove());
 		}
 	}
 }

@@ -1,5 +1,7 @@
 package gov.noaa.pmel.tmap.las.client.map;
 
+import org.apache.tools.ant.taskdefs.Sleep;
+
 import gov.noaa.pmel.tmap.las.client.laswidget.Util;
 
 import com.google.gwt.core.client.EntryPoint;
@@ -689,4 +691,8 @@ public class ReferenceMap extends Composite {
 			
 		}
 	};
+
+	public void turnOffSelectButton() {
+		selectWidget.turnOffSelectButton();	
+	}
 }
