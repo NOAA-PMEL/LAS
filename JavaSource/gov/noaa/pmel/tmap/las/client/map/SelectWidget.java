@@ -544,9 +544,11 @@ public class SelectWidget extends Composite {
 				} else {
 				    mMap.setDraggable(true);
 				}
-				mSelect.setDown(false);
-				mXYDrawMarker.setVisible(false);
-				mMap.removeMapMouseMoveHandler(mouseMove);
+				if ( allowEditing ) {
+					mSelect.setDown(false);
+					mXYDrawMarker.setVisible(false);
+					mMap.removeMapMouseMoveHandler(mouseMove);
+				}
 				mDraw = false;
 				mapTool.setEditingEnabled(allowEditing);
 				if ( !allowEditing ) {
@@ -992,9 +994,11 @@ public class SelectWidget extends Composite {
 				} else {
 				    mMap.setDraggable(true);
 				}
-				mSelect.setDown(false);
-				mYDrawMarker.setVisible(false);
-				mMap.removeMapMouseMoveHandler(mouseMove);
+				if ( allowEditing ) {
+					mSelect.setDown(false);
+					mYDrawMarker.setVisible(false);
+					mMap.removeMapMouseMoveHandler(mouseMove);
+				}
 				mDraw = false;
 				mapTool.setEditingEnabled(allowEditing);
 				if ( !allowEditing ) {
@@ -1553,9 +1557,11 @@ public class SelectWidget extends Composite {
 				} else {
 				    mMap.setDraggable(true);
 				}
-				mSelect.setDown(false);
-				mYDrawMarker.setVisible(false);
-				mMap.removeMapMouseMoveHandler(mouseMove);
+				if ( allowEditing ) {
+					mSelect.setDown(false);
+					mYDrawMarker.setVisible(false);
+					mMap.removeMapMouseMoveHandler(mouseMove);
+				}
 				mDraw = false;
 				mapTool.setEditingEnabled(allowEditing);
 				if ( !allowEditing ) {
