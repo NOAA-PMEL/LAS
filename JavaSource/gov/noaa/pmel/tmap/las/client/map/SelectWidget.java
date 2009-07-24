@@ -54,12 +54,16 @@ public class SelectWidget extends Composite {
     private String toolType = "xy";
     
     String imageURL;
+    
+    // Try turning off the editing on the mouse up and see if it works ok.
+    boolean allowEditing = false;
     /**
      * Constructs a selectWidget
      * @param refMap the reference map to which the widget is attached
      */   
-	public SelectWidget (ReferenceMap refMap) {
+	public SelectWidget (ReferenceMap refMap, boolean allowEditing) {
 		this.refMap = refMap;
+		this.allowEditing = allowEditing;
         imageURL = Util.getImageURL();
 		mSelect = new ToggleButton("Select");
 		
@@ -287,6 +291,7 @@ public class SelectWidget extends Composite {
 				toolType = "pt";
 			}
 		}
+		mapTool.setEditingEnabled(allowEditing);
 	}
 	/**
 	 * Gets the current tool setting.
@@ -322,6 +327,10 @@ public class SelectWidget extends Composite {
 		Marker seMarker;
 		Marker sw_seMarker;
 		Marker centerMarker;
+		
+		// Polygon to mark the previous selection if editing is not allowed.
+		Polygon shadow = null;
+		
 		/**
 		 * Construct a marker tool with the default colors, weights and opacities.
 		 * @param dataBounds the valid data region
@@ -509,6 +518,7 @@ public class SelectWidget extends Composite {
 		 */
 		MarkerMouseDownHandler markerMouseDownHandler = new MarkerMouseDownHandler() {
 			public void onMouseDown(MarkerMouseDownEvent event) {
+				shadow = new Polygon(polygonPoints, shadowColor, strokeWeight, strokeOpacity, fillColor, fillOpacity);
 				mDraw = true;
 				LatLng click = mXYDrawMarker.getLatLng();
 				mapTool.setClick(click);
@@ -516,6 +526,9 @@ public class SelectWidget extends Composite {
 				LatLngBounds bounds = LatLngBounds.newInstance(click, click);
 				setSelectionBounds(bounds, false, true);
 				mMap.setDraggable(false);
+				if ( !allowEditing ) {
+					mMap.addOverlay(shadow);
+				}
 			}
 		};
 		
@@ -535,7 +548,12 @@ public class SelectWidget extends Composite {
 				mXYDrawMarker.setVisible(false);
 				mMap.removeMapMouseMoveHandler(mouseMove);
 				mDraw = false;
-				mapTool.setEditingEnabled(true);
+				mapTool.setEditingEnabled(allowEditing);
+				if ( !allowEditing ) {
+					if ( shadow != null ) {
+						mMap.removeOverlay(shadow);
+					}
+				}
 			}
 
 		};
@@ -831,7 +849,7 @@ public class SelectWidget extends Composite {
 			sw_seMarker.setLatLng(LatLng.newInstance(sw.getLatitude(), rectBounds.getCenter().getLongitude()));
 			centerMarker.setLatLng(rectBounds.getCenter());
 			if ( show ) {
-				setEditingEnabled(true);
+				setEditingEnabled(allowEditing);
 			} else {
 			    setEditingEnabled(false);
 			}
@@ -857,6 +875,7 @@ public class SelectWidget extends Composite {
 		Marker sMarker;
 		LatLng polylinePoints[] = new LatLng[3];
 		Polyline polyline;
+		Polyline shadow;
 		Marker mYDrawMarker;
 		boolean mDraw = false;
 		/**
@@ -949,6 +968,7 @@ public class SelectWidget extends Composite {
 		 */
 		MarkerMouseDownHandler markerMouseDownHandler = new MarkerMouseDownHandler() {
 			public void onMouseDown(MarkerMouseDownEvent event) {
+				shadow = new Polyline(polylinePoints, shadowColor, strokeWeight, strokeOpacity);
 				mDraw = true;
 				LatLng click = mYDrawMarker.getLatLng();
 				mapTool.setClick(click);
@@ -956,6 +976,9 @@ public class SelectWidget extends Composite {
 				LatLngBounds bounds = LatLngBounds.newInstance(click, click);
 				setSelectionBounds(bounds, false, true);
 				mMap.setDraggable(false);
+				if ( !allowEditing ) {
+					mMap.addOverlay(shadow);
+				}
 			}		
 		};
 		/**
@@ -973,7 +996,12 @@ public class SelectWidget extends Composite {
 				mYDrawMarker.setVisible(false);
 				mMap.removeMapMouseMoveHandler(mouseMove);
 				mDraw = false;
-				mapTool.setEditingEnabled(true);
+				mapTool.setEditingEnabled(allowEditing);
+				if ( !allowEditing ) {
+					if ( shadow != null ) {
+						mMap.removeOverlay(shadow);
+					}
+				}
 				
 			}
 		};
@@ -1189,7 +1217,7 @@ public class SelectWidget extends Composite {
 			nMarker.setLatLng(LatLng.newInstance(ne.getLatitude(), rectBounds.getCenter().getLongitude()));
 			cMarker.setLatLng(rectBounds.getCenter());
 			if ( show ) {
-				setEditingEnabled(true);
+				setEditingEnabled(allowEditing);
 			} else {
 			    setEditingEnabled(false);
 			}
@@ -1216,6 +1244,7 @@ public class SelectWidget extends Composite {
 	public class XMapTool extends MapTool {
 		LatLng polylinePoints[] = new LatLng[3];
 		Polyline polyline;
+		Polyline shadow;
 		Marker mYDrawMarker;
 		boolean mDraw = false;
 		Marker eMarker;
@@ -1386,7 +1415,7 @@ public class SelectWidget extends Composite {
 			eMarker.setLatLng(LatLng.newInstance(rectBounds.getCenter().getLatitude(), ne.getLongitude()));
 			cMarker.setLatLng(rectBounds.getCenter());
 			if ( show ) {
-				setEditingEnabled(true);
+				setEditingEnabled(allowEditing);
 			} else {
 			    setEditingEnabled(false);
 			}
@@ -1500,6 +1529,7 @@ public class SelectWidget extends Composite {
 		 */
 		MarkerMouseDownHandler markerMouseDownHandler = new MarkerMouseDownHandler() {
 			public void onMouseDown(MarkerMouseDownEvent event) {
+				shadow = new Polyline(polylinePoints, shadowColor, strokeWeight, strokeOpacity);
 				mDraw = true;
 				LatLng click = mYDrawMarker.getLatLng();
 				mapTool.setClick(click);
@@ -1507,6 +1537,9 @@ public class SelectWidget extends Composite {
 				LatLngBounds bounds = LatLngBounds.newInstance(click, click);
 				setSelectionBounds(bounds, false, true);
 				mMap.setDraggable(false);
+				if ( !allowEditing ) {
+					mMap.addOverlay(shadow);
+				}
 			}		
 		};
 		/**
@@ -1524,8 +1557,12 @@ public class SelectWidget extends Composite {
 				mYDrawMarker.setVisible(false);
 				mMap.removeMapMouseMoveHandler(mouseMove);
 				mDraw = false;
-				mapTool.setEditingEnabled(true);
-				
+				mapTool.setEditingEnabled(allowEditing);
+				if ( !allowEditing ) {
+					if ( shadow != null ) {
+						mMap.removeOverlay(shadow);
+					}
+				}
 			}
 		};
 		/**
