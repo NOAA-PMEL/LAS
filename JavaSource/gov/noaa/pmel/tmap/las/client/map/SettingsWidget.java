@@ -126,6 +126,7 @@ public class SettingsWidget extends Composite {
 			} else {
 				// Do something else with the panel layout
 			}
+			refMap.turnOffSelectButton();
 		}	
 	};
 	public ClickListener operationsClickListener = new ClickListener() {
