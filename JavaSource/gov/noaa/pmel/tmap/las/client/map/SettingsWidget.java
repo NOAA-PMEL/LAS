@@ -56,7 +56,7 @@ public class SettingsWidget extends Composite {
 	 */
 	Grid vertical = new Grid(5,1);
 
-	public SettingsWidget(String title, LatLng center, int zoom, int xpix, int ypix, String panelID, String operationID, RPCServiceAsync rpcService, String layout) {
+	public SettingsWidget(String title, LatLng center, int zoom, int xpix, int ypix, String panelID, String operationID, RPCServiceAsync rpcService, String layout, boolean allowEditing) {
 		this.operationID = operationID;
 		this.rpcService = rpcService;
 		this.layout = layout;
@@ -79,7 +79,7 @@ public class SettingsWidget extends Composite {
 		datasetAndOptions = new HorizontalPanel();
 		datasetAndOptions.add(datasetButton);
 		datasetAndOptions.add(optionsButton);
-		refMap = new ReferenceMap(center, zoom, xpix, ypix);
+		refMap = new ReferenceMap(center, zoom, xpix, ypix, allowEditing);
 		operations = new OperationsWidget();
 		operations.addClickListener(operationsClickListener);
 		if ( layout.equals("button") ) {

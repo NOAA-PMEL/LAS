@@ -20,6 +20,7 @@ public abstract class MapTool {
 	LatLngBounds selectionBounds;
 	LatLng click;
 	String strokeColor = "#FF0000";
+	String shadowColor = "#FF00FF";
 	int strokeWeight = 3;
 	float strokeOpacity = 1.0f;
 	String fillColor = "#FF0000";

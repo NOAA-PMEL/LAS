@@ -95,7 +95,7 @@ public class ReferenceMap extends Composite {
 	 * 
 	 * 
 	 */
-	public ReferenceMap (LatLng center, int zoom, int width, int height) {
+	public ReferenceMap (LatLng center, int zoom, int width, int height, boolean allowEditing) {
         panel = new DockPanel();
         topControls = new Grid(2,2);
         bottomControls = new HorizontalPanel();
@@ -120,7 +120,7 @@ public class ReferenceMap extends Composite {
 		mWidth = width;
 		mHeight = height;
 		mMap.setSize(String.valueOf(mWidth)+"px", String.valueOf(mHeight)+"px");
-		selectWidget = new SelectWidget(this);
+		selectWidget = new SelectWidget(this, allowEditing);
 		textWidget = new LatLonWidget();
 		textWidget.addSouthChangeListener(southChangeListener);
 		textWidget.addNorthChangeListener(northChangeListener);
