@@ -12,6 +12,7 @@ import gov.noaa.pmel.tmap.las.exception.LASException;
 import gov.noaa.pmel.tmap.las.jdom.LASConfig;
 import gov.noaa.pmel.tmap.las.product.server.LASConfigPlugIn;
 import gov.noaa.pmel.tmap.las.util.Category;
+import gov.noaa.pmel.tmap.las.util.ContainerComparator;
 import gov.noaa.pmel.tmap.las.util.Grid;
 import gov.noaa.pmel.tmap.las.util.Operation;
 import gov.noaa.pmel.tmap.las.util.Option;
@@ -19,6 +20,7 @@ import gov.noaa.pmel.tmap.las.util.Variable;
 import gov.noaa.pmel.tmap.las.util.View;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 
@@ -77,6 +79,7 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
 		} catch (JDOMException e) {
 			throw new RPCException(e.getMessage());
 		}
+		Collections.sort(categories, new ContainerComparator("name"));
 		CategorySerializable[] cats;
 		try {
 			cats = lasConfig.getCategorySerializable(categories);
