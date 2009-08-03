@@ -189,7 +189,7 @@ public class VizGalPanel extends Composite {
 		//grid.getCellFormatter().setHeight(0, 0, panelHeader);
 		datasetLabel = new Label();
 
-		top = new Grid(1,2);
+		top = new Grid(1,3);
 
 		String title = "Settings";
 		settingsButton = new SettingsWidget(title, LatLng.newInstance(0.0, 0.0), 1, 256, 360, ID, op, rpcService, "button", allowEditing);
@@ -485,6 +485,7 @@ public class VizGalPanel extends Composite {
 									retry.addClickListener(new ClickListener() {
 										public void onClick(Widget sender) {
 											// Put the selection widget back in place...
+											grid.setWidget(1, 0, new HTML("Retrying..."));
 											grid.setWidget(2, 0, getCompareWidget());
 											// Just send the same request again to see if it works the second time.
 											String url = productServer+"?xml="+URL.encode(lasRequest.getXMLText());
@@ -586,7 +587,7 @@ public class VizGalPanel extends Composite {
 			grid.setWidget(2, 0, tandzWidgets);
 			setCompareAxisVisible(false);
 			if ( !singlePanel ) {
-				top.add(revert);
+				top.setWidget(0, 2, revert);
 			}
 		} else {
 			grid.setWidget(2, 0, getCompareWidget());
