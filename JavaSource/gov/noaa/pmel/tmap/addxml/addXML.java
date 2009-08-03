@@ -43,6 +43,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -95,12 +96,14 @@ import thredds.catalog.ThreddsMetadata.Variables;
 import thredds.catalog2.ThreddsMetadata;
 
 import ucar.nc2.Attribute;
+import ucar.nc2.constants.FeatureType;
 import ucar.nc2.dataset.CoordinateAxis;
 import ucar.nc2.dataset.CoordinateAxis1D;
 import ucar.nc2.dataset.CoordinateAxis2D;
 import ucar.nc2.dataset.NetcdfDataset;
 import ucar.nc2.dods.DODSNetcdfFile;
 import ucar.nc2.dt.GridDatatype;
+import ucar.nc2.dt.TypedDatasetFactory;
 import ucar.nc2.dt.grid.GeoGrid;
 import ucar.nc2.dt.grid.GridCoordSys;
 import ucar.nc2.dt.grid.GridDataset;
@@ -1337,11 +1340,18 @@ public class addXML {
 			}
 		}
 
-		GridDataset gridDs = new GridDataset(ncds);
+		GridDataset gridDs = null;
+		StringBuilder error = new StringBuilder();
+		try {
+			gridDs = (GridDataset) TypedDatasetFactory.open(FeatureType.GRID, ncds, null, error);
+		} catch (IOException e) {
+			log.error("I/O Error converting data source to GridDataset");
+		}
+			//new GridDataset(ncds);
 		if (name == null) {
 			name = url;
 		}
-
+        log.debug("TypedDatasetFactory message " + error.toString());
 		String elementName;
 		if ( esg ) {
 			elementName = threddsDataset.getID();
@@ -1357,7 +1367,13 @@ public class addXML {
 		dataset.setElement(elementName);
 		dataset.setUrl(url);
 
-		List grids = gridDs.getGrids();
+		List grids = new ArrayList();
+		if ( gridDs != null ) {
+		    grids = gridDs.getGrids();
+		}
+		if ( grids.size() == 0 ) {
+			grids = gridDs.getGridsets();
+		}
 
 		if (grids.size() == 0) {
 			dataset.setComment(

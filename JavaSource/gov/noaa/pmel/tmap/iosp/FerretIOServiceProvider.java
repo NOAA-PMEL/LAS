@@ -781,4 +781,22 @@ public class FerretIOServiceProvider implements IOServiceProvider {
 		return null;
 	}
 
+	@Override
+	public String getFileTypeDescription() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String getFileTypeId() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String getFileTypeVersion() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }
