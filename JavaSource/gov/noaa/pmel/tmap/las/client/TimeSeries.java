@@ -1,5 +1,6 @@
 package gov.noaa.pmel.tmap.las.client;
 
+import gov.noaa.pmel.tmap.las.client.laswidget.DateTimeWidget;
 import gov.noaa.pmel.tmap.las.client.laswidget.LASDateWidget;
 import gov.noaa.pmel.tmap.las.client.laswidget.LASRequestWrapper;
 import gov.noaa.pmel.tmap.las.client.laswidget.OptionsWidget;
@@ -51,9 +52,8 @@ public class TimeSeries implements EntryPoint {
 		
 		ListBox timeSeriesList = new ListBox();
 		TimeSeriesMap timeSeriesMap = new TimeSeriesMap();
-		LASDateWidget start_date;
 		CheckBoxPanel variables = new CheckBoxPanel(this);
-		LASDateWidget dates;
+		DateTimeWidget dates = new DateTimeWidget();
 		HTML output = new HTML();
 		ListBox z = new ListBox();
 		PopupPanel options_panel = new PopupPanel(true);
@@ -77,9 +77,10 @@ public class TimeSeries implements EntryPoint {
 					cat = categories.get(id);
 					timeSeriesMap.update(categories.get(id));
 					variables.setVisible(false);
-					dates.hide();
+					dates.setVisible(false);
 					dates_label.setVisible(false);
 					output.setVisible(false);
+					z_label.setVisible(false);
 					z.setVisible(false);
 				}
 			});
@@ -96,13 +97,16 @@ public class TimeSeries implements EntryPoint {
 			RootPanel.get("z_label").add(z_label);
 			z_label.setVisible(false);
 			z_label.setStyleName("small-banner");
-			dates = dates.init("1990-01-01", "2000-01-01", 0, 0, 0, 0);
-			dates.render("dates", "YMDT", "YMDT");
+			dates.init("1990-01-01", "2000-01-01", 1, "YMDT", false);
+			dates.setRange(true);
+			RootPanel.get("dates").add(dates);
 			RootPanel.get("dates_label").add(dates_label);
-			dates.hide();
+			dates.setVisible(false);
 			dates_label.setVisible(false);
 			dates_label.setStyleName("small-banner");
 			RootPanel.get("output").add(output);
+			options_widget = new OptionsWidget(rpcService, "Plot_1D", this, this);
+            options_panel.add(options_widget);
 			//this.setElement(RootPanel.get().getElement());
 		}
 		AsyncCallback timeSeriesCallback = new AsyncCallback() {
@@ -141,7 +145,7 @@ public class TimeSeries implements EntryPoint {
 					Marker marker = (Marker) sender;
 					String gridID = timeSeriesMap.getCurrentGridID();
 					showVariables(gridID, marker);
-					dates.hide();
+					dates.setVisible(false);
 					dates_label.setVisible(false);
 					variables.hideButtons();
 					z.setVisible(false);
@@ -158,10 +162,8 @@ public class TimeSeries implements EntryPoint {
 				String hi = tAxis.getHi();
 				String lo = tAxis.getLo();
 				int delta = (int) tAxis.getMinuteInterval();
-				dates = dates.init(lo, hi, delta, 0, 0, 0);
-				dates.render("dates", "YMDT", "YMDT");
-				dates.show();
-				dates_label.setVisible(true);
+				dates.init(lo, hi, delta, "YMDT", false);
+				dates.setVisible(true);
 				AxisSerializable zAxis = cat.getVariable(varID).getGrid().getZAxis();
 				if ( zAxis != null ) {
 					z.clear();
@@ -261,7 +263,7 @@ public class TimeSeries implements EntryPoint {
 						lasRequest.setRange("z", zval, zval, 0);
 					}
 
-					lasRequest.setRange("t", dates.getDate1_Ferret(), dates.getDate2_Ferret(), 0);
+					lasRequest.setRange("t", dates.getFerretDateLo(), dates.getFerretDateHi(), 0);
 					GridSerializable grid = cat.getVariable(selectedVariables.get(0)).getGrid();
 					AxisSerializable xAxis = grid.getXAxis();
 					AxisSerializable yAxis = grid.getYAxis();
@@ -295,12 +297,6 @@ public class TimeSeries implements EntryPoint {
 					*/
 					Window.open(url,"data","resizable=yes,scrollbars=yes,status=yes"); 
 				} else if ( button_name.equals(PLOT_OPTIONS_BUTTON_NAME) ) {
-					if ( options_widget == null ) {
-                        options_widget = new OptionsWidget(this);
-                        options_widget.setOptions(rpcService, "Options_1D_7");
-                        options_state = options_widget.getState();
-                        options_panel.add(options_widget);
-					}
 					options_state = options_widget.getState();
                     options_panel.center();
 				} else if ( button_name.equals("OK") ) {
