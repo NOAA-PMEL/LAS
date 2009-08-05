@@ -335,15 +335,7 @@ public class DateTimeWidget extends Composite {
 	}
 
 	public void setVisible(boolean b) {
-		lo_year.setVisible(b);
-		lo_month.setVisible(b);
-		lo_day.setVisible(b);
-		lo_hour.setVisible(b);
-
-		hi_year.setVisible(b);
-		hi_month.setVisible(b);
-		hi_day.setVisible(b);
-		hi_hour.setVisible(b);
+		dateTimeWidget.setVisible(b);
 	}
 	public String getFerretDateLo() {
 		StringBuffer date = new StringBuffer();
