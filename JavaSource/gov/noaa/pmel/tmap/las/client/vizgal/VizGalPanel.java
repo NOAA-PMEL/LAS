@@ -203,7 +203,7 @@ public class VizGalPanel extends Composite {
 
 		top.setWidget(0, 0, datasetLabel);
 		//top.getCellFormatter().setWordWrap(0, 0, false);
-		top.getColumnFormatter().setWidth(0, "80%");
+		top.getColumnFormatter().setWidth(0, "85%");
 		top.getCellFormatter().setHeight(0, 0, "30px");
 		top.getColumnFormatter().addStyleName(1, "las-align-right");
 		

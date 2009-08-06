@@ -496,14 +496,14 @@ public final class ProductServerAction extends LASAction {
             synchronized(productServerRunner) {
                 try {
                     long timeout = productServerRunner.getProgressTimeout()*1000;
-                    log.info("Starting ProductServerRunner thread with timeout="+timeout);
+                    log.debug("Starting ProductServerRunner thread with timeout="+timeout);
                     if ( timeout > 0 && JSESSIONID != null && !JSESSIONID.equals("") ) {
                         // Timeout set in the request.
                         // Wait until timeout elapses then send progress page.
                         productServerRunner.join(timeout);
                     } else {
                         // No time out set or no session id.  Wait forever.
-                    	log.info("Starting thread with no progress timeout limit.");
+                    	log.debug("Starting thread with no progress timeout limit.");
                         productServerRunner.join();
                     }   
                 } catch (Exception e) {
