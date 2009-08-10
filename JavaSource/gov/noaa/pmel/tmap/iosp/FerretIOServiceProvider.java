@@ -390,8 +390,8 @@ public class FerretIOServiceProvider implements IOServiceProvider {
         }
         // This creates the data variables form the Ferret XML description.
         // Only do this if the file does not come from an expression...
-        log.debug("looking at raf="+raf.getLocation());
-        if ( !raf.getLocation().contains("_expr_") ) {
+       
+        
         	log.debug("Found "+data.size()+" 'datasets'");
         	for (Iterator dataIt = data.iterator(); dataIt.hasNext();) {
         		Element dataset = (Element) dataIt.next();
@@ -473,11 +473,15 @@ public class FerretIOServiceProvider implements IOServiceProvider {
         					}
         				}
         				dataVar.addAttribute(new Attribute("dataset", dataset_name));
-        				ncfile.addVariable(null, dataVar);
+        				Variable vvv = ncfile.findVariable(dataVar.getName());
+        				// Don't add the second variable of the same name...
+        				if ( vvv != null ) {
+        				    ncfile.addVariable(null, dataVar);
+        				}
         			}
         		}
         	}
-        }
+        
         ncfile.addAttribute(null, new Attribute("Conventions", "COARDS"));
         
         log.debug("parsing complete.");
