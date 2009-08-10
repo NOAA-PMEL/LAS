@@ -111,7 +111,9 @@ public class OperationsWidget extends StackPanel {
 					String view = (String) viewIt.next();
 					if ( !op.getName().contains("omparison") ) {
 						Map<String, String> attrs = op.getAttributes();
-						if ( attrs != null && attrs.containsKey("default")) {
+						
+						// A hack to allow zoomable plots in the old interface and use Plot_2D_XY here.
+						if ( (attrs != null && attrs.containsKey("default") && !op.getID().equals("XY_zoomable_image"))|| op.getID().equals("Plot_2D_XY")) {
 							if ( view.equals("xy") && (intervals.contains("x") && intervals.contains("y"))) {	
 								if (!hasXYMap) {
 									xyMap.clear();
