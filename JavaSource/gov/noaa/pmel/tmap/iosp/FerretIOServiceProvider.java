@@ -393,6 +393,7 @@ public class FerretIOServiceProvider implements IOServiceProvider {
        
         
         	log.debug("Found "+data.size()+" 'datasets'");
+        	ArrayList<String> varNAMES = new ArrayList<String>();
         	for (Iterator dataIt = data.iterator(); dataIt.hasNext();) {
         		Element dataset = (Element) dataIt.next();
         		String dataset_name = dataset.getAttributeValue("name");
@@ -402,67 +403,57 @@ public class FerretIOServiceProvider implements IOServiceProvider {
         			String name = var.getAttributeValue("name");
         			if ( !globalNames.contains(name)) {
         				// Name conflicts should handled in the Ferret script that defines the dataset.
-        				Variable dataVar = new Variable(ncfile, null, null, name);
-        				List var_axes = var.getChild("grid").getChild("axes").getChildren();
-        				ArrayList<Dimension> varDims = new ArrayList<Dimension>();
-        				String direction = "";
-        				for (Iterator axisIt = var_axes.iterator(); axisIt.hasNext();) {
-        					Element axis = (Element) axisIt.next();
-        					String axisName = axis.getTextNormalize();
-        					for (Iterator dimIt = allDims.iterator(); dimIt.hasNext();) {
-        						Dimension dim = (Dimension) dimIt.next();
-        						if ( dim.getName().equals(axisName) ) { 
-        							varDims.add(dim);
-        							direction = direction + directions.get(dim.getName());
+        				// This is not working...  This hack will keep it from crashing -- I think.
+        				if ( !varNAMES.contains(name) ) {
+        					varNAMES.add(name);
+
+        					Variable dataVar = new Variable(ncfile, null, null, name);
+        					List var_axes = var.getChild("grid").getChild("axes").getChildren();
+        					ArrayList<Dimension> varDims = new ArrayList<Dimension>();
+        					String direction = "";
+        					for (Iterator axisIt = var_axes.iterator(); axisIt.hasNext();) {
+        						Element axis = (Element) axisIt.next();
+        						String axisName = axis.getTextNormalize();
+        						for (Iterator dimIt = allDims.iterator(); dimIt.hasNext();) {
+        							Dimension dim = (Dimension) dimIt.next();
+        							if ( dim.getName().equals(axisName) ) { 
+        								varDims.add(dim);
+        								direction = direction + directions.get(dim.getName());
+        							}
         						}
         					}
-        				}
-        				Collections.reverse(varDims);
-        				dataVar.setDimensions(varDims);
-        				dataVar.addAttribute(new Attribute("direction", direction));
-        				dataVar.setDataType(DataType.FLOAT);
-        				/*
-        				 * Old Ferrets write attributes like this:
-        				 * <var name="SITE_NETCODE">
-        				 *     <long_name>Contributing radar site network affiliation code</long_name>
-        				 *     <_FillValue>-1.000000E+34</_FillValue>
-        				 *     <missing_value>-1.000000E+34</missing_value>
-        				 *     <ferret_datatype>STRING</ferret_datatype>
-        				 *     <infile_datatype>CHAR</infile_datatype>
-        				 *     
-        				 *     ....
-        				 *     
-        				 * New Ferrets (v6.1.1+) write them like this:
-        				 * 
-        				 * <var name="SITE_NETCODE">
-        				 *    <attribute name="long_name" value="Contributing radar site network affiliation code" />
-        				 *    <attribute name="_FillValue" value="-1.000000E+34" />
-        				 *    <attribute name="missing_value" value="-1.000000E+34" />
-        				 *    <attribute name="ferret_datatype" value="STRING" />
-        				 *    <attribute name="infile_datatype" value="CHAR />
-        				 * 
-        				 * Try the new way first...
-        				 */
-        				List attributeElements = var.getChildren("attribute");
-        				if ( attributeElements != null && attributeElements.size() > 0 ) {
-        					for (Iterator attIt = attributeElements.iterator(); attIt.hasNext();) {
-        						Element attribute = (Element) attIt.next();
-        						String value = attribute.getAttributeValue("value");
-        						String aname = attribute.getAttributeValue("name");
-        						try {
-        							float fvalue = Float.valueOf(value).floatValue();
-        							dataVar.addAttribute(new Attribute(aname, new Float(fvalue)));
-        						} catch (NumberFormatException nfe) {
-        							dataVar.addAttribute(new Attribute(aname, value));
-        						}
-        					}
-        				} else {
-        					List attributes = var.getChildren();
-        					for (Iterator attIt = attributes.iterator(); attIt.hasNext();) {
-        						Element attribute = (Element) attIt.next();
-        						if ( !attribute.getName().equals("grid") ) {
-        							String value = attribute.getTextNormalize();
-        							String aname = attribute.getName();
+        					Collections.reverse(varDims);
+        					dataVar.setDimensions(varDims);
+        					dataVar.addAttribute(new Attribute("direction", direction));
+        					dataVar.setDataType(DataType.FLOAT);
+        					/*
+        					 * Old Ferrets write attributes like this:
+        					 * <var name="SITE_NETCODE">
+        					 *     <long_name>Contributing radar site network affiliation code</long_name>
+        					 *     <_FillValue>-1.000000E+34</_FillValue>
+        					 *     <missing_value>-1.000000E+34</missing_value>
+        					 *     <ferret_datatype>STRING</ferret_datatype>
+        					 *     <infile_datatype>CHAR</infile_datatype>
+        					 *     
+        					 *     ....
+        					 *     
+        					 * New Ferrets (v6.1.1+) write them like this:
+        					 * 
+        					 * <var name="SITE_NETCODE">
+        					 *    <attribute name="long_name" value="Contributing radar site network affiliation code" />
+        					 *    <attribute name="_FillValue" value="-1.000000E+34" />
+        					 *    <attribute name="missing_value" value="-1.000000E+34" />
+        					 *    <attribute name="ferret_datatype" value="STRING" />
+        					 *    <attribute name="infile_datatype" value="CHAR />
+        					 * 
+        					 * Try the new way first...
+        					 */
+        					List attributeElements = var.getChildren("attribute");
+        					if ( attributeElements != null && attributeElements.size() > 0 ) {
+        						for (Iterator attIt = attributeElements.iterator(); attIt.hasNext();) {
+        							Element attribute = (Element) attIt.next();
+        							String value = attribute.getAttributeValue("value");
+        							String aname = attribute.getAttributeValue("name");
         							try {
         								float fvalue = Float.valueOf(value).floatValue();
         								dataVar.addAttribute(new Attribute(aname, new Float(fvalue)));
@@ -470,13 +461,24 @@ public class FerretIOServiceProvider implements IOServiceProvider {
         								dataVar.addAttribute(new Attribute(aname, value));
         							}
         						}
+        					} else {
+        						List attributes = var.getChildren();
+        						for (Iterator attIt = attributes.iterator(); attIt.hasNext();) {
+        							Element attribute = (Element) attIt.next();
+        							if ( !attribute.getName().equals("grid") ) {
+        								String value = attribute.getTextNormalize();
+        								String aname = attribute.getName();
+        								try {
+        									float fvalue = Float.valueOf(value).floatValue();
+        									dataVar.addAttribute(new Attribute(aname, new Float(fvalue)));
+        								} catch (NumberFormatException nfe) {
+        									dataVar.addAttribute(new Attribute(aname, value));
+        								}
+        							}
+        						}
         					}
-        				}
-        				dataVar.addAttribute(new Attribute("dataset", dataset_name));
-        				Variable vvv = ncfile.findVariable(dataVar.getName());
-        				// Don't add the second variable of the same name...
-        				if ( vvv != null ) {
-        				    ncfile.addVariable(null, dataVar);
+        					dataVar.addAttribute(new Attribute("dataset", dataset_name));
+        					ncfile.addVariable(null, dataVar);
         				}
         			}
         		}
