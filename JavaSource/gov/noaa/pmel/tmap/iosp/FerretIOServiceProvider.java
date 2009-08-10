@@ -390,6 +390,7 @@ public class FerretIOServiceProvider implements IOServiceProvider {
         }
         // This creates the data variables form the Ferret XML description.
         // Only do this if the file does not come from an expression...
+        log.debug("looking at raf="+raf.getLocation());
         if ( !raf.getLocation().contains("_expr_") ) {
         	log.debug("Found "+data.size()+" 'datasets'");
         	for (Iterator dataIt = data.iterator(); dataIt.hasNext();) {
