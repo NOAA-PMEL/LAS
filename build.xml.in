@@ -96,6 +96,7 @@
        <fileset dir="WebContent">
           <include name="examples/**"/>
           <include name="TimeSeries/**"/>
+          <include name="VizGal/**"/>
           <include name="classes/**"/>
           <include name="productserver/**"/>
           <include name="fds/**"/>
@@ -219,7 +220,7 @@
     <copy file="${addxml-src}/gov/noaa/pmel/tmap/addxml/log4j.xml" tofile="${addxml-build}/log4j.xml"/>
     <unjar src="WebContent/WEB-INF/lib/joda-time-1.5.2.jar" dest="${addxml-build}"/>
     <unjar src="WebContent/WEB-INF/lib/JSAP_1.03a.jar" dest="${addxml-build}"/>
-    <unjar src="lib/toolsUI-2.2.20.jar" dest="${addxml-build}"/>
+    <unjar src="lib/toolsUI-4.0.jar" dest="${addxml-build}"/>
     <javac srcdir="${addxml-src}/gov/noaa/pmel/tmap/addxml:${addxml-src}/org/joda" destdir="${addxml-build}">
       <classpath>
         <fileset id="addxml-libs" dir="WebContent/WEB-INF/lib">
