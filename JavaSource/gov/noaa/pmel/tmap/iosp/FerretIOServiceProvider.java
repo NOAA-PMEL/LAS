@@ -389,91 +389,93 @@ public class FerretIOServiceProvider implements IOServiceProvider {
             }
         }
         // This creates the data variables form the Ferret XML description.
-        
-        log.debug("Found "+data.size()+" 'datasets'");
-        for (Iterator dataIt = data.iterator(); dataIt.hasNext();) {
-            Element dataset = (Element) dataIt.next();
-            String dataset_name = dataset.getAttributeValue("name");
-            List vars = dataset.getChildren("var");
-            for (Iterator varIt = vars.iterator(); varIt.hasNext();) {
-                Element var = (Element) varIt.next();
-                String name = var.getAttributeValue("name");
-                if ( !globalNames.contains(name)) {
-                	// Name conflicts should handled in the Ferret script that defines the dataset.
-                    Variable dataVar = new Variable(ncfile, null, null, name);
-                    List var_axes = var.getChild("grid").getChild("axes").getChildren();
-                    ArrayList<Dimension> varDims = new ArrayList<Dimension>();
-                    String direction = "";
-                    for (Iterator axisIt = var_axes.iterator(); axisIt.hasNext();) {
-                        Element axis = (Element) axisIt.next();
-                        String axisName = axis.getTextNormalize();
-                        for (Iterator dimIt = allDims.iterator(); dimIt.hasNext();) {
-                            Dimension dim = (Dimension) dimIt.next();
-                            if ( dim.getName().equals(axisName) ) { 
-                                varDims.add(dim);
-                                direction = direction + directions.get(dim.getName());
-                            }
-                        }
-                    }
-                    Collections.reverse(varDims);
-                    dataVar.setDimensions(varDims);
-                    dataVar.addAttribute(new Attribute("direction", direction));
-                    dataVar.setDataType(DataType.FLOAT);
-                    /*
-                     * Old Ferrets write attributes like this:
-                     * <var name="SITE_NETCODE">
-                     *     <long_name>Contributing radar site network affiliation code</long_name>
-                     *     <_FillValue>-1.000000E+34</_FillValue>
-                     *     <missing_value>-1.000000E+34</missing_value>
-                     *     <ferret_datatype>STRING</ferret_datatype>
-                     *     <infile_datatype>CHAR</infile_datatype>
-                     *     
-                     *     ....
-                     *     
-                     * New Ferrets (v6.1.1+) write them like this:
-                     * 
-                     * <var name="SITE_NETCODE">
-                     *    <attribute name="long_name" value="Contributing radar site network affiliation code" />
-                     *    <attribute name="_FillValue" value="-1.000000E+34" />
-                     *    <attribute name="missing_value" value="-1.000000E+34" />
-                     *    <attribute name="ferret_datatype" value="STRING" />
-                     *    <attribute name="infile_datatype" value="CHAR />
-                     * 
-                     * Try the new way first...
-                     */
-                    List attributeElements = var.getChildren("attribute");
-                    if ( attributeElements != null && attributeElements.size() > 0 ) {
-                    	for (Iterator attIt = attributeElements.iterator(); attIt.hasNext();) {
-                    		Element attribute = (Element) attIt.next();
-                    		String value = attribute.getAttributeValue("value");
-                			String aname = attribute.getAttributeValue("name");
-                			try {
-                				float fvalue = Float.valueOf(value).floatValue();
-                				dataVar.addAttribute(new Attribute(aname, new Float(fvalue)));
-                			} catch (NumberFormatException nfe) {
-                				dataVar.addAttribute(new Attribute(aname, value));
-                			}
-                    	}
-                    } else {
-                    	List attributes = var.getChildren();
-                    	for (Iterator attIt = attributes.iterator(); attIt.hasNext();) {
-                    		Element attribute = (Element) attIt.next();
-                    		if ( !attribute.getName().equals("grid") ) {
-                    			String value = attribute.getTextNormalize();
-                    			String aname = attribute.getName();
-                    			try {
-                    				float fvalue = Float.valueOf(value).floatValue();
-                    				dataVar.addAttribute(new Attribute(aname, new Float(fvalue)));
-                    			} catch (NumberFormatException nfe) {
-                    				dataVar.addAttribute(new Attribute(aname, value));
-                    			}
-                    		}
-                    	}
-                    }
-                    dataVar.addAttribute(new Attribute("dataset", dataset_name));
-                    ncfile.addVariable(null, dataVar);
-                }
-            }
+        // Only do this if the file does not come from an expression...
+        if ( !raf.getLocation().contains("_expr_") ) {
+        	log.debug("Found "+data.size()+" 'datasets'");
+        	for (Iterator dataIt = data.iterator(); dataIt.hasNext();) {
+        		Element dataset = (Element) dataIt.next();
+        		String dataset_name = dataset.getAttributeValue("name");
+        		List vars = dataset.getChildren("var");
+        		for (Iterator varIt = vars.iterator(); varIt.hasNext();) {
+        			Element var = (Element) varIt.next();
+        			String name = var.getAttributeValue("name");
+        			if ( !globalNames.contains(name)) {
+        				// Name conflicts should handled in the Ferret script that defines the dataset.
+        				Variable dataVar = new Variable(ncfile, null, null, name);
+        				List var_axes = var.getChild("grid").getChild("axes").getChildren();
+        				ArrayList<Dimension> varDims = new ArrayList<Dimension>();
+        				String direction = "";
+        				for (Iterator axisIt = var_axes.iterator(); axisIt.hasNext();) {
+        					Element axis = (Element) axisIt.next();
+        					String axisName = axis.getTextNormalize();
+        					for (Iterator dimIt = allDims.iterator(); dimIt.hasNext();) {
+        						Dimension dim = (Dimension) dimIt.next();
+        						if ( dim.getName().equals(axisName) ) { 
+        							varDims.add(dim);
+        							direction = direction + directions.get(dim.getName());
+        						}
+        					}
+        				}
+        				Collections.reverse(varDims);
+        				dataVar.setDimensions(varDims);
+        				dataVar.addAttribute(new Attribute("direction", direction));
+        				dataVar.setDataType(DataType.FLOAT);
+        				/*
+        				 * Old Ferrets write attributes like this:
+        				 * <var name="SITE_NETCODE">
+        				 *     <long_name>Contributing radar site network affiliation code</long_name>
+        				 *     <_FillValue>-1.000000E+34</_FillValue>
+        				 *     <missing_value>-1.000000E+34</missing_value>
+        				 *     <ferret_datatype>STRING</ferret_datatype>
+        				 *     <infile_datatype>CHAR</infile_datatype>
+        				 *     
+        				 *     ....
+        				 *     
+        				 * New Ferrets (v6.1.1+) write them like this:
+        				 * 
+        				 * <var name="SITE_NETCODE">
+        				 *    <attribute name="long_name" value="Contributing radar site network affiliation code" />
+        				 *    <attribute name="_FillValue" value="-1.000000E+34" />
+        				 *    <attribute name="missing_value" value="-1.000000E+34" />
+        				 *    <attribute name="ferret_datatype" value="STRING" />
+        				 *    <attribute name="infile_datatype" value="CHAR />
+        				 * 
+        				 * Try the new way first...
+        				 */
+        				List attributeElements = var.getChildren("attribute");
+        				if ( attributeElements != null && attributeElements.size() > 0 ) {
+        					for (Iterator attIt = attributeElements.iterator(); attIt.hasNext();) {
+        						Element attribute = (Element) attIt.next();
+        						String value = attribute.getAttributeValue("value");
+        						String aname = attribute.getAttributeValue("name");
+        						try {
+        							float fvalue = Float.valueOf(value).floatValue();
+        							dataVar.addAttribute(new Attribute(aname, new Float(fvalue)));
+        						} catch (NumberFormatException nfe) {
+        							dataVar.addAttribute(new Attribute(aname, value));
+        						}
+        					}
+        				} else {
+        					List attributes = var.getChildren();
+        					for (Iterator attIt = attributes.iterator(); attIt.hasNext();) {
+        						Element attribute = (Element) attIt.next();
+        						if ( !attribute.getName().equals("grid") ) {
+        							String value = attribute.getTextNormalize();
+        							String aname = attribute.getName();
+        							try {
+        								float fvalue = Float.valueOf(value).floatValue();
+        								dataVar.addAttribute(new Attribute(aname, new Float(fvalue)));
+        							} catch (NumberFormatException nfe) {
+        								dataVar.addAttribute(new Attribute(aname, value));
+        							}
+        						}
+        					}
+        				}
+        				dataVar.addAttribute(new Attribute("dataset", dataset_name));
+        				ncfile.addVariable(null, dataVar);
+        			}
+        		}
+        	}
         }
         ncfile.addAttribute(null, new Attribute("Conventions", "COARDS"));
         
