@@ -317,7 +317,7 @@ public class ProductRequest {
                             } else if ( !regrid && do_analysis ) {
                             	// Send in all the gridTo junk, but it won't get used.  
                             	// This will all be redone in the next implementation when this moves to it's own service/class.
-                                setAnalysisURL(analysis, data, lasConfig, lasRequest, varXPath, var_count, dataset_number, regrid);                               
+                                setAnalysisURL(analysis, data, lasConfig, lasRequest, varXPath, var_count, dataset_number, regrid, "");                               
                             } else if ( regrid && !do_analysis ) {
                             	
                                 if ( dataObjectsE.getChildren("data").size() <= 0 ) {
@@ -381,7 +381,7 @@ public class ProductRequest {
 
                             } else if ( regrid && do_analysis ) {
                             	// Create the analyzed variable then set the gridTo information to use it.
-                            	StringBuffer jnl = setAnalysisURL(analysis, data, lasConfig, lasRequest, varXPath, var_count, dataset_number, regrid);
+                            	StringBuffer jnl = setAnalysisURL(analysis, data, lasConfig, lasRequest, varXPath, var_count, dataset_number, regrid, "_2");
                                 if ( dataObjectsE.getChildren("data").size() <= 0 ) {
                                 	gridTo.setJnl(jnl);
                                     gridTo.setURL(data.getAttributeValue("url"));
@@ -720,7 +720,7 @@ public class ProductRequest {
      * @throws LASException
      * @throws UnsupportedEncodingException
      */
-    private StringBuffer setAnalysisURL(Element analysis, Element data, LASConfig lasConfig, LASUIRequest lasRequest, String varXPath, int var_count, int dataset_number, boolean regrid) throws JDOMException, LASException, UnsupportedEncodingException {
+    private StringBuffer setAnalysisURL(Element analysis, Element data, LASConfig lasConfig, LASUIRequest lasRequest, String varXPath, int var_count, int dataset_number, boolean regrid, String rename_suffix) throws JDOMException, LASException, UnsupportedEncodingException {
         int dset = dataset_number;
     	if ( !regrid ) {
     		dset = 1;
@@ -834,10 +834,10 @@ public class ProductRequest {
             } else if ( ocean_mask != null) {
                 jnl.append("let analysis_mask = if rose_on_grid gt 0 then 1_cr_");           
             }
-            jnl.append("let masked_"+var+"="+var+"_2[d="+var_count+"]*analysis_mask_cr_");
+            jnl.append("let masked_"+var+"="+var+rename_suffix+"[d="+var_count+"]*analysis_mask_cr_");
             jnl.append("let "+var+"_"+var_count+"_regrid=masked_"+var+"_2[d="+dset+grid+"]_cr_");
         } else {
-            jnl.append("let "+var+"_"+var_count+"_regrid="+var+"_2[d="+dset+grid+"]");
+            jnl.append("let "+var+"_"+var_count+"_regrid="+var+rename_suffix+"[d="+dset+grid+"]");
         }
 
         String fdsURL = lasConfig.getFTDSURL(varXPath);
