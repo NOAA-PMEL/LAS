@@ -906,7 +906,10 @@ LASUI.prototype.doProductIconClick = function (evt) {
 	this.toggleUIMask('');
 
 	if(this.state.operations.getOperationByID(id))
-		if(this.state.operations.getOperationByID(id).optiondef) {
+		if(this.state.operations.getOperationByID(id).optiondef &&
+		    id != "Plot_2D_XY_SlideSorter" &&
+		    id != "Plot_2D_SlideSorter" &&
+		    id != "Plot_1D_SlideSorter" ) {
 			this.getOptions(this.state.operations.getOperationByID(id).optiondef.IDREF, "external", true);
 			this.refs.options.external.DOMNode.style.display="";
 		} else {
