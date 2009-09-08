@@ -116,11 +116,16 @@ function MapWidget(args) {
 	 	this.ondraw = args.ondraw;
 	else
 		this.ondraw = function () {};
+
 	if (args.onafterdraw)
 	 	this.onafterdraw = args.onafterdraw;
 	else
-		this.onafterdraw = function () {};  	
+		this.onafterdraw = function () {};  
 	
+	if (args.onmarginclick)
+	 	this.onmarginclick = args.onmarginclick;
+	else
+		this.onmarginclick = function () {};
 
 }
 MapWidget.prototype.enable = function() {
@@ -208,7 +213,7 @@ MapWidget.prototype.initPixelExtents = function(evt) {
 }
 
 
-// set the drawing area to the full plhttp://porter.pmel.noaa.gov:8580/las_newui/ui/ot area
+// set the drawing area to the full plot area
 MapWidget.prototype.setMaxDrawingArea = function() {
 	this.getDOMNodeOffsets();
    this.setDataPixXMin(this.getPlotPixXMin());
@@ -715,10 +720,10 @@ MapWidget.prototype.getX = function (evt) {
    	case "Safari": break;
   }	
 				
-   if (x < this.getDataPixXMin()) 
-      x = this.getDataPixXMin();
-   else if (x  > this.getDataPixXMax())  	  
-   	x = this.getDataPixXMax();
+  // if (x < this.getDataPixXMin()) 
+  //    x = this.getDataPixXMin();
+  // else if (x  > this.getDataPixXMax())  	  
+  // 	x = this.getDataPixXMax();
    return x;
 }
 
@@ -738,10 +743,10 @@ MapWidget.prototype.getX = function (evt) {
    	case "Safari": break;
    }	
    
-   if (y < this.getDataPixYMin()) 
-		y = this.getDataPixYMin();
-   else if (y > this.getDataPixYMax()) 
-      y = this.getDataPixYMax();
+  // if (y < this.getDataPixYMin()) 
+//		y = this.getDataPixYMin();
+ //  else if (y > this.getDataPixYMax()) 
+   //   y = this.getDataPixYMax();
    return y;
 } 
 
@@ -839,15 +844,9 @@ MapWidget.prototype.drawBox = function (evt) {
    if (this.getState() == null || this.view != this.g_box)
 	return;
    	
-	if(this.X1 !=this.getX(evt) || this.Y1 != this.getY(evt)) {
-   	this.X1 = this.getX(evt);
-  		this.Y1 = this.getY(evt);
-	   this.displayBox(true);   
-   	this.displayCentralBox(true);
-  	} else {
-  		this.displayBox(true);   
+  	this.displayBox(true);   
    	this.displayCentralBox(true);	
-  	}
+  	
   	if (this.ondraw) this.ondraw(this);
 }
 
@@ -858,7 +857,6 @@ MapWidget.prototype.drawHLine = function (evt) {
    if (this.getState() == null || this.getView() != this.g_hLine)
 	return;
    
-   this.X1 = this.getX(evt);
    this.Y1 = this.Y0;
    
    this.displayBox(true);   
@@ -876,7 +874,6 @@ MapWidget.prototype.drawVLine = function (evt) {
 	return;
    
    this.X1 = this.X0;
-   this.Y1 = this.getY(evt);
    
    this.displayBox(true);   
    this.displayCentralBox(true);
@@ -891,8 +888,6 @@ MapWidget.prototype.drawPoint = function (evt) {
 
    if (this.getState() == null || this.getView() != this.g_point)
 	return;
-   this.X1 = this.getX(evt);
-   this.Y1 = this.getY(evt);
    this.X0 = this.X1;
    this.Y0 = this.Y1;
    
@@ -911,8 +906,6 @@ MapWidget.prototype.drawPoint = function (evt) {
      return;
    }
    
-   this.X1 = this.getX(evt);
-   this.Y1 = this.getY(evt);
    
    if (view == this.g_vRange) {
      this.X0 = this.getDataPixelXMin();
@@ -985,8 +978,11 @@ MapWidget.prototype.start = function (evt) {
    document.onmouseup = this.stopDrawing.bindAsEventListener(this);        
    this.X0 = this.getX(evt);
    this.Y0 = this.getY(evt);  
-	if(this.X0 > this.getDataPixXMax() || this.X0 < this.getDataPixXMin()  || this.Y0 > this.getDataPixYMax() || this.Y0 < this.getDataPixYMin()) 
-		return false;
+	if(this.X0 > this.getDataPixXMax() || this.X0 < this.getDataPixXMin()  || this.Y0 > this.getDataPixYMax() || this.Y0 < this.getDataPixYMin()) {
+		if(this.onmarginclick) this.onmarginclick();
+		this.stopDrawing();
+		return;
+	}
 		
 	
 	this.displayCentralBox(false);
@@ -1012,7 +1008,19 @@ MapWidget.prototype.draw = function (evt) {
     	this.plot.onselectstart="return false;";
     }
     else {evt.preventDefault(); evt.stopPropagation()};
-	
+  this.X1 = this.getX(evt);
+  this.Y1 = this.getY(evt);
+	if(this.X1 > this.getDataPixXMax())
+		this.X1 = this.getDataPixXMax();
+	if(this.X1 < this.getDataPixXMin())
+		this.X1 = this.getDataPixXMin();
+	if(this.Y1 > this.getDataPixYMax())
+		this.Y1 = this.getDataPixYMax();
+	if(this.Y1 < this.getDataPixYMin())
+		this.Y1 = this.getDataPixYMin();
+
+
+
 	if (this.view == this.g_box)
      this.drawBox(evt);
    else if (this.view == this.g_hLine)
