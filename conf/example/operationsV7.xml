@@ -123,7 +123,7 @@ streamable="true" mime_type="application/postscript"/> -->
         </operation>
     </operation>
 
-    <operation name="Comparison" ID="Plot_1D_SlideSorter" output_template="SlideSorter" service_action="" order="0801" category="visualization">
+    <operation name="Comparison" ID="Plot_1D_SlideSorter" output_template="vizGal" service_action="" order="0801" category="visualization">
           <service>template</service>
           <region>
             <intervals name="x" />
@@ -159,7 +159,7 @@ streamable="true" mime_type="application/postscript"/> -->
           <optiondef IDREF="Options_1D_7"/>
     </operation>
 
-    <operation name="Comparison" ID="Plot_2D_XY_SlideSorter" output_template="SlideSorter" service_action="" category="visualization">
+    <operation name="Comparison" ID="Plot_2D_XY_SlideSorter" output_template="vizGal" service_action="" category="visualization">
         <service>template</service>
         <region>
             <intervals name="xy" />
@@ -560,7 +560,7 @@ streamable="true" mime_type="application/postscript"/> -->
     </operation>
 <!-- End of operation for WMS -->
 
-    <operation name="Comparison" ID="Plot_2D_SlideSorter" output_template="SlideSorter" service_action="" category="visualization">
+    <operation name="Comparison" ID="Plot_2D_SlideSorter" output_template="vizGal" service_action="" category="visualization">
         <service>template</service>
         <region>
             <!--  xy has its own operation -->
