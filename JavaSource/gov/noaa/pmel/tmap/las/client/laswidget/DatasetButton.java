@@ -28,14 +28,10 @@ public class DatasetButton extends Composite {
 	VariableSerializable selectedVariable;
 	Grid popupGrid;
 	Button close;
+	int offset = 0;
 	public DatasetButton (RPCServiceAsync rpcService) {
 		choose = new Button("Data Set");
-		choose.addClickListener(new ClickListener() {
-			public void onClick(Widget sender) {
-				datasetPanel.setPopupPosition(choose.getAbsoluteLeft(), choose.getAbsoluteTop()-60);
-				datasetPanel.show();
-			}
-		});
+		choose.addClickListener(openClick);
 		datasetPanel = new PopupPanel(false);
 		datasetWidget = new DatasetWidget();
 		datasetWidget.addTreeListener(new TreeListener() {
@@ -70,6 +66,15 @@ public class DatasetButton extends Composite {
 		datasetPanel.hide();
 		initWidget(choose);
 	}
+	public void setOffset(int offset) {
+		this.offset = offset;
+	}
+	public ClickListener openClick = new ClickListener() {
+		public void onClick(Widget sender) {
+			datasetPanel.setPopupPosition(choose.getAbsoluteLeft()+offset, choose.getAbsoluteTop()-60);
+			datasetPanel.show();
+		}
+	};
 	public VariableSerializable getSelectedVariable() {
 		return selectedVariable;
 	}
