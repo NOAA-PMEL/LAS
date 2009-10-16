@@ -192,7 +192,7 @@ public class VizGalPanel extends Composite {
 		top = new Grid(1,3);
 
 		String title = "Settings";
-		settingsButton = new SettingsWidget(title, LatLng.newInstance(0.0, 0.0), 1, 256, 360, ID, op, rpcService, "button", allowEditing);
+		settingsButton = new SettingsWidget(title, ID, op, rpcService, "button", allowEditing);
 		settingsButton.addApplyClickListener(applyPanelClick);
 		settingsButton.addCloseClickListener(closeClick);
 		settingsButton.addDatasetTreeListener(datasetTreeListener);
@@ -225,7 +225,7 @@ public class VizGalPanel extends Composite {
 	public void init(boolean usePanel) {
 		min =  999999999.;
 		max = -999999999.;
-		datasetLabel.setText(var.getDSName()+": "+var.getName());
+	    datasetLabel.setText(var.getDSName()+": "+var.getName());
 		GridSerializable ds_grid = var.getGrid();
 		double grid_west = Double.valueOf(ds_grid.getXAxis().getLo());
 		double grid_east = Double.valueOf(ds_grid.getXAxis().getHi());
@@ -234,9 +234,8 @@ public class VizGalPanel extends Composite {
 		double grid_north = Double.valueOf(ds_grid.getYAxis().getHi());
 
 		double delta = Math.abs(Double.valueOf(ds_grid.getXAxis().getArangeSerializable().getStep()));
-
-		LatLngBounds bounds = LatLngBounds.newInstance(LatLng.newInstance(grid_south, grid_west), LatLng.newInstance(grid_north, grid_east));
-		settingsButton.getRefMap().initDataBounds(bounds, delta, true);
+		settingsButton.getRefMap().setExtent(grid_south, grid_north, grid_west, grid_east, delta);
+		
 		settingsButton.setOperations(rpcService, var.getIntervals(), var.getDSID(), var.getID(), op, view, null);
 		tandzWidgets.removeAxes();
 		settingsButton.setUsePanel(usePanel);
@@ -531,9 +530,7 @@ public class VizGalPanel extends Composite {
 			}
 		}
 	};
-	public void setRegion(int i, String region) {
-		settingsButton.getRefMap().setRegion(i, region);
-	}
+
 	TreeListener datasetTreeListener = new TreeListener() {
 
 		public void onTreeItemSelected(TreeItem item) {
@@ -730,9 +727,9 @@ public class VizGalPanel extends Composite {
 		pwidth = Math.min(width,  max);
 		setImageWidth();	
 	}
-	public void addRegionChangeListener(ChangeListener listener) {
-		settingsButton.getRefMap().addRegionChangeListener(listener);
-	}
+//	public void addRegionChangeListener(ChangeListener listener) {
+//		settingsButton.getRefMap().addRegionChangeListener(listener);
+//	}
 
 	public void setParentAxisValue(String axis, String value) {
 		if ( axis.equals("z") ) {
