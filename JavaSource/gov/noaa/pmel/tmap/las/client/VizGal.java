@@ -307,7 +307,7 @@ public class VizGal extends LASEntryPoint {
 
 		// This is a control panel that will control the settings for all the panels and it appears vertically on the left side.
 		// The last false is to disallow editing with the grab handles on the map.
-		settingsControls = new SettingsWidget("Gallery Settings", LatLng.newInstance(0.0, 0.0), 0, 256, 360, "Slide Sorter", op, rpcService, "panel", allowEditing);
+		settingsControls = new SettingsWidget("Gallery Settings", "Slide Sorter", op, rpcService, "panel", allowEditing);
 		settingsControls.setTitle("Settings for all panels.");
 		settingsControls.addDatasetTreeListener(datasetTreeListener);
 		settingsControls.addOptionsOkClickListener(optionsOkListener);
@@ -737,9 +737,8 @@ public class VizGal extends LASEntryPoint {
 
 		double delta = Math.abs(Double.valueOf(ds_grid.getXAxis().getArangeSerializable().getStep()));
 
-		LatLngBounds bounds = LatLngBounds.newInstance(LatLng.newInstance(grid_south, grid_west), LatLng.newInstance(grid_north, grid_east));
-		settingsControls.getRefMap().initDataBounds(bounds, delta, true);
-
+		settingsControls.getRefMap().setExtent(grid_south, grid_north, grid_west, grid_east, delta);
+		
 		ortho.clear();
 		if ( datePanel != null ) {
 			datePanel.clear();
