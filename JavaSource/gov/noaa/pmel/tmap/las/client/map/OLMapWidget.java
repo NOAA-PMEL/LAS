@@ -394,10 +394,17 @@ public class OLMapWidget extends Composite {
 	public void setCurrentSelection(double slat, double nlat, double wlon, double elon) {
 		Bounds bounds = new Bounds(wlon, slat, elon, nlat);
 		boxLayer.destroyFeatures();
-		if ( tool.equals("pt") ) {
+		if ( tool.equals("t") || tool.equals("z") || tool.equals("zt") || tool.equals("pt") ) {	
 			Point p = new Point(bounds.getCenterLonLat().lon(), bounds.getCenterLonLat().lat());
 			boxLayer.addFeature(new VectorFeature(p));
+		} else if ( tool.equals("x") || tool.equals("xz") || tool.equals("xt") ) {
+			Bounds lineBounds = new Bounds(wlon, bounds.getCenterLonLat().lat(), elon, bounds.getCenterLonLat().lat());
+			boxLayer.addFeature(new VectorFeature(lineBounds.toGeometry()));
+		} else if ( tool.equals("y") || tool.equals("yz") || tool.equals("yt") ) {
+			Bounds lineBounds = new Bounds(bounds.getCenterLonLat().lon(), slat, bounds.getCenterLonLat().lon(), nlat);
+			boxLayer.addFeature(new VectorFeature(lineBounds.toGeometry()));
 		} else {
+			// XY box
 			boxLayer.addFeature(new VectorFeature(bounds.toGeometry()));
 		}
 		trimSelection(bounds);
