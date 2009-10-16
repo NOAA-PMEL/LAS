@@ -100,7 +100,7 @@ public class DatasetWidget extends Tree implements TreeListener {
 		}
         
 		public void onFailure(Throwable caught) {
-			Window.alert("Messed up with "+caught.getMessage());
+			Window.alert("Server Request Failed: "+caught.getMessage());
 		}
 	};
 	/* Work around for focus on tree in scroll panel scrolling to the top bug.  #369
