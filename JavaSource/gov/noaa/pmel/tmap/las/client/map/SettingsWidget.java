@@ -33,7 +33,7 @@ public class SettingsWidget extends Composite {
 	protected Button applyButton;
 	protected HorizontalPanel closeAndApply;
 	protected HorizontalPanel datasetAndOptions;
-	protected ReferenceMap refMap;
+	protected OLMapWidget refMap;
 	protected DatasetButton datasetButton;
 	protected OptionsButton optionsButton;
 	protected String operationID;
@@ -56,7 +56,7 @@ public class SettingsWidget extends Composite {
 	 */
 	Grid vertical = new Grid(5,1);
 
-	public SettingsWidget(String title, LatLng center, int zoom, int xpix, int ypix, String panelID, String operationID, RPCServiceAsync rpcService, String layout, boolean allowEditing) {
+	public SettingsWidget(String title, String panelID, String operationID, RPCServiceAsync rpcService, String layout, boolean allowEditing) {
 		this.operationID = operationID;
 		this.rpcService = rpcService;
 		this.layout = layout;
@@ -73,13 +73,15 @@ public class SettingsWidget extends Composite {
 		datasetButton = new DatasetButton(rpcService);
 		if ( layout.equals("button") ) {
 		    optionsButton = new OptionsButton(rpcService, operationID, 300);
+		    datasetButton.setOffset(0);
 		} else {
 			optionsButton = new OptionsButton(rpcService, operationID, 0);
+			datasetButton.setOffset(260);
 		}
 		datasetAndOptions = new HorizontalPanel();
 		datasetAndOptions.add(datasetButton);
 		datasetAndOptions.add(optionsButton);
-		refMap = new ReferenceMap(center, zoom, xpix, ypix, allowEditing);
+		refMap = new OLMapWidget();
 		operations = new OperationsWidget();
 		operations.addClickListener(operationsClickListener);
 		if ( layout.equals("button") ) {
@@ -87,15 +89,14 @@ public class SettingsWidget extends Composite {
 			settingsButton.addClickListener(settingsButtonClick);
 			interiorPanel = new HorizontalPanel();
 			mainPanel = new VerticalPanel();
-
 			settingsDialog = new DialogBox(false, false);
 			settingsDialog.setText("Set Region and Plot Options for "+panelID+" ... [Drag Me]");
 			leftInteriorPanel = new VerticalPanel();
 			rightInteriorPanel = new VerticalPanel();
-			leftInteriorPanel.add(datasetAndOptions);
-			leftInteriorPanel.add(operations);
+			leftInteriorPanel.add(refMap);
 			interiorPanel.add(leftInteriorPanel);
-			rightInteriorPanel.add(refMap);
+			rightInteriorPanel.add(datasetAndOptions);
+			rightInteriorPanel.add(operations);
 			interiorPanel.add(rightInteriorPanel);
 			mainPanel.add(closeAndApply);
 			mainPanel.add(interiorPanel);
@@ -126,12 +127,11 @@ public class SettingsWidget extends Composite {
 			} else {
 				// Do something else with the panel layout
 			}
-			refMap.turnOffSelectButton();
 		}	
 	};
 	public ClickListener operationsClickListener = new ClickListener() {
 		public void onClick(Widget sender) {
-			refMap.setToolType(getCurrentOperationView());		
+			refMap.setTool(getCurrentOperationView());		
 			optionsButton.setOptions(getCurrentOp().getOptionsID());
 		}
 	};
@@ -144,17 +144,13 @@ public class SettingsWidget extends Composite {
 		applyButton.addClickListener(apply);
 	}
 
-	public ReferenceMap getRefMap() {
-		return refMap;
-	}
-
 	public void setOperations(RPCServiceAsync rpcService, String intervals, String dsID,
 			String varID, String opID, String view, OperationsMenu menu) {
 		operations.setOperations(rpcService, intervals, dsID, varID, opID, view, menu);
 	}
 
 	public void setLatLon(String xlo, String xhi, String ylo, String yhi) {
-		refMap.setLatLon(xlo, xhi, ylo, yhi);
+		refMap.setCurrentSelection(Double.valueOf(ylo), Double.valueOf(yhi), Double.valueOf(xlo), Double.valueOf(xhi));
 	}
 
 	public void addDatasetTreeListener(TreeListener datasetTreeListener) {
@@ -186,7 +182,7 @@ public class SettingsWidget extends Composite {
 	}
 
 	public void setToolType(String view) {
-		refMap.setToolType(view);
+		refMap.setTool(view);
 	}
 
 	public OperationsWidget getOperationsWidget() {
@@ -211,11 +207,42 @@ public class SettingsWidget extends Composite {
 	};
 	protected ClickListener settingsButtonClick = new ClickListener() {
 		public void onClick(Widget sender) {
+			
+			/*
+			 * If you don't remove the map, all the features that have
+			 * been rendered to it while it was hidden will appear on
+			 * the map and will be zombies (you can clear them
+			 * and you can't select them).  Remove the map and reinitializing
+			 * it works around this problem.
+			 */
+			leftInteriorPanel.remove(refMap);
+			
+			// n, s, e, w...
+			double[] data = refMap.getDataExtents();
+			double[] selection = refMap.getCurrentSelection();
+			double delta = refMap.getDelta();
+			int zoom = refMap.getZoom();
+			double[] center = refMap.getCenterLatLon();
+			
+			refMap = new OLMapWidget();
+			
+			refMap.setExtent(data[1], data[0], data[3], data[2], delta);
+			
+			refMap.setCurrentSelection(selection[1], selection[0], selection[3], selection[2]);
+			
+			refMap.setCenter(center[0], center[1], zoom);
+			
 			settingsDialog.setPopupPosition(settingsButton.getAbsoluteLeft()-350, settingsButton.getAbsoluteTop());
-			settingsDialog.show();			
+			settingsDialog.show();		
+			
+			leftInteriorPanel.add(refMap);
+
+			
 		}		
 	};
-
+    public OLMapWidget getRefMap() {
+    	return refMap;
+    }
 	public String getHistoryToken() {
 		StringBuilder token = new StringBuilder();
 		token.append(";xlo="+getRefMap().getXlo());

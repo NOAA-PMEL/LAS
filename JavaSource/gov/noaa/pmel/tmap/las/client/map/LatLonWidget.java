@@ -1,8 +1,6 @@
 package gov.noaa.pmel.tmap.las.client.map;
 
 import com.google.gwt.i18n.client.NumberFormat;
-import com.google.gwt.maps.client.geom.LatLng;
-import com.google.gwt.maps.client.geom.LatLngBounds;
 import com.google.gwt.user.client.ui.ChangeListener;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Grid;
@@ -25,8 +23,7 @@ public class LatLonWidget extends Composite {
 	Label lonLabel;
 	Label latLabel;
 	Grid panel;
-	NumberFormat latFormat;
-	NumberFormat lonFormat;
+	
 	private static final String boxWidth = "70px";
 	/**
 	 * Constructs an empty widget.
@@ -55,50 +52,24 @@ public class LatLonWidget extends Composite {
 		panel.setWidget(0, 2, lonLabel);
 		panel.setWidget(0, 3, eastLon);
 		panel.setWidget(1, 3, westLon);
-		latFormat = NumberFormat.getFormat("###.##");
-		lonFormat = NumberFormat.getFormat("####.##");
+		
 		initWidget(panel);
 	}
 	/**
 	 * Sets the values of the N and S latitude and the E and W longitude, use a degenerate bounds when the tool type is a line or point.
 	 * @param selectionBounds
 	 */
-	public void setText(LatLngBounds selectionBounds) {
-		LatLng swPolyCorner = selectionBounds.getSouthWest();
-		LatLng nePolyCorner = selectionBounds.getNorthEast();
-		ylo = swPolyCorner.getLatitude();
-		String slat_f;
-		if ( ylo <= 0.0 ) {
-			slat_f = latFormat.format(Math.abs(ylo))+" S";
-		} else {
-			slat_f = latFormat.format(ylo)+" N";
-		}
+	public void setText(double nLat, double sLat, double eLon, double wLon) {
+		ylo = sLat;
+		String slat_f = GeoUtil.compassLat(ylo);
 		southLat.setText(slat_f);
-		
-		yhi = nePolyCorner.getLatitude();
-		String nlat_f;
-		if ( yhi <= 0.0 ) {
-			nlat_f = latFormat.format(Math.abs(yhi))+" S";
-		} else {
-			nlat_f = latFormat.format(yhi)+" N";
-		}
+		yhi = nLat;
+		String nlat_f = GeoUtil.compassLat(yhi);
 		northLat.setText(nlat_f);
-		xlo = swPolyCorner.getLongitude();
-		xhi = nePolyCorner.getLongitude();
-		String wlon_f;
-		String elon_f;
-		if ( xlo < 0.0 ) {
-			wlon_f = lonFormat.format(Math.abs(xlo))+" W";
-		} else {
-			wlon_f = lonFormat.format(xlo)+" E";
-		}
-		if ( xhi < 0.0 ) {
-			elon_f = lonFormat.format(Math.abs(xhi))+" W";
-		} else {
-			elon_f = lonFormat.format(xhi)+" E";
-		}
-
-
+		xlo = wLon;
+		xhi = eLon;
+		String wlon_f = GeoUtil.compassLon(GeoUtil.normalizeLon(xlo));
+		String elon_f = GeoUtil.compassLon(GeoUtil.normalizeLon(xhi));
 		westLon.setText(wlon_f);
 		eastLon.setText(elon_f);
 		
