@@ -261,9 +261,10 @@ public class OLMapWidget extends Composite {
 		zoomMap();
 		currentSelection = dataBounds;
 		boxLayer.destroyFeatures();
-		if ( !modulo ) {
-		    boxLayer.addFeature(new VectorFeature(currentSelection.toGeometry()));
-		}
+		// For now don't select the region at all.
+//		if ( !modulo ) {
+//		    boxLayer.addFeature(new VectorFeature(currentSelection.toGeometry()));
+//		}
 	}
 	public void setExtent(double slat, double nlat, double wlon, double elon) {
 		setExtent(slat, nlat, wlon, elon, delta);
