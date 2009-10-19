@@ -393,6 +393,7 @@ public class OLMapWidget extends Composite {
 		}
 	}
 	public void setCurrentSelection(double slat, double nlat, double wlon, double elon) {
+		selectionMade = true;
 		Bounds bounds = new Bounds(wlon, slat, elon, nlat);
 		boxLayer.destroyFeatures();
 		if ( tool.equals("t") || tool.equals("z") || tool.equals("zt") || tool.equals("pt") ) {	
