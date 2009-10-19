@@ -235,6 +235,11 @@ public class VizGal extends LASEntryPoint {
      Map<String, String> historyTokens;
      
      boolean allowEditing = true;
+     
+     // This tells whether or not the range passed in is a sub-region to the data range.
+     // If it is we set the current selection to this. 
+     boolean subRegion = false;
+     
 	/*
 	 * (non-Javadoc)
 	 * @see gov.noaa.pmel.tmap.las.client.LASEntryPoint#onModuleLoad()
@@ -694,8 +699,9 @@ public class VizGal extends LASEntryPoint {
 				}
 			}
 		}
-		if ( xlo != null && !xlo.equals("") && xhi != null && !xhi.equals("") && 
-				ylo != null && !ylo.equals("") && yhi != null && !yhi.equals("") ) {
+		// If these limits are not the same as the dataBounds, then set them.
+		if ( subRegion && xlo != null && !xlo.equals("") && xhi != null && !xhi.equals("") && 
+			 ylo != null && !ylo.equals("") && yhi != null && !yhi.equals("") ) {
 			settingsControls.setLatLon(xlo, xhi, ylo, yhi);
 			for (Iterator panelIt = panels.iterator(); panelIt.hasNext();) {
 				VizGalPanel panel = (VizGalPanel) panelIt.next();
@@ -738,7 +744,11 @@ public class VizGal extends LASEntryPoint {
 		double delta = Math.abs(Double.valueOf(ds_grid.getXAxis().getArangeSerializable().getStep()));
 
 		settingsControls.getRefMap().setExtent(grid_south, grid_north, grid_west, grid_east, delta);
-		
+		if ( xlo != null && !xlo.equals("") && xhi != null && !xhi.equals("") && 
+				ylo != null && !ylo.equals("") && yhi != null && !yhi.equals("") ) {
+			subRegion =  !((Math.abs(grid_south - Double.valueOf(ylo)) < .1) && (Math.abs(grid_north - Double.valueOf(yhi) ) < .1) &&
+					       (Math.abs(grid_west - Double.valueOf(xlo)) < .1) && (Math.abs(grid_east - Double.valueOf(xhi)) < .1));
+		}
 		ortho.clear();
 		if ( datePanel != null ) {
 			datePanel.clear();
@@ -1015,17 +1025,25 @@ public class VizGal extends LASEntryPoint {
 	/**
 	 * A helper methods that moves the current state of the map widget to the panels.
 	 */
-	private void setMapRanges() {
+	private void setMapRanges(double[] cs) {
 		for (Iterator panelIt = panels.iterator(); panelIt.hasNext();) {
 			VizGalPanel panel = (VizGalPanel) panelIt.next();
+			
 			if (!panel.isUsePanelSettings()) {
-				panel.setLatLon(String.valueOf(settingsControls.getRefMap().getXlo()), String.valueOf(settingsControls.getRefMap().getXhi()), String.valueOf(settingsControls.getRefMap().getYlo()), String.valueOf(settingsControls.getRefMap().getYhi()));
+				if ( cs == null ) {
+				    panel.setLatLon(String.valueOf(settingsControls.getRefMap().getXlo()), String.valueOf(settingsControls.getRefMap().getXhi()), String.valueOf(settingsControls.getRefMap().getYlo()), String.valueOf(settingsControls.getRefMap().getYhi()));
+				} else {
+					//cs contains n, s, e w
+					panel.setLatLon(String.valueOf(cs[3]), String.valueOf(cs[2]), String.valueOf(cs[1]), String.valueOf(cs[0]));
+				}
 			}
 		}
 	}
 	ClickListener settingsButtonApplyListener = new ClickListener() {
 		public void onClick(Widget sender) {
+			double[] cs = null;
 			if ( changeDataset ) {
+				cs = settingsControls.getRefMap().getCurrentSelection();
 				changeDataset();			
 			}
 
@@ -1037,9 +1055,12 @@ public class VizGal extends LASEntryPoint {
 				view = op_view;
 			}
 			settingsControls.setToolType(view);
-			// Update the plot based on the new settings first by moving the map settings
+			// Update the plot based on the new settings first set the "gallery map" then by moving the map settings
 			// to all the panels that are under slide sorter control, the refresh (which handles the options).
-			setMapRanges();
+			if ( cs != null ) {
+			    settingsControls.setLatLon(String.valueOf(cs[3]), String.valueOf(cs[2]), String.valueOf(cs[1]), String.valueOf(cs[0]));
+			}
+			setMapRanges(cs);
 			refresh(false, true);
 		}
 	};
