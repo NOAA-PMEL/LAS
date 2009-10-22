@@ -218,7 +218,7 @@ public class SettingsWidget extends Composite {
 			leftInteriorPanel.remove(refMap);
 			
 			// n, s, e, w...
-			double[] data = refMap.getDataExtents();
+			double[] data = refMap.getDataExtent();
 			double[] selection = refMap.getCurrentSelection();
 			double delta = refMap.getDelta();
 			int zoom = refMap.getZoom();
@@ -226,7 +226,7 @@ public class SettingsWidget extends Composite {
 			
 			refMap = new OLMapWidget();
 			
-			refMap.setExtent(data[1], data[0], data[3], data[2], delta);
+			refMap.setDataExtent(data[1], data[0], data[3], data[2], delta);
 			
 			refMap.setCurrentSelection(selection[1], selection[0], selection[3], selection[2]);
 			

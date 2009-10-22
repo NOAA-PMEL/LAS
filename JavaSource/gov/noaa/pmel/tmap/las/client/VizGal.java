@@ -743,7 +743,7 @@ public class VizGal extends LASEntryPoint {
 
 		double delta = Math.abs(Double.valueOf(ds_grid.getXAxis().getArangeSerializable().getStep()));
 
-		settingsControls.getRefMap().setExtent(grid_south, grid_north, grid_west, grid_east, delta);
+		settingsControls.getRefMap().setDataExtent(grid_south, grid_north, grid_west, grid_east, delta);
 		if ( xlo != null && !xlo.equals("") && xhi != null && !xhi.equals("") && 
 				ylo != null && !ylo.equals("") && yhi != null && !yhi.equals("") ) {
 			subRegion =  !((Math.abs(grid_south - Double.valueOf(ylo)) < .1) && (Math.abs(grid_north - Double.valueOf(yhi) ) < .1) &&

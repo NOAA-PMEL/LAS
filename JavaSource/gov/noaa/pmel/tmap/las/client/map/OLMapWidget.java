@@ -1,5 +1,8 @@
 package gov.noaa.pmel.tmap.las.client.map;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+
 import gov.noaa.pmel.tmap.las.client.openlayers.DrawSingleFeature;
 import gov.noaa.pmel.tmap.las.client.openlayers.DrawSingleFeatureOptions;
 import gov.noaa.pmel.tmap.las.client.openlayers.HorizontalPathHandler;
@@ -30,6 +33,7 @@ import org.gwtopenmaps.openlayers.client.layer.WMSOptions;
 import org.gwtopenmaps.openlayers.client.layer.WMSParams;
 import org.gwtopenmaps.openlayers.client.marker.Box;
 
+import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
@@ -134,7 +138,7 @@ public class OLMapWidget extends Composite {
 			@Override
 			public void onClick(ClickEvent event) {
 				boxLayer.destroyFeatures();
-				setExtent(dataBounds.getLowerLeftY(), dataBounds.getUpperRightY(), dataBounds.getLowerLeftX(), dataBounds.getUpperRightX(), delta);
+				setDataExtent(dataBounds.getLowerLeftY(), dataBounds.getUpperRightY(), dataBounds.getLowerLeftX(), dataBounds.getUpperRightX(), delta);
 			}
 			
 		});
@@ -213,6 +217,7 @@ public class OLMapWidget extends Composite {
 				Geometry geo = Geometry.narrowToGeometry(vectorFeature.getGeometry().getJSObject());
 				trimSelection(geo.getBounds());	
 				selectionMade = true;
+				featureModified();
 			}
 		};
 		modifyFeatureOptionsXY.onModification(onModification);
@@ -247,7 +252,7 @@ public class OLMapWidget extends Composite {
 		dockPanel.add(textWidget, DockPanel.SOUTH);
 		initWidget(dockPanel);
 	}
-	public void setExtent(double slat, double nlat, double wlon, double elon, double delta) {
+	public void setDataExtent(double slat, double nlat, double wlon, double elon, double delta) {
 		this.delta = delta;
 		dataBounds = new Bounds(wlon, slat, elon, nlat);
 		double w = dataBounds.getWidth();
@@ -266,8 +271,8 @@ public class OLMapWidget extends Composite {
 //		    boxLayer.addFeature(new VectorFeature(currentSelection.toGeometry()));
 //		}
 	}
-	public void setExtent(double slat, double nlat, double wlon, double elon) {
-		setExtent(slat, nlat, wlon, elon, delta);
+	public void setDataExtent(double slat, double nlat, double wlon, double elon) {
+		setDataExtent(slat, nlat, wlon, elon, delta);
 	}
 	private void zoomMap() {	
 		int zoom = map.getZoomForExtent(dataBounds, false);
@@ -308,6 +313,7 @@ public class OLMapWidget extends Composite {
 			if ( modulo && !selectionMade ) {
 				setSelection(new Bounds(center.lon() - 180.0, center.lat() - 90., center.lon() + 180.0, center.lat() + 90.));
 			}
+			mapMoved();
 		}	
 	};
 	FeatureAddedListener featureAddedListener = new FeatureAddedListener() {
@@ -318,6 +324,7 @@ public class OLMapWidget extends Composite {
 			Geometry geo = Geometry.narrowToGeometry(vectorFeature.getGeometry().getJSObject());
 			trimSelection(geo.getBounds());
 			selectionMade = true;
+			featureAdded();
 		}
 	};
 	private void setSelection(Bounds bounds) {
@@ -720,7 +727,7 @@ public class OLMapWidget extends Composite {
 	public void render() {
 		map.render();
 	}
-	public double[] getDataExtents() {
+	public double[] getDataExtent() {
 		double[] d = new double[4];
 		// n, s, e, w
 		d[0] = dataBounds.getUpperRightY();
@@ -755,4 +762,51 @@ public class OLMapWidget extends Composite {
 		LonLat c = new LonLat(lon, lat);
 		map.setCenter(c, zoom);
 	}
+	public static native void featureAdded() /*-{
+        if (typeof $wnd.featureAddedCallback == 'function') {
+            $wnd.featureAddedCallback();
+        }
+    }-*/;
+    public static native void featureModified() /*-{
+	    if(typeof $wnd.featureModifiedCallback == 'function') {
+            $wnd.featureModifiedCallback();
+	    }
+    }-*/;
+    public static native void mapMoved()/*-{
+    	if (typeof $wnd.mapMovedCallback == 'function') {
+    		$wnd.mapMovedCallback();
+    	}
+    }-*/;
+	public native void activateNativeHooks()/*-{
+		var localMap = this;
+        $wnd.setMapCurrentSelection = function(slat, nlat, wlon, elon) {       	
+	        localMap.@gov.noaa.pmel.tmap.las.client.map.OLMapWidget::setCurrentSelection(DDDD)(slat, nlat, wlon, elon);
+        } 
+        $wnd.setMapTool = function(tool) {
+        	localMap.@gov.noaa.pmel.tmap.las.client.map.OLMapWidget::setTool(Ljava/lang/String;)(tool);
+        }
+        $wnd.setMapDataExtent = function(slat, nlat, wlon, elon, delta) {
+        	localMap.@gov.noaa.pmel.tmap.las.client.map.OLMapWidget::setDataExtent(DDDDD)(slat, nlat, wlon, elon, delta);
+        }
+        $wnd.getMapZoom = function() {
+        	var zm = localMap.@gov.noaa.pmel.tmap.las.client.map.OLMapWidget::getZoom()();
+        	return zm;
+        }
+        $wnd.getMapXhi = function() {
+        	var p = localMap.@gov.noaa.pmel.tmap.las.client.map.OLMapWidget::getXhi()();
+        	return p;
+        }
+        $wnd.getMapXlo = function() {
+        	var p = localMap.@gov.noaa.pmel.tmap.las.client.map.OLMapWidget::getXlo()();
+        	return p;
+        }
+        $wnd.getMapYhi = function() {
+        	var p = localMap.@gov.noaa.pmel.tmap.las.client.map.OLMapWidget::getYhi()();
+        	return p;
+        }
+        $wnd.getMapYlo = function() {
+        	var p = localMap.@gov.noaa.pmel.tmap.las.client.map.OLMapWidget::getYlo()();
+        	return p;
+        }
+    }-*/;
 }
