@@ -1211,9 +1211,6 @@ public class LASConfig extends LASDocument {
                 Element datasetsE = (Element) datasetsIt.next();
                 List memberDatasets = datasetsE.getChildren("dataset");
                 // If we found a match quit. I don't like this so much, but it might be a bit more efficient.
-                if ( container_dataset != null ) {
-                    break;
-                }
                 for (Iterator memberDSIt = memberDatasets.iterator(); memberDSIt.hasNext();) {
                     Element dataset = (Element) memberDSIt.next();
                     Element container_dataset_element = (Element) dataset.clone();
@@ -1225,7 +1222,6 @@ public class LASConfig extends LASDocument {
                          (tag_equals != null && ID.equals(tag_equals)) ) {
                         // There is nothing to do except create the dataset container and break out.
                         container_dataset = new Dataset(container_dataset_element);
-                        break; // I don't like this so much, but it might be a bit more efficient.
                     }
                 }
             }
@@ -1236,9 +1232,7 @@ public class LASConfig extends LASDocument {
              */
             List datasets = getRootElement().getChildren("datasets");
             for (Iterator datasetsIt = datasets.iterator(); datasetsIt.hasNext();) {
-                if ( container_dataset != null ) {
-                    break; // Ugly loop breaking in the interest of efficiency.
-                }
+                
                 Element datasetsE = (Element) datasetsIt.next();
                 List memberDatasets = datasetsE.getChildren("dataset");
                 for (Iterator memberDSIt = memberDatasets.iterator(); memberDSIt.hasNext();) {
