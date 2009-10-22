@@ -234,7 +234,7 @@ public class VizGalPanel extends Composite {
 		double grid_north = Double.valueOf(ds_grid.getYAxis().getHi());
 
 		double delta = Math.abs(Double.valueOf(ds_grid.getXAxis().getArangeSerializable().getStep()));
-		settingsButton.getRefMap().setExtent(grid_south, grid_north, grid_west, grid_east, delta);
+		settingsButton.getRefMap().setDataExtent(grid_south, grid_north, grid_west, grid_east, delta);
 		
 		settingsButton.setOperations(rpcService, var.getIntervals(), var.getDSID(), var.getID(), op, view, null);
 		tandzWidgets.removeAxes();
