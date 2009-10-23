@@ -152,7 +152,7 @@ public class VizGalPanel extends Composite {
 	/**
 	 * Builds a VizGal panel with a default plot for the variable.  See {@code}VizGal(LASRequest) if you want more options on the initial plot.
 	 */
-	public VizGalPanel(String id, boolean comparePanel, String op, String view, String productServer, boolean single, RPCServiceAsync rpcService, boolean allowEditing) {
+	public VizGalPanel(String id, boolean comparePanel, String op, String view, String productServer, boolean single, RPCServiceAsync rpcService) {
 		this.ID = id;
 		this.comparePanel = comparePanel;
 		this.productServer = productServer;
@@ -192,7 +192,7 @@ public class VizGalPanel extends Composite {
 		top = new Grid(1,3);
 
 		String title = "Settings";
-		settingsButton = new SettingsWidget(title, ID, op, rpcService, "button", allowEditing);
+		settingsButton = new SettingsWidget(title, ID, op, rpcService, "button");
 		settingsButton.addApplyClickListener(applyPanelClick);
 		settingsButton.addCloseClickListener(closeClick);
 		settingsButton.addDatasetTreeListener(datasetTreeListener);

@@ -91,6 +91,7 @@ public class CategorySerializable extends Serializable implements IsSerializable
 	public DatasetSerializable getDatasetSerializable() {
 		return datasetSerializable;
 	}
+
 	/**
 	 * @param datasetSerializable the datasetSerializable to set
 	 */
