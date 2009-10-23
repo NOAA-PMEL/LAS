@@ -234,8 +234,6 @@ public class VizGal extends LASEntryPoint {
 	 */
      Map<String, String> historyTokens;
      
-     boolean allowEditing = true;
-     
      // This tells whether or not the range passed in is a sub-region to the data range.
      // If it is we set the current selection to this. 
      boolean subRegion = false;
@@ -265,11 +263,6 @@ public class VizGal extends LASEntryPoint {
 		zhi = getParameterString("zhi");
 		tlo = getParameterString("tlo");
 		thi = getParameterString("thi");
-		
-		String editing = getParameterString("allowEditing");
-		if ( editing != null && editing.equals("false") ) {
-			allowEditing = false;
-		}
 		
 		initialHistory = getAnchor();
 		
@@ -312,7 +305,7 @@ public class VizGal extends LASEntryPoint {
 
 		// This is a control panel that will control the settings for all the panels and it appears vertically on the left side.
 		// The last false is to disallow editing with the grab handles on the map.
-		settingsControls = new SettingsWidget("Gallery Settings", "Slide Sorter", op, rpcService, "panel", allowEditing);
+		settingsControls = new SettingsWidget("Gallery Settings", "Slide Sorter", op, rpcService, "panel");
 		settingsControls.setTitle("Settings for all panels.");
 		settingsControls.addDatasetTreeListener(datasetTreeListener);
 		settingsControls.addOptionsOkClickListener(optionsOkListener);
@@ -395,11 +388,6 @@ public class VizGal extends LASEntryPoint {
 		RootPanel.get("header").add(header);
 		RootPanel.get("slides").add(mainPanel);
 		
-		if ( allowEditing ) {
-		    RootPanel.get("no_edit").add(new InlineHTML("<a href=\""+getNoEditURL()+"\">Turn off map selection editing.</a>"));
-		} else {
-			RootPanel.get("no_edit").add(new InlineHTML("<a href=\""+getEditURL()+"\">Turn on map selection editing.</a>"));
-		}
 		Window.addWindowResizeListener(windowResizeListener);
 		History.addValueChangeHandler(new ValueChangeHandler<String>() {
 			public void onValueChange(ValueChangeEvent<String> event) {
@@ -448,26 +436,6 @@ public class VizGal extends LASEntryPoint {
 			return "";
 		}
 		
-	}
-	private String getNoEditURL() {
-		String url = Window.Location.getHref();
-		if ( url.contains("allowEditing=false") ) {
-			return url;
-		} else if ( url.contains("allowEditing=true") ) {
-			return url.replace("allowEditing=true", "allowEditing=false" );
-		} else {
-			return url+"&allowEditing=false";
-		}
-	}
-	private String getEditURL() {
-		String url = Window.Location.getHref();
-		if ( url.contains("allowEditing=false") ) {
-			return url.replace("allowEditing=false", "allowEditing=true" );
-		} else if ( url.contains("allowEditing=true") ) {
-			return url;
-		} else {
-			return url+"&allowEditing=true";
-		}
 	}
 	TreeListener datasetTreeListener = new TreeListener() {
 
@@ -559,7 +527,7 @@ public class VizGal extends LASEntryPoint {
 		if ( pwidth <= 0 ) {
 			pwidth = 400;
 		}
-		VizGalPanel sp1 = new VizGalPanel("Panel 0", true, op, view, productServer, false, rpcService, allowEditing);
+		VizGalPanel sp1 = new VizGalPanel("Panel 0", true, op, view, productServer, false, rpcService);
 		sp1.addRevertListener(panelApplyButtonClick);
 		sp1.addApplyListener(panelApplyButtonClick);
 		slides.setWidget(0, 0, sp1);
@@ -569,7 +537,7 @@ public class VizGal extends LASEntryPoint {
 		sp1.addTChangeListner(panelAxisMenuChange);
 		panels.add(sp1);
 
-		VizGalPanel sp2 = new VizGalPanel("Panel 1", false, op, view, productServer, false, rpcService, allowEditing);
+		VizGalPanel sp2 = new VizGalPanel("Panel 1", false, op, view, productServer, false, rpcService);
 		sp2.addRevertListener(panelApplyButtonClick);
 		sp2.addApplyListener(panelApplyButtonClick);
 		//sp2.addRegionChangeListener(regionChange);
@@ -580,7 +548,7 @@ public class VizGal extends LASEntryPoint {
 		sp2.addTChangeListner(panelAxisMenuChange);		
 		panels.add(sp2);
 
-		VizGalPanel sp3 = new VizGalPanel("Panel 2", false, op, view, productServer, false, rpcService, allowEditing);
+		VizGalPanel sp3 = new VizGalPanel("Panel 2", false, op, view, productServer, false, rpcService);
 		sp3.addRevertListener(panelApplyButtonClick);
 		sp3.addApplyListener(panelApplyButtonClick);
 		//sp2.addRegionChangeListener(regionChange);
@@ -591,7 +559,7 @@ public class VizGal extends LASEntryPoint {
 		sp3.addTChangeListner(panelAxisMenuChange);		
 		panels.add(sp3);
 
-		VizGalPanel sp4 = new VizGalPanel("Panel 3", false, op, view, productServer, false, rpcService, allowEditing);
+		VizGalPanel sp4 = new VizGalPanel("Panel 3", false, op, view, productServer, false, rpcService);
 		sp4.addRevertListener(panelApplyButtonClick);
 		sp4.addApplyListener(panelApplyButtonClick);
 		//sp2.addRegionChangeListener(regionChange);

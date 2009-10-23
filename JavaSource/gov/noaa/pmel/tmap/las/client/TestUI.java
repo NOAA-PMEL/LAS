@@ -207,7 +207,7 @@ public class TestUI extends LASEntryPoint {
 			ortho.clear();
 			int width = Window.getClientWidth();
 			int pwidth = (width-rightPad);
-			panel = new VizGalPanel("LAS", false, op, view, productServer, true, rpcService, true);
+			panel = new VizGalPanel("LAS", false, op, view, productServer, true, rpcService);
 			panel.setVariable(var);
 			panel.init(true);
 			panel.addCompareAxisChangeListener(onAxisChange);

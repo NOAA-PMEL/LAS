@@ -81,17 +81,19 @@ public class DatasetWidget extends Tree implements TreeListener {
 								currentlySelected.addItem(item);
 							}
 						} else {
-							// Must have variable children and there should be only 1, but we're not checking :-)
-							DatasetSerializable ds = cat.getDatasetSerializable();
-							VariableSerializable[] vars = ds.getVariablesSerializable();
+							// Must have variable children...
 							TreeItem item = currentlySelected.getChild(0);
-							item.setText(vars[0].getName());
-							item.setUserObject(vars[0]);
-							for (int j = 1; j < vars.length; j++) {
-								item = new TreeItem();
-								item.setText(vars[j].getName());
-								item.setUserObject(vars[j]);
-								currentlySelected.addItem(item);
+							if ( cat.hasMultipleDatasets() ) {
+								DatasetSerializable[] dses = cat.getDatasetSerializableArray();
+								for (int j = 0; j < dses.length; j++) {
+									DatasetSerializable ds = dses[j];
+									VariableSerializable[] vars = ds.getVariablesSerializable();
+									loadItem(item, vars);
+								}
+							} else {
+								DatasetSerializable ds = cat.getDatasetSerializable();
+								VariableSerializable[] vars = ds.getVariablesSerializable();							
+								loadItem(item, vars);
 							}
 						}
 					}
@@ -101,6 +103,17 @@ public class DatasetWidget extends Tree implements TreeListener {
         
 		public void onFailure(Throwable caught) {
 			Window.alert("Server Request Failed: "+caught.getMessage());
+		}
+		
+		private void loadItem(TreeItem item, VariableSerializable[] vars ) {			
+			item.setText(vars[0].getName());
+			item.setUserObject(vars[0]);
+			for (int j = 1; j < vars.length; j++) {
+				item = new TreeItem();
+				item.setText(vars[j].getName());
+				item.setUserObject(vars[j]);
+				currentlySelected.addItem(item);
+			}
 		}
 	};
 	/* Work around for focus on tree in scroll panel scrolling to the top bug.  #369
