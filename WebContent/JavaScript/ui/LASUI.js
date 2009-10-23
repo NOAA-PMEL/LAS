@@ -531,6 +531,7 @@ LASUI.prototype.onSetVariable = function() {
 				document.getElementById("analysisWrapper").style.display="none";
 				this.refs.analysis.enabled = false;
 			}
+			if(document.getElementById("V6"))
 			document.getElementById("V6").href="servlets/datasets?dset=" + this.urlencode(categories + "/" + varObj.name);
 		}
 }
@@ -598,7 +599,7 @@ LASUI.prototype.setVariable = function (evt) {
 	var dataset = args[1];
 	var i = args[2];
 
-	var datasetID = dataset.category.getDatasetID();
+	var datasetID = dataset.category.getDatasetID(i);
 	var variableID = dataset.category.getChildID(i);
 	var variable = dataset.category.getChild(i);
 
@@ -2121,7 +2122,8 @@ LASUI.prototype.initMap = function (mapid) {
 	req.setRange("x",-180,180);
 	req.setRange("y",-90,90);
 	args.img.src = this.hrefs.getProduct.url + "?xml=" + this.urlencode(req.getXMLText()) + "&stream=true&stream_ID=plot_image";
-  	this.refs.XYSelect = new MapWidget(args);
+	  
+	this.refs.XYSelect = new MapWidget(args);
   	this.refs.XYSelect.disable();
 
 }
@@ -2129,11 +2131,11 @@ LASUI.prototype.initMap = function (mapid) {
  * Method to update the xy constraints textboxes
  *	@param {object} XYSelect A MapWidget object
  */
-LASUI.prototype.displayCoords = function (XYSelect) {
-	this.refs.inputs.minY.value=XYSelect.getSelectionGridYMin();
-	this.refs.inputs.maxY.value=XYSelect.getSelectionGridYMax();
-	this.refs.inputs.minX.value=XYSelect.getSelectionGridXMin();
-	this.refs.inputs.maxX.value=XYSelect.getSelectionGridXMax();
+LASUI.prototype.displayCoords = function (evt) {
+	this.refs.inputs.minY.value=this.refs.XYSelect.getSelectionGridYMin();
+	this.refs.inputs.maxY.value=this.refs.XYSelect.getSelectionGridYMax();
+	this.refs.inputs.minX.value=this.refs.XYSelect.getSelectionGridXMin();
+	this.refs.inputs.maxX.value=this.refs.XYSelect.getSelectionGridXMax();
 }
 /**
  * Event handler for the min X constraint textbox
@@ -2172,7 +2174,7 @@ LASUI.prototype.onafterdraw = function (evt) {
 		this.fullXYExtent=false;
 	else
 		this.fullXYExtent=true;
-
+	this.displayCoords();
 	if(!this.updating)
 		if(this.autoupdate) {
 			this.makeRequest();
