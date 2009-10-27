@@ -65,7 +65,13 @@ public class LASConfigTest extends TestCase {
         }
         las_config.mergeProperites();
         
-        las_config.convertToSeven();
+        try {
+			las_config.convertToSeven();
+		} catch (JDOMException e3) {
+			
+			e3.printStackTrace();
+			fail();
+		}
         
       
             try {

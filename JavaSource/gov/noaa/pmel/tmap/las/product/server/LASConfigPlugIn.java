@@ -27,6 +27,8 @@ import org.apache.log4j.LogManager;
 
 public class LASConfigPlugIn implements PlugIn {
     
+	private static boolean reinit_flag = false;
+	
 	/* These are Java objects that contain these configuration pieces. */
     /**  Servlet context key server config is stored under */
     public final static String LAS_CONFIG_KEY = "las_config";
@@ -142,8 +144,19 @@ public class LASConfigPlugIn implements PlugIn {
         	context.setAttribute(LAS_UI_CONFIG_FILENAME_KEY, lasUIFileName);
         }
         
-        go_init(false);
+        reinit_flag = false;
+        init_thread.run();
     }
+    public Thread init_thread = new Thread() {
+		@Override
+		public void run() {
+			try {
+				go_init();
+			} catch (JDOMException e) {
+				log.error("Could not parse the las config file "+configFileName);
+			}
+		}
+    };
     public void reinit(ServletContext reinitContext) throws ServletException {
     	context = reinitContext;
     	configFileName = (String) reinitContext.getAttribute(LAS_CONFIG_FILENAME_KEY);
@@ -168,10 +181,15 @@ public class LASConfigPlugIn implements PlugIn {
         if (lasUIFileName == null || lasUIFileName.length() == 0) {
             throw new ServletException("No ui.xml file specified.");
         }
-    	go_init(true);
-    }
-    public void go_init(boolean reinit) {
+        reinit_flag = true;
+        init_thread.run();
 
+    }
+    public void go_init() throws JDOMException {
+    	
+    	// If this is not a reinit, lock the product server here!!
+        if ( !reinit_flag ) context.setAttribute("lock", "true");
+        
     	File configFile = new File(configFileName);
         LASConfig lasConfig = new LASConfig();
         
@@ -194,7 +212,7 @@ public class LASConfigPlugIn implements PlugIn {
         context.setAttribute(SERVER_CONFIG_KEY, serverConfig);
         
         // The cache is emptied and reinitialized in a separate task so it gets created in the init and left alone in a reinit.
-        if (!reinit) {
+        if (!reinit_flag) {
         	// Create the Cache
         	Cache cache = new Cache(serverConfig.getCacheSize(), serverConfig.getCacheMaxBytes());
 
@@ -242,7 +260,7 @@ public class LASConfigPlugIn implements PlugIn {
         // Create XML stubs from THREDDS or netCDF input.
         Cache cache = (Cache) context.getAttribute(CACHE_KEY);
         try {
-			long next = lasConfig.addXML(reinit, cache);
+			long next = lasConfig.addXML(reinit_flag, cache);
 			if ( next < 999999999999999999l ) {
 			    UpdateTask update = new UpdateTask(context);
 			    Timer updateTimer = new Timer();
@@ -368,7 +386,9 @@ public class LASConfigPlugIn implements PlugIn {
         } catch (Exception e) {
             log.error("Cannot write out new Version 7.0 las.xml file.", e);
         }
-       context.setAttribute(LAS_CONFIG_KEY, lasConfig);   
+       context.setAttribute(LAS_CONFIG_KEY, lasConfig);  
+       // Unlock the product server and start accepting new requests...
+       context.setAttribute("lock", "false");
     }
     public void destroy() {
 
