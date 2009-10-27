@@ -2,8 +2,12 @@
 <html debug="true">
 	<head>
 		<title>$las_config.getTitle()</title>
-		<!--<script type="text/javascript" src="JavaScript/components/BrowserSniff.js" ></script>		-->
-<!--		<script type="text/javascript" src="JavaScript/frameworks/firebug/firebug/firebug.js" ></script> -->	
+
+		<link rel="stylesheet" href="JavaScript/frameworks/OpenLayers/theme/default/style.css" type="text/css" />
+ 		<link rel="stylesheet" href="JavaScript/frameworks/OpenLayersExtensions/style.css" type="text/css" />
+	 	<script src="JavaScript/frameworks/OpenLayers/OpenLayers.js"></script>
+		<script src="JavaScript/frameworks/OpenLayersExtensions/VerticalPath.js"></script>
+		<script src="JavaScript/frameworks/OpenLayersExtensions/HorizontalPath.js"></script> 
 		<script type="text/javascript" src="JavaScript/components/xmldom.js" ></script>
 		<script type="text/javascript" src="JavaScript/components/LASRequest.js" ></script>
 		<script type="text/javascript" src="JavaScript/components/LASGetGridResponse.js" ></script>
@@ -12,7 +16,7 @@
 		<script type="text/javascript" src="JavaScript/components/LASGetViewsResponse.js" ></script>
 		<script type="text/javascript" src="JavaScript/components/LASGetOperationsResponse.js" ></script>
 		<script type="text/javascript" src="JavaScript/components/LASGetOptionsResponse.js" ></script>
-		<script type="text/javascript" src="JavaScript/components/MapWidget.js" ></script>
+		<script type="text/javascript" src="JavaScript/components/LASOpenLayers.js" ></script>
 		<script type="text/javascript" src="JavaScript/components/querystring.js" ></script>
 		<script  type="text/javascript" src="JavaScript/components/DateWidget.js" ></script>
 		<script  type="text/javascript" src="JavaScript/components/MenuWidget.js" ></script>
@@ -23,7 +27,7 @@
 			var LAS = new LASUI();
 			LAS.products = {
 				"Maps" : {
-					"Latitude-Longitude" : {"view" : "xy", "class" : "visualization", "id" : "XY_zoomable_image", "optiondef" : "Options_2D_image_contour_xy"}
+					"Latitude-Longitude" : {"view" : "xy", "class" : "visualization", "id" : "PLot_2D_XY", "optiondef" : "Options_2D_image_contour_xy"}
 				},
 				"Line Plots" : {
 					"Time series" : {"view" : "t", "class" : "visualization", "id" : "Plot_1D", "optiondef" : "Options_1D"},
@@ -180,13 +184,13 @@
 				</div>
 			</div>
 			<div id="message_bar"><img id="wait" style="visibility:hidden;float:right;margin:2pt;padding:2pt;" src="JavaScript/components/mozilla_blu.gif"><span id="breadcrumb"></span></div>
-			<table height="600px" width="1024px"><tbody><tr><td valign="top" border=1>
+			<table height="600px" width="1024px"><tbody><tr><td style="vertical-align:top" border=1>
 				<div id="constraints">
-					<div id="MapWidget" style="border:1px solid black;" ><div style="position:absolute;z-index:4;text-align:center"><!--<img src="images/north-mini.png" onmousedown="LAS.refs.XYSelect.panPlot(0,10);"><br>--><img src="images/west-mini.png" onmousedown="LAS.refs.XYSelect.panPlot(-20,0);"><img src="images/east-mini.png" onmousedown="LAS.refs.XYSelect.panPlot(20,0);"><!--<br><img src="images/south-mini.png" onmousedown="LAS.refs.XYSelect.panPlot(0,-10);"><br><img src="images/zoom-plus-mini.png" onclick="LAS.refs.XYSelect.zoom(2);"><br><img src="images/zoom-minus-mini.png"  onclick="LAS.refs.XYSelect.zoom(-1)">--></div></div>
+					<div id="MapWidget" style="border:1px solid black;width:220px;height:130px;z-index:10;"></div>
 					<strong>
+						<input type="radio" id="map_nav" onclick="LAS.refs.XYSelect.setControl(this.id)" name="map_mode" >Navigate&nbsp;&nbsp;<input onclick="LAS.refs.XYSelect.setControl(this.id)" type="radio" id="map_select" checked="checked" name="map_mode">Select&nbsp;&nbsp;<input type="radio" onclick="LAS.refs.XYSelect.setControl(this.id)" id="map_change" name="map_mode">Change
 						Latitude range <input size=3  id="input_minY" type="text" value="-90.0">&nbsp;:&nbsp;<input id="input_maxY" size=3 type="text" value="90.0"><br>
-						Longitude range <input size=3 id="input_minX" value="-180.0">&nbsp;:&nbsp;<input value="180.0" size=3 id="input_maxX"><br>
-						<span class="LASLink" onclick="LAS.resetXY=true;LAS.updateConstraints()">Reset Map</span>
+						Longitude range <input size=3 id="input_minX" value="-180.0">&nbsp;:&nbsp;<input value="180.0" size=3 id="input_maxX"><br>						
 					</strong>
 					<div id="constraintsScroll"  class="LASConstraintsPane">
 						<div id="plotType"></div>
