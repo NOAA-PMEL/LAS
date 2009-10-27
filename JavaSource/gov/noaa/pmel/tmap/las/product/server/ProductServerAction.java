@@ -445,12 +445,10 @@ public final class ProductServerAction extends LASAction {
                         	
                             // Timeout set in the request.
                             long to = Math.min(timeout, 2);
-                            log.info("Joining thread with timeout of "+to);
                             productServerRunner.join(to);
                         } else {
                             // No time out set.  Very unlikely, but possible if a new request wants the same
                             // product without an assoicated session.
-                        	log.info("Joining thread with no timeout value set");
                             productServerRunner.join();
                         }                        
                     } catch (Exception e) {

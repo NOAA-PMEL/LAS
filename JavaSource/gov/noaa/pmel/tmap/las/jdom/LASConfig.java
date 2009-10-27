@@ -611,12 +611,18 @@ public class LASConfig extends LASDocument {
     }
     /**
      * Converts to XML that can be validated against a schema, or returns if it detects that XML is already "Version 7".
+     * @throws JDOMException 
      *
      */
-    public void convertToSeven() {
+    public void convertToSeven() throws JDOMException {
         Element root = getRootElement();
         String version = root.getAttributeValue("version");
-        if ( version != null && version.contains("7.")) {
+        String allow_sisters = root.getAttributeValue("allow_sisters");
+        boolean sister = false;
+        if ( allow_sisters != null ) {
+        	sister = true;
+        }
+        if ( version != null && version.contains("7.") && !sister) {
             return;
         }
         root.setAttribute("version", "7.0");
@@ -639,6 +645,7 @@ public class LASConfig extends LASDocument {
                     	 !dataset.getName().equals("contributor")) {
                         String ID = dataset.getName();
                         dataset.setName("dataset");
+                        if ( sister ) ID = getBaseServerURL() + "::-::" + ID;
                         dataset.setAttribute("ID", ID);
                         // Technically, I think there's only one of these per dataset,
                         // but you can't be sure so loop over all you can find.
