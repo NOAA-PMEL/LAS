@@ -60,17 +60,22 @@ function LASGetCategoriesResponse_getCategoryType() {
 function LASGetCategoriesResponse_getDatasetID(i) {
 	if(i==null) 
 		i=0;
-	if(this.getCategoryType() == "dataset")
+	if(this.getCategoryType() == "dataset") {
 		var ct=0;
-	        for (d=0;d<this.response.categories.category[0].dataset.length;d++)
-                        if(this.response.categories.category[0].dataset[d].variables)
+		var len = this.response.categories.category[0].dataset.length;
+		if(!len)
+			len = 1;
+	        for (d=0;d<len;d++)
+			if(len==1) {
+                                 return this.response.categories.category[0].dataset.ID;
+                        } else if(this.response.categories.category[0].dataset[d].variables)
                                 if(this.response.categories.category[0].dataset[d].variables.variable){
                                         lastct=ct;
                                         ct+=this.response.categories.category[0].dataset[d].variables.variable.length;
                                         if(i>=lastct && i<ct)
                                                  return this.response.categories.category[0].dataset[d].ID;
                                 }
-	else
+	} else
 		return "category";
 }
 /**
@@ -93,8 +98,14 @@ function LASGetCategoriesResponse_getDatasetName() {
 function LASGetCategoriesResponse_getCategorySize() {
 	if(this.getCategoryType() == "dataset") {
 		var ct =0;
-		for (i=0;i<this.response.categories.category[0].dataset.length;i++)
-			if(this.response.categories.category[0].dataset[i].variables)
+                var len = this.response.categories.category[0].dataset.length;
+                if(!len)
+                        len = 1;
+		for (i=0;i<len;i++)
+			if(len==1) {
+				if(this.response.categories.category[0].dataset.variables.variable)
+                                        ct+=this.response.categories.category[0].dataset.variables.variable.length; 	
+			} else if(this.response.categories.category[0].dataset[i].variables)
 				if(this.response.categories.category[0].dataset[i].variables.variable)
 					ct+=this.response.categories.category[0].dataset[i].variables.variable.length;
 		return ct;
@@ -114,7 +125,20 @@ function LASGetCategoriesResponse_getCategorySize() {
 function LASGetCategoriesResponse_getChild(i) {
    if(this.getCategoryType()=="dataset") {
    	var ct=0;
-	for (d=0;d<this.response.categories.category[0].dataset.length;d++)
+        var len = this.response.categories.category[0].dataset.length;
+        if(!len)
+          len = 1;
+ 
+	for (d=0;d<len;d++)
+			 if(len==1) {
+                                if(this.response.categories.category[0].dataset.variables.variable)
+                                        if(this.response.categories.category[0].dataset.variables.variable){
+                                        lastct=ct;
+                                        ct+=this.response.categories.category[0].dataset.variables.variable.length;
+                                        if(i>=lastct && i<ct)
+                                                 return this.response.categories.category[0].dataset.variables.variable[i-lastct];
+                                }
+                        }
                         if(this.response.categories.category[0].dataset[d].variables)
                                 if(this.response.categories.category[0].dataset[d].variables.variable){
 					lastct=ct;
