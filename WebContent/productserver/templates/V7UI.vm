@@ -27,7 +27,7 @@
 			var LAS = new LASUI();
 			LAS.products = {
 				"Maps" : {
-					"Latitude-Longitude" : {"view" : "xy", "class" : "visualization", "id" : "PLot_2D_XY", "optiondef" : "Options_2D_image_contour_xy"}
+					"Latitude-Longitude" : {"view" : "xy", "class" : "visualization", "id" : "Plot_2D_XY", "optiondef" : "Options_2D_image_contour_xy"}
 				},
 				"Line Plots" : {
 					"Time series" : {"view" : "t", "class" : "visualization", "id" : "Plot_1D", "optiondef" : "Options_1D"},
