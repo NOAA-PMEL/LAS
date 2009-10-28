@@ -166,6 +166,23 @@ public class TemplateTool extends Tool {
     	}
     	return contents.toString();
     }
+    public String readMergedDatabaseTemplate(File file) throws IOException {
+    	BufferedReader reader = null;
+    	FileReader f = new FileReader(file);
+    	reader = new BufferedReader(f);
+
+    	StringBuffer contents = new StringBuffer("");
+    	if (reader != null) {
+
+    		String line = reader.readLine();
+    		while ( line != null ) {
+    			contents = contents.append(line.trim()+" ");
+    			line = reader.readLine();
+    		}
+
+    	}
+    	return contents.toString();
+    }
     protected void mergeCommandTemplate (LASBackendRequest lasBackendRequest, File jnlFile, String template) throws LASException, Exception {
         PrintWriter templateWriter = null;
         try {

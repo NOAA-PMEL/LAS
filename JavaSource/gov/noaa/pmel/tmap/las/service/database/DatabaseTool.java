@@ -147,7 +147,7 @@ public class DatabaseTool extends TemplateTool {
         ResultSet rset = null;
         String statement = "";
         try {
-        	statement = readMergedTemplate(sqlFile);
+        	statement = readMergedDatabaseTemplate(sqlFile);
         } catch (IOException e ) {
         	lasBackendResponse.setError("Unable to read line from SQL file ", e);
         	return lasBackendResponse;
@@ -210,7 +210,14 @@ public class DatabaseTool extends TemplateTool {
             stmt.setFetchSize(f);
             
             log.debug("Timing "+ti+" : "+lasBackendRequest.getResultAsFile("db_debug")+": Executing database query.");
-            rset = stmt.executeQuery(statement);
+       	    if (stmt.execute(statement)) {
+	    	rset = stmt.getResultSet();
+	    } else {
+		int rows = stmt.getUpdateCount();
+		log.debug("Executed "+statement+" which affected "+rows+" rows.");
+		log.info("Executed "+statement+" which affected "+rows+" rows.");
+	    }    
+	
             log.debug("Timing "+ti+" : "+lasBackendRequest.getResultAsFile("db_debug")+": Finished executing database query.");
             ti++;
         } catch (Exception e) {
