@@ -138,7 +138,7 @@ function LASGetCategoriesResponse_getChild(i) {
                                         if(i>=lastct && i<ct)
                                                  return this.response.categories.category[0].dataset.variables.variable[i-lastct];
                                 }
-                        }
+                        } else
                         if(this.response.categories.category[0].dataset[d].variables)
                                 if(this.response.categories.category[0].dataset[d].variables.variable){
 					lastct=ct;

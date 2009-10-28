@@ -203,7 +203,7 @@ LASUI.prototype.setInitialVariable = function(strJson) {
 	if(response.categories.status=="ok") {
 	var category = new LASGetCategoriesResponse(response);
 
-	this.state.dataset = category.getDatasetID();
+	this.state.dataset = category.getDatasetID(0);
 	this.state.datasets[this.state.dataset] = category;
 	this.getGrid(this.state.dataset,this.state.variable);
 	this.getDataConstraints(this.state.dataset,this.state.variable);
@@ -422,11 +422,11 @@ LASUI.prototype.createVariableTreeNode = function (node, i) {
 	node.children[i].LINode.className = "LASTreeLINode";
 	node.marginLeft="5pt";
 	if(document.all) {
-		var elem_nm = "<INPUT NAME='" + node.category.getDatasetID()+"'>";
+		var elem_nm = "<INPUT NAME='" + node.category.getDatasetID(i)+"'>";
 		node.children[i].INPUTNode = document.createElement(elem_nm);
 	} else {
 		node.children[i].INPUTNode = document.createElement("INPUT");
-		node.children[i].INPUTNode.name=node.category.getDatasetID();
+		node.children[i].INPUTNode.name=node.category.getDatasetID(i);
 	}
 	node.children[i].INPUTNode.type="radio";
 	node.children[i].className = "LASRadioInputNode";
@@ -605,7 +605,7 @@ LASUI.prototype.setVariable = function (evt) {
 
 	//start an array of selected variables for this datasetthis.state.datasets[this.state.dataset] if we havent already
 	this.state.datasets[datasetID] = dataset.category;
-
+        this.state.lastDataset = this.state.dataset;
 	this.state.dataset = datasetID;
 	this.state.variable = variableID;
 	this.getGrid(datasetID,variableID);
@@ -1044,7 +1044,7 @@ LASUI.prototype.setDefaultProductMenu = function () {
 	}*/
 	this.updating=true;
 	this.refs.XYSelect.updatePixelExtents();
-
+	this.updating=false;
 }
 LASUI.prototype.setProductTypeNode = function(type) {
 
