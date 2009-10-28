@@ -154,6 +154,8 @@ public class LASConfigPlugIn implements PlugIn {
 				go_init();
 			} catch (JDOMException e) {
 				log.error("Could not parse the las config file "+configFileName);
+			} catch (UnsupportedEncodingException e) {
+				log.error("Could not parse the las config file "+configFileName);
 			}
 		}
     };
@@ -185,7 +187,7 @@ public class LASConfigPlugIn implements PlugIn {
         init_thread.run();
 
     }
-    public void go_init() throws JDOMException {
+    public void go_init() throws JDOMException, UnsupportedEncodingException {
     	
     	// If this is not a reinit, lock the product server here!!
         if ( !reinit_flag ) context.setAttribute("lock", "true");
@@ -402,7 +404,7 @@ public class LASConfigPlugIn implements PlugIn {
 
     }
 
-	public void update(ServletContext context) throws ServletException, JDOMException {
+	public void update(ServletContext context) throws ServletException, JDOMException, UnsupportedEncodingException {
 		this.context = context;
 		configFileName = (String) context.getAttribute(LAS_CONFIG_FILENAME_KEY);
     	

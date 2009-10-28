@@ -7,6 +7,7 @@ import gov.noaa.pmel.tmap.las.util.Option;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -70,6 +71,10 @@ public class LASConfigTest extends TestCase {
 		} catch (JDOMException e3) {
 			
 			e3.printStackTrace();
+			fail();
+		} catch (UnsupportedEncodingException e) {
+			
+			e.printStackTrace();
 			fail();
 		}
         

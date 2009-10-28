@@ -1,5 +1,6 @@
 package gov.noaa.pmel.tmap.las.product.server;
 
+import java.io.UnsupportedEncodingException;
 import java.util.TimerTask;
 
 import javax.servlet.ServletContext;
@@ -26,6 +27,9 @@ public class UpdateTask extends TimerTask {
 			// Log the error and continue.
 			log.error("Could not update configuration: "+e.toString());
 		} catch (JDOMException e) {
+			// Log the error and continue.
+			log.error("Could not update configuration: "+e.toString());
+		} catch (UnsupportedEncodingException e) {
 			// Log the error and continue.
 			log.error("Could not update configuration: "+e.toString());
 		}
