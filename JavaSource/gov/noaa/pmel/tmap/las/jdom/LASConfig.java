@@ -612,9 +612,10 @@ public class LASConfig extends LASDocument {
     /**
      * Converts to XML that can be validated against a schema, or returns if it detects that XML is already "Version 7".
      * @throws JDOMException 
+     * @throws UnsupportedEncodingException 
      *
      */
-    public void convertToSeven() throws JDOMException {
+    public void convertToSeven() throws JDOMException, UnsupportedEncodingException {
         Element root = getRootElement();
         String version = root.getAttributeValue("version");
         String allow_sisters = root.getAttributeValue("allow_sisters");
@@ -645,7 +646,7 @@ public class LASConfig extends LASDocument {
                     	 !dataset.getName().equals("contributor")) {
                         String ID = dataset.getName();
                         dataset.setName("dataset");
-                        if ( sister ) ID = getBaseServerURL() + "::-::" + ID;
+                        if ( sister ) ID = JDOMUtils.MD5Encode(getBaseServerURL()) + "_ns_" + ID;
                         dataset.setAttribute("ID", ID);
                         // Technically, I think there's only one of these per dataset,
                         // but you can't be sure so loop over all you can find.
