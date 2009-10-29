@@ -36,8 +36,21 @@ ELSE
   DEFINE SYMBOL data_url \"($data_($num)_url)\"
 ENDIF
 
+IF ($data_($num)_name"0|1|*>1) THEN 
+   IF ($data_($num)_title"0|*>1") THEN DEFINE SYMBOL data_title ($data_($num)_title)
+ELSE
+   IF ($data_($num)_var"0|*>1") THEN DEFINE SYMBOL data_title ($data_($num)_var)
+ENDIF
+
+DEFINE SYMBOL ferret_plot_title "($data_title) ($data_units)"
+
+! If the units symbol was sent in with just ""
+! this causes problems with the logic below. 
+DEFINE SYMBOL test_units = .($data_($num)_units%.%).
+IF ($test_units%0|."".>1|*>0%) THEN CANCEL symbol data_($num)_units
+
 ! Remove single quotes around a units string
-IF `STRINDEX("($data_($num)_units)", "'") GT 0` THEN 
+IF `STRINDEX("($data_($num)_units% %)", "'") GT 0` THEN 
    LET s1 = `STRINDEX("($data_($num)_units)", "'")`
    LET s2 = `STRRINDEX("($data_($num)_units)", "'")`
    DEFINE SYMBOL data_var_units `SUBSTRING("($data_($num)_units)", s1+1, s2-s1-1)`
@@ -48,21 +61,12 @@ ENDIF
 IF ($data_($num)_var"0|*>1") THEN DEFINE SYMBOL data_var ($data_($num)_var)
 IF ($data_($num)_units"0|*>1") THEN 
    DEFINE SYMBOL data_units (($data_($num)_units))
-   IF `STRINDEX("($data_units)", "((") GT 0` THEN \
-     DEFINE SYMBOL data_units ($data_($num)_units)
+   IF `STRINDEX("($data_units)", "((") GT 0` THEN DEFINE SYMBOL data_units ($data_($num)_units)
 ENDIF
 
 ! Do not define data_units with an empty string
 IF ($data_($num)_units%1|"">1|*>0%) THEN CANCEL SYMBOL data_units
 IF ($data_($num)_units%1|" ">1|*>0%) THEN CANCEL SYMBOL data_units
-
-IF ($data_($num)_name"0|1|*>1) THEN 
-   IF ($data_($num)_title"0|*>1") THEN DEFINE SYMBOL data_title ($data_($num)_title)
-ELSE
-   IF ($data_($num)_var"0|*>1") THEN DEFINE SYMBOL data_title ($data_($num)_var)
-ENDIF
-
-DEFINE SYMBOL ferret_plot_title "($data_title) ($data_units)"
 
 ! TODO:  Use new error features in Ferret to turn off STDERR and check
 ! TODO:  for Ferret error symbols to see if the SET DATA command actually worked.
@@ -71,12 +75,14 @@ DEFINE SYMBOL ferret_plot_title "($data_title) ($data_units)"
 
 SET DATA ($data_url)
 
+
 IF ($fer_last_error"0|*>1") THEN
   DEFINE SYMBOL error_status = ERROR
   DEFINE SYMBOL error_type = DATA
   DEFINE SYMBOL error_string = The ($data_var) source file -- ($data_url) did not open successfully.
   EXIT/SCRIPT
 ENDIF
+
 
 ! End of $RCSfile ------------LAS_initialize_dataset.jnl--------------------------
 
