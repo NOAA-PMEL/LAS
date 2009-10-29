@@ -6,6 +6,7 @@ import gov.noaa.pmel.tmap.las.client.laswidget.AxisWidget;
 import gov.noaa.pmel.tmap.las.client.laswidget.DateTimeWidget;
 import gov.noaa.pmel.tmap.las.client.laswidget.LASRequestWrapper;
 import gov.noaa.pmel.tmap.las.client.laswidget.TandZWidgets;
+import gov.noaa.pmel.tmap.las.client.laswidget.Util;
 import gov.noaa.pmel.tmap.las.client.map.SettingsWidget;
 import gov.noaa.pmel.tmap.las.client.serializable.GridSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.VariableSerializable;
@@ -160,11 +161,13 @@ public class VizGalPanel extends Composite {
 		this.rpcService = rpcService;
 		this.op = op;
 		this.view = view;
+		String spinImageURL = Util.getImageURL()+"/mozilla_blu.gif";
+		spinImage = new HTML("<img src=\""+spinImageURL+"\" alt=\"Spinner\"/>");
 		dateTimeWidget.addChangeListener(comparisonAxisChangeListener);
 		zAxisWidget.addChangeListener(comparisonAxisChangeListener);
 
 		spin = new PopupPanel();
-		spinImage = new HTML("<img src=\"../JavaScript/components/mozilla_blu.gif\" alt=\"Spinner\"/>");
+		
 		spin.add(spinImage);
 
 		messagePanel = new PopupPanel();
@@ -216,7 +219,7 @@ public class VizGalPanel extends Composite {
 
 		grid.setWidget(0, 0, top);
 		HTML plot = new HTML();
-		plot.setHTML("<img src=\"../JavaScript/components/mozilla_blu.gif\" alt=\"Spinner\"/>");
+		plot.setHTML(spinImage.getHTML());
 		grid.setWidget(1, 0, plot);
 		initWidget(grid);	
 
