@@ -6,6 +6,12 @@
 IF `STRINDEX("($data_var)", "_1_regrid") GT 0` THEN
    LET nnx = `STRINDEX("($data_var)", "_1_regrid")`
    DEFINE SYMBOL data_var_only = `SUBSTRING("($data_var)", 1, nnx-1)`
+ELSE
+   ! Maybe it was defined in an init script
+   IF ($ferret_init_script"0|*>1") THEN 
+      DEFINE SYMBOL definition = ($data_var).long_name
+      EXIT/SCRIPT
+   ENDIF
 ENDIF
 
 LET its_x_analysis = STRINDEX("($data_($num)_title)", "x=") 
