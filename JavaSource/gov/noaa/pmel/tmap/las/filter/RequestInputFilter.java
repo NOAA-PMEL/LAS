@@ -285,7 +285,7 @@ public class RequestInputFilter implements Filter {
 			return true;
 		}
 		if ( value.length > 1 ) return false;
-		if ( !value[0].equals("json") || !value[0].equals("xml") ) return false;
+		if ( !value[0].equals("json") && !value[0].equals("xml") ) return false;
 		return true;
 	}
 	private boolean validBBOX(HttpServletRequest request) {
