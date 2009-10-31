@@ -27,6 +27,7 @@ import gov.noaa.pmel.tmap.las.product.server.Cache;
 import gov.noaa.pmel.tmap.las.ui.state.StateNameValueList;
 import gov.noaa.pmel.tmap.las.ui.state.TimeSelector;
 import gov.noaa.pmel.tmap.las.util.Category;
+import gov.noaa.pmel.tmap.las.util.Constants;
 import gov.noaa.pmel.tmap.las.util.DataConstraint;
 import gov.noaa.pmel.tmap.las.util.Dataset;
 import gov.noaa.pmel.tmap.las.util.Grid;
@@ -36,6 +37,7 @@ import gov.noaa.pmel.tmap.las.util.Operation;
 import gov.noaa.pmel.tmap.las.util.Option;
 import gov.noaa.pmel.tmap.las.util.Region;
 import gov.noaa.pmel.tmap.las.util.TimeAxis;
+import gov.noaa.pmel.tmap.las.util.Tributary;
 import gov.noaa.pmel.tmap.las.util.Variable;
 import gov.noaa.pmel.tmap.las.util.View;
 
@@ -317,6 +319,7 @@ public class LASConfig extends LASDocument {
         if ( version != null && !version.contains("7.")) {
             throw new LASException("XML is not version 7.0 or above.  Try convertToSeven() first.");
         }
+       
         List datasetsElements = root.getChildren("datasets");
         for (Iterator dseIt = datasetsElements.iterator(); dseIt.hasNext();) {
             Element datasetsE = (Element) dseIt.next();
@@ -609,6 +612,14 @@ public class LASConfig extends LASDocument {
         }
         return false;
     }
+    public boolean allowsSisters() {
+    	String allow_sisters = getRootElement().getAttributeValue("allow_sisters");
+    	boolean sister = false;
+        if ( allow_sisters != null ) {
+        	sister = true;
+        }
+        return sister;
+    }
     /**
      * Converts to XML that can be validated against a schema, or returns if it detects that XML is already "Version 7".
      * @throws JDOMException 
@@ -618,12 +629,9 @@ public class LASConfig extends LASDocument {
     public void convertToSeven() throws JDOMException, UnsupportedEncodingException {
         Element root = getRootElement();
         String version = root.getAttributeValue("version");
-        String allow_sisters = root.getAttributeValue("allow_sisters");
-        boolean sister = false;
-        if ( allow_sisters != null ) {
-        	sister = true;
-        }
-        if ( version != null && version.contains("7.") && !sister) {
+        
+        
+        if ( version != null && version.contains("7.") && !allowsSisters()) {
             return;
         }
         root.setAttribute("version", "7.0");
@@ -646,7 +654,7 @@ public class LASConfig extends LASDocument {
                     	 !dataset.getName().equals("contributor")) {
                         String ID = dataset.getName();
                         dataset.setName("dataset");
-                        if ( sister ) ID = JDOMUtils.MD5Encode(getBaseServerURL()) + "_ns_" + ID;
+                        if ( allowsSisters() ) ID = JDOMUtils.MD5Encode(getBaseServerURL()) + Constants.NAME_SPACE_SPARATOR + ID;
                         dataset.setAttribute("ID", ID);
                         // Technically, I think there's only one of these per dataset,
                         // but you can't be sure so loop over all you can find.
@@ -748,6 +756,20 @@ public class LASConfig extends LASDocument {
                 setIDs(categories);                     
             }
 
+        }
+        List las_serverElements = root.getChildren("las_server");
+        for (Iterator lsIt = las_serverElements.iterator(); lsIt.hasNext();) {
+        	Element las_server = (Element) lsIt.next();
+        	String url = las_server.getAttributeValue("url");
+        	if ( url == null ) {
+        		log.warn("<las_server> configured without a url attribute.");
+        	} else {
+        		String ID = las_server.getAttributeValue("ID");
+        		if ( ID == null ) {
+        			ID = JDOMUtils.MD5Encode(url);
+        			las_server.setAttribute("ID", ID);
+        		}
+        	}
         }
     }
     /**
@@ -3178,7 +3200,7 @@ public class LASConfig extends LASDocument {
             }
         }
     }
-    private void setIDs(List categories) {
+    private void setIDs(List categories) throws UnsupportedEncodingException, JDOMException {
         for (Iterator catIt = categories.iterator(); catIt.hasNext();) {
             Element category = (Element) catIt.next();
             String ID = category.getAttributeValue("ID");
@@ -3189,6 +3211,9 @@ public class LASConfig extends LASDocument {
                     ID = JDOMUtils.MD5Encode(name + parents);
                 } catch (UnsupportedEncodingException e) {
                     ID = String.valueOf(Math.random());
+                }
+                if ( allowsSisters() ) {
+                	ID = JDOMUtils.MD5Encode(getBaseServerURL()) + Constants.NAME_SPACE_SPARATOR + ID;
                 }
                 category.setAttribute("ID", ID);
             }   
@@ -3795,5 +3820,25 @@ public class LASConfig extends LASDocument {
 			    las_categoriesE.addContent(catE);
 			}
 		}
+	}
+	public ArrayList<Tributary> getTributaries() {
+		ArrayList<Tributary> tributaries = new ArrayList<Tributary>();
+		List tribElements = getRootElement().getChildren("las_server");
+		for (Iterator tribIt = tribElements.iterator(); tribIt.hasNext();) {
+			Element trib = (Element) tribIt.next();
+			Tributary tributary = new Tributary(trib);			
+			tributaries.add(tributary);
+		}
+		return tributaries;
+	}
+	public Tributary getTributary(String key) {
+		List tribElements = getRootElement().getChildren("las_server");
+		for (Iterator tribIt = tribElements.iterator(); tribIt.hasNext();) {
+			Element trib = (Element) tribIt.next();
+			if ( trib.getAttributeValue("ID").equals(key) ) {
+				return new Tributary((Element) trib.clone());
+			}
+		}
+		return null;
 	}
 }
