@@ -40,4 +40,8 @@ public class Dataset extends Container implements DatasetInterface {
 		}
     	return vs;
     }
+	public void addVariable(Variable variable) {
+		Element variables = element.getChild("variables");
+		variables.addContent((Element) variable.getElement().clone());
+	}
 }

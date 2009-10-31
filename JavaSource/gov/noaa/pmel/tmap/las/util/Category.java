@@ -3,8 +3,10 @@ package gov.noaa.pmel.tmap.las.util;
 import gov.noaa.pmel.tmap.las.client.serializable.CategorySerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.DatasetSerializable;
 import gov.noaa.pmel.tmap.las.exception.LASException;
+import gov.noaa.pmel.tmap.las.jdom.JDOMUtils;
 import gov.noaa.pmel.tmap.las.ui.Util;
 
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -17,6 +19,21 @@ import org.json.JSONObject;
 public class Category extends Container implements CategoryInterface {
 	public Category(Element category) {
 		super(category);
+	}
+	public Category (String name) {
+		super(new Element("category"));
+		setName(name);
+		try {
+			setID(JDOMUtils.MD5Encode(name));
+		} catch (UnsupportedEncodingException e) {
+			setID(String.valueOf(Math.random()));
+		}
+	}
+	public void addCategory(Category cat) {
+		getElement().addContent(cat.getElement());
+	}
+	public void addCategory(Element cat) {
+		getElement().addContent(cat);
 	}
 	public boolean hasCategoryChildren() {
 		return !hasVariableChildren();
