@@ -3858,21 +3858,6 @@ public class LASConfig extends LASDocument {
 					}
 				}		    	
 		    }
-		    List optionsElements = getRootElement().getChildren("options");
-		    for (Iterator optionsEIt = optionsElements.iterator(); optionsEIt.hasNext();) {
-				Element options = (Element) optionsEIt.next();
-				List optionsdefElements = options.getChildren("optiondef");
-				for (Iterator optionsdefIt = optionsdefElements.iterator(); optionsdefIt.hasNext();) {
-					Element optionsdef = (Element) optionsdefIt.next();
-					List opsElements = optionsdef.getChildren("option");
-					for (Iterator opsIt = opsElements.iterator(); opsIt.hasNext();) {
-						Element option = (Element) opsIt.next();
-						String ID = option.getAttributeValue("ID");
-						ID = JDOMUtils.MD5Encode(getBaseServerURL()) + Constants.NAME_SPACE_SPARATOR + ID;
-						option.setAttribute("ID", ID);
-					}
-				}
-			}
 		}
 	}
 }
