@@ -384,7 +384,7 @@ public class LASConfigPlugIn implements PlugIn {
 		lasConfig.getRootElement().addContent(ui);
 
 
-		// Finally add the server id to the operations if applicable.
+		// Finally add the server id to the options if applicable.
 		lasConfig.addServerID();
 
 		File v7 = new File(lasConfig.getOutputDir()+"/lasV7.xml");

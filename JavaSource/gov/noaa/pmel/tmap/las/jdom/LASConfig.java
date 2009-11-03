@@ -3849,11 +3849,30 @@ public class LASConfig extends LASDocument {
 		    	List ops = opsParent.getChildren("operation");
 		    	for (Iterator opsIt = ops.iterator(); opsIt.hasNext();) {
 					Element op = (Element) opsIt.next();
-					String ID = op.getAttributeValue("ID");
-			    	ID = JDOMUtils.MD5Encode(getBaseServerURL()) + Constants.NAME_SPACE_SPARATOR + ID;
-			    	op.setAttribute("ID", ID);
+					Element optiondef = op.getChild("optiondef");	
+					// Maybe null for old operations or those without options
+					if ( optiondef != null ) {
+						String IDREF = optiondef.getAttributeValue("IDREF");
+						IDREF = JDOMUtils.MD5Encode(getBaseServerURL()) + Constants.NAME_SPACE_SPARATOR + IDREF;
+						optiondef.setAttribute("IDREF", IDREF);
+					}
 				}		    	
 		    }
+		    List optionsElements = getRootElement().getChildren("options");
+		    for (Iterator optionsEIt = optionsElements.iterator(); optionsEIt.hasNext();) {
+				Element options = (Element) optionsEIt.next();
+				List optionsdefElements = options.getChildren("optiondef");
+				for (Iterator optionsdefIt = optionsdefElements.iterator(); optionsdefIt.hasNext();) {
+					Element optionsdef = (Element) optionsdefIt.next();
+					List opsElements = optionsdef.getChildren("option");
+					for (Iterator opsIt = opsElements.iterator(); opsIt.hasNext();) {
+						Element option = (Element) opsIt.next();
+						String ID = option.getAttributeValue("ID");
+						ID = JDOMUtils.MD5Encode(getBaseServerURL()) + Constants.NAME_SPACE_SPARATOR + ID;
+						option.setAttribute("ID", ID);
+					}
+				}
+			}
 		}
 	}
 }
