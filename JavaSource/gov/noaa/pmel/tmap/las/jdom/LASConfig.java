@@ -3841,4 +3841,19 @@ public class LASConfig extends LASDocument {
 		}
 		return null;
 	}
+	public void addServerID() throws UnsupportedEncodingException, JDOMException {
+		if ( allowsSisters() ) {
+			List operationsElements = getRootElement().getChildren("operations");
+		    for (Iterator opsElementsIt = operationsElements.iterator(); opsElementsIt.hasNext();) {   
+		    	Element opsParent = (Element) opsElementsIt.next();
+		    	List ops = opsParent.getChildren("operation");
+		    	for (Iterator opsIt = ops.iterator(); opsIt.hasNext();) {
+					Element op = (Element) opsIt.next();
+					String ID = op.getAttributeValue("ID");
+			    	ID = JDOMUtils.MD5Encode(getBaseServerURL()) + Constants.NAME_SPACE_SPARATOR + ID;
+			    	op.setAttribute("ID", ID);
+				}		    	
+		    }
+		}
+	}
 }
