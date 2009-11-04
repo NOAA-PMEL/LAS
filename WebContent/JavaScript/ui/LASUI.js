@@ -734,7 +734,7 @@ LASUI.prototype.getOperations = function (dataset, variable, view) {
 			req.open("GET", this.hrefs.getOperations.url + '?dsid=' + dataset + '&varid=' + variable + viewStr);
 			req.send(null);
 		}
-		this.resetOptions("plot");
+		//this.resetOptions("plot");
 
 }/**
  *	Event handler to set the operation
@@ -887,6 +887,7 @@ LASUI.prototype.setOperationList = function (strJson) {
 		this.state.operation.plot = defaultVis;
 	}
 	this.getOptions(this.state.operations.getOperationByID(this.state.operation.plot).optiondef.IDREF, "plot", true);
+
 	if(this.refs.analysis.enabled||!this.state.grid.hasAxis('t'))document.getElementById('Animation').style.visibility='hidden';
 }
 
