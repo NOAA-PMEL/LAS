@@ -734,6 +734,7 @@ LASUI.prototype.getOperations = function (dataset, variable, view) {
 			req.open("GET", this.hrefs.getOperations.url + '?dsid=' + dataset + '&varid=' + variable + viewStr);
 			req.send(null);
 		}
+		this.resetOptions("plot");
 
 }/**
  *	Event handler to set the operation
@@ -791,8 +792,15 @@ LASUI.prototype.setOperation = function (evt) {
 	var id = args[1];
 	var optiondef = args[3];
 	var type = args[4];
-	if(!type)
+	if(!type) {
 		type="plot";
+		
+	}
+	if (type == "plot")
+		try {
+			if(this.state.operations.getOperationByID(id).optiondef.IDREF)
+				optiondef = this.state.operations.getOperationByID(id).optiondef.IDREF;
+		} catch (e) {}
 	//for ie radio button bug
  	if(type=="plot"&&document.all&&evt.srcElement) {
 
@@ -878,6 +886,7 @@ LASUI.prototype.setOperationList = function (strJson) {
 	if(setDefaultVis==true && defaultVis) {
 		this.state.operation.plot = defaultVis;
 	}
+	this.getOptions(this.state.operations.getOperationByID(this.state.operation.plot).optiondef.IDREF, "plot", true);
 	if(this.refs.analysis.enabled||!this.state.grid.hasAxis('t'))document.getElementById('Animation').style.visibility='hidden';
 }
 
@@ -1832,7 +1841,7 @@ LASUI.prototype.getOptions = function (optiondef, type, reset) {
 	submit.value=	"OK";
 	submit.className = "LASSubmitInputNode";
 	var strHandler = "this.setChangedOptions('"+ type+ "');this.hideOptions('"+ type+ "')";
-	if(type!="plot")
+	if(type!="plot") 
 		strHandler += ";this.makeRequest({},'"+type+"')"
 	submit.onclick = this.genericHandler.LASBind(this,strHandler);
 
