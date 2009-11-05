@@ -65,13 +65,8 @@ public class FerretDataSource implements DatasetSource {
                 String[] urls = expressions.get(0).split(",");
                 for ( int i = 0; i < urls.length; i++ ) { 
                 	String dataURL = URLDecoder.decode(urls[i], "UTF-8");
-                        if ( i > 1 ) {
-                	    int ds = i + 2;
-                	    //jnl.append("go open_and_rename \""+dataURL+"\" \"_"+ds+"\"\n");
-                	    jnl.append("use \""+dataURL+"\"\n");
-                        } else {
-                	    jnl.append("use \""+dataURL+"\"\n");
-                        }
+                	int ds = i + 2;
+                	jnl.append("go open_and_rename \""+dataURL+"\" \"_"+ds+"\"\n");
                 }
             }
             if ( !expressions.get(1).trim().equals("") ) {
@@ -93,13 +88,8 @@ public class FerretDataSource implements DatasetSource {
                 String[] urls = expressions.get(0).split(",");
                 for ( int i = 0; i < urls.length; i++ ) {
                 	String dataURL = URLDecoder.decode(urls[i], "UTF-8");
-                        if ( i > 1 ) {
-                	    int ds = i + 2;
-                	    //jnl.append("go open_and_rename \""+dataURL+"\" \"_"+ds+"\"\n");
-                	    jnl.append("use \""+dataURL+"\"\n");
-                        } else {
-                	    jnl.append("use \""+dataURL+"\"\n");
-                        }
+                        int ds = i + 2;
+                	jnl.append("go open_and_rename \""+dataURL+"\" \"_"+ds+"\"\n");
                 }
             }
         } else if ( expressions.size() == 0 ) {
@@ -110,7 +100,7 @@ public class FerretDataSource implements DatasetSource {
         
         String key = JDOMUtils.MD5Encode(jnl.toString());
         
-        String script = data_path+File.separator+"data_"+key+".jnl";
+        String script = data_path+File.separator+"data_expr_"+key+".jnl";
 
         log.debug("using "+script+" for temporary script file.");
         
