@@ -33,14 +33,15 @@
           <action name="constrain" path="/MyInitConstrain" scope="session" type="gov.noaa.pmel.tmap.las.ui.InitConstrainAction">
         <forward name="constrain" path="/myconstrain.jsp" />
           </action>
-          <action path="/getMetadata" type="gov.noaa.pmel.tmap.las.ui.getMetadata"/>
-          <action path="/getViews" type="gov.noaa.pmel.tmap.las.ui.getViews" />
-          <action path="/getGrid" type="gov.noaa.pmel.tmap.las.ui.getGrid" />
-          <action path="/getOperations" type="gov.noaa.pmel.tmap.las.ui.getOperations" />
-          <action path="/getOptions" type="gov.noaa.pmel.tmap.las.ui.getOptions" />
-          <action path="/getCategories" type="gov.noaa.pmel.tmap.las.ui.getCategories" />
-          <action path="/getRegions" type="gov.noaa.pmel.tmap.las.ui.getRegions" />
-          <action path="/getDataConstraints" type="gov.noaa.pmel.tmap.las.ui.getDataConstraints" />
+          <action path="/getMetadata" type="gov.noaa.pmel.tmap.las.ui.GetMetadata"/>
+          <action path="/getViews" type="gov.noaa.pmel.tmap.las.ui.GetViews" />
+          <action path="/getGrid" type="gov.noaa.pmel.tmap.las.ui.GetGrid" />
+          <action path="/getOperations" type="gov.noaa.pmel.tmap.las.ui.GetOperations" />
+          <action path="/getOptions" type="gov.noaa.pmel.tmap.las.ui.GetOptions" />
+          <action path="/getCategories" type="gov.noaa.pmel.tmap.las.ui.GetCategories" />
+          <action path="/getVariables" type="gov.noaa.pmel.tmap.las.ui.GetVariables" />
+          <action path="/getRegions" type="gov.noaa.pmel.tmap.las.ui.GetRegions" />
+          <action path="/getDataConstraints" type="gov.noaa.pmel.tmap.las.ui.GetDataConstraints" />
           <action path="/GEServer" type="gov.noaa.pmel.tmap.las.service.kml.GEServerAction"/>
 	      <action path="/getUI" type="org.apache.struts.actions.ForwardAction" parameter="/productserver/templates/V7UI.vm"/>
 	      <action path="/admin" type="org.apache.struts.actions.ForwardAction" parameter="/productserver/templates/admin.vm"/>

@@ -1,5 +1,7 @@
 package gov.noaa.pmel.tmap.las.ui;
 
+import java.io.UnsupportedEncodingException;
+
 import gov.noaa.pmel.tmap.las.jdom.LASUIRequest;
 import gov.noaa.pmel.tmap.las.product.server.LASAction;
 
@@ -10,7 +12,7 @@ import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 
-public class getMetadata extends LASAction {
+public class GetMetadata extends LASAction {
 
 	/* (non-Javadoc)
 	 * @see org.apache.struts.action.Action#execute(org.apache.struts.action.ActionMapping, org.apache.struts.action.ActionForm, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
@@ -18,7 +20,10 @@ public class getMetadata extends LASAction {
 	@Override
 	public ActionForward execute(ActionMapping mapping, ActionForm form,
 			HttpServletRequest request, HttpServletResponse response)
-			throws Exception {
+			throws Exception {		
+		return new ActionForward("/ProductServer.do?xml="+prepareURL(request, response));
+	}
+	public static String prepareURL(HttpServletRequest request, HttpServletResponse response) throws UnsupportedEncodingException {
 		String dsid = request.getParameter("dsid");
 		String catitem = request.getParameter("catitem");
 		String opendap = request.getParameter("opendap");
@@ -30,7 +35,7 @@ public class getMetadata extends LASAction {
 		} else {
 			ui_request.setOperation("Metadata");
 		}
-		return new ActionForward("/ProductServer.do?xml="+ui_request.toEncodedURLString());
+		return ui_request.toEncodedURLString();
 	}
 
 }

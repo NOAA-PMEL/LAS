@@ -28,6 +28,16 @@ public class Dataset extends Container implements DatasetInterface {
     public String getDoc() {
     	return element.getAttributeValue("doc");
     }
+    public ArrayList<Variable> getVariables() {
+    	ArrayList<Variable> vars = new ArrayList<Variable>();
+    	List variables = element.getChild("variables").getChildren("variable");
+    	for (Iterator varIt = variables.iterator(); varIt.hasNext();) {
+			Element var = (Element) varIt.next();
+			Variable v = new Variable(var, getID(), getName());
+			vars.add(v);
+    	}
+    	return vars;
+    }
     public VariableSerializable[] getVariablesSerializable() {
     	List variables = element.getChild("variables").getChildren("variable");
     	VariableSerializable[] vs = new VariableSerializable[variables.size()];

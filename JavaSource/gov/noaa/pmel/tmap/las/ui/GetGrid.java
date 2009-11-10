@@ -41,7 +41,7 @@ import org.json.XML;
  * XDoclet definition:
  * @struts.action validate="true"
  */
-public class getGrid extends ConfigService {
+public class GetGrid extends ConfigService {
     /*
      * Generated Methods
      */
@@ -54,7 +54,7 @@ public class getGrid extends ConfigService {
      * @param response
      * @return ActionForward
      */
-    private static Logger log = LogManager.getLogger(getGrid.class.getName());
+    private static Logger log = LogManager.getLogger(GetGrid.class.getName());
     public ActionForward execute(ActionMapping mapping, ActionForm form,
             HttpServletRequest request, HttpServletResponse response) {
         
@@ -102,6 +102,7 @@ public class getGrid extends ConfigService {
         	sendError(response, "grid", format, e.toString());
         }
         log.info("Finishing: getGrid.do?dsid="+dsID+"&varid="+varID+"&format="+format);
+		
         return null;
     }
 }

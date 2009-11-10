@@ -7,11 +7,13 @@ package gov.noaa.pmel.tmap.las.ui;
 import gov.noaa.pmel.tmap.las.jdom.LASConfig;
 import gov.noaa.pmel.tmap.las.product.server.LASConfigPlugIn;
 import gov.noaa.pmel.tmap.las.util.Category;
+import gov.noaa.pmel.tmap.las.util.Constants;
 import gov.noaa.pmel.tmap.las.util.NameValuePair;
 import gov.noaa.pmel.tmap.las.util.Option;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Iterator;
 
@@ -36,8 +38,8 @@ import org.json.XML;
  * XDoclet definition:
  * @struts.action validate="true"
  */
-public class getOptions extends ConfigService {
-	private static Logger log = LogManager.getLogger(getOptions.class.getName());
+public class GetOptions extends ConfigService {
+	private static Logger log = LogManager.getLogger(GetOptions.class.getName());
 	/*
 	 * Generated Methods
 	 */
@@ -56,6 +58,24 @@ public class getOptions extends ConfigService {
 		String opid = request.getParameter("opid");
 		String format = request.getParameter("format");
 
+		
+		// Handle the case of a forward from a confluence server to retrieve local options.
+
+		if ( opid.contains(Constants.NAME_SPACE_SPARATOR)) {
+			String[] parts = opid.split(Constants.NAME_SPACE_SPARATOR);
+			String server_key = parts[0];
+
+			String local_server_key = null;
+			try {
+				local_server_key = lasConfig.getBaseServerURLKey();
+			} catch (UnsupportedEncodingException e) {
+				sendError(response, "options", format, e.toString());
+			} catch (JDOMException e) {
+				sendError(response, "options", format, e.toString());
+			}
+            if ( server_key.equals(local_server_key) ) opid = parts[1];
+
+		}
 		if ( format == null ) {
 			format = "json";
 		}
@@ -79,7 +99,7 @@ public class getOptions extends ConfigService {
 		} catch (Exception e) {
 			sendError(response, "options", format, e.toString());
 		} 
-		log.info("Finished: getOptions.do?opid="+opid+"&format="+format);
+		log.info("Finished: getOptions.do?opid="+opid+"&format="+format);		
 		return null;
 	}
 	private JSONObject toJSON(ArrayList<Option> options, String string) throws JSONException {
@@ -95,4 +115,5 @@ public class getOptions extends ConfigService {
 		json_response.put("options", options_object);
 		return json_response;
 	}
+	
 }

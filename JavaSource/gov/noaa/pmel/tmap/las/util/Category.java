@@ -20,8 +20,13 @@ public class Category extends Container implements CategoryInterface {
 	public Category(Element category) {
 		super(category);
 	}
-	public Category (String name) {
+	public Category (String name, String ID) {
 		super(new Element("category"));
+		setName(name);
+		setID(ID);
+	}
+	public Category (String name) {
+		super (new Element("category"));
 		setName(name);
 		try {
 			setID(JDOMUtils.MD5Encode(name));
@@ -102,6 +107,16 @@ public class Category extends Container implements CategoryInterface {
 		
 		Element dataset = element.getChild("dataset");
 		return elementToDatasetSerializable(dataset);
+	}
+	public ArrayList<Dataset> getAllDatasets() {
+		ArrayList<Dataset> datasets = new ArrayList<Dataset>();
+		List datasetElements = element.getChildren("dataset");
+		for (Iterator dataIt = datasetElements.iterator(); dataIt.hasNext();) {
+			Element dataset = (Element) dataIt.next();
+			Dataset ds = new Dataset(dataset);
+			datasets.add(ds);
+		}
+		return datasets;
 	}
 	public DatasetSerializable[] getAllDatasetSerializables() throws LASException {
 		List datasetElements = element.getChildren("dataset");
