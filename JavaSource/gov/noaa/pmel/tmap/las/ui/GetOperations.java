@@ -34,8 +34,8 @@ import org.json.JSONObject;
  * XDoclet definition:
  * @struts.action validate="true"
  */
-public class getOperations extends ConfigService {
-	private static Logger log = LogManager.getLogger(getOperations.class.getName());
+public class GetOperations extends ConfigService {
+	private static Logger log = LogManager.getLogger(GetOperations.class.getName());
 	/*
 	 * Generated Methods
 	 */
@@ -60,22 +60,24 @@ public class getOperations extends ConfigService {
 		if ( format == null ) {
 			format = "json";
 		}
+		boolean error = false;
 		log.info("Starting: getOperations.do?dsid="+dsID+"&varid="+varID+"&view="+view+".");
 		try {
 			ArrayList<Operation> operations;
 			if ( view != null) {
+				
 				operations = lasConfig.getOperations(view, dsID, varID);
 
 				if ( operations.size() <= 0 ) {
+					error = true;
 					sendError(response, "operations", format, "No operations found.");
-					return null;
 				} else {
 					// Check to see if there's something in there.
 					Operation op = operations.get(0);
 					String name = op.getName();
 					if ( name == null || name.equals("") ) {
+						error = true;
 						sendError(response, "operations", format, "No operations found.");
-						return null;
 					}
 				}
 			} else {
@@ -98,25 +100,26 @@ public class getOperations extends ConfigService {
 				
 			}
 			Collections.sort(operations, new ContainerComparator("order", "name"));
+			if ( ! error ) {
+				PrintWriter respout = response.getWriter();
 
-			PrintWriter respout = response.getWriter();
-
-			if ( format.equals("xml") ) {
-				response.setContentType("application/xml");
-				respout.print(Util.toXML(operations, "operations"));
-			} else {
-				response.setContentType("application/json");
-				JSONObject json_response = toJSON(operations, "operations");
-				log.debug(json_response.toString(3));
-				json_response.write(respout);      
+				if ( format.equals("xml") ) {
+					response.setContentType("application/xml");
+					respout.print(Util.toXML(operations, "operations"));
+				} else {
+					response.setContentType("application/json");
+					JSONObject json_response = toJSON(operations, "operations");
+					log.debug(json_response.toString(3));
+					json_response.write(respout);      
+				}
 			}
-
 			// JDOMException, JSONException and IOException expected
 		} catch (Exception e) {
 			sendError(response, "operations", format, e.toString());
 		} 
 
 		log.info("Finished: getOperations.do?dsid="+dsID+"&varid="+varID+"&view="+view+".");
+		
 		return null;
 	}
 	private JSONObject toJSON(ArrayList<Operation> operations, String wrapper) throws JSONException {

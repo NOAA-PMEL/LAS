@@ -10,6 +10,7 @@
 package gov.noaa.pmel.tmap.las.jdom;
 
 import gov.noaa.pmel.tmap.las.exception.LASException;
+import gov.noaa.pmel.tmap.las.util.Category;
 
 import java.io.File;
 import java.io.IOException;
@@ -20,6 +21,10 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.security.MessageDigest;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
 
 import org.jdom.input.SAXBuilder;
 import org.jdom.Document;
@@ -148,4 +153,16 @@ public class JDOMUtils {
         content = content.replaceAll("\\n","");
         return content;
     }
+
+	public static ArrayList<Category> getCategories(String catxml) throws IOException, JDOMException {
+		LASDocument catdoc = new LASDocument();
+		ArrayList<Category> cats = new ArrayList<Category>();
+		XML2JDOM(catxml, catdoc);
+		List catElements = catdoc.getRootElement().getChildren("category");
+		for (Iterator catIt = catElements.iterator(); catIt.hasNext();) {
+			Element catE = (Element) catIt.next();
+			cats.add(new Category(catE));		
+		}
+		return cats;
+	}
 }

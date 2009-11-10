@@ -41,11 +41,11 @@ import org.json.XML;
  * XDoclet definition:
  * @struts.action validate="true"
  */
-public class getViews extends ConfigService {
+public class GetViews extends ConfigService {
     /*
      * Generated Methods
      */
-    private static Logger log = LogManager.getLogger(getViews.class.getName());
+    private static Logger log = LogManager.getLogger(GetViews.class.getName());
 
     /** 
      * Method execute
@@ -83,7 +83,7 @@ public class getViews extends ConfigService {
         } catch (Exception e) {
             sendError(response, "views", format, e.toString());
         }
-        log.info("Finished: getViews.do?dsid="+dsID+"&varid="+varID+"&format="+format);
+        log.info("Finished: getViews.do?dsid="+dsID+"&varid="+varID+"&format="+format);		
         return null;
     }
     public JSONObject toJSON(ArrayList<View> views, String wrapper) throws JSONException {

@@ -16,6 +16,7 @@ import gov.noaa.pmel.tmap.addxml.DatasetsGridsAxesBean;
 import gov.noaa.pmel.tmap.addxml.FilterBean;
 import gov.noaa.pmel.tmap.addxml.GridBean;
 import gov.noaa.pmel.tmap.addxml.addXML;
+import gov.noaa.pmel.tmap.las.client.RPCException;
 import gov.noaa.pmel.tmap.las.client.serializable.CategorySerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.DatasetSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.VariableSerializable;
@@ -612,14 +613,6 @@ public class LASConfig extends LASDocument {
         }
         return false;
     }
-    public boolean allowsSisters() {
-    	String allow_sisters = getRootElement().getAttributeValue("allow_sisters");
-    	boolean sister = false;
-        if ( allow_sisters != null ) {
-        	sister = true;
-        }
-        return sister;
-    }
     /**
      * Converts to XML that can be validated against a schema, or returns if it detects that XML is already "Version 7".
      * @throws JDOMException 
@@ -976,6 +969,35 @@ public class LASConfig extends LASDocument {
     	constraint.addContent(menu);
     	
     	return new DataConstraint(constraint);
+    }
+    /**
+     * This call gets the categories and if a category contains a data set and variables it fills in the grid.
+     * The "normal" getCategories call sends back "empty" variables and you have to get the grid with a separate call.  
+     * @param id
+     * @return
+     * @throws LASException
+     * @throws JDOMException
+     */
+    public ArrayList<Category> getFullCategories(String id) throws LASException, JDOMException {
+    	ArrayList<Category> categories = getCategories(id);
+    	for (Iterator iterator = categories.iterator(); iterator.hasNext();) {
+			Category category = (Category) iterator.next();
+			if ( category.hasVariableChildren() ) {
+				ArrayList<Dataset> datasets = category.getAllDatasets();
+				for (Iterator dsIt = datasets.iterator(); dsIt.hasNext();) {
+					Dataset dataset = (Dataset) dsIt.next();
+					ArrayList<Variable> vars = dataset.getVariables();
+					for (Iterator varIt = vars.iterator(); varIt.hasNext();) {
+						Variable variable = (Variable) varIt.next();
+						Grid grid = getGrid(variable.getDSID(), variable.getID());
+						Element varE = variable.getElement();
+						varE.removeChild("grid");  // Get rid of the old grid with just the IDREF and replace it with the grid and axes.
+						varE.addContent((Element) grid.getElement());
+					}
+				}
+			}
+		}
+    	return categories;
     }
     public CategorySerializable[] getCategorySerializable(ArrayList<Category> categories) throws LASException, JDOMException {
     	CategorySerializable[] cats = new CategorySerializable[categories.size()];
@@ -3859,5 +3881,30 @@ public class LASConfig extends LASDocument {
 				}		    	
 		    }
 		}
+	}
+	public boolean allowsSisters() {
+		String allow_sisters = getRootElement().getAttributeValue("allow_sisters");
+		boolean sister = false;
+		if ( allow_sisters != null ) {
+			sister = true;
+		}
+		return sister;
+	}
+	public boolean isLocal(String id) throws UnsupportedEncodingException, JDOMException {
+		boolean local = false;
+		if ( id.contains(Constants.NAME_SPACE_SPARATOR) ) {
+			String server_key = id.split(Constants.NAME_SPACE_SPARATOR)[0];
+			String local_server_key = local_server_key = getBaseServerURLKey();
+			if ( server_key.equals(local_server_key) ) {
+				local = true;
+			}
+		}
+		return local;
+	}
+	public String getBaseServerURLKey() throws UnsupportedEncodingException, JDOMException {
+		return JDOMUtils.MD5Encode(getBaseServerURL());
+	}
+	public String getServerNameKey() throws UnsupportedEncodingException, JDOMException {
+		return JDOMUtils.MD5Encode(getTitle());
 	}
 }

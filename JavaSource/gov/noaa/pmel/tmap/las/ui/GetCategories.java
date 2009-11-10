@@ -8,6 +8,7 @@ import gov.noaa.pmel.tmap.las.jdom.LASConfig;
 import gov.noaa.pmel.tmap.las.product.server.LASConfigPlugIn;
 import gov.noaa.pmel.tmap.las.ui.json.JSONUtil;
 import gov.noaa.pmel.tmap.las.util.Category;
+import gov.noaa.pmel.tmap.las.util.Constants;
 import gov.noaa.pmel.tmap.las.util.ContainerComparator;
 import gov.noaa.pmel.tmap.las.util.Dataset;
 
@@ -40,7 +41,7 @@ import org.json.XML;
  * XDoclet definition:
  * @struts.action validate="true"
  */
-public class getCategories extends ConfigService {
+public class GetCategories extends ConfigService {
 	/*
 	 * Generated Methods
 	 */
@@ -53,21 +54,23 @@ public class getCategories extends ConfigService {
 	 * @param response
 	 * @return ActionForward
 	 */
-	private static Logger log = LogManager.getLogger(getCategories.class.getName());
+	private static Logger log = LogManager.getLogger(GetCategories.class.getName());
 	public ActionForward execute(ActionMapping mapping, ActionForm form,
 			HttpServletRequest request, HttpServletResponse response) {
-
+		LASConfig lasConfig = (LASConfig)servlet.getServletContext().getAttribute(LASConfigPlugIn.LAS_CONFIG_KEY); 
 		String format = request.getParameter("format");
 		if ( format == null ) {
 			format = "json";
 		}
 		String catid = request.getParameter("catid");
-		log.info("Starting: getCategories.do?catid="+catid+"&format="+format);
-
-		LASConfig lasConfig = (LASConfig)servlet.getServletContext().getAttribute(LASConfigPlugIn.LAS_CONFIG_KEY); 
-
+		log.info("Starting: getCategories.do?catid="+catid+"&format="+format);	
+		
+		
 		ArrayList<Category> categories = new ArrayList<Category>();
 		try {
+			// Handle the case where the request is for local categories on a confluence server (the made up parent category is the same
+			// as null).
+			if ( catid.equals(lasConfig.getBaseServerURLKey()+Constants.NAME_SPACE_SPARATOR+lasConfig.getServerNameKey())) catid=null;
 			categories = lasConfig.getCategories(catid);
 
 
@@ -75,39 +78,32 @@ public class getCategories extends ConfigService {
 			Category cat = categories.get(0);
 			if (!cat.hasVariableChildren() && !cat.hasCategoryChildren() ) {
 				sendError(response, "categories", format, "No categories found.");
-				return null;
-			}
+			} else {
 
 			Collections.sort(categories, new ContainerComparator("name"));
-
-			PrintWriter respout = response.getWriter();
-			if (format.equals("xml")) {
-				response.setContentType("application/xml");
-				respout.print(Util.toXML(categories, "categories"));
-			} else {
-				response.setContentType("application/json");
-				JSONObject json_response = toJSON(categories, "categories");
-				log.debug(json_response.toString(3));
-				json_response.write(respout);
+			
+			writeResponse(response, categories, format);
 			}
+						
 			// IOExceptiono, JSONException and JDOM Exception are expected.
 		} catch (Exception e) {
 			sendError(response, "categories", format, e.toString());
 		}     
 		log.info("Finished: getCategories.do?catid="+catid+"&format="+format);
+		
 		return null;
 	}
-	private JSONObject toJSON(ArrayList<Category> categories, String string) throws JSONException {
-		JSONObject json_response = new JSONObject();
-		JSONObject categories_object = new JSONObject();
-		for (Iterator catIt = categories.iterator(); catIt.hasNext();) {
-			Category cat = (Category) catIt.next();
-			JSONObject category = cat.toJSON();          
-			categories_object.array_accumulate("category", category);           
+	public void writeResponse(HttpServletResponse response, ArrayList<Category> categories, String format) throws IOException, JSONException {
+		PrintWriter respout = response.getWriter();
+		if (format.equals("xml")) {
+			response.setContentType("application/xml");
+			respout.print(Util.toXML(categories, "categories"));
+		} else {
+			response.setContentType("application/json");
+			JSONObject json_response = Util.toJSON(categories, "categories");
+			log.debug(json_response.toString(3));
+			json_response.write(respout);
 		}
-		categories_object.put("status", "ok");
-		categories_object.put("error", "");
-		json_response.put("categories", categories_object);
-		return json_response;
+		
 	}
 }

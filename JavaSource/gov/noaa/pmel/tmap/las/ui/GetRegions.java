@@ -8,9 +8,9 @@ import gov.noaa.pmel.tmap.las.jdom.LASConfig;
 import gov.noaa.pmel.tmap.las.product.server.LASConfigPlugIn;
 import gov.noaa.pmel.tmap.las.util.Container;
 import gov.noaa.pmel.tmap.las.util.ContainerComparator;
-import gov.noaa.pmel.tmap.las.util.DataConstraint;
 import gov.noaa.pmel.tmap.las.util.NameValuePair;
 import gov.noaa.pmel.tmap.las.util.Option;
+import gov.noaa.pmel.tmap.las.util.Region;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -41,11 +41,11 @@ import org.json.XML;
  * XDoclet definition:
  * @struts.action validate="true"
  */
-public class getDataConstraints extends ConfigService {
+public class GetRegions extends ConfigService {
     /*
      * Generated Methods
      */
-    private static Logger log = LogManager.getLogger(getDataConstraints.class.getName());
+    private static Logger log = LogManager.getLogger(GetRegions.class.getName());
 
     /** 
      * Method execute
@@ -64,38 +64,39 @@ public class getDataConstraints extends ConfigService {
         if ( format == null ) {
             format = "json";
         }
-        log.info("Starting: getDataConstraints.do?dsid="+dsID+"&varid="+varID+"&format="+format);
+        log.info("Starting: getRegions.do?dsid="+dsID+"&varid="+varID+"&format="+format);
         try {
-            ArrayList<DataConstraint> constraints = lasConfig.getConstraints(dsID, varID);
+            ArrayList<Region> Regions = lasConfig.getRegions(dsID, varID);
+            //Collections.sort(Regions, new ContainerComparator("value"));
             PrintWriter respout = response.getWriter();
             if ( format.equals("xml") ) {
                 response.setContentType("application/xml");
-                respout.print(Util.toXML(constraints, "constraintss"));
+                respout.print(Util.toXML(Regions, "Regions"));
             } else {
                 response.setContentType("application/json");
-                //JSONObject json_response = Util.toJSON_keep_array(constraints, "constraints");
-                JSONObject json_response = toJSON(constraints, "constraints");
+                //JSONObject json_response = Util.toJSON_keep_array(Regions, "Regions");
+                JSONObject json_response = toJSON(Regions, "Regions");
                 log.debug(json_response.toString(3));
                 json_response.write(respout);
             }
             // Catch for IOException, JSONException and JDOMException and anything unexpected.
         } catch (Exception e) {
-            sendError(response, "constraints", format, e.toString());
+            sendError(response, "Regions", format, e.toString());
         }
-        log.info("Finished: getconstraints.do?dsid="+dsID+"&varid="+varID+"&format="+format);
+        log.info("Finished: getRegions.do?dsid="+dsID+"&varid="+varID+"&format="+format);
         return null;
     }
-    public JSONObject toJSON(ArrayList<DataConstraint> constraints, String wrapper) throws JSONException {
+    public JSONObject toJSON(ArrayList<Region> Regions, String wrapper) throws JSONException {
         JSONObject json_response = new JSONObject();
-        JSONObject constraints_object = new JSONObject();
-        for (Iterator constraintIt = constraints.iterator(); constraintIt.hasNext();) {
-            DataConstraint constraint = (DataConstraint) constraintIt.next();
-            JSONObject constraint_object = constraint.toJSON();            
-            constraints_object.array_accumulate("constraint", constraint_object);
+        JSONObject Regions_object = new JSONObject();
+        for (Iterator RegionIt = Regions.iterator(); RegionIt.hasNext();) {
+            Region Region = (Region) RegionIt.next();
+            JSONObject Region_object = Region.toJSON();            
+            Regions_object.array_accumulate("Region", Region_object);
         }
-        constraints_object.put("status", "ok");
-        constraints_object.put("error", "");
-        json_response.put("constraints", constraints_object);
+        Regions_object.put("status", "ok");
+        Regions_object.put("error", "");
+        json_response.put("Regions", Regions_object);
         return json_response;
     }
 }

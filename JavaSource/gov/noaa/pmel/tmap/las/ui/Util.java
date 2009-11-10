@@ -77,6 +77,19 @@ public class Util {
     		return null; 
     	} 
     }
+    public static JSONObject toJSON(ArrayList<Category> categories, String string) throws JSONException {
+		JSONObject json_response = new JSONObject();
+		JSONObject categories_object = new JSONObject();
+		for (Iterator catIt = categories.iterator(); catIt.hasNext();) {
+			Category cat = (Category) catIt.next();
+			JSONObject category = cat.toJSON();          
+			categories_object.array_accumulate("category", category);           
+		}
+		categories_object.put("status", "ok");
+		categories_object.put("error", "");
+		json_response.put("categories", categories_object);
+		return json_response;
+	}
 /*
     public static JSONObject toJSONarray(ArrayList containers, String wrapper) throws JSONException {
         JSONObject json_response = new JSONObject();

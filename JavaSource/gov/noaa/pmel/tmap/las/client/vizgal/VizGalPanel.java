@@ -65,7 +65,7 @@ public class VizGalPanel extends Composite {
 	Grid top;
 
 	/* A widget to return panel to the slide sorter control */
-	Button revert = new Button("Cancel Panel Settings");
+	Button revert = new Button("Revert");
 
 	/* The current data set and variable.  */
 	Label datasetLabel;

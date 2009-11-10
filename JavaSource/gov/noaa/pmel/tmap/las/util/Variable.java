@@ -3,6 +3,7 @@
  */
 package gov.noaa.pmel.tmap.las.util;
 
+import gov.noaa.pmel.tmap.las.client.serializable.GridSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.VariableSerializable;
 
 import org.jdom.Element;
@@ -79,7 +80,12 @@ public class Variable extends Container implements VariableInterface {
     	variableSerializable.setDSName(getDSName());
     	variableSerializable.setAttributes(getAttributesAsMap());
     	variableSerializable.setProperties(getPropertiesAsMap());
+    	variableSerializable.setGrid(getGridSerializable());
     	return variableSerializable;
+    }
+    public GridSerializable getGridSerializable() {
+    	Grid grid = new Grid(getElement().getChild("grid"));
+    	return grid.getGridSerializable();
     }
 	/**
 	 * @return the dsid

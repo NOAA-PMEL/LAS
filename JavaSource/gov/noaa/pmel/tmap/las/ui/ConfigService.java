@@ -11,7 +11,7 @@ import org.json.JSONObject;
 import org.json.XML;
 
 public class ConfigService extends Action {
-	public void sendError(HttpServletResponse response, String container, String format, String message) {
+	public static void sendError(HttpServletResponse response, String container, String format, String message) {
 		PrintWriter respout;
 		String xml = "<"+container+"><status>error</status><error>"+message+"</error></"+container+">";
 		try {
