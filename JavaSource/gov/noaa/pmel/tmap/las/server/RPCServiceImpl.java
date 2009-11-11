@@ -83,7 +83,7 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
 						server_key = parts[0];
 						if ( server_key != null ) {
 							Tributary trib = lasConfig.getTributary(server_key);
-							String las_url = trib.getURL() + Constants.GET_VARIABLES + "?format=xml&dsid=" + id;
+							String las_url = trib.getURL() + Constants.GET_FULLVARIABLES + "?format=xml&dsid=" + id;
 							String variables_xml = lasProxy.executeGetMethodAndReturnResult(las_url);
 							LASDocument varsdoc = new LASDocument();
 							JDOMUtils.XML2JDOM(variables_xml, varsdoc);
@@ -92,12 +92,6 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
 								Element varElement = (Element) varsIt.next();
 								Variable variable = new Variable((Element)varElement.clone(), id);
 								variables.add(variable);
-								String grid_url = trib.getURL() + Constants.GET_GRID + "?format=xml&dsid="+id+"&varid="+variable.getID();
-								String grid_xml = lasProxy.executeGetMethodAndReturnResult(grid_url);
-								LASDocument griddoc = new LASDocument();
-								JDOMUtils.XML2JDOM(grid_xml, griddoc);
-								Grid grid = new Grid(griddoc.detachRootElement());
-								grids.add(grid);
 							}
 						} else {
 							throw new RPCException("No server key found.");
@@ -121,7 +115,6 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
 		VariableSerializable[] wire_vars = new VariableSerializable[variables.size()];
 		for (int i = 0; i < variables.size(); i++ ) {
 			Variable variable = variables.get(i);	
-			wire_vars[i].setGrid(grids.get(i).getGridSerializable());
 			wire_vars[i] = variable.getVariableSerializable();
 		}
 		return wire_vars;
