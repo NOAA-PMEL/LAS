@@ -3908,11 +3908,14 @@ public class LASConfig extends LASDocument {
 		return JDOMUtils.MD5Encode(getTitle());
 	}
 	public ArrayList<Variable> getFullVariables(String dsID) throws JDOMException, LASException {
+		Dataset dataset = getDataset(dsID);
 		ArrayList<Variable> variables = getVariables(dsID);
 		ArrayList<Variable> clones = new ArrayList<Variable>();
 		for (Iterator varIt = variables.iterator(); varIt.hasNext();) {
 			Variable var = (Variable) varIt.next();
-			clones.add(new Variable((Element) var.getElement().clone(), var.getDSID()));
+			Variable clone_var = new Variable((Element) var.getElement().clone(), var.getDSID());
+			clone_var.setDSName(dataset.getName());
+			clones.add(clone_var);
 		}
 		for (Iterator cloneIt = clones.iterator(); cloneIt.hasNext();) {
 			Variable var = (Variable) cloneIt.next();
