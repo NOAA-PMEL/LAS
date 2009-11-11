@@ -990,7 +990,7 @@ public class LASConfig extends LASDocument {
 					for (Iterator varIt = vars.iterator(); varIt.hasNext();) {
 						Variable variable = (Variable) varIt.next();
 						Grid grid = getGrid(variable.getDSID(), variable.getID());
-						Element varE = variable.getElement();
+						Element varE = (Element) variable.getElement().clone();
 						varE.removeChild("grid");  // Get rid of the old grid with just the IDREF and replace it with the grid and axes.
 						varE.addContent((Element) grid.getElement());
 					}
