@@ -56,6 +56,8 @@ public class GetFullVariables extends ConfigService {
 			variables = lasConfig.getVariables(dsID);
 			for (Iterator varIt = variables.iterator(); varIt.hasNext();) {
 				Variable var = (Variable) varIt.next();
+				Element varE = (Element) var.getElement().clone();
+				varE.removeChild("grid");  // Get rid of the old grid with just the IDREF and replace it with the grid and axes.
 				Grid grid = lasConfig.getGrid(var.getDSID(), var.getID());
 				var.getElement().addContent((Element)grid.getElement().clone());
 			}
