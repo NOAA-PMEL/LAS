@@ -12,6 +12,7 @@ public class Constants {
 	public static final String GET_OPTIONS = "/getOptions.do";
 	public static final String GET_REGIONS = "/getRegions.do";
 	public static final String GET_VARIABLES = "/getVariables.do";
+	public static final String GET_FULLVARIABLES = "/getFullVariables.do";
 	public static final String GET_VIEWS = "/getViews.do";
 
 	public static final String PRODUCT_SERVER = "/ProductServer.do";
