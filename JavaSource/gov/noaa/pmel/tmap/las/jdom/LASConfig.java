@@ -3907,4 +3907,20 @@ public class LASConfig extends LASDocument {
 	public String getServerNameKey() throws UnsupportedEncodingException, JDOMException {
 		return JDOMUtils.MD5Encode(getTitle());
 	}
+	public ArrayList<Variable> getFullVariables(String dsID) throws JDOMException, LASException {
+		ArrayList<Variable> variables = getVariables(dsID);
+		ArrayList<Variable> clones = new ArrayList<Variable>();
+		for (Iterator varIt = variables.iterator(); varIt.hasNext();) {
+			Variable var = (Variable) varIt.next();
+			clones.add(new Variable((Element) var.getElement().clone(), var.getDSID()));
+		}
+		for (Iterator cloneIt = clones.iterator(); cloneIt.hasNext();) {
+			Variable var = (Variable) cloneIt.next();
+			Element varE = (Element) var.getElement();
+			varE.removeChild("grid");  // Get rid of the old grid with just the IDREF and replace it with the grid and axes.
+			Grid grid = getGrid(var.getDSID(), var.getID());
+			varE.addContent((Element)grid.getElement().clone());
+		}
+		return clones;
+	}
 }
