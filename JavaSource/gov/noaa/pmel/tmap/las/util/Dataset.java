@@ -3,6 +3,7 @@
  */
 package gov.noaa.pmel.tmap.las.util;
 
+import gov.noaa.pmel.tmap.las.client.serializable.DatasetSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.VariableSerializable;
 
 import java.util.ArrayList;
@@ -27,6 +28,15 @@ public class Dataset extends Container implements DatasetInterface {
     }
     public String getDoc() {
     	return element.getAttributeValue("doc");
+    }
+    public void setVariables(ArrayList<Variable> variables) {
+    	element.removeChild("variables");
+    	Element varsE = new Element("variables");
+    	for (Iterator varIt = variables.iterator(); varIt.hasNext();) {
+    		Variable var = (Variable) varIt.next();
+    		varsE.addContent(var.getElement());
+    	}
+    	element.addContent(varsE);
     }
     public ArrayList<Variable> getVariables() {
     	ArrayList<Variable> vars = new ArrayList<Variable>();
@@ -53,5 +63,12 @@ public class Dataset extends Container implements DatasetInterface {
 	public void addVariable(Variable variable) {
 		Element variables = element.getChild("variables");
 		variables.addContent((Element) variable.getElement().clone());
+	}
+	public DatasetSerializable getDatasetSerializable() {
+		DatasetSerializable wire_ds = new DatasetSerializable();
+		wire_ds.setName(getName());
+		wire_ds.setID(getID());
+		wire_ds.setVariablesSerializable(getVariablesSerializable());
+		return wire_ds;
 	}
 }

@@ -1411,15 +1411,33 @@ public class LASConfig extends LASDocument {
      * @param dsID the id of the dataset 
      * @return the data set element
      * @throws JDOMException
+     * @throws LASException 
      */
-    public Dataset getDataset(String dsID) throws JDOMException {
+    public Dataset getDataset(String dsID) throws JDOMException, LASException {
     	String xpathValue = "/lasdata/datasets/dataset[@ID='"+dsID+"']";
-    	Element ds = getElementByXPath(xpathValue);
+    	Element ds = (Element) getElementByXPath(xpathValue).clone();
+    	Dataset dataset;
     	if ( ds != null ) {
-    		return new Dataset(ds);
+    		dataset = new Dataset(ds);
     	} else {
     		return null;
     	}
+    	ArrayList<Variable> variables = getVariables(dsID);
+		ArrayList<Variable> clones = new ArrayList<Variable>();
+		for (Iterator varIt = variables.iterator(); varIt.hasNext();) {
+			Variable var = (Variable) varIt.next();
+			Variable clone_var = new Variable((Element) var.getElement().clone(), var.getDSID(), dataset.getName());
+			clones.add(clone_var);
+		}
+		for (Iterator cloneIt = clones.iterator(); cloneIt.hasNext();) {
+			Variable var = (Variable) cloneIt.next();
+			Element varE = (Element) var.getElement();
+			varE.removeChild("grid");  // Get rid of the old grid with just the IDREF and replace it with the grid and axes.
+			Grid grid = getGrid(var.getDSID(), var.getID());
+			varE.addContent((Element)grid.getElement().clone());
+		}    	
+		dataset.setVariables(clones);
+		return dataset;
     }
     /**
      * !!!! returns datasets list This ignores categories for now.  Have to fix this.
@@ -3913,8 +3931,7 @@ public class LASConfig extends LASDocument {
 		ArrayList<Variable> clones = new ArrayList<Variable>();
 		for (Iterator varIt = variables.iterator(); varIt.hasNext();) {
 			Variable var = (Variable) varIt.next();
-			Variable clone_var = new Variable((Element) var.getElement().clone(), var.getDSID());
-			clone_var.setDSName(dataset.getName());
+			Variable clone_var = new Variable((Element) var.getElement().clone(), var.getDSID(), dataset.getName());
 			clones.add(clone_var);
 		}
 		for (Iterator cloneIt = clones.iterator(); cloneIt.hasNext();) {

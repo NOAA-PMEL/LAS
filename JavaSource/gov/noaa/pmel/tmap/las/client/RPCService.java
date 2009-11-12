@@ -2,6 +2,7 @@ package gov.noaa.pmel.tmap.las.client;
 
 
 import gov.noaa.pmel.tmap.las.client.serializable.CategorySerializable;
+import gov.noaa.pmel.tmap.las.client.serializable.DatasetSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.GridSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.OperationSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.OptionSerializable;
@@ -20,4 +21,5 @@ public interface RPCService extends RemoteService {
 	public OptionSerializable[] getOptions(String opid) throws RPCException;
 	public OptionSerializable[] getOptionsByOperationID(String operationid) throws RPCException;
 	public CategorySerializable[] getTimeSeries() throws RPCException;
+	public DatasetSerializable getDataset(String id) throws RPCException;
 }

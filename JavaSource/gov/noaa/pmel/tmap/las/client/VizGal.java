@@ -372,7 +372,7 @@ public class VizGal extends LASEntryPoint {
 		if ( dsid != null && vid != null & op != null && view != null) {
 			// If the proper information was sent to the widget, pull down the variable definition
 			// and initialize the slide sorter with this Ajax call.
-			rpcService.getVariables(dsid, initVisGal);
+			rpcService.getDataset(dsid, initVisGal);
 		}
 
 
@@ -463,8 +463,10 @@ public class VizGal extends LASEntryPoint {
 	};
 	AsyncCallback initVisGal = new AsyncCallback() {
 		public void onSuccess(Object result) {
-			VariableSerializable[] vars = (VariableSerializable[]) result;
+			DatasetSerializable ds = (DatasetSerializable) result;
+			VariableSerializable[] vars = ds.getVariablesSerializable();
 			for (int i=0; i < vars.length; i++ ) {
+				vars[i].setDSName(ds.getName());
 				if ( vars[i].getID().equals(vid) ) {
 					var = vars[i];
 					initial_var = var;
