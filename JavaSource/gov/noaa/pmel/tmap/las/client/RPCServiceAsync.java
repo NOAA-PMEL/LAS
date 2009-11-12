@@ -10,4 +10,5 @@ public interface RPCServiceAsync {
 	public void getOptions(String opid, AsyncCallback optionsCallback);
 	public void getOptionsByOperationID(String operationID, AsyncCallback optionsCallBack);
     public void getTimeSeries(AsyncCallback timeSeriesCallback);
+    public void getDataset(String id, AsyncCallback datasetCallback);
 }

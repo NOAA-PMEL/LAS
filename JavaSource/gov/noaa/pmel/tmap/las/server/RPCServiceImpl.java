@@ -5,6 +5,7 @@ import gov.noaa.pmel.tmap.las.jdom.JDOMUtils;
 import gov.noaa.pmel.tmap.las.client.RPCException;
 import gov.noaa.pmel.tmap.las.client.RPCService;
 import gov.noaa.pmel.tmap.las.client.serializable.CategorySerializable;
+import gov.noaa.pmel.tmap.las.client.serializable.DatasetSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.GridSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.OperationSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.OptionSerializable;
@@ -17,6 +18,7 @@ import gov.noaa.pmel.tmap.las.ui.LASProxy;
 import gov.noaa.pmel.tmap.las.util.Category;
 import gov.noaa.pmel.tmap.las.util.Constants;
 import gov.noaa.pmel.tmap.las.util.ContainerComparator;
+import gov.noaa.pmel.tmap.las.util.Dataset;
 import gov.noaa.pmel.tmap.las.util.Grid;
 import gov.noaa.pmel.tmap.las.util.Operation;
 import gov.noaa.pmel.tmap.las.util.Option;
@@ -63,6 +65,18 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
 		}
 		return cats;
 	}
+	public DatasetSerializable getDataset(String id) throws RPCException {
+		LASConfig lasConfig = (LASConfig) getServletContext().getAttribute(LASConfigPlugIn.LAS_CONFIG_KEY); 
+		Dataset dataset = null;
+		try {
+			dataset = lasConfig.getDataset(id);
+		} catch (JDOMException e) {
+			throw new RPCException(e.getMessage());
+		} catch (Exception e) {
+			throw new RPCException(e.getMessage());
+		} 
+		return dataset.getDatasetSerializable();
+	}
 	public VariableSerializable[] getVariables(String id) throws RPCException {
 		LASConfig lasConfig = (LASConfig) getServletContext().getAttribute(LASConfigPlugIn.LAS_CONFIG_KEY); 
 		ArrayList<Variable> variables = new ArrayList<Variable>();
@@ -90,7 +104,7 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
 							List varElements = varsdoc.getRootElement().getChildren("variable");
 							for (Iterator varsIt = varElements.iterator(); varsIt.hasNext();) {
 								Element varElement = (Element) varsIt.next();
-								Variable variable = new Variable((Element)varElement.clone(), id);
+								Variable variable = new Variable((Element)varElement.clone(), id, varElement.getAttributeValue("DSName"));
 								variables.add(variable);
 							}
 						} else {
