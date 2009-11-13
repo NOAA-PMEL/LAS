@@ -29,7 +29,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.XML;
 
-public class GetFullDatset extends ConfigService {
+public class GetFullDataset extends ConfigService {
 
 	/** 
 	 * Method execute
@@ -39,7 +39,7 @@ public class GetFullDatset extends ConfigService {
 	 * @param response
 	 * @return ActionForward
 	 */
-	private static Logger log = LogManager.getLogger(GetFullDatset.class.getName());
+	private static Logger log = LogManager.getLogger(GetFullDataset.class.getName());
 	public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request, HttpServletResponse response) {
 
 		LASConfig lasConfig = (LASConfig)servlet.getServletContext().getAttribute(LASConfigPlugIn.LAS_CONFIG_KEY);
