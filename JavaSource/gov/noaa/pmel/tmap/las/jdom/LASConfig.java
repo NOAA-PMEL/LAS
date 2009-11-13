@@ -3943,4 +3943,10 @@ public class LASConfig extends LASDocument {
 		}
 		return clones;
 	}
+	public Dataset getFullDataset(String dsID) throws JDOMException, LASException {
+		Dataset dataset = getDataset(dsID);
+		ArrayList<Variable> variables = getFullVariables(dsID);
+		dataset.setVariables(variables);
+		return dataset;
+	}
 }
