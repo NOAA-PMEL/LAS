@@ -67,15 +67,37 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
 	}
 	public DatasetSerializable getDataset(String id) throws RPCException {
 		LASConfig lasConfig = (LASConfig) getServletContext().getAttribute(LASConfigPlugIn.LAS_CONFIG_KEY); 
-		Dataset dataset = null;
 		try {
-			dataset = lasConfig.getDataset(id);
+			if ( id != null ) {
+				if ( lasConfig.isLocal(id) ) {
+					Dataset dataset = lasConfig.getDataset(id);
+					return dataset.getDatasetSerializable();
+				} else {
+					String[] parts = id.split(Constants.NAME_SPACE_SPARATOR);
+					String server_key = null;
+					if ( parts != null ) {
+						server_key = parts[0];
+						if ( server_key != null ) {
+							Tributary trib = lasConfig.getTributary(server_key);
+							String las_url = trib.getURL() + Constants.GET_FULLDATASET + "?format=xml&dsid=" + id;
+							String dataset_xml = lasProxy.executeGetMethodAndReturnResult(las_url);
+							LASDocument dsdoc = new LASDocument();
+							JDOMUtils.XML2JDOM(dataset_xml, dsdoc);
+							Element dsElement = dsdoc.getRootElement();
+							Dataset ds = new Dataset(dsElement);
+							return ds.getDatasetSerializable();
+						}
+					}
+				}
+			} else {
+				throw new RPCException("No server key found.");
+			}
 		} catch (JDOMException e) {
 			throw new RPCException(e.getMessage());
 		} catch (Exception e) {
 			throw new RPCException(e.getMessage());
 		} 
-		return dataset.getDatasetSerializable();
+		return null;
 	}
 	public VariableSerializable[] getVariables(String id) throws RPCException {
 		LASConfig lasConfig = (LASConfig) getServletContext().getAttribute(LASConfigPlugIn.LAS_CONFIG_KEY); 
@@ -84,12 +106,7 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
 		try {
 			if ( id != null ) {
 				if ( lasConfig.isLocal(id) ) {
-					variables = lasConfig.getVariables(id);
-					for (int i = 0; i < variables.size(); i++ ) {
-						Variable variable = variables.get(i);		
-						Grid grid = lasConfig.getGrid(variable.getXPath());
-						grids.add(grid);
-					}
+					variables = lasConfig.getFullVariables(id);
 				} else {
 					String[] parts = id.split(Constants.NAME_SPACE_SPARATOR);
 					String server_key = null;
