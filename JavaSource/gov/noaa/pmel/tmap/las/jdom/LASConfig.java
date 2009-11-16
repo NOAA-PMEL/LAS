@@ -3889,10 +3889,12 @@ public class LASConfig extends LASDocument {
 		    	List ops = opsParent.getChildren("operation");
 		    	for (Iterator opsIt = ops.iterator(); opsIt.hasNext();) {
 					Element op = (Element) opsIt.next();
-					String id = op.getAttributeValue("ID");
-					if ( id != null ) {					
-						id = JDOMUtils.MD5Encode(getBaseServerURL()) + Constants.NAME_SPACE_SPARATOR + id;
-						op.setAttribute("ID", id);
+					Element optiondef = op.getChild("optiondef");	
+					// Maybe null for old operations or those without options
+					if ( optiondef != null ) {
+						String IDREF = optiondef.getAttributeValue("IDREF");
+						IDREF = JDOMUtils.MD5Encode(getBaseServerURL()) + Constants.NAME_SPACE_SPARATOR + IDREF;
+						optiondef.setAttribute("IDREF", IDREF);
 					}
 				}		    	
 		    }
