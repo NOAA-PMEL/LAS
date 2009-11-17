@@ -13,7 +13,7 @@
     #set($op="Plot_1D")
  #end
  
- #set($optionid=$las_config.getOptionID($op)
+ #set($optionid=$las_config.getOptionID($op))
  
  #set($region="")
  #if ($las_request.getXlo() != "" && $las_request.getXlo() != "null")
