@@ -2,15 +2,19 @@
 <html>
 <!-- LAS SERVER OK -->
 #set($op="Plot_2D_XY")
+#set($optionid="Options_2D_image_contour_xy_7")
 #if($las_request.getOperation().equals("Plot_2D_XY_SlideSorter"))
     #set($op="Plot_2D_XY")
- #end
+#end
 #if ($las_request.getOperation().equals("Plot_2D_SlideSorter"))
     #set($op="Plot_2D")
  #end
  #if ($las_request.getOperation().equals("Plot_1D_SlideSorter"))
     #set($op="Plot_1D")
  #end
+ 
+ #set($optionid=$las_config.getOptionID($op)
+ 
  #set($region="")
  #if ($las_request.getXlo() != "" && $las_request.getXlo() != "null")
     #set($region=$region+"&xlo="+$las_request.getXlo())
@@ -39,7 +43,7 @@
 <head>
 
 <title>LAS Output -- $las_config.getTitle()</title>
-<META http-equiv="refresh" content="0;URL=VizGal.html?dsid=$las_request.datasetIDs.get(0)&vid=$las_request.variableIDs.get(0)&opid=$op&view=$las_request.getProperty("ferret","view")$region"> 
+<META http-equiv="refresh" content="0;URL=VizGal.html?dsid=$las_request.datasetIDs.get(0)&vid=$las_request.variableIDs.get(0)&opid=$op&optionid=$optionid&view=$las_request.getProperty("ferret","view")$region"> 
 </head>
 <body>
 </body>
