@@ -37,6 +37,7 @@ public class SettingsWidget extends Composite {
 	protected DatasetButton datasetButton;
 	protected OptionsButton optionsButton;
 	protected String operationID;
+	protected String optionID;
 	boolean usePanel = false;
 	protected RPCServiceAsync rpcService;
 
@@ -56,8 +57,9 @@ public class SettingsWidget extends Composite {
 	 */
 	Grid vertical = new Grid(5,1);
 
-	public SettingsWidget(String title, String panelID, String operationID, RPCServiceAsync rpcService, String layout) {
+	public SettingsWidget(String title, String panelID, String operationID, String optionID, RPCServiceAsync rpcService, String layout) {
 		this.operationID = operationID;
+		this.optionID = optionID;
 		this.rpcService = rpcService;
 		this.layout = layout;
 		applyButton = new Button("Apply");
@@ -72,10 +74,10 @@ public class SettingsWidget extends Composite {
 		closeAndApply.add(applyButton);
 		datasetButton = new DatasetButton(rpcService);
 		if ( layout.equals("button") ) {
-		    optionsButton = new OptionsButton(rpcService, operationID, 300);
+		    optionsButton = new OptionsButton(rpcService, optionID, 300);
 		    datasetButton.setOffset(0);
 		} else {
-			optionsButton = new OptionsButton(rpcService, operationID, 0);
+			optionsButton = new OptionsButton(rpcService, optionID, 0);
 			datasetButton.setOffset(260);
 		}
 		datasetAndOptions = new HorizontalPanel();

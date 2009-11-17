@@ -115,6 +115,7 @@ public class TestUI extends LASEntryPoint {
 	String dsid;
 	String vid;
 	String op;
+	String optionID;
 	String view;
 	int rightPad = 15;
 	VariableSerializable var;
@@ -127,6 +128,7 @@ public class TestUI extends LASEntryPoint {
 		vid = parameters.get("vid").get(0);
 		//TODO If the operation is null, get the default operation (the map or plot; left nav) for this view.
 		op = parameters.get("opid").get(0);
+		optionID = parameters.get("optionid").get(0);
 		view = parameters.get("view").get(0);
 		if ( dsid != null && vid != null & op != null && view != null) {
 			// If the proper information was sent to the widget, pull down the variable definition
@@ -207,7 +209,7 @@ public class TestUI extends LASEntryPoint {
 			ortho.clear();
 			int width = Window.getClientWidth();
 			int pwidth = (width-rightPad);
-			panel = new VizGalPanel("LAS", false, op, view, productServer, true, rpcService);
+			panel = new VizGalPanel("LAS", false, op, optionID, view, productServer, true, rpcService);
 			panel.setVariable(var);
 			panel.init(true);
 			panel.addCompareAxisChangeListener(onAxisChange);

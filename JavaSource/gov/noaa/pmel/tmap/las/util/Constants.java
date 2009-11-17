@@ -14,7 +14,7 @@ public class Constants {
 	public static final String GET_VARIABLES = "/getVariables.do";
 	public static final String GET_FULLVARIABLES = "/getFullVariables.do";
 	public static final String GET_VIEWS = "/getViews.do";
-	public static final String GET_FULLDATASET = "getFullDataset.do";
+	public static final String GET_FULLDATASET = "/getFullDataset.do";
 
 	public static final String PRODUCT_SERVER = "/ProductServer.do";
 	public static final String PRODUCT_SERVER_KEY = "LocalProductServer";

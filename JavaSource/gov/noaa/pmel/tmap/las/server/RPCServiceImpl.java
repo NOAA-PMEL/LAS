@@ -267,36 +267,115 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
 
 		return wireOps;
 	}
-	public OptionSerializable[] getOptionsByOperationID(String operationID) throws RPCException {
-		LASConfig lasConfig = (LASConfig) getServletContext().getAttribute(LASConfigPlugIn.LAS_CONFIG_KEY);
-		ArrayList<Option> options;
-		OptionSerializable[] wireOptions;
-		try {
-			options = lasConfig.getOptionsByOperationID(operationID);
-		} catch (JDOMException e) {
-			throw new RPCException(e.getMessage());
-		}
-		int i=0;
-		if ( options != null ) {
-			wireOptions = new OptionSerializable[options.size()];
-		    for (Iterator optionIt = options.iterator(); optionIt.hasNext();) {
-				Option option = (Option) optionIt.next();
-				wireOptions[i] = option.getOptionSerializable();
-			    i++;
-		    }
-		    return wireOptions;
-		} else {
-			return null;
-		}
-	}
+//	public OptionSerializable[] getOptionsByOperationID(String operationID) throws RPCException {
+//		LASConfig lasConfig = (LASConfig) getServletContext().getAttribute(LASConfigPlugIn.LAS_CONFIG_KEY);
+//		ArrayList<Option> options = new ArrayList<Option>();
+//		OptionSerializable[] wireOptions;
+//
+//		try {
+//
+//			if ( operationID != null ) {
+//				if ( lasConfig.isLocal(operationID) ) {
+//					options = lasConfig.getOptionsByOperationID(operationID);
+//				} else {
+//					String[] parts = operationID.split(Constants.NAME_SPACE_SPARATOR);
+//					String server_key = null;
+//					if ( parts != null ) {
+//						server_key = parts[0];
+//						if ( server_key != null ) {
+//							Tributary trib = lasConfig.getTributary(server_key);	
+//
+//
+//
+//							String las_url = trib.getURL() + Constants.GET_OPTIONS + "?format=xml&dsid=" + operationID;
+//							String variables_xml = lasProxy.executeGetMethodAndReturnResult(las_url);
+//							LASDocument optionsdoc = new LASDocument();
+//							JDOMUtils.XML2JDOM(variables_xml, optionsdoc);
+//							List opElements = optionsdoc.getRootElement().getChildren("option");
+//							for (Iterator opIt = opElements.iterator(); opIt.hasNext();) {
+//								Element opElement = (Element) opIt.next();
+//								Option option = new Option((Element)opElement.clone());
+//								options.add(option);
+//							}
+//
+//
+//
+//						}
+//					}
+//				}
+//			}
+//			options = lasConfig.getOptionsByOperationID(operationID);
+//		} catch (JDOMException e) {
+//			throw new RPCException(e.getMessage());
+//		} catch (UnsupportedEncodingException e) {
+//			throw new RPCException(e.getMessage());
+//		} catch (HttpException e) {
+//			throw new RPCException(e.getMessage());
+//		} catch (IOException e) {
+//			throw new RPCException(e.getMessage());
+//		}
+//		int i=0;
+//		if ( options != null ) {
+//			wireOptions = new OptionSerializable[options.size()];
+//			for (Iterator optionIt = options.iterator(); optionIt.hasNext();) {
+//				Option option = (Option) optionIt.next();
+//				wireOptions[i] = option.getOptionSerializable();
+//				i++;
+//			}
+//			return wireOptions;
+//		} else {
+//			return null;
+//		}
+//	}
+	/**
+	 * (non-Javadoc)
+	 * @see gov.noaa.pmel.tmap.las.client.RPCService#getOptions(java.lang.String)
+	 * @deprecated
+	 */
 	public OptionSerializable[] getOptions(String opid) throws RPCException {
 		LASConfig lasConfig = (LASConfig) getServletContext().getAttribute(LASConfigPlugIn.LAS_CONFIG_KEY);
-		ArrayList<Option> options;
+		// The id is actually the name in the options section of the XML, but it's unique and functions as an id...
+		ArrayList<Option> options = new ArrayList<Option>();
 		OptionSerializable[] wireOptions;
 		try {
-			options = lasConfig.getOptions(opid);
+			if ( opid != null ) {
+				if ( lasConfig.isLocal(opid) ) {
+					options = lasConfig.getOptions(opid);
+				} else {
+					String[] parts = opid.split(Constants.NAME_SPACE_SPARATOR);
+					String server_key = null;
+					if ( parts != null ) {
+						server_key = parts[0];
+						if ( server_key != null ) {
+							Tributary trib = lasConfig.getTributary(server_key);	
+
+
+
+							String las_url = trib.getURL() + Constants.GET_OPTIONS + "?format=xml&dsid=" + opid;
+							String variables_xml = lasProxy.executeGetMethodAndReturnResult(las_url);
+							LASDocument optionsdoc = new LASDocument();
+							JDOMUtils.XML2JDOM(variables_xml, optionsdoc);
+							List opElements = optionsdoc.getRootElement().getChildren("option");
+							for (Iterator opIt = opElements.iterator(); opIt.hasNext();) {
+								Element opElement = (Element) opIt.next();
+								Option option = new Option((Element)opElement.clone());
+								options.add(option);
+							}
+
+
+
+						}
+					}
+				}
+			}
 		} catch (JDOMException e) {
 			throw new RPCException(e.getMessage());
+		} catch (HttpException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		} 
 		int i=0;
 		if ( options != null ) {
