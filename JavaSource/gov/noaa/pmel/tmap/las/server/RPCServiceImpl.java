@@ -164,7 +164,7 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
 				ArrayList<Tributary> tributaries = lasConfig.getTributaries();
 				for (Iterator tribIt = tributaries.iterator(); tribIt.hasNext();) {
 					Tributary tributary = (Tributary) tribIt.next();
-					String url = tributary.getURL() + Constants.GET_FULL_CATEGORIES;
+					String url = tributary.getURL() + Constants.GET_FULL_CATEGORIES + "?format=xml";
 					String catxml = lasProxy.executeGetMethodAndReturnResult(url);
 					categories.addAll(JDOMUtils.getCategories(catxml));
 				}
@@ -217,39 +217,65 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
 		LASConfig lasConfig = (LASConfig) getServletContext().getAttribute(LASConfigPlugIn.LAS_CONFIG_KEY);
 		OperationSerializable[] wireOps = null;
 		try {
-			ArrayList<Operation> operations;
-			if ( view != null) {
-				operations = lasConfig.getOperations(view, dsID, varID);
-
+			ArrayList<Operation> operations = new ArrayList<Operation>();
+						
+			if ( dsID != null ) {
+				if ( lasConfig.isLocal(dsID) ) {
+					if ( view != null) {	
+						operations = lasConfig.getOperations(view, dsID, varID);
+					} else {
+						ArrayList<View> views = lasConfig.getViewsByDatasetAndVariable(dsID, varID);
+						HashMap<String, Operation> allOps = new HashMap<String, Operation>();
+						for (Iterator viewIt = views.iterator(); viewIt.hasNext();) {
+							View aView = (View) viewIt.next();
+							ArrayList<Operation> ops = lasConfig.getOperations(aView.getValue(), dsID, varID);
+							for (Iterator opsIt = ops.iterator(); opsIt.hasNext();) {
+								Operation op = (Operation) opsIt.next();
+								String id = op.getID();
+								allOps.put(id, op);
+							}
+						}
+						for (Iterator idIt = allOps.keySet().iterator(); idIt.hasNext();) {
+							String id = (String) idIt.next();
+							operations.add(allOps.get(id));
+						}
+					}
+				} else {
+					String[] parts = dsID.split(Constants.NAME_SPACE_SPARATOR);
+					String server_key = null;
+					if ( parts != null ) {
+						server_key = parts[0];
+						if ( server_key != null ) {
+							Tributary trib = lasConfig.getTributary(server_key);
+							String las_url = trib.getURL() + Constants.GET_OPERATIONS + "?format=xml&dsid=" + dsID + "&varid=" + varID;
+							if ( view != null) {	
+								las_url = las_url + "&view="+view;
+							} 
+							String op_xml = lasProxy.executeGetMethodAndReturnResult(las_url);
+							LASDocument opdoc = new LASDocument();
+							JDOMUtils.XML2JDOM(op_xml, opdoc);
+							Element opsElement = opdoc.getRootElement();
+							List ops = opsElement.getChildren("operation");
+							for (Iterator opIt = ops.iterator(); opIt.hasNext();) {
+								Element op = (Element) opIt.next();
+								Operation operation = new Operation(op);
+								operations.add(operation);
+							}									
+						}
+					}
+				}
 				if ( operations.size() <= 0 ) {
 					throw new RPCException("No operations found.");
 				} else {
 					// Check to see if there's something in there.
 					Operation op = operations.get(0);
-					String name = op.getName();
-					if ( name == null || name.equals("") ) {
+					String id = op.getID();
+					if ( id == null || id.equals("") ) {
 						throw new RPCException("No operations found.");
 					}
 				}
-			} else {
-				operations = new ArrayList<Operation>();
-				ArrayList<View> views = lasConfig.getViewsByDatasetAndVariable(dsID, varID);
-				HashMap<String, Operation> allOps = new HashMap<String, Operation>();
-				for (Iterator viewIt = views.iterator(); viewIt.hasNext();) {
-					View aView = (View) viewIt.next();
-					ArrayList<Operation> ops = lasConfig.getOperations(aView.getValue(), dsID, varID);
-					for (Iterator opsIt = ops.iterator(); opsIt.hasNext();) {
-						Operation op = (Operation) opsIt.next();
-						String id = op.getID();
-						allOps.put(id, op);
-					}
-				}
-				for (Iterator idIt = allOps.keySet().iterator(); idIt.hasNext();) {
-					String id = (String) idIt.next();
-					operations.add(allOps.get(id));
-				}
+			}				
 
-			}
 			wireOps = new OperationSerializable[operations.size()];
 			int k=0;
 			for (Iterator opsIt = operations.iterator(); opsIt.hasNext();) {
@@ -262,6 +288,12 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
 		} catch (RPCException e) {
 			throw new RPCException(e.getMessage());
 		} catch (LASException e) {
+			throw new RPCException(e.getMessage());
+		} catch (UnsupportedEncodingException e) {
+			throw new RPCException(e.getMessage());
+		} catch (HttpException e) {
+			throw new RPCException(e.getMessage());
+		} catch (IOException e) {
 			throw new RPCException(e.getMessage());
 		}
 
@@ -330,7 +362,7 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
 	/**
 	 * (non-Javadoc)
 	 * @see gov.noaa.pmel.tmap.las.client.RPCService#getOptions(java.lang.String)
-	 * @deprecated
+	 * 
 	 */
 	public OptionSerializable[] getOptions(String opid) throws RPCException {
 		LASConfig lasConfig = (LASConfig) getServletContext().getAttribute(LASConfigPlugIn.LAS_CONFIG_KEY);
@@ -348,13 +380,12 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
 						server_key = parts[0];
 						if ( server_key != null ) {
 							Tributary trib = lasConfig.getTributary(server_key);	
-
-
-
-							String las_url = trib.getURL() + Constants.GET_OPTIONS + "?format=xml&dsid=" + opid;
-							String variables_xml = lasProxy.executeGetMethodAndReturnResult(las_url);
+							// The server key is in the operations definition, we need to get it from the options without the server key.
+							opid = parts[1];
+							String las_url = trib.getURL() + Constants.GET_OPTIONS + "?format=xml&opid=" + opid;
+							String options_xml = lasProxy.executeGetMethodAndReturnResult(las_url);
 							LASDocument optionsdoc = new LASDocument();
-							JDOMUtils.XML2JDOM(variables_xml, optionsdoc);
+							JDOMUtils.XML2JDOM(options_xml, optionsdoc);
 							List opElements = optionsdoc.getRootElement().getChildren("option");
 							for (Iterator opIt = opElements.iterator(); opIt.hasNext();) {
 								Element opElement = (Element) opIt.next();
@@ -371,11 +402,9 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
 		} catch (JDOMException e) {
 			throw new RPCException(e.getMessage());
 		} catch (HttpException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			throw new RPCException(e.getMessage());
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			throw new RPCException(e.getMessage());
 		} 
 		int i=0;
 		if ( options != null ) {
