@@ -88,8 +88,9 @@ public class VizGalPanel extends Composite {
 	 */
 	TandZWidgets tandzWidgets = new TandZWidgets();
 
-	/* Keep track of the view and operation.  These are passed in as parameters when the pane is created. */
-	String op;
+	/* Keep track of the optionID, view and operation.  These are passed in as parameters when the pane is created. */
+	String optionID;
+	String operationID;
 	String view;
 
 	/* The product server base URL */
@@ -153,13 +154,13 @@ public class VizGalPanel extends Composite {
 	/**
 	 * Builds a VizGal panel with a default plot for the variable.  See {@code}VizGal(LASRequest) if you want more options on the initial plot.
 	 */
-	public VizGalPanel(String id, boolean comparePanel, String op, String view, String productServer, boolean single, RPCServiceAsync rpcService) {
+	public VizGalPanel(String id, boolean comparePanel, String op, String optionID, String view, String productServer, boolean single, RPCServiceAsync rpcService) {
 		this.ID = id;
 		this.comparePanel = comparePanel;
 		this.productServer = productServer;
 		this.singlePanel = single;
 		this.rpcService = rpcService;
-		this.op = op;
+		this.operationID = op;
 		this.view = view;
 		String spinImageURL = Util.getImageURL()+"/mozilla_blu.gif";
 		spinImage = new HTML("<img src=\""+spinImageURL+"\" alt=\"Spinner\"/>");
@@ -195,7 +196,7 @@ public class VizGalPanel extends Composite {
 		top = new Grid(1,3);
 
 		String title = "Settings";
-		settingsButton = new SettingsWidget(title, ID, op, rpcService, "button");
+		settingsButton = new SettingsWidget(title, ID, operationID, optionID, rpcService, "button");
 		settingsButton.addApplyClickListener(applyPanelClick);
 		settingsButton.addCloseClickListener(closeClick);
 		settingsButton.addDatasetTreeListener(datasetTreeListener);
@@ -239,7 +240,7 @@ public class VizGalPanel extends Composite {
 		double delta = Math.abs(Double.valueOf(ds_grid.getXAxis().getArangeSerializable().getStep()));
 		settingsButton.getRefMap().setDataExtent(grid_south, grid_north, grid_west, grid_east, delta);
 		
-		settingsButton.setOperations(rpcService, var.getIntervals(), var.getDSID(), var.getID(), op, view, null);
+		settingsButton.setOperations(rpcService, var.getIntervals(), var.getDSID(), var.getID(), operationID, view, null);
 		tandzWidgets.removeAxes();
 		settingsButton.setUsePanel(usePanel);
 		if ( ds_grid.getTAxis() != null ) {
@@ -303,7 +304,7 @@ public class VizGalPanel extends Composite {
 
 		lasRequest.addVariable(var.getDSID(), var.getID());
 
-		lasRequest.setOperation(op, "v7");
+		lasRequest.setOperation(operationID, "v7");
 		lasRequest.setProperty("ferret", "view", view);
 		lasRequest.setProperty("ferret", "size", ".8333");
 
@@ -963,7 +964,7 @@ public class VizGalPanel extends Composite {
 			if ( sender instanceof OperationButton ) {
 				OperationButton o = (OperationButton) sender;
 				view = settingsButton.getOperationsWidget().getCurrentView();
-				op = settingsButton.getCurrentOp().getID();
+				operationID = settingsButton.getCurrentOp().getID();
 				usePanel(true);
 				if ( isUsePanelSettings() || singlePanel ) {
 					if ( view.contains("t") ) {
@@ -1014,7 +1015,7 @@ public class VizGalPanel extends Composite {
 	}
 	public void setOperation(String id, String v) {
 		settingsButton.setOperation(id, v);	
-		op = settingsButton.getCurrentOp().getID();
+		operationID = settingsButton.getCurrentOp().getID();
 		view = settingsButton.getCurrentOperationView();
 		settingsButton.setToolType(view);
 	}

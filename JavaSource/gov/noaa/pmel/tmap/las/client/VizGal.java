@@ -73,6 +73,7 @@ public class VizGal extends LASEntryPoint {
 	String vid;
 	String view;
 	String op;
+	String optionID;
 	/*
 	 * These are optional parameters that can be used to set the xyzt ranges for the initial plot in the panels.
 	 */
@@ -252,6 +253,7 @@ public class VizGal extends LASEntryPoint {
 		vid = getParameterString("vid");
 		//TODO If the operation is null, get the default operation (the map or plot; left nav) for this view.
 		op = getParameterString("opid");
+		optionID = getParameterString("optionid");
 		view = getParameterString("view");
 
 		// This may have come from a running LAS and it might want to set up the xyzt ranges for the plots in the panels.
@@ -305,7 +307,7 @@ public class VizGal extends LASEntryPoint {
 
 		// This is a control panel that will control the settings for all the panels and it appears vertically on the left side.
 		// The last false is to disallow editing with the grab handles on the map.
-		settingsControls = new SettingsWidget("Gallery Settings", "Slide Sorter", op, rpcService, "panel");
+		settingsControls = new SettingsWidget("Gallery Settings", "Slide Sorter", op, optionID, rpcService, "panel");
 		settingsControls.setTitle("Settings for all panels.");
 		settingsControls.addDatasetTreeListener(datasetTreeListener);
 		settingsControls.addOptionsOkClickListener(optionsOkListener);
@@ -529,7 +531,7 @@ public class VizGal extends LASEntryPoint {
 		if ( pwidth <= 0 ) {
 			pwidth = 400;
 		}
-		VizGalPanel sp1 = new VizGalPanel("Panel 0", true, op, view, productServer, false, rpcService);
+		VizGalPanel sp1 = new VizGalPanel("Panel 0", true, op, optionID, view, productServer, false, rpcService);
 		sp1.addRevertListener(panelApplyButtonClick);
 		sp1.addApplyListener(panelApplyButtonClick);
 		slides.setWidget(0, 0, sp1);
@@ -539,7 +541,7 @@ public class VizGal extends LASEntryPoint {
 		sp1.addTChangeListner(panelAxisMenuChange);
 		panels.add(sp1);
 
-		VizGalPanel sp2 = new VizGalPanel("Panel 1", false, op, view, productServer, false, rpcService);
+		VizGalPanel sp2 = new VizGalPanel("Panel 1", false, op, optionID, view, productServer, false, rpcService);
 		sp2.addRevertListener(panelApplyButtonClick);
 		sp2.addApplyListener(panelApplyButtonClick);
 		//sp2.addRegionChangeListener(regionChange);
@@ -550,7 +552,7 @@ public class VizGal extends LASEntryPoint {
 		sp2.addTChangeListner(panelAxisMenuChange);		
 		panels.add(sp2);
 
-		VizGalPanel sp3 = new VizGalPanel("Panel 2", false, op, view, productServer, false, rpcService);
+		VizGalPanel sp3 = new VizGalPanel("Panel 2", false, op, optionID, view, productServer, false, rpcService);
 		sp3.addRevertListener(panelApplyButtonClick);
 		sp3.addApplyListener(panelApplyButtonClick);
 		//sp2.addRegionChangeListener(regionChange);
@@ -561,7 +563,7 @@ public class VizGal extends LASEntryPoint {
 		sp3.addTChangeListner(panelAxisMenuChange);		
 		panels.add(sp3);
 
-		VizGalPanel sp4 = new VizGalPanel("Panel 3", false, op, view, productServer, false, rpcService);
+		VizGalPanel sp4 = new VizGalPanel("Panel 3", false, op, optionID, view, productServer, false, rpcService);
 		sp4.addRevertListener(panelApplyButtonClick);
 		sp4.addApplyListener(panelApplyButtonClick);
 		//sp2.addRegionChangeListener(regionChange);

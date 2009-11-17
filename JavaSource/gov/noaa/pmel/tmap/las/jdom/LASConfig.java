@@ -2101,22 +2101,31 @@ public class LASConfig extends LASDocument {
      * @throws JDOMException 
      */
     public ArrayList<Option> getOptionsByOperationID(String operationID) throws JDOMException {
-        ArrayList<Option> options = new ArrayList<Option>();
-        
-        // Be sure to make items null for textarea.
-        
-        Element op = getElementByXPath("/lasdata/operations/operation[@ID='"+operationID+"']");
-        if ( op != null ) {
-            Element option = op.getChild("optiondef");
-            if ( option != null ) {
-                String optionID = option.getAttributeValue("IDREF");
-                if ( optionID != null ) {
-                    // Collect the options from this ID (which is really the name, but nevermind).
-                    options.addAll(extractOptions(optionID));
-                }
-            }
-        }
-        return options;
+    	ArrayList<Option> options = new ArrayList<Option>();
+
+    	// Be sure to make items null for textarea.
+
+    	String optionID = getOptionID(operationID);
+    	if ( optionID != null && !optionID.equals("") ) {
+    		// Collect the options from this ID (which is really the name, but nevermind).
+    		options.addAll(extractOptions(optionID));
+    	}
+
+    	return options;
+    }
+    public String getOptionID(String operationID) throws JDOMException {
+    	 Element op = getElementByXPath("/lasdata/operations/operation[@ID='"+operationID+"']");
+    	 String optionID = "";
+         if ( op != null ) {
+             Element option = op.getChild("optiondef");
+             if ( option != null ) {
+                 optionID = option.getAttributeValue("IDREF");
+                 if ( optionID == null ) {
+                	 optionID = "";
+                 }
+             }
+         }
+         return optionID;
     }
     /**
 	 * Get the name of the output directory for this LAS

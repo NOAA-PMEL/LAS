@@ -8,7 +8,7 @@ public interface RPCServiceAsync {
     public void getGrid(String dsid, String varid, AsyncCallback gridCallback);
     public void getOperations(String view, String dsid, String varid, AsyncCallback opCallback);
 	public void getOptions(String opid, AsyncCallback optionsCallback);
-	public void getOptionsByOperationID(String operationID, AsyncCallback optionsCallBack);
+	//public void getOptionsByOperationID(String operationID, AsyncCallback optionsCallBack);
     public void getTimeSeries(AsyncCallback timeSeriesCallback);
     public void getDataset(String id, AsyncCallback datasetCallback);
 }
