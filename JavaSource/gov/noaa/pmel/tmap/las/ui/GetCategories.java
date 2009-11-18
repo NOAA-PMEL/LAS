@@ -71,7 +71,7 @@ public class GetCategories extends ConfigService {
 			// Handle the case where the request is for local categories on a confluence server (the made up parent category is the same
 			// as null).
 			if ( catid != null && catid.contains(Constants.NAME_SPACE_SPARATOR) ) {
-			    if ( catid.equals(lasConfig.getBaseServerURLKey()+Constants.NAME_SPACE_SPARATOR+lasConfig.getServerNameKey())) catid=null;
+			    if ( catid.equals(lasConfig.getTopLevelCategoryID()) ) catid=null;
 			}
 			categories = lasConfig.getCategories(catid);
 
