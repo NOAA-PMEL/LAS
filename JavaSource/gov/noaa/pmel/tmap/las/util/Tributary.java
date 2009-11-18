@@ -18,4 +18,8 @@ public class Tributary extends Container implements TributaryInterface {
 		getElement().setAttribute("url", url);
 	}
 
+	public String getTopLevelCategoryID() {
+		return getID()+Constants.NAME_SPACE_SPARATOR+"Top_of_"+getID();
+	}
+
 }
