@@ -156,32 +156,58 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
 		
 		try {
 			if ( id == null ) {
+				Category local_cat = new Category(lasConfig.getTitle(), lasConfig.getTopLevelCategoryID()); 
 				// Do the local top level category
-				categories = lasConfig.getFullCategories(id);
-
+				ArrayList<Category> local_cats = lasConfig.getFullCategories(id);
+                for (Iterator catIt = local_cats.iterator(); catIt.hasNext();) {
+					Category category = (Category) catIt.next();
+					local_cat.addCategory(category);
+				}
+                categories.add(local_cat);
 				// Do the remote categories...
 
 				ArrayList<Tributary> tributaries = lasConfig.getTributaries();
 				for (Iterator tribIt = tributaries.iterator(); tribIt.hasNext();) {
 					Tributary tributary = (Tributary) tribIt.next();
+					Category server_cat = new Category(tributary.getName(), tributary.getTopLevelCategoryID());
 					String url = tributary.getURL() + Constants.GET_FULL_CATEGORIES + "?format=xml";
 					String catxml = lasProxy.executeGetMethodAndReturnResult(url);
-					categories.addAll(JDOMUtils.getCategories(catxml));
+					ArrayList<Category> trib_cats = JDOMUtils.getCategories(catxml);
+					for (Iterator tribCatsIt = trib_cats.iterator(); tribCatsIt.hasNext();) {
+						Category category = (Category) tribCatsIt.next();
+						server_cat.addCategory(category);
+					}
+					categories.add(server_cat);
 				}
 
 				Collections.sort(categories, new ContainerComparator("name"));
 
 			} else {
-				// Figure out if the category is from the local or remote server and process accordingly.
-				
-				// TODO as above
+				if ( lasConfig.isLocal(id) ) {
+					categories = lasConfig.getFullCategories(id);
+				} else {
+					String[] parts = id.split(Constants.NAME_SPACE_SPARATOR);
+					String server_key = null;
+					if ( parts != null ) {
+						server_key = parts[0];
+						if ( server_key != null ) {
+							Tributary trib = lasConfig.getTributary(server_key);
+							String las_url = trib.getURL() + Constants.GET_FULL_CATEGORIES + "?format=xml&catid="+id;
+							String catxml = lasProxy.executeGetMethodAndReturnResult(las_url);
+							ArrayList<Category> trib_cats = JDOMUtils.getCategories(catxml);
+							for (Iterator tribCatsIt = trib_cats.iterator(); tribCatsIt.hasNext();) {
+								Category category = (Category) tribCatsIt.next();
+								categories.add(category);
+							}
+						}
+					}
+				}
 				
 			}
 			CategorySerializable[] cats = new CategorySerializable[categories.size()];
-			int i = 0;
-			for (Iterator catIt = categories.iterator(); catIt.hasNext();) {
-				Category category = (Category) catIt.next();
-				cats[i] = category.getCategorySerializable();
+			
+			for (int i = 0; i < cats.length; i++) {
+				cats[i] = categories.get(i).getCategorySerializable();
 			}
             return cats;
 

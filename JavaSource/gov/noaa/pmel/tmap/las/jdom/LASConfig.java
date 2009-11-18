@@ -3931,8 +3931,8 @@ public class LASConfig extends LASDocument {
 	public String getBaseServerURLKey() throws UnsupportedEncodingException, JDOMException {
 		return JDOMUtils.MD5Encode(getBaseServerURL());
 	}
-	public String getServerNameKey() throws UnsupportedEncodingException, JDOMException {
-		return JDOMUtils.MD5Encode(getTitle());
+	public String getTopLevelCategoryID() throws UnsupportedEncodingException, JDOMException {
+	    return getBaseServerURLKey()+Constants.NAME_SPACE_SPARATOR+"Top_of_"+getBaseServerURLKey();
 	}
 	public ArrayList<Variable> getFullVariables(String dsID) throws JDOMException, LASException {
 		Dataset dataset = getDataset(dsID);

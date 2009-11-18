@@ -126,7 +126,7 @@ public class Confluence extends LASAction {
 					}
 					try {
 						// Start with the categories on this server...
-						Category local_cat = new Category(lasConfig.getTitle(), lasConfig.getBaseServerURLKey()+Constants.NAME_SPACE_SPARATOR+lasConfig.getServerNameKey()); 
+						Category local_cat = new Category(lasConfig.getTitle(), lasConfig.getTopLevelCategoryID()); 
 						ArrayList<Category> local_cats = lasConfig.getCategories(null);
 						// Only add it as a top level category if it has some children...
 						if ( local_cats.size() > 0 ) {
@@ -145,7 +145,7 @@ public class Confluence extends LASAction {
 							if ( !category.equals("") && category.contains("xml") ) {
 								LASDocument cat = new LASDocument();
 								JDOMUtils.XML2JDOM(category, cat);
-								Category server_cat = new Category(trib.getName(), trib.getID()+Constants.NAME_SPACE_SPARATOR+JDOMUtils.MD5Encode(trib.getName()));
+								Category server_cat = new Category(trib.getName(), trib.getTopLevelCategoryID());
 								List cats = cat.getRootElement().getChildren("category");
 								for (Iterator catsIt = cats.iterator(); catsIt.hasNext();) {
 									Element acat = (Element) catsIt.next();

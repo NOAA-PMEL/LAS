@@ -35,7 +35,7 @@ public class Category extends Container implements CategoryInterface {
 		}
 	}
 	public void addCategory(Category cat) {
-		getElement().addContent(cat.getElement());
+		getElement().addContent((Element)cat.getElement().clone());
 	}
 	public void addCategory(Element cat) {
 		getElement().addContent(cat);
