@@ -127,33 +127,12 @@ public class Confluence extends LASAction {
 					try {
 						// Start with the categories on this server...
 						Category local_cat = new Category(lasConfig.getTitle(), lasConfig.getTopLevelCategoryID()); 
-						ArrayList<Category> local_cats = lasConfig.getCategories(null);
-						// Only add it as a top level category if it has some children...
-						if ( local_cats.size() > 0 ) {
-							for (Iterator catsIt = local_cats.iterator(); catsIt.hasNext();) {
-								Category category = (Category) catsIt.next();
-								local_cat.addCategory(category);
-							}
-							categories.add(local_cat);
-						}
+						categories.add(local_cat);
+
 						for (Iterator servIt = servers.iterator(); servIt.hasNext();) {
 							Tributary trib = (Tributary) servIt.next();
-							String las_url = trib.getURL()+Constants.GET_CATEGORIES+"?format=xml";
-							String category;
-
-							category = lasProxy.executeGetMethodAndReturnResult(las_url, response);
-							if ( !category.equals("") && category.contains("xml") ) {
-								LASDocument cat = new LASDocument();
-								JDOMUtils.XML2JDOM(category, cat);
-								Category server_cat = new Category(trib.getName(), trib.getTopLevelCategoryID());
-								List cats = cat.getRootElement().getChildren("category");
-								for (Iterator catsIt = cats.iterator(); catsIt.hasNext();) {
-									Element acat = (Element) catsIt.next();
-									Category acategory = new Category((Element)acat.clone());
-									server_cat.addCategory(acategory);
-								}
-								categories.add(server_cat);
-							}
+                            Category server_cat = new Category(trib.getName(), trib.getTopLevelCategoryID());
+							categories.add(server_cat);
 						}
 						InputStream is = new ByteArrayInputStream(Util.toJSON(categories, "categories").toString().getBytes("UTF-8"));
 						lasProxy.stream(is, response.getOutputStream());
