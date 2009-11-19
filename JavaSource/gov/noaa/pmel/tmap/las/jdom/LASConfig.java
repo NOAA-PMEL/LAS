@@ -1032,13 +1032,17 @@ public class LASConfig extends LASDocument {
     	}
     	return cats;
     }
+    public ArrayList<Category> getCategories(String catid) throws JDOMException, LASException {
+    	return getCategories(catid, false);
+    }
     /**
      * Get the categories directly below this id.  If the id is null get the top.
      * @param catid
      * @return
      * @throws JDOMException
+     * @throws LASException 
      */
-    public ArrayList<Category> getCategories(String catid) throws JDOMException {
+    public ArrayList<Category> getCategories(String catid, boolean full) throws JDOMException, LASException {
         ArrayList<Category> categories = new ArrayList<Category>();
         List tops = getRootElement().getChildren("las_categories");
         if ( catid == null ) {
@@ -1071,7 +1075,11 @@ public class LASConfig extends LASDocument {
                     }
                 }
             } else {
-                categories = getDatasets();
+            	if ( full ) {
+            		categories = getFullDatasets();
+            	} else {
+                    categories = getDatasets();
+            	}
             }
         } else {
             // There are categories in the config, use them...
@@ -1351,12 +1359,19 @@ public class LASConfig extends LASDocument {
         String xPath = "/lasdata/datasets/dataset[@ID='"+dsid+"']";
         return getElementByXPath(xPath);
     }
-    
+    public ArrayList<Category> getFullDatasets() throws JDOMException, LASException {
+    	return getDatasets(true);
+    }
+    public ArrayList<Category> getDatasets() throws JDOMException, LASException {
+    	return getDatasets(false);
+    }
     /**
      * Returns all the datasets as gov.noaa.pmel.tmap.las.util.Dataset objects.
      * @return ArrayList of dataset objects
+     * @throws LASException 
+     * @throws JDOMException 
      */
-    public ArrayList<Category> getDatasets() {
+    public ArrayList<Category> getDatasets(boolean full) throws JDOMException, LASException {
         ArrayList<Category> datasets = new ArrayList<Category>();
         Element datasetsE = getDatasetsAsElement();
         List datasetElements = datasetsE.getChildren("dataset");
@@ -1364,28 +1379,38 @@ public class LASConfig extends LASDocument {
             Element dataset = (Element) dsIt.next();
             Element ds_novars = (Element)dataset.clone();
             ds_novars.setName("category");
-            /*
-             * Since we don't want all the children (the variables, composites, etc.)
-             * we'll remove every things that's not properties.  However, we will
-             * keep the contributor and documentation elements.
-             */
-            List children = ds_novars.getChildren();
-            ArrayList<String> remove = new ArrayList<String>();
-            for (Iterator childIt = children.iterator(); childIt.hasNext();) {
-                Element child = (Element) childIt.next();
-                if (!child.getName().equals("properties") && 
-                    !child.getName().equals("documentation") && 
-                    !child.getName().equals("contributor") ) {
-                    remove.add(child.getName());                  
-                }
-            }     
-            for (int i=0; i < remove.size(); i++) {
-               ds_novars.removeChild(remove.get(i));
+            
+            if ( full ) {
+            	ArrayList<Variable> variables = getFullVariables(dataset.getAttributeValue("ID"));
+            	ds_novars.getChild("variables").removeChildren("variable");
+            	for (Iterator varIt = variables.iterator(); varIt.hasNext();) {
+					Variable variable = (Variable) varIt.next();
+					ds_novars.getChild("variables").addContent((Element)variable.getElement().clone());
+				}
+            } else {
+            	/*
+                 * For, the JavaScript UI, we want to strip out the children.
+                 * we'll remove every things that's not properties.  However, we will
+                 * keep the contributor and documentation elements.
+                 */
+            	List children = ds_novars.getChildren();
+            	ArrayList<String> remove = new ArrayList<String>();
+            	for (Iterator childIt = children.iterator(); childIt.hasNext();) {
+            		Element child = (Element) childIt.next();
+            		if (!child.getName().equals("properties") && 
+            				!child.getName().equals("documentation") && 
+            				!child.getName().equals("contributor") ) {
+            			remove.add(child.getName());                  
+            		}
+            	}     
+            	for (int i=0; i < remove.size(); i++) {
+            		ds_novars.removeChild(remove.get(i));
+            	}          	
             }
             ds_novars.setAttribute("children", "variables");
-            ds_novars.setAttribute("children_dsid", ds_novars.getAttributeValue("ID"));
-            Category ds = new Category(ds_novars);                
-            datasets.add(ds);
+        	ds_novars.setAttribute("children_dsid", ds_novars.getAttributeValue("ID"));
+        	Category ds = new Category(ds_novars);                
+        	datasets.add(ds);
         }
         return datasets;
     }
