@@ -1257,11 +1257,7 @@ public class addXML {
 				if ( esg ) {
 					tag = ThreddsDataset.getID();
 				} else {
-					if ( ThreddsDataset != null && ThreddsDataset.getID() != null && !ThreddsDataset.getID().equals("") ) {
-						tag = ThreddsDataset.getID();
-					} else {
-						tag = encodeID(url);
-					}
+				    tag = encodeID(url);
 				}
 
 				filter.setContainstag(tag);
