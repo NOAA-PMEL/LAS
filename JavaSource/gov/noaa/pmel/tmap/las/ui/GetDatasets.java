@@ -4,6 +4,7 @@
  */
 package gov.noaa.pmel.tmap.las.ui;
 
+import gov.noaa.pmel.tmap.las.exception.LASException;
 import gov.noaa.pmel.tmap.las.jdom.LASConfig;
 import gov.noaa.pmel.tmap.las.product.server.LASConfigPlugIn;
 import gov.noaa.pmel.tmap.las.ui.json.JSONUtil;
@@ -25,6 +26,7 @@ import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.jdom.Element;
+import org.jdom.JDOMException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -37,7 +39,7 @@ import org.json.XML;
  * XDoclet definition:
  * @struts.action validate="true"
  */
-public class GetDatasets extends Action {
+public class GetDatasets extends ConfigService {
     /*
      * Generated Methods
      */
@@ -63,7 +65,14 @@ public class GetDatasets extends Action {
         log.debug("Processing request for dataset list.");
         LASConfig lasConfig = (LASConfig)servlet.getServletContext().getAttribute(LASConfigPlugIn.LAS_CONFIG_KEY); 
                 
-        ArrayList<Category> datasets = lasConfig.getDatasets();
+        ArrayList<Category> datasets = new ArrayList<Category>();
+		try {
+			datasets = lasConfig.getDatasets();
+		} catch (JDOMException e) {
+			sendError(response, "<datasets>", format, e.getMessage());
+		} catch (LASException e) {
+			sendError(response, "<datasets>", format, e.getMessage());
+		}
         StringBuffer xml = new StringBuffer();
         
         xml.append("<datasets>");
@@ -85,11 +94,9 @@ public class GetDatasets extends Action {
                 json_response.write(respout);
             }
         } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+        	sendError(response, "<datasets>", format, e.getMessage());
         } catch (JSONException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+        	sendError(response, "<datasets>", format, e.getMessage());
         }        
         return null;
     }

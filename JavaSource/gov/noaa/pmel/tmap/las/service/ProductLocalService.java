@@ -55,7 +55,7 @@ public class ProductLocalService extends ProductService {
         super(lasBackendRequest, serverURL, methodName, outputFileName);
     }
 
-    public void getTHREDDS(LASBackendRequest lasBackendRequest, LASConfig lasConfig, ServerConfig serverConfig) throws JDOMException, URISyntaxException, UnsupportedEncodingException {
+    public void getTHREDDS(LASBackendRequest lasBackendRequest, LASConfig lasConfig, ServerConfig serverConfig) throws JDOMException, URISyntaxException, UnsupportedEncodingException, LASException {
         
         LASBackendResponse lasBackendResponse = new LASBackendResponse();
         String fdsServerURL = lasConfig.getServerURL().replace("ProductServer.do", "fds/data/");
