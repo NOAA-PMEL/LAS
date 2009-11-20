@@ -65,91 +65,89 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
 		}
 		return cats;
 	}
-	public DatasetSerializable getDataset(String id) throws RPCException {
-		LASConfig lasConfig = (LASConfig) getServletContext().getAttribute(LASConfigPlugIn.LAS_CONFIG_KEY); 
-		try {
-			if ( id != null ) {
-				if ( lasConfig.isLocal(id) ) {
-					Dataset dataset = lasConfig.getDataset(id);
-					return dataset.getDatasetSerializable();
-				} else {
-					String[] parts = id.split(Constants.NAME_SPACE_SPARATOR);
-					String server_key = null;
-					if ( parts != null ) {
-						server_key = parts[0];
-						if ( server_key != null ) {
-							Tributary trib = lasConfig.getTributary(server_key);
-							String las_url = trib.getURL() + Constants.GET_FULLDATASET + "?format=xml&dsid=" + id;
-							String dataset_xml = lasProxy.executeGetMethodAndReturnResult(las_url);
-							LASDocument dsdoc = new LASDocument();
-							JDOMUtils.XML2JDOM(dataset_xml, dsdoc);
-							Element dsElement = dsdoc.getRootElement();
-							Dataset ds = new Dataset(dsElement);
-							return ds.getDatasetSerializable();
-						}
-					}
-				}
-			} else {
-				throw new RPCException("No server key found.");
-			}
-		} catch (JDOMException e) {
-			throw new RPCException(e.getMessage());
-		} catch (Exception e) {
-			throw new RPCException(e.getMessage());
-		} 
-		return null;
-	}
-	public VariableSerializable[] getVariables(String id) throws RPCException {
-		LASConfig lasConfig = (LASConfig) getServletContext().getAttribute(LASConfigPlugIn.LAS_CONFIG_KEY); 
-		ArrayList<Variable> variables = new ArrayList<Variable>();
-		ArrayList<Grid> grids = new ArrayList<Grid>();
-		try {
-			if ( id != null ) {
-				if ( lasConfig.isLocal(id) ) {
-					variables = lasConfig.getFullVariables(id);
-				} else {
-					String[] parts = id.split(Constants.NAME_SPACE_SPARATOR);
-					String server_key = null;
-					if ( parts != null ) {
-						server_key = parts[0];
-						if ( server_key != null ) {
-							Tributary trib = lasConfig.getTributary(server_key);
-							String las_url = trib.getURL() + Constants.GET_FULLVARIABLES + "?format=xml&dsid=" + id;
-							String variables_xml = lasProxy.executeGetMethodAndReturnResult(las_url);
-							LASDocument varsdoc = new LASDocument();
-							JDOMUtils.XML2JDOM(variables_xml, varsdoc);
-							List varElements = varsdoc.getRootElement().getChildren("variable");
-							for (Iterator varsIt = varElements.iterator(); varsIt.hasNext();) {
-								Element varElement = (Element) varsIt.next();
-								Variable variable = new Variable((Element)varElement.clone(), id, varElement.getAttributeValue("DSName"));
-								variables.add(variable);
-							}
-						} else {
-							throw new RPCException("No server key found.");
-						}
-					} else {
-						throw new RPCException("No server key found.");
-					}
-				}
-			}
-		} catch (UnsupportedEncodingException e) {
-			throw new RPCException(e.getMessage());
-		} catch (HttpException e) {
-			throw new RPCException(e.getMessage());
-		} catch (JDOMException e) {
-			throw new RPCException(e.getMessage());
-		} catch (IOException e) {
-			throw new RPCException(e.getMessage());
-		} catch (LASException e) {
-			throw new RPCException(e.getMessage());
-		}
-		VariableSerializable[] wire_vars = new VariableSerializable[variables.size()];
-		for (int i = 0; i < variables.size(); i++ ) {
-			Variable variable = variables.get(i);	
-			wire_vars[i] = variable.getVariableSerializable();
-		}
-		return wire_vars;
-	}
+//	public DatasetSerializable getDataset(String id) throws RPCException {
+//		LASConfig lasConfig = (LASConfig) getServletContext().getAttribute(LASConfigPlugIn.LAS_CONFIG_KEY); 
+//		try {
+//			if ( id != null ) {
+//				if ( lasConfig.isLocal(id) ) {
+//					Dataset dataset = lasConfig.getDataset(id);
+//					return dataset.getDatasetSerializable();
+//				} else {
+//					String[] parts = id.split(Constants.NAME_SPACE_SPARATOR);
+//					String server_key = null;
+//					if ( parts != null ) {
+//						server_key = parts[0];
+//						if ( server_key != null ) {
+//							Tributary trib = lasConfig.getTributary(server_key);
+//							String las_url = trib.getURL() + Constants.GET_FULLDATASET + "?format=xml&dsid=" + id;
+//							String dataset_xml = lasProxy.executeGetMethodAndReturnResult(las_url);
+//							LASDocument dsdoc = new LASDocument();
+//							JDOMUtils.XML2JDOM(dataset_xml, dsdoc);
+//							Element dsElement = dsdoc.getRootElement();
+//							Dataset ds = new Dataset(dsElement);
+//							return ds.getDatasetSerializable();
+//						}
+//					}
+//				}
+//			} else {
+//				throw new RPCException("No server key found.");
+//			}
+//		} catch (JDOMException e) {
+//			throw new RPCException(e.getMessage());
+//		} catch (Exception e) {
+//			throw new RPCException(e.getMessage());
+//		} 
+//		return null;
+//	}
+//	public VariableSerializable[] getVariables(String id) throws RPCException {
+//		LASConfig lasConfig = (LASConfig) getServletContext().getAttribute(LASConfigPlugIn.LAS_CONFIG_KEY); 
+//		ArrayList<Variable> variables = new ArrayList<Variable>();
+//		ArrayList<Grid> grids = new ArrayList<Grid>();
+//		try {
+//			if ( id != null ) {
+//				if ( lasConfig.isLocal(id) ) {
+//					variables = lasConfig.getVariables(id);
+//				} else {
+//					String[] parts = id.split(Constants.NAME_SPACE_SPARATOR);
+//					String server_key = null;
+//					if ( parts != null ) {
+//						server_key = parts[0];
+//						if ( server_key != null ) {
+//							Tributary trib = lasConfig.getTributary(server_key);
+//							String las_url = trib.getURL() + Constants.GET_VARIABLES + "?format=xml&dsid=" + id;
+//							String variables_xml = lasProxy.executeGetMethodAndReturnResult(las_url);
+//							LASDocument varsdoc = new LASDocument();
+//							JDOMUtils.XML2JDOM(variables_xml, varsdoc);
+//							List varElements = varsdoc.getRootElement().getChildren("variable");
+//							for (Iterator varsIt = varElements.iterator(); varsIt.hasNext();) {
+//								Element varElement = (Element) varsIt.next();
+//								Variable variable = new Variable((Element)varElement.clone(), id, varElement.getAttributeValue("DSName"));
+//								variables.add(variable);
+//							}
+//						} else {
+//							throw new RPCException("No server key found.");
+//						}
+//					} else {
+//						throw new RPCException("No server key found.");
+//					}
+//				}
+//			}
+//		} catch (UnsupportedEncodingException e) {
+//			throw new RPCException(e.getMessage());
+//		} catch (HttpException e) {
+//			throw new RPCException(e.getMessage());
+//		} catch (JDOMException e) {
+//			throw new RPCException(e.getMessage());
+//		} catch (IOException e) {
+//			throw new RPCException(e.getMessage());
+//		} 
+//		VariableSerializable[] wire_vars = new VariableSerializable[variables.size()];
+//		for (int i = 0; i < variables.size(); i++ ) {
+//			Variable variable = variables.get(i);	
+//			wire_vars[i] = variable.getVariableSerializable();
+//		}
+//		return wire_vars;
+//	}
 	public CategorySerializable[] getCategories(String id) throws RPCException {
 		LASConfig lasConfig = (LASConfig) getServletContext().getAttribute(LASConfigPlugIn.LAS_CONFIG_KEY); 
 		ArrayList<Category> categories = new ArrayList<Category>();
@@ -158,7 +156,7 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
 			if ( id == null ) {
 				Category local_cat = new Category(lasConfig.getTitle(), lasConfig.getTopLevelCategoryID()); 
 				// Do the local top level category
-				ArrayList<Category> local_cats = lasConfig.getFullCategories(id);
+				ArrayList<Category> local_cats = lasConfig.getCategories(id);
                 for (Iterator catIt = local_cats.iterator(); catIt.hasNext();) {
 					Category category = (Category) catIt.next();
 					local_cat.addCategory(category);
@@ -170,7 +168,7 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
 				for (Iterator tribIt = tributaries.iterator(); tribIt.hasNext();) {
 					Tributary tributary = (Tributary) tribIt.next();
 					Category server_cat = new Category(tributary.getName(), tributary.getTopLevelCategoryID());
-					String url = tributary.getURL() + Constants.GET_FULL_CATEGORIES + "?format=xml";
+					String url = tributary.getURL() + Constants.GET_CATEGORIES + "?format=xml";
 					String catxml = lasProxy.executeGetMethodAndReturnResult(url);
 					ArrayList<Category> trib_cats = JDOMUtils.getCategories(catxml);
 					for (Iterator tribCatsIt = trib_cats.iterator(); tribCatsIt.hasNext();) {
@@ -184,7 +182,7 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
 
 			} else {
 				if ( lasConfig.isLocal(id) ) {
-					categories = lasConfig.getFullCategories(id);
+					categories = lasConfig.getCategories(id);
 				} else {
 					String[] parts = id.split(Constants.NAME_SPACE_SPARATOR);
 					String server_key = null;
@@ -192,7 +190,7 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
 						server_key = parts[0];
 						if ( server_key != null ) {
 							Tributary trib = lasConfig.getTributary(server_key);
-							String las_url = trib.getURL() + Constants.GET_FULL_CATEGORIES + "?format=xml&catid="+id;
+							String las_url = trib.getURL() + Constants.GET_CATEGORIES + "?format=xml&catid="+id;
 							String catxml = lasProxy.executeGetMethodAndReturnResult(las_url);
 							ArrayList<Category> trib_cats = JDOMUtils.getCategories(catxml);
 							for (Iterator tribCatsIt = trib_cats.iterator(); tribCatsIt.hasNext();) {
@@ -227,10 +225,32 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
 		LASConfig lasConfig = (LASConfig) getServletContext().getAttribute(LASConfigPlugIn.LAS_CONFIG_KEY);
 		Grid grid = null;
 		try {
-			grid = lasConfig.getGrid(dsID, varID);
+			if ( dsID != null ) {
+				if ( lasConfig.isLocal(dsID) ) {
+					grid = lasConfig.getGrid(dsID, varID);
+				} else {
+					String[] parts = dsID.split(Constants.NAME_SPACE_SPARATOR);
+					String server_key = null;
+					if ( parts != null ) {
+						server_key = parts[0];
+						if ( server_key != null ) {
+							Tributary trib = lasConfig.getTributary(server_key);
+							String las_url = trib.getURL() + Constants.GET_GRID+"?dsid="+dsID+"&varid="+varID;
+							String grid_xml = lasProxy.executeGetMethodAndReturnResult(las_url);
+							LASDocument griddoc = new LASDocument();
+							JDOMUtils.XML2JDOM(grid_xml, griddoc);
+							grid = new Grid((Element)griddoc.getRootElement().clone());
+						}
+					}
+				}
+			}
 		} catch (JDOMException e) {
 			throw new RPCException(e.getMessage());
 		} catch (LASException e) {
+			throw new RPCException(e.getMessage());
+		} catch (UnsupportedEncodingException e) {
+			throw new RPCException(e.getMessage());
+		} catch (IOException e) {
 			throw new RPCException(e.getMessage());
 		}
 		if ( grid != null ) {
@@ -325,66 +345,6 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
 
 		return wireOps;
 	}
-//	public OptionSerializable[] getOptionsByOperationID(String operationID) throws RPCException {
-//		LASConfig lasConfig = (LASConfig) getServletContext().getAttribute(LASConfigPlugIn.LAS_CONFIG_KEY);
-//		ArrayList<Option> options = new ArrayList<Option>();
-//		OptionSerializable[] wireOptions;
-//
-//		try {
-//
-//			if ( operationID != null ) {
-//				if ( lasConfig.isLocal(operationID) ) {
-//					options = lasConfig.getOptionsByOperationID(operationID);
-//				} else {
-//					String[] parts = operationID.split(Constants.NAME_SPACE_SPARATOR);
-//					String server_key = null;
-//					if ( parts != null ) {
-//						server_key = parts[0];
-//						if ( server_key != null ) {
-//							Tributary trib = lasConfig.getTributary(server_key);	
-//
-//
-//
-//							String las_url = trib.getURL() + Constants.GET_OPTIONS + "?format=xml&dsid=" + operationID;
-//							String variables_xml = lasProxy.executeGetMethodAndReturnResult(las_url);
-//							LASDocument optionsdoc = new LASDocument();
-//							JDOMUtils.XML2JDOM(variables_xml, optionsdoc);
-//							List opElements = optionsdoc.getRootElement().getChildren("option");
-//							for (Iterator opIt = opElements.iterator(); opIt.hasNext();) {
-//								Element opElement = (Element) opIt.next();
-//								Option option = new Option((Element)opElement.clone());
-//								options.add(option);
-//							}
-//
-//
-//
-//						}
-//					}
-//				}
-//			}
-//			options = lasConfig.getOptionsByOperationID(operationID);
-//		} catch (JDOMException e) {
-//			throw new RPCException(e.getMessage());
-//		} catch (UnsupportedEncodingException e) {
-//			throw new RPCException(e.getMessage());
-//		} catch (HttpException e) {
-//			throw new RPCException(e.getMessage());
-//		} catch (IOException e) {
-//			throw new RPCException(e.getMessage());
-//		}
-//		int i=0;
-//		if ( options != null ) {
-//			wireOptions = new OptionSerializable[options.size()];
-//			for (Iterator optionIt = options.iterator(); optionIt.hasNext();) {
-//				Option option = (Option) optionIt.next();
-//				wireOptions[i] = option.getOptionSerializable();
-//				i++;
-//			}
-//			return wireOptions;
-//		} else {
-//			return null;
-//		}
-//	}
 	/**
 	 * (non-Javadoc)
 	 * @see gov.noaa.pmel.tmap.las.client.RPCService#getOptions(java.lang.String)
