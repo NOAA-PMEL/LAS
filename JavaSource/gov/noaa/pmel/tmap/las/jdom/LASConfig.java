@@ -970,35 +970,6 @@ public class LASConfig extends LASDocument {
     	
     	return new DataConstraint(constraint);
     }
-    /**
-     * This call gets the categories and if a category contains a data set and variables it fills in the grid.
-     * The "normal" getCategories call sends back "empty" variables and you have to get the grid with a separate call.  
-     * @param id
-     * @return
-     * @throws LASException
-     * @throws JDOMException
-     */
-    public ArrayList<Category> getFullCategories(String id) throws LASException, JDOMException {
-    	ArrayList<Category> categories = getCategories(id);
-    	for (Iterator iterator = categories.iterator(); iterator.hasNext();) {
-			Category category = (Category) iterator.next();
-			if ( category.hasVariableChildren() ) {
-				ArrayList<Dataset> datasets = category.getAllDatasets();
-				for (Iterator dsIt = datasets.iterator(); dsIt.hasNext();) {
-					Dataset dataset = (Dataset) dsIt.next();
-					ArrayList<Variable> vars = dataset.getVariables();
-					for (Iterator varIt = vars.iterator(); varIt.hasNext();) {
-						Variable variable = (Variable) varIt.next();
-						Grid grid = getGrid(variable.getDSID(), variable.getID());
-						Element varE = (Element) variable.getElement().clone();
-						varE.removeChild("grid");  // Get rid of the old grid with just the IDREF and replace it with the grid and axes.
-						varE.addContent((Element) grid.getElement());
-					}
-				}
-			}
-		}
-    	return categories;
-    }
     public CategorySerializable[] getCategorySerializable(ArrayList<Category> categories) throws LASException, JDOMException {
     	CategorySerializable[] cats = new CategorySerializable[categories.size()];
     	int i=0;
@@ -1032,9 +1003,6 @@ public class LASConfig extends LASDocument {
     	}
     	return cats;
     }
-    public ArrayList<Category> getCategories(String catid) throws JDOMException, LASException {
-    	return getCategories(catid, false);
-    }
     /**
      * Get the categories directly below this id.  If the id is null get the top.
      * @param catid
@@ -1042,7 +1010,7 @@ public class LASConfig extends LASDocument {
      * @throws JDOMException
      * @throws LASException 
      */
-    public ArrayList<Category> getCategories(String catid, boolean full) throws JDOMException, LASException {
+    public ArrayList<Category> getCategories(String catid) throws JDOMException, LASException {
         ArrayList<Category> categories = new ArrayList<Category>();
         List tops = getRootElement().getChildren("las_categories");
         if ( catid == null ) {
@@ -1075,11 +1043,7 @@ public class LASConfig extends LASDocument {
                     }
                 }
             } else {
-            	if ( full ) {
-            		categories = getFullDatasets();
-            	} else {
-                    categories = getDatasets();
-            	}
+            	categories = getDatasets();
             }
         } else {
             // There are categories in the config, use them...

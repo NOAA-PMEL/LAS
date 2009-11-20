@@ -11,6 +11,8 @@ import gov.noaa.pmel.tmap.las.client.serializable.GridSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.TimeAxisSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.VariableSerializable;
 import gov.noaa.pmel.tmap.las.client.vizgal.VizGalPanel;
+import gov.noaa.pmel.tmap.las.exception.LASException;
+import gov.noaa.pmel.tmap.las.util.Category;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -374,7 +376,7 @@ public class VizGal extends LASEntryPoint {
 		if ( dsid != null && vid != null & op != null && view != null) {
 			// If the proper information was sent to the widget, pull down the variable definition
 			// and initialize the slide sorter with this Ajax call.
-			rpcService.getDataset(dsid, initVisGal);
+			rpcService.getCategories(dsid, requestGrid);
 		}
 
 
@@ -463,17 +465,52 @@ public class VizGal extends LASEntryPoint {
 		}
 
 	};
-	AsyncCallback initVisGal = new AsyncCallback() {
+	AsyncCallback requestGrid = new AsyncCallback() {
 		public void onSuccess(Object result) {
-			DatasetSerializable ds = (DatasetSerializable) result;
-			VariableSerializable[] vars = ds.getVariablesSerializable();
-			for (int i=0; i < vars.length; i++ ) {
-				vars[i].setDSName(ds.getName());
-				if ( vars[i].getID().equals(vid) ) {
-					var = vars[i];
+			CategorySerializable[] cats = (CategorySerializable[]) result;
+			if ( cats.length > 1 ) {
+				Window.alert("Error getting variables for this dataset.");
+			} else {
+				if ( cats[0].isVariableChildren() ) {
+					var = cats[0].getVariable(vid);
 					initial_var = var;
+					rpcService.getGrid(dsid, vid, initVisGal);
+				} else {
+					Window.alert("No variables found in this category");
 				}
 			}
+		}
+
+		@Override
+		public void onFailure(Throwable caught) {
+			Window.alert("Failed to initalizes VizGal."+caught.toString());
+		}
+	};
+	AsyncCallback requestGridForHistory = new AsyncCallback() {
+		public void onSuccess(Object result) {
+			CategorySerializable[] cats = (CategorySerializable[]) result;
+			if ( cats.length > 1 ) {
+				Window.alert("Error getting variables for this dataset.");
+			} else {
+				if ( cats[0].isVariableChildren() ) {
+					var = cats[0].getVariable(vid);
+					initial_var = var;
+					rpcService.getGrid(dsid, vid, initVizGalForHistory);
+				} else {
+					Window.alert("No variables found in this category");
+				}
+			}
+		}
+
+		@Override
+		public void onFailure(Throwable caught) {
+			Window.alert("Failed to initalizes VizGal."+caught.toString());
+		}
+	};
+	AsyncCallback initVisGal = new AsyncCallback() {
+		public void onSuccess(Object result) {
+			GridSerializable grid = (GridSerializable) result;
+			var.setGrid(grid);
 			initPanels();
 		}
 		public void onFailure(Throwable caught) {
@@ -482,12 +519,8 @@ public class VizGal extends LASEntryPoint {
 	};
 	AsyncCallback initVizGalForHistory = new AsyncCallback() {
 		public void onSuccess(Object result) {
-			VariableSerializable[] vars = (VariableSerializable[]) result;
-			for (int i=0; i < vars.length; i++ ) {
-				if ( vars[i].getID().equals(vid) ) {
-					var = vars[i];
-				}
-			}
+			GridSerializable grid = (GridSerializable) result;
+			var.setGrid(grid);
 			initPanels();
 			applyHistory(historyTokens);
 		}
@@ -1374,7 +1407,7 @@ public class VizGal extends LASEntryPoint {
 				} else {
 					// Otherwise, save the history tokens, call back to the server for the variable and then apply the history in the callback.
 					historyTokens = tokenMap;
-					rpcService.getVariables(tokenMap.get("dsid"), initVizGalForHistory);
+					rpcService.getGrid(tokenMap.get("dsid"), tokenMap.get("vid"), requestGridForHistory);
 				}
 			}
             // TODO what about the options for the gallery............................??
