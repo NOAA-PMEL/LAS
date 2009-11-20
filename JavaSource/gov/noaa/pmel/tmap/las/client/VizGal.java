@@ -241,6 +241,8 @@ public class VizGal extends LASEntryPoint {
      // If it is we set the current selection to this. 
      boolean subRegion = false;
      
+     // Sometimes  you need to keep the current map selection values.
+     double[] cs = null;
 	/*
 	 * (non-Javadoc)
 	 * @see gov.noaa.pmel.tmap.las.client.LASEntryPoint#onModuleLoad()
@@ -484,6 +486,40 @@ public class VizGal extends LASEntryPoint {
 		@Override
 		public void onFailure(Throwable caught) {
 			Window.alert("Failed to initalizes VizGal."+caught.toString());
+		}
+	};
+
+	AsyncCallback getGridForChangeDatasetCallback = new AsyncCallback() {
+		public void onSuccess(Object result) {
+
+			GridSerializable grid = (GridSerializable) result;
+			var.setGrid(grid);
+			// Figure out the compare and fixed axis
+			init();
+			for (Iterator panelIt = panels.iterator(); panelIt.hasNext();) {
+				VizGalPanel panel = (VizGalPanel) panelIt.next();
+				panel.setPanelColor("regularBackground");
+				panel.setOperation(op, view);
+				panel.setVariable(var);
+				// Send in the ortho axis to allow these to be built and displayed in the panel
+
+				panel.init(false);
+				if ( fixedAxis.equals("t") ) {
+					panel.setParentAxisValue("t", dateWidget.getFerretDateLo());
+				} else if ( fixedAxis.equals("z") ) {
+					panel.setParentAxisValue("z", xyzWidget.getLo());
+				}
+			}
+			
+			// Now that we have the grid, finish applying the changes.
+			finishApply();
+			
+		}
+
+		@Override
+		public void onFailure(Throwable caught) {
+			Window.alert("Could not get grid for new variable."+caught.toString());
+			
 		}
 	};
 	AsyncCallback requestGridForHistory = new AsyncCallback() {
@@ -1009,24 +1045,10 @@ public class VizGal extends LASEntryPoint {
 		}
 		view = "xy";
 
-
-		// Figure out the compare and fixed axis
-		init();
-		for (Iterator panelIt = panels.iterator(); panelIt.hasNext();) {
-			VizGalPanel panel = (VizGalPanel) panelIt.next();
-			panel.setPanelColor("regularBackground");
-			panel.setOperation(op, view);
-			panel.setVariable(var);
-			// Send in the ortho axis to allow these to be build and displayed in the panel
-
-			panel.init(false);
-			if ( fixedAxis.equals("t") ) {
-				panel.setParentAxisValue("t", dateWidget.getFerretDateLo());
-			} else if ( fixedAxis.equals("z") ) {
-				panel.setParentAxisValue("z", xyzWidget.getLo());
-			}
-		}
+		// Go get the grid if you don't have it already...
+		rpcService.getGrid(var.getDSID(), var.getID(), getGridForChangeDatasetCallback);
 	}
+
 	/**
 	 * A helper methods that moves the current state of the map widget to the panels.
 	 */
@@ -1046,12 +1068,18 @@ public class VizGal extends LASEntryPoint {
 	}
 	ClickListener settingsButtonApplyListener = new ClickListener() {
 		public void onClick(Widget sender) {
-			double[] cs = null;
+			
 			if ( changeDataset ) {
 				cs = settingsControls.getRefMap().getCurrentSelection();
-				changeDataset();			
+				// This involves a jump across the wire, so the finishApply gets called in the callback from the getGrid.
+				changeDataset();
+			} else {
+				// No jump required, just finish up now.
+				finishApply();
 			}
-
+		}
+	};
+	public void finishApply() {
 			// Check to see if the operation changed.  If so, change the tool.
 			String op_id = settingsControls.getCurrentOp().getID();
 			String op_view = settingsControls.getCurrentOperationView();
@@ -1067,8 +1095,7 @@ public class VizGal extends LASEntryPoint {
 			}
 			setMapRanges(cs);
 			refresh(false, true);
-		}
-	};
+	}
 	ClickListener panelApplyButtonClick = new ClickListener() {
 		public void onClick(Widget sender) {
 			String title = sender.getTitle();

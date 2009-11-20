@@ -235,7 +235,7 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
 						server_key = parts[0];
 						if ( server_key != null ) {
 							Tributary trib = lasConfig.getTributary(server_key);
-							String las_url = trib.getURL() + Constants.GET_GRID+"?dsid="+dsID+"&varid="+varID;
+							String las_url = trib.getURL() + Constants.GET_GRID+"?format=xml&dsid="+dsID+"&varid="+varID;
 							String grid_xml = lasProxy.executeGetMethodAndReturnResult(las_url);
 							LASDocument griddoc = new LASDocument();
 							JDOMUtils.XML2JDOM(grid_xml, griddoc);
