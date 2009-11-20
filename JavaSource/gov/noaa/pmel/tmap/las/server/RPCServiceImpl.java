@@ -181,7 +181,7 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
 				Collections.sort(categories, new ContainerComparator("name"));
 
 			} else {
-				if ( lasConfig.isLocal(id) ) {
+				if ( !id.contains(Constants.NAME_SPACE_SPARATOR) || lasConfig.isLocal(id) ) {
 					categories = lasConfig.getCategories(id);
 				} else {
 					String[] parts = id.split(Constants.NAME_SPACE_SPARATOR);
@@ -226,7 +226,7 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
 		Grid grid = null;
 		try {
 			if ( dsID != null ) {
-				if ( lasConfig.isLocal(dsID) ) {
+				if ( !dsID.contains(Constants.NAME_SPACE_SPARATOR) || lasConfig.isLocal(dsID) ) {
 					grid = lasConfig.getGrid(dsID, varID);
 				} else {
 					String[] parts = dsID.split(Constants.NAME_SPACE_SPARATOR);
@@ -266,7 +266,7 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
 			ArrayList<Operation> operations = new ArrayList<Operation>();
 						
 			if ( dsID != null ) {
-				if ( lasConfig.isLocal(dsID) ) {
+				if ( !dsID.contains(Constants.NAME_SPACE_SPARATOR) || lasConfig.isLocal(dsID) ) {
 					if ( view != null) {	
 						operations = lasConfig.getOperations(view, dsID, varID);
 					} else {
@@ -357,7 +357,12 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
 		OptionSerializable[] wireOptions;
 		try {
 			if ( opid != null ) {
-				if ( lasConfig.isLocal(opid) ) {
+				
+				if ( !opid.contains(Constants.NAME_SPACE_SPARATOR) || lasConfig.isLocal(opid) ) {
+					if ( opid.contains(Constants.NAME_SPACE_SPARATOR) ) {
+						String[] parts = opid.split(Constants.NAME_SPACE_SPARATOR);
+						opid = parts[1];
+					}
 					options = lasConfig.getOptions(opid);
 				} else {
 					String[] parts = opid.split(Constants.NAME_SPACE_SPARATOR);
