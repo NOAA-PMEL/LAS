@@ -151,15 +151,7 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
 	public CategorySerializable[] getCategories(String id) throws RPCException {
 		LASConfig lasConfig = (LASConfig) getServletContext().getAttribute(LASConfigPlugIn.LAS_CONFIG_KEY); 
 		ArrayList<Category> categories = new ArrayList<Category>();
-		if ( id != null && id.contains(Constants.NAME_SPACE_SPARATOR) ) {
-		    try {
-				if ( id.equals(lasConfig.getTopLevelCategoryID()) ) id=null;
-			} catch (UnsupportedEncodingException e) {
-				throw new RPCException(e.getMessage());
-			} catch (JDOMException e) {
-				throw new RPCException(e.getMessage());
-			}
-		}
+		
 		try {
 			if ( id == null ) {
 				Category local_cat = new Category(lasConfig.getTitle(), lasConfig.getTopLevelCategoryID()); 
@@ -190,6 +182,8 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
 
 			} else {
 				if ( !id.contains(Constants.NAME_SPACE_SPARATOR) || lasConfig.isLocal(id) ) {
+					// Handle the case where we're getting the local top level catagories
+					if ( id.equals(lasConfig.getTopLevelCategoryID()) ) id=null;
 					categories = lasConfig.getCategories(id);
 				} else {
 					String[] parts = id.split(Constants.NAME_SPACE_SPARATOR);
