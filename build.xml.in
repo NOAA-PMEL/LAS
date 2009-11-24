@@ -132,6 +132,21 @@
     </war>
   </target>
 
+  <target name="deploy-iosp" depends="dist">
+     <!-- Delete old IOSP code. -->
+     <delete dir="${jakarta.home}/webapps/thredds/WEB-INF/classes/gov/noaa/pmel/tmap"/>
+     <delete dir="${jakarta.home}/webapps/thredds/WEB-INF/classes/resources/iosp"/>
+     <!-- Deploy new IOSP code. -->
+     <copy todir="${jakarta.home}/webapps/thredds/WEB-INF/classes">
+        <fileset dir="WebContent/WEB-INF/classes">
+           <include name="gov/noaa/pmel/tmap/iosp/**"/>     
+        </fileset>
+        <fileset dir="JavaSource">
+           <include name="resources/iosp/**"/>     
+        </fileset>
+     </copy> 
+     <copy file="JavaSource/resources/ferret/FerretBackendConfig.xml" tofile="${jakarta.home}/webapps/thredds/WEB-INF/classes/resources/iosp/FerretConfig.xml"/>
+  </target>
   <target name="deploy" depends="dist">
      <!-- Delete old IOSP code. -->
      <delete dir="${jakarta.home}/webapps/thredds/WEB-INF/classes/gov/noaa/pmel/tmap"/>
@@ -223,7 +238,6 @@
     <unjar src="WebContent/WEB-INF/lib/JSAP_1.03a.jar" dest="${addxml-build}"/>
     <unjar src="WebContent/WEB-INF/lib/toolsUI-4.0.jar" dest="${addxml-build}"/>
     <unjar src="WebContent/WEB-INF/lib/log4j-1.2.13.jar" dest="${addxml-build}"/>
-    <unjar src="lib/toolsUI-4.0.jar" dest="${addxml-build}"/>
     <javac srcdir="${addxml-src}/gov/noaa/pmel/tmap/addxml:${addxml-src}/org/joda" destdir="${addxml-build}">
       <classpath>
         <fileset id="addxml-libs" dir="WebContent/WEB-INF/lib">
