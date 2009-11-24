@@ -3014,7 +3014,12 @@ public class LASConfig extends LASDocument {
             // Throw away index 0 since the string has a leading "/".
             xpathValue = "/"+parts[1]+"/"+parts[2]+"/dataset[@ID='"+parts[3]+"']/"+parts[4]+"/variable[@ID='"+parts[5]+"']";
         }
-        return getElementByXPath(xpathValue).getAttributeValue("name");
+        Element variableE = getElementByXPath(xpathValue);
+        if ( variableE != null ) {
+        	return variableE.getAttributeValue("name");
+        } else {
+        	return "";
+        }
     }
     public ArrayList<View> getViewsByDatasetAndVariable(String dsID, String varID) throws JDOMException, LASException {
         String variableXPath = "/lasdata/datasets/dataset[@ID='"+dsID+"']/variables/variable[@ID='"+varID+"']";
