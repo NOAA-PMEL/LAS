@@ -3971,6 +3971,9 @@ public class LASConfig extends LASDocument {
                 var.setAttribute("ftds_url", url);
                 var.setAttribute("var_name", getVariableName(varXPath));
                 var.setAttribute("var_title", getVariableTitle(varXPath));
+                Variable varContainer = getVariableByXPath(varXPath);
+                var.setAttribute("dsid", varContainer.getDSID());
+                var.setAttribute("gridid", varContainer.getGridID());
             }
         }
         return lasRequest.toCompactString();
