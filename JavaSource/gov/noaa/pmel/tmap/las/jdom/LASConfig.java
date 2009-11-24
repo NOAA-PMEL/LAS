@@ -1520,7 +1520,8 @@ public class LASConfig extends LASDocument {
         }
         Element variable = getElementByXPath(xpathValue);
         if ( variable == null ) {
-            throw new LASException("Variable: "+xpathValue+" not found.");
+        	// It might be a "remote" variable...
+        	return "";
         }
         Element dataset = variable.getParentElement().getParentElement();
         String varURL = variable.getAttributeValue("url");
@@ -2738,6 +2739,8 @@ public class LASConfig extends LASDocument {
 		            xpathValue = "/"+parts[1]+"/"+parts[2]+"/dataset[@ID='"+parts[3]+"']/"+parts[4]+"/variable[@ID='"+parts[5]+"']";
 		        }
 		        Element var = getElementByXPath(xpathValue);
+		        // Might be a remote variable...
+		        if ( var == null ) return "";
 		        if ( var.getAttributeValue("ID") != null ) {
 		            return var.getAttributeValue("ID");
 		        } else {
@@ -3952,7 +3955,7 @@ public class LASConfig extends LASDocument {
 		dataset.setVariables(variables);
 		return dataset;
 	}
-	public String resolveURLS(LASUIRequest lasRequest) throws JDOMException {
+	public String resolveURLS(LASUIRequest lasRequest) throws JDOMException, LASException {
 		// Start looping on the args in the request
 		List vars = lasRequest.getRootElement().getChild("args").getChildren("link");
         for (Iterator varIt = vars.iterator(); varIt.hasNext();) {
@@ -3961,6 +3964,8 @@ public class LASConfig extends LASDocument {
             String url = getFTDSURL(varXPath);
             if ( url != null && !url.equals("") ) {
                 var.setAttribute("ftds_url", url);
+                var.setAttribute("var_name", getVariableName(varXPath));
+                var.setAttribute("var_title", getVariableTitle(varXPath));
             }
         }
         return lasRequest.toCompactString();
