@@ -1,0 +1,34 @@
+package gov.noaa.pmel.tmap.las.ui;
+
+import java.io.PrintWriter;
+
+import gov.noaa.pmel.tmap.las.jdom.JDOMUtils;
+import gov.noaa.pmel.tmap.las.jdom.LASConfig;
+import gov.noaa.pmel.tmap.las.jdom.LASUIRequest;
+import gov.noaa.pmel.tmap.las.product.server.LASConfigPlugIn;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.struts.action.ActionForm;
+import org.apache.struts.action.ActionForward;
+import org.apache.struts.action.ActionMapping;
+
+public class ResolveURL extends ConfigService {
+
+	@Override
+	public ActionForward execute(ActionMapping mapping, ActionForm form,
+			HttpServletRequest request, HttpServletResponse response)
+			throws Exception {
+		LASConfig lasConfig = (LASConfig)servlet.getServletContext().getAttribute(LASConfigPlugIn.LAS_CONFIG_KEY); 
+		String xml = request.getParameter("xml");
+		LASUIRequest lasRequest = new LASUIRequest();
+		JDOMUtils.XML2JDOM(xml, lasRequest);
+		String resolvedRequest = lasConfig.resolveURLS(lasRequest);
+		PrintWriter respout = response.getWriter();
+		response.setContentType("application/xml");
+		respout.print(resolvedRequest);
+		return null;
+	}
+
+}
