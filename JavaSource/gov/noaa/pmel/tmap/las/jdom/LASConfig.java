@@ -2422,14 +2422,19 @@ public class LASConfig extends LASDocument {
 		 * @return the F-TDS URL
 		 * @throws JDOMException
 		 */
-		public String getFTDSURL(Element variable) {
-		    String ftds_url = variable.getAttributeValue("ftds_url");
-		    if ( ftds_url != null ) {
-		        return ftds_url;
-		    } else {
-		        return "";
-		    }
-		}
+        public String getFTDSURL(Element variable) {
+        	String ftds_url = "";
+        	if ( variable != null ) { 
+        		ftds_url = variable.getAttributeValue("ftds_url");
+        		if ( ftds_url != null ) {
+        			return ftds_url;
+        		} else {
+        			return "";
+        		}
+        	} else {
+        		return "";
+        	}
+        }
         
         /**
          * Get the F-TDS URL for the variable specified by the XPath
