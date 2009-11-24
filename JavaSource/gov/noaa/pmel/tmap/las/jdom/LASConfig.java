@@ -3947,4 +3947,17 @@ public class LASConfig extends LASDocument {
 		dataset.setVariables(variables);
 		return dataset;
 	}
+	public String resolveURLS(LASUIRequest lasRequest) throws JDOMException {
+		// Start looping on the args in the request
+		List vars = lasRequest.getRootElement().getChild("args").getChildren("link");
+        for (Iterator varIt = vars.iterator(); varIt.hasNext();) {
+            Element var = (Element) varIt.next();
+            String varXPath = var.getAttributeValue("match");
+            String url = getFTDSURL(varXPath);
+            if ( url != null && !url.equals("") ) {
+                var.setAttribute("ftds_url", url);
+            }
+        }
+        return lasRequest.toCompactString();
+	}
 }
