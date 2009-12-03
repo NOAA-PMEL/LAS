@@ -42,7 +42,8 @@ function LASUI () {
 		"embed" : true,
 		"xybox" : {},
 		"categorynames" : [],
-		"analysis" : {"type":null,"axes":{}}
+		"analysis" : {"type":null,"axes":{}},
+		"selection" : {}
 	};
 
 	//DOM anchor ids.
@@ -62,7 +63,7 @@ function LASUI () {
 			"minY" : "input_minY"
 		 },
 		"analysis" : "analysis"
-	}
+	};
 
 	this.request = new LASRequest();
 
@@ -142,12 +143,7 @@ LASUI.prototype.initUI = function (anchorId)
 	this.refs.inputs = {};
 	for(var i in this.anchors.inputs)
 		this.refs.inputs[i] = document.getElementById(this.anchors.inputs[i]);
-   	this.refs.inputs.maxX.onchange = this.setMaxX.LASBind(this);
-	this.refs.inputs.maxY.onchange = this.setMaxY.LASBind(this);
-	this.refs.inputs.minX.onchange = this.setMinX.LASBind(this);
-	this.refs.inputs.minY.onchange = this.setMinY.LASBind(this);
-	//inititialize the map widget
-	this.initMap('MapWidget');
+
 
 	if(document.getElementById("categories")) {
 		this.refs.categories = {};
@@ -798,8 +794,9 @@ LASUI.prototype.setOperation = function (evt) {
 	}
 	if (type == "plot")
 		try {
-			if(this.state.operations.getOperationByID(id).optiondef.IDREF)
-				optiondef = this.state.operations.getOperationByID(id).optiondef.IDREF;
+			if(this.state.operations)
+				if(this.state.operations.getOperationByID(id).optiondef.IDREF)
+					optiondef = this.state.operations.getOperationByID(id).optiondef.IDREF;
 		} catch (e) {}
 	//for ie radio button bug
  	if(type=="plot"&&document.all&&evt.srcElement) {
@@ -1052,9 +1049,6 @@ LASUI.prototype.setDefaultProductMenu = function () {
 		this.refs.operations.download.children[defaultDownloadProductName].DOMNode.selected = true;
 
 	}*/
-	this.updating=true;
-	this.refs.XYSelect.updatePixelExtents();
-	this.updating=false;
 }
 LASUI.prototype.setProductTypeNode = function(type) {
 
@@ -1125,18 +1119,34 @@ LASUI.prototype.onPlotLoad = function () {
 		var iframeDOM = window.frames[this.anchors.output];
 	//else
 	//	var iframeDOM = window.frames[this.anchors.output].contentWindow;
+	if(document.getElementById("output").src.indexOf("xml=")>=0) {
+		var xml = unescape(document.getElementById("output").src.slice(document.getElementById("output").src.indexOf("xml=")+4)).replace(/\+/g," ");
 
 
-	if(iframeDOM.myMapWidget) {
-		this.refs.plot = iframeDOM.myMapWidget;
-		this.updating=true;
-		//TODO use product request instead of javascript in IFrame
-		this.initXYSelect();	
-	//this.updateConstraints();
-		iframeDOM.onPlotLoad = this.onPlotLoad.LASBind(this);
-	} else
-		this.refs.plot = {};
-
+	try  {
+	var plot_req = new LASRequest(xml);
+	
+	if(plot_req.getRangeHi('x'))
+		this.state.selection.x.max=plot_req.getRangeHi('x');
+        if(plot_req.getRangeLo('x'))
+                this.state.selection.x.min=plot_req.getRangeLo('x');
+        if(plot_req.getRangeHi('y'))
+                this.state.selection.y.max=plot_req.getRangeHi('y');
+        if(plot_req.getRangeLo('y'))
+                this.state.selection.y.min=plot_req.getRangeLo('y');
+        if(plot_req.getRangeHi('z'))
+                this.state.selection.z.max=plot_req.getRangeHi('z');
+        if(plot_req.getRangeLo('z'))
+                this.state.selection.z.min=plot_req.getRangeLo('z');
+        if(plot_req.getRangeHi('t'))
+                this.state.selection.t.max=plot_req.getRangeHi('t');
+        if(plot_req.getRangeLo('t'))
+                this.state.selection.t.min=plot_req.getRangeLo('t');
+	this.updating = true;
+	this.updateConstraints();
+	} catch (e) {
+	}
+	}
 	if(document.getElementById("wait"))
 		document.getElementById("wait").style.visibility="hidden";
 	if(document.getElementById("wait_msg"))
@@ -1177,10 +1187,7 @@ LASUI.prototype.updateConstraints = function (view) {
 		document.getElementById("Depth").removeChild(document.getElementById("Depth").firstChild);
 
 
-	if(this.state.grid.getAxis('x') || this.state.grid.getAxis('y')) {
-		if(!this.refs.XYSelect.enabled)
-			this.refs.XYSelect.enable();
-	}
+
 	var reset=false;
 	var resetXY=false;
 	if(this.state.lastgrid) {
@@ -1211,7 +1218,7 @@ LASUI.prototype.updateConstraints = function (view) {
 	else if(view.indexOf('x')<0&&view.indexOf('y')>=0)
 		this.initXYSelect("y",resetXY);
 	else if(view.indexOf('x')<0&&view.indexOf('y')<0)
-		this.initXYSelect("point",resetXY);
+		this.initXYSelect("pt",resetXY);
 
 	for(var d=0;d<this.state.grid.response.grid.axis.length;d++)
 		if(view.indexOf(this.state.grid.response.grid.axis[d].type) < 0)
@@ -1221,8 +1228,6 @@ LASUI.prototype.updateConstraints = function (view) {
 				eval("this.init" + this.state.grid.response.grid.axis[d].type.toUpperCase() + "Constraint('range',reset)");
 		else
 			eval("this.init" + this.state.grid.response.grid.axis[d].type.toUpperCase() + "Constraint('range',reset)");
-	//this.updating = true;
-	this.refs.XYSelect.updatePixelExtents();
 
 
 	if(this.refs.analysis.enabled)
@@ -1264,38 +1269,24 @@ LASUI.prototype.updateConstraints = function (view) {
 LASUI.prototype.initXYSelect = function (mode, reset) {
 	if(!this.products)
 		document.getElementById("XYRegionType").style.display = "";
-	if(this.refs.XYSelect && this.state.view.plot && this.state.dataset && this.state.variable)
-		this.refs.XYSelect.enable();
 	if(this.state.grid.getAxis('x') && this.state.grid.getAxis('y') && mode)
 	 {
 		var grid = {"x": {"min" : 0, "max" :0}, "y" : {"min" :0, "max" : 0}};
 
+		if(!this.state.selection.x) 
+			this.state.selection.x = {"min" : getMapXlo(),
+					 "max" : getMapXhi()
+					};
+		if(!this.state.selection.y)
+			this.state.selection.y = {"min" :getMapYlo(),
+					 "max" : getMapYhi()
+					};
+			
+		
 
-		/*if(document.all) {
-			//alert('foo');
-			this.refs.plot = window.frames["output"].document;
-			var str ="";
-			for(var i in this.refs.plot)
-				str+= i + ",";
-			alert(str);
-		}*/
-
-		if(this.refs.plot.extents) {
-			var sel = this.refs.plot.extents.selection.grid;
-
-			//alert(this.refs.plot.extents.selection.grid.x.min + ' & ' + sel.x.min + ' ' + reset);
-		}
-		else {
-			var sel = {"x" : {"min" : this.refs.XYSelect.getSelectionGridXMin(),
-					 "max" : this.refs.XYSelect.getSelectionGridXMax()
-					},
-				 "y" : {"min" : this.refs.XYSelect.getSelectionGridYMin(),
-					 "max" : this.refs.XYSelect.getSelectionGridYMax()
-					}
-			}
-		}
 
 		var resetGrid=false;
+
 		if(this.state.lastgrid) {
 			if(this.state.grid.response.grid.ID!=this.state.lastgrid.response.grid.ID)
 			resetGrid=true;
@@ -1311,131 +1302,28 @@ LASUI.prototype.initXYSelect = function (mode, reset) {
 			grid.y.max = parseFloat(this.state.grid.getHi('y'));
 		}
 
-		if(reset)
-			sel = grid;
-
-
-		if (sel.x.min>grid.x.min&&sel.x.min<grid.x.max && this.firstload!=true) {
-			if(sel.x.min == sel.x.max&&mode!='y'&&mode!='point') {
-				if(this.state.xybox.width) {
-					if(sel.x.min-this.state.xybox.width/2 > grid.x.min)
-						sel.x.min=sel.x.min-this.state.xybox.width/2;
-					else
-						sel.x.min=grid.x.min;
-					if(sel.x.max+this.state.xybox.width/2 < grid.x.max)
- 						sel.x.max=sel.x.max+this.state.xybox.width/2;
-					else
-						sel.x.max=grid.x.max;
-				} else {
-					sel.x.min=grid.x.min;
- 					sel.x.max=grid.x.max;
-			   	}
-			}
-		} else
-			sel.x.min=grid.x.min;
-
-		if (sel.x.max>grid.x.min&&sel.x.max<grid.x.max&&this.firstload!=true) {
-			if(sel.x.min == sel.x.max&&mode!='y'&&mode!='point') {
-				if(this.state.xybox.width) {
-					if(sel.x.min-this.state.xybox.width/2 > grid.x.min)
-						sel.x.min=sel.x.min-this.state.xybox.width/2;
-					else
-						sel.x.min=grid.x.min;
-					if(sel.x.max+this.state.xybox.width/2 < grid.x.max)
- 						sel.x.max=sel.x.max+this.state.xybox.width/2;
-					else
-						sel.x.max=grid.x.max;
-				} else {
-					sel.x.min=grid.x.min;
- 					sel.x.max=grid.x.max;
-				}
-			}
-		} else
-			sel.x.max=grid.x.max;
-
-		if (sel.y.min>grid.y.min&&sel.y.min<grid.y.max&&this.firstload!=true){
-			if(sel.y.min == sel.y.max&&mode!='x'&&mode!='point') {
-				if(this.state.xybox.height) {
-					if(sel.y.min-this.state.xybox.height/2 > grid.y.min)
-						sel.y.min=sel.y.min-this.state.xybox.height/2;
-					else
-						sel.y.min=grid.y.min;
-					if(sel.y.max+this.state.xybox.height/2 < grid.y.max)
- 						sel.y.max=sel.y.max+this.state.xybox.height/2;
-					else
-						sel.y.max=grid.y.max;
-				} else {
-					sel.y.min=grid.y.min;
-	 				sel.y.max=grid.y.max;
-				}
-			}
-		} else
-			sel.y.min=grid.y.min;
-
-		if (sel.y.max>grid.y.min&&sel.y.max<grid.y.max&&this.firstload!=true) {
-			if(sel.y.min == sel.y.max&&mode!='x'&&mode!='point') {
-				if(this.state.xybox.height) {
-					if(sel.y.min-this.state.xybox.height/2 > grid.y.min)
-						sel.y.min=sel.y.min-this.state.xybox.height/2;
-					else
-						sel.y.min=grid.y.min;
-					if(sel.y.max+this.state.xybox.height/2 < grid.y.max)
- 						sel.y.max=sel.y.max+this.state.xybox.height/2;
-					else
-						sel.y.max=grid.y.max;
-				} else {
-					sel.y.min=grid.y.min;
- 					sel.y.max=grid.y.max;
-				}
-			}
-		} else
-			sel.y.max=grid.y.max;
-
-		if((grid.x.max-grid.x.min) < 3 || (grid.y.max-grid.y.min) < 3)
-			var zoomgrid = {"x" : {"min" : (grid.x.min-180),"max" : (grid.x.min+180)}, "y" : {"min": -90, "max" :90}}
-		else
-			var zoomgrid = grid;
-
-		this.refs.XYSelect.zoomOnBBox(zoomgrid);
-		this.refs.XYSelect.setDataGridBBox(grid);
-		if(reset==true) {
-
-			this.refs.XYSelect.setSelectionGridBBox(grid);
-		}
+		if(reset==true)
+			setMapDataExtent(grid.y.min,grid.y.max,grid.x.min,grid.x.max);
+	         
 
 		if(this.state.newgrid)
-			this.refs.XYSelect.setSelectionGridBBox(grid);
+			setMapCurrentSelection(grid.y.min,grid.y.max,grid.x.min,grid.x.max);
 		else
-			this.refs.XYSelect.setSelectionGridBBox(sel);
+			 setMapCurrentSelection(this.state.selection.y.min,this.state.selection.y.max,this.state.selection.x.min,this.state.selection.x.max);
 		delete(this.state.newgrid);
+
 		if(this.submitOnLoad && this.params){
 			var bbox = {};
 			if(this.params.x)
 				bbox.x = this.params.x;
 			if(this.params.y)
 				bbox.y = this.params.y;
-			this.refs.XYSelect.setSelectionGridBBox(sel);
 
 		}
 
-		if(this.submitOnLoad && this.params){
-			if(this.params.viewx)
-				bbox.x = this.params.viewx;
-			if(this.params.viewy)
-				bbox.y = this.params.viewy;
-		}
-		//this.refs.XYSelect.zoomOnBBox(bbox);
-		//save some params in case we return
-		if(sel.x.min!=sel.x.max)
-			this.state.xybox.width=(sel.x.max-sel.x.min);
-		if(sel.y.min!=sel.y.max)
-			this.state.xybox.height=(sel.y.max-sel.y.min);
-
-
-		this.refs.XYSelect.setView(mode);
+		setMapTool(mode);
 
 	}
-	this.refs.XYSelect.updatePixelExtents();
 }
 /**
  * Initialize an X grid control
@@ -1456,6 +1344,11 @@ LASUI.prototype.initYConstraint = function (mode) {
 LASUI.prototype.initZConstraint = function (mode, reset) {
 	while(document.getElementById("Depth").firstChild)
 		document.getElementById("Depth").removeChild(document.getElementById("Depth").firstChild);
+
+	if(!this.state.selection.z)
+		this.state.selection.z = {min : null, max: null};
+
+
 	if(this.state.grid.hasMenu('z'))
 		if (reset || this.refs.DepthWidget.widgetType != "menu") {
 			this.refs.DepthWidget.menu = [document.createElement("SELECT"),document.createElement("SELECT")];
@@ -1533,6 +1426,9 @@ LASUI.prototype.initTConstraint = function (mode,reset) {
 	while(document.getElementById("Date").firstChild)
 							document.getElementById("Date").removeChild(document.getElementById("Date").firstChild);
 
+        if(!this.state.selection.t)
+                this.state.selection.t = {min : null, max: null};
+
 	switch(this.state.grid.getDisplayType('t')) {
 		case "widget":
 			if(reset || !this.refs.DW)
@@ -1609,10 +1505,8 @@ LASUI.prototype.initTConstraint = function (mode,reset) {
 	 }
 
 
-
-
 }
-LASUI.prototype.showUpdateLink = function (){
+LASUI.prototype.showUpdateLink = function () {
 	this.expired = true;
 	document.getElementById('update').style.color='orange';
 	document.getElementById('update').style.visibility='visible';
@@ -1704,12 +1598,12 @@ LASUI.prototype.makeRequest = function (evt, type) {
 					var Axis = {"type" : axis_id, "op" : this.state.analysis.type};
 					switch(axis_id) {
 						case 'x' :
-							Axis.lo=this.refs.XYSelect.extents.selection.grid.x.min;
-							Axis.hi =this.refs.XYSelect.extents.selection.grid.x.max;
+							Axis.lo=getMapXlo();
+							Axis.hi=getMapXhi();
 							break;
 						case 'y' :
-						 	Axis.lo=this.refs.XYSelect.extents.selection.grid.y.min;
-							Axis.hi=this.refs.XYSelect.extents.selection.grid.y.max;
+						 	Axis.lo=getMapYlo();
+							Axis.hi=getMapYhi();
 							break;
 							case 't' :
 							if(this.state.grid.hasMenu('t')){
@@ -1738,20 +1632,17 @@ LASUI.prototype.makeRequest = function (evt, type) {
 				switch(this.state.grid.response.grid.axis[d].type) {
 					case 'x' :
 						if(this.state.view[type].indexOf('x')>=0||this.state.datasets[this.state.dataset].getChildByID(this.state.variable).grid_type=="scattered")
-							this.request.addRange('x',this.refs.XYSelect.extents.selection.grid.x.min,this.refs.XYSelect.extents.selection.grid.x.max);
+							this.request.addRange('x',getMapXlo(),getMapXhi());
 						else
-							this.request.addRange('x',(this.refs.XYSelect.extents.selection.grid.x.min+this.refs.XYSelect.extents.selection.grid.x.max)/2,(this.refs.XYSelect.extents.selection.grid.x.min+this.refs.XYSelect.extents.selection.grid.x.max)/2);
-						//this.uirequest+="&x=" + escape("{ 'min' : " + this.refs.XYSelect.extents.selection.grid.x.min + ", 'max' : " + this.refs.XYSelect.extents.selection.grid.x.max + "}");
-						//this.uirequest+="&viewx="+escape("{ 'min' : " + this.refs.XYSelect.extents.data.grid.x.min + ", 'max' : " + this.refs.XYSelect.extents.data.grid.x.max + "}");
-
+							this.request.addRange('x',(getMapXlo()+getMapXhi())/2,(getMapXlo()+getMapXhi())/2);
 						break;
 					case 'y' :
 						if(this.state.view[type].indexOf('y')>=0||this.state.datasets[this.state.dataset].getChildByID(this.state.variable).grid_type=="scattered")
-							this.request.addRange('y',this.refs.XYSelect.extents.selection.grid.y.min,this.refs.XYSelect.extents.selection.grid.y.max);
+							this.request.addRange('y',getMapYlo(),getMapYhi());
 						else
-							this.request.addRange('y',(this.refs.XYSelect.extents.selection.grid.y.min+this.refs.XYSelect.extents.selection.grid.y.max)/2,(this.refs.XYSelect.extents.selection.grid.y.min+this.refs.XYSelect.extents.selection.grid.y.max)/2);
+							this.request.addRange('y',(getMapYlo()+getMapYhi())/2,(getMapYlo()+getMapYhi())/2);
 
-						//this.uirequest+="&y="+escape("{ 'min' : " + this.refs.XYSelect.extents.selection.grid.y.min + ", 'max' : " + this.refs.XYSelect.extents.selection.grid.y.max + "}");
+						//this.uirequest+="&y="+escape("{ 'min' : " + getMapYlo() + ", 'max' : " + getMapYhi() + "}");
 					 	//this.uirequest+="&viewy="+escape("{ 'min' : " + this.refs.XYSelect.extents.data.grid.y.min + ", 'max' : " + this.refs.XYSelect.extents.data.grid.y.max + "}");
 						break;
 					case 't' :
@@ -1808,8 +1699,6 @@ LASUI.prototype.makeRequest = function (evt, type) {
 			window.open(this.hrefs.getProduct.url + '?xml=' +  this.urlencode(this.request.getXMLText()));
 	}
 
-	if(this.updating)
-	this.refs.XYSelect.updatePixelExtents();
 	this.updating =false;
 	//get all the other data for this dataset/variable combo
 	this.state.lastVariable = this.state.variable;
@@ -1818,8 +1707,8 @@ LASUI.prototype.makeRequest = function (evt, type) {
 
 	if(this.state.grid.hasAxis('x')&&this.state.grid.hasAxis('y'))
 	if(
-		Math.abs((this.refs.XYSelect.extents.selection.grid.x.max-this.refs.XYSelect.extents.selection.grid.x.min)-(this.state.grid.getHi("x") - this.state.grid.getLo("x")))<10&&
-		Math.abs((this.refs.XYSelect.extents.selection.grid.y.max-this.refs.XYSelect.extents.selection.grid.y.min)-(this.state.grid.getHi("y") - this.state.grid.getLo("y")))<5
+		Math.abs((getMapXhi()-getMapXlo())-(this.state.grid.getHi("x") - this.state.grid.getLo("x")))<10&&
+		Math.abs((getMapYhi()-getMapYlo())-(this.state.grid.getHi("y") - this.state.grid.getLo("y")))<5
 
 	)
 		this.state.selectGlobal=true;
@@ -2092,99 +1981,10 @@ LASUI.prototype.cancelChangedOptions = function () {
 			}
 		}
 }
-/**
- * initMap()
- * Method to initialize the mapwidget
- * @param {object} mapid The id of the map container object in the DOM
- */
-LASUI.prototype.initMap = function (mapid) {
 
-  var args = {
-  				  'DOMNode' : document.getElementById(mapid),
-  				  'ondraw' : this.displayCoords.LASBind(this),
-  				  'onafterdraw' : this.onafterdraw.LASBind(this),
-  				  'plot_area' : {
-  				  		'offX' : 0,
-  				  		'offY' : 0,
-  				  		'width' : 200,
-  				  		'height' : 100
-  				  },
-  				  'img' : {
-  				  		'src' : '',
-  				  		'width' : 200,
-  				  		'height' :100,
-  				  		'extent' : {
-  				  			'x' : {
-  				  				'min' : -180,
-  				  				'max' : 180
-  				  			},
-  				  			'y' : {
-  				  				'min' : -90,
-  				  				'max' : 90
-  				  			}
-  				  		}
-  				  	}
-  				 };
-  	var req = new LASRequest();
-  	req.removeVariables();
-  	req.removeRegion();
-	req.setOperation("xy_map");
-	req.setRange("x",-180,180);
-	req.setRange("y",-90,90);
-	args.img.src = this.hrefs.getProduct.url + "?xml=" + this.urlencode(req.getXMLText()) + "&stream=true&stream_ID=plot_image";
-	  
-	this.refs.XYSelect = new MapWidget(args);
-  	this.refs.XYSelect.disable();
 
-}
-/**
- * Method to update the xy constraints textboxes
- *	@param {object} XYSelect A MapWidget object
- */
-LASUI.prototype.displayCoords = function (evt) {
-	this.refs.inputs.minY.value=this.refs.XYSelect.getSelectionGridYMin();
-	this.refs.inputs.maxY.value=this.refs.XYSelect.getSelectionGridYMax();
-	this.refs.inputs.minX.value=this.refs.XYSelect.getSelectionGridXMin();
-	this.refs.inputs.maxX.value=this.refs.XYSelect.getSelectionGridXMax();
-}
-/**
- * Event handler for the min X constraint textbox
- * @param {object} evt The event object
- */
-LASUI.prototype.setMinX = function (evt) {
-	this.refs.XYSelect.updateSelectionGridXMin(this.refs.inputs.minX.value);
-}
-/**
- * Event handler for the max X constraint textbox
- * @param {object} evt The event object
- */
-LASUI.prototype.setMaxX = function (evt) {
-	this.refs.XYSelect.updateSelectionGridXMax(this.refs.inputs.maxX.value);
-}
-/**
- * Event handler for the min Y constraint textbox
- * @param {object} evt The event object
- */
-LASUI.prototype.setMinY = function (evt) {
-	this.refs.XYSelect.updateSelectionGridYMin(this.refs.inputs.minY.value);
-}
-/**
- * Event handler for the max Y constraint textbox
- * @param {object} evt The event object
- */
-LASUI.prototype.setMaxY = function (evt) {
-	this.refs.XYSelect.updateSelectionGridYMax(this.refs.inputs.maxY.value);
-}
-/**
- * Event handler to be attached to the MapWidget onafterdraw function
- * @param {object} evt The event object
- */
 LASUI.prototype.onafterdraw = function (evt) {
-	if(this.refs.XYSelect.extents.data.grid != this.refs.XYSelect.extents.selection.grid)
-		this.fullXYExtent=false;
-	else
-		this.fullXYExtent=true;
-	this.displayCoords();
+	
 	if(!this.updating)
 		if(this.autoupdate) {
 			this.makeRequest();

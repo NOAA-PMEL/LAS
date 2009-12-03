@@ -111,6 +111,8 @@ var args = {
                   }
 		myMapWidget = new MapWidget(args);
 
+		if(window.parent.LAS)
+			window.parent.LAS.onPlotLoad();
 }
 
 
