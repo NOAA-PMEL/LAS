@@ -111,8 +111,6 @@ var args = {
                   }
 		myMapWidget = new MapWidget(args);
 
-		if(window.parent.LAS)
-			window.parent.LAS.onPlotLoad();
 }
 
 
@@ -147,7 +145,6 @@ function eval2(strJson) {
                                }
                            }
                        }
-			//myMapWidget.updatePixelExtents();
  			myMapWidget.initImage();
 			myMapWidget.extents.selection.grid = myMapWidget.img.extent;
 			myMapWidget.updatePixelExtents();
