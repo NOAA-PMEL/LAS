@@ -43,6 +43,61 @@ public class LAS_JSAP
 
     esg.setHelp(
     "Look for ESG metadata in the data source.");
+    
+    FlaggedOption depth = new FlaggedOption("depth")
+        .setStringParser(new StringStringParser())
+        .setAllowMultipleDeclarations(false)
+        .setRequired(false)
+        .setShortFlag('D')
+        .setLongFlag("depth");
+        depth.setHelp("Depth to crawl to in the category tree");
+    
+    Switch listCategories = new Switch("listCategories")
+        .setShortFlag('l')
+        .setDefault("false")
+        .setLongFlag("list_datasets");
+        listCategories.setHelp("Only list category sizes");
+
+    Switch log_bad_dsets = new Switch("log_bad_dsets")
+        .setDefault("false")
+        .setLongFlag("log_bad_dsets");
+        log_bad_dsets.setHelp("Output log of bad datasets and categories");
+
+
+    Switch categories_only = new Switch("categories_only")
+        .setShortFlag('C')
+        .setDefault("false")
+        .setLongFlag("categories_only");
+        categories_only.setHelp("Only create categories.");
+
+
+    FlaggedOption exclude_file = new FlaggedOption("exclude_file")
+        .setStringParser(new StringStringParser())
+        .setAllowMultipleDeclarations(false)
+        .setRequired(false)
+        .setShortFlag('X')
+        .setLongFlag("exclude_file");
+
+     exclude_file.setHelp (
+        "File that contains a list or URLs to exclude from the search.");
+
+    FlaggedOption maxDatasets = new FlaggedOption("maxDatasets")
+        .setStringParser(new StringStringParser())
+        .setAllowMultipleDeclarations(false)
+        .setRequired(false)
+        .setLongFlag("maxDatasets");
+
+     maxDatasets.setHelp (
+        "Maximum number of datasets to allow in a category.");
+
+    FlaggedOption maxCategories = new FlaggedOption("maxCategories")
+        .setStringParser(new StringStringParser())
+        .setAllowMultipleDeclarations(false)
+        .setRequired(false)
+        .setLongFlag("maxCategories");
+
+     maxCategories.setHelp (
+        "Maximum number of subcategories to allow in a category.");
 
     QualifiedSwitch dataset = (QualifiedSwitch)new QualifiedSwitch("dataset")
         .setStringParser(new StringStringParser())
@@ -214,7 +269,14 @@ public class LAS_JSAP
       this.registerParameter(groupname);
       this.registerParameter(grouptype);
       this.registerParameter(esg);
-    }
+      this.registerParameter(categories_only);
+      this.registerParameter(exclude_file);
+      this.registerParameter(listCategories);
+      this.registerParameter(maxCategories);
+      this.registerParameter(maxDatasets);
+       this.registerParameter(depth);
+	 this.registerParameter(log_bad_dsets);
+	}
     catch (JSAPException ex) {
       this.errorout();
     }

@@ -2,56 +2,56 @@
 <html debug="true">
 	<head>
 		<title>$las_config.getTitle()</title>
+		<script type="text/javascript" language="javascript" src="JavaScript/ui/LASUI.js" ></script>
+		<script type="text/javascript" language="javascript" src="JavaScript/components/gov.noaa.pmel.tmap.las.NativeMapWidget/gov.noaa.pmel.tmap.las.NativeMapWidget.nocache.js"></script> 
+    		<script type="text/javascript" language="javascript" src="JavaScript/frameworks/OpenLayers/OpenLayers.js"></script> 
+    		<script type="text/javascript" language="javascript" src="JavaScript/frameworks/OpenLayersExtensions/DrawSingleFeature.js"></script> 
+    		<script type="text/javascript" language="javascript" src="JavaScript/frameworks/OpenLayersExtensions/HorizontalPath.js"></script> 
+    		<script type="text/javascript" language="javascript" src="JavaScript/frameworks/OpenLayersExtensions/VerticalPath.js"></script> 
+		<script type="text/javascript" language="javascript" src="JavaScript/components/xmldom.js" ></script>
+		<script type="text/javascript" language="javascript" src="JavaScript/components/LASRequest.js" ></script>
+		<script type="text/javascript" language="javascript" src="JavaScript/components/LASGetGridResponse.js" ></script>
+		<script type="text/javascript" language="javascript" src="JavaScript/components/LASGetCategoriesResponse.js" ></script>
+		<script type="text/javascript" language="javascript" src="JavaScript/components/LASGetDataConstraintsResponse.js" ></script>
+		<script type="text/javascript" language="javascript" src="JavaScript/components/LASGetViewsResponse.js" ></script>
+		<script type="text/javascript" language="javascript" src="JavaScript/components/LASGetOperationsResponse.js" ></script>
+		<script type="text/javascript" language="javascript" src="JavaScript/components/LASGetOptionsResponse.js" ></script>
+		<script type="text/javascript" language="javascript" src="JavaScript/components/LASOpenLayers.js" ></script>
+		<script type="text/javascript" language="javascript" src="JavaScript/components/querystring.js" ></script>
+		<script type="text/javascript" language="javascript" src="JavaScript/components/DateWidget.js" ></script>
+		<script type="text/javascript" language="javascript" src="JavaScript/components/MenuWidget.js" ></script>
+		<script type="text/javascript" language="javascript" src="JavaScript/frameworks/json/json2.js" ></script>
+		<script type="text/javascript" language="javascript" >
 
-		<link rel="stylesheet" href="JavaScript/frameworks/OpenLayers/theme/default/style.css" type="text/css" />
- 		<link rel="stylesheet" href="JavaScript/frameworks/OpenLayersExtensions/style.css" type="text/css" />
-	 	<script src="JavaScript/frameworks/OpenLayers/OpenLayers.js"></script>
-		<script src="JavaScript/frameworks/OpenLayersExtensions/VerticalPath.js"></script>
-		<script src="JavaScript/frameworks/OpenLayersExtensions/HorizontalPath.js"></script> 
-		<script type="text/javascript" src="JavaScript/components/xmldom.js" ></script>
-		<script type="text/javascript" src="JavaScript/components/LASRequest.js" ></script>
-		<script type="text/javascript" src="JavaScript/components/LASGetGridResponse.js" ></script>
-		<script type="text/javascript" src="JavaScript/components/LASGetCategoriesResponse.js" ></script>
-		<script type="text/javascript" src="JavaScript/components/LASGetDataConstraintsResponse.js" ></script>
-		<script type="text/javascript" src="JavaScript/components/LASGetViewsResponse.js" ></script>
-		<script type="text/javascript" src="JavaScript/components/LASGetOperationsResponse.js" ></script>
-		<script type="text/javascript" src="JavaScript/components/LASGetOptionsResponse.js" ></script>
-		<script type="text/javascript" src="JavaScript/components/LASOpenLayers.js" ></script>
-		<script type="text/javascript" src="JavaScript/components/querystring.js" ></script>
-		<script  type="text/javascript" src="JavaScript/components/DateWidget.js" ></script>
-		<script  type="text/javascript" src="JavaScript/components/MenuWidget.js" ></script>
-		<script type="text/javascript" src="JavaScript/frameworks/json/json2.js" ></script>
-		<script type="text/javascript" src="JavaScript/ui/LASUI.js" ></script>
-		<script src="css/UX/metallic/hover.js" type="text/javascript"></script>
-		<script type="text/javascript">
+           
 			var LAS = new LASUI();
 			LAS.products = {
 				"Maps" : {
-					"Latitude-Longitude" : {"view" : "xy", "class" : "visualization", "id" : "Plot_2D_XY", "optiondef" : "Options_2D_image_contour_xy"}
+					"Latitude-Longitude" : {"view" : "xy", "class" : "visualization", "id" : "Plot_2D_XY", "optiondef" : ""} //"Options_2D_image_contour_xy"}
 				},
 				"Line Plots" : {
-					"Time series" : {"view" : "t", "class" : "visualization", "id" : "Plot_1D", "optiondef" : "Options_1D"},
-					"Depth" : {"view" : "z", "class" : "visualization", "id" : "Plot_1D", "optiondef" : "Options_1D"},					
-					"Longitude" : {"view" : "x", "class" : "visualization", "id" : "Plot_1D", "optiondef" : "Options_1D"},
-					"Latitude" : {"view" : "y", "class" : "visualization", "id" : "Plot_1D", "optiondef" : "Options_1D"}
+					"Time series" : {"view" : "t", "class" : "visualization", "id" : "Plot_1D", "optiondef" : ""}, //Options_1D"},
+					"Depth" : {"view" : "z", "class" : "visualization", "id" : "Plot_1D", "optiondef" : ""}, //Options_1D"},					
+					"Longitude" : {"view" : "x", "class" : "visualization", "id" : "Plot_1D", "optiondef" : ""}, //Options_1D"},
+					"Latitude" : {"view" : "y", "class" : "visualization", "id" : "Plot_1D", "optiondef" : ""}, //Options_1D"}
 					
 				},
 				"Vertical Section Plots" : {
-					"Longitude-depth" : {"view" : "xz", "class" : "visualization", "id" : "Plot_2D", "optiondef" : "Options_2D_image_contour"},
-					"Latitude-depth" : {"view" : "yz", "class" : "visualization", "id" : "Plot_2D", "optiondef" : "Options_2D_image_contour"}										
+					"Longitude-depth" : {"view" : "xz", "class" : "visualization", "id" : "Plot_2D", "optiondef" : ""}, //Options_2D_image_contour"},
+					"Latitude-depth" : {"view" : "yz", "class" : "visualization", "id" : "Plot_2D", "optiondef" : ""} //Options_2D_image_contour"}										
 				},
 				"Hofmuller Plots" : {
-					"Longitude-time" : {"view" : "xt", "class" : "visualization", "id" : "Plot_2D", "optiondef" : "Options_2D_image_contour"},
-					"Latitude-time" : {"view" : "yt", "class" : "visualization", "id" : "Plot_2D", "optiondef" : "Options_2D_image_contour"},
-					"Depth-time" : {"view" : "zt", "class" : "visualization", "id" : "Plot_2D", "optiondef" : "Options_2D_image_contour"}													
+					"Longitude-time" : {"view" : "xt", "class" : "visualization", "id" : "Plot_2D", "optiondef" : ""}, //Options_2D_image_contour"},
+					"Latitude-time" : {"view" : "yt", "class" : "visualization", "id" : "Plot_2D", "optiondef" : ""}, //Options_2D_image_contour"},
+					"Depth-time" : {"view" : "zt", "class" : "visualization", "id" : "Plot_2D", "optiondef" : ""} //Options_2D_image_contour"}													
 				},
-				"Point Data" : {"Single Value" : {"view" : "","class" : "visualization", "id" : "Data_Extract", "optiondef" : "Options_Data"}}/*,
-				"Download Data" : {
-					"Table of values" : {"view" : "xyzt", "class" : "download", "id" : "Data_Extract", "optiondef" : "Options_Data"},
-					"ARC GIS" : {"view" : "xy", "class" : "download", "id" : "Data_Extract_ArcView", "optiondef" : ""},
-					"ASCII File" : {"view" : "xyzt", "class" : "download", "id" : "Data_Extract_File", "optiondef" : "Options_Data_file"},
-					"netCDF File" : {"view" : "xyzt", "class" : "download", "id" : "Data_Extract_netCDF", "optiondef" : "Options_Data"},
-					"Scripts" : {"view" : "xyzt", "class" : "download", "id" : "Gen_Scripts", "optiondef" : "Options_gen_script"}	
+				"Point Data" : {"Single Value" : {"view" : "","class" : "visualization", "id" : "Data_Extract", "optiondef" : ""}} //Options_Data"}}/*,
+				/* "Download Data" : {
+					"Table of values" : {"view" : "xyzt", "class" : "download", "id" : "Data_Extract", "optiondef" : ""}, //Options_Data"},
+					"ARC GIS" : {"view" : "xy", "class" : "download", "id" : "Data_Extract_ArcView", "optiondef" : ""}, //
+					"ASCII File" : {"view" : "xyzt", "class" : "download", "id" : "Data_Extract_File", "optiondef" : ""}, //Options_Data_file"},
+					"netCDF File" : {"view" : "xyzt", "class" : "download", "id" : "Data_Extract_netCDF", "optiondef" : ""},//Options_Data"},
+					"Scripts" : {"view" : "xyzt", "class" : "download", "id" : "Gen_Scripts", "optiondef" : ""} //Options_gen_script"}	
 					
 				}*/
 			};
@@ -110,9 +110,16 @@
 #else
 				'options' :{}				
 #end
+		
 		}
+
+		var featureAddedCallback = LAS.onafterdraw.LASBind(LAS);    
+         	var featureModifiedCallback = LAS.onafterdraw.LASBind(LAS);
+         	var mapMoveCallback = LAS.onafterdraw.LASBind(LAS);
+		
 		function init () {
-			LAS.initUI();		
+			LAS.initUI();
+					
 		}
 		</script>
 		<style media="all" type="text/css">
@@ -134,7 +141,7 @@
 		}
 		#constraints {
 			height:650px;
-			width: 224px;
+			width: 268px;
 			border: 1px solid #5c731e;
 			float:left;
 		}
@@ -186,12 +193,7 @@
 			<div id="message_bar"><img id="wait" style="visibility:hidden;float:right;margin:2pt;padding:2pt;" src="JavaScript/components/mozilla_blu.gif"><span id="breadcrumb"></span></div>
 			<table height="600px" width="1024px"><tbody><tr><td style="vertical-align:top" border=1>
 				<div id="constraints">
-					<div id="MapWidget" style="border:1px solid black;width:220px;height:130px;z-index:10;"></div>
-					<strong>
-						<input type="radio" id="map_nav" onclick="LAS.refs.XYSelect.setControl(this.id)" name="map_mode" >Navigate&nbsp;&nbsp;<input onclick="LAS.refs.XYSelect.setControl(this.id)" type="radio" id="map_select" checked="checked" name="map_mode">Select&nbsp;&nbsp;<input type="radio" onclick="LAS.refs.XYSelect.setControl(this.id)" id="map_change" name="map_mode">Change
-						Latitude range <input size=3  id="input_minY" type="text" value="-90.0">&nbsp;:&nbsp;<input id="input_maxY" size=3 type="text" value="90.0"><br>
-						Longitude range <input size=3 id="input_minX" value="-180.0">&nbsp;:&nbsp;<input value="180.0" size=3 id="input_maxX"><br>						
-					</strong>
+					<div id="ol_map_widget" ></div>
 					<div id="constraintsScroll"  class="LASConstraintsPane">
 						<div id="plotType"></div>
 						<div id="Date"></div>
@@ -228,7 +230,7 @@
 					#else
 						src="start.html" 
 					#end 
-					id="output" name="output" onload="LAS.onPlotLoad();" frameborder=0></iframe>			
+					id="output" name="output" onreadystatechange="LAS.onPlotLoad();" onload="LAS.onPlotLoad();" frameborder=0></iframe>			
 			</td></tr></tbody></table>
 			#parse( "/productserver/templates/V7UIFooter.vm") 
 		</div>
