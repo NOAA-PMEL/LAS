@@ -151,7 +151,7 @@ function eval2(strJson) {
 			myMapWidget.rubberBand.style.visibility = "hidden";
 			myMapWidget.rubberBand_c.style.visibility = "hidden";
 			if (typeof onPlotLoad == 'function') 
-				onPlotLoad();
+				onPlotLoad(Req);
 
 /*
 * if this isn't the first plot, show the zoom out button
