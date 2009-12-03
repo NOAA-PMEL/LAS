@@ -1113,18 +1113,25 @@ LASUI.prototype.setProductNode = function(type, product) {
 
 	}
 }
-LASUI.prototype.onPlotLoad = function () {
+LASUI.prototype.onPlotLoad = function (e) {
 
 	//if(document.all)
 		var iframeDOM = window.frames[this.anchors.output];
 	//else
 	//	var iframeDOM = window.frames[this.anchors.output].contentWindow;
-	if(document.getElementById("output").src.indexOf("xml=")>=0) {
-		var xml = unescape(document.getElementById("output").src.slice(document.getElementById("output").src.indexOf("xml=")+4)).replace(/\+/g," ");
+ 
+	iframeDOM.onPlotLoad = this.onPlotLoad.LASBind(this); 
+	url = iframeDOM.document.location.href;
+	
+	if(e) {
+		if(e.getXMLText)
+			var plot_req = e;
+	} else	if(url.indexOf("xml=")>=0) {
+		var xml = unescape(url.slice(url.indexOf("xml=")+4)).replace(/\+/g," ");
+		var plot_req = new LASRequest(xml);
+	} 
 
-
-	try  {
-	var plot_req = new LASRequest(xml);
+	if(plot_req)  {
 	
 	if(plot_req.getRangeHi('x'))
 		this.state.selection.x.max=plot_req.getRangeHi('x');
@@ -1144,9 +1151,8 @@ LASUI.prototype.onPlotLoad = function () {
                 this.state.selection.t.min=plot_req.getRangeLo('t');
 	this.updating = true;
 	this.updateConstraints();
-	} catch (e) {
-	}
-	}
+	} 
+	
 	if(document.getElementById("wait"))
 		document.getElementById("wait").style.visibility="hidden";
 	if(document.getElementById("wait_msg"))
