@@ -225,12 +225,7 @@
 					</div>					
 				</div></td><td>
 				<div id="wait_msg">Please wait while the plot loads...</div>
-				<iframe width="100%" height="100%" 
-					#if($request.getParameter('catid')) 
-					#else
-						src="start.html" 
-					#end 
-					id="output" name="output" onreadystatechange="LAS.onPlotLoad();" onload="LAS.onPlotLoad();" frameborder=0></iframe>			
+				<iframe width="100%" height="100%" id="output" name="output" onreadystatechange="LAS.onPlotLoad();" onload="LAS.onPlotLoad();" frameborder=0></iframe>			
 			</td></tr></tbody></table>
 			#parse( "/productserver/templates/V7UIFooter.vm") 
 		</div>

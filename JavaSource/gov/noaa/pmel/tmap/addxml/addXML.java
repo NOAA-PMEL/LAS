@@ -1259,6 +1259,17 @@ public class addXML {
 		if ( dt.endsWith("Z") ) return dt.substring(0, dt.length() - 1);
 		return dt;
 	}
+	
+	public static Vector processDatasets(InvDataset ThreddsDataset) {
+           return processDatasets(ThreddsDataset, 0);
+       }
+
+       public static CategoryBean processCategories(InvDataset ThreddsDataset) {
+           return processCategories(ThreddsDataset, 0);
+       }
+
+
+
 	/**
 	 * processCategories
 	 *
