@@ -16,6 +16,10 @@
 			org.apache.axis.transport.http.AxisHTTPSessionListener
 		</listener-class>
 	</listener>
+	    <listener>
+        <description>LAS Session Listener for Confluence/Tributary Server (Sister Servers) Variable Clean-up</description>
+        <listener-class>gov.noaa.pmel.tmap.las.session.LASSessionListener</listener-class>
+    </listener>
 <!--  Apply an input filter every LAS request via the Struts Action class servlet. -->
   <filter>
     <filter-name>RequestInputFilter</filter-name>

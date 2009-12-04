@@ -34,12 +34,15 @@
         <forward name="constrain" path="/myconstrain.jsp" />
           </action>
           <action path="/getMetadata" type="gov.noaa.pmel.tmap.las.ui.GetMetadata"/>
+          <action path="/resolveURL" type="gov.noaa.pmel.tmap.las.ui.ResolveURL"/>
           <action path="/getViews" type="gov.noaa.pmel.tmap.las.ui.GetViews" />
           <action path="/getGrid" type="gov.noaa.pmel.tmap.las.ui.GetGrid" />
           <action path="/getOperations" type="gov.noaa.pmel.tmap.las.ui.GetOperations" />
           <action path="/getOptions" type="gov.noaa.pmel.tmap.las.ui.GetOptions" />
           <action path="/getCategories" type="gov.noaa.pmel.tmap.las.ui.GetCategories" />
           <action path="/getVariables" type="gov.noaa.pmel.tmap.las.ui.GetVariables" />
+          <action path="/getFullVariables" type="gov.noaa.pmel.tmap.las.ui.GetFullVariables" />
+          <action path="/getFullDataset" type="gov.noaa.pmel.tmap.las.ui.GetFullDataset" />
           <action path="/getRegions" type="gov.noaa.pmel.tmap.las.ui.GetRegions" />
           <action path="/getDataConstraints" type="gov.noaa.pmel.tmap.las.ui.GetDataConstraints" />
           <action path="/GEServer" type="gov.noaa.pmel.tmap.las.service.kml.GEServerAction"/>
