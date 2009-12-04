@@ -24,6 +24,7 @@ import com.google.gwt.http.client.URL;
 import com.google.gwt.maps.client.geom.LatLng;
 import com.google.gwt.maps.client.geom.LatLngBounds;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.ChangeListener;
 import com.google.gwt.user.client.ui.ClickListener;
@@ -147,6 +148,9 @@ public class VizGalPanel extends Composite {
 
 	// The new variable.
 	VariableSerializable nvar;
+	
+	// The new grid.
+	GridSerializable ngrid;
 	
 	// The height in pixels of the panel header
 	String panelHeader = "75px";
@@ -541,7 +545,9 @@ public class VizGalPanel extends Composite {
 			Object v = item.getUserObject();
 			if ( v instanceof VariableSerializable ) {
 				nvar = (VariableSerializable) v;
+				ngrid = null;
 				changeDataset = true;
+				rpcService.getGrid(nvar.getDSID(), nvar.getID(), gridCallback);
 			}
 		}
 
@@ -551,6 +557,20 @@ public class VizGalPanel extends Composite {
 		}
 
 	};
+	public AsyncCallback gridCallback = new AsyncCallback() {
+
+		@Override
+		public void onFailure(Throwable caught) {
+			Window.alert("Could not fetch grid for new variable.");
+		}
+
+		@Override
+		public void onSuccess(Object result) {
+			ngrid = (GridSerializable) result;
+			nvar.setGrid(ngrid);
+		}
+		
+	};
 	public void setVariable(VariableSerializable v) {
 		var = v;
 	}
@@ -559,6 +579,10 @@ public class VizGalPanel extends Composite {
 	}
 	ClickListener applyPanelClick = new ClickListener() {
 		public void onClick(Widget sender) {
+			if ( ngrid == null ) {
+				Window.alert("Still fetching grid for new variable.");
+				return;
+			}
 			if (changeDataset) {			
 				var = nvar;
 				datasetLabel.setText(var.getDSName()+": "+var.getName());
