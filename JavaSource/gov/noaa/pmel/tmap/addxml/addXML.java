@@ -876,7 +876,7 @@ public class addXML {
         			i++;
         			tmpiter.next();
         		}
-        		if(i<maxDatasets) {
+        		if(maxDatasets < 0 || i<maxDatasets) {
 				for (Iterator iter = ThreddsDataset.getDatasets().iterator();iter.hasNext(); ) {
 					beans.addAll(processDatasets( (InvDataset) iter.next(), depth));
 					if(verbose)
