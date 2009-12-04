@@ -50,6 +50,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -3986,6 +3987,70 @@ public class LASConfig extends LASDocument {
         }
         return lasRequest.toCompactString();
 	}
+	public void removeRemoteVariables(String JSESSIONID) {
+		HashSet<String> toRemove = remoteData.get(JSESSIONID);
+		HashSet<String> inUse = new HashSet<String>();
+		
+		// Find id's being used by other sessions...
+		for (Iterator dsIt = remoteData.keySet().iterator(); dsIt.hasNext();) {
+			String session = (String) dsIt.next();
+			if ( !session.equals(JSESSIONID) ) {
+				HashSet<String> ds_ids = remoteData.get(JSESSIONID);
+				for (Iterator removeIt = toRemove.iterator(); removeIt.hasNext();) {
+					String id = (String) removeIt.next();
+					if ( ds_ids.contains(id) ) {
+						inUse.add(id);
+					}
+				}
+			}
+		}
+		
+		// ... then remove them from the list of variables to be removed.
+		for (Iterator inUseIt = inUse.iterator(); inUseIt.hasNext();) {
+			String id = (String) inUseIt.next();
+			toRemove.remove(id);
+		}
+		
+		// Remove the variable...
+		
+		HashSet<String> datasets = new HashSet<String>();
+		for (Iterator varsit = toRemove.iterator(); varsit.hasNext();) {
+			String xpath = (String) varsit.next();
+			Element variable = null;
+			try {
+				variable = getElementByXPath(xpath);
+				String dsxpath = xpath.substring(0, xpath.indexOf("/variables"));
+				datasets.add(dsxpath);
+				Element ds = getElementByXPath(dsxpath);
+				ds.getChild("variables").removeContent(variable);
+			} catch (JDOMException e) {
+				// This gets called by the session listener which is not allowed to throw an
+				// exception.  The best we can do is log the error.
+				log.error("Unable to remove "+xpath);
+			}			
+		}
+		
+		// Remove the dataset it it's empty.
+		for (Iterator dsIt = datasets.iterator(); dsIt.hasNext();) {
+			String dsxpath = (String) dsIt.next();
+			try {
+				Element ds = getElementByXPath(dsxpath);
+				List variables = ds.getChild("variables").getChildren("variable");
+				if ( variables == null || variables.size() == 0 ) {
+					getRootElement().getChild("datasets").removeContent(ds);
+				}
+			} catch (JDOMException e) {
+				// This gets called by the session listener which is not allowed to throw an
+				// exception.  The best we can do is log the error.
+				log.error("Unable to remove "+dsxpath);
+			}
+		}
+		
+		remoteData.remove(JSESSIONID);
+		Date now = new Date();
+		File debug = new File(getOutputDir()+"/las_debug_remove"+now.getTime()+".xml");
+		write(debug);
+	}
 	public void addRemoteVariables(String JSESSIONID, LASUIRequest lasRequest) throws HttpException, IOException, JDOMException, LASException {
 		ArrayList<String> dsids = lasRequest.getDatasetIDs();
 		ArrayList<String> varids = lasRequest.getVariableIDs();
@@ -3999,8 +4064,15 @@ public class LASConfig extends LASDocument {
 
 				// Only add if it is not local data...
 				if ( !server_key.equals(getBaseServerURLKey()) ) {
-					//
+					
 					// Get the data set list for this session from the and add the data set id.
+					HashSet<String> remove_var_xpaths = remoteData.get(JSESSIONID);
+					if ( remove_var_xpaths == null ) {
+						remove_var_xpaths = new HashSet<String>();
+					}
+					remove_var_xpaths.add("/lasdata/datasets/dataset[@ID='"+dsid+"']/variables/variable[@ID='"+varid+"']");
+					remoteData.put(JSESSIONID, remove_var_xpaths);
+					
 					
 					ArrayList<String[]> grid_ids_for_key = new ArrayList<String[]>();
 					Tributary trib = getTributary(server_key);
@@ -4107,5 +4179,8 @@ public class LASConfig extends LASDocument {
 				}
 			}
 		}
+		Date now = new Date();
+		File debug = new File(getOutputDir()+"/las_debug_add_"+now.getTime()+".xml");
+		write(debug);
 	}
 }
