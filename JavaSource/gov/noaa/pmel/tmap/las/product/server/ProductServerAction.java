@@ -42,6 +42,7 @@ import javax.sql.rowset.WebRowSet;
 
 import oracle.jdbc.rowset.OracleWebRowSet;
 
+import org.apache.commons.httpclient.HttpException;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
@@ -227,6 +228,29 @@ public final class ProductServerAction extends LASAction {
         	request.setAttribute("debug", "false");
         	lasRequest.setProperty("las", "debug", "false");
         }
+        
+        // If this is a request from a confluence server that contains references to remote data sets,
+        // augment the local configuration with the the remote config.
+        
+        String remote_las = request.getParameter("remote_las");
+        if ( remote_las != null ) {
+        	try {
+				lasConfig.addRemoteVariables(JSESSIONID, lasRequest);
+			} catch (HttpException e) {
+				 logerror(request, "Could not get remote data set definitions.", e);
+		         return mapping.findForward("error");
+			} catch (IOException e) {
+				 logerror(request, "Could not get remote data set definitions.", e);
+		         return mapping.findForward("error");
+			} catch (JDOMException e) {
+				logerror(request, "Could not get remote data set definitions.", e);
+		        return mapping.findForward("error");
+			} catch (LASException e) {
+				logerror(request, "Could not get remote data set definitions.", e);
+		        return mapping.findForward("error");
+			}
+        }
+        
         
         // Report logging level only for "debug" and "trace" levels.
         log.debug("Logging set to " + log.getEffectiveLevel().toString() + " for "+log.getName());

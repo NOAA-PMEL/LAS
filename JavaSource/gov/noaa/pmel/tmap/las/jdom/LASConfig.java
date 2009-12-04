@@ -25,8 +25,10 @@ import gov.noaa.pmel.tmap.las.jdom.filter.AttributeFilter;
 import gov.noaa.pmel.tmap.las.jdom.filter.CategoryFilter;
 import gov.noaa.pmel.tmap.las.jdom.filter.EmptySrcDatasetFilter;
 import gov.noaa.pmel.tmap.las.product.server.Cache;
+import gov.noaa.pmel.tmap.las.ui.LASProxy;
 import gov.noaa.pmel.tmap.las.ui.state.StateNameValueList;
 import gov.noaa.pmel.tmap.las.ui.state.TimeSelector;
+import gov.noaa.pmel.tmap.las.util.Axis;
 import gov.noaa.pmel.tmap.las.util.Category;
 import gov.noaa.pmel.tmap.las.util.Constants;
 import gov.noaa.pmel.tmap.las.util.DataConstraint;
@@ -49,10 +51,12 @@ import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 
+import org.apache.commons.httpclient.HttpException;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.jdom.Attribute;
@@ -82,6 +86,8 @@ import ucar.nc2.dods.DODSNetcdfFile;
  */
 public class LASConfig extends LASDocument {
     private static Logger log = LogManager.getLogger(LASConfig.class.getName());
+    private static HashMap<String, HashSet<String>> remoteData = new HashMap<String, HashSet<String>>();
+    private static LASProxy lasProxy = new LASProxy();
     private static String time_formats[] = {
             "yyyy-MM-dd HH:mm:ss",
             "yyyy-MM-dd HH:mm",
@@ -1603,7 +1609,9 @@ public class LASConfig extends LASDocument {
         Element gridE = null;
         if (variable != null) {
             String ID = variable.getChild("grid").getAttributeValue("IDREF");          
-            gridE = (Element) getElementByXPath("/lasdata/grids/grid[@ID='"+ID+"']").clone();          
+            Element gt = getElementByXPath("/lasdata/grids/grid[@ID='"+ID+"']");
+            if ( gt == null ) return null;
+            gridE = (Element) gt.clone();          
             List axes = gridE.getChildren("axis");           
             for (Iterator axisIt = axes.iterator(); axisIt.hasNext();) {
                 Element axis_ref = (Element) axisIt.next();                
@@ -1625,7 +1633,7 @@ public class LASConfig extends LASDocument {
             gridE.setContent(axes_list);
             return new Grid(gridE);
         } else {
-        	throw new LASException("The grid was empty.");
+        	return null;
         }
     }
     /**
@@ -3977,5 +3985,127 @@ public class LASConfig extends LASDocument {
             }
         }
         return lasRequest.toCompactString();
+	}
+	public void addRemoteVariables(String JSESSIONID, LASUIRequest lasRequest) throws HttpException, IOException, JDOMException, LASException {
+		ArrayList<String> dsids = lasRequest.getDatasetIDs();
+		ArrayList<String> varids = lasRequest.getVariableIDs();
+		HashMap<String, ArrayList<String[]>> grid_ids = new HashMap<String, ArrayList<String[]>>();
+		Iterator varIt = varids.iterator();
+		for (Iterator dsidIt = dsids.iterator(); dsidIt.hasNext();) {
+			String dsid = (String) dsidIt.next();
+			String varid = (String) varIt.next();			
+			if ( dsid.contains(Constants.NAME_SPACE_SPARATOR) ) {
+				String server_key = dsid.split(Constants.NAME_SPACE_SPARATOR)[0];
+
+				// Only add if it is not local data...
+				if ( !server_key.equals(getBaseServerURLKey()) ) {
+					//
+					// Get the data set list for this session from the and add the data set id.
+					
+					ArrayList<String[]> grid_ids_for_key = new ArrayList<String[]>();
+					Tributary trib = getTributary(server_key);
+					String las_url = trib.getURL()+Constants.GET_CATEGORIES+"?format=xml&catid="+dsid;
+					String ds_xml = lasProxy.executeGetMethodAndReturnResult(las_url);
+					LASDocument ds_doc = new LASDocument();
+					JDOMUtils.XML2JDOM(ds_xml, ds_doc);
+					Element dataset = (Element) ds_doc.getRootElement().getChild("category").getChild("dataset").clone();
+					Element variable = null;
+					List variableElements = dataset.getChild("variables").getChildren("variable");
+					for (Iterator varElementIt = variableElements.iterator(); varElementIt.hasNext();) {
+						Element var = (Element) varElementIt.next();
+						if ( var.getAttributeValue("ID").equals(varid)) {
+							variable = (Element) var.clone();	
+						}
+					}
+					// Found it.  Add it to the local config.
+					if ( variable != null ) {
+						Element dataset_exists = getDatasetElement(dsid);
+						if ( dataset_exists != null ) {
+							boolean exists = false;
+							List variables = dataset_exists.getChild("variables").getChildren("variable");
+							for (Iterator existVarIt = variables.iterator(); existVarIt.hasNext();) {
+								Element var_exists = (Element) existVarIt.next();
+								if ( var_exists.getAttributeValue("ID").equals(variable.getAttributeValue("ID"))) {
+									exists = true;
+								}
+							}
+							if ( !exists ) {
+								dataset_exists.getChild("variables").addContent(variable);
+								// Need to add these axes to the local config.
+								String[] ids = new String[] {dsid, variable.getAttributeValue("ID")};
+								grid_ids_for_key.add(ids);
+							}
+						} else {
+							dataset.removeContent();
+							dataset.setAttribute("temporary", "true");
+							Element variables = new Element("variables");
+							variables.addContent(variable);
+							dataset.addContent(variables);
+							getRootElement().getChild("datasets").addContent(dataset);
+
+							String[] idpair = new String[] {dsid, variable.getAttributeValue("ID")};
+							grid_ids_for_key.add(idpair);
+						}			    	
+					}
+					grid_ids.put(server_key, grid_ids_for_key);
+
+					// Add the grids and axes for the remote variable...
+					for (Iterator keysIt = grid_ids.keySet().iterator(); keysIt.hasNext();) {
+						String s_key = (String) keysIt.next();
+						ArrayList<String[]> grid_id_list = grid_ids.get(s_key);
+						for (Iterator gridIdIt = grid_id_list.iterator(); gridIdIt.hasNext();) {
+							String[] id_pair = (String[]) gridIdIt.next();
+							Grid grid = getGrid(id_pair[0], id_pair[1]);
+							if ( grid == null ) {
+								// Get the grid.
+								Tributary tributary = getTributary(server_key);
+								String grid_las_url = tributary.getURL()+Constants.GET_GRID+"?format=xml&dsid="+id_pair[0]+"&varid="+id_pair[1];
+								String g_xml = lasProxy.executeGetMethodAndReturnResult(grid_las_url);
+								LASDocument g_doc = new LASDocument();
+								JDOMUtils.XML2JDOM(g_xml, g_doc);
+								// Get the axes and add the using the server id.
+								// and build the grid element with the IDREF to the axes.
+								grid = new Grid(g_doc.getRootElement());
+								Element gridE = new Element("grid");
+								gridE.setAttribute("ID", grid.getID());
+								if ( grid.hasT() ) {
+									TimeAxis t = grid.getTime();
+									String tid = t.getID();
+									getRootElement().getChild("axes").addContent((Element)t.getElement().clone());
+									Element axis = new Element("axis");
+									axis.setAttribute("IDREF", tid);
+									gridE.addContent(axis);
+								}
+								if ( grid.hasX() ) {
+									Axis x = grid.getAxis("x");
+									String xid = x.getID();
+									getRootElement().getChild("axes").addContent((Element)x.getElement().clone());
+									Element axis = new Element("axis");
+									axis.setAttribute("IDREF", xid);
+									gridE.addContent(axis);
+								}
+								if ( grid.hasY() ) {
+									Axis y = grid.getAxis("y");
+									String yid = y.getID();
+									getRootElement().getChild("axes").addContent((Element)y.getElement().clone());
+									Element axis = new Element("axis");
+									axis.setAttribute("IDREF", yid);
+									gridE.addContent(axis);
+								}
+								if ( grid.hasZ() ) {
+									Axis z = grid.getAxis("z");
+									String zid = z.getID();
+									getRootElement().getChild("axes").addContent((Element)z.getElement().clone());
+									Element axis = new Element("axis");
+									axis.setAttribute("IDREF", zid);
+									gridE.addContent(axis);
+								}
+								getRootElement().getChild("grids").addContent(gridE);				
+							}
+						}
+					}
+				}
+			}
+		}
 	}
 }

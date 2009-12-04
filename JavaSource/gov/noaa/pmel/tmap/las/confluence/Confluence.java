@@ -7,6 +7,7 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -73,14 +74,14 @@ public class Confluence extends LASAction {
 			//Unnamed Block.  
 			{  
 				put(Constants.GET_CATEGORIES, new String[]{"catid"});  
-				put("getDataConstraints", new String[]{"dsid", "varid"});  
-				put("getGrid",  new String[]{"dsid", "varid"});  
-				put("getMetadata", new String[]{"dsid", "catitem", "opendap"});  
-				put("getOperations", new String[]{"dsid", "varid", "view"}); 
-				put("getOptions", new String[]{"dsid", "opid"});
-				put("getRegions", new String[]{"dsid", "varid"});
-				put("getVariables", new String[]{"dsid"});
-				put("getViews", new String[]{"dsid", "varid"});
+				put(Constants.GET_DATACONSTRAINTS, new String[]{"dsid", "varid"});  
+				put(Constants.GET_GRID,  new String[]{"dsid", "varid"});  
+				put(Constants.GET_METADATA, new String[]{"dsid", "catitem", "opendap"});  
+				put(Constants.GET_OPERATIONS, new String[]{"dsid", "varid", "view"}); 
+				put(Constants.GET_OPTIONS, new String[]{"dsid", "opid"});
+				put(Constants.GET_REGIONS, new String[]{"dsid", "varid"});
+				put(Constants.GET_VARIABLES, new String[]{"dsid"});
+				put(Constants.GET_VIEWS, new String[]{"dsid", "varid"});
 			}  
 		};
 		
@@ -223,8 +224,40 @@ public class Confluence extends LASAction {
 					// Forward to the local server...
 					return mapping.findForward("LocalProductServer");
 				} else if ( ids.size() > 1 ) {
-					logerror(request, "Cannot do two variables yet.", "Comming soon.");
-					return mapping.findForward("error");
+					// Check to see how many servers are needed for this product.
+					
+					HashMap<String, Tributary> tribs = new HashMap<String, Tributary>();
+					for (Iterator idsIt = ids.iterator(); idsIt.hasNext();) {
+						String id = (String) idsIt.next();
+						String server_key = id.split(Constants.NAME_SPACE_SPARATOR)[0];
+						Tributary trib = lasConfig.getTributary(server_key);
+						tribs.put(server_key, trib);
+					}
+					try {
+						if ( tribs.size() == 1 ) {
+							String key = (String) tribs.keySet().toArray()[0];
+							// Multiple variables, but one server so send to the appropriate server.
+							if ( key.equals(lasConfig.getBaseServerURLKey()) ) {
+								// Process here as normal...
+								return mapping.findForward(Constants.LOCAL_PRODUCT_SERVER_KEY);
+							} else {
+								String las_url = tribs.get(key).getURL();
+								las_url = las_url + Constants.PRODUCT_SERVER + "?" + request.getQueryString();	
+								lasProxy.executeGetMethodAndStreamResult(las_url, response);
+							}
+						} else {
+							// Add the special parameter to create product locally using remote analysis and send to local product server.
+							return new ActionForward(Constants.LOCAL_PRODUCT_SERVER+"?remote_las=true&xml="+xml);
+						}
+					} catch (JDOMException e) {
+						logerror(request, "Unable to fetch categories.", e);
+					} catch (UnsupportedEncodingException e) {
+						logerror(request, "Unable to fetch categories.", e);
+					} catch (HttpException e) {
+						logerror(request, "Unable to fetch categories.", e);
+					} catch (IOException e) {
+						logerror(request, "Unable to fetch categories.", e);
+					}
 				} else {
 					try {
 						// Get the server key and forward to that server...

@@ -553,4 +553,101 @@ public class LASUIRequest extends LASDocument {
 			return String.valueOf(Math.random());
 		}
 	}
+	public String getFTDSURL(String varXPath) {
+		String ftds_url = "";
+		List vars = getRootElement().getChild("args").getChildren("link");
+        for (Iterator varIt = vars.iterator(); varIt.hasNext();) {
+            Element var = (Element) varIt.next();
+            String link = var.getAttributeValue("link");
+            if ( link != null && link.equals(varXPath) ) {
+            	String f = var.getAttributeValue("ftds_url");
+            	if ( f != null ) {
+            		ftds_url = f;
+            	}
+            }
+        }
+        return ftds_url;
+	}
+	/**
+	 * Get variable name from a request that's been run through the URL resolver.
+	 * @param varXPath
+	 * @return
+	 */
+	public String getVariableName(String varXPath) {
+		String var_name = "";
+		List vars = getRootElement().getChild("args").getChildren("link");
+        for (Iterator varIt = vars.iterator(); varIt.hasNext();) {
+            Element var = (Element) varIt.next();
+            String link = var.getAttributeValue("link");
+            if ( link != null && link.equals(varXPath) ) {
+            	String n = var.getAttributeValue("var_name");
+            	if ( n != null ) {
+            		var_name = n;
+            	}
+            }
+        }
+        return var_name;
+	}
+	/**
+	 * Get variable name from a request that's been run through the URL resolver.
+	 * @param varXPath
+	 * @return
+	 */
+	public String getVariableTitle(String varXPath) {
+		String var_title = "";
+		List vars = getRootElement().getChild("args").getChildren("link");
+        for (Iterator varIt = vars.iterator(); varIt.hasNext();) {
+            Element var = (Element) varIt.next();
+            String link = var.getAttributeValue("link");
+            if ( link != null && link.equals(varXPath) ) {
+            	String t = var.getAttributeValue("var_title");
+            	if ( t != null ) {
+            		var_title = t;
+            	}
+            }
+        }
+        return var_title;
+	}
+	
+	/**
+	 * Get variable name from a request that's been run through the URL resolver.
+	 * @param varXPath
+	 * @return
+	 */
+	public String getDatasetID(String varXPath) {
+		String dsid = "";
+		List vars = getRootElement().getChild("args").getChildren("link");
+        for (Iterator varIt = vars.iterator(); varIt.hasNext();) {
+            Element var = (Element) varIt.next();
+            String link = var.getAttributeValue("link");
+            if ( link != null && link.equals(varXPath) ) {
+            	String t = var.getAttributeValue("dsid");
+            	if ( t != null ) {
+            		dsid = t;
+            	}
+            }
+        }
+        return dsid;
+	}
+	
+	/**
+	 * Get variable name from a request that's been run through the URL resolver.
+	 * @param varXPath
+	 * @return
+	 */
+	public String getGridID(String varXPath) {
+		String gridid = "";
+		List vars = getRootElement().getChild("args").getChildren("link");
+        for (Iterator varIt = vars.iterator(); varIt.hasNext();) {
+            Element var = (Element) varIt.next();
+            String link = var.getAttributeValue("link");
+            if ( link != null && link.equals(varXPath) ) {
+            	String t = var.getAttributeValue("gridid");
+            	if ( t != null ) {
+            		gridid = t;
+            	}
+            }
+        }
+        return gridid;
+	}
 }
