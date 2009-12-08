@@ -43,7 +43,7 @@ function LASUI () {
 		"xybox" : {},
 		"categorynames" : [],
 		"analysis" : {"type":null,"axes":{}},
-		"selection" : {}
+		"selection" : {"x":{},"y":{},"z":{},"t":{}}
 	};
 
 	//DOM anchor ids.
@@ -1133,22 +1133,14 @@ LASUI.prototype.onPlotLoad = function (e) {
 
 	if(plot_req)  {
 	
-	if(plot_req.getRangeHi('x'))
-		this.state.selection.x.max=plot_req.getRangeHi('x');
-        if(plot_req.getRangeLo('x'))
-                this.state.selection.x.min=plot_req.getRangeLo('x');
-        if(plot_req.getRangeHi('y'))
-                this.state.selection.y.max=plot_req.getRangeHi('y');
-        if(plot_req.getRangeLo('y'))
-                this.state.selection.y.min=plot_req.getRangeLo('y');
-        if(plot_req.getRangeHi('z'))
-                this.state.selection.z.max=plot_req.getRangeHi('z');
-        if(plot_req.getRangeLo('z'))
-                this.state.selection.z.min=plot_req.getRangeLo('z');
-        if(plot_req.getRangeHi('t'))
-                this.state.selection.t.max=plot_req.getRangeHi('t');
-        if(plot_req.getRangeLo('t'))
-                this.state.selection.t.min=plot_req.getRangeLo('t');
+	this.state.selection.x.max=plot_req.getRangeHi('x');
+        this.state.selection.x.min=plot_req.getRangeLo('x');
+        this.state.selection.y.max=plot_req.getRangeHi('y');
+        this.state.selection.y.min=plot_req.getRangeLo('y');
+        this.state.selection.z.max=plot_req.getRangeHi('z');
+        this.state.selection.z.min=plot_req.getRangeLo('z');
+        this.state.selection.t.max=plot_req.getRangeHi('t');
+        this.state.selection.t.min=plot_req.getRangeLo('t');
 	this.updating = true;
 	this.updateConstraints();
 	} 
@@ -1288,8 +1280,10 @@ LASUI.prototype.initXYSelect = function (mode, reset) {
 					 "max" : getMapYhi()
 					};
 			
-		
-
+		if(this.state.selection.y.max==null)
+			this.state.selection.y.max=this.state.selection.y.min;
+		if(this.state.selection.x.max==null)
+                        this.state.selection.x.max=this.state.selection.x.min;
 
 		var resetGrid=false;
 
@@ -1314,8 +1308,9 @@ LASUI.prototype.initXYSelect = function (mode, reset) {
 
 		if(this.state.newgrid)
 			setMapCurrentSelection(grid.y.min,grid.y.max,grid.x.min,grid.x.max);
-		else
-			 setMapCurrentSelection(this.state.selection.y.min,this.state.selection.y.max,this.state.selection.x.min,this.state.selection.x.max);
+		else 
+			setMapCurrentSelection(this.state.selection.y.min,this.state.selection.y.max,this.state.selection.x.min,this.state.selection.x.max);
+		
 		delete(this.state.newgrid);
 
 		if(this.submitOnLoad && this.params){

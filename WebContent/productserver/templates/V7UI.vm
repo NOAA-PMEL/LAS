@@ -140,7 +140,7 @@
 			height: 100%;
 		}
 		#constraints {
-			height:650px;
+			min-height:500px;
 			width: 268px;
 			border: 1px solid #5c731e;
 			float:left;
@@ -191,7 +191,9 @@
 				</div>
 			</div>
 			<div id="message_bar"><img id="wait" style="visibility:hidden;float:right;margin:2pt;padding:2pt;" src="JavaScript/components/mozilla_blu.gif"><span id="breadcrumb"></span></div>
-			<table height="600px" width="1024px"><tbody><tr><td style="vertical-align:top" border=1>
+
+
+			<table  width="1024px"><tbody><tr><td style="vertical-align:top" border=1>
 				<div id="constraints">
 					<div id="ol_map_widget" ></div>
 					<div id="constraintsScroll"  class="LASConstraintsPane">
@@ -225,7 +227,12 @@
 					</div>					
 				</div></td><td>
 				<div id="wait_msg">Please wait while the plot loads...</div>
-				<iframe width="100%" height="100%" id="output" name="output" onreadystatechange="LAS.onPlotLoad();" onload="LAS.onPlotLoad();" frameborder=0></iframe>			
+				<iframe width="100%" height="100%" 
+					                #if($request.getParameter('catid'))  
+	 	                                        #else 
+	 	                                                src="start.html"  
+	 	                                        #end  
+					id="output" name="output" onreadystatechange="LAS.onPlotLoad();" onload="LAS.onPlotLoad();" frameborder=0></iframe>			
 			</td></tr></tbody></table>
 			#parse( "/productserver/templates/V7UIFooter.vm") 
 		</div>
