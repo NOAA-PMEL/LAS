@@ -1303,7 +1303,7 @@ LASUI.prototype.initXYSelect = function (mode, reset) {
 		}
 
 		if(reset==true)
-			setMapDataExtent(grid.y.min,grid.y.max,grid.x.min,grid.x.max);
+			setMapDataExtent(grid.y.min,grid.y.max,grid.x.min,grid.x.max,parseFloat(this.state.grid.getDelta('x')));
 	         
 
 		if(this.state.newgrid)
