@@ -1,10 +1,12 @@
 package gov.noaa.pmel.tmap.las.client.map;
 
-import com.google.gwt.i18n.client.NumberFormat;
+import gov.noaa.pmel.tmap.las.client.laswidget.Util;
+
 import com.google.gwt.user.client.ui.ChangeListener;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.Grid;
-import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.TextBox;
 /**
  * A widget that displays the N and S latitude and E and W longitude of the current selection.
@@ -20,19 +22,18 @@ public class LatLonWidget extends Composite {
 	TextBox northLat;
 	TextBox westLon;
 	TextBox eastLon;
-	Label lonLabel;
-	Label latLabel;
-	Grid panel;
+	Image rose;
+	FlexTable panel;
 	
 	private static final String boxWidth = "70px";
 	/**
 	 * Constructs an empty widget.
 	 */
 	public LatLonWidget() {
-		panel = new Grid(2,4);
+		panel = new FlexTable();
 		
-		latLabel = new Label("Lat:");
-		lonLabel = new Label("Lon:");
+		rose = new Image(Util.getImageURL()+"rose.png");
+		rose.addStyleName("LSS_middle");
 
 		southLat = new TextBox();
 		northLat = new TextBox();
@@ -45,13 +46,13 @@ public class LatLonWidget extends Composite {
 
 		eastLon.setWidth(boxWidth);
 		westLon.setWidth(boxWidth);
-      
-		panel.setWidget(0, 0, latLabel);
-		panel.setWidget(0, 1, northLat);
-		panel.setWidget(1, 1, southLat);
-		panel.setWidget(0, 2, lonLabel);
-		panel.setWidget(0, 3, eastLon);
-		panel.setWidget(1, 3, westLon);
+        
+		panel.setWidget(0, 1, northLat);		
+		panel.setWidget(1, 0, westLon);
+		panel.setWidget(1, 1, rose);
+		panel.setWidget(1, 2, eastLon);
+		panel.setWidget(2, 1, southLat);
+//		panel.getFlexCellFormatter().setColSpan(2, 0, 2);
 		
 		initWidget(panel);
 	}
