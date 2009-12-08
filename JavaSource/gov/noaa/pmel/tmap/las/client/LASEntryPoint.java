@@ -14,8 +14,8 @@ public class LASEntryPoint implements EntryPoint {
 		ServiceDefTarget endpoint = (ServiceDefTarget) rpcService;
 		String rpcURL = "";
 		String base_path = Util.getBaseURL();
-		rpcURL = base_path + "/rpc";
+		rpcURL = base_path + "rpc";
 		endpoint.setServiceEntryPoint(rpcURL);
-		productServer = base_path + "/ProductServer.do";
+		productServer = base_path + "ProductServer.do";
 	}
 }
