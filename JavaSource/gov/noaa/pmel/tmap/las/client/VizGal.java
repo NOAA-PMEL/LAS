@@ -279,8 +279,8 @@ public class VizGal extends LASEntryPoint {
 
 		// Control whether the headers are hidden.
 		panelHeaderHidden = false;
-		tridown = Util.getImageURL()+"tri-down.png";
-		triright = Util.getImageURL()+"tri-right.png";
+		tridown = Util.getImageURL()+"plus.png";
+		triright = Util.getImageURL()+"minus.png";
 		showHide = new Image(tridown);
 		header.setWidget(0, 0, showHide);
 		showHide.addClickHandler(new ClickHandler() {
