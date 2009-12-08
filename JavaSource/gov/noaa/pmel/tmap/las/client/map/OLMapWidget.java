@@ -3,6 +3,7 @@ package gov.noaa.pmel.tmap.las.client.map;
 import java.util.ArrayList;
 import java.util.Iterator;
 
+import gov.noaa.pmel.tmap.las.client.laswidget.Util;
 import gov.noaa.pmel.tmap.las.client.openlayers.DrawSingleFeature;
 import gov.noaa.pmel.tmap.las.client.openlayers.DrawSingleFeatureOptions;
 import gov.noaa.pmel.tmap.las.client.openlayers.HorizontalPathHandler;
@@ -44,9 +45,12 @@ import com.google.gwt.user.client.ui.DockPanel;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.ToggleButton;
+import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 public class OLMapWidget extends Composite {
@@ -82,14 +86,21 @@ public class OLMapWidget extends Composite {
 	
 	private RegionWidget regionWidget = new RegionWidget();
     private LatLonWidget textWidget = new LatLonWidget();
-	private ToggleButton helpButton;
-	private Button resetButton;
+	private Image helpButton;
+	private Image resetButton;
+	private Image drawButton;
+	//private Image zoomButton;
+	//private Image panButton;
+	private HorizontalPanel buttonPanel;
 	private PopupPanel helpPanel;
+	private VerticalPanel helpInterior;
+	private Button closeHelp;
     private HTML help;
     private FlexTable topGrid;
   
     private boolean modulo = true;
 	private boolean selectionMade = false;
+	private boolean drawing = true;
 	
     Boxes boxes = new Boxes("Valid Region");
 	Box box = null;
@@ -106,31 +117,53 @@ public class OLMapWidget extends Composite {
 		textWidget.addWestChangeListener(westChangeListener);
 		dockPanel = new DockPanel();
 		helpPanel = new PopupPanel();
-		helpButton = new ToggleButton("Help");
-		resetButton = new Button("Reset");
+		helpInterior = new VerticalPanel();
+	    buttonPanel = new HorizontalPanel();
+		helpButton = new Image(Util.getImageURL()+"info.png");
+		helpButton.setTitle("Help");
+		closeHelp = new Button("Close");
+		closeHelp.addClickHandler(new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
+				helpPanel.hide();			
+			}
+			
+		});
+		resetButton = new Image(Util.getImageURL()+"reset.png");
+		resetButton.setTitle("Reset Map");
 		help = new HTML("<div style=\"font-family:verdana;font-size:9;\">" +
-				"<ul><li>To select an area of the map, use CTRL-CLICK-DRAG.</li>" +
-				"<li>Click the selected area to modify it.  (Click outside it when finished.)</li>" +
-				"<li>To zoom, use SHFT-CLICK-DRAG on the map, double click on the map, or use the +- buttons.</li>" +
-				"<li>To pan the map, use the arrow buttons or CLICK-DRAG on the map.</li>" +
-				"<li>To re-center and zoom out and keep your selection click on the world icon button.</li>" +
-				"<li>To start over, click the Reset button above the map.</li></ul>"+
+				"<ul><li>To select an area of the map, click the <img alt=\"draw\" src=\""+Util.getImageURL()+"draw.png"+"\"/> button then click and drag on the map.</li>" +
+				"<li>To modify a selection click the button to deactivate <img alt=\"draw off\" src=\""+Util.getImageURL()+"draw_off.png"+"\"/> drawing and click the selected area to modify it.  (Click outside it when finished.)</li>" +
+				"<li>To zoom, click the <img alt=\"zoom in\" src=\""+Util.getBaseURL()+"JavaScript/frameworks/OpenLayers/img/zoom-plus-mini.png\"/> and <img alt=\"zoom out\" src=\""+Util.getBaseURL()+"JavaScript/frameworks/OpenLayers/img/zoom-minus-mini.png\"/> buttons.</li>" +
+				"<li>To pan the map, click the <img alt=\"arrow \" src=\""+Util.getBaseURL()+"JavaScript/frameworks/OpenLayers/img/north-mini.png\"/> <img alt=\"arrow buttons\" src=\""+Util.getBaseURL()+"JavaScript/frameworks/OpenLayers/img/south-mini.png\"/> <img alt=\"arrow buttons\" src=\""+Util.getBaseURL()+"JavaScript/frameworks/OpenLayers/img/east-mini.png\"/> <img alt=\"arrow buttons\" src=\""+Util.getBaseURL()+"JavaScript/frameworks/OpenLayers/img/west-mini.png\"/> buttons or deactivate <img alt=\"draw\" src=\""+Util.getImageURL()+"draw_off.png"+"\"/> drawing and click, hold and drag on the map.</li>" +
+				"<li>To re-center and zoom out and keep your selection click on the <img alt=\"world\" src=\""+Util.getBaseURL()+"JavaScript/frameworks/OpenLayers/img/zoom-world-mini.png\"/> button.</li>" +
+				"<li>To start over, click the <img alt=\"reset\" src=\""+Util.getImageURL()+"reset.png"+"\"/> button above the map.</li></ul>"+
 		        "</div>");
-		helpPanel.add(help);
+		helpInterior.add(closeHelp);
+		helpInterior.add(help); 
+		helpPanel.add(helpInterior);
+		drawButton = new Image(Util.getImageURL()+"draw.png");
+		drawButton.setTitle("Draw Selection");
+		drawButton.addClickHandler(drawButtonClickHandler);
+		//zoomButton = new Image(Util.getImageURL()+"zoom_off.png");
+		//zoomButton.setTitle("Zoom Map");
+		// TODO Zoom Click handler
+		//panButton = new Image(Util.getImageURL()+"pan_off.png");
+		//panButton.setTitle("Pan Map");
+		//panButton.addClickHandler(panButtonClickHandler);
+		buttonPanel.add(helpButton);
+		buttonPanel.add(resetButton);
+		buttonPanel.add(drawButton);
+		//buttonPanel.add(zoomButton);
+		//buttonPanel.add(panButton);
 		topGrid = new FlexTable();
-		topGrid.setWidget(0, 0, helpButton);
-		topGrid.setWidget(0, 1, resetButton);
-		topGrid.getFlexCellFormatter().setColSpan(1, 0, 2);
+		topGrid.setWidget(0, 0, buttonPanel);
 		topGrid.setWidget(1, 0, regionWidget);
 		helpButton.addClickHandler(new ClickHandler(){
 			@Override
 			public void onClick(ClickEvent event) {
-				if ( helpButton.isDown() ) {
-					helpPanel.setPopupPosition(helpButton.getAbsoluteLeft()+256, helpButton.getAbsoluteTop()+20);
-					helpPanel.show();			
-				} else {
-					helpPanel.hide();
-				}
+				helpPanel.setPopupPosition(helpButton.getAbsoluteLeft()+256, helpButton.getAbsoluteTop()+20);
+				helpPanel.show();			
 			}
 		});
 		resetButton.addClickHandler(new ClickHandler() {
@@ -181,7 +214,7 @@ public class OLMapWidget extends Composite {
 		regularPolygonHandlerOptions = new RegularPolygonHandlerOptions();
 		regularPolygonHandlerOptions.setSides(4);
 		regularPolygonHandlerOptions.setIrregular(true);
-		regularPolygonHandlerOptions.setKeyMask(Handler.MOD_CTRL);
+		//regularPolygonHandlerOptions.setKeyMask(Handler.MOD_CTRL);
 		drawSingleFeatureOptionsForRectangle.setHandlerOptions(regularPolygonHandlerOptions);
 				
 		regularPolygonHandler = new RegularPolygonHandler();
@@ -191,7 +224,7 @@ public class OLMapWidget extends Composite {
 		drawRectangle = new DrawSingleFeature(boxLayer, regularPolygonHandler, drawSingleFeatureOptionsForRectangle);
 		
 		pathHandlerOptions = new RegularPolygonHandlerOptions();
-		pathHandlerOptions.setKeyMask(Handler.MOD_CTRL);
+		//pathHandlerOptions.setKeyMask(Handler.MOD_CTRL);
 		pathHandlerOptions.setIrregular(true);
 		pathHandlerOptions.setSides(4);
 		drawSingleFeatureOptionsForLines = new DrawSingleFeatureOptions();
@@ -241,7 +274,7 @@ public class OLMapWidget extends Composite {
 		drawXLine.deactivate();
 		drawYLine.deactivate();
 		drawPoint.deactivate();
-		modifyFeatureXY.activate();
+		modifyFeatureXY.deactivate();
 		modifyFeatureLine.deactivate();
 		
 		map.setCenter(new LonLat(0, 0), 0);
@@ -488,6 +521,137 @@ public class OLMapWidget extends Composite {
 			} 
 		}
 	}
+	public ClickHandler panButtonClickHandler = new ClickHandler() {
+
+		@Override
+		public void onClick(ClickEvent event) {
+			drawButton.setUrl(Util.getImageURL()+"draw_off.png"); 
+			//panButton.setUrl(Util.getImageURL()+"pan.png");
+			//zoomButton.setUrl(Util.getImageURL()+"zoom_off.png");
+			drawRectangle.deactivate();
+			drawXLine.deactivate();
+			drawYLine.deactivate();
+			drawPoint.deactivate();
+			if ( tool.equals("xy") ) {
+				
+				modifyFeatureXY.activate();
+				modifyFeatureLine.deactivate();
+				
+			} else if ( tool.equals("x") || tool.equals("xz") || tool.equals("xt") ) {
+				
+				modifyFeatureXY.deactivate();
+				modifyFeatureLine.activate();
+				
+			} else if ( tool.equals("y") || tool.equals("yz") || tool.equals("yt") ) {
+				
+				modifyFeatureXY.deactivate();
+				modifyFeatureLine.activate();
+				
+			} else if ( tool.equals("t") || tool.equals("z") || tool.equals("zt") || tool.equals("pt") ) {
+				// A view of z to t is a point tool type
+				
+				modifyFeatureXY.deactivate();
+				modifyFeatureLine.deactivate();
+				
+			} 
+		}
+		
+	};
+	public ClickHandler drawButtonClickHandler = new ClickHandler() {
+
+		@Override
+		public void onClick(ClickEvent event) {
+			if ( !drawing ) {
+				// Drawing is not active, so activate it.
+				drawing = true;
+
+				drawButton.setUrl(Util.getImageURL()+"draw.png"); 
+				//panButton.setUrl(Util.getImageURL()+"pan_off.png");
+				//zoomButton.setUrl(Util.getImageURL()+"zoom_off.png");
+				if ( tool.equals("xy") ) {
+
+					drawRectangle.activate();
+					drawXLine.deactivate();
+					drawYLine.deactivate();
+					drawPoint.deactivate();
+					modifyFeatureXY.activate();
+					modifyFeatureLine.deactivate();
+
+				} else if ( tool.equals("x") || tool.equals("xz") || tool.equals("xt") ) {
+
+					drawRectangle.deactivate();
+					drawXLine.activate();
+					drawYLine.deactivate();
+					drawPoint.deactivate();
+					modifyFeatureXY.deactivate();
+					modifyFeatureLine.activate();
+
+				} else if ( tool.equals("y") || tool.equals("yz") || tool.equals("yt") ) {
+
+					drawRectangle.deactivate();
+					drawXLine.deactivate();
+					drawYLine.activate();
+					drawPoint.deactivate();
+					modifyFeatureXY.deactivate();
+					modifyFeatureLine.activate();
+
+				} else if ( tool.equals("t") || tool.equals("z") || tool.equals("zt") || tool.equals("pt") ) {
+					// A view of z to t is a point tool type
+
+					drawRectangle.deactivate();
+					drawXLine.deactivate();
+					drawYLine.deactivate();
+					drawPoint.activate();
+					modifyFeatureXY.deactivate();
+					modifyFeatureLine.deactivate();
+
+				} 
+			} else {
+				// Turn off drawing to allow selections
+				drawing = false;
+				drawButton.setUrl(Util.getImageURL()+"draw_off.png"); 
+				//panButton.setUrl(Util.getImageURL()+"pan_off.png");
+				if ( tool.equals("xy") ) {
+
+					drawRectangle.deactivate();
+					drawXLine.deactivate();
+					drawYLine.deactivate();
+					drawPoint.deactivate();
+					modifyFeatureXY.activate();
+					modifyFeatureLine.deactivate();
+
+				} else if ( tool.equals("x") || tool.equals("xz") || tool.equals("xt") ) {
+
+					drawRectangle.deactivate();
+					drawXLine.deactivate();
+					drawYLine.deactivate();
+					drawPoint.deactivate();
+					modifyFeatureXY.deactivate();
+					modifyFeatureLine.activate();
+
+				} else if ( tool.equals("y") || tool.equals("yz") || tool.equals("yt") ) {
+
+					drawRectangle.deactivate();
+					drawXLine.deactivate();
+					drawYLine.deactivate();
+					drawPoint.deactivate();
+					modifyFeatureXY.deactivate();
+					modifyFeatureLine.activate();
+
+				} else if ( tool.equals("t") || tool.equals("z") || tool.equals("zt") || tool.equals("pt") ) {
+					// A view of z to t is a point tool type
+
+					drawRectangle.deactivate();
+					drawXLine.deactivate();
+					drawYLine.deactivate();
+					drawPoint.deactivate();
+					modifyFeatureXY.deactivate();
+					modifyFeatureLine.deactivate();
+
+				} 
+			}
+		}		
+	};
 	/**
 	 * A listener that will handle change events when the user types text into the TextBox with the south latitude value.
 	 */
