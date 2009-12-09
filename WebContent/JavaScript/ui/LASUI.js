@@ -1308,9 +1308,11 @@ LASUI.prototype.initXYSelect = function (mode, reset) {
 
 		if(this.state.newgrid)
 			setMapCurrentSelection(grid.y.min,grid.y.max,grid.x.min,grid.x.max);
-		else 
+		else if (this.state.selection.y.min&&this.state.selection.y.max&&this.state.selection.x.min&&this.state.selection.x.max)
 			setMapCurrentSelection(this.state.selection.y.min,this.state.selection.y.max,this.state.selection.x.min,this.state.selection.x.max);
-		
+			else
+				setMapCurrentSelection(grid.y.min,grid.y.max,grid.x.min,grid.x.max);
+
 		delete(this.state.newgrid);
 
 		if(this.submitOnLoad && this.params){
