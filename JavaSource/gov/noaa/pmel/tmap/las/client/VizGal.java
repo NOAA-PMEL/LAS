@@ -305,6 +305,7 @@ public class VizGal extends LASEntryPoint {
 		settingsControls.addDatasetTreeListener(datasetTreeListener);
 		settingsControls.addOptionsOkClickListener(optionsOkListener);
 		settingsControls.addOperationClickListener(operationsClickListener);
+		settingsControls.setToolType(view);
 
 		// Sets the contour levels for all plots based on the global min/max of the data (as returned in the map scale file).
 		autoContourButton = new ToggleButton("Auto Set Color Fill Levels for Gallery");
@@ -579,6 +580,7 @@ public class VizGal extends LASEntryPoint {
 		panels.clear();
 
 		settingsControls.addApplyClickListener(settingsButtonApplyListener);
+		
 		// FYI Column 3 of the header used to contain the gallery settings button.
 		int win = Window.getClientWidth();
 		if ( panelHeaderHidden ) {

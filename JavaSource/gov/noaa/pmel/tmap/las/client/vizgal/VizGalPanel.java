@@ -201,6 +201,7 @@ public class VizGalPanel extends Composite {
 
 		String title = "Settings";
 		settingsButton = new SettingsWidget(title, ID, operationID, optionID, rpcService, "button");
+        settingsButton.setToolType(this.view);
 		settingsButton.addApplyClickListener(applyPanelClick);
 		settingsButton.addCloseClickListener(closeClick);
 		settingsButton.addDatasetTreeListener(datasetTreeListener);
