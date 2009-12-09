@@ -1269,6 +1269,7 @@ LASUI.prototype.initXYSelect = function (mode, reset) {
 		document.getElementById("XYRegionType").style.display = "";
 	if(this.state.grid.getAxis('x') && this.state.grid.getAxis('y') && mode)
 	 {
+		setMapTool(mode);
 		var grid = {"x": {"min" : 0, "max" :0}, "y" : {"min" :0, "max" : 0}};
 
 		if(!this.state.selection.x) 
@@ -1323,8 +1324,6 @@ LASUI.prototype.initXYSelect = function (mode, reset) {
 				bbox.y = this.params.y;
 
 		}
-
-		setMapTool(mode);
 
 	}
 }
