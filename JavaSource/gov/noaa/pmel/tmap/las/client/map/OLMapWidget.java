@@ -54,7 +54,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 public class OLMapWidget extends Composite {
-	private String tool = "xy";
+	private String tool = "";
 	private DockPanel dockPanel;
 	private MapOptions wmsMapOptions;
 	private MapOptions wrapMapOptions;
@@ -270,7 +270,7 @@ public class OLMapWidget extends Composite {
 		this.map.addControl(modifyFeatureXY);
 		this.map.addControl(modifyFeatureLine);
 		
-		drawRectangle.activate();
+		drawRectangle.deactivate();
 		drawXLine.deactivate();
 		drawYLine.deactivate();
 		drawPoint.deactivate();
@@ -786,8 +786,21 @@ public class OLMapWidget extends Composite {
 					Window.alert(oentry+" is not a valid longitude value.");
 				}
 			}
-			if ( xlo < dataBounds.getLowerLeftX() ) {
-				xlo = dataBounds.getLowerLeftX();
+			xlo = GeoUtil.normalizeLon(xlo);
+			if ( !modulo ) {
+				// This is not a global data set, make sure we're not west of the data bounds.
+				if ( xlo < GeoUtil.normalizeLon(dataBounds.getLowerLeftX()) ) {
+					xlo = dataBounds.getLowerLeftX();
+				}
+			} else {
+				// It's a modulo data set, make the east and west wrap as appropriate.
+				if ( xlo >= GeoUtil.normalizeLon(xhi) ) {
+					
+					xhi = GeoUtil.normalizeLon(xhi);
+					while ( xlo >= xhi ) {
+						xhi = xhi + 360.;
+					}
+				}
 			}
 			
 //			if ( xlo > xhi ) {
@@ -835,13 +848,22 @@ public class OLMapWidget extends Composite {
 					Window.alert(oentry+" is not a valid longitude value.");
 				}
 			}
-			if ( xhi > dataBounds.getUpperRightX() ) {
-				xhi = dataBounds.getUpperRightX();
+			
+			xhi = GeoUtil.normalizeLon(xhi);
+			if ( !modulo ) {
+				// This is not a global data set, make sure we're not east of the data bounds.
+				if ( xhi > GeoUtil.normalizeLon(dataBounds.getUpperRightX()) ) {
+					xhi = dataBounds.getUpperRightX();
+				}
+			} else {
+				// It's a modulo data set, make the east and west wrap as appropriate.
+				if ( xlo >= GeoUtil.normalizeLon(xhi) ) {
+					while ( xlo >= xhi ) {
+						xhi = xhi + 360.;
+					}
+				}
 			}
-//			if ( xhi < xlo ) {
-//				xhi = xhi + 360;
-//			}
-//			
+			
 			setCurrentSelection(currentSelection.getLowerLeftY(), currentSelection.getUpperRightY(), xlo, xhi);
 			
 		}
