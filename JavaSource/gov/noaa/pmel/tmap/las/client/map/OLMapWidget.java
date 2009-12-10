@@ -551,9 +551,10 @@ public class OLMapWidget extends Composite {
 					Math.abs(l.lon() - dataBounds.getLowerLeftX())/2.0);
 			double halfy = Math.min(Math.abs(dataBounds.getUpperRightY() - l.lat())/2.0,
 					Math.abs(l.lat() - dataBounds.getLowerLeftY())/2.0);
-			drawing = true;
-			drawButton.setUrl(Util.getImageURL()+"draw.png");
+			
 			if ( tool.equals("xy") ) {
+				drawing = true;
+				drawButton.setUrl(Util.getImageURL()+"draw.png");
 				// Draw the box from the center of the current geometry to half of the shortest distance to the edge of the data bounds.			
 				Bounds b = new Bounds(l.lon()-halfx, l.lat()-halfy, l.lon()+halfx, l.lat()+halfy);
 				VectorFeature rv = new VectorFeature(b.toGeometry());
@@ -567,6 +568,8 @@ public class OLMapWidget extends Composite {
 				modifyFeatureLine.deactivate();
 				trimSelection(b);
 			} else if ( tool.equals("x") || tool.equals("xz") || tool.equals("xt") ) {
+				drawing = true;
+				drawButton.setUrl(Util.getImageURL()+"draw.png");
 				Bounds b = new Bounds(l.lon()-halfx, l.lat(), l.lon()+halfx, l.lat());
 				VectorFeature rv = new VectorFeature(b.toGeometry());
 				boxLayer.destroyFeatures();
@@ -579,6 +582,8 @@ public class OLMapWidget extends Composite {
 				modifyFeatureLine.activate();
 				trimSelection(b);
 			} else if ( tool.equals("y") || tool.equals("yz") || tool.equals("yt") ) {
+				drawing = true;
+				drawButton.setUrl(Util.getImageURL()+"draw.png");
 				Bounds b = new Bounds(l.lon(), l.lat()-halfy, l.lon(), l.lat()+halfy);
 				VectorFeature rv = new VectorFeature(b.toGeometry());
 				boxLayer.destroyFeatures();
@@ -591,6 +596,8 @@ public class OLMapWidget extends Composite {
 				modifyFeatureLine.activate();
 				trimSelection(b);
 			} else if ( tool.equals("t") || tool.equals("z") || tool.equals("zt") || tool.equals("pt") ) {
+				drawing = true;
+				drawButton.setUrl(Util.getImageURL()+"draw.png");
 				// A view of z to t is a point tool type
 				Bounds b = new Bounds(l.lon(), l.lat(), l.lon(), l.lat());
 				boxLayer.destroyFeatures();
