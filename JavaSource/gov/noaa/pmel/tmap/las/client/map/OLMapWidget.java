@@ -414,6 +414,7 @@ public class OLMapWidget extends Composite {
 			Geometry geo = Geometry.narrowToGeometry(vectorFeature.getGeometry().getJSObject());
 			trimSelection(geo.getBounds());
 			selectionMade = true;
+			drawing = false;
 			drawButton.setUrl(Util.getImageURL()+"draw_off.png");
 			drawRectangle.deactivate();
 			drawXLine.deactivate();
