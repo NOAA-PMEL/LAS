@@ -15,9 +15,13 @@ import org.gwtopenmaps.openlayers.client.LonLat;
 import org.gwtopenmaps.openlayers.client.Map;
 import org.gwtopenmaps.openlayers.client.MapOptions;
 import org.gwtopenmaps.openlayers.client.MapWidget;
+import org.gwtopenmaps.openlayers.client.Style;
+import org.gwtopenmaps.openlayers.client.StyleMap;
 import org.gwtopenmaps.openlayers.client.control.ModifyFeature;
 import org.gwtopenmaps.openlayers.client.control.ModifyFeatureOptions;
+import org.gwtopenmaps.openlayers.client.control.ModifyFeature.OnModificationEndListener;
 import org.gwtopenmaps.openlayers.client.control.ModifyFeature.OnModificationListener;
+import org.gwtopenmaps.openlayers.client.control.ModifyFeature.OnModificationStartListener;
 import org.gwtopenmaps.openlayers.client.event.MapMoveListener;
 import org.gwtopenmaps.openlayers.client.feature.VectorFeature;
 import org.gwtopenmaps.openlayers.client.geometry.Geometry;
@@ -94,7 +98,7 @@ public class OLMapWidget extends Composite {
 	private HorizontalPanel buttonPanel;
 	private PopupPanel helpPanel;
 	private VerticalPanel helpInterior;
-	private Button closeHelp;
+	private Image closeHelp;
     private HTML help;
     private FlexTable topGrid;
   
@@ -109,6 +113,8 @@ public class OLMapWidget extends Composite {
     
     double delta;
     
+    boolean editing = false;
+    
 	public OLMapWidget() {
 		regionWidget.setChangeListener(regionChangeListener);
 		textWidget.addSouthChangeListener(southChangeListener);
@@ -121,7 +127,8 @@ public class OLMapWidget extends Composite {
 	    buttonPanel = new HorizontalPanel();
 		helpButton = new Image(Util.getImageURL()+"info.png");
 		helpButton.setTitle("Help");
-		closeHelp = new Button("Close");
+		closeHelp = new Image(Util.getImageURL()+"close.png");
+		closeHelp.setTitle("Close");
 		closeHelp.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
@@ -133,9 +140,9 @@ public class OLMapWidget extends Composite {
 		resetButton.setTitle("Reset Map");
 		help = new HTML("<div style=\"font-family:verdana;font-size:9;\">" +
 				"<ul><li>To select an area of the map, click the <img alt=\"draw\" src=\""+Util.getImageURL()+"draw.png"+"\"/> button then click and drag on the map.</li>" +
-				"<li>To modify a selection click the button to deactivate <img alt=\"draw off\" src=\""+Util.getImageURL()+"draw_off.png"+"\"/> drawing and click the selected area to modify it.  (Click outside it when finished.)</li>" +
+				"<li>To modify a selection verify drawing is off <img alt=\"draw off\" src=\""+Util.getImageURL()+"draw_off.png"+"\"/> and click the selected area to modify it.  (Click outside it when finished.)</li>" +
 				"<li>To zoom, click the <img alt=\"zoom in\" src=\""+Util.getBaseURL()+"JavaScript/frameworks/OpenLayers/img/zoom-plus-mini.png\"/> and <img alt=\"zoom out\" src=\""+Util.getBaseURL()+"JavaScript/frameworks/OpenLayers/img/zoom-minus-mini.png\"/> buttons.</li>" +
-				"<li>To pan the map, click the <img alt=\"arrow \" src=\""+Util.getBaseURL()+"JavaScript/frameworks/OpenLayers/img/north-mini.png\"/> <img alt=\"arrow buttons\" src=\""+Util.getBaseURL()+"JavaScript/frameworks/OpenLayers/img/south-mini.png\"/> <img alt=\"arrow buttons\" src=\""+Util.getBaseURL()+"JavaScript/frameworks/OpenLayers/img/east-mini.png\"/> <img alt=\"arrow buttons\" src=\""+Util.getBaseURL()+"JavaScript/frameworks/OpenLayers/img/west-mini.png\"/> buttons or deactivate <img alt=\"draw\" src=\""+Util.getImageURL()+"draw_off.png"+"\"/> drawing and click, hold and drag on the map.</li>" +
+				"<li>To pan the map, click the <img alt=\"arrow \" src=\""+Util.getBaseURL()+"JavaScript/frameworks/OpenLayers/img/north-mini.png\"/> <img alt=\"arrow buttons\" src=\""+Util.getBaseURL()+"JavaScript/frameworks/OpenLayers/img/south-mini.png\"/> <img alt=\"arrow buttons\" src=\""+Util.getBaseURL()+"JavaScript/frameworks/OpenLayers/img/east-mini.png\"/> <img alt=\"arrow buttons\" src=\""+Util.getBaseURL()+"JavaScript/frameworks/OpenLayers/img/west-mini.png\"/> buttons or verify drawing is off <img alt=\"draw\" src=\""+Util.getImageURL()+"draw_off.png"+"\"/> and click, hold and drag on the map.</li>" +
 				"<li>To re-center and zoom out and keep your selection click on the <img alt=\"world\" src=\""+Util.getBaseURL()+"JavaScript/frameworks/OpenLayers/img/zoom-world-mini.png\"/> button.</li>" +
 				"<li>To start over, click the <img alt=\"reset\" src=\""+Util.getImageURL()+"reset.png"+"\"/> button above the map.</li></ul>"+
 		        "</div>");
@@ -158,7 +165,7 @@ public class OLMapWidget extends Composite {
 		//buttonPanel.add(panButton);
 		topGrid = new FlexTable();
 		topGrid.setWidget(0, 0, buttonPanel);
-		topGrid.setWidget(1, 0, regionWidget);
+		topGrid.setWidget(0, 1, regionWidget);
 		helpButton.addClickHandler(new ClickHandler(){
 			@Override
 			public void onClick(ClickEvent event) {
@@ -201,7 +208,25 @@ public class OLMapWidget extends Composite {
 				WMS_URL,
 				wmsParams,
 				wmsOptions);
-		boxLayer = new Vector("Box Layer");
+		VectorOptions boxOptions = new VectorOptions();
+		Style defaultStyle = new Style();
+		defaultStyle.setStrokeWidth(4);
+		Style selectedStyle = new Style();
+		// Ripped from the OL source.  Bad I know, but ...
+		// border: 2px solid blue;
+	    // position: absolute;
+	    // background-color: white;
+	    // opacity: 0.50;
+	    // font-size: 1px;
+	    // filter: alpha(opacity=50);
+        selectedStyle.setStrokeWidth(2);
+        selectedStyle.setStrokeColor("blue");
+        selectedStyle.setFillColor("blue");
+        selectedStyle.setFillOpacity(.5);
+		
+		StyleMap styles = new StyleMap(defaultStyle, selectedStyle, new Style());
+		boxOptions.setStyleMap(styles);
+		boxLayer = new Vector("Box Layer", boxOptions);
 		VectorOptions wrapLayerOptions = new VectorOptions();
 		wrapLayerOptions.setIsBaseLayer(true);
 		wrapLayer = new Vector("Wrap Layer", wrapLayerOptions);		
@@ -252,8 +277,29 @@ public class OLMapWidget extends Composite {
 				selectionMade = true;
 				featureModified();
 			}
+			
+		};
+		OnModificationStartListener onModificationStart = new OnModificationStartListener() {
+			@Override
+			public void onModificationStart(VectorFeature vectorFeature) {
+				editing = true;
+				drawing = false;
+				drawButton.setUrl(Util.getImageURL()+"draw_off.png");
+				drawRectangle.deactivate();
+				drawXLine.deactivate();
+				drawYLine.deactivate();
+				drawPoint.deactivate();
+			}
+		};
+		OnModificationEndListener onModificationEnd = new OnModificationEndListener() {
+			@Override
+			public void onModificationEnd(VectorFeature vectorFeature) {
+				editing = false;
+			}
 		};
 		modifyFeatureOptionsXY.onModification(onModification);
+		modifyFeatureOptionsXY.onModificationStart(onModificationStart);
+		modifyFeatureOptionsXY.onModificationEnd(onModificationEnd);
 		modifyFeatureXY = new ModifyFeature(boxLayer, modifyFeatureOptionsXY);
 		
 		// Setup for modifying line shape...  Allows RESIZE, DRAG...  RESHAPE is not allowed
@@ -261,6 +307,8 @@ public class OLMapWidget extends Composite {
 		modifyFeatureOptionsLine.setDeleteCodes(new int[0]);
     	modifyFeatureOptionsLine.setMode(ModifyFeature.RESIZE|ModifyFeature.DRAG);
 		modifyFeatureOptionsLine.onModification(onModification);
+		modifyFeatureOptionsLine.onModificationStart(onModificationStart);
+		modifyFeatureOptionsLine.onModificationEnd(onModificationEnd);
 		modifyFeatureLine = new ModifyFeature(boxLayer, modifyFeatureOptionsLine);
 			
 		this.map.addControl(drawRectangle);
@@ -357,6 +405,33 @@ public class OLMapWidget extends Composite {
 			Geometry geo = Geometry.narrowToGeometry(vectorFeature.getGeometry().getJSObject());
 			trimSelection(geo.getBounds());
 			selectionMade = true;
+			drawButton.setUrl(Util.getImageURL()+"draw_off.png");
+			drawRectangle.deactivate();
+			drawXLine.deactivate();
+			drawYLine.deactivate();
+			drawPoint.deactivate();
+            if ( tool.equals("xy") ) {
+				
+				modifyFeatureXY.activate();
+				modifyFeatureLine.deactivate();
+				
+			} else if ( tool.equals("x") || tool.equals("xz") || tool.equals("xt") ) {
+				
+				modifyFeatureXY.deactivate();
+				modifyFeatureLine.activate();
+				
+			} else if ( tool.equals("y") || tool.equals("yz") || tool.equals("yt") ) {
+				
+				modifyFeatureXY.deactivate();
+				modifyFeatureLine.activate();
+				
+			} else if ( tool.equals("t") || tool.equals("z") || tool.equals("zt") || tool.equals("pt") ) {
+				// A view of z to t is a point tool type
+				
+				modifyFeatureXY.deactivate();
+				modifyFeatureLine.deactivate();
+				
+			} 
 			featureAdded();
 		}
 	};
@@ -466,7 +541,7 @@ public class OLMapWidget extends Composite {
 					Math.abs(l.lon() - dataBounds.getLowerLeftX())/2.0);
 			double halfy = Math.min(Math.abs(dataBounds.getUpperRightY() - l.lat())/2.0,
 					Math.abs(l.lat() - dataBounds.getLowerLeftY())/2.0);
-
+			drawButton.setUrl(Util.getImageURL()+"draw.png");
 			if ( tool.equals("xy") ) {
 				// Draw the box from the center of the current geometry to half of the shortest distance to the edge of the data bounds.			
 				Bounds b = new Bounds(l.lon()-halfx, l.lat()-halfy, l.lon()+halfx, l.lat()+halfy);
@@ -697,7 +772,7 @@ public class OLMapWidget extends Composite {
 			}
 			
 			setCurrentSelection(ylo, yhi, currentSelection.getLowerLeftX(), currentSelection.getUpperRightX());
-			
+			zoomMapToSelection();
 		}
 	};
 	/**
@@ -746,7 +821,7 @@ public class OLMapWidget extends Composite {
 			}
 			
 			setCurrentSelection(ylo, yhi, currentSelection.getLowerLeftX(), currentSelection.getUpperRightX());
-			
+			zoomMapToSelection();
 		}
 	};
 	/**
@@ -808,7 +883,7 @@ public class OLMapWidget extends Composite {
 //			}
 			
 			setCurrentSelection(currentSelection.getLowerLeftY(), currentSelection.getUpperRightY(), xlo, xhi);
-			
+			zoomMapToSelection();
 		}
 	};
 	/**
@@ -865,7 +940,7 @@ public class OLMapWidget extends Composite {
 			}
 			
 			setCurrentSelection(currentSelection.getLowerLeftY(), currentSelection.getUpperRightY(), xlo, xhi);
-			
+			zoomMapToSelection();
 		}
 	};
 
@@ -948,6 +1023,9 @@ public class OLMapWidget extends Composite {
 		LonLat c = new LonLat(lon, lat);
 		map.setCenter(c, zoom);
 	}
+	public boolean isEditing() {
+		return editing;
+	}
 	public static native void featureAdded() /*-{
         if (typeof $wnd.featureAddedCallback == 'function') {
             $wnd.featureAddedCallback();
@@ -993,6 +1071,13 @@ public class OLMapWidget extends Composite {
         $wnd.getMapYlo = function() {
         	var p = localMap.@gov.noaa.pmel.tmap.las.client.map.OLMapWidget::getYlo()();
         	return p;
+        }
+        $wnd.isFeatureEditing = function() {
+        	var p = localMap.@gov.noaa.pmel.tmap.las.client.map.OLMapWidget::isEditing()();
+        	return p;
+        }
+        $wnd.zoomAndPanToSelection = function() {
+        	localMap.@gov.noaa.pmel.tmap.las.client.map.OLMapWidget::zoomMapToSelection()();
         }
     }-*/;
 }
