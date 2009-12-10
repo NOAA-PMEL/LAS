@@ -8,6 +8,7 @@ import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.TextBox;
+import com.google.gwt.user.client.ui.VerticalPanel;
 /**
  * A widget that displays the N and S latitude and E and W longitude of the current selection.
  * @author rhs
@@ -23,14 +24,16 @@ public class LatLonWidget extends Composite {
 	TextBox westLon;
 	TextBox eastLon;
 	Image rose;
-	FlexTable panel;
+	VerticalPanel middle;
+	Grid panel;
 	
 	private static final String boxWidth = "70px";
 	/**
 	 * Constructs an empty widget.
 	 */
 	public LatLonWidget() {
-		panel = new FlexTable();
+		panel = new Grid(1,3);
+		middle = new VerticalPanel();
 		
 		rose = new Image(Util.getImageURL()+"rose.png");
 		rose.addStyleName("LSS_middle");
@@ -47,11 +50,11 @@ public class LatLonWidget extends Composite {
 		eastLon.setWidth(boxWidth);
 		westLon.setWidth(boxWidth);
         
-		panel.setWidget(0, 1, northLat);		
-		panel.setWidget(1, 0, westLon);
-		panel.setWidget(1, 1, rose);
-		panel.setWidget(1, 2, eastLon);
-		panel.setWidget(2, 1, southLat);
+		panel.setWidget(0, 0, westLon);	
+		middle.add(northLat);
+		middle.add(southLat);
+		panel.setWidget(0, 1, middle);
+		panel.setWidget(0, 2, eastLon);
 //		panel.getFlexCellFormatter().setColSpan(2, 0, 2);
 		
 		initWidget(panel);

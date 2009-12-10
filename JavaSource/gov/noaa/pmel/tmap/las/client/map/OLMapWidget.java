@@ -386,6 +386,15 @@ public class OLMapWidget extends Composite {
 		}
 		map.setCenter(center, zoom);
 	}
+	private void panMapToSelection() {
+		int zoom = map.getZoom();
+		LonLat center = currentSelection.getCenterLonLat();
+		if ( center.lon() + 180. > 360. ) {
+			zoom = 0;
+			center = new LonLat(180., 0.);
+		}
+		map.setCenter(center, zoom);		
+	}
 	MapMoveListener mapMoveListener = new MapMoveListener() {
 
 		@Override
@@ -1078,6 +1087,9 @@ public class OLMapWidget extends Composite {
         }
         $wnd.zoomAndPanToSelection = function() {
         	localMap.@gov.noaa.pmel.tmap.las.client.map.OLMapWidget::zoomMapToSelection()();
+        }
+         $wnd.panToSelection = function() {
+        	localMap.@gov.noaa.pmel.tmap.las.client.map.OLMapWidget::panMapToSelection()();
         }
     }-*/;
 }
