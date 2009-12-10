@@ -551,6 +551,7 @@ public class OLMapWidget extends Composite {
 					Math.abs(l.lon() - dataBounds.getLowerLeftX())/2.0);
 			double halfy = Math.min(Math.abs(dataBounds.getUpperRightY() - l.lat())/2.0,
 					Math.abs(l.lat() - dataBounds.getLowerLeftY())/2.0);
+			drawing = true;
 			drawButton.setUrl(Util.getImageURL()+"draw.png");
 			if ( tool.equals("xy") ) {
 				// Draw the box from the center of the current geometry to half of the shortest distance to the edge of the data bounds.			
@@ -606,42 +607,7 @@ public class OLMapWidget extends Composite {
 			} 
 		}
 	}
-	public ClickHandler panButtonClickHandler = new ClickHandler() {
-
-		@Override
-		public void onClick(ClickEvent event) {
-			drawButton.setUrl(Util.getImageURL()+"draw_off.png"); 
-			//panButton.setUrl(Util.getImageURL()+"pan.png");
-			//zoomButton.setUrl(Util.getImageURL()+"zoom_off.png");
-			drawRectangle.deactivate();
-			drawXLine.deactivate();
-			drawYLine.deactivate();
-			drawPoint.deactivate();
-			if ( tool.equals("xy") ) {
-				
-				modifyFeatureXY.activate();
-				modifyFeatureLine.deactivate();
-				
-			} else if ( tool.equals("x") || tool.equals("xz") || tool.equals("xt") ) {
-				
-				modifyFeatureXY.deactivate();
-				modifyFeatureLine.activate();
-				
-			} else if ( tool.equals("y") || tool.equals("yz") || tool.equals("yt") ) {
-				
-				modifyFeatureXY.deactivate();
-				modifyFeatureLine.activate();
-				
-			} else if ( tool.equals("t") || tool.equals("z") || tool.equals("zt") || tool.equals("pt") ) {
-				// A view of z to t is a point tool type
-				
-				modifyFeatureXY.deactivate();
-				modifyFeatureLine.deactivate();
-				
-			} 
-		}
-		
-	};
+	
 	public ClickHandler drawButtonClickHandler = new ClickHandler() {
 
 		@Override
@@ -649,10 +615,7 @@ public class OLMapWidget extends Composite {
 			if ( !drawing ) {
 				// Drawing is not active, so activate it.
 				drawing = true;
-
 				drawButton.setUrl(Util.getImageURL()+"draw.png"); 
-				//panButton.setUrl(Util.getImageURL()+"pan_off.png");
-				//zoomButton.setUrl(Util.getImageURL()+"zoom_off.png");
 				if ( tool.equals("xy") ) {
 
 					drawRectangle.activate();
@@ -695,7 +658,6 @@ public class OLMapWidget extends Composite {
 				// Turn off drawing to allow selections
 				drawing = false;
 				drawButton.setUrl(Util.getImageURL()+"draw_off.png"); 
-				//panButton.setUrl(Util.getImageURL()+"pan_off.png");
 				if ( tool.equals("xy") ) {
 
 					drawRectangle.deactivate();
