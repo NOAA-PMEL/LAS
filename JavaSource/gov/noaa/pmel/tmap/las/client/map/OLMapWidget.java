@@ -104,7 +104,7 @@ public class OLMapWidget extends Composite {
   
     private boolean modulo = true;
 	private boolean selectionMade = false;
-	private boolean drawing = true;
+	private boolean drawing = false;
 	
     Boxes boxes = new Boxes("Valid Region");
 	Box box = null;
@@ -149,7 +149,7 @@ public class OLMapWidget extends Composite {
 		helpInterior.add(closeHelp);
 		helpInterior.add(help); 
 		helpPanel.add(helpInterior);
-		drawButton = new Image(Util.getImageURL()+"draw.png");
+		drawButton = new Image(Util.getImageURL()+"draw_off.png");
 		drawButton.setTitle("Draw Selection");
 		drawButton.addClickHandler(drawButtonClickHandler);
 		//zoomButton = new Image(Util.getImageURL()+"zoom_off.png");
