@@ -1306,25 +1306,24 @@ LASUI.prototype.initXYSelect = function (mode, reset) {
 		if(reset==true)
 			setMapDataExtent(grid.y.min,grid.y.max,grid.x.min,grid.x.max,parseFloat(this.state.grid.getDelta('x')));
 	         
-
-		if(this.state.newgrid)
-			setMapCurrentSelection(grid.y.min,grid.y.max,grid.x.min,grid.x.max);
-		else if (this.state.selection.y.min&&this.state.selection.y.max&&this.state.selection.x.min&&this.state.selection.x.max)
-			setMapCurrentSelection(this.state.selection.y.min,this.state.selection.y.max,this.state.selection.x.min,this.state.selection.x.max);
-			else
+		if(!isFeatureEditing()) {
+			if(this.state.newgrid) {
 				setMapCurrentSelection(grid.y.min,grid.y.max,grid.x.min,grid.x.max);
-
-		delete(this.state.newgrid);
-
-		if(this.submitOnLoad && this.params){
-			var bbox = {};
-			if(this.params.x)
-				bbox.x = this.params.x;
-			if(this.params.y)
-				bbox.y = this.params.y;
-
+			} else if (this.state.selection.y.min&&this.state.selection.y.max&&this.state.selection.x.min&&this.state.selection.x.max) {
+				setMapCurrentSelection(this.state.selection.y.min,this.state.selection.y.max,this.state.selection.x.min,this.state.selection.x.max);
+				} else {
+					setMapCurrentSelection(grid.y.min,grid.y.max,grid.x.min,grid.x.max);
+				}
+			delete(this.state.newgrid);
+			zoomAndPanToSelection();
+			if(this.submitOnLoad && this.params){
+				var bbox = {};
+				if(this.params.x)
+					bbox.x = this.params.x;
+				if(this.params.y)
+					bbox.y = this.params.y;
+			}
 		}
-
 	}
 }
 /**
