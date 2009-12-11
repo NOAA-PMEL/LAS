@@ -91,7 +91,9 @@ IF ($ferret_fill_levels"0|*>1") THEN
       DEFINE SYMBOL num_fine_levels = ($ferret_fill_levels)  ! How to test that this is just a number??
       CANCEL SYMBOL input_fill_levels  ! we will redefine the levels in this script
    ENDIF
-   IF `nc EQ 0 AND other NE 0` THEN  EXIT/SCRIPT
+   IF `nc EQ 0 AND other NE 0` THEN 
+      
+      EXIT/SCRIPT
 ENDIF
 
 ! Apply to the variable on the requested region in x, y, z and all time.
