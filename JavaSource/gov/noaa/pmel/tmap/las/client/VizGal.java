@@ -301,7 +301,7 @@ public class VizGal extends LASEntryPoint {
 		settingsControls.addDatasetTreeListener(datasetTreeListener);
 		settingsControls.addOptionsOkClickListener(optionsOkListener);
 		settingsControls.addOperationClickListener(operationsClickListener);
-		settingsControls.setToolType(view);
+		//settingsControls.setToolType(view);
 
 		// Sets the contour levels for all plots based on the global min/max of the data (as returned in the map scale file).
 		autoContourButton = new ToggleButton("Auto Set Color Fill Levels for Gallery");
@@ -770,12 +770,9 @@ public class VizGal extends LASEntryPoint {
 		double grid_north = Double.valueOf(ds_grid.getYAxis().getHi());
 
 		double delta = Math.abs(Double.valueOf(ds_grid.getXAxis().getArangeSerializable().getStep()));
-
+		settingsControls.setToolType(view);
 		settingsControls.getRefMap().setDataExtent(grid_south, grid_north, grid_west, grid_east, delta);
-		if ( xlo != null && !xlo.equals("") && xhi != null && !xhi.equals("") && 
-				ylo != null && !ylo.equals("") && yhi != null && !yhi.equals("") ) {
-			// TODO get rid of if
-		}
+		
 		ortho.clear();
 		if ( datePanel != null ) {
 			datePanel.clear();

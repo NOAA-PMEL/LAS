@@ -188,11 +188,30 @@ public class OLMapWidget extends Composite {
 		wmsMapOptions = new MapOptions();
 		wmsMapOptions.setMaxExtent(wmsExtent);
 		wmsMapOptions.setRestrictedExtent(wmsExtent);
-		trimSelection(wmsExtent);
 		wrapMapOptions = new MapOptions();
 		wrapMapOptions.setMaxExtent(wrapExtent);
 		wrapMapOptions.setRestrictedExtent(wrapExtent);
-		
+		VectorOptions boxOptions = new VectorOptions();
+		Style defaultStyle = new Style();
+		defaultStyle.setStrokeWidth(4);
+		Style selectedStyle = new Style();
+		// Ripped from the OL source.  Bad I know, but ...
+		// border: 2px solid blue;
+	    // position: absolute;
+	    // background-color: white;
+	    // opacity: 0.50;
+	    // font-size: 1px;
+	    // filter: alpha(opacity=50);
+        selectedStyle.setStrokeWidth(2);
+        selectedStyle.setStrokeColor("blue");
+        selectedStyle.setFillColor("blue");
+        selectedStyle.setFillOpacity(.5);		
+		StyleMap styles = new StyleMap(defaultStyle, selectedStyle, new Style());
+		boxOptions.setStyleMap(styles);
+		boxLayer = new Vector("Box Layer", boxOptions);
+		VectorOptions wrapLayerOptions = new VectorOptions();
+		wrapLayerOptions.setIsBaseLayer(true);
+		wrapLayer = new Vector("Wrap Layer", wrapLayerOptions);		
 		MapWidget mapWidget = new MapWidget("256px","128px", wmsMapOptions);
 		map = mapWidget.getMap();
 	   
@@ -208,29 +227,7 @@ public class OLMapWidget extends Composite {
 				WMS_URL,
 				wmsParams,
 				wmsOptions);
-		VectorOptions boxOptions = new VectorOptions();
-		Style defaultStyle = new Style();
-		defaultStyle.setStrokeWidth(4);
-		Style selectedStyle = new Style();
-		// Ripped from the OL source.  Bad I know, but ...
-		// border: 2px solid blue;
-	    // position: absolute;
-	    // background-color: white;
-	    // opacity: 0.50;
-	    // font-size: 1px;
-	    // filter: alpha(opacity=50);
-        selectedStyle.setStrokeWidth(2);
-        selectedStyle.setStrokeColor("blue");
-        selectedStyle.setFillColor("blue");
-        selectedStyle.setFillOpacity(.5);
 		
-		StyleMap styles = new StyleMap(defaultStyle, selectedStyle, new Style());
-		boxOptions.setStyleMap(styles);
-		boxLayer = new Vector("Box Layer", boxOptions);
-		VectorOptions wrapLayerOptions = new VectorOptions();
-		wrapLayerOptions.setIsBaseLayer(true);
-		wrapLayer = new Vector("Wrap Layer", wrapLayerOptions);		
-				
 		map.addLayer(wrapLayer);
 		map.addLayer(wmsLayer);
 		map.addLayer(boxLayer);
@@ -461,61 +458,71 @@ public class OLMapWidget extends Composite {
 		}
 	}
 	private void trimSelection(Bounds bounds) {
-		if ( modulo ) {
-			setSelection(bounds);
-		} else {
-			// Bounds is entirely contained in the dataBounds, use it.
-			if ( dataBounds.containsBounds(bounds, false, true) ) {
-				setSelection(bounds);		
-				// Bounds intersects the dataBounds, trim it to fit, then use it.
-			} else if ( dataBounds.containsBounds(bounds, true, true) ){
-
-
-				double s_data = dataBounds.getLowerLeftY();
-				double n_data = dataBounds.getUpperRightY();
-				double w_data = dataBounds.getLowerLeftX();
-				double e_data = dataBounds.getUpperRightX();
-
-				double s_selection = bounds.getLowerLeftY();
-				double n_selection = bounds.getUpperRightY();
-				double w_selection = bounds.getLowerLeftX();
-				double e_selection = bounds.getUpperRightX();
-
-				if ( tool.equals("xy") || tool.equals("x") || tool.equals("y") ) {
-					if ( s_selection < s_data ) {
-						s_selection = s_data;
-					}
-					if ( n_selection > n_data ) {
-						n_selection = n_data;
-					}
-					if ( w_selection < w_data ) {
-						w_selection = w_data;
-					}
-					if ( e_selection > e_data ) {
-						e_selection = e_data;
-					}
-					// Fix the bounds then make a new feature using those bounds and use that.
-					Bounds selectionBounds = new Bounds(w_selection, s_selection, e_selection, n_selection);
-					boxLayer.destroyFeatures();
-					boxLayer.addFeature(new VectorFeature(selectionBounds.toGeometry()));
-					setSelection(selectionBounds);
-				} else if ( tool.equals("pt") ) {
-					// If the point is on the line it's ok, you can use it.
-					setSelection(bounds);
-				}			
-				// Entirely outside the dataBounds.
-			} else {
-				// Discard the feature that was drawn by the user.
-				boxLayer.destroyFeatures();
-				// Recreate the previous feature.
-				if ( tool.equals("pt") ) {
-					Point p = new Point(currentSelection.getCenterLonLat().lon(), currentSelection.getCenterLonLat().lat());
-					boxLayer.addFeature(new VectorFeature(p));
-				} else {
-					boxLayer.addFeature(new VectorFeature(currentSelection.toGeometry()));
-				}
+		// Always trip the north and south bounds
+		double s_data = dataBounds.getLowerLeftY();
+		double n_data = dataBounds.getUpperRightY();
+		double w_data = dataBounds.getLowerLeftX();
+		double e_data = dataBounds.getUpperRightX();
+		double w_selection = bounds.getLowerLeftX();
+		double e_selection = bounds.getUpperRightX();
+		double s_selection = bounds.getLowerLeftY();
+		double n_selection = bounds.getUpperRightY();
+		if ( tool.equals("xy") || tool.equals("x") || tool.equals("y") ) {
+			if ( s_selection < s_data ) {
+				s_selection = s_data;
+			}
+			if ( n_selection > n_data ) {
+				n_selection = n_data;
 			}
 		}
+		
+			if ( modulo ) {
+				Bounds selectionBounds = new Bounds(w_selection, s_selection, e_selection, n_selection);
+				boxLayer.destroyFeatures();
+				boxLayer.addFeature(new VectorFeature(selectionBounds.toGeometry()));
+				setSelection(selectionBounds);
+			} else {
+				// Bounds is entirely contained in the dataBounds, use it.
+				if ( dataBounds.containsBounds(bounds, false, true) ) {
+					boxLayer.destroyFeatures();
+					boxLayer.addFeature(new VectorFeature(bounds.toGeometry()));
+					setSelection(bounds);
+					// Bounds intersects the dataBounds, trim it to fit, then use it.
+				} else if ( dataBounds.containsBounds(bounds, true, true) ){
+
+
+
+					if ( tool.equals("xy") || tool.equals("x") || tool.equals("y") ) {
+						// Only trip the east west if the data is not modulo
+						if ( w_selection < w_data ) {
+							w_selection = w_data;
+						}
+						if ( e_selection > e_data ) {
+							e_selection = e_data;
+						}
+						// Fix the bounds then make a new feature using those bounds and use that.
+						Bounds selectionBounds = new Bounds(w_selection, s_selection, e_selection, n_selection);
+						boxLayer.destroyFeatures();
+						boxLayer.addFeature(new VectorFeature(selectionBounds.toGeometry()));
+						setSelection(selectionBounds);
+					} else if ( tool.equals("pt") ) {
+						// If the point is on the line it's ok, you can use it.
+						setSelection(bounds);
+					}			
+					// Entirely outside the dataBounds.
+				} else {
+					// Discard the feature that was drawn by the user.
+					boxLayer.destroyFeatures();
+					// Recreate the previous feature.
+					if ( tool.equals("pt") ) {
+						Point p = new Point(currentSelection.getCenterLonLat().lon(), currentSelection.getCenterLonLat().lat());
+						boxLayer.addFeature(new VectorFeature(p));
+					} else {
+						boxLayer.addFeature(new VectorFeature(currentSelection.toGeometry()));
+					}
+				}
+			}
+		
 	}
 	public void setCurrentSelection(double slat, double nlat, double wlon, double elon) {
 		// Only set this if it is an actual sub-region of the data region of a global data set.
