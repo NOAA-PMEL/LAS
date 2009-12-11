@@ -179,6 +179,9 @@ public class OLMapWidget extends Composite {
 			public void onClick(ClickEvent event) {
 				boxLayer.destroyFeatures();
 				setDataExtent(dataBounds.getLowerLeftY(), dataBounds.getUpperRightY(), dataBounds.getLowerLeftX(), dataBounds.getUpperRightX(), delta);
+			    if ( !modulo ) {
+			    	trimSelection(dataBounds);
+			    }
 			}
 			
 		});
