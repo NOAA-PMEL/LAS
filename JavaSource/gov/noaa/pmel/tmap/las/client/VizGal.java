@@ -226,10 +226,6 @@ public class VizGal extends LASEntryPoint {
 	 */
      Map<String, String> historyTokens;
      
-     // This tells whether or not the range passed in is a sub-region to the data range.
-     // If it is we set the current selection to this. 
-     boolean subRegion = false;
-     
      // Sometimes  you need to keep the current map selection values.
      double[] cs = null;
 	/*
@@ -732,7 +728,7 @@ public class VizGal extends LASEntryPoint {
 			}
 		}
 		// If these limits are not the same as the dataBounds, then set them.
-		if ( subRegion && xlo != null && !xlo.equals("") && xhi != null && !xhi.equals("") && 
+		if ( xlo != null && !xlo.equals("") && xhi != null && !xhi.equals("") && 
 			 ylo != null && !ylo.equals("") && yhi != null && !yhi.equals("") ) {
 			settingsControls.setLatLon(xlo, xhi, ylo, yhi);
 			for (Iterator panelIt = panels.iterator(); panelIt.hasNext();) {
@@ -778,8 +774,7 @@ public class VizGal extends LASEntryPoint {
 		settingsControls.getRefMap().setDataExtent(grid_south, grid_north, grid_west, grid_east, delta);
 		if ( xlo != null && !xlo.equals("") && xhi != null && !xhi.equals("") && 
 				ylo != null && !ylo.equals("") && yhi != null && !yhi.equals("") ) {
-			subRegion =  !((Math.abs(grid_south - Double.valueOf(ylo)) < .1) && (Math.abs(grid_north - Double.valueOf(yhi) ) < .1) &&
-					       (Math.abs(grid_west - Double.valueOf(xlo)) < .1) && (Math.abs(grid_east - Double.valueOf(xhi)) < .1));
+			// TODO get rid of if
 		}
 		ortho.clear();
 		if ( datePanel != null ) {
