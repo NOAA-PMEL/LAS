@@ -183,8 +183,10 @@ define symbol fmt = A`len`
 list/nohead/format=(($fmt))/FILE/append framesStart
 
 !------------
-! fill_levels
+! fill_levels  ! see the note under ferret_contour_levels
 !------------
+IF `($ferret_fill_levels"0|*>1") EQ 0` THEN DEFINE SYMBOL ferret_fill_levels 10
+
 LET f = "<fill_levels>"
 list/norowhead/nohead/format=(A13)/FILE/append f
 
@@ -197,7 +199,12 @@ list/norowhead/nohead/format=(A14)/FILE/append f
 
 !---------------
 ! contour_levels
+! If there is no ferret_contour_levels then send a value
+! anyway - the xml file apparently needs it to be set. It
+! will not be used in the plot unless the plot style draws lines. 
+! Just skipping this block and writing no contour_levels fails.
 !---------------
+IF `($ferret_contour_levels"0|*>1") EQ 0` THEN DEFINE SYMBOL ferret_contour_levels 10
 LET f = "<contour_levels>"
 list/norowhead/nohead/format=(A16)/FILE/append f
 
