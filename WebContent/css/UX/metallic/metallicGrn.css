@@ -34,14 +34,14 @@ height: 100%;
 	font-weight:bold; 
 	padding:2px 2px 2px 4px;
 	cursor:pointer;
-       background:#5c5cff;
+       background:#7391A5;
        border: groove ;
        margin-right:2px;
        margin-left:2px
 }
 .top_link:hover {
-     color:#FBDE11; 
-     background:#454DAB;
+     color:#FFFFFF; 
+     background:#AABDCE
 }
 
 
