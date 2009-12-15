@@ -174,6 +174,8 @@ public class OLMapWidget extends Composite {
 			@Override
 			public void onClick(ClickEvent event) {
 				boxLayer.destroyFeatures();
+				lineLayer.destroyFeatures();
+				editing = false;
 				setDataExtent(dataBounds.getLowerLeftY(), dataBounds.getUpperRightY(), dataBounds.getLowerLeftX(), dataBounds.getUpperRightX(), delta);
 			    if ( !modulo ) {
 			    	trimSelection(dataBounds);
@@ -346,6 +348,7 @@ public class OLMapWidget extends Composite {
 		currentSelection = dataBounds;
 		boxLayer.destroyFeatures();
 		lineLayer.destroyFeatures();
+		editing = false;
 		// For now don't select the region at all.
 //		if ( !modulo ) {
 //		    boxLayer.addFeature(new VectorFeature(currentSelection.toGeometry()));
@@ -452,6 +455,9 @@ public class OLMapWidget extends Composite {
 		}
 	}
 	private void trimSelection(Bounds bounds) {
+		
+		editing = false;
+		
 		// Always trip the north and south bounds
 		double s_data = dataBounds.getLowerLeftY();
 		double n_data = dataBounds.getUpperRightY();
@@ -537,6 +543,7 @@ public class OLMapWidget extends Composite {
 		}	
 	}
 	public void setCurrentSelection(double slat, double nlat, double wlon, double elon) {
+		editing = false;
 		// Only set this if it is an actual sub-region of the data region of a global data set.
 		boolean subRegion = true;
 		if (modulo) {
@@ -566,6 +573,7 @@ public class OLMapWidget extends Composite {
 	}
 	public void setTool(String tool) {
 		if ( !this.tool.equals(tool) ) {
+			editing = false;
 			this.tool = tool;
 			LonLat l = null;
 			VectorFeature[] features = boxLayer.getFeatures();
