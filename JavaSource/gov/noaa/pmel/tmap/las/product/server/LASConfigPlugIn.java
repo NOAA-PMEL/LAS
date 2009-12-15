@@ -1,14 +1,12 @@
 package gov.noaa.pmel.tmap.las.product.server;
 
+import gov.noaa.pmel.tmap.las.exception.LASException;
 import gov.noaa.pmel.tmap.las.jdom.JDOMUtils;
 import gov.noaa.pmel.tmap.las.jdom.LASConfig;
 import gov.noaa.pmel.tmap.las.jdom.LASDocument;
 import gov.noaa.pmel.tmap.las.jdom.ServerConfig;
-import gov.noaa.pmel.tmap.las.util.Constants;
-import gov.noaa.pmel.tmap.las.exception.LASException;
 
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.Iterator;
@@ -18,13 +16,13 @@ import java.util.Timer;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import org.apache.struts.action.ActionServlet;
 import org.apache.struts.action.PlugIn;
 import org.apache.struts.config.ModuleConfig;
 import org.jdom.Element;
 import org.jdom.JDOMException;
-import org.apache.log4j.Logger;
-import org.apache.log4j.LogManager;
 
 public class LASConfigPlugIn implements PlugIn {
 

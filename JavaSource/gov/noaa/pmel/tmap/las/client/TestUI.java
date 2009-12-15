@@ -1,6 +1,7 @@
 package gov.noaa.pmel.tmap.las.client;
 
 import gov.noaa.pmel.tmap.las.client.laswidget.OperationsMenu;
+import gov.noaa.pmel.tmap.las.client.map.SettingsWidget;
 import gov.noaa.pmel.tmap.las.client.serializable.CategorySerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.DatasetSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.GridSerializable;
@@ -18,6 +19,7 @@ import com.google.gwt.user.client.WindowResizeListener;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.ChangeListener;
 import com.google.gwt.user.client.ui.ClickListener;
+import com.google.gwt.user.client.ui.DockPanel;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.RootPanel;
@@ -121,25 +123,46 @@ public class TestUI extends LASEntryPoint {
 	VariableSerializable var;
 	ArrayList<String> ortho = new ArrayList<String>();
 	String compareAxis;
+	SettingsWidget settingsControls;
+	DockPanel dockPanel = new DockPanel();
 	public void onModuleLoad() {
 		super.onModuleLoad();
 		Map<String, List<String>> parameters = Window.Location.getParameterMap();
-		dsid = parameters.get("dsid").get(0);
-		vid = parameters.get("vid").get(0);
+		dsid = getParameterString("dsid");
+		vid = getParameterString("vid");
 		//TODO If the operation is null, get the default operation (the map or plot; left nav) for this view.
-		op = parameters.get("opid").get(0);
-		optionID = parameters.get("optionid").get(0);
-		view = parameters.get("view").get(0);
-		if ( dsid != null && vid != null & op != null && view != null) {
+		op = getParameterString("opid");
+		optionID = getParameterString("optionid");
+		view = getParameterString("view");
+		
+		if ( op == null ) {
+			op = "Plot_2D_XY";
+		}
+		if ( optionID == null ) {
+			optionID = "Options_2D_image_contour_xy_7";
+		}
+		
+		if ( dsid != null && vid != null ) {
 			// If the proper information was sent to the widget, pull down the variable definition
 			// and initialize the slide sorter with this Ajax call.
 			rpcService.getCategories(dsid, initPanelCallback);
+		} else {
+			// Use some the default view and put up a "blank" interface.
+			if ( view == null ) {
+				view = "xy";
+			}
 		}
+		settingsControls = new SettingsWidget("Settings", "LAS", op, optionID, rpcService, "panel");
+		settingsControls.addDatasetTreeListener(datasetTreeListener);
+		settingsControls.addApplyClickListener(panelApply);
 		operationsMenu = new OperationsMenu();
-		RootPanel.get("menu").add(operationsMenu);
+		dockPanel.add(operationsMenu, DockPanel.NORTH);
+		dockPanel.add(settingsControls, DockPanel.WEST);
+		RootPanel.get("main").add(dockPanel);
 		
 		Window.addWindowResizeListener(windowResizeListener);
 	}
+	// TODO you're going to have to fix this to work, but for now...
 	public AsyncCallback initPanelCallback = new AsyncCallback() {
 		public void onSuccess(Object result) {
 			CategorySerializable[] cats = (CategorySerializable[]) result;
@@ -153,7 +176,7 @@ public class TestUI extends LASEntryPoint {
 					for (int i=0; i < vars.length; i++ ) {
 						if ( vars[i].getID().equals(vid) ) {
 							var = vars[i];
-					        initPanel();
+							rpcService.getGrid(var.getDSID(), var.getID(), getGridCallback);
 						}
 					}
 				}
@@ -176,7 +199,9 @@ public class TestUI extends LASEntryPoint {
 
 			double delta = Math.abs(Double.valueOf(ds_grid.getXAxis().getArangeSerializable().getStep()));
 
-			LatLngBounds bounds = LatLngBounds.newInstance(LatLng.newInstance(grid_south, grid_west), LatLng.newInstance(grid_north, grid_east));
+			settingsControls.setToolType(view);
+			settingsControls.getRefMap().setDataExtent(grid_south, grid_north, grid_west, grid_east, delta);
+			settingsControls.setOperations(rpcService, var.getIntervals(), var.getDSID(), var.getID(), op, view, null);
 		}
 		// Examine the variable axes and determine which are orthogonal to the view. 
 
@@ -211,18 +236,34 @@ public class TestUI extends LASEntryPoint {
 			int pwidth = (width-rightPad);
 			panel = new VizGalPanel("LAS", false, op, optionID, view, productServer, true, rpcService);
 			panel.setVariable(var);
-			panel.init(true);
+			panel.init(false);
 			panel.addCompareAxisChangeListener(onAxisChange);
-			RootPanel.get("panel").add(panel);
 			panel.setPanelWidth(pwidth);
 			panel.addApplyListener(panelApply);
 			panel.refreshPlot(null, false, false);
+			dockPanel.add(panel, DockPanel.CENTER);
 		}
 	}
 	ClickListener panelApply = new ClickListener() {
 		public void onClick(Widget sender) {
 			panel.refreshPlot(null, false, true);
 		}		
+	};
+	AsyncCallback getGridCallback = new AsyncCallback() {
+		public void onSuccess(Object result) {
+
+			GridSerializable grid = (GridSerializable) result;
+			var.setGrid(grid);
+			initPanel();
+			
+		}
+
+		@Override
+		public void onFailure(Throwable caught) {
+			Window.alert("Could not fetch grid.  "+caught.getLocalizedMessage());
+			
+		}
+		
 	};
 	public WindowResizeListener windowResizeListener = new WindowResizeListener() {
 		public void onWindowResized(int width, int height) {
@@ -237,7 +278,7 @@ public class TestUI extends LASEntryPoint {
 			Object u = item.getUserObject();
 			if ( u instanceof VariableSerializable ) {
 				var = (VariableSerializable) u;
-				initPanel();
+				rpcService.getGrid(var.getDSID(), var.getID(), getGridCallback);
 			}
 		}
 

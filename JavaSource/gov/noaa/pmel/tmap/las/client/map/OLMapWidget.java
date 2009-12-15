@@ -66,6 +66,10 @@ public class OLMapWidget extends Composite {
 	private Map map;
 	private WMS wmsLayer;
 	private Vector boxLayer;
+	
+	// Add a separate layer for the lines so that the they can have their own style.
+	private Vector lineLayer;
+	
 	private Vector wrapLayer;
 	
 	private Bounds wmsExtent;
@@ -93,8 +97,6 @@ public class OLMapWidget extends Composite {
 	private Image helpButton;
 	private Image resetButton;
 	private Image drawButton;
-	//private Image zoomButton;
-	//private Image panButton;
 	private HorizontalPanel buttonPanel;
 	private PopupPanel helpPanel;
 	private VerticalPanel helpInterior;
@@ -152,12 +154,6 @@ public class OLMapWidget extends Composite {
 		drawButton = new Image(Util.getImageURL()+"draw_off.png");
 		drawButton.setTitle("Draw Selection");
 		drawButton.addClickHandler(drawButtonClickHandler);
-		//zoomButton = new Image(Util.getImageURL()+"zoom_off.png");
-		//zoomButton.setTitle("Zoom Map");
-		// TODO Zoom Click handler
-		//panButton = new Image(Util.getImageURL()+"pan_off.png");
-		//panButton.setTitle("Pan Map");
-		//panButton.addClickHandler(panButtonClickHandler);
 		buttonPanel.add(helpButton);
 		buttonPanel.add(resetButton);
 		buttonPanel.add(drawButton);
@@ -194,7 +190,7 @@ public class OLMapWidget extends Composite {
 		wrapMapOptions = new MapOptions();
 		wrapMapOptions.setMaxExtent(wrapExtent);
 		wrapMapOptions.setRestrictedExtent(wrapExtent);
-		VectorOptions boxOptions = new VectorOptions();
+		VectorOptions lineOptions = new VectorOptions();
 		Style defaultStyle = new Style();
 		defaultStyle.setStrokeWidth(4);
 		Style selectedStyle = new Style();
@@ -210,8 +206,9 @@ public class OLMapWidget extends Composite {
         selectedStyle.setFillColor("blue");
         selectedStyle.setFillOpacity(.5);		
 		StyleMap styles = new StyleMap(defaultStyle, selectedStyle, new Style());
-		boxOptions.setStyleMap(styles);
-		boxLayer = new Vector("Box Layer", boxOptions);
+		lineOptions.setStyleMap(styles);
+		boxLayer = new Vector("Box Layer");
+		lineLayer = new Vector("Line Layer", lineOptions);
 		VectorOptions wrapLayerOptions = new VectorOptions();
 		wrapLayerOptions.setIsBaseLayer(true);
 		wrapLayer = new Vector("Wrap Layer", wrapLayerOptions);		
@@ -234,6 +231,7 @@ public class OLMapWidget extends Composite {
 		map.addLayer(wrapLayer);
 		map.addLayer(wmsLayer);
 		map.addLayer(boxLayer);
+		map.addLayer(lineLayer);
         
 		drawSingleFeatureOptionsForRectangle = new DrawSingleFeatureOptions();
 		regularPolygonHandlerOptions = new RegularPolygonHandlerOptions();
@@ -257,10 +255,10 @@ public class OLMapWidget extends Composite {
 		drawSingleFeatureOptionsForLines.setHandlerOptions(pathHandlerOptions);
 		
 		// The X-Line drawing control
-		drawXLine = new DrawSingleFeature(boxLayer, new HorizontalPathHandler(), drawSingleFeatureOptionsForLines);
+		drawXLine = new DrawSingleFeature(lineLayer, new HorizontalPathHandler(), drawSingleFeatureOptionsForLines);
 		
 		// The Y-Line drawing control
-		drawYLine = new DrawSingleFeature(boxLayer, new VerticalPathHandler(), drawSingleFeatureOptionsForLines);
+		drawYLine = new DrawSingleFeature(lineLayer, new VerticalPathHandler(), drawSingleFeatureOptionsForLines);
 		
 		// The Point drawing control
 		drawPoint = new DrawSingleFeature(boxLayer, new PointHandler(), drawSingleFeatureOptionsForLines);
@@ -309,7 +307,7 @@ public class OLMapWidget extends Composite {
 		modifyFeatureOptionsLine.onModification(onModification);
 		modifyFeatureOptionsLine.onModificationStart(onModificationStart);
 		modifyFeatureOptionsLine.onModificationEnd(onModificationEnd);
-		modifyFeatureLine = new ModifyFeature(boxLayer, modifyFeatureOptionsLine);
+		modifyFeatureLine = new ModifyFeature(lineLayer, modifyFeatureOptionsLine);
 			
 		this.map.addControl(drawRectangle);
 		this.map.addControl(drawXLine);
@@ -347,6 +345,7 @@ public class OLMapWidget extends Composite {
 		zoomMap();
 		currentSelection = dataBounds;
 		boxLayer.destroyFeatures();
+		lineLayer.destroyFeatures();
 		// For now don't select the region at all.
 //		if ( !modulo ) {
 //		    boxLayer.addFeature(new VectorFeature(currentSelection.toGeometry()));
@@ -420,20 +419,12 @@ public class OLMapWidget extends Composite {
 			drawXLine.deactivate();
 			drawYLine.deactivate();
 			drawPoint.deactivate();
-            if ( tool.equals("xy") ) {
-				
+			
+            if ( tool.equals("xy") || tool.equals("x") || tool.equals("xz") || tool.equals("xt") ||
+            	 tool.equals("y") || tool.equals("yz") || tool.equals("yt") ) {
+            	      	
 				modifyFeatureXY.activate();
 				modifyFeatureLine.deactivate();
-				
-			} else if ( tool.equals("x") || tool.equals("xz") || tool.equals("xt") ) {
-				
-				modifyFeatureXY.deactivate();
-				modifyFeatureLine.activate();
-				
-			} else if ( tool.equals("y") || tool.equals("yz") || tool.equals("yt") ) {
-				
-				modifyFeatureXY.deactivate();
-				modifyFeatureLine.activate();
 				
 			} else if ( tool.equals("t") || tool.equals("z") || tool.equals("zt") || tool.equals("pt") ) {
 				// A view of z to t is a point tool type
@@ -478,54 +469,72 @@ public class OLMapWidget extends Composite {
 				n_selection = n_data;
 			}
 		}
-		
-			if ( modulo ) {
-				Bounds selectionBounds = new Bounds(w_selection, s_selection, e_selection, n_selection);
+
+		if ( modulo || dataBounds.containsBounds(bounds, false, true) ) {
+			Bounds selectionBounds = new Bounds(w_selection, s_selection, e_selection, n_selection);
+			if ( tool.equals("xy") ) {
+				lineLayer.destroyFeatures();
 				boxLayer.destroyFeatures();
 				boxLayer.addFeature(new VectorFeature(selectionBounds.toGeometry()));
 				setSelection(selectionBounds);
-			} else {
-				// Bounds is entirely contained in the dataBounds, use it.
-				if ( dataBounds.containsBounds(bounds, false, true) ) {
-					boxLayer.destroyFeatures();
-					boxLayer.addFeature(new VectorFeature(bounds.toGeometry()));
-					setSelection(bounds);
-					// Bounds intersects the dataBounds, trim it to fit, then use it.
-				} else if ( dataBounds.containsBounds(bounds, true, true) ){
-
-
-
-					if ( tool.equals("xy") || tool.equals("x") || tool.equals("y") ) {
-						// Only trip the east west if the data is not modulo
-						if ( w_selection < w_data ) {
-							w_selection = w_data;
-						}
-						if ( e_selection > e_data ) {
-							e_selection = e_data;
-						}
-						// Fix the bounds then make a new feature using those bounds and use that.
-						Bounds selectionBounds = new Bounds(w_selection, s_selection, e_selection, n_selection);
-						boxLayer.destroyFeatures();
-						boxLayer.addFeature(new VectorFeature(selectionBounds.toGeometry()));
-						setSelection(selectionBounds);
-					} else if ( tool.equals("pt") ) {
-						// If the point is on the line it's ok, you can use it.
-						setSelection(bounds);
-					}			
-					// Entirely outside the dataBounds.
-				} else {
-					// Discard the feature that was drawn by the user.
-					boxLayer.destroyFeatures();
-					// Recreate the previous feature.
-					if ( tool.equals("pt") ) {
-						Point p = new Point(currentSelection.getCenterLonLat().lon(), currentSelection.getCenterLonLat().lat());
-						boxLayer.addFeature(new VectorFeature(p));
-					} else {
-						boxLayer.addFeature(new VectorFeature(currentSelection.toGeometry()));
-					}
-				}
+			} else if ( tool.equals("x") || tool.equals("xz") || tool.equals("xt") ||
+					tool.equals("y") || tool.equals("yz") || tool.equals("yt") ) {
+				lineLayer.destroyFeatures();
+				boxLayer.destroyFeatures();
+				lineLayer.addFeature(new VectorFeature(selectionBounds.toGeometry()));
+				setSelection(selectionBounds);
+			} else if ( tool.equals("t") || tool.equals("z") || tool.equals("zt") || tool.equals("pt") ) {
+				lineLayer.destroyFeatures();
+				boxLayer.destroyFeatures();
+				Point p = new Point(selectionBounds.getCenterLonLat().lon(), selectionBounds.getCenterLonLat().lat());
+				boxLayer.addFeature(new VectorFeature(p));
+				setSelection(selectionBounds);
 			}
-		
+		} else {
+
+			if ( tool.equals("xy") ) {
+
+				// Only trip the east west if the data is not modulo
+				if ( w_selection < w_data ) {
+					w_selection = w_data;
+				}
+				if ( e_selection > e_data ) {
+					e_selection = e_data;
+				}
+				// Fix the bounds then make a new feature using those bounds and use that.
+				Bounds selectionBounds = new Bounds(w_selection, s_selection, e_selection, n_selection);
+				lineLayer.destroyFeatures();
+				boxLayer.destroyFeatures();
+				boxLayer.addFeature(new VectorFeature(selectionBounds.toGeometry()));
+				setSelection(selectionBounds);
+
+			} else if ( tool.equals("x") || tool.equals("xz") || tool.equals("xt") ||
+					tool.equals("y") || tool.equals("yz") || tool.equals("yt") ) {
+
+				// Only trip the east west if the data is not modulo
+				if ( w_selection < w_data ) {
+					w_selection = w_data;
+				}
+				if ( e_selection > e_data ) {
+					e_selection = e_data;
+				}
+				// Fix the bounds then make a new feature using those bounds and use that.
+				Bounds selectionBounds = new Bounds(w_selection, s_selection, e_selection, n_selection);
+				lineLayer.destroyFeatures();
+				boxLayer.destroyFeatures();
+				lineLayer.addFeature(new VectorFeature(selectionBounds.toGeometry()));
+				setSelection(selectionBounds);
+
+			} else if ( tool.equals("t") || tool.equals("z") || tool.equals("zt") || tool.equals("pt") ) {
+
+				lineLayer.destroyFeatures();
+				boxLayer.destroyFeatures();
+				Point p = new Point(currentSelection.getCenterLonLat().lon(), currentSelection.getCenterLonLat().lat());
+				boxLayer.addFeature(new VectorFeature(p));
+
+			}
+
+		}	
 	}
 	public void setCurrentSelection(double slat, double nlat, double wlon, double elon) {
 		// Only set this if it is an actual sub-region of the data region of a global data set.
@@ -537,16 +546,17 @@ public class OLMapWidget extends Composite {
 		if ( subRegion ) {
 			selectionMade = true;
 			Bounds bounds = new Bounds(wlon, slat, elon, nlat);
+			lineLayer.destroyFeatures();
 			boxLayer.destroyFeatures();
 			if ( tool.equals("t") || tool.equals("z") || tool.equals("zt") || tool.equals("pt") ) {	
 				Point p = new Point(bounds.getCenterLonLat().lon(), bounds.getCenterLonLat().lat());
 				boxLayer.addFeature(new VectorFeature(p));
 			} else if ( tool.equals("x") || tool.equals("xz") || tool.equals("xt") ) {
 				Bounds lineBounds = new Bounds(wlon, bounds.getCenterLonLat().lat(), elon, bounds.getCenterLonLat().lat());
-				boxLayer.addFeature(new VectorFeature(lineBounds.toGeometry()));
+				lineLayer.addFeature(new VectorFeature(lineBounds.toGeometry()));
 			} else if ( tool.equals("y") || tool.equals("yz") || tool.equals("yt") ) {
 				Bounds lineBounds = new Bounds(bounds.getCenterLonLat().lon(), slat, bounds.getCenterLonLat().lon(), nlat);
-				boxLayer.addFeature(new VectorFeature(lineBounds.toGeometry()));
+				lineLayer.addFeature(new VectorFeature(lineBounds.toGeometry()));
 			} else {
 				// XY box
 				boxLayer.addFeature(new VectorFeature(bounds.toGeometry()));
@@ -568,63 +578,55 @@ public class OLMapWidget extends Composite {
 					Math.abs(l.lon() - dataBounds.getLowerLeftX())/2.0);
 			double halfy = Math.min(Math.abs(dataBounds.getUpperRightY() - l.lat())/2.0,
 					Math.abs(l.lat() - dataBounds.getLowerLeftY())/2.0);
+			// Turn off all drawing contorls.  The point might get turned back on below...
 			
+			drawRectangle.deactivate();
+			drawXLine.deactivate();
+			drawYLine.deactivate();
+			drawPoint.deactivate();
+			drawing = false;
+			drawButton.setUrl(Util.getImageURL()+"draw_off.png");
+            // Turn drawing off for all geomeotry types except point;
 			if ( tool.equals("xy") ) {
-//				drawing = true;
-//				drawButton.setUrl(Util.getImageURL()+"draw.png");
+				
 				// Draw the box from the center of the current geometry to half of the shortest distance to the edge of the data bounds.			
 				Bounds b = new Bounds(l.lon()-halfx, l.lat()-halfy, l.lon()+halfx, l.lat()+halfy);
 				VectorFeature rv = new VectorFeature(b.toGeometry());
 				boxLayer.destroyFeatures();
+				lineLayer.destroyFeatures();
 				boxLayer.addFeature(rv);
-//				drawRectangle.activate();
-//				drawXLine.deactivate();
-//				drawYLine.deactivate();
-//				drawPoint.deactivate();
 				modifyFeatureXY.activate();
 				modifyFeatureLine.deactivate();
 				trimSelection(b);
 			} else if ( tool.equals("x") || tool.equals("xz") || tool.equals("xt") ) {
-//				drawing = true;
-//				drawButton.setUrl(Util.getImageURL()+"draw.png");
+				
 				Bounds b = new Bounds(l.lon()-halfx, l.lat(), l.lon()+halfx, l.lat());
 				VectorFeature rv = new VectorFeature(b.toGeometry());
 				boxLayer.destroyFeatures();
-				boxLayer.addFeature(rv);
-//				drawRectangle.deactivate();
-//				drawXLine.activate();
-//				drawYLine.deactivate();
-//				drawPoint.deactivate();
+				lineLayer.destroyFeatures();
+				lineLayer.addFeature(rv);
 				modifyFeatureXY.deactivate();
 				modifyFeatureLine.activate();
 				trimSelection(b);
 			} else if ( tool.equals("y") || tool.equals("yz") || tool.equals("yt") ) {
-//				drawing = true;
-//				drawButton.setUrl(Util.getImageURL()+"draw.png");
+				
 				Bounds b = new Bounds(l.lon(), l.lat()-halfy, l.lon(), l.lat()+halfy);
 				VectorFeature rv = new VectorFeature(b.toGeometry());
 				boxLayer.destroyFeatures();
-				boxLayer.addFeature(rv);
-//				drawRectangle.deactivate();
-//				drawXLine.deactivate();
-//				drawYLine.activate();
-//				drawPoint.deactivate();
+				lineLayer.destroyFeatures();
+				lineLayer.addFeature(rv);
 				modifyFeatureXY.deactivate();
 				modifyFeatureLine.activate();
 				trimSelection(b);
 			} else if ( tool.equals("t") || tool.equals("z") || tool.equals("zt") || tool.equals("pt") ) {
-//				drawing = true;
-//				drawButton.setUrl(Util.getImageURL()+"draw.png");
+				
 				// A view of z to t is a point tool type
 				Bounds b = new Bounds(l.lon(), l.lat(), l.lon(), l.lat());
 				boxLayer.destroyFeatures();
+				lineLayer.destroyFeatures();
 				Point p = new Point(l.lon(), l.lat());
 				VectorFeature pv = new VectorFeature(p);
 				boxLayer.addFeature(pv);
-//				drawRectangle.deactivate();
-//				drawXLine.deactivate();
-//				drawYLine.deactivate();
-//				drawPoint.activate();
 				modifyFeatureXY.deactivate();
 				modifyFeatureLine.deactivate();
 				trimSelection(b);
