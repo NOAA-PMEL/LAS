@@ -1,9 +1,13 @@
 package gov.noaa.pmel.tmap.las.client;
 
+import java.util.List;
+import java.util.Map;
+
 import gov.noaa.pmel.tmap.las.client.laswidget.Util;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.ServiceDefTarget;
 
 public class LASEntryPoint implements EntryPoint {
@@ -17,5 +21,13 @@ public class LASEntryPoint implements EntryPoint {
 		rpcURL = base_path + "rpc";
 		endpoint.setServiceEntryPoint(rpcURL);
 		productServer = base_path + "ProductServer.do";
+	}
+	public String getParameterString(String name) {
+		Map<String, List<String>> parameters = Window.Location.getParameterMap();			
+		List param = parameters.get(name);
+		if ( param != null ) {
+			return (String) param.get(0);
+		}
+		return null;
 	}
 }
