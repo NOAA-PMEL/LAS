@@ -597,7 +597,8 @@ public class OLMapWidget extends Composite {
 				boxLayer.addFeature(rv);
 				modifyFeatureXY.activate();
 				modifyFeatureLine.deactivate();
-				trimSelection(b);
+				setSelection(b);
+				
 			} else if ( tool.equals("x") || tool.equals("xz") || tool.equals("xt") ) {
 				
 				Bounds b = new Bounds(l.lon()-halfx, l.lat(), l.lon()+halfx, l.lat());
@@ -607,7 +608,8 @@ public class OLMapWidget extends Composite {
 				lineLayer.addFeature(rv);
 				modifyFeatureXY.deactivate();
 				modifyFeatureLine.activate();
-				trimSelection(b);
+				setSelection(b);
+				
 			} else if ( tool.equals("y") || tool.equals("yz") || tool.equals("yt") ) {
 				
 				Bounds b = new Bounds(l.lon(), l.lat()-halfy, l.lon(), l.lat()+halfy);
@@ -617,7 +619,8 @@ public class OLMapWidget extends Composite {
 				lineLayer.addFeature(rv);
 				modifyFeatureXY.deactivate();
 				modifyFeatureLine.activate();
-				trimSelection(b);
+				setSelection(b);
+				
 			} else if ( tool.equals("t") || tool.equals("z") || tool.equals("zt") || tool.equals("pt") ) {
 				
 				// A view of z to t is a point tool type
@@ -629,7 +632,8 @@ public class OLMapWidget extends Composite {
 				boxLayer.addFeature(pv);
 				modifyFeatureXY.deactivate();
 				modifyFeatureLine.deactivate();
-				trimSelection(b);
+				setSelection(b);
+				
 			} 
 		}
 	}
