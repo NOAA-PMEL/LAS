@@ -171,7 +171,7 @@
 		<div style="display:none" class="LASPopupDIVNode" id="categories"></div>
 		<div id="main">
 			#parse ("/productserver/templates/V7UIHeader.vm")
-			<div id="nav_bg" style="width:100%;background-color:#454DAB;overflow:hidden;padding-top:4pt;padding-bottom:3pt;">
+			<div id="nav_bg" style="width:100%;background-color:#AABCCE;overflow:hidden;padding-top:4pt;padding-bottom:3pt;">
 				<div id="nav" style="position:relative;height:100%;width:100%;">
 				#if ($request.getParameter('hideCat'))
 				#else
