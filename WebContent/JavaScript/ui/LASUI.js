@@ -1516,7 +1516,7 @@ LASUI.prototype.initTConstraint = function (mode,reset) {
 }
 LASUI.prototype.showUpdateLink = function () {
 	this.expired = true;
-	document.getElementById('update').style.color='orange';
+	document.getElementById('update').style.color='#f5ed52';
 	document.getElementById('update').style.visibility='visible';
 	document.getElementById('plotOptionsButton').style.visibility='visible';
 	if(document.getElementById("wait"))
