@@ -1156,9 +1156,16 @@ LASUI.prototype.onPlotLoad = function (e) {
 }
 
 LASUI.prototype.onFirstPlotLoad = function () {
-	this.firstload =false;
-	window.frames[this.anchors.output].onload = this.onPlotLoad.LASBind(this);
-	this.onPlotLoad();
+	//window.frames[this.anchors.output].onload = this.onPlotLoad.LASBind(this);
+	       if(document.getElementById("wait"))
+                document.getElementById("wait").style.visibility="hidden";
+        if(document.getElementById("wait_msg"))
+                document.getElementById("wait_msg").style.display="none";
+        if(document.getElementById('output')) {
+                document.getElementById("output").style.visibility="visible";
+
+        }
+
 }
 LASUI.prototype.roundGrid = function(grid) {
 	var outgrid = {"x" : {"min": 0, "max": 0}, "y" : {"min": 0, "max": 0}};
@@ -1286,11 +1293,11 @@ LASUI.prototype.initXYSelect = function (mode, reset) {
 		if(this.state.selection.x.max==null)
                         this.state.selection.x.max=this.state.selection.x.min;
 
-		var resetGrid=false;
+		
 
 		if(this.state.lastgrid) {
 			if(this.state.grid.response.grid.ID!=this.state.lastgrid.response.grid.ID)
-			resetGrid=true;
+			reset=true;
 		}
 
 		if(this.state.grid.hasArange('x')||this.state.grid.hasMenu('x')) {
@@ -1303,10 +1310,10 @@ LASUI.prototype.initXYSelect = function (mode, reset) {
 			grid.y.max = parseFloat(this.state.grid.getHi('y'));
 		}
 
-		if(reset==true)
-			setMapDataExtent(grid.y.min,grid.y.max,grid.x.min,grid.x.max,parseFloat(this.state.grid.getDelta('x')));
-	         
+		
 		if(!isFeatureEditing()) {
+			if(reset==true) setMapDataExtent(grid.y.min,grid.y.max,grid.x.min,grid.x.max,parseFloat(this.state.grid.getDelta('x')));
+	         
 			if(this.state.newgrid) {
 				setMapCurrentSelection(grid.y.min,grid.y.max,grid.x.min,grid.x.max);
 			} else if (this.state.selection.y.min&&this.state.selection.y.max&&this.state.selection.x.min&&this.state.selection.x.max) {
@@ -1315,7 +1322,7 @@ LASUI.prototype.initXYSelect = function (mode, reset) {
 					setMapCurrentSelection(grid.y.min,grid.y.max,grid.x.min,grid.x.max);
 				}
 			delete(this.state.newgrid);
-			zoomAndPanToSelection();
+			panToSelection();
 			if(this.submitOnLoad && this.params){
 				var bbox = {};
 				if(this.params.x)
@@ -1694,7 +1701,7 @@ LASUI.prototype.makeRequest = function (evt, type) {
 			if(document.getElementById("wait_msg"))
 				document.getElementById("wait_msg").style.display="";
 			document.getElementById('output').style.visibility="hidden";
-			if (this.firstload==true) document.getElementById(this.anchors.output).onload = this.onFirstPlotLoad.LASBind(this);
+			//document.getElementById(this.anchors.output).onload = this.onFirstPlotLoad.LASBind(this);
 			document.getElementById('output').src = (this.hrefs.getProduct.url + '?xml=' + this.urlencode(this.request.getXMLText()));
 		} else
 			window.open(this.hrefs.getProduct.url + '?xml=' +  this.urlencode(this.request.getXMLText()));

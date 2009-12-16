@@ -232,7 +232,7 @@
 	 	                                        #else 
 	 	                                                src="start.html"  
 	 	                                        #end  
-					id="output" name="output" onreadystatechange="LAS.onPlotLoad();" onload="LAS.onPlotLoad();" frameborder=0></iframe>			
+					id="output" name="output" onload="LAS.onPlotLoad();" onreadystatechange="LAS.onPlotLoad();" frameborder=0></iframe>			
 			</td></tr></tbody></table>
 			#parse( "/productserver/templates/V7UIFooter.vm") 
 		</div>
