@@ -42,6 +42,16 @@ import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
 public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
 	private static final LASProxy lasProxy = new LASProxy();
+	public HashMap<String, String> getPropertyGroup(String name) throws RPCException {
+		LASConfig lasConfig = (LASConfig) getServletContext().getAttribute(LASConfigPlugIn.LAS_CONFIG_KEY);	
+		HashMap<String, String> property_group;
+		try {
+			property_group = lasConfig.getGlobalPropertyGroupAsHashMap(name);
+		} catch (LASException e) {
+			throw new RPCException(e.getLocalizedMessage());
+		}
+		return property_group;
+	}
 	/**
 	 * @throws RPCException 
 	 * 

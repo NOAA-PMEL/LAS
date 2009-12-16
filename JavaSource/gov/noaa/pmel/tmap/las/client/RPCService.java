@@ -1,6 +1,8 @@
 package gov.noaa.pmel.tmap.las.client;
 
 
+import java.util.HashMap;
+
 import gov.noaa.pmel.tmap.las.client.serializable.CategorySerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.DatasetSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.GridSerializable;
@@ -19,4 +21,5 @@ public interface RPCService extends RemoteService {
 	public OperationSerializable[] getOperations(String view, String dsID, String varID) throws RPCException;
 	public OptionSerializable[] getOptions(String opid) throws RPCException;
 	public CategorySerializable[] getTimeSeries() throws RPCException;
+	public HashMap<String, String> getPropertyGroup(String name) throws RPCException;
 }

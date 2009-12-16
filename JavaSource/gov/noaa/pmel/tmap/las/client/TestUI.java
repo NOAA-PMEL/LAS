@@ -1,6 +1,8 @@
 package gov.noaa.pmel.tmap.las.client;
 
 import gov.noaa.pmel.tmap.las.client.laswidget.OperationsMenu;
+import gov.noaa.pmel.tmap.las.client.laswidget.Util;
+import gov.noaa.pmel.tmap.las.client.laswidget.Constants;
 import gov.noaa.pmel.tmap.las.client.map.SettingsWidget;
 import gov.noaa.pmel.tmap.las.client.serializable.CategorySerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.DatasetSerializable;
@@ -9,6 +11,8 @@ import gov.noaa.pmel.tmap.las.client.serializable.VariableSerializable;
 import gov.noaa.pmel.tmap.las.client.vizgal.VizGalPanel;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -22,6 +26,7 @@ import com.google.gwt.user.client.ui.ClickListener;
 import com.google.gwt.user.client.ui.DockPanel;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.TreeItem;
 import com.google.gwt.user.client.ui.TreeListener;
@@ -29,87 +34,6 @@ import com.google.gwt.user.client.ui.Widget;
 
 
 public class TestUI extends LASEntryPoint {
-	/*
-	private MapWidget mapWidget;
-	private Map map;
-	private WMS wmsLayer;
-	private Markers markers;
-	private Popup popup;
-	public void onModuleLoad() {
-		super.onModuleLoad();
-		MapOptions mapOptions = new MapOptions();
-		mapOptions.setControls(new JObjectArray(new JSObject[] {}));
-		mapOptions.setNumZoomLevels(16);
-		mapOptions.setProjection("EPSG:4326");
-
-		// let's create map widget and map objects
-		mapWidget = new MapWidget("350px", "350px", mapOptions);
-		map = mapWidget.getMap();
-		markers = new Markers("marker layer");
-		
-		WMSParams wmsParams = new WMSParams();
-		wmsParams.setFormat("image/png");
-		wmsParams.setLayers("tiger-ny");
-		wmsParams.setStyles("");
-		wmsParams.setMaxExtent(new Bounds(-74.047185, 40.679648, -73.907005, 40.882078));
-
-		wmsLayer = new WMS("WMS Layer", "http://localhost:8080/geoserver/wms", wmsParams);
-
-		// let's add layers and controls to map
-		map.addLayers(new Layer[] {wmsLayer, markers});
-
-		map.addControl(new PanZoomBar(RootPanel.get("nav").getElement()));
-		map.addControl(new MousePosition(RootPanel.get("position").getElement()));
-		map.addControl(new Scale(RootPanel.get("scale").getElement()));
-		map.addControl(new MouseToolbar());
-		map.addControl(new LayerSwitcher());
-		
-		LonLat center = new LonLat(-73.99, 40.73);
-		map.setCenter(center, 13);
-
-		// add marker
-		Size size = new Size(10,17);
-		Pixel offset = new Pixel(-5, -17);
-		Icon icon = new Icon("img/marker.png", size, offset);
-		Marker marker = new Marker(center, icon);
-		markers.addMarker(marker);
-		marker.getEvents().register("mouseover", marker, new EventHandler() {
-			public void onHandle(JSObject source, JSObject[] param) {
-				Marker marker = Marker.narrowToMarker(source);
-				if (popup != null) {
-					map.removePopup(popup);
-				}
-
-				popup = new AnchoredBubble("marker-info",
-						marker.getLonLat(),
-						new Size(120,80),
-						"<p>You moved near " + marker.getLonLat().lon() + " : " + marker.getLonLat().lat() + "</p>" ,
-						new Icon("", new Size(0,0), new Pixel(0,0)),
-						true);
-			map.addPopup(popup);
-
-			}
-		});
-
-		// register mouse out event
-		marker.getEvents().register("mouseout", marker, new EventHandler() {
-			public void onHandle(JSObject source, JSObject[] param) {
-				Marker marker = Marker.narrowToMarker(source);
-				if (popup != null) {
-					map.removePopup(popup);
-				}
-			}
-		});
-
-		DockPanel dockPanel = new DockPanel();
-		dockPanel.add(mapWidget, DockPanel.CENTER);
-		dockPanel.setBorderWidth(1);
-		RootPanel.get("map").add(dockPanel);
-
-		
-	}
-	*/
-	
 	HTML output;
 	VizGalPanel panel;
 	Grid layout = new Grid(2, 1);
@@ -117,53 +41,90 @@ public class TestUI extends LASEntryPoint {
 	String dsid;
 	String vid;
 	String op;
-	String optionID;
+	String option;
 	String view;
+	String initial_time = null;
+	String initial_z = null;
 	int rightPad = 15;
 	VariableSerializable var;
 	ArrayList<String> ortho = new ArrayList<String>();
 	String compareAxis;
 	SettingsWidget settingsControls;
 	DockPanel dockPanel = new DockPanel();
+	PopupPanel initializing = new PopupPanel();
 	public void onModuleLoad() {
 		super.onModuleLoad();
+		String spinImageURL = Util.getImageURL()+"/mozilla_blu.gif";
+		output = new HTML("<img src=\""+spinImageURL+"\" alt=\"Spinner\"/> Initializing...");
+	    initializing.add(output);
+	    initializing.show();
 		Map<String, List<String>> parameters = Window.Location.getParameterMap();
 		dsid = getParameterString("dsid");
 		vid = getParameterString("vid");
-		//TODO If the operation is null, get the default operation (the map or plot; left nav) for this view.
 		op = getParameterString("opid");
-		optionID = getParameterString("optionid");
+		option = getParameterString("optionid");
 		view = getParameterString("view");
 		
+		
+		if ( dsid != null && vid != null && op != null && view != null && option != null) {
+			rpcService.getCategories(dsid, initPanelFromParametersCallback);
+		} else {
+			rpcService.getPropertyGroup("product_server", initPanelFromDefaultsCallback);	
+		}
+
 		if ( op == null ) {
 			op = "Plot_2D_XY";
 		}
-		if ( optionID == null ) {
-			optionID = "Options_2D_image_contour_xy_7";
+		if ( option == null ) {
+			option = "Options_2D_image_contour_xy_7";
 		}
-		
-		if ( dsid != null && vid != null ) {
-			// If the proper information was sent to the widget, pull down the variable definition
-			// and initialize the slide sorter with this Ajax call.
-			rpcService.getCategories(dsid, initPanelCallback);
-		} else {
-			// Use some the default view and put up a "blank" interface.
-			if ( view == null ) {
-				view = "xy";
-			}
-		}
-		settingsControls = new SettingsWidget("Settings", "LAS", op, optionID, rpcService, "panel");
+		settingsControls = new SettingsWidget("Settings", "LAS", op, option, rpcService, "panel");
 		settingsControls.addDatasetTreeListener(datasetTreeListener);
 		settingsControls.addApplyClickListener(panelApply);
 		operationsMenu = new OperationsMenu();
 		dockPanel.add(operationsMenu, DockPanel.NORTH);
 		dockPanel.add(settingsControls, DockPanel.WEST);
-		RootPanel.get("main").add(dockPanel);
-		
+		RootPanel.get("main").add(dockPanel);	
 		Window.addWindowResizeListener(windowResizeListener);
 	}
+	public AsyncCallback initPanelFromDefaultsCallback = new AsyncCallback() {
+
+		@Override
+		public void onFailure(Throwable caught) {
+			// Ok with me.  User will just have to select a data set.
+			initializing.hide();
+		}
+
+		@Override
+		public void onSuccess(Object result) {
+			HashMap<String, String> product_server = (HashMap<String, String>) result;
+			for (Iterator nameIt = product_server.keySet().iterator(); nameIt.hasNext();) {
+				String name = (String) nameIt.next();
+				String value = product_server.get(name);
+				if ( name.equals(Constants.DEFAULT_DSID) ) {
+					dsid = value;
+				} else if ( name.equals(Constants.DEFAULT_VARID) ) {
+					vid = value;
+				} else if ( name.equals(Constants.DEFAULT_OP) ) {
+					op = value;
+				} else if ( name.equals(Constants.DEFAULT_OPTION) ) {
+					option = value; 
+				} else if ( name.equals(Constants.DEFAULT_VIEW) ) {
+					view = value;
+				} else if ( name.equals(Constants.DEFAULT_TIME) ) {
+					initial_time = value;
+				} else if ( name.equals(Constants.DEFAULT_Z) ) {
+					initial_z = value;
+				}
+			}
+			if ( dsid != null && vid != null && op != null && view != null && option != null) {
+				rpcService.getCategories(dsid, initPanelFromParametersCallback);
+			}
+		}
+		
+	};
 	// TODO you're going to have to fix this to work, but for now...
-	public AsyncCallback initPanelCallback = new AsyncCallback() {
+	public AsyncCallback initPanelFromParametersCallback = new AsyncCallback() {
 		public void onSuccess(Object result) {
 			CategorySerializable[] cats = (CategorySerializable[]) result;
 			if ( cats != null && cats.length > 1 ) {
@@ -183,10 +144,12 @@ public class TestUI extends LASEntryPoint {
 			}
 		}
 		public void onFailure(Throwable caught) {
+			initializing.hide();
 			Window.alert("Failed to initalizes VizGal."+caught.toString());
 		}
 	};
 	private void initPanel() {
+		initializing.hide();
 		if ( view.equals("xy") ) {
 			// If the plot view is XY set up the map for selecting the region in all panels.
 			// TODO Still need this for other views but with parameters to set the map selector tool.
@@ -234,7 +197,7 @@ public class TestUI extends LASEntryPoint {
 			ortho.clear();
 			int width = Window.getClientWidth();
 			int pwidth = (width-rightPad);
-			panel = new VizGalPanel("LAS", false, op, optionID, view, productServer, true, rpcService);
+			panel = new VizGalPanel("LAS", false, op, option, view, productServer, true, rpcService);
 			panel.setVariable(var);
 			panel.init(false);
 			panel.addCompareAxisChangeListener(onAxisChange);
@@ -251,7 +214,7 @@ public class TestUI extends LASEntryPoint {
 	};
 	AsyncCallback getGridCallback = new AsyncCallback() {
 		public void onSuccess(Object result) {
-
+            
 			GridSerializable grid = (GridSerializable) result;
 			var.setGrid(grid);
 			initPanel();
@@ -260,6 +223,7 @@ public class TestUI extends LASEntryPoint {
 
 		@Override
 		public void onFailure(Throwable caught) {
+			initializing.hide();
 			Window.alert("Could not fetch grid.  "+caught.getLocalizedMessage());
 			
 		}

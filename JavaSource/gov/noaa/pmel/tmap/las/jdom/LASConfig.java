@@ -1592,6 +1592,28 @@ public class LASConfig extends LASDocument {
         }
         return value;
     }
+    
+    public HashMap<String, String> getGlobalPropertyGroupAsHashMap(String name) throws LASException {
+    	HashMap<String, String> property_group_hash = new HashMap<String, String>();
+    	Element properties = getRootElement().getChild("properties");
+        if (properties != null) {
+            List groups = properties.getChildren("property_group");
+            for (Iterator groupsIt = groups.iterator(); groupsIt.hasNext();) {
+                Element property_group = (Element) groupsIt.next();
+                if ( property_group.getAttributeValue("type").equals(name)) {
+                    List props = property_group.getChildren("property");
+                    for (Iterator propsIt = props.iterator(); propsIt.hasNext();) {
+                        Element property = (Element) propsIt.next();
+                        String pname = property.getChildTextNormalize("name");
+                        String pvalue = property.getChildTextNormalize("value");
+                        property_group_hash.put(pname, pvalue);
+                    }
+                }
+            }
+        }
+    	return property_group_hash;
+    }
+    
     /**
      * Get the grid of a variable from its XPath
      * @param varXPath

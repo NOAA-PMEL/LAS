@@ -8,4 +8,5 @@ public interface RPCServiceAsync {
     public void getOperations(String view, String dsid, String varid, AsyncCallback opCallback);
 	public void getOptions(String opid, AsyncCallback optionsCallback);
     public void getTimeSeries(AsyncCallback timeSeriesCallback);
+    public void getPropertyGroup(String name, AsyncCallback propertyGroupCallback);
 }
