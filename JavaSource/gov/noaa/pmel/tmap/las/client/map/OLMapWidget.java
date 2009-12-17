@@ -74,6 +74,7 @@ public class OLMapWidget extends Composite {
 	private Bounds wrapExtent;
 	private Bounds currentSelection;
 	private Bounds dataBounds;
+	private Bounds currentRectangle;
 	
 	private RegularPolygonHandler regularPolygonHandler;
 	private DrawSingleFeatureOptions drawSingleFeatureOptionsForRectangle;
@@ -494,6 +495,7 @@ public class OLMapWidget extends Composite {
 		public void onFeatureAdded(VectorFeature vectorFeature) {
 			// How come there is no narrowToGeometry with a Geometry argument.
 			Geometry geo = Geometry.narrowToGeometry(vectorFeature.getGeometry().getJSObject());
+			currentRectangle = null;
 			trimSelection(geo.getBounds());
 			selectionMade = true;
 			
@@ -528,10 +530,9 @@ public class OLMapWidget extends Composite {
 					c.lon(), c.lon());
 		}
 	}
-	private void trimSelection(Bounds bounds) {
-		
+	private void trimSelection(Bounds bounds) {	
 		editing = false;
-		
+
 		// Always trip the north and south bounds
 		double s_data = dataBounds.getLowerLeftY();
 		double n_data = dataBounds.getUpperRightY();
@@ -549,72 +550,42 @@ public class OLMapWidget extends Composite {
 				n_selection = n_data;
 			}
 		}
-
+		Bounds selectionBounds;
 		if ( modulo || dataBounds.containsBounds(bounds, false, true) ) {
-			Bounds selectionBounds = new Bounds(w_selection, s_selection, e_selection, n_selection);
-			if ( tool.equals("xy") ) {
-				lineLayer.destroyFeatures();
-				boxLayer.destroyFeatures();
-				boxLayer.addFeature(new VectorFeature(selectionBounds.toGeometry()));
-				setSelection(selectionBounds);
-			} else if ( tool.equals("x") || tool.equals("xz") || tool.equals("xt") ||
-					    tool.equals("y") || tool.equals("yz") || tool.equals("yt") ) {
-				lineLayer.destroyFeatures();
-				boxLayer.destroyFeatures();
-				lineLayer.addFeature(new VectorFeature(selectionBounds.toGeometry()));
-				setSelection(selectionBounds);
-			} else if ( tool.equals("t") || tool.equals("z") || tool.equals("zt") || tool.equals("pt") ) {
-				lineLayer.destroyFeatures();
-				boxLayer.destroyFeatures();
-				Point p = new Point(selectionBounds.getCenterLonLat().lon(), selectionBounds.getCenterLonLat().lat());
-				boxLayer.addFeature(new VectorFeature(p));
-				setSelection(selectionBounds);
-			}
+			lineLayer.destroyFeatures();
+			boxLayer.destroyFeatures();
+			selectionBounds = new Bounds(w_selection, s_selection, e_selection, n_selection);
 		} else {
-
-			if ( tool.equals("xy") ) {
-
-				// Only trip the east west if the data is not modulo
-				if ( w_selection < w_data ) {
-					w_selection = w_data;
-				}
-				if ( e_selection > e_data ) {
-					e_selection = e_data;
-				}
-				// Fix the bounds then make a new feature using those bounds and use that.
-				Bounds selectionBounds = new Bounds(w_selection, s_selection, e_selection, n_selection);
-				lineLayer.destroyFeatures();
-				boxLayer.destroyFeatures();
-				boxLayer.addFeature(new VectorFeature(selectionBounds.toGeometry()));
-				setSelection(selectionBounds);
-
-			} else if ( tool.equals("x") || tool.equals("xz") || tool.equals("xt") ||
-					    tool.equals("y") || tool.equals("yz") || tool.equals("yt") ) {
-
-				// Only trip the east west if the data is not modulo
-				if ( w_selection < w_data ) {
-					w_selection = w_data;
-				}
-				if ( e_selection > e_data ) {
-					e_selection = e_data;
-				}
-				// Fix the bounds then make a new feature using those bounds and use that.
-				Bounds selectionBounds = new Bounds(w_selection, s_selection, e_selection, n_selection);
-				lineLayer.destroyFeatures();
-				boxLayer.destroyFeatures();
-				lineLayer.addFeature(new VectorFeature(selectionBounds.toGeometry()));
-				setSelection(selectionBounds);
-
-			} else if ( tool.equals("t") || tool.equals("z") || tool.equals("zt") || tool.equals("pt") ) {
-
-				lineLayer.destroyFeatures();
-				boxLayer.destroyFeatures();
-				Point p = new Point(currentSelection.getCenterLonLat().lon(), currentSelection.getCenterLonLat().lat());
-				boxLayer.addFeature(new VectorFeature(p));
-
+			// Only trip the east west if the data is not modulo
+			if ( w_selection < w_data ) {
+				w_selection = w_data;
 			}
+			if ( e_selection > e_data ) {
+				e_selection = e_data;
+			}
+			selectionBounds = new Bounds(w_selection, s_selection, e_selection, n_selection);
 
-		}	
+		}
+		LonLat center = selectionBounds.getCenterLonLat();
+		if ( tool.equals("xy") ) {
+			// Use it.
+			boxLayer.addFeature(new VectorFeature(selectionBounds.toGeometry()));
+			setSelection(selectionBounds);
+			currentRectangle = selectionBounds;
+		} else if ( tool.equals("x") || tool.equals("xz") || tool.equals("xt") ) {
+			// Modify it then use it.
+			selectionBounds = new Bounds(w_selection, center.lat(), e_selection, center.lat());
+			lineLayer.addFeature(new VectorFeature(selectionBounds.toGeometry()));
+			setSelection(selectionBounds);
+		} else if (  tool.equals("y") || tool.equals("yz") || tool.equals("yt") ) {
+			selectionBounds = new Bounds(center.lon(), s_selection, center.lon(), n_selection);
+			lineLayer.addFeature(new VectorFeature(selectionBounds.toGeometry()));
+			setSelection(selectionBounds);
+		} else if ( tool.equals("t") || tool.equals("z") || tool.equals("zt") || tool.equals("pt") ) {
+			Point p = new Point(selectionBounds.getCenterLonLat().lon(), selectionBounds.getCenterLonLat().lat());
+			boxLayer.addFeature(new VectorFeature(p));
+			setSelection(selectionBounds);
+		}
 	}
 	public void setCurrentSelection(double slat, double nlat, double wlon, double elon) {
 		editing = false;
@@ -662,71 +633,29 @@ public class OLMapWidget extends Composite {
 					Math.abs(l.lon() - dataBounds.getLowerLeftX())/2.0);
 			double halfy = Math.min(Math.abs(dataBounds.getUpperRightY() - l.lat())/2.0,
 					Math.abs(l.lat() - dataBounds.getLowerLeftY())/2.0);
-			// Turn off all drawing contorls.  The point might get turned back on below...
+			
 			
 			drawRectangle.deactivate();
 			drawXLine.deactivate();
 			drawYLine.deactivate();
-			drawPoint.deactivate();
-			drawing = false;
-			drawButton.setDown(false);
-			// Make sure it's on.  We might turn it of if it's a point.
-			editButton.setEnabled(true);
-            // Turn drawing off for all geomeotry types except point;
-			if ( tool.equals("xy") ) {
-				
-				// Draw the box from the center of the current geometry to half of the shortest distance to the edge of the data bounds.			
-				Bounds b = new Bounds(l.lon()-halfx, l.lat()-halfy, l.lon()+halfx, l.lat()+halfy);
-				VectorFeature rv = new VectorFeature(b.toGeometry());
-				boxLayer.destroyFeatures();
-				lineLayer.destroyFeatures();
-				boxLayer.addFeature(rv);
-				
-				// TODO: test
-				// modifyFeatureXY.activate();
-				modifyFeatureLine.deactivate();
-				setSelection(b);
-				
-			} else if ( tool.equals("x") || tool.equals("xz") || tool.equals("xt") ) {
-				
-				Bounds b = new Bounds(l.lon()-halfx, l.lat(), l.lon()+halfx, l.lat());
-				VectorFeature rv = new VectorFeature(b.toGeometry());
-				boxLayer.destroyFeatures();
-				lineLayer.destroyFeatures();
-				lineLayer.addFeature(rv);
-				modifyFeatureXY.deactivate();
-				// TODO: Test
-				//modifyFeatureLine.activate();
-				setSelection(b);
-				
-			} else if ( tool.equals("y") || tool.equals("yz") || tool.equals("yt") ) {
-				
-				Bounds b = new Bounds(l.lon(), l.lat()-halfy, l.lon(), l.lat()+halfy);
-				VectorFeature rv = new VectorFeature(b.toGeometry());
-				boxLayer.destroyFeatures();
-				lineLayer.destroyFeatures();
-				lineLayer.addFeature(rv);
-				modifyFeatureXY.deactivate();
-				// TODO test
-				// modifyFeatureLine.activate();
-				setSelection(b);
-				
-			} else if ( tool.equals("t") || tool.equals("z") || tool.equals("zt") || tool.equals("pt") ) {
-				
-				// A view of z to t is a point tool type
-				Bounds b = new Bounds(l.lon(), l.lat(), l.lon(), l.lat());
-				boxLayer.destroyFeatures();
-				lineLayer.destroyFeatures();
-				Point p = new Point(l.lon(), l.lat());
-				VectorFeature pv = new VectorFeature(p);
-				boxLayer.addFeature(pv);
-				modifyFeatureXY.deactivate();
-				modifyFeatureLine.deactivate();
-				setSelection(b);
-				
+			if ( !lockDraw ) {
+				drawPoint.deactivate();
+				drawing = false;
+				drawButton.setDown(false);
+			}
+			// Draw the box from the center of the current geometry to half of the shortest distance to the edge of the data bounds.			
+			Bounds b = currentRectangle;
+			if ( b == null ) {
+				b = new Bounds(l.lon()-halfx, l.lat()-halfy, l.lon()+halfx, l.lat()+halfy);
+			}
+			trimSelection(b);
+
+			if ( tool.equals("t") || tool.equals("z") || tool.equals("zt") || tool.equals("pt") ) {
+				// Disable selecting for points
 				editButton.setEnabled(false);
-				
-			} 
+			} else {
+				editButton.setEnabled(true);
+			}
 		}
 	}
 	public ClickHandler editButtonClickHandler = new ClickHandler() {
