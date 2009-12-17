@@ -20,6 +20,6 @@
       <entry-point class='gov.noaa.pmel.tmap.las.client.VizGal'/>
     
       <!-- Specify the application specific style sheet. -->     
-      <stylesheet src='JavaScript/frameworks/OpenLayersExtension/OLMapWidget.css' />
+      <stylesheet src="OLMapWidget.css" />
 	
 </module>
