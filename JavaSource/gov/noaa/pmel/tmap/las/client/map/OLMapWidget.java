@@ -695,6 +695,10 @@ public class OLMapWidget extends Composite {
 			panButton.setUrl(Util.getImageURL()+"pan_off.png");
 			editButton.setUrl(Util.getImageURL()+"edit.png");
 			drawButton.setUrl(Util.getImageURL()+"draw_off.png"); 
+			drawPoint.deactivate();
+			drawRectangle.deactivate();
+			drawXLine.deactivate();
+			drawYLine.deactivate();
 			if ( tool.equals("xy") ) {
 				if ( boxLayer.getFeatures() == null ) {
 					Window.alert("Make a selection on the map then select this button, to edit it.");
