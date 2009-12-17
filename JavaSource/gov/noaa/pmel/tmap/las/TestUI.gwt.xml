@@ -15,8 +15,9 @@
       
       
 
-      <!-- Other module inherits                                      -->
-      <inherits name="com.google.gwt.maps.GoogleMaps" />
+      <!-- Other module inherits.  -->
+      <inherits name="com.google.gwt.maps.GoogleMaps" />                   
+      <inherits name='org.gwtopenmaps.openlayers.OpenLayers'/>
       <inherits name="com.google.gwt.xml.XML" />
 
       <!--
