@@ -18,5 +18,5 @@
       <inherits name="com.google.gwt.xml.XML" />
       <!-- Specify the app entry point class.                         -->
       <entry-point class='gov.noaa.pmel.tmap.las.client.NativeMapWidget'/>
-	
+	  <stylesheet src='JavaScript/frameworks/OpenLayersExtension/OLMapWidget.css' />
 </module>
