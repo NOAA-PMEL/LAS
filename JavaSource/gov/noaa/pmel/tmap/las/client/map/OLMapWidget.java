@@ -506,6 +506,8 @@ public class OLMapWidget extends Composite {
 				drawXLine.deactivate();
 				drawYLine.deactivate();
 				drawPoint.deactivate();
+				modifyFeatureLine.deactivate();
+				modifyFeatureXY.deactivate();
 			}
             
 			featureAdded();
