@@ -36,14 +36,18 @@ import org.gwtopenmaps.openlayers.client.marker.Box;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.ChangeListener;
+import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.DockPanel;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -91,16 +95,22 @@ public class OLMapWidget extends Composite {
 	private Image drawButton;
 	private Image panButton;
 	private Image editButton;
+	private Image settingsButton;
+	private PopupPanel mapSettings;
+	private VerticalPanel mapSettingsInterior;
+	private CheckBox drawLock;
 	private HorizontalPanel buttonPanel;
 	private PopupPanel helpPanel;
 	private VerticalPanel helpInterior;
-	private Image closeHelp;
+	private Image helpClose;
+	private Image settingsClose;
     private HTML help;
     private FlexTable topGrid;
   
     private boolean modulo = true;
 	private boolean selectionMade = false;
 	private boolean drawing = false;
+	private boolean lockDraw = false;
 	
     Boxes boxes = new Boxes("Valid Region");
 	Box box = null;
@@ -117,32 +127,47 @@ public class OLMapWidget extends Composite {
 		textWidget.addNorthChangeListener(northChangeListener);
 		textWidget.addEastChangeListener(eastChangeListener);
 		textWidget.addWestChangeListener(westChangeListener);
+		mapSettings = new PopupPanel();
+		mapSettingsInterior = new VerticalPanel();
 		dockPanel = new DockPanel();
 		helpPanel = new PopupPanel();
 		helpInterior = new VerticalPanel();
 	    buttonPanel = new HorizontalPanel();
 		helpButton = new Image(Util.getImageURL()+"info.png");
 		helpButton.setTitle("Help");
-		closeHelp = new Image(Util.getImageURL()+"close.png");
-		closeHelp.setTitle("Close");
-		closeHelp.addClickHandler(new ClickHandler() {
+		
+		helpClose = new Image(Util.getImageURL()+"close.png");
+		helpClose.setTitle("Close");
+		helpClose.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
-				helpPanel.hide();			
+				helpPanel.hide();
 			}
 			
 		});
+		
+		settingsClose = new Image(Util.getImageURL()+"close.png");
+		settingsClose.setTitle("Close");
+		settingsClose.addClickHandler(new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
+				mapSettings.hide();
+			}
+		});
+		
 		resetButton = new Image(Util.getImageURL()+"reset.png");
 		resetButton.setTitle("Reset Map");
 		help = new HTML("<div style=\"font-family:verdana;font-size:9;\">" +
 				"<ul><li>To select an area of the map, click the <img alt=\"draw\" src=\""+Util.getImageURL()+"draw.png"+"\"/> button then click and drag on the map.</li>" +
-				"<li>To modify a selection verify drawing is off <img alt=\"draw off\" src=\""+Util.getImageURL()+"draw_off.png"+"\"/> and click the selected area to modify it.  (Click outside it when finished.)</li>" +
+				"<li>When you finish drawing your selection, the selection button will deactivate.  I you want it to stay on click the <img alt=\"settings\" src=\""+Util.getImageURL()+"settings.png"+"\"/> button and check the box." +
+				"<li>To modify a selection click the <img alt=\"edit\" src=\""+Util.getImageURL()+"edit.png"+"\"/> button and click the selected area to modify it.  (Click again when finished.)</li>" +
 				"<li>To zoom, click the <img alt=\"zoom in\" src=\""+Util.getBaseURL()+"JavaScript/frameworks/OpenLayers/img/zoom-plus-mini.png\"/> and <img alt=\"zoom out\" src=\""+Util.getBaseURL()+"JavaScript/frameworks/OpenLayers/img/zoom-minus-mini.png\"/> buttons.</li>" +
-				"<li>To pan the map, click the <img alt=\"arrow \" src=\""+Util.getBaseURL()+"JavaScript/frameworks/OpenLayers/img/north-mini.png\"/> <img alt=\"arrow buttons\" src=\""+Util.getBaseURL()+"JavaScript/frameworks/OpenLayers/img/south-mini.png\"/> <img alt=\"arrow buttons\" src=\""+Util.getBaseURL()+"JavaScript/frameworks/OpenLayers/img/east-mini.png\"/> <img alt=\"arrow buttons\" src=\""+Util.getBaseURL()+"JavaScript/frameworks/OpenLayers/img/west-mini.png\"/> buttons or verify drawing is off <img alt=\"draw\" src=\""+Util.getImageURL()+"draw_off.png"+"\"/> and click, hold and drag on the map.</li>" +
+				"<li>To pan the map, click the <img alt=\"pan\" src=\""+Util.getImageURL()+"pan.png\"/> button and click and drag on the map.</li>" +
+				"<li>or click the <img alt=\"arrow \" src=\""+Util.getBaseURL()+"JavaScript/frameworks/OpenLayers/img/north-mini.png\"/> <img alt=\"arrow buttons\" src=\""+Util.getBaseURL()+"JavaScript/frameworks/OpenLayers/img/south-mini.png\"/> <img alt=\"arrow buttons\" src=\""+Util.getBaseURL()+"JavaScript/frameworks/OpenLayers/img/east-mini.png\"/> <img alt=\"arrow buttons\" src=\""+Util.getBaseURL()+"JavaScript/frameworks/OpenLayers/img/west-mini.png\"/> buttons.</li>" +
 				"<li>To re-center and zoom out and keep your selection click on the <img alt=\"world\" src=\""+Util.getBaseURL()+"JavaScript/frameworks/OpenLayers/img/zoom-world-mini.png\"/> button.</li>" +
 				"<li>To start over, click the <img alt=\"reset\" src=\""+Util.getImageURL()+"reset.png"+"\"/> button above the map.</li></ul>"+
 		        "</div>");
-		helpInterior.add(closeHelp);
+		helpInterior.add(helpClose);
 		helpInterior.add(help); 
 		helpPanel.add(helpInterior);
 		drawButton = new Image(Util.getImageURL()+"draw_off.png");
@@ -154,13 +179,32 @@ public class OLMapWidget extends Composite {
 		editButton = new Image(Util.getImageURL()+"edit_off.png");
 		editButton.setTitle("Click on selection to edit.");
 		editButton.addClickHandler(editButtonClickHandler);
+		drawLock = new CheckBox("Keep map selection button active.");
+		drawLock.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+
+			@Override
+			public void onValueChange(ValueChangeEvent<Boolean> event) {
+
+                 lockDraw = event.getValue();
+				
+			}
+			
+		});
+		mapSettingsInterior.add(settingsClose);
+		mapSettingsInterior.add(new Label("Check this box to keep the map region selector active until you click another button."));
+		mapSettingsInterior.add(drawLock);
+		mapSettings.add(mapSettingsInterior);
+		settingsButton = new Image(Util.getImageURL()+"settings.png");
+		settingsButton.setTitle("Map Widget Settings");
+		settingsButton.addClickHandler(settingsButtonClickHandler);
+		
 		buttonPanel.add(helpButton);
 		buttonPanel.add(resetButton);
 		buttonPanel.add(editButton);
 		buttonPanel.add(panButton);
 		buttonPanel.add(drawButton);
+		buttonPanel.add(settingsButton);
 		
-		//buttonPanel.add(panButton);
 		topGrid = new FlexTable();
 		topGrid.setWidget(0, 0, buttonPanel);
 		topGrid.setWidget(1, 0, regionWidget);
@@ -418,15 +462,17 @@ public class OLMapWidget extends Composite {
 			Geometry geo = Geometry.narrowToGeometry(vectorFeature.getGeometry().getJSObject());
 			trimSelection(geo.getBounds());
 			selectionMade = true;
-			drawing = false;
-			panButton.setUrl(Util.getImageURL()+"pan.png");
-			drawButton.setUrl(Util.getImageURL()+"draw_off.png");
-			editButton.setUrl(Util.getImageURL()+"edit_off.png");
-			drawRectangle.deactivate();
-			drawXLine.deactivate();
-			drawYLine.deactivate();
-			drawPoint.deactivate();
 			
+			if ( !lockDraw ) {
+				drawing = false;
+				panButton.setUrl(Util.getImageURL()+"pan.png");
+				drawButton.setUrl(Util.getImageURL()+"draw_off.png");
+				editButton.setUrl(Util.getImageURL()+"edit_off.png");
+				drawRectangle.deactivate();
+				drawXLine.deactivate();
+				drawYLine.deactivate();
+				drawPoint.deactivate();
+			}
             
 			featureAdded();
 		}
@@ -681,6 +727,18 @@ public class OLMapWidget extends Composite {
 		}
 
 	};
+	
+	public ClickHandler settingsButtonClickHandler = new ClickHandler() {
+
+		@Override
+		public void onClick(ClickEvent event) {
+			
+			mapSettings.setPopupPosition(settingsButton.getAbsoluteLeft(), settingsButton.getAbsoluteTop()-25);
+			mapSettings.show();
+			
+		}
+		
+	};
 	public ClickHandler panButtonClickHandler = new ClickHandler() {
 
 		@Override
@@ -689,6 +747,10 @@ public class OLMapWidget extends Composite {
 			panButton.setUrl(Util.getImageURL()+"pan.png");
 			drawButton.setUrl(Util.getImageURL()+"draw_off.png");
 			editButton.setUrl(Util.getImageURL()+"edit_off.png");
+			drawPoint.deactivate();
+			drawRectangle.deactivate();
+			drawXLine.deactivate();
+			drawYLine.deactivate();
 		    modifyFeatureXY.deactivate();
 		    modifyFeatureLine.deactivate();
 		}
@@ -738,6 +800,8 @@ public class OLMapWidget extends Composite {
 				// Turn off drawing to allow selections
 				drawing = false;
 				drawButton.setUrl(Util.getImageURL()+"draw_off.png"); 
+				panButton.setUrl(Util.getImageURL()+"pan.png");
+				editButton.setUrl(Util.getImageURL()+"edit_off.png");
 				if ( tool.equals("xy") ) {
 
 					drawRectangle.deactivate();

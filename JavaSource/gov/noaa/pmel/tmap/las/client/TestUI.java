@@ -197,7 +197,7 @@ public class TestUI extends LASEntryPoint {
 			ortho.clear();
 			int width = Window.getClientWidth();
 			int pwidth = (width-rightPad);
-			panel = new VizGalPanel("LAS", false, op, option, view, productServer, true, rpcService);
+			panel = new VizGalPanel("LAS", true, op, option, view, productServer, true, rpcService);
 			panel.setVariable(var);
 			panel.init(false);
 			panel.addCompareAxisChangeListener(onAxisChange);
@@ -209,7 +209,8 @@ public class TestUI extends LASEntryPoint {
 	}
 	ClickListener panelApply = new ClickListener() {
 		public void onClick(Widget sender) {
-			panel.refreshPlot(null, false, true);
+			panel.setLatLon(String.valueOf(settingsControls.getRefMap().getXlo()), String.valueOf(settingsControls.getRefMap().getXhi()), String.valueOf(settingsControls.getRefMap().getYlo()), String.valueOf(settingsControls.getRefMap().getYhi()));
+			panel.refreshPlot(settingsControls.getOptions(), false, true);
 		}		
 	};
 	AsyncCallback getGridCallback = new AsyncCallback() {
