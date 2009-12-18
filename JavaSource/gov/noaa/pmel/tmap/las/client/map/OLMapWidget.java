@@ -72,9 +72,8 @@ public class OLMapWidget extends Composite {
 	
 	private Bounds wmsExtent;
 	private Bounds wrapExtent;
-	private Bounds currentSelection;
+	private Bounds currentSelection = new Bounds(-180, -90, 180, 90);
 	private Bounds dataBounds;
-	private Bounds currentRectangle;
 	
 	private RegularPolygonHandler regularPolygonHandler;
 	private DrawSingleFeatureOptions drawSingleFeatureOptionsForRectangle;
@@ -495,7 +494,6 @@ public class OLMapWidget extends Composite {
 		public void onFeatureAdded(VectorFeature vectorFeature) {
 			// How come there is no narrowToGeometry with a Geometry argument.
 			Geometry geo = Geometry.narrowToGeometry(vectorFeature.getGeometry().getJSObject());
-			currentRectangle = null;
 			trimSelection(geo.getBounds());
 			selectionMade = true;
 			
@@ -571,7 +569,6 @@ public class OLMapWidget extends Composite {
 			// Use it.
 			boxLayer.addFeature(new VectorFeature(selectionBounds.toGeometry()));
 			setSelection(selectionBounds);
-			currentRectangle = selectionBounds;
 		} else if ( tool.equals("x") || tool.equals("xz") || tool.equals("xt") ) {
 			// Modify it then use it.
 			selectionBounds = new Bounds(w_selection, center.lat(), e_selection, center.lat());
@@ -622,13 +619,8 @@ public class OLMapWidget extends Composite {
 		if ( !this.tool.equals(tool) ) {
 			editing = false;
 			this.tool = tool;
-			LonLat l = null;
-			VectorFeature[] features = boxLayer.getFeatures();
-			if ( features != null && features.length > 0 ) {
-				l = features[0].getCenterLonLat();
-			} else {
-				l = dataBounds.getCenterLonLat();
-			}
+			LonLat l = currentSelection.getCenterLonLat();
+			
 			double halfx = Math.min(Math.abs(dataBounds.getUpperRightX() - l.lon())/2.0, 
 					Math.abs(l.lon() - dataBounds.getLowerLeftX())/2.0);
 			double halfy = Math.min(Math.abs(dataBounds.getUpperRightY() - l.lat())/2.0,
@@ -644,10 +636,8 @@ public class OLMapWidget extends Composite {
 				drawButton.setDown(false);
 			}
 			// Draw the box from the center of the current geometry to half of the shortest distance to the edge of the data bounds.			
-			Bounds b = currentRectangle;
-			if ( b == null ) {
-				b = new Bounds(l.lon()-halfx, l.lat()-halfy, l.lon()+halfx, l.lat()+halfy);
-			}
+			
+			Bounds b = new Bounds(l.lon()-halfx, l.lat()-halfy, l.lon()+halfx, l.lat()+halfy);
 			trimSelection(b);
 
 			if ( tool.equals("t") || tool.equals("z") || tool.equals("zt") || tool.equals("pt") ) {
