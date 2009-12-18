@@ -10,7 +10,7 @@
 .OL_MAP-PushButton-down-disabled {
   margin: 0;
   text-decoration: none;
-  background: url("images/hborder.png") repeat-x 0px -27px;
+  background: url("../images/hborder.png") repeat-x 0px -27px;
 }
 .OL_MAP-PushButton-up,
 .OL_MAP-PushButton-up-hovering,
@@ -69,7 +69,7 @@
 .OL_MAP-ToggleButton-down-disabled {
   margin: 0;
   text-decoration: none;
-  background: url("images/hborder.png") repeat-x 0px -27px;
+  background: url("../images/hborder.png") repeat-x 0px -27px;
 }
 .OL_MAP-ToggleButton-up,
 .OL_MAP-ToggleButton-up-hovering,
