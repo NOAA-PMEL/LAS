@@ -122,6 +122,22 @@
 			LAS.initUI();
 					
 		}
+		function showDatasetPicker() {
+			if(document.getElementById('categories').style.display=='none') {
+				document.getElementById('categories').style.display='';
+				LAS.toggleUIMask('')
+			} else {
+				document.getElementById('categories').style.display='none'; 
+				LAS.toggleUIMask('none');
+			}	
+		}
+		function showPlotOptions() {
+			if(LAS.refs.options.plot.options)	{
+				LAS.toggleUIMask('');
+				document.getElementById('plotOptions').style.display='';
+			}	
+		}
+
 		</script>
 		<style media="all" type="text/css">
 			@import "JavaScript/ui/LASUI.css";
@@ -176,10 +192,10 @@
 				<div id="nav" style="position:relative;height:100%;width:100%;">
 				#if ($request.getParameter('hideCat'))
 				#else
-					<span class="top_link" width="100%" type="button" onclick="if(document.getElementById('categories').style.display=='none'){document.getElementById('categories').style.display='';LAS.toggleUIMask('')} else {document.getElementById('categories').style.display='none'; LAS.toggleUIMask('none');}">Choose dataset&nbsp;</span>		
+					<span class="top_link" width="100%" type="button" onclick="showDatasetPicker()">Choose dataset&nbsp;</span>		
 					#end	
 					<span  class="top_link" style="visibility:hidden" id="update" onclick="LAS.makeRequest();">Update Plot&nbsp;&nbsp<INPUT style="margin-bottom:-2pt;margin-right:-2pt;padding-left:2pt;margin-left:-2pt;padding-right:2pt;padding-bottom:2pt;margin-top:-1pt" type="checkbox" #if($request.getParameter('auto')) checked #end  onmousemove="window.status='Check to automatically update the plot.';" onmouseout="window.status='';" onclick="LAS.toggleAutoUpdate(event,this.checked)"></span>
-					<span  class="top_link" style="visibility:hidden" id="plotOptionsButton" onclick="if(LAS.refs.options.plot.options){LAS.toggleUIMask('');document.getElementById('plotOptions').style.display='';}">Set plot options&nbsp;</span>
+					<span  class="top_link" style="visibility:hidden" id="plotOptionsButton" onclick="showPlotOptions()">Set plot options&nbsp;</span>
 					<span width="100%" id="productButtons">
 						<span class="top_link" style="visibility:hidden" ID="Animation">Animate&nbsp;</span>
 						<span class="top_link" style="visibility:hidden" ID="Comparison">Compare&nbsp;</span>							
@@ -196,7 +212,7 @@
 
 			<table  width="1024px"><tbody><tr><td style="vertical-align:top" border=1>
 				<div id="constraints">
-					<div id="ol_map_widget" ></div>
+					<div id="ol_map_widget" onmouseover="showDatasetPicker(); this.onmouseover=null;"></div>
 					<div id="constraintsScroll"  class="LASConstraintsPane">
 						<div id="plotType"></div>
 						<div id="Date"></div>
@@ -227,13 +243,13 @@
 						<div id="DataConstraints"></div>
 					</div>					
 				</div></td><td>
-				<div id="wait_msg">Please wait while the plot loads...</div>
+				<div style="display:none;" id="wait_msg">Please wait while the plot loads...</div>
 				<iframe width="100%" height="100%" 
 					                #if($request.getParameter('catid'))  
 	 	                                        #else 
 	 	                                                src="start.html"  
 	 	                                        #end  
-					id="output" name="output" onload="LAS.onPlotLoad();" onreadystatechange="LAS.onPlotLoad();" frameborder=0></iframe>			
+					id="output" name="output" frameborder=0></iframe>			
 			</td></tr></tbody></table>
 			#parse( "/productserver/templates/V7UIFooter.vm") 
 		</div>

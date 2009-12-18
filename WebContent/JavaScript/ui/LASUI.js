@@ -138,7 +138,7 @@ LASUI.prototype.initUI = function (anchorId)
 	//}
 	this.refs.analysis.type.op.onchange = this.selectAnalysisType.LASBind(this);
 
-
+	document.getElementById(this.anchors.output).addEventListener("load",this.onPlotLoad.LASBind(this),true);
 	//grab references to the map constraint inputs
 	this.refs.inputs = {};
 	for(var i in this.anchors.inputs)
@@ -1116,57 +1116,37 @@ LASUI.prototype.setProductNode = function(type, product) {
 LASUI.prototype.onPlotLoad = function (e) {
 
 	//if(document.all)
-		var iframeDOM = window.frames[this.anchors.output];
+	var iframeDOM = window.frames[this.anchors.output];
 	//else
 	//	var iframeDOM = window.frames[this.anchors.output].contentWindow;
- 
+	 
 	iframeDOM.onPlotLoad = this.onPlotLoad.LASBind(this); 
-	url = iframeDOM.document.location.href;
+	//url = iframeDOM.document.location.href;
 	
-	if(e) {
-		if(e.getXMLText)
+	if(e) 
+		if(e.getXMLText) {
 			var plot_req = e;
-	} else	if(url.indexOf("xml=")>=0) {
-		var xml = unescape(url.slice(url.indexOf("xml=")+4)).replace(/\+/g," ");
-		var plot_req = new LASRequest(xml);
-	} 
-
-	if(plot_req)  {
-	
-	this.state.selection.x.max=plot_req.getRangeHi('x');
-        this.state.selection.x.min=plot_req.getRangeLo('x');
-        this.state.selection.y.max=plot_req.getRangeHi('y');
-        this.state.selection.y.min=plot_req.getRangeLo('y');
-        this.state.selection.z.max=plot_req.getRangeHi('z');
-        this.state.selection.z.min=plot_req.getRangeLo('z');
-        this.state.selection.t.max=plot_req.getRangeHi('t');
-        this.state.selection.t.min=plot_req.getRangeLo('t');
-	this.updating = true;
-	this.updateConstraints();
-	} 
+			this.state.selection.x.max=plot_req.getRangeHi('x');
+        		this.state.selection.x.min=plot_req.getRangeLo('x');
+        		this.state.selection.y.max=plot_req.getRangeHi('y');
+        		this.state.selection.y.min=plot_req.getRangeLo('y');
+        		this.state.selection.z.max=plot_req.getRangeHi('z');
+        		this.state.selection.z.min=plot_req.getRangeLo('z');
+        		this.state.selection.t.max=plot_req.getRangeHi('t');
+        		this.state.selection.t.min=plot_req.getRangeLo('t');
+			this.updating = true;
+			this.updateConstraints();
+		} 
 	
 	if(document.getElementById("wait"))
 		document.getElementById("wait").style.visibility="hidden";
 	if(document.getElementById("wait_msg"))
 		document.getElementById("wait_msg").style.display="none";
-	if(document.getElementById('output')) {
+	if(document.getElementById('output')) 
 		document.getElementById("output").style.visibility="visible";
-
-	}
+	
 }
 
-LASUI.prototype.onFirstPlotLoad = function () {
-	//window.frames[this.anchors.output].onload = this.onPlotLoad.LASBind(this);
-	       if(document.getElementById("wait"))
-                document.getElementById("wait").style.visibility="hidden";
-        if(document.getElementById("wait_msg"))
-                document.getElementById("wait_msg").style.display="none";
-        if(document.getElementById('output')) {
-                document.getElementById("output").style.visibility="visible";
-
-        }
-
-}
 LASUI.prototype.roundGrid = function(grid) {
 	var outgrid = {"x" : {"min": 0, "max": 0}, "y" : {"min": 0, "max": 0}};
 	outgrid.x.min = Math.round(grid.x.min*1000)/1000;
@@ -1275,25 +1255,14 @@ LASUI.prototype.initXYSelect = function (mode, reset) {
 	if(!this.products)
 		document.getElementById("XYRegionType").style.display = "";
 	if(this.state.grid.getAxis('x') && this.state.grid.getAxis('y') && mode)
-	 {
-		setMapTool(mode);
+	 {	
+		var modeChanged = false;
+		//if(this.state.view.plot!=mode||this.firstload) {
+			setMapTool(mode);
+		//	modeChanged=true;
+		//	this.firstload=false;
+		//}
 		var grid = {"x": {"min" : 0, "max" :0}, "y" : {"min" :0, "max" : 0}};
-
-		if(!this.state.selection.x) 
-			this.state.selection.x = {"min" : getMapXlo(),
-					 "max" : getMapXhi()
-					};
-		if(!this.state.selection.y)
-			this.state.selection.y = {"min" :getMapYlo(),
-					 "max" : getMapYhi()
-					};
-			
-		if(this.state.selection.y.max==null)
-			this.state.selection.y.max=this.state.selection.y.min;
-		if(this.state.selection.x.max==null)
-                        this.state.selection.x.max=this.state.selection.x.min;
-
-		
 
 		if(this.state.lastgrid) {
 			if(this.state.grid.response.grid.ID!=this.state.lastgrid.response.grid.ID)
@@ -1301,26 +1270,27 @@ LASUI.prototype.initXYSelect = function (mode, reset) {
 		}
 
 		if(this.state.grid.hasArange('x')||this.state.grid.hasMenu('x')) {
-				grid.x.min = parseFloat(this.state.grid.getLo('x'));
-				grid.x.max = parseFloat(this.state.grid.getHi('x'));
-			}
-
+			grid.x.min = parseFloat(this.state.grid.getLo('x'));
+			grid.x.max = parseFloat(this.state.grid.getHi('x'));
+		}
+		
 		if(this.state.grid.hasArange('y')||this.state.grid.hasMenu('y')) {
 			grid.y.min = parseFloat(this.state.grid.getLo('y'));
 			grid.y.max = parseFloat(this.state.grid.getHi('y'));
 		}
 
-		
+                	//setMapDataExtent(grid.y.min,grid.y.max,grid.x.min,grid.x.max,parseFloat(this.state.grid.getDelta('x')));
+
+
+
 		if(!isFeatureEditing()) {
-			if(reset==true) setMapDataExtent(grid.y.min,grid.y.max,grid.x.min,grid.x.max,parseFloat(this.state.grid.getDelta('x')));
-	         
-			if(this.state.newgrid) {
+			if(reset) { 
+				setMapDataExtent(grid.y.min,grid.y.max,grid.x.min,grid.x.max,parseFloat(this.state.grid.getDelta('x')));
 				setMapCurrentSelection(grid.y.min,grid.y.max,grid.x.min,grid.x.max);
-			} else if (this.state.selection.y.min&&this.state.selection.y.max&&this.state.selection.x.min&&this.state.selection.x.max) {
+			} else if(!reset&&(360-(this.state.selection.x.max- this.state.selection.x.min))/2>=parseFloat(this.state.grid.getDelta('x')))
 				setMapCurrentSelection(this.state.selection.y.min,this.state.selection.y.max,this.state.selection.x.min,this.state.selection.x.max);
-				} else {
-					setMapCurrentSelection(grid.y.min,grid.y.max,grid.x.min,grid.x.max);
-				}
+		
+		
 			delete(this.state.newgrid);
 			panToSelection();
 			if(this.submitOnLoad && this.params){
@@ -1992,7 +1962,12 @@ LASUI.prototype.cancelChangedOptions = function () {
 
 
 LASUI.prototype.onafterdraw = function (evt) {
-	
+
+	this.state.selection.x.min=getMapXlo();
+	this.state.selection.x.max=getMapXhi();
+	this.state.selection.y.min=getMapYlo();
+	this.state.selection.y.max=getMapYhi();
+
 	if(!this.updating)
 		if(this.autoupdate) {
 			this.makeRequest();
