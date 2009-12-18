@@ -56,6 +56,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 public class OLMapWidget extends Composite {
+    private double epsilon = .001;	
 	private String tool = "";
 	private DockPanel dockPanel;
 	private MapOptions wmsMapOptions;
@@ -73,6 +74,7 @@ public class OLMapWidget extends Composite {
 	private Bounds wmsExtent;
 	private Bounds wrapExtent;
 	private Bounds currentSelection = new Bounds(-180, -90, 180, 90);
+	private Bounds lastRectangle = new Bounds(-180, -90, 180, 90);
 	private Bounds dataBounds;
 	
 	private RegularPolygonHandler regularPolygonHandler;
@@ -116,9 +118,11 @@ public class OLMapWidget extends Composite {
 	private HorizontalPanel buttonPanel;
 	private PopupPanel helpPanel;
 	private VerticalPanel helpInterior;
-	private Image closeUp;
-	private Image closeDown;
+	private Image helpCloseUp;
+	private Image helpCloseDown;
 	private PushButton helpClose;
+	private Image settingsCloseUp;
+	private Image settingsCloseDown;
 	private PushButton settingsClose;
     private HTML help;
     private FlexTable topGrid;
@@ -144,8 +148,8 @@ public class OLMapWidget extends Composite {
 		textWidget.addEastChangeListener(eastChangeListener);
 		textWidget.addWestChangeListener(westChangeListener);
 		
-		closeUp = new Image(Util.getImageURL()+"close_off.png");
-		closeDown = new Image(Util.getImageURL()+"close_on.png");
+		helpCloseUp = new Image(Util.getImageURL()+"close_off.png");
+		helpCloseDown = new Image(Util.getImageURL()+"close_on.png");
 		
 		mapSettings = new PopupPanel();
 		mapSettingsInterior = new VerticalPanel();
@@ -163,9 +167,9 @@ public class OLMapWidget extends Composite {
 			}
 		});
 		helpButton.setTitle("Help");
-		helpButton.setStylePrimaryName("OL_MAP_image");
+		helpButton.setStylePrimaryName("OL_MAP-PushButton");
 		
-		helpClose = new PushButton(closeUp, closeDown, new ClickHandler() {
+		helpClose = new PushButton(helpCloseUp, helpCloseDown, new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
 				helpPanel.hide();
@@ -173,16 +177,21 @@ public class OLMapWidget extends Composite {
 			
 		});
 		helpClose.setTitle("Close");
-		helpClose.setStylePrimaryName("OL_MAP_image_button_close");
+		helpClose.setStylePrimaryName("OL_MAP-PushButton");
+		helpClose.addStyleName("OL_MAP-CloseButton");
 		
-		settingsClose = new PushButton(closeUp, closeDown, new ClickHandler() {
+		settingsCloseUp = new Image(Util.getImageURL()+"close_off.png");
+		settingsCloseDown = new Image(Util.getImageURL()+"close_on.png");
+		
+		settingsClose = new PushButton(settingsCloseUp, settingsCloseDown, new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
 				mapSettings.hide();
 			}
 		});
 		settingsClose.setTitle("Close");
-		settingsClose.setStylePrimaryName("OL_MAP_image_button_close");
+		settingsClose.setStylePrimaryName("OL_MAP-PushButton");
+		settingsClose.addStyleName("OL_MAP-CloseButton");
 		
 		resetButtonUp = new Image(Util.getImageURL()+"reset_off.png");
 		resetButtonDown = new Image(Util.getImageURL()+"reset_on.png");
@@ -201,7 +210,7 @@ public class OLMapWidget extends Composite {
 			
 		});
 		resetButton.setTitle("Reset Map");
-		resetButton.setStylePrimaryName("OL_MAP_image_button");
+		resetButton.setStylePrimaryName("OL_MAP-PushButton");
 		help = new HTML("<div style=\"font-family:verdana;font-size:9;\">" +
 				"<ul><li>To select an area of the map, click the <img alt=\"draw\" src=\""+Util.getImageURL()+"draw_off.png"+"\"/> button then click and drag on the map.</li>" +
 				"<li>When you finish drawing your selection, the selection button will deactivate.  I you want it to stay on click the <img alt=\"settings\" src=\""+Util.getImageURL()+"settings_off.png"+"\"/> button and check the box." +
@@ -219,18 +228,18 @@ public class OLMapWidget extends Composite {
 		drawButtonDown = new Image(Util.getImageURL()+"draw_on.png");
 		drawButton = new ToggleButton(drawButtonUp, drawButtonDown, drawButtonClickHandler);
 		drawButton.setTitle("Draw Selection");
-		drawButton.setStylePrimaryName("OL_MAP_image_button");
+		drawButton.setStylePrimaryName("OL_MAP-ToggleButton");
 		panButtonUp = new Image(Util.getImageURL()+"pan_off.png");
 		panButtonDown = new Image(Util.getImageURL()+"pan_on.png");
 		panButton = new ToggleButton(panButtonUp, panButtonDown, panButtonClickHandler);
 		panButton.setTitle("Pan Map");
-		panButton.setStylePrimaryName("OL_MAP_image_button");
+		panButton.setStylePrimaryName("OL_MAP-ToggleButton");
 		panButton.setDown(true);
 		editButtonUp = new Image(Util.getImageURL()+"edit_off.png");
 		editButtonDown = new Image(Util.getImageURL()+"edit_on.png");
 	    editButton = new ToggleButton(editButtonUp, editButtonDown, editButtonClickHandler);
 		editButton.setTitle("Click on selection to edit.");
-		editButton.setStylePrimaryName("OL_MAP_image_button");
+		editButton.setStylePrimaryName("OL_MAP-PushButton");
 		drawLock = new CheckBox("Keep map selection button active.");
 		drawLock.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
 
@@ -250,7 +259,7 @@ public class OLMapWidget extends Composite {
 		settingsButtonDown = new Image(Util.getImageURL()+"settings_on.png");
 		settingsButton = new PushButton(settingsButtonUp, settingsButtonDown, settingsButtonClickHandler);
 		settingsButton.setTitle("Map Widget Settings");
-		settingsButton.setStylePrimaryName("OL_MAP_image_button");
+		settingsButton.setStylePrimaryName("OL_MAP-PushButton");
 		
 		buttonPanel.add(helpButton);
 		buttonPanel.add(resetButton);
@@ -518,6 +527,7 @@ public class OLMapWidget extends Composite {
 		if ( tool.equals("xy") || tool.equals("t") || tool.equals("z") || tool.equals("zt") || tool.equals("pt") ) {
 			textWidget.setText(currentSelection.getUpperRightY(), currentSelection.getLowerLeftY(), 
 					currentSelection.getUpperRightX(), currentSelection.getLowerLeftX());
+			lastRectangle = currentSelection;
 		} else if ( tool.equals("x") || tool.equals("xz") || tool.equals("xt") ) {
 			LonLat c = currentSelection.getCenterLonLat();
 			textWidget.setText(c.lat(), c.lat(), 
@@ -549,9 +559,9 @@ public class OLMapWidget extends Composite {
 			}
 		}
 		Bounds selectionBounds;
-		if ( modulo || dataBounds.containsBounds(bounds, false, true) ) {
-			lineLayer.destroyFeatures();
-			boxLayer.destroyFeatures();
+		lineLayer.destroyFeatures();
+		boxLayer.destroyFeatures();
+		if ( modulo || dataBounds.containsBounds(bounds, false, true) ) {			
 			selectionBounds = new Bounds(w_selection, s_selection, e_selection, n_selection);
 		} else {
 			// Only trip the east west if the data is not modulo
@@ -620,24 +630,54 @@ public class OLMapWidget extends Composite {
 			editing = false;
 			this.tool = tool;
 			LonLat l = currentSelection.getCenterLonLat();
+			LonLat r = lastRectangle.getCenterLonLat();
+			
+			boolean useLast = false;
+			if ( Math.abs(l.lat() - r.lat() ) < epsilon && 
+				 Math.abs(l.lon() - r.lon() ) < epsilon ) {
+				useLast = true;
+			}
 			
 			double halfx = Math.min(Math.abs(dataBounds.getUpperRightX() - l.lon())/2.0, 
 					Math.abs(l.lon() - dataBounds.getLowerLeftX())/2.0);
 			double halfy = Math.min(Math.abs(dataBounds.getUpperRightY() - l.lat())/2.0,
 					Math.abs(l.lat() - dataBounds.getLowerLeftY())/2.0);
 			
-			
 			drawRectangle.deactivate();
 			drawXLine.deactivate();
 			drawYLine.deactivate();
-			if ( !lockDraw ) {
-				drawPoint.deactivate();
+			drawPoint.deactivate();
+			if ( !lockDraw ) {				
 				drawing = false;
 				drawButton.setDown(false);
 			}
-			// Draw the box from the center of the current geometry to half of the shortest distance to the edge of the data bounds.			
 			
-			Bounds b = new Bounds(l.lon()-halfx, l.lat()-halfy, l.lon()+halfx, l.lat()+halfy);
+			Bounds b;
+			if ( tool.equals("t") || tool.equals("z") || tool.equals("zt") || tool.equals("pt") ) {	
+				if ( lockDraw ) {
+					drawPoint.activate();
+				}
+			} else if ( tool.equals("x") || tool.equals("xz") || tool.equals("xt") ) {
+				if ( lockDraw ) {
+					drawXLine.activate();
+				}
+			} else if ( tool.equals("y") || tool.equals("yz") || tool.equals("yt") ) {
+				if ( lockDraw ) {
+					drawYLine.activate();
+				}
+			} else {
+				if ( lockDraw ) {
+				    drawRectangle.activate();
+				}
+			}
+			
+			// If the center of the current c
+			// Draw the box from the center of the current geometry to half of the shortest distance to the edge of the data bounds.			
+			if ( useLast ) {
+				b = lastRectangle;
+			} else {
+				b = new Bounds(l.lon()-halfx, l.lat()-halfy, l.lon()+halfx, l.lat()+halfy);
+			}
 			trimSelection(b);
 
 			if ( tool.equals("t") || tool.equals("z") || tool.equals("zt") || tool.equals("pt") ) {
