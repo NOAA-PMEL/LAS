@@ -530,6 +530,7 @@ LASUI.prototype.onSetVariable = function() {
 			if(document.getElementById("V6"))
 			document.getElementById("V6").href="servlets/datasets?dset=" + this.urlencode(categories + "/" + varObj.name);
 		}
+		 document.getElementById("ol_map_widget").onmouseover = null;
 }
 /**
  * Event handler for category selection, bind to category DOM object events.
