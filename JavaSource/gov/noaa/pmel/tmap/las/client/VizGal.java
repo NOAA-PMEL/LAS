@@ -288,7 +288,7 @@ public class VizGal extends LASEntryPoint {
 		header.setWidget(0, 0, showHide);
 		
 		showHide.setTitle("Show/Hide Panel Headers");
-
+        showHide.setStylePrimaryName("OL_MAP-ToggleButton");
 		// Button to turn on and off difference mode.
 		differenceButton = new ToggleButton("Difference Mode");
 		differenceButton.setTitle("Toggle Difference Mode");
