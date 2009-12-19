@@ -1283,14 +1283,16 @@ LASUI.prototype.initXYSelect = function (mode, reset) {
 			grid.y.max = parseFloat(this.state.grid.getHi('y'));
 		}
 
-                	//setMapDataExtent(grid.y.min,grid.y.max,grid.x.min,grid.x.max,parseFloat(this.state.grid.getDelta('x')));
+                setMapDataExtent(grid.y.min,grid.y.max,grid.x.min,grid.x.max,parseFloat(this.state.grid.getDelta('x')));
 
 
 
 		if(!isFeatureEditing()) {
 			if(reset) { 
-				setMapDataExtent(grid.y.min,grid.y.max,grid.x.min,grid.x.max,parseFloat(this.state.grid.getDelta('x')));
+				//setMapDataExtent(grid.y.min,grid.y.max,grid.x.min,grid.x.max,parseFloat(this.state.grid.getDelta('x')));
 				setMapCurrentSelection(grid.y.min,grid.y.max,grid.x.min,grid.x.max);
+				this.state.selection.x = grid.x;
+				 this.state.selection.y = grid.y;
 			} else if(!reset&&(360-(this.state.selection.x.max- this.state.selection.x.min))/2>=parseFloat(this.state.grid.getDelta('x')))
 				setMapCurrentSelection(this.state.selection.y.min,this.state.selection.y.max,this.state.selection.x.min,this.state.selection.x.max);
 		
