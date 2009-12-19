@@ -991,6 +991,8 @@ LASUI.prototype.setViews = function (strJson) {
 		this.refs.views = {};
 	this.refs.views.views = new LASGetViewsResponse(response);
 	this.setDefaultProductMenu();
+	if(this.refs.views.views.getViewByID(this.state.view.plot))
+		this.getOperations(this.state.dataset,this.state.variable,this.state.view.plot);
 }
 LASUI.prototype.setDefaultProductMenu = function () {
 	while(this.refs.operations.plot.DOMNode.firstChild)
@@ -1248,6 +1250,7 @@ LASUI.prototype.updateConstraints = function (view) {
 			this.showUpdateLink();
 
 	this.updating = false;
+	this.state.lastgrid=this.clone(this.state.grid);
 }
 /**
  * Initialize the XY select widget to the grid
