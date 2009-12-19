@@ -198,13 +198,14 @@ public class VizGal extends LASEntryPoint {
 	 */
 	VariableSerializable nvar;
 	boolean changeDataset = false;
-	String tridown;
-	String triright;
+	
 
 	/*
 	 * Button for showing and hiding the panel headers.
 	 */
-	Image showHide;
+	ToggleButton showHide;
+	Image minus;
+	Image plus;
 	boolean panelHeaderHidden;
 
 	/*
@@ -275,17 +276,17 @@ public class VizGal extends LASEntryPoint {
 
 		// Control whether the headers are hidden.
 		panelHeaderHidden = false;
-		tridown = Util.getImageURL()+"plus.png";
-		triright = Util.getImageURL()+"minus.png";
-		showHide = new Image(tridown);
-		header.setWidget(0, 0, showHide);
-		showHide.addClickHandler(new ClickHandler() {
+		plus = new Image(Util.getImageURL()+"plus_on.png");
+		minus = new Image(Util.getImageURL()+"minus_on.png");
+		showHide = new ToggleButton(plus, minus, new ClickHandler() {
+			@Override
 			public void onClick(ClickEvent event) {
 				// Handle the change by passing in the current state.
 				handlePanelShowHide();				
-			}			
+			}	
 		});
-
+		header.setWidget(0, 0, showHide);
+		
 		showHide.setTitle("Show/Hide Panel Headers");
 
 		// Button to turn on and off difference mode.
@@ -396,7 +397,6 @@ public class VizGal extends LASEntryPoint {
 				panel.show();
 			}
 			cellFormatter.setVisible(0, 0, true);
-			showHide.setUrl(tridown);
 			pwidth = pwidth - controlsWidth/2;
 			resize();
 		} else {
@@ -405,7 +405,6 @@ public class VizGal extends LASEntryPoint {
 				panel.hide();
 			}
 			cellFormatter.setVisible(0, 0, false);
-			showHide.setUrl(triright);
 			pwidth = pwidth + controlsWidth/2;
 			resize();
 		}
