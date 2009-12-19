@@ -15,7 +15,7 @@
 .OL_MAP-PushButton-up,
 .OL_MAP-PushButton-up-hovering,
 .OL_MAP-PushButton-up-disabled {
-  padding: 3px 5px 3px 5px;
+  padding: 1px 3px 1px 3px;
 }
 .OL_MAP-PushButton-up {
   border: 1px outset #ccc;
@@ -38,7 +38,7 @@
 .OL_MAP-PushButton-down,
 .OL_MAP-PushButton-down-hovering,
 .OL_MAP-PushButton-down-disabled {
-  padding: 4px 4px 2px 6px;
+  padding: 2px 2px 1px 3px;
 }
 .OL_MAP-PushButton-down {
   border: 1px inset #666;
@@ -74,7 +74,7 @@
 .OL_MAP-ToggleButton-up,
 .OL_MAP-ToggleButton-up-hovering,
 .OL_MAP-ToggleButton-up-disabled {
-  padding: 3px 5px 3px 5px;
+  padding: 1px 3px 1px 3px;
 }
 .OL_MAP-ToggleButton-up {
   border: 1px outset #ccc;
@@ -97,7 +97,7 @@
 .OL_MAP-ToggleButton-down,
 .OL_MAP-ToggleButton-down-hovering,
 .OL_MAP-ToggleButton-down-disabled {
-  padding: 4px 4px 2px 6px;
+  padding: 2px 2px 1px 3px;
 }
 .OL_MAP-ToggleButton-down {
   background-position: 0 -513px;
