@@ -1127,20 +1127,8 @@ LASUI.prototype.onPlotLoad = function (e) {
 	//url = iframeDOM.document.location.href;
 	
 	if(e) 
-		if(e.getXMLText) {
-			var plot_req = e;
-			this.state.selection.x.max=plot_req.getRangeHi('x');
-        		this.state.selection.x.min=plot_req.getRangeLo('x');
-        		this.state.selection.y.max=plot_req.getRangeHi('y');
-        		this.state.selection.y.min=plot_req.getRangeLo('y');
-        		this.state.selection.z.max=plot_req.getRangeHi('z');
-        		this.state.selection.z.min=plot_req.getRangeLo('z');
-        		this.state.selection.t.max=plot_req.getRangeHi('t');
-        		this.state.selection.t.min=plot_req.getRangeLo('t');
-			this.updating = true;
-			this.updateConstraints();
-		} 
-	
+		if(e.getXMLText&&!isFeatureEditing()&&this.state.view.plot=="xy")
+				 setMapCurrentSelection(e.getRangeLo('y'),e.getRangeHi('y'),e.getRangeLo('x'),e.getRangeHi('x'));			 
 	if(document.getElementById("wait"))
 		document.getElementById("wait").style.visibility="hidden";
 	if(document.getElementById("wait_msg"))
@@ -1256,57 +1244,11 @@ LASUI.prototype.updateConstraints = function (view) {
  * Initialize the XY select widget to the grid
  */
 LASUI.prototype.initXYSelect = function (mode, reset) {
-	if(!this.products)
-		document.getElementById("XYRegionType").style.display = "";
 	if(this.state.grid.getAxis('x') && this.state.grid.getAxis('y') && mode)
 	 {	
-		var modeChanged = false;
-		//if(this.state.view.plot!=mode||this.firstload) {
-			setMapTool(mode);
-		//	modeChanged=true;
-		//	this.firstload=false;
-		//}
-		var grid = {"x": {"min" : 0, "max" :0}, "y" : {"min" :0, "max" : 0}};
-
-		if(this.state.lastgrid) {
-			if(this.state.grid.response.grid.ID!=this.state.lastgrid.response.grid.ID)
-			reset=true;
-		}
-
-		if(this.state.grid.hasArange('x')||this.state.grid.hasMenu('x')) {
-			grid.x.min = parseFloat(this.state.grid.getLo('x'));
-			grid.x.max = parseFloat(this.state.grid.getHi('x'));
-		}
+		setMapTool(mode);
+                setMapDataExtent(parseFloat(this.state.grid.getLo('y')), parseFloat(this.state.grid.getHi('y')), parseFloat(this.state.grid.getLo('x')), parseFloat(this.state.grid.getHi('x')),parseFloat(this.state.grid.getDelta('x')));
 		
-		if(this.state.grid.hasArange('y')||this.state.grid.hasMenu('y')) {
-			grid.y.min = parseFloat(this.state.grid.getLo('y'));
-			grid.y.max = parseFloat(this.state.grid.getHi('y'));
-		}
-
-                setMapDataExtent(grid.y.min,grid.y.max,grid.x.min,grid.x.max,parseFloat(this.state.grid.getDelta('x')));
-
-
-
-		if(!isFeatureEditing()) {
-			if(reset) { 
-				//setMapDataExtent(grid.y.min,grid.y.max,grid.x.min,grid.x.max,parseFloat(this.state.grid.getDelta('x')));
-				setMapCurrentSelection(grid.y.min,grid.y.max,grid.x.min,grid.x.max);
-				this.state.selection.x = grid.x;
-				 this.state.selection.y = grid.y;
-			} else if(!reset&&(360-(this.state.selection.x.max- this.state.selection.x.min))/2>=parseFloat(this.state.grid.getDelta('x')))
-				setMapCurrentSelection(this.state.selection.y.min,this.state.selection.y.max,this.state.selection.x.min,this.state.selection.x.max);
-		
-		
-			delete(this.state.newgrid);
-			panToSelection();
-			if(this.submitOnLoad && this.params){
-				var bbox = {};
-				if(this.params.x)
-					bbox.x = this.params.x;
-				if(this.params.y)
-					bbox.y = this.params.y;
-			}
-		}
 	}
 }
 /**
