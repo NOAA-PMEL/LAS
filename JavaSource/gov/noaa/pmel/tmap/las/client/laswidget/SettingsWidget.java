@@ -1,10 +1,7 @@
-package gov.noaa.pmel.tmap.las.client.map;
+package gov.noaa.pmel.tmap.las.client.laswidget;
 
 import gov.noaa.pmel.tmap.las.client.RPCServiceAsync;
-import gov.noaa.pmel.tmap.las.client.laswidget.DatasetButton;
-import gov.noaa.pmel.tmap.las.client.laswidget.OperationsMenu;
-import gov.noaa.pmel.tmap.las.client.laswidget.OperationsWidget;
-import gov.noaa.pmel.tmap.las.client.laswidget.OptionsButton;
+import gov.noaa.pmel.tmap.las.client.map.OLMapWidget;
 import gov.noaa.pmel.tmap.las.client.serializable.OperationSerializable;
 
 import java.util.Iterator;
