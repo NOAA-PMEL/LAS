@@ -213,7 +213,7 @@ public class OLMapWidget extends Composite {
 		resetButton.setStylePrimaryName("OL_MAP-PushButton");
 		help = new HTML("<div style=\"font-family:verdana;font-size:9;\">" +
 				"<ul><li>To select an area of the map, click the <img alt=\"draw\" src=\""+Util.getImageURL()+"draw_off.png"+"\"/> button then click and drag on the map.</li>" +
-				"<li>When you finish drawing your selection, the selection button will deactivate.  I you want it to stay on click the <img alt=\"settings\" src=\""+Util.getImageURL()+"settings_off.png"+"\"/> button and check the box." +
+				"<li>When you finish drawing your selection, the selection button will deactivate.  If you want it to stay on click the <img alt=\"settings\" src=\""+Util.getImageURL()+"settings_off.png"+"\"/> button and check the box." +
 				"<li>To modify a selection click the <img alt=\"edit\" src=\""+Util.getImageURL()+"edit_off.png"+"\"/> button and click the selected area to modify it.  (Click again when finished.)</li>" +
 				"<li>To zoom, click the <img alt=\"zoom in\" src=\""+Util.getBaseURL()+"JavaScript/frameworks/OpenLayers/img/zoom-plus-mini.png\"/> and <img alt=\"zoom out\" src=\""+Util.getBaseURL()+"JavaScript/frameworks/OpenLayers/img/zoom-minus-mini.png\"/> buttons.</li>" +
 				"<li>To pan the map, click the <img alt=\"pan\" src=\""+Util.getImageURL()+"pan_off.png\"/> button and click and drag on the map.</li>" +
