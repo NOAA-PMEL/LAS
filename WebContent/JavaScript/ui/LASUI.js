@@ -1244,11 +1244,13 @@ LASUI.prototype.updateConstraints = function (view) {
  * Initialize the XY select widget to the grid
  */
 LASUI.prototype.initXYSelect = function (mode, reset) {
-	if(this.state.grid.getAxis('x') && this.state.grid.getAxis('y') && mode)
+	if(this.state.grid.getAxis('x') && this.state.grid.getAxis('y') && reset)
 	 {	
 		setMapTool(mode);
-                setMapDataExtent(parseFloat(this.state.grid.getLo('y')), parseFloat(this.state.grid.getHi('y')), parseFloat(this.state.grid.getLo('x')), parseFloat(this.state.grid.getHi('x')),parseFloat(this.state.grid.getDelta('x')));
+        setMapDataExtent(parseFloat(this.state.grid.getLo('y')), parseFloat(this.state.grid.getHi('y')), parseFloat(this.state.grid.getLo('x')), parseFloat(this.state.grid.getHi('x')),parseFloat(this.state.grid.getDelta('x')));
 		
+	} else {
+		setMapTool(mode);
 	}
 }
 /**
