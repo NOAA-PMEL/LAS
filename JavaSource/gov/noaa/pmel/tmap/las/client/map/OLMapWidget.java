@@ -435,9 +435,11 @@ public class OLMapWidget extends Composite {
 		}
 		zoomMap();
 		currentSelection = dataBounds;
+		lastRectangle = dataBounds;
 		boxLayer.destroyFeatures();
 		lineLayer.destroyFeatures();
 		editing = false;
+		setSelection(currentSelection);
 		// For now don't select the region at all.
 //		if ( !modulo ) {
 //		    boxLayer.addFeature(new VectorFeature(currentSelection.toGeometry()));
