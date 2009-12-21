@@ -555,10 +555,10 @@ public class OLMapWidget extends Composite {
 		double s_selection = bounds.getLowerLeftY();
 		double n_selection = bounds.getUpperRightY();
 		if ( tool.equals("xy") || tool.equals("x") || tool.equals("y") ) {
-			if ( s_selection < s_data ) {
+			if ( s_selection < s_data || s_selection > n_data ) {
 				s_selection = s_data;
 			}
-			if ( n_selection > n_data ) {
+			if ( n_selection > n_data || n_selection < s_data ) {
 				n_selection = n_data;
 			}
 		}
@@ -569,10 +569,10 @@ public class OLMapWidget extends Composite {
 			selectionBounds = new Bounds(w_selection, s_selection, e_selection, n_selection);
 		} else {
 			// Only trip the east west if the data is not modulo
-			if ( w_selection < w_data ) {
+			if ( w_selection < w_data || w_selection > e_data ) {
 				w_selection = w_data;
 			}
-			if ( e_selection > e_data ) {
+			if ( e_selection > e_data || e_selection < w_data ) {
 				e_selection = e_data;
 			}
 			selectionBounds = new Bounds(w_selection, s_selection, e_selection, n_selection);
