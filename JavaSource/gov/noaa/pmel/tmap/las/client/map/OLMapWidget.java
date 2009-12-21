@@ -1,11 +1,11 @@
 package gov.noaa.pmel.tmap.las.client.map;
 
-import gov.noaa.pmel.tmap.las.client.laswidget.Util;
 import gov.noaa.pmel.tmap.las.client.openlayers.DrawSingleFeature;
 import gov.noaa.pmel.tmap.las.client.openlayers.DrawSingleFeatureOptions;
 import gov.noaa.pmel.tmap.las.client.openlayers.HorizontalPathHandler;
 import gov.noaa.pmel.tmap.las.client.openlayers.VerticalPathHandler;
 import gov.noaa.pmel.tmap.las.client.openlayers.DrawSingleFeature.FeatureAddedListener;
+import gov.noaa.pmel.tmap.las.client.util.Util;
 
 import org.gwtopenmaps.openlayers.client.Bounds;
 import org.gwtopenmaps.openlayers.client.LonLat;

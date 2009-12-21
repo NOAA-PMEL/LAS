@@ -1,5 +1,7 @@
 package gov.noaa.pmel.tmap.las.client.laswidget;
 
+import gov.noaa.pmel.tmap.las.client.util.Util;
+
 import com.google.gwt.user.client.ui.ListBox;
 
 public class HourListBox extends ListBox {
