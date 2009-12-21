@@ -3,7 +3,7 @@ package gov.noaa.pmel.tmap.las.client;
 import java.util.List;
 import java.util.Map;
 
-import gov.noaa.pmel.tmap.las.client.laswidget.Util;
+import gov.noaa.pmel.tmap.las.client.util.Util;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;

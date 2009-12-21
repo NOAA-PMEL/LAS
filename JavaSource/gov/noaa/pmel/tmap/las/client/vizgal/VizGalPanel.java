@@ -7,9 +7,9 @@ import gov.noaa.pmel.tmap.las.client.laswidget.DateTimeWidget;
 import gov.noaa.pmel.tmap.las.client.laswidget.LASRequestWrapper;
 import gov.noaa.pmel.tmap.las.client.laswidget.SettingsWidget;
 import gov.noaa.pmel.tmap.las.client.laswidget.TandZWidgets;
-import gov.noaa.pmel.tmap.las.client.laswidget.Util;
 import gov.noaa.pmel.tmap.las.client.serializable.GridSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.VariableSerializable;
+import gov.noaa.pmel.tmap.las.client.util.Util;
 
 import java.util.HashMap;
 import java.util.Iterator;

@@ -1,6 +1,6 @@
 package gov.noaa.pmel.tmap.las.client.map;
 
-import gov.noaa.pmel.tmap.las.client.laswidget.Util;
+import gov.noaa.pmel.tmap.las.client.util.Util;
 
 import com.google.gwt.user.client.ui.ChangeListener;
 import com.google.gwt.user.client.ui.Composite;

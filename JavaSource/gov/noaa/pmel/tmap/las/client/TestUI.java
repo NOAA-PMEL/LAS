@@ -2,12 +2,12 @@ package gov.noaa.pmel.tmap.las.client;
 
 import gov.noaa.pmel.tmap.las.client.laswidget.OperationsMenu;
 import gov.noaa.pmel.tmap.las.client.laswidget.SettingsWidget;
-import gov.noaa.pmel.tmap.las.client.laswidget.Util;
 import gov.noaa.pmel.tmap.las.client.laswidget.Constants;
 import gov.noaa.pmel.tmap.las.client.serializable.CategorySerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.DatasetSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.GridSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.VariableSerializable;
+import gov.noaa.pmel.tmap.las.client.util.Util;
 import gov.noaa.pmel.tmap.las.client.vizgal.VizGalPanel;
 
 import java.util.ArrayList;
