@@ -524,10 +524,14 @@ public class OLMapWidget extends Composite {
 	};
 	private void setSelection(Bounds bounds) {
 		currentSelection = bounds;
-		if ( tool.equals("xy") || tool.equals("t") || tool.equals("z") || tool.equals("zt") || tool.equals("pt") ) {
+		if ( tool.equals("xy") ) {
 			textWidget.setText(currentSelection.getUpperRightY(), currentSelection.getLowerLeftY(), 
 					currentSelection.getUpperRightX(), currentSelection.getLowerLeftX());
 			lastRectangle = currentSelection;
+		} else if (tool.equals("t") || tool.equals("z") || tool.equals("zt") || tool.equals("pt") ) {
+			LonLat center = currentSelection.getCenterLonLat();
+			textWidget.setText(center.lat(), center.lat(), 
+					center.lon(), center.lon());
 		} else if ( tool.equals("x") || tool.equals("xz") || tool.equals("xt") ) {
 			LonLat c = currentSelection.getCenterLonLat();
 			textWidget.setText(c.lat(), c.lat(), 
