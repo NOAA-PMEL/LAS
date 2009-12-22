@@ -14,8 +14,12 @@ import org.gwtopenmaps.openlayers.client.MapOptions;
 import org.gwtopenmaps.openlayers.client.MapWidget;
 import org.gwtopenmaps.openlayers.client.Style;
 import org.gwtopenmaps.openlayers.client.StyleMap;
+import org.gwtopenmaps.openlayers.client.control.ArgParser;
+import org.gwtopenmaps.openlayers.client.control.Attribution;
 import org.gwtopenmaps.openlayers.client.control.ModifyFeature;
 import org.gwtopenmaps.openlayers.client.control.ModifyFeatureOptions;
+import org.gwtopenmaps.openlayers.client.control.Navigation;
+import org.gwtopenmaps.openlayers.client.control.PanZoom;
 import org.gwtopenmaps.openlayers.client.control.ModifyFeature.OnModificationEndListener;
 import org.gwtopenmaps.openlayers.client.control.ModifyFeature.OnModificationListener;
 import org.gwtopenmaps.openlayers.client.control.ModifyFeature.OnModificationStartListener;
@@ -34,6 +38,7 @@ import org.gwtopenmaps.openlayers.client.layer.WMSOptions;
 import org.gwtopenmaps.openlayers.client.layer.WMSParams;
 import org.gwtopenmaps.openlayers.client.marker.Box;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -44,6 +49,7 @@ import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.DockPanel;
 import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.Frame;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
@@ -92,6 +98,8 @@ public class OLMapWidget extends Composite {
 	private ModifyFeature modifyFeatureXY;
 	private ModifyFeature modifyFeatureLine;
 	
+	private PanZoom panZoomControl = new PanZoom();
+	
 	private RegionWidget regionWidget = new RegionWidget();
     private LatLonWidget textWidget = new LatLonWidget();
 	private Image helpButtonUp;
@@ -115,6 +123,7 @@ public class OLMapWidget extends Composite {
 	private PopupPanel mapSettings;
 	private VerticalPanel mapSettingsInterior;
 	private CheckBox drawLock;
+	private CheckBox panZoom;
 	private HorizontalPanel buttonPanel;
 	private PopupPanel helpPanel;
 	private VerticalPanel helpInterior;
@@ -124,7 +133,7 @@ public class OLMapWidget extends Composite {
 	private Image settingsCloseUp;
 	private Image settingsCloseDown;
 	private PushButton settingsClose;
-    private HTML help;
+    private Frame help;
     private FlexTable topGrid;
   
     private boolean modulo = true;
@@ -148,8 +157,8 @@ public class OLMapWidget extends Composite {
 		textWidget.addEastChangeListener(eastChangeListener);
 		textWidget.addWestChangeListener(westChangeListener);
 		
-		helpCloseUp = new Image(Util.getImageURL()+"close_off.png");
-		helpCloseDown = new Image(Util.getImageURL()+"close_on.png");
+		helpCloseUp = new Image(GWT.getModuleBaseURL()+"../images/close_off.png");
+		helpCloseDown = new Image(GWT.getModuleBaseURL()+"../images/close_on.png");
 		
 		mapSettings = new PopupPanel();
 		mapSettingsInterior = new VerticalPanel();
@@ -157,8 +166,8 @@ public class OLMapWidget extends Composite {
 		helpPanel = new PopupPanel();
 		helpInterior = new VerticalPanel();
 	    buttonPanel = new HorizontalPanel();
-		helpButtonUp = new Image(Util.getImageURL()+"info_off.png");
-		helpButtonDown = new Image(Util.getImageURL()+"info_on.png");
+		helpButtonUp = new Image(GWT.getModuleBaseURL()+"../images/info_off.png");
+		helpButtonDown = new Image(GWT.getModuleBaseURL()+"../images/info_on.png");
 		helpButton = new PushButton(helpButtonUp, helpButtonDown, new ClickHandler(){
 			@Override
 			public void onClick(ClickEvent event) {
@@ -180,8 +189,8 @@ public class OLMapWidget extends Composite {
 		helpClose.setStylePrimaryName("OL_MAP-PushButton");
 		helpClose.addStyleName("OL_MAP-CloseButton");
 		
-		settingsCloseUp = new Image(Util.getImageURL()+"close_off.png");
-		settingsCloseDown = new Image(Util.getImageURL()+"close_on.png");
+		settingsCloseUp = new Image(GWT.getModuleBaseURL()+"../images/close_off.png");
+		settingsCloseDown = new Image(GWT.getModuleBaseURL()+"../images/close_on.png");
 		
 		settingsClose = new PushButton(settingsCloseUp, settingsCloseDown, new ClickHandler() {
 			@Override
@@ -193,8 +202,8 @@ public class OLMapWidget extends Composite {
 		settingsClose.setStylePrimaryName("OL_MAP-PushButton");
 		settingsClose.addStyleName("OL_MAP-CloseButton");
 		
-		resetButtonUp = new Image(Util.getImageURL()+"reset_off.png");
-		resetButtonDown = new Image(Util.getImageURL()+"reset_on.png");
+		resetButtonUp = new Image(GWT.getModuleBaseURL()+"../images/reset_off.png");
+		resetButtonDown = new Image(GWT.getModuleBaseURL()+"../images/reset_on.png");
 		resetButton = new PushButton(resetButtonUp, resetButtonDown, new ClickHandler() {
 
 			@Override
@@ -211,7 +220,9 @@ public class OLMapWidget extends Composite {
 		});
 		resetButton.setTitle("Reset Map");
 		resetButton.setStylePrimaryName("OL_MAP-PushButton");
-		help = new HTML("<div style=\"font-family:verdana;font-size:9;\">" +
+		help = new Frame(GWT.getModuleBaseURL()+"../css/maphelp.html");
+				/*
+				"<div style=\"font-family:verdana;font-size:9;\">" +
 				"<ul><li>To select an area of the map, click the <img alt=\"draw\" src=\""+Util.getImageURL()+"draw_off.png"+"\"/> button then click and drag on the map.</li>" +
 				"<li>When you finish drawing your selection, the selection button will deactivate.  If you want it to stay on click the <img alt=\"settings\" src=\""+Util.getImageURL()+"settings_off.png"+"\"/> button and check the box." +
 				"<li>To modify a selection click the <img alt=\"edit\" src=\""+Util.getImageURL()+"edit_off.png"+"\"/> button and click the selected area to modify it.  (Click again when finished.)</li>" +
@@ -221,26 +232,42 @@ public class OLMapWidget extends Composite {
 				"<li>To re-center and zoom out and keep your selection click on the <img alt=\"world\" src=\""+Util.getBaseURL()+"JavaScript/frameworks/OpenLayers/img/zoom-world-mini.png\"/> button.</li>" +
 				"<li>To start over, click the <img alt=\"reset\" src=\""+Util.getImageURL()+"reset_off.png"+"\"/> button above the map.</li></ul>"+
 		        "</div>");
+		        */;
 		helpInterior.add(helpClose);
 		helpInterior.add(help); 
 		helpPanel.add(helpInterior);
-		drawButtonUp = new Image(Util.getImageURL()+"draw_off.png");
-		drawButtonDown = new Image(Util.getImageURL()+"draw_on.png");
+		drawButtonUp = new Image(GWT.getModuleBaseURL()+"../images/draw_off.png");
+		drawButtonDown = new Image(GWT.getModuleBaseURL()+"../images/draw_on.png");
 		drawButton = new ToggleButton(drawButtonUp, drawButtonDown, drawButtonClickHandler);
-		drawButton.setTitle("Draw Selection");
+		drawButton.setTitle("Select Region");
 		drawButton.setStylePrimaryName("OL_MAP-ToggleButton");
-		panButtonUp = new Image(Util.getImageURL()+"pan_off.png");
-		panButtonDown = new Image(Util.getImageURL()+"pan_on.png");
+		panButtonUp = new Image(GWT.getModuleBaseURL()+"../images/pan_off.png");
+		panButtonDown = new Image(GWT.getModuleBaseURL()+"../images/pan_on.png");
 		panButton = new ToggleButton(panButtonUp, panButtonDown, panButtonClickHandler);
 		panButton.setTitle("Pan Map");
 		panButton.setStylePrimaryName("OL_MAP-ToggleButton");
 		panButton.setDown(true);
-		editButtonUp = new Image(Util.getImageURL()+"edit_off.png");
-		editButtonDown = new Image(Util.getImageURL()+"edit_on.png");
+		editButtonUp = new Image(GWT.getModuleBaseURL()+"../images/edit_off.png");
+		editButtonDown = new Image(GWT.getModuleBaseURL()+"../images/edit_on.png");
 	    editButton = new ToggleButton(editButtonUp, editButtonDown, editButtonClickHandler);
 		editButton.setTitle("Click on selection to edit.");
 		editButton.setStylePrimaryName("OL_MAP-PushButton");
-		drawLock = new CheckBox("Keep map selection button active.");
+		panZoom = new CheckBox("Display Pan and Zoom Controls on the Map");
+		panZoom.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+			@Override
+			public void onValueChange(ValueChangeEvent<Boolean> event) {
+
+				boolean panZoomOn = event.getValue();
+				if ( panZoomOn ) {
+					panZoomControl = new PanZoom();
+					map.addControl(panZoomControl);
+				} else {
+					map.removeControl(panZoomControl);
+				}
+			}
+		});
+		panZoom.setValue(true, false);
+		drawLock = new CheckBox("Keep region selection button active.");
 		drawLock.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
 
 			@Override
@@ -252,13 +279,14 @@ public class OLMapWidget extends Composite {
 			
 		});
 		mapSettingsInterior.add(settingsClose);
-		mapSettingsInterior.add(new Label("Check this box to keep the map region selector active until you click another button."));
+		mapSettingsInterior.add(new Label("Optional Map Settings"));
 		mapSettingsInterior.add(drawLock);
+		mapSettingsInterior.add(panZoom);
 		mapSettings.add(mapSettingsInterior);
-		settingsButtonUp = new Image(Util.getImageURL()+"settings_off.png");
-		settingsButtonDown = new Image(Util.getImageURL()+"settings_on.png");
+		settingsButtonUp = new Image(GWT.getModuleBaseURL()+"../images/settings_off.png");
+		settingsButtonDown = new Image(GWT.getModuleBaseURL()+"../images/settings_on.png");
 		settingsButton = new PushButton(settingsButtonUp, settingsButtonDown, settingsButtonClickHandler);
-		settingsButton.setTitle("Map Widget Settings");
+		settingsButton.setTitle("Map Settings");
 		settingsButton.setStylePrimaryName("OL_MAP-PushButton");
 		
 		buttonPanel.add(helpButton);
@@ -278,6 +306,7 @@ public class OLMapWidget extends Composite {
 		wmsMapOptions = new MapOptions();
 		wmsMapOptions.setMaxExtent(wmsExtent);
 		wmsMapOptions.setRestrictedExtent(wmsExtent);
+		wmsMapOptions.removeDefaultControls();
 		wrapMapOptions = new MapOptions();
 		wrapMapOptions.setMaxExtent(wrapExtent);
 		wrapMapOptions.setRestrictedExtent(wrapExtent);
@@ -305,7 +334,11 @@ public class OLMapWidget extends Composite {
 		wrapLayer = new Vector("Wrap Layer", wrapLayerOptions);		
 		MapWidget mapWidget = new MapWidget("256px","128px", wmsMapOptions);
 		map = mapWidget.getMap();
-	   
+	    map.addControl(new Navigation());
+	    map.addControl(new Attribution());
+	    map.addControl(new ArgParser());
+	    // Keep an handle so we can remove it later.
+	    map.addControl(panZoomControl);
 		//Add a WMS layer for a little background
 		WMSParams wmsParams = new WMSParams();
 		wmsParams.setFormat("image/png");
@@ -744,7 +777,7 @@ public class OLMapWidget extends Composite {
 		@Override
 		public void onClick(ClickEvent event) {
 			
-			mapSettings.setPopupPosition(settingsButton.getAbsoluteLeft(), settingsButton.getAbsoluteTop()-25);
+			mapSettings.setPopupPosition(settingsButton.getAbsoluteLeft()+128, settingsButton.getAbsoluteTop()-25);
 			mapSettings.show();
 			
 		}
