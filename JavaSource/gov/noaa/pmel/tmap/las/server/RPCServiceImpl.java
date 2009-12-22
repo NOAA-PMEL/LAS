@@ -75,6 +75,16 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
 		}
 		return cats;
 	}
+	public VariableSerializable getVariable(String dsid, String varid ) throws RPCException {
+		LASConfig lasConfig = (LASConfig) getServletContext().getAttribute(LASConfigPlugIn.LAS_CONFIG_KEY);
+		Variable variable;
+		try {
+			variable = lasConfig.getVariable(dsid, varid);
+		} catch (JDOMException e) {
+			throw new RPCException(e.getMessage());
+		}
+		return variable.getVariableSerializable();
+	}
 	public CategorySerializable[] getCategories(String id) throws RPCException {
 		LASConfig lasConfig = (LASConfig) getServletContext().getAttribute(LASConfigPlugIn.LAS_CONFIG_KEY); 
 		ArrayList<Category> categories = new ArrayList<Category>();

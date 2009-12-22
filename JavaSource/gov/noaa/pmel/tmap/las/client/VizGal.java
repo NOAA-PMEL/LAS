@@ -366,7 +366,7 @@ public class VizGal extends LASEntryPoint {
 		if ( dsid != null && vid != null & op != null && view != null) {
 			// If the proper information was sent to the widget, pull down the variable definition
 			// and initialize the slide sorter with this Ajax call.
-			rpcService.getCategories(dsid, requestGrid);
+			rpcService.getVariable(dsid, vid, requestGrid);
 		}
 
 
@@ -448,19 +448,11 @@ public class VizGal extends LASEntryPoint {
 	};
 	AsyncCallback requestGrid = new AsyncCallback() {
 		public void onSuccess(Object result) {
-			CategorySerializable[] cats = (CategorySerializable[]) result;
-			if ( cats.length > 1 ) {
-				Window.alert("Error getting variables for this dataset.");
-			} else {
-				if ( cats[0].isVariableChildren() ) {
-					var = cats[0].getVariable(vid);
-					initial_var = var;
-					rpcService.getGrid(dsid, vid, initVisGal);
-				} else {
-					Window.alert("No variables found in this category");
-				}
-			}
+			var = (VariableSerializable) result;
+			initial_var = var;
+			rpcService.getGrid(dsid, vid, initVisGal);
 		}
+
 
 		@Override
 		public void onFailure(Throwable caught) {
