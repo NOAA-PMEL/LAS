@@ -17,6 +17,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -276,8 +277,8 @@ public class VizGal extends LASEntryPoint {
 
 		// Control whether the headers are hidden.
 		panelHeaderHidden = false;
-		plus = new Image(Util.getImageURL()+"plus_on.png");
-		minus = new Image(Util.getImageURL()+"minus_on.png");
+		plus = new Image(GWT.getModuleBaseURL()+"../images/plus_on.png");
+		minus = new Image(GWT.getModuleBaseURL()+"../images/minus_on.png");
 		showHide = new ToggleButton(plus, minus, new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
