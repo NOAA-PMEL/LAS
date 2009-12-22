@@ -266,7 +266,7 @@ public class OLMapWidget extends Composite {
 				}
 			}
 		});
-		panZoom.setValue(true, false);
+		
 		drawLock = new CheckBox("Keep region selection button active.");
 		drawLock.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
 
@@ -337,8 +337,7 @@ public class OLMapWidget extends Composite {
 	    map.addControl(new Navigation());
 	    map.addControl(new Attribution());
 	    map.addControl(new ArgParser());
-	    // Keep an handle so we can remove it later.
-	    map.addControl(panZoomControl);
+	    
 		//Add a WMS layer for a little background
 		WMSParams wmsParams = new WMSParams();
 		wmsParams.setFormat("image/png");
