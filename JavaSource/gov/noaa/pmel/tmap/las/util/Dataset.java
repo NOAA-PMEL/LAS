@@ -71,4 +71,16 @@ public class Dataset extends Container implements DatasetInterface {
 		wire_ds.setVariablesSerializable(getVariablesSerializable());
 		return wire_ds;
 	}
+	public Variable getVariable(String varid) {
+		ArrayList<Variable> variables = getVariables();
+		for (Iterator varId = variables.iterator(); varId.hasNext();) {
+			Variable variable = (Variable) varId.next();
+			if ( variable.getID().equals(varid) ) {
+				variable.setDSID(getID());
+				variable.setDSName(getName());
+				return variable;
+			}
+		}
+		return null;
+	}
 }
