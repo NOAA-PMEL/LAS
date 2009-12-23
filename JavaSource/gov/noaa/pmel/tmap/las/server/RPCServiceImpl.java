@@ -300,8 +300,28 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
 			}
 		} else {
 			try {
-				operations = lasConfig.getOperations(view, dsID, varID);
+				if ( view != null) {	
+					operations = lasConfig.getOperations(view, dsID, varID);
+				} else {
+					ArrayList<View> views = lasConfig.getViewsByDatasetAndVariable(dsID, varID);
+					HashMap<String, Operation> allOps = new HashMap<String, Operation>();
+					for (Iterator viewIt = views.iterator(); viewIt.hasNext();) {
+						View aView = (View) viewIt.next();
+						ArrayList<Operation> ops = lasConfig.getOperations(aView.getValue(), dsID, varID);
+						for (Iterator opsIt = ops.iterator(); opsIt.hasNext();) {
+							Operation op = (Operation) opsIt.next();
+							String id = op.getID();
+							allOps.put(id, op);
+						}
+					}
+					for (Iterator idIt = allOps.keySet().iterator(); idIt.hasNext();) {
+						String id = (String) idIt.next();
+						operations.add(allOps.get(id));
+					}
+				}
 			} catch (JDOMException e) {
+				throw new RPCException(e.getMessage());
+			} catch (LASException e) {
 				throw new RPCException(e.getMessage());
 			}
 		}
