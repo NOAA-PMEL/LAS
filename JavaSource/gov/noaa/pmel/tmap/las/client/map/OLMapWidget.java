@@ -5,7 +5,6 @@ import gov.noaa.pmel.tmap.las.client.openlayers.DrawSingleFeatureOptions;
 import gov.noaa.pmel.tmap.las.client.openlayers.HorizontalPathHandler;
 import gov.noaa.pmel.tmap.las.client.openlayers.VerticalPathHandler;
 import gov.noaa.pmel.tmap.las.client.openlayers.DrawSingleFeature.FeatureAddedListener;
-import gov.noaa.pmel.tmap.las.client.util.Util;
 
 import org.gwtopenmaps.openlayers.client.Bounds;
 import org.gwtopenmaps.openlayers.client.LonLat;
@@ -16,10 +15,15 @@ import org.gwtopenmaps.openlayers.client.Style;
 import org.gwtopenmaps.openlayers.client.StyleMap;
 import org.gwtopenmaps.openlayers.client.control.ArgParser;
 import org.gwtopenmaps.openlayers.client.control.Attribution;
+import org.gwtopenmaps.openlayers.client.control.Control;
 import org.gwtopenmaps.openlayers.client.control.ModifyFeature;
 import org.gwtopenmaps.openlayers.client.control.ModifyFeatureOptions;
 import org.gwtopenmaps.openlayers.client.control.Navigation;
-import org.gwtopenmaps.openlayers.client.control.PanZoom;
+import org.gwtopenmaps.openlayers.client.control.Panel;
+import org.gwtopenmaps.openlayers.client.control.PanelOptions;
+import org.gwtopenmaps.openlayers.client.control.ZoomIn;
+import org.gwtopenmaps.openlayers.client.control.ZoomOut;
+import org.gwtopenmaps.openlayers.client.control.ZoomPanel;
 import org.gwtopenmaps.openlayers.client.control.ModifyFeature.OnModificationEndListener;
 import org.gwtopenmaps.openlayers.client.control.ModifyFeature.OnModificationListener;
 import org.gwtopenmaps.openlayers.client.control.ModifyFeature.OnModificationStartListener;
@@ -41,19 +45,14 @@ import org.gwtopenmaps.openlayers.client.marker.Box;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.ChangeListener;
-import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.DockPanel;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.Frame;
-import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
-import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.PushButton;
 import com.google.gwt.user.client.ui.TextBox;
@@ -98,8 +97,6 @@ public class OLMapWidget extends Composite {
 	private ModifyFeature modifyFeatureXY;
 	private ModifyFeature modifyFeatureLine;
 	
-	private PanZoom panZoomControl = new PanZoom();
-	
 	private RegionWidget regionWidget = new RegionWidget();
     private LatLonWidget textWidget = new LatLonWidget();
 	private Image helpButtonUp;
@@ -117,22 +114,15 @@ public class OLMapWidget extends Composite {
 	private Image editButtonUp;
 	private Image editButtonDown;
 	private ToggleButton editButton;
-	private Image settingsButtonUp;
-	private Image settingsButtonDown;
-	private PushButton settingsButton;
-	private PopupPanel mapSettings;
-	private VerticalPanel mapSettingsInterior;
-	private CheckBox drawLock;
-	private CheckBox panZoom;
+	private Image lockDrawButtonUp;
+	private Image lockDrawButtonDown;
+	private ToggleButton lockDrawButton;
 	private HorizontalPanel buttonPanel;
 	private PopupPanel helpPanel;
 	private VerticalPanel helpInterior;
 	private Image helpCloseUp;
 	private Image helpCloseDown;
 	private PushButton helpClose;
-	private Image settingsCloseUp;
-	private Image settingsCloseDown;
-	private PushButton settingsClose;
     private Frame help;
     private FlexTable topGrid;
   
@@ -150,6 +140,12 @@ public class OLMapWidget extends Composite {
     
     boolean editing = false;
     
+    // Explicitly construct and add the controls we want instead of the defaults.
+    private Navigation navControl;
+    private ArgParser argParser;
+    private Attribution attribControl;
+    private ZoomPanel zoomPanel;
+    
 	public OLMapWidget() {
 		regionWidget.setChangeListener(regionChangeListener);
 		textWidget.addSouthChangeListener(southChangeListener);
@@ -160,8 +156,6 @@ public class OLMapWidget extends Composite {
 		helpCloseUp = new Image(GWT.getModuleBaseURL()+"../images/close_off.png");
 		helpCloseDown = new Image(GWT.getModuleBaseURL()+"../images/close_on.png");
 		
-		mapSettings = new PopupPanel();
-		mapSettingsInterior = new VerticalPanel();
 		dockPanel = new DockPanel();
 		helpPanel = new PopupPanel();
 		helpInterior = new VerticalPanel();
@@ -189,19 +183,6 @@ public class OLMapWidget extends Composite {
 		helpClose.setStylePrimaryName("OL_MAP-PushButton");
 		helpClose.addStyleName("OL_MAP-CloseButton");
 		
-		settingsCloseUp = new Image(GWT.getModuleBaseURL()+"../images/close_off.png");
-		settingsCloseDown = new Image(GWT.getModuleBaseURL()+"../images/close_on.png");
-		
-		settingsClose = new PushButton(settingsCloseUp, settingsCloseDown, new ClickHandler() {
-			@Override
-			public void onClick(ClickEvent event) {
-				mapSettings.hide();
-			}
-		});
-		settingsClose.setTitle("Close");
-		settingsClose.setStylePrimaryName("OL_MAP-PushButton");
-		settingsClose.addStyleName("OL_MAP-CloseButton");
-		
 		resetButtonUp = new Image(GWT.getModuleBaseURL()+"../images/reset_off.png");
 		resetButtonDown = new Image(GWT.getModuleBaseURL()+"../images/reset_on.png");
 		resetButton = new PushButton(resetButtonUp, resetButtonDown, new ClickHandler() {
@@ -221,18 +202,6 @@ public class OLMapWidget extends Composite {
 		resetButton.setTitle("Reset Map");
 		resetButton.setStylePrimaryName("OL_MAP-PushButton");
 		help = new Frame(GWT.getModuleBaseURL()+"../css/maphelp.html");
-				/*
-				"<div style=\"font-family:verdana;font-size:9;\">" +
-				"<ul><li>To select an area of the map, click the <img alt=\"draw\" src=\""+Util.getImageURL()+"draw_off.png"+"\"/> button then click and drag on the map.</li>" +
-				"<li>When you finish drawing your selection, the selection button will deactivate.  If you want it to stay on click the <img alt=\"settings\" src=\""+Util.getImageURL()+"settings_off.png"+"\"/> button and check the box." +
-				"<li>To modify a selection click the <img alt=\"edit\" src=\""+Util.getImageURL()+"edit_off.png"+"\"/> button and click the selected area to modify it.  (Click again when finished.)</li>" +
-				"<li>To zoom, click the <img alt=\"zoom in\" src=\""+Util.getBaseURL()+"JavaScript/frameworks/OpenLayers/img/zoom-plus-mini.png\"/> and <img alt=\"zoom out\" src=\""+Util.getBaseURL()+"JavaScript/frameworks/OpenLayers/img/zoom-minus-mini.png\"/> buttons.</li>" +
-				"<li>To pan the map, click the <img alt=\"pan\" src=\""+Util.getImageURL()+"pan_off.png\"/> button and click and drag on the map.</li>" +
-				"<li>or click the <img alt=\"arrow \" src=\""+Util.getBaseURL()+"JavaScript/frameworks/OpenLayers/img/north-mini.png\"/> <img alt=\"arrow buttons\" src=\""+Util.getBaseURL()+"JavaScript/frameworks/OpenLayers/img/south-mini.png\"/> <img alt=\"arrow buttons\" src=\""+Util.getBaseURL()+"JavaScript/frameworks/OpenLayers/img/east-mini.png\"/> <img alt=\"arrow buttons\" src=\""+Util.getBaseURL()+"JavaScript/frameworks/OpenLayers/img/west-mini.png\"/> buttons.</li>" +
-				"<li>To re-center and zoom out and keep your selection click on the <img alt=\"world\" src=\""+Util.getBaseURL()+"JavaScript/frameworks/OpenLayers/img/zoom-world-mini.png\"/> button.</li>" +
-				"<li>To start over, click the <img alt=\"reset\" src=\""+Util.getImageURL()+"reset_off.png"+"\"/> button above the map.</li></ul>"+
-		        "</div>");
-		        */;
 		helpInterior.add(helpClose);
 		helpInterior.add(help); 
 		helpPanel.add(helpInterior);
@@ -252,49 +221,19 @@ public class OLMapWidget extends Composite {
 	    editButton = new ToggleButton(editButtonUp, editButtonDown, editButtonClickHandler);
 		editButton.setTitle("Click on selection to edit.");
 		editButton.setStylePrimaryName("OL_MAP-PushButton");
-		panZoom = new CheckBox("Display Pan and Zoom Controls on the Map");
-		panZoom.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
-			@Override
-			public void onValueChange(ValueChangeEvent<Boolean> event) {
-
-				boolean panZoomOn = event.getValue();
-				if ( panZoomOn ) {
-					panZoomControl = new PanZoom();
-					map.addControl(panZoomControl);
-				} else {
-					map.removeControl(panZoomControl);
-				}
-			}
-		});
 		
-		drawLock = new CheckBox("Keep region selection button active.");
-		drawLock.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
-
-			@Override
-			public void onValueChange(ValueChangeEvent<Boolean> event) {
-
-                 lockDraw = event.getValue();
-				
-			}
-			
-		});
-		mapSettingsInterior.add(settingsClose);
-		mapSettingsInterior.add(new Label("Optional Map Settings"));
-		mapSettingsInterior.add(drawLock);
-		mapSettingsInterior.add(panZoom);
-		mapSettings.add(mapSettingsInterior);
-		settingsButtonUp = new Image(GWT.getModuleBaseURL()+"../images/settings_off.png");
-		settingsButtonDown = new Image(GWT.getModuleBaseURL()+"../images/settings_on.png");
-		settingsButton = new PushButton(settingsButtonUp, settingsButtonDown, settingsButtonClickHandler);
-		settingsButton.setTitle("Map Settings");
-		settingsButton.setStylePrimaryName("OL_MAP-PushButton");
+		lockDrawButtonUp = new Image(GWT.getModuleBaseURL()+"../images/draw_lock_off.png");
+		lockDrawButtonDown = new Image(GWT.getModuleBaseURL()+"../images/draw_lock_on.png");
+		lockDrawButton = new ToggleButton(lockDrawButtonUp, lockDrawButtonDown, lockDrawButtonClickHandler);
+		lockDrawButton.setTitle("Lock Select Region On");
+		lockDrawButton.setStylePrimaryName("OL_MAP-PushButton");
 		
 		buttonPanel.add(helpButton);
 		buttonPanel.add(resetButton);
 		buttonPanel.add(editButton);
 		buttonPanel.add(panButton);
 		buttonPanel.add(drawButton);
-		buttonPanel.add(settingsButton);
+		buttonPanel.add(lockDrawButton);
 		
 		topGrid = new FlexTable();
 		topGrid.setWidget(0, 0, buttonPanel);
@@ -306,7 +245,6 @@ public class OLMapWidget extends Composite {
 		wmsMapOptions = new MapOptions();
 		wmsMapOptions.setMaxExtent(wmsExtent);
 		wmsMapOptions.setRestrictedExtent(wmsExtent);
-		wmsMapOptions.removeDefaultControls();
 		wrapMapOptions = new MapOptions();
 		wrapMapOptions.setMaxExtent(wrapExtent);
 		wrapMapOptions.setRestrictedExtent(wrapExtent);
@@ -332,12 +270,10 @@ public class OLMapWidget extends Composite {
 		VectorOptions wrapLayerOptions = new VectorOptions();
 		wrapLayerOptions.setIsBaseLayer(true);
 		wrapLayer = new Vector("Wrap Layer", wrapLayerOptions);		
+		// Start with no controls on the map.
+		wmsMapOptions.removeDefaultControls();
 		MapWidget mapWidget = new MapWidget("256px","128px", wmsMapOptions);
 		map = mapWidget.getMap();
-	    map.addControl(new Navigation());
-	    map.addControl(new Attribution());
-	    map.addControl(new ArgParser());
-	    
 		//Add a WMS layer for a little background
 		WMSParams wmsParams = new WMSParams();
 		wmsParams.setFormat("image/png");
@@ -355,7 +291,28 @@ public class OLMapWidget extends Composite {
 		map.addLayer(wmsLayer);
 		map.addLayer(boxLayer);
 		map.addLayer(lineLayer);
-        
+		
+		/*
+		 * We removed the default controls... which are:
+		
+		       - OpenLayers.Control.Navigation<http://dev.openlayers.org/docs/files/OpenLayers/Control/Navigation-js.html#OpenLayers.Control.Navigation>
+			   - OpenLayers.Control.PanZoom<http://dev.openlayers.org/docs/files/OpenLayers/Control/PanZoom-js.html#OpenLayers.Control.PanZoom>
+			   - OpenLayers.Control.ArgParser<http://dev.openlayers.org/docs/files/OpenLayers/Control/ArgParser-js.html#OpenLayers.Control.ArgParser>
+			   - OpenLayers.Control.Attribution<http://dev.openlayers.org/docs/files/OpenLayers/Control/Attribution-js.html#OpenLayers.Control.Attribution>
+
+		  * Now we add back all of them except we substitute the zoom control for the pan/zoom control.
+		  */
+		// Just like the defaults...
+		navControl = new Navigation();
+		argParser = new ArgParser();
+		attribControl = new Attribution();
+		zoomPanel = new ZoomPanel();
+		
+		map.addControl(navControl);
+		map.addControl(argParser);
+		map.addControl(attribControl);
+		map.addControl(zoomPanel);
+	
 		drawSingleFeatureOptionsForRectangle = new DrawSingleFeatureOptions();
 		regularPolygonHandlerOptions = new RegularPolygonHandlerOptions();
 		regularPolygonHandlerOptions.setSides(4);
@@ -771,14 +728,17 @@ public class OLMapWidget extends Composite {
 
 	};
 	
-	public ClickHandler settingsButtonClickHandler = new ClickHandler() {
+	public ClickHandler lockDrawButtonClickHandler = new ClickHandler() {
 
 		@Override
 		public void onClick(ClickEvent event) {
 			
-			mapSettings.setPopupPosition(settingsButton.getAbsoluteLeft()+128, settingsButton.getAbsoluteTop()-25);
-			mapSettings.show();
-			
+			if (lockDrawButton.isDown()) {
+				lockDraw = true;
+			} else {
+				lockDraw = false;
+			}
+			toggleDrawing();
 		}
 		
 	};
@@ -799,83 +759,87 @@ public class OLMapWidget extends Composite {
 		}
 		
 	};
+	private void toggleDrawing() {
+		if ( !drawing ) {
+			// Drawing is not active, so activate it.
+			drawing = true;
+			panButton.setDown(false);
+			editButton.setDown(false);
+			drawButton.setDown(true);
+			if ( tool.equals("xy") ) {
+
+				drawRectangle.activate();
+				drawXLine.deactivate();
+				drawYLine.deactivate();
+				drawPoint.deactivate();
+
+			} else if ( tool.equals("x") || tool.equals("xz") || tool.equals("xt") ) {
+
+				drawRectangle.deactivate();
+				drawXLine.activate();
+				drawYLine.deactivate();
+				drawPoint.deactivate();
+
+			} else if ( tool.equals("y") || tool.equals("yz") || tool.equals("yt") ) {
+
+				drawRectangle.deactivate();
+				drawXLine.deactivate();
+				drawYLine.activate();
+				drawPoint.deactivate();
+
+			} else if ( tool.equals("t") || tool.equals("z") || tool.equals("zt") || tool.equals("pt") ) {
+				// A view of z to t is a point tool type
+
+				drawRectangle.deactivate();
+				drawXLine.deactivate();
+				drawYLine.deactivate();
+				drawPoint.activate();
+
+			} 
+		} else {
+			// Turn off drawing to allow selections
+			drawing = false;
+			drawButton.setDown(false);
+			lockDrawButton.setDown(false);
+			panButton.setDown(true);
+			editButton.setDown(false);
+			if ( tool.equals("xy") ) {
+
+				drawRectangle.deactivate();
+				drawXLine.deactivate();
+				drawYLine.deactivate();
+				drawPoint.deactivate();
+
+			} else if ( tool.equals("x") || tool.equals("xz") || tool.equals("xt") ) {
+
+				drawRectangle.deactivate();
+				drawXLine.deactivate();
+				drawYLine.deactivate();
+				drawPoint.deactivate();
+
+			} else if ( tool.equals("y") || tool.equals("yz") || tool.equals("yt") ) {
+
+				drawRectangle.deactivate();
+				drawXLine.deactivate();
+				drawYLine.deactivate();
+				drawPoint.deactivate();
+
+			} else if ( tool.equals("t") || tool.equals("z") || tool.equals("zt") || tool.equals("pt") ) {
+				// A view of z to t is a point tool type
+
+				drawRectangle.deactivate();
+				drawXLine.deactivate();
+				drawYLine.deactivate();
+				drawPoint.deactivate();
+
+			} 
+		}
+	}
 	public ClickHandler drawButtonClickHandler = new ClickHandler() {
 
 		@Override
 		public void onClick(ClickEvent event) {
-			if ( !drawing ) {
-				// Drawing is not active, so activate it.
-				drawing = true;
-				panButton.setDown(false);
-				editButton.setDown(false);
-				drawButton.setDown(true);
-				if ( tool.equals("xy") ) {
-
-					drawRectangle.activate();
-					drawXLine.deactivate();
-					drawYLine.deactivate();
-					drawPoint.deactivate();
-
-				} else if ( tool.equals("x") || tool.equals("xz") || tool.equals("xt") ) {
-
-					drawRectangle.deactivate();
-					drawXLine.activate();
-					drawYLine.deactivate();
-					drawPoint.deactivate();
-
-				} else if ( tool.equals("y") || tool.equals("yz") || tool.equals("yt") ) {
-
-					drawRectangle.deactivate();
-					drawXLine.deactivate();
-					drawYLine.activate();
-					drawPoint.deactivate();
-
-				} else if ( tool.equals("t") || tool.equals("z") || tool.equals("zt") || tool.equals("pt") ) {
-					// A view of z to t is a point tool type
-
-					drawRectangle.deactivate();
-					drawXLine.deactivate();
-					drawYLine.deactivate();
-					drawPoint.activate();
-
-				} 
-			} else {
-				// Turn off drawing to allow selections
-				drawing = false;
-				drawButton.setDown(false);
-				panButton.setDown(true);
-				editButton.setDown(false);
-				if ( tool.equals("xy") ) {
-
-					drawRectangle.deactivate();
-					drawXLine.deactivate();
-					drawYLine.deactivate();
-					drawPoint.deactivate();
-
-				} else if ( tool.equals("x") || tool.equals("xz") || tool.equals("xt") ) {
-
-					drawRectangle.deactivate();
-					drawXLine.deactivate();
-					drawYLine.deactivate();
-					drawPoint.deactivate();
-
-				} else if ( tool.equals("y") || tool.equals("yz") || tool.equals("yt") ) {
-
-					drawRectangle.deactivate();
-					drawXLine.deactivate();
-					drawYLine.deactivate();
-					drawPoint.deactivate();
-
-				} else if ( tool.equals("t") || tool.equals("z") || tool.equals("zt") || tool.equals("pt") ) {
-					// A view of z to t is a point tool type
-
-					drawRectangle.deactivate();
-					drawXLine.deactivate();
-					drawYLine.deactivate();
-					drawPoint.deactivate();
-
-				} 
-			}
+			toggleDrawing();
 		}		
 	};
 	/**
