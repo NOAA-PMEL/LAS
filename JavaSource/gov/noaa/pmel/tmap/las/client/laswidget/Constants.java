@@ -7,6 +7,7 @@ public class Constants {
 	public static final String DEFAULT_OP = "default_operation";
 	public static final String DEFAULT_OPTION = "default_option";
 	public static final String DEFAULT_VIEW = "default_view";
+	// Not used at this time.  Probably need default hi and low for all axes...
 	public static final String DEFAULT_TIME = "default_time";
 	public static final String DEFAULT_Z = "default_z";
 	
