@@ -2,6 +2,7 @@ package gov.noaa.pmel.tmap.las.client.map;
 
 import gov.noaa.pmel.tmap.las.client.util.Util;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.ui.ChangeListener;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
@@ -35,7 +36,7 @@ public class LatLonWidget extends Composite {
 		panel = new Grid(1,3);
 		middle = new VerticalPanel();
 		
-		rose = new Image(Util.getImageURL()+"rose.png");
+		rose = new Image(GWT.getModuleBaseURL()+"../images/compass_rose.png");
 		rose.addStyleName("LSS_middle");
 
 		southLat = new TextBox();
@@ -52,6 +53,7 @@ public class LatLonWidget extends Composite {
         
 		panel.setWidget(0, 0, westLon);	
 		middle.add(northLat);
+		middle.add(rose);
 		middle.add(southLat);
 		panel.setWidget(0, 1, middle);
 		panel.setWidget(0, 2, eastLon);
