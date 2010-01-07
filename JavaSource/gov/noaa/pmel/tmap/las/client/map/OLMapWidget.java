@@ -114,9 +114,18 @@ public class OLMapWidget extends Composite {
 	private Image editButtonUp;
 	private Image editButtonDown;
 	private ToggleButton editButton;
-	private Image lockDrawButtonUp;
-	private Image lockDrawButtonDown;
-	private ToggleButton lockDrawButton;
+	private Image zoomInButtonUp;
+	private Image zoomInButtonDown;
+	private PushButton zoomInButton;
+	private Image zoomOutButtonUp;
+	private Image zoomOutButtonDown;
+	private PushButton zoomOutButton;
+	private Image zoomFullButtonUp;
+	private Image zoomFullButtonDown;
+	private PushButton zoomFullButton;
+	
+	private Image compass_rose;
+	
 	private HorizontalPanel buttonPanel;
 	private PopupPanel helpPanel;
 	private VerticalPanel helpInterior;
@@ -129,7 +138,6 @@ public class OLMapWidget extends Composite {
     private boolean modulo = true;
 	private boolean selectionMade = false;
 	private boolean drawing = false;
-	private boolean lockDraw = false;
 	
     Boxes boxes = new Boxes("Valid Region");
 	Box box = null;
@@ -144,7 +152,6 @@ public class OLMapWidget extends Composite {
     private Navigation navControl;
     private ArgParser argParser;
     private Attribution attribControl;
-    private ZoomPanel zoomPanel;
     
 	public OLMapWidget() {
 		regionWidget.setChangeListener(regionChangeListener);
@@ -193,7 +200,7 @@ public class OLMapWidget extends Composite {
 				lineLayer.destroyFeatures();
 				editing = false;
 				setDataExtent(dataBounds.getLowerLeftY(), dataBounds.getUpperRightY(), dataBounds.getLowerLeftX(), dataBounds.getUpperRightX(), delta);
-			    if ( !modulo ) {
+			    if ( !modulo || !tool.equals("xy") ) {
 			    	trimSelection(dataBounds);
 			    }
 			}
@@ -219,28 +226,62 @@ public class OLMapWidget extends Composite {
 		editButtonUp = new Image(GWT.getModuleBaseURL()+"../images/edit_off.png");
 		editButtonDown = new Image(GWT.getModuleBaseURL()+"../images/edit_on.png");
 	    editButton = new ToggleButton(editButtonUp, editButtonDown, editButtonClickHandler);
-		editButton.setTitle("Click on selection to edit.");
+		editButton.setTitle("Click Selection to Edit");
 		editButton.setStylePrimaryName("OL_MAP-PushButton");
+		zoomInButtonUp = new Image(GWT.getModuleBaseURL()+"../images/zoom_in_off.png");
+		zoomInButtonDown = new Image(GWT.getModuleBaseURL()+"../images/zoom_in_on.png");
+		zoomInButton = new PushButton(zoomInButtonUp, zoomInButtonDown, new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
+				int zoom = map.getZoom();
+				zoom = zoom + 1;
+				zoom = zoom % 16;  // Hack.  Should implement getNumZoomLevels for the map.
+				map.zoomTo(zoom);
+			}		
+		});
+		zoomInButton.setStylePrimaryName("OL_MAP-PushButton");
+		zoomInButton.setTitle("Zoom In");
 		
-		lockDrawButtonUp = new Image(GWT.getModuleBaseURL()+"../images/draw_lock_off.png");
-		lockDrawButtonDown = new Image(GWT.getModuleBaseURL()+"../images/draw_lock_on.png");
-		lockDrawButton = new ToggleButton(lockDrawButtonUp, lockDrawButtonDown, lockDrawButtonClickHandler);
-		lockDrawButton.setTitle("Lock Select Region On");
-		lockDrawButton.setStylePrimaryName("OL_MAP-PushButton");
+		zoomOutButtonUp = new Image(GWT.getModuleBaseURL() + "../images/zoom_out_off.png");
+		zoomOutButtonDown = new Image(GWT.getModuleBaseURL() + "../images/zoom_out_on.png");
+		zoomOutButton = new PushButton(zoomOutButtonUp, zoomOutButtonDown, new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
+				int zoom = map.getZoom();
+				zoom = zoom - 1;
+				if ( zoom < 0 ) zoom = 0;
+				map.zoomTo(zoom);
+			}
+		});
+		zoomOutButton.setStylePrimaryName("OL_MAP-PushButton");
+		zoomOutButton.setTitle("Zoom Out");
+		
+		zoomFullButtonUp = new Image(GWT.getModuleBaseURL() + "../images/zoom_out_full_off.png");
+		zoomFullButtonDown = new Image(GWT.getModuleBaseURL() + "../images/zoom_out_full_on.png");
+		zoomFullButton = new PushButton(zoomFullButtonUp, zoomFullButtonDown, new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
+				zoomOutAndPanToSelection();
+			}
+		});
+		zoomFullButton.setStylePrimaryName("OL_MAP-PushButton");
+		zoomFullButton.setTitle("Zoom Out to Full Extent");
 		
 		buttonPanel.add(helpButton);
 		buttonPanel.add(resetButton);
 		buttonPanel.add(editButton);
 		buttonPanel.add(panButton);
 		buttonPanel.add(drawButton);
-		buttonPanel.add(lockDrawButton);
+		buttonPanel.add(zoomInButton);
+		buttonPanel.add(zoomFullButton);
+		buttonPanel.add(zoomOutButton);
 		
 		topGrid = new FlexTable();
 		topGrid.setWidget(0, 0, buttonPanel);
 		topGrid.setWidget(1, 0, regionWidget);
 		
 		wmsExtent = new Bounds(-180, -90, 180, 90);
-		wrapExtent  = new Bounds(-360, -90, 360, 90);
+		wrapExtent  = new Bounds(-540, -90, 540, 90);
 		dataBounds = wmsExtent;
 		wmsMapOptions = new MapOptions();
 		wmsMapOptions.setMaxExtent(wmsExtent);
@@ -269,6 +310,7 @@ public class OLMapWidget extends Composite {
 		lineLayer = new Vector("Line Layer", lineOptions);
 		VectorOptions wrapLayerOptions = new VectorOptions();
 		wrapLayerOptions.setIsBaseLayer(true);
+		wrapLayerOptions.setMaxExtent(wrapExtent);
 		wrapLayer = new Vector("Wrap Layer", wrapLayerOptions);		
 		// Start with no controls on the map.
 		wmsMapOptions.removeDefaultControls();
@@ -300,18 +342,16 @@ public class OLMapWidget extends Composite {
 			   - OpenLayers.Control.ArgParser<http://dev.openlayers.org/docs/files/OpenLayers/Control/ArgParser-js.html#OpenLayers.Control.ArgParser>
 			   - OpenLayers.Control.Attribution<http://dev.openlayers.org/docs/files/OpenLayers/Control/Attribution-js.html#OpenLayers.Control.Attribution>
 
-		  * Now we add back all of them except we substitute the zoom control for the pan/zoom control.
+		  * Now we add back all of them except pan/zoom control.  We don't want pan buttons, and we want our own zoom behavior.
 		  */
-		// Just like the defaults...
+		
 		navControl = new Navigation();
 		argParser = new ArgParser();
 		attribControl = new Attribution();
-		zoomPanel = new ZoomPanel();
 		
 		map.addControl(navControl);
 		map.addControl(argParser);
 		map.addControl(attribControl);
-		map.addControl(zoomPanel);
 	
 		drawSingleFeatureOptionsForRectangle = new DrawSingleFeatureOptions();
 		regularPolygonHandlerOptions = new RegularPolygonHandlerOptions();
@@ -373,6 +413,7 @@ public class OLMapWidget extends Composite {
 			@Override
 			public void onModificationEnd(VectorFeature vectorFeature) {
 				editing = false;
+				panMapToSelection();
 			}
 		};
 		modifyFeatureOptionsXY.onModification(onModification);
@@ -462,11 +503,15 @@ public class OLMapWidget extends Composite {
 	private void zoomMapToSelection() {
 		int zoom = map.getZoomForExtent(currentSelection, false);
 		LonLat center = currentSelection.getCenterLonLat();
-		if ( center.lon() + 180. > 360. ) {
+		if ( center.lon() + 180. > 540. ) {
 			zoom = 0;
-			center = new LonLat(180., 0.);
+			center = new LonLat(360., 0.);
 		}
 		map.setCenter(center, zoom);
+	}
+	private void zoomOutAndPanToSelection() {
+		map.zoomTo(0);
+		panMapToSelection();
 	}
 	private void panMapToSelection() {
 		int zoom = map.getZoom();
@@ -496,20 +541,10 @@ public class OLMapWidget extends Composite {
 			Geometry geo = Geometry.narrowToGeometry(vectorFeature.getGeometry().getJSObject());
 			trimSelection(geo.getBounds());
 			selectionMade = true;
-			
-			if ( !lockDraw ) {
-				drawing = false;
-				panButton.setDown(true);
-				drawButton.setDown(false);
-				editButton.setDown(false);
-				drawRectangle.deactivate();
-				drawXLine.deactivate();
-				drawYLine.deactivate();
-				drawPoint.deactivate();
-				modifyFeatureLine.deactivate();
-				modifyFeatureXY.deactivate();
+			if (!tool.equals("t") && !tool.equals("z") && !tool.equals("zt") && !tool.equals("pt")) {
+				zoomMapToSelection();
 			}
-            
+			            
 			featureAdded();
 		}
 	};
@@ -603,20 +638,15 @@ public class OLMapWidget extends Composite {
 			lineLayer.destroyFeatures();
 			boxLayer.destroyFeatures();
 			if ( tool.equals("t") || tool.equals("z") || tool.equals("zt") || tool.equals("pt") ) {	
-				Point p = new Point(bounds.getCenterLonLat().lon(), bounds.getCenterLonLat().lat());
-				boxLayer.addFeature(new VectorFeature(p));
+				trimSelection(bounds);
 			} else if ( tool.equals("x") || tool.equals("xz") || tool.equals("xt") ) {
 				Bounds lineBounds = new Bounds(wlon, bounds.getCenterLonLat().lat(), elon, bounds.getCenterLonLat().lat());
 				trimSelection(lineBounds);
-//				lineLayer.addFeature(new VectorFeature(lineBounds.toGeometry()));
 			} else if ( tool.equals("y") || tool.equals("yz") || tool.equals("yt") ) {
 				Bounds lineBounds = new Bounds(bounds.getCenterLonLat().lon(), slat, bounds.getCenterLonLat().lon(), nlat);
 				trimSelection(lineBounds);
-//				lineLayer.addFeature(new VectorFeature(lineBounds.toGeometry()));
 			} else {
 				trimSelection(bounds);
-				// XY box
-				//boxLayer.addFeature(new VectorFeature(bounds.toGeometry()));
 			}
 		}
 	}
@@ -642,27 +672,32 @@ public class OLMapWidget extends Composite {
 			drawXLine.deactivate();
 			drawYLine.deactivate();
 			drawPoint.deactivate();
-			if ( !lockDraw ) {				
-				drawing = false;
-				drawButton.setDown(false);
-			}
+			
 			
 			Bounds b;
 			if ( tool.equals("t") || tool.equals("z") || tool.equals("zt") || tool.equals("pt") ) {	
-				if ( lockDraw ) {
+				drawButtonUp.setUrl(GWT.getModuleBaseURL()+"../images/draw_pt_off.png");
+				drawButtonDown.setUrl(GWT.getModuleBaseURL()+"../images/draw_pt_on.png");
+				if ( drawButton.isDown() ) {
 					drawPoint.activate();
 				}
 			} else if ( tool.equals("x") || tool.equals("xz") || tool.equals("xt") ) {
-				if ( lockDraw ) {
+				drawButtonUp.setUrl(GWT.getModuleBaseURL()+"../images/draw_x_line_off.png");
+				drawButtonDown.setUrl(GWT.getModuleBaseURL()+"../images/draw_x_line_on.png");
+				if ( drawButton.isDown() ) {
 					drawXLine.activate();
 				}
 			} else if ( tool.equals("y") || tool.equals("yz") || tool.equals("yt") ) {
-				if ( lockDraw ) {
+				drawButtonUp.setUrl(GWT.getModuleBaseURL()+"../images/draw_y_line_off.png");
+				drawButtonDown.setUrl(GWT.getModuleBaseURL()+"../images/draw_y_line_on.png");
+				if ( drawButton.isDown() ) {
 					drawYLine.activate();
 				}
 			} else {
-				if ( lockDraw ) {
-				    drawRectangle.activate();
+				drawButtonUp.setUrl(GWT.getModuleBaseURL()+"../images/draw_off.png");
+				drawButtonDown.setUrl(GWT.getModuleBaseURL()+"../images/draw_on.png");
+				if ( drawButton.isDown() ) {
+					drawRectangle.activate();
 				}
 			}
 			
@@ -728,20 +763,6 @@ public class OLMapWidget extends Composite {
 
 	};
 	
-	public ClickHandler lockDrawButtonClickHandler = new ClickHandler() {
-
-		@Override
-		public void onClick(ClickEvent event) {
-			
-			if (lockDrawButton.isDown()) {
-				lockDraw = true;
-			} else {
-				lockDraw = false;
-			}
-			toggleDrawing();
-		}
-		
-	};
 	public ClickHandler panButtonClickHandler = new ClickHandler() {
 
 		@Override
@@ -800,7 +821,6 @@ public class OLMapWidget extends Composite {
 			// Turn off drawing to allow selections
 			drawing = false;
 			drawButton.setDown(false);
-			lockDrawButton.setDown(false);
 			panButton.setDown(true);
 			editButton.setDown(false);
 			if ( tool.equals("xy") ) {
@@ -882,8 +902,18 @@ public class OLMapWidget extends Composite {
 			if ( ylo < dataBounds.getLowerLeftY() ) {
 				ylo = dataBounds.getLowerLeftY();
 			}
-			if ( ylo > yhi ) {
-				ylo = yhi;
+			
+			
+
+			// If it's a point or an x tool bring the hi down to the lo that was just set.
+			if  ( tool.equals("t") || tool.equals("z") || tool.equals("zt") || tool.equals("pt") || 
+	              tool.equals("x") || tool.equals("xz") || tool.equals("xt") ) {
+				yhi = ylo;
+			} else {
+				// Keep the rectangle from going inside out.
+				if ( ylo > yhi ) {
+					ylo = yhi;
+				}
 			}
 			
 			setCurrentSelection(ylo, yhi, currentSelection.getLowerLeftX(), currentSelection.getUpperRightX());
@@ -927,14 +957,23 @@ public class OLMapWidget extends Composite {
 					Window.alert(oentry+" is not a valid latitude value.");
 				}
 			}
+			
 			if ( yhi > dataBounds.getUpperRightY() ) {
 				yhi = dataBounds.getUpperRightY();
 			}
-
-			if ( yhi < ylo ) {
-				yhi = ylo;
-			}
+                  
 			
+			
+			// If it's a point or an x tool bring the lo up to the hi.
+			if  ( tool.equals("t") || tool.equals("z") || tool.equals("zt") || tool.equals("pt") || 
+	              tool.equals("x") || tool.equals("xz") || tool.equals("xt") ) {
+				ylo = yhi;
+			} else {
+				// If the value would turn the rectangle inside out pull the value down to the current ylo.
+				if ( yhi < ylo  ) {
+					yhi = ylo;
+				}
+			}
 			setCurrentSelection(ylo, yhi, currentSelection.getLowerLeftX(), currentSelection.getUpperRightX());
 			zoomMapToSelection();
 			featureAdded();
@@ -944,7 +983,6 @@ public class OLMapWidget extends Composite {
 	 * A listener that will handle change events when the user types text into the TextBox with the west longitude value.
 	 */
 	public ChangeListener westChangeListener = new ChangeListener() {
-
 		public void onChange(Widget sender) {
 			TextBox tb = (TextBox) sender;
 			double xlo = textWidget.getXlo();
@@ -978,26 +1016,31 @@ public class OLMapWidget extends Composite {
 				}
 			}
 			xlo = GeoUtil.normalizeLon(xlo);
-			if ( !modulo ) {
-				// This is not a global data set, make sure we're not west of the data bounds.
-				if ( xlo < GeoUtil.normalizeLon(dataBounds.getLowerLeftX()) ) {
-					xlo = dataBounds.getLowerLeftX();
-				}
+			if ( tool.equals("t") || tool.equals("z") || tool.equals("zt") || tool.equals("pt") || 
+				 tool.equals("y") || tool.equals("yz") || tool.equals("yt")) {	
+				// If it's a point or a Y line, move the selection to this location by setting the East to the same value.
+				xhi = xlo;
+			    
 			} else {
-				// It's a modulo data set, make the east and west wrap as appropriate.
-				if ( xlo >= GeoUtil.normalizeLon(xhi) ) {
-					
-					xhi = GeoUtil.normalizeLon(xhi);
-					while ( xlo >= xhi ) {
-						xhi = xhi + 360.;
+				// If it's a rectangle or an x-line check the end points and the redraw.
+				if ( !modulo ) {
+					// This is not a global data set, make sure we're not west of the data bounds.
+					if ( xlo < GeoUtil.normalizeLon(dataBounds.getLowerLeftX()) ) {
+						xlo = dataBounds.getLowerLeftX();
+					}
+				} else {
+					// It's a modulo data set, make the east and west wrap as appropriate.
+					if ( xlo >= GeoUtil.normalizeLon(xhi) ) {
+
+						xhi = GeoUtil.normalizeLon(xhi);
+						while ( xlo >= xhi ) {
+							xhi = xhi + 360.;
+						}
 					}
 				}
+
 			}
-			
-//			if ( xlo > xhi ) {
-//				xlo = xhi;
-//			}
-			
+
 			setCurrentSelection(currentSelection.getLowerLeftY(), currentSelection.getUpperRightY(), xlo, xhi);
 			zoomMapToSelection();
 			featureAdded();
@@ -1042,16 +1085,24 @@ public class OLMapWidget extends Composite {
 			}
 			
 			xhi = GeoUtil.normalizeLon(xhi);
-			if ( !modulo ) {
-				// This is not a global data set, make sure we're not east of the data bounds.
-				if ( xhi > GeoUtil.normalizeLon(dataBounds.getUpperRightX()) ) {
-					xhi = dataBounds.getUpperRightX();
-				}
+			if ( tool.equals("t") || tool.equals("z") || tool.equals("zt") || tool.equals("pt") || 
+				 tool.equals("y") || tool.equals("yz") || tool.equals("yt")) {	
+				// If it's a point or a X line, move the selection to this location by setting the East to the same value.
+				xlo = xhi;
+
 			} else {
-				// It's a modulo data set, make the east and west wrap as appropriate.
-				if ( xlo >= GeoUtil.normalizeLon(xhi) ) {
-					while ( xlo >= xhi ) {
-						xhi = xhi + 360.;
+
+				if ( !modulo ) {
+					// This is not a global data set, make sure we're not east of the data bounds.
+					if ( xhi > GeoUtil.normalizeLon(dataBounds.getUpperRightX()) ) {
+						xhi = dataBounds.getUpperRightX();
+					}
+				} else {
+					// It's a modulo data set, make the east and west wrap as appropriate.
+					if ( xlo >= GeoUtil.normalizeLon(xhi) ) {
+						while ( xlo >= xhi ) {
+							xhi = xhi + 360.;
+						}
 					}
 				}
 			}
