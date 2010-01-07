@@ -607,7 +607,7 @@ LASUI.prototype.setVariable = function (evt) {
 	this.state.variable = variableID;
 	this.getGrid(datasetID,variableID);
 	this.getDataConstraints(datasetID,variableID);
-
+	this.newVariable=true;
 	if(this.onSetVariable)
 		this.onSetVariable();
 }
@@ -853,11 +853,6 @@ LASUI.prototype.setOperationList = function (strJson) {
 	var response = eval("(" + strJson + ")");
 	var setDefault = true;
 	this.state.operations = new LASGetOperationsResponse(response);
-	//if(!this.refs.options.external.DOMNode) {
-	//	this.refs.options.external.DOMNode= document.createElement('DIV');
-	//	this.refs.options.external.DOMNode.className='LASPopupDIVNode';
-	//	this.refs.options.external.DOMNode.style.display="none";
-	//}
 	//disable all nodes first
 	for(var row=0;row<document.getElementById("productButtons").childNodes.length;row++)
 		for(var cell=0;cell<document.getElementById("productButtons").childNodes[row].childNodes.length;cell++)
@@ -869,6 +864,8 @@ LASUI.prototype.setOperationList = function (strJson) {
 		this.refs.operations.download.children[o].OPTIONNode.disabled=true;
 
 	//document.body.appendChild(this.refs.options.external.DOMNode);
+	//disable all nodes first
+	for(var row=0;row<document.getElementById("productButtons").childNodes.length;row++)
 	var setDefaultVis = true;
 	if(!this.state.operations.response.operations.error)
 		for(var i=0;i<this.state.operations.getOperationCount();i++) {
@@ -915,10 +912,7 @@ LASUI.prototype.doProductIconClick = function (evt) {
 	this.toggleUIMask('');
 
 	if(this.state.operations.getOperationByID(id))
-		if(this.state.operations.getOperationByID(id).optiondef &&
-		    id != "Plot_2D_XY_SlideSorter" &&
-		    id != "Plot_2D_SlideSorter" &&
-		    id != "Plot_1D_SlideSorter" ) {
+		if(this.state.operations.getOperationByID(id).optiondef) {
 			this.getOptions(this.state.operations.getOperationByID(id).optiondef.IDREF, "external", true);
 			this.refs.options.external.DOMNode.style.display="";
 		} else {
@@ -1015,29 +1009,20 @@ LASUI.prototype.setDefaultProductMenu = function () {
 					if(!this.state.grid.hasAxis(this.products[type][product].view.charAt(axis))||!this.refs.views.views.getViewByID(this.products[type][product].view))
 						useView =false;
 
-			if(useView || type == "Download Data" || this.products[type][product].view == "") {
+			if(useView) {
 				if(!this.refs.operations.plot.children)
 					this.refs.operations.plot.children = {};
-				if((!this.refs.operations.plot.children[type]&&type!="Download Data")||(!this.refs.operations.download.SELECTNode&&type=="Download Data"))
+				if((!this.refs.operations.plot.children[type])||(!this.refs.operations.download.SELECTNode))
 					this.setProductTypeNode(type);
 				this.setProductNode(type, product);
-				if(defaultPlotProduct == null && type != "Download Data"){
+				if(defaultPlotProduct == null){
 					var defaultPlotProduct = this.products[type][product];
 					var defaultPlotProductName = product;
 				}
-				if(defaultDownloadProduct == null && type == "Download Data"){
-					var defaultDownloadProduct = this.products[type][product];
-					var defaultDownloadProductName = product;
-				}
-				if(this.state.operation.plot == this.products[type][product].id && type != "Download Data" && this.state.view.plot == this.products[type][product].view) {
+				if(this.state.operation.plot == this.products[type][product].id && this.state.view.plot == this.products[type][product].view) {
 					setPlotDefault = false;
 					this.refs.operations.plot.children[product].radio.checked = true;
 					this.setOperation(this,this.products[type][product].id,this.products[type][product].view,this.products[type][product].optiondef);
-				}
-				if(this.state.operation.download == this.products[type][product].id && type == "Download Data"/*&& this.state.view.plot == this.products[type][product].view*/ ) {
-					setDownloadDefault = false;
-					//this.refs.operations.download.children[product].DOMNode.selected = true;
-					this.setDownloadOperation(this.products[type][product].id,this.products[type][product].optiondef);
 				}
 			}
 	}
@@ -1046,33 +1031,11 @@ LASUI.prototype.setDefaultProductMenu = function () {
 		this.setOperation(this,defaultPlotProduct.id,defaultPlotProduct.view,defaultPlotProduct.optiondef);
 		this.refs.operations.plot.children[defaultPlotProductName].radio.checked = true;
 
-	}/*
-	if(setDownloadDefault) {
-		this.setDownloadOperation(this,defaultDownloadProduct.id,defaultProduct.view,defaultProduct.optiondef);
-		this.refs.operations.download.children[defaultDownloadProductName].DOMNode.selected = true;
+	}
 
-	}*/
 }
 LASUI.prototype.setProductTypeNode = function(type) {
 
-	if(type=="Download Data") {
-		this.refs.operations.download.SELECTNode = document.createElement("SELECT");
-		//this.refs.operations.download.SELECTNode.style.position = "relative";
-		this.refs.operations.download.SELECTNode.style.marginTop = "2pt";
-		var format = document.createElement("option");
-		format.appendChild(document.createTextNode("Select format.."));
-		this.refs.operations.download.SELECTNode.appendChild(format);
-		this.refs.operations.download.SELECTNode.onchange = function (evt) {this.options[this.selectedIndex].onselect()};
-		this.refs.operations.download.SELECTNode.style.position="relative";
-		this.refs.operations.download.INPUTNode = document.createElement("SPAN");
-		this.refs.operations.download.INPUTNode.className = "top_link"
-		this.refs.operations.download.INPUTNode.appendChild(document.createTextNode("Download Data"));
-		this.refs.operations.download.INPUTNode.onclick = this.doDownload.LASBind(this);
-		this.refs.operations.download.DOMNode.appendChild(this.refs.operations.download.INPUTNode);
-		//this.refs.operations.download.DOMNode.appendChild(document.createTextNode('\u00a0'));
-		this.refs.operations.download.DOMNode.appendChild(this.refs.operations.download.SELECTNode);
-	} else
-		if(type!="Point Data") {
 			this.refs.operations.plot.children[type] = {};
 			this.refs.operations.plot.children[type].LINode = document.createElement("LI");
 			this.refs.operations.plot.children[type].LINode
@@ -1081,13 +1044,8 @@ LASUI.prototype.setProductTypeNode = function(type) {
 			this.refs.operations.plot.children[type].LINode.className = "LASPlotCategory";
 			this.refs.operations.plot.children[type].LINode.appendChild(this.refs.operations.plot.children[type].title);
 			this.refs.operations.plot.DOMNode.appendChild(this.refs.operations.plot.children[type].LINode);
-		}
-}
-LASUI.prototype.downloadData = function() {
-
 }
 LASUI.prototype.setProductNode = function(type, product) {
-	if(type!="Download Data") {
 		this.refs.operations.plot.children[product] = {};
 		this.refs.operations.plot.children[product].LINode = document.createElement("LI");
 		this.refs.operations.plot.children[product].LINode.className = "LASPlotType";
@@ -1104,17 +1062,6 @@ LASUI.prototype.setProductNode = function(type, product) {
 		this.refs.operations.plot.children[product].LINode.appendChild(this.refs.operations.plot.children[product].radio);
 		this.refs.operations.plot.children[product].LINode.appendChild(this.refs.operations.plot.children[product].title);
 		this.refs.operations.plot.DOMNode.appendChild(this.refs.operations.plot.children[product].LINode);
-	} else {
-		this.refs.operations.download.children[product] = {};
-		this.refs.operations.download.children[product].OPTIONNode = document.createElement("option");
-		this.refs.operations.download.children[product].OPTIONNode.id ="OPTION_DOWNLOAD_" +  this.products[type][product].id;
-		this.refs.operations.download.children[product].OPTIONNode.appendChild(document.createTextNode(product));
-		this.refs.operations.download.children[product].OPTIONNode.value = this.products[type][product].id;
-		this.refs.operations.download.children[product].OPTIONNode.onselect = this.setDownloadOperation.LASBind(this,this.products[type][product].id,this.products[type][product].optiondef);
-		//this.refs.operations.plot.children[product].OPTIONNode.onclick = this.setOperation.LASBind(this,this.products[type][product].id,this.products[type][product].view,this.products[type][product].optiondef);
-		this.refs.operations.download.SELECTNode.appendChild(this.refs.operations.download.children[product].OPTIONNode);
-
-	}
 }
 LASUI.prototype.onPlotLoad = function (e) {
 
@@ -1230,8 +1177,9 @@ LASUI.prototype.updateConstraints = function (view) {
 
 	this.initialized=true;
 	if(!this.updating)
-		if(this.autoupdate||this.submitOnLoad){
+		if(this.autoupdate||this.submitOnLoad||this.newVariable){
 			this.submitOnLoad =false;
+			this.newVariable=false;
 			this.makeRequest();
 
 		} else

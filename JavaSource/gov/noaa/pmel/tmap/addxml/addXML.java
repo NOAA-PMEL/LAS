@@ -142,6 +142,8 @@ public class addXML {
 	private static int fileCount;
 	private static HashMap<String, Boolean> forceAxes = new HashMap<String, Boolean>();
 	private static String title;
+	private static String basefilename;
+	private static String ofile;
 	private static String version_string = "1.6.0.0";
 	private static String global_title_attribute;
 	private static String format;
@@ -189,6 +191,8 @@ public class addXML {
 		String[] thredds = command_parameters.getStringArray("in_thredds");
 		String in_xml = command_parameters.getString("in_xml");
 		String basename = command_parameters.getString("basename");
+		basefilename = basename;
+		
 		global_title_attribute = command_parameters.getString(
 		"title_attribute");
 		oneDataset = command_parameters.getBoolean("dataset");
@@ -427,7 +431,7 @@ public class addXML {
 
 						Document lasdoc = createXMLfromDatasetsGridsAxesBean(dgab);
 
-						String ofile = getOutfileName(basename);
+						
 						if (inputLasDoc != null) {
 
 							String entityName = getEntityName(ofile);
@@ -728,8 +732,9 @@ public class addXML {
 		while (di.hasNext()) {
 			InvDataset ThreddsDataset = (InvDataset) di.next();
 			if (ThreddsDataset.hasNestedDatasets()) {
-				CategoryBean cb = processCategories(ThreddsDataset, 0);
-				CategoryBeans.add(cb);
+				//CategoryBean cb = processCategories(ThreddsDataset, 0);
+				processCategories(ThreddsDataset, 0);
+				//CategoryBeans.add(cb);
 			}
 		}
 
@@ -740,7 +745,8 @@ public class addXML {
 		di = ThreddsDatasets.iterator();
 		while (di.hasNext()) {
 			InvDataset ThreddsDataset = (InvDataset) di.next();
-			DGABeans.addAll(processDatasets(ThreddsDataset, 0));
+			//DGABeans.addAll(processDatasets(ThreddsDataset, 0));
+			processDatasets(ThreddsDataset, 0);		
 		}
 
 		// Each THREDDS "dataset" is a separate LAS data set.
@@ -852,6 +858,7 @@ public class addXML {
 	 */
 	public static Vector processDatasets(InvDataset ThreddsDataset, int depth) {
 		Vector beans = new Vector();
+		DatasetsGridsAxesBean dgab = null;
 		if (ThreddsDataset.hasAccess()) {
 			boolean done = false;
 			for (Iterator iter = ThreddsDataset.getAccess().iterator();
@@ -862,8 +869,7 @@ public class addXML {
 						access.getService().getServiceType() == ServiceType.OPENDAP) &&
 						!done) {
 					done = true;
-					DatasetsGridsAxesBean dgab =
-						createBeansFromThreddsDataset(ThreddsDataset, access);
+					dgab = createBeansFromThreddsDataset(ThreddsDataset, access);
 					if (dgab!=null) beans.add(dgab);
 				}
 			}
@@ -878,9 +884,11 @@ public class addXML {
         		}
         		if(maxDatasets < 0 || i<maxDatasets) {
 				for (Iterator iter = ThreddsDataset.getDatasets().iterator();iter.hasNext(); ) {
-					beans.addAll(processDatasets( (InvDataset) iter.next(), depth));
+					//beans.addAll(processDatasets( (InvDataset) iter.next(), depth));
+					processDatasets( (InvDataset) iter.next(), depth);
 					if(verbose)
 					 	System.out.println("Stepping up a category.");
+					
 				}
 			} else if(verbose || log_bad_dsets) {
 		 		System.out.println("Unaggregated, " + ThreddsDataset.getSubsetUrl());
@@ -889,10 +897,36 @@ public class addXML {
 			 System.out.println("Hit max category depth of "+maxCategoryDepth+".");
 		}
 		if(verbose)
-			System.out.println("Stepping up a category..");
-		return beans;
+			System.out.println("Writing dataset xml and stepping up a category..");
+	
+		//return beans;
+		if(dgab!=null) {
+			Document lasdoc = createXMLfromDatasetsGridsAxesBean(dgab);
+			String ofile = getOutfileName(basefilename);
+			Element lasdata = lasdoc.getRootElement();
+			Element datasets = lasdata.getChild("datasets");
+			outputXML(ofile, datasets, false);
+			Element grids = lasdata.getChild("grids");
+			outputXML(ofile, grids, true);
+			Element axes = lasdata.getChild("axes");
+			outputXML(ofile, axes, true);
+			if (category) {
+				for (Iterator cit = datasets.getChildren().iterator();cit.hasNext(); ) {
+					Element datasetElem = (Element) cit.next();
+					CategoryBean ds_category = new CategoryBean();
+					ds_category.setName(datasetElem.getAttribute("name").getValue());
+					FilterBean filter = new FilterBean();
+					filter.setAction("apply-dataset");
+					filter.setContainstag(datasetElem.getName());
+					ds_category.addFilter(filter);
+					Element lc = new Element("las_categories");
+					lc.addContent(ds_category.toXml());
+					outputXML(ofile, lc, true);
+				}
+			}
+		}
+		return null;
 	}
-
 	/**
 	 * createDatasetBeanFromThreddsDataset
 	 *
@@ -1278,6 +1312,7 @@ public class addXML {
 	 */
 	public static CategoryBean processCategories(InvDataset ThreddsDataset, int depth) {
 		CategoryBean cb = new CategoryBean();
+		
 		// Make any THREDDS documentation links into LAS contributor links.
 		List docs = ThreddsDataset.getDocumentation();
 		Vector contribs = new Vector();
@@ -1345,6 +1380,7 @@ public class addXML {
 					InvDataset subDataset = (InvDataset) subDatasetsIt.next();
 					// Process the sub-categories
 					CategoryBean subCat = processCategories(subDataset, depth);
+					//processCategories(subDataset, depth);
 					subCats.add(subCat);
 				}
 				cb.setCategories(subCats);
@@ -1352,6 +1388,20 @@ public class addXML {
 			
 		}
 		return cb;
+		//write categories to XML
+		//Document lasdoc = createXMLfromDatasetsGridsAxesBean(dgab);
+		
+		//Element lasdata = lasdoc.getRootElement();
+		/*if(cb!=null)
+			if(cb.toXml()!=null) { 	
+				Element lc = new Element("las_categories");
+				lc.addContent(cb.toXml());
+				String ofile = getOutfileName(basefilename);
+				outputXML(ofile, lc, true);
+			}
+			
+		return null; */
+
 	}
 
 	/**
