@@ -37,7 +37,7 @@ public class LatLonWidget extends Composite {
 		middle = new VerticalPanel();
 		
 		rose = new Image(GWT.getModuleBaseURL()+"../images/compass_rose.png");
-		rose.addStyleName("LSS_middle");
+		rose.addStyleName("OL_MAP-middle");
 
 		southLat = new TextBox();
 		northLat = new TextBox();

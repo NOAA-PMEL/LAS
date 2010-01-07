@@ -1,4 +1,9 @@
 /** Add css rules here for your application. */
+.OL_MAP-middle {
+	display: block;
+    margin-left: auto;
+    margin-right: auto 
+}
 .OL_MAP-CloseButton {
 	float: right;
 }
