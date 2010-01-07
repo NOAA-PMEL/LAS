@@ -108,7 +108,7 @@ public class RequestInputFilter implements Filter {
     private final static String[] bp = {
     	"cancel",
     	"debug",
-    	"stream"
+    	"stream",
     	"auto"
     };
     private final static Set<String> LAS_BOOLEAN_PARAMETERS = new HashSet<String>(Arrays.asList(bp));
