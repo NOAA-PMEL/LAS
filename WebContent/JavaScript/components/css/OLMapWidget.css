@@ -4,6 +4,9 @@
     margin-left: auto;
     margin-right: auto 
 }
+.OL_MAP-center_vertical {
+	vertical-align: middle;
+}
 .OL_MAP-CloseButton {
 	float: right;
 }

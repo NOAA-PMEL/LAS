@@ -59,10 +59,10 @@ public class RegionWidget extends ListBox {
     	} else {
     		addItem(title, "none");
     	}
-    	if ( global ) {
-    		regions.put("global", new double[]{-90., 90, -180., 180.0});
-    		addItem("Global", "global");
-    	}
+//    	if ( global ) {
+//    		regions.put("global", new double[]{-90., 90, -180., 180.0});
+//    		addItem("Global", "global");
+//    	}
     	regions.put("africa", new double[]{-40, 40, -20, 60});
     	addItem("Africa", "africa");
     	regions.put("asia", new double[]{0, 80, 40, 180});
@@ -89,70 +89,8 @@ public class RegionWidget extends ListBox {
     	addItem("Equatorial Pacific", "equatorial pacific");
     	regions.put("south pacific", new double[]{-75, 0, 150, 290});
     	addItem("South Pacific", "south pacific");
+    	setVisibleItemCount(regions.size() - regions.size()/2);
     }
-    /**
-     * Get the bounds of the currently selected named region
-     * @return bounds the bounds of the currently selected region
-     */
-    public double[] getBounds() {
-    	double[] region = regions.get(0);
-    	if ( getSelectedIndex() >= 1 ) {
-    		region = regions.get(getValue(getSelectedIndex()));
-    	}
-    	if ( region == null ) {
-    		setSelectedIndex(0);
-    	}
-    	return region;
-    }
-////    /**
-////     * Set the map to have the currently named region selected if possible
-////     * @param region the region to select
-////     */
-////    public void setToRegion(LatLngBounds region) {
-////    	if ( region != null ) {
-////			int trys = 0;
-////			while ( trys < 3 ) {
-////				if ( refMap.getDataBounds().containsBounds(region) ) {
-////					
-////					if ( refMap.isModulo() ) {
-////						int zoom = refMap.getBoundsZoomLevel(region);
-////						LatLngBounds dBounds = refMap.getDataBounds();
-////						double nlat = dBounds.getNorthEast().getLatitude();
-////						double slat = dBounds.getSouthWest().getLatitude();
-////						double clon = region.getCenter().getLongitude();
-////						double wlon = clon - 180;
-////						double elon = clon + 179;
-////						LatLng sw = LatLng.newInstance(slat, wlon);
-////						LatLng ne = LatLng.newInstance(nlat, elon);
-////						LatLngBounds bounds = LatLngBounds.newInstance(sw, ne);
-////						refMap.setDataBounds(bounds, refMap.getDelta(), true);
-////						refMap.setCenter(region.getCenter());
-////						refMap.setZoom(zoom);
-////					}
-////					refMap.setSelectionBounds(region, true, true);
-////					
-////					break;
-////				} else {
-////					if ( refMap.isModulo() ){
-////						refMap.rotateEast();
-////					} else {
-////						break;
-////					}
-////					trys++;
-////				}		
-////			}
-////		}
-////    	setSelectedIndex(0);
-////    }
-//    /**
-//     * Add a listener to region list
-//     */
-//    ChangeListener regionChange = new ChangeListener() {
-//		public void onChange(Widget sender) {
-//			LatLngBounds region = getBounds();
-//			setToRegion(region);
-//		}	
-//	};
 	/**
 	 * Remove the default listener and add the listener
 	 * @param listener the listener that will replace the default
