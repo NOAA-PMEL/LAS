@@ -55,7 +55,7 @@ public class RegionWidget extends ListBox {
     private void init(String title, boolean global) {
     	
     	if (title == null ) {
-    	    addItem("Select region", "none");
+    	    addItem("Select Region", "none");
     	} else {
     		addItem(title, "none");
     	}
