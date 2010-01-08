@@ -48,11 +48,14 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.ChangeListener;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.DockPanel;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.Frame;
+import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.PushButton;
 import com.google.gwt.user.client.ui.TextBox;
@@ -101,7 +104,7 @@ public class OLMapWidget extends Composite {
     private LatLonWidget textWidget = new LatLonWidget();
 	private Image helpButtonUp;
 	private Image helpButtonDown;
-	private PushButton helpButton;
+	private ToggleButton helpButton;
 	private Image resetButtonUp;
 	private Image resetButtonDown;
 	private PushButton resetButton;
@@ -125,13 +128,20 @@ public class OLMapWidget extends Composite {
 	private PushButton zoomFullButton;
 	
 	private HorizontalPanel buttonPanel;
+	private PopupPanel regionPanel;
+	private VerticalPanel regionInterior;
+	private Image regionOpenUp;
+	private Image regionOpenDown;
+	private ToggleButton regionButton;
+	private Image regionCloseUp;
+	private Image regionCloseDown;
+	private PushButton regionClose;
 	private PopupPanel helpPanel;
 	private VerticalPanel helpInterior;
 	private Image helpCloseUp;
 	private Image helpCloseDown;
 	private PushButton helpClose;
     private Frame help;
-    private FlexTable topGrid;
   
     private boolean modulo = true;
 	private boolean selectionMade = false;
@@ -168,11 +178,15 @@ public class OLMapWidget extends Composite {
 
 		helpButtonUp = new Image(GWT.getModuleBaseURL()+"../images/info_off.png");
 		helpButtonDown = new Image(GWT.getModuleBaseURL()+"../images/info_on.png");
-		helpButton = new PushButton(helpButtonUp, helpButtonDown, new ClickHandler(){
+		helpButton = new ToggleButton(helpButtonUp, helpButtonDown, new ClickHandler(){
 			@Override
 			public void onClick(ClickEvent event) {
-				helpPanel.setPopupPosition(helpButton.getAbsoluteLeft()+256, helpButton.getAbsoluteTop()+20);
-				helpPanel.show();			
+				if ( helpButton.isDown() ) {
+					helpPanel.setPopupPosition(helpButton.getAbsoluteLeft()+256, helpButton.getAbsoluteTop()+20);
+					helpPanel.show();
+				} else {
+					helpPanel.hide();
+				}
 			}
 		});
 		helpButton.setTitle("Help");
@@ -182,6 +196,7 @@ public class OLMapWidget extends Composite {
 			@Override
 			public void onClick(ClickEvent event) {
 				helpPanel.hide();
+				helpButton.setDown(false);
 			}
 			
 		});
@@ -189,6 +204,41 @@ public class OLMapWidget extends Composite {
 		helpClose.setStylePrimaryName("OL_MAP-PushButton");
 		helpClose.addStyleName("OL_MAP-CloseButton");
 		
+		regionCloseUp = new Image(GWT.getModuleBaseURL()+"../images/close_off.png");
+		regionCloseDown = new Image(GWT.getModuleBaseURL()+"../images/close_on.png");
+		regionClose = new PushButton(regionCloseUp, regionCloseDown, new ClickHandler() {
+
+			@Override
+			public void onClick(ClickEvent event) {
+				regionPanel.hide();
+				regionButton.setDown(false);
+			}
+			
+		});
+		regionClose.setStylePrimaryName("OL_MAP-PushButton");
+		regionClose.addStyleName("OL_MAP-CloseButton");
+		
+		regionPanel = new PopupPanel();
+		regionInterior = new VerticalPanel();
+		regionInterior.add(regionClose);
+		regionInterior.add(regionWidget); 
+		regionPanel.add(regionInterior);
+		
+		regionOpenUp = new Image(GWT.getModuleBaseURL()+"../images/menu_off.png");
+		regionOpenDown = new Image(GWT.getModuleBaseURL()+"../images/menu_on.png");
+		regionButton = new ToggleButton(regionOpenUp, regionOpenDown, new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
+				if ( regionButton.isDown() ) {
+					regionPanel.setPopupPosition(regionButton.getAbsoluteLeft()+60, helpButton.getAbsoluteTop()+20);
+					regionPanel.show();
+				} else {
+					regionPanel.hide();
+				}
+			}			
+		});
+		regionButton.setTitle("Select Region");
+		regionButton.setStylePrimaryName("OL_MAP-ToggleButton");
 		resetButtonUp = new Image(GWT.getModuleBaseURL()+"../images/reset_off.png");
 		resetButtonDown = new Image(GWT.getModuleBaseURL()+"../images/reset_on.png");
 		resetButton = new PushButton(resetButtonUp, resetButtonDown, new ClickHandler() {
@@ -274,10 +324,7 @@ public class OLMapWidget extends Composite {
 		buttonPanel.add(zoomInButton);
 		buttonPanel.add(zoomFullButton);
 		buttonPanel.add(zoomOutButton);
-				
-		topGrid = new FlexTable();
-		topGrid.setWidget(0, 0, buttonPanel);
-		topGrid.setWidget(1, 0, regionWidget);
+		buttonPanel.add(regionButton);
 		
 		wmsExtent = new Bounds(-180, -90, 180, 90);
 		wrapExtent  = new Bounds(-540, -90, 540, 90);
@@ -446,7 +493,7 @@ public class OLMapWidget extends Composite {
 		map.setCenter(new LonLat(0, 0), 0);
 		map.setOptions(wrapMapOptions);		
 		map.addMapMoveListener(mapMoveListener);
-		dockPanel.add(topGrid, DockPanel.NORTH);
+		dockPanel.add(buttonPanel, DockPanel.NORTH);
 		dockPanel.add(mapWidget, DockPanel.CENTER);
 		dockPanel.add(textWidget, DockPanel.SOUTH);
 		initWidget(dockPanel);
@@ -1149,7 +1196,10 @@ public class OLMapWidget extends Composite {
 				setCurrentSelection(reg[0], reg[1], reg[2], reg[3]);
 				zoomMapToSelection();
 			}	
+			
 			regionWidget.setSelectedIndex(0);
+			
+			
 			// This call back is called by the drawing control when a feature is added by drawing.
 			// We need to call it ourselves when the region widget fires.
 			featureAdded();
