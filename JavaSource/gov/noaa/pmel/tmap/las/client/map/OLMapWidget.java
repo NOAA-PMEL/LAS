@@ -124,8 +124,7 @@ public class OLMapWidget extends Composite {
 	private Image zoomFullButtonDown;
 	private PushButton zoomFullButton;
 	
-	private Image compass_rose;
-	
+	private HorizontalPanel regionAndZoomPanel;	
 	private HorizontalPanel buttonPanel;
 	private PopupPanel helpPanel;
 	private VerticalPanel helpInterior;
@@ -167,6 +166,7 @@ public class OLMapWidget extends Composite {
 		helpPanel = new PopupPanel();
 		helpInterior = new VerticalPanel();
 	    buttonPanel = new HorizontalPanel();
+	    regionAndZoomPanel = new HorizontalPanel();
 		helpButtonUp = new Image(GWT.getModuleBaseURL()+"../images/info_off.png");
 		helpButtonDown = new Image(GWT.getModuleBaseURL()+"../images/info_on.png");
 		helpButton = new PushButton(helpButtonUp, helpButtonDown, new ClickHandler(){
@@ -272,13 +272,15 @@ public class OLMapWidget extends Composite {
 		buttonPanel.add(editButton);
 		buttonPanel.add(panButton);
 		buttonPanel.add(drawButton);
-		buttonPanel.add(zoomInButton);
-		buttonPanel.add(zoomFullButton);
-		buttonPanel.add(zoomOutButton);
 		
+		regionAndZoomPanel.add(regionWidget);
+		regionAndZoomPanel.add(zoomInButton);
+		regionAndZoomPanel.add(zoomFullButton);
+		regionAndZoomPanel.add(zoomOutButton);
+				
 		topGrid = new FlexTable();
 		topGrid.setWidget(0, 0, buttonPanel);
-		topGrid.setWidget(1, 0, regionWidget);
+		topGrid.setWidget(1, 0, regionAndZoomPanel);
 		
 		wmsExtent = new Bounds(-180, -90, 180, 90);
 		wrapExtent  = new Bounds(-540, -90, 540, 90);
