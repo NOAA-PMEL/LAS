@@ -74,6 +74,7 @@ public class RequestInputFilter implements Filter {
      */
     // All LAS query parameters.
     private final static String[] p = {
+    	"auto",
     	"BBOX", 
     	"cancel",
     	"cancel_button",
