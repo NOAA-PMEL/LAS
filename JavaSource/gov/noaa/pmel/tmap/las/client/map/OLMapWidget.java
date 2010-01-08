@@ -286,6 +286,7 @@ public class OLMapWidget extends Composite {
 				zoom = zoom + 1;
 				zoom = zoom % 16;  // Hack.  Should implement getNumZoomLevels for the map.
 				map.zoomTo(zoom);
+				panMapToSelection();
 			}		
 		});
 		zoomInButton.setStylePrimaryName("OL_MAP-PushButton");
@@ -300,6 +301,7 @@ public class OLMapWidget extends Composite {
 				zoom = zoom - 1;
 				if ( zoom < 0 ) zoom = 0;
 				map.zoomTo(zoom);
+				panMapToSelection();
 			}
 		});
 		zoomOutButton.setStylePrimaryName("OL_MAP-PushButton");
