@@ -582,14 +582,14 @@ public class OLMapWidget extends Composite {
 		double e_selection = bounds.getUpperRightX();
 		double s_selection = bounds.getLowerLeftY();
 		double n_selection = bounds.getUpperRightY();
-		if ( tool.equals("xy") || tool.equals("x") || tool.equals("y") ) {
-			if ( s_selection < s_data || s_selection > n_data ) {
-				s_selection = s_data;
-			}
-			if ( n_selection > n_data || n_selection < s_data ) {
-				n_selection = n_data;
-			}
+        // Always check the north/south against the data range.
+		if ( s_selection < s_data || s_selection > n_data ) {
+			s_selection = s_data;
 		}
+		if ( n_selection > n_data || n_selection < s_data ) {
+			n_selection = n_data;
+		}
+	
 		Bounds selectionBounds;
 		lineLayer.destroyFeatures();
 		boxLayer.destroyFeatures();
