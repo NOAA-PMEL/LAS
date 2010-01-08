@@ -1590,8 +1590,10 @@ LASUI.prototype.makeRequest = function (evt, type) {
 		this.state.selectGlobal=true;
 
 
-	this.expired=false;
-	document.getElementById('update').style.color='';
+	if(type=='plot') {
+		this.expired=false;	
+		document.getElementById('update').style.color='';
+	}
 
 }
 /**
