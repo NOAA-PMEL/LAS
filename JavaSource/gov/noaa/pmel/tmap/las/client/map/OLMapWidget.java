@@ -562,13 +562,8 @@ public class OLMapWidget extends Composite {
 		panMapToSelection();
 	}
 	private void panMapToSelection() {
-		int zoom = map.getZoom();
 		LonLat center = currentSelection.getCenterLonLat();
-		if ( center.lon() + 180. > 360. ) {
-			zoom = 0;
-			center = new LonLat(180., 0.);
-		}
-		map.setCenter(center, zoom);		
+	    map.setCenter(center);
 	}
 	MapMoveListener mapMoveListener = new MapMoveListener() {
 
