@@ -217,7 +217,7 @@ LASUI.prototype.setInitialVariable = function(strJson) {
 		document.getElementById(this.anchors.breadcrumb).appendChild(varlist);
 	}
 	document.getElementById(this.anchors.variables).onchange = function (evt) {this.options[this.selectedIndex].onselect({"target" : {"selected" :true}})}
-	for(i=0;i<category.getCategorySize();i++) {
+	for(var i=0;i<category.getCategorySize();i++) {
 		if(this.state.variable==category.getChildID(i))
 			var selected = true;
 		else
@@ -1012,7 +1012,7 @@ LASUI.prototype.setDefaultProductMenu = function () {
 			if(useView) {
 				if(!this.refs.operations.plot.children)
 					this.refs.operations.plot.children = {};
-				if((!this.refs.operations.plot.children[type])||(!this.refs.operations.download.SELECTNode))
+				if(!this.refs.operations.plot.children[type])
 					this.setProductTypeNode(type);
 				this.setProductNode(type, product);
 				if(defaultPlotProduct == null){

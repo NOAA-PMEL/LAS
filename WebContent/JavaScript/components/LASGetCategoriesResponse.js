@@ -84,9 +84,12 @@ function LASGetCategoriesResponse_getDatasetID(i) {
  * @type String or Boolean
  */
 function LASGetCategoriesResponse_getDatasetName() {
-	if(this.getCategoryType() == "dataset")
-		return this.response.categories.category[0].dataset.name;
-	else
+	if(this.getCategoryType() == "dataset") {
+		if(this.response.categories.category[0].dataset.name)
+			return this.response.categories.category[0].dataset.name;
+		else if (this.response.categories.category[0].name)
+			return this.response.categories.category[0].name;
+	} else
 		return "category";
 }
 
