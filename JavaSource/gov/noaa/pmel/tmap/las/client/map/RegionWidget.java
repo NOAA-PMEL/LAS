@@ -89,7 +89,7 @@ public class RegionWidget extends ListBox {
     	addItem("Equatorial Pacific", "equatorial pacific");
     	regions.put("south pacific", new double[]{-75, 0, 150, 290});
     	addItem("South Pacific", "south pacific");
-    	setVisibleItemCount(regions.size() - regions.size()/2);
+    	setVisibleItemCount(regions.size());
     }
 	/**
 	 * Remove the default listener and add the listener
