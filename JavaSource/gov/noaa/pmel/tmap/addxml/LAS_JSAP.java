@@ -51,6 +51,15 @@ public class LAS_JSAP
         .setShortFlag('D')
         .setLongFlag("depth");
         depth.setHelp("Depth to crawl to in the category tree");
+
+    FlaggedOption ignore = new FlaggedOption("ignore")
+        .setStringParser(new StringStringParser())
+        .setAllowMultipleDeclarations(false)
+        .setRequired(false)
+        .setShortFlag('I')
+        .setLongFlag("ignore");
+        ignore.setHelp("Ignore urls containing this string");
+
     
     Switch listCategories = new Switch("listCategories")
         .setShortFlag('l')
@@ -276,6 +285,7 @@ public class LAS_JSAP
       this.registerParameter(maxDatasets);
        this.registerParameter(depth);
 	 this.registerParameter(log_bad_dsets);
+	 this.registerParameter(ignore);
 	}
     catch (JSAPException ex) {
       this.errorout();
