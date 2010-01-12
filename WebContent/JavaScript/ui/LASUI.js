@@ -834,8 +834,8 @@ LASUI.prototype.setOperation = function (evt) {
 	this.updateConstraints(view);
 	this.state.lastVariable = this.state.variable;
 	this.state.lastDataset = this.state.dataset;
-
-	this.getOperations(this.state.dataset,this.state.variable,this.state.view.plot);
+	if(type=='plot'&&this.state.operation.plot=='init')
+		this.getOperations(this.state.dataset,this.state.variable,this.state.view.plot);
 	if(optiondef)
 		this.getOptions(optiondef, "plot",false);
 	}
@@ -884,6 +884,7 @@ LASUI.prototype.setOperationList = function (strJson) {
 	this.getOptions(this.state.operations.getOperationByID(this.state.operation.plot).optiondef.IDREF, "plot", true);
 
 	if(this.refs.analysis.enabled||!this.state.grid.hasAxis('t'))document.getElementById('Animation').style.visibility='hidden';
+
 }
 
 /**
@@ -1082,6 +1083,8 @@ LASUI.prototype.onPlotLoad = function (e) {
 		document.getElementById("wait_msg").style.display="none";
 	if(document.getElementById('output')) 
 		document.getElementById("output").style.visibility="visible";
+	 if(document.getElementById('update')) 
+	document.getElementById('update').style.color='';
 	
 }
 
@@ -1177,9 +1180,7 @@ LASUI.prototype.updateConstraints = function (view) {
 
 	this.initialized=true;
 	if(!this.updating)
-		if(this.autoupdate||this.submitOnLoad||this.newVariable){
-			this.submitOnLoad =false;
-			this.newVariable=false;
+		if(this.autoupdate){
 			this.makeRequest();
 
 		} else
@@ -1417,11 +1418,16 @@ LASUI.prototype.makeRequest = function (evt, type) {
 	if(!type)
 		var type = 'plot';
 	if(!this.updating||this.expired) {
+		if(type=='plot'&&this.state.operation.plot=='init') {
+			this.getOperations(this.state.dataset,this.state.variable,this.state.view.plot)
+			return null;
+		}
+
 		document.getElementById('output').height="100%";
 		document.getElementById('output').width="100%";
 		document.getElementById('update').style.visibility='visible';
 		document.getElementById('plotOptionsButton').style.visibility='visible';
-
+		
 		this.request = null;
 		this.uirequest = '';
 		this.request = new LASRequest('');
@@ -1672,6 +1678,15 @@ LASUI.prototype.setOptionList = function (strJson,DOMNode,type,reset) {
 		for(var i=0;i<ct;i++)
 			this.setOptionTRNode(this.refs.options[type].options.getOptionID(i),tbody,type,reset);
 
+	 if(!this.updating)
+                if(this.autoupdate||this.submitOnLoad||this.newVariable){
+                        this.submitOnLoad =false;
+                        this.newVariable=false;
+                        this.makeRequest();
+
+                } else
+                        this.showUpdateLink();
+
 }
 /**
  * Method to create an option tree node and add it to the DOM
@@ -1712,9 +1727,11 @@ LASUI.prototype.setOptionTRNode = function (id,TBODYNode,type,reset) {
 		}
 		this.refs.options.cache[id].TD3 = document.createElement("TD");
 		this.refs.options.cache[id].A = document.createElement("A");
-		var img = document.createElement("img");
-		img.src="images/icon_info.gif";
-		this.refs.options.cache[id].A.appendChild(img);
+		if(!this.info_icon) {
+			this.info_icon = document.createElement("img");
+			this.info_icon.src="images/icon_info.gif";
+		}
+		this.refs.options.cache[id].A.appendChild(this.info_icon);
 		this.refs.options.cache[id].A.onclick = this.showOptionInfo.LASBind(this,this.refs.options.cache[id].help);
 		this.refs.options.cache[id].TD3.appendChild(this.refs.options.cache[id].A);
 		this.refs.options.cache[id].TRNode.appendChild(this.refs.options.cache[id].TD1);
