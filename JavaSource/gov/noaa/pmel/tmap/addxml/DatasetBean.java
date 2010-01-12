@@ -21,7 +21,7 @@ public class DatasetBean extends LasBean {
 	private String name;
 	private String doc;
 	private String url;
-	private Vector variables = new Vector();
+	private ArrayList<VariableBean> variables = new ArrayList<VariableBean>();
 	private String comment;
 	private String version;
 	private String creator;
@@ -51,16 +51,16 @@ public class DatasetBean extends LasBean {
 	public DatasetBean() {
 	}
 
-	public void addAllVariables(Vector var) {
+	public void addAllVariables(ArrayList<VariableBean> var) {
 		if (variables == null) {
-			variables = new Vector();
+			variables = new ArrayList<VariableBean>();
 		}
 		this.variables.addAll(var);
 	}
 
 	public void addVariable(VariableBean var) {
 		if (variables == null) {
-			variables = new Vector();
+			variables = new ArrayList<VariableBean>();
 		}
 		this.variables.add(var);
 	}
@@ -134,7 +134,7 @@ public class DatasetBean extends LasBean {
 		return url;
 	}
 
-	public Vector getVariables() {
+	public ArrayList<VariableBean> getVariables() {
 		return variables;
 	}
 
@@ -211,7 +211,7 @@ public class DatasetBean extends LasBean {
 		this.url = url;
 	}
 
-	public void setVariables(Vector variables) {
+	public void setVariables(ArrayList<VariableBean> variables) {
 		this.variables = variables;
 	}
 
