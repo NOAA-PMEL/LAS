@@ -160,6 +160,7 @@ public class addXML {
 	private static boolean irregular = false;
 	private static boolean categories_only = false;
 	private static boolean listCategories = false;
+	private static int categoryCount = 0;
 	private static int maxCategories = -1;
         private static int maxDatasets = -1;
 	private static int maxCategoryDepth = -1;
@@ -877,9 +878,11 @@ public class addXML {
 						if(thredds_urls.containsKey(url)) {
                                                 	 System.out.println("RECURSION " + url);
                                 
-                                        } else {
+                                        } else if (url.indexOf(ignore_url)>=0) {
+						System.out.println("IGNORING " + url);					
+					} else {
                                                 thredds_urls.put(url,url);
-                                        }beans.add(dgab);
+                                        } beans.add(dgab);
 				}
 			}
 		}
@@ -1345,8 +1348,9 @@ public class addXML {
 		else {
 			cb.setName("THREDDS Dataset");
 		}
+		categoryCount++;
 		if(verbose)
-			System.out.println("Processing category for " + name);
+			System.out.println(categoryCount + "Processing category " + name);
 
 		if(name.indexOf(ignore_url)>=0) {
 			 System.out.println("IGNORING " + name);
