@@ -237,8 +237,9 @@ public class OLMapWidget extends Composite {
 				}
 			}			
 		});
-		regionButton.setTitle("Select Region");
+		regionButton.setTitle("Select Named Region");
 		regionButton.setStylePrimaryName("OL_MAP-ToggleButton");
+		
 		resetButtonUp = new Image(GWT.getModuleBaseURL()+"../images/reset_off.png");
 		resetButtonDown = new Image(GWT.getModuleBaseURL()+"../images/reset_on.png");
 		resetButton = new PushButton(resetButtonUp, resetButtonDown, new ClickHandler() {
@@ -264,7 +265,7 @@ public class OLMapWidget extends Composite {
 		drawButtonUp = new Image(GWT.getModuleBaseURL()+"../images/draw_off.png");
 		drawButtonDown = new Image(GWT.getModuleBaseURL()+"../images/draw_on.png");
 		drawButton = new ToggleButton(drawButtonUp, drawButtonDown, drawButtonClickHandler);
-		drawButton.setTitle("Select Region");
+		drawButton.setTitle("Select Region with Click and Drag");
 		drawButton.setStylePrimaryName("OL_MAP-ToggleButton");
 		panButtonUp = new Image(GWT.getModuleBaseURL()+"../images/pan_off.png");
 		panButtonDown = new Image(GWT.getModuleBaseURL()+"../images/pan_on.png");
@@ -461,7 +462,6 @@ public class OLMapWidget extends Composite {
 			@Override
 			public void onModificationEnd(VectorFeature vectorFeature) {
 				editing = false;
-				panMapToSelection();
 			}
 		};
 		modifyFeatureOptionsXY.onModification(onModification);
@@ -1196,7 +1196,8 @@ public class OLMapWidget extends Composite {
 			
 			regionWidget.setSelectedIndex(0);
 			
-			
+			regionPanel.hide();
+			regionButton.setDown(false);
 			// This call back is called by the drawing control when a feature is added by drawing.
 			// We need to call it ourselves when the region widget fires.
 			featureAdded();
