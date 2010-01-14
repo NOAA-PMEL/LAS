@@ -31,7 +31,10 @@ public class Cleaner {
 	 */
 	public static void main(String[] args) {
 		InvCatalogFactory factory = new InvCatalogFactory("default", false);
-		File source = new File("/home/rhs/uaf_catalog_test.xml");
+		if ( args[0] == null || args[0].equals("") ) {
+			System.out.println("Use: Cleaner catalog.xml");
+		}
+		File source = new File(args[0]);
 		Document uaf = new Document();
 		try {
 			JDOMUtils.XML2JDOM(source, uaf);
