@@ -99,10 +99,12 @@ LASUI.prototype.initUI = function (anchorId)
 		this.state.operation.plot = this.params.plot;
 		this.state.view.plot = this.params.view;
 		//this.state.xybox = eval("("+unescape(this.params.bbox)+")");
-
+	
 		this.autoupdate = this.params.autoupdate;
-		if((this.state.dataset!=""||this.params.catid!="")&&this.state.variable!="")
+		if((this.state.dataset!=""||this.params.catid!="")&&this.state.variable!="") {
 			this.submitOnLoad=true;
+			 document.getElementById("ol_map_widget").onmouseover = null;
+		}
 		else
 			this.submitOnLoad=false;
 
@@ -1569,6 +1571,7 @@ LASUI.prototype.makeRequest = function (evt, type) {
 				break;
 			}
 		}
+		 document.getElementById("ol_map_widget").onmouseover = null;
 		if(this.state.embed && type == "plot"){
 			if(document.getElementById("wait"))
 				document.getElementById("wait").style.visibility="visible";

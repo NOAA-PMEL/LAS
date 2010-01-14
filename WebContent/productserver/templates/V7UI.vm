@@ -198,7 +198,7 @@
 
 			<table  width="1024px"><tbody><tr><td style="vertical-align:top" border=1>
 				<div id="constraints">
-					<div id="ol_map_widget"  #if($request.getParameter("catid")==""||$request.getParameter("varid")=="") onmouseover="showDatasetPicker()" #end></div>
+					<div id="ol_map_widget"  onmouseover="showDatasetPicker()"></div>
 					<div id="constraintsScroll"  class="LASConstraintsPane">
 						<div id="plotType"></div>
 						<div id="Date"></div>
