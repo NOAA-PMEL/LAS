@@ -859,13 +859,12 @@ public class addXML {
 	 * @return DatasetBean
 	 */
 	public static Vector processDatasets(InvDataset ThreddsDataset, int depth) {
-		Vector beans = new Vector();
+		ArrayList<DatasetsGridsAxesBean> beans = new ArrayList<DatasetsGridsAxesBean>();
 		DatasetsGridsAxesBean dgab = null;
 		
 		if (ThreddsDataset.hasAccess()) {
 			boolean done = false;
-			for (Iterator iter = ThreddsDataset.getAccess().iterator();
-			iter.hasNext(); ) {
+			for (Iterator iter = ThreddsDataset.getAccess().iterator();	iter.hasNext(); ) {
 				InvAccess access = (InvAccess) iter.next();
 				if ( (access.getService().getServiceType() == ServiceType.DODS ||
 						access.getService().getServiceType() == ServiceType.NETCDF ||
@@ -876,13 +875,14 @@ public class addXML {
 					String url = ThreddsDataset.getSubsetUrl();
 					if (dgab!=null) 
 						if(thredds_urls.containsKey(url)) {
-                                                	 System.out.println("RECURSION " + url);
-                                
-                                        } else if (url.indexOf(ignore_url)>=0) {
-						System.out.println("IGNORING " + url);					
-					} else {
-                                                thredds_urls.put(url,url);
-                                        } beans.add(dgab);
+							System.out.println("RECURSION " + url);
+
+						} else if (ignore_url != null && url.indexOf(ignore_url)>=0) {
+							System.out.println("IGNORING " + url);					
+						} else {
+							thredds_urls.put(url,url);
+						} 
+					beans.add(dgab);
 				}
 			}
 		}
@@ -1351,10 +1351,12 @@ public class addXML {
 		categoryCount++;
 		if(verbose)
 			System.out.println(categoryCount + "Processing category " + name);
-
-		if(name.indexOf(ignore_url)>=0) {
-			 System.out.println("IGNORING " + name);
-			return cb;
+        
+		if ( ignore_url != null ) {
+			if(name != null && name.length() > 0 && name.indexOf(ignore_url)>=0) {
+				System.out.println("IGNORING " + name);
+				return cb;
+			}
 		}
 
 		if (ThreddsDataset.hasAccess()) {
@@ -1369,11 +1371,11 @@ public class addXML {
 						access.getService().getServiceType() == ServiceType.NETCDF) {
 					url = access.getStandardUrlName();
 					if(thredds_urls.containsKey(url)) {
-                                                 System.out.println("RECURSION " + url);
-                                                 return cb;
-                                        } else if(url.indexOf(ignore_url)>=0||name.indexOf(ignore_url)>=0){
-						 System.out.println("IGNORING " + name + " " + url);
-                                                 return cb;
+						System.out.println("RECURSION " + url);
+						return cb;
+					} else if(ignore_url != null && (url.indexOf(ignore_url)>=0||name.indexOf(ignore_url)>=0) ){
+						System.out.println("IGNORING " + name + " " + url);
+						return cb;
 					} else {
 						thredds_urls.put(url,url);
 					}    
