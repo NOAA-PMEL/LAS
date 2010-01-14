@@ -1,10 +1,6 @@
 package gov.noaa.pmel.tmap.addxml;
 
-import gov.noaa.pmel.tmap.iosp.JDOMUtils;
-
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -14,15 +10,12 @@ import java.util.List;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.jdom.Element;
-import org.jdom.output.XMLOutputter;
 
 import thredds.catalog.InvAccess;
 import thredds.catalog.InvCatalog;
 import thredds.catalog.InvCatalogImpl;
 import thredds.catalog.InvDataset;
 import thredds.catalog.InvDatasetImpl;
-import thredds.catalog.InvMetadata;
-import thredds.catalog.InvProperty;
 import thredds.catalog.InvService;
 import thredds.catalog.ServiceType;
 import ucar.nc2.constants.FeatureType;

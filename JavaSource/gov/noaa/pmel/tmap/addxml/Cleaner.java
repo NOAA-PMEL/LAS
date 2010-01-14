@@ -1,7 +1,5 @@
 package gov.noaa.pmel.tmap.addxml;
 
-import gov.noaa.pmel.tmap.iosp.JDOMUtils;
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
