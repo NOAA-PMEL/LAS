@@ -9,9 +9,6 @@
  */
 package gov.noaa.pmel.tmap.addxml;
 
-import gov.noaa.pmel.tmap.las.exception.LASException;
-import gov.noaa.pmel.tmap.las.util.Category;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
@@ -21,15 +18,11 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.security.MessageDigest;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
 
-import org.jdom.input.SAXBuilder;
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.JDOMException;
+import org.jdom.input.SAXBuilder;
 /**
  * A collection of helper methods for managing JDOM documents.
  * @author Roland Schweitzer
