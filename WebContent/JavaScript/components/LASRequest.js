@@ -876,7 +876,7 @@ function LASReq_addRange(xyzt,lo,hi,region_ID) {
     this.addRegion();
   }
   var nodeXML = '';
-  if (hi && (hi != lo)) {
+  if (hi != null && (hi != lo)) {
     nodeXML = '<range type=\"' + xyzt + '\" low=\"' + lo + '\" high=\"' + hi + '\"/>';
   } else {
     nodeXML = '<point type=\"' + xyzt + '\" v=\"' + lo + '\"/>';
