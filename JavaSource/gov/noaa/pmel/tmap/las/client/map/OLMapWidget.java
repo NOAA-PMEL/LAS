@@ -583,11 +583,7 @@ public class OLMapWidget extends Composite {
 			// How come there is no narrowToGeometry with a Geometry argument.
 			Geometry geo = Geometry.narrowToGeometry(vectorFeature.getGeometry().getJSObject());
 			trimSelection(geo.getBounds());
-			selectionMade = true;
-			if (!tool.equals("t") && !tool.equals("z") && !tool.equals("zt") && !tool.equals("pt")) {
-				zoomMapToSelection();
-			}
-			            
+			selectionMade = true;        
 			featureAdded();
 		}
 	};
