@@ -7,10 +7,12 @@ import java.util.List;
 import ucar.nc2.dt.GridDataset;
 import ucar.nc2.dt.GridDatatype;
 
-public class GridDatasetComparator implements Comparator<GridDataset> {
+public class GridDatasetComparator implements Comparator<DatasetGridPair> {
 
 	@Override
-	public int compare(GridDataset gd1, GridDataset gd2) {
+	public int compare(DatasetGridPair pair1, DatasetGridPair pair2) {
+		GridDataset gd1 = pair1.getGrid();
+		GridDataset gd2 = pair2.getGrid();
 		long diff = gd1.getEndDate().getTime() - gd2.getEndDate().getTime();
 		 if ( diff > 0 ) {
 			 return 1;

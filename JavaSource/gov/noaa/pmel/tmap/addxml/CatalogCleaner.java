@@ -16,6 +16,7 @@ import thredds.catalog.InvCatalog;
 import thredds.catalog.InvCatalogImpl;
 import thredds.catalog.InvDataset;
 import thredds.catalog.InvDatasetImpl;
+import thredds.catalog.InvProperty;
 import thredds.catalog.InvService;
 import thredds.catalog.ServiceType;
 import ucar.nc2.constants.FeatureType;
@@ -34,9 +35,10 @@ public class CatalogCleaner {
 	private String key;
 	private InvService remoteService;
 	private InvService localService;
+	private boolean aggregate = false;
 	
-	public CatalogCleaner (InvCatalog catalog) throws URISyntaxException, UnsupportedEncodingException {
-		
+	public CatalogCleaner (InvCatalog catalog, boolean aggregate) throws URISyntaxException, UnsupportedEncodingException {
+		this.aggregate = aggregate;
 		sourceCatalog = (InvCatalogImpl) catalog;
 		key = JDOMUtils.MD5Encode(catalog.getUriString());
 		cleanCatalog = new InvCatalogImpl("Clean Catalog for "+sourceCatalog.getUriString(), "1.0.1", new URI(catalog.getUriString()));
@@ -80,15 +82,15 @@ public class CatalogCleaner {
     	remoteService = new InvService("remoteOPeNDAP_"+key, "OPeNDAP", base, null, null);
     	cleanCatalog.addService(remoteService);
 	}
-	private void addAggregation(InvDatasetImpl parent, InvDataset invDataset, List<GridDataset> agg, int index) throws Exception {
+	private void addAggregation(InvDatasetImpl parent, InvDataset invDataset, List<DatasetGridPair> agg, int index) throws Exception {
 		InvDatasetImpl aggDatasetNode = new InvDatasetImpl((InvDatasetImpl)invDataset);
 		aggDatasetNode.setName(aggDatasetNode.getName()+" "+index);
 		aggDatasetNode.setUrlPath("aggregation_"+index);
 		aggDatasetNode.setID(aggDatasetNode.getUrlPath()+"_"+key+"_"+index);
 		Element ncml = NCML.getRootElement();
-		NCML.addAggregationElement(ncml, agg.get(0));
-		for (Iterator fileIt = agg.iterator(); fileIt.hasNext();) {
-			GridDataset aggDataset = (GridDataset) fileIt.next();
+		NCML.addAggregationElement(ncml, agg.get(0).getGrid());
+		for (int i = 0; i < agg.size(); i++ ) {
+			GridDataset aggDataset = (GridDataset) agg.get(i).getGrid();
 			NCML.addDataset(ncml, aggDataset);
 		}
 		aggDatasetNode.setServiceName(localService.getName());
@@ -99,30 +101,40 @@ public class CatalogCleaner {
 	}
 	public void clean(InvDataset invDataset) throws Exception {	
 		if ( invDataset.hasNestedDatasets() ) {
-			Aggregates aggregates = new Aggregates(invDataset);
+			Aggregates aggregates = new Aggregates(invDataset, aggregate);
 			if ( remoteService == null ) {
 				setService(aggregates.getBase());
 			}
-			if ( aggregates.needsAggregation() ) {
-				List<List<GridDataset>> aggregations = aggregates.getAggregations();
+			if ( aggregates.needsAggregation() && aggregate ) {
+				List<List<DatasetGridPair>> aggregations = aggregates.getAggregations();
 				InvDatasetImpl parent = new InvDatasetImpl((InvDatasetImpl) invDataset);
 				cleanCatalog.addDataset(parent);
 				for (int i = 0; i < aggregations.size(); i++) {
-					List<GridDataset> agg = (List<GridDataset>) aggregations.get(i);
+					List<DatasetGridPair> agg = (List<DatasetGridPair>) aggregations.get(i);
 					addAggregation(parent, invDataset, agg, i);
 				}
-			} else {
+			} else if ( aggregates.needsAggregation() && !aggregate ) {
+				InvDatasetImpl parent = new InvDatasetImpl((InvDatasetImpl) invDataset);
+				InvProperty property = new InvProperty("needsAggregation", "true");
+				parent.addProperty(property);
+				cleanCatalog.addDataset(parent);
+			} 
+			if ( aggregates.hasIndividualDataset() ) {
 				for (Iterator ndsIt = aggregates.getIndividuals().iterator(); ndsIt.hasNext();) {
-					InvDataset nestedDataset = (InvDataset) ndsIt.next();
+					DatasetGridPair gridDataset = (DatasetGridPair) ndsIt.next();
 
-					if ( nestedDataset.hasAccess() ) { 
-						if ( hasGrid(nestedDataset) ) {
-							addGridDataset(nestedDataset);
+					
+						if ( hasGrid(gridDataset.getGrid()) ) {
+							addGridDataset(gridDataset.getDataset());
 						}
-					}
-					if ( nestedDataset.hasNestedDatasets() ) {
-						clean(nestedDataset);
-					}
+					
+				}
+			}
+			// All the children are just containers...  Clean them...
+			if ( !aggregates.hasIndividualDataset() && !aggregates.needsAggregation() ) {
+				for (Iterator nestedIt = invDataset.getDatasets().iterator(); nestedIt.hasNext();) {
+					InvDataset nestedDataset = (InvDataset) nestedIt.next();
+					clean(nestedDataset);
 				}
 			}
 		} 
