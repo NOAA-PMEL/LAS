@@ -30,7 +30,7 @@ public class Cleaner {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		InvCatalogFactory factory = new InvCatalogFactory("default", false);
+		InvCatalogFactory factory = new InvCatalogFactory("default", true);
 		if ( args[0] == null || args[0].equals("") ) {
 			System.out.println("Use: Cleaner catalog.xml");
 		}
@@ -57,7 +57,7 @@ public class Cleaner {
 
 			CatalogCleaner cleaner = null;
 			try {
-				cleaner = new CatalogCleaner(catalog);
+				cleaner = new CatalogCleaner(catalog, true);
 			} catch (UnsupportedEncodingException e) {
 
 				e.printStackTrace();
@@ -76,7 +76,12 @@ public class Cleaner {
 			}
 
 			if ( clean != null ) {
+				
 				try {
+					// TODO Remove this DEBUG OUTPUT!!
+					factory.writeXML(clean, System.out, true);
+					
+					// Write to a file...
 					String f = JDOMUtils.MD5Encode(data)+".xml";
 					File file = new File(f);
 					FileOutputStream out = new FileOutputStream(file);
