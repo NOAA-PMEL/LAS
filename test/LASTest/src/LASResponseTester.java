@@ -309,7 +309,7 @@ public class LASResponseTester{
         lr = buildLASUIRequest(viewtype,dsID,varID);
         serverURL = getProductServerURL(las_config);
         try{
-            requestURL = serverURL+"?xml=" + lr.toEncodedURLString()+"&debug=debug";
+            requestURL = serverURL+"?xml=" + lr.toEncodedURLString()+"&debug=true"; 
         } catch (Exception e){
              e.printStackTrace();
         }
