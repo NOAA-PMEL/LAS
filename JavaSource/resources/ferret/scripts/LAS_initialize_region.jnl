@@ -238,6 +238,30 @@ IF ($region_yt"0|*>1") THEN DEFINE SYMBOL region_($num)_yt = ($region_yt)
 IF ($region_yz"0|*>1") THEN DEFINE SYMBOL region_($num)_yz = ($region_yz)
 IF ($region_zt"0|*>1") THEN DEFINE SYMBOL region_($num)_zt = ($region_zt)
 
+! For SOCAT server labels, make time symbols w/o the trailing 00:00:00
+
+IF ($region_0_t_lo"0|*>1") THEN
+   DEFINE SYMBOL t_lab_lo = ($region_0_t_lo)
+   LET iz = STRINDEX("($region_0_t_lo)", " 00:00:00")
+   IF `iz GT 0` THEN 
+      DEFINE SYMBOL t_lab_lo = `SUBSTRING("($region_0_t_lo)", 1, iz-1)`
+   ELSE
+      LET iz = STRINDEX("($region_0_t_lo)", ":00:00")
+      IF `iz GT 0` THEN DEFINE SYMBOL t_lab_lo = `SUBSTRING("($region_0_t_lo)", 1, iz-1)`
+   ENDIF
+ENDIF 
+
+IF ($region_0_t_hi"0|*>1") THEN
+   DEFINE SYMBOL t_lab_hi = ($region_0_t_hi)
+   LET iz = STRINDEX("($region_0_t_hi)", " 00:00:00")
+   IF `iz GT 0` THEN 
+      DEFINE SYMBOL t_lab_hi = `SUBSTRING("($region_0_t_hi)", 1, iz-1)`
+   ELSE
+      LET iz = STRINDEX("($region_0_t_hi)", ":00:00")
+      IF `iz GT 0` THEN DEFINE SYMBOL t_lab_hi = `SUBSTRING("($region_0_t_hi)", 1, iz-1)`
+   ENDIF
+ENDIF
+
 ! If no regions have been defined then we have an error.
 
 IF ($region_full"1|*>0")  THEN

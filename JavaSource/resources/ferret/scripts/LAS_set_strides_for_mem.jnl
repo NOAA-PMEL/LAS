@@ -1,12 +1,15 @@
 !LAS_set_strides_for_mem.jnl
 ! Called by LAS_set_strides.jnl
 
+
 IF `($stride_for_mem"0") GT 1` THEN
    IF `($region_x_range"0|*>1") GT 0` THEN
       IF `($no_native_strides_xy"0|*>1") NE 1` THEN 
-      SET AXIS/STRIDE=($stride_for_mem) `pvar,RETURN=xaxis`
-      ELSE
-      DEFINE SYMBOL add_to_title = Stride ($stride_for_mem) in X
+         DEFINE SYMBOL modax = "`pvar, RETURN=xmod`"
+         SET AXIS/STRIDE=($stride_for_mem) `pvar,RETURN=xaxis`
+         IF `STRCMP(($modax), " ") NE 0` THEN SET AXIS/MODULO `pvar,RETURN=xaxis`
+         DEFINE SYMBOL add_to_title = Stride ($stride_for_mem) in X
+      ENDIF
    ENDIF
    IF `($region_y_range"0|*>1") GT 0 AND ($no_native_strides_xy"0|*>1") NE 1` THEN 
       SET AXIS/STRIDE=($stride_for_mem) `pvar,RETURN=yaxis`
@@ -18,9 +21,12 @@ IF `($stride_for_mem"0") GT 1` THEN
    ENDIF
    
    IF `STRINDEX( "($operation_ID)", "Animation" ) EQ 0` THEN
-   IF `($region_t"0|*>1") GT 0` THEN 
-      SET AXIS/STRIDE=($stride_for_mem) `pvar,RETURN=taxis`
-      DEFINE SYMBOL add_to_title = ($add_to_title) Stride ($stride_for_mem) in T
+      IF `($region_t"0|*>1") GT 0` THEN 
+         DEFINE SYMBOL modax = "`pvar, RETURN=tmod`"
+         SET AXIS/STRIDE=($stride_for_mem) `pvar,RETURN=taxis`
+         IF `STRCMP(($modax), " ") NE 0` THEN SET AXIS/MODULO `pvar,RETURN=taxis`
+         DEFINE SYMBOL add_to_title = ($add_to_title) Stride ($stride_for_mem) in T
+      ENDIF
    ENDIF
    SET VAR/TITLE="($ferret_plot_title) ($add_to_title)" ($ferret_plot_var) 
 

@@ -40,14 +40,14 @@ IF ($ferret_curvi_coord_lat"0|*>1") THEN DEFINE SYMBOL do_curvi_xy = 1
 IF ($ferret_thk_var"0|*>1") THEN  DEFINE SYMBOL do_hybrid_z = 1
 IF `($do_curvi_xy) + ($do_hybrid_z) EQ 2` THEN DEFINE SYMBOL do_curvi_xy_and_hybrid_z = 1
 
-IF ($do_curvi_xy_and_hybrid_z) THEN GO transform_hybrid_z_curvi_xy
+IF ($do_curvi_xy_and_hybrid_z) THEN
+   GO transform_hybrid_z_curvi_xy
 
-! Set up to deal with hybrid-Z data. 
-IF `($do_hybrid_z) AND ($do_curvi_xy_and_hybrid_z"0") EQ 0` THEN \
+ELIF ($do_curvi_xy) THEN ! Set up to deal with curvilinear XY data
+   GO transform_curvi_xy.jnl
+
+ELIF ($do_hybrid_z) THEN  ! Set up to deal with hybrid-Z data. 
    GO transform_hybrid_z.jnl
-
-! Set up to deal with curvilinear XY data
-IF ($do_curvi_xy) THEN GO transform_curvi_xy.jnl
+ENDIF
 
 ! End of $RCSfile ------------LAS_transforms.jnl-------------------------------
-

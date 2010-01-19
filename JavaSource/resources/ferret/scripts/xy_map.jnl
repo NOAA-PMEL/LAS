@@ -38,11 +38,8 @@ LET map_area = `(($region_x_range) * ($region_y_range)) / (360 * 180)`
 
 ! Set data resolution based on the region (from LAS_fland.jnl)
 
-! Note to installers: The dataset smith_sandwell_topo may be downloaded from 
-! the Ferret downloads pages, under Miscellaneous Datasets
-
 IF `map_area LT 0.01` THEN
-  USE "http://pale.pmel.noaa.gov:8085/thredds/dodsC/data/PMEL/smith_sandwell_topo_v8_2.nc"
+  SET DATA smith_sandwell_topo
 ELIF `map_area LT 0.08` THEN
   SET DATA etopo05
 ELIF `map_area LT 0.4` THEN

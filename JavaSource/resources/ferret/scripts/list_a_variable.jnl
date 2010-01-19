@@ -54,16 +54,9 @@ IF `its_curvi` THEN
    EXIT/SCRIPT
 ENDIF
 
-! Write all global attributes that came in from the input dataset 
-! TODO: When we get to listing comparisions, will need to decide what to
-!       do, list global attrs of both files?
+! Output all the attributes that came in from the input dataset
 
-IF `($ferret_version) GT 6.19` THEN
-IF `STRINDEX( "($result_ferret_listing_type)", "netcdf" ) NE 0` THEN
-   DEFINE ATT/OUTPUT ..FERRET_comment = "File written via LAS. Attributes are inherited from originating dataset"
-   SET ATT/OUTPUT=all .
-ENDIF
-ENDIF
+SET ATT/OUTPUT=all ($data_($var_num)_var)
 
 ! Set up a history attribute for the variable, and a text variable with
 ! the same information for ascii and text output.
@@ -72,12 +65,6 @@ SET DATA/SAVE
 SET DATA ($data_num)
 LET attlist = ($data_var).attnames
 
-sh sym ferret_list_var
-
-LET/UNITS="`($ferret_list_var),RETURN=units)`"\
-  the_list_var = ($ferret_list_var)
-!SET ATT/LIKE=($data_var) the_list_var
-
 IF ($data_var_transform"0|*>1") THEN 
     DEFINE attribute ($ferret_list_var).transform_history  "($data_var)($data_var_transform)"
     SET ATTRIBUTE/OUTPUT ($ferret_list_var).transform_history
@@ -85,16 +72,13 @@ IF ($data_var_transform"0|*>1") THEN
     LET var_hist = "($var_history)"
     SET VAR/TITLE="($ferret_list_var)($data_var_transform)" ($ferret_list_var)
     IF ($data_dup_varname"0|*>1") THEN
-
-        LET ($data_dup_varname) = ($ferret_list_var)
-!        DEFINE SYMBOL data_dup_varname =  ($data_var)  ! the limits min,max,chunk determine the range
-        SET VAR/TITLE="($data_title)($data_var_transform)" ($data_dup_varname)
-        SET VAR/UNITS="($data_units)" ($data_dup_varname)
-
-       DEFINE attribute ($data_dup_varname).transform_history  "($data_var)($data_var_transform)"
-       SET ATTRIBUTE/OUTPUT ($data_dup_varname).transform_history
+       DEFINE attribute ($ferret_list_var).transform_history  "($data_var)($data_var_transform)"
+       SET ATTRIBUTE/OUTPUT ($ferret_list_var).transform_history
     ENDIF
-
+    IF ($data_dup_varname"0|*>1") THEN
+       DEFINE attribute ($ferret_list_var).transform_history  "($data_var)($data_var_transform)"
+       SET ATTRIBUTE/OUTPUT ($ferret_list_var).transform_history
+    ENDIF
 ENDIF
 SET DATA/RESTORE
 
@@ -188,11 +172,6 @@ IF `($lmax"0") lt 1` THEN DEFINE SYMBOL lmax 1
 IF `($lsize"0") lt 1` THEN DEFINE SYMBOL lsize 1
 CANCEL REGION/X
 
-! the default is set under 1/4 of Ferret's memory allowing for LET definitions 
-LET use_size = 1000000*($ferret_memory)/4.
-LET max_size = ($MAX_LIST_SIZE"`use_size`")  ! use this for debugging, too
-
-! Size of the data variable 
 LET size = ($isize)*($jsize)*($ksize)*($lsize)
 
 ! default chunk sizes
@@ -203,36 +182,10 @@ LET lchunk = INT(max_size/size * ($lsize))
 ! IF mode interpolate is desired
 IF ($ferret_interpolate_data%0|false>0|true>1|1|0|*>1%) THEN SET MODE INTERPOLATE 
 
-! Write all the attributtes on the file and coordinate variables.
+! the default is set under 1/4 of Ferret's memory allowing for LET definitions 
 
-! Set up to output all the input attributes. If there are attributes 
-! slab_minor slab_max on the input variable (which would have come 
-! from a Ferret subset written with the enhanced header)then writing
-! those to a file causes a netCDF err: Coordinates out of Domain. 
-! So do not write those.
-
-!SET ATT/OUTPUT=all ($data_var)
-
-LET allatts = ($data_var).attnames
-LET natts = ($data_var).nattrs
- REPEAT/RANGE=1:`natts`/NAME=m (LET attname = allatts[I=`m`]; \
-    LET is_slab = STRINDEX("`attname`", "slab_min") + STRINDEX("`attname`", "slab_max"); \
-    IF `is_slab EQ 0` THEN SET ATT/OUTPUT ($data_var).`attname`)
-
-! Set up to write all attributes for the coordinate variables. 
-
-! DEFINE SYMBOL out_xax = `the_list_var,RETURN=xaxis`
-! DEFINE SYMBOL out_yax = `the_list_var,RETURN=yaxis`
-! DEFINE SYMBOL out_zax = `the_list_var,RETURN=zaxis`
-! DEFINE SYMBOL out_tax = `the_list_var,RETURN=taxis`
-! IF `STRCMP("($out_xax)", "NORMAL") NE 0 AND \
-!   STRCMP("($out_xax)", "ABSTRACT") NE 0` THEN SET ATT/OUTPUT=all (($out_xax))
-! IF `STRCMP("($out_yax)", "NORMAL") NE 0 AND  \
-!   STRCMP("($out_yax)", "ABSTRACT") NE 0` THEN SET ATT/OUTPUT=all (($out_yax))
-! IF `STRCMP("($out_zax)", "NORMAL") NE 0 AND  \
-!   STRCMP("($out_zax)", "ABSTRACT") NE 0` THEN SET ATT/OUTPUT=all (($out_zax))
-! IF `STRCMP("($out_tax)", "NORMAL") NE 0 AND  \
-!   STRCMP("($out_tax)", "ABSTRACT") NE 0` THEN SET ATT/OUTPUT=all (($out_tax))
+LET use_size = 1000000*($ferret_memory)/4.
+LET max_size = ($MAX_LIST_SIZE"`use_size`")  ! use this for debugging, too
 
 IF `size LE max_size` THEN
 
@@ -243,11 +196,8 @@ IF `size LE max_size` THEN
    ! IF a duplicate variable name is assigned for netcdf listings, change the name before listing 
 
    IF `($data_dup_varname%0|*>1%) GT 0` THEN
-
-      LET ($data_dup_varname) = ($ferret_list_var)
+      LET/TITLE="($data_title)($data_var_transform)"/d=($data_num) ($data_dup_varname) = ($ferret_plot_var)
       SET VAR/UNITS="($data_units)" ($data_dup_varname)
-      SET VAR/TITLE="($data_title)" ($data_dup_varname)
-      !SET ATT/OUTPUT=all ($data_dup_varname)
 
       IF `($ferret_format"0|asc>1|*>0") + ($ferret_format"0|txt>1|*>0") GT 0` THEN
          IF ($var_history"0|*>1") THEN LIST/APPEND/NOHEAD/FORMAT=(A)/FILE="($result_ferret_listing_filename)" var_hist
@@ -260,11 +210,6 @@ IF `size LE max_size` THEN
       IF `($ferret_format"0|asc>1|*>0") + ($ferret_format"0|txt>1|*>0") GT 0` THEN  
          IF ($var_history"0|*>1") THEN LIST/APPEND/NOHEAD/FORMAT=(A)/FILE="($result_ferret_listing_filename)" var_hist
       ENDIF
-
-!      LET/TITLE="($data_title)($data_var_transform)"/d=($data_num)\
-!       /units="`($ferret_list_var),RETURN=units`"\
-!       /BAD=`($ferret_list_var),RETURN=bad` f_plot_var = ($ferret_list_var)
-!      LIST/APPEND/FILE/($frmt) f_plot_var
 
       LIST/APPEND/FILE/($frmt) ($ferret_list_var)
 
@@ -318,6 +263,7 @@ ELSE
         ENDIF
      ELSE
      ! ... netCDF output in chunks
+
         REPEAT/L=($lmin):($lmax):`lchunk` REPEAT/K=($kmin):($kmax):`kchunk` REPEAT/J=($jmin):($jmax):`jchunk` (LIST/APPEND/FILE/($frmt)/J=`j`:`jtop`/K=`k`:`ktop`/L=`l`:`ltop`/JLIMITS=($jmin):($jmax)/KLIMITS=($kmin):($kmax)/LLIMITS=($lmin):($lmax) ($ferret_x_var); CANC MEM/ALL)
      ENDIF
 
@@ -334,7 +280,7 @@ ELSE
 
      REPEAT/L=($lmin):($lmax):`lchunk` REPEAT/K=($kmin):($kmax):`kchunk` REPEAT/J=($jmin):($jmax):`jchunk` (LIST/APPEND/FILE/($frmt)/J=`j`:`jtop`/K=`k`:`ktop`/L=`l`:`ltop` ($ferret_x_var); CANC MEM/ALL)
    ENDIF
-   SET REGION save
+   set region save
 
 ENDIF
 
