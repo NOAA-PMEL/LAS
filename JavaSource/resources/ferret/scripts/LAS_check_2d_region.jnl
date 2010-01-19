@@ -11,7 +11,7 @@
 ! Check whether the region is too small to make a 2D plot on this grid.
 ! Call after region and dataset have been initialized for 2D plot.
 
-! Change ($data_var)[d=($data_num) to the_plot_var_noregion[
+! Change ($data_var)[d=($data_num)] to the_plot_var_noregion
 
 CANCEL SYMBOL region_small*
 
