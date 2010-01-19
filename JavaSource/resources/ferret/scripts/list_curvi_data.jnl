@@ -29,14 +29,6 @@ CANCEL MODE INTERPOLATE  ! important when evaluating the size limits
 DEFINE SYMBOL ferret_list_var ($data_var)[d=($data_num)]
 IF ($region_zt"0|*>1) THEN DEFINE SYMBOL ferret_list_var ($data_var)[d=($data_num), ($region_zt)]
 
-! Output all the attributes that came in from the input dataset
-! If its being re-packed by outputting scale and offset, then set 
-! the output data type to match the input data type.
-
-SET ATT/OUTPUT=all ($ferret_curvi_coord_lon)
-SET ATT/OUTPUT=all ($ferret_curvi_coord_lat)
-SET ATT/OUTPUT=all ($data_($var_num)_var)
-
 ! Set up a history attribute for the variable, and a text variable with
 ! the same information for ascii and text output.
 
@@ -98,6 +90,9 @@ IF `($kmax) LT 1` THEN DEFINE SYMBOL kmax 1
 IF `($lmin) LT 1` THEN DEFINE SYMBOL lmin 1
 IF `($lmax) LT 1` THEN DEFINE SYMBOL lmax 1
 
+! the default is set under 1/4 of Ferret's memory allowing for LET definitions 
+LET max_size = ($MAX_LIST_SIZE"1000000")  ! use this for debugging, too
+
 ! Size of the data variable 
 LET size = ($isize)*($jsize)*($ksize)*($lsize) 
 
@@ -108,9 +103,6 @@ LET lchunk = INT(max_size/size * ($lsize))
 
 ! if mode interpolate is desired
 IF ($ferret_interpolate_data%0|false>0|true>1|1|0|*>1%) THEN SET MODE INTERPOLATE 
-
-! the default is set under 1/4 of Ferret's memory allowing for LET definitions 
-LET max_size = ($MAX_LIST_SIZE"1000000")  ! use this for debugging, too
 
 ! First write the curvilinear coordinates
 
@@ -170,8 +162,9 @@ ELSE
    ENDIF
 
      ! ... netCDF output in chunks
-   REPEAT/L=($lmin):($lmax):`lchunk` REPEAT/K=($kmin):($kmax):`kchunk` REPEAT/J=($clat_jmin):($clat_jmax):`jchunk` (LIST/APPEND/FILE/($frmt)/J=`j`:`jtop`/K=`k`:`ktop`/L=`l`:`ltop`/JLIMITS=($clat_jmin):($clat_jmax)/KLIMITS=($kmin):($kmax)/LLIMITS=($lmin):($lmax)/I=($clon_imin):($clon_imax)  ($ferret_list_var); CANC MEM/ALL)
+   REPEAT/L=($lmin):($lmax):`lchunk` REPEAT/K=($kmin):($kmax):`kchunk` REPEAT/J=($clat_jmin):($clat_jmax):`jchunk` (LIST/APPEND/FILE/($frmt)/J=`j`:`jtop`/K=`k`:`ktop`/L=`l`:`ltop`/JLIMITS=($clat_jmin):($clat_jmax)/KLIMITS=($kmin):($kmax)/LLIMITS=($lmin):($lmax)/I=($clon_imin):($clon_imax) ($ferret_list_var); CANC MEM/ALL)
 
 ENDIF
 
 ! End of script ---------- list_a_variable.jnl----------------------------
+

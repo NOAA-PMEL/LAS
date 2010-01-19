@@ -42,20 +42,20 @@ IF `($region_x_lo_orig"0|*>1") EQ 0` THEN
    DEFINE SYMBOL region_0_x_hi_orig =  ($region_0_x_hi)
 ENDIF
 
-IF `($region_x_lo) LT ($ferret_curv_lon_min)` THEN 
+IF `($region_($num)_x_lo) LT ($ferret_curv_lon_min)` THEN 
    DEFINE SYMBOL region_0_x_lo `($region_0_x_lo) + 360`
    DEFINE SYMBOL region_0_x_hi `($region_0_x_hi) + 360`
 
    GO LAS_initialize_region ($num)
 
 ENDIF
-IF `($region_x_hi) GT ($ferret_curv_lon_max)` THEN 
+IF `($region_($num)_x_hi) GT ($ferret_curv_lon_max)` THEN 
    DEFINE SYMBOL region_0_x_lo `($region_0_x_lo) - 360`
    DEFINE SYMBOL region_0_x_hi `($region_0_x_hi) - 360`
 
    GO LAS_initialize_region ($num)
 
-   IF `($region_x_lo) LT ($ferret_curv_lon_min)` THEN  ! still crosses branch cut
+   IF `($region_($num)_x_lo) LT ($ferret_curv_lon_min)` THEN  ! still crosses branch cut
       DEFINE SYMBOL two_slices 1  ! will need to use all xcoords (get_curv_coord_box)
    ENDIF
 ENDIF
@@ -63,6 +63,24 @@ ENDIF
 IF `($hvlimits_curvi"0|*>1") EQ 0` THEN \
    DEFINE SYMBOL hvlimits_curvi = /HLIM=($region_0_x_lo):($region_0_x_hi)/VLIM=($region_0_y_lo):($region_0_y_hi)
    DEFINE SYMBOL ferret_curvi_quals = ($hvlimits_curvi)
+
+! If this is a vector plot, do operations here only once, on the first 
+! vector component
+
+DEFINE SYMBOL check_linear = 1
+IF ` ($operation_ID"0|Plot_vector>1|*>0") AND ($num) GT 0` THEN DEFINE SYMBOL check_linear = 0
+
+! When x and/or y analysis is requested for data on a curvilinear grid,
+! and if the region is in the curvilienar portion of the grid, then first
+! do a curvi-to-rectilinear regridding.
+
+!!IF `($ferret_linear_coords_file"0|*>1") AND ($check_linear) AND \
+
+IF `($check_linear) AND ($analysis_def"0|*>1") ` THEN 
+      GO LAS_set_x_y_analysis.jnl
+      GO LAS_set_regridding_for_analysis
+ENDIF
+
 ! curvilinear to rectilinear regridding
 
 IF `($constraint_0_lhs"0|Curv_to_Rect_Regridding>1|*>0")` THEN
@@ -75,8 +93,6 @@ IF `($constraint_0_lhs"0|Curv_to_Rect_Regridding>1|*>0")` THEN
    EXIT/SCRIPT
 ENDIF
 
-
-
 !!!!!!!!!!!
 
 ! Special setup, if a latitude has been specified such that the grid
@@ -86,25 +102,39 @@ ENDIF
 ! If it is, then redefine the axes and proceed as if it is a rectilinear grid. Otherwise
 ! call LAS_set_strides_curvilinear.jnl
 
-
-! If this is a vector plot, do this only once, on the first vector component
-
-DEFINE SYMBOL check_linear = 1
-IF ` ($operation_ID"0|Plot_vector>1|*>0") AND ($num) GT 0` THEN DEFINE SYMBOL check_linear = 0
-
 IF `($ferret_linear_coords_file"0|*>1") AND ($check_linear)` THEN
 
    IF `($ferret_linear_lat_max"0|*>1") AND (($region_y_hi"0")  LT ($ferret_linear_lat_max))` THEN 
    
 ! If we have a precomputed set of new axes, and if we are in the linear portion of
 ! the grid, then redefine the axes.
+
+! First see if we have been told that the underlying coordinate axes have the
+! correct coordinates in the rectilinear portion of the grid (as in the GFDL tripolar grids)
+      IF `STRCMP("($ferret_linear_coords_file)", "same_as_infile") EQ 0` THEN
+      
+! Now we no longer need to deal with this data as being on a curvilinear grid
+
+         CANCEL SYMBOL ferret_curvi_coord_lon
+         CANCEL SYMBOL ferret_curvi_coord_lat
+         DEFINE SYMBOL do_curvi_xy = 0
+         DEFINE SYMBOL do_curvi_xy_and_hybrid_z = 0
+
+         EXIT/SCRIPT
+      ENDIF
+ 
       SET DATA "($ferret_linear_coords_file)"
       DEFINE SYMBOL xaxunits = `(HYCOM_lon_axis).units`
       DEFINE SYMBOL yaxunits = `(HYCOM_lat_axis).units`
       CANCEL DATA "($ferret_linear_coords_file)"
 
-      DEFINE AXIS/X/UNITS="($xaxunits)"/modulo `($data_var),RETURN=xaxis` = x[gx=HYCOM_lon_axis]
-      DEFINE AXIS/Y/UNITS="($yaxunits)" `($data_var),RETURN=yaxis` = y[gy=HYCOM_lat_axis]
+      IF ($data_var_only"0|*>1") THEN
+         DEFINE AXIS/X/UNITS="($xaxunits)"/modulo `($data_var_only),RETURN=xaxis` = x[gx=HYCOM_lon_axis]
+         DEFINE AXIS/Y/UNITS="($yaxunits)" `($data_var_only),RETURN=yaxis` = y[gy=HYCOM_lat_axis]
+      ELSE
+         DEFINE AXIS/X/UNITS="($xaxunits)"/modulo `($data_var),RETURN=xaxis` = x[gx=HYCOM_lon_axis]
+         DEFINE AXIS/Y/UNITS="($yaxunits)" `($data_var),RETURN=yaxis` = y[gy=HYCOM_lat_axis]
+      ENDIF
 
 ! Now we no longer need to deal with this data as being on a curvilinear grid
 
@@ -131,8 +161,29 @@ IF `($ferret_linear_coords_file"0|*>1") AND ($check_linear)` THEN
    ENDIF
 
 ELSE
+   ! set box and strides for curvi
    
    GO get_curv_coord_bbox.jnl
+
+   IF ($analysis_def"0|*>1") THEN
+      GO LAS_set_x_y_analysis.jnl
+      GO LAS_set_regridding_for_analysis
+
+      
+      ! curvilinear to rectilinear regridding
+
+      IF `($constraint_0_lhs"0|Curv_to_Rect_Regridding>1|*>0")` THEN
+         IF ($region_t"0|*>1") THEN DEFINE SYMBOL reg_zt ($region_t)
+         IF ($region_z"0|*>1") THEN DEFINE SYMBOL reg_zt ($region_z)
+         IF ($region_zt"0|*>1") THEN DEFINE SYMBOL reg_zt ($region_zt)
+         IF ($region_($which_var)_zt"0|*>1") THEN DEFINE SYMBOL reg_zt ($region_($which_var)_zt)
+   
+         GO transform_curv_to_rect.jnl
+         EXIT/SCRIPT
+      ENDIF
+
+   ENDIF
+
    GO LAS_set_strides_curvilinear.jnl
 
 ENDIF
@@ -209,10 +260,11 @@ IF ($ferret_view"|xy>1|*>0") THEN
 	 IF `strd LT 1` THEN LET strd  = 1
          LET xcn = xcoord[i=($clon_imax),j=($clat_jmin):($clat_jmax):`strd`]
       ENDIF
-      LET outside = `xc1 GT ($region_x_lo)` + `xcn LT ($region_x_hi)`
+      LET outside = `xc1 GT ($region_($num)_x_lo)` + `xcn LT ($region_($num)_x_hi)`
       IF `($ferret_lon_modulo"1|1|0|yes>1|no>0|*>0") AND outside GT 0 AND its_vector EQ 0` THEN \
           DEFINE SYMBOL ferret_lon_modulo = 1 
    ENDIF
+   ! set up for native curvi xy
 
 ! Or set up for native slices: Sample in the X and Y directions of the slice
 
@@ -232,3 +284,4 @@ ELIF `STRLEN ("($ferret_view)") GT 2 AND STRINDEX("($ferret_view)", "xy") GT 0` 
 ENDIF
 
 ! End of $RCSfile ------------transform_curvi_xy.jnl-------------------------------
+
