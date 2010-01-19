@@ -16,24 +16,16 @@
 	<div style="position:absolute;top:0px;left:0px">
 	<font style="float:right" id="zoomInfo" name="zoomInfo" color="red">Click and drag to zoom in.</font>
 	<a class="LASLink" onclick="window.open(document.location)">Open plot in a new window</a>&nbsp;			
-	<a id="zoom_button" name="zoom_button" class="LASLink" onclick="submitZoomOutXML()">Zoom back.</a>&nbsp;	<img id="waiting" src="JavaScript/components/mozilla_blu.gif">&nbsp;	 	</div>	
+	<a id="zoom_button" name="zoom_button" class="LASLink" onclick="submitZoomOutXML()">Zoom back.</a>&nbsp;	<img id="waiting" src="JavaScript/components/mozilla_blu.gif">&nbsp;	 	</div><br>	
   	<div id="img_body" name="img_body"></div>
 </body>
 
 <script language="JavaScript" src="JavaScript/components/xmldom.js"></script>
 <script language="JavaScript" src="JavaScript/components/LASRequest.js"></script>
-<script type="text/javascript" src="JavaScript/frameworks/dojo/dojo.js"></script>
 <SCRIPT language="JavaScript" src="JavaScript/components/MapWidget.js"></SCRIPT>
 
 
 <script language="JavaScript">
-
-
-dojo.require("dojo.io.*");
-
-
-
-
 
 var myMapWidget = {};  //put it in a global variable, or else you'll lose it.
 var Req = {}; //Same goes for the LAS request object
@@ -63,14 +55,18 @@ var axisHi = "";
 *     request -- the product server request string
 */
 function evalMyRequest (request) {
+
              document.getElementById('waiting').style["display"]="";
-              var bindArgs = {                           url: request,
-                       mimetype: "text/plain",
-                       preventCache:true,
-                       error: function(type,error) {submitXML()},
-                       load: function(type,data,event) {eval2(data);}
-                };
-               var request = dojo.io.bind(bindArgs);
+                if(!document.all)
+                        var req = new XMLHttpRequest(this);
+                else
+                        var req = new ActiveXObject("Microsoft.XMLHTTP");
+
+                req.onreadystatechange = function() {if(req.readyState==4)eval2(req.responseText)};
+                req.open("GET", request);
+                req.send(null);
+
+
 
 }
 
@@ -198,9 +194,9 @@ function submitXML() {
      Req.setRange(axisHi,myMapWidget.extents.selection.grid.y.min,myMapWidget.extents.selection.grid.y.max);
     }
    
-    Req.setOperation('XY_2D_zoom','LAS7');
+    //Req.setOperation('XY_2D_zoom','LAS7');
     var URL = './ProductServer.do?xml=' + escape(Req.getXMLText());
-    evalMyRequest(URL);
+    document.location = URL;//evalMyRequest(URL);
   }
 }
 
