@@ -64,12 +64,14 @@ ENDIF
 !           with data_($num)_var if it exists, but we could
 !           extend to different data sets with further symbols
 
-DEFINE SYMBOL data_x_var ($data_($num)_x_var)
-DEFINE SYMBOL data_y_var ($data_($num)_y_var)
+DEFINE SYMBOL data_num = `($data_($num)_x_var),RETURN=dsetnum`
+DEFINE SYMBOL data_x_var ($data_($num)_x_var)[d=($data_num)]
+DEFINE SYMBOL data_y_var ($data_($num)_y_var)[d=($data_num)]
 
 ! The variable at the x and y locations
 
 IF ($data_($num)_var"0|1|*>1) THEN DEFINE SYMBOL data_var ($data_($num)_var)
+
 !IF ($data_($num)_units"0|*>1") THEN 
 !   DEFINE SYMBOL data_units (($data_($num)_units))
 !   DEFINE SYMBOL data_units "(($data_($num)_units))"
@@ -109,8 +111,8 @@ DEFINE SYMBOL ferret_plot_title ($data_title)
 
 LET its_keyword = `STRINDEX ("($data_x_var)", "'") GT 0`
 IF `its_keyword` THEN
-   DEFINE SYMBOL data_x_var  `UPCASE("($data_x_var)")`
-   LET data_num = `($data_x_var) ,return=dsetnum`
+   DEFINE SYMBOL data_x_var  `UPCASE("($data_x_var)[d=($data_num)]")`
+   LET data_num = `($data_x_var) ,RETURN=dsetnum`
    DEFINE SYMBOL data_num = `($data_x_var) ,return=dsetnum`
 ELSE
    LET data_num = `($data_x_var) ,return=dsetnum`
@@ -122,11 +124,11 @@ ENDIF
 
 LET its_keyword = `STRINDEX ("($data_y_var)", "'") GT 0`
 IF `its_keyword` THEN
-   DEFINE SYMBOL data_y_var  `UPCASE("($data_y_var)")`
+   DEFINE SYMBOL data_y_var  `UPCASE("($data_y_var)[d=($data_num)]")`
 ENDIF
 
 IF ($data_var"0|*>1") THEN
-   DEFINE SYMBOL ferret_plot_var = ($data_var)
+   DEFINE SYMBOL ferret_plot_var = ($data_var)[d=($data_num)]
 ENDIF
 
 IF ($data_title"0|*>1") THEN \
@@ -190,5 +192,3 @@ IF ($ferret_expression"0|*>1") THEN
 ENDIF
 
 CANCEL VAR data_num
-
-
