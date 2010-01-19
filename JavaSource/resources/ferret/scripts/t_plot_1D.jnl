@@ -80,19 +80,16 @@ IF `($ferret_line_color%0|default>0|*>1%)` THEN
   DEFINE SYMBOL qualifiers = ($qualifiers)/COLOR=($ferret_line_color%0|default>black|red|blue|green|lightblue|purple|*>black%)
 ENDIF
 
-! line thickness
-
-DEFINE SYMBOL plotsymbol = 25
-IF `($ferret_line_thickness%0|default>1|*>1%)` THEN
-   DEFINE SYMBOL qualifiers = ($qualifiers)($ferret_line_thickness%/THICK=1|default>/THICK=1|1>/THICK=1|2>/THICK=2|3>/THICK=3|*>/THICK=1%)
-   IF `($ferret_line_thickness%1|1|2|3|*>1%) EQ 2` THEN DEFINE SYMBOL plotsymbol = 25/SIZ=0.12
-   IF `($ferret_line_thickness%1|1|2|3|*>1%) EQ 3` THEN DEFINE SYMBOL plotsymbol = 27/SIZ=0.15
-ENDIF
-
 ! symbols
 
 IF `($ferret_line_or_sym%0|default>1|*>1%)` THEN
-   DEFINE SYMBOL qualifiers = ($qualifiers)($ferret_line_or_sym%/LINE|default>/LINE|line>/LINE|both>/LINE/SYM=($plotsymbol)|sym>/SYM=($plotsymbol)%)
+DEFINE SYMBOL qualifiers = ($qualifiers)($ferret_line_or_sym%/LINE|default>/LINE|line>/LINE|both>/LINE/SYM|sym>/SYM%)
+ENDIF
+
+! line thickness
+
+IF `($ferret_line_thickness%0|default>1|*>1%)` THEN
+   DEFINE SYMBOL qualifiers = ($qualifiers)($ferret_line_thickness%/THICK=1|default>/THICK=1|1>/THICK=1|2>/THICK=2|3>/THICK=3|*>/THICK=1%)
 ENDIF
 
 ! Set the plot argument. If there are multiple variables, plot them
@@ -164,10 +161,6 @@ IF `($data_count"0") GT 1` THEN
    PPL PLOT
    GO LAS_url_label `($data_count)-1`
 ELSE
-   DEFINE SYMBOL split_title = ($ferret_title_0)
-   GO LAS_split_title
-   DEFINE SYMBOL ferret_title_0 = ($split_title)
-
    PLOT($qualifiers)/NOKEY/SET/TITLE="($ferret_title_0)" ($plot_arg)
       IF ($xform_dms"0|*>1") THEN PPL XFOR (($xform_dms))
       IF `($ferret_dep_axis_scale"0|*>1")` THEN PPL YAXIS ($ferret_dep_axis_scale)
@@ -175,7 +168,6 @@ ELSE
       IF `($labnum_datitl%0|*>1%)` THEN GO unlabel ($labnum_datitl)
       IF `($labnum_dods%0|*>1%)` THEN GO unlabel ($labnum_dods)
    PPL PLOT
-
    GO LAS_url_label 0
 ENDIF
 

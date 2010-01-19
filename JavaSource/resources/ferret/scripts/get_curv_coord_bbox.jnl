@@ -19,21 +19,6 @@
 IF ($curv_coord_bbox_done"0") THEN EXIT/SCRIPT
 DEFINE SYMBOL curv_coord_bbox_done = 1
 
-
-! For analysis operations on curvilienar grids we may not have definitions for region_x_* and
-! region_y_*  but there should be region_0_**
-
-IF `($region_x_lo"-999") EQ -999` THEN
-   DEFINE SYMBOL remove_x_region = 1
-   DEFINE SYMBOL region_x_lo = ($region_0_x_lo)
-   DEFINE SYMBOL region_x_hi = ($region_0_x_hi)
-ENDIF
-IF `($region_y_lo"-999") EQ -999` THEN
-   DEFINE SYMBOL remove_y_region = 1
-   DEFINE SYMBOL region_y_lo = ($region_0_y_lo)
-   DEFINE SYMBOL region_y_hi = ($region_0_y_hi)
-ENDIF
-
 ! If the whole grid is specified, we are done.
 IF ($ferret_curv_lon_min"0|*>1") THEN
    LET xlodiff =  ABS(($ferret_curv_lon_min) - ($region_x_lo) )
@@ -55,7 +40,6 @@ IF ($ferret_curv_lon_min"0|*>1") THEN
       DEFINE SYMBOL clat_jmin `clat_jmin`
       DEFINE  SYMBOL clat_jmax `clat_jmax`
 
-      GO cancel_temp_regions
       EXIT/SCRIPT
    ENDIF  
 ENDIF
@@ -170,7 +154,6 @@ IF ($box_cf_map_url"0|*>1") THEN  ! If we have a map file, use it.
    CAN DATA ($mapfile_num)
    SET DATA/RESTORE
    
-   GO cancel_temp_regions
    EXIT/SCRIPT
 ENDIF  ! if we have a map 
 LET kludge = 1
@@ -198,45 +181,23 @@ ENDIF
 ! See if this is a rectangle or an X line; if an X line then expand
 ! the region to make a rectangle.
 
-IF `($region_x_hi"-999|*>1") EQ -999` THEN
-   IF `($region_0_x_hi) GT ($region_0_x_lo)` THEN
-      LET box_x_lo = ($region_0_x_lo)
-      LET box_x_hi = ($region_0_x_hi) 
-   ELSE
-      LET box_x_lo = `($region_0_x_lo) - 4.`
-      LET box_x_hi = `($region_0_x_hi) + 4.`
-   ENDIF
+IF `($region_x_hi) GT ($region_x_lo)` THEN
+   LET box_x_lo = ($region_x_lo)
+   LET box_x_hi = ($region_x_hi) 
 ELSE
-   IF `($region_x_hi) GT ($region_x_lo)` THEN
-      LET box_x_lo = ($region_x_lo)
-      LET box_x_hi = ($region_x_hi) 
-   ELSE
-      LET box_x_lo = `($region_x_lo) - 4.`
-      LET box_x_hi = `($region_x_hi) + 4.`
-   ENDIF
+   LET box_x_lo = `($region_x_lo) - 4.`
+   LET box_x_hi = `($region_x_hi) + 4.`
 ENDIF
 
 ! See if this is a rectangle or a Y line; if a Y line then expand
 ! the region to make a rectangle.
 
-IF `($region_y_hi"-999|*>1") EQ -999` THEN
-
-   IF `($region_0_y_hi) GT ($region_0_y_lo)` THEN
-      LET box_y_lo = ($region_0_y_lo)
-      LET box_y_hi = ($region_0_y_hi) 
-   ELSE
-      LET box_y_lo = `($region_0_y_lo) - 4.`
-      LET box_y_hi = `($region_0_y_hi) + 4.`
-   ENDIF
+IF `($region_y_hi) GT ($region_y_lo)` THEN
+   LET box_y_lo = ($region_y_lo)
+   LET box_y_hi = ($region_y_hi) 
 ELSE
-
-   IF `($region_y_hi) GT ($region_y_lo)` THEN
-      LET box_y_lo = ($region_y_lo)
-      LET box_y_hi = ($region_y_hi) 
-   ELSE
-      LET box_y_lo = `($region_y_lo) - 4.`
-      LET box_y_hi = `($region_y_hi) + 4.`
-   ENDIF
+   LET box_y_lo = `($region_y_lo) - 4.`
+   LET box_y_hi = `($region_y_hi) + 4.`
 ENDIF
 
 ! Define a small output grid, 2x2 and use the curvilinear map function
@@ -292,5 +253,6 @@ DEFINE SYMBOL clon_imax_computed ($clon_imax)
 DEFINE SYMBOL clon_imin 1
 DEFINE SYMBOL clon_imax `($ferret_curvi_coord_lon)[j=1,x=@NGD]`
 
-GO cancel_temp_regions
 ! End of get_curv_coord_bbox.jnl ------------------------------------------------------
+
+

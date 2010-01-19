@@ -18,7 +18,6 @@ IF `($do_curvi_xy_and_hybrid_z)` THEN EXIT/SCRIPT
 ! always correct for these variables (dont exit, test works for some cases)
 ! IF `STRINDEX ("($ferret_plot_var)", "sampled_var") GT 0` THEN EXIT/SCRIPT
 
-set mem/siz=800
 LET the_plot_var = ($ferret_plot_var)
 LOAD the_plot_var
 DEFINE SYMBOL varshape = `the_plot_var,RETURN=shape`

@@ -14,14 +14,12 @@ IF `STRCMP("($dir)", "T") EQ 0` THEN  DEFINE SYMBOL indx = l
 DEFINE SYMBOL var_mod = "`($data_var)[d=($data_num)],RETURN=($dir)mod` "
 IF  `STRCMP (" ", ($var_mod)) EQ 0` THEN CANCEL SYMBOL var_mod
 
-! See if an X axis is subspan modulo - if so we dont have to worry about losing
+! See if it is subspan modulo - if so we dont have to worry about losing
 ! modulo property with striding. 
-IF ($indx"|i>1|l>0") THEN
-   CANCEL MODE LONG_LABEL
-   LET xaxlen = `($data_var),RETURN=xend` -  `($data_var),RETURN=xstart`
-   SET MODE/LAST LONG_LABEL
-   IF `xaxlen LT ($var_mod"0")` THEN DEFINE SYMBOL var_mod " "    ! its subspan modulo
-ENDIF
+CANCEL MODE LONG_LABEL
+LET xaxlen = `($data_var),RETURN=xend` -  `($data_var),RETURN=xstart`
+SET MODE/LAST LONG_LABEL
+IF `xaxlen LT ($var_mod"0")` THEN DEFINE SYMBOL var_mod " "    ! its subspan modulo
 
 IF  `STRCMP (" ", ($var_mod)) EQ 0` THEN
    CANCEL SYMBOL FER_LAST_ERROR

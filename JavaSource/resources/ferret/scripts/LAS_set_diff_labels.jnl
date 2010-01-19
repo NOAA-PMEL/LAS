@@ -35,17 +35,15 @@ DEFINE SYMBOL ferret_diff_list_title = \
 IF `STRLEN("($ferret_diff_title)") GT 150` THEN
 
   DEFINE SYMBOL lab_0 = ($ferret_title_0) from ($data_0_dataset_name)(1)
-  IF `STRLEN("($lab_0)") GT 80` THEN  
+  IF `STRLEN("($lab_0)") GT 80` THEN  \
     DEFINE SYMBOL lab_0 = ($ferret_title_0) \
     <NL>  from @AC($data_0_dataset_name)(1) 
-  ENDIF
 
   DEFINE SYMBOL lab_1 = ($ferret_title_1)) from ($data_1_dataset_name)(2)
-
-  IF `STRLEN("($lab_1)") GT 80` THEN  
+  IF `STRLEN("($lab_1)") GT 80` THEN  \
     DEFINE SYMBOL lab_1 = ($ferret_title_1) \
-    <NL>  from @AC($data_1_dataset_name)(2)
-  ENDIF
+    <NL>  from @AC($data_1_dataset_name)(2) 
+
   DEFINE SYMBOL ferret_diff_title = ($lab_0)<NL>  -  @P2($lab_1)
   DEFINE SYMBOL title_size 0.12   ! make title text smaller...
 ENDIF
@@ -57,16 +55,14 @@ DEFINE SYMBOL ferret_over_title = \
 IF `STRLEN("($ferret_over_title)") GT 150` THEN
 
   DEFINE SYMBOL lab_0 = ($ferret_title_0) from ($data_0_dataset_name)(1)
-  IF `STRLEN("($lab_0)") GT 80` THEN 
+  IF `STRLEN("($lab_0)") GT 80` THEN  \
     DEFINE SYMBOL lab_0 = ($ferret_title_0) \
     <NL>  from @AC($data_0_dataset_name)(1) 
-  ENDIF
 
   DEFINE SYMBOL lab_1 = ($ferret_title_1)) from ($data_1_dataset_name)(2)
-  IF `STRLEN("($lab_1)") GT 80` THEN  
+  IF `STRLEN("($lab_1)") GT 80` THEN  \
     DEFINE SYMBOL lab_1 = ($ferret_title_1) \
     <NL>  from @AC($data_1_dataset_name)(2) 
-  ENDIF
 
   DEFINE SYMBOL ferret_over_title = ($lab_0)<NL>  @P2($lab_1)
   DEFINE SYMBOL title_size 0.12   ! make title text smaller...
