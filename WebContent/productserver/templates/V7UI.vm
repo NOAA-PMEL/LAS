@@ -2,12 +2,13 @@
 <html debug="true">
 	<head>
 		<title>$las_config.getTitle()</title>
-		<script type="text/javascript" language="javascript" src="JavaScript/ui/LASUI.js" ></script>
+		
+		<script type="text/javascript" language="javascript" src="JavaScript/ui/LASUI.js"></script>
 		<script type="text/javascript" language="javascript" src="JavaScript/components/gov.noaa.pmel.tmap.las.NativeMapWidget/gov.noaa.pmel.tmap.las.NativeMapWidget.nocache.js"></script> 
-    	<script type="text/javascript" language="javascript" src="JavaScript/frameworks/OpenLayers/OpenLayers.js"></script> 
-    	<script type="text/javascript" language="javascript" src="JavaScript/frameworks/OpenLayersExtensions/DrawSingleFeature.js"></script> 
-    	<script type="text/javascript" language="javascript" src="JavaScript/frameworks/OpenLayersExtensions/HorizontalPath.js"></script> 
-    	<script type="text/javascript" language="javascript" src="JavaScript/frameworks/OpenLayersExtensions/VerticalPath.js"></script> 
+    		<script type="text/javascript" language="javascript" src="JavaScript/frameworks/OpenLayers/OpenLayers.js"></script> 
+    		<script type="text/javascript" language="javascript" src="JavaScript/frameworks/OpenLayersExtensions/DrawSingleFeature.js"></script> 
+    		<script type="text/javascript" language="javascript" src="JavaScript/frameworks/OpenLayersExtensions/HorizontalPath.js"></script> 
+    		<script type="text/javascript" language="javascript" src="JavaScript/frameworks/OpenLayersExtensions/VerticalPath.js"></script> 
 		<script type="text/javascript" language="javascript" src="JavaScript/components/xmldom.js" ></script>
 		<script type="text/javascript" language="javascript" src="JavaScript/components/LASRequest.js" ></script>
 		<script type="text/javascript" language="javascript" src="JavaScript/components/LASGetGridResponse.js" ></script>
@@ -196,7 +197,7 @@
 			<div id="message_bar"><img id="wait" style="visibility:hidden;float:right;margin:2pt;padding:2pt;" src="JavaScript/components/mozilla_blu.gif"><span id="breadcrumb"></span></div>
 
 
-			<table  width="1024px"><tbody><tr><td style="vertical-align:top" border=1>
+			<table  width="1024px"><tbody><tr><td style="vertical-align:top;border:1pt solid black">
 				<div id="constraints">
 					<div id="ol_map_widget"  onmouseover="showDatasetPicker()"></div>
 					<div id="constraintsScroll"  class="LASConstraintsPane">

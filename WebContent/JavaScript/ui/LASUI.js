@@ -64,7 +64,7 @@ function LASUI () {
 		 },
 		"analysis" : "analysis"
 	};
-
+	this.AJAX_cache={};
 	this.request = new LASRequest();
 
 	this.autoupdate=false;
@@ -139,8 +139,15 @@ LASUI.prototype.initUI = function (anchorId)
 		this.refs.analysis.type.axes.onchange = this.selectAnalysisAxis.LASBind(this,null,true);
 	//}
 	this.refs.analysis.type.op.onchange = this.selectAnalysisType.LASBind(this);
-
-	document.getElementById(this.anchors.output).addEventListener("load",this.onPlotLoad.LASBind(this),true);
+	
+	if(document.getElementById(this.anchors.output).addEventListener&&!document.all)
+		document.getElementById(this.anchors.output).addEventListener("load",this.onPlotLoad.LASBind(this),true);
+	else if (document.getElementById(this.anchors.output).attachEvent&&!document.all)
+		 document.getElementById(this.anchors.output).addEventListener("load",this.onPlotLoad.LASBind(this));
+	else if (document.all)
+		document.getElementById(this.anchors.output).onreadystatechange=this.onPlotLoad.LASBind(this);
+	else
+		 document.getElementById(this.anchors.output).onload=this.onPlotLoad.LASBind(this);
 	//grab references to the map constraint inputs
 	this.refs.inputs = {};
 	for(var i in this.anchors.inputs)
@@ -172,7 +179,8 @@ LASUI.prototype.initUI = function (anchorId)
 		else
 			var req = new ActiveXObject("Microsoft.XMLHTTP");
 
-		req.onreadystatechange = this.AJAXhandler.LASBind(this, req, "this.setCategoryTreeNode(req.responseText,this.refs.categories,'categories');");
+		req.onreadystatechange = this.AJAXhandler.LASBind(this, req, "this.AJAX_cache['"+escape(this.hrefs.getCategories.url)+"']=req.responseText;this.setCategoryTreeNode(req.responseText,this.refs.categories,'categories');");
+		this.AJAX_cache[this.hrefs.getCategories.url]="waiting";
 		req.open("GET", this.hrefs.getCategories.url);
 		req.send(null);
 	}
@@ -726,12 +734,18 @@ LASUI.prototype.getOperations = function (dataset, variable, view) {
 			var req = new XMLHttpRequest(this);
 		else
 			var req = new ActiveXObject("Microsoft.XMLHTTP");
-
+	
+			
+		var url = this.hrefs.getOperations.url + '?dsid=' + dataset + '&varid=' + variable + '&view=' + view;
+		
 		if(view) {
-			var viewStr = '&view=' + view;
-			req.onreadystatechange = this.AJAXhandler.LASBind(this, req, "this.setOperationList(req.responseText);");
-			req.open("GET", this.hrefs.getOperations.url + '?dsid=' + dataset + '&varid=' + variable + viewStr);
-			req.send(null);
+			if(!this.AJAX_cache[url]) {
+				this.AJAX_cache[url]="waiting";
+				req.onreadystatechange = this.AJAXhandler.LASBind(this, req, "this.AJAX_cache['"+url+"'] = req.responseText; this.setOperationList(req.responseText);");
+				req.open("GET", url);
+				req.send(null);
+			} else if(this.AJAX_cache[url]!="waiting")
+				this.setOperationList(this.AJAX_cache[url]);
 		}
 		//this.resetOptions("plot");
 
@@ -931,14 +945,20 @@ LASUI.prototype.doProductIconClick = function (evt) {
  * @param {string} variable A variable id within the dataset
  */
 LASUI.prototype.getGrid = function (dataset, variable) {
-			if(!document.all)
-			var req = new XMLHttpRequest(this);
-		else
-			var req = new ActiveXObject("Microsoft.XMLHTTP");
-		req.onreadystatechange = this.AJAXhandler.LASBind(this, req, "this.setGrid(req.responseText);");
-		req.open("GET",  this.hrefs.getGrid.url + '?dsid=' + dataset + '&varid=' + variable);
-		req.send(null);
 
+		var url = this.hrefs.getGrid.url + '?dsid=' + dataset + '&varid=' + variable;
+		
+		if(!this.AJAX_cache[url]) {
+			this.AJAX_cache[url]="waiting";
+			if(!document.all)
+				var req = new XMLHttpRequest(this);
+			else
+				var req = new ActiveXObject("Microsoft.XMLHTTP");
+			req.onreadystatechange = this.AJAXhandler.LASBind(this, req, "this.AJAX_cache['"+url+"']=req.responseText;this.setGrid(req.responseText);");
+			req.open("GET",  this.hrefs.getGrid.url + '?dsid=' + dataset + '&varid=' + variable);
+			req.send(null);
+		} else if (this.AJAX_cache[url]!="waiting")
+			this.setGrid(AJAX_cache[url]);
 
 
 }
@@ -968,13 +988,19 @@ LASUI.prototype.setGrid = function (strJson) {
  * @param {string} variable A variable id
  */
 LASUI.prototype.getViews = function (dataset,variable) {
-				if(!document.all)
-			var req = new XMLHttpRequest(this);
-		else
-			var req = new ActiveXObject("Microsoft.XMLHTTP");
-		req.onreadystatechange = this.AJAXhandler.LASBind(this, req, "this.setViews(req.responseText);");
-		req.open("GET", this.hrefs.getViews.url + '?dsid=' + dataset + '&varid=' +variable);
-		req.send(null);
+		
+		var url = this.hrefs.getViews.url + '?dsid=' + dataset + '&varid=' +variable;
+		if(!this.AJAX_cache[url]) {
+                        this.AJAX_cache[url]="waiting";
+			if(!document.all)
+				var req = new XMLHttpRequest(this);
+			else
+				var req = new ActiveXObject("Microsoft.XMLHTTP");
+			req.onreadystatechange = this.AJAXhandler.LASBind(this, req, "this.AJAX_cache['"+url+"']=req.responseText;this.setViews(req.responseText);");
+			req.open("GET", url);
+			req.send(null);
+		} if (this.AJAX_cache[url]!="waiting")
+			this.setViews(this.AJAX_cache[url]);
 
 }
 /**
@@ -1067,18 +1093,16 @@ LASUI.prototype.setProductNode = function(type, product) {
 		this.refs.operations.plot.DOMNode.appendChild(this.refs.operations.plot.children[product].LINode);
 }
 LASUI.prototype.onPlotLoad = function (e) {
-
-	//if(document.all)
-	var iframeDOM = window.frames[this.anchors.output];
-	//else
-	//	var iframeDOM = window.frames[this.anchors.output].contentWindow;
-	 
-	iframeDOM.onPlotLoad = this.onPlotLoad.LASBind(this); 
-	//url = iframeDOM.document.location.href;
 	
-	if(e) 
-		if(e.getXMLText&&!isFeatureEditing()&&this.state.view.plot=="xy")
-				 setMapCurrentSelection(e.getRangeLo('y'),e.getRangeHi('y'),e.getRangeLo('x'),e.getRangeHi('x'));			 
+	var urlArr = window.frames[this.anchors.output].document.location.search.replace("?","").split("&");
+	for(var i=0;i<urlArr.length;i++)
+		if(urlArr[i].substr(0,3)=="xml")
+			var Req = new LASRequest(unescape(urlArr[i].substr(4,urlArr[i].length)).replace(/\+/g," "));
+
+	if(Req) 
+		if(Req.getXMLText&&!isFeatureEditing()&&this.state.view.plot=="xy")
+				 setMapCurrentSelection(Req.getRangeLo('y'),Req.getRangeHi('y'),Req.getRangeLo('x'),Req.getRangeHi('x'));			 
+
 	if(document.getElementById("wait"))
 		document.getElementById("wait").style.visibility="hidden";
 	if(document.getElementById("wait_msg"))
@@ -1611,47 +1635,48 @@ LASUI.prototype.makeRequest = function (evt, type) {
  */
 LASUI.prototype.getOptions = function (optiondef, type, reset) {
 
-	var submit = document.createElement("INPUT");
-	var cancel = document.createElement("INPUT");
 
-	submit.type = "submit";
-	submit.value=	"OK";
-	submit.className = "LASSubmitInputNode";
-	var strHandler = "this.setChangedOptions('"+ type+ "');this.hideOptions('"+ type+ "')";
-	if(type!="plot") 
-		strHandler += ";this.makeRequest({},'"+type+"')"
-	submit.onclick = this.genericHandler.LASBind(this,strHandler);
+	var url =  this.hrefs.getOptions.url + '?opid=' + optiondef;
 
-	cancel.type = "submit";
-	cancel.value=	"Cancel";
-	cancel.className = "LASSubmitInputNode";
-	cancel.onclick = this.genericHandler.LASBind(this,"this.cancelChangedOptions('"+ type+ "');this.hideOptions('"+ type+ "')");
-	var reset = document.createElement("INPUT");
-	reset.type = "submit";
-	reset.onclick =  this.genericHandler.LASBind(this,"this.resetOptions('" +type + "')");
-	reset.name = "Reset";
-	reset.value = "Reset";
-	while(this.refs.options[type].DOMNode.firstChild)
-		this.refs.options[type].DOMNode.removeChild(this.refs.options[type].DOMNode.firstChild);
-	/*	if(this.state.operations)
-			if(this.state.operations.getOperationByID(this.state.operation[type])){
-			var label = document.createElement("STRONG");
-			label.appendChild(document.createTextNode("Set " + this.state.operations.getOperationByID(this.state.operation[type]).name + " options."));
-			this.refs.options[type].DOMNode.appendChild(label);
-			this.refs.options[type].DOMNode.appendChild(document.createElement("BR"));
-	}*/
-	this.refs.options[type].DOMNode.appendChild(submit);
-	this.refs.options[type].DOMNode.appendChild(reset);
-	this.refs.options[type].DOMNode.appendChild(cancel);
+	
+		var submit = document.createElement("INPUT");
+		var cancel = document.createElement("INPUT");
 
-			if(!document.all)
+		submit.type = "submit";
+		submit.value=	"OK";
+		submit.className = "LASSubmitInputNode";
+		var strHandler = "this.setChangedOptions('"+ type+ "');this.hideOptions('"+ type+ "')";
+		if(type!="plot") 
+			strHandler += ";this.makeRequest({},'"+type+"')"
+		submit.onclick = this.genericHandler.LASBind(this,strHandler);
+	
+		cancel.type = "submit";
+		cancel.value=	"Cancel";
+		cancel.className = "LASSubmitInputNode";
+		cancel.onclick = this.genericHandler.LASBind(this,"this.cancelChangedOptions('"+ type+ "');this.hideOptions('"+ type+ "')");
+		var reset = document.createElement("INPUT");
+		reset.type = "submit";
+		reset.onclick =  this.genericHandler.LASBind(this,"this.resetOptions('" +type + "')");
+		reset.name = "Reset";
+		reset.value = "Reset";
+		while(this.refs.options[type].DOMNode.firstChild)
+			this.refs.options[type].DOMNode.removeChild(this.refs.options[type].DOMNode.firstChild);
+		this.refs.options[type].DOMNode.appendChild(submit);
+		this.refs.options[type].DOMNode.appendChild(reset);
+		this.refs.options[type].DOMNode.appendChild(cancel);
+	
+
+	if(!this.AJAX_cache[url]) {
+		this.AJAX_cache[url]="waiting";
+		if(!document.all)
 			var req = new XMLHttpRequest(this);
 		else
 			var req = new ActiveXObject("Microsoft.XMLHTTP");
-	req.onreadystatechange = this.AJAXhandler.LASBind(this, req, "this.setOptionList(req.responseText,args[3],args[4],args[5]);",this.refs.options[type].DOMNode,type,reset);
-	req.open("GET", this.hrefs.getOptions.url + '?opid=' + optiondef);
-	req.send(null);
-
+		req.onreadystatechange = this.AJAXhandler.LASBind(this, req, "this.AJAX_cache['"+url+"']=req.responseText;this.setOptionList(req.responseText,args[3],args[4],args[5]);",this.refs.options[type].DOMNode,type,reset);
+		req.open("GET", this.hrefs.getOptions.url + '?opid=' + optiondef);
+		req.send(null);
+	} else if (this.AJAX_cache[url]!="waiting")
+		this.setOptionList(this.AJAX_cache[url],this.refs.options[type].DOMNode,type,reset);
 
 }
 /**
