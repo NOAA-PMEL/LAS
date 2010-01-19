@@ -112,7 +112,7 @@ ELSE ! not xmod eq 0
             DEFINE SYMBOL x_hi_1 `x[gx=($data_var),x=($region_x_hi)]`
             DEFINE SYMBOL i_hi_1 `i[gx=($data_var),x=($region_x_hi)]`
    
-         ELSE   !!! from region_x_hi LT xaxlo
+         ELSE   !!! from `($region_x_hi) LT ($xaxlo)`
             DEFINE SYMBOL section 2
    
             ! End of sec 1 is 1 less than start of X axis
@@ -130,11 +130,11 @@ ELSE ! not xmod eq 0
                DEFINE SYMBOL x_hi_2 `x[gx=($data_var),x=($region_x_hi)]`
                DEFINE SYMBOL i_hi_2 `i[gx=($data_var),x=($region_x_hi)]`
    
-            ENDIF !!! region_x_hi LE xaxhi
+            ENDIF !!! `($region_x_hi) LE ($xaxhi)`
      
-         ENDIF   !!! region_x_hi LT xaxlo
+         ENDIF   !!! IF `($region_x_hi) LT ($xaxlo)` THEN 
       
-      ELSE    !!! region_x_lo GE xaxlo 
+      ELSE    !!! `($region_x_lo) GE ($xaxlo)` 
          DEFINE SYMBOL section 1
    
          ! Start of Sec 1 is start of region
@@ -144,7 +144,7 @@ ELSE ! not xmod eq 0
          IF `($region_x_hi) LE ($xaxhi)` THEN
             DEFINE SYMBOL x_hi_1 `x[gx=($data_var),x=($region_x_hi)]`
             DEFINE SYMBOL i_hi_1 `i[gx=($data_var),x=($region_x_hi)]`
-         ELSE   !!! region_x_hi LE xaxhi
+         ELSE   !!! `($region_x_hi) LE ($xaxhi)`
             DEFINE SYMBOL section 2 
             
             ! End of sec 1 is end of X axis
@@ -159,10 +159,10 @@ ELSE ! not xmod eq 0
             DEFINE SYMBOL x_hi_2 `x[gx=($data_var),x=($region_x_hi)]`
             DEFINE SYMBOL i_hi_2 `i[gx=($data_var),x=($region_x_hi)]`
    
-         ENDIF !!! region_x_hi LE xaxhi
-      ENDIF  !!! region_x_lo GE xaxlo
+         ENDIF !!! `($region_x_hi) LE ($xaxhi)`
+      ENDIF  !!! `($region_x_lo) GE ($xaxlo)` 
    
-   ENDIF !!! region_x_hi defined
+   ENDIF !!! ($region_x_hi"0|*>1")
 
    ! Make the indices positive: add npts to either section if they are negative
    LET add_1 = 0
@@ -184,7 +184,7 @@ ELSE ! not xmod eq 0
       IF `($i_lo_2) EQ ($i_hi_1)` THEN DEFINE SYMBOL i_lo_2 `($i_lo_2) + 1`
       IF `($i_hi_2) EQ ($i_lo_1)` THEN DEFINE SYMBOL i_hi_2 `($i_hi_2) - 1`
 
-   ENDIF !!! section
+   ENDIF !!! `($section"0|0|1|2>1|*>0")`
 
 ENDIF
 ENDIF   !!! X region
@@ -220,13 +220,11 @@ ENDIF   !!! Z region
 IF `STRINDEX("($varshape)", "T") NE 0` THEN
    IF ($region_t_hi"0|*>1") THEN
 
-      LET tpts = t[gt=`($ferret_plot_var),return=taxis`]
+      LET tpts = t[gt=($ferret_plot_var)]
 
-!      LET tt = `t[gt=tpts,t="($region_t_lo)"]`
       LET tt = `t[gt=($data_var),t="($region_t_lo)"]`
       DEFINE SYMBOL t_lo "`TAX_DATESTRING(tt, tpts, "days")`"
 
-!      LET tt = `t[gt=tpts,t="($region_t_hi)"]`
       LET tt = `t[gt=($data_var),t="($region_t_hi)"]`
       DEFINE SYMBOL t_hi "`TAX_DATESTRING(tt, tpts, "days")`"
 
