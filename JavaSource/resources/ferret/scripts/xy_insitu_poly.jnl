@@ -75,8 +75,9 @@ ENDIF
 ! What if the x locations are a modulo-360 distance outside the region?
 ! Define a new variable with the data plus or minus 360.
 
-LET data_xmin = ($data_x_var)[x=@min,y=@min,z=@min,t=@min]
-LET data_xmax = ($data_x_var)[x=@max,y=@max,z=@max,t=@max]
+LET data_x = ($data_x_var)
+LET data_xmin = data_x[x=@min,y=@min,z=@min,t=@min]
+LET data_xmax = data_x[x=@max,y=@max,z=@max,t=@max]
 IF `data_xmax LT ($region_x_lo)` THEN
    DEFINE SYMBOL data_x_var_xmod = ($data_x_var)+360
 
