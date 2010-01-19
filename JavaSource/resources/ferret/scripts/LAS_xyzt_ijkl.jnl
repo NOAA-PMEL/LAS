@@ -45,6 +45,7 @@
 !                undefined, 0, 1, or 2.
 ! 2007/11/14 acm If there is no x axis at all then the `LOAD var,return=xmod` results in an 
 !                error. Check for the existence of an axis in the x direction first.  (trac 315)
+! 2010 01 15 acm remove parentheses for comments on ENDIFS; so this will run with v6.4 and prev.
 
 ! For the present, this script does not handle curvilinear or hybrid Z data...
 
