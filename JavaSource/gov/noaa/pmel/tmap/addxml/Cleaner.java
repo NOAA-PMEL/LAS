@@ -51,10 +51,10 @@ public class Cleaner {
 
 			InvCatalog catalog = (InvCatalog) factory.readXML(data);
 			StringBuilder buff = new StringBuilder();
-			if (!catalog.check(buff, true)) {
+			if (!catalog.check(buff, false)) {
 				log.error("Invalid catalog " + data + "\n" + buff.toString());
 			}
-
+            log.debug("Cleaning: "+data);
 			CatalogCleaner cleaner = null;
 			try {
 				cleaner = new CatalogCleaner(catalog, false);
