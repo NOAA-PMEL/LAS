@@ -32,7 +32,6 @@ public class Aggregates {
 	private static final Logger log = LogManager.getLogger(Aggregates.class);
 	public Aggregates(List<InvDataset> nestedDatasets, boolean aggregate) {
 		this.aggregate = aggregate;
-		List<DatasetGridPair> gridDatasets = new ArrayList<DatasetGridPair>();
 		
 		List<List<DatasetGridPair>> datasetGroups = new ArrayList<List<DatasetGridPair>>();
 		List<DatasetGridPair> group0 = new ArrayList<DatasetGridPair>();
