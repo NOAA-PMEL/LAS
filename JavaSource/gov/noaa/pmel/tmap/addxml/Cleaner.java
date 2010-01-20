@@ -57,7 +57,7 @@ public class Cleaner {
 
 			CatalogCleaner cleaner = null;
 			try {
-				cleaner = new CatalogCleaner(catalog, true);
+				cleaner = new CatalogCleaner(catalog, false);
 			} catch (UnsupportedEncodingException e) {
 
 				e.printStackTrace();
