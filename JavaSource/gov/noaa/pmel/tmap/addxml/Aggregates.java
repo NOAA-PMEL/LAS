@@ -34,6 +34,10 @@ public class Aggregates {
 		this.aggregate = aggregate;
 		List<DatasetGridPair> gridDatasets = new ArrayList<DatasetGridPair>();
 		
+		List<List<DatasetGridPair>> datasetGroups = new ArrayList<List<DatasetGridPair>>();
+		List<DatasetGridPair> group0 = new ArrayList<DatasetGridPair>();
+		
+		int index = 0;
 		for (Iterator ndsIt = nestedDatasets.iterator(); ndsIt.hasNext();) {
 			InvDataset invDataset = (InvDataset) ndsIt.next();
             // We know this already :-)
@@ -50,8 +54,19 @@ public class Aggregates {
 						StringBuilder error = new StringBuilder();
 						GridDataset gds = (GridDataset) TypedDatasetFactory.open(FeatureType.GRID, ncds, null, error);
 						if ( CatalogCleaner.hasGrid(gds) ) {
-							gridDatasets.add(new DatasetGridPair(invDataset, gds));
+							
+							if ( index == 0 ) {
+								group0.add(new DatasetGridPair(invDataset, gds));
+								datasetGroups.add(group0);
+							} else {
+								group(new DatasetGridPair(invDataset, gds), datasetGroups);
+								if ( done ) {
+									return;
+								}
+							}
+							index++;
 						}
+						
 					} catch (IOException e) {
 						log.debug("Failed to open: "+opendap.getStandardUrlName());
 					}
@@ -60,53 +75,39 @@ public class Aggregates {
 
 		}
 		log.debug("AGGREGATES: Grids extracted");
-		if ( gridDatasets.size() > 0 ) {
-			DatasetGridPair gridDataset = gridDatasets.get(0);
-			List<List<DatasetGridPair>> datasetGroups = new ArrayList<List<DatasetGridPair>>();
-			List<DatasetGridPair> group0 = new ArrayList<DatasetGridPair>();
-			group0.add(gridDataset);
-			datasetGroups.add(group0);
-			for (int i = 1; i < gridDatasets.size(); i++ ) {
-				DatasetGridPair nextPair = gridDatasets.get(i);
-				group(nextPair, datasetGroups);
-				if ( done ) {
-					return;
-				}
-			}
-			// Move single data sets to the individual list
-			List<Integer> singles = new ArrayList<Integer>();
-			for (int i = 0; i < datasetGroups.size(); i++) {
-				List<DatasetGridPair> group = (List<DatasetGridPair>) datasetGroups.get(i);
-				if ( group.size() == 1 ) {
-					singles.add(i);
-				}
-			}
-			for ( int i = 0; i < singles.size(); i++ ) {
-				List<DatasetGridPair> group = (List<DatasetGridPair>) datasetGroups.get(singles.get(i));
-				individualDatasets.add(group.get(0));
-				datasetGroups.remove(singles.get(i));
-			}
-			log.debug("AGGREGATES: Grids groupped");
-			// sort the rest
-			for (Iterator dsgIt = datasetGroups.iterator(); dsgIt.hasNext();) {
-				List<DatasetGridPair> group = (List<DatasetGridPair>) dsgIt.next();
-				Collections.sort(group, new GridDatasetComparator());
-				long end_time = group.get(0).getGrid().getEndDate().getTime();
-				boolean mono = true;
-				for (int i = 1; i < group.size(); i++ ) {
-					GridDataset gds = (GridDataset) group.get(i).getGrid();
-					if (gds.getEndDate().getTime() > end_time ) {
-						end_time = gds.getEndDate().getTime();
-					} else { 
-						mono = false;
-					}
-				}
-				if ( mono ) {
-					aggregations.add(group);
-				}
+
+		// Move single data sets to the individual list
+		List<Integer> singles = new ArrayList<Integer>();
+		for (int i = 0; i < datasetGroups.size(); i++) {
+			List<DatasetGridPair> group = (List<DatasetGridPair>) datasetGroups.get(i);
+			if ( group.size() == 1 ) {
+				singles.add(i);
 			}
 		}
-		
+		for ( int i = 0; i < singles.size(); i++ ) {
+			List<DatasetGridPair> group = (List<DatasetGridPair>) datasetGroups.get(singles.get(i));
+			individualDatasets.add(group.get(0));
+			datasetGroups.remove(singles.get(i));
+		}
+		log.debug("AGGREGATES: Grids groupped");
+		// sort the rest
+		for (Iterator dsgIt = datasetGroups.iterator(); dsgIt.hasNext();) {
+			List<DatasetGridPair> group = (List<DatasetGridPair>) dsgIt.next();
+			Collections.sort(group, new GridDatasetComparator());
+			long end_time = group.get(0).getGrid().getEndDate().getTime();
+			boolean mono = true;
+			for (int i = 1; i < group.size(); i++ ) {
+				GridDataset gds = (GridDataset) group.get(i).getGrid();
+				if (gds.getEndDate().getTime() > end_time ) {
+					end_time = gds.getEndDate().getTime();
+				} else { 
+					mono = false;
+				}
+			}
+			if ( mono ) {
+				aggregations.add(group);
+			}
+		}
 	}
     private void group(DatasetGridPair next, List<List<DatasetGridPair>> groups) {
     	boolean added = false;
