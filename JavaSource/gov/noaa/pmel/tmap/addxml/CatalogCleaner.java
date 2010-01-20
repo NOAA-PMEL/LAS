@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -100,8 +101,22 @@ public class CatalogCleaner {
 		parent.addDataset(aggDatasetNode);
 	}
 	public void clean(InvDataset invDataset) throws Exception {	
-		if ( invDataset.hasNestedDatasets() ) {
-			Aggregates aggregates = new Aggregates(invDataset, aggregate);
+		List<InvDataset> children = invDataset.getDatasets();
+		List<InvDataset> possibleAggregates = new ArrayList<InvDataset>();
+		List<InvDataset> containerDatasets = new ArrayList<InvDataset>();
+		for (Iterator dsIt = children.iterator(); dsIt.hasNext();) {
+			InvDataset dataset = (InvDataset) dsIt.next();
+			if ( dataset.hasAccess() ) {
+				possibleAggregates.add(dataset);
+			} else {
+				containerDatasets.add(dataset);
+			}
+		}
+		if ( possibleAggregates.size() > 0 && possibleAggregates.size() <= 250 ) {
+			log.debug("AGGREGATES: Starting aggregate analysis for "+possibleAggregates.size()+" datasets from "+invDataset.getName()+".");
+			Aggregates aggregates = new Aggregates(possibleAggregates, aggregate);
+			log.debug("AGGREGATES: Finishing aggregate analysis for "+invDataset.getName()+" datasets.");
+			log.debug("AGGREGATES: Starting to build the aggregation for "+invDataset.getName()+" datasets.");
 			if ( remoteService == null ) {
 				setService(aggregates.getBase());
 			}
@@ -123,21 +138,22 @@ public class CatalogCleaner {
 				for (Iterator ndsIt = aggregates.getIndividuals().iterator(); ndsIt.hasNext();) {
 					DatasetGridPair gridDataset = (DatasetGridPair) ndsIt.next();
 
-					
-						if ( hasGrid(gridDataset.getGrid()) ) {
-							addGridDataset(gridDataset.getDataset());
-						}
-					
+
+					if ( hasGrid(gridDataset.getGrid()) ) {
+						addGridDataset(gridDataset.getDataset());
+					}
+
 				}
 			}
-			// All the children are just containers...  Clean them...
-			if ( !aggregates.hasIndividualDataset() && !aggregates.needsAggregation() ) {
-				for (Iterator nestedIt = invDataset.getDatasets().iterator(); nestedIt.hasNext();) {
-					InvDataset nestedDataset = (InvDataset) nestedIt.next();
-					clean(nestedDataset);
-				}
-			}
-		} 
+			log.debug("AGGREGATES: Finished building the aggregation for "+invDataset.getName()+" datasets.");
+		} else {
+			log.info("Skipping "+invDataset.getName()+" because "+possibleAggregates.size()+" is just too many data sets to contemplate.");
+		}
+		
+		for (Iterator dsIt = containerDatasets.iterator(); dsIt.hasNext();) {
+			InvDataset container = (InvDataset) dsIt.next();
+			clean(container);
+		}
 	}
 	
 	private static boolean hasGrid(InvDataset dataset) {
@@ -146,6 +162,7 @@ public class CatalogCleaner {
 		
 		if ( access != null ) {
 			String accessUrl = access.getStandardUrlName();
+			log.debug("HASGRID: Starting grid analysis for "+accessUrl);
 			try {
 				NetcdfDataset nc = NetcdfDataset.openDataset(accessUrl);
 				StringBuilder error = new StringBuilder();
@@ -156,8 +173,9 @@ public class CatalogCleaner {
 				    
 				}
 			} catch (IOException e) {
-				log.error("Failed to open "+accessUrl+" with "+e.getLocalizedMessage());
+				log.error("HASGRID: Failed to open "+accessUrl+" with "+e.getLocalizedMessage());
 			}
+			log.debug("Finising grid analysis for "+accessUrl);
 		}
 		return has_good_grid;
 	}

@@ -30,83 +30,83 @@ public class Aggregates {
 	boolean aggregate;
 	boolean done = false;
 	private static final Logger log = LogManager.getLogger(Aggregates.class);
-	public Aggregates(InvDataset dataset, boolean aggregate) {
+	public Aggregates(List<InvDataset> nestedDatasets, boolean aggregate) {
 		this.aggregate = aggregate;
-		if ( dataset.hasNestedDatasets() ) {
-			
-			List<InvDataset> nestedDatasets = dataset.getDatasets();
-			List<DatasetGridPair> gridDatasets = new ArrayList<DatasetGridPair>();
-			for (Iterator ndsIt = nestedDatasets.iterator(); ndsIt.hasNext();) {
-				InvDataset invDataset = (InvDataset) ndsIt.next();
-
-				if ( invDataset.hasAccess() ) {
-					InvAccess opendap = invDataset.getAccess(ServiceType.OPENDAP);
-					if ( base == null ) {
-						String url = opendap.getUrlPath();
-						String full_url = opendap.getStandardUri().toString();
-						base = full_url.substring(0, full_url.indexOf(url));
-					}
-					if ( opendap != null ) {
-						try {
-							NetcdfDataset ncds = NetcdfDataset.openDataset(opendap.getStandardUrlName());
-							StringBuilder error = new StringBuilder();
-							GridDataset gds = (GridDataset) TypedDatasetFactory.open(FeatureType.GRID, ncds, null, error);
-							if ( CatalogCleaner.hasGrid(gds) ) {
-								gridDatasets.add(new DatasetGridPair(invDataset, gds));
-							}
-						} catch (IOException e) {
-							log.debug("Failed to open: "+opendap.getStandardUrlName());
+		List<DatasetGridPair> gridDatasets = new ArrayList<DatasetGridPair>();
+		
+		for (Iterator ndsIt = nestedDatasets.iterator(); ndsIt.hasNext();) {
+			InvDataset invDataset = (InvDataset) ndsIt.next();
+            // We know this already :-)
+			if ( invDataset.hasAccess() ) {
+				InvAccess opendap = invDataset.getAccess(ServiceType.OPENDAP);
+				if ( base == null ) {
+					String url = opendap.getUrlPath();
+					String full_url = opendap.getStandardUri().toString();
+					base = full_url.substring(0, full_url.indexOf(url));
+				}
+				if ( opendap != null ) {
+					try {
+						NetcdfDataset ncds = NetcdfDataset.openDataset(opendap.getStandardUrlName());
+						StringBuilder error = new StringBuilder();
+						GridDataset gds = (GridDataset) TypedDatasetFactory.open(FeatureType.GRID, ncds, null, error);
+						if ( CatalogCleaner.hasGrid(gds) ) {
+							gridDatasets.add(new DatasetGridPair(invDataset, gds));
 						}
-					}
-				}
-
-			}
-			if ( gridDatasets.size() > 0 ) {
-				DatasetGridPair gridDataset = gridDatasets.get(0);
-				List<List<DatasetGridPair>> datasetGroups = new ArrayList<List<DatasetGridPair>>();
-				List<DatasetGridPair> group0 = new ArrayList<DatasetGridPair>();
-				group0.add(gridDataset);
-				datasetGroups.add(group0);
-				for (int i = 1; i < gridDatasets.size(); i++ ) {
-					DatasetGridPair nextPair = gridDatasets.get(i);
-					group(nextPair, datasetGroups);
-					if ( done ) {
-						return;
-					}
-				}
-				// Move single data sets to the individual list
-				List<Integer> singles = new ArrayList<Integer>();
-				for (int i = 0; i < datasetGroups.size(); i++) {
-					List<DatasetGridPair> group = (List<DatasetGridPair>) datasetGroups.get(i);
-					if ( group.size() == 1 ) {
-						singles.add(i);
-					}
-				}
-				for ( int i = 0; i < singles.size(); i++ ) {
-					List<DatasetGridPair> group = (List<DatasetGridPair>) datasetGroups.get(singles.get(i));
-					individualDatasets.add(group.get(0));
-					datasetGroups.remove(singles.get(i));
-				}
-				// sort the rest
-				for (Iterator dsgIt = datasetGroups.iterator(); dsgIt.hasNext();) {
-					List<DatasetGridPair> group = (List<DatasetGridPair>) dsgIt.next();
-					Collections.sort(group, new GridDatasetComparator());
-					long end_time = group.get(0).getGrid().getEndDate().getTime();
-					boolean mono = true;
-					for (int i = 1; i < group.size(); i++ ) {
-						GridDataset gds = (GridDataset) group.get(i).getGrid();
-						if (gds.getEndDate().getTime() > end_time ) {
-							end_time = gds.getEndDate().getTime();
-						} else { 
-							mono = false;
-						}
-					}
-					if ( mono ) {
-						aggregations.add(group);
+					} catch (IOException e) {
+						log.debug("Failed to open: "+opendap.getStandardUrlName());
 					}
 				}
 			}
-		}  	
+
+		}
+		log.debug("AGGREGATES: Grids extracted");
+		if ( gridDatasets.size() > 0 ) {
+			DatasetGridPair gridDataset = gridDatasets.get(0);
+			List<List<DatasetGridPair>> datasetGroups = new ArrayList<List<DatasetGridPair>>();
+			List<DatasetGridPair> group0 = new ArrayList<DatasetGridPair>();
+			group0.add(gridDataset);
+			datasetGroups.add(group0);
+			for (int i = 1; i < gridDatasets.size(); i++ ) {
+				DatasetGridPair nextPair = gridDatasets.get(i);
+				group(nextPair, datasetGroups);
+				if ( done ) {
+					return;
+				}
+			}
+			// Move single data sets to the individual list
+			List<Integer> singles = new ArrayList<Integer>();
+			for (int i = 0; i < datasetGroups.size(); i++) {
+				List<DatasetGridPair> group = (List<DatasetGridPair>) datasetGroups.get(i);
+				if ( group.size() == 1 ) {
+					singles.add(i);
+				}
+			}
+			for ( int i = 0; i < singles.size(); i++ ) {
+				List<DatasetGridPair> group = (List<DatasetGridPair>) datasetGroups.get(singles.get(i));
+				individualDatasets.add(group.get(0));
+				datasetGroups.remove(singles.get(i));
+			}
+			log.debug("AGGREGATES: Grids groupped");
+			// sort the rest
+			for (Iterator dsgIt = datasetGroups.iterator(); dsgIt.hasNext();) {
+				List<DatasetGridPair> group = (List<DatasetGridPair>) dsgIt.next();
+				Collections.sort(group, new GridDatasetComparator());
+				long end_time = group.get(0).getGrid().getEndDate().getTime();
+				boolean mono = true;
+				for (int i = 1; i < group.size(); i++ ) {
+					GridDataset gds = (GridDataset) group.get(i).getGrid();
+					if (gds.getEndDate().getTime() > end_time ) {
+						end_time = gds.getEndDate().getTime();
+					} else { 
+						mono = false;
+					}
+				}
+				if ( mono ) {
+					aggregations.add(group);
+				}
+			}
+		}
+		
 	}
     private void group(DatasetGridPair next, List<List<DatasetGridPair>> groups) {
     	boolean added = false;
