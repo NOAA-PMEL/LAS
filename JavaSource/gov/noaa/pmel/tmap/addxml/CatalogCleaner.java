@@ -203,7 +203,7 @@ public class CatalogCleaner {
 			} catch (IOException e) {
 				System.err.println(dateFormat.format(new Date())+"\t ... HASGRID: Failed to open "+accessUrl+" with "+e.getLocalizedMessage());
 			}
-			System.out.println(dateFormat.format(new Date())+"\t ... Finising grid analysis for "+accessUrl);
+			System.out.println(dateFormat.format(new Date())+"\t ... Finished grid analysis for "+accessUrl);
 		}
 		return has_good_grid;
 	}
