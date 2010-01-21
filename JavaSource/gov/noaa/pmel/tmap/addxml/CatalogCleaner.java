@@ -4,12 +4,12 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
 import org.jdom.Element;
 
 import thredds.catalog.InvAccess;
@@ -44,7 +44,8 @@ public class CatalogCleaner {
 	private static final int MIN_AGGS = 10;
 	private static final int MIN_FILES = 100;
 	private static final int MAX_TOTAL_FILES = 1000;
-
+    // "yyyy-MM-dd HH:mm:ss,S"  	2001-07-04 12:08:56,831
+	private static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss,S");
 	public CatalogCleaner (InvCatalog catalog, boolean aggregate) throws URISyntaxException, UnsupportedEncodingException {
 		this.aggregate = aggregate;
 		sourceCatalog = (InvCatalogImpl) catalog;
@@ -68,12 +69,14 @@ public class CatalogCleaner {
 			if ( invDataset.hasNestedDatasets() ) {
 				if ( done ) {
 					cleanCatalog.finish();
+					System.out.println(dateFormat.format(new Date())+" Checked "+total+" files.  Found "+total_files+" files and "+total_aggregations+" aggregations.");
 					return cleanCatalog;
 				}
 				clean(invDataset);
 
 			}
 		}
+		System.out.println(dateFormat.format(new Date())+" Checked "+total+" files.  Found "+total_files+" files and "+total_aggregations+" aggregations.");
 		cleanCatalog.finish();
 		return cleanCatalog;
 	}
@@ -132,15 +135,15 @@ public class CatalogCleaner {
 			}
 			if ( total > MAX_TOTAL_FILES && (total_aggregations < MIN_AGGS || total_files < MIN_FILES ) ) {
 				done = true;
-				System.out.println("We've looked at "+MAX_TOTAL_FILES+" files in this catalog and have fewer than "+MIN_AGGS+" aggregations and "+MIN_FILES+" files in the clean catalog... ");
-				System.out.println("Consider subdividing this catalog into more managable parts.");
+				System.out.println(dateFormat.format(new Date())+"\t ... We've looked at "+MAX_TOTAL_FILES+" files in this catalog and have fewer than "+MIN_AGGS+" aggregations and "+MIN_FILES+" files in the clean catalog... ");
+				System.out.println(dateFormat.format(new Date())+"\t ... Consider subdividing this catalog into more managable parts.");
 				return;
 			}
 			if ( possibleAggregates.size() > 0 && possibleAggregates.size() <= MAX_ACCESS_POINTS ) {
-				System.out.println("AGGREGATES: Starting aggregate analysis for "+possibleAggregates.size()+" datasets from "+invDataset.getName()+".");
+				System.out.println(dateFormat.format(new Date())+"\t ... AGGREGATES: Starting aggregate analysis for "+possibleAggregates.size()+" datasets from "+invDataset.getName()+".");
 				Aggregates aggregates = new Aggregates(possibleAggregates, aggregate);
-				System.out.println("AGGREGATES: Finishing aggregate analysis for "+invDataset.getName()+" datasets.");
-				System.out.println("AGGREGATES: Starting to build the aggregation for "+invDataset.getName()+" datasets.");
+				System.out.println(dateFormat.format(new Date())+"\t ... AGGREGATES: Finishing aggregate analysis for "+invDataset.getName()+" datasets.");
+				System.out.println(dateFormat.format(new Date())+"\t ... AGGREGATES: Starting to build the aggregation for "+invDataset.getName()+" datasets.");
 				if ( remoteService == null ) {
 					setService(aggregates.getBase());
 				}
@@ -169,9 +172,9 @@ public class CatalogCleaner {
 
 					}
 				}
-				System.out.println("AGGREGATES: Finished building the aggregation for "+invDataset.getName()+" datasets.");
+				System.out.println(dateFormat.format(new Date())+"\t ... AGGREGATES: Finished building the aggregation for "+invDataset.getName()+" datasets.");
 			} else {
-				System.out.println("Skipping "+invDataset.getName()+" because is just too hard data sets to contemplate working with "+possibleAggregates.size()+" data sets.");
+				System.out.println(dateFormat.format(new Date())+"\t ... Skipping "+invDataset.getName()+" because is just too hard data sets to contemplate working with "+possibleAggregates.size()+" data sets.");
 			}
 
 			for (Iterator dsIt = containerDatasets.iterator(); dsIt.hasNext();) {
@@ -187,7 +190,7 @@ public class CatalogCleaner {
 
 		if ( access != null ) {
 			String accessUrl = access.getStandardUrlName();
-			System.out.println("HASGRID: Starting grid analysis for "+accessUrl);
+			System.out.println(dateFormat.format(new Date())+"\t ... HASGRID: Starting grid analysis for "+accessUrl);
 			try {
 				NetcdfDataset nc = NetcdfDataset.openDataset(accessUrl);
 				StringBuilder error = new StringBuilder();
@@ -198,9 +201,9 @@ public class CatalogCleaner {
 
 				}
 			} catch (IOException e) {
-				System.err.println("HASGRID: Failed to open "+accessUrl+" with "+e.getLocalizedMessage());
+				System.err.println(dateFormat.format(new Date())+"\t ... HASGRID: Failed to open "+accessUrl+" with "+e.getLocalizedMessage());
 			}
-			System.out.println("Finising grid analysis for "+accessUrl);
+			System.out.println(dateFormat.format(new Date())+"\t ... Finising grid analysis for "+accessUrl);
 		}
 		return has_good_grid;
 	}
