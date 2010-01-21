@@ -5,6 +5,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -25,20 +27,30 @@ import thredds.catalog.InvDatasetImpl;
 import thredds.catalog.ServiceType;
 
 public class Cleaner {
+	private static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss,S");
 	/**
 	 * @param args
 	 */
 	public static void main(String[] args) {
 		InvCatalogFactory factory = new InvCatalogFactory("default", true);
 		if ( args[0] == null || args[0].equals("") ) {
-			System.out.println("Use: Cleaner catalog.xml");
+			System.out.println("Cleaner catalog.xml true|false (file to clean and whether to make aggregation ncML.");
 		}
+		
 		File source = new File(args[0]);
 		Document uaf = new Document();
+
+		boolean aggregations = false;
+		if ( args.length > 1 ) {
+			if ( args[1] != null && (args[1].equals("true") || args[1].equals("false")) ) {
+				aggregations = Boolean.valueOf(args[1]);
+			}
+		}
+		
 		try {
 			JDOMUtils.XML2JDOM(source, uaf);
 		} catch (Exception e) {
-			System.err.println("Trouble reading source catalog: " + e.getMessage());
+			System.err.println(dateFormat.format(new Date())+"\t ... Trouble reading source catalog: " + e.getMessage());
 		}
 
 		Namespace xlink = Namespace.getNamespace("http://www.w3.org/1999/xlink");
@@ -51,12 +63,12 @@ public class Cleaner {
 			InvCatalog catalog = (InvCatalog) factory.readXML(data);
 			StringBuilder buff = new StringBuilder();
 			if (!catalog.check(buff, false)) {
-				System.err.println("Invalid catalog " + data + "\n" + buff.toString());
+				System.err.println(dateFormat.format(new Date())+"Invalid catalog " + data + "\n" + buff.toString());
 			}
-            System.out.println("Cleaning: "+data);
+            System.out.println(dateFormat.format(new Date())+" Cleaning: "+data);
 			CatalogCleaner cleaner = null;
 			try {
-				cleaner = new CatalogCleaner(catalog, false);
+				cleaner = new CatalogCleaner(catalog, aggregations);
 			} catch (UnsupportedEncodingException e) {
 
 				e.printStackTrace();
@@ -77,8 +89,6 @@ public class Cleaner {
 			if ( clean != null ) {
 				
 				try {
-					// TODO Remove this DEBUG OUTPUT!!
-					factory.writeXML(clean, System.out, true);
 					
 					// Write to a file...
 					String f = JDOMUtils.MD5Encode(data)+".xml";
