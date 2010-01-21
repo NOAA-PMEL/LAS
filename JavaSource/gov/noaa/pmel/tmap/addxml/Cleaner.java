@@ -3,6 +3,7 @@ package gov.noaa.pmel.tmap.addxml;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
 import java.text.SimpleDateFormat;
@@ -34,7 +35,7 @@ public class Cleaner {
 	public static void main(String[] args) {
 		InvCatalogFactory factory = new InvCatalogFactory("default", true);
 		if ( args[0] == null || args[0].equals("") ) {
-			System.out.println("Cleaner catalog.xml true|false (file to clean and whether to make aggregation ncML.");
+			error("Cleaner catalog.xml true|false (file to clean and whether to make aggregation ncML.", 0);
 		}
 		
 		File source = new File(args[0]);
@@ -50,7 +51,7 @@ public class Cleaner {
 		try {
 			JDOMUtils.XML2JDOM(source, uaf);
 		} catch (Exception e) {
-			System.err.println(dateFormat.format(new Date())+"\t ... Trouble reading source catalog: " + e.getMessage());
+			error("Trouble reading source catalog: " + e.getMessage(), 0);
 		}
 
 		Namespace xlink = Namespace.getNamespace("http://www.w3.org/1999/xlink");
@@ -63,9 +64,9 @@ public class Cleaner {
 			InvCatalog catalog = (InvCatalog) factory.readXML(data);
 			StringBuilder buff = new StringBuilder();
 			if (!catalog.check(buff, false)) {
-				System.err.println(dateFormat.format(new Date())+"Invalid catalog " + data + "\n" + buff.toString());
+				error(dateFormat.format(new Date())+"Invalid catalog " + data + "\n" + buff.toString(), 1);
 			}
-            System.out.println(dateFormat.format(new Date())+" Cleaning: "+data);
+            info("Cleaning: "+data, 0);
 			CatalogCleaner cleaner = null;
 			try {
 				cleaner = new CatalogCleaner(catalog, aggregations);
@@ -103,6 +104,15 @@ public class Cleaner {
 			}
 		}
 	}
-
-
+    public static void info(String message, int level) {
+    	out(message, System.out, level);   	
+    }
+    public static void error(String message, int level) {
+    	out(message, System.err, level);
+    }
+    private static void out(String message, PrintStream stream, int level) {
+    	if ( level == 0 ) stream.println(dateFormat.format(new Date())+" "+message);
+		if ( level == 1 ) stream.println(dateFormat.format(new Date())+"\t ... "+message);
+		if ( level >= 1 ) stream.println(dateFormat.format(new Date())+"\t\t ... "+message);   	
+    }
 }
