@@ -2,132 +2,6 @@
 <html debug="true">
 	<head>
 		<title>$las_config.getTitle()</title>
-		
-		<script type="text/javascript" language="javascript" src="JavaScript/ui/LASUI.js"></script>
-		<script type="text/javascript" language="javascript" src="JavaScript/components/gov.noaa.pmel.tmap.las.NativeMapWidget/gov.noaa.pmel.tmap.las.NativeMapWidget.nocache.js"></script> 
-    		<script type="text/javascript" language="javascript" src="JavaScript/frameworks/OpenLayers/OpenLayers.js"></script> 
-    		<script type="text/javascript" language="javascript" src="JavaScript/frameworks/OpenLayersExtensions/DrawSingleFeature.js"></script> 
-    		<script type="text/javascript" language="javascript" src="JavaScript/frameworks/OpenLayersExtensions/HorizontalPath.js"></script> 
-    		<script type="text/javascript" language="javascript" src="JavaScript/frameworks/OpenLayersExtensions/VerticalPath.js"></script> 
-		<script type="text/javascript" language="javascript" src="JavaScript/components/xmldom.js" ></script>
-		<script type="text/javascript" language="javascript" src="JavaScript/components/LASRequest.js" ></script>
-		<script type="text/javascript" language="javascript" src="JavaScript/components/LASGetGridResponse.js" ></script>
-		<script type="text/javascript" language="javascript" src="JavaScript/components/LASGetCategoriesResponse.js" ></script>
-		<script type="text/javascript" language="javascript" src="JavaScript/components/LASGetDataConstraintsResponse.js" ></script>
-		<script type="text/javascript" language="javascript" src="JavaScript/components/LASGetViewsResponse.js" ></script>
-		<script type="text/javascript" language="javascript" src="JavaScript/components/LASGetOperationsResponse.js" ></script>
-		<script type="text/javascript" language="javascript" src="JavaScript/components/LASGetOptionsResponse.js" ></script>
-		<script type="text/javascript" language="javascript" src="JavaScript/components/querystring.js" ></script>
-		<script type="text/javascript" language="javascript" src="JavaScript/components/DateWidget.js" ></script>
-		<script type="text/javascript" language="javascript" >
-
-           
-			var LAS = new LASUI();
-			LAS.products = {
-				"Maps" : {
-					"Latitude-Longitude" : {"view" : "xy", "class" : "visualization", "id" : "init", "optiondef" : ""} //"Options_2D_image_contour_xy"}
-				},
-				"Line Plots" : {
-					"Time series" : {"view" : "t", "class" : "visualization", "id" : "init", "optiondef" : ""}, //Options_1D"},
-					"Depth" : {"view" : "z", "class" : "visualization", "id" : "init", "optiondef" : ""}, //Options_1D"},					
-					"Longitude" : {"view" : "x", "class" : "visualization", "id" : "init", "optiondef" : ""}, //Options_1D"},
-					"Latitude" : {"view" : "y", "class" : "visualization", "id" : "init", "optiondef" : ""}, //Options_1D"}
-					
-				},
-				"Vertical Section Plots" : {
-					"Longitude-depth" : {"view" : "xz", "class" : "visualization", "id" : "init", "optiondef" : ""}, //Options_2D_image_contour"},
-					"Latitude-depth" : {"view" : "yz", "class" : "visualization", "id" : "init", "optiondef" : ""} //Options_2D_image_contour"}										
-				},
-				"Hofmuller Plots" : {
-					"Longitude-time" : {"view" : "xt", "class" : "visualization", "id" : "init", "optiondef" : ""}, //Options_2D_image_contour"},
-					"Latitude-time" : {"view" : "yt", "class" : "visualization", "id" : "init", "optiondef" : ""}, //Options_2D_image_contour"},
-					"Depth-time" : {"view" : "zt", "class" : "visualization", "id" : "init", "optiondef" : ""} //Options_2D_image_contour"}													
-				},
-				"Point Data" : {"Single Value" : {"view" : "","class" : "visualization", "id" : "init", "optiondef" : ""}} //Options_Data"}}/*,
-			};
-			LAS.params = {
-#if ($request.getParameter('state')!="")
-				'state' : $request.getParameter('state'),
-#end
-
-#if ($request.getParameter('catid')!="") 
-				'catid' :'$request.getParameter('catid')',
-#else
-				'catid' : {},
-#end
-#if  ($request.getParameter("dsid")!="")
-				'dsid' : '$request.getParameter("dsid")',
-#else
-				'dsid' : '',
-#end
-#if  ($request.getParameter("varid")!="")
-				'varid' : '$request.getParameter("varid")',
-#else
-				'varid' : [],
-#end
-#if ($request.getParameter('plot')!="")
-				'plot' : '$request.getParameter('plot')',
-#end
-#if ($request.getParameter('view')!="")
-				'view' : '$request.getParameter('view')',
-#end
-
-#if ($request.getParameter('x')!="")
-				'x' : $request.getParameter('x'),		
-#end
-#if ($request.getParameter('y')!="")
-				'y' : $request.getParameter('y'),		
-#end
-#if ($request.getParameter('viewx')!="")
-				'viewx' : $request.getParameter('viewx'),		
-#end
-#if ($request.getParameter('y')!="")
-				'viewy' : $request.getParameter('viewy'),		
-#end
-#if ($request.getParameter('z')!="")
-				'z' : $request.getParameter('z'),		
-#end
-#if ($request.getParameter('t')!="")
-				't' : $request.getParameter('t'),		
-#end
-#if ($request.getParameter('auto'))
-				'autoupdate' : true,		
-#else
-				'autoupdate' : false,	
-#end
-#if ($request.getParameter('options')!="")
-				'options' : $request.getParameter('options')checkbox
-#else
-				'options' :{}				
-#end
-		
-		}
-
-		var featureAddedCallback = LAS.onafterdraw.LASBind(LAS);    
-         	var featureModifiedCallback = LAS.onafterdraw.LASBind(LAS);
-         	var mapMoveCallback = LAS.onafterdraw.LASBind(LAS);
-		function init () {
-			LAS.initUI();
-					
-		}
-		function showDatasetPicker() {
-			if(document.getElementById('categories').style.display=='none') {
-				document.getElementById('categories').style.display='';
-				LAS.toggleUIMask('')
-			} else {
-				document.getElementById('categories').style.display='none'; 
-				LAS.toggleUIMask('none');
-			}	
-			
-		}
-		function showPlotOptions() {
-			if(LAS.refs.options.plot.options)	{
-				LAS.toggleUIMask('');
-				document.getElementById('plotOptions').style.display='';
-			}	
-		}
-
-		</script>
 	</head>
 		<stylesheet src="JavaScript/frameworks/OpenLayersExtension/OLMapWidget.css"></stylesheet>
 		<style media="all" type="text/css">
@@ -245,6 +119,85 @@
 		<div id="downloadOptions" class="LASPopupDIVNode" style="display:none;"></div>
 		<div id="externalOptions" class="LASPopupDIVNode" style="display:none;"></div>
 	</body>
+	         <script type="text/javascript" language="javascript" src="JavaScript/ui/LASUI_includes.vm"></script>
+                <script type="text/javascript" language="javascript" src="JavaScript/components/gov.noaa.pmel.tmap.las.NativeMapWidget/gov.noaa.pmel.tmap.las.NativeMapWidget.nocache.js"></script>
+                <script type="text/javascript" language="javascript" src="JavaScript/frameworks/OpenLayers/OpenLayers.js"></script>
+                <script type="text/javascript" language="javascript" src="JavaScript/frameworks/OpenLayersExtensions/DrawSingleFeature.js"></script>
+                <script type="text/javascript" language="javascript" src="JavaScript/frameworks/OpenLayersExtensions/HorizontalPath.js"></script>
+                <script type="text/javascript" language="javascript" src="JavaScript/frameworks/OpenLayersExtensions/VerticalPath.js"></script>
+                 <script type="text/javascript" language="javascript">
+                var LAS = new LASUI();
+                        LAS.products = {
+                                "Maps" : {
+                                        "Latitude-Longitude" : {"view" : "xy", "class" : "visualization", "id" : "init", "optiondef" : ""} //"Options_2D_image_contour_xy"}
+                                },
+                                "Line Plots" : {
+                                        "Time series" : {"view" : "t", "class" : "visualization", "id" : "init", "optiondef" : ""}, //Options_1D"},
+                                        "Depth" : {"view" : "z", "class" : "visualization", "id" : "init", "optiondef" : ""}, //Options_1D"},
+                                        "Longitude" : {"view" : "x", "class" : "visualization", "id" : "init", "optiondef" : ""}, //Options_1D"},
+                                        "Latitude" : {"view" : "y", "class" : "visualization", "id" : "init", "optiondef" : ""}, //Options_1D"}
+
+                                },
+                                "Vertical Section Plots" : {
+                                        "Longitude-depth" : {"view" : "xz", "class" : "visualization", "id" : "init", "optiondef" : ""}, //Options_2D_image_contour"},
+                                        "Latitude-depth" : {"view" : "yz", "class" : "visualization", "id" : "init", "optiondef" : ""} //Options_2D_image_contour"}                                                              
+                                },
+                                "Hofmuller Plots" : {
+                                        "Longitude-time" : {"view" : "xt", "class" : "visualization", "id" : "init", "optiondef" : ""}, //Options_2D_image_contour"},
+                                        "Latitude-time" : {"view" : "yt", "class" : "visualization", "id" : "init", "optiondef" : ""}, //Options_2D_image_contour"},
+                                        "Depth-time" : {"view" : "zt", "class" : "visualization", "id" : "init", "optiondef" : ""} //Options_2D_image_contour"}                                                                  
+                                },
+                                "Point Data" : {"Single Value" : {"view" : "","class" : "visualization", "id" : "init", "optiondef" : ""}} //Options_Data"}}/*,
+                        };
+                        LAS.params = {
+
+#if ($request.getParameter('catid')!="")
+                                'catid' :'$request.getParameter('catid')',
+#else
+                                'catid' : {},
+#end
+#if  ($request.getParameter("dsid")!="")
+                                'dsid' : '$request.getParameter("dsid")',
+#else
+                                'dsid' : '',
+#end
+#if  ($request.getParameter("varid")!="")
+                                'varid' : '$request.getParameter("varid")',
+#else
+                                'varid' : [],
+#end
+#if ($request.getParameter('auto'))
+                                'autoupdate' : true,
+#else
+                                'autoupdate' : false,
+#end
+
+                }
+
+                var featureAddedCallback = LAS.onafterdraw.LASBind(LAS);
+                var featureModifiedCallback = LAS.onafterdraw.LASBind(LAS);
+                var mapMoveCallback = LAS.onafterdraw.LASBind(LAS);
+                function init () {
+                        LAS.initUI();
+
+                }
+                function showDatasetPicker() {
+                        if(document.getElementById('categories').style.display=='none') {
+                                document.getElementById('categories').style.display='';
+                                LAS.toggleUIMask('')
+                        } else {
+                                document.getElementById('categories').style.display='none';
+                                LAS.toggleUIMask('none');
+                        }
+
+                }
+                function showPlotOptions() {
+                        if(LAS.refs.options.plot.options)       {
+                                LAS.toggleUIMask('');
+                                document.getElementById('plotOptions').style.display='';
+                        }
+                }
+         </script>
 </html>
 
 
