@@ -140,10 +140,10 @@ public class CatalogCleaner {
 				return;
 			}
 			if ( possibleAggregates.size() > 0 && possibleAggregates.size() <= MAX_ACCESS_POINTS ) {
-				Cleaner.info("AGGREGATES: Starting aggregate analysis for "+possibleAggregates.size()+" datasets from "+invDataset.getName()+".", 2);
+				Cleaner.info("AGGREGATES: Starting aggregate analysis for "+possibleAggregates.size()+" datasets from "+invDataset.getName()+".", 1);
 				Aggregates aggregates = new Aggregates(possibleAggregates, aggregate);
-				Cleaner.info("AGGREGATES: Finishing aggregate analysis for "+invDataset.getName()+" datasets.", 2);
-				Cleaner.info("AGGREGATES: Starting to build the aggregation for "+invDataset.getName()+" datasets.", 2);
+				Cleaner.info("AGGREGATES: Finished aggregate analysis for "+invDataset.getName()+" datasets.", 1);
+				Cleaner.info("AGGREGATES: Starting to build the aggregation for "+invDataset.getName()+" datasets.", 1);
 				if ( remoteService == null ) {
 					setService(aggregates.getBase());
 				}
@@ -172,7 +172,7 @@ public class CatalogCleaner {
 
 					}
 				}
-				Cleaner.info("AGGREGATES: Finished building the aggregation for "+invDataset.getName()+" datasets.", 2);
+				Cleaner.info("AGGREGATES: Finished building the aggregation for "+invDataset.getName()+" datasets.", 1);
 			} else {
 				Cleaner.info("Skipping "+invDataset.getName()+" because is just too hard data sets to contemplate working with "+possibleAggregates.size()+" data sets.", 2);
 			}
