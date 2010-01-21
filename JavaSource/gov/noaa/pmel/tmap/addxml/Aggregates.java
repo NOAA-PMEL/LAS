@@ -41,12 +41,13 @@ public class Aggregates {
             // We know this already :-)
 			if ( invDataset.hasAccess() ) {
 				InvAccess opendap = invDataset.getAccess(ServiceType.OPENDAP);
-				if ( base == null ) {
-					String url = opendap.getUrlPath();
-					String full_url = opendap.getStandardUri().toString();
-					base = full_url.substring(0, full_url.indexOf(url));
-				}
+				
 				if ( opendap != null ) {
+					if ( base == null ) {
+						String url = opendap.getUrlPath();
+						String full_url = opendap.getStandardUri().toString();
+						base = full_url.substring(0, full_url.indexOf(url));
+					}
 					try {
 						NetcdfDataset ncds = NetcdfDataset.openDataset(opendap.getStandardUrlName());
 						StringBuilder error = new StringBuilder();
