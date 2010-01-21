@@ -138,6 +138,10 @@ public class CatalogCleaner {
 				Cleaner.info("We've looked at over "+MAX_TOTAL_FILES+" files in this catalog and have fewer than "+MIN_AGGS+" aggregations and "+MIN_FILES+" files in the clean catalog... ", 0);
 				Cleaner.info("Consider subdividing this catalog into more managable parts.", 0);
 				return;
+			} else {
+				if ( total % 100 == 0 ) {
+					Cleaner.info("Looked at "+total+" files so far.  Found "+total_files+" files and "+total_aggregations+" aggregations so far.", 1);
+				}
 			}
 			if ( possibleAggregates.size() > 0 && possibleAggregates.size() <= MAX_ACCESS_POINTS ) {
 				Cleaner.info("AGGREGATES: Starting aggregate analysis for "+possibleAggregates.size()+" datasets from "+invDataset.getName()+".", 1);
