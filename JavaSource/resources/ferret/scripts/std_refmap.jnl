@@ -76,16 +76,17 @@ set region/x=$1:$2/Y=$3:$4
 
 ! Keep longitude region within 360 degrees. Supposes that xhi-xlo <= 360
 def sym ref_dx = `(360-ABS($2-$1))/2`
+def sym neg_ref_dx = `-1*($ref_dx)`
 
 IF ($refmap_type%|box>1|*>0%) THEN    ! IF "box"
 !  *jd* 2.3.97 define region/default/dx=-130:130/y=90s:90n band
-  define region/default/dx=`max(-1*(($ref_dx)),-60)`:`min(($ref_dx),60)`/dy=-30:30 band
+  define region/default/dx=`max(($neg_ref_dx),-60)`:`min(($ref_dx),60)`/dy=-30:30 band
 
 ELIF ($refmap_type%|xline>1|*>0%) THEN    ! ELSE IF "xline"
-  define region/default/dy=$6"-30:30|1>-30:30|*>-20:20"/dx=$6"0:0|1>0:0|2>0:0|*>`max(-1*(($ref_dx)),-50)`:`min(($ref_dx),50)`" band
+  define region/default/dy=$6"-30:30|1>-30:30|*>-20:20"/dx=$6"0:0|1>0:0|2>0:0|*>`max(($neg_ref_dx),-50)`:`min(($ref_dx),50)`" band
 
 ELIF ($refmap_type%|yline>1|*>0%) THEN    ! ELSE IF "yline"
-  define region/default/dx=$6"`max(-1*(($ref_dx)),-40)`:`min(($ref_dx),40)`|1>`max(-1*(($ref_dx)),-60)`:`min(($ref_dx),60)`|2>`max(-1*(($ref_dx)),-40)`:`min(($ref_dx),40)`|*>`max(-1*(($ref_dx)),-30)`:`min(($ref_dx),30)`"/dy=$6"0:0|1>0:0|2>0:0|*>-20:20" band
+  define region/default/dx=$6"`max(($neg_ref_dx),-40)`:`min(($ref_dx),40)`|1>`max(($neg_ref_dx),-60)`:`min(($ref_dx),60)`|2>`max(($neg_ref_dx),-40)`:`min(($ref_dx),40)`|*>`max(($neg_ref_dx),-30)`:`min(($ref_dx),30)`"/dy=$6"0:0|1>0:0|2>0:0|*>-20:20" band
 
 ELSE				 ! "point"
 ! original statement: define region/dy=-45:45/dx=-60:60 band
