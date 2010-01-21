@@ -139,7 +139,7 @@ public class CatalogCleaner {
 				Cleaner.info("Consider subdividing this catalog into more managable parts.", 0);
 				return;
 			} else {
-				if ( total % 100 == 0 ) {
+				if ( total > 1 && total % 100 == 0 ) {
 					Cleaner.info("Looked at "+total+" files so far.  Found "+total_files+" files and "+total_aggregations+" aggregations so far.", 1);
 				}
 			}
