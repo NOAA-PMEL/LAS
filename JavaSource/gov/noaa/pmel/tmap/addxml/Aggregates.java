@@ -29,7 +29,6 @@ public class Aggregates {
 	String base = null;
 	boolean aggregate;
 	boolean done = false;
-	private static final Logger log = LogManager.getLogger(Aggregates.class);
 	public Aggregates(List<InvDataset> nestedDatasets, boolean aggregate) {
 		this.aggregate = aggregate;
 		
@@ -67,13 +66,13 @@ public class Aggregates {
 						}
 						
 					} catch (IOException e) {
-						log.debug("Failed to open: "+opendap.getStandardUrlName());
+						System.err.println("Failed to open: "+opendap.getStandardUrlName());
 					}
 				}
 			}
 
 		}
-		log.debug("AGGREGATES: Grids extracted");
+		System.out.println("AGGREGATES: Grids extracted");
 
 		// Move single data sets to the individual list
 		List<Integer> singles = new ArrayList<Integer>();
@@ -88,7 +87,7 @@ public class Aggregates {
 			individualDatasets.add(group.get(0));
 			datasetGroups.remove(singles.get(i));
 		}
-		log.debug("AGGREGATES: Grids groupped");
+		System.out.println("AGGREGATES: Grids groupped");
 		// sort the rest
 		for (Iterator dsgIt = datasetGroups.iterator(); dsgIt.hasNext();) {
 			List<DatasetGridPair> group = (List<DatasetGridPair>) dsgIt.next();

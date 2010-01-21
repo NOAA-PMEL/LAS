@@ -25,7 +25,6 @@ import thredds.catalog.InvDatasetImpl;
 import thredds.catalog.ServiceType;
 
 public class Cleaner {
-	private static final Logger log = LogManager.getLogger(Cleaner.class);
 	/**
 	 * @param args
 	 */
@@ -39,7 +38,7 @@ public class Cleaner {
 		try {
 			JDOMUtils.XML2JDOM(source, uaf);
 		} catch (Exception e) {
-			log.error("Trouble reading source catalog: " + e.getMessage());
+			System.err.println("Trouble reading source catalog: " + e.getMessage());
 		}
 
 		Namespace xlink = Namespace.getNamespace("http://www.w3.org/1999/xlink");
@@ -52,9 +51,9 @@ public class Cleaner {
 			InvCatalog catalog = (InvCatalog) factory.readXML(data);
 			StringBuilder buff = new StringBuilder();
 			if (!catalog.check(buff, false)) {
-				log.error("Invalid catalog " + data + "\n" + buff.toString());
+				System.err.println("Invalid catalog " + data + "\n" + buff.toString());
 			}
-            log.debug("Cleaning: "+data);
+            System.out.println("Cleaning: "+data);
 			CatalogCleaner cleaner = null;
 			try {
 				cleaner = new CatalogCleaner(catalog, false);
