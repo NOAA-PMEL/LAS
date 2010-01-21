@@ -135,7 +135,7 @@ public class CatalogCleaner {
 			}
 			if ( total > MAX_TOTAL_FILES && (total_aggregations < MIN_AGGS || total_files < MIN_FILES ) ) {
 				done = true;
-				Cleaner.info("We've looked at "+MAX_TOTAL_FILES+" files in this catalog and have fewer than "+MIN_AGGS+" aggregations and "+MIN_FILES+" files in the clean catalog... ", 0);
+				Cleaner.info("We've looked at over "+MAX_TOTAL_FILES+" files in this catalog and have fewer than "+MIN_AGGS+" aggregations and "+MIN_FILES+" files in the clean catalog... ", 0);
 				Cleaner.info("Consider subdividing this catalog into more managable parts.", 0);
 				return;
 			}
@@ -174,7 +174,7 @@ public class CatalogCleaner {
 				}
 				Cleaner.info("AGGREGATES: Finished building the aggregation for "+invDataset.getName()+" datasets.", 1);
 			} else {
-				Cleaner.info("Skipping "+invDataset.getName()+" because is just too hard data sets to contemplate working with "+possibleAggregates.size()+" data sets.", 2);
+				Cleaner.info("Skipping "+invDataset.getName()+" because it is just too hard to contemplate working with "+possibleAggregates.size()+" data sets.", 1);
 			}
 
 			for (Iterator dsIt = containerDatasets.iterator(); dsIt.hasNext();) {
