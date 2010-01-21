@@ -111,8 +111,12 @@ public class Cleaner {
     	out(message, System.err, level);
     }
     private static void out(String message, PrintStream stream, int level) {
-    	if ( level == 0 ) stream.println(dateFormat.format(new Date())+" "+message);
-		if ( level == 1 ) stream.println(dateFormat.format(new Date())+"\t ... "+message);
-		if ( level >= 1 ) stream.println(dateFormat.format(new Date())+"\t\t ... "+message);   	
+    	if ( level == 0 ) {
+    		stream.println(dateFormat.format(new Date())+" "+message);
+    	} else if ( level == 1 ) {
+    		stream.println(dateFormat.format(new Date())+"\t ... "+message);
+    	} else if ( level >= 1 ) {
+    		stream.println(dateFormat.format(new Date())+"\t\t ... "+message);   	
+    	}
     }
 }
