@@ -66,13 +66,13 @@ public class Aggregates {
 						}
 						
 					} catch (IOException e) {
-						System.err.println("Failed to open: "+opendap.getStandardUrlName());
+						Cleaner.error("AGGREGATES: Failed to open: "+opendap.getStandardUrlName(), 2);
 					}
 				}
 			}
 
 		}
-		System.out.println("AGGREGATES: Grids extracted");
+		Cleaner.info("AGGREGATES: Grids extracted", 2);
 
 		// Move single data sets to the individual list
 		List<Integer> singles = new ArrayList<Integer>();
@@ -87,7 +87,7 @@ public class Aggregates {
 			individualDatasets.add(group.get(0));
 			datasetGroups.remove(singles.get(i));
 		}
-		System.out.println("AGGREGATES: Grids groupped");
+		Cleaner.info("AGGREGATES: Grids groupped", 2);
 		// sort the rest
 		for (Iterator dsgIt = datasetGroups.iterator(); dsgIt.hasNext();) {
 			List<DatasetGridPair> group = (List<DatasetGridPair>) dsgIt.next();

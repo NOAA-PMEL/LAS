@@ -190,7 +190,7 @@ public class CatalogCleaner {
 
 		if ( access != null ) {
 			String accessUrl = access.getStandardUrlName();
-			Cleaner.info("\t ... HASGRID: Starting grid analysis for "+accessUrl, 2);
+			Cleaner.info("HASGRID: Starting grid analysis for "+accessUrl, 2);
 			try {
 				NetcdfDataset nc = NetcdfDataset.openDataset(accessUrl);
 				StringBuilder error = new StringBuilder();
@@ -203,7 +203,7 @@ public class CatalogCleaner {
 			} catch (IOException e) {
 				Cleaner.error("HASGRID: Failed to open "+accessUrl+" with "+e.getLocalizedMessage(), 2);
 			}
-			Cleaner.info("Finished grid analysis for "+accessUrl, 2);
+			Cleaner.info("HASGRID: Finished grid analysis for "+accessUrl, 2);
 		}
 		return has_good_grid;
 	}
