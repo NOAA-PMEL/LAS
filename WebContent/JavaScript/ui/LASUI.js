@@ -1100,9 +1100,16 @@ LASUI.prototype.onPlotLoad = function (e) {
 			var Req = new LASRequest(unescape(urlArr[i].substr(4,urlArr[i].length)).replace(/\+/g," "));
 
 	if(Req) 
-		if(Req.getXMLText&&!isFeatureEditing()&&this.state.view.plot=="xy")
+		if(Req.getXMLText&&!isFeatureEditing()&&this.state.view.plot=='xy'){
 				 setMapCurrentSelection(Req.getRangeLo('y'),Req.getRangeHi('y'),Req.getRangeLo('x'),Req.getRangeHi('x'));			 
-
+	//	this.state.selection.t.min=Req.getRangeLo('t');
+	//	this.state.selection.t.max=Req.getRangeHi('t');
+	//	this.state.selection.z.min=Req.getRangeLo('z');
+	//	this.state.selection.z.max=Req.getRangeHi('z');
+	//	this.updating=true;
+	//		this.updateConstraints();
+		this.request = Req;
+	}
 	if(document.getElementById("wait"))
 		document.getElementById("wait").style.visibility="hidden";
 	if(document.getElementById("wait_msg"))
