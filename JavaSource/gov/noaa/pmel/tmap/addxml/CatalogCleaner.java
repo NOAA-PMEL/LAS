@@ -30,7 +30,6 @@ import ucar.nc2.dt.TypedDatasetFactory;
 
 public class CatalogCleaner {
 
-	private static final Logger log = LogManager.getLogger(CatalogCleaner.class);
 	private InvCatalogImpl sourceCatalog;
 	private InvCatalogImpl cleanCatalog;
 	private String key;
@@ -133,15 +132,15 @@ public class CatalogCleaner {
 			}
 			if ( total > MAX_TOTAL_FILES && (total_aggregations < MIN_AGGS || total_files < MIN_FILES ) ) {
 				done = true;
-				log.debug("We've looked at "+MAX_TOTAL_FILES+" files in this catalog and have fewer than "+MIN_AGGS+" aggregations and "+MIN_FILES+" files in the clean catalog... ");
-				log.debug("Consider subdividing this catalog into more managable parts.");
+				System.out.println("We've looked at "+MAX_TOTAL_FILES+" files in this catalog and have fewer than "+MIN_AGGS+" aggregations and "+MIN_FILES+" files in the clean catalog... ");
+				System.out.println("Consider subdividing this catalog into more managable parts.");
 				return;
 			}
 			if ( possibleAggregates.size() > 0 && possibleAggregates.size() <= MAX_ACCESS_POINTS ) {
-				log.debug("AGGREGATES: Starting aggregate analysis for "+possibleAggregates.size()+" datasets from "+invDataset.getName()+".");
+				System.out.println("AGGREGATES: Starting aggregate analysis for "+possibleAggregates.size()+" datasets from "+invDataset.getName()+".");
 				Aggregates aggregates = new Aggregates(possibleAggregates, aggregate);
-				log.debug("AGGREGATES: Finishing aggregate analysis for "+invDataset.getName()+" datasets.");
-				log.debug("AGGREGATES: Starting to build the aggregation for "+invDataset.getName()+" datasets.");
+				System.out.println("AGGREGATES: Finishing aggregate analysis for "+invDataset.getName()+" datasets.");
+				System.out.println("AGGREGATES: Starting to build the aggregation for "+invDataset.getName()+" datasets.");
 				if ( remoteService == null ) {
 					setService(aggregates.getBase());
 				}
@@ -170,9 +169,9 @@ public class CatalogCleaner {
 
 					}
 				}
-				log.debug("AGGREGATES: Finished building the aggregation for "+invDataset.getName()+" datasets.");
+				System.out.println("AGGREGATES: Finished building the aggregation for "+invDataset.getName()+" datasets.");
 			} else {
-				log.info("Skipping "+invDataset.getName()+" because is just too hard data sets to contemplate working with "+possibleAggregates.size()+" data sets.");
+				System.out.println("Skipping "+invDataset.getName()+" because is just too hard data sets to contemplate working with "+possibleAggregates.size()+" data sets.");
 			}
 
 			for (Iterator dsIt = containerDatasets.iterator(); dsIt.hasNext();) {
@@ -188,7 +187,7 @@ public class CatalogCleaner {
 
 		if ( access != null ) {
 			String accessUrl = access.getStandardUrlName();
-			log.debug("HASGRID: Starting grid analysis for "+accessUrl);
+			System.out.println("HASGRID: Starting grid analysis for "+accessUrl);
 			try {
 				NetcdfDataset nc = NetcdfDataset.openDataset(accessUrl);
 				StringBuilder error = new StringBuilder();
@@ -199,9 +198,9 @@ public class CatalogCleaner {
 
 				}
 			} catch (IOException e) {
-				log.error("HASGRID: Failed to open "+accessUrl+" with "+e.getLocalizedMessage());
+				System.err.println("HASGRID: Failed to open "+accessUrl+" with "+e.getLocalizedMessage());
 			}
-			log.debug("Finising grid analysis for "+accessUrl);
+			System.out.println("Finising grid analysis for "+accessUrl);
 		}
 		return has_good_grid;
 	}
