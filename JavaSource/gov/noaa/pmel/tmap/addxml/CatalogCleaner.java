@@ -69,14 +69,14 @@ public class CatalogCleaner {
 			if ( invDataset.hasNestedDatasets() ) {
 				if ( done ) {
 					cleanCatalog.finish();
-					System.out.println(dateFormat.format(new Date())+" Checked "+total+" files.  Found "+total_files+" files and "+total_aggregations+" aggregations.");
+					Cleaner.info("Checked "+total+" files.  Found "+total_files+" files and "+total_aggregations+" aggregations.", 0);
 					return cleanCatalog;
 				}
 				clean(invDataset);
 
 			}
 		}
-		System.out.println(dateFormat.format(new Date())+" Checked "+total+" files.  Found "+total_files+" files and "+total_aggregations+" aggregations.");
+		Cleaner.info("Checked "+total+" files.  Found "+total_files+" files and "+total_aggregations+" aggregations.", 0);
 		cleanCatalog.finish();
 		return cleanCatalog;
 	}
@@ -135,15 +135,15 @@ public class CatalogCleaner {
 			}
 			if ( total > MAX_TOTAL_FILES && (total_aggregations < MIN_AGGS || total_files < MIN_FILES ) ) {
 				done = true;
-				System.out.println(dateFormat.format(new Date())+"\t ... We've looked at "+MAX_TOTAL_FILES+" files in this catalog and have fewer than "+MIN_AGGS+" aggregations and "+MIN_FILES+" files in the clean catalog... ");
-				System.out.println(dateFormat.format(new Date())+"\t ... Consider subdividing this catalog into more managable parts.");
+				Cleaner.info("We've looked at "+MAX_TOTAL_FILES+" files in this catalog and have fewer than "+MIN_AGGS+" aggregations and "+MIN_FILES+" files in the clean catalog... ", 0);
+				Cleaner.info("Consider subdividing this catalog into more managable parts.", 0);
 				return;
 			}
 			if ( possibleAggregates.size() > 0 && possibleAggregates.size() <= MAX_ACCESS_POINTS ) {
-				System.out.println(dateFormat.format(new Date())+"\t ... AGGREGATES: Starting aggregate analysis for "+possibleAggregates.size()+" datasets from "+invDataset.getName()+".");
+				Cleaner.info("AGGREGATES: Starting aggregate analysis for "+possibleAggregates.size()+" datasets from "+invDataset.getName()+".", 2);
 				Aggregates aggregates = new Aggregates(possibleAggregates, aggregate);
-				System.out.println(dateFormat.format(new Date())+"\t ... AGGREGATES: Finishing aggregate analysis for "+invDataset.getName()+" datasets.");
-				System.out.println(dateFormat.format(new Date())+"\t ... AGGREGATES: Starting to build the aggregation for "+invDataset.getName()+" datasets.");
+				Cleaner.info("AGGREGATES: Finishing aggregate analysis for "+invDataset.getName()+" datasets.", 2);
+				Cleaner.info("AGGREGATES: Starting to build the aggregation for "+invDataset.getName()+" datasets.", 2);
 				if ( remoteService == null ) {
 					setService(aggregates.getBase());
 				}
@@ -172,9 +172,9 @@ public class CatalogCleaner {
 
 					}
 				}
-				System.out.println(dateFormat.format(new Date())+"\t ... AGGREGATES: Finished building the aggregation for "+invDataset.getName()+" datasets.");
+				Cleaner.info("AGGREGATES: Finished building the aggregation for "+invDataset.getName()+" datasets.", 2);
 			} else {
-				System.out.println(dateFormat.format(new Date())+"\t ... Skipping "+invDataset.getName()+" because is just too hard data sets to contemplate working with "+possibleAggregates.size()+" data sets.");
+				Cleaner.info("Skipping "+invDataset.getName()+" because is just too hard data sets to contemplate working with "+possibleAggregates.size()+" data sets.", 2);
 			}
 
 			for (Iterator dsIt = containerDatasets.iterator(); dsIt.hasNext();) {
@@ -190,7 +190,7 @@ public class CatalogCleaner {
 
 		if ( access != null ) {
 			String accessUrl = access.getStandardUrlName();
-			System.out.println(dateFormat.format(new Date())+"\t ... HASGRID: Starting grid analysis for "+accessUrl);
+			Cleaner.info("\t ... HASGRID: Starting grid analysis for "+accessUrl, 2);
 			try {
 				NetcdfDataset nc = NetcdfDataset.openDataset(accessUrl);
 				StringBuilder error = new StringBuilder();
@@ -201,9 +201,9 @@ public class CatalogCleaner {
 
 				}
 			} catch (IOException e) {
-				System.err.println(dateFormat.format(new Date())+"\t ... HASGRID: Failed to open "+accessUrl+" with "+e.getLocalizedMessage());
+				Cleaner.error("HASGRID: Failed to open "+accessUrl+" with "+e.getLocalizedMessage(), 2);
 			}
-			System.out.println(dateFormat.format(new Date())+"\t ... Finished grid analysis for "+accessUrl);
+			Cleaner.info("Finished grid analysis for "+accessUrl, 2);
 		}
 		return has_good_grid;
 	}
