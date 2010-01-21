@@ -41,6 +41,10 @@ public class CatalogCleaner {
 	private int total_aggregations;
 	private int total_files;
 	private boolean done;
+	private static final int MAX_ACCESS_POINTS = 100;
+	private static final int MIN_AGGS = 10;
+	private static final int MIN_FILES = 100;
+	private static final int MAX_TOTAL_FILES = 1000;
 
 	public CatalogCleaner (InvCatalog catalog, boolean aggregate) throws URISyntaxException, UnsupportedEncodingException {
 		this.aggregate = aggregate;
@@ -127,13 +131,13 @@ public class CatalogCleaner {
 					containerDatasets.add(dataset);
 				}
 			}
-			if ( total > 1000 && total_aggregations < 10 && total_files < 100 ) {
+			if ( total > MAX_TOTAL_FILES && (total_aggregations < MIN_AGGS || total_files < MIN_FILES ) ) {
 				done = true;
-				log.debug("We've looked at 1000 files in this catalog and have fewer than 10 and 100 files in the clean catalog... ");
-				log.debug("Consider subdividing this catalog into more interesting parts.");
+				log.debug("We've looked at "+MAX_TOTAL_FILES+" files in this catalog and have fewer than "+MIN_AGGS+" aggregations and "+MIN_FILES+" files in the clean catalog... ");
+				log.debug("Consider subdividing this catalog into more managable parts.");
 				return;
 			}
-			if ( possibleAggregates.size() > 0 && possibleAggregates.size() <= 250 ) {
+			if ( possibleAggregates.size() > 0 && possibleAggregates.size() <= MAX_ACCESS_POINTS ) {
 				log.debug("AGGREGATES: Starting aggregate analysis for "+possibleAggregates.size()+" datasets from "+invDataset.getName()+".");
 				Aggregates aggregates = new Aggregates(possibleAggregates, aggregate);
 				log.debug("AGGREGATES: Finishing aggregate analysis for "+invDataset.getName()+" datasets.");
