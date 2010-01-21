@@ -1,0 +1,12 @@
+#include("JavaScript/ui/LASUI.js")
+#include("JavaScript/components/xmldom.js" )
+#include("JavaScript/components/LASRequest.js" )
+#include("JavaScript/components/LASGetGridResponse.js" )
+#include("JavaScript/components/LASGetCategoriesResponse.js" )
+#include("JavaScript/components/LASGetDataConstraintsResponse.js" )
+#include("JavaScript/components/LASGetViewsResponse.js" )
+#include("JavaScript/components/LASGetOperationsResponse.js" )
+#include("JavaScript/components/LASGetOptionsResponse.js" )
+#include("JavaScript/components/querystring.js" )
+#include("JavaScript/components/DateWidget.js" )
+
