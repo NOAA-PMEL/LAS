@@ -21,6 +21,7 @@ import thredds.catalog.InvProperty;
 import thredds.catalog.InvService;
 import thredds.catalog.ServiceType;
 import ucar.nc2.constants.FeatureType;
+import ucar.nc2.dataset.CoordinateAxis;
 import ucar.nc2.dataset.CoordinateAxis1D;
 import ucar.nc2.dataset.NetcdfDataset;
 import ucar.nc2.dt.GridCoordSystem;
@@ -218,10 +219,14 @@ public class CatalogCleaner {
 			for (Iterator gridIt = grids.iterator(); gridIt.hasNext();) {
 				GridDatatype grid = (GridDatatype) gridIt.next();
 				GridCoordSystem gcs = grid.getCoordinateSystem();
-				CoordinateAxis1D x = (CoordinateAxis1D) gcs.getXHorizAxis();
-				CoordinateAxis1D y = (CoordinateAxis1D) gcs.getYHorizAxis();		
-				if ( x.getSize() > 1 && y.getSize() > 1 ) {
-					return true;
+				CoordinateAxis xa = (CoordinateAxis) gcs.getXHorizAxis();
+				CoordinateAxis ya = (CoordinateAxis) gcs.getYHorizAxis();
+				if (xa instanceof CoordinateAxis1D && ya instanceof CoordinateAxis1D ) {
+					CoordinateAxis1D x = (CoordinateAxis1D) xa;
+					CoordinateAxis1D y = (CoordinateAxis1D) ya;	
+					if ( x.getSize() > 1 && y.getSize() > 1 ) {
+						return true;
+					}
 				}
 			}
 		}
