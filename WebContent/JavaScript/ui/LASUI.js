@@ -66,7 +66,8 @@ function LASUI () {
 	};
 	this.AJAX_cache={};
 	this.request = new LASRequest();
-
+        this.info_icon = document.createElement("img");
+        this.info_icon.src="images/icon_info.gif";
 	this.autoupdate=false;
 
 	for(var f in this)
@@ -214,9 +215,8 @@ LASUI.prototype.setInitialVariable = function(strJson) {
 	this.getGrid(this.state.dataset,this.state.variable);
 	this.getDataConstraints(this.state.dataset,this.state.variable);
 
-	var info = document.createElement("IMG");
+	var info = info_icon.cloneNode();
 	info.onclick = this.getMetadata.LASBind(this);
-	info.src = "images/icon_info.gif";
 	var varlist = document.createElement("SELECT");
 	varlist.id="variables";
 	if(document.getElementById(this.anchors.breadcrumb)) {
@@ -339,9 +339,15 @@ LASUI.prototype.createCategoryTreeNode = function (node, i, id) {
 	node.children[i].LINode = document.createElement("LI");
 	node.children[i].LINode.className = "LASTreeLINode";
 
-	node.children[i].IMGNode =  document.createElement("IMG");
+	
+	if(!this.plus_img) {
+		this.plus_img = document.createElement("IMG");
+		this.plus_img.src = "JavaScript/ui/plus.gif";
+	}
+		
+	node.children[i].IMGNode = this.plus_img.cloneNode();
+	node.children[i].IMGNod.className =  "LASCategoryIMGNode";
 	node.children[i].IMGNode.onclick = this.selectCategory.LASBind(this, node, i);
-
 	node.children[i].IMGNode.src = "JavaScript/ui/plus.gif";
 	node.children[i].IMGNode.className = "LASCategoryIMGNode";
 	node.children[i].isExpanded = false;
@@ -375,9 +381,7 @@ LASUI.prototype.createCategoryTreeNode = function (node, i, id) {
 	if(node.category.getChildChildrenType(i)=="variables") {
 		var td3 = document.createElement("TD");
 		node.children[i].A = document.createElement("A");
-		var img = document.createElement("img");
-		img.src="images/icon_info.gif";
-		node.children[i].A.appendChild(img);
+		node.children[i].A.appendChild(info_icon.cloneNode());
 		node.children[i].A.onclick = this.showInfo.LASBind(this,node,i);
 		td3.appendChild(node.children[i].A);
 		td3.className = "LASTreeTableCell";
@@ -506,10 +510,8 @@ LASUI.prototype.onSetVariable = function() {
 		}
 		else
 			var categories = this.state.datasets[this.state.dataset].getDatasetName();
-
-		var info = document.createElement("IMG");
+		var info = this.info_icon.cloneNode();
 		info.onclick = this.getMetadata.LASBind(this);
-		info.src = "images/icon_info.gif";
 		var varlist = document.createElement("SELECT");
 		varlist.id="variables";
 		var cats = document.createElement("TEXT");
@@ -1762,11 +1764,7 @@ LASUI.prototype.setOptionTRNode = function (id,TBODYNode,type,reset) {
 		}
 		this.refs.options.cache[id].TD3 = document.createElement("TD");
 		this.refs.options.cache[id].A = document.createElement("A");
-		if(!this.info_icon) {
-			this.info_icon = document.createElement("img");
-			this.info_icon.src="images/icon_info.gif";
-		}
-		this.refs.options.cache[id].A.appendChild(this.info_icon);
+		this.refs.options.cache[id].A.appendChild(this.info_icon.cloneNode());
 		this.refs.options.cache[id].A.onclick = this.showOptionInfo.LASBind(this,this.refs.options.cache[id].help);
 		this.refs.options.cache[id].TD3.appendChild(this.refs.options.cache[id].A);
 		this.refs.options.cache[id].TRNode.appendChild(this.refs.options.cache[id].TD1);
