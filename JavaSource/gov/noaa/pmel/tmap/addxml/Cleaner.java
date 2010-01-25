@@ -59,7 +59,7 @@ public class Cleaner {
 		for (Iterator catalogRefs = uaf.getDescendants(new CatalogRefFilter()); catalogRefs.hasNext();) {
 			Element catalogRef = (Element) catalogRefs.next();
 
-			String data = catalogRef.getAttributeValue("href", xlink);
+			String data = catalogRef.getAttributeValue("href", xlink).trim();
 
 			InvCatalog catalog;
 			try {
@@ -89,7 +89,8 @@ public class Cleaner {
 							clean = cleaner.cleanCatalog();
 						} catch (Exception e) {
 
-							System.out.println("Summary, "+data+", crashed with "+e.getLocalizedMessage());
+							System.out.println("Summary, "+data+", crashed with "+e.toString());
+							e.printStackTrace();
 						}
 					}
 
