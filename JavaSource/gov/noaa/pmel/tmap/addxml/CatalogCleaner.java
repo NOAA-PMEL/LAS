@@ -44,7 +44,8 @@ public class CatalogCleaner {
 	private static final int MAX_ACCESS_POINTS = 100;
 	private static final int MIN_AGGS = 10;
 	private static final int MIN_FILES = 100;
-	private static final int MAX_TOTAL_FILES = 1000;
+	//private static final int MAX_TOTAL_FILES = 1000;
+	private static final int MAX_TOTAL_FILES = 10;
     // "yyyy-MM-dd HH:mm:ss,S"  	2001-07-04 12:08:56,831
 	private static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss,S");
 	public CatalogCleaner (InvCatalog catalog, boolean aggregate) throws URISyntaxException, UnsupportedEncodingException {
@@ -71,6 +72,7 @@ public class CatalogCleaner {
 				if ( done ) {
 					cleanCatalog.finish();
 					Cleaner.info("Checked "+total+" files.  Found "+total_files+" files and "+total_aggregations+" aggregations.", 0);
+					System.out.println("Summary, "+sourceCatalog.getUriString()+", files checked; files found; aggregations made, "+total+", "+total_files+", "+total_aggregations);
 					return cleanCatalog;
 				}
 				clean(invDataset);
@@ -78,6 +80,7 @@ public class CatalogCleaner {
 			}
 		}
 		Cleaner.info("Checked "+total+" files.  Found "+total_files+" files and "+total_aggregations+" aggregations.", 0);
+		System.out.println("Summary, "+sourceCatalog.getUriString()+", files checked; files found; aggregations made, "+total+", "+total_files+", "+total_aggregations);
 		cleanCatalog.finish();
 		return cleanCatalog;
 	}

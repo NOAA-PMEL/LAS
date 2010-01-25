@@ -66,9 +66,11 @@ public class Cleaner {
 				catalog = (InvCatalog) factory.readXML(data);
 
 				StringBuilder buff = new StringBuilder();
-				if (!catalog.check(buff, false)) {
+				if ( !data.startsWith("http://") ) {
+					 System.out.println("Summary, "+data+", will not clean relative catalogs.");
+				} else if (!catalog.check(buff, false)) {
 					error("Invalid catalog " + data + "\n" + buff.toString(), 1);
-
+                    System.out.println("Summary, "+data+", invalid");
 				} else {
 					info("Cleaning: "+data, 0);
 					CatalogCleaner cleaner = null;
@@ -87,7 +89,7 @@ public class Cleaner {
 							clean = cleaner.cleanCatalog();
 						} catch (Exception e) {
 
-							e.printStackTrace();
+							System.out.println("Summary, "+data+", crashed with "+e.getLocalizedMessage());
 						}
 					}
 
