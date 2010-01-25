@@ -3,6 +3,7 @@ package gov.noaa.pmel.tmap.addxml;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -93,14 +94,20 @@ public class Aggregates {
 		for (Iterator dsgIt = datasetGroups.iterator(); dsgIt.hasNext();) {
 			List<DatasetGridPair> group = (List<DatasetGridPair>) dsgIt.next();
 			Collections.sort(group, new GridDatasetComparator());
-			long end_time = group.get(0).getGrid().getEndDate().getTime();
 			boolean mono = true;
-			for (int i = 1; i < group.size(); i++ ) {
-				GridDataset gds = (GridDataset) group.get(i).getGrid();
-				if (gds.getEndDate().getTime() > end_time ) {
-					end_time = gds.getEndDate().getTime();
-				} else { 
-					mono = false;
+			Date end_date = group.get(0).getGrid().getEndDate();
+			long end_time = -1;
+			if ( end_date != null ) {
+				end_time = end_date.getTime();
+			}
+			if ( mono = true ) {
+				for (int i = 1; i < group.size(); i++ ) {
+					GridDataset gds = (GridDataset) group.get(i).getGrid();
+					if (gds.getEndDate() != null && gds.getEndDate().getTime() > end_time ) {
+						end_time = gds.getEndDate().getTime();
+					} else { 
+						mono = false;
+					}
 				}
 			}
 			if ( mono ) {
