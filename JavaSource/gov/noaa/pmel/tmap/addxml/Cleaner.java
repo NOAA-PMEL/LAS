@@ -1,7 +1,9 @@
 package gov.noaa.pmel.tmap.addxml;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
@@ -18,6 +20,7 @@ import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.Namespace;
 import org.jdom.filter.Filter;
+import org.jdom.output.XMLOutputter;
 
 import thredds.catalog.InvAccess;
 import thredds.catalog.InvCatalog;
@@ -60,6 +63,15 @@ public class Cleaner {
 			Element catalogRef = (Element) catalogRefs.next();
 
 			String data = catalogRef.getAttributeValue("href", xlink).trim();
+			String f = "";
+			try {
+				f = JDOMUtils.MD5Encode(data)+".xml";
+			} catch (UnsupportedEncodingException e) {
+				error("Cannot create sub-catalog file name." + data + "\n", 1);
+				e.printStackTrace();
+			}
+			
+			
 
 			InvCatalog catalog;
 			try {
@@ -99,7 +111,7 @@ public class Cleaner {
 						try {
 
 							// Write to a file...
-							String f = JDOMUtils.MD5Encode(data)+".xml";
+							catalogRef.setAttribute("href", "geoIDECleanCatalogs/"+f);
 							File file = new File(f);
 							FileOutputStream out = new FileOutputStream(file);
 							factory.writeXML(clean, out, true);
@@ -113,6 +125,21 @@ public class Cleaner {
 
 			} catch (Exception e) {
 				error("Could not read catalog " + data + "\n" + e.getLocalizedMessage(), 1);
+			}
+			try {
+				File file = new File("geoIDECleanCatalog.xml");
+				FileWriter xmlout = new FileWriter(file);
+				org.jdom.output.Format format = org.jdom.output.Format.getPrettyFormat();
+				format.setLineSeparator(System.getProperty("line.separator"));
+				XMLOutputter outputter =
+					new XMLOutputter(format);
+				outputter.output(uaf, xmlout);
+				// Close the FileWriter
+				xmlout.close();
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
 			}
 		}
 	}
