@@ -45,7 +45,7 @@ public class CatalogCleaner {
 	private static final int MIN_AGGS = 10;
 	private static final int MIN_FILES = 100;
 	//private static final int MAX_TOTAL_FILES = 1000;
-	private static final int MAX_TOTAL_FILES = 10;
+	private static final int MAX_TOTAL_FILES = 50;
     // "yyyy-MM-dd HH:mm:ss,S"  	2001-07-04 12:08:56,831
 	private static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss,S");
 	public CatalogCleaner (InvCatalog catalog, boolean aggregate) throws URISyntaxException, UnsupportedEncodingException {

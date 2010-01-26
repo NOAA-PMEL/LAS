@@ -57,7 +57,7 @@ public class Cleaner {
 			error("Trouble reading source catalog: " + e.getMessage(), 0);
 		}
 
-		Namespace xlink = Namespace.getNamespace("http://www.w3.org/1999/xlink");
+		Namespace xlink = Namespace.getNamespace("xlink", "http://www.w3.org/1999/xlink");
 
 		for (Iterator catalogRefs = uaf.getDescendants(new CatalogRefFilter()); catalogRefs.hasNext();) {
 			Element catalogRef = (Element) catalogRefs.next();
@@ -124,7 +124,8 @@ public class Cleaner {
 				}
 
 			} catch (Exception e) {
-				error("Could not read catalog " + data + "\n" + e.getLocalizedMessage(), 1);
+				e.printStackTrace();
+				error("Could not read catalog " + data + "\n" + e.toString(), 1);
 			}
 			try {
 				File file = new File("geoIDECleanCatalog.xml");
