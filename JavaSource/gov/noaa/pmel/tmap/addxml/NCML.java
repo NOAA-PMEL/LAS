@@ -2,6 +2,7 @@ package gov.noaa.pmel.tmap.addxml;
 
 import org.jdom.Element;
 
+import ucar.nc2.dataset.CoordinateAxis1D;
 import ucar.nc2.dt.GridDataset;
 import ucar.nc2.dt.GridDatatype;
 
@@ -22,8 +23,11 @@ public class NCML {
 		Element agg = new Element("aggregation");
 		agg.setAttribute("type", "joinExisting");
 		GridDatatype grid = dataset.getGrids().get(0);
-		String tname = grid.getCoordinateSystem().getTimeAxis1D().getName();
-		agg.setAttribute("dimName", tname);
+		CoordinateAxis1D time =  grid.getCoordinateSystem().getTimeAxis1D();
+		if ( time != null ) {
+			String tname = time.getName();
+			agg.setAttribute("dimName", tname);
+		}
 		root.addContent(agg);
 	}
 	/*
@@ -36,8 +40,11 @@ public class NCML {
 		Element netcdf = new Element("netcdf");
 		netcdf.setAttribute("location", dataset.getLocationURI());
 		GridDatatype grid = dataset.getGrids().get(0);
-		long tsize = grid.getCoordinateSystem().getTimeAxis1D().getSize();
-		netcdf.setAttribute("ncoords", String.valueOf(tsize));
+		CoordinateAxis1D time =  grid.getCoordinateSystem().getTimeAxis1D();
+		if ( time != null ) {
+			long tsize =time.getSize();
+			netcdf.setAttribute("ncoords", String.valueOf(tsize));
+		}
 		agg.addContent(netcdf);
 	}
 }
