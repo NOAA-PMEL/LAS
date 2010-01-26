@@ -111,7 +111,7 @@ public class Cleaner {
 						try {
 
 							// Write to a file...
-							catalogRef.setAttribute("href", "geoIDECleanCatalogs/"+f);
+							catalogRef.setAttribute("href", "geoIDECleanCatalogs/"+f, xlink);
 							File file = new File(f);
 							FileOutputStream out = new FileOutputStream(file);
 							factory.writeXML(clean, out, true);
