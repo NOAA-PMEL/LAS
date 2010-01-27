@@ -59,6 +59,13 @@ public class Cleaner {
 				refs = args[2];
 			}
 		}
+		
+		String stop_string = "";
+		if ( args.length > 3 ) {
+			if ( args[3] != null && (args[3].equalsIgnoreCase(OUTPUT_REFERENCES_CATALOGS) || args[3].equalsIgnoreCase(OUTPUT_REFERENCES_DATASETS)) ) {
+				stop_string = args[3];
+			}
+		}
 
 		try {
 			JDOMUtils.XML2JDOM(source, uaf);
@@ -96,7 +103,7 @@ public class Cleaner {
 					info("Cleaning: "+data, 0);
 					CatalogCleaner cleaner = null;
 					try {
-						cleaner = new CatalogCleaner(catalog, aggregations, refs);
+						cleaner = new CatalogCleaner(catalog, aggregations, refs, stop_string);
 					} catch (UnsupportedEncodingException e) {
 
 						e.printStackTrace();
