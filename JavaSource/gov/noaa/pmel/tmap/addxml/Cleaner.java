@@ -32,13 +32,15 @@ import thredds.catalog.ServiceType;
 
 public class Cleaner {
 	private static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss,S");
+	public static final String OUTPUT_REFERENCES_CATALOGS = "catalogs";
+	public static final String OUTPUT_REFERENCES_DATASETS = "datasets";
 	/**
 	 * @param args
 	 */
 	public static void main(String[] args) {
 		InvCatalogFactory factory = new InvCatalogFactory("default", true);
 		if ( args[0] == null || args[0].equals("") ) {
-			error("Cleaner catalog.xml true|false (file to clean and whether to make aggregation ncML.", 0);
+			error("Cleaner catalog.xml true|false catalogs|datasets (file to clean and whether to make aggregation ncML, weather to write catalogRefs or individual datasets.", 0);
 		}
 
 		File source = new File(args[0]);
@@ -48,6 +50,13 @@ public class Cleaner {
 		if ( args.length > 1 ) {
 			if ( args[1] != null && (args[1].equals("true") || args[1].equals("false")) ) {
 				aggregations = Boolean.valueOf(args[1]);
+			}
+		}
+		
+		String refs = "catalogs";
+		if ( args.length > 2 ) {
+			if ( args[2] != null && (args[2].equalsIgnoreCase(OUTPUT_REFERENCES_CATALOGS) || args[2].equalsIgnoreCase(OUTPUT_REFERENCES_DATASETS)) ) {
+				refs = args[2];
 			}
 		}
 
@@ -87,7 +96,7 @@ public class Cleaner {
 					info("Cleaning: "+data, 0);
 					CatalogCleaner cleaner = null;
 					try {
-						cleaner = new CatalogCleaner(catalog, aggregations);
+						cleaner = new CatalogCleaner(catalog, aggregations, refs);
 					} catch (UnsupportedEncodingException e) {
 
 						e.printStackTrace();

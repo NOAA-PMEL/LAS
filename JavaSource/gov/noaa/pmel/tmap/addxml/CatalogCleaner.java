@@ -15,6 +15,7 @@ import org.jdom.Element;
 import thredds.catalog.InvAccess;
 import thredds.catalog.InvCatalog;
 import thredds.catalog.InvCatalogImpl;
+import thredds.catalog.InvCatalogRef;
 import thredds.catalog.InvDataset;
 import thredds.catalog.InvDatasetImpl;
 import thredds.catalog.InvProperty;
@@ -38,18 +39,22 @@ public class CatalogCleaner {
 	private InvService localService;
 	private boolean aggregate = false;
 	private int total;
-	private int total_aggregations;
-	private int total_files;
+	private int total_aggregations = 0;
+	private int total_files = 0;
+	private int total_catalogs = 0;
 	private boolean done;
 	private static final int MAX_ACCESS_POINTS = 100;
 	private static final int MIN_AGGS = 10;
 	private static final int MIN_FILES = 100;
 	//private static final int MAX_TOTAL_FILES = 1000;
-	private static final int MAX_TOTAL_FILES = 50;
+	private static final int MAX_TOTAL_FILES = 1000;
+	private static final int MIN_CATALOGS = 10;
+	String refs;
     // "yyyy-MM-dd HH:mm:ss,S"  	2001-07-04 12:08:56,831
 	private static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss,S");
-	public CatalogCleaner (InvCatalog catalog, boolean aggregate) throws URISyntaxException, UnsupportedEncodingException {
+	public CatalogCleaner (InvCatalog catalog, boolean aggregate, String output_type) throws URISyntaxException, UnsupportedEncodingException {
 		this.aggregate = aggregate;
+		this.refs = output_type;
 		sourceCatalog = (InvCatalogImpl) catalog;
 		key = JDOMUtils.MD5Encode(catalog.getUriString());
 		cleanCatalog = new InvCatalogImpl("Clean Catalog for "+sourceCatalog.getUriString(), "1.0.1", new URI(catalog.getUriString()));
@@ -59,30 +64,40 @@ public class CatalogCleaner {
 	public InvCatalogImpl cleanCatalog() throws Exception {
 		done = false;
 		total = 0;
+	
 		List<InvDataset> threddsDatasets = sourceCatalog.getDatasets();
 		for (Iterator dsIt = threddsDatasets.iterator(); dsIt.hasNext();) {
 			InvDataset invDataset = (InvDataset) dsIt.next();
 			if ( invDataset.hasAccess() ) {
 				if ( hasGrid(invDataset) ) {	
-					total++;
-					addGridDataset(invDataset);
+					total++;					
+				    addGridDataset(invDataset);
 				}
 			}
 			if ( invDataset.hasNestedDatasets() ) {
 				if ( done ) {
 					cleanCatalog.finish();
 					Cleaner.info("Checked "+total+" files.  Found "+total_files+" files and "+total_aggregations+" aggregations.", 0);
-					System.out.println("Summary, "+sourceCatalog.getUriString()+", files checked; files found; aggregations made, "+total+", "+total_files+", "+total_aggregations);
+					System.out.println("Summary, "+sourceCatalog.getUriString()+", files checked; files found; aggregations made; total catalogs refed,"+total+", "+total_files+", "+total_aggregations+", "+total_catalogs);
 					return cleanCatalog;
 				}
 				clean(invDataset);
 
 			}
 		}
+		
 		Cleaner.info("Checked "+total+" files.  Found "+total_files+" files and "+total_aggregations+" aggregations.", 0);
-		System.out.println("Summary, "+sourceCatalog.getUriString()+", files checked; files found; aggregations made, "+total+", "+total_files+", "+total_aggregations);
+		System.out.println("Summary, "+sourceCatalog.getUriString()+", files checked; files found; aggregations made; total catalogs refed, "+total+", "+total_files+", "+total_aggregations+", "+total_catalogs);
 		cleanCatalog.finish();
 		return cleanCatalog;
+	}
+	private void addCatalogRef(List<DatasetGridPair> group) {
+		total_catalogs++;
+		InvDatasetImpl group_parent = (InvDatasetImpl) group.get(0).getDataset().getParent();
+		String url = group_parent.getCatalogUrl();
+		url = url.replace("#null", "");
+		InvCatalogRef ref = new InvCatalogRef(group_parent, group_parent.getFullName(), url);
+		cleanCatalog.addDataset(ref);
 	}
 	private void addGridDataset(InvDataset invDataset) {
 		total_files++;
@@ -138,7 +153,7 @@ public class CatalogCleaner {
 					containerDatasets.add(dataset);
 				}
 			}
-			if ( total > MAX_TOTAL_FILES && (total_aggregations < MIN_AGGS || total_files < MIN_FILES ) ) {
+			if ( total > MAX_TOTAL_FILES && (total_aggregations < MIN_AGGS || total_files < MIN_FILES || total_catalogs < MIN_CATALOGS ) ) {
 				done = true;
 				Cleaner.info("We've looked at over "+MAX_TOTAL_FILES+" files in this catalog and have fewer than "+MIN_AGGS+" aggregations and "+MIN_FILES+" files in the clean catalog... ", 0);
 				Cleaner.info("Consider subdividing this catalog into more managable parts.", 0);
@@ -149,7 +164,7 @@ public class CatalogCleaner {
 				}
 			}
 			if ( possibleAggregates.size() > 0 && possibleAggregates.size() <= MAX_ACCESS_POINTS ) {
-				Cleaner.info("AGGREGATES: Starting aggregate analysis for "+possibleAggregates.size()+" datasets from "+invDataset.getName()+".", 1);
+ 				Cleaner.info("AGGREGATES: Starting aggregate analysis for "+possibleAggregates.size()+" datasets from "+invDataset.getName()+".", 1);
 				Aggregates aggregates = new Aggregates(possibleAggregates, aggregate);
 				Cleaner.info("AGGREGATES: Finished aggregate analysis for "+invDataset.getName()+" datasets.", 1);
 				Cleaner.info("AGGREGATES: Starting to build the aggregation for "+invDataset.getName()+" datasets.", 1);
@@ -172,13 +187,8 @@ public class CatalogCleaner {
 				} 
 				if ( aggregates.hasIndividualDataset() ) {
 					for (Iterator ndsIt = aggregates.getIndividuals().iterator(); ndsIt.hasNext();) {
-						DatasetGridPair gridDataset = (DatasetGridPair) ndsIt.next();
-
-
-						if ( hasGrid(gridDataset.getGrid()) ) {
-							addGridDataset(gridDataset.getDataset());
-						}
-
+						List<DatasetGridPair> group = (List<DatasetGridPair>) ndsIt.next();
+                        addCatalogRef(group);
 					}
 				}
 				Cleaner.info("AGGREGATES: Finished building the aggregation for "+invDataset.getName()+" datasets.", 1);
