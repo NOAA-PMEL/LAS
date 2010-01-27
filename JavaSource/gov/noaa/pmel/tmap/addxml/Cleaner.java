@@ -62,7 +62,7 @@ public class Cleaner {
 		
 		String stop_string = "";
 		if ( args.length > 3 ) {
-			if ( args[3] != null && (args[3].equalsIgnoreCase(OUTPUT_REFERENCES_CATALOGS) || args[3].equalsIgnoreCase(OUTPUT_REFERENCES_DATASETS)) ) {
+			if ( args[3] != null ) {
 				stop_string = args[3];
 			}
 		}
