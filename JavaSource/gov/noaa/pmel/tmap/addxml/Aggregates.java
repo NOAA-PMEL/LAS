@@ -25,7 +25,7 @@ import ucar.nc2.dt.TypedDatasetFactory;
 
 public class Aggregates {
 
-	List<DatasetGridPair> individualDatasets = new ArrayList<DatasetGridPair>();
+	List<List<DatasetGridPair>> groupsOfIndividualFiles = new ArrayList<List<DatasetGridPair>>();
 	List<List<DatasetGridPair>> aggregations = new ArrayList<List<DatasetGridPair>>();
 	String base = null;
 	boolean aggregate;
@@ -86,7 +86,7 @@ public class Aggregates {
 		}
 		for ( int i = 0; i < singles.size(); i++ ) {
 			List<DatasetGridPair> group = (List<DatasetGridPair>) datasetGroups.get(singles.get(i));
-			individualDatasets.add(group.get(0));
+			groupsOfIndividualFiles.add(group);
 			datasetGroups.remove(singles.get(i));
 		}
 		Cleaner.info("AGGREGATES: Grids groupped", 2);
@@ -96,6 +96,11 @@ public class Aggregates {
 			Collections.sort(group, new GridDatasetComparator());
 			boolean mono = true;
 			Date end_date = group.get(0).getGrid().getEndDate();
+			Date start_date = group.get(0).getGrid().getStartDate();
+			long start_time = -1;
+			if ( start_date != null ) {
+				start_time = start_date.getTime();
+			}
 			long end_time = -1;
 			if ( end_date != null ) {
 				end_time = end_date.getTime();
@@ -103,7 +108,7 @@ public class Aggregates {
 			if ( mono = true ) {
 				for (int i = 1; i < group.size(); i++ ) {
 					GridDataset gds = (GridDataset) group.get(i).getGrid();
-					if (gds.getEndDate() != null && gds.getEndDate().getTime() > end_time ) {
+					if (gds.getStartDate() != null && gds.getEndDate() != null && gds.getStartDate().getTime() > end_time ) {
 						end_time = gds.getEndDate().getTime();
 					} else { 
 						mono = false;
@@ -112,6 +117,8 @@ public class Aggregates {
 			}
 			if ( mono ) {
 				aggregations.add(group);
+			} else {
+				groupsOfIndividualFiles.add(group);
 			}
 		}
 	}
@@ -221,8 +228,8 @@ public class Aggregates {
     public List<List<DatasetGridPair>> getAggregations() {
     	return aggregations;
     }
-    public List<DatasetGridPair> getIndividuals() {
-    	return individualDatasets;
+    public List<List<DatasetGridPair>> getIndividuals() {
+    	return groupsOfIndividualFiles;
     }
     public boolean needsAggregation() {
     	// Only need aggregation if one list has at least two members
@@ -235,7 +242,7 @@ public class Aggregates {
     	return false;
     }
     public boolean hasIndividualDataset() {
-    	return individualDatasets.size() > 0;
+    	return groupsOfIndividualFiles.size() > 0;
     }
     public String getBase() {
     	return base;
