@@ -49,12 +49,14 @@ public class CatalogCleaner {
 	//private static final int MAX_TOTAL_FILES = 1000;
 	private static final int MAX_TOTAL_FILES = 1000;
 	private static final int MIN_CATALOGS = 10;
-	String refs;
+	private String refs;
+	private String stop_string;
     // "yyyy-MM-dd HH:mm:ss,S"  	2001-07-04 12:08:56,831
 	private static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss,S");
-	public CatalogCleaner (InvCatalog catalog, boolean aggregate, String output_type) throws URISyntaxException, UnsupportedEncodingException {
+	public CatalogCleaner (InvCatalog catalog, boolean aggregate, String output_type, String stop_string) throws URISyntaxException, UnsupportedEncodingException {
 		this.aggregate = aggregate;
 		this.refs = output_type;
+		this.stop_string = stop_string;
 		sourceCatalog = (InvCatalogImpl) catalog;
 		key = JDOMUtils.MD5Encode(catalog.getUriString());
 		cleanCatalog = new InvCatalogImpl("Clean Catalog for "+sourceCatalog.getUriString(), "1.0.1", new URI(catalog.getUriString()));
@@ -140,7 +142,8 @@ public class CatalogCleaner {
 		parent.addDataset(aggDatasetNode);
 	}
 	public void clean(InvDataset invDataset) throws Exception {	
-		if ( !done ) {
+		if ( invDataset.getName().contains(stop_string)) done = true;
+		if ( !done ) {			
 			List<InvDataset> children = invDataset.getDatasets();
 			List<InvDataset> possibleAggregates = new ArrayList<InvDataset>();
 			List<InvDataset> containerDatasets = new ArrayList<InvDataset>();
