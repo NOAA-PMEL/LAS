@@ -109,8 +109,9 @@ public class CatalogCleaner {
 		total_aggregations++;
 		InvDatasetImpl aggDatasetNode = new InvDatasetImpl((InvDatasetImpl)invDataset);
 		aggDatasetNode.setName(aggDatasetNode.getName()+" "+index);
-		aggDatasetNode.setUrlPath(aggDatasetNode.getUrlPath()+"/aggregation_"+index);
-		aggDatasetNode.setID(aggDatasetNode.getUrlPath()+"_"+key+"_"+index);
+		String id = key+"_"+total_aggregations;
+		aggDatasetNode.setUrlPath(id+"/aggregation_"+total_aggregations);
+		aggDatasetNode.setID(id);
 		Element ncml = NCML.getRootElement();
 		NCML.addAggregationElement(ncml, agg.get(0).getGrid());
 		for (int i = 0; i < agg.size(); i++ ) {
