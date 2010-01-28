@@ -14,6 +14,7 @@ import org.apache.log4j.Logger;
 
 import thredds.catalog.InvAccess;
 import thredds.catalog.InvDataset;
+import thredds.catalog.InvDatasetImpl;
 import thredds.catalog.ServiceType;
 import ucar.nc2.constants.FeatureType;
 import ucar.nc2.dataset.CoordinateAxis;
@@ -30,7 +31,8 @@ public class Aggregates {
 	String base = null;
 	boolean aggregate;
 	boolean done = false;
-	public Aggregates(List<InvDataset> nestedDatasets, boolean aggregate) {
+	@SuppressWarnings("unchecked")
+	public Aggregates(List<InvDatasetImpl> nestedDatasets, boolean aggregate) {
 		this.aggregate = aggregate;
 		
 		List<List<DatasetGridPair>> datasetGroups = new ArrayList<List<DatasetGridPair>>();
@@ -38,7 +40,7 @@ public class Aggregates {
 		
 		int index = 0;
 		for (Iterator ndsIt = nestedDatasets.iterator(); ndsIt.hasNext();) {
-			InvDataset invDataset = (InvDataset) ndsIt.next();
+			InvDatasetImpl invDataset = (InvDatasetImpl) ndsIt.next();
             // We know this already :-)
 			if ( invDataset.hasAccess() ) {
 				InvAccess opendap = invDataset.getAccess(ServiceType.OPENDAP);

@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import org.jdom.Element;
 
@@ -51,12 +52,14 @@ public class CatalogCleaner {
 	private static final int MIN_CATALOGS = 10;
 	private String refs;
 	private String stop_string;
+	private Set<String> skip;
     // "yyyy-MM-dd HH:mm:ss,S"  	2001-07-04 12:08:56,831
 	private static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss,S");
-	public CatalogCleaner (InvCatalog catalog, boolean aggregate, String output_type, String stop_string) throws URISyntaxException, UnsupportedEncodingException {
+	public CatalogCleaner (InvCatalog catalog, boolean aggregate, String output_type, Set<String> skip, String stop_string) throws URISyntaxException, UnsupportedEncodingException {
 		this.aggregate = aggregate;
 		this.refs = output_type;
 		this.stop_string = stop_string;
+		this.skip = skip;
 		sourceCatalog = (InvCatalogImpl) catalog;
 		key = JDOMUtils.MD5Encode(catalog.getUriString());
 		cleanCatalog = new InvCatalogImpl("Clean Catalog for "+sourceCatalog.getUriString(), "1.0.1", new URI(catalog.getUriString()));
@@ -69,7 +72,7 @@ public class CatalogCleaner {
 	
 		List<InvDataset> threddsDatasets = sourceCatalog.getDatasets();
 		for (Iterator dsIt = threddsDatasets.iterator(); dsIt.hasNext();) {
-			InvDataset invDataset = (InvDataset) dsIt.next();
+			InvDatasetImpl invDataset = (InvDatasetImpl) dsIt.next();
 			if ( invDataset.hasAccess() ) {
 				if ( hasGrid(invDataset) ) {	
 					total++;					
@@ -93,15 +96,28 @@ public class CatalogCleaner {
 		cleanCatalog.finish();
 		return cleanCatalog;
 	}
-	private void addCatalogRef(List<DatasetGridPair> group) {
+	private void addCatalogRef(List<DatasetGridPair> group) throws UnsupportedEncodingException {
 		total_catalogs++;
 		InvDatasetImpl group_parent = (InvDatasetImpl) group.get(0).getDataset().getParent();
 		String url = group_parent.getCatalogUrl();
 		url = url.replace("#null", "");
 		InvCatalogRef ref = new InvCatalogRef(group_parent, group_parent.getFullName(), url);
-		cleanCatalog.addDataset(ref);
+		InvDatasetImpl parent = (InvDatasetImpl) group_parent.getParent();
+		InvDatasetImpl parent_in_catalog = null;
+		if ( parent != null ) {
+			parent_in_catalog = (InvDatasetImpl) cleanCatalog.findDatasetByID(JDOMUtils.MD5Encode(parent.getName()));
+			if ( parent_in_catalog != null ) {
+				parent_in_catalog = new InvDatasetImpl(parent);
+				cleanCatalog.addDataset(parent_in_catalog);
+			}
+		}
+		if ( parent_in_catalog != null ) {
+		    parent_in_catalog.addDataset(ref);
+		} else {
+			cleanCatalog.addDataset(ref);
+		}
 	}
-	private void addGridDataset(InvDataset invDataset) {
+	private void addGridDataset(InvDatasetImpl invDataset) {
 		total_files++;
 		InvAccess access = invDataset.getAccess(ServiceType.OPENDAP);
 		String url = access.getUrlPath();
@@ -122,7 +138,7 @@ public class CatalogCleaner {
 		remoteService = new InvService("remoteOPeNDAP_"+key, "OPeNDAP", base, null, null);
 		cleanCatalog.addService(remoteService);
 	}
-	private void addAggregation(InvDatasetImpl parent, InvDataset invDataset, List<DatasetGridPair> agg, int index) throws Exception {
+	private void addAggregation(InvDatasetImpl parent, InvDatasetImpl invDataset, List<DatasetGridPair> agg, int index) throws Exception {
 		total_aggregations++;
 		InvDatasetImpl aggDatasetNode = new InvDatasetImpl((InvDatasetImpl)invDataset);
 		aggDatasetNode.setName(aggDatasetNode.getName()+" "+index);
@@ -141,14 +157,22 @@ public class CatalogCleaner {
 		aggDatasetNode.finish();
 		parent.addDataset(aggDatasetNode);
 	}
-	public void clean(InvDataset invDataset) throws Exception {	
-		if ( invDataset.getName().contains(stop_string)) done = true;
+	public void clean(InvDatasetImpl invDataset) throws Exception {	
+		if ( !stop_string.equals("") && invDataset.getName().contains(stop_string)) {
+			done = true;
+		}
+		for (Iterator skipIt = skip.iterator(); skipIt.hasNext();) {
+			String skip_string = (String) skipIt.next();
+			if ( invDataset.getName().contains(skip_string) ) {
+				return;
+			}
+		}
 		if ( !done ) {			
 			List<InvDataset> children = invDataset.getDatasets();
-			List<InvDataset> possibleAggregates = new ArrayList<InvDataset>();
-			List<InvDataset> containerDatasets = new ArrayList<InvDataset>();
+			List<InvDatasetImpl> possibleAggregates = new ArrayList<InvDatasetImpl>();
+			List<InvDatasetImpl> containerDatasets = new ArrayList<InvDatasetImpl>();
 			for (Iterator dsIt = children.iterator(); dsIt.hasNext();) {
-				InvDataset dataset = (InvDataset) dsIt.next();
+				InvDatasetImpl dataset = (InvDatasetImpl) dsIt.next();
 				if ( dataset.hasAccess() ) {
 					possibleAggregates.add(dataset);
 					total++;
@@ -200,13 +224,13 @@ public class CatalogCleaner {
 			}
 
 			for (Iterator dsIt = containerDatasets.iterator(); dsIt.hasNext();) {
-				InvDataset container = (InvDataset) dsIt.next();
+				InvDatasetImpl container = (InvDatasetImpl) dsIt.next();
 				clean(container);
 			}
 		}
 	}
 
-	private static boolean hasGrid(InvDataset dataset) {
+	private static boolean hasGrid(InvDatasetImpl dataset) {
 		Boolean has_good_grid = false;
 		InvAccess access = dataset.getAccess(ServiceType.OPENDAP);
 
