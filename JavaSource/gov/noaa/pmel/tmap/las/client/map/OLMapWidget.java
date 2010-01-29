@@ -253,6 +253,7 @@ public class OLMapWidget extends Composite {
 			    if ( !modulo || !tool.equals("xy") ) {
 			    	trimSelection(dataBounds);
 			    }
+			    featureAdded();
 			}
 			
 		});
