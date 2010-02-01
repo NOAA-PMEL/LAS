@@ -62,8 +62,8 @@ streamable="true" mime_type="application/postscript"/> -->
              <result type="image" ID="plot_image" streamable="true" mime_type="image/png" file_suffix=".gif"/>
              <!-- <result type="ps" ID="plot_postscript" streamable="true" mime_type="application/postscript"/> -->
              <result type="image" ID="ref_map" file_suffix=".gif" />
-             <result type="map_scale" ID="map_scale" file_suffix=".xml"/>
-             <result type="debug" ID="debug" file_suffix=".txt"/>
+             <result type="map_scale" ID="map_scale"/>
+	     <result type="debug" ID="debug" file_suffix=".txt"/>
              <result type="cancel" ID="cancel" file_suffix=".txt"/>
           </response>
           <region>
@@ -757,7 +757,7 @@ streamable="true" mime_type="application/postscript"/> -->
         <grid_types>
             <grid_type name="regular" />
         </grid_types>
-        <optiondef IDREF="Options_Data"/>
+   
     </operation>
     <!-- End: interactive download -->
     <operation name="Table of values (text)" ID="Data_Extract"
@@ -828,7 +828,7 @@ streamable="true" mime_type="application/postscript"/> -->
         <service>ferret</service>
         <response ID="Data_Extract_File_Response">
             <result type="ascii" ID="ferret_listing" streamable="true"
-                mime_type="text/plain" file_suffix=".txt"/>
+                mime_type="ascii/text" file_suffix=".txt"/>
             <result type="debug" ID="debug" file_suffix=".txt"/>
         </response>
         <region>
@@ -884,7 +884,7 @@ streamable="true" mime_type="application/postscript"/> -->
        </response>
        <service>database</service>
     </operation>
-    <operation name="Location Plot" ID="Insitu_extract_location_plot" output_template="output" order="0104" category="visualization">
+    <operation name="Location Plot" ID="Insitu_extract_location_plot" output_template="zoom_2D_XY" order="0104" category="visualization">
           <operation name="Database Extraction" ID="DBExtract" output_template="ascii" service_action="sql">
                <response ID="DBExtractResponse">
                     <result type="debug" ID="db_debug" file_suffix=".txt"/>
@@ -900,7 +900,7 @@ streamable="true" mime_type="application/postscript"/> -->
                   </property_group>
                </properties>
           </operation>
-          <operation chained="true" name="In-situ location plot" ID="Plot_insitu_XY_locations" output_template="output" service_action="Plot_insitu_XY_locations">
+          <operation chained="true" name="In-situ location plot" ID="Plot_insitu_XY_locations" output_template="zoom_2D_XY" service_action="Plot_insitu_XY_locations">
                <args>
                     <arg chained="true" type="variable" index="1" operation="DBExtract" result="netcdf"/>
                     <arg type="region" index="1" ID="in-situ-Region"/>
@@ -910,6 +910,7 @@ streamable="true" mime_type="application/postscript"/> -->
                     <!-- <result type="ps" ID="plot_postscript" streamable="true" mime_type="application/postscript" file_suffix=".ps"/> -->
                     <result type="image" ID="ref_map" file_suffix=".gif" />
                     <result type="debug" ID="debug" file_suffix=".txt"/>
+		<result type="map_scale" ID="map_scale"/>
                </response>
                <service>ferret</service>
           </operation>
@@ -936,7 +937,7 @@ streamable="true" mime_type="application/postscript"/> -->
         </grid_types>
     </operation>
     <operation name="Location and Value Plot"
-        ID="Insitu_extract_location_value_plot" output_template="output" order="0105" category="visualization">
+        ID="Insitu_extract_location_value_plot" output_template="zoom_2D_XY" order="0105" category="visualization">
         <operation name="Database Extraction" ID="DBExtract"
             output_template="ascii" service_action="sql">
             <response ID="DBExtractResponse">
@@ -954,7 +955,7 @@ streamable="true" mime_type="application/postscript"/> -->
             </properties>
         </operation>
         <operation chained="true" name="In-situ location and value plot"
-            ID="Plot_insitu_XY_locations_and_values" output_template="output"
+            ID="Plot_insitu_XY_locations_and_values" output_template="zoom_2D_XY"
             service_action="Plot_insitu_XY_locations_and_values">
             <args>
                 <arg chained="true" type="variable" index="1"
@@ -967,7 +968,8 @@ streamable="true" mime_type="application/postscript"/> -->
                 <!-- <result type="ps" ID="plot_postscript" streamable="true"
                     mime_type="application/postscript" file_suffix=".ps"/> -->
                 <result type="image" ID="ref_map"  file_suffix=".gif"/>
-                <result type="debug" ID="debug" file_suffix=".txt"/>
+		<result type="map_scale" ID="map_scale"/>
+		<result type="debug" ID="debug" file_suffix=".txt"/>
             </response>
             <service>ferret</service>
         </operation>
@@ -1029,7 +1031,7 @@ streamable="true" mime_type="application/postscript"/> -->
             <service>drds</service>
         </operation>
         <operation chained="true" name="DRDS location and value plot"
-            ID="Plot_DRDS_XY_locations_and_values" output_template="output"
+            ID="Plot_DRDS_XY_locations_and_values" output_template="zoom_2D_XY"
             service_action="Plot_insitu_XY_locations_and_values" order="0107">
             <args>
                 <arg chained="true" type="variable" index="1"
@@ -1042,6 +1044,7 @@ streamable="true" mime_type="application/postscript"/> -->
                 <!-- <result type="ps" ID="plot_postscript" streamable="true"
                     mime_type="application/postscript" file_suffix=".ps"/> -->
                 <result type="image" ID="ref_map"  file_suffix=".gif"/>
+		<result type="map_scale" ID="map_scale"/>
                 <result type="debug" ID="debug" file_suffix=".txt"/>
                 <result type="cancel" ID="cancel" file_suffix=".txt"/>
             </response>
@@ -1089,7 +1092,7 @@ streamable="true" mime_type="application/postscript"/> -->
             <service>drds</service>
         </operation>
         <operation chained="true" name="DRDS location plot"
-            ID="Plot_DRDS_XY_locations" output_template="output"
+            ID="Plot_DRDS_XY_locations" output_template="zoom_2D_XY"
             service_action="Plot_insitu_XY_locations">
             <args>
                 <arg chained="true" type="variable" index="1"
@@ -1102,6 +1105,7 @@ streamable="true" mime_type="application/postscript"/> -->
                 <!-- <result type="ps" ID="plot_postscript" streamable="true"
                     mime_type="application/postscript" file_suffix=".ps"/> -->
                 <result type="image" ID="ref_map"  file_suffix=".gif" />
+		<result type="map_scale" ID="map_scale"/>
                 <result type="debug" ID="debug" file_suffix=".txt"/>
                 <result type="cancel" ID="cancel" file_suffix=".txt"/>
             </response>
@@ -1228,7 +1232,7 @@ streamable="true" mime_type="application/postscript"/> -->
             <service>dapper</service>
         </operation>
         <operation chained="true" name="Dapper location plot"
-            ID="Plot_Dapper_XY_locations" output_template="output"
+            ID="Plot_Dapper_XY_locations" output_template="zoom_2D_XY"
             service_action="Plot_insitu_XY_locations" category="visualization">
             <args>
                 <arg chained="true" type="variable" index="1"
@@ -1241,6 +1245,7 @@ streamable="true" mime_type="application/postscript"/> -->
                 <!-- <result type="ps" ID="plot_postscript" streamable="true"
                     mime_type="application/postscript" file_suffix=".ps" /> -->
                 <result type="image" ID="ref_map"  file_suffix=".gif"/>
+		<result type="map_scale" ID="map_scale"/>
                 <result type="debug" ID="debug" file_suffix=".txt"/>
                 <result type="cancel" ID="cancel" file_suffix=".txt"/>
             </response>

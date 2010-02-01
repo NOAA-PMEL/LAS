@@ -1,10 +1,11 @@
+
+#set ($error=$las_response.getResult("error"))
+#if ( $error != "" )
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <!-- LAS SERVER OK -->
 <head><title>LAS Output</title></head>
 <body bgcolor="white">
-#set ($error=$las_response.getResult("error"))
-#if ( $error != "" )
 <h3>An error occurred creating your product.</h3>
 The information below contains the messages that were written to standard output
 and standard error.
@@ -12,35 +13,24 @@ and standard error.
 <pre>
 $error
 </pre>
+#elseif ( $las_response.getResult("ferret_listing") != "" )
+$response.sendRedirect("$las_response.getResult('ferret_listing')")
+#elseif ( $las_response.getResult("netcdf") != "" )
+$response.sendRedirect("$las_response.getResult('netcdf')")
 #else
-<table width="100%">
-  <tr>
-      <th>Link to your netCDF file.</th>
-  </tr>
-  <tr>
-     <td>
-        #if ( $las_response.getResult("ferret_listing") != "" )
-           <a href="$las_response.getResult('ferret_listing')">Your netCDF file.</a>
-        #elseif ( $las_response.getResult("netcdf") != "" )
-           <a href="$las_response.getResult('netcdf')">Your netCDF file.</a>
-        #else
-           Could not find a result with your netcdf file.
-        #end
-      </td>
-  </tr>
-  #if ( $debug=="true" || $debug=="debug" ) 
-  <tr>
-     <th>Debug Output (including symbols from the request).</th>
-  </tr>
-  <tr>
-     <td width="100%">
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- LAS SERVER OK -->
+<head><title>LAS Output</title></head>
+<body bgcolor="white">
+	Could not find a result with your netcdf file
+
+#if ( $debug=="true" || $debug=="debug" ) 
+	Debug Output (including symbols from the request).<br>
         <iframe src="$las_response.getResult("debug")" width="600">
            Missing debug output.
         </iframe>
-     </td>
-  </tr>
-  #end
-</table>
 #end
 </body>
 </html>
+#end

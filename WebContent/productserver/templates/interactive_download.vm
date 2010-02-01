@@ -108,7 +108,6 @@
     fmt += " <OPTION SELECTED VALUE=0>NetCDF ";
     fmt += " <OPTION VALUE=1>ASCII ";
     fmt += " <OPTION VALUE=1>arcGrid ";
-    fmt += " <OPTION VALUE=2>ShapeFile ";
     fmt += " </SELECT><br><br>";
     document.getElementById("format").innerHTML = fmt;
   }
@@ -116,7 +115,7 @@
   function genUI(){
 
     //selected region
-    var UIString = "<b><h2>Interactive Downloading</h2></b>";  
+    var UIString = "<b><h2>Download Data</h2></b>";  
     UIString += "<table cellpadding='5'><tr><td valign=top><b>Selected Region</b></td>";
     UIString += "<td>Longitude range: [" + initXLo+", "+initXHi+"]<br> ";
     UIString += "Latitude range: [" + initYLo+", "+initYHi+"]<br></td></tr><br>";
@@ -261,6 +260,7 @@
   function sendLASRequest(lasReq){
     var prefix =  baseURL + '/ProductServer.do?xml=';
     var url = prefix+escape(lasReq.getXMLText());
+    //document.location = url;
     var OpenWindow=window.open(url, "newwindow", "height=450, width=650,toolbar=1,menubar=1,scrollbars=1,status=1");
     //OpenWindow.document.close();
   }
