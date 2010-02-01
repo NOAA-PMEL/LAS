@@ -66,8 +66,8 @@ function LASUI () {
 	};
 	this.AJAX_cache={};
 	this.request = new LASRequest();
-        this.info_icon = document.createElement("img");
-        this.info_icon.src="images/icon_info.gif";
+	this.info_icon=document.createElement("img");
+	this.info_icon.src="images/icon_info.gif";
 	this.autoupdate=false;
 
 	for(var f in this)
@@ -120,9 +120,7 @@ LASUI.prototype.initUI = function (anchorId)
 	this.firstload=true;
 	this.expired=false;
 	this.refs.operations.plot.DOMNode = document.getElementById("plotType");
-	this.refs.operations.download.DOMNode = document.getElementById("downloadType");
 	this.refs.options.plot.DOMNode = document.getElementById("plotOptions");
-	this.refs.options.download.DOMNode = document.getElementById("downloadOptions");
 	this.refs.options.external.DOMNode = document.getElementById("externalOptions");
 	this.refs.analysis.type = {"op" : document.getElementById("analysis_op"),
 				   "axes" : document.getElementById("analysis_axes")
@@ -141,14 +139,15 @@ LASUI.prototype.initUI = function (anchorId)
 	//}
 	this.refs.analysis.type.op.onchange = this.selectAnalysisType.LASBind(this);
 	
-	if(document.getElementById(this.anchors.output).addEventListener&&!document.all)
+	if(document.getElementById(this.anchors.output).addEventListener&&!document.all) {
 		document.getElementById(this.anchors.output).addEventListener("load",this.onPlotLoad.LASBind(this),true);
-	else if (document.getElementById(this.anchors.output).attachEvent&&!document.all)
-		 document.getElementById(this.anchors.output).addEventListener("load",this.onPlotLoad.LASBind(this));
-	else if (document.all)
+	} else if (document.getElementById(this.anchors.output).attachEvent&&!document.all) {
+		 document.getElementById(this.anchors.output).attachEvent("load",this.onPlotLoad.LASBind(this));
+	} else if (document.all)
 		document.getElementById(this.anchors.output).onreadystatechange=this.onPlotLoad.LASBind(this);
 	else
-		 document.getElementById(this.anchors.output).onload=this.onPlotLoad.LASBind(this);
+		document.getElementById(this.anchors.output).onload=this.onPlotLoad.LASBind(this);
+
 	//grab references to the map constraint inputs
 	this.refs.inputs = {};
 	for(var i in this.anchors.inputs)
@@ -215,15 +214,19 @@ LASUI.prototype.setInitialVariable = function(strJson) {
 	this.getGrid(this.state.dataset,this.state.variable);
 	this.getDataConstraints(this.state.dataset,this.state.variable);
 
-	var info = info_icon.cloneNode();
+	var info = this.info_icon.cloneNode(true);
 	info.onclick = this.getMetadata.LASBind(this);
+	
 	var varlist = document.createElement("SELECT");
 	varlist.id="variables";
 	if(document.getElementById(this.anchors.breadcrumb)) {
 		while (document.getElementById(this.anchors.breadcrumb).firstChild)
 			document.getElementById(this.anchors.breadcrumb).removeChild(document.getElementById(this.anchors.breadcrumb).firstChild);
+		document.getElementById(this.anchors.breadcrumb).appendChild(document.createTextNode('\u00a0'));
 		document.getElementById(this.anchors.breadcrumb).appendChild(info);
+		document.getElementById(this.anchors.breadcrumb).appendChild(document.createTextNode('\u00a0'));
 		document.getElementById(this.anchors.breadcrumb).appendChild(document.createTextNode(category.getDatasetName()));
+		document.getElementById(this.anchors.breadcrumb).appendChild(document.createTextNode('\u00a0'));
 		document.getElementById(this.anchors.breadcrumb).appendChild(varlist);
 	}
 	document.getElementById(this.anchors.variables).onchange = function (evt) {this.options[this.selectedIndex].onselect({"target" : {"selected" :true}})}
@@ -252,8 +255,17 @@ LASUI.prototype.setInitialVariable = function(strJson) {
 				}
 				//document.getElementById("V6").href="servlets/datasets?dset=" + this.urlencode(categories + "/" + varObj.name);
 		}
+	}
 }
+LASUI.prototype.printPlot = function () {
+	var plot = window.frames[this.anchors.output].document.getElementById('plot');
+	if(plot != null) {
+		var print_win = window.open(plot.src);
+		print_win.onload = function(){this.print()}
+	}
+
 }
+
 LASUI.prototype.getMetadata = function (evt) {
 	window.open(this.hrefs.getMetadata.url + '?dsid=' + this.state.dataset);
 }
@@ -339,15 +351,9 @@ LASUI.prototype.createCategoryTreeNode = function (node, i, id) {
 	node.children[i].LINode = document.createElement("LI");
 	node.children[i].LINode.className = "LASTreeLINode";
 
-	
-	if(!this.plus_img) {
-		this.plus_img = document.createElement("IMG");
-		this.plus_img.src = "JavaScript/ui/plus.gif";
-	}
-		
-	node.children[i].IMGNode = this.plus_img.cloneNode();
-	node.children[i].IMGNod.className =  "LASCategoryIMGNode";
+	node.children[i].IMGNode =  document.createElement("IMG");
 	node.children[i].IMGNode.onclick = this.selectCategory.LASBind(this, node, i);
+
 	node.children[i].IMGNode.src = "JavaScript/ui/plus.gif";
 	node.children[i].IMGNode.className = "LASCategoryIMGNode";
 	node.children[i].isExpanded = false;
@@ -381,7 +387,8 @@ LASUI.prototype.createCategoryTreeNode = function (node, i, id) {
 	if(node.category.getChildChildrenType(i)=="variables") {
 		var td3 = document.createElement("TD");
 		node.children[i].A = document.createElement("A");
-		node.children[i].A.appendChild(info_icon.cloneNode());
+		var img = this.info_icon.cloneNode(true);
+		node.children[i].A.appendChild(img);
 		node.children[i].A.onclick = this.showInfo.LASBind(this,node,i);
 		td3.appendChild(node.children[i].A);
 		td3.className = "LASTreeTableCell";
@@ -485,17 +492,6 @@ LASUI.prototype.getCategory = function (parentNode, i) {
 		req.send(null);
 
 	}
-/*	if(parentNode.children[i].ULNode.style.display=="none") {
-		for(var c=0;c< parentNode.children.length;c++)
-			parentNode.children[c].ULNode.style.display="none";
-		parentNode.children[i].ULNode.style.display="";	//expand the category if it has been selected
-		if(parentNode.children[i].category) //if the category is a dataset set it as the selected dataset
-			if(parentNode.children[i].category.getCategoryType()=="dataset")
-			{
-					this.setDataset(parentNode.category.getChildID(i));
-			}
-	} //else*/
-		//parentNode.children[i].ULNode.style.display="none";
 }
 LASUI.prototype.onSetVariable = function() {
 		document.getElementById('constraints').style.visibility="visible";
@@ -510,8 +506,10 @@ LASUI.prototype.onSetVariable = function() {
 		}
 		else
 			var categories = this.state.datasets[this.state.dataset].getDatasetName();
-		var info = this.info_icon.cloneNode();
+
+		var info = this.info_icon.cloneNode(true);
 		info.onclick = this.getMetadata.LASBind(this);
+
 		var varlist = document.createElement("SELECT");
 		varlist.id="variables";
 		var cats = document.createElement("TEXT");
@@ -519,9 +517,11 @@ LASUI.prototype.onSetVariable = function() {
 		if(document.getElementById(this.anchors.breadcrumb)) {
 			while (document.getElementById(this.anchors.breadcrumb).firstChild)
 			  document.getElementById(this.anchors.breadcrumb).removeChild(document.getElementById(this.anchors.breadcrumb).firstChild);
-
+			document.getElementById(this.anchors.breadcrumb).appendChild(document.createTextNode('\u00a0'));
 			document.getElementById(this.anchors.breadcrumb).appendChild(info);
+			document.getElementById(this.anchors.breadcrumb).appendChild(document.createTextNode('\u00a0'));
 			document.getElementById(this.anchors.breadcrumb).appendChild(cats);
+			document.getElementById(this.anchors.breadcrumb).appendChild(document.createTextNode('\u00a0'));
 			document.getElementById(this.anchors.breadcrumb).appendChild(varlist);
 		}
 		for(var i=0;i<this.state.datasets[this.state.dataset].getCategorySize();i++)
@@ -543,6 +543,8 @@ LASUI.prototype.onSetVariable = function() {
 			document.getElementById("V6").href="servlets/datasets?dset=" + this.urlencode(categories + "/" + varObj.name);
 		}
 		 document.getElementById("ol_map_widget").onmouseover = null;
+		if(this.state.dataset==this.state.lastDataset)
+			this.refresh();
 }
 /**
  * Event handler for category selection, bind to category DOM object events.
@@ -617,11 +619,15 @@ LASUI.prototype.setVariable = function (evt) {
         this.state.lastDataset = this.state.dataset;
 	this.state.dataset = datasetID;
 	this.state.variable = variableID;
-	this.getGrid(datasetID,variableID);
+        if(this.state.dataset!=this.state.lastDataset)
+                this.getGrid(datasetID,variableID);
+	
 	this.getDataConstraints(datasetID,variableID);
 	this.newVariable=true;
 	if(this.onSetVariable)
 		this.onSetVariable();
+
+	
 }
 /**
  * Method to set the active dataset and call getGrid if appropriate
@@ -647,9 +653,17 @@ LASUI.prototype.getDataConstraints = function (dataset, variable) {
 			var req = new XMLHttpRequest(this);
 		else
 			var req = new ActiveXObject("Microsoft.XMLHTTP");
-		req.onreadystatechange = this.AJAXhandler.LASBind(this, req, "this.setDataConstraints(req.responseText);");
-		req.open("GET", this.hrefs.getDataConstraints.url + '?dsid=' + dataset + '&varid=' + variable);
-		req.send(null);
+
+		var url = this.hrefs.getDataConstraints.url + '?dsid=' + dataset + '&varid=' + variable;
+
+		if(!this.AJAX_cache[url]) {
+			this.AJAX_cache[url]="waiting";
+			req.onreadystatechange = this.AJAXhandler.LASBind(this, req, "this.AJAX_cache['"+url+"']=req.responseText;this.setDataConstraints(req.responseText);");
+			req.open("GET", this.hrefs.getDataConstraints.url + '?dsid=' + dataset + '&varid=' + variable);
+			req.send(null);
+		} else if (this.AJAX_cache[url]!="waiting")
+				this.setDataConstraints(this.AJAX_cache[url]);
+			
 }
 /**
  * Method to query the server for a category
@@ -751,48 +765,6 @@ LASUI.prototype.getOperations = function (dataset, variable, view) {
 		}
 		//this.resetOptions("plot");
 
-}/**
- *	Event handler to set the operation
- *	@param {object} evt The event object
- * @arguments Arguments added using function.prototype.LASBind<br>
- *			this -- the context the handler is executing in.<br>
- *get			id -- an operation id
- */
-LASUI.prototype.setDownloadOperation = function (evt) {
-	var args = arguments;
-	var id = args[1];
-	var optiondef = args[2];
-
-	this.state.operation.download=id;
-	this.state.optiondefs.download =optiondef;
-
-	var view = args[2];
-	var optiondef = args[3];
-	this.state.view.download = this.state.view.plot;//just use the plot for the sprint
-
-
-
-
-}
-LASUI.prototype.doDownload = function () {
-	if(!this.state.operation.download||this.refs.operations.download.SELECTNode.selectedIndex==0) {
-		alert("Please choose a file format to download.");
-		return;
-	}
-
-	if(document.getElementById("OPTION_DOWNLOAD_"+this.state.operation.download).disabled) {
-		alert("The " + document.getElementById("OPTION_DOWNLOAD_"+this.state.operation.download).innerHTML + " download format is not compatible with the current plot view. Please choose another plot view, or another download format.");
-		return;
-	}
-
-
-		if(this.state.optiondefs.download != "") {
-			this.toggleUIMask('');
-			this.refs.options.download.DOMNode.style.display="";
-			this.getOptions(this.state.optiondefs.download, "download", true);
-		} else
-			this.makeRequest({},"download");
-
 }
 
 /**
@@ -811,7 +783,7 @@ LASUI.prototype.setOperation = function (evt) {
 		type="plot";
 		
 	}
-	if (type == "plot")
+	if (type == "plot" && id !="init")
 		try {
 			if(this.state.operations)
 				if(this.state.operations.getOperationByID(id).optiondef.IDREF)
@@ -878,8 +850,6 @@ LASUI.prototype.setOperationList = function (strJson) {
 					document.getElementById("productButtons").childNodes[row].style.visibility="hidden";
 				} catch (e) {}
 
-	for(var o in this.refs.operations.download.children)
-		this.refs.operations.download.children[o].OPTIONNode.disabled=true;
 
 	//document.body.appendChild(this.refs.options.external.DOMNode);
 	//disable all nodes first
@@ -899,12 +869,31 @@ LASUI.prototype.setOperationList = function (strJson) {
 	if(setDefaultVis==true && defaultVis) {
 		this.state.operation.plot = defaultVis;
 	}
+	if(this.state.operations.getOperationByID(this.state.operation.plot).optiondef)
+		if(this.state.operations.getOperationByID(this.state.operation.plot).optiondef.IDREF)
 	this.getOptions(this.state.operations.getOperationByID(this.state.operation.plot).optiondef.IDREF, "plot", true);
-
+		else	{
+			document.getElementById('plotOptionsButton').style.visibility='hidden';
+			this.refresh();
+		}
+	else	{
+		document.getElementById('plotOptionsButton').style.visibility='hidden';
+		this.refresh();
+	}
 	if(this.refs.analysis.enabled||!this.state.grid.hasAxis('t'))document.getElementById('Animation').style.visibility='hidden';
 
 }
 
+LASUI.prototype.refresh = function() {
+         if(!this.updating)
+                if(this.autoupdate||this.submitOnLoad||this.newVariable){
+                        this.submitOnLoad =false;
+                        this.newVariable=false;
+                        this.makeRequest();
+
+                } else
+                        this.showUpdateLink();
+}
 /**
  * Method to create an operation radio button and add it to the operations tree node.
  * @param {string} id The operation id
@@ -960,7 +949,7 @@ LASUI.prototype.getGrid = function (dataset, variable) {
 			req.open("GET",  this.hrefs.getGrid.url + '?dsid=' + dataset + '&varid=' + variable);
 			req.send(null);
 		} else if (this.AJAX_cache[url]!="waiting")
-			this.setGrid(AJAX_cache[url]);
+			this.setGrid(this.AJAX_cache[url]);
 
 
 }
@@ -1022,12 +1011,9 @@ LASUI.prototype.setViews = function (strJson) {
 LASUI.prototype.setDefaultProductMenu = function () {
 	while(this.refs.operations.plot.DOMNode.firstChild)
 		this.refs.operations.plot.DOMNode.removeChild(this.refs.operations.plot.DOMNode.firstChild);
-	while(this.refs.operations.download.DOMNode.firstChild)
-		this.refs.operations.download.DOMNode.removeChild(this.refs.operations.download.DOMNode.firstChild);
 
 	for(var type in this.refs.operations)
 		this.refs.operations[type].children ={};
-	delete this.refs.operations.download.SELECTNode;
 	var setPlotDefault = "true";
 	var setDownloadDefault = "true";
 	var defaultPlotProduct = null;
@@ -1063,6 +1049,9 @@ LASUI.prototype.setDefaultProductMenu = function () {
 		this.refs.operations.plot.children[defaultPlotProductName].radio.checked = true;
 
 	}
+	
+	if(this.refs.analysis.enabled)
+		this.showAnalysis();
 
 }
 LASUI.prototype.setProductTypeNode = function(type) {
@@ -1104,12 +1093,6 @@ LASUI.prototype.onPlotLoad = function (e) {
 	if(Req) 
 		if(Req.getXMLText&&!isFeatureEditing()&&this.state.view.plot=='xy'){
 				 setMapCurrentSelection(Req.getRangeLo('y'),Req.getRangeHi('y'),Req.getRangeLo('x'),Req.getRangeHi('x'));			 
-	//	this.state.selection.t.min=Req.getRangeLo('t');
-	//	this.state.selection.t.max=Req.getRangeHi('t');
-	//	this.state.selection.z.min=Req.getRangeLo('z');
-	//	this.state.selection.z.max=Req.getRangeHi('z');
-	//	this.updating=true;
-	//		this.updateConstraints();
 		this.request = Req;
 	}
 	if(document.getElementById("wait"))
@@ -1122,7 +1105,16 @@ LASUI.prototype.onPlotLoad = function (e) {
 	document.getElementById('update').style.color='';
 	
 }
+LASUI.prototype.onPlotUnload = function (e) {
 
+        if(document.getElementById("wait"))
+                document.getElementById("wait").style.visibility="visible";
+        if(document.getElementById("wait_msg"))
+                document.getElementById("wait_msg").style.display="";
+        if(document.getElementById('output'))
+                document.getElementById("output").style.visibility="hidden";
+
+}
 LASUI.prototype.roundGrid = function(grid) {
 	var outgrid = {"x" : {"min": 0, "max": 0}, "y" : {"min": 0, "max": 0}};
 	outgrid.x.min = Math.round(grid.x.min*1000)/1000;
@@ -1422,7 +1414,6 @@ LASUI.prototype.showUpdateLink = function () {
 	this.expired = true;
 	document.getElementById('update').style.color='#f5ed52';
 	document.getElementById('update').style.visibility='visible';
-	document.getElementById('plotOptionsButton').style.visibility='visible';
 	if(document.getElementById("wait"))
 		document.getElementById("wait").style.visibility="hidden";
 	if(document.getElementById("wait_msg"))
@@ -1442,9 +1433,6 @@ LASUI.prototype.toggleAutoUpdate = function (e, toggle) {
     e.stopPropagation? e.stopPropagation() : e.cancelBubble = true;
 	return false;
 }
-LASUI.prototype.makeDownloadRequest = function (){
-
-}
 
 /**
  * Put together and submit an LAS request
@@ -1461,7 +1449,6 @@ LASUI.prototype.makeRequest = function (evt, type) {
 		document.getElementById('output').height="100%";
 		document.getElementById('output').width="100%";
 		document.getElementById('update').style.visibility='visible';
-		document.getElementById('plotOptionsButton').style.visibility='visible';
 		
 		this.request = null;
 		this.uirequest = '';
@@ -1605,16 +1592,22 @@ LASUI.prototype.makeRequest = function (evt, type) {
 			}
 		}
 		 document.getElementById("ol_map_widget").onmouseover = null;
+
+		
+		if(type=="external"&&this.state.operation.external == "Interactive_Download")
+			var window_options = "height=400,width=400,status=no,toolbar=no,menubar=no,location=no"; 
+		else
+			var window_options = "";
+
 		if(this.state.embed && type == "plot"){
 			if(document.getElementById("wait"))
 				document.getElementById("wait").style.visibility="visible";
 			if(document.getElementById("wait_msg"))
 				document.getElementById("wait_msg").style.display="";
-			document.getElementById('output').style.visibility="hidden";
-			//document.getElementById(this.anchors.output).onload = this.onFirstPlotLoad.LASBind(this);
-			document.getElementById('output').src = (this.hrefs.getProduct.url + '?xml=' + this.urlencode(this.request.getXMLText()));
+			document.getElementById(this.anchors.output).style.visibility="hidden";
+			document.getElementById(this.anchors.output).src = (this.hrefs.getProduct.url + '?xml=' + this.urlencode(this.request.getXMLText()));
 		} else
-			window.open(this.hrefs.getProduct.url + '?xml=' +  this.urlencode(this.request.getXMLText()));
+			window.open(this.hrefs.getProduct.url + '?xml=' +  this.urlencode(this.request.getXMLText()),null,window_options);
 	}
 
 	this.updating =false;
@@ -1635,6 +1628,7 @@ LASUI.prototype.makeRequest = function (evt, type) {
 	if(type=='plot') {
 		this.expired=false;	
 		document.getElementById('update').style.color='';
+		document.getElementById('print').style.visibility='visible';
 	}
 
 }
@@ -1695,7 +1689,7 @@ LASUI.prototype.getOptions = function (optiondef, type, reset) {
 LASUI.prototype.setOptionList = function (strJson,DOMNode,type,reset) {
 
 
-
+	document.getElementById('plotOptionsButton').style.visibility='visible';
 	var table = document.createElement("TABLE");
 	table.style.margin = "-4pt";
 	table.style.marginLeft = "6pt";
@@ -1764,7 +1758,7 @@ LASUI.prototype.setOptionTRNode = function (id,TBODYNode,type,reset) {
 		}
 		this.refs.options.cache[id].TD3 = document.createElement("TD");
 		this.refs.options.cache[id].A = document.createElement("A");
-		this.refs.options.cache[id].A.appendChild(this.info_icon.cloneNode());
+		this.refs.options.cache[id].A.appendChild(this.info_icon.cloneNode(true));
 		this.refs.options.cache[id].A.onclick = this.showOptionInfo.LASBind(this,this.refs.options.cache[id].help);
 		this.refs.options.cache[id].TD3.appendChild(this.refs.options.cache[id].A);
 		this.refs.options.cache[id].TRNode.appendChild(this.refs.options.cache[id].TD1);
@@ -2002,43 +1996,31 @@ LASUI.prototype.showAnalysis = function () {
 	document.getElementById('Animation').style.visibility='hidden';
 	for(var a in this.refs.analysis.axes)
 		this.refs.analysis.axes[a].style.display="none";
-	//turn on the "area" analysis switch
-	if(this.state.grid.hasAxis('x')&&this.state.grid.hasAxis('y'))
-		this.refs.analysis.axes.xy.style.display="";
+
+	document.getElementById("analysis_axes").selectedIndex=0;	
 	//turn on the other axes switches
 	for(var d=0;d<this.state.grid.response.grid.axis.length;d++) {
-		eval("this.init" + this.state.grid.response.grid.axis[d].type.toUpperCase() + "Constraint('range',reset)");
 		this.refs.analysis.axes[this.state.grid.response.grid.axis[d].type.toLowerCase()].style.display="";
 
-
-		if(this.state.view.plot.indexOf(this.state.grid.response.grid.axis[d].type.toLowerCase())<0&&!this.state.analysis.axes[this.state.grid.response.grid.axis[d].type.toLowerCase()]) {
-			switch(this.state.grid.response.grid.axis[d].type.toLowerCase()) {
-				case 'z': this.refs.DepthWidget[this.refs.DepthWidget.widgetType][1].disabled = true; break;
-				case 't': if(!this.refs.DW.widgetType)
-						this.refs.DW[1].disabled = true;
-					  else
-						this.refs.DW.disable('hi');
-					  break;
-
-			}
-		} else {
-switch(this.state.grid.response.grid.axis[d].type.toLowerCase()) {
-				case 'z': this.refs.DepthWidget[this.refs.DepthWidget.widgetType][1].disabled = false; break;
-				case 't': if(!this.refs.DW.widgetType)
-						this.refs.DW[1].disabled = false;
-					  else
-						this.refs.DW.enable('hi');
-					  break;
-
-			}
-		}
 	}
+	if(this.state.grid.hasAxis('x')&&this.state.grid.hasAxis('y'))
+		this.refs.analysis.axes.xy.style.display="";
+	
 	document.getElementById(this.anchors.analysis).style.display="";
-	if(this.state.analysis.axes.x&&this.state.analysis.axes.y)
+	
+	//select the analysis view	
+	if(this.state.analysis.axes.x&&this.state.analysis.axes.y&&this.state.grid.hasAxis('x')&&this.state.grid.hasAxis('y'))
 		this.selectAnalysisAxis(null,"xy",true);
 	else
-		for(var a in this.state.analysis.axes)
-			this.selectAnalysisAxis(null,a,true);
+		this.selectAnalysisAxis(null,"xy",false);
+
+	for(var a in this.state.analysis.axes)
+			if(a!='xy')
+				if(this.state.grid.hasAxis(a))
+					this.selectAnalysisAxis(null,a,true);
+				else
+					this.selectAnalysisAxis(null,a,false);
+	
 
 	if(this.state.analysis.type)
 		this.selectAnalysisType(null,this.state.analysis.type,true);
@@ -2088,14 +2070,7 @@ LASUI.prototype.selectAnalysisType = function (evt) {
 
 	}
 
-
-	if(this.state.analysis.axes.x && this.state.analysis.axes.y)
-		this.selectAnalysisAxis(null,"xy", true);
-	else
-		for(var a in this.state.analysis.axes)
-			if(this.state.grid.hasAxis(a))
-				this.selectAnalysisAxis(null,a, true);
-
+			
 }
 LASUI.prototype.selectAnalysisAxis = function (evt) {
 	var axes =arguments[1];
@@ -2175,7 +2150,9 @@ LASUI.prototype.setVisualization = function (d) {
  */
 LASUI.prototype.collapse = function (obj) {
 		if(obj.ULNode) obj.ULNode.style.display = "none";
-		if(obj.IMGNode) obj.IMGNode.src = "JavaScript/ui/plus.gif";
+		if(obj.IMGNode) 
+			if(obj.IMGNode.src != "JavaScript/ui/plus.gif")
+				obj.IMGNode.src = "JavaScript/ui/plus.gif";
 		obj.isExpanded = false;
 }
 /**
@@ -2184,7 +2161,9 @@ LASUI.prototype.collapse = function (obj) {
  */
 LASUI.prototype.expand = function (obj) {
 	if(obj.ULNode) obj.ULNode.style.display = "";
-	if(obj.IMGNode) obj.IMGNode.src = "JavaScript/ui/minus.gif";
+	if(obj.IMGNode) 
+		if(obj.IMGNode.src != "JavaScript/ui/minus.gif")
+			obj.IMGNode.src = "JavaScript/ui/minus.gif";
 	obj.isExpanded = true;
 }
 //generic function to clone objects
@@ -2201,19 +2180,6 @@ LASUI.prototype.clone = function (obj) {
 	return myclone;
  }
 LASUI.prototype.urlencode = function ( str ) {
-    // http://kevin.vanzonneveld.net
-    // +   original by: Philip Peterson
-    // +   improved by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
-    // +      input by: AJ
-    // +   improved by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
-    // %          note: info on what encoding functions to use from: http://xkr.us/articles/javascript/encode-compare/
-    // *     example 1: urlencode('Kevin van Zonneveld!');
-    // *     returns 1: 'Kevin+van+Zonneveld%21'
-    // *     example 2: urlencode('http://kevin.vanzonneveld.net/');
-    // *     returns 2: 'http%3A%2F%2Fkevin.vanzonneveld.net%2F'
-    // *     example 3: urlencode('http://www.google.nl/search?q=php.js&ie=utf-8&oe=utf-8&aq=t&rls=com.ubuntu:en-US:unofficial&client=firefox-a');
-    // *     returns 3: 'http%3A%2F%2Fwww.google.nl%2Fsearch%3Fq%3Dphp.js%26ie%3Dutf-8%26oe%3Dutf-8%26aq%3Dt%26rls%3Dcom.ubuntu%3Aen-US%3Aunofficial%26client%3Dfirefox-a'
-
     var histogram = {}, histogram_r = {}, code = 0, tmp_arr = [];
     var ret = str.toString();
 
@@ -2239,6 +2205,4 @@ LASUI.prototype.urlencode = function ( str ) {
     return ret.replace(/(\%([a-z0-9]{2}))/g, function(full, m1, m2) {
         return "%"+m2.toUpperCase();
     });
-
-    return ret;
 }

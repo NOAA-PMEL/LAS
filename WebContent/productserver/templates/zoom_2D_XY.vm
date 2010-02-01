@@ -1,86 +1,30 @@
-
-
-
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html>
 <head>
 <title>LAS Output -- $las_config.getTitle()</title>
 
-#set($use_ref_map=$las_request.getProperty("ferret", "use_ref_map"))
 		<style media="all" type="text/css">
 			@import "JavaScript/ui/LASUI.css";
 		</style>
 </head>
-
 <body onload="initializeLASRequest(); loadMap()">
-	<div style="position:absolute;top:0px;left:0px">
-	<font style="float:right" id="zoomInfo" name="zoomInfo" color="red">Click and drag to zoom in.</font>
-	<a class="LASLink" onclick="window.open(document.location)">Open plot in a new window</a>&nbsp;			
-	<a id="zoom_button" name="zoom_button" class="LASLink" onclick="submitZoomOutXML()">Zoom back.</a>&nbsp;	<img id="waiting" src="JavaScript/components/mozilla_blu.gif">&nbsp;	 	</div><br>	
   	<div id="img_body" name="img_body"></div>
 </body>
 
 <script language="JavaScript" src="JavaScript/components/xmldom.js"></script>
 <script language="JavaScript" src="JavaScript/components/LASRequest.js"></script>
 <SCRIPT language="JavaScript" src="JavaScript/components/MapWidget.js"></SCRIPT>
-
-
 <script language="JavaScript">
 
 var myMapWidget = {};  //put it in a global variable, or else you'll lose it.
 var Req = {}; //Same goes for the LAS request object
-var previousXRegionsLo = new Array();
-var previousYRegionsLo = new Array();
-var previousXRegionsHi = new Array();
-var previousYRegionsHi = new Array();
 var axisLow = "";
 var axisHi = "";
-#if($request.getParameter('opid'))
-	var opid = "$getParameter('opid')";
-#else
-	var opid = "XY_2D_zoom";
-#end
-
-
-
-////////////////////////////////////////////////////////////
-//                                                        //
-// Functions called from the HTML page                    //
-//                                                        //
-////////////////////////////////////////////////////////////
-
-/*
-*  run some javascript from request
-*  params:
-*     request -- the product server request string
-*/
-function evalMyRequest (request) {
-
-             document.getElementById('waiting').style["display"]="";
-                if(!document.all)
-                        var req = new XMLHttpRequest(this);
-                else
-                        var req = new ActiveXObject("Microsoft.XMLHTTP");
-
-                req.onreadystatechange = function() {if(req.readyState==4)eval2(req.responseText)};
-                req.open("GET", request);
-                req.send(null);
-
-
-
-}
-
-
-
 /* 
 *  load the initial XY image that was requested from LAS
 */
 function loadMap (){
-var zoomButton = document.getElementById('zoom_button');
-if (zoomButton) {
-   zoomButton.style["display"] = "none"
-}
-var args = {
+	var args = {
                    'DOMNode' : document.getElementById('img_body'), // the container Node
                    'onafterdraw' : function () {submitXML()},      //a function to fire after drawing (talk to me about this one)
                    'plot_area' : {                              // defining the plot region within the image
@@ -105,73 +49,13 @@ var args = {
                            }
                        }
                   }
-		myMapWidget = new MapWidget(args);
+	myMapWidget = new MapWidget(args);
 
 }
-
-
-
-/* 
-* now load up new image and prepare to send requests to LAS for more stuff
-*/
-function eval2(strJson) {
- //alert(strJson);
- document.getElementById('waiting').style["display"]="none";
- eval(strJson);
-                  //myMapWidget.DOMNode = document.getElementById('img_body'), // the container Node
-                  //myMapWidget.onafterdraw = function () {submitXML()},      //a function to fire after drawing
-                   myMapWidget.plot_area = {                                                       // defining the plot region within the image
-                           'offX' : newImage.offX,
-                           'offY' : newImage.offY,
-                           'width' : newImage.width,
-                           'height' : newImage.height
-                   },
-                   myMapWidget.img = {                                                                //the image
-                           'src' : newImage.url,
-                           'width' : newImage.wholeImageWidth,
-                           'height' :newImage.wholeImageHeight,
-                           'extent' : {                                                     //coordinate extent of the image being passed
-                               'x' : {
-                                   'min' : newImage.lowX,
-                                   'max' : newImage.highX
-                               },
-                               'y' : {
-                                   'min' : newImage.lowY,
-                                   'max' : newImage.highY
-                               }
-                           }
-                       }
- 			myMapWidget.initImage();
-			myMapWidget.extents.selection.grid = myMapWidget.img.extent;
-			myMapWidget.updatePixelExtents();
-			myMapWidget.rubberBand.style.visibility = "hidden";
-			myMapWidget.rubberBand_c.style.visibility = "hidden";
-			if (typeof onPlotLoad == 'function') 
-				onPlotLoad(Req);
-
-/*
-* if this isn't the first plot, show the zoom out button
-*/
- var zoomButton = document.getElementById('zoom_button');
- if (zoomButton) {
-  if (previousXRegionsLo[0]) {
-   zoomButton.style["display"] = ""
-   document.getElementById('zoomInfo').style["display"]="none";
-  } else {
-   zoomButton.style["display"] = "none"
-   document.getElementById('zoomInfo').style["display"]="";
- }
-}
-
-}
-
 
 function initializeLASRequest() {
   Req = new LASRequest('$las_request.toJavaScriptSafeString()');
-  document.getElementById('waiting').style["display"]="none";
-
 }
-
 function submitXML() {
 
 /*
@@ -186,35 +70,16 @@ function submitXML() {
     axisLow = view.substr(0,1);
     axisHi = view.substr(1,1);
     if (myMapWidget.extents.selection.grid.x.min) {
-     previousXRegionsLo.push(Req.getRangeLo(axisLow));
-     previousXRegionsHi.push(Req.getRangeHi(axisLow));
-     previousYRegionsLo.push(Req.getRangeLo(axisHi));
-     previousYRegionsHi.push(Req.getRangeHi(axisHi));
      Req.setRange(axisLow,myMapWidget.extents.selection.grid.x.min,myMapWidget.extents.selection.grid.x.max);
      Req.setRange(axisHi,myMapWidget.extents.selection.grid.y.min,myMapWidget.extents.selection.grid.y.max);
     }
    
-    //Req.setOperation('XY_2D_zoom','LAS7');
     var URL = './ProductServer.do?xml=' + escape(Req.getXMLText());
-    document.location = URL;//evalMyRequest(URL);
+    if(parent.LAS)
+	if(parent.LAS.onPlotUnload)
+		parent.LAS.onPlotUnload();
+    document.location = URL;
   }
 }
-
-/*
-* pop the previous regions of region stack and zoom back to that image
-*/
-function submitZoomOutXML() {
-
-     Req.setRange(axisLow,previousXRegionsLo.pop(),previousXRegionsHi.pop());
-     Req.setRange(axisHi,previousYRegionsLo.pop(),previousYRegionsHi.pop());
-     Req.setOperation('XY_2D_zoom','LAS7');
-     var URL = './ProductServer.do?xml=' + escape(Req.getXMLText());
-     evalMyRequest(URL);
-
-}
-
-
 </script>
-
 </html>
-
