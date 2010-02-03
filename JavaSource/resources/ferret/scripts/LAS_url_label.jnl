@@ -64,8 +64,9 @@ IF `slen GT 80` THEN
    LET last_slash = STRRINDEX("($upper_right_($n_right_labels))", "/")
 
    IF `last_slash GT slen2` THEN
-      LET upper_right_first = ($upper_right_($n_right_labels))
-      DEFINE SYMBOL upper_right_first = `upper_right_first`
+!      LET upper_right_first = "($upper_right_($n_right_labels))"
+!      DEFINE SYMBOL upper_right_first = `upper_right_first`
+      DEFINE SYMBOL upper_right_first = ($upper_right_($n_right_labels))
       REPEAT/RANGE=1:5 (\
         LET upper_right_first = SUBSTRING("($upper_right_first)", 0, last_slash-1) ;\
         DEFINE SYMBOL upper_right_first = `upper_right_first` ;\
