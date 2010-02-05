@@ -13,6 +13,7 @@
 ! one of these blank strings, then use the attnames syntax to see if the dataset 
 ! variable has units defined, and if so define the data_units symbol from that.
 
+
 ! The LAS_initialize_data.jnl script takes care of everything having to
 ! do with initializing a datset for later use.
 !
@@ -38,9 +39,17 @@ ENDIF
 
 IF ($data_($num)_var"0|*>1") THEN DEFINE SYMBOL data_var ($data_($num)_var)
 
+! Use the units passed in from the XML unless they are null; 
+! in that case try to get from the dataset
+
 ! Do not define data_units with an empty string
-IF ($data_($num)_units%1|"">1|*>0%) THEN CANCEL SYMBOL data_units
-IF ($data_($num)_units%1|" ">1|*>0%) THEN CANCEL SYMBOL data_units
+IF ($data_($num)_units%1|"">1|*>0%) THEN 
+   CANCEL SYMBOL data_units
+ELIF ($data_($num)_units%1|" ">1|*>0%) THEN 
+   CANCEL SYMBOL data_units
+ELSE
+   DEFINE SYMBOL data_units ($data_($num)_units)
+ENDIF
 
 IF ($data_units"0|*>1") THEN 
    DEFINE SYMBOL data_units (($data_($num)_units))
