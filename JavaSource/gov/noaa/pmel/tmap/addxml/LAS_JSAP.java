@@ -27,6 +27,14 @@ public class LAS_JSAP
 
     verbose.setHelp(
         "Switch to print out lots of helpful information about what addXML is doing.  Default is off.");
+    
+    Switch generate_names = new Switch("generate_names")
+    .setShortFlag('N')
+    .setDefault("false")
+    .setLongFlag("generate_names");
+
+    generate_names.setHelp(
+    "Switch that causes addXML to read the data source to generate the data set name in the category.  Default is off.");
 
     Switch version = new Switch("version")
         .setShortFlag('V')
@@ -43,70 +51,6 @@ public class LAS_JSAP
 
     esg.setHelp(
     "Look for ESG metadata in the data source.");
-    
-    FlaggedOption depth = new FlaggedOption("depth")
-        .setStringParser(new StringStringParser())
-        .setAllowMultipleDeclarations(false)
-        .setRequired(false)
-        .setShortFlag('D')
-        .setLongFlag("depth");
-        depth.setHelp("Depth to crawl to in the category tree");
-
-    FlaggedOption ignore = new FlaggedOption("ignore")
-        .setStringParser(new StringStringParser())
-        .setAllowMultipleDeclarations(false)
-        .setRequired(false)
-        .setShortFlag('I')
-        .setLongFlag("ignore");
-        ignore.setHelp("Ignore urls containing this string");
-
-    
-    Switch listCategories = new Switch("listCategories")
-        .setShortFlag('l')
-        .setDefault("false")
-        .setLongFlag("list_datasets");
-        listCategories.setHelp("Only list category sizes");
-
-    Switch log_bad_dsets = new Switch("log_bad_dsets")
-        .setDefault("false")
-        .setLongFlag("log_bad_dsets");
-        log_bad_dsets.setHelp("Output log of bad datasets and categories");
-
-
-    Switch categories_only = new Switch("categories_only")
-        .setShortFlag('C')
-        .setDefault("false")
-        .setLongFlag("categories_only");
-        categories_only.setHelp("Only create categories.");
-
-
-    FlaggedOption exclude_file = new FlaggedOption("exclude_file")
-        .setStringParser(new StringStringParser())
-        .setAllowMultipleDeclarations(false)
-        .setRequired(false)
-        .setShortFlag('X')
-        .setLongFlag("exclude_file");
-
-     exclude_file.setHelp (
-        "File that contains a list or URLs to exclude from the search.");
-
-    FlaggedOption maxDatasets = new FlaggedOption("maxDatasets")
-        .setStringParser(new StringStringParser())
-        .setAllowMultipleDeclarations(false)
-        .setRequired(false)
-        .setLongFlag("maxDatasets");
-
-     maxDatasets.setHelp (
-        "Maximum number of datasets to allow in a category.");
-
-    FlaggedOption maxCategories = new FlaggedOption("maxCategories")
-        .setStringParser(new StringStringParser())
-        .setAllowMultipleDeclarations(false)
-        .setRequired(false)
-        .setLongFlag("maxCategories");
-
-     maxCategories.setHelp (
-        "Maximum number of subcategories to allow in a category.");
 
     QualifiedSwitch dataset = (QualifiedSwitch)new QualifiedSwitch("dataset")
         .setStringParser(new StringStringParser())
@@ -278,15 +222,8 @@ public class LAS_JSAP
       this.registerParameter(groupname);
       this.registerParameter(grouptype);
       this.registerParameter(esg);
-      this.registerParameter(categories_only);
-      this.registerParameter(exclude_file);
-      this.registerParameter(listCategories);
-      this.registerParameter(maxCategories);
-      this.registerParameter(maxDatasets);
-       this.registerParameter(depth);
-	 this.registerParameter(log_bad_dsets);
-	 this.registerParameter(ignore);
-	}
+      this.registerParameter(generate_names);
+    }
     catch (JSAPException ex) {
       this.errorout();
     }

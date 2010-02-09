@@ -138,12 +138,10 @@ public class addXML {
 		"yyyy-MM-dd HH:mm:ss", "yyyy-MM-ddTHH:mm:ss",
 		"yyyy-MM-dd HH:mm:ss", "yyyy-MM-dd HH:mm:ss"};
 	private static boolean verbose;
-	private static boolean log_bad_dsets;
+	private static boolean generate_names;
 	private static int fileCount;
 	private static HashMap<String, Boolean> forceAxes = new HashMap<String, Boolean>();
 	private static String title;
-	private static String basefilename;
-	private static String ofile;
 	private static String version_string = "1.6.0.0";
 	private static String global_title_attribute;
 	private static String format;
@@ -151,19 +149,11 @@ public class addXML {
 	private static String units_format;
 	private static String group_type;
 	private static String group_name;
-	private static String ignore_url;
-	private static HashMap<String, String> thredds_urls = new HashMap<String,String>();
 	private static boolean group;
 	private static boolean category;
 	private static boolean use_suffix = false;
 	private static boolean oneDataset = false;
 	private static boolean irregular = false;
-	private static boolean categories_only = false;
-	private static boolean listCategories = false;
-	private static int categoryCount = 0;
-	private static int maxCategories = -1;
-        private static int maxDatasets = -1;
-	private static int maxCategoryDepth = -1;
 	private static boolean esg = false;
 
 	public addXML() {
@@ -194,24 +184,13 @@ public class addXML {
 		String[] thredds = command_parameters.getStringArray("in_thredds");
 		String in_xml = command_parameters.getString("in_xml");
 		String basename = command_parameters.getString("basename");
-		basefilename = basename;
-		
 		global_title_attribute = command_parameters.getString(
 		"title_attribute");
 		oneDataset = command_parameters.getBoolean("dataset");
-		ignore_url = command_parameters.getString("ignore");
 		title = command_parameters.getString("dataset");
 		category = command_parameters.getBoolean("category");
 		format = command_parameters.getString("format");
 		units_format = command_parameters.getString("units_format");
-	   	categories_only = command_parameters.getBoolean("categories_only");
-		listCategories = command_parameters.getBoolean("listCategories");
-		if(command_parameters.getString("maxDatasets")!=null)
-			maxDatasets =  Integer.parseInt(command_parameters.getString("maxDatasets"));
-		if(command_parameters.getString("maxCategories")!=null)
-			maxCategories =  Integer.parseInt(command_parameters.getString("maxCategories"));
-		if(command_parameters.getString("depth")!=null)
-			maxCategoryDepth =  Integer.parseInt(command_parameters.getString("depth"));
 
 		boolean forceArange = command_parameters.getBoolean("arange");
 		String aranges;
@@ -247,12 +226,7 @@ public class addXML {
 		group_name = command_parameters.getString("groupname");
 
 		verbose = command_parameters.getBoolean("verbose");
-		log_bad_dsets = command_parameters.getBoolean("log_bad_dsets");
-
-		if (log_bad_dsets) {
-			verbose = false;
-		}
-
+		generate_names = command_parameters.getBoolean("generate_names");
 		boolean version = command_parameters.getBoolean("version");
 		irregular = command_parameters.getBoolean("irregular");
 
@@ -374,109 +348,109 @@ public class addXML {
 		int numThredds = 0;
 		int numNetcdf = 0;
 
-		for (int id = 0; id < data.length; id++) {	
+		for (int id = 0; id < data.length; id++) {
+
 			DatasetsGridsAxesBean dgab = null;
 			try {
 				String url = DODSNetcdfFile.canonicalURL(data[id]);
 				NetcdfDataset ncds = ucar.nc2.dataset.NetcdfDataset.openDataset(url);
 				dgab = createBeansFromNetcdfDataset(ncds, data[id], false, null);
 				ncds.close();
-				Vector db = (Vector) dgab.getDatasets();
-				if (db != null && db.size() > 0) {
+			}
+			catch (IOException e) {
+				log.error("IO error = " + e);
+			}
+			Vector db = (Vector) dgab.getDatasets();
+			if (db != null && db.size() > 0) {
 
-					if (oneDataset) {
-						// We're only going to use one data set.  Accumulate all the info
-						// into that one data set.
-						DatasetBean databean = (DatasetBean) dgab.getDatasets().get(0);
+				if (oneDataset) {
+					// We're only going to use one data set.  Accumulate all the info
+					// into that one data set.
+					DatasetBean databean = (DatasetBean) dgab.getDatasets().get(0);
 
-						// Check to see if the name has been set.
-						if (oneDb.getName() == null || oneDb.getName() == "") {
-							oneDb.setName(databean.getName());
-							// If the data set name wasn't set neither was the category
-							oneCat.setName(databean.getName());
-						}
-						// Set the category filter to include this data set.
-						FilterBean filter = new FilterBean();
-						filter.setAction("apply-dataset");
-						filter.setContainstag(databean.getElement());
-						oneCat.addFilter(filter);
+					// Check to see if the name has been set.
+					if (oneDb.getName() == null || oneDb.getName() == "") {
+						oneDb.setName(databean.getName());
+						// If the data set name wasn't set neither was the category
+						oneCat.setName(databean.getName());
+					}
+					// Set the category filter to include this data set.
+					FilterBean filter = new FilterBean();
+					filter.setAction("apply-dataset");
+					filter.setContainstag(databean.getElement());
+					oneCat.addFilter(filter);
 
-						ArrayList<VariableBean> variables = (ArrayList<VariableBean>) databean.getVariables();
-						// All the URL's must be fixed to not be relative to the data set
-						// URL
-						Iterator vit = variables.iterator();
-						while (vit.hasNext()) {
-							VariableBean vb = (VariableBean) vit.next();
-							url = databean.getUrl() + vb.getUrl();
-							vb.setUrl(url);
-						}
-						oneDb.addAllVariables(variables);
-						if (oneDb.getElement() == null || oneDb.getElement() == "") {
-							oneDb.setElement(databean.getElement());
-						}
-	
-						Vector grids = dgab.getGrids();
-						Vector existingGrids = oneDgab.getGrids();
-						if (existingGrids == null) {
-							existingGrids = new Vector();
-						}
-						existingGrids.addAll(grids);
-						oneDgab.setGrids(existingGrids);
+					ArrayList variables = (ArrayList) databean.getVariables();
+					// All the URL's must be fixed to not be relative to the data set
+					// URL
+					Iterator vit = variables.iterator();
+					while (vit.hasNext()) {
+						VariableBean vb = (VariableBean) vit.next();
+						String url = databean.getUrl() + vb.getUrl();
+						vb.setUrl(url);
+					}
+					oneDb.addAllVariables(variables);
+					if (oneDb.getElement() == null || oneDb.getElement() == "") {
+						oneDb.setElement(databean.getElement());
+					}
 
-						Vector axes = dgab.getAxes();
-						Vector existingAxes = oneDgab.getAxes();
-						if (existingAxes == null) {
-							existingAxes = new Vector();
-						}
-						existingAxes.addAll(axes);
-						oneDgab.setAxes(existingAxes);
+					Vector grids = dgab.getGrids();
+					Vector existingGrids = oneDgab.getGrids();
+					if (existingGrids == null) {
+						existingGrids = new Vector();
+					}
+					existingGrids.addAll(grids);
+					oneDgab.setGrids(existingGrids);
 
-					} else {
+					Vector axes = dgab.getAxes();
+					Vector existingAxes = oneDgab.getAxes();
+					if (existingAxes == null) {
+						existingAxes = new Vector();
+					}
+					existingAxes.addAll(axes);
+					oneDgab.setAxes(existingAxes);
 
-						Document lasdoc = createXMLfromDatasetsGridsAxesBean(dgab);
+				}
+				else {
 
-						
-						if (inputLasDoc != null) {
+					Document lasdoc = createXMLfromDatasetsGridsAxesBean(dgab);
 
-							String entityName = getEntityName(ofile);
+					String ofile = getOutfileName(basename);
+					if (inputLasDoc != null) {
 
-							// Add an entity reference to the input document if it exists.
-							EntityRef entityReference = new EntityRef(entityName, ofile);
-							addEntityRef(inputLasDoc, entityName, ofile, entityReference);
-						}
-						Element lasdata = lasdoc.getRootElement();
-						Element datasets = lasdata.getChild("datasets");
-						numNetcdf = datasets.getChildren().size();
+						String entityName = getEntityName(ofile);
 
-						if (numNetcdf > 0) {
-							outputXML(ofile, datasets, false);
-							Element grids = lasdata.getChild("grids");
-							outputXML(ofile, grids, true);
-							Element axes = lasdata.getChild("axes");
-							outputXML(ofile, axes, true);
-							if (category) {
-								for (Iterator cit = datasets.getChildren().iterator();cit.hasNext(); ) {
-									Element datasetElem = (Element) cit.next();
-									CategoryBean ds_category = new CategoryBean();
-									ds_category.setName(datasetElem.getAttribute("name").getValue());
-									FilterBean filter = new FilterBean();
-									filter.setAction("apply-dataset");
-									filter.setContainstag(datasetElem.getName());
-									ds_category.addFilter(filter);
-									Element lc = new Element("las_categories");
-									lc.addContent(ds_category.toXml());
-									outputXML(ofile, lc, true);
-								}
+						// Add an entity reference to the input document if it exists.
+						EntityRef entityReference = new EntityRef(entityName, ofile);
+						addEntityRef(inputLasDoc, entityName, ofile, entityReference);
+					}
+					Element lasdata = lasdoc.getRootElement();
+					Element datasets = lasdata.getChild("datasets");
+					numNetcdf = datasets.getChildren().size();
+
+					if (numNetcdf > 0) {
+						outputXML(ofile, datasets, false);
+						Element grids = lasdata.getChild("grids");
+						outputXML(ofile, grids, true);
+						Element axes = lasdata.getChild("axes");
+						outputXML(ofile, axes, true);
+						if (category) {
+							for (Iterator cit = datasets.getChildren().iterator(); cit.hasNext(); ) {
+								Element datasetElem = (Element) cit.next();
+								CategoryBean ds_category = new CategoryBean();
+								ds_category.setName(datasetElem.getAttribute("name").getValue());
+								FilterBean filter = new FilterBean();
+								filter.setAction("apply-dataset");
+								filter.setContainstag(datasetElem.getName());
+								ds_category.addFilter(filter);
+								Element lc = new Element("las_categories");
+								lc.addContent(ds_category.toXml());
+								outputXML(ofile, lc, true);
 							}
 						}
 					}
 				}
 			}
-                        catch (IOException e) {
-                                log.error("IO error = " + e);
-
-                        }
-
 		}
 
 		if (oneDataset && data.length > 0) {
@@ -736,72 +710,72 @@ public class addXML {
 		while (di.hasNext()) {
 			InvDataset ThreddsDataset = (InvDataset) di.next();
 			if (ThreddsDataset.hasNestedDatasets()) {
-				CategoryBean cb = processCategories(ThreddsDataset, 0);
+				CategoryBean cb = processCategories(ThreddsDataset);
 				CategoryBeans.add(cb);
 			}
 		}
 
 		// Discover and process all the THREDDS dataset elements that actually
 		// connect to a data source.
- 		if(!categories_only) {
-			ThreddsDatasets = catalog.getDatasets();
-			di = ThreddsDatasets.iterator();
-			while (di.hasNext()) {
-				InvDataset ThreddsDataset = (InvDataset) di.next();
-				//DGABeans.addAll(processDatasets(ThreddsDataset, 0));
-				processDatasets(ThreddsDataset, 0);		
-			}
+
+		ThreddsDatasets = catalog.getDatasets();
+		di = ThreddsDatasets.iterator();
+		while (di.hasNext()) {
+			InvDataset ThreddsDataset = (InvDataset) di.next();
+			DGABeans.addAll(processDatasets(ThreddsDataset));
+		}
 
 		// Each THREDDS "dataset" is a separate LAS data set.
 		// If oneDataset is true, combine them before making the XML.
 
-			if (oneDataset) {
-				Vector newDAGBVector = new Vector();
-				DatasetsGridsAxesBean newDAGB = new DatasetsGridsAxesBean();
-				GridBean theGrid = (GridBean)(((DatasetsGridsAxesBean)DGABeans.get(0)).getGrids()).get(0);
-				Vector newGrids = new Vector();
-				newGrids.add(theGrid);
-				newDAGB.setGrids(newGrids);
-				newDAGB.setAxes(theGrid.getAxes());
-				DatasetBean newDSB = new DatasetBean();
-				if (group) {
-					newDSB.setGroup_name(group_name);
-					newDSB.setGroup_type(group_type);
-					newDSB.setGroup_id(encodeID(group_name+" "+group_type));
-				}
-				newDSB.setUrl(null);
-				if (title != null) {
-					newDSB.setName(title);
-				}
-
-				for (Iterator dgabIter = DGABeans.iterator(); dgabIter.hasNext();) {
-					DatasetsGridsAxesBean aDAGB = (DatasetsGridsAxesBean) dgabIter.next();
-					Vector datasets = aDAGB.getDatasets();            
-					for (Iterator ds = datasets.iterator(); ds.hasNext();) {
-						DatasetBean dsb = (DatasetBean) ds.next();
-						if (newDSB.getElement() == null) {
-							newDSB.setElement(dsb.getElement());
-						}
-						ArrayList<VariableBean> oldVars = dsb.getVariables();
-						ArrayList<VariableBean> newVariables = new ArrayList<VariableBean>();
-						for (Iterator ovIt = oldVars.iterator(); ovIt.hasNext();) {
-							VariableBean var = (VariableBean) ovIt.next();
-							String durl = dsb.getUrl();
-							String vurl = var.getUrl();
-							var.setUrl(durl+vurl);
-							var.setGrid(theGrid);
-							newVariables.add(var);
-						}
-						newDSB.addAllVariables(newVariables);
-					}
-				}
-				Vector newDatasets = new Vector();
-				newDatasets.add(newDSB);
-				newDAGB.setDatasets(newDatasets);
-				newDAGBVector.add(newDAGB);
-				DGABeans = newDAGBVector;
+		if (oneDataset) {
+			Vector newDAGBVector = new Vector();
+			DatasetsGridsAxesBean newDAGB = new DatasetsGridsAxesBean();
+			GridBean theGrid = (GridBean)(((DatasetsGridsAxesBean)DGABeans.get(0)).getGrids()).get(0);
+			Vector newGrids = new Vector();
+			newGrids.add(theGrid);
+			newDAGB.setGrids(newGrids);
+			newDAGB.setAxes(theGrid.getAxes());
+			DatasetBean newDSB = new DatasetBean();
+			if (group) {
+				newDSB.setGroup_name(group_name);
+				newDSB.setGroup_type(group_type);
+				newDSB.setGroup_id(encodeID(group_name+" "+group_type));
 			}
+			newDSB.setUrl(null);
+			if (title != null) {
+				newDSB.setName(title);
+			}
+
+
+			for (Iterator dgabIter = DGABeans.iterator(); dgabIter.hasNext();) {
+				DatasetsGridsAxesBean aDAGB = (DatasetsGridsAxesBean) dgabIter.next();
+				Vector datasets = aDAGB.getDatasets();            
+				for (Iterator ds = datasets.iterator(); ds.hasNext();) {
+					DatasetBean dsb = (DatasetBean) ds.next();
+					if (newDSB.getElement() == null) {
+						newDSB.setElement(dsb.getElement());
+					}
+					ArrayList oldVars = dsb.getVariables();
+					ArrayList newVariables = new ArrayList();
+					for (Iterator ovIt = oldVars.iterator(); ovIt.hasNext();) {
+						VariableBean var = (VariableBean) ovIt.next();
+						String durl = dsb.getUrl();
+						String vurl = var.getUrl();
+						var.setUrl(durl+vurl);
+						var.setGrid(theGrid);
+						newVariables.add(var);
+					}
+					newDSB.addAllVariables(newVariables);
+				}
+			}
+			Vector newDatasets = new Vector();
+			newDatasets.add(newDSB);
+			newDAGB.setDatasets(newDatasets);
+			newDAGBVector.add(newDAGB);
+			DGABeans = newDAGBVector;
 		}
+
 		top.setCategories(CategoryBeans);
 		// create las_categories and datasets elements at this level
 		Document doc = new Document();
@@ -858,87 +832,31 @@ public class addXML {
 	 * @param ThreddsDataset InvDataset
 	 * @return DatasetBean
 	 */
-	public static Vector processDatasets(InvDataset ThreddsDataset, int depth) {
-		ArrayList<DatasetsGridsAxesBean> beans = new ArrayList<DatasetsGridsAxesBean>();
-		DatasetsGridsAxesBean dgab = null;
-		
+	public static Vector processDatasets(InvDataset ThreddsDataset) {
+		Vector beans = new Vector();
 		if (ThreddsDataset.hasAccess()) {
 			boolean done = false;
-			for (Iterator iter = ThreddsDataset.getAccess().iterator();	iter.hasNext(); ) {
+			for (Iterator iter = ThreddsDataset.getAccess().iterator();
+			iter.hasNext(); ) {
 				InvAccess access = (InvAccess) iter.next();
 				if ( (access.getService().getServiceType() == ServiceType.DODS ||
 						access.getService().getServiceType() == ServiceType.NETCDF ||
 						access.getService().getServiceType() == ServiceType.OPENDAP) &&
 						!done) {
 					done = true;
-					dgab = createBeansFromThreddsDataset(ThreddsDataset, access);
-					String url = ThreddsDataset.getSubsetUrl();
-					if (dgab!=null) 
-						if(thredds_urls.containsKey(url)) {
-							System.out.println("RECURSION " + url);
-
-						} else if (ignore_url != null && url.indexOf(ignore_url)>=0) {
-							System.out.println("IGNORING " + url);					
-						} else {
-							thredds_urls.put(url,url);
-						} 
+					DatasetsGridsAxesBean dgab =
+						createBeansFromThreddsDataset(ThreddsDataset, access);
 					beans.add(dgab);
 				}
 			}
 		}
-		if(verbose)
-			System.out.println("Parsing subdatasets");
-		if (maxCategoryDepth < 0 || depth < maxCategoryDepth) {
-		        int i=0;
-         		for (Iterator tmpiter = ThreddsDataset.getDatasets().iterator();tmpiter.hasNext();) {
-        			i++;
-        			tmpiter.next();
-        		}
-        		if(maxDatasets < 0 || i<maxDatasets) {
-				for (Iterator iter = ThreddsDataset.getDatasets().iterator();iter.hasNext(); ) {
-					//beans.addAll(processDatasets( (InvDataset) iter.next(), depth));
-					processDatasets( (InvDataset) iter.next(), depth);
-					if(verbose)
-					 	System.out.println("Stepping up a category.");
-					
-				}
-			} else if(verbose || log_bad_dsets) {
-		 		System.out.println("Unaggregated, " + ThreddsDataset.getSubsetUrl());
-				}
-		} else if (maxCategoryDepth>0&&verbose) {
-			 System.out.println("Hit max category depth of "+maxCategoryDepth+".");
+		for (Iterator iter = ThreddsDataset.getDatasets().iterator();
+		iter.hasNext(); ) {
+			beans.addAll(processDatasets( (InvDataset) iter.next()));
 		}
-		if(verbose)
-			System.out.println("Writing dataset xml and stepping up a category..");
-	
-		//return beans;
-		if(dgab!=null) {
-			Document lasdoc = createXMLfromDatasetsGridsAxesBean(dgab);
-			String ofile = getOutfileName(basefilename);
-			Element lasdata = lasdoc.getRootElement();
-			Element datasets = lasdata.getChild("datasets");
-			outputXML(ofile, datasets, false);
-			Element grids = lasdata.getChild("grids");
-			outputXML(ofile, grids, true);
-			Element axes = lasdata.getChild("axes");
-			outputXML(ofile, axes, true);
-			if (category) {
-				for (Iterator cit = datasets.getChildren().iterator();cit.hasNext(); ) {
-					Element datasetElem = (Element) cit.next();
-					CategoryBean ds_category = new CategoryBean();
-					ds_category.setName(datasetElem.getAttribute("name").getValue());
-					FilterBean filter = new FilterBean();
-					filter.setAction("apply-dataset");
-					filter.setContainstag(datasetElem.getName());
-					ds_category.addFilter(filter);
-					Element lc = new Element("las_categories");
-					lc.addContent(ds_category.toXml());
-					outputXML(ofile, lc, true);
-				}
-			}
-		}
-		return null;
+		return beans;
 	}
+
 	/**
 	 * createDatasetBeanFromThreddsDataset
 	 *
@@ -964,31 +882,15 @@ public class addXML {
 					}
 				}
 			} else {
-				if(verbose)
-					 System.out.println("Trying to access dataset at " + url);
-				try {
-					String dods = url.replaceAll("http", "dods");
-					NetcdfDataset ncds = ucar.nc2.dataset.NetcdfDataset.openDataset(dods);
-					dgab = createBeansFromNetcdfDataset(ncds, url, false, null);
-					 ncds.close();	
-				}
-				catch (RuntimeException re) {
-					if(log_bad_dsets)
-		                                 System.out.println("RuntimeException, " + url);
-					return null;
-				}	
-				
+				String dods = url.replaceAll("http", "dods");
+				NetcdfDataset ncds = ucar.nc2.dataset.NetcdfDataset.openDataset(dods);
+				dgab = createBeansFromNetcdfDataset(ncds, url, false, null);
+				ncds.close();
 			}
 		}
 		catch (IOException e) {
 			dgab.setError(e.getMessage());
-			log.error("IO error accessing " + url + " = " + e.getMessage());
-			if(verbose)
-				 System.out.println("Bad dataset at " + url);
-			if(log_bad_dsets)
-				 System.out.println("IOException, " + url);
-			
-			return null;
+			log.error("IO error = " + e.getMessage());
 		}
 
 		return dgab;
@@ -1305,30 +1207,17 @@ public class addXML {
 		if ( dt.endsWith("Z") ) return dt.substring(0, dt.length() - 1);
 		return dt;
 	}
-	
-	public static Vector processDatasets(InvDataset ThreddsDataset) {
-           return processDatasets(ThreddsDataset, 0);
-       }
-
-       public static CategoryBean processCategories(InvDataset ThreddsDataset) {
-           return processCategories(ThreddsDataset, 0);
-       }
-
-
-
 	/**
 	 * processCategories
 	 *
 	 * @param ThreddsDataset InvDataset
 	 * @return CategoryBean
 	 */
-	public static CategoryBean processCategories(InvDataset ThreddsDataset, int depth) {
+	public static CategoryBean processCategories(InvDataset ThreddsDataset) {
 		CategoryBean cb = new CategoryBean();
-		
 		// Make any THREDDS documentation links into LAS contributor links.
 		List docs = ThreddsDataset.getDocumentation();
 		Vector contribs = new Vector();
-		depth++;
 		for (Iterator dit = docs.iterator(); dit.hasNext(); ) {
 			InvDocumentation doc = (InvDocumentation) dit.next();
 			if (doc.hasXlink()) {
@@ -1348,17 +1237,6 @@ public class addXML {
 		else {
 			cb.setName("THREDDS Dataset");
 		}
-		categoryCount++;
-		if(verbose)
-			System.out.println(categoryCount + "Processing category " + name);
-        
-		if ( ignore_url != null ) {
-			if(name != null && name.length() > 0 && name.indexOf(ignore_url)>=0) {
-				System.out.println("IGNORING " + name);
-				return cb;
-			}
-		}
-
 		if (ThreddsDataset.hasAccess()) {
 			// This will create a filter that doesn't match anything.
 			// The LAS interface generator will ignore this category.
@@ -1370,15 +1248,28 @@ public class addXML {
 						access.getService().getServiceType() == ServiceType.OPENDAP ||
 						access.getService().getServiceType() == ServiceType.NETCDF) {
 					url = access.getStandardUrlName();
-					if(thredds_urls.containsKey(url)) {
-						System.out.println("RECURSION " + url);
-						return cb;
-					} else if(ignore_url != null && (url.indexOf(ignore_url)>=0||name.indexOf(ignore_url)>=0) ){
-						System.out.println("IGNORING " + name + " " + url);
-						return cb;
-					} else {
-						thredds_urls.put(url,url);
-					}    
+					// Replace the name with a bunch of stuff from the file if possible...
+					if ( generate_names ) {
+						StringBuilder dataset_name = new StringBuilder();
+						try {
+							NetcdfDataset ncds = NetcdfDataset.openDataset(url);
+							StringBuilder error = new StringBuilder();
+							GridDataset gds = (GridDataset) TypedDatasetFactory.open(FeatureType.GRID, ncds, null, error);
+							List<GridDatatype> grids = gds.getGrids();
+							if ( grids != null && grids.size() > 0 ) {
+								for (int i = 0; i < grids.size(); i++) {
+									GridDatatype grid = (GridDatatype) grids.get(i);
+									if ( i > 0 ) {
+										dataset_name.append(" ");
+									}
+									dataset_name.append(grid.getDescription() + " (" + grid.getUnitsString() + ")");
+								}
+							}
+						} catch (IOException e) {
+							// Oh well, couldn't enhance the data set name...
+						}
+						cb.setName(dataset_name.toString());
+					}
 				}
 			}
 			if ( access != null && ((esg && url.contains("aggregation")) || !esg ) ) {
@@ -1395,43 +1286,19 @@ public class addXML {
 				filter.setContainstag(tag);
 				cb.addFilter(filter);
 			}
-		} 
+		}
 
 		Vector subCats = new Vector();
-		
-		 if (maxCategoryDepth < 0 || depth < maxCategoryDepth) {
-       			int i=0;
-			for (Iterator tmpiter = ThreddsDataset.getDatasets().iterator();tmpiter.hasNext();) {
-          			i++;
-          			InvDataset foo = (InvDataset) tmpiter.next();
-			}
-			if(i<maxCategories||maxCategories<0) {
-				for (Iterator subDatasetsIt = ThreddsDataset.getDatasets().iterator(); subDatasetsIt.hasNext(); ) {
-					InvDataset subDataset = (InvDataset) subDatasetsIt.next();
-					// Process the sub-categories
-					CategoryBean subCat = processCategories(subDataset, depth);
-					//processCategories(subDataset, depth);
-					subCats.add(subCat);
-				}
-				cb.setCategories(subCats);
-			} else if(verbose || log_bad_dsets) System.out.println("Unaggregated, " + ThreddsDataset.getSubsetUrl());
-			
+		for (Iterator subDatasetsIt = ThreddsDataset.getDatasets().iterator();
+		subDatasetsIt.hasNext(); ) {
+			InvDataset subDataset = (InvDataset) subDatasetsIt.next();
+			// Process the sub-categories
+			CategoryBean subCat = processCategories(subDataset);
+			subCats.add(subCat);
 		}
-		return cb;
-		//write categories to XML
-		//Document lasdoc = createXMLfromDatasetsGridsAxesBean(dgab);
-		
-		//Element lasdata = lasdoc.getRootElement();
-		/*if(cb!=null)
-			if(cb.toXml()!=null) { 	
-				Element lc = new Element("las_categories");
-				lc.addContent(cb.toXml());
-				String ofile = getOutfileName(basefilename);
-				outputXML(ofile, lc, true);
-			}
-			
-		return null; */
+		cb.setCategories(subCats);
 
+		return cb;
 	}
 
 	/**
@@ -1676,7 +1543,9 @@ public class addXML {
 		return dagb;
 	}
 
-	public static org.jdom.Document createXMLfromNetcdfDataset(NetcdfDataset ncds, String url) {
+	public static org.jdom.Document createXMLfromNetcdfDataset(NetcdfDataset
+			ncds,
+			String url) {
 		DatasetsGridsAxesBean beans = createBeansFromNetcdfDataset(ncds, url, false, null);
 		DatasetBean dataset = (DatasetBean) beans.getDatasets().get(0);
 		Vector GridBeans = (Vector) beans.getGrids();
