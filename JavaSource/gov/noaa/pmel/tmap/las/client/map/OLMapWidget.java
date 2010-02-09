@@ -957,7 +957,7 @@ public class OLMapWidget extends Composite {
 			}
 			
 			setCurrentSelection(ylo, yhi, currentSelection.getLowerLeftX(), currentSelection.getUpperRightX());
-			zoomMapToSelection();
+			featureAdded();
 		}
 	};
 	/**
@@ -1015,7 +1015,6 @@ public class OLMapWidget extends Composite {
 				}
 			}
 			setCurrentSelection(ylo, yhi, currentSelection.getLowerLeftX(), currentSelection.getUpperRightX());
-			zoomMapToSelection();
 			featureAdded();
 		}
 	};
@@ -1082,7 +1081,6 @@ public class OLMapWidget extends Composite {
 			}
 
 			setCurrentSelection(currentSelection.getLowerLeftY(), currentSelection.getUpperRightY(), xlo, xhi);
-			zoomMapToSelection();
 			featureAdded();
 		}
 	};
@@ -1148,7 +1146,6 @@ public class OLMapWidget extends Composite {
 			}
 			
 			setCurrentSelection(currentSelection.getLowerLeftY(), currentSelection.getUpperRightY(), xlo, xhi);
-			zoomMapToSelection();
 			featureAdded();
 		}
 	};
