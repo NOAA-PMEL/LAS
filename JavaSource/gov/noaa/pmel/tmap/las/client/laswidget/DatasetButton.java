@@ -29,7 +29,7 @@ public class DatasetButton extends Composite {
 	Grid popupGrid;
 	Button close;
 	int offset = 0;
-	public DatasetButton (RPCServiceAsync rpcService) {
+	public DatasetButton () {
 		choose = new Button("Data Set");
 		choose.addClickListener(openClick);
 		datasetPanel = new PopupPanel(false);
@@ -48,7 +48,7 @@ public class DatasetButton extends Composite {
 			}
 			
 		});
-		datasetWidget.init(rpcService);
+		datasetWidget.init();
 		popupGrid = new Grid(3, 1);		
 		close = new Button("close");
 		close.addClickListener(new ClickListener() {

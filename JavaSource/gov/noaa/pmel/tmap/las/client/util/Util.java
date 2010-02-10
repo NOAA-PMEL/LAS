@@ -1,8 +1,15 @@
 package gov.noaa.pmel.tmap.las.client.util;
 
+import gov.noaa.pmel.tmap.las.client.RPCService;
+import gov.noaa.pmel.tmap.las.client.RPCServiceAsync;
+
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.rpc.ServiceDefTarget;
 
 public class Util {
 	public static HashMap<String, String> getTokenMap(String token) {
@@ -60,5 +67,25 @@ public class Util {
 		} else {
 			return String.valueOf(i);
 		}
+	}
+	public static RPCServiceAsync getRPCService() {
+		RPCServiceAsync rpcService = (RPCServiceAsync) GWT.create(RPCService.class);
+		ServiceDefTarget endpoint = (ServiceDefTarget) rpcService;
+		String rpcURL = "";
+		String base_path = Util.getBaseURL();
+		rpcURL = base_path + "rpc";
+		endpoint.setServiceEntryPoint(rpcURL);
+		return rpcService;
+	}
+	public static String getProductServer() {
+		return Util.getBaseURL() + "ProductServer.do";
+	}
+	public static String getParameterString(String name) {
+		Map<String, List<String>> parameters = Window.Location.getParameterMap();			
+		List param = parameters.get(name);
+		if ( param != null ) {
+			return (String) param.get(0);
+		}
+		return null;
 	}
 }

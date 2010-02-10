@@ -17,9 +17,9 @@ public class OptionsButton extends Composite {
 	OptionsWidget options;
 	Map<String, String> state;
 	int offset;
-    public OptionsButton (RPCServiceAsync optionsService, String opid, int offset) {
+    public OptionsButton (String opid, int offset) {
     	this.offset = offset;
-    	options = new OptionsWidget(optionsService, opid, okClick, cancelClick);
+    	options = new OptionsWidget(opid, okClick, cancelClick);
     	optionsButton.addClickListener(openClick);
     	optionsDialog.add(options);
     	optionsDialog.setText("Set Plot Options for all Plots.");

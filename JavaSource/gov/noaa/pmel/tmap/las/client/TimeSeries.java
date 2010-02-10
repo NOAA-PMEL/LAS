@@ -11,6 +11,7 @@ import gov.noaa.pmel.tmap.las.client.serializable.DatasetSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.GridSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.TimeAxisSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.VariableSerializable;
+import gov.noaa.pmel.tmap.las.client.util.Util;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -48,7 +49,7 @@ import com.google.gwt.user.client.ui.Widget;
  * Entry point classes define <code>onModuleLoad()</code>.
  */
 public class TimeSeries implements EntryPoint {
-	private static class TimeSeriesComposite extends LASEntryPoint implements ClickListener {
+	private static class TimeSeriesComposite implements EntryPoint, ClickListener {
 		
 		ListBox timeSeriesList = new ListBox();
 		TimeSeriesMap timeSeriesMap = new TimeSeriesMap();
@@ -67,9 +68,8 @@ public class TimeSeries implements EntryPoint {
 		public static final String PLOT_BUTTON_NAME = "Plot";
 		public static final String PLOT_OPTIONS_BUTTON_NAME = "Plot Options";
 		
-		public TimeSeriesComposite () {
+		public void onModuleLoad() {
 			// Set up the RPC service for getting LAS metadata
-			super.onModuleLoad();
 			timeSeriesList.addChangeListener( new ChangeListener() {
 				public void onChange(Widget sender) {
 					int index = timeSeriesList.getSelectedIndex();
@@ -85,7 +85,7 @@ public class TimeSeries implements EntryPoint {
 				}
 			});
 			
-			rpcService.getTimeSeries(timeSeriesCallback);
+			Util.getRPCService().getTimeSeries(timeSeriesCallback);
 			lasRequest.removeVariables();
 			timeSeriesMap.addMapClickHandler(mapClick);
 			RootPanel.get("timeseries_collection_listbox").add(timeSeriesList);
@@ -105,7 +105,7 @@ public class TimeSeries implements EntryPoint {
 			dates_label.setVisible(false);
 			dates_label.setStyleName("small-banner");
 			RootPanel.get("output").add(output);
-			options_widget = new OptionsWidget(rpcService, "Plot_1D", this, this);
+			options_widget = new OptionsWidget("Plot_1D", this, this);
             options_panel.add(options_widget);
 			//this.setElement(RootPanel.get().getElement());
 		}
@@ -286,7 +286,7 @@ public class TimeSeries implements EntryPoint {
 					lasRequest.addProperty("ferret", "view", "t");
 					lasRequest.addProperty("ferret", "image_format", "gif");
 
-					String url = productServer+"?xml="+URL.encode(lasRequest.getXMLText());
+					String url = Util.getProductServer()+"?xml="+URL.encode(lasRequest.getXMLText());
 					/*
 					RequestBuilder sendRequest = new RequestBuilder(RequestBuilder.GET, url);
 					try {

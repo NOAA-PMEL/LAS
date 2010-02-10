@@ -16,6 +16,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.maps.client.geom.LatLng;
 import com.google.gwt.maps.client.geom.LatLngBounds;
 import com.google.gwt.user.client.Window;
@@ -33,7 +34,7 @@ import com.google.gwt.user.client.ui.TreeListener;
 import com.google.gwt.user.client.ui.Widget;
 
 
-public class TestUI extends LASEntryPoint {
+public class TestUI implements EntryPoint {
 	HTML output;
 	VizGalPanel panel;
 	Grid layout = new Grid(2, 1);
@@ -53,23 +54,22 @@ public class TestUI extends LASEntryPoint {
 	DockPanel dockPanel = new DockPanel();
 	PopupPanel initializing = new PopupPanel();
 	public void onModuleLoad() {
-		super.onModuleLoad();
 		String spinImageURL = Util.getImageURL()+"/mozilla_blu.gif";
 		output = new HTML("<img src=\""+spinImageURL+"\" alt=\"Spinner\"/> Initializing...");
 	    initializing.add(output);
 	    initializing.show();
 		Map<String, List<String>> parameters = Window.Location.getParameterMap();
-		dsid = getParameterString("dsid");
-		vid = getParameterString("vid");
-		op = getParameterString("opid");
-		option = getParameterString("optionid");
-		view = getParameterString("view");
+		dsid = Util.getParameterString("dsid");
+		vid = Util.getParameterString("vid");
+		op = Util.getParameterString("opid");
+		option = Util.getParameterString("optionid");
+		view = Util.getParameterString("view");
 		
 		
 		if ( dsid != null && vid != null && op != null && view != null && option != null) {
-			rpcService.getCategories(dsid, initPanelFromParametersCallback);
+			Util.getRPCService().getCategories(dsid, initPanelFromParametersCallback);
 		} else {
-			rpcService.getPropertyGroup("product_server", initPanelFromDefaultsCallback);	
+			Util.getRPCService().getPropertyGroup("product_server", initPanelFromDefaultsCallback);	
 		}
 
 		if ( op == null ) {
@@ -78,7 +78,7 @@ public class TestUI extends LASEntryPoint {
 		if ( option == null ) {
 			option = "Options_2D_image_contour_xy_7";
 		}
-		settingsControls = new SettingsWidget("Settings", "LAS", op, option, rpcService, "panel");
+		settingsControls = new SettingsWidget("Settings", "LAS", op, option, "panel");
 		settingsControls.addDatasetTreeListener(datasetTreeListener);
 		settingsControls.addApplyClickListener(panelApply);
 		operationsMenu = new OperationsMenu();
@@ -118,7 +118,7 @@ public class TestUI extends LASEntryPoint {
 				}
 			}
 			if ( dsid != null && vid != null && op != null && view != null && option != null) {
-				rpcService.getCategories(dsid, initPanelFromParametersCallback);
+				Util.getRPCService().getCategories(dsid, initPanelFromParametersCallback);
 			}
 		}
 		
@@ -137,7 +137,7 @@ public class TestUI extends LASEntryPoint {
 					for (int i=0; i < vars.length; i++ ) {
 						if ( vars[i].getID().equals(vid) ) {
 							var = vars[i];
-							rpcService.getGrid(var.getDSID(), var.getID(), getGridCallback);
+							Util.getRPCService().getGrid(var.getDSID(), var.getID(), getGridCallback);
 						}
 					}
 				}
@@ -164,7 +164,7 @@ public class TestUI extends LASEntryPoint {
 
 			settingsControls.setToolType(view);
 			settingsControls.getRefMap().setDataExtent(grid_south, grid_north, grid_west, grid_east, delta);
-			settingsControls.setOperations(rpcService, var.getIntervals(), var.getDSID(), var.getID(), op, view, null);
+			settingsControls.setOperations(var.getIntervals(), var.getDSID(), var.getID(), op, view, null);
 		}
 		// Examine the variable axes and determine which are orthogonal to the view. 
 
@@ -197,7 +197,7 @@ public class TestUI extends LASEntryPoint {
 			ortho.clear();
 			int width = Window.getClientWidth();
 			int pwidth = (width-rightPad);
-			panel = new VizGalPanel("LAS", true, op, option, view, productServer, true, rpcService);
+			panel = new VizGalPanel("LAS", true, op, option, view, true);
 			panel.setVariable(var);
 			panel.init(false);
 			panel.addCompareAxisChangeListener(onAxisChange);
@@ -243,7 +243,7 @@ public class TestUI extends LASEntryPoint {
 			Object u = item.getUserObject();
 			if ( u instanceof VariableSerializable ) {
 				var = (VariableSerializable) u;
-				rpcService.getGrid(var.getDSID(), var.getID(), getGridCallback);
+				Util.getRPCService().getGrid(var.getDSID(), var.getID(), getGridCallback);
 			}
 		}
 

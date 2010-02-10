@@ -17,6 +17,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -49,7 +50,7 @@ import com.google.gwt.user.client.ui.HTMLTable.CellFormatter;
  * @author rhs
  *
  */
-public class VizGal extends LASEntryPoint {
+public class VizGal implements EntryPoint {
 
 	/*
 	 * This is a hack for right now, but we are going to define two default operations.
@@ -230,32 +231,28 @@ public class VizGal extends LASEntryPoint {
      
      // Sometimes  you need to keep the current map selection values.
      double[] cs = null;
-	/*
-	 * (non-Javadoc)
-	 * @see gov.noaa.pmel.tmap.las.client.LASEntryPoint#onModuleLoad()
-	 */
-	@Override
+     
+     
 	public void onModuleLoad() {
-		super.onModuleLoad();
-
+		
 		ortho = new ArrayList<String>(); 
 
-		dsid = getParameterString("dsid");
-		vid = getParameterString("vid");
+		dsid = Util.getParameterString("dsid");
+		vid = Util.getParameterString("vid");
 		//TODO If the operation is null, get the default operation (the map or plot; left nav) for this view.
-		op = getParameterString("opid");
-		optionID = getParameterString("optionid");
-		view = getParameterString("view");
+		op = Util.getParameterString("opid");
+		optionID = Util.getParameterString("optionid");
+		view = Util.getParameterString("view");
 
 		// This may have come from a running LAS and it might want to set up the xyzt ranges for the plots in the panels.
-		xlo = getParameterString("xlo");
-		xhi = getParameterString("xhi");
-		ylo = getParameterString("ylo");
-		yhi = getParameterString("yhi");
-		zlo = getParameterString("zlo");
-		zhi = getParameterString("zhi");
-		tlo = getParameterString("tlo");
-		thi = getParameterString("thi");
+		xlo = Util.getParameterString("xlo");
+		xhi = Util.getParameterString("xhi");
+		ylo = Util.getParameterString("ylo");
+		yhi = Util.getParameterString("yhi");
+		zlo = Util.getParameterString("zlo");
+		zhi = Util.getParameterString("zhi");
+		tlo = Util.getParameterString("tlo");
+		thi = Util.getParameterString("thi");
 		
 		initialHistory = getAnchor();
 		
@@ -298,7 +295,7 @@ public class VizGal extends LASEntryPoint {
 
 		// This is a control panel that will control the settings for all the panels and it appears vertically on the left side.
 		// The last false is to disallow editing with the grab handles on the map.
-		settingsControls = new SettingsWidget("Gallery Settings", "Slide Sorter", op, optionID, rpcService, "panel");
+		settingsControls = new SettingsWidget("Gallery Settings", "Slide Sorter", op, optionID, "panel");
 		settingsControls.setTitle("Settings for all panels.");
 		settingsControls.addDatasetTreeListener(datasetTreeListener);
 		settingsControls.addOptionsOkClickListener(optionsOkListener);
@@ -366,7 +363,7 @@ public class VizGal extends LASEntryPoint {
 		if ( dsid != null && vid != null & op != null && view != null) {
 			// If the proper information was sent to the widget, pull down the variable definition
 			// and initialize the slide sorter with this Ajax call.
-			rpcService.getVariable(dsid, vid, requestGrid);
+			Util.getRPCService().getVariable(dsid, vid, requestGrid);
 		}
 
 
@@ -450,7 +447,7 @@ public class VizGal extends LASEntryPoint {
 		public void onSuccess(Object result) {
 			var = (VariableSerializable) result;
 			initial_var = var;
-			rpcService.getGrid(dsid, vid, initVisGal);
+			Util.getRPCService().getGrid(dsid, vid, initVisGal);
 		}
 
 
@@ -502,7 +499,7 @@ public class VizGal extends LASEntryPoint {
 				if ( cats[0].isVariableChildren() ) {
 					var = cats[0].getVariable(vid);
 					initial_var = var;
-					rpcService.getGrid(dsid, vid, initVizGalForHistory);
+					Util.getRPCService().getGrid(dsid, vid, initVizGalForHistory);
 				} else {
 					Window.alert("No variables found in this category");
 				}
@@ -572,7 +569,7 @@ public class VizGal extends LASEntryPoint {
 		if ( pwidth <= 0 ) {
 			pwidth = 400;
 		}
-		VizGalPanel sp1 = new VizGalPanel("Panel 0", true, op, optionID, view, productServer, false, rpcService);
+		VizGalPanel sp1 = new VizGalPanel("Panel 0", true, op, optionID, view, false);
 		sp1.addRevertListener(panelApplyButtonClick);
 		sp1.addApplyListener(panelApplyButtonClick);
 		slides.setWidget(0, 0, sp1);
@@ -582,7 +579,7 @@ public class VizGal extends LASEntryPoint {
 		sp1.addTChangeListner(panelAxisMenuChange);
 		panels.add(sp1);
 
-		VizGalPanel sp2 = new VizGalPanel("Panel 1", false, op, optionID, view, productServer, false, rpcService);
+		VizGalPanel sp2 = new VizGalPanel("Panel 1", false, op, optionID, view, false);
 		sp2.addRevertListener(panelApplyButtonClick);
 		sp2.addApplyListener(panelApplyButtonClick);
 		//sp2.addRegionChangeListener(regionChange);
@@ -593,7 +590,7 @@ public class VizGal extends LASEntryPoint {
 		sp2.addTChangeListner(panelAxisMenuChange);		
 		panels.add(sp2);
 
-		VizGalPanel sp3 = new VizGalPanel("Panel 2", false, op, optionID, view, productServer, false, rpcService);
+		VizGalPanel sp3 = new VizGalPanel("Panel 2", false, op, optionID, view, false);
 		sp3.addRevertListener(panelApplyButtonClick);
 		sp3.addApplyListener(panelApplyButtonClick);
 		//sp2.addRegionChangeListener(regionChange);
@@ -604,7 +601,7 @@ public class VizGal extends LASEntryPoint {
 		sp3.addTChangeListner(panelAxisMenuChange);		
 		panels.add(sp3);
 
-		VizGalPanel sp4 = new VizGalPanel("Panel 3", false, op, optionID, view, productServer, false, rpcService);
+		VizGalPanel sp4 = new VizGalPanel("Panel 3", false, op, optionID, view, false);
 		sp4.addRevertListener(panelApplyButtonClick);
 		sp4.addApplyListener(panelApplyButtonClick);
 		//sp2.addRegionChangeListener(regionChange);
@@ -746,7 +743,7 @@ public class VizGal extends LASEntryPoint {
 		// This will load up the operations panels and select the radio button for the op id that is passed in...
 		// Initially the default operation is passed in in the query string.  For subsequent initializations
 		// the value gets set to the default operation for the data type.
-		settingsControls.setOperations(rpcService, var.getIntervals(), var.getDSID(), var.getID(), op, view, null);
+		settingsControls.setOperations(var.getIntervals(), var.getDSID(), var.getID(), op, view, null);
 		GridSerializable ds_grid = var.getGrid();
 		double grid_west = Double.valueOf(ds_grid.getXAxis().getLo());
 		double grid_east = Double.valueOf(ds_grid.getXAxis().getHi());
@@ -944,8 +941,8 @@ public class VizGal extends LASEntryPoint {
 				// If it's not down, the current options value will be used.
 				autoContourTextBox.setText("");
 			}
-			for (Iterator panelIt = panels.iterator(); panelIt.hasNext();) {
-				VizGalPanel panel = (VizGalPanel) panelIt.next();
+			for (int panelIndexCounter = 0; panelIndexCounter < panels.size(); panelIndexCounter++) {
+				VizGalPanel panel = (VizGalPanel) panels.get(panelIndexCounter);
 				panel.setFillLevels(autoContourTextBox.getText());
 				panel.refreshPlot(temp_state, switchAxis, true);
 			}
@@ -1014,7 +1011,7 @@ public class VizGal extends LASEntryPoint {
 		view = "xy";
 
 		// Go get the grid if you don't have it already...
-		rpcService.getGrid(var.getDSID(), var.getID(), getGridForChangeDatasetCallback);
+		Util.getRPCService().getGrid(var.getDSID(), var.getID(), getGridForChangeDatasetCallback);
 	}
 
 	/**
@@ -1402,7 +1399,7 @@ public class VizGal extends LASEntryPoint {
 				} else {
 					// Otherwise, save the history tokens, call back to the server for the variable and then apply the history in the callback.
 					historyTokens = tokenMap;
-					rpcService.getGrid(tokenMap.get("dsid"), tokenMap.get("vid"), requestGridForHistory);
+					Util.getRPCService().getGrid(tokenMap.get("dsid"), tokenMap.get("vid"), requestGridForHistory);
 				}
 			}
             // TODO what about the options for the gallery............................??

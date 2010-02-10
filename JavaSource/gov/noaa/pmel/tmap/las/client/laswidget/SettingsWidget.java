@@ -36,7 +36,6 @@ public class SettingsWidget extends Composite {
 	protected String operationID;
 	protected String optionID;
 	boolean usePanel = false;
-	protected RPCServiceAsync rpcService;
 
 	/*
 	 * Objects specific to the button layout
@@ -54,10 +53,9 @@ public class SettingsWidget extends Composite {
 	 */
 	Grid vertical = new Grid(5,1);
 
-	public SettingsWidget(String title, String panelID, String operationID, String optionID, RPCServiceAsync rpcService, String layout) {
+	public SettingsWidget(String title, String panelID, String operationID, String optionID, String layout) {
 		this.operationID = operationID;
 		this.optionID = optionID;
-		this.rpcService = rpcService;
 		this.layout = layout;
 		applyButton = new Button("Apply");
 		applyButton.setTitle("Apply changes to "+panelID);
@@ -69,12 +67,12 @@ public class SettingsWidget extends Composite {
 		closeAndApply = new HorizontalPanel();
 		closeAndApply.add(closeButton);
 		closeAndApply.add(applyButton);
-		datasetButton = new DatasetButton(rpcService);
+		datasetButton = new DatasetButton();
 		if ( layout.equals("button") ) {
-		    optionsButton = new OptionsButton(rpcService, optionID, 300);
+		    optionsButton = new OptionsButton(optionID, 300);
 		    datasetButton.setOffset(0);
 		} else {
-			optionsButton = new OptionsButton(rpcService, optionID, 0);
+			optionsButton = new OptionsButton(optionID, 0);
 			datasetButton.setOffset(260);
 		}
 		datasetAndOptions = new HorizontalPanel();
@@ -143,9 +141,8 @@ public class SettingsWidget extends Composite {
 		applyButton.addClickListener(apply);
 	}
 
-	public void setOperations(RPCServiceAsync rpcService, String intervals, String dsID,
-			String varID, String opID, String view, OperationsMenu menu) {
-		operations.setOperations(rpcService, intervals, dsID, varID, opID, view, menu);
+	public void setOperations(String intervals, String dsID, String varID, String opID, String view, OperationsMenu menu) {
+		operations.setOperations(intervals, dsID, varID, opID, view, menu);
 	}
 
 	public void setLatLon(String xlo, String xhi, String ylo, String yhi) {

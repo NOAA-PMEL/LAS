@@ -4,6 +4,7 @@ package gov.noaa.pmel.tmap.las.client.laswidget;
 import gov.noaa.pmel.tmap.las.client.OperationButton;
 import gov.noaa.pmel.tmap.las.client.RPCServiceAsync;
 import gov.noaa.pmel.tmap.las.client.serializable.OperationSerializable;
+import gov.noaa.pmel.tmap.las.client.util.Util;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -18,7 +19,6 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 public class OperationsWidget extends StackPanel {
-    RPCServiceAsync opService;
 	VerticalPanel xyMap = new VerticalPanel();
 	VerticalPanel linePlots = new VerticalPanel();
 	VerticalPanel sectionPlots = new VerticalPanel();
@@ -56,8 +56,7 @@ public class OperationsWidget extends StackPanel {
 		setSize("256px", "200px");
 		
 	}
-	public void setOperations(RPCServiceAsync rpcService, String intervals, String dsID, String varID, String opID, String view, OperationsMenu menu) {
-		this.opService = rpcService;
+	public void setOperations(String intervals, String dsID, String varID, String opID, String view, OperationsMenu menu) {
 		this.menu = menu;
 		this.intervals = intervals;
 		this.initialOp = opID;
@@ -66,7 +65,7 @@ public class OperationsWidget extends StackPanel {
 		if ( ops != null ) {
 			setOps();
 		}  else {
-			opService.getOperations(null, dsID, varID, operationsCallback);	
+			Util.getRPCService().getOperations(null, dsID, varID, operationsCallback);	
 		}
 	}
 	AsyncCallback operationsCallback = new AsyncCallback() {
