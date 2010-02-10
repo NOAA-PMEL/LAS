@@ -11,6 +11,7 @@ package gov.noaa.pmel.tmap.las.client.laswidget;
 
 import gov.noaa.pmel.tmap.las.client.RPCServiceAsync;
 import gov.noaa.pmel.tmap.las.client.serializable.OptionSerializable;
+import gov.noaa.pmel.tmap.las.client.util.Util;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -38,7 +39,6 @@ import com.google.gwt.user.client.ui.Widget;
  *
  */
 public class OptionsWidget extends VerticalPanel {
-	RPCServiceAsync optionsService;
 	OptionSerializable[] options;
 	Button ok = new Button("OK");
 	Button cancel = new Button("Cancel");
@@ -49,19 +49,17 @@ public class OptionsWidget extends VerticalPanel {
 		layout_grid.setWidget(0, 0, ok);
 		layout_grid.setWidget(0, 1, cancel);
 	}
-	public OptionsWidget(RPCServiceAsync rpcService, String opID) {
+	public OptionsWidget(String opID) {
 		layout_grid.setWidget(0, 0, ok);
 		layout_grid.setWidget(0, 1, cancel);
-		this.optionsService = rpcService;
-		optionsService.getOptions(opID, optionsCallback);	
+		Util.getRPCService().getOptions(opID, optionsCallback);	
 	}
-	public OptionsWidget(RPCServiceAsync rpcService, String optionID, ClickListener okListener, ClickListener cancelListener) {
+	public OptionsWidget(String optionID, ClickListener okListener, ClickListener cancelListener) {
 		layout_grid.setWidget(0, 0, ok);
 		layout_grid.setWidget(0, 1, cancel);
 		ok.addClickListener(okListener);
 		cancel.addClickListener(cancelListener);
-		this.optionsService = rpcService;
-		optionsService.getOptions(optionID, optionsCallback);	
+		Util.getRPCService().getOptions(optionID, optionsCallback);	
 	}
 	public OptionsWidget(ClickListener listener) {
 		ok.addClickListener(listener);
@@ -69,20 +67,17 @@ public class OptionsWidget extends VerticalPanel {
 		layout_grid.setWidget(0, 0, ok);
 		layout_grid.setWidget(0, 1, cancel);
 	}
-	public void setOptions(RPCServiceAsync rpcService, String opID) {
-		this.optionsService = rpcService;
-		
-	}
+	
 	public void setOptions(String id) {
 		callbackState = null;
 		if ( id != null && !id.equals("") ) {
-		    optionsService.getOptions(id, optionsCallback);
+		    Util.getRPCService().getOptions(id, optionsCallback);
 		}
 	}
 	public void setOptions(String id, Map<String, String> options ) {
 		callbackState = options;
 		if ( id != null && !id.equals("") ) {
-		    optionsService.getOptions(id, optionsCallback);
+		    Util.getRPCService().getOptions(id, optionsCallback);
 		}
 	}
 	AsyncCallback optionsCallback = new AsyncCallback() {

@@ -94,10 +94,6 @@ public class VizGalPanel extends Composite {
 	String operationID;
 	String view;
 
-	/* The product server base URL */
-
-	String productServer;
-
 	/* The current variable in this panel. */
 	VariableSerializable var;
 
@@ -120,8 +116,6 @@ public class VizGalPanel extends Composite {
 	String yhi;
 
 	String ID;
-
-	RPCServiceAsync rpcService;
 
 	// Some information to control the size of the image as the browser window changes size.
 	int pwidth;
@@ -161,12 +155,10 @@ public class VizGalPanel extends Composite {
 	/**
 	 * Builds a VizGal panel with a default plot for the variable.  See {@code}VizGal(LASRequest) if you want more options on the initial plot.
 	 */
-	public VizGalPanel(String id, boolean comparePanel, String op, String optionID, String view, String productServer, boolean single, RPCServiceAsync rpcService) {
+	public VizGalPanel(String id, boolean comparePanel, String op, String optionID, String view, boolean single) {
 		this.ID = id;
 		this.comparePanel = comparePanel;
-		this.productServer = productServer;
 		this.singlePanel = single;
-		this.rpcService = rpcService;
 		this.operationID = op;
 		this.view = view;
 		String spinImageURL = Util.getImageURL()+"/mozilla_blu.gif";
@@ -206,7 +198,7 @@ public class VizGalPanel extends Composite {
 		top = new Grid(1,3);
 
 		String title = "Settings";
-		settingsButton = new SettingsWidget(title, ID, operationID, optionID, rpcService, "button");
+		settingsButton = new SettingsWidget(title, ID, operationID, optionID, "button");
         settingsButton.setToolType(this.view);
 		settingsButton.addApplyClickListener(applyPanelClick);
 		settingsButton.addCloseClickListener(closeClick);
@@ -251,7 +243,7 @@ public class VizGalPanel extends Composite {
 		double delta = Math.abs(Double.valueOf(ds_grid.getXAxis().getArangeSerializable().getStep()));
 		settingsButton.getRefMap().setDataExtent(grid_south, grid_north, grid_west, grid_east, delta);
 		
-		settingsButton.setOperations(rpcService, var.getIntervals(), var.getDSID(), var.getID(), operationID, view, null);
+		settingsButton.setOperations(var.getIntervals(), var.getDSID(), var.getID(), operationID, view, null);
 		tandzWidgets.removeAxes();
 		settingsButton.setUsePanel(usePanel);
 		if ( ds_grid.getTAxis() != null ) {
@@ -379,7 +371,7 @@ public class VizGalPanel extends Composite {
 			lasRequest.addProperty("ferret", "fill_levels", fill_levels);
 		}
 		lasRequest.setProperty("product_server", "ui_timeout", "10");
-		String url = productServer+"?xml="+URL.encode(lasRequest.getXMLText());
+		String url = Util.getProductServer()+"?xml="+URL.encode(lasRequest.getXMLText());
 		
 		if ( !url.equals(currentURL) ) {
 			currentURL = url;
@@ -519,7 +511,7 @@ public class VizGalPanel extends Composite {
 											grid.setWidget(1, 0, new HTML("Retrying..."));
 											grid.setWidget(2, 0, getCompareWidget());
 											// Just send the same request again to see if it works the second time.
-											String url = productServer+"?xml="+URL.encode(lasRequest.getXMLText());
+											String url = Util.getProductServer()+"?xml="+URL.encode(lasRequest.getXMLText());
 											RequestBuilder sendRequest = new RequestBuilder(RequestBuilder.GET, url);
 											try {
 												sendRequest.sendRequest(null, lasRequestCallback);
@@ -537,8 +529,8 @@ public class VizGalPanel extends Composite {
 							String elapsed_time = result.getAttribute("elapsed_time");
 							HTML batch = new HTML(spinImage.getHTML()+"<br><br>Your request has been processing for "+elapsed_time+" seconds.<br>This panel will refresh automatically.<br><br>");
 							grid.setWidget(1, 0, batch);
-							lasRequest.setProperty("product_server", "ui_timeout", "3");
-							String url = productServer+"?xml="+URL.encode(lasRequest.getXMLText());
+							lasRequest.setProperty("product_server", "ui_timeout", "10");
+							String url = Util.getProductServer()+"?xml="+URL.encode(lasRequest.getXMLText());
 							RequestBuilder sendRequest = new RequestBuilder(RequestBuilder.GET, url);
 							try {
 								sendRequest.sendRequest(null, lasRequestCallback);
@@ -571,7 +563,7 @@ public class VizGalPanel extends Composite {
 				nvar = (VariableSerializable) v;
 				ngrid = null;
 				changeDataset = true;
-				rpcService.getGrid(nvar.getDSID(), nvar.getID(), gridCallback);
+				Util.getRPCService().getGrid(nvar.getDSID(), nvar.getID(), gridCallback);
 			}
 		}
 
@@ -971,7 +963,7 @@ public class VizGalPanel extends Composite {
 			}
 		}
 		lasRequest.setProperty("product_server", "ui_timeout", "20");
-		String url = productServer+"?xml="+URL.encode(lasRequest.getXMLText());
+		String url = Util.getProductServer()+"?xml="+URL.encode(lasRequest.getXMLText());
 		
 		if ( !url.equals(currentURL) ) {
 			currentURL = url;

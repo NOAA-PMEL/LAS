@@ -5,6 +5,7 @@ import gov.noaa.pmel.tmap.las.client.RPCServiceAsync;
 import gov.noaa.pmel.tmap.las.client.serializable.CategorySerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.DatasetSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.VariableSerializable;
+import gov.noaa.pmel.tmap.las.client.util.Util;
 
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
@@ -19,7 +20,6 @@ import com.google.gwt.user.client.ui.TreeListener;
  */
 public class DatasetWidget extends Tree implements TreeListener {
     TreeItem currentlySelected = null;
-    RPCServiceAsync catService;
 	/* (non-Javadoc)
 	 * @see com.google.gwt.user.client.ui.TreeListener#onTreeItemSelected(com.google.gwt.user.client.ui.TreeItem)
 	 */
@@ -38,15 +38,14 @@ public class DatasetWidget extends Tree implements TreeListener {
 		currentlySelected = item;
 		if ( item.getChild(0).getText().equals("Loading...") ) {
 			CategorySerializable cat = (CategorySerializable) item.getUserObject();
-			catService.getCategories(cat.getID(), categoryCallback);
+			Util.getRPCService().getCategories(cat.getID(), categoryCallback);
 		}
 	}
 	/**
 	 * Set up the tree and the associated RPC.
 	 */
-	public void init(RPCServiceAsync catService) {
-		this.catService = catService;
-		catService.getCategories(null, categoryCallback);
+	public void init() {
+		Util.getRPCService().getCategories(null, categoryCallback);
 		addTreeListener(this);	
 	}
 	AsyncCallback categoryCallback = new AsyncCallback() {
