@@ -529,7 +529,7 @@ public class VizGalPanel extends Composite {
 							String elapsed_time = result.getAttribute("elapsed_time");
 							HTML batch = new HTML(spinImage.getHTML()+"<br><br>Your request has been processing for "+elapsed_time+" seconds.<br>This panel will refresh automatically.<br><br>");
 							grid.setWidget(1, 0, batch);
-							lasRequest.setProperty("product_server", "ui_timeout", "10");
+							lasRequest.setProperty("product_server", "ui_timeout", "3");
 							String url = Util.getProductServer()+"?xml="+URL.encode(lasRequest.getXMLText());
 							RequestBuilder sendRequest = new RequestBuilder(RequestBuilder.GET, url);
 							try {
