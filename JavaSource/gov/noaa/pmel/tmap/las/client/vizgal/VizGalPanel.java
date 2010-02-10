@@ -110,6 +110,7 @@ public class VizGalPanel extends Composite {
 	// Some widgets to show when a panel is being refreshed.
 	PopupPanel spin;
 	HTML spinImage;
+	HTML timeRangeMessage;
 
 	// The view will have at most two axes,  these hold the ranges for those axes.
 	String xlo;
@@ -155,6 +156,8 @@ public class VizGalPanel extends Composite {
 	// The height in pixels of the panel header
 	String panelHeader = "75px";
 
+	// The current Product URL being displayed in this frame.
+	String currentURL = "";
 	/**
 	 * Builds a VizGal panel with a default plot for the variable.  See {@code}VizGal(LASRequest) if you want more options on the initial plot.
 	 */
@@ -168,6 +171,9 @@ public class VizGalPanel extends Composite {
 		this.view = view;
 		String spinImageURL = Util.getImageURL()+"/mozilla_blu.gif";
 		spinImage = new HTML("<img src=\""+spinImageURL+"\" alt=\"Spinner\"/>");
+		
+		timeRangeMessage = new HTML("Set time selectors to a range to see an updated plot");
+		
 		dateTimeWidget.addChangeListener(comparisonAxisChangeListener);
 		zAxisWidget.addChangeListener(comparisonAxisChangeListener);
 
@@ -298,10 +304,7 @@ public class VizGalPanel extends Composite {
 		if (switchAxis) {
 			switchAxis();
 		}
-		if (popup) {
-			spin.setPopupPosition(grid.getWidget(1,0).getAbsoluteLeft(), grid.getWidget(1,0).getAbsoluteTop());
-			spin.show();
-		}
+		
 		lasRequest = new LASRequestWrapper();
 		lasRequest.removeRegion(0);
 		lasRequest.removeVariables();
@@ -313,10 +316,21 @@ public class VizGalPanel extends Composite {
 		lasRequest.setProperty("ferret", "view", view);
 		lasRequest.setProperty("ferret", "size", ".8333");
 
+		
 		if ( var.getGrid().getTAxis() != null ) {
 			if (isUsePanelSettings() || singlePanel) {
+				// Don't update the plot until the time range is set to an interval in those cases where the view contains "t"
+				if ( view.contains("t") && tandzWidgets.getDateWidget().getFerretDateLo().equals(tandzWidgets.getDateWidget().getFerretDateHi()) ) {
+					spin.setWidget(timeRangeMessage);
+					return;
+				}
 				lasRequest.setRange("t", tandzWidgets.getDateWidget().getFerretDateLo(), tandzWidgets.getDateWidget().getFerretDateHi(), 0);
 			} else {
+				// Don't update the plot until the time range is set to an interval in those cases where the view contains "t"
+				if ( view.contains("t") && dateTimeWidget.getFerretDateLo().equals(dateTimeWidget.getFerretDateHi()) ) {
+					spin.setWidget(timeRangeMessage);
+					return;
+				}
 				lasRequest.setRange("t", dateTimeWidget.getFerretDateLo(), dateTimeWidget.getFerretDateHi(), 0);
 			}
 		}
@@ -366,12 +380,21 @@ public class VizGalPanel extends Composite {
 		}
 		lasRequest.setProperty("product_server", "ui_timeout", "10");
 		String url = productServer+"?xml="+URL.encode(lasRequest.getXMLText());
-		RequestBuilder sendRequest = new RequestBuilder(RequestBuilder.GET, url);
-		try {
-			sendRequest.sendRequest(null, lasRequestCallback);
-		} catch (RequestException e) {
-			HTML error = new HTML(e.toString());
-			grid.setWidget(1, 0, error);
+		
+		if ( !url.equals(currentURL) ) {
+			currentURL = url;
+			if (popup) {
+				spin.setWidget(spinImage);
+				spin.setPopupPosition(grid.getWidget(1,0).getAbsoluteLeft(), grid.getWidget(1,0).getAbsoluteTop());
+				spin.show();
+			}
+			RequestBuilder sendRequest = new RequestBuilder(RequestBuilder.GET, url);
+			try {
+				sendRequest.sendRequest(null, lasRequestCallback);
+			} catch (RequestException e) {
+				HTML error = new HTML(e.toString());
+				grid.setWidget(1, 0, error);
+			}
 		}
 	}
 
@@ -809,8 +832,7 @@ public class VizGalPanel extends Composite {
 			messagePanel.show();
 			return;
 		}
-		spin.setPopupPosition(grid.getWidget(1,0).getAbsoluteLeft(), grid.getWidget(1,0).getAbsoluteTop());
-		spin.show();
+		
 		lasRequest = new LASRequestWrapper();
 		lasRequest.removeRegion(0);
 		lasRequest.removeVariables();
@@ -950,12 +972,19 @@ public class VizGalPanel extends Composite {
 		}
 		lasRequest.setProperty("product_server", "ui_timeout", "20");
 		String url = productServer+"?xml="+URL.encode(lasRequest.getXMLText());
-		RequestBuilder sendRequest = new RequestBuilder(RequestBuilder.GET, url);
-		try {
-			sendRequest.sendRequest(null, lasRequestCallback);
-		} catch (RequestException e) {
-			HTML error = new HTML(e.toString());
-			grid.setWidget(1, 0, error);
+		
+		if ( !url.equals(currentURL) ) {
+			currentURL = url;
+			spin.setPopupPosition(grid.getWidget(1, 0).getAbsoluteLeft(), grid.getWidget(1, 0).getAbsoluteTop());
+			spin.show();
+			RequestBuilder sendRequest = new RequestBuilder(RequestBuilder.GET,
+					url);
+			try {
+				sendRequest.sendRequest(null, lasRequestCallback);
+			} catch (RequestException e) {
+				HTML error = new HTML(e.toString());
+				grid.setWidget(1, 0, error);
+			}
 		}
 	}
 	public void addCompareAxisChangeListener(ChangeListener compareAxisChangeListener) {
