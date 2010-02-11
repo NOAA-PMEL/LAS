@@ -249,10 +249,7 @@ public class OLMapWidget extends Composite {
 				boxLayer.destroyFeatures();
 				lineLayer.destroyFeatures();
 				editing = false;
-				setDataExtent(dataBounds.getLowerLeftY(), dataBounds.getUpperRightY(), dataBounds.getLowerLeftX(), dataBounds.getUpperRightX(), delta);
-			    if ( !modulo || !tool.equals("xy") ) {
-			    	trimSelection(dataBounds);
-			    }
+				setDataExtent(dataBounds.getLowerLeftY(), dataBounds.getUpperRightY(), dataBounds.getLowerLeftX(), dataBounds.getUpperRightX());		    
 			    featureAdded();
 			}
 			
@@ -688,6 +685,8 @@ public class OLMapWidget extends Composite {
 			} else {
 				trimSelection(bounds);
 			}
+		} else {
+			setDataExtent(dataBounds.getLowerLeftY(), dataBounds.getUpperRightY(), dataBounds.getLowerLeftX(), dataBounds.getUpperRightX());
 		}
 	}
 	public void setTool(String tool) {
