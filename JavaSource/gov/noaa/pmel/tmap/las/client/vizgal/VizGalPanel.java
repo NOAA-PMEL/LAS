@@ -9,6 +9,7 @@ import gov.noaa.pmel.tmap.las.client.laswidget.SettingsWidget;
 import gov.noaa.pmel.tmap.las.client.laswidget.TandZWidgets;
 import gov.noaa.pmel.tmap.las.client.serializable.GridSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.VariableSerializable;
+import gov.noaa.pmel.tmap.las.client.util.Constants;
 import gov.noaa.pmel.tmap.las.client.util.Util;
 
 import java.util.HashMap;
@@ -371,7 +372,7 @@ public class VizGalPanel extends Composite {
 			}			
 		}
 		// Now force in the auto contour settings if it exists.
-		if ( fill_levels != null && !fill_levels.equals("") ) {
+		if ( fill_levels != null && !fill_levels.equals("") && !fill_levels.equals(Constants.NO_MIN_MAX) ) {
 			lasRequest.addProperty("ferret", "fill_levels", fill_levels);
 		}
 		lasRequest.setProperty("product_server", "ui_timeout", "10");
