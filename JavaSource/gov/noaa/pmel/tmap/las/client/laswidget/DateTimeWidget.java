@@ -413,6 +413,11 @@ public class DateTimeWidget extends Composite {
 					lo_day.setSelectedIndex(d);
 				}
 			}
+			int lo_i = lo_day.getSelectedIndex();
+			int hi_i = hi_day.getSelectedIndex();
+			if ( lo_i > hi_i ) {
+				hi_day.setSelectedIndex(lo_i);
+			}
 		} else {
 			Date lo = parseFerretDate(tlo);
 			
@@ -444,7 +449,16 @@ public class DateTimeWidget extends Composite {
 					}
 				}
 			}
-
+			 // The new value is set.  Check the range (even it it's not visible).
+			if ( hasYear ) {
+				checkRangeEndYear();
+			} else if ( hasMonth ) {
+				checkRangeEndMonth();
+			} else if ( hasDay ) {
+				checkRangeEndDay();
+			} else {
+				checkRangeEndHour();
+			}
 		}
 	}
 	public void setHi(String thi) {
@@ -455,6 +469,11 @@ public class DateTimeWidget extends Composite {
 				if ( value.equals(thi) ) {
 					hi_day.setSelectedIndex(d);
 				}
+			}
+			int lo_i = lo_day.getSelectedIndex();
+			int hi_i = hi_day.getSelectedIndex();
+			if ( lo_i > hi_i ) {
+				lo_day.setSelectedIndex(hi_i);
 			}
 		} else {
 			Date hi = parseFerretDate(thi);
@@ -487,7 +506,16 @@ public class DateTimeWidget extends Composite {
 					}
 				}
 			}
-
+            // The new value is set.  Check the range (even it it's not visible).
+			if ( hasYear ) {
+				checkRangeStartYear();
+			} else if ( hasMonth ) {
+				checkRangeStartMonth();
+			} else if ( hasDay ) {
+				checkRangeStartDay();
+			} else {
+				checkRangeStartHour();
+			}
 		}
 	}
 

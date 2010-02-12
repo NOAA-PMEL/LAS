@@ -297,6 +297,8 @@ public class VizGalPanel extends Composite {
 			switchAxis();
 		}
 		
+		spin.hide();
+		
 		lasRequest = new LASRequestWrapper();
 		lasRequest.removeRegion(0);
 		lasRequest.removeVariables();
@@ -314,6 +316,7 @@ public class VizGalPanel extends Composite {
 				// Don't update the plot until the time range is set to an interval in those cases where the view contains "t"
 				if ( view.contains("t") && tandzWidgets.getDateWidget().getFerretDateLo().equals(tandzWidgets.getDateWidget().getFerretDateHi()) ) {
 					spin.setWidget(timeRangeMessage);
+					spin.show();
 					return;
 				}
 				lasRequest.setRange("t", tandzWidgets.getDateWidget().getFerretDateLo(), tandzWidgets.getDateWidget().getFerretDateHi(), 0);
@@ -321,6 +324,7 @@ public class VizGalPanel extends Composite {
 				// Don't update the plot until the time range is set to an interval in those cases where the view contains "t"
 				if ( view.contains("t") && dateTimeWidget.getFerretDateLo().equals(dateTimeWidget.getFerretDateHi()) ) {
 					spin.setWidget(timeRangeMessage);
+					spin.show();
 					return;
 				}
 				lasRequest.setRange("t", dateTimeWidget.getFerretDateLo(), dateTimeWidget.getFerretDateHi(), 0);
@@ -682,10 +686,14 @@ public class VizGalPanel extends Composite {
 	}
 
 	public String getThi() {
-		return tandzWidgets.getDateWidget().getFerretDateHi();
+		return dateTimeWidget.getFerretDateHi();
+		// I think this is wrong.  This is "panel" mode.  I want the value for compare widget value.
+		//return tandzWidgets.getDateWidget().getFerretDateHi();
 	}
 	public String getTlo() {
-		return tandzWidgets.getDateWidget().getFerretDateLo();
+		return dateTimeWidget.getFerretDateLo();
+		// Same as above.
+		// return tandzWidgets.getDateWidget().getFerretDateLo();
 	}
 
 	public String getZhi() {
@@ -817,7 +825,8 @@ public class VizGalPanel extends Composite {
 		if (switchAxis) {
 			switchAxis();
 		}
-
+		
+        spin.hide();
 
 		if ( !view_in.equals(settingsButton.getOperationsWidget().getCurrentView()) ) {
 			messagePanel.setPopupPosition(grid.getWidget(1, 0).getAbsoluteLeft()+15, grid.getWidget(1,0).getAbsoluteTop()+15);
