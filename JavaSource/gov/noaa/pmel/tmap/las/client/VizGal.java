@@ -736,6 +736,11 @@ public class VizGal implements EntryPoint {
 			}
 
 		}
+		boolean diff = !view.contains(compareAxis);	
+		if ( !diff ) {
+			differenceButton.setDown(false);
+		}
+		differenceButton.setEnabled(diff);
 		refresh(false, false);
 	}
 	public boolean init() {
@@ -872,7 +877,11 @@ public class VizGal implements EntryPoint {
 				}
 				refresh(true, true);
 			}		
-			differenceButton.setEnabled(!view.contains(compareAxis));
+			boolean diff = !view.contains(compareAxis);	
+			if ( !diff ) {
+				differenceButton.setDown(false);
+			}
+			differenceButton.setEnabled(diff);
 		}			
 	};
 	private void refresh(boolean switchAxis, boolean history) {
@@ -1246,8 +1255,12 @@ public class VizGal implements EntryPoint {
 	private void setupMenusForOperationChange() {
 		view = settingsControls.getOperationsWidget().getCurrentView();
 		op = settingsControls.getCurrentOp().getID();
-		// Turn off the difference button when the compare axis is a range.			    
-		differenceButton.setEnabled(!view.contains(compareAxis));
+		// Turn off the difference button when the compare axis is a range.			
+		boolean diff = !view.contains(compareAxis);
+		if ( !diff ) {
+			differenceButton.setDown(false);
+		}
+		differenceButton.setEnabled(diff);
 		if ( view.length() !=  2 ) {
 			autoContourTextBox.setText("");
 			autoContourButton.setDown(false);
