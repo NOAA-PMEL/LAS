@@ -8,6 +8,7 @@ import gov.noaa.pmel.tmap.las.client.serializable.CategorySerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.GridSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.TimeAxisSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.VariableSerializable;
+import gov.noaa.pmel.tmap.las.client.util.Constants;
 import gov.noaa.pmel.tmap.las.client.util.Util;
 import gov.noaa.pmel.tmap.las.client.vizgal.VizGalPanel;
 
@@ -886,6 +887,9 @@ public class VizGal implements EntryPoint {
 	};
 	private void refresh(boolean switchAxis, boolean history) {
 
+		if (autoContourTextBox.getText().equals(Constants.NO_MIN_MAX) ) {
+			autoContourTextBox.setText("");
+		}
 		if ( differenceButton.isDown() ) {
 			if ( autoContourButton.isDown() ) {
 				autoContourButton.setDown(false);
@@ -1242,7 +1246,14 @@ public class VizGal implements EntryPoint {
 
 		// Modify the optionTextField and submit the request
 		String fill_levels = "(" + uminr + "," + umaxr + "," + dint + ")";
-		autoContourTextBox.setText(fill_levels);
+
+		// These are pretty close to zero.  I think the min/max did not come back from the server, so stop
+		if ( uminr + .00001 < .0001 && umaxr + .00001 < .0001 ) {
+			autoContourTextBox.setText(Constants.NO_MIN_MAX);
+			autoContourButton.setDown(false);
+		} else {
+			autoContourTextBox.setText(fill_levels);
+		}
 	}
 	public ClickListener operationsClickListener = new ClickListener() {
 		public void onClick(Widget sender) {
