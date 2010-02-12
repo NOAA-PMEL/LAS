@@ -1248,7 +1248,7 @@ public class VizGal implements EntryPoint {
 		String fill_levels = "(" + uminr + "," + umaxr + "," + dint + ")";
 
 		// These are pretty close to zero.  I think the min/max did not come back from the server, so stop
-		if ( uminr + .00001 < .0001 && umaxr + .00001 < .0001 ) {
+		if ( (uminr + .00001 < .0001 && umaxr + .00001 < .0001) || globalMax < -9999999. && globalMin > 9999999. ) {
 			autoContourTextBox.setText(Constants.NO_MIN_MAX);
 			autoContourButton.setDown(false);
 		} else {
