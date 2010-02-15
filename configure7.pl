@@ -480,6 +480,14 @@ EOF
 
 
 if ( getYesOrNo("Do you want to install the example data set configuration") ) {
+
+     my $serverConf = "conf/server";
+     if ( !(-d $serverConf) ) {
+        &File::Path::mkpath($serverConf);
+        print "Creating the $serverConf directory.\n";
+     }
+
+
     my @sample_in = ();
     my @sample_out = ();
 
