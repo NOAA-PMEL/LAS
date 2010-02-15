@@ -1635,7 +1635,7 @@ public class addXML {
 		String calendar = "standard";  // The mixed Gregorian/Julian calendar in Java and UDUNITS.
 		Attribute calendarAttribute = axis.findAttribute("calendar");
 		if (calendarAttribute != null) {
-			calendar = calendarAttribute.getStringValue();
+			calendar = calendarAttribute.getStringValue().toLowerCase();
 		}
 
 
@@ -1883,10 +1883,12 @@ public class addXML {
 			DateTime jodaDate1 = makeDate(t0, dateUnit, chrono);
 			arange.setSize("1");
 			arange.setStep("1");
-			arange.setStart(fmt.print(jodaDate1));
+			String start = fmt.print(jodaDate1);
+			if (start.startsWith("-")) start = start.substring(1);
+			arange.setStart(start);
 			// The UI will eliminate this axis.  I think it's safe to set
 			// the units to anything.  !?!?
-			axisbean.setUnits("day");
+			axisbean.setUnits(dateUnit.getTimeUnitString());
 			axisbean.setArange(arange);
 		}
 
