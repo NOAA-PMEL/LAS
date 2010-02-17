@@ -44,7 +44,6 @@ import java.security.NoSuchAlgorithmException;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -71,7 +70,6 @@ import org.joda.time.DurationFieldType;
 import org.joda.time.Hours;
 import org.joda.time.Months;
 import org.joda.time.Period;
-import org.joda.time.PeriodType;
 import org.joda.time.Years;
 import org.joda.time.chrono.All360Chronology;
 import org.joda.time.chrono.AllLeapChronology;
@@ -93,8 +91,6 @@ import thredds.catalog.ThreddsMetadata.GeospatialCoverage;
 import thredds.catalog.ThreddsMetadata.Range;
 import thredds.catalog.ThreddsMetadata.Variable;
 import thredds.catalog.ThreddsMetadata.Variables;
-import thredds.catalog2.ThreddsMetadata;
-
 import ucar.nc2.Attribute;
 import ucar.nc2.constants.FeatureType;
 import ucar.nc2.dataset.CoordinateAxis;
@@ -110,8 +106,6 @@ import ucar.nc2.dt.grid.GridDataset;
 import ucar.nc2.units.DateRange;
 import ucar.nc2.units.DateType;
 import ucar.nc2.units.DateUnit;
-import ucar.nc2.units.SimpleUnit;
-import ucar.nc2.units.TimeDuration;
 import ucar.unidata.geoloc.ProjectionImpl;
 import ucar.unidata.geoloc.projection.LambertConformal;
 import ucar.unidata.geoloc.projection.LatLonProjection;
@@ -132,11 +126,17 @@ import com.martiansoftware.jsap.JSAPResult;
  * @version 1.5
  */
 public class addXML {
+
 	private static final Logger log = LogManager.getLogger(addXML.class);
 	private static final String patterns[] = {
 		"yyyy", "yyyy-MM-dd", "yyyy-MM-dd", "yyyy-MM-dd",
 		"yyyy-MM-dd HH:mm:ss", "yyyy-MM-ddTHH:mm:ss",
 		"yyyy-MM-dd HH:mm:ss", "yyyy-MM-dd HH:mm:ss"};
+	
+	// Constants
+	private static final String Z_VALUES = "z_values";
+	
+	
 	private static boolean verbose;
 	private static boolean generate_names;
 	private static int fileCount;
@@ -965,18 +965,20 @@ public class addXML {
 							boolean hasZ = false;
 							boolean readZ = false;
 							String zvalues = null;
+													
 							Range z = coverage.getUpDownRange();
 							if ( z != null ) {	
 								hasZ = true;
 								double zsize = z.getSize();
 								double zresolution = z.getResolution();
 								double zstart = z.getStart();
-								zvalues = threddsDataset.findProperty("zvalues");
+								zvalues = threddsDataset.findProperty(Z_VALUES).trim();
 								if ( ( Double.isNaN(zsize) || Double.isNaN(zresolution) || Double.isNaN(zstart) ) &&
 										zvalues == null ) {
 									readZ = true;
 								}
 							}
+							
 							// One of these axes is not sufficiently specified in the metadata so prepare read the data out of the aggregation.
 							NetcdfDataset ncds = null;
 							GridDataset gridsDs = null;
@@ -1078,9 +1080,8 @@ public class addXML {
 									String zunits = z.getUnits();
 									zAxis.setType("z");
 									zAxis.setUnits(zunits);
-									zvalues = zvalues.trim().replaceAll("\\s+", "");
-									String[] v = zvalues.split(",");
-									zAxis.setV(v);
+									String[] zvs = zvalues.split("\\s+");								
+									zAxis.setV(zvs);
 								} else {
 									log.info("Loading Z without property metadata: "+elementName);
 									zAxis.setElement(elementName);
@@ -1257,12 +1258,10 @@ public class addXML {
 							GridDataset gds = (GridDataset) TypedDatasetFactory.open(FeatureType.GRID, ncds, null, error);
 							List<GridDatatype> grids = gds.getGrids();
 							if ( grids != null && grids.size() > 0 ) {
-								for (int i = 0; i < grids.size(); i++) {
-									GridDatatype grid = (GridDatatype) grids.get(i);
-									if ( i > 0 ) {
-										dataset_name.append(" ");
-									}
-									dataset_name.append(grid.getDescription() + " (" + grid.getUnitsString() + ")");
+								GridDatatype grid = (GridDatatype) grids.get(0);
+								dataset_name.append(grid.getDescription() + " (" + grid.getUnitsString() + ")");
+								if ( grids.size() > 1 ) {
+									dataset_name.append(" more...");
 								}
 							}
 						} catch (IOException e) {
