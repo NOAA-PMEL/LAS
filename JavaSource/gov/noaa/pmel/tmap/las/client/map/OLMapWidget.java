@@ -521,6 +521,21 @@ public class OLMapWidget extends Composite {
 //		    boxLayer.addFeature(new VectorFeature(currentSelection.toGeometry()));
 //		}
 	}
+	
+	// This is to work around the bug that drawing on the map while it's hidden doesn't work
+	// You must follow this will a call to set selection.
+	public void setDataExtentOnly(double slat, double nlat, double wlon, double elon, double delta) {
+		this.delta = delta;
+		dataBounds = new Bounds(wlon, slat, elon, nlat);
+		double w = dataBounds.getWidth();
+		double dt = Math.abs(360. - w);
+		if ( dt <= 2.*delta ) {
+			modulo = true;
+			selectionMade = false;
+		} else {
+			modulo = false;
+		}
+	}
 	public void setDataExtent(double slat, double nlat, double wlon, double elon) {
 		setDataExtent(slat, nlat, wlon, elon, delta);
 	}
@@ -689,6 +704,9 @@ public class OLMapWidget extends Composite {
 			setDataExtent(dataBounds.getLowerLeftY(), dataBounds.getUpperRightY(), dataBounds.getLowerLeftX(), dataBounds.getUpperRightX());
 		}
 	}
+	public String getTool() {
+		return tool;
+	}
 	public void setTool(String tool) {
 		if ( !this.tool.equals(tool) ) {
 			editing = false;
@@ -755,6 +773,46 @@ public class OLMapWidget extends Composite {
 			} else {
 				editButton.setEnabled(true);
 			}
+		}
+	}
+	// We need to set the tool, but not draw on the map to work around the problem of drawing on the map when it's hidden.
+	public void setToolOnly(String tool) {
+		editing = false;
+		this.tool = tool;
+		drawRectangle.deactivate();
+		drawXLine.deactivate();
+		drawYLine.deactivate();
+		drawPoint.deactivate();
+		if ( tool.equals("t") || tool.equals("z") || tool.equals("zt") || tool.equals("pt") ) {	
+			drawButtonUp.setUrl(GWT.getModuleBaseURL()+"../images/draw_pt_off.png");
+			drawButtonDown.setUrl(GWT.getModuleBaseURL()+"../images/draw_pt_on.png");
+			if ( drawButton.isDown() ) {
+				drawPoint.activate();
+			}
+		} else if ( tool.equals("x") || tool.equals("xz") || tool.equals("xt") ) {
+			drawButtonUp.setUrl(GWT.getModuleBaseURL()+"../images/draw_x_line_off.png");
+			drawButtonDown.setUrl(GWT.getModuleBaseURL()+"../images/draw_x_line_on.png");
+			if ( drawButton.isDown() ) {
+				drawXLine.activate();
+			}
+		} else if ( tool.equals("y") || tool.equals("yz") || tool.equals("yt") ) {
+			drawButtonUp.setUrl(GWT.getModuleBaseURL()+"../images/draw_y_line_off.png");
+			drawButtonDown.setUrl(GWT.getModuleBaseURL()+"../images/draw_y_line_on.png");
+			if ( drawButton.isDown() ) {
+				drawYLine.activate();
+			}
+		} else {
+			drawButtonUp.setUrl(GWT.getModuleBaseURL()+"../images/draw_off.png");
+			drawButtonDown.setUrl(GWT.getModuleBaseURL()+"../images/draw_on.png");
+			if ( drawButton.isDown() ) {
+				drawRectangle.activate();
+			}
+		}
+		if ( tool.equals("t") || tool.equals("z") || tool.equals("zt") || tool.equals("pt") ) {
+			// Disable selecting for points
+			editButton.setEnabled(false);
+		} else {
+			editButton.setEnabled(true);
 		}
 	}
 	public ClickHandler editButtonClickHandler = new ClickHandler() {
@@ -1299,4 +1357,5 @@ public class OLMapWidget extends Composite {
         	localMap.@gov.noaa.pmel.tmap.las.client.map.OLMapWidget::panMapToSelection()();
         }
     }-*/;
+	
 }

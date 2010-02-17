@@ -295,7 +295,7 @@ public class VizGal implements EntryPoint {
 		header.setWidget(0, 1, differenceButton);
 
 		// This is a control panel that will control the settings for all the panels and it appears vertically on the left side.
-		// The last false is to disallow editing with the grab handles on the map.
+		
 		settingsControls = new SettingsWidget("Gallery Settings", "Slide Sorter", op, optionID, "panel");
 		settingsControls.setTitle("Settings for all panels.");
 		settingsControls.addDatasetTreeListener(datasetTreeListener);
@@ -717,6 +717,15 @@ public class VizGal implements EntryPoint {
 			for (Iterator panelIt = panels.iterator(); panelIt.hasNext();) {
 				VizGalPanel panel = (VizGalPanel) panelIt.next();
 				panel.setLatLon(xlo, xhi, ylo, yhi);
+			}
+		} else {
+			double tmp_xlo = settingsControls.getRefMap().getXlo();
+			double tmp_xhi = settingsControls.getRefMap().getXhi();
+			double tmp_ylo = settingsControls.getRefMap().getYlo();
+			double tmp_yhi = settingsControls.getRefMap().getYhi();
+			for (Iterator panelIt = panels.iterator(); panelIt.hasNext();) {
+				VizGalPanel panel = (VizGalPanel) panelIt.next();
+				panel.setLatLon(String.valueOf(tmp_xlo), String.valueOf(tmp_xhi), String.valueOf(tmp_ylo), String.valueOf(tmp_yhi));
 			}
 		}
 		
