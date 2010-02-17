@@ -235,6 +235,7 @@ public class VizGalPanel extends Composite {
 		max = -999999999.;
 	    datasetLabel.setText(var.getDSName()+": "+var.getName());
 		GridSerializable ds_grid = var.getGrid();
+		ngrid = ds_grid;
 		double grid_west = Double.valueOf(ds_grid.getXAxis().getLo());
 		double grid_east = Double.valueOf(ds_grid.getXAxis().getHi());
 
@@ -421,6 +422,10 @@ public class VizGalPanel extends Composite {
 
 				setImageWidth();
 
+				//TODO hack
+				// TODO debug test
+				
+				/*
 				// Also set the min and max for the data in this panel.
 				String mn = getElementValue("data_min", responseXML);
 				if ( mn != null ) {
@@ -431,7 +436,7 @@ public class VizGalPanel extends Composite {
 				if ( mx != null ) {
 					max = Double.valueOf(mx);
 				}
-
+                */
 			}	
 		}		
 	};
@@ -600,6 +605,7 @@ public class VizGalPanel extends Composite {
 	}
 	ClickListener applyPanelClick = new ClickListener() {
 		public void onClick(Widget sender) {
+			setPanelMode();
 			if ( ngrid == null ) {
 				Window.alert("Still fetching grid for new variable.");
 				return;

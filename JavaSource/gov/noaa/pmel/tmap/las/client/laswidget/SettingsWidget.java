@@ -207,7 +207,7 @@ public class SettingsWidget extends Composite {
 			/*
 			 * If you don't remove the map, all the features that have
 			 * been rendered to it while it was hidden will appear on
-			 * the map and will be zombies (you can clear them
+			 * the map and will be zombies (you can't clear them
 			 * and you can't select them).  Remove the map and reinitializing
 			 * it works around this problem.
 			 */
@@ -215,24 +215,31 @@ public class SettingsWidget extends Composite {
 			
 			// n, s, e, w...
 			double[] data = refMap.getDataExtent();
-			double[] selection = refMap.getCurrentSelection();
+			
+			double xlo = refMap.getXlo();
+			double xhi = refMap.getXhi();
+			double ylo = refMap.getYlo();
+			double yhi = refMap.getYhi();
+			
 			double delta = refMap.getDelta();
 			int zoom = refMap.getZoom();
 			double[] center = refMap.getCenterLatLon();
-			
-			refMap = new OLMapWidget();
-			
-			refMap.setDataExtent(data[1], data[0], data[3], data[2], delta);
-			
-			refMap.setCurrentSelection(selection[1], selection[0], selection[3], selection[2]);
-			
-			refMap.setCenter(center[0], center[1], zoom);
+			String tool = refMap.getTool();
 			
 			settingsDialog.setPopupPosition(settingsButton.getAbsoluteLeft()-350, settingsButton.getAbsoluteTop());
 			settingsDialog.show();		
 			
+			refMap = new OLMapWidget();
+			
+			refMap.setDataExtentOnly(data[1], data[0], data[3], data[2], delta);
+			
+			refMap.setToolOnly(tool);
+			
+			refMap.setCenter(center[0], center[1], zoom);
+			
+			refMap.setCurrentSelection(ylo, yhi, xlo, xhi);
+			
 			leftInteriorPanel.add(refMap);
-
 			
 		}		
 	};
