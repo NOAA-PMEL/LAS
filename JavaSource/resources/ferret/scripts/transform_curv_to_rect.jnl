@@ -58,7 +58,7 @@ LET the_var_rect = ($regrid_fcn)(($data_var_only)[d=($data_num)],($cf_map_var)[d
 LET the_var_rect_region = ($regrid_fcn)(($data_var_only)[d=($data_num)],($cf_map_var)[d=($mapfile_num)])
 LET the_var_rect_no_zt = ($regrid_fcn)(($data_var_only)[d=($data_num)],($cf_map_var)[d=($mapfile_num)])
 
-IF ($reg_zt"0|*>1)) THEN \
+IF ($reg_zt"0|*>1) THEN \
   LET the_var_rect = ($regrid_fcn)(($data_var_only)[d=($data_num),($reg_zt)],($cf_map_var)[d=($mapfile_num)])
 
 LET nx = `map[d=($mapfile_num),J=1,K=1,L=1,X=@NGD]`
@@ -93,7 +93,7 @@ LET the_var_rect_no_zt = ($regrid_fcn)(\
 
 LET the_var_rect = ($regrid_fcn)(\
  ($data_var_only)[d=($data_num),I=($clon_imin):($clon_imax),J=($clat_jmin):($clat_jmax)], ($cf_map_var)[d=($mapfile_num),($region_xy)] )
-IF ($reg_zt"0|*>1)) THEN LET the_var_rect = ($regrid_fcn)(\
+IF ($reg_zt"0|*>1) THEN LET the_var_rect = ($regrid_fcn)(\
  ($data_var_only)[d=($data_num),($reg_zt),I=($clon_imin):($clon_imax),J=($clat_jmin):($clat_jmax)], ($cf_map_var)[d=($mapfile_num),($region_xy)] )
 LET the_var_rect_no_zt = ($regrid_fcn)(\
  ($data_var_only)[d=($data_num),I=($clon_imin):($clon_imax),J=($clat_jmin):($clat_jmax)], ($cf_map_var)[d=($mapfile_num),($region_xy)] )
