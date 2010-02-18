@@ -130,7 +130,7 @@ public class addXML {
 	private static final Logger log = LogManager.getLogger(addXML.class);
 	private static final String patterns[] = {
 		"yyyy", "yyyy-MM-dd", "yyyy-MM-dd", "yyyy-MM-dd",
-		"yyyy-MM-dd HH:mm:ss", "yyyy-MM-ddTHH:mm:ss",
+		"yyyy-MM-dd HH:mm:ss", "yyyy-MM-dd'T'HH:mm:ss",
 		"yyyy-MM-dd HH:mm:ss", "yyyy-MM-dd HH:mm:ss"};
 	
 	// Constants
@@ -145,7 +145,6 @@ public class addXML {
 	private static String version_string = "1.6.0.0";
 	private static String global_title_attribute;
 	private static String format;
-	private static DateTimeFormatter fmt;
 	private static String units_format;
 	private static String group_type;
 	private static String group_name;
@@ -1133,7 +1132,7 @@ public class addXML {
 
 							String tstart = trimUnidataDateTimeString(dateRange.getStart());
 							String tend = trimUnidataDateTimeString(dateRange.getEnd());
-							DateTimeFormatter f = DateTimeFormat.forPattern("yyyy-MM-dd 00:00:00").withChronology(chrono);
+							DateTimeFormatter f = DateTimeFormat.forPattern( "yyyy-MM-dd HH:mm:ss").withChronology(chrono);
 							DateTime s = f.parseDateTime(tstart).withChronology(chrono);
 							DateTime e = f.parseDateTime(tend).withChronology(chrono);
 							Months mm = Months.monthsBetween(s, e);
@@ -1623,6 +1622,7 @@ public class addXML {
 
 		// LAS only understands time units of: 'year', 'month', 'day', and 'hour'
 
+		DateTimeFormatter fmt = null;
 
 		String type = "t";
 		AxisBean axisbean = new AxisBean();
