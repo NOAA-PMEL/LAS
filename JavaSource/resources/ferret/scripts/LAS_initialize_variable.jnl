@@ -19,6 +19,7 @@ DEFINE SYMBOL data_num = `($data_var),RETURN=dsetnum`
 DEFINE SYMBOL data_($num)_num = `($data_var),RETURN=dsetnum`
 
 LET attlist = ($data_var).attnames
+DEFINE SYMBOL data_var_only = `UPCASE("($data_var)")`
 
 ! setup for analysis ops on curvilinear grids 
 IF `IS_ELEMENT_OF_STR (attlist, "ferret_definition") GT 0 AND\
