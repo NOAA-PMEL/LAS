@@ -246,11 +246,58 @@
       </classpath>
     </javac>
   </target>
-  <target name="addxml-dist" depends="addxml-compile">
+  <target name="addxml-build" depends="addxml-compile">
     <mkdir dir="${addxml-dist}/lib"/>
     <jar jarfile="${addxml-dist}/lib/addXML.jar" basedir="${addxml-build}"/>
   </target>
   <target name="addxml-clean">
     <delete dir="${addxml-build}"/>
   </target>
+<target name="addxml-dist">
+ <mkdir dir="dist/addxml" />
+ <mkdir dir="dist/addxml/src/gov/noaa/pmel/tmap/addxml" />
+ <mkdir dir="dist/addxml/src/org/joda/time/chrono" />
+ <mkdir dir="dist/addxml/bin" />
+ <mkdir dir="dist/addxml/lib" />
+ <copy todir="dist/addxml/src/gov/noaa/pmel/tmap/addxml">
+   <fileset dir="JavaSource/gov/noaa/pmel/tmap/addxml">
+     <include name="*.java"/>
+   </fileset>
+ </copy>
+ <copy todir="dist/addxml/src/org/joda/time/chrono">
+   <fileset dir="JavaSource/org/joda/time/chrono">
+     <include name="*.java"/>
+   </fileset>
+ </copy>
+ <copy file="JavaSource/gov/noaa/pmel/tmap/addxml/log4j.xml" tofile="dist/addxml/src/gov/noaa/pmel/tmap/addxml/log4j.xml"/>
+ <copy file="WebContent/WEB-INF/lib/joda-time-1.5.2.jar" todir="dist/addxml/lib"/>
+ <copy file="WebContent/WEB-INF/lib/JSAP_1.03a.jar" todir="dist/addxml/lib"/>
+ <copy file="WebContent/WEB-INF/lib/toolsUI-4.0.jar" todir="dist/addxml/lib"/>
+ <copy file="WebContent/WEB-INF/lib/log4j-1.2.13.jar" todir="dist/addxml/lib"/>
+ <copy file="bin/catalogClean.sh" todir="dist/addxml/bin"/>
+ <copy file="bin/addXML.sh.in" tofile="dist/addxml/bin/addXML.sh"/>
+ <chmod file="dist/addxml/bin/addXML.sh" perm="755"/>
+ <copy file="build.xml.in" tofile="dist/addxml/build.xml"/>
+ <copy file="bin/README_catalogCleaner.html" tofile="dist/addxml/README_catalogCleaner.html"/>
+ <copy file="bin/README" tofile="dist/addxml/README"/>
+</target>
+  <target name="addxml">
+    <unjar src="lib/joda-time-1.5.2.jar" dest="${addxml-build}"/>
+    <unjar src="lib/JSAP_1.03a.jar" dest="${addxml-build}"/>
+    <unjar src="lib/toolsUI-4.0.jar" dest="${addxml-build}"/>
+    <unjar src="lib/log4j-1.2.13.jar" dest="${addxml-build}"/>
+    <javac srcdir="src/gov/noaa/pmel/tmap/addxml:src/org/joda" destdir="${addxml-build}">
+      <classpath>
+        <fileset id="addxml-libs" dir="lib">
+          <include name="**/*.jar"/>
+        </fileset>
+      </classpath>
+    </javac>
+    <mkdir dir="${addxml-dist}/lib"/>
+    <copy file="src/gov/noaa/pmel/tmap/addxml/log4j.xml" todir="${addxml-dist}/lib" />
+    <jar jarfile="${addxml-dist}/lib/addXML.jar" basedir="${addxml-build}"/>
+  </target>
+ <target name="addxml-distclean">
+   <delete dir="dist"/>
+ </target> 
 </project>

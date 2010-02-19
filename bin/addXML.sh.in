@@ -6,9 +6,9 @@ then
    echo "Please set the JAVA_HOME environment variable"
    exit
 fi
-if [ "$ADDXML_HOME" == "" ]
+if [ "$ADDXML_HOME" == "@PWD@" ]
 then
    echo "Please edit the addXML.sh file and set the home directory of your addXML installation."
    exit
 fi
-$JAVA_HOME/bin/java -cp $ADDXML_HOME/dist/lib/addXML.jar gov.noaa.pmel.tmap.addxml.addXML "$@"
+$JAVA_HOME/bin/java -cp $ADDXML_HOME/dist/lib/addXML.jar:$ADDXML_HOME/dist/lib gov.noaa.pmel.tmap.addxml.addXML "$@"
