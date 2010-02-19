@@ -15,52 +15,17 @@
 ! Define the plot variable. For comparison plots, we want to save the dataset number
 ! for each dataset.
 
-LET allvars = ..varnames
+DEFINE SYMBOL data_num = `($data_var),RETURN=dsetnum`
+DEFINE SYMBOL data_($num)_num = `($data_var),RETURN=dsetnum`
 
-DEFINE SYMBOL data_var_only = `UPCASE("($data_var)")`
+LET attlist = ($data_var).attnames
 
-LET nvars = ..nvars
-LET is_var = 0
-REPEAT/RANGE=1:`nvars`/NAME=m ( LET avar =allvars[i=`m`]; list avar; \
-  DEFINE SYMBOL ivar = `UPCASE(avar)`; \ 
-  IF `STRINDEX("($ivar)", "($data_var_only)" ) GT 0` THEN LET is_var = 1)
-
-IF  `is_var GT 0` THEN 
-
-   DEFINE SYMBOL data_num = `($data_var),RETURN=dsetnum`
-   DEFINE SYMBOL data_($num)_num = `($data_var),RETURN=dsetnum`
-
-   ! HACK:
-   ! If there is a ferret_definition in the data variable (some analysis operation)
-   ! then replace data_var with that. Causes us to need fewer F-TDS operations
-
-   LET attlist = ($data_var).attnames
-   IF `IS_ELEMENT_OF_STR (attlist, "ferret_definition") GT 0` THEN
-
-      LET data_var_definition = `($data_var).ferret_definition`
-      DEFINE SYMBOL data_var_def = `($data_var).ferret_definition`
-
-      ! Set a dup name for listings
-      IF `STRINDEX("($data_var)", "regrid") GT 0` THEN
-         DEFINE SYMBOL str1 = `SUBSTRING("($data_var)", 1, (STRINDEX("($data_var)", "regrid")-4))`
-         IF `($data_dup_varname"0|*>1") EQ 0` THEN \
-	 DEFINE SYMBOL data_dup_varname ($str1)_regrid
-      ENDIF
-
-      IF `STRINDEX("($data_var)", "regrid") GT 0 AND ($ferret_curvi_coord_lon"0|*>1")` THEN
-         GO LAS_setup_regrid_variable
-      ELSE
-         LET data_var_definition = `($data_var).ferret_definition`
-	 DEFINE SYMBOL data_var_def = `($data_var).ferret_definition`
-         DEFINE SYMBOL data_var = data_var_definition
-      ENDIF
-
-   ENDIF
-
-ELSE
-   GO LAS_setup_regrid_variable
-   DEFINE SYMBOL data_num = `($data_var_only),RETURN=dsetnum`
-ENDIF
+! setup for analysis ops on curvilinear grids 
+IF `IS_ELEMENT_OF_STR (attlist, "ferret_definition") GT 0 AND\
+    ($ferret_curvi_coord_lon"0|*>1")` THEN
+   LET data_var_definition = `($data_var).ferret_definition`
+   DEFINE SYMBOL data_var_def = `($data_var).ferret_definition`
+   DEFINE SYMBOL data_var = data_var_definition
 
 ! If there is an X or Y analysis operation then the X or Y region has
 ! Not been set. Get the X and/or Y analysis request, set up 
@@ -68,8 +33,8 @@ ENDIF
 ! by finding the region in the rectiliear portion of the grid
 ! or by first doing a curvi-to-rectilnear regridding operation.
 
-IF `($ferret_curvi_coord_lon"0|*>1")` THEN
-    GO LAS_set_x_y_analysis.jnl
+   GO LAS_set_x_y_analysis.jnl
+
 ENDIF
 
 ! Be sure units and title are defined.
@@ -105,9 +70,9 @@ IF `($data_title"0|*>1") EQ 0` THEN
   CANCEL SYMBOL has_units
 ENDIF
 
-DEFINE SYMBOL ferret_plot_var = ($data_var)[d=($data_num),($region_full)]
 
-IF ($analysis_def"0|*>1") THEN
+DEFINE SYMBOL ferret_plot_var = ($data_var)[d=($data_num),($region_full)]
+IF ($analysis_def"0|*>1") THEN  ! analysis_def from curvi data or transform
    LET fplot_var = ($ferret_plot_var)
    DEFINE SYMBOL ferret_plot_var = fplot_var($analysis_def)
 ENDIF
@@ -175,7 +140,6 @@ DEFINE SYMBOL variables_initialized `1 + ($variables_initialized"0")`
 IF `($num)+1 EQ ($data_count)` THEN GO LAS_set_strides.jnl
 
 ! to set non-native strides for dataset 1 on a difference plot.
-
 IF `($no_native_strides_xy"0|*>1") AND ($set_ndx_strides"0|*>1") EQ 0` THEN 
    GO LAS_set_strides
 ENDIF
@@ -195,4 +159,3 @@ IF `($data_num) EQ 1` THEN
 ENDIF
 
 ! End of $RCSfile ------------LAS_initialize_variable.jnl--------------------------
-
