@@ -758,7 +758,7 @@ public class VizGal implements EntryPoint {
 		// This will load up the operations panels and select the radio button for the op id that is passed in...
 		// Initially the default operation is passed in in the query string.  For subsequent initializations
 		// the value gets set to the default operation for the data type.
-		settingsControls.setOperations(var.getIntervals(), var.getDSID(), var.getID(), op, view, null);
+		settingsControls.setOperations(var.getIntervals(), var.getDSID(), var.getID(), op, view);
 		GridSerializable ds_grid = var.getGrid();
 		double grid_west = Double.valueOf(ds_grid.getXAxis().getLo());
 		double grid_east = Double.valueOf(ds_grid.getXAxis().getHi());

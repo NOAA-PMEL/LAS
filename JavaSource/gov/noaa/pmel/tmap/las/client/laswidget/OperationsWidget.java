@@ -23,7 +23,7 @@ public class OperationsWidget extends StackPanel {
 	VerticalPanel linePlots = new VerticalPanel();
 	VerticalPanel sectionPlots = new VerticalPanel();
 	VerticalPanel hofmullerPlots = new VerticalPanel();
-	OperationsMenu menu;
+	
 	boolean hasXYMap = false;
 	boolean hasLinePlots = false;
 	boolean hasSectionPlots = false;
@@ -36,11 +36,15 @@ public class OperationsWidget extends StackPanel {
     String intervals;
     String initialOp;
     String initialView;
+    String groupName;
 	/**
 	 * Set up the StackPanel and the associated RPC.
 	 */
-	public OperationsWidget() {
+	public OperationsWidget(String groupName) {
 		super();
+		
+		this.groupName = groupName;
+		
 		xyMap.add(new Label("Select a variable..."));
 		add(xyMap, "Maps");
 		
@@ -56,8 +60,8 @@ public class OperationsWidget extends StackPanel {
 		setSize("256px", "200px");
 		
 	}
-	public void setOperations(String intervals, String dsID, String varID, String opID, String view, OperationsMenu menu) {
-		this.menu = menu;
+	public void setOperations(String intervals, String dsID, String varID, String opID, String view) {
+		
 		this.intervals = intervals;
 		this.initialOp = opID;
 		this.initialView = view;
@@ -72,9 +76,6 @@ public class OperationsWidget extends StackPanel {
 		public void onSuccess(Object result) {
 			ops = (OperationSerializable[]) result;
 			setOps();
-			if ( menu != null ) {
-			    menu.setMenus(ops);
-			}
 		}
 		public void onFailure(Throwable caught) {
 			// TODO Alert users...
@@ -118,7 +119,7 @@ public class OperationsWidget extends StackPanel {
 									xyMap.clear();
 									hasXYMap = true;
 								}
-								OperationButton button = new OperationButton("op", "Latitude-Longitude");
+								OperationButton button = new OperationButton(groupName, "Latitude-Longitude");
 								button.setView(view);
 								button.setOperation(op);
 								button.addClickListener(buttonListener);
@@ -134,14 +135,14 @@ public class OperationsWidget extends StackPanel {
 								}
 								OperationButton button;
 								if ( view.equals("x") ) {
-									button = new OperationButton("op", "Longitude");
+									button = new OperationButton(groupName, "Longitude");
 								} else if ( view.equals("y") ) {
-									button = new OperationButton("op", "Latitude");
+									button = new OperationButton(groupName, "Latitude");
 								} else if ( view.equals("z") ) {
 									// TODO, get the grid and initialize from the grid so you have the z-axis label.
-									button = new OperationButton("op", "Z");
+									button = new OperationButton(groupName, "Z");
 								} else {
-									button = new OperationButton("op", "Time");
+									button = new OperationButton(groupName, "Time");
 								}
 								
 								button.setView(view);
@@ -157,9 +158,9 @@ public class OperationsWidget extends StackPanel {
 								}
 								OperationButton button;
 								if ( view.equals("xz") ) {
-									button = new OperationButton("op", "Longitude-z");
+									button = new OperationButton(groupName, "Longitude-z");
 								} else {
-									button = new OperationButton("op", "Latitude-z");
+									button = new OperationButton(groupName, "Latitude-z");
 								}
 								
 								button.setOperation(op);
@@ -176,11 +177,11 @@ public class OperationsWidget extends StackPanel {
 								}
 								OperationButton button;
 								if ( view.equals("xt") ) {
-								    button = new OperationButton("op", "Longitude-time");
+								    button = new OperationButton(groupName, "Longitude-time");
 								} else if (view.equals("yt") ) {
-									button = new OperationButton("op", "Latitude-time");
+									button = new OperationButton(groupName, "Latitude-time");
 								} else {
-									button = new OperationButton("op", "Z-time");
+									button = new OperationButton(groupName, "Z-time");
 								}
 								button.setView(view);
 								button.setOperation(op);

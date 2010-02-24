@@ -79,7 +79,7 @@ public class SettingsWidget extends Composite {
 		datasetAndOptions.add(datasetButton);
 		datasetAndOptions.add(optionsButton);
 		refMap = new OLMapWidget();
-		operations = new OperationsWidget();
+		operations = new OperationsWidget(title);
 		operations.addClickListener(operationsClickListener);
 		if ( layout.equals("button") ) {
 			settingsButton = new Button (title);
@@ -141,8 +141,8 @@ public class SettingsWidget extends Composite {
 		applyButton.addClickListener(apply);
 	}
 
-	public void setOperations(String intervals, String dsID, String varID, String opID, String view, OperationsMenu menu) {
-		operations.setOperations(intervals, dsID, varID, opID, view, menu);
+	public void setOperations(String intervals, String dsID, String varID, String opID, String view) {
+		operations.setOperations(intervals, dsID, varID, opID, view);
 	}
 
 	public void setLatLon(String xlo, String xhi, String ylo, String yhi) {

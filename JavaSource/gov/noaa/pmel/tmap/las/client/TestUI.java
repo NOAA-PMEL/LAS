@@ -164,7 +164,7 @@ public class TestUI implements EntryPoint {
 
 			settingsControls.setToolType(view);
 			settingsControls.getRefMap().setDataExtent(grid_south, grid_north, grid_west, grid_east, delta);
-			settingsControls.setOperations(var.getIntervals(), var.getDSID(), var.getID(), op, view, null);
+			settingsControls.setOperations(var.getIntervals(), var.getDSID(), var.getID(), op, view);
 		}
 		// Examine the variable axes and determine which are orthogonal to the view. 
 
