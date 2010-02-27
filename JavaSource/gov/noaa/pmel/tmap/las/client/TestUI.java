@@ -1,12 +1,17 @@
 package gov.noaa.pmel.tmap.las.client;
 
+import gov.noaa.pmel.tmap.las.client.laswidget.Constants;
+import gov.noaa.pmel.tmap.las.client.laswidget.LASRequestWrapper;
+import gov.noaa.pmel.tmap.las.client.laswidget.OperationPushButton;
+import gov.noaa.pmel.tmap.las.client.laswidget.OperationRadioButton;
 import gov.noaa.pmel.tmap.las.client.laswidget.OperationsMenu;
 import gov.noaa.pmel.tmap.las.client.laswidget.SettingsWidget;
-import gov.noaa.pmel.tmap.las.client.laswidget.Constants;
 import gov.noaa.pmel.tmap.las.client.serializable.CategorySerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.DatasetSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.GridSerializable;
+import gov.noaa.pmel.tmap.las.client.serializable.OperationSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.VariableSerializable;
+import gov.noaa.pmel.tmap.las.client.util.URLUtil;
 import gov.noaa.pmel.tmap.las.client.util.Util;
 import gov.noaa.pmel.tmap.las.client.vizgal.VizGalPanel;
 
@@ -17,8 +22,9 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.gwt.core.client.EntryPoint;
-import com.google.gwt.maps.client.geom.LatLng;
-import com.google.gwt.maps.client.geom.LatLngBounds;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.http.client.URL;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.WindowResizeListener;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -31,6 +37,7 @@ import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.TreeItem;
 import com.google.gwt.user.client.ui.TreeListener;
+import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 
@@ -47,14 +54,16 @@ public class TestUI implements EntryPoint {
 	String initial_time = null;
 	String initial_z = null;
 	int rightPad = 15;
+	int topPad = 120;
 	VariableSerializable var;
 	ArrayList<String> ortho = new ArrayList<String>();
 	String compareAxis;
 	SettingsWidget settingsControls;
 	DockPanel dockPanel = new DockPanel();
 	PopupPanel initializing = new PopupPanel();
+	VerticalPanel center = new VerticalPanel();
 	public void onModuleLoad() {
-		String spinImageURL = Util.getImageURL()+"/mozilla_blu.gif";
+		String spinImageURL = URLUtil.getImageURL()+"/mozilla_blu.gif";
 		output = new HTML("<img src=\""+spinImageURL+"\" alt=\"Spinner\"/> Initializing...");
 	    initializing.add(output);
 	    initializing.show();
@@ -78,12 +87,16 @@ public class TestUI implements EntryPoint {
 		if ( option == null ) {
 			option = "Options_2D_image_contour_xy_7";
 		}
-		settingsControls = new SettingsWidget("Settings", "LAS", op, option, "panel");
+		settingsControls = new SettingsWidget("", "LAS", op, option, "panel");
 		settingsControls.addDatasetTreeListener(datasetTreeListener);
 		settingsControls.addApplyClickListener(panelApply);
+		settingsControls.addOperationClickListener(operationsClickListener);
 		operationsMenu = new OperationsMenu();
-		dockPanel.add(operationsMenu, DockPanel.NORTH);
+		operationsMenu.addClickHandler(externalOperationClick);
+		center.add(operationsMenu);
+		settingsControls.setOperationsMenu(operationsMenu);
 		dockPanel.add(settingsControls, DockPanel.WEST);
+		dockPanel.add(center, DockPanel.CENTER);
 		RootPanel.get("main").add(dockPanel);	
 		Window.addWindowResizeListener(windowResizeListener);
 	}
@@ -195,16 +208,20 @@ public class TestUI implements EntryPoint {
 			Window.alert("There are "+ortho.size()+" orthogonal axes.  The SlideSorterOld only allows 2.");
 		} else {
 			ortho.clear();
-			int width = Window.getClientWidth();
-			int pwidth = (width-rightPad);
+			int height = Window.getClientHeight();
+			int pheight = (height-topPad);
+			if ( panel != null ) {
+				center.remove(panel);
+			}
 			panel = new VizGalPanel("LAS", true, op, option, view, true);
 			panel.setVariable(var);
 			panel.init(false);
 			panel.addCompareAxisChangeListener(onAxisChange);
-			panel.setPanelWidth(pwidth);
+			panel.setPanelHeight(pheight);
 			panel.addApplyListener(panelApply);
 			panel.refreshPlot(null, false, false);
-			dockPanel.add(panel, DockPanel.CENTER);
+			center.add(panel);
+			
 		}
 	}
 	ClickListener panelApply = new ClickListener() {
@@ -230,11 +247,12 @@ public class TestUI implements EntryPoint {
 		}
 		
 	};
+	// In vizGal we monitor the window width since there are two across.  In this case we want the height to fit.
 	public WindowResizeListener windowResizeListener = new WindowResizeListener() {
 		public void onWindowResized(int width, int height) {
-			int pwidth = (width-rightPad);
+			int pheight = (height-topPad);
 			if (panel != null ) {
-	            panel.setPanelWidth(pwidth);
+	            panel.setPanelHeight(pheight);
 			}
 		}
 	};
@@ -258,5 +276,36 @@ public class TestUI implements EntryPoint {
 			panel.refreshPlot(null, false, true);	
 		}
 	};
-	
+	public ClickListener operationsClickListener = new ClickListener() {
+		public void onClick(Widget sender) {
+			if ( sender instanceof OperationRadioButton ) {
+				view = settingsControls.getCurrentOperationView();
+				op = settingsControls.getCurrentOp().getID();
+				panel.setOperation(op, view);
+				if ( view.contains("t") ) {
+					panel.setParentAxisRange("t", true);
+				} else {
+					panel.setParentAxisRange("t", false);
+				}
+				if ( view.contains("z") ) {
+					panel.setParentAxisRange("z", true);
+				} else {
+					panel.setParentAxisRange("z", false);
+				}
+			}
+		}
+	};
+	public ClickHandler externalOperationClick = new ClickHandler() {
+
+		@Override
+		public void onClick(ClickEvent event) {
+			OperationPushButton b = (OperationPushButton) event.getSource();
+			OperationSerializable op = b.getOperation();
+			LASRequestWrapper lasRequest = panel.getRequest();
+			lasRequest.setOperation(op.getID(), "v7");
+			String features = "toolbar=1,location=1,directories=1,status=1,menubar=1,scrollbars=1,resizable=1"; 
+			Window.open(Util.getProductServer()+"?xml="+URL.encode(lasRequest.getXMLText()), op.getName(), features);
+		}
+		
+	};
 }

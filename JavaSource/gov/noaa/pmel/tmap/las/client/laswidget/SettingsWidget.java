@@ -15,6 +15,7 @@ import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.PushButton;
 import com.google.gwt.user.client.ui.TreeListener;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -26,10 +27,10 @@ public class SettingsWidget extends Composite {
 	 * Objects common to any layout.
 	 */
 	protected OperationsWidget operations;
-	protected Button closeButton;
-	protected Button applyButton;
+	protected PushButton closeButton;
+	protected PushButton applyButton;
 	protected HorizontalPanel closeAndApply;
-	protected HorizontalPanel datasetAndOptions;
+	protected HorizontalPanel buttonBar;
 	protected OLMapWidget refMap;
 	protected DatasetButton datasetButton;
 	protected OptionsButton optionsButton;
@@ -51,17 +52,16 @@ public class SettingsWidget extends Composite {
 	/*
 	 * Objects specific to the vertical panel layout
 	 */
-	Grid vertical = new Grid(5,1);
+	Grid vertical = new Grid(4,1);
 
 	public SettingsWidget(String title, String panelID, String operationID, String optionID, String layout) {
 		this.operationID = operationID;
 		this.optionID = optionID;
 		this.layout = layout;
-		applyButton = new Button("Apply");
+		applyButton = new PushButton("Apply");
 		applyButton.setTitle("Apply changes to "+panelID);
-		applyButton.addStyleName("blackBorder");
 		applyButton.addClickListener(applyClick);
-		closeButton = new Button("Close");
+		closeButton = new PushButton("Close");
 		closeButton.setTitle("Close settings panel for "+panelID);
 		closeButton.addClickListener(closeClick);
 		closeAndApply = new HorizontalPanel();
@@ -75,9 +75,8 @@ public class SettingsWidget extends Composite {
 			optionsButton = new OptionsButton(optionID, 0);
 			datasetButton.setOffset(260);
 		}
-		datasetAndOptions = new HorizontalPanel();
-		datasetAndOptions.add(datasetButton);
-		datasetAndOptions.add(optionsButton);
+		buttonBar = new HorizontalPanel();
+		
 		refMap = new OLMapWidget();
 		operations = new OperationsWidget(title);
 		operations.addClickListener(operationsClickListener);
@@ -92,7 +91,9 @@ public class SettingsWidget extends Composite {
 			rightInteriorPanel = new VerticalPanel();
 			leftInteriorPanel.add(refMap);
 			interiorPanel.add(leftInteriorPanel);
-			rightInteriorPanel.add(datasetAndOptions);
+			buttonBar.add(datasetButton);
+			buttonBar.add(optionsButton);
+			rightInteriorPanel.add(buttonBar);
 			rightInteriorPanel.add(operations);
 			interiorPanel.add(rightInteriorPanel);
 			mainPanel.add(closeAndApply);
@@ -100,11 +101,20 @@ public class SettingsWidget extends Composite {
 			settingsDialog.add(mainPanel);
 			initWidget(settingsButton);	
 		} else {
-			vertical.setWidget(0, 0, new Label(title));
-			vertical.setWidget(1, 0, applyButton);
-			vertical.setWidget(2, 0, datasetAndOptions);
-			vertical.setWidget(3, 0, refMap);
-			vertical.setWidget(4, 0, operations);
+			if ( title.equals("") ) {
+				vertical.setWidget(0, 0, buttonBar);
+				vertical.setWidget(1, 0, refMap);
+				vertical.setWidget(2, 0, operations);
+			} else {
+				vertical.setWidget(0, 0, new Label(title));
+				vertical.setWidget(1, 0, buttonBar);
+				vertical.setWidget(2, 0, refMap);
+				vertical.setWidget(3, 0, operations);
+			}
+			buttonBar.add(applyButton);
+			buttonBar.add(datasetButton);
+			buttonBar.add(optionsButton);
+			
 			vertical.setWidth("256px");
 			initWidget(vertical);
 		}
@@ -272,5 +282,9 @@ public class SettingsWidget extends Composite {
 		if ( optionsMap.size() >= 1 ) {
 			optionsButton.setState(optionsMap);
 		}
+	}
+
+	public void setOperationsMenu(OperationsMenu operationsMenu) {
+		operations.setOperationsMenu(operationsMenu);
 	}
 }

@@ -2,6 +2,7 @@ package gov.noaa.pmel.tmap.las.client;
 
 import gov.noaa.pmel.tmap.las.client.laswidget.AxisWidget;
 import gov.noaa.pmel.tmap.las.client.laswidget.DateTimeWidget;
+import gov.noaa.pmel.tmap.las.client.laswidget.OperationRadioButton;
 import gov.noaa.pmel.tmap.las.client.laswidget.SettingsWidget;
 import gov.noaa.pmel.tmap.las.client.serializable.AxisSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.CategorySerializable;
@@ -1266,7 +1267,7 @@ public class VizGal implements EntryPoint {
 	}
 	public ClickListener operationsClickListener = new ClickListener() {
 		public void onClick(Widget sender) {
-			if ( sender instanceof OperationButton ) {
+			if ( sender instanceof OperationRadioButton ) {
 				setupMenusForOperationChange();
 			}
 		}

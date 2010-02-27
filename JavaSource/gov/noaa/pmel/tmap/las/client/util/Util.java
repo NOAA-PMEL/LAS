@@ -38,16 +38,7 @@ public class Util {
 		}
 		return optionsMap;
 	}
-	public static String getImageURL() {
-		return getBaseURL() + "images/";
-	}
-	public static String getBaseURL() {
-		String moduleRelativeURL = GWT.getModuleBaseURL();
-		int first_path_slash = moduleRelativeURL.indexOf("/", moduleRelativeURL.indexOf("://")+4);
-		int second_path_slash = moduleRelativeURL.indexOf("/", first_path_slash+1);
-		String base =  moduleRelativeURL.substring(0, second_path_slash) + "/";
-		return base;
-	}
+	
 	public static String format_two(int i) {
 		// Really an error for i<10 and i>99, but these are 1<days<31 and 0<hours<23.
 		if ( i < 10 ) {
@@ -72,13 +63,13 @@ public class Util {
 		RPCServiceAsync rpcService = (RPCServiceAsync) GWT.create(RPCService.class);
 		ServiceDefTarget endpoint = (ServiceDefTarget) rpcService;
 		String rpcURL = "";
-		String base_path = Util.getBaseURL();
+		String base_path = URLUtil.getBaseURL();
 		rpcURL = base_path + "rpc";
 		endpoint.setServiceEntryPoint(rpcURL);
 		return rpcService;
 	}
 	public static String getProductServer() {
-		return Util.getBaseURL() + "ProductServer.do";
+		return URLUtil.getBaseURL() + "ProductServer.do";
 	}
 	public static String getParameterString(String name) {
 		Map<String, List<String>> parameters = Window.Location.getParameterMap();			
