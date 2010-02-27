@@ -256,7 +256,15 @@
 		<delete dir="WebContent/WEB-INF/classes/resources" />
 		<delete file="${app.name}.war" />
 	</target>
-	<!-- Targets for addXML -->
+	<!-- Targets for addXML 
+
+            ant addxml-compile  # will compile the code
+            ant addxml-build    # depends on compile and will make a jar file in dist/lib/addXML.jar which is used by bin/addXML.sh
+            ant addxml-dist     # creates a directory dist/addxml which is suitable to be tarred and distributed
+            ant addxml          # used to build the distribution copy after ant-dist (everything is relative to /dist/addxml
+            ant dist-clean      # cleans up the distribution directory
+
+        -->
 	<property name="addxml-src" value="JavaSource" />
 	<property name="addxml-build" value="build" />
 	<property name="addxml-dist" value="dist" />
@@ -351,4 +359,57 @@
 	<target name="addxml-distclean">
 		<delete dir="dist" />
 	</target>
+
+  <!-- Targets for creating a distribution of the map widget that can be used by other projects.  -->
+
+  <target name="mapwidget-dist">
+     <mkdir dir="dist/olmapwidget/src/com/weathertopconsulting/olmapwidget/client/util" />
+     <mkdir dir="dist/olmapwidget/src/com/weathertopconsulting/olmapwidget/client/map" />
+     <mkdir dir="dist/olmapwidget/bin" />
+     <mkdir dir="dist/olmapwidget/lib" />
+     <copy todir="dist/olmapwidget/src/com/weathertopconsulting/olmapwidget/client/map">
+        <fileset dir="JavaSource/gov/noaa/pmel/tmap/las/client/map">
+           <include name="**/*.java"/>
+        </fileset>
+     </copy>
+     <copy todir="dist/olmapwidget/src/com/weathertopconsulting/olmapwidget/client/util">
+        <fileset dir="JavaSource/gov/noaa/pmel/tmap/las/client/util">
+           <include name="**/*.java"/>
+           <exclude name="**/Util.java"/>
+        </fileset>
+     </copy>
+     <copy todir="dist/olmapwidget/src/com/weathertopconsulting/olmapwidget/client/openlayers">
+        <fileset dir="JavaSource/gov/noaa/pmel/tmap/las/client/openlayers">
+           <include name="**/*.java"/>
+        </fileset>
+     </copy>
+     <copy file="JavaSource/gov/noaa/pmel/tmap/las/NativeMapWidget.gwt.xml" todir="dist/olmapwidget/src/com/weathertopconsulting/olmapwidget"/>
+     <copy file="build.xml.in" tofile="dist/olmapwidget/build.xml"/>
+     <copy file="bin/ol-compile.sh" todir="dist/olmapwidget/bin"/>
+     <copy file="WebContent/WEB-INF/lib/gwtopenlayers.jar" todir="dist/olmapwidget/lib"/>
+     <chmod file="dist/olmapwidget/bin/ol-compile.sh" perm="755" />
+     <replaceregexp byline="true">
+        <regexp pattern="gov.noaa.pmel.tmap.las.client"/>
+        <substitution expression="com.weathertopconsulting.olmapwidget.client"/>
+        <fileset dir="dist/olmapwidget/src/com/weathertopconsulting/olmapwidget/">
+           <include name="*.xml"/>
+        </fileset>
+        <fileset dir="dist/olmapwidget/src/com/weathertopconsulting/olmapwidget/client/map">
+           <include name="*.java"/>
+        </fileset>
+        <fileset dir="dist/olmapwidget/src/com/weathertopconsulting/olmapwidget/client/util">
+           <include name="*.java"/>
+           <exclude name="Util.java"/>
+        </fileset>
+        <fileset dir="dist/olmapwidget/src/com/weathertopconsulting/olmapwidget/client/openlayers">
+           <include name="*.java"/>
+        </fileset>
+     </replaceregexp>
+  </target>
+  <target name="mapwidget">
+     <exec executable="./bin/ol-compile.sh" failifexecutionfails="false"/>
+  </target>
+  <target name="mapwidget-clean">
+     <delete dir="dist/olmapwidget" />
+  </target>
 </project>
