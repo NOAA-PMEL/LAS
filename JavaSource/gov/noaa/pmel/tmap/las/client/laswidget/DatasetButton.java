@@ -12,13 +12,14 @@ import com.google.gwt.user.client.ui.DecoratorPanel;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PopupPanel;
+import com.google.gwt.user.client.ui.PushButton;
 import com.google.gwt.user.client.ui.TreeItem;
 import com.google.gwt.user.client.ui.TreeListener;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 public class DatasetButton extends Composite {
-	Button choose;
+	PushButton choose;
 	PopupPanel datasetPanel;
 	Label dataset_name = new Label("");
 	Label variable_name = new Label("");
@@ -30,7 +31,7 @@ public class DatasetButton extends Composite {
 	Button close;
 	int offset = 0;
 	public DatasetButton () {
-		choose = new Button("Data Set");
+		choose = new PushButton("Data Set");
 		choose.addClickListener(openClick);
 		datasetPanel = new PopupPanel(false);
 		datasetWidget = new DatasetWidget();
@@ -70,7 +71,7 @@ public class DatasetButton extends Composite {
 	}
 	public ClickListener openClick = new ClickListener() {
 		public void onClick(Widget sender) {
-			datasetPanel.setPopupPosition(choose.getAbsoluteLeft()+offset, choose.getAbsoluteTop()-60);
+			datasetPanel.setPopupPosition(choose.getAbsoluteLeft()+offset, choose.getAbsoluteTop());
 			datasetPanel.show();
 		}
 	};

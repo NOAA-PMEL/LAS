@@ -5,95 +5,109 @@ import gov.noaa.pmel.tmap.las.client.serializable.OperationSerializable;
 import java.util.Iterator;
 import java.util.List;
 
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.MenuBar;
 import com.google.gwt.user.client.ui.MenuItem;
 
-public class OperationsMenu extends MenuBar {
-	MenuBar animationMenu = new MenuBar(true);
-	MenuBar compareMenu = new MenuBar(true);
-	MenuBar googleEarthMenu = new MenuBar(true);
+public class OperationsMenu extends Composite {
+	// In the configuration should have metadata that indicates that the operation goes in the button bar and that it is the default
+	// operation of that type for that view.  This way we could construct these "on the fly" and keep them in a ArrayList and add them
+	// all at once at the end.
+	HorizontalPanel buttonBar;
+	OperationPushButton animationButton;
+	OperationPushButton compareButton;
+	OperationPushButton googleEarthButton;
+	OperationPushButton showValuesButton;
+	OperationPushButton downloadButton;
 	boolean hasComparison = false;
 	boolean hasAnimation = false;
 	boolean hasGoogleEarth = false;
+	ClickHandler clickHandler;
 	public OperationsMenu() {
-		super();
-		addStyleName("las-MenuBar");
-		setAnimationEnabled(false);
-		animationMenu.setVisible(false);
-		compareMenu.setVisible(false);
-		googleEarthMenu.setVisible(false);
-		addItem("Animation", animationMenu);
-		addItem("Compare", compareMenu);
-		addItem("Google Earth", googleEarthMenu);
-
+		buttonBar = new HorizontalPanel();
+		initWidget(buttonBar);
 	}
 
-	public OperationsMenu(boolean vertical, MenuBarImages images) {
-		super(vertical, images);
-		// TODO Auto-generated constructor stub
-	}
-
-	public OperationsMenu(boolean vertical) {
-		super(vertical);
-		// TODO Auto-generated constructor stub
-	}
-
-	public OperationsMenu(MenuBarImages images) {
-		super(images);
-		// TODO Auto-generated constructor stub
-	}
-
-	public void setMenus(OperationSerializable[] ops) {
+	public void setMenus(OperationSerializable[] ops, String view) {
 		hasComparison = false;
 		hasAnimation = false;
 		hasGoogleEarth = false;
+		buttonBar.clear();
 		for (int i = 0; i < ops.length; i++) {
 			OperationSerializable op = ops[i];
 			String category = op.getAttributes().get("category").toLowerCase();
 			List<String> views = op.getViews();
 			for (Iterator viewIt = views.iterator(); viewIt.hasNext();) {
-				String view = (String) viewIt.next();
+				String op_view = (String) viewIt.next();
 				if ( category.equals("visualization")) {
 					if ( op.getName().toLowerCase().contains("compar") ) {
-
-						if ( !hasComparison ) {
-							compareMenu.clearItems();
-							compareMenu.setVisible(true);
-							hasComparison = true;
+						if ( op_view.equals(view) ) {
+							if ( (op.getAttributes().get("private") == null || !op.getAttributes().get("private").equalsIgnoreCase("true") ) 
+									&& ( op.getAttributes().get("default") != null && op.getAttributes().get("default").equalsIgnoreCase("true") ) ) {
+								if ( !hasComparison ) {
+									hasComparison = true;
+									compareButton = new OperationPushButton(op.getName());
+									compareButton.setOperation(op);
+									compareButton.addClickHandler(clickHandler);
+									buttonBar.add(compareButton);
+								}
+							}
 						}
-						MenuItem item = new MenuItem(op.getName()+" in "+view, processMenuSelection);
-						compareMenu.addItem(item);
-
 					}
 				} else if ( category.contains("animation") ) {
-					if ( !hasAnimation ) {
-						animationMenu.clearItems();
-						animationMenu.setVisible(true);
-						hasAnimation = true;
+					if ( op_view.equals(view) ) {
+						if ( (op.getAttributes().get("private") == null || !op.getAttributes().get("private").equalsIgnoreCase("true") ) 
+								&& ( op.getAttributes().get("default") != null && op.getAttributes().get("default").equalsIgnoreCase("true") ) ) {	
+							if ( !hasAnimation ) {
+								hasAnimation = true;
+								animationButton= new OperationPushButton(op.getName());
+								animationButton.setOperation(op);
+								animationButton.addClickHandler(clickHandler);
+								buttonBar.add(animationButton);
+							}
+						}
 					}
-					MenuItem item = new MenuItem(op.getName()+" in "+view, processMenuSelection);
-					animationMenu.addItem(item);
 				} else if ( category.contains("globe") ) {
-					if ( !hasGoogleEarth ) {
-						googleEarthMenu.clearItems();
-						googleEarthMenu.setVisible(true);
-						hasGoogleEarth = true;
+					if ( op_view.equals(view) ) {
+						if ( (op.getAttributes().get("private") == null || !op.getAttributes().get("private").equalsIgnoreCase("true") ) 
+								&& ( op.getAttributes().get("default") != null && op.getAttributes().get("default").equalsIgnoreCase("true") ) ) {
+							if ( !hasGoogleEarth ) {
+								hasGoogleEarth = true;
+								googleEarthButton = new OperationPushButton(op.getName());
+								googleEarthButton.setOperation(op);
+								googleEarthButton.addClickHandler(clickHandler);
+								buttonBar.add(googleEarthButton);
+							}
+						}
 					}
-					MenuItem item = new MenuItem(op.getName()+" in "+view, processMenuSelection);
-					googleEarthMenu.addItem(item);
+				} else if ( category.contains("table") ) {
+					if ( op_view.equals(view) ) {
+						if ( (op.getAttributes().get("private") == null || !op.getAttributes().get("private").equalsIgnoreCase("true") ) 
+					 	  && ( op.getAttributes().get("default") != null && op.getAttributes().get("default").equalsIgnoreCase("true") ) ) {
+							if ( op.getName().toLowerCase().contains("values") ) {
+								showValuesButton = new OperationPushButton(op.getName());
+								showValuesButton.setOperation(op);
+								showValuesButton.addClickHandler(clickHandler);
+								buttonBar.add(showValuesButton);
+							}
+							if ( op.getName().toLowerCase().contains("download") ) {
+								downloadButton = new OperationPushButton(op.getName());
+								downloadButton.setOperation(op);
+								downloadButton.addClickHandler(clickHandler);
+								buttonBar.add(downloadButton);
+							}
+						}
+					}
 				}
-
 			}
-
 		}
 	}
-
-	Command processMenuSelection = new Command() {
-		public void execute() {
-
-		}
-	};
+    public void addClickHandler(ClickHandler clickHandler) {
+    	this.clickHandler = clickHandler;   	
+    }
 }

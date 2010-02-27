@@ -1,7 +1,6 @@
 package gov.noaa.pmel.tmap.las.client.laswidget;
 
 
-import gov.noaa.pmel.tmap.las.client.OperationButton;
 import gov.noaa.pmel.tmap.las.client.RPCServiceAsync;
 import gov.noaa.pmel.tmap.las.client.serializable.OperationSerializable;
 import gov.noaa.pmel.tmap.las.client.util.Util;
@@ -31,12 +30,22 @@ public class OperationsWidget extends StackPanel {
 	OperationSerializable[] ops;
 	OperationSerializable currentOp;
 	String currentView;
-    ArrayList<OperationButton> buttons = new ArrayList<OperationButton>();
+    ArrayList<OperationRadioButton> buttons = new ArrayList<OperationRadioButton>();
     ArrayList<ClickListener> clicks = new ArrayList<ClickListener>();
     String intervals;
     String initialOp;
     String initialView;
     String groupName;
+    
+    // Optional OperationsMenu.  If set, then it is kept in sync with this widget.
+    OperationsMenu operationsMenu = null;
+    
+	public OperationsMenu getOperationsMenu() {
+		return operationsMenu;
+	}
+	public void setOperationsMenu(OperationsMenu operationsMenu) {
+		this.operationsMenu = operationsMenu;
+	}
 	/**
 	 * Set up the StackPanel and the associated RPC.
 	 */
@@ -75,7 +84,7 @@ public class OperationsWidget extends StackPanel {
 	AsyncCallback operationsCallback = new AsyncCallback() {
 		public void onSuccess(Object result) {
 			ops = (OperationSerializable[]) result;
-			setOps();
+			setOps();		
 		}
 		public void onFailure(Throwable caught) {
 			// TODO Alert users...
@@ -84,14 +93,18 @@ public class OperationsWidget extends StackPanel {
 	ClickListener buttonListener = new ClickListener() {
 
 		public void onClick(Widget sender) {
-			OperationButton button = (OperationButton) sender;
+			OperationRadioButton button = (OperationRadioButton) sender;
 			currentOp = button.getOperation();
 			currentView = button.getView();
 		}
     	
     };
-	
-	public void setOps() {
+	private void setMenu() {
+		if ( operationsMenu != null ) {
+			operationsMenu.setMenus(ops, currentView);
+		}
+	}
+	private void setOps() {
 		hasHofmullerPlots = false;
 		hasLinePlots = false;
 		hasSectionPlots = false;
@@ -119,7 +132,7 @@ public class OperationsWidget extends StackPanel {
 									xyMap.clear();
 									hasXYMap = true;
 								}
-								OperationButton button = new OperationButton(groupName, "Latitude-Longitude");
+								OperationRadioButton button = new OperationRadioButton(groupName, "Latitude-Longitude");
 								button.setView(view);
 								button.setOperation(op);
 								button.addClickListener(buttonListener);
@@ -133,16 +146,16 @@ public class OperationsWidget extends StackPanel {
 									linePlots.clear();
 									hasLinePlots = true;
 								}
-								OperationButton button;
+								OperationRadioButton button;
 								if ( view.equals("x") ) {
-									button = new OperationButton(groupName, "Longitude");
+									button = new OperationRadioButton(groupName, "Longitude");
 								} else if ( view.equals("y") ) {
-									button = new OperationButton(groupName, "Latitude");
+									button = new OperationRadioButton(groupName, "Latitude");
 								} else if ( view.equals("z") ) {
 									// TODO, get the grid and initialize from the grid so you have the z-axis label.
-									button = new OperationButton(groupName, "Z");
+									button = new OperationRadioButton(groupName, "Z");
 								} else {
-									button = new OperationButton(groupName, "Time");
+									button = new OperationRadioButton(groupName, "Time");
 								}
 								
 								button.setView(view);
@@ -156,11 +169,11 @@ public class OperationsWidget extends StackPanel {
 									sectionPlots.clear();
 									hasSectionPlots = true;
 								}
-								OperationButton button;
+								OperationRadioButton button;
 								if ( view.equals("xz") ) {
-									button = new OperationButton(groupName, "Longitude-z");
+									button = new OperationRadioButton(groupName, "Longitude-z");
 								} else {
-									button = new OperationButton(groupName, "Latitude-z");
+									button = new OperationRadioButton(groupName, "Latitude-z");
 								}
 								
 								button.setOperation(op);
@@ -175,13 +188,13 @@ public class OperationsWidget extends StackPanel {
 									hofmullerPlots.clear();
 									hasHofmullerPlots = true;
 								}
-								OperationButton button;
+								OperationRadioButton button;
 								if ( view.equals("xt") ) {
-								    button = new OperationButton(groupName, "Longitude-time");
+								    button = new OperationRadioButton(groupName, "Longitude-time");
 								} else if (view.equals("yt") ) {
-									button = new OperationButton(groupName, "Latitude-time");
+									button = new OperationRadioButton(groupName, "Latitude-time");
 								} else {
-									button = new OperationButton(groupName, "Z-time");
+									button = new OperationRadioButton(groupName, "Z-time");
 								}
 								button.setView(view);
 								button.setOperation(op);
@@ -201,6 +214,7 @@ public class OperationsWidget extends StackPanel {
 		if ( initialOp != null && initialView != null ) {
 			setOperation(initialOp, initialView);
 		}
+		setMenu();
 	}
 	public OperationSerializable[] getOperationsSerializable() {
 		return ops;
@@ -216,13 +230,13 @@ public class OperationsWidget extends StackPanel {
 			clicks.add(operationsClickListener);
 		}
 		for (Iterator buttonIt = buttons.iterator(); buttonIt.hasNext();) {
-			OperationButton button = (OperationButton) buttonIt.next();
+			OperationRadioButton button = (OperationRadioButton) buttonIt.next();
 			button.addClickListener(operationsClickListener);
 		}
 	}
 	public void setOperation(String id, String view) {
 		for (Iterator buttonId = buttons.iterator(); buttonId.hasNext();) {
-			OperationButton button = (OperationButton) buttonId.next();
+			OperationRadioButton button = (OperationRadioButton) buttonId.next();
 			if ( button.getOperation().getID().equals(id) && button.getView().equals(view) ) {
 				button.setChecked(true);
 				currentOp = button.getOperation();

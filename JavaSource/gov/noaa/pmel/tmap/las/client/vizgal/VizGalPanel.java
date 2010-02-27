@@ -1,15 +1,16 @@
 package gov.noaa.pmel.tmap.las.client.vizgal;
 
-import gov.noaa.pmel.tmap.las.client.OperationButton;
 import gov.noaa.pmel.tmap.las.client.RPCServiceAsync;
 import gov.noaa.pmel.tmap.las.client.laswidget.AxisWidget;
 import gov.noaa.pmel.tmap.las.client.laswidget.DateTimeWidget;
 import gov.noaa.pmel.tmap.las.client.laswidget.LASRequestWrapper;
+import gov.noaa.pmel.tmap.las.client.laswidget.OperationRadioButton;
 import gov.noaa.pmel.tmap.las.client.laswidget.SettingsWidget;
 import gov.noaa.pmel.tmap.las.client.laswidget.TandZWidgets;
 import gov.noaa.pmel.tmap.las.client.serializable.GridSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.VariableSerializable;
 import gov.noaa.pmel.tmap.las.client.util.Constants;
+import gov.noaa.pmel.tmap.las.client.util.URLUtil;
 import gov.noaa.pmel.tmap.las.client.util.Util;
 
 import java.util.HashMap;
@@ -162,7 +163,7 @@ public class VizGalPanel extends Composite {
 		this.singlePanel = single;
 		this.operationID = op;
 		this.view = view;
-		String spinImageURL = Util.getImageURL()+"/mozilla_blu.gif";
+		String spinImageURL = URLUtil.getImageURL()+"/mozilla_blu.gif";
 		spinImage = new HTML("<img src=\""+spinImageURL+"\" alt=\"Spinner\"/>");
 		
 		timeRangeMessage = new HTML("Set time selectors to a range to see an updated plot");
@@ -257,20 +258,25 @@ public class VizGalPanel extends Composite {
 			compareAxis = "z";
 			fixedAxis = "none";
 		}
+		
 		if ( ds_grid.getTAxis() != null ) {
 			dateTimeWidget.init(ds_grid.getTAxis(), false);
 			dateTimeWidget.setVisible(true);
 			tandzWidgets.getDateWidget().init(ds_grid.getTAxis(), false);
 			tandzWidgets.addAxis("t");
-			if ( compareAxis.equals("t") ) {
-				grid.setWidget(2, 0, dateTimeWidget);
-			}
 		}
 		if ( ds_grid.getZAxis() != null ) {
 			zAxisWidget.init(ds_grid.getZAxis());
 			zAxisWidget.setVisible(true);
 			tandzWidgets.getZWidget().init(ds_grid.getZAxis());
 			tandzWidgets.addAxis("z");
+		}
+		if ( singlePanel ) {
+			grid.setWidget(2, 0, tandzWidgets);
+		} else {
+			if ( compareAxis.equals("t") ) {
+				grid.setWidget(2, 0, dateTimeWidget);
+			}
 			if ( compareAxis.equals("z") ) {
 				grid.setWidget(2, 0, zAxisWidget);
 			}
@@ -301,53 +307,9 @@ public class VizGalPanel extends Composite {
 		
 		spin.hide();
 		
-		lasRequest = new LASRequestWrapper();
-		lasRequest.removeRegion(0);
-		lasRequest.removeVariables();
-		lasRequest.removePropertyGroup("ferret");
-
-		lasRequest.addVariable(var.getDSID(), var.getID());
-
-		lasRequest.setOperation(operationID, "v7");
-		lasRequest.setProperty("ferret", "view", view);
+        lasRequest = getRequest();
+        lasRequest.setProperty("ferret", "view", view);
 		lasRequest.setProperty("ferret", "size", ".8333");
-
-		
-		if ( var.getGrid().getTAxis() != null ) {
-			if (isUsePanelSettings() || singlePanel) {
-				// Don't update the plot until the time range is set to an interval in those cases where the view contains "t"
-				if ( view.contains("t") && tandzWidgets.getDateWidget().getFerretDateLo().equals(tandzWidgets.getDateWidget().getFerretDateHi()) ) {
-					spin.setWidget(timeRangeMessage);
-					spin.show();
-					return;
-				}
-				lasRequest.setRange("t", tandzWidgets.getDateWidget().getFerretDateLo(), tandzWidgets.getDateWidget().getFerretDateHi(), 0);
-			} else {
-				// Don't update the plot until the time range is set to an interval in those cases where the view contains "t"
-				if ( view.contains("t") && dateTimeWidget.getFerretDateLo().equals(dateTimeWidget.getFerretDateHi()) ) {
-					spin.setWidget(timeRangeMessage);
-					spin.show();
-					return;
-				}
-				lasRequest.setRange("t", dateTimeWidget.getFerretDateLo(), dateTimeWidget.getFerretDateHi(), 0);
-			}
-		}
-
-		xlo = String.valueOf(settingsButton.getRefMap().getXlo());
-		xhi = String.valueOf(settingsButton.getRefMap().getXhi());
-		ylo = String.valueOf(settingsButton.getRefMap().getYlo());
-		yhi = String.valueOf(settingsButton.getRefMap().getYhi());
-
-		lasRequest.setRange("x", xlo, xhi, 0);
-		lasRequest.setRange("y", ylo, yhi, 0);
-
-		if ( var.getGrid().getZAxis() != null ) {
-			if ( isUsePanelSettings() || singlePanel ) {
-				lasRequest.setRange("z", tandzWidgets.getZWidget().getLo(), tandzWidgets.getZWidget().getHi(), 0);
-			} else {
-				lasRequest.setRange("z", zAxisWidget.getLo(), zAxisWidget.getHi(), 0);
-			}
-		}
 		lasRequest.addProperty("ferret", "image_format", "gif");
 		lasRequest.addProperty("las", "output_type", "xml");
 		if ( settingsButton.isUsePanelSettings() || singlePanel ) {
@@ -376,7 +338,29 @@ public class VizGalPanel extends Composite {
 		if ( fill_levels != null && !fill_levels.equals("") && !fill_levels.equals(Constants.NO_MIN_MAX) ) {
 			lasRequest.addProperty("ferret", "fill_levels", fill_levels);
 		}
-		lasRequest.setProperty("product_server", "ui_timeout", "10");
+		lasRequest.setProperty("product_server", "ui_timeout", "10");	
+        if ( var.getGrid().getTAxis() != null ) {
+			if (isUsePanelSettings() || singlePanel) {
+				// Don't update the plot until the time range is set to an interval in those cases where the view contains "t"
+				if ( view.contains("t") && tandzWidgets.getDateWidget().getFerretDateLo().equals(tandzWidgets.getDateWidget().getFerretDateHi()) ) {
+					spin.setWidget(timeRangeMessage);
+					spin.show();
+					return;
+				}
+			} else {
+				// Don't update the plot until the time range is set to an interval in those cases where the view contains "t"
+				if ( view.contains("t") && dateTimeWidget.getFerretDateLo().equals(dateTimeWidget.getFerretDateHi()) ) {
+					spin.setWidget(timeRangeMessage);
+					spin.show();
+					return;
+				}
+			}
+		}
+        
+        if ( lasRequest == null ) {
+        	return;
+        }
+        
 		String url = Util.getProductServer()+"?xml="+URL.encode(lasRequest.getXMLText());
 		
 		if ( !url.equals(currentURL) ) {
@@ -396,6 +380,41 @@ public class VizGalPanel extends Composite {
 		}
 	}
 
+	public LASRequestWrapper getRequest() {
+		LASRequestWrapper lasRequest = new LASRequestWrapper();
+		lasRequest.removeRegion(0);
+		lasRequest.removeVariables();
+		lasRequest.removePropertyGroup("ferret");
+
+		lasRequest.addVariable(var.getDSID(), var.getID());
+		lasRequest.setOperation(operationID, "v7");
+		
+
+		if ( var.getGrid().getTAxis() != null ) {
+			if (isUsePanelSettings() || singlePanel) {
+				lasRequest.setRange("t", tandzWidgets.getDateWidget().getFerretDateLo(), tandzWidgets.getDateWidget().getFerretDateHi(), 0);
+			} else {
+				lasRequest.setRange("t", dateTimeWidget.getFerretDateLo(), dateTimeWidget.getFerretDateHi(), 0);
+			}
+		}
+
+		xlo = String.valueOf(settingsButton.getRefMap().getXlo());
+		xhi = String.valueOf(settingsButton.getRefMap().getXhi());
+		ylo = String.valueOf(settingsButton.getRefMap().getYlo());
+		yhi = String.valueOf(settingsButton.getRefMap().getYhi());
+
+		lasRequest.setRange("x", xlo, xhi, 0);
+		lasRequest.setRange("y", ylo, yhi, 0);
+
+		if ( var.getGrid().getZAxis() != null ) {
+			if ( isUsePanelSettings() || singlePanel ) {
+				lasRequest.setRange("z", tandzWidgets.getZWidget().getLo(), tandzWidgets.getZWidget().getHi(), 0);
+			} else {
+				lasRequest.setRange("z", zAxisWidget.getLo(), zAxisWidget.getHi(), 0);
+			}
+		}
+		return lasRequest;
+	}
 	private RequestCallback mapScaleCallBack = new RequestCallback() {
 
 		public void onError(Request request, Throwable exception) {
@@ -780,6 +799,11 @@ public class VizGalPanel extends Composite {
 			spin.setPopupPosition(w.getAbsoluteLeft(), w.getAbsoluteTop());
 		}
 	}
+	public void setPanelHeight(int height) {
+		autoZoom = true;
+		pwidth = (int) ((image_w/image_h)*Double.valueOf(height));
+		setImageWidth();
+	}
 	public void setPanelWidth(int width) {
 		autoZoom = true;
 		int max = (int) image_w;
@@ -1023,8 +1047,8 @@ public class VizGalPanel extends Composite {
 	};
 	public ClickListener operationsClickListener = new ClickListener() {
 		public void onClick(Widget sender) {
-			if ( sender instanceof OperationButton ) {
-				OperationButton o = (OperationButton) sender;
+			if ( sender instanceof OperationRadioButton ) {
+				OperationRadioButton o = (OperationRadioButton) sender;
 				view = settingsButton.getOperationsWidget().getCurrentView();
 				operationID = settingsButton.getCurrentOp().getID();
 				usePanel(true);

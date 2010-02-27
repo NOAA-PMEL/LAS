@@ -9,10 +9,11 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.ClickListener;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.DialogBox;
+import com.google.gwt.user.client.ui.PushButton;
 import com.google.gwt.user.client.ui.Widget;
 
 public class OptionsButton extends Composite {
-	Button optionsButton = new Button("Plot Options");
+	PushButton optionsButton = new PushButton("Plot Options");
 	DialogBox optionsDialog = new DialogBox(false);
 	OptionsWidget options;
 	Map<String, String> state;
@@ -41,7 +42,7 @@ public class OptionsButton extends Composite {
     ClickListener openClick = new ClickListener() {
 		public void onClick(Widget sender) {
 			state = options.getState();
-			optionsDialog.setPopupPosition(optionsButton.getAbsoluteLeft() - offset, optionsButton.getAbsoluteTop()-60);
+			optionsDialog.setPopupPosition(optionsButton.getAbsoluteLeft() - offset, optionsButton.getAbsoluteTop());
 			optionsDialog.show();
 		}
     };
