@@ -130,7 +130,7 @@ public class addXML {
 	private static final Logger log = LogManager.getLogger(addXML.class);
 	private static final String patterns[] = {
 		"yyyy-MM-dd", "yyyy-MM-dd", "yyyy-MM-dd", "yyyy-MM-dd",
-		"yyyy-MM-dd HH:mm:ss", "yyyy-MM-dd'T'HH:mm:ss",
+		"yyyy-MM-dd HH:mm:ss", "yyyy-MM-dd HH:mm:ss",
 		"yyyy-MM-dd HH:mm:ss", "yyyy-MM-dd HH:mm:ss"};
 	
 	// Constants
