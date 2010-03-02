@@ -528,7 +528,7 @@ public class LASConfig extends LASDocument {
                 axis.setAttribute("dayNeeded", "false");
                 axis.setAttribute("monthNeeded", "false");
                 axis.setAttribute("yearNeeded", "true");                        
-                double start = Double.valueOf(tlo).doubleValue();
+                double start = lodt.getYear();
                 int years = (int) Math.round(start + (size-1)*step);
                 hidt = lodt.plus(Period.years(years));
                 axis.setAttribute("hi", hidt.toString(longfmt));
