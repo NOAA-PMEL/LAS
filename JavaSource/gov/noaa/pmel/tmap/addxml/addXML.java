@@ -914,6 +914,12 @@ public class addXML {
 		dataset.setCreated((new DateTime()).toString());
 		dataset.setUrl(url);
 		List<Variables> variables = threddsDataset.getVariables();
+		
+		if ( variables.size() == 0 ) {
+			// See if the variables list is in the parent data set.
+			InvDataset parent = threddsDataset.getParent();
+			variables = parent.getVariables();
+		}
 		if (variables.size() > 0 ) {
 			for (Iterator varlistIt = variables.iterator(); varlistIt.hasNext();) {
 				Variables vars_container = (Variables) varlistIt.next();
@@ -1107,12 +1113,18 @@ public class addXML {
 									zAxis.setElement(AxisBeans.getMatchingID(zAxis));
 								}
 							}
+							String start_time = threddsDataset.findProperty("start");
+							String time_length = threddsDataset.findProperty("time_length");
 							String time_delta = threddsDataset.findProperty("time_delta");
 							String calendar = threddsDataset.findProperty("calendar");
-
-							String[] time_parts = time_delta.split("\\s+");
-							String tdelta = time_parts[0];
-							String tunits = time_parts[1];
+							String tdelta = "1";
+							String tunits = "month";
+							if ( time_delta.contains(" ") ) {
+								String[] time_parts = time_delta.split("\\s+");
+								tdelta = time_parts[0];
+								tunits = time_parts[1];
+							}
+							
 
 							// Use this chronology and the UTC Time Zone
 							Chronology chrono = GJChronology.getInstance(DateTimeZone.UTC);
@@ -1132,7 +1144,7 @@ public class addXML {
 
 							String tstart = trimUnidataDateTimeString(dateRange.getStart());
 							String tend = trimUnidataDateTimeString(dateRange.getEnd());
-							DateTimeFormatter f = DateTimeFormat.forPattern( "yyyy-MM-dd HH:mm:ss").withChronology(chrono);
+							DateTimeFormatter f = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss").withChronology(chrono);
 							DateTime s = f.parseDateTime(tstart).withChronology(chrono);
 							DateTime e = f.parseDateTime(tend).withChronology(chrono);
 							Months mm = Months.monthsBetween(s, e);
