@@ -1142,31 +1142,87 @@ public class addXML {
 								chrono = All360Chronology.getInstance(DateTimeZone.UTC);
 							}
 
-							String tstart = trimUnidataDateTimeString(dateRange.getStart());
-							String tend = trimUnidataDateTimeString(dateRange.getEnd());
-							DateTimeFormatter f = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss").withChronology(chrono);
-							DateTime s = f.parseDateTime(tstart).withChronology(chrono);
-							DateTime e = f.parseDateTime(tend).withChronology(chrono);
-							Months mm = Months.monthsBetween(s, e);
-							int nm = mm.getMonths();
-							int size = 0;
-							if ( tunits.trim().toLowerCase().contains("year") ) {
-								s = s.dayOfMonth().withMinimumValue();
-								e = e.dayOfMonth().withMaximumValue();
-								Years y = Years.yearsBetween(s, e);
-								size = y.getValue(0);
-							} else if ( tunits.trim().toLowerCase().contains("month") ) {
-								s = s.dayOfMonth().withMinimumValue();
-								e = e.dayOfMonth().withMaximumValue();
-								Months m = Months.monthsBetween(s, e);
-								size = m.getMonths();
-							} else if ( tunits.trim().toLowerCase().contains("day") ) {
-								Days d = Days.daysBetween(s, e);
-								size = d.getValue(0);
-							} else if ( tunits.trim().toLowerCase().contains("hour") ) {
-								Hours h = Hours.hoursBetween(s, e);
-								size = h.getValue(0);
-							}
+							String esg_formats[] = {"yyyy-MM-dd HH:mm:ss.s",
+								                    "yyyy-MM-dd HH:mm:s.s",
+									                "yyyy-MM-dd HH:m:ss.s",
+								                    "yyyy-MM-dd HH:m:s.s",
+								                    
+							
+								                    "yyyy-MM-dd HH:mm:ss.s",
+								                    "yyyy-MM-dd HH:mm:s.s",
+									                "yyyy-MM-dd HH:m:ss.s",
+								                    "yyyy-MM-dd HH:m:s.s",
+								                    "yyyy-MM-dd H:mm:ss.s",
+								                    "yyyy-MM-dd H:mm:s.s",
+									                "yyyy-MM-dd H:m:ss.s",
+								                    "yyyy-MM-dd H:m:s.s",
+								                    
+									                "yyyy-MM-dd HH:mm:ss.s",
+								                    "yyyy-MM-dd HH:mm:s.s",
+									                "yyyy-MM-dd HH:m:ss.s",
+								                    "yyyy-MM-dd HH:m:s.s",
+								                    "yyyy-MM-dd H:mm:ss.s",
+								                    "yyyy-MM-dd H:mm:s.s",
+									                "yyyy-MM-dd H:m:ss.s",
+								                    "yyyy-MM-dd H:m:s.s",
+									                
+									                "yyyy-MM-d HH:mm:ss.s",
+								                    "yyyy-MM-d HH:mm:s.s",
+									                "yyyy-MM-d HH:m:ss.s",
+								                    "yyyy-MM-d HH:m:s.s",
+								                    "yyyy-MM-d H:mm:ss.s",
+								                    "yyyy-MM-d H:mm:s.s",
+									                "yyyy-MM-d H:m:ss.s",
+								                    "yyyy-MM-d H:m:s.s",                
+									                
+									                "yyyy-MM-dd HH:mm:ss.s",
+								                    "yyyy-MM-dd HH:mm:s.s",
+									                "yyyy-MM-dd HH:m:ss.s",
+								                    "yyyy-MM-dd HH:m:s.s",
+								                    "yyyy-MM-dd H:mm:ss.s",
+								                    "yyyy-MM-dd H:mm:s.s",
+									                "yyyy-MM-dd H:m:ss.s",
+								                    "yyyy-MM-dd H:m:s.s",
+									                
+									                "yyyy-MM-d HH:mm:ss.s",
+								                    "yyyy-MM-d HH:mm:s.s",
+									                "yyyy-MM-d HH:m:ss.s",
+								                    "yyyy-MM-d HH:m:s.s",
+								                    "yyyy-MM-d H:mm:ss.s",
+								                    "yyyy-MM-d H:mm:s.s",
+									                "yyyy-MM-d H:m:ss.s",
+								                    "yyyy-MM-d H:m:s.s", 
+								                    
+									                "yyyy-M-dd HH:mm:ss.s",
+								                    "yyyy-M-dd HH:mm:s.s",
+									                "yyyy-M-dd HH:m:ss.s",
+								                    "yyyy-M-dd HH:m:s.s",
+								                    "yyyy-M-dd H:mm:ss.s",
+								                    "yyyy-M-dd H:mm:s.s",
+									                "yyyy-M-dd H:m:ss.s",
+								                    "yyyy-M-dd H:m:s.s",
+									                
+									                "yyyy-M-d HH:mm:ss.s",
+								                    "yyyy-M-d HH:mm:s.s",
+									                "yyyy-M-d HH:m:ss.s",
+								                    "yyyy-M-d HH:m:s.s",
+								                    "yyyy-M-d H:mm:ss.s",
+								                    "yyyy-M-d H:mm:s.s",
+									                "yyyy-M-d H:m:ss.s",
+								                    "yyyy-M-d H:m:s.s"				
+							
+							};
+							DateTime s = null;
+							for ( int i = 0; i < esg_formats.length; i++) {
+								try {
+									DateTimeFormatter f = DateTimeFormat.forPattern(esg_formats[i]).withChronology(chrono);
+									s = f.parseDateTime(start_time).withChronology(chrono);
+									break;
+								} catch (Exception e) {
+									// Try again...
+								}
+							}							
+							
 							log.info("Loading T from metadata: "+elementName);
 							AxisBean tAxis = new AxisBean();
 							tAxis.setElement(threddsDataset.getID()+"-t-axis");
@@ -1174,9 +1230,11 @@ public class addXML {
 							tAxis.setType("t");
 							tAxis.setUnits(tunits);
 							ArangeBean tr = new ArangeBean();
-							tr.setStart(tstart);
+							DateTimeFormatter fmt = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
+							log.debug("Using start time: "+fmt.print(s)+ " from input "+start_time);
+							tr.setStart(fmt.print(s));
 							tr.setStep(tdelta);
-							tr.setSize(String.valueOf(size));
+							tr.setSize(time_length);
 							tAxis.setArange(tr);
 							if ( !AxisBeans.contains(tAxis) ) {
 								AxisBeans.addUnique(tAxis);
