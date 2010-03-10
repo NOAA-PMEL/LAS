@@ -3524,12 +3524,12 @@ public class LASConfig extends LASDocument {
 										src_index++;
 										nextUpdate = Math.min(n, nextUpdate);
 										if ( src_type.equalsIgnoreCase("netCDF") ) {
-											if ( addXMLprops.get("categories") != null && addXMLprops.get("categories").equalsIgnoreCase("true") ) {
+											if ( addXMLprops.get("category") != null && addXMLprops.get("category").equalsIgnoreCase("true") ) {
 												categoryList.addAll(makeCategories(dgab));	
 											}
 										}
 									}
-									if ( src_type.equalsIgnoreCase("THREDDS") && addXMLprops.get("categories") != null && addXMLprops.get("categories").equalsIgnoreCase("true") ) {
+									if ( src_type.equalsIgnoreCase("THREDDS") && addXMLprops.get("category") != null && addXMLprops.get("category").equalsIgnoreCase("true") ) {
 										categoryList.addAll(makeCategoriesFromTHREDDS(src));
 									}
 								} else {
@@ -3545,7 +3545,8 @@ public class LASConfig extends LASDocument {
 							File ds_file = cache.getFile(ds_filename, Cache.GET_CACHE);
 							File grids_file = cache.getFile(grids_filename, Cache.GET_CACHE);
 							File axes_file = cache.getFile(axes_filename, Cache.GET_CACHE);
-							if ( ds_file.exists() && grids_file.exists() && axes_file.exists() ) {
+							if ( ds_file != null && grids_file != null && axes_file != null &&
+									ds_file.exists() && grids_file.exists() && axes_file.exists() ) {
 								LASDocument ds_doc = new LASDocument();
 								LASDocument grids_doc = new LASDocument();
 								LASDocument axes_doc = new LASDocument();

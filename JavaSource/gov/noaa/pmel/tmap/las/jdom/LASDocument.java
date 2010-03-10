@@ -208,7 +208,11 @@ public class LASDocument extends Document {
     }
     public static List convertProperties(Element properties) {
         List<Element> new_prop_groups = new ArrayList<Element>();
-        List property_groups = properties.getChildren();
+        List property_groups = properties.getChildren("property_group");
+        if ( property_groups != null && property_groups.size() > 0 ) {
+        	return property_groups;
+        }
+        property_groups = properties.getChildren();
         for (Iterator grpIt = property_groups.iterator(); grpIt.hasNext();) {
             Element group = (Element) grpIt.next();
             Element property_group = new Element("property_group");
