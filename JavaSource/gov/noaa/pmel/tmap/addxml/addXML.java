@@ -873,11 +873,20 @@ public class addXML {
 					// Try to get metadata from the catalog.
 					dgab = createBeansFromThreddsMetadata(ThreddsDataset, url);
 					if ( dgab == null ) {
+					  /* 
+					   * Doing the initialization from the files is just too expensive.
+					   * If we can't get it from the metadata, then forget it.
+					   * 
+					   
 						// Else open the aggregation and get it from there
 						String dods = url.replaceAll("http", "dods");
 						NetcdfDataset ncds = ucar.nc2.dataset.NetcdfDataset.openDataset(dods);
 						dgab = createBeansFromNetcdfDataset(ncds, url, esg, ThreddsDataset);
 						ncds.close();
+						*
+						* Log the data set and move on...
+						*/
+						log.warn("Not enough metadata to create LAS configuration for "+ThreddsDataset.getName()+".  Skipping...");
 					}
 				}
 			} else {
