@@ -341,19 +341,16 @@ public class DateTimeWidget extends Composite {
 	}
 	public String getFerretDateLo() {
 		StringBuffer date = new StringBuffer();
+		
 		if ( hasDay ) {
 			date.append(lo_day.getValue(lo_day.getSelectedIndex()));
 		} else {
-			if ( hasMonth ) {
-				date.append("15");
-			} else {
-				date.append("01");
-			}
+			date.append(Util.format_two(lo.getDate()));
 		}
 		if ( hasMonth ) {
 			date.append("-"+lo_month.getValue(lo_month.getSelectedIndex()));
 		} else {
-			date.append("-Jan");
+			date.append("-"+MONTHS.get(lo.getMonth()));
 		}
 
 		if ( climatology ) {
@@ -375,17 +372,13 @@ public class DateTimeWidget extends Composite {
 			StringBuffer date = new StringBuffer();
 			if ( hasDay ) {
 				date.append(hi_day.getValue(hi_day.getSelectedIndex()));
-			} else {
-				if ( hasMonth ) {
-					date.append("15");
-				} else {
-					date.append("01");
-				}
+			} else {				
+				date.append(Util.format_two(lo.getDate()));
 			}
 			if ( hasMonth ) {
 				date.append("-"+hi_month.getValue(hi_month.getSelectedIndex()));
 			} else {
-				date.append("-Jan");
+				date.append("-"+MONTHS.get(lo.getMonth()));
 			}
 
 			if ( climatology ) {
