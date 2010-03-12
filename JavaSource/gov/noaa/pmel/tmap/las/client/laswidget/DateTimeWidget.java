@@ -346,15 +346,20 @@ public class DateTimeWidget extends Composite {
 		} else {
 			if ( hasMonth ) {
 				date.append("15");
+			} else {
+				date.append("01");
 			}
 		}
 		if ( hasMonth ) {
 			date.append("-"+lo_month.getValue(lo_month.getSelectedIndex()));
+		} else {
+			date.append("-Jan");
 		}
 
 		if ( climatology ) {
 			date.append("-0001");   
 		} else {
+			
 			if ( hasYear ) {
 				date.append("-"+lo_year.getValue(lo_year.getSelectedIndex()));
 			}
@@ -373,15 +378,20 @@ public class DateTimeWidget extends Composite {
 			} else {
 				if ( hasMonth ) {
 					date.append("15");
+				} else {
+					date.append("01");
 				}
 			}
 			if ( hasMonth ) {
 				date.append("-"+hi_month.getValue(hi_month.getSelectedIndex()));
+			} else {
+				date.append("-Jan");
 			}
 
 			if ( climatology ) {
 				date.append("-0001");   
 			} else {
+				
 				if ( hasYear ) {
 					date.append("-"+hi_year.getValue(hi_year.getSelectedIndex()));
 				}
