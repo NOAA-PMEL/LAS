@@ -21,6 +21,8 @@ import java.util.Map;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -31,14 +33,11 @@ import com.google.gwt.user.client.WindowResizeListener;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.ChangeListener;
 import com.google.gwt.user.client.ui.ClickListener;
-import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
-import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
-import com.google.gwt.user.client.ui.RadioButton;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.ToggleButton;
@@ -137,29 +136,9 @@ public class VizGal implements EntryPoint {
 	DateTimeWidget dateWidget;
 
 	/*
-	 * RadioButton to select the dateWidget as the comparison axis.
-	 */
-	RadioButton dateButton;
-
-	/*
-	 * Panel to hold the date widget and the radio button.
-	 */
-	HorizontalPanel datePanel = new HorizontalPanel();
-
-	/*
 	 * An AxisWidget to globally control the z-axis.
 	 */
-	AxisWidget xyzWidget;
-
-	/*
-	 * A Radio Button to select the Z axis as the comparison axis.
-	 */
-	RadioButton xyzButton;
-
-	/*
-	 * Panel to hold the z widget and the radio button.
-	 */
-	HorizontalPanel xyzPanel = new HorizontalPanel();
+	AxisWidget zWidget;
 
 	/*
 	 * A settings panel for the entire Slide Sorter.
@@ -186,16 +165,6 @@ public class VizGal implements EntryPoint {
 	 */
 	ToggleButton autoContourButton;
 	TextBox autoContourTextBox;
-
-	/*
-	 * Grid for the Global ZT selector.
-	 */
-	FlexTable ztGrid;
-
-	/*
-	 * Label for compare axis selector
-	 */
-	Label varyAxis;
 
 	/*
 	 * Keep track of the new variable and change state to be able apply data set changes only after apply button is pressed.
@@ -265,15 +234,6 @@ public class VizGal implements EntryPoint {
 		// A strip across the top with some of the gallery controls...
 		header = new Grid(1, 10);
 
-		// Controls which axis is the compare axis and which is the fixed axis
-		ztGrid = new FlexTable();
-		varyAxis = new Label("Select Axis to Vary in Panels");
-		varyAxis.addStyleName("las-align-center");
-		ztGrid.setWidget(0, 0, varyAxis);
-		ztGrid.getFlexCellFormatter().setColSpan(0, 0, 2);
-		ztGrid.addStyleName("LSS_middle");
-		header.setWidget(0, 2, ztGrid);
-
 		// Control whether the headers are hidden.
 		panelHeaderHidden = false;
 		plus = new Image(GWT.getModuleBaseURL()+"../images/plus_on.png");
@@ -301,7 +261,8 @@ public class VizGal implements EntryPoint {
 		settingsControls.setTitle("Settings for all panels.");
 		settingsControls.addDatasetTreeListener(datasetTreeListener);
 		settingsControls.addOptionsOkClickListener(optionsOkListener);
-		settingsControls.addOperationClickListener(operationsClickListener);
+		settingsControls.addOperationClickHandler(operationsClickHandler);
+		settingsControls.addComparisonAxisSelectorChangeHandler(compareAxisChangeHandler);
 		//settingsControls.setToolType(view);
 
 		// Sets the contour levels for all plots based on the global min/max of the data (as returned in the map scale file).
@@ -477,7 +438,7 @@ public class VizGal implements EntryPoint {
 				if ( fixedAxis.equals("t") ) {
 					panel.setParentAxisValue("t", dateWidget.getFerretDateLo());
 				} else if ( fixedAxis.equals("z") ) {
-					panel.setParentAxisValue("z", xyzWidget.getLo());
+					panel.setParentAxisValue("z", zWidget.getLo());
 				}
 			}
 			
@@ -555,8 +516,6 @@ public class VizGal implements EntryPoint {
 	private void initPanels() {
 
 		ortho.clear();
-		datePanel.clear();
-		xyzPanel.clear();
 		panels.clear();
 
 		settingsControls.addApplyClickListener(settingsButtonApplyListener);
@@ -650,10 +609,10 @@ public class VizGal implements EntryPoint {
 			// And if z exists, it will be the fixed axis so it also needs to be set.
 			if ( fixedAxis.equals("z") ) {
 				// Set the z axis in the gallery
-				if ( xyzWidget.isRange() ) {
+				if ( zWidget.isRange() ) {
 					if ( zlo != null && !zlo.equals("") && zhi != null && !zhi.equals("") ) {
-						xyzWidget.setLo(zlo);
-						xyzWidget.setHi(zhi);
+						zWidget.setLo(zlo);
+						zWidget.setHi(zhi);
 						// Pass the settings down to the panels
 						for (Iterator panelIt = panels.iterator(); panelIt.hasNext();) {
 							VizGalPanel panel = (VizGalPanel) panelIt.next();
@@ -663,7 +622,7 @@ public class VizGal implements EntryPoint {
 					}
 				} else {
 					if ( zlo != null && !zlo.equals("") ) {
-						xyzWidget.setLo(zlo);
+						zWidget.setLo(zlo);
 						for (Iterator panelIt = panels.iterator(); panelIt.hasNext();) {
 							VizGalPanel panel = (VizGalPanel) panelIt.next();
 							panel.setParentAxisValue("z", zlo);
@@ -677,17 +636,17 @@ public class VizGal implements EntryPoint {
 			// Same if z is the compare axis.
 			for (Iterator panelIt = panels.iterator(); panelIt.hasNext();) {
 				VizGalPanel panel = (VizGalPanel) panelIt.next();
-				if ( xyzWidget.isRange() ) {
+				if ( zWidget.isRange() ) {
 					panel.setParentAxisRangeValues("z", zlo, zhi);
 				} else {
 					panel.setParentAxisValue("z", zlo);
 				}
 			}
-			if ( xyzWidget.isRange() ) {
-				xyzWidget.setLo(zlo);
-				xyzWidget.setHi(zhi);
+			if ( zWidget.isRange() ) {
+				zWidget.setLo(zlo);
+				zWidget.setHi(zhi);
 			} else {
-				xyzWidget.setLo(zlo);
+				zWidget.setLo(zlo);
 			}
 
 			if ( fixedAxis.equals("t") ) {
@@ -772,20 +731,14 @@ public class VizGal implements EntryPoint {
 		settingsControls.getRefMap().setDataExtent(grid_south, grid_north, grid_west, grid_east, delta);
 		
 		ortho.clear();
-		if ( datePanel != null ) {
-			datePanel.clear();
-			ztGrid.remove(datePanel);
-		}
-		if ( xyzPanel != null ) {
-			xyzPanel.clear();
-			ztGrid.remove(xyzPanel);
+		
+		if ( var.getGrid().getTAxis() != null  ) {
+			ortho.add("t");
 		}
 		if ( var.getGrid().getZAxis() != null ) {
 			ortho.add("z");
 		}
-		if ( var.getGrid().getTAxis() != null  ) {
-			ortho.add("t");
-		}
+		
 		if ( ortho.size() == 0 ) {
 			Window.alert("There are no axes orthogonal to the view on which the data can be compared.");
 			return false;
@@ -799,6 +752,10 @@ public class VizGal implements EntryPoint {
 			}  else if ( ortho.contains("z") ) {
 				compareAxis = "z";
 			}
+			
+		
+			settingsControls.getComparisonAxisSelector().setAxes(ortho);
+			settingsControls.getComparisonAxisSelector().setVisible(true);
 			for (Iterator orthoIt = ortho.iterator(); orthoIt.hasNext();) {
 				String type = (String) orthoIt.next();
 				if ( type.equals("t") ) {
@@ -808,38 +765,21 @@ public class VizGal implements EntryPoint {
 					dateWidget = new DateTimeWidget(axis, false);
 					dateWidget.addChangeListener(fixedAxisMenuChange);
 					if (view.contains("t")) dateWidget.setRange(true);
-					if ( compareAxis.equals("t") ) {
-						dateWidget.setEnabled(false);
-					} else {
-						dateWidget.setEnabled(true);
+					if ( !compareAxis.equals("t") ) {
 						fixedAxis = "t";
 					}
-					dateButton = new RadioButton("compare", " ");
-					dateButton.addClickListener(compareAxisChangeListener);
-					if ( compareAxis.equals("t") ) {
-						dateButton.setChecked(true);
-					}
-					datePanel.add(dateButton);
-					datePanel.add(dateWidget);
-					ztGrid.setWidget(1, pos, datePanel);
+					settingsControls.getComparisonAxisSelector().setFixedAxisWidget(dateWidget);
 				} else {
 					AxisSerializable axis = var.getGrid().getAxis(type);
-
-					xyzButton = new RadioButton("compare", " ");
-					xyzButton.addClickListener(compareAxisChangeListener);
-					xyzWidget = new AxisWidget(axis);
-					xyzWidget.addChangeListener(fixedAxisMenuChange);
-					if ( view.contains("z") ) xyzWidget.setRange(true);
-					if ( compareAxis.equals(type) ) {
-						xyzButton.setChecked(true);
-						xyzWidget.setEnabled(false);
-					} else {
+					zWidget = new AxisWidget(axis);
+					zWidget.addChangeListener(fixedAxisMenuChange);
+					if ( view.contains("z") ) zWidget.setRange(true);
+					if ( !compareAxis.equals(type) ) {
 						fixedAxis = type;
-						xyzWidget.setEnabled(true);
 					}
-					xyzPanel.add(xyzButton);
-					xyzPanel.add(xyzWidget);
-					ztGrid.setWidget(1, pos, xyzPanel);
+					
+					//TODO You need the axis change handler on the axes menu of the comparisonaxisselector...
+					settingsControls.getComparisonAxisSelector().setFixedAxisWidget(zWidget);
 				}
 				pos++;
 			}
@@ -849,45 +789,46 @@ public class VizGal implements EntryPoint {
 			return true;
 		}
 	}
-	public ClickListener compareAxisChangeListener = new ClickListener() {
-		public void onClick(Widget sender) {
-			if ( sender instanceof RadioButton) {
-				String temp = compareAxis;
-				compareAxis = fixedAxis;
-				fixedAxis = temp;
-				boolean fixed_axis_range = false;
-				String fixedAxisLoValue = "";
-				String fixedAxisHiValue = "";
-				if ( compareAxis.equals("t") ) {
-					dateWidget.setRange(false);
-					dateWidget.setEnabled(false);
-					xyzWidget.setEnabled(true);
-					xyzWidget.setRange(view.contains("z"));
-					fixedAxisLoValue = xyzWidget.getLo();
-					fixedAxisHiValue = xyzWidget.getHi();
-					fixed_axis_range = xyzWidget.isRange();
-				}  else {
-					dateWidget.setEnabled(true);
-					dateWidget.setRange(view.contains("t"));
-					xyzWidget.setRange(false);
-					xyzWidget.setEnabled(false);
-					fixedAxisLoValue = dateWidget.getFerretDateLo();
-					fixedAxisHiValue = dateWidget.getFerretDateHi();
-					fixed_axis_range = dateWidget.isRange();
-				}
-				// Set the value of the fixed axis in all the panels under slide sorter control.
-				for (Iterator panelIt = panels.iterator(); panelIt.hasNext();) {
-					VizGalPanel panel = (VizGalPanel) panelIt.next();
-					if ( !panel.isUsePanelSettings() ) {
-						if ( fixed_axis_range ) {
-							panel.setParentAxisRangeValues(fixedAxis, fixedAxisLoValue, fixedAxisHiValue);
-						} else {
-							panel.setParentAxisValue(fixedAxis, fixedAxisLoValue);
-						}
+	public ChangeHandler compareAxisChangeHandler = new ChangeHandler() {
+
+		@Override
+		public void onChange(ChangeEvent event) {
+			ListBox axes = (ListBox) event.getSource();
+			fixedAxis = compareAxis;
+			compareAxis = axes.getValue(axes.getSelectedIndex());
+			boolean fixed_axis_range = false;
+			String fixedAxisLoValue = "";
+			String fixedAxisHiValue = "";
+			if ( compareAxis.equals("t") ) {
+				dateWidget.setRange(false);
+				fixedAxisLoValue = zWidget.getLo();
+				fixedAxisHiValue = zWidget.getHi();
+				fixed_axis_range = zWidget.isRange();
+				
+				settingsControls.getComparisonAxisSelector().setFixedAxisWidget(zWidget);
+				
+			}  else {
+				zWidget.setRange(false);
+				fixedAxisLoValue = dateWidget.getFerretDateLo();
+				fixedAxisHiValue = dateWidget.getFerretDateHi();
+				fixed_axis_range = dateWidget.isRange();
+				
+				settingsControls.getComparisonAxisSelector().setFixedAxisWidget(dateWidget);
+				
+			}
+			// Set the value of the fixed axis in all the panels under slide sorter control.
+			for (Iterator panelIt = panels.iterator(); panelIt.hasNext();) {
+				VizGalPanel panel = (VizGalPanel) panelIt.next();
+				if ( !panel.isUsePanelSettings() ) {
+					if ( fixed_axis_range ) {
+						panel.setParentAxisRangeValues(fixedAxis, fixedAxisLoValue, fixedAxisHiValue);
+					} else {
+						panel.setParentAxisValue(fixedAxis, fixedAxisLoValue);
 					}
 				}
-				refresh(true, true);
-			}		
+			}
+			refresh(true, true);
+
 			boolean diff = !view.contains(compareAxis);	
 			if ( !diff ) {
 				differenceButton.setDown(false);
@@ -908,7 +849,7 @@ public class VizGal implements EntryPoint {
 			VizGalPanel comparePanel = null;
 			for (Iterator panelIt = panels.iterator(); panelIt.hasNext();) {
 				VizGalPanel panel = (VizGalPanel) panelIt.next();
-				if ( panel.getID().contains("Panel 0") ) {
+				if ( panel.isComparePanel() ) {
 					comparePanel = panel;
 					panel.refreshPlot(settingsControls.getOptions(), switchAxis, true);	
 				}
@@ -942,8 +883,8 @@ public class VizGal implements EntryPoint {
 							}
 						}
 						if ( fixedAxis.equals("z") ) {
-							zlo = xyzWidget.getLo();
-							zhi = xyzWidget.getHi();
+							zlo = zWidget.getLo();
+							zhi = zWidget.getHi();
 						} else {
 							if ( comparePanel.getVariable().getGrid().getAxis("z") != null ) {
 								zlo = comparePanel.getZlo();
@@ -1101,7 +1042,7 @@ public class VizGal implements EntryPoint {
 						if ( fixedAxis.equals("t") ) {
 							panel.setParentAxisValue("t", dateWidget.getFerretDateLo());
 						} else if ( fixedAxis.equals("z") ) {
-							panel.setParentAxisValue("z", xyzWidget.getLo());
+							panel.setParentAxisValue("z", zWidget.getLo());
 						}
 						panel.setLatLon(String.valueOf(settingsControls.getRefMap().getXlo()), String.valueOf(settingsControls.getRefMap().getXhi()), String.valueOf(settingsControls.getRefMap().getYlo()), String.valueOf(settingsControls.getRefMap().getYhi()));
 						panel.setOperation(op, view);
@@ -1137,9 +1078,9 @@ public class VizGal implements EntryPoint {
 				hi_value = dateWidget.getFerretDateHi();
 				range = dateWidget.isRange();
 			} else if ( fixedAxis.equals("z") ) {
-				lo_value = xyzWidget.getLo();
-				hi_value = xyzWidget.getHi();
-				range = xyzWidget.isRange();
+				lo_value = zWidget.getLo();
+				hi_value = zWidget.getHi();
+				range = zWidget.isRange();
 			}
 			setParentAxis(fixedAxis, lo_value, hi_value, range, false);
 			refresh(false, true);
@@ -1164,10 +1105,10 @@ public class VizGal implements EntryPoint {
 				}	
 			} else if ( axis.equals("z") ) {
 				if ( range ) {
-					xyzWidget.setLo(lo);
-					xyzWidget.setHi(hi);
+					zWidget.setLo(lo);
+					zWidget.setHi(hi);
 				} else {
-					xyzWidget.setLo(lo);
+					zWidget.setLo(lo);
 				}
 			}
 		}
@@ -1265,8 +1206,11 @@ public class VizGal implements EntryPoint {
 			autoContourTextBox.setText(fill_levels);
 		}
 	}
-	public ClickListener operationsClickListener = new ClickListener() {
-		public void onClick(Widget sender) {
+	public ClickHandler operationsClickHandler = new ClickHandler() {
+		
+		@Override
+		public void onClick(ClickEvent event) {
+			Widget sender = (Widget) event.getSource();
 			if ( sender instanceof OperationRadioButton ) {
 				setupMenusForOperationChange();
 			}
@@ -1294,13 +1238,13 @@ public class VizGal implements EntryPoint {
 			if ( fixedAxis.equals("t") ) {
 				dateWidget.setRange(true);
 			} else if ( fixedAxis.equals("z") ) {
-				xyzWidget.setRange(true);
+				zWidget.setRange(true);
 			}
 		} else {
 			if ( fixedAxis.equals("t") ) {
 				dateWidget.setRange(false);
 			} else if ( fixedAxis.equals("z") ) {
-				xyzWidget.setRange(false);
+				zWidget.setRange(false);
 			}
 		}
 
@@ -1319,7 +1263,11 @@ public class VizGal implements EntryPoint {
 				panel.setParentAxisRange("z", false);
 			}
 		}
-
+		if ( view.contains("t") || view.contains("z") ) {
+			settingsControls.hideMap();
+		} else {
+			settingsControls.showMap();
+		}
 	}	
 	private void pushHistory() {
 		// First token collection is the gallery settings (mostly in the header of the UI)
@@ -1332,8 +1280,8 @@ public class VizGal implements EntryPoint {
 			historyToken.append(";fixedAxisLo="+dateWidget.getFerretDateLo());
 			historyToken.append(";fixedAxisHi="+dateWidget.getFerretDateHi());
 		} else if ( fixedAxis.equals("z") ) {
-			historyToken.append(";fixedAxisLo="+xyzWidget.getLo());
-			historyToken.append(";fixedAxisHi="+xyzWidget.getHi());
+			historyToken.append(";fixedAxisLo="+zWidget.getLo());
+			historyToken.append(";fixedAxisHi="+zWidget.getHi());
 		}
 		historyToken.append(";autoContour="+autoContourButton.isDown());
 		if ( panels.get(0).getMin() < 99999999. ) {
@@ -1473,22 +1421,19 @@ public class VizGal implements EntryPoint {
 			String new_fixedAxis = tokenMap.get("fixedAxis");
 			if ( !new_fixedAxis.equals(fixedAxis) ) {
 				switch_axis = true;
-				// You have to manually set the correct radio button since there was not button push to change to this state.
+				if ( tokenMap.containsKey("compareAxis") && tokenMap.get("compareAxis") != null ) {
+				    settingsControls.getComparisonAxisSelector().setValue(tokenMap.get("compareAxis"));
+				}
 			}
+			
 			if ( new_fixedAxis.equals("t") ) {
-				xyzButton.setValue(true);
-				xyzWidget.setEnabled(false);
-				dateButton.setValue(false);
-				dateWidget.setEnabled(true);
 				dateWidget.setLo(tokenMap.get("fixedAxisLo"));
 				dateWidget.setHi(tokenMap.get("fixedAxisHi"));
+				settingsControls.getComparisonAxisSelector().setFixedAxisWidget(dateWidget);
 			} else if ( new_fixedAxis.equals("z") ) {
-				dateButton.setValue(true);
-				dateWidget.setEnabled(false);
-				xyzButton.setValue(false);
-				xyzWidget.setEnabled(true);
-				xyzWidget.setLo(tokenMap.get("fixedAxisLo"));
-				xyzWidget.setHi(tokenMap.get("fixedAxisHi"));
+				zWidget.setLo(tokenMap.get("fixedAxisLo"));
+				zWidget.setHi(tokenMap.get("fixedAxisHi"));
+				settingsControls.getComparisonAxisSelector().setFixedAxisWidget(zWidget);
 			}
 		}
 		if ( tokenMap.containsKey("autoContour") ) {
