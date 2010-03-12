@@ -307,7 +307,8 @@ public class DateTimeWidget extends Composite {
 		
 		if  ( lo_year == year ) {
 			start = lo.getMonth();
-		} else if ( hi_year == year ) {
+		} 
+		if ( hi_year == year ) {
 			end = hi.getMonth() + 1;
 		}
 		for (int m = start; m < end; m++ ) {
