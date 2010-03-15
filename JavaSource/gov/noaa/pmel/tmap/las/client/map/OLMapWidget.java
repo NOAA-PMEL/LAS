@@ -161,6 +161,8 @@ public class OLMapWidget extends Composite {
     private ArgParser argParser;
     private Attribution attribControl;
     
+    private MapSelectionChangeListener mapListener;
+    
 	public OLMapWidget() {
 		regionWidget.setChangeListener(regionChangeListener);
 		textWidget.addSouthChangeListener(southChangeListener);
@@ -251,6 +253,9 @@ public class OLMapWidget extends Composite {
 				editing = false;
 				setDataExtent(dataBounds.getLowerLeftY(), dataBounds.getUpperRightY(), dataBounds.getLowerLeftX(), dataBounds.getUpperRightX());		    
 			    featureAdded();
+			    if ( mapListener != null ) {
+			    	mapListener.onFeatureChanged();
+			    }
 			}
 			
 		});
@@ -516,10 +521,10 @@ public class OLMapWidget extends Composite {
 		lineLayer.destroyFeatures();
 		editing = false;
 		setSelection(currentSelection);
-		// For now don't select the region at all.
-//		if ( !modulo ) {
-//		    boxLayer.addFeature(new VectorFeature(currentSelection.toGeometry()));
-//		}
+		// Add the geometry back on to the map if the tools is not a rectangle.
+		if ( !tool.equals("xy") ) {	
+			trimSelection(currentSelection);
+		}
 	}
 	
 	// This is to work around the bug that drawing on the map while it's hidden doesn't work
@@ -598,6 +603,9 @@ public class OLMapWidget extends Composite {
 			trimSelection(geo.getBounds());
 			selectionMade = true;        
 			featureAdded();
+			if ( mapListener != null ) {
+		    	mapListener.onFeatureChanged();
+		    }
 		}
 	};
 	private void setSelection(Bounds bounds) {
@@ -1016,6 +1024,9 @@ public class OLMapWidget extends Composite {
 			setCurrentSelection(ylo, yhi, currentSelection.getLowerLeftX(), currentSelection.getUpperRightX());
 			panMapToSelection();
 			featureAdded();
+			if ( mapListener != null ) {
+		    	mapListener.onFeatureChanged();
+		    }
 		}
 	};
 	/**
@@ -1075,6 +1086,9 @@ public class OLMapWidget extends Composite {
 			setCurrentSelection(ylo, yhi, currentSelection.getLowerLeftX(), currentSelection.getUpperRightX());
 			panMapToSelection();
 			featureAdded();
+			if ( mapListener != null ) {
+		    	mapListener.onFeatureChanged();
+		    }
 		}
 	};
 	/**
@@ -1142,6 +1156,9 @@ public class OLMapWidget extends Composite {
 			setCurrentSelection(currentSelection.getLowerLeftY(), currentSelection.getUpperRightY(), xlo, xhi);
 			panMapToSelection();
 			featureAdded();
+			if ( mapListener != null ) {
+		    	mapListener.onFeatureChanged();
+		    }
 		}
 	};
 	/**
@@ -1208,6 +1225,9 @@ public class OLMapWidget extends Composite {
 			setCurrentSelection(currentSelection.getLowerLeftY(), currentSelection.getUpperRightY(), xlo, xhi);
 			panMapToSelection();
 			featureAdded();
+			if ( mapListener != null ) {
+		    	mapListener.onFeatureChanged();
+		    }
 		}
 	};
 
@@ -1256,6 +1276,9 @@ public class OLMapWidget extends Composite {
 			// This call back is called by the drawing control when a feature is added by drawing.
 			// We need to call it ourselves when the region widget fires.
 			featureAdded();
+			if ( mapListener != null ) {
+		    	mapListener.onFeatureChanged();
+		    }
 		}
 	};
 
@@ -1299,6 +1322,12 @@ public class OLMapWidget extends Composite {
 	}
 	public boolean isEditing() {
 		return editing;
+	}
+	public MapSelectionChangeListener getMapListener() {
+		return mapListener;
+	}
+	public void setMapListener(MapSelectionChangeListener mapListener) {
+		this.mapListener = mapListener;
 	}
 	public static native void featureAdded() /*-{
         if (typeof $wnd.featureAddedCallback == 'function') {

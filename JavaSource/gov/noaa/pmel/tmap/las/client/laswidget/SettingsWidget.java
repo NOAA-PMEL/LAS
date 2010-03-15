@@ -4,21 +4,30 @@ import gov.noaa.pmel.tmap.las.client.RPCServiceAsync;
 import gov.noaa.pmel.tmap.las.client.map.OLMapWidget;
 import gov.noaa.pmel.tmap.las.client.serializable.OperationSerializable;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
+import com.google.gwt.event.dom.client.ChangeHandler;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.maps.client.geom.LatLng;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.ClickListener;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.DecoratorPanel;
 import com.google.gwt.user.client.ui.DialogBox;
+import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.Grid;
+import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PushButton;
 import com.google.gwt.user.client.ui.TreeListener;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.FlexTable.FlexCellFormatter;
 
 public class SettingsWidget extends Composite {
 
@@ -37,6 +46,7 @@ public class SettingsWidget extends Composite {
 	protected String operationID;
 	protected String optionID;
 	boolean usePanel = false;
+	protected ComparisonAxisSelector comparisonAxisSelector = new ComparisonAxisSelector(new ArrayList<String>());
 
 	/*
 	 * Objects specific to the button layout
@@ -46,13 +56,13 @@ public class SettingsWidget extends Composite {
 	protected DialogBox settingsDialog;
 	protected VerticalPanel mainPanel;
 	protected HorizontalPanel interiorPanel;
-	protected VerticalPanel leftInteriorPanel;
+	protected FlexTable leftInteriorPanel;
 	protected VerticalPanel rightInteriorPanel;
 
 	/*
 	 * Objects specific to the vertical panel layout
 	 */
-	Grid vertical = new Grid(4,1);
+	Grid vertical = new Grid(5,1);
 
 	public SettingsWidget(String title, String panelID, String operationID, String optionID, String layout) {
 		this.operationID = operationID;
@@ -79,17 +89,16 @@ public class SettingsWidget extends Composite {
 		
 		refMap = new OLMapWidget();
 		operations = new OperationsWidget(title);
-		operations.addClickListener(operationsClickListener);
+		operations.addClickHandler(operationsClickHandler);
+		leftInteriorPanel = new FlexTable();
 		if ( layout.equals("button") ) {
 			settingsButton = new Button (title);
 			settingsButton.addClickListener(settingsButtonClick);
 			interiorPanel = new HorizontalPanel();
 			mainPanel = new VerticalPanel();
 			settingsDialog = new DialogBox(false, false);
-			settingsDialog.setText("Set Region and Plot Options for "+panelID+" ... [Drag Me]");
-			leftInteriorPanel = new VerticalPanel();
+			settingsDialog.setText("Set Region and Plot Options for "+panelID+" ... [Drag Me]");		
 			rightInteriorPanel = new VerticalPanel();
-			leftInteriorPanel.add(refMap);
 			interiorPanel.add(leftInteriorPanel);
 			buttonBar.add(datasetButton);
 			buttonBar.add(optionsButton);
@@ -101,15 +110,25 @@ public class SettingsWidget extends Composite {
 			settingsDialog.add(mainPanel);
 			initWidget(settingsButton);	
 		} else {
+			FlexCellFormatter cellFormatter = leftInteriorPanel.getFlexCellFormatter();
+		    cellFormatter.setHorizontalAlignment(0, 0, HasHorizontalAlignment.ALIGN_CENTER);
+			leftInteriorPanel.setHTML(0, 0, "Plot Axes");
+			leftInteriorPanel.setWidget(1, 0, refMap);
+			DecoratorPanel decPanel = new DecoratorPanel();
+			decPanel.add(leftInteriorPanel);
+			decPanel.setWidth("260px");
 			if ( title.equals("") ) {
+				
 				vertical.setWidget(0, 0, buttonBar);
-				vertical.setWidget(1, 0, refMap);
-				vertical.setWidget(2, 0, operations);
+				vertical.setWidget(1, 0, decPanel);
+				vertical.setWidget(2, 0, comparisonAxisSelector);
+				vertical.setWidget(3, 0, operations);
 			} else {
 				vertical.setWidget(0, 0, new Label(title));
 				vertical.setWidget(1, 0, buttonBar);
-				vertical.setWidget(2, 0, refMap);
-				vertical.setWidget(3, 0, operations);
+				vertical.setWidget(2, 0, decPanel);
+				vertical.setWidget(3, 0, comparisonAxisSelector);
+				vertical.setWidget(4, 0, operations);
 			}
 			buttonBar.add(applyButton);
 			buttonBar.add(datasetButton);
@@ -121,6 +140,12 @@ public class SettingsWidget extends Composite {
 
 	}
 
+	public void showMap() {
+		refMap.setVisible(true);
+	}
+	public void hideMap() {
+		refMap.setVisible(false);
+	}
 	public void addClickListener(ClickListener listener) {
 		closeButton.addClickListener(listener);
 	}
@@ -136,8 +161,9 @@ public class SettingsWidget extends Composite {
 			}
 		}	
 	};
-	public ClickListener operationsClickListener = new ClickListener() {
-		public void onClick(Widget sender) {
+	public ClickHandler operationsClickHandler = new ClickHandler() {
+		@Override
+		public void onClick(ClickEvent event) {
 			refMap.setTool(getCurrentOperationView());		
 			optionsButton.setOptions(getCurrentOp().getOptionsID());
 		}
@@ -195,8 +221,8 @@ public class SettingsWidget extends Composite {
 		return operations;
 	}
 
-	public void addOperationClickListener(ClickListener operationsClickListener) {
-		operations.addClickListener(operationsClickListener);
+	public void addOperationClickHandler(ClickHandler operationsClickHandler) {
+		operations.addClickHandler(operationsClickHandler);
 	}
 
 	public void setOperation(String id, String view) {
@@ -213,48 +239,51 @@ public class SettingsWidget extends Composite {
 	};
 	protected ClickListener settingsButtonClick = new ClickListener() {
 		public void onClick(Widget sender) {
-			
-			/*
-			 * If you don't remove the map, all the features that have
-			 * been rendered to it while it was hidden will appear on
-			 * the map and will be zombies (you can't clear them
-			 * and you can't select them).  Remove the map and reinitializing
-			 * it works around this problem.
-			 */
-			leftInteriorPanel.remove(refMap);
-			
-			// n, s, e, w...
-			double[] data = refMap.getDataExtent();
-			
-			double xlo = refMap.getXlo();
-			double xhi = refMap.getXhi();
-			double ylo = refMap.getYlo();
-			double yhi = refMap.getYhi();
-			
-			double delta = refMap.getDelta();
-			int zoom = refMap.getZoom();
-			double[] center = refMap.getCenterLatLon();
-			String tool = refMap.getTool();
-			
+
 			settingsDialog.setPopupPosition(settingsButton.getAbsoluteLeft()-350, settingsButton.getAbsoluteTop());
-			settingsDialog.show();		
-			
-			refMap = new OLMapWidget();
-			
-			refMap.setDataExtentOnly(data[1], data[0], data[3], data[2], delta);
-			
-			refMap.setToolOnly(tool);
-			
-			refMap.setCenter(center[0], center[1], zoom);
-			
-			refMap.setCurrentSelection(ylo, yhi, xlo, xhi);
-			
-			leftInteriorPanel.add(refMap);
+			settingsDialog.show();	
+			resetRefMap();
 			
 		}		
 	};
     public OLMapWidget getRefMap() {
     	return refMap;
+    }
+    public OLMapWidget getDisplayRefMap() {
+    	resetRefMap();
+    	return refMap;
+    }
+    private void resetRefMap() {
+    	/*
+		 * If you don't remove the map, all the features that have
+		 * been rendered to it while it was hidden will appear on
+		 * the map and will be zombies (you can't clear them
+		 * and you can't select them).  Remove the map and reinitializing
+		 * it works around this problem.
+		 */
+		leftInteriorPanel.remove(refMap);
+		
+		// n, s, e, w...
+		double[] data = refMap.getDataExtent();
+		
+		double xlo = refMap.getXlo();
+		double xhi = refMap.getXhi();
+		double ylo = refMap.getYlo();
+		double yhi = refMap.getYhi();
+		
+		double delta = refMap.getDelta();
+		int zoom = refMap.getZoom();
+		double[] center = refMap.getCenterLatLon();
+		String tool = refMap.getTool();
+				
+		refMap = new OLMapWidget();
+		refMap.setDataExtentOnly(data[1], data[0], data[3], data[2], delta);
+		refMap.setToolOnly(tool);
+		refMap.setCenter(center[0], center[1], zoom);
+		refMap.setCurrentSelection(ylo, yhi, xlo, xhi);
+		
+		leftInteriorPanel.add(refMap);
+		
     }
 	public String getHistoryToken() {
 		StringBuilder token = new StringBuilder();
@@ -286,5 +315,22 @@ public class SettingsWidget extends Composite {
 
 	public void setOperationsMenu(OperationsMenu operationsMenu) {
 		operations.setOperationsMenu(operationsMenu);
+	}
+
+	public void addComparisonAxisSelector(List<String> ortho) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public ComparisonAxisSelector getComparisonAxisSelector() {
+		return comparisonAxisSelector;
+	}
+
+	public void setComparisonAxisSelector(ComparisonAxisSelector comparisonAxisSelector) {
+		this.comparisonAxisSelector = comparisonAxisSelector;
+	}
+
+	public void addComparisonAxisSelectorChangeHandler(ChangeHandler compareAxisChangeHandler) {
+		this.comparisonAxisSelector.addAxesChangeHandler(compareAxisChangeHandler);		
 	}
 }

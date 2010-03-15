@@ -6,7 +6,9 @@ import gov.noaa.pmel.tmap.las.client.laswidget.DateTimeWidget;
 import gov.noaa.pmel.tmap.las.client.laswidget.LASRequestWrapper;
 import gov.noaa.pmel.tmap.las.client.laswidget.OperationRadioButton;
 import gov.noaa.pmel.tmap.las.client.laswidget.SettingsWidget;
-import gov.noaa.pmel.tmap.las.client.laswidget.TandZWidgets;
+import gov.noaa.pmel.tmap.las.client.laswidget.PanelAxesWidgets;
+import gov.noaa.pmel.tmap.las.client.map.MapSelectionChangeListener;
+import gov.noaa.pmel.tmap.las.client.map.OLMapWidget;
 import gov.noaa.pmel.tmap.las.client.serializable.GridSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.VariableSerializable;
 import gov.noaa.pmel.tmap.las.client.util.Constants;
@@ -17,6 +19,9 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestBuilder;
 import com.google.gwt.http.client.RequestCallback;
@@ -61,8 +66,11 @@ public class VizGalPanel extends Composite {
 	Button messageButton;
 	HTML message;
 
-	/* The base widget used to layout the other widgets.  A single column of three rows. */
+	/* The base widget used to layout the panel.  A single column of three rows. */
 	FlexTable grid;
+	
+	/* In the case where main view contains t, we need the comparison axis and the map displayed at the bottom of the panel. */
+	HorizontalPanel compareAxisAndMap = new HorizontalPanel();
 
 	/* The top bar of widgets... */
 	Grid top;
@@ -89,7 +97,7 @@ public class VizGalPanel extends Composite {
 	/*
 	 * A widget that keeps track of the orthogonal axes for this panel.  When in using panel settings it's displayed on the bottom of the panel.
 	 */
-	TandZWidgets tandzWidgets = new TandZWidgets();
+	PanelAxesWidgets panelAxesWidgets = new PanelAxesWidgets();
 
 	/* Keep track of the optionID, view and operation.  These are passed in as parameters when the pane is created. */
 	String optionID;
@@ -206,7 +214,7 @@ public class VizGalPanel extends Composite {
 		settingsButton.addCloseClickListener(closeClick);
 		settingsButton.addDatasetTreeListener(datasetTreeListener);
 		settingsButton.addOptionsOkClickListener(optionsOkListener);
-		settingsButton.addOperationClickListener(operationsClickListener);
+		settingsButton.addOperationClickHandler(operationsClickHandler);
 		revert.addClickListener(revertListener);
 		revert.setTitle("Cancel Panel Settings for "+ID);
 
@@ -247,7 +255,7 @@ public class VizGalPanel extends Composite {
 		settingsButton.getRefMap().setDataExtent(grid_south, grid_north, grid_west, grid_east, delta);
 		
 		settingsButton.setOperations(var.getIntervals(), var.getDSID(), var.getID(), operationID, view);
-		tandzWidgets.removeAxes();
+		panelAxesWidgets.removeAxes();
 		settingsButton.setUsePanel(usePanel);
 		if ( ds_grid.getTAxis() != null ) {
 			compareAxis = "t";
@@ -262,17 +270,39 @@ public class VizGalPanel extends Composite {
 		if ( ds_grid.getTAxis() != null ) {
 			dateTimeWidget.init(ds_grid.getTAxis(), false);
 			dateTimeWidget.setVisible(true);
-			tandzWidgets.getDateWidget().init(ds_grid.getTAxis(), false);
-			tandzWidgets.addAxis("t");
+			panelAxesWidgets.getDateWidget().init(ds_grid.getTAxis(), false);
+			panelAxesWidgets.addAxis("t");
 		}
 		if ( ds_grid.getZAxis() != null ) {
 			zAxisWidget.init(ds_grid.getZAxis());
 			zAxisWidget.setVisible(true);
-			tandzWidgets.getZWidget().init(ds_grid.getZAxis());
-			tandzWidgets.addAxis("z");
+			panelAxesWidgets.getZWidget().init(ds_grid.getZAxis());
+			panelAxesWidgets.addAxis("z");
 		}
 		if ( singlePanel ) {
-			grid.setWidget(2, 0, tandzWidgets);
+			grid.setWidget(2, 0, panelAxesWidgets);
+		} else {
+			setLocalAxesWidgets();
+			
+		}
+	}
+	private void setLocalAxesWidgets() {
+		if ( view.contains("t") ) {
+			compareAxisAndMap.clear();
+			if ( compareAxis.equals("t") ) {
+				compareAxisAndMap.add(dateTimeWidget);
+				OLMapWidget map = settingsButton.getDisplayRefMap();
+				map.setMapListener(mapListener);
+				compareAxisAndMap.add(map);
+				grid.setWidget(2, 0, compareAxisAndMap);
+			}
+			if ( compareAxis.equals("z") ) {
+				compareAxisAndMap.add(zAxisWidget);
+				OLMapWidget map = settingsButton.getDisplayRefMap();
+				map.setMapListener(mapListener);
+				compareAxisAndMap.add(map);
+				grid.setWidget(2, 0, compareAxisAndMap);
+			}		
 		} else {
 			if ( compareAxis.equals("t") ) {
 				grid.setWidget(2, 0, dateTimeWidget);
@@ -287,16 +317,16 @@ public class VizGalPanel extends Composite {
 		compareAxis = fixedAxis;
 		fixedAxis = temp;
 		if ( compareAxis.equals("t") ) {
-			String tlo = tandzWidgets.getDateWidget().getFerretDateLo();
+			String tlo = panelAxesWidgets.getDateWidget().getFerretDateLo();
 			dateTimeWidget.setLo(tlo);
-			grid.setWidget(2, 0, dateTimeWidget);
+			setLocalAxesWidgets();			
 		} else {
-			String zlo = tandzWidgets.getZWidget().getLo();
+			String zlo = panelAxesWidgets.getZWidget().getLo();
 			zAxisWidget.setLo(zlo);
-			grid.setWidget(2, 0, zAxisWidget);
+			setLocalAxesWidgets();
 		}
 		if ( isUsePanelSettings() || singlePanel ) {
-			grid.setWidget(2, 0, tandzWidgets);
+			grid.setWidget(2, 0, panelAxesWidgets);
 		}
 	}
 	// The SliderSorter needs to pass in which axis it is controlling and the value it should have...
@@ -342,7 +372,7 @@ public class VizGalPanel extends Composite {
         if ( var.getGrid().getTAxis() != null ) {
 			if (isUsePanelSettings() || singlePanel) {
 				// Don't update the plot until the time range is set to an interval in those cases where the view contains "t"
-				if ( view.contains("t") && tandzWidgets.getDateWidget().getFerretDateLo().equals(tandzWidgets.getDateWidget().getFerretDateHi()) ) {
+				if ( view.contains("t") && panelAxesWidgets.getDateWidget().getFerretDateLo().equals(panelAxesWidgets.getDateWidget().getFerretDateHi()) ) {
 					spin.setWidget(timeRangeMessage);
 					spin.show();
 					return;
@@ -379,7 +409,9 @@ public class VizGalPanel extends Composite {
 			}
 		}
 	}
-
+	public boolean isComparePanel() {
+		return comparePanel;
+	}
 	public LASRequestWrapper getRequest() {
 		LASRequestWrapper lasRequest = new LASRequestWrapper();
 		lasRequest.removeRegion(0);
@@ -392,7 +424,7 @@ public class VizGalPanel extends Composite {
 
 		if ( var.getGrid().getTAxis() != null ) {
 			if (isUsePanelSettings() || singlePanel) {
-				lasRequest.setRange("t", tandzWidgets.getDateWidget().getFerretDateLo(), tandzWidgets.getDateWidget().getFerretDateHi(), 0);
+				lasRequest.setRange("t", panelAxesWidgets.getDateWidget().getFerretDateLo(), panelAxesWidgets.getDateWidget().getFerretDateHi(), 0);
 			} else {
 				lasRequest.setRange("t", dateTimeWidget.getFerretDateLo(), dateTimeWidget.getFerretDateHi(), 0);
 			}
@@ -408,7 +440,7 @@ public class VizGalPanel extends Composite {
 
 		if ( var.getGrid().getZAxis() != null ) {
 			if ( isUsePanelSettings() || singlePanel ) {
-				lasRequest.setRange("z", tandzWidgets.getZWidget().getLo(), tandzWidgets.getZWidget().getHi(), 0);
+				lasRequest.setRange("z", panelAxesWidgets.getZWidget().getLo(), panelAxesWidgets.getZWidget().getHi(), 0);
 			} else {
 				lasRequest.setRange("z", zAxisWidget.getLo(), zAxisWidget.getHi(), 0);
 			}
@@ -441,10 +473,7 @@ public class VizGalPanel extends Composite {
 
 				setImageWidth();
 
-				//TODO hack
-				// TODO debug test
 				
-				/*
 				// Also set the min and max for the data in this panel.
 				String mn = getElementValue("data_min", responseXML);
 				if ( mn != null ) {
@@ -455,7 +484,7 @@ public class VizGalPanel extends Composite {
 				if ( mx != null ) {
 					max = Double.valueOf(mx);
 				}
-                */
+                
 			}	
 		}		
 	};
@@ -577,9 +606,9 @@ public class VizGalPanel extends Composite {
 	ChangeListener comparisonAxisChangeListener = new ChangeListener() {
 		public void onChange(Widget sender) {
 			if ( compareAxis.equals("t") ) {
-				tandzWidgets.getDateWidget().setLo(dateTimeWidget.getFerretDateLo());
+				panelAxesWidgets.getDateWidget().setLo(dateTimeWidget.getFerretDateLo());
 			} else {
-				tandzWidgets.getZWidget().setLo(zAxisWidget.getLo());
+				panelAxesWidgets.getZWidget().setLo(zAxisWidget.getLo());
 			}
 		}
 	};
@@ -638,7 +667,7 @@ public class VizGalPanel extends Composite {
 			}
 			if (settingsButton.isUsePanelSettings()) {
 				grid.setStyleName("panelSettingsColor");
-				grid.setWidget(2, 0, tandzWidgets);
+				grid.setWidget(2, 0, panelAxesWidgets);
 				setCompareAxisVisible(false);
 			} else {
 				grid.setStyleName("regularBackground");
@@ -655,7 +684,7 @@ public class VizGalPanel extends Composite {
 	private void setPanelMode() {
 		if (settingsButton.isUsePanelSettings() ) {
 			grid.addStyleName("panelSettingsColor");
-			grid.setWidget(2, 0, tandzWidgets);
+			grid.setWidget(2, 0, panelAxesWidgets);
 			setCompareAxisVisible(false);
 			if ( !singlePanel ) {
 				top.setWidget(0, 2, revert);
@@ -675,10 +704,14 @@ public class VizGalPanel extends Composite {
 		}	
 	}
 	private Widget getCompareWidget() {
-		if ( compareAxis.equals("t") ) {
-			return dateTimeWidget;
-		} else{
-			return zAxisWidget;
+		if ( view.contains("t") ) {
+            return compareAxisAndMap;
+		} else {
+			if ( compareAxis.equals("t") ) {
+				return dateTimeWidget;
+			} else{
+				return zAxisWidget;
+			}
 		}
 	}
 	private void setCompareAxisEnabled(boolean b) {
@@ -723,10 +756,10 @@ public class VizGalPanel extends Composite {
 	}
 
 	public String getZhi() {
-		return tandzWidgets.getZWidget().getHi();
+		return panelAxesWidgets.getZWidget().getHi();
 	}
 	public String getZlo() {
-		return tandzWidgets.getZWidget().getLo();
+		return panelAxesWidgets.getZWidget().getLo();
 	}
 
 	public String getYhiFormatted() {
@@ -756,12 +789,12 @@ public class VizGalPanel extends Composite {
 	}
 
 	public void setT(String tlo, String thi) {
-		tandzWidgets.getDateWidget().setLo(tlo);
+		panelAxesWidgets.getDateWidget().setLo(tlo);
 		// TODO also set the hi value
 	}
 
 	public void setZ(String zlo, String zhi) {
-		tandzWidgets.getZWidget().setLo(zlo);
+		panelAxesWidgets.getZWidget().setLo(zlo);
 		// TODO also set hi if it's a range
 	}
 
@@ -824,9 +857,9 @@ public class VizGalPanel extends Composite {
 	public void setAxisValue(String axis, String value) {
 		//TODO what if it's a range?
 		if ( axis.equals("z") ) {
-			tandzWidgets.getZWidget().setLo(value);
+			panelAxesWidgets.getZWidget().setLo(value);
 		} else {
-			tandzWidgets.getDateWidget().setLo(value);
+			panelAxesWidgets.getDateWidget().setLo(value);
 		}
 
 	}
@@ -921,12 +954,12 @@ public class VizGalPanel extends Composite {
 			}
 			if ( !view.contains("z") ) {
 				if ( var.getGrid().getZAxis() != null ) {
-					lasRequest.setRange("z", tandzWidgets.getZWidget().getLo(), tandzWidgets.getZWidget().getHi(), 1);
+					lasRequest.setRange("z", panelAxesWidgets.getZWidget().getLo(), panelAxesWidgets.getZWidget().getHi(), 1);
 				}
 			}
 			if ( !view.contains("t") ) {
 				if ( var.getGrid().getTAxis() != null ) {
-					lasRequest.setRange("t", tandzWidgets.getDateWidget().getFerretDateLo(), tandzWidgets.getDateWidget().getFerretDateHi(), 1);
+					lasRequest.setRange("t", panelAxesWidgets.getDateWidget().getFerretDateLo(), panelAxesWidgets.getDateWidget().getFerretDateHi(), 1);
 				}
 			}
 		} else {
@@ -1045,25 +1078,29 @@ public class VizGalPanel extends Composite {
 			setPanelMode();
 		}
 	};
-	public ClickListener operationsClickListener = new ClickListener() {
-		public void onClick(Widget sender) {
-			if ( sender instanceof OperationRadioButton ) {
-				OperationRadioButton o = (OperationRadioButton) sender;
+	public ClickHandler operationsClickHandler = new ClickHandler() {
+		@Override
+		public void onClick(ClickEvent event) {
+			if ( event.getSource() instanceof OperationRadioButton ) {
+				OperationRadioButton o = (OperationRadioButton) event.getSource();
 				view = settingsButton.getOperationsWidget().getCurrentView();
 				operationID = settingsButton.getCurrentOp().getID();
 				usePanel(true);
 				if ( isUsePanelSettings() || singlePanel ) {
 					if ( view.contains("t") ) {
-						tandzWidgets.setRange("t", true);
+						panelAxesWidgets.setRange("t", true);
 					} else {
-						tandzWidgets.setRange("t", false);
+						panelAxesWidgets.setRange("t", false);
 					}
 					if ( view.contains("z") ) {
-						tandzWidgets.setRange("z", true);
+						panelAxesWidgets.setRange("z", true);
 					} else {
-						tandzWidgets.setRange("z", false);
+						panelAxesWidgets.setRange("z", false);
 					}
 				} else {
+					// If this panel is under the control of vizGal and if the view
+					// contains "t" then the map needs to be up to select the location
+					// along the comparison axis.
 					if ( compareAxis.equals("t") ) {
 						if ( view.contains("t") ) {
 							dateTimeWidget.setRange(true);
@@ -1078,26 +1115,30 @@ public class VizGalPanel extends Composite {
 							zAxisWidget.setRange(false);
 						}
 					}
+					if ( view.contains("t") ) {
+						settingsButton.getRefMap();
+					}
 				}
-			}
+			}			
 		}	
 	};
 
 	public void setParentAxisRange(String type, boolean b) {
 		if ( type.equals("t") ) {
 			if ( isUsePanelSettings() || singlePanel ) {
-				tandzWidgets.setRange("t", b);
+				panelAxesWidgets.setRange("t", b);
 			} else {
 				dateTimeWidget.setRange(b);
 			}
 		}
 		if ( type.equals("z") ) {
 			if ( isUsePanelSettings() || singlePanel ) {
-				tandzWidgets.setRange("z", b);
+				panelAxesWidgets.setRange("z", b);
 			} else {
 				zAxisWidget.setRange(b);
 			}
 		}
+		setLocalAxesWidgets();
 	}
 	public void setOperation(String id, String v) {
 		settingsButton.setOperation(id, v);	
@@ -1108,11 +1149,11 @@ public class VizGalPanel extends Composite {
 
 
 	public void addZChangeListner(ChangeListener zChangeListener) {
-		tandzWidgets.addZChangeListener(zChangeListener);
+		panelAxesWidgets.addZChangeListener(zChangeListener);
 	}
 
 	public void addTChangeListner(ChangeListener tChangeListener) {
-		tandzWidgets.addTChangeListener(tChangeListener);
+		panelAxesWidgets.addTChangeListener(tChangeListener);
 	}
 	public void addSettingsButtonListener(ClickListener clickListener) {
 		settingsButton.addClickListener(clickListener);
@@ -1164,5 +1205,16 @@ public class VizGalPanel extends Composite {
 		}
 		
 	}
+	
+	public MapSelectionChangeListener mapListener = new MapSelectionChangeListener() {
+
+		@Override
+		public void onFeatureChanged() {
+			
+			refreshPlot(null, false, true);
+			
+		}
+		
+	};
 	
 }

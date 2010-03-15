@@ -1,7 +1,6 @@
 package gov.noaa.pmel.tmap.las.client.laswidget;
 
 
-import gov.noaa.pmel.tmap.las.client.RPCServiceAsync;
 import gov.noaa.pmel.tmap.las.client.serializable.OperationSerializable;
 import gov.noaa.pmel.tmap.las.client.util.Util;
 
@@ -10,6 +9,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.ClickListener;
 import com.google.gwt.user.client.ui.Label;
@@ -31,7 +31,7 @@ public class OperationsWidget extends StackPanel {
 	OperationSerializable currentOp;
 	String currentView;
     ArrayList<OperationRadioButton> buttons = new ArrayList<OperationRadioButton>();
-    ArrayList<ClickListener> clicks = new ArrayList<ClickListener>();
+    ArrayList<ClickHandler> clicks = new ArrayList<ClickHandler>();
     String intervals;
     String initialOp;
     String initialView;
@@ -208,8 +208,8 @@ public class OperationsWidget extends StackPanel {
 			}
 		}
 		for (Iterator clickIt = clicks.iterator(); clickIt.hasNext();) {
-			ClickListener click = (ClickListener) clickIt.next();
-			addClickListener(click);
+			ClickHandler click = (ClickHandler) clickIt.next();
+			addClickHandler(click);
 		}
 		if ( initialOp != null && initialView != null ) {
 			setOperation(initialOp, initialView);
@@ -225,13 +225,13 @@ public class OperationsWidget extends StackPanel {
 	public String getCurrentView() {
 		return currentView;
 	}
-	public void addClickListener(ClickListener operationsClickListener) {
-		if ( !clicks.contains(operationsClickListener) ) {
-			clicks.add(operationsClickListener);
+	public void addClickHandler(ClickHandler operationsClickHandler) {
+		if ( !clicks.contains(operationsClickHandler) ) {
+			clicks.add(operationsClickHandler);
 		}
 		for (Iterator buttonIt = buttons.iterator(); buttonIt.hasNext();) {
 			OperationRadioButton button = (OperationRadioButton) buttonIt.next();
-			button.addClickListener(operationsClickListener);
+			button.addClickHandler(operationsClickHandler);
 		}
 	}
 	public void setOperation(String id, String view) {
