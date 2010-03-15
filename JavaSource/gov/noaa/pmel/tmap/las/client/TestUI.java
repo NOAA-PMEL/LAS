@@ -90,7 +90,7 @@ public class TestUI implements EntryPoint {
 		settingsControls = new SettingsWidget("", "LAS", op, option, "panel");
 		settingsControls.addDatasetTreeListener(datasetTreeListener);
 		settingsControls.addApplyClickListener(panelApply);
-		settingsControls.addOperationClickListener(operationsClickListener);
+		settingsControls.addOperationClickHandler(operationsClickHandler);
 		operationsMenu = new OperationsMenu();
 		operationsMenu.addClickHandler(externalOperationClick);
 		center.add(operationsMenu);
@@ -276,23 +276,22 @@ public class TestUI implements EntryPoint {
 			panel.refreshPlot(null, false, true);	
 		}
 	};
-	public ClickListener operationsClickListener = new ClickListener() {
-		public void onClick(Widget sender) {
-			if ( sender instanceof OperationRadioButton ) {
-				view = settingsControls.getCurrentOperationView();
-				op = settingsControls.getCurrentOp().getID();
-				panel.setOperation(op, view);
-				if ( view.contains("t") ) {
-					panel.setParentAxisRange("t", true);
-				} else {
-					panel.setParentAxisRange("t", false);
-				}
-				if ( view.contains("z") ) {
-					panel.setParentAxisRange("z", true);
-				} else {
-					panel.setParentAxisRange("z", false);
-				}
+	public ClickHandler operationsClickHandler = new ClickHandler() {
+		@Override
+		public void onClick(ClickEvent event) {
+			view = settingsControls.getCurrentOperationView();
+			op = settingsControls.getCurrentOp().getID();
+			panel.setOperation(op, view);
+			if ( view.contains("t") ) {
+				panel.setParentAxisRange("t", true);
+			} else {
+				panel.setParentAxisRange("t", false);
 			}
+			if ( view.contains("z") ) {
+				panel.setParentAxisRange("z", true);
+			} else {
+				panel.setParentAxisRange("z", false);
+			}		
 		}
 	};
 	public ClickHandler externalOperationClick = new ClickHandler() {
