@@ -120,7 +120,7 @@ public class FerretTool extends Tool{
 
         log.debug("Finished creating Ferret journal file.");
 
-        String args[] = new String[]{driver, jnlFile.getAbsolutePath()};
+        String args[] = new String[]{driver, jnlFile.getAbsolutePath(), output_filename};
 
         log.debug("Creating Ferret task.");
 
@@ -167,23 +167,27 @@ public class FerretTool extends Tool{
                     err_filename = output_filename+".err";
                 }
                 log.debug("Writing output to "+output_filename);
+                
                 PrintWriter headerWriter=null;
                 File header = new File(output_filename);
-                headerWriter = new PrintWriter(new FileOutputStream(header));               
-                headerWriter.println(output);
-                if ( err_filename.endsWith(".log" ) ) {
-                    // Append error to the log file
-                    headerWriter.println(stderr);
-                } else {
-                    // Create a new error file.
-                    File error = new File(err_filename);
-                    PrintWriter errWriter = new PrintWriter(new FileOutputStream(error));
-                    errWriter.println(stderr);
-                    errWriter.flush();
-                    errWriter.close();
+                // TODO temporary? check to see if the script made the output file itself.
+                if ( !header.exists() ) {
+                	headerWriter = new PrintWriter(new FileOutputStream(header));               
+                	headerWriter.println(output);
+                	if ( err_filename.endsWith(".log" ) ) {
+                		// Append error to the log file
+                		headerWriter.println(stderr);
+                	} else {
+                		// Create a new error file.
+                		File error = new File(err_filename);
+                		PrintWriter errWriter = new PrintWriter(new FileOutputStream(error));
+                		errWriter.println(stderr);
+                		errWriter.flush();
+                		errWriter.close();
+                	}
+                	headerWriter.flush();
+                	headerWriter.close();
                 }
-                headerWriter.flush();
-                headerWriter.close();
 
             }
         }
