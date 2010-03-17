@@ -199,6 +199,12 @@ my ($servlet_connector_port, $autoservlet_connector_port);
 $jakarta_home = getAnswer("Full path of Tomcat JAKARTA_HOME directory where you would like to deploy the servlet", $jakarta_home);
 $LasConfig{jakarta_home} = $jakarta_home;
 $LasConfig{webapps}="$jakarta_home/webapps";
+my $jakarta_lib;
+if (-d "$jakarta_home/common/lib" ) {
+   $jakarta_lib = "$jakarta_home/common/lib";
+} else {
+   $jakarta_lib = "$jakarta_home/lib";
+}
 my $appname = $LasConfig{uipath};
 $appname =~ s/\///g;
 $LasConfig{appname} = $appname;
@@ -407,6 +413,7 @@ foreach my $script (@Scripts){
     my $java_home = dirname(dirname($java));
     while (<INSCRIPT>){
         s/\@JAKARTA_HOME\@/$jakarta_home/g;
+        s/\@JAKARTA_LIB\@/$jakarta_lib/g;
         s/\@JAVA_HOME\@/$java_home/g;
         s/\@FERRET\@/$LasConfig{ferret}/g;
         s/\@OUTPUT_ALIAS\@/$LasConfig{output_alias}/g;

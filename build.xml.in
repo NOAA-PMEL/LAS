@@ -3,6 +3,7 @@
 	<property environment="env" />
 	<property name="app.name" value="@APPNAME@" />
 	<property name="jakarta.home" value="@JAKARTA_HOME@" />
+	<property name="jakarta.lib" value="@JAKARTA_LIB@" />
 	<property name="deploy.home"
 		value="${jakarta.home}/webapps/${app.name}" />
 	<property name="dist.war"
@@ -51,7 +52,7 @@
 				<fileset dir="WebContent/WEB-INF/lib">
 					<include name="**/*.jar" />
 				</fileset>
-				<fileset dir="${jakarta.home}/common/lib">
+				<fileset dir="${jakarta.lib}">
 					<include name="**/*.jar" />
 				</fileset>
 			</classpath>
@@ -74,7 +75,7 @@
 				<fileset dir="WebContent/WEB-INF/lib">
 					<include name="**/*.jar" />
 				</fileset>
-				<fileset dir="${jakarta.home}/common/lib">
+				<fileset dir="${jakarta.lib}">
 					<include name="**/*.jar" />
 				</fileset>
 			</classpath>
@@ -104,7 +105,7 @@
 				<fileset dir="WebContent/WEB-INF/lib">
 					<include name="**/*.jar" />
 				</fileset>
-				<fileset dir="${jakarta.home}/common/lib">
+				<fileset dir="${jakarta.lib}">
 					<include name="**/*.jar" />
 				</fileset>
 			</classpath>
