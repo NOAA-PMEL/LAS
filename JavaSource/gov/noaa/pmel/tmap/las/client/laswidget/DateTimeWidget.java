@@ -341,42 +341,16 @@ public class DateTimeWidget extends Composite {
 	}
 	public String getFerretDateLo() {
 		StringBuffer date = new StringBuffer();
-		
-		if ( hasDay ) {
-			date.append(lo_day.getValue(lo_day.getSelectedIndex()));
+		if ( isMenu ) {
+			return lo_day.getValue(lo_day.getSelectedIndex());
 		} else {
-			date.append(Util.format_two(lo.getDate()));
-		}
-		if ( hasMonth ) {
-			date.append("-"+lo_month.getValue(lo_month.getSelectedIndex()));
-		} else {
-			date.append("-"+MONTHS.get(lo.getMonth()));
-		}
-
-		if ( climatology ) {
-			date.append("-0001");   
-		} else {
-			
-			if ( hasYear ) {
-				date.append("-"+lo_year.getValue(lo_year.getSelectedIndex()));
-			}
-		}
-        if ( hasHour ) {
-        	date.append(" "+lo_hour.getValue(lo_hour.getSelectedIndex()));
-        }
-		return date.toString();
-	}
-
-	public String getFerretDateHi() {
-		if ( range ) {
-			StringBuffer date = new StringBuffer();
 			if ( hasDay ) {
-				date.append(hi_day.getValue(hi_day.getSelectedIndex()));
-			} else {				
+				date.append(lo_day.getValue(lo_day.getSelectedIndex()));
+			} else {
 				date.append(Util.format_two(lo.getDate()));
 			}
 			if ( hasMonth ) {
-				date.append("-"+hi_month.getValue(hi_month.getSelectedIndex()));
+				date.append("-"+lo_month.getValue(lo_month.getSelectedIndex()));
 			} else {
 				date.append("-"+MONTHS.get(lo.getMonth()));
 			}
@@ -384,15 +358,48 @@ public class DateTimeWidget extends Composite {
 			if ( climatology ) {
 				date.append("-0001");   
 			} else {
-				
+
 				if ( hasYear ) {
-					date.append("-"+hi_year.getValue(hi_year.getSelectedIndex()));
+					date.append("-"+lo_year.getValue(lo_year.getSelectedIndex()));
 				}
 			}
-            if ( hasHour ) {
-            	date.append(" "+hi_hour.getValue(hi_hour.getSelectedIndex()));
-            }
+			if ( hasHour ) {
+				date.append(" "+lo_hour.getValue(lo_hour.getSelectedIndex()));
+			}
 			return date.toString();
+		}
+	}
+
+	public String getFerretDateHi() {
+		if ( range ) {
+			if ( isMenu ) {
+				return hi_day.getValue(hi_day.getSelectedIndex());
+			} else {
+				StringBuffer date = new StringBuffer();
+				if ( hasDay ) {
+					date.append(hi_day.getValue(hi_day.getSelectedIndex()));
+				} else {				
+					date.append(Util.format_two(lo.getDate()));
+				}
+				if ( hasMonth ) {
+					date.append("-"+hi_month.getValue(hi_month.getSelectedIndex()));
+				} else {
+					date.append("-"+MONTHS.get(lo.getMonth()));
+				}
+
+				if ( climatology ) {
+					date.append("-0001");   
+				} else {
+
+					if ( hasYear ) {
+						date.append("-"+hi_year.getValue(hi_year.getSelectedIndex()));
+					}
+				}
+				if ( hasHour ) {
+					date.append(" "+hi_hour.getValue(hi_hour.getSelectedIndex()));
+				}
+				return date.toString();
+			}
 		} else {
 			return getFerretDateLo();
 		}
