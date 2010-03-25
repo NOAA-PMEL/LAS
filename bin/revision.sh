@@ -4,7 +4,7 @@ if [ ! -d JavaSource ]; then
 echo "Must be run from LAS home."
 exit 1
 fi
-REV=`vnversion -n`
+REV=`svnversion -n`
 if [ "$?" -ne "0" ]; then
        echo "Subversion not installed.  That is ok..."
        REV="No version information available."
@@ -13,7 +13,7 @@ echo -n "#set (\$revision=\"$REV\")" > WebContent/productserver/templates/revisi
 
 echo '<h3>Subversion Info:</h3>' > WebContent/productserver/templates/svn.vm
 echo '<pre>' >> WebContent/productserver/templates/svn.vm
-vn info >> WebContent/productserver/templates/svn.vm
+svn info >> WebContent/productserver/templates/svn.vm
 if [ "$?" -ne "0" ]; then
        echo "Subversion not installed.  That is ok..." >> WebContent/productserver/templates/info_tmp.vm
 fi
