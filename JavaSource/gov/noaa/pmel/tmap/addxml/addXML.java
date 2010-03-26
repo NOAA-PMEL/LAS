@@ -1948,8 +1948,6 @@ public class addXML {
 					axisbean.setV(ts);
 
 				}
-
-				axisbean.setArange(arange);
 			}
 		}
 		else {
