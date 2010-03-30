@@ -83,4 +83,16 @@ public class GridSerializable implements IsSerializable {
 			return null;
 		}
 	}
+	public boolean hasT() {
+		return getTAxis() != null;
+	}
+	public boolean hasZ() {
+		return getZAxis() != null;
+	}
+	public boolean hasY() {
+		return getYAxis() != null;
+	}
+	public boolean hasX() {
+		return getXAxis() != null;
+	}
 }
