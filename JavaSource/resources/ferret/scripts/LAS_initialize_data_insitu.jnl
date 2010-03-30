@@ -111,7 +111,7 @@ DEFINE SYMBOL ferret_plot_title ($data_title)
 
 LET its_keyword = `STRINDEX ("($data_x_var)", "'") GT 0`
 IF `its_keyword` THEN
-   DEFINE SYMBOL data_x_var  `UPCASE("($data_x_var)[d=($data_num)]")`
+   DEFINE SYMBOL data_x_var  `UPCASE("($data_x_var)")`
    LET data_num = `($data_x_var) ,RETURN=dsetnum`
    DEFINE SYMBOL data_num = `($data_x_var) ,return=dsetnum`
 ELSE
@@ -124,7 +124,7 @@ ENDIF
 
 LET its_keyword = `STRINDEX ("($data_y_var)", "'") GT 0`
 IF `its_keyword` THEN
-   DEFINE SYMBOL data_y_var  `UPCASE("($data_y_var)[d=($data_num)]")`
+   DEFINE SYMBOL data_y_var  `UPCASE("($data_y_var)")`
 ENDIF
 
 IF ($data_var"0|*>1") THEN
