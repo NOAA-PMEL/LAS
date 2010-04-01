@@ -245,6 +245,7 @@
       var req = new LASRequest(initReq_xml);
       var theView = req.getProperty('ferret','view');
       req.setProperty('ferret','time_step',timeInterval);
+      req.setProperty('product_server','ps_timeout',99999999);
       initStep = timeInterval;
 
       //set time to user selected range 
@@ -328,7 +329,8 @@
    */
   function makeFramesRequest(theReq){
       theReq.setProperty('las','output_type','json');
-      var prefix = 'ProductServer.do?xml=';
+      theReq.setProperty('product_server','ps_timeout',9999999999);
+	     var prefix = 'ProductServer.do?xml=';
       var url = prefix+escape(theReq.getXMLText());
       var xmlhttp = new XMLHttpRequest();
       //var xmlhttp = getNewHTTPObject();

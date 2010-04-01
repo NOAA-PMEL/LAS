@@ -1145,6 +1145,8 @@ MapWidget.prototype.initImage = function () {
 		this.plot = document.createElement("IMG");
 		this.DOMNode.appendChild(this.plot);
 	}	
+	 this.plot.id='plot';
+
 	if (this.img) {
 		this.plot.src = this.img.src;
 		this.plot.width = this.img.width;

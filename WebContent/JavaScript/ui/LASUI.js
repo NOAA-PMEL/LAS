@@ -317,7 +317,7 @@ LASUI.prototype.showInfo = function (evt) {
 	if(node.category)
 		if(node.category.getChildID(i))
 			if(node.category.getChildChildrenType(i)=="variables")
-				window.open(this.hrefs.getMetadata.url + '?dsid=' + node.category.getChildID(i));
+				window.open(this.hrefs.getMetadata.url + '?dsid=' + node.category.getChildDatasetID(i));
 			else
 				window.open(this.hrefs.getMetadata.url + '?catid=' + node.category.getChildID(i));
 
@@ -619,7 +619,7 @@ LASUI.prototype.setVariable = function (evt) {
         this.state.lastDataset = this.state.dataset;
 	this.state.dataset = datasetID;
 	this.state.variable = variableID;
-        if(this.state.dataset!=this.state.lastDataset)
+//        if(this.state.dataset!=this.state.lastDataset)
                 this.getGrid(datasetID,variableID);
 	
 	this.getDataConstraints(datasetID,variableID);
@@ -1032,7 +1032,7 @@ LASUI.prototype.setDefaultProductMenu = function () {
 				if(!this.refs.operations.plot.children[type])
 					this.setProductTypeNode(type);
 				this.setProductNode(type, product);
-				if(defaultPlotProduct == null){
+				if(defaultPlotProduct == null ||  (this.refs.views.views.getViewByID(this.products[type][product].view)&&this.state.view.plot==this.products[type][product].view)){
 					var defaultPlotProduct = this.products[type][product];
 					var defaultPlotProductName = product;
 				}

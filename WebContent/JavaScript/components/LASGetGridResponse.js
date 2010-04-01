@@ -234,7 +234,11 @@ function LASGetGridResponse_getHi(axis) {
   var axis_lc = String(axis).toLowerCase();
   var value = null;
   if (axis_lc == 't') {
-    value = this.getAxis(axis_lc).hi;
+    	if(this.getAxis(axis_lc).hi)
+		value = this.getAxis(axis_lc).hi;
+	else
+		value = this.getAxis(axis_lc).lo;
+		
   } else {
     if (this.hasMenu(axis)) { // <v> array
       var index = this.getAxis(axis_lc).v.length - 1;
