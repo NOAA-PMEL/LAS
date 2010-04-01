@@ -144,7 +144,7 @@ public class addXML {
 	private static int fileCount;
 	private static HashMap<String, Boolean> forceAxes = new HashMap<String, Boolean>();
 	private static String title;
-	private static String version_string = "1.7.1.0";
+	private static String version_string = "1.7.3.0";
 	private static String global_title_attribute;
 	private static String format;
 	private static String units_format;
