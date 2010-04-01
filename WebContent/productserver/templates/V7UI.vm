@@ -118,10 +118,10 @@
 		<div id="downloadOptions" class="LASPopupDIVNode" style="display:none;"></div>
 		<div id="externalOptions" class="LASPopupDIVNode" style="display:none;"></div>
 	</body>
-                <script type="text/javascript" language="javascript" src="JavaScript/ui/LASUI.js"></script>
+   <!--             <script type="text/javascript" language="javascript" src="JavaScript/ui/LASUI.js"></script>-->
                 <script type="text/javascript" language="javascript" src="JavaScript/ui/LASUI_compiled_components.js"></script>
 
-<!--                <script type="text/javascript" language="javascript" src="JavaScript/ui/LASUI_compiled.js"></script> -->
+                <script type="text/javascript" language="javascript" src="JavaScript/ui/LASUI_compiled.js"></script> 
 
 
                 <script type="text/javascript" language="javascript" src="JavaScript/components/gov.noaa.pmel.tmap.las.NativeMapWidget/gov.noaa.pmel.tmap.las.NativeMapWidget.nocache.js"></script>

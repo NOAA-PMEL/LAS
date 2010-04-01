@@ -21,7 +21,7 @@ $las_response.toString()
         <a href="$las_response.getResult("plot_postscript")>Postscript File of the Plot</a>
       #else
       <td>
-         <img alt="Plot Image" border="0" src="$las_response.getResult("plot_image")">
+         <img alt="Plot Image" id="plot" border="0" src="$las_response.getResult("plot_image")">
       </td>
       #end
   </tr>
