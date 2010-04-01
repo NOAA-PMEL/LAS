@@ -133,6 +133,8 @@ public class addXML {
 		"yyyy-MM-dd HH:mm:ss", "yyyy-MM-dd HH:mm:ss",
 		"yyyy-MM-dd HH:mm:ss", "yyyy-MM-dd HH:mm:ss"};
 	
+	private static DateTimeFormatter ferret_time_formatter = DateTimeFormat.forPattern("dd-MMM-yyyy HH:mm:ss");
+
 	// Constants
 	private static final String Z_VALUES = "z_values";
 	
@@ -1905,12 +1907,10 @@ public class addXML {
 						double t[] = axis.getCoordValues();
 						String ts[] = new String[t.length];
 						// We don't know what these times look like.  Use a format with everything.
-						if (fmt == null ) {
-							fmt = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
-						}
+						
 						for (int i = 0; i < t.length; i++) {
 							DateTime dt = makeDate(t[i], dateUnit, chrono);
-							ts[i] = fmt.print(dt.withZone(DateTimeZone.UTC));
+							ts[i] = ferret_time_formatter.print(dt.withZone(DateTimeZone.UTC));
 						}
 						axisbean.setV(ts);
 
@@ -1943,7 +1943,7 @@ public class addXML {
 					String ts[] = new String[t.length];
 					for (int i = 0; i < t.length; i++) {
 						DateTime dt = makeDate(t[i], dateUnit, chrono);
-						ts[i] = fmt.print(dt.withZone(DateTimeZone.UTC));
+						ts[i] = ferret_time_formatter.print(dt.withZone(DateTimeZone.UTC));
 					}
 					axisbean.setV(ts);
 
