@@ -36,6 +36,7 @@ IF `($region_($num)_x_lo"0|*>1") EQ 0` THEN
       LET dummy  = SUBSTRING("($var_def2)", nhi1, nhi2-nhi1)
       DEFINE SYMBOL region_($num)_x_hi = `dummy`
       DEFINE SYMBOL region_($num)_x_range = `($region_($num)_x_hi) - ($region_($num)_x_lo)`
+      DEFINE SYMBOL xyop = X=`SUBSTRING("($var_def2)", nhi2, 4)`
       DEFINE SYMBOL reset_regions = 1
    ENDIF
 ENDIF
@@ -61,6 +62,11 @@ IF `($region_($num)_y_lo"0|*>1") EQ 0` THEN
       LET dummy  = SUBSTRING("($var_def4)", nhi1, nhi2-nhi1)
       DEFINE SYMBOL region_($num)_y_hi = `dummy`
       DEFINE SYMBOL region_($num)_y_range = `($region_($num)_y_hi) - ($region_($num)_y_lo)`
+      IF ($xyop"0|*>1") THEN 
+         DEFINE SYMBOL xyop = ($xyop),Y=`SUBSTRING("($var_def4)", nhi2, 4)`
+      ELSE
+         DEFINE SYMBOL xyop = ($xyop)`SUBSTRING("($var_def4)", nhi2, 4)`
+      ENDIF
       DEFINE SYMBOL reset_regions = 1
    ENDIF
 
@@ -71,6 +77,15 @@ IF `($reset_regions"0|*>1") AND \
 
    GO LAS_initialize_region
 ENDIF
+
+IF ($xyop"0|*>1") THEN 
+   LET nbkt = `STRINDEX("($data_var_def)", "[")`
+   DEFINE SYMBOL data_var_def `SUBSTRING("($DATA_VAR_DEF)", 1, nbkt-1)`
+   LET data_var_definition = ($data_var_def)
+ENDIF
+DEFINE SYMBOL analysis_def = [($xyop)]
+
 CANCEL SYMBOL reset_regions
 
 ! End of $RCSfile ------------LAS_set_x_y_analysis.jnl--------------------------
+
