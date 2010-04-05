@@ -72,6 +72,12 @@ DEFINE SYMBOL ferret_plot_title "($data_title) ($data_units)"
 
 SET DATA ($data_url)
 
+LET ulen = STRLEN ("($data_($num)_units)")
+IF `(STRINDEX("($data_($num)_units)", "'") EQ 1) AND (STRRINDEX("($data_($num)_units)", "'") EQ ulen)` THEN
+   DEFINE SYMBOL data_units `SUBSTRING("($data_($num)_units)", 2, ulen-2)`
+   DEFINE SYMBOL data_units (($data_units))
+ENDIF
+
 IF ($fer_last_error"0|*>1") THEN
   DEFINE SYMBOL error_status = ERROR
   DEFINE SYMBOL error_type = DATA

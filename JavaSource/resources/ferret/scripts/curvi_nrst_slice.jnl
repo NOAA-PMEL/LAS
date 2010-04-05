@@ -1,4 +1,4 @@
-\cancel mode verify
+!\cancel mode verify
 
 ! curvi_sample_slice.jnl
 ! 3/07 ACM
@@ -38,6 +38,14 @@ IF ($its_animate"0|*>1") THEN LET sampled_var = ($ferret_xyz_var)
 
 GO get_curv_coord_bbox
 
+! If its an XY analysis then we just average over the box
+IF ($xyop"0|*>1") THEN 
+   DEFINE VARIABLE data_var_box = \
+     data_var_definition[d=($data_num),i=($clon_imin):($clon_imax), j=($clat_jmin):($clat_jmax),($region_zt)]
+   DEFINE SYMBOL ferret_plot_var = data_var_box[($xyop)]
+   EXIT/SCRIPT
+ENDIF
+
 ! For analysis operations on curvilienar grids we may not have definitions for region_x_* and
 ! region_y_*  but there should be region_0_**
 
@@ -64,10 +72,10 @@ DEFINE AXIS/Y=($region_y_lo):($region_y_hi)/NPOINTS=`npts`/UNITS=degrees sample_
 DEFINE AXIS/Y=($region_y_lo):($region_y_hi)/NPOINTS=`npts`/UNITS=degrees sample_y
 
 
+
+
 ! Y line, or YZ, YT slice
 LET yslice = ($ferret_view"|y>1|*>0") + ($ferret_view"|yz>1|*>0") + ($ferret_view"|yt>1|*>0")
-IF `yslice EQ 0` THEN LET yslice = `its_y_analysis GT 0`
-
 
 IF `yslice GT 0` THEN
 
@@ -186,7 +194,6 @@ ENDIF
 
 ! X line, or XZ, XT slice
 LET xslice = ($ferret_view"|x>1|*>0") + ($ferret_view"|xz>1|*>0") + ($ferret_view"|xt>1|*>0")
-IF `xslice EQ 0` THEN LET xslice = `its_x_analysis GT 0`
 
 IF `xslice GT 0` THEN
 
@@ -410,4 +417,3 @@ ENDIF
 
 GO cancel_temp_regions
 ! End of file ------------curvi_nrst_slice.jnl--------------------------
-

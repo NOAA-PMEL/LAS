@@ -37,11 +37,12 @@ IF `($ferret_curv_lon_max"1|*>0")` THEN \
 
 IF `($ferret_curv_lon_max)- ($ferret_curv_lon_min) GT 360` THEN DEFINE SYMBOL ferret_curv_lon_max `($ferret_curv_lon_min) + 360`
 
-IF `($region_x_lo_orig"0|*>1") EQ 0` THEN
+IF `($region_x_lo_orig"0|*>1") EQ 0 AND ($region_0_x_lo"0|*>1|)` THEN
    DEFINE SYMBOL region_0_x_lo_orig =  ($region_0_x_lo)
    DEFINE SYMBOL region_0_x_hi_orig =  ($region_0_x_hi)
 ENDIF
 
+   GO LAS_initialize_region ($num)
 IF `($region_x_lo) LT ($ferret_curv_lon_min)` THEN 
    DEFINE SYMBOL region_0_x_lo `($region_0_x_lo) + 360`
    DEFINE SYMBOL region_0_x_hi `($region_0_x_hi) + 360`
@@ -49,6 +50,8 @@ IF `($region_x_lo) LT ($ferret_curv_lon_min)` THEN
    GO LAS_initialize_region ($num)
 
 ENDIF
+
+GO  LAS_initialize_region 0
 IF `($region_x_hi) GT ($ferret_curv_lon_max)` THEN 
    DEFINE SYMBOL region_0_x_lo `($region_0_x_lo) - 360`
    DEFINE SYMBOL region_0_x_hi `($region_0_x_hi) - 360`
@@ -72,10 +75,12 @@ IF `($constraint_0_lhs"0|Curv_to_Rect_Regridding>1|*>0")` THEN
    IF ($region_($which_var)_zt"0|*>1") THEN DEFINE SYMBOL reg_zt ($region_($which_var)_zt)
    
    GO transform_curv_to_rect.jnl
+   GO  LAS_initialize_region 0
+
    EXIT/SCRIPT
 ENDIF
 
-
+GO LAS_initialize_region ($num)
 
 !!!!!!!!!!!
 
@@ -92,6 +97,7 @@ ENDIF
 DEFINE SYMBOL check_linear = 1
 IF ` ($operation_ID"0|Plot_vector>1|*>0") AND ($num) GT 0` THEN DEFINE SYMBOL check_linear = 0
 
+IF `($ferret_linear_coords_file"0|same_as_infile>1|*>0")` THEN CANCEL SYMBOL ferret_linear_coords_file
 IF `($ferret_linear_coords_file"0|*>1") AND ($check_linear)` THEN
 
    IF `($ferret_linear_lat_max"0|*>1") AND (($region_y_hi"0")  LT ($ferret_linear_lat_max))` THEN 
@@ -115,6 +121,8 @@ IF `($ferret_linear_coords_file"0|*>1") AND ($check_linear)` THEN
    
 ! Because we have redefined the axes we cant set native strides
       DEFINE SYMBOL no_native_strides_xy = 1
+      GO  LAS_initialize_region 0
+
       EXIT/SCRIPT
    
    ELSE
