@@ -115,11 +115,14 @@ public class Operation extends Container implements OperationInterface {
     }
     public List<String> getViews() {
     	List<String> views = new ArrayList<String>();
-    	List intervals = element.getChild("region").getChildren("intervals");
-    	for (Iterator intervalIt = intervals.iterator(); intervalIt.hasNext();) {
-			Element intervalsElement = (Element) intervalIt.next();
-			views.add(intervalsElement.getAttributeValue("name"));
-		}
+    	Element region = element.getChild("region");
+    	if ( region != null ) {
+    		List intervals = region.getChildren("intervals");
+    		for (Iterator intervalIt = intervals.iterator(); intervalIt.hasNext();) {
+    			Element intervalsElement = (Element) intervalIt.next();
+    			views.add(intervalsElement.getAttributeValue("name"));
+    		}
+    	}
     	return views;
     }
 }
