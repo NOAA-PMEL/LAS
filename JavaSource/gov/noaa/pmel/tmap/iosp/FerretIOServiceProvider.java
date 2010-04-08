@@ -550,6 +550,8 @@ public class FerretIOServiceProvider implements IOServiceProvider {
                 line = jnlBuffReader.readLine();
             }
         } catch (IOException e) {
+        	log.debug("IO Exception reading the random access file.");
+            throw e;
         }
         jnl = inJnl.toString();
 
@@ -611,22 +613,36 @@ public class FerretIOServiceProvider implements IOServiceProvider {
         }
 
         log.debug("Attempting to open data file: "+filename);
-        NetcdfFile nds = NetcdfFile.open(filename, null);
-        log.debug("Attempting to find variable : "+readname);
-        Variable v = nds.findVariable(readname);
-        if ( readname.equals("COORDS")) {
-            List dims = v.getDimensions();
-            // Should be only 1.
-            if ( dims.size() < 0 || dims.size() > 1 ) {
-                log.error("A coordinate variable has more than one dimension.");
-            }
-            Dimension cdim = (Dimension) dims.get(0);
-            String name = cdim.getName();
-            v = nds.findVariable(name);
+        NetcdfFile nds = null;
+        try {
+        	nds = NetcdfFile.open(filename, null);
+        	log.debug("Attempting to find variable : "+readname);
+        	Variable v = nds.findVariable(readname);
+        	if ( readname.equals("COORDS")) {
+        		List dims = v.getDimensions();
+        		// Should be only 1.
+        		if ( dims.size() < 0 || dims.size() > 1 ) {
+        			log.error("A coordinate variable has more than one dimension.");
+        		}
+        		Dimension cdim = (Dimension) dims.get(0);
+        		String name = cdim.getName();
+        		v = nds.findVariable(name);
+        	}
+        	log.debug("Attempting to read var: "+readname+" with ranges "+Range.makeSectionSpec(newsection));
+        	a = v.read(newsection);
+        	log.debug("Finished reading variable data.");
+        } catch (IOException e ) {
+        	log.error("Exception opening netCDF data file.");
+        	throw e;
+        } finally {
+        	if ( nds != null ) {
+        		try {
+        			nds.close();
+        		} catch (IOException e){
+        			log.error("Exception closing the netCDF data file.");
+        		}
+        	}
         }
-        log.debug("Attempting to read var: "+readname+" with ranges "+Range.makeSectionSpec(newsection));
-        a = v.read(newsection);
-        log.debug("Finished reading variable data.");
         return a;
     }
 
@@ -672,7 +688,7 @@ public class FerretIOServiceProvider implements IOServiceProvider {
     }
     
     public static void main(String[] args) {
-        /*
+    	/*
         try {
             log.debug("Registering gov.noaa.pmel.tmap.iosp.FerretIOServiceProvider");
             NetcdfFile.registerIOProvider("gov.noaa.pmel.tmap.iosp.FerretIOServiceProvider");
@@ -686,89 +702,90 @@ public class FerretIOServiceProvider implements IOServiceProvider {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-        */
-        //String filename = "http://porter.pmel.noaa.gov:8920/thredds/dodsC/las/coads_climatology_cdf/data_coads_climatology.jnl";
-        //String filename = "/home/porter/rhs/data/coads_climatology.cdf";
-    	
-    	String filename = "http://porter.pmel.noaa.gov:8920/thredds/dodsC/las/NOAA_NCEP_EMC_CMB_Ocean_Analysis_ml/data__iridl.ldeo.columbia.edu_SOURCES_.NOAA_.NCEP_.EMC_.CMB_.Pacific_.monthly_dods.jnl";
-    	
-        
-        //String filename = "http://strider.weathertopconsulting.com:8880/thredds/dodsC/las/coads_climatology_cdf/data_coads_climatology.jnl";
-        //String expr = 		"_expr_{levitus_climatology}{let airt_regrid=airt[d=1,t=\"15-Jan\":\"15-Dec\"@ave];let temp_regrid=temp[d=2,gxy=airt_regrid[d=1]]}";
-        String inner = "http://porter.pmel.noaa.gov:8920/thredds/dodsC/las/levitus_climatology_cdf/coads_climatology_cdf.jnl";
-        String ninner = "";
-        log.setLevel(Level.DEBUG);
-        try {
-			ninner = URLEncoder.encode(inner, "UTF-8");
-		} catch (UnsupportedEncodingException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-        String expr = 		"_expr_{"+ninner+"}{let temp_1_regrid=temp[d=1,z=5.00:75.00@ave];let sst_2_regrid=sst[d=2,t=\"15-Jan\":\"15-Mar\"@ave];let sst_2_regrid_2_regrid=sst_2_regrid[d=2,gxy=temp_1_regrid[d=1]]}";
-        
-        try {
-			filename = filename + URLEncoder.encode(expr, "UTF-8");
-		} catch (UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		filename = "http://strider.weathertopconsulting.com:8880/thredds/dodsC/las/id-2c2b44e493/data_ocean_atlas_subset.jnl";
-        NetcdfDataset ncd = null;
-        if ( filename.startsWith("http")) {
-        	System.out.println(filename);
-        	//System.exit(0);
-        }
-        try {
-          log.debug("Calling openDataset");
-          ncd = NetcdfDataset.openDataset(filename);
-          log.debug("Finished openDataset");
-        } catch (IOException ioe) {
-          log.error("trying to open " + filename + "  " + ioe);
-        } finally { 
-          if (null != ncd) try {
-            List variables = ncd.getVariables();
-            StringBuffer vars = new StringBuffer();
-            for (Iterator vIt = variables.iterator(); vIt.hasNext();) {
-                Variable v = (Variable) vIt.next();
-                if ( v.isCoordinateVariable() ) {
-                   if ( vars.length() > 0 ) vars.append(";");
-                   vars.append(v.getName());
-                } 
-            }
-            //NCdump.print(ncd, System.out, true, true, false, true, vars.toString(), null);
-            for (Iterator vIt = variables.iterator(); vIt.hasNext();) {
-                Variable v = (Variable) vIt.next();
-                if ( v.isCoordinateVariable() ) {
-                    log.debug("reading "+v.getName());
-                    int[] shape = v.getShape();
-                    int[] origin = new int[shape.length];
-                    for ( int s = 0; s < shape.length; s++) {
-                        if ( shape[s] > 7 ) {
-                           origin[s] = shape[s]/2;
-                        } else {
-                           origin[s] = 0;
-                        }
-                        shape[s] = Math.min(3,shape[s]);
-                        log.debug("for dimension s="+s+" setting origin="+origin[s]+" shape="+shape[s]);
-                    }
-                    Array a = v.read(origin, shape);
-                    IndexIterator it = a.getIndexIterator();
-                    log.debug("Iterate on the array.");
-                    while ( it.hasNext() ) {
-                        float val = it.getFloatNext();
-                        log.debug("Value for "+it.toString()+ "=" +val);
-                    }
-                }
-            }
-                ncd.close();
-            } catch (IOException ioe) {
-                log.error("trying to close " + filename + "  " + ioe.toString());
-            } catch (InvalidRangeException ire) {
-                log.error("bad range: "+ ire.toString());
-            }
-          }
+    	 */
+    	//String filename = "http://porter.pmel.noaa.gov:8920/thredds/dodsC/las/coads_climatology_cdf/data_coads_climatology.jnl";
+    	//String filename = "/home/porter/rhs/data/coads_climatology.cdf";
 
-        }
+    	String filename = "http://porter.pmel.noaa.gov:8920/thredds/dodsC/las/NOAA_NCEP_EMC_CMB_Ocean_Analysis_ml/data__iridl.ldeo.columbia.edu_SOURCES_.NOAA_.NCEP_.EMC_.CMB_.Pacific_.monthly_dods.jnl";
+
+
+    	//String filename = "http://strider.weathertopconsulting.com:8880/thredds/dodsC/las/coads_climatology_cdf/data_coads_climatology.jnl";
+    	//String expr = 		"_expr_{levitus_climatology}{let airt_regrid=airt[d=1,t=\"15-Jan\":\"15-Dec\"@ave];let temp_regrid=temp[d=2,gxy=airt_regrid[d=1]]}";
+    	String inner = "http://porter.pmel.noaa.gov:8920/thredds/dodsC/las/levitus_climatology_cdf/coads_climatology_cdf.jnl";
+    	String ninner = "";
+    	log.setLevel(Level.DEBUG);
+    	try {
+    		ninner = URLEncoder.encode(inner, "UTF-8");
+    	} catch (UnsupportedEncodingException e1) {
+    		// TODO Auto-generated catch block
+    		e1.printStackTrace();
+    	}
+    	String expr = 		"_expr_{"+ninner+"}{let temp_1_regrid=temp[d=1,z=5.00:75.00@ave];let sst_2_regrid=sst[d=2,t=\"15-Jan\":\"15-Mar\"@ave];let sst_2_regrid_2_regrid=sst_2_regrid[d=2,gxy=temp_1_regrid[d=1]]}";
+
+    	try {
+    		filename = filename + URLEncoder.encode(expr, "UTF-8");
+    	} catch (UnsupportedEncodingException e) {
+    		// TODO Auto-generated catch block
+    		e.printStackTrace();
+    	}
+    	filename = "http://strider.weathertopconsulting.com:8880/thredds/dodsC/las/id-2c2b44e493/data_ocean_atlas_subset.jnl";
+    	NetcdfDataset ncd = null;
+    	if ( filename.startsWith("http")) {
+    		System.out.println(filename);
+    		//System.exit(0);
+    	}
+    	try {
+    		log.debug("Calling openDataset");
+    		ncd = NetcdfDataset.openDataset(filename);
+    		log.debug("Finished openDataset");
+    	} catch (IOException ioe) {
+    		log.error("trying to open " + filename + "  " + ioe);
+    	} finally { 
+    		if (null != ncd) {
+    			try {
+    				List variables = ncd.getVariables();
+    				StringBuffer vars = new StringBuffer();
+    				for (Iterator vIt = variables.iterator(); vIt.hasNext();) {
+    					Variable v = (Variable) vIt.next();
+    					if ( v.isCoordinateVariable() ) {
+    						if ( vars.length() > 0 ) vars.append(";");
+    						vars.append(v.getName());
+    					} 
+    				}
+    				//NCdump.print(ncd, System.out, true, true, false, true, vars.toString(), null);
+    				for (Iterator vIt = variables.iterator(); vIt.hasNext();) {
+    					Variable v = (Variable) vIt.next();
+    					if ( v.isCoordinateVariable() ) {
+    						log.debug("reading "+v.getName());
+    						int[] shape = v.getShape();
+    						int[] origin = new int[shape.length];
+    						for ( int s = 0; s < shape.length; s++) {
+    							if ( shape[s] > 7 ) {
+    								origin[s] = shape[s]/2;
+    							} else {
+    								origin[s] = 0;
+    							}
+    							shape[s] = Math.min(3,shape[s]);
+    							log.debug("for dimension s="+s+" setting origin="+origin[s]+" shape="+shape[s]);
+    						}
+    						Array a = v.read(origin, shape);
+    						IndexIterator it = a.getIndexIterator();
+    						log.debug("Iterate on the array.");
+    						while ( it.hasNext() ) {
+    							float val = it.getFloatNext();
+    							log.debug("Value for "+it.toString()+ "=" +val);
+    						}
+    					}
+    				}
+    				ncd.close();
+    			} catch (IOException ioe) {
+    				log.error("trying to close " + filename + "  " + ioe.toString());
+    			} catch (InvalidRangeException ire) {
+    				log.error("bad range: "+ ire.toString());
+    			}
+    		}
+    	}
+    }
 
     public String getDataDir() {
         try {
