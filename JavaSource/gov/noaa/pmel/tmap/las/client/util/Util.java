@@ -2,7 +2,9 @@ package gov.noaa.pmel.tmap.las.client.util;
 
 import gov.noaa.pmel.tmap.las.client.RPCService;
 import gov.noaa.pmel.tmap.las.client.RPCServiceAsync;
+import gov.noaa.pmel.tmap.las.client.serializable.GridSerializable;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -12,6 +14,22 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.ServiceDefTarget;
 
 public class Util {
+	public static List<String> setOrthoAxes(String view, GridSerializable grid) {
+		List<String> ortho = new ArrayList<String>();
+		if ( !view.contains("t") && grid.hasT() ) {
+			ortho.add("t");
+		}
+		if ( !view.contains("z") && grid.hasZ() ) {
+			ortho.add("z");
+		}
+		if ( !view.contains("y") && grid.hasY() ) {
+			ortho.add("y");
+		}
+		if ( !view.contains("x") && grid.hasX() ) {
+			ortho.add("x");
+		}
+		return ortho;
+	}
 	public static HashMap<String, String> getTokenMap(String token) {
 		String[] tokens = token.split(";");
 		HashMap<String, String> tokenMap = new HashMap<String, String>();
