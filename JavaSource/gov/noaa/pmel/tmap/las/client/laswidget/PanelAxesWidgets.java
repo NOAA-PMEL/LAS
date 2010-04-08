@@ -1,6 +1,6 @@
 package gov.noaa.pmel.tmap.las.client.laswidget;
 
-import com.google.gwt.user.client.ui.ChangeListener;
+import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 
@@ -38,11 +38,11 @@ public class PanelAxesWidgets extends Composite {
 			layout.remove(zAxisWidget);
 		}		
 	}
-	public void addTChangeListener(ChangeListener listener) {
-		dateTimeWidget.addChangeListener(listener);
+	public void addTChangeListener(ChangeHandler handler) {
+		dateTimeWidget.addChangeHandler(handler);
 	}
-	public void addZChangeListener(ChangeListener listener) {
-		zAxisWidget.addChangeListener(listener);
+	public void addZChangeListener(ChangeHandler handler) {
+		zAxisWidget.addChangeHandler(handler);
 	}
 	public void setRange(String type, boolean b) {
 		if ( type.equals("z") ) {

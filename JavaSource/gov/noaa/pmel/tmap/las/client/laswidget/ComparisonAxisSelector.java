@@ -6,6 +6,7 @@ import java.util.List;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.DecoratorPanel;
+import com.google.gwt.user.client.ui.DisclosurePanel;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
@@ -17,36 +18,39 @@ import com.google.gwt.user.client.ui.FlexTable.FlexCellFormatter;
 
 public class ComparisonAxisSelector extends Composite {
 	ListBox axes;
-	FlexTable layout = new FlexTable();
-	public ComparisonAxisSelector(List<String> ortho) {
-		FlexCellFormatter cellFormatter = layout.getFlexCellFormatter();
-
-	    // Add a title to the form
-	    layout.setHTML(0, 0, "Other Axes");
-	    cellFormatter.setColSpan(0, 0, 2);
-	    cellFormatter.setHorizontalAlignment(0, 0, HasHorizontalAlignment.ALIGN_CENTER);
-	    //cellFormatter.setHorizontalAlignment(1, 0, HasHorizontalAlignment.ALIGN_CENTER);
+	
+	public ComparisonAxisSelector(String width) {
 
 		axes = new ListBox();
-		for (Iterator orthoIt = ortho.iterator(); orthoIt.hasNext();) {
-			String axis = (String) orthoIt.next();
-			axes.addItem(axis, axis);
+		
+		
+		DisclosurePanel disPanel = new DisclosurePanel("Select axis to vary in panels:");
+		disPanel.add(axes);
+		disPanel.setOpen(true);
+		
+		if ( width != null && !width.equals("") ) {
+		    disPanel.setWidth(width);
 		}
-		layout.setHTML(1, 0, "Select Axis to Vary In Panels");
-		layout.setWidget(1, 1, axes);
-		DecoratorPanel decPanel = new DecoratorPanel();
-		decPanel.add(layout);
-		decPanel.setWidth("275px");
-		initWidget(decPanel);
+		initWidget(disPanel);
 	}
 	public void setAxes(List<String> ortho) {
 		if ( axes == null ) {
 			axes = new ListBox();
 		}
 		axes.clear();
+		StringBuffer map_axes = new StringBuffer();
 		for (Iterator orthoIt = ortho.iterator(); orthoIt.hasNext();) {
 			String axis = (String) orthoIt.next();
-			axes.addItem(axis, axis);
+			if ( !axis.equals("x") && !axis.equals("y") ) {
+				axes.addItem(axis, axis);
+			} else {
+				map_axes.append(axis);
+			}
+		}
+		if ( map_axes.length() == 1 ) {
+			axes.addItem(map_axes.toString(), map_axes.toString());
+		} else if ( map_axes.length() == 2 ) {
+			axes.addItem("xy", "xy");
 		}
 	}
 	public void setValue(String value) {
@@ -56,12 +60,8 @@ public class ComparisonAxisSelector extends Composite {
 			}
 		}
 	}
-	public void setFixedAxisWidget(Widget w) {
-		FlexCellFormatter cellFormatter = layout.getFlexCellFormatter();
-		layout.setHTML(2, 0, "Fixed Axis Value:&nbsp;");
-		layout.setWidget(3, 0, w);
-		cellFormatter.setColSpan(2, 0, 2);
-		cellFormatter.setColSpan(2, 1, 2);
+	public String getValue() {
+		return axes.getValue(axes.getSelectedIndex());
 	}
 	public void addAxesChangeHandler(ChangeHandler compareAxisChangeHandler) {
 		axes.addChangeHandler(compareAxisChangeHandler);	

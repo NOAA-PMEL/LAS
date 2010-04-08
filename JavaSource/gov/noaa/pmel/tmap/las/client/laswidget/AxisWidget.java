@@ -3,17 +3,14 @@ package gov.noaa.pmel.tmap.las.client.laswidget;
 import gov.noaa.pmel.tmap.las.client.serializable.ArangeSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.AxisSerializable;
 
-import java.util.Iterator;
-import java.util.Map;
-
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.i18n.client.NumberFormat;
-import com.google.gwt.user.client.ui.ChangeListener;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
-import com.google.gwt.user.client.ui.Widget;
 
 public class AxisWidget extends Composite {
 	String type;
@@ -22,9 +19,9 @@ public class AxisWidget extends Composite {
 	Label hi_label_range = new Label();
     ListBox lo_axis = new ListBox();
     ListBox hi_axis = new ListBox();
-    HorizontalPanel lo_layout = new HorizontalPanel();
-    HorizontalPanel hi_layout = new HorizontalPanel();
-    VerticalPanel layout = new VerticalPanel();
+    FlexTable lo_layout = new FlexTable();
+    FlexTable hi_layout = new FlexTable();
+    FlexTable layout = new FlexTable();
     NumberFormat format = NumberFormat.getFormat("###.##");
     boolean range;
     public AxisWidget(AxisSerializable ax) {
@@ -42,8 +39,8 @@ public class AxisWidget extends Composite {
     private void initialize(AxisSerializable ax) {
     	lo_axis.clear();
     	hi_axis.clear();
-    	lo_axis.addChangeListener(loAxisChangeListener);
-    	hi_axis.addChangeListener(hiAxisChangeListener);
+    	lo_axis.addChangeHandler(loAxisChangeHandler);
+    	hi_axis.addChangeHandler(hiAxisChangeHandler);
     	String units = ax.getUnits();
     	if ( ax.getLabel() != null && !ax.getLabel().equals("") ) {
     		if ( units != null && !units.equals("") ) {
@@ -101,16 +98,16 @@ public class AxisWidget extends Composite {
     	hi_layout.clear();
     	layout.clear();
     	if ( range ) {
-    		lo_layout.add(lo_label_range);
-    	    lo_layout.add(lo_axis);
-    	    hi_layout.add(hi_label_range);
-    	    hi_layout.add(hi_axis);
-    	    layout.add(lo_layout);
-    	    layout.add(hi_layout);
+    		lo_layout.setWidget(0, 0, lo_label_range);
+    	    lo_layout.setWidget(0, 1, lo_axis);
+    	    hi_layout.setWidget(0, 0, hi_label_range);
+    	    hi_layout.setWidget(0, 1, hi_axis);
+    	    layout.setWidget(0, 0, lo_layout);
+    	    layout.setWidget(1, 0, hi_layout);
     	} else {
-    	    lo_layout.add(lo_label);
-    	    lo_layout.add(lo_axis);
-    	    layout.add(lo_layout);
+    	    lo_layout.setWidget(0, 0, lo_label);
+    	    lo_layout.setWidget(0, 1, lo_axis);
+    	    layout.setWidget(0, 0, lo_layout);
     	}
     }
     public AxisWidget() {
@@ -123,9 +120,9 @@ public class AxisWidget extends Composite {
     	return lo_axis.getValue(i);
     }
 
-	public void addChangeListener(ChangeListener listener) {
-		lo_axis.addChangeListener(listener);	
-		hi_axis.addChangeListener(listener);
+	public void addChangeHandler(ChangeHandler handler) {
+		lo_axis.addChangeHandler(handler);	
+		hi_axis.addChangeHandler(handler);
 	}
 
 	public void setEnabled(boolean b) {
@@ -189,13 +186,15 @@ public class AxisWidget extends Composite {
 			}
 		}
 	}
-	public ChangeListener loAxisChangeListener = new ChangeListener() {
-		public void onChange(Widget sender) {
+	public ChangeHandler loAxisChangeHandler = new ChangeHandler() {
+		@Override
+		public void onChange(ChangeEvent arg0) {
 			checkOrderLo();	
 		}
 	};
-	public ChangeListener hiAxisChangeListener = new ChangeListener() {
-		public void onChange(Widget sender) {
+	public ChangeHandler hiAxisChangeHandler = new ChangeHandler() {
+		@Override
+		public void onChange(ChangeEvent arg0) {
 			checkOrderHi();
 		}
 	};

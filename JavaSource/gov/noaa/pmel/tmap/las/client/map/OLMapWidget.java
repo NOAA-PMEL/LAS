@@ -1287,20 +1287,20 @@ public class OLMapWidget extends Composite {
 	}
 	public double[] getDataExtent() {
 		double[] d = new double[4];
-		// n, s, e, w
-		d[0] = dataBounds.getUpperRightY();
-		d[1] = dataBounds.getLowerLeftY();
-		d[2] = dataBounds.getUpperRightX();
-		d[3] = dataBounds.getLowerLeftX();
+		// s, n, w, e to match setDataExtent...
+		d[0] = dataBounds.getLowerLeftY();
+		d[1] = dataBounds.getUpperRightY();
+		d[2] = dataBounds.getLowerLeftX();
+		d[3] = dataBounds.getUpperRightX();
 		return d;
 	}
 	public double[] getCurrentSelection() {
 		double[] cs = new double[4];
-		// n, s, e, w
-		cs[0] = currentSelection.getUpperRightY();
-		cs[1] = currentSelection.getLowerLeftY();
-		cs[2] = currentSelection.getUpperRightX();
-		cs[3] = currentSelection.getLowerLeftX();
+		// s, n, w, e to match setDataExtent
+		cs[0] = currentSelection.getLowerLeftY();
+		cs[1] = currentSelection.getUpperRightY();
+		cs[2] = currentSelection.getLowerLeftX();
+		cs[3] = currentSelection.getUpperRightX();
 		return cs;
 	}
 	public double getDelta() {

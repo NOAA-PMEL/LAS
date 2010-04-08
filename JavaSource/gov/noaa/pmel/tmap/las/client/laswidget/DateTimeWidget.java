@@ -8,10 +8,11 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.ChangeListener;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Grid;
@@ -122,15 +123,15 @@ public class DateTimeWidget extends Composite {
 			
 	}
 	public void setListeners() {
-		lo_year.addChangeListener(loYearListener);
-		lo_month.addChangeListener(loMonthListener);
-		lo_day.addChangeListener(loDayListener);
-		lo_hour.addChangeListener(loHourListener);
+		lo_year.addChangeHandler(loYearHandler);
+		lo_month.addChangeHandler(loMonthHandler);
+		lo_day.addChangeHandler(loDayHandler);
+		lo_hour.addChangeHandler(loHourHandler);
 		
-		hi_year.addChangeListener(hiYearListener);
-		hi_month.addChangeListener(hiMonthListener);
-		hi_day.addChangeListener(hiDayListener);
-		hi_hour.addChangeListener(hiHourListener);
+		hi_year.addChangeHandler(hiYearHandler);
+		hi_month.addChangeHandler(hiMonthHandler);
+		hi_day.addChangeHandler(hiDayHandler);
+		hi_hour.addChangeHandler(hiHourHandler);
 	}
 	public void init(String lo_date, String hi_date, int delta, String render, boolean climo) {
 		this.render = render;
@@ -404,16 +405,16 @@ public class DateTimeWidget extends Composite {
 			return getFerretDateLo();
 		}
 	}
-	public void addChangeListener(ChangeListener change) {
-		lo_year.addChangeListener(change);
-		lo_month.addChangeListener(change);
-		lo_day.addChangeListener(change);
-		lo_hour.addChangeListener(change);
+	public void addChangeHandler(ChangeHandler change) {
+		lo_year.addChangeHandler(change);
+		lo_month.addChangeHandler(change);
+		lo_day.addChangeHandler(change);
+		lo_hour.addChangeHandler(change);
 
-		hi_year.addChangeListener(change);
-		hi_month.addChangeListener(change);
-		hi_day.addChangeListener(change);
-		hi_hour.addChangeListener(change);
+		hi_year.addChangeHandler(change);
+		hi_month.addChangeHandler(change);
+		hi_day.addChangeHandler(change);
+		hi_hour.addChangeHandler(change);
 	}
 	public void setLo(String tlo) {
 		
@@ -703,8 +704,9 @@ public class DateTimeWidget extends Composite {
 			lo_hour.setSelectedIndex(hi_hour.getSelectedIndex());
 		}
 	}
-	public ChangeListener loYearListener = new ChangeListener() {
-		public void onChange(Widget sender) {
+	public ChangeHandler loYearHandler = new ChangeHandler() {
+		@Override
+		public void onChange(ChangeEvent arg0) {
 			int year = Integer.valueOf(lo_year.getValue(lo_year.getSelectedIndex())).intValue();
 			int month = MONTHS.indexOf(lo_month.getValue(lo_month.getSelectedIndex()));
 			int day = Integer.valueOf(lo_day.getValue(lo_day.getSelectedIndex())).intValue();
@@ -714,8 +716,9 @@ public class DateTimeWidget extends Composite {
 			checkRangeEndYear();
 		}
 	};
-	public ChangeListener loMonthListener = new ChangeListener() {
-		public void onChange(Widget sender) {
+	public ChangeHandler loMonthHandler = new ChangeHandler() {
+		@Override
+		public void onChange(ChangeEvent event) {
 			int year = Integer.valueOf(lo_year.getValue(lo_year.getSelectedIndex())).intValue();
 			int month = MONTHS.indexOf(lo_month.getValue(lo_month.getSelectedIndex()));
 			int day = Integer.valueOf(lo_day.getValue(lo_day.getSelectedIndex())).intValue();
@@ -726,8 +729,10 @@ public class DateTimeWidget extends Composite {
 		}	
 	};
 	// The loDayListener and hiDayListener are the only ones that should fire when the Widget contains a menu.
-	public ChangeListener loDayListener = new ChangeListener() {
-		public void onChange(Widget sender) {
+	public ChangeHandler loDayHandler = new ChangeHandler() {
+
+		@Override
+		public void onChange(ChangeEvent arg0) {
 			if ( isMenu ) {
 				int lo_i = lo_day.getSelectedIndex();
 				int hi_i = hi_day.getSelectedIndex();
@@ -745,13 +750,15 @@ public class DateTimeWidget extends Composite {
 			} 
 		}
 	};
-	public ChangeListener loHourListener = new ChangeListener() {
-		public void onChange(Widget sender) {
+	public ChangeHandler loHourHandler = new ChangeHandler() {
+		@Override
+		public void onChange(ChangeEvent arg0) {
 			checkRangeEndHour();
 		}
 	};
-	public ChangeListener hiYearListener = new ChangeListener() {
-		public void onChange(Widget sender) {
+	public ChangeHandler hiYearHandler = new ChangeHandler() {
+		@Override
+		public void onChange(ChangeEvent arg0) {
 			int year = Integer.valueOf(hi_year.getValue(hi_year.getSelectedIndex())).intValue();
 			int month = MONTHS.indexOf(hi_month.getValue(hi_month.getSelectedIndex()));
 			int day = Integer.valueOf(hi_day.getValue(hi_day.getSelectedIndex())).intValue();
@@ -761,8 +768,9 @@ public class DateTimeWidget extends Composite {
 			checkRangeStartYear();
 		}
 	};
-	public ChangeListener hiMonthListener = new ChangeListener() {
-		public void onChange(Widget sender) {
+	public ChangeHandler hiMonthHandler = new ChangeHandler() {
+		@Override
+		public void onChange(ChangeEvent arg0) {
 			int year = Integer.valueOf(hi_year.getValue(hi_year.getSelectedIndex())).intValue();
 			int month = MONTHS.indexOf(hi_month.getValue(hi_month.getSelectedIndex()));
 			int day = Integer.valueOf(hi_day.getValue(hi_day.getSelectedIndex())).intValue();
@@ -772,8 +780,9 @@ public class DateTimeWidget extends Composite {
 			checkRangeStartMonth();
 		}	
 	};
-	public ChangeListener hiDayListener = new ChangeListener() {
-		public void onChange(Widget sender) {
+	public ChangeHandler hiDayHandler = new ChangeHandler() {
+		@Override
+		public void onChange(ChangeEvent arg0) {
 			if ( isMenu ) {
 				int lo_i = lo_day.getSelectedIndex();
 				int hi_i = hi_day.getSelectedIndex();
@@ -791,8 +800,9 @@ public class DateTimeWidget extends Composite {
 			}
 		}
 	};
-	public ChangeListener hiHourListener = new ChangeListener() {
-		public void onChange(Widget sender) {
+	public ChangeHandler hiHourHandler = new ChangeHandler() {
+		@Override
+		public void onChange(ChangeEvent arg0) {
 			checkRangeStartHour();
 		}
 	};

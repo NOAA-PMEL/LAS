@@ -3,7 +3,6 @@ package gov.noaa.pmel.tmap.las.client;
 import gov.noaa.pmel.tmap.las.client.laswidget.Constants;
 import gov.noaa.pmel.tmap.las.client.laswidget.LASRequestWrapper;
 import gov.noaa.pmel.tmap.las.client.laswidget.OperationPushButton;
-import gov.noaa.pmel.tmap.las.client.laswidget.OperationRadioButton;
 import gov.noaa.pmel.tmap.las.client.laswidget.OperationsMenu;
 import gov.noaa.pmel.tmap.las.client.laswidget.SettingsWidget;
 import gov.noaa.pmel.tmap.las.client.serializable.CategorySerializable;
@@ -22,13 +21,14 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.gwt.core.client.EntryPoint;
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.http.client.URL;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.WindowResizeListener;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.ChangeListener;
 import com.google.gwt.user.client.ui.ClickListener;
 import com.google.gwt.user.client.ui.DockPanel;
 import com.google.gwt.user.client.ui.Grid;
@@ -87,9 +87,9 @@ public class TestUI implements EntryPoint {
 		if ( option == null ) {
 			option = "Options_2D_image_contour_xy_7";
 		}
-		settingsControls = new SettingsWidget("", "LAS", op, option, "panel");
+		settingsControls = new SettingsWidget("LAS", "panel", op, option);
 		settingsControls.addDatasetTreeListener(datasetTreeListener);
-		settingsControls.addApplyClickListener(panelApply);
+		//settingsControls.addApplyClickListener(panelApply);
 		settingsControls.addOperationClickHandler(operationsClickHandler);
 		operationsMenu = new OperationsMenu();
 		operationsMenu.addClickHandler(externalOperationClick);
@@ -175,8 +175,8 @@ public class TestUI implements EntryPoint {
 
 			double delta = Math.abs(Double.valueOf(ds_grid.getXAxis().getArangeSerializable().getStep()));
 
-			settingsControls.setToolType(view);
-			settingsControls.getRefMap().setDataExtent(grid_south, grid_north, grid_west, grid_east, delta);
+//			settingsControls.setToolType(view);
+//			settingsControls.getRefMap().setDataExtent(grid_south, grid_north, grid_west, grid_east, delta);
 			settingsControls.setOperations(var.getIntervals(), var.getDSID(), var.getID(), op, view);
 		}
 		// Examine the variable axes and determine which are orthogonal to the view. 
@@ -216,17 +216,18 @@ public class TestUI implements EntryPoint {
 			panel = new VizGalPanel("LAS", true, op, option, view, true);
 			panel.setVariable(var);
 			panel.init(false);
-			panel.addCompareAxisChangeListener(onAxisChange);
+			// will be done with apply button... panel.addCompareAxisChangeHandler(onAxisChange);
 			panel.setPanelHeight(pheight);
-			panel.addApplyListener(panelApply);
+			panel.addApplyHandler(panelApply);
 			panel.refreshPlot(null, false, false);
 			center.add(panel);
 			
 		}
 	}
-	ClickListener panelApply = new ClickListener() {
-		public void onClick(Widget sender) {
-			panel.setLatLon(String.valueOf(settingsControls.getRefMap().getXlo()), String.valueOf(settingsControls.getRefMap().getXhi()), String.valueOf(settingsControls.getRefMap().getYlo()), String.valueOf(settingsControls.getRefMap().getYhi()));
+	ClickHandler panelApply = new ClickHandler() {
+		@Override
+		public void onClick(ClickEvent arg0) {
+//			panel.setLatLon(String.valueOf(settingsControls.getRefMap().getYlo()), String.valueOf(settingsControls.getRefMap().getYhi()), String.valueOf(settingsControls.getRefMap().getXlo()), String.valueOf(settingsControls.getRefMap().getXhi()));
 			panel.refreshPlot(settingsControls.getOptions(), false, true);
 		}		
 	};
@@ -271,8 +272,9 @@ public class TestUI implements EntryPoint {
 		}
 
 	};
-	public ChangeListener onAxisChange = new ChangeListener() {
-		public void onChange(Widget sender) {
+	public ChangeHandler onAxisChange = new ChangeHandler() {
+		@Override
+		public void onChange(ChangeEvent arg0) {
 			panel.refreshPlot(null, false, true);	
 		}
 	};
