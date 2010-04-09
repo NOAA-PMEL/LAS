@@ -3,6 +3,8 @@ package gov.noaa.pmel.tmap.las.client.laswidget;
 import gov.noaa.pmel.tmap.las.client.RPCServiceAsync;
 import gov.noaa.pmel.tmap.las.client.serializable.VariableSerializable;
 
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.maps.client.geom.LatLng;
 import com.google.gwt.maps.client.geom.LatLngBounds;
 import com.google.gwt.user.client.ui.Button;
@@ -32,7 +34,7 @@ public class DatasetButton extends Composite {
 	int offset = 0;
 	public DatasetButton () {
 		choose = new PushButton("Data Set");
-		choose.addClickListener(openClick);
+		choose.addClickHandler(openClick);
 		datasetPanel = new PopupPanel(false);
 		datasetWidget = new DatasetWidget();
 		datasetWidget.addTreeListener(new TreeListener() {
@@ -51,9 +53,10 @@ public class DatasetButton extends Composite {
 		datasetWidget.init();
 		popupGrid = new Grid(3, 1);		
 		close = new Button("close");
-		close.addClickListener(new ClickListener() {
-			public void onClick(Widget sender) {
-				datasetPanel.hide();			
+		close.addClickHandler(new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent arg0) {
+				datasetPanel.hide();
 			}
 		});
 		verticalPanel.add(dataset_name);
@@ -69,8 +72,9 @@ public class DatasetButton extends Composite {
 	public void setOffset(int offset) {
 		this.offset = offset;
 	}
-	public ClickListener openClick = new ClickListener() {
-		public void onClick(Widget sender) {
+	public ClickHandler openClick = new ClickHandler() {
+		@Override
+		public void onClick(ClickEvent event) {
 			datasetPanel.setPopupPosition(choose.getAbsoluteLeft()+offset, choose.getAbsoluteTop());
 			datasetPanel.show();
 		}
@@ -80,5 +84,11 @@ public class DatasetButton extends Composite {
 	}
 	public void addTreeListener(TreeListener treeListener) {
 		datasetWidget.addTreeListener(treeListener);
+	}
+	public void addOpenClickHandler(ClickHandler handler) {
+		choose.addClickHandler(handler);
+	}
+	public void addCloseClickHandler(ClickHandler handler) {
+		close.addClickHandler(handler);
 	}
 }

@@ -10,13 +10,11 @@ import java.util.List;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.DecoratorPanel;
 import com.google.gwt.user.client.ui.DisclosurePanel;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HasText;
+import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.PushButton;
-import com.google.gwt.user.client.ui.FlexTable.FlexCellFormatter;
 
 public class AxesWidgetGroup extends Composite {
 	// Apply button only used in the horizontal layout.
@@ -35,6 +33,11 @@ public class AxesWidgetGroup extends Composite {
 	String orthoTitle;
 	boolean hasZ;
 	boolean hasT;
+	boolean plotPanelIsOpen = true;
+	boolean orthoPanelIsOpen = true;
+	String mapLocation;
+	int mapRow;
+	int mapCol;
 	List<String> viewAxes = new ArrayList<String>();   // This is just the view, but individual axes
 	/**
 	 * A widget to hold a set of x, y, z and t axis controls and to display them in groups according to the view.  Initially the map
@@ -61,6 +64,9 @@ public class AxesWidgetGroup extends Composite {
 		dateTimeWidget.setVisible(false);
 		plotAxesLayout.setWidget(0, 0, plotApplyButton);
 		plotAxesLayout.setWidget(1, 0, refMap);
+		mapLocation = "plot";
+		mapRow = 1;
+		mapCol = 0;
 		plotPanel = new DisclosurePanel(plot_title);
 		plotPanel.add(plotAxesLayout);
 		plotPanel.setOpen(true);
@@ -71,11 +77,15 @@ public class AxesWidgetGroup extends Composite {
 		orthoPanel.add(orthoAxesLayout);
 		orthoPanel.setOpen(true);
 		panelLayout = new FlexTable();
+		panelLayout.getCellFormatter().setVerticalAlignment(0, 0, HasVerticalAlignment.ALIGN_TOP);
+		panelLayout.addStyleDependentName("vizgal-align-top");
 		panelLayout.setWidget(0, 0, plotPanel);
 		if ( layout != null && layout.equals("horizontal") ) {
 			panelLayout.setWidget(0, 1, orthoPanel);
+			panelLayout.getCellFormatter().setVerticalAlignment(0, 1, HasVerticalAlignment.ALIGN_TOP);
 		} else {
 			panelLayout.setWidget(1, 0, orthoPanel);
+			panelLayout.getCellFormatter().setVerticalAlignment(1, 0, HasVerticalAlignment.ALIGN_TOP);
 		}
 		if ( width != null && !width.equals("") ) {
 		    plotPanel.setWidth(width);
@@ -130,7 +140,7 @@ public class AxesWidgetGroup extends Composite {
 		}
 	}
     private void arrangeAxes(String view, List<String> ortho, String compareAxis) {
-
+       
     	// First put all of the axes into the correct panels.
     	plotAxesLayout.clear();
     	orthoAxesLayout.clear();
@@ -140,6 +150,9 @@ public class AxesWidgetGroup extends Composite {
     	int plotAxesRow = 1;
     	if ( view.contains("x") || view.contains("y") ) {
     		plotAxesLayout.setWidget(plotAxesRow, 0, refMap);
+    		mapLocation = "plot";
+    		mapRow = plotAxesRow;
+    		mapCol = 0;
     		refMap.setVisible(true);
     		plotAxesRow++;
     		if ( view.contains("x") ) {
@@ -177,20 +190,25 @@ public class AxesWidgetGroup extends Composite {
     	int orthoAxesRow = 1;
     	if ( ortho.contains("x") || ortho.contains("y") || ortho.contains("xy") ) {
     		orthoAxesLayout.setWidget(orthoAxesRow, 0, refMap);
+    		mapLocation = "ortho";
+    		mapRow = orthoAxesRow;
+    		mapCol = 0;
     		if ( view.contains("x") && !view.contains("y") ) {
     			if ( compareAxis.equals("y") ) {
-    				plotAxisMessage = new HTML("(The x axis values are set in the map in the upper left panel.)");
+    				plotAxisMessage = new HTML("(The longitude range is set in the map in the upper left panel.)");
     			} else {
-    			    plotAxisMessage = new HTML("(The x axis values are set in the map below.)");
+    			    plotAxisMessage = new HTML("(The longitude range is set in the map below.)");
+    			    orthoPanel.setOpen(true);
     			}
     			
     			plotAxesLayout.setWidget(orthoAxesRow, 0, plotAxisMessage);
     		}
     		if ( view.contains("y") && !view.contains("x") ) {
     			if ( compareAxis.equals("x") ) {
-    				plotAxisMessage = new HTML("(The y axis values are set in the map in the upper left panel.)");
+    				plotAxisMessage = new HTML("(The latitude range is set in the map in the upper left panel.)");
     			} else {
-    			    plotAxisMessage = new HTML("(The y axis values are set in the map below.)");
+    			    plotAxisMessage = new HTML("(The latitude range is set in the map below.)");
+    			    orthoPanel.setOpen(true);
     			}
     			plotAxesLayout.setWidget(orthoAxesRow, 0, plotAxisMessage);
     		}
@@ -244,22 +262,45 @@ public class AxesWidgetGroup extends Composite {
     }
     public void setFixedAxis(String view, List<String> ortho, String fixedAxis, String compareAxis) {
         arrangeAxes(view, ortho, compareAxis);
-        
+        boolean showFixedPanel = false;
         for (Iterator orthoIt = ortho.iterator(); orthoIt.hasNext();) {
 			String ax = (String) orthoIt.next();
 			if ( !compareAxis.contains(ax) ) {
 		        setAxisVisible(ax, true);
+		        showFixedPanel = true;
 			} else {
 			    setAxisVisible(ax, false);
 			}
 		}
+        orthoPanel.setVisible(showFixedPanel);
     }
     public void showAll(String view, List<String> ortho) {
+    	
     	arrangeAxes(view, ortho, "");
+       
     	plotPanel.setVisible(true);
     	orthoPanel.setVisible(true);
+    	plotPanel.setOpen(true);
+    	orthoPanel.setVisible(true);
+
+        if ( mapLocation.equals("plot") ) {
+    		plotAxesLayout.remove(refMap);
+    	} else {
+    		orthoAxesLayout.remove(refMap);
+    	}
+        
+        refMap = new OLMapWidget();
     	refMap.setVisible(true);
-    	refMap.setTool(view);
+      
+        if ( mapLocation.equals("plot") ) {
+        	plotAxesLayout.setWidget(mapRow, mapCol, refMap);
+        } else {
+        	orthoAxesLayout.setWidget(mapRow, mapCol, refMap);
+        }
+
+    	
+    	
+    	
     	if ( hasZ ) {
     		zWidget.setVisible(true);
     		if ( view.contains("z") ) {
@@ -292,5 +333,16 @@ public class AxesWidgetGroup extends Composite {
 	public void setOpen(boolean b) {
 		plotPanel.setOpen(b);
 		orthoPanel.setOpen(b);
+	}
+
+	public void closePanels() {
+		plotPanelIsOpen = plotPanel.isOpen();
+		orthoPanelIsOpen = orthoPanel.isOpen();
+		plotPanel.setOpen(false);
+		orthoPanel.setOpen(false);
+	}
+	public void restorePanels() {
+		plotPanel.setOpen(plotPanelIsOpen);
+		orthoPanel.setOpen(orthoPanelIsOpen);
 	}
 }

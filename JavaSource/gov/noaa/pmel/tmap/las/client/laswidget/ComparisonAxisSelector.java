@@ -18,13 +18,13 @@ import com.google.gwt.user.client.ui.FlexTable.FlexCellFormatter;
 
 public class ComparisonAxisSelector extends Composite {
 	ListBox axes;
-	
+	DisclosurePanel disPanel;
 	public ComparisonAxisSelector(String width) {
 
 		axes = new ListBox();
 		
 		
-		DisclosurePanel disPanel = new DisclosurePanel("Select axis to vary in panels:");
+		disPanel = new DisclosurePanel("Axis to vary in panels");
 		disPanel.add(axes);
 		disPanel.setOpen(true);
 		
@@ -33,7 +33,7 @@ public class ComparisonAxisSelector extends Composite {
 		}
 		initWidget(disPanel);
 	}
-	public void setAxes(List<String> ortho) {
+	public void setAxes(List<String> ortho) {		
 		if ( axes == null ) {
 			axes = new ListBox();
 		}
@@ -51,6 +51,11 @@ public class ComparisonAxisSelector extends Composite {
 			axes.addItem(map_axes.toString(), map_axes.toString());
 		} else if ( map_axes.length() == 2 ) {
 			axes.addItem("xy", "xy");
+		}
+		if ( axes.getItemCount() == 0 || axes.getItemCount() == 1 ) {
+			disPanel.setVisible(false);
+		} else {
+			disPanel.setVisible(true);
 		}
 	}
 	public void setValue(String value) {
