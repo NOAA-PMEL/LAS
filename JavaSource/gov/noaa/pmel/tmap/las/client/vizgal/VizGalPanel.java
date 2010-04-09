@@ -213,9 +213,10 @@ public class VizGalPanel extends Composite {
 
 		String title = "Settings";
 		settingsButton = new SettingsWidget(title, ID, operationID, optionID);
-		
-		settingsButton.addCloseClickListener(closeClick);
+	
 		settingsButton.addDatasetTreeListener(datasetTreeListener);
+		settingsButton.addOpenHandler(datasetOpenHandler);
+		settingsButton.addCloseHandler(datasetCloseHandler);
 		settingsButton.addOptionsOkClickListener(optionsOkListener);
 		settingsButton.addOperationClickHandler(operationsClickHandler);
 		revert.addClickListener(revertListener);
@@ -616,6 +617,7 @@ public class VizGalPanel extends Composite {
 		public void onSuccess(Object result) {
 			ngrid = (GridSerializable) result;
 			nvar.setGrid(ngrid);
+			applyChanges();
 		}
 		
 	};
@@ -627,56 +629,34 @@ public class VizGalPanel extends Composite {
 		this.compareAxis = compareAxis;
 		panelAxesWidgets.setCompareAxis(view, ortho, compareAxis);
 	}
-	ClickListener applyPanelClick = new ClickListener() {
-		public void onClick(Widget sender) {
-			setPanelMode();
-			if ( ngrid == null ) {
-				Window.alert("Still fetching grid for new variable.");
-				return;
-			}
-			if (changeDataset) {			
-				var = nvar;
-				datasetLabel.setText(var.getDSName()+": "+var.getName());
-				usePanel(true);
-				changeDataset = false;
-				init(true);
-			}
-			
-			// TODO This ain't quite right.
-			if (settingsButton.isUsePanelSettings()) {
-				grid.setStyleName("panelSettingsColor");
-				grid.setWidget(2, 0, panelAxesWidgets);
-				setCompareAxisVisible(false);
-			} else {
-				grid.setStyleName("regularBackground");
-				panelAxesWidgets.setCompareAxis(view, ortho, compareAxis);
-			}	
+	private void applyChanges() {
+		
+		if ( ngrid == null ) {
+			Window.alert("Still fetching grid for new variable.");
+			return;
 		}
-	};
-	ClickListener closeClick = new ClickListener() {
-		public void onClick(Widget sender) {
-			setPanelMode();
+		if (changeDataset) {			
+			var = nvar;
+			datasetLabel.setText(var.getDSName()+": "+var.getName());
+			settingsButton.setUsePanel(true);
+			changeDataset = false;
+			init(true);
 		}
-	};
-	private void setPanelMode() {
-		if (settingsButton.isUsePanelSettings() ) {
-			grid.addStyleName("panelSettingsColor");
-			panelAxesWidgets.showAll(view, Util.setOrthoAxes(view, var.getGrid()));
+		
+		if (settingsButton.isUsePanelSettings()) {
+			grid.setStyleName("panelSettingsColor");
 			if ( !singlePanel ) {
 				top.setWidget(0, 2, revert);
 			}
+			showAllAxes();
 		} else {
-			panelAxesWidgets.setCompareAxis(view, ortho, compareAxis);
-			if ( compareAxis.equals("t") ) {
-				setAxisRangeValues("t", panelAxesWidgets.getTAxis().getFerretDateLo(), panelAxesWidgets.getTAxis().getFerretDateHi());
-			} else if ( compareAxis.equals("z") ) {
-				setAxisRangeValues("z", panelAxesWidgets.getZAxis().getLo(), panelAxesWidgets.getZAxis().getHi());
-			}
 			grid.setStyleName("regularBackground");
 			if ( !singlePanel ) {
 				top.remove(revert);
 			}
-		}	
+			panelAxesWidgets.setCompareAxis(view, ortho, compareAxis);
+		}
+		refreshPlot(settingsButton.getOptions(), false, true);
 	}
 	
 	private void setCompareAxisEnabled(boolean b) {
@@ -689,22 +669,10 @@ public class VizGalPanel extends Composite {
 			a.setEnabled(b);
 		}
 	}
-	private void setCompareAxisVisible(boolean b) {
-		Widget w = grid.getWidget(2, 0);
-		if ( w instanceof DateTimeWidget ) {
-			DateTimeWidget dt = (DateTimeWidget) w;
-			dt.setVisible(b);
-		} else if ( w instanceof AxisWidget ) {
-			AxisWidget a = (AxisWidget) w;
-			a.setVisible(b);
-		}
-	}
 	public String getID() {
 		return ID;
 	}
-	public void addCloseListener(ClickListener closeClick) {
-		settingsButton.addCloseClickListener(closeClick);
-	}
+	
 	public void addApplyHandler(ClickHandler applyClick) {
 		//settingsButton.addApplyClickListener(applyClick);
 		panelAxesWidgets.addApplyHandler(applyClick);
@@ -826,10 +794,7 @@ public class VizGalPanel extends Composite {
 	public boolean isUsePanelSettings() {
 		return settingsButton.isUsePanelSettings();
 	}
-	public void usePanel(boolean b) {
-		settingsButton.setUsePanel(b);
-		setPanelMode();
-	}
+	
 	public VariableSerializable getVariable() {
 		return var;
 	}
@@ -1016,7 +981,7 @@ public class VizGalPanel extends Composite {
 	public ClickListener revertListener = new ClickListener() {
 		public void onClick(Widget sender) {
 			settingsButton.setUsePanel(false);
-			setPanelMode();
+			applyChanges();
 		}
 	};
 
@@ -1026,7 +991,7 @@ public class VizGalPanel extends Composite {
 	public ClickListener optionsOkListener = new ClickListener() {
 		public void onClick(Widget sender) {
 			settingsButton.setUsePanel(true);
-			setPanelMode();
+			applyChanges();
 		}
 	};
 	public ClickHandler operationsClickHandler = new ClickHandler() {
@@ -1036,7 +1001,7 @@ public class VizGalPanel extends Composite {
 				OperationRadioButton o = (OperationRadioButton) event.getSource();
 				view = settingsButton.getOperationsWidget().getCurrentView();
 				operationID = settingsButton.getCurrentOp().getID();
-				usePanel(true);
+				settingsButton.setUsePanel(true);
 				if ( isUsePanelSettings() || singlePanel ) {
 					if ( view.contains("t") ) {
 						panelAxesWidgets.setRange("t", true);
@@ -1048,13 +1013,45 @@ public class VizGalPanel extends Composite {
 					} else {
 						panelAxesWidgets.setRange("z", false);
 					}
-					panelAxesWidgets.showAll(view, Util.setOrthoAxes(view, var.getGrid()));
-					refreshPlot(settingsButton.getOptions(), false, true);
+					
+					// In "panel" mode so show all the axes.
+					showAllAxes();
+					 
+
+					applyChanges();
 				} 
 			}			
 		}	
 	};
+    private void showAllAxes() {
+    	/*
+         * If you don't remove the map, all the features that have
+         * been rendered to it while it was hidden will appear on
+         * the map and will be zombies (you can't clear them
+         * and you can't select them).  Remove the map and reinitializing
+         * it works around this problem.
+         */
+    	
 
+       
+        double[] data = panelAxesWidgets.getRefMap().getDataExtent();
+
+        double xlo = panelAxesWidgets.getRefMap().getXlo();
+        double xhi = panelAxesWidgets.getRefMap().getXhi();
+        double ylo = panelAxesWidgets.getRefMap().getYlo();
+        double yhi = panelAxesWidgets.getRefMap().getYhi();
+
+        double delta = panelAxesWidgets.getRefMap().getDelta();
+        int zoom = panelAxesWidgets.getRefMap().getZoom();
+        double[] center = panelAxesWidgets.getRefMap().getCenterLatLon();
+        
+		panelAxesWidgets.showAll(view, Util.setOrthoAxes(view, var.getGrid()));
+		
+		panelAxesWidgets.getRefMap().setTool(view);
+		panelAxesWidgets.getRefMap().setCenter(center[0], center[1], zoom);
+		panelAxesWidgets.getRefMap().setDataExtentOnly(data[0], data[1], data[2], data[3], delta);
+		panelAxesWidgets.getRefMap().setCurrentSelection(ylo, yhi, xlo, xhi);
+    }
 	public void setParentAxisRange(String type, boolean b) {
 		if ( type.equals("t") ) {
 			panelAxesWidgets.setRange("t", b);
@@ -1134,5 +1131,25 @@ public class VizGalPanel extends Composite {
 		}
 		
 	};
-	
+	ClickHandler datasetOpenHandler = new ClickHandler() {
+
+		@Override
+		public void onClick(ClickEvent arg0) {
+			
+			panelAxesWidgets.closePanels();
+			
+		}
+		
+	};
+	ClickHandler datasetCloseHandler = new ClickHandler() {
+
+		@Override
+		public void onClick(ClickEvent arg0) {
+			
+			panelAxesWidgets.restorePanels();
+			
+		}
+		
+		
+	};
 }

@@ -153,6 +153,9 @@ public class VizGal implements EntryPoint {
     OperationsWidget operationsWidget;
    
     FlexTable settingsControls;
+    
+    DisclosurePanel operationsPanel;
+    boolean operationsPanelIsOpen = true;
 
 	/*
 	 * The currently selected variable.
@@ -270,6 +273,9 @@ public class VizGal implements EntryPoint {
 	    buttonLayout = new FlexTable();
 	    datasetButton = new DatasetButton();
 	    datasetButton.addTreeListener(datasetTreeListener);
+	    // This is all to get around the fact that the OpenLayers map is always in front.
+	    datasetButton.addOpenClickHandler(datasetOpenHandler);
+	    datasetButton.addCloseClickHandler(datasetCloseHandler);
 	    optionsButton = new OptionsButton(optionID, 0);
 	    optionsButton.addOkClickListener(optionsOkListener);
 	    
@@ -285,7 +291,7 @@ public class VizGal implements EntryPoint {
 		
 		operationsWidget = new OperationsWidget("Operations");
 		operationsWidget.addClickHandler(operationsClickHandler);
-		DisclosurePanel operationsPanel = new DisclosurePanel("Plots");
+		operationsPanel = new DisclosurePanel("Plots");
 		operationsPanel.add(operationsWidget);
 		operationsPanel.setOpen(true);
 		operationsPanel.setWidth(settingsWidth);
@@ -422,6 +428,7 @@ public class VizGal implements EntryPoint {
 			if ( v instanceof VariableSerializable ) {
 				nvar = (VariableSerializable) v;
 				changeDataset = true;
+				changeDataset();
 				/*
 				if ( nvar.getAttributes().get("grid_type").equals("regular") ) {
 					changeDataset = true;
@@ -566,42 +573,27 @@ public class VizGal implements EntryPoint {
 		sp1.addApplyHandler(panelApplyButtonClick);
 		slides.setWidget(0, 0, sp1);
 		sp1.setPanelWidth(pwidth);
-//		sp1.addCompareAxisChangeListener(panelAxisMenuChange);
-//		sp1.addZChangeListner(panelAxisMenuChange);
-//		sp1.addTChangeListner(panelAxisMenuChange);
 		panels.add(sp1);
 
 		VizGalPanel sp2 = new VizGalPanel("Panel 1", false, op, optionID, view, false);
 		sp2.addRevertHandler(panelApplyButtonClick);
 		sp2.addApplyHandler(panelApplyButtonClick);
-		//sp2.addRegionChangeListener(regionChange);
 		slides.setWidget(0, 1, sp2);
-		sp2.setPanelWidth(pwidth);
-//		sp2.addCompareAxisChangeListener(panelAxisMenuChange);
-//		sp2.addZChangeListner(panelAxisMenuChange);
-//		sp2.addTChangeListner(panelAxisMenuChange);		
+		sp2.setPanelWidth(pwidth);		
 		panels.add(sp2);
 
 		VizGalPanel sp3 = new VizGalPanel("Panel 2", false, op, optionID, view, false);
 		sp3.addRevertHandler(panelApplyButtonClick);
 		sp3.addApplyHandler(panelApplyButtonClick);
-		//sp2.addRegionChangeListener(regionChange);
 		slides.setWidget(1, 0, sp3);
-		sp3.setPanelWidth(pwidth);
-//		sp3.addCompareAxisChangeListener(panelAxisMenuChange);
-//		sp3.addZChangeListner(panelAxisMenuChange);
-//		sp3.addTChangeListner(panelAxisMenuChange);		
+		sp3.setPanelWidth(pwidth);		
 		panels.add(sp3);
 
 		VizGalPanel sp4 = new VizGalPanel("Panel 3", false, op, optionID, view, false);
 		sp4.addRevertHandler(panelApplyButtonClick);
 		sp4.addApplyHandler(panelApplyButtonClick);
-		//sp2.addRegionChangeListener(regionChange);
 		slides.setWidget(1, 1, sp4);
-		sp4.setPanelWidth(pwidth);
-//		sp4.addCompareAxisChangeListener(panelAxisMenuChange);
-//		sp4.addZChangeListner(panelAxisMenuChange);
-//		sp4.addTChangeListner(panelAxisMenuChange);		
+		sp4.setPanelWidth(pwidth);		
 		panels.add(sp4);
 
 		sp1.setVariable(var);
@@ -745,17 +737,23 @@ public class VizGal implements EntryPoint {
 			// Figure out which axis vary in each frame.  Take them in order of t, z, x, y...
 			if ( ortho.contains("t") ) {
 				compareAxis = "t";
-				fixedAxis = "z";
+				if ( ds_grid.hasZ() ) {
+				    fixedAxis = "z";
+				} else {
+					fixedAxis = "";
+				}
 			}  else if ( ortho.contains("z") ) {
 				compareAxis = "z";
-				fixedAxis = "t";
+				if ( ds_grid.hasT() ) {
+				    fixedAxis = "t";
+				} else {
+					fixedAxis = "";
+				}
 			}
 			
-		
+		    
 			comparisonAxesSelector.setAxes(ortho);
-			comparisonAxesSelector.setVisible(true);
 			axesWidget.init(var.getGrid());
-			comparisonAxesSelector.setAxes(ortho);
 			axesWidget.setFixedAxis(view, ortho, fixedAxis, compareAxis);
 			return true;
 		}
@@ -1666,4 +1664,27 @@ public class VizGal implements EntryPoint {
 		
 		return switch_axis;
 	}
+	ClickHandler datasetOpenHandler = new ClickHandler() {
+
+		@Override
+		public void onClick(ClickEvent arg0) {
+			
+			axesWidget.closePanels();
+			operationsPanelIsOpen = operationsPanel.isOpen();
+			operationsPanel.setOpen(false);
+			
+		}
+		
+	};
+	ClickHandler datasetCloseHandler = new ClickHandler() {
+
+		@Override
+		public void onClick(ClickEvent arg0) {
+			
+			axesWidget.restorePanels();
+			operationsPanel.setOpen(operationsPanelIsOpen);
+		}
+		
+		
+	};
 }

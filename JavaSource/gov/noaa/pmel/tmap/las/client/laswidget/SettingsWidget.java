@@ -190,4 +190,12 @@ public class SettingsWidget extends Composite {
 		// TODO Auto-generated method stub
 		
 	}
+
+
+	public void addOpenHandler(ClickHandler handler) {
+		settingsButton.addClickHandler(handler);
+	}
+	public void addCloseHandler(ClickHandler handler) {
+		closeButton.addClickHandler(handler);
+	}
 }
