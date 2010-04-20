@@ -218,6 +218,44 @@ public class LASConfig extends LASDocument {
         return comboList;
     }
     /**
+     * Return up to max direct and F-TDS URLs that can be tested.  This just grabs them in order.  Something more sophisticated could be done.
+     * @param max
+     * @return
+     */
+    public List<String> getFTDSTestURLs(int max) {
+    	List<String> testURLs = new ArrayList<String>();
+        List datasetsElements = getRootElement().getChildren("datasets");
+        // Guess at how many we need...
+        int perDataset = max/datasetsElements.size() + 1;
+        for (Iterator datasetsElementIt = datasetsElements.iterator(); datasetsElementIt.hasNext();) {
+            Element datasetsE = (Element) datasetsElementIt.next();
+            List datasets = datasetsE.getChildren("dataset");
+            
+            for (Iterator datasetIt = datasets.iterator(); datasetIt.hasNext();) {
+                HashMap<String, String> jnls = new HashMap<String, String>();
+                Element dataset = (Element) datasetIt.next();
+                String dsID = dataset.getAttributeValue("ID");
+                List variablesElements = dataset.getChildren("variables");
+                for (Iterator variablesEelementsIt = variablesElements.iterator(); variablesEelementsIt.hasNext();) {
+                    Element variablesE = (Element) variablesEelementsIt.next();
+                    List variables = variablesE.getChildren("variable");
+                    int count = 0;
+                    for (Iterator varsIt = variables.iterator(); varsIt.hasNext();) {
+                    	Element variable = (Element) varsIt.next();
+                    	if ( count < perDataset && variable.getAttributeValue("grid_type").equals("regular") ) {
+                    		testURLs.add(variable.getAttributeValue("ftds_url"));
+                    		count++;
+                    	}
+                    	if ( testURLs.size() > max ) {
+                    		return testURLs;
+                    	}
+                    }
+                }
+            }
+        }
+        return testURLs;
+    }
+    /**
      * Take F-TDS server URL and data directory and build the F-TDS URLs for each variable. 
      * @param fds_base the base URL of the F-TDS server http://server:port/thredds/dodsC
      * @param fds_dir the directory into which the F-TDS journal files will be written
@@ -1158,6 +1196,22 @@ public class LASConfig extends LASDocument {
         return url;
     }
     /**
+     * Returns a URL for an LAS data set that will show something intelligible in the browser.
+     * @param xpath
+     * @param fds
+     * @return
+     * @throws LASException
+     * @throws JDOMException
+     */
+    public String getDataAccessBrowserURL(String xpath, boolean fds) throws LASException, JDOMException {
+    	String link = getDataAccessURL(xpath, fds);
+    	if ( link.contains("iridl.ldeo") ) {
+    		return link;
+    	} else {
+    		return link+".html";
+    	}
+    }
+    /**
      * Get data access URL.  If fds is set to true, then the FDS URL will be
      * returned in every case.  If the fds boolean is set to false, then the 
      * actual OPeNDAP URL of the remote data set will be returned where available.
@@ -1170,6 +1224,23 @@ public class LASConfig extends LASDocument {
      */
     public String getDataAccessURL(String dsID, String varID, boolean fds) throws LASException, JDOMException {
         return getDataAccessURL("/lasdata/datasets/dataset[@ID='"+dsID+"']/variables/variable[@ID='"+varID+"']", fds);
+    }
+    /**
+     * Return a link for an LAS data set that will return something itelligble to the browser.
+     * @param dsID
+     * @param varID
+     * @param fds
+     * @return
+     * @throws LASException
+     * @throws JDOMException
+     */
+    public String getDataAccessBrowserURL(String dsID, String varID, boolean fds) throws LASException, JDOMException {
+        String link = getDataAccessURL("/lasdata/datasets/dataset[@ID='"+dsID+"']/variables/variable[@ID='"+varID+"']", fds);
+        if ( link.contains("iridl.ldeo") ) {
+        	return link;
+        } else {
+        	return link+".html";
+        }
     }
     /**
      * Returns the data access URL for a particular variable via the XPath of the variable (strips off the #var)

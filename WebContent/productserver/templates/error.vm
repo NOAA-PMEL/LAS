@@ -14,13 +14,22 @@ $las_response.toString()
 <head><title>LAS Output</title></head>
 <body bgcolor="white">
 <h3>$las_response.getResult("las_message")</h3>
+#if ( $las_response.getResult("las_message").contains("A remote server") ) 
+LAS was trying to access these servers:
+
+<ol>
+#foreach ($variable in $las_request.getVariables() )
+#set($url=$las_config.getDataAccessURL($variable, false))
+#set($browser_url=$las_config.getDataAccessBrowserURL($variable, false))
+<li><a target="_blank" href="$browser_url">$url</a>
+#end
+</ol>
+
+#end
 <hr>
-<a href="ProductServer.do?xml=$las_request.toEncodedURLString()&debug=true">Clicking 
-this link will resubmit the product request with debugging turned on.</a>  Sending this URL to the LAS administrator is a good way to report the error since the URL 
-contains everything they need to reproduce the error.  Copy the URL from the link to the failed product and paste it into the body of a message to the 
-site administrator.
+<a href="ProductServer.do?xml=$las_request.toEncodedURLString()&debug=true">Resubmit the product request with debugging turned on.</a>
 #if ("$!institution.getContact()" != "")
-<a href="mailto:$institution.getContact()?subject=LAS Error&body=Type message and paste the URL here.">Click here to send email to the site administrator.</a>
+<p><a href="mailto:$institution.getContact()?subject=LAS Error&body=Type message and paste the URL here.">Email to the site administrator.</a>
 #end
 <hr>
 #if ( $debug=="true" || $debug=="debug" )

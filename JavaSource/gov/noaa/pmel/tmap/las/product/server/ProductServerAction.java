@@ -32,6 +32,7 @@ import java.net.URL;
 import java.net.URLDecoder;
 import java.sql.SQLException;
 import java.util.HashSet;
+import java.util.List;
 
 import javax.imageio.ImageIO;
 import javax.servlet.ServletOutputStream;
@@ -50,6 +51,12 @@ import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.jdom.JDOMException;
+
+import ucar.nc2.constants.FeatureType;
+import ucar.nc2.dataset.NetcdfDataset;
+import ucar.nc2.dods.DODSNetcdfFile;
+import ucar.nc2.dt.TypedDatasetFactory;
+import ucar.nc2.dt.grid.GridDataset;
 
 import com.sun.rowset.WebRowSetImpl;
 
@@ -76,6 +83,8 @@ public final class ProductServerAction extends LASAction {
         ServerConfig serverConfig = (ServerConfig)servlet.getServletContext().getAttribute(ServerConfigPlugIn.SERVER_CONFIG_KEY);
         // Get the global cache object.
         Cache cache = (Cache) servlet.getServletContext().getAttribute(ServerConfigPlugIn.CACHE_KEY);
+        
+        boolean ftds_up = Boolean.valueOf((String) servlet.getServletContext().getAttribute(LASConfigPlugIn.LAS_FTDS_UP_KEY));
         
         Institution institution = null;
         try {
@@ -201,6 +210,17 @@ public final class ProductServerAction extends LASAction {
         		return mapping.findForward("error");
         	}
         }
+        
+        if ( lasRequest.isAnalysisRequest() ) {
+        	// This request will require F-TDS...
+        	// If it's marked as down, test it...
+        	if ( !ftds_up ) {
+        		if ( !testFTDS(lasConfig) ) {
+        		    return mapping.findForward("ftds_down");
+        		}
+        	}
+        }
+        
         
         // Get the debug level from the query or request property.
         
@@ -838,7 +858,8 @@ public final class ProductServerAction extends LASAction {
             }            
             return null;
         } else {            
-            // Send control to the template specified in the LASRequest.
+            // Send control to the template specified in the LASRequest.     	
+        	
             request.setAttribute("las_response", compoundResponse);
             String output_template = productRequest.getTemplate();
             
@@ -852,9 +873,36 @@ public final class ProductServerAction extends LASAction {
             if ( mimeType != null && !mimeType.equals("") ) {
                 request.setAttribute("las_mime_type", mimeType);
             }
-            
             return new ActionForward("/productserver/templates/"+productRequest.getTemplate()+".vm");
         }
         
     }
+    private boolean testFTDS(LASConfig lasConfig) {
+		int max = 10;
+		List<String> test = lasConfig.getFTDSTestURLs(max);
+		for (int i = 0; i < test.size(); i++ ) {
+			String url = test.get(i);
+			NetcdfDataset ncds = null;
+			try {
+				String dodsurl = DODSNetcdfFile.canonicalURL(url);
+				ncds = ucar.nc2.dataset.NetcdfDataset.openDataset(dodsurl);
+				StringBuilder error = new StringBuilder();
+				GridDataset gridDs = (GridDataset) TypedDatasetFactory.open(FeatureType.GRID, ncds, null, error);
+				servlet.getServletContext().setAttribute(LASConfigPlugIn.LAS_FTDS_UP_KEY, "true");
+				return true;
+			} catch (IOException e) {
+				log.error("IO error testing FTDS URL = " + e);
+			} finally {
+				if ( ncds != null ) {
+					try {
+						ncds.close();
+					} catch (IOException e) {
+						log.error("IO error testing FTDS URL = " + e);
+					}
+				}
+			}
+		}
+		servlet.getServletContext().setAttribute(LASConfigPlugIn.LAS_FTDS_UP_KEY, "false");
+		return false;
+	}
 }

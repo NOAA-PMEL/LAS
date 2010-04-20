@@ -46,6 +46,11 @@ public class LASConfigPlugIn implements PlugIn {
 	public final static String LAS_SERVER_CONFIG_FILENAME_KEY = "server_config_filename";
 	public final static String LAS_OPERATIONS_CONFIG_FILENAME_KEY = "operations_config_filename";
 	public final static String LAS_UI_CONFIG_FILENAME_KEY = "ui_config_filename";
+	
+	/*
+	 * This is the key where we will store a boolean with the results of an F-TDS test.
+	 */
+	public final static String LAS_FTDS_UP_KEY = "ftds_up";
 
 	private static Logger log = LogManager.getLogger(LASConfigPlugIn.class.getName());
 
@@ -393,6 +398,11 @@ public class LASConfigPlugIn implements PlugIn {
 		}
 
 		context.setAttribute(LAS_CONFIG_KEY, lasConfig);  
+		
+		
+		// Set it to false so it gets tested at least the first time...
+		context.setAttribute(LAS_FTDS_UP_KEY, "false");
+		
 		// Unlock the product server and start accepting new requests...
 		context.setAttribute("lock", "false");
 	}
