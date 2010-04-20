@@ -174,11 +174,12 @@ public class FerretIOServiceProvider implements IOServiceProvider {
         log.debug("process the XML header in "+xmlHeader);
         // Process the XML.
         Document header = new Document();
+        File headerFile = new File(xmlHeader);
         try {
-            JDOMUtils.XML2JDOM(new File(xmlHeader), header);
+            JDOMUtils.XML2JDOM(headerFile, header);
         } catch (Exception e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+        	headerFile.renameTo(new File(headerFile.getAbsoluteFile()+".bad"));
+            log.error("Error processing header file XML");
         }
         log.debug("document built "+header.toString());
 
