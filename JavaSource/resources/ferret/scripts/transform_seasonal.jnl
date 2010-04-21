@@ -26,12 +26,18 @@ IF `STRCMP("($region_t_lo)", "($region_t_hi)") EQ 0` THEN
 ENDIF
 
 ! First check whether the incoming time axis is a modulo axis...
+! If there is a modulo attribute, check that its value isnt  = NO
 
 LET tmod = 0
 DEFINE SYMBOL data_t = `($data_var),RETURN=taxis`
 
 LET all_attnames = (($data_t)).attnames
-IF `IS_ELEMENT_OF_STR(all_attnames, "modulo") GE 1` THEN  LET tmod = 1
+IF `IS_ELEMENT_OF_STR(all_attnames, "modulo") GE 1` THEN 
+   LET tmod = 1
+   DEFINE SYMBOL modulo_val = MODULO_IS_`(($data_t)).modulo`
+   DEFINE SYMBOL up_modulo_val = `UPCASE ("($modulo_val)")`
+   IF `STRCMP("($up_modulo_val)", "MODULO_IS_NO") EQ 0`  THEN LET tmod = 0
+ENDIF 
 
 ! If the original data is on a modulo time axis, regrid to
 ! a modulo seasonal time axis

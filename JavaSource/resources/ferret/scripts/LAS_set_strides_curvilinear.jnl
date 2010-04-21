@@ -6,8 +6,6 @@
 
 
 ! cannot do native striding if this is a descriptor dataset. 
-! *acm* This script has a change that makes it work with NetCDF-4 library,
-!       which seems to be pickier about requests with striding than OPeNDAP lib. was.
 
 IF ($data_var_only"0|*>1") THEN 
    DEFINE SYMBOL check_for_des =  `($data_var_only)[d=($data_num)],RETURN=dsetpath`
@@ -149,16 +147,14 @@ IF `STRLEN("($ferret_view)") EQ 2` THEN
          GO check_modulo_factor x 
 
          LET rem = ( (($clon_imin)/($xstride)) - int(($clon_imin)/($xstride)) )* ($xstride)
-	 DEFINE SYMBOL xoffset = `INT(($xstride) - rem)`
-         DEFINE SYMBOL xoff = /OFFSET=($xoffset)
+         DEFINE SYMBOL xoff = /OFFSET=`INT(($xstride) - rem)`
          IF `rem EQ 0` THEN CANCEL SYMBOL xoff 
 
          SET AXIS/STRIDE=($xstride)($xoff) `($data_var)[d=($data_num)],RETURN=xaxis`
          DEFINE SYMBOL clon_imin = `MAX(1, INT(($clon_imin)/($xstride)) )`
-	 DEFINE SYMBOL clon_imax = `MIN (nx, INT(($clon_imax)/($xstride)) )`
-	 IF ($xoff%0|*>1%) THEN DEFINE SYMBOL clon_imax = `($clon_imax)-1`
+         DEFINE SYMBOL clon_imax = `MIN (nx, INT(($clon_imax)/($xstride)) )`
       ENDIF
-
+      
 ! Use /HLIM and /VLIM to define the plot rectangle. If this is a native
 ! curvilienar plot this step is done elsewhere.
       IF `($native_curvilinear_xy"0|*>1") EQ 0` THEN \
@@ -176,8 +172,10 @@ IF `STRLEN("($ferret_view)") EQ 2` THEN
       DEFINE SYMBOL ystride = `MAX(($ystride"1"), ($stride_for_mem"1"))`
 
       IF `($ystride"0") GT 1` THEN 
-
-         SET AXIS/STRIDE=($ystride) `($data_var)[d=($data_num)],RETURN=yaxis`
+         LET rem = ( (($clat_jmin)/($ystride)) - int(($clat_jmin)/($ystride)) )* ($ystride)
+         DEFINE SYMBOL yoff = /OFFSET=`INT(($ystride) - rem)`
+         IF `rem EQ 0` THEN CANCEL SYMBOL yoff 
+         SET AXIS/STRIDE=($ystride)($yoff) `($data_var)[d=($data_num)],RETURN=yaxis`
          DEFINE SYMBOL clat_jmin = `MAX(1, INT(($clat_jmin)/($ystride)) )`
          DEFINE SYMBOL clat_jmax = `MIN(ny, INT(($clat_jmax)/($ystride)) )`
 

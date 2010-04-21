@@ -34,21 +34,36 @@ IF `($region_y_lo"-999") EQ -999` THEN
    DEFINE SYMBOL region_y_hi = ($region_0_y_hi)
 ENDIF
 
+! Make computations based on the range of lon/lat in the grid.
+
+IF `($ferret_curv_lon_min%0|*>1%) EQ 0` THEN \
+   DEFINE SYMBOL ferret_curv_lon_min = `($ferret_curvi_coord_lon)[x=@min,y=@min]`
+IF `($ferret_curv_lon_max%0|*>1%) EQ 0` THEN \
+   DEFINE SYMBOL ferret_curv_lon_max = `($ferret_curvi_coord_lon)[x=@max,y=@max]`
+IF `($ferret_curv_lat_min%0|*>1%) EQ 0` THEN \
+   DEFINE SYMBOL ferret_curv_lat_min = `($ferret_curvi_coord_lat)[x=@min,y=@min]`
+IF `($ferret_curv_lat_max%0|*>1%) EQ 0` THEN \
+   DEFINE SYMBOL ferret_curv_lat_max = `($ferret_curvi_coord_lat)[x=@max,y=@max]`
+
+LET ncurv_x = `($ferret_curvi_coord_lon),RETURN=isize`
+LET ncurv_y = `($ferret_curvi_coord_lon),RETURN=jsize`
+LET del_x = (($ferret_curv_lon_max) - ($ferret_curv_lon_min))/(ncurv_x/2)
+LET del_y = (($ferret_curv_lat_max) - ($ferret_curv_lat_min))/(ncurv_y/2)
+
 ! If the whole grid is specified, we are done.
 IF ($ferret_curv_lon_min"0|*>1") THEN
    LET xlodiff =  ABS(($ferret_curv_lon_min) - ($region_x_lo) )
    LET xhidiff =  ABS(($ferret_curv_lon_max) - ($region_x_hi) )
+   LET ylodiff =  ABS(($ferret_curv_lat_min) - ($region_y_lo) )
+   LET yhidiff =  ABS(($ferret_curv_lat_max) - ($region_y_hi) )
 
-   IF `ABS((xlodiff) -  (xhidiff)) LT 0.2` THEN
+   IF `(MAX((xlodiff), (xhidiff)) LT del_x) AND\ 
+       (MAX((ylodiff), (yhidiff)) LT del_y)` THEN
       LET clon_imin = 1
-      LET xx = x[gx=($ferret_curvi_coord_lon)]
-      STAT xx
-      LET clon_imax = ($STAT_NGOOD)
+      LET clon_imax = ncurv_x
 
       LET clat_jmin = 1
-      LET yy = y[gy=($ferret_curvi_coord_lon)]
-      STAT yy
-      LET clat_jmax = ($STAT_NGOOD)
+      LET clat_jmax = ncurv_y
 
       DEFINE SYMBOL clon_imin `clon_imin`
       DEFINE SYMBOL clon_imax `clon_imax`
@@ -198,6 +213,10 @@ ENDIF
 ! See if this is a rectangle or an X line; if an X line then expand
 ! the region to make a rectangle.
 
+! expand relative to the grid itself. Previous use of 4 deg way too
+! large if the grid itself spans a small region.
+
+
 IF `($region_x_hi"-999|*>1") EQ -999` THEN
    IF `($region_0_x_hi) GT ($region_0_x_lo)` THEN
       LET box_x_lo = ($region_0_x_lo)
@@ -205,6 +224,8 @@ IF `($region_x_hi"-999|*>1") EQ -999` THEN
    ELSE
       LET box_x_lo = `($region_0_x_lo) - 4.`
       LET box_x_hi = `($region_0_x_hi) + 4.`
+      LET box_x_lo = `($region_0_x_lo) - del_x`
+      LET box_x_hi = `($region_0_x_hi) + del_x`
    ENDIF
 ELSE
    IF `($region_x_hi) GT ($region_x_lo)` THEN
@@ -213,6 +234,8 @@ ELSE
    ELSE
       LET box_x_lo = `($region_x_lo) - 4.`
       LET box_x_hi = `($region_x_hi) + 4.`
+      LET box_x_lo = `($region_x_lo) - del_x`
+      LET box_x_hi = `($region_x_hi) + del_x`
    ENDIF
 ENDIF
 
@@ -227,6 +250,8 @@ IF `($region_y_hi"-999|*>1") EQ -999` THEN
    ELSE
       LET box_y_lo = `($region_0_y_lo) - 4.`
       LET box_y_hi = `($region_0_y_hi) + 4.`
+      LET box_y_lo = `($region_0_y_lo) - del_y`
+      LET box_y_hi = `($region_0_y_hi) + del_y`
    ENDIF
 ELSE
 
@@ -236,6 +261,8 @@ ELSE
    ELSE
       LET box_y_lo = `($region_y_lo) - 4.`
       LET box_y_hi = `($region_y_hi) + 4.`
+      LET box_y_lo = `($region_y_lo) - del_y`
+      LET box_y_hi = `($region_y_hi) + del_y`
    ENDIF
 ENDIF
 
@@ -289,8 +316,10 @@ ENDIF
 DEFINE SYMBOL clon_imin_computed ($clon_imin)
 DEFINE SYMBOL clon_imax_computed ($clon_imax)
 
-DEFINE SYMBOL clon_imin 1
-DEFINE SYMBOL clon_imax `($ferret_curvi_coord_lon)[j=1,x=@NGD]`
+IF ($ferret_lon_modulo"0|0|*>1") THEN
+   DEFINE SYMBOL clon_imin 1
+   DEFINE SYMBOL clon_imax `($ferret_curvi_coord_lon)[j=1,x=@NGD]`
+ENDIF
 
 GO cancel_temp_regions
 ! End of get_curv_coord_bbox.jnl ------------------------------------------------------
