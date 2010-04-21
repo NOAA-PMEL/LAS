@@ -6,10 +6,14 @@
 </head>
 
 <body>
-<p align="left">&nbsp;</p>
+<BR><BR>
+<p align="center">
+<img height="100px" src="images/LASlogo.gif" align="center"">
+</p>
+
 <p>&nbsp; </p>
 <p align="center"><font size="+3" face="Arial, Helvetica, sans-serif">Introduction 
-  to LAS version 7.1 User Interface</font></p>
+  to the LAS version 7.1 User Interface</font></p>
 <p align="center">&nbsp;</p>
 <p align="left"><font size="+1" face="Arial, Helvetica, sans-serif"><strong>Table 
   of Contents:</strong></font></p>
@@ -18,28 +22,25 @@
     to the Live Access Server (LAS)</font></a></li>
 
   <li><a href="#intro_UI"><font size="+1" face="Arial, Helvetica, sans-serif">Introduction 
-    and Overview to v7.1 user interface</font></a></li>
-  <li><font size="+1" face="Arial, Helvetica, sans-serif"><a href="#products">Getting 
-    images and Data from LAS</a> </font> 
+    and Overview to v7.1 User Interface</font></a></li>
+  <li><font size="+1" face="Arial, Helvetica, sans-serif">
+  <a href="#products">Getting Images and Data from LAS</a> </font> 
     <ul>
       <li><font size="+1" face="Arial, Helvetica, sans-serif"><a href="#selectDataset">Specifying 
         Variable and Dataset</a></font></li>
-      <li><font size="+1" face="Arial, Helvetica, sans-serif"><a href="#selectRegion">Specifying 
-        the lat/long/depth and date</a></font></li>  
+      <li><font size="+1" face="Arial, Helvetica, sans-serif"><a href="#selectRegion">Specifying the Location and Date</a></font></li>  
     </ul>
   </li>
-  <li><font size="+1" face="Arial, Helvetica, sans-serif"><a href="#customizing">Customizing 
-    what you get from LAS</a></font></li>
-  <li><font size="+1" face="Arial, Helvetica, sans-serif"><a href="#compare">Comparing 
-    fields in LAS</a></font></li>
-  <li><font size="+1" face="Arial, Helvetica, sans-serif"><a href="#animations">Animations 
-    (movies)</a></font></li>
-  <li><font size="+1" face="Arial, Helvetica, sans-serif"><a href="#googleEarth">Using 
-    Google Earth&reg;</a></font></li>
+  <li><font size="+1" face="Arial, Helvetica, sans-serif"><a href="#customizing">Customizing what you get from LAS</a></font></li>
+  <li><font size="+1" face="Arial, Helvetica, sans-serif">
+  <a href="#compare">Comparing fields in LAS</a></font></li>
+  <li><font size="+1" face="Arial, Helvetica, sans-serif"><a href="#animations">Animations (movies)</a></font></li>
+  <li><font size="+1" face="Arial, Helvetica, sans-serif">
+  <a href="#googleEarth">Using Google Earth&reg;</a></font></li>
 	
-  <li><font size="+1" face="Arial, Helvetica, sans-serif"><a href="#data_options">Viewing and Saving data</a></font></li>
-	<li><font size="+1" face="Arial, Helvetica, sans-serif"><a href="#needV6">LAS 
-    V6 &quot;Classic&quot; interface</a></font></li>
+  <li><font size="+1" face="Arial, Helvetica, sans-serif"><a href="#data_options">Viewing and Saving Data</a></font></li>
+	<li><font size="+1" face="Arial, Helvetica, sans-serif">
+	<a href="#needV6">LAS V6 &quot;Classic&quot; Interface</a></font></li>
 </ul>
 <hr>
 <p><a name="intro"><font size="+2" face="Arial, Helvetica, sans-serif"><strong><em>Introduction 
@@ -130,9 +131,7 @@ The longitude and latitude widgets below the map may be used to enter the X and 
 
 <p><font face="Arial, Helvetica, sans-serif">Example: Create a 2D xy color plot 
   of Sea Surface Temperature from the coads climatology dataset.</font></strong></p>
-<p>&nbsp;</p>
-<p><font face="Arial, Helvetica, sans-serif"><a name="selectDataset"></a>Step 
-  1: Select the Coads climatology dataset: Click on the &quot;Choose Dataset&quot; button:</font></p>
+<p><font face="Arial, Helvetica, sans-serif"><a name="selectDataset"></a>Select the Coads climatology dataset: Click on the &quot;Choose Dataset&quot; button:</font></p>
 <p align="left"><img src="./images/lasV7_1_tutorial_choose_dataset_button.gif" border=2></p>
 <br>
 
@@ -146,19 +145,18 @@ The longitude and latitude widgets below the map may be used to enter the X and 
 
 <br>
 <p align="left"><font face="Arial, Helvetica, sans-serif"><a name="selectRegion"></a>LAS 
-  will then use your choice of data and variable and create a Latitude-Longitude map by default:</font></p>
+  will use your choice of data and variable and create a Latitude-Longitude map by default:</font></p>
 <p>&nbsp;</p>
 <p align="left"><img src="./images/lasV7_1_tutorial_coads_opened.gif" border=2 width="800" height="500"></p>
 
 <br>
 <p align="left"><font face="Arial, Helvetica, sans-serif">Using the zoom 
-  and pan reference map, the user may refine the latitude and longitude used to 
-  create the image or download data.
+  and pan reference map, you may refine the latitude and longitude displayed by the reference map; and using the selection tool the user can change the region selected. Then that region will be used when you update the plot or ask for data.
   <p align="left"><font face="Arial, Helvetica, sans-serif">
-  Longitude-latitude images are also interactive. This means that the user can click and drag to 
+  Longitude-latitude images are also interactive. This means that you can click and drag to 
   zoom into a particular region on the image itself. Use the browser's &quot;Back&quot; button to return to earlier plots.
   <p align="left"><font face="Arial, Helvetica, sans-serif">
-  The user is now free to begin interacting with LAS. For example, clicking 
+  You are now free to begin interacting with LAS. For example, clicking 
   &quot;Time Series&quot; on the left side of 
   the interface will result in this image:</font></p>
 <p align="left"><img src="./images/lasV7_1_tutorial_coads_opened_TimeSeries_selected.gif" border=2 width="800" height="500"></p>
@@ -178,7 +176,7 @@ The longitude and latitude widgets below the map may be used to enter the X and 
   lines. First, to change the output size of the plot, click the &quot;Set plot 
   options&quot; button from the menu toolbar.</font></p>
 <p><font face="Arial, Helvetica, sans-serif">This will open up a menu from which 
-  the user may change several options for plot creation. In the below - we have 
+  you may change several options for plot creation. In the below - we have 
   turned off the graticules option as well as selecting a different pallete:</font></p>
 <p align="left"><img src="./images/lasV7_1_tutorial_show_plot_options.gif" border=2 ></p>
 <br>
@@ -190,7 +188,7 @@ The longitude and latitude widgets below the map may be used to enter the X and 
 
 <p><font face="Arial, Helvetica, sans-serif">When the &quot;Update Plot&quot; 
   button is yellow like above, it means that the current image is out of sync 
-  with something in the user interface. In this example, it is because the plot 
+  with something in the User Interface. In this example, it is because the plot 
   options have changed, but it could also happen if a different variable was selected, 
   or a different time range was chosen, etc.</font></p>
   Alternatively, if the select box in the &quot;Update plot&quot; button is selected, 
@@ -202,7 +200,7 @@ The longitude and latitude widgets below the map may be used to enter the X and 
 <p align="left"><img src="./images/lasV7_1_tutorial_after_changing_plot_options.gif" border=2 width="800" height="500"></font></p>
 <br>
 <p><font face="Arial, Helvetica, sans-serif">There are many other options 
-  that the user can play with, and it's important to note that these options can 
+  that you can play with, and it's important to note that these options can 
   be &quot;view&quot; specific or possibly even dataset specific.</font></p>
 <table width="19%" height="39" border="0" cellpadding="0" cellspacing="0">
   <tr> 
@@ -228,7 +226,7 @@ The longitude and latitude widgets below the map may be used to enter the X and 
 <br>
 <p><font face="Arial, Helvetica, sans-serif">In addition, it is now easier then 
   ever to see anomalies with the dataset using vizGal. Clicking the &quot;Difference 
-  Mode&quot; button will allow the user to easily see 
+  Mode&quot; button will allow you to easily see 
   how the values from the upper left panel differ from those in the other three 
   panels:</font></p>
 <p><img src="./images/lasV7_1_tutorial_vizgal_difference_mode.gif" border=2 width="800" height="500"></p>
@@ -267,8 +265,8 @@ comparison with the plots in other panels, either side-by-side or in Difference 
 <p><a name="animations"></a><strong><font size="+2" face="Arial, Helvetica, sans-serif"><em>Animations 
   from LAS</em></font></strong></p>
 <p><font face="Arial, Helvetica, sans-serif">From the v7.1 UI, it is also quite 
-  easy for the user to view data as an animation or movie. Clicking the &quot;Animation&quot; 
-  button will bring up a dialog for the user to specify the desired length of 
+  easy for you to view data as an animation or movie. Clicking the &quot;Animation&quot; 
+  button will bring up a dialog for you to specify the desired length of 
   the animation:</font></p>
 <p><font face="Arial, Helvetica, sans-serif"><img src="./images/lasV7_1_tutorial_submit_animation.gif" border=2 width="800" height="500" width="800" height="500"></font></p>
 <p>&nbsp;</p>
@@ -321,7 +319,7 @@ example, ranges of Time and Depth may be chosen.</font></p>
 <p align="left"><font face="Arial, Helvetica, sans-serif">The result will be a file to download.</font></p>
 <p align="left"><font face="Arial, Helvetica, sans-serif">The remaining button at the 
 top of the User Interface is &quot;Export to Desktop Application&quot;. This button 
-shows the user a page showing the OPeNDAP URL for the data selected and how it can 
+shows you a page showing the OPeNDAP URL for the data selected and how it can 
 be opened with Ferret, GrADS, and Matlab to point to the current variable and region 
 in space and time. 
 </font></p><table width="19%" height="39" border="0" cellpadding="0" cellspacing="0">
@@ -336,12 +334,12 @@ in space and time.
 <p align="left"><font size="+2" face="Arial, Helvetica, sans-serif"><strong><em><a name="needV6"></a>The Classic LAS UI</em></strong></font></p>
 </font></p>
 <p align="left"><font face="Arial, Helvetica, sans-serif">At the option of the LAS installer, the 
-V6 LAS user interface may be made available. If this option has been installed, then you may bring 
+V6 LAS User Interface may be made available. If this option has been installed, then you may bring 
 up the classic interface by clicking the &quot;Use Classic LAS&quot; link on the 
   right side of the v7.1 UI banner.</font></p>
 <p align="left"><img src="./images/lasV7_1_tutorial_use_classic_las_banner.gif" border=2 width="800"></p>
 <p align="left"><font face="Arial, Helvetica, sans-serif">This link will take 
-  the user to the V6 UI so that the user may request vector plots and some more complex
+  you to the V6 UI so that you may request vector plots and some more complex
   comparisons.</font></li>
 </ul>
 <table width="19%" height="39" border="0" cellpadding="0" cellspacing="0">
