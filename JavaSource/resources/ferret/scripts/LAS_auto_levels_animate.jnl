@@ -3,6 +3,9 @@
 !
 ! acm 9/11/07 If its a descriptor file Ferret wont allow striding. 
 !             check for that case and just set num levels.
+! acm* 2/2010 Set up a few things and then Use Ferret-s open-ended levels 
+!             if the levs havent been set by the user or configuration.
+!             Allow for old algorithm if older Ferret is in place.
 
 ! Based on a variables value over its entire range, set strides
 ! if needed to quickly get stats on the variable. Use this to set levels.
@@ -72,8 +75,10 @@ IF ($ferret_contour_levels"0|*>1") THEN
       DEFINE SYMBOL num_fine_levels_contour = ($num_fine_levels)
       CANCEL SYMBOL input_contour_levels  ! we will redefine the levels in this script
    ENDIF
+
    IF `nc EQ 0 AND other NE 0` THEN  EXIT/SCRIPT
 ENDIF
+
 
 IF ($ferret_fill_levels"0|*>1") THEN
    DEFINE SYMBOL up_fill_levels = `UPCASE("($ferret_fill_levels)")`
@@ -91,6 +96,9 @@ IF ($ferret_fill_levels"0|*>1") THEN
       DEFINE SYMBOL num_fine_levels = ($ferret_fill_levels)  ! How to test that this is just a number??
       CANCEL SYMBOL input_fill_levels  ! we will redefine the levels in this script
    ENDIF
+   
+   say IF `nc EQ 0 AND other NE 0` THEN EXIT/SCRIPT
+
    IF `nc EQ 0 AND other NE 0` THEN EXIT/SCRIPT
 ENDIF
 
@@ -98,7 +106,11 @@ ENDIF
 
 IF `($ferret_plot_var"0|*>1") EQ 0` THEN EXIT/SCRIPT  !e.g. for insitu plots may not have a plot_var
 
-LET pvar = ($ferret_xyz_var)
+IF `($do_curvi_xy"0|*>1") EQ 0` THEN 
+   LET pvar = ($ferret_xyz_var)
+ELSE
+   DEFINE SYMBOL ferret_plot_var = pvar
+ENDIF
 
 IF ($ferret_plot_var"0|sampled_var>1|*>0) THEN LET pvar = ($ferret_plot_var)
 
@@ -107,6 +119,7 @@ DEFINE SYMBOL var_dim = `pvar,RETURN=shape`
 LET ndims = STRLEN("($var_dim)")
 
 LET stride_for_speed = `INT( 1+ ((var_size/memsize))/ndims )`
+LET stride_for_speed = `INT( 1+ ((var_size/memsize)) )`
 
 ! If axes are not already strided, apply simple striding which
 ! we will undo later.
@@ -135,7 +148,7 @@ ENDIF
 ! region syms also dont apply to insitu data (they are just on an abstract axis)
 
 LET indx_strd_used = 0
-IF `($native_curvilinear_xy"0") EQ 0 AND ($its_insitu"0") NE 1` THEN  
+IF `($do_curvi_xy"0") EQ 0 AND ($its_insitu"0") NE 1` THEN  
 
 IF `($xstride"1|1>0|*>0") OR ($no_native_strides_xy"0|*>1")` THEN
    LET xsize  `pvar,RETURN=isize`
@@ -230,6 +243,13 @@ ENDIF
 
 ENDIF ! region syms dont apply to native curv grid directly
 
+IF `($do_curvi_xy"0")` THEN
+   LET xsize = ($clon_imax) - ($clon_imin)
+   LET ysize = ($clat_jmax) - ($clat_jmin)
+   IF `xsize GT max_size` THEN DEFINE SYMBOL i_curv_stride = :`INT(xsize/10)`
+   IF `ysize GT max_size` THEN DEFINE SYMBOL j_curv_stride = :`INT(ysize/10)`
+ENDIF
+
 !IF `indx_strd_used EQ 0` THEN CANCEL SYMBOL index_strides
 
 IF ($index_strides"0|*>1") THEN 
@@ -280,28 +300,52 @@ IF ($index_strides"0|*>1") THEN
    DEFINE SYMBOL ppvar = ($data_var)[d=($data_num),($index_strides)]
    LET anim_stridevar = ($ferret_plot_var_noregion)
    DEFINE SYMBOL ppvar = anim_stridevar[($index_strides)]
-   IF `($native_curvilinear_xy"0") OR ($region_sample"0|*>1")` THEN
+   IF `($do_curvi_xy"0") OR ($region_sample"0|*>1")` THEN
       LET pvar = \
-      ($data_var)[d=($data_num),i=($clon_imin):($clon_imax),j=($clat_jmin):($clat_jmax),\
+      ($data_var)[d=($data_num),i=($clon_imin):($clon_imax)($i_curv_stride),\
+      j=($clat_jmin):($clat_jmax)($i_curv_stride),\
       ($index_strides)]
 
       IF ($region_z"0|*>1") THEN  LET pvar = \
-      ($data_var)[d=($data_num),i=($clon_imin):($clon_imax),j=($clat_jmin):($clat_jmax),\
+      ($data_var)[d=($data_num),i=($clon_imin):($clon_imax)($i_curv_stride),\
+      j=($clat_jmin):($clat_jmax)($i_curv_stride),\
       ($region_z),($index_strides)]
    ENDIF
 ELSE
    DEFINE SYMBOL ppvar = pvar
-   IF `($native_curvilinear_xy"0") OR ($region_sample"0|*>1")` THEN
+   IF `($do_curvi_xy"0") OR ($region_sample"0|*>1")` THEN
       LET pvar = \
-      ($data_var)[d=($data_num),i=($clon_imin):($clon_imax),j=($clat_jmin):($clat_jmax)]
+      ($data_var)[d=($data_num),i=($clon_imin):($clon_imax)($i_curv_stride),\
+      j=($clat_jmin):($clat_jmax)($i_curv_stride)]
 
       IF ($region_z"0|*>1") THEN  LET pvar = \
-      ($data_var)[d=($data_num),i=($clon_imin):($clon_imax),j=($clat_jmin):($clat_jmax),\
+      ($data_var)[d=($data_num),i=($clon_imin):($clon_imax)($i_curv_stride),\
+      j=($clat_jmin):($clat_jmax)($i_curv_stride),\
       ($region_z)]
    ENDIF
 ENDIF
 
-IF ($native_curvilinear_xy"0") THEN DEFINE SYMBOL ppvar = pvar
+IF ($do_curvi_xy"0") THEN DEFINE SYMBOL ppvar = pvar
+
+! Use Ferrets variance-based levels.
+IF `STRFLOAT("($FERRET_VERSION)") GE 6.425` THEN
+   LET var1d = XSEQUENCE(($ppvar))
+   LET nvar1d = `var1d,RETURN=isize`
+   LET isqr = INT((nvar1d)^0.5)
+   DEFINE AXIS/y=1:`isqr`:1 yshortaxis
+   DEFINE AXIS/x=1:`INT(nvar1d/isqr)`:1 xhalfaxis
+   LET varshape = x[gx=xhalfaxis] + y[gy=yshortaxis]
+   LET var2d = RESHAPE(var1d, varshape)
+   IF ($ferret_center_levels) THEN 
+     SHADE/LEV=($num_fine_levels)vc var2d
+   ELSE
+     SHADE/LEV=($num_fine_levels)v var2d
+   ENDIF
+   DEFINE SYMBOL ferret_fill_levels = ($LEV_OPNLEVS)
+   DEFINE SYMBOL ferret_contour_levels = ($LEV_OPNLEVS)
+
+   EXIT/SCRIPT
+ENDIF
 
 ! Execute the stat command to load symbols with the variables
 ! mean, max, min, std.
