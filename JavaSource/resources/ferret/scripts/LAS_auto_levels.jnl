@@ -1,7 +1,11 @@
 ! LAS_auto_levels.jnl
+
 ! ACM 8/22/2007
 ! acm 9/11/07 If its a descriptor file Ferret wont allow striding. 
 !             check for that case and just set num levels.
+! acm* 2/2010 Set up a few things and then Use Ferret-s open-ended levels 
+!             if the levs havent been set by the user or configuration.
+!             Allow for old algorithm if older Ferret is in place.
 
 ! Based on a variables value over its entire range, set strides
 ! if needed to quickly get stats on the variable. Use this to set levels.
@@ -44,6 +48,9 @@ IF `STRINDEX("($op)", "ANIMATION") GT 0`  THEN EXIT/SCRIPT
 ! just return.
 
 IF `($ferret_diff_var"1|*>0") AND STRINDEX("($op)", "COMPARE_PLOT") NE 0` THEN
+   EXIT/SCRIPT
+ENDIF 
+IF `($ferret_diff_var"1|*>0") AND ($its_gridded_scattered"0|*>1")` THEN
    EXIT/SCRIPT
 ENDIF 
 
@@ -111,6 +118,24 @@ IF ($ferret_fill_levels"0|*>1") THEN
    IF `nc EQ 0 AND other NE 0` THEN  EXIT/SCRIPT
 ENDIF
 
+! IF contour and fill levels have not been set by the user or in the config, then
+! use Ferrets auto-open-ended levels
+
+IF `($FERRET_VERSION"0") GE 6.4` THEN
+   IF `($input_contour_levels"0|0|1") EQ 0` THEN 
+      DEFINE SYMBOL ferret_fill_levels = ($num_fine_levels)v
+      IF  ($ferret_center_levels"0|0|1") THEN \
+        DEFINE SYMBOL ferret_fill_levels = ($num_fine_levels)vc
+   ENDIF
+   IF `($input_contour_levels"0|0|1") EQ 0` THEN 
+      DEFINE SYMBOL ferret_contour_levels = ($num_fine_levels)v
+      IF  ($ferret_center_levels"0|0|1") THEN DEFINE SYMBOL \
+        ferret_contour_levels = ($num_fine_levels)vc
+   ENDIF
+
+   EXIT/SCRIPT
+ENDIF  ! version 6.4
+
 ! Apply to the variable on the requested region
 
 IF `($ferret_plot_var"0|*>1") EQ 0` THEN EXIT/SCRIPT  !e.g. for insitu plots may not have a plot_var
@@ -146,7 +171,6 @@ IF ($ferret_diff_var"0|*>1") THEN
       DEFINE SYMBOL ferret_center_levels = 1
    ENDIF
 
-   
    IF ($native_curvilinear_xy"0|*>1") THEN 
       LET pvar = ( ($ferret_plot_base_var_0)  - ($ferret_plot_base_var_1))
    ELSE
@@ -175,9 +199,7 @@ IF `stride_for_speed GT 1` THEN
                      STRCMP("`pvar,RETURN=yaxis`", "SAMPLE_Y") EQ 0
 ENDIF
 
-
- DEFINE SYMBOL ppvar = pvar
-
+DEFINE SYMBOL ppvar = pvar
 
 IF ($native_curvilinear_xy"0") THEN DEFINE SYMBOL ppvar = pvar
 
@@ -206,7 +228,10 @@ IF `STRINDEX("($stat_std)", "too big") GT 0 OR \
   STRINDEX("($stat_std)", "Inf") GT 0 OR \
   STRINDEX("($stat_mean)", "Inf") GT 0 OR \
   STRINDEX("($stat_min)", "Inf") GT 0 OR \
-  STRINDEX("($stat_max)", "Inf") GT 0` THEN 
+  STRINDEX("($stat_max)", "Inf") GT 0 OR \
+  STRINDEX("($stat_mean)", "NaN") GT 0 OR \
+  STRINDEX("($stat_min)", "NaN") GT 0 OR \
+  STRINDEX("($stat_max)", "NaN") GT 0` THEN 
 
    IF `($input_fill_levels"0|0|1") EQ 0` THEN 
       DEFINE SYMBOL ferret_fill_levels = 40
@@ -216,7 +241,6 @@ IF `STRINDEX("($stat_std)", "too big") GT 0 OR \
       DEFINE SYMBOL ferret_contour_levels = 40
       IF ($ferret_center_levels) THEN DEFINE SYMBOL ferret_contour_levels = 40c
    ENDIF
-
    EXIT/SCRIPT
 ENDIF
 
