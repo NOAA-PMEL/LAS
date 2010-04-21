@@ -31,7 +31,7 @@ GO LAS_initialize_data 0
 ! Here is the variable we will list out, with the region specified.
 DEFINE SYMBOL ferret_list_var = ($ferret_plot_var)
 
-IF ($native_curvilinear_xy"0") THEN 
+IF ($do_curvi_xy"0") THEN 
    LET the_var = ($data_var)[d=($data_num),i=($clon_imin):($clon_imax),j=($clat_jmin):($clat_jmax)]
    IF ($region_zt"0|*>1") THEN \
     LET the_var = ($data_var)[d=($data_num),i=($clon_imin):($clon_imax),j=($clat_jmin):($clat_jmax),($region_zt)]
@@ -61,6 +61,7 @@ DEFINE SYMBOL lsize `the_var,return=lsize`
 ! LAS_auto_levels_animate checks whether symbols for color levels
 ! have been set, and if not, sets them for the variable at all time steps.
 GO LAS_auto_levels_animate 
+
 
 !for animation of 1D plots
 
@@ -101,6 +102,13 @@ ENDIF  ! ndim = 1
 
 SET LIST/FILE="($result_ferret_listing_filename)"
 
+
+IF ($do_curvi_xy"0") THEN 
+   LET the_var = ($data_var)[d=($data_num),i=($clon_imin):($clon_imax),j=($clat_jmin):($clat_jmax)]
+   IF ($region_zt"0|*>1") THEN \
+    LET the_var = ($data_var)[d=($data_num),i=($clon_imin):($clon_imax),j=($clat_jmin):($clat_jmax),($region_zt)]
+ENDIF 
+
 DEFINE SYMBOL hasT = 1
 
 !-----------------------------------------
@@ -115,7 +123,7 @@ DEFINE SYMBOL hasT = 1
 !DEFINE SYMBOL max_tpoints 7   ! should be an odd number
 
 ! Determine a new time range if just a single point requested
-IF ($native_curvilinear_xy"0") THEN 
+IF ($do_curvi_xy"0") THEN 
    DEFINE SYMBOL nt = `the_var,return=lsize`   ! no. of time points requested
 ELSE
    DEFINE SYMBOL nt = `the_var,return=lsize`   ! no. of time points requested
@@ -153,7 +161,7 @@ IF `($nt) eq 1` THEN
         EXIT/PROGRAM
      ENDIF
 
-     IF ($native_curvilinear_xy"0") THEN 
+     IF ($do_curvi_xy"0") THEN 
         DEFINE SYMBOL ferret_plot_var = ($data_var)[d=($data_num),d=($data_num),($region_full)], xcoord, ycoord
      ELSE
         DEFINE SYMBOL ferret_plot_var = ($data_var)[d=($data_num),d=($data_num),($region_full)]
@@ -162,12 +170,11 @@ IF `($nt) eq 1` THEN
 
 ENDIF
 
-IF ($native_curvilinear_xy"0") THEN 
-   DEFINE SYMBOL ferret_list_var = ($ferret_plot_base_var)
+IF ($do_curvi_xy"0") THEN 
+   DEFINE SYMBOL ferret_list_var = the_var
 ELSE
    DEFINE SYMBOL ferret_list_var = ($ferret_plot_var)
 ENDIF
-
 
 !----------------------------------------
 ! start writing to the file

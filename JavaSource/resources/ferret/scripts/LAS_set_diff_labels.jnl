@@ -23,9 +23,22 @@
 ! locations or times normal to the plot, previously missed if region was defined 
 ! for variable 2 but not variable 1
 
-DEFINE SYMBOL ferret_diff_title = \
-@AC($ferret_title_0) from ($data_0_dataset_name)(1) \
-<NL> -  @P2($ferret_title_1)) from ($data_1_dataset_name)(2)
+LET add_urls = 1
+IF `STRCMP("($data_0_dataset_name)", "($data_0_dataset_name)") EQ 0` THEN LET add_urls = 0
+ 
+! BUT THE URLS are also at the top of the page. Remove them from here 
+! (Under discussion)
+LET add_urls = 0
+
+IF `add_urls EQ 1` THEN
+   DEFINE SYMBOL ferret_diff_title = \
+   @AC($ferret_title_0) from ($data_0_dataset_name)(1) \
+   <NL> -  @P2($ferret_title_1)) from ($data_1_dataset_name)(2)
+ELSE
+   DEFINE SYMBOL ferret_diff_title = \
+   @AC($ferret_title_0) (1) \
+   <NL> -  @P2($ferret_title_1)) (2)
+ENDIF
 
 ! For data listings, a title without formatting information.
 DEFINE SYMBOL ferret_diff_list_title = \
