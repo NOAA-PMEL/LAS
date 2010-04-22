@@ -13,7 +13,7 @@
 			</div>
 		</TD>  			
                 <td bgcolor="#7391AD" align="right" >
-		   <a class="top_link_left"  href="doc/las_v7_ui_introduction.html" target="_new">Help</a><br>
+		   <a class="top_link_left"  href="doc/las_v7_1_ui_introduction.html" target="_new">Help</a><br>
 	           <a class="top_link_left"  href="$server_config.getFTDSBase()" target="_new">OPeNDAP (F-TDS) / THREDDS</a> 
 		</td>
 		</tr>
