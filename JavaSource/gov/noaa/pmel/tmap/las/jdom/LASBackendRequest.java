@@ -311,6 +311,26 @@ public class LASBackendRequest extends LASDocument {
         }
         return symbols;       
     }
+    public HashMap<String, String>  getPropertyGroup(String group_name) {
+
+        HashMap<String, String> propertyGroup = new HashMap<String, String>();
+       	ArrayList groups = findPropertyGroupList(group_name);
+        
+	if(groups != null) {
+		for(Iterator grpIt = groups.iterator(); grpIt.hasNext();) {
+			Element grp = (Element) grpIt.next();
+			for(Iterator propIt = grp.getChildren().iterator(); propIt.hasNext();) {
+				Element property = (Element) propIt.next();
+				propertyGroup.put(property.getChild("name").getValue(), property.getChild("value").getValue());
+						
+			}
+		}
+		return propertyGroup;
+	}
+	else return null;
+	
+    }
+
     /**
      * Translate the dataObjects in this request into pairs of names and values and return in a HashMap
      * @return the HashMap of dataObject information to be dumped as symbols for Ferret
