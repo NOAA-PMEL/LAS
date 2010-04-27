@@ -163,7 +163,14 @@ public class OLMapWidget extends Composite {
     
     private MapSelectionChangeListener mapListener;
     
-	public OLMapWidget() {
+    public OLMapWidget() {
+    	init("128px", "256px");
+    }
+    
+	public OLMapWidget(String height, String width) {
+		init(height, width);
+	}
+	private void init(String height, String width) {
 		regionWidget.setChangeListener(regionChangeListener);
 		textWidget.addSouthChangeListener(southChangeListener);
 		textWidget.addNorthChangeListener(northChangeListener);
@@ -366,7 +373,7 @@ public class OLMapWidget extends Composite {
 		wrapLayer = new Vector("Wrap Layer", wrapLayerOptions);		
 		// Start with no controls on the map.
 		wmsMapOptions.removeDefaultControls();
-		MapWidget mapWidget = new MapWidget("256px","128px", wmsMapOptions);
+		MapWidget mapWidget = new MapWidget(width, height, wmsMapOptions);
 		map = mapWidget.getMap();
 		//Add a WMS layer for a little background
 		WMSParams wmsParams = new WMSParams();
@@ -503,6 +510,9 @@ public class OLMapWidget extends Composite {
 		dockPanel.add(textWidget, DockPanel.SOUTH);
 		initWidget(dockPanel);
 	}
+	public Map getMap() {
+		return map;
+	}
 	public void setDataExtent(double slat, double nlat, double wlon, double elon, double delta) {
 		this.delta = delta;
 		dataBounds = new Bounds(wlon, slat, elon, nlat);
@@ -544,7 +554,8 @@ public class OLMapWidget extends Composite {
 	public void setDataExtent(double slat, double nlat, double wlon, double elon) {
 		setDataExtent(slat, nlat, wlon, elon, delta);
 	}
-	private void zoomMap() {	
+	
+	public void zoomMap() {	
 		int zoom = map.getZoomForExtent(dataBounds, false);
 		if ( box != null ) {
 		    boxes.removeMarker(box);
@@ -566,7 +577,7 @@ public class OLMapWidget extends Composite {
 		}
 		map.setCenter(center, zoom);
 	}
-	private void zoomMapToSelection() {
+	public void zoomMapToSelection() {
 		int zoom = map.getZoomForExtent(currentSelection, false);
 		LonLat center = currentSelection.getCenterLonLat();
 		if ( center.lon() + 180. > 540. ) {
@@ -575,11 +586,11 @@ public class OLMapWidget extends Composite {
 		}
 		map.setCenter(center, zoom);
 	}
-	private void zoomOutAndPanToSelection() {
+	public void zoomOutAndPanToSelection() {
 		map.zoomTo(0);
 		panMapToSelection();
 	}
-	private void panMapToSelection() {
+	public void panMapToSelection() {
 		LonLat center = currentSelection.getCenterLonLat();
 	    map.setCenter(center);
 	}

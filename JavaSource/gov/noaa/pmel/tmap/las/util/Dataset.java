@@ -40,11 +40,16 @@ public class Dataset extends Container implements DatasetInterface {
     }
     public ArrayList<Variable> getVariables() {
     	ArrayList<Variable> vars = new ArrayList<Variable>();
-    	List variables = element.getChild("variables").getChildren("variable");
-    	for (Iterator varIt = variables.iterator(); varIt.hasNext();) {
-			Element var = (Element) varIt.next();
-			Variable v = new Variable(var, getID(), getName());
-			vars.add(v);
+    	Element variablesElement = element.getChild("variables");
+    	if (variablesElement != null){
+    		List variables = variablesElement.getChildren("variable");
+    		if ( variables != null ) {
+    			for (Iterator varIt = variables.iterator(); varIt.hasNext();) {
+    				Element var = (Element) varIt.next();
+    				Variable v = new Variable(var, getID(), getName());
+    				vars.add(v);
+    			}
+    		}
     	}
     	return vars;
     }

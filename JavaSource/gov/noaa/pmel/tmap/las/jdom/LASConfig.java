@@ -1076,8 +1076,10 @@ public class LASConfig extends LASDocument {
                         // Set the "chidren" attribute to identify what kind of kids it has.
                         if ( category.getChild("filter") != null ) {
                         	Element filter = category.getChild("filter");
-                        	Dataset dataset = getDataset(filter);
-                        	if ( dataset != null ) {
+                        	List<Dataset> datasets = getDataset(filter);
+                        	// TODO what if there is more than one data set here?
+                        	if ( datasets != null && datasets.size() > 0 ) {
+                        		Dataset dataset = datasets.get(0);
                         	    category_container.setAttribute("children_dsid", dataset.getAttributeValue("ID"));
                         	}
                             category_container.setAttribute("children", "variables");
@@ -1106,7 +1108,7 @@ public class LASConfig extends LASDocument {
                     category_container.setAttribute(attr.getName(), attr.getValue());
                 }
                 List cats = (List) category.getChildren("category");
-                if ( cats.size() > 0 ) {
+                if ( cats.size() > 1 ) {
                     for (Iterator catsIt = cats.iterator(); catsIt.hasNext();) {
                         Element cat = (Element) catsIt.next();
                         Element cat_nokids = new Element("category");
@@ -1118,8 +1120,10 @@ public class LASConfig extends LASDocument {
                         List filters = cat.getChildren("filter");
                         if ( filters.size() > 0 ) {  
                         	Element filter = (Element)filters.get(0);
-                        	Dataset dataset = getDataset(filter);
-                        	if ( dataset != null ) {
+                        	List<Dataset> datasets = getDataset(filter);
+                        	if ( datasets != null && datasets.size() > 0 ) {
+                        		// TODO What if there is more than one data set here???
+                        		Dataset dataset = datasets.get(0);
                         		// Add only if the filter returns a dataset.  It's possible to create
                         		// a filter that returns an empty list.
                         	    cat_nokids.setAttribute("children_dsid", dataset.getAttributeValue("ID"));
@@ -1144,9 +1148,13 @@ public class LASConfig extends LASDocument {
                          * element the filtered list of variables.  Therefore this
                          * is a getDataset call...
                          */
-                        Dataset dataset = getDataset(filter);
-                        if ( dataset != null ) {
-                            category_container.addContent(dataset.getElement());
+                        List<Dataset> datasets = getDataset(filter);
+                        for ( int i = 0; i < datasets.size(); i++ ) {
+                        	Dataset dataset = datasets.get(i);
+                        	if ( dataset != null && dataset.getVariables().size() > 0) {
+                        		category_container.addContent(dataset.getElement());
+                        		category.setAttribute("children", "variables");
+                        	}
                         }
                     }
                     categories.add(new Category(category_container));
@@ -1289,11 +1297,12 @@ public class LASConfig extends LASDocument {
 	    return variable.getAttributes();
 	}
     /**
-     * Extract data sets based on a &lt;filter&gt; element from the config. 
+     * Extract data sets based on a &lt;filter&gt; element from the config.   A filter might return data from more that one dataset.
      * @param filter A category filter element to be used to select variables from the configuration.
      * @return the data set that matches the filter
      */
-    private Dataset getDataset(Element filter) {
+    private List<Dataset> getDataset(Element filter) {
+    	List<Dataset> dataset_list = new ArrayList<Dataset>();
         Dataset container_dataset = null;
         String action = filter.getAttributeValue("action");
 
@@ -1333,18 +1342,24 @@ public class LASConfig extends LASDocument {
              * filter its member variables to include only the matches.
              */
             List datasets = getRootElement().getChildren("datasets");
+            Element container_dataset_element = null;
             for (Iterator datasetsIt = datasets.iterator(); datasetsIt.hasNext();) {
                 
                 Element datasetsE = (Element) datasetsIt.next();
                 List memberDatasets = datasetsE.getChildren("dataset");
+                
                 for (Iterator memberDSIt = memberDatasets.iterator(); memberDSIt.hasNext();) {
-                    if ( container_dataset != null ) {
-                        break;  // Ugly loop breaking in the interest of efficiency.
-                    }
-                    Element dataset = (Element) memberDSIt.next();    
-                    Element container_dataset_element = (Element) dataset.clone();
-                    container_dataset_element.removeChildren("variables");
+//                    if ( container_dataset != null ) {
+//                        break;  // Ugly loop breaking in the interest of efficiency.
+//                    }
+                    Element dataset = (Element) memberDSIt.next();  
+                   
+                    	container_dataset_element = (Element) dataset.clone();
+                    	container_dataset_element.removeChildren("variables");
+                    
                         List memberVariables = dataset.getChild("variables").getChildren("variable");
+                        Element varsElementContainer = new Element("variables");
+                        boolean hasVariable = false;
                         for (Iterator varIt = memberVariables.iterator(); varIt.hasNext();) {
                             Element variable = (Element) varIt.next();
                             Element container_variable = (Element) variable.clone();
@@ -1354,14 +1369,20 @@ public class LASConfig extends LASDocument {
                                  (name_equals != null && name.equals(name_equals)) ||
                                  (tag_contains != null && ID.contains(tag_contains)) ||
                                  (tag_equals != null && ID.equals(tag_equals)) ) { 
-                                 container_dataset_element.addContent(container_variable);
+                            	 varsElementContainer.addContent(container_variable);
+                                 hasVariable = true;
                         }
                     }
-                    container_dataset = new Dataset(container_dataset_element);
+                    if ( hasVariable ) {
+                        container_dataset_element.addContent(varsElementContainer);
+                        container_dataset = new Dataset(container_dataset_element);
+                        dataset_list.add(container_dataset);
+                    }
                 }
+                
             }
         }
-        return container_dataset;
+        return dataset_list;
     }
     
     /**
