@@ -84,10 +84,13 @@ public class DatasetWidget extends Tree implements TreeListener {
 							TreeItem item = currentlySelected.getChild(0);
 							if ( cat.hasMultipleDatasets() ) {
 								DatasetSerializable[] dses = cat.getDatasetSerializableArray();
-								for (int j = 0; j < dses.length; j++) {
-									DatasetSerializable ds = dses[j];
-									VariableSerializable[] vars = ds.getVariablesSerializable();
-									loadItem(item, vars);
+								DatasetSerializable ds = dses[0];
+								VariableSerializable[] vars = ds.getVariablesSerializable();
+								loadItem(item, vars);
+								for (int j = 1; j < dses.length; j++) {
+									ds = dses[j];
+									vars = ds.getVariablesSerializable();
+									loadItem(vars);
 								}
 							} else {
 								DatasetSerializable ds = cat.getDatasetSerializable();
@@ -112,6 +115,14 @@ public class DatasetWidget extends Tree implements TreeListener {
 				item.setText(vars[j].getName());
 				item.setUserObject(vars[j]);
 				currentlySelected.addItem(item);
+			}
+		}
+		private void loadItem(VariableSerializable[] vars) {
+			for (int j = 0; j < vars.length; j++) {
+				TreeItem item = new TreeItem();
+				item.setText(vars[j].getName());
+				item.setUserObject(vars[j]);
+			    currentlySelected.addItem(item);
 			}
 		}
 	};

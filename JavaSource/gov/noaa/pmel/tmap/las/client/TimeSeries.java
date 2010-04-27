@@ -49,188 +49,193 @@ import com.google.gwt.user.client.ui.Widget;
  * Entry point classes define <code>onModuleLoad()</code>.
  */
 public class TimeSeries implements EntryPoint {
-	private static class TimeSeriesComposite implements EntryPoint, ClickListener {
-		
-		ListBox timeSeriesList = new ListBox();
-		TimeSeriesMap timeSeriesMap = new TimeSeriesMap();
-		CheckBoxPanel variables = new CheckBoxPanel(this);
-		DateTimeWidget dates = new DateTimeWidget();
-		HTML output = new HTML();
-		ListBox z = new ListBox();
-		PopupPanel options_panel = new PopupPanel(true);
-		OptionsWidget options_widget;
-		HashMap<String, CategorySerializable> categories = new HashMap<String, CategorySerializable>();
-		CategorySerializable cat;
-		LASRequestWrapper lasRequest =  new LASRequestWrapper();
-		Map<String, String> options_state;
-		Label z_label = new Label("Select a z-value:");
-		Label dates_label = new Label("Select a date range:");
-		public static final String PLOT_BUTTON_NAME = "Plot";
-		public static final String PLOT_OPTIONS_BUTTON_NAME = "Plot Options";
-		
-		public void onModuleLoad() {
-			// Set up the RPC service for getting LAS metadata
-			timeSeriesList.addChangeListener( new ChangeListener() {
-				public void onChange(Widget sender) {
-					int index = timeSeriesList.getSelectedIndex();
-					String id = timeSeriesList.getValue(index);
-					cat = categories.get(id);
-					timeSeriesMap.update(categories.get(id));
-					variables.setVisible(false);
-					dates.setVisible(false);
-					dates_label.setVisible(false);
-					output.setVisible(false);
-					z_label.setVisible(false);
-					z.setVisible(false);
-				}
-			});
-			
-			Util.getRPCService().getTimeSeries(timeSeriesCallback);
-			lasRequest.removeVariables();
-			timeSeriesMap.addMapClickHandler(mapClick);
-			RootPanel.get("timeseries_collection_listbox").add(timeSeriesList);
-			variables.setVisible(false);
-			RootPanel.get("map").add(timeSeriesMap);
-			RootPanel.get("variables").add(variables);
-			z.setVisible(false);
-			RootPanel.get("z").add(z);
-			RootPanel.get("z_label").add(z_label);
-			z_label.setVisible(false);
-			z_label.setStyleName("small-banner");
-			dates.init("1990-01-01", "2000-01-01", 1, "YMDT", false);
-			dates.setRange(true);
-			RootPanel.get("dates").add(dates);
-			RootPanel.get("dates_label").add(dates_label);
-			dates.setVisible(false);
-			dates_label.setVisible(false);
-			dates_label.setStyleName("small-banner");
-			RootPanel.get("output").add(output);
-			options_widget = new OptionsWidget("Plot_1D", this, this);
-            options_panel.add(options_widget);
-			//this.setElement(RootPanel.get().getElement());
+
+	ListBox timeSeriesList = new ListBox();
+	OLTimeSeriesMap timeSeriesMap = new OLTimeSeriesMap();
+	CheckBoxPanel variables;
+	DateTimeWidget dates = new DateTimeWidget();
+	HTML output = new HTML();
+	ListBox z = new ListBox();
+	PopupPanel options_panel = new PopupPanel(true);
+	OptionsWidget options_widget;
+	HashMap<String, CategorySerializable> categories = new HashMap<String, CategorySerializable>();
+	CategorySerializable cat;
+	LASRequestWrapper lasRequest =  new LASRequestWrapper();
+	Map<String, String> options_state;
+	Label z_label = new Label("Select a z-value:");
+	Label dates_label = new Label("Select a date range:");
+	public static final String PLOT_BUTTON_NAME = "Plot";
+	public static final String PLOT_OPTIONS_BUTTON_NAME = "Plot Options";
+
+	public void onModuleLoad() {
+		// Set up the RPC service for getting LAS metadata
+		timeSeriesList.addChangeListener( new ChangeListener() {
+			public void onChange(Widget sender) {
+				int index = timeSeriesList.getSelectedIndex();
+				String id = timeSeriesList.getValue(index);
+				cat = categories.get(id);
+				timeSeriesMap.update(categories.get(id));
+				variables.setVisible(false);
+				dates.setVisible(false);
+				dates_label.setVisible(false);
+				output.setVisible(false);
+				z_label.setVisible(false);
+				z.setVisible(false);
+			}
+		});
+		variables = new CheckBoxPanel(clickListener);
+		Util.getRPCService().getTimeSeries(timeSeriesCallback);
+		lasRequest.removeVariables();
+		//timeSeriesMap.addMapClickHandler(mapClick);
+		RootPanel.get("timeseries_collection_listbox").add(timeSeriesList);
+		variables.setVisible(false);
+		RootPanel.get("map").add(timeSeriesMap);
+		RootPanel.get("variables").add(variables);
+		z.setVisible(false);
+		RootPanel.get("z").add(z);
+		RootPanel.get("z_label").add(z_label);
+		z_label.setVisible(false);
+		z_label.setStyleName("small-banner");
+		dates.init("1990-01-01", "2000-01-01", 1, "YMDT", false);
+		dates.setRange(true);
+		RootPanel.get("dates").add(dates);
+		RootPanel.get("dates_label").add(dates_label);
+		dates.setVisible(false);
+		dates_label.setVisible(false);
+		dates_label.setStyleName("small-banner");
+		RootPanel.get("output").add(output);
+		options_widget = new OptionsWidget("Options_1D_7", clickListener, clickListener);
+		options_panel.add(options_widget);
+		//this.setElement(RootPanel.get().getElement());
+	}
+	
+	AsyncCallback timeSeriesCallback = new AsyncCallback() {
+
+		public void onFailure(Throwable caught) {
+			HTML out = new HTML();
+			PopupPanel p = new PopupPanel();
+			p.add(out);
+			out.setHTML("<H1>Error getting time series data sets.  Message:"+caught.getMessage());
+			p.show();
 		}
-		AsyncCallback timeSeriesCallback = new AsyncCallback() {
 
-			public void onFailure(Throwable caught) {
-			    HTML out = new HTML();
-			    PopupPanel p = new PopupPanel();
-			    p.add(out);
-			    out.setHTML("<H1>Error getting time series data sets.  Message:"+caught.getMessage());
-			    p.show();
+		public void onSuccess(Object result) {
+			if ( result == null ) {
+				Window.alert("No time series data sets found.");
+				return;
 			}
-
-			public void onSuccess(Object result) {
-				if ( result == null ) {
-					Window.alert("No time series data sets found.");
-					return;
-				}
-				CategorySerializable[] cats = (CategorySerializable[]) result;
-                Arrays.sort(cats);
-				for (int i = 0; i < cats.length; i++) {
-					CategorySerializable cat = cats[i];
-					timeSeriesList.addItem(cat.getName(), cat.getID());
-					categories.put(cat.getID(), cat);
-				}
-				cat = cats[0];
-				timeSeriesMap.update(cat);
+			CategorySerializable[] cats = (CategorySerializable[]) result;
+			if ( cats.length == 0 ) {
+				Window.alert("No time series data sets found.");
+				return;
 			}
-
-		};
-
-		public MapClickHandler mapClick = new MapClickHandler() {
-
-			public void onClick(MapClickEvent event) {
-				Overlay sender = event.getOverlay();
-				if ( sender != null && sender instanceof Marker ) {
-					Marker marker = (Marker) sender;
-					String gridID = timeSeriesMap.getCurrentGridID();
-					showVariables(gridID, marker);
-					dates.setVisible(false);
-					dates_label.setVisible(false);
-					variables.hideButtons();
-					z.setVisible(false);
-					z_label.setVisible(false);
-					variables.setFirst(true);
-					output.setVisible(false);
-				}
+			Arrays.sort(cats);
+			for (int i = 0; i < cats.length; i++) {
+				CategorySerializable cat = cats[i];
+				timeSeriesList.addItem(cat.getName(), cat.getID());
+				categories.put(cat.getID(), cat);
 			}
+			cat = cats[0];
+			timeSeriesMap.update(cat);
+		}
 
-		};
-		public void showDateWidgets(String varID) {
-			if (variables.isFirst() ) {
-				TimeAxisSerializable tAxis = cat.getVariable(varID).getGrid().getTAxis();
-				String hi = tAxis.getHi();
-				String lo = tAxis.getLo();
-				int delta = (int) tAxis.getMinuteInterval();
-				dates.init(lo, hi, delta, "YMDT", false);
-				dates.setVisible(true);
-				AxisSerializable zAxis = cat.getVariable(varID).getGrid().getZAxis();
-				if ( zAxis != null ) {
-					z.clear();
-					if (zAxis.getNames() != null) {
-						String[] names = zAxis.getNames();
-						String[] values = zAxis.getValues();
-						for (int i=0; i<names.length; i++) {
-							z.addItem(names[i], values[i]);
-						}
-					} else {
-						ArangeSerializable a = zAxis.getArangeSerializable();
-						double start = Double.valueOf(a.getStart()).doubleValue();
-						int size = Integer.valueOf(a.getSize()).intValue();
-						double step = Double.valueOf(a.getStep()).doubleValue();
-						for ( int i = 0; i < size; i++ ) {
-							double v = start + i*step;
-							z.addItem(String.valueOf(i), String.valueOf(v));
-						}
-					}
-					z.setVisible(true);
-					if ( zAxis.getAttributes().get("label") != null && !zAxis.getAttributes().get("label").equals("")) {
-					     z_label.setText(zAxis.getAttributes().get("label")+" ("+zAxis.getAttributes().get("units")+"):");
-					} else {
-						z_label.setText("Depth or height ("+zAxis.getAttributes().get("units")+"):");
-					}
-					z_label.setVisible(true);
-				}
+	};
+
+	public MapClickHandler mapClick = new MapClickHandler() {
+
+		public void onClick(MapClickEvent event) {
+			Overlay sender = event.getOverlay();
+			if ( sender != null && sender instanceof Marker ) {
+				Marker marker = (Marker) sender;
+				String gridID = timeSeriesMap.getCurrentGridID();
+				showVariables(gridID, marker);
+				dates.setVisible(false);
+				dates_label.setVisible(false);
+				variables.hideButtons();
+				z.setVisible(false);
+				z_label.setVisible(false);
+				variables.setFirst(true);
+				output.setVisible(false);
 			}
 		}
-		public void showVariables(String gridID, Marker sender) {
-			HashMap<String, ArrayList<VariableSerializable>> allVars = new HashMap<String, ArrayList<VariableSerializable>>();
-			if ( cat.hasMultipleDatasets() ) {
-				DatasetSerializable[] ds = cat.getDatasetSerializableArray();
-				ArrayList<VariableSerializable> varsWithGrid = new ArrayList<VariableSerializable>();
-				for (int i = 0; i < ds.length; i++) {
-					boolean match = false;
-					DatasetSerializable d = ds[i];
-					VariableSerializable[] vars = d.getVariablesSerializable();
-					for (int j = 0; j < vars.length; j++) {
-						VariableSerializable var = vars[j];
-						GridSerializable grid = var.getGrid();
-						if ( var.getGrid().getID().equals(gridID)) {
-							varsWithGrid.add(var);
-							match = true;
-						}
+
+	};
+	public void showDateWidgets(String varID) {
+		if (variables.isFirst() ) {
+			TimeAxisSerializable tAxis = cat.getVariable(varID).getGrid().getTAxis();
+			String hi = tAxis.getHi();
+			String lo = tAxis.getLo();
+			int delta = (int) tAxis.getMinuteInterval();
+			dates.init(lo, hi, delta, "YMDT", false);
+			dates.setVisible(true);
+			AxisSerializable zAxis = cat.getVariable(varID).getGrid().getZAxis();
+			if ( zAxis != null ) {
+				z.clear();
+				if (zAxis.getNames() != null) {
+					String[] names = zAxis.getNames();
+					String[] values = zAxis.getValues();
+					for (int i=0; i<names.length; i++) {
+						z.addItem(names[i], values[i]);
 					}
-					if (match) {
-						allVars.put(d.getName(), varsWithGrid);
-						match = false;
+				} else {
+					ArangeSerializable a = zAxis.getArangeSerializable();
+					double start = Double.valueOf(a.getStart()).doubleValue();
+					int size = Integer.valueOf(a.getSize()).intValue();
+					double step = Double.valueOf(a.getStep()).doubleValue();
+					for ( int i = 0; i < size; i++ ) {
+						double v = start + i*step;
+						z.addItem(String.valueOf(i), String.valueOf(v));
 					}
 				}
-			} else {
-				DatasetSerializable ds = cat.getDatasetSerializable();
-				VariableSerializable[] vars = ds.getVariablesSerializable();
-				ArrayList<VariableSerializable> varsWithGrid = new ArrayList<VariableSerializable>();
+				z.setVisible(true);
+				if ( zAxis.getAttributes().get("label") != null && !zAxis.getAttributes().get("label").equals("")) {
+					z_label.setText(zAxis.getAttributes().get("label")+" ("+zAxis.getAttributes().get("units")+"):");
+				} else {
+					z_label.setText("Depth or height ("+zAxis.getAttributes().get("units")+"):");
+				}
+				z_label.setVisible(true);
+			}
+		}
+	}
+	public void showVariables(String gridID, Marker sender) {
+		HashMap<String, ArrayList<VariableSerializable>> allVars = new HashMap<String, ArrayList<VariableSerializable>>();
+		if ( cat.hasMultipleDatasets() ) {
+			DatasetSerializable[] ds = cat.getDatasetSerializableArray();
+			ArrayList<VariableSerializable> varsWithGrid = new ArrayList<VariableSerializable>();
+			for (int i = 0; i < ds.length; i++) {
+				boolean match = false;
+				DatasetSerializable d = ds[i];
+				VariableSerializable[] vars = d.getVariablesSerializable();
 				for (int j = 0; j < vars.length; j++) {
 					VariableSerializable var = vars[j];
 					GridSerializable grid = var.getGrid();
 					if ( var.getGrid().getID().equals(gridID)) {
 						varsWithGrid.add(var);
+						match = true;
 					}
 				}
-				allVars.put(ds.getName(), varsWithGrid);
+				if (match) {
+					allVars.put(d.getName(), varsWithGrid);
+					match = false;
+				}
 			}
-			variables.update(sender.getPoint(), allVars);
-			variables.setVisible(true);
+		} else {
+			DatasetSerializable ds = cat.getDatasetSerializable();
+			VariableSerializable[] vars = ds.getVariablesSerializable();
+			ArrayList<VariableSerializable> varsWithGrid = new ArrayList<VariableSerializable>();
+			for (int j = 0; j < vars.length; j++) {
+				VariableSerializable var = vars[j];
+				GridSerializable grid = var.getGrid();
+				if ( var.getGrid().getID().equals(gridID)) {
+					varsWithGrid.add(var);
+				}
+			}
+			allVars.put(ds.getName(), varsWithGrid);
 		}
+		variables.update(sender.getPoint(), allVars);
+		variables.setVisible(true);
+	}
+	public ClickListener clickListener = new ClickListener() {
 		public void onClick(Widget widget) {
 			if ( widget instanceof CheckBox ) {
 				showDateWidgets(widget.getTitle());
@@ -238,8 +243,8 @@ public class TimeSeries implements EntryPoint {
 				Button button = (Button) widget;
 				String button_name = button.getText();
 				if ( button_name.equals(PLOT_BUTTON_NAME)) {
-//					output.setHTML("<img src=\"../JavaScript/components/mozilla_blu.gif\" alt=\"Spinner\"/>");
-//					output.setVisible(true);
+					//					output.setHTML("<img src=\"../JavaScript/components/mozilla_blu.gif\" alt=\"Spinner\"/>");
+					//					output.setVisible(true);
 					lasRequest.removeRegion(0);
 					lasRequest.removeVariables();
 					lasRequest.removePropertyGroup("ferret");
@@ -269,10 +274,10 @@ public class TimeSeries implements EntryPoint {
 					AxisSerializable yAxis = grid.getYAxis();
 					lasRequest.setRange("x", xAxis.getLo(), xAxis.getHi(), 0);
 					lasRequest.setRange("y", yAxis.getLo(), yAxis.getHi(), 0);
-					
+
 					if ( options_state != null && options_state.size() > 0 ) {
 						lasRequest.removePropertyGroup("ferret");
-						
+
 						for (Iterator opIt = options_state.keySet().iterator(); opIt.hasNext();) {
 							String name = (String) opIt.next();
 							String value = options_state.get(name);
@@ -294,11 +299,11 @@ public class TimeSeries implements EntryPoint {
 					} catch (RequestException e) {
 						output.setHTML(e.toString());
 					}
-					*/
+					 */
 					Window.open(url,"data","resizable=yes,scrollbars=yes,status=yes"); 
 				} else if ( button_name.equals(PLOT_OPTIONS_BUTTON_NAME) ) {
 					options_state = options_widget.getState();
-                    options_panel.center();
+					options_panel.center();
 				} else if ( button_name.equals("OK") ) {
 					options_state = options_widget.getState();
 					options_panel.hide();
@@ -308,27 +313,16 @@ public class TimeSeries implements EntryPoint {
 				}
 			}
 		}
-		private RequestCallback lasRequestCallback = new RequestCallback() {
-			public void onError(Request request, Throwable exception) {
-				output.setHTML(exception.toString());
-			}
+	};
+	private RequestCallback lasRequestCallback = new RequestCallback() {
+		public void onError(Request request, Throwable exception) {
+			output.setHTML(exception.toString());
+		}
 
-			public void onResponseReceived(Request request, Response response) {
-				String doc = response.getText();
-				output.setHTML(doc);
-			}
-		};
-	}
+		public void onResponseReceived(Request request, Response response) {
+			String doc = response.getText();
+			output.setHTML(doc);
+		}
+	};
 
-	/**
-	 * This is the entry point method.
-	 */
-	public void onModuleLoad() {
-		
-		TimeSeriesComposite tsc = new TimeSeriesComposite();
-		/*
-		Panel map_area = RootPanel.get("map");
-		map_area.add(tsc);
-		*/
-	}
 }

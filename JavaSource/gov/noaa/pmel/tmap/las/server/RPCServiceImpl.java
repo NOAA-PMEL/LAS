@@ -59,11 +59,8 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
 	public CategorySerializable[] getTimeSeries() throws RPCException {
 		LASConfig lasConfig = (LASConfig) getServletContext().getAttribute(LASConfigPlugIn.LAS_CONFIG_KEY);	
 		CategorySerializable[] cats = null;
-		if ( true ) {
-			// Proxy off to the appropriate server...
-			// TODO ** need a getTimeSeriesDatasets.do that does this to allow us to implement the proxy...
-		} else {
-
+		// TODO Do we need a confluence implementation of this?
+		
 			try {
 				ArrayList<Category> categories = lasConfig.getTimeSeriesDatasets();
 				cats = lasConfig.getCategorySerializable(categories);
@@ -72,7 +69,7 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
 			} catch (JDOMException e) {
 				throw new RPCException(e.getMessage());
 			}
-		}
+		
 		return cats;
 	}
 	public VariableSerializable getVariable(String dsid, String varid ) throws RPCException {
