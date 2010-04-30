@@ -1153,7 +1153,7 @@ public class LASConfig extends LASDocument {
                         	Dataset dataset = datasets.get(i);
                         	if ( dataset != null && dataset.getVariables().size() > 0) {
                         		category_container.addContent(dataset.getElement());
-                        		category.setAttribute("children", "variables");
+                        		category_container.setAttribute("children", "variables");
                         	}
                         }
                     }
@@ -1333,6 +1333,7 @@ public class LASConfig extends LASDocument {
                          (tag_equals != null && ID.equals(tag_equals)) ) {
                         // There is nothing to do except create the dataset container and break out.
                         container_dataset = new Dataset(container_dataset_element);
+                        dataset_list.add(container_dataset);
                     }
                 }
             }
