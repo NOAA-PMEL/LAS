@@ -133,6 +133,9 @@ IF ($ferret_size"0|0.25>1|*>0")    THEN LET maxpix = 500  ! medium
 IF ($ferret_size"0|0.5>1|*>0")     THEN LET maxpix = 600  ! default
 IF ($ferret_size"0|0.8333>1|*>0")  THEN LET maxpix = 700  ! large
 
+IF `STRINDEX("($operation_ID)", "Anim" ) GT 0` THEN LET maxpix = 50
+
+
 IF `($ferret_google_plot"0|0|*>1")` THEN LET  maxpix = `2*maxpix`
 
 IF `($region_x_range"0|0|*>1")` THEN 
@@ -308,7 +311,10 @@ IF ($ferret_google_plot"0|*>1") THEN
 
 ENDIF
 
+LET pvar = ($data_var)[d=($data_num),($set_ndx_strides)]
+
 IF `($num"0|*>1") EQ 0` THEN \
  DEFINE SYMBOL set_ndx_strides_0 =  ($set_ndx_strides)
 
 ! End of $RCSfile ------------ LAS_set_strides_nonative.jnl--------------------------
+

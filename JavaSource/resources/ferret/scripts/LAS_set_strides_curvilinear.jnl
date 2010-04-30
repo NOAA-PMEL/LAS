@@ -119,6 +119,11 @@ ENDIF
 
 LET nx_orig = `nx`
 
+
+! lon and lat max were computed in finding the bbox
+DEFINE SYMBOL grid_x_range = `($ferret_curv_lon_max) - ($ferret_curv_lon_min)`
+DEFINE SYMBOL grid_y_range = `($ferret_curv_lat_max) - ($ferret_curv_lat_min)`
+
 ! For 2D plots
 
 IF `STRLEN("($ferret_view)") EQ 2` THEN
@@ -126,22 +131,24 @@ IF `STRLEN("($ferret_view)") EQ 2` THEN
 ! curvilinear grid? Get percentage of total that the region represents, see
 ! if the number of points looks like it will be large.
 
+
 ! Curvilinear and XY plot
 
    IF `($ferret_curvi_coord_lat"0|*>1") + ($ferret_view"|xy>1|*>0") EQ 2 ` THEN 
-   
+
       LET xx = x[gx=($data_var)[d=($data_num)]]
       LET nx = xx[i=@ngd]
-      LET x_pct = ($region_x_range)/360
+      LET x_pct = ($region_x_range)/($grid_x_range)
       LET pixsize = `nx*x_pct`
 !         LET pixsize = `MAX(pixsize, nx)`  ! comment this out to set strides by region
 
 !         IF `pixsize GT maxpix` THEN DEFINE SYMBOL xstride = `INT((pixsize/maxpix)+1)`
       IF `pixsize GT maxpix` THEN DEFINE SYMBOL xstride = `2*INT((pixsize/maxpix)+1)`
+
       DEFINE SYMBOL xstride = `MAX(($xstride"1"), ($stride_for_mem"1"))`
       IF `($xstride"0") GT 1` THEN 
 ! Check whether X axis is modulo. check_modulo_factor.jnl checks whether the
-! axis is modulo and if so, whether the stride is a factor of the lentgh of 
+! axis is modulo and if so, whether the stride is a factor of the length of 
 ! the axis, resetting it if possible to retain the modulo character of the axis.
 
          GO check_modulo_factor x 
@@ -154,7 +161,7 @@ IF `STRLEN("($ferret_view)") EQ 2` THEN
          DEFINE SYMBOL clon_imin = `MAX(1, INT(($clon_imin)/($xstride)) )`
          DEFINE SYMBOL clon_imax = `MIN (nx, INT(($clon_imax)/($xstride)) )`
       ENDIF
-      
+
 ! Use /HLIM and /VLIM to define the plot rectangle. If this is a native
 ! curvilienar plot this step is done elsewhere.
       IF `($native_curvilinear_xy"0|*>1") EQ 0` THEN \
@@ -162,7 +169,7 @@ IF `STRLEN("($ferret_view)") EQ 2` THEN
 
       LET yy = y[gy=($data_var)[d=($data_num)]]
       LET ny = yy[j=@ngd]; LET ny_orig = `ny`
-      LET y_pct = ($region_y_range)/180
+      LET y_pct = ($region_y_range)/($grid_y_range)
       LET pixsize = `ny*y_pct`
 
 !         LET pixsize = `MAX(pixsize, ny)`  ! comment this out to set strides by region
@@ -188,7 +195,7 @@ IF `STRLEN("($ferret_view)") EQ 2` THEN
         IF `(STRINDEX("($ferret_view)", "x") GT 0)` THEN 
            LET xx = x[gx=($data_var)[d=($data_num)]]
            LET nx = xx[i=@ngd]
-           LET x_pct = ($region_x_range)/360
+           LET x_pct = ($region_x_range)/($grid_x_range)
            LET pixsize = `nx*x_pct`
            LET pixsize = `MAX(pixsize, nx)`  ! comment this out to set strides by region
     
@@ -217,7 +224,7 @@ IF `STRLEN("($ferret_view)") EQ 2` THEN
         IF `(STRINDEX("($ferret_view)", "y") GT 0)` THEN 
            LET yy = y[gy=($data_var)[d=($data_num)]]
            LET ny = yy[j=@ngd]
-           LET y_pct = ($region_y_range)/180
+           LET y_pct = ($region_y_range)/($grid_y_range)
            LET pixsize = `ny*y_pct`
            LET pixsize = `MAX(pixsize, ny)`  ! comment this out to set strides by region
   
@@ -281,7 +288,7 @@ IF `STRLEN("($ferret_view)") EQ 3 AND STRINDEX("($ferret_view)", "xy") GT 0` THE
    
       LET xx = x[gx=($data_var)[d=($data_num)]]
       LET nx = xx[i=@ngd]
-      LET x_pct = ($region_x_range)/360
+      LET x_pct = ($region_x_range)/($grid_x_range)
       LET pixsize = `nx*x_pct`
 !         LET pixsize = `MAX(pixsize, nx)`  ! comment this out to set strides by region
 
@@ -301,7 +308,7 @@ IF `STRLEN("($ferret_view)") EQ 3 AND STRINDEX("($ferret_view)", "xy") GT 0` THE
 
       LET yy = y[gy=($data_var)[d=($data_num)]]
       LET ny = yy[j=@ngd]
-      LET y_pct = ($region_y_range)/180
+      LET y_pct = ($region_y_range)/($grid_y_range)
       LET pixsize = `ny*y_pct`
 
 !         LET pixsize = `MAX(pixsize, ny)`  ! comment this out to set strides by region
@@ -373,6 +380,19 @@ IF `($xstride"0|1>0|*>1") + ($ystride"0|1>0|*>1") + ($zstride"0|1>0|*>1") + ($ts
       LET need_comma = 1
    ENDIF
 
+ENDIF
+
+! Redefine pvar using new longitude and latitude indices. 
+! They may have been reset after defining striding.
+
+IF ($clon_imin"0|*>1") THEN 
+   LET pvar = ($expr1)($data_var)[d=($data_num),i=($clon_imin):($clon_imax),j=($clat_jmin):($clat_jmax)]($expr2)
+   IF ($region_zt"0|*>1") THEN \
+      LET pvar = ($expr1)($data_var)[d=($data_num),i=($clon_imin):($clon_imax),j=($clat_jmin):($clat_jmax),($region_zt)]($expr2)
+   IF ($ferret_season_length"0|*>1") THEN
+      LET pvar = ($expr1)S($num)_the_plot_var_zt[i=($clon_imin):($clon_imax),j=($clat_jmin):($clat_jmax)]($expr2)
+
+   ENDIF
 ENDIF
 
 ! End of $RCSfile ------------LAS_set_strides_curvilinear.jnl--------------------------
