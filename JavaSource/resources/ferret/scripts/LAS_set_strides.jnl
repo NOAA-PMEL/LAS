@@ -77,8 +77,21 @@ IF `STRINDEX( "($operation_ID)", "Side" ) NE 0` THEN
 ENDIF
 
 IF `($num)+1 EQ ($nvars)` THEN
-   LET varsiz `pvar,RETURN=size`
+   LET ndims = 0
+   LET xsiz = `pvar,RETURN=isize`
+   IF `xsiz GT 1` THEN LET ndims = `ndims + 1`
+   LET ysiz = `pvar,RETURN=jsize`
+   IF `ysiz GT 1` THEN LET ndims = `ndims + 1`
+   LET zsiz = `pvar,RETURN=ksize`
+   IF `zsiz GT 1` THEN LET ndims = `ndims + 1`
+   LET tsiz = `pvar,RETURN=lsize`
+   IF `tsiz GT 1` THEN LET ndims = `ndims + 1`
+
+   LET varsiz = xsiz* ysiz* zsiz* tsiz
    DEFINE SYMBOL stride_for_mem = `INT( 1+ varsiz/(.5*($memsize)) )`
+   IF `ndims EQ 2` THEN DEFINE SYMBOL stride_for_mem = `INT(($stride_for_mem)^0.5)`
+   IF `ndims EQ 3` THEN DEFINE SYMBOL stride_for_mem = `INT(($stride_for_mem)^0.33)`
+   IF `ndims EQ 4` THEN DEFINE SYMBOL stride_for_mem = `INT(($stride_for_mem)^0.25)`
 
 ENDIF
 
@@ -89,7 +102,6 @@ IF `STRINDEX( "($operation_ID)", "Plot" ) EQ 0 AND \
     STRINDEX( "($operation_ID)", "Anim" ) EQ 0 AND \
     STRINDEX( "($operation_ID)", "Grid_for_GE" ) EQ 0` THEN
    GO LAS_set_strides_for_mem
-   
    EXIT/SCRIPT
 ENDIF
 
@@ -103,10 +115,7 @@ IF ($ferret_size"0|0.25>1|*>0")    THEN LET maxpix = 500  ! medium
 IF ($ferret_size"0|0.5>1|*>0")     THEN LET maxpix = 600  ! default
 IF ($ferret_size"0|0.8333>1|*>0")  THEN LET maxpix = 700  ! large
 
-sh sym region_0_x_range
-sh sym region_x_range
-sh sym region_0_y_range
-sh sym region_y_range
+IF `STRINDEX("($operation_ID)", "Anim" ) GT 0` THEN LET maxpix = 50
 
 IF `($region_x_range"0|*>1") EQ 0` THEN
    DEFINE SYMBOL no_region_x_range = 1
@@ -132,7 +141,6 @@ IF `(STRINDEX("($ferret_view)","x") NE 0) AND \
      ENDIF
    ENDIF
 
-
    IF `pixsize GT maxpix` THEN DEFINE SYMBOL xstride = `INT((pixsize/maxpix)+1)`
    DEFINE SYMBOL xstride = `MAX(($xstride"1"), ($stride_for_mem"1"))`
 
@@ -148,7 +156,7 @@ IF `(STRINDEX("($ferret_view)","x") NE 0) AND \
          DEFINE SYMBOL axis_stride_($axname) = ($xstride)
       ENDIF
    ENDIF
-
+   
    IF ($SYMBOL no_region_x_range"0|*>1") THEN CANCEL SYMBOL region_x_range
 ENDIF
 
