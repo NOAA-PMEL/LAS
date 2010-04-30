@@ -17,6 +17,12 @@
 
 DEFINE SYMBOL var_num = $1
 
+! Cannot list out a pseudo-variable, e.g. Z. In the initialization,
+! check for pseutonames. If the variable name is a pseudo-var name, 
+! write out name_1 e.g. Z_1 with all the same attributes.
+
+DEFINE SYMBOL check_for_pseudonames = 1
+
 GO LAS_initialize_region ($var_num)
 GO LAS_initialize_data ($var_num)
 
@@ -70,7 +76,7 @@ ENDIF
 
 SET DATA/SAVE
 SET DATA ($data_num)
-LET attlist = ($data_var).attnames
+LET attlist = ($data_var_nq).attnames
 
 sh sym ferret_list_var
 
@@ -213,11 +219,11 @@ IF ($ferret_interpolate_data%0|false>0|true>1|1|0|*>1%) THEN SET MODE INTERPOLAT
 
 !SET ATT/OUTPUT=all ($data_var)
 
-LET allatts = ($data_var).attnames
-LET natts = ($data_var).nattrs
+LET allatts = ($data_var_nq).attnames
+LET natts = ($data_var_nq).nattrs
  REPEAT/RANGE=1:`natts`/NAME=m (LET attname = allatts[I=`m`]; \
     LET is_slab = STRINDEX("`attname`", "slab_min") + STRINDEX("`attname`", "slab_max"); \
-    IF `is_slab EQ 0` THEN SET ATT/OUTPUT ($data_var).`attname`)
+    IF `is_slab EQ 0` THEN SET ATT/OUTPUT ($data_var_nq).`attname`)
 
 ! Set up to write all attributes for the coordinate variables. 
 
