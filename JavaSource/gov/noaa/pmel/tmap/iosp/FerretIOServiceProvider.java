@@ -244,6 +244,17 @@ public class FerretIOServiceProvider implements IOServiceProvider {
             String length = attribute_hash.get("length");
             String name = axisE.getAttributeValue("name");
             log.debug("Working on axis: "+name);
+            String axisType = axisE.getName();
+
+			if ( axisType.equals("xaxis") ) {
+				directions.put(name, "I");
+			} else if ( axisType.equals("yaxis") ) {
+				directions.put(name, "J");
+			} else if ( axisType.equals("zaxis") ) {
+				directions.put(name, "K");
+			} else {
+				directions.put(name, "L");
+			}
             if ( length != null ) {
                 String dimS = length.trim();
                 Dimension dim = new Dimension(name, Integer.valueOf(dimS).intValue(), true);
@@ -263,11 +274,7 @@ public class FerretIOServiceProvider implements IOServiceProvider {
 							.hasNext();) {
 						String aname = (String) attIt.next();
 						String value = attribute_hash.get(aname).trim();
-						
-
-            			if ( aname.equals("direction") ) {
-            				directions.put(name, value);
-            			}
+											
             			try {
             				double dvalue = Double.valueOf(value).doubleValue();
             				coord.addAttribute(new Attribute(aname, new Double(dvalue)));
