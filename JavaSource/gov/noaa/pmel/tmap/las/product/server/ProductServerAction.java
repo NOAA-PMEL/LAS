@@ -75,7 +75,10 @@ public final class ProductServerAction extends LASAction {
         ProgressForm progress = (ProgressForm) form;
         
         log.debug("Entering ProductServerAction");
-
+        String lazy_start = (String) servlet.getServletContext().getAttribute(LASConfigPlugIn.LAS_LAZY_START_KEY);
+        if ( lazy_start != null && lazy_start.equals("true") ) {
+        	return mapping.findForward("lazy_start");
+        }
         // Get the LASConfig (sub-class of JDOM Document) from the servlet context.
         
         LASConfig lasConfig = (LASConfig)servlet.getServletContext().getAttribute(LASConfigPlugIn.LAS_CONFIG_KEY);
@@ -108,10 +111,7 @@ public final class ProductServerAction extends LASAction {
             logerror(request, "No product server URL defined.", "Check las.xml operations element...");
             return mapping.findForward("error");
         }
-        String lazy_start = (String) servlet.getServletContext().getAttribute(LASConfigPlugIn.LAS_LAZY_START_KEY);
-        if ( lazy_start != null && lazy_start.equals("true") ) {
-        	return mapping.findForward("lazy_start");
-        }
+        
         // See if the server is being reinitialized.  If so, stop.
         String lock = (String) servlet.getServletContext().getAttribute(LASConfigPlugIn.LAS_LOCK_KEY);
         if ( lock != null && lock.equals("true") ) {
