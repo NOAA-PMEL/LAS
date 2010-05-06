@@ -40,7 +40,7 @@ public class ReInit extends Action {
 			// Check for sessions and wait...
 		} else {
 			// Check for sessions and quit if found...
-			context.setAttribute("lock", "true");
+			context.setAttribute(LASConfigPlugIn.LAS_LOCK_KEY, "true");
 			boolean can_reinit = true;
 			Enumeration attrs = context.getAttributeNames();
 			while (attrs.hasMoreElements() ) {
@@ -61,7 +61,7 @@ public class ReInit extends Action {
 			}
 
 		}
-		context.removeAttribute("lock");
+		context.removeAttribute(LASConfigPlugIn.LAS_LOCK_KEY);
 		return mapping.findForward("reinit");
 	}
 

@@ -46,6 +46,8 @@ public class LASConfigPlugIn implements PlugIn {
 	public final static String LAS_SERVER_CONFIG_FILENAME_KEY = "server_config_filename";
 	public final static String LAS_OPERATIONS_CONFIG_FILENAME_KEY = "operations_config_filename";
 	public final static String LAS_UI_CONFIG_FILENAME_KEY = "ui_config_filename";
+	public final static String LAS_LAZY_START_KEY = "lazy_start";
+	public final static String LAS_LOCK_KEY = "lock";
 	
 	/*
 	 * This is the key where we will store a boolean with the results of an F-TDS test.
@@ -194,7 +196,7 @@ public class LASConfigPlugIn implements PlugIn {
 	public void go_init() throws JDOMException, UnsupportedEncodingException {
 
 		// If this is not a reinit, lock the product server here!!
-		if ( !reinit_flag ) context.setAttribute("lock", "true");
+		if ( !reinit_flag ) context.setAttribute(LAS_LOCK_KEY, "true");
 
 		File configFile = new File(configFileName);
 		LASConfig lasConfig = new LASConfig();
@@ -216,7 +218,8 @@ public class LASConfigPlugIn implements PlugIn {
 		}
 
 		context.setAttribute(SERVER_CONFIG_KEY, serverConfig);
-
+		Element root = lasConfig.getRootElement();
+		String lazy_start = null;
 		// The cache is emptied and reinitialized in a separate task so it gets created in the init and left alone in a reinit.
 		if (!reinit_flag) {
 			// Create the Cache
@@ -232,179 +235,185 @@ public class LASConfigPlugIn implements PlugIn {
 				}
 			}
 
+			lazy_start = root.getAttributeValue("lazy_start");
+			
 			// Store the cache in the context.
 			context.setAttribute(CACHE_KEY, cache);
 		}
-		Element root = lasConfig.getRootElement();
-		String version = root.getAttributeValue("version");
-
-		boolean seven = false;
-		if ( version != null && version.contains("7.")) {
-			seven = true;
-		}
-
-		File v7OperationsFile = new File(v7OperationsFileName);
-		LASDocument v7operationsDoc = new LASDocument();
-		try {
-			JDOMUtils.XML2JDOM(v7OperationsFile, v7operationsDoc);
-		} catch (Exception e) {
-			log.error("Could not parse the v7 operations file "+v7OperationsFileName, e);
-		}
-
-
-		List v7operations = v7operationsDoc.getRootElement().getChildren("operation");
-		Element operations = lasConfig.getRootElement().getChild("operations");
-		for (Iterator opIt = v7operations.iterator(); opIt.hasNext();) {
-			Element op = (Element) opIt.next();
-			operations.addContent((Element)op.clone());
-		}
-
-
-		if ( lasConfig.getOutputDir() == null ) {
-			lasConfig.setOutputDir(context.getRealPath("/")+"output");
-		}
-
-		// Create XML stubs from THREDDS or netCDF input.
-		Cache cache = (Cache) context.getAttribute(CACHE_KEY);
-		try {
-			long next = lasConfig.addXML(reinit_flag, cache);
-			if ( next < 999999999999999999l ) {
-				UpdateTask update = new UpdateTask(context);
-				Timer updateTimer = new Timer();
-				updateTimer.schedule(update, next);
-			}
-		} catch (UnsupportedEncodingException e) {
-			log.error("Could not add the referencd dataset by addXML.", e);
-		} catch (IOException e) {
-			log.error("Could not add the referencd dataset by addXML.", e);
-		} catch (JDOMException e) {
-			log.error("Could not add the referencd dataset by addXML.", e);
-		}
-
-		if ( !seven ) {
-			lasConfig.convertToSeven();
-		}
-
-		lasConfig.mergeProperites();
-
-		try {
-			lasConfig.addIntervalsAndPoints();        
-		} catch (Exception e) {
-			log.error("Could not add the intervals and points attributes to variables in this LAS configuration.", e);
-		}
-
-		try {
-			lasConfig.addGridType();
-		} catch (Exception e) {
-			log.error("Could not add the grid_type to variables in this LAS configuration.", e);
-		}
-
-		String fds_base = serverConfig.getFTDSBase();
-		String fds_dir = serverConfig.getFTDSDir();
-		try {
-			log.debug("Adding F-TDS attributes to data set.");
-			log.debug("base url: "+fds_base+" local directory "+fds_dir);
-			lasConfig.addFDS(fds_base, fds_dir);
-		} catch (LASException e) {
-			log.error("Could not add F-TDS URLs to data configuration. "+e.toString());
-		} catch (JDOMException e) {
-			log.error("Could not add F-TDS URLs to data configuration. "+e.toString());
-		} catch (IOException e) {
-			log.error("Could not add F-TDS URLs to data configuration. "+e.toString());
-		}
-
-
-		File lasUIFile = new File(lasUIFileName);
-		LASDocument lasUIDoc = new LASDocument();
-		try {
-			JDOMUtils.XML2JDOM(lasUIFile, lasUIDoc);
-		} catch (Exception e) {
-			log.error("Could not parse the ui.xml file "+lasUIFileName, e);
-		}
-
-		String title = lasUIDoc.getRootElement().getAttributeValue("title");
-		List uis = lasUIDoc.getRootElement().getChildren("ui");
-
-		Element ui = new Element("lasui");
-		if (title != null && !title.equals("")) {
-			ui.setAttribute("title", title);
-		}
-		for (Iterator uiIt = uis.iterator(); uiIt.hasNext();) {
-			Element uiE = (Element) uiIt.next();
-			ui.addContent((Element)uiE.clone());
-		}
-
-		List options = lasUIDoc.getRootElement().getChildren("options");
-
-		for (Iterator optionsIt = options.iterator(); optionsIt.hasNext();) {
-			Element optionsElement = (Element) optionsIt.next();
-			List optionsDefElements = optionsElement.getChildren("optiondef");
-			for (Iterator optionsDefElementsIt = optionsDefElements.iterator(); optionsDefElementsIt.hasNext();) {
-				Element optionsDef = (Element) optionsDefElementsIt.next();
-				String od_name = optionsDef.getAttributeValue("name");
-				List optionElements = optionsDef.getChildren("option");
-				for (Iterator optionsElementsIt = optionElements.iterator(); optionsElementsIt.hasNext();) {
-					String id = "id_"+Double.toString(Math.random());
-					Element option = (Element) optionsElementsIt.next();
-					Element textfield = option.getChild("textfield");
-					String name = "";
-					if (textfield != null) {
-						name = textfield.getAttributeValue("name");
-					}
-					Element menu = option.getChild("menu");
-					if ( menu != null ) {
-						name = menu.getAttributeValue("name");
-					}
-					if (!od_name.equals(name)) {
-						id = od_name+"_"+name.replaceAll(" ", "_");
-					} else {
-						id = od_name;
-					}
-					option.setAttribute("ID", id);
-				}
-			}
-			ui.addContent((Element)optionsElement.clone());
-		}
-
-		List defaults = lasUIDoc.getRootElement().getChildren("defaults");
-		for (Iterator defit = defaults.iterator(); defit.hasNext();) {
-			Element defaultE = (Element) defit.next();
-			ui.addContent((Element)defaultE.clone());
-		}
-
-		List maps = lasUIDoc.getRootElement().getChildren("maps");
-		for (Iterator mapIt = maps.iterator(); mapIt.hasNext();) {
-			Element mapsE = (Element) mapIt.next();
-			ui.addContent((Element)mapsE.clone());
-		}
-
-		List menus = lasUIDoc.getRootElement().getChildren("menus");
-		for (Iterator menuIt = menus.iterator(); menuIt.hasNext();) {
-			Element menusE = (Element) menuIt.next();
-			ui.addContent((Element)menusE.clone());
-		}
-
-		lasConfig.getRootElement().addContent(ui);
-
-
-		// Finally add the server id to the options if applicable.
-		lasConfig.addServerID();
-
-		File v7 = new File(lasConfig.getOutputDir()+"/lasV7.xml");
-		try {
-			lasConfig.write(v7);
-		} catch (Exception e) {
-			log.error("Cannot write out new Version 7.0 las.xml file.", e);
-		}
-
-		context.setAttribute(LAS_CONFIG_KEY, lasConfig);  
 		
+		String version = root.getAttributeValue("version");
+		
+		if ( lazy_start != null && lazy_start.equals("true") ) {
+			context.setAttribute(LAS_LAZY_START_KEY, "true");
+		} else {
+			context.setAttribute(LAS_LAZY_START_KEY, "false");
+			boolean seven = false;
+			if ( version != null && version.contains("7.")) {
+				seven = true;
+			}
+
+			File v7OperationsFile = new File(v7OperationsFileName);
+			LASDocument v7operationsDoc = new LASDocument();
+			try {
+				JDOMUtils.XML2JDOM(v7OperationsFile, v7operationsDoc);
+			} catch (Exception e) {
+				log.error("Could not parse the v7 operations file "+v7OperationsFileName, e);
+			}
+
+
+			List v7operations = v7operationsDoc.getRootElement().getChildren("operation");
+			Element operations = lasConfig.getRootElement().getChild("operations");
+			for (Iterator opIt = v7operations.iterator(); opIt.hasNext();) {
+				Element op = (Element) opIt.next();
+				operations.addContent((Element)op.clone());
+			}
+
+
+			if ( lasConfig.getOutputDir() == null ) {
+				lasConfig.setOutputDir(context.getRealPath("/")+"output");
+			}
+
+			// Create XML stubs from THREDDS or netCDF input.
+			Cache cache = (Cache) context.getAttribute(CACHE_KEY);
+			try {
+				long next = lasConfig.addXML(reinit_flag, cache);
+				if ( next < 999999999999999999l ) {
+					UpdateTask update = new UpdateTask(context);
+					Timer updateTimer = new Timer();
+					updateTimer.schedule(update, next);
+				}
+			} catch (UnsupportedEncodingException e) {
+				log.error("Could not add the referencd dataset by addXML.", e);
+			} catch (IOException e) {
+				log.error("Could not add the referencd dataset by addXML.", e);
+			} catch (JDOMException e) {
+				log.error("Could not add the referencd dataset by addXML.", e);
+			}
+
+			if ( !seven ) {
+				lasConfig.convertToSeven();
+			}
+
+			lasConfig.mergeProperites();
+
+			try {
+				lasConfig.addIntervalsAndPoints();        
+			} catch (Exception e) {
+				log.error("Could not add the intervals and points attributes to variables in this LAS configuration.", e);
+			}
+
+			try {
+				lasConfig.addGridType();
+			} catch (Exception e) {
+				log.error("Could not add the grid_type to variables in this LAS configuration.", e);
+			}
+
+			String fds_base = serverConfig.getFTDSBase();
+			String fds_dir = serverConfig.getFTDSDir();
+			try {
+				log.debug("Adding F-TDS attributes to data set.");
+				log.debug("base url: "+fds_base+" local directory "+fds_dir);
+				lasConfig.addFDS(fds_base, fds_dir);
+			} catch (LASException e) {
+				log.error("Could not add F-TDS URLs to data configuration. "+e.toString());
+			} catch (JDOMException e) {
+				log.error("Could not add F-TDS URLs to data configuration. "+e.toString());
+			} catch (IOException e) {
+				log.error("Could not add F-TDS URLs to data configuration. "+e.toString());
+			}
+
+
+			File lasUIFile = new File(lasUIFileName);
+			LASDocument lasUIDoc = new LASDocument();
+			try {
+				JDOMUtils.XML2JDOM(lasUIFile, lasUIDoc);
+			} catch (Exception e) {
+				log.error("Could not parse the ui.xml file "+lasUIFileName, e);
+			}
+
+			String title = lasUIDoc.getRootElement().getAttributeValue("title");
+			List uis = lasUIDoc.getRootElement().getChildren("ui");
+
+			Element ui = new Element("lasui");
+			if (title != null && !title.equals("")) {
+				ui.setAttribute("title", title);
+			}
+			for (Iterator uiIt = uis.iterator(); uiIt.hasNext();) {
+				Element uiE = (Element) uiIt.next();
+				ui.addContent((Element)uiE.clone());
+			}
+
+			List options = lasUIDoc.getRootElement().getChildren("options");
+
+			for (Iterator optionsIt = options.iterator(); optionsIt.hasNext();) {
+				Element optionsElement = (Element) optionsIt.next();
+				List optionsDefElements = optionsElement.getChildren("optiondef");
+				for (Iterator optionsDefElementsIt = optionsDefElements.iterator(); optionsDefElementsIt.hasNext();) {
+					Element optionsDef = (Element) optionsDefElementsIt.next();
+					String od_name = optionsDef.getAttributeValue("name");
+					List optionElements = optionsDef.getChildren("option");
+					for (Iterator optionsElementsIt = optionElements.iterator(); optionsElementsIt.hasNext();) {
+						String id = "id_"+Double.toString(Math.random());
+						Element option = (Element) optionsElementsIt.next();
+						Element textfield = option.getChild("textfield");
+						String name = "";
+						if (textfield != null) {
+							name = textfield.getAttributeValue("name");
+						}
+						Element menu = option.getChild("menu");
+						if ( menu != null ) {
+							name = menu.getAttributeValue("name");
+						}
+						if (!od_name.equals(name)) {
+							id = od_name+"_"+name.replaceAll(" ", "_");
+						} else {
+							id = od_name;
+						}
+						option.setAttribute("ID", id);
+					}
+				}
+				ui.addContent((Element)optionsElement.clone());
+			}
+
+			List defaults = lasUIDoc.getRootElement().getChildren("defaults");
+			for (Iterator defit = defaults.iterator(); defit.hasNext();) {
+				Element defaultE = (Element) defit.next();
+				ui.addContent((Element)defaultE.clone());
+			}
+
+			List maps = lasUIDoc.getRootElement().getChildren("maps");
+			for (Iterator mapIt = maps.iterator(); mapIt.hasNext();) {
+				Element mapsE = (Element) mapIt.next();
+				ui.addContent((Element)mapsE.clone());
+			}
+
+			List menus = lasUIDoc.getRootElement().getChildren("menus");
+			for (Iterator menuIt = menus.iterator(); menuIt.hasNext();) {
+				Element menusE = (Element) menuIt.next();
+				ui.addContent((Element)menusE.clone());
+			}
+
+			lasConfig.getRootElement().addContent(ui);
+
+
+			// Finally add the server id to the options if applicable.
+			lasConfig.addServerID();
+
+			File v7 = new File(lasConfig.getOutputDir()+"/lasV7.xml");
+			try {
+				lasConfig.write(v7);
+			} catch (Exception e) {
+				log.error("Cannot write out new Version 7.0 las.xml file.", e);
+			}
+
+			context.setAttribute(LAS_CONFIG_KEY, lasConfig);  
+		}
 		
 		// Set it to false so it gets tested at least the first time...
 		context.setAttribute(LAS_FTDS_UP_KEY, "false");
 		
 		// Unlock the product server and start accepting new requests...
-		context.setAttribute("lock", "false");
+		context.setAttribute(LAS_LOCK_KEY, "false");
 	}
 	public void destroy() {
 
