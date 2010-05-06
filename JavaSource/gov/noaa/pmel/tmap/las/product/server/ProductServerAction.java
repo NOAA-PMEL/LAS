@@ -108,8 +108,12 @@ public final class ProductServerAction extends LASAction {
             logerror(request, "No product server URL defined.", "Check las.xml operations element...");
             return mapping.findForward("error");
         }
+        String lazy_start = (String) servlet.getServletContext().getAttribute(LASConfigPlugIn.LAS_LAZY_START_KEY);
+        if ( lazy_start != null && lazy_start.equals("true") ) {
+        	return mapping.findForward("lazy_start");
+        }
         // See if the server is being reinitialized.  If so, stop.
-        String lock = (String) servlet.getServletContext().getAttribute("lock");
+        String lock = (String) servlet.getServletContext().getAttribute(LASConfigPlugIn.LAS_LOCK_KEY);
         if ( lock != null && lock.equals("true") ) {
         	return mapping.findForward("maintenance");
         }
