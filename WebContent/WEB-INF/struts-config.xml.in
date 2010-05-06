@@ -47,6 +47,7 @@
 			<forward name="progress" path="/productserver/templates/progress.vm" redirect="false"/>
 			<forward name="info" path="/productserver/templates/info.vm" redirect="false"/>
 			<forward name="cancel" path="/productserver/templates/cancel.vm" redirect="false"/>
+			<forward name="ftds_down" path="/productserver/templates/ftds_down.vm" redirect="false"/>
 		  </action>
           <action path="/localGetMetadata" type="gov.noaa.pmel.tmap.las.ui.GetMetadata"/>
           <action path="/localGetViews" type="gov.noaa.pmel.tmap.las.ui.GetViews" />
@@ -72,8 +73,12 @@
 	          <forward name="progress" path="/productserver/templates/progress.vm" redirect="false" />
 	          <forward name="info" path="/productserver/templates/info.vm" redirect="false" />
 	          <forward name="cancel" path="/productserver/templates/cancel.vm" redirect="false" />
+	          <forward name="ftds_down" path="/productserver/templates/ftds_down.vm" redirect="false"/>
+	          <forward name="lazy_start" path="/productserver/templates/lazy_start.vm" redirect="false"/>
           </action>
-          
+          <action path="/getUI"  type="gov.noaa.pmel.tmap.las.ui.GetUI">
+	           <forward name="lazy_start" path="/productserver/templates/lazy_start.vm" redirect="false"/>
+	      </action>
           <action path="/getMetadata" type="gov.noaa.pmel.tmap.las.ui.GetMetadata"/>
           <action path="/resolveURL" type="gov.noaa.pmel.tmap.las.ui.ResolveURL"/>
           <action path="/getViews" type="gov.noaa.pmel.tmap.las.ui.GetViews" />
@@ -87,7 +92,6 @@
           <action path="/getRegions" type="gov.noaa.pmel.tmap.las.ui.GetRegions" />
           <action path="/getDataConstraints" type="gov.noaa.pmel.tmap.las.ui.GetDataConstraints" />
           <action path="/GEServer" type="gov.noaa.pmel.tmap.las.service.kml.GEServerAction"/>
-	      <action path="/getUI" type="org.apache.struts.actions.ForwardAction" parameter="/productserver/templates/V7UI.vm"/>
 	      <action path="/admin" type="org.apache.struts.actions.ForwardAction" parameter="/productserver/templates/admin.vm"/>
           <action path="/ReInit" type="gov.noaa.pmel.tmap.las.ui.ReInit">
               <forward name="reinit" path="/productserver/templates/reinit.vm"/>
@@ -106,7 +110,9 @@
           <!--  Not affected by confluence configuration... -->
           
           <action path="/GEServer" type="gov.noaa.pmel.tmap.las.service.kml.GEServerAction"/>
-	      <action path="/getUI" type="org.apache.struts.actions.ForwardAction" parameter="/productserver/templates/V7UI.vm"/>
+	       <action path="/getUI"  type="gov.noaa.pmel.tmap.las.ui.GetUI">
+	           <forward name="lazy_start" path="/productserver/templates/lazy_start.vm" redirect="false"/>
+	      </action>
 	      <action path="/admin" type="org.apache.struts.actions.ForwardAction" parameter="/productserver/templates/admin.vm"/>
           <action path="/ReInit" type="gov.noaa.pmel.tmap.las.ui.ReInit">
               <forward name="reinit" path="/productserver/templates/reinit.vm"/>
