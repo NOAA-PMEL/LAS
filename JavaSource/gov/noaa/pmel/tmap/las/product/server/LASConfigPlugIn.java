@@ -190,7 +190,7 @@ public class LASConfigPlugIn implements PlugIn {
 			throw new ServletException("No ui.xml file specified.");
 		}
 		reinit_flag = true;
-		init_thread.run();
+		init_thread.start();
 
 	}
 	public void go_init() throws JDOMException, UnsupportedEncodingException {
