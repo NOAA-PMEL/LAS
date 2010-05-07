@@ -244,7 +244,6 @@ public class FerretIOServiceProvider implements IOServiceProvider {
             String length = attribute_hash.get("length");
             String name = axisE.getAttributeValue("name");
             log.debug("Working on axis: "+name);
-            String axisType = axisE.getName();
 
             if ( length != null ) {
                 String dimS = length.trim();
@@ -258,7 +257,10 @@ public class FerretIOServiceProvider implements IOServiceProvider {
                 coord.setDimensions(dims);
                 coord.setDataType(DataType.DOUBLE);
                 // See comment about attributes below...
-                coord.addAttribute(new Attribute("dataset", axis_datasets.get(name)));
+                String datasetName = axis_datasets.get(name);
+                if  (datasetName != null ) {
+                    coord.addAttribute(new Attribute("dataset", datasetName));
+                }
                 
                 if ( attribute_hash != null && attribute_hash.size() > 1 ) {
                 	for (Iterator attIt = attribute_hash.keySet().iterator(); attIt
