@@ -192,7 +192,6 @@ public class LASConfigPlugIn implements PlugIn {
 		} catch (UnsupportedEncodingException e) {
 			log.error("Could not parse the las config file "+configFileName);
 		}
-		context.removeAttribute(LASConfigPlugIn.LAS_LAZY_START_KEY);
 	}
 	public void go_init() throws JDOMException, UnsupportedEncodingException {
 
