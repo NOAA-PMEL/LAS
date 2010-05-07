@@ -270,10 +270,7 @@ public class FerretIOServiceProvider implements IOServiceProvider {
             				double dvalue = Double.valueOf(value).doubleValue();
             				coord.addAttribute(new Attribute(aname, new Double(dvalue)));
             			} catch (NumberFormatException nfe) {
-            				// Ignore this attribute since it turns out it can be wrong for curvilinear data.
-            				if ( !aname.equals("direction") ) {
-            					coord.addAttribute(new Attribute(aname, value));
-            				}
+            				coord.addAttribute(new Attribute(aname, value));
             			}
 					}
 
