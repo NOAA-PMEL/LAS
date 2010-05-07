@@ -246,15 +246,6 @@ public class FerretIOServiceProvider implements IOServiceProvider {
             log.debug("Working on axis: "+name);
             String axisType = axisE.getName();
 
-			if ( axisType.equals("xaxis") ) {
-				directions.put(name, "I");
-			} else if ( axisType.equals("yaxis") ) {
-				directions.put(name, "J");
-			} else if ( axisType.equals("zaxis") ) {
-				directions.put(name, "K");
-			} else {
-				directions.put(name, "L");
-			}
             if ( length != null ) {
                 String dimS = length.trim();
                 Dimension dim = new Dimension(name, Integer.valueOf(dimS).intValue(), true);
@@ -274,7 +265,10 @@ public class FerretIOServiceProvider implements IOServiceProvider {
 							.hasNext();) {
 						String aname = (String) attIt.next();
 						String value = attribute_hash.get(aname).trim();
-											
+						
+						if ( aname.equals("direction") ) {
+            				directions.put(name, value);
+            			}			
             			try {
             				double dvalue = Double.valueOf(value).doubleValue();
             				coord.addAttribute(new Attribute(aname, new Double(dvalue)));
@@ -330,11 +324,22 @@ public class FerretIOServiceProvider implements IOServiceProvider {
                 for (Iterator axisIt = var_axes.iterator(); axisIt.hasNext();) {
                     Element axis = (Element) axisIt.next();
                     String axisName = axis.getTextNormalize();
+                    String axisType = axis.getName();
                     for (Iterator dimIt = allDims.iterator(); dimIt.hasNext();) {
                         Dimension dim = (Dimension) dimIt.next();
                         if ( dim.getName().equals(axisName) ) {
                             varDims.add(dim);
-                            direction = direction + directions.get(dim.getName());
+                            String direc = "";
+                            if (axisType.equals("xaxis") ) {
+                            	direc = "I";
+                            } else if ( axisType.equals("yaxis") ) {
+                            	direc = "J";
+                            } else if ( axisType.equals("zaxis") ) {
+                            	direc = "K";
+                            } else if ( axisType.equals("taxis") ) {
+                            	direc = "L";
+                            }
+                            direction = direction + direc;
                         }                     
                     }
                 }
