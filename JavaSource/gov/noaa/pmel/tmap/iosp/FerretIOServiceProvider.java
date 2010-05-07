@@ -426,12 +426,23 @@ public class FerretIOServiceProvider implements IOServiceProvider {
         					String direction = "";
         					for (Iterator axisIt = var_axes.iterator(); axisIt.hasNext();) {
         						Element axis = (Element) axisIt.next();
+        						String axisType = axis.getName();
         						String axisName = axis.getTextNormalize();
         						for (Iterator dimIt = allDims.iterator(); dimIt.hasNext();) {
         							Dimension dim = (Dimension) dimIt.next();
         							if ( dim.getName().equals(axisName) ) { 
         								varDims.add(dim);
-        								direction = direction + directions.get(dim.getName());
+        								String direc = "";
+        	                            if (axisType.equals("xaxis") ) {
+        	                            	direc = "I";
+        	                            } else if ( axisType.equals("yaxis") ) {
+        	                            	direc = "J";
+        	                            } else if ( axisType.equals("zaxis") ) {
+        	                            	direc = "K";
+        	                            } else if ( axisType.equals("taxis") ) {
+        	                            	direc = "L";
+        	                            }
+        	                            direction = direction + direc;
         							}
         						}
         					}
