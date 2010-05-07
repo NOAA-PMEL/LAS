@@ -216,7 +216,7 @@ public class FerretIOServiceProvider implements IOServiceProvider {
 
         // Keep a list of all the Dimensions created.
         ArrayList<Dimension> allDims = new ArrayList<Dimension>();
-        HashMap<String, String> directions = new HashMap<String, String>(); 
+       
         for (Iterator axisIt = axes.iterator(); axisIt.hasNext();) {
             Element axisE = (Element) axisIt.next();
             // Collect all the attributes in a HashMap
@@ -265,15 +265,15 @@ public class FerretIOServiceProvider implements IOServiceProvider {
 							.hasNext();) {
 						String aname = (String) attIt.next();
 						String value = attribute_hash.get(aname).trim();
-						
-						if ( aname.equals("direction") ) {
-            				directions.put(name, value);
-            			}			
+								
             			try {
             				double dvalue = Double.valueOf(value).doubleValue();
             				coord.addAttribute(new Attribute(aname, new Double(dvalue)));
             			} catch (NumberFormatException nfe) {
-            				coord.addAttribute(new Attribute(aname, value));
+            				// Ignore this attribute since it turns out it can be wrong for curvilinear data.
+            				if ( !aname.equals("direction") ) {
+            					coord.addAttribute(new Attribute(aname, value));
+            				}
             			}
 					}
 
