@@ -19,5 +19,6 @@ public class InitThread extends Thread {
 		} catch (ServletException e) {
 			log.error("Error in LAS init thread.");
 		}
+		context.removeAttribute(LASConfigPlugIn.LAS_LAZY_START_KEY);
 	}
 }
