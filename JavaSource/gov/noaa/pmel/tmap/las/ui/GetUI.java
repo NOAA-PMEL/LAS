@@ -6,6 +6,7 @@ package gov.noaa.pmel.tmap.las.ui;
 
 import gov.noaa.pmel.tmap.las.exception.LASException;
 import gov.noaa.pmel.tmap.las.jdom.LASConfig;
+import gov.noaa.pmel.tmap.las.product.server.InitThread;
 import gov.noaa.pmel.tmap.las.product.server.LASConfigPlugIn;
 import gov.noaa.pmel.tmap.las.util.Arange;
 import gov.noaa.pmel.tmap.las.util.Axis;
@@ -61,10 +62,9 @@ public class GetUI extends ConfigService {
     	ServletContext context = (ServletContext) servlet.getServletContext();
         String lazy_start = (String) context.getAttribute(LASConfigPlugIn.LAS_LAZY_START_KEY);
         if ( lazy_start != null && lazy_start.equals("true") ) {
-        	// forward to lazy start page
-        	context.removeAttribute(LASConfigPlugIn.LAS_LAZY_START_KEY);
-        	LASConfigPlugIn plugin = new LASConfigPlugIn();
-        	plugin.reinit(context);
+        	// Start the initialization and forward to lazy start page
+        	InitThread thread = new InitThread(context);
+        	thread.start();
         	return mapping.findForward("lazy_start");
         } else {
         	// forward to the UI
