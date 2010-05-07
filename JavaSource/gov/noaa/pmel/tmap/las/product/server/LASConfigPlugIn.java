@@ -151,20 +151,15 @@ public class LASConfigPlugIn implements PlugIn {
 		}
 
 		reinit_flag = false;
-		init_thread.run();
-	}
-	public Thread init_thread = new Thread() {
-		@Override
-		public void run() {
-			try {
-				go_init();
-			} catch (JDOMException e) {
-				log.error("Could not parse the las config file "+configFileName);
-			} catch (UnsupportedEncodingException e) {
-				log.error("Could not parse the las config file "+configFileName);
-			}
+		try {
+			go_init();
+		} catch (JDOMException e) {
+			log.error("Could not parse the las config file "+configFileName);
+		} catch (UnsupportedEncodingException e) {
+			log.error("Could not parse the las config file "+configFileName);
 		}
-	};
+	}
+	
 	public void reinit(ServletContext reinitContext) throws ServletException {
 		context = reinitContext;
 		configFileName = (String) reinitContext.getAttribute(LAS_CONFIG_FILENAME_KEY);
@@ -190,8 +185,14 @@ public class LASConfigPlugIn implements PlugIn {
 			throw new ServletException("No ui.xml file specified.");
 		}
 		reinit_flag = true;
-		init_thread.start();
-
+		try {
+			go_init();
+		} catch (JDOMException e) {
+			log.error("Could not parse the las config file "+configFileName);
+		} catch (UnsupportedEncodingException e) {
+			log.error("Could not parse the las config file "+configFileName);
+		}
+		context.removeAttribute(LASConfigPlugIn.LAS_LAZY_START_KEY);
 	}
 	public void go_init() throws JDOMException, UnsupportedEncodingException {
 
