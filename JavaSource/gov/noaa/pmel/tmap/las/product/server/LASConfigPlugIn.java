@@ -246,7 +246,7 @@ public class LASConfigPlugIn implements PlugIn {
 		if ( lazy_start != null && lazy_start.equals("true") ) {
 			context.setAttribute(LAS_LAZY_START_KEY, "true");
 		} else {
-			context.setAttribute(LAS_LAZY_START_KEY, "false");
+			
 			boolean seven = false;
 			if ( version != null && version.contains("7.")) {
 				seven = true;
