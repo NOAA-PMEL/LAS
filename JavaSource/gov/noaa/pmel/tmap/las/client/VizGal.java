@@ -1,19 +1,13 @@
 package gov.noaa.pmel.tmap.las.client;
 
 import gov.noaa.pmel.tmap.las.client.laswidget.AxesWidgetGroup;
-import gov.noaa.pmel.tmap.las.client.laswidget.AxisWidget;
 import gov.noaa.pmel.tmap.las.client.laswidget.ComparisonAxisSelector;
 import gov.noaa.pmel.tmap.las.client.laswidget.DatasetButton;
-import gov.noaa.pmel.tmap.las.client.laswidget.DateTimeWidget;
-import gov.noaa.pmel.tmap.las.client.laswidget.LASDecoratorPanel;
 import gov.noaa.pmel.tmap.las.client.laswidget.OperationRadioButton;
 import gov.noaa.pmel.tmap.las.client.laswidget.OperationsWidget;
 import gov.noaa.pmel.tmap.las.client.laswidget.OptionsButton;
-import gov.noaa.pmel.tmap.las.client.laswidget.SettingsWidget;
-import gov.noaa.pmel.tmap.las.client.serializable.AxisSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.CategorySerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.GridSerializable;
-import gov.noaa.pmel.tmap.las.client.serializable.TimeAxisSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.VariableSerializable;
 import gov.noaa.pmel.tmap.las.client.util.Constants;
 import gov.noaa.pmel.tmap.las.client.util.Util;
@@ -26,11 +20,14 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.gwt.core.client.EntryPoint;
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.logical.shared.CloseEvent;
+import com.google.gwt.event.logical.shared.CloseHandler;
+import com.google.gwt.event.logical.shared.OpenEvent;
+import com.google.gwt.event.logical.shared.OpenHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.History;
@@ -42,18 +39,16 @@ import com.google.gwt.user.client.ui.ClickListener;
 import com.google.gwt.user.client.ui.DisclosurePanel;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.Grid;
-import com.google.gwt.user.client.ui.HasVerticalAlignment;
-import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
-import com.google.gwt.user.client.ui.PushButton;
-import com.google.gwt.user.client.ui.RootPanel;
+import com.google.gwt.user.client.ui.RootLayoutPanel;
+import com.google.gwt.user.client.ui.SplitLayoutPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.ToggleButton;
 import com.google.gwt.user.client.ui.TreeItem;
 import com.google.gwt.user.client.ui.TreeListener;
 import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.user.client.ui.HTMLTable.CellFormatter;
+import com.google.gwt.user.client.ui.FlexTable.FlexCellFormatter;
 
 /**
  * A UI widget with one or more panels containing an LAS product with widgets to interact with the specifications of the products.
@@ -61,7 +56,7 @@ import com.google.gwt.user.client.ui.HTMLTable.CellFormatter;
  *
  */
 public class VizGal implements EntryPoint {
-
+    
 	/*
 	 * This is a hack for right now, but we are going to define two default operations.
 	 */
@@ -105,11 +100,6 @@ public class VizGal implements EntryPoint {
 	String fixedAxis;
 
 	/*
-	 * A header row with some widgets.
-	 */
-	Grid header;
-
-	/*
 	 * The slide sorter grid.
 	 */
 	Grid slides;
@@ -117,8 +107,8 @@ public class VizGal implements EntryPoint {
 	/*
 	 * The container for the slides and controls.
 	 */
-	Grid mainPanel;
-	CellFormatter cellFormatter;
+	SplitLayoutPanel mainPanel;
+	FlexCellFormatter cellFormatter;
 
 	/*
 	 * Button to make slide sorter compute differences
@@ -147,6 +137,7 @@ public class VizGal implements EntryPoint {
 	DatasetButton datasetButton;
 	OptionsButton optionsButton; 
 	FlexTable buttonLayout;
+	FlexCellFormatter buttonFormatter;
 		
     AxesWidgetGroup axesWidget;
     ComparisonAxisSelector comparisonAxesSelector;
@@ -154,9 +145,13 @@ public class VizGal implements EntryPoint {
    
     FlexTable settingsControls;
     
-    DisclosurePanel operationsPanel;
+    
+    DisclosurePanel settingsHeader = new DisclosurePanel("Settings");
+
+    
     boolean operationsPanelIsOpen = true;
 
+    boolean panelHeaderHidden = false;
 	/*
 	 * The currently selected variable.
 	 */
@@ -184,14 +179,6 @@ public class VizGal implements EntryPoint {
 	VariableSerializable nvar;
 	boolean changeDataset = false;
 	
-
-	/*
-	 * Button for showing and hiding the panel headers.
-	 */
-	ToggleButton showHide;
-	Image minus;
-	Image plus;
-	boolean panelHeaderHidden;
 
 	/*
 	 * Image size control.
@@ -244,33 +231,16 @@ public class VizGal implements EntryPoint {
 		// TODO make the gallery size changeable somehow...
 		slides = new Grid(2,2);
 
-		// A strip across the top with some of the gallery controls...
-		header = new Grid(1, 10);
-
-		// Control whether the headers are hidden.
-		panelHeaderHidden = false;
-		plus = new Image(GWT.getModuleBaseURL()+"../images/plus_on.png");
-		minus = new Image(GWT.getModuleBaseURL()+"../images/minus_on.png");
-		showHide = new ToggleButton(plus, minus, new ClickHandler() {
-			@Override
-			public void onClick(ClickEvent event) {
-				// Handle the change by passing in the current state.
-				handlePanelShowHide();				
-			}	
-		});
-		header.setWidget(0, 0, showHide);
 		
-		showHide.setTitle("Show/Hide Panel Headers");
-        showHide.setStylePrimaryName("OL_MAP-ToggleButton");
 		// Button to turn on and off difference mode.
 		differenceButton = new ToggleButton("Difference Mode");
 		differenceButton.setTitle("Toggle Difference Mode");
 		differenceButton.addClickListener(differencesClick);
-		header.setWidget(0, 1, differenceButton);
 
 		// This is a control panel that will control the settings for all the panels and it appears vertically on the left side.
 		
 	    buttonLayout = new FlexTable();
+	    buttonFormatter = buttonLayout.getFlexCellFormatter();
 	    datasetButton = new DatasetButton();
 	    datasetButton.addTreeListener(datasetTreeListener);
 	    // This is all to get around the fact that the OpenLayers map is always in front.
@@ -282,8 +252,12 @@ public class VizGal implements EntryPoint {
 		
 		buttonLayout.setWidget(0, 0, datasetButton);
 		buttonLayout.setWidget(0, 1, optionsButton);
+		buttonFormatter.setColSpan(1, 0, 2);
 		
-		axesWidget = new AxesWidgetGroup("Plot Axes", "Fixed Axes", "vertical", settingsWidth, "ApplyTo_gallery");
+		differenceButton.setWidth("95px");
+		buttonLayout.setWidget(1, 0, differenceButton);
+		
+		axesWidget = new AxesWidgetGroup("Plot Axes", "Comparison Axes", "vertical", settingsWidth, "ApplyTo_gallery");
 		axesWidget.addApplyHandler(settingsButtonApplyHandler);
 		// Comparison Axes Selector
 		comparisonAxesSelector = new ComparisonAxisSelector(settingsWidth);
@@ -291,26 +265,40 @@ public class VizGal implements EntryPoint {
 		
 		operationsWidget = new OperationsWidget("Operations");
 		operationsWidget.addClickHandler(operationsClickHandler);
-		operationsPanel = new DisclosurePanel("Plots");
-		operationsPanel.add(operationsWidget);
-		operationsPanel.setOpen(true);
-		operationsPanel.setWidth(settingsWidth);
 		
-		settingsControls = new FlexTable();
-		settingsControls.setHTML(0, 0, "Settings for all Panels");
-		settingsControls.setWidget(1, 0, buttonLayout);
-		settingsControls.setWidget(2, 0, axesWidget);
-		settingsControls.setWidget(3, 0, comparisonAxesSelector);
-		settingsControls.setWidget(4, 0, operationsPanel);
-		
+		settingsHeader.addCloseHandler(new CloseHandler<DisclosurePanel> () {
 
+			@Override
+			public void onClose(CloseEvent<DisclosurePanel> event) {
+				operationsWidget.setOpen(false);
+				comparisonAxesSelector.setOpen(false);
+				axesWidget.setOpen(false);
+			}
+			
+		});
+		settingsHeader.addOpenHandler(new OpenHandler<DisclosurePanel>() {
+
+			@Override
+			public void onOpen(OpenEvent<DisclosurePanel> arg0) {
+				operationsWidget.setOpen(true);
+				comparisonAxesSelector.setOpen(true);
+				axesWidget.setOpen(true);
+			}
+			
+		});
+		
+		settingsHeader.setOpen(true);
+		
+		
+		
 		// Sets the contour levels for all plots based on the global min/max of the data (as returned in the map scale file).
-		autoContourButton = new ToggleButton("Auto Set Color Fill Levels for Gallery");
+		autoContourButton = new ToggleButton("Auto Colors");
 		autoContourButton.setTitle("Set consistent contour levels for all panels.");
 		autoContourButton.addClickListener(autoContour);
-		header.setWidget(0, 4, autoContourButton);
+		
+		buttonLayout.setWidget(2, 0, autoContourButton);
 		autoContourTextBox = new TextBox();
-		header.setWidget(0, 5, autoContourTextBox);
+		buttonLayout.setWidget(2, 1, autoContourTextBox);
 
 		/*
 		 * Control widget that sets the sizing of the image in the panel.
@@ -358,8 +346,11 @@ public class VizGal implements EntryPoint {
 				}
 			}		
 		});
-		header.setWidget(0, 6, imageSizeLabel);
-		header.setWidget(0, 7, imageSize);
+		
+		
+		buttonLayout.setWidget(3, 0, imageSizeLabel);
+		buttonLayout.setWidget(3, 1, imageSize);
+		
 
 		// Initialize the gallery with an asynchronous call to the server to get variable needed.
 		if ( dsid != null && vid != null & op != null && view != null) {
@@ -367,19 +358,31 @@ public class VizGal implements EntryPoint {
 			// and initialize the slide sorter with this Ajax call.
 			Util.getRPCService().getVariable(dsid, vid, requestGrid);
 		}
+        settingsHeader.add(buttonLayout);
+		settingsControls = new FlexTable();
+		settingsControls.setWidget(0, 0, settingsHeader);
+		
+		
+		settingsControls.setWidget(1, 0, operationsWidget);
+		settingsControls.setWidget(2, 0, comparisonAxesSelector);
+		settingsControls.setWidget(3, 0, axesWidget);
 
+		mainPanel = new SplitLayoutPanel();
+		
+//		cellFormatter = mainPanel.getFlexCellFormatter();
+//		cellFormatter.setVerticalAlignment(0, 0, HasVerticalAlignment.ALIGN_TOP);
+//		cellFormatter.setVerticalAlignment(0, 1, HasVerticalAlignment.ALIGN_TOP);
+		
+		
+		mainPanel.addWest(settingsControls, controlsWidth);
+		mainPanel.add(slides);
+		
 
-		mainPanel = new Grid(1, 2);
-		mainPanel.setWidget(0,0,settingsControls);
-		mainPanel.setWidget(0,1, slides);
-		cellFormatter = mainPanel.getCellFormatter();
-		// Float the controls and the panels to the top of their respective cells
-		cellFormatter.setVerticalAlignment(0, 0, HasVerticalAlignment.ALIGN_TOP);
-		cellFormatter.setVerticalAlignment(0, 1, HasVerticalAlignment.ALIGN_TOP);
-		cellFormatter.setWidth(0, 0 ,settingsWidth);
-
-		RootPanel.get("header").add(header);
-		RootPanel.get("slides").add(mainPanel);
+		
+		RootLayoutPanel rp = RootLayoutPanel.get();
+		rp.add(mainPanel);
+//		RootPanel.get("header").add(header);
+//		RootPanel.get("slides").add(mainPanel);
 		
 		Window.addWindowResizeListener(windowResizeListener);
 		History.addValueChangeHandler(new ValueChangeHandler<String>() {
@@ -390,27 +393,27 @@ public class VizGal implements EntryPoint {
 		});
 	}
 	
-	public void handlePanelShowHide() {
-		if ( panelHeaderHidden ) {
-			for (Iterator panelIt = panels.iterator(); panelIt.hasNext();) {
-				VizGalPanel panel = (VizGalPanel) panelIt.next();
-				panel.show();
-			}
-			cellFormatter.setVisible(0, 0, true);
-			pwidth = pwidth - controlsWidth/2;
-			resize();
-		} else {
-			for (Iterator panelIt = panels.iterator(); panelIt.hasNext();) {
-				VizGalPanel panel = (VizGalPanel) panelIt.next();
-				panel.hide();
-			}
-			cellFormatter.setVisible(0, 0, false);
-			pwidth = pwidth + controlsWidth/2;
-			resize();
-		}
-		panelHeaderHidden = !panelHeaderHidden;
-		pushHistory();
-	}
+//	public void handlePanelShowHide() {
+//		if ( panelHeaderHidden ) {
+//			for (Iterator panelIt = panels.iterator(); panelIt.hasNext();) {
+//				VizGalPanel panel = (VizGalPanel) panelIt.next();
+//				panel.show();
+//			}
+//			cellFormatter.setVisible(0, 0, true);
+//			pwidth = pwidth - controlsWidth/2;
+//			resize();
+//		} else {
+//			for (Iterator panelIt = panels.iterator(); panelIt.hasNext();) {
+//				VizGalPanel panel = (VizGalPanel) panelIt.next();
+//				panel.hide();
+//			}
+//			cellFormatter.setVisible(0, 0, false);
+//			pwidth = pwidth + controlsWidth/2;
+//			resize();
+//		}
+//		panelHeaderHidden = !panelHeaderHidden;
+//		pushHistory();
+//	}
 	
 	private String getAnchor() {
 		String url = Window.Location.getHref();
@@ -537,6 +540,7 @@ public class VizGal implements EntryPoint {
 	};
 	public WindowResizeListener windowResizeListener = new WindowResizeListener() {
 		public void onWindowResized(int width, int height) {
+			mainPanel.getLayoutData();
 			if ( panelHeaderHidden ) {
 				pwidth = (width - rightPad)/2;
 			} else {
@@ -1384,7 +1388,7 @@ public class VizGal implements EntryPoint {
 		// Only use 4 significant digits
 
 		// Modify the optionTextField and submit the request
-		String fill_levels = "(" + uminr + "," + umaxr + "," + dint + ")";
+		String fill_levels = "(-inf)(" + uminr + "," + umaxr + "," + dint + ")(inf)";
 
 		// These are pretty close to zero.  I think the min/max did not come back from the server, so stop
 		if ( (uminr + .00001 < .0001 && umaxr + .00001 < .0001) || globalMax < -9999999. && globalMin > 9999999. ) {
@@ -1613,7 +1617,7 @@ public class VizGal implements EntryPoint {
 			boolean new_panelHeaderHidden = Boolean.valueOf(tokenMap.get("panelHeaderHidden")).booleanValue();
 			if ( new_panelHeaderHidden != panelHeaderHidden ) {
 				// If the new state should be different, handle it.  Otherwise ignore it.
-				handlePanelShowHide();
+				//handlePanelShowHide();
 			}
 		}
 		if ( tokenMap.containsKey("differences") ) {
@@ -1670,8 +1674,8 @@ public class VizGal implements EntryPoint {
 		public void onClick(ClickEvent arg0) {
 			
 			axesWidget.closePanels();
-			operationsPanelIsOpen = operationsPanel.isOpen();
-			operationsPanel.setOpen(false);
+			operationsPanelIsOpen = operationsWidget.isOpen();
+			operationsWidget.setOpen(false);
 			
 		}
 		
@@ -1682,7 +1686,7 @@ public class VizGal implements EntryPoint {
 		public void onClick(ClickEvent arg0) {
 			
 			axesWidget.restorePanels();
-			operationsPanel.setOpen(operationsPanelIsOpen);
+			operationsWidget.setOpen(operationsPanelIsOpen);
 		}
 		
 		
