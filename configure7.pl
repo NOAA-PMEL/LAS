@@ -74,8 +74,8 @@ while (! $java){
             my $vstring = $pieces[$#pieces];
             $vstring =~ s/\"//g;
             my ($major,$minor) = split(/\./, $vstring);
-            if ($major < 2 && $minor < 4){
-                print "Java version is $vstring. Must have at least 1.4\n";
+            if ($major < 2 && $minor < 6){
+                print "Java version is $vstring. Must have at least 1.6\n";
             } else {
                 $isJava = 1;
             }
@@ -112,7 +112,7 @@ while (! $ferret){
         my $isFerret = 0;
         my $testres = `echo exit | $ferret -nojnl`;
         my @lines = split /^/m, $testres;
-        my $ferretVersion = "6.1";
+        my $ferretVersion = "6.5";
         foreach my $line (@lines){
             my @words = split(/\s+/,$line);
             if ($words[1] =~ /Version|FERRET/){
@@ -134,6 +134,30 @@ while (! $ferret){
         }
     }
 }
+print "\n\n";
+
+my $autotds4 = $LasConfig{autotds4};
+if (! $autotds4){
+   $autotds4 = "yes";
+}
+
+while (! $tds4){
+    print "Do you have a copy of TDS 4 installed?: [$autotds4] ";
+    $tds4 = <STDIN>;
+    chomp $tds4;
+    $tds4 = $autotds4 if ! $tds4;
+    if ($tds4 ne "yes" && $tds4 ne "no") {
+        print "You must answer 'yes' or 'no'.\n";
+        $tds4 = undef;
+    }
+}
+if ( $tds4 eq "no" ) {
+                    print "\nYou need to upgrade TDS.\n";
+                    print "You need to be using TDS version 4.x.\n\n";
+                    exit 1;
+}
+
+print "\n\n";
 
 # Make a dummy properties file so the redirect filter can start
 my $classesDir = "WebContent/WEB-INF/classes";
@@ -200,11 +224,12 @@ $jakarta_home = getAnswer("Full path of Tomcat JAKARTA_HOME directory where you 
 $LasConfig{jakarta_home} = $jakarta_home;
 $LasConfig{webapps}="$jakarta_home/webapps";
 my $jakarta_lib;
-if (-d "$jakarta_home/common/lib" ) {
+if ( -d "$jakarta_home/common/lib" ) {
    $jakarta_lib = "$jakarta_home/common/lib";
 } else {
    $jakarta_lib = "$jakarta_home/lib";
 }
+
 my $appname = $LasConfig{uipath};
 $appname =~ s/\///g;
 $LasConfig{appname} = $appname;
@@ -328,7 +353,7 @@ if ($LasConfig{proxy} eq "yes") {
 #
 my $tds_temp;
 my $autotds_temp = $LasConfig{tds_temp};
-$autotds_temp = $ENV{PWD}."/conf/server/temp" if ! $autotds_temp;
+$autotds_temp = &Cwd::cwd()."/conf/server/temp" if ! $autotds_temp;
 
 print "The TDS you installed will be used by LAS to regrid data as needed to make comparisons.\n";
 print "During this process the Ferret IOSP will write lots of temporary files.\n";
@@ -349,7 +374,7 @@ $LasConfig{tds_temp} = $tds_temp;
 
 # Get the data dir.
 my $autotds_data = $LasConfig{tds_data};
-$autotds_data = $ENV{PWD}."/conf/server/data" if ! $autotds_data;
+$autotds_data = &Cwd::cwd()."/conf/server/data" if ! $autotds_data;
 
 print "In the installation installation instructions you were asked to configure TDS\n";
 print "with a datascan directory to be used by LAS.\n";
@@ -411,6 +436,7 @@ foreach my $script (@Scripts){
     my $cplinclude = "";
     $cplinclude = "$cust_name" if $cust_name;
     my $java_home = dirname(dirname($java));
+    my $cdir = &Cwd::cwd();
     while (<INSCRIPT>){
         s/\@JAKARTA_HOME\@/$jakarta_home/g;
         s/\@JAKARTA_LIB\@/$jakarta_lib/g;
@@ -436,7 +462,7 @@ foreach my $script (@Scripts){
         s/\@TDS_DATA\@/$LasConfig{tds_data}/g;
         s/\@TDS_DYNADATA\@/$LasConfig{tds_dynadata}/g;
         s/\@TDS_TEMP\@/$LasConfig{tds_temp}/g;
-        s/\@PWD\@/$ENV{PWD}/g;
+        s/\@PWD\@/$cdir/g;
         print OUTSCRIPT $_;
     }
     close INSCRIPT;
@@ -488,12 +514,11 @@ EOF
 
 if ( getYesOrNo("Do you want to install the example data set configuration") ) {
 
-     my $serverConf = "conf/server";
-     if ( !(-d $serverConf) ) {
-        &File::Path::mkpath($serverConf);
-        print "Creating the $serverConf directory.\n";
-     }
-
+    my $serverConf = "conf/server";
+    if ( !(-d $serverConf) ) {
+       &File::Path::mkpath($serverConf);
+       print "Creating the $serverConf directory.\n";
+    }
 
     my @sample_in = ();
     my @sample_out = ();
@@ -684,7 +709,7 @@ print SCRIPT_OUT <<EOL3;
 #
 
 # Attempt to shutdown the server gracefully.
-$ENV{PWD}/stopserver.sh
+&Cwd::cwd()/stopserver.sh
 
 # Wait to let things shutdown.
 sleep 5
@@ -701,7 +726,7 @@ STATUS=$?
  fi
 
 # Start the server again.  Answer the question 'yes' if necessary.
-$ENV{PWD}/startserver.sh
+&Cwd::cwd()/startserver.sh
 EOL3
 
 close SCRIPT_OUT;
@@ -764,7 +789,7 @@ sub printENV($ferretConfig, @EnvVars) {
             } elsif ($var =~ /FER_DESCR/){
                 $ENV{$var} = "des " . $ENV{$var};
             } elsif ($var =~ /DODS_CONF/){
-                $ENV{$var} = "$ENV{PWD}/conf/server/dods/.dodsrc";
+                $ENV{$var} = &Cwd::cwd()."/conf/server/dods/.dodsrc";
             }
 
             my @values = split(' ',$ENV{$var});
