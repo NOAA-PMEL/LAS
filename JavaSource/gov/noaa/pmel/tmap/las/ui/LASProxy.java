@@ -13,6 +13,7 @@ import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.methods.GetMethod;
+import org.apache.commons.httpclient.params.HttpClientParams;
 import org.apache.commons.httpclient.params.HttpMethodParams;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
@@ -102,7 +103,9 @@ public class LASProxy {
 		HttpClient client = new HttpClient();
 
 		GetMethod method = new GetMethod(request);
-
+		HttpClientParams params = client.getParams();
+		params.setParameter(HttpClientParams.ALLOW_CIRCULAR_REDIRECTS,Boolean.TRUE);
+		client.setParams(params);
 		method.getParams().setParameter(HttpMethodParams.RETRY_HANDLER, new DefaultHttpMethodRetryHandler(3, false));
 
 		try {
