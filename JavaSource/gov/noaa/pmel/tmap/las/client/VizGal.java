@@ -544,7 +544,7 @@ public class VizGal implements EntryPoint {
 	};
 	public WindowResizeListener windowResizeListener = new WindowResizeListener() {
 		public void onWindowResized(int width, int height) {
-			mainPanel.getLayoutData();
+			
 			if ( panelHeaderHidden ) {
 				pwidth = (width - rightPad)/2;
 			} else {
