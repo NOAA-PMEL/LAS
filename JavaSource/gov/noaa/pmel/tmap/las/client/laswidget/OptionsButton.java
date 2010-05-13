@@ -22,6 +22,7 @@ public class OptionsButton extends Composite {
     	this.offset = offset;
     	options = new OptionsWidget(opid, okClick, cancelClick);
     	optionsButton.addClickListener(openClick);
+    	optionsButton.setWidth("75px");
     	optionsDialog.add(options);
     	optionsDialog.setText("Set Plot Options for all Plots.");
     	initWidget(optionsButton);
