@@ -8,6 +8,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.DecoratorPanel;
 import com.google.gwt.user.client.ui.DisclosurePanel;
 import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
@@ -17,20 +18,23 @@ import com.google.gwt.user.client.ui.FlexTable.FlexCellFormatter;
 
 
 public class ComparisonAxisSelector extends Composite {
+	FlexTable flex;
 	ListBox axes;
 	DisclosurePanel disPanel;
 	public ComparisonAxisSelector(String width) {
 
 		axes = new ListBox();
-		
-		
-		disPanel = new DisclosurePanel("Axis to vary in panels");
-		disPanel.add(axes);
+		flex = new FlexTable();
+		HTML html = new HTML("Axis: ");
+		flex.setWidget(0, 0, html);
+		flex.setWidget(0, 1, axes);
+		disPanel = new DisclosurePanel("Compare");
+		disPanel.add(flex);
 		disPanel.setOpen(true);
 		
-		if ( width != null && !width.equals("") ) {
-		    disPanel.setWidth(width);
-		}
+//		if ( width != null && !width.equals("") ) {
+//		    disPanel.setWidth(width);
+//		}
 		initWidget(disPanel);
 	}
 	public void setAxes(List<String> ortho) {		
@@ -70,6 +74,9 @@ public class ComparisonAxisSelector extends Composite {
 	}
 	public void addAxesChangeHandler(ChangeHandler compareAxisChangeHandler) {
 		axes.addChangeHandler(compareAxisChangeHandler);	
+	}
+	public void setOpen(boolean open) {
+		disPanel.setOpen(open);
 	}
 
 }

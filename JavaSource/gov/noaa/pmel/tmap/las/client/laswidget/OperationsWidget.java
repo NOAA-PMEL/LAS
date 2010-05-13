@@ -12,16 +12,30 @@ import java.util.Map;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.ClickListener;
+import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.DisclosurePanel;
+import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.StackPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
-public class OperationsWidget extends StackPanel {
-	VerticalPanel xyMap = new VerticalPanel();
-	VerticalPanel linePlots = new VerticalPanel();
-	VerticalPanel sectionPlots = new VerticalPanel();
-	VerticalPanel hofmullerPlots = new VerticalPanel();
+public class OperationsWidget extends Composite {
+    boolean isOpen;
+	FlexTable layout = new FlexTable();
+	DisclosurePanel xyMap = new DisclosurePanel("Maps");
+	FlexTable xyMapTable = new FlexTable();
+	DisclosurePanel linePlots = new DisclosurePanel("Line Plots");
+	FlexTable linePlotsTable = new FlexTable();
+	DisclosurePanel sectionPlots = new DisclosurePanel("Vertical Section Plots");
+	FlexTable sectionPlotsTable = new FlexTable();
+	DisclosurePanel hofmullerPlots = new DisclosurePanel("Hofmuller Plots");
+	FlexTable hofmullerPlotsTable = new FlexTable();
+	
+	int xyMapRow = 0;
+	int linePlotsRow = 0;
+	int sectionPlotsRow = 0;
+	int hofmullerPlotsRow = 0;
 	
 	boolean hasXYMap = false;
 	boolean hasLinePlots = false;
@@ -50,24 +64,9 @@ public class OperationsWidget extends StackPanel {
 	 * Set up the StackPanel and the associated RPC.
 	 */
 	public OperationsWidget(String groupName) {
-		super();
-		
 		this.groupName = groupName;
-		
-		xyMap.add(new Label("Select a variable..."));
-		add(xyMap, "Maps");
-		
-		linePlots.add(new Label("Select a variable..."));
-		add(linePlots, "Line Plots");
-		
-		sectionPlots.add(new Label("Select a variable..."));
-		add(sectionPlots, "Vertical Section Plots");
-		
-		hofmullerPlots.add(new Label("Select a variable..."));
-		add(hofmullerPlots, "Hofmuller Plots");
-		
-		setSize("256px", "200px");
-		
+		layout.setWidth("256px");
+	    initWidget(layout);
 	}
 	public void setOperations(String intervals, String dsID, String varID, String opID, String view) {
 		
@@ -105,16 +104,21 @@ public class OperationsWidget extends StackPanel {
 		}
 	}
 	private void setOps() {
+		isOpen = true;
 		hasHofmullerPlots = false;
 		hasLinePlots = false;
 		hasSectionPlots = false;
 		hasXYMap = false;
-		
+		layout.clear();
 		buttons.clear();
 		xyMap.clear();
 		linePlots.clear();
 		sectionPlots.clear();
 		hofmullerPlots.clear();
+		xyMapRow = 0;
+		linePlotsRow = 0;
+		sectionPlotsRow = 0;
+		hofmullerPlotsRow = 0;
 		for (int i = 0; i < ops.length; i++) {
 			OperationSerializable op = ops[i];
 			String category = op.getAttributes().get("category");
@@ -129,7 +133,7 @@ public class OperationsWidget extends StackPanel {
 						if ( (attrs != null && attrs.containsKey("default") && !op.getID().equals("XY_zoomable_image"))|| op.getID().equals("Plot_2D_XY")) {
 							if ( view.equals("xy") && (intervals.contains("x") && intervals.contains("y"))) {	
 								if (!hasXYMap) {
-									xyMap.clear();
+									xyMapTable.clear();
 									hasXYMap = true;
 								}
 								OperationRadioButton button = new OperationRadioButton(groupName, "Latitude-Longitude");
@@ -140,10 +144,11 @@ public class OperationsWidget extends StackPanel {
 								buttons.add(button);
 								currentOp = button.getOperation();
 								currentView = "xy";
-								xyMap.add(button);
+								xyMapTable.setWidget(xyMapRow, 0, button);
+								xyMapRow++;
 							} else if ( (view.equals("x") && intervals.contains("x")) || (view.equals("y") && intervals.contains("y")) || (view.equals("z") && intervals.contains("z")) || (view.equals("t") && intervals.contains("t")) ) {
 								if ( !hasLinePlots ) {
-									linePlots.clear();
+									linePlotsTable.clear();
 									hasLinePlots = true;
 								}
 								OperationRadioButton button;
@@ -162,11 +167,12 @@ public class OperationsWidget extends StackPanel {
 								button.setOperation(op);
 								button.addClickListener(buttonListener);
 								buttons.add(button);
-								linePlots.add(button);
+								linePlotsTable.setWidget(linePlotsRow, 0, button);
+								linePlotsRow++;
 							} else if ( (view.equals("xz") && intervals.contains("x") && intervals.contains("z") )|| 
 									    (view.equals("yz") && intervals.contains("y") && intervals.contains("z") )) {
 								if ( !hasSectionPlots ) {
-									sectionPlots.clear();
+									sectionPlotsTable.clear();
 									hasSectionPlots = true;
 								}
 								OperationRadioButton button;
@@ -180,12 +186,13 @@ public class OperationsWidget extends StackPanel {
 								button.setView(view);
 								button.addClickListener(buttonListener);
 								buttons.add(button);
-								sectionPlots.add(button);
+								sectionPlotsTable.setWidget(sectionPlotsRow, 0, button);
+								sectionPlotsRow++;
 							} else if ( (view.equals("xt") && intervals.contains("x") && intervals.contains("t") ) || 
 									    (view.equals("yt") && intervals.contains("y") && intervals.contains("t") ) || 
 									    (view.equals("zt") && intervals.contains("z") && intervals.contains("t") ) ) {
 								if ( !hasHofmullerPlots ) {
-									hofmullerPlots.clear();
+									hofmullerPlotsTable.clear();
 									hasHofmullerPlots = true;
 								}
 								OperationRadioButton button;
@@ -200,12 +207,37 @@ public class OperationsWidget extends StackPanel {
 								button.setOperation(op);
 								button.addClickListener(buttonListener);
 								buttons.add(button);
-								hofmullerPlots.add(button);
+								hofmullerPlotsTable.setWidget(hofmullerPlotsRow, 0, button);
+								hofmullerPlotsRow++;
 							}
 						}
 					}
 				}
 			}
+		}
+		int row = 0;
+		if ( hasXYMap ) {
+			xyMap.add(xyMapTable);
+			layout.setWidget(row, 0, xyMap);
+			xyMap.setOpen(true);
+			row++;
+		}
+		if ( hasLinePlots ) {
+			linePlots.add(linePlotsTable);
+			layout.setWidget(row, 0, linePlots);
+			linePlots.setOpen(true);
+			row++;
+		}
+		if ( hasSectionPlots ) {
+			sectionPlots.add(sectionPlotsTable);
+			layout.setWidget(row, 0, sectionPlots);
+			sectionPlots.setOpen(true);
+			row++;
+		}
+		if ( hasHofmullerPlots ) {
+			hofmullerPlots.add(hofmullerPlotsTable);
+			layout.setWidget(row, 0, hofmullerPlots);
+			hofmullerPlots.setOpen(true);
 		}
 		for (Iterator clickIt = clicks.iterator(); clickIt.hasNext();) {
 			ClickHandler click = (ClickHandler) clickIt.next();
@@ -245,6 +277,15 @@ public class OperationsWidget extends StackPanel {
 				button.setChecked(false);
 			}
 		}
-		
+	}
+	public void setOpen(boolean open) {
+		isOpen = open;
+		xyMap.setOpen(open);
+		linePlots.setOpen(open);
+		sectionPlots.setOpen(open);
+		hofmullerPlots.setOpen(open);
+	}
+	public boolean isOpen() {
+		return isOpen;
 	}
 }

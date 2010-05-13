@@ -1077,7 +1077,6 @@ public class LASConfig extends LASDocument {
                         if ( category.getChild("filter") != null ) {
                         	Element filter = category.getChild("filter");
                         	List<Dataset> datasets = getDataset(filter);
-                        	// TODO what if there is more than one data set here?
                         	if ( datasets != null && datasets.size() > 0 ) {
                         		Dataset dataset = datasets.get(0);
                         	    category_container.setAttribute("children_dsid", dataset.getAttributeValue("ID"));
@@ -1314,14 +1313,9 @@ public class LASConfig extends LASDocument {
         if ( action.equals("apply-dataset") ) {
 
             List datasets = getRootElement().getChildren("datasets");
-            /**
-             * In this case, we're going to take the first dataset that matches
-             * and ignore all the rest...
-             */
             for (Iterator datasetsIt = datasets.iterator(); datasetsIt.hasNext();) {
                 Element datasetsE = (Element) datasetsIt.next();
                 List memberDatasets = datasetsE.getChildren("dataset");
-                // If we found a match quit. I don't like this so much, but it might be a bit more efficient.
                 for (Iterator memberDSIt = memberDatasets.iterator(); memberDSIt.hasNext();) {
                     Element dataset = (Element) memberDSIt.next();
                     Element container_dataset_element = (Element) dataset.clone();
@@ -1331,17 +1325,12 @@ public class LASConfig extends LASDocument {
                          (name_equals != null && name.equals(name_equals)) ||
                          (tag_contains != null && ID.contains(tag_contains)) ||
                          (tag_equals != null && ID.equals(tag_equals)) ) {
-                        // There is nothing to do except create the dataset container and break out.
                         container_dataset = new Dataset(container_dataset_element);
                         dataset_list.add(container_dataset);
                     }
                 }
             }
         } else if ( action.equals("apply-variable") ) {
-            /*
-             * In this case we need to find the data set that contains the first match,
-             * filter its member variables to include only the matches.
-             */
             List datasets = getRootElement().getChildren("datasets");
             Element container_dataset_element = null;
             for (Iterator datasetsIt = datasets.iterator(); datasetsIt.hasNext();) {
@@ -1350,9 +1339,6 @@ public class LASConfig extends LASDocument {
                 List memberDatasets = datasetsE.getChildren("dataset");
                 
                 for (Iterator memberDSIt = memberDatasets.iterator(); memberDSIt.hasNext();) {
-//                    if ( container_dataset != null ) {
-//                        break;  // Ugly loop breaking in the interest of efficiency.
-//                    }
                     Element dataset = (Element) memberDSIt.next();  
                    
                     	container_dataset_element = (Element) dataset.clone();
@@ -4104,6 +4090,7 @@ public class LASConfig extends LASDocument {
         return lasRequest.toCompactString();
 	}
 	public void removeRemoteVariables(String JSESSIONID) {
+		if ( JSESSIONID == null ) return;
 		HashSet<String> toRemove = remoteData.get(JSESSIONID);
 		if ( toRemove != null ) {
 			HashSet<String> inUse = new HashSet<String>();
