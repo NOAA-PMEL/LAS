@@ -15,29 +15,29 @@
 ! Define the plot variable. For comparison plots, we want to save the dataset number
 ! for each dataset.
 
-
 DEFINE SYMBOL data_num = `($data_var),RETURN=dsetnum`
 DEFINE SYMBOL data_($num)_num = `($data_var),RETURN=dsetnum`
 
 LET attlist = ($data_var).attnames
+IF ($data_var_nq"0|*>1") THEN LET attlist = ($data_var_nq).attnames
 DEFINE SYMBOL data_var_only = `UPCASE("($data_var)")`
-! setup for analysis ops on curvilinear grids 
 
-! IF `IS_ELEMENT_OF_STR (attlist, "ferret_definition") GT 0 AND\
-!     ($ferret_curvi_coord_lon"0|*>1")` THEN
-!    LET data_var_definition = `($data_var).ferret_definition`
-!    DEFINE SYMBOL data_var_def = `($data_var).ferret_definition`
-!    DEFINE SYMBOL data_var = data_var_definition
-! 
-! ! If there is an X or Y analysis operation then the X or Y region has
-! ! Not been set. Get the X and/or Y analysis request, set up 
-! ! x an y region definitions, and prepare to do the request either
-! ! by finding the region in the rectiliear portion of the grid
-! ! or by first doing a curvi-to-rectilnear regridding operation.
-! 
-!    GO LAS_set_x_y_analysis.jnl
-! 
-! ENDIF
+! setup for analysis ops on curvilinear grids 
+IF `IS_ELEMENT_OF_STR (attlist, "ferret_definition") GT 0 AND\
+    ($ferret_curvi_coord_lon"0|*>1")` THEN
+   LET data_var_definition = `($data_var).ferret_definition`
+   DEFINE SYMBOL data_var_def = `($data_var).ferret_definition`
+   DEFINE SYMBOL data_var = data_var_definition
+
+! If there is an X or Y analysis operation then the X or Y region has
+! Not been set. Get the X and/or Y analysis request, set up 
+! x an y region definitions, and prepare to do the request either
+! by finding the region in the rectiliear portion of the grid
+! or by first doing a curvi-to-rectilnear regridding operation.
+
+   GO LAS_set_x_y_analysis.jnl
+
+ENDIF
 
 ! Be sure units and title are defined.
 ! If units are not defined, try to get units from the data variable.
@@ -45,14 +45,10 @@ DEFINE SYMBOL data_var_only = `UPCASE("($data_var)")`
 
 ! data_units should have been defined in LAS_initialize_dataset
 
-
-GO setup_speed_not_xy.jnl
-
 IF ($data_units"0|*>1") THEN
    DEFINE SYMBOL has_units = 1
 ELSE
-   LET anames = ($data_var).attnames
-   IF `IS_ELEMENT_OF_STR (anames, "units") OR IS_ELEMENT_OF_STR (anames, "UNITS")` THEN
+   IF `IS_ELEMENT_OF_STR (attlist, "units") OR IS_ELEMENT_OF_STR (attlist, "UNITS")` THEN
       DEFINE SYMBOL data_var_units `($data_var),RETURN=units`123   ! check for empty units string.
       IF `STRLEN("($data_var_units)" ) EQ 3` THEN
          CANCEL SYMBOL data_var_units
@@ -60,6 +56,22 @@ ELSE
          DEFINE SYMBOL data_var_units `($data_var),RETURN=units`
          DEFINE SYMBOL data_units (`($data_var),RETURN=units`)
       ENDIF
+   ENDIF
+ENDIF
+
+IF ($check_for_pseudonames"0|*>1") THEN
+   LET pseudo_names = {\
+"'i'", "'j'", "'k'", "'l'", "'x'", "'y'", "'z'", "'t'", "'xbox'", "'ybox'", "'zbox'", "'tbox'", \
+"'xboxlo'", "'yboxlo'", "'zboxlo'", "'tboxlo'", "'xboxhi'", "'yboxhi'", "'zboxhi'", "'tboxhi'",  \
+"'I'", "'J'", "'K'", "'L'", "'X'", "'Y'", "'Z'", "'T'", "'XBOX'", "'YBOX'", "'ZBOX'", "'TBOX'", \
+"'XBOXLO'", "'YBOXLO'", "'ZBOXLO'", "'TBOXLO'", "'XBOXHI'", "'YBOXHI'", "'ZBOXHI'", "'TBOXHI'"}
+
+   IF `IS_ELEMENT_OF_STR("($data_var)",pseudo_names) `  THEN
+      LET slen = STRLEN("($data_var)")
+      DEFINE SYMBOL data_var_nq = `SUBSTRING("($data_var)", 2, slen-2)`
+      LET ($data_var_nq)_1 = ($data_var)
+      SET ATT/LIKE=($data_var) ($data_var_nq)_1
+      DEFINE SYMBOL data_var ($data_var_nq)_1
    ENDIF
 ENDIF
 
@@ -89,7 +101,6 @@ DEFINE SYMBOL ferret_plot_base_var = ($ferret_plot_var)
 DEFINE SYMBOL ferret_plot_base_var_($num) = ($ferret_plot_var) 
 DEFINE SYMBOL ferret_plot_base_var_noregion = ($data_var)[d=($data_num)]
 
- 
 ! Needed for transform_seasonal, save variable definition without any
 ! time-region information that may be added, and also with the time region only
 
@@ -153,8 +164,16 @@ ENDIF
 ! Mark whether there are contour levels set on first entry. 
 ! Compute automatic open-ended levels.
 
+! consolidate here so that all 2D plots use only ferret_fill_levels.
+! Allow for config that may have used ferret_contour levels instead or also.
+
+IF ($ferret_fill_levels"0|*>1") THEN
+   IF ($ferret_contour_levels"0|*>1") THEN CANCEL SYMBOL ferret_contour_levels
+ELSE
+   IF ($ferret_contour_levels"0|*>1") THEN DEFINE SYMBOL ferret_fill_levels ($ferret_contour_levels)
+ENDIF
+
 IF `($data_num) EQ 1` THEN
-   IF ($ferret_contour_levels"0|*>1") THEN DEFINE SYMBOL input_contour_levels = 1
    IF ($ferret_fill_levels"0|*>1") THEN DEFINE SYMBOL input_fill_levels = 1
 
    IF `STRLEN("($ferret_view)") EQ 2 AND STRINDEX("($operation_ID)", "Plot") GT 0` THEN 
