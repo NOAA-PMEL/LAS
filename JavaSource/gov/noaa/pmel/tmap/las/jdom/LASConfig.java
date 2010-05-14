@@ -1107,7 +1107,7 @@ public class LASConfig extends LASDocument {
                     category_container.setAttribute(attr.getName(), attr.getValue());
                 }
                 List cats = (List) category.getChildren("category");
-                if ( cats.size() > 1 ) {
+                if ( cats.size() > 0 ) {
                     for (Iterator catsIt = cats.iterator(); catsIt.hasNext();) {
                         Element cat = (Element) catsIt.next();
                         Element cat_nokids = new Element("category");
