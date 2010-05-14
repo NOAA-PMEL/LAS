@@ -37,20 +37,9 @@ ELSE
   DEFINE SYMBOL data_url \"($data_($num)_url)\"
 ENDIF
 
+GO setup_speed_not_xy.jnl
+
 IF ($data_($num)_var"0|*>1") THEN DEFINE SYMBOL data_var ($data_($num)_var)
-
-
-! Put quotes around variable name in case its a Ferret reserved name like Z
-! (Apparently addXML now does this automatically, so check for it already being in ' ')
-
-IF ($data_($num)_var"0|*>1") THEN DEFINE SYMBOL data_var = `UPCASE("($data_var)")`
-LET varlen = `STRLEN("($data_var)")`
-IF `STRINDEX("($data_var)", "'") EQ 1 AND STRRINDEX("($data_var)", "'") EQ varlen` THEN
-   DEFINE SYMBOL surrounding_quotes_already = 1
-ELSE 
-   IF ($data_($num)_var"0|*>1") THEN DEFINE SYMBOL data_var_nq = ($data_var)
-   IF ($data_($num)_var"0|*>1") THEN DEFINE SYMBOL data_var = '($data_var)'
-ENDIF
 
 ! Use the units passed in from the XML unless they are null; 
 ! in that case try to get from the dataset
@@ -78,24 +67,17 @@ ENDIF
 
 DEFINE SYMBOL ferret_plot_title "($data_title) ($data_units)"
 
+! TODO:  Use new error features in Ferret to turn off STDERR and check
+! TODO:  for Ferret error symbols to see if the SET DATA command actually worked.
+
 ! SET DATA and check for errors
 
 SET DATA ($data_url)
 
-! Use PPLUS symbol editing to check for units sent in as ""
-PPL SET ulen $LENGTH(data_($num)_units)
-IF `($ulen) LE 2` THEN  
-    PPL SET isquote1 $EXTRACT(1,1,data_0_units)
-    PPL SET isquote2 $EXTRACT(2,1,data_0_units)
-    IF  `($isquote1%0|"">1|*>0%) OR ($isquote2%0|"">1|*>0%)` THEN \
-      DEFINE SYMBOL units_double_quotes = 1
-ENDIF
-
-IF `($units_double_quotes"0|*>1") EQ 0` THEN 
-   LET ulen = STRLEN ("($data_($num)_units)")
-   IF `(STRINDEX("($data_($num)_units)", "'") EQ 1) AND \
-    (STRRINDEX("($data_($num)_units)", "'") EQ ulen)` THEN \
-      DEFINE SYMBOL data_units `SUBSTRING("($data_($num)_units)", 2, ulen-2)`
+LET ulen = STRLEN ("($data_($num)_units)")
+IF `(STRINDEX("($data_($num)_units)", "'") EQ 1) AND (STRRINDEX("($data_($num)_units)", "'") EQ ulen)` THEN
+   DEFINE SYMBOL data_units `SUBSTRING("($data_($num)_units)", 2, ulen-2)`
+   DEFINE SYMBOL data_units (($data_units))
 ENDIF
 
 IF ($fer_last_error"0|*>1") THEN
@@ -105,4 +87,6 @@ IF ($fer_last_error"0|*>1") THEN
   EXIT/SCRIPT
 ENDIF
 
+
 ! End of $RCSfile ------------LAS_initialize_dataset.jnl--------------------------
+
