@@ -368,11 +368,10 @@ public class VizGal implements EntryPoint {
 		settingsControls = new FlexTable();
 		settingsControls.setWidget(0, 0, settingsHeader);
 		
-		
-		settingsControls.setWidget(1, 0, operationsWidget);
+		settingsControls.setWidget(1, 0, axesWidget);
 		settingsControls.setWidget(2, 0, comparisonAxesSelector);
-		settingsControls.setWidget(3, 0, axesWidget);
-
+		settingsControls.setWidget(3, 0, operationsWidget);
+		
 		mainPanel = new FlexTable();
 		
 		cellFormatter = mainPanel.getFlexCellFormatter();

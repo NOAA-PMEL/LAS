@@ -19,12 +19,15 @@ import com.google.gwt.user.client.ui.FlexTable.FlexCellFormatter;
 
 public class ComparisonAxisSelector extends Composite {
 	FlexTable flex;
+	FlexTable layout;
 	ListBox axes;
 	DisclosurePanel disPanel;
 	public ComparisonAxisSelector(String width) {
-
+        // The the other widgets have flextable layouts.  Without it, this one doesn't line up.
+		layout = new FlexTable();
 		axes = new ListBox();
 		flex = new FlexTable();
+		// It looks funny without some sort of label on the same line.
 		HTML html = new HTML("Axis: ");
 		flex.setWidget(0, 0, html);
 		flex.setWidget(0, 1, axes);
@@ -35,7 +38,8 @@ public class ComparisonAxisSelector extends Composite {
 //		if ( width != null && !width.equals("") ) {
 //		    disPanel.setWidth(width);
 //		}
-		initWidget(disPanel);
+		layout.setWidget(0, 0, disPanel);
+		initWidget(layout);
 	}
 	public void setAxes(List<String> ortho) {		
 		if ( axes == null ) {
