@@ -1580,9 +1580,11 @@ public class addXML {
 					log.error("\t\t Time axis: ");
 				}
 				AxisBean taxis = makeTimeAxis(tAxis, elementName);
-				GridAxisBeans.addUnique(taxis);
-				if (verbose) {
-					log.error(taxis.toString());
+				if ( taxis != null ) {
+					GridAxisBeans.addUnique(taxis);
+					if (verbose) {
+						log.error(taxis.toString());
+					}
 				}
 			}
 			else {
@@ -1951,21 +1953,7 @@ public class addXML {
 			}
 		}
 		else {
-			// Time axis has only one time step.
-			// We have no idea what this single time point looks like so,
-			// format it for all year, month, day, hours, minutes, seconds
-			fmt = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
-			double t0 = axis.getCoordValue(0);
-			DateTime jodaDate1 = makeDate(t0, dateUnit, chrono);
-			arange.setSize("1");
-			arange.setStep("1");
-			String start = fmt.print(jodaDate1);
-			if (start.startsWith("-")) start = start.substring(1);
-			arange.setStart(start);
-			// The UI will eliminate this axis.  I think it's safe to set
-			// the units to anything.  !?!?
-			axisbean.setUnits(dateUnit.getTimeUnitString());
-			axisbean.setArange(arange);
+			axisbean = null;
 		}
 
 		return axisbean;
