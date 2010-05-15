@@ -165,11 +165,7 @@ public class CategoryBean {
 
         category.addContent(filterE);
       }
-    }
-    if ( category.getChildren().size() == 0 ) { 
-    	return null;
-    } else {
-        return category;
-    }
+    }    
+    return category;
   }
 }
