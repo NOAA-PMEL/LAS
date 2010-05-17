@@ -37,6 +37,27 @@ IF ($result_plot_image_filename%0|*>1%) THEN FRAME($trans)/FORMAT=gif/FILE="($re
 
 cancel region 
 
+
+IF ($have_pvar"0") THEN 
+         LET the_plot_var = pvar  ! from LAS_auto_levels
+ELSE
+   IF ($native_curvilinear_xy"0|*>1") THEN 
+      LET the_plot_var = ($ferret_plot_base_var_noregion)
+   ELIF ($do_hybrid_z"0|*>1") THEN
+      LET the_plot_var = ($ferret_plot_base_var_noregion)
+   ELIF ($native_Z_plot"0|*>1") THEN
+      LET the_plot_var = ($ferret_var_0)
+   ELIF ($ferret_plot_var"0|*>1") THEN
+      LET the_plot_var = ($ferret_plot_var)
+      IF ($ferret_plot_var"0|sampled_var>1|*>0) THEN LET the_plot_var = ($ferret_plot_var)
+   ELSE
+      IF ($basemap_url"0|*>1") THEN
+         USE ($basemap_url)
+         LET the_plot_var = ($basemap_var)
+      ENDIF
+   ENDIF
+ENDIF
+
 ! First list the urls and variable names; the URLs can be so long they make the
 ! commands too long for the Ferret command-line buffer. 
 
@@ -89,6 +110,24 @@ IF ($result_map_scale_filename%0|*>1%) THEN
       ENDIF
    ENDIF
 
+   DEFINE SYMBOL taxis_dir = 0
+
+   IF `($ax_horiz"0|T>1|*>0")` THEN
+      DEFINE SYMBOL taxlo = \
+`TAX_DATESTRING(t[gt=the_plot_var,t=($xaxlo)],t[gt=the_plot_var,t=($xaxlo)], "min")`
+      DEFINE SYMBOL taxhi = \
+`TAX_DATESTRING(t[gt=the_plot_var,t=($xaxhi)],t[gt=the_plot_var,t=($xaxhi)], "min")`
+      DEFINE SYMBOL taxis_dir = horiz
+   ENDIF
+
+   IF `($ax_vert"0|T>1|*>0")` THEN
+      DEFINE SYMBOL taxlo = \
+`TAX_DATESTRING(t[gt=the_plot_var,t=($YAXIS_MIN)],t[gt=the_plot_var,t=($YAXIS_MIN)], "min")`
+      DEFINE SYMBOL taxhi = \
+`TAX_DATESTRING(t[gt=the_plot_var,t=($YAXIS_MAX)],t[gt=the_plot_var,t=($YAXIS_MAX)], "min")`
+      DEFINE SYMBOL taxis_dir = horiz
+   ENDIF
+
    LET syms_vals = {\
       "($PPL$XMIN)", "($PPL$XMAX)", \
       "($PPL$YMIN)", "($PPL$YMAX)", \
@@ -122,52 +161,49 @@ IF ($result_map_scale_filename%0|*>1%) THEN
 ! TODO: Question - do we want a line for a possible positive= attribute to always
 !       be written or only when that attribute exists??
 
-   IF ($ax_horiz"0|*>1") THEN 
+   IF `($ax_horiz"0|*>1") OR ($ax_vert"0|*>1")`  THEN 
       LET syms_names = {"AX_HORIZ", "AX_HORIZ_POSTV", "AX_VERT", "AX_VERT_POSTV", \
-      "DATA_EXISTS", "DATA_MIN", "DATA_MAX"}
+      "DATA_EXISTS", "DATA_MIN", "DATA_MAX", \
+      "TAXIS_DIR", "TAXLO", "TAXHI"}
 
-      IF ($have_pvar"0") THEN 
-         LET the_plot_var = pvar  ! from LAS_auto_levels
-      ELSE
-         IF ($native_curvilinear_xy"0|*>1") THEN 
-            LET the_plot_var = ($ferret_plot_base_var_noregion)
-         ELIF ($do_hybrid_z"0|*>1") THEN
-            LET the_plot_var = ($ferret_plot_base_var_noregion)
-         ELIF ($native_Z_plot"0|*>1") THEN
-            LET the_plot_var = ($ferret_var_0)
-         ELIF ($ferret_plot_var"0|*>1") THEN
-            LET the_plot_var = ($ferret_plot_var)
-            IF ($ferret_plot_var"0|sampled_var>1|*>0) THEN LET the_plot_var = ($ferret_plot_var)
+! Find the axis directions
+
+! Remove striding so we can get the attributes of axes
+
+      IF `($xstride"0") GT 1` THEN CANCEL AXIS/STRIDE `the_plot_var,RETURN=xaxis`
+      IF `($ystride"0") GT 1` THEN CANCEL AXIS/STRIDE `the_plot_var,RETURN=yaxis`
+      IF `($zstride"0") GT 1` THEN CANCEL AXIS/STRIDE `the_plot_var,RETURN=zaxis`
+      IF `($tstride"0") GT 1` THEN CANCEL AXIS/STRIDE `the_plot_var,RETURN=taxis`
+      
+      IF ($ax_horiz"0|*>1") THEN
+
+         DEFINE SYMBOL the_axis =  `the_plot_var,RETURN=($ax_horiz)axis`
+         IF `STRINDEX("($the_axis)", "(") GT 0` THEN 
+            LET attlist = ($the_axis).attnames
+            IF `IS_ELEMENT_OF_STR(attlist, "positive") GT 0` THEN \
+            DEFINE SYMBOL AX_HORIZ_POSTV = `($the_axis).positive`
          ELSE
-            IF ($basemap_url"0|*>1") THEN
-               USE ($basemap_url)
-               LET the_plot_var = ($basemap_var)
-            ENDIF
+            LET attlist = (($the_axis)).attnames
+            IF `IS_ELEMENT_OF_STR(attlist, "positive") GT 0` THEN \
+            DEFINE SYMBOL AX_HORIZ_POSTV = `(($the_axis)).positive`
          ENDIF
+      ELSE
+         DEFINE SYMBOL ax_horiz = D
       ENDIF
 
-* Find the axis directions
-
-      DEFINE SYMBOL the_axis =  `the_plot_var,RETURN=($ax_horiz)axis`
-      IF `STRINDEX("($the_axis)", "(") GT 0` THEN 
-         LET attlist = ($the_axis).attnames
-         IF `IS_ELEMENT_OF_STR(attlist, "positive") GT 0` THEN \
-         DEFINE SYMBOL AX_HORIZ_POSTV = `($the_axis).positive`
+      IF ($ax_vert"0|*>1") THEN
+         DEFINE SYMBOL the_axis =  `the_plot_var,RETURN=($ax_vert)axis`
+         IF `STRINDEX("($the_axis)", "(") GT 0` THEN 
+            LET attlist = ($the_axis).attnames
+            IF `IS_ELEMENT_OF_STR(attlist, "positive") GT 0` THEN \
+            DEFINE SYMBOL AX_VERT_POSTV = `($the_axis).positive`
+         ELSE
+            LET attlist = (($the_axis)).attnames
+            IF `IS_ELEMENT_OF_STR(attlist, "positive") GT 0` THEN \
+            DEFINE SYMBOL AX_VERT_POSTV = `(($the_axis)).positive`
+         ENDIF
       ELSE
-         LET attlist = (($the_axis)).attnames
-         IF `IS_ELEMENT_OF_STR(attlist, "positive") GT 0` THEN \
-         DEFINE SYMBOL AX_HORIZ_POSTV = `(($the_axis)).positive`
-      ENDIF
-
-      DEFINE SYMBOL the_axis =  `the_plot_var,RETURN=($ax_vert)axis`
-      IF `STRINDEX("($the_axis)", "(") GT 0` THEN 
-         LET attlist = ($the_axis).attnames
-         IF `IS_ELEMENT_OF_STR(attlist, "positive") GT 0` THEN \
-         DEFINE SYMBOL AX_VERT_POSTV = `($the_axis).positive`
-      ELSE
-         LET attlist = (($the_axis)).attnames
-         IF `IS_ELEMENT_OF_STR(attlist, "positive") GT 0` THEN \
-         DEFINE SYMBOL AX_VERT_POSTV = `(($the_axis)).positive`
+         DEFINE SYMBOL ax_vert = D
       ENDIF
 
 * Find the data min, max.  If all data was bad, send blank strings to the output.
@@ -184,7 +220,9 @@ IF ($result_map_scale_filename%0|*>1%) THEN
       ENDIF
 
       LET syms_vals = {"($AX_HORIZ)", "($AX_HORIZ_POSTV)", "($AX_VERT)", "($AX_VERT_POSTV)",\
-       "($DATA_EXISTS)", "($DATA_MIN)", "($DATA_MAX)"}
+       "($DATA_EXISTS)", "($DATA_MIN)", "($DATA_MAX)",\
+       "($TAXIS_DIR)", "($TAXLO)", "($TAXHI)"}
+      
       
       LIST/APPEND/FILE="($result_map_scale_filename)"/NOHEAD/NOROWLAB syms_names, syms_vals
    ENDIF
