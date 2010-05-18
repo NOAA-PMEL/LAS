@@ -1508,7 +1508,11 @@ public class addXML {
 				variable.setName(geogrid.getName());
 			}
 			variable.setElement(geogrid.getName() + "-" + elementName);
-			variable.setUnits(geogrid.getUnitsString());
+			if ( geogrid.getUnitsString() != null && !geogrid.getUnitsString().equals("") ) {
+				variable.setUnits(geogrid.getUnitsString());
+			} else {
+				variable.setUnits("no units");
+			}
 
 			GridCoordSys gcs = (GridCoordSys) geogrid.getCoordinateSystem();
 
