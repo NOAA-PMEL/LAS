@@ -386,6 +386,7 @@ public class VizGal implements EntryPoint {
 
 		
 		RootPanel.get("vizGal").add(mainPanel);
+		RootPanel.get("PLOT_LINK").setVisible(false);
 		
 		Window.addWindowResizeListener(windowResizeListener);
 		History.addValueChangeHandler(new ValueChangeHandler<String>() {
@@ -695,11 +696,11 @@ public class VizGal implements EntryPoint {
 				HashMap<String, String> optionsMap = Util.getOptionsMap(settings[t+1]);
 				if ( t == 0 ) {
 					
-					operationsWidget.setOperation(tokenMap.get("operation_id"), tokenMap.get("view"));
-					axesWidget.getRefMap().setCurrentSelection(Double.valueOf(tokenMap.get("ylo")),
-							                                   Double.valueOf(tokenMap.get("yhi")), 
-							                                   Double.valueOf(tokenMap.get("xlo")),
-							                                   Double.valueOf(tokenMap.get("xhi")));
+					operationsWidget.setOperation(tokenMap.get("operation_id"), panelTokenMap.get("view"));
+					axesWidget.getRefMap().setCurrentSelection(Double.valueOf(panelTokenMap.get("ylo")),
+							                                   Double.valueOf(panelTokenMap.get("yhi")), 
+							                                   Double.valueOf(panelTokenMap.get("xlo")),
+							                                   Double.valueOf(panelTokenMap.get("xhi")));
 					if ( optionsMap.size() >= 1 ) {
 						optionsButton.setState(optionsMap);
 					}

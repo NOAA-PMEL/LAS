@@ -216,28 +216,41 @@ public class OperationsWidget extends Composite {
 			}
 		}
 		int row = 0;
+		boolean firstOpen = false;
 		if ( hasXYMap ) {
 			xyMap.add(xyMapTable);
 			layout.setWidget(row, 0, xyMap);
-			xyMap.setOpen(true);
+			if ( !firstOpen ) {
+				firstOpen = true;
+				xyMap.setOpen(true);
+			}
 			row++;
 		}
 		if ( hasLinePlots ) {
 			linePlots.add(linePlotsTable);
 			layout.setWidget(row, 0, linePlots);
-			linePlots.setOpen(true);
+			if ( !firstOpen ) {
+			    firstOpen = true;
+				linePlots.setOpen(true);
+			}
 			row++;
 		}
 		if ( hasSectionPlots ) {
 			sectionPlots.add(sectionPlotsTable);
 			layout.setWidget(row, 0, sectionPlots);
-			sectionPlots.setOpen(true);
+			if ( !firstOpen ) {
+			    firstOpen = true;
+				sectionPlots.setOpen(true);
+			}
 			row++;
 		}
 		if ( hasHofmullerPlots ) {
 			hofmullerPlots.add(hofmullerPlotsTable);
 			layout.setWidget(row, 0, hofmullerPlots);
-			hofmullerPlots.setOpen(true);
+			if ( !firstOpen ) {
+			    firstOpen = true;
+				hofmullerPlots.setOpen(true);
+			}
 		}
 		for (Iterator clickIt = clicks.iterator(); clickIt.hasNext();) {
 			ClickHandler click = (ClickHandler) clickIt.next();
