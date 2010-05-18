@@ -1103,7 +1103,13 @@ public class VizGalPanel extends Composite {
 		return token.toString();
 	}
 	public String getSettingsWidgetHistoryToken() {
-		return settingsButton.getHistoryToken();
+		
+		return settingsButton.getHistoryToken()+
+		       ";xlo="+panelAxesWidgets.getRefMap().getXlo()+
+		       ";xhi="+panelAxesWidgets.getRefMap().getXhi()+
+		       ";ylo="+panelAxesWidgets.getRefMap().getYlo()+
+		       ";yhi="+panelAxesWidgets.getRefMap().getYhi();
+		
 	}
 	public void setFromHistoryToken(Map<String, String> tokenMap, Map<String, String> optionsMap) {		
 		// Do the panel stuff here.
