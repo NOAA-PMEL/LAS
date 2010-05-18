@@ -942,7 +942,11 @@ public class addXML {
 						VariableBean las_var = new VariableBean();
 						las_var.setElement(threddsDataset.getID()+"-"+variable.getName());
 						las_var.setName(variable.getName());
-						las_var.setUnits(variable.getUnits());
+						if ( variable.getUnits() != null && !variable.getUnits().equals("") ) {
+							las_var.setUnits(variable.getUnits());
+						} else {
+							las_var.setUnits("no units");
+						}
 						las_var.setUrl("#"+variable.getName());
 						log.info("Processing ESG THREDDS variable: " + variable.getName());
 
