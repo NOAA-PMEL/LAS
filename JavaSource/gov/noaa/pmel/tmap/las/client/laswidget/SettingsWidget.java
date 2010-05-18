@@ -46,7 +46,6 @@ public class SettingsWidget extends Composite {
 	
 
 	protected FlexTable settingsLayout = new FlexTable();
-	protected DisclosurePanel disPanel;
 
 	public SettingsWidget(String title, String panelID, String operationID, String optionID) {
 		this.operationID = operationID;
@@ -64,10 +63,7 @@ public class SettingsWidget extends Composite {
 
 		operations = new OperationsWidget(title);
 		operations.addClickHandler(operationsClickHandler);
-		disPanel = new DisclosurePanel("Plots");
-		disPanel.add(operations);
-		disPanel.setOpen(true);
-
+	
 		settingsButton = new Button (title);
 		settingsButton.addClickListener(settingsButtonClick);
 		settingsPopup = new PopupPanel(true);
@@ -77,7 +73,7 @@ public class SettingsWidget extends Composite {
 
 		settingsLayout = new FlexTable();
 		settingsLayout.setWidget(0, 0, buttonBar);
-		settingsLayout.setWidget(1, 0, disPanel);
+		settingsLayout.setWidget(1, 0, operations);
 
 
 		settingsPopup.add(settingsLayout);
