@@ -1331,14 +1331,15 @@ EOL2
 
 close SCRIPT_OUT;
 mychmod 0755,"stopserver.sh";
-
+my $stopsrv = &Cwd::cwd()."/stopserver.sh";
+my $startsrv = &Cwd::cwd()."/startserver.sh";
 open SCRIPT_OUT, ">rebootserver.sh" or die "Can't open rebootserver.sh";
 print SCRIPT_OUT <<EOL3;
 #! /bin/sh
 #
 
 # Attempt to shutdown the server gracefully.
-&Cwd::cwd()/stopserver.sh
+$stopsrv
 
 # Wait to let things shutdown.
 sleep 5
@@ -1355,7 +1356,7 @@ STATUS=$?
  fi
 
 # Start the server again.  Answer the question 'yes' if necessary.
-&Cwd::cwd()/startserver.sh
+$startsrv
 EOL3
 
 close SCRIPT_OUT;
