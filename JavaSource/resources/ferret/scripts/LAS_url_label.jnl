@@ -79,8 +79,8 @@ IF `slen GT 80` THEN
       DEFINE SYMBOL upper_right_first = `upper_right_first`
       LET upper_right_last = SUBSTRING("($upper_right_($n_right_labels))", last_slash+1, slen-last_slash)
       DEFINE SYMBOL upper_right_last = `upper_right_last`
-      DEFINE SYMBOL upper_right_($n_right_labels) = ($upper_right_first)/<NL>($upper_right_last)
-!      DEFINE SYMBOL upper_right_($n_right_labels) = ($upper_right_first)/<NL>@AS($upper_right_last)
+!      DEFINE SYMBOL upper_right_($n_right_labels) = ($upper_right_first)/<NL>($upper_right_last)
+      DEFINE SYMBOL upper_right_($n_right_labels) = ($upper_right_first)/<NL>@AS($upper_right_last)
    ENDIF
 ENDIF
 
