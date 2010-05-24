@@ -261,9 +261,7 @@ public class RequestInputFilter implements Filter {
 			 !value[0].equals("yx") && 
 			 !value[0].equals("yz") && 
 			 !value[0].equals("yt") && 
-			 !value[0].equals("tx") && 
-			 !value[0].equals("ty") && 
-			 !value[0].equals("tz") && 
+			 !value[0].equals("zt") && 
 			 !value[0].equals("xyz") && 
 			 !value[0].equals("xyt") && 
 			 !value[0].equals("xzt") && 
