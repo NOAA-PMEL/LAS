@@ -5,6 +5,7 @@ my $PERLBIN = shift;
 #
 # Extra Perl goodies needed for this script.
 #
+use Cwd;              # getcwd()
 use File::Basename;   # fileparse(), basename(), dirname()
 use File::Copy;       # cp()
 use File::Path;       # mkpath()
