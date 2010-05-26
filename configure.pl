@@ -582,6 +582,7 @@ if (! -d $dodsCacheDir){
 }
 
 my $dodsConf = "$dodsConfDir/.dodsrc";
+my $ccdir = &Cwd::cwd();
 if (! -f $dodsConf){
    open DOUT, ">$dodsConf" or die "Can't open $dodsConf for writing";
    print DOUT "\# DODS client configuration file. See the DODS\n";
@@ -590,7 +591,7 @@ if (! -f $dodsConf){
    print DOUT "MAX_CACHE_SIZE=100\n";
    print DOUT "MAX_CACHED_OBJ=5\n";
    print DOUT "IGNORE_EXPIRES=0\n";
-   print DOUT "CACHE_ROOT=".&Cwd::cwd()."/$dodsCacheDir\n";
+   print DOUT "CACHE_ROOT=$ccdir/$dodsCacheDir\n";
    print DOUT "DEFAULT_EXPIRES=86400\n";
    print DOUT "ALWAYS_VALIDATE=0\n";
    close DOUT;
@@ -606,7 +607,7 @@ if (! -f $dodsConf_no_cache){
    print DOUT "MAX_CACHE_SIZE=100\n";
    print DOUT "MAX_CACHED_OBJ=5\n";
    print DOUT "IGNORE_EXPIRES=0\n";
-   print DOUT "CACHE_ROOT=".&Cwd::cwd()."/$dodsCacheDir\n";
+   print DOUT "CACHE_ROOT=$ccdir/$dodsCacheDir\n";
    print DOUT "DEFAULT_EXPIRES=86400\n";
    print DOUT "ALWAYS_VALIDATE=0\n";
    close DOUT;
