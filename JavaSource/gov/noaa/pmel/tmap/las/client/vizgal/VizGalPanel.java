@@ -1158,4 +1158,8 @@ public class VizGalPanel extends Composite {
 		
 		
 	};
+
+	public String getURL() {
+		return currentURL;
+	}
 }

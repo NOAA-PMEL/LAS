@@ -16,6 +16,10 @@
       <inherits name='org.gwtopenmaps.openlayers.OpenLayers'/>
       
       <inherits name="com.google.gwt.xml.XML" />
+      
+      <!--  The nifty printing utility -->
+      <inherits name='br.com.freller.tool.PrintTest'/>
+      
       <!-- Specify the app entry point class.                         -->
       <entry-point class='gov.noaa.pmel.tmap.las.client.VizGal'/>
     
