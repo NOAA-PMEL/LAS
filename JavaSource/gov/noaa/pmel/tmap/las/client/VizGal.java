@@ -19,6 +19,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import br.com.freller.tool.client.Print;
+
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
@@ -34,14 +36,19 @@ import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.WindowResizeListener;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.ChangeListener;
 import com.google.gwt.user.client.ui.ClickListener;
 import com.google.gwt.user.client.ui.DisclosurePanel;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
+import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
+import com.google.gwt.user.client.ui.PopupPanel;
+import com.google.gwt.user.client.ui.PushButton;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.ToggleButton;
@@ -186,6 +193,11 @@ public class VizGal implements EntryPoint {
 	ListBox imageSize;
 	Label imageSizeLabel = new Label("Image zoom: ");
 	int pwidth = 0;
+	
+	/*
+	 * Make an HTML only popup page that can be printed.
+	 */
+	PushButton printerFriendlyButton;
 	
 	/*
 	 * Keep if a history token is attached to an initial URL,  keep it and apply it after the VizGal has initialized.
@@ -357,7 +369,20 @@ public class VizGal implements EntryPoint {
 		buttonLayout.setWidget(0, 6, imageSizeLabel);
 		buttonLayout.setWidget(0, 7, imageSize);
 		
+		printerFriendlyButton = new PushButton("Print...");
+	    printerFriendlyButton.addClickHandler(new ClickHandler() {
 
+			@Override
+			public void onClick(ClickEvent print) {
+				
+				printerFriendly();
+				
+			}
+	    	
+	    });
+	    
+	    buttonLayout.setWidget(0, 8, printerFriendlyButton);
+		
 		// Initialize the gallery with an asynchronous call to the server to get variable needed.
 		if ( dsid != null && vid != null & op != null && view != null) {
 			// If the proper information was sent to the widget, pull down the variable definition
@@ -1695,4 +1720,88 @@ public class VizGal implements EntryPoint {
 		
 		
 	};
+	
+	private void printerFriendly() {
+
+		final double image_h = 631.;
+		final double image_w = 998.;
+		final PopupPanel pop = new PopupPanel(false);
+		final boolean panelHidden = panelHeaderHidden;
+		final Image[] images = new Image[panels.size()];
+		final ListBox size = new ListBox();
+		size.addItem("100%", "1.0");
+		size.addItem(" 90%", ".9");
+		size.addItem(" 80%", ".8");
+		size.addItem(" 70%", ".7");
+		size.addItem(" 60%", ".6");
+		size.addItem(" 50%", ".5");
+		size.addItem(" 40%", ".4");
+		size.addItem(" 30%", ".3");
+		size.addChangeHandler(new ChangeHandler() {
+
+			@Override
+			public void onChange(ChangeEvent event) {
+                double px = image_w * Double.valueOf(size.getValue(size.getSelectedIndex()));
+				int pw = (int) px;
+				for(int i = 0; i < images.length; i++ ) {
+					images[i].setWidth(pw+"px");
+				}
+
+			}
+
+		});
+		Label imageSizeLabel= new Label("Image Size: ");
+		if ( !panelHidden ) {
+			handlePanelShowHide();
+		}
+		PushButton close = new PushButton("Close");
+		close.addClickHandler(new ClickHandler() {
+
+			@Override
+			public void onClick(ClickEvent event) {
+				
+				pop.hide();
+				if ( !panelHidden ) {
+					handlePanelShowHide();
+				}
+				
+			}
+			
+		});
+		
+		PushButton print = new PushButton("Print");
+		print.addClickHandler(new ClickHandler() {
+
+			@Override
+			public void onClick(ClickEvent arg0) {
+				Print.it(pop);
+			}
+			
+		});
+		
+		FlexTable buttons = new FlexTable();
+		buttons.setWidget(0, 0, close);
+		buttons.setWidget(0, 1, print);
+		buttons.setWidget(0, 2, imageSizeLabel);
+		buttons.setWidget(0, 3, size);
+		FlexTable plots = new FlexTable();
+		FlexCellFormatter formatter =  plots.getFlexCellFormatter();
+		formatter.setColSpan(0, 0, 2);
+		plots.setWidget(0, 0, buttons);
+		pop.setGlassEnabled(true);
+		int rows = panels.size()/2;
+		int cols = 2;
+		int panel_index = 0;
+		for (int i = 0; i < rows; i++) {
+			for (int j = 0; j < cols; j++) {
+				String panel_url = ((VizGalPanel)panels.get(panel_index)).getURL();
+				final Image image = new Image(panel_url+"&stream=true&stream_ID=plot_image");
+				images[panel_index] = image;
+				plots.setWidget(i+1, j, image);
+				panel_index++;
+			}
+		}
+		pop.add(plots);
+		pop.show();
+	}
 }

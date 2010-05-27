@@ -85,7 +85,11 @@ public class LASBackendResponse extends LASDocument {
      * @return url - a String with a reference to the result as a URL.
      */
     public String getResult(String ID) {
-       
+        String openid = getRootElement().getAttributeValue("openid");
+        String appendid = "";
+        if ( openid != null && !openid.equals("") ) {
+        	appendid = "?openid="+openid;
+        }
         Element result = getResultElement(ID);
         if ( result != null ) {
             String type = result.getAttributeValue("type");
@@ -96,7 +100,7 @@ public class LASBackendResponse extends LASDocument {
                     return text;
                     //return result.getText();
                 } else {
-                    return result.getAttributeValue("url");
+                    return result.getAttributeValue("url")+appendid;
                 }
             }
         }
@@ -831,5 +835,10 @@ public class LASBackendResponse extends LASDocument {
         brief.getRootElement().addContent(brief_response);
         return brief;
     }
+	public void setOpenId(String openid) {
+		
+		getRootElement().setAttribute("openid", openid);
+		
+	}
 }
 

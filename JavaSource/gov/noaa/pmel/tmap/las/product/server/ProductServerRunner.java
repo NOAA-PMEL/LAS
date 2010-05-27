@@ -89,6 +89,10 @@ public class ProductServerRunner  extends Thread  {
 
         this.errorAction = null;
         this.compoundResponse = new LASBackendResponse();
+        String openid = request.getParameter("openid");
+        if ( openid != null && !openid.equals("") ) {
+            this.compoundResponse.setOpenId(openid);
+        }
         HttpSession session = request.getSession();
         try {
             serverURL = lasConfig.getBaseServerURL();
@@ -106,7 +110,7 @@ public class ProductServerRunner  extends Thread  {
         HttpSession session = request.getSession();
         stillWorking = true;
        
-        compoundResponse.setRootElement(new Element("backend_response"));
+        //compoundResponse.setRootElement(new Element("backend_response"));
         // Check the cache.
         boolean globalUseCache = productRequest.getUseCache();
         String compoundResponseFileName = lasConfig.getOutputDir()+File.separator+productRequest.getCacheKey()+"_response.xml";

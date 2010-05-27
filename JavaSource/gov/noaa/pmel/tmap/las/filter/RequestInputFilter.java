@@ -93,6 +93,7 @@ public class RequestInputFilter implements Filter {
     	"key",
 		"log_level",
 		"opendap",
+		"openid",
 		"opid",
 		"plot",
 		"reinit", 
