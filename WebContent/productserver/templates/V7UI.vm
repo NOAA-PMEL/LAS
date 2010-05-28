@@ -139,7 +139,7 @@
                                         "Time series" : {"view" : "t", "class" : "visualization", "id" : "init", "optiondef" : ""}, //Options_1D"},
                                         "Depth" : {"view" : "z", "class" : "visualization", "id" : "init", "optiondef" : ""}, //Options_1D"},
                                         "Longitude" : {"view" : "x", "class" : "visualization", "id" : "init", "optiondef" : ""}, //Options_1D"},
-                                        "Latitude" : {"view" : "y", "class" : "visualization", "id" : "init", "optiondef" : ""}, //Options_1D"}
+                                        "Latitude" : {"view" : "y", "class" : "visualization", "id" : "init", "optiondef" : ""} //Options_1D"}
 
                                 },
                                 "Vertical Section Plots" : {
@@ -170,9 +170,9 @@
                                 'varid' : [],
 #end
 #if ($request.getParameter('auto'))
-                                'autoupdate' : true,
+                                'autoupdate' : true
 #else
-                                'autoupdate' : false,
+                                'autoupdate' : false
 #end
 
                 }
