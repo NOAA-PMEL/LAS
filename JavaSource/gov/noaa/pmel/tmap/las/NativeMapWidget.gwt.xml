@@ -15,6 +15,10 @@
       <inherits name='org.gwtopenmaps.openlayers.OpenLayers'/>
       <!-- not needed for this code, but other things in the package need it. -->
       <inherits name="com.google.gwt.maps.GoogleMaps" />
+
+      <!--  The nifty printing utility -->
+      <inherits name='br.com.freller.tool.PrintTest'/>
+
       
       <inherits name="com.google.gwt.xml.XML" />
       <!-- Specify the app entry point class.                         -->
