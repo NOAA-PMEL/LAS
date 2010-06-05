@@ -20,18 +20,19 @@ function LASUI () {
 
 	// server side resource urls
 	this.hrefs = {
-		"getProduct"  : {"url" : "ProductServer.do"},
-		"getCategories" : {"url" : "getCategories.do"},
-		"getDataConstraints" : {"url" : "getDataConstraints.do"},
-		"getGrid" : {"url" : "getGrid.do"},
-		"getViews" : {"url" : "getViews.do"},
-		"getOperations" : {"url" : "getOperations.do"},
-		"getOptions" : {"url" : "getOptions.do"},
-		"getMetadata" : {"url" : "getMetadata.do"}
+		"getProduct"  : {"url" : "ProductServer.do?"},
+		"getCategories" : {"url" : "getCategories.do?"},
+		"getDataConstraints" : {"url" : "getDataConstraints.do?"},
+		"getGrid" : {"url" : "getGrid.do?"},
+		"getViews" : {"url" : "getViews.do?"},
+		"getOperations" : {"url" : "getOperations.do?"},
+		"getOptions" : {"url" : "getOptions.do?"},
+		"getMetadata" : {"url" : "getMetadata.do?"}
 	};
 
 	//application state
 	this.state = {
+		"extra_args" : "",
 		"dataset" : null,
 		"datasets" : {},
 		"operation" : {"plot" :null,"download":null,"external":null},
@@ -90,6 +91,8 @@ function LASUI () {
  */
 LASUI.prototype.initUI = function (anchorId)
 {
+	if(this.params.openid)
+		this.state.extra_args+="openid="+this.params.openid+"&";
 
 	if((this.params.dsid||this.params.catid)&&this.params.varid) {
 		this.state.dataset = this.params.dsid;
@@ -178,10 +181,10 @@ LASUI.prototype.initUI = function (anchorId)
 			var req = new XMLHttpRequest(this);
 		else
 			var req = new ActiveXObject("Microsoft.XMLHTTP");
-
-		req.onreadystatechange = this.AJAXhandler.LASBind(this, req, "this.AJAX_cache['"+escape(this.hrefs.getCategories.url)+"']=req.responseText;this.setCategoryTreeNode(req.responseText,this.refs.categories,'categories');");
-		this.AJAX_cache[this.hrefs.getCategories.url]="waiting";
-		req.open("GET", this.hrefs.getCategories.url);
+		var url = this.hrefs.getCategories.url + this.state.extra_args;
+		req.onreadystatechange = this.AJAXhandler.LASBind(this, req, "this.AJAX_cache['"+escape(url)+"']=req.responseText;this.setCategoryTreeNode(req.responseText,this.refs.categories,'categories');");
+		this.AJAX_cache[url]="waiting";
+		req.open("GET", url);
 		req.send(null);
 	}
 
@@ -198,7 +201,7 @@ LASUI.prototype.initUI = function (anchorId)
 		else
 			var req = new ActiveXObject("Microsoft.XMLHTTP");
 		req.onreadystatechange = this.AJAXhandler.LASBind(this, req, "this.setInitialVariable(req.responseText);");
-		req.open("GET", this.hrefs.getCategories.url + "?catid=" + catid);
+		req.open("GET", this.hrefs.getCategories.url + this.state.extra_args + "catid=" + catid);
 		req.send(null);
 	}
 }
@@ -260,14 +263,14 @@ LASUI.prototype.setInitialVariable = function(strJson) {
 LASUI.prototype.printPlot = function () {
 	var plot = window.frames[this.anchors.output].document.getElementById('plot');
 	if(plot != null) {
-		var print_win = window.open(plot.src);
+		var print_win = window.open(plot.src + "?" + this.state.extra_args);
 		print_win.onload = function(){this.print()}
 	}
 
 }
 
 LASUI.prototype.getMetadata = function (evt) {
-	window.open(this.hrefs.getMetadata.url + '?dsid=' + this.state.dataset);
+	window.open(this.hrefs.getMetadata.url + this.state.extra_args + 'dsid=' + this.state.dataset);
 }
 LASUI.prototype.hideCategories = function() {
 	this.refs.categories.LINode.style.display="none";
@@ -317,9 +320,9 @@ LASUI.prototype.showInfo = function (evt) {
 	if(node.category)
 		if(node.category.getChildID(i))
 			if(node.category.getChildChildrenType(i)=="variables")
-				window.open(this.hrefs.getMetadata.url + '?dsid=' + node.category.getChildDatasetID(i));
+				window.open(this.hrefs.getMetadata.url + this.state.extra_args + 'dsid=' + node.category.getChildDatasetID(i));
 			else
-				window.open(this.hrefs.getMetadata.url + '?catid=' + node.category.getChildID(i));
+				window.open(this.hrefs.getMetadata.url + this.state.extra_args + 'catid=' + node.category.getChildID(i));
 
 }
 /**
@@ -488,7 +491,7 @@ LASUI.prototype.getCategory = function (parentNode, i) {
 		else
 			var req = new ActiveXObject("Microsoft.XMLHTTP");
 		req.onreadystatechange = this.AJAXhandler.LASBind(this, req, "this.setCategoryTreeNode(req.responseText,args[3].children[args[4]],args[3].category.getChild(args[4]));", parentNode, i);
-		req.open("GET", this.hrefs.getCategories.url + "?catid=" + parentNode.category.getChildID(i));
+		req.open("GET", this.hrefs.getCategories.url + this.state.extra_args + "catid=" + parentNode.category.getChildID(i));
 		req.send(null);
 
 	}
@@ -591,7 +594,7 @@ LASUI.prototype.selectCategory = function (evt) {
 		else
 			var req = new ActiveXObject("Microsoft.XMLHTTP");
 		req.onreadystatechange = this.AJAXhandler.LASBind(this, req, "this.setCategoryTreeNode(req.responseText,args[3].children[args[4]],args[3].category.getChild(args[4]));", parentNode, i);
-		req.open("GET", this.hrefs.getCategories.url + "?catid=" + parentNode.category.getChildID(i));
+		req.open("GET", this.hrefs.getCategories.url + this.state.extra_args + "catid=" + parentNode.category.getChildID(i));
 		req.send(null);
 		this.state.catid=parentNode.category.getChildID(i);
 	}
@@ -654,12 +657,12 @@ LASUI.prototype.getDataConstraints = function (dataset, variable) {
 		else
 			var req = new ActiveXObject("Microsoft.XMLHTTP");
 
-		var url = this.hrefs.getDataConstraints.url + '?dsid=' + dataset + '&varid=' + variable;
+		var url = this.hrefs.getDataConstraints.url + this.state.extra_args + 'dsid=' + dataset + '&varid=' + variable;
 
 		if(!this.AJAX_cache[url]) {
 			this.AJAX_cache[url]="waiting";
 			req.onreadystatechange = this.AJAXhandler.LASBind(this, req, "this.AJAX_cache['"+url+"']=req.responseText;this.setDataConstraints(req.responseText);");
-			req.open("GET", this.hrefs.getDataConstraints.url + '?dsid=' + dataset + '&varid=' + variable);
+			req.open("GET", this.hrefs.getDataConstraints.url + this.state.extra_args + 'dsid=' + dataset + '&varid=' + variable);
 			req.send(null);
 		} else if (this.AJAX_cache[url]!="waiting")
 				this.setDataConstraints(this.AJAX_cache[url]);
@@ -752,7 +755,7 @@ LASUI.prototype.getOperations = function (dataset, variable, view) {
 			var req = new ActiveXObject("Microsoft.XMLHTTP");
 	
 			
-		var url = this.hrefs.getOperations.url + '?dsid=' + dataset + '&varid=' + variable + '&view=' + view;
+		var url = this.hrefs.getOperations.url + this.state.extra_args + 'dsid=' + dataset + '&varid=' + variable + '&view=' + view;
 		
 		if(view) {
 			if(!this.AJAX_cache[url]) {
@@ -937,7 +940,7 @@ LASUI.prototype.doProductIconClick = function (evt) {
  */
 LASUI.prototype.getGrid = function (dataset, variable) {
 
-		var url = this.hrefs.getGrid.url + '?dsid=' + dataset + '&varid=' + variable;
+		var url = this.hrefs.getGrid.url + this.state.extra_args + 'dsid=' + dataset + '&varid=' + variable;
 		
 		if(!this.AJAX_cache[url]) {
 			this.AJAX_cache[url]="waiting";
@@ -946,7 +949,7 @@ LASUI.prototype.getGrid = function (dataset, variable) {
 			else
 				var req = new ActiveXObject("Microsoft.XMLHTTP");
 			req.onreadystatechange = this.AJAXhandler.LASBind(this, req, "this.AJAX_cache['"+url+"']=req.responseText;this.setGrid(req.responseText);");
-			req.open("GET",  this.hrefs.getGrid.url + '?dsid=' + dataset + '&varid=' + variable);
+			req.open("GET",  this.hrefs.getGrid.url + this.state.extra_args + 'dsid=' + dataset + '&varid=' + variable);
 			req.send(null);
 		} else if (this.AJAX_cache[url]!="waiting")
 			this.setGrid(this.AJAX_cache[url]);
@@ -980,7 +983,7 @@ LASUI.prototype.setGrid = function (strJson) {
  */
 LASUI.prototype.getViews = function (dataset,variable) {
 		
-		var url = this.hrefs.getViews.url + '?dsid=' + dataset + '&varid=' +variable;
+		var url = this.hrefs.getViews.url + this.state.extra_args + 'dsid=' + dataset + '&varid=' +variable;
 		if(!this.AJAX_cache[url]) {
                         this.AJAX_cache[url]="waiting";
 			if(!document.all)
@@ -1090,9 +1093,10 @@ LASUI.prototype.onPlotLoad = function (e) {
 		if(urlArr[i].substr(0,3)=="xml")
 			var Req = new LASRequest(unescape(urlArr[i].substr(4,urlArr[i].length)).replace(/\+/g," "));
 
-	if(Req) 
-		if(Req.getXMLText&&!isFeatureEditing()&&this.state.view.plot=='xy'){
-				 setMapCurrentSelection(Req.getRangeLo('y'),Req.getRangeHi('y'),Req.getRangeLo('x'),Req.getRangeHi('x'));			 
+	if(Req)  {
+			if(Req.getXMLText&&!isFeatureEditing()) 
+				 setMapCurrentSelection(Req.getRangeLo('y'),Req.getRangeHi('y'),Req.getRangeLo('x'),Req.getRangeHi('x'));
+			
 		this.request = Req;
 	}
 	if(document.getElementById("wait"))
@@ -1605,9 +1609,9 @@ LASUI.prototype.makeRequest = function (evt, type) {
 			if(document.getElementById("wait_msg"))
 				document.getElementById("wait_msg").style.display="";
 			document.getElementById(this.anchors.output).style.visibility="hidden";
-			document.getElementById(this.anchors.output).src = (this.hrefs.getProduct.url + '?xml=' + this.urlencode(this.request.getXMLText()));
+			document.getElementById(this.anchors.output).src = (this.hrefs.getProduct.url + this.state.extra_args + 'xml=' + this.urlencode(this.request.getXMLText()));
 		} else
-			window.open(this.hrefs.getProduct.url + '?xml=' +  this.urlencode(this.request.getXMLText()),null,window_options);
+			window.open(this.hrefs.getProduct.url + this.state.extra_args + 'xml=' +  this.urlencode(this.request.getXMLText()),null,window_options);
 	}
 
 	this.updating =false;
@@ -1639,7 +1643,7 @@ LASUI.prototype.makeRequest = function (evt, type) {
 LASUI.prototype.getOptions = function (optiondef, type, reset) {
 
 
-	var url =  this.hrefs.getOptions.url + '?opid=' + optiondef;
+	var url =  this.hrefs.getOptions.url + this.state.extra_args + 'opid=' + optiondef;
 
 	
 		var submit = document.createElement("INPUT");
@@ -1676,7 +1680,7 @@ LASUI.prototype.getOptions = function (optiondef, type, reset) {
 		else
 			var req = new ActiveXObject("Microsoft.XMLHTTP");
 		req.onreadystatechange = this.AJAXhandler.LASBind(this, req, "this.AJAX_cache['"+url+"']=req.responseText;this.setOptionList(req.responseText,args[3],args[4],args[5]);",this.refs.options[type].DOMNode,type,reset);
-		req.open("GET", this.hrefs.getOptions.url + '?opid=' + optiondef);
+		req.open("GET", this.hrefs.getOptions.url + this.state.extra_args + 'opid=' + optiondef);
 		req.send(null);
 	} else if (this.AJAX_cache[url]!="waiting")
 		this.setOptionList(this.AJAX_cache[url],this.refs.options[type].DOMNode,type,reset);
