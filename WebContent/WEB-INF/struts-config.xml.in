@@ -33,8 +33,8 @@
           <action path="/getOptions" type="gov.noaa.pmel.tmap.las.confluence.Confluence" >
               <forward name="localGetOptions" path="/localGetOptions.do"/>
           </action>
-          <action path="/getVaraible" type="gov.noaa.pmel.tmap.las.confluence.Confluence">
-               <forward name="localGetVaraible" path="/localGetVariable.do"/>
+          <action path="/getVariable" type="gov.noaa.pmel.tmap.las.confluence.Confluence">
+               <forward name="localGetVariable" path="/localGetVariable.do"/>
           </action>
           <action path="/getRegions" type="gov.noaa.pmel.tmap.las.confluence.Confluence">
               <forward name="localGetRegions" path="/localGetRegions.do"/>
