@@ -61,7 +61,7 @@
           <action path="/localGetVariable" type="gov.noaa.pmel.tmap.las.ui.GetVariable" />
           <action path="/getFullCategories" type="gov.noaa.pmel.tmap.las.ui.GetFullCategories" />
           <action path="/getVariables" type="gov.noaa.pmel.tmap.las.ui.GetVariables" />
-          <action path="/getVaraible" type="gov.noaa.pmel.tmap.las.ui.GetVariable" />
+          <action path="/getVariable" type="gov.noaa.pmel.tmap.las.ui.GetVariable" />
           <action path="/getFullVariables" type="gov.noaa.pmel.tmap.las.ui.GetFullVariables"/>
           <action path="getFullDataset" type="gov.noaa.pmel.tmap.las.ui.GetFullDataset"/>
           <action path="/localGetRegions" type="gov.noaa.pmel.tmap.las.ui.GetRegions" />
@@ -92,6 +92,7 @@
           <action path="/getOptions" type="gov.noaa.pmel.tmap.las.ui.GetOptions" />
           <action path="/getCategories" type="gov.noaa.pmel.tmap.las.ui.GetCategories" />
           <action path="/getVariables" type="gov.noaa.pmel.tmap.las.ui.GetVariables" />
+          <action path="/getVariable" type="gov.noaa.pmel.tmap.las.ui.GetVariable" />
           <action path="/getFullVariables" type="gov.noaa.pmel.tmap.las.ui.GetFullVariables" />
           <action path="/getFullDataset" type="gov.noaa.pmel.tmap.las.ui.GetFullDataset" />
           <action path="/getRegions" type="gov.noaa.pmel.tmap.las.ui.GetRegions" />
