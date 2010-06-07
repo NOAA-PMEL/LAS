@@ -3,8 +3,10 @@ package gov.noaa.pmel.tmap.las.ui;
 import java.io.IOException;
 import java.io.PrintWriter;
 
+import gov.noaa.pmel.tmap.las.exception.LASException;
 import gov.noaa.pmel.tmap.las.jdom.LASConfig;
 import gov.noaa.pmel.tmap.las.product.server.LASConfigPlugIn;
+import gov.noaa.pmel.tmap.las.util.Dataset;
 import gov.noaa.pmel.tmap.las.util.Variable;
 
 import javax.servlet.http.HttpServletRequest;
@@ -38,9 +40,12 @@ public class GetVariable extends ConfigService {
 		
 		Variable variable = null;
 		try {
-			variable = lasConfig.getVariable(dsID, varID);
+			Dataset dataset = lasConfig.getDataset(dsID);			
+			variable = dataset.getVariable(varID);
 		} catch (JDOMException e) {
 			
+		} catch (LASException e) {
+		
 		}
 		
 		try {

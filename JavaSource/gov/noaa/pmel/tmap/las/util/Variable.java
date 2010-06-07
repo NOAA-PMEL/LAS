@@ -19,12 +19,12 @@ public class Variable extends Container implements VariableInterface {
     
     public Variable(Element variable, String dsid) {
         super(variable);
-        this.dsid = dsid;
+        setDSID(dsid);
     }
     public Variable(Element variable, String dsid, String DSName) {
         super(variable);
-        this.dsid = dsid;
-        this.DSName = DSName;
+        setDSID(dsid);
+        setDSName(DSName);
     }
     /* (non-Javadoc)
      * @see gov.noaa.pmel.tmap.las.util.VariableInterface#getXPath()
@@ -43,6 +43,7 @@ public class Variable extends Container implements VariableInterface {
      */
     public void setDSID(String dsid) {
         this.dsid = dsid;
+        element.setAttribute("dsid", dsid);
     }
     /* (non-Javadoc)
      * @see gov.noaa.pmel.tmap.las.util.VariableInterface#getGridID()
@@ -110,5 +111,6 @@ public class Variable extends Container implements VariableInterface {
 	 */
 	public void setDSName(String name) {
 		DSName = name;
+		element.setAttribute("dsname", name);
 	}
 }
