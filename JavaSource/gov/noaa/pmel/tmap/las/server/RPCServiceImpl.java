@@ -74,13 +74,40 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
 	}
 	public VariableSerializable getVariable(String dsid, String varid ) throws RPCException {
 		LASConfig lasConfig = (LASConfig) getServletContext().getAttribute(LASConfigPlugIn.LAS_CONFIG_KEY);
-		Variable variable;
+		Variable variable = null;
 		try {
-			Dataset dataset = lasConfig.getDataset(dsid);
-			variable = dataset.getVariable(varid);
+			Dataset dataset = null;
+			if ( !dsid.contains(Constants.NAME_SPACE_SPARATOR) || lasConfig.isLocal(dsid) ) {
+				dataset = lasConfig.getDataset(dsid);
+			} else {
+				String[] parts = dsid.split(Constants.NAME_SPACE_SPARATOR);
+				String server_key = null;
+				if ( parts != null ) {
+					server_key = parts[0];
+					if ( server_key != null ) {
+						Tributary trib = lasConfig.getTributary(server_key);
+						String las_url = trib.getURL() + Constants.GET_VARIABLE + "?format=xml&dsid="+dsid+"varid="+varid;
+						String varxml = lasProxy.executeGetMethodAndReturnResult(las_url);
+						LASDocument vardoc = new LASDocument();
+						JDOMUtils.XML2JDOM(varxml, vardoc);
+						variable = new Variable(vardoc.getRootElement(), dsid);
+					}
+				}
+			}
+			if ( dataset != null ) {
+			   variable = dataset.getVariable(varid);
+			} else {
+				throw new RPCException("Cannot find data set for this id: "+dsid);
+			}
 		} catch (JDOMException e) {
 			throw new RPCException(e.getMessage());
 		} catch (LASException e) {
+			throw new RPCException(e.getMessage());
+		} catch (UnsupportedEncodingException e) {
+			throw new RPCException(e.getMessage());
+		} catch (HttpException e) {
+			throw new RPCException(e.getMessage());
+		} catch (IOException e) {
 			throw new RPCException(e.getMessage());
 		}
 		if ( variable != null ) {

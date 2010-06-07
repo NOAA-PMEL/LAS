@@ -11,6 +11,7 @@ public class Constants {
 	public static final String GET_OPERATIONS = "/getOperations.do"; 
 	public static final String GET_OPTIONS = "/getOptions.do";
 	public static final String GET_REGIONS = "/getRegions.do";
+	public static final String GET_VARIABLE = "/getVariable.do";
 	public static final String GET_VARIABLES = "/getVariables.do";
 	public static final String GET_VIEWS = "/getViews.do";
 	public static final String RESOLVE_URL = "/resolveURL.do";
@@ -28,6 +29,7 @@ public class Constants {
 	public static final String GET_OPTIONS_KEY = "localGetOptions";
 	public static final String GET_REGIONS_KEY = "localGetRegions";
 	public static final String GET_VARIABLES_KEY = "localGetVariables";
+	public static final String GET_VARIABLE_KEY = "localGetVariable";
 	public static final String GET_VIEWS_KEY = "localGetViews";	
 	
 	

@@ -33,6 +33,9 @@
           <action path="/getOptions" type="gov.noaa.pmel.tmap.las.confluence.Confluence" >
               <forward name="localGetOptions" path="/localGetOptions.do"/>
           </action>
+          <action path="/getVaraible" type="gov.noaa.pmel.tmap.las.confluence.Confluence">
+               <forward name="localGetVaraible" path="/localGetVariable.do"/>
+          </action>
           <action path="/getRegions" type="gov.noaa.pmel.tmap.las.confluence.Confluence">
               <forward name="localGetRegions" path="/localGetRegions.do"/>
           </action>
@@ -55,8 +58,10 @@
           <action path="/localGetOperations" type="gov.noaa.pmel.tmap.las.ui.GetOperations" />
           <action path="/localGetOptions" type="gov.noaa.pmel.tmap.las.ui.GetOptions" />
           <action path="/localGetCategories" type="gov.noaa.pmel.tmap.las.ui.GetCategories" />
+          <action path="/localGetVariable" type="gov.noaa.pmel.tmap.las.ui.GetVariable" />
           <action path="/getFullCategories" type="gov.noaa.pmel.tmap.las.ui.GetFullCategories" />
           <action path="/getVariables" type="gov.noaa.pmel.tmap.las.ui.GetVariables" />
+          <action path="/getVaraible" type="gov.noaa.pmel.tmap.las.ui.GetVariable" />
           <action path="/getFullVariables" type="gov.noaa.pmel.tmap.las.ui.GetFullVariables"/>
           <action path="getFullDataset" type="gov.noaa.pmel.tmap.las.ui.GetFullDataset"/>
           <action path="/localGetRegions" type="gov.noaa.pmel.tmap.las.ui.GetRegions" />
