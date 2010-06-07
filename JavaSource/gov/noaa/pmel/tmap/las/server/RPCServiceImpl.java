@@ -79,6 +79,11 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
 			Dataset dataset = null;
 			if ( !dsid.contains(Constants.NAME_SPACE_SPARATOR) || lasConfig.isLocal(dsid) ) {
 				dataset = lasConfig.getDataset(dsid);
+				if ( dataset != null ) {
+					variable = dataset.getVariable(varid);
+				} else {
+					throw new RPCException("Cannot find data set for this id: "+dsid);
+				}
 			} else {
 				String[] parts = dsid.split(Constants.NAME_SPACE_SPARATOR);
 				String server_key = null;
@@ -86,19 +91,14 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
 					server_key = parts[0];
 					if ( server_key != null ) {
 						Tributary trib = lasConfig.getTributary(server_key);
-						String las_url = trib.getURL() + Constants.GET_VARIABLE + "?format=xml&dsid="+dsid+"varid="+varid;
+						String las_url = trib.getURL() + Constants.GET_VARIABLE + "?format=xml&dsid="+dsid+"&varid="+varid;
 						String varxml = lasProxy.executeGetMethodAndReturnResult(las_url);
 						LASDocument vardoc = new LASDocument();
 						JDOMUtils.XML2JDOM(varxml, vardoc);
 						variable = new Variable(vardoc.getRootElement(), dsid);
 					}
 				}
-			}
-			if ( dataset != null ) {
-			   variable = dataset.getVariable(varid);
-			} else {
-				throw new RPCException("Cannot find data set for this id: "+dsid);
-			}
+			}		
 		} catch (JDOMException e) {
 			throw new RPCException(e.getMessage());
 		} catch (LASException e) {
