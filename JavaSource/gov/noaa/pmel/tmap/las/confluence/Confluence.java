@@ -80,7 +80,7 @@ public class Confluence extends LASAction {
 				put(Constants.GET_OPERATIONS, new String[]{"dsid", "varid", "view"}); 
 				put(Constants.GET_OPTIONS, new String[]{"dsid", "opid"});
 				put(Constants.GET_REGIONS, new String[]{"dsid", "varid"});
-				put(Constants.GET_VARIABLES, new String[]{"dsid"});
+				put(Constants.GET_VARIABLE, new String[]{"dsid", "varid"});
 				put(Constants.GET_VIEWS, new String[]{"dsid", "varid"});
 			}  
 		};
@@ -97,7 +97,7 @@ public class Confluence extends LASAction {
 					put(Constants.GET_OPERATIONS_KEY, Constants.GET_OPERATIONS); 
 					put(Constants.GET_OPTIONS_KEY, Constants.GET_OPTIONS);
 					put(Constants.GET_REGIONS_KEY, Constants.GET_REGIONS);
-					put(Constants.GET_VARIABLES_KEY, Constants.GET_VARIABLES);
+					put(Constants.GET_VARIABLES_KEY, Constants.GET_VARIABLE);
 					put(Constants.GET_VIEWS_KEY, Constants.GET_VIEWS);
 				}  
 			};
@@ -323,6 +323,12 @@ public class Confluence extends LASAction {
 							return mapping.findForward(Constants.GET_VARIABLES_KEY);
 						} else {
 						   las_url = las_url + Constants.GET_VARIABLES + "?" + request.getQueryString();
+						}
+					} else if ( url.contains(Constants.GET_VARIABLE) ) {
+						if ( local ) {
+							return mapping.findForward(Constants.GET_VARIABLE_KEY);
+						} else {
+						   las_url = las_url + Constants.GET_VARIABLE + "?" + request.getQueryString();
 						}
 					} else if ( url.contains(Constants.GET_VIEWS) ) {
 						if ( local ) {
