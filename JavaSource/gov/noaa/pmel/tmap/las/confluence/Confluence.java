@@ -201,11 +201,11 @@ public class Confluence extends LASAction {
 						return mapping.findForward(Constants.GET_OPTIONS_KEY);
 					}
 				} catch (HttpException e) {
-					log.error("Unable to fetch categories.", e);
+					log.error("Unable to fetch options.", e);
 				} catch (IOException e) {
-					log.error("Unable to fetch categories.", e);
+					log.error("Unable to fetch options.", e);
 				} catch (JDOMException e) {
-					log.error("Unable to fetch categories.", e);
+					log.error("Unable to fetch options.", e);
 				}
 			} else if (url.contains(Constants.PRODUCT_SERVER)) {
 				String xml = request.getParameter("xml");
@@ -250,13 +250,13 @@ public class Confluence extends LASAction {
 							return new ActionForward(Constants.LOCAL_PRODUCT_SERVER+"?remote_las=true&xml="+xml);
 						}
 					} catch (JDOMException e) {
-						logerror(request, "Unable to fetch categories.", e);
+						logerror(request, "Unable to fetch product.", e);
 					} catch (UnsupportedEncodingException e) {
-						logerror(request, "Unable to fetch categories.", e);
+						logerror(request, "Unable to fetch product.", e);
 					} catch (HttpException e) {
-						logerror(request, "Unable to fetch categories.", e);
+						logerror(request, "Unable to fetch product.", e);
 					} catch (IOException e) {
-						logerror(request, "Unable to fetch categories.", e);
+						logerror(request, "Unable to fetch product.", e);
 					}
 				} else {
 					try {
@@ -270,15 +270,15 @@ public class Confluence extends LASAction {
 						las_url = las_url + Constants.PRODUCT_SERVER + "?" + request.getQueryString();	
 						lasProxy.executeGetMethodAndStreamResult(las_url, response);
 					} catch (HttpException e) {
-						logerror(request, "Unable to fetch categories.", e);
+						logerror(request, "Unable to fetch product.", e);
 					} catch (IOException e) {
-						logerror(request, "Unable to fetch categories.", e);
+						logerror(request, "Unable to fetch product.", e);
 					} catch (JDOMException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
 				}
-			}else {
+			} else {
 				String dsid = request.getParameter("dsid");
 				String server_key = dsid.split(Constants.NAME_SPACE_SPARATOR)[0];
 				try {
@@ -341,11 +341,11 @@ public class Confluence extends LASAction {
 					    lasProxy.executeGetMethodAndStreamResult(las_url, response);
 					}					
 				} catch (HttpException e) {
-					logerror(request, "Unable to fetch categories.", e);
+					logerror(request, "Unable to do local request.", e);
 				} catch (IOException e) {
-					logerror(request, "Unable to fetch categories.", e);
+					logerror(request, "Unable to do local request.", e);
 				} catch (JDOMException e) {
-					logerror(request, "Unable to fetch categories.", e);
+					logerror(request, "Unable to do local request.", e);
 				}
 			}
 			return null;

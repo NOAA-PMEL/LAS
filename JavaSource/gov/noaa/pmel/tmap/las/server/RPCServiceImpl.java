@@ -96,6 +96,8 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
 						LASDocument vardoc = new LASDocument();
 						JDOMUtils.XML2JDOM(varxml, vardoc);
 						variable = new Variable(vardoc.getRootElement(), dsid);
+						variable.setDSName(variable.getAttributeValue("dsname"));
+						variable.setDSID(variable.getAttributeValue("dsid"));
 					}
 				}
 			}		
