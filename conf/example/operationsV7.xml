@@ -35,7 +35,7 @@
        <operation name="Overlay plot" ID="Overlay_Plot_2D" output_template="output" service_action="Overlay_Plot_2D" order="0200" private="true" category="visualization" default="true" isZoomable="true">
           <service>ferret</service>
           <response ID="PlotResp">
-             <result type="image" ID="plot_image" streamable="true" mime_type="image/png" file_suffix=".gif" />
+             <result type="image" ID="plot_image" streamable="true" mime_type="image/gif" file_suffix=".gif" />
              <!--  <result type="ps" ID="plot_postscript" 
 streamable="true" mime_type="application/postscript"/> -->
              <result type="image" ID="ref_map"  file_suffix=".gif" />
@@ -59,8 +59,8 @@ streamable="true" mime_type="application/postscript"/> -->
     <operation name="Difference plot" ID="Compare_Plot" output_template="output" service_action="Compare_Plot" order="0201" regrid_prn="true" private="true" category="visualization" isZoomable="true">
           <service>ferret</service>
           <response ID="PlotResp">
-             <result type="image" ID="plot_image" streamable="true" mime_type="image/png" file_suffix=".gif"/>
-             <!-- <result type="ps" ID="plot_postscript" streamable="true" mime_type="application/postscript"/> -->
+             <result type="image" ID="plot_image" streamable="true" mime_type="image/gif" file_suffix=".gif" />
+	<!-- <result type="ps" ID="plot_postscript" streamable="true" mime_type="application/postscript"/> -->
              <result type="image" ID="ref_map" file_suffix=".gif" />
              <result type="map_scale" ID="map_scale"/>
 	     <result type="debug" ID="debug" file_suffix=".txt"/>
@@ -86,7 +86,7 @@ streamable="true" mime_type="application/postscript"/> -->
             <service>ferret</service>
             <response ID="PlotResp">
                 <result type="image" ID="plot_image1" streamable="true"
-                    mime_type="image/png" file_suffix=".gif"/>
+                    mime_type="image/gif" file_suffix=".gif"/>
                 <!-- <result type="ps" ID="plot_postscript1"
                     streamable="true" mime_type="application/postscript" file_suffix=".ps"/> --> -->
                 <result type="image" ID="ref_map1"  file_suffix=".gif"/>
@@ -100,7 +100,7 @@ streamable="true" mime_type="application/postscript"/> -->
             <service>ferret</service>
             <response ID="PlotResp">
                 <result type="image" ID="plot_image2" streamable="true"
-                    mime_type="image/png" file_suffix=".gif" />
+                    mime_type="image/gif" file_suffix=".gif" />
                 <!-- <result type="ps" ID="plot_postscript2"
                     streamable="true" mime_type="application/postscript" file_suffix=".ps"/> -->
                 <result type="image" ID="ref_map2" file_suffix=".gif" />
@@ -134,13 +134,12 @@ streamable="true" mime_type="application/postscript"/> -->
           <grid_types>
             <grid_type name="regular" />
           </grid_types>
-	  <optiondef IDREF="Options_1D"/>
     </operation>
 
-    <operation name="Line plot" ID="Plot_1D" output_template="output" service_action="Plot_1D" order="0102" category="visualization" default="true" isZoomable="true">
+    <operation name="Line plot" ID="Plot_1D" output_template="output" service_action="Plot_1D" order="0102" category="visualization" default="true" isZoomable="false">
           <service>ferret</service>
           <response ID="PlotResp">
-             <result type="image" ID="plot_image" streamable="true" mime_type="image/png" file_suffix=".gif"/>
+             <result type="image" ID="plot_image" streamable="true" mime_type="image/gif" file_suffix=".gif"/>
              <!-- <result type="ps" ID="plot_postscript" streamable="true" mime_type="application/postscript" file_suffix=".ps"/> -->
              <result type="image" ID="ref_map" file_suffix=".gif"/>
              <result type="map_scale" ID="map_scale" file_suffix=".xml"/>
@@ -158,6 +157,28 @@ streamable="true" mime_type="application/postscript"/> -->
           </grid_types>
           <optiondef IDREF="Options_1D_7"/>
     </operation>
+    <operation name="Line plot" ID="Plot_1D_zoom" output_template="zoom" service_action="Plot_1D" order="0102" category="visualization" default="true" isZoomable="true">
+          <service>ferret</service>
+          <response ID="PlotResp">
+             <result type="image" ID="plot_image" streamable="true" mime_type="image/gif" file_suffix=".gif"/>
+             <!-- <result type="ps" ID="plot_postscript" streamable="true" mime_type="application/postscript" file_suffix=".ps"/> -->
+             <result type="image" ID="ref_map" file_suffix=".gif"/>
+             <result type="map_scale" ID="map_scale" file_suffix=".xml"/>
+             <result type="debug" ID="debug" file_suffix=".txt"/>
+             <result type="cancel" ID="cancel" file_suffix=".txt"/>
+          </response>
+          <region>
+            <intervals name="x" />
+            <intervals name="y" />
+            <intervals name="z" />
+            <!--<intervals name="t" />-->
+          </region>
+          <grid_types>
+            <grid_type name="regular" />
+          </grid_types>
+          <optiondef IDREF="Options_1D_7"/>
+    </operation>
+
 
     <operation name="Comparison" ID="Plot_2D_XY_SlideSorter" output_template="vizGal" service_action="" category="visualization">
         <service>template</service>
@@ -167,7 +188,6 @@ streamable="true" mime_type="application/postscript"/> -->
         <grid_types>
             <grid_type name="regular" />
         </grid_types>
-	<optiondef IDREF="Options_2D_image_contour_xy"/>
     </operation>
 
     <operation name="Color plot" ID="Plot_2D_XY"
@@ -175,7 +195,7 @@ streamable="true" mime_type="application/postscript"/> -->
         <service>ferret</service>
         <response ID="PlotResp">
             <result type="image" ID="plot_image" streamable="true"
-                mime_type="image/png" file_suffix=".gif" />
+                mime_type="image/gif" file_suffix=".gif" />
             <!-- <result type="ps" ID="plot_postscript" streamable="true"
                 mime_type="application/postscript" file_suffix=".ps"/> -->
             <result type="image" ID="ref_map" file_suffix=".gif" />
@@ -198,7 +218,7 @@ streamable="true" mime_type="application/postscript"/> -->
         <service>ferret</service>
         <response ID="PlotResp">
             <result type="image" ID="plot_image" streamable="true"
-                mime_type="image/png" />
+                mime_type="image/gif" file_suffix=".gif"/>
             <!-- <result type="ps" ID="plot_postscript" streamable="true"
                 mime_type="application/postscript" /> -->
             <result type="image" ID="ref_map" />
@@ -358,8 +378,8 @@ streamable="true" mime_type="application/postscript"/> -->
     <operation name="Plot to Google Earth (static)" ID="Plot_GE_kml" mime_type="application/vnd.google-earth.kml+xml" output_template="output_GE" private="true" category="virtual_globe">
       <operation name="Plot_2D_GE" ID="Plot_for_GE" service_action="Plot_2D_GE">
         <response ID="PlotResp">
-                        <result type="image" ID="plot_image" streamable="true" mime_type="image/png" file_suffix=".gif"/>
-                        <result type="image" ID="colorbar" streamable="true" mime_type="image/png" file_suffix=".gif"/>
+                        <result type="image" ID="plot_image" streamable="true" mime_type="image/gif" file_suffix=".gif"/>
+                        <result type="image" ID="colorbar" streamable="true" mime_type="image/gif" file_suffix=".gif"/>
                         <!-- <result type="ps" ID="plot_postscript" streamable="true" mime_type="application/postscript" file_suffix=".ps"/> -->
                         <result type="image" ID="ref_map" file_suffix=".gif"/>
                         <result type="map_scale" ID="map_scale" file_suffix=".xml"/>
@@ -392,7 +412,7 @@ streamable="true" mime_type="application/postscript"/> -->
     <operation name="Plot to Google Earth (static)" ID="Vector_GE_kml" mime_type="application/vnd.google-earth.kml+xml" output_template="output_GE" private="true" category="virtual_globe">
       <operation name="Plot_vector_GE" ID="Vector_for_GE" service_action="Plot_vector_GE">
         <response ID="PlotResp">
-          <result type="image" ID="plot_image" streamable="true" mime_type="image/png" file_suffix=".gif"/>
+          <result type="image" ID="plot_image" streamable="true" mime_type="image/gif" file_suffix=".gif"/>
           <!-- <result type="ps" ID="plot_postscript" streamable="true" mime_type="application/postscript" file_suffix=".ps"/> -->
           <result type="image" ID="ref_map" file_suffix=".gif"/>
           <result type="map_scale" ID="map_scale" file_suffix=".xml"/>
@@ -457,7 +477,7 @@ streamable="true" mime_type="application/postscript"/> -->
     <operation name="1D Plot" ID="Plot_1D_GE" output_template="output_response" service_action="Plot_1D" private="true" order="0704" category="visualization">
           <service>ferret</service>
           <response ID="PlotResp">
-             <result type="image" ID="plot_image" streamable="true" mime_type="image/png" file_suffix=".gif"/>
+             <result type="image" ID="plot_image" streamable="true" mime_type="image/gif" file_suffix=".gif"/>
              <!-- <result type="ps" ID="plot_postscript" streamable="true" mime_type="application/postscript" file_suffix=".ps"/> -->
              <result type="image" ID="ref_map" file_suffix=".gif"/>
              <result type="map_scale" ID="map_scale" file_suffix=".xml"/>
@@ -533,7 +553,7 @@ streamable="true" mime_type="application/postscript"/> -->
         output_template="output_wms" service_action="Plot_2D_WMS" private="true" order="9999">
         <response ID="PlotResp">
             <result type="image" ID="plot_image" streamable="true"
-                mime_type="image/png" file_suffix=".gif"/>
+                mime_type="image/gif" file_suffix=".gif"/>
         </response>
         <service>ferret</service>
         <region>
@@ -547,7 +567,7 @@ streamable="true" mime_type="application/postscript"/> -->
     <operation name="2D Color Key for WMS" ID="Plot_2D_ColorKey" 
           output_template="output_colorkey" service_action="Plot_2D_WMS" private="true">
           <response ID="PlotResp">
-             <result type="image" ID="colorbar" streamable="true" mime_type="image/png" />
+             <result type="image" ID="colorbar" streamable="true" mime_type="image/gif" />
           </response>
         <service>ferret</service>
         <region>
@@ -573,15 +593,13 @@ streamable="true" mime_type="application/postscript"/> -->
         <grid_types>
             <grid_type name="regular" />
         </grid_types>
-	<optiondef IDREF="Options_2D_image_contour"/>
     </operation>
-
     <operation name="Color plot" ID="Plot_2D" default="true" output_template="output"
         service_action="Plot_2D" order="0101" category="visualization" isZoomable="true">
         <service>ferret</service>
         <response ID="PlotResp">
             <result type="image" ID="plot_image" streamable="true"
-                mime_type="image/png" file_suffix=".gif" />
+                mime_type="image/gif" file_suffix=".gif" />
             <!-- <result type="ps" ID="plot_postscript" streamable="true"
                 mime_type="application/postscript" /> -->
             <result type="image" ID="ref_map" file_suffix=".gif" />
@@ -590,7 +608,7 @@ streamable="true" mime_type="application/postscript"/> -->
             <result type="cancel" ID="cancel" file_suffix=".txt"/>
         </response>
         <region>
-            <!--  xy has its own operation -->
+	    <!--<intervals name="xy" />-->
             <intervals name="xz" />
             <intervals name="xt" />
             <intervals name="yz" />
@@ -602,12 +620,62 @@ streamable="true" mime_type="application/postscript"/> -->
         </grid_types>
         <optiondef IDREF="Options_2D_image_contour_7"/>
     </operation>
+
+    <operation name="Color plot" ID="Plot_2D_zoom" default="true" output_template="zoom"
+        service_action="Plot_2D" order="0101" category="visualization" isZoomable="true">
+        <service>ferret</service>
+        <response ID="PlotResp">
+            <result type="image" ID="plot_image" streamable="true"
+                mime_type="image/gif" file_suffix=".gif" />
+            <!-- <result type="ps" ID="plot_postscript" streamable="true"
+                mime_type="application/postscript" /> -->
+            <result type="image" ID="ref_map" file_suffix=".gif" />
+            <result type="map_scale" ID="map_scale" file_suffix=".xml"/>
+            <result type="debug" ID="debug" file_suffix=".txt"/>
+            <result type="cancel" ID="cancel" file_suffix=".txt"/>
+        </response>
+        <region>
+	    <!--<intervals name="xy" />-->
+            <intervals name="xz" />
+            <!--<intervals name="xt" />-->
+            <intervals name="yz" />
+            <!--<intervals name="yt" />-->
+            <!--<intervals name="zt" />-->
+
+        </region>
+        <grid_types>
+            <grid_type name="regular" />
+        </grid_types>
+        <optiondef IDREF="Options_2D_image_contour_7"/>
+    </operation>
+    <operation name="Color plot" ID="Plot_2D_XY_zoom" default="true" output_template="zoom"
+        service_action="Plot_2D_XY" order="0101" category="visualization" isZoomable="true">
+        <service>ferret</service>
+        <response ID="PlotResp">
+            <result type="image" ID="plot_image" streamable="true"
+                mime_type="image/gif" file_suffix=".gif" />
+            <!-- <result type="ps" ID="plot_postscript" streamable="true"
+                mime_type="application/postscript" /> -->
+            <result type="image" ID="ref_map" file_suffix=".gif" />
+            <result type="map_scale" ID="map_scale" file_suffix=".xml"/>
+            <result type="debug" ID="debug" file_suffix=".txt"/>
+            <result type="cancel" ID="cancel" file_suffix=".txt"/>
+        </response>
+        <region>
+            <intervals name="xy" />
+        </region>
+        <grid_types>
+            <grid_type name="regular" />
+        </grid_types>
+        <optiondef IDREF="Options_2D_image_contour_7"/>
+    </operation>
+
     <operation name="Vector plot" ID="Plot_vector"
         output_template="output" service_action="Plot_vector" order="0103" private="true" category="visualization" isZoomable="true">
         <service>ferret</service>
         <response ID="PlotResp">
             <result type="image" ID="plot_image" streamable="true"
-                mime_type="image/png" file_suffix=".gif" />
+                mime_type="image/gif" file_suffix=".gif" />
             <!-- <result type="ps" ID="plot_postscript" streamable="true"
                 mime_type="application/postscript" file_suffix=".ps"/> -->
             <result type="image" ID="ref_map" file_suffix=".gif" />
@@ -884,7 +952,7 @@ streamable="true" mime_type="application/postscript"/> -->
        </response>
        <service>database</service>
     </operation>
-    <operation name="Location Plot" ID="Insitu_extract_location_plot" output_template="zoom_2D_XY" order="0104" category="visualization">
+    <operation name="Location Plot" ID="Insitu_extract_location_plot" output_template="zoom" order="0104" category="visualization">
           <operation name="Database Extraction" ID="DBExtract" output_template="ascii" service_action="sql">
                <response ID="DBExtractResponse">
                     <result type="debug" ID="db_debug" file_suffix=".txt"/>
@@ -900,13 +968,13 @@ streamable="true" mime_type="application/postscript"/> -->
                   </property_group>
                </properties>
           </operation>
-          <operation chained="true" name="In-situ location plot" ID="Plot_insitu_XY_locations" output_template="zoom_2D_XY" service_action="Plot_insitu_XY_locations">
+          <operation chained="true" name="In-situ location plot" ID="Plot_insitu_XY_locations" output_template="zoom" service_action="Plot_insitu_XY_locations">
                <args>
                     <arg chained="true" type="variable" index="1" operation="DBExtract" result="netcdf"/>
                     <arg type="region" index="1" ID="in-situ-Region"/>
                </args>
                <response ID="PlotResp" type="HTML" index="1">
-                    <result type="image" ID="plot_image" streamable="true" mime_type="image/png" file_suffix=".gif"/>
+                    <result type="image" ID="plot_image" streamable="true" mime_type="image/gif" file_suffix=".gif"/>
                     <!-- <result type="ps" ID="plot_postscript" streamable="true" mime_type="application/postscript" file_suffix=".ps"/> -->
                     <result type="image" ID="ref_map" file_suffix=".gif" />
                     <result type="debug" ID="debug" file_suffix=".txt"/>
@@ -937,7 +1005,7 @@ streamable="true" mime_type="application/postscript"/> -->
         </grid_types>
     </operation>
     <operation name="Location and Value Plot"
-        ID="Insitu_extract_location_value_plot" output_template="zoom_2D_XY" order="0105" category="visualization">
+        ID="Insitu_extract_location_value_plot" output_template="zoom" order="0105" category="visualization">
         <operation name="Database Extraction" ID="DBExtract"
             output_template="ascii" service_action="sql">
             <response ID="DBExtractResponse">
@@ -955,7 +1023,7 @@ streamable="true" mime_type="application/postscript"/> -->
             </properties>
         </operation>
         <operation chained="true" name="In-situ location and value plot"
-            ID="Plot_insitu_XY_locations_and_values" output_template="zoom_2D_XY"
+            ID="Plot_insitu_XY_locations_and_values" output_template="zoom"
             service_action="Plot_insitu_XY_locations_and_values">
             <args>
                 <arg chained="true" type="variable" index="1"
@@ -964,7 +1032,7 @@ streamable="true" mime_type="application/postscript"/> -->
             </args>
             <response ID="PlotResp" type="HTML" index="1">
                 <result type="image" ID="plot_image" streamable="true"
-                    mime_type="image/png"  file_suffix=".gif"/>
+                    mime_type="image/gif"  file_suffix=".gif"/>
                 <!-- <result type="ps" ID="plot_postscript" streamable="true"
                     mime_type="application/postscript" file_suffix=".ps"/> -->
                 <result type="image" ID="ref_map"  file_suffix=".gif"/>
@@ -1012,7 +1080,7 @@ streamable="true" mime_type="application/postscript"/> -->
         <service>drds</service>
     </operation>
     <operation name="Extract DRDS Data and Plot Location and Value"
-        ID="DRDS_extract_location_value_plot" output_template="output" order="0106" category="visualization">
+        ID="DRDS_extract_location_value_plot" output_template="zoom" order="0106" category="visualization">
         <operation name="Database Extraction" ID="DRDSExtract"
             service_action="drds">
             <response ID="DBExtractResponse">
@@ -1031,7 +1099,7 @@ streamable="true" mime_type="application/postscript"/> -->
             <service>drds</service>
         </operation>
         <operation chained="true" name="DRDS location and value plot"
-            ID="Plot_DRDS_XY_locations_and_values" output_template="zoom_2D_XY"
+            ID="Plot_DRDS_XY_locations_and_values" output_template="zoom"
             service_action="Plot_insitu_XY_locations_and_values" order="0107">
             <args>
                 <arg chained="true" type="variable" index="1"
@@ -1040,7 +1108,7 @@ streamable="true" mime_type="application/postscript"/> -->
             </args>
             <response ID="PlotResp" type="HTML" index="1">
                 <result type="image" ID="plot_image" streamable="true"
-                    mime_type="image/png"  file_suffix=".gif"/>
+                    mime_type="image/gif"  file_suffix=".gif"/>
                 <!-- <result type="ps" ID="plot_postscript" streamable="true"
                     mime_type="application/postscript" file_suffix=".ps"/> -->
                 <result type="image" ID="ref_map"  file_suffix=".gif"/>
@@ -1073,7 +1141,7 @@ streamable="true" mime_type="application/postscript"/> -->
         </grid_types>
     </operation>
     <operation name="Extract DRDS Data and Plot Location"
-        ID="DRDS_extract_location_plot" output_template="output" order="0108" category="visualization" default="true">
+        ID="DRDS_extract_location_plot" output_template="zoom" order="0108" category="visualization" default="true">
         <operation name="Database Extraction" ID="DRDSExtract"
             service_action="drds">
             <response ID="DBExtractResponse">
@@ -1092,7 +1160,7 @@ streamable="true" mime_type="application/postscript"/> -->
             <service>drds</service>
         </operation>
         <operation chained="true" name="DRDS location plot"
-            ID="Plot_DRDS_XY_locations" output_template="zoom_2D_XY"
+            ID="Plot_DRDS_XY_locations" output_template="zoom"
             service_action="Plot_insitu_XY_locations">
             <args>
                 <arg chained="true" type="variable" index="1"
@@ -1101,7 +1169,7 @@ streamable="true" mime_type="application/postscript"/> -->
             </args>
             <response ID="PlotResp" type="HTML" index="1">
                 <result type="image" ID="plot_image" streamable="true"
-                    mime_type="image/png"  file_suffix=".gif"/>
+                    mime_type="image/gif"  file_suffix=".gif"/>
                 <!-- <result type="ps" ID="plot_postscript" streamable="true"
                     mime_type="application/postscript" file_suffix=".ps"/> -->
                 <result type="image" ID="ref_map"  file_suffix=".gif" />
@@ -1162,7 +1230,7 @@ streamable="true" mime_type="application/postscript"/> -->
             </args>
             <response ID="PlotResp" type="HTML" index="1">
                 <result type="image" ID="plot_image" streamable="true"
-                    mime_type="image/png"  file_suffix=".gif"/>
+                    mime_type="image/gif"  file_suffix=".gif"/>
                 <!-- <result type="ps" ID="plot_postscript" streamable="true"
                     mime_type="application/postscript" file_suffix=".ps"/> -->
                 <result type="image" ID="ref_map"  file_suffix=".gif" />
@@ -1232,7 +1300,7 @@ streamable="true" mime_type="application/postscript"/> -->
             <service>dapper</service>
         </operation>
         <operation chained="true" name="Dapper location plot"
-            ID="Plot_Dapper_XY_locations" output_template="zoom_2D_XY"
+            ID="Plot_Dapper_XY_locations" output_template="zoom"
             service_action="Plot_insitu_XY_locations" category="visualization">
             <args>
                 <arg chained="true" type="variable" index="1"
@@ -1241,7 +1309,7 @@ streamable="true" mime_type="application/postscript"/> -->
             </args>
             <response ID="PlotResp" type="HTML" index="1">
                 <result type="image" ID="plot_image" streamable="true"
-                    mime_type="image/png"  file_suffix=".gif"/>
+                    mime_type="image/gif"  file_suffix=".gif"/>
                 <!-- <result type="ps" ID="plot_postscript" streamable="true"
                     mime_type="application/postscript" file_suffix=".ps" /> -->
                 <result type="image" ID="ref_map"  file_suffix=".gif"/>
@@ -1302,7 +1370,7 @@ streamable="true" mime_type="application/postscript"/> -->
             </args>
             <response ID="PlotResp" type="HTML" index="1">
                 <result type="image" ID="plot_image" streamable="true"
-                    mime_type="image/png"  file_suffix=".gif"/>
+                    mime_type="image/gif"  file_suffix=".gif"/>
                 <!-- <result type="ps" ID="plot_postscript" streamable="true"
                     mime_type="application/postscript" file_suffix=".ps" /> -->
                 <result type="image" ID="ref_map"  file_suffix=".gif"/>
@@ -1344,72 +1412,6 @@ streamable="true" mime_type="application/postscript"/> -->
         </response>
     </operation>
 
-
-<!-- Begin: interactive 2d XY plot additions -->
-    <operation name="Color plot" ID="XY_2D_zoom" output_template="newImageInfo" service_action="Plot_2D_XY" default="true" isZoomable="true" private="true" category="visualization">
-          <service>ferret</service>
-          <response ID="PlotResp">
-             <result type="image" ID="plot_image" streamable="true" mime_type="image/png"/>
-             <!-- <result type="ps" ID="plot_postscript" streamable="true" mime_type="application/postscript"/> -->
-             <result type="image" ID="ref_map"/>
-             <result type="map_scale" ID="map_scale"/>
-             <result type="debug" ID="debug"/>
-             <result type="cancel" ID="cancel"/>
-          </response>
-          <region>
-             <intervals name="xy" />
-          </region>
-          <grid_types>
-             <grid_type name="regular"/>
-          </grid_types>
-
-    </operation>
-    <operation name="Interactive color plot" ID="XY_zoomable_image" isZoomable="true" output_template="zoom_2D_XY" service_action="Plot_2D_XY" category="visualization">
-          <service>ferret</service>
-          <response ID="PlotResp">
-             <result type="image" ID="plot_image" streamable="true" mime_type="image/png"/>
-             <!-- <result type="ps" ID="plot_postscript" streamable="true" mime_type="application/postscript"/> -->
-             <result type="image" ID="ref_map"/>
-             <result type="map_scale" ID="map_scale"/>
-             <result type="debug" ID="debug"/>
-             <result type="cancel" ID="cancel"/>
-          </response>
-          <region>
-             <intervals name="xy" />
-          </region>
-          <grid_types>
-             <grid_type name="regular"/>
-          </grid_types>
-         <optiondef IDREF="Options_2D_image_contour_xy_7"/>
-    </operation>
-
-<!-- End: interactive 2d XY plot additions -->
-
-<!-- Begin: interactive plot additions -->
-    <operation name="2D Plot" ID="Zoom_2D" output_template="newImageInfo" service_action="Plot_2D" isZoomable="true">
-          <service>ferret</service>
-          <response ID="PlotResp">
-             <result type="image" ID="plot_image" streamable="true" mime_type="image/png"/>
-             <!-- <result type="ps" ID="plot_postscript" streamable="true" mime_type="application/postscript"/> -->
-             <result type="image" ID="ref_map"/>
-             <result type="map_scale" ID="map_scale"/>
-             <result type="debug" ID="debug"/>
-             <result type="cancel" ID="cancel"/>
-          </response>
-    </operation>
-    <operation name="2D Zoom" ID="Zoomable_image" output_template="zoom_2D" service_action="Plot_2D" category="visualization" isZoomable="true">
-          <service>ferret</service>
-          <response ID="PlotResp">
-             <result type="image" ID="plot_image" streamable="true" mime_type="image/png"/>
-             <!-- <result type="ps" ID="plot_postscript" streamable="true" mime_type="application/postscript"/> -->
-             <result type="image" ID="ref_map"/>
-             <result type="map_scale" ID="map_scale"/>
-             <result type="debug" ID="debug"/>
-             <result type="cancel" ID="cancel"/>
-          </response>
-    </operation>
-
-<!-- End: interactive 2d plot additions -->
 
 <!--  Create a Metadata operation to replace the metadata action managed by the old UI. -->
 <!--  This one shows only summeary and contact information with the variables and their ranges. -->
