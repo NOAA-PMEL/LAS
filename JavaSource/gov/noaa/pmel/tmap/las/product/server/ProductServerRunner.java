@@ -110,7 +110,6 @@ public class ProductServerRunner  extends Thread  {
         HttpSession session = request.getSession();
         stillWorking = true;
        
-        //compoundResponse.setRootElement(new Element("backend_response"));
         // Check the cache.
         boolean globalUseCache = productRequest.getUseCache();
         String compoundResponseFileName = lasConfig.getOutputDir()+File.separator+productRequest.getCacheKey()+"_response.xml";

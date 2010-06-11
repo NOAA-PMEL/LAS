@@ -130,7 +130,7 @@ public class OperationsWidget extends Composite {
 						Map<String, String> attrs = op.getAttributes();
 						
 						// A hack to allow zoomable plots in the old interface and use Plot_2D_XY here.
-						if ( (attrs != null && attrs.containsKey("default") && !op.getID().equals("XY_zoomable_image"))|| op.getID().equals("Plot_2D_XY")) {
+						if ( (attrs != null && attrs.containsKey("default") && !op.getID().equals("Plot_2D_XY_zoom"))|| op.getID().equals("Plot_2D_XY")) {
 							if ( view.equals("xy") && (intervals.contains("x") && intervals.contains("y"))) {	
 								if (!hasXYMap) {
 									xyMapTable.clear();

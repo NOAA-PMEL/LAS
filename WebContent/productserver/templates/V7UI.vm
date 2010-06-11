@@ -53,7 +53,7 @@
 				<div id="nav" style="position:relative;height:100%;width:100%;">
 				#if ($request.getParameter('hideCat'))
 				#else
-					<div class="top_link" width="100%" type="button"  onclick="showDatasetPicker()">Choose dataset&nbsp;</div>		
+					<div id="choose_dataset" class="top_link" width="100%" type="button"  onclick="showDatasetPicker()">Choose dataset&nbsp;</div>		
 					#end	
 					<div  class="top_link" style=" visibility:hidden" id="update" onclick="LAS.makeRequest();"><div style="display:inline;vertical-align:top;">Update Plot</div><input type="checkbox" style="border:none;margin:0pt;" #if($request.getParameter('auto')) checked #end  onmousemove="window.status='Check to automatically update the plot.';" onmouseout="window.status='';" onclick="LAS.toggleAutoUpdate(event,this.checked)"></div>
 					<div  class="top_link" style="visibility:hidden" id="plotOptionsButton" onclick="showPlotOptions()">Set plot options&nbsp;</div>
