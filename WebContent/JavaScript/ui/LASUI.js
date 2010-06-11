@@ -1094,9 +1094,16 @@ LASUI.prototype.onPlotLoad = function (e) {
 			var Req = new LASRequest(unescape(urlArr[i].substr(4,urlArr[i].length)).replace(/\+/g," "));
 
 	if(Req)  {
-			if(Req.getXMLText&&!isFeatureEditing()) 
-				 setMapCurrentSelection(Req.getRangeLo('y'),Req.getRangeHi('y'),Req.getRangeLo('x'),Req.getRangeHi('x'));
-			
+			if(Req.getXMLText&&!isFeatureEditing()) {
+				var minx = Req.getRangeLo('x');
+				var miny = Req.getRangeLo('y');
+				var maxx = Req.getRangeHi('x');
+				var maxy = Req.getRangeHi('y');
+				if(!maxx)maxx=minx;
+				if(!maxy)maxy=miny;
+				if(miny&&minx&&maxy&&maxx)
+				 setMapCurrentSelection(miny,maxy,minx,maxx);
+			}	
 		this.request = Req;
 	}
 	if(document.getElementById("wait"))
@@ -1498,7 +1505,7 @@ LASUI.prototype.makeRequest = function (evt, type) {
 
 		this.request.addRegion();
 		//do the analysis, if required.
-		if(this.refs.analysis.enabled && this.state.analysis.name) {
+		if(this.refs.analysis.enabled && this.state.analysis.enabled) {
 			var Analysis = {"label" : this.state.analysis.name + ' ' + this.state.datasets[this.state.dataset].getChildByID(this.state.variable).name, "axis" : []};
 			for(var axis_id in this.state.analysis.axes) {
 				var Axis= {"type" : axis_id, "op" : this.state.analysis.type};
@@ -1536,7 +1543,7 @@ LASUI.prototype.makeRequest = function (evt, type) {
 		}
 
 		for(var d=0;d<this.state.grid.response.grid.axis.length;d++)
-			if(!(this.refs.analysis.enabled && this.state.analysis.name && this.state.analysis.axes[this.state.grid.response.grid.axis[d].type]))
+			if(!(this.refs.analysis.enabled && this.state.analysis.enabled && this.state.analysis.axes[this.state.grid.response.grid.axis[d].type]))
 				switch(this.state.grid.response.grid.axis[d].type) {
 					case 'x' :
 						if(this.state.view[type].indexOf('x')>=0||this.state.datasets[this.state.dataset].getChildByID(this.state.variable).grid_type=="scattered")
@@ -2068,11 +2075,26 @@ LASUI.prototype.selectAnalysisType = function (evt) {
 		else if (evt.srcElement)
 			var DOMNode = evt.srcElement;
 
-
 		this.state.analysis.type = DOMNode.options[DOMNode.selectedIndex].value;
-		this.state.analysis.name = DOMNode.options[DOMNode.selectedIndex].innerHTML;
-
-	}
+		this.state.analysis.name = DOMNode.options[DOMNode.selectedIndex].innerHTML;	
+	}		
+		 this.state.analysis.enabled = false;
+		if(this.state.analysis.type&&this.state.analysis.axes) {
+			
+			for(var axis in this.state.analysis.axes)
+                                if(this.state.analysis.axes[axis])
+                                        this.state.analysis.enabled = true;
+			if(this.state.analysis.enabled) {
+				for(var axis in this.state.analysis.axes)
+					if(!this.state.view.widgets.indexOf(axis)>=0&&this.state.analysis.axes[axis])
+						this.state.view.widgets+=axis;
+			} 
+		}
+		
+		if(this.state.analysis.enabled)
+         		this.updateConstraints(this.state.view.widgets);
+	        else
+               		this.updateConstraints(this.state.view.plot);
 
 			
 }
@@ -2086,41 +2108,36 @@ LASUI.prototype.selectAnalysisAxis = function (evt) {
 			try {axes =evt.srcElement.value;}
 			catch (e) {axes = ""};
 	}
-	//turn all axes off
-	for(var a in this.state.analysis.axes) {
-			//remove the analysis axis from the widget view
-			if(this.state.view.widgets.indexOf(a)>=0)//&&this.state.view.plot.indexOf(arguments[1])<0)
-				this.state.view.widgets=this.state.view.widgets.substr(0,this.state.view.widgets.indexOf(a))+this.state.view.widgets.substr(this.state.view.widgets.indexOf(a)+1,this.state.view.widgets.length);
-	}
-	this.state.analysis.axes = {};
+        this.state.analysis.axes = {};
+	var changeVis=false;
 
-	if(arguments[2]==true||evt)
-	{
-
-		var changeVis= false;
-		//turn the analysis axis on
+	if((arguments[2]==true||evt)) {
+		//turn the analysis axes on
 		for(var i=0; i< axes.length; i++) {
 			this.state.analysis.axes[axes.charAt(i)] = true;//this.refs.analysis.type.op.value;
-			if(this.state.view.plot.indexOf(axes.charAt(i))>=0&&this.state.analysis.type && this.state.analysis.name != "None")
+			if(this.state.view.plot.indexOf(axes.charAt(i))>=0&&this.state.analysis.type)
 				changeVis = true;
 
-			if(this.state.view.widgets.indexOf(axes.charAt(i))<0&&this.state.analysis.type && this.state.analysis.name != "None")
+			if(this.state.view.widgets.indexOf(axes.charAt(i))<0&&this.state.analysis.type)
 				this.state.view.widgets+=axes.charAt(i);
 		}
-
-
-
-	} else {
-		//turning the analysis axis off
+		
 	}
-	if(this.state.analysis.type && this.state.analysis.name != "None")
+
+	this.state.analysis.enabled = false; 
+	if(this.state.analysis.type&&this.state.analysis.axes) {
+                        for(var axis in this.state.analysis.axes)
+				if(this.state.analysis.axes[axis])
+					this.state.analysis.enabled = true;
+        } 
+
+	if(this.state.analysis.enabled)
 		this.updateConstraints(this.state.view.widgets);
 	else
 		this.updateConstraints(this.state.view.plot);
 
 	if(changeVis)
 		this.setVisualization(axes);
-
 
 }
 LASUI.prototype.setVisualization = function (d) {
