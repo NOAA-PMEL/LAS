@@ -117,8 +117,11 @@ public class DateTimeWidget extends Composite {
 		} else {
 			lo_date = tAxis.getLo();
 			hi_date = tAxis.getHi();
-			
-            init(lo_date, hi_date, tAxis.getRenderString(), tAxis.isClimatology());
+			if ( tAxis.getRenderString().toLowerCase().contains("t") ) {
+               init(lo_date, hi_date, (int)(tAxis.getMinuteInterval()), tAxis.getRenderString(), tAxis.isClimatology());
+			} else {
+				init(lo_date, hi_date, tAxis.getRenderString(), tAxis.isClimatology());
+			}
 		}
 			
 	}
