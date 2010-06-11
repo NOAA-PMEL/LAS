@@ -44,7 +44,7 @@ function LASUI () {
 		"xybox" : {},
 		"categorynames" : [],
 		"analysis" : {"type":null,"axes":{}},
-		"selection" : {"x":{},"y":{},"z":{},"t":{}}
+		"selection" : {"x":{"min":null,"max" :null},"y":{"min":null,"max" :null},"z":{"min":null,"max" :null},"t":{"min":null,"max":null}}
 	};
 
 	//DOM anchor ids.
@@ -1095,14 +1095,33 @@ LASUI.prototype.onPlotLoad = function (e) {
 
 	if(Req)  {
 			if(Req.getXMLText&&!isFeatureEditing()) {
-				var minx = Req.getRangeLo('x');
-				var miny = Req.getRangeLo('y');
-				var maxx = Req.getRangeHi('x');
-				var maxy = Req.getRangeHi('y');
-				if(!maxx)maxx=minx;
-				if(!maxy)maxy=miny;
+				var minx = parseFloat(Req.getRangeLo('x'));
+				var miny = parseFloat(Req.getRangeLo('y'));
+				var maxx = parseFloat(Req.getRangeHi('x'));
+				var maxy = parseFloat(Req.getRangeHi('y'));
+				var mint = parseFloat(Req.getRangeLo('t'));
+                                var minz = parseFloat(Req.getRangeLo('z'));
+                                var maxt = parseFloat(Req.getRangeHi('t'));
+                                var maxz = parseFloat(Req.getRangeHi('z'));
+				if(!maxx&&minx)maxx=minx;
+				if(!maxy&&minx)maxy=miny;
+                                if(!maxz&&minz)maxz=minz;
+                                if(!maxt&&mint)maxt=mint;
+				if(minz>maxz){var z = minz; minz = maxz; maxz = z}			
+	
+				
 				if(miny&&minx&&maxy&&maxx)
 				 setMapCurrentSelection(miny,maxy,minx,maxx);
+				if(minx) this.state.selection.x.min = minx;
+				if(maxx) this.state.selection.x.max = maxx;
+				if(miny) this.state.selection.z.min = miny;
+                                if(maxy) this.state.selection.z.max = maxy;
+                                if(minz) this.state.selection.z.min = minz;
+                                if(maxz) this.state.selection.z.max = maxz;
+	                        if(mint) this.state.selection.t.min = mint;
+                                if(maxt) this.state.selection.t.max = maxt;
+				
+				if(this.state.view.widgets.indexOf('z')>=0) this.initZConstraint('range',true);
 			}	
 		this.request = Req;
 	}
@@ -1260,8 +1279,8 @@ LASUI.prototype.initZConstraint = function (mode, reset) {
 	while(document.getElementById("Depth").firstChild)
 		document.getElementById("Depth").removeChild(document.getElementById("Depth").firstChild);
 
-	if(!this.state.selection.z)
-		this.state.selection.z = {min : null, max: null};
+	if(!this.state.selection.z.min) this.state.selection.z.min = this.state.grid.getLo('z');
+	if(!this.state.selection.z.max) this.state.selection.z.max = this.state.grid.getHi('z');
 
 
 	if(this.state.grid.hasMenu('z'))
@@ -1269,15 +1288,34 @@ LASUI.prototype.initZConstraint = function (mode, reset) {
 			this.refs.DepthWidget.menu = [document.createElement("SELECT"),document.createElement("SELECT")];
 			this.refs.DepthWidget.widgetType = "menu";
 			for(var m=0;m<this.refs.DepthWidget[this.refs.DepthWidget.widgetType].length;m++) {
+				selected = null;
 				for(var v=0;v<this.state.grid.getMenu('z').length;v++) {
 					var _opt = document.createElement("OPTION");
 					_opt.value = this.state.grid.getMenu('z')[v][1];
 					_opt.className = "LASOptionNode";
 					_opt.appendChild(document.createTextNode(this.state.grid.getMenu('z')[v][0]));
-					if(m==1 && v >= this.state.grid.getMenu('z').length-1)
-						_opt.selected=true;
-					if(m==0 && v == 0)
-						_opt.selected=true;
+					if(m==1 && parseFloat(this.state.grid.getMenu('z')[v][0]) >= this.state.selection.z.max){
+						if(selected){
+                                                        if(  parseFloat(this.state.grid.getMenu('z')[v][0])<selected) {
+                                                                _opt.selected=true;
+                                                                selected =  parseFloat(this.state.grid.getMenu('z')[v][0]);
+                                                        }
+                                                } else {
+							 _opt.selected=true;
+                                                        selected= parseFloat(this.state.grid.getMenu('z')[v][0]);
+						}
+					}
+					if(m==0 &&  parseFloat(this.state.grid.getMenu('z')[v][0])<= this.state.selection.z.min){
+					        if(selected) {
+                                                        if(  parseFloat(this.state.grid.getMenu('z')[v][0])>selected) {
+                                                                _opt.selected=true;
+                                                                selected =   parseFloat(this.state.grid.getMenu('z')[v][0]);
+                                                        }
+                                                } else {
+							 _opt.selected=true;
+                                                        selected=  parseFloat(this.state.grid.getMenu('z')[v][0]);
+						}
+					}
 
 					this.refs.DepthWidget[this.refs.DepthWidget.widgetType][m].appendChild(_opt);
 
@@ -1292,15 +1330,34 @@ LASUI.prototype.initZConstraint = function (mode, reset) {
 			this.refs.DepthWidget.widgetType = "arange";
 			for(var m=0;m<this.refs.DepthWidget[this.refs.DepthWidget.widgetType].length;m++) {
 				this.refs.DepthWidget[this.refs.DepthWidget.widgetType][m].className = "LASSelectNode";
+				var selected = null;
 				for(var v=parseFloat(this.state.grid.getLo('z'));v<=parseFloat(this.state.grid.getHi('z'));v+=parseFloat(this.state.grid.getDelta('z'))) {
 					var _opt = document.createElement("option");
 					_opt.value = v;
 					_opt.className = "LASOptionNode";
 					_opt.appendChild(document.createTextNode(v));
-					if(m==1 && v == this.state.grid.getHi('z'))
-						_opt.selected=true;
-					if(m==0 && v == this.state.grid.getLo('z'))
-						_opt.selected=true;
+					if(m==1 && v >= this.state.selection.z.max) {
+						if(selected){
+							if(v<selected) {
+								_opt.selected=true;
+								selected = v
+							}
+						} else {
+							 _opt.selected=true;
+							selected=v;
+						}
+					}
+					if(m==0 && v <= this.state.selection.z.min) {
+						 if(selected){
+                                                        if(v>selected) {
+                                                                _opt.selected=true;
+                                                                selected = v
+                                                        }
+                                                } else {
+                                                        selected=v;
+							 _opt.selected=true;
+						}
+					}
 
 
 					this.refs.DepthWidget[this.refs.DepthWidget.widgetType][m].appendChild(_opt);
@@ -1348,7 +1405,7 @@ LASUI.prototype.initTConstraint = function (mode,reset) {
 		case "widget":
 			if(reset || !this.refs.DW)
 				if(reset || this.refs.DW.widgetType != "DateWidget")	{
-					this.refs.DW = new DateWidget(this.state.grid.getLo('t'),this.state.grid.getHi('t'));
+					this.refs.DW = new DateWidget(this.state.grid.getLo('t'),this.state.grid.getHi('t'),this.state.grid.getMinuteInterval('t'));
 					this.refs.DW.callback = this.handleDateRangeChange.LASBind(this);
 				}
 

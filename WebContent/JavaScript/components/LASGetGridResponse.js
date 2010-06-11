@@ -96,7 +96,7 @@ function LASGetGridResponse(response) {
   this.getSize = LASGetGridResponse_getSize;
   this.getUnits = LASGetGridResponse_getUnits;
   this.getID = LASGetGridResponse_getID;
-
+   this.getMinuteInterval = LASGetGridResponse_getMinuteInterval;
   this.getDisplayType = LASGetGridResponse_getDisplayType;
   this.getRenderFormat = LASGetGridResponse_getRenderFormat;
   this.getMenu = LASGetGridResponse_getMenu;
@@ -273,7 +273,22 @@ function LASGetGridResponse_getDelta(axis) {
   }
   return Number(value);
 }
-
+/**
+ * Returns the minutes delta value of an &lt;arange&gt; associated with a particular
+ * axis of the grid OR <b>null</b> if  the axis has a (&lt;v&gt; array) or 
+ * if the axis doesn't exist in the grid.<p>
+ * @param {string} axis axis of interest
+ * @return delta delta value associated with this axis
+ * @type int
+ */
+function LASGetGridResponse_getMinuteInterval(axis) {
+  var axis_lc = String(axis).toLowerCase();
+  var value = null;
+  if (this.hasArange(axis_lc)) {
+    value = Number(this.getAxis(axis_lc).minuteInterval);
+  }
+  return value;
+}
 
 /**
  * Returns the size of an &lt;arange&gt; associated with a particular
