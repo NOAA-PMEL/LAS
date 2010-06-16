@@ -1757,8 +1757,17 @@ public class LASConfig extends LASDocument {
 	 */
 	public String getGridType(String dsID, String varID) throws JDOMException {
 	    String grid_type="";
+	    
+	    // Try to get a variable with this ID:
+	    
 	    String varXPath = "/lasdata/datasets/dataset[@ID='"+dsID+"']/variables/variable[@ID='"+varID+"']";
 	    Element var = getElementByXPath(varXPath);
+	    
+	    // If it's null try to get a composite with this ID.
+	    if ( var == null ) {
+	    	varXPath = "/lasdata/datasets/dataset[@ID='"+dsID+"']/composite/variable[@ID='"+varID+"']";
+		    var = getElementByXPath(varXPath);
+	    }
 	    if ( var != null ) {
 	        grid_type = var.getAttributeValue("grid_type");
 	        if ( grid_type == null ) {
@@ -2736,7 +2745,17 @@ public class LASConfig extends LASDocument {
 		 * @throws JDOMException
 		 */
 	    public String getUIDefaultName(String dsID, String varID) throws JDOMException {
-			return getVariablePropertyValue("/lasdata/datasets/dataset[@ID='"+dsID+"']/variables/variable[@ID='"+varID+"']","ui", "default");
+	    	String xpath = "/lasdata/datasets/dataset[@ID='"+dsID+"']/variables/variable[@ID='"+varID+"']";
+	    	Element variable = getElementByXPath(xpath);
+	    	if ( variable == null ) {
+	    		xpath = "/lasdata/datasets/dataset[@ID='"+dsID+"']/composite/variable[@ID='"+varID+"']";
+	    	    variable = getElementByXPath(xpath);
+	    	}
+	    	if ( variable == null ) {
+	    		return "";
+	    	} else {
+			    return getVariablePropertyValue(variable,"ui", "default");
+	    	}
 		}
 	    /**
 	     * Get the actual UI Default element
