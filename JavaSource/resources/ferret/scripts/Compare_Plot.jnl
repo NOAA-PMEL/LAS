@@ -11,7 +11,7 @@
 ! dimension.
 !
 
-DEFINE SYMBOL ferret_palette ($ferret_palette"light_centered|default>light_centered|*>($ferret_palette))
+DEFINE SYMBOL ferret_palette light_centered
 
 IF ($ferret_view"|xt>1|*>0") THEN
 

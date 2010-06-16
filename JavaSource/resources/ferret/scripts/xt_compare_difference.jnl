@@ -23,6 +23,12 @@ IF ($ferret_interpolate_data%0|false>0|true>1|1|0|*>1%) THEN SET MODE INTERPOLAT
 
 DEFINE SYMBOL fview = `UPCASE("($ferret_view)")`
 
+! If levels werent sent in, set to use centered levels.
+
+IF `($ferret_contour_levels"0|*>1") EQ 0` THEN DEFINE SYMBOL ferret_contour_levels = c
+IF `($ferret_fill_levels"0|*>1") EQ 0` THEN DEFINE SYMBOL ferret_fill_levels = c
+
+
 ! Define symbols associated with the regign and data and perform any
 ! initialization needed for this dataset.
 !
