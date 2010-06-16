@@ -6,7 +6,11 @@
 ! 3/30/2007 ACM When writing the map_scale.xml file, first list the urls separately;
 !               long URLs can make the Ferret command too long.
 ! 2/11/2008 ACM Add DATA_MIN, DATA_MAX and DATA_EXISTS to the map scale file for 2D plots. 
-
+! 5/2010    ACM Add axis direction symbols for 1D plots: axis_vert or axis_horiz give the 
+!               indep axis, use D for the dep axis.
+!              
+! 5/2010    ACM Write time range in formatted time strings if a time axis.
+! .......................................................................................
 !
 ! LAS_results.jnl creates the result files. 
 !
@@ -112,22 +116,6 @@ IF ($result_map_scale_filename%0|*>1%) THEN
 
    DEFINE SYMBOL taxis_dir = 0
 
-   IF `($ax_horiz"0|T>1|*>0")` THEN
-      DEFINE SYMBOL taxlo = \
-`TAX_DATESTRING(t[gt=the_plot_var,t=($xaxlo)],t[gt=the_plot_var,t=($xaxlo)], "min")`
-      DEFINE SYMBOL taxhi = \
-`TAX_DATESTRING(t[gt=the_plot_var,t=($xaxhi)],t[gt=the_plot_var,t=($xaxhi)], "min")`
-      DEFINE SYMBOL taxis_dir = horiz
-   ENDIF
-
-   IF `($ax_vert"0|T>1|*>0")` THEN
-      DEFINE SYMBOL taxlo = \
-`TAX_DATESTRING(t[gt=the_plot_var,t=($YAXIS_MIN)],t[gt=the_plot_var,t=($YAXIS_MIN)], "min")`
-      DEFINE SYMBOL taxhi = \
-`TAX_DATESTRING(t[gt=the_plot_var,t=($YAXIS_MAX)],t[gt=the_plot_var,t=($YAXIS_MAX)], "min")`
-      DEFINE SYMBOL taxis_dir = horiz
-   ENDIF
-
    LET syms_vals = {\
       "($PPL$XMIN)", "($PPL$XMAX)", \
       "($PPL$YMIN)", "($PPL$YMAX)", \
@@ -163,8 +151,7 @@ IF ($result_map_scale_filename%0|*>1%) THEN
 
    IF `($ax_horiz"0|*>1") OR ($ax_vert"0|*>1")`  THEN 
       LET syms_names = {"AX_HORIZ", "AX_HORIZ_POSTV", "AX_VERT", "AX_VERT_POSTV", \
-      "DATA_EXISTS", "DATA_MIN", "DATA_MAX", \
-      "TAXIS_DIR", "TAXLO", "TAXHI"}
+      "DATA_EXISTS", "DATA_MIN", "DATA_MAX"}
 
 ! Find the axis directions
 
@@ -220,8 +207,7 @@ IF ($result_map_scale_filename%0|*>1%) THEN
       ENDIF
 
       LET syms_vals = {"($AX_HORIZ)", "($AX_HORIZ_POSTV)", "($AX_VERT)", "($AX_VERT_POSTV)",\
-       "($DATA_EXISTS)", "($DATA_MIN)", "($DATA_MAX)",\
-       "($TAXIS_DIR)", "($TAXLO)", "($TAXHI)"}
+       "($DATA_EXISTS)", "($DATA_MIN)", "($DATA_MAX)"}
       
       
       LIST/APPEND/FILE="($result_map_scale_filename)"/NOHEAD/NOROWLAB syms_names, syms_vals
