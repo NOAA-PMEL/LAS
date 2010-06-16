@@ -6,7 +6,6 @@
 ! acm* 2/2010 Set up a few things and then Use Ferret-s open-ended levels 
 !             if the levs havent been set by the user or configuration.
 !             Allow for old algorithm if older Ferret is in place.
-! acm  4/2010 Consolidate so that we use only ferret_fill_levels
 
 ! Based on a variables value over its entire range, set strides
 ! if needed to quickly get stats on the variable. Use this to set levels.
@@ -20,8 +19,9 @@
 ! This script should be done BEFORE any other striding is done.
 ! It operates on the variable on its entire native unstrided grid.
 
-! input_fill_levels is defined in LAS_initialize_variable.jnl, telling 
-! whether settings for levels was sent in
+! input_fill_levels and input_contour_levels are symbols that are defined in 
+! LAS_initialize_variable.jnl, telling whether settings for levels were
+! made 
 
 ! Determine striding for speed in operating the STAT command
 LET memsize = 0.5* 1.e6
@@ -46,13 +46,39 @@ ENDIF
 DEFINE SYMBOL ferret_center_levels ($ferret_center_levels"0|1|TRUE>1|*>0")
 
 ! See if centered levels were requested, either by setting the symbol ferret_center_levels
-! or with a fill_levels that is centered.
+! or with a contour_levels or fill_levels that is centered.
+
+! See if centered levels were requested, either by setting the symbol ferret_center_levels
+! or with a contour_levels or fill_levels that is centered.
 
 ! If contour levels requested with levels of nC, e.g. 20C, then get the value to
 ! set num_fine_levels in the %RANGE command below
 
 ! In general if other levels spec is given, return. However if it is a simple number, 
 ! use that to set the number of fine levels.
+
+IF ($ferret_contour_levels"0|*>1") THEN
+   DEFINE SYMBOL up_contour_levels = `UPCASE("($ferret_contour_levels)")`
+   LET nc = `STRINDEX("($up_contour_levels)", "C")`
+   DEFINE SYMBOL ferret_center_levels = `nc GT 0`
+   IF `nc GT 0` THEN
+      LET slen = STRLEN ("($up_contour_levels)") 
+      IF `slen GT 1` THEN DEFINE SYMBOL num_fine_levels = `SUBSTRING ("($up_contour_levels)", 1, slen-1)`
+      IF `slen GT 1` THEN DEFINE SYMBOL num_fine_levels_contour = ($num_fine_levels)
+      CANCEL SYMBOL input_contour_levels  ! we will redefine the levels in this script
+   ENDIF
+   LET other = `STRINDEX("($up_contour_levels)", "D")` + \
+      `STRINDEX("($up_contour_levels)", "(")`+ \
+      `STRINDEX("($up_contour_levels)", ".")`
+   IF `nc EQ 0 AND other EQ 0` THEN 
+      DEFINE SYMBOL num_fine_levels = ($ferret_contour_levels) ! How to test that this is just a number??
+      DEFINE SYMBOL num_fine_levels_contour = ($num_fine_levels)
+      CANCEL SYMBOL input_contour_levels  ! we will redefine the levels in this script
+   ENDIF
+
+   IF `nc EQ 0 AND other NE 0` THEN  EXIT/SCRIPT
+ENDIF
+
 
 IF ($ferret_fill_levels"0|*>1") THEN
    DEFINE SYMBOL up_fill_levels = `UPCASE("($ferret_fill_levels)")`
@@ -301,50 +327,128 @@ ENDIF
 IF ($do_curvi_xy"0") THEN DEFINE SYMBOL ppvar = pvar
 
 ! Use Ferrets variance-based levels.
-LET varxd = ($ppvar)
-DEFINE SYMBOL shapevar = `varxd,RETURN=shape`
+IF `STRFLOAT("($FERRET_VERSION)") GE 6.425` THEN
+   LET varxd = ($ppvar)
+   DEFINE SYMBOL shapevar = `varxd,RETURN=shape`
 
 ! When we have used striding, RETURN=size doesnt work well
-LET csiz = 1
-DEFINE SYMBOL vsiz = 1
-IF `STRINDEX("($shapevar)", "X") GT 0` THEN 
-   LET cvar = x[gx=varxd]
-   LET csiz = `cvar,RETURN=isize`
-   DEFINE SYMBOL vsiz = `csiz * ($vsiz) `
-ENDIF
-IF `STRINDEX("($shapevar)", "Y") GT 0` THEN 
-   LET cvar = y[gy=varxd]
-   LET csiz = `cvar,RETURN=jsize`
-   DEFINE SYMBOL vsiz = `csiz * ($vsiz)`
-ENDIF
-IF `STRINDEX("($shapevar)", "Z") GT 0` THEN 
-   LET cvar = z[gz=varxd]
-   LET csiz = `cvar,RETURN=ksize`
-   DEFINE SYMBOL vsiz = `csiz * ($vsiz)`
-ENDIF
-IF `STRINDEX("($shapevar)", "T") GT 0` THEN 
-   LET cvar = t[gt=varxd]
-   LET csiz = `cvar,RETURN=lsize`
-   DEFINE SYMBOL vsiz = `csiz * ($vsiz)`
-ENDIF
+   LET csiz = 1
+   DEFINE SYMBOL vsiz = 1
+   IF `STRINDEX("($shapevar)", "X") GT 0` THEN 
+      LET cvar = x[gx=varxd]
+      LET csiz = `cvar,RETURN=isize`
+      DEFINE SYMBOL vsiz = `csiz * ($vsiz) `
+   ENDIF
+   IF `STRINDEX("($shapevar)", "Y") GT 0` THEN 
+      LET cvar = y[gy=varxd]
+      LET csiz = `cvar,RETURN=jsize`
+      DEFINE SYMBOL vsiz = `csiz * ($vsiz)`
+   ENDIF
+   IF `STRINDEX("($shapevar)", "Z") GT 0` THEN 
+      LET cvar = z[gz=varxd]
+      LET csiz = `cvar,RETURN=ksize`
+      DEFINE SYMBOL vsiz = `csiz * ($vsiz)`
+   ENDIF
+   IF `STRINDEX("($shapevar)", "T") GT 0` THEN 
+      LET cvar = t[gt=varxd]
+      LET csiz = `cvar,RETURN=lsize`
+      DEFINE SYMBOL vsiz = `csiz * ($vsiz)`
+   ENDIF
 
 
-LET isqr = INT(($vsiz)^0.5)
+   LET isqr = INT(($vsiz)^0.5)
+   
+   DEFINE AXIS/y=1:`isqr`:1 yshortaxis
+   DEFINE AXIS/x=1:`INT(($vsiz)/isqr)`:1 xhalfaxis
+   LET varshape = x[gx=xhalfaxis] + y[gy=yshortaxis]
+   LET var1d = XSEQUENCE(($ppvar))
+   LET var2d = RESHAPE(var1d, varshape)
+   IF ($ferret_center_levels) THEN 
+     SHADE/LEV=($num_fine_levels)vc var2d
+   ELSE
+     SHADE/LEV=($num_fine_levels)v var2d
+   ENDIF
+   DEFINE SYMBOL ferret_fill_levels = ($LEV_OPNLEVS)
+   DEFINE SYMBOL ferret_contour_levels = ($LEV_OPNLEVS)
 
-DEFINE AXIS/y=1:`isqr`:1 yshortaxis
-DEFINE AXIS/x=1:`INT(($vsiz)/isqr)`:1 xhalfaxis
-LET varshape = x[gx=xhalfaxis] + y[gy=yshortaxis]
-LET var1d = XSEQUENCE(($ppvar))
-LET var2d = RESHAPE(var1d, varshape)
+   EXIT/SCRIPT
+ENDIF
 
+! Execute the stat command to load symbols with the variables
+! mean, max, min, std.
+
+DEFINE SYMBOL stat_ngood= 0
+STAT ($ppvar)
+
+IF `($stat_ngood"0") EQ 0` THEN EXIT/SCRIPT
+
+! If the data values are so big we cant compute stats correctly, just
+! set nominal levels and exit
+
+IF `STRINDEX("($stat_std)", "too big") GT 0 OR \
+  STRINDEX("($stat_mean)", "too big") GT 0 OR \
+  STRINDEX("($stat_min)", "too big") GT 0 OR \
+  STRINDEX("($stat_max)", "too big") GT 0 OR \
+  STRINDEX("($stat_std)", "Inf") GT 0 OR \
+  STRINDEX("($stat_mean)", "Inf") GT 0 OR \
+  STRINDEX("($stat_min)", "Inf") GT 0 OR \
+  STRINDEX("($stat_max)", "Inf") GT 0` THEN 
+
+   IF `($input_fill_levels"0|0|1") EQ 0` THEN 
+      DEFINE SYMBOL ferret_fill_levels = 40
+      IF ($ferret_center_levels) THEN DEFINE SYMBOL ferret_fill_levels = 40c
+   ENDIF
+   IF `($input_contour_levels"0|0|1") EQ 0` THEN 
+      DEFINE SYMBOL ferret_contour_levels = 40
+      IF ($ferret_center_levels) THEN DEFINE SYMBOL ferret_contour_levels = 40c
+   ENDIF
+
+   EXIT/SCRIPT
+ENDIF
+
+! Compute rounded-off levels with the PPL %RANGE command.
+
+!!!  Suggestions from Hankin
+! Determine contour levels to use such that a fine density of levels is used within +/- 1 std dev
+! and a coarse density is used out to +/- 2 std dev.
+! The ratio of densities is density_factor = fine/coarse.
+
+LET density_factor = 4
+! fraction_that_are_fine = density_factor/(1+density_factor)
+
+! This can happen if the data is a constant value...
+IF `($stat_min) EQ ($stat_max)` THEN EXIT/SCRIPT
+
+DEFINE SYMBOL num_fine_levels = `(density_factor/(1+density_factor)) * ($num_contour_levels"30")`
+DEFINE SYMBOL num_coarse_levels =  `($num_contour_levels"30") - ($num_fine_levels)`
+DEFINE SYMBOL half_num_coarse_levels = `($num_coarse_levels)/2`
+
+! Compute rounded-off levels with the PPL %RANGE command.
+
+LET nstd = 2*($stat_std)
+LET nstd = 1*($stat_std)
+
+IF ($stat_mean"1|bad>1|*>0") THEN 
+  DEFINE SYMBOL error_string "The ($data_var)[d=($data_num)] variable has no valid data"
+  MESSAGE/ERROR **ERROR ($error_string)
+  EXIT/PROGRAM
+ENDIF
+
+! Use the statistics above to actually compute the levels
+
+DEFINE SYMBOL remove_plus = 1
 IF ($ferret_center_levels) THEN 
-  SHADE/NOLAB/NOKEY/LEV=($num_fine_levels)vc var2d
+   GO LAS_centered_levels
 ELSE
-  SHADE/NOLAB/NOKEY/LEV=($num_fine_levels)v var2d
+   GO LAS_non_centered_levels
 ENDIF
-DEFINE SYMBOL ferret_fill_levels = ($LEV_OPNLEVS)
 
-EXIT/SCRIPT
+! Use these levels to reset ferret_contour_levels and ferret_fill_levels 
+
+IF `($input_contour_levels"0|0|1") EQ 0` THEN \
+   DEFINE SYMBOL ferret_fill_levels = ($ferret_auto_levels)
+IF `($input_contour_levels"0|0|1") EQ 0` THEN \
+   DEFINE SYMBOL ferret_contour_levels = ($ferret_auto_lines)
 
 ! End of file ------------LAS_auto_levels_animate.jnl--------------------------
 
