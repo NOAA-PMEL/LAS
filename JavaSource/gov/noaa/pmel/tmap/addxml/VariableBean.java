@@ -123,6 +123,14 @@ public class VariableBean extends LasBean {
 		return true;
 	}
 
+	public String getShortName() {
+		if ( getUrl().contains("#") ) {
+			return getUrl().substring(getUrl().indexOf("#")+1);
+		} else {
+			return getElement();
+		}
+	}
+
 
 
 }
