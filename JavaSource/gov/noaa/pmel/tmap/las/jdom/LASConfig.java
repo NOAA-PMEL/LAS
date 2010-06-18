@@ -414,7 +414,16 @@ public class LASConfig extends LASDocument {
                     for (Iterator varIt = variables.iterator(); varIt.hasNext();) {
                         Element variable = (Element) varIt.next();
                         // Get the reference to the grid
-                        if ( variable.getAttributeValue("grid_type") != null && !variable.getAttributeValue("grid_type").equals("vector")) {
+                        if ( variable.getAttributeValue("grid_type") != null && variable.getAttributeValue("grid_type").equals("vector")) {
+                        	List<Element> compositeVars = variable.getChildren("variable");
+                        	if ( compositeVars.size() > 0 ) {
+                        		String VARID = compositeVars.get(0).getAttributeValue("IDREF");
+                        		Grid grid = getGrid(dataset.getAttributeValue("ID"), VARID);
+                        		Element gridE = new Element("grid");
+                        		gridE.setAttribute("IDREF", grid.getID());
+                        		variable.addContent(gridE);
+                        	}                        	
+                        } else {                      	
                         	Element grid = variable.getChild("grid");
                         	String gridID = grid.getAttributeValue("IDREF");
                         	// Replace it with the actual grid element.
@@ -473,15 +482,6 @@ public class LASConfig extends LASDocument {
                         	}
                         	if ( existingIntervals == null ) {
                         		variable.setAttribute("intervals", intervals[0]+intervals[1]+intervals[2]+intervals[3]);
-                        	}
-                        } else {
-                        	List<Element> compositeVars = variable.getChildren("variable");
-                        	if ( compositeVars.size() > 0 ) {
-                        		String VARID = compositeVars.get(0).getAttributeValue("IDREF");
-                        		Grid grid = getGrid(dataset.getAttributeValue("ID"), VARID);
-                        		Element gridE = new Element("grid");
-                        		gridE.setAttribute("IDREF", grid.getID());
-                        		variable.addContent(gridE);
                         	}
                         }
                     }
