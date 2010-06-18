@@ -414,64 +414,75 @@ public class LASConfig extends LASDocument {
                     for (Iterator varIt = variables.iterator(); varIt.hasNext();) {
                         Element variable = (Element) varIt.next();
                         // Get the reference to the grid
-                        Element grid = variable.getChild("grid");
-                        String gridID = grid.getAttributeValue("IDREF");
-                        // Replace it with the actual grid element.
-                        grid = getElementByXPath("/lasdata/grids/grid[@ID='"+gridID+"']");
-                        List axes = grid.getChildren("axis");
-                        String[] intervals = {"","","",""};
-                        String[] points = {"","","",""};
-                        for (Iterator axIt = axes.iterator(); axIt.hasNext();) {
-                            // This is a reference to an axis
-                            Element axis = (Element) axIt.next();
-                            String axisID = axis.getAttributeValue("IDREF");
-                            // Replace it with the actual axis
-                            axis = getElementByXPath("/lasdata/axes/axis[@ID='"+axisID+"']");
-                            String type = axis.getAttributeValue("type");
-                            Element arange = axis.getChild("arange");
-                            int size;
-                            if ( arange != null ) {
-                                size = Integer.valueOf(arange.getAttributeValue("size")).intValue();
-                            } else {
-                                List v = axis.getChildren("v");
-                                size = v.size();
-                            }
-                            // The axis defintions can come in any order but
-                            // we want this string orders XYZT
-                            if ( size == 1 ) {
-                                if ( type.equals("x") ) {
-                                    points[0] = type;
-                                } else if ( type.equals("y") ) {
-                                    points[1] = type;
-                                } else if ( type.equals("z") ) {
-                                    points[2] = type;
-                                } else if ( type.equals("t") ) {
-                                    points[3] = type;
-                                }
-                            } else if ( size > 1 ) {
-                                if ( type.equals("x") ) {
-                                    points[0] = type;
-                                    intervals[0] = type;
-                                } else if ( type.equals("y") ) {
-                                    points[1] = type;
-                                    intervals[1] = type;
-                                } else if ( type.equals("z") ) {
-                                    points[2] = type;
-                                    intervals[2] = type;
-                                } else if ( type.equals("t") ) {
-                                    points[3] = type;
-                                    intervals[3] = type;
-                                }
-                            }
-                        }
-                        String existingPoints = variable.getAttributeValue("points");
-                        String existingIntervals = variable.getAttributeValue("intervals");
-                        // Set them only if they don't already exist in the variable definition.
-                        if ( existingPoints == null ) {
-                            variable.setAttribute("points", points[0]+points[1]+points[2]+points[3]);
-                        }
-                        if ( existingIntervals == null ) {
-                            variable.setAttribute("intervals", intervals[0]+intervals[1]+intervals[2]+intervals[3]);
+                        if ( variable.getAttributeValue("grid_type") != null && !variable.getAttributeValue("grid_type").equals("vector")) {
+                        	Element grid = variable.getChild("grid");
+                        	String gridID = grid.getAttributeValue("IDREF");
+                        	// Replace it with the actual grid element.
+                        	grid = getElementByXPath("/lasdata/grids/grid[@ID='"+gridID+"']");
+                        	List axes = grid.getChildren("axis");
+                        	String[] intervals = {"","","",""};
+                        	String[] points = {"","","",""};
+                        	for (Iterator axIt = axes.iterator(); axIt.hasNext();) {
+                        		// This is a reference to an axis
+                        		Element axis = (Element) axIt.next();
+                        		String axisID = axis.getAttributeValue("IDREF");
+                        		// Replace it with the actual axis
+                        		axis = getElementByXPath("/lasdata/axes/axis[@ID='"+axisID+"']");
+                        		String type = axis.getAttributeValue("type");
+                        		Element arange = axis.getChild("arange");
+                        		int size;
+                        		if ( arange != null ) {
+                        			size = Integer.valueOf(arange.getAttributeValue("size")).intValue();
+                        		} else {
+                        			List v = axis.getChildren("v");
+                        			size = v.size();
+                        		}
+                        		// The axis defintions can come in any order but
+                        		// we want this string orders XYZT
+                        		if ( size == 1 ) {
+                        			if ( type.equals("x") ) {
+                        				points[0] = type;
+                        			} else if ( type.equals("y") ) {
+                        				points[1] = type;
+                        			} else if ( type.equals("z") ) {
+                        				points[2] = type;
+                        			} else if ( type.equals("t") ) {
+                        				points[3] = type;
+                        			}
+                        		} else if ( size > 1 ) {
+                        			if ( type.equals("x") ) {
+                        				points[0] = type;
+                        				intervals[0] = type;
+                        			} else if ( type.equals("y") ) {
+                        				points[1] = type;
+                        				intervals[1] = type;
+                        			} else if ( type.equals("z") ) {
+                        				points[2] = type;
+                        				intervals[2] = type;
+                        			} else if ( type.equals("t") ) {
+                        				points[3] = type;
+                        				intervals[3] = type;
+                        			}
+                        		}
+                        	}
+                        	String existingPoints = variable.getAttributeValue("points");
+                        	String existingIntervals = variable.getAttributeValue("intervals");
+                        	// Set them only if they don't already exist in the variable definition.
+                        	if ( existingPoints == null ) {
+                        		variable.setAttribute("points", points[0]+points[1]+points[2]+points[3]);
+                        	}
+                        	if ( existingIntervals == null ) {
+                        		variable.setAttribute("intervals", intervals[0]+intervals[1]+intervals[2]+intervals[3]);
+                        	}
+                        } else {
+                        	List<Element> compositeVars = variable.getChildren("variable");
+                        	if ( compositeVars.size() > 0 ) {
+                        		String VARID = compositeVars.get(0).getAttributeValue("IDREF");
+                        		Grid grid = getGrid(dataset.getAttributeValue("ID"), VARID);
+                        		Element gridE = new Element("grid");
+                        		gridE.setAttribute("IDREF", grid.getID());
+                        		variable.addContent(gridE);
+                        	}
                         }
                     }
                 }
@@ -697,12 +708,19 @@ public class LASConfig extends LASDocument {
                         // Technically, I think there's only one of these per dataset,
                         // but you can't be sure so loop over all you can find.
                         List variablesParents = dataset.getChildren();
+                        List<Element> compositeElements = new ArrayList<Element>();
                         for (Iterator varsIt = variablesParents.iterator(); varsIt.hasNext();) {
                             Element variablesElement = (Element) varsIt.next();
+                          
                             if ( !variablesElement.getName().equals("properties") &&
                             	 !variablesElement.getName().equals("documentation") &&
                             	 !variablesElement.getName().equals("contributor") ) {
+                            	boolean composite = false;
                                 List variables = variablesElement.getChildren();
+                                
+                                if ( variablesElement.getName().equals("composite") ) {
+                                	composite = true;
+                                }
                                 for (Iterator varIt = variables.iterator(); varIt.hasNext();) {
                                     Element var = (Element) varIt.next();
                                     if ( !var.getName().equals("properties") &&
@@ -711,14 +729,28 @@ public class LASConfig extends LASDocument {
                                         String VID = var.getName();
                                         var.setName("variable");
                                         var.setAttribute("ID", VID);
-                                        Element grid = var.getChild("link");
-                                        String GID = grid.getAttributeValue("match");
-                                        String[] parts = GID.split("/");
-                                        GID = parts[3];
-                                        grid.setName("grid");
-                                        grid.removeAttribute("match");
-                                        grid.setAttribute("IDREF", GID);
-                                        // Convert any proproperties.
+                                        if ( composite ) {
+                                        	var.setAttribute("grid_type", "vector");
+                                        	List<Element> varRef = var.getChildren("link");
+                                        	for (Iterator varRefIt = varRef.iterator(); varRefIt.hasNext();) {
+												Element element = (Element) varRefIt.next();
+												String VARID = element.getAttributeValue("match");											
+												VARID = VARID.substring(VARID.lastIndexOf("/")+1);
+												element.setName("variable");
+												element.removeAttribute("match");
+												element.setAttribute("IDREF", VARID);
+											}
+                                            compositeElements.add(var);
+                                        } else {
+                                        	Element grid = var.getChild("link");
+                                        	String GID = grid.getAttributeValue("match");
+                                        	String[] parts = GID.split("/");
+                                        	GID = parts[3];
+                                        	grid.setName("grid");
+                                        	grid.removeAttribute("match");
+                                        	grid.setAttribute("IDREF", GID);
+                                        }
+                                        // Convert any properties.
                                         Element vprops = var.getChild("properties");
                                         if (vprops != null) {
                                             vprops.setContent(LASDocument.convertProperties(vprops));
@@ -726,6 +758,13 @@ public class LASConfig extends LASDocument {
                                     } else if ( var.getName().equals("properties") ){
                                         var.setContent(LASDocument.convertProperties(var));
                                     }
+                                }
+                                if ( composite ) {
+                                	Element firstVariablesElement = dataset.getChild("variables");
+                                	for (Iterator compIt = compositeElements.iterator(); compIt.hasNext();) {
+										Element compVar = (Element) compIt.next();
+										firstVariablesElement.addContent(compVar.detach());
+									}
                                 }
                             } else if ( variablesElement.getName().equals("properties") ) {
                                 variablesElement.setContent(LASDocument.convertProperties(variablesElement));
