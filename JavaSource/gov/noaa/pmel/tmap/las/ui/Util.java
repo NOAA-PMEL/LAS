@@ -166,7 +166,11 @@ public class Util {
 					if ( child.getChildren().size() > 0 ) {
 						json.array_accumulate(child.getName(), toJSON(child, asArrays));
 					} else {
-						json.accumulate(child.getName(), child.getTextTrim());
+						if ( child.getTextTrim().length() > 0 && child.getAttributes().size() == 0 ) {
+							json.accumulate(child.getName(), child.getTextTrim());
+						} else {
+							json.accumulate(child.getName(), toJSON(child, asArrays));
+						}
 					}
 				} else {
 					if ( child.getChildren().size() > 0 ) {
