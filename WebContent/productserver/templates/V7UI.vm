@@ -119,8 +119,8 @@
 		<div id="externalOptions" class="LASPopupDIVNode" style="display:none;"></div>
 	</body>
                 <script type="text/javascript" language="javascript" src="JavaScript/ui/LASUI.js"></script>
-#if ($request.getParameter("debug"=="true")
-	#include(JavaScript/ui/LASUI_includes.vm)
+#if ($request.getParameter("debug")=="true")
+	#include("JavaScript/ui/LASUI_includes.vm")
 #else
 		<script type="text/javascript" language="javascript" src="JavaScript/ui/LASUI_compiled_components.js"></script>
                 <script type="text/javascript" language="javascript" src="JavaScript/ui/LASUI_compiled.js"></script>
