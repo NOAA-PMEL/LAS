@@ -1047,7 +1047,7 @@ LASUI.prototype.setDefaultProductMenu = function () {
 			}
 	}
 
-	if(setPlotDefault) {
+	if(setPlotDefault&&defaultPlotProduct) {
 		this.setOperation(this,defaultPlotProduct.id,defaultPlotProduct.view,defaultPlotProduct.optiondef);
 		this.refs.operations.plot.children[defaultPlotProductName].radio.checked = true;
 
@@ -1555,7 +1555,10 @@ LASUI.prototype.makeRequest = function (evt, type) {
 		this.request.removeRegion();
 
 		//add the variables
-
+		if(this.state.datasets[this.state.dataset].getChildByID(this.state.variable).grid_type=="vector") {
+			for(var v=0;v<this.state.datasets[this.state.dataset].getChildByID(this.state.variable).variable.length;v++)
+				 this.request.addVariable(this.state.dataset,this.state.datasets[this.state.dataset].getChildByID(this.state.variable).variable[v].IDREF)	
+		} else
 		this.request.setVariable(this.state.dataset, this.state.variable);
 
 
