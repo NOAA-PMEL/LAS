@@ -1,0 +1,273 @@
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! $RCSfile: xy_compare_vectors.jnl
+! 
+! $Author: ansley $
+! $Date: 2010/06/23
+
+! xy_compare_vectors.jnl creates an XY plot for use with the 
+! Back End Server code that sits behind a Live Access Server (LAS). 
+! It produces a difference plot of 2 vector pairs variables which 
+! are on the same xy grid
+!
+! Set any Ferret modes
+!
+! NOTE:  Should we support any of the following Ferrt modes?
+! NOTE:    ASCII_FONT, CALENDAR, DEPTH_LABEL, LABELS, LATIT_LABEL, LONG_LABEL 
+
+IF ($ferret_interpolate_data%0|false>0|true>1|1|0|*>1%) THEN SET MODE INTERPOLATE
+
+DEFINE SYMBOL fview = `UPCASE("($ferret_view)")`
+
+! If levels werent sent in, set to use centered levels.
+
+IF `($ferret_contour_levels"0|*>1") EQ 0` THEN DEFINE SYMBOL ferret_contour_levels = c
+IF `($ferret_fill_levels"0|*>1") EQ 0` THEN DEFINE SYMBOL ferret_fill_levels = c
+
+! Define symbols associated with the regign and data and perform any
+! initialization needed for this dataset.
+!
+! NOTE:  Adding support for a 'base layer' variable would mean passing
+! NOTE:  some other argument.  For now, though, we always use 'data_0'
+! NOTE:  for the base layer and region.
+
+GO LAS_initialize_region 0
+
+GO LAS_initialize_data 0
+DEFINE SYMBOL ferret_vector_x1 ($ferret_plot_var)
+DEFINE SYMBOL ferret_plot_title_x1 "($data_title) ($data_units)"
+
+GO LAS_initialize_data 1
+DEFINE SYMBOL ferret_vector_y1 ($ferret_plot_var)
+DEFINE SYMBOL ferret_title_0 "($ferret_plot_title_x1), ($data_title) ($data_units)"
+
+! Check for errors (They often occur during dataset initialization.)
+
+IF ($error_status"0|*>1") THEN
+  MESSAGE/ERROR **ERROR ($error_string)
+  EXIT/PROGRAM
+ENDIF
+
+
+! Check for errors 
+IF ($error_status"0|ERROR>1") THEN
+  MESSAGE/ERROR ($error_string)
+  EXIT/PROGRAM
+ENDIF
+
+! Initialize next dataset. 
+! (The interface guarantees that the match in X and Y)
+
+! Apply any expression only to the first variable not to this one.
+CANCEL SYMBOL ferret_expression 
+
+
+GO LAS_initialize_region 2
+DEFINE SYMBOL region_1_t_lo ($region_2_t_lo)  ! so that LAS_set_diff_label can be used.
+
+GO LAS_initialize_data 2
+DEFINE SYMBOL ferret_vector_x2 ($ferret_plot_var)
+DEFINE SYMBOL ferret_plot_title_x2 "($data_title) ($data_units)"
+
+GO LAS_initialize_data 3
+DEFINE SYMBOL ferret_vector_y2 ($ferret_plot_var)
+DEFINE SYMBOL ferret_title_1 "($ferret_plot_title_x2), ($data_title) ($data_units)"
+
+! Check whether the region is too small to make a 2D plot on this grid.
+GO LAS_check_2d_region
+
+! Check for errors 
+
+IF ($error_status"0|*>1") THEN
+   MESSAGE/ERROR **ERROR ($error_string)
+   EXIT/PROGRAM
+ENDIF
+
+
+! If we are using index strides then apply the correct ones to 
+! the first variable.
+IF ($set_ndx_strides_0"0|*>1") THEN
+   DEFINE SYMBOL ferret_var_0 = ($data_0_var)[d=($data_0_num),($set_ndx_strides_0)]
+ENDIF
+
+! Compare the X and Y axes of the two variables. They must be the same.
+
+GO LAS_compare_axes "($data_0_var)[d=($data_0_num)]" "($data_2_var)[d=($data_2_num)]" ($fview)
+
+! Check for errors 
+
+IF ($error_status"0|*>1") THEN   
+   DEFINE SYMBOL error_string = ($fview) grid of ($data_2_var) must match ($fview) grid of ($data_0_var)
+   MESSAGE/ERROR **ERROR ($error_string)
+   EXIT/PROGRAM
+ENDIF
+
+! Define the plot variable 
+
+DEFINE SYMBOL ferret_vector_xdiff = ($ferret_vector_x1)-($ferret_vector_x2)
+DEFINE SYMBOL ferret_vector_ydiff = ($ferret_vector_y1)-($ferret_vector_y2)
+DEFINE SYMBOL ferret_diff_var = ($ferret_vector_xdiff), ($ferret_vector_ydiff)
+
+IF ($native_curvilinear_xy"0|*>1") THEN 
+  DEFINE SYMBOL ferret_vector_base_xdiff = ($ferret_vector_x1)-($ferret_vector_x2)
+  DEFINE SYMBOL ferret_vector_base_ydiff = ($ferret_vector_y1)-($ferret_vector_y2)
+  DEFINE SYMBOL ferret_diff_var = ($ferret_vector_base_xdiff),($ferret_vector_base_ydiff), xcoord, ycoord
+  DEFINE SYMBOL ferret_diff_var_m360 = ($ferret_vector_base_xdiff),($ferret_vector_base_ydiff), xcoord-360, ycoord
+ENDIF
+
+! Set the title, and the labels for the upper left listing the locations
+! and time in directions normal to the plot, and in the upper right listing
+! urls if dataset are opendap.
+
+GO LAS_set_diff_labels ($fview)
+DEFINE SYMBOL ferret_plot_title ($ferret_diff_title)
+
+! Open the window, apply size, scale options
+GO LAS_open_window
+
+! TODO:  Should the creation of the ($qualifiers) symbol for standard
+! TODO:  2D plots be separated out in a separate script called:
+! TODO:    LAS_2D_plot_qualifiers.jnl
+!
+! Build up the plot qualifiers
+
+! Curvilinear plots may have more qualifiers. 
+IF ($native_curvilinear_xy"0|*>1") THEN
+  DEFINE SYMBOL qualifiers = ($qualifiers)($ferret_curvi_quals)
+ENDIF
+
+
+! Set up for degrees-minutes-seconds labels on axes with units of degrees
+
+IF ($ferret_deg_min_sec"0|false>0|*>1") THEN GO LAS_set_deg_min_sec.jnl
+
+! Vector style arrow (default) or flowline
+
+IF `($ferret_vector_style"0|default>0|1|*>0") GT 0` THEN  
+   DEFINE SYMBOL qualifiers = ($qualifiers)/FLOWLINE
+ENDIF
+IF `($ferret_land_type"0|contour>1|*>0") EQ 1` THEN DEFINE SYMBOL ferret_land_arg = thick
+
+! Vector density for flowline plots
+
+IF `($ferret_vector_density"0|*>1") GT 0` THEN  
+   DEFINE SYMBOL qualifiers = ($qualifiers)/DENSITY=($ferret_vector_density)
+ENDIF
+
+! Vector length scale
+
+IF `($ferret_vector_length"0") GT 0` THEN  
+   DEFINE SYMBOL qualifiers = ($qualifiers)/LENGTH=($ferret_vector_length)
+ENDIF
+
+! Vector xskip and yskip
+
+IF ($ferret_vector_skip"0|*>1") THEN
+   LET comloc = `STRINDEX("($ferret_vector_skip)", ",")`
+   LET nlen = `STRLEN("($ferret_vector_skip)")`
+   IF `comloc GT 1` THEN
+       DEFINE SYMBOL xskp = `SUBSTRING ("($ferret_vector_skip)", 1, comloc-1)`
+       DEFINE SYMBOL yskp = `SUBSTRING ("($ferret_vector_skip)", comloc+1, nlen-comloc)`
+    ELSE
+       DEFINE SYMBOL xskp = ($ferret_vector_skip)
+       DEFINE SYMBOL yskp = ($ferret_vector_skip)
+    ENDIF
+
+    LET xs = STRFLOAT ("($xskp)")
+    LET ys = STRFLOAT ("($yskp)")
+
+    IF ($error_status"0|*>1") THEN
+       MESSAGE/ERROR **ERROR format of vector skip is xskip,yskip
+       EXIT/PROGRAM
+    ENDIF
+
+    DEFINE SYMBOL qualifiers = ($qualifiers)/XSKIP=`xs`/YSKIP=`ys`
+
+ENDIF
+
+IF ($ferret_use_graticules"1|0|*>1) THEN
+  SET MODE GRATICULE:(DASH,COLOR=black)
+ENDIF
+
+
+! Line color
+
+IF `($ferret_line_color%0|default>0|*>1%)` THEN
+  DEFINE SYMBOL qualifiers = ($qualifiers)/COLOR=($ferret_line_color%0|default>black|red|blue|green|lightblue|purple|*>black%)
+ENDIF
+
+! line thickness
+
+IF `($ferret_line_thickness%0|default>1|*>1%)` THEN
+   DEFINE SYMBOL qualifiers = ($qualifiers)($ferret_line_thickness%/THICK=1|default>/THICK=1|1>/THICK=1|2>/THICK=2|3>/THICK=3|*>/THICK=1%)
+ENDIF
+
+! Do the plot. On VECTOR/SET the /XSKIP and /YSKIP are ignored. 
+!
+
+DEFINE SYMBOL shade_var = ($ferret_vector_x1)
+IF ($native_curvilinear_xy"0") THEN DEFINE SYMBOL  shade_var = ferret_vector_x1, xcoord, ycoord
+
+IF ($ferret_curvi_quals"0|*>1") THEN 
+   IF ($ferret_lon_modulo"1|1|0|yes>1|no>0|*>0") THEN  DEFINE SYMBOL shade_qualifiers = /($shade_qualifiers)/MODULO
+ENDIF
+
+SHADE/pal=white/nokey($shade_qualifiers)/TITLE="($ferret_plot_title)"/SET  ($shade_var)
+   IF ($xform_dms"0|*>1") THEN PPL XFOR (($xform_dms))
+   IF ($yform_dms"0|*>1") THEN PPL YFOR (($yform_dms))
+   
+      if ($labnum_dset"0|*>1") THEN go unlabel ($labnum_dset)
+      if ($labnum_datitl"0|*>1") THEN go unlabel ($labnum_datitl)
+      if ($labnum_dods"0|*>1") THEN go unlabel ($labnum_dods)
+      IF `($title_size%0|*>1%)` THEN PPL LABSET ($title_size)
+PPL SHADE
+
+! use XSKIP and YSKIP as qualifiers if given
+IF ($ferret_vector_skip"0") THEN
+
+   VECTOR/OVER/NOLAB($qualifiers)/TITLE="($ferret_plot_title)"/XSKIP=`xs`/YSKIP=`ys` \
+       ($ferret_diff_var)
+
+   IF `($ferret_vector_style"1|default>1|*>0") GT 0` THEN  
+      DEFINE SYMBOL n_left_labels = `($n_left_labels"0")+1`
+      DEFINE SYMBOL upper_left_($n_left_labels) = Vector xskip=`xs`,yskip=`ys`
+   ENDIF
+
+ELSE
+   VECTOR/OVER/NOLAB($qualifiers)/TITLE="($ferret_plot_title)"  \
+       ($ferret_diff_var)
+
+   IF `($ferret_vector_style"1|default>1|*>0") GT 0` THEN  
+      DEFINE SYMBOL n_left_labels = `($n_left_labels"0")+1`
+      DEFINE SYMBOL upper_left_($n_left_labels) = Automatic vector xskip,yskip 
+   ENDIF
+ENDIF
+
+! Overall header at the very top
+GO LAS_ferret_las_version_header
+
+! Put the labels for time/location in the upper left
+
+GO labels_above_plot
+
+! Overlay additional cartography data (land mask, outlines, rivers, ...)
+
+IF ($ferret_land_type"1|none>0|contour>0|filled>1|default>1|*>0") THEN
+  GO LAS_fland 
+ELIF ($ferret_land_type"0|none>0|contour>1|filled>0|*>0") THEN
+  IF `( ($region_x_range"360") LT 60) OR ( ($region_y_range) LT 30)` THEN
+     GO land_detail
+  ELSE
+     GO land 
+  ENDIF
+ENDIF
+
+! Mark grid points. Options are no, subsample (tests if subsampling needed)
+! or all to force marking all points.
+
+IF ($ferret_mark_grid"0|no>0|all>1|subsample>1|*>0") THEN GO mark_grid
+
+! Save the results
+GO LAS_results box
+
+! End of $RCSfile -----------------------------------------------------
+
