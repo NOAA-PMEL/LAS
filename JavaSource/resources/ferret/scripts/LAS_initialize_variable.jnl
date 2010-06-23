@@ -22,6 +22,8 @@ LET attlist = ($data_var).attnames
 IF ($data_var_nq"0|*>1") THEN LET attlist = ($data_var_nq).attnames
 DEFINE SYMBOL data_var_only = `UPCASE("($data_var)")`
 
+IF ($ferret_bad_flag"0|*>1") THEN SET VAR/BAD=($ferret_bad_flag) ($data_var)
+
 ! setup for analysis ops on curvilinear grids 
 IF `IS_ELEMENT_OF_STR (attlist, "ferret_definition") GT 0 AND\
     ($ferret_curvi_coord_lon"0|*>1")` THEN
