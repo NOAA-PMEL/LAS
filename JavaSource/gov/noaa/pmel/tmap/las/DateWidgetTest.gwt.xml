@@ -3,6 +3,9 @@
       <!-- Inherit the core Web Toolkit stuff.                        -->
       <inherits name='com.google.gwt.user.User'/>
       <inherits name="com.google.gwt.i18n.I18N"/>
+      <inherits name='org.gwtopenmaps.openlayers.OpenLayers'/>
+       <!--  The nifty printing utility -->
+      <inherits name='br.com.freller.tool.PrintTest'/>
       
       <source path="client"/>
 	

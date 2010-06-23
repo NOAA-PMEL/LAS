@@ -28,6 +28,7 @@ import gov.noaa.pmel.tmap.las.product.server.Cache;
 import gov.noaa.pmel.tmap.las.ui.LASProxy;
 import gov.noaa.pmel.tmap.las.ui.state.StateNameValueList;
 import gov.noaa.pmel.tmap.las.ui.state.TimeSelector;
+import gov.noaa.pmel.tmap.las.util.Arange;
 import gov.noaa.pmel.tmap.las.util.Axis;
 import gov.noaa.pmel.tmap.las.util.Category;
 import gov.noaa.pmel.tmap.las.util.Constants;
@@ -422,73 +423,90 @@ public class LASConfig extends LASDocument {
                         		Element gridE = new Element("grid");
                         		gridE.setAttribute("IDREF", grid.getID());
                         		variable.addContent(gridE);
+                        		setPointsAndIntervals(variable, grid);
                         	}                        	
                         } else {                      	
-                        	Element grid = variable.getChild("grid");
-                        	String gridID = grid.getAttributeValue("IDREF");
-                        	// Replace it with the actual grid element.
-                        	grid = getElementByXPath("/lasdata/grids/grid[@ID='"+gridID+"']");
-                        	List axes = grid.getChildren("axis");
-                        	String[] intervals = {"","","",""};
-                        	String[] points = {"","","",""};
-                        	for (Iterator axIt = axes.iterator(); axIt.hasNext();) {
-                        		// This is a reference to an axis
-                        		Element axis = (Element) axIt.next();
-                        		String axisID = axis.getAttributeValue("IDREF");
-                        		// Replace it with the actual axis
-                        		axis = getElementByXPath("/lasdata/axes/axis[@ID='"+axisID+"']");
-                        		String type = axis.getAttributeValue("type");
-                        		Element arange = axis.getChild("arange");
-                        		int size;
-                        		if ( arange != null ) {
-                        			size = Integer.valueOf(arange.getAttributeValue("size")).intValue();
-                        		} else {
-                        			List v = axis.getChildren("v");
-                        			size = v.size();
-                        		}
-                        		// The axis defintions can come in any order but
-                        		// we want this string orders XYZT
-                        		if ( size == 1 ) {
-                        			if ( type.equals("x") ) {
-                        				points[0] = type;
-                        			} else if ( type.equals("y") ) {
-                        				points[1] = type;
-                        			} else if ( type.equals("z") ) {
-                        				points[2] = type;
-                        			} else if ( type.equals("t") ) {
-                        				points[3] = type;
-                        			}
-                        		} else if ( size > 1 ) {
-                        			if ( type.equals("x") ) {
-                        				points[0] = type;
-                        				intervals[0] = type;
-                        			} else if ( type.equals("y") ) {
-                        				points[1] = type;
-                        				intervals[1] = type;
-                        			} else if ( type.equals("z") ) {
-                        				points[2] = type;
-                        				intervals[2] = type;
-                        			} else if ( type.equals("t") ) {
-                        				points[3] = type;
-                        				intervals[3] = type;
-                        			}
-                        		}
-                        	}
-                        	String existingPoints = variable.getAttributeValue("points");
-                        	String existingIntervals = variable.getAttributeValue("intervals");
-                        	// Set them only if they don't already exist in the variable definition.
-                        	if ( existingPoints == null ) {
-                        		variable.setAttribute("points", points[0]+points[1]+points[2]+points[3]);
-                        	}
-                        	if ( existingIntervals == null ) {
-                        		variable.setAttribute("intervals", intervals[0]+intervals[1]+intervals[2]+intervals[3]);
-                        	}
+                        	Grid grid = getGrid(dataset.getAttributeValue("ID"), variable.getAttributeValue("ID"));
+                        	setPointsAndIntervals(variable, grid);
                         }
                     }
                 }
             }
         }
     }
+    private void setPointsAndIntervals(Element variable, Grid grid) throws JDOMException {
+    	List<Axis> axes = grid.getAxes();
+    	String[] intervals = {"","","",""};
+    	String[] points = {"","","",""};
+    	int size;
+    	if ( grid.hasT() ) {
+    		TimeAxis taxis = grid.getTime();
+    		Arange arange = taxis.getArange();
+
+    		if ( arange != null ) {
+    			size = Integer.valueOf(arange.getSize()).intValue();
+    		} else {
+    			List v = taxis.getVerticies();
+    			size = v.size();
+    		}
+    		if ( size == 1 ) {				
+    			points[3] = "t";
+    		} else if ( size > 1 ) {
+    			points[3] = "t";
+    			intervals[3] = "t";
+    		}
+    	}
+
+    	for (Iterator axesIt = axes.iterator(); axesIt.hasNext();) {
+    		Axis axis = (Axis) axesIt.next();
+    		String type = axis.getType();
+    		Arange arange = axis.getArange();
+
+    		if ( arange != null ) {
+    			size = Integer.valueOf(arange.getSize()).intValue();
+    		} else {
+    			List v = axis.getVerticies();
+    			size = v.size();
+    		}
+    		// The axis defintions can come in any order but
+    		// we want this string orders XYZT
+    		if ( size == 1 ) {
+    			if ( type.equals("x") ) {
+    				points[0] = type;
+    			} else if ( type.equals("y") ) {
+    				points[1] = type;
+    			} else if ( type.equals("z") ) {
+    				points[2] = type;
+    			} else if ( type.equals("t") ) {
+    				points[3] = type;
+    			}
+    		} else if ( size > 1 ) {
+    			if ( type.equals("x") ) {
+    				points[0] = type;
+    				intervals[0] = type;
+    			} else if ( type.equals("y") ) {
+    				points[1] = type;
+    				intervals[1] = type;
+    			} else if ( type.equals("z") ) {
+    				points[2] = type;
+    				intervals[2] = type;
+    			} else if ( type.equals("t") ) {
+    				points[3] = type;
+    				intervals[3] = type;
+    			}
+    		}
+    	}
+    	String existingPoints = variable.getAttributeValue("points");
+    	String existingIntervals = variable.getAttributeValue("intervals");
+    	// Set them only if they don't already exist in the variable definition.
+    	if ( existingPoints == null ) {
+    		variable.setAttribute("points", points[0]+points[1]+points[2]+points[3]);
+    	}
+    	if ( existingIntervals == null ) {
+    		variable.setAttribute("intervals", intervals[0]+intervals[1]+intervals[2]+intervals[3]);
+    	}    	
+    }
+
     /**
      * Create all the extra fancy attributes for a time axis so the DateWidgets can be initialized.
      * @param axis the axis description from this config

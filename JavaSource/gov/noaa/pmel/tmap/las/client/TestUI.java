@@ -6,6 +6,7 @@ import gov.noaa.pmel.tmap.las.client.laswidget.OperationPushButton;
 import gov.noaa.pmel.tmap.las.client.laswidget.OperationsMenu;
 import gov.noaa.pmel.tmap.las.client.laswidget.SettingsWidget;
 import gov.noaa.pmel.tmap.las.client.serializable.CategorySerializable;
+import gov.noaa.pmel.tmap.las.client.serializable.ConfigSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.DatasetSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.GridSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.OperationSerializable;
@@ -62,6 +63,7 @@ public class TestUI implements EntryPoint {
 	DockPanel dockPanel = new DockPanel();
 	PopupPanel initializing = new PopupPanel();
 	VerticalPanel center = new VerticalPanel();
+	OperationSerializable[] ops;
 	public void onModuleLoad() {
 		String spinImageURL = URLUtil.getImageURL()+"/mozilla_blu.gif";
 		output = new HTML("<img src=\""+spinImageURL+"\" alt=\"Spinner\"/> Initializing...");
@@ -150,7 +152,7 @@ public class TestUI implements EntryPoint {
 					for (int i=0; i < vars.length; i++ ) {
 						if ( vars[i].getID().equals(vid) ) {
 							var = vars[i];
-							Util.getRPCService().getGrid(var.getDSID(), var.getID(), getGridCallback);
+							Util.getRPCService().getConfig(view, var.getDSID(), var.getID(), getGridCallback);
 						}
 					}
 				}
@@ -215,7 +217,7 @@ public class TestUI implements EntryPoint {
 			}
 			panel = new VizGalPanel("LAS", true, op, option, view, true);
 			panel.setVariable(var);
-			panel.init(false);
+			panel.init(false, ops);
 			// will be done with apply button... panel.addCompareAxisChangeHandler(onAxisChange);
 			panel.setPanelHeight(pheight);
 			panel.addApplyHandler(panelApply);
@@ -231,10 +233,11 @@ public class TestUI implements EntryPoint {
 			panel.refreshPlot(settingsControls.getOptions(), false, true);
 		}		
 	};
-	AsyncCallback getGridCallback = new AsyncCallback() {
-		public void onSuccess(Object result) {
+	AsyncCallback<ConfigSerializable> getGridCallback = new AsyncCallback<ConfigSerializable>() {
+		public void onSuccess(ConfigSerializable config) {
             
-			GridSerializable grid = (GridSerializable) result;
+			GridSerializable grid = config.getGrid();
+			ops = config.getOperations();
 			var.setGrid(grid);
 			initPanel();
 			

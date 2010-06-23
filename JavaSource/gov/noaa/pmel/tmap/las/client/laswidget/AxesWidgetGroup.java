@@ -260,7 +260,7 @@ public class AxesWidgetGroup extends Composite {
     		refMap.setVisible(false);
     	}
     }
-    public void setFixedAxis(String view, List<String> ortho, String fixedAxis, String compareAxis) {
+    public void setFixedAxis(String view, List<String> ortho, String compareAxis) {
         arrangeAxes(view, ortho, compareAxis);
         boolean showFixedPanel = false;
         for (Iterator orthoIt = ortho.iterator(); orthoIt.hasNext();) {

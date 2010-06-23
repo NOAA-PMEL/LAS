@@ -9,7 +9,9 @@ import gov.noaa.pmel.tmap.las.client.laswidget.OperationRadioButton;
 import gov.noaa.pmel.tmap.las.client.laswidget.SettingsWidget;
 import gov.noaa.pmel.tmap.las.client.map.MapSelectionChangeListener;
 import gov.noaa.pmel.tmap.las.client.map.OLMapWidget;
+import gov.noaa.pmel.tmap.las.client.serializable.ConfigSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.GridSerializable;
+import gov.noaa.pmel.tmap.las.client.serializable.OperationSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.VariableSerializable;
 import gov.noaa.pmel.tmap.las.client.util.Constants;
 import gov.noaa.pmel.tmap.las.client.util.URLUtil;
@@ -168,6 +170,9 @@ public class VizGalPanel extends Composite {
 	// Keep track of whether the retry is visible and remove it when the results come back.
 	boolean retryShowing = false;
 	
+	// Keep track of the current operations set
+	OperationSerializable[] ops;
+	
 	/**
 	 * Builds a VizGal panel with a default plot for the variable.  See {@code}VizGal(LASRequest) if you want more options on the initial plot.
 	 */
@@ -181,7 +186,7 @@ public class VizGalPanel extends Composite {
 		String spinImageURL = URLUtil.getImageURL()+"/mozilla_blu.gif";
 		spinImage = new HTML("<img src=\""+spinImageURL+"\" alt=\"Spinner\"/>");
 		
-		rangeMessage = new HTML("Set plot range selectors to a different values and clike the Apply button.");
+		rangeMessage = new HTML("Set plot range selectors to a different values and click the Apply button.");
 
 		spin = new PopupPanel();
 		
@@ -243,7 +248,8 @@ public class VizGalPanel extends Composite {
 
 
 	}
-	public void init(boolean usePanel) {
+	public void init(boolean usePanel, OperationSerializable[] ops) {
+		this.ops = ops;
 		min =  999999999.;
 		max = -999999999.;
 	    datasetLabel.setText(var.getDSName()+": "+var.getName());
@@ -259,7 +265,7 @@ public class VizGalPanel extends Composite {
 		double delta = Math.abs(Double.valueOf(ds_grid.getXAxis().getArangeSerializable().getStep()));
 		panelAxesWidgets.getRefMap().setDataExtent(grid_south, grid_north, grid_west, grid_east, delta);
 		
-		settingsButton.setOperations(var.getIntervals(), var.getDSID(), var.getID(), operationID, view);
+		settingsButton.setOperations(var.getIntervals(), operationID, view, ops);
 		
 		settingsButton.setUsePanel(usePanel);
 		if ( ds_grid.getTAxis() != null ) {
@@ -407,9 +413,16 @@ public class VizGalPanel extends Composite {
 		lasRequest.removeVariables();
 		lasRequest.removePropertyGroup("ferret");
 
-		lasRequest.addVariable(var.getDSID(), var.getID());
+		if ( var.getAttributes().get("grid_type").equals("vector") ) {
+			// Add the first component
+			lasRequest.addVariable(var.getDSID(), var.getComponents().get(0));
+		} else {
+			lasRequest.addVariable(var.getDSID(), var.getID());
+		}
 		lasRequest.setOperation(operationID, "v7");
-		
+
+		// If its a vector plot add the second variable.
+
 
 		if ( var.getGrid().getTAxis() != null ) {
 			lasRequest.setRange("t", panelAxesWidgets.getTAxis().getFerretDateLo(), panelAxesWidgets.getTAxis().getFerretDateHi(), 0);
@@ -426,6 +439,34 @@ public class VizGalPanel extends Composite {
 		if ( var.getGrid().getZAxis() != null ) {
 			lasRequest.setRange("z", panelAxesWidgets.getZAxis().getLo(), panelAxesWidgets.getZAxis().getHi(), 0);
 		}
+
+		if ( var.isVector() ) {
+			// Add the second component...
+			lasRequest.addVariable("dummy", "dummy");
+
+			lasRequest.addRegion();
+			lasRequest.replaceVariable(var.getDSID(), var.getComponents().get(1), 1);
+			
+			// TODO you will need to determine which component you need from the view!
+			
+			if ( var.getGrid().getTAxis() != null ) {
+				lasRequest.setRange("t", panelAxesWidgets.getTAxis().getFerretDateLo(), panelAxesWidgets.getTAxis().getFerretDateHi(), 1);
+			}
+
+			xlo = String.valueOf(panelAxesWidgets.getRefMap().getXlo());
+			xhi = String.valueOf(panelAxesWidgets.getRefMap().getXhi());
+			ylo = String.valueOf(panelAxesWidgets.getRefMap().getYlo());
+			yhi = String.valueOf(panelAxesWidgets.getRefMap().getYhi());
+
+			lasRequest.setRange("x", xlo, xhi, 1);
+			lasRequest.setRange("y", ylo, yhi, 1);
+
+			if ( var.getGrid().getZAxis() != null ) {
+				lasRequest.setRange("z", panelAxesWidgets.getZAxis().getLo(), panelAxesWidgets.getZAxis().getHi(), 1);
+			}
+
+		}
+
 		return lasRequest;
 	}
 	private RequestCallback mapScaleCallBack = new RequestCallback() {
@@ -596,7 +637,7 @@ public class VizGalPanel extends Composite {
 				nvar = (VariableSerializable) v;
 				ngrid = null;
 				changeDataset = true;
-				Util.getRPCService().getGrid(nvar.getDSID(), nvar.getID(), gridCallback);
+				Util.getRPCService().getConfig(view, nvar.getDSID(), nvar.getID(), configCallback);
 			}
 		}
 
@@ -606,7 +647,7 @@ public class VizGalPanel extends Composite {
 		}
 
 	};
-	public AsyncCallback gridCallback = new AsyncCallback() {
+	public AsyncCallback<ConfigSerializable> configCallback = new AsyncCallback<ConfigSerializable>() {
 
 		@Override
 		public void onFailure(Throwable caught) {
@@ -614,9 +655,10 @@ public class VizGalPanel extends Composite {
 		}
 
 		@Override
-		public void onSuccess(Object result) {
-			ngrid = (GridSerializable) result;
+		public void onSuccess(ConfigSerializable config) {
+			ngrid = config.getGrid();
 			nvar.setGrid(ngrid);
+			ops = config.getOperations();
 			applyChanges();
 		}
 		
@@ -640,7 +682,7 @@ public class VizGalPanel extends Composite {
 			datasetLabel.setText(var.getDSName()+": "+var.getName());
 			settingsButton.setUsePanel(true);
 			changeDataset = false;
-			init(true);
+			init(true, ops);
 		}
 		
 		if (settingsButton.isUsePanelSettings()) {
