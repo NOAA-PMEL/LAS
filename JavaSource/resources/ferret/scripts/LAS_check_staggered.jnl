@@ -1,0 +1,35 @@
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! LAS_check_staggered.jnl
+! 
+! Author: ansley 
+! Date: 2010/06 
+!
+! Vector components may be on staggered grids. Detect this and set the 
+! second component to be regridded to the grid of the first.
+!
+
+DEFINE SYMBOL xax_vec_1 = `($ferret_plot_base_var_0),RETURN=xaxis`
+DEFINE SYMBOL yax_vec_1 = `($ferret_plot_base_var_0),RETURN=yaxis`
+DEFINE SYMBOL xax_vec_2 = `($ferret_plot_base_var_1),RETURN=xaxis`
+DEFINE SYMBOL yax_vec_2 = `($ferret_plot_base_var_1),RETURN=yaxis`
+
+IF `STRCMP("($xax_vec_1)", "($xax_vec_2)") NE 0` THEN DEFINE SYMBOL ferret_staggered_grid = 1
+IF `STRCMP("($yax_vec_1)", "($yax_vec_2)") NE 0` THEN DEFINE SYMBOL ferret_staggered_grid = 1
+
+! Regrid the second component to the grid of the first. If in curvilinear
+! coordinates (will staggered grids always be in curvi??) then define 
+! the regridding on the base var, w/o curvi coordinate variables.
+! The curvi coord variables should match the first component.
+
+IF `($ferret_staggered_grid"0|default>1|*>1") GT 0` THEN  
+   IF ($do_curvi_xy"0|0|1|*>1") THEN 
+      LET v2 = ($ferret_plot_base_var_1)
+      DEFINE SYMBOL ferret_plot_base_var_1 = v2[gxy=($ferret_plot_base_var_0)]
+   ELSE
+      LET v2 = ($ferret_vector_2)
+      DEFINE SYMBOL ferret_vector_2 = v2[gxy=($ferret_vector_1)]
+   ENDIF
+
+   DEFINE SYMBOL n_left_labels = `($n_left_labels"0")+1`
+   DEFINE SYMBOL upper_left_($n_left_labels) = "Regridded from Staggered Grid" 
+ENDIF
