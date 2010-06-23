@@ -3,6 +3,10 @@
  */
 package gov.noaa.pmel.tmap.las.util;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 import gov.noaa.pmel.tmap.las.client.serializable.GridSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.VariableSerializable;
 
@@ -82,6 +86,10 @@ public class Variable extends Container implements VariableInterface {
     	variableSerializable.setAttributes(getAttributesAsMap());
     	variableSerializable.setProperties(getPropertiesAsMap());
     	variableSerializable.setGrid(getGridSerializable());
+    	if ( isVector() ) {
+    		variableSerializable.setVector(isVector());
+    		variableSerializable.setComponents(getComponents());
+    	}
     	return variableSerializable;
     }
     public GridSerializable getGridSerializable() {
@@ -112,5 +120,40 @@ public class Variable extends Container implements VariableInterface {
 	public void setDSName(String name) {
 		DSName = name;
 		element.setAttribute("dsname", name);
+	}
+	
+	public boolean isVector() {
+		boolean vector = false;
+		for (Iterator attrIt = getAttributes().iterator(); attrIt.hasNext();) {
+			NameValuePair attr = (NameValuePair) attrIt.next();
+			if ( attr.getName().equals("grid_type") && attr.getValue().equals("vector") ) {
+				vector = true;
+			}
+		}
+		return vector;
+	}
+	
+	public boolean hasW() {
+		boolean hasw = false;
+		if ( isVector() ) {
+			if ( getComponents().size() == 3 ) {
+			   hasw = true;
+			}
+		}
+		return hasw;
+	}
+	public List<String> getComponents() {
+		
+		List<String> components = new ArrayList<String>();
+		
+		if ( isVector() ) {
+			List comps = getElement().getChildren("variable");
+			for (Iterator compsIt = comps.iterator(); compsIt.hasNext();) {
+				Element var = (Element) compsIt.next();
+				components.add(var.getAttributeValue("IDREF"));
+			}
+		}
+		
+		return components;
 	}
 }

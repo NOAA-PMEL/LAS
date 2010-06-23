@@ -5,10 +5,12 @@ import gov.noaa.pmel.tmap.las.jdom.JDOMUtils;
 import gov.noaa.pmel.tmap.las.client.RPCException;
 import gov.noaa.pmel.tmap.las.client.RPCService;
 import gov.noaa.pmel.tmap.las.client.serializable.CategorySerializable;
+import gov.noaa.pmel.tmap.las.client.serializable.ConfigSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.DatasetSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.GridSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.OperationSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.OptionSerializable;
+import gov.noaa.pmel.tmap.las.client.serializable.RegionSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.VariableSerializable;
 import gov.noaa.pmel.tmap.las.exception.LASException;
 import gov.noaa.pmel.tmap.las.jdom.LASConfig;
@@ -22,6 +24,7 @@ import gov.noaa.pmel.tmap.las.util.Dataset;
 import gov.noaa.pmel.tmap.las.util.Grid;
 import gov.noaa.pmel.tmap.las.util.Operation;
 import gov.noaa.pmel.tmap.las.util.Option;
+import gov.noaa.pmel.tmap.las.util.Region;
 import gov.noaa.pmel.tmap.las.util.Tributary;
 import gov.noaa.pmel.tmap.las.util.Variable;
 import gov.noaa.pmel.tmap.las.util.View;
@@ -71,6 +74,16 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
 			}
 		
 		return cats;
+	}
+	public ConfigSerializable getConfig(String view, String dsid, String varid) throws RPCException {
+		ConfigSerializable wire_config = new ConfigSerializable();
+		GridSerializable wire_grid = getGridSerializable(dsid, varid);
+		wire_config.setGrid(wire_grid);
+		OperationSerializable[] wire_operations = getOperationsSerialziable(view, dsid, varid);
+		wire_config.setOperations(wire_operations);
+		RegionSerializable[] wire_regions = getRegionsSerializable(dsid, varid);
+		wire_config.setRegions(wire_regions);
+		return wire_config;
 	}
 	public VariableSerializable getVariable(String dsid, String varid ) throws RPCException {
 		LASConfig lasConfig = (LASConfig) getServletContext().getAttribute(LASConfigPlugIn.LAS_CONFIG_KEY);
@@ -206,6 +219,9 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
 		return cats;	
 	}
 	public GridSerializable getGrid(String dsID, String varID) throws RPCException {
+		return getGridSerializable(dsID, varID);
+	}
+	private GridSerializable getGridSerializable(String dsID, String varID) throws RPCException {
 		LASConfig lasConfig = (LASConfig) getServletContext().getAttribute(LASConfigPlugIn.LAS_CONFIG_KEY);
 		Grid grid = null;
 		if ( lasConfig.allowsSisters() ) {
@@ -254,6 +270,9 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
 		}
 	}
 	public OperationSerializable[] getOperations(String view, String dsID, String varID) throws RPCException {
+		return getOperationsSerialziable(view, dsID, varID);
+	}
+	private OperationSerializable[] getOperationsSerialziable(String view, String dsID, String varID) throws RPCException {
 		LASConfig lasConfig = (LASConfig) getServletContext().getAttribute(LASConfigPlugIn.LAS_CONFIG_KEY);
 		ArrayList<Operation> operations = new ArrayList<Operation>();
 		OperationSerializable[] wireOps = null;
@@ -366,6 +385,54 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
 			k++;
 		}
 		return wireOps;
+	}
+	public RegionSerializable[] getRegions(String dsID, String varID) throws RPCException {
+		return getRegionsSerializable(dsID, varID);
+	}
+	private RegionSerializable[] getRegionsSerializable(String dsID, String varID) throws RPCException {
+		LASConfig lasConfig = (LASConfig) getServletContext().getAttribute(LASConfigPlugIn.LAS_CONFIG_KEY);
+		ArrayList<Region> regions = new ArrayList<Region>();
+		RegionSerializable[] wire_regions = null;
+		if ( lasConfig.allowsSisters() ) {
+			try {
+				if ( dsID != null ) {
+					if ( !dsID.contains(Constants.NAME_SPACE_SPARATOR) || lasConfig.isLocal(dsID) ) {
+					    regions = lasConfig.getRegions(dsID, varID);
+					} else {
+						String[] parts = dsID.split(Constants.NAME_SPACE_SPARATOR);
+						String server_key = null;
+						if ( parts != null ) {
+							server_key = parts[0];
+							if ( server_key != null ) {
+								Tributary trib = lasConfig.getTributary(server_key);
+								String las_url = trib.getURL() + Constants.GET_REGIONS + "?format=xml&dsid="+dsID+"&varid="+varID;
+								String regionsxml = lasProxy.executeGetMethodAndReturnResult(las_url);
+								LASDocument regionsdoc = new LASDocument();
+								JDOMUtils.XML2JDOM(regionsxml, regionsdoc);
+								Element regionsElement = regionsdoc.getRootElement();
+								List regionsList = regionsElement.getChildren("region");
+								for (Iterator regionIt = regionsList.iterator(); regionIt.hasNext();) {
+									Element region = (Element) regionIt.next();
+									Region r = new Region(region);
+									regions.add(r);
+								}
+							}
+						}
+					}
+				}
+			} catch(Exception e) {
+				throw new RPCException(e.getMessage());
+			}
+		}
+		if ( regions.size() <= 0 ) {
+			// TODO throw this.  In the meantime it's ok to send back an empty list since we're not using it on the client.
+			//throw new RPCException("No regions found.");
+		}
+		wire_regions = new RegionSerializable[regions.size()];
+		for( int i = 0; i < regions.size(); i++ ) {
+			wire_regions[i] = regions.get(i).getRegionSerializable();
+		}
+		return wire_regions;
 	}
 	/**
 	 * (non-Javadoc)

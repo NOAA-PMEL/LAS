@@ -101,6 +101,10 @@ public class SettingsWidget extends Composite {
 	public void setOperations(String intervals, String dsID, String varID, String opID, String view) {
 		operations.setOperations(intervals, dsID, varID, opID, view);
 	}
+	
+	public void setOperations(String intervals, String opID, String view, OperationSerializable[] ops) {
+		operations.setOperations(intervals, opID, view, ops);
+	}
 
 	public void addDatasetTreeListener(TreeListener datasetTreeListener) {
 		datasetButton.addTreeListener(datasetTreeListener);

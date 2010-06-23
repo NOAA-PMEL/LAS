@@ -10,6 +10,7 @@
 package gov.noaa.pmel.tmap.las.client.serializable;
 
 
+import java.util.List;
 import java.util.Map;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
@@ -23,6 +24,9 @@ public class VariableSerializable extends Serializable implements IsSerializable
     String DSID;
     String DSName;
     GridSerializable grid;
+    List<String> components;
+	boolean vector;
+	
 	
 	/**
 	 * 
@@ -69,5 +73,18 @@ public class VariableSerializable extends Serializable implements IsSerializable
 	
 	public String getIntervals() {
 		return attributes.get("intervals");
+	}
+	
+	public List<String> getComponents() {
+		return components;
+	}
+	public void setComponents(List<String> components) {
+		this.components = components;
+	}
+	public boolean isVector() {
+		return vector;
+	}
+	public void setVector(boolean vector) {
+		this.vector = vector;
 	}
 }

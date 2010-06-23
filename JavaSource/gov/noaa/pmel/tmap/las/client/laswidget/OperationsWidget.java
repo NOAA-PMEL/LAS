@@ -74,11 +74,15 @@ public class OperationsWidget extends Composite {
 		this.initialOp = opID;
 		this.initialView = view;
 		this.currentView = initialView;
-		if ( ops != null ) {
-			setOps();
-		}  else {
-			Util.getRPCService().getOperations(null, dsID, varID, operationsCallback);	
-		}
+		Util.getRPCService().getOperations(null, dsID, varID, operationsCallback);	
+	}
+	public void setOperations(String intervals, String opID, String view, OperationSerializable[] ops) {
+		this.intervals = intervals;
+		this.initialOp = opID;
+		this.initialView = view;
+		this.currentView = initialView;
+		this.ops = ops;
+		setOps();
 	}
 	AsyncCallback operationsCallback = new AsyncCallback() {
 		public void onSuccess(Object result) {

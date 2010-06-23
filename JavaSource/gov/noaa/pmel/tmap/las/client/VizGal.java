@@ -7,7 +7,9 @@ import gov.noaa.pmel.tmap.las.client.laswidget.OperationRadioButton;
 import gov.noaa.pmel.tmap.las.client.laswidget.OperationsWidget;
 import gov.noaa.pmel.tmap.las.client.laswidget.OptionsButton;
 import gov.noaa.pmel.tmap.las.client.serializable.CategorySerializable;
+import gov.noaa.pmel.tmap.las.client.serializable.ConfigSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.GridSerializable;
+import gov.noaa.pmel.tmap.las.client.serializable.OperationSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.VariableSerializable;
 import gov.noaa.pmel.tmap.las.client.util.Constants;
 import gov.noaa.pmel.tmap.las.client.util.Util;
@@ -77,7 +79,7 @@ public class VizGal implements EntryPoint {
 	String dsid;
 	String vid;
 	String view;
-	String op;
+	String operationID;
 	String optionID;
 	/*
 	 * These are optional parameters that can be used to set the xyzt ranges for the initial plot in the panels.
@@ -214,6 +216,8 @@ public class VizGal implements EntryPoint {
      // Sometimes  you need to keep the current map selection values.
      double[] cs = null;
 	
+     // Keep track of the current operations
+     OperationSerializable[] ops;
      
      
 	public void onModuleLoad() {
@@ -223,7 +227,7 @@ public class VizGal implements EntryPoint {
 		dsid = Util.getParameterString("dsid");
 		vid = Util.getParameterString("vid");
 		//TODO If the operation is null, get the default operation (the map or plot; left nav) for this view.
-		op = Util.getParameterString("opid");
+		operationID = Util.getParameterString("opid");
 		optionID = Util.getParameterString("optionid");
 		view = Util.getParameterString("view");
 
@@ -246,6 +250,7 @@ public class VizGal implements EntryPoint {
 		
 		// Button to turn on and off difference mode.
 		differenceButton = new ToggleButton("Difference Mode");
+		differenceButton.ensureDebugId("differenceButton");
 		differenceButton.setTitle("Toggle Difference Mode");
 		differenceButton.addClickListener(differencesClick);
 
@@ -254,11 +259,13 @@ public class VizGal implements EntryPoint {
 	    buttonLayout = new FlexTable();
 	    buttonFormatter = buttonLayout.getFlexCellFormatter();
 	    datasetButton = new DatasetButton();
+	    datasetButton.ensureDebugId("datasetButton");
 	    datasetButton.addTreeListener(datasetTreeListener);
 	    // This is all to get around the fact that the OpenLayers map is always in front.
 	    datasetButton.addOpenClickHandler(datasetOpenHandler);
 	    datasetButton.addCloseClickHandler(datasetCloseHandler);
 	    optionsButton = new OptionsButton(optionID, 0);
+	    optionsButton.ensureDebugId("optionsButton");
 	    optionsButton.addOkClickListener(optionsOkListener);
 	    hideControls.setOpen(true);
 	    hideControls.addCloseHandler(new CloseHandler<DisclosurePanel>() {
@@ -311,11 +318,13 @@ public class VizGal implements EntryPoint {
 		
 		// Sets the contour levels for all plots based on the global min/max of the data (as returned in the map scale file).
 		autoContourButton = new ToggleButton("Auto Colors");
+		autoContourButton.ensureDebugId("autoContourButton");
 		autoContourButton.setTitle("Set consistent contour levels for all panels.");
 		autoContourButton.addClickListener(autoContour);
 		
 		buttonLayout.setWidget(0, 4, autoContourButton);
 		autoContourTextBox = new TextBox();
+		autoContourTextBox.ensureDebugId("autoContourTextBox");
 		buttonLayout.setWidget(0, 5, autoContourTextBox);
 
 		/*
@@ -384,7 +393,7 @@ public class VizGal implements EntryPoint {
 	    buttonLayout.setWidget(0, 8, printerFriendlyButton);
 		
 		// Initialize the gallery with an asynchronous call to the server to get variable needed.
-		if ( dsid != null && vid != null & op != null && view != null) {
+		if ( dsid != null && vid != null & operationID != null && view != null) {
 			// If the proper information was sent to the widget, pull down the variable definition
 			// and initialize the slide sorter with this Ajax call.
 			Util.getRPCService().getVariable(dsid, vid, requestGrid);
@@ -482,7 +491,7 @@ public class VizGal implements EntryPoint {
 		public void onSuccess(Object result) {
 			var = (VariableSerializable) result;
 			initial_var = var;
-			Util.getRPCService().getGrid(dsid, vid, initVisGal);
+			Util.getRPCService().getConfig(view, dsid, vid, initVizGal);
 		}
 
 
@@ -492,21 +501,23 @@ public class VizGal implements EntryPoint {
 		}
 	};
 
-	AsyncCallback getGridForChangeDatasetCallback = new AsyncCallback() {
-		public void onSuccess(Object result) {
+	AsyncCallback<ConfigSerializable> getGridForChangeDatasetCallback = new AsyncCallback<ConfigSerializable>() {
+		public void onSuccess(ConfigSerializable config) {
 
-			GridSerializable grid = (GridSerializable) result;
+			GridSerializable grid = config.getGrid();
+			ops = config.getOperations();
+			operationsWidget.setOperations(var.getIntervals(), operationID, view, ops);
 			var.setGrid(grid);
 			// Figure out the compare and fixed axis
 			init();
 			for (Iterator panelIt = panels.iterator(); panelIt.hasNext();) {
 				VizGalPanel panel = (VizGalPanel) panelIt.next();
 				panel.setPanelColor("regularBackground");
-				panel.setOperation(op, view);
 				panel.setVariable(var);
-				// Send in the ortho axis to allow these to be built and displayed in the panel
-
-				panel.init(false);
+				panel.init(false, ops);
+				panel.setOperation(operationID, view);
+				
+				
 				if ( fixedAxis.equals("t") ) {
 					panel.setAxisRangeValues("t", axesWidget.getTAxis().getFerretDateLo(), axesWidget.getTAxis().getFerretDateHi());
 				} else if ( fixedAxis.equals("z") ) {
@@ -546,9 +557,11 @@ public class VizGal implements EntryPoint {
 			Window.alert("Failed to initalizes VizGal."+caught.toString());
 		}
 	};
-	AsyncCallback initVisGal = new AsyncCallback() {
-		public void onSuccess(Object result) {
-			GridSerializable grid = (GridSerializable) result;
+	AsyncCallback<ConfigSerializable> initVizGal = new AsyncCallback<ConfigSerializable>() {
+		public void onSuccess(ConfigSerializable config) {
+			
+			GridSerializable grid = config.getGrid();
+			ops = config.getOperations();
 			var.setGrid(grid);
 			initPanels();
 		}
@@ -601,28 +614,28 @@ public class VizGal implements EntryPoint {
 		if ( pwidth <= 0 ) {
 			pwidth = 400;
 		}
-		VizGalPanel sp1 = new VizGalPanel("Panel 0", true, op, optionID, view, false);
+		VizGalPanel sp1 = new VizGalPanel("Panel 0", true, operationID, optionID, view, false);
 		sp1.addRevertHandler(panelApplyButtonClick);
 		sp1.addApplyHandler(panelApplyButtonClick);
 		slides.setWidget(0, 0, sp1);
 		sp1.setPanelWidth(pwidth);
 		panels.add(sp1);
 
-		VizGalPanel sp2 = new VizGalPanel("Panel 1", false, op, optionID, view, false);
+		VizGalPanel sp2 = new VizGalPanel("Panel 1", false, operationID, optionID, view, false);
 		sp2.addRevertHandler(panelApplyButtonClick);
 		sp2.addApplyHandler(panelApplyButtonClick);
 		slides.setWidget(0, 1, sp2);
 		sp2.setPanelWidth(pwidth);		
 		panels.add(sp2);
 
-		VizGalPanel sp3 = new VizGalPanel("Panel 2", false, op, optionID, view, false);
+		VizGalPanel sp3 = new VizGalPanel("Panel 2", false, operationID, optionID, view, false);
 		sp3.addRevertHandler(panelApplyButtonClick);
 		sp3.addApplyHandler(panelApplyButtonClick);
 		slides.setWidget(1, 0, sp3);
 		sp3.setPanelWidth(pwidth);		
 		panels.add(sp3);
 
-		VizGalPanel sp4 = new VizGalPanel("Panel 3", false, op, optionID, view, false);
+		VizGalPanel sp4 = new VizGalPanel("Panel 3", false, operationID, optionID, view, false);
 		sp4.addRevertHandler(panelApplyButtonClick);
 		sp4.addApplyHandler(panelApplyButtonClick);
 		slides.setWidget(1, 1, sp4);
@@ -630,13 +643,13 @@ public class VizGal implements EntryPoint {
 		panels.add(sp4);
 
 		sp1.setVariable(var);
-		sp1.init(false);
+		sp1.init(false, ops);
 		sp2.setVariable(var);
-		sp2.init(false);
+		sp2.init(false, ops);
 		sp3.setVariable(var);
-		sp3.init(false);
+		sp3.init(false, ops);
 		sp4.setVariable(var);
-		sp4.init(false);
+		sp4.init(false, ops);
 
 		init();
 
@@ -744,10 +757,7 @@ public class VizGal implements EntryPoint {
 	}
 	public boolean init() {
 
-		// This will load up the operations panels and select the radio button for the op id that is passed in...
-		// Initially the default operation is passed in in the query string.  For subsequent initializations
-		// the value gets set to the default operation for the data type.
-		operationsWidget.setOperations(var.getIntervals(), var.getDSID(), var.getID(), op, view);
+		operationsWidget.setOperations(var.getIntervals(), operationID, view, ops);
 		GridSerializable ds_grid = var.getGrid();
 		double grid_west = Double.valueOf(ds_grid.getXAxis().getLo());
 		double grid_east = Double.valueOf(ds_grid.getXAxis().getHi());
@@ -787,7 +797,7 @@ public class VizGal implements EntryPoint {
 		    
 			comparisonAxesSelector.setAxes(ortho);
 			axesWidget.init(var.getGrid());
-			axesWidget.setFixedAxis(view, ortho, fixedAxis, compareAxis);
+			axesWidget.setFixedAxis(view, ortho, compareAxis);
 			return true;
 		}
 	}
@@ -812,7 +822,7 @@ public class VizGal implements EntryPoint {
 				fixedAxisHiValue = axesWidget.getTAxis().getFerretDateHi();
 				fixed_axis_range = axesWidget.getTAxis().isRange();
 			}
-			axesWidget.setFixedAxis(view, ortho, fixedAxis, compareAxis);
+			axesWidget.setFixedAxis(view, ortho, compareAxis);
 			// Set the value of the fixed axis in all the panels under slide sorter control.
 			ortho = Util.setOrthoAxes(view, var.getGrid());
 			for (Iterator panelIt = panels.iterator(); panelIt.hasNext();) {
@@ -942,7 +952,7 @@ public class VizGal implements EntryPoint {
 					VariableSerializable v = panel.getVariable();
 					if ( !v.getID().equals(var.getID()) || !v.getDSID().equals(var.getDSID() ) ) {
 						panel.setVariable(var);
-						panel.init(false);
+						panel.init(false, ops);
 					} 
 					if ( view.equals("xy") && compareAxis.equals("z") ) {
 						// set x, y, and t in the panel
@@ -1134,7 +1144,7 @@ public class VizGal implements EntryPoint {
 							panel.setAxisRangeValues("t", axesWidget.getTAxis().getFerretDateLo(), axesWidget.getTAxis().getFerretDateHi());
 						}
 					}
-					panel.setOperation(op, view);
+					panel.setOperation(operationID, view);
 				}
 				if ( !panel.getCurrentOperationView().equals(operationsWidget.getCurrentView()) ) {
 					differenceButton.setDown(false);
@@ -1215,14 +1225,17 @@ public class VizGal implements EntryPoint {
 		// TODO Maybe we can derive the default operations from the data set during the init(), but it would require an asynchronous request
 		// to know the default operation for the new dataset and variable...
 		if ( nvar.getAttributes().get("grid_type").equals("regular") ) {
-			op = "XY_zoomable_image";
+			operationID = "XY_zoomable_image";
+		} else if ( nvar.getAttributes().get("grid_type").equals("vector") ) {
+			operationID = "Plot_vector";
 		} else {
-			op = "Insitu_extract_location_value_plot";
+			operationID = "Insitu_extract_location_value_plot";
 		}
 		view = "xy";
 
 		// Go get the grid if you don't have it already...
-		Util.getRPCService().getGrid(var.getDSID(), var.getID(), getGridForChangeDatasetCallback);
+		Util.getRPCService().getConfig(view, var.getDSID(), var.getID(), getGridForChangeDatasetCallback);
+		
 	}
 
 	/**
@@ -1264,8 +1277,8 @@ public class VizGal implements EntryPoint {
 		// Check to see if the operation changed.  If so, change the tool.
 		String op_id = operationsWidget.getCurrentOp().getID();
 		String op_view = operationsWidget.getCurrentView();
-		if ( !op_id.equals(op) && !op_view.equals(view) ) {
-			op = op_id;
+		if ( !op_id.equals(operationID) && !op_view.equals(view) ) {
+			operationID = op_id;
 			view = op_view;
 		}
 		// The view may have changed if the operation changed before the apply.
@@ -1440,7 +1453,7 @@ public class VizGal implements EntryPoint {
 
 	private void setupMenusForOperationChange() {
 		view = operationsWidget.getCurrentView();
-		op = operationsWidget.getCurrentOp().getID();
+		operationID = operationsWidget.getCurrentOp().getID();
 		ortho = Util.setOrthoAxes(view, var.getGrid());
 		
 		comparisonAxesSelector.setAxes(ortho);
@@ -1453,13 +1466,17 @@ public class VizGal implements EntryPoint {
 			autoContourButton.setEnabled(true);
 		}
 		compareAxis = ortho.get(0);
-		fixedAxis = ortho.get(1);
-		axesWidget.setFixedAxis(view, ortho, fixedAxis, compareAxis);
+		if ( ortho.size() > 1 ) {
+		    fixedAxis = ortho.get(1);
+		} else {
+			fixedAxis = "";
+		}
+		axesWidget.setFixedAxis(view, ortho, compareAxis);
         // This will not be right for the new paradigm.
 		// Set the orthogonal axes to a range in each panel.
 		for (Iterator panelsIt = panels.iterator(); panelsIt.hasNext();) {
 			VizGalPanel panel = (VizGalPanel) panelsIt.next();
-			panel.setOperation(op, view);
+			panel.setOperation(operationID, view);
 			
 			panel.setCompareAxis(view, ortho, compareAxis);
 			if ( view.contains("t") ) {
@@ -1671,7 +1688,7 @@ public class VizGal implements EntryPoint {
 				axesWidget.getZAxis().setLo(tokenMap.get("fixedAxisLo"));
 				axesWidget.getZAxis().setHi(tokenMap.get("fixedAxisHi"));
 			}
-			axesWidget.setFixedAxis(view, ortho, fixedAxis, compareAxis);
+			axesWidget.setFixedAxis(view, ortho, compareAxis);
 			// TODO set compare axis in panels?
 		}
 		if ( tokenMap.containsKey("autoContour") ) {
