@@ -10,24 +10,39 @@
 ! $1 = ignore the user specified resolution
 ! $2 = palette
 
-define symbol fland_palette ($2"gray")
+DEFINE SYMBOL fland_palette ($2"gray")
 
-let lon_range = `($region_X_hi) - ($region_X_lo)`
-let lat_range = `($region_Y_hi) - ($region_Y_lo)`
-let fland_area = `(lon_range * lat_range) / (360 * 180)`
-IF `fland_area LT 0.04` THEN
-  define symbol fland_resolution 05
-ELIF `fland_area LT 0.1` THEN
-  define symbol fland_resolution 20
-ELIF `fland_area LT 0.2` THEN
-  define symbol fland_resolution 40
-  define symbol fland_resolution 20
+LET lon_range = `($region_X_hi) - ($region_X_lo)`
+LET lat_range = `($region_Y_hi) - ($region_Y_lo)`
+LET fland_area = `(lon_range * lat_range) / (360 * 180)`
+
+! If a tiny region then use smith_sandwell topo from PMEL server
+IF `fland_area LT 0.005` THEN
+  
+   SET DATA/SAVE
+
+   DEF SYM xlo_hack ($xaxis_min%0%)
+   DEF SYM xhi_hack ($xaxis_max%360%)
+   DEF SYM ylo_hack ($yaxis_min%-90%)
+   DEF SYM yhi_hack ($yaxis_max%90%)
+
+   DEF SYM map_reg = [x=($xlo_hack):($xhi_hack),y=($ylo_hack):($yhi_hack)]
+
+   USE "http://ferret.pmel.noaa.gov/thredds/dodsC/data/PMEL/smith_sandwell_topo_v8_2.nc"
+
+   SHADE/NOLAB/NOKEY/LEV=(0,10000,10000)/PAL=gray/OVERLAY rose($map_reg)
+   CAN DATA smith_sandwell_topo_v8_2
+   SET DATA/RESTORE
+   DEFINE SYMBOL fland_done = 1
+
+ELIF `fland_area LT 0.04` THEN
+  DEFINE SYMBOL fland_resolution 05
 ELSE
-  define symbol fland_resolution 60
-  define symbol fland_resolution 20
+  DEFINE SYMBOL fland_resolution 20
 ENDIF
 
-go fland ($fland_resolution) ($fland_palette)
+IF `($fland_done"0|*>1") EQ 0` THEN \
+GO fland ($fland_resolution) ($fland_palette)
 
 ! End of $RCSfile: LAS_fland.jnl,v $ -----------------------------------------------------
 
