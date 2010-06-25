@@ -20,11 +20,15 @@ IF `STRCMP("($yax_vec_1)", "($yax_vec_2)") NE 0` THEN DEFINE SYMBOL ferret_stagg
 ! coordinates (will staggered grids always be in curvi??) then define 
 ! the regridding on the base var, w/o curvi coordinate variables.
 ! The curvi coord variables should match the first component.
+! 6/25/10 When there are staggered grids, the LAS machinery is sending the 
+! curvi coord vars corresponding to the second component.  For now at least
+! regrid to the second component.
 
 IF `($ferret_staggered_grid"0|default>1|*>1") GT 0` THEN  
    IF ($do_curvi_xy"0|0|1|*>1") THEN 
       LET v2 = ($ferret_plot_base_var_1)
       DEFINE SYMBOL ferret_plot_base_var_1 = v2[gxy=($ferret_plot_base_var_0)]
+      DEFINE SYMBOL ferret_plot_base_var_1 = v2[gxy=xcoord]  ! whichever curvi coords got sent (!)
    ELSE
       LET v2 = ($ferret_vector_2)
       DEFINE SYMBOL ferret_vector_2 = v2[gxy=($ferret_vector_1)]
