@@ -21,7 +21,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 public class OperationsWidget extends Composite {
-    boolean isOpen;
+	boolean isOpen;
 	FlexTable layout = new FlexTable();
 	DisclosurePanel xyMap = new DisclosurePanel("Maps");
 	FlexTable xyMapTable = new FlexTable();
@@ -31,12 +31,12 @@ public class OperationsWidget extends Composite {
 	FlexTable sectionPlotsTable = new FlexTable();
 	DisclosurePanel hofmullerPlots = new DisclosurePanel("Hofmuller Plots");
 	FlexTable hofmullerPlotsTable = new FlexTable();
-	
+
 	int xyMapRow = 0;
 	int linePlotsRow = 0;
 	int sectionPlotsRow = 0;
 	int hofmullerPlotsRow = 0;
-	
+
 	boolean hasXYMap = false;
 	boolean hasLinePlots = false;
 	boolean hasSectionPlots = false;
@@ -44,16 +44,16 @@ public class OperationsWidget extends Composite {
 	OperationSerializable[] ops;
 	OperationSerializable currentOp;
 	String currentView;
-    ArrayList<OperationRadioButton> buttons = new ArrayList<OperationRadioButton>();
-    ArrayList<ClickHandler> clicks = new ArrayList<ClickHandler>();
-    String intervals;
-    String initialOp;
-    String initialView;
-    String groupName;
-    
-    // Optional OperationsMenu.  If set, then it is kept in sync with this widget.
-    OperationsMenu operationsMenu = null;
-    
+	ArrayList<OperationRadioButton> buttons = new ArrayList<OperationRadioButton>();
+	ArrayList<ClickHandler> clicks = new ArrayList<ClickHandler>();
+	String intervals;
+	String initialOp;
+	String initialView;
+	String groupName;
+
+	// Optional OperationsMenu.  If set, then it is kept in sync with this widget.
+	OperationsMenu operationsMenu = null;
+
 	public OperationsMenu getOperationsMenu() {
 		return operationsMenu;
 	}
@@ -66,10 +66,10 @@ public class OperationsWidget extends Composite {
 	public OperationsWidget(String groupName) {
 		this.groupName = groupName;
 		layout.setWidth("256px");
-	    initWidget(layout);
+		initWidget(layout);
 	}
 	public void setOperations(String intervals, String dsID, String varID, String opID, String view) {
-		
+
 		this.intervals = intervals;
 		this.initialOp = opID;
 		this.initialView = view;
@@ -100,8 +100,8 @@ public class OperationsWidget extends Composite {
 			currentOp = button.getOperation();
 			currentView = button.getView();
 		}
-    	
-    };
+
+	};
 	private void setMenu() {
 		if ( operationsMenu != null ) {
 			operationsMenu.setMenus(ops, currentView);
@@ -132,9 +132,11 @@ public class OperationsWidget extends Composite {
 					String view = (String) viewIt.next();
 					if ( !op.getName().contains("omparison") ) {
 						Map<String, String> attrs = op.getAttributes();
-						
+
 						// A hack to allow zoomable plots in the old interface and use Plot_2D_XY here.
-						if ( (attrs != null && attrs.containsKey("default") && !op.getID().equals("Plot_2D_XY_zoom"))|| op.getID().equals("Plot_2D_XY")) {
+						//					if ( (attrs != null && attrs.containsKey("default") && !op.getID().equals("Plot_2D_XY_zoom"))|| op.getID().equals("Plot_2D_XY")) {
+						if ( attrs != null && attrs.get("default") != null && Boolean.valueOf(attrs.get("default")) ) {
+
 							if ( view.equals("xy") && (intervals.contains("x") && intervals.contains("y"))) {	
 								if (!hasXYMap) {
 									xyMapTable.clear();
@@ -166,7 +168,7 @@ public class OperationsWidget extends Composite {
 								} else {
 									button = new OperationRadioButton(groupName, "Time");
 								}
-								
+
 								button.setView(view);
 								button.setOperation(op);
 								button.addClickListener(buttonListener);
@@ -174,7 +176,7 @@ public class OperationsWidget extends Composite {
 								linePlotsTable.setWidget(linePlotsRow, 0, button);
 								linePlotsRow++;
 							} else if ( (view.equals("xz") && intervals.contains("x") && intervals.contains("z") )|| 
-									    (view.equals("yz") && intervals.contains("y") && intervals.contains("z") )) {
+									(view.equals("yz") && intervals.contains("y") && intervals.contains("z") )) {
 								if ( !hasSectionPlots ) {
 									sectionPlotsTable.clear();
 									hasSectionPlots = true;
@@ -185,7 +187,7 @@ public class OperationsWidget extends Composite {
 								} else {
 									button = new OperationRadioButton(groupName, "Latitude-z");
 								}
-								
+
 								button.setOperation(op);
 								button.setView(view);
 								button.addClickListener(buttonListener);
@@ -193,15 +195,15 @@ public class OperationsWidget extends Composite {
 								sectionPlotsTable.setWidget(sectionPlotsRow, 0, button);
 								sectionPlotsRow++;
 							} else if ( (view.equals("xt") && intervals.contains("x") && intervals.contains("t") ) || 
-									    (view.equals("yt") && intervals.contains("y") && intervals.contains("t") ) || 
-									    (view.equals("zt") && intervals.contains("z") && intervals.contains("t") ) ) {
+									(view.equals("yt") && intervals.contains("y") && intervals.contains("t") ) || 
+									(view.equals("zt") && intervals.contains("z") && intervals.contains("t") ) ) {
 								if ( !hasHofmullerPlots ) {
 									hofmullerPlotsTable.clear();
 									hasHofmullerPlots = true;
 								}
 								OperationRadioButton button;
 								if ( view.equals("xt") ) {
-								    button = new OperationRadioButton(groupName, "Longitude-time");
+									button = new OperationRadioButton(groupName, "Longitude-time");
 								} else if (view.equals("yt") ) {
 									button = new OperationRadioButton(groupName, "Latitude-time");
 								} else {
@@ -234,7 +236,7 @@ public class OperationsWidget extends Composite {
 			linePlots.add(linePlotsTable);
 			layout.setWidget(row, 0, linePlots);
 			if ( !firstOpen ) {
-			    firstOpen = true;
+				firstOpen = true;
 				linePlots.setOpen(true);
 			}
 			row++;
@@ -243,7 +245,7 @@ public class OperationsWidget extends Composite {
 			sectionPlots.add(sectionPlotsTable);
 			layout.setWidget(row, 0, sectionPlots);
 			if ( !firstOpen ) {
-			    firstOpen = true;
+				firstOpen = true;
 				sectionPlots.setOpen(true);
 			}
 			row++;
@@ -252,7 +254,7 @@ public class OperationsWidget extends Composite {
 			hofmullerPlots.add(hofmullerPlotsTable);
 			layout.setWidget(row, 0, hofmullerPlots);
 			if ( !firstOpen ) {
-			    firstOpen = true;
+				firstOpen = true;
 				hofmullerPlots.setOpen(true);
 			}
 		}

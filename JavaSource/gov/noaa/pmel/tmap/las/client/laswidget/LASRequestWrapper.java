@@ -408,4 +408,8 @@ public class LASRequestWrapper {
 	private static native void setVariableImpl(JavaScriptObject lasRequest, String dsID, String varID) /*-{
 		lasRequest.setVariable(dsID, varID);
 	}-*/;
+	
+	public String toString() {
+		return getXMLTextImpl(lasRequest);
+	}
 }
