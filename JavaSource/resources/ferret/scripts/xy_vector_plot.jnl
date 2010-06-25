@@ -33,15 +33,20 @@ DEFINE SYMBOL fview = `UPCASE("($ferret_view)")`
 
 GO LAS_initialize_region 0
 GO LAS_initialize_data 0
-DEFINE SYMBOL ferret_vector_1 ($ferret_plot_var)
+DEFINE SYMBOL ferret_vector_x ($ferret_plot_var)
 DEFINE SYMBOL ferret_plot_title_1 "($data_title) ($data_units)"
+DEFINE SYMBOL ferret_vector_x_noregion ($ferret_plot_var_0_noregion)
 
 GO LAS_initialize_data 1
-DEFINE SYMBOL ferret_vector_2 ($ferret_plot_var)
+DEFINE SYMBOL ferret_vector_y ($ferret_plot_var)
 DEFINE SYMBOL ferret_plot_title "($ferret_plot_title_1), ($data_title) ($data_units)"
+DEFINE SYMBOL ferret_vector_y_noregion ($ferret_plot_var_1_noregion)
 
 ! See if the vector components are on staggered grids
 GO LAS_check_staggered
+
+! Testing the length-animation script
+!GO LAS_auto_veclen_animate
 
 ! Check for errors (They often occur during dataset initialization.)
 
@@ -71,7 +76,12 @@ GO LAS_open_window
 
 DEFINE SYMBOL qualifiers  = ($qualifiers)/ASPECT
 
-IF ($ferret_plot_key"0|0|nokey>0|*>1") THEN
+IF `($ferret_line_color%0|default>1|*>2%) LT 2` THEN DEFINE SYMBOL ferret_line_color = blue
+
+DEFINE SYMBOL ferret_plot_key = 1
+IF `($ferret_plot_key"0|*>1")` THEN
+  IF `($ferret_version"0") GE 6.63` THEN DEFINE SYMBOL qualifiers = ($qualifiers)/KEY
+ELSE
   DEFINE SYMBOL qualifiers = ($qualifiers)/NOKEY
 ENDIF
 
@@ -88,11 +98,13 @@ ENDIF
 
 IF ($ferret_deg_min_sec"0|false>0|*>1") THEN GO LAS_set_deg_min_sec.jnl
 
-! Vector style arrow (default) or flowline
-
+! Vector style arrow (default) or flowline=1
+DEFINE SYMBOL flowline_vectors = 0
 IF `($ferret_vector_style"0|default>0|1|*>0") GT 0` THEN  
    DEFINE SYMBOL qualifiers = ($qualifiers)/FLOWLINE
+   DEFINE SYMBOL flowline_vectors = 1
 ENDIF
+
 IF `($ferret_land_type"0|contour>1|*>0") EQ 1` THEN DEFINE SYMBOL ferret_land_arg = thick
 
 ! Vector density for flowline plots
@@ -144,56 +156,61 @@ IF `($ferret_line_thickness%0|default>1|*>1%)` THEN
    DEFINE SYMBOL qualifiers = ($qualifiers)($ferret_line_thickness%/THICK=1|default>/THICK=1|1>/THICK=1|2>/THICK=2|3>/THICK=3|*>/THICK=1%)
 ENDIF
 
-! Do the plot. On VECTOR/SET the /XSKIP and /YSKIP are ignored. 
+! Set the URL label for the first dataset.
+GO LAS_url_label 0
 
-! Do a shade underlay if deg-min labelling is requested, then we dont have
+! Draw  the plot. On VECTOR/SET the /XSKIP and /YSKIP are ignored. 
+
+! Do a shade underlay, then we dont have
 ! to do VECTOR/SET which ignores the automatic skip 
 
-DEFINE SYMBOL shade_var = ($ferret_vector_1)
-IF ($native_curvilinear_xy"0") THEN DEFINE SYMBOL  shade_var = ($ferret_plot_base_var_0)
+DEFINE SYMBOL shade_var = ($ferret_vector_x)
+IF ($native_curvilinear_xy"0") THEN DEFINE SYMBOL  shade_var = ($ferret_vector_x)
 
-SHADE/pal=white/nokey/TITLE="($ferret_plot_title)"/SET  ($ferret_vector_1)
+SHADE/pal=white/nokey/TITLE="($ferret_plot_title)"/SET  ($shade_var)
    IF ($xform_dms"0|*>1") THEN PPL XFOR (($xform_dms))
    IF ($yform_dms"0|*>1") THEN PPL YFOR (($yform_dms))
+   IF ($labnum_dset"0|*>1") THEN go unlabel ($labnum_dset)
+   IF ($labnum_datitl"0|*>1") THEN go unlabel ($labnum_datitl)
+   IF ($labnum_dods"0|*>1") THEN go unlabel ($labnum_dods)
 PPL SHADE
+DEFINE SYMBOL qualifiers = ($qualifiers)/OVER/NOLAB
 
 ! use XSKIP and YSKIP as qualifiers if given
 IF ($ferret_vector_skip"0") THEN
 
    IF ($native_curvilinear_xy"0") THEN 
-      VECTOR/OVER/NOLAB($qualifiers)/TITLE="($ferret_plot_title)"/XSKIP=`xs`/YSKIP=`ys` \
+      VECTOR($qualifiers)/TITLE="($ferret_plot_title)"/XSKIP=`xs`/YSKIP=`ys` \
        ($ferret_plot_base_var_0), ($ferret_plot_base_var_1), xcoord, ycoord
 
    ELSE
-      VECTOR/OVER/NOLAB($qualifiers)/TITLE="($ferret_plot_title)"/XSKIP=`xs`/YSKIP=`ys` \
-       ($ferret_vector_1), ($ferret_vector_2)
+      VECTOR($qualifiers)/TITLE="($ferret_plot_title)"/XSKIP=`xs`/YSKIP=`ys` \
+       ($ferret_vector_x), ($ferret_vector_y)
 
-   ENDIF
-
-   IF `($ferret_vector_style"1|default>1|*>0") GT 0` THEN  
-      DEFINE SYMBOL n_left_labels = `($n_left_labels"0")+1`
-      DEFINE SYMBOL upper_left_($n_left_labels) = Vector xskip=`xs`,yskip=`ys`
    ENDIF
 
 ELSE
    IF ($native_curvilinear_xy"0") THEN 
-      VECTOR/OVER/NOLAB($qualifiers)/TITLE="($ferret_plot_title)" \
+      VECTOR($qualifiers)/TITLE="($ferret_plot_title)" \
       ($ferret_plot_base_var_0), ($ferret_plot_base_var_1), xcoord, ycoord
 
    ELSE
-   VECTOR/OVER/NOLAB($qualifiers)/TITLE="($ferret_plot_title)" ($ferret_vector_1), ($ferret_vector_2)
+   VECTOR($qualifiers)/TITLE="($ferret_plot_title)" ($ferret_vector_x), ($ferret_vector_y)
 
    ENDIF
-   IF `($ferret_vector_style"1|default>1|*>0") GT 0` THEN  
+ENDIF
+
+! Label with skip, if style not flowline=1 and if skip >1 in either direction
+IF `($flowline_vectors"0") EQ 0` THEN  
+   IF `( ($PPL_VEC_XSKIP"0|*>1") GT 1)  OR (($PPL_VEC_YSKIP"0|*>1") GT 1)` THEN
       DEFINE SYMBOL n_left_labels = `($n_left_labels"0")+1`
-      DEFINE SYMBOL upper_left_($n_left_labels) = Automatic vector xskip,yskip 
+      DEFINE SYMBOL upper_left_($n_left_labels) = \
+      Vector xskip=($PPL_VEC_XSKIP), yskip=($PPL_VEC_YSKIP) 
    ENDIF
 ENDIF
 
 ! Overall header at the very top
 GO LAS_ferret_las_version_header
-IF ($needs_url"0|*>1") THEN \
-LABEL/NOUSER `($ppl$xlen)*.33`, `($ppl$ylen)+1.`, -1, 0, 0.10, "DATA SET: @AS($data_var_url)"
 
 ! Overlay additional cartography data (land mask, outlines, rivers, ...)
 ! For land outline, if the region is smaller than 60 degrees in x or 30 degrees in y,
@@ -209,7 +226,7 @@ ELIF ($ferret_land_type"0|none>0|contour>1|filled>0|*>0") THEN
   ENDIF
 ENDIF
 
-go labels_above_plot
+GO labels_above_plot
 
 ! Mark grid points. Options are no, subsample (tests if subsampling needed)
 ! or all to force marking all points.
