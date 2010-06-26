@@ -90,7 +90,7 @@ public class SettingsWidget extends Composite {
 		@Override
 		public void onClick(ClickEvent event) {	
 			//TODO  Need to be able to register an handler from the parent to get the map tool right.
-			optionsButton.setOptions(getCurrentOp().getOptionsID());
+			optionsButton.setOptions(getCurrentOperation().getOptionsID());
 		}
 	};
 
@@ -126,8 +126,8 @@ public class SettingsWidget extends Composite {
 		return optionsButton.getState();
 	}
 
-	public OperationSerializable getCurrentOp() {
-		return operations.getCurrentOp();
+	public OperationSerializable getCurrentOperation() {
+		return operations.getCurrentOperation();
 	}
 
 	public String getCurrentOperationView() {
@@ -161,8 +161,8 @@ public class SettingsWidget extends Composite {
 	public String getHistoryToken() {
 		StringBuilder token = new StringBuilder();
 		
-		if ( getCurrentOp() != null ) {
-			token.append(";operation_id="+getCurrentOp().getID());
+		if ( getCurrentOperation() != null ) {
+			token.append(";operation_id="+getCurrentOperation().getID());
 			token.append(";view="+getCurrentOperationView());
 		}
 		Map<String, String> options = getOptions();

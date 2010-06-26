@@ -181,6 +181,7 @@ public class VizGalPanel extends Composite {
 		this.comparePanel = comparePanel;
 		this.singlePanel = single;
 		this.operationID = op;
+		this.optionID = optionID;
 		this.view = view;
 		panelAxesWidgets = new AxesWidgetGroup("Plot Axis", "Comparison Axis", "horizontal", "", "Apply To "+ID);
 		String spinImageURL = URLUtil.getImageURL()+"/mozilla_blu.gif";
@@ -404,9 +405,356 @@ public class VizGalPanel extends Composite {
 			}
 		}
 	}
-	public boolean isComparePanel() {
-		return comparePanel;
+	public void computeDifference(Map<String, String> options, boolean switchAxis, VariableSerializable variable, String view_in, 
+			String xlo_in, String xhi_in, String ylo_in, String yhi_in, String zlo_in,
+			String zhi_in, String tlo_in, String thi_in) {
+
+		if (switchAxis) {
+			switchAxis();
+		}
+		
+        spin.hide();
+
+		if ( !view_in.equals(settingsButton.getOperationsWidget().getCurrentView()) ) {
+			messagePanel.setPopupPosition(grid.getWidget(1, 0).getAbsoluteLeft()+15, grid.getWidget(1,0).getAbsoluteTop()+15);
+			messagePanel.show();
+			return;
+		}
+		
+		lasRequest = new LASRequestWrapper();
+		lasRequest.removeRegion(0);
+		lasRequest.removeVariables();
+		lasRequest.removePropertyGroup("ferret");
+		if ( variable.isVector() ) {
+			lasRequest.setOperation("Compare_Vectors", "v7");
+		} else {
+		    lasRequest.setOperation("Compare_Plot", "v7");
+		}
+		lasRequest.setProperty("ferret", "view", view);
+		lasRequest.setProperty("ferret", "size", ".8333");
+		// Add the variable in the upper left panel
+		if ( variable.isVector() ) {
+			// Add the first component
+			lasRequest.addVariable(var.getDSID(), var.getComponents().get(0));
+		} else {
+	 	    lasRequest.addVariable(variable.getDSID(), variable.getID());
+		}
+        lasRequest.addRegion();
+		// From the current slide sorter is this comment:
+		//
+		// Need to add a dummy variable here because the addRegion/AddVariable
+		// methods of LASRequest.js will not always add at the end of the <args>
+		// node list when there are duplicate <link ...> or <region ...> nodes.
+		// Using 'DUMMY' guarantees that addRegion will place the new region at
+		// the end.  Then we just replace 'DUMMY'.
+		// All this is necessary because order is important in comparison 
+		// requests.
+		//
+		// mimic this action here....
+
+		// For the first variable set the region according to the values passed in...
+		if ( xlo_in != null && xhi_in != null && !xlo_in.equals("") && !xhi_in.equals("") ) {
+			lasRequest.setRange("x", xlo_in, xhi_in, 0);
+		}
+		if ( ylo_in != null && yhi_in != null && !ylo_in.equals("") && !yhi_in.equals("") ) {
+			lasRequest.setRange("y", ylo_in, yhi_in, 0);
+		}
+		if ( zlo_in != null && zhi_in != null && !zlo_in.equals("") && !zhi_in.equals("") ) {
+			lasRequest.setRange("z", zlo_in, zhi_in, 0);
+		}
+		if ( tlo_in != null && thi_in != null && !tlo_in.equals("") && !thi_in.equals("") ) {
+			lasRequest.setRange("t", tlo_in, thi_in, 0);
+		}
+		
+		
+		
+		if ( variable.isVector() ) {
+			// Add the second component and its region to match the first component.
+			lasRequest.addVariable(variable.getDSID(), variable.getComponents().get(1));
+			lasRequest.addRegion();
+			// For the second component variable set the region according to the values passed in...
+			if ( xlo_in != null && xhi_in != null && !xlo_in.equals("") && !xhi_in.equals("") ) {
+				lasRequest.setRange("x", xlo_in, xhi_in, 1);
+			}
+			if ( ylo_in != null && yhi_in != null && !ylo_in.equals("") && !yhi_in.equals("") ) {
+				lasRequest.setRange("y", ylo_in, yhi_in, 1);
+			}
+			if ( zlo_in != null && zhi_in != null && !zlo_in.equals("") && !zhi_in.equals("") ) {
+				lasRequest.setRange("z", zlo_in, zhi_in, 1);
+			}
+			if ( tlo_in != null && thi_in != null && !tlo_in.equals("") && !thi_in.equals("") ) {
+				lasRequest.setRange("t", tlo_in, thi_in, 1);
+			}
+		} else {
+			
+			// The comparison variable and it's region from the panel axes.
+			
+			lasRequest.addVariable(var.getDSID(), var.getID());
+			lasRequest.addRegion();
+			
+			// For the second variable set all the axes that are not in the view, 
+			// either from the fixed in the slide sorter and the comparison axis in the panel
+			// or from the panel settings.
+			if ( isUsePanelSettings() || singlePanel ) {
+				if ( !view.contains("x") ) {
+					if ( var.getGrid().hasX() ) {
+						lasRequest.setRange("x", String.valueOf(panelAxesWidgets.getRefMap().getXlo()), String.valueOf(panelAxesWidgets.getRefMap().getXhi()), 1);
+					}
+				}
+				if ( !view.contains("y") ) {
+					if ( var.getGrid().hasY() ) {
+						lasRequest.setRange("y", String.valueOf(panelAxesWidgets.getRefMap().getYlo()), String.valueOf(panelAxesWidgets.getRefMap().getYhi()), 1);
+					}
+				}
+				if ( !view.contains("z") ) {
+					if ( var.getGrid().hasZ() ) {
+						lasRequest.setRange("z", panelAxesWidgets.getZAxis().getLo(), panelAxesWidgets.getZAxis().getHi(), 1);
+					}
+				}
+				if ( !view.contains("t") ) {
+					if ( var.getGrid().hasT() ) {
+						lasRequest.setRange("t", panelAxesWidgets.getTAxis().getFerretDateLo(), panelAxesWidgets.getTAxis().getFerretDateHi(), 1);
+					}
+				}
+			} else {
+				if ( !view.contains("x") ) {
+					if ( var.getGrid().hasX() ) {
+						if ( compareAxis.contains("x") ) {
+							lasRequest.setRange("x", String.valueOf(panelAxesWidgets.getRefMap().getXlo()), String.valueOf(panelAxesWidgets.getRefMap().getXhi()), 1);
+						} else {
+							lasRequest.setRange("x", xlo_in, xhi_in, 1);
+						}
+					}
+				}
+				if ( !view.contains("y") ) {
+					if ( var.getGrid().hasY() ) {
+						if ( compareAxis.contains("y") ) {
+							lasRequest.setRange("y", String.valueOf(panelAxesWidgets.getRefMap().getYlo()), String.valueOf(panelAxesWidgets.getRefMap().getYhi()), 1);
+						} else {
+							lasRequest.setRange("y", ylo_in, yhi_in, 1);
+						}
+					}
+				}
+				if ( !view.contains("z") ) {
+					if ( var.getGrid().hasZ() ) {
+						if ( compareAxis.equals("z") ) {
+							// Use the panel's compare axis widget.
+							lasRequest.setRange("z", panelAxesWidgets.getZAxis().getLo(), panelAxesWidgets.getZAxis().getHi(), 1);
+						} else {
+							//Use the fixed axis in the slide sorter (the passed in value) if it applies to this data set.
+							if ( zlo_in != null && zhi_in != null && !zlo_in.equals("") && !zhi_in.equals("") ) {
+								lasRequest.setRange("z", zlo_in, zhi_in, 1);
+							}
+						}				
+					}
+				}
+				if ( !view.contains("t") ) {
+					if ( var.getGrid().getTAxis() != null ) {
+						if ( compareAxis.equals("t") ) {
+							// Use the panel's compare axis widget.
+							lasRequest.setRange("t", panelAxesWidgets.getTAxis().getFerretDateLo(), panelAxesWidgets.getTAxis().getFerretDateHi(), 1);
+						} else {
+							//Use the fixed axis in the slide sorter (the passed in value) if it applies to this data set.
+							if ( tlo_in != null && thi_in != null && !tlo_in.equals("") && !thi_in.equals("") ) {
+								lasRequest.setRange("t", tlo_in, thi_in, 1);
+							}
+						}	
+					}
+
+				}		
+			}
+		}
+		
+		// If the passed in variable is a vector, then the panel variable must also be a vector.  Right?
+		if ( variable.isVector() && !var.isVector() ) {
+			// Need to a panel message that the other variable is not a vector
+		} else {
+			lasRequest.addVariable(var.getDSID(), var.getComponents().get(0));
+			if ( isUsePanelSettings() || singlePanel ) {
+				if ( !view.contains("x") ) {
+					if ( var.getGrid().hasX() ) {
+						lasRequest.setRange("x", String.valueOf(panelAxesWidgets.getRefMap().getXlo()), String.valueOf(panelAxesWidgets.getRefMap().getXhi()), 2);
+					}
+				}
+				if ( !view.contains("y") ) {
+					if ( var.getGrid().hasY() ) {
+						lasRequest.setRange("y", String.valueOf(panelAxesWidgets.getRefMap().getYlo()), String.valueOf(panelAxesWidgets.getRefMap().getYhi()), 2);
+					}
+				}
+				if ( !view.contains("z") ) {
+					if ( var.getGrid().hasZ() ) {
+						lasRequest.setRange("z", panelAxesWidgets.getZAxis().getLo(), panelAxesWidgets.getZAxis().getHi(), 2);
+					}
+				}
+				if ( !view.contains("t") ) {
+					if ( var.getGrid().hasT() ) {
+						lasRequest.setRange("t", panelAxesWidgets.getTAxis().getFerretDateLo(), panelAxesWidgets.getTAxis().getFerretDateHi(), 2);
+					}
+				}
+			} else {
+				if ( !view.contains("x") ) {
+					if ( var.getGrid().hasX() ) {
+						if ( compareAxis.contains("x") ) {
+							lasRequest.setRange("x", String.valueOf(panelAxesWidgets.getRefMap().getXlo()), String.valueOf(panelAxesWidgets.getRefMap().getXhi()), 2);
+						} else {
+							lasRequest.setRange("x", xlo_in, xhi_in, 2);
+						}
+					}
+				}
+				if ( !view.contains("y") ) {
+					if ( var.getGrid().hasY() ) {
+						if ( compareAxis.contains("y") ) {
+							lasRequest.setRange("y", String.valueOf(panelAxesWidgets.getRefMap().getYlo()), String.valueOf(panelAxesWidgets.getRefMap().getYhi()), 2);
+						} else {
+							lasRequest.setRange("y", ylo_in, yhi_in, 2);
+						}
+					}
+				}
+				if ( !view.contains("z") ) {
+					if ( var.getGrid().hasZ() ) {
+						if ( compareAxis.equals("z") ) {
+							// Use the panel's compare axis widget.
+							lasRequest.setRange("z", panelAxesWidgets.getZAxis().getLo(), panelAxesWidgets.getZAxis().getHi(), 2);
+						} else {
+							//Use the fixed axis in the slide sorter (the passed in value) if it applies to this data set.
+							if ( zlo_in != null && zhi_in != null && !zlo_in.equals("") && !zhi_in.equals("") ) {
+								lasRequest.setRange("z", zlo_in, zhi_in, 2);
+							}
+						}				
+					}
+				}
+				if ( !view.contains("t") ) {
+					if ( var.getGrid().getTAxis() != null ) {
+						if ( compareAxis.equals("t") ) {
+							// Use the panel's compare axis widget.
+							lasRequest.setRange("t", panelAxesWidgets.getTAxis().getFerretDateLo(), panelAxesWidgets.getTAxis().getFerretDateHi(), 2);
+						} else {
+							//Use the fixed axis in the slide sorter (the passed in value) if it applies to this data set.
+							if ( tlo_in != null && thi_in != null && !tlo_in.equals("") && !thi_in.equals("") ) {
+								lasRequest.setRange("t", tlo_in, thi_in, 2);
+							}
+						}	
+					}
+
+				}		
+			}
+			lasRequest.addVariable(var.getDSID(), var.getComponents().get(1));
+			if ( isUsePanelSettings() || singlePanel ) {
+				if ( !view.contains("x") ) {
+					if ( var.getGrid().hasX() ) {
+						lasRequest.setRange("x", String.valueOf(panelAxesWidgets.getRefMap().getXlo()), String.valueOf(panelAxesWidgets.getRefMap().getXhi()), 3);
+					}
+				}
+				if ( !view.contains("y") ) {
+					if ( var.getGrid().hasY() ) {
+						lasRequest.setRange("y", String.valueOf(panelAxesWidgets.getRefMap().getYlo()), String.valueOf(panelAxesWidgets.getRefMap().getYhi()), 3);
+					}
+				}
+				if ( !view.contains("z") ) {
+					if ( var.getGrid().hasZ() ) {
+						lasRequest.setRange("z", panelAxesWidgets.getZAxis().getLo(), panelAxesWidgets.getZAxis().getHi(), 3);
+					}
+				}
+				if ( !view.contains("t") ) {
+					if ( var.getGrid().hasT() ) {
+						lasRequest.setRange("t", panelAxesWidgets.getTAxis().getFerretDateLo(), panelAxesWidgets.getTAxis().getFerretDateHi(), 3);
+					}
+				}
+			} else {
+				if ( !view.contains("x") ) {
+					if ( var.getGrid().hasX() ) {
+						if ( compareAxis.contains("x") ) {
+							lasRequest.setRange("x", String.valueOf(panelAxesWidgets.getRefMap().getXlo()), String.valueOf(panelAxesWidgets.getRefMap().getXhi()), 3);
+						} else {
+							lasRequest.setRange("x", xlo_in, xhi_in, 3);
+						}
+					}
+				}
+				if ( !view.contains("y") ) {
+					if ( var.getGrid().hasY() ) {
+						if ( compareAxis.contains("y") ) {
+							lasRequest.setRange("y", String.valueOf(panelAxesWidgets.getRefMap().getYlo()), String.valueOf(panelAxesWidgets.getRefMap().getYhi()), 3);
+						} else {
+							lasRequest.setRange("y", ylo_in, yhi_in, 3);
+						}
+					}
+				}
+				if ( !view.contains("z") ) {
+					if ( var.getGrid().hasZ() ) {
+						if ( compareAxis.equals("z") ) {
+							// Use the panel's compare axis widget.
+							lasRequest.setRange("z", panelAxesWidgets.getZAxis().getLo(), panelAxesWidgets.getZAxis().getHi(), 3);
+						} else {
+							//Use the fixed axis in the slide sorter (the passed in value) if it applies to this data set.
+							if ( zlo_in != null && zhi_in != null && !zlo_in.equals("") && !zhi_in.equals("") ) {
+								lasRequest.setRange("z", zlo_in, zhi_in, 3);
+							}
+						}				
+					}
+				}
+				if ( !view.contains("t") ) {
+					if ( var.getGrid().getTAxis() != null ) {
+						if ( compareAxis.equals("t") ) {
+							// Use the panel's compare axis widget.
+							lasRequest.setRange("t", panelAxesWidgets.getTAxis().getFerretDateLo(), panelAxesWidgets.getTAxis().getFerretDateHi(), 3);
+						} else {
+							//Use the fixed axis in the slide sorter (the passed in value) if it applies to this data set.
+							if ( tlo_in != null && thi_in != null && !tlo_in.equals("") && !thi_in.equals("") ) {
+								lasRequest.setRange("t", tlo_in, thi_in, 3);
+							}
+						}	
+					}
+
+				}		
+			}
+		}
+		
+		
+		
+		lasRequest.addProperty("ferret", "image_format", "gif");
+		lasRequest.addProperty("las", "output_type", "xml");
+		if ( settingsButton.isUsePanelSettings() || singlePanel ) {
+			// Use the panel options.
+			Map<String, String> panelOptions = settingsButton.getOptions();
+			if ( panelOptions != null ) {
+				for (Iterator opIt = panelOptions.keySet().iterator(); opIt.hasNext();) {
+					String key = (String) opIt.next();
+					String value = panelOptions.get(key);
+					if ( !value.toLowerCase().equals("default") && !value.equals("") ) {
+						lasRequest.addProperty("ferret", key, value);
+					}
+				}
+			}
+		} else {
+			// Use the global options.
+			if ( options != null ) {
+				for (Iterator opIt = options.keySet().iterator(); opIt.hasNext();) {
+					String key = (String) opIt.next();
+					String value = options.get(key);
+					if ( !value.toLowerCase().equals("default") && !value.equals("") ) {
+						lasRequest.addProperty("ferret", key, value);
+					}
+				}
+			}
+		}
+		lasRequest.setProperty("product_server", "ui_timeout", "20");
+		String url = Util.getProductServer()+"?xml="+URL.encode(lasRequest.getXMLText());
+		
+		if ( !url.equals(currentURL) ) {
+			currentURL = url;
+			spin.setPopupPosition(grid.getWidget(1, 0).getAbsoluteLeft(), grid.getWidget(1, 0).getAbsoluteTop());
+			spin.show();
+			RequestBuilder sendRequest = new RequestBuilder(RequestBuilder.GET,
+					url);
+			try {
+				sendRequest.sendRequest(null, lasRequestCallback);
+			} catch (RequestException e) {
+				HTML error = new HTML(e.toString());
+				grid.setWidget(1, 0, error);
+			}
+		}
 	}
+
 	public LASRequestWrapper getRequest() {
 		LASRequestWrapper lasRequest = new LASRequestWrapper();
 		lasRequest.removeRegion(0);
@@ -419,6 +767,7 @@ public class VizGalPanel extends Composite {
 		} else {
 			lasRequest.addVariable(var.getDSID(), var.getID());
 		}
+		lasRequest.addRegion();
 		lasRequest.setOperation(operationID, "v7");
 
 		// If its a vector plot add the second variable.
@@ -442,11 +791,8 @@ public class VizGalPanel extends Composite {
 
 		if ( var.isVector() ) {
 			// Add the second component...
-			lasRequest.addVariable("dummy", "dummy");
-
+			lasRequest.addVariable(var.getDSID(), var.getComponents().get(1));
 			lasRequest.addRegion();
-			lasRequest.replaceVariable(var.getDSID(), var.getComponents().get(1), 1);
-			
 			// TODO you will need to determine which component you need from the view!
 			
 			if ( var.getGrid().getTAxis() != null ) {
@@ -468,6 +814,9 @@ public class VizGalPanel extends Composite {
 		}
 
 		return lasRequest;
+	}
+	public boolean isComparePanel() {
+		return comparePanel;
 	}
 	private RequestCallback mapScaleCallBack = new RequestCallback() {
 
@@ -637,7 +986,8 @@ public class VizGalPanel extends Composite {
 				nvar = (VariableSerializable) v;
 				ngrid = null;
 				changeDataset = true;
-				Util.getRPCService().getConfig(view, nvar.getDSID(), nvar.getID(), configCallback);
+				// Get all operations by using a null view.
+				Util.getRPCService().getConfig(null, nvar.getDSID(), nvar.getID(), configCallback);
 			}
 		}
 
@@ -840,176 +1190,7 @@ public class VizGalPanel extends Composite {
 	public VariableSerializable getVariable() {
 		return var;
 	}
-	public void computeDifference(Map<String, String> options, boolean switchAxis, VariableSerializable variable, String view_in, 
-			String xlo_in, String xhi_in, String ylo_in, String yhi_in, String zlo_in,
-			String zhi_in, String tlo_in, String thi_in) {
 
-		if (switchAxis) {
-			switchAxis();
-		}
-		
-        spin.hide();
-
-		if ( !view_in.equals(settingsButton.getOperationsWidget().getCurrentView()) ) {
-			messagePanel.setPopupPosition(grid.getWidget(1, 0).getAbsoluteLeft()+15, grid.getWidget(1,0).getAbsoluteTop()+15);
-			messagePanel.show();
-			return;
-		}
-		
-		lasRequest = new LASRequestWrapper();
-		lasRequest.removeRegion(0);
-		lasRequest.removeVariables();
-		lasRequest.removePropertyGroup("ferret");
-		lasRequest.setOperation("Compare_Plot", "v7");
-		lasRequest.setProperty("ferret", "view", view);
-		lasRequest.setProperty("ferret", "size", ".8333");
-		// Add the variable in the upper left panel
-		lasRequest.addVariable(variable.getDSID(), variable.getID());
-
-		// From the current slide sorter is this comment:
-		//
-		// Need to add a dummy variable here because the addRegion/AddVariable
-		// methods of LASRequest.js will not always add at the end of the <args>
-		// node list when there are duplicate <link ...> or <region ...> nodes.
-		// Using 'DUMMY' guarantees that addRegion will place the new region at
-		// the end.  Then we just replace 'DUMMY'.
-		// All this is necessary because order is important in comparison 
-		// requests.
-		//
-		// mimic this action here....
-
-		// For the first variable set the region according to the values passed in...
-		if ( xlo_in != null && xhi_in != null && !xlo_in.equals("") && !xhi_in.equals("") ) {
-			lasRequest.setRange("x", xlo_in, xhi_in, 0);
-		}
-		if ( ylo_in != null && yhi_in != null && !ylo_in.equals("") && !yhi_in.equals("") ) {
-			lasRequest.setRange("y", ylo_in, yhi_in, 0);
-		}
-		if ( zlo_in != null && zhi_in != null && !zlo_in.equals("") && !zhi_in.equals("") ) {
-			lasRequest.setRange("z", zlo_in, zhi_in, 0);
-		}
-		if ( tlo_in != null && thi_in != null && !tlo_in.equals("") && !thi_in.equals("") ) {
-			lasRequest.setRange("t", tlo_in, thi_in, 0);
-		}
-		lasRequest.addVariable("dummy", "dummy");
-
-		lasRequest.addRegion();
-		lasRequest.replaceVariable(var.getDSID(), var.getID(), 1);
-
-		// For the second variable set all the axes that are not in the view, 
-		// either from the fixed in the slide sorter and the comparison axis in the panel
-		// or from the panel settings.
-		if ( isUsePanelSettings() || singlePanel ) {
-			if ( !view.contains("x") ) {
-				if ( var.getGrid().hasX() ) {
-					lasRequest.setRange("x", String.valueOf(panelAxesWidgets.getRefMap().getXlo()), String.valueOf(panelAxesWidgets.getRefMap().getXhi()), 1);
-				}
-			}
-			if ( !view.contains("y") ) {
-				if ( var.getGrid().hasY() ) {
-					lasRequest.setRange("y", String.valueOf(panelAxesWidgets.getRefMap().getYlo()), String.valueOf(panelAxesWidgets.getRefMap().getYhi()), 1);
-				}
-			}
-			if ( !view.contains("z") ) {
-				if ( var.getGrid().hasZ() ) {
-					lasRequest.setRange("z", panelAxesWidgets.getZAxis().getLo(), panelAxesWidgets.getZAxis().getHi(), 1);
-				}
-			}
-			if ( !view.contains("t") ) {
-				if ( var.getGrid().hasT() ) {
-					lasRequest.setRange("t", panelAxesWidgets.getTAxis().getFerretDateLo(), panelAxesWidgets.getTAxis().getFerretDateHi(), 1);
-				}
-			}
-		} else {
-			if ( !view.contains("x") ) {
-				if ( var.getGrid().hasX() ) {
-					if ( compareAxis.contains("x") ) {
-						lasRequest.setRange("x", String.valueOf(panelAxesWidgets.getRefMap().getXlo()), String.valueOf(panelAxesWidgets.getRefMap().getXhi()), 1);
-					} else {
-						lasRequest.setRange("x", xlo_in, xhi_in, 1);
-					}
-				}
-			}
-			if ( !view.contains("y") ) {
-				if ( var.getGrid().hasY() ) {
-					if ( compareAxis.contains("y") ) {
-						lasRequest.setRange("y", String.valueOf(panelAxesWidgets.getRefMap().getYlo()), String.valueOf(panelAxesWidgets.getRefMap().getYhi()), 1);
-					} else {
-						lasRequest.setRange("y", ylo_in, yhi_in, 1);
-					}
-				}
-			}
-			if ( !view.contains("z") ) {
-				if ( var.getGrid().hasZ() ) {
-					if ( compareAxis.equals("z") ) {
-						// Use the panel's compare axis widget.
-						lasRequest.setRange("z", panelAxesWidgets.getZAxis().getLo(), panelAxesWidgets.getZAxis().getHi(), 1);
-					} else {
-						//Use the fixed axis in the slide sorter (the passed in value) if it applies to this data set.
-						if ( zlo_in != null && zhi_in != null && !zlo_in.equals("") && !zhi_in.equals("") ) {
-							lasRequest.setRange("z", zlo_in, zhi_in, 1);
-						}
-					}				
-				}
-			}
-			if ( !view.contains("t") ) {
-				if ( var.getGrid().getTAxis() != null ) {
-					if ( compareAxis.equals("t") ) {
-						// Use the panel's compare axis widget.
-						lasRequest.setRange("t", panelAxesWidgets.getTAxis().getFerretDateLo(), panelAxesWidgets.getTAxis().getFerretDateHi(), 1);
-					} else {
-						//Use the fixed axis in the slide sorter (the passed in value) if it applies to this data set.
-						if ( tlo_in != null && thi_in != null && !tlo_in.equals("") && !thi_in.equals("") ) {
-							lasRequest.setRange("t", tlo_in, thi_in, 1);
-						}
-					}	
-				}
-
-			}		
-		}
-		lasRequest.addProperty("ferret", "image_format", "gif");
-		lasRequest.addProperty("las", "output_type", "xml");
-		if ( settingsButton.isUsePanelSettings() || singlePanel ) {
-			// Use the panel options.
-			Map<String, String> panelOptions = settingsButton.getOptions();
-			if ( panelOptions != null ) {
-				for (Iterator opIt = panelOptions.keySet().iterator(); opIt.hasNext();) {
-					String key = (String) opIt.next();
-					String value = panelOptions.get(key);
-					if ( !value.toLowerCase().equals("default") && !value.equals("") ) {
-						lasRequest.addProperty("ferret", key, value);
-					}
-				}
-			}
-		} else {
-			// Use the global options.
-			if ( options != null ) {
-				for (Iterator opIt = options.keySet().iterator(); opIt.hasNext();) {
-					String key = (String) opIt.next();
-					String value = options.get(key);
-					if ( !value.toLowerCase().equals("default") && !value.equals("") ) {
-						lasRequest.addProperty("ferret", key, value);
-					}
-				}
-			}
-		}
-		lasRequest.setProperty("product_server", "ui_timeout", "20");
-		String url = Util.getProductServer()+"?xml="+URL.encode(lasRequest.getXMLText());
-		
-		if ( !url.equals(currentURL) ) {
-			currentURL = url;
-			spin.setPopupPosition(grid.getWidget(1, 0).getAbsoluteLeft(), grid.getWidget(1, 0).getAbsoluteTop());
-			spin.show();
-			RequestBuilder sendRequest = new RequestBuilder(RequestBuilder.GET,
-					url);
-			try {
-				sendRequest.sendRequest(null, lasRequestCallback);
-			} catch (RequestException e) {
-				HTML error = new HTML(e.toString());
-				grid.setWidget(1, 0, error);
-			}
-		}
-	}
 	public void addCompareAxisChangeListener(ChangeHandler compareAxisChangeHandler) {
 		panelAxesWidgets.getTAxis().addChangeHandler(compareAxisChangeHandler);
 		panelAxesWidgets.getZAxis().addChangeHandler(compareAxisChangeHandler);
@@ -1042,7 +1223,7 @@ public class VizGalPanel extends Composite {
 			if ( event.getSource() instanceof OperationRadioButton ) {
 				OperationRadioButton o = (OperationRadioButton) event.getSource();
 				view = settingsButton.getOperationsWidget().getCurrentView();
-				operationID = settingsButton.getCurrentOp().getID();
+				operationID = settingsButton.getCurrentOperation().getID();
 				settingsButton.setUsePanel(true);
 				if ( isUsePanelSettings() || singlePanel ) {
 					if ( view.contains("t") ) {

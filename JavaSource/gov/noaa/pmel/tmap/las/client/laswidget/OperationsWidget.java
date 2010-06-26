@@ -42,7 +42,7 @@ public class OperationsWidget extends Composite {
 	boolean hasSectionPlots = false;
 	boolean hasHofmullerPlots = false;
 	OperationSerializable[] ops;
-	OperationSerializable currentOp;
+	OperationSerializable currentOperation;
 	String currentView;
 	ArrayList<OperationRadioButton> buttons = new ArrayList<OperationRadioButton>();
 	ArrayList<ClickHandler> clicks = new ArrayList<ClickHandler>();
@@ -97,7 +97,7 @@ public class OperationsWidget extends Composite {
 
 		public void onClick(Widget sender) {
 			OperationRadioButton button = (OperationRadioButton) sender;
-			currentOp = button.getOperation();
+			currentOperation = button.getOperation();
 			currentView = button.getView();
 		}
 
@@ -148,7 +148,7 @@ public class OperationsWidget extends Composite {
 								button.addClickListener(buttonListener);
 								button.setChecked(true);
 								buttons.add(button);
-								currentOp = button.getOperation();
+								currentOperation = button.getOperation();
 								currentView = "xy";
 								xyMapTable.setWidget(xyMapRow, 0, button);
 								xyMapRow++;
@@ -270,8 +270,8 @@ public class OperationsWidget extends Composite {
 	public OperationSerializable[] getOperationsSerializable() {
 		return ops;
 	}
-	public OperationSerializable getCurrentOp() {
-		return currentOp;
+	public OperationSerializable getCurrentOperation() {
+		return currentOperation;
 	}
 	public String getCurrentView() {
 		return currentView;
@@ -290,7 +290,7 @@ public class OperationsWidget extends Composite {
 			OperationRadioButton button = (OperationRadioButton) buttonId.next();
 			if ( button.getOperation().getID().equals(id) && button.getView().equals(view) ) {
 				button.setChecked(true);
-				currentOp = button.getOperation();
+				currentOperation = button.getOperation();
 				currentView = button.getView();
 			} else {
 				button.setChecked(false);

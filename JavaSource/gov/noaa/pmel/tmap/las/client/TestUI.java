@@ -152,7 +152,8 @@ public class TestUI implements EntryPoint {
 					for (int i=0; i < vars.length; i++ ) {
 						if ( vars[i].getID().equals(vid) ) {
 							var = vars[i];
-							Util.getRPCService().getConfig(view, var.getDSID(), var.getID(), getGridCallback);
+							// View is null to get all operations
+							Util.getRPCService().getConfig(null, var.getDSID(), var.getID(), getGridCallback);
 						}
 					}
 				}
@@ -285,7 +286,7 @@ public class TestUI implements EntryPoint {
 		@Override
 		public void onClick(ClickEvent event) {
 			view = settingsControls.getCurrentOperationView();
-			op = settingsControls.getCurrentOp().getID();
+			op = settingsControls.getCurrentOperation().getID();
 			panel.setOperation(op, view);
 			if ( view.contains("t") ) {
 				panel.setParentAxisRange("t", true);
