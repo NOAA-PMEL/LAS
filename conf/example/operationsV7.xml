@@ -675,7 +675,33 @@ streamable="true" mime_type="application/postscript"/> -->
     </operation>
 
     <operation name="Vector plot" ID="Plot_vector"
-        output_template="zoom" service_action="Plot_vector" order="0103" private="true" category="visualization" isZoomable="true">
+        output_template="zoom" service_action="Plot_vector" order="0103" private="false" category="visualization" isZoomable="true">
+        <service>ferret</service>
+        <response ID="PlotResp">
+            <result type="image" ID="plot_image" streamable="true"
+                mime_type="image/gif" file_suffix=".gif" />
+            <!-- <result type="ps" ID="plot_postscript" streamable="true"
+                mime_type="application/postscript" file_suffix=".ps"/> -->
+            <result type="image" ID="ref_map" file_suffix=".gif" />
+            <result type="map_scale" ID="map_scale" file_suffix=".xml"/>
+            <result type="debug" ID="debug" file_suffix=".txt"/>
+            <result type="cancel" ID="cancel" file_suffix=".txt"/>
+        </response>
+        <region>
+            <intervals name="xy" />
+            <intervals name="xz" />
+            <intervals name="xt" />
+            <intervals name="yz" />
+            <intervals name="yt" />
+            <intervals name="zt" />
+        </region>
+        <grid_types>
+            <grid_type name="regular" />
+        </grid_types>
+        <optiondef IDREF="Options_Vector_7"/>
+    </operation>
+    <operation name="Vector comparison plot" ID="Compare_Vectors"
+        output_template="zoom" service_action="Compare_Vectors" order="0103" private="false" category="visualization" isZoomable="true">
         <service>ferret</service>
         <response ID="PlotResp">
             <result type="image" ID="plot_image" streamable="true"

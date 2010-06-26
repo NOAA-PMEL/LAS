@@ -67,12 +67,6 @@ import com.google.gwt.user.client.ui.FlexTable.FlexCellFormatter;
 public class VizGal implements EntryPoint {
     
 	/*
-	 * This is a hack for right now, but we are going to define two default operations.
-	 */
-	String default_regular_op = "Plot_2D_XY";
-	String default_scattered_op = "Insitu_extract_location_value_plot";
-
-	/*
 	 * These are the four pieces of information required
 	 * to initialize a SlideSorterOld
 	 */
@@ -491,7 +485,8 @@ public class VizGal implements EntryPoint {
 		public void onSuccess(Object result) {
 			var = (VariableSerializable) result;
 			initial_var = var;
-			Util.getRPCService().getConfig(view, dsid, vid, initVizGal);
+			// Null view to get all operations.
+			Util.getRPCService().getConfig(null, dsid, vid, initVizGal);
 		}
 
 
@@ -1225,7 +1220,7 @@ public class VizGal implements EntryPoint {
 		// TODO Maybe we can derive the default operations from the data set during the init(), but it would require an asynchronous request
 		// to know the default operation for the new dataset and variable...
 		if ( nvar.getAttributes().get("grid_type").equals("regular") ) {
-			operationID = "XY_zoomable_image";
+			operationID = "Plot_2D_XY_zoom";
 		} else if ( nvar.getAttributes().get("grid_type").equals("vector") ) {
 			operationID = "Plot_vector";
 		} else {
@@ -1233,8 +1228,8 @@ public class VizGal implements EntryPoint {
 		}
 		view = "xy";
 
-		// Go get the grid if you don't have it already...
-		Util.getRPCService().getConfig(view, var.getDSID(), var.getID(), getGridForChangeDatasetCallback);
+		// Get all the config info.  View is null to get all operations.
+		Util.getRPCService().getConfig(null, var.getDSID(), var.getID(), getGridForChangeDatasetCallback);
 		
 	}
 
@@ -1275,7 +1270,7 @@ public class VizGal implements EntryPoint {
 	};
 	public void finishApply() {
 		// Check to see if the operation changed.  If so, change the tool.
-		String op_id = operationsWidget.getCurrentOp().getID();
+		String op_id = operationsWidget.getCurrentOperation().getID();
 		String op_view = operationsWidget.getCurrentView();
 		if ( !op_id.equals(operationID) && !op_view.equals(view) ) {
 			operationID = op_id;
@@ -1453,7 +1448,7 @@ public class VizGal implements EntryPoint {
 
 	private void setupMenusForOperationChange() {
 		view = operationsWidget.getCurrentView();
-		operationID = operationsWidget.getCurrentOp().getID();
+		operationID = operationsWidget.getCurrentOperation().getID();
 		ortho = Util.setOrthoAxes(view, var.getGrid());
 		
 		comparisonAxesSelector.setAxes(ortho);
@@ -1539,8 +1534,8 @@ public class VizGal implements EntryPoint {
 		token.append(";xhi="+axesWidget.getRefMap().getXhi());
 		token.append(";ylo="+axesWidget.getRefMap().getYlo());
 		token.append(";yhi="+axesWidget.getRefMap().getYhi());
-		if ( operationsWidget.getCurrentOp() != null ) {
-			token.append(";operation_id="+operationsWidget.getCurrentOp().getID());
+		if ( operationsWidget.getCurrentOperation() != null ) {
+			token.append(";operation_id="+operationsWidget.getCurrentOperation().getID());
 			token.append(";view="+operationsWidget.getCurrentView());
 		}
 		Map<String, String> options = optionsButton.getState();
