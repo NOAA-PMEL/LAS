@@ -316,6 +316,7 @@ public class VizGalPanel extends Composite {
 		}
 		
 		spin.hide();
+		messagePanel.hide();
 		
         lasRequest = getRequest();
         lasRequest.setProperty("ferret", "view", view);
