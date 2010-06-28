@@ -615,7 +615,7 @@ function _XMLDoc_insertNodeAfter (referenceNode, newNode) {
 
     var parentXMLText = this.getUnderlyingXMLText();
     var selectedNodeXMLText = referenceNode.getUnderlyingXMLText();
-    var originalNodePos = parentXMLText.indexOf(selectedNodeXMLText) + selectedNodeXMLText.length;
+    var originalNodePos = parentXMLText.lastIndexOf(selectedNodeXMLText) + selectedNodeXMLText.length;
     var newXML = parentXMLText.substr(0,originalNodePos);
     newXML += newNode.getUnderlyingXMLText();
     newXML += parentXMLText.substr(originalNodePos);
