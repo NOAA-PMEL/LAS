@@ -1210,6 +1210,11 @@ public class VizGal implements EntryPoint {
 	 */
 	public void changeDataset() {
 		var = nvar;
+		if ( var.isVector() ) {
+			autoContourButton.setEnabled(false);
+		} else {
+			autoContourButton.setEnabled(true);
+		}
 		changeDataset = false;
 		differenceButton.setEnabled(true);
 		differenceButton.setDown(false);

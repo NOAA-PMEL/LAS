@@ -71,10 +71,7 @@ public class VizGalPanel extends Composite {
      */
 	
 	/* A message window when the plot cannot be made... */
-	PopupPanel messagePanel;
-	Grid messageGrid;
-	Button messageButton;
-	HTML message;
+	MessagePanel messagePanel;
 
 	/* The base widget used to layout the panel.  A single column of three rows. */
 	FlexTable grid;
@@ -117,7 +114,6 @@ public class VizGalPanel extends Composite {
 	// Some widgets to show when a panel is being refreshed.
 	PopupPanel spin;
 	HTML spinImage;
-	HTML rangeMessage;
 
 	// The view will have at most two axes,  these hold the ranges for those axes.
 	String xlo;
@@ -186,29 +182,12 @@ public class VizGalPanel extends Composite {
 		panelAxesWidgets = new AxesWidgetGroup("Plot Axis", "Comparison Axis", "horizontal", "", "Apply To "+ID);
 		String spinImageURL = URLUtil.getImageURL()+"/mozilla_blu.gif";
 		spinImage = new HTML("<img src=\""+spinImageURL+"\" alt=\"Spinner\"/>");
-		
-		rangeMessage = new HTML("Set plot range selectors to a different values and click the Apply button.");
-
 		spin = new PopupPanel();
 		
 		spin.add(spinImage);
 
-		messagePanel = new PopupPanel();
-		messageGrid = new Grid(1, 2);
-		messageButton = new Button("Close");
-		messageButton.addClickListener(new ClickListener() {
-
-			public void onClick(Widget sender) {
-				messagePanel.hide();
-			}
-
-		});
-
-		message = new HTML("Could not make plot.  Axes set to ranges do not match the upper left panel.");
-		messageGrid.setWidget(0, 0, message);
-		messageGrid.setWidget(0, 1, messageButton);
-
-		messagePanel.add(messageGrid);
+		messagePanel = new MessagePanel();
+		
 
 		grid = new FlexTable();
 		grid.setStyleName("regularBackground");
@@ -372,12 +351,11 @@ public class VizGalPanel extends Composite {
 		lasRequest.setProperty("product_server", "ui_timeout", "10");	
         if ( var.getGrid().getTAxis() != null ) {		
         	if ( view.contains("t") && panelAxesWidgets.getTAxis().getFerretDateLo().equals(panelAxesWidgets.getTAxis().getFerretDateHi()) ) {
-        		spin.setWidget(rangeMessage);
-        		spin.show();
+        		messagePanel.show(grid.getWidget(1, 0).getAbsoluteLeft()+15, grid.getWidget(1,0).getAbsoluteTop()+15, "Set plot range selectors to a different values and click the Apply button.");
         		return;
         	}
         	if ( view.contains("z") && panelAxesWidgets.getZAxis().getLo().equals(panelAxesWidgets.getZAxis().getHi()) ) {
-        		spin.setWidget(rangeMessage);
+        		messagePanel.show(grid.getWidget(1, 0).getAbsoluteLeft()+15, grid.getWidget(1,0).getAbsoluteTop()+15, "Set plot range selectors to a different values and click the Apply button.");
         		spin.show();
         		return;
         	}
@@ -416,8 +394,7 @@ public class VizGalPanel extends Composite {
         spin.hide();
 
 		if ( !view_in.equals(settingsButton.getOperationsWidget().getCurrentView()) ) {
-			messagePanel.setPopupPosition(grid.getWidget(1, 0).getAbsoluteLeft()+15, grid.getWidget(1,0).getAbsoluteTop()+15);
-			messagePanel.show();
+			messagePanel.show(grid.getWidget(1, 0).getAbsoluteLeft()+15, grid.getWidget(1,0).getAbsoluteTop()+15, "Could not make plot.  Axes set to ranges do not match the upper left panel.");
 			return;
 		}
 		
@@ -567,7 +544,8 @@ public class VizGalPanel extends Composite {
 		
 		// If the passed in variable is a vector, then the panel variable must also be a vector.  Right?
 		if ( variable.isVector() && !var.isVector() ) {
-			// Need to a panel message that the other variable is not a vector
+			messagePanel.show(grid.getWidget(1, 0).getAbsoluteLeft()+15, grid.getWidget(1,0).getAbsoluteTop()+15, "Could not make plot.  Variable in panel must also be a vector.");
+            return;
 		} else {
 			lasRequest.addVariable(var.getDSID(), var.getComponents().get(0));
 			if ( isUsePanelSettings() || singlePanel ) {
