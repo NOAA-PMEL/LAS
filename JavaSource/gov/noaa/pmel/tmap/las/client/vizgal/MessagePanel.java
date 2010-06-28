@@ -16,7 +16,7 @@ public class MessagePanel extends Composite {
 	String messageText = "Empty message.";
 	public MessagePanel() {
 		messagePanel = new PopupPanel();
-		messageGrid = new Grid(1, 2);
+		messageGrid = new Grid(2, 1);
 		messageButton = new Button("Close");
 		messageButton.addClickListener(new ClickListener() {
 
@@ -25,10 +25,10 @@ public class MessagePanel extends Composite {
 			}
 
 		});
-
+        messageButton.setWidth("60px");
 		message = new HTML(messageText);
 		messageGrid.setWidget(0, 0, message);
-		messageGrid.setWidget(0, 1, messageButton);
+		messageGrid.setWidget(1, 0, messageButton);
 
 		messagePanel.add(messageGrid);
 	}
@@ -37,5 +37,8 @@ public class MessagePanel extends Composite {
 		messageText = text;
 		message.setHTML(messageText);
 		messagePanel.show();
+	}
+	public void hide() {
+		messagePanel.hide();
 	}
 }

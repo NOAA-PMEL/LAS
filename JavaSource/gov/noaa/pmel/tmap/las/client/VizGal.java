@@ -1145,7 +1145,18 @@ public class VizGal implements EntryPoint {
 					differenceButton.setDown(false);
 					differenceButton.setEnabled(false);
 				} else {
-					differenceButton.setEnabled(true);
+					if ( var.isVector() ) {
+						if ( !view.equals("xy") ) {
+							differenceButton.setDown(false);
+							differenceButton.setEnabled(false);
+						} else {
+						    differenceButton.setDown(false);
+						    differenceButton.setEnabled(true);
+						}
+					} else {
+				  	    differenceButton.setDown(false);
+					    differenceButton.setEnabled(true);
+					}
 				}
 
 
@@ -1211,14 +1222,22 @@ public class VizGal implements EntryPoint {
 	public void changeDataset() {
 		var = nvar;
 		if ( var.isVector() ) {
+			autoContourTextBox.setText("");
+			autoContourButton.setDown(false);
 			autoContourButton.setEnabled(false);
+			if ( !view.equals("xy") ) {
+				differenceButton.setDown(false);
+				differenceButton.setEnabled(false);
+			} else {
+				differenceButton.setDown(false);
+				differenceButton.setEnabled(true);
+			}
 		} else {
 			autoContourButton.setEnabled(true);
+			differenceButton.setDown(false);
+			differenceButton.setEnabled(true);
 		}
 		changeDataset = false;
-		differenceButton.setEnabled(true);
-		differenceButton.setDown(false);
-
 
 		// Since we are changing data sets, go to the default plot and view.
 
@@ -1456,6 +1475,18 @@ public class VizGal implements EntryPoint {
 		operationID = operationsWidget.getCurrentOperation().getID();
 		ortho = Util.setOrthoAxes(view, var.getGrid());
 		
+		if ( var.isVector() ) {
+			if ( !view.equals("xy") ) {
+				differenceButton.setDown(false);
+				differenceButton.setEnabled(false);
+			} else {
+				differenceButton.setDown(false);
+				differenceButton.setEnabled(true);
+			}
+		} else {
+			differenceButton.setDown(false);
+			differenceButton.setEnabled(true);
+		}
 		comparisonAxesSelector.setAxes(ortho);
 		
 		if ( view.length() !=  2 ) {
@@ -1463,7 +1494,13 @@ public class VizGal implements EntryPoint {
 			autoContourButton.setDown(false);
 			autoContourButton.setEnabled(false);
 		} else {
-			autoContourButton.setEnabled(true);
+			if ( var.isVector() ) {
+				autoContourTextBox.setText("");
+				autoContourButton.setDown(false);
+				autoContourButton.setEnabled(false);
+			} else {
+			    autoContourButton.setEnabled(true);
+			}
 		}
 		compareAxis = ortho.get(0);
 		if ( ortho.size() > 1 ) {
