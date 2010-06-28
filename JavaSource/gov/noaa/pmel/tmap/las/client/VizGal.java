@@ -502,6 +502,7 @@ public class VizGal implements EntryPoint {
 			GridSerializable grid = config.getGrid();
 			ops = config.getOperations();
 			operationsWidget.setOperations(var.getIntervals(), operationID, view, ops);
+			optionsButton.setOptions(operationsWidget.getCurrentOperation().getOptionsID());
 			var.setGrid(grid);
 			// Figure out the compare and fixed axis
 			init();
@@ -753,6 +754,7 @@ public class VizGal implements EntryPoint {
 	public boolean init() {
 
 		operationsWidget.setOperations(var.getIntervals(), operationID, view, ops);
+		optionsButton.setOptions(operationsWidget.getCurrentOperation().getOptionsID());
 		GridSerializable ds_grid = var.getGrid();
 		double grid_west = Double.valueOf(ds_grid.getXAxis().getLo());
 		double grid_east = Double.valueOf(ds_grid.getXAxis().getHi());
@@ -1473,6 +1475,7 @@ public class VizGal implements EntryPoint {
 	private void setupMenusForOperationChange() {
 		view = operationsWidget.getCurrentView();
 		operationID = operationsWidget.getCurrentOperation().getID();
+		optionsButton.setOptions(operationsWidget.getCurrentOperation().getOptionsID());
 		ortho = Util.setOrthoAxes(view, var.getGrid());
 		
 		if ( var.isVector() ) {
