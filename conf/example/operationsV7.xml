@@ -696,7 +696,7 @@ streamable="true" mime_type="application/postscript"/> -->
             <intervals name="zt" />
         </region>
         <grid_types>
-            <grid_type name="regular" />
+            <grid_type name="vector" />
         </grid_types>
         <optiondef IDREF="Options_Vector_7"/>
     </operation>
