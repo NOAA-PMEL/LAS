@@ -674,7 +674,7 @@ streamable="true" mime_type="application/postscript"/> -->
         <optiondef IDREF="Options_2D_image_contour_7"/>
     </operation>
 
-    <operation name="Vector plot" ID="Plot_vector"
+    <operation name="Vector plot" ID="Plot_vector" default="true"
         output_template="zoom" service_action="Plot_vector" order="0103" private="false" category="visualization" isZoomable="true">
         <service>ferret</service>
         <response ID="PlotResp">
