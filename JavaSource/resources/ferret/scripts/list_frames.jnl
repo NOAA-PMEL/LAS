@@ -14,6 +14,8 @@
 !           may be other datasets open, e.g. for transformed variables.
 ! 4/28/2008 ACM Define tvar, used for getting time axis information, as
 !           just t[gt=var] so that it isn't a huge variable to load in tax_datestring.
+! 6/2010    ACM If its a vector plot, call LAS_auto_veclen_animate instead of 
+!           LAS_auto_levels_animate.
 !
 ! list_frames.jnl creates a listing in XML format for animation
 ! Assumes symbol ferret_listing is the output file.
@@ -58,10 +60,18 @@ DEFINE SYMBOL lmin `the_var,return=lstart`
 DEFINE SYMBOL lmax `the_var,return=lend`
 DEFINE SYMBOL lsize `the_var,return=lsize`
 
-! LAS_auto_levels_animate checks whether symbols for color levels
-! have been set, and if not, sets them for the variable at all time steps.
-GO LAS_auto_levels_animate 
+! For vector plots, compute consistent vector length for the 
+! animation.
 
+! For color or contour plots, LAS_auto_levels_animate checks whether 
+! symbols for color levels have been set, and if not, sets them for 
+! the variable at all time steps.
+
+IF `($data_count"1") EQ 2` THEN
+   GO LAS_auto_veclen_animate
+ELSE
+   GO LAS_auto_levels_animate 
+ENDIF
 
 !for animation of 1D plots
 
