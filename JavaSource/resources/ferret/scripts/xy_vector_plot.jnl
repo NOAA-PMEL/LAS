@@ -33,14 +33,14 @@ DEFINE SYMBOL fview = `UPCASE("($ferret_view)")`
 
 GO LAS_initialize_region 0
 GO LAS_initialize_data 0
-DEFINE SYMBOL ferret_vector_x ($ferret_plot_var)
+DEFINE SYMBOL ferret_vector_1 ($ferret_plot_var)
 DEFINE SYMBOL ferret_plot_title_1 "($data_title) ($data_units)"
-DEFINE SYMBOL ferret_vector_x_noregion ($ferret_plot_var_0_noregion)
+DEFINE SYMBOL ferret_vector_1_noregion ($ferret_plot_var_0_noregion)
 
 GO LAS_initialize_data 1
-DEFINE SYMBOL ferret_vector_y ($ferret_plot_var)
+DEFINE SYMBOL ferret_vector_2 ($ferret_plot_var)
 DEFINE SYMBOL ferret_plot_title "($ferret_plot_title_1), ($data_title) ($data_units)"
-DEFINE SYMBOL ferret_vector_y_noregion ($ferret_plot_var_1_noregion)
+DEFINE SYMBOL ferret_vector_2_noregion ($ferret_plot_var_1_noregion)
 
 ! See if the vector components are on staggered grids
 GO LAS_check_staggered
@@ -77,6 +77,10 @@ GO LAS_open_window
 DEFINE SYMBOL qualifiers  = ($qualifiers)/ASPECT
 
 IF `($ferret_line_color%0|default>1|*>2%) LT 2` THEN DEFINE SYMBOL ferret_line_color = blue
+
+IF `($ferret_line_thickness%0|default>1|*>1%)` THEN
+   DEFINE SYMBOL qualifiers = ($qualifiers)($ferret_line_thickness%/THICK=1|default>/THICK=1|1>/THICK=1|2>/THICK=2|3>/THICK=3|*>/THICK=1%)
+ENDIF
 
 DEFINE SYMBOL ferret_plot_key = 1
 IF `($ferret_plot_key"0|*>1")` THEN
@@ -164,8 +168,8 @@ GO LAS_url_label 0
 ! Do a shade underlay, then we dont have
 ! to do VECTOR/SET which ignores the automatic skip 
 
-DEFINE SYMBOL shade_var = ($ferret_vector_x)
-IF ($native_curvilinear_xy"0") THEN DEFINE SYMBOL  shade_var = ($ferret_vector_x)
+DEFINE SYMBOL shade_var = ($ferret_vector_1)
+IF ($native_curvilinear_xy"0") THEN DEFINE SYMBOL  shade_var = ($ferret_vector_1)
 
 SHADE/pal=white/nokey/TITLE="($ferret_plot_title)"/SET  ($shade_var)
    IF ($xform_dms"0|*>1") THEN PPL XFOR (($xform_dms))
@@ -185,7 +189,7 @@ IF ($ferret_vector_skip"0") THEN
 
    ELSE
       VECTOR($qualifiers)/TITLE="($ferret_plot_title)"/XSKIP=`xs`/YSKIP=`ys` \
-       ($ferret_vector_x), ($ferret_vector_y)
+       ($ferret_vector_1), ($ferret_vector_2)
 
    ENDIF
 
@@ -195,7 +199,7 @@ ELSE
       ($ferret_plot_base_var_0), ($ferret_plot_base_var_1), xcoord, ycoord
 
    ELSE
-   VECTOR($qualifiers)/TITLE="($ferret_plot_title)" ($ferret_vector_x), ($ferret_vector_y)
+   VECTOR($qualifiers)/TITLE="($ferret_plot_title)" ($ferret_vector_1), ($ferret_vector_2)
 
    ENDIF
 ENDIF
