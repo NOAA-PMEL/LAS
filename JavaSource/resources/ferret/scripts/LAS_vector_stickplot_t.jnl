@@ -1,0 +1,166 @@
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! LAS_vector_stickplot_t.jnl
+! 
+! Author: ansley 
+! Date: 2010/06/10
+!
+! xt_vector_plot and yt_vector_plot call this script to plot
+! the variable as stacked vector stick plots at each time.
+! Based on stack_stick.jnl
+
+! Set up parameters for defining the viewports and making the plots.
+
+!GO LAS_auto_veclen_animate
+LET speed = (($ferret_vector_1)^2 + ($ferret_vector_2)^2) ^ 0.5
+STAT speed  ! should do with strided variable...
+
+LET ferret_vector_length = ($stat_std)/2
+DEFINE SYMBOL ferret_vector_length = `ferret_vector_length,PREC=2`
+SHOW SYMBOL ferret_vector_length
+
+DEFINE SYMBOL qualifiers = ($qualifiers)/VLIMITS=`-1*($ferret_vector_length)`:($ferret_vector_length)
+DEFINE SYMBOL yaxis_setting `-1*($ferret_vector_length)` ($ferret_vector_length) `($ferret_vector_length)/2`
+
+LET num_times = 20  ! approx max time steps to use
+
+LET tt = t[GT=($ferret_vector_1)]
+
+LET lls = `L[gt=tt,t=($region_t_lo)]`
+LET lle = `L[gt=tt,t=($region_t_hi)]`
+LET nt = `lle - lls + 1`
+LET y2 = 0.88
+
+LET delta_t = 1
+LET ent = nt
+IF `nt GT num_times` THEN
+   LET delta_t = `INT((nt/num_times)+1 )`
+   LET ent = `INT((nt/delta_t)+0.5)`
+ENDIF
+
+LET del = `0.8/(ent)`
+LET y1 = `y2 - del` + 0.02
+
+! This viewport will be used to draw the axis at the bottom 
+! and to label the t axis.
+
+DEF VIEW/AXES/XLIM=0.1:0.9/YLIM=0.095:0.85 bigview
+
+! This viewport will contain the key with the standard arrow length.
+
+DEF VIEW/AXES/XLIM=0.:1./YLIM=0.01:0.095 keyview
+
+! Draw the horizontal axis by plotting a variable having no data in the vertical range.
+! Label the vertical stacks of axes in the middle.
+
+SET VIEW bigview
+LET/BAD=9999 all_zero = IF MISSING(($ferret_vector_1),0) THEN 0 ELSE 0*($ferret_vector_1)
+PLOT/NOY/AX=0,1,0,0/L=`lle`/VLIM=100:200/TITLE=" "/SET all_zero 
+   IF ($labnum_dset"0|*>1") THEN GO unlabel ($labnum_dset)
+   IF ($labnum_datitl"0|*>1") THEN GO unlabel ($labnum_datitl)
+   IF ($labnum_dods"0|*>1") THEN GO unlabel ($labnum_dods)
+PPL PLOT
+
+! Define viewports for all the stacked plots.
+!
+! The rt_* viewports, one for each depth being plotted are used to plot the right-
+! hand axes giving the data range for each T level.
+
+! The lf_* viewports are the same size and shape. They will be used to plot the
+! left-hand axis with the corresponding depth
+
+LET count = 0
+REPEAT/RANGE=`lls`:`lle`:`delta_t`/NAME=m (  \
+   LET count = `count+1`;\
+   IF `count GT ent` THEN EXIT/LOOP;  \
+   DEF VIEW/AXES/XLIM=0.1:0.9/YLIM=`y1`:`y2` rt_`m`; \
+   DEF VIEW/AXES/XLIM=0.1:0.9/YLIM=`y1`:`y2` lf_`m`; \
+   LET y1 = `y1 - del`; LET y2 = `y2 - del`)
+
+LABEL/NOUSER `($ppl$xlen)/2`,-0.8, 0, 0, 0.14, ($ferret_plot_title)
+
+! Overall header at the very top
+GO LAS_ferret_las_version_header
+
+! Add labels at the top for the location of overlaid lines
+! and for URLs IF they exist  
+
+GO labels_above_plot
+
+! Draw a plot for each series, labelling on the left with the depth.
+
+! Put most of the labels on , except for the title, depth, and yaxis label.
+
+SET VIEW lf_`lls`
+PPL TICS,0,0,0,0
+PPL AXLSZE,0,0
+PLOT/SET_UP/NOY/AXES=0,0,1,0/NOLAB/COLOR=white/L=`lls` ($ferret_vector_1)*0
+   PPL PLOT
+LET tlab = TAX_DATESTRING(tt[l=`lls`], tt,"day")
+LABEL/NOUSER `-1*0.1*($ppl$xorg)`, `($ppl$ylen)/2`, 1, 0, 0.12, "`tlab`"
+PPL TICS,.125,.25,.125,.25
+PPL AXLINT,2,2
+PPL AXLSZE,0.1,0.1
+PPL AXATIC 5,5
+
+SET VIEW rt_`lls`
+CANCEL MODE logo
+! Unlabel 1 removes the depth label...
+PLOT/NOY/L=`lls`/AXES=0,0,0,1($qualifiers)/SET ($ferret_vector_1), ($ferret_vector_2)
+   GO unlabel 1
+   PPL yaxis ($yaxis_setting)
+   PPL tics,0,0,0,0; PPL AXLSZE,0,0
+   PPL ylab " "
+PPL PLOTUV 0 1
+
+LET count = 1
+REPEAT/RANGE=`lls+delta_t`:`lle`:`delta_t`/NAME=m (  \
+   LET count = `count+1`;\
+   IF `count GT ent` THEN EXIT/LOOP;  \
+   SET VIEW lf_`m`; \
+   PPL TICS,0,0,0,0; PPL AXLSZE,0,0; \
+     PLOT/SET_UP/NOY/AXES=0,0,1,0/NOLAB/COLOR=white/l=`lls` ($ferret_vector_1)*0; \
+     PPL PLOT; \
+   LET tlab = TAX_DATESTRING(tt[l=`m`], tt,"day") ; \
+   LABEL/NOUSER `-1*0.1*($ppl$xorg)`, `($ppl$ylen)/2`, 1, 0, 0.12, "`tlab`"; \
+   PPL TICS,.125,.25,.125,.25; \ 
+   PPL AXLINT,2,2; \
+   PPL AXLSZE,0.1,0.1; \
+   PPL AXATIC 5,5;\
+   ; \
+   SET VIEW rt_`m`; \
+   PLOT/NOY/L=`M`/AXES=0,0,0,1($qualifiers)/SET ($ferret_vector_1), ($ferret_vector_2); \
+     PPL YAXIS ($yaxis_setting);  PPL TICS,0,0,0,0; PPL AXLSZE,0,0; PPL PLOTUV 0 1) 
+
+
+! Make a key: a stick of the length of half the vertical axis; labeled with
+! the length of the corresponding vector.
+
+LET sticklen = ($ferret_vector_length)  ! for label
+LET ylen = `($ppl$ylen)/2/($VP_WIDTH)/($VP_SCALE)`
+LET ylen = `($ferret_vector_length)/2/($VP_WIDTH)/($VP_SCALE)`
+LET xstart = ($ppl$xorg)/($VP_WIDTH)/($VP_SCALE)
+
+! make the key at the lower left, below any title or time axis label 
+SET VIEW keyview
+
+PLOT/I=1:10/HLIM=0:1/VLIM=0:1/NOAX/NOLAB 10*i
+LET ypos = 0.25
+PLOT/OVER/VS/LINE/COLOR=($ferret_line_color"black")/NOAX/NOLAB {`xstart`, `xstart+ylen`}, {`ypos`, `ypos`}
+
+! Center the label on the line we just drew
+
+LET xpos = xstart + ylen/2
+LET keysize = 0.14
+DEF SYM unlab ($data_0_units)
+LABEL `xpos`, `ypos-1.4*keysize`, 0, 0, `keysize`,  "`sticklen` @AC($unlab)"
+
+
+! Make the big plot again to set the correct symbols for the RESULT.
+SET VIEW bigview
+CANCEL MODE nodata_lab  ! so there isnt a NO VALID DATA label on the plot.
+LET/BAD=9999 all_bad = IF MISSING(($ferret_vector_1),0) THEN 9999 ELSE 9999 + 0*($ferret_vector_1)
+SHADE/NOLAB/NOAX all_bad 
+
+
+!  ----------------- End of LAS_vector_stickplot_t ------------------------------------
+
