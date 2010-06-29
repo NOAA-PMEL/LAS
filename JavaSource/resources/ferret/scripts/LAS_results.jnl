@@ -157,10 +157,10 @@ IF ($result_map_scale_filename%0|*>1%) THEN
 
 ! Remove striding so we can get the attributes of axes
 
-      IF `($xstride"0") GT 1` THEN CANCEL AXIS/STRIDE `the_plot_var,RETURN=xaxis`
-      IF `($ystride"0") GT 1` THEN CANCEL AXIS/STRIDE `the_plot_var,RETURN=yaxis`
-      IF `($zstride"0") GT 1` THEN CANCEL AXIS/STRIDE `the_plot_var,RETURN=zaxis`
-      IF `($tstride"0") GT 1` THEN CANCEL AXIS/STRIDE `the_plot_var,RETURN=taxis`
+      IF `($xstride"0") GT 1` THEN CANCEL AXIS/STRIDE `x_strided_var,RETURN=xaxis`
+      IF `($ystride"0") GT 1` THEN CANCEL AXIS/STRIDE `y_strided_var,RETURN=yaxis`
+      IF `($zstride"0") GT 1` THEN CANCEL AXIS/STRIDE `z_strided_var,RETURN=zaxis`
+      IF `($tstride"0") GT 1` THEN CANCEL AXIS/STRIDE `t_strided_var,RETURN=taxis`
       
       IF ($ax_horiz"0|*>1") THEN
 

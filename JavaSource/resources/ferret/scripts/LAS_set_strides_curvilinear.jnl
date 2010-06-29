@@ -85,18 +85,22 @@ IF `STRINDEX( "($operation_ID)", "Plot" ) EQ 0 AND \
    IF `($stride_for_mem"0") GT 1` THEN
       IF `($region_x_range"0|*>1") GT 0` THEN 
          SET AXIS/STRIDE=($stride_for_mem) `pvar,RETURN=xaxis`
+	 LET x_strided_var = pvar
          DEFINE SYMBOL add_to_title = Stride ($stride_for_mem) in X
       ENDIF
       IF `($region_y_range"0|*>1") GT 0` THEN 
          SET AXIS/STRIDE=($stride_for_mem) `pvar,RETURN=yaxis`
+	 LET y_strided_var = pvar
          DEFINE SYMBOL add_to_title = ($add_to_title) Stride ($stride_for_mem) in Y
       ENDIF
       IF `($region_z_range"0|*>1") GT 0` THEN 
          SET AXIS/STRIDE=($stride_for_mem) `pvar,RETURN=zaxis`
+	 LET z_strided_var = pvar
          DEFINE SYMBOL add_to_title = ($add_to_title) Stride ($stride_for_mem) in Z
       ENDIF
       IF `($region_t"0|*>1") GT 0` THEN 
          SET AXIS/STRIDE=($stride_for_mem) `pvar,RETURN=taxis`
+	 LET t_strided_var = pvar
          DEFINE SYMBOL add_to_title = ($add_to_title) Stride ($stride_for_mem) in T
       ENDIF
       SET VAR/TITLE="($ferret_plot_title) ($add_to_title)" ($ferret_plot_var) 
@@ -158,6 +162,7 @@ IF `STRLEN("($ferret_view)") EQ 2` THEN
          IF `rem EQ 0` THEN CANCEL SYMBOL xoff 
 
          SET AXIS/STRIDE=($xstride)($xoff) `($data_var)[d=($data_num)],RETURN=xaxis`
+	 LET x_strided_var = ($data_var)[d=($data_num)]
          DEFINE SYMBOL clon_imin = `MAX(1, INT(($clon_imin)/($xstride)) )`
          DEFINE SYMBOL clon_imax = `MIN (nx, INT(($clon_imax)/($xstride)) )`
       ENDIF
@@ -183,6 +188,7 @@ IF `STRLEN("($ferret_view)") EQ 2` THEN
          DEFINE SYMBOL yoff = /OFFSET=`INT(($ystride) - rem)`
          IF `rem EQ 0` THEN CANCEL SYMBOL yoff 
          SET AXIS/STRIDE=($ystride)($yoff) `($data_var)[d=($data_num)],RETURN=yaxis`
+	 LET y_strided_var = ($data_var)[d=($data_num)]
          DEFINE SYMBOL clat_jmin = `MAX(1, INT(($clat_jmin)/($ystride)) )`
          DEFINE SYMBOL clat_jmax = `MIN(ny, INT(($clat_jmax)/($ystride)) )`
 
@@ -214,6 +220,7 @@ IF `STRLEN("($ferret_view)") EQ 2` THEN
               DEFINE SYMBOL xoff = /OFFSET=`($xstride) - rem`
               IF `rem EQ 0` THEN CANCEL SYMBOL xoff 
               SET AXIS/STRIDE=($xstride)($xoff) `($data_var)[d=($data_num)],RETURN=xaxis`
+	      LET x_strided_var = ($data_var)[d=($data_num)]
               DEFINE SYMBOL clon_imin = `INT(($clon_imin)/($xstride))`
               DEFINE SYMBOL clon_imax = `INT(($clon_imax)/($xstride))`
 
@@ -238,6 +245,7 @@ IF `STRLEN("($ferret_view)") EQ 2` THEN
               DEFINE SYMBOL yoff = /OFFSET=`($ystride) - rem`
               IF `rem EQ 0` THEN CANCEL SYMBOL yoff 
               SET AXIS/STRIDE=($ystride)($yoff) `($data_var)[d=($data_num)],RETURN=yaxis`
+	      LET y_strided_var = ($data_var)[d=($data_num)]
               DEFINE SYMBOL clat_jmin = `INT(($clat_jmin)/($ystride))`
               DEFINE SYMBOL clat_jmax = `INT(($clat_jmax)/($ystride))`
            ENDIF
@@ -254,6 +262,7 @@ IF `STRLEN("($ferret_view)") EQ 2` THEN
               DEFINE SYMBOL zstride = `MAX(($zstride"1"), ($stride_for_mem"1"))`
            ENDIF
            IF `($zstride"0") GT 1` THEN SET AXIS/STRIDE=($zstride) `($data_var)[d=($data_num)],RETURN=zaxis`
+	   LET z_strided_var = ($data_var)[d=($data_num)]
 
         ENDIF
    
@@ -268,6 +277,7 @@ IF `STRLEN("($ferret_view)") EQ 2` THEN
               DEFINE SYMBOL tstride = `MAX(($tstride"1"), ($stride_for_mem"1"))`
            ENDIF
            IF `($tstride"0") GT 1` THEN SET AXIS/STRIDE=($tstride) `($data_var)[d=($data_num)],RETURN=taxis`
+	   LET t_strided_var = ($data_var)[d=($data_num)]
 
         ENDIF
 
@@ -300,6 +310,7 @@ IF `STRLEN("($ferret_view)") EQ 3 AND STRINDEX("($ferret_view)", "xy") GT 0` THE
          DEFINE SYMBOL xoff = /OFFSET=`($xstride) - rem`
          IF `rem EQ 0` THEN CANCEL SYMBOL xoff 
          SET AXIS/STRIDE=($xstride)($xoff) `($data_var)[d=($data_num)],RETURN=xaxis`
+	 LET x_strided_var = ($data_var)[d=($data_num)]
          DEFINE SYMBOL clon_imin = `INT(($clon_imin)/($xstride))`
          IF `($clon_imin) EQ 0` THEN DEFINE SYMBOL clon_imin = 1
          DEFINE SYMBOL clon_imax = `INT(($clon_imax)/($xstride))`
@@ -322,6 +333,7 @@ IF `STRLEN("($ferret_view)") EQ 3 AND STRINDEX("($ferret_view)", "xy") GT 0` THE
          DEFINE SYMBOL yoff = /OFFSET=`($ystride) - rem`
          IF `rem EQ 0` THEN CANCEL SYMBOL yoff 
          SET AXIS/STRIDE=($ystride)($yoff) `($data_var)[d=($data_num)],RETURN=yaxis`
+	 LET y_strided_var = ($data_var)[d=($data_num)]
          DEFINE SYMBOL clat_jmin = `MAX(1, INT(($clat_jmin)/($ystride)) )`
          IF `($clat_jmin) EQ 0` THEN DEFINE SYMBOL clat_jmin = 1
          DEFINE SYMBOL clat_jmax = `MIN(ny, INT(($clat_jmax)/($ystride)) )`
