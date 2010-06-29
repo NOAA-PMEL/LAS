@@ -1,34 +1,19 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! $RCSfile: xt_plot_2D.jnl,v $
+! xt_plot_2D.jnl
 ! 
-! $Author: ansley $
-! $Date: 2006/10/05$
+! Author: ansley 
+! Date: 2010/06/10
 !
-! 3/7/2007: ACM. Put code to check that the region was not too small, resulting 
-!           in degenerate plot into LAS_initialize_data.jnl rather than in the 
-!           individual plot scripts.
-
-! 3/29/2007 ACM Fix logic interpreting contents of ferret_interpolate_data 
-! 3/17/2008 ACM Add /FLOWLINE[/DENSITY] options and also line color and thickness
-!!
 ! xt_vector_plot.jnl creates an XT vector plot for use with the Back End Server
 ! code that sits behind a Live Access Server (LAS). 
 !
-! NOTE:  This code handles overlays but not differencing.
 !
 ! Set any Ferret modes
-!
-! NOTE:  Should we support any of the following Ferrt modes?
-! NOTE:    ASCII_FONT, CALENDAR, DEPTH_LABEL, LABELS, LATIT_LABEL, LONG_LABEL 
 
 IF ($ferret_interpolate_data%0|false>0|true>1|1|0|*>1%) THEN SET MODE INTERPOLATE
 
 ! Define symbols associated with the regiogn and data and perform any
 ! initialization needed for this dataset.
-!
-! NOTE:  Adding support for a 'base layer' variable would mean passing
-! NOTE:  some other argument.  For now, though, we always use 'data_0'
-! NOTE:  for the base layer and region.
 
 GO LAS_initialize_region 0
 GO LAS_initialize_data 0
@@ -38,7 +23,6 @@ DEFINE SYMBOL ferret_plot_title_1 "($data_title) ($data_units)"
 GO LAS_initialize_data 1
 DEFINE SYMBOL ferret_vector_2 ($ferret_plot_var)
 DEFINE SYMBOL ferret_plot_title "($ferret_plot_title_1), ($data_title) ($data_units)"
-
 
 ! Check for errors (They often occur during dataset initialization.)
 
@@ -60,10 +44,6 @@ ENDIF
 ! Open the window, apply size, scale options
 GO LAS_open_window
 
-! TODO:  Should the creation of the ($qualifiers) symbol for standard
-! TODO:  2D plots be separated out in a separate script called:
-! TODO:    LAS_2D_plot_qualifiers.jnl
-!
 ! Build up the plot qualifiers
 
 DEFINE SYMBOL qualifiers = ($qualifiers)/NOLAB
@@ -233,7 +213,7 @@ LET/BAD=9999 all_bad = IF MISSING(($ferret_vector_1),0) THEN 9999 ELSE 9999 + 0*
 SHADE/NOLAB/NOAX all_bad 
 
 ! Save the results
-GO LAS_results xline
+GO LAS_results box
 
 ! End of $RCSfile -----------------------------------------------------
 
