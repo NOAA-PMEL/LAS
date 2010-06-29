@@ -23,8 +23,6 @@
 
 IF ($ferret_interpolate_data%0|false>0|true>1|1|0|*>1%) THEN SET MODE INTERPOLATE
 
-DEFINE SYMBOL fview = `UPCASE("($ferret_view)")`
-
 ! Define symbols associated with the regiogn and data and perform any
 ! initialization needed for this dataset.
 !
@@ -68,15 +66,10 @@ GO LAS_open_window
 !
 ! Build up the plot qualifiers
 
+DEFINE SYMBOL qualifiers = ($qualifiers)/NOLAB
+
 IF ($ferret_plot_key"0|0|nokey>0|*>1") THEN
   DEFINE SYMBOL qualifiers = ($qualifiers)/NOKEY
-ENDIF
-
-! TODO:  For time plots, either the configurer or the script might want to turn on 
-! TODO:  graticules at the small tic marks.  /GRATICULE=(DASH)="small, large"
-
-IF ($ferret_use_graticules"1|0|*>1) THEN
-  SET MODE GRATICULE:(DASH,COLOR=black)
 ENDIF
 
 ! Set up for degrees-minutes-seconds labels on axes with units of degrees
@@ -85,21 +78,10 @@ IF ($ferret_deg_min_sec"0|false>0|*>1") THEN GO LAS_set_deg_min_sec.jnl
 
 ! Line color
 
+IF `($ferret_line_color%0|default>1|*>2%) LT 2` THEN DEFINE SYMBOL ferret_line_color = blue
+
 IF `($ferret_line_color%0|default>0|*>1%)` THEN
   DEFINE SYMBOL qualifiers = ($qualifiers)/COLOR=($ferret_line_color%0|default>black|red|blue|green|lightblue|purple|*>black%)
-ENDIF
-
-! Vector style arrow (default) or flowline
-
-IF `($ferret_vector_style"0|default>0|1|*>0") GT 0` THEN  
-   DEFINE SYMBOL qualifiers = ($qualifiers)/FLOWLINE
-   IF `($ferret_land_type"0|contour>1|*>0") EQ 1` THEN DEFINE SYMBOL ferret_land_arg = thick
-ENDIF
-
-! Vector density for flowline plots
-
-IF `($ferret_vector_density"0|*>1") GT 0` THEN  
-   DEFINE SYMBOL qualifiers = ($qualifiers)/DENSITY=($ferret_vector_density)
 ENDIF
 
 ! line thickness
@@ -108,60 +90,147 @@ IF `($ferret_line_thickness%0|default>1|*>1%)` THEN
    DEFINE SYMBOL qualifiers = ($qualifiers)($ferret_line_thickness%/THICK=1|default>/THICK=1|1>/THICK=1|2>/THICK=2|3>/THICK=3|*>/THICK=1%)
 ENDIF
 
+!GO LAS_auto_veclen_animate
+LET speed = (($ferret_vector_1)^2 + ($ferret_vector_2)^2) ^ 0.5
+STAT speed  ! should do with strided variable...
+
+LET ferret_vector_length = ($stat_std)/2
+DEFINE SYMBOL ferret_vector_length = `ferret_vector_length,PREC=2`
+SHOW SYMBOL ferret_vector_length
+
+DEFINE SYMBOL qualifiers = ($qualifiers)/VLIMITS=`-1*($ferret_vector_length)`:($ferret_vector_length)
+DEFINE SYMBOL yaxis_setting `-1*($ferret_vector_length)` ($ferret_vector_length) `($ferret_vector_length)/2`
+
+! Set the URL label for the first dataset.
+GO LAS_url_label 0
+
 ! Do the plot
+! From T_stick_vector.jnl (based on stack_stick)
+! Set up parameters for defining the viewports and making the plots.
 
+LET tt = t[GT=($ferret_vector_1)]
 
-! Do a shade underlay if deg-min labelling is requested, then we dont have
-! to do VECTOR/SET which ignores the automatic skip 
+LET lls = `tt,RETURN=Lstart`
+LET lle = `tt,RETURN=Lend`
+LET nt = `tt,RETURN=Lsize`
 
-SHADE/pal=white/nokey/TITLE="($ferret_plot_title)"/SET  ($ferret_vector_1)
-   IF ($xform_dms"0|*>1") THEN PPL XFOR (($xform_dms))
-   IF ($yform_dms"0|*>1") THEN PPL YFOR (($yform_dms))
-PPL SHADE
+LET y2 = 0.9
+LET y2 = 0.88
+LET del = 0.8/`nt`
+LET y1 = `y2 - del` + 0.02
 
-! use XSKIP and YSKIP if given
-IF ($ferret_vector_skip"0") THEN
+! This viewport will be used to draw the axis at the bottom 
+! and to label the t axis.
 
-   VECTOR/OVER/NOLAB($qualifiers)/TITLE="($ferret_plot_title)"/XSKIP=`xs`/YSKIP=`ys` \
-       ($ferret_vector_1), ($ferret_vector_2)
+DEF VIEW/AXES/XLIM=0.1:0.9/YLIM=0.095:0.85 bigview
 
-   IF `($ferret_vector_style"1|default>1|*>0") GT 0` THEN  
-      DEFINE SYMBOL n_left_labels = `($n_left_labels"0")+1`
-      DEFINE SYMBOL upper_left_($n_left_labels) = Vector xskip=`xs`,yskip=`ys`
-   ENDIF
+! This viewport will contain the key with the standard arrow length.
 
-ELSE
-   VECTOR/OVER/NOLAB($qualifiers)/TITLE="($ferret_plot_title)" ($ferret_vector_1), ($ferret_vector_2)
+DEF VIEW/AXES/XLIM=0.:1./YLIM=0.01:0.095 keyview
 
-   IF `($ferret_vector_style"1|default>1|*>0") GT 0` THEN  
-      DEFINE SYMBOL n_left_labels = `($n_left_labels"0")+1`
-      DEFINE SYMBOL upper_left_($n_left_labels) = Automatic vector xskip,yskip 
-   ENDIF
+! Define viewports for all the stacked plots.
+!
+! The rt_* viewports, one for each depth being plotted are used to plot the right-
+! hand axes giving the data range for each T level.
 
-ENDIF
+! The lf_* viewports are the same size and shape. They will be used to plot the
+! left-hand axis with the corresponding depth
+
+REPEAT/RANGE=`lls`:`lle`/NAME=m (DEF VIEW/AXES/XLIM=0.1:0.9/YLIM=`y1`:`y2` rt_`m`; \
+                          DEF VIEW/AXES/XLIM=0.1:0.9/YLIM=`y1`:`y2` lf_`m`; \
+                          LET y1 = `y1 - del`; LET y2 = `y2 - del`)
+
+! Draw the time axis by plotting a variable having no data in the vertical range.
+! Label the vertical stacks of axes in the middle.
+
+SET VIEW bigview
+LET/BAD=9999 all_zero = IF MISSING(($ferret_vector_1),0) THEN 0 ELSE 0*($ferret_vector_1)
+PLOT/NOY/AX=0,1,0,0/L=`lle`/VLIM=100:200/TITLE=" "/SET all_zero 
+   IF ($labnum_dset"0|*>1") THEN GO unlabel ($labnum_dset)
+   IF ($labnum_datitl"0|*>1") THEN GO unlabel ($labnum_datitl)
+   IF ($labnum_dods"0|*>1") THEN GO unlabel ($labnum_dods)
+PPL PLOT
+
+LABEL/NOUSER `($ppl$xlen)/2`,-0.8, 0, 0, 0.14, ($ferret_plot_title)
 
 ! Overall header at the very top
 GO LAS_ferret_las_version_header
-IF ($needs_url"0|*>1") THEN \
-LABEL/NOUSER `($ppl$xlen)*.33`, `($ppl$ylen)+1.`, -1, 0, 0.10, "DATA SET: @AS($data_var_url)"
 
-! Overlay additional data 
+! Add labels at the top for the location of overlaid lines
+! and for URLs IF they exist  
 
-! TODO:  Support user options for contour overlays:  color, labeling, ...
+GO labels_above_plot
 
-IF `($data_count"0") GT 1` THEN
+! Draw a plot for each series, labelling on the left with the depth.
 
-REPEAT/range=2:`($data_count)-1`/NAME=m (  \
-  GO LAS_initialize_region `m` ;  \
-  GO LAS_initialize_data  `m` ; \
-  DEFINE SYMBOL qualifiers_over = /LINE=`m` ;\
-  CONTOUR/OVER($qualifiers_over) ($ferret_plot_var) \
-)
+! Put most of the labels on , except for the title, depth, and yaxis label.
 
-! Mark grid points. Options are no, subsample (tests if subsampling needed)
-! or all to force marking all points. 
+SET VIEW lf_`lls`
+PPL TICS,0,0,0,0
+PPL AXLSZE,0,0
+PLOT/SET_UP/NOY/AXES=0,0,1,0/NOLAB/COLOR=white/L=`lls` ($ferret_vector_1)*0
+   PPL PLOT
+LET tlab = TAX_DATESTRING(tt[l=`lls`], tt,"day")
+LABEL/NOUSER `-1*0.1*($ppl$xorg)`, `($ppl$ylen)/2`, 1, 0, 0.13, "`tlab`"
+PPL TICS,.125,.25,.125,.25
+PPL AXLINT,2,2
+PPL AXLSZE,0.1,0.1
+PPL AXATIC 5,5
 
-IF ($ferret_mark_grid"0|no>0|all>1|subsample>1|*>0") THEN GO mark_grid
+SET VIEW rt_`lls`
+CANCEL MODE logo
+! Unlabel 1 removes the depth label...
+PLOT/NOY/L=`lls`/AXES=0,0,0,1($qualifiers)/SET ($ferret_vector_1), ($ferret_vector_2)
+   GO unlabel 1
+   PPL yaxis ($yaxis_setting)
+   PPL tics,0,0,0,0; PPL AXLSZE,0,0
+   PPL ylab " "
+PPL PLOTUV 0 1
+
+REPEAT/RANGE=`lls+1`:`lle`/NAME=m (  SET VIEW lf_`m`; \
+   PPL TICS,0,0,0,0; PPL AXLSZE,0,0; \
+     PLOT/SET_UP/NOY/AXES=0,0,1,0/NOLAB/COLOR=white/l=`lls` ($ferret_vector_1)*0; \
+     PPL PLOT; \
+   LET tlab = TAX_DATESTRING(tt[l=`m`], tt,"day") ; \
+   label/nouser `-1*0.1*($ppl$xorg)`, `($ppl$ylen)/2`, 1, 0, 0.13, "`tlab`"; \
+   PPL TICS,.125,.25,.125,.25; \ 
+   PPL AXLINT,2,2; \
+   PPL AXLSZE,0.1,0.1; \
+   PPL AXATIC 5,5;\
+   ; \
+   SET VIEW rt_`m`; \
+   PLOT/NOY/L=`M`/AXES=0,0,0,1($qualifiers)/SET ($ferret_vector_1), ($ferret_vector_2); \
+     PPL YAXIS ($yaxis_setting);  PPL TICS,0,0,0,0; PPL AXLSZE,0,0; PPL PLOTUV 0 1) 
+
+
+! Make a key: a stick of the length of half the vertical axis; labeled with
+! the length of the corresponding vector.
+
+LET sticklen = ($ferret_vector_length)  ! for label
+LET ylen = `($ppl$ylen)/2/($VP_WIDTH)/($VP_SCALE)`
+LET ylen = `($ferret_vector_length)/2/($VP_WIDTH)/($VP_SCALE)`
+LET xstart = ($ppl$xorg)/($VP_WIDTH)/($VP_SCALE)
+
+! make the key at the lower left, below any title or time axis label 
+SET VIEW keyview
+
+PLOT/I=1:10/HLIM=0:1/VLIM=0:1/NOAX/NOLAB 10*i
+LET ypos = 0.25
+PLOT/OVER/VS/LINE/COLOR=($ferret_line_color"black")/NOAX/NOLAB {`xstart`, `xstart+ylen`}, {`ypos`, `ypos`}
+
+! Center the label on the line we just drew
+
+LET xpos = xstart + ylen/2
+LET keysize = 0.14
+DEF SYM unlab ($data_0_units)
+LABEL `xpos`, `ypos-1.4*keysize`, 0, 0, `keysize`,  "`sticklen` @AC($unlab)"
+
+
+! Make the big plot again to set the correct symbols for the RESULT.
+SET VIEW bigview
+CANCEL MODE nodata_lab  ! so there isnt a NO VALID DATA label on the plot.
+LET/BAD=9999 all_bad = IF MISSING(($ferret_vector_1),0) THEN 9999 ELSE 9999 + 0*($ferret_vector_1)
+SHADE/NOLAB/NOAX all_bad 
 
 ! Save the results
 GO LAS_results xline
