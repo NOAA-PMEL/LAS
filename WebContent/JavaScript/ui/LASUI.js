@@ -1558,6 +1558,7 @@ LASUI.prototype.makeRequest = function (evt, type) {
 		if(this.state.datasets[this.state.dataset].getChildByID(this.state.variable).grid_type=="vector") {
 			for(var v=0;v<this.state.datasets[this.state.dataset].getChildByID(this.state.variable).variable.length;v++)
 				 this.request.addVariable(this.state.dataset,this.state.datasets[this.state.dataset].getChildByID(this.state.variable).variable[v].IDREF)	
+			this.request.setProperty("ferret","vector_name",this.state.datasets[this.state.dataset].getChildByID(this.state.variable).name);
 		} else
 		this.request.setVariable(this.state.dataset, this.state.variable);
 
@@ -2074,7 +2075,7 @@ LASUI.prototype.showAnalysis = function () {
 		this.refs.analysis.axes[this.state.grid.response.grid.axis[d].type.toLowerCase()].style.display="";
 
 	}
-	if(this.state.grid.hasAxis('x')&&this.state.grid.hasAxis('y'))
+	if(this.state.grid.hasAxis('x')&&this.state.grid.hasAxis('y')&&this.state.datasets[this.state.dataset].getChildByID(this.state.variable).grid_type!='vector')
 		this.refs.analysis.axes.xy.style.display="";
 	
 	document.getElementById(this.anchors.analysis).style.display="";
