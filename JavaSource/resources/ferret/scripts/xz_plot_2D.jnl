@@ -110,40 +110,7 @@ IF ($plot_type"0|FILL>1|*>0) THEN DEFINE SYMBOL shade_underlay = TRUE
 ! Set the URL label for the first dataset.
 GO LAS_url_label 0
 
-! Set up for second variable, overlaid as contour lines.
-! If there were more than 2 data sets, then use a loop (below) with
-! CONTOUR/OVERLAY and rely on automatic Ferret labelling of the contours.
-! For just two data sets, set up fancier titles and labels.
-
-IF `($data_count"0") EQ 2` THEN
-   ! Apply any expression only to the first variable not to subsequent ones
-   CANCEL SYMBOL ferret_expression 
-
-   GO LAS_initialize_region 1
-   GO LAS_initialize_data 1 
-   DEFINE SYMBOL qualifiers_over = /LINE=1 
-
-   ! Check for errors (They often occur during dataset initialization.)
-
-   IF ($error_status"0|*>1") THEN
-      MESSAGE/ERROR **ERROR ($error_string)
-      EXIT/PROGRAM
-    ENDIF
-
-  ! Here is variable 1 and its title
-
-   DEFINE SYMBOL ferret_var_1 = ($ferret_plot_var)
-   DEFINE SYMBOL ferret_title_1 = ($ferret_plot_title"($data_var)")
-
-   ! Set the title, and the labels for the upper left listing the locations
-   ! and time in directions normal to the plot, and in the upper right listing
-   ! urls if dataset are opendap.
-
-   GO LAS_set_diff_labels ($fview)
-
-ENDIF
-
-! If there is just one variable, draw the plot and we are done
+! Draw the plot and we are done
 
 IF `($data_count"0") EQ 1` THEN
    DEFINE SYMBOL split_title = ($ferret_plot_title)
@@ -160,7 +127,8 @@ IF `($data_count"0") EQ 1` THEN
          if ($labnum_dset"0|*>1") THEN go unlabel ($labnum_dset)
          if ($labnum_datitl"0|*>1") THEN go unlabel ($labnum_datitl)
          if ($labnum_dods"0|*>1") THEN go unlabel ($labnum_dods)
-	 PPL SHAKEY 1,,,,,,,,,,1 
+	 IF `($ppl$zmin) GE 1.e35 AND ($ppl$zmax) LE -1.e35` THEN DEFINE SYMBOL nokey = 1
+	 IF `($nokey"0") EQ 0` THEN PPL SHAKEY 1,,,,,,,,,,1
       PPL SHADE
       IF `($LEV_NUM"0") GT 245/2` THEN PPL SHASET RESET
       ($plot_type)($qualifiers)/OVER/NOLAB ($ferret_var_0)
@@ -174,7 +142,8 @@ IF `($data_count"0") EQ 1` THEN
          if ($labnum_dset"0|*>1") THEN go unlabel ($labnum_dset)
          if ($labnum_datitl"0|*>1") THEN go unlabel ($labnum_datitl)
          if ($labnum_dods"0|*>1") THEN go unlabel ($labnum_dods)
-	 PPL SHAKEY 1,,,,,,,,,,1 
+	 IF `($ppl$zmin) GE 1.e35 AND ($ppl$zmax) LE -1.e35` THEN DEFINE SYMBOL nokey = 1
+	 IF `($nokey"0") EQ 0` THEN PPL SHAKEY 1,,,,,,,,,,1
       PPL ($plot_type)
    ENDIF
 
@@ -191,49 +160,7 @@ IF `($data_count"0") EQ 1` THEN
    DEFINE SYMBOL data_plotted_min = ($ppl$zmin)
    DEFINE SYMBOL data_plotted_max = ($ppl$zmax)
 
-! If there are two variables draw the first, removing the labels at the top
-! and then overlay the second. 
-
-ELIF  `($data_count"0") EQ 2` THEN
-   DEFINE SYMBOL ferret_contour_title ($ferret_over_title)(contours)
-   ($plot_type)($qualifiers)/TITLE="($ferret_contour_title)"/SET ($ferret_var_0)
-      IF ($xform_dms"0|*>1") THEN PPL XFOR (($xform_dms))
-      IF ($yform_dms"0|*>1") THEN PPL YFOR (($yform_dms))
-      IF `($labnum_y%0|*>1%)` THEN GO unlabel ($labnum_y)
-      IF `($labnum_t%0|*>1%)` THEN GO unlabel ($labnum_t)
-      IF `($labnum_dset%0|*>1%)` THEN GO unlabel ($labnum_dset)
-      IF `($labnum_datitl%0|*>1%)` THEN GO unlabel ($labnum_datitl)
-      IF `($labnum_dods%0|*>1%)` THEN GO unlabel ($labnum_dods)
-      IF `($title_size%0|*>1%)` THEN PPL LABSET ($title_size)
-      IF ($axlab_command"0|*>1") THEN PPL ($axlab_command)
-      IF ($axtic_command"0|*>1") THEN PPL ($axtic_command)
-      IF ($axlen_command"0|*>1") THEN PPL ($axlen_command)
-	 PPL SHAKEY 1,,,,,,,,,,1 
-   PPL ($plot_type)
-   
-! One of the results is the data min and max. Save those here.
-   DEFINE SYMBOL data_plotted_min = ($ppl$zmin)
-   DEFINE SYMBOL data_plotted_max = ($ppl$zmax)
-
-   CONTOUR/OVER($qualifiers_over)/NOKEY/NOLAB ($ferret_var_1) 
-   GO LAS_url_label 1
-
 ENDIF
-
-! Overlay additional data
-
-! TODO:  Support user options for contour overlays:  color, labeling, ...
-
-! If there were more than 2 data sets, then use a loop and rely on 
-!   automatic Ferret labelling of the contours.
-! IF `($data_count"0") GT 0` THEN
-! 
-! REPEAT/range=1:`($data_count)-1`/NAME=m (  \
-!   GO LAS_initialize_region `m` ;  \
-!   GO LAS_initialize_data  `m` ; \
-!   DEFINE SYMBOL qualifiers_over = /LINE=`m` ;\
-!   CONTOUR/OVER($qualifiers_over) ($ferret_plot_var) \
-! )
 
 ! Overall header at the very top
 GO LAS_ferret_las_version_header
