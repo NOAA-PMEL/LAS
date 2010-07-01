@@ -239,7 +239,7 @@ LASUI.prototype.setInitialVariable = function(strJson) {
 		else
 		var selected = false;
 		var OPTIONNode = new Option(category.getChildName(i),category.getChildID(i),false,selected);
-		OPTIONNode.onselect = this.setVariable.LASBind(this, {category :category}, i, true);
+		OPTIONNode.onselect = this.setVariable.LASBind(this, {category : category}, i, true);
 		OPTIONNode.id = "OPTION_" + category.getChildID(i);
 		document.getElementById(this.anchors.variables).options[document.getElementById(this.anchors.variables).length] = OPTIONNode;
 	}
@@ -627,8 +627,8 @@ LASUI.prototype.setVariable = function (evt) {
 	
 	this.getDataConstraints(datasetID,variableID);
 	this.newVariable=true;
-	if(this.onSetVariable)
-		this.onSetVariable();
+	//if(this.onSetVariable)
+	//	this.onSetVariable();
 
 	
 }
@@ -1555,7 +1555,7 @@ LASUI.prototype.makeRequest = function (evt, type) {
 		this.request.removeRegion();
 
 		//add the variables
-		if(this.state.datasets[this.state.dataset].getChildByID(this.state.variable).grid_type=="vector") {
+		if(this.state.datasets[this.state.dataset].getChildByID(this.state.variable).grid_type=="vector"&&type=="plot") {
 			for(var v=0;v<this.state.datasets[this.state.dataset].getChildByID(this.state.variable).variable.length;v++)
 				 this.request.addVariable(this.state.dataset,this.state.datasets[this.state.dataset].getChildByID(this.state.variable).variable[v].IDREF)	
 			this.request.setProperty("ferret","vector_name",this.state.datasets[this.state.dataset].getChildByID(this.state.variable).name);
@@ -1781,7 +1781,11 @@ LASUI.prototype.setOptionList = function (strJson,DOMNode,type,reset) {
 		for(var i=0;i<ct;i++)
 			this.setOptionTRNode(this.refs.options[type].options.getOptionID(i),tbody,type,reset);
 
-	 if(!this.updating)
+	if(this.newVariable&&this.onSetVariable)
+               this.onSetVariable();
+		 
+	
+	if(!this.updating)
                 if(this.autoupdate||this.submitOnLoad||this.newVariable){
                         this.submitOnLoad =false;
                         this.newVariable=false;
@@ -2222,6 +2226,17 @@ LASUI.prototype.setVisualization = function (d) {
 						this.refs.operations.plot.children[p].radio.onclick({"srcElement" : this.refs.operations.plot.children[p].radio});
 						stop = true;
 					}
+	if(!stop)
+	   for(var t in this.products)
+                for (var p in this.products[t])
+                        if(this.products[t][p].view.indexOf(d)<0  && !stop)
+                                if(this.refs.operations.plot.children[p])
+                                        if(this.refs.operations.plot.children[p].radio){
+                                                this.refs.operations.plot.children[p].radio.checked = true;
+                                                this.refs.operations.plot.children[p].radio.onclick({"srcElement" : this.refs.operations.plot.children[p].radio});
+                                                stop = true;
+                                        }
+
 
 
 	this.refs.analysis.axes[d].selected=true;
