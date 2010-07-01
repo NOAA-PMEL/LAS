@@ -883,7 +883,7 @@ LASUI.prototype.setOperationList = function (strJson) {
 		document.getElementById('plotOptionsButton').style.visibility='hidden';
 		this.refresh();
 	}
-	if(this.refs.analysis.enabled||!this.state.grid.hasAxis('t'))document.getElementById('Animation').style.visibility='hidden';
+	if(this.refs.analysis.enabled)document.getElementById('Animation').style.visibility='hidden';
 
 }
 
@@ -1555,7 +1555,7 @@ LASUI.prototype.makeRequest = function (evt, type) {
 		this.request.removeRegion();
 
 		//add the variables
-		if(this.state.datasets[this.state.dataset].getChildByID(this.state.variable).grid_type=="vector"&&type=="plot") {
+		if(this.state.datasets[this.state.dataset].getChildByID(this.state.variable).grid_type=="vector") {
 			for(var v=0;v<this.state.datasets[this.state.dataset].getChildByID(this.state.variable).variable.length;v++)
 				 this.request.addVariable(this.state.dataset,this.state.datasets[this.state.dataset].getChildByID(this.state.variable).variable[v].IDREF)	
 			this.request.setProperty("ferret","vector_name",this.state.datasets[this.state.dataset].getChildByID(this.state.variable).name);
