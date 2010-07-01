@@ -256,7 +256,7 @@ streamable="true" mime_type="application/postscript"/> -->
     </operation>
 
     <!-- animate XY vector plots -->
-    <operation ID="Animation_2D_XY_vector" default="true" name="Animation_vector" output_template="output_animation" service_action="Data_Extract_Frames" order="9999" category="animation">
+    <operation ID="Animation_2D_XY_vector" default="true" name="Animation" output_template="output_animation" service_action="Data_Extract_Frames" order="9999" category="animation">
           <service>ferret</service>
           <response ID="Data_Extract_Frames_Response">
               <result type="xml" ID="ferret_listing" streamable="true" mime_type="text/xml" file_suffix=".xml"/>
@@ -358,8 +358,8 @@ streamable="true" mime_type="application/postscript"/> -->
         <optiondef IDREF="Options_2D_image_contour_xy_GE"/>
     </operation>
     <!-- for vector plots [private]; only visible on V6 UI-->
-    <operation name="Vector Plot to Google Earth" ID="Vector_GE_Overlay"  mime_type="application/vnd.google-earth.kml+xml"
-        output_template="output_GE_overlay" service_action="Plot_vector_GE" private="true" category="virtual_globe">
+    <operation name="Plot to Google Earth" ID="Vector_GE_Overlay"  mime_type="application/vnd.google-earth.kml+xml"
+        output_template="output_GE_overlay" service_action="Plot_vector_GE" default="true" category="virtual_globe">
         <service>ferret</service>
         <response ID="PlotResp">
                 <result type="debug" ID="debug" file_suffix=".txt"/>
