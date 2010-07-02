@@ -6,7 +6,7 @@ then
    echo "Please set the JAVA_HOME environment variable"
    exit
 fi
-if [ "$ADDXML_HOME" == "@PWD@" ]
+if [ "$ADDXML_HOME" == "" ]
 then
    echo "Please edit the addXML.sh file and set the home directory of your addXML installation."
    exit
