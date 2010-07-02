@@ -282,7 +282,7 @@
 			dest="${addxml-build}" />
 		<unjar src="WebContent/WEB-INF/lib/JSAP_1.03a.jar"
 			dest="${addxml-build}" />
-		<unjar src="WebContent/WEB-INF/lib/toolsUI-4.1.jar"
+		<unjar src="WebContent/WEB-INF/lib/toolsUI-4.0.jar"
 			dest="${addxml-build}" />
 		<unjar src="WebContent/WEB-INF/lib/log4j-1.2.13.jar"
 			dest="${addxml-build}" />
