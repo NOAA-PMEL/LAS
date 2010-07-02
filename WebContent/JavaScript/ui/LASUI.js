@@ -532,7 +532,7 @@ LASUI.prototype.onSetVariable = function() {
 
 		var varObj = this.state.datasets[this.state.dataset].getChildByID(this.state.variable);
  		if(varObj) {
-			if(varObj.grid_type!="scattered"){
+			if(varObj.grid_type!="scattered"&&varObj.grid_type!="vector"){
 				if(this.refs.analysis.enabled) {
 					this.hideAnalysis();
 					this.showAnalysis();
@@ -2076,12 +2076,10 @@ LASUI.prototype.showAnalysis = function () {
 	document.getElementById("analysis_axes").selectedIndex=0;	
 	//turn on the other axes switches
 	for(var d=0;d<this.state.grid.response.grid.axis.length;d++) {
-		//disabling hoefmuller && depth section averages on vectors
-		if((this.state.grid.response.grid.axis[d].type.toLowerCase()!='x'&&this.state.grid.response.grid.axis[d].type.toLowerCase()!='y')||this.state.datasets[this.state.dataset].getChildByID(this.state.variable).grid_type!='vector')
 		this.refs.analysis.axes[this.state.grid.response.grid.axis[d].type.toLowerCase()].style.display="";
 
 	}
-	if(this.state.grid.hasAxis('x')&&this.state.grid.hasAxis('y')&&this.state.datasets[this.state.dataset].getChildByID(this.state.variable).grid_type!='vector')
+	if(this.state.grid.hasAxis('x')&&this.state.grid.hasAxis('y'))
 		this.refs.analysis.axes.xy.style.display="";
 	
 	document.getElementById(this.anchors.analysis).style.display="";
