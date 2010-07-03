@@ -88,7 +88,7 @@ streamable="true" mime_type="application/postscript"/> -->
                 <result type="image" ID="plot_image1" streamable="true"
                     mime_type="image/gif" file_suffix=".gif"/>
                 <!-- <result type="ps" ID="plot_postscript1"
-                    streamable="true" mime_type="application/postscript" file_suffix=".ps"/> --> -->
+                    streamable="true" mime_type="application/postscript" file_suffix=".ps"/> --> 
                 <result type="image" ID="ref_map1"  file_suffix=".gif"/>
                 <result type="map_scale" ID="map_scale1" file_suffix=".xml"/>
                 <result type="debug" ID="debug1" file_suffix=".txt"/>
