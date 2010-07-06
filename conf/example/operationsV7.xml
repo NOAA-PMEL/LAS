@@ -88,7 +88,7 @@ streamable="true" mime_type="application/postscript"/> -->
                 <result type="image" ID="plot_image1" streamable="true"
                     mime_type="image/gif" file_suffix=".gif"/>
                 <!-- <result type="ps" ID="plot_postscript1"
-                    streamable="true" mime_type="application/postscript" file_suffix=".ps"/> --> 
+                    streamable="true" mime_type="application/postscript" file_suffix=".ps"/> --> -->
                 <result type="image" ID="ref_map1"  file_suffix=".gif"/>
                 <result type="map_scale" ID="map_scale1" file_suffix=".xml"/>
                 <result type="debug" ID="debug1" file_suffix=".txt"/>
@@ -357,7 +357,6 @@ streamable="true" mime_type="application/postscript"/> -->
         </grid_types>
         <optiondef IDREF="Options_2D_image_contour_xy_GE"/>
     </operation>
-    <!-- for vector plots [private]; only visible on V6 UI-->
     <operation name="Plot to Google Earth" ID="Vector_GE_Overlay"  mime_type="application/vnd.google-earth.kml+xml"
         output_template="output_GE_overlay" service_action="Plot_vector_GE" default="true" category="virtual_globe">
         <service>ferret</service>
@@ -369,7 +368,7 @@ streamable="true" mime_type="application/postscript"/> -->
                 <intervals name="xy" />
         </region>
         <grid_types>
-                <grid_type name="regular" />
+                <grid_type name="vector" />
         </grid_types>
         <optiondef IDREF="Options_Vector_GE"/>
     </operation>
