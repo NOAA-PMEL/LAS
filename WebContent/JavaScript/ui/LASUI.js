@@ -1667,7 +1667,7 @@ LASUI.prototype.makeRequest = function (evt, type) {
 
 		
 		if(type=="external"&&this.state.operation.external == "Interactive_Download")
-			var window_options = "height=400,width=400,status=no,toolbar=no,menubar=no,location=no"; 
+			var window_options = "height=500,width=400,status=no,toolbar=no,menubar=no,location=no"; 
 		else
 			var window_options = "";
 
