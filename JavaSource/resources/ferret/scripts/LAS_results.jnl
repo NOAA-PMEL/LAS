@@ -22,13 +22,11 @@
 ! For Google Earth plots, use transparency for white background if the 
 ! ferret version has that option available.
 
-LET its_GE = `STRINDEX( "($operation_ID)", "Plot_for_GE" ) NE 0 OR \
-      STRINDEX( "($operation_ID)", "Plot_GE_Overlay" ) NE 0` 
+LET its_GE = `STRINDEX( "($operation_ID)", "_GE" ) NE 0` 
 
 IF `its_GE EQ 1 AND ($ferret_version) GE 6.12` THEN DEFINE SYMBOL trans = /TRANS
 
 IF ($result_plot_image_filename%0|*>1%) THEN FRAME($trans)/FORMAT=gif/FILE="($result_plot_image_filename)"
-
 
 ! Result map_scale_file is output map scale file
 ! Write the output immediately after drawing the plot; it uses symbols 
