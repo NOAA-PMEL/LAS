@@ -27,7 +27,7 @@ GO LAS_initialize_region ($var_num)
 GO LAS_initialize_data ($var_num)
 
 ! Here is the variable we will list out, with the region specified.
-IF `($ferret_list_var"0|*>1") NE 1` THEN DEFINE SYMBOL ferret_list_var = ($ferret_plot_var)
+DEFINE SYMBOL ferret_list_var = ($ferret_plot_var)
 
 IF ($ferret_format%|txt>1|*>0) THEN
   DEFINE SYMBOL frmt ($frmt)/width=1024
