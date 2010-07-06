@@ -15,16 +15,17 @@ ELIF ($ferret_view"|xy>1|*>0") THEN
    !! Make a plot in XY...
    ! Redefine a few symbols for Google-Earth style plots
    DEFINE SYMBOL ferret_margins = false
-   DEFINE SYMBOL qualifiers ($qualifiers)/NOAXES
+   DEFINE SYMBOL qualifiers = ($qualifiers)/NOAXES
    DEFINE SYMBOL ferret_land_type = contour
    DEFINE SYMBOL ferret_google_plot = 1
    !always use large size for plots on GE
    DEFINE SYMBOL ferret_size = 0.8333
 
-   LET its_GE = `STRINDEX( "($operation_ID)", "Vector_for_GE" ) NE 0 OR \
-      STRINDEX( "($operation_ID)", "Vector_GE_Overlay" ) NE 0` 
-   IF `its_GE` THEN
-       go xy_vector_plot
+   DEFINE SYMBOL its_GE = `STRINDEX( "($operation_ID)", "_GE" ) NE 0` 
+   IF ($its_GE"0|*>1") THEN
+      !go xy_plot_2D
+
+      go xy_vector_plot
    ENDIF
 
 ELIF ($ferret_view"|xz>1|*>0") THEN
