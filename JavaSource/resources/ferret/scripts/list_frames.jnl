@@ -23,6 +23,7 @@
 ! - fill_levels      for 2D plots
 ! - contour_levels   for 2D plots
 ! - dep_axis_scale   for 1D plots
+! - vector_length    for vector plots
 ! - hasT             used to determine if the dataset has time axis
 ! - units            units of the time axis
 ! - frames           list of each individual time points
@@ -244,6 +245,23 @@ list/norowhead/nohead/format=(A`nlen`)/FILE/append a
 
 LET f = "</dep_axis_scale>"
 list/norowhead/nohead/format=(A17)/FILE/append f
+
+
+!------------
+! vector_length  ! see the note under ferret_contour_levels
+!------------
+IF `($ferret_vector_length"0|*>1") EQ 0` THEN DEFINE SYMBOL ferret_vector_length 10
+
+LET f = "<vector_length>"
+list/norowhead/nohead/format=(A15)/FILE/append f
+
+let nlen = strlen ("($ferret_vector_length)")
+let a = "($ferret_vector_length)"
+list/norowhead/nohead/format=(A`nlen`)/FILE/append a
+
+LET f = "</vector_length>"
+list/norowhead/nohead/format=(A16)/FILE/append f
+
 
 !------------
 ! hasT
