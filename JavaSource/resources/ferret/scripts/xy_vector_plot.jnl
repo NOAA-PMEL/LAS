@@ -65,18 +65,7 @@ IF ($error_status"0|ERROR>1") THEN
   EXIT/PROGRAM
 ENDIF
 
-! Open the window, apply size, scale options
-GO LAS_open_window
-
 IF `($ferret_land_type"0|contour>1|*>0")` THEN DEFINE SYMBOL ferret_land_arg = thick
-
-! Build up the plot qualifiers
-
-! Always use /ASPECT adjusts scaling based upon the ratio of the 
-! axis scale factors (meters on the Earth to inches on the plot) and 
-! it preserves the vector magnitudes -- adjusting only the orientation. 
-
-!DEFINE SYMBOL qualifiers  = ($qualifiers)/ASPECT/NOLAB  ! but dont make a label about it.
 
 IF `($its_GE"0|*>1") ` THEN 
 
@@ -86,12 +75,24 @@ IF `($its_GE"0|*>1") ` THEN
    SET MODE LINECOLORS:7
    PPL COLOR,7,100,50,0  ! orange lines
    IF `($ferret_line_color%1|default>1|*>2%) EQ 1` THEN DEFINE SYMBOL ferret_line_color=7
-   IF `($ferret_line_thickness%1|default>1|*>2%) EQ 1` THEN DEFINE SYMBOL ferret_line_thickness = 2
    sh sym ferret_line_color
-   sh sym ferret_line_thickness
    IF `($ferret_land_type"0|contour>1|*>0")` THEN DEFINE SYMBOL ferret_land_arg = 8
 
 ENDIF
+
+
+! Open the window, apply size, scale options
+GO LAS_open_window
+
+
+! Build up the plot qualifiers
+
+! Always use /ASPECT adjusts scaling based upon the ratio of the 
+! axis scale factors (meters on the Earth to inches on the plot) and 
+! it preserves the vector magnitudes -- adjusting only the orientation. 
+
+!DEFINE SYMBOL qualifiers  = ($qualifiers)/ASPECT/NOLAB  ! but dont make a label about it.
+
 
 IF `($ferret_line_color%0|default>1|*>2%) LT 2` THEN DEFINE SYMBOL ferret_line_color = blue
 
@@ -175,30 +176,6 @@ ENDIF
 GO LAS_url_label 0
 
 ! Draw  the plot. On VECTOR/SET the /XSKIP and /YSKIP are ignored. 
-
-! For Google Earth Plots, first fill with all-white, which will be transparent.
-IF `($ferret_margins"1|0|1|false>0|true>1") EQ 0` THEN
-   DEFINE VIEW/AXES/XLIM=0:1/YLIM=0:1 WMSview2
-   SET VIEW WMSview2
-   SHADE/PAL=white/NOAX/NOLAB 0*($ferret_plot_base_var_0)
-   SET VIEW WMSview
-ENDIF
-
-! Do a shade underlay, then we dont have
-! to do VECTOR/SET which ignores the automatic skip 
-!dont do shade underlay -- if we do its not transparent adn dont get key,
-
-!DEFINE SYMBOL shade_var = ($ferret_vector_1)
-!IF ($native_curvilinear_xy"0") THEN DEFINE SYMBOL  shade_var = ($ferret_vector_1)
-!
-!SHADE/pal=white/nokey/TITLE="($ferret_plot_title)"/SET  ($shade_var)
-!   IF ($xform_dms"0|*>1") THEN PPL XFOR (($xform_dms))
-!   IF ($yform_dms"0|*>1") THEN PPL YFOR (($yform_dms))
-!   IF ($labnum_dset"0|*>1") THEN go unlabel ($labnum_dset)
-!   IF ($labnum_datitl"0|*>1") THEN go unlabel ($labnum_datitl)
-!   IF ($labnum_dods"0|*>1") THEN go unlabel ($labnum_dods)
-!PPL SHADE
-!DEFINE SYMBOL qualifiers = ($qualifiers)/OVER
 
 ! use XSKIP and YSKIP as qualifiers if given
 IF ($ferret_vector_skip"0") THEN
