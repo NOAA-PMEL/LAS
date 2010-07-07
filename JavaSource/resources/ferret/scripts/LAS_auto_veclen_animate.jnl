@@ -14,13 +14,19 @@
 ! Determine striding for speed in operating the STAT command
 LET memsize = 0.5* 1.e6
 
-! Make sure its a 2D plot operation.
+GO LAS_initialize_region 0
+GO LAS_initialize_data 0
+DEFINE SYMBOL ferret_vector_1 ($ferret_plot_var)
+DEFINE SYMBOL ferret_plot_title_1 "($data_title) ($data_units)"
+DEFINE SYMBOL ferret_vector_1_noregion ($ferret_plot_var_0_noregion)
 
-DEFINE SYMBOL op = `UPCASE("($operation_ID)")`
+GO LAS_initialize_data 1
+DEFINE SYMBOL ferret_vector_2 ($ferret_plot_var)
+DEFINE SYMBOL ferret_plot_title "($ferret_plot_title_1), ($data_title) ($data_units)"
+DEFINE SYMBOL ferret_vector_2_noregion ($ferret_plot_var_1_noregion)
 
-! comment out for testing
-! IF `STRINDEX("($op)", "VECTOR") EQ 0` THEN EXIT/SCRIPT
-! IF `STRINDEX("($op)", "ANIMATION") EQ 0` THEN EXIT/SCRIPT
+! See if the vector components are on staggered grids
+GO LAS_check_staggered
 
 ! If the user or configuration sets the length, we are done.
 IF ($ferret_vector_length"0|*>1") THEN EXIT/SCRIPT
