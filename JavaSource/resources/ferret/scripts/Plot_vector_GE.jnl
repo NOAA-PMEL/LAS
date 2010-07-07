@@ -23,8 +23,6 @@ ELIF ($ferret_view"|xy>1|*>0") THEN
 
    DEFINE SYMBOL its_GE = `STRINDEX( "($operation_ID)", "_GE" ) NE 0` 
    IF ($its_GE"0|*>1") THEN
-      !go xy_plot_2D
-
       go xy_vector_plot
    ENDIF
 
