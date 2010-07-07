@@ -34,9 +34,8 @@ ELIF ($ferret_view"|xy>1|*>0") THEN
    DEFINE SYMBOL ferret_size = 0.8333
 
 
-   LET its_GE = `STRINDEX( "($operation_ID)", "Plot_for_GE" ) NE 0 OR \
-      STRINDEX( "($operation_ID)", "Plot_GE_Overlay" ) NE 0` 
-   IF `its_GE` THEN
+   DEFINE SYMBOL its_GE = `STRINDEX( "($operation_ID)", "_GE" ) NE 0` 
+   IF ($its_GE"0|*>1") THEN
 
 ! For Google Earth plots, check y region:
 ! check if region_y_hi > dataset_y_max; if so, reset region_y_hi to dataset_y_max 
