@@ -7,6 +7,7 @@
 ! Vector components may be on staggered grids. Detect this and set the 
 ! second component to be regridded to the grid of the first.
 !
+IF ($native_curvilinear_xy"0") THEN EXIT/SCRIPT
 
 DEFINE SYMBOL xax_vec_1 = `($ferret_plot_base_var_0),RETURN=xaxis`
 DEFINE SYMBOL yax_vec_1 = `($ferret_plot_base_var_0),RETURN=yaxis`
