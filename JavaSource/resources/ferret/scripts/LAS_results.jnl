@@ -157,9 +157,10 @@ IF ($result_map_scale_filename%0|*>1%) THEN
       IF `($ystride"0") GT 1` THEN CANCEL AXIS/STRIDE `y_strided_var,RETURN=yaxis`
       IF `($zstride"0") GT 1` THEN CANCEL AXIS/STRIDE `z_strided_var,RETURN=zaxis`
       IF `($tstride"0") GT 1` THEN CANCEL AXIS/STRIDE `t_strided_var,RETURN=taxis`
-      
-      IF ($ax_horiz"0|*>1") THEN
 
+      IF `($native_curvilinear_xy"0") EQ 0` THEN 
+
+      IF ($ax_horiz"0|*>1") THEN
          DEFINE SYMBOL the_axis =  `the_plot_var,RETURN=($ax_horiz)axis`
          IF `STRINDEX("($the_axis)", "(") GT 0` THEN 
             LET attlist = ($the_axis).attnames
@@ -188,6 +189,7 @@ IF ($result_map_scale_filename%0|*>1%) THEN
       ELSE
          DEFINE SYMBOL ax_vert = D
       ENDIF
+      ENDIF  ! curvilinear
 
 * Find the data min, max.  If all data was bad, send blank strings to the output.
 
