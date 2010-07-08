@@ -27,9 +27,12 @@ IF ($ferret_bad_flag"0|*>1") THEN SET VAR/BAD=($ferret_bad_flag) ($data_var)
 ! setup for analysis ops on curvilinear grids 
 IF `IS_ELEMENT_OF_STR (attlist, "ferret_definition") GT 0 AND\
     ($ferret_curvi_coord_lon"0|*>1")` THEN
-   LET data_var_definition = `($data_var).ferret_definition`
-   DEFINE SYMBOL data_var_def = `($data_var).ferret_definition`
-   DEFINE SYMBOL data_var = data_var_definition
+   LET its_x_analysis = STRINDEX("($data_($num)_title)", "x=") 
+   LET its_y_analysis = STRINDEX("($data_($num)_title)", "y=")
+   IF `its_x_analysis OR its_y_analysis ` THEN
+      LET data_var_definition = `($data_var).ferret_definition`
+      DEFINE SYMBOL data_var_def = `($data_var).ferret_definition`
+      DEFINE SYMBOL data_var = data_var_definition
 
 ! If there is an X or Y analysis operation then the X or Y region has
 ! Not been set. Get the X and/or Y analysis request, set up 
@@ -37,8 +40,8 @@ IF `IS_ELEMENT_OF_STR (attlist, "ferret_definition") GT 0 AND\
 ! by finding the region in the rectiliear portion of the grid
 ! or by first doing a curvi-to-rectilnear regridding operation.
 
-   GO LAS_set_x_y_analysis.jnl
-
+      GO LAS_set_x_y_analysis.jnl
+   ENDIF
 ENDIF
 
 ! Be sure units and title are defined.
