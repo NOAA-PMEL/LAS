@@ -11,15 +11,8 @@
 ! List a variable with its curviliear coordinate data to a netCDF file.
 ! Based on list_data.jnl
 
-! For now only write netCDF output
-!
 ! Skip the stuff about "if a duplicate variable name is assigned for netcdf listings..."
 ! Is that used in current LAS structure?
-
-! IF ($ferret_format"1|cdf>0|*>1") THEN 
-!   MESSAGE/ERROR **ERROR Script allows curvilinear data to be written only to netCDF files (for ! now)
-!   EXIT/PROGRAM
-! ENDIF
 
 CANCEL MODE INTERPOLATE  ! important when evaluating the size limits
 
@@ -76,12 +69,14 @@ GO get_curv_coord_bbox
 ! Now get the start, stop and size information
 DEFINE SYMBOL isize `($clon_imax) - ($clon_imin) + 1`
 DEFINE SYMBOL jsize `($clat_jmax) - ($clat_jmin) + 1`
-DEFINE SYMBOL kmin `($ferret_list_var),return=kstart`
-DEFINE SYMBOL kmax `($ferret_list_var),return=kend`
-DEFINE SYMBOL ksize `($ferret_list_var),return=ksize`
-DEFINE SYMBOL lmin `($ferret_list_var),return=lstart`
-DEFINE SYMBOL lmax `($ferret_list_var),return=lend`
-DEFINE SYMBOL lsize `($ferret_list_var),return=lsize`
+
+LET testvar = ($data_($var_num)_var)[($region_zt)]
+DEFINE SYMBOL kmin `testvar,return=kstart`
+DEFINE SYMBOL kmax `testvar,return=kend`
+DEFINE SYMBOL ksize `testvar,return=ksize`
+DEFINE SYMBOL lmin `testvar,return=lstart`
+DEFINE SYMBOL lmax `testvar,return=lend`
+DEFINE SYMBOL lsize `testvar,return=lsize`
 
 ! RETURN=*start returns 0 if the axis is an undefined axis
 ! This messes messes up the repeat loop below if the data is chunked.
@@ -94,6 +89,7 @@ IF `($lmax) LT 1` THEN DEFINE SYMBOL lmax 1
 
 ! the default is set under 1/4 of Ferret's memory allowing for LET definitions 
 LET max_size = ($MAX_LIST_SIZE"1000000")  ! use this for debugging, too
+LET max_size =  100000
 
 ! Size of the data variable 
 LET size = ($isize)*($jsize)*($ksize)*($lsize) 
@@ -108,7 +104,7 @@ IF ($ferret_interpolate_data%0|false>0|true>1|1|0|*>1%) THEN SET MODE INTERPOLAT
 
 ! First write the curvilinear coordinates
 
-! list them just once if this is a vector variable
+! list coordinates just once if this is a vector variable
 IF `($ferret_coordinates_done"0|*>1") EQ 0` THEN
    
    IF `($ferret_format"0|asc>1|*>0") + ($ferret_format"0|txt>1|*>0") GT 0` THEN 
@@ -128,6 +124,11 @@ ENDIF
 SET VAR/TITLE="($data_title)($data_var_transform)" ($data_var)
 SET ATTRIBUTE/OUTPUT ($data_var_nq).coordinates 
 
+SET VAR/name=old_($var_num) ($data_($var_num)_var)
+LET/TITLE="($data_title)($data_var_transform)"/UNITS="`old_($var_num),RETURN=units`" \
+($data_($var_num)_var) = old_($var_num)[d=($data_num),i=($clon_imin):($clon_imax),j=($clat_jmin):($clat_jmax),\
+k=($kmin):($kmax),l=($lmin):($lmax)]
+SET ATTR/LIKE=old_($var_num) ($data_($var_num)_var)
 
 IF `size LE max_size` THEN
 
@@ -135,15 +136,13 @@ IF `size LE max_size` THEN
    !     This special case is not strictly necessary -- the logic for listing
    !     large files also works for small ... but with some overhead
 
-   DEFINE SYMBOL ferret_list_var ($data_var)[d=($data_num),i=($clon_imin):($clon_imax),j=($clat_jmin):($clat_jmax),\
-            k=($kmin):($kmax),l=($lmin):($lmax)]
+   DEFINE SYMBOL ferret_list_var ($data_($var_num)_var)
 
    IF `($ferret_format"0|asc>1|*>0") + ($ferret_format"0|txt>1|*>0") GT 0` THEN  
       IF ($var_history"0|*>1") THEN LIST/APPEND/NOHEAD/FORMAT=(A)/FILE="($result_ferret_listing_filename)" var_hist
    ENDIF
 
-   LIST/APPEND/FILE/($frmt) ($ferret_list_var)
-
+   LIST/APPEND/FILE/($frmt) ($data_($var_num)_var); pause
 ELSE
 
    DEFINE SYMBOL ferret_list_var ($data_var)[d=($data_num)]
@@ -171,7 +170,7 @@ ELSE
    ENDIF
 
      ! ... netCDF output in chunks
-   REPEAT/L=($lmin):($lmax):`lchunk` REPEAT/K=($kmin):($kmax):`kchunk` REPEAT/J=($clat_jmin):($clat_jmax):`jchunk` (LIST/APPEND/FILE/($frmt)/J=`j`:`jtop`/K=`k`:`ktop`/L=`l`:`ltop`/JLIMITS=($clat_jmin):($clat_jmax)/KLIMITS=($kmin):($kmax)/LLIMITS=($lmin):($lmax)/I=($clon_imin):($clon_imax) ($ferret_list_var); CANC MEM/ALL)
+   REPEAT/L=($lmin):($lmax):`lchunk` REPEAT/K=($kmin):($kmax):`kchunk` REPEAT/J=($clat_jmin):($clat_jmax):`jchunk` (LIST/APPEND/FILE/($frmt)/J=`j`:`jtop`/K=`k`:`ktop`/L=`l`:`ltop`/JLIMITS=($clat_jmin):($clat_jmax)/KLIMITS=($kmin):($kmax)/LLIMITS=($lmin):($lmax)/I=($clon_imin):($clon_imax) ($data_($var_num)_var); CANC MEM/ALL)
 
 ENDIF
 

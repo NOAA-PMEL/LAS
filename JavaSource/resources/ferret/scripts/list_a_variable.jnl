@@ -53,7 +53,7 @@ LET its_curvi = `( ($ferret_curvi_coord_lat"0|*>1) + STRINDEX("($ferret_view)", 
 ! If user requested regridding to rectilinear grid, then proceed 
 ! as for non-curvilinear data
 
-IF ($constraint_($var_num)_lhs"0|Curv_to_Rect_Regridding>1|*>0") THEN LET its_curvi = 0
+IF ($constraint_($num)_lhs"0|Curv_to_Rect_Regridding>1|*>0") THEN LET its_curvi = 0
 
 IF `its_curvi` THEN
    GO list_curvi_data.jnl
