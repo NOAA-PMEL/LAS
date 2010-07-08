@@ -65,6 +65,19 @@ IF ($error_status"0|ERROR>1") THEN
   EXIT/PROGRAM
 ENDIF
 
+IF `(($native_curvilinear_xy"0") EQ 0) AND (($its_GE"0|*>1") EQ 1)` THEN 
+   LET delx = `xbox[gx=($ferret_plot_var),x=($region_x_lo)]`
+   list delx
+   list ($region_x_range)
+   list 360-delx
+
+   IF `($region_x_range) GT (360-1.1*delx)` THEN
+      DEFINE SYMBOL region_0_x_lo = `($region_0_x_lo) - delx/2`
+      DEFINE SYMBOL region_0_x_hi = `($region_0_x_hi) + delx/2`
+      GO LAS_initialize_region 0
+   ENDIF
+ENDIF   
+
 IF `($ferret_land_type"0|contour>1|*>0")` THEN DEFINE SYMBOL ferret_land_arg = thick
 
 IF `($its_GE"0|*>1") ` THEN 
@@ -75,7 +88,6 @@ IF `($its_GE"0|*>1") ` THEN
    SET MODE LINECOLORS:7
    PPL COLOR,7,100,50,0  ! orange lines
    IF `($ferret_line_color%1|default>1|*>2%) EQ 1` THEN DEFINE SYMBOL ferret_line_color=7
-   sh sym ferret_line_color
    IF `($ferret_land_type"0|contour>1|*>0")` THEN DEFINE SYMBOL ferret_land_arg = 8
 
 ENDIF
@@ -176,6 +188,24 @@ ENDIF
 GO LAS_url_label 0
 
 ! Draw  the plot. On VECTOR/SET the /XSKIP and /YSKIP are ignored. 
+
+IF ($its_GE"0|*>1") THEN
+   CANCEL MODE nodata_lab
+   LET allbad = 1./0. +  ($ferret_vector_1)
+!   SHADE/NOKEY/NOLAB allbad
+
+   DEFINE SYMBOL shade_var = ($ferret_vector_1)
+   IF ($native_curvilinear_xy"0") THEN DEFINE SYMBOL  shade_var = ($ferret_plot_base_var_0)
+
+!   LET all_bad = ($shade_var)
+   SHADE/pal=white/nokey/TITLE="($ferret_plot_title)"/SET  ($shade_var)
+      IF ($xform_dms"0|*>1") THEN PPL XFOR (($xform_dms))
+      IF ($yform_dms"0|*>1") THEN PPL YFOR (($yform_dms))
+   PPL SHADE
+
+   DEFINE SYMBOL qualifiers = ($qualifiers)/OVER/NOLAB
+
+ENDIF
 
 ! use XSKIP and YSKIP as qualifiers if given
 IF ($ferret_vector_skip"0") THEN

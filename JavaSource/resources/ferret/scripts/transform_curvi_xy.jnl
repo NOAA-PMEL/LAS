@@ -145,6 +145,41 @@ ELSE
 
 ENDIF
 
+
+sh sym  clon*
+sh sym clat*
+sh sym region_full
+DEFINE SYMBOL region_x = i=($clon_imin):($clon_imax)
+DEFINE SYMBOL region_y = j=($clat_jmin):($clat_jmax)
+DEFINE SYMBOL region_xy = i=($clon_imin):($clon_imax),j=($clat_jmin):($clat_jmax)
+IF ($region_t"0|*>1") THEN DEFINE SYMBOL region_xyt = ($region_xy),($region_t)
+IF ($region_z"0|*>1") THEN DEFINE SYMBOL region_xyz = ($region_xy),($region_z)
+IF ($region_zt"0|*>1") THEN DEFINE SYMBOL region_xyzt = ($region_xy),($region_zt)
+
+IF ($region_xt"0|*>1") THEN DEFINE SYMBOL region_xt = ($region_x),($region_t)
+IF ($region_xz"0|*>1") THEN DEFINE SYMBOL region_xz = ($region_x),($region_z)
+IF ($region_xzt"0|*>1") THEN DEFINE SYMBOL region_xzt = ($region_x),($region_zt)
+
+IF ($region_yt"0|*>1") THEN DEFINE SYMBOL region_yt = ($region_y),($region_t)
+IF ($region_yz"0|*>1") THEN DEFINE SYMBOL region_yz = ($region_y),($region_z)
+IF ($region_yzt"0|*>1") THEN DEFINE SYMBOL region_yzt = ($region_y),($region_zt)
+
+IF ($region_full"0|*>1") THEN DEFINE SYMBOL region_full = region_xyzt
+
+
+! For sampling from a curvilinear variable, save the region definitions with
+! the variable number.
+IF ($region_x"0|*>1") THEN DEFINE SYMBOL region_($num)_x = ($region_x)
+IF ($region_y"0|*>1") THEN DEFINE SYMBOL region_($num)_y = ($region_y)
+IF ($region_z"0|*>1") THEN DEFINE SYMBOL region_($num)_z = ($region_z)
+IF ($region_t"0|*>1") THEN DEFINE SYMBOL region_($num)_t = ($region_t)
+IF ($region_xt"0|*>1") THEN DEFINE SYMBOL region_($num)_xt = ($region_xt)
+IF ($region_xy"0|*>1") THEN DEFINE SYMBOL region_($num)_xy = ($region_xy)
+IF ($region_xz"0|*>1") THEN DEFINE SYMBOL region_($num)_xz = ($region_xz)
+IF ($region_yt"0|*>1") THEN DEFINE SYMBOL region_($num)_yt = ($region_yt)
+IF ($region_yz"0|*>1") THEN DEFINE SYMBOL region_($num)_yz = ($region_yz)
+IF ($region_zt"0|*>1") THEN DEFINE SYMBOL region_($num)_zt = ($region_zt)
+
 !!!!!!!!!!!
 
 ! Set up native curvilinear plots
@@ -200,7 +235,6 @@ IF ($ferret_view"|xy>1|*>0") THEN
    ENDIF
 
 ! and if the longitudes are in a different modulo branch than requested add /MODULO
-   LET its_vector =  STRINDEX("($operation_ID)", "vector") NE 0
    IF `($ferret_lon_modulo"1|1|0|yes>1|no>0|*>0") AND ( ($num)+1 EQ ($data_count) )` THEN 
       LET outside = 0
       IF ($ferret_curv_lon_min"0|*>1") THEN 
@@ -218,10 +252,11 @@ IF ($ferret_view"|xy>1|*>0") THEN
          LET xcn = xcoord[i=($clon_imax),j=($clat_jmin):($clat_jmax):`strd`]
       ENDIF
       LET outside = `xc1 GT ($region_x_lo)` + `xcn LT ($region_x_hi)`
-      IF `($ferret_lon_modulo"1|1|0|yes>1|no>0|*>0") AND outside GT 0 AND its_vector EQ 0` THEN \
+      IF `($ferret_lon_modulo"1|1|0|yes>1|no>0|*>0") AND outside GT 0 AND \
+        ($itsa_vector_plot"0") EQ 0` THEN \
           DEFINE SYMBOL ferret_lon_modulo = 1 
    ENDIF
-
+pause
 ! Or set up for native slices: Sample in the X and Y directions of the slice
 
 ELIF `STRLEN ("($ferret_view)") LE 2` THEN
@@ -232,11 +267,15 @@ ELIF `STRLEN ("($ferret_view)") LE 2` THEN
    ELSE
       GO curvi_nrst_slice.jnl
    ENDIF
-
+   IF ($itsa_vector_plot"0") THEN 
+      DEFINE SYMBOL ferret_plot_base_var_noregion($var_num) = sampled_var($var_num)
+      DEFINE SYMBOL ferret_plot_var = sampled_var($var_num)
+      DEFINE SYMBOL is_sampled = 1
+   ENDIF
 ELIF `STRLEN ("($ferret_view)") GT 2 AND STRINDEX("($ferret_view)", "xy") GT 0` THEN  ! google placemarks
 
    DEFINE SYMBOL native_curvilinear_xy = 1
 
 ENDIF
-
 ! End of $RCSfile ------------transform_curvi_xy.jnl-------------------------------
+pause

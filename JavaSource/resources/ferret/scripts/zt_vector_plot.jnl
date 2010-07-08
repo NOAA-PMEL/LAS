@@ -1,5 +1,5 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! zt_plot_2D.jnl
+! zt_vector_plot.jnl
 ! 
 ! 
 ! Author: ansley 
@@ -11,26 +11,33 @@
 ! Calls LAS_vector_stickplot_z to plot the variable as stacked vector stick 
 ! plots at each depth or a sampling of depths.
 
+
 ! Set any Ferret modes
 
 IF ($ferret_interpolate_data%0|false>0|true>1|1|0|*>1%) THEN SET MODE INTERPOLATE
 
-! Define symbols associated with the regiogn and data and perform any
+DEFINE SYMBOL itsa_vector_plot = 1
+
+! Define symbols associated with the region and data and perform any
 ! initialization needed for this dataset.
 
-GO LAS_initialize_region 0
-GO LAS_initialize_data 0
+DEFINE SYMBOL var_num = 0
+GO LAS_initialize_region ($var_num)
+GO LAS_initialize_data ($var_num)
 DEFINE SYMBOL ferret_vector_1 ($ferret_plot_var)
 DEFINE SYMBOL ferret_plot_title_1 "($data_title) ($data_units)"
 LET ferret_vector_1_noz = ($FERRET_PLOT_BASE_VAR_NOREGION)
 DEFINE SYMBOL ferret_vector_1_noz ferret_vector_1_noz[($region_xyt)]
+IF ($is_sampled"0") THEN DEFINE SYMBOL ferret_vector_1_noz ($ferret_plot_base_var_noregion($var_num))
 
-GO LAS_initialize_data 1
+DEFINE SYMBOL var_num = 1
+GO LAS_initialize_data ($var_num)
 DEFINE SYMBOL ferret_vector_2 ($ferret_plot_var)
 DEFINE SYMBOL ferret_plot_title "($ferret_plot_title_1), ($data_title) ($data_units)"
 DEFINE SYMBOL ferret_vector_2_noregion ($FERRET_PLOT_BASE_VAR_NOREGION)
 LET ferret_vector_2_noz = ($FERRET_PLOT_BASE_VAR_NOREGION)
 DEFINE SYMBOL ferret_vector_2_noz ferret_vector_2_noz[($region_xyt)]
+IF ($is_sampled"0") THEN DEFINE SYMBOL ferret_vector_2_noz ($ferret_plot_base_var_noregion($var_num))
 
 ! Check for errors (They often occur during dataset initialization.)
 

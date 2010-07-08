@@ -45,7 +45,7 @@ ENDIF
 LET y2 = 0.88
 LET del = `0.8/enz`
 LET y1 = `y2 - del` + 0.02
-pause
+
 ! This viewport will be used to draw the axis at the bottom 
 ! and to label the t axis.
 
