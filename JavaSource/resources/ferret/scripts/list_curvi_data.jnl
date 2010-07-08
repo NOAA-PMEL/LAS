@@ -47,6 +47,8 @@ IF ($data_var_transform"0|*>1") THEN
     LET var_hist = "($var_history)"
     SET VAR/TITLE="($data_title)($data_var_transform)" ($data_var)
 ENDIF
+
+
 SET DATA/RESTORE
 SET DATA ($data_num)
 
@@ -55,12 +57,12 @@ SET DATA ($data_num)
 ! See if there is a  z and/or t axis; if the RETURN= is not the same as NORMAL
 ! then will add the name to the coordinates attribute.
 
-DEFINE SYMBOL zcoord_name = `($data_var),RETURN=zaxis`
+DEFINE SYMBOL zcoord_name = `($data_0_var),RETURN=zaxis`
 IF `(STRINDEX("($zcoord_name)", "NORMAL") EQ 1) + \
     (STRLEN("($zcoord_name)") EQ STRLEN("NORMAL") ) EQ 2` THEN
    CANCEL SYMBOL zcoord_name
 ENDIF
-DEFINE SYMBOL tcoord_name = `($data_var),RETURN=taxis`
+DEFINE SYMBOL tcoord_name = `($data_0_var),RETURN=taxis`
 IF `(STRINDEX("($tcoord_name)", "NORMAL") EQ 1) + \
     (STRLEN("($tcoord_name)") EQ STRLEN("NORMAL") ) EQ 2` THEN
    CANCEL SYMBOL tcoord_name
@@ -106,19 +108,26 @@ IF ($ferret_interpolate_data%0|false>0|true>1|1|0|*>1%) THEN SET MODE INTERPOLAT
 
 ! First write the curvilinear coordinates
 
-IF `($ferret_format"0|asc>1|*>0") + ($ferret_format"0|txt>1|*>0") GT 0` THEN 
-   LET var_coord_note = "Listing Curvilinear Coordinate Fields Then Data Field"
-   LIST/APPEND/NOHEAD/FORMAT=(A)/FILE="($result_ferret_listing_filename)" var_coord_note
-ENDIF
+! list them just once if this is a vector variable
+IF `($ferret_coordinates_done"0|*>1") EQ 0` THEN
+   
+   IF `($ferret_format"0|asc>1|*>0") + ($ferret_format"0|txt>1|*>0") GT 0` THEN 
+      LET var_coord_note = "Listing Curvilinear Coordinate Fields Then Data Field"
+      LIST/APPEND/NOHEAD/FORMAT=(A)/FILE="($result_ferret_listing_filename)" var_coord_note
+   ENDIF
+   
+   DEFINE SYMBOL ferret_list_xcoords ($ferret_curvi_coord_lon)[d=($data_num),i=($clon_imin):($clon_imax),j=($clat_jmin):($clat_jmax)]
+   DEFINE SYMBOL ferret_list_ycoords ($ferret_curvi_coord_lat)[d=($data_num),i=($clon_imin):($clon_imax),j=($clat_jmin):($clat_jmax)]
+   LIST/APPEND/FILE/($frmt) ($ferret_list_xcoords)
+   LIST/APPEND/FILE/($frmt) ($ferret_list_ycoords)
 
-DEFINE SYMBOL ferret_list_xcoords ($ferret_curvi_coord_lon)[d=($data_num),i=($clon_imin):($clon_imax),j=($clat_jmin):($clat_jmax)]
-DEFINE SYMBOL ferret_list_ycoords ($ferret_curvi_coord_lat)[d=($data_num),i=($clon_imin):($clon_imax),j=($clat_jmin):($clat_jmax)]
-LIST/APPEND/FILE/($frmt) ($ferret_list_xcoords)
-LIST/APPEND/FILE/($frmt) ($ferret_list_ycoords)
+   DEFINE SYMBOL ferret_coordinates_done = 1
+ENDIF
 
 !SET DATA ($data_num)
 SET VAR/TITLE="($data_title)($data_var_transform)" ($data_var)
 SET ATTRIBUTE/OUTPUT ($data_var_nq).coordinates 
+
 
 IF `size LE max_size` THEN
 
@@ -166,5 +175,5 @@ ELSE
 
 ENDIF
 
-! End of script ---------- list_a_variable.jnl----------------------------
+! End of script ---------- list_curvi_data.jnl----------------------------
 
