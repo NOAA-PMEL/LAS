@@ -95,6 +95,7 @@
   var theTimes = new Array(); 
   var fillLevels;
   var contourLevels;
+  var vectorLength
   var depAxisScale;
   var timeInterval; //animation time interval
   var isVector;
@@ -399,7 +400,7 @@
           var d = new XMLHttpRequest();
 	  d.open("GET", xml, false);
 	  d.send(null);
-	  xmlDoc=d.responseXML;
+	  xmlDoc= d.responseXML;
       //for IE
       }else if(window.ActiveXObject){
           xmlDoc = new ActiveXObject("Microsoft.XMLDOM");	
@@ -425,6 +426,9 @@
       }
       if(xmlDoc.getElementsByTagName("contour_levels")[0].childNodes[0] != null){
           contourLevels = xmlDoc.getElementsByTagName("contour_levels")[0].childNodes[0].nodeValue;
+      }
+      if(xmlDoc.getElementsByTagName("vector_length")[0].childNodes[0] != null){
+          vectorLength = xmlDoc.getElementsByTagName("vector_length")[0].childNodes[0].nodeValue;
       }
       if(xmlDoc.getElementsByTagName("dep_axis_scale")[0].childNodes[0]!=null){
           depAxisScale  = xmlDoc.getElementsByTagName("dep_axis_scale")[0].childNodes[0].nodeValue;
@@ -730,15 +734,20 @@
             thisReq.setOperation('Plot_vector');
         }else{
             thisReq.setOperation('Plot_2D_XY');
-
-            if(fillLevels != null && fillLevels != "" && fillLevels != "\n" && fillLevels != 0){
-                thisReq.setProperty('ferret','fill_levels', fillLevels);
+        }
+        if(fillLevels != null && fillLevels != "" && fillLevels != "\n" && fillLevels != 0){
+               thisReq.setProperty('ferret','fill_levels', fillLevels);
             }
 
             if(contourLevels != null && contourLevels != "" && contourLevels != "\n"){
                 thisReq.setProperty('ferret','contour_levels', contourLevels);
             }
-        }
+
+            if(vectorLength != null && vectorLength != "" && vectorLength != "\n"){
+                thisReq.setProperty('ferret','vector_length', vectorLength);
+            }
+
+        
       }
 
       //for XZ view
@@ -750,6 +759,10 @@
           if(contourLevels != null && contourLevels != "" && contourLevels != "\n"){
               thisReq.setProperty('ferret','contour_levels', contourLevels);
           }
+            if(vectorLength != null && vectorLength != "" && vectorLength != "\n"){
+                thisReq.setProperty('ferret','vector_length', vectorLength);
+            }
+
       }
 
       //for YZ view
@@ -761,6 +774,10 @@
           if(contourLevels != null && contourLevels != "" && contourLevels != "\n"){
               thisReq.setProperty('ferret','contour_levels', contourLevels);
           }
+            if(vectorLength != null && vectorLength != "" && vectorLength != "\n"){
+                thisReq.setProperty('ferret','vector_length', vectorLength);
+            }
+
       }
 
       //for XT view
@@ -831,6 +848,10 @@
               if(contourLevels != null && contourLevels != "" && contourLevels != "\n"){
                   thisReq.setProperty('ferret','contour_levels', contourLevels);
               }
+            if(vectorLength != null && vectorLength != "" && vectorLength != "\n"){
+                thisReq.setProperty('ferret','vector_length', vectorLength);
+            }
+
           }
       }
 
@@ -844,6 +865,10 @@
           if(contourLevels != null && contourLevels != "" && contourLevels != "\n"){
               thisReq.setProperty('ferret','contour_levels', contourLevels);
           }
+            if(vectorLength != null && vectorLength != "" && vectorLength != "\n"){
+                thisReq.setProperty('ferret','vector_length', vectorLength);
+            }
+
       }
 
       //for YZT view
@@ -856,6 +881,10 @@
           if(contourLevels != null && contourLevels != "" && contourLevels != "\n"){
               thisReq.setProperty('ferret','contour_levels', contourLevels);
           }
+            if(vectorLength != null && vectorLength != "" && vectorLength != "\n"){
+                thisReq.setProperty('ferret','vector_length', vectorLength);
+            }
+
       }
 
       //change the time from range to point
