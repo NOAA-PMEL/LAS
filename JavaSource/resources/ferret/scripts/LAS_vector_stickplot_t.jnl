@@ -25,8 +25,8 @@ LET num_times = 20  ! approx max time steps to use
 
 LET tt = t[GT=($ferret_vector_1)]
 
-LET lls = `L[gt=tt,t=($region_t_lo)]`
-LET lle = `L[gt=tt,t=($region_t_hi)]`
+LET lls = `L[gt=tt,t="($region_t_lo)"]`
+LET lle = `L[gt=tt,t="($region_t_hi)"]`
 LET nt = `lle - lls + 1`
 LET y2 = 0.88
 

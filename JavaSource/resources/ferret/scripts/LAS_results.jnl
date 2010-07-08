@@ -41,22 +41,23 @@ cancel region
 IF ($have_pvar"0") THEN 
          LET the_plot_var = pvar  ! from LAS_auto_levels
 ELSE
-   IF ($native_curvilinear_xy"0|*>1") THEN 
+   IF ($native_curvilinear_xy"0|0|*>1") THEN 
       LET the_plot_var = ($ferret_plot_base_var_noregion)
-   ELIF ($do_hybrid_z"0|*>1") THEN
+   ELIF ($do_hybrid_z"0|0|*>1") THEN
       LET the_plot_var = ($ferret_plot_base_var_noregion)
-   ELIF ($native_Z_plot"0|*>1") THEN
+   ELIF ($native_Z_plot"0|0|*>1") THEN
       LET the_plot_var = ($ferret_var_0)
-   ELIF ($ferret_plot_var"0|*>1") THEN
+   ELIF ($ferret_plot_var"0|0|*>1") THEN
       LET the_plot_var = ($ferret_plot_var)
       IF ($ferret_plot_var"0|sampled_var>1|*>0) THEN LET the_plot_var = ($ferret_plot_var)
    ELSE
-      IF ($basemap_url"0|*>1") THEN
+      IF ($basemap_url"0|0|*>1") THEN
          USE ($basemap_url)
          LET the_plot_var = ($basemap_var)
       ENDIF
    ENDIF
 ENDIF
+
 
 ! First list the urls and variable names; the URLs can be so long they make the
 ! commands too long for the Ferret command-line buffer. 
