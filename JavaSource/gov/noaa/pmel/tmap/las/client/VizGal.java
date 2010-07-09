@@ -839,6 +839,11 @@ public class VizGal implements EntryPoint {
 			comparisonAxesSelector.setAxes(ortho);
 			axesWidget.init(var.getGrid());
 			axesWidget.setFixedAxis(view, ortho, compareAxis);
+			
+			for (Iterator panelIt = panels.iterator(); panelIt.hasNext();) {
+				VizGalPanel panel = (VizGalPanel) panelIt.next();
+				panel.setCompareAxis(view, ortho, compareAxis);
+			}
 			return true;
 		}
 	}
