@@ -448,6 +448,7 @@ public class VizGalPanel extends Composite {
 		
 		if ( variable.isVector() ) {
 			// Add the second component and its region to match the first component.
+			lasRequest.addProperty("ferret", "vector_name", variable.getName());
 			lasRequest.addVariable(variable.getDSID(), variable.getComponents().get(1));
 			lasRequest.addRegion();
 			// For the second component variable set the region according to the values passed in...
@@ -740,9 +741,10 @@ public class VizGalPanel extends Composite {
 		lasRequest.removeVariables();
 		lasRequest.removePropertyGroup("ferret");
 
-		if ( var.getAttributes().get("grid_type").equals("vector") ) {
+		if ( var.isVector() ) {
 			// Add the first component
 			lasRequest.addVariable(var.getDSID(), var.getComponents().get(0));
+			lasRequest.addProperty("ferret", "vector_name", var.getName());
 		} else {
 			lasRequest.addVariable(var.getDSID(), var.getID());
 		}

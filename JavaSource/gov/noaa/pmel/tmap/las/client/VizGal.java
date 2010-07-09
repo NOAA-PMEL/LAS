@@ -666,54 +666,7 @@ public class VizGal implements EntryPoint {
 			axesWidget.getZAxis().setHi(zhi);
 		}
 
-//		if ( ortho.contains("t") && tlo != null && !tlo.equals("") ) {
-//			// If "t" is the orthogonal to the plot then set it to the passed in values in the panels
-//			for (Iterator panelIt = panels.iterator(); panelIt.hasNext();) {
-//				VizGalPanel panel = (VizGalPanel) panelIt.next();
-//				panel.setAxisRangeValues("t", tlo, thi);
-//			}
-//			// and in the currently hidden fixed axis widget
-//			if ( axesWidget.getTAxis().isRange() ) {
-//				axesWidget.getTAxis().setLo(tlo);
-//				axesWidget.getTAxis().setHi(thi);
-//			} else {
-//			    axesWidget.getTAxis().setLo(tlo);
-//			}
-//
-//
-//			// And if z exists, it will be the fixed axis so it also needs to be set.
-//			if ( fixedAxis.equals("z") ) {
-//				axesWidget.getZAxis().setLo(zlo);
-//				axesWidget.getZAxis().setHi(zhi);			
-//				// Pass the settings down to the panels
-//				for (Iterator panelIt = panels.iterator(); panelIt.hasNext();) {
-//					VizGalPanel panel = (VizGalPanel) panelIt.next();
-//					panel.setParentAxisRange("z", true);
-//					panel.setAxisRangeValues("z", zlo, zhi);
-//				}
-//			}
-//		} else if ( ortho.contains("z") && zlo != null && !zlo.equals("") ) {
-//			// Same if z is orthogonal to the plot.
-//			for (Iterator panelIt = panels.iterator(); panelIt.hasNext();) {
-//				VizGalPanel panel = (VizGalPanel) panelIt.next();
-//				panel.setAxisRangeValues("z", zlo, zhi);
-//			}
-//			if ( axesWidget.getZAxis().isRange() ) {
-//				axesWidget.getZAxis().setLo(zlo);
-//				axesWidget.getZAxis().setHi(zhi);
-//			} else {
-//				axesWidget.getZAxis().setLo(zlo);
-//			}
-//
-//			if ( fixedAxis.equals("t") ) {
-//				axesWidget.getTAxis().setLo(tlo);
-//				axesWidget.getTAxis().setHi(thi);
-//				for (Iterator panelIt = panels.iterator(); panelIt.hasNext();) {
-//					VizGalPanel panel = (VizGalPanel) panelIt.next();
-//					panel.setAxisRangeValues("t", tlo, thi);
-//				}	
-//			}
-//		}
+
 		// If these limits are not the same as the dataBounds, then set them.
 		if ( xlo != null && !xlo.equals("") && xhi != null && !xhi.equals("") && 
 			 ylo != null && !ylo.equals("") && yhi != null && !yhi.equals("") ) {
