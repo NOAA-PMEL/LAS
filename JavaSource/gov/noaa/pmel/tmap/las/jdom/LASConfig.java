@@ -3186,6 +3186,26 @@ public class LASConfig extends LASDocument {
         return variables;
     }
     /**
+     * Get a vector variable from a data set that is made up of the components passed in as a list of variable ids.
+     * @param dsid
+     * @param varids
+     * @return
+     * @throws JDOMException 
+     */
+    public Variable getVectorVariable(String dsid, ArrayList<String> varids ) throws JDOMException {
+    	ArrayList<Variable> variables = getVariables(dsid);
+    	for (Iterator varid = variables.iterator(); varid.hasNext();) {
+			Variable variable = (Variable) varid.next();
+			if ( variable.isVector() ) {
+				List<String> compids = variable.getComponents();
+				if ( compids.containsAll(varids)) {
+					return variable;
+				}
+			}
+		}
+    	return null;
+    }
+    /**
      * Extract the supposedly human interesting title of a variable
      * @param xpathValue The XPath of the variable
      * @return title The title of the variable (Not to quibble but, it's actually the name attibute)
