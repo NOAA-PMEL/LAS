@@ -856,7 +856,6 @@ LASUI.prototype.setOperationList = function (strJson) {
 
 	//document.body.appendChild(this.refs.options.external.DOMNode);
 	//disable all nodes first
-	for(var row=0;row<document.getElementById("productButtons").childNodes.length;row++)
 	var setDefaultVis = true;
 	if(!this.state.operations.response.operations.error)
 		for(var i=0;i<this.state.operations.getOperationCount();i++) {
@@ -883,7 +882,7 @@ LASUI.prototype.setOperationList = function (strJson) {
 		document.getElementById('plotOptionsButton').style.visibility='hidden';
 		this.refresh();
 	}
-	if(this.refs.analysis.enabled)document.getElementById('Animation').style.visibility='hidden';
+	if(this.refs.analysis.enabled||!this.state.grid.hasAxis('t'))document.getElementById('Animation').style.visibility='hidden';
 
 }
 

@@ -394,7 +394,7 @@ streamable="true" mime_type="application/postscript"/> -->
         <grid_types>
                 <grid_type name="vector" />
         </grid_types>
-        <optiondef IDREF="Options_Vector_7"/>
+        <optiondef IDREF="Options_GE_Vector_7"/>
     </operation>
     <!-- END: dynamic overlay on Google Earth -->
 
