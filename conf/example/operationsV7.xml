@@ -136,6 +136,20 @@ streamable="true" mime_type="application/postscript"/> -->
           </grid_types>
     </operation>
 
+	<operation name="Comparison" ID="Plot_1D_SlideSorter_Vector"
+		output_template="vizGal" service_action="" order="0801" category="comparison">
+		<service>template</service>
+		<region>
+			<intervals name="x" />
+			<intervals name="y" />
+			<intervals name="z" />
+			<intervals name="t" />
+		</region>
+		<grid_types>
+			<grid_type name="vector" />
+		</grid_types>
+	</operation>
+
     <operation ID="Plot_1D" default="true" name="Line plot" output_template="output" service_action="Plot_1D" order="0102" category="visualization" isZoomable="false">
           <service>ferret</service>
           <response ID="PlotResp">
@@ -192,6 +206,16 @@ streamable="true" mime_type="application/postscript"/> -->
         </grid_types>
     </operation>
 
+     <operation name="Comparison" ID="Plot_2D_XY_SlideSorter_Vector" output_template="vizGal" service_action="" category="comparison">
+        <service>template</service>
+        <region>
+            <intervals name="xy" />
+        </region>
+        <grid_types>
+            <grid_type name="vector" />
+        </grid_types>
+    </operation>
+    
     <operation name="Color plot" ID="Plot_2D_XY"
         output_template="output" service_action="Plot_2D_XY" order="0100" category="visualization"  isZoomable="true">
         <service>ferret</service>

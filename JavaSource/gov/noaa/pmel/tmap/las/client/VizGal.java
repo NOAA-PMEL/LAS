@@ -648,55 +648,72 @@ public class VizGal implements EntryPoint {
 		sp4.init(false, ops);
 
 		init();
-
-		if ( compareAxis.equals("t") && tlo != null && !tlo.equals("") ) {
-			// If "t" is the compare axis, then set it to the passed in values in the panels
+		
+		if ( tlo != null && !tlo.equals("") ) {
 			for (Iterator panelIt = panels.iterator(); panelIt.hasNext();) {
 				VizGalPanel panel = (VizGalPanel) panelIt.next();
 				panel.setAxisRangeValues("t", tlo, thi);
 			}
-			// and in the currently hidden fixed axis widget
-			if ( axesWidget.getTAxis().isRange() ) {
-				axesWidget.getTAxis().setLo(tlo);
-				axesWidget.getTAxis().setHi(thi);
-			} else {
-			    axesWidget.getTAxis().setLo(tlo);
-			}
-
-
-			// And if z exists, it will be the fixed axis so it also needs to be set.
-			if ( fixedAxis.equals("z") ) {
-				axesWidget.getZAxis().setLo(zlo);
-				axesWidget.getZAxis().setHi(zhi);			
-				// Pass the settings down to the panels
-				for (Iterator panelIt = panels.iterator(); panelIt.hasNext();) {
-					VizGalPanel panel = (VizGalPanel) panelIt.next();
-					panel.setParentAxisRange("z", true);
-					panel.setAxisRangeValues("z", zlo, zhi);
-				}
-			}
-		} else if ( compareAxis.equals("z") && zlo != null && !zlo.equals("") ) {
-			// Same if z is the compare axis.
+			axesWidget.getTAxis().setLo(tlo);
+			axesWidget.getTAxis().setHi(thi);
+		}
+		if ( zlo != null && !zlo.equals("") ) {
 			for (Iterator panelIt = panels.iterator(); panelIt.hasNext();) {
 				VizGalPanel panel = (VizGalPanel) panelIt.next();
 				panel.setAxisRangeValues("z", zlo, zhi);
 			}
-			if ( axesWidget.getZAxis().isRange() ) {
-				axesWidget.getZAxis().setLo(zlo);
-				axesWidget.getZAxis().setHi(zhi);
-			} else {
-				axesWidget.getZAxis().setLo(zlo);
-			}
-
-			if ( fixedAxis.equals("t") ) {
-				axesWidget.getTAxis().setLo(tlo);
-				axesWidget.getTAxis().setHi(thi);
-				for (Iterator panelIt = panels.iterator(); panelIt.hasNext();) {
-					VizGalPanel panel = (VizGalPanel) panelIt.next();
-					panel.setAxisRangeValues("t", tlo, thi);
-				}	
-			}
+			axesWidget.getZAxis().setLo(zlo);
+			axesWidget.getZAxis().setHi(zhi);
 		}
+
+//		if ( ortho.contains("t") && tlo != null && !tlo.equals("") ) {
+//			// If "t" is the orthogonal to the plot then set it to the passed in values in the panels
+//			for (Iterator panelIt = panels.iterator(); panelIt.hasNext();) {
+//				VizGalPanel panel = (VizGalPanel) panelIt.next();
+//				panel.setAxisRangeValues("t", tlo, thi);
+//			}
+//			// and in the currently hidden fixed axis widget
+//			if ( axesWidget.getTAxis().isRange() ) {
+//				axesWidget.getTAxis().setLo(tlo);
+//				axesWidget.getTAxis().setHi(thi);
+//			} else {
+//			    axesWidget.getTAxis().setLo(tlo);
+//			}
+//
+//
+//			// And if z exists, it will be the fixed axis so it also needs to be set.
+//			if ( fixedAxis.equals("z") ) {
+//				axesWidget.getZAxis().setLo(zlo);
+//				axesWidget.getZAxis().setHi(zhi);			
+//				// Pass the settings down to the panels
+//				for (Iterator panelIt = panels.iterator(); panelIt.hasNext();) {
+//					VizGalPanel panel = (VizGalPanel) panelIt.next();
+//					panel.setParentAxisRange("z", true);
+//					panel.setAxisRangeValues("z", zlo, zhi);
+//				}
+//			}
+//		} else if ( ortho.contains("z") && zlo != null && !zlo.equals("") ) {
+//			// Same if z is orthogonal to the plot.
+//			for (Iterator panelIt = panels.iterator(); panelIt.hasNext();) {
+//				VizGalPanel panel = (VizGalPanel) panelIt.next();
+//				panel.setAxisRangeValues("z", zlo, zhi);
+//			}
+//			if ( axesWidget.getZAxis().isRange() ) {
+//				axesWidget.getZAxis().setLo(zlo);
+//				axesWidget.getZAxis().setHi(zhi);
+//			} else {
+//				axesWidget.getZAxis().setLo(zlo);
+//			}
+//
+//			if ( fixedAxis.equals("t") ) {
+//				axesWidget.getTAxis().setLo(tlo);
+//				axesWidget.getTAxis().setHi(thi);
+//				for (Iterator panelIt = panels.iterator(); panelIt.hasNext();) {
+//					VizGalPanel panel = (VizGalPanel) panelIt.next();
+//					panel.setAxisRangeValues("t", tlo, thi);
+//				}	
+//			}
+//		}
 		// If these limits are not the same as the dataBounds, then set them.
 		if ( xlo != null && !xlo.equals("") && xhi != null && !xhi.equals("") && 
 			 ylo != null && !ylo.equals("") && yhi != null && !yhi.equals("") ) {
@@ -774,21 +791,48 @@ public class VizGal implements EntryPoint {
 		} else {
 
 			int pos = 0;
-			// Figure out which axis vary in each frame.  Take them in order of t, z, x, y...
+			// Figure out which axis vary in each frame.  Take them in order of t, z, y, x...
 			if ( ortho.contains("t") ) {
+				
 				compareAxis = "t";
-				if ( ds_grid.hasZ() ) {
-				    fixedAxis = "z";
+				
+				if ( ortho.contains("z") ) {
+					fixedAxis = "z";
+				} else if ( ortho.contains("y") ) {
+					fixedAxis = "y";
+				} else if ( ortho.contains("x") ) {
+					fixedAxis = "x";
 				} else {
 					fixedAxis = "";
 				}
+		
 			}  else if ( ortho.contains("z") ) {
+				
 				compareAxis = "z";
-				if ( ds_grid.hasT() ) {
-				    fixedAxis = "t";
+				
+				if ( ortho.contains("y") ) {
+					fixedAxis = "y";
+				} else if ( ortho.contains("x") ) {
+					fixedAxis = "x";
 				} else {
 					fixedAxis = "";
 				}
+				
+			} else if ( ortho.contains("y") ) {
+                
+				compareAxis = "y";
+				
+				if ( ortho.contains("x") ) {
+					fixedAxis = "x";
+				} else {
+					fixedAxis = "";
+				}
+				
+			} else if ( ortho.contains("x") ) {
+				
+				compareAxis = "x";
+				fixedAxis = "";
+				
 			}
 			
 		    

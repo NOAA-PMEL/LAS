@@ -5,12 +5,24 @@
 #set($optionid="Options_2D_image_contour_xy_7")
 #if($las_request.getOperation().equals("Plot_2D_XY_SlideSorter"))
     #set($op="Plot_2D_XY")
+    #set($vid=$las_request.variableIDs.get(0))
+#end
+#set($dsid=$las_request.datasetIDs.get(0))
+#if($las_request.getOperation().equals("Plot_2D_XY_SlideSorter_Vector"))
+    #set($op="Plot_vector")
+    #set($vid=$las_config.getVectorVariable($dsid, $las_request.variableIDs).getID())
 #end
 #if ($las_request.getOperation().equals("Plot_2D_SlideSorter"))
     #set($op="Plot_2D")
+     #set($vid=$las_request.variableIDs.get(0))
  #end
  #if ($las_request.getOperation().equals("Plot_1D_SlideSorter"))
     #set($op="Plot_1D")
+     #set($vid=$las_request.variableIDs.get(0))
+ #end
+  #if ($las_request.getOperation().equals("Plot_1D_SlideSorter_Vector"))
+    #set($op="Plot_vector")
+     #set($vid=$las_config.getVectorVariable($dsid, $las_request.variableIDs).getID())
  #end
  
  #set($optionid=$las_config.getOptionID($op))
@@ -43,7 +55,7 @@
 <head>
 
 <title>LAS Output -- $las_config.getTitle()</title>
-<META http-equiv="refresh" content="0;URL=VizGal.vm?dsid=$las_request.datasetIDs.get(0)&vid=$las_request.variableIDs.get(0)&opid=$op&optionid=$optionid&view=$las_request.getProperty("ferret","view")$region"> 
+<META http-equiv="refresh" content="0;URL=VizGal.vm?dsid=$dsid&vid=$vid&opid=$op&optionid=$optionid&view=$las_request.getProperty("ferret","view")$region"> 
 </head>
 <body>
 </body>
