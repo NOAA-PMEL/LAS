@@ -269,17 +269,43 @@ public class DatasetBean extends LasBean {
 		}
 		dataset.addContent(variablesElement);
 		
-		
-		vars = variables.iterator();
-		// Loop through all variables
-		while (vars.hasNext()) {
-			VariableBean var = (VariableBean) vars.next();
+		List<String> vectors = new ArrayList<String>();
+		// First do names containing "zonal".
+		for (int v = 0; v < variables.size(); v++ ) {
+			VariableBean var = (VariableBean) variables.get(v);
+			String vname = var.getShortName();
+			if ( vname.toLowerCase().contains(Util.zonal) ) {
+				vectors.add(var.getElement());
+				String match_name = vname.replace(Util.zonal, Util.meridional);
+				for (int j = 0; j < variables.size(); j++ ) {
+					VariableBean vVar = variables.get(j);
+					if ( vVar.getShortName().toLowerCase().equals(match_name) ) {
+						vectors.add(vVar.getElement());
+					}
+				}
+			}
+		}
+		if ( vectors.size() > 0 ) {
+			StringBuilder vector_id = new StringBuilder();
+			StringBuilder vector_long_name = new StringBuilder("Vector of ");
+			for ( int i = 0; i < vectors.size(); i++ ) {
+				vector_id.append(vectors.get(i));
+				vector_long_name.append(getVariable(vectors.get(i)).getName());
+				if ( i < vectors.size() -1 ) {
+					vector_id.append("_");
+					vector_long_name.append(" and ");
+				}
+			}
+			addComposite(dataset, vector_long_name.toString(), vector_id.toString(), vectors);
+		}
+		for (int v = 0; v < variables.size(); v++ ) {
+			VariableBean var = (VariableBean) variables.get(v);
 			
 			String vname = var.getShortName();
 			int matching_occurance_index = -1;
 			
 			for ( int p = 0; p < Util.vectorPatterns[0].length; p ++ ) {
-				List<String> vectors = new ArrayList<String>();
+				vectors = new ArrayList<String>();
 				// Look for x, X, u or U
 				char c = Util.vectorPatterns[0][p];
 				int count = Util.countOccurrences(vname, c);
@@ -347,10 +373,10 @@ public class DatasetBean extends LasBean {
 					
 					// I think we should try based on the long names first and see how we like that.
 					if ( matches > 0 && matches == vectors.size() ) {
-						Element compositeElement = new Element("composite");
+						
                         String vector_name = null;
 						// We have some so add it to its parent
-						dataset.addContent(compositeElement);
+						
 						if ( vectors.get(0).length() > 1 ) {
 							if ( matching_occurance_index == 0 ) {
 								// Matches the first character	
@@ -367,24 +393,7 @@ public class DatasetBean extends LasBean {
 						} else {
 							vector_name = substituion.toString();
 						}
-						Element vectorElement = new Element(vector_id.toString());;
-						vectorElement.setAttribute("name", vector_long_name.toString());
-						vectorElement.setAttribute("units", getVariable(vectors.get(0)).getUnits());
-						
-						Element properties = new Element("properties");
-						Element ui = new Element("ui");
-						Element defaultElement = new Element("default");
-						defaultElement.setText("file:ui.xml#VecVariable");
-						ui.addContent(defaultElement);
-						properties.addContent(ui);
-						vectorElement.addContent(properties);
-						
-						for ( int i = 0; i < vectors.size(); i++ ) {
-							Element link = new Element("link");
-							link.setAttribute("match", "../../variables/"+vectors.get(i));
-							vectorElement.addContent(link);
-						}
-						compositeElement.addContent(vectorElement);
+						addComposite(dataset, vector_long_name.toString(), vector_id.toString(), vectors);
 					}
 				}
 			}
@@ -392,6 +401,28 @@ public class DatasetBean extends LasBean {
 		return dataset;
 	}
 
+	private void addComposite(Element dataset, String name, String id, List<String> vectors) {
+		Element compositeElement = new Element("composite");
+		dataset.addContent(compositeElement);
+		Element vectorElement = new Element(id.toString());;
+		vectorElement.setAttribute("name", name.toString());
+		vectorElement.setAttribute("units", getVariable(vectors.get(0)).getUnits());
+		
+		Element properties = new Element("properties");
+		Element ui = new Element("ui");
+		Element defaultElement = new Element("default");
+		defaultElement.setText("file:ui.xml#VecVariable");
+		ui.addContent(defaultElement);
+		properties.addContent(ui);
+		vectorElement.addContent(properties);
+		
+		for ( int i = 0; i < vectors.size(); i++ ) {
+			Element link = new Element("link");
+			link.setAttribute("match", "../../variables/"+vectors.get(i));
+			vectorElement.addContent(link);
+		}
+		compositeElement.addContent(vectorElement);
+	}
 	public VariableBean getVariable(String element) {
 		for (Iterator varIt = getVariables().iterator(); varIt.hasNext();) {
 			VariableBean var = (VariableBean) varIt.next();
