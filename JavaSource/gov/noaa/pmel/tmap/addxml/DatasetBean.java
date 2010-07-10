@@ -282,6 +282,13 @@ public class DatasetBean extends LasBean {
 					if ( vVar.getShortName().toLowerCase().equals(match_name) ) {
 						vectors.add(vVar.getElement());
 					}
+					// look for vertical dimension
+					for ( int k = 0; k < Util.verticalComponentNames.length; k++) {
+						String vertical_match = vname.replace(Util.zonal, Util.verticalComponentNames[k]);
+						if ( vVar.getShortName().toLowerCase().equals(vertical_match) ) {
+							vectors.add(vVar.getElement());
+						}
+					}
 				}
 			}
 		}
