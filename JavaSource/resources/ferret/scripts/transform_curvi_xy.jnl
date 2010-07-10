@@ -164,7 +164,7 @@ IF ($region_yt"0|*>1") THEN DEFINE SYMBOL region_yt = ($region_y),($region_t)
 IF ($region_yz"0|*>1") THEN DEFINE SYMBOL region_yz = ($region_y),($region_z)
 IF ($region_yzt"0|*>1") THEN DEFINE SYMBOL region_yzt = ($region_y),($region_zt)
 
-IF ($region_full"0|*>1") THEN DEFINE SYMBOL region_full = region_xyzt
+IF ($region_full"0|*>1") THEN DEFINE SYMBOL region_full = ($region_xyzt)
 
 
 ! For sampling from a curvilinear variable, save the region definitions with
@@ -256,7 +256,10 @@ IF ($ferret_view"|xy>1|*>0") THEN
         ($itsa_vector_plot"0") EQ 0` THEN \
           DEFINE SYMBOL ferret_lon_modulo = 1 
    ENDIF
-pause
+   sh sym num, which_var
+   sh sym region_($which_var)_zt
+   sh sym ferret_plot_base_var_($which_var)
+
 ! Or set up for native slices: Sample in the X and Y directions of the slice
 
 ELIF `STRLEN ("($ferret_view)") LE 2` THEN
@@ -278,4 +281,4 @@ ELIF `STRLEN ("($ferret_view)") GT 2 AND STRINDEX("($ferret_view)", "xy") GT 0` 
 
 ENDIF
 ! End of $RCSfile ------------transform_curvi_xy.jnl-------------------------------
-pause
+

@@ -116,22 +116,8 @@ DEFINE SYMBOL ferret_t_var = ($data_var)[d=($data_num),($region_t)]
 DEFINE SYMBOL ferret_x_var = ($data_var)[d=($data_num),($region_x)]
 IF `($region_x"0|*>1) EQ 0` THEN DEFINE SYMBOL ferret_x_var = ($data_var)[d=($data_num)]
 
-! Apply the expression in ferret_expression. $ represents the variable.
-
-! Check if we are working with the second of two variables in comparison mode
-IF ($variables_initialized"0|*>1") THEN
-   IF ($ferret_expression2"0|*>1") THEN DEFINE SYMBOL ferret_expression ($ferret_expression2)
-ENDIF
-
-! The side by side plots pretend that the second plot is plot 1, so 
-IF `STRCMP("($operation_service_action)", "Side2") EQ 0` THEN
-   IF ($ferret_expression2"0|*>1") THEN DEFINE SYMBOL ferret_expression ($ferret_expression2)
-ENDIF
-
-IF ($ferret_expression"0|*>1") THEN GO LAS_expression
-
 ! Apply any transforms that may have been specified.
-GO LAS_transforms ($variables_initialized"0|*>1")
+GO LAS_transforms ($num)
 
 ! Get any DEFINE VARIABLE analysis definitions
 ! This renames the data variable, and so redefines the symbol data_var
@@ -149,14 +135,6 @@ IF ($data_0_analysis_label"0|*>1") THEN
      DEFINE SYMBOL ferret_plot_var_noregion = plot_var[($data_analysis_expr)]
    ENDIF
 ENDIF
-
-! Keep track of variables initialized, to tell us if next time we
-! want ferret_expression or ferret_expression2
-
-DEFINE SYMBOL variables_initialized `1 + ($variables_initialized"0")`
-
-! From the variable we can define striding. 
-! TODO: script works only for rectangular data so far...
 
 ! (check for Google Earth plots is inside LAS_set_strides)
 IF `($num)+1 EQ ($data_count)` THEN GO LAS_set_strides.jnl
