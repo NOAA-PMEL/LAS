@@ -280,6 +280,3 @@ IF ($ferret_mark_grid"0|no>0|all>1|subsample>1|*>0") THEN GO mark_grid
 GO LAS_results box
 
 ! End of $RCSfile -----------------------------------------------------
-IF `($ferret_land_type"0|contour>1|*>0") EQ 1` THEN DEFINE SYMBOL ferret_land_arg = thick
-     GO land_detail ($ferret_land_arg)
-     GO land  ($ferret_land_arg)
