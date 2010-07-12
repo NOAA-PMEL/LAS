@@ -142,7 +142,7 @@ IF `size LE max_size` THEN
       IF ($var_history"0|*>1") THEN LIST/APPEND/NOHEAD/FORMAT=(A)/FILE="($result_ferret_listing_filename)" var_hist
    ENDIF
 
-   LIST/APPEND/FILE/($frmt) ($data_($var_num)_var); pause
+   LIST/APPEND/FILE/($frmt) ($data_($var_num)_var)
 ELSE
 
    DEFINE SYMBOL ferret_list_var ($data_var)[d=($data_num)]
