@@ -33,6 +33,7 @@ DEFINE SYMBOL fview = `UPCASE("($ferret_view)")`
 
 GO LAS_initialize_region 0
 GO LAS_initialize_data 0
+
 DEFINE SYMBOL ferret_vector_1 ($ferret_plot_var)
 DEFINE SYMBOL ferret_plot_title_1 "($data_title) ($data_units)"
 DEFINE SYMBOL ferret_vector_1_noregion ($ferret_plot_var_0_noregion)
@@ -65,33 +66,32 @@ IF ($error_status"0|ERROR>1") THEN
   EXIT/PROGRAM
 ENDIF
 
-IF `(($native_curvilinear_xy"0") EQ 0) AND (($its_GE"0|*>1") EQ 1)` THEN 
-   LET delx = `xbox[gx=($ferret_plot_var),x=($region_x_lo)]`
-   list delx
-   list ($region_x_range)
-   list 360-delx
-
-   IF `($region_x_range) GT (360-1.1*delx)` THEN
-      DEFINE SYMBOL region_0_x_lo = `($region_0_x_lo) - delx/2`
-      DEFINE SYMBOL region_0_x_hi = `($region_0_x_hi) + delx/2`
-      GO LAS_initialize_region 0
-   ENDIF
-ENDIF   
+! Trying a hack to close the gap on GE plots. Not very effective
+!IF `(($native_curvilinear_xy"0") EQ 0) AND (($its_GE"0|*>1") EQ 1)` THEN 
+!   LET delx = `xbox[gx=($ferret_plot_var),x=($region_x_lo)]`
+!
+!   IF `($region_x_range) GT (360-1.1*delx)` THEN
+!      DEFINE SYMBOL region_0_x_lo = `($region_0_x_lo) - delx`
+!      DEFINE SYMBOL region_0_x_hi = `($region_0_x_hi) + delx`
+!      DEFINE SYMBOL qualifiers = ($qualifiers)/HLIM=($region_0_x_lo):($region_0_x_hi)
+!      GO LAS_initialize_region 0
+!   ENDIF
+!ENDIF   
 
 IF `($ferret_land_type"0|contour>1|*>0")` THEN DEFINE SYMBOL ferret_land_arg = thick
 
 IF `($its_GE"0|*>1") ` THEN 
 
-   sh sym ferret_line_color
-   sh sym ferret_line_thickness
+! This when we get transparency working
+!   SET MODE LINECOLORS:7
+!   PPL COLOR,7,100,50,0  ! orange lines
+!   IF `($ferret_line_color%1|default>1|*>2%) EQ 1` THEN DEFINE SYMBOL ferret_line_color=7
+!   IF `($ferret_land_type"0|contour>1|*>0")` THEN DEFINE SYMBOL ferret_land_arg = 8
 
-   SET MODE LINECOLORS:7
-   PPL COLOR,7,100,50,0  ! orange lines
-   IF `($ferret_line_color%1|default>1|*>2%) EQ 1` THEN DEFINE SYMBOL ferret_line_color=7
-   IF `($ferret_land_type"0|contour>1|*>0")` THEN DEFINE SYMBOL ferret_land_arg = 8
+   IF `($ferret_line_color%1|default>1|*>2%) EQ 1` THEN DEFINE SYMBOL ferret_line_color = blue
+   IF `($ferret_land_type"0|contour>1|*>0")` THEN DEFINE SYMBOL ferret_land_arg = 7
 
 ENDIF
-
 
 ! Open the window, apply size, scale options
 GO LAS_open_window
@@ -191,13 +191,12 @@ GO LAS_url_label 0
 
 IF ($its_GE"0|*>1") THEN
    CANCEL MODE nodata_lab
-   LET allbad = 1./0. +  ($ferret_vector_1)
-!   SHADE/NOKEY/NOLAB allbad
 
+! Do a shade underlay for GE plots
+ 	
    DEFINE SYMBOL shade_var = ($ferret_vector_1)
    IF ($native_curvilinear_xy"0") THEN DEFINE SYMBOL  shade_var = ($ferret_plot_base_var_0)
-
-!   LET all_bad = ($shade_var)
+ 	
    SHADE/pal=white/nokey/TITLE="($ferret_plot_title)"/SET  ($shade_var)
       IF ($xform_dms"0|*>1") THEN PPL XFOR (($xform_dms))
       IF ($yform_dms"0|*>1") THEN PPL YFOR (($yform_dms))
