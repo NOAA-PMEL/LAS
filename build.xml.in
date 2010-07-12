@@ -432,6 +432,19 @@
   </target>
   <target name="mapwidget">
      <exec executable="./bin/ol-compile.sh" failifexecutionfails="false"/>
+     <tar destfile="../olmapwidget.tar" basedir="../olmapwidget"/>
+     <gzip destfile="../olmapwidget.tar.gz" src="../olmapwidget.tar"/>
+     <javac srcdir="src">
+         <classpath>
+             <fileset id="mapwidget-libs" dir="lib">
+                  <include name="**/*.jar" />
+             </fileset>
+             <fileset id="gwt-libs" dir="/home/porter/rhs/gwt">
+                  <include name="**/*.jar" />
+             </fileset>
+         </classpath>
+     </javac>
+     <tar destfile="../olmapwidget.jar" basedir="../olmapwidget/src"/>
   </target>
   <target name="mapwidget-clean">
      <delete dir="dist/olmapwidget" />
