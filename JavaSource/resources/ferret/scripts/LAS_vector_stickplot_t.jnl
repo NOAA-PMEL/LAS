@@ -54,11 +54,7 @@ DEF VIEW/AXES/XLIM=0.:1./YLIM=0.01:0.095 keyview
 
 SET VIEW bigview
 LET/BAD=9999 all_zero = IF MISSING(($ferret_vector_1),0) THEN 0 ELSE 0*($ferret_vector_1)
-PLOT/NOY/AX=0,1,0,0/L=`lle`/VLIM=100:200/TITLE=" "/SET all_zero 
-   IF ($labnum_dset"0|*>1") THEN GO unlabel ($labnum_dset)
-   IF ($labnum_datitl"0|*>1") THEN GO unlabel ($labnum_datitl)
-   IF ($labnum_dods"0|*>1") THEN GO unlabel ($labnum_dods)
-PPL PLOT
+PLOT/NOY/AX=0,1,0,0/L=`lle`/VLIM=100:200/TITLE=" "/NOLAB/NOLAB all_zero 
 
 ! Define viewports for all the stacked plots.
 !
@@ -76,7 +72,7 @@ REPEAT/RANGE=`lls`:`lle`:`delta_t`/NAME=m (  \
    DEF VIEW/AXES/XLIM=0.1:0.9/YLIM=`y1`:`y2` lf_`m`; \
    LET y1 = `y1 - del`; LET y2 = `y2 - del`)
 
-LABEL/NOUSER `($ppl$xlen)/2`,-0.8, 0, 0, 0.14, ($ferret_plot_title)
+LABEL/NOUSER `($ppl$xlen)/2`,-0.5, 0, 0, 0.14, ($ferret_plot_title)
 
 ! Overall header at the very top
 GO LAS_ferret_las_version_header

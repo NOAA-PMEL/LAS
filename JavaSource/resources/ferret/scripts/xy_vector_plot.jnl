@@ -187,6 +187,12 @@ ENDIF
 ! Set the URL label for the first dataset.
 GO LAS_url_label 0
 
+! If the title is long, split it before the second-component label
+DEFINE SYMBOL split_title = @AS($ferret_plot_title)
+DEFINE SYMBOL split_string = ($data_title)
+GO LAS_split_vector_title.jnl 
+DEFINE SYMBOL ferret_plot_title ($split_title)
+pause
 ! Draw  the plot. On VECTOR/SET the /XSKIP and /YSKIP are ignored. 
 
 IF ($its_GE"0|*>1") THEN
@@ -197,7 +203,7 @@ IF ($its_GE"0|*>1") THEN
    DEFINE SYMBOL shade_var = ($ferret_vector_1)
    IF ($native_curvilinear_xy"0") THEN DEFINE SYMBOL  shade_var = ($ferret_plot_base_var_0)
  	
-   SHADE/pal=white/nokey/TITLE="($ferret_plot_title)"/SET  ($shade_var)
+   SHADE/pal=white/nokey/TITLE=" "/SET  ($shade_var)
       IF ($xform_dms"0|*>1") THEN PPL XFOR (($xform_dms))
       IF ($yform_dms"0|*>1") THEN PPL YFOR (($yform_dms))
    PPL SHADE
@@ -210,7 +216,7 @@ ENDIF
 IF ($ferret_vector_skip"0") THEN
 
    IF ($native_curvilinear_xy"0") THEN 
-      VECTOR($qualifiers)/TITLE="($ferret_plot_title)"/XSKIP=`xs`/YSKIP=`ys`/SET \
+      VECTOR($qualifiers)/TITLE=" "/XSKIP=`xs`/YSKIP=`ys`/SET \
        ($ferret_plot_base_var_0), ($ferret_plot_base_var_1), xcoord, ycoord
        IF ($xform_dms"0|*>1") THEN PPL XFOR (($xform_dms))
        IF ($yform_dms"0|*>1") THEN PPL YFOR (($yform_dms))
@@ -220,7 +226,7 @@ IF ($ferret_vector_skip"0") THEN
       PPL VECTOR,`xs`,`ys` 
 
    ELSE
-      VECTOR($qualifiers)/TITLE="($ferret_plot_title)"/XSKIP=`xs`/YSKIP=`ys`/SET \
+      VECTOR($qualifiers)/TITLE=" "/XSKIP=`xs`/YSKIP=`ys`/SET \
        ($ferret_vector_1), ($ferret_vector_2)
        IF ($xform_dms"0|*>1") THEN PPL XFOR (($xform_dms))
        IF ($yform_dms"0|*>1") THEN PPL YFOR (($yform_dms))
@@ -233,11 +239,11 @@ IF ($ferret_vector_skip"0") THEN
 
 ELSE
    IF ($native_curvilinear_xy"0") THEN 
-      VECTOR($qualifiers)/TITLE="($ferret_plot_title)" \
+      VECTOR($qualifiers)/TITLE=" " \
       ($ferret_plot_base_var_0), ($ferret_plot_base_var_1), xcoord, ycoord
 
    ELSE
-      VECTOR($qualifiers)/TITLE="($ferret_plot_title)" ($ferret_vector_1), ($ferret_vector_2)
+      VECTOR($qualifiers)/TITLE=" " ($ferret_vector_1), ($ferret_vector_2)
 
    ENDIF
 ENDIF
@@ -253,6 +259,9 @@ ENDIF
 
 ! Overall header at the very top
 GO LAS_ferret_las_version_header
+
+LABEL/NOUSER `($ppl$xlen)/2`,-0.8, 0, 0, 0.13, ($ferret_plot_title)
+
 
 ! Overlay additional cartography data (land mask, outlines, rivers, ...)
 ! For land outline, if the region is smaller than 60 degrees in x or 30 degrees in y,
