@@ -60,6 +60,18 @@ IF ($error_status"0|ERROR>1") THEN
   EXIT/PROGRAM
 ENDIF
 
+! Trying a hack to close the gap on GE plots. Not very effective
+!IF `(($native_curvilinear_xy"0") EQ 0) AND (($its_GE"0|*>1") EQ 1)` THEN 
+!   LET delx = `xbox[gx=($ferret_plot_var),x=($region_x_lo)]`
+!
+!   IF `($region_x_range) GT (360-1.1*delx)` THEN
+!      DEFINE SYMBOL region_0_x_lo = `($region_0_x_lo) - delx`
+!      DEFINE SYMBOL region_0_x_hi = `($region_0_x_hi) + delx`
+!      DEFINE SYMBOL qualifiers = ($qualifiers)/HLIM=($region_0_x_lo):($region_0_x_hi)
+!      GO LAS_initialize_region 0
+!   ENDIF
+!ENDIF   
+
 ! Here is variable 0 and its title
 
 DEFINE SYMBOL ferret_var_0 = ($ferret_plot_var)
@@ -224,6 +236,7 @@ ENDIF
 IF ($ferret_mark_grid"0|no>0|all>1|subsample>1|*>0") THEN GO mark_grid
 
 ! Save the results
+
 GO LAS_results box
 
 ! End of $RCSfile -----------------------------------------------------
