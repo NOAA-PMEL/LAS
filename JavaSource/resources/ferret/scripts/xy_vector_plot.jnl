@@ -192,7 +192,7 @@ DEFINE SYMBOL split_title = @AS($ferret_plot_title)
 DEFINE SYMBOL split_string = ($data_title)
 GO LAS_split_vector_title.jnl 
 DEFINE SYMBOL ferret_plot_title ($split_title)
-pause
+
 ! Draw  the plot. On VECTOR/SET the /XSKIP and /YSKIP are ignored. 
 
 IF ($its_GE"0|*>1") THEN

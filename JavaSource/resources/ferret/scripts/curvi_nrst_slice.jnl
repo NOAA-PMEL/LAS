@@ -324,20 +324,23 @@ IF `ztslice GT 0` THEN
 
 ! Define upper-left labels with the longitude region
    
-   DEFINE SYMBOL n_left_labels = `($n_left_labels"0")+1`
-   DEFINE SYMBOL upper_left_($n_left_labels"0") = "Longitude: ($region_x_lo)E"
-   IF `($region_x_lo) LT 0` THEN 
-         DEFINE SYMBOL west_region_x_lo = `-1* ($region_x_lo)`
-      DEFINE SYMBOL upper_left_($n_left_labels"0") = "Longitude: ($west_region_x_lo)W"
-   ENDIF
+   IF `($upper_left_done"0|*>1") EQ 0` THEN
+      DEFINE SYMBOL n_left_labels = `($n_left_labels"0")+1`
+      DEFINE SYMBOL upper_left_($n_left_labels"0") = "Longitude: ($region_x_lo)E"
+      IF `($region_x_lo) LT 0` THEN 
+          DEFINE SYMBOL west_region_x_lo = `-1* ($region_x_lo)`
+         DEFINE SYMBOL upper_left_($n_left_labels"0") = "Longitude: ($west_region_x_lo)W"
+      ENDIF
 
 ! Define upper-left labels with the latitude region
 
-   DEFINE SYMBOL n_left_labels = `($n_left_labels"0")+1`
-   DEFINE SYMBOL upper_left_($n_left_labels"0") = "Latitude: ($region_y_lo)N"
-   IF `($region_y_lo) LT 0` THEN 
-      DEFINE SYMBOL south_region_y_lo = `-1* ($region_y_lo)`
-      DEFINE SYMBOL upper_left_($n_left_labels"0") = "Latitude: ($south_region_y_lo)S"
+      DEFINE SYMBOL n_left_labels = `($n_left_labels"0")+1`
+      DEFINE SYMBOL upper_left_($n_left_labels"0") = "Latitude: ($region_y_lo)N"
+      IF `($region_y_lo) LT 0` THEN 
+         DEFINE SYMBOL south_region_y_lo = `-1* ($region_y_lo)`
+         DEFINE SYMBOL upper_left_($n_left_labels"0") = "Latitude: ($south_region_y_lo)S"
+      ENDIF
+      DEFINE SYMBOL upper_left_done = 1
    ENDIF
 ENDIF
 

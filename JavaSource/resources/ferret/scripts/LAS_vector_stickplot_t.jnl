@@ -10,6 +10,43 @@
 
 ! Set up parameters for defining the viewports and making the plots.
 
+LET num_times = 20  ! approx max time steps to use
+
+LET tt = t[GT=($ferret_vector_1)]
+
+LET lls = `L[gt=tt,t="($region_t_lo)"]`
+LET lle = `L[gt=tt,t="($region_t_hi)"]`
+LET nt = `lle - lls + 1`
+LET y2 = 0.88
+
+IF `lls EQ lle` THEN 
+   
+   CANCEL SYMBOL n_left_labels
+   CANCEL SYMBOL n_right_labels
+   DEFINE SYMBOL n_left_labels = `($n_left_labels"0")+1`
+   DEFINE SYMBOL upper_left_($n_left_labels"0") = @CR[The requested T region is smaller than 1 grid cell]
+   DEFINE SYMBOL region_small_($n_left_labels"0") = yes
+   
+   ! Make a nominal plot and put the -no-valid-region lable on  it.
+   GO margins 2 2 2 2
+   PLOT/I=1:2/NOLAB/NOAX/VLIM=10:11 i
+   GO labels_above_plot
+
+   EXIT/SCRIPT
+ENDIF
+
+
+LET delta_t = 1
+LET ent = nt
+IF `nt GT num_times` THEN
+   LET delta_t = `INT((nt/num_times)+1 )`
+   LET ent = `INT((nt/delta_t)+0.5)`
+ENDIF
+
+LET del = `0.8/(ent)`
+LET y1 = `y2 - del` + 0.02
+
+
 !GO LAS_auto_veclen_animate
 LET speed = (($ferret_vector_1)^2 + ($ferret_vector_2)^2) ^ 0.5
 STAT speed  ! should do with strided variable...
@@ -21,24 +58,6 @@ SHOW SYMBOL ferret_vector_length
 DEFINE SYMBOL qualifiers = ($qualifiers)/VLIMITS=`-1*($ferret_vector_length)`:($ferret_vector_length)
 DEFINE SYMBOL yaxis_setting `-1*($ferret_vector_length)` ($ferret_vector_length) `($ferret_vector_length)/2`
 
-LET num_times = 20  ! approx max time steps to use
-
-LET tt = t[GT=($ferret_vector_1)]
-
-LET lls = `L[gt=tt,t="($region_t_lo)"]`
-LET lle = `L[gt=tt,t="($region_t_hi)"]`
-LET nt = `lle - lls + 1`
-LET y2 = 0.88
-
-LET delta_t = 1
-LET ent = nt
-IF `nt GT num_times` THEN
-   LET delta_t = `INT((nt/num_times)+1 )`
-   LET ent = `INT((nt/delta_t)+0.5)`
-ENDIF
-
-LET del = `0.8/(ent)`
-LET y1 = `y2 - del` + 0.02
 
 ! This viewport will be used to draw the axis at the bottom 
 ! and to label the t axis.
