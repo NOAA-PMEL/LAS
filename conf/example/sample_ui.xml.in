@@ -77,7 +77,7 @@
             <item values="Data_Extract,txt,20">Table of values (text)</item>
             <item values="Data_Extract_netCDF,cdf,20">NetCDF file</item>
             <item values="Data_Extract_File,asc,20">ASCII file</item>
-	    <item values="Zoomable_image,html,20">Interactive Color plot</item>
+	    <item values="Plot_2D_zoom,html,20">Interactive Color plot</item>
             <item values="Gen_Scripts,html,20">Desktop application data access scripts</item>
             <item values="Animation_2D,txt,2">Animation</item>
             <item values="Interactive_Download,txt,20">Interactive Download</item>
@@ -88,7 +88,7 @@
             <item values="Data_Extract,txt,20">Table of values (text)</item>
             <item values="Data_Extract_netCDF,cdf,20">NetCDF file</item>
             <item values="Data_Extract_File,asc,20">ASCII file</item>
-	    <item values="Zoomable_image,html,20">Interactive Color plot</item>
+	    <item values="Plot_2D_zoom,html,20">Interactive Color plot</item>
             <item values="Gen_Scripts,html,20">Desktop application data access scripts</item>
             <item values="Animation_1D,txt,2">Animation</item>
             <item values="Interactive_Download,txt,20">Interactive Download</item>
@@ -100,7 +100,7 @@
             <item values="Data_Extract_netCDF,cdf,20">NetCDF file</item>
             <item values="Data_Extract_File,asc,20">ASCII file</item>
             <item values="Data_Extract_ArcView,arc,20">ArcView gridded</item>
-	    <item values="XY_zoomable_image,html,20">Interactive Color plot</item>
+	    <item values="Plot_2D_XY_zoom,html,20">Interactive Color plot</item>
             <item values="Gen_Scripts,html,20">Desktop application data access scripts</item>
             <item values="Plot_GE_Overlay,html,2">Plot to Google Earth</item>
             <item values="Animation_2D_XY,txt,2">Animation</item>
@@ -138,34 +138,34 @@
             <item values="Gen_Scripts,html,20">Desktop application data access scripts</item>
             <item values="Interactive_Download,txt,20">Interactive Download</item>
         </menu>
-        <menu type="ops" name="Ops_StdVec">
+                <menu type="ops" name="Ops_StdVec">
             <item values="Plot_vector,vector,2">Vector plot</item>
             <item values="Plot_1D_SlideSorter_Vector,shade,2">Color plot comparison</item>
-            <item values="Data_Extract,txt,20">Table of values (text)</item>
+            <item values="Vector_Data_Extract,txt,20">Table of values (text)</item>
             <item values="Data_Extract_netCDF,cdf,20">NetCDF file</item>
             <item values="Data_Extract_File,asc,20">ASCII file</item>
             <item values="Gen_Scripts,html,20">Desktop application data access scripts</item>
-            <item values="Interactive_Download,txt,20">Interactive Download</item>
+            <item values="Interactive_Vector_Download,txt,20">Interactive Download</item>
         </menu>
         <menu type="ops" name="Ops_StdVec_XY">
             <item values="Plot_vector,vector,2">Vector plot</item>
             <item values="Plot_2D_XY_SlideSorter_Vector,shade,2">Color plot comparison</item>
             <item values="Vector_GE_Overlay,html,20">Plot to Google Earth</item>
             <item values="Animation_2D_XY_vector,txt,2">Animation</item>
-            <item values="Data_Extract,txt,20">Table of values (text)</item>
+            <item values="Vector_Data_Extract,txt,20">Table of values (text)</item>
             <item values="Data_Extract_netCDF,cdf,20">NetCDF file</item>
             <item values="Data_Extract_File,asc,20">ASCII file</item>
             <item values="Gen_Scripts,html,20">Desktop application data access scripts</item>
-            <item values="Interactive_Download,txt,20">Interactive Download</item>
+            <item values="Interactive_Vector_Download,txt,20">Interactive Download</item>
         </menu>
         <menu type="ops" name="Ops_StdVec_XYT">
             <item values="Animation_2D_XY_vector,txt,2">Animation</item>
             <item values="Plot_2D_XY_SlideSorter_Vector,shade,2">Color plot comparison</item>
-            <item values="Data_Extract,txt,20">Table of values (text)</item>
+            <item values="Vector_Data_Extract,txt,20">Table of values (text)</item>
             <item values="Data_Extract_netCDF,cdf,20">NetCDF file</item>
             <item values="Data_Extract_File,asc,20">ASCII file</item>
             <item values="Gen_Scripts,html,20">Desktop application data access scripts</item>
-            <item values="Interactive_Download,txt,20">Interactive Download</item>
+            <item values="Interactive_Vector_Download,txt,20">Interactive Download</item>
         </menu>
         <menu type="views" name="Views_StdVec">
             <ifitem view="xy" values="xy">Longitude-Latitude map (xy)</ifitem>
@@ -300,8 +300,8 @@
             <ifoptions op="Animation_2D_XY_vector" href="#Options_Vector"/>
             <ifoptions op="Animation_2D" href="#Options_2D_image_contour_animation"/> 
             <ifoptions op="Animation_1D" href="#Options_1D_Animation"/>
-            <ifoptions op="XY_zoomable_image" href="#Options_2D_image_contour_xy"/>
-            <ifoptions op="Zoomable_image" href="#Options_2D_image_contour_xy"/>
+            <ifoptions op="Plot_2D_XY_zoom" href="#Options_2D_image_contour_xy"/>
+            <ifoptions op="Plot_2D_zoom" href="#Options_2D_image_contour_xy"/>
             <ifoptions op="Grid_GE_kml" href="#Options_1D_Animation"/>
             <options href=""/>
         </map>
