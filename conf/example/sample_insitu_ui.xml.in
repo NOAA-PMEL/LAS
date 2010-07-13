@@ -117,11 +117,11 @@
 	                <menu type="ops" name="Ops_StdVec">
             <item values="Plot_vector,vector,2">Vector plot</item>
             <item values="Plot_1D_SlideSorter_Vector,shade,2">Color plot comparison</item>
-            <item values="Vector_Data_Extract,txt,20">Table of values (text)</item>
+<!--            <item values="Data_Extract,txt,20">Table of values (text)</item>-->
             <item values="Data_Extract_netCDF,cdf,20">NetCDF file</item>
             <item values="Data_Extract_File,asc,20">ASCII file</item>
             <item values="Gen_Scripts,html,20">Desktop application data access scripts</item>
-            <item values="Interactive_Vector_Download,txt,20">Interactive Download</item>
+<!--            <item values="Interactive_Vector_Download,txt,20">Interactive Download</item>-->
         </menu>
         <menu type="ops" name="Ops_StdVec_XY">
             <item values="Plot_vector,vector,2">Vector plot</item>
@@ -137,11 +137,11 @@
         <menu type="ops" name="Ops_StdVec_XYT">
             <item values="Animation_2D_XY_vector,txt,2">Animation</item>
             <item values="Plot_2D_XY_SlideSorter_Vector,shade,2">Color plot comparison</item>
-            <item values="Vector_Data_Extract,txt,20">Table of values (text)</item>
+<!--            <item values="Vector_Data_Extract,txt,20">Table of values (text)</item>-->
             <item values="Data_Extract_netCDF,cdf,20">NetCDF file</item>
             <item values="Data_Extract_File,asc,20">ASCII file</item>
             <item values="Gen_Scripts,html,20">Desktop application data access scripts</item>
-            <item values="Interactive_Vector_Download,txt,20">Interactive Download</item>
+<!--            <item values="Interactive_Vector_Download,txt,20">Interactive Download</item>-->
         </menu>
         <menu type="views" name="Views_StdVec">
 	    <ifitem view="xy" values="xy">Longitude-Latitude map (xy)</ifitem>
