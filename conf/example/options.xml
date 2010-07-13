@@ -656,7 +656,7 @@ i.e. 48 - start time: 24 hours before selected timestep
   <!-- Vector plots NOTE THERE SHOULD BE A SEPARATE Options_Vector_XY -->
   <optiondef name="Options_Vector" inherit="#Options_Default,#set_aspect,#line_color,#line_thickness,#land_type,#vector_skip,#vector_length,#vector_style"/>
   <optiondef name="Options_Vector_7" inherit="#Options_Default_7,#set_aspect,#line_color,#line_thickness,#land_type,#vector_skip,#vector_length,#vector_style"/>
-  <optiondef name="Options_GE_Vector_7" inherit="#Options_Default_7,#set_aspect,#line_color,#line_thickness,#land_type,#vector_skip,#vector_length,#vector_style,#stride_quality_factor,#ge_overlay_style"/>
+  <optiondef name="Options_Vector_GE_7" inherit="#Options_Default_7,#set_aspect,#line_color,#line_thickness,#land_type,#vector_skip,#vector_length,#vector_style,#stride_quality_factor,#ge_overlay_style"/>
 
 
   <!-- 2 dimensional plots -->
