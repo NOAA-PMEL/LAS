@@ -1,5 +1,6 @@
 package gov.noaa.pmel.tmap.las.client.laswidget;
 
+import gov.noaa.pmel.tmap.las.client.map.GeoUtil;
 import gov.noaa.pmel.tmap.las.client.serializable.TimeAxisSerializable;
 import gov.noaa.pmel.tmap.las.client.util.Util;
 
@@ -278,7 +279,7 @@ public class DateTimeWidget extends Composite {
 			end = hi.getDate();
 		}
 		for ( int i = start; i <= end; i++) {
-			day.addItem(Util.format_two(i), Util.format_two(i));
+			day.addItem(GeoUtil.format_two(i), GeoUtil.format_two(i));
 		}
 	}
 	
@@ -325,7 +326,7 @@ public class DateTimeWidget extends Composite {
 		int start = lo.getYear() + 1900;
 		int end = hi.getYear() + 1900;
 		for ( int y = start; y <= end; y++ ) {
-			year.addItem(Util.format_four(y), Util.format_four(y));
+			year.addItem(GeoUtil.format_four(y), GeoUtil.format_four(y));
 		}
 	}
 	public void setEnabled(boolean b) {
@@ -351,7 +352,7 @@ public class DateTimeWidget extends Composite {
 			if ( hasDay ) {
 				date.append(lo_day.getValue(lo_day.getSelectedIndex()));
 			} else {
-				date.append(Util.format_two(lo.getDate()));
+				date.append(GeoUtil.format_two(lo.getDate()));
 			}
 			if ( hasMonth ) {
 				date.append("-"+lo_month.getValue(lo_month.getSelectedIndex()));
@@ -383,7 +384,7 @@ public class DateTimeWidget extends Composite {
 				if ( hasDay ) {
 					date.append(hi_day.getValue(hi_day.getSelectedIndex()));
 				} else {				
-					date.append(Util.format_two(lo.getDate()));
+					date.append(GeoUtil.format_two(lo.getDate()));
 				}
 				if ( hasMonth ) {
 					date.append("-"+hi_month.getValue(hi_month.getSelectedIndex()));
@@ -572,7 +573,7 @@ public class DateTimeWidget extends Composite {
 
 			for (int i = 0; i < day_list.getItemCount(); i++) {
 				String v = day_list.getValue(i);
-				if ( v.equals(Util.format_two(day)) ) {
+				if ( v.equals(GeoUtil.format_two(day)) ) {
 					day_list.setSelectedIndex(i);
 				}
 			}
