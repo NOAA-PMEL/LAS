@@ -559,6 +559,18 @@ public class VizGal implements EntryPoint {
 			GridSerializable grid = config.getGrid();
 			ops = config.getOperations();
 			var.setGrid(grid);
+			if (var.isVector() ) {
+				autoContourTextBox.setText("");
+				autoContourButton.setDown(false);
+				autoContourButton.setEnabled(false);
+				if ( !view.equals("xy") ) {
+					differenceButton.setDown(false);
+					differenceButton.setEnabled(false);
+				} else {
+					differenceButton.setDown(false);
+					differenceButton.setEnabled(true);
+				}
+			}
 			initPanels();
 		}
 		public void onFailure(Throwable caught) {

@@ -1,12 +1,12 @@
 package gov.noaa.pmel.tmap.las.client.laswidget;
 
-import gov.noaa.pmel.tmap.las.client.util.Util;
+import gov.noaa.pmel.tmap.las.client.map.GeoUtil;
 
 import com.google.gwt.user.client.ui.ListBox;
 
 public class HourListBox extends ListBox {
 	public void addItem(int hour, int min) {
-		addItem(Util.format_two(hour)+":"+Util.format_two(min), Util.format_two(hour)+":"+Util.format_two(min));
+		addItem(GeoUtil.format_two(hour)+":"+GeoUtil.format_two(min), GeoUtil.format_two(hour)+":"+GeoUtil.format_two(min));
 	}
     public int getHour() {
     	String selected_time = getValue(getSelectedIndex());
