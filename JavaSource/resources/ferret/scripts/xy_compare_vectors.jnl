@@ -118,11 +118,28 @@ IF ($native_curvilinear_xy"0|*>1") THEN
   DEFINE SYMBOL ferret_diff_var_p360 = ($ferret_vector_base_xdiff),($ferret_vector_base_ydiff), xcoord+360, ycoord
 ENDIF
 
+
+IF `($ferret_land_type"0|contour>1|*>0") EQ 1` THEN DEFINE SYMBOL ferret_land_arg = 7
+
+! Line color
+DEFINE SYMBOL pencolor = 2
+
+! or define our own color
+! But if we do this, do the same for labels on other difference plots.
+
+! SET MODE LINECOLORS:7
+! PPL COLOR,7,75,0,0  ! dark red 
+! DEFINE SYMBOL pencolor = 7
+! IF `($ferret_line_color%1|default>1|*>2%) EQ 1` THEN DEFINE SYMBOL ferret_line_color=7
+! IF `($ferret_land_type"0|contour>1|*>0")` THEN DEFINE SYMBOL ferret_land_arg = 8
+
+IF `($ferret_line_color%0|default>1|*>2%) LT 2` THEN DEFINE SYMBOL ferret_line_color = ($pencolor)
+
 ! Set the title, and the labels for the upper left listing the locations
 ! and time in directions normal to the plot, and in the upper right listing
 ! urls if dataset are opendap.
 
-GO LAS_set_diff_labels ($fview)
+GO LAS_set_diff_labels ($fview) ($pencolor)
 DEFINE SYMBOL ferret_plot_title ($ferret_diff_title)
 
 ! Open the window, apply size, scale options
@@ -139,7 +156,6 @@ IF ($native_curvilinear_xy"0|*>1") THEN
   DEFINE SYMBOL qualifiers = ($qualifiers)($ferret_curvi_quals)
 ENDIF
 
-IF `($ferret_land_type"0|contour>1|*>0")` THEN DEFINE SYMBOL ferret_land_arg = thick
 
 ! Set up for degrees-minutes-seconds labels on axes with units of degrees
 
@@ -150,7 +166,6 @@ IF ($ferret_deg_min_sec"0|false>0|*>1") THEN GO LAS_set_deg_min_sec.jnl
 IF `($ferret_vector_style"0|default>0|1|*>0") GT 0` THEN  
    DEFINE SYMBOL qualifiers = ($qualifiers)/FLOWLINE
 ENDIF
-IF `($ferret_land_type"0|contour>1|*>0") EQ 1` THEN DEFINE SYMBOL ferret_land_arg = thick
 
 ! Vector density for flowline plots
 
@@ -194,11 +209,8 @@ IF ($ferret_use_graticules"1|0|*>1) THEN
 ENDIF
 
 
-! Line color
-IF `($ferret_line_color%0|default>1|*>2%) LT 2` THEN DEFINE SYMBOL ferret_line_color = purple
-
 IF `($ferret_line_color%0|default>0|*>1%)` THEN
-  DEFINE SYMBOL qualifiers = ($qualifiers)/COLOR=($ferret_line_color%0|default>black|red|blue|green|lightblue|purple|*>black%)
+  DEFINE SYMBOL qualifiers = ($qualifiers)/COLOR=($ferret_line_color%black|default>black|*%)
 ENDIF
 
 ! line thickness
