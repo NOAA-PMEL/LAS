@@ -91,7 +91,10 @@ REPEAT/RANGE=`lls`:`lle`:`delta_t`/NAME=m (  \
    DEF VIEW/AXES/XLIM=0.1:0.9/YLIM=`y1`:`y2` lf_`m`; \
    LET y1 = `y1 - del`; LET y2 = `y2 - del`)
 
-LABEL/NOUSER `($ppl$xlen)/2`,-0.5, 0, 0, 0.14, ($ferret_plot_title)
+! Put on the title. If the title was split into two lines, move it up a bit.
+LET yloc = `-0.7`
+IF `STRINDEX("($ferret_plot_title)", "<NL>") GT 0` THEN LET yloc = -0.5
+LABEL/NOUSER `($ppl$xlen)/2`,`yloc`, 0, 0, 0.14, ($ferret_plot_title)
 
 ! Overall header at the very top
 GO LAS_ferret_las_version_header
