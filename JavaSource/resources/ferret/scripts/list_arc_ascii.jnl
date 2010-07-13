@@ -197,9 +197,11 @@ SET VAR/BAD=`mybad` nodata
 ! ncols and nrows need to be integer
 ! LIST/FILE/NOHEAD/APPEND/FORMAT="('ncols',1PG15.7)" Ni
 ! LIST/FILE/NOHEAD/APPEND/FORMAT="('nrows',1PG15.7)" Nj
-LET aout = "ncols `Ni`"
+DEFINE SYMBOL ni = `ni`
+DEFINE SYMBOL nj = `nj`
+LET aout = "ncols ($ni)"
 LIST/FILE/NOHEAD/APPEND/FORMAT="(A)" aout
-LET aout = "nrows `Nj`"
+LET aout = "nrows ($ni)"
 LIST/FILE/NOHEAD/APPEND/FORMAT="(A)" aout
 
 ! Create header lines. List the missing-value flag
@@ -207,12 +209,16 @@ LIST/FILE/NOHEAD/APPEND/FORMAT="(A)" aout
 ! used to list the data.
 
 SET LIST/PREC=9
-LET aout = "xllcorner `xlo`"
+DEFINE SYMBOL xlo = `xlo`
+DEFINE SYMBOL ylo = `ylo`
+
+LET aout = "xllcorner ($xlo)"
 LIST/FILE/NOHEAD/APPEND/FORMAT="(A)" aout
-LET aout = "yllcorner `ylo`"
+LET aout = "yllcorner ($ylo)"
 LIST/FILE/NOHEAD/APPEND/FORMAT="(A)" aout
 
-LET aout = "cellsize `cell_size`"
+DEFINE SYMBOL cellsize `cell_size`
+LET aout = "cellsize ($cellsize)"
 LIST/FILE/NOHEAD/APPEND/FORMAT="(A)" aout
 
 LIST/FILE/NOHEAD/APPEND/FORMAT="('nodata_value',1PG15.7)"  nodata
