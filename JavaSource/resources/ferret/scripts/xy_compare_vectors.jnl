@@ -210,34 +210,35 @@ ENDIF
 ! Do the plot. On VECTOR/SET the /XSKIP and /YSKIP are ignored. 
 !
 
-DEFINE SYMBOL shade_var = ($ferret_vector_x1)
-!IF ($native_curvilinear_xy"0") THEN DEFINE SYMBOL  shade_var = ($ferret_vector_x1), xcoord, ycoord
+! DEFINE SYMBOL shade_var = ($ferret_vector_x1)
+! !IF ($native_curvilinear_xy"0") THEN DEFINE SYMBOL  shade_var = ($ferret_vector_x1), xcoord, ycoord
 
-IF ($ferret_curvi_quals"0|*>1") THEN 
-   IF ($ferret_lon_modulo"1|1|0|yes>1|no>0|*>0") THEN  DEFINE SYMBOL shade_qualifiers = ($shade_qualifiers)/MODULO
-ENDIF
+! IF ($ferret_curvi_quals"0|*>1") THEN 
+!    IF ($ferret_lon_modulo"1|1|0|yes>1|no>0|*>0") THEN  DEFINE SYMBOL shade_qualifiers = ($shade_qualifiers)/MODULO
+! ENDIF
 
-SHADE/pal=white/nokey($shade_qualifiers)/TITLE="($ferret_plot_title)"/SET  ($shade_var)
-   IF ($xform_dms"0|*>1") THEN PPL XFOR (($xform_dms))
-   IF ($yform_dms"0|*>1") THEN PPL YFOR (($yform_dms))
-   
-      if ($labnum_dset"0|*>1") THEN go unlabel ($labnum_dset)
-      if ($labnum_datitl"0|*>1") THEN go unlabel ($labnum_datitl)
-      if ($labnum_dods"0|*>1") THEN go unlabel ($labnum_dods)
-      IF `($title_size%0|*>1%)` THEN PPL LABSET ($title_size)
-PPL SHADE
+! SHADE/pal=white/nokey($shade_qualifiers)/TITLE="($ferret_plot_title)"/SET  ($shade_var)
+!    IF ($xform_dms"0|*>1") THEN PPL XFOR (($xform_dms))
+!    IF ($yform_dms"0|*>1") THEN PPL YFOR (($yform_dms))
+!    
+!       if ($labnum_dset"0|*>1") THEN go unlabel ($labnum_dset)
+!       if ($labnum_datitl"0|*>1") THEN go unlabel ($labnum_datitl)
+!       if ($labnum_dods"0|*>1") THEN go unlabel ($labnum_dods)
+!       IF `($title_size%0|*>1%)` THEN PPL LABSET ($title_size)
+! PPL SHADE
+! DEFINE SYMBOL qualifiers ($qualifiers)/OVER/NOLAB
 
 ! use XSKIP and YSKIP as qualifiers if given
 IF ($ferret_vector_skip"0") THEN
 
-   VECTOR/OVER/NOLAB($qualifiers)/TITLE="($ferret_plot_title)"/XSKIP=`xs`/YSKIP=`ys` \
+   VECTOR($qualifiers)/TITLE="($ferret_plot_title)"/XSKIP=`xs`/YSKIP=`ys` \
        ($ferret_diff_var)
        
    IF ($native_curvilinear_xy"0|*>1") THEN \
-      VECTOR/OVER/NOLAB($qualifiers)/TITLE="($ferret_plot_title)"/XSKIP=`xs`/YSKIP=`ys` \
+      VECTOR($qualifiers)/TITLE="($ferret_plot_title)"/XSKIP=`xs`/YSKIP=`ys` \
        ($ferret_diff_var_m360)
    IF ($native_curvilinear_xy"0|*>1") THEN \
-      VECTOR/OVER/NOLAB($qualifiers)/TITLE="($ferret_plot_title)"/XSKIP=`xs`/YSKIP=`ys` \
+      VECTOR($qualifiers)/TITLE="($ferret_plot_title)"/XSKIP=`xs`/YSKIP=`ys` \
        ($ferret_diff_var_p360)
 
    IF `($ferret_vector_style"1|default>1|*>0") GT 0` THEN  
@@ -246,19 +247,19 @@ IF ($ferret_vector_skip"0") THEN
    ENDIF
 
 ELSE
-   VECTOR/OVER/NOLAB($qualifiers)/TITLE="($ferret_plot_title)"  \
+   VECTOR($qualifiers)/TITLE="($ferret_plot_title)"  \
        ($ferret_diff_var)
    IF ($native_curvilinear_xy"0|*>1") THEN \
-   VECTOR/OVER/NOLAB($qualifiers)/TITLE="($ferret_plot_title)"  \
+   VECTOR($qualifiers)/TITLE="($ferret_plot_title)"  \
        ($ferret_diff_var_m360)
    IF ($native_curvilinear_xy"0|*>1") THEN \
-   VECTOR/OVER/NOLAB($qualifiers)/TITLE="($ferret_plot_title)"  \
+   VECTOR($qualifiers)/TITLE="($ferret_plot_title)"  \
        ($ferret_diff_var_p360)
 
-   IF `($ferret_vector_style"1|default>1|*>0") GT 0` THEN  
-      DEFINE SYMBOL n_left_labels = `($n_left_labels"0")+1`
-      DEFINE SYMBOL upper_left_($n_left_labels) = Automatic vector xskip,yskip 
-   ENDIF
+!   IF `($ferret_vector_style"1|default>1|*>0") GT 0` THEN  
+!      DEFINE SYMBOL n_left_labels = `($n_left_labels"0")+1`
+!      DEFINE SYMBOL upper_left_($n_left_labels) = Automatic vector xskip,yskip 
+!   ENDIF
 ENDIF
 
 ! Overall header at the very top

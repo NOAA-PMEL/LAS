@@ -10,17 +10,6 @@
 
 ! Set up parameters for defining the viewports and making the plots.
 
-!GO LAS_auto_veclen_animate
-LET speed = (($ferret_vector_1)^2 + ($ferret_vector_2)^2) ^ 0.5
-STAT speed  ! should do with strided variable...
-
-LET ferret_vector_length = ($stat_std)/2
-DEFINE SYMBOL ferret_vector_length = `ferret_vector_length,PREC=2`
-SHOW SYMBOL ferret_vector_length
-
-DEFINE SYMBOL qualifiers = ($qualifiers)/VLIMITS=`-1*($ferret_vector_length)`:($ferret_vector_length)
-DEFINE SYMBOL yaxis_setting `-1*($ferret_vector_length)` ($ferret_vector_length) `($ferret_vector_length)/2`
-
 
 ! Do the plot
 ! From Z_stick_vector.jnl (based on stack_stick)
@@ -35,6 +24,46 @@ LET ks = `K[gz=zz,z=($region_z_lo)]`
 LET ke = `K[gz=zz,z=($region_z_hi)]`
 LET nz = `ke - ks + 1`
 
+IF `ks EQ ke` THEN 
+   
+   CANCEL SYMBOL n_left_labels
+   CANCEL SYMBOL n_right_labels
+   DEFINE SYMBOL n_left_labels = `($n_left_labels"0")+1`
+   DEFINE SYMBOL upper_left_($n_left_labels"0") = @CR[The requested Z region is smaller than 1 grid cell]
+   DEFINE SYMBOL region_small_($n_left_labels"0") = yes
+
+   
+   ! Make a nominal plot and put the -no-valid-region lable on  it.
+   GO margins 2 2 2 2
+   PLOT/I=1:2/NOLAB/NOAX/VLIM=10:11 i
+   GO labels_above_plot
+   
+   EXIT/SCRIPT
+ENDIF
+
+IF ($ferret_view"|zt>1|*>0") THEN  ! also check that NT>0
+   
+   LET tt = t[GT=($ferret_vector_1)]
+
+   LET lls = `L[gt=tt,t="($region_t_lo)"]`
+   LET lle = `L[gt=tt,t="($region_t_hi)"]`
+
+   IF `lls EQ lle` THEN
+      CANCEL SYMBOL n_left_labels
+      CANCEL SYMBOL n_right_labels
+      DEFINE SYMBOL n_left_labels = `($n_left_labels"0")+1`
+      DEFINE SYMBOL upper_left_($n_left_labels"0") = @CR[The requested T region is smaller than 1 grid cell]
+      DEFINE SYMBOL region_small_($n_left_labels"0") = yes
+   
+      ! Make a nominal plot and put the -no-valid-region lable on  it.
+      GO margins 2 2 2 2
+      PLOT/I=1:2/NOLAB/NOAX/VLIM=10:11 i
+      GO labels_above_plot
+
+      EXIT/SCRIPT
+   ENDIF
+ENDIF
+
 LET delta_z = 1
 LET enz = nz
 IF `nz GT num_levels` THEN
@@ -45,6 +74,17 @@ ENDIF
 LET y2 = 0.88
 LET del = `0.8/enz`
 LET y1 = `y2 - del` + 0.02
+
+!GO LAS_auto_veclen_animate
+LET speed = (($ferret_vector_1)^2 + ($ferret_vector_2)^2) ^ 0.5
+STAT speed  ! should do with strided variable...
+
+LET ferret_vector_length = ($stat_std)/2
+DEFINE SYMBOL ferret_vector_length = `ferret_vector_length,PREC=2`
+SHOW SYMBOL ferret_vector_length
+
+DEFINE SYMBOL qualifiers = ($qualifiers)/VLIMITS=`-1*($ferret_vector_length)`:($ferret_vector_length)
+DEFINE SYMBOL yaxis_setting `-1*($ferret_vector_length)` ($ferret_vector_length) `($ferret_vector_length)/2`
 
 ! This viewport will be used to draw the axis at the bottom 
 ! and to label the t axis.
@@ -76,7 +116,7 @@ SET VIEW bigview
 LET/BAD=9999 all_zero = IF MISSING(($ferret_vector_1),0) THEN 0 ELSE 0*($ferret_vector_1)
 PLOT/NOY/AX=0,1,0,0/k=`ke`/VLIM=100:200/TITLE=" "/NOLAB all_zero 
 
-LABEL/NOUSER `($ppl$xlen)/2`,-0.5, 0, 0, 0.14, ($ferret_plot_title)
+LABEL/NOUSER `($ppl$xlen)/2`,-0.7, 0, 0, 0.14, ($ferret_plot_title)
 LABEL/NOUSER -0.7, `($ppl$ylen)/2`, 0, 90, 0.12 "Depth (`($ferret_vector_1),return=zunits`)"
 
 ! Overall header at the very top
@@ -131,7 +171,6 @@ REPEAT/RANGE=`ks+delta_z`:`ke`:`delta_z`/NAME=m (  \
  PLOT/NOY/K=`M`/AXES=0,0,0,1($qualifiers)/set ($ferret_vector_1_noz), ($ferret_vector_2_noz); \
    PPL YAXIS ($yaxis_setting);  PPL tics,0,0,0,0; PPL axlsze,0,0; PPL PLOTUV 0 1) 
 
-
 ! Make a key: a stick of the length of half the vertical axis; labeled with
 ! the length of the corresponding vector.
 
@@ -158,6 +197,7 @@ LABEL `xpos`, `ypos-1.4*keysize`, 0, 0, `keysize`,  "`sticklen` @AC($unlab)"
 SET VIEW bigview
 CANCEL MODE nodata_lab  ! so there isnt a NO VALID DATA label on the plot.
 LET/BAD=9999 all_bad = IF MISSING(($ferret_vector_1),0) THEN 9999 ELSE 9999 + 0*($ferret_vector_1)
+
 SHADE/NOLAB/NOAX all_bad 
 
 !  ----------------- End of LAS_vector_stickplot_z ------------------------------------
