@@ -462,7 +462,7 @@ streamable="true" mime_type="application/postscript"/> -->
       <grid_types>
         <grid_type name="regular" />
       </grid_types>
-      <optiondef IDREF="Options_Vector_GE"/>
+      <optiondef IDREF="Options_Vector_GE_7"/>
     </operation>
 
     <!-- END: static overlay -->
