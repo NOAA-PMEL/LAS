@@ -879,6 +879,23 @@ streamable="true" mime_type="application/postscript"/> -->
         </grid_types>
    
     </operation>
+
+    <operation ID="Interactive_Vector_Download" default="true" name="Interactive Download"
+        output_template="interactive_download" service_action="Data_Download" order="0300" category="table">
+        <service>ferret</service>
+        <response ID="Data_Download_Response">
+            <result type="text" ID="ferret_listing" streamable="true"
+                mime_type="text/plain" />
+            <result type="debug" ID="debug" file_suffix=".txt"/>
+        </response>
+        <region>
+            <intervals name="xy" />
+        </region>
+        <grid_types>
+            <grid_type name="vector" />
+        </grid_types>
+    </operation>
+
     <!-- End: interactive download -->
     <operation ID="Data_Extract" default="true" name="Table of values (text)"
         output_template="table" service_action="Data_Extract" order="0300" category="table">
@@ -911,6 +928,23 @@ streamable="true" mime_type="application/postscript"/> -->
         </grid_types>
         <optiondef IDREF="Options_Data"/>
     </operation>
+    <operation ID="Vector_Data_Extract" default="true" name="Table of values (text)"
+        output_template="table" service_action="Data_Extract" order="0300" category="table">
+        <service>ferret</service>
+        <response ID="Data_Extract_Response">
+            <result type="text" ID="ferret_listing" streamable="true"
+                mime_type="text/plain" />
+            <result type="debug" ID="debug" file_suffix=".txt"/>
+        </response>
+        <region>
+            <intervals name="xy" />
+        </region>
+        <grid_types>
+            <grid_type name="vector" />
+        </grid_types>
+        <optiondef IDREF="Options_Data"/>
+    </operation>
+
     <operation name="NetCDF file"
         ID="Data_Extract_netCDF" output_template="netcdf"
         service_action="Data_Extract_netCDF" order="0500" category="file">
