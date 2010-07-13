@@ -291,8 +291,8 @@
             <ifoptions op="SidebySide_Plot_2D" href="#Options_Side"/>
             <ifoptions op="Plot_vector" href="#Options_Vector"/>
             <ifoptions op="gen_script" href="#Options_gen_script"/>
-            <ifoptions op="Vector_GE_Overlay" href="#Options_Vector_GE"/>
-            <ifoptions op="Vector_GE_kml" href="#Options_Vector_GE"/>
+            <ifoptions op="Vector_GE_Overlay" href="#Options_Vector_GE_7"/>
+            <ifoptions op="Vector_GE_kml" href="#Options_Vector_GE_7"/>
             <ifoptions op="Plot_GE_Overlay" href="#Options_2D_image_contour_xy_GE"/>
             <ifoptions op="Plot_GE_kml" href="#Options_2D_image_contour_xy_GE"/>
             <ifoptions op="Data_Extract_Grid" href="#Options_Data"/>
