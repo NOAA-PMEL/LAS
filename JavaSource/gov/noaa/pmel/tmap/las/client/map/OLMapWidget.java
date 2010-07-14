@@ -1,3 +1,19 @@
+/**
+ * This software was developed by Roland Schweitzer of Weathertop Consulting, LLC 
+ * (http://www.weathertopconsulting.com/) as part of work performed for
+ * NOAA Contracts AB113R-04-RP-0068 and AB113R-09-CN-0182.  
+ * 
+ * The NOAA licensing terms are explained below.
+ * 
+ * 
+ * This software is provided by NOAA for full, free and open release.  It is
+ * understood by the recipient/user that NOAA assumes no liability for any
+ * errors contained in the code.  Although this software is released without
+ * conditions or restrictions in its use, it is expected that appropriate
+ * credit be given to its author and to the National Oceanic and Atmospheric
+ * Administration should the software be included by the recipient as an
+ * element in other product development. 
+ */
 package gov.noaa.pmel.tmap.las.client.map;
 
 import gov.noaa.pmel.tmap.las.client.openlayers.DrawSingleFeature;
@@ -15,15 +31,9 @@ import org.gwtopenmaps.openlayers.client.Style;
 import org.gwtopenmaps.openlayers.client.StyleMap;
 import org.gwtopenmaps.openlayers.client.control.ArgParser;
 import org.gwtopenmaps.openlayers.client.control.Attribution;
-import org.gwtopenmaps.openlayers.client.control.Control;
 import org.gwtopenmaps.openlayers.client.control.ModifyFeature;
 import org.gwtopenmaps.openlayers.client.control.ModifyFeatureOptions;
 import org.gwtopenmaps.openlayers.client.control.Navigation;
-import org.gwtopenmaps.openlayers.client.control.Panel;
-import org.gwtopenmaps.openlayers.client.control.PanelOptions;
-import org.gwtopenmaps.openlayers.client.control.ZoomIn;
-import org.gwtopenmaps.openlayers.client.control.ZoomOut;
-import org.gwtopenmaps.openlayers.client.control.ZoomPanel;
 import org.gwtopenmaps.openlayers.client.control.ModifyFeature.OnModificationEndListener;
 import org.gwtopenmaps.openlayers.client.control.ModifyFeature.OnModificationListener;
 import org.gwtopenmaps.openlayers.client.control.ModifyFeature.OnModificationStartListener;
@@ -48,14 +58,10 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.ChangeListener;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.DockPanel;
-import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.Frame;
-import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
-import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.PushButton;
 import com.google.gwt.user.client.ui.TextBox;
