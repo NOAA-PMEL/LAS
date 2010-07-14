@@ -6,121 +6,57 @@
 </head>
 <body bgcolor="white">
 
-This ReferenceMap is a a wrapper for the Google Web Toolkit MapWidget which adds widgets that
+The OLMapWidget is a a wrapper for the OpenLayers which adds widgets that
 allow a click, hold and drag, selection of latitude/longitude rectangles, latitude lines, longitude lines and points
 while displaying an overlay on the map showing the selected area.  The lines and rectangles
-have grab handles that allow the selection to be edited by moving the handles.  The map
+allow the item to be selected and for the selection to be edited by moving the handles.  The map
 includes text widgets which display the N and S latitude, and E and W longitude of the 
 current selection and allow for user entry of values to edit the selection.  The map includes
-a reset button to zoom to the current valid data region.  At smallest zoom level drags are limited
-to facilitate the click, hold and drag selections over one 360 region, but map can be re-centered
-to allow any continuous region to be selected.
-<p>
-The map can be started with any zoom level and limit selections to any Lat/Lon bounds.  The bounds and selection can be changed
-at runtime.
+a reset button to zoom to the current valid data region.  
 <p>
 We use this widget a part of a tool kit that makes server requests based on the map selections.  We expect you will want to use 
 this widget as part of a client that will use the selection, but you can
 implement a listener in the class that has your OnModuleLoad and use this widget it to pan and zoom to the selection to mimic the behavior of
 other drag and zoom implementations available in the native JavaScript map.
-
 <p>
 
+ This software was developed by Roland Schweitzer of Weathertop Consulting, LLC 
+  (http://www.weathertopconsulting.com/) as part of work performed for
+  NOAA Contracts AB113R-04-RP-0068 and AB113R-09-CN-0182.  
+<p>
+  The NOAA licensing terms are explained below.
+<p>  
+  This software is provided by NOAA for full, free and open release.  It is
+  understood by the recipient/user that NOAA assumes no liability for any
+  errors contained in the code.  Although this software is released without
+  conditions or restrictions in its use, it is expected that appropriate
+  credit be given to its author and to the National Oceanic and Atmospheric
+  Administration should the software be included by the recipient as an
+  element in other product development. 
+ 
+<p>
 <pre>
-package com.weathertopconsulting.refmap.client;
+import com.weathertopconsulting.olmapwidget.client.map.OLMapWidget;
+public class MapExample implements EntryPoint {
+    OLMapWidget mapWidget = new OLMapWidget();
+        public void onModuleLoad() {
 
-import com.google.gwt.core.client.EntryPoint;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.maps.client.geom.LatLng;
-import com.google.gwt.maps.client.geom.LatLngBounds;
-import com.google.gwt.user.client.ui.ChangeListener;
-import com.google.gwt.user.client.ui.Grid;
-import com.google.gwt.user.client.ui.RadioButton;
-import com.google.gwt.user.client.ui.RootPanel;
-import com.google.gwt.user.client.ui.TextBox;
-import com.google.gwt.user.client.ui.Widget;
-
-/**
- * An example GWT application that uses the reference map.  Presumably the application would also do something with the selected region.  :-)
- */
-public class RefMap implements EntryPoint {
-	ReferenceMap refMap;
-	TextBox centerLat = new TextBox();
-	TextBox centerLon = new TextBox();
-	Grid center = new Grid(1,2);
-	/**
-	 * This is the entry point method.
-	 */
-	public void onModuleLoad() {
-		center.setWidget(0, 0, centerLat);
-		center.setWidget(0, 1, centerLon);
-		Grid tools = new Grid(2,2);
-		refMap = new ReferenceMap(LatLng.newInstance(0.0, 0.0), 0, 256, 360);
-		refMap.setDataBounds(LatLngBounds.newInstance(LatLng.newInstance(-89.5, -179.5), LatLng.newInstance(89.5, 179.5)), 1., true);
-		RadioButton xy = new RadioButton("tool", "Latitude/Longitude");
-		xy.setValue(true);
-		xy.addClickHandler(new ClickHandler() {
-
-			public void onClick(ClickEvent event) {
-				refMap.setToolType("xy");				
-			}
-		});
-		tools.setWidget(0, 0, xy);
-		RadioButton y = new RadioButton("tool", "Latitude Line");
-		y.addClickHandler(new ClickHandler() {
-
-			public void onClick(ClickEvent event) {
-				refMap.setToolType("y");			
-			}
-			
-		});
-		tools.setWidget(0, 1, y);
-		RadioButton x = new RadioButton("tool", "Longitude Line");
-		x.addClickHandler(new ClickHandler() {
-
-			public void onClick(ClickEvent event) {
-				refMap.setToolType("x");				
-			}
-			
-		});
-		tools.setWidget(1, 0, x);
-		RadioButton pt = new RadioButton("tool", "Point");
-		pt.addClickHandler(new ClickHandler() {
-			
-			public void onClick(ClickEvent event) {
-				refMap.setToolType("pt");				
-			}
-			
-		});
-		tools.setWidget(1, 1, pt);
-		RegionWidget dataRegions = new RegionWidget(refMap, "Select Data Region", true);
-		dataRegions.setChangeListener(new ChangeListener() {
-            
-			public void onChange(Widget sender) {
-				RegionWidget rw = (RegionWidget) sender;
-				refMap.setDataBounds(rw.getBounds(), 1., true);
-				
-			}
-			
-		});
-		
-		RootPanel.get("dataRegionSelectContainer").add(dataRegions);
-		RootPanel.get("toolSelectContainer").add(tools);
-		RootPanel.get("refMapContainer").add(refMap);
-	}
+                mapWidget.setDataExtent(-90, 90, -180, 180, 1);
+                mapWidget.setTool("xy");
+                RootPanel.get().add(mapWidget);
+        }
 }
 
 </pre>
 <h2>Package Specification</h2>
 
- A compile time Google Web Toolkit and the Google Webtool Kit Maps API jars.
+ A compile time Google Web Toolkit and the GWT-OpenLayers API jars.
 
 
 <h2>Related Documentation </h2>
 <ul>
 <li><a href="">The Google code site for this widget</a>
-<li><a href="http://maps.weathertopconsulting.com/" target="_blank">A working example, unless it has been swamped by curious on-lookers.</a>
+<li><a href="http://code.google.com/p/referencemap/" target="_blank">The code and some examples.</a>
 <li><a href="http://code.google.com/webtoolkit/">Google Web Toolkit</a>
 <li><a href="http://code.google.com/p/gwt-google-apis/">Google Web Toolkit Maps API</a>
 </ul>

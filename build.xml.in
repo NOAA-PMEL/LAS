@@ -4,6 +4,7 @@
 	<property name="app.name" value="@APPNAME@" />
 	<property name="jakarta.home" value="@JAKARTA_HOME@" />
 	<property name="jakarta.lib" value="@JAKARTA_LIB@" />
+        <property name="map_version" value="1.0"/>
 	<property name="deploy.home"
 		value="${jakarta.home}/webapps/${app.name}" />
 	<property name="dist.war"
@@ -407,6 +408,7 @@
         </fileset>
      </copy>
      <copy file="JavaSource/gov/noaa/pmel/tmap/las/NativeMapWidget.gwt.xml" todir="dist/olmapwidget/src/com/weathertopconsulting/olmapwidget"/>
+     <copy file="JavaSource/gov/noaa/pmel/tmap/las/OLMapWidget.gwt.xml" todir="dist/olmapwidget/src/com/weathertopconsulting/olmapwidget"/>
      <copy file="WebContent/OLMapWidget/mapwidget.html" todir="dist/olmapwidget/war/OLMapWidget"/>
      <copy file="build.xml.in" tofile="dist/olmapwidget/build.xml"/>
      <copy file="bin/ol-compile.sh" todir="dist/olmapwidget/bin"/>
@@ -432,21 +434,35 @@
   </target>
   <target name="mapwidget">
      <exec executable="./bin/ol-compile.sh" failifexecutionfails="false"/>
-     <tar destfile="../olmapwidget.tar" basedir="../olmapwidget"/>
-     <gzip destfile="../olmapwidget.tar.gz" src="../olmapwidget.tar"/>
+     <tar destfile="../olmapwidget.${map_version}.tar" basedir="../olmapwidget/war"/>
      <javac srcdir="src">
          <classpath>
              <fileset id="mapwidget-libs" dir="lib">
                   <include name="**/*.jar" />
              </fileset>
-             <fileset id="gwt-libs" dir="/home/porter/rhs/gwt">
+             <fileset id="gwt-libs" dir="/home/rhs/gwt">
                   <include name="**/*.jar" />
              </fileset>
          </classpath>
      </javac>
-     <tar destfile="../olmapwidget.jar" basedir="../olmapwidget/src"/>
+     <jar jarfile="../olmapwidget.${map_version}.jar" basedir="../olmapwidget/src">
+         <fileset dir="../olmapwidget/src">
+             <include name="**/*.java" />
+             <include name="**/*.class" />
+         </fileset>
+     </jar>
+     <tar destfile="../olmapwidget_css_images.${map_version}.tar" basedir="../olmapwidget/war">
+           <fileset dir="../olmapwidget/war">
+                <include name="images/**" />
+                <include name="css/**" />
+                <include name="JavaScript/frameworks/OpenLayersExtentions**" />
+           </fileset>
+     </tar>
   </target>
   <target name="mapwidget-clean">
      <delete dir="dist/olmapwidget" />
+     <delete file="dist/olmapwidget.${map_version}.jar" />
+     <delete file="dist/olmapwidget.${map_version}.tar" />
+     <delete file="dist/olmapwidget.${map_version}.tar.gz" />
   </target>
 </project>
