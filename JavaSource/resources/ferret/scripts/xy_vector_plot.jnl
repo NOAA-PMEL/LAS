@@ -224,6 +224,9 @@ IF ($ferret_vector_skip"0") THEN
 	       IF ($labnum_datitl"0|*>1") THEN go unlabel ($labnum_datitl)
        IF ($labnum_dods"0|*>1") THEN go unlabel ($labnum_dods)
       PPL VECTOR,`xs`,`ys` 
+      
+      VECTOR($qualifiers)/TITLE=" "/XSKIP=`xs`/YSKIP=`ys`/OVER/NOLAB \
+       ($ferret_plot_base_var_0), ($ferret_plot_base_var_1), xcoord-360, ycoord
 
    ELSE
       VECTOR($qualifiers)/TITLE=" "/XSKIP=`xs`/YSKIP=`ys`/SET \
@@ -241,6 +244,9 @@ ELSE
    IF ($native_curvilinear_xy"0") THEN 
       VECTOR($qualifiers)/TITLE=" " \
       ($ferret_plot_base_var_0), ($ferret_plot_base_var_1), xcoord, ycoord
+
+      VECTOR($qualifiers)/TITLE=" "/OVER/NOLAB \
+       ($ferret_plot_base_var_0), ($ferret_plot_base_var_1), xcoord-360, ycoord
 
    ELSE
       VECTOR($qualifiers)/TITLE=" " ($ferret_vector_1), ($ferret_vector_2)
