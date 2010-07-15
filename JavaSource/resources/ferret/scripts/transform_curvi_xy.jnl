@@ -256,9 +256,6 @@ IF ($ferret_view"|xy>1|*>0") THEN
         ($itsa_vector_plot"0") EQ 0` THEN \
           DEFINE SYMBOL ferret_lon_modulo = 1 
    ENDIF
-   sh sym num, which_var
-   sh sym region_($which_var)_zt
-   sh sym ferret_plot_base_var_($which_var)
 
 ! Or set up for native slices: Sample in the X and Y directions of the slice
 
