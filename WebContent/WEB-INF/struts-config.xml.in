@@ -133,12 +133,12 @@
 	<plug-in
 		className="gov.noaa.pmel.tmap.las.product.server.LASConfigPlugIn">
 		<set-property property="configFileName"
-			value="@PWD@/conf/server/las.xml" />
+			value="@JAKARTA_HOME@/content/@APPNAME@/conf/server/las.xml" />
 		<set-property property="v7OperationsFileName"
-			value="@PWD@/conf/server/operationsV7.xml" />
+			value="@JAKARTA_HOME@/content/@APPNAME@/conf/server/operationsV7.xml" />
                 <set-property property="lasUIFileName" 
-                        value="@PWD@/conf/server/ui.xml" />
+                        value="@JAKARTA_HOME@/content/@APPNAME@/conf/server/ui.xml" />
 		<set-property property="serverConfigFileName"
-			value="@PWD@/conf/server/productserver.xml" />
+			value="@JAKARTA_HOME@/content/@APPNAME@/conf/server/productserver.xml" />
 	</plug-in>
 </struts-config>

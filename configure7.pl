@@ -350,7 +350,7 @@ if ($LasConfig{proxy} eq "yes") {
 }
 # Get info about the TDS installation.
 
-    my $serverConf = "conf/server";
+    my $serverConf = $LasConfig{jakarta_home}."/content".$LasConfig{uipath}."/conf/server";
     if ( !(-d $serverConf) ) {
        &File::Path::mkpath($serverConf);
        print "Creating the $serverConf directory.\n";
@@ -359,18 +359,7 @@ if ($LasConfig{proxy} eq "yes") {
 #
 # Get the temp dir.
 #
-my $tds_temp;
-my $autotds_temp = $LasConfig{tds_temp};
-$autotds_temp = &Cwd::cwd()."/conf/server/temp" if ! $autotds_temp;
-
-print "The TDS you installed will be used by LAS to regrid data as needed to make comparisons.\n";
-print "During this process the Ferret IOSP will write lots of temporary files.\n";
-
-    print "Enter a directory path for F-TDS temporary files: [$autotds_temp] ";
-    $tds_temp = <STDIN>;
-    chomp($tds_temp);
-    $tds_temp = $autotds_temp if ! $tds_temp;
-
+my $tds_temp = $serverConf."/temp";
 if ( !(-d $tds_temp) ) {
    &File::Path::mkpath($tds_temp);
    print "Creating the $tds_temp directory.\n";
@@ -380,18 +369,10 @@ print "\n\n";
 
 $LasConfig{tds_temp} = $tds_temp;
 
+#
 # Get the data dir.
-my $autotds_data = $LasConfig{tds_data};
-$autotds_data = &Cwd::cwd()."/conf/server/data" if ! $autotds_data;
-
-print "In the installation installation instructions you were asked to configure TDS\n";
-print "with a datascan directory to be used by LAS.\n";
-
-    print "Enter the directory path you configured for LAS F-TDS data files: [$autotds_data] ";
-    $tds_data = <STDIN>;
-    chomp($tds_data);
-    $tds_data = $autotds_data if ! $tds_data;
-
+#
+my $tds_data = $serverConf."/data";
 if ( !(-d $tds_data) ) {
    &File::Path::mkpath($tds_data);
    print "Creating the $tds_data directory.\n";
@@ -529,44 +510,44 @@ if ( getYesOrNo("Do you want to install the example data set configuration") ) {
     my @insitu_out = ();
 
     $sample_in[0] = "conf/example/sample_las.xml";
-    $sample_out[0] = "conf/server/las.xml";
+    $sample_out[0] = $serverConf."/las.xml";
     $sample_in[1] = "conf/example/productserver.xml";
-    $sample_out[1] = "conf/server/productserver.xml";
+    $sample_out[1] = $serverConf."/productserver.xml";
     $sample_in[2] = "conf/example/operationsV7.xml";
-    $sample_out[2] = "conf/server/operationsV7.xml";
+    $sample_out[2] = $serverConf."/operationsV7.xml";
     $sample_in[3] = "conf/example/sample_ui.xml";
-    $sample_out[3]= "conf/server/ui.xml";
+    $sample_out[3]= $serverConf."/ui.xml";
     $sample_in[4] = "xml/perl/coads.xml";
-    $sample_out[4] = "conf/server/coads.xml";
+    $sample_out[4] = $serverConf."/coads.xml";
     $sample_in[5] = "conf/example/DODS_IRI_NOAA_NCEP_EMC_CMB_Pac_ocean.xml";
-    $sample_out[5] = "conf/server/DODS_IRI_NOAA_NCEP_EMC_CMB_Pac_ocean.xml";
+    $sample_out[5] = $serverConf."/DODS_IRI_NOAA_NCEP_EMC_CMB_Pac_ocean.xml";
     $sample_in[6] = "xml/perl/levitus.xml";
-    $sample_out[6] = "conf/server/levitus.xml";
+    $sample_out[6] = $serverConf."/levitus.xml";
     $sample_in[7] = "conf/example/ocean_atlas_subset.xml";
-    $sample_out[7] = "conf/server/ocean_atlas_subset.xml";
+    $sample_out[7] = $serverConf."/ocean_atlas_subset.xml";
     $sample_in[8] = "conf/example/options.xml";
-    $sample_out[8] = "conf/server/options.xml";
+    $sample_out[8] = $serverConf."/options.xml";
 
     $insitu_in[0] = "conf/example/insitu_demo_1.xml";
-    $insitu_out[0] = "conf/server/insitu_demo_1.xml";
+    $insitu_out[0] = $serverConf."/insitu_demo_1.xml";
     $insitu_in[1] = "conf/example/insitu_demo_2.xml";
-    $insitu_out[1] = "conf/server/insitu_demo_2.xml";
+    $insitu_out[1] = $serverConf."/insitu_demo_2.xml";
     $insitu_in[2] = "conf/example/insitu_demo_ui.xml";
-    $insitu_out[2] = "conf/server/insitu_demo_ui.xml";
+    $insitu_out[2] = $serverConf."/insitu_demo_ui.xml";
     $insitu_in[3] = "conf/example/insitu_ui.xml";
-    $insitu_out[3] = "conf/server/insitu_ui.xml";
+    $insitu_out[3] = $serverConf."/insitu_ui.xml";
     $insitu_in[4] = "conf/example/insitu_options.xml";
-    $insitu_out[4] = "conf/server/insitu_options.xml";
+    $insitu_out[4] = $serverConf."/insitu_options.xml";
 
     # Overwrite gridded only las.xml and ui.xml for insitu demo.
     $insitu_in[5] = "conf/example/sample_insitu_las.xml";
-    $insitu_out[5] = "conf/server/las.xml";
+    $insitu_out[5] = $serverConf."/las.xml";
     $insitu_in[6] = "conf/example/sample_insitu_ui.xml";
-    $insitu_out[6] = "conf/server/ui.xml";
+    $insitu_out[6] = $serverConf."/ui.xml";
     $insitu_in[7] = "conf/example/nwioos_hake98.xml";
-    $insitu_out[7] = "conf/server/nwioos_hake98.xml";
+    $insitu_out[7] = $serverConf."/nwioos_hake98.xml";
     $insitu_in[8] = "conf/example/pfeg.xml";
-    $insitu_out[8] = "conf/server/pfeg.xml";
+    $insitu_out[8] = $serverConf."/pfeg.xml";
 
 
     my $insitu = 0;
@@ -793,7 +774,7 @@ sub printENV($ferretConfig, @EnvVars) {
             } elsif ($var =~ /FER_DESCR/){
                 $ENV{$var} = "des " . $ENV{$var};
             } elsif ($var =~ /DODS_CONF/){
-                $ENV{$var} = &Cwd::cwd()."/conf/server/dods/.dodsrc";
+                $ENV{$var} = $serverConf."/dods/.dodsrc";
             }
 
             my @values = split(' ',$ENV{$var});
