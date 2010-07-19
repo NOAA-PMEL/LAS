@@ -43,6 +43,7 @@ if ($ARGV[0] && $ARGV[0] eq '-noui'){
     
 my @Scripts = qw(build.xml
                  xml/perl/genLas.pl
+                 xml/perl/LASServlet.pm
                  xml/perl/template.xml
                  xml/perl/genTests.pl
                  xml/perl/printMethods.pl
@@ -442,7 +443,7 @@ my ($dbh, $host, $account, $password);
 
 my $classesDir = "WebContent/WEB-INF/classes";
 if ( ! -d $classesDir ) {
-    mkdir $classesDir, 0755 or die "Can't create directory $classesDir: $!\n";
+    &File::Path::mkpath($classesDir, {mode => 0755,}) or die "Can't create directory $classesDir: $!\n";
     print "Created a directory for the webapp classes and resources.\n\n";
 }
 if ( $wantUI ) {
@@ -541,44 +542,88 @@ $dbh->disconnect if defined $dbh;
 } #end of if $wantUI
 
 print "\n\n";
+my ($pathname, $autopathname);
+#
+# Get the path to access the LAS UI
+#
+$autopathname = $LasConfig{uipath};
+$autopathname = "/las" if ! $autopathname;
+if ($wantUI) {
+print "\nYou must now specify the path name the Web client will use\n";
+print "when accessing LAS. Unless you have more than one version of LAS\n";
+print "installed, the default of $autopathname should be fine\n";
+} else {
+print "\nYou must now specify the path name the Web client will use\n";
+print "when accessing your product server. Unless you have more than one \n";
+print "version of LAS installed, the default of $autopathname should be fine\n";
+}
+
+while (! $pathname){
+    print "Enter path name for LAS: [$autopathname] ";
+    $pathname = <STDIN>;
+    chomp($pathname);
+    $pathname = $autopathname if ! $pathname;
+    if ($pathname !~ /^\//){
+        print "Path name must begin with a '/'\n";
+        undef $pathname;
+    }
+    $pathname =~ s/[\/]+$//g;
+    my $count = split('\/', $pathname);
+    if ($count > 2){
+        print "Path name can only be one level deep (i.e. /las ok, /las/foo not)\n";
+        undef $pathname;
+    }
+}
+$LasConfig{uipath} = $pathname;
+
+if (!$wantUI) {
+print "Your product server URL will be: \n";
+print "http://".$LasConfig{tomcat_hostname}.":".$servlet_port.$pathname."/ProductServer.do\n";
+}
+undef $pathname;
+
+my $appname = $LasConfig{uipath};
+$appname =~ s/\///g;
+$LasConfig{appname} = $appname;
+
 
 #
 # Set up any custom stuff
 #
-my $serverDir = "conf/server";
-my $customDir = "conf/server/custom";
+my $serverDir = $LasConfig{jakarta_home}."/content".$LasConfig{uipath}."/conf/server";
+my $customDir = $serverDir."/custom";
 my $docsDir = "WebContent/docs";
 if (! -d $docsDir){
-       mkdir $docsDir, 0755 or die "Can't create directory $docsDir: $!\n";
+       &File::Path::mkpath($docsDir, {mode => 0755,}) or die "Can't create directory $docsDir: $!\n";
        print "Created a directory for docs.\n\n";
 }
 if (! -d $customDir){
     if ( ! -d $serverDir ) {
-       mkdir $serverDir, 0755 or die "Can't create directory $serverDir: $!\n";
+       &File::Path::mkpath($serverDir, {mode => 0755,}) or die "Can't create directory $serverDir: $!\n";
        print "Created a directory for an example server.\n\n";
     }
-    mkdir $customDir, 0755 or die "Can't create directory $customDir: $!\n";
+    &File::Path::mkpath($customDir, {mode => 0755,}) or die "Can't create directory $customDir: $!\n";
     print "Created a directory for custom code.\n\n";
 }
 if (! -d "$customDir/WebContent"){
-    mkdir "$customDir/WebContent", 0755 or die "Can't create directory $customDir/WebContent $!\n";
+    &File::Path::mkpath($customDir."/WebContent", {mode => 0755,}) or die "Can't create directory $docsDir/WebContent: $!\n";
 }
 
 if (! -d "$customDir/WebContent/images"){
-    mkdir "$customDir/WebContent/images", 0755 or die "Can't create directory $customDir/WebContent/images $!\n";
+    &File::Path::mkpath($customDir."/WebContent/images", {mode => 0755,}) or die "Can't create directory $customDir/WebContent/images: $!\n";
     print "Created a directory for custom images.\n\n";
 }
 
 # Set up DODS Configuration and Cache stuff
 #
 
-my $dodsConfDir = "conf/server/dods";
+my $dodsConfDir = $serverDir."/dods";
 if (! -d $dodsConfDir){
-   mkdir $dodsConfDir, 0775 or die "Can't create directory $dodsConfDir: $!\n";
+   &File::Path::mkpath($dodsConfDir, {mode => 0775,}) or die "Can't create directory $dodsConfDir: $!\n";
 }
 my $dodsCacheDir = "$dodsConfDir/.dods_cache";
 if (! -d $dodsCacheDir){
-   mkdir $dodsCacheDir, 0775 or die "Can't create directory $dodsCacheDir: $!\n";
+   &File::Path::mkpath($dodsCacheDir, {mode => 0775,}) or die "Can't create directory $dodsCacheDir: $!\n";
 }
 
 my $dodsConf = "$dodsConfDir/.dodsrc";
@@ -715,50 +760,6 @@ EOF
     #}
 #}
 
-my ($pathname, $autopathname);
-#
-# Get the path to access the LAS UI
-#
-$autopathname = $LasConfig{uipath};
-$autopathname = "/las" if ! $autopathname;
-if ($wantUI) {
-print "\nYou must now specify the path name the Web client will use\n";
-print "when accessing LAS. Unless you have more than one version of LAS\n";
-print "installed, the default of $autopathname should be fine\n";
-} else {
-print "\nYou must now specify the path name the Web client will use\n";
-print "when accessing your product server. Unless you have more than one \n";
-print "version of LAS installed, the default of $autopathname should be fine\n";
-}
-
-while (! $pathname){
-    print "Enter path name for LAS: [$autopathname] ";
-    $pathname = <STDIN>;
-    chomp($pathname);
-    $pathname = $autopathname if ! $pathname;
-    if ($pathname !~ /^\//){
-        print "Path name must begin with a '/'\n";
-        undef $pathname;
-    }
-    $pathname =~ s/[\/]+$//g;
-    my $count = split('\/', $pathname);
-    if ($count > 2){
-        print "Path name can only be one level deep (i.e. /las ok, /las/foo not)\n";
-        undef $pathname;
-    }
-}
-$LasConfig{uipath} = $pathname;
-
-if (!$wantUI) {
-print "Your product server URL will be: \n";
-print "http://".$LasConfig{tomcat_hostname}.":".$servlet_port.$pathname."/ProductServer.do\n";
-}
-undef $pathname;
-
-my $appname = $LasConfig{uipath};
-$appname =~ s/\///g;
-$LasConfig{appname} = $appname;
-
 createScripts();
 
 #
@@ -809,17 +810,7 @@ if ($LasConfig{proxy} eq "yes") {
 #
 # Get the temp dir.
 #
-my $tds_temp;
-my $autotds_temp = $LasConfig{tds_temp};
-$autotds_temp = &Cwd::cwd()."/conf/server/temp" if ! $autotds_temp;
-
-print "\nThe TDS you installed will be used by LAS to regrid data as needed to make comparisons.\n";
-print "During this process the Ferret IOSP will write lots of temporary files.\n";
-
-    print "Enter a directory path for F-TDS temporary files: [$autotds_temp] ";
-    $tds_temp = <STDIN>;
-    chomp($tds_temp);
-    $tds_temp = $autotds_temp if ! $tds_temp;
+my $tds_temp = $serverDir."/temp";
 
 if ( !(-d $tds_temp) ) {
    &File::Path::mkpath($tds_temp);
@@ -828,17 +819,7 @@ if ( !(-d $tds_temp) ) {
 
 $LasConfig{tds_temp} = $tds_temp;
 
-# Get the data dir.
-my $autotds_data = $LasConfig{tds_data};
-$autotds_data = &Cwd::cwd()."/conf/server/data" if ! $autotds_data;
-
-print "\nIn the installation installation instructions you were asked to configure TDS\n";
-print "with a datascan directory to be used by LAS.\n";
-
-    print "Enter the directory path you configured for LAS F-TDS data files: [$autotds_data] ";
-    $tds_data = <STDIN>;
-    chomp($tds_data);
-    $tds_data = $autotds_data if ! $tds_data;
+my $tds_data = $serverDir."/data";
 
 if ( !(-d $tds_data) ) {
    &File::Path::mkpath($tds_data);
@@ -950,40 +931,40 @@ EOF
 Ferret_Config(@EnvVars);
 
 # Always get a fresh a copy of LAS_config.pl from the examples.
-    copy("conf/example/LAS_config.pl","conf/server/LAS_config.pl") or
+    copy("conf/example/LAS_config.pl","$serverDir/LAS_config.pl") or
          die "Cannot get copy of LAS_config.pl from conf/example.";
 
 # Get a copy of operations.xml from the examples.
-if (! -f "conf/server/operations.xml") {
-    copy("conf/example/operations.xml","conf/server/operations.xml") or
+if (! -f "$serverDir/operations.xml") {
+    copy("conf/example/operations.xml","$serverDir/operations.xml") or
          die "Cannot get copy of operations.xml from conf/example.";
 }
 
 # Get a copy of insitu_operations.xml from the examples.
-if (! -f "conf/server/insitu_operations.xml") {
-    copy("conf/example/insitu_operations.xml","conf/server/insitu_operations.xml") or
+if (! -f "$serverDir/insitu_operations.xml") {
+    copy("conf/example/insitu_operations.xml","$serverDir/insitu_operations.xml") or
          die "Cannot get copy of insitu_operations.xml from conf/example.";
 }
 
 # Get a copy of options.xml from the examples.
-if (! -f "conf/server/options.xml") {
-    copy("conf/example/options.xml","conf/server/options.xml") or
+if (! -f "$serverDir/options.xml") {
+    copy("conf/example/options.xml","$serverDir/options.xml") or
          die "Cannot get copy of options.xml from conf/example.";
 }
 
 # Get a copy of insitu_options.xml from the examples.
-if (! -f "conf/server/insitu_options.xml") {
-    copy("conf/example/insitu_options.xml","conf/server/insitu_options.xml") or
+if (! -f "$serverDir/insitu_options.xml") {
+    copy("conf/example/insitu_options.xml","$serverDir/insitu_options.xml") or
          die "Cannot get copy of insitu_options.xml from conf/example.";
 }
 
 # Get a copy of browsers.xml from the examples.
-if (! -f "conf/server/browsers.xml") {
-    copy("conf/example/browsers.xml","conf/server/browsers.xml") or
+if (! -f "$serverDir/browsers.xml") {
+    copy("conf/example/browsers.xml","$serverDir/browsers.xml") or
          die "Cannot get copy of browsers.xml from conf/example.";
 }
 
-system("mkdir -p WebContent/classes/gifs");
+&File::Path::mkpath("WebContent/classes/gifs");
 my @gifs = glob("WebContent/luis/applet_gifs/*.gif");
 chomp(@gifs);
 foreach my $file (@gifs) {
@@ -999,7 +980,7 @@ copy("WebContent/luis/livemap/LiveMap_30.jar","WebContent/classes/LiveMap_30.jar
 #
 my $checkForSample = 1;
 if ( $wantUI ) {
-if (-f 'conf/server/las.xml'){
+if (-f "$serverDir/las.xml"){
     $checkForSample = 0;
     print "\nYou have an existing XML file in server/las.xml\n";
     if (getYesOrNo("Do you want to set up the server to use this file")){
@@ -1015,7 +996,7 @@ EOF
     }
 }
 } else {
-   if ( -f 'conf/server/las.xml' ) {
+   if ( -f "$serverDir/las.xml" ) {
       $checkForSample=0;
    }
 }
@@ -1201,41 +1182,41 @@ sub genSamples {
     my @insitu_out = ();
 
     $sample_in[0] = "conf/example/sample_las.xml";
-    $sample_out[0] = "conf/server/las.xml";
+    $sample_out[0] = "$serverDir/las.xml";
     $sample_in[1] = "conf/example/productserver.xml";
-    $sample_out[1] = "conf/server/productserver.xml";
+    $sample_out[1] = "$serverDir/productserver.xml";
     $sample_in[2] = "conf/example/operationsV7.xml";
-    $sample_out[2] = "conf/server/operationsV7.xml";
+    $sample_out[2] = "$serverDir/operationsV7.xml";
     $sample_in[3] = "conf/example/sample_ui.xml";
-    $sample_out[3]= "conf/server/ui.xml";
+    $sample_out[3]= "$serverDir/ui.xml";
     $sample_in[4] = "xml/perl/coads.xml";
-    $sample_out[4] = "conf/server/coads.xml";
+    $sample_out[4] = "$serverDir/coads.xml";
     $sample_in[5] = "conf/example/DODS_IRI_NOAA_NCEP_EMC_CMB_Pac_ocean.xml";
-    $sample_out[5] = "conf/server/DODS_IRI_NOAA_NCEP_EMC_CMB_Pac_ocean.xml";
+    $sample_out[5] = "$serverDir/DODS_IRI_NOAA_NCEP_EMC_CMB_Pac_ocean.xml";
     $sample_in[6] = "xml/perl/levitus.xml";
-    $sample_out[6] = "conf/server/levitus.xml";
+    $sample_out[6] = "$serverDir/levitus.xml";
     $sample_in[7] = "conf/example/ocean_atlas_subset.xml";
-    $sample_out[7] = "conf/server/ocean_atlas_subset.xml";
+    $sample_out[7] = "$serverDir/ocean_atlas_subset.xml";
     $insitu_in[0] = "conf/example/insitu_demo_1.xml";
-    $insitu_out[0] = "conf/server/insitu_demo_1.xml";
+    $insitu_out[0] = "$serverDir/insitu_demo_1.xml";
     $insitu_in[1] = "conf/example/insitu_demo_2.xml";
-    $insitu_out[1] = "conf/server/insitu_demo_2.xml";
+    $insitu_out[1] = "$serverDir/insitu_demo_2.xml";
     $insitu_in[2] = "conf/example/insitu_demo_ui.xml";
-    $insitu_out[2] = "conf/server/insitu_demo_ui.xml";
+    $insitu_out[2] = "$serverDir/insitu_demo_ui.xml";
     $insitu_in[3] = "conf/example/insitu_ui.xml";
-    $insitu_out[3] = "conf/server/insitu_ui.xml";
+    $insitu_out[3] = "$serverDir/insitu_ui.xml";
     $insitu_in[4] = "conf/example/insitu_options.xml";
-    $insitu_out[4] = "conf/server/insitu_options.xml";
+    $insitu_out[4] = "$serverDir/insitu_options.xml";
 
     # Overwrite gridded only las.xml and ui.xml for insitu demo.
     $insitu_in[5] = "conf/example/sample_insitu_las.xml";
-    $insitu_out[5] = "conf/server/las.xml";
+    $insitu_out[5] = "$serverDir/las.xml";
     $insitu_in[6] = "conf/example/sample_insitu_ui.xml";
-    $insitu_out[6] = "conf/server/ui.xml";
+    $insitu_out[6] = "$serverDir/ui.xml";
     $insitu_in[7] = "conf/example/nwioos_hake98.xml";
-    $insitu_out[7] = "conf/server/nwioos_hake98.xml";
+    $insitu_out[7] = "$serverDir/nwioos_hake98.xml";
     $insitu_in[8] = "conf/example/pfeg.xml";
-    $insitu_out[8] = "conf/server/pfeg.xml";
+    $insitu_out[8] = "$serverDir/pfeg.xml";
 
 
     my $insitu = 0;
@@ -1292,7 +1273,8 @@ sub genSamples {
 
 sub genHTML {
     print "Generating HTML... \n";
-    if (system(qq{cd conf/server; ../../xml/perl/genLas.pl -s -u "$account" -p "$password" -h "$host" las.xml})){
+    my $genLAS = &Cwd::cwd()."/xml/perl/genLas.pl";
+    if (system(qq{cd $serverDir; $genLAS -s -u "$account" -p "$password" -h "$host" las.xml})){
         die "Error in generating HTML.\n";
     }
 }
@@ -1753,7 +1735,7 @@ sub printENV($ferretConfig, @EnvVars) {
             } elsif ($var =~ /FER_DESCR/){
                 $ENV{$var} = "des " . $ENV{$var};
             } elsif ($var =~ /DODS_CONF/){
-                $ENV{$var} = &Cwd::cwd()."/conf/server/dods/.dodsrc";
+                $ENV{$var} = $serverDir."/dods/.dodsrc";
             }
 
             my @values = split(' ',$ENV{$var});
@@ -1783,12 +1765,10 @@ sub printENV($ferretConfig, @EnvVars) {
 
 sub Ferret_Config (@EnvVars) {
 
-my $ferretConfig = "conf/server/Ferret_config.pl";
+my $ferretConfig = $serverDir."/Ferret_config.pl";
 print <<EOF;
 
 Now setting up the Ferret environment for the server...
-I will use settings in your current Ferret environment. If you want to change
-them, edit 'server/Ferret_config.pl'.
 EOF
 
 open CONFIGFILE, ">>$ferretConfig"

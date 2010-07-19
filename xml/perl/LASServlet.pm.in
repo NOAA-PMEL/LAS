@@ -1006,7 +1006,7 @@ sub getHttpImage {
 sub getFileImage {
     my ($self, $url) = @_;
     my $dir = $self->{gen}->getDir;
-    my @paths = ("$dir../../WebContent/classes/$url",
+    my @paths = ("@PWD@/WebContent/classes/$url",
                  "$dir$url");
     my $path;
     foreach my $p (@paths){
@@ -2116,7 +2116,7 @@ sub validate {
     my $dset = $var->getDataset;
     my $docURL = $dset->getAttribute("doc");
     if ($docURL && !$ValidateCache{$docURL}){
-        if (!&LAS::validateURL($docURL, '../../WebContent')){
+        if (!&LAS::validateURL($docURL, '@PWD@/WebContent')){
             $self->printValidateError("*** Can't find documentation URL set by dataset 'doc' attribute: '$docURL'");
         }
         $ValidateCache{$docURL} = 1;

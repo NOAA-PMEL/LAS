@@ -7,10 +7,10 @@
 
 # $Id: genLas.pl.in,v 1.15 2005/03/21 23:47:42 callahan Exp $
 use Config;
-use lib ('../../xml/perl','.', '../../xml/perl/install/lib/' . $Config{version},
-         '../../xml/perl/install/lib/site_perl/' . $Config{version},
-         '../../xml/perl/install/lib/perl5/' . $Config{version},
-         '../../xml/perl/install/lib/perl5/site_perl/' . $Config{version});
+use lib ('@PWD@/xml/perl','@PWD@', '@PWD@/xml/perl/install/lib/' . $Config{version},
+         '@PWD@/xml/perl/install/lib/site_perl/' . $Config{version},
+         '@PWD@/xml/perl/install/lib/perl5/' . $Config{version},
+         '@PWD@/xml/perl/install/lib/perl5/site_perl/' . $Config{version});
 use LAS;
 use LASUI;
 use LASServlet;
@@ -71,7 +71,7 @@ sub genProperties {
     # and add the database map.
     #
     my $host;
-    if (open IN, "<../../WebContent/WEB-INF/classes/las.properties") {
+    if (open IN, "<@PWD@/WebContent/WEB-INF/classes/las.properties") {
        while (<IN>) {
           $line = $_;
           chomp $line;
@@ -87,7 +87,7 @@ sub genProperties {
     if ($rows < 1) {
        die "No las DB user is available.  Try running configure again for this LAS.\n";
     }
-    open OUT,">../../WebContent/WEB-INF/classes/las.properties" or die "Can't open '../../WebContent/WEB-INF/classes/las.properties'";
+    open OUT,">@PWD@/WebContent/WEB-INF/classes/las.properties" or die "Can't open '../../WebContent/WEB-INF/classes/las.properties'";
     print OUT "las.db.host=$host\n";
     print OUT "las.db.user=las\n";
     print OUT "las.db.password=lasrules\n";
