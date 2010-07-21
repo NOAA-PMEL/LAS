@@ -548,7 +548,7 @@ public class VizGalPanel extends Composite {
 		if ( variable.isVector() && !var.isVector() ) {
 			messagePanel.show(grid.getWidget(1, 0).getAbsoluteLeft()+15, grid.getWidget(1,0).getAbsoluteTop()+15, "Could not make plot.  Variable in panel must also be a vector.");
             return;
-		} else {
+		} else if ( variable.isVector() && var.isVector() ){
 			lasRequest.addVariable(var.getDSID(), var.getComponents().get(0));
 			if ( isUsePanelSettings() || singlePanel ) {
 				if ( !view.contains("x") ) {
