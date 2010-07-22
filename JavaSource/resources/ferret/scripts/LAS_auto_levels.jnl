@@ -62,8 +62,7 @@ DEFINE SYMBOL ferret_center_levels ($ferret_center_levels"0|1|TRUE>1|*>0")
 ! If contour levels requested with levels of nC, e.g. 20C, then get the value to
 ! set num_fine_levels in the %RANGE command below
 
-! In general if other levels spec is given, return. However if it is a simple number, 
-! use that to set the number of fine levels.
+! If other levels spec is given, return.
 
 IF ($ferret_fill_levels"0|*>1") THEN
 
@@ -89,7 +88,12 @@ IF ($ferret_fill_levels"0|*>1") THEN
       DEFINE SYMBOL num_fine_levels = ($ferret_fill_levels)  ! How to test that this is just a number??
       CANCEL SYMBOL input_fill_levels  ! we will redefine the levels in this script
    ENDIF
-   IF `nc EQ 0 AND other NE 0` THEN  EXIT/SCRIPT
+
+! used to use a simple number as the # of fine levs for open-ended. 
+! but this left no way to force the script to use old-style linear levs, short of spelling out levels.
+!   IF `nc EQ 0 AND other NE 0` THEN  EXIT/SCRIPT  
+
+   IF `nc EQ 0` THEN  EXIT/SCRIPT
 ENDIF
 
 ! IF fill levels have not been set by the user or in the config, then
