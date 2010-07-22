@@ -355,10 +355,12 @@ Choices are:
 
   <optiondef name="fill_levels">
     <option>
-      <help>Set the fill levels of the plot. Fill levels are described using Ferret syntax. Examples:
+      <help>Set the fill levels of the plot. Fill levels are described using Ferret syntax. The
+	  number of levels is approximate, and may be changed as the algorithm rounds off the values. Examples:
 &lt;ul>&lt;li>&lt;b>(0,100,10)&lt;/b>  Bands of color starting at 0, ending at 100, with an interval of 10
-&lt;li>&lt;b>25&lt;/b> Draw 25 lines 
-&lt;li>&lt;b>10C&lt;/b> Draw 10 lines centered at 0 
+&lt;li>&lt;b>25&lt;/b> Draw 25 levels 
+&lt;li>&lt;b>10C&lt;/b> Draw 10 levels centered at 0 
+&lt;li>&lt;b>60V&lt;/b> Draw 60 levels using the default open-ended color level calculation
 &lt;li>&lt;b>(-inf)(-10,10,0.25)(inf)&lt;/b> Bands of color between -10 and 10 with an additional color at each end of the spectrum representing all values below (-inf) or above (inf)
 &lt;li>&lt;b>(-100)(-10,10,0.25)(100)&lt;/b> Bands of color between -10 and 10 with a additional bands for all outlying values up to +/- 100.
 &lt;/ul> 
