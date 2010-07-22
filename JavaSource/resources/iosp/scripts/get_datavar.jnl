@@ -18,7 +18,7 @@
 ! After this script is run, the value of the Ferret symbol $fer_last_error contains 
 ! an error string if an unexpected error was encountered.
 
-set mem/siz=100
+set mem/siz=300
 
 ! Save the dataset number of the current dataset
 SET DATA/SAVE
@@ -93,13 +93,22 @@ IF `STRINDEX("($shape)", "K") GT 0` THEN
 ENDIF
 
 IF `STRINDEX("($shape)", "L") GT 0` THEN
-!  There is a T axis. Add the L indices to the region spec.
+!  There is a T axis. Write the data one timestep at a time.
+!  This makes longer time series work well - for curvilinear data
+!  sometimes the subset is a large 3-D subset with a box of data in
+!  IJ that will be sampled to get the slice.
 
    LET count = `count+1`
    DEFINE SYMBOL mdim = `count`
 
    DEFINE SYMBOL region_l l=`lo_index_($mdim)`:`hi_index_($mdim)`:`stride_($mdim)`
-   DEFINE SYMBOL region_full = ($region_full)($comma)($region_l)
+   SAVE/FILE="$1"/CLOBBER $3[($region_full)($comma)L=`lo_index_($mdim)`]
+
+   REPEAT/L=`lo_index_($mdim)+stride_($mdim)`:`hi_index_($mdim)`:`stride_($mdim)` \
+     SAVE/FILE="$1"/APPEND $3[($region_full)]
+   
+   SET DATA/RESTORE
+   EXIT/SCRIPT
 ENDIF
 
 ! All the region information has been gathered. Now write the file.  
