@@ -23,6 +23,9 @@ public class LASProxy {
 	private static Logger log = LogManager.getLogger(LASProxy.class.getName());
 	public String executeGetMethodAndReturnResult(String url, HttpServletResponse response) throws IOException, HttpException {
 		HttpClient client = new HttpClient();
+		HttpClientParams params = client.getParams();
+		params.setParameter(HttpClientParams.ALLOW_CIRCULAR_REDIRECTS,Boolean.TRUE);
+		client.setParams(params);
         GetMethod method = new GetMethod(url);
 		method.getParams().setParameter(HttpMethodParams.RETRY_HANDLER, new DefaultHttpMethodRetryHandler(3, false));
 
@@ -64,7 +67,9 @@ public class LASProxy {
 	public void executeGetMethodAndStreamResult(String request, HttpServletResponse response) throws IOException, HttpException {
 
 		HttpClient client = new HttpClient();
-
+		HttpClientParams params = client.getParams();
+		params.setParameter(HttpClientParams.ALLOW_CIRCULAR_REDIRECTS,Boolean.TRUE);
+		client.setParams(params);
 		GetMethod method = new GetMethod(request);
 
 		method.getParams().setParameter(HttpMethodParams.RETRY_HANDLER, new DefaultHttpMethodRetryHandler(3, false));
