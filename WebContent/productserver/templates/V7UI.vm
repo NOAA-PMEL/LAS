@@ -157,8 +157,6 @@
                         LAS.params = {
 #if ($request.getParameter('openid')!="")
                                 'openid' :'$request.getParameter('openid')',
-#else
-                                'openid' : {},
 #end
 #if ($request.getParameter('catid')!="")
                                 'catid' :'$request.getParameter('catid')',
