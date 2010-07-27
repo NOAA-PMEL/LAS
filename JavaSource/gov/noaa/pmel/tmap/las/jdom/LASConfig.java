@@ -2105,7 +2105,110 @@ public class LASConfig extends LASDocument {
 		}
 		return operations;
 	}
+	/**
+	 * Return operations based on the variable xpath.
+	 * @param view
+	 * @param xpath
+	 * @return
+	 * @throws JDOMException
+	 */
+	public ArrayList<Operation> getOperations(String view, String xpath) throws JDOMException {
+		String dsid = getDSIDfromXPath(xpath);
+		String varid = getVarIDfromXPath(xpath);
+		return getOperations(view, dsid, varid);
+	}
+	private String getDSIDfromXPath(String xpath) {
+		String dsid;
+		if (!xpath.contains("@ID")) {
+			String[] parts = xpath.split("/");
+			// Throw away index 0 since the string has a leading "/".
+			dsid = parts[3];
+		} else {
+			dsid = xpath.substring(xpath.indexOf("@ID"), xpath.indexOf("]")-1);
+		}
+		return dsid;
+	}
+	private String getVarIDfromXPath(String xpath) {
+		String varid;
+		if (!xpath.contains("@ID")) {
+			String[] parts = xpath.split("/");
+			// Throw away index 0 since the string has a leading "/".
+			varid=parts[5];
+		} else {
+			varid = xpath.substring(xpath.lastIndexOf("@ID"), xpath.lastIndexOf("]")-1);
+		}
+		return varid;
+	}
+	/**
+	 * Get all the operations that require more that one variable.
+	 * @param view the current UI view
+	 * @param xpath the dataset/variable xpath of the selected variables
+	 * @return
+	 */
+	public ArrayList<Operation> getOperations(String view, String[] xpath) throws LASException, JDOMException {
+		ArrayList<Operation> operations = new ArrayList<Operation>();
+		String ui_default = "";
+		
+		for (int i = 0; i < xpath.length; i++) {
+			String dsid = getDSIDfromXPath(xpath[i]);
+			String varid = getVarIDfromXPath(xpath[i]);
+			String current_ui_default = getUIDefaultName(dsid, varid);
+			if ( !current_ui_default.equals("") || !ui_default.equals("")) {
+				if ( i > 0 ) {
+					if (!current_ui_default.equals(ui_default)) {
+						throw new LASException("The selected variables have different UI default parameters");
+					} else {
+						ui_default = current_ui_default;
+					}
+				} else {
+					ui_default = current_ui_default;
+				}
+			} 
+		}
+		for (int i = 0; i < xpath.length; i++) {
+			operations.addAll(getOperations(view, xpath[i]));
+		}
+		ArrayList<Operation> multi_variable_operations = new ArrayList<Operation>();
+		int var_count = xpath.length;
+		int minvars = -1;
+		int maxvars = -1;
+		for (int o = 0; o < operations.size(); o++) {
+			Operation op = operations.get(o);
+			String min = op.getAttributeValue("minvars");
+			String max = op.getAttributeValue("maxvars");
+			if ( min != null && !min.equals("") ) {
+				try {
+					minvars = Integer.valueOf(min).intValue();
+				} catch (Exception e) {
+					throw new LASException("Cannot parse the minvars attribute value.");
+				}
+			}
+			if ( max != null && !max.equals("") ) {
+				try {
+					maxvars = Integer.valueOf(max).intValue();
+				} catch (Exception e) {
+					throw new LASException("Cannot parse the maxvars attribute value.");
+				}
+			}
+			if ( minvars > 0 ) {
+				if ( maxvars > 0 ) {
+					if ( var_count >= minvars && var_count <= maxvars ) {
+						multi_variable_operations.add(op);
+						minvars = -1;
+						maxvars = -1;
+					}
+				} else {
+					if ( var_count >= minvars ) {
+						multi_variable_operations.add(op);
+						minvars = -1;
+						maxvars = -1;
+					}
+				}
+			}
+		}
 
+		return multi_variable_operations;
+	}
 	/**
 	 * Get the operations that are include with a particular UI default
 	 * @param ui_default
