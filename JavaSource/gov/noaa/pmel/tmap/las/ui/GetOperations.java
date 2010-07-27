@@ -56,18 +56,23 @@ public class GetOperations extends ConfigService {
 		String varID = request.getParameter("varid");
 		String view = request.getParameter("view");
 		String format = request.getParameter("format");
+		String[] xpath = request.getParameterValues("xpath");
 		
 		if ( format == null ) {
 			format = "json";
 		}
 		boolean error = false;
-		log.info("Starting: getOperations.do?dsid="+dsID+"&varid="+varID+"&view="+view+".");
+		
 		try {
 			ArrayList<Operation> operations;
 			if ( view != null) {
-				
-				operations = lasConfig.getOperations(view, dsID, varID);
-
+				if ( xpath != null && xpath.length > 0 ) {
+					log.info("Starting xpaths: getOperations.do?&view="+view+".");
+					operations = lasConfig.getOperations(view, xpath);
+				} else {
+					log.info("Starting: getOperations.do?dsid="+dsID+"&varid="+varID+"&view="+view+".");
+					operations = lasConfig.getOperations(view, dsID, varID);
+				}
 				if ( operations.size() <= 0 ) {
 					error = true;
 					sendError(response, "operations", format, "No operations found.");
@@ -80,13 +85,19 @@ public class GetOperations extends ConfigService {
 						sendError(response, "operations", format, "No operations found.");
 					}
 				}
+
 			} else {
 				operations = new ArrayList<Operation>();
 				ArrayList<View> views = lasConfig.getViewsByDatasetAndVariable(dsID, varID);
 				HashMap<String, Operation> allOps = new HashMap<String, Operation>();
 				for (Iterator viewIt = views.iterator(); viewIt.hasNext();) {
 					View aView = (View) viewIt.next();
-					ArrayList<Operation> ops = lasConfig.getOperations(aView.getValue(), dsID, varID);
+					ArrayList<Operation> ops;
+					if ( xpath != null && xpath.length > 0 ) {
+						ops = lasConfig.getOperations(view, xpath);
+					} else {
+						ops = lasConfig.getOperations(aView.getValue(), dsID, varID);
+					}
 					for (Iterator opsIt = ops.iterator(); opsIt.hasNext();) {
 						Operation op = (Operation) opsIt.next();
 						String id = op.getID();
@@ -97,7 +108,6 @@ public class GetOperations extends ConfigService {
 					String id = (String) idIt.next();
 					operations.add(allOps.get(id));
 				}
-				
 			}
 			Collections.sort(operations, new ContainerComparator("order", "name"));
 			if ( ! error ) {
@@ -118,7 +128,7 @@ public class GetOperations extends ConfigService {
 			sendError(response, "operations", format, e.toString());
 		} 
 
-		log.info("Finished: getOperations.do?dsid="+dsID+"&varid="+varID+"&view="+view+".");
+		log.info("Finished: getOperations.do");
 		
 		return null;
 	}

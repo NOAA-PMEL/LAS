@@ -102,7 +102,8 @@ public class RequestInputFilter implements Filter {
 		"stream_ID", 
 		"varid",
 		"view",
-		"xml"
+		"xml",
+		"xpath"
     };
     private final static Set<String> LAS_PARAMETERS = new HashSet<String>(Arrays.asList(p));
 	
