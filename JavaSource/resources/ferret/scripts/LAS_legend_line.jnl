@@ -1,6 +1,8 @@
 ! LAS_legend_line.jnl
 ! Draw lines for a multi-1D plot legend.
-! ACM 7/2010
+! ACM 7/2010 
+! 7/2010    ACM updates for V7.2 multi-variable plots
+
 !
 ! From the Ferret Users List, contrib by E. Vanvyve and B. Kessler.
 ! Added a 7th argument which is the line style (symbols, etc.)

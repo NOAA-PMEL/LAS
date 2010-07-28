@@ -3,7 +3,8 @@
 ! 
 ! $Author: ansley $
 ! $Date: 11-Jan-2008
-!
+! 7/2010    ACM updates for V7.2 multi-variable plots
+
 ! prop_prop_plot.jnl creates a property-property plot, using the 
 ! data variable in symbol data_0_var and the second variable from
 ! ferret symbol ferret_prop_var. Lets us do a property-property
@@ -205,5 +206,5 @@ GO LAS_ferret_las_version_header
 
 GO LAS_results box
 
-! End of $RCSfile -----------------------------------------------------
+! ----- End of prop_prop_plot.jnl ------------------------------------------------
 

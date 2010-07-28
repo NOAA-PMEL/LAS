@@ -2,9 +2,10 @@
 ! Set up the region labels that will be in the upper left of the plot.
 ! 
 ! Called by prop_prop_plot.jnl
-! 26-Jul-2010 ACM
-! Can add to this if/when the two variables may have different regions,
-! e.g. different depths or times.
+! 7/2010    ACM updates for V7.2 multi-variable plots
+
+! NOTE: We can add to this if/when the two variables may have
+! different regions, e.g. different depths or times.
 
 IF ($region_x_lo"0|*>1") THEN
    DEFINE SYMBOL n_left_labels = `($n_left_labels"0") + 1`
