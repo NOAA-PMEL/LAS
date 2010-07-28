@@ -273,6 +273,11 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
 		}
 	}
 	public OperationSerializable[] getOperations(String view, String[] xpath ) throws RPCException {
+		if ( xpath.length == 1 ) {
+			String dsid = LASConfig.getDSIDfromXPath(xpath[0]);
+			String varid = LASConfig.getVarIDfromXPath(xpath[0]);
+			return getOperations(view, dsid, varid);
+		}
 		// For now require them to all be from the same data set.
 		Map<String, OperationSerializable> operations = new HashMap<String, OperationSerializable>();
 		for (int i = 0; i < xpath.length; i++) {
