@@ -16,6 +16,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -106,6 +107,13 @@ public class Confluence extends LASAction {
 				HttpServletRequest request,
 				HttpServletResponse response){
 
+			Cookie[] cookies = request.getCookies();
+			String openid = null;
+			for (int i = 0; i < cookies.length; i++) {
+				if ( cookies[i].getName().equals("esg.openid.identity.cookie") ) {
+					openid = cookies[i].getValue();
+				}
+			}
 			LASConfig lasConfig = (LASConfig)servlet.getServletContext().getAttribute(LASConfigPlugIn.LAS_CONFIG_KEY);
 
 			ArrayList<Tributary> servers = new ArrayList<Tributary>();
@@ -168,7 +176,7 @@ public class Confluence extends LASAction {
 								// add it on.
 								las_url = las_url + "?" + request.getQueryString();
 							}
-							lasProxy.executeGetMethodAndStreamResult(las_url, response);
+							lasProxy.executeGetMethodAndStreamResult(las_url, response, openid);
 						}
 					} catch (HttpException e) {
 						log.error("Unable to fetch categories.", e);
@@ -195,7 +203,7 @@ public class Confluence extends LASAction {
 
 						Tributary trib = lasConfig.getTributary(server_key);
 						String las_url = trib.getURL() + Constants.GET_OPTIONS + "?opid=" + opid;
-						lasProxy.executeGetMethodAndStreamResult(las_url, response);
+						lasProxy.executeGetMethodAndStreamResult(las_url, response, openid);
 					} else {
 						// Send it to the local server which will work most of the time..
 						return mapping.findForward(Constants.GET_OPTIONS_KEY);
@@ -243,7 +251,7 @@ public class Confluence extends LASAction {
 							} else {
 								String las_url = tribs.get(key).getURL();
 								las_url = las_url + Constants.PRODUCT_SERVER + "?" + request.getQueryString();	
-								lasProxy.executeGetMethodAndStreamResult(las_url, response);
+								lasProxy.executeGetMethodAndStreamResult(las_url, response, openid);
 							}
 						} else {
 							// Add the special parameter to create product locally using remote analysis and send to local product server.
@@ -268,7 +276,7 @@ public class Confluence extends LASAction {
 						Tributary trib = lasConfig.getTributary(server_key);
 						String las_url = trib.getURL();
 						las_url = las_url + Constants.PRODUCT_SERVER + "?" + request.getQueryString();	
-						lasProxy.executeGetMethodAndStreamResult(las_url, response);
+						lasProxy.executeGetMethodAndStreamResult(las_url, response, openid);
 					} catch (HttpException e) {
 						logerror(request, "Unable to fetch product.", e);
 					} catch (IOException e) {
@@ -338,7 +346,7 @@ public class Confluence extends LASAction {
 						}
 					}
 					if ( !local ) {
-					    lasProxy.executeGetMethodAndStreamResult(las_url, response);
+					    lasProxy.executeGetMethodAndStreamResult(las_url, response, openid);
 					}					
 				} catch (HttpException e) {
 					logerror(request, "Unable to do local request.", e);
