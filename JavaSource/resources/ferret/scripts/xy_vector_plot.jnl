@@ -31,6 +31,11 @@ DEFINE SYMBOL fview = `UPCASE("($ferret_view)")`
 ! NOTE:  some other argument.  For now, though, we always use 'data_0'
 ! NOTE:  for the base layer and region.
 
+IF ($its_ge"0|*>1") THEN
+  DEFINE SYMBOL region_0_x_hi = `($region_0_x_hi) + 1`
+  DEFINE SYMBOL region_0_x_lo = `($region_0_x_lo) - 1`
+ENDIF
+
 GO LAS_initialize_region 0
 GO LAS_initialize_data 0
 
@@ -199,14 +204,14 @@ IF ($its_GE"0|*>1") THEN
    CANCEL MODE nodata_lab
 
 ! Do a shade underlay for GE plots
- 	
-   DEFINE SYMBOL shade_var = ($ferret_vector_1)
-   IF ($native_curvilinear_xy"0") THEN DEFINE SYMBOL  shade_var = ($ferret_plot_base_var_0)
- 	
-   SHADE/pal=white/nokey/TITLE=" "/SET  ($shade_var)
-      IF ($xform_dms"0|*>1") THEN PPL XFOR (($xform_dms))
-      IF ($yform_dms"0|*>1") THEN PPL YFOR (($yform_dms))
-   PPL SHADE
+
+   IF ($native_curvilinear_xy"0") THEN 
+      LET sv = ($ferret_plot_base_var_0)
+   ELSE 
+      LET sv = ($ferret_vector_1)
+   ENDIF
+   DEFINE SYMBOL shade_var = sv
+   SHADE/NOKEY/TITLE=" "/PAL=white ($shade_var)  
 
    DEFINE SYMBOL qualifiers = ($qualifiers)/OVER/NOLAB
 
@@ -255,11 +260,15 @@ ELSE
 ENDIF
 
 ! Label with skip, if style not flowline=1 and if skip >1 in either direction
-IF `($flowline_vectors"0") EQ 0` THEN  
-   IF `( ($PPL_VEC_XSKIP"0|*>1") GT 1)  OR (($PPL_VEC_YSKIP"0|*>1") GT 1)` THEN
+IF `($flowline_vectors"0") EQ 0 AND ($its_GE"0|*>1") EQ 0` THEN  
+   IF `( ($PPL_VEC_XSKIP"0|*") GT 1)  OR (($PPL_VEC_YSKIP"0|*") GT 1)` THEN
       DEFINE SYMBOL n_left_labels = `($n_left_labels"0")+1`
       DEFINE SYMBOL upper_left_($n_left_labels) = \
       Vector xskip=($PPL_VEC_XSKIP), yskip=($PPL_VEC_YSKIP) 
+   ELIF ($ferret_vector_skip"0|*>1") THEN
+      DEFINE SYMBOL n_left_labels = `($n_left_labels"0")+1`
+      DEFINE SYMBOL upper_left_($n_left_labels) = \
+      Vector xskip=`xs`, yskip=`ys` 
    ENDIF
 ENDIF
 

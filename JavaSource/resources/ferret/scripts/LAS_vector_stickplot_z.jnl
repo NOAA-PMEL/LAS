@@ -202,5 +202,5 @@ CANCEL MODE nodata_lab  ! so there isnt a NO VALID DATA label on the plot.
 LET/BAD=9999 all_bad = IF MISSING(($ferret_vector_1),0) THEN 9999 ELSE 9999 + 0*($ferret_vector_1)
 
 SHADE/NOLAB/NOAX all_bad 
-pause
+
 !  ----------------- End of LAS_vector_stickplot_z ------------------------------------

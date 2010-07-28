@@ -33,6 +33,9 @@ ELSE
    IF `STRLEN("($ferret_view)") EQ 2` THEN 
       DEFINE VIEW/X=0:0.95/Y=0:1 xspace
       SET VIEW xspace
+   ELSE
+! For 1D plots we may be doing a line key in a new viewport, so set the initial viewport.
+      SET VIEW full
    ENDIF
 
 ENDIF
