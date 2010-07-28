@@ -2146,6 +2146,9 @@ public class LASConfig extends LASDocument {
 	 * @return
 	 */
 	public ArrayList<Operation> getOperations(String view, String[] xpath) throws LASException, JDOMException {
+		if ( xpath.length == 1 ) {
+			return getOperations(view, xpath[0]);
+		}
 		ArrayList<Operation> operations = new ArrayList<Operation>();
 		String ui_default = "";
 		
