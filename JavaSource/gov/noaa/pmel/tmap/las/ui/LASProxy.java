@@ -5,12 +5,15 @@ import gov.noaa.pmel.tmap.las.product.server.ProductServerAction;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URL;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.httpclient.Cookie;
 import org.apache.commons.httpclient.DefaultHttpMethodRetryHandler;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
+import org.apache.commons.httpclient.HttpState;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.params.HttpClientParams;
@@ -21,8 +24,13 @@ import org.apache.log4j.Logger;
 public class LASProxy {
 	private int streamBufferSize = 8196;
 	private static Logger log = LogManager.getLogger(LASProxy.class.getName());
-	public String executeGetMethodAndReturnResult(String url, HttpServletResponse response) throws IOException, HttpException {
+	public String executeGetMethodAndReturnResult(String url, HttpServletResponse response, String id) throws IOException, HttpException {
+		HttpState initialState = new HttpState();
+		URL urlo = new URL(url);
+		Cookie cookie = new Cookie(urlo.getHost(), "esg.openid.identity.cookie", id);
+		initialState.addCookie(cookie);
 		HttpClient client = new HttpClient();
+		client.setState(initialState);
 		HttpClientParams params = client.getParams();
 		params.setParameter(HttpClientParams.ALLOW_CIRCULAR_REDIRECTS,Boolean.TRUE);
 		client.setParams(params);
@@ -55,7 +63,10 @@ public class LASProxy {
 		}
 	}
 	public String executeGetMethodAndReturnResult(String url) throws HttpException, IOException {
-		return executeGetMethodAndReturnResult(url, null);
+		return executeGetMethodAndReturnResult(url, null, null);
+	}
+	public String executeGetMethodAndReturnResult(String url, String id) throws HttpException, IOException {
+		return executeGetMethodAndReturnResult(url, null, id);
 	}
 	/**
 	 * Makes HTTP GET request and writes result to response output stream.
@@ -64,9 +75,20 @@ public class LASProxy {
 	 * @throws IOException
 	 * @throws HttpException
 	 */
-	public void executeGetMethodAndStreamResult(String request, HttpServletResponse response) throws IOException, HttpException {
+	public void executeGetMethodAndStreamResult(String request, HttpServletResponse response, String openid) throws IOException, HttpException {
 
+		HttpState state = null;
+		
+		if ( openid != null ) {
+			state = new HttpState();
+			URL url = new URL(request);
+			Cookie cookie = new Cookie(url.getHost(), "esg.openid.identity.cookie", openid);
+			state.addCookie(cookie);
+		}
 		HttpClient client = new HttpClient();
+		if ( state != null ) {
+			client.setState(state);
+		}
 		HttpClientParams params = client.getParams();
 		params.setParameter(HttpClientParams.ALLOW_CIRCULAR_REDIRECTS,Boolean.TRUE);
 		client.setParams(params);
