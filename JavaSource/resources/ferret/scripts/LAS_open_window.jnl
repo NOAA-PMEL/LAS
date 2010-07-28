@@ -2,6 +2,7 @@
 ! 
 ! Author: ansley 
 ! Date: 2007/02/12 
+! 7/2010    ACM updates for V7.2 multi-variable plots
 !
 ! The LAS_open_windw.jnl script takes care of everything having to
 ! do with starting the window.

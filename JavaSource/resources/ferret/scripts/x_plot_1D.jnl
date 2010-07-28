@@ -8,24 +8,15 @@
 !           in degenerate plot into LAS_initialize_data.jnl rather than in the 
 !           individual plot scripts.
 ! 3/29/2007 ACM Fix logic interpreting contents of ferret_interpolate_data 
+! 7/2010    ACM updates for V7.2 multi-variable plots
 
 !
 ! X_plot.jnl creates an X line plot for use with the Back End Server
 ! code that sits behind a Live Access Server (LAS). 
 !
-! NOTE:  This code handles overlays but not differencing.
-!
-! TODO:  We should support user choice of the 'base layer' variable.
-! TODO:  From the Ferret script writers' perspective it would be nice
-! TODO:  if this were handled in the UI so that ($data_0_...) always
-! TODO:  referred to the base layer.
-
 
 ! Set any Ferret modes
 !
-! NOTE:  Should we support any of the following Ferrt modes?
-! NOTE:    ASCII_FONT, CALENDAR, DEPTH_LABEL, LABELS, LATIT_LABEL, LONG_LABEL 
-
 IF ($ferret_interpolate_data%0|false>0|true>1|1|0|*>1%) THEN SET MODE INTERPOLATE
 
 DEFINE SYMBOL fview = `UPCASE("($ferret_view)")`

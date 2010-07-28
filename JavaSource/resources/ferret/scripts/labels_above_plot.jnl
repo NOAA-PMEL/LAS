@@ -6,6 +6,7 @@
 ! ACM 8/7/2007 - use symbols region_small* rather than looking for 
 !                certain text within the labels for a more robust
 !                means of setting up for the region-too-small label.
+! 7/2010    ACM updates for V7.2 multi-variable plots. Loop over labels.
 
 ! Add labels at the top for the location of overlaid lines,
 ! transformations, and for URLs if they exist  

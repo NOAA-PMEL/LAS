@@ -1,5 +1,6 @@
 ! LAS_draw_multi_line_plot.jnl
-!  Do a multi-line plot. 
+!  Do a multi-line 1-D plot. 
+! 7/2010    ACM updates for V7.2 multi-variable plots
 
 
 
