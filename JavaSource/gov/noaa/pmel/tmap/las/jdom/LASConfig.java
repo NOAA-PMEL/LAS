@@ -2117,7 +2117,7 @@ public class LASConfig extends LASDocument {
 		String varid = getVarIDfromXPath(xpath);
 		return getOperations(view, dsid, varid);
 	}
-	private String getDSIDfromXPath(String xpath) {
+	public static String getDSIDfromXPath(String xpath) {
 		String dsid;
 		if (!xpath.contains("@ID")) {
 			String[] parts = xpath.split("/");
@@ -2128,7 +2128,7 @@ public class LASConfig extends LASDocument {
 		}
 		return dsid;
 	}
-	private String getVarIDfromXPath(String xpath) {
+	public static String getVarIDfromXPath(String xpath) {
 		String varid;
 		if (!xpath.contains("@ID")) {
 			String[] parts = xpath.split("/");
@@ -2150,8 +2150,8 @@ public class LASConfig extends LASDocument {
 		String ui_default = "";
 		
 		for (int i = 0; i < xpath.length; i++) {
-			String dsid = getDSIDfromXPath(xpath[i]);
-			String varid = getVarIDfromXPath(xpath[i]);
+			String dsid = LASConfig.getDSIDfromXPath(xpath[i]);
+			String varid = LASConfig.getVarIDfromXPath(xpath[i]);
 			String current_ui_default = getUIDefaultName(dsid, varid);
 			if ( !current_ui_default.equals("") || !ui_default.equals("")) {
 				if ( i > 0 ) {

@@ -24,13 +24,9 @@ import org.apache.log4j.Logger;
 public class LASProxy {
 	private int streamBufferSize = 8196;
 	private static Logger log = LogManager.getLogger(LASProxy.class.getName());
-	public String executeGetMethodAndReturnResult(String url, HttpServletResponse response, String id) throws IOException, HttpException {
-		HttpState initialState = new HttpState();
-		URL urlo = new URL(url);
-		Cookie cookie = new Cookie(urlo.getHost(), "esg.openid.identity.cookie", id);
-		initialState.addCookie(cookie);
+	public String executeGetMethodAndReturnResult(String url, HttpServletResponse response) throws IOException, HttpException {
+		
 		HttpClient client = new HttpClient();
-		client.setState(initialState);
 		HttpClientParams params = client.getParams();
 		params.setParameter(HttpClientParams.ALLOW_CIRCULAR_REDIRECTS,Boolean.TRUE);
 		client.setParams(params);
@@ -63,10 +59,7 @@ public class LASProxy {
 		}
 	}
 	public String executeGetMethodAndReturnResult(String url) throws HttpException, IOException {
-		return executeGetMethodAndReturnResult(url, null, null);
-	}
-	public String executeGetMethodAndReturnResult(String url, String id) throws HttpException, IOException {
-		return executeGetMethodAndReturnResult(url, null, id);
+		return executeGetMethodAndReturnResult(url, null);
 	}
 	/**
 	 * Makes HTTP GET request and writes result to response output stream.
@@ -75,20 +68,8 @@ public class LASProxy {
 	 * @throws IOException
 	 * @throws HttpException
 	 */
-	public void executeGetMethodAndStreamResult(String request, HttpServletResponse response, String openid) throws IOException, HttpException {
-
-		HttpState state = null;
-		
-		if ( openid != null ) {
-			state = new HttpState();
-			URL url = new URL(request);
-			Cookie cookie = new Cookie(url.getHost(), "esg.openid.identity.cookie", openid);
-			state.addCookie(cookie);
-		}
+	public void executeGetMethodAndStreamResult(String request, HttpServletResponse response) throws IOException, HttpException {
 		HttpClient client = new HttpClient();
-		if ( state != null ) {
-			client.setState(state);
-		}
 		HttpClientParams params = client.getParams();
 		params.setParameter(HttpClientParams.ALLOW_CIRCULAR_REDIRECTS,Boolean.TRUE);
 		client.setParams(params);
