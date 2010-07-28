@@ -38,25 +38,32 @@ IF ($error_status"0|*>1") THEN
   EXIT/PROGRAM
 ENDIF
 
-! The second variable may be in a different dataset
+! Here is variable 0 title 
+DEFINE SYMBOL ferret_title_0 = ($ferret_plot_title"($data_var)")
+LET/TITLE="($ferret_title_0)" xvar = XSEQUENCE(($ferret_plot_var))
 
-IF ($ferret_prop_url"0|*>1") THEN 
-   SET DATA "($ferret_prop_url)"
-   DEFINE SYMBOL prop_num = `($ferret_prop_url),RETURN=dsetnum`
-   IF ($error_status"0|*>1") THEN
-     MESSAGE/ERROR "**ERROR dataset for second variable not opened"
-     EXIT/PROGRAM
-   ENDIF
+! Set up upper-left labels with the region info
+GO LAS_pp_set_region_labels
 
-ELSE
-! The second variable is assumed to be in dataset 0 initialized above. Check this
-! and define the second variable with the same region as the first.
-   DEFINE SYMBOL prop_num = `($ferret_prop_var),RETURN=dsetnum`
-   DEFINE SYMBOL prop_var = ($ferret_prop_var)[d=($prop_num),($region_xyzt)]
+! Initialize the second variable.
+! In fact the region and dataset will be the
+! same as for var 0 (for now anyway)
+
+GO LAS_initialize_region 1
+GO LAS_initialize_data 1
+
+IF ($error_status"0|*>1") THEN
+  MESSAGE/ERROR **ERROR ($error_string)
+  EXIT/PROGRAM
 ENDIF
 
-! Here is variable 0 title (not used)
-!DEFINE SYMBOL ferret_title_0 = ($ferret_plot_title"($data_var)")
+! Here is variable 1 title 
+DEFINE SYMBOL ferret_title_1 = ($ferret_plot_title"($data_var)")
+LET/TITLE="($ferret_title_1)" yvar = XSEQUENCE(($ferret_plot_var))
+
+! Set up upper-left labels with the region info
+! Could call this if the region is potentially different.
+! GO LAS_pp_set_region_labels
 
 ! Open the window, apply size, scale options
 GO LAS_open_window
@@ -71,54 +78,125 @@ IF ($ferret_use_graticules"0|0|*>1) THEN
   SET MODE GRATICULE:(DASH,COLOR=black)
 ENDIF
 
-! This is going to be a PLOT/VS plot.
+! This is going to be a PLOT/VS plot. (or a polygon plot??)
 DEFINE SYMBOL qualifiers = ($qualifiers)/VS
 
-! Line color
-
-IF `($ferret_line_color%0|default>0|*>1%)` THEN
-  DEFINE SYMBOL qualifiers = ($qualifiers)/COLOR=($ferret_line_color%0|default>black|red|blue|green|lightblue|purple|*>black%)
-ENDIF
+!  color
+DEFINE SYMBOL ferret_line_color=white
+DEFINE SYMBOL qualifiers = ($qualifiers)/COLOR=($ferret_line_color%black|default>black|black|red|blue|green|lightblue|purple|white|*>blue%)
 
 ! symbol type, default to 20, a triangle. This could be an option.
 
 DEFINE SYMBOL qualifiers = ($qualifiers)/SYM=20
 
-! line thickness, default to thick=2
+! line thickness, default to thick=1
 
 IF `($ferret_line_thickness%0|default>1|*>1%)` THEN
    DEFINE SYMBOL qualifiers = ($qualifiers)($ferret_line_thickness%/THICK=1|default>/THICK=2|1>/THICK=1|2>/THICK=2|3>/THICK=3|*>/THICK=2%)
 ELSE 
-   DEFINE SYMBOL qualifiers = ($qualifiers)/THICK=2
+!!   DEFINE SYMBOL qualifiers = ($qualifiers)/THICK=1
 ENDIF
+
+DEFINE SYMBOL ferret_plot_title = " "
 
 ! Set the plot argument. 
 
-DEFINE SYMBOL plot_arg = ($ferret_plot_var), ($prop_var)
+DEFINE SYMBOL plot_arg = xvar, yvar
 
 ! Expand the horizontal and vertical scale a bit data is not on top of
 ! the plot axes.
 
-STAT ($ferret_plot_var)
+STAT xvar
 PPL %RANGE `($stat_min)`, `($stat_max)`, 10
 DEFINE SYMBOL ferret_indep_axis_scale ($ppl$range_low),($ppl$range_high),($ppl$range_inc)
+DEFINE SYMBOL qualifiers ($qualifiers)/HLIM=($ppl$range_low):($ppl$range_high)
 
-STAT ($prop_var)
+STAT yvar
 PPL %RANGE `($stat_min)`, `($stat_max)`, 10
 DEFINE SYMBOL ferret_dep_axis_scale ($ppl$range_low),($ppl$range_high),($ppl$range_inc)
+DEFINE SYMBOL qualifiers ($qualifiers)/VLIM=($ppl$range_low):($ppl$range_high)
 
-! Draw the plot
+DEFINE SYMBOL qualifiers ($qualifiers)/NOKEY/NOLAB
 
-PLOT($qualifiers)/NOKEY/SET/TITLE="($ferret_title_0)" ($plot_arg)
-   IF `($ferret_indep_axis_scale"0|*>1")` THEN PPL XAXIS ($ferret_indep_axis_scale)
-   IF `($ferret_dep_axis_scale"0|*>1")` THEN PPL YAXIS ($ferret_dep_axis_scale)
-   IF `($labnum_dset%0|*>1%)` THEN GO unlabel ($labnum_dset)
-   IF `($labnum_datitl%0|*>1%)` THEN GO unlabel ($labnum_datitl)
-   IF `($labnum_dods%0|*>1%)` THEN GO unlabel ($labnum_dods)
-PPL PLOT
+! Draw the plot underlay
+
+PLOT($qualifiers)/TITLE="($ferret_title)" ($plot_arg)
+LABEL/NOUSER `($ppl$xlen)/2`, -0.6, 0, 0, 0.14 ($ferret_title_0)
+LABEL/NOUSER -0.8, `($ppl$ylen)/2`, 0, 90, 0.14 ($ferret_title_1)
+
+! Polygons and regression line
+
+LET p = xvar  ! for regression line
+LET q = yvar
+LET do_rsquare = 1
+
+! Set the shapes with the same script as in the script 200symbols.jnl
+
+DEFINE SYMBOL polyshape = ($ferret_poly_shape"triangle|delta|square|diamond|pentagon|hexagon|circle|star|plus|ex|*>triangle") \
+
+DEFINE SYMBOL polycolor = ($ferret_line_color%black|default>black|black|red|blue|green|lightblue|purple|*>blue%)
+DEFINE SYMBOL poly_size = 0.6
+
+DEFINE SYMBOL poly_command POLY/OVER/NOLAB/PAL=black
+DEFINE SYMBOL  line_color = blue  ! regression line
+
+GO polymark ($poly_command) p, q, p, ($polyshape), ($poly_size)
+! GO polymark POLY/OVER/NOLAB/PAL=black p, q, p, triangle, 0.4
+
+
+! Add the linear fit information
+! Gaps in p and qhat mean that just plotting p, qhat
+! may result in a gappy or invisible line. Plot between the
+! first and last good point instead.
+
+GO regressx
+
+IF `(p[x=@NGD] LE 1) OR (qhat[x=@NGD] LE 1)` THEN DEFINE SYMBOL do_rsquare = 0
+IF ($do_rsquare"1|0|*>1) THEN 
+
+! Note that qhat in the regress script is defined as
+!   LET qhat = slope*p + intercep
+! If one of p or q has lots of missing values this can look wierd
+
+   LET qhatmasked = slope*pmasked + intercep
+
+   LET pminmax = MINMAX(pmasked)
+   LOAD pminmax
+   LET p1 = `pminmax[i=1]`
+   LET p2 = `pminmax[i=2]`
+
+   LET qminmax = MINMAX(qhatmasked)
+   LOAD qminmax
+   LET q1 = `qminmax[i=1]`
+   LET q2 = `qminmax[i=2]`
+
+   IF `slope LT 0` THEN 
+     LET qtmp = `q2`
+     LET q2 = `q1`
+     LET q1 = `qtmp`
+   ENDIF
+
+   PLOT/VS/OVER/NOLAB/LINE/THICK=2/color=($line_color) {`p1`,`p2`}, {`q1`,`q2`}
+
+   IF `rsquare` THEN
+      IF `slope LE 0.` THEN 
+         LABEL/NOUSER `($ppl$xlen)-0.2`,`($ppl$ylen)-0.4`,1, 0, 0.12, @P4@SRR^2 = `rsquare,P=3`
+         LABEL/NOUSER `($ppl$xlen)-0.2`,`($ppl$ylen)-0.6`,1, 0, 0.12, @P4@SRSlope = `slope,P=3`
+      ELSE
+         LABEL/NOUSER `($ppl$xorg)+0.2`,`($ppl$ylen)-0.4`,1, 0, 0.12, @P4@SRR^2 = `rsquare,P=3`
+         LABEL/NOUSER `($ppl$xorg)+0.2`,`($ppl$ylen)-0.6`,1, 0, 0.12, @P4@SRSlope = `slope,P=3`
+      ENDIF
+
+   ENDIF
+
+ENDIF
+
+
+
+
 
 GO LAS_url_label 0
-IF `($n_right_labels"0") GT 0` THEN GO labels_above_plot
+IF `($n_right_labels"0") GT 0 OR ($n_left_labels"0") GT 0` THEN GO labels_above_plot
 
 ! Overall header at the very top
 GO LAS_ferret_las_version_header

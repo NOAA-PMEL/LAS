@@ -2,6 +2,8 @@
 ! 
 !
 ! Plot_prop_prop.jnl calls the property-property plot script.
+! See Compare_Plot.jnl., Do we need to do similar things here,
+! reconciling the regions?
 !
 go prop_prop_plot.jnl
 

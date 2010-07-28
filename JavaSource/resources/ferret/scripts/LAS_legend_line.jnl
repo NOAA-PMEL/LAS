@@ -1,0 +1,70 @@
+! LAS_legend_line.jnl
+! Draw lines for a multi-1D plot legend.
+! ACM 7/2010
+!
+! From the Ferret Users List, contrib by E. Vanvyve and B. Kessler.
+! Added a 7th argument which is the line style (symbols, etc.)
+!
+!-----------------------------------------------------------------------------+
+! Ferret v5.50 scripts                   E. Vanvyve 19.06.2003 (LM 28.07.2003)|
+!                                                                             |
+! MAKE A LEGEND LINE AND ITS LABEL                                            |
+!  script from Billy Kessler <billy.kessler@noaa.gov>, adapted since          |
+!  and again (use of PLOT/VS rather than ALINE)  16-dec-2006
+!                                                                             |
+! Syntax : go comm $1 $2 $3 $4 $5 $6                                          |
+!                  $1 = x-value of line starting point (nouser units)         |
+!                  $2 = length of line                 (nouser units)         |
+!                  $3 = y-value of line                (nouser units)         |
+!                  $4 = line type (number 1-19)                               |
+!                  $5 = text character height (negative for z pos down axes)  |
+!                  $6 = label text (in double-quotes if more than 1 word)     |
+!                  $7 = qualifiers for line style, incl the slash. e.g.       | 
+!                          /LINE/SYM=25	 (/color and /thick= are ignored.     |
+!                          They are described by the /LINE argument)          |
+!                                                                             |
+!                     ------<-$2->------  "$6($5)"  [< $3]                    |
+!                     ^                                                       |
+!                    [$1]                                                     |
+!                                                                             |
+!          ! this one handles either z pos up or down axes                    |
+!-----------------------------------------------------------------------------+
+
+!LINE : xy coordinates in nouser units
+
+  !$ppl$yaxis_min : y axis minimum / $ppl$yaxis_max : y axis maximum
+  !$ppl$xaxis_min : x axis minimum / $ppl$xaxis_max : x axis maximum
+  
+  !axis ranges/length
+! these are relative to the first x-value of the data ($xaxis_min)
+! see comments at the text label below
+  DEFINE SYMBOL xr = `($xaxis_max) - ($xaxis_min)`                !  user units
+  DEFINE SYMBOL yr = `($yaxis_max) - ($yaxis_min)`                !  user units
+  DEFINE SYMBOL xl = `($ppl$xlen)`                                !nouser units
+  DEFINE SYMBOL yl = `($ppl$ylen)`                                !nouser units
+
+!   ------------------  "$6($5)"  [< y1]                                       
+!   ^                ^                                                         
+!  [$x1]            [$x2]                                                      
+  
+  DEFINE SYMBOL x1 = `($xaxis_min) + ($1) * ($xr)/($xl)`
+  DEFINE SYMBOL x2 = `($x1)        + ($2) * ($xr)/($xl)`
+  DEFINE SYMBOL y1 = `($yaxis_min) + ($3) * ($yr)/($yl)`
+
+! use plot/vs rather than aline
+  ppl window,off
+  plot/vs/over/nolab/color=($4)($7%/nolab%) {`($x1)`,`($x2)`},{`($y1)`,`($y1)`}
+  ppl window,on
+  
+!TEXT : xy coordinates in nouser units
+! note that these are relative to the beginning of the plot x-axis
+! this is not necessarily the same as ($xaxis_min)!
+  DEFINE SYMBOL tx = `($1) + ($2)+($2)/10`
+  DEFINE SYMBOL ty = `($3)-($5)/2`
+
+  !LABEL/[no]user xpos, ypos, center, angle, size   text
+  LABEL/nouser ($tx) ($ty) -1 0 ($5) ($6)
+
+CANCEL SYMBOL xr yr xl yl x1 x2 y1 tx ty
+SET MODE/last verify
+

@@ -1,0 +1,84 @@
+! LAS_pp_set_region_labels.jnl
+! Set up the region labels that will be in the upper left of the plot.
+! 
+! Called by prop_prop_plot.jnl
+! 26-Jul-2010 ACM
+! Can add to this if/when the two variables may have different regions,
+! e.g. different depths or times.
+
+IF ($region_x_lo"0|*>1") THEN
+   DEFINE SYMBOL n_left_labels = `($n_left_labels"0") + 1`
+   DEFINE AXIS/X=-180:720:.01/UNIT=degrees/MODULO xqencode
+   LET xq = X[GX=xqencode]
+   SET REGION/($region_x)
+   DEFINE SYMBOL zf = `-1*($region_x_lo"0")`
+   IF `($region_x_lo"0") EQ ($region_x_hi"($zf)")` THEN
+      DEFINE SYMBOL upper_left_($n_left_labels) = Longitude: `xq,RETURN=xstart,PREC=4`
+   ELSE
+      DEFINE SYMBOL upper_left_($n_left_labels) = \
+Longitude: `xq,RETURN=xstart,PREC=4` to `xq,RETURN=xend,PREC=4`
+   ENDIF
+   CANCEL VAR xq
+   CANCEL AXIS xqencode
+ENDIF
+IF ($region_y_lo"0|*>1") THEN
+   DEFINE SYMBOL n_left_labels = `($n_left_labels"0") + 1`
+   define axis/y=90s:90n:.01/unit=degrees yqencode
+   LET yq = y[gy=yqencode]
+   SET REGION/($region_y)
+   DEFINE SYMBOL zf = `-1*($region_y_lo"0")`
+   IF `($region_y_lo"0") EQ ($region_y_hi"($zf)")` THEN
+      DEFINE SYMBOL upper_left_($n_left_labels) = Latitude: `yq,RETURN=ystart,PREC=4`
+   ELSE
+      DEFINE SYMBOL upper_left_($n_left_labels) = \
+Latitude: `yq,RETURN=ystart,PREC=4` to `yq,RETURN=yend,PREC=4`
+   ENDIF
+   CANCEL VAR yq
+   CANCEL AXIS yqencode
+ENDIF
+CAN REGION
+IF ($region_z_lo"0|*>1") THEN
+   DEFINE SYMBOL n_left_labels = `($n_left_labels"0") + 1`
+   IF `($ferret_plot_var),RETURN=isdepth` THEN 
+      DEFINE SYMBOL dqual = /DEPTH
+      DEFINE SYMBOL zlabel = Depth
+   ELSE
+      DEFINE SYMBOL zlabel = Altitude
+   ENDIF
+   DEFINE AXIS/z=`($ferret_plot_var),RETURN=zstart`:\
+`($ferret_plot_var),RETURN=zend`:0.1/units="`($ferret_plot_var),RETURN=zunits`"\
+($dqual) zqencode
+   LET zq = z[gz=zqencode]
+   SET REGION/($region_z)
+   DEFINE SYMBOL zf = `-1*($region_z_lo"0")`
+   IF `($region_z_lo"0") EQ ($region_z_hi"($zf)")` THEN
+      DEFINE SYMBOL upper_left_($n_left_labels) = ($zlabel): `zq,RETURN=zstart,PREC=4` \
+`($ferret_plot_var),RETURN=zunits`
+   ELSE
+      DEFINE SYMBOL upper_left_($n_left_labels) = \
+($zlabel): `zq,RETURN=zstart,PREC=4` to `zq,RETURN=zend,PREC=4` \
+`($ferret_plot_var),RETURN=zunits`
+   ENDIF
+   CANCEL VAR zq
+   CANCEL AXIS zqencode
+ENDIF
+CAN REGION
+IF ($region_t_lo"0|*>1") THEN
+   DEFINE SYMBOL n_left_labels = `($n_left_labels"0") + 1`
+   IF `STRINDEX ("($region_t_lo)", ":") GT 0` THEN 
+      DEFINE SYMBOL tprec = minutes
+   ELSE
+      DEFINE SYMBOL tprec = days
+   ENDIF
+   LET tt = t[gt=($data_0_var)]
+   LET tlo_coord = tt[t=($region_t_lo)]
+   LET thi_coord = tt[t=($region_t_hi)]
+   IF `STRCMP("($region_t_lo"0")", "($region_t_hi%-999%)") EQ 0` THEN
+      DEFINE SYMBOL upper_left_($n_left_labels) = `TAX_DATESTRING(tlo_coord, tt, "($tprec)")`
+   ELSE
+      DEFINE SYMBOL upper_left_($n_left_labels) = `TAX_DATESTRING(tlo_coord, tt, "($tprec)")` to \
+`TAX_DATESTRING(thi_coord, tt, "($tprec)")`
+   ENDIF
+ENDIF
+
+! End of LAS_pp_set_region_labels.jnl -----------------------------------------------------
