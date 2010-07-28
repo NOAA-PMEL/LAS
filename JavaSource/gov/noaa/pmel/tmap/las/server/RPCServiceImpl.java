@@ -36,6 +36,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.Cookie;
 
 import org.apache.commons.httpclient.HttpException;
 import org.jdom.Element;
@@ -268,6 +271,57 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
 		} else {
 			return null;
 		}
+	}
+	public OperationSerializable[] getOperations(String view, String[] xpath ) throws RPCException {
+		// For now require them to all be from the same data set.
+		Map<String, OperationSerializable> operations = new HashMap<String, OperationSerializable>();
+		for (int i = 0; i < xpath.length; i++) {
+			String dsid = LASConfig.getDSIDfromXPath(xpath[i]);
+			String varid = LASConfig.getVarIDfromXPath(xpath[i]);
+			OperationSerializable[] ops = getOperations(view, dsid, varid);
+			for (int j = 0; j < ops.length; j++) {
+				operations.put(ops[j].getID(), ops[j]);
+			}
+		}
+		int var_count = xpath.length;
+		int minvars = -1;
+		int maxvars = -1;
+		List<OperationSerializable> multi_variable_operations = new ArrayList<OperationSerializable>();
+		for (int o = 0; o < operations.size(); o++) {
+			OperationSerializable op = operations.get(o);
+			String min = op.getAttributes().get("minvars");
+			String max = op.getAttributes().get("maxvars");
+			if ( min != null && !min.equals("") ) {
+				try {
+					minvars = Integer.valueOf(min).intValue();
+				} catch (Exception e) {
+					throw new RPCException("Cannot parse the minvars attribute value.");
+				}
+			}
+			if ( max != null && !max.equals("") ) {
+				try {
+					maxvars = Integer.valueOf(max).intValue();
+				} catch (Exception e) {
+					throw new RPCException("Cannot parse the maxvars attribute value.");
+				}
+			}
+			if ( minvars > 0 ) {
+				if ( maxvars > 0 ) {
+					if ( var_count >= minvars && var_count <= maxvars ) {
+						multi_variable_operations.add(op);
+						minvars = -1;
+						maxvars = -1;
+					}
+				} else {
+					if ( var_count >= minvars ) {
+						multi_variable_operations.add(op);
+						minvars = -1;
+						maxvars = -1;
+					}
+				}
+			}
+		}
+		return (OperationSerializable[]) multi_variable_operations.toArray();
 	}
 	public OperationSerializable[] getOperations(String view, String dsID, String varID) throws RPCException {
 		return getOperationsSerialziable(view, dsID, varID);

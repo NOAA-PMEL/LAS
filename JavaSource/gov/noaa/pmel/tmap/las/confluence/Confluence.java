@@ -176,7 +176,7 @@ public class Confluence extends LASAction {
 								// add it on.
 								las_url = las_url + "?" + request.getQueryString();
 							}
-							lasProxy.executeGetMethodAndStreamResult(las_url, response, openid);
+							lasProxy.executeGetMethodAndStreamResult(las_url, response);
 						}
 					} catch (HttpException e) {
 						log.error("Unable to fetch categories.", e);
@@ -203,7 +203,7 @@ public class Confluence extends LASAction {
 
 						Tributary trib = lasConfig.getTributary(server_key);
 						String las_url = trib.getURL() + Constants.GET_OPTIONS + "?opid=" + opid;
-						lasProxy.executeGetMethodAndStreamResult(las_url, response, openid);
+						lasProxy.executeGetMethodAndStreamResult(las_url, response);
 					} else {
 						// Send it to the local server which will work most of the time..
 						return mapping.findForward(Constants.GET_OPTIONS_KEY);
@@ -251,7 +251,7 @@ public class Confluence extends LASAction {
 							} else {
 								String las_url = tribs.get(key).getURL();
 								las_url = las_url + Constants.PRODUCT_SERVER + "?" + request.getQueryString();	
-								lasProxy.executeGetMethodAndStreamResult(las_url, response, openid);
+								lasProxy.executeGetMethodAndStreamResult(las_url, response);
 							}
 						} else {
 							// Add the special parameter to create product locally using remote analysis and send to local product server.
@@ -276,7 +276,7 @@ public class Confluence extends LASAction {
 						Tributary trib = lasConfig.getTributary(server_key);
 						String las_url = trib.getURL();
 						las_url = las_url + Constants.PRODUCT_SERVER + "?" + request.getQueryString();	
-						lasProxy.executeGetMethodAndStreamResult(las_url, response, openid);
+						lasProxy.executeGetMethodAndStreamResult(las_url, response);
 					} catch (HttpException e) {
 						logerror(request, "Unable to fetch product.", e);
 					} catch (IOException e) {
@@ -346,7 +346,7 @@ public class Confluence extends LASAction {
 						}
 					}
 					if ( !local ) {
-					    lasProxy.executeGetMethodAndStreamResult(las_url, response, openid);
+					    lasProxy.executeGetMethodAndStreamResult(las_url, response);
 					}					
 				} catch (HttpException e) {
 					logerror(request, "Unable to do local request.", e);
