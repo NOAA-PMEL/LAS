@@ -144,7 +144,7 @@ ENDIF
 
 IF `($data_count"0") GT 1` THEN
 
-   GO LAS_draw_multi_line_plot
+   GO LAS_draw_multi_line_z_plot
    GO LAS_url_label `($data_count)-1`
 
 ELSE

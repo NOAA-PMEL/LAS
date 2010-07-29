@@ -1,0 +1,147 @@
+! LAS_draw_multi_line_z_plot.jnl
+!  Do a multi-line 1-D plot in Z. 
+! 7/2010    ACM updates for V7.2 multi-variable plots
+
+! By default dont use graticules. They can be a mess.
+! The user can turn them on if desired.
+
+
+
+REPEAT/range=1:`($data_count)-1`/NAME=m (  \
+  DEFINE SYMBOL m = `m`; \
+  GO LAS_initialize_region ($m) ;  \
+  GO LAS_initialize_data  ($m) ; \
+  DEFINE SYMBOL plot_arg = ($plot_arg),($ferret_plot_var); \
+  DEFINE SYMBOL ferret_plot_var_($m) = ($ferret_plot_var); \ 
+  DEFINE SYMBOL ferret_title_($m) = ($ferret_plot_title); \ 
+  LET tlen = STRLEN("($ferret_title_($m))"); \
+  LET title_len = `MAX(tlen, title_len)`; \
+)
+
+! Set the title, and the labels for the upper left listing the locations
+! and time in directions normal to the plot.
+
+!   GO LAS_set_diff_labels ($fview)  ! Do this if the regions are different.
+!   DEFINE SYMBOL plot_title = ($ferret_over_title)
+GO LAS_pp_set_region_labels       ! This script sets ONE set of region labels.
+
+! If there are two variables with different units, scale each independently, putting
+! one dependent axis on the left an the other on the right.
+
+DEFINE SYMBOL units_0 = `UPCASE("($data_0_units)")`
+DEFINE SYMBOL units_1 = `UPCASE("($data_1_units)")`
+IF `(($data_count"0") EQ 2) AND (STRCMP("($units_0)", "($units_1)") NE 0)` THEN 
+
+   CANCEL MODE GRATICULE
+
+! Plot second variable in red, with its axis on the right.
+
+   DEFINE VIEWPORT/x=0:1/y=0:1 right_axis_view
+   SET VIEW right_axis_view
+   PLOT($qualifiers)/AXES=1,0,0,0/NOKEY/TITLE=" "/COLOR=red/SET ($ferret_plot_var_1)
+      GO remove_logo
+      IF `($labnum_x%0|*>1%)` THEN GO unlabel ($labnum_x)
+      IF `($labnum_y%0|*>1%)` THEN GO unlabel ($labnum_y)
+      IF `($labnum_z%0|*>1%)` THEN GO unlabel ($labnum_z)
+      IF `($labnum_t%0|*>1%)` THEN GO unlabel ($labnum_t)
+      IF `($labnum_dset%0|*>1%)` THEN GO unlabel ($labnum_dset)
+      IF `($labnum_datitl%0|*>1%)` THEN GO unlabel ($labnum_datitl)
+      IF `($labnum_dods%0|*>1%)` THEN GO unlabel ($labnum_dods)
+      IF `($labnum_calend%0|*>1%)` THEN GO unlabel ($labnum_calend)
+      PPL ylab
+   PPL PLOT
+ 
+   DEFINE SYMBOL extra_y_space = 0.5  ! Start the labels higher up, to give space for 
+                                      ! a formatted axis on the top
+
+! Set up for plotting 1st variable, in black, with its axis on the left.
+
+   DEFINE SYMBOL qualifiers = ($qualifiers)/AXES=0,1,1,1
+   DEFINE SYMBOL data_count = 1
+   DEFINE SYMBOL plot_arg = ($ferret_plot_var_0)
+   DEFINE SYMBOL two_axes = 1
+   SET VIEW FULL
+ENDIF
+
+
+! If line style is just symbols, we need to do lines separately to get different colors.
+IF `($ferret_line_or_sym%0|sym>1|*>0%)` THEN  
+   PLOT/NOKEY/SET/COLOR=WHITE/NOLAB ($plot_arg)
+      IF `($labnum_x%0|*>1%)` THEN GO unlabel ($labnum_x)
+      IF `($labnum_y%0|*>1%)` THEN GO unlabel ($labnum_y)
+      IF `($labnum_z%0|*>1%)` THEN GO unlabel ($labnum_z)
+      IF `($labnum_t%0|*>1%)` THEN GO unlabel ($labnum_t)
+      IF `($labnum_dset%0|*>1%)` THEN GO unlabel ($labnum_dset)
+      IF `($labnum_datitl%0|*>1%)` THEN GO unlabel ($labnum_datitl)
+      IF `($labnum_dods%0|*>1%)` THEN GO unlabel ($labnum_dods)
+      IF `($labnum_calend%0|*>1%)` THEN GO unlabel ($labnum_calend)
+      IF `($title_size%0|*>1%)` THEN PPL LABSET ($title_size)
+      IF `($ferret_dep_axis_scale"0|*>1")` THEN PPL XAXIS ($ferret_dep_axis_scale)
+      PPL ylab
+      IF `($data_count"0") GT 2` THEN PPL xlab
+   PPL PLOT
+   PLOT($qualifiers)/NOKEY/NOLAB/OVER/COLOR=black ($ferret_plot_var_0)
+   IF `($data_count"0") GT 1` THEN PLOT($qualifiers)/NOKEY/OVER/COLOR=red ($ferret_plot_var_1)
+   IF `($data_count"0") GT 2` THEN PLOT($qualifiers)/NOKEY/OVER/COLOR=green ($ferret_plot_var_2)
+   IF `($data_count"0") GT 3` THEN PLOT($qualifiers)/NOKEY/OVER/COLOR=blue ($ferret_plot_var_3)
+   IF `($data_count"0") GT 4` THEN PLOT($qualifiers)/NOKEY/OVER/COLOR=lightblue ($ferret_plot_var_4)
+   IF `($data_count"0") GT 5` THEN PLOT($qualifiers)/NOKEY/OVER/COLOR=purple ($ferret_plot_var_5)
+ELSE
+
+   PLOT($qualifiers)/NOKEY/TITLE=" "/SET ($plot_arg)
+      IF `($labnum_x%0|*>1%)` THEN GO unlabel ($labnum_x)
+      IF `($labnum_y%0|*>1%)` THEN GO unlabel ($labnum_y)
+      IF `($labnum_z%0|*>1%)` THEN GO unlabel ($labnum_z)
+      IF `($labnum_t%0|*>1%)` THEN GO unlabel ($labnum_t)
+      IF `($labnum_dset%0|*>1%)` THEN GO unlabel ($labnum_dset)
+      IF `($labnum_datitl%0|*>1%)` THEN GO unlabel ($labnum_datitl)
+      IF `($labnum_dods%0|*>1%)` THEN GO unlabel ($labnum_dods)
+      IF `($labnum_calend%0|*>1%)` THEN GO unlabel ($labnum_calend)
+      IF `($title_size%0|*>1%)` THEN PPL LABSET ($title_size)
+      IF `($ferret_dep_axis_scale"0|*>1")` THEN PPL XAXIS ($ferret_dep_axis_scale)
+      PPL ylab
+      IF `($data_count"0") GT 2` THEN PPL xlab
+   PPL PLOT
+ENDIF
+
+IF ($labnum_calend%0|*>1%) THEN
+   DEFINE SYMBOL n_left_labels = `($n_left_labels"0") + 1`
+   DEFINE SYMBOL upper_left_($n_left_labels) = ($lab($labnum_calend))
+ENDIF
+
+DEFINE SYMBOL ax_vert_save = ($ax_vert"D")
+DEFINE SYMBOL ax_horiz_save = ($ax_horiz"D")
+
+! Draw the legend.
+
+! Make an invisible xy plot. The legline script doesnt work well with z and t plots.
+IF `($two_axes"0") EQ 1` THEN DEFINE SYMBOL data_count = 2
+
+DEFINE VIEWPORT/x=0:1/y=0:1 overview
+SET VIEW overview
+PLOT/NOLAB/NOAX/I=1:2/VLIM=100:102 i
+
+! The start (x,y) position for each line drawn on the key
+let xkey = {0, 0, 0, `0.6*($ppl$xlen)`, `0.6*($ppl$xlen)`, `0.6*($ppl$xlen)`}
+let ykey = {-0.6, -0.8, -1., -0.6, -0.8, -1.}
+
+LET titlesiz = 0.11
+IF `title_len GT 40 AND ($data_count"0") GT 3` THEN LET titlesiz = 0.10
+REPEAT/range=1:`($data_count)`/NAME=m (; \
+   DEFINE SYMBOL m = `m`;  \
+   DEFINE SYMBOL lnum = `m-1` ; \
+   LET xpos = xkey[i=($m)]; LET ypos = ykey[i=($m)]; \
+   GO LAS_legend_line \
+   `xpos` 0.5 `ypos` `m + 6*($thicknum)` `titlesiz` "($ferret_title_($lnum))" ($legend_qual);\   
+)
+
+! The results script needs the actual axis directions. Restore them.
+
+DEFINE SYMBOL ax_vert = ($ax_vert_save)
+IF ($ax_vert"|D>1|*>0") THEN CANCEL SYMBOL ax_vert
+DEFINE SYMBOL ax_horiz = ($ax_horiz_save)
+IF ($ax_horiz"|D>1|*>0") THEN CANCEL SYMBOL ax_horiz
+
+
+! --------------- End of LAS_draw_multi_line_plot  ---------------------------
+
