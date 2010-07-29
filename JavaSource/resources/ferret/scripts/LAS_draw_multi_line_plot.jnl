@@ -51,6 +51,7 @@ IF `(($data_count"0") EQ 2) AND (STRCMP("($units_0)", "($units_1)") NE 0)` THEN
       IF `($labnum_datitl%0|*>1%)` THEN GO unlabel ($labnum_datitl)
       IF `($labnum_dods%0|*>1%)` THEN GO unlabel ($labnum_dods)
       IF `($labnum_calend%0|*>1%)` THEN GO unlabel ($labnum_calend)
+      PPL xlab
    PPL PLOT
 
 ! Set up for plotting 1st variable, in black, with its axis on the left.
@@ -75,7 +76,6 @@ IF `($ferret_line_or_sym%0|sym>1|*>0%)` THEN
       IF `($labnum_dods%0|*>1%)` THEN GO unlabel ($labnum_dods)
       IF `($labnum_calend%0|*>1%)` THEN GO unlabel ($labnum_calend)
       IF `($title_size%0|*>1%)` THEN PPL LABSET ($title_size)
-      IF `($ferret_dep_axis_scale"0|*>1")` THEN PPL XAXIS ($ferret_dep_axis_scale)
       PPL xlab
       IF `($data_count"0") GT 2` THEN PPL ylab
    PPL PLOT
@@ -97,7 +97,7 @@ ELSE
       IF `($labnum_dods%0|*>1%)` THEN GO unlabel ($labnum_dods)
       IF `($labnum_calend%0|*>1%)` THEN GO unlabel ($labnum_calend)
       IF `($title_size%0|*>1%)` THEN PPL LABSET ($title_size)
-      IF `($ferret_dep_axis_scale"0|*>1")` THEN PPL XAXIS ($ferret_dep_axis_scale)
+      IF `($ferret_dep_axis_scale"0|*>1")` THEN PPL YAXIS ($ferret_dep_axis_scale)
       PPL xlab
       IF `($data_count"0") GT 2` THEN PPL ylab
    PPL PLOT
