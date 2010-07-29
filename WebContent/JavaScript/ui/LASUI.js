@@ -220,17 +220,16 @@ LASUI.prototype.setInitialVariable = function(strJson) {
 	var info = this.info_icon.cloneNode(true);
 	info.onclick = this.getMetadata.LASBind(this);
 	
-	var varlist = document.createElement("SELECT");
-	varlist.id="variables";
-	if(document.getElementById(this.anchors.breadcrumb)) {
-		while (document.getElementById(this.anchors.breadcrumb).firstChild)
-			document.getElementById(this.anchors.breadcrumb).removeChild(document.getElementById(this.anchors.breadcrumb).firstChild);
-		document.getElementById(this.anchors.breadcrumb).appendChild(document.createTextNode('\u00a0'));
-		document.getElementById(this.anchors.breadcrumb).appendChild(info);
-		document.getElementById(this.anchors.breadcrumb).appendChild(document.createTextNode('\u00a0'));
-		document.getElementById(this.anchors.breadcrumb).appendChild(document.createTextNode(category.getDatasetName()));
-		document.getElementById(this.anchors.breadcrumb).appendChild(document.createTextNode('\u00a0'));
-		document.getElementById(this.anchors.breadcrumb).appendChild(varlist);
+
+	if(document.getElementsByName(this.anchors.breadcrumb).item(0)) {
+		while (document.getElementsByName(this.anchors.breadcrumb).item(0).firstChild)
+			document.getElementsByName(this.anchors.breadcrumb).item(0).removeChild(document.getElementsByName(this.anchors.breadcrumb).item(0).firstChild);
+		document.getElementsByName(this.anchors.breadcrumb).item(0).appendChild(document.createTextNode('\u00a0'));
+		document.getElementsByName(this.anchors.breadcrumb).item(0).appendChild(info);
+		document.getElementsByName(this.anchors.breadcrumb).item(0).appendChild(document.createTextNode('\u00a0Dataset:&nbsp;'));
+		document.getElementsByName(this.anchors.breadcrumb).item(0).appendChild(document.createTextNode(category.getDatasetName()));
+		document.getElementsByName(this.anchors.breadcrumb).item(0).appendChild(document.createTextNode('\u00a0Variable:&nbsp;'));
+		document.getElementsByName(this.anchors.breadcrumb).item(0).appendChild(varlist1);
 	}
 	document.getElementById(this.anchors.variables).onchange = function (evt) {this.options[this.selectedIndex].onselect({"target" : {"selected" :true}})}
 	for(var i=0;i<category.getCategorySize();i++) {
@@ -240,9 +239,11 @@ LASUI.prototype.setInitialVariable = function(strJson) {
 		var selected = false;
 		var OPTIONNode = new Option(category.getChildName(i),category.getChildID(i),false,selected);
 		OPTIONNode.onselect = this.setVariable.LASBind(this, {category : category}, i, true);
-		OPTIONNode.id = "OPTION_" + category.getChildID(i);
-		document.getElementById(this.anchors.variables).options[document.getElementById(this.anchors.variables).length] = OPTIONNode;
+		OPTIONNode.id = category.getChildID(i);
+		OPTIONNode.value= "/lasdata/datasets/dataset[@ID='"+category.getDatasetID()+"'/lasdata/datasets/dataset[@ID='"+category.getChildID(i)+"']";
+		document.getElementById('variables').options[document.getElementById('varaibles').length] = OPTIONNode;
 	}
+	
 
 	var varObj = this.state.datasets[this.state.dataset].getChildByID(this.state.variable);
 	if(varObj) {
@@ -411,18 +412,26 @@ LASUI.prototype.createCategoryTreeNode = function (node, i, id) {
 	if(this.refs.categories[node.category.getChild(i).ID]||node.category.getChild(i).ID==this.state.dataset)
 		this.selectCategory(null,node,i);
 }
-LASUI.prototype.createVariableOptionNode = function (node, i) {
+LASUI.prototype.createVariableList = function () {
+	
+	var select = document.createElement("SELECT"); 
+	select.name='variables';
+	for(var i=0;i<this.state.datasets[this.state.dataset].getCategorySize();i++) {
+		select.onchange = function (evt) {this.options[this.selectedIndex].onselect({"target" : {"selected" :true}})}
+		var node = this.state.datasets[this.state.dataset];
+		if(this.state.variable==node.getChildID(i))
+			var selected = true;
+		else
+			var selected = false;
 
-	document.getElementById(this.anchors.variables).onchange = function (evt) {this.options[this.selectedIndex].onselect({"target" : {"selected" :true}})}
-	if(this.state.variable==node.category.getChildID(i))
-		var selected = true;
-	else
-		var selected = false;
-
-	var OPTIONNode = new Option(node.category.getChildName(i),node.category.getChildID(i),false,selected);
-	OPTIONNode.onselect = this.setVariable.LASBind(this, node, i, true);
-	OPTIONNode.id = "OPTION_" + node.category.getChildID(i);
-	document.getElementById(this.anchors.variables).options[document.getElementById(this.anchors.variables).length] = OPTIONNode;
+		var OPTIONNode = new Option(node.getChildName(i),node.getChildID(i),false,selected);
+		OPTIONNode.onselect = this.setVariable.LASBind(this, node, i, true);
+		OPTIONNode.id = node.getChildID(i);
+		OPTIONNode.value ="/lasdata/datasets/dataset[@ID='"+node.getDatasetID()+"'/lasdata/datasets/dataset[@ID='"+node.getChildID(i)+"']";
+		select.options[select.length] = OPTIONNode;
+	}
+	document.getElementsByName(this.anchors.breadcrumb).item(0).appendChild(select);
+	
 
 }
 /**
@@ -513,22 +522,27 @@ LASUI.prototype.onSetVariable = function() {
 		var info = this.info_icon.cloneNode(true);
 		info.onclick = this.getMetadata.LASBind(this);
 
-		var varlist = document.createElement("SELECT");
-		varlist.id="variables";
+		var addvar = document.createElement("A");
+		addvar.href="javascript:";
+		addvar.onclick = this.addVariable.LASBind(this); 
+	 	addvar.appendChild(document.createTextNode('add variable'));
+
 		var cats = document.createElement("TEXT");
 		cats.innerHTML= categories;
-		if(document.getElementById(this.anchors.breadcrumb)) {
-			while (document.getElementById(this.anchors.breadcrumb).firstChild)
-			  document.getElementById(this.anchors.breadcrumb).removeChild(document.getElementById(this.anchors.breadcrumb).firstChild);
-			document.getElementById(this.anchors.breadcrumb).appendChild(document.createTextNode('\u00a0'));
-			document.getElementById(this.anchors.breadcrumb).appendChild(info);
-			document.getElementById(this.anchors.breadcrumb).appendChild(document.createTextNode('\u00a0'));
-			document.getElementById(this.anchors.breadcrumb).appendChild(cats);
-			document.getElementById(this.anchors.breadcrumb).appendChild(document.createTextNode('\u00a0'));
-			document.getElementById(this.anchors.breadcrumb).appendChild(varlist);
-		}
-		for(var i=0;i<this.state.datasets[this.state.dataset].getCategorySize();i++)
-			this.createVariableOptionNode({"category" : this.state.datasets[this.state.dataset]},i);
+		if(document.getElementsByName(this.anchors.breadcrumb).item(0)) {
+			while (document.getElementsByName(this.anchors.breadcrumb).item(0).firstChild)
+			  document.getElementsByName(this.anchors.breadcrumb).item(0).removeChild(document.getElementsByName(this.anchors.breadcrumb).item(0).firstChild);
+			document.getElementsByName(this.anchors.breadcrumb).item(0).appendChild(document.createTextNode('\u00a0'));
+			document.getElementsByName(this.anchors.breadcrumb).item(0).appendChild(info);
+			document.getElementsByName(this.anchors.breadcrumb).item(0).appendChild(document.createTextNode('\u00a0'));
+			document.getElementsByName(this.anchors.breadcrumb).item(0).appendChild(cats);
+			document.getElementsByName(this.anchors.breadcrumb).item(0).appendChild(document.createTextNode('\u00a0'));
+		}	
+		this.createVariableList({"category" : this.state.datasets[this.state.dataset]},i);
+				
+		document.getElementsByName(this.anchors.breadcrumb).item(0).appendChild(document.createTextNode('\u00a0'));
+                document.getElementsByName(this.anchors.breadcrumb).item(0).appendChild(addvar);
+
 
 		var varObj = this.state.datasets[this.state.dataset].getChildByID(this.state.variable);
  		if(varObj) {
@@ -548,6 +562,21 @@ LASUI.prototype.onSetVariable = function() {
 		 document.getElementById("ol_map_widget").onmouseover = null;
 		if(this.state.dataset==this.state.lastDataset)
 			this.refresh();
+}
+LASUI.prototype.addVariable = function(evt) {
+	var args = arguments;
+	var elm = evt.target.parentNode;
+        var clone = elm.cloneNode(true);
+        var newvar = elm.cloneNode(true);
+	
+	clone.lastChild.innerHTML=("remove variable");
+	clone.lastChild.onclick = this.removeVariable.LASBind(this);
+	elm.parentNode.insertBefore(clone,elm);
+		
+}
+LASUI.prototype.removeVariable = function(evt) {
+	evt.target.parentNode.parentNode.removeChild(evt.target.parentNode);
+	
 }
 /**
  * Event handler for category selection, bind to category DOM object events.
@@ -622,8 +651,8 @@ LASUI.prototype.setVariable = function (evt) {
         this.state.lastDataset = this.state.dataset;
 	this.state.dataset = datasetID;
 	this.state.variable = variableID;
-//        if(this.state.dataset!=this.state.lastDataset)
-                this.getGrid(datasetID,variableID);
+        
+	this.getGrid(datasetID,variableID);
 	
 	this.getDataConstraints(datasetID,variableID);
 	this.newVariable=true;
@@ -631,6 +660,39 @@ LASUI.prototype.setVariable = function (evt) {
 	//	this.onSetVariable();
 
 	
+}
+/**
+ *Event handler for variable selection, bind to variable DOM object events.
+ *@param {object} evt The event object
+ *@param {object} arguments Arguments added using function.prototype.LASBind<br>
+ *                                              this -- context setVariable is being run in<br>
+ *                                      dataset -- a LASGetCategoriesReponse dataset object<br>
+ *                                      i -- index the variable within the category or dataset
+ */
+
+LASUI.prototype.setComparisonVariable = function (evt) {
+        var args = arguments
+        var dataset = args[1];
+        var i = args[2];
+
+//        var datasetID = dataset.category.getDatasetID(i);
+        var variableID = dataset.category.getChildID(i);
+        var variable = dataset.category.getChild(i);
+
+        //start an array of selected variables for this datasetthis.state.datasets[this.state.dataset] if we havent already
+//        this.state.datasets[datasetID] = dataset.category;
+//        this.state.lastDataset = this.state.dataset;
+//        this.state.dataset = datasetID;
+        this.state.comparison_variable = variableID;
+
+//        this.getGrid(datasetID,variableID);
+
+//        this.getDataConstraints(datasetID,variableID);
+//        this.newVariable=true;
+        if(this.onSetVariable)
+              this.onSetVariable();
+
+
 }
 /**
  * Method to set the active dataset and call getGrid if appropriate
@@ -1559,8 +1621,10 @@ LASUI.prototype.makeRequest = function (evt, type) {
 				 this.request.addVariable(this.state.dataset,this.state.datasets[this.state.dataset].getChildByID(this.state.variable).variable[v].IDREF)	
 			this.request.setProperty("ferret","vector_name",this.state.datasets[this.state.dataset].getChildByID(this.state.variable).name);
 		} else
-		this.request.setVariable(this.state.dataset, this.state.variable);
-
+		for(var v=0;v<document.getElementsByName(this.anchors.breadcrumb).length;v++) {
+			this.request.addVariable(this.state.dataset,document.getElementsByName(this.anchors.breadcrumb).item(v).children.namedItem('variables').options[document.getElementsByName(this.anchors.breadcrumb).item(v).children.namedItem('variables').selectedIndex].id);
+		///this.request.setVariable(this.state.dataset, this.state.variable);
+		}
 
 
 		this.request.addRegion();
