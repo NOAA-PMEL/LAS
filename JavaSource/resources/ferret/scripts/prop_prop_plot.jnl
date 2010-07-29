@@ -58,7 +58,6 @@ LET/TITLE="($ferret_title_1)" yvar = XSEQUENCE(($ferret_plot_var))
 
 LET xsize = `xvar,RETURN=isize`
 LET ysize = `yvar,RETURN=isize`
-let ysize = 0
 IF `xsize NE ysize` THEN 
   MESSAGE/ERROR **ERROR The variables must have the same dimensions: ($data_0_var), ($data_1_var)
   EXIT/PROGRAM
@@ -122,7 +121,7 @@ LABEL/NOUSER -0.8, `($ppl$ylen)/2`, 0, 90, 0.14 ($ferret_title_1)
 ! Polygon plot
 
 DEFINE SYMBOL poly_command POLY/OVER/NOLAB/PAL=($polycolor)
-GO polymark ($poly_command) p, q, p, ($polyshape), ($polysize)
+GO polymark ($poly_command) xvar, yvar, xvar, ($polyshape), ($polysize)
 
 ! Add the linear fit information
 ! Gaps in p and qhat mean that just plotting p, qhat
