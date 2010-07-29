@@ -62,12 +62,30 @@ ENDIF
 DEFINE SYMBOL ferret_title_1 = ($ferret_plot_title"($data_var)")
 LET/TITLE="($ferret_title_1)" yvar = XSEQUENCE(($ferret_plot_var))
 
+! The variables must be the same size. Probably guaranteed by the
+! data selection process, but check and set up a nice message.
+
+LET xsize = `xvar,RETURN=isize`
+LET ysize = `yvar,RETURN=isize`
+let ysize = 0
+IF `xsize NE ysize` THEN 
+  MESSAGE/ERROR **ERROR The variables must have the same dimensions: ($data_0_var), ($data_1_var)
+  EXIT/PROGRAM
+ENDIF
+
 ! Set up upper-left labels with the region info
 ! Could call this if the region is potentially different.
 ! GO LAS_pp_set_region_labels
 
 ! Open the window, apply size, scale options
+
+! dont want to set the aspect ratio using xy region.
+DEFINE SYMBOL viewsave = ($ferret_view)
+DEFINE SYMBOL ferret_view = aa  
+
 GO LAS_open_window
+
+DEFINE SYMBOL ferret_view = ($viewsave)
 
 ! TODO:  Should the creation of the ($qualifiers) symbol for standard
 ! TODO:  1D plots be separated out in a separate script called:
@@ -79,30 +97,28 @@ IF ($ferret_use_graticules"0|0|*>1) THEN
   SET MODE GRATICULE:(DASH,COLOR=black)
 ENDIF
 
-! This is going to be a PLOT/VS plot. (or a polygon plot??)
-DEFINE SYMBOL qualifiers = ($qualifiers)/VS
+! This is going to be a polygon plot
 
-!  color
-DEFINE SYMBOL ferret_line_color=white
-DEFINE SYMBOL qualifiers = ($qualifiers)/COLOR=($ferret_line_color%black|default>black|black|red|blue|green|lightblue|purple|white|*>blue%)
+DEFINE SYMBOL polycolor = ($ferret_poly_color%black|default>black|black|red|blue|green|lightblue|purple|*>blue%)
 
-! symbol type, default to 20, a triangle. This could be an option.
+DEFINE SYMBOL polysize = 0.6
 
-DEFINE SYMBOL qualifiers = ($qualifiers)/SYM=20
+! Could  have an option for the shape
 
-! line thickness, default to thick=1
+DEFINE SYMBOL polyshape = ($ferret_poly_shape%triangle|default>triangle|triangle|delta\
+|square|diamond|pentagon|hexagon|circle|star|plus|ex|*>triangle%)
 
-IF `($ferret_line_thickness%0|default>1|*>1%)` THEN
-   DEFINE SYMBOL qualifiers = ($qualifiers)($ferret_line_thickness%/THICK=1|default>/THICK=2|1>/THICK=1|2>/THICK=2|3>/THICK=3|*>/THICK=2%)
-ELSE 
-!!   DEFINE SYMBOL qualifiers = ($qualifiers)/THICK=1
-ENDIF
+! Could have an option for the size
+
+DEFINE SYMBOL polysize = ($ferret_poly_size%0.6|default>*0.6|*%)
 
 DEFINE SYMBOL ferret_plot_title = " "
 
 ! Set the plot argument. 
-
 DEFINE SYMBOL plot_arg = xvar, yvar
+
+! The underlying plot is a PLOT/VS
+DEFINE SYMBOL qualifiers = ($qualifiers)/VS/COLOR=WHITE
 
 ! Expand the horizontal and vertical scale a bit data is not on top of
 ! the plot axes.
@@ -131,24 +147,18 @@ LET p = xvar  ! for regression line
 LET q = yvar
 LET do_rsquare = 1
 
-! Set the shapes with the same script as in the script 200symbols.jnl
 
-DEFINE SYMBOL polyshape = ($ferret_poly_shape"triangle|delta|square|diamond|pentagon|hexagon|circle|star|plus|ex|*>triangle") \
+DEFINE SYMBOL poly_command POLY/OVER/NOLAB/PAL=($polycolor)
 
-DEFINE SYMBOL polycolor = ($ferret_line_color%black|default>black|black|red|blue|green|lightblue|purple|*>blue%)
-DEFINE SYMBOL poly_size = 0.6
-
-DEFINE SYMBOL poly_command POLY/OVER/NOLAB/PAL=black
-DEFINE SYMBOL  line_color = blue  ! regression line
-
-GO polymark ($poly_command) p, q, p, ($polyshape), ($poly_size)
-! GO polymark POLY/OVER/NOLAB/PAL=black p, q, p, triangle, 0.4
-
+GO polymark ($poly_command) p, q, p, ($polyshape), ($polysize)
 
 ! Add the linear fit information
 ! Gaps in p and qhat mean that just plotting p, qhat
 ! may result in a gappy or invisible line. Plot between the
 ! first and last good point instead.
+
+DEFINE SYMBOL  line_color = blue  ! regression line
+IF ($polycolor%0|blue>1|*>0%) THEN DEFINE SYMBOL  line_color = red
 
 GO regressx
 
@@ -191,9 +201,6 @@ IF ($do_rsquare"1|0|*>1) THEN
    ENDIF
 
 ENDIF
-
-
-
 
 
 GO LAS_url_label 0
