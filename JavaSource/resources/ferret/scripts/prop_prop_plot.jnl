@@ -7,23 +7,14 @@
 
 ! prop_prop_plot.jnl creates a property-property plot, using the 
 ! data variable in symbol data_0_var and the second variable from
-! ferret symbol ferret_prop_var. Lets us do a property-property
-! plot without being in 2-variable mode.
+! data_1_var, with its own full definition.
 
-! This script assumes the usual symbols for a single-variable plot, plus 
-!    ferret_prop_var   Second var for vertical axis of PLOT/VS plot
-!    ferret_prop_url   Optional - URL for the 2nd var, if different from 
-!                      data_0_url.
-!
-! The symbols for a line plot e.g. color, thickness might apply. Default
-! values of these are assumed (black, thickness=2)
+! The scatter plot is drawn using polygons, with options sent in for
+! symbol_color, symbol_shape, and symbol_size.
 
-! TODO:
-! * Check the variables for conformability. The script currently applies ($region_xyzt)
-!      as computed for the first variable.
-! * Input another symbol ferret_plot_symbol = either plot-point symbol codes
-!      as understood by Ferret, or some other means of choosing the symbol
-! * Allow for polygons instead of plot/vs
+! NOTE If the two variables are going to have DIFFERENT region settings,
+! changes will need to be made to annotate that info on the plot.
+
 
 
 ! Define symbols associated with the region and data and perform any
@@ -73,13 +64,10 @@ IF `xsize NE ysize` THEN
   EXIT/PROGRAM
 ENDIF
 
-! Set up upper-left labels with the region info
-! Could call this if the region is potentially different.
-! GO LAS_pp_set_region_labels
-
 ! Open the window, apply size, scale options
 
-! dont want to set the aspect ratio using xy region.
+! dont want to set the aspect ratio using xy regionm, so reset
+! ferret_view temporarily.
 DEFINE SYMBOL viewsave = ($ferret_view)
 DEFINE SYMBOL ferret_view = aa  
 
@@ -87,30 +75,20 @@ GO LAS_open_window
 
 DEFINE SYMBOL ferret_view = ($viewsave)
 
-! TODO:  Should the creation of the ($qualifiers) symbol for standard
-! TODO:  1D plots be separated out in a separate script called:
-! TODO:    LAS_1D_plot_qualifiers.jnl
-!
 ! Build up the plot qualifiers
 
 IF ($ferret_use_graticules"0|0|*>1) THEN
   SET MODE GRATICULE:(DASH,COLOR=black)
 ENDIF
 
-! This is going to be a polygon plot
+! This is going to be a polygon plot. Options for color, shape, size.
 
-DEFINE SYMBOL polycolor = ($ferret_poly_color%black|default>black|black|red|blue|green|lightblue|purple|*>blue%)
+DEFINE SYMBOL polycolor = ($ferret_symbol_color%black|default>black|black|red|blue|green|lightblue|purple|*>blue%)
 
-DEFINE SYMBOL polysize = 0.6
+DEFINE SYMBOL polysize = ($ferret_symbol_size%0.6|default>*0.6|*%)
 
-! Could  have an option for the shape
-
-DEFINE SYMBOL polyshape = ($ferret_poly_shape%triangle|default>triangle|triangle|delta\
+DEFINE SYMBOL polyshape = ($ferret_symbol_shape%triangle|default>triangle|triangle|delta\
 |square|diamond|pentagon|hexagon|circle|star|plus|ex|*>triangle%)
-
-! Could have an option for the size
-
-DEFINE SYMBOL polysize = ($ferret_poly_size%0.6|default>*0.6|*%)
 
 DEFINE SYMBOL ferret_plot_title = " "
 
@@ -141,21 +119,21 @@ PLOT($qualifiers)/TITLE="($ferret_title)" ($plot_arg)
 LABEL/NOUSER `($ppl$xlen)/2`, -0.6, 0, 0, 0.14 ($ferret_title_0)
 LABEL/NOUSER -0.8, `($ppl$ylen)/2`, 0, 90, 0.14 ($ferret_title_1)
 
-! Polygons and regression line
-
-LET p = xvar  ! for regression line
-LET q = yvar
-LET do_rsquare = 1
-
+! Polygon plot
 
 DEFINE SYMBOL poly_command POLY/OVER/NOLAB/PAL=($polycolor)
-
 GO polymark ($poly_command) p, q, p, ($polyshape), ($polysize)
 
 ! Add the linear fit information
 ! Gaps in p and qhat mean that just plotting p, qhat
 ! may result in a gappy or invisible line. Plot between the
 ! first and last good point instead.
+
+! variables for the regression line
+
+LET p = xvar  ! for regression line
+LET q = yvar
+LET do_rsquare = 1
 
 DEFINE SYMBOL  line_color = blue  ! regression line
 IF ($polycolor%0|blue>1|*>0%) THEN DEFINE SYMBOL  line_color = red
@@ -202,6 +180,7 @@ IF ($do_rsquare"1|0|*>1) THEN
 
 ENDIF
 
+! Add labels at the top of the plot
 
 GO LAS_url_label 0
 IF `($n_right_labels"0") GT 0 OR ($n_left_labels"0") GT 0` THEN GO labels_above_plot
