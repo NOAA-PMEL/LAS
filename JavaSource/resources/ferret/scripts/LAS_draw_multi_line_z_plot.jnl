@@ -78,7 +78,7 @@ IF `($ferret_line_or_sym%0|sym>1|*>0%)` THEN
       IF `($title_size%0|*>1%)` THEN PPL LABSET ($title_size)
       IF `($ferret_dep_axis_scale"0|*>1")` THEN PPL XAXIS ($ferret_dep_axis_scale)
       PPL ylab
-      IF `($data_count"0") GT 2` THEN PPL xlab
+      IF `($data_count"0") GT 2` THEN PPL xlab Common Scale for All Variables
    PPL PLOT
    PLOT($qualifiers)/NOKEY/NOLAB/OVER/COLOR=black ($ferret_plot_var_0)
    IF `($data_count"0") GT 1` THEN PLOT($qualifiers)/NOKEY/OVER/COLOR=red ($ferret_plot_var_1)
@@ -100,8 +100,8 @@ ELSE
       IF `($title_size%0|*>1%)` THEN PPL LABSET ($title_size)
       IF `($ferret_dep_axis_scale"0|*>1")` THEN PPL XAXIS ($ferret_dep_axis_scale)
       PPL ylab
-      IF `($data_count"0") GT 2` THEN PPL xlab
-   PPL PLOT
+      IF `($data_count"0") GT 2` THEN PPL xlab Common Scale for All Variables
+   PPL PLOT 
 ENDIF
 
 IF ($labnum_calend%0|*>1%) THEN
@@ -122,8 +122,8 @@ SET VIEW overview
 PLOT/NOLAB/NOAX/I=1:2/VLIM=100:102 i
 
 ! The start (x,y) position for each line drawn on the key
-let xkey = {0, 0, 0, `0.6*($ppl$xlen)`, `0.6*($ppl$xlen)`, `0.6*($ppl$xlen)`}
-let ykey = {-0.6, -0.8, -1., -0.6, -0.8, -1.}
+LET xkey = {0,         0,     0, `0.6*($ppl$xlen)`, `0.6*($ppl$xlen)`, `0.6*($ppl$xlen)`,     0, 0}
+LET ykey = {-0.65, -0.85, -1.05,             -0.65,             -0.85,             -1.05, -1.25, -1.25}
 
 LET titlesiz = 0.11
 IF `title_len GT 40 AND ($data_count"0") GT 3` THEN LET titlesiz = 0.10
