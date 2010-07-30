@@ -48,6 +48,7 @@ IF `(($data_count"0") EQ 2) AND (STRCMP("($units_0)", "($units_1)") NE 0)` THEN
       IF `($labnum_y%0|*>1%)` THEN GO unlabel ($labnum_y)
       IF `($labnum_z%0|*>1%)` THEN GO unlabel ($labnum_z)
       IF `($labnum_t%0|*>1%)` THEN GO unlabel ($labnum_t)
+      IF `($labnum_year%0|*>1%)` THEN GO unlabel ($labnum_year)
       IF `($labnum_dset%0|*>1%)` THEN GO unlabel ($labnum_dset)
       IF `($labnum_datitl%0|*>1%)` THEN GO unlabel ($labnum_datitl)
       IF `($labnum_dods%0|*>1%)` THEN GO unlabel ($labnum_dods)
@@ -65,7 +66,9 @@ IF `(($data_count"0") EQ 2) AND (STRCMP("($units_0)", "($units_1)") NE 0)` THEN
 ENDIF
 
 ! If line style is just symbols, we need to do lines separately to get different colors.
-IF `($two_axes"0") EQ 0` THEN DEFINE SYMBOL qualifiers = ($qualifiers)/NOLAB !If 2 variables only, label units on x axis
+
+! If 2 variables, label units on axis; otherwise dont
+IF `($data_count) GT 2 AND ($two_axes"0") EQ 0` THEN DEFINE SYMBOL qualifiers = ($qualifiers)/NOLAB 
 
 IF `($ferret_line_or_sym%0|sym>1|*>0%)` THEN  
    PLOT($qualifiers)/NOKEY/SET/COLOR=WHITE ($plot_arg)
@@ -73,6 +76,7 @@ IF `($ferret_line_or_sym%0|sym>1|*>0%)` THEN
       IF `($labnum_y%0|*>1%)` THEN GO unlabel ($labnum_y)
       IF `($labnum_z%0|*>1%)` THEN GO unlabel ($labnum_z)
       IF `($labnum_t%0|*>1%)` THEN GO unlabel ($labnum_t)
+      IF `($labnum_year%0|*>1%)` THEN GO unlabel ($labnum_year)
       IF `($labnum_dset%0|*>1%)` THEN GO unlabel ($labnum_dset)
       IF `($labnum_datitl%0|*>1%)` THEN GO unlabel ($labnum_datitl)
       IF `($labnum_dods%0|*>1%)` THEN GO unlabel ($labnum_dods)
@@ -95,6 +99,7 @@ ELSE
       IF `($labnum_y%0|*>1%)` THEN GO unlabel ($labnum_y)
       IF `($labnum_z%0|*>1%)` THEN GO unlabel ($labnum_z)
       IF `($labnum_t%0|*>1%)` THEN GO unlabel ($labnum_t)
+      IF `($labnum_year%0|*>1%)` THEN GO unlabel ($labnum_year)
       IF `($labnum_dset%0|*>1%)` THEN GO unlabel ($labnum_dset)
       IF `($labnum_datitl%0|*>1%)` THEN GO unlabel ($labnum_datitl)
       IF `($labnum_dods%0|*>1%)` THEN GO unlabel ($labnum_dods)
