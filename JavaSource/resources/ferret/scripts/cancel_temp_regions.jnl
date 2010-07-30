@@ -19,11 +19,11 @@ ENDIF
 
 ! Make these Definitions from the end of curvi_nrst_slice
 IF ($region_sample"0|*>1") THEN 
-   DEFINE SYMBOL ferret_plot_var = ($expr1)sampled_var($expr2)
+   DEFINE SYMBOL ferret_plot_var = ($expr1)sampled_var($var_num)($expr2)
    DEFINE SYMBOL ferret_plot_title "($expr1) ($data_title) ($expr2) ($data_units)"
 
    IF ($expr3"0|*>1") THEN
-      DEFINE SYMBOL ferret_plot_var ($expr1)sampled_var($expr3)sampled_var($expr4)
+      DEFINE SYMBOL ferret_plot_var ($expr1)sampled_var($var_num)($expr3)sampled_var($var_num)($expr4)
       DEFINE SYMBOL ferret_plot_title "($expr1) ($data_title) ($expr3) ($data_title) ($expr4)"
    ENDIF
 ENDIF
