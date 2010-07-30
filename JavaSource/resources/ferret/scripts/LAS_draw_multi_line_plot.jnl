@@ -22,12 +22,13 @@ REPEAT/range=1:`($data_count)-1`/NAME=m (  \
   LET title_len = `MAX(tlen, title_len)`; \
 )
 
-! Set the title, and the labels for the upper left listing the locations
+! Set the labels for the upper left listing the locations
 ! and time in directions normal to the plot.
 
-!   GO LAS_set_diff_labels ($fview)  ! Do this if the regions are different.
-!   DEFINE SYMBOL plot_title = ($ferret_over_title)
 GO LAS_pp_set_region_labels       ! This script sets ONE set of region labels.
+
+! No title; variable names and units are listed in the legend.
+DEFINE SYMBOL qualifiers = ($qualifiers)/TITLE=" "
 
 ! If there are two variables with different units, scale each independently, putting
 ! one dependent axis on the left an the other on the right.
@@ -41,7 +42,7 @@ IF `(($data_count"0") EQ 2) AND (STRCMP("($units_0)", "($units_1)") NE 0)` THEN
 
    DEFINE VIEWPORT/x=0:1/y=0:1 right_axis_view
    SET VIEW right_axis_view
-   PLOT($qualifiers)/AXES=0,0,0,1/NOKEY/TITLE=" "/COLOR=red/SET ($ferret_plot_var_1)
+   PLOT($qualifiers)/AXES=0,0,0,1/NOKEY/COLOR=red/SET ($ferret_plot_var_1)
       GO remove_logo
       IF `($labnum_x%0|*>1%)` THEN GO unlabel ($labnum_x)
       IF `($labnum_y%0|*>1%)` THEN GO unlabel ($labnum_y)
@@ -63,10 +64,11 @@ IF `(($data_count"0") EQ 2) AND (STRCMP("($units_0)", "($units_1)") NE 0)` THEN
    SET VIEW FULL
 ENDIF
 
-
 ! If line style is just symbols, we need to do lines separately to get different colors.
+IF `($two_axes"0") EQ 0` THEN DEFINE SYMBOL qualifiers = ($qualifiers)/NOLAB !If 2 variables only, label units on x axis
+
 IF `($ferret_line_or_sym%0|sym>1|*>0%)` THEN  
-   PLOT/NOKEY/SET/COLOR=WHITE/NOLAB ($plot_arg)
+   PLOT($qualifiers)/NOKEY/SET/COLOR=WHITE ($plot_arg)
       IF `($labnum_x%0|*>1%)` THEN GO unlabel ($labnum_x)
       IF `($labnum_y%0|*>1%)` THEN GO unlabel ($labnum_y)
       IF `($labnum_z%0|*>1%)` THEN GO unlabel ($labnum_z)
@@ -79,6 +81,7 @@ IF `($ferret_line_or_sym%0|sym>1|*>0%)` THEN
       PPL xlab
       IF `($data_count"0") GT 2` THEN PPL ylab Common Scale for All Variables
    PPL PLOT
+
    PLOT($qualifiers)/NOKEY/NOLAB/OVER/COLOR=black ($ferret_plot_var_0)
    IF `($data_count"0") GT 1` THEN PLOT($qualifiers)/NOKEY/OVER/COLOR=red ($ferret_plot_var_1)
    IF `($data_count"0") GT 2` THEN PLOT($qualifiers)/NOKEY/OVER/COLOR=green ($ferret_plot_var_2)
@@ -87,7 +90,7 @@ IF `($ferret_line_or_sym%0|sym>1|*>0%)` THEN
    IF `($data_count"0") GT 5` THEN PLOT($qualifiers)/NOKEY/OVER/COLOR=purple ($ferret_plot_var_5)
 ELSE
 
-   PLOT($qualifiers)/NOKEY/TITLE=" "/SET ($plot_arg)
+   PLOT($qualifiers)/NOKEY/SET ($plot_arg)
       IF `($labnum_x%0|*>1%)` THEN GO unlabel ($labnum_x)
       IF `($labnum_y%0|*>1%)` THEN GO unlabel ($labnum_y)
       IF `($labnum_z%0|*>1%)` THEN GO unlabel ($labnum_z)
@@ -121,8 +124,8 @@ SET VIEW overview
 PLOT/NOLAB/NOAX/I=1:2/VLIM=100:102 i
 
 ! The start (x,y) position for each line drawn on the key
-LET xkey = {0,         0,     0, `0.6*($ppl$xlen)`, `0.6*($ppl$xlen)`, `0.6*($ppl$xlen)`,     0, 0}
-LET ykey = {-0.65, -0.85, -1.05,             -0.65,             -0.85,             -1.05, -1.25, -1.25}
+LET xkey = { -0.5,  -0.5, -0.5, `0.6*($ppl$xlen)`, `0.6*($ppl$xlen)`, `0.6*($ppl$xlen)`,     0, 0}
+LET ykey = {-0.65, -0.85, -1.05,            -0.65,             -0.85,             -1.05, -1.25, -1.25}
 
 LET titlesiz = 0.11
 IF `title_len GT 40 AND ($data_count"0") GT 3` THEN LET titlesiz = 0.10
@@ -131,7 +134,7 @@ REPEAT/range=1:`($data_count)`/NAME=m (; \
    DEFINE SYMBOL lnum = `m-1` ; \
    LET xpos = xkey[i=($m)]; LET ypos = ykey[i=($m)]; \
    GO LAS_legend_line \
-   `xpos` 0.5 `ypos` `m + 6*($thicknum)` `titlesiz` "($ferret_title_($lnum))" ($legend_qual);\   
+   `xpos-0.5` 0.5 `ypos` `m + 6*($thicknum)` `titlesiz` "($ferret_title_($lnum))" ($legend_qual);\   
 )
 
 ! The results script needs the actual axis directions. Restore them.

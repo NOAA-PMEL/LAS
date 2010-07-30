@@ -18,12 +18,13 @@ REPEAT/range=1:`($data_count)-1`/NAME=m (  \
   LET title_len = `MAX(tlen, title_len)`; \
 )
 
-! Set the title, and the labels for the upper left listing the locations
+! Set the labels for the upper left listing the locations
 ! and time in directions normal to the plot.
 
-!   GO LAS_set_diff_labels ($fview)  ! Do this if the regions are different.
-!   DEFINE SYMBOL plot_title = ($ferret_over_title)
 GO LAS_pp_set_region_labels       ! This script sets ONE set of region labels.
+
+! No title; variable names and units are listed in the legend.
+DEFINE SYMBOL qualifiers = ($qualifiers)/TITLE=" "
 
 ! If there are two variables with different units, scale each independently, putting
 ! one dependent axis on the left an the other on the right.
@@ -38,7 +39,7 @@ IF `(($data_count"0") EQ 2) AND (STRCMP("($units_0)", "($units_1)") NE 0)` THEN
 
    DEFINE VIEWPORT/x=0:1/y=0:1 right_axis_view
    SET VIEW right_axis_view
-   PLOT($qualifiers)/AXES=1,0,0,0/NOKEY/TITLE=" "/COLOR=red/SET ($ferret_plot_var_1)
+   PLOT($qualifiers)/AXES=1,0,0,0/NOKEY/COLOR=red/SET ($ferret_plot_var_1)
       GO remove_logo
       IF `($labnum_x%0|*>1%)` THEN GO unlabel ($labnum_x)
       IF `($labnum_y%0|*>1%)` THEN GO unlabel ($labnum_y)
@@ -62,10 +63,12 @@ IF `(($data_count"0") EQ 2) AND (STRCMP("($units_0)", "($units_1)") NE 0)` THEN
    SET VIEW FULL
 ENDIF
 
-
 ! If line style is just symbols, we need to do lines separately to get different colors.
+
+IF `($two_axes"0") EQ 0` THEN DEFINE SYMBOL qualifiers = ($qualifiers)/NOLAB !If 2 variables only, label units on x axis
+
 IF `($ferret_line_or_sym%0|sym>1|*>0%)` THEN  
-   PLOT/NOKEY/SET/COLOR=WHITE/NOLAB ($plot_arg)
+   PLOT($qualifiers)/NOKEY/SET/COLOR=WHITE ($plot_arg)
       IF `($labnum_x%0|*>1%)` THEN GO unlabel ($labnum_x)
       IF `($labnum_y%0|*>1%)` THEN GO unlabel ($labnum_y)
       IF `($labnum_z%0|*>1%)` THEN GO unlabel ($labnum_z)
@@ -78,7 +81,8 @@ IF `($ferret_line_or_sym%0|sym>1|*>0%)` THEN
       IF `($ferret_dep_axis_scale"0|*>1")` THEN PPL XAXIS ($ferret_dep_axis_scale)
       IF `($data_count"0") GT 2` THEN PPL xlab Common Scale for All Variables
    PPL PLOT
-   PLOT($qualifiers)/NOKEY/NOLAB/OVER/COLOR=black ($ferret_plot_var_0)
+
+   PLOT($qualifiers)/NOKEY/NOLAB/OVER/NOAX/COLOR=black ($ferret_plot_var_0)
    IF `($data_count"0") GT 1` THEN PLOT($qualifiers)/NOKEY/OVER/COLOR=red ($ferret_plot_var_1)
    IF `($data_count"0") GT 2` THEN PLOT($qualifiers)/NOKEY/OVER/COLOR=green ($ferret_plot_var_2)
    IF `($data_count"0") GT 3` THEN PLOT($qualifiers)/NOKEY/OVER/COLOR=blue ($ferret_plot_var_3)
@@ -86,7 +90,7 @@ IF `($ferret_line_or_sym%0|sym>1|*>0%)` THEN
    IF `($data_count"0") GT 5` THEN PLOT($qualifiers)/NOKEY/OVER/COLOR=purple ($ferret_plot_var_5)
 ELSE
 
-   PLOT($qualifiers)/NOKEY/TITLE=" "/SET ($plot_arg)
+   PLOT($qualifiers)/NOKEY/SET ($plot_arg)
       IF `($labnum_x%0|*>1%)` THEN GO unlabel ($labnum_x)
       IF `($labnum_y%0|*>1%)` THEN GO unlabel ($labnum_y)
       IF `($labnum_z%0|*>1%)` THEN GO unlabel ($labnum_z)
