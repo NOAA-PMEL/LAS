@@ -48,7 +48,6 @@ IF `(($data_count"0") EQ 2) AND (STRCMP("($units_0)", "($units_1)") NE 0)` THEN
       IF `($labnum_datitl%0|*>1%)` THEN GO unlabel ($labnum_datitl)
       IF `($labnum_dods%0|*>1%)` THEN GO unlabel ($labnum_dods)
       IF `($labnum_calend%0|*>1%)` THEN GO unlabel ($labnum_calend)
-      PPL ylab
    PPL PLOT
  
    DEFINE SYMBOL extra_y_space = 0.5  ! Start the labels higher up, to give space for 
@@ -77,7 +76,6 @@ IF `($ferret_line_or_sym%0|sym>1|*>0%)` THEN
       IF `($labnum_calend%0|*>1%)` THEN GO unlabel ($labnum_calend)
       IF `($title_size%0|*>1%)` THEN PPL LABSET ($title_size)
       IF `($ferret_dep_axis_scale"0|*>1")` THEN PPL XAXIS ($ferret_dep_axis_scale)
-      PPL ylab
       IF `($data_count"0") GT 2` THEN PPL xlab Common Scale for All Variables
    PPL PLOT
    PLOT($qualifiers)/NOKEY/NOLAB/OVER/COLOR=black ($ferret_plot_var_0)
@@ -99,7 +97,6 @@ ELSE
       IF `($labnum_calend%0|*>1%)` THEN GO unlabel ($labnum_calend)
       IF `($title_size%0|*>1%)` THEN PPL LABSET ($title_size)
       IF `($ferret_dep_axis_scale"0|*>1")` THEN PPL XAXIS ($ferret_dep_axis_scale)
-      PPL ylab
       IF `($data_count"0") GT 2` THEN PPL xlab Common Scale for All Variables
    PPL PLOT 
 ENDIF
