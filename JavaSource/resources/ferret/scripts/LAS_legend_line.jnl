@@ -51,17 +51,17 @@
   
   DEFINE SYMBOL x1 = `($xaxis_min) + ($1) * ($xr)/($xl)`
   DEFINE SYMBOL x2 = `($x1)        + ($2) * ($xr)/($xl)`
+  DEFINE SYMBOL xhalf = `(($x2) + ($x1)) / 2.`
   DEFINE SYMBOL y1 = `($yaxis_min) + ($3) * ($yr)/($yl)`
 
 ! use plot/vs rather than aline
   ppl window,off
-  plot/vs/over/nolab/color=($4)($7%/nolab%) {`($x1)`,`($x2)`},{`($y1)`,`($y1)`}
+  plot/vs/over/nolab/color=($4)($7%/nolab%) {`($x1)`, `($xhalf)`, `($x2)`},{`($y1)`,`($y1)`,`($y1)`}
   ppl window,on
-  
 !TEXT : xy coordinates in nouser units
 ! note that these are relative to the beginning of the plot x-axis
 ! this is not necessarily the same as ($xaxis_min)!
-  DEFINE SYMBOL tx = `($1) + ($2)+($2)/10`
+  DEFINE SYMBOL tx = `($1) + ($2)+($2)/5`
   DEFINE SYMBOL ty = `($3)-($5)/2`
 
   !LABEL/[no]user xpos, ypos, center, angle, size   text
@@ -69,4 +69,5 @@
 
 CANCEL SYMBOL xr yr xl yl x1 x2 y1 tx ty
 SET MODE/last verify
+pause
 
