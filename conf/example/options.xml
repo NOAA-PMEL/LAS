@@ -238,7 +238,7 @@ at the edges of the plot (WMS-style plots). By default margins are shown.
   <optiondef name="line_color">
     <option>
       <help>Set the color of the plot symbols and/or line.</help>
-      <title>Line color (var no.1)</title>
+      <title>Line color (single-var plots)</title>
       <menu type="options" name="line_color">
         <item values="default">Default</item>
         <item values="black">Black</item>
