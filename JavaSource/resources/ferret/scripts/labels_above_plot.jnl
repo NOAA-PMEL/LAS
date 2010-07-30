@@ -39,7 +39,7 @@ IF ($n_left_labels"0|*>1") THEN
       IF ($region_small_($m)"0|*>1") THEN LET labyloc = `($ppl$ylen) + (($num_labels)+2)* labdel` ;\
     )
 ENDIF
-pause
+
 ! Put any URL labels in the upper right
 ! Put any dataset labels in the upper right
 
