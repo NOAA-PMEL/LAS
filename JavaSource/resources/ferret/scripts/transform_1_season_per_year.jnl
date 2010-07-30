@@ -15,7 +15,7 @@
 ! ferret_season_center  Symbol defining the month on which the average is to be centered.
 ! 
 ! Results:
-! Defines ferret_plot_var with the correct sampling or averaging in time
+! Defines ferret_plot_var($var_num) with the correct sampling or averaging in time
 ! Adds text to ferret_plot_title explaining the sampling or averaging.
 
 ! TODO:  What if some other transformation has been defined on the Time Axis??
@@ -61,11 +61,11 @@ ENDIF
 LET season_length = ($ferret_season_length)
 
 ! The dataset, region and plot variable have already been initialized
-LET S($num)_the_plot_var = ($ferret_t_var)
-LET S($num)_the_plot_var = ($ferret_plot_var)
-IF `season_length EQ 1` THEN LET S($num)_the_plot_var = ($ferret_plot_var)
-LET S($num)_the_plot_var_noregion = ($ferret_plot_var_noregion)
-LET S($num)_the_plot_var_zt = ($ferret_plot_var_noregion)
+LET S($num)_the_plot_var($var_num) = ($ferret_t_var)
+LET S($num)_the_plot_var($var_num) = ($ferret_plot_var($var_num))
+IF `season_length EQ 1` THEN LET S($num)_the_plot_var($var_num) = ($ferret_plot_var($var_num))
+LET S($num)_the_plot_var($var_num)_noregion = ($ferret_plot_var($var_num)_noregion)
+LET S($num)_the_plot_var($var_num)_zt = ($ferret_plot_var($var_num)_noregion)
 
 ! If we have averaged over T then cant do this. Return a message.
 DEFINE SYMBOL op_num = `($data_num) - 1`
@@ -76,11 +76,11 @@ IF ($DATA_($op_num)_ANALYSIS_AXIS_0_OP"0|*>1") THEN
   EXIT/SCRIPT
 ENDIF
 
-LET tt = t[gt=S($num)_the_plot_var]
+LET tt = t[gt=S($num)_the_plot_var($var_num)]
 LET tsiz = `tt,RETURN=lsize`
 
-LET n1 = `S($num)_the_plot_var,RETURN=lstart`
-LET nn = `S($num)_the_plot_var,RETURN=lend`
+LET n1 = `S($num)_the_plot_var($var_num),RETURN=lstart`
+LET nn = `S($num)_the_plot_var($var_num),RETURN=lend`
 
 ! Correction if the dataset time axis does not start in January.
 LET first_month_data = TAX_MONTH(tt[L=1], tt)
@@ -104,7 +104,7 @@ IF `nn EQ n1` THEN
       LET L1 = `($ferret_season_center) - ( 1+INT(season_length/2) )`
       LET L2 = `L1 + season_length - 1`
       IF `L1 LT 1` THEN LET L1 = 1
-      DEFINE SYMBOL ferret_plot_var = S($num)_the_plot_var[L=`L1`:`L2`@ave]
+      DEFINE SYMBOL ferret_plot_var($var_num) = S($num)_the_plot_var($var_num)[L=`L1`:`L2`@ave]
       
       DEFINE SYMBOL ferret_plot_title \
         ($ferret_plot_title) (($ferret_season_length)-month ave, Centered ($mon1))
@@ -133,34 +133,34 @@ IF `season_length EQ 1` THEN
          ENDIF
       ENDIF
 
-!      DEFINE SYMBOL ferret_plot_var S($num)_the_plot_var[L=`L1`]
-      LET S($num)_the_plot_var = ($ferret_xyz_var)
-      LET S($num)_the_plot_var_noregion = ($ferret_plot_var_noregion)
+!      DEFINE SYMBOL ferret_plot_var($var_num) S($num)_the_plot_var($var_num)[L=`L1`]
+      LET S($num)_the_plot_var($var_num) = ($ferret_xyz_var)
+      LET S($num)_the_plot_var($var_num)_noregion = ($ferret_plot_var($var_num)_noregion)
 
-      DEFINE SYMBOL ferret_plot_var S($num)_the_plot_var[L=`L1`]
-      DEFINE SYMBOL ferret_plot_var_zt S($num)_the_plot_var[L=`L1`, ($region_z)]
-      LET S($num)_the_plot_var_zt = S($num)_the_plot_var_noregion[L=`L1`, ($region_z)]
+      DEFINE SYMBOL ferret_plot_var($var_num) S($num)_the_plot_var($var_num)[L=`L1`]
+      DEFINE SYMBOL ferret_plot_var($var_num)_zt S($num)_the_plot_var($var_num)[L=`L1`, ($region_z)]
+      LET S($num)_the_plot_var($var_num)_zt = S($num)_the_plot_var($var_num)_noregion[L=`L1`, ($region_z)]
 
-      DEFINE SYMBOL ferret_plot_var_noregion S($num)_the_plot_var_noregion[L=`L1`]
-      DEFINE SYMBOL ferret_plot_var_zt S($num)_the_plot_var_zt
+      DEFINE SYMBOL ferret_plot_var($var_num)_noregion S($num)_the_plot_var($var_num)_noregion[L=`L1`]
+      DEFINE SYMBOL ferret_plot_var($var_num)_zt S($num)_the_plot_var($var_num)_zt
       DEFINE SYMBOL ferret_plot_title ($ferret_plot_title) every ($mon1)
       DEFINE SYMBOL region_transform_t L=`L1`
 
    ELSE
       LET L1 = n1 - first_month_selected
       LET L1 = `n1 + ($loffset) - (first_month_selected-1)`
-      DEFINE SYMBOL ferret_plot_var S($num)_the_plot_var[L=`L1`:`nn`:12]
-      LET S($num)_the_plot_var_zt = S($num)_the_plot_var_noregion[L=`L1`, ($region_z)]
+      DEFINE SYMBOL ferret_plot_var($var_num) S($num)_the_plot_var($var_num)[L=`L1`:`nn`:12]
+      LET S($num)_the_plot_var($var_num)_zt = S($num)_the_plot_var($var_num)_noregion[L=`L1`, ($region_z)]
 
-      DEFINE SYMBOL ferret_plot_var_noregion S($num)_the_plot_var_noregion[L=`L1`:`nn`:12]
-      DEFINE SYMBOL ferret_plot_var_zt S($num)_the_plot_var_noregion[L=`L1`:`nn`:12, ($region_z)]
+      DEFINE SYMBOL ferret_plot_var($var_num)_noregion S($num)_the_plot_var($var_num)_noregion[L=`L1`:`nn`:12]
+      DEFINE SYMBOL ferret_plot_var($var_num)_zt S($num)_the_plot_var($var_num)_noregion[L=`L1`:`nn`:12, ($region_z)]
       DEFINE SYMBOL ferret_plot_title ($ferret_plot_title) every ($mon1)
       DEFINE SYMBOL region_transform_t = L=`L1`:`nn`:12
    ENDIF
 
 ELSE
 
-! When there is just one time in the result, redefine S($num)_the_plot_var and the 
+! When there is just one time in the result, redefine S($num)_the_plot_var($var_num) and the 
 ! index range for the time axis. The computation will use an expanded time range
 ! and then sample from that the desired output time.
 
@@ -182,8 +182,8 @@ ELSE
       LET tpts2 = tt[L=`nn`]
       LET endbracket = STRRINDEX("($ferret_xyz_var)", "]") - 1
       LET theplotvar = "`SUBSTRING("($ferret_xyz_var)", 1, endbracket)`"
-      LET S($num)_the_plot_var = `theplotvar`,L=`L1`:`nn`]
-      LET S($num)_the_plot_var_zt = `theplotvar`,L=`L1`:`nn`]
+      LET S($num)_the_plot_var($var_num) = `theplotvar`,L=`L1`:`nn`]
+      LET S($num)_the_plot_var($var_num)_zt = `theplotvar`,L=`L1`:`nn`]
       DEFINE SYMBOL n_left_labels = `($n_left_labels"0")+1`
       DEFINE SYMBOL upper_left_($n_left_labels) = "(Data centered nearest ($mon1))"
       DEFINE SYMBOL single_time = 1
@@ -193,7 +193,7 @@ ELSE
 
    IF `nn-n1 LT 24` THEN
       DEFINE SYMBOL ferret_expand_time = 1
-!      LET S($num)_the_plot_var = ($ferret_xyz_var)
+!      LET S($num)_the_plot_var($var_num) = ($ferret_xyz_var)
 
       LET nn = MIN(`tsiz`, `nn + 24`)
       LET n1 = MAX(1, `n1-24`)
@@ -217,7 +217,7 @@ ELSE
    LET L_indx_T = COMPRESSL(time_mask)
 
 ! Sample the variable at only the months that will be used in the avgs.
-   LET S($num)_seas_months = SAMPLEL(S($num)_the_plot_var,L_indx_T[l=1:`nmsk`])
+   LET S($num)_seas_months = SAMPLEL(S($num)_the_plot_var($var_num),L_indx_T[l=1:`nmsk`])
    LET tsample = SAMPLEL(tt,L_indx_T[l=1:`nmsk`])
    LOAD tt
    LOAD L_indx_T[l=1:`nmsk`]
@@ -250,9 +250,9 @@ ELSE
    LET S($num)_weight_sum = S($num)_weights2D[GT=timeax_years@SUM]
    LET S($num)_seas_per_year = S($num)_sum/S($num)_weight_sum 
 
-   DEFINE SYMBOL ferret_plot_var S($num)_seas_per_year
-   IF ($single_time"0|*>1") THEN DEFINE SYMBOL ferret_plot_var S($num)_seas_per_year[($region_t)]
-   DEFINE SYMBOL ferret_plot_var_noregion S($num)_seas_per_year[($region_t)]
+   DEFINE SYMBOL ferret_plot_var($var_num) S($num)_seas_per_year
+   IF ($single_time"0|*>1") THEN DEFINE SYMBOL ferret_plot_var($var_num) S($num)_seas_per_year[($region_t)]
+   DEFINE SYMBOL ferret_plot_var($var_num)_noregion S($num)_seas_per_year[($region_t)]
 
 ! Add information to the title
    DEFINE SYMBOL ferret_plot_title ($ferret_plot_title) (($ferret_season_length)-month ave, Centered ($mon1))
