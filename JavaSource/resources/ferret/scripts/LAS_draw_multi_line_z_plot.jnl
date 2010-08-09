@@ -53,6 +53,7 @@ IF `(($data_count"0") EQ 2) AND (STRCMP("($units_0)", "($units_1)") NE 0)` THEN
 
    DEFINE VIEWPORT/x=0:1/y=0:1 right_axis_view
    SET VIEW right_axis_view
+   SET VAR/UNITS="@P2`($ferret_plot_var_1),RETURN=units`" ($ferret_plot_var_1)
    PLOT($qualifiers)/AXES=1,0,0,0/NOKEY/COLOR=red/SET ($ferret_plot_var_1)
       GO remove_logo
       IF `($labnum_x%0|*>1%)` THEN GO unlabel ($labnum_x)
@@ -64,8 +65,8 @@ IF `(($data_count"0") EQ 2) AND (STRCMP("($units_0)", "($units_1)") NE 0)` THEN
       IF `($labnum_datitl%0|*>1%)` THEN GO unlabel ($labnum_datitl)
       IF `($labnum_dods%0|*>1%)` THEN GO unlabel ($labnum_dods)
       IF `($labnum_calend%0|*>1%)` THEN GO unlabel ($labnum_calend)
+      ppl list labels
    PPL PLOT
- 
    DEFINE SYMBOL extra_y_space = 0.5  ! Start the labels higher up, to give space for 
                                       ! a formatted axis on the top
 
@@ -120,7 +121,7 @@ ELSE
       IF `($title_size%0|*>1%)` THEN PPL LABSET ($title_size)
       IF `($ferret_dep_axis_scale"0|*>1")` THEN PPL XAXIS ($ferret_dep_axis_scale)
       IF `($data_count"0") GT 2` THEN PPL xlab ($common_varlab)
-   PPL PLOT 
+   PPL PLOT
 ENDIF
 
 IF ($labnum_calend%0|*>1%) THEN

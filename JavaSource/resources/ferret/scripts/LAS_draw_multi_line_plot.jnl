@@ -50,6 +50,7 @@ pause
 
    DEFINE VIEWPORT/x=0:1/y=0:1 right_axis_view
    SET VIEW right_axis_view
+   SET VAR/UNITS="@P2`($ferret_plot_var_1),RETURN=units`" ($ferret_plot_var_1)
    PLOT($qualifiers)/AXES=0,0,0,1/NOKEY/COLOR=red/SET ($ferret_plot_var_1)
       GO remove_logo
       IF `($labnum_x%0|*>1%)` THEN GO unlabel ($labnum_x)
