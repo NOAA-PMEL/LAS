@@ -61,13 +61,20 @@ public class GetViews extends ConfigService {
         String dsID = request.getParameter("dsid");
         String varID = request.getParameter("varid");
         String format = request.getParameter("format");        
+	String[] xpath = request.getParameterValues("xpath");
         if ( format == null ) {
             format = "json";
         }
         log.info("Starting: getViews.do?dsid="+dsID+"&varid="+varID+"&format="+format);
         try {
-            ArrayList<View> views = lasConfig.getViewsByDatasetAndVariable(dsID, varID);
-            //Collections.sort(views, new ContainerComparator("value"));
+
+            ArrayList<View> views;
+	    if(xpath != null && xpath.length > 0)
+	    	views  = lasConfig.getViewsByDefault(null);
+	    else
+		views  = lasConfig.getViewsByDatasetAndVariable(dsID, varID);
+            
+	    //Collections.sort(views, new ContainerComparator("value"));
             PrintWriter respout = response.getWriter();
             if ( format.equals("xml") ) {
                 response.setContentType("application/xml");
