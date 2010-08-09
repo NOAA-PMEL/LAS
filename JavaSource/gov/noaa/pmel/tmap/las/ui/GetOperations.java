@@ -88,13 +88,20 @@ public class GetOperations extends ConfigService {
 
 			} else {
 				operations = new ArrayList<Operation>();
-				ArrayList<View> views = lasConfig.getViewsByDatasetAndVariable(dsID, varID);
+				ArrayList<View> views =  new ArrayList<View>();
+				if ( xpath != null && xpath.length > 0 ) {
+					//String ui_default = "";
+	                                //ui_default = getVariablePropertyValue(xpath,"ui", "default");
+					views = lasConfig.getViewsByDefault(null);
+				} else {
+					views = lasConfig.getViewsByDatasetAndVariable(dsID, varID);
+				}
 				HashMap<String, Operation> allOps = new HashMap<String, Operation>();
 				for (Iterator viewIt = views.iterator(); viewIt.hasNext();) {
 					View aView = (View) viewIt.next();
 					ArrayList<Operation> ops;
 					if ( xpath != null && xpath.length > 0 ) {
-						ops = lasConfig.getOperations(view, xpath);
+						ops = lasConfig.getOperations(aView.getValue(), xpath);
 					} else {
 						ops = lasConfig.getOperations(aView.getValue(), dsID, varID);
 					}
