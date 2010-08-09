@@ -28,7 +28,7 @@ public class FerretCommands {
             "ELSE ",
             "ENDIF ",
             "EXIT ",
-            "FILE ",
+//  Has to have at least one other command beside this one since other file type contain this string       "FILE ",
             "FILL ",
             "FRAME ",
             "GO ",
@@ -60,13 +60,14 @@ public class FerretCommands {
             "USER ",
             "VECTOR ",
             "WHERE ",
-            "WIRE"};
+            "WIRE "};
     /**
      * Test if a string contains a Ferret command.
      * @param string - the string to test
      * @return true if the string contains a Ferret command; false if it does not.
      */
     static public boolean containsCommand(String string) {
+    	if ( string.length() == 0 ) return false;
         for ( int i=0; i<command.length; i++ ) {
             if ( string.toUpperCase().contains(command[i]))  {
                 return true;
