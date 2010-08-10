@@ -90,9 +90,9 @@ public class GetOperations extends ConfigService {
 				operations = new ArrayList<Operation>();
 				ArrayList<View> views =  new ArrayList<View>();
 				if ( xpath != null && xpath.length > 0 ) {
-					//String ui_default = "";
-	                                //ui_default = getVariablePropertyValue(xpath,"ui", "default");
-					views = lasConfig.getViewsByDefault(null);
+					String ui_default = "";
+	                                ui_default = lasConfig.getVariablePropertyValue(xpath,"ui", "default");
+					views = lasConfig.getViewsByDefault(ui_default);
 				} else {
 					views = lasConfig.getViewsByDatasetAndVariable(dsID, varID);
 				}
