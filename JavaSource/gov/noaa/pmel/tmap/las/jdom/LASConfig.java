@@ -56,6 +56,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.Vector;
 
 import org.apache.commons.httpclient.HttpException;
@@ -3334,14 +3335,18 @@ public class LASConfig extends LASDocument {
         }
     }
     public ArrayList<View> getViewsByXpath(String[] xpaths) throws JDOMException, LASException {
-    	 ArrayList<View> views = new ArrayList<View>();
-    	 for (int i = 0; i < xpaths.length; i++) {
-			String dsid = getDSIDfromXPath(xpaths[i]);
-			String varid = getVarIDfromXPath(xpaths[i]);
-			views.addAll(getViewsByDatasetAndVariable(dsid, varid));
+    	Set<View> viewSet = new HashSet<View>();
+    	ArrayList<View> views = new ArrayList<View>();
+    	for (int i = 0; i < xpaths.length; i++) {
+    		String dsid = getDSIDfromXPath(xpaths[i]);
+    		String varid = getVarIDfromXPath(xpaths[i]);
+    		viewSet.addAll(getViewsByDatasetAndVariable(dsid, varid));
+    	}
+        for (Iterator iterator = viewSet.iterator(); iterator.hasNext();) {
+			View view = (View) iterator.next();
+			views.add(view);
 		}
-    	 
-    	 return views;
+    	return views;
     }
     public ArrayList<View> getViewsByDatasetAndVariable(String dsID, String varID) throws JDOMException, LASException {
         String variableXPath = "/lasdata/datasets/dataset[@ID='"+dsID+"']/variables/variable[@ID='"+varID+"']";
