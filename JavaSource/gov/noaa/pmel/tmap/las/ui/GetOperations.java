@@ -96,8 +96,7 @@ public class GetOperations extends ConfigService {
 						ArrayList<View> views = lasConfig.getViewsByDatasetAndVariable(dsid, varid);
 						for (Iterator viewIt = views.iterator(); viewIt.hasNext();) {
 							View aView = (View) viewIt.next();
-							lasConfig.getOperations(view, xpath);
-							ArrayList<Operation> ops = lasConfig.getOperations(aView.getValue(), dsID, varID);
+							ArrayList<Operation> ops = lasConfig.getOperations(aView.getValue(), dsid, varid);
 							for (Iterator opsIt = ops.iterator(); opsIt.hasNext();) {
 								Operation op = (Operation) opsIt.next();
 								String id = op.getID();
