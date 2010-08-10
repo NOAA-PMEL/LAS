@@ -3333,6 +3333,16 @@ public class LASConfig extends LASDocument {
         	return "";
         }
     }
+    public ArrayList<View> getViewsByXpath(String[] xpaths) throws JDOMException, LASException {
+    	 ArrayList<View> views = new ArrayList<View>();
+    	 for (int i = 0; i < xpaths.length; i++) {
+			String dsid = getDSIDfromXPath(xpaths[i]);
+			String varid = getVarIDfromXPath(xpaths[i]);
+			views.addAll(getViewsByDatasetAndVariable(dsid, varid));
+		}
+    	 
+    	 return views;
+    }
     public ArrayList<View> getViewsByDatasetAndVariable(String dsID, String varID) throws JDOMException, LASException {
         String variableXPath = "/lasdata/datasets/dataset[@ID='"+dsID+"']/variables/variable[@ID='"+varID+"']";
         String ui_default = "";
