@@ -15,7 +15,7 @@
 ! NOTE If the two variables are going to have DIFFERENT region settings,
 ! changes will need to be made to annotate that info on the plot.
 
-
+DEFINE SYMBOL its_prop_prop_plot = 1  ! used in RESULTS.
 
 ! Define symbols associated with the region and data and perform any
 ! initialization needed for this dataset.
