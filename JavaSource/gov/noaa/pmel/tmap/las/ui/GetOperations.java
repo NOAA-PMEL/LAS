@@ -88,28 +88,35 @@ public class GetOperations extends ConfigService {
 
 			} else {
 				operations = new ArrayList<Operation>();
-				ArrayList<View> views =  new ArrayList<View>();
-				if ( xpath != null && xpath.length > 0 ) {
-					String ui_default = "";
-	                                ui_default = lasConfig.getVariablePropertyValue(xpath,"ui", "default");
-					views = lasConfig.getViewsByDefault(ui_default);
-				} else {
-					views = lasConfig.getViewsByDatasetAndVariable(dsID, varID);
-				}
 				HashMap<String, Operation> allOps = new HashMap<String, Operation>();
-				for (Iterator viewIt = views.iterator(); viewIt.hasNext();) {
-					View aView = (View) viewIt.next();
-					ArrayList<Operation> ops;
-					if ( xpath != null && xpath.length > 0 ) {
-						ops = lasConfig.getOperations(aView.getValue(), xpath);
-					} else {
-						ops = lasConfig.getOperations(aView.getValue(), dsID, varID);
+				if ( xpath != null && xpath.length > 0 ) {
+					for (int i = 0; i < xpath.length; i++) {
+						String dsid = LASConfig.getDSIDfromXPath(xpath[i]);
+						String varid = LASConfig.getVarIDfromXPath(xpath[i]);
+						ArrayList<View> views = lasConfig.getViewsByDatasetAndVariable(dsid, varid);
+						for (Iterator viewIt = views.iterator(); viewIt.hasNext();) {
+							View aView = (View) viewIt.next();
+							lasConfig.getOperations(view, xpath);
+							ArrayList<Operation> ops = lasConfig.getOperations(aView.getValue(), dsID, varID);
+							for (Iterator opsIt = ops.iterator(); opsIt.hasNext();) {
+								Operation op = (Operation) opsIt.next();
+								String id = op.getID();
+								allOps.put(id, op);
+							}
+						}
 					}
-					for (Iterator opsIt = ops.iterator(); opsIt.hasNext();) {
-						Operation op = (Operation) opsIt.next();
-						String id = op.getID();
-						allOps.put(id, op);
-					}
+				} else {
+					ArrayList<View> views = lasConfig.getViewsByDatasetAndVariable(dsID, varID);
+
+					for (Iterator viewIt = views.iterator(); viewIt.hasNext();) {
+						View aView = (View) viewIt.next();
+						ArrayList<Operation> ops = lasConfig.getOperations(aView.getValue(), dsID, varID);
+						for (Iterator opsIt = ops.iterator(); opsIt.hasNext();) {
+							Operation op = (Operation) opsIt.next();
+							String id = op.getID();
+							allOps.put(id, op);
+						}
+					}					
 				}
 				for (Iterator idIt = allOps.keySet().iterator(); idIt.hasNext();) {
 					String id = (String) idIt.next();
