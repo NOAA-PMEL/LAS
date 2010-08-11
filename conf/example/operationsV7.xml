@@ -1,4 +1,25 @@
 <operations>
+    <operation ID="Plot_2D_XY_zoom" default="true" name="Color plot"  output_template="zoom"
+        service_action="Plot_2D_XY" order="0101" category="visualization" isZoomable="true">
+        <service>ferret</service>
+        <response ID="PlotResp">
+            <result type="image" ID="plot_image" streamable="true"
+                mime_type="image/gif" file_suffix=".gif" />
+            <!-- <result type="ps" ID="plot_postscript" streamable="true"
+                mime_type="application/postscript" /> -->
+            <result type="image" ID="ref_map" file_suffix=".gif" />
+            <result type="map_scale" ID="map_scale" file_suffix=".xml"/>
+            <result type="debug" ID="debug" file_suffix=".txt"/>
+            <result type="cancel" ID="cancel" file_suffix=".txt"/>
+        </response>
+        <region>
+            <intervals name="xy" type="Maps" title="Latitude-Longitude"/>
+        </region>
+        <grid_types>
+            <grid_type name="regular" />
+        </grid_types>
+        <optiondef IDREF="Options_2D_image_contour_7"/>
+    </operation>
    <operation name="V7 User Interface" ID="V7UI" output_template="V7UI" service_action="V7UI" private="true">
         <service>template</service>
    </operation>
@@ -56,7 +77,7 @@ streamable="true" mime_type="application/postscript"/> -->
           </grid_types>
           <optiondef IDREF="Options_2D_7"/>
     </operation>
-    <operation name="Difference plot" ID="Compare_Plot" output_template="output" service_action="Compare_Plot" order="0201" regrid_prn="true" private="true" category="visualization" isZoomable="true">
+    <operation name="Difference plot" ID="Compare_Plot" output_template="output" service_action="Compare_Plot" order="0201" regrid_prn="true" private="true" category="visualization" isZoomable="true" minvars="2" maxvars="2">
           <service>ferret</service>
           <response ID="PlotResp">
              <result type="image" ID="plot_image" streamable="true" mime_type="image/gif" file_suffix=".gif" />
@@ -66,13 +87,13 @@ streamable="true" mime_type="application/postscript"/> -->
 	     <result type="debug" ID="debug" file_suffix=".txt"/>
              <result type="cancel" ID="cancel" file_suffix=".txt"/>
           </response>
-          <region>
-            <intervals name="xy" />
-            <intervals name="xz" />
-            <intervals name="xt" />
-            <intervals name="yz" />
-            <intervals name="yt" />
-            <intervals name="zt" />
+        <region>
+            <intervals name="xy" type="Maps" title="Latitude-Longitude Difference"/>
+            <intervals name="xz" type="Depth Profile" title="Longitude-Depth Difference"/>
+            <intervals name="xt" type="Hovmoller Plots" title="Longitude Time Difference"/>
+            <intervals name="yz" type="Depth Profile" title="Latitude-Depth Difference"/>
+            <intervals name="yt" type="Hovmoller Plots" title="Latitude-Time Difference"/>
+            <intervals name="zt" type="Hovmoller Plots" title="Depth-Time Difference"/>
           </region>
           <grid_types>
            <grid_type name="regular"/>
@@ -150,7 +171,7 @@ streamable="true" mime_type="application/postscript"/> -->
 		</grid_types>
 	</operation>
 
-    <operation ID="Plot_1D" default="true" name="Line plot" output_template="output" service_action="Plot_1D" order="0102" category="visualization" isZoomable="false">
+    <operation ID="Plot_1D" default="true" name="Line plot" output_template="output" service_action="Plot_1D" order="0102" category="visualization" isZoomable="false" minvars="1" maxvars="10">
           <service>ferret</service>
           <response ID="PlotResp">
              <result type="image" ID="plot_image" streamable="true" mime_type="image/gif" file_suffix=".gif"/>
@@ -166,14 +187,14 @@ streamable="true" mime_type="application/postscript"/> -->
             <intervals name="y" />
             <intervals name="z" />
           -->
-            <intervals name="t" />
+            <intervals name="t" type="Line Plots" title="Time Series"/>
           </region>
           <grid_types>
             <grid_type name="regular" />
           </grid_types>
           <optiondef IDREF="Options_1D_7"/>
     </operation>
-    <operation ID="Plot_1D_zoom" default="true" name="Line plot" output_template="zoom" service_action="Plot_1D" order="0102" category="visualization"  isZoomable="true">
+    <operation ID="Plot_1D_zoom" default="true" name="Line plot" type="Line Plots" output_template="zoom" service_action="Plot_1D" order="0102" category="visualization"  isZoomable="true" minvars="1" maxvars="10">
           <service>ferret</service>
           <response ID="PlotResp">
              <result type="image" ID="plot_image" streamable="true" mime_type="image/gif" file_suffix=".gif"/>
@@ -184,9 +205,9 @@ streamable="true" mime_type="application/postscript"/> -->
              <result type="cancel" ID="cancel" file_suffix=".txt"/>
           </response>
           <region>
-            <intervals name="x" />
-            <intervals name="y" />
-            <intervals name="z" />
+            <intervals name="x" type="Line Plots" title="Longitude"/>
+            <intervals name="y" type="Line Plots" title="Latitude"/>
+            <intervals name="z" type="Line Plots" title="Depth"/>
             <!--<intervals name="t" />-->
           </region>
           <grid_types>
@@ -232,6 +253,7 @@ streamable="true" mime_type="application/postscript"/> -->
         <region>
             <intervals name="xy" />
         </region>
+	
         <grid_types>
             <grid_type name="regular" />
         </grid_types>
@@ -632,15 +654,19 @@ streamable="true" mime_type="application/postscript"/> -->
             <result type="debug" ID="debug" file_suffix=".txt"/>
             <result type="cancel" ID="cancel" file_suffix=".txt"/>
         </response>
+	<visualization_types>
+                <type name="Hovmoller Plots" />
+		<type name="Line Plots" />
+        </visualization_types>
         <region>
 	    <!--<intervals name="xy" />-->
 	    <!--  These zoom 
             <intervals name="xz" />
             <intervals name="yz" />
             -->
-            <intervals name="xt" />
-            <intervals name="yt" />
-            <intervals name="zt" />
+            <intervals name="xt" type="Hovmoller Plots" title="Longitude-Time"/>
+            <intervals name="yt" type="Hovmoller Plots" title="Latitude-Time"/>
+            <intervals name="zt" type="Hovmoller Plots" title="Depth-Time"/>
         </region>
         <grid_types>
             <grid_type name="regular" />
@@ -662,34 +688,8 @@ streamable="true" mime_type="application/postscript"/> -->
             <result type="cancel" ID="cancel" file_suffix=".txt"/>
         </response>
         <region>
-	    <!--<intervals name="xy" />-->
-            <intervals name="xz" />
-            <!--<intervals name="xt" />-->
-            <intervals name="yz" />
-            <!--<intervals name="yt" />-->
-            <!--<intervals name="zt" />-->
-
-        </region>
-        <grid_types>
-            <grid_type name="regular" />
-        </grid_types>
-        <optiondef IDREF="Options_2D_image_contour_7"/>
-    </operation>
-    <operation ID="Plot_2D_XY_zoom" default="true" name="Color plot" output_template="zoom"
-        service_action="Plot_2D_XY" order="0101" category="visualization" isZoomable="true">
-        <service>ferret</service>
-        <response ID="PlotResp">
-            <result type="image" ID="plot_image" streamable="true"
-                mime_type="image/gif" file_suffix=".gif" />
-            <!-- <result type="ps" ID="plot_postscript" streamable="true"
-                mime_type="application/postscript" /> -->
-            <result type="image" ID="ref_map" file_suffix=".gif" />
-            <result type="map_scale" ID="map_scale" file_suffix=".xml"/>
-            <result type="debug" ID="debug" file_suffix=".txt"/>
-            <result type="cancel" ID="cancel" file_suffix=".txt"/>
-        </response>
-        <region>
-            <intervals name="xy" />
+            <intervals name="xz" type="Depth Profiles" title="Longitude-Depth"/>
+            <intervals name="yz" type="Depth Profiles" title="Latitude-Depth"/>
         </region>
         <grid_types>
             <grid_type name="regular" />
@@ -711,19 +711,19 @@ streamable="true" mime_type="application/postscript"/> -->
             <result type="cancel" ID="cancel" file_suffix=".txt"/>
         </response>
         <region>
-            <intervals name="xy" />
-            <intervals name="xz" />
-            <intervals name="xt" />
-            <intervals name="yz" />
-            <intervals name="yt" />
-            <intervals name="zt" />
+            <intervals name="xy" type="Maps" title="Latitude-Longitude" />
+            <intervals name="xz" type="Depth Profiles" title="Longitude-Depth" />
+            <intervals name="xt" type="Hovmoller Plots" title="Longitude-Time" />
+            <intervals name="yz" type="Depth Profiles" title="Latitude-Depth" />
+            <intervals name="yt" type="Hovmoller Plots" title="Latitude-Time" />
+            <intervals name="zt" type="Hovmoller Plots" title="Depth-Time" />
         </region>
         <grid_types>
             <grid_type name="vector" />
         </grid_types>
-        <optiondef IDREF="Options_Vector_7"/>
+        <optiondef IDREF="Options_Vector_7" />
     </operation>
-    <operation name="Vector comparison plot" ID="Compare_Vectors"
+    <operation name="Vector comparison" ID="Compare_Vectors" minvars="2" maxvars="2"
         output_template="zoom" service_action="Compare_Vectors" order="0103" private="false" category="visualization" isZoomable="true">
         <service>ferret</service>
         <response ID="PlotResp">
@@ -737,12 +737,12 @@ streamable="true" mime_type="application/postscript"/> -->
             <result type="cancel" ID="cancel" file_suffix=".txt"/>
         </response>
         <region>
-            <intervals name="xy" />
-            <intervals name="xz" />
-            <intervals name="xt" />
-            <intervals name="yz" />
-            <intervals name="yt" />
-            <intervals name="zt" />
+            <intervals name="xy" type="Comparison Plots" title="Vector Comparison Map"/>
+            <intervals name="xz" type="Comparison Plots" title="Longitude-Depth Vector Comparison"/>
+            <intervals name="xt" type="Comparison Plots" title="Longitude-Time Vector Comparison"/>
+            <intervals name="yz" type="Comparison Plots" title="Latitude-Depth Vector Comparison"/>
+            <intervals name="yt" type="Comparison Plots" title="Latitude-Time Vector Comparison"/>
+            <intervals name="zt" type="Comparison Plots" title="Depth-Time Vector Comparison"/>
         </region>
         <grid_types>
             <grid_type name="regular" />
@@ -1037,23 +1037,24 @@ streamable="true" mime_type="application/postscript"/> -->
                </response>
                <service>ferret</service>
           </operation>
+
           <region>
           <!-- Not sure about this since the plot is planar in XY but the extract doesn't have to be. -->
-            <intervals name="x" />
-            <intervals name="y" />
-            <intervals name="z" />
-            <intervals name="t" />
-            <intervals name="xy" />
-            <intervals name="xz" />
-            <intervals name="xt" />
-            <intervals name="yz" />
-            <intervals name="yt" />
-            <intervals name="zt" />
-            <intervals name="xyz" />
-            <intervals name="xyt" />
-            <intervals name="xzt" />
-            <intervals name="yzt" />
-            <intervals name="xyzt" />
+            <intervals name="x"   type="Maps" title="Location Plot"/>
+            <intervals name="y"   type="Maps" title="Location Plot"/>
+            <intervals name="z"   type="Maps" title="Location Plot"/>
+            <intervals name="t"   type="Maps" title="Location Plot"/>
+            <intervals name="xy"   type="Maps" title="Location Plot"/>
+            <intervals name="xz"   type="Maps" title="Location Plot"/>
+            <intervals name="xt"   type="Maps" title="Location Plot"/>
+            <intervals name="yz"   type="Maps" title="Location Plot"/>
+            <intervals name="yt"   type="Maps" title="Location Plot"/>
+            <intervals name="zt"   type="Maps" title="Location Plot"/>
+            <intervals name="xyz"   type="Maps" title="Location Plot"/>
+            <intervals name="xyt"   type="Maps" title="Location Plot"/>
+            <intervals name="xzt"   type="Maps" title="Location Plot"/>
+            <intervals name="yzt"   type="Maps" title="Location Plot"/>
+            <intervals name="xyzt"   type="Maps" title="Location Plot"/>
         </region>
         <grid_types>
             <grid_type name="scattered" />
@@ -1096,23 +1097,26 @@ streamable="true" mime_type="application/postscript"/> -->
             </response>
             <service>ferret</service>
         </operation>
+	<visualization_types>
+                <type name="Maps" />
+        </visualization_types>
         <region>
             <!-- Not sure about this since the plot is planar in XY but the extract doesn't have to be. -->
-            <intervals name="x" />
-            <intervals name="y" />
-            <intervals name="z" />
-            <intervals name="t" />
-            <intervals name="xy" />
-            <intervals name="xz" />
-            <intervals name="xt" />
-            <intervals name="yz" />
-            <intervals name="yt" />
-            <intervals name="zt" />
-            <intervals name="xyz" />
-            <intervals name="xyt" />
-            <intervals name="xzt" />
-            <intervals name="yzt" />
-            <intervals name="xyzt" />
+            <intervals name="x"   type="Maps" title="Location Plot"/>
+            <intervals name="y"   type="Maps" title="Location Plot"/>
+            <intervals name="z"   type="Maps" title="Location Plot"/>
+            <intervals name="t"   type="Maps" title="Location Plot"/>
+            <intervals name="xy"   type="Maps" title="Location Plot"/>
+            <intervals name="xz"   type="Maps" title="Location Plot"/>
+            <intervals name="xt"   type="Maps" title="Location Plot"/>
+            <intervals name="yz"   type="Maps" title="Location Plot"/>
+            <intervals name="yt"   type="Maps" title="Location Plot"/>
+            <intervals name="zt"   type="Maps" title="Location Plot"/>
+            <intervals name="xyz"   type="Maps" title="Location Plot"/>
+            <intervals name="xyt"   type="Maps" title="Location Plot"/>
+            <intervals name="xzt"   type="Maps" title="Location Plot"/>
+            <intervals name="yzt"   type="Maps" title="Location Plot"/>
+            <intervals name="xyzt"   type="Maps" title="Location Plot"/>
         </region>
         <grid_types>
             <grid_type name="scattered" />
@@ -1173,23 +1177,26 @@ streamable="true" mime_type="application/postscript"/> -->
             </response>
             <service>ferret</service>
         </operation>
+	<visualization_types>
+                <type name="Maps" />
+        </visualization_types>
         <region>
             <!-- Not sure about this since the plot is planar in XY but the extract doesn't have to be. -->
-            <intervals name="x" />
-            <intervals name="y" />
-            <intervals name="z" />
-            <intervals name="t" />
-            <intervals name="xy" />
-            <intervals name="xz" />
-            <intervals name="xt" />
-            <intervals name="yz" />
-            <intervals name="yt" />
-            <intervals name="zt" />
-            <intervals name="xyz" />
-            <intervals name="xyt" />
-            <intervals name="xzt" />
-            <intervals name="yzt" />
-            <intervals name="xyzt" />
+            <intervals name="x"   type="Maps" title="Location Plot"/>
+            <intervals name="y"   type="Maps" title="Location Plot"/>
+            <intervals name="z"   type="Maps" title="Location Plot"/>
+            <intervals name="t"   type="Maps" title="Location Plot"/>
+            <intervals name="xy"   type="Maps" title="Location Plot"/>
+            <intervals name="xz"   type="Maps" title="Location Plot"/>
+            <intervals name="xt"   type="Maps" title="Location Plot"/>
+            <intervals name="yz"   type="Maps" title="Location Plot"/>
+            <intervals name="yt"   type="Maps" title="Location Plot"/>
+            <intervals name="zt"   type="Maps" title="Location Plot"/>
+            <intervals name="xyz"   type="Maps" title="Location Plot"/>
+            <intervals name="xyt"   type="Maps" title="Location Plot"/>
+            <intervals name="xzt"   type="Maps" title="Location Plot"/>
+            <intervals name="yzt"   type="Maps" title="Location Plot"/>
+            <intervals name="xyzt"   type="Maps" title="Location Plot"/>
         </region>
         <grid_types>
             <grid_type name="scattered" />
@@ -1234,23 +1241,26 @@ streamable="true" mime_type="application/postscript"/> -->
             </response>
             <service>ferret</service>
         </operation>
+        <visualization_types>
+                <type name="Maps" />
+        </visualization_types>
         <region>
             <!-- Not sure about this since the plot is planar in XY but the extract doesn't have to be. -->
-            <intervals name="x" />
-            <intervals name="y" />
-            <intervals name="z" />
-            <intervals name="t" />
-            <intervals name="xy" />
-            <intervals name="xz" />
-            <intervals name="xt" />
-            <intervals name="yz" />
-            <intervals name="yt" />
-            <intervals name="zt" />
-            <intervals name="xyz" />
-            <intervals name="xyt" />
-            <intervals name="xzt" />
-            <intervals name="yzt" />
-            <intervals name="xyzt" />
+            <intervals name="x"  type="Maps" title="Location Plot" />
+            <intervals name="y"  type="Maps" title="Location Plot" />
+            <intervals name="z"  type="Maps" title="Location Plot" />
+            <intervals name="t"  type="Maps" title="Location Plot" />
+            <intervals name="xy"  type="Maps" title="Location Plot" />
+            <intervals name="xz"  type="Maps" title="Location Plot" />
+            <intervals name="xt"  type="Maps" title="Location Plot" />
+            <intervals name="yz"  type="Maps" title="Location Plot" />
+            <intervals name="yt"  type="Maps" title="Location Plot" />
+            <intervals name="zt"  type="Maps" title="Location Plot" />
+            <intervals name="xyz"  type="Maps" title="Location Plot" />
+            <intervals name="xyt"  type="Maps" title="Location Plot" />
+            <intervals name="xzt"  type="Maps" title="Location Plot" />
+            <intervals name="yzt"  type="Maps" title="Location Plot" />
+            <intervals name="xyzt"  type="Maps" title="Location Plot" />
         </region>
         <grid_types>
             <grid_type name="scattered" />
@@ -1294,23 +1304,26 @@ streamable="true" mime_type="application/postscript"/> -->
             </response>
             <service>ferret</service>
         </operation>
+        <visualization_types>
+                <type name="Maps" />
+        </visualization_types>
         <region>
 	    <!-- Not sure about this since the plot is planar in XY but the extract doesn't have to be. -->
-	    <intervals name="x" />
-	    <intervals name="y" />
-	    <intervals name="z" />
-	    <intervals name="t" />
-	    <intervals name="xy" />
-	    <intervals name="xz" />
-	    <intervals name="xt" />
-	    <intervals name="yz" />
-	    <intervals name="yt" />
-	    <intervals name="zt" />
-	    <intervals name="xyz" />
-	    <intervals name="xyt" />
-	    <intervals name="xzt" />
-	    <intervals name="yzt" />
-	    <intervals name="xyzt" />
+	    <intervals name="x"  type="Maps" title="Location Plot" />
+	    <intervals name="y"  type="Maps" title="Location Plot" />
+	    <intervals name="z"  type="Maps" title="Location Plot" />
+	    <intervals name="t"  type="Maps" title="Location Plot" />
+	    <intervals name="xy"  type="Maps" title="Location Plot" />
+	    <intervals name="xz"  type="Maps" title="Location Plot" />
+	    <intervals name="xt"  type="Maps" title="Location Plot" />
+	    <intervals name="yz"  type="Maps" title="Location Plot" />
+	    <intervals name="yt"  type="Maps" title="Location Plot" />
+	    <intervals name="zt"  type="Maps" title="Location Plot" />
+	    <intervals name="xyz"  type="Maps" title="Location Plot" />
+	    <intervals name="xyt"  type="Maps" title="Location Plot" />
+	    <intervals name="xzt"  type="Maps" title="Location Plot" />
+	    <intervals name="yzt"  type="Maps" title="Location Plot" />
+	    <intervals name="xyzt"  type="Maps" title="Location Plot" />
 	</region>
 	<grid_types>
 	    <grid_type name="scattered" />
@@ -1376,21 +1389,21 @@ streamable="true" mime_type="application/postscript"/> -->
         </operation>
         <region>
             <!-- Not sure about this since the plot is planar in XY but the extract doesn't have to be. -->
-            <intervals name="x" />
-            <intervals name="y" />
-            <intervals name="z" />
-            <intervals name="t" />
-            <intervals name="xy" />
-            <intervals name="xz" />
-            <intervals name="xt" />
-            <intervals name="yz" />
-            <intervals name="yt" />
-            <intervals name="zt" />
-            <intervals name="xyz" />
-            <intervals name="xyt" />
-            <intervals name="xzt" />
-            <intervals name="yzt" />
-            <intervals name="xyzt" />
+            <intervals name="x" type="Maps" title="Location Plot" />
+            <intervals name="y"  type="Maps" title="Location Plot" />
+            <intervals name="z"  type="Maps" title="Location Plot" />
+            <intervals name="t"  type="Maps" title="Location Plot" />
+            <intervals name="xy"  type="Maps" title="Location Plot" />
+            <intervals name="xz"  type="Maps" title="Location Plot" />
+            <intervals name="xt"  type="Maps" title="Location Plot" />
+            <intervals name="yz"  type="Maps" title="Location Plot" />
+            <intervals name="yt"  type="Maps" title="Location Plot" />
+            <intervals name="zt"  type="Maps" title="Location Plot" />
+            <intervals name="xyz"  type="Maps" title="Location Plot" />
+            <intervals name="xyt"  type="Maps" title="Location Plot" />
+            <intervals name="xzt"  type="Maps" title="Location Plot" />
+            <intervals name="yzt"  type="Maps" title="Location Plot" />
+            <intervals name="xyzt"  type="Maps" title="Location Plot" />
         </region>
         <grid_types>
             <grid_type name="scattered" />
@@ -1434,23 +1447,26 @@ streamable="true" mime_type="application/postscript"/> -->
             </response>
             <service>ferret</service>
         </operation>
+        <visualization_types>
+                <type name="Maps" />
+        </visualization_types>
         <region>
             <!-- Not sure about this since the plot is planar in XY but the extract doesn't have to be. -->
-            <intervals name="x" />
-            <intervals name="y" />
-            <intervals name="z" />
-            <intervals name="t" />
-            <intervals name="xy" />
-            <intervals name="xz" />
-            <intervals name="xt" />
-            <intervals name="yz" />
-            <intervals name="yt" />
-            <intervals name="zt" />
-            <intervals name="xyz" />
-            <intervals name="xyt" />
-            <intervals name="xzt" />
-            <intervals name="yzt" />
-            <intervals name="xyzt" />
+            <intervals name="x"  type="Maps" title="Location Plot" />
+            <intervals name="y"  type="Maps" title="Location Plot" />
+            <intervals name="z"  type="Maps" title="Location Plot" />
+            <intervals name="t"  type="Maps" title="Location Plot" />
+            <intervals name="xy"  type="Maps" title="Location Plot" />
+            <intervals name="xz"  type="Maps" title="Location Plot" />
+            <intervals name="xt"  type="Maps" title="Location Plot" />
+            <intervals name="yz"  type="Maps" title="Location Plot" />
+            <intervals name="yt"  type="Maps" title="Location Plot" />
+            <intervals name="zt"  type="Maps" title="Location Plot" />
+            <intervals name="xyz"  type="Maps" title="Location Plot" />
+            <intervals name="xyt"  type="Maps" title="Location Plot" />
+            <intervals name="xzt"  type="Maps" title="Location Plot" />
+            <intervals name="yzt"  type="Maps" title="Location Plot" />
+            <intervals name="xyzt"  type="Maps" title="Location Plot" />
         </region>
         <grid_types>
             <grid_type name="scattered" />
@@ -1579,5 +1595,27 @@ streamable="true" mime_type="application/postscript"/> -->
     	<grid_types>
     		<grid_type name="regular" />
     	</grid_types>
+    </operation>
+    <operation default="true" category="visualization" name="Property Property Plot" ID="prop_prop_plot" service_action="prop_prop_plot" output_template="zoom" minvars="2" maxvars="2">
+               <response ID="PlotResp" type="HTML" index="1">
+                    <result type="map_scale" ID="map_scale" file_suffix=".xml"/>
+                    <result type="image" ID="plot_image" streamable="true" mime_type="image/png" file_suffix=".gif"/>
+                    <result type="debug" ID="debug" file_suffix=".txt"/>
+                    <result type="xml" ID="webrowset" file_suffix=".xml"/>
+                    <result type="cancel" ID="cancel" />
+               </response>
+		<region>
+                        <intervals name="xyz"   type="Comparison Plots" title="Property-Property" />
+                        <intervals name="xyt"   type="Comparison Plots" title="Property-Property" />
+                        <intervals name="xyzt"   type="Comparison Plots" title="Property-Property" />
+			<degenerate />
+	        </region>
+        	<visualization_types>
+                	<type name="Comparison Plots" />
+ 	        </visualization_types>
+                <grid_types>
+                	<grid_type name="regular" />
+	        </grid_types>
+		<service>ferret</service>
     </operation>
 </operations>

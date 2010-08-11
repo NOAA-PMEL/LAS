@@ -941,7 +941,7 @@ LASUI.prototype.setOperationList = function (strJson) {
 	 for(var i=0;i<this.state.operations.getOperationCount();i++) 
 		if(document.getElementById(this.state.operations.getOperationName(i))) {
 			document.getElementById(this.state.operations.getOperationName(i)).style.visibility='visible';
-			document.getElementById(this.state.operations.getOperationName(i)).onclick="javascript:LAS.state.operation.external='"+this.state.operations.getOperationID(i)+"';LAS.makeRequest('external')";
+			document.getElementById(this.state.operations.getOperationName(i)).onclick="LAS.state.operation.external='"+this.state.operations.getOperationID(i)+"';LAS.makeRequest('external')";
 		}
 
 	if(this.state.operations.getOperationByID(this.state.operation.plot).optiondef) {
