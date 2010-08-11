@@ -85,10 +85,16 @@ function submitXML() {
     axes="xyzt";
     if(H_axis&&axes.search(H_axis)>=0) 
     	Req.setRange(H_axis,myMapWidget.extents.selection.grid.x.min,myMapWidget.extents.selection.grid.x.max);
+    else {
+	 Req.addVariableConstraint(Req.getDataset(0), H_axis,"lt",myMapWidget.extents.selection.grid.x.max);
+    	 Req.addVariableConstraint(Req.getDataset(0), H_axis,"gt",myMapWidget.extents.selection.grid.x.min);
+    }
     if(V_axis&&axes.search(V_axis)>=0)
 	Req.setRange(V_axis,myMapWidget.extents.selection.grid.y.min,myMapWidget.extents.selection.grid.y.max);
-    
-   
+    else {
+	 Req.addVariableConstraint(Req.getDataset(0), V_axis,"lt",myMapWidget.extents.selection.grid.y.max);
+         Req.addVariableConstraint(Req.getDataset(0), V_axis,"gt",myMapWidget.extents.selection.grid.y.min);	
+    }
     var URL = './ProductServer.do?xml=' + escape(Req.getXMLText());
     document.location = URL;
   }

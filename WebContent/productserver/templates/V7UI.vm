@@ -152,7 +152,10 @@
                                         "Longitude-time" : {"view" : "xt", "class" : "visualization", "id" : "init", "optiondef" : ""}, //Options_2D_image_contour"},
                                         "Latitude-time" : {"view" : "yt", "class" : "visualization", "id" : "init", "optiondef" : ""}, //Options_2D_image_contour"},
                                         "Depth-time" : {"view" : "zt", "class" : "visualization", "id" : "init", "optiondef" : ""} //Options_2D_image_contour"}                                                                  
-                                }
+                                },
+				"Comparison Plots" : {
+					"Property-property" : {"view" : "xyt", "class" : "visualization", "id" : "init", "optiondef" : ""} //Options_2D_image_contour"}
+				}
                         };
                         LAS.params = {
 #if ($request.getParameter('openid')!="")
