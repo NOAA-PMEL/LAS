@@ -88,7 +88,7 @@ function LASGetGridResponse(response) {
   this.hasAxis = LASGetGridResponse_hasAxis;
   this.hasArange = LASGetGridResponse_hasArange;
   this.hasMenu = LASGetGridResponse_hasMenu;
-
+  this.hasView =  LASGetGridResponse_hasView;
   this.getAxis = LASGetGridResponse_getAxis;	
   this.getLo = LASGetGridResponse_getLo;
   this.getHi = LASGetGridResponse_getHi;
@@ -140,7 +140,12 @@ function LASGetGridResponse_getAxis(axis) {
   }
   return value;
 }
-
+function LASGetGridResponse_hasView(view) {
+    for(var i=0;i<view.length;i++)
+	if(!this.hasAxis(view[i]))
+		return false;
+    return true;
+}
 /**
  * Returns Boolean True if the specified axis exists in the grid.
  * @param {string} axis axis of interest
