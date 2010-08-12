@@ -190,6 +190,10 @@ LET/TITLE="Latitude"/units=degrees  ycoord = ($ferret_curvi_coord_lat)[d=($data_
 
 IF ($ferret_view"|xy>1|*>0") THEN
 
+! Unless its a prop/prop plot, label as a native curv plot.
+   DEFINE SYMBOL native_lab = Native Curvilinear Plot
+   IF ($its_prop_prop_plot"0|*>1") THEN CANCEL SYMBOL native_lab 
+
    DEFINE SYMBOL native_curvilinear_xy = 1
 
 ! Get the range of I,J needed to grab the region. Use it to define the plot or output variable.
@@ -220,7 +224,7 @@ IF ($ferret_view"|xy>1|*>0") THEN
       DEFINE SYMBOL ferret_plot_var ($expr1)plot_var[d=($data_num)]($expr2), xcoord, ycoord
       DEFINE SYMBOL ferret_plot_var_m360 ($expr1)plot_var[d=($data_num)]($expr2), xcoord-360, ycoord
    ENDIF
-   DEFINE SYMBOL ferret_plot_title "($expr1)($data_title)($expr2) ($data_units) Native Curvilinear Plot"
+   DEFINE SYMBOL ferret_plot_title "($expr1)($data_title)($expr2) ($data_units) ($native_lab)"
 
    IF ($expr3"0|*>1") THEN
       DEFINE SYMBOL ferret_plot_var ($expr1)plot_var[d=($data_num)]($expr3)plot_var[d=($data_num)]($expr4), xcoord, ycoord
@@ -231,7 +235,7 @@ IF ($ferret_view"|xy>1|*>0") THEN
          DEFINE SYMBOL ferret_plot_var_m360 \
              ($expr1)plot_var[d=($data_num)]($expr3)plot_var[d=($data_num)]($expr4), xcoord-360, ycoord
       ENDIF
-      DEFINE SYMBOL ferret_plot_title "($expr1)($data_title)($expr3)($data_title)($expr4) ($data_units) Native Curvilinear Plot"
+      DEFINE SYMBOL ferret_plot_title "($expr1)($data_title)($expr3)($data_title)($expr4) ($data_units) ($native_lab)"
    ENDIF
 
 ! and if the longitudes are in a different modulo branch than requested add /MODULO
