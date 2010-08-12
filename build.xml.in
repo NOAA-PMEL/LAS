@@ -100,7 +100,7 @@
 		<javac srcdir="JavaSource"
 			includes="gov/**,au/**,org/**,dods/**,gnu/**"
 			destdir="WebContent/WEB-INF/classes" debug="on" optimize="off"
-			deprecation="off">
+			deprecation="off" includeantruntime="false">
 			<classpath>
 				<pathelement path="classes" />
 				<fileset dir="WebContent/WEB-INF/lib">
