@@ -426,7 +426,7 @@ LASUI.prototype.createVariableList = function () {
 			var selected = false;
 
 		var OPTIONNode = new Option(node.getChildName(i),node.getChildID(i),false,selected);
-		//OPTIONNode.onselect = this.setVariable.LASBind(this, node, i, true);
+		OPTIONNode.onselect = this.getOperations.LASBind(this);
 		OPTIONNode.id = node.getChildID(i);
 		OPTIONNode.value ="/lasdata/datasets/"+node.getDatasetID()+"/variables/"+node.getChildID(i);
 		select.options[select.length] = OPTIONNode;
@@ -507,51 +507,6 @@ LASUI.prototype.getCategory = function (parentNode, i) {
 	}
 }
 LASUI.prototype.onSetVariable = function() {
-		document.getElementById('constraints').style.visibility="visible";
-		if(document.getElementById('categories'))
-			document.getElementById('categories').style.display='none';
-		this.toggleUIMask('none');
-		if(this.state.categorynames)
-		if(this.state.categorynames.length>0) {
-			var categories = this.state.categorynames[0];
-			for(var i=1;i<this.state.categorynames.length;i++)
-				categories += ' / ' + this.state.categorynames[i];
-		}
-		else
-			var categories = this.state.datasets[this.state.dataset].getDatasetName();
-
-		var info = this.info_icon.cloneNode(true);
-		info.onclick = this.getMetadata.LASBind(this);
-		var delvar = document.createElement("A");
-		delvar.onclick=this.removeVariable.LASBind(this);
-		delvar.appendChild(document.createTextNode('remove variable'));
-		delvar.name="del";
-		delvar.href="javascript:";
-		delvar.style.display='none';
-		var addvar=document.createElement("A");
-		addvar.name="add";
-		addvar.href="javascript:"
-		addvar.onclick = this.addVariable.LASBind(this); 
-	 	addvar.appendChild(document.createTextNode('add variable'));
-
-		var cats = document.createElement("TEXT");
-		cats.innerHTML= categories;
- 		
-		if(document.getElementsByName(this.anchors.breadcrumb).item(0)) {
-			while (document.getElementsByName(this.anchors.breadcrumb).item(0).firstChild)
-			  document.getElementsByName(this.anchors.breadcrumb).item(0).removeChild(document.getElementsByName(this.anchors.breadcrumb).item(0).firstChild);
-			document.getElementsByName(this.anchors.breadcrumb).item(0).appendChild(document.createTextNode('\u00a0'));
-			document.getElementsByName(this.anchors.breadcrumb).item(0).appendChild(info);
-			document.getElementsByName(this.anchors.breadcrumb).item(0).appendChild(document.createTextNode('\u00a0'));
-			document.getElementsByName(this.anchors.breadcrumb).item(0).appendChild(cats);
-			document.getElementsByName(this.anchors.breadcrumb).item(0).appendChild(document.createTextNode('\u00a0'));
-		}	
-		this.createVariableList({"category" : this.state.datasets[this.state.dataset]},i);
-				
-		document.getElementsByName(this.anchors.breadcrumb).item(0).appendChild(document.createTextNode('\u00a0'));
-                document.getElementsByName(this.anchors.breadcrumb).item(0).appendChild(addvar);
-		document.getElementsByName(this.anchors.breadcrumb).item(0).appendChild(document.createTextNode('\u00a0'));
-		document.getElementsByName(this.anchors.breadcrumb).item(0).appendChild(delvar);
 
 		var varObj = this.state.datasets[this.state.dataset].getChildByID(this.state.variable);
  		if(varObj) {
@@ -586,6 +541,7 @@ LASUI.prototype.addVariable = function(evt) {
                 if(newvar.children.item(i).name=="del")
                         newvar.children.item(i).onclick = this.removeVariable.LASBind(this);
 	}
+	this.getOperations();
 
 }
 LASUI.prototype.removeVariable = function(evt) {
@@ -595,7 +551,7 @@ LASUI.prototype.removeVariable = function(evt) {
 	if(document.getElementsByName('del').length==1)
 		for(var i=0;i<document.getElementsByName('del').length;i++)
                         document.getElementsByName('del').item(i).style.display='none';
-	this.getViews(null,null,null);
+	this.getOperations();
 }
 /**
  * Event handler for category selection, bind to category DOM object events.
@@ -685,6 +641,52 @@ LASUI.prototype.setVariable = function (evt) {
         this.state.lastDataset = this.state.dataset;
 	this.state.dataset = datasetID;
 	this.state.variable = variableID;
+		document.getElementById('constraints').style.visibility="visible";
+		if(document.getElementById('categories'))
+			document.getElementById('categories').style.display='none';
+		this.toggleUIMask('none');
+		if(this.state.categorynames)
+		if(this.state.categorynames.length>0) {
+			var categories = this.state.categorynames[0];
+			for(var i=1;i<this.state.categorynames.length;i++)
+				categories += ' / ' + this.state.categorynames[i];
+		}
+		else
+			var categories = this.state.datasets[this.state.dataset].getDatasetName();
+
+		var info = this.info_icon.cloneNode(true);
+		info.onclick = this.getMetadata.LASBind(this);
+		var delvar = document.createElement("A");
+		delvar.onclick=this.removeVariable.LASBind(this);
+		delvar.appendChild(document.createTextNode('remove variable'));
+		delvar.name="del";
+		delvar.href="javascript:";
+		delvar.style.display='none';
+		var addvar=document.createElement("A");
+		addvar.name="add";
+		addvar.href="javascript:"
+		addvar.onclick = this.addVariable.LASBind(this); 
+	 	addvar.appendChild(document.createTextNode('add variable'));
+
+		var cats = document.createElement("TEXT");
+		cats.innerHTML= categories;
+ 		
+		if(document.getElementsByName(this.anchors.breadcrumb).item(0)) {
+			while (document.getElementsByName(this.anchors.breadcrumb).item(0).firstChild)
+			  document.getElementsByName(this.anchors.breadcrumb).item(0).removeChild(document.getElementsByName(this.anchors.breadcrumb).item(0).firstChild);
+			document.getElementsByName(this.anchors.breadcrumb).item(0).appendChild(document.createTextNode('\u00a0'));
+			document.getElementsByName(this.anchors.breadcrumb).item(0).appendChild(info);
+			document.getElementsByName(this.anchors.breadcrumb).item(0).appendChild(document.createTextNode('\u00a0'));
+			document.getElementsByName(this.anchors.breadcrumb).item(0).appendChild(cats);
+			document.getElementsByName(this.anchors.breadcrumb).item(0).appendChild(document.createTextNode('\u00a0'));
+		}	
+		this.createVariableList({"category" : this.state.datasets[this.state.dataset]},i);
+				
+		document.getElementsByName(this.anchors.breadcrumb).item(0).appendChild(document.createTextNode('\u00a0'));
+                document.getElementsByName(this.anchors.breadcrumb).item(0).appendChild(addvar);
+		document.getElementsByName(this.anchors.breadcrumb).item(0).appendChild(document.createTextNode('\u00a0'));
+		document.getElementsByName(this.anchors.breadcrumb).item(0).appendChild(delvar);
+document.getElementById("ol_map_widget").onmouseover = null;
 	this.getGrid(datasetID,variableID);
 	
 	this.getDataConstraints(datasetID,variableID);
@@ -880,6 +882,31 @@ LASUI.prototype.setOperation = function (evt) {
 				delete this.state.analysis.axes[a];
 			}
 	this.state.view.widgets = view;
+	var varct=document.getElementsByName('variables').length;
+	 for(var i=0;i<this.state.operations.getOperationCount();i++) {
+		var minvars = parseInt(this.state.operations.getOperation(i).minvars);
+		if(!minvars)
+			minvars=1;
+		var maxvars = parseInt(this.state.operations.getOperation(i).maxvars);
+		if(!maxvars)
+			maxvars=1;		
+		if(document.getElementById(this.state.operations.getOperationName(i))&&this.state.operations.hasInterval(this.state.operations.getOperationID(i),view)&&minvars<=varct&&maxvars>=varct) {
+			this.setOperationNode(this.state.operations.getOperationID(i),this.state.operations.getOperationName(i));			
+		}
+	}
+	if(this.state.operations.getOperationByID(this.state.operation.plot).optiondef) {
+		if(this.state.operations.getOperationByID(this.state.operation.plot).optiondef.IDREF) {
+			this.getOptions(this.state.operations.getOperationByID(this.state.operation.plot).optiondef.IDREF, "plot", true);
+		} else {
+			document.getElementById('plotOptionsButton').style.visibility='hidden';
+			this.onSetVariable();
+	} } else {
+		document.getElementById('plotOptionsButton').style.visibility='hidden';
+		this.onSetVariable();
+	}
+
+	if(this.refs.analysis.enabled||!this.state.grid.hasAxis('t'))
+		document.getElementById('Animation').style.visibility='hidden';
 
 	this.updateConstraints(view);
 	this.state.lastVariable = this.state.variable;
@@ -919,44 +946,11 @@ LASUI.prototype.setOperationList = function (strJson) {
 				} catch (e) {}
 
 
-	//document.body.appendChild(this.refs.options.external.DOMNode);
-	//disable all nodes first
 	var setDefaultVis = true;
 	if(!this.state.operations.response.operations.error)
 		this.setDefaultProductMenu();
-	/*	for(var i=0;i<this.state.operations.getOperationCount();i++) {
-			this.setOperationNode(this.state.operations.getOperationID(i), this.state.operations.getOperationName(i));
-			if(this.state.operations.getOperation(i).category == "visualization")
-			 	if(this.state.operations.getOperation(i)["default"]=="true") {
-					this.state.operation.plot = this.state.operations.getOperationID(i);
-					setDefaultVis = false;
-				} else
-					var defaultVis = this.state.operations.getOperationID(i);
-		}
+	
 
-	if(setDefaultVis==true && defaultVis) {
-		this.state.operation.plot = defaultVis;
-	}
-*/
-	 for(var i=0;i<this.state.operations.getOperationCount();i++) 
-		if(document.getElementById(this.state.operations.getOperationName(i))) {
-			document.getElementById(this.state.operations.getOperationName(i)).style.visibility='visible';
-			document.getElementById(this.state.operations.getOperationName(i)).onclick="LAS.state.operation.external='"+this.state.operations.getOperationID(i)+"';LAS.makeRequest('external')";
-		}
-
-	if(this.state.operations.getOperationByID(this.state.operation.plot).optiondef) {
-		if(this.state.operations.getOperationByID(this.state.operation.plot).optiondef.IDREF) {
-			this.getOptions(this.state.operations.getOperationByID(this.state.operation.plot).optiondef.IDREF, "plot", true);
-		} else {
-			document.getElementById('plotOptionsButton').style.visibility='hidden';
-			this.onSetVariable();
-	} } else {
-		document.getElementById('plotOptionsButton').style.visibility='hidden';
-		this.onSetVariable();
-	}
-
-	if(this.refs.analysis.enabled||!this.state.grid.hasAxis('t'))
-		document.getElementById('Animation').style.visibility='hidden';
 }
 
 LASUI.prototype.refresh = function() {
@@ -1046,7 +1040,7 @@ LASUI.prototype.setGrid = function (strJson) {
 	this.state.grid = new LASGetGridResponse(response);
 	if(!this.state.lastgrid)
 		this.state.lastgrid = this.clone(this.state.grid);
-	this.getViews(this.state.dataset,this.state.variable);
+	this.getOperations(this.state.dataset,this.state.variable);
 }
 /**
  * Method to query the server for a list of allowed views
@@ -1101,14 +1095,20 @@ LASUI.prototype.setDefaultProductMenu = function () {
 	var defaultPlotProduct = null;
 	var defaultDownloadProduct = null;
 	var viz_types = {}
-
+	var varct=document.getElementsByName('variables').length;
 
 	//for each product category, cycle through the views it contains, and the operations that 
 	for (var type in this.state.operations.getAllOperationTypes())
 		for(var view in this.state.operations.getAllIntervals())
 			if(this.state.grid.hasView(view))
-			for(var op in this.state.operations.getOperationsByType(type))
-				if(this.state.operations.getOperationByID(op).default=="true"&&this.state.operations.getOperationByID(op).category=="visualization"&&this.state.operations.hasInterval(op,view)) {
+			for(var op in this.state.operations.getOperationsByType(type)) {
+				var minvars = parseInt(this.state.operations.getOperationByID(op).minvars);
+				if(!minvars)
+					minvars=1;
+				var maxvars = parseInt(this.state.operations.getOperationByID(op).maxvars);
+				if(!maxvars)
+					maxvars=1;
+				if(this.state.operations.getOperationByID(op).default=="true"&&this.state.operations.getOperationByID(op).category=="visualization"&&this.state.operations.hasInterval(op,view)&&minvars<=varct&&maxvars>=varct) {
 					if(!this.refs.operations.plot.children[type])
 	                                        this.setProductTypeNode(type);
 					if(!defaultPlotProduct||(this.state.operation.plot=op&&this.state.view.plot==view))
@@ -1117,13 +1117,14 @@ LASUI.prototype.setDefaultProductMenu = function () {
 						this.setProductNode(op, view, this.state.operations.getOperationIntervals(op)[view].title);
 					
 				}
+			}
 			
 
 	if(defaultPlotProduct) {
 		//this.setOperation(this,defaultPlotProduct.id,defaultPlotProduct.view,defaultPlotProduct.optiondef);
-		defaultPlotProduct.radio.onclick();
-		defaultPlotProduct.radio.checked="checked";
-		 defaultPlotProduct.radio.selected=true;
+		defaultPlotProduct.onclick();
+		defaultPlotProduct.checked="checked";
+		 defaultPlotProduct.selected=true;
 	}
 	
 	if(this.refs.analysis.enabled)
@@ -1162,7 +1163,7 @@ LASUI.prototype.setProductNode = function(id, view, product){i
 		this.refs.operations.plot.children[product].LINode.appendChild(this.refs.operations.plot.children[product].radio);
 		this.refs.operations.plot.children[product].LINode.appendChild(this.refs.operations.plot.children[product].title);
 		this.refs.operations.plot.DOMNode.appendChild(this.refs.operations.plot.children[product].LINode);
-		return {id:id, view:view, optiondef:optiondef, radio : this.refs.operations.plot.children[product].radio};
+		return this.refs.operations.plot.children[product].radio;
 }
 LASUI.prototype.onPlotLoad = function (e) {
 	

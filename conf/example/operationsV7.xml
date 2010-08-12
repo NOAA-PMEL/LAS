@@ -171,7 +171,7 @@ streamable="true" mime_type="application/postscript"/> -->
 		</grid_types>
 	</operation>
 
-    <operation ID="Plot_1D" default="true" name="Line plot" output_template="output" service_action="Plot_1D" order="0102" category="visualization" isZoomable="false" minvars="1" maxvars="10">
+    <operation ID="Plot_1D" default="true" name="Line plot" minvars="1" maxvars="12" output_template="output" service_action="Plot_1D" order="0102" category="visualization" isZoomable="false">
           <service>ferret</service>
           <response ID="PlotResp">
              <result type="image" ID="plot_image" streamable="true" mime_type="image/gif" file_suffix=".gif"/>
@@ -194,7 +194,7 @@ streamable="true" mime_type="application/postscript"/> -->
           </grid_types>
           <optiondef IDREF="Options_1D_7"/>
     </operation>
-    <operation ID="Plot_1D_zoom" default="true" name="Line plot" type="Line Plots" output_template="zoom" service_action="Plot_1D" order="0102" category="visualization"  isZoomable="true" minvars="1" maxvars="10">
+    <operation ID="Plot_1D_zoom" default="true" name="Line plot"  minvars="1" maxvars="12"  type="Line Plots" output_template="zoom" service_action="Plot_1D" order="0102" category="visualization"  isZoomable="true">
           <service>ferret</service>
           <response ID="PlotResp">
              <result type="image" ID="plot_image" streamable="true" mime_type="image/gif" file_suffix=".gif"/>
