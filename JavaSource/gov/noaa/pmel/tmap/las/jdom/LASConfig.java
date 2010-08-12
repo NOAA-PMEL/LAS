@@ -2147,30 +2147,32 @@ public class LASConfig extends LASDocument {
 	 * @return
 	 */
 	public ArrayList<Operation> getOperations(String view, String[] xpath) throws LASException, JDOMException {
-		if ( xpath.length == 1 ) {
-			return getOperations(view, xpath[0]);
-		}
 		ArrayList<Operation> operations = new ArrayList<Operation>();
-		String ui_default = "";
-		
-		for (int i = 0; i < xpath.length; i++) {
-			String dsid = LASConfig.getDSIDfromXPath(xpath[i]);
-			String varid = LASConfig.getVarIDfromXPath(xpath[i]);
-			String current_ui_default = getUIDefaultName(dsid, varid);
-			if ( !current_ui_default.equals("") || !ui_default.equals("")) {
-				if ( i > 0 ) {
-					if (!current_ui_default.equals(ui_default)) {
-						throw new LASException("The selected variables have different UI default parameters");
+		if ( xpath.length == 1 ) {
+			operations.addAll(getOperations(view, xpath[0]));
+		} else {
+			
+			String ui_default = "";
+
+			for (int i = 0; i < xpath.length; i++) {
+				String dsid = LASConfig.getDSIDfromXPath(xpath[i]);
+				String varid = LASConfig.getVarIDfromXPath(xpath[i]);
+				String current_ui_default = getUIDefaultName(dsid, varid);
+				if ( !current_ui_default.equals("") || !ui_default.equals("")) {
+					if ( i > 0 ) {
+						if (!current_ui_default.equals(ui_default)) {
+							throw new LASException("The selected variables have different UI default parameters");
+						} else {
+							ui_default = current_ui_default;
+						}
 					} else {
 						ui_default = current_ui_default;
 					}
-				} else {
-					ui_default = current_ui_default;
-				}
-			} 
-		}
-		for (int i = 0; i < xpath.length; i++) {
-			operations.addAll(getOperations(view, xpath[i]));
+				} 
+			}
+			for (int i = 0; i < xpath.length; i++) {
+				operations.addAll(getOperations(view, xpath[i]));
+			}
 		}
 		ArrayList<Operation> multi_variable_operations = new ArrayList<Operation>();
 		int var_count = xpath.length;
