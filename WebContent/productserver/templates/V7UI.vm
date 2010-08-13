@@ -133,30 +133,6 @@
                 <script type="text/javascript" language="javascript" src="JavaScript/frameworks/OpenLayersExtensions/VerticalPath.js"></script>
                  <script type="text/javascript" language="javascript">
                 var LAS = new LASUI();
-                        LAS.products = {
-                                "Maps" : {
-                                        "Latitude-Longitude" : {"view" : "xy", "class" : "visualization", "id" : "init", "optiondef" : ""} //"Options_2D_image_contour_xy"}
-                                },
-                                "Line Plots" : {
-                                        "Time series" : {"view" : "t", "class" : "visualization", "id" : "init", "optiondef" : ""}, //Options_1D"},
-                                        "Depth" : {"view" : "z", "class" : "visualization", "id" : "init", "optiondef" : ""}, //Options_1D"},
-                                        "Longitude" : {"view" : "x", "class" : "visualization", "id" : "init", "optiondef" : ""}, //Options_1D"},
-                                        "Latitude" : {"view" : "y", "class" : "visualization", "id" : "init", "optiondef" : ""} //Options_1D"}
-
-                                },
-                                "Vertical Section Plots" : {
-                                        "Longitude-depth" : {"view" : "xz", "class" : "visualization", "id" : "init", "optiondef" : ""}, //Options_2D_image_contour"},
-                                        "Latitude-depth" : {"view" : "yz", "class" : "visualization", "id" : "init", "optiondef" : ""} //Options_2D_image_contour"}                                                              
-                                },
-                                "Hofmuller Plots" : {
-                                        "Longitude-time" : {"view" : "xt", "class" : "visualization", "id" : "init", "optiondef" : ""}, //Options_2D_image_contour"},
-                                        "Latitude-time" : {"view" : "yt", "class" : "visualization", "id" : "init", "optiondef" : ""}, //Options_2D_image_contour"},
-                                        "Depth-time" : {"view" : "zt", "class" : "visualization", "id" : "init", "optiondef" : ""} //Options_2D_image_contour"}                                                                  
-                                },
-				"Comparison Plots" : {
-					"Property-property" : {"view" : "xyt", "class" : "visualization", "id" : "init", "optiondef" : ""} //Options_2D_image_contour"}
-				}
-                        };
                         LAS.params = {
 #if ($request.getParameter('openid')!="")
                                 'openid' :'$request.getParameter('openid')',

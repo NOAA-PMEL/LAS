@@ -1,6 +1,6 @@
 <operations>
     <operation ID="Plot_2D_XY_zoom" default="true" name="Color plot"  output_template="zoom"
-        service_action="Plot_2D_XY" order="0101" category="visualization" isZoomable="true">
+        service_action="Plot_2D_XY" order="0001" category="visualization" isZoomable="true">
         <service>ferret</service>
         <response ID="PlotResp">
             <result type="image" ID="plot_image" streamable="true"
