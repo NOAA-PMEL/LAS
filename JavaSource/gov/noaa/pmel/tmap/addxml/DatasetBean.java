@@ -292,7 +292,7 @@ public class DatasetBean extends LasBean {
 				}
 			}
 		}
-		if ( vectors.size() > 0 ) {
+		if ( vectors.size() > 1 ) {
 			StringBuilder vector_id = new StringBuilder();
 			StringBuilder vector_long_name = new StringBuilder("Vector of ");
 			for ( int i = 0; i < vectors.size(); i++ ) {
@@ -379,7 +379,7 @@ public class DatasetBean extends LasBean {
 					// This constructs a name based on the netCDF variables names.
 					
 					// I think we should try based on the long names first and see how we like that.
-					if ( matches > 0 && matches == vectors.size() ) {
+					if ( matches > 0 && matches == vectors.size() && vectors.size() > 1 ) {
 						
                         String vector_name = null;
 						// We have some so add it to its parent
