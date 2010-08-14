@@ -120,7 +120,7 @@ ELSE
       IF `($labnum_calend%0|*>1%)` THEN GO unlabel ($labnum_calend)
       IF `($title_size%0|*>1%)` THEN PPL LABSET ($title_size)
       IF `($ferret_dep_axis_scale"0|*>1")` THEN PPL XAXIS ($ferret_dep_axis_scale)
-      IF `($data_count"0") GT 2` THEN PPL xlab ($common_varlab)
+      IF `($common_varlab"0|*>1")` THEN PPL xlab ($common_varlab)
    PPL PLOT
 ENDIF
 
