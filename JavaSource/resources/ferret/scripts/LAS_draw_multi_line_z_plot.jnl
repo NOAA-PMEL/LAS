@@ -14,7 +14,7 @@ ENDIF
 ! titles for the plot legend and units for labeling 
 ! the plot axes.
 
-DEFINE SYMBOL common_varlab = Common Scale for All Variables
+!!DEFINE SYMBOL common_varlab = Common Scale for All Variables
 DEFINE SYMBOL units_0 = `UPCASE("($data_0_units)")`
 LET units_same = 0
 
@@ -28,7 +28,7 @@ REPEAT/range=1:`($data_count)-1`/NAME=m (  \
   LET tlen = STRLEN("($ferret_title_($m))"); \
   LET title_len = `MAX(tlen, title_len)`; \
   DEFINE SYMBOL units_($m) = `UPCASE("($data_($m)_units)")`;\
-  IF `($m) gt 1` THEN LET units_same = `(STRCMP("($units_0)", "($units_1)") EQ 0)`\
+  IF `($m) GE 1` THEN LET units_same = `(STRCMP("($units_0)", "($units_1)") EQ 0)`\
 )
 IF `units_same EQ 1` THEN DEFINE SYMBOL common_varlab = ($units_0)
 
@@ -97,7 +97,7 @@ IF `($ferret_line_or_sym%0|sym>1|*>0%)` THEN
       IF `($labnum_calend%0|*>1%)` THEN GO unlabel ($labnum_calend)
       IF `($title_size%0|*>1%)` THEN PPL LABSET ($title_size)
       IF `($ferret_dep_axis_scale"0|*>1")` THEN PPL XAXIS ($ferret_dep_axis_scale)
-      IF `($data_count"0") GT 2` THEN PPL xlab ($common_varlab)
+      IF `($common_varlab"0|*>1")` THEN PPL xlab ($common_varlab)
    PPL PLOT
 
    PLOT($qualifiers)/NOKEY/NOLAB/OVER/NOAX/COLOR=black ($ferret_plot_var_0)
