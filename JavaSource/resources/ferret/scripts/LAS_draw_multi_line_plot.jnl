@@ -31,7 +31,7 @@ REPEAT/range=1:`($data_count)-1`/NAME=m (  \
   IF `($m) gt 1` THEN LET units_same = `(STRCMP("($units_0)", "($units_1)") EQ 0)`\
 )
 IF `units_same EQ 1` THEN DEFINE SYMBOL common_varlab = ($units_0)
-pause
+
 ! Set the labels for the upper left listing the locations
 ! and time in directions normal to the plot.
 
@@ -79,6 +79,49 @@ ENDIF
 ! If 2 variables, label units on axis; otherwise dont
 IF `($data_count) GT 2 AND ($two_axes"0") EQ 0` THEN DEFINE SYMBOL qualifiers = ($qualifiers)/NOLAB 
 
+DEFINE SYMBOL color0 = black
+DEFINE SYMBOL color1 = red
+DEFINE SYMBOL color2 = green
+DEFINE SYMBOL color3 = blue
+DEFINE SYMBOL color4 = lightblue
+DEFINE SYMBOL color5 = purple
+
+IF `(units_same NE 1) AND (($data_count) GT 2)` THEN
+   SET WIN/ASP=0.6
+   LET margin_del = 0.05
+   LET xpl = `1 - margin_del* (($data_count)-1)`
+   LET ypl = 1
+   PPL AXLSZE,,0.08
+   PPL AXNSIG,,2
+
+! Draw the plot axes in colors to match the lines
+
+   REPEAT/RANGE=1:($data_count)/name=m (\
+      DEFINE SYMBOL vm = `m-1`; \
+      DEFINE VIEWPORT/X=0:`xpl`/y=0:`ypl` v($vm); \
+      SET VIEW v($vm); \
+      PPL PEN,0,`m`;\
+      PLOT/SYM/AXES=0,0,0,1/COLOR=white/NOLAB ($ferret_plot_var_($vm));\
+      PPL PEN,0,1;\
+      LET xpl = `xpl + margin_del`)
+
+! Draw the lines each in its own viewport
+   LET xpl = `1 - margin_del* (($data_count)-1)`
+
+   REPEAT/RANGE=1:($data_count)/name=m (\
+      DEFINE SYMBOL vm = `m-1`; \
+      DEFINE VIEWPORT/X=0:`xpl`/y=0:`ypl` v0_($vm);\
+      SET VIEW v0_($vm);\
+      PLOT/AXES=1,1,0,0/COLOR=($color($vm))/NOLAB ($ferret_plot_var_($vm)))
+
+! Finally draw a left-hand axis
+   LET xpl = `1 - margin_del* (($data_count)-1)`
+   DEFINE VIEW/X=0:`xpl`/y=0:`ypl` another_v
+   SET VIEW another_v
+   PLOT/NOLAB/NOAX/VS/LINE/COLOR=black/HLIM=0:1/VLIM=0:1 {0,0}, {0,1}
+
+ELSE
+
 IF `($ferret_line_or_sym%0|sym>1|*>0%)` THEN  
    PLOT($qualifiers)/NOKEY/SET/COLOR=WHITE ($plot_arg)
       IF `($labnum_x%0|*>1%)` THEN GO unlabel ($labnum_x)
@@ -119,6 +162,8 @@ ELSE
       IF `($data_count"0") GT 2` THEN PPL ylab ($common_varlab)
    PPL PLOT
 ENDIF
+
+ENDIF ! units_same 
 
 IF ($labnum_calend%0|*>1%) THEN
    DEFINE SYMBOL n_left_labels = `($n_left_labels"0") + 1`
