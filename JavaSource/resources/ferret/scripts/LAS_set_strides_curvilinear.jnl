@@ -4,6 +4,8 @@
 ! a transformation or something, then this might be better someplace else, or
 ! might be undone by the transform script.
 
+! When native striding is used for curvilinear data, be sure the range
+! of index values requested wont go beyond the index range of the grid.
 
 ! cannot do native striding if this is a descriptor dataset. 
 
@@ -136,12 +138,18 @@ IF `STRLEN("($ferret_view)") EQ 2` THEN
 ! if the number of points looks like it will be large.
 
 
+      LET xx = x[gx=($data_var)[d=($data_num)]]
+      LET nx = ($clon_imax) - ($clon_imin)
+      let ixmax = xx[i=@max]
+
+      LET yy = y[gy=($data_var)[d=($data_num)]]
+      LET ny = ($clat_jmax) - ($clat_jmin)
+      let jymax = yy[j=@max]
+
 ! Curvilinear and XY plot
 
    IF `($ferret_curvi_coord_lat"0|*>1") + ($ferret_view"|xy>1|*>0") EQ 2 ` THEN 
 
-      LET xx = x[gx=($data_var)[d=($data_num)]]
-      LET nx = xx[i=@ngd]
       LET x_pct = ($region_x_range)/($grid_x_range)
       LET pixsize = `nx*x_pct`
 !         LET pixsize = `MAX(pixsize, nx)`  ! comment this out to set strides by region
@@ -164,7 +172,9 @@ IF `STRLEN("($ferret_view)") EQ 2` THEN
          SET AXIS/STRIDE=($xstride)($xoff) `($data_var)[d=($data_num)],RETURN=xaxis`
 	 LET x_strided_var = ($data_var)[d=($data_num)]
          DEFINE SYMBOL clon_imin = `MAX(1, INT(($clon_imin)/($xstride)) )`
-         DEFINE SYMBOL clon_imax = `MIN (nx, INT(($clon_imax)/($xstride)) )`
+         DEFINE SYMBOL clon_imax = `MIN (ixmax, INT(($clon_imax)/($xstride)) )`
+	 IF `(($clon_imin) + ($clon_imax)*($xstride)) GT ixmax` THEN \
+	    DEFINE SYMBOL clon_imax = `($clon_imax)-($xstride)`
       ENDIF
 
 ! Use /HLIM and /VLIM to define the plot rectangle. If this is a native
@@ -172,8 +182,6 @@ IF `STRLEN("($ferret_view)") EQ 2` THEN
       IF `($native_curvilinear_xy"0|*>1") EQ 0` THEN \
         DEFINE SYMBOL qualifiers = ($qualifiers)/HLIM=`($region_x_lo)`:`($region_x_hi)`
 
-      LET yy = y[gy=($data_var)[d=($data_num)]]
-      LET ny = yy[j=@ngd]; LET ny_orig = `ny`
       LET y_pct = ($region_y_range)/($grid_y_range)
       LET pixsize = `ny*y_pct`
 
@@ -190,7 +198,9 @@ IF `STRLEN("($ferret_view)") EQ 2` THEN
          SET AXIS/STRIDE=($ystride)($yoff) `($data_var)[d=($data_num)],RETURN=yaxis`
 	 LET y_strided_var = ($data_var)[d=($data_num)]
          DEFINE SYMBOL clat_jmin = `MAX(1, INT(($clat_jmin)/($ystride)) )`
-         DEFINE SYMBOL clat_jmax = `MIN(ny, INT(($clat_jmax)/($ystride)) )`
+         DEFINE SYMBOL clat_jmax = `MIN(jymax, INT(($clat_jmax)/($ystride)) )`
+	 IF `(($clat_jmin) + ($clat_jmax)*($ystride)) GT jymax` THEN \
+	    DEFINE SYMBOL clat_jmax = `($clat_jmax)-($ystride)`
 
       ENDIF
 
@@ -199,8 +209,6 @@ IF `STRLEN("($ferret_view)") EQ 2` THEN
    ELIF `($ferret_curvi_coord_lat"0|*>1") AND (STRINDEX("($ferret_view)", "x") + STRINDEX("($ferret_view)", "y") GT 0) ` THEN
 
         IF `(STRINDEX("($ferret_view)", "x") GT 0)` THEN 
-           LET xx = x[gx=($data_var)[d=($data_num)]]
-           LET nx = xx[i=@ngd]
            LET x_pct = ($region_x_range)/($grid_x_range)
            LET pixsize = `nx*x_pct`
            LET pixsize = `MAX(pixsize, nx)`  ! comment this out to set strides by region
@@ -223,14 +231,14 @@ IF `STRLEN("($ferret_view)") EQ 2` THEN
 	      LET x_strided_var = ($data_var)[d=($data_num)]
               DEFINE SYMBOL clon_imin = `INT(($clon_imin)/($xstride))`
               DEFINE SYMBOL clon_imax = `INT(($clon_imax)/($xstride))`
-
+ 
+	      IF `(($clon_imin) + ($xoff) + ($clon_imax)*($xstride)) GT ixmax` THEN \
+	         DEFINE SYMBOL clon_imax = `($clon_imax)-($xstride)`
            ENDIF
 
         ENDIF
   
         IF `(STRINDEX("($ferret_view)", "y") GT 0)` THEN 
-           LET yy = y[gy=($data_var)[d=($data_num)]]
-           LET ny = yy[j=@ngd]
            LET y_pct = ($region_y_range)/($grid_y_range)
            LET pixsize = `ny*y_pct`
            LET pixsize = `MAX(pixsize, ny)`  ! comment this out to set strides by region
@@ -248,6 +256,8 @@ IF `STRLEN("($ferret_view)") EQ 2` THEN
 	      LET y_strided_var = ($data_var)[d=($data_num)]
               DEFINE SYMBOL clat_jmin = `INT(($clat_jmin)/($ystride))`
               DEFINE SYMBOL clat_jmax = `INT(($clat_jmax)/($ystride))`
+	      IF `(($clat_jmin) + ($yoff) + ($clat_jmax)*($ystride)) GT ny` THEN \
+	         DEFINE SYMBOL clat_jmax = `($clat_jmax)-($ystride)`
            ENDIF
 
         ENDIF
@@ -295,9 +305,7 @@ IF `STRLEN("($ferret_view)") EQ 3 AND STRINDEX("($ferret_view)", "xy") GT 0` THE
 ! Curvilinear and XY plot
 
    IF `($ferret_curvi_coord_lat"0|*>1")` THEN 
-   
-      LET xx = x[gx=($data_var)[d=($data_num)]]
-      LET nx = xx[i=@ngd]
+
       LET x_pct = ($region_x_range)/($grid_x_range)
       LET pixsize = `nx*x_pct`
 !         LET pixsize = `MAX(pixsize, nx)`  ! comment this out to set strides by region
@@ -408,4 +416,3 @@ IF ($clon_imin"0|*>1") THEN
 ENDIF
 
 ! End of $RCSfile ------------LAS_set_strides_curvilinear.jnl--------------------------
-
