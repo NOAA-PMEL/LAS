@@ -737,12 +737,12 @@ streamable="true" mime_type="application/postscript"/> -->
             <result type="cancel" ID="cancel" file_suffix=".txt"/>
         </response>
         <region>
-            <intervals name="xy" type="Comparison Plots" title="Vector Comparison Map"/>
-            <intervals name="xz" type="Comparison Plots" title="Longitude-Depth Vector Comparison"/>
-            <intervals name="xt" type="Comparison Plots" title="Longitude-Time Vector Comparison"/>
-            <intervals name="yz" type="Comparison Plots" title="Latitude-Depth Vector Comparison"/>
-            <intervals name="yt" type="Comparison Plots" title="Latitude-Time Vector Comparison"/>
-            <intervals name="zt" type="Comparison Plots" title="Depth-Time Vector Comparison"/>
+            <intervals name="xy" type="Scatter Plots" title="Vector Comparison Map"/>
+            <intervals name="xz" type="Scatter Plots" title="Longitude-Depth Vector Comparison"/>
+            <intervals name="xt" type="Scatter Plots" title="Longitude-Time Vector Comparison"/>
+            <intervals name="yz" type="Scatter Plots" title="Latitude-Depth Vector Comparison"/>
+            <intervals name="yt" type="Scatter Plots" title="Latitude-Time Vector Comparison"/>
+            <intervals name="zt" type="Scatter Plots" title="Depth-Time Vector Comparison"/>
         </region>
         <grid_types>
             <grid_type name="regular" />
@@ -1605,13 +1605,11 @@ streamable="true" mime_type="application/postscript"/> -->
                     <result type="cancel" ID="cancel" />
                </response>
 		<region>
-                        <intervals name="xyz"   type="Comparison Plots" title="Property-Property" />
-                        <intervals name="xyt"   type="Comparison Plots" title="Property-Property" />
-                        <intervals name="xyzt"   type="Comparison Plots" title="Property-Property" />
+                        <intervals name="xy"   type="Scatter Plots" title="Property-Property" />
 			<degenerate />
 	        </region>
         	<visualization_types>
-                	<type name="Comparison Plots" />
+                	<type name="Scatter Plots" />
  	        </visualization_types>
                 <grid_types>
                 	<grid_type name="regular" />
