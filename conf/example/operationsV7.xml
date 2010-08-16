@@ -1608,9 +1608,6 @@ streamable="true" mime_type="application/postscript"/> -->
                         <intervals name="xy"   type="Scatter Plots" title="Property-Property" />
 			<degenerate />
 	        </region>
-        	<visualization_types>
-                	<type name="Scatter Plots" />
- 	        </visualization_types>
                 <grid_types>
                 	<grid_type name="regular" />
 	        </grid_types>

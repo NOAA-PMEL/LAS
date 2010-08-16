@@ -1040,7 +1040,7 @@ LASUI.prototype.setDefaultProductMenu = function () {
 	                                        	this.setProductTypeNode(type);
 						if(!defaultPlotProduct||(this.state.operation.plot=op&&this.state.view.plot==view))
 							defaultPlotProduct=this.setProductNode(op, view, this.state.operations.getOperationIntervals(op)[view].title);				       
-						else 
+						else if(!document.getElementById(op+"_"+view))
 							this.setProductNode(op, view, this.state.operations.getOperationIntervals(op)[view].title);
 					
 					}
@@ -1553,6 +1553,9 @@ LASUI.prototype.makeRequest = function (evt, type) {
 		this.request.removeRegion();
 
 		//add the variables
+		if(!this.state.xpaths)
+			return;
+
 		if(this.state.xpaths[0].grid_type=="vector") {
 			for(var v=0;v<this.state.xpaths[0].variable.length;v++)
 				 this.request.addVariable(this.state.dataset,this.state.xpaths[0].variable[v].IDREF)	
