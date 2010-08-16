@@ -777,8 +777,6 @@ LASUI.prototype.getOperations = function (evt) {
 		try {
 			if(evt.target.options[evt.target.selectedIndex].data)
 				var selectedVariable=eval("("+evt.target.options[evt.target.selectedIndex].data+")");
-			if(selectedVariable.grid_type=="vector")
-				alert("Its a Vector Victor!");
 		} catch(e) {}
 	
 	
