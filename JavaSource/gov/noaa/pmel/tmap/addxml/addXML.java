@@ -63,6 +63,7 @@ import org.jdom.input.SAXBuilder;
 import org.jdom.output.XMLOutputter;
 import org.joda.time.Chronology;
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeFieldType;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Days;
 import org.joda.time.Duration;
@@ -132,6 +133,8 @@ public class addXML {
 		"yyyy-MM-dd", "yyyy-MM-dd", "yyyy-MM-dd", "yyyy-MM-dd",
 		"yyyy-MM-dd HH:mm:ss", "yyyy-MM-dd HH:mm:ss",
 		"yyyy-MM-dd HH:mm:ss", "yyyy-MM-dd HH:mm:ss"};
+	
+	private static final String pattern_with_hours = "yyyy-MM-dd HH:mm:ss";
 	
 	private static DateTimeFormatter ferret_time_formatter = DateTimeFormat.forPattern("dd-MMM-yyyy HH:mm:ss");
 
@@ -1632,7 +1635,7 @@ public class addXML {
 		return dagb;
 	}
 
-	public static org.jdom.Document createXMLfromNetcdfDataset(NetcdfDataset
+	public org.jdom.Document createXMLfromNetcdfDataset(NetcdfDataset
 			ncds,
 			String url) {
 		DatasetsGridsAxesBean beans = createBeansFromNetcdfDataset(ncds, url, false, null);
@@ -1867,7 +1870,13 @@ public class addXML {
 						numPeriods++;
 						// set if not set by command line arg.
 						if (fmt == null ) {
-							fmt = DateTimeFormat.forPattern(patterns[i]);
+							// Sometimes the start time is not 0 even though the interval between times is in whole units.
+							// If it is, include the hours.
+							if ( jodaDate1.get(DateTimeFieldType.hourOfDay()) > 0 )  {
+								fmt = DateTimeFormat.forPattern(pattern_with_hours);
+							} else {
+							    fmt = DateTimeFormat.forPattern(patterns[i]);
+							}
 						}
 						step = values[i];
 						String typeName = types[i].getName();

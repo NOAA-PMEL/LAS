@@ -22,24 +22,53 @@ import ucar.nc2.dods.DODSNetcdfFile;
 
 public class AddxmlTest {
 
-	private addXML addxml = new addXML();
+	
 	@Before
 	public void setUp() throws Exception {
-		HashMap<String, String> options= new HashMap<String, String>();
-		addxml.setOptions(options);
+		
 	}
 
 	@After
 	public void tearDown() throws Exception {
 	}
-
+    @Test
+    public final void testNGDC() {
+    	// The sole purpose of this test it to check the starting our of the time axis.
+    	// The time axis is regular with an interval of 1 day, but for some strange reason the times are recorded at 17:00
+    	// so the hour needs to be included in the start string.
+    	String url = DODSNetcdfFile.canonicalURL("http://www.ngdc.noaa.gov/thredds/dodsC/sst-100km-aggregation");
+		NetcdfDataset ncds;
+		try {
+			addXML addxml = new addXML();
+			HashMap<String, String> options= new HashMap<String, String>();
+			options.put("force","t");
+			addxml.setOptions(options);
+			ncds = ucar.nc2.dataset.NetcdfDataset.openDataset(url);
+			Document ngdc = addxml.createXMLfromNetcdfDataset(ncds , url);
+			Iterator<Element> arangeIt = ngdc.getDescendants(new ElementFilter("arange"));
+			assertTrue(arangeIt.hasNext());
+			while ( arangeIt.hasNext() ) {
+				Element arange = (Element) arangeIt.next();
+				String start = arange.getAttributeValue("start");
+				if ( start.length() > 6) {
+					assertTrue(start.endsWith("17:00:00"));
+				}
+			}
+		} catch (IOException e) {
+			fail("Unable to connect to OPeNDAP server.");
+		}
+    }
 	@Test
 	public final void testWOA() {
 		String url = DODSNetcdfFile.canonicalURL("http://ferret.pmel.noaa.gov/thredds/dodsC/data/PMEL/WOA01/english/seasonal/sili_sea_mean_1deg.nc");
 		NetcdfDataset ncds;
 		try {
+			addXML addxml = new addXML();
+			HashMap<String, String> options= new HashMap<String, String>();
+			options.put("force", "t");
+			addxml.setOptions(options);
 			ncds = ucar.nc2.dataset.NetcdfDataset.openDataset(url);
-			Document woa = addXML.createXMLfromNetcdfDataset(ncds , url);
+			Document woa = addxml.createXMLfromNetcdfDataset(ncds , url);
 			Iterator<Element> arangeIt = woa.getDescendants(new ElementFilter("arange"));
 			assertTrue(arangeIt.hasNext());
 			// X-Axis
@@ -60,7 +89,7 @@ public class AddxmlTest {
 			assertTrue(arangeIt.hasNext());
 			arange = arangeIt.next();
 			assertTrue(arange.getAttributeValue("size").equals("4"));
-			assertTrue(arange.getAttributeValue("start").equals("0000-02-15"));
+			assertTrue(arange.getAttributeValue("start").equals("0000-02-15 15:00:00"));
 			assertTrue(arange.getAttributeValue("step").equals("3"));
 		} catch (IOException e) {
 			fail("Unable to connect to OPeNDAP server.");
@@ -71,9 +100,12 @@ public class AddxmlTest {
 		String url = DODSNetcdfFile.canonicalURL("http://ferret.pmel.noaa.gov/thredds/dodsC/data/PMEL/coads_climatology.nc");
 		NetcdfDataset ncds;
 		try {
+			addXML addxml = new addXML();
+			HashMap<String, String> options= new HashMap<String, String>();
+			addxml.setOptions(options);
 			ncds = ucar.nc2.dataset.NetcdfDataset.openDataset(url);
 			// Test from COADS, which tests the new vectors capability
-			Document coads = addXML.createXMLfromNetcdfDataset(ncds , url);
+			Document coads = addxml.createXMLfromNetcdfDataset(ncds , url);
 			
 			
 			Iterator<Element> compIt = coads.getDescendants(new ElementFilter("composite"));
@@ -111,9 +143,12 @@ public class AddxmlTest {
 		String[] units = new String[]{"m s-1"};
 		NetcdfDataset ncds;
 		try {
+			addXML addxml = new addXML();
+			HashMap<String, String> options= new HashMap<String, String>();
+			addxml.setOptions(options);
 			ncds = ucar.nc2.dataset.NetcdfDataset.openDataset(url);
 			// Test from COADS, which tests the new vectors capability
-			Document leetmaa = addXML.createXMLfromNetcdfDataset(ncds , url);
+			Document leetmaa = addxml.createXMLfromNetcdfDataset(ncds , url);
 			Iterator compIt = leetmaa.getRootElement().getDescendants(new ElementFilter("composite"));
 			assertTrue(compIt.hasNext());
 			int index = 0;
@@ -141,9 +176,12 @@ public class AddxmlTest {
 		String[] units = new String[]{"unitless", "cm/s"};
 		NetcdfDataset ncds;
 		try {
+			addXML addxml = new addXML();
+			HashMap<String, String> options= new HashMap<String, String>();
+			addxml.setOptions(options);
 			ncds = ucar.nc2.dataset.NetcdfDataset.openDataset(url);
 			// Test from COADS, which tests the new vectors capability
-			Document leetmaa = addXML.createXMLfromNetcdfDataset(ncds , url);
+			Document leetmaa = addxml.createXMLfromNetcdfDataset(ncds , url);
 			Iterator compIt = leetmaa.getRootElement().getDescendants(new ElementFilter("composite"));
 			assertTrue(compIt.hasNext());
 			int index = 0;
@@ -158,6 +196,16 @@ public class AddxmlTest {
 				assertTrue(vname.equals(name[index]));
 				assertTrue(vunits.equals(units[index]));
 				index++;
+			}
+			Iterator arIt = leetmaa.getDescendants(new ElementFilter("arange"));
+			assertTrue(arIt.hasNext());
+			while ( arIt.hasNext() ) {
+				Element arange = (Element) arIt.next();
+				String start = arange.getAttributeValue("start");
+				if ( start.length() > 6 ) {
+					// It's the time...
+					assertTrue(start.equals("1980-01-01"));
+				}
 			}
 		} catch (IOException e) {
 			fail("Unable to connect to OPeNDAP server.");
