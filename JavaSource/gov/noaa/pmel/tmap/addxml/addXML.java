@@ -1904,6 +1904,16 @@ public class addXML {
 						// We're guessing these are months
 						axisbean.setUnits("month");
 						arange.setStep("1");
+						if ( zeroOrigin ) {
+							axisbean.setModulo(true);
+						}
+					} else if ( values[1] > 0 ) {
+						// We're again guessing that the value is months (and everything else is in the noise)
+						axisbean.setUnits("month");
+						arange.setStep(String.valueOf(values[1]));
+						if ( zeroOrigin ) {
+							axisbean.setModulo(true);
+						}
 					} else if ( numPeriods == 2 && periods.contains("week") && periods.contains("day")  ) {
 						// We can convert this to days. :-)
 						axisbean.setUnits("day");
@@ -1941,7 +1951,15 @@ public class addXML {
 					}
 					arange.setSize(String.valueOf(axis.getSize()));
 					String str = fmt.print(jodaDate1.withZone(DateTimeZone.UTC));
-					if ( str.startsWith("-") ) str = str.substring(1, str.length());
+					
+					if ( str.startsWith("-") ) {
+						if ( zeroOrigin ) {
+						    str = str.substring(1, str.length());
+						    str = str.replace("0001", "0000");
+						} else {
+							str = str.substring(1, str.length());			
+						}
+					}
 					arange.setStart(str);
 					axisbean.setArange(arange);
 				}
