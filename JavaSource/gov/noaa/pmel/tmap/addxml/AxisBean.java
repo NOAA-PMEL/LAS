@@ -22,9 +22,18 @@ public class AxisBean extends LasBean {
 	private String display_hi;
 	private String ddefault;
 	private String[] v;
+	private boolean modulo;
 	private ArangeBean arange;
 
 	public AxisBean() {
+	}
+
+	public boolean isModulo() {
+		return modulo;
+	}
+
+	public void setModulo(boolean modulo) {
+		this.modulo = modulo;
 	}
 
 	public void setType(String type) {
@@ -93,6 +102,9 @@ public class AxisBean extends LasBean {
 		if ( this.units == null ) {
 			System.err.println("Axis has no units.  Setting units to 'none'.  Check output.");
 			this.units = "none";
+		}
+		if ( isModulo() ) {
+			axis.setAttribute("modulo", "true");
 		}
 		axis.setAttribute("units", this.units);
 		if (arange != null) {

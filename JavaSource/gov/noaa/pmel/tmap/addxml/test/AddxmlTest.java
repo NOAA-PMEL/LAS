@@ -34,6 +34,39 @@ public class AddxmlTest {
 	}
 
 	@Test
+	public final void testWOA() {
+		String url = DODSNetcdfFile.canonicalURL("http://ferret.pmel.noaa.gov/thredds/dodsC/data/PMEL/WOA01/english/seasonal/sili_sea_mean_1deg.nc");
+		NetcdfDataset ncds;
+		try {
+			ncds = ucar.nc2.dataset.NetcdfDataset.openDataset(url);
+			Document woa = addXML.createXMLfromNetcdfDataset(ncds , url);
+			Iterator<Element> arangeIt = woa.getDescendants(new ElementFilter("arange"));
+			assertTrue(arangeIt.hasNext());
+			// X-Axis
+			// <arange start="0.5" size="360" step="1" />
+			Element arange = arangeIt.next();
+			assertTrue(arange.getAttributeValue("size").equals("360"));
+			assertTrue(arange.getAttributeValue("start").equals("0.5"));
+			assertTrue(arange.getAttributeValue("step").equals("1"));
+			// Y-Axis
+			// <arange start="-89.5" size="180" step="1" />
+			assertTrue(arangeIt.hasNext());
+			arange = arangeIt.next();
+			assertTrue(arange.getAttributeValue("size").equals("180"));
+			assertTrue(arange.getAttributeValue("start").equals("-89.5"));
+			assertTrue(arange.getAttributeValue("step").equals("1"));
+			// T-Axis
+			// <arange start="0000-02-15" size="4" step="3" />
+			assertTrue(arangeIt.hasNext());
+			arange = arangeIt.next();
+			assertTrue(arange.getAttributeValue("size").equals("4"));
+			assertTrue(arange.getAttributeValue("start").equals("0000-02-15"));
+			assertTrue(arange.getAttributeValue("step").equals("3"));
+		} catch (IOException e) {
+			fail("Unable to connect to OPeNDAP server.");
+		}
+	}
+	@Test
 	public final void testCOADS() {
 		String url = DODSNetcdfFile.canonicalURL("http://ferret.pmel.noaa.gov/thredds/dodsC/data/PMEL/coads_climatology.nc");
 		NetcdfDataset ncds;
