@@ -15,7 +15,6 @@ ENDIF
 ! titles for the plot legend and units for labeling 
 ! the plot axes.
 
-!!DEFINE SYMBOL common_varlab = Common Scale for All Variables
 DEFINE SYMBOL units_0 = `UPCASE("($data_0_units)")`
 DEFINE SYMBOL all_units_same = 1
 
@@ -177,7 +176,6 @@ ELSE
       IF `($title_size%0|*>1%)` THEN PPL LABSET ($title_size)
       IF `($ferret_dep_axis_scale"0|*>1")` THEN PPL YAXIS ($ferret_dep_axis_scale)
       PPL xlab
-      IF `($common_varlab"0|*>1")` THEN PPL ylab ($common_varlab)
    PPL PLOT
 ENDIF
 
