@@ -1,0 +1,61 @@
+! Build up plot_vars_n symbols, with sets of variables
+! that have common units.
+
+! comma between variables
+CANCEL SYMBOL comma
+IF `($m) eq 1` THEN DEFINE SYMBOL comma = ,
+
+! symbol containing the units, in a form that can be useed
+! to define a symbol to mark that these units have been done.
+
+PPL SET inunits_collapse $EDIT(in_units,COLLAPSE)
+LET ireplace = STRINDEX("($inunits_collapse)", "/")
+IF `ireplace GT 0` THEN
+   DEFINE SYMBOL iu1 = `SUBSTRING("($inunits_collapse)", 1, ireplace-1)`
+   LET slen = STRLEN("($inunits_collapse)")
+   DEFINE SYMBOL iu2 = `SUBSTRING("($inunits_collapse)", ireplace+1, slen-ireplace)`
+   DEFINE SYMBOL inunits_collapse = ($iu1)_rr_($iu2)
+ENDIF
+LET ireplace = STRINDEX("($inunits_collapse)", "*")
+IF `ireplace GT 0` THEN
+   DEFINE SYMBOL iu1 = `SUBSTRING("($inunits_collapse)", 1, ireplace-1)`
+   LET slen = STRLEN("($inunits_collapse)")
+   DEFINE SYMBOL iu2 = `SUBSTRING("($inunits_collapse)", ireplace+1, slen-ireplace)`
+   DEFINE SYMBOL inunits_collapse = ($iu1)_rr_($iu2)
+ENDIF
+LET ireplace = STRINDEX("($inunits_collapse)", "*")
+IF `ireplace GT 0` THEN
+   DEFINE SYMBOL iu1 = `SUBSTRING("($inunits_collapse)", 1, ireplace-1)`
+   LET slen = STRLEN("($inunits_collapse)")
+   DEFINE SYMBOL iu2 = `SUBSTRING("($inunits_collapse)", ireplace+1, slen-ireplace)`
+   DEFINE SYMBOL inunits_collapse = ($iu1)_rr_($iu2)
+ENDIF
+LET ireplace = STRINDEX("($inunits_collapse)", "^")
+IF `ireplace GT 0` THEN
+   DEFINE SYMBOL iu1 = `SUBSTRING("($inunits_collapse)", 1, ireplace-1)`
+   LET slen = STRLEN("($inunits_collapse)")
+   DEFINE SYMBOL iu2 = `SUBSTRING("($inunits_collapse)", ireplace+1, slen-ireplace)`
+   DEFINE SYMBOL inunits_collapse = ($iu1)_rr_($iu2)
+ENDIF
+
+! If we already have a set of vars with these units then we are done
+IF ($done_($inunits_collapse)%0|*>1%) THEN exit/script
+
+! For this units, collect the variables.
+REPEAT/RANGE=1:`($data_count)-1`/NAME=g (\
+   DEFINE SYMBOL g = `g`;\
+   DEFINE SYMBOL gg = `g-1`;\
+   DEFINE SYMBOL this_units = `UPCASE("($data_($g)_units)")`; \
+   sh sym this_units; \
+   sh sym in_units; \
+   LET match_units = `STRCMP("($this_units)", "($in_units)") EQ 0`; \
+   IF `match_units` THEN DEFINE SYMBOL plot_vars_($iplot) = ($plot_vars_($iplot))($comma) ($ferret_plot_var_($g));\
+   IF `match_units` THEN DEFINE SYMBOL comma = , ;\
+   IF `match_units` THEN DEFINE SYMBOL group_label_($iplot) = ($data_($g)_units) \
+ )
+
+! Mark this units string as being done and prepare for the next one
+DEFINE SYMBOL done_($inunits_collapse) = 1
+DEFINE SYMBOL iplot = `($iplot) + 1`
+
+!  ----------------- End of collect_units_var.jnl ------------------------------------
