@@ -1,9 +1,10 @@
 ! LAS_draw_multi_line_z_plot.jnl
-!  Do a multi-line 1-D plot in Z. 
+!  Do a multi-line 1-D plot in z. 
 ! 7/2010    ACM updates for V7.2 multi-variable plots
 
 ! By default dont use graticules. They can be a mess.
 ! The user can turn them on if desired.
+set mode ver:always
 
 CANCEL MODE GRATICULE
 IF ($ferret_use_graticules"0|0|1|*>1) THEN
@@ -14,9 +15,11 @@ ENDIF
 ! titles for the plot legend and units for labeling 
 ! the plot axes.
 
-!!DEFINE SYMBOL common_varlab = Common Scale for All Variables
 DEFINE SYMBOL units_0 = `UPCASE("($data_0_units)")`
-LET units_same = 0
+DEFINE SYMBOL all_units_same = 1
+
+DEFINE SYMBOL unique_units_0 = ($data_0_units)
+DEFINE SYMBOL nunique = 0
 
 REPEAT/range=1:`($data_count)-1`/NAME=m (  \
   DEFINE SYMBOL m = `m`; \
@@ -27,10 +30,9 @@ REPEAT/range=1:`($data_count)-1`/NAME=m (  \
   DEFINE SYMBOL ferret_title_($m) = ($ferret_plot_title); \ 
   LET tlen = STRLEN("($ferret_title_($m))"); \
   LET title_len = `MAX(tlen, title_len)`; \
-  DEFINE SYMBOL units_($m) = `UPCASE("($data_($m)_units)")`;\
-  IF `($m) GE 1` THEN LET units_same = `(STRCMP("($units_0)", "($units_($m))") EQ 0)`\
+  DEFINE SYMBOL units_($m) = `UPCASE("($data_($m)_units)")`; \
+  DEFINE SYMBOL all_units_same = `($all_units_same) AND (STRCMP("($units_0)", "($units_($m))") EQ 0)` \
 )
-IF `units_same EQ 1` THEN DEFINE SYMBOL common_varlab = ($units_0)
 
 ! Set the labels for the upper left listing the locations
 ! and time in directions normal to the plot.
@@ -43,17 +45,14 @@ DEFINE SYMBOL qualifiers = ($qualifiers)/TITLE=" "
 ! If there are two variables with different units, scale each independently, putting
 ! one dependent axis on the left an the other on the right.
 
-DEFINE SYMBOL units_0 = `UPCASE("($data_0_units)")`
-DEFINE SYMBOL units_1 = `UPCASE("($data_1_units)")`
 IF `(($data_count"0") EQ 2) AND (STRCMP("($units_0)", "($units_1)") NE 0)` THEN 
-
-   CANCEL MODE GRATICULE
+   CANCEL MODE GRATICULE  ! graticules are a mess if two dependent axes!
 
 ! Plot second variable in red, with its axis on the right.
 
    DEFINE VIEWPORT/x=0:1/y=0:1 right_axis_view
    SET VIEW right_axis_view
-   SET VAR/UNITS="@P2`($ferret_plot_var_1),RETURN=units`" ($ferret_plot_var_1)
+   SET VAR/UNITS="@P2@AC($data_1_units)" ($ferret_plot_var_1)
    PLOT($qualifiers)/AXES=1,0,0,0/NOKEY/COLOR=red/SET ($ferret_plot_var_1)
       GO remove_logo
       IF `($labnum_x%0|*>1%)` THEN GO unlabel ($labnum_x)
@@ -65,10 +64,9 @@ IF `(($data_count"0") EQ 2) AND (STRCMP("($units_0)", "($units_1)") NE 0)` THEN
       IF `($labnum_datitl%0|*>1%)` THEN GO unlabel ($labnum_datitl)
       IF `($labnum_dods%0|*>1%)` THEN GO unlabel ($labnum_dods)
       IF `($labnum_calend%0|*>1%)` THEN GO unlabel ($labnum_calend)
-      ppl list labels
    PPL PLOT
-   DEFINE SYMBOL extra_y_space = 0.5  ! Start the labels higher up, to give space for 
-                                      ! a formatted axis on the top
+   DEFINE SYMBOL extra_y_space = 0.5 ! start labels higher up to give space for a
+			             ! a formatted axis on top.
 
 ! Set up for plotting 1st variable, in black, with its axis on the left.
 
@@ -76,6 +74,8 @@ IF `(($data_count"0") EQ 2) AND (STRCMP("($units_0)", "($units_1)") NE 0)` THEN
    DEFINE SYMBOL data_count = 1
    DEFINE SYMBOL plot_arg = ($ferret_plot_var_0)
    DEFINE SYMBOL two_axes = 1
+   SET VAR/UNITS="@AC($data_0_units)" ($ferret_plot_var_0)
+
    SET VIEW FULL
 ENDIF
 
@@ -84,10 +84,69 @@ ENDIF
 ! If 2 variables, label units on axis; otherwise dont
 IF `($data_count) GT 2 AND ($two_axes"0") EQ 0` THEN DEFINE SYMBOL qualifiers = ($qualifiers)/NOLAB 
 
+DEFINE SYMBOL color0 = black
+DEFINE SYMBOL color1 = red
+DEFINE SYMBOL color2 = green
+DEFINE SYMBOL color3 = blue
+DEFINE SYMBOL color4 = lightblue
+DEFINE SYMBOL color5 = purple
+
+IF `(($all_units_same) EQ 0) AND (($data_count) GT 2)` THEN
+   SET WIN/ASP=1.3
+   LET margin_del = 0.08
+   PPL AXLSZE,,0.08
+   PPL AXNSIG,,2
+
+   DEFINE SYMBOL iplot = 0
+   DEFINE SYMBOL plot_vars_0 = ($ferret_plot_var_0)
+   DEFINE SYMBOL group_label_0 = ($data_0_units)
+   REPEAT/RANGE=1:($data_count)/name=m (\
+      DEFINE SYMBOL m = `m`; \
+      DEFINE SYMBOL mm = `m-1`; \
+      DEFINE SYMBOL in_units = ($units_($mm)); \
+      GO collect_units_vars )
+
+! Draw the other plot axes scaled for each set of variables with common units
+! Plot axis with first set of units will be on the left.
+! Draw the plots for other sets of variables as /SYM/COLOR=white so that
+! only the axis shows. The variables will be plotted individually below
+! so that we can control the line color.
+
+
+   LET xpl = 1
+   LET ypl = `1 - margin_del* (($iplot)-1)`
+
+   REPEAT/RANGE=2:($iplot)/NAME=m (\
+      DEFINE SYMBOL vm = `m-1`; \
+      DEFINE VIEWPORT/X=0:`xpl`/y=0:`ypl` v($vm); \
+      SET VIEW v($vm); \
+      PLOT/AXES=1,0,0,0/SYM/COLOR=white/NOLAB ($plot_vars_($vm));\
+      LABEL/NOUSER `($ppl$xlen)/2`, `($ppl$ylen) + 0.5`, 0, 0, 0.12, @AC($group_label_($vm)); \
+      LET ypl = `ypl + margin_del` \
+   )
+
+! Draw the lines each in its own viewport
+
+   LET ypl = `1 - margin_del* (($iplot)-1)`
+
+! Draw the first variable
+   DEFINE SYMBOL vm = 0
+   DEFINE VIEWPORT/X=0:`xpl`/y=0:`ypl` v0_($vm)
+   SET VIEW v0_0
+   PLOT/AXES=0,1,1,1/COLOR=($color($vm))/NOLAB ($ferret_plot_var_($vm)); \
+   LABEL/NOUSER `($ppl$xlen)/2`, `-0.5`, 0, 0, 0.12, @AC($group_label_($vm)); \
+
+   REPEAT/RANGE=2:($data_count)/name=m (\
+      DEFINE SYMBOL vm = `m-1`; \
+      DEFINE VIEWPORT/X=0:`xpl`/y=0:`ypl` v0_($vm);\
+      SET VIEW v0_($vm);\
+      PLOT/AXES=0,0,0,0/COLOR=($color($vm))/NOLAB ($ferret_plot_var_($vm)) )
+ELSE
+
 IF `($ferret_line_or_sym%0|sym>1|*>0%)` THEN  
    PLOT($qualifiers)/NOKEY/SET/COLOR=WHITE ($plot_arg)
       IF `($labnum_x%0|*>1%)` THEN GO unlabel ($labnum_x)
-      IF `($labnum_y%0|*>1%)` THEN GO unlabel ($labnum_y)
+      IF `($labnum_x%0|*>1%)` THEN GO unlabel ($labnum_y)
       IF `($labnum_z%0|*>1%)` THEN GO unlabel ($labnum_z)
       IF `($labnum_t%0|*>1%)` THEN GO unlabel ($labnum_t)
       IF `($labnum_year%0|*>1%)` THEN GO unlabel ($labnum_year)
@@ -97,10 +156,9 @@ IF `($ferret_line_or_sym%0|sym>1|*>0%)` THEN
       IF `($labnum_calend%0|*>1%)` THEN GO unlabel ($labnum_calend)
       IF `($title_size%0|*>1%)` THEN PPL LABSET ($title_size)
       IF `($ferret_dep_axis_scale"0|*>1")` THEN PPL XAXIS ($ferret_dep_axis_scale)
-      IF `($common_varlab"0|*>1")` THEN PPL xlab ($common_varlab)
    PPL PLOT
 
-   PLOT($qualifiers)/NOKEY/NOLAB/OVER/NOAX/COLOR=black ($ferret_plot_var_0)
+   PLOT($qualifiers)/NOKEY/NOLAB/OVER/COLOR=black ($ferret_plot_var_0)
    IF `($data_count"0") GT 1` THEN PLOT($qualifiers)/NOKEY/OVER/COLOR=red ($ferret_plot_var_1)
    IF `($data_count"0") GT 2` THEN PLOT($qualifiers)/NOKEY/OVER/COLOR=green ($ferret_plot_var_2)
    IF `($data_count"0") GT 3` THEN PLOT($qualifiers)/NOKEY/OVER/COLOR=blue ($ferret_plot_var_3)
@@ -119,10 +177,11 @@ ELSE
       IF `($labnum_dods%0|*>1%)` THEN GO unlabel ($labnum_dods)
       IF `($labnum_calend%0|*>1%)` THEN GO unlabel ($labnum_calend)
       IF `($title_size%0|*>1%)` THEN PPL LABSET ($title_size)
-      IF `($ferret_dep_axis_scale"0|*>1")` THEN PPL XAXIS ($ferret_dep_axis_scale)
-      IF `($common_varlab"0|*>1")` THEN PPL xlab ($common_varlab)
+      IF `($ferret_dep_axis_scale"0|*>1")` THEN PPL YAXIS ($ferret_dep_axis_scale)
    PPL PLOT
 ENDIF
+
+ENDIF ! same units for all 
 
 IF ($labnum_calend%0|*>1%) THEN
    DEFINE SYMBOL n_left_labels = `($n_left_labels"0") + 1`
@@ -142,8 +201,8 @@ SET VIEW overview
 PLOT/NOLAB/NOAX/I=1:2/VLIM=100:102 i
 
 ! The start (x,y) position for each line drawn on the key
-LET xkey = {0,         0,     0, `0.6*($ppl$xlen)`, `0.6*($ppl$xlen)`, `0.6*($ppl$xlen)`,     0, 0}
-LET ykey = {-0.65, -0.85, -1.05,             -0.65,             -0.85,             -1.05, -1.25, -1.25}
+LET xkey = {-0.2 , -0.2 , -0.2 , `0.6*($ppl$xlen)`, `0.6*($ppl$xlen)`, `0.6*($ppl$xlen)`,     0, 0}
+LET ykey = {-0.65, -0.85, -1.05,            -0.65,             -0.85,             -1.05, -1.25, -1.25}
 
 LET titlesiz = 0.11
 IF `title_len GT 40 AND ($data_count"0") GT 3` THEN LET titlesiz = 0.10
@@ -152,7 +211,7 @@ REPEAT/range=1:`($data_count)`/NAME=m (; \
    DEFINE SYMBOL lnum = `m-1` ; \
    LET xpos = xkey[i=($m)]; LET ypos = ykey[i=($m)]; \
    GO LAS_legend_line \
-   `xpos` 0.5 `ypos` `m + 6*($thicknum)` `titlesiz` "($ferret_title_($lnum))" ($legend_qual);\   
+   `xpos-0.2` 0.5 `ypos` `m + 6*($thicknum)` `titlesiz` "($ferret_title_($lnum))" ($legend_qual);\   
 )
 
 ! The results script needs the actual axis directions. Restore them.
@@ -162,6 +221,5 @@ IF ($ax_vert"|D>1|*>0") THEN CANCEL SYMBOL ax_vert
 DEFINE SYMBOL ax_horiz = ($ax_horiz_save)
 IF ($ax_horiz"|D>1|*>0") THEN CANCEL SYMBOL ax_horiz
 
-
-! --------------- End of LAS_draw_multi_line_plot  ---------------------------
+! --------------- End of LAS_draw_multi_line_z_plot  ---------------------------
 
