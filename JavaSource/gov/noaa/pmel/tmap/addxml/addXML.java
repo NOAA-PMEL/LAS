@@ -1147,17 +1147,22 @@ public class addXML {
 
 							// Use this chronology and the UTC Time Zone
 							Chronology chrono = GJChronology.getInstance(DateTimeZone.UTC);
-
+							String calendar_name = null;
 							// If calendar attribute is set, use appropriate Chronology.
 							if (calendar.equals("proleptic_gregorian") ) {
+								calendar_name = "proleptic_gregorian";
 								chrono = GregorianChronology.getInstance(DateTimeZone.UTC);
 							} else if (calendar.equals("noleap") || calendar.equals("365_day") ) {
+								calendar_name = "noleap";
 								chrono = NoLeapChronology.getInstance(DateTimeZone.UTC);
 							} else if (calendar.equals("julian") ) {
+								calendar_name = "julian";
 								chrono = JulianChronology.getInstance(DateTimeZone.UTC);
 							} else if ( calendar.equals("all_leap") || calendar.equals("366_day") ) {
+								calendar_name = "all_leap";
 								chrono = AllLeapChronology.getInstance(DateTimeZone.UTC);
 							} else if ( calendar.equals("360_day") ) {  /* aggiunto da lele */
+								calendar_name = "360_day";
 								chrono = All360Chronology.getInstance(DateTimeZone.UTC);
 							}
 
@@ -1244,6 +1249,9 @@ public class addXML {
 							
 							log.info("Loading T from metadata: "+elementName);
 							AxisBean tAxis = new AxisBean();
+							if ( calendar_name != null ) {
+								tAxis.setCalendar(calendar_name);
+							}
 							tAxis.setElement(threddsDataset.getID()+"-t-axis");
 							grid_name.append("-t-axis");
 							tAxis.setType("t");
