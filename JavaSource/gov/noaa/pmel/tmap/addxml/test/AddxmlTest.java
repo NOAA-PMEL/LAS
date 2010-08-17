@@ -24,16 +24,44 @@ public class AddxmlTest {
 
 	
 	@Before
-	public void setUp() throws Exception {
-		
+	public void setUp() throws Exception {		
 	}
 
 	@After
 	public void tearDown() throws Exception {
 	}
+	
+	@Test
+	public final void testOISST() {
+		// This is a test of the hack in the code to identify an climatology from ESRL/PSD.  There should be a modulo=true attribute
+		// on the time axis.
+		String url = DODSNetcdfFile.canonicalURL("http://ferret.pmel.noaa.gov/thredds/dodsC/data/PMEL/sst.ltm.1971-2000.nc");
+		NetcdfDataset ncds;
+		try {
+			addXML addxml = new addXML();
+			HashMap<String, String> options= new HashMap<String, String>();
+			addxml.setOptions(options);
+			ncds = ucar.nc2.dataset.NetcdfDataset.openDataset(url);
+			Document coads = addxml.createXMLfromNetcdfDataset(ncds , url);
+			Element axes = coads.getRootElement().getChild("axes");
+			List<Element> axisList = axes.getChildren();
+			assertTrue(axisList.size() > 0);
+			for (Iterator axisIt = axisList.iterator(); axisIt.hasNext();) {
+				Element axis = (Element) axisIt.next();
+				String type = axis.getAttributeValue("type");
+				if ( type.equals("t") ) {
+					String mod = axis.getAttributeValue("modulo");
+					assertTrue(mod.equals("true"));
+				}
+			}
+		} catch (IOException e) {
+			fail("Unable to connect to OPeNDAP server.");
+		}
+	}
+	
     @Test
     public final void testNGDC() {
-    	// The sole purpose of this test it to check the starting our of the time axis.
+    	// The sole purpose of this test it to check the starting hour of the time axis.
     	// The time axis is regular with an interval of 1 day, but for some strange reason the times are recorded at 17:00
     	// so the hour needs to be included in the start string.
     	String url = DODSNetcdfFile.canonicalURL("http://www.ngdc.noaa.gov/thredds/dodsC/sst-100km-aggregation");

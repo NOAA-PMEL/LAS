@@ -363,6 +363,7 @@ public class addXML {
 			}
 			catch (IOException e) {
 				log.error("IO error = " + e);
+				System.exit(-1);
 			}
 			Vector db = (Vector) dgab.getDatasets();
 			if (db != null && db.size() > 0) {
@@ -1859,6 +1860,17 @@ public class addXML {
 				double t1 = axis.getCoordValue(1);
 				DateTime jodaDate1 = makeDate(t0, dateUnit, chrono);
 				DateTime jodaDate2 = makeDate(t1, dateUnit, chrono);
+				
+				if ( unitsString.contains("0001") || unitsString.contains("1-1-1") ) {
+					// ESRL/PSD climo hack...
+					int year1 = jodaDate1.get(DateTimeFieldType.year());
+					int year2 = jodaDate2.get(DateTimeFieldType.year());
+					// If both dates 'decode' as year 1 then it's likely a climo.
+					if ( year1 == 1 && year2 == 1 ) {
+						axisbean.setModulo(true);
+					}
+				}
+				
 				int step = 0;
 				Period period =	new Period(jodaDate1.withZone(DateTimeZone.UTC), jodaDate2.withZone(DateTimeZone.UTC));
 				int numPeriods = 0;
@@ -1962,12 +1974,10 @@ public class addXML {
 					String str = fmt.print(jodaDate1.withZone(DateTimeZone.UTC));
 					
 					if ( str.startsWith("-") ) {
-						if ( zeroOrigin ) {
+						
 						    str = str.substring(1, str.length());
 						    str = str.replace("0001", "0000");
-						} else {
-							str = str.substring(1, str.length());			
-						}
+						    axisbean.setModulo(true);
 					}
 					arange.setStart(str);
 					axisbean.setArange(arange);
