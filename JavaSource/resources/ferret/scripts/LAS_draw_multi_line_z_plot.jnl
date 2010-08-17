@@ -133,14 +133,14 @@ IF `(($all_units_same) EQ 0) AND (($data_count) GT 2)` THEN
    DEFINE SYMBOL vm = 0
    DEFINE VIEWPORT/X=0:`xpl`/y=0:`ypl` v0_($vm)
    SET VIEW v0_0
-   PLOT/AXES=0,1,1,1/COLOR=($color($vm))/NOLAB ($ferret_plot_var_($vm)); \
+   PLOT($qualifiers)/AXES=0,1,1,1/COLOR=($color($vm))/NOLAB ($ferret_plot_var_($vm)); \
    LABEL/NOUSER `($ppl$xlen)/2`, `-0.5`, 0, 0, 0.12, @AC($group_label_($vm)); \
 
    REPEAT/RANGE=2:($data_count)/name=m (\
       DEFINE SYMBOL vm = `m-1`; \
       DEFINE VIEWPORT/X=0:`xpl`/y=0:`ypl` v0_($vm);\
       SET VIEW v0_($vm);\
-      PLOT/AXES=0,0,0,0/COLOR=($color($vm))/NOLAB ($ferret_plot_var_($vm)) )
+      PLOT($qualifiers)/AXES=0,0,0,0/COLOR=($color($vm))/NOLAB ($ferret_plot_var_($vm)) )
 ELSE
 
 IF `($ferret_line_or_sym%0|sym>1|*>0%)` THEN  
@@ -201,19 +201,25 @@ SET VIEW overview
 PLOT/NOLAB/NOAX/I=1:2/VLIM=100:102 i
 
 ! The start (x,y) position for each line drawn on the key
-LET xkey = {-0.2 , -0.2 , -0.2 , `0.6*($ppl$xlen)`, `0.6*($ppl$xlen)`, `0.6*($ppl$xlen)`,     0, 0}
+LET x1 = -0.2
+IF `($data_count) GT 3` THEN LET x1 = -0.5
+IF `(($data_count) GT 3) AND (title_len GT 40)` THEN LET x1 = -0.6
+LET xkey = {`x1` , `x1` , `x1` , `0.6*($ppl$xlen)`, `0.6*($ppl$xlen)`, `0.6*($ppl$xlen)`,     0, 0}
 LET ykey = {-0.65, -0.85, -1.05,            -0.65,             -0.85,             -1.05, -1.25, -1.25}
 
 LET titlesiz = 0.11
-IF `title_len GT 40 AND ($data_count"0") GT 3` THEN LET titlesiz = 0.10
+IF `title_len GE 40 AND ($data_count"0") GT 3` THEN LET titlesiz = 0.10
+IF `title_len GE 50 AND ($data_count"0") GT 3` THEN LET titlesiz = 0.09
+IF `title_len GE 60 AND ($data_count"0") GT 3` THEN LET titlesiz = 0.08
+
 REPEAT/range=1:`($data_count)`/NAME=m (; \
    DEFINE SYMBOL m = `m`;  \
    DEFINE SYMBOL lnum = `m-1` ; \
    LET xpos = xkey[i=($m)]; LET ypos = ykey[i=($m)]; \
    GO LAS_legend_line \
-   `xpos-0.2` 0.5 `ypos` `m + 6*($thicknum)` `titlesiz` "($ferret_title_($lnum))" ($legend_qual);\   
+   `xpos+x1` 0.3 `ypos` `m + 6*($thicknum)` `titlesiz` "($ferret_title_($lnum))" ($legend_qual);\   
 )
-
+pause
 ! The results script needs the actual axis directions. Restore them.
 
 DEFINE SYMBOL ax_vert = ($ax_vert_save)
