@@ -28,7 +28,7 @@ REPEAT/range=1:`($data_count)-1`/NAME=m (  \
   LET tlen = STRLEN("($ferret_title_($m))"); \
   LET title_len = `MAX(tlen, title_len)`; \
   DEFINE SYMBOL units_($m) = `UPCASE("($data_($m)_units)")`;\
-  IF `($m) GE 1` THEN LET units_same = `(STRCMP("($units_0)", "($units_1)") EQ 0)`\
+  IF `($m) GE 1` THEN LET units_same = `(STRCMP("($units_0)", "($units_($m))") EQ 0)`\
 )
 IF `units_same EQ 1` THEN DEFINE SYMBOL common_varlab = ($units_0)
 
