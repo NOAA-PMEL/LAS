@@ -561,7 +561,6 @@ if ( getYesOrNo("Do you want to install the example data set configuration") ) {
            print "product server in $sample_out[$i].\n";
            if (! getYesOrNo("Overwrite this file", 1)){
               print "I will not generate a sample configuration\n";
-              return;
           }
        }
        if (-f $sample_out[$i] && !unlink $sample_out[$i]){
@@ -569,7 +568,6 @@ if ( getYesOrNo("Do you want to install the example data set configuration") ) {
        }
        if (!copy($sample_in[$i], $sample_out[$i])){
            print "Couldn't copy $sample_in[$i] to $sample_out[$i]\n";
-           return;
        }
     }
     if (!copy("WebContent/luis/web/levitus_monthly.html","WebContent/docs/levitus_monthly.html")){
@@ -584,7 +582,6 @@ if ( getYesOrNo("Do you want to install the example data set configuration") ) {
               print "product server in $insitu_out[$i].\n";
               if (! getYesOrNo("Overwrite this file", 1)){
                  print "I will not generate a sample configuration\n";
-                 return;
              }
           }
           if (-f $insitu_out[$i] && !unlink $insitu_out[$i]){
@@ -592,7 +589,6 @@ if ( getYesOrNo("Do you want to install the example data set configuration") ) {
           }
           if (!copy($insitu_in[$i], $insitu_out[$i])){
               print "Couldn't copy $insitu_in[$i] to $insitu_out[$i]\n";
-              return;
           }
        }
     }
