@@ -1521,7 +1521,11 @@ LASUI.prototype.makeRequest = function (evt, type) {
 			this.getOperations(this.state.dataset,this.state.variable,this.state.view.plot)
 			return null;
 		}
-
+	if(!document.getElementById(this.state.operation.plot+'_'+this.state.view.plot).checked) {
+		document.getElementById(this.state.operation.plot+'_'+this.state.view.plot).checked=true;
+		 document.getElementById(this.state.operation.plot+'_'+this.state.view.plot).onclick();
+		return null;	
+	}
 		document.getElementById('output').height="100%";
 		document.getElementById('output').width="100%";
 		document.getElementById('update').style.visibility='visible';
