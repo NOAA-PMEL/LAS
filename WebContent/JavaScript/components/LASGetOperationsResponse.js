@@ -39,12 +39,16 @@ function LASGetOperationsResponse(JSONObject) {
 
 function  LASGetOperationsResponse_hasInterval(id, interval) {
        
+	if(this.getOperationByID(id).region)
+	if(this.getOperationByID(id).region.intervals)
 	if(this.getOperationByID(id).region.intervals.length) {
 		for(var v=0; v<this.getOperationByID(id).region.intervals.length;v++)
                             if(this.getOperationByID(id).region.intervals[v].name==interval)
                             		return true;
 	} else if(this.getOperationByID(id).region.intervals.name==interval)
 			return true;
+	else
+		return false;
 	else
 		return false;
 } 

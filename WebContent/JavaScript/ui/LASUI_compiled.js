@@ -397,9 +397,8 @@ LASUI.prototype.createVariableList = function () {
 			var selected = false;
 
 		var OPTIONNode = new Option(node.getChildName(i),node.getChildID(i),false,selected);
-		OPTIONNode.id = node.getChildID(i);
-		OPTIONNode.value ="/lasdata/datasets/"+node.getDatasetID()+"/variables/"+node.getChildID(i);
-		OPTIONNode.data = JSON.stringify(node.getChild(i));
+		OPTIONNode.value = JSON.stringify(node.getChild(i)); //node.getChildID(i);
+		OPTIONNode.id ="/lasdata/datasets/"+node.getDatasetID()+"/variables/"+node.getChildID(i);
 		select.options[select.length] = OPTIONNode;
 	}
 	document.getElementsByName(this.anchors.breadcrumb).item(0).appendChild(select);
@@ -510,7 +509,16 @@ LASUI.prototype.addVariable = function(evt) {
 			newvar.children.item(i).onclick = this.addVariable.LASBind(this);	
                 if(newvar.children.item(i).name=="del")
                         newvar.children.item(i).onclick = this.removeVariable.LASBind(this);
+		if(newvar.children.item(i).name=="variables")
+			newvar.children.item(i).onchange = this.getOperations.LASBind(this);
 	}
+	for(var i=0; i<document.getElementsByName("variables").length;i++)
+		for(var v=0;v<document.getElementsByName("variables").item(i).options.length;v++) {
+			var variable = eval('('+document.getElementsByName("variables").item(i).options[v].value+')');
+			if(variable.grid_type=='vector')
+				document.getElementsByName("variables").item(i).options[v].style.display='none';
+		}
+
 	this.getOperations();
 
 }
@@ -518,9 +526,12 @@ LASUI.prototype.removeVariable = function(evt) {
 
 	if(document.getElementsByName('variables').length>=2)
 		evt.target.parentNode.parentNode.removeChild(evt.target.parentNode);
-	if(document.getElementsByName('del').length==1)
+	if(document.getElementsByName('del').length==1) {
 		for(var i=0;i<document.getElementsByName('del').length;i++)
                         document.getElementsByName('del').item(i).style.display='none';
+		for(var v=0;v<document.getElementsByName("variables").item(0).options.length;v++)
+			document.getElementsByName("variables").item(0).options[v].style.display="";
+	}
 	this.getOperations();
 }
 /**
@@ -775,8 +786,8 @@ LASUI.prototype.getOperations = function (evt) {
 		//check to see if seelected variable is a vector, if so, disable other variables ... or something
 		if(evt)
 		try {
-			if(evt.target.options[evt.target.selectedIndex].data)
-				var selectedVariable=eval("("+evt.target.options[evt.target.selectedIndex].data+")");
+			if(evt.target.options[evt.target.selectedIndex].name)
+				var selectedVariable=eval("("+evt.target.options[evt.target.selectedIndex].value+")");
 		} catch(e) {}
 	
 	
@@ -784,9 +795,9 @@ LASUI.prototype.getOperations = function (evt) {
 		
 		if(document.getElementsByName('variables').length>0) {
 			this.state.xpaths=[];
-			for (var x=0; x<document.getElementsByName('variables').length;x++) {
-				url += '&xpath=' + document.getElementsByName('variables').item(x).value
-				this.state.xpaths.push(eval("("+document.getElementsByName('variables').item(x).options[document.getElementsByName('variables').item(x).selectedIndex].data+")"));
+			for (var x=0; x < document.getElementsByName('variables').length;x++) {
+				url += '&xpath=' + document.getElementsByName('variables').item(x).options[document.getElementsByName('variables').item(x).selectedIndex].id
+				this.state.xpaths.push(eval("("+document.getElementsByName('variables').item(x).options[document.getElementsByName('variables').item(x).selectedIndex].value+")"));
 			}
 			if(!this.AJAX_cache[url]) {
 				this.AJAX_cache[url]="waiting";
@@ -1551,18 +1562,23 @@ LASUI.prototype.makeRequest = function (evt, type) {
 		this.request.removeRegion();
 
 		//add the variables
-		if(!this.state.xpaths)
-			return;
-
-		if(this.state.xpaths[0].grid_type=="vector") {
-			for(var v=0;v<this.state.xpaths[0].variable.length;v++)
-				 this.request.addVariable(this.state.dataset,this.state.xpaths[0].variable[v].IDREF)	
-			this.request.setProperty("ferret","vector_name",this.state.datasets[this.state.dataset].getChildByID(this.state.variable).name);
-		} else
-		for(var v=0;v<document.getElementsByName(this.anchors.breadcrumb).length;v++) {
-			this.request.addVariable(this.state.dataset,document.getElementsByName(this.anchors.breadcrumb).item(v).children.namedItem('variables').options[document.getElementsByName(this.anchors.breadcrumb).item(v).children.namedItem('variables').selectedIndex].id);
-		///this.request.setVariable(this.state.dataset, this.state.variable);
+			
+		var xpaths={};		
+		for(var v=0;v<document.getElementsByName("variables").length;v++) {
+			xpaths[document.getElementsByName("variables").item(v).options[document.getElementsByName("variables").item(v).selectedIndex].id]=eval("("+document.getElementsByName("variables").item(v).options[document.getElementsByName("variables").item(v).selectedIndex].value+")");
 		}
+		
+		for(xpath in xpaths) {
+			this.request.addVariable(this.state.dataset,xpaths[xpath].ID);
+		}
+		
+		for(xpath in xpaths) 
+                	if(xpaths[xpath].grid_type=="vector") {
+				this.request.removeVariables(); 	
+		       		this.request.addVariable(this.state.dataset,xpaths[xpath].variable[0].IDREF);
+	        		this.request.addVariable(this.state.dataset,xpaths[xpath].variable[1].IDREF);
+		        }
+		
 
 
 		this.request.addRegion();
