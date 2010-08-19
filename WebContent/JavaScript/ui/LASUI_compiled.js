@@ -1044,7 +1044,8 @@ LASUI.prototype.setDefaultProductMenu = function () {
 					var maxvars = parseInt(this.state.operations.getOperationByID(op).maxvars);
 					if(!maxvars)
 						maxvars=1;
-					if(this.state.operations.getOperationByID(op).default=="true"&&this.state.operations.getOperationByID(op).category=="visualization"&&this.state.operations.hasInterval(op,view)&&minvars<=varct&&maxvars>=varct) {
+					try {
+					if(this.state.operations.getOperationByID(op)['default']&&this.state.operations.getOperationByID(op).category=="visualization"&&this.state.operations.hasInterval(op,view)&&minvars<=varct&&maxvars>=varct) {
 						if(!document.getElementById(type))
 	                                        	this.setProductTypeNode(type);
 						if(!defaultPlotProduct||(this.state.operation.plot=op&&this.state.view.plot==view))
@@ -1052,7 +1053,7 @@ LASUI.prototype.setDefaultProductMenu = function () {
 						else if(!document.getElementById(op+"_"+view))
 							this.setProductNode(op, view, this.state.operations.getOperationIntervals(op)[view].title);
 					
-					}
+					} }catch(e){}
 				}
 			
 
