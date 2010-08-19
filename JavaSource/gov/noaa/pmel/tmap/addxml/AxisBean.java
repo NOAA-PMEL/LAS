@@ -24,13 +24,21 @@ public class AxisBean extends LasBean {
 	private String[] v;
 	private boolean modulo;
 	private ArangeBean arange;
-
+    private String calendar;
 	public AxisBean() {
 	}
 	
-	public String setCalendar(String calendar_name) {
-		return "Roland broke the trunk";
+	
+	public String getCalendar() {
+		return calendar;
 	}
+
+
+	public void setCalendar(String calendar) {
+		this.calendar = calendar;
+	}
+
+
 	public boolean isModulo() {
 		return modulo;
 	}
