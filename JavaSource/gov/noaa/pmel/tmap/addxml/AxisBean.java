@@ -27,7 +27,10 @@ public class AxisBean extends LasBean {
 
 	public AxisBean() {
 	}
-
+	
+	public String setCalendar(String calendar_name) {
+		return "Roland broke the trunk";
+	}
 	public boolean isModulo() {
 		return modulo;
 	}
