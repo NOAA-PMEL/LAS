@@ -24,7 +24,7 @@
         <service>template</service>
    </operation>
    <operation name="Desktop application data access scripts"
-        ID="Gen_Scripts" output_template="scripts"
+        ID="Gen_Scripts" output_template="scripts"  minvars="1" maxvars="100000" 
         service_action="Convert_to_Index" order="0600" category="file">
         <service>ferret</service>
         <response ID="ConvertResp">
@@ -848,7 +848,7 @@ streamable="true" mime_type="application/postscript"/> -->
     <!-- End of Data Extract operations for differences. -->
 
     <!-- Begin: interactive download -->
-    <operation ID="Interactive_Download" default="true" name="Interactive Download"
+    <operation ID="Interactive_Download" default="true" minvars="1" maxvars="100000" name="Interactive Download"
         output_template="interactive_download" service_action="Data_Download" order="0300" category="table">
         <service>ferret</service>
         <response ID="Data_Download_Response">
@@ -1007,7 +1007,7 @@ streamable="true" mime_type="application/postscript"/> -->
        </response>
        <service>database</service>
     </operation>
-    <operation name="Location Plot" ID="Insitu_extract_location_plot" output_template="zoom" order="0104" category="visualization">
+    <operation name="Location Plot" ID="Insitu_extract_location_plot" minvars="1" maxvars="1" default="true" output_template="zoom" order="0104" category="visualization">
           <operation name="Database Extraction" ID="DBExtract" output_template="ascii" service_action="sql">
                <response ID="DBExtractResponse">
                     <result type="debug" ID="db_debug" file_suffix=".txt"/>
@@ -1040,28 +1040,14 @@ streamable="true" mime_type="application/postscript"/> -->
 
           <region>
           <!-- Not sure about this since the plot is planar in XY but the extract doesn't have to be. -->
-            <intervals name="x"   type="Maps" title="Location Plot"/>
-            <intervals name="y"   type="Maps" title="Location Plot"/>
-            <intervals name="z"   type="Maps" title="Location Plot"/>
-            <intervals name="t"   type="Maps" title="Location Plot"/>
             <intervals name="xy"   type="Maps" title="Location Plot"/>
-            <intervals name="xz"   type="Maps" title="Location Plot"/>
-            <intervals name="xt"   type="Maps" title="Location Plot"/>
-            <intervals name="yz"   type="Maps" title="Location Plot"/>
-            <intervals name="yt"   type="Maps" title="Location Plot"/>
-            <intervals name="zt"   type="Maps" title="Location Plot"/>
-            <intervals name="xyz"   type="Maps" title="Location Plot"/>
-            <intervals name="xyt"   type="Maps" title="Location Plot"/>
-            <intervals name="xzt"   type="Maps" title="Location Plot"/>
-            <intervals name="yzt"   type="Maps" title="Location Plot"/>
-            <intervals name="xyzt"   type="Maps" title="Location Plot"/>
         </region>
         <grid_types>
             <grid_type name="scattered" />
         </grid_types>
     </operation>
     <operation name="Location and Value Plot"
-        ID="Insitu_extract_location_value_plot" output_template="zoom" order="0105" category="visualization">
+        ID="Insitu_extract_location_value_plot" output_template="zoom" order="0105" default="true" category="visualization">
         <operation name="Database Extraction" ID="DBExtract"
             output_template="ascii" service_action="sql">
             <response ID="DBExtractResponse">
@@ -1097,26 +1083,9 @@ streamable="true" mime_type="application/postscript"/> -->
             </response>
             <service>ferret</service>
         </operation>
-	<visualization_types>
-                <type name="Maps" />
-        </visualization_types>
         <region>
             <!-- Not sure about this since the plot is planar in XY but the extract doesn't have to be. -->
-            <intervals name="x"   type="Maps" title="Location Plot"/>
-            <intervals name="y"   type="Maps" title="Location Plot"/>
-            <intervals name="z"   type="Maps" title="Location Plot"/>
-            <intervals name="t"   type="Maps" title="Location Plot"/>
-            <intervals name="xy"   type="Maps" title="Location Plot"/>
-            <intervals name="xz"   type="Maps" title="Location Plot"/>
-            <intervals name="xt"   type="Maps" title="Location Plot"/>
-            <intervals name="yz"   type="Maps" title="Location Plot"/>
-            <intervals name="yt"   type="Maps" title="Location Plot"/>
-            <intervals name="zt"   type="Maps" title="Location Plot"/>
-            <intervals name="xyz"   type="Maps" title="Location Plot"/>
-            <intervals name="xyt"   type="Maps" title="Location Plot"/>
-            <intervals name="xzt"   type="Maps" title="Location Plot"/>
-            <intervals name="yzt"   type="Maps" title="Location Plot"/>
-            <intervals name="xyzt"   type="Maps" title="Location Plot"/>
+            <intervals name="xy"   type="Maps" title="Location and Value"/>
         </region>
         <grid_types>
             <grid_type name="scattered" />
@@ -1182,21 +1151,7 @@ streamable="true" mime_type="application/postscript"/> -->
         </visualization_types>
         <region>
             <!-- Not sure about this since the plot is planar in XY but the extract doesn't have to be. -->
-            <intervals name="x"   type="Maps" title="Location Plot"/>
-            <intervals name="y"   type="Maps" title="Location Plot"/>
-            <intervals name="z"   type="Maps" title="Location Plot"/>
-            <intervals name="t"   type="Maps" title="Location Plot"/>
             <intervals name="xy"   type="Maps" title="Location Plot"/>
-            <intervals name="xz"   type="Maps" title="Location Plot"/>
-            <intervals name="xt"   type="Maps" title="Location Plot"/>
-            <intervals name="yz"   type="Maps" title="Location Plot"/>
-            <intervals name="yt"   type="Maps" title="Location Plot"/>
-            <intervals name="zt"   type="Maps" title="Location Plot"/>
-            <intervals name="xyz"   type="Maps" title="Location Plot"/>
-            <intervals name="xyt"   type="Maps" title="Location Plot"/>
-            <intervals name="xzt"   type="Maps" title="Location Plot"/>
-            <intervals name="yzt"   type="Maps" title="Location Plot"/>
-            <intervals name="xyzt"   type="Maps" title="Location Plot"/>
         </region>
         <grid_types>
             <grid_type name="scattered" />
@@ -1246,21 +1201,7 @@ streamable="true" mime_type="application/postscript"/> -->
         </visualization_types>
         <region>
             <!-- Not sure about this since the plot is planar in XY but the extract doesn't have to be. -->
-            <intervals name="x"  type="Maps" title="Location Plot" />
-            <intervals name="y"  type="Maps" title="Location Plot" />
-            <intervals name="z"  type="Maps" title="Location Plot" />
-            <intervals name="t"  type="Maps" title="Location Plot" />
             <intervals name="xy"  type="Maps" title="Location Plot" />
-            <intervals name="xz"  type="Maps" title="Location Plot" />
-            <intervals name="xt"  type="Maps" title="Location Plot" />
-            <intervals name="yz"  type="Maps" title="Location Plot" />
-            <intervals name="yt"  type="Maps" title="Location Plot" />
-            <intervals name="zt"  type="Maps" title="Location Plot" />
-            <intervals name="xyz"  type="Maps" title="Location Plot" />
-            <intervals name="xyt"  type="Maps" title="Location Plot" />
-            <intervals name="xzt"  type="Maps" title="Location Plot" />
-            <intervals name="yzt"  type="Maps" title="Location Plot" />
-            <intervals name="xyzt"  type="Maps" title="Location Plot" />
         </region>
         <grid_types>
             <grid_type name="scattered" />
@@ -1309,21 +1250,7 @@ streamable="true" mime_type="application/postscript"/> -->
         </visualization_types>
         <region>
 	    <!-- Not sure about this since the plot is planar in XY but the extract doesn't have to be. -->
-	    <intervals name="x"  type="Maps" title="Location Plot" />
-	    <intervals name="y"  type="Maps" title="Location Plot" />
-	    <intervals name="z"  type="Maps" title="Location Plot" />
-	    <intervals name="t"  type="Maps" title="Location Plot" />
 	    <intervals name="xy"  type="Maps" title="Location Plot" />
-	    <intervals name="xz"  type="Maps" title="Location Plot" />
-	    <intervals name="xt"  type="Maps" title="Location Plot" />
-	    <intervals name="yz"  type="Maps" title="Location Plot" />
-	    <intervals name="yt"  type="Maps" title="Location Plot" />
-	    <intervals name="zt"  type="Maps" title="Location Plot" />
-	    <intervals name="xyz"  type="Maps" title="Location Plot" />
-	    <intervals name="xyt"  type="Maps" title="Location Plot" />
-	    <intervals name="xzt"  type="Maps" title="Location Plot" />
-	    <intervals name="yzt"  type="Maps" title="Location Plot" />
-	    <intervals name="xyzt"  type="Maps" title="Location Plot" />
 	</region>
 	<grid_types>
 	    <grid_type name="scattered" />
@@ -1389,21 +1316,7 @@ streamable="true" mime_type="application/postscript"/> -->
         </operation>
         <region>
             <!-- Not sure about this since the plot is planar in XY but the extract doesn't have to be. -->
-            <intervals name="x" type="Maps" title="Location Plot" />
-            <intervals name="y"  type="Maps" title="Location Plot" />
-            <intervals name="z"  type="Maps" title="Location Plot" />
-            <intervals name="t"  type="Maps" title="Location Plot" />
             <intervals name="xy"  type="Maps" title="Location Plot" />
-            <intervals name="xz"  type="Maps" title="Location Plot" />
-            <intervals name="xt"  type="Maps" title="Location Plot" />
-            <intervals name="yz"  type="Maps" title="Location Plot" />
-            <intervals name="yt"  type="Maps" title="Location Plot" />
-            <intervals name="zt"  type="Maps" title="Location Plot" />
-            <intervals name="xyz"  type="Maps" title="Location Plot" />
-            <intervals name="xyt"  type="Maps" title="Location Plot" />
-            <intervals name="xzt"  type="Maps" title="Location Plot" />
-            <intervals name="yzt"  type="Maps" title="Location Plot" />
-            <intervals name="xyzt"  type="Maps" title="Location Plot" />
         </region>
         <grid_types>
             <grid_type name="scattered" />
@@ -1452,21 +1365,7 @@ streamable="true" mime_type="application/postscript"/> -->
         </visualization_types>
         <region>
             <!-- Not sure about this since the plot is planar in XY but the extract doesn't have to be. -->
-            <intervals name="x"  type="Maps" title="Location Plot" />
-            <intervals name="y"  type="Maps" title="Location Plot" />
-            <intervals name="z"  type="Maps" title="Location Plot" />
-            <intervals name="t"  type="Maps" title="Location Plot" />
             <intervals name="xy"  type="Maps" title="Location Plot" />
-            <intervals name="xz"  type="Maps" title="Location Plot" />
-            <intervals name="xt"  type="Maps" title="Location Plot" />
-            <intervals name="yz"  type="Maps" title="Location Plot" />
-            <intervals name="yt"  type="Maps" title="Location Plot" />
-            <intervals name="zt"  type="Maps" title="Location Plot" />
-            <intervals name="xyz"  type="Maps" title="Location Plot" />
-            <intervals name="xyt"  type="Maps" title="Location Plot" />
-            <intervals name="xzt"  type="Maps" title="Location Plot" />
-            <intervals name="yzt"  type="Maps" title="Location Plot" />
-            <intervals name="xyzt"  type="Maps" title="Location Plot" />
         </region>
         <grid_types>
             <grid_type name="scattered" />
