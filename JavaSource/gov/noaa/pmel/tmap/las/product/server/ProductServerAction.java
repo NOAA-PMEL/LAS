@@ -30,6 +30,7 @@ import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.List;
@@ -73,7 +74,17 @@ public final class ProductServerAction extends LASAction {
             HttpServletResponse response){
 
         ProgressForm progress = (ProgressForm) form;
-        
+		String query = request.getQueryString();
+		if ( query != null ) {
+			try{
+				query = URLDecoder.decode(query, "UTF-8");
+				log.info("START: "+request.getRequestURL()+"?"+query);
+			} catch (UnsupportedEncodingException e) {
+				// Don't care we missed a log message.
+			}			
+		} else {
+			log.info("START: "+request.getRequestURL());
+		}
         log.debug("Entering ProductServerAction");
         String lazy_start = (String) servlet.getServletContext().getAttribute(LASConfigPlugIn.LAS_LAZY_START_KEY);
         if ( lazy_start != null && lazy_start.equals("true") ) {
@@ -770,7 +781,11 @@ public final class ProductServerAction extends LASAction {
         servlet.getServletContext().removeAttribute("runner_"+productRequest.getCacheKey());
         
         // Log the access to the product server.
-        log.info("Processed request: xml=\""+lasRequest.toCompactString()+"\"");
+        if ( query != null ) {
+			log.info("END:   "+request.getRequestURL()+"?"+query);						
+		} else {
+			log.info("END:   "+request.getRequestURL());
+		}
         if ( stream ) {
             
         	if ( stream_ids == null ) {

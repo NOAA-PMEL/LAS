@@ -14,6 +14,8 @@ import gov.noaa.pmel.tmap.las.util.View;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -57,6 +59,17 @@ public class GetViews extends ConfigService {
      */
     public ActionForward execute(ActionMapping mapping, ActionForm form,
             HttpServletRequest request, HttpServletResponse response) {
+		String query = request.getQueryString();
+		if ( query != null ) {
+			try{
+				query = URLDecoder.decode(query, "UTF-8");
+				log.info("START: "+request.getRequestURL()+"?"+query);
+			} catch (UnsupportedEncodingException e) {
+				// Don't care we missed a log message.
+			}			
+		} else {
+			log.info("START: "+request.getRequestURL());
+		}
         LASConfig lasConfig = (LASConfig)servlet.getServletContext().getAttribute(LASConfigPlugIn.LAS_CONFIG_KEY);
         String dsID = request.getParameter("dsid");
         String varID = request.getParameter("varid");
@@ -69,10 +82,8 @@ public class GetViews extends ConfigService {
         try {
         	ArrayList<View> views;
         	if ( xpath != null && xpath.length > 0 ) {
-				log.info("Starting xpaths: getViews");
 				views = lasConfig.getViewsByXpath(xpath);
         	} else {
-        		log.info("Starting: getViews.do?dsid="+dsID+"&varid="+varID+"&format="+format);
                views = lasConfig.getViewsByDatasetAndVariable(dsID, varID);
         	}
             //Collections.sort(views, new ContainerComparator("value"));
@@ -91,7 +102,11 @@ public class GetViews extends ConfigService {
         } catch (Exception e) {
             sendError(response, "views", format, e.toString());
         }
-        log.info("Finished: getViews.do?dsid="+dsID+"&varid="+varID+"&format="+format);		
+        if ( query != null ) {
+			log.info("END:   "+request.getRequestURL()+"?"+query);						
+		} else {
+			log.info("END:   "+request.getRequestURL());
+		}
         return null;
     }
     public JSONObject toJSON(ArrayList<View> views, String wrapper) throws JSONException {

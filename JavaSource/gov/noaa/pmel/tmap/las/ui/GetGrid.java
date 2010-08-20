@@ -15,6 +15,8 @@ import gov.noaa.pmel.tmap.las.util.TimeAxis;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Iterator;
 
@@ -60,7 +62,17 @@ public class GetGrid extends ConfigService {
         
         // TODO Add a format=json|xml|json-xml and then for XML extract the data set JDOM element collection and return that as XML
         // Get the LASConfig (sub-class of JDOM Document) from the servlet context.
-        
+		String query = request.getQueryString();
+		if ( query != null ) {
+			try{
+				query = URLDecoder.decode(query, "UTF-8");
+				log.info("START: "+request.getRequestURL()+"?"+query);
+			} catch (UnsupportedEncodingException e) {
+				// Don't care we missed a log message.
+			}			
+		} else {
+			log.info("START: "+request.getRequestURL());
+		}
         LASConfig lasConfig = (LASConfig)servlet.getServletContext().getAttribute(LASConfigPlugIn.LAS_CONFIG_KEY);
         String dsID = request.getParameter("dsid");
         String varID = request.getParameter("varid");
@@ -68,7 +80,7 @@ public class GetGrid extends ConfigService {
         if ( format == null ) {
             format = "json";
         }
-        log.info("Starting: getGrid.do?dsid="+dsID+"&varid="+varID+"&format="+format);
+        
         Grid grid = null;
         
         StringBuffer xml = new StringBuffer();
@@ -101,7 +113,11 @@ public class GetGrid extends ConfigService {
         } catch (LASException e) {
         	sendError(response, "grid", format, e.toString());
         }
-        log.info("Finishing: getGrid.do?dsid="+dsID+"&varid="+varID+"&format="+format);
+        if ( query != null ) {
+			log.info("END:   "+request.getRequestURL()+"?"+query);						
+		} else {
+			log.info("END:   "+request.getRequestURL());
+		}
 		
         return null;
     }
