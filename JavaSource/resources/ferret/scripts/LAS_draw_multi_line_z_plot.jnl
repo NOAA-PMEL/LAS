@@ -21,17 +21,17 @@ DEFINE SYMBOL all_units_same = 1
 DEFINE SYMBOL unique_units_0 = ($data_0_units)
 DEFINE SYMBOL nunique = 0
 
-REPEAT/range=1:`($data_count)-1`/NAME=m (  \
-  DEFINE SYMBOL m = `m`; \
-  GO LAS_initialize_region ($m) ;  \
-  GO LAS_initialize_data  ($m) ; \
+REPEAT/range=1:`($data_count)-1`/NAME=qdat (  \
+  DEFINE SYMBOL qdat = `qdat`; \
+  GO LAS_initialize_region ($qdat) ;  \
+  GO LAS_initialize_data  ($qdat) ; \
   DEFINE SYMBOL plot_arg = ($plot_arg),($ferret_plot_var); \
-  DEFINE SYMBOL ferret_plot_var_($m) = ($ferret_plot_var); \ 
-  DEFINE SYMBOL ferret_title_($m) = ($ferret_plot_title); \ 
-  LET tlen = STRLEN("($ferret_title_($m))"); \
+  DEFINE SYMBOL ferret_plot_var_($qdat) = ($ferret_plot_var); \ 
+  DEFINE SYMBOL ferret_title_($qdat) = ($ferret_plot_title); \ 
+  LET tlen = STRLEN("($ferret_title_($qdat))"); \
   LET title_len = `MAX(tlen, title_len)`; \
-  DEFINE SYMBOL units_($m) = `UPCASE("($data_($m)_units)")`; \
-  DEFINE SYMBOL all_units_same = `($all_units_same) AND (STRCMP("($units_0)", "($units_($m))") EQ 0)` \
+  DEFINE SYMBOL units_($qdat) = `UPCASE("($data_($qdat)_units)")`; \
+  DEFINE SYMBOL all_units_same = `($all_units_same) AND (STRCMP("($units_0)", "($units_($qdat))") EQ 0)` \
 )
 
 ! Set the labels for the upper left listing the locations
