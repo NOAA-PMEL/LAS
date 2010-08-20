@@ -6,6 +6,8 @@ package gov.noaa.pmel.tmap.las.service;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.Map;
 import java.util.Properties;
 
@@ -43,7 +45,7 @@ public class ProductService {
         this.methodName = methodName;
         this.outputFileName = outputFileName;
         this.responseXML = null;
-        
+
         Properties p = new Properties();
         InputStream is;
         String resourcePath = "resources/local";
@@ -52,7 +54,6 @@ public class ProductService {
         if (is == null) {
             if ( template != null ) {
                 // Can't find properties file.  Set where we look for templates.
-                log.info("Setting template path to default: "+template);
                 p.setProperty("file.resource.loader.path", template);
             } else {
                 throw new LASException("Cannot find the local service templates directory.");
@@ -63,7 +64,7 @@ public class ProductService {
         if ( p.getProperty("file.resource.loader.path") == null ) {
             if ( template != null ) {
                 // Can't find properties file.  Set where we look for templates.
-                log.info("Template path not found in properties file.  Setting to default: "+template);
+                log.debug("Template path not found in properties file.  Setting to default: "+template);
                 p.setProperty("file.resource.loader.path", template);
             } else {
                 throw new LASException("Cannot find database templates directory.");
@@ -71,7 +72,7 @@ public class ProductService {
         }
            
         try {
-            log.info("Setting loader path to: "+p.getProperty("file.resource.loader.path"));
+            log.debug("Setting loader path to: "+p.getProperty("file.resource.loader.path"));
             ve.init(p);
         } catch (Exception e) {
             throw new LASException("Cannot initialize the velocity engine.");

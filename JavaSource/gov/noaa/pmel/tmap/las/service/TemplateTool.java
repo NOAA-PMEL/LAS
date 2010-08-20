@@ -46,7 +46,7 @@ public class TemplateTool extends Tool {
         if (is == null) {
             if ( template != null ) {
                 // Can't find properties file.  Set where we look for templates.
-                log.info("Setting template path to default: "+template);
+                log.debug("Setting template path to default: "+template);
                 p.setProperty("file.resource.loader.path", template);
             } else {
                 throw new LASException("Cannot find "+serviceName+" templates directory.");
@@ -57,7 +57,7 @@ public class TemplateTool extends Tool {
         if ( p.getProperty("file.resource.loader.path") == null ) {
             if ( template != null ) {
                 // Can't find properties file.  Set where we look for templates.
-                log.info("Template path not found in properties file.  Setting to default: "+template);
+                log.debug("Template path not found in properties file.  Setting to default: "+template);
                 p.setProperty("file.resource.loader.path", template);
             } else {
                 throw new LASException("Cannot find database templates directory.");
@@ -65,7 +65,7 @@ public class TemplateTool extends Tool {
         }
            
         try {
-            log.info("Setting loader path to: "+p.getProperty("file.resource.loader.path"));
+            log.debug("Setting loader path to: "+p.getProperty("file.resource.loader.path"));
             ve.init(p);
         } catch (Exception e) {
             throw new LASException("Cannot initialize the velocity engine.");
@@ -203,7 +203,7 @@ public class TemplateTool extends Tool {
         context.put("symbols", symbols);   
         context.put("las_backendrequest", lasBackendRequest);
         // Guaranteed to be set by the Product Server
-        log.info("Velocity resource path: "+ve.getProperty("file.resource.loader.path"));
+        log.debug("Velocity resource path: "+ve.getProperty("file.resource.loader.path"));
         ve.mergeTemplate(template,"ISO-8859-1", context, templateWriter);
         templateWriter.flush();
         templateWriter.close();
