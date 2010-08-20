@@ -2,6 +2,8 @@ package gov.noaa.pmel.tmap.las.ui;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 
 import gov.noaa.pmel.tmap.las.exception.LASException;
 import gov.noaa.pmel.tmap.las.jdom.LASConfig;
@@ -27,6 +29,17 @@ public class GetVariable extends ConfigService {
 	private static Logger log = LogManager.getLogger(GetVariables.class.getName());
 	public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request, HttpServletResponse response) {
 
+		String query = request.getQueryString();
+		if ( query != null ) {
+			try{
+				query = URLDecoder.decode(query, "UTF-8");
+				log.info("START: "+request.getRequestURL()+"?"+query);
+			} catch (UnsupportedEncodingException e) {
+				// Don't care we missed a log message.
+			}			
+		} else {
+			log.info("START: "+request.getRequestURL());
+		}
 		LASConfig lasConfig = (LASConfig)servlet.getServletContext().getAttribute(LASConfigPlugIn.LAS_CONFIG_KEY);
 		String dsID = request.getParameter("dsid");
 		String varID = request.getParameter("varid");
@@ -65,7 +78,12 @@ public class GetVariable extends ConfigService {
 		} catch (JSONException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}            
+		}     
+		if ( query != null ) {
+			log.info("END:   "+request.getRequestURL()+"?"+query);						
+		} else {
+			log.info("END:   "+request.getRequestURL());
+		}
 		return null;
 	}
 }

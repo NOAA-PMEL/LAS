@@ -14,6 +14,8 @@ import gov.noaa.pmel.tmap.las.util.Option;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -57,6 +59,17 @@ public class GetDataConstraints extends ConfigService {
 	 */
 	public ActionForward execute(ActionMapping mapping, ActionForm form,
 			HttpServletRequest request, HttpServletResponse response) {
+		String query = request.getQueryString();
+		if ( query != null ) {
+			try{
+				query = URLDecoder.decode(query, "UTF-8");
+				log.info("START: "+request.getRequestURL()+"?"+query);
+			} catch (UnsupportedEncodingException e) {
+				// Don't care we missed a log message.
+			}			
+		} else {
+			log.info("START: "+request.getRequestURL());
+		}
 		LASConfig lasConfig = (LASConfig)servlet.getServletContext().getAttribute(LASConfigPlugIn.LAS_CONFIG_KEY);
 		String dsID = request.getParameter("dsid");
 		String varID = request.getParameter("varid");
@@ -64,7 +77,7 @@ public class GetDataConstraints extends ConfigService {
 		if ( format == null ) {
 			format = "json";
 		}
-		log.info("Starting: getDataConstraints.do?dsid="+dsID+"&varid="+varID+"&format="+format);
+		
 		try {
 			ArrayList<DataConstraint> constraints = lasConfig.getConstraints(dsID, varID);
 			PrintWriter respout = response.getWriter();
@@ -82,7 +95,11 @@ public class GetDataConstraints extends ConfigService {
 		} catch (Exception e) {
 			sendError(response, "constraints", format, e.toString());
 		}
-		log.info("Finished: getconstraints.do?dsid="+dsID+"&varid="+varID+"&format="+format);
+		if ( query != null ) {
+			log.info("END:   "+request.getRequestURL()+"?"+query);						
+		} else {
+			log.info("END:   "+request.getRequestURL());
+		}
 		return null;
 	}
 

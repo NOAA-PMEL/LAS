@@ -14,6 +14,8 @@ import gov.noaa.pmel.tmap.las.util.Dataset;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -57,15 +59,27 @@ public class GetCategories extends ConfigService {
 	private static Logger log = LogManager.getLogger(GetCategories.class.getName());
 	public ActionForward execute(ActionMapping mapping, ActionForm form,
 			HttpServletRequest request, HttpServletResponse response) {
+		
+		String query = request.getQueryString();
+		if ( query != null ) {
+			try{
+				query = URLDecoder.decode(query, "UTF-8");
+				log.info("START: "+request.getRequestURL()+"?"+query);
+			} catch (UnsupportedEncodingException e) {
+				// Don't care we missed a log message.
+			}			
+		} else {
+			log.info("START: "+request.getRequestURL());
+		}
+		
+		
 		LASConfig lasConfig = (LASConfig)servlet.getServletContext().getAttribute(LASConfigPlugIn.LAS_CONFIG_KEY); 
 		String format = request.getParameter("format");
 		if ( format == null ) {
 			format = "json";
 		}
 		String catid = request.getParameter("catid");
-		log.info("Starting: getCategories.do?catid="+catid+"&format="+format);	
-		
-		
+				
 		ArrayList<Category> categories = new ArrayList<Category>();
 		try {
 			// Handle the case where the request is for local categories on a confluence server (the made up parent category is the same
@@ -90,9 +104,14 @@ public class GetCategories extends ConfigService {
 			// IOExceptiono, JSONException and JDOM Exception are expected.
 		} catch (Exception e) {
 			sendError(response, "categories", format, e.toString());
-		}     
-		log.info("Finished: getCategories.do?catid="+catid+"&format="+format);
+		}
 		
+		if ( query != null ) {
+			log.info("END:   "+request.getRequestURL()+"?"+query);						
+		} else {
+			log.info("END:   "+request.getRequestURL());
+		}
+
 		return null;
 	}
 	public void writeResponse(HttpServletResponse response, ArrayList<Category> categories, String format) throws IOException, JSONException {

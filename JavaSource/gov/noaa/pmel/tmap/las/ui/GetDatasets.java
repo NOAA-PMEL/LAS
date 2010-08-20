@@ -13,6 +13,8 @@ import gov.noaa.pmel.tmap.las.util.Dataset;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Iterator;
 
@@ -55,7 +57,17 @@ public class GetDatasets extends ConfigService {
     private static Logger log = LogManager.getLogger(GetDatasets.class.getName());
     public ActionForward execute(ActionMapping mapping, ActionForm form,
             HttpServletRequest request, HttpServletResponse response) {
-
+		String query = request.getQueryString();
+		if ( query != null ) {
+			try{
+				query = URLDecoder.decode(query, "UTF-8");
+				log.info("START: "+request.getRequestURL()+"?"+query);
+			} catch (UnsupportedEncodingException e) {
+				// Don't care we missed a log message.
+			}			
+		} else {
+			log.info("START: "+request.getRequestURL());
+		}
         String format = request.getParameter("format");
         if ( format == null ) {
             format = "json";
@@ -97,7 +109,12 @@ public class GetDatasets extends ConfigService {
         	sendError(response, "<datasets>", format, e.getMessage());
         } catch (JSONException e) {
         	sendError(response, "<datasets>", format, e.getMessage());
-        }        
+        }   
+        if ( query != null ) {
+			log.info("END:   "+request.getRequestURL()+"?"+query);						
+		} else {
+			log.info("END:   "+request.getRequestURL());
+		}
         return null;
     }
 }
