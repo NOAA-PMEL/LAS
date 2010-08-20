@@ -22,6 +22,7 @@
 			<fileset dir="JavaSource">
 				<include name="resources/**" />
 				<include name="**.properties" />
+				<include name="**.xml" />
 			</fileset>
 		</copy>
 		<copy file="WebContent/luis/web/levitus_monthly.html"
