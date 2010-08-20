@@ -1,7 +1,5 @@
 package gov.noaa.pmel.tmap.addxml.test;
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import gov.noaa.pmel.tmap.addxml.addXML;
 
 import java.io.IOException;

@@ -9,9 +9,9 @@ public class AllTests {
 		Class[] testClasses = { TestCOADS.class, 
 				                TestGFDL.class, 
 				                TestLeetmaa.class, 
-				                TestNGDC.class, 
-				                TestNYHOPS.class, 
-				                TestOISST.class};
+				                TestNGDC.class,
+				                TestOISST.class,
+				                TestNYHOPS.class};
 		TestSuite suite= new TestSuite(testClasses);
 		return suite;
 	}

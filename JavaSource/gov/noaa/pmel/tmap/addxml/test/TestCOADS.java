@@ -1,12 +1,9 @@
 package gov.noaa.pmel.tmap.addxml.test;
 
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import gov.noaa.pmel.tmap.addxml.addXML;
 
 import java.io.IOException;
-import java.lang.annotation.Annotation;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -16,8 +13,6 @@ import junit.framework.TestCase;
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.filter.ElementFilter;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 
 import ucar.nc2.dataset.NetcdfDataset;
