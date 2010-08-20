@@ -796,7 +796,9 @@ LASUI.prototype.getOperations = function (evt) {
 		if(document.getElementsByName('variables').length>0) {
 			this.state.xpaths=[];
 			for (var x=0; x < document.getElementsByName('variables').length;x++) {
-				url += '&xpath=' + document.getElementsByName('variables').item(x).options[document.getElementsByName('variables').item(x).selectedIndex].id
+				if (x>0)
+					url+="&"
+				url += 'xpath=' + document.getElementsByName('variables').item(x).options[document.getElementsByName('variables').item(x).selectedIndex].id
 				this.state.xpaths.push(eval("("+document.getElementsByName('variables').item(x).options[document.getElementsByName('variables').item(x).selectedIndex].value+")"));
 			}
 			if(!this.AJAX_cache[url]) {
