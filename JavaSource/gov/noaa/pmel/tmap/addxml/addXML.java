@@ -1834,16 +1834,22 @@ public class addXML {
 		if (axis.getSize() >= 2.) {
 			// Only do this if the user specified the axis was irregular, meaning the axis span high frequency
 			// and irregular like a time series from a sensor that reports often but at irregular intervals.
-			
+			double t0 = axis.getCoordValue(0);
+			double t1 = axis.getCoordValue(1);
+			DateTime jodaDate1 = makeDate(t0, dateUnit, chrono);
+			DateTime jodaDate2 = makeDate(t1, dateUnit, chrono);
+			if ( Math.abs(jodaDate2.getMillis() - jodaDate1.getMillis()) < 3600*1000 ) {
+				irregular = true;
+			}
 			if ( irregular ) {
 
 				log.info("Time axis is irregular");
 				fmt = DateTimeFormat.forPattern(patterns[4]);
 				int length = (int) axis.getSize();
-				double t0 = axis.getCoordValue(0);
-				double t1 = axis.getCoordValue(length-1);
-				DateTime jodaDate1 = makeDate(t0, dateUnit, chrono);
-				DateTime jodaDate2 = makeDate(t1, dateUnit, chrono);
+				// Get the entire span of time
+				t1 = axis.getCoordValue(length-1);
+				jodaDate2 = makeDate(t1, dateUnit, chrono);
+				
 				Duration duration = new Duration(jodaDate1, jodaDate2);
 				Period period = duration.toPeriod();
 				Hours hours = period.toStandardHours();
@@ -1864,10 +1870,7 @@ public class addXML {
 				  // two dates.
 
 				// Only one should be greater than 0.
-				double t0 = axis.getCoordValue(0);
-				double t1 = axis.getCoordValue(1);
-				DateTime jodaDate1 = makeDate(t0, dateUnit, chrono);
-				DateTime jodaDate2 = makeDate(t1, dateUnit, chrono);
+				
 				
 				if ( unitsString.contains("0001") || unitsString.contains("1-1-1") ) {
 					// ESRL/PSD climo hack...
@@ -1966,6 +1969,7 @@ public class addXML {
 					}
 				}
 				Boolean forceAxis = (Boolean) forceAxes.get("t");
+				String units = axisbean.getUnits();
 				if ( (axis.isRegular() || axisbean.getUnits().equals("month")) ||
 						forceAxis.booleanValue()) {
 
@@ -2051,11 +2055,15 @@ public class addXML {
 			Double ceiling = Math.ceil(double_hour);
 			Double remainder_min = 0.;
 			if ( ceiling > double_hour ) {
-				remainder_min = (double_hour - Math.floor(double_hour))*60.;
+				if ( double_hour > 0 ) {
+				    remainder_min = (double_hour - Math.floor(double_hour))*60.;
+				} else {
+					remainder_min = (Math.floor(double_hour) - double_hour)*60.;
+				}
 				minutes = Double.valueOf(remainder_min).intValue();
-			}
+			} 
 			// Use millis for hours, minutes, seconds and millis since they are more likely to overflow an int.
-			long milli = Double.valueOf(d).longValue()*3600*1000;
+			long milli = (long)(d*3600.*1000.);
 			period = new Period(milli);
 		} else if ( pstring.contains("minute") ) {
 			long milli = Double.valueOf(d).longValue()*60*1000;
