@@ -223,7 +223,8 @@ public class Confluence extends LASAction {
 							} else {
 								String las_url = tribs.get(key).getURL();
 								las_url = las_url + Constants.PRODUCT_SERVER + "?" + request.getQueryString();	
-								response.sendRedirect(las_url);
+								lasProxy.executeGetMethodAndStreamResult(las_url, response);
+//								response.sendRedirect(las_url);
 							}
 						} else {
 							// Add the special parameter to create product locally using remote analysis and send to local product server.
@@ -248,7 +249,8 @@ public class Confluence extends LASAction {
 						Tributary trib = lasConfig.getTributary(server_key);
 						String las_url = trib.getURL();
 						las_url = las_url + Constants.PRODUCT_SERVER + "?" + request.getQueryString();	
-						response.sendRedirect(las_url);
+//						response.sendRedirect(las_url);
+						lasProxy.executeGetMethodAndStreamResult(las_url, response);
 					} catch (HttpException e) {
 						logerror(request, "Unable to fetch product.", e);
 					} catch (IOException e) {
