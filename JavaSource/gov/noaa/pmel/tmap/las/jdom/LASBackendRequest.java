@@ -21,6 +21,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 
 import org.jdom.Attribute;
 import org.jdom.Content;
@@ -1207,9 +1208,9 @@ public class LASBackendRequest extends LASDocument {
      */
     public String getDatabaseTime(String time, String target_format) throws LASException {
         
-        DateTimeFormatter short_fmt = DateTimeFormat.forPattern("dd-MMM-yyyy").withZone(DateTimeZone.UTC);
-        DateTimeFormatter long_fmt = DateTimeFormat.forPattern("dd-MMM-yyyy HH:mm:ss").withZone(DateTimeZone.UTC);
-        DateTimeFormatter target_fmt = DateTimeFormat.forPattern(target_format).withZone(DateTimeZone.UTC);
+        DateTimeFormatter short_fmt = DateTimeFormat.forPattern("dd-MMM-yyyy").withZone(DateTimeZone.UTC).withLocale(Locale.US);
+        DateTimeFormatter long_fmt = DateTimeFormat.forPattern("dd-MMM-yyyy HH:mm:ss").withZone(DateTimeZone.UTC).withLocale(Locale.US);
+        DateTimeFormatter target_fmt = DateTimeFormat.forPattern(target_format).withZone(DateTimeZone.UTC).withLocale(Locale.US);
      
         DateTime dt;
         if (time.length() > 11) {
