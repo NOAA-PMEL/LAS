@@ -1,65 +1,37 @@
 package gov.noaa.pmel.tmap.las.confluence;
 
+import gov.noaa.pmel.tmap.las.jdom.JDOMUtils;
+import gov.noaa.pmel.tmap.las.jdom.LASConfig;
+import gov.noaa.pmel.tmap.las.jdom.LASUIRequest;
+import gov.noaa.pmel.tmap.las.product.server.LASAction;
+import gov.noaa.pmel.tmap.las.product.server.LASConfigPlugIn;
+import gov.noaa.pmel.tmap.las.ui.GetMetadata;
+import gov.noaa.pmel.tmap.las.ui.LASProxy;
+import gov.noaa.pmel.tmap.las.ui.Util;
+import gov.noaa.pmel.tmap.las.util.Category;
+import gov.noaa.pmel.tmap.las.util.Constants;
+import gov.noaa.pmel.tmap.las.util.Tributary;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.PrintWriter;
-import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.httpclient.DefaultHttpMethodRetryHandler;
-import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
-import org.apache.commons.httpclient.HttpStatus;
-import org.apache.commons.httpclient.NameValuePair;
-import org.apache.commons.httpclient.methods.GetMethod;
-import org.apache.commons.httpclient.params.HttpMethodParams;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
-import org.jdom.Element;
 import org.jdom.JDOMException;
 import org.json.JSONException;
-
-import HTTPClient.URI;
-
-import gov.noaa.pmel.tmap.las.jdom.JDOMUtils;
-import gov.noaa.pmel.tmap.las.jdom.LASConfig;
-import gov.noaa.pmel.tmap.las.jdom.LASDocument;
-import gov.noaa.pmel.tmap.las.jdom.LASUIRequest;
-import gov.noaa.pmel.tmap.las.product.server.LASAction;
-import gov.noaa.pmel.tmap.las.product.server.LASConfigPlugIn;
-import gov.noaa.pmel.tmap.las.product.server.ProductServerAction;
-import gov.noaa.pmel.tmap.las.ui.GetDataConstraints;
-import gov.noaa.pmel.tmap.las.ui.GetGrid;
-import gov.noaa.pmel.tmap.las.ui.GetMetadata;
-import gov.noaa.pmel.tmap.las.ui.GetOperations;
-import gov.noaa.pmel.tmap.las.ui.GetOptions;
-import gov.noaa.pmel.tmap.las.ui.GetRegions;
-import gov.noaa.pmel.tmap.las.ui.GetVariables;
-import gov.noaa.pmel.tmap.las.ui.GetViews;
-import gov.noaa.pmel.tmap.las.ui.LASProxy;
-import gov.noaa.pmel.tmap.las.ui.Util;
-import gov.noaa.pmel.tmap.las.ui.GetCategories;
-import gov.noaa.pmel.tmap.las.util.Category;
-import gov.noaa.pmel.tmap.las.util.Constants;
-import gov.noaa.pmel.tmap.las.util.ContainerComparator;
-import gov.noaa.pmel.tmap.las.util.Tributary;
 
 public class Confluence extends LASAction {
 
@@ -251,7 +223,7 @@ public class Confluence extends LASAction {
 							} else {
 								String las_url = tribs.get(key).getURL();
 								las_url = las_url + Constants.PRODUCT_SERVER + "?" + request.getQueryString();	
-								lasProxy.executeGetMethodAndStreamResult(las_url, response);
+								response.sendRedirect(las_url);
 							}
 						} else {
 							// Add the special parameter to create product locally using remote analysis and send to local product server.
@@ -276,7 +248,7 @@ public class Confluence extends LASAction {
 						Tributary trib = lasConfig.getTributary(server_key);
 						String las_url = trib.getURL();
 						las_url = las_url + Constants.PRODUCT_SERVER + "?" + request.getQueryString();	
-						lasProxy.executeGetMethodAndStreamResult(las_url, response);
+						response.sendRedirect(las_url);
 					} catch (HttpException e) {
 						logerror(request, "Unable to fetch product.", e);
 					} catch (IOException e) {
@@ -288,6 +260,12 @@ public class Confluence extends LASAction {
 				}
 			} else {
 				String dsid = request.getParameter("dsid");
+				// All xpaths will come from the same data set for now.  :-)
+				// TODO cross-server data set comparisons
+				if ( dsid == null ) {
+					String[] xpaths = request.getParameterValues("xpath");
+					dsid = LASConfig.getDSIDfromXPath(xpaths[0]);
+				}
 				String server_key = dsid.split(Constants.NAME_SPACE_SPARATOR)[0];
 				try {
 					boolean local = server_key.equals(lasConfig.getBaseServerURLKey());
