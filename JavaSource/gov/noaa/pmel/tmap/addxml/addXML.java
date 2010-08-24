@@ -72,12 +72,9 @@ import org.joda.time.Hours;
 import org.joda.time.Months;
 import org.joda.time.Period;
 import org.joda.time.Years;
-import org.joda.time.chrono.All360Chronology;
-import org.joda.time.chrono.AllLeapChronology;
 import org.joda.time.chrono.GJChronology;
 import org.joda.time.chrono.GregorianChronology;
 import org.joda.time.chrono.JulianChronology;
-import org.joda.time.chrono.NoLeapChronology;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
@@ -110,6 +107,9 @@ import ucar.nc2.units.DateUnit;
 import ucar.unidata.geoloc.ProjectionImpl;
 import ucar.unidata.geoloc.projection.LambertConformal;
 import ucar.unidata.geoloc.projection.LatLonProjection;
+import uk.ac.rdg.resc.edal.time.AllLeapChronology;
+import uk.ac.rdg.resc.edal.time.NoLeapChronology;
+import uk.ac.rdg.resc.edal.time.ThreeSixtyDayChronology;
 
 import com.martiansoftware.jsap.JSAPResult;
 
@@ -1153,17 +1153,17 @@ public class addXML {
 								calendar_name = "proleptic_gregorian";
 								chrono = GregorianChronology.getInstance(DateTimeZone.UTC);
 							} else if (calendar.equals("noleap") || calendar.equals("365_day") ) {
+								chrono = NoLeapChronology.getInstanceUTC();
 								calendar_name = "noleap";
-								chrono = NoLeapChronology.getInstance(DateTimeZone.UTC);
 							} else if (calendar.equals("julian") ) {
 								calendar_name = "julian";
-								chrono = JulianChronology.getInstance(DateTimeZone.UTC);
+								chrono = JulianChronology.getInstanceUTC();
 							} else if ( calendar.equals("all_leap") || calendar.equals("366_day") ) {
+								chrono = AllLeapChronology.getInstanceUTC();
 								calendar_name = "all_leap";
-								chrono = AllLeapChronology.getInstance(DateTimeZone.UTC);
 							} else if ( calendar.equals("360_day") ) {  /* aggiunto da lele */
+								chrono = ThreeSixtyDayChronology.getInstanceUTC();
 								calendar_name = "360_day";
-								chrono = All360Chronology.getInstance(DateTimeZone.UTC);
 							}
 
 							String esg_formats[] = {"yyyy-MM-dd HH:mm:ss.s",
@@ -1812,7 +1812,7 @@ public class addXML {
 			log.error("Not a date Unit String: " + unitsString);
 		}
 
-		// This is the Joda Time Chronology that cooresponds to the
+		// This is the Joda Time Chronology that corresponds to the
 		// Java Gregorian Calendar and the Udunits Calendar.
 
 		// Use this chronology and the UTC Time Zone
@@ -1822,13 +1822,13 @@ public class addXML {
 		if (calendar.equals("proleptic_gregorian") ) {
 			chrono = GregorianChronology.getInstance(DateTimeZone.UTC);
 		} else if (calendar.equals("noleap") || calendar.equals("365_day") ) {
-			chrono = NoLeapChronology.getInstance(DateTimeZone.UTC);
+			chrono = NoLeapChronology.getInstanceUTC();
 		} else if (calendar.equals("julian") ) {
 			chrono = JulianChronology.getInstance(DateTimeZone.UTC);
 		} else if ( calendar.equals("all_leap") || calendar.equals("366_day") ) {
-			chrono = AllLeapChronology.getInstance(DateTimeZone.UTC);
+			chrono = AllLeapChronology.getInstanceUTC();
 		} else if ( calendar.equals("360_day") ) {  /* aggiunto da lele */
-			chrono = All360Chronology.getInstance(DateTimeZone.UTC);
+			chrono = ThreeSixtyDayChronology.getInstanceUTC();
 		}
 
 		if (axis.getSize() >= 2.) {
