@@ -1888,7 +1888,10 @@ public class addXML {
 				String periods = "";
 				int values[] = period.getValues();
 				DurationFieldType types[] = period.getFieldTypes();
-				for (int i = 0; i < values.length; i++) {
+				// Finds spacing in terms of years, months, weeks, days, hours, minutes, seconds, millis
+				// We will check years, months, weeks, days, hours
+				// If it's less than an hour it should get caught by the "irregular (should be high frequency)" test
+				for (int i = 0; i < 5; i++) {
 					if (values[i] > 0) {
 						numPeriods++;
 						// set if not set by command line arg.
