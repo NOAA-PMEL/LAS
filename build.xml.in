@@ -280,8 +280,6 @@
 	<target name="addxml-compile" depends="addxml-init">
 		<copy file="${addxml-src}/gov/noaa/pmel/tmap/addxml/log4j.xml"
 			tofile="${addxml-build}/log4j.xml" />
-		<unjar src="WebContent/WEB-INF/lib/joda-time-1.5.2.jar"
-			dest="${addxml-build}" />
 		<unjar src="WebContent/WEB-INF/lib/JSAP_1.03a.jar"
 			dest="${addxml-build}" />
 		<unjar src="WebContent/WEB-INF/lib/toolsUI-4.0.jar"
@@ -289,7 +287,7 @@
 		<unjar src="WebContent/WEB-INF/lib/log4j-1.2.13.jar"
 			dest="${addxml-build}" />
 		<javac
-			srcdir="${addxml-src}/gov/noaa/pmel/tmap/addxml:${addxml-src}/org/joda"
+			srcdir="${addxml-src}/gov/noaa/pmel/tmap/addxml:${addxml-src}/uk/ac/rdg/resc/edal"
 			destdir="${addxml-build}">
 			<classpath>
 				<fileset id="addxml-libs"
@@ -310,7 +308,7 @@
 	<target name="addxml-dist">
 		<mkdir dir="dist/addxml" />
 		<mkdir dir="dist/addxml/src/gov/noaa/pmel/tmap/addxml" />
-		<mkdir dir="dist/addxml/src/org/joda/time/chrono" />
+		<mkdir dir="dist/addxml/src/uk/ac/rdg/resc/edal/time" />
 		<mkdir dir="dist/addxml/bin" />
 		<mkdir dir="dist/addxml/lib" />
 		<copy todir="dist/addxml/src/gov/noaa/pmel/tmap/addxml">
@@ -318,8 +316,8 @@
 				<include name="*.java" />
 			</fileset>
 		</copy>
-		<copy todir="dist/addxml/src/org/joda/time/chrono">
-			<fileset dir="JavaSource/org/joda/time/chrono">
+		<copy todir="dist/addxml/src/uk/ac/rdg/resc/edal/time">
+			<fileset dir="JavaSource/uk/ac/rdg/resc/edal/time">
 				<include name="*.java" />
 			</fileset>
 		</copy>
@@ -347,7 +345,7 @@
 		<unjar src="lib/JSAP_1.03a.jar" dest="${addxml-build}" />
 		<unjar src="lib/toolsUI-4.0.jar" dest="${addxml-build}" />
 		<unjar src="lib/log4j-1.2.13.jar" dest="${addxml-build}" />
-		<javac srcdir="src/gov/noaa/pmel/tmap/addxml:src/org/joda"
+		<javac srcdir="src/gov/noaa/pmel/tmap/addxml:src/uk/ac/rdg/resc/edal"
 			destdir="${addxml-build}">
 			<classpath>
 				<fileset id="addxml-libs" dir="lib">
