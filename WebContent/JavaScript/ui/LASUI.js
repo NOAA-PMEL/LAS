@@ -221,7 +221,7 @@ alert('yakkity yak');
 	
 	var varObj = this.state.datasets[this.state.dataset].getChildByID(this.state.variable);
 	if(varObj) {
-				if(varObj.grid_type!="scattered"){
+				if(varObj.grid_type!="scattered"&&document.getElementsByName("variables").length==1){
 					if(this.refs.analysis.enabled) {
 						this.hideAnalysis();
 						this.showAnalysis();
@@ -480,7 +480,7 @@ LASUI.prototype.onSetVariable = function() {
 		for(var xpath in this.state.xpaths) {
 			var varObj = this.state.xpaths[xpath];
  			if(varObj) {
-				if(varObj.grid_type!="scattered"&&varObj.grid_type!="vector"){
+				if(varObj.grid_type!="scattered"&&varObj.grid_type!="vector"&&document.getElementsByName("variables").length==1){
 					if(this.refs.analysis.enabled) {
 						this.hideAnalysis();
 						this.showAnalysis();
@@ -498,6 +498,13 @@ LASUI.prototype.onSetVariable = function() {
 		this.refresh();
 }
 LASUI.prototype.addVariable = function(evt) {
+	
+
+	var stop = false;
+	if(!evt) {
+		evt={target : document.getElementsByName("variables").item(0)}		
+		var stop = true;
+	}
 	var elm = evt.target.parentNode;
         var newvar = elm.cloneNode(true);
 	elm.parentNode.insertBefore(newvar,elm);
@@ -519,11 +526,24 @@ LASUI.prototype.addVariable = function(evt) {
 				document.getElementsByName("variables").item(i).options[v].style.display='none';
 		}
 
-	this.getOperations();
+	if(document.getElementsByName('variables').length >= document.getElementsByName('variables').item(0).options.length) {
+		for (var i=0;i<document.getElementsByName('add').length;i++)
+			 document.getElementsByName('add').item(i).style.display="none";		
+	} else
+		for (var i=0;i<document.getElementsByName('add').length;i++)
+			 document.getElementsByName('add').item(i).style.display="";		
+		
+	document.getElementById("analysisWrapper").style.display="none";
+	this.refs.analysis.enabled = false;
+	this.getOperations(true);
 
 }
 LASUI.prototype.removeVariable = function(evt) {
-
+	var stop = false;
+	if(!evt) {
+                evt={target : document.getElementsByName("variables").item(document.getElementsByName("variables").length-1)}
+		stop = true;
+	}
 	if(document.getElementsByName('variables').length>=2)
 		evt.target.parentNode.parentNode.removeChild(evt.target.parentNode);
 	if(document.getElementsByName('del').length==1) {
@@ -532,7 +552,15 @@ LASUI.prototype.removeVariable = function(evt) {
 		for(var v=0;v<document.getElementsByName("variables").item(0).options.length;v++)
 			document.getElementsByName("variables").item(0).options[v].style.display="";
 	}
-	this.getOperations();
+
+	if(document.getElementsByName('variables').length >= document.getElementsByName('variables').item(0).options.length) {
+		for (var i=0;i<document.getElementsByName('add').length;i++)
+			 document.getElementsByName('add').item(i).style.display="none";		
+	} else
+		for (var i=0;i<document.getElementsByName('add').length;i++)
+			 document.getElementsByName('add').item(i).style.display="";
+	
+	this.getOperations(true);
 }
 /**
  * Event handler for category selection, bind to category DOM object events.
@@ -782,13 +810,16 @@ LASUI.prototype.getOperations = function (evt) {
 		if(!view) var view = this.state.view.plot;
 	
 		var url = this.hrefs.getOperations.url + this.state.extra_args;// + 'view=' +view;
-		
+		var stop =false;
 		//check to see if seelected variable is a vector, if so, disable other variables ... or something
-		if(evt)
-		try {
-			if(evt.target.options[evt.target.selectedIndex].name)
-				var selectedVariable=eval("("+evt.target.options[evt.target.selectedIndex].value+")");
-		} catch(e) {}
+		if(evt) 
+			if(evt.target) 
+				try {
+					if(evt.target.options[evt.target.selectedIndex].name)
+					var selectedVariable=eval("("+evt.target.options[evt.target.selectedIndex].value+")");
+				} catch(e) {}
+			else
+				var stop=true;
 	
 	
 			
@@ -803,12 +834,14 @@ LASUI.prototype.getOperations = function (evt) {
 			}
 			if(!this.AJAX_cache[url]) {
 				this.AJAX_cache[url]="waiting";
-				req.onreadystatechange = this.AJAXhandler.LASBind(this, req, "this.AJAX_cache['"+url+"'] = req.responseText; this.setOperationList(req.responseText);");
+				req.onreadystatechange = this.AJAXhandler.LASBind(this, req, "this.AJAX_cache['"+url+"'] = req.responseText; this.setOperationList(req.responseText,"+stop+");");
 				req.open("GET", url);
 				req.send(null);
 			} else if(this.AJAX_cache[url]!="waiting")
-				this.setOperationList(this.AJAX_cache[url]);
+				this.setOperationList(this.AJAX_cache[url],stop);
 		}
+		
+
 }
 
 /**
@@ -844,12 +877,23 @@ LASUI.prototype.setOperation = function (evt) {
 
 	}
 
+
 	this.state.operation[type]=id;
 	this.refs.options[type].DOMNode.innerHTML="";
 
 	var view = args[2];
 
 	this.state.view[type] = view;
+	if(document.getElementsByName("variables").length==1) {
+		document.getElementById("analysisWrapper").style.display="";
+	//	if(this.refs.analysis.enabled)
+	//		this.showAnalysis();
+	//	else
+	//		this.hideAnalysis();
+	} else {
+		document.getElementById("analysisWrapper").style.display="none";
+	//	this.hideAnalysis();
+	}
 	if(this.refs.analysis.enabled)
 		for(var a in this.state.analysis.axes)
 			if(view.indexOf(a)<0){
@@ -863,15 +907,8 @@ LASUI.prototype.setOperation = function (evt) {
 				delete this.state.analysis.axes[a];
 			}
 	this.state.view.widgets = view;
-	var varct=document.getElementsByName('variables').length;
-	 for(var i=0;i<this.state.operations.getOperationCount();i++) {
-		var minvars = parseInt(this.state.operations.getOperation(i).minvars);
-		if(!minvars)
-			minvars=1;
-		var maxvars = parseInt(this.state.operations.getOperation(i).maxvars);
-		if(!maxvars)
-			maxvars=1;		
-		if(document.getElementById(this.state.operations.getOperationName(i))&&this.state.operations.hasInterval(this.state.operations.getOperationID(i),view)&&minvars<=varct&&maxvars>=varct) 
+	for(var i=0;i<this.state.operations.getOperationCount();i++) {
+		if(document.getElementById(this.state.operations.getOperationName(i))&&this.state.operations.hasInterval(this.state.operations.getOperationID(i),view)) 
 			this.setOperationNode(this.state.operations.getOperationID(i),this.state.operations.getOperationName(i));	
 	}
 
@@ -899,6 +936,21 @@ LASUI.prototype.setOperation = function (evt) {
 		this.getOptions(optiondef, "plot",false);
 	else
 		this.onSetVariable();
+	
+	var minvars =1;
+        if(this.state.operations.getOperationByID(id).minvars)
+                minvars=parseInt(this.state.operations.getOperationByID(id).minvars);
+        var maxvars =1;
+        if(this.state.operations.getOperationByID(id).maxvars)
+                maxvars=parseInt(this.state.operations.getOperationByID(id).maxvars);
+
+        while(document.getElementsByName('variables').length<minvars)
+                this.addVariable();
+
+        while(document.getElementsByName('variables').length>maxvars)
+                this.removeVariable()
+
+
 }
 LASUI.prototype.genericHandler = function (evt) {
 	if(arguments[1])
@@ -908,14 +960,15 @@ LASUI.prototype.genericHandler = function (evt) {
  *  Method to populate the list of avialable operations from a json response from the server
  *  @param {string} strJson A json string compatibe with the LASGetOperationsResponse class
  */
-LASUI.prototype.setOperationList = function (strJson) {
+LASUI.prototype.setOperationList = function (strJson, stop) {
 
 	var response = eval("(" + strJson + ")");
 	var setDefault = true;
 	if(response.operations.error=="No operations found.") {
+		//need to do something else here
 		if(this.state.view.plot.length>1) {
 			this.state.view.plot=this.state.view.plot[0];
-			this.setVisualization(this.state.view.plot);
+			this.setVisualization(this.state.view.plot,"view");
 			return null;
 		}
 	}
@@ -928,11 +981,23 @@ LASUI.prototype.setOperationList = function (strJson) {
 				} catch (e) {}
 
 
-	var setDefaultVis = true;
-	if(!this.state.operations.response.operations.error)
+	if(!this.state.operations.response.operations.error&&!stop)
 		this.setDefaultProductMenu();
+	var varct = document.getElementsByName('variables').length;
 	
-
+	if(stop) {
+		for(var i=0;i<this.state.operations.getOperationCount();i++) {
+			var minvars= 1;
+			if(this.state.operations.getOperation(i).minvars)
+			minvars=parseInt(this.state.operations.getOperation(i).minvars);
+			var maxvars = 1;
+			if(this.state.operations.getOperation(i).maxvars)
+			maxvars=parseInt(this.state.operations.getOperation(i).maxvars);
+			
+			if(document.getElementsByName("variables").length<=maxvars&&document.getElementsByName("variables").length>=minvars)					this.setOperationNode(this.state.operations.getOperationID(i),this.state.operations.getOperationName(i));
+		}
+		this.setVisualization(this.state.view.plot,"varct");	
+	}
 }
 
 LASUI.prototype.refresh = function() {
@@ -956,10 +1021,6 @@ LASUI.prototype.setOperationNode = function (id, name) {
 	if(button) {
 		button.style.visibility = "visible";
 		button.onclick=this.doProductIconClick.LASBind(this, id);
-	}
-	var option = document.getElementById("OPTION_DOWNLOAD_" + id);
-	if(option) {
-		option.disabled="";
 	}
 }
 LASUI.prototype.doProductIconClick = function (evt) {
@@ -1047,7 +1108,7 @@ LASUI.prototype.setDefaultProductMenu = function () {
 					if(!maxvars)
 						maxvars=1;
 					try {
-					if(this.state.operations.getOperationByID(op)['default']&&this.state.operations.getOperationByID(op).category=="visualization"&&this.state.operations.hasInterval(op,view)&&minvars<=varct&&maxvars>=varct) {
+					if(this.state.operations.getOperationByID(op)['default']&&this.state.operations.getOperationByID(op).category=="visualization"&&this.state.operations.hasInterval(op,view)) { //&&minvars<=varct&&maxvars>=varct) {
 						if(!document.getElementById(type))
 	                                        	this.setProductTypeNode(type);
 						if(!defaultPlotProduct||(this.state.operation.plot=op&&this.state.view.plot==view))
@@ -1090,7 +1151,7 @@ LASUI.prototype.setProductNode = function(id, view, title) {
 		var title = document.createTextNode(title);
 		var radio = document.createElement("INPUT");
 		radio.type = "radio";
-		radio.name = "product";
+		radio.name = "visualizations";
 		radio.className = "LASRadioInputNode";
 		radio.value = id;
 		radio.id=id+'_'+view;
@@ -1573,11 +1634,10 @@ LASUI.prototype.makeRequest = function (evt, type) {
 		var xpaths={};		
 		for(var v=0;v<document.getElementsByName("variables").length;v++) {
 			xpaths[document.getElementsByName("variables").item(v).options[document.getElementsByName("variables").item(v).selectedIndex].id]=eval("("+document.getElementsByName("variables").item(v).options[document.getElementsByName("variables").item(v).selectedIndex].value+")");
+			var variable = eval("("+document.getElementsByName("variables").item(v).options[document.getElementsByName("variables").item(v).selectedIndex].value+")");
+			this.request.addVariable(this.state.dataset,variable.ID);
 		}
 		
-		for(xpath in xpaths) {
-			this.request.addVariable(this.state.dataset,xpaths[xpath].ID);
-		}
 		
 		for(xpath in xpaths) 
                 	if(xpaths[xpath].grid_type=="vector") {
@@ -2213,42 +2273,88 @@ LASUI.prototype.selectAnalysisAxis = function (evt) {
 		this.updateConstraints(this.state.view.plot);
 
 	if(changeVis)
-		this.setVisualization(axes);
+		this.setVisualization(axes,"view");
 
 }
-LASUI.prototype.setVisualization = function (d) {
+LASUI.prototype.setVisualization = function (d, priority) {
 
 	var stop = false;
-	var bestView = "";
+
+	var bestView = this.state.view.plot;
 	if(this.state.view.plot.indexOf(d)>=0)
 		 bestView = this.state.view.plot.substr(0,this.state.view.plot.indexOf(d)) + this.state.view.plot.substr(this.state.view.plot.indexOf(d)+d.length,this.state.view.plot.length);
 
-	if(bestView == "")
-		for(var i in this.state.grid.response.grid.axis)
-			if(d.indexOf(this.state.grid.response.grid.axis[i].type)<0)
-				bestView=this.state.grid.response.grid.axis[i].type;
-//redo this using getElementsByName
-	for(var type in this.state.operations.getOperationTypes())
-		for (var op in  this.state.operations.getOperationsByType(type))
-			if(this.state.operations.hasInterval(op,bestView)  && !stop)// && this.state.operations.getOperationById(op).visualizat)
-				{
-						this.refs.operations.plot.children[p].radio.checked = true;
-						this.refs.operations.plot.children[p].radio.onclick({"srcElement" : this.refs.operations.plot.children[p].radio});
+	//redo this using getElementsByName
+		
+
+	if(document.getElementById(this.state.operation.plot+'_'+bestView)) {
+		document.getElementById(this.state.operation.plot+'_'+bestView).checked=true;
+		document.getElementById(this.state.operation.plot+'_'+bestView).onclick({srcElement : document.getElementById(this.state.operation.plot+'_'+bestView)})	
+	} else { for(var v=0; v< document.getElementsByName("plotType").length; v++) {
+			var plotView = document.getElementsByName("plotType").item(v).id.substr(document.getElementsByName("plotType").item(v).id.lastIndexOf('_'),document.getElementsByName("plotType").item(v).id.length);
+			var plotId = document.getElementsByName("plotType").item(v).id.substr(0,document.getElementsByName("plotType").item(v).id.lastIndexOf('_'));
+			var varct = document.getElementsByName("variables").length;
+			var minvars = 1;
+			var maxvars = 1;
+			if(this.state.operations.getOperationByID(plotId).minvars)
+				minvars = parseInt(this.state.operations.getOperationByID(plotId).minvars);
+			if(this.state.operations.getOperationByID(plotId).maxvars)
+                                maxvars = parseInt(this.state.operations.getOperationByID(plotId).maxvars);
+			if(!stop)switch(priority) {
+				case 'view': if(plotView==bestView&&this.state.operation.plot==plotId) {
+						document.getElementsByName("plotType").item(v).checked = true;
+						document.getElementsByName("plotType").item(v).onclick({"srcElement" : document.getElementsByName("plotType").item(v)})
 						stop = true;
-					}
-	if(!stop)
-	   for(var t in this.products)
-                for (var p in this.products[t])
-                        if(this.products[t][p].view.indexOf(d)<0  && !stop)
-                                if(this.refs.operations.plot.children[p])
-                                        if(this.refs.operations.plot.children[p].radio){
-                                                this.refs.operations.plot.children[p].radio.checked = true;
-                                                this.refs.operations.plot.children[p].radio.onclick({"srcElement" : this.refs.operations.plot.children[p].radio});
+					     } 
+					     break;
+				case 'varct': if(varct<=maxvars&&varct>=minvars&&this.state.operation.plot==plotId) {
+						document.getElementsByName("plotType").item(v).checked = true;
+                                                document.getElementsByName("plotType").item(v).onclick({"srcElement" : document.getElementsByName("plotType").item(v)});
+					        stop = true;
+					      }
+					      break;
+			}
+		}
+		if(!stop)
+		for(var v=0; v< document.getElementsByName("plotType").length; v++) {
+                        var plotView = document.getElementsByName("plotType").item(v).id.substr(document.getElementsByName("plotType").item(v).id.lastIndexOf('_'),document.getElementsByName("plotType").item(v).id.length);
+                        var plotId = document.getElementsByName("plotType").item(v).id.substr(0,document.getElementsByName("plotType").item(v).id.lastIndexOf('_'));
+                        var varct = document.getElementsByName("variables").length;
+                        var minvars = 1;
+                        var maxvars = 1;
+                        if(this.state.operations.getOperationByID(plotId).minvars)
+                                minvars = parseInt(this.state.operations.getOperationByID(plotId).minvars);
+                        if(this.state.operations.getOperationByID(plotId).maxvars)
+                                maxvars = parseInt(this.state.operations.getOperationByID(plotId).maxvars);
+                        if(!stop)switch(priority) {
+                                case 'view': if(plotView==bestView) {
+                                                document.getElementsByName("plotType").item(v).checked = true;
+                                                document.getElementsByName("plotType").item(v).onclick({"srcElement" : document.getElementsByName("plotType").item(v)})
                                                 stop = true;
-                                        }
+                                             }
+                                             break;
+                                case 'varct': if(varct<=maxvars&&varct>=minvars) {
+                                                document.getElementsByName("plotType").item(v).checked = true;
+                                                document.getElementsByName("plotType").item(v).onclick({"srcElement" : document.getElementsByName("plotType").item(v)});
+                                                stop = true;
+                                              }
+                                              break;
 
-
-
+				default: if(plotView==bestView||(varct<=maxvars&&varct>=minvars)) {
+                                                var defaultPlot = document.getElementsByName("plotType").item(v).id;
+					}
+			}
+		}
+	}
+	if(!stop&&defaultPlot) {
+		if(document.getElementById(defaultPlot)) {
+			document.getElementById(defaultPlot).checked = true;
+                	document.getElementById(defaultPlot).onclick({"srcElement" : document.getElementById("defaultPlot")})
+		}
+	} else if(!stop) {
+		document.getElementsByName("plotType").item(0).checked = true;
+                document.getElementsByName("plotType").item(0).onclick({"srcElement" : document.getElementsByName("plotType").item(0)});
+	}	
 	this.refs.analysis.axes[d].selected=true;
 }
 /**
