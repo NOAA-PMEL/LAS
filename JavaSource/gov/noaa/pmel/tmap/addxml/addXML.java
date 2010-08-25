@@ -2141,14 +2141,12 @@ public class addXML {
 		// Since the axis is curvi, represent it as a 1-degree arange.
 		double min = axis.getMinValue();
 		double max = axis.getMaxValue();
-		int size = (int)(max-min);
-		if (size > 360) {
-			size = 360;
-		}
+		double diff = Math.abs(max - min);
+        // divide the range into 50 equal increments...
 		ArangeBean arange = new ArangeBean();
 		axisbean.setUnits(axis.getUnitsString());
-		arange.setSize(String.valueOf(size));
-		arange.setStep("1.0");
+		arange.setSize("50");
+		arange.setStep(String.valueOf(diff/50.));
 		arange.setStart(fmt.format(min));
 		axisbean.setArange(arange);
 		return axisbean;
