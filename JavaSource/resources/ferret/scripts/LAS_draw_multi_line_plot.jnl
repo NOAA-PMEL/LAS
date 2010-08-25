@@ -15,6 +15,11 @@ ENDIF
 ! titles for the plot legend and units for labeling 
 ! the plot axes.
 
+IF `($data_count"0") GT 6` THEN 
+   DEFINE SYMBOL data_count = 6
+   DEFINE SYMBOL reset_count = 1
+ENDIF
+
 DEFINE SYMBOL units_0 = `UPCASE("($data_0_units)")`
 DEFINE SYMBOL all_units_same = 1
 
@@ -219,6 +224,10 @@ REPEAT/range=1:`($data_count)`/NAME=m (; \
    GO LAS_legend_line \
    `xpos-0.2` 0.3 `ypos` `m + 6*($thicknum)` `titlesiz` "($ferret_title_($lnum))" ($legend_qual);\   
 )
+
+! IF ($reset_count"0|*>1") THEN 
+!   LABEL/nouser `xkey[i=@ave]` `ykey[i=@min]-0.1` 0 0  `titlesiz` "Plot maximum of 6 lines"
+
 
 ! The results script needs the actual axis directions. Restore them.
 
