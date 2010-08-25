@@ -18,7 +18,7 @@
         <grid_types>
             <grid_type name="regular" />
         </grid_types>
-        <optiondef IDREF="Options_2D_image_contour_7"/>
+        <optiondef IDREF="Options_2D_image_contour_xy_7"/>
     </operation>
    <operation name="V7 User Interface" ID="V7UI" output_template="V7UI" service_action="V7UI" private="true">
         <service>template</service>
