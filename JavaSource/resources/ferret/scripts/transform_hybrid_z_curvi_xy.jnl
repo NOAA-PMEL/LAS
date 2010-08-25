@@ -25,7 +25,7 @@ IF ($ferret_thk_url"0|*>1") THEN
    DEFINE SYMBOL thk_num = `($ferret_thk_var),return=dsetnum`
 
    IF ($error_status"0|*>1") THEN
-     MESSAGE/ERROR "**ERROR Layer Thickness dataset not opened"
+     MESSAGE/ERROR **ERROR "**ERROR Layer Thickness dataset not opened"
      EXIT/PROGRAM
    ENDIF
 ENDIF

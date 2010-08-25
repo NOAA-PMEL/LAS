@@ -50,12 +50,12 @@
 
 IF ($ferret_curvi_coord_lat"0|*>1") THEN
    DEFINE SYMBOL error_string = "Desktop Access script not available for data on a Curvilinear grid"
-   MESSAGE/ERROR ($error_string)
+   MESSAGE/ERROR **ERROR ($error_string)
    EXIT/PROGRAM
 ENDIF
 IF `($ferret_thk_var"0|*>1")` THEN
    DEFINE SYMBOL error_string = "Desktop Access script not available for data on a Hybrid Z grid"
-   MESSAGE/ERROR ($error_string)
+   MESSAGE/ERROR **ERROR ($error_string)
    EXIT/PROGRAM
 ENDIF
 
