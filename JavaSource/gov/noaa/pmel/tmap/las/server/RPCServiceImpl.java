@@ -12,6 +12,7 @@ import gov.noaa.pmel.tmap.las.client.serializable.OperationSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.OptionSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.RegionSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.VariableSerializable;
+import gov.noaa.pmel.tmap.las.client.util.Util;
 import gov.noaa.pmel.tmap.las.exception.LASException;
 import gov.noaa.pmel.tmap.las.jdom.LASConfig;
 import gov.noaa.pmel.tmap.las.jdom.LASDocument;
@@ -348,7 +349,8 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
 							HashMap<String, Operation> allOps = new HashMap<String, Operation>();
 							for (Iterator viewIt = views.iterator(); viewIt.hasNext();) {
 								View aView = (View) viewIt.next();
-								ArrayList<Operation> ops = lasConfig.getOperations(aView.getValue(), dsID, varID);
+								String[] xpaths = new String[] {Util.getVariableXPATH(dsID, varID)};
+								ArrayList<Operation> ops = lasConfig.getOperations(aView.getValue(), xpaths);
 								for (Iterator opsIt = ops.iterator(); opsIt.hasNext();) {
 									Operation op = (Operation) opsIt.next();
 									String id = op.getID();
@@ -367,7 +369,8 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
 							server_key = parts[0];
 							if ( server_key != null ) {
 								Tributary trib = lasConfig.getTributary(server_key);
-								String las_url = trib.getURL() + Constants.GET_OPERATIONS + "?format=xml&dsid=" + dsID + "&varid=" + varID;
+								String xpath = Util.getVariableXPATH(dsID, varID);
+								String las_url = trib.getURL() + Constants.GET_OPERATIONS + "?format=xml&xpath=" + xpath;
 								if ( view != null) {	
 									las_url = las_url + "&view="+view;
 								} 
@@ -411,14 +414,15 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
 			}
 		} else {
 			try {
-				if ( view != null) {	
-					operations = lasConfig.getOperations(view, dsID, varID);
+				String[] xpaths = new String[] {Util.getVariableXPATH(dsID, varID)};
+				if ( view != null) {						
+					operations = lasConfig.getOperations(view, xpaths);
 				} else {
 					ArrayList<View> views = lasConfig.getViewsByDatasetAndVariable(dsID, varID);
-					HashMap<String, Operation> allOps = new HashMap<String, Operation>();
+					HashMap<String, Operation> allOps = new HashMap<String, Operation>();					
 					for (Iterator viewIt = views.iterator(); viewIt.hasNext();) {
 						View aView = (View) viewIt.next();
-						ArrayList<Operation> ops = lasConfig.getOperations(aView.getValue(), dsID, varID);
+						ArrayList<Operation> ops = lasConfig.getOperations(aView.getValue(), xpaths);
 						for (Iterator opsIt = ops.iterator(); opsIt.hasNext();) {
 							Operation op = (Operation) opsIt.next();
 							String id = op.getID();

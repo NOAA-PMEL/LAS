@@ -2182,32 +2182,37 @@ public class LASConfig extends LASDocument {
 			Operation op = operations.get(o);
 			String min = op.getAttributeValue("minvars");
 			String max = op.getAttributeValue("maxvars");
-			if ( min != null && !min.equals("") ) {
-				try {
-					minvars = Integer.valueOf(min).intValue();
-				} catch (Exception e) {
-					throw new LASException("Cannot parse the minvars attribute value.");
-				}
-			}
-			if ( max != null && !max.equals("") ) {
-				try {
-					maxvars = Integer.valueOf(max).intValue();
-				} catch (Exception e) {
-					throw new LASException("Cannot parse the maxvars attribute value.");
-				}
-			}
-			if ( minvars > 0 ) {
-				if ( maxvars > 0 ) {
-					if ( var_count >= minvars && var_count <= maxvars ) {
-						multi_variable_operations.add(op);
-						minvars = -1;
-						maxvars = -1;
+			if ( min != null && min.equals("") && max != null && max.equals("") && xpath.length == 1 ) {
+				// Default is 1 for min and max so include it.
+				multi_variable_operations.add(op);
+			} else {
+				if ( min != null && !min.equals("") ) {
+					try {
+						minvars = Integer.valueOf(min).intValue();
+					} catch (Exception e) {
+						throw new LASException("Cannot parse the minvars attribute value.");
 					}
-				} else {
-					if ( var_count >= minvars ) {
-						multi_variable_operations.add(op);
-						minvars = -1;
-						maxvars = -1;
+				}
+				if ( max != null && !max.equals("") ) {
+					try {
+						maxvars = Integer.valueOf(max).intValue();
+					} catch (Exception e) {
+						throw new LASException("Cannot parse the maxvars attribute value.");
+					}
+				}
+				if ( minvars > 0 ) {
+					if ( maxvars > 0 ) {
+						if ( var_count >= minvars && var_count <= maxvars ) {
+							multi_variable_operations.add(op);
+							minvars = -1;
+							maxvars = -1;
+						}
+					} else {
+						if ( var_count >= minvars ) {
+							multi_variable_operations.add(op);
+							minvars = -1;
+							maxvars = -1;
+						}
 					}
 				}
 			}
