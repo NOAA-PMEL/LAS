@@ -105,7 +105,7 @@ ENDIF
 ENDIF
 
 ! Do we need a YEAR label?  If its a 1-D Time plot then we do
-LET L_time = `sampled_var1,return=Lsize`
+LET L_time = `($ferret_plot_var),return=Lsize`
 IF `(($have_year_lab"0|*>1") EQ 0) AND (L_time GT 1)` THEN
 IF `(STRCMP("($fview%A%)", "T") EQ 0) AND ($region_t_lo"0|*>1") AND ($do_t)` THEN
 PLOT/SET ($ferret_plot_var)
