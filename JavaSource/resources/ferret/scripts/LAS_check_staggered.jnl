@@ -7,7 +7,8 @@
 ! Vector components may be on staggered grids. Detect this and set the 
 ! second component to be regridded to the grid of the first.
 !
-IF ($native_curvilinear_xy"0") THEN EXIT/SCRIPT
+
+!IF ($native_curvilinear_xy"0") THEN EXIT/SCRIPT
 
 DEFINE SYMBOL xax_vec_1 = `($ferret_plot_base_var_0),RETURN=xaxis`
 DEFINE SYMBOL yax_vec_1 = `($ferret_plot_base_var_0),RETURN=yaxis`
@@ -20,19 +21,20 @@ IF `STRCMP("($yax_vec_1)", "($yax_vec_2)") NE 0` THEN DEFINE SYMBOL ferret_stagg
 ! Regrid the second component to the grid of the first. If in curvilinear
 ! coordinates (will staggered grids always be in curvi??) then define 
 ! the regridding on the base var, w/o curvi coordinate variables.
-! The curvi coord variables should match the first component.
-! 6/25/10 When there are staggered grids, the LAS machinery is sending the 
-! curvi coord vars corresponding to the second component.  For now at least
-! regrid to the second component.
+!
+! Regrid to the grid of the curvilinear coordinate variables.
 
 IF `($ferret_staggered_grid"0|default>1|*>1") GT 0` THEN  
    IF ($do_curvi_xy"0|0|1|*>1") THEN 
-      LET v2 = ($ferret_plot_base_var_1)
-      DEFINE SYMBOL ferret_plot_base_var_1 = v2[gxy=($ferret_plot_base_var_0)]
-      DEFINE SYMBOL ferret_plot_base_var_1 = v2[gxy=xcoord]  ! whichever curvi coords got sent (!)
+      LET vec1 = ($ferret_plot_var_0_noregion)
+      LET vec1_regrid = vec1[gxy=xcoord]   ! whichever curvi coords got sent (!)
+      DEFINE SYMBOL ferret_plot_base_var_0 = vec1_regrid[($region_full)]
+      LET vec2 = ($ferret_plot_var_0_noregion)
+      LET vec2_regrid = vec2[gxy=xcoord]   ! whichever curvi coords got sent (!)
+      DEFINE SYMBOL ferret_plot_base_var_1 = vec2_regrid[($region_full)]
    ELSE
-      LET v2 = ($ferret_vector_2)
-      DEFINE SYMBOL ferret_vector_2 = v2[gxy=($ferret_vector_1)]
+      LET vec2 = ($ferret_vector_2)
+      DEFINE SYMBOL ferret_vector_2 = vec2[gxy=($ferret_vector_1)]
    ENDIF
 
    DEFINE SYMBOL n_left_labels = `($n_left_labels"0")+1`
