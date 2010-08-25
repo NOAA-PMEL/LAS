@@ -38,6 +38,9 @@ ELSE
 ENDIF
 
 IF ($data_($num)_var"0|*>1") THEN DEFINE SYMBOL data_var ($data_($num)_var)
+DEFINE SYMBOL data_name ($data_($num)_name)
+IF `($data_($num)_name"0|*>1") EQ 0` THEN DEFINE SYMBOL data_name ($data_var)
+
 DEFINE SYM var_num ($num)
 
 ! Put quotes around variable name in case its a Ferret reserved name like Z
