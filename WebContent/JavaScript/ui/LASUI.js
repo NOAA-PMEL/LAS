@@ -217,7 +217,7 @@ LASUI.prototype.setInitialVariable = function(strJson) {
 				return;
 			}
 	
-	 this.setVariable(this.state.dataset,0);
+	 this.setVariable(null,category,0);
          }
 }
 LASUI.prototype.printPlot = function () {
