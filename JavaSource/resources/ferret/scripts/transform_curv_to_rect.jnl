@@ -128,7 +128,7 @@ IF `nmem GT ($memsize)` THEN SET MEM/SIZ=`nmem/1.e6`
 
 ! Check for errors 
 IF ($error_status"0|ERROR>1") THEN
-  MESSAGE/ERROR ($error_string)
+  MESSAGE/ERROR **ERROR ($error_string)
   EXIT/PROGRAM
 ENDIF
 

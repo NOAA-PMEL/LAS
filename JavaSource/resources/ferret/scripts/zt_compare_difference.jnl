@@ -45,7 +45,7 @@ ENDIF
 
 ! Check for errors 
 IF ($error_status"0|ERROR>1") THEN
-  MESSAGE/ERROR ($error_string)
+  MESSAGE/ERROR **ERROR ($error_string)
   EXIT/PROGRAM
 ENDIF
 

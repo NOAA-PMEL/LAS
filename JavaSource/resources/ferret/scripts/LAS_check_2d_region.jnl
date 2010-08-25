@@ -43,7 +43,7 @@ IF `STRCMP("($varshape)", "POINT") EQ 0` THEN
 !  DEFINE SYMBOL error_status = ERROR
 !  DEFINE SYMBOL error_type = REGION
 !  DEFINE SYMBOL error_action = Checking grid and region
-!  DEFINE SYMBOL error_string = **ERROR The ($viewshape) region is too small to draw a 2D plot
+!  DEFINE SYMBOL error_string = The ($viewshape) region is too small to draw a 2D plot
 !  GO LAS_error_result
 !  EXIT/PROGRAM
 
@@ -179,7 +179,7 @@ IF `STRLEN("($varshape)") EQ 1` THEN
 !  IF `indx EQ 1` THEN DEFINE SYMBOL shortdir = `SUBSTRING ("($viewshape)" , 2, 1)`
 !  IF `indx EQ 2` THEN DEFINE SYMBOL shortdir = `SUBSTRING ("($viewshape)" , 1, 1)`
 !  DEFINE SYMBOL error_action = Checking grid and region
-!  DEFINE SYMBOL error_string = **ERROR The requested ($shortdir) region is too small to draw a 2D plot
+!  DEFINE SYMBOL error_string = The requested ($shortdir) region is too small to draw a 2D plot
 !  GO LAS_error_result
 !  EXIT/PROGRAM
 
