@@ -75,7 +75,7 @@
 				<div id="constraints">
 					<div id="ol_map_widget"  onmouseover="showDatasetPicker()"></div>
 					<div id="constraintsScroll"  class="LASConstraintsPane">
-						<div id="plotType"></div>
+						<div id="plotTypes"></div>
 						<div id="Date"></div>
 						<div id="Depth"></div>
 						<div id="analysisWrapper"  class="LASAnalysis" style="display:none">							

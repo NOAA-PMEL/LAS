@@ -374,6 +374,11 @@ LASUI.prototype.createVariableList = function () {
 	var select = document.createElement("SELECT"); 
 	select.onchange = this.getOperations.LASBind(this);
 	select.name='variables';
+	
+	if(document.all)
+		select.id='variables'; 
+	else
+		select.id='variable_list_'+document.getElementsByName('variables').length;
 	for(var i=0;i<this.state.datasets[this.state.dataset].getCategorySize();i++) {
 		var node = this.state.datasets[this.state.dataset];
 		if(this.state.variable==node.getChildID(i))
@@ -490,10 +495,12 @@ LASUI.prototype.addVariable = function(evt) {
 		evt={target : document.getElementsByName("variables").item(0)}		
 		var stop = true;
 	}
-	if(document.all)
+
+	if(document.all&&!evt.target)
 		var elm = evt.srcElement.parentNode;
 	else
 		var elm = evt.target.parentNode;
+
         var newvar = elm.cloneNode(true);
 	elm.parentNode.insertBefore(newvar,elm);
 	if(document.getElementsByName('variables').length>=2)
@@ -533,7 +540,10 @@ LASUI.prototype.removeVariable = function(evt) {
 		stop = true;
 	}
 	if(document.getElementsByName('variables').length>=2)
-		evt.target.parentNode.parentNode.removeChild(evt.target.parentNode);
+		if(document.all&&!evt.target)
+			evt.srcElement.parentNode.parentNode.removeChild(evt.srcElement.parentNode);
+		else
+			evt.target.parentNode.parentNode.removeChild(evt.target.parentNode);
 	if(document.getElementsByName('del').length==1) {
 		for(var i=0;i<document.getElementsByName('del').length;i++)
                         document.getElementsByName('del').item(i).style.display='none';
@@ -655,10 +665,12 @@ LASUI.prototype.setVariable = function (evt) {
 	delvar.onclick=this.removeVariable.LASBind(this);
 	delvar.appendChild(document.createTextNode('remove variable'));
 	delvar.name="del";
+	delvar.id="del"
 	delvar.href="javascript:";
 	delvar.style.display='none';
 	var addvar=document.createElement("A");
 	addvar.name="add";
+	addvar.id="add";
 	addvar.href="javascript:"
 	addvar.onclick = this.addVariable.LASBind(this); 
 	addvar.appendChild(document.createTextNode('add variable'));
@@ -1075,8 +1087,8 @@ LASUI.prototype.setGrid = function (strJson) {
 }
 LASUI.prototype.setDefaultProductMenu = function () {
 	//clear the menu
-	while(document.getElementById("plotType").firstChild)
-		document.getElementById("plotType").removeChild(document.getElementById("plotType").firstChild);
+	while(document.getElementById("plotTypes").firstChild)
+		document.getElementById("plotTypes").removeChild(document.getElementById("plotTypes").firstChild);
 	
 	var setPlotDefault = "true";
 	var setDownloadDefault = "true";
@@ -1126,7 +1138,7 @@ LASUI.prototype.setProductTypeNode = function(type) {
 			LINode.className = "LASPlotCategory";
 			LINode.id=type;
 			LINode.appendChild(title);
-			document.getElementById("plotType").appendChild(LINode);
+			document.getElementById("plotTypes").appendChild(LINode);
 }
 LASUI.prototype.setProductNode = function(id, view, title) {
 	        if(this.state.operations.getOperationByID(id).optiondef)
@@ -1148,7 +1160,7 @@ LASUI.prototype.setProductNode = function(id, view, title) {
 		radio.onclick = this.setOperation.LASBind(this,id,view,optiondef,"plot");
 		LINode.appendChild(radio);
 		LINode.appendChild(title);
-		document.getElementById("plotType").appendChild(LINode);
+		document.getElementById("plotTypes").appendChild(LINode);
 		return radio;
 }
 LASUI.prototype.onPlotLoad = function (e) {
