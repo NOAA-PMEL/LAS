@@ -14,6 +14,9 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.ServiceDefTarget;
 
 public class Util {
+	public static String getVariableXPATH(String dsid, String varid) {
+		return "/lasdata/datasaets/"+dsid+"/variables/"+varid;
+	}
 	public static List<String> setOrthoAxes(String view, GridSerializable grid) {
 		List<String> ortho = new ArrayList<String>();
 		if ( !view.contains("t") && grid.hasT() ) {
