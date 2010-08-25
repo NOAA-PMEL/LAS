@@ -25,19 +25,22 @@ REPEAT/range=1:`($data_count)-1`/NAME=qdat (  \
   DEFINE SYMBOL qdat = `qdat`; \
   GO LAS_initialize_region ($qdat) ;  \
   GO LAS_initialize_data  ($qdat) ; \
+  GO LAS_check_var_direction; \
+  IF ($error_status"0|*>1") THEN EXIT/LOOP; \
   DEFINE SYMBOL plot_arg = ($plot_arg),($ferret_plot_var); \
   DEFINE SYMBOL ferret_plot_var_($qdat) = ($ferret_plot_var); \ 
   DEFINE SYMBOL ferret_title_($qdat) = ($ferret_plot_title); \ 
   LET tlen = STRLEN("($ferret_title_($qdat))"); \
   LET title_len = `MAX(tlen, title_len)`; \
   DEFINE SYMBOL units_($qdat) = `UPCASE("($data_($qdat)_units)")`; \
-  DEFINE SYMBOL all_units_same = `($all_units_same) AND (STRCMP("($units_0)", "($units_($qdat))") EQ 0)` \
+  DEFINE SYMBOL all_units_same = `($all_units_same) AND (STRCMP("($units_0)", "($units_($qdat))") EQ 0)`; \
+  GO LAS_pp_set_region_labels \
 )
 
-! Set the labels for the upper left listing the locations
-! and time in directions normal to the plot.
-
-GO LAS_pp_set_region_labels       ! This script sets ONE set of region labels.
+IF ($error_status"0|*>1") THEN
+  MESSAGE/ERROR **ERROR ($error_string)
+  EXIT/PROGRAM
+ENDIF
 
 ! No title; variable names and units are listed in the legend.
 DEFINE SYMBOL qualifiers = ($qualifiers)/TITLE=" "
@@ -219,7 +222,6 @@ REPEAT/range=1:`($data_count)`/NAME=m (; \
    GO LAS_legend_line \
    `xpos+x1` 0.3 `ypos` `m + 6*($thicknum)` `titlesiz` "($ferret_title_($lnum))" ($legend_qual);\   
 )
-pause
 ! The results script needs the actual axis directions. Restore them.
 
 DEFINE SYMBOL ax_vert = ($ax_vert_save)

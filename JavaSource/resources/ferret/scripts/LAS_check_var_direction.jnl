@@ -1,0 +1,35 @@
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! LAS_check_var_direction.jnl
+! 
+! Author: ansley 
+! Date: 2010/08 
+!
+! See if the variable ($data_var) can be used in a 1-D plot in the
+! ($ferret_view) direction.  If not set has_no_line = 1, else set to 0.
+
+CANCEL SYMBOL error*
+
+DEFINE SYMBOL index_dir = ($ferret_view%N|x>I|y>J|z>K|t>L|*>N%)
+IF `STRCMP("($index_dir)", "N") EQ 0` THEN EXIT/SCRIPT
+
+DEFINE SYMBOL ax1d = `($data_var),RETURN=($ferret_view)axis`
+
+IF `STRCMP("($ax1d)", "NORMAL") EQ 0` THEN
+   DEFINE SYMBOL error_status = ERROR
+   DEFINE SYMBOL error_type = REGION
+   DEFINE SYMBOL error_action = Checking grid and region 
+   DEFINE SYMBOL error_string Variable ($data_name) has no ($ferret_view) axis
+   EXIT/SCRIPT
+ENDIF
+
+! Or there may be a 1-point axis
+LET tsiz = `($data_var),return=($index_dir)size`
+IF `tsiz LE 1` THEN
+   DEFINE SYMBOL error_status = ERROR
+   DEFINE SYMBOL error_type = REGION
+   DEFINE SYMBOL error_action = Checking grid and region  
+   DEFINE SYMBOL error_string Variable ($data_name) has no ($ferret_view) axis
+ENDIF
+
+pause
+! --------------- End of LAS_check_var_direction  ---------------------------
