@@ -142,7 +142,7 @@ function LASGetGridResponse_getAxis(axis) {
 }
 function LASGetGridResponse_hasView(view) {
     for(var i=0;i<view.length;i++)
-	if(!this.hasAxis(view[i]))
+	if(!this.hasAxis(view.charAt(i)))
 		return false;
     return true;
 }
