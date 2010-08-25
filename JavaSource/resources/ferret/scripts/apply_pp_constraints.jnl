@@ -1,0 +1,23 @@
+! apply_pp_constraints.jnl
+! Apply variable constraints for Prop-Prop plots
+
+! Argument is the variable id
+! Assumes there are always 4 sets of constraints:
+! each var ge one value and le another value.
+
+DEFINE SYMBOL var_id = ($1)
+
+IF ($constraint_0_lhs"0|($data_($var_id)_var)>1|*>0") THEN 
+   LET constrain_1_($var_id) = IF ($ferret_plot_var) ($constraint_0_op) ($constraint_0_rhs) THEN ($ferret_plot_var)
+   IF ($constraint_1_lhs"0|($data_($var_id)_var)>1|*>0") THEN LET var_constr_($var_id) = \
+      IF constrain_1_($var_id) ($constraint_1_op) ($constraint_1_rhs) THEN constrain_1_($var_id)
+ENDIF
+
+IF ($constraint_2_lhs"0|($data_($var_id)_var)>1|*>0") THEN 
+   LET constrain_1_($var_id) = IF ($ferret_plot_var) ($constraint_2_op) ($constraint_2_rhs) THEN ($ferret_plot_var)
+   IF ($constraint_3_lhs"0|($data_($var_id)_var)>1|*>0") THEN LET var_constr_($var_id) = \
+      IF constrain_1_($var_id) ($constraint_3_op) ($constraint_3_rhs) THEN  constrain_1_($var_id)
+ENDIF
+
+! End of  ------------- apply_pp_constraints.jnl--------------------------
+
