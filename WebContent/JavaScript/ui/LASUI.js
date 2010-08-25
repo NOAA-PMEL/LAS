@@ -203,37 +203,22 @@ LASUI.prototype.initUI = function (anchorId)
 }
 LASUI.prototype.setInitialVariable = function(strJson) {
 	var response = eval("(" + strJson + ")");
-alert('yakkity yak');
 	if(response.categories)
 	if(response.categories.status)
 	if(response.categories.status=="ok") {
 	var category = new LASGetCategoriesResponse(response);
-
+	
 	this.state.dataset = category.getDatasetID(0);
 	this.state.datasets[this.state.dataset] = category;
-	this.getGrid(this.state.dataset,this.state.variable);
-	this.getDataConstraints(this.state.dataset,this.state.variable);
-
-	var info = this.info_icon.cloneNode(true);
-	info.onclick = this.getMetadata.LASBind(this);
+	if(this.state.variable&&category.getCategoryType()=="dataset")
+		for(var i=0;i<category.getCategorySize();i++)
+			if(category.getChildID(i)== this.state.variable) {
+				this.setVariable(null,category,i);
+				return;
+			}
 	
-	this.createVariableList();
-	
-	var varObj = this.state.datasets[this.state.dataset].getChildByID(this.state.variable);
-	if(varObj) {
-				if(varObj.grid_type!="scattered"&&document.getElementsByName("variables").length==1){
-					if(this.refs.analysis.enabled) {
-						this.hideAnalysis();
-						this.showAnalysis();
-					}
-					document.getElementById("analysisWrapper").style.display="";
-				} else {
-					document.getElementById("analysisWrapper").style.display="none";
-					this.refs.analysis.enabled = false;
-				}
-				//document.getElementById("V6").href="servlets/datasets?dset=" + this.urlencode(categories + "/" + varObj.name);
-		}
-	}
+	 this.setVariable(this.state.dataset,0);
+         }
 }
 LASUI.prototype.printPlot = function () {
 	var plot = window.frames[this.anchors.output].document.getElementById('plot');
@@ -505,7 +490,10 @@ LASUI.prototype.addVariable = function(evt) {
 		evt={target : document.getElementsByName("variables").item(0)}		
 		var stop = true;
 	}
-	var elm = evt.target.parentNode;
+	if(document.all)
+		var elm = evt.srcElement.parentNode;
+	else
+		var elm = evt.target.parentNode;
         var newvar = elm.cloneNode(true);
 	elm.parentNode.insertBefore(newvar,elm);
 	if(document.getElementsByName('variables').length>=2)
@@ -868,11 +856,11 @@ LASUI.prototype.setOperation = function (evt) {
 					optiondef = this.state.operations.getOperationByID(id).optiondef.IDREF;
 		} catch (e) {}
 	//for ie radio button bug
- 	if(type=="plot"&&document.all&&evt.srcElement) {
-
+ 	if(type=="plot"&&document.all&&evt) 
+		if(evt.srcElement) {
  		for(var i=0;i<document.getElementsByName("plotType").length;i++)
  				document.getElementsByName("plotType").item(i).checked=false;
-
+		
 		evt.srcElement.checked=true;
 
 	}
@@ -1111,7 +1099,7 @@ LASUI.prototype.setDefaultProductMenu = function () {
 					if(this.state.operations.getOperationByID(op)['default']&&this.state.operations.getOperationByID(op).category=="visualization"&&this.state.operations.hasInterval(op,view)) { //&&minvars<=varct&&maxvars>=varct) {
 						if(!document.getElementById(type))
 	                                        	this.setProductTypeNode(type);
-						if(!defaultPlotProduct||(this.state.operation.plot=op&&this.state.view.plot==view))
+						if(!defaultPlotProduct||(this.state.operation.plot==op&&this.state.view.plot==view))
 							defaultPlotProduct=this.setProductNode(op, view, this.state.operations.getOperationIntervals(op)[view].title);				       
 						else if(!document.getElementById(op+"_"+view))
 							this.setProductNode(op, view, this.state.operations.getOperationIntervals(op)[view].title);

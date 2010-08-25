@@ -68,7 +68,7 @@
 					<span class="top_link"  style="visibility:hidden;" onclick="LAS.printPlot()" id="print">Print&nbsp;</span>				
 				</div>
 			</div>
-			<div id="message_bar"><img id="wait" style="visibility:hidden;float:right;margin:2pt;padding:2pt;" src="JavaScript/components/mozilla_blu.gif"><div name="breadcrumb"></div></div>
+			<div id="message_bar"><img id="wait" style="visibility:hidden;float:right;margin:2pt;padding:2pt;" src="JavaScript/components/mozilla_blu.gif"><div id="breadcrumb" name="breadcrumb"></div></div>
 
 
 			<table  width="1024px"><tbody><tr><td style="vertical-align:top;border:1pt solid black">
