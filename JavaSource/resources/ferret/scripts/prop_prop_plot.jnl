@@ -15,6 +15,7 @@
 ! NOTE If the two variables are going to have DIFFERENT region settings,
 ! changes will need to be made to annotate that info on the plot.
 
+set mode ver:always
 
 IF `($data_count"0") LT 2` THEN
   MESSAGE/ERROR **ERROR Expecting two variables, but only received ($data_count)
@@ -39,8 +40,14 @@ ENDIF
 ! Here is variable 0 title 
 DEFINE SYMBOL ferret_title_0 = ($ferret_plot_title"($data_var)")
 IF ($do_curvi_xy"0|*>1") THEN DEFINE SYMBOL ferret_plot_var = ($ferret_plot_base_var_0)
-LET/TITLE="($ferret_title_0)" xvar = XSEQUENCE(($ferret_plot_var))
 
+IF ($constraint_0_lhs"0|*>1) THEN
+   GO apply_pp_constraints 0
+   DEFINE SYMBOL ferret_plot_var = var_constr_0
+ENDIF
+
+LET/TITLE="($ferret_title_0)" xvar = XSEQUENCE(($ferret_plot_var))
+pause
 ! Set up upper-left labels with the region info
 GO LAS_pp_set_region_labels
 
@@ -60,7 +67,14 @@ ENDIF
 DEFINE SYMBOL ferret_title_1 = ($ferret_plot_title"($data_var)")
 
 IF ($do_curvi_xy"0|*>1") THEN DEFINE SYMBOL ferret_plot_var = ($ferret_plot_base_var_1)
+
+IF ($constraint_0_lhs"0|*>1) THEN
+   GO apply_pp_constraints 1
+   DEFINE SYMBOL ferret_plot_var = var_constr_1
+ENDIF
+
 LET/TITLE="($ferret_title_1)" yvar = XSEQUENCE(($ferret_plot_var))
+pause
 
 ! The variables must be the same size. Probably guaranteed by the
 ! data selection process, but check and set up a nice message.
