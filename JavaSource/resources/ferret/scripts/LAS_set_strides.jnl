@@ -128,10 +128,15 @@ IF `($region_y_range"0|*>1") EQ 0` THEN
      DEFINE SYMBOL region_y_range = ($region_($num)_y_range) 
 ENDIF
 
+CANCEL SYMBOL no*axis
+
+DEFINE SYMBOL xaxname = `($data_var),RETURN=xaxis`
+IF `STRCMP("($xaxname)", "NORMAL") EQ 0` THEN DEFINE SYMBOL noxaxis = 1
 IF `(STRINDEX("($ferret_view)","x") NE 0) AND \
     ($region_x_range"0|0|*>1") AND \
     ($no_native_strides_xy"0|*>1") NE 1 AND \
-    ($region_x"0|0|*>1")` THEN 
+    ($region_x"0|0|*>1") AND \
+    (($noxaxis"0|1|*>1") NE 1)` THEN 
 
    LET xx = x[gx=($data_var)[d=($data_num)]]  
    LET pixsize = `xx[($region_x)@ngd]` 
@@ -161,10 +166,13 @@ IF `(STRINDEX("($ferret_view)","x") NE 0) AND \
    IF ($SYMBOL no_region_x_range"0|*>1") THEN CANCEL SYMBOL region_x_range
 ENDIF
 
+DEFINE SYMBOL xaxname = `($data_var),RETURN=yaxis`
+IF `STRCMP("($xaxname)", "NORMAL") EQ 0` THEN DEFINE SYMBOL noyaxis = 1
 IF `(STRINDEX("($ferret_view)","y") NE 0) AND \
     ($region_y_range"0|0|*>1") AND \
     ($no_native_strides_xy"0|*>1") NE 1 AND \
-    ($region_y"0|0|*>1")` THEN 
+    ($region_y"0|0|*>1") AND \
+    (($noyaxis"0|1|*>1") NE 1)` THEN 
 
    LET yy = y[gy=($data_var)[d=($data_num)]]
    LET pixsize = `yy[($region_y)@ngd]`
@@ -187,9 +195,13 @@ IF `(STRINDEX("($ferret_view)","y") NE 0) AND \
    IF ($SYMBOL no_region_y_range"0|*>1") THEN CANCEL SYMBOL region_y_range
 ENDIF
 
+DEFINE SYMBOL xaxname = `($data_var),RETURN=zaxis`
+IF `STRCMP("($xaxname)", "NORMAL") EQ 0` THEN DEFINE SYMBOL nozaxis = 1
 IF `(STRINDEX("($ferret_view)","z") NE 0) AND \
     ($region_z_range"0|0|*>1") AND \
-    ($region_z"0|0|*>1")` THEN 
+    ($region_z"0|0|*>1") AND \
+    (($nozaxis"0|1|*>1") NE 1)` THEN 
+
    LET zz = z[gz=($data_var)[d=($data_num)]]
    LET pixsize = `zz[($region_z)@ngd]`
 
@@ -207,10 +219,15 @@ ENDIF
 
 ! If this is an animation then the time step is controlled by that. Do not do
 ! striding in time.
+
+DEFINE SYMBOL xaxname = `($data_var),RETURN=taxis`
+IF `STRCMP("($xaxname)", "NORMAL") EQ 0` THEN DEFINE SYMBOL notaxis = 1
+
 LET trange = STRCMP("($region_t_lo%0%)", "($region_t_hi%1%)")
 IF `(STRINDEX("($ferret_view)","t") NE 0) AND \
     ($region_t"0|0|*>1") AND ( ($DO_TRANS_1_SEAS_PER_YEAR"0") EQ 0) AND \
-    trange NE 0 AND STRINDEX("($operation_ID)", "Animation_Frames") EQ 0 ` THEN
+    (trange NE 0 AND STRINDEX("($operation_ID)", "Animation_Frames") EQ 0) AND \
+    (($notaxis"0|1|*>1") NE 1)` THEN
    LET tt = t[gt=($data_var)[d=($data_num)]]
    LET pixsize = `tt[($region_t)@ngd]`      
    DEFINE SYMBOL tstride = `INT((pixsize/maxpix)+1)`
