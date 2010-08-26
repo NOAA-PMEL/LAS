@@ -45,6 +45,8 @@ REPEAT/range=1:`($data_count)-1`/NAME=qdat (  \
 )
 
 IF ($error_status"0|*>1") THEN
+  GO LAS_error_msg 
+  EXIT/PROGRAM
   MESSAGE/ERROR **ERROR ($error_string)
   EXIT/PROGRAM
 ENDIF

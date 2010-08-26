@@ -18,7 +18,7 @@ IF `STRCMP("($ax1d)", "NORMAL") EQ 0` THEN
    DEFINE SYMBOL error_status = ERROR
    DEFINE SYMBOL error_type = REGION
    DEFINE SYMBOL error_action = Checking grid and region 
-   DEFINE SYMBOL error_string Variable ($data_name) has no ($ferret_view) axis
+   DEFINE SYMBOL error_string Variable "($data_name)" has no ($ferret_view) axis
    EXIT/SCRIPT
 ENDIF
 
@@ -28,8 +28,7 @@ IF `tsiz LE 1` THEN
    DEFINE SYMBOL error_status = ERROR
    DEFINE SYMBOL error_type = REGION
    DEFINE SYMBOL error_action = Checking grid and region  
-   DEFINE SYMBOL error_string Variable ($data_name) has no ($ferret_view) axis
+   DEFINE SYMBOL error_string Variable "($data_name)" has no ($ferret_view) axis
 ENDIF
 
-pause
 ! --------------- End of LAS_check_var_direction  ---------------------------

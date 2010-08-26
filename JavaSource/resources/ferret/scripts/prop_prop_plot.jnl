@@ -49,7 +49,7 @@ IF ($constraint_0_lhs"0|*>1) THEN
 ENDIF
 
 LET/TITLE="($ferret_title_0)" xvar = XSEQUENCE(($ferret_plot_var))
-pause
+
 ! Set up upper-left labels with the region info
 GO LAS_pp_set_region_labels
 
@@ -89,9 +89,39 @@ IF `xsize NE ysize` THEN
   EXIT/PROGRAM
 ENDIF
 
+IF `($data_count"0") EQ 3` THEN ! color by 3rd variable
+
+   ! Initialize the 3rd variable.
+   ! In fact the region and dataset will be the
+   ! same as for var 0 (for now anyway)
+   
+   GO LAS_initialize_region 2
+   GO LAS_initialize_data 2
+   
+   IF ($error_status"0|*>1") THEN
+     MESSAGE/ERROR **ERROR ($error_string)
+     EXIT/PROGRAM
+   ENDIF
+   
+   ! Here is variable 2 title 
+   DEFINE SYMBOL ferret_title_2 = ($ferret_plot_title"($data_var)")
+   
+   IF ($do_curvi_xy"0|*>1") THEN DEFINE SYMBOL ferret_plot_var = ($ferret_plot_base_var_2)
+   
+   ! If there are constraints, apply them.
+   
+   IF ($constraint_0_lhs"0|*>1) THEN
+      GO apply_pp_constraints 2
+      DEFINE SYMBOL ferret_plot_var = var_constr_2
+   ENDIF
+   
+   LET/TITLE="($ferret_title_2)" zvar = XSEQUENCE(($ferret_plot_var))
+   DEFINE SYMBOL color_by = 1
+ENDIF
+
 ! Open the window, apply size, scale options
 
-! dont want to set the aspect ratio using xy regionm, so reset
+! dont want to set the aspect ratio using xy region, so reset
 ! ferret_view temporarily.
 DEFINE SYMBOL viewsave = ($ferret_view)
 DEFINE SYMBOL ferret_view = aa  
@@ -146,8 +176,35 @@ LABEL/NOUSER -0.8, `($ppl$ylen)/2`, 0, 90, 0.14 ($ferret_title_1)
 
 ! Polygon plot
 
-DEFINE SYMBOL poly_command POLY/OVER/NOLAB/PAL=($polycolor)
-GO polymark ($poly_command) xvar, yvar, xvar, ($polyshape), ($polysize)
+DEFINE SYMBOL plot_arg = xvar, yvar, xvar
+DEFINE SYMBOL poly_qual = /OVER/NOLAB
+
+IF ($color_by"0|*>1") THEN 
+   DEFINE SYMBOL plot_arg = xvar, yvar, zvar
+   
+! Get color-plot qualifiers
+   IF ($ferret_fill_levels"0|*>1") THEN 
+      DEFINE SYMBOL poly_qual = ($poly_qual)/LEVELS=($ferret_fill_levels)
+   ELSE
+      DEFINE SYMBOL poly_qual = ($poly_qual)/LEVELS=v
+   ENDIF
+
+   IF ($ferret_plot_key"0|0|nokey>1|*>0") THEN 
+      DEFINE SYMBOL poly_qual = ($poly_qual)/NOKEY
+   ELSE
+      DEFINE SYMBOL poly_qual = ($poly_qual)/KEY
+   ENDIF
+
+   DEFINE SYMBOL poly_qual = ($poly_qual)/PALETTE=($ferret_palette"rainbow|default>rainbow|*>*)
+   DEFINE SYMBOL color_by_title = `zvar,RETURN=title`
+ELSE
+   DEFINE SYMBOL poly_qual = ($poly_qual)/($polycolor)
+ENDIF
+
+DEFINE SYMBOL poly_command POLYGON($poly_qual)
+GO polymark ($poly_command) ($plot_arg), ($polyshape), ($polysize)
+
+IF ($color_by_title"0|*>1") THEN LABEL/NOUSER `($ppl$width)-($ppl$xorg)-0.5`, -0.7, 1, 0, 0.12 Colored by <NL>($color_by_title)
 
 ! Add the linear fit information
 ! Gaps in p and qhat mean that just plotting p, qhat
