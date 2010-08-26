@@ -204,7 +204,7 @@ ENDIF
 DEFINE SYMBOL poly_command POLYGON($poly_qual)
 GO polymark ($poly_command) ($plot_arg), ($polyshape), ($polysize)
 
-IF ($color_by_title"0|*>1") THEN LABEL/NOUSER `($ppl$width)-($ppl$xorg)-0.5`, -0.7, 1, 0, 0.12 Colored by <NL>($color_by_title)
+IF ($color_by_title"0|*>1") THEN LABEL/NOUSER `($ppl$width)-($ppl$xorg)-0.2`, -0.7, 1, 0, 0.12 Colored by <NL>($color_by_title)
 
 ! Add the linear fit information
 ! Gaps in p and qhat mean that just plotting p, qhat
