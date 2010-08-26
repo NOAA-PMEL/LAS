@@ -83,6 +83,7 @@ public class RequestInputFilter implements Filter {
     	"clean",
     	"cleanbutton",
     	"cleands",
+    	"data_url",
     	"debug",
     	"dojo.preventCache",
     	"dsid",
