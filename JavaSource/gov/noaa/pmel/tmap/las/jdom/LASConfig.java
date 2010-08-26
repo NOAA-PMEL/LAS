@@ -219,6 +219,47 @@ public class LASConfig extends LASDocument {
         }
         return comboList;
     }
+    public String getIDs(String data_url) throws JDOMException, LASException {
+    	List<Category> categories = getCategories(null);
+    	for (Iterator catIt = categories.iterator(); catIt.hasNext();) {
+			Category category = (Category) catIt.next();
+			String ids = findDataURL(data_url, category);
+			if ( !ids.equals("") ) {
+				return ids;
+			}
+    	}
+    	return "";
+    }
+    private String findDataURL(String data_url, Category category) throws JDOMException, LASException {
+
+    	if ( category.getAttributeValue("children") != null && category.getAttributeValue("children").equals("variables") ) {
+    		// Look for the data url.
+
+    		List<Variable> vars = getVariables(category.getAttributeValue("children_dsid"));
+    		for (Iterator varsIt = vars.iterator(); varsIt.hasNext();) {
+    			Variable variable = (Variable) varsIt.next();
+    			String url = getFullDataObjectURL(variable.getDSID(), variable.getID());
+    			if ( !url.equals("") ) {						
+    				if ( url.startsWith(data_url) || url.endsWith(data_url) ) {
+    					// matches the data set, but not the variable...
+    					return "catid="+category.getID()+"&varid="+variable.getID();
+    				}
+    			}
+    		}
+    		return "";
+
+    	} else {
+    		List<Category> categories = getCategories(category.getID());
+    		for (Iterator catIt = categories.iterator(); catIt.hasNext();) {
+    			Category cat = (Category) catIt.next();
+    			String ids = findDataURL(data_url, cat);
+    			if ( !ids.equals("") ) {
+    				return ids;
+    			}
+    		}
+    	}
+    	return "";
+    }
     /**
      * Return up to max direct and F-TDS URLs that can be tested.  This just grabs them in order.  Something more sophisticated could be done.
      * @param max
@@ -889,13 +930,18 @@ public class LASConfig extends LASDocument {
             if ( inherit.contains(",")) {
                 String[] inheritedOptionsIDs = optiondef.getAttributeValue("inherit").split(",");
                 for (int i = 0; i < inheritedOptionsIDs.length; i++) {
-                    options.addAll(extractOptions(inheritedOptionsIDs[i].substring(1)));
+                	String option_name = inheritedOptionsIDs[i].substring(1);
+                    options.addAll(extractOptions(option_name));
                 }
             } else {
                 options.addAll(extractOptions(inherit.substring(1)));
             }
         }
         return options;
+    }
+    private static ArrayList<Option> extractInheritances(String optionsID) {
+    	 ArrayList<Option> options = new ArrayList<Option>();
+    	 return options;
     }
     /**
      * A filter to find a category by its ID
@@ -1645,6 +1691,9 @@ public class LASConfig extends LASDocument {
             url = url.substring(5, url.length());
         }
          return url;
+    }
+    public String getFullDataObjectURL(String dsid, String varid) throws LASException, JDOMException {
+    	return getFullDataObjectURL("/lasdata/datasets/dataset[@ID='"+dsid+"']/variables/variable[@ID='"+varid+"']");
     }
     /**
      * Returns the full data URL for a particular variable (as identified by its XPath) including the #var (netCDF variable name convention used by LAS)

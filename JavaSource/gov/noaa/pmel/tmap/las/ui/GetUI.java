@@ -61,6 +61,7 @@ public class GetUI extends ConfigService {
     public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request, HttpServletResponse response) throws Exception {    
     	ServletContext context = (ServletContext) servlet.getServletContext();
         String lazy_start = (String) context.getAttribute(LASConfigPlugIn.LAS_LAZY_START_KEY);
+        LASConfig lasConfig = (LASConfig)servlet.getServletContext().getAttribute(LASConfigPlugIn.LAS_CONFIG_KEY);
         if ( lazy_start != null && lazy_start.equals("true") ) {
         	// Start the initialization and forward to lazy start page
         	InitThread thread = new InitThread(context);
@@ -68,6 +69,11 @@ public class GetUI extends ConfigService {
         	return mapping.findForward("lazy_start");
         } else {
         	// forward to the UI
+        	String data_url = request.getParameter("data_url");
+        	if ( data_url != null && !data_url.equals("") ) {
+        		String ids = lasConfig.getIDs(data_url);
+        		response.sendRedirect("getUI.do?"+ids);
+        	}
         	return new ActionForward("/productserver/templates/V7UI.vm");
         }
     }
