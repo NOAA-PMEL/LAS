@@ -1,0 +1,19 @@
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! LAS_error_msg.jnl
+! 
+! Author: ansley 
+! Date: 2010/08 
+!
+! DEMO:  When the scripts have tested for an error condition and set an error
+!        string how bout if I make a plot with that string across it, so that
+!        the user sees this rather than the current stuff.
+
+SET WIN/ASP=0.5/SIZ=0.5
+PLOT/NOLAB/NOAX/COLOR=white/I=1:10/VLIM=100:200 i
+
+LABEL/NOUSER `0`, `($ppl$ylen)`, -1, 0, 0.14, **ERROR: ($error_string)
+
+GO LAS_results point
+
+! --------------- End of LAS_error_msg  ---------------------------
+
