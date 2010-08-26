@@ -19,22 +19,24 @@ DEFINE SYMBOL ax1d = `($data_var),RETURN=($ferret_view)axis`
 
 IF `STRCMP("($ax1d)", "NORMAL") EQ 0` THEN
    DEFINE SYMBOL has_no_line = 1
-  DEFINE SYMBOL error_status = ERROR
-  DEFINE SYMBOL error_type = REGION
-  DEFINE SYMBOL error_action = Checking grid and region  
-   DEFINE SYMBOL error_string Variable ($data_name) has no ($ferret_view) axis
-   EXIT/SCRIPT
+   DEFINE SYMBOL error_status = ERROR
+   DEFINE SYMBOL error_type = REGION
+   DEFINE SYMBOL error_action = Checking grid and region  
+   DEFINE SYMBOL error_string Variable "($data_name)" has no ($ferret_view) axis
+   GO LAS_error_msg 
+   EXIT/PROGRAM
 ENDIF
 
 ! Or there may be a 1-point axis
 LET tsiz = `($data_var),return=($index_dir)size`
 IF `tsiz LE 1` THEN
    DEFINE SYMBOL has_no_line = 1
-  DEFINE SYMBOL error_status = ERROR
-  DEFINE SYMBOL error_type = REGION
-  DEFINE SYMBOL error_action = Checking grid and region  
-   DEFINE SYMBOL error_string Variable ($data_name) has no ($ferret_view) variation
-   EXIT/SCRIPT
+   DEFINE SYMBOL error_status = ERROR
+   DEFINE SYMBOL error_type = REGION
+   DEFINE SYMBOL error_action = Checking grid and region  
+   DEFINE SYMBOL error_string Variable "($data_name)" has no ($ferret_view) variation
+   GO LAS_error_msg 
+   EXIT/PROGRAM
 ENDIF
 
 ! Or the region may reduce to a single point.
@@ -47,11 +49,13 @@ LOAD the_plot_var
 DEFINE SYMBOL varshape = `the_plot_var,RETURN=shape`
 DEFINE SYMBOL viewshape =  `UPCASE("($ferret_view)")`
 IF `STRCMP("($varshape)", "POINT") EQ 0` THEN
-  DEFINE SYMBOL error_status = ERROR
-  DEFINE SYMBOL error_type = REGION
-  DEFINE SYMBOL error_action = Checking grid and region  
-  DEFINE SYMBOL error_string The ($viewshape) region is too small, it reduces to a single point. Variable ($data_var)
-  EXIT/SCRIPT
+   DEFINE SYMBOL error_status = ERROR
+   DEFINE SYMBOL error_type = REGION
+   DEFINE SYMBOL error_action = Checking grid and region  
+   DEFINE SYMBOL error_string For Variable "($data_name)" <NL>\
+the ($viewshape) region is too small. It reduces to a single point.
+   GO LAS_error_msg 
+  EXIT/PROGRAM
 ENDIF
 
 ! End of file ------------LAS_check_1d_region.jnl-------------------------------
