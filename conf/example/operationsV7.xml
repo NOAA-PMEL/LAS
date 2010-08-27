@@ -1495,7 +1495,7 @@ streamable="true" mime_type="application/postscript"/> -->
     		<grid_type name="regular" />
     	</grid_types>
     </operation>
-    <operation default="true" category="visualization" name="Property Property Plot" ID="prop_prop_plot" service_action="prop_prop_plot" output_template="zoom" minvars="2" maxvars="2">
+    <operation default="true" category="visualization" name="Property Property Plot" ID="prop_prop_plot" service_action="prop_prop_plot" output_template="zoom" minvars="2" maxvars="3">
                <response ID="PlotResp" type="HTML" index="1">
                     <result type="map_scale" ID="map_scale" file_suffix=".xml"/>
                     <result type="image" ID="plot_image" streamable="true" mime_type="image/png" file_suffix=".gif"/>
@@ -1504,11 +1504,12 @@ streamable="true" mime_type="application/postscript"/> -->
                     <result type="cancel" ID="cancel" />
                </response>
 		<region>
-                        <intervals name="xy"   type="Scatter Plots" title="Property-Property" />
+                        <intervals name="xy" abstract="true"  type="Scatter Plots" title="Property-Property" />
 			<degenerate />
 	        </region>
                 <grid_types>
                 	<grid_type name="regular" />
+			<grid_type name="scattered" />
 	        </grid_types>
 		<service>ferret</service>
     </operation>

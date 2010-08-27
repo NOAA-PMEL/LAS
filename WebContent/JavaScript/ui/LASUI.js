@@ -674,6 +674,8 @@ LASUI.prototype.setVariable = function (evt) {
 	addvar.href="javascript:"
 	addvar.onclick = this.addVariable.LASBind(this); 
 	addvar.appendChild(document.createTextNode('add variable'));
+	if(variable.grid_type=="vector")
+		addvar.style.display="none";
 
 	var cats = document.createElement("TEXT");
 	cats.innerHTML= categories;
@@ -815,8 +817,12 @@ LASUI.prototype.getOperations = function (evt) {
 		if(evt) 
 			if(evt.target) 
 				try {
-					if(evt.target.options[evt.target.selectedIndex].name)
-					var selectedVariable=eval("("+evt.target.options[evt.target.selectedIndex].value+")");
+					if(evt.target.options[evt.target.selectedIndex].value)
+					var selectedVariable=eval("("+evt.target.options[evt.target.selectedIndex].value+")");				
+					if(selectedVariable.grid_type=="vector"&&document.getElementsByName("add").length==1)
+						document.getElementsByName("add").item(0).style.display="none";
+					else
+						document.getElementsByName("add").item(0).style.display="";
 				} catch(e) {}
 			else
 				var stop=true;
