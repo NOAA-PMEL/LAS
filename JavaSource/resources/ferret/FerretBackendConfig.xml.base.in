@@ -21,6 +21,12 @@
               </text>
            </message>
            <message type="startsWith" level="error">
+              <key>**ERROR "Desktop Access script not available for data on a Curvilinear grid</key>
+              <text>
+                Desktop Access script not available for data on a Curvilinear grid.
+              </text>
+           </message>
+           <message type="startsWith" level="error">
               <key>**ERROR</key>
               <text>
                 An error occurred in the service that was creating your product.
