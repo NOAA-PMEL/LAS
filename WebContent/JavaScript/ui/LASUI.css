@@ -158,8 +158,8 @@ font-weight: bold;
 	width:600px;
 }
 .LASConstraintsPane {
-	width:225px;
-	height:490px;
+	min-height:490px;
+	min-width:250px;
 	overflow-x:auto;
 	overflow-y:hide;
 	
@@ -198,3 +198,81 @@ font-weight: bold;
 
 .LASCheckboxInputNode {
 }
+
+html, body {
+height: 100%;
+}
+#nav {
+    padding:0; 
+    margin:0; 
+    list-style:none; 
+    height:38px; 
+    /*background:#fff url(grn_0.gif) repeat-x; filter:alpha(opacity=55);-moz-opacity:.55;opacity:.55; */
+    position:relative;  
+    font-family:arial, verdana, sans-serif;
+}
+
+.top_link_title {
+	display:block; 
+	float:left; 
+	color:#FFFFFC; 
+	text-decoration:none; 
+	font-size:11px; 
+	font-weight:bold; 
+	padding:0 0 0 12px; 
+	cursor:pointer;
+}
+.top_link_title:hover {
+     color:red; /* background:  url(grn_1.gif) no-repeat;*/
+}
+.top_link_disabled {
+	display:block; 
+	float:left; 
+	color:#FFFFFF; 
+	text-decoration:none; 
+	font-size:11px; 
+	font-weight:bold; 
+	padding:2px 2px 2px 4px;
+	
+	cursor:pointer;
+       background: #AABCCE;
+       border: groove ;
+       margin-right:2px;
+       margin-left:2px
+}
+
+.top_link {
+        display:block;
+        float:left;
+        color:#FFFFFF;
+        text-decoration:none;
+        font-size:11px;
+        font-weight:bold;
+        padding:2px 2px 2px 4px;
+        cursor:pointer;
+       background:#7391A5;
+       border: groove ;
+       margin-right:2px;
+       margin-left:2px
+}
+
+
+.top_link:hover {
+     color:#FFFFFF; 
+     background:#AABDCE
+}
+
+
+.top_link_left {
+	display:block; 
+	float:right; 
+	color:#FFFFFC; 
+	text-decoration:none; 
+	font-size:9px; 
+	font-weight:bold; 
+	margin-right:2px; 
+	cursor:pointer;
+}
+.top_link_left:hover {color:#f5ed52;  /* background:  url(grn_1.gif) no-repeat; */}
+
+.top_link:hover {color:#f5ed52;  /* background:  url(grn_1.gif) no-repeat; */}

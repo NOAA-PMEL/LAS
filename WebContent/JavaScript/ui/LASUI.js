@@ -646,6 +646,10 @@ LASUI.prototype.setVariable = function (evt) {
         this.state.lastDataset = this.state.dataset;
 	this.state.dataset = datasetID;
 	this.state.variable = variableID;
+	if(variable.grid_type=="vector")
+		while(document.getElementsByName(this.anchors.breadcrumb).length>1)
+			document.getElementsByName(this.anchors.breadcrumb).item(document.getElementsByName(this.anchors.breadcrumb).length-1).parentNode.removeChild(document.getElementsByName(this.anchors.breadcrumb).item(document.getElementsByName(this.anchors.breadcrumb).length-1));
+
 	document.getElementById('constraints').style.visibility="visible";
 	if(document.getElementById('categories'))
 		document.getElementById('categories').style.display='none';
@@ -658,7 +662,6 @@ LASUI.prototype.setVariable = function (evt) {
 		}
 		else
 			var categories = this.state.datasets[this.state.dataset].getDatasetName();
-
 	var info = this.info_icon.cloneNode(true);
 	info.onclick = this.getMetadata.LASBind(this);
 	var delvar = document.createElement("A");
@@ -821,7 +824,7 @@ LASUI.prototype.getOperations = function (evt) {
 					var selectedVariable=eval("("+evt.target.options[evt.target.selectedIndex].value+")");				
 					if(selectedVariable.grid_type=="vector"&&document.getElementsByName("add").length==1)
 						document.getElementsByName("add").item(0).style.display="none";
-					else
+					else if (document.getElementsByName('variables').length<document.getElementsByName('variables').item(0).options.length)
 						document.getElementsByName("add").item(0).style.display="";
 				} catch(e) {}
 			else
@@ -922,16 +925,20 @@ LASUI.prototype.setOperation = function (evt) {
 		if(this.state.operations.getOperationByID(this.state.operation.plot).optiondef.IDREF) {
 			this.getOptions(this.state.operations.getOperationByID(this.state.operation.plot).optiondef.IDREF, "plot", true);
 		} else {
-			document.getElementById('plotOptionsButton').style.visibility='hidden';
+			document.getElementById('plotOptionsButton').className='top_link_disabled';
+			document.getElementById('plotOptionsButton').onclick=function(){};
 			this.onSetVariable();
 		} 
 	} else {
-		document.getElementById('plotOptionsButton').style.visibility='hidden';
+		document.getElementById('plotOptionsButton').className='top_link_disabled';
+		document.getElementById('plotOptionsButton').onclick=function(){};
 		this.onSetVariable();
 	}
 
-	if(this.refs.analysis.enabled||!this.state.grid.hasAxis('t'))
-		document.getElementById('Animation').style.visibility='hidden';
+	if(this.refs.analysis.enabled||!this.state.grid.hasAxis('t')) {
+		document.getElementById('Animation').className='top_link_disabled';
+		document.getElementById('Animation').onclick=function(){};
+	}
 
 	this.updateConstraints(view);
 	this.state.lastVariable = this.state.variable;
@@ -983,7 +990,8 @@ LASUI.prototype.setOperationList = function (strJson, stop) {
 	for(var row=0;row<document.getElementById("productButtons").childNodes.length;row++)
 		for(var cell=0;cell<document.getElementById("productButtons").childNodes[row].childNodes.length;cell++)
 			try {
-					document.getElementById("productButtons").childNodes[row].style.visibility="hidden";
+					document.getElementById("productButtons").childNodes[row].className='top_link_disabled';
+					document.getElementById("productButtons").childNodes[row].onclick = function(){};
 				} catch (e) {}
 
 
@@ -1025,7 +1033,7 @@ LASUI.prototype.setOperationNode = function (id, name) {
 
 	var button = document.getElementById(name);
 	if(button) {
-		button.style.visibility = "visible";
+		button.className='top_link';
 		button.onclick=this.doProductIconClick.LASBind(this, id);
 	}
 }
@@ -1214,8 +1222,10 @@ LASUI.prototype.onPlotLoad = function (e) {
 		document.getElementById("wait_msg").style.display="none";
 	if(document.getElementById('output')) 
 		document.getElementById("output").style.visibility="visible";
-	 if(document.getElementById('update')) 
-	document.getElementById('update').style.color='';
+	 if(document.getElementById('update')) {
+		document.getElementById('update').className='top_link';
+		document.getElementById('update').style.color='';
+	}
 	
 }
 LASUI.prototype.onPlotUnload = function (e) {
@@ -1446,19 +1456,22 @@ LASUI.prototype.initZConstraint = function (mode, reset) {
 	switch (mode) {
 			case 'range':
 				var depth_label2 =document.createElement("STRONG");
-				depth_label2.appendChild(document.createTextNode("Minimum Depth (" + this.state.grid.getAxis('z').units +") : "));
+				depth_label2.appendChild(document.createTextNode("Minimum Depth (" + this.state.grid.getAxis('z').units +"):"));
+				//depth_label2.appendChild(document.createElement("BR"));
 				document.getElementById("Depth").appendChild(depth_label2);
 				document.getElementById("Depth").appendChild(this.refs.DepthWidget[this.refs.DepthWidget.widgetType][0]);
 				document.getElementById("Depth").appendChild(document.createElement("BR"));
 				var depth_label3 =document.createElement("STRONG");
-				depth_label3.appendChild(document.createTextNode("Maximum Depth (" + this.state.grid.getAxis('z').units +") : "));
+				depth_label3.appendChild(document.createTextNode("Maximum Depth (" + this.state.grid.getAxis('z').units +"):"));
+				//depth_label3.appendChild(document.createElement("BR"));
 				document.getElementById("Depth").appendChild(depth_label3);
 				document.getElementById("Depth").appendChild(this.refs.DepthWidget[this.refs.DepthWidget.widgetType][1]);
 				document.getElementById("Depth").style.display="";
 				break;
 			case 'point':
 				var depth_label = document.createElement("STRONG");
-				depth_label.appendChild(document.createTextNode("Depth (" + this.state.grid.getAxis('z').units + ") : "));
+				depth_label.appendChild(document.createTextNode("Depth (" + this.state.grid.getAxis('z').units + "):"));
+				//depth_label.appendChild(document.createElement("BR"));
 				document.getElementById("Depth").appendChild(depth_label);
 				document.getElementById("Depth").appendChild(this.refs.DepthWidget[this.refs.DepthWidget.widgetType][0]);
 				document.getElementById("Depth").style.display="";
@@ -1499,11 +1512,11 @@ LASUI.prototype.initTConstraint = function (mode,reset) {
 
 			switch(mode) {
 				case 'range':
-					document.getElementById("Date").innerHTML="<table><tbody><tr><td><table><tbody><tr><td><strong>Start Date :</strong></td></tr><tr><td><strong>End Date :</strong></tr></tbody></table></td><td id='DWAnchor'></td></tr></tbody></table>";
+					document.getElementById("Date").innerHTML="<strong>Date Range:</strong><div id='DWAnchor' />";
 					this.refs.DW.render("DWAnchor", DWDisplay, DWDisplay);
 					break;
 				case 'point':
-					document.getElementById("Date").innerHTML="<table><tbody><tr><td><table><tbody><tr><td><strong>Date :</strong></td><td id='DWAnchor'></td></tr></tbody></table>";
+					document.getElementById("Date").innerHTML="<strong>Date:</strong><div id='DWAnchor' />";
 					this.refs.DW.render("DWAnchor", DWDisplay);
 					break;
 			}
@@ -1534,18 +1547,21 @@ LASUI.prototype.initTConstraint = function (mode,reset) {
 			switch(mode) {
 				case 'range':
 					var date_label = document.createElement("STRONG");
-					date_label.appendChild(document.createTextNode("Start Date : "));
+					date_label.appendChild(document.createTextNode("Start Date:"));
+					//date_label.appendChild(document.createElement("BR"));
 					document.getElementById("Date").appendChild(date_label);
 					document.getElementById("Date").appendChild(this.refs.DW[0]);
 					document.getElementById("Date").appendChild(document.createElement("BR"));
 					var label = document.createElement("STRONG");
-					label.appendChild(document.createTextNode("End Date : "));
+					label.appendChild(document.createTextNode("End Date:"));
+					//label.appendChild(document.createElement("BR"));
 					document.getElementById("Date").appendChild(label);
 					document.getElementById("Date").appendChild(this.refs.DW[1]);
 					break;
 				case 'point':
 					var date_label = document.createElement("STRONG");
-					date_label.appendChild(document.createTextNode("Date : "));
+					date_label.appendChild(document.createTextNode("Date:"));
+					//date_label.appendChild(document.createElement("BR"));
 					document.getElementById("Date").appendChild(date_label);
 					document.getElementById("Date").appendChild(this.refs.DW[0]);
 					break;
@@ -1790,7 +1806,7 @@ LASUI.prototype.makeRequest = function (evt, type) {
 	if(type=='plot') {
 		this.expired=false;	
 		document.getElementById('update').style.color='';
-		document.getElementById('print').style.visibility='visible';
+		document.getElementById('print').className='top_link';
 	}
 
 }
@@ -1851,7 +1867,7 @@ LASUI.prototype.getOptions = function (optiondef, type, reset) {
 LASUI.prototype.setOptionList = function (strJson,DOMNode,type,reset) {
 
 
-	document.getElementById('plotOptionsButton').style.visibility='visible';
+	document.getElementById('plotOptionsButton').className='top_link';
 	var table = document.createElement("TABLE");
 	table.style.margin = "-4pt";
 	table.style.marginLeft = "6pt";
@@ -2146,7 +2162,9 @@ LASUI.prototype.showAnalysis = function () {
 
 	this.refs.analysis.enabled = true;
 	var reset=false;
-	document.getElementById('Animation').style.visibility='hidden';
+	document.getElementById('Animation').className='top_link_disabled';
+	document.getElementById('Animation').onclick = function(){};
+	
 	for(var a in this.refs.analysis.axes)
 		this.refs.analysis.axes[a].style.display="none";
 
@@ -2189,7 +2207,7 @@ LASUI.prototype.hideAnalysis = function () {
 	if(!this.state.operations.response.operations.error&&this.state.grid.hasAxis('t'))
 		for(var i=0;i<this.state.operations.getOperationCount();i++)
 			if(this.state.operations.getOperationName(i)=="Animation")
-				document.getElementById('Animation').style.visibility="visible";
+				document.getElementById('Animation').className='top_link';
 
 	document.getElementById(this.anchors.analysis).style.display="none";
 	for(var d=0;d<this.state.grid.response.grid.axis.length;d++)

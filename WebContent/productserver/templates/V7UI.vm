@@ -6,7 +6,6 @@
 		<stylesheet src="JavaScript/frameworks/OpenLayersExtension/OLMapWidget.css"></stylesheet>
 		<style media="all" type="text/css">
 			@import "JavaScript/ui/LASUI.css";
-			@import "css/UX/metallic/metallicGrn.css";
 			body {
 				height : 100%; 
 				width:100%; 
@@ -55,17 +54,17 @@
 				#else
 					<div id="choose_dataset" class="top_link" width="100%" type="button"  onclick="showDatasetPicker()">Choose dataset&nbsp;</div>		
 					#end	
-					<div  class="top_link" style=" visibility:hidden" id="update" onclick="LAS.makeRequest();"><div style="display:inline;vertical-align:top;">Update Plot</div><input type="checkbox" style="border:none;margin:0pt;" #if($request.getParameter('auto')) checked #end  onmousemove="window.status='Check to automatically update the plot.';" onmouseout="window.status='';" onclick="LAS.toggleAutoUpdate(event,this.checked)"></div>
-					<div  class="top_link" style="visibility:hidden" id="plotOptionsButton" onclick="showPlotOptions()">Set plot options&nbsp;</div>
+					<div  class="top_link_disabled" id="update" onclick="if(this.className!='top_link_disabled')LAS.makeRequest();"><div style="display:inline;vertical-align:top;">Update Plot</div><input type="checkbox" style="border:none;margin:0pt;" #if($request.getParameter('auto')) checked #end  onmousemove="window.status='Check to automatically update the plot.';" onmouseout="window.status='';" onclick="LAS.toggleAutoUpdate(event,this.checked)"></div>
+					<div  class="top_link_disabled" id="plotOptionsButton" onclick="showPlotOptions()">Set plot options&nbsp;</div>
 					<span width="100%" id="productButtons">
-						<div class="top_link" style="visibility:hidden" ID="Animation">Animate&nbsp;</div>
-						<div class="top_link" style="visibility:hidden" ID="Comparison">Compare&nbsp;</div>							
-						<div class="top_link" style="visibility:hidden" ID="Plot to Google Earth">Google Earth&nbsp;</div>
-						<div class="top_link" style="visibility:hidden" ID="Table of values (text)">Show Values&nbsp;</div>
-						<div class="top_link" style="visibility:hidden" ID="Desktop application data access scripts">Export to Desktop Application&nbsp;</div>
-						<div class="top_link" style="visibility:hidden; right:0px" id="Interactive Download">Save As ...</div>						
+						<div class="top_link_disabled"  ID="Animation">Animate&nbsp;</div>
+						<div class="top_link_disabled"  ID="Comparison">Compare&nbsp;</div>							
+						<div class="top_link_disabled"  ID="Plot to Google Earth">Google Earth&nbsp;</div>
+						<div class="top_link_disabled"  ID="Table of values (text)">Show Values&nbsp;</div>
+						<div class="top_link_disabled"  ID="Desktop application data access scripts">Export to Desktop Application&nbsp;</div>
+						<div class="top_link_disabled"  ID="Interactive Download">Save As ...</div>						
 					</span>
-					<span class="top_link"  style="visibility:hidden;" onclick="LAS.printPlot()" id="print">Print&nbsp;</span>				
+					<span class="top_link_disabled" onclick="LAS.printPlot()" id="print">Print</span>				
 				</div>
 			</div>
 			<div id="message_bar"><img id="wait" style="visibility:hidden;float:right;margin:2pt;padding:2pt;" src="JavaScript/components/mozilla_blu.gif"><div id="breadcrumb" name="breadcrumb"></div></div>
