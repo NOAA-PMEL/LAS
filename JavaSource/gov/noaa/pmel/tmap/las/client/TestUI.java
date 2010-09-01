@@ -24,6 +24,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.beans.factory.InitializingBean;
+
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
@@ -311,9 +313,12 @@ public class TestUI implements EntryPoint {
 			}
 			if ( dsid != null && vid != null && op != null && view != null && option != null) {
 				Util.getRPCService().getCategories(dsid, initPanelFromParametersCallback);
+			} else {
+				// set a default view.
+				view = "xy";
 			}
-		}
-		
+			initializing.hide();
+		}		
 	};
 	// TODO you're going to have to fix this to work, but for now...
 	public AsyncCallback initPanelFromParametersCallback = new AsyncCallback() {
@@ -344,7 +349,9 @@ public class TestUI implements EntryPoint {
 	private void initPanel() {
 		
 		initializing.hide();
-		
+		if ( view == null ) {
+			view = "xy";
+		}
 		GridSerializable ds_grid = var.getGrid();
 		double grid_west = Double.valueOf(ds_grid.getXAxis().getLo());
 		double grid_east = Double.valueOf(ds_grid.getXAxis().getHi());
@@ -397,14 +404,18 @@ public class TestUI implements EntryPoint {
 				axesWidget.getTAxis().setLo(tlo);
 				axesWidget.getTAxis().setHi(thi);
 			} else {
-				panel.setAxisRangeValues("t", axesWidget.getTAxis().getFerretDateLo(), axesWidget.getTAxis().getFerretDateHi());
+				if ( var.getGrid().hasT() ) {
+					panel.setAxisRangeValues("t", axesWidget.getTAxis().getFerretDateLo(), axesWidget.getTAxis().getFerretDateHi());
+				}
 			}
 			if ( zlo != null && !zlo.equals("") ) {
 				panel.setAxisRangeValues("z", zlo, zhi);
 				axesWidget.getZAxis().setLo(zlo);
 				axesWidget.getZAxis().setHi(zhi);
 			} else {
-				panel.setAxisRangeValues("z", axesWidget.getZAxis().getHi(), axesWidget.getZAxis().getLo());
+				if ( var.getGrid().hasZ() ) {
+					panel.setAxisRangeValues("z", axesWidget.getZAxis().getHi(), axesWidget.getZAxis().getLo());
+				}
 			}
 
 
@@ -453,12 +464,19 @@ public class TestUI implements EntryPoint {
 			}
 			// The view may have changed if the operation changed before the apply.
 			axesWidget.getRefMap().setTool(view);
-			panel.setAxisRangeValues("t", axesWidget.getTAxis().getFerretDateLo(), axesWidget.getTAxis().getFerretDateHi());
-			panel.setAxisRangeValues("z", axesWidget.getZAxis().getHi(), axesWidget.getZAxis().getLo());
+			if ( var.getGrid().hasT() ) {
+				panel.setAxisRangeValues("t", axesWidget.getTAxis().getFerretDateLo(), axesWidget.getTAxis().getFerretDateHi());
+			}
+			if ( var.getGrid().hasZ() ) {
+				panel.setAxisRangeValues("z", axesWidget.getZAxis().getHi(), axesWidget.getZAxis().getLo());
+			}
+			
 			double tmp_xlo = axesWidget.getRefMap().getXlo();
 			double tmp_xhi = axesWidget.getRefMap().getXhi();
+
 			double tmp_ylo = axesWidget.getRefMap().getYlo();
 			double tmp_yhi = axesWidget.getRefMap().getYhi();
+			
 			panel.setLatLon(String.valueOf(tmp_ylo), String.valueOf(tmp_yhi), String.valueOf(tmp_xlo), String.valueOf(tmp_xhi));
 			// TODO GEt an options button for kripes sake Map<String, String> temp_state = new HashMap<String, String>(optionsButton.getState());
 			panel.refreshPlot(null, false, true);
@@ -536,7 +554,7 @@ public class TestUI implements EntryPoint {
 			Object u = item.getUserObject();
 			if ( u instanceof VariableSerializable ) {
 				var = (VariableSerializable) u;
-				Util.getRPCService().getGrid(var.getDSID(), var.getID(), getGridCallback);
+				Util.getRPCService().getConfig(view, var.getDSID(), var.getID(), getGridCallback);
 			}
 		}
 
