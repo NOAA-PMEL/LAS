@@ -157,13 +157,7 @@ font-weight: bold;
 	z-index : 1050;
 	width:600px;
 }
-.LASConstraintsPane {
-	min-height:490px;
-	min-width:250px;
-	overflow-x:auto;
-	overflow-y:hide;
 	
-}
 .LASTitleTextNode {
 	font-family:arial;
 	color : white;
@@ -228,7 +222,7 @@ height: 100%;
 .top_link_disabled {
 	display:block; 
 	float:left; 
-	color:#FFFFFF; 
+	color: #DDDDDD; 
 	text-decoration:none; 
 	font-size:11px; 
 	font-weight:bold; 
@@ -275,4 +269,6 @@ height: 100%;
 }
 .top_link_left:hover {color:#f5ed52;  /* background:  url(grn_1.gif) no-repeat; */}
 
-.top_link:hover {color:#f5ed52;  /* background:  url(grn_1.gif) no-repeat; */}
+.top_link:hover {color:#f5ed52;},
+#main : {margin:5pt, padding:5pt},
+#output : {overflow : hidden}
