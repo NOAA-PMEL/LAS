@@ -515,6 +515,7 @@ public class OLMapWidget extends Composite {
 		dockPanel.add(mapWidget, DockPanel.CENTER);
 		dockPanel.add(textWidget, DockPanel.SOUTH);
 		initWidget(dockPanel);
+		mapInitialized();
 	}
 	public Map getMap() {
 		return map;
@@ -1361,11 +1362,16 @@ public class OLMapWidget extends Composite {
     		$wnd.mapMovedCallback();
     	}
     }-*/;
+    public static native void mapInitialized()/*-{
+    	if ( typeof $wnd.mapDone == 'function') {
+    		$wnd.mapDone();
+    	}
+    }-*/;
 	public native void activateNativeHooks()/*-{
 		var localMap = this;
         $wnd.setMapCurrentSelection = function(slat, nlat, wlon, elon) {       	
 	        localMap.@gov.noaa.pmel.tmap.las.client.map.OLMapWidget::setCurrentSelection(DDDD)(slat, nlat, wlon, elon);
-        } 
+        }
         $wnd.setMapTool = function(tool) {
         	localMap.@gov.noaa.pmel.tmap.las.client.map.OLMapWidget::setTool(Ljava/lang/String;)(tool);
         }
