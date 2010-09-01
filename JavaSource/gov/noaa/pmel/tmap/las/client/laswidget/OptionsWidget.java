@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
@@ -192,5 +193,11 @@ public class OptionsWidget extends VerticalPanel {
 			add(option_layout);
 		}
 		add(layout_grid);	
+	}
+	public void addOkHandler(ClickHandler handler) {
+		ok.addClickHandler(handler);
+	}
+	public void addCancelHandler(ClickHandler handler) {
+		cancel.addClickHandler(handler);
 	}
 }

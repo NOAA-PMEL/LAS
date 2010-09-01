@@ -263,15 +263,25 @@ public class AxesWidgetGroup extends Composite {
     public void setFixedAxis(String view, List<String> ortho, String compareAxis) {
         arrangeAxes(view, ortho, compareAxis);
         boolean showFixedPanel = false;
-        for (Iterator orthoIt = ortho.iterator(); orthoIt.hasNext();) {
-			String ax = (String) orthoIt.next();
-			if ( !compareAxis.contains(ax) ) {
-		        setAxisVisible(ax, true);
-		        showFixedPanel = true;
-			} else {
-			    setAxisVisible(ax, false);
-			}
-		}
+        // Hide the compare axis in this axis group if it is specified.
+        if ( compareAxis != null ) {
+        	for (Iterator orthoIt = ortho.iterator(); orthoIt.hasNext();) {
+        		String ax = (String) orthoIt.next();
+        		if ( !compareAxis.contains(ax) ) {
+        			setAxisVisible(ax, true);
+        			showFixedPanel = true;
+        		} else {
+        			setAxisVisible(ax, false);
+        		}
+        	}
+        } else {
+        	// Otherwise just show all the orthogonal axes
+        	for (Iterator orthoIt = ortho.iterator(); orthoIt.hasNext();) {
+        		String ax = (String) orthoIt.next();
+        		setAxisVisible(ax, true);
+        	}
+        	showFixedPanel = true;
+        }
         orthoPanel.setVisible(showFixedPanel);
     }
     public void showAll(String view, List<String> ortho) {
