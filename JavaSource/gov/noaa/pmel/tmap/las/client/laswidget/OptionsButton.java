@@ -5,6 +5,7 @@ import java.util.Map;
 import gov.noaa.pmel.tmap.las.client.RPCServiceAsync;
 import gov.noaa.pmel.tmap.las.client.serializable.OptionSerializable;
 
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.ClickListener;
 import com.google.gwt.user.client.ui.Composite;
@@ -65,5 +66,12 @@ public class OptionsButton extends Composite {
 	}
 	public void setOptions(String id, Map<String, String> state) {
 		options.setOptions(id, state);
+	}
+	public void addOpenClickHandler(ClickHandler handler) {
+		optionsButton.addClickHandler(handler);
+	}
+	public void addCloseClickHandler(ClickHandler handler) {
+		options.addOkHandler(handler);
+		options.addCancelHandler(handler);
 	}
 }

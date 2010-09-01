@@ -72,6 +72,7 @@ public class Confluence extends LASAction {
 					put(Constants.GET_REGIONS_KEY, Constants.GET_REGIONS);
 					put(Constants.GET_VARIABLES_KEY, Constants.GET_VARIABLE);
 					put(Constants.GET_VIEWS_KEY, Constants.GET_VIEWS);
+					put(Constants.GET_UI_KEY, Constants.GET_UI);
 				}  
 			};
 		public ActionForward execute(ActionMapping mapping,
@@ -113,6 +114,7 @@ public class Confluence extends LASAction {
 						for (Iterator servIt = servers.iterator(); servIt.hasNext();) {
 							Tributary trib = (Tributary) servIt.next();
                             Category server_cat = new Category(trib.getName(), trib.getTopLevelCategoryID());
+                            server_cat.setAttribute("remote_las", trib.getURL()+Constants.GET_UI);
 							categories.add(server_cat);
 						}
 						InputStream is = new ByteArrayInputStream(Util.toJSON(categories, "categories").toString().getBytes("UTF-8"));

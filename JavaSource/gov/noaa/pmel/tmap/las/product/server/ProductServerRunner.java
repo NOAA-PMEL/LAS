@@ -139,6 +139,12 @@ public class ProductServerRunner  extends Thread  {
                 stillWorking=false;
             } else {
                 hit = cache.cacheHit(compoundResponse);
+                if ( hit ) {
+                	String openid = request.getParameter("openid");
+                    if ( openid != null && !openid.equals("") ) {
+                        this.compoundResponse.setOpenId(openid);
+                    }
+                }
             }
         } 
 
