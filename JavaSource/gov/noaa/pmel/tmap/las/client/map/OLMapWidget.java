@@ -515,7 +515,7 @@ public class OLMapWidget extends Composite {
 		dockPanel.add(mapWidget, DockPanel.CENTER);
 		dockPanel.add(textWidget, DockPanel.SOUTH);
 		initWidget(dockPanel);
-		mapInitialized();
+		mapDone();
 	}
 	public Map getMap() {
 		return map;
@@ -1362,9 +1362,9 @@ public class OLMapWidget extends Composite {
     		$wnd.mapMovedCallback();
     	}
     }-*/;
-    public static native void mapInitialized()/*-{
-    	if ( typeof $wnd.mapDone == 'function') {
-    		$wnd.mapDone();
+    public static native void mapDone()/*-{
+    	if ( typeof $wnd.mapDoneCallback == 'function') {
+    		$wnd.mapDoneCallback();
     	}
     }-*/;
 	public native void activateNativeHooks()/*-{
