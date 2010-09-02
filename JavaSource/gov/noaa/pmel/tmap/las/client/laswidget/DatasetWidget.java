@@ -58,10 +58,13 @@ public class DatasetWidget extends Tree implements TreeListener {
 				if ( currentlySelected == null ) {
 					for (int i = 0; i < cats.length; i++) {
 						CategorySerializable cat = cats[i];
-						String auth_url = cat.getAttributes().get("remote_las");
-						if ( auth_url != null && openid != null ) {
-							Frame authFrame = new Frame(auth_url+"&openid="+openid);
-							RootPanel.get(Constants.AUTH_FRAME_ID).add(authFrame);
+						if ( openid != null ) {
+							String auth_url = cat.getAttributes().get("remote_las");
+							if ( auth_url != null ) {
+								auth_url = auth_url + "&openid="+openid;
+								Frame authFrame = new Frame(auth_url);
+								RootPanel.get(Constants.AUTH_FRAME_ID).add(authFrame);
+							}
 						}
 						String name = cat.getName();
 						TreeItem item = new TreeItem();
