@@ -10,5 +10,6 @@ public class Constants {
 	// Not used at this time.  Probably need default hi and low for all axes...
 	public static final String DEFAULT_TIME = "default_time";
 	public static final String DEFAULT_Z = "default_z";
+	public static final String AUTH_FRAME_ID = "__esg_authenticateFrame";
 	
 }

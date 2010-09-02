@@ -72,7 +72,7 @@ public class Confluence extends LASAction {
 					put(Constants.GET_REGIONS_KEY, Constants.GET_REGIONS);
 					put(Constants.GET_VARIABLES_KEY, Constants.GET_VARIABLE);
 					put(Constants.GET_VIEWS_KEY, Constants.GET_VIEWS);
-					put(Constants.GET_UI_KEY, Constants.GET_UI);
+					put(Constants.GET_AUTH_KEY, Constants.GET_AUTH);
 				}  
 			};
 		public ActionForward execute(ActionMapping mapping,
@@ -80,13 +80,8 @@ public class Confluence extends LASAction {
 				HttpServletRequest request,
 				HttpServletResponse response){
 
-			Cookie[] cookies = request.getCookies();
-			String openid = null;
-			for (int i = 0; i < cookies.length; i++) {
-				if ( cookies[i].getName().equals("esg.openid.identity.cookie") ) {
-					openid = cookies[i].getValue();
-				}
-			}
+			
+			String openid = request.getParameter("openid");
 			LASConfig lasConfig = (LASConfig)servlet.getServletContext().getAttribute(LASConfigPlugIn.LAS_CONFIG_KEY);
 
 			ArrayList<Tributary> servers = new ArrayList<Tributary>();
@@ -112,9 +107,11 @@ public class Confluence extends LASAction {
 						categories.add(local_cat);
 
 						for (Iterator servIt = servers.iterator(); servIt.hasNext();) {
-							Tributary trib = (Tributary) servIt.next();
+							Tributary trib = (Tributary) servIt.next();						
                             Category server_cat = new Category(trib.getName(), trib.getTopLevelCategoryID());
-                            server_cat.setAttribute("remote_las", trib.getURL()+Constants.GET_UI);
+                            if ( openid != null ) {
+                            	server_cat.setAttribute("remote_las", trib.getURL()+Constants.GET_AUTH);
+							}
 							categories.add(server_cat);
 						}
 						InputStream is = new ByteArrayInputStream(Util.toJSON(categories, "categories").toString().getBytes("UTF-8"));
