@@ -16,7 +16,7 @@ $las_response.toString()
 			@import "JavaScript/ui/LASUI.css";
 		</style>
 </head>
-<body onload="initializeLASRequest(); loadMap()">
+<body onload="initializeLASRequest(); loadMap(); resizeme()">
   	<div id="img_body" name="img_body"></div>
 </body>
 
@@ -24,7 +24,6 @@ $las_response.toString()
 <script language="JavaScript" src="JavaScript/components/LASRequest.js"></script>
 <SCRIPT language="JavaScript" src="JavaScript/components/MapWidget.js"></SCRIPT>
 <script language="JavaScript">
-
 var myMapWidget = {};  //put it in a global variable, or else you'll lose it.
 var Req = {}; //Same goes for the LAS request object
 var axisLow = "";
@@ -98,6 +97,13 @@ function submitXML() {
     var URL = './ProductServer.do?xml=' + escape(Req.getXMLText());
     document.location = URL;
   }
+}
+function resizeme () {
+	if(parent!=self) 
+       	 if(parent.document.getElementById("output")) {
+		 	parent.document.getElementById("output").height=window.screen.height+20;
+                 	parent.document.getElementById("output").width=window.screen.width+20;
+	}
 }
 </script>
 </html>
