@@ -92,4 +92,7 @@ public class DatasetButton extends Composite {
 	public void addCloseClickHandler(ClickHandler handler) {
 		close.addClickHandler(handler);
 	}
+	public void setOpenID(String openid) {
+		datasetWidget.setOpenID(openid);
+	}
 }
