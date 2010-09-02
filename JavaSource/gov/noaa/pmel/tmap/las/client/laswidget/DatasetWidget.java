@@ -11,6 +11,8 @@ import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Frame;
+import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.Tree;
 import com.google.gwt.user.client.ui.TreeItem;
 import com.google.gwt.user.client.ui.TreeListener;
@@ -55,6 +57,11 @@ public class DatasetWidget extends Tree implements TreeListener {
 				if ( currentlySelected == null ) {
 					for (int i = 0; i < cats.length; i++) {
 						CategorySerializable cat = cats[i];
+						String auth_url = cat.getAttributes().get("remote_las");
+						if ( auth_url != null ) {
+							Frame authFrame = new Frame(auth_url);
+							RootPanel.get(Constants.AUTH_FRAME_ID).add(authFrame);
+						}
 						String name = cat.getName();
 						TreeItem item = new TreeItem();
 						item.addItem("Loading...");
