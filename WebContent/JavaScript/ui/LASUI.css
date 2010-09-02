@@ -4,6 +4,8 @@ font: 70% "Lucida Grande", Verdana, Lucida, Helvetica, Arial, sans-serif;
 a {
 color: #436976;
 background-color: transparent;
+text-decoration: none; 
+font:120% "Lucida Grande",Verdana,Lucida,Helvetica,Arial,sans-serif;
 }
 p {
 margin: 0 0 0.75em 0;
