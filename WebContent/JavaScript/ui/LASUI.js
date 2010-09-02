@@ -506,9 +506,12 @@ LASUI.prototype.onSetVariable = function() {
 			}
 		}
 		 document.getElementById("ol_map_widget").onmouseover = null;
+		this.newVariable=true;		
 		this.refresh();
 }
 LASUI.prototype.updateVariableLists = function () {
+	if(this.state.datasets[this.state.dataset].getCategorySize()==1)
+		return;
 	//get the minvar and maxvar counts for this operation
         var minvars =1;
         if(this.state.operations.getOperationByID(this.state.operation.plot).minvars)
@@ -541,8 +544,8 @@ LASUI.prototype.updateVariableLists = function () {
                         document.getElementsByName('add').item(i).onclick = this.addVariable.LASBind(this);
         for(var i=0; i< document.getElementsByName('del');i++)
 			document.getElementsByName('del').item(i).onclick = this.removeVariable.LASBind(this);
-        for(var i=0; i< document.getElementsByName('variable');i++)                
-		 document.getElementsByName('variable').item(i).onchange = this.getOperations.LASBind(this);
+        for(var i=0; i< document.getElementsByName('variables');i++)                
+		 document.getElementsByName('variables').item(i).onchange = this.getOperations.LASBind(this);
 
 	//hide vectors if necessary	
 	if(document.getElementsByName("variables").length>1)
@@ -562,10 +565,10 @@ LASUI.prototype.updateVariableLists = function () {
 	//hide the add buttons if weve hit the max number of non vector vars, otherwise, show them
 	if(document.getElementsByName(this.anchors.variables).length >= ct || variable.grid_type=="vector") {
                 for (var i=0;i<document.getElementsByName('add').length;i++)
-                         document.getElementsByName('add').item(i).style.display="none";
+                         document.getElementsByName('add').item(i).style.visibility='hidden';
         } else if (variable.grid_type!="vector")
                 for (var i=0;i<document.getElementsByName('add').length;i++)
-                         document.getElementsByName('add').item(i).style.display="";
+                         document.getElementsByName('add').item(i).style.visibility='visible';
 
 	//update the variables to reflect the request
 	for(var v=0;v<document.getElementsByName("variables").length;v++)
@@ -576,12 +579,14 @@ LASUI.prototype.updateVariableLists = function () {
 	this.updateAxisLabels();
 }
 LASUI.prototype.updateAxisLabels = function () {
-	if(this.state.operations.getOperationByID(this.state.operation.plot).axis_labels)
+	if(this.state.operations.getOperationByID(this.state.operation.plot).axis_labels) {
 		if(this.state.operations.getOperationByID(this.state.operation.plot).axis_labels.label.name)
 			 document.getElementsByName('axis_labels').item(0).innerHTML=this.state.operations.getOperationByID(this.state.operation.plot).axis_labels.label.name;
 		else for (var i=0;i<this.state.operations.getOperationByID(this.state.operation.plot).axis_labels.label.length;i++)
 			try {document.getElementsByName('axis_labels').item(i).innerHTML=this.state.operations.getOperationByID(this.state.operation.plot).axis_labels.label[i].name;} catch(e) {}
-
+	} else
+		for(var i=0;i<document.getElementsByName('axis_labels').length;i++)
+			document.getElementsByName('axis_labels').item(i).innerHTML="";
 }
 
 LASUI.prototype.addVariable = function(evt) {
@@ -595,7 +600,7 @@ LASUI.prototype.addVariable = function(evt) {
 	
 	if(document.getElementsByName('variables').length>=2)
 		for(var i=0;i<document.getElementsByName('del').length;i++)
-			document.getElementsByName('del').item(i).style.display='';
+			document.getElementsByName('del').item(i).style.visibility='visible';
         for(var i=0; i<newvar.children.length;i++) {
 		if(newvar.children.item(i).name=="add")
 			newvar.children.item(i).onclick = this.addVariable.LASBind(this);	
@@ -619,10 +624,10 @@ LASUI.prototype.addVariable = function(evt) {
 
 	if(document.getElementsByName('variables').length >= ct) {
 		for (var i=0;i<document.getElementsByName('add').length;i++)
-			 document.getElementsByName('add').item(i).style.display="none";		
+			 document.getElementsByName('add').item(i).style.visibility='hidden';		
 	} else
 		for (var i=0;i<document.getElementsByName('add').length;i++)
-			 document.getElementsByName('add').item(i).style.display="";		
+			 document.getElementsByName('add').item(i).style.visibility='visible';		
 
 	 for(var v=0;v<document.getElementsByName('variables').length;v++)
 		for(var i=0;i<document.getElementsByName('variables').item(v).options.length;i++)
@@ -646,22 +651,22 @@ LASUI.prototype.removeVariable = function(evt) {
 			evt.target.parentNode.parentNode.removeChild(evt.target.parentNode);
 	if(document.getElementsByName('del').length==1) {
 		for(var i=0;i<document.getElementsByName('del').length;i++)
-                        document.getElementsByName('del').item(i).style.display='none';
+                        document.getElementsByName('del').item(i).style.visibility='hidden';
 		for(var v=0;v<document.getElementsByName("variables").item(0).options.length;v++)
 			document.getElementsByName("variables").item(0).options[v].disabled=false;
 	}
 
 	if(document.getElementsByName('variables').length >= document.getElementsByName('variables').item(0).options.length) {
 		for (var i=0;i<document.getElementsByName('add').length;i++)
-			 document.getElementsByName('add').item(i).style.display="none";		
+			 document.getElementsByName('add').item(i).style.visibility='hidden';		
 	} else
 		for (var i=0;i<document.getElementsByName('add').length;i++)
-			 document.getElementsByName('add').item(i).style.display="";
+			 document.getElementsByName('add').item(i).style.visibility='visible';
 
 	for (var i=0;i<document.getElementsByName('variables').length;i++) {
              document.getElementsByName('add').item(i).onclick = this.addVariable.LASBind(this);
 	     document.getElementsByName('del').item(i).onclick = this.removeVariable.LASBind(this);
-	     document.getElementsByName('variable').item(i).onclick = this.getOperations.LASBind(this);
+	     document.getElementsByName('variables').item(i).onchange = this.getOperations.LASBind(this);
 	}		
 
 	this.updateAxisLabels();
@@ -730,12 +735,13 @@ LASUI.prototype.setVariable = function (evt) {
 	var args = arguments
 	var dataset = args[1];
 	var i = args[2];
-
+	this.newVariable=true;
 	if(dataset.category) {
 	var datasetID = dataset.category.getDatasetID(i);
 	var variableID = dataset.category.getChildID(i);
 	var variable = dataset.category.getChild(i);
 	this.state.datasets[datasetID] = dataset.category;
+	dataset=dataset.category;
 	} else
 	{       
 		var datasetID = dataset.getDatasetID(i);
@@ -746,11 +752,13 @@ LASUI.prototype.setVariable = function (evt) {
 	this.state.variables[0]=variableID;
 	
 	//clear the breadcrumbs, we dont have cross-dataset multivariable support, yet
-	if(datasetID != this.state.dataset)
+	if(datasetID != this.state.dataset) {
         	while(document.getElementsByName(this.anchors.breadcrumb).length>1)
         	        document.getElementsByName(this.anchors.breadcrumb).item(document.getElementsByName(this.anchors.breadcrumb).length-1).parentNode.removeChild(document.getElementsByName(this.anchors.breadcrumb).item(document.getElementsByName(this.anchors.breadcrumb).length-1));
-
-
+        	while(document.getElementsByName(this.anchors.variables).length>1)
+        	        document.getElementsByName(this.anchors.variables).item(document.getElementsByName(this.anchors.variables).length-1).parentNode.removeChild(document.getElementsByName(this.anchors.variables).item(document.getElementsByName(this.anchors.variables).length-1));
+			
+	}
 
 	//start an array of selected variables for this dataset this.state.datasets[this.state.dataset] if we havent already
         this.state.lastDataset = this.state.dataset;
@@ -776,7 +784,7 @@ LASUI.prototype.setVariable = function (evt) {
 	info.onclick = this.getMetadata.LASBind(this);
 	var delvar = document.createElement("A");
 	delvar.onclick=this.removeVariable.LASBind(this);
-	delvar.appendChild(document.createTextNode('x'));
+	delvar.appendChild(document.createTextNode('X'));
 	delvar.name="del";
 	delvar.id="del"
 	delvar.href="javascript:";
@@ -785,14 +793,22 @@ LASUI.prototype.setVariable = function (evt) {
 	addvar.name="add";
 	addvar.id="add";
 	addvar.href="javascript:"
+	addvar.style.fontSize="150%";
 	addvar.onclick = this.addVariable.LASBind(this); 
 	addvar.appendChild(document.createTextNode('+'));
 	var axis_labels = document.createElement("a");
 	axis_labels.id="axis_labels";
 	axis_labels.name="axis_labels";
 	
-	if(variable.grid_type=="vector")
+	if(dataset.getCategorySize()==1) {
+		addvar.style.visibility='hidden';
+		delvar.style.visibility='hidden';
+	}
+	
+	if(variable.grid_type=="vector") {
 		addvar.style.display="none";
+		document.getElementById("analysisWrapper").style.display='none';
+	}
 	
 	var cats = document.createElement("TEXT");
 	cats.innerHTML= categories;
@@ -943,18 +959,17 @@ LASUI.prototype.getOperations = function (evt) {
 			if(evt.target) 
 				try {
 					if(evt.target.options[evt.target.selectedIndex].value)
-					var selectedVariable=eval("("+evt.target.options[evt.target.selectedIndex].value+")");				
+					var selectedVariable=eval("("+evt.target.options[evt.target.selectedIndex].value+")");
+									
 					if(selectedVariable.grid_type=="vector"&&document.getElementsByName("add").length==1)
-						document.getElementsByName("add").item(0).style.display="none";
+						document.getElementsByName("add").item(0).style.visibility="hidden";
 				//	else if (document.getElementsByName('variables').length<document.getElementsByName('variables').item(0).options.length)
 				//		document.getElementsByName("add").item(0).style.display="";
 				} catch(e) {}
 			else
 				var stop=true;
 	
-	
-			
-		
+		this.state.xpaths=[];	
 		if(document.getElementsByName('variables').length>0) {
 			this.state.xpaths=[];
 			for (var x=0; x < document.getElementsByName('variables').length;x++) {
@@ -963,6 +978,12 @@ LASUI.prototype.getOperations = function (evt) {
 				url += 'xpath=' + document.getElementsByName('variables').item(x).options[document.getElementsByName('variables').item(x).selectedIndex].id
 				this.state.xpaths.push(eval("("+document.getElementsByName('variables').item(x).options[document.getElementsByName('variables').item(x).selectedIndex].value+")"));
 			}
+			try{for(var i=0;i<document.getElementsByName(this.state.dataset).length;i++)
+				if(document.getElementsByName(this.state.dataset).item(i).id==this.state.xpaths[0].ID)
+					document.getElementsByName(this.state.dataset).item(i).checked=true;
+				if(this.state.xpaths[0].grid_type=='vector')
+					document.getElementById('analysisWrapper').style.display='none';
+			} catch(e) {}		
 			if(!this.AJAX_cache[url]) {
 				this.AJAX_cache[url]="waiting";
 				req.onreadystatechange = this.AJAXhandler.LASBind(this, req, "this.AJAX_cache['"+url+"'] = req.responseText; this.setOperationList(req.responseText,"+stop+");");
@@ -1015,8 +1036,9 @@ LASUI.prototype.setOperation = function (evt) {
 	var view = args[2];
 
 	this.state.view[type] = view;
-	if(document.getElementsByName("variables").length==1) {
+	if(document.getElementsByName("variables").length==1&&this.state.xpaths[0].grid_type!='vector'&&this.state.xpaths[0].grid_type!='scattered') {
 		document.getElementById("analysisWrapper").style.display="";
+		this.refs.analysis.enabled=false;
 	} else {
 		document.getElementById("analysisWrapper").style.display="none";
 	}
@@ -1044,12 +1066,10 @@ LASUI.prototype.setOperation = function (evt) {
 		} else {
 			document.getElementById('plotOptionsButton').className='top_link_disabled';
 			document.getElementById('plotOptionsButton').onclick=function(){};
-			this.onSetVariable();
 		} 
 	} else {
 		document.getElementById('plotOptionsButton').className='top_link_disabled';
 		document.getElementById('plotOptionsButton').onclick=function(){};
-		this.onSetVariable();
 	}
 
 	if(this.refs.analysis.enabled||!this.state.grid.hasAxis('t')||this.state.operation.plot.indexOf('prop_prop')>0) {
@@ -1058,16 +1078,17 @@ LASUI.prototype.setOperation = function (evt) {
 	}
 
 	this.updateConstraints(view);
+	this.updateVariableLists();
 	this.state.lastVariable = this.state.variable;
 	this.state.lastDataset = this.state.dataset;
 	if(type=='plot'&&this.state.operation.plot=='init')
 		this.getOperations(this.state.dataset,this.state.variable,this.state.view.plot,this.state.xpaths);
 	if(optiondef)
 		this.getOptions(optiondef, "plot",false);
-	else
-		this.onSetVariable();
+	else if(this.newVariable&&this.onSetVariable)
+		this.onSetVariable();	
 
-	this.updateVariableLists();
+	
 	
 	this.firstload=false;
 
@@ -1238,7 +1259,7 @@ LASUI.prototype.setDefaultProductMenu = function () {
 					if(!maxvars)
 						maxvars=1;
 					try {
-					if(this.state.operations.getOperationByID(op)['default']&&this.state.operations.getOperationByID(op).category=="visualization"&&this.state.operations.hasInterval(op,view)) { //&&minvars<=varct&&maxvars>=varct) {
+					if(this.state.operations.getOperationByID(op)['default']&&this.state.operations.getOperationByID(op).category=="visualization"&&this.state.operations.hasInterval(op,view)&&this.state.datasets[this.state.dataset].getCategorySize()>=minvars) { //&&minvars<=varct&&maxvars>=varct) {
 						if(!document.getElementById(type))
 	                                        	this.setProductTypeNode(type);
 						if(!defaultPlotProduct||(this.state.operation.plot==op&&this.state.view.plot==view))
@@ -1697,6 +1718,8 @@ LASUI.prototype.showUpdateLink = function () {
 		document.getElementById("wait_msg").style.display="none";
 	if(document.getElementById('output'))
 		document.getElementById("output").style.visibility="visible";
+	if(this.newVariable)
+		this.makeRequest();
 
 
 }
