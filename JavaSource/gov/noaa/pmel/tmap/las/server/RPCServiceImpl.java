@@ -137,6 +137,7 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
 	}
 	public CategorySerializable[] getCategories(String id) throws RPCException {
 		LASConfig lasConfig = (LASConfig) getServletContext().getAttribute(LASConfigPlugIn.LAS_CONFIG_KEY); 
+		
 		ArrayList<Category> categories = new ArrayList<Category>();
 		if ( lasConfig.allowsSisters() ) {
 			try {
@@ -155,6 +156,7 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
 					for (Iterator tribIt = tributaries.iterator(); tribIt.hasNext();) {
 						Tributary tributary = (Tributary) tribIt.next();
 						Category server_cat = new Category(tributary.getName(), tributary.getTopLevelCategoryID());
+						server_cat.setAttribute("remote_las", tributary.getURL()+Constants.GET_AUTH);
 						String url = tributary.getURL() + Constants.GET_CATEGORIES + "?format=xml";
 						String catxml = lasProxy.executeGetMethodAndReturnResult(url);
 						ArrayList<Category> trib_cats = JDOMUtils.getCategories(catxml);
