@@ -64,6 +64,7 @@ public class TestUI implements EntryPoint {
 	String view;
 	String initial_time = null;
 	String initial_z = null;
+	String openid;
 	int topPad = 120;
 	VariableSerializable var;
 	ArrayList<String> ortho = new ArrayList<String>();
@@ -142,6 +143,7 @@ public class TestUI implements EntryPoint {
 		zhi = Util.getParameterString("zhi");
 		tlo = Util.getParameterString("tlo");
 		thi = Util.getParameterString("thi");
+		openid = Util.getParameterString("openid");
 
 		if ( dsid != null && vid != null && op != null && view != null && option != null) {
 			Util.getRPCService().getCategories(dsid, initPanelFromParametersCallback);
@@ -185,6 +187,9 @@ public class TestUI implements EntryPoint {
 		operationsMenu.addClickHandler(externalOperationClick);
 
 		datasetButton = new DatasetButton();
+		if ( openid != null && !openid.equals("") ) {
+			datasetButton.setOpenID(openid);
+		}
 		datasetButton.ensureDebugId("datasetButton");
 		datasetButton.addTreeListener(datasetTreeListener);
 		// This is all to get around the fact that the OpenLayers map is always in front.

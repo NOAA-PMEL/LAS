@@ -22,6 +22,7 @@ import com.google.gwt.user.client.ui.TreeListener;
  */
 public class DatasetWidget extends Tree implements TreeListener {
     TreeItem currentlySelected = null;
+    String openid;
 	/* (non-Javadoc)
 	 * @see com.google.gwt.user.client.ui.TreeListener#onTreeItemSelected(com.google.gwt.user.client.ui.TreeItem)
 	 */
@@ -58,8 +59,8 @@ public class DatasetWidget extends Tree implements TreeListener {
 					for (int i = 0; i < cats.length; i++) {
 						CategorySerializable cat = cats[i];
 						String auth_url = cat.getAttributes().get("remote_las");
-						if ( auth_url != null ) {
-							Frame authFrame = new Frame(auth_url);
+						if ( auth_url != null && openid != null ) {
+							Frame authFrame = new Frame(auth_url+"&openid="+openid);
 							RootPanel.get(Constants.AUTH_FRAME_ID).add(authFrame);
 						}
 						String name = cat.getName();
@@ -141,5 +142,9 @@ public class DatasetWidget extends Tree implements TreeListener {
 	*/
 	public Object getCurrentlySelected() {
 		return currentlySelected.getUserObject();
+	}
+
+	public void setOpenID(String openid) {
+		this.openid = openid;
 	}
 }
