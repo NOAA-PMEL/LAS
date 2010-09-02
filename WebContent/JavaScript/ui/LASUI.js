@@ -1036,10 +1036,11 @@ LASUI.prototype.setOperation = function (evt) {
 	var view = args[2];
 
 	this.state.view[type] = view;
-	if(document.getElementsByName("variables").length==1&&this.state.xpaths[0].grid_type!='vector'&&this.state.xpaths[0].grid_type!='scattered') {
+	this.updateVariableLists();
+	if(document.getElementsByName("variables").length==1&&this.state.xpaths[0].grid_type!='vector'&&this.state.xpaths[0].grid_type!='scattered'&&id!="prop_prop_plot") {
 		document.getElementById("analysisWrapper").style.display="";
-		this.refs.analysis.enabled=false;
 	} else {
+		this.refs.analysis.enabled=false;
 		document.getElementById("analysisWrapper").style.display="none";
 	}
 	if(this.refs.analysis.enabled)
@@ -1071,18 +1072,21 @@ LASUI.prototype.setOperation = function (evt) {
 		document.getElementById('plotOptionsButton').className='top_link_disabled';
 		document.getElementById('plotOptionsButton').onclick=function(){};
 	}
+	this.updateConstraints(view);
 
-	if(this.refs.analysis.enabled||!this.state.grid.hasAxis('t')||this.state.operation.plot.indexOf('prop_prop')>0) {
+	if(this.refs.analysis.enabled||!this.state.grid.hasAxis('t')||this.state.operation.plot.indexOf('prop_prop')>=0) {
 		document.getElementById('Animation').className='top_link_disabled';
 		document.getElementById('Animation').onclick=function(){};
 	}
+	if(this.state.operation.plot.indexOf('prop_prop')>=0) {
+		document.getElementById('Plot to Google Earth').className='top_link_disabled';
+		document.getElementById('Plot to Google Earth').onclick=function(){};
+	}
 
-	this.updateConstraints(view);
-	this.updateVariableLists();
+	
+
 	this.state.lastVariable = this.state.variable;
 	this.state.lastDataset = this.state.dataset;
-	if(type=='plot'&&this.state.operation.plot=='init')
-		this.getOperations(this.state.dataset,this.state.variable,this.state.view.plot,this.state.xpaths);
 	if(optiondef)
 		this.getOptions(optiondef, "plot",false);
 	else if(this.newVariable&&this.onSetVariable)
@@ -1429,7 +1433,7 @@ LASUI.prototype.updateConstraints = function (view) {
 
 	for(var d=0;d<this.state.grid.response.grid.axis.length;d++)
 		if(view.indexOf(this.state.grid.response.grid.axis[d].type) < 0)
-			if(this.state.datasets[this.state.dataset].getChildByID(this.state.variable).grid_type!="scattered"&&!this.refs.analysis.enabled)
+			if(this.state.datasets[this.state.dataset].getChildByID(this.state.variable).grid_type!="scattered"&&!this.refs.analysis.enabled&&this.state.operation.plot!="prop_prop_plot")
 				eval("this.init" + this.state.grid.response.grid.axis[d].type.toUpperCase() + "Constraint('point',reset)");
 			else
 				eval("this.init" + this.state.grid.response.grid.axis[d].type.toUpperCase() + "Constraint('range',reset)");
