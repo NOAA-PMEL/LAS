@@ -28,7 +28,11 @@ var myMapWidget = {};  //put it in a global variable, or else you'll lose it.
 var Req = {}; //Same goes for the LAS request object
 var axisLow = "";
 var axisHi = "";
-var openid = "$request.getParameter('openid')"
+#if($request.getParameter('openid')!='')
+var openid = '$request.getParameter('openid')'
+#else
+var openid =  ''
+#end
 /* 
 *  load the initial XY image that was requested from LAS
 */
@@ -97,7 +101,7 @@ function submitXML() {
     }
     var URL = './ProductServer.do?xml=' + escape(Req.getXMLText());
     if(openid!="")
-	URL+="&"+openid;
+	URL+="&openid="+openid;
     document.location = URL;
   }
 }
