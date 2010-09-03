@@ -317,7 +317,7 @@ LASUI.prototype.authorizeRemoteLASHandler= function(evt) {
 	var i = args[3];
 	var id = args[4];
 	
-	if(req.readystate == 4) { //validate auth response here
+	if(req.readyState == 4) { //validate auth response here
 		window.status = '';
 		this.setCategoryTreeSubNode(node, i,id);
 	}
