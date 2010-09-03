@@ -295,18 +295,25 @@ LASUI.prototype.setCategoryTreeNode = function (strJson, node, id) {
 	this.expand(node);
 }
 LASUI.prototype.authorizeRemoteLAS=function(node,i,id) {
-	if(!document.all)
-		var req = new XMLHttpRequest(this);
-	else
-		var req = new ActiveXObject("Microsoft.XMLHTTP");
+	//if(!document.all)
+	//	var req = new XMLHttpRequest(this);
+	//else
+	//	var req = new ActiveXObject("Microsoft.XMLHTTP");
 	
 	var url =node.category.getChild(i).remote_las;
 	if(this.state.extra_args)
 		url+='?'+this.state.extra_args;
+	var auth_frame = document.createElement("IFRAME");
+	auth_frame.onload=this.authorizeRemoteLASHandler.LASBind(this, auth_frame, node, i, id);
+//	req.onreadystatechange = this.authorizeRemoteLASHandler.LASBind(this, req, node, i, id);
+//	req.open("GET", url);
+//	req.send(null);
+	auth_frame.style.height="0px";
+	auth_frame.style.width="0px"
+	 auth_frame.style.position="absolute";
+	auth_frame.src=url;
+	document.body.appendChild(auth_frame);
 
-	req.onreadystatechange = this.authorizeRemoteLASHandler.LASBind(this, req, node, i, id);
-	req.open("GET", url);
-	req.send(null);
 	window.status='Authenticating with remote LAS at ' + url;
 }
 LASUI.prototype.authorizeRemoteLASHandler= function(evt) {
@@ -316,10 +323,11 @@ LASUI.prototype.authorizeRemoteLASHandler= function(evt) {
 	var i = args[3];
 	var id = args[4];
 	
-	if(req.readyState == 4) { //validate auth response here
-		window.status = '';
+	//if(req.readyState == 4) { //validate auth response here
+	//	window.status = '';
 		this.setCategoryTreeSubNode(node, i,id);
-	}
+	req.parentNode.removeChild(req);
+	//}
 }
 /**
  * Method to show category and variable metadata.
