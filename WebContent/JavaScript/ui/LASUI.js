@@ -284,11 +284,43 @@ LASUI.prototype.setCategoryTreeNode = function (strJson, node, id) {
 
 	if(node.category.getCategoryType()=="category")
 		node.children=[];
-
-
-	for(var i=0; i<node.category.getCategorySize();i++)
-		this.setCategoryTreeSubNode(node, i,id);
+	
+	for(var i=0; i<node.category.getCategorySize();i++) {
+		if(node.category.getChild(i).remote_las) 
+			this.authorizeRemoteLAS(node, i,id)
+		else		
+			this.setCategoryTreeSubNode(node, i,id);
+		
+	}
 	this.expand(node);
+}
+LASUI.prototype.authorizeRemoteLAS=function(node,i,id) {
+	if(!document.all)
+		var req = new XMLHttpRequest(this);
+	else
+		var req = new ActiveXObject("Microsoft.XMLHTTP");
+	
+	var url =node.category.getChild(i).remote_las;
+	if(this.state.extra_args)
+		url+='?'+this.state.extra_args;
+
+	req.onreadystatechange = this.authorizeRemoteLASHandler.LASBind(this, req, node, i, id);
+	req.open("GET", url);
+	req.send(null);
+	window.status='Authenticating with remote LAS at ' + url;
+	this.setCategoryTreeSubNode(node, i,id);
+}
+LASUI.prototype.authorizeRemoteLASHandler= function(evt) {
+	var args = arguments;
+	var req =args[1]
+	var node = args[2];
+	var i = args[3];
+	var id = args[4];
+	
+	if(req.readystate == 4) { //validate auth response here
+		window.status = '';
+		this.setCategoryTreeSubNode(node, i,id);
+	}
 }
 /**
  * Method to show category and variable metadata.
@@ -540,11 +572,11 @@ LASUI.prototype.updateVariableLists = function () {
                 for(var i=0;i<document.getElementsByName('del').length;i++)
                         document.getElementsByName('del').item(i).style.display='';
 
-	for(var i=0; i< document.getElementsByName('add');i++) 
+	for(var i=0; i< document.getElementsByName('add').length;i++) 
                         document.getElementsByName('add').item(i).onclick = this.addVariable.LASBind(this);
-        for(var i=0; i< document.getElementsByName('del');i++)
+        for(var i=0; i< document.getElementsByName('del').length;i++)
 			document.getElementsByName('del').item(i).onclick = this.removeVariable.LASBind(this);
-        for(var i=0; i< document.getElementsByName('variables');i++)                
+        for(var i=0; i< document.getElementsByName('variables').length;i++)                
 		 document.getElementsByName('variables').item(i).onchange = this.getOperations.LASBind(this);
 
 	//hide vectors if necessary	
@@ -785,15 +817,16 @@ LASUI.prototype.setVariable = function (evt) {
 	var delvar = document.createElement("A");
 	delvar.onclick=this.removeVariable.LASBind(this);
 	delvar.appendChild(document.createTextNode('X'));
+	delvar.className="delvar";
 	delvar.name="del";
 	delvar.id="del"
 	delvar.href="javascript:";
 	delvar.style.display='none';
 	var addvar=document.createElement("A");
 	addvar.name="add";
+	addvar.className="addvar";
 	addvar.id="add";
 	addvar.href="javascript:"
-	addvar.style.fontSize="150%";
 	addvar.onclick = this.addVariable.LASBind(this); 
 	addvar.appendChild(document.createTextNode('+'));
 	var axis_labels = document.createElement("a");

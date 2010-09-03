@@ -29,7 +29,7 @@
 			</div>
 		</TD>
 	        <td bgcolor="#7391AD"  style="align:right;border-bottom:1pt solid #FFFFFC">
-		                 <a class="top_link_left"  onmouseover="window.status='Link to this plot';" onmouseout="window.status=''"   class="LASLink" onclick="prompt('Clicking OK will save this link to your list of bookmarks.\nThis will save the current application state so that you may return to this point\nat any time in the future.','http://' + document.location.host + document.location.pathname + '?' + LAS.uirequest)">Link to this page</a>
+		                 <a class="top_link_left"  onmouseover="window.status='Link to this plot';" onmouseout="window.status=''"   class="LASLink" onclick="prompt('This URL will return you to the current dataset, variable and plot.','http://' + document.location.host + document.location.pathname + '?' + LAS.uirequest)">Link to this page</a>
 		</td>
 	</TR><TBODY>
 </TABLE>

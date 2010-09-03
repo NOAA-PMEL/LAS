@@ -7,6 +7,7 @@ background-color: transparent;
 text-decoration: none; 
 font:120% "Lucida Grande",Verdana,Lucida,Helvetica,Arial,sans-serif;
 }
+
 p {
 margin: 0 0 0.75em 0;
 line-height: 1.5em;
@@ -36,6 +37,17 @@ h6 {
 font-size: 85%;
 border-bottom: none;
 font-weight: bold;
+}
+.addvar {
+	background-color:"#ccFFcc";
+	border:"1pt solid #dddddd";
+	font-size:"150%";
+	padding:1pt;
+}
+.delvar {
+	background-color:"#FF3300";
+	border:"1pt solid #dddddd";
+	padding:1pt;
 }
 .LASAnalysis {
 	padding:5pt;
