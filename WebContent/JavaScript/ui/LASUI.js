@@ -308,7 +308,6 @@ LASUI.prototype.authorizeRemoteLAS=function(node,i,id) {
 	req.open("GET", url);
 	req.send(null);
 	window.status='Authenticating with remote LAS at ' + url;
-	this.setCategoryTreeSubNode(node, i,id);
 }
 LASUI.prototype.authorizeRemoteLASHandler= function(evt) {
 	var args = arguments;
