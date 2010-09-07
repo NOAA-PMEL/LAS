@@ -11,8 +11,9 @@
 !   constraint_n_type must be "variable"
 
 DEFINE SYMBOL var_id = ($1)
+LET var_constr_($var_id) = ($ferret_plot_var)
 
-IF ($constraint_0_lhs"0|($data_($var_id)_var)>1|*>0") THEN 
+IF ($constraint_0_lhs"0|($data_($var_id)_var)>1|*>0") THEN
    IF `($constraint_0_type"variable>1|*>0") EQ 0` THEN EXIT/SCRIPT
    IF `($constraint_1_type"variable>1|*>0") EQ 0` THEN EXIT/SCRIPT
    LET constrain_1_($var_id) = IF ($ferret_plot_var) ($constraint_0_op) ($constraint_0_rhs) THEN ($ferret_plot_var)
@@ -29,4 +30,3 @@ IF ($constraint_2_lhs"0|($data_($var_id)_var)>1|*>0") THEN
 ENDIF
 
 ! End of  ------------- apply_pp_constraints.jnl--------------------------
-
