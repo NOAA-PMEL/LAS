@@ -198,7 +198,7 @@ IF ($color_by"0|*>1") THEN
    DEFINE SYMBOL poly_qual = ($poly_qual)/PALETTE=($ferret_palette"rainbow|default>rainbow|*>*)
    DEFINE SYMBOL color_by_title = `zvar,RETURN=title`
 ELSE
-   DEFINE SYMBOL poly_qual = ($poly_qual)/($polycolor)
+   DEFINE SYMBOL poly_qual = ($poly_qual)/palette=($polycolor)
 ENDIF
 
 DEFINE SYMBOL poly_command POLYGON($poly_qual)
