@@ -826,13 +826,15 @@ LASUI.prototype.setVariable = function (evt) {
 	delvar.appendChild(document.createTextNode('X'));
 	delvar.className="delvar";
 	delvar.name="del";
-	delvar.id="del"
+	delvar.id="del";
+	delvar.alt="Click to remove this variable.";
 	delvar.href="javascript:";
 	delvar.style.display='none';
 	var addvar=document.createElement("A");
 	addvar.name="add";
 	addvar.className="addvar";
 	addvar.id="add";
+	addvar.alt="Click to add another variable.";
 	addvar.href="javascript:"
 	addvar.onclick = this.addVariable.LASBind(this); 
 	addvar.appendChild(document.createTextNode('+'));
