@@ -608,6 +608,13 @@ LASUI.prototype.updateVariableLists = function () {
         } else if (variable.grid_type!="vector")
                 for (var i=0;i<document.getElementsByName('add').length;i++)
                          document.getElementsByName('add').item(i).style.visibility='visible';
+	//show delete buttonsif there are more than one open
+	if(document.getElementsByName(this.anchors.variables).length > 1)
+		for (var i=0;i<document.getElementsByName('add').length;i++)
+                         document.getElementsByName('del').item(i).style.visibility='visible';
+	else
+		 for (var i=0;i<document.getElementsByName('del').length;i++)
+                         document.getElementsByName('del').item(i).style.visibility='hidden';
 
 	//update the variables to reflect the request
 	for(var v=0;v<document.getElementsByName("variables").length;v++)
