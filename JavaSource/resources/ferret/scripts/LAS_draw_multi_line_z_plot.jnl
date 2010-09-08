@@ -11,6 +11,9 @@ IF ($ferret_use_graticules"0|0|1|*>1) THEN
   SET MODE GRATICULE:(DASH,COLOR=black)
 ENDIF
 
+
+GO LAS_pp_set_region_labels  ! for first dataset/variable
+
 ! Initialize datasets beyond the first one. Keep
 ! titles for the plot legend and units for labeling 
 ! the plot axes.

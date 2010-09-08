@@ -132,3 +132,4 @@ IF `(($have_year_lab"0|*>1") EQ 0) AND (L_time GT 1)` THEN
 ENDIF
 
 ! End of LAS_pp_set_region_labels.jnl -----------------------------------------
+exit
