@@ -62,5 +62,70 @@ the ($viewshape) region is too small. It reduces to a single point.
   EXIT/PROGRAM
 ENDIF
 
-! End of file ------------LAS_check_1d_region.jnl-------------------------------
 
+
+! For multi-line plot, if var has extra dimensons use IJKL=1 in the extra directions.
+ 
+IF `STRLEN("($varshape)") GT 1` THEN
+   IF `($data_count) GT 1` THEN  
+      LET s1 = `STRINDEX("($varshape)", "($viewshape)")`
+      LET slen = `STRLEN("($varshape)")`
+      IF `s1 GT 1` THEN DEFINE SYMBOL str1 = `SUBSTRING("($varshape)", 1, s1-1)`
+      IF `s1 LT slen` THEN DEFINE SYMBOL str2 = `SUBSTRING("($varshape)", s1+1, slen)`
+      DEFINE SYMBOL missing_dir = ($str1)($str2)
+      IF ($missing_dir"0|X>1|*>0") THEN 
+         IF ($native_curvilinear_xy"0") THEN
+            DEFINE SYMBOL error_status = ERROR
+            DEFINE SYMBOL error_type = REGION
+            DEFINE SYMBOL error_action = Checking grid and region  
+            DEFINE SYMBOL error_string Variable "($data_name)" on ($region_full) is not a ($viewshape) line
+            GO LAS_error_msg 
+            EXIT/PROGRAM
+	 ENDIF
+         DEFINE SYMBOL region_full ($region_full),I=1
+	 DEFINE SYMBOL region_xyz ($region_xyz),I=1
+	 DEFINE SYMBOL region_x ($region_x),I=1
+	 DEFINE SYMBOL n_left_labels = `($n_left_labels"0") + 1`
+	 DEFINE SYMBOL upper_left_($n_left_labels"0") = Longitude `($data_var),RETURN=xstart`
+      ENDIF
+      IF ($missing_dir"0|Y>1|*>0") THEN 
+         IF ($native_curvilinear_xy"0") THEN
+            DEFINE SYMBOL error_status = ERROR
+            DEFINE SYMBOL error_type = REGION
+            DEFINE SYMBOL error_action = Checking grid and region  
+            DEFINE SYMBOL error_string Variable "($data_name)" on ($region_full) is not a ($viewshape) line
+            GO LAS_error_msg 
+            EXIT/PROGRAM
+	 ENDIF
+         DEFINE SYMBOL region_full ($region_full),J=1
+	 DEFINE SYMBOL region_xyz ($region_xyz),J=1
+	 DEFINE SYMBOL n_left_labels = `($n_left_labels"0") + 1`
+	 DEFINE SYMBOL upper_left_($n_left_labels"0") = Latitude `($data_var),RETURN=ystart`
+      ENDIF
+      IF ($missing_dir"0|Z>1|*>0") THEN 
+         DEFINE SYMBOL region_full ($region_full),K=1
+	 DEFINE SYMBOL region_xyz ($region_xyz),K=1
+	 DEFINE SYMBOL n_left_labels = `($n_left_labels"0") + 1`
+	 DEFINE SYMBOL upper_left_($n_left_labels"0") = Depth `($data_var),RETURN=zstart` (`($data_var),RETURN=zunits`)
+      ENDIF
+      IF ($missing_dir"0|T>1|*>0") THEN 
+         DEFINE SYMBOL region_full ($region_full),L=1
+	 DEFINE SYMBOL region_t ($region_t),L=1
+	 DEFINE SYMBOL n_left_labels = `($n_left_labels"0") + 1`
+	 DEFINE SYMBOL upper_left_($n_left_labels"0") = `uwnd,return=tstart,prec=5`
+
+      ENDIF
+      GO LAS_redefine_variable
+
+
+   ELSE
+      DEFINE SYMBOL error_status = ERROR
+      DEFINE SYMBOL error_type = REGION
+      DEFINE SYMBOL error_action = Checking grid and region  
+      DEFINE SYMBOL error_string Variable "($data_name)" on ($region_full) is not a ($viewshape) line
+      GO LAS_error_msg 
+      EXIT/PROGRAM
+   ENDIF
+ENDIF
+      
+! End of file ------------LAS_check_var_direction.jnl-------------------------------
