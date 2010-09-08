@@ -1195,6 +1195,17 @@ LASUI.prototype.setOperationList = function (strJson, stop) {
                     maxvars=parseInt(this.state.operations.getOperationByID(this.state.operation.plot).maxvars);
 		if(document.getElementsByName("variables").length>maxvars||document.getElementsByName("variables").length<minvars)
 			this.setVisualization(this.state.view.plot,"varct");	
+	} else {
+	                for(var i=0;i<this.state.operations.getOperationCount();i++) {
+                        var minvars= 1;
+                        if(this.state.operations.getOperation(i).minvars)
+                        minvars=parseInt(this.state.operations.getOperation(i).minvars);
+                        var maxvars = 1;
+                        if(this.state.operations.getOperation(i).maxvars)
+                        maxvars=parseInt(this.state.operations.getOperation(i).maxvars);
+
+                        if(document.getElementsByName("variables").length<=maxvars&&document.getElementsByName("variables").length>=minvars)                                    this.setOperationNode(this.state.operations.getOperationID(i),this.state.operations.getOperationName(i));
+                }
 	} 
 	
 }
