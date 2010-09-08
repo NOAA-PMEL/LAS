@@ -57,6 +57,8 @@ IF `($have_z_lab"0|*>1") EQ 0` THEN
    DEFINE SYMBOL has_depth = `($ferret_plot_var),RETURN=isdepth`
    DEFINE SYMBOL do_z_lab = 1
    IF `STRINDEX("($has_depth)", "NORMAL") NE 0` THEN DEFINE SYMBOL do_z_lab = 0
+   DEFINE SYMBOL varshape = `($ferret_plot_var),RETURN=shape`  ! for curvi grids also check shape
+   IF `(STRINDEX("($varshape)", "Z") EQ 0) and ($do_curvi_xy"0)` THEN DEFINE SYMBOL do_z_lab = 0
 
    IF `(STRCMP("($fview%A%)", "Z") NE 0) AND  ($region_z_lo"0|*>1") AND ($do_z_lab"0")` THEN
       DEFINE SYMBOL n_left_labels = `($n_left_labels"0") + 1`
