@@ -883,7 +883,7 @@ streamable="true" mime_type="application/postscript"/> -->
 
     <!-- End: interactive download -->
     <operation ID="Data_Extract" default="true" name="Table of values (text)"
-        output_template="table" service_action="Data_Extract" order="0300" category="table">
+        output_template="table" service_action="Data_Extract" order="0300" category="table" minvars="1" maxvars="9999">
         <service>ferret</service>
         <response ID="Data_Extract_Response">
             <result type="text" ID="ferret_listing" streamable="true"
