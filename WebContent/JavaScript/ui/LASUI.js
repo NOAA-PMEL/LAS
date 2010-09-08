@@ -1915,47 +1915,39 @@ LASUI.prototype.makeRequest = function (evt, type) {
 			if(!(this.refs.analysis.enabled && this.state.analysis.enabled && this.state.analysis.axes[this.state.grid.response.grid.axis[d].type]))
 				switch(this.state.grid.response.grid.axis[d].type) {
 					case 'x' :
-						if(this.state.view[type].indexOf('x')>=0||this.state.datasets[this.state.dataset].getChildByID(this.state.variable).grid_type=="scattered")
+						if(this.state.view[type].indexOf('x')>=0||this.state.datasets[this.state.dataset].getChildByID(this.state.variable).grid_type=="scattered"||this.state.operation.plot.indexOf('prop_prop')>=0)
 							this.request.addRange('x',getMapXlo(),getMapXhi());
 						else
 							this.request.addRange('x',(getMapXlo()+getMapXhi())/2,(getMapXlo()+getMapXhi())/2);
 						break;
 					case 'y' :
-						if(this.state.view[type].indexOf('y')>=0||this.state.datasets[this.state.dataset].getChildByID(this.state.variable).grid_type=="scattered")
+						if(this.state.view[type].indexOf('y')>=0||this.state.datasets[this.state.dataset].getChildByID(this.state.variable).grid_type=="scattered"||this.state.operation.plot.indexOf('prop_prop')>=0)
 							this.request.addRange('y',getMapYlo(),getMapYhi());
 						else
 							this.request.addRange('y',(getMapYlo()+getMapYhi())/2,(getMapYlo()+getMapYhi())/2);
 
-						//this.uirequest+="&y="+escape("{ 'min' : " + getMapYlo() + ", 'max' : " + getMapYhi() + "}");
-					 	//this.uirequest+="&viewy="+escape("{ 'min' : " + this.refs.XYSelect.extents.data.grid.y.min + ", 'max' : " + this.refs.XYSelect.extents.data.grid.y.max + "}");
 						break;
 					case 't' :
-						if(this.state.view[type].indexOf('t')>=0||this.state.datasets[this.state.dataset].getChildByID(this.state.variable).grid_type=="scattered")
+						if(this.state.view[type].indexOf('t')>=0||this.state.datasets[this.state.dataset].getChildByID(this.state.variable).grid_type=="scattered"||this.state.operation.plot.indexOf('prop_prop')>=0)
 							if(this.state.grid.hasMenu('t')){
 								this.request.addRange('t',this.refs.DW[0].value,this.refs.DW[1].value);
-								//this.uirequest+="&t="+escape("{ 'min' : '" + this.refs.DW[0].value+ "', 'max' : '" + this.refs.DW[1].value + "'}");
 						} else {
 							this.request.addRange('t',this.refs.DW.getDate1_Ferret(),this.refs.DW.getDate2_Ferret());
-							//this.uirequest+="&t="+escape("{ 'min' : '" + this.refs.DW.getDate1_Ferret()+ "', 'max' : '" + this.refs.DW.getDate2_Ferret()+ "'}");
 						}
-					else
-						if(this.state.grid.hasMenu('t')){
-							this.request.addRange('t',this.refs.DW[0].value);
-						//	this.uirequest+="&t=" + escape("{ 'min' : '" + this.refs.DW[0].value+ "', 'max' : '" + this.refs.DW[0].value + "'}");
-						}
-						else {
-							this.request.addRange('t',this.refs.DW.getDate1_Ferret());
-						//	this.uirequest+="&t=" + escape("{ 'min' : '" + this.refs.DW.getDate1_Ferret()+ "', 'max' : '" + this.refs.DW.getDate1_Ferret()+ "'}");
-						}
-					break;
+						else
+							if(this.state.grid.hasMenu('t')){
+								this.request.addRange('t',this.refs.DW[0].value);
+							}
+							else {
+								this.request.addRange('t',this.refs.DW.getDate1_Ferret());
+							}
+						break;
 				case 'z' :
-					if(this.state.view[type].indexOf('z')>=0||this.state.datasets[this.state.dataset].getChildByID(this.state.variable).grid_type=="scattered") {
+					if(this.state.view[type].indexOf('z')>=0||this.state.datasets[this.state.dataset].getChildByID(this.state.variable).grid_type=="scattered"||this.state.operation.plot.indexOf('prop_prop')>=0) {
 							this.request.addRange('z',this.refs.DepthWidget[this.refs.DepthWidget.widgetType][0].value,this.refs.DepthWidget[this.refs.DepthWidget.widgetType][1].value);
-						//	this.uirequest+="&z=" + escape("{ 'min' : '" + this.refs.DepthWidget[this.refs.DepthWidget.widgetType][0].value+ "', 'max' : '" + this.refs.DepthWidget[this.refs.DepthWidget.widgetType][1].value + "'}");
 						}
 						else {
 							this.request.addRange('z',this.refs.DepthWidget[this.refs.DepthWidget.widgetType][0].value);
-						//	this.uirequest+="&z=" + escape("{ 'min' : '" + this.refs.DepthWidget[this.refs.DepthWidget.widgetType][0].value+ "', 'max' : '" + this.refs.DepthWidget[this.refs.DepthWidget.widgetType][1].value + "'}");
 						}
 					break;
 			}
