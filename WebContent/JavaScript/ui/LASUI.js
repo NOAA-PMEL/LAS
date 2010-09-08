@@ -610,7 +610,7 @@ LASUI.prototype.updateVariableLists = function () {
                          document.getElementsByName('add').item(i).style.visibility='visible';
 	//show delete buttonsif there are more than one open
 	if(document.getElementsByName(this.anchors.variables).length > 1)
-		for (var i=0;i<document.getElementsByName('add').length;i++)
+		for (var i=0;i<document.getElementsByName('del').length;i++)
                          document.getElementsByName('del').item(i).style.visibility='visible';
 	else
 		 for (var i=0;i<document.getElementsByName('del').length;i++)
@@ -678,6 +678,14 @@ LASUI.prototype.addVariable = function(evt) {
 	} else
 		for (var i=0;i<document.getElementsByName('add').length;i++)
 			 document.getElementsByName('add').item(i).style.visibility='visible';		
+	
+	//show delete buttonsif there are more than one open
+        if(document.getElementsByName(this.anchors.variables).length > 1)
+                for (var i=0;i<document.getElementsByName('del').length;i++)
+                         document.getElementsByName('del').item(i).style.visibility='visible';
+        else
+                 for (var i=0;i<document.getElementsByName('del').length;i++)
+                         document.getElementsByName('del').item(i).style.visibility='hidden';
 
 	 for(var v=0;v<document.getElementsByName('variables').length;v++)
 		for(var i=0;i<document.getElementsByName('variables').item(v).options.length;i++)
@@ -2506,25 +2514,57 @@ LASUI.prototype.selectAnalysisAxis = function (evt) {
 		this.updateConstraints(this.state.view.plot);
 
 	if(changeVis)
-		this.setVisualization(axes,"view");
+		this.setVisualization(axes,"analysis");
 
 }
 LASUI.prototype.setVisualization = function (d, priority) {
 
 	var stop = false;
+	var bestView ='';
 
 	var bestView = this.state.view.plot;
-	if(this.state.view.plot.indexOf(d)>=0)
+	if(this.state.view.plot.indexOf(d)>=0&&priority!='analysis')
 		 bestView = this.state.view.plot.substr(0,this.state.view.plot.indexOf(d)) + this.state.view.plot.substr(this.state.view.plot.indexOf(d)+d.length,this.state.view.plot.length);
+	
+	if(priority=='analysis')
+		switch(d) {
+			case 'xy' : if(this.state.grid.hasAxis('t') )
+					bestView ='t';
+				    else if (this.state.grid.hasAxis('z') )
+					bestView ='z';
+					break;
+			case 't' : if(this.state.grid.hasAxis('x')&&this.state.grid.hasAxis('y'))
+					bestView = 'xy';
+				   else if(this.state.grid.hasAxis('z'))
+					bestView ='z';
+					break;
+			case 'z' :  if(this.state.grid.hasAxis('x')&&this.state.grid.hasAxis('y'))
+                                        bestView = 'xy';
+                                   else if(this.state.grid.hasAxis('t'))
+                                        bestView ='t';
+                                        break;
+			case 'x' :  if(this.state.grid.hasAxis('y'))
+                                        bestView = 'y';
+                                   else if(this.state.grid.hasAxis('t'))
+                                        bestView ='t';
+				   else if(this.state.grid.hasAxis('z'))
+                                        bestView ='z';
+                                        break;
+			case 'y' :  if(this.state.grid.hasAxis('x'))
+                                        bestView = 'x';
+                                   else if(this.state.grid.hasAxis('t'))
+                                        bestView ='t';
+                                   else if(this.state.grid.hasAxis('z'))
+                                        bestView ='z';
+                                        break;
 
-	//redo this using getElementsByName
-		
+		}		
 
-	if(document.getElementById(this.state.operation.plot+'_'+bestView)) {
+	if(document.getElementById(this.state.operation.plot+'_'+bestView)&&priority!='analysis') {
 		document.getElementById(this.state.operation.plot+'_'+bestView).checked=true;
 		document.getElementById(this.state.operation.plot+'_'+bestView).onclick({srcElement : document.getElementById(this.state.operation.plot+'_'+bestView)})	
 	} else { for(var v=0; v< document.getElementsByName("plotType").length; v++) {
-			var plotView = document.getElementsByName("plotType").item(v).id.substr(document.getElementsByName("plotType").item(v).id.lastIndexOf('_'),document.getElementsByName("plotType").item(v).id.length);
+			var plotView = document.getElementsByName("plotType").item(v).id.substr(document.getElementsByName("plotType").item(v).id.lastIndexOf('_')+1,document.getElementsByName("plotType").item(v).id.length);
 			var plotId = document.getElementsByName("plotType").item(v).id.substr(0,document.getElementsByName("plotType").item(v).id.lastIndexOf('_'));
 			var varct = document.getElementsByName("variables").length;
 			var minvars = 1;
@@ -2544,11 +2584,16 @@ LASUI.prototype.setVisualization = function (d, priority) {
 						document.getElementsByName("plotType").item(v).checked = true;
                                                 document.getElementsByName("plotType").item(v).onclick({"srcElement" : document.getElementsByName("plotType").item(v)});
 					        stop = true;
-					      }
+					      } break;
+				case 'analysis' : if(minvars==1&&plotView==bestView ){
+						document.getElementsByName("plotType").item(v).checked = true;
+                                                document.getElementsByName("plotType").item(v).onclick({"srcElement" : document.getElementsByName("plotType").item(v)});
+						stop=true;
+						}
 					      break;
 			}
 		}
-		if(!stop)
+		if(!stop&&priority!='analysis')
 		for(var v=0; v< document.getElementsByName("plotType").length; v++) {
                         var plotView = document.getElementsByName("plotType").item(v).id.substr(document.getElementsByName("plotType").item(v).id.lastIndexOf('_'),document.getElementsByName("plotType").item(v).id.length);
                         var plotId = document.getElementsByName("plotType").item(v).id.substr(0,document.getElementsByName("plotType").item(v).id.lastIndexOf('_'));
@@ -2579,6 +2624,7 @@ LASUI.prototype.setVisualization = function (d, priority) {
 			}
 		}
 	}
+
 	if(!stop&&defaultPlot) {
 		if(document.getElementById(defaultPlot)) {
 			document.getElementById(defaultPlot).checked = true;
@@ -2588,7 +2634,8 @@ LASUI.prototype.setVisualization = function (d, priority) {
 		document.getElementsByName("plotType").item(0).checked = true;
                 document.getElementsByName("plotType").item(0).onclick({"srcElement" : document.getElementsByName("plotType").item(0)});
 	}	
-	this.refs.analysis.axes[d].selected=true;
+
+	if(priority=='analysis')	this.refs.analysis.axes[d].selected=true;
 }
 /**
  * Method to collapse a tree node
