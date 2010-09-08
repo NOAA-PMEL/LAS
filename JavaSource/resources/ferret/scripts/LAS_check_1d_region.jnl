@@ -28,7 +28,12 @@ IF `STRCMP("($ax1d)", "NORMAL") EQ 0` THEN
 ENDIF
 
 ! Or there may be a 1-point axis
-LET tsiz = `($data_var),return=($index_dir)size`
+
+CANCEL SYMBOL error*
+
+DEFINE SYMBOL index_dir = ($ferret_view%N|x>I|y>J|z>K|t>L|*>N%)
+IF `STRCMP("($index_dir)", "N") EQ 0` THEN EXIT/SCRIPT
+
 IF `tsiz LE 1` THEN
    DEFINE SYMBOL has_no_line = 1
    DEFINE SYMBOL error_status = ERROR
