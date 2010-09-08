@@ -622,6 +622,10 @@ LASUI.prototype.updateVariableLists = function () {
                         if(document.getElementsByName('variables').item(v).options[i].id.substr(document.getElementsByName('variables').item(v).options[i].id.lastIndexOf("/")+1,document.getElementsByName('variables').item(v).options[i].id.length)==this.state.variables[v])
                                 document.getElementsByName('variables').item(v).options[i].selected=true;
 
+	//show analysis if we can
+	if(this.state.operation.plot.indexOf('prop_prop')<0&&document.getElementsByName("variables").length==1)
+		document.getElementById('analysisWrapper').style.display='';
+
 	this.updateAxisLabels();
 }
 LASUI.prototype.updateAxisLabels = function () {
@@ -716,6 +720,9 @@ LASUI.prototype.removeVariable = function(evt) {
 	}		
 
 	this.updateAxisLabels();
+	//show analysis if we can
+        if(this.state.operation.plot.indexOf('prop_prop')<0&&document.getElementsByName("variables").length==1)
+                document.getElementById('analysisWrapper').style.display='';
 
 	this.state.variables.pop();
 	this.getOperations(true);
