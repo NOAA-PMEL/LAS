@@ -625,7 +625,7 @@ LASUI.prototype.updateAxisLabels = function () {
 			try {document.getElementsByName('axis_labels').item(i).innerHTML=this.state.operations.getOperationByID(this.state.operation.plot).axis_labels.label[i].name;} catch(e) {}
 	} else
 		for(var i=0;i<document.getElementsByName('axis_labels').length;i++)
-			document.getElementsByName('axis_labels').item(i).innerHTML="";
+			try {document.getElementsByName('axis_labels').item(i).innerHTML="";} catch(e) {}
 }
 
 LASUI.prototype.addVariable = function(evt) {
@@ -828,6 +828,7 @@ LASUI.prototype.setVariable = function (evt) {
 	delvar.name="del";
 	delvar.id="del";
 	delvar.alt="Click to remove this variable.";
+	delvar.title="Click to remove this variable.";
 	delvar.href="javascript:";
 	delvar.style.display='none';
 	var addvar=document.createElement("A");
@@ -835,6 +836,7 @@ LASUI.prototype.setVariable = function (evt) {
 	addvar.className="addvar";
 	addvar.id="add";
 	addvar.alt="Click to add another variable.";
+	addvar.title="Click to add another variable.";
 	addvar.href="javascript:"
 	addvar.onclick = this.addVariable.LASBind(this); 
 	addvar.appendChild(document.createTextNode('+'));
