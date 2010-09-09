@@ -84,8 +84,8 @@ function submitXML() {
 
   if ((myMapWidget.extents.selection.grid.x.min == myMapWidget.extents.selection.grid.x.max) || (myMapWidget.extents.selection.grid.y.min == myMapWidget.extents.selection.grid.y.max)) { 
   } else {
-    H_axis = '$las_map_scale.getAxis_horizontal().toLowerCase()';
-    V_axis = '$las_map_scale.getAxis_vertical().toLowerCase()';
+    H_axis = '$las_map_scale.getAxis_horizontal()';
+    V_axis = '$las_map_scale.getAxis_vertical()';
     axes="xyzt";
     if(H_axis&&axes.search(H_axis)>=0) 
     	Req.setRange(H_axis,myMapWidget.extents.selection.grid.x.min,myMapWidget.extents.selection.grid.x.max);
