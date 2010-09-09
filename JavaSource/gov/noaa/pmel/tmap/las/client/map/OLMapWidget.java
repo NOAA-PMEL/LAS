@@ -59,6 +59,7 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.ChangeListener;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.DockPanel;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Frame;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
@@ -66,7 +67,6 @@ import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.PushButton;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.ToggleButton;
-import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 public class OLMapWidget extends Composite {
@@ -135,7 +135,7 @@ public class OLMapWidget extends Composite {
 	
 	private HorizontalPanel buttonPanel;
 	private PopupPanel regionPanel;
-	private VerticalPanel regionInterior;
+	private FlowPanel regionInterior;
 	private Image regionOpenUp;
 	private Image regionOpenDown;
 	private ToggleButton regionButton;
@@ -143,7 +143,7 @@ public class OLMapWidget extends Composite {
 	private Image regionCloseDown;
 	private PushButton regionClose;
 	private PopupPanel helpPanel;
-	private VerticalPanel helpInterior;
+	private FlowPanel helpInterior;
 	private Image helpCloseUp;
 	private Image helpCloseDown;
 	private PushButton helpClose;
@@ -188,7 +188,7 @@ public class OLMapWidget extends Composite {
 		
 		dockPanel = new DockPanel();
 		helpPanel = new PopupPanel();
-		helpInterior = new VerticalPanel();
+		helpInterior = new FlowPanel();
 	    buttonPanel = new HorizontalPanel();
 
 		helpButtonUp = new Image(GWT.getModuleBaseURL()+"../images/info_off.png");
@@ -234,7 +234,7 @@ public class OLMapWidget extends Composite {
 		regionClose.addStyleName("OL_MAP-CloseButton");
 		
 		regionPanel = new PopupPanel();
-		regionInterior = new VerticalPanel();
+		regionInterior = new FlowPanel();
 		regionInterior.add(regionClose);
 		regionInterior.add(regionWidget); 
 		regionPanel.add(regionInterior);
