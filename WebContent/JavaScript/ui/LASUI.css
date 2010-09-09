@@ -285,4 +285,4 @@ height: 100%;
 
 .top_link:hover {color:#f5ed52;},
 #main : {margin:5pt, padding:5pt},
-#output : {overflow : hidden}
+#output : {overflow : scroll}
