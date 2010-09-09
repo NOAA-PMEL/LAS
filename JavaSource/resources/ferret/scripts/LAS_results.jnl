@@ -208,8 +208,8 @@ IF ($result_map_scale_filename%0|*>1%) THEN
       ENDIF
 
       IF ($its_prop_prop_plot"0|*>1") THEN
-          DEFINE SYMBOL ax_horiz = ($data_0_var)
-	  DEFINE SYMBOL ax_vert = ($data_1_var)
+          DEFINE SYMBOL ax_horiz = ($data_0_id)
+	  DEFINE SYMBOL ax_vert = ($data_1_id)
       ENDIF
 
       LET syms_vals = {"($AX_HORIZ)", "($AX_HORIZ_POSTV)", "($AX_VERT)", "($AX_VERT_POSTV)",\
