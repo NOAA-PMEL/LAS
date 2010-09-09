@@ -47,6 +47,7 @@ IF ($constraint_0_lhs"0|*>1) THEN
    GO apply_pp_constraints 0
    DEFINE SYMBOL ferret_plot_var = var_constr_0
 ENDIF
+DEFINE SYMBOL ferret_plot_var_0 = ($ferret_plot_var)
 
 LET/TITLE="($ferret_title_0)" xvar = XSEQUENCE(($ferret_plot_var))
 
@@ -77,13 +78,19 @@ IF ($constraint_0_lhs"0|*>1) THEN
    DEFINE SYMBOL ferret_plot_var = var_constr_1
 ENDIF
 
-LET/TITLE="($ferret_title_1)" yvar = XSEQUENCE(($ferret_plot_var))
+DEFINE SYMBOL ferret_plot_var_1 = ($ferret_plot_var)
+
+GO LAS_check_var_shape 0 1
+
+LET/TITLE="($ferret_title_0)" xvar = XSEQUENCE(($ferret_plot_var_0))
+LET/TITLE="($ferret_title_1)" yvar = XSEQUENCE(($ferret_plot_var_1))
 
 ! The variables must be the same size. Probably guaranteed by the
 ! data selection process, but check and set up a nice message.
 
 LET xsize = `xvar,RETURN=isize`
 LET ysize = `yvar,RETURN=isize`
+
 IF `xsize NE ysize` THEN 
   MESSAGE/ERROR **ERROR The variables must have the same dimensions: ($data_0_var), ($data_1_var)
   EXIT/PROGRAM
@@ -114,8 +121,10 @@ IF `($data_count"0") EQ 3` THEN ! color by 3rd variable
       GO apply_pp_constraints 2
       DEFINE SYMBOL ferret_plot_var = var_constr_2
    ENDIF
-   
-   LET/TITLE="($ferret_title_2)" zvar = XSEQUENCE(($ferret_plot_var))
+   DEFINE SYMBOL ferret_plot_var_2 = ($ferret_plot_var)
+   GO LAS_check_var_shape 1 2
+
+   LET/TITLE="($ferret_title_2)" zvar = XSEQUENCE(($ferret_plot_var_2))
    DEFINE SYMBOL color_by = 1
 ENDIF
 
