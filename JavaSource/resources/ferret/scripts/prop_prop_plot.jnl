@@ -80,6 +80,7 @@ ENDIF
 
 DEFINE SYMBOL ferret_plot_var_1 = ($ferret_plot_var)
 
+GO LAS_set_strides_prop
 GO LAS_check_var_shape 0 1
 
 LET/TITLE="($ferret_title_0)" xvar = XSEQUENCE(($ferret_plot_var_0))
@@ -167,11 +168,22 @@ DEFINE SYMBOL qualifiers = ($qualifiers)/VS/COLOR=WHITE
 
 STAT xvar
 PPL %RANGE `($stat_min)`, `($stat_max)`, 10
+IF `($ppl$range_high) EQ ($ppl$range_low)`  THEN 
+   DEFINE SYMBOL ppl$range_low = `($ppl$range_low) - 1`
+   DEFINE SYMBOL ppl$range_high = `($ppl$range_high) + 1`
+   DEFINE SYMBOL ppl$range_inc = 1
+ENDIF
 DEFINE SYMBOL ferret_indep_axis_scale ($ppl$range_low),($ppl$range_high),($ppl$range_inc)
+   
 DEFINE SYMBOL qualifiers ($qualifiers)/HLIM=($ppl$range_low):($ppl$range_high)
 
 STAT yvar
 PPL %RANGE `($stat_min)`, `($stat_max)`, 10
+IF `($ppl$range_high) EQ ($ppl$range_low)`  THEN 
+   DEFINE SYMBOL ppl$range_low = `($ppl$range_low) - 1`
+   DEFINE SYMBOL ppl$range_high = `($ppl$range_high) + 1`
+   DEFINE SYMBOL ppl$range_inc = 1
+ENDIF
 DEFINE SYMBOL ferret_dep_axis_scale ($ppl$range_low),($ppl$range_high),($ppl$range_inc)
 DEFINE SYMBOL qualifiers ($qualifiers)/VLIM=($ppl$range_low):($ppl$range_high)
 
