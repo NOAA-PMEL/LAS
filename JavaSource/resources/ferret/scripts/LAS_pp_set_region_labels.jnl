@@ -90,13 +90,17 @@ IF `($have_z_lab"0|*>1") EQ 0` THEN
 ENDIF
 CAN REGION
 
-DEFINE SYMBOL do_t = `($ferret_plot_var),RETURN=taxis`
 DEFINE SYMBOL do_t = 1
-IF `STRINDEX("($do_t)", "NORMAL") NE 0` THEN DEFINE SYMBOL do_t = 0
-
+DEFINE SYMBOL do_t = `($ferret_plot_var),RETURN=taxis`
+!
+IF `STRINDEX("($do_t)", "NORMAL") NE 0` THEN 
+   DEFINE SYMBOL do_t = 0
+ELSE 
+   DEFINE SYMBOL do_t = 0
+ENDIF
 
 IF `($have_time_lab"0|*>1") EQ 0` THEN
-   IF `(STRCMP("($fview%A%)", "T") NE 0) AND ($region_t_lo"0|*>1") AND ($do_t)` THEN
+   IF `(STRCMP("($fview%A%)", "T") NE 0) AND ($region_t_lo"0|*>1") AND ($do_t"0")` THEN
       DEFINE SYMBOL n_left_labels = `($n_left_labels"0") + 1`
 
       IF `STRINDEX ("($region_t_lo)", ":") GT 0` THEN
@@ -123,7 +127,7 @@ ENDIF
 ! Do we need a YEAR label?  If its a 1-D Time plot then we do
 LET L_time = `($ferret_plot_var),return=Lsize`
 IF `(($have_year_lab"0|*>1") EQ 0) AND (L_time GT 1)` THEN
-   IF `(STRCMP("($fview%A%)", "T") EQ 0) AND ($region_t_lo"0|*>1") AND ($do_t)` THEN
+   IF `(STRCMP("($fview%A%)", "T") EQ 0) AND ($region_t_lo"0|*>1") AND ($do_t"0")` THEN
       PLOT/SET ($ferret_plot_var)
 
       IF `($labnum_year%0|*>1%)` THEN
@@ -136,4 +140,4 @@ IF `(($have_year_lab"0|*>1") EQ 0) AND (L_time GT 1)` THEN
 ENDIF
 
 ! End of LAS_pp_set_region_labels.jnl -----------------------------------------
-EXIT
+
