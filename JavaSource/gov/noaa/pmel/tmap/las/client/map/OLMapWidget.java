@@ -520,6 +520,11 @@ public class OLMapWidget extends Composite {
 	public Map getMap() {
 		return map;
 	}
+	public void resizeMap() {
+		Bounds myBounds = currentSelection;
+		setDataExtent(dataBounds.getLowerLeftY(), dataBounds.getUpperRightY(), dataBounds.getLowerLeftX(), dataBounds.getUpperRightX());
+		trimSelection(myBounds);
+	}
 	public void setDataExtent(double slat, double nlat, double wlon, double elon, double delta) {
 		this.delta = delta;
 		dataBounds = new Bounds(wlon, slat, elon, nlat);
@@ -1299,10 +1304,6 @@ public class OLMapWidget extends Composite {
 		    }
 		}
 	};
-
-	public void render() {
-		map.render();
-	}
 	public double[] getDataExtent() {
 		double[] d = new double[4];
 		// s, n, w, e to match setDataExtent...
@@ -1369,6 +1370,9 @@ public class OLMapWidget extends Composite {
     }-*/;
 	public native void activateNativeHooks()/*-{
 		var localMap = this;
+		$wnd.mapResize = function() {
+			localMap.@gov.noaa.pmel.tmap.las.client.map.OLMapWidget::resizeMap()();
+		}
         $wnd.setMapCurrentSelection = function(slat, nlat, wlon, elon) {       	
 	        localMap.@gov.noaa.pmel.tmap.las.client.map.OLMapWidget::setCurrentSelection(DDDD)(slat, nlat, wlon, elon);
         }
