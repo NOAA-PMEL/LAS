@@ -15,17 +15,19 @@
 IF `($have_lon_lab"0|*>1") EQ 0` THEN
    IF `(STRCMP("($fview%A%)", "X") NE 0) AND ($region_x_lo"0|*>1")` THEN
       DEFINE SYMBOL n_left_labels = `($n_left_labels"0") + 1`
-      DEFINE AXIS/X=-180:720:.01/UNIT=degrees/MODULO xqencode
+      DEFINE AXIS/X=0:359.99:.01/UNIT=degrees/MODULO xqencode
       LET xq = X[GX=xqencode]
-      SET REGION/($region_x)
+      LET xq1 = ($REGION_0_X_LO)
+      IF `xq1 LT 0` THEN LET xq1 = `($REGION_0_X_LO)+360`
+      LET xq2 = ($REGION_0_X_HI)
+      IF `xq2 LT 0` THEN LET xq2 = `($REGION_0_X_HI)+360`
+      SET REGION/x=`xq1`:`xq2`
       DEFINE SYMBOL zf = `-1*($region_x_lo"0")`
       IF `($region_x_lo"0") EQ ($region_x_hi"($zf)")` THEN
-
          DEFINE SYMBOL upper_left_($n_left_labels) = Longitude: `xq,RETURN=xstart,PREC=4`
       ELSE
          DEFINE SYMBOL upper_left_($n_left_labels) = Longitude: `xq,RETURN=xstart,PREC=4` to `xq,RETURN=xend,PREC=4`
       ENDIF
-
       DEFINE SYMBOL have_lon_lab = 1
       CANCEL VAR xq
       CANCEL AXIS xqencode
@@ -134,4 +136,4 @@ IF `(($have_year_lab"0|*>1") EQ 0) AND (L_time GT 1)` THEN
 ENDIF
 
 ! End of LAS_pp_set_region_labels.jnl -----------------------------------------
-exit
+EXIT
