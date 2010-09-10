@@ -192,7 +192,10 @@ IF ($result_map_scale_filename%0|*>1%) THEN
       ELSE
          DEFINE SYMBOL ax_vert = D
       ENDIF
+      
       ENDIF  ! curvilinear
+      DEFINE SYMBOL ax_horiz = `DNCASE("($ax_horiz)")`
+      DEFINE SYMBOL ax_vert = `DNCASE("($ax_vert)")`
 
 * Find the data min, max.  If all data was bad, send blank strings to the output.
 
