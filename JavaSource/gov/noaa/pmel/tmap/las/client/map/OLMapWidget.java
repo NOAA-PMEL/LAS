@@ -521,9 +521,10 @@ public class OLMapWidget extends Composite {
 		return map;
 	}
 	public void resizeMap() {
-		Bounds myBounds = currentSelection;
-		setDataExtent(dataBounds.getLowerLeftY(), dataBounds.getUpperRightY(), dataBounds.getLowerLeftX(), dataBounds.getUpperRightX());
-		trimSelection(myBounds);
+		// Do a meaningless little calculation to force the map to recalibrate where it is on the page.
+		int zoom = map.getZoom();
+		LonLat center = map.getCenter();
+		map.setCenter(center, zoom);
 	}
 	public void setDataExtent(double slat, double nlat, double wlon, double elon, double delta) {
 		this.delta = delta;
@@ -577,8 +578,8 @@ public class OLMapWidget extends Composite {
 			boxes.addMarker(box);
 			map.addLayer(boxes);
 		}
-		mapOptions = new MapOptions();
-		map.setOptions(mapOptions);		
+//		mapOptions = new MapOptions();
+//		map.setOptions(mapOptions);		
 		trimSelection(dataBounds);
 		LonLat center = dataBounds.getCenterLonLat();
 		// The selected region cannot not be centered exactly.
