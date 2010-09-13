@@ -74,6 +74,15 @@ LET varsiz = xsiz* ysiz* zsiz* tsiz* ($nvars)
 DEFINE SYMBOL stride_for_mem = `INT( 1+ varsiz/(.1*($memsize)) )`
 
 IF `($stride_for_mem) GT 1` THEN
+   IF ($do_curvi_xy"0|*>1) THEN 
+      IF `tsiz LT zsiz` THEN 
+         LET t_pct = tsiz/zsiz
+	 LET z_pct = 1. - t_pct
+      ELSE
+         LET z_pct = zsiz/tsiz
+	 LET t_pct = 1. - z_pct
+      ENDIF
+   ENDIF
    
    IF `($region_x_range"0|*>1") GT 0 AND (($do_curvi_xy"0|*>1) NE 1)` THEN
       DEFINE SYMBOL modax = "`pvar, RETURN=xmod`"
@@ -85,15 +94,15 @@ IF `($stride_for_mem) GT 1` THEN
    ENDIF
 
    IF `($region_y_range"0|*>1") GT 0 AND (($do_curvi_xy"0|*>1) NE 1)` THEN 
-      DEFINE SYMBOL ystride = `1 + INT( ($stride_for_mem)/(varsiz/ysiz) )`
+      DEFINE SYMBOL ystride = `1 + INT( ($stride_for_mem)/(varsiz/ysiz) `
       SET AXIS/STRIDE=($ystride) `pvar,RETURN=yaxis`
       LET y_strided_var = pvar
       DEFINE SYMBOL add_to_title = ($add_to_title) Stride ($ystride) in Y
    ENDIF
       
    IF `($region_z_range"0|*>1") GT 0 AND zsiz GT 5` THEN
-      DEFINE SYMBOL zstride = `INT( ($stride_for_mem)*zsiz/varsiz)^0.5 )`
-      IF `zstride GT 1` THEN
+      DEFINE SYMBOL zstride = `INT( ($stride_for_mem)*z_pct )`
+      IF `($zstride) GT 1` THEN
          SET AXIS/STRIDE=($zstride) `pvar,RETURN=zaxis`
          LET z_strided_var = pvar
          DEFINE SYMBOL add_to_title = ($add_to_title) Stride ($zstride) in Z
@@ -102,8 +111,8 @@ IF `($stride_for_mem) GT 1` THEN
    
    IF `($region_t"0|*>1") GT 0 AND tsiz GT 5` THEN 
       DEFINE SYMBOL modax = "`pvar, RETURN=tmod`"
-      DEFINE SYMBOL tstride = `INT( ($stride_for_mem)*tsiz/varsiz)^0.5 )`
-      IF `tstride GT 1` THEN
+      DEFINE SYMBOL tstride = `INT( ($stride_for_mem)*t_pct ) `
+      IF `($tstride) GT 1` THEN
          SET AXIS/STRIDE=($tstride) `pvar,RETURN=taxis`
          LET t_strided_var = pvar
          DEFINE SYMBOL add_to_title = ($add_to_title) Stride ($tstride) in T
