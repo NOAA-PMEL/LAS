@@ -26,8 +26,10 @@ IF `(STRINDEX( "($operation_ID)", "Data_Extract" ) NE 0) AND \
 IF ($ferret_curvi_coord_lat"0|0|*>1") THEN EXIT/SCRIPT
 
 ! Hybrid Z not dealt with here...
-
 IF ($do_hybrid_z"0|0|1|*>1") THEN  EXIT/SCRIPT 
+
+! Property-property plots have their own version of striding
+IF ($its_prop_prop_plot"0|0|1|*>1") THEN  EXIT/SCRIPT 
 
 ! ---------------------------------------------------------------------
 ! Determine striding based on the memory allocation
