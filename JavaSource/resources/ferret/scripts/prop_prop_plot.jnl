@@ -81,13 +81,11 @@ ENDIF
 DEFINE SYMBOL ferret_plot_var_1 = ($ferret_plot_var)
 
 GO LAS_set_strides_prop
-GO LAS_check_var_shape 0 1
 
 LET/TITLE="($ferret_title_0)" xvar = XSEQUENCE(($ferret_plot_var_0))
 LET/TITLE="($ferret_title_1)" yvar = XSEQUENCE(($ferret_plot_var_1))
 
-! The variables must be the same size. Probably guaranteed by the
-! data selection process, but check and set up a nice message.
+! The variables must be the same size. Check and set up a nice message if not.
 
 LET xsize = `xvar,RETURN=isize`
 LET ysize = `yvar,RETURN=isize`
@@ -123,7 +121,6 @@ IF `($data_count"0") EQ 3` THEN ! color by 3rd variable
       DEFINE SYMBOL ferret_plot_var = var_constr_2
    ENDIF
    DEFINE SYMBOL ferret_plot_var_2 = ($ferret_plot_var)
-   GO LAS_check_var_shape 1 2
 
    LET/TITLE="($ferret_title_2)" zvar = XSEQUENCE(($ferret_plot_var_2))
    DEFINE SYMBOL color_by = 1
