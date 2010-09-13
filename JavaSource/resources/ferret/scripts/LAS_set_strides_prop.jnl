@@ -1,0 +1,121 @@
+! LAS_set_strides.jnl
+! ACM
+
+! From the region and the grid we can define striding. Compute strides 
+! based first on Ferret memory and then if it is a graphics product, on 
+! pixel size. 
+! ACM 8/312/2007 Do not issue the SET AXIS/STRIDE= command if the stride is 1
+!                This partially works around TRAC #224.
+! ACM 3/2008  If the transform-to-1-season per year has been set then do not 
+!             stride in t
+! ACM 4/2008  For descriptor data or for data whose axes are replaced cant
+!             do native strides. In these cases set up index strides with
+!             a call to LAS_set_strides_nonative
+! 10-Jul-2008 ACM  Fixes for Google Earth placemark strides
+
+! TODO: When there's going to be a transformation or something, then these 
+! calculations may not be sufficient. Might be better done by the transform script.
+
+! If the operation is writing a netCDF file, that is done in chunks. Do not use strides
+
+IF `(STRINDEX( "($operation_ID)", "Data_Extract" ) NE 0) AND \
+    (STRINDEX( "($result_ferret_listing_type)", "netcdf" ) NE 0)` THEN EXIT/SCRIPT
+
+! See LAS_set_strides_curvilinear for first cut on dealing with strides and curvi data.
+! If it is a native curvilinear plot then LAS_set_strides_curvilinear has been called.
+!!IF ($ferret_curvi_coord_lat"0|0|*>1") THEN EXIT/SCRIPT
+
+! Hybrid Z not dealt with here...
+
+IF ($do_hybrid_z"0|0|1|*>1") THEN  EXIT/SCRIPT 
+
+! ---------------------------------------------------------------------
+! Determine striding based on the memory allocation
+
+DEFINE SYMBOL memsize = 0.25* ($FERRET_MEMORY"6.4")* 1.e6
+
+! Cannot do native striding if this is a descriptor dataset.
+
+DEFINE SYMBOL no_native = 0
+IF ($data_var_only"0|*>1") THEN 
+   DEFINE SYMBOL check_for_des =  `($data_var_only)[d=($data_num)],RETURN=dsetpath`
+ELSE
+   DEFINE SYMBOL check_for_des =  `($data_var)[d=($data_num)],RETURN=dsetpath`
+ENDIF
+
+IF `STRINDEX("($check_for_des)", ".des") GT 0 OR ($no_native_strides_xy"0|*>1")` THEN 
+   EXIT/SCRIPT
+ENDIF
+
+! If multiple variables add the sizes.
+DEFINE SYMBOL nvars = ($data_count)
+
+LET pvar = ($ferret_plot_var) 
+DEFINE SYMBOL var_size = ($var_size"0") + `pvar,RETURN=size`
+
+LET ndims = 0
+IF ($native_curvilinear_xy"0|*>1") THEN
+   LET xsiz = ($clon_imax) - ($clon_imin) + 1
+   LET ysiz = ($clat_jmax) - ($clat_jmin) + 1
+   let ndims = 0  ! dont stride in XY when curvilinear grid.
+ELSE
+   LET xsiz = `pvar,RETURN=isize`
+   IF `xsiz GT 1` THEN LET ndims = `ndims + 1`
+   LET ysiz = `pvar,RETURN=jsize`
+   IF `ysiz GT 1` THEN LET ndims = `ndims + 1`
+ENDIF
+
+LET zsiz = `pvar,RETURN=ksize`
+IF `zsiz GT 1` THEN LET ndims = `ndims + 1`
+LET tsiz = `pvar,RETURN=lsize`
+IF `tsiz GT 1` THEN LET ndims = `ndims + 1`
+
+LET varsiz = xsiz* ysiz* zsiz* tsiz* ($nvars)
+DEFINE SYMBOL stride_for_mem = `INT( 1+ varsiz/(.1*($memsize)) )`
+
+IF `($stride_for_mem) GT 1` THEN
+   
+   IF `($region_x_range"0|*>1") GT 0 AND (($do_curvi_xy"0|*>1) NE 1)` THEN
+      DEFINE SYMBOL modax = "`pvar, RETURN=xmod`"
+      DEFINE SYMBOL xstride = `1 + INT( ($stride_for_mem)/(varsiz/xsiz) )`
+      SET AXIS/STRIDE=($xstride) `pvar,RETURN=xaxis`
+      LET x_strided_var = pvar
+      IF `STRCMP(($modax), " ") NE 0` THEN SET AXIS/MODULO `pvar,RETURN=xaxis`
+      DEFINE SYMBOL add_to_title = Stride ($xstride) in X
+   ENDIF
+
+   IF `($region_y_range"0|*>1") GT 0 AND (($do_curvi_xy"0|*>1) NE 1)` THEN 
+      DEFINE SYMBOL ystride = `1 + INT( ($stride_for_mem)/(varsiz/ysiz) )`
+      SET AXIS/STRIDE=($ystride) `pvar,RETURN=yaxis`
+      LET y_strided_var = pvar
+      DEFINE SYMBOL add_to_title = ($add_to_title) Stride ($ystride) in Y
+   ENDIF
+      
+   IF `($region_z_range"0|*>1") GT 0 AND zsiz GT 5` THEN
+      DEFINE SYMBOL zstride = `INT( ($stride_for_mem)*zsiz/varsiz)^0.5 )`
+      IF `zstride GT 1` THEN
+         SET AXIS/STRIDE=($zstride) `pvar,RETURN=zaxis`
+         LET z_strided_var = pvar
+         DEFINE SYMBOL add_to_title = ($add_to_title) Stride ($zstride) in Z
+      ENDIF
+   ENDIF
+   
+   IF `($region_t"0|*>1") GT 0 AND tsiz GT 5` THEN 
+      DEFINE SYMBOL modax = "`pvar, RETURN=tmod`"
+      DEFINE SYMBOL tstride = `INT( ($stride_for_mem)*tsiz/varsiz)^0.5 )`
+      IF `tstride GT 1` THEN
+         SET AXIS/STRIDE=($tstride) `pvar,RETURN=taxis`
+         LET t_strided_var = pvar
+         DEFINE SYMBOL add_to_title = ($add_to_title) Stride ($tstride) in T
+      ENDIF
+   ENDIF
+
+ENDIF
+   
+IF ($add_to_title"0|*>1") THEN
+   DEFINE SYMBOL n_left_labels = `($n_left_labels"0") + 1`    
+   DEFINE SYMBOL upper_left_($n_left_labels) = ($add_to_title)
+ENDIF
+
+! End of $RCSfile ------------LAS_set_strides_prop.jnl--------------------------
+pause
