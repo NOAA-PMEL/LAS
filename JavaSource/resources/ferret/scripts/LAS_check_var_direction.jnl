@@ -1,4 +1,4 @@
-! LAS_check_1d_region.jnl
+! LAS_check_var_direction.jnl
 ! 
 ! Author: ansley
 ! $Date: 2007/06/22
@@ -12,8 +12,6 @@ IF `($do_curvi_xy"0") AND ($native_curvilinear_xy"0")` THEN EXIT/SCRIPT
 IF `($do_hybrid_z"0") AND ($native_Z_plot"0")` THEN EXIT/SCRIPT
 IF `($do_curvi_xy_and_hybrid_z)` THEN EXIT/SCRIPT
 
-! IF `($do_curvi_xy"0") OR ($do_hybrid_z"0") OR ($do_curvi_xy_and_hybrid_z)` THEN EXIT/SCRIPT
-
 ! See if there is an axis in this direction (may happen for a var in a multi-line plot)
 DEFINE SYMBOL ax1d = `($data_var),RETURN=($ferret_view)axis`
 
@@ -22,7 +20,7 @@ IF `STRCMP("($ax1d)", "NORMAL") EQ 0` THEN
    DEFINE SYMBOL error_status = ERROR
    DEFINE SYMBOL error_type = REGION
    DEFINE SYMBOL error_action = Checking grid and region  
-   DEFINE SYMBOL error_string Variable "($data_name)" has no ($ferret_view) axis
+   DEFINE SYMBOL error_string No ($ferret_view) axis for variable ($data_name)
    GO LAS_error_msg 
    EXIT/PROGRAM
 ENDIF
@@ -38,7 +36,7 @@ IF `tsiz LE 1` THEN
    DEFINE SYMBOL error_status = ERROR
    DEFINE SYMBOL error_type = REGION
    DEFINE SYMBOL error_action = Checking grid and region  
-   DEFINE SYMBOL error_string Variable "($data_name)" has no ($ferret_view) variation
+   MESSAGE/ERROR **ERROR DEFINE SYMBOL error_string No ($ferret_view) axis for variable ($data_name)
    GO LAS_error_msg 
    EXIT/PROGRAM
 ENDIF
@@ -48,6 +46,7 @@ ENDIF
 ! always correct for these variables (dont exit, test works for some cases)
 ! IF `STRINDEX ("($ferret_plot_var)", "sampled_var") GT 0` THEN EXIT/SCRIPT
 
+
 LET the_plot_var = ($ferret_plot_var)
 LOAD the_plot_var
 DEFINE SYMBOL varshape = `the_plot_var,RETURN=shape`
@@ -56,29 +55,32 @@ IF `STRCMP("($varshape)", "POINT") EQ 0` THEN
    DEFINE SYMBOL error_status = ERROR
    DEFINE SYMBOL error_type = REGION
    DEFINE SYMBOL error_action = Checking grid and region  
-   DEFINE SYMBOL error_string For Variable "($data_name)" <NL>\
-the ($viewshape) region is too small. It reduces to a single point.
+   MESSAGE/ERROR **ERROR The ($viewshape) region is too small. It reduces to a single point.<NL>\
+   Variable ($data_name)
    GO LAS_error_msg 
   EXIT/PROGRAM
 ENDIF
-
-
 
 ! For multi-line plot, if var has extra dimensons use IJKL=1 in the extra directions.
  
 IF `STRLEN("($varshape)") GT 1` THEN
    IF `($data_count) GT 1` THEN  
-      LET s1 = `STRINDEX("($varshape)", "($viewshape)")`
-      LET slen = `STRLEN("($varshape)")`
-      IF `s1 GT 1` THEN DEFINE SYMBOL str1 = `SUBSTRING("($varshape)", 1, s1-1)`
-      IF `s1 LT slen` THEN DEFINE SYMBOL str2 = `SUBSTRING("($varshape)", s1+1, slen)`
-      DEFINE SYMBOL missing_dir = ($str1)($str2)
-      IF ($missing_dir"0|X>1|*>0") THEN 
+
+      DEFINE SYMBOL  varshape0 = `($data_0_var),RETURN=shape`
+      DEFINE SYMBOL  varshape1 = `($data_1_var),RETURN=shape`
+      IF `STRLEN("($varshape1)") GT STRLEN("($varshape0)")` THEN
+        IF `STRINDEX("($varshape0)", "X") EQ 0 AND STRINDEX("($varshape1)", "X") NE 0` THEN DEFINE SYMBOL missing_x = 1
+        IF `STRINDEX("($varshape0)", "Y") EQ 0 AND STRINDEX("($varshape1)", "Y") NE 0` THEN DEFINE SYMBOL missing_y = 1
+        IF `STRINDEX("($varshape0)", "Z") EQ 0 AND STRINDEX("($varshape1)", "Z") NE 0` THEN DEFINE SYMBOL missing_z = 1
+        IF `STRINDEX("($varshape0)", "T") EQ 0 AND STRINDEX("($varshape1)", "T") NE 0` THEN DEFINE SYMBOL missing_t = 1
+      ENDIF
+pause
+      IF ($missing_x"0|*>1") THEN 
          IF ($native_curvilinear_xy"0") THEN
             DEFINE SYMBOL error_status = ERROR
             DEFINE SYMBOL error_type = REGION
             DEFINE SYMBOL error_action = Checking grid and region  
-            DEFINE SYMBOL error_string Variable "($data_name)" on ($region_full) is not a ($viewshape) line
+            DEFINE SYMBOL error_string Variable ($data_name) on ($region_full) is not a ($viewshape) line
             GO LAS_error_msg 
             EXIT/PROGRAM
 	 ENDIF
@@ -88,12 +90,12 @@ IF `STRLEN("($varshape)") GT 1` THEN
 	 DEFINE SYMBOL n_left_labels = `($n_left_labels"0") + 1`
 	 DEFINE SYMBOL upper_left_($n_left_labels"0") = Longitude `($data_var),RETURN=xstart`
       ENDIF
-      IF ($missing_dir"0|Y>1|*>0") THEN 
+      IF ($missing_y"0|*>1") THEN 
          IF ($native_curvilinear_xy"0") THEN
             DEFINE SYMBOL error_status = ERROR
             DEFINE SYMBOL error_type = REGION
             DEFINE SYMBOL error_action = Checking grid and region  
-            DEFINE SYMBOL error_string Variable "($data_name)" on ($region_full) is not a ($viewshape) line
+            DEFINE SYMBOL error_string Variable ($data_name) on ($region_full) is not a ($viewshape) line
             GO LAS_error_msg 
             EXIT/PROGRAM
 	 ENDIF
@@ -102,13 +104,13 @@ IF `STRLEN("($varshape)") GT 1` THEN
 	 DEFINE SYMBOL n_left_labels = `($n_left_labels"0") + 1`
 	 DEFINE SYMBOL upper_left_($n_left_labels"0") = Latitude `($data_var),RETURN=ystart`
       ENDIF
-      IF ($missing_dir"0|Z>1|*>0") THEN 
+      IF ($missing_z"0|*>1") THEN 
          DEFINE SYMBOL region_full ($region_full),K=1
 	 DEFINE SYMBOL region_xyz ($region_xyz),K=1
 	 DEFINE SYMBOL n_left_labels = `($n_left_labels"0") + 1`
 	 DEFINE SYMBOL upper_left_($n_left_labels"0") = Depth `($data_var),RETURN=zstart` (`($data_var),RETURN=zunits`)
       ENDIF
-      IF ($missing_dir"0|T>1|*>0") THEN 
+      IF ($missing_t"0|*>1") THEN 
          DEFINE SYMBOL region_full ($region_full),L=1
 	 DEFINE SYMBOL region_t ($region_t),L=1
 	 DEFINE SYMBOL n_left_labels = `($n_left_labels"0") + 1`
@@ -122,10 +124,11 @@ IF `STRLEN("($varshape)") GT 1` THEN
       DEFINE SYMBOL error_status = ERROR
       DEFINE SYMBOL error_type = REGION
       DEFINE SYMBOL error_action = Checking grid and region  
-      DEFINE SYMBOL error_string Variable "($data_name)" on ($region_full) is not a ($viewshape) line
+      DEFINE SYMBOL error_string Variable ($data_name) on ($region_full) is not a ($viewshape) line
       GO LAS_error_msg 
       EXIT/PROGRAM
    ENDIF
 ENDIF
       
 ! End of file ------------LAS_check_var_direction.jnl-------------------------------
+pause
