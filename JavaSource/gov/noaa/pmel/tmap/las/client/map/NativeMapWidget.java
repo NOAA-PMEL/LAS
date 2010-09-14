@@ -26,6 +26,7 @@ public class NativeMapWidget implements EntryPoint {
 	public void onModuleLoad() {
         map.activateNativeHooks();
 		RootPanel.get("ol_map_widget").add(map);
+		OLMapWidget.mapDone();
 	}
 
 }
