@@ -74,7 +74,7 @@ IF `STRLEN("($varshape)") GT 1` THEN
         IF `STRINDEX("($varshape0)", "Z") EQ 0 AND STRINDEX("($varshape1)", "Z") NE 0` THEN DEFINE SYMBOL missing_z = 1
         IF `STRINDEX("($varshape0)", "T") EQ 0 AND STRINDEX("($varshape1)", "T") NE 0` THEN DEFINE SYMBOL missing_t = 1
       ENDIF
-pause
+
       IF ($missing_x"0|*>1") THEN 
          IF ($native_curvilinear_xy"0") THEN
             DEFINE SYMBOL error_status = ERROR
@@ -131,4 +131,4 @@ pause
 ENDIF
       
 ! End of file ------------LAS_check_var_direction.jnl-------------------------------
-pause
+
