@@ -23,7 +23,6 @@ DEFINE SYMBOL varshape_($aa) = `the_plot_var,RETURN=shape`
 LET the_plot_var = ($ferret_plot_var_($bb))
 !LOAD the_plot_var
 DEFINE SYMBOL varshape_($bb) = `the_plot_var,RETURN=shape`
-pause
 
 IF `STRLEN("($varshape_($aa))") GT STRLEN("($varshape_($bb))")` THEN
    LET v_expand = ($ferret_plot_var_($bb)) + 0*($ferret_plot_var_($aa))

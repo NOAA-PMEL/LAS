@@ -20,10 +20,12 @@
 ! LAS_initialize_data.jnl takes an argument that specifies which data
 ! item [0|1|2|3|...] to create symbols for. 
 
-!ACM_note: if we use a loop in the plot routine, we are not 
-! limited to 9 data items
-! DEFINE SYMBOL num ($1"0|0|1|2|3|4|5|6|7|8|9")
 DEFINE SYMBOL num ($1"0")
+
+IF `($num) EQ 0 AND ($data_count) GT 1 and ($check_multi_regions_done"0|*>1) EQ 0` THEN
+   GO LAS_check_multi_regions
+   DEFINE SYMBOL check_multi_regions_done = 1
+ENDIF
 
 ! TODO:  It would be nice if the java code removed this dependency upon
 ! TODO:  whether an operation was 'chained' or not.
@@ -53,6 +55,10 @@ IF `STRINDEX("($data_var)", "'") EQ 1 AND STRRINDEX("($data_var)", "'") EQ varle
 ELSE 
    IF ($data_($num)_var"0|*>1") THEN DEFINE SYMBOL data_var_nq = ($data_var)
    IF ($data_($num)_var"0|*>1") THEN DEFINE SYMBOL data_var = '($data_var)'
+ENDIF
+IF ($add_to_var($num)"0|*>1") THEN 
+   LET dvar = ($data_var) + ($add_to_var($num))
+   DEFINE SYMBOL data_var = dvar
 ENDIF
 
 ! Use the units passed in from the XML unless they are null; 

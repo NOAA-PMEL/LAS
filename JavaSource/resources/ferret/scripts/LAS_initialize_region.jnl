@@ -77,6 +77,10 @@ IF ($($region)_z_lo"0|*>1") THEN
     DEFINE SYMBOL region_z_range = `($region_z_lo) - ($region_z_hi)`
   ENDIF
 ENDIF
+IF ($add_region_z"0|*>1") THEN
+   DEFINE SYMBOL region_z = ($add_region_z)
+   DEFINE SYMBOL region_z_range = 0
+ENDIF
 
 ! NOTE:  Normally we use 'DEFINE SYMBOL ~ = ...'
 ! NOTE:  For the time axis we use 'DEFINE SYMBOL ~ ...' because the Ferret
@@ -87,6 +91,9 @@ IF ($($region)_t_lo"0|*>1") THEN
   DEFINE SYMBOL region_t_hi = ($($region)_t_hi)
   DEFINE SYMBOL limits_t \"($region_t_lo)\":\"($region_t_hi)\"
   DEFINE SYMBOL region_t T=\"($region_t_lo)\":\"($region_t_hi)\"
+ENDIF
+IF ($add_region_t"0|*>1") THEN
+   DEFINE SYMBOL region_t = ($add_region_t)
 ENDIF
 
 ! Now build up all possible multi-axis regions, being careful not to use
