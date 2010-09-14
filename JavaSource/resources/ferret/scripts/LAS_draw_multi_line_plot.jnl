@@ -44,13 +44,6 @@ REPEAT/range=1:`($data_count)-1`/NAME=qdat (  \
   GO LAS_pp_set_region_labels \
 )
 
-IF ($error_status"0|*>1") THEN
-  GO LAS_error_msg 
-  EXIT/PROGRAM
-  MESSAGE/ERROR **ERROR ($error_string)
-  EXIT/PROGRAM
-ENDIF
-
 ! No title; variable names and units are listed in the legend.
 DEFINE SYMBOL qualifiers = ($qualifiers)/TITLE=" "
 
