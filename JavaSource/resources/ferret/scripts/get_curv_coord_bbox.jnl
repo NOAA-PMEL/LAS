@@ -196,21 +196,6 @@ IF ($box_cf_map_url"0|*>1") THEN  ! If we have a map file, use it.
 ENDIF  ! if we have a map 
 LET kludge = 1
 
-
-sh sym region_x_range
-sh sym region_y_range
-sh sym *lon*max*
-sh sym ferret_curv_l*
-sh sym clon*, clat*
-LET curv_lon_range = ($ferret_curv_lon_max) - ($ferret_curv_lon_min) 
-LET curv_lat_range = ($ferret_curv_lat_max) - ($ferret_curv_lat_min) 
-IF `ABS(($region_x_range) - curv_lon_range)) LT 0.95` AND \
-   `ABS(($region_x_range) - curv_lon_range)) LT 0.95`THEN
-   LET kludge = 0
-ENDIF
-
-pause
-
 IF `kludge LT 1` THEN
    LET  box_longitude = ($ferret_curvi_coord_lon)[d=($data_num)]
    LET  box_latitude = ($ferret_curvi_coord_lat)[d=($data_num)]
