@@ -20,7 +20,7 @@ LET nc = `($data_count) - 1`
 ! Get the shape of all variables
 REPEAT/RANGE=0:`nc`/NAME=ivar (\
 DEFINE SYMBOL ivar = `ivar`; \
-DEFINE SYMBOL data_url \"($data_($num)_url)\"; \
+DEFINE SYMBOL data_url \"($data_($ivar)_url)\"; \
 IF ($data_($ivar)_var"0|*>1") THEN DEFINE SYMBOL data_var ($data_($ivar)_var); \
 IF ($data_($ivar)_var"0|*>1") THEN DEFINE SYMBOL data_var = `UPCASE("($data_var)")`; \
 SET DATA ($data_url); \
