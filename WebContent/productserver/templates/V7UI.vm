@@ -171,7 +171,6 @@
                                 document.getElementById('plotOptions').style.display='';
                         }
                 }
-		window.onresize = mapResize;
          </script>
 </html>
 
