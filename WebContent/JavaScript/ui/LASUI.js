@@ -172,9 +172,10 @@ LASUI.prototype.initUI = function (anchorId)
 	else
 		document.getElementById(this.anchors.output).onload=this.onPlotLoad.LASBind(this);
 
-	if(mapResize)
+	if(typeof mapResize != "undefined")
 		window.onresize = mapResize;
-	if(document.body.onresize && mapResize)
+
+	if(document.body.onresize && typeof mapResize != "undefined")
 		document.body.onresize = mapResize;
 
 	//get the top level category
