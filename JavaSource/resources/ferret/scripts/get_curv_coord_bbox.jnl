@@ -50,15 +50,21 @@ LET ncurv_y = `($ferret_curvi_coord_lon),RETURN=jsize`
 LET del_x = (($ferret_curv_lon_max) - ($ferret_curv_lon_min))/(ncurv_x/2)
 LET del_y = (($ferret_curv_lat_max) - ($ferret_curv_lat_min))/(ncurv_y/2)
 
-! If the whole grid is specified, we are done.
+! If the whole grid, or nearly the whole grid, is specified, we are done.
 IF ($ferret_curv_lon_min"0|*>1") THEN
+
    LET xlodiff =  ABS(($ferret_curv_lon_min) - ($region_x_lo) )
    LET xhidiff =  ABS(($ferret_curv_lon_max) - ($region_x_hi) )
    LET ylodiff =  ABS(($ferret_curv_lat_min) - ($region_y_lo) )
    LET yhidiff =  ABS(($ferret_curv_lat_max) - ($region_y_hi) )
 
-   IF `(MAX((xlodiff), (xhidiff)) LT del_x) AND\ 
-       (MAX((ylodiff), (yhidiff)) LT del_y)` THEN
+   LET ndel_x = del_x
+   IF `ncurv_x GT 6` THEN LET ndel_x = 5*del_x
+   LET ndel_y = del_y
+   IF `ncurv_y GT 6` THEN LET ndel_y = 5*del_y
+
+   IF `(MAX((xlodiff), (xhidiff)) LT ndel_x) AND\ 
+       (MAX((ylodiff), (yhidiff)) LT ndel_y)` THEN
       LET clon_imin = 1
       LET clon_imax = ncurv_x
 
@@ -190,6 +196,21 @@ IF ($box_cf_map_url"0|*>1") THEN  ! If we have a map file, use it.
 ENDIF  ! if we have a map 
 LET kludge = 1
 
+
+sh sym region_x_range
+sh sym region_y_range
+sh sym *lon*max*
+sh sym ferret_curv_l*
+sh sym clon*, clat*
+LET curv_lon_range = ($ferret_curv_lon_max) - ($ferret_curv_lon_min) 
+LET curv_lat_range = ($ferret_curv_lat_max) - ($ferret_curv_lat_min) 
+IF `ABS(($region_x_range) - curv_lon_range)) LT 0.95` AND \
+   `ABS(($region_x_range) - curv_lon_range)) LT 0.95`THEN
+   LET kludge = 0
+ENDIF
+
+pause
+
 IF `kludge LT 1` THEN
    LET  box_longitude = ($ferret_curvi_coord_lon)[d=($data_num)]
    LET  box_latitude = ($ferret_curvi_coord_lat)[d=($data_num)]
@@ -265,6 +286,7 @@ ELSE
       LET box_y_hi = `($region_y_hi) + del_y`
    ENDIF
 ENDIF
+
 
 ! Define a small output grid, 2x2 and use the curvilinear map function
 
