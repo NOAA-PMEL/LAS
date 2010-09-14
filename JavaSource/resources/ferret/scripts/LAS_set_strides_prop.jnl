@@ -33,7 +33,7 @@ IF ($do_hybrid_z"0|0|1|*>1") THEN  EXIT/SCRIPT
 ! Determine striding based on the memory allocation
 
 DEFINE SYMBOL memsize = 0.25* ($FERRET_MEMORY"6.4")* 1.e6
-LET memsize = 100000 ! limit the number of points plotted.
+DEFINE SYMBOL  memsize = 100000 ! limit the number of points plotted.
 
 ! Cannot do native striding if this is a descriptor dataset.
 
@@ -71,7 +71,7 @@ IF `zsiz GT 1` THEN LET ndims = `ndims + 1`
 LET tsiz = `pvar,RETURN=lsize`
 IF `tsiz GT 1` THEN LET ndims = `ndims + 1`
 
-LET varsiz = xsiz* ysiz* zsiz* tsiz* ($nvars)
+LET varsiz = `xsiz* ysiz* zsiz* tsiz* ($nvars)`
 DEFINE SYMBOL stride_for_mem = `INT( 1+ varsiz/(($memsize)) )`
 
 IF `($stride_for_mem) GT 1` THEN
@@ -85,7 +85,10 @@ IF `($stride_for_mem) GT 1` THEN
 	 LET t_pct = 1. - z_pct
       ENDIF
    ELSE
-      DEFINE SYMBOL stride_for_mem = `INT(($stride_for_mem)/ndims)`
+!      DEFINE SYMBOL stride_for_mem = `INT(1+($stride_for_mem)/ndims)`
+      IF `ndims EQ 2` THEN DEFINE SYMBOL stride_for_mem = `INT(($stride_for_mem)^0.5)`
+      IF `ndims EQ 3` THEN DEFINE SYMBOL stride_for_mem = `INT(($stride_for_mem)^0.33)`
+      IF `ndims EQ 4` THEN DEFINE SYMBOL stride_for_mem = `INT(($stride_for_mem)^0.25)`
    ENDIF
 
    IF `($region_x_range"0|*>1") GT 0 AND (($do_curvi_xy"0|0|1|*>1") NE 1)` THEN
@@ -134,4 +137,3 @@ IF ($add_to_title"0|*>1") THEN
 ENDIF
 
 ! End of $RCSfile ------------LAS_set_strides_prop.jnl--------------------------
-
