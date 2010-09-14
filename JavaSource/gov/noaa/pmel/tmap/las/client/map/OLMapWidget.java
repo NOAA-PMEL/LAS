@@ -156,8 +156,8 @@ public class OLMapWidget extends Composite {
     Boxes boxes = new Boxes("Valid Region");
 	Box box = null;
 	//public static final String WMS_URL = "http://strider.weathertopconsulting.com:8282/geoserver/wms?";
-    public static final String WMS_URL = "http://labs.metacarta.com/wms/vmap0";
-    
+    //public static final String WMS_URL = "http://labs.metacarta.com/wms/vmap0";
+	public static final String WMS_URL = "http://vmap0.tiles.osgeo.org/wms/vmap0";
     double delta;
     
     boolean editing = false;
@@ -515,13 +515,12 @@ public class OLMapWidget extends Composite {
 		dockPanel.add(mapWidget, DockPanel.CENTER);
 		dockPanel.add(textWidget, DockPanel.SOUTH);
 		initWidget(dockPanel);
-		mapDone();
 	}
 	public Map getMap() {
 		return map;
 	}
 	public void resizeMap() {
-		// Do a meaningless little calculation to force the map to recalibrate where it is on the page.
+		// Do a meaningless little calculation to force the map to re-calibrate where it is on the page.
 		int zoom = map.getZoom();
 		LonLat center = map.getCenter();
 		map.setCenter(center, zoom);
