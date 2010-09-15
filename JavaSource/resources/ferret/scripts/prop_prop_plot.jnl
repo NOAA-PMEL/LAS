@@ -70,6 +70,9 @@ GO LAS_set_strides_prop
 LET/TITLE="($ferret_title_0)" xvar = XSEQUENCE(($ferret_plot_var_0))
 LET/TITLE="($ferret_title_1)" yvar = XSEQUENCE(($ferret_plot_var_1))
 
+DEFINE SYMBOL xvar = xvar
+DEFINE SYMBOL yvar = yvar
+
 ! Apply any constraints
 IF ($constraint_0_lhs"0|*>1) THEN
    GO apply_pp_constraints 0 xvar
@@ -83,7 +86,6 @@ ENDIF
 LET xsize = `($xvar),RETURN=isize`
 LET ysize = `($yvar),RETURN=isize`
 
-pause
 
 IF `xsize NE ysize` THEN 
   MESSAGE/ERROR **ERROR The variables must have the same dimensions: ($data_0_var), ($data_1_var)

@@ -160,7 +160,7 @@ DEFINE SYMBOL xstride = `xstride`
 DEFINE SYMBOL ystride = `ystride`
 DEFINE SYMBOL zstride = `zstride`
 DEFINE SYMBOL tstride = `tstride`
-pause
+
 
 IF `($region_x_range"0|*>1") GT 0` THEN
       DEFINE SYMBOL modax = "`pvar, RETURN=xmod`"
@@ -171,9 +171,9 @@ IF `($region_x_range"0|*>1") GT 0` THEN
          DEFINE SYMBOL clon_imin = `MAX(1, INT(($clon_imin)/($xstride)) )`
          DEFINE SYMBOL clon_imax = `MIN (ixmax, INT(($clon_imax)/($xstride)) )`
 	 IF `(($clon_imin) + ($clon_imax)*($xstride)) GT ixmax` THEN \
-	    DEFINE SYMBOL clon_imax = `($clon_imax)-($xstride)`
+	    IF `($clon_imax)-($xstride) GT 0` THEN DEFINE SYMBOL clon_imax = `($clon_imax)-($xstride)`
       ENDIF
-
+pause
       LET x_strided_var = pvar
 !      IF `STRCMP(($modax), " ") NE 0` THEN SET AXIS/MODULO `($data_var),RETURN=xaxis`
       IF `($xstride) GT 1` THEN DEFINE SYMBOL add_to_title = Stride ($xstride) in X
@@ -187,9 +187,9 @@ IF `($region_y_range"0|*>1") GT 0` THEN
          DEFINE SYMBOL clat_jmin = `MAX(1, INT(($clat_jmin)/($ystride)) )`
          DEFINE SYMBOL clat_jmax = `MIN(jymax, INT(($clat_jmax)/($ystride)) )`
 	 IF `(($clat_jmin) + ($clat_jmax)*($ystride)) GT jymax` THEN \
-	    DEFINE SYMBOL clat_jmax = `($clat_jmax)-($ystride)`
+	    IF `($clat_jmax)-($ystride) GT 0` THEN DEFINE SYMBOL clat_jmax = `($clat_jmax)-($ystride)`
       ENDIF
-
+pause
       IF `($ystride) GT 1` THEN DEFINE SYMBOL add_to_title = ($add_to_title) Stride ($ystride) in Y
 ENDIF
       
