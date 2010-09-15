@@ -1,11 +1,6 @@
 package gov.noaa.pmel.tmap.las.client;
 
-import gov.noaa.pmel.tmap.las.client.laswidget.AxesWidgetGroup;
-import gov.noaa.pmel.tmap.las.client.laswidget.ComparisonAxisSelector;
-import gov.noaa.pmel.tmap.las.client.laswidget.DatasetButton;
 import gov.noaa.pmel.tmap.las.client.laswidget.OperationRadioButton;
-import gov.noaa.pmel.tmap.las.client.laswidget.OperationsWidget;
-import gov.noaa.pmel.tmap.las.client.laswidget.OptionsButton;
 import gov.noaa.pmel.tmap.las.client.serializable.CategorySerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.ConfigSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.GridSerializable;
@@ -15,47 +10,27 @@ import gov.noaa.pmel.tmap.las.client.util.Constants;
 import gov.noaa.pmel.tmap.las.client.util.Util;
 import gov.noaa.pmel.tmap.las.client.vizgal.VizGalPanel;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 
-import br.com.freller.tool.client.Print;
-
-import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.logical.shared.CloseEvent;
-import com.google.gwt.event.logical.shared.CloseHandler;
-import com.google.gwt.event.logical.shared.OpenEvent;
-import com.google.gwt.event.logical.shared.OpenHandler;
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.event.logical.shared.SelectionEvent;
+import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.WindowResizeListener;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.ChangeListener;
 import com.google.gwt.user.client.ui.ClickListener;
-import com.google.gwt.user.client.ui.DisclosurePanel;
 import com.google.gwt.user.client.ui.FlexTable;
-import com.google.gwt.user.client.ui.Grid;
-import com.google.gwt.user.client.ui.HasVerticalAlignment;
-import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.Image;
-import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
-import com.google.gwt.user.client.ui.PopupPanel;
-import com.google.gwt.user.client.ui.PushButton;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.ToggleButton;
 import com.google.gwt.user.client.ui.TreeItem;
-import com.google.gwt.user.client.ui.TreeListener;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.client.ui.FlexTable.FlexCellFormatter;
 
@@ -64,33 +39,15 @@ import com.google.gwt.user.client.ui.FlexTable.FlexCellFormatter;
  * @author rhs
  *
  */
-public class VizGal implements EntryPoint {
-    
+public class VizGal extends BaseUI {
+	
+	
+	
 	/*
-	 * These are the four pieces of information required
-	 * to initialize a SlideSorterOld
+	 * The main panel for this UI, has custom vizGal Buttons and the BaseUI main panel
 	 */
-	String dsid;
-	String vid;
-	String view;
-	String operationID;
-	String optionID;
-	/*
-	 * These are optional parameters that can be used to set the xyzt ranges for the initial plot in the panels.
-	 */
-	String xlo;
-	String xhi;
-	String ylo;
-	String yhi;
-	String zlo;
-	String zhi;
-	String tlo;
-	String thi;
+	FlexTable vVizGalPanel = new FlexTable();
 
-	/*
-	 * Keep track of the axes orthogonal to the view.
-	 */
-	List<String> ortho;
 
 	/*
 	 * Keep track of which axis is in the plot panels.
@@ -103,62 +60,13 @@ public class VizGal implements EntryPoint {
 	String fixedAxis;
 
 	/*
-	 * The slide sorter grid.
-	 */
-	Grid slides;
-
-	/*
-	 * The container for the slides and controls.
-	 */
-	FlexTable mainPanel;
-	FlexCellFormatter cellFormatter;
-
-	/*
 	 * Button to make slide sorter compute differences
 	 */
 	ToggleButton differenceButton;
-
-	/*
-	 * The panels in this slide sorter.
-	 */
-	List<VizGalPanel> panels = new ArrayList<VizGalPanel>();
-
-	/*
-	 * Padding on the right side of the browser frame...
-	 */
-	int rightPad = 45;
-	/*
-	 * Fixed size of the left control panel
-	 */
-	int controlsWidth = 290;
-	String settingsWidth = String.valueOf(controlsWidth) + "px";
-
 	
-	// Try making the settings controls out of a collection of independent widgets managed by vizGal.
-	
-	
-	DatasetButton datasetButton;
-	OptionsButton optionsButton; 
-	FlexTable buttonLayout;
+	FlexTable buttonLayout = new FlexTable();
 	FlexCellFormatter buttonFormatter;
-		
-    AxesWidgetGroup axesWidget;
-    ComparisonAxisSelector comparisonAxesSelector;
-    OperationsWidget operationsWidget;
-   
-    FlexTable settingsControls;
-    
-    
-    DisclosurePanel settingsHeader = new DisclosurePanel("Settings");
-    DisclosurePanel hideControls = new DisclosurePanel("");
-    
-    boolean operationsPanelIsOpen = true;
 
-    boolean panelHeaderHidden = false;
-	/*
-	 * The currently selected variable.
-	 */
-	VariableSerializable var;
 	/*
 	 * The initial variable for when we run off the top off the history stack.
 	 */
@@ -176,24 +84,7 @@ public class VizGal implements EntryPoint {
 	ToggleButton autoContourButton;
 	TextBox autoContourTextBox;
 
-	/*
-	 * Keep track of the new variable and change state to be able apply data set changes only after apply button is pressed.
-	 */
-	VariableSerializable nvar;
 	boolean changeDataset = false;
-	
-
-	/*
-	 * Image size control.
-	 */
-	ListBox imageSize;
-	Label imageSizeLabel = new Label("Image zoom: ");
-	int pwidth = 0;
-	
-	/*
-	 * Make an HTML only popup page that can be printed.
-	 */
-	PushButton printerFriendlyButton;
 	
 	/*
 	 * Keep if a history token is attached to an initial URL,  keep it and apply it after the VizGal has initialized.
@@ -213,102 +104,31 @@ public class VizGal implements EntryPoint {
      // Keep track of the current operations
      OperationSerializable[] ops;
      
-     
+     // Everybody that sub-classes BaseUI must implement three handlers for options OK, operations clicks and data set selections.
+   
 	public void onModuleLoad() {
+		super.onModuleLoad();
 		
-		ortho = new ArrayList<String>(); 
-
-		dsid = Util.getParameterString("dsid");
-		vid = Util.getParameterString("vid");
-		//TODO If the operation is null, get the default operation (the map or plot; left nav) for this view.
-		operationID = Util.getParameterString("opid");
-		optionID = Util.getParameterString("optionid");
-		view = Util.getParameterString("view");
-
-		// This may have come from a running LAS and it might want to set up the xyzt ranges for the plots in the panels.
-		xlo = Util.getParameterString("xlo");
-		xhi = Util.getParameterString("xhi");
-		ylo = Util.getParameterString("ylo");
-		yhi = Util.getParameterString("yhi");
-		zlo = Util.getParameterString("zlo");
-		zhi = Util.getParameterString("zhi");
-		tlo = Util.getParameterString("tlo");
-		thi = Util.getParameterString("thi");
+		
+		vVizGalPanel.setWidget(0, 0, buttonLayout);
+		vVizGalPanel.setWidget(1, 0, xMainPanel);
 		
 		initialHistory = getAnchor();
 		
-		// Hard-coded 4 panel display.
-		// TODO make the gallery size changeable somehow...
-		slides = new Grid(2,2);
-
 		
 		// Button to turn on and off difference mode.
 		differenceButton = new ToggleButton("Difference Mode");
 		differenceButton.ensureDebugId("differenceButton");
 		differenceButton.setTitle("Toggle Difference Mode");
 		differenceButton.addClickListener(differencesClick);
-
-		// This is a control panel that will control the settings for all the panels and it appears vertically on the left side.
 		
-	    buttonLayout = new FlexTable();
-	    buttonFormatter = buttonLayout.getFlexCellFormatter();
-	    datasetButton = new DatasetButton();
-	    datasetButton.ensureDebugId("datasetButton");
-	    datasetButton.addTreeListener(datasetTreeListener);
-	    // This is all to get around the fact that the OpenLayers map is always in front.
-	    datasetButton.addOpenClickHandler(datasetOpenHandler);
-	    datasetButton.addCloseClickHandler(datasetCloseHandler);
-	    optionsButton = new OptionsButton(optionID, 0);
-	    optionsButton.ensureDebugId("optionsButton");
-	    optionsButton.addOkClickListener(optionsOkListener);
-	    hideControls.setOpen(true);
-	    hideControls.addCloseHandler(new CloseHandler<DisclosurePanel>() {
-			@Override
-			public void onClose(CloseEvent<DisclosurePanel> arg0) {
-				handlePanelShowHide();
-			}
-	    });
-	    hideControls.addOpenHandler(new OpenHandler<DisclosurePanel>() {
-			@Override
-			public void onOpen(OpenEvent<DisclosurePanel> arg0) {
-				handlePanelShowHide();
-			}
-	    });
-	   
-		buttonLayout.setWidget(0, 0, hideControls);
-		buttonLayout.setWidget(0, 1, datasetButton);
-		buttonLayout.setWidget(0, 2, optionsButton);
-		buttonLayout.setWidget(0, 3, differenceButton);
+		buttonLayout.setWidget(0, 0, differenceButton);
 		
-		axesWidget = new AxesWidgetGroup("Plot Axes", "Comparison Axes", "vertical", settingsWidth, "ApplyTo_gallery");
-		axesWidget.addApplyHandler(settingsButtonApplyHandler);
+		
+		xAxesWidget.addApplyHandler(settingsButtonApplyHandler);
 		// Comparison Axes Selector
-		comparisonAxesSelector = new ComparisonAxisSelector(settingsWidth);
-		comparisonAxesSelector.addAxesChangeHandler(compareAxisChangeHandler);
 		
-		operationsWidget = new OperationsWidget("Operations");
-		operationsWidget.addClickHandler(operationsClickHandler);
-        settingsHeader.setOpen(true);		
-		settingsHeader.addCloseHandler(new CloseHandler<DisclosurePanel> () {
-
-			@Override
-			public void onClose(CloseEvent<DisclosurePanel> event) {
-				operationsWidget.setOpen(false);
-				comparisonAxesSelector.setOpen(false);
-				axesWidget.setOpen(false);
-			}
-			
-		});
-		settingsHeader.addOpenHandler(new OpenHandler<DisclosurePanel>() {
-
-			@Override
-			public void onOpen(OpenEvent<DisclosurePanel> arg0) {
-				operationsWidget.setOpen(true);
-				comparisonAxesSelector.setOpen(true);
-				axesWidget.setOpen(true);
-			}
-			
-		});
+		xComparisonAxesSelector.addAxesChangeHandler(compareAxisChangeHandler);
 		
 		// Sets the contour levels for all plots based on the global min/max of the data (as returned in the map scale file).
 		autoContourButton = new ToggleButton("Auto Colors");
@@ -316,136 +136,32 @@ public class VizGal implements EntryPoint {
 		autoContourButton.setTitle("Set consistent contour levels for all panels.");
 		autoContourButton.addClickListener(autoContour);
 		
-		buttonLayout.setWidget(0, 4, autoContourButton);
+		buttonLayout.setWidget(0, 1, autoContourButton);
 		autoContourTextBox = new TextBox();
 		autoContourTextBox.ensureDebugId("autoContourTextBox");
-		buttonLayout.setWidget(0, 5, autoContourTextBox);
-
-		/*
-		 * Control widget that sets the sizing of the image in the panel.
-		 * If set to auto the panel resizes with the browser up to the size of the actual image.
-		 * If set to 90% to 30% the image is set to a fixed size as a percentage of the actual image
-		 * If set to 100% the image is fixed at full size.
-		 * 
-		 * Any size transformation to get to less than 100% is done by the browser.
-		 */
-		imageSize = new ListBox();
-		imageSize.addItem("Auto", "auto");
-		imageSize.addItem("100%", "100");
-		imageSize.addItem(" 90%", "90");
-		imageSize.addItem(" 80%", "80");
-		imageSize.addItem(" 70%", "70");
-		imageSize.addItem(" 60%", "60");
-		imageSize.addItem(" 50%", "50");
-		imageSize.addItem(" 40%", "40");
-		imageSize.addItem(" 30%", "30");
-
-		imageSize.addChangeListener(new ChangeListener() {
-			public void onChange(Widget sender) {
-				String value = imageSize.getValue(imageSize.getSelectedIndex());
-				if ( !value.equals("auto") ) {
-					for (Iterator panelIt = panels.iterator(); panelIt.hasNext();) {
-						VizGalPanel panel = (VizGalPanel) panelIt.next();
-						panel.setImageSize(Integer.valueOf(value).intValue());
-					}
-				} else {
-					if ( pwidth == 0 ) {
-						int win = Window.getClientWidth();
-						if ( panelHeaderHidden ) {
-							pwidth = (win - rightPad)/2;
-						} else {
-							pwidth = (win-(rightPad+controlsWidth))/2;
-						}
-						if ( pwidth <= 0 ) {
-							pwidth = 400;
-						}
-					}
-					for (Iterator panelIt = panels.iterator(); panelIt.hasNext();) {
-						VizGalPanel panel = (VizGalPanel) panelIt.next();
-						panel.setPanelWidth(pwidth);
-					}
-				}
-			}		
-		});
-		
-		
-		buttonLayout.setWidget(0, 6, imageSizeLabel);
-		buttonLayout.setWidget(0, 7, imageSize);
-		
-		printerFriendlyButton = new PushButton("Print...");
-	    printerFriendlyButton.addClickHandler(new ClickHandler() {
-
-			@Override
-			public void onClick(ClickEvent print) {
-				
-				printerFriendly();
-				
-			}
-	    	
-	    });
-	    
-	    buttonLayout.setWidget(0, 8, printerFriendlyButton);
-		
-		// Initialize the gallery with an asynchronous call to the server to get variable needed.
-		if ( dsid != null && vid != null & operationID != null && view != null) {
-			// If the proper information was sent to the widget, pull down the variable definition
-			// and initialize the slide sorter with this Ajax call.
-			Util.getRPCService().getVariable(dsid, vid, requestGrid);
-		}
-        
-		settingsControls = new FlexTable();
-		settingsControls.setWidget(0, 0, settingsHeader);
-		
-		settingsControls.setWidget(1, 0, axesWidget);
-		settingsControls.setWidget(2, 0, comparisonAxesSelector);
-		settingsControls.setWidget(3, 0, operationsWidget);
-		
-		mainPanel = new FlexTable();
-		
-		cellFormatter = mainPanel.getFlexCellFormatter();
-		cellFormatter.setColSpan(0, 0, 2);
-		cellFormatter.setVerticalAlignment(1, 0, HasVerticalAlignment.ALIGN_TOP);
-		cellFormatter.setVerticalAlignment(1, 1, HasVerticalAlignment.ALIGN_TOP);
-		
-		mainPanel.setWidget(0, 0, buttonLayout);
-		mainPanel.setWidget(1, 0, settingsControls);
-		mainPanel.setWidget(1, 1, slides);
-		
+		buttonLayout.setWidget(0, 2, autoContourTextBox);
 
 		
-		RootPanel.get("vizGal").add(mainPanel);
+		RootPanel.get("vizGal").add(vVizGalPanel);
 		RootPanel.get("PLOT_LINK").setVisible(false);
 		
-		Window.addWindowResizeListener(windowResizeListener);
-		History.addValueChangeHandler(new ValueChangeHandler<String>() {
-			public void onValueChange(ValueChangeEvent<String> event) {
-				String historyToken = event.getValue();
-				popHistory(historyToken);
-			}
-		});
+		super.init(4);
+		
+		// Set the three required handlers
+		setDatasetSelectionHandler(xVisGalDatasetSelectionHandler);
+		setOperationsClickHandler(xVizGalOperationsClickHandler);
+		setOptionsOkHandler(optionsOkHandler);
+		
+		// Initialize the gallery with an asynchronous call to the server to get variable needed.
+		if ( xDSID != null && xVarID != null & xOperationID != null && xView != null) {
+			// If the proper information was sent to the widget, pull down the variable definition
+			// and initialize the slide sorter with this Ajax call.
+			Util.getRPCService().getVariable(xDSID, xVarID, requestGrid);
+		}
+		
 	}
 	
-	public void handlePanelShowHide() {
-		if ( panelHeaderHidden ) {
-			for (Iterator panelIt = panels.iterator(); panelIt.hasNext();) {
-				VizGalPanel panel = (VizGalPanel) panelIt.next();
-				panel.show();
-			}
-			cellFormatter.setVisible(1, 0, true);
-			pwidth = pwidth - controlsWidth/2;
-			resize();
-		} else {
-			for (Iterator panelIt = panels.iterator(); panelIt.hasNext();) {
-				VizGalPanel panel = (VizGalPanel) panelIt.next();
-				panel.hide();
-			}
-			cellFormatter.setVisible(1, 0, false);
-			pwidth = pwidth + controlsWidth/2;
-			resize();
-		}
-		panelHeaderHidden = !panelHeaderHidden;
-		pushHistory();
-	}
+
 	
 	private String getAnchor() {
 		String url = Window.Location.getHref();
@@ -456,37 +172,27 @@ public class VizGal implements EntryPoint {
 		}
 		
 	}
-	TreeListener datasetTreeListener = new TreeListener() {
+	SelectionHandler<TreeItem> xVisGalDatasetSelectionHandler = new SelectionHandler<TreeItem>() {
 
-		public void onTreeItemSelected(TreeItem item) {
+		@Override
+		public void onSelection(SelectionEvent<TreeItem> event) {
+			TreeItem item = (TreeItem) event.getSelectedItem();
 			Object v = item.getUserObject();
 			if ( v instanceof VariableSerializable ) {
-				nvar = (VariableSerializable) v;
+				xNewVariable = (VariableSerializable) v;
 				changeDataset = true;
 				changeDataset();
-				/*
-				if ( nvar.getAttributes().get("grid_type").equals("regular") ) {
-					changeDataset = true;
-				} else {
-					nvar = var;
-					Window.alert("visGal cannot work with scattered data at this time.");
-				}
-				 */
 			}
 		}
 
-		public void onTreeItemStateChanged(TreeItem item) {
-			// TODO Auto-generated method stub
-
-		}
-
 	};
+	
 	AsyncCallback requestGrid = new AsyncCallback() {
 		public void onSuccess(Object result) {
-			var = (VariableSerializable) result;
-			initial_var = var;
+			xVariable = (VariableSerializable) result;
+			initial_var = xVariable;
 			// Null view to get all operations.
-			Util.getRPCService().getConfig(null, dsid, vid, initVizGal);
+			Util.getRPCService().getConfig(null, xDSID, xVarID, initVizGal);
 		}
 
 
@@ -501,23 +207,23 @@ public class VizGal implements EntryPoint {
 
 			GridSerializable grid = config.getGrid();
 			ops = config.getOperations();
-			operationsWidget.setOperations(var.getIntervals(), operationID, view, ops);
-			optionsButton.setOptions(operationsWidget.getCurrentOperation().getOptionsID());
-			var.setGrid(grid);
+			xOperationsWidget.setOperations(xVariable.getIntervals(), xOperationID, xView, ops);
+			xOptionsButton.setOptions(xOperationsWidget.getCurrentOperation().getOptionsID());
+			xVariable.setGrid(grid);
 			// Figure out the compare and fixed axis
 			init();
-			for (Iterator panelIt = panels.iterator(); panelIt.hasNext();) {
+			for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
 				VizGalPanel panel = (VizGalPanel) panelIt.next();
 				panel.setPanelColor("regularBackground");
-				panel.setVariable(var);
+				panel.setVariable(xVariable);
 				panel.init(false, ops);
-				panel.setOperation(operationID, view);
+				panel.setOperation(xOperationID, xView);
 				
 				
 				if ( fixedAxis.equals("t") ) {
-					panel.setAxisRangeValues("t", axesWidget.getTAxis().getFerretDateLo(), axesWidget.getTAxis().getFerretDateHi());
+					panel.setAxisRangeValues("t", xAxesWidget.getTAxis().getFerretDateLo(), xAxesWidget.getTAxis().getFerretDateHi());
 				} else if ( fixedAxis.equals("z") ) {
-					panel.setAxisRangeValues("z", axesWidget.getZAxis().getLo(), axesWidget.getZAxis().getHi());
+					panel.setAxisRangeValues("z", xAxesWidget.getZAxis().getLo(), xAxesWidget.getZAxis().getHi());
 				}
 			}
 			
@@ -539,9 +245,9 @@ public class VizGal implements EntryPoint {
 				Window.alert("Error getting variables for this dataset.");
 			} else {
 				if ( cats[0].isVariableChildren() ) {
-					var = cats[0].getVariable(vid);
-					initial_var = var;
-					Util.getRPCService().getGrid(dsid, vid, initVizGalForHistory);
+					xVariable = cats[0].getVariable(xVarID);
+					initial_var = xVariable;
+					Util.getRPCService().getGrid(xDSID, xVarID, initVizGalForHistory);
 				} else {
 					Window.alert("No variables found in this category");
 				}
@@ -558,12 +264,13 @@ public class VizGal implements EntryPoint {
 			
 			GridSerializable grid = config.getGrid();
 			ops = config.getOperations();
-			var.setGrid(grid);
-			if (var.isVector() ) {
+			
+			xVariable.setGrid(grid);
+			if (xVariable.isVector() ) {
 				autoContourTextBox.setText("");
 				autoContourButton.setDown(false);
 				autoContourButton.setEnabled(false);
-				if ( !view.equals("xy") ) {
+				if ( !xView.equals("xy") ) {
 					differenceButton.setDown(false);
 					differenceButton.setEnabled(false);
 				} else {
@@ -580,7 +287,7 @@ public class VizGal implements EntryPoint {
 	AsyncCallback initVizGalForHistory = new AsyncCallback() {
 		public void onSuccess(Object result) {
 			GridSerializable grid = (GridSerializable) result;
-			var.setGrid(grid);
+			xVariable.setGrid(grid);
 			initPanels();
 			applyHistory(historyTokens);
 		}
@@ -588,115 +295,72 @@ public class VizGal implements EntryPoint {
 			Window.alert("Failed to initalizes VizGal."+caught.toString());
 		}
 	};
-	public WindowResizeListener windowResizeListener = new WindowResizeListener() {
-		public void onWindowResized(int width, int height) {
-			
-			if ( panelHeaderHidden ) {
-				pwidth = (width - rightPad)/2;
-			} else {
-				pwidth = (width-(rightPad+controlsWidth))/2;
-			}
-			resize();
-		}
-	};
-	public void resize() {
-		if ( imageSize.getValue(imageSize.getSelectedIndex()).equals("auto") ) {
-			for (Iterator panelIt = panels.iterator(); panelIt.hasNext();) {
-				VizGalPanel panel = (VizGalPanel) panelIt.next();
-				panel.setPanelWidth(pwidth);
-			}
-		}
-	}
+	
+	
 	private void initPanels() {
 
-		ortho.clear();
-		panels.clear();
+		xOrtho.clear();
 		
-		// FYI Column 3 of the header used to contain the gallery settings button.
-		int win = Window.getClientWidth();
-		if ( panelHeaderHidden ) {
-			pwidth = (win - rightPad)/2;
-		} else {
-			pwidth = (win-(rightPad+controlsWidth))/2;
-		}
-		if ( pwidth <= 0 ) {
-			pwidth = 400;
-		}
-		VizGalPanel sp1 = new VizGalPanel("Panel 0", true, operationID, optionID, view, false);
-		sp1.addRevertHandler(panelApplyButtonClick);
-		sp1.addApplyHandler(panelApplyButtonClick);
-		slides.setWidget(0, 0, sp1);
-		sp1.setPanelWidth(pwidth);
-		panels.add(sp1);
-
-		VizGalPanel sp2 = new VizGalPanel("Panel 1", false, operationID, optionID, view, false);
-		sp2.addRevertHandler(panelApplyButtonClick);
-		sp2.addApplyHandler(panelApplyButtonClick);
-		slides.setWidget(0, 1, sp2);
-		sp2.setPanelWidth(pwidth);		
-		panels.add(sp2);
-
-		VizGalPanel sp3 = new VizGalPanel("Panel 2", false, operationID, optionID, view, false);
-		sp3.addRevertHandler(panelApplyButtonClick);
-		sp3.addApplyHandler(panelApplyButtonClick);
-		slides.setWidget(1, 0, sp3);
-		sp3.setPanelWidth(pwidth);		
-		panels.add(sp3);
-
-		VizGalPanel sp4 = new VizGalPanel("Panel 3", false, operationID, optionID, view, false);
-		sp4.addRevertHandler(panelApplyButtonClick);
-		sp4.addApplyHandler(panelApplyButtonClick);
-		slides.setWidget(1, 1, sp4);
-		sp4.setPanelWidth(pwidth);		
-		panels.add(sp4);
-
-		sp1.setVariable(var);
-		sp1.init(false, ops);
-		sp2.setVariable(var);
-		sp2.init(false, ops);
-		sp3.setVariable(var);
-		sp3.init(false, ops);
-		sp4.setVariable(var);
-		sp4.init(false, ops);
-
 		init();
 		
-		if ( tlo != null && !tlo.equals("") ) {
-			for (Iterator panelIt = panels.iterator(); panelIt.hasNext();) {
-				VizGalPanel panel = (VizGalPanel) panelIt.next();
-				panel.setAxisRangeValues("t", tlo, thi);
-			}
-			axesWidget.getTAxis().setLo(tlo);
-			axesWidget.getTAxis().setHi(thi);
+		for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
+			VizGalPanel panel = (VizGalPanel) panelIt.next();
+			panel.setVariable(xVariable);
+			panel.init(false, ops);
 		}
-		if ( zlo != null && !zlo.equals("") ) {
-			for (Iterator panelIt = panels.iterator(); panelIt.hasNext();) {
+		
+		if ( xTlo != null && !xTlo.equals("") ) {
+			for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
 				VizGalPanel panel = (VizGalPanel) panelIt.next();
-				panel.setAxisRangeValues("z", zlo, zhi);
+				if ( xThi != null && !xThi.equals("") ) {
+					panel.setAxisRangeValues("t", xTlo, xThi);
+				} else {
+					panel.setAxisRangeValues("t", xTlo, xTlo);
+				}
+			}			
+			xAxesWidget.getTAxis().setLo(xTlo);
+			if ( xThi != null && !xThi.equals("") ) {
+				xAxesWidget.getTAxis().setHi(xThi);
+			} else {
+				xAxesWidget.getTAxis().setHi(xTlo);
 			}
-			axesWidget.getZAxis().setLo(zlo);
-			axesWidget.getZAxis().setHi(zhi);
+		}
+		if ( xZlo != null && !xZlo.equals("") ) {
+			for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
+				VizGalPanel panel = (VizGalPanel) panelIt.next();
+				if ( xZhi != null && !xZhi.equals("") ) {
+					panel.setAxisRangeValues("z", xZlo, xZhi);
+				} else {
+					panel.setAxisRangeValues("z", xZlo, xZlo);
+				}
+			}
+			xAxesWidget.getZAxis().setLo(xZlo);
+			if ( xZhi != null && !xZhi.equals("") ) {
+			xAxesWidget.getZAxis().setHi(xZhi);
+			} else {
+				xAxesWidget.getZAxis().setHi(xZlo);
+			}
 		}
 
 
 		// If these limits are not the same as the dataBounds, then set them.
-		if ( xlo != null && !xlo.equals("") && xhi != null && !xhi.equals("") && 
-			 ylo != null && !ylo.equals("") && yhi != null && !yhi.equals("") ) {
-			axesWidget.getRefMap().setCurrentSelection(Double.valueOf(ylo), Double.valueOf(yhi), Double.valueOf(xlo), Double.valueOf(xhi));
-			for (Iterator panelIt = panels.iterator(); panelIt.hasNext();) {
+		if ( xXlo != null && !xXlo.equals("") && xXhi != null && !xXhi.equals("") && 
+			 xYlo != null && !xYlo.equals("") && xYhi != null && !xYhi.equals("") ) {
+			xAxesWidget.getRefMap().setCurrentSelection(Double.valueOf(xYlo), Double.valueOf(xYhi), Double.valueOf(xXlo), Double.valueOf(xXhi));
+			for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
 				VizGalPanel panel = (VizGalPanel) panelIt.next();
-				panel.setMapTool(view);
-				panel.setLatLon(ylo, yhi, xlo, xhi);
+				panel.setMapTool(xView);
+				panel.setLatLon(xYlo, xYhi, xXlo, xXhi);
 			}
 		} else {
-			double tmp_xlo = axesWidget.getRefMap().getXlo();
-			double tmp_xhi = axesWidget.getRefMap().getXhi();
-			double tmp_ylo = axesWidget.getRefMap().getYlo();
-			double tmp_yhi = axesWidget.getRefMap().getYhi();
-			for (Iterator panelIt = panels.iterator(); panelIt.hasNext();) {
+			double tmp_xXlo = xAxesWidget.getRefMap().getXlo();
+			double tmp_xhi = xAxesWidget.getRefMap().getXhi();
+			double tmp_ylo = xAxesWidget.getRefMap().getYlo();
+			double tmp_yhi = xAxesWidget.getRefMap().getYhi();
+			for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
 				VizGalPanel panel = (VizGalPanel) panelIt.next();
-				panel.setMapTool(view);
-				panel.setLatLon(String.valueOf(tmp_ylo), String.valueOf(tmp_yhi), String.valueOf(tmp_xlo), String.valueOf(tmp_xhi));
+				panel.setMapTool(xView);
+				panel.setLatLon(String.valueOf(tmp_ylo), String.valueOf(tmp_yhi), String.valueOf(tmp_xXlo), String.valueOf(tmp_xhi));
 			}
 		}
 		
@@ -707,26 +371,26 @@ public class VizGal implements EntryPoint {
 			applyHistory(tokenMap);
 
 
-			for (int t = 0; t < panels.size(); t++) {
+			for (int t = 0; t < xPanels.size(); t++) {
 				HashMap<String, String> panelTokenMap = Util.getTokenMap(settings[t+1]);
 				HashMap<String, String> optionsMap = Util.getOptionsMap(settings[t+1]);
 				if ( t == 0 ) {
 					
-					operationsWidget.setOperation(tokenMap.get("operation_id"), panelTokenMap.get("view"));
-					axesWidget.getRefMap().setCurrentSelection(Double.valueOf(panelTokenMap.get("ylo")),
+					xOperationsWidget.setOperation(tokenMap.get("operation_id"), panelTokenMap.get("xView"));
+					xAxesWidget.getRefMap().setCurrentSelection(Double.valueOf(panelTokenMap.get("ylo")),
 							                                   Double.valueOf(panelTokenMap.get("yhi")), 
 							                                   Double.valueOf(panelTokenMap.get("xlo")),
 							                                   Double.valueOf(panelTokenMap.get("xhi")));
 					if ( optionsMap.size() >= 1 ) {
-						optionsButton.setState(optionsMap);
+						xOptionsButton.setState(optionsMap);
 					}
 					
 				}
-				panels.get(t).setFromHistoryToken(panelTokenMap, optionsMap);
+				xPanels.get(t).setFromHistoryToken(panelTokenMap, optionsMap);
 			}
 
 		}
-		boolean diff = !view.contains(compareAxis);	
+		boolean diff = !xView.contains(compareAxis);	
 		if ( !diff ) {
 			differenceButton.setDown(false);
 		}
@@ -735,9 +399,9 @@ public class VizGal implements EntryPoint {
 	}
 	public boolean init() {
 
-		operationsWidget.setOperations(var.getIntervals(), operationID, view, ops);
-		optionsButton.setOptions(operationsWidget.getCurrentOperation().getOptionsID());
-		GridSerializable ds_grid = var.getGrid();
+		xOperationsWidget.setOperations(xVariable.getIntervals(), xOperationID, xView, ops);
+		xOptionsButton.setOptions(xOperationsWidget.getCurrentOperation().getOptionsID());
+		GridSerializable ds_grid = xVariable.getGrid();
 		double grid_west = Double.valueOf(ds_grid.getXAxis().getLo());
 		double grid_east = Double.valueOf(ds_grid.getXAxis().getHi());
 
@@ -745,55 +409,55 @@ public class VizGal implements EntryPoint {
 		double grid_north = Double.valueOf(ds_grid.getYAxis().getHi());
 
 		double delta = Math.abs(Double.valueOf(ds_grid.getXAxis().getArangeSerializable().getStep()));
-		axesWidget.getRefMap().setTool(view);
-		axesWidget.getRefMap().setDataExtent(grid_south, grid_north, grid_west, grid_east, delta);
+		xAxesWidget.getRefMap().setTool(xView);
+		xAxesWidget.getRefMap().setDataExtent(grid_south, grid_north, grid_west, grid_east, delta);
 		
-		ortho = Util.setOrthoAxes(view, var.getGrid());
+		xOrtho = Util.setOrthoAxes(xView, xVariable.getGrid());
 		
-		if ( ortho.size() == 0 ) {
+		if ( xOrtho.size() == 0 ) {
 			Window.alert("There are no axes orthogonal to the view on which the data can be compared.");
 			return false;
 		} else {
 
 			int pos = 0;
 			// Figure out which axis vary in each frame.  Take them in order of t, z, y, x...
-			if ( ortho.contains("t") ) {
+			if ( xOrtho.contains("t") ) {
 				
 				compareAxis = "t";
 				
-				if ( ortho.contains("z") ) {
+				if ( xOrtho.contains("z") ) {
 					fixedAxis = "z";
-				} else if ( ortho.contains("y") ) {
+				} else if ( xOrtho.contains("y") ) {
 					fixedAxis = "y";
-				} else if ( ortho.contains("x") ) {
+				} else if ( xOrtho.contains("x") ) {
 					fixedAxis = "x";
 				} else {
 					fixedAxis = "";
 				}
 		
-			}  else if ( ortho.contains("z") ) {
+			}  else if ( xOrtho.contains("z") ) {
 				
 				compareAxis = "z";
 				
-				if ( ortho.contains("y") ) {
+				if ( xOrtho.contains("y") ) {
 					fixedAxis = "y";
-				} else if ( ortho.contains("x") ) {
+				} else if ( xOrtho.contains("x") ) {
 					fixedAxis = "x";
 				} else {
 					fixedAxis = "";
 				}
 				
-			} else if ( ortho.contains("y") ) {
+			} else if ( xOrtho.contains("y") ) {
                 
 				compareAxis = "y";
 				
-				if ( ortho.contains("x") ) {
+				if ( xOrtho.contains("x") ) {
 					fixedAxis = "x";
 				} else {
 					fixedAxis = "";
 				}
 				
-			} else if ( ortho.contains("x") ) {
+			} else if ( xOrtho.contains("x") ) {
 				
 				compareAxis = "x";
 				fixedAxis = "";
@@ -801,13 +465,13 @@ public class VizGal implements EntryPoint {
 			}
 			
 		    
-			comparisonAxesSelector.setAxes(ortho);
-			axesWidget.init(var.getGrid());
-			axesWidget.setFixedAxis(view, ortho, compareAxis);
+			xComparisonAxesSelector.setAxes(xOrtho);
+			xAxesWidget.init(xVariable.getGrid());
+			xAxesWidget.setFixedAxis(xView, xOrtho, compareAxis);
 			
-			for (Iterator panelIt = panels.iterator(); panelIt.hasNext();) {
+			for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
 				VizGalPanel panel = (VizGalPanel) panelIt.next();
-				panel.setCompareAxis(view, ortho, compareAxis);
+				panel.setCompareAxis(xView, xOrtho, compareAxis);
 			}
 			return true;
 		}
@@ -823,32 +487,32 @@ public class VizGal implements EntryPoint {
 			String fixedAxisLoValue = "";
 			String fixedAxisHiValue = "";
 			if ( compareAxis.equals("t") ) {
-				axesWidget.setRange("t", false);
-				fixedAxisLoValue = axesWidget.getZAxis().getLo();
-				fixedAxisHiValue = axesWidget.getZAxis().getHi();
-				fixed_axis_range = axesWidget.getZAxis().isRange();	
+				xAxesWidget.setRange("t", false);
+				fixedAxisLoValue = xAxesWidget.getZAxis().getLo();
+				fixedAxisHiValue = xAxesWidget.getZAxis().getHi();
+				fixed_axis_range = xAxesWidget.getZAxis().isRange();	
 			}  else {
-				axesWidget.setRange("z", false);
-				fixedAxisLoValue = axesWidget.getTAxis().getFerretDateLo();
-				fixedAxisHiValue = axesWidget.getTAxis().getFerretDateHi();
-				fixed_axis_range = axesWidget.getTAxis().isRange();
+				xAxesWidget.setRange("z", false);
+				fixedAxisLoValue = xAxesWidget.getTAxis().getFerretDateLo();
+				fixedAxisHiValue = xAxesWidget.getTAxis().getFerretDateHi();
+				fixed_axis_range = xAxesWidget.getTAxis().isRange();
 			}
-			axesWidget.setFixedAxis(view, ortho, compareAxis);
+			xAxesWidget.setFixedAxis(xView, xOrtho, compareAxis);
 			// Set the value of the fixed axis in all the panels under slide sorter control.
-			ortho = Util.setOrthoAxes(view, var.getGrid());
-			for (Iterator panelIt = panels.iterator(); panelIt.hasNext();) {
+			xOrtho = Util.setOrthoAxes(xView, xVariable.getGrid());
+			for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
 				VizGalPanel panel = (VizGalPanel) panelIt.next();
 				if ( !panel.isUsePanelSettings() ) {
-					panel.setCompareAxis(view, ortho, compareAxis);
+					panel.setCompareAxis(xView, xOrtho, compareAxis);
 					panel.setAxisRangeValues(fixedAxis, fixedAxisLoValue, fixedAxisHiValue);
 					
 					// A time or zWidget is already initialized so the setCompareAxis displays
 					// these widgets and they are ready to go.  A map on the other hand has to
 					// be initialized after it gets placed in the display.
-					double[] data = axesWidget.getRefMap().getDataExtent();
-					double[] selection = axesWidget.getRefMap().getCurrentSelection();
+					double[] data = xAxesWidget.getRefMap().getDataExtent();
+					double[] selection = xAxesWidget.getRefMap().getCurrentSelection();
 					// Set the map tool.
-					panel.setMapTool(view);
+					panel.setMapTool(xView);
 					// Set the data extents.
 					panel.setDataExtent(data);
 					// Set the current selection.
@@ -858,7 +522,7 @@ public class VizGal implements EntryPoint {
 			}
 			refresh(true, true);
 
-			boolean diff = !view.contains(compareAxis);	
+			boolean diff = !xView.contains(compareAxis);	
 			if ( !diff ) {
 				differenceButton.setDown(false);
 			}
@@ -876,18 +540,18 @@ public class VizGal implements EntryPoint {
 				autoContourTextBox.setText("");
 			}
 			VizGalPanel comparePanel = null;
-			for (Iterator panelIt = panels.iterator(); panelIt.hasNext();) {
+			for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
 				VizGalPanel panel = (VizGalPanel) panelIt.next();
 				if ( panel.isComparePanel() ) {
 					comparePanel = panel;
-					panel.refreshPlot(optionsButton.getState(), switchAxis, true);	
+					panel.refreshPlot(xOptionsButton.getState(), switchAxis, true);	
 				}
 			}
 			if ( comparePanel != null ) {
-				for (Iterator panelIt = panels.iterator(); panelIt.hasNext();) {
+				for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
 					VizGalPanel panel = (VizGalPanel) panelIt.next();
 					if ( !panel.getID().equals(comparePanel.getID()) ) {
-						String xlo = "";
+						String xXlo = "";
 						String xhi = "";
 						String ylo = "";
 						String yhi = "";
@@ -898,271 +562,271 @@ public class VizGal implements EntryPoint {
 						// The values for the first variable come from either the Gallery or
 						// the comparison panel.
 						if ( compareAxis.contains("x") ) {
-							xlo = String.valueOf(comparePanel.getXlo());
+							xXlo = String.valueOf(comparePanel.getXlo());
 							xhi = String.valueOf(comparePanel.getXhi());
 						} else {
-							xlo = String.valueOf(axesWidget.getRefMap().getXlo());
-							xhi = String.valueOf(axesWidget.getRefMap().getXhi());
+							xXlo = String.valueOf(xAxesWidget.getRefMap().getXlo());
+							xhi = String.valueOf(xAxesWidget.getRefMap().getXhi());
 						}
 						if ( compareAxis.contains("y") ) {
 							ylo = String.valueOf(comparePanel.getYlo());
 							yhi = String.valueOf(comparePanel.getYhi());
 						} else {
-							ylo = String.valueOf(axesWidget.getRefMap().getYlo());
-							yhi = String.valueOf(axesWidget.getRefMap().getYhi());
+							ylo = String.valueOf(xAxesWidget.getRefMap().getYlo());
+							yhi = String.valueOf(xAxesWidget.getRefMap().getYhi());
 						}
 						
-						if ( var.getGrid().hasT() ) {
+						if ( xVariable.getGrid().hasT() ) {
 							if ( compareAxis.equals("t") ) {
 							    tlo = comparePanel.getTlo();
 							    thi = comparePanel.getThi();
 							} else {
-								tlo = axesWidget.getTAxis().getFerretDateLo();
-								thi = axesWidget.getTAxis().getFerretDateHi();
+								tlo = xAxesWidget.getTAxis().getFerretDateLo();
+								thi = xAxesWidget.getTAxis().getFerretDateHi();
 							}
 						} else {
 							tlo = null;
 							thi = null;
 						}
-						if ( var.getGrid().hasZ() ) {
+						if ( xVariable.getGrid().hasZ() ) {
 							if ( compareAxis.equals("z") ) {
 								zlo = comparePanel.getZlo();
 								zhi = comparePanel.getZhi();
 							} else {
-								zlo = axesWidget.getZAxis().getLo();
-								zhi = axesWidget.getZAxis().getHi();
+								zlo = xAxesWidget.getZAxis().getLo();
+								zhi = xAxesWidget.getZAxis().getHi();
 							}
 						} else {
 							zlo = null;
 							zhi = null;
 						}
-						panel.computeDifference(optionsButton.getState(), switchAxis, comparePanel.getVariable(), operationsWidget.getCurrentView(), xlo, xhi, ylo, yhi, zlo, zhi, tlo, thi);
+						panel.computeDifference(xOptionsButton.getState(), switchAxis, comparePanel.getVariable(), xOperationsWidget.getCurrentView(), xXlo, xhi, ylo, yhi, zlo, zhi, tlo, thi);
 					}
 				}
 			}
 		} else {
-			double plot_xlo = -9999.;
+			double plot_xXlo = -9999.;
 			double plot_xhi = -9999.;
 			double plot_yhi = -9999.;
 			double plot_ylo = -9999.;
-			for (Iterator panelIt = panels.iterator(); panelIt.hasNext();) {
+			for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
 				VizGalPanel panel = (VizGalPanel) panelIt.next();
 				if ( panel.isComparePanel() ) {
-					plot_xlo = panel.getXlo();
+					plot_xXlo = panel.getXlo();
 					plot_xhi = panel.getXhi();
 					plot_ylo = panel.getYlo();
 					plot_yhi = panel.getYhi();
 				}
 			}
-			for (Iterator panelIt = panels.iterator(); panelIt.hasNext();) {
+			for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
 				VizGalPanel panel = (VizGalPanel) panelIt.next();
 
 				// See if the panel settings are being used on this panel, if not
 				// reset the fixed axis and the view axis and the operation to the slide sorter value.
 				if ( !panel.isUsePanelSettings() ) {
 					VariableSerializable v = panel.getVariable();
-					if ( !v.getID().equals(var.getID()) || !v.getDSID().equals(var.getDSID() ) ) {
-						panel.setVariable(var);
+					if ( !v.getID().equals(xVariable.getID()) || !v.getDSID().equals(xVariable.getDSID() ) ) {
+						panel.setVariable(xVariable);
 						panel.init(false, ops);
 					} 
-					if ( view.equals("xy") && compareAxis.equals("z") ) {
+					if ( xView.equals("xy") && compareAxis.equals("z") ) {
 						// set x, y, and t in the panel
-						if ( var.getGrid().hasT() ) {
-							panel.setAxisRangeValues("t", axesWidget.getTAxis().getFerretDateLo(), axesWidget.getTAxis().getFerretDateHi());
+						if ( xVariable.getGrid().hasT() ) {
+							panel.setAxisRangeValues("t", xAxesWidget.getTAxis().getFerretDateLo(), xAxesWidget.getTAxis().getFerretDateHi());
 						}
-						panel.setLatLon(String.valueOf(axesWidget.getRefMap().getYlo()), 
-								        String.valueOf(axesWidget.getRefMap().getYhi()), 
-								        String.valueOf(axesWidget.getRefMap().getXlo()), 
-								        String.valueOf(axesWidget.getRefMap().getXhi()));
-					} else if ( view.equals("xy") && compareAxis.equals("t") ) {
+						panel.setLatLon(String.valueOf(xAxesWidget.getRefMap().getYlo()), 
+								        String.valueOf(xAxesWidget.getRefMap().getYhi()), 
+								        String.valueOf(xAxesWidget.getRefMap().getXlo()), 
+								        String.valueOf(xAxesWidget.getRefMap().getXhi()));
+					} else if ( xView.equals("xy") && compareAxis.equals("t") ) {
 						// set x, y and z in the panel
-						if ( var.getGrid().hasZ() ) {
-							panel.setAxisRangeValues("z", axesWidget.getZAxis().getLo(), axesWidget.getZAxis().getHi());
+						if ( xVariable.getGrid().hasZ() ) {
+							panel.setAxisRangeValues("z", xAxesWidget.getZAxis().getLo(), xAxesWidget.getZAxis().getHi());
 						}
-						panel.setLatLon(String.valueOf(axesWidget.getRefMap().getYlo()), 
-						        String.valueOf(axesWidget.getRefMap().getYhi()), 
-						        String.valueOf(axesWidget.getRefMap().getXlo()), 
-						        String.valueOf(axesWidget.getRefMap().getXhi()));
-					} else if ( view.equals("x") && compareAxis.equals("t") ) {
+						panel.setLatLon(String.valueOf(xAxesWidget.getRefMap().getYlo()), 
+						        String.valueOf(xAxesWidget.getRefMap().getYhi()), 
+						        String.valueOf(xAxesWidget.getRefMap().getXlo()), 
+						        String.valueOf(xAxesWidget.getRefMap().getXhi()));
+					} else if ( xView.equals("x") && compareAxis.equals("t") ) {
 						// The map and z are in the fixed axis panel,  take the map value for both x and y and set z. 
 						// ( OR from above )
-						if ( var.getGrid().hasZ() ) {
-							panel.setAxisRangeValues("z", axesWidget.getZAxis().getLo(), axesWidget.getZAxis().getHi());
+						if ( xVariable.getGrid().hasZ() ) {
+							panel.setAxisRangeValues("z", xAxesWidget.getZAxis().getLo(), xAxesWidget.getZAxis().getHi());
 						}
-						panel.setLatLon(String.valueOf(axesWidget.getRefMap().getYlo()), 
-						        String.valueOf(axesWidget.getRefMap().getYhi()), 
-						        String.valueOf(axesWidget.getRefMap().getXlo()), 
-						        String.valueOf(axesWidget.getRefMap().getXhi()));
-					} else if ( view.equals("x") && compareAxis.equals("z") ) {
-						if ( var.getGrid().hasT() ) {
-							panel.setAxisRangeValues("t", axesWidget.getTAxis().getFerretDateLo(), axesWidget.getTAxis().getFerretDateHi());
+						panel.setLatLon(String.valueOf(xAxesWidget.getRefMap().getYlo()), 
+						        String.valueOf(xAxesWidget.getRefMap().getYhi()), 
+						        String.valueOf(xAxesWidget.getRefMap().getXlo()), 
+						        String.valueOf(xAxesWidget.getRefMap().getXhi()));
+					} else if ( xView.equals("x") && compareAxis.equals("z") ) {
+						if ( xVariable.getGrid().hasT() ) {
+							panel.setAxisRangeValues("t", xAxesWidget.getTAxis().getFerretDateLo(), xAxesWidget.getTAxis().getFerretDateHi());
 						}
-						panel.setLatLon(String.valueOf(axesWidget.getRefMap().getYlo()), 
-						        String.valueOf(axesWidget.getRefMap().getYhi()), 
-						        String.valueOf(axesWidget.getRefMap().getXlo()), 
-						        String.valueOf(axesWidget.getRefMap().getXhi()));
-					} else if ( view.equals("x") && compareAxis.equals("y") ) {
+						panel.setLatLon(String.valueOf(xAxesWidget.getRefMap().getYlo()), 
+						        String.valueOf(xAxesWidget.getRefMap().getYhi()), 
+						        String.valueOf(xAxesWidget.getRefMap().getXlo()), 
+						        String.valueOf(xAxesWidget.getRefMap().getXhi()));
+					} else if ( xView.equals("x") && compareAxis.equals("y") ) {
 						// The map is in the panels.  z and t are in the fixed axes panel.
 						// Take z and t from the global controls and x from the first panel and put back the y from each panel
-						if ( var.getGrid().hasZ() ) {
-							panel.setAxisRangeValues("z", axesWidget.getZAxis().getLo(), axesWidget.getZAxis().getHi());
+						if ( xVariable.getGrid().hasZ() ) {
+							panel.setAxisRangeValues("z", xAxesWidget.getZAxis().getLo(), xAxesWidget.getZAxis().getHi());
 						}
-						if ( var.getGrid().hasT() ) {
-							panel.setAxisRangeValues("t", axesWidget.getTAxis().getFerretDateLo(), axesWidget.getTAxis().getFerretDateHi());
+						if ( xVariable.getGrid().hasT() ) {
+							panel.setAxisRangeValues("t", xAxesWidget.getTAxis().getFerretDateLo(), xAxesWidget.getTAxis().getFerretDateHi());
 						}
 						panel.setLatLon(String.valueOf(panel.getYlo()), 
 						        String.valueOf(panel.getYhi()), 
-						        String.valueOf(plot_xlo), 
+						        String.valueOf(plot_xXlo), 
 						        String.valueOf(plot_xhi));
-					} else if ( view.equals("y") && compareAxis.equals("t") ) {
-						if ( var.getGrid().hasZ() ) {
-							panel.setAxisRangeValues("z", axesWidget.getZAxis().getLo(), axesWidget.getZAxis().getHi());
+					} else if ( xView.equals("y") && compareAxis.equals("t") ) {
+						if ( xVariable.getGrid().hasZ() ) {
+							panel.setAxisRangeValues("z", xAxesWidget.getZAxis().getLo(), xAxesWidget.getZAxis().getHi());
 						}
-						panel.setLatLon(String.valueOf(axesWidget.getRefMap().getYlo()), 
-						        String.valueOf(axesWidget.getRefMap().getYhi()), 
-						        String.valueOf(axesWidget.getRefMap().getXlo()), 
-						        String.valueOf(axesWidget.getRefMap().getXhi()));
-					} else if ( view.equals("y") && compareAxis.equals("z") ) {
-						if ( var.getGrid().hasT() ) {
-							panel.setAxisRangeValues("t", axesWidget.getTAxis().getFerretDateLo(), axesWidget.getTAxis().getFerretDateHi());
+						panel.setLatLon(String.valueOf(xAxesWidget.getRefMap().getYlo()), 
+						        String.valueOf(xAxesWidget.getRefMap().getYhi()), 
+						        String.valueOf(xAxesWidget.getRefMap().getXlo()), 
+						        String.valueOf(xAxesWidget.getRefMap().getXhi()));
+					} else if ( xView.equals("y") && compareAxis.equals("z") ) {
+						if ( xVariable.getGrid().hasT() ) {
+							panel.setAxisRangeValues("t", xAxesWidget.getTAxis().getFerretDateLo(), xAxesWidget.getTAxis().getFerretDateHi());
 						}
-						panel.setLatLon(String.valueOf(axesWidget.getRefMap().getYlo()), 
-						        String.valueOf(axesWidget.getRefMap().getYhi()), 
-						        String.valueOf(axesWidget.getRefMap().getXlo()), 
-						        String.valueOf(axesWidget.getRefMap().getXhi()));
-					} else if ( view.equals("y") && compareAxis.equals("x") ) {
-						if ( var.getGrid().hasZ() ) {
-							panel.setAxisRangeValues("z", axesWidget.getZAxis().getLo(), axesWidget.getZAxis().getHi());
+						panel.setLatLon(String.valueOf(xAxesWidget.getRefMap().getYlo()), 
+						        String.valueOf(xAxesWidget.getRefMap().getYhi()), 
+						        String.valueOf(xAxesWidget.getRefMap().getXlo()), 
+						        String.valueOf(xAxesWidget.getRefMap().getXhi()));
+					} else if ( xView.equals("y") && compareAxis.equals("x") ) {
+						if ( xVariable.getGrid().hasZ() ) {
+							panel.setAxisRangeValues("z", xAxesWidget.getZAxis().getLo(), xAxesWidget.getZAxis().getHi());
 						}
-						if ( var.getGrid().hasT() ) {
-							panel.setAxisRangeValues("t", axesWidget.getTAxis().getFerretDateLo(), axesWidget.getTAxis().getFerretDateHi());
+						if ( xVariable.getGrid().hasT() ) {
+							panel.setAxisRangeValues("t", xAxesWidget.getTAxis().getFerretDateLo(), xAxesWidget.getTAxis().getFerretDateHi());
 						}
 						panel.setLatLon(String.valueOf(plot_ylo), 
 						        String.valueOf(plot_yhi), 
 						        String.valueOf(panel.getXlo()), 
 						        String.valueOf(panel.getXhi()));
-					} else if ( view.equals("z") && compareAxis.equals("t") ) {
-						if ( var.getGrid().hasZ() ) {
-							panel.setAxisRangeValues("z", axesWidget.getZAxis().getLo(), axesWidget.getZAxis().getHi());
+					} else if ( xView.equals("z") && compareAxis.equals("t") ) {
+						if ( xVariable.getGrid().hasZ() ) {
+							panel.setAxisRangeValues("z", xAxesWidget.getZAxis().getLo(), xAxesWidget.getZAxis().getHi());
 						}
-						panel.setLatLon(String.valueOf(axesWidget.getRefMap().getYlo()), 
-						        String.valueOf(axesWidget.getRefMap().getYhi()), 
-						        String.valueOf(axesWidget.getRefMap().getXlo()), 
-						        String.valueOf(axesWidget.getRefMap().getXhi()));
-					} else if ( view.equals("z") && compareAxis.equals("xy") ) {
-						if ( var.getGrid().hasZ() ) {
-							panel.setAxisRangeValues("z", axesWidget.getZAxis().getLo(), axesWidget.getZAxis().getHi());
+						panel.setLatLon(String.valueOf(xAxesWidget.getRefMap().getYlo()), 
+						        String.valueOf(xAxesWidget.getRefMap().getYhi()), 
+						        String.valueOf(xAxesWidget.getRefMap().getXlo()), 
+						        String.valueOf(xAxesWidget.getRefMap().getXhi()));
+					} else if ( xView.equals("z") && compareAxis.equals("xy") ) {
+						if ( xVariable.getGrid().hasZ() ) {
+							panel.setAxisRangeValues("z", xAxesWidget.getZAxis().getLo(), xAxesWidget.getZAxis().getHi());
 						}
-						if ( var.getGrid().hasT() ) {
-							panel.setAxisRangeValues("t", axesWidget.getTAxis().getFerretDateLo(), axesWidget.getTAxis().getFerretDateHi());
+						if ( xVariable.getGrid().hasT() ) {
+							panel.setAxisRangeValues("t", xAxesWidget.getTAxis().getFerretDateLo(), xAxesWidget.getTAxis().getFerretDateHi());
 						}
-					} else if ( view.equals("t") && compareAxis.equals("z") ) {
-						if ( var.getGrid().hasT() ) {
-							panel.setAxisRangeValues("t", axesWidget.getTAxis().getFerretDateLo(), axesWidget.getTAxis().getFerretDateHi());
+					} else if ( xView.equals("t") && compareAxis.equals("z") ) {
+						if ( xVariable.getGrid().hasT() ) {
+							panel.setAxisRangeValues("t", xAxesWidget.getTAxis().getFerretDateLo(), xAxesWidget.getTAxis().getFerretDateHi());
 						}
-						panel.setLatLon(String.valueOf(axesWidget.getRefMap().getYlo()), 
-						        String.valueOf(axesWidget.getRefMap().getYhi()), 
-						        String.valueOf(axesWidget.getRefMap().getXlo()), 
-						        String.valueOf(axesWidget.getRefMap().getXhi()));
-					} else if ( view.equals("t") && compareAxis.equals("xy") ) {
-						if ( var.getGrid().hasZ() ) {
-							panel.setAxisRangeValues("z", axesWidget.getZAxis().getLo(), axesWidget.getZAxis().getHi());
+						panel.setLatLon(String.valueOf(xAxesWidget.getRefMap().getYlo()), 
+						        String.valueOf(xAxesWidget.getRefMap().getYhi()), 
+						        String.valueOf(xAxesWidget.getRefMap().getXlo()), 
+						        String.valueOf(xAxesWidget.getRefMap().getXhi()));
+					} else if ( xView.equals("t") && compareAxis.equals("xy") ) {
+						if ( xVariable.getGrid().hasZ() ) {
+							panel.setAxisRangeValues("z", xAxesWidget.getZAxis().getLo(), xAxesWidget.getZAxis().getHi());
 						}
-						if ( var.getGrid().hasT() ) {
-							panel.setAxisRangeValues("t", axesWidget.getTAxis().getFerretDateLo(), axesWidget.getTAxis().getFerretDateHi());
+						if ( xVariable.getGrid().hasT() ) {
+							panel.setAxisRangeValues("t", xAxesWidget.getTAxis().getFerretDateLo(), xAxesWidget.getTAxis().getFerretDateHi());
 						}
-					} else if ( view.equals("xz") && compareAxis.equals("y") ) {
-						if ( var.getGrid().hasZ() ) {
-							panel.setAxisRangeValues("z", axesWidget.getZAxis().getLo(), axesWidget.getZAxis().getHi());
+					} else if ( xView.equals("xz") && compareAxis.equals("y") ) {
+						if ( xVariable.getGrid().hasZ() ) {
+							panel.setAxisRangeValues("z", xAxesWidget.getZAxis().getLo(), xAxesWidget.getZAxis().getHi());
 						}
-						if ( var.getGrid().hasT() ) {
-							panel.setAxisRangeValues("t", axesWidget.getTAxis().getFerretDateLo(), axesWidget.getTAxis().getFerretDateHi());
+						if ( xVariable.getGrid().hasT() ) {
+							panel.setAxisRangeValues("t", xAxesWidget.getTAxis().getFerretDateLo(), xAxesWidget.getTAxis().getFerretDateHi());
 						}
 						panel.setLatLon(String.valueOf(panel.getYlo()), 
 						        String.valueOf(panel.getYhi()), 
-						        String.valueOf(plot_xlo), 
+						        String.valueOf(plot_xXlo), 
 						        String.valueOf(plot_xhi));
-					} else if ( view.equals("xz") && compareAxis.equals("t") ) {
-						if ( var.getGrid().hasZ() ) {
-							panel.setAxisRangeValues("z", axesWidget.getZAxis().getLo(), axesWidget.getZAxis().getHi());
+					} else if ( xView.equals("xz") && compareAxis.equals("t") ) {
+						if ( xVariable.getGrid().hasZ() ) {
+							panel.setAxisRangeValues("z", xAxesWidget.getZAxis().getLo(), xAxesWidget.getZAxis().getHi());
 						}
-						panel.setLatLon(String.valueOf(axesWidget.getRefMap().getYlo()), 
-						        String.valueOf(axesWidget.getRefMap().getYhi()), 
-						        String.valueOf(axesWidget.getRefMap().getXlo()), 
-						        String.valueOf(axesWidget.getRefMap().getXhi()));
-					} else if ( view.equals("yz") && compareAxis.equals("x") ) {
-						if ( var.getGrid().hasZ() ) {
-							panel.setAxisRangeValues("z", axesWidget.getZAxis().getLo(), axesWidget.getZAxis().getHi());
+						panel.setLatLon(String.valueOf(xAxesWidget.getRefMap().getYlo()), 
+						        String.valueOf(xAxesWidget.getRefMap().getYhi()), 
+						        String.valueOf(xAxesWidget.getRefMap().getXlo()), 
+						        String.valueOf(xAxesWidget.getRefMap().getXhi()));
+					} else if ( xView.equals("yz") && compareAxis.equals("x") ) {
+						if ( xVariable.getGrid().hasZ() ) {
+							panel.setAxisRangeValues("z", xAxesWidget.getZAxis().getLo(), xAxesWidget.getZAxis().getHi());
 						}
-						if ( var.getGrid().hasT() ) {
-							panel.setAxisRangeValues("t", axesWidget.getTAxis().getFerretDateLo(), axesWidget.getTAxis().getFerretDateHi());
+						if ( xVariable.getGrid().hasT() ) {
+							panel.setAxisRangeValues("t", xAxesWidget.getTAxis().getFerretDateLo(), xAxesWidget.getTAxis().getFerretDateHi());
 						}
 						panel.setLatLon(String.valueOf(plot_ylo), 
 						        String.valueOf(plot_yhi), 
 						        String.valueOf(panel.getXlo()), 
 						        String.valueOf(panel.getXhi()));
-					} else if ( view.equals("yz") && compareAxis.equals("t") ) {
-						if ( var.getGrid().hasZ() ) {
-							panel.setAxisRangeValues("z", axesWidget.getZAxis().getLo(), axesWidget.getZAxis().getHi());
+					} else if ( xView.equals("yz") && compareAxis.equals("t") ) {
+						if ( xVariable.getGrid().hasZ() ) {
+							panel.setAxisRangeValues("z", xAxesWidget.getZAxis().getLo(), xAxesWidget.getZAxis().getHi());
 						}
-						panel.setLatLon(String.valueOf(axesWidget.getRefMap().getYlo()), 
-						        String.valueOf(axesWidget.getRefMap().getYhi()), 
-						        String.valueOf(axesWidget.getRefMap().getXlo()), 
-						        String.valueOf(axesWidget.getRefMap().getXhi()));
-					} else if ( view.equals("xt") && compareAxis.equals("z") ) {
-						if ( var.getGrid().hasT() ) {
-							panel.setAxisRangeValues("t", axesWidget.getTAxis().getFerretDateLo(), axesWidget.getTAxis().getFerretDateHi());
+						panel.setLatLon(String.valueOf(xAxesWidget.getRefMap().getYlo()), 
+						        String.valueOf(xAxesWidget.getRefMap().getYhi()), 
+						        String.valueOf(xAxesWidget.getRefMap().getXlo()), 
+						        String.valueOf(xAxesWidget.getRefMap().getXhi()));
+					} else if ( xView.equals("xt") && compareAxis.equals("z") ) {
+						if ( xVariable.getGrid().hasT() ) {
+							panel.setAxisRangeValues("t", xAxesWidget.getTAxis().getFerretDateLo(), xAxesWidget.getTAxis().getFerretDateHi());
 						}
-						panel.setLatLon(String.valueOf(axesWidget.getRefMap().getYlo()), 
-						        String.valueOf(axesWidget.getRefMap().getYhi()), 
-						        String.valueOf(axesWidget.getRefMap().getXlo()), 
-						        String.valueOf(axesWidget.getRefMap().getXhi()));
-					} else if ( view.equals("xt") && compareAxis.equals("y") ) {
-						if ( var.getGrid().hasZ() ) {
-							panel.setAxisRangeValues("z", axesWidget.getZAxis().getLo(), axesWidget.getZAxis().getHi());
+						panel.setLatLon(String.valueOf(xAxesWidget.getRefMap().getYlo()), 
+						        String.valueOf(xAxesWidget.getRefMap().getYhi()), 
+						        String.valueOf(xAxesWidget.getRefMap().getXlo()), 
+						        String.valueOf(xAxesWidget.getRefMap().getXhi()));
+					} else if ( xView.equals("xt") && compareAxis.equals("y") ) {
+						if ( xVariable.getGrid().hasZ() ) {
+							panel.setAxisRangeValues("z", xAxesWidget.getZAxis().getLo(), xAxesWidget.getZAxis().getHi());
 						}
-						if ( var.getGrid().hasT() ) {
-							panel.setAxisRangeValues("t", axesWidget.getTAxis().getFerretDateLo(), axesWidget.getTAxis().getFerretDateHi());
+						if ( xVariable.getGrid().hasT() ) {
+							panel.setAxisRangeValues("t", xAxesWidget.getTAxis().getFerretDateLo(), xAxesWidget.getTAxis().getFerretDateHi());
 						}
 						panel.setLatLon(String.valueOf(panel.getYlo()), 
 						        String.valueOf(panel.getYhi()), 
-						        String.valueOf(plot_xlo), 
+						        String.valueOf(plot_xXlo), 
 						        String.valueOf(plot_xhi));
-					} else if ( view.equals("yt") && compareAxis.equals("x") ) {
-						if ( var.getGrid().hasZ() ) {
-							panel.setAxisRangeValues("z", axesWidget.getZAxis().getLo(), axesWidget.getZAxis().getHi());
+					} else if ( xView.equals("yt") && compareAxis.equals("x") ) {
+						if ( xVariable.getGrid().hasZ() ) {
+							panel.setAxisRangeValues("z", xAxesWidget.getZAxis().getLo(), xAxesWidget.getZAxis().getHi());
 						}
-						if ( var.getGrid().hasT() ) {
-							panel.setAxisRangeValues("t", axesWidget.getTAxis().getFerretDateLo(), axesWidget.getTAxis().getFerretDateHi());
+						if ( xVariable.getGrid().hasT() ) {
+							panel.setAxisRangeValues("t", xAxesWidget.getTAxis().getFerretDateLo(), xAxesWidget.getTAxis().getFerretDateHi());
 						}
 						panel.setLatLon(String.valueOf(plot_ylo), 
 						        String.valueOf(plot_yhi), 
 						        String.valueOf(panel.getXlo()), 
 						        String.valueOf(panel.getXhi()));
-					} else if ( view.equals("yt") && compareAxis.equals("z") ) {
-						if ( var.getGrid().hasT() ) {
-							panel.setAxisRangeValues("t", axesWidget.getTAxis().getFerretDateLo(), axesWidget.getTAxis().getFerretDateHi());
+					} else if ( xView.equals("yt") && compareAxis.equals("z") ) {
+						if ( xVariable.getGrid().hasT() ) {
+							panel.setAxisRangeValues("t", xAxesWidget.getTAxis().getFerretDateLo(), xAxesWidget.getTAxis().getFerretDateHi());
 						}
-						panel.setLatLon(String.valueOf(axesWidget.getRefMap().getYlo()), 
-						        String.valueOf(axesWidget.getRefMap().getYhi()), 
-						        String.valueOf(axesWidget.getRefMap().getXlo()), 
-						        String.valueOf(axesWidget.getRefMap().getXhi()));
-					} else if ( view.equals("zt") ) {
-						if ( var.getGrid().hasZ() ) {
-							panel.setAxisRangeValues("z", axesWidget.getZAxis().getLo(), axesWidget.getZAxis().getHi());
+						panel.setLatLon(String.valueOf(xAxesWidget.getRefMap().getYlo()), 
+						        String.valueOf(xAxesWidget.getRefMap().getYhi()), 
+						        String.valueOf(xAxesWidget.getRefMap().getXlo()), 
+						        String.valueOf(xAxesWidget.getRefMap().getXhi()));
+					} else if ( xView.equals("zt") ) {
+						if ( xVariable.getGrid().hasZ() ) {
+							panel.setAxisRangeValues("z", xAxesWidget.getZAxis().getLo(), xAxesWidget.getZAxis().getHi());
 						}
-						if ( var.getGrid().hasT() ) {
-							panel.setAxisRangeValues("t", axesWidget.getTAxis().getFerretDateLo(), axesWidget.getTAxis().getFerretDateHi());
+						if ( xVariable.getGrid().hasT() ) {
+							panel.setAxisRangeValues("t", xAxesWidget.getTAxis().getFerretDateLo(), xAxesWidget.getTAxis().getFerretDateHi());
 						}
 					}
-					panel.setOperation(operationID, view);
+					panel.setOperation(xOperationID, xView);
 				}
-				if ( !panel.getCurrentOperationView().equals(operationsWidget.getCurrentView()) ) {
+				if ( !panel.getCurrentOperationView().equals(xOperationsWidget.getCurrentView()) ) {
 					differenceButton.setDown(false);
 					differenceButton.setEnabled(false);
 				} else {
-					if ( var.isVector() ) {
-						if ( !view.equals("xy") ) {
+					if ( xVariable.isVector() ) {
+						if ( !xView.equals("xy") ) {
 							differenceButton.setDown(false);
 							differenceButton.setEnabled(false);
 						} else {
@@ -1177,7 +841,7 @@ public class VizGal implements EntryPoint {
 
 
 				// Get the current state of the options...
-				Map<String, String> temp_state = new HashMap<String, String>(optionsButton.getState());
+				Map<String, String> temp_state = new HashMap<String, String>(xOptionsButton.getState());
 				if ( autoContourButton.isDown() ) {
 					// If the auto button is down, it wins...
 					autoScale();
@@ -1194,54 +858,17 @@ public class VizGal implements EntryPoint {
 			pushHistory();
 		}
 	}
-	/*
-	 * A region change in the panel is now only going to be applied to the panel.
-	 * 
-	 * Need some controls to prevent the global settings from overriding the panel setting after a panel it settings changed.
-	 * 
-	 * 
-	ChangeListener regionChange = new ChangeListener() {
 
-		public void onChange(Widget sender) {
-		    RegionWidget r = (RegionWidget) sender;
-			Widget parent = sender;
-			String title="";
-			while ( parent != null ) {
-				parent = parent.getParent();
-				if ( parent instanceof DialogBox ) {
-					DialogBox d = (DialogBox) parent;
-					title = d.getText();
-				}
-			}
-			List<String> applyAll = new ArrayList<String>();
-			for (Iterator panelIt = panels.iterator(); panelIt.hasNext();) {
-	    		SlideSorterPanel panel = (SlideSorterPanel) panelIt.next();
-	    		if ( title.contains(panel.getID())) {
-	    			applyAll = panel.getApplyAll();	
-	    		}
-			}
-			if ( applyAll.contains("x") || applyAll.contains("y") ) {
-				for (Iterator panelIt = panels.iterator(); panelIt.hasNext();) {
-		    		SlideSorterPanel panel = (SlideSorterPanel) panelIt.next();
-		    		if (!title.contains(panel.getID())) {
-		    			//TODO this assumes the regions are the same in each panel.  Bad assumption.
-		    			panel.setRegion(r.getSelectedIndex(), r.getValue(r.getSelectedIndex()));
-		    		}
-				}
-    		}	
-		}		
-	};
-	 */
 	/**
 	 * A little helper method to change data sets.
 	 */
 	public void changeDataset() {
-		var = nvar;
-		if ( var.isVector() ) {
+		xVariable = xNewVariable;
+		if ( xVariable.isVector() ) {
 			autoContourTextBox.setText("");
 			autoContourButton.setDown(false);
 			autoContourButton.setEnabled(false);
-			if ( !view.equals("xy") ) {
+			if ( !xView.equals("xy") ) {
 				differenceButton.setDown(false);
 				differenceButton.setEnabled(false);
 			} else {
@@ -1259,17 +886,17 @@ public class VizGal implements EntryPoint {
 
 		// TODO Maybe we can derive the default operations from the data set during the init(), but it would require an asynchronous request
 		// to know the default operation for the new dataset and variable...
-		if ( nvar.getAttributes().get("grid_type").equals("regular") ) {
-			operationID = "Plot_2D_XY_zoom";
-		} else if ( nvar.getAttributes().get("grid_type").equals("vector") ) {
-			operationID = "Plot_vector";
+		if ( xNewVariable.getAttributes().get("grid_type").equals("regular") ) {
+			xOperationID = "Plot_2D_XY_zoom";
+		} else if ( xNewVariable.getAttributes().get("grid_type").equals("vector") ) {
+			xOperationID = "Plot_vector";
 		} else {
-			operationID = "Insitu_extract_location_value_plot";
+			xOperationID = "Insitu_extract_location_value_plot";
 		}
-		view = "xy";
+		xView = "xy";
 
 		// Get all the config info.  View is null to get all operations.
-		Util.getRPCService().getConfig(null, var.getDSID(), var.getID(), getGridForChangeDatasetCallback);
+		Util.getRPCService().getConfig(null, xVariable.getDSID(), xVariable.getID(), getGridForChangeDatasetCallback);
 		
 	}
 
@@ -1277,13 +904,13 @@ public class VizGal implements EntryPoint {
 	 * A helper methods that moves the current state of the map widget to the panels.
 	 */
 	private void setMapRanges(double[] cs) {
-		for (Iterator panelIt = panels.iterator(); panelIt.hasNext();) {
+		for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
 			VizGalPanel panel = (VizGalPanel) panelIt.next();
 			
 			if (!panel.isUsePanelSettings()) {
-				panel.setMapTool(view);
+				panel.setMapTool(xView);
 				if ( cs == null ) {
-				    panel.setLatLon(String.valueOf(axesWidget.getRefMap().getYlo()), String.valueOf(axesWidget.getRefMap().getYhi()), String.valueOf(axesWidget.getRefMap().getXlo()), String.valueOf(axesWidget.getRefMap().getXhi()));
+				    panel.setLatLon(String.valueOf(xAxesWidget.getRefMap().getYlo()), String.valueOf(xAxesWidget.getRefMap().getYhi()), String.valueOf(xAxesWidget.getRefMap().getXlo()), String.valueOf(xAxesWidget.getRefMap().getXhi()));
 				} else {
 					//cs contains s, n, w, e
 					panel.setLatLon(String.valueOf(cs[0]), String.valueOf(cs[1]), String.valueOf(cs[2]), String.valueOf(cs[3]));
@@ -1293,7 +920,7 @@ public class VizGal implements EntryPoint {
 	}
 	public void applyChange() {
 		if ( changeDataset ) {
-			cs = axesWidget.getRefMap().getCurrentSelection();
+			cs = xAxesWidget.getRefMap().getCurrentSelection();
 			// This involves a jump across the wire, so the finishApply gets called in the callback from the getGrid.
 			changeDataset();
 		} else {
@@ -1310,14 +937,14 @@ public class VizGal implements EntryPoint {
 	};
 	public void finishApply() {
 		// Check to see if the operation changed.  If so, change the tool.
-		String op_id = operationsWidget.getCurrentOperation().getID();
-		String op_view = operationsWidget.getCurrentView();
-		if ( !op_id.equals(operationID) && !op_view.equals(view) ) {
-			operationID = op_id;
-			view = op_view;
+		String op_id = xOperationsWidget.getCurrentOperation().getID();
+		String op_view = xOperationsWidget.getCurrentView();
+		if ( !op_id.equals(xOperationID) && !op_view.equals(xView) ) {
+			xOperationID = op_id;
+			xView = op_view;
 		}
 		// The view may have changed if the operation changed before the apply.
-		axesWidget.getRefMap().setTool(view);
+		xAxesWidget.getRefMap().setTool(xView);
 		
 		refresh(false, true);
 	}
@@ -1325,10 +952,6 @@ public class VizGal implements EntryPoint {
 		@Override
 		public void onClick(ClickEvent event) {
 			refresh(false, true);
-			Widget sender = (Widget) event.getSource();
-			String title = sender.getTitle();
-			
-			
 		}
 	};
 	ClickListener differencesClick = new ClickListener() {
@@ -1347,13 +970,13 @@ public class VizGal implements EntryPoint {
 			String hi_value = null;
 			boolean range = false;
 			if ( fixedAxis.equals("t") ) {
-				lo_value = axesWidget.getTAxis().getFerretDateLo();
-				hi_value = axesWidget.getTAxis().getFerretDateHi();
-				range = axesWidget.getTAxis().isRange();
+				lo_value = xAxesWidget.getTAxis().getFerretDateLo();
+				hi_value = xAxesWidget.getTAxis().getFerretDateHi();
+				range = xAxesWidget.getTAxis().isRange();
 			} else if ( fixedAxis.equals("z") ) {
-				lo_value = axesWidget.getZAxis().getLo();
-				hi_value = axesWidget.getZAxis().getHi();
-				range = axesWidget.getZAxis().isRange();
+				lo_value = xAxesWidget.getZAxis().getLo();
+				hi_value = xAxesWidget.getZAxis().getHi();
+				range = xAxesWidget.getZAxis().isRange();
 			}
 			setParentAxis(fixedAxis, lo_value, hi_value, range, false);
 			refresh(false, true);
@@ -1371,31 +994,33 @@ public class VizGal implements EntryPoint {
 		if ( set_local ) {
 			if ( axis.equals("t") ) {
 				if ( range ) {
-					axesWidget.getTAxis().setLo(lo);
-					axesWidget.getTAxis().setHi(hi);
+					xAxesWidget.getTAxis().setLo(lo);
+					xAxesWidget.getTAxis().setHi(hi);
 				} else {
-					axesWidget.getTAxis().setLo(lo);
+					xAxesWidget.getTAxis().setLo(lo);
 				}	
 			} else if ( axis.equals("z") ) {
 				if ( range ) {
-					axesWidget.getZAxis().setLo(lo);
-					axesWidget.getZAxis().setHi(hi);
+					xAxesWidget.getZAxis().setLo(lo);
+					xAxesWidget.getZAxis().setHi(hi);
 				} else {
-					axesWidget.getZAxis().setLo(lo);
+					xAxesWidget.getZAxis().setLo(lo);
 				}
 			}
 		}
-		for (Iterator panelIt = panels.iterator(); panelIt.hasNext();) {
+		for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
 			VizGalPanel panel = (VizGalPanel) panelIt.next();
 			if ( !panel.isUsePanelSettings() ) {
 				panel.setAxisRangeValues(axis, lo, hi);
 			}
 		}
 	}
-	ClickListener optionsOkListener = new ClickListener() {
-		public void onClick(Widget sender) {
+	ClickHandler optionsOkHandler = new ClickHandler() {
+		@Override
+		public void onClick(ClickEvent arg0) {
 			refresh(false, true);
 		}
+		
 	};
 	ClickListener autoContour = new ClickListener() {
 		public void onClick(Widget sender) {
@@ -1405,7 +1030,7 @@ public class VizGal implements EntryPoint {
 	private void autoScale() {
 
 		// Use the values from the "compare panel" to set the auto contour levels.
-		VizGalPanel panel = panels.get(0);
+		VizGalPanel panel = xPanels.get(0);
 
 		if ( panel.getMin() < globalMin ) {
 			globalMin = panel.getMin();
@@ -1475,7 +1100,7 @@ public class VizGal implements EntryPoint {
 			autoContourTextBox.setText(fill_levels);
 		}
 	}
-	public ClickHandler operationsClickHandler = new ClickHandler() {
+	public ClickHandler xVizGalOperationsClickHandler = new ClickHandler() {
 		
 		@Override
 		public void onClick(ClickEvent event) {
@@ -1487,13 +1112,13 @@ public class VizGal implements EntryPoint {
 	};
 
 	private void setupMenusForOperationChange() {
-		view = operationsWidget.getCurrentView();
-		operationID = operationsWidget.getCurrentOperation().getID();
-		optionsButton.setOptions(operationsWidget.getCurrentOperation().getOptionsID());
-		ortho = Util.setOrthoAxes(view, var.getGrid());
+		xView = xOperationsWidget.getCurrentView();
+		xOperationID = xOperationsWidget.getCurrentOperation().getID();
+		xOptionsButton.setOptions(xOperationsWidget.getCurrentOperation().getOptionsID());
+		xOrtho = Util.setOrthoAxes(xView, xVariable.getGrid());
 		
-		if ( var.isVector() ) {
-			if ( !view.equals("xy") ) {
+		if ( xVariable.isVector() ) {
+			if ( !xView.equals("xy") ) {
 				differenceButton.setDown(false);
 				differenceButton.setEnabled(false);
 			} else {
@@ -1504,14 +1129,14 @@ public class VizGal implements EntryPoint {
 			differenceButton.setDown(false);
 			differenceButton.setEnabled(true);
 		}
-		comparisonAxesSelector.setAxes(ortho);
+		xComparisonAxesSelector.setAxes(xOrtho);
 		
-		if ( view.length() !=  2 ) {
+		if ( xView.length() !=  2 ) {
 			autoContourTextBox.setText("");
 			autoContourButton.setDown(false);
 			autoContourButton.setEnabled(false);
 		} else {
-			if ( var.isVector() ) {
+			if ( xVariable.isVector() ) {
 				autoContourTextBox.setText("");
 				autoContourButton.setDown(false);
 				autoContourButton.setEnabled(false);
@@ -1519,29 +1144,29 @@ public class VizGal implements EntryPoint {
 			    autoContourButton.setEnabled(true);
 			}
 		}
-		compareAxis = ortho.get(0);
-		if ( ortho.size() > 1 ) {
-		    fixedAxis = ortho.get(1);
+		compareAxis = xOrtho.get(0);
+		if ( xOrtho.size() > 1 ) {
+		    fixedAxis = xOrtho.get(1);
 		} else {
 			fixedAxis = "";
 		}
-		axesWidget.setFixedAxis(view, ortho, compareAxis);
+		xAxesWidget.setFixedAxis(xView, xOrtho, compareAxis);
         // This will not be right for the new paradigm.
 		// Set the orthogonal axes to a range in each panel.
-		for (Iterator panelsIt = panels.iterator(); panelsIt.hasNext();) {
+		for (Iterator panelsIt = xPanels.iterator(); panelsIt.hasNext();) {
 			VizGalPanel panel = (VizGalPanel) panelsIt.next();
-			panel.setOperation(operationID, view);
+			panel.setOperation(xOperationID, xView);
 			
-			panel.setCompareAxis(view, ortho, compareAxis);
-			if ( view.contains("t") ) {
-				panel.setParentAxisRange("t", true);
+			panel.setCompareAxis(xView, xOrtho, compareAxis);
+			if ( xView.contains("t") ) {
+				panel.setPanelAxisRange("t", true);
 			} else {
-				panel.setParentAxisRange("t", false);
+				panel.setPanelAxisRange("t", false);
 			}
-			if ( view.contains("z") ) {
-				panel.setParentAxisRange("z", true);
+			if ( xView.contains("z") ) {
+				panel.setPanelAxisRange("z", true);
 			} else {
-				panel.setParentAxisRange("z", false);
+				panel.setPanelAxisRange("z", false);
 			}
 		}
 		applyChange();
@@ -1550,38 +1175,38 @@ public class VizGal implements EntryPoint {
 	private void pushHistory() {
 		// First token collection is the gallery settings (mostly in the header of the UI)
 		StringBuilder historyToken = new StringBuilder();
-		historyToken.append("panelHeaderHidden="+panelHeaderHidden);
+		historyToken.append("panelHeaderHidden="+xPanelHeaderHidden);
 		historyToken.append(";differences="+differenceButton.isDown());
 		historyToken.append(";compareAxis="+compareAxis);
 		historyToken.append(";fixedAxis="+fixedAxis);
 		if ( fixedAxis.equals("t") ) {
-			historyToken.append(";fixedAxisLo="+axesWidget.getTAxis().getFerretDateLo());
-			historyToken.append(";fixedAxisHi="+axesWidget.getTAxis().getFerretDateHi());
+			historyToken.append(";fixedAxisLo="+xAxesWidget.getTAxis().getFerretDateLo());
+			historyToken.append(";fixedAxisHi="+xAxesWidget.getTAxis().getFerretDateHi());
 		} else if ( fixedAxis.equals("z") ) {
-			historyToken.append(";fixedAxisLo="+axesWidget.getZAxis().getLo());
-			historyToken.append(";fixedAxisHi="+axesWidget.getZAxis().getHi());
+			historyToken.append(";fixedAxisLo="+xAxesWidget.getZAxis().getLo());
+			historyToken.append(";fixedAxisHi="+xAxesWidget.getZAxis().getHi());
 		}
 		historyToken.append(";autoContour="+autoContourButton.isDown());
-		if ( panels.get(0).getMin() < 99999999. ) {
-			historyToken.append(";globalMin="+panels.get(0).getMin());
+		if ( xPanels.get(0).getMin() < 99999999. ) {
+			historyToken.append(";globalMin="+xPanels.get(0).getMin());
 		}
-		if ( panels.get(0).getMax() > -99999999. ) {
-			historyToken.append(";globalMax="+panels.get(0).getMax());
+		if ( xPanels.get(0).getMax() > -99999999. ) {
+			historyToken.append(";globalMax="+xPanels.get(0).getMax());
 		}
-		historyToken.append(";dsid="+var.getDSID());
-		historyToken.append(";varid="+var.getID());
+		historyToken.append(";xDSID="+xVariable.getDSID());
+		historyToken.append(";varid="+xVariable.getID());
 		
-		historyToken.append(";imageSize="+imageSize.getValue(imageSize.getSelectedIndex()));
+		historyToken.append(";imageSize="+xImageSize.getValue(xImageSize.getSelectedIndex()));
 		
 		// Build the tokens for the panels.
 		
 		// The 0 panel is controlled by the SettingsControl in the gallery.
 		
 		// The next N tokens are the states of the individual panels.
-		historyToken.append("token"+panels.get(0).getHistoryToken()+getHistoryToken());
+		historyToken.append("token"+xPanels.get(0).getHistoryToken()+getHistoryToken());
 		
-		for (int i = 1; i < panels.size(); i++) {
-			VizGalPanel panel = panels.get(i);
+		for (int i = 1; i < xPanels.size(); i++) {
+			VizGalPanel panel = xPanels.get(i);
 			historyToken.append("token"+panel.getHistoryToken()+panel.getSettingsWidgetHistoryToken());
 		}
        
@@ -1589,15 +1214,15 @@ public class VizGal implements EntryPoint {
 	}
 	private String getHistoryToken() {
 		StringBuilder token = new StringBuilder();
-		token.append(";xlo="+axesWidget.getRefMap().getXlo());
-		token.append(";xhi="+axesWidget.getRefMap().getXhi());
-		token.append(";ylo="+axesWidget.getRefMap().getYlo());
-		token.append(";yhi="+axesWidget.getRefMap().getYhi());
-		if ( operationsWidget.getCurrentOperation() != null ) {
-			token.append(";operation_id="+operationsWidget.getCurrentOperation().getID());
-			token.append(";view="+operationsWidget.getCurrentView());
+		token.append(";xXlo="+xAxesWidget.getRefMap().getXlo());
+		token.append(";xhi="+xAxesWidget.getRefMap().getXhi());
+		token.append(";ylo="+xAxesWidget.getRefMap().getYlo());
+		token.append(";yhi="+xAxesWidget.getRefMap().getYhi());
+		if ( xOperationsWidget.getCurrentOperation() != null ) {
+			token.append(";operation_id="+xOperationsWidget.getCurrentOperation().getID());
+			token.append(";view="+xOperationsWidget.getCurrentView());
 		}
-		Map<String, String> options = optionsButton.getState();
+		Map<String, String> options = xOptionsButton.getState();
 		for (Iterator opIt = options.keySet().iterator(); opIt.hasNext();) {
 			String name = (String) opIt.next();
 			String value = options.get(name);
@@ -1608,19 +1233,19 @@ public class VizGal implements EntryPoint {
 		return token.toString();
 	}
 	public void setFromHistoryToken(Map<String, String> tokenMap, Map<String, String> optionsMap) {
-		operationsWidget.setOperation(tokenMap.get("operation_id"), tokenMap.get("view"));
+		xOperationsWidget.setOperation(tokenMap.get("operation_id"), tokenMap.get("view"));
 		//s, n, w, e
-		axesWidget.getRefMap().setCurrentSelection(Double.valueOf(tokenMap.get("ylo")),
+		xAxesWidget.getRefMap().setCurrentSelection(Double.valueOf(tokenMap.get("ylo")),
 				                                   Double.valueOf(tokenMap.get("yhi")), 
 				                                   Double.valueOf(tokenMap.get("xlo")), 
 				                                   Double.valueOf(tokenMap.get("xhi")));
 		if ( optionsMap.size() >= 1 ) {
-			optionsButton.setState(optionsMap);
+			xOptionsButton.setState(optionsMap);
 		}
 	}
 	private void popHistory(String historyToken) {
 		if ( historyToken.equals("") ) {
-			var = initial_var;
+			xVariable = initial_var;
 			initPanels();
 		} else {
 			// First split out the panel history
@@ -1643,9 +1268,9 @@ public class VizGal implements EntryPoint {
 			boolean galleryOnly = true;
 
 			// Panel 0 is the gallery panel...
-			for (int t = 1; t < panels.size(); t++) {
+			for (int t = 1; t < xPanels.size(); t++) {
 
-				VizGalPanel panel = panels.get(t);
+				VizGalPanel panel = xPanels.get(t);
 				galleryOnly = galleryOnly && !panel.isUsePanelSettings();
 			}
 
@@ -1661,8 +1286,8 @@ public class VizGal implements EntryPoint {
 			 */
 
 			boolean switch_axis = false;
-			if ( (tokenMap.containsKey("dsid") && tokenMap.get("dsid").equals(var.getDSID())) && 
-				 (tokenMap.containsKey("varid") && tokenMap.get("varid").equals(var.getID())) )  {
+			if ( (tokenMap.containsKey("xDSID") && tokenMap.get("xDSID").equals(xVariable.getDSID())) && 
+				 (tokenMap.containsKey("varid") && tokenMap.get("varid").equals(xVariable.getID())) )  {
 				switch_axis = applyHistory(tokenMap);
 				/*
 				 * Apply the settings to the panels (the compare axis and some plot options).
@@ -1673,24 +1298,24 @@ public class VizGal implements EntryPoint {
 				 * (index 0) to the gallery ControlSettings widget then the panel.
 				 */
 				
-				for (int t = 0; t < panels.size(); t++) {
+				for (int t = 0; t < xPanels.size(); t++) {
 					HashMap<String, String> panelTokenMap = Util.getTokenMap(settings[t+1]);
 					HashMap<String, String> optionsMap = Util.getOptionsMap(settings[t+1]);
 					if ( t == 0 ) {
 						setFromHistoryToken(panelTokenMap, optionsMap);
 					}
-					panels.get(t).setFromHistoryToken(panelTokenMap, optionsMap);
+					xPanels.get(t).setFromHistoryToken(panelTokenMap, optionsMap);
 				}
 			} else {
 				// If the variable happens to be the initial variable use it.
-				if ( (tokenMap.containsKey("dsid") && tokenMap.get("dsid").equals(initial_var.getDSID())) && 
+				if ( (tokenMap.containsKey("xDSID") && tokenMap.get("xDSID").equals(initial_var.getDSID())) && 
 					 (tokenMap.containsKey("varid") && tokenMap.get("varid").equals(initial_var.getID())) )  {
 					initPanels();
 					switch_axis = applyHistory(tokenMap);
 				} else {
 					// Otherwise, save the history tokens, call back to the server for the variable and then apply the history in the callback.
 					historyTokens = tokenMap;
-					Util.getRPCService().getGrid(tokenMap.get("dsid"), tokenMap.get("vid"), requestGridForHistory);
+					Util.getRPCService().getGrid(tokenMap.get("xDSID"), tokenMap.get("vid"), requestGridForHistory);
 				}
 			}
             // TODO what about the options for the gallery............................??
@@ -1715,7 +1340,7 @@ public class VizGal implements EntryPoint {
 		boolean switch_axis = false;
 		if ( tokenMap.containsKey("panelHeaderHidden") ) {
 			boolean new_panelHeaderHidden = Boolean.valueOf(tokenMap.get("panelHeaderHidden")).booleanValue();
-			if ( new_panelHeaderHidden != panelHeaderHidden ) {
+			if ( new_panelHeaderHidden != xPanelHeaderHidden ) {
 				// If the new state should be different, handle it.  Otherwise ignore it.
 				//handlePanelShowHide();
 			}
@@ -1731,18 +1356,18 @@ public class VizGal implements EntryPoint {
 			if ( !new_fixedAxis.equals(fixedAxis) ) {
 				switch_axis = true;
 				if ( tokenMap.containsKey("compareAxis") && tokenMap.get("compareAxis") != null ) {
-				    comparisonAxesSelector.setValue(tokenMap.get("compareAxis"));
+				    xComparisonAxesSelector.setValue(tokenMap.get("compareAxis"));
 				}
 			}
 			
 			if ( new_fixedAxis.equals("t") ) {
-				axesWidget.getTAxis().setLo(tokenMap.get("fixedAxisLo"));
-				axesWidget.getTAxis().setHi(tokenMap.get("fixedAxisHi"));
+				xAxesWidget.getTAxis().setLo(tokenMap.get("fixedAxisLo"));
+				xAxesWidget.getTAxis().setHi(tokenMap.get("fixedAxisHi"));
 			} else if ( new_fixedAxis.equals("z") ) {
-				axesWidget.getZAxis().setLo(tokenMap.get("fixedAxisLo"));
-				axesWidget.getZAxis().setHi(tokenMap.get("fixedAxisHi"));
+				xAxesWidget.getZAxis().setLo(tokenMap.get("fixedAxisLo"));
+				xAxesWidget.getZAxis().setHi(tokenMap.get("fixedAxisHi"));
 			}
-			axesWidget.setFixedAxis(view, ortho, compareAxis);
+			xAxesWidget.setFixedAxis(xView, xOrtho, compareAxis);
 			// TODO set compare axis in panels?
 		}
 		if ( tokenMap.containsKey("autoContour") ) {
@@ -1758,121 +1383,17 @@ public class VizGal implements EntryPoint {
 			globalMax = Double.valueOf(tokenMap.get("globalMax")).doubleValue();
 		}
 
-		int count = imageSize.getItemCount();
+		int count = xImageSize.getItemCount();
 		for (int i = 0; i < count; i++ ) {
-			String item_value = imageSize.getValue(i);
+			String item_value = xImageSize.getValue(i);
 			if ( item_value.equals(tokenMap.get("imageSize")) ) {
-				imageSize.setSelectedIndex(i);
+				xImageSize.setSelectedIndex(i);
 			}
 		}
 		
 		return switch_axis;
 	}
-	ClickHandler datasetOpenHandler = new ClickHandler() {
 
-		@Override
-		public void onClick(ClickEvent arg0) {
-			
-			axesWidget.closePanels();
-			operationsPanelIsOpen = operationsWidget.isOpen();
-			operationsWidget.setOpen(false);
-			
-		}
-		
-	};
-	ClickHandler datasetCloseHandler = new ClickHandler() {
-
-		@Override
-		public void onClick(ClickEvent arg0) {
-			
-			axesWidget.restorePanels();
-			operationsWidget.setOpen(operationsPanelIsOpen);
-		}
-		
-		
-	};
 	
-	private void printerFriendly() {
 
-		final double image_h = 631.;
-		final double image_w = 998.;
-		final PopupPanel pop = new PopupPanel(false);
-		final boolean panelHidden = panelHeaderHidden;
-		final Image[] images = new Image[panels.size()];
-		final ListBox size = new ListBox();
-		size.addItem("100%", "1.0");
-		size.addItem(" 90%", ".9");
-		size.addItem(" 80%", ".8");
-		size.addItem(" 70%", ".7");
-		size.addItem(" 60%", ".6");
-		size.addItem(" 50%", ".5");
-		size.addItem(" 40%", ".4");
-		size.addItem(" 30%", ".3");
-		size.addChangeHandler(new ChangeHandler() {
-
-			@Override
-			public void onChange(ChangeEvent event) {
-                double px = image_w * Double.valueOf(size.getValue(size.getSelectedIndex()));
-				int pw = (int) px;
-				for(int i = 0; i < images.length; i++ ) {
-					images[i].setWidth(pw+"px");
-				}
-
-			}
-
-		});
-		Label imageSizeLabel= new Label("Image Size: ");
-		if ( !panelHidden ) {
-			handlePanelShowHide();
-		}
-		PushButton close = new PushButton("Close");
-		close.addClickHandler(new ClickHandler() {
-
-			@Override
-			public void onClick(ClickEvent event) {
-				
-				pop.hide();
-				if ( !panelHidden ) {
-					handlePanelShowHide();
-				}
-				
-			}
-			
-		});
-		
-		PushButton print = new PushButton("Print");
-		print.addClickHandler(new ClickHandler() {
-
-			@Override
-			public void onClick(ClickEvent arg0) {
-				Print.it(pop);
-			}
-			
-		});
-		
-		FlexTable buttons = new FlexTable();
-		buttons.setWidget(0, 0, close);
-		buttons.setWidget(0, 1, print);
-		buttons.setWidget(0, 2, imageSizeLabel);
-		buttons.setWidget(0, 3, size);
-		FlexTable plots = new FlexTable();
-		FlexCellFormatter formatter =  plots.getFlexCellFormatter();
-		formatter.setColSpan(0, 0, 2);
-		plots.setWidget(0, 0, buttons);
-		pop.setGlassEnabled(true);
-		int rows = panels.size()/2;
-		int cols = 2;
-		int panel_index = 0;
-		for (int i = 0; i < rows; i++) {
-			for (int j = 0; j < cols; j++) {
-				String panel_url = ((VizGalPanel)panels.get(panel_index)).getURL();
-				final Image image = new Image(panel_url+"&stream=true&stream_ID=plot_image");
-				images[panel_index] = image;
-				plots.setWidget(i+1, j, image);
-				panel_index++;
-			}
-		}
-		pop.add(plots);
-		pop.show();
-	}
 }
