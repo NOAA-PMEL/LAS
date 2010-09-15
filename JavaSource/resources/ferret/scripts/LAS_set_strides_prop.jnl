@@ -88,11 +88,17 @@ LET ystride = 1
 LET zstride = 1
 LET tstride = 1
 
-LET logx = INT(0.5* LOG(xsiz) )
-LET logy = INT(0.5* LOG(ysiz) )
-LET logxy = INT(0.5* LOG(xsiz*ysiz) )
-LET logt = INT(0.5* LOG(tsiz) )
-LET logz = INT(0.5* LOG(zsiz) )
+LET logx = INT(0.5+ LOG(xsiz) )
+LET logy = INT(0.5+ LOG(ysiz) )
+LET logxy = INT(0.5+ LOG(xsiz*ysiz) )
+LET logt = INT(0.5+ LOG(tsiz) )
+LET logz = INT(0.5+ LOG(zsiz) )
+
+LET logx = INT(LOG(xsiz) )
+LET logy = INT(LOG(ysiz) )
+LET logxy = INT(LOG(xsiz*ysiz) )
+LET logt = INT(LOG(tsiz) )
+LET logz = INT(LOG(zsiz) )
 
 LET stride_each = `INT(0.5+ ($stride_for_mem)^(1./ndims) )`
 list logx, logy, logxy, logt, logz
@@ -107,17 +113,17 @@ IF `(logt GE logxy) AND (logz LT logxy)` THEN
    LET xstride = INT( 0.5+ stride_xyt^0.5 )
    LET ystride = xstride
    let tstride = stride_xyt
-ELIF `(logx eq logt) and (logy eq logt) and (logx gt logz) and (logy gt logz)` THEN
+ELIF `(logt GE logx) AND(logt GE logy) AND (logz LT logxy)` THEN
    LET nc = `ndims`
    IF `zsiz GT 1` THEN 
       LET zstride = `INT(0.5+ MAX(2, stride_each/4) )`
       LET nc = `nc - 1`
    ENDIF
    LET stride_xyt = `INT(0.5+  (($stride_for_mem)/zstride)^(1./nc) )`
-   IF `xsiz GT 1` THEN LET xstride = stride_xyt
-   IF `ysiz GT 1` THEN LET ystride = stride_xyt
-   IF `tsiz GT 1` THEN LET tstride = stride_xyt
-ELIF `(logx gt logt) and (logy gt logt) and (logx gt logz) and (logy gt logt)` THEN
+   LET xstride = INT( 0.5+ stride_xyt^0.5 )
+   LET ystride = xstride
+   let tstride = stride_xyt
+ELIF `(logx eq logt) and (logy eq logt) and (logx gt logz) and (logy gt logz)` THEN
    LET nc = `ndims`
    IF `zsiz GT 1` THEN
       LET zstride = `INT(0.5+ MAX(2, stride_each/4) )`
