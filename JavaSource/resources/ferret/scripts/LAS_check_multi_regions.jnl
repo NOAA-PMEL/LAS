@@ -45,7 +45,7 @@ IF ($add_region_t"0|*>1") THEN
    REPEAT/RANGE=0:`nc`/NAME=ivar (\
    IF `(STRINDEX("($shape($ivar))", "Z") NE 0) AND (STRINDEX("($shape($need_t))", "Z") NE 0)` THEN \
  GO compare_axes ($ivar) ($need_t) y;\
-      IF ($cancel_it"0|*>1") THEN CANCEL SYMBOL add_region_t
+      IF ($cancel_it"0|*>1") THEN CANCEL SYMBOL add_region_t\
    )
 ENDIF
 
@@ -87,5 +87,3 @@ IF ($add_region_z"0|*>1") THEN
 CANCEL DATA/ALL
 ! End of file ------------ LAS_check_multi_regions.jnl-------------------------------
 
-sh sym add*
-pause
