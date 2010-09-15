@@ -114,7 +114,7 @@ IF `STRLEN("($varshape)") GT 1` THEN
          DEFINE SYMBOL region_full ($region_full),L=1
 	 DEFINE SYMBOL region_t ($region_t),L=1
 	 DEFINE SYMBOL n_left_labels = `($n_left_labels"0") + 1`
-	 DEFINE SYMBOL upper_left_($n_left_labels"0") = `uwnd,return=tstart,prec=5`
+	 DEFINE SYMBOL upper_left_($n_left_labels"0") = `($data_var),return=tstart,prec=5`
 
       ENDIF
       GO LAS_redefine_variable
