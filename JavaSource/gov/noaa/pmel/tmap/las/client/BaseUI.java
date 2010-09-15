@@ -128,10 +128,6 @@ public class BaseUI implements EntryPoint {
 	// Disclosure panel to open and close all the left-hand controls
 	DisclosurePanel xSettingsHeader = new DisclosurePanel("Settings");
 
-    Button grow = new Button("GROW");
-    Button shrink = new Button("SHRINK");
-    FlexTable growshrink = new FlexTable();
-	
 	// The controls themselves
 	AxesWidgetGroup xAxesWidget;
 	ComparisonAxisSelector xComparisonAxesSelector;
@@ -181,31 +177,6 @@ public class BaseUI implements EntryPoint {
 	@Override
 	public void onModuleLoad() {
 
-		shrink.addClickHandler(new ClickHandler() {
-
-			@Override
-			public void onClick(ClickEvent arg0) {
-				int rows = growshrink.getRowCount();
-				if ( rows >= 1 ) {
-					growshrink.removeRow(rows - 1);
-//					xAxesWidget.getRefMap().resizeMap();
-				}
-			}
-			
-		});
-		
-		grow.addClickHandler(new ClickHandler() {
-
-			@Override
-			public void onClick(ClickEvent arg0) {
-				Label label = new Label(String.valueOf(Math.random()));
-				int rows = growshrink.getRowCount();
-				growshrink.setWidget(rows, 0, label);
-//				xAxesWidget.getRefMap().resizeMap();
-			}
-			
-		});
-		
 		xDSID = Util.getParameterString("dsid");
 		xVarID = Util.getParameterString("vid");
 		xOperationID = Util.getParameterString("opid");
@@ -252,8 +223,6 @@ public class BaseUI implements EntryPoint {
 		xMainPanelCellFormatter.setVerticalAlignment(1, 1, HasVerticalAlignment.ALIGN_TOP);
 
 		xNavigationControls.setWidget(0, 0, xSettingsHeader);		
-		
-		xNavigationControls.setWidget(0, 1, growshrink);
 		
 		// This are bumped down one for the grow shrink experiment...
 		xNavigationControls.setWidget(2, 0, xAxesWidget);
@@ -328,9 +297,6 @@ public class BaseUI implements EntryPoint {
 		xButtonLayout.setWidget(0, 1, xDatasetButton);
 		xButtonLayout.setWidget(0, 2, xOptionsButton);
 		xButtonLayout.setWidget(0, 3, xPrinterFriendlyButton);
-		
-		xButtonLayout.setWidget(0, 4, grow);
-		xButtonLayout.setWidget(0, 5, shrink);
 		
 		xMainPanel.setWidget(0, 0, xButtonLayout);
 		xMainPanel.setWidget(1, 0, xNavigationControls);
