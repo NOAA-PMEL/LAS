@@ -179,7 +179,7 @@ IF `($region_x_range"0|*>1") GT 0` THEN
 	 IF `(($clon_imin) + ($clon_imax)*($xstride)) GT ixmax` THEN \
 	    IF `($clon_imax)-($xstride) GT 0` THEN DEFINE SYMBOL clon_imax = `($clon_imax)-($xstride)`
       ENDIF
-pause
+
       LET x_strided_var = pvar
 !      IF `STRCMP(($modax), " ") NE 0` THEN SET AXIS/MODULO `($data_var),RETURN=xaxis`
       IF `($xstride) GT 1` THEN DEFINE SYMBOL add_to_title = Stride ($xstride) in X
@@ -195,7 +195,7 @@ IF `($region_y_range"0|*>1") GT 0` THEN
 	 IF `(($clat_jmin) + ($clat_jmax)*($ystride)) GT jymax` THEN \
 	    IF `($clat_jmax)-($ystride) GT 0` THEN DEFINE SYMBOL clat_jmax = `($clat_jmax)-($ystride)`
       ENDIF
-pause
+
       IF `($ystride) GT 1` THEN DEFINE SYMBOL add_to_title = ($add_to_title) Stride ($ystride) in Y
 ENDIF
       
@@ -236,7 +236,6 @@ IF ($add_to_title"0|*>1") THEN
    DEFINE SYMBOL n_left_labels = `($n_left_labels"0") + 1`    
    DEFINE SYMBOL upper_left_($n_left_labels) = ($add_to_title)
 ENDIF
-pause
 
 ! End of $RCSfile ------------LAS_set_strides_prop.jnl--------------------------
 
