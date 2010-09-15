@@ -67,13 +67,7 @@ public class TestUI extends BaseUI {
 		HTML output = new HTML("<img src=\""+spinImageURL+"\" alt=\"Spinner\"/> Initializing...");
 		initializing.add(output);
 		initializing.show();
-		
 
-		if ( xDSID != null && xVarID != null && xOperationID != null && xView != null && xOptionID != null) {
-			Util.getRPCService().getCategories(xDSID, initPanelFromParametersCallback);
-		} else {
-			Util.getRPCService().getPropertyGroup("product_server", initPanelFromDefaultsCallback);	
-		}
 
 		if ( xOperationID == null ) {
 			xOperationID = "Plot_2D_XY";
@@ -82,7 +76,7 @@ public class TestUI extends BaseUI {
 			xOptionID = "Options_2D_image_contour_xy_7";
 		}
 		
-		super.init(1);
+		
 		tOperationsMenu.addClickHandler(tExternalOperationClickHandler);
 		uiPanel.setWidget(0, 0, tOperationsMenu);
 		uiPanel.setWidget(1, 0, xMainPanel);
@@ -96,6 +90,14 @@ public class TestUI extends BaseUI {
 		xAxesWidget.addApplyHandler(settingsButtonApplyHandler);
 		
 		RootPanel.get("main").add(uiPanel);	
+		
+
+		if ( xDSID != null && xVarID != null && xOperationID != null && xView != null && xOptionID != null) {
+			xOptionsButton.setOptions(xOptionID);
+			Util.getRPCService().getCategories(xDSID, initPanelFromParametersCallback);
+		} else {
+			Util.getRPCService().getPropertyGroup("product_server", initPanelFromDefaultsCallback);	
+		}
 		
 	}
 	
@@ -131,6 +133,12 @@ public class TestUI extends BaseUI {
 			}
 			
 			initializing.hide();
+			if ( xDSID != null && xVarID != null && xOperationID != null && xView != null && xOptionID != null) {
+				xOptionsButton.setOptions(xOptionID);
+				Util.getRPCService().getCategories(xDSID, initPanelFromParametersCallback);
+			} else {
+				Window.alert("Initalization failed.");
+			}
 		}		
 	};
 	// TODO you're going to have to fix this to work, but for now...
@@ -345,6 +353,7 @@ public class TestUI extends BaseUI {
 			ops = config.getOperations();
 			xVariable.setGrid(grid);
 			xAnalysisWidget.setAnalysisAxes(grid);
+			TestUI.super.init(1);
 			initPanel();
 
 		}

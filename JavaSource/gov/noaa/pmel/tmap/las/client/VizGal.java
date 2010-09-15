@@ -143,7 +143,7 @@ public class VizGal extends BaseUI {
 
 		
 		RootPanel.get("vizGal").add(vVizGalPanel);
-		RootPanel.get("PLOT_LINK").setVisible(false);
+		//RootPanel.get("PLOT_LINK").setVisible(false);
 		
 		super.init(4);
 		
@@ -841,7 +841,7 @@ public class VizGal extends BaseUI {
 
 
 				// Get the current state of the options...
-				Map<String, String> temp_state = new HashMap<String, String>(xOptionsButton.getState());
+				Map<String, String> ts = xOptionsButton.getState();
 				if ( autoContourButton.isDown() ) {
 					// If the auto button is down, it wins...
 					autoScale();
@@ -851,7 +851,7 @@ public class VizGal extends BaseUI {
 				}
 				
 				panel.setFillLevels(autoContourTextBox.getText());
-				panel.refreshPlot(temp_state, switchAxis, true);
+				panel.refreshPlot(ts, switchAxis, true);
 			}
 		}
 		if ( history ) {

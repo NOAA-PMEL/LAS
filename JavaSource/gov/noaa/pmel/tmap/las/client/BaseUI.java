@@ -265,7 +265,7 @@ public class BaseUI implements EntryPoint {
 		// This is all to get around the fact that the OpenLayers map is always in front.
 		xDatasetButton.addOpenClickHandler(xButtonOpenHandler);
 		xDatasetButton.addCloseClickHandler(xButtonCloseHandler);
-		xOptionsButton = new OptionsButton(xOptionID, 0);
+		xOptionsButton = new OptionsButton(0);
 		xOptionsButton.addOpenClickHandler(xButtonOpenHandler);
 		xOptionsButton.addCloseClickHandler(xButtonCloseHandler);
 	    xOptionsButton.ensureDebugId("xOptionsButton");
