@@ -107,7 +107,7 @@ public class SettingsWidget extends Composite {
 	}
 
 	public void addDatasetTreeListener(TreeListener datasetTreeListener) {
-		datasetButton.addTreeListener(datasetTreeListener);
+		//datasetButton.addTreeListener(datasetTreeListener);
 	}
 
 	public boolean isUsePanelSettings() {
@@ -119,7 +119,7 @@ public class SettingsWidget extends Composite {
 	}
 
 	public void addOptionsOkClickListener(ClickListener listener) {
-		optionsButton.addOkClickListener(listener);
+	//	optionsButton.addOkClickListener(listener);
 	}
 
 	public Map<String, String> getOptions() {

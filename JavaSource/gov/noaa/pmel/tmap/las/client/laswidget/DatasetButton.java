@@ -5,6 +5,8 @@ import gov.noaa.pmel.tmap.las.client.serializable.VariableSerializable;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.logical.shared.SelectionHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.maps.client.geom.LatLng;
 import com.google.gwt.maps.client.geom.LatLngBounds;
 import com.google.gwt.user.client.ui.Button;
@@ -83,8 +85,8 @@ public class DatasetButton extends Composite {
 	public VariableSerializable getSelectedVariable() {
 		return selectedVariable;
 	}
-	public void addTreeListener(TreeListener treeListener) {
-		datasetWidget.addTreeListener(treeListener);
+	public HandlerRegistration addSelectionHandler(SelectionHandler<TreeItem> handler) {
+		return datasetWidget.addSelectionHandler(handler);
 	}
 	public void addOpenClickHandler(ClickHandler handler) {
 		choose.addClickHandler(handler);

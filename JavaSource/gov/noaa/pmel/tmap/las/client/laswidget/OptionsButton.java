@@ -6,6 +6,7 @@ import gov.noaa.pmel.tmap.las.client.RPCServiceAsync;
 import gov.noaa.pmel.tmap.las.client.serializable.OptionSerializable;
 
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.ClickListener;
 import com.google.gwt.user.client.ui.Composite;
@@ -51,9 +52,7 @@ public class OptionsButton extends Composite {
     public Map<String, String> getState() {
     	return state;
     }
-	public void addOkClickListener(ClickListener optionsOkListener) {
-		options.addOkClickListner(optionsOkListener);	
-	}
+
 	public void setState(Map<String, String> state) {
 		options.restore(state);
 		this.state = options.getState();
@@ -73,5 +72,8 @@ public class OptionsButton extends Composite {
 	public void addCloseClickHandler(ClickHandler handler) {
 		options.addOkHandler(handler);
 		options.addCancelHandler(handler);
+	}
+	public HandlerRegistration addOkClickHandler(ClickHandler handler) {
+		return options.addOkClickHandler(handler);
 	}
 }
