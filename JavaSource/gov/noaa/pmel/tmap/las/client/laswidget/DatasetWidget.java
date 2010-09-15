@@ -61,7 +61,7 @@ public class DatasetWidget extends Tree implements TreeListener {
 						if ( openid != null ) {
 							String auth_url = cat.getAttributes().get("remote_las");
 							if ( auth_url != null ) {
-								auth_url = auth_url + "&openid="+openid;
+								auth_url = auth_url + "?openid="+openid;
 								Frame authFrame = new Frame(auth_url);
 								RootPanel.get(Constants.AUTH_FRAME_ID).add(authFrame);
 							}

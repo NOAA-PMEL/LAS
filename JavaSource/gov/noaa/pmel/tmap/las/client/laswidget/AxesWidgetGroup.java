@@ -355,4 +355,7 @@ public class AxesWidgetGroup extends Composite {
 		plotPanel.setOpen(plotPanelIsOpen);
 		orthoPanel.setOpen(orthoPanelIsOpen);
 	}
+	public void setOrthoTitle(String title) {
+		orthoPanel.getHeaderTextAccessor().setText(title);
+	}
 }

@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.Vector;
 
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
@@ -137,8 +138,8 @@ public class OptionsWidget extends VerticalPanel {
 		}
 		return state;
 	}
-	public void addOkClickListner(ClickListener optionsOkListener) {
-		ok.addClickListener(optionsOkListener);
+	public HandlerRegistration addOkClickHandler(ClickHandler handler) {
+		return ok.addClickHandler(handler);
 	}
 	public void setOptions(OptionSerializable[] op) {
 		options = op;
