@@ -1,22 +1,26 @@
 ! apply_pp_constraints.jnl
 ! Apply variable constraints for Prop-Prop plots
 
-! Argument is the variable id
+! Argument 1 is the variable id
+! Argument 2 is the variable to apply constraints to.  This is 
+! the variable after region, striding and XSEQUENE are applied.
+
 ! Assumes there are always 4 sets of constraints:
 ! each var ge one value and le another value.
 
-!   constraint_n_lhs  is the variable name
+!   constraint_n_lhs  is the variable name (from data_0_var or data_1_var)
 !   constraint_n_op   is the operation (le, ge)
 !   constraint_n_rhs  is the value 
 !   constraint_n_type must be "variable"
 
 DEFINE SYMBOL var_id = ($1)
-LET var_constr_($var_id) = ($ferret_plot_var)
+DEFINE SYMBOL var_in = ($2)
+LET var_constr_($var_id) = ($var_in)
 
 IF ($constraint_0_lhs"0|($data_($var_id)_var)>1|*>0") THEN
    IF `($constraint_0_type"0|variable>1|*>0") EQ 0` THEN EXIT/SCRIPT
    IF `($constraint_1_type"0|variable>1|*>0") EQ 0` THEN EXIT/SCRIPT
-   LET constrain_1_($var_id) = IF ($ferret_plot_var) ($constraint_0_op) ($constraint_0_rhs) THEN ($ferret_plot_var)
+   LET constrain_1_($var_id) = IF ($var_in) ($constraint_0_op) ($constraint_0_rhs) THEN ($var_in)
    IF ($constraint_1_lhs"0|($data_($var_id)_var)>1|*>0") THEN LET var_constr_($var_id) = \
       IF constrain_1_($var_id) ($constraint_1_op) ($constraint_1_rhs) THEN constrain_1_($var_id)
 ENDIF
@@ -24,7 +28,7 @@ ENDIF
 IF ($constraint_2_lhs"0|($data_($var_id)_var)>1|*>0") THEN 
    IF `($constraint_2_type"0|variable>1|*>0") EQ 0` THEN EXIT/SCRIPT
    IF `($constraint_3_type"0|variable>1|*>0") EQ 0` THEN EXIT/SCRIPT
-   LET constrain_1_($var_id) = IF ($ferret_plot_var) ($constraint_2_op) ($constraint_2_rhs) THEN ($ferret_plot_var)
+   LET constrain_1_($var_id) = IF ($var_in) ($constraint_2_op) ($constraint_2_rhs) THEN ($var_in)
    IF ($constraint_3_lhs"0|($data_($var_id)_var)>1|*>0") THEN LET var_constr_($var_id) = \
       IF constrain_1_($var_id) ($constraint_3_op) ($constraint_3_rhs) THEN  constrain_1_($var_id)
 ENDIF

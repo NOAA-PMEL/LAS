@@ -41,14 +41,6 @@ ENDIF
 DEFINE SYMBOL ferret_title_0 = ($ferret_plot_title"($data_var)")
 IF ($do_curvi_xy"0|*>1") THEN DEFINE SYMBOL ferret_plot_var = ($ferret_plot_base_var_0)
 
-! If there are constraints, apply them.
-
-IF ($constraint_0_lhs"0|*>1) THEN
-   GO apply_pp_constraints 0
-   DEFINE SYMBOL ferret_plot_var = var_constr_0
-ENDIF
-DEFINE SYMBOL ferret_plot_var_0 = ($ferret_plot_var)
-
 LET/TITLE="($ferret_title_0)" xvar = XSEQUENCE(($ferret_plot_var))
 
 ! Set up upper-left labels with the region info
@@ -71,13 +63,6 @@ DEFINE SYMBOL ferret_title_1 = ($ferret_plot_title"($data_var)")
 
 IF ($do_curvi_xy"0|*>1") THEN DEFINE SYMBOL ferret_plot_var = ($ferret_plot_base_var_1)
 
-! If there are constraints, apply them.
-
-IF ($constraint_0_lhs"0|*>1) THEN
-   GO apply_pp_constraints 1
-   DEFINE SYMBOL ferret_plot_var = var_constr_1
-ENDIF
-
 DEFINE SYMBOL ferret_plot_var_1 = ($ferret_plot_var)
 
 GO LAS_set_strides_prop
@@ -85,10 +70,20 @@ GO LAS_set_strides_prop
 LET/TITLE="($ferret_title_0)" xvar = XSEQUENCE(($ferret_plot_var_0))
 LET/TITLE="($ferret_title_1)" yvar = XSEQUENCE(($ferret_plot_var_1))
 
+! Apply any constraints
+IF ($constraint_0_lhs"0|*>1) THEN
+   GO apply_pp_constraints 0 xvar
+   DEFINE SYMBOL xvar = var_constr_0
+   GO apply_pp_constraints 1 yvar
+   DEFINE SYMBOL yvar = var_constr_1
+ENDIF
+
 ! The variables must be the same size. Check and set up a nice message if not.
 
-LET xsize = `xvar,RETURN=isize`
-LET ysize = `yvar,RETURN=isize`
+LET xsize = `($xvar),RETURN=isize`
+LET ysize = `($yvar),RETURN=isize`
+
+pause
 
 IF `xsize NE ysize` THEN 
   MESSAGE/ERROR **ERROR The variables must have the same dimensions: ($data_0_var), ($data_1_var)
@@ -113,14 +108,6 @@ IF `($data_count"0") EQ 3` THEN ! color by 3rd variable
    DEFINE SYMBOL ferret_title_2 = ($ferret_plot_title"($data_var)")
    
    IF ($do_curvi_xy"0|*>1") THEN DEFINE SYMBOL ferret_plot_var = ($ferret_plot_base_var_2)
-   
-   ! If there are constraints, apply them.
-   
-   IF ($constraint_0_lhs"0|*>1) THEN
-      GO apply_pp_constraints 2
-      DEFINE SYMBOL ferret_plot_var = var_constr_2
-   ENDIF
-   DEFINE SYMBOL ferret_plot_var_2 = ($ferret_plot_var)
 
    LET/TITLE="($ferret_title_2)" zvar = XSEQUENCE(($ferret_plot_var_2))
    DEFINE SYMBOL color_by = 1
@@ -155,7 +142,7 @@ DEFINE SYMBOL polyshape = ($ferret_symbol_shape%triangle|default>triangle|triang
 DEFINE SYMBOL ferret_plot_title = " "
 
 ! Set the plot argument. 
-DEFINE SYMBOL plot_arg = xvar, yvar
+DEFINE SYMBOL plot_arg = ($xvar), ($yvar)
 
 ! The underlying plot is a PLOT/VS
 DEFINE SYMBOL qualifiers = ($qualifiers)/VS/COLOR=WHITE
@@ -163,7 +150,7 @@ DEFINE SYMBOL qualifiers = ($qualifiers)/VS/COLOR=WHITE
 ! Expand the horizontal and vertical scale a bit data is not on top of
 ! the plot axes.
 
-STAT xvar
+STAT ($xvar)
 PPL %RANGE `($stat_min)`, `($stat_max)`, 10
 IF `($ppl$range_high) EQ ($ppl$range_low)`  THEN 
    DEFINE SYMBOL ppl$range_low = `($ppl$range_low) - 1`
@@ -174,7 +161,7 @@ DEFINE SYMBOL ferret_indep_axis_scale ($ppl$range_low),($ppl$range_high),($ppl$r
    
 DEFINE SYMBOL qualifiers ($qualifiers)/HLIM=($ppl$range_low):($ppl$range_high)
 
-STAT yvar
+STAT ($yvar)
 PPL %RANGE `($stat_min)`, `($stat_max)`, 10
 IF `($ppl$range_high) EQ ($ppl$range_low)`  THEN 
    DEFINE SYMBOL ppl$range_low = `($ppl$range_low) - 1`
@@ -194,11 +181,11 @@ LABEL/NOUSER -0.8, `($ppl$ylen)/2`, 0, 90, 0.14 ($ferret_title_1)
 
 ! Polygon plot
 
-DEFINE SYMBOL plot_arg = xvar, yvar, xvar
+DEFINE SYMBOL plot_arg = ($xvar), ($yvar), ($xvar)
 DEFINE SYMBOL poly_qual = /OVER/NOLAB
 
 IF ($color_by"0|*>1") THEN 
-   DEFINE SYMBOL plot_arg = xvar, yvar, zvar
+   DEFINE SYMBOL plot_arg = ($xvar), ($yvar), zvar
    
 ! Get color-plot qualifiers
    IF ($ferret_fill_levels"0|*>1") THEN 
@@ -231,8 +218,8 @@ IF ($color_by_title"0|*>1") THEN LABEL/NOUSER `($ppl$width)-($ppl$xorg)-0.2`, -0
 
 ! variables for the regression line
 
-LET p = xvar  ! for regression line
-LET q = yvar
+LET p = ($xvar)  ! for regression line
+LET q = ($yvar)
 LET do_rsquare = 1
 
 DEFINE SYMBOL  line_color = blue  ! regression line
