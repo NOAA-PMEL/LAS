@@ -30,6 +30,15 @@ public class OptionsButton extends Composite {
     	initWidget(optionsButton);
     	state = options.getState();
     }
+    public OptionsButton (int offset) {
+    	this.offset = offset;
+    	options = new OptionsWidget(okClick, cancelClick);
+    	optionsButton.addClickListener(openClick);
+    	optionsButton.setWidth("75px");
+    	optionsDialog.add(options);
+    	optionsDialog.setText("Set Plot Options for all Plots.");
+    	initWidget(optionsButton);
+    }
     ClickListener okClick = new ClickListener() {
 		public void onClick(Widget sender) {
 			state = options.getState();

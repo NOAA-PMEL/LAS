@@ -63,6 +63,12 @@ public class OptionsWidget extends VerticalPanel {
 		cancel.addClickListener(cancelListener);
 		Util.getRPCService().getOptions(optionID, optionsCallback);	
 	}
+	public OptionsWidget(ClickListener okListener, ClickListener cancelListener) {
+		layout_grid.setWidget(0, 0, ok);
+		layout_grid.setWidget(0, 1, cancel);
+		ok.addClickListener(okListener);
+		cancel.addClickListener(cancelListener);
+	}
 	public OptionsWidget(ClickListener listener) {
 		ok.addClickListener(listener);
 		cancel.addClickListener(listener);
