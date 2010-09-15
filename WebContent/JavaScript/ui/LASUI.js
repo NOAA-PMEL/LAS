@@ -506,7 +506,7 @@ LASUI.prototype.createVariableTreeNode = function (node, i) {
 	tbody.appendChild(tr);
 	table.appendChild(tbody);
 	node.children[i].LINode.appendChild(table);
-
+	
 
 	if(this.state.variable==node.category.getChildID(i))
 		node.children[i].INPUTNode.checked=true;
@@ -632,6 +632,9 @@ LASUI.prototype.updateVariableLists = function () {
 		document.getElementById('analysisWrapper').style.display='';
 
 	this.updateAxisLabels();
+        if(typeof mapResize != "undefined")
+                mapResize();
+
 }
 LASUI.prototype.updateAxisLabels = function () {
 	if(this.state.operations.getOperationByID(this.state.operation.plot).axis_labels) {
@@ -701,6 +704,8 @@ LASUI.prototype.addVariable = function(evt) {
 			
 	document.getElementById("analysisWrapper").style.display="none";
 	this.refs.analysis.enabled = false;
+	if(typeof mapResize != "undefined")
+		mapResize();
 	this.getOperations(true);
 
 }
@@ -738,6 +743,9 @@ LASUI.prototype.removeVariable = function(evt) {
                 document.getElementById('analysisWrapper').style.display='';
 
 	this.state.variables.pop();
+        if(typeof mapResize != "undefined")
+                mapResize();
+
 	this.getOperations(true);
 }
 /**
