@@ -283,6 +283,25 @@ height: 100%;
 }
 .top_link_left:hover {color:#f5ed52;  /* background:  url(grn_1.gif) no-repeat; */}
 
-.top_link:hover {color:#f5ed52;},
-#main : {margin:5pt, padding:5pt},
-#output : {overflow : scroll}
+.top_link:hover {color:#f5ed52;}
+#main  {margin:5pt; padding:5pt}
+#output  {overflow : scroll;
+	min-width:800px;
+	max-width:1200px;
+	min-height:500px;
+	max-height:800px;
+	}
+#constraints {
+                        min-height:500px;
+                        width: 256px;
+                        border-right: 1px solid #5c731e;
+                        float:left;
+                }
+                #wait_msg {
+                        text-align:left;
+                }
+                #message_bar {
+                        min-height:20pt;
+                        border-bottom:1pt solid black;
+                }
+
