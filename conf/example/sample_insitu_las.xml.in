@@ -17,7 +17,7 @@
 <!ENTITY insitu_demo_1 SYSTEM "insitu_demo_1.xml">
 <!ENTITY insitu_demo_2 SYSTEM "insitu_demo_2.xml">
 <!ENTITY nwioos_hake98 SYSTEM "nwioos_hake98.xml">
-<!ENTITY pfeg SYSTEM "pfeg.xml">
+<!--<!ENTITY pfeg SYSTEM "pfeg.xml">-->
 
 ]>
 

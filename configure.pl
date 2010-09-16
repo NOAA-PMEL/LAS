@@ -1215,8 +1215,8 @@ sub genSamples {
     $insitu_out[6] = "$serverDir/ui.xml";
     $insitu_in[7] = "conf/example/nwioos_hake98.xml";
     $insitu_out[7] = "$serverDir/nwioos_hake98.xml";
-    $insitu_in[8] = "conf/example/pfeg.xml";
-    $insitu_out[8] = "$serverDir/pfeg.xml";
+   # $insitu_in[8] = "conf/example/pfeg.xml";
+   # $insitu_out[8] = "$serverDir/pfeg.xml";
 
 
     my $insitu = 0;
