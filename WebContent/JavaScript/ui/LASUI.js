@@ -1034,6 +1034,9 @@ LASUI.prototype.getOperations = function (evt) {
 		var url = this.hrefs.getOperations.url + this.state.extra_args;// + 'view=' +view;
 		var stop =false;
 		//check to see if seelected variable is a vector, if so, disable other variables ... or something
+
+	
+
 		if(evt) 
 			if(evt.target) 
 				try {
@@ -1042,11 +1045,18 @@ LASUI.prototype.getOperations = function (evt) {
 									
 					if(selectedVariable.grid_type=="vector"&&document.getElementsByName("add").length==1)
 						document.getElementsByName("add").item(0).style.visibility="hidden";
-				//	else if (document.getElementsByName('variables').length<document.getElementsByName('variables').item(0).options.length)
-				//		document.getElementsByName("add").item(0).style.display="";
+
+					if(evt.target == document.getElementsByName('variables').item(0)) {
+						this.setVariable(null,this.state.datasets[this.state.dataset],document.getElementsByName("variables").item(0).selectedIndex);
+						return;
+					}
 				} catch(e) {}
-			else
-				var stop=true;
+			else if (document.getElementsByName('variables').length == 1) {
+					this.setVariable(this.state.dataset,this.state.datasets[this.state.dataset],document.getElementsByName("variables").item(0).selectedIndex);
+					return
+				} else 
+					var stop=true;
+
 	
 		this.state.xpaths=[];	
 		if(document.getElementsByName('variables').length>0) {
