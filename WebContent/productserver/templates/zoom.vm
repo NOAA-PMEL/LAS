@@ -91,13 +91,13 @@ function submitXML() {
     axes="xyzt";
     if(H_axis_lc&&axes.search(H_axis_lc)>=0) 
     	Req.setRange(H_axis_lc,myMapWidget.extents.selection.grid.x.min,myMapWidget.extents.selection.grid.x.max);
-    else if (Req.getOperation()=='prop_prop_plot') {
+    else if (Req.getOperation().indexOf('prop_prop_plot')>=0) {
 	 Req.addVariableConstraint(Req.getDataset(0), H_axis,"le",myMapWidget.extents.selection.grid.x.max,"hmax");
     	 Req.addVariableConstraint(Req.getDataset(0), H_axis,"ge",myMapWidget.extents.selection.grid.x.min,"hmin");
     }
     if(V_axis_lc&&axes.search(V_axis_lc)>=0)
 	Req.setRange(V_axis_lc,myMapWidget.extents.selection.grid.y.min,myMapWidget.extents.selection.grid.y.max);
-    else if (Req.getOperation()=='prop_prop_plot'){
+    else if (Req.getOperation().indexOf('prop_prop_plot')>=0){
 	 Req.addVariableConstraint(Req.getDataset(0), V_axis,"le",myMapWidget.extents.selection.grid.y.max,"vmax");
          Req.addVariableConstraint(Req.getDataset(0), V_axis,"ge",myMapWidget.extents.selection.grid.y.min,"vmin");	
     }

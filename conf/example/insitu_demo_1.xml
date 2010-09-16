@@ -39,10 +39,10 @@
     </properties>
 
     <variables>
-      <Temperature units="umol/kg" name="Temperature: ">
+      <Temperature units="Deg C" name="Temperature: ">
         <link match="/lasdata/grids/Indian_latitude_longitude_depth_time_grid"/>
       </Temperature>
-      <Salinity units="" name="Salinity: ">
+      <Salinity units="umol/kg" name="Salinity: ">
         <link match="/lasdata/grids/Indian_latitude_longitude_depth_time_grid"/>
       </Salinity>
     </variables>
