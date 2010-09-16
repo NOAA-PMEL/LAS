@@ -6,7 +6,7 @@
 <!ENTITY insitu_options SYSTEM "insitu_options.xml">
 
 <!-- UI elements specific to the LAS_insitu_demo -->
-<!ENTITY insitu_demo_ui SYSTEM "insitu_demo_ui.xml">
+<!--<!ENTITY insitu_demo_ui SYSTEM "insitu_demo_ui.xml">-->
 
 <!-- UI elements specific to the LAS_seasonal_regridding_demo -->
 <!ENTITY Regrid_to_Seasonal_ui SYSTEM "Regrid_to_Seasonal_ui.xml">

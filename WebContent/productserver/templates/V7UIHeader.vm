@@ -1,4 +1,4 @@
-<TABLE CELLPADDING="0" CELLSPACING="0" BORDER="0" WIDTH="100%">
+<TABLE id="header" CELLPADDING="0" CELLSPACING="0" BORDER="0" WIDTH="100%">
 	<TBODY><TR>
 		<TD bgcolor="#7391AD"  height="10px" width="280px" align="left">
 			<div style="position: relative; width: 280px; height: 10px;margin-right:2px">
