@@ -700,8 +700,20 @@ LASUI.prototype.addVariable = function(evt) {
 	                if(document.getElementsByName('variables').item(v).options[i].id.substr(document.getElementsByName('variables').item(v).options[i].id.lastIndexOf("/")+1,document.getElementsByName('variables').item(v).options[i].id.length)==this.state.variables[v])
         	                document.getElementsByName('variables').item(v).options[i].selected=true;
 
+	//get rid of the current op if it doesnt support the current number of variables
+       /* var minvars=1;
+        var maxvars=1;
+        try {
+                if(this.state.operations.getOperationByID(this.state.operation.plot).minvars)
+                        minvars = parseInt(this.state.operations.getOperationByID(this.state.operation.plot).minvars);
+                if(this.state.operations.getOperationByID(this.state.operation.plot).maxvars)
+                        maxvars = parseInt(this.state.operations.getOperationByID(this.state.operation.plot).maxvars);
+        } catch(e) {}
+        if(document.getElementsByName('variables').length<minvars||document.getElementsByName('variables').length>maxvars)
+                this.state.operation.plot="";
+	*/
 	this.updateAxisLabels();
-			
+	
 	document.getElementById("analysisWrapper").style.display="none";
 	this.refs.analysis.enabled = false;
 	if(typeof mapResize != "undefined")
@@ -738,7 +750,18 @@ LASUI.prototype.removeVariable = function(evt) {
 	}		
 
 	this.updateAxisLabels();
-	//show analysis if we can
+	//get rid of the current op if it doesnt support the current number of variables
+	var minvars=1;
+	var maxvars=1;
+	try {
+		if(this.state.operations.getOperationByID(this.state.operation.plot).minvars)
+			minvars = parseInt(this.state.operations.getOperationByID(this.state.operation.plot).minvars);
+		if(this.state.operations.getOperationByID(this.state.operation.plot).maxvars)
+                	maxvars = parseInt(this.state.operations.getOperationByID(this.state.operation.plot).maxvars);  
+	} catch(e) {}
+	if(document.getElementsByName('variables').length<minvars||document.getElementsByName('variables').length>maxvars)
+		this.state.operation.plot="";
+
         if(this.state.operation.plot.indexOf('prop_prop')<0&&document.getElementsByName("variables").length==1)
                 document.getElementById('analysisWrapper').style.display='';
 
@@ -1049,10 +1072,10 @@ LASUI.prototype.getOperations = function (evt) {
 					if(evt.target == document.getElementsByName('variables').item(0)) {
 						this.setVariable(null,this.state.datasets[this.state.dataset],document.getElementsByName("variables").item(0).selectedIndex);
 						return;
-					}
+					} 
 				} catch(e) {}
 			else if (document.getElementsByName('variables').length == 1) {
-					this.setVariable(this.state.dataset,this.state.datasets[this.state.dataset],document.getElementsByName("variables").item(0).selectedIndex);
+					this.setVariable(null,this.state.datasets[this.state.dataset],document.getElementsByName("variables").item(0).selectedIndex);
 					return
 				} else 
 					var stop=true;
