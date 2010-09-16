@@ -87,8 +87,10 @@ IF `STRLEN("($varshape)") GT 1` THEN
          DEFINE SYMBOL region_full ($region_full),I=1
 	 DEFINE SYMBOL region_xyz ($region_xyz),I=1
 	 DEFINE SYMBOL region_x ($region_x),I=1
-	 DEFINE SYMBOL n_left_labels = `($n_left_labels"0") + 1`
-	 DEFINE SYMBOL upper_left_($n_left_labels"0") = Longitude `($data_var),RETURN=xstart`
+	 IF `(STRCMP("($fview%A%)", "X") NE 0) AND ($have_lon_lab"0|0|1|*>1") EQ 0` THEN
+	    DEFINE SYMBOL n_left_labels = `($n_left_labels"0") + 1`
+	    DEFINE SYMBOL upper_left_($n_left_labels"0") = Longitude `($data_var),RETURN=xstart`
+	 ENDIF
       ENDIF
       IF ($missing_y"0|*>1") THEN 
          IF ($native_curvilinear_xy"0") THEN
@@ -101,21 +103,30 @@ IF `STRLEN("($varshape)") GT 1` THEN
 	 ENDIF
          DEFINE SYMBOL region_full ($region_full),J=1
 	 DEFINE SYMBOL region_xyz ($region_xyz),J=1
-	 DEFINE SYMBOL n_left_labels = `($n_left_labels"0") + 1`
-	 DEFINE SYMBOL upper_left_($n_left_labels"0") = Latitude `($data_var),RETURN=ystart`
+	 IF `(STRCMP("($fview%A%)", "X") NE 0) AND ($have_lon_lab"0|0|1|*>1") EQ 0` THEN
+	    DEFINE SYMBOL n_left_labels = `($n_left_labels"0") + 1`
+	    DEFINE SYMBOL upper_left_($n_left_labels"0") = Latitude `($data_var),RETURN=ystart`
+	 ENDIF
       ENDIF
       IF ($missing_z"0|*>1") THEN 
          DEFINE SYMBOL region_full ($region_full),K=1
 	 DEFINE SYMBOL region_xyz ($region_xyz),K=1
-	 DEFINE SYMBOL n_left_labels = `($n_left_labels"0") + 1`
-	 DEFINE SYMBOL upper_left_($n_left_labels"0") = Depth `($data_var),RETURN=zstart` (`($data_var),RETURN=zunits`)
+	 IF `(STRCMP("($fview%A%)", "Z") NE 0) AND ($have_z_lab"0|0|1|*>1") EQ 0` THEN
+ 	    DEFINE SYMBOL n_left_labels = `($n_left_labels"0") + 1`
+	    DEFINE SYMBOL upper_left_($n_left_labels"0") = Depth `($data_var),RETURN=zstart` (`($data_var),RETURN=zunits`)
+	    DEFINE SYMBOL have_z_lab = 1
+	 ENDIF
       ENDIF
+      sh sym missing_t, have_time_lab
       IF ($missing_t"0|*>1") THEN 
          DEFINE SYMBOL region_full ($region_full),L=1
 	 DEFINE SYMBOL region_t ($region_t),L=1
-	 DEFINE SYMBOL n_left_labels = `($n_left_labels"0") + 1`
-	 DEFINE SYMBOL upper_left_($n_left_labels"0") = `($data_var),return=tstart,prec=5`
-
+	 IF `(STRCMP("($fview%A%)", "T") NE 0) AND ($have_time_lab"0|0|1|*>1") EQ 0` THEN
+	    DEFINE SYMBOL n_left_labels = `($n_left_labels"0") + 1`
+	    DEFINE SYMBOL upper_left_($n_left_labels"0") = `($data_var),return=tstart,prec=5`
+	    DEFINE SYMBOL have_time_lab = 1
+	    DEFINE SYMBOL have_year_lab = 1
+	 ENDIF
       ENDIF
       GO LAS_redefine_variable
 
