@@ -1138,6 +1138,7 @@ LASUI.prototype.setOperation = function (evt) {
 				delete this.state.analysis.axes[a];
 			}
 	this.state.view.widgets = view;
+	
 	for(var i=0;i<this.state.operations.getOperationCount();i++) {
 		if(document.getElementById(this.state.operations.getOperationName(i))&&this.state.operations.hasInterval(this.state.operations.getOperationID(i),view)) 
 			this.setOperationNode(this.state.operations.getOperationID(i),this.state.operations.getOperationName(i));	
@@ -1217,32 +1218,38 @@ LASUI.prototype.setOperationList = function (strJson, stop) {
 	if(stop) {
 		for(var i=0;i<this.state.operations.getOperationCount();i++) {
 			var minvars= 1;
-			if(this.state.operations.getOperation(i).minvars)
-			minvars=parseInt(this.state.operations.getOperation(i).minvars);
 			var maxvars = 1;
-			if(this.state.operations.getOperation(i).maxvars)
-			maxvars=parseInt(this.state.operations.getOperation(i).maxvars);
-			
-			if(document.getElementsByName("variables").length<=maxvars&&document.getElementsByName("variables").length>=minvars)					this.setOperationNode(this.state.operations.getOperationID(i),this.state.operations.getOperationName(i));
+			try {
+				if(this.state.operations.getOperation(i).minvars)
+					minvars=parseInt(this.state.operations.getOperation(i).minvars);
+				if(this.state.operations.getOperation(i).maxvars)
+					maxvars=parseInt(this.state.operations.getOperation(i).maxvars);
+			}  catch (e) {}
+			if(this.state.operations.hasInterval(this.state.operations.getOperationID(i),this.state.view.plot)&&document.getElementsByName("variables").length<=maxvars&&document.getElementsByName("variables").length>=minvars)
+					this.setOperationNode(this.state.operations.getOperationID(i),this.state.operations.getOperationName(i));
 		}
 		var minvars= 1;
-                if(this.state.operations.getOperationByID(this.state.operation.plot).minvars)
+		 var maxvars = 1;
+                try{if(this.state.operations.getOperationByID(this.state.operation.plot).minvars)
                     minvars=parseInt(this.state.operations.getOperationByID(this.state.operation.plot).minvars);
-                var maxvars = 1;
                 if(this.state.operations.getOperationByID(this.state.operation.plot).maxvars)
                     maxvars=parseInt(this.state.operations.getOperationByID(this.state.operation.plot).maxvars);
+		} catch(e) {}
 		if(document.getElementsByName("variables").length>maxvars||document.getElementsByName("variables").length<minvars)
 			this.setVisualization(this.state.view.plot,"varct");	
 	} else {
+
 	                for(var i=0;i<this.state.operations.getOperationCount();i++) {
                         var minvars= 1;
-                        if(this.state.operations.getOperation(i).minvars)
-                        minvars=parseInt(this.state.operations.getOperation(i).minvars);
-                        var maxvars = 1;
-                        if(this.state.operations.getOperation(i).maxvars)
-                        maxvars=parseInt(this.state.operations.getOperation(i).maxvars);
-
-                        if(document.getElementsByName("variables").length<=maxvars&&document.getElementsByName("variables").length>=minvars)                                    this.setOperationNode(this.state.operations.getOperationID(i),this.state.operations.getOperationName(i));
+			var maxvars = 1;
+                        try { 
+				if(this.state.operations.getOperation(i).minvars)
+                        		minvars=parseInt(this.state.operations.getOperation(i).minvars);
+                        	if(this.state.operations.getOperation(i).maxvars)
+                        		maxvars=parseInt(this.state.operations.getOperation(i).maxvars);
+			} catch (e) {}
+                        if(this.state.operations.hasInterval(this.state.operations.getOperationID(i),this.state.view.plot)&&document.getElementsByName("variables").length<=maxvars&&document.getElementsByName("variables").length>=minvars)
+                                    this.setOperationNode(this.state.operations.getOperationID(i),this.state.operations.getOperationName(i));
                 }
 	} 
 	
