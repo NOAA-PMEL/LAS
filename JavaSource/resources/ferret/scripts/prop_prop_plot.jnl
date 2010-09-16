@@ -114,6 +114,7 @@ IF `($data_count"0") EQ 3` THEN ! color by 3rd variable
    DEFINE SYMBOL ferret_title_2 = ($ferret_plot_title"($data_var)")
    
    IF ($do_curvi_xy"0|*>1") THEN DEFINE SYMBOL ferret_plot_var = ($ferret_plot_base_var_2)
+   IF ($do_curvi_xy"0|*>1") THEN DEFINE SYMBOL ferret_plot_var_2 = ($ferret_plot_base_var_2)
 
    LET/TITLE="($ferret_title_2)" zvar = XSEQUENCE(($ferret_plot_var_2))
    DEFINE SYMBOL color_by = 1
