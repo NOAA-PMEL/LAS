@@ -598,7 +598,7 @@ LASUI.prototype.updateVariableLists = function () {
         	        for(var v=0;v<document.getElementsByName("variables").item(i).options.length;v++) {
                 	        var variable = eval('('+document.getElementsByName("variables").item(i).options[v].value+')');
                 	        if(variable.grid_type=='vector')
-                	                document.getElementsByName("variables").item(i).options[v].style.disabled=true;
+                	                document.getElementsByName("variables").item(i).options[v].disabled=true;
 				else
 					ct++;
                 	}
@@ -865,7 +865,7 @@ LASUI.prototype.setVariable = function (evt) {
 	delvar.alt="Click to remove this variable.";
 	delvar.title="Click to remove this variable.";
 	delvar.href="javascript:";
-	delvar.style.display='none';
+	delvar.style.visibility='hidden';
 	var addvar=document.createElement("A");
 	addvar.name="add";
 	addvar.className="addvar";
@@ -885,7 +885,7 @@ LASUI.prototype.setVariable = function (evt) {
 	}
 	
 	if(variable.grid_type=="vector") {
-		addvar.style.display="none";
+		addvar.style.visibility="hidden";
 		document.getElementById("analysisWrapper").style.display='none';
 	}
 	
@@ -1116,6 +1116,9 @@ LASUI.prototype.setOperation = function (evt) {
 
 	this.state.view[type] = view;
 	this.updateVariableLists();
+	if(document.getElementsByName("variables").length==1) {
+		
+	}
 	if(document.getElementsByName("variables").length==1&&this.state.xpaths[0].grid_type!='vector'&&this.state.xpaths[0].grid_type!='scattered'&&id!="prop_prop_plot") {
 		document.getElementById("analysisWrapper").style.display="";
 	} else {

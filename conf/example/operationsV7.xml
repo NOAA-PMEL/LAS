@@ -1196,9 +1196,6 @@ streamable="true" mime_type="application/postscript"/> -->
             </response>
             <service>ferret</service>
         </operation>
-        <visualization_types>
-                <type name="Maps" />
-        </visualization_types>
         <region>
             <!-- Not sure about this since the plot is planar in XY but the extract doesn't have to be. -->
             <intervals name="xy"  type="Maps" title="Location Plot" />
@@ -1207,7 +1204,7 @@ streamable="true" mime_type="application/postscript"/> -->
             <grid_type name="scattered" />
         </grid_types>
     </operation>
-    <operation name="Extract DRDS data and property_depth plot"
+    <operation name="Extract DRDS data and property_depth plot" default="true"
         ID="DRDS_Property_Depth" output_template="output" category="visualization">
         <operation name="Database Extraction" ID="DRDSExtract"
             service_action="drds">
@@ -1245,12 +1242,9 @@ streamable="true" mime_type="application/postscript"/> -->
             </response>
             <service>ferret</service>
         </operation>
-        <visualization_types>
-                <type name="Maps" />
-        </visualization_types>
         <region>
 	    <!-- Not sure about this since the plot is planar in XY but the extract doesn't have to be. -->
-	    <intervals name="xy"  type="Maps" title="Location Plot" />
+	    <intervals name="z"  type="Line Plot" title="Depth Profile" />
 	</region>
 	<grid_types>
 	    <grid_type name="scattered" />
@@ -1276,7 +1270,7 @@ streamable="true" mime_type="application/postscript"/> -->
         <service>dapper</service>
     </operation>
     <operation name="Extract Dapper Data and Plot Location"
-        ID="Dapper_extract_location_plot" output_template="output" order="0110" category="visualization">
+        ID="Dapper_extract_location_plot" output_template="output" minvars="1" maxvars="1" default="true" order="0110" category="visualization">
         <operation name="Database Extraction" ID="DapperExtract"
             service_action="dapper">
             <response ID="DBExtractResponse">
@@ -1322,8 +1316,8 @@ streamable="true" mime_type="application/postscript"/> -->
             <grid_type name="scattered" />
         </grid_types>
     </operation>
-    <operation name="Extract Dapper Data and Time Series Plot"
-        ID="Dapper_extract_time_series_plot" output_template="output" order="0140" category="visualization">
+    <operation name="Extract Dapper Data and Time Series Plot" minvars="1" maxvars="999" 
+        ID="Dapper_extract_time_series_plot" output_template="output" order="0140" category="visualization" default="true">
         <operation name="Database Extraction" ID="DapperExtract"
             service_action="dapper">
             <response ID="DBExtractResponse">
@@ -1360,12 +1354,9 @@ streamable="true" mime_type="application/postscript"/> -->
             </response>
             <service>ferret</service>
         </operation>
-        <visualization_types>
-                <type name="Maps" />
-        </visualization_types>
         <region>
             <!-- Not sure about this since the plot is planar in XY but the extract doesn't have to be. -->
-            <intervals name="xy"  type="Maps" title="Location Plot" />
+            <intervals name="t"  type="Line Plot" title="Time Series" />
         </region>
         <grid_types>
             <grid_type name="scattered" />
@@ -1517,21 +1508,42 @@ streamable="true" mime_type="application/postscript"/> -->
 	        </grid_types>
 		<service>ferret</service>
     </operation>
-    <operation default="true" category="visualization" name="Property Property Plot" ID="prop_prop_plot2" service_action="prop_prop_plot" output_template="zoom" minvars="2" maxvars="3">
-               <response ID="PlotResp" type="HTML" index="1">
-                    <result type="map_scale" ID="map_scale" file_suffix=".xml"/>
-                    <result type="image" ID="plot_image" streamable="true" mime_type="image/png" file_suffix=".gif"/>
-                    <result type="debug" ID="debug" file_suffix=".txt"/>
-                    <result type="xml" ID="webrowset" file_suffix=".xml"/>
-                    <result type="cancel" ID="cancel" />
+    <operation default="true" category="visualization" name="Property Property Plot" ID="prop_prop_plot_insitu" output_template="zoom" minvars="2" maxvars="3">
+	  <operation name="Database Extraction" ID="DBExtract" output_template="ascii" service_action="prop_prop_sql">
+               <response ID="DBExtractResponse">
+                    <result type="debug" ID="db_debug" file_suffix=".txt"/>
+                    <result type="netCDF" ID="netcdf" file_suffix=".nc"/>
                </response>
-                <region>
-                        <intervals name="xy" abstract="true"  type="Scatter Plots" title="Property-Property" />
-                        <degenerate />
-                </region>
-                <grid_types>
-                        <grid_type name="scattered" />
-                </grid_types>
-                <service>ferret</service>
+               <service>database</service>
+               <properties>
+                  <property_group type="backend_request">
+                     <property>
+                        <name>exclude</name>
+                        <value>ferret</value>
+                     </property>
+                  </property_group>
+               </properties>
+          </operation>
+          <operation chained="true" name="Property Property Plot" ID="prop_prop_plot_insitu" output_template="zoom" service_action="prop_prop_plot">
+               <args>
+                    <arg chained="true" type="variable" index="1" operation="DBExtract" result="netcdf"/>
+                    <arg type="region" index="1" ID="in-situ-Region"/>
+               </args>
+               <response ID="PlotResp" type="HTML" index="1">
+                    <result type="image" ID="plot_image" streamable="true" mime_type="image/gif" file_suffix=".gif"/>
+                    <result type="debug" ID="debug" file_suffix=".txt"/>
+               	    <result type="map_scale" ID="map_scale" file_suffix=".xml"/>
+		     <result type="cancel" ID="cancel" />
+		</response>
+               <service>ferret</service>
+          </operation>
+        <region>
+                <intervals name="xy" abstract="true"  type="Scatter Plots" title="Property-Property" />
+        	<degenerate />
+        </region>
+        <grid_types>
+        	<grid_type name="scattered" />
+        </grid_types>
+    	<service>ferret</service>
     </operation>
 </operations>
