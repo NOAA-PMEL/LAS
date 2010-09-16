@@ -86,7 +86,7 @@
 					</div>					
 				</div></td><td  style="vertical-align:top">
 				<div style="display:none;" id="wait_msg">Please wait while the plot loads...</div>
-				<iframe scrolling="no"  
+				<iframe scrolling="yes"  
 					                #if($las_request)
 								src='ProductServer.do?xml=$las_request.toEncodedURLString()'  
 	 	                                        #else 
