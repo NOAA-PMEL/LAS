@@ -17,7 +17,7 @@ IF ($add_to_var($iadd)"0|*>1") THEN
    IF `(STRINDEX("($shape($iadd))", "Z") NE 0)  AND (STRINDEX("($shape($nvar))", "Z") NE 0)` THEN
       DEFINE SYMBOL axi = `($data_($iadd)_var),RETURN=zaxis`
       DEFINE SYMBOL axn = `($data_($nvar)_var),RETURN=zaxis`
-      IF `STRCMP("($axi)", "($axn)") NE 0` THEN CANCEL symbol add_to_var($iadd)
+!      IF `STRCMP("($axi)", "($axn)") NE 0` THEN CANCEL symbol add_to_var($iadd)
    ENDIF
 ENDIF
 
@@ -34,17 +34,17 @@ IF ($add_to_var($iadd)"0|*>1") THEN
    IF `(STRINDEX("($shape($iadd))", "X") NE 0)  AND (STRINDEX("($shape($nvar))", "X") NE 0)` THEN
       DEFINE SYMBOL axi = `($data_($iadd)_var),RETURN=xaxis`
       DEFINE SYMBOL axn = `($data_($nvar)_var),RETURN=xaxis`
-      IF `STRCMP("($axi)", "($axn)") NE 0` THEN CANCEL symbol add_to_var($iadd)
+!      IF `STRCMP("($axi)", "($axn)") NE 0` THEN CANCEL symbol add_to_var($iadd)
    ENDIF
    IF `(STRINDEX("($shape($iadd))", "Y") NE 0)  AND (STRINDEX("($shape($nvar))", "Y") NE 0)` THEN
       DEFINE SYMBOL axi = `($data_($iadd)_var),RETURN=yaxis`
       DEFINE SYMBOL axn = `($data_($nvar)_var),RETURN=yaxis`
-      IF `STRCMP("($axi)", "($axn)") NE 0` THEN CANCEL symbol add_to_var($iadd)
+!      IF `STRCMP("($axi)", "($axn)") NE 0` THEN CANCEL symbol add_to_var($iadd)
    ENDIF
    IF `(STRINDEX("($shape($iadd))", "Z") NE 0)  AND (STRINDEX("($shape($nvar))", "Z") NE 0)` THEN
       DEFINE SYMBOL axi = `($data_($iadd)_var),RETURN=zaxis`
       DEFINE SYMBOL axn = `($data_($nvar)_var),RETURN=zaxis`
-      IF `STRCMP("($axi)", "($axn)") NE 0` THEN CANCEL symbol add_to_var($iadd)
+!      IF `STRCMP("($axi)", "($axn)") NE 0` THEN CANCEL symbol add_to_var($iadd)
    ENDIF
 ENDIF
 
