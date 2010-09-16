@@ -1,7 +1,6 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! LAS_results.jnl
 !
-pause
 ! $Author: ansley $
 ! $Date: 2006/07/13 18:08:18 $
 ! 3/30/2007 ACM When writing the map_scale.xml file, first list the urls separately;
