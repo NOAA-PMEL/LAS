@@ -6,25 +6,6 @@
 		<stylesheet src="JavaScript/frameworks/OpenLayersExtension/OLMapWidget.css"></stylesheet>
 		<style media="all" type="text/css">
 			@import "JavaScript/ui/LASUI.css";
-		#constraints {
-			min-height:500px;
-			width: 256px;
-			border-right: 1px solid #5c731e;
-			float:left;
-		}
-		#output {
-			text-align:left;
-			min-width: 800px;
-			min-height:500px;
-			overflow: hidden;
-		}
-		#wait_msg {
-			text-align:left;
-		}
-		#message_bar {
-			min-height:20pt;
-			border-bottom:1pt solid black;
-		}
 		</style>	
 	<body onload="this.height=document.innerHeight;">
 		<div style="display:none" class="LASPopupDIVNode" id="categories"></div>
@@ -86,7 +67,7 @@
 					</div>					
 				</div></td><td  style="vertical-align:top">
 				<div style="display:none;" id="wait_msg">Please wait while the plot loads...</div>
-				<iframe scrolling="yes"  
+				<iframe   
 					                #if($las_request)
 								src='ProductServer.do?xml=$las_request.toEncodedURLString()'  
 	 	                                        #else 
