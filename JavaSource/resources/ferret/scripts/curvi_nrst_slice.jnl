@@ -71,11 +71,16 @@ IF `($region_y_hi) - ($region_y_lo) EQ 0` THEN LET npts = 1
 DEFINE AXIS/Y=($region_y_lo):($region_y_hi)/NPOINTS=`npts`/UNITS=degrees sample_ylon
 DEFINE AXIS/Y=($region_y_lo):($region_y_hi)/NPOINTS=`npts`/UNITS=degrees sample_y
 
-
-
+! For multi-var plots, the variables may be on staggered grids.
+! Just regrid willy-nilly to the grid of the first variable.
+LET var_to_sample_($var_num) = ($data_var)[d=($data_num)]
+IF `($var_num) GT 0` THEN 
+   LET var_to_sample_($var_num) = ($data_var)[d=($data_num),GXY=($ferret_curvi_coord_lon)@ASN]
+ENDIF
 
 ! Y line, or YZ, YT slice
 LET yslice = ($ferret_view"|y>1|*>0") + ($ferret_view"|yz>1|*>0") + ($ferret_view"|yt>1|*>0")
+
 
 IF `yslice GT 0` THEN
 
@@ -89,7 +94,7 @@ IF `yslice GT 0` THEN
    LET sample_xpts = ($region_x_lo) + 0*sample_ypts
 
    LET fer_plot_var($var_num) = SAMPLEXY_CURV_NRST( \
-     ($data_var)[d=($data_num),i=($clon_imin):($clon_imax), j=($clat_jmin):($clat_jmax)($region_sample)], \
+     var_to_sample_($var_num)[i=($clon_imin):($clon_imax), j=($clat_jmin):($clat_jmax)($region_sample)], \
      ($ferret_curvi_coord_lon)[d=($data_num),i=($clon_imin):($clon_imax), j=($clat_jmin):($clat_jmax)], \
      ($ferret_curvi_coord_lat)[d=($data_num),i=($clon_imin):($clon_imax), j=($clat_jmin):($clat_jmax)], \
      sample_xpts, sample_ypts)
@@ -206,7 +211,7 @@ IF `xslice GT 0` THEN
    LET sample_ypts = ($region_y_lo) + 0*sample_xpts
 
    LET fer_plot_var($var_num) = SAMPLEXY_CURV_NRST( \
-     ($data_var)[d=($data_num),i=($clon_imin):($clon_imax), j=($clat_jmin):($clat_jmax)($region_sample)], \
+     var_to_sample_($var_num)[i=($clon_imin):($clon_imax), j=($clat_jmin):($clat_jmax)($region_sample)], \
      ($ferret_curvi_coord_lon)[d=($data_num),i=($clon_imin):($clon_imax), j=($clat_jmin):($clat_jmax)], \
      ($ferret_curvi_coord_lat)[d=($data_num),i=($clon_imin):($clon_imax), j=($clat_jmin):($clat_jmax)], \
      sample_xpts, sample_ypts)
@@ -314,7 +319,7 @@ IF `ztslice GT 0` THEN
 ! Define the x and y point to sample at 
 
    LET fer_plot_var($var_num) = SAMPLEXY_CURV_NRST( \
-     ($data_var)[d=($data_num),i=($clon_imin):($clon_imax), j=($clat_jmin):($clat_jmax)($region_sample)], \
+     var_to_sample_($var_num)[i=($clon_imin):($clon_imax), j=($clat_jmin):($clat_jmax)($region_sample)], \
      ($ferret_curvi_coord_lon)[d=($data_num),i=($clon_imin):($clon_imax), j=($clat_jmin):($clat_jmax)], \
      ($ferret_curvi_coord_lat)[d=($data_num),i=($clon_imin):($clon_imax), j=($clat_jmin):($clat_jmax)], \
      ($region_x_lo), ($region_y_lo))
@@ -355,7 +360,7 @@ IF `tslice GT 0` THEN
    LET sample_ypts = {($region_y_lo)}
 
    LET fer_plot_var($var_num) = SAMPLEXY_CURV_NRST( \
-     ($data_var)[d=($data_num),i=($clon_imin):($clon_imax), j=($clat_jmin):($clat_jmax)($region_sample)], \
+     var_to_sample_($var_num)[i=($clon_imin):($clon_imax), j=($clat_jmin):($clat_jmax)($region_sample)], \
      ($ferret_curvi_coord_lon)[d=($data_num),i=($clon_imin):($clon_imax), j=($clat_jmin):($clat_jmax)], \
      ($ferret_curvi_coord_lat)[d=($data_num),i=($clon_imin):($clon_imax), j=($clat_jmin):($clat_jmax)], \
      sample_xpts, sample_ypts)
@@ -388,7 +393,7 @@ IF `zslice GT 0` THEN
    LET sample_ypts = {($region_y_lo)}
 
    LET fer_plot_var($var_num) = SAMPLEXY_CURV_NRST( \
-     ($data_var)[d=($data_num),i=($clon_imin):($clon_imax), j=($clat_jmin):($clat_jmax)($region_sample)], \
+     var_to_sample_($var_num)[i=($clon_imin):($clon_imax), j=($clat_jmin):($clat_jmax)($region_sample)], \
      ($ferret_curvi_coord_lon)[d=($data_num),i=($clon_imin):($clon_imax), j=($clat_jmin):($clat_jmax)], \
      ($ferret_curvi_coord_lat)[d=($data_num),i=($clon_imin):($clon_imax), j=($clat_jmin):($clat_jmax)], \
      sample_xpts, sample_ypts)

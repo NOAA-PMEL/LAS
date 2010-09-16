@@ -38,6 +38,14 @@ IF `ireplace GT 0` THEN
    DEFINE SYMBOL iu2 = `SUBSTRING("($inunits_collapse)", ireplace+1, slen-ireplace)`
    DEFINE SYMBOL inunits_collapse = ($iu1)_rr_($iu2)
 ENDIF
+LET ireplace = STRINDEX("($inunits_collapse)", "-")
+IF `ireplace GT 0` THEN
+   DEFINE SYMBOL iu1 = `SUBSTRING("($inunits_collapse)", 1, ireplace-1)`
+   LET slen = STRLEN("($inunits_collapse)")
+   DEFINE SYMBOL iu2 = `SUBSTRING("($inunits_collapse)", ireplace+1, slen-ireplace)`
+   DEFINE SYMBOL inunits_collapse = ($iu1)_rr_($iu2)
+ENDIF
+pause
 LET ireplace = STRINDEX("($inunits_collapse)", ",")
 IF `ireplace GT 0` THEN
    DEFINE SYMBOL iu1 = `SUBSTRING("($inunits_collapse)", 1, ireplace-1)`
