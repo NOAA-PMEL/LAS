@@ -207,7 +207,9 @@ IF ($color_by"0|*>1") THEN
       DEFINE SYMBOL poly_qual = ($poly_qual)/KEY
    ENDIF
 
+! Dont use the palette coming in. Its for variable 0
    DEFINE SYMBOL poly_qual = ($poly_qual)/PALETTE=($ferret_palette"rainbow|default>rainbow|*>*)
+   DEFINE SYMBOL poly_qual = ($poly_qual)/PALETTE=rainbow
    DEFINE SYMBOL color_by_title = `zvar,RETURN=title`
 ELSE
    DEFINE SYMBOL poly_qual = ($poly_qual)/palette=($polycolor)
