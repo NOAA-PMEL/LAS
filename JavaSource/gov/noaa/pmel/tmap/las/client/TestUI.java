@@ -296,7 +296,8 @@ public class TestUI extends BaseUI {
 			double tmp_yhi = xAxesWidget.getRefMap().getYhi();
 
 			xPanels.get(0).setLatLon(String.valueOf(tmp_ylo), String.valueOf(tmp_yhi), String.valueOf(tmp_xlo), String.valueOf(tmp_xhi));
-			Map<String, String> temp_state = new HashMap<String, String>(xOptionsButton.getState());
+			
+			Map<String, String> temp_state = xOptionsButton.getState();
 			xPanels.get(0).refreshPlot(temp_state, false, true);
 		}
 	}
@@ -322,8 +323,8 @@ public class TestUI extends BaseUI {
 		xView = "xy";
 
 		// Get all the config info.  View is null to get all operations.
-		//TODO a call back for getting the grid of the new variable...
-		Util.getRPCService().getConfig(null, xVariable.getDSID(), xVariable.getID(), null);
+		
+		Util.getRPCService().getConfig(null, xVariable.getDSID(), xVariable.getID(), getGridCallback);
 
 	}
 	ClickHandler optionsOkHandler = new ClickHandler() {
@@ -353,7 +354,9 @@ public class TestUI extends BaseUI {
 			ops = config.getOperations();
 			xVariable.setGrid(grid);
 			xAnalysisWidget.setAnalysisAxes(grid);
-			TestUI.super.init(1);
+			if ( xPanels == null || xPanels.size() == 0 ) {
+		    	TestUI.super.init(1);
+			}
 			initPanel();
 
 		}
