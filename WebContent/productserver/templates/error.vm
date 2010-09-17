@@ -54,7 +54,7 @@ $las_response.toString()
                 }
               </style>
 </head>
-<body bgcolor="white">
+<body bgcolor="white" onload="resizeme();">
 
 <br><br>
 <table>
@@ -93,6 +93,16 @@ $las_response.getResult("exception_message")
 </pre>
 #end
 </body>
+<script type="text/javascript">
+        function resizeme() {
+                if(parent!=self)
+                 if(parent.document.getElementById("output")) {
+                        parent.document.getElementById("output").height=window.screen.height+20;
+                        parent.document.getElementById("output").width=window.screen.width+20;
+                }
+        }
+</script>
+
 </html>
 
 #end
