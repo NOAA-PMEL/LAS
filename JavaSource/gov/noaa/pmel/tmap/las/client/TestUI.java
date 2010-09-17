@@ -70,7 +70,7 @@ public class TestUI extends BaseUI {
 
 
 		if ( xOperationID == null ) {
-			xOperationID = "Plot_2D_XY";
+			xOperationID = "Plot_2D_XY_zoom";
 		}
 		if ( xOptionID == null ) {
 			xOptionID = "Options_2D_image_contour_xy_7";
