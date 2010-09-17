@@ -13,9 +13,18 @@ $las_response.toString()
 <!-- LAS SERVER OK -->
 <head>
 <title>LAS Output -- $las_config.getTitle()</title>
-<body>
+<body onload="resizeme()">
          <img alt="Plot Image" id="plot" border="0" src="$las_response.getResult("plot_image")">
 </body>
+<script type="text/javascript">
+	function resizeme() {
+	        if(parent!=self)
+	         if(parent.document.getElementById("output")) {
+                        parent.document.getElementById("output").height=window.screen.height+20;
+                        parent.document.getElementById("output").width=window.screen.width+20;
+        	}
+	}
+</script>
 </html>
 
 #end
