@@ -58,6 +58,7 @@ public class AxesWidgetGroup extends Composite {
 		plotAxesLayout = new FlexTable();
 		orthoAxesLayout = new FlexTable();
 		refMap = new OLMapWidget();
+		refMap.activateNativeHooks();
 		zWidget = new AxisWidget();
 		zWidget.setVisible(false);
 		dateTimeWidget = new DateTimeWidget();
