@@ -1176,7 +1176,8 @@ LASUI.prototype.setOperation = function (evt) {
 		if(document.getElementById(this.state.operations.getOperationName(i))&&this.state.operations.hasInterval(this.state.operations.getOperationID(i),view)) 
 			this.setOperationNode(this.state.operations.getOperationID(i),this.state.operations.getOperationName(i));	
 	}
-
+	
+	this.updateConstraints(view);
 	if(this.state.operations.getOperationByID(this.state.operation.plot).optiondef) {
 		if(this.state.operations.getOperationByID(this.state.operation.plot).optiondef.IDREF) {
 			this.getOptions(this.state.operations.getOperationByID(this.state.operation.plot).optiondef.IDREF, "plot", true);
@@ -1188,7 +1189,7 @@ LASUI.prototype.setOperation = function (evt) {
 		document.getElementById('plotOptionsButton').className='top_link_disabled';
 		document.getElementById('plotOptionsButton').onclick=function(){};
 	}
-	this.updateConstraints(view);
+	//this.updateConstraints(view);
 
 	if(this.refs.analysis.enabled||!this.state.grid.hasAxis('t')||this.state.operation.plot.indexOf('prop_prop')>=0) {
 		document.getElementById('Animation').className='top_link_disabled';
