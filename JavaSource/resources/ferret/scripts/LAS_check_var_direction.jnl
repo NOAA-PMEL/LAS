@@ -66,8 +66,8 @@ ENDIF
 IF `STRLEN("($varshape)") GT 1` THEN
    IF `($data_count) GT 1` THEN  
 
-      DEFINE SYMBOL  varshape0 = `($data_0_var),RETURN=shape`
-      DEFINE SYMBOL  varshape1 = `($data_1_var),RETURN=shape`
+      DEFINE SYMBOL  varshape0 = `($data_0_var)[d=($dset0)],RETURN=shape`
+      DEFINE SYMBOL  varshape1 = `($data_1_var)[d=($dset1)],RETURN=shape`
       IF `STRLEN("($varshape1)") GT STRLEN("($varshape0)")` THEN
         IF `STRINDEX("($varshape0)", "X") EQ 0 AND STRINDEX("($varshape1)", "X") NE 0` THEN DEFINE SYMBOL missing_x = 1
         IF `STRINDEX("($varshape0)", "Y") EQ 0 AND STRINDEX("($varshape1)", "Y") NE 0` THEN DEFINE SYMBOL missing_y = 1

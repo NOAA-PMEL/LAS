@@ -25,6 +25,7 @@ IF ($data_($ivar)_var"0|*>1") THEN DEFINE SYMBOL data_var ($data_($ivar)_var); \
 IF ($data_($ivar)_var"0|*>1") THEN DEFINE SYMBOL data_var = `UPCASE("($data_var)")`; \
 SET DATA ($data_url); \
 DEFINE SYMBOL shape($ivar) = `($data_var),RETURN=shape`; \
+DEFINE SYMBOL dset($ivar) = `($data_($ivar)_var),RETURN=dsetnum`;\
 )
 
 ! Set up to add 0*var if needed
