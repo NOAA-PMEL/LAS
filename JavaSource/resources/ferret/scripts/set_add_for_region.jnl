@@ -26,7 +26,7 @@ ENDIF
 IF `($region_z"0|*>1") AND (STRINDEX("($shape($iadd))", "Z") EQ 0)` THEN 
    REPEAT/RANGE=0:`nc`/NAME=nvar (\
       DEFINE SYMBOL nvar = `nvar`; \
-      IF `(STRINDEX("($shape($nvar))", "Z") NE 0)`THEN DEFINE SYMBOL add_to_var($iadd)= \
+      IF `(STRINDEX("($shape($nvar))", "Z") NE 0)` THEN DEFINE SYMBOL add_to_var($iadd)= \
 0*($data_($nvar)_var)[d=($dset($nvar))]; \
       IF `(STRINDEX("($shape($nvar))", "Z") NE 0)` THEN EXIT/LOOP)
 ENDIF
