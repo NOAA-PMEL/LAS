@@ -56,7 +56,18 @@ ELSE
    IF ($data_($num)_var"0|*>1") THEN DEFINE SYMBOL data_var_nq = ($data_var)
    IF ($data_($num)_var"0|*>1") THEN DEFINE SYMBOL data_var = '($data_var)'
 ENDIF
+
+! If the grids werent the same but were reconciled with an add_var, add that.
+! The variables must be the same size. Check and set up a nice message if not.
+
 IF ($add_to_var($num)"0|*>1") THEN 
+   LET xsize = `XSEQUENCE(($data_var)),RETURN=isize`
+   LET ysize = `XSEQUENCE(($add_to_var($num))),RETURN=isize`   
+   IF `xsize NE ysize` THEN 
+      MESSAGE/ERROR **ERROR The variables must have the same dimensions: ($data_0_var), ($data_1_var)
+      EXIT/PROGRAM
+   ENDIF
+
    LET dvar = ($data_var) + ($add_to_var($num))
    DEFINE SYMBOL data_var = dvar
 ENDIF
