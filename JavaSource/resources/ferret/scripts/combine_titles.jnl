@@ -1,0 +1,30 @@
+
+IF `STRINDEX("($op_last)", "G") GT 0 AND STRINDEX("($op)", "L") GT 0` THEN 
+   DEFINE SYMBOL letter2 = `SUBSTRING("($op_last)", 2, 1)`
+   DEFINE SYMBOL reverse = `STRCAT("L", "($letter2)")`
+
+
+   DEFINE SYMBOL math_op_sym = ($reverse)
+   IF ($math_sym_convert"1|no_convert>0") THEN GO op_math_sym ($translate_math) ($reverse)
+   DEFINE SYMBOL opA = ($math_op_sym)
+   
+   DEFINE SYMBOL math_op_sym = ($op)
+   IF ($math_sym_convert"1|no_convert>0") THEN GO op_math_sym ($translate_math) ($op)
+   DEFINE SYMBOL opB = ($math_op_sym)
+   DEFINE SYMBOL nmask_labels = `($nmask_labels) - 1` 
+   DEFINE SYMBOL mask_title_($nmask_labels) = Where `($rhs_last),prec=3` ($opA) ($lhs_last) ($opB) `($rhs),prec=3`
+ENDIF
+IF `STRINDEX("($op_last)", "L") GT 0 AND STRINDEX("($op)", "G") GT 0` THEN 
+   DEFINE SYMBOL letter2 = `SUBSTRING("($op)", 2, 1)`
+   DEFINE SYMBOL reverse = `STRCAT("L", "($letter2)")`
+   
+   DEFINE SYMBOL math_op_sym = ($reverse)
+   IF ($math_sym_convert"1|no_convert>0") THEN GO op_math_sym ($translate_math) ($reverse)
+   DEFINE SYMBOL opA = ($math_op_sym)
+   
+   DEFINE SYMBOL math_op_sym = ($op)
+   IF ($math_sym_convert"1|no_convert>0") THEN GO op_math_sym ($translate_math) ($op_last)
+   DEFINE SYMBOL opB = ($math_op_sym)
+   DEFINE SYMBOL nmask_labels = `($nmask_labels) - 1` 
+   DEFINE SYMBOL  mask_title_($nmask_labels) = Where `($rhs),prec=3` ($opA) ($lhs_last) ($opB) `($rhs_last),prec=3`
+ENDIF

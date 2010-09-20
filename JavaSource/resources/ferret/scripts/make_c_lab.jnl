@@ -1,0 +1,25 @@
+! make_c_lab.jnl
+! Called by set_contsratint_labels. 
+!
+! Make the label from constraints. Calld as a second
+! script as the command line from a single REPEAT
+! statement containing all the commands could get too long.
+
+IF `STRINDEX("($rhs)", "'") GT 0` THEN
+   LET slen = `STRLEN("($rhs)")`
+   LET s1 = `STRINDEX("($rhs)", "'")`
+   DEFINE SYMBOL rhs = `SUBSTRING("($rhs)", s1+1, slen-2)`
+ENDIF
+
+DEFINE SYMBOL nmask_labels = `($nmask_labels"0") + 1` 
+GO remove_underscores ($lhs)
+DEFINE SYMBOL lhs = ($Var_Lab) 
+IF ($op"0|*>1") THEN DEFINE SYMBOL op = `UPCASE("($op)")` 
+DEFINE SYMBOL math_op_sym = ($op)
+IF ($math_sym_convert"1|no_convert>0") THEN GO op_math_sym ($translate_math) ($op) 
+DEFINE SYMBOL mask_title_($nmask_labels) = Where ($lhs) ($math_op_sym) ($rhs)
+IF `STRCMP("($lhs_last)", "($lhs% %)") EQ 0` THEN GO combine_titles 
+DEFINE SYMBOL lhs_last = ($lhs)
+DEFINE SYMBOL op_last = ($op)
+DEFINE SYMBOL rhs_last = ($rhs) 
+

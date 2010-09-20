@@ -242,4 +242,3 @@ IF ($add_to_title"0|*>1") THEN
 ENDIF
 
 ! End of $RCSfile ------------LAS_set_strides_prop.jnl--------------------------
-pause
