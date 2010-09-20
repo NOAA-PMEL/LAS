@@ -110,7 +110,25 @@ IF `($have_time_lab"0|*>1") EQ 0` THEN
          DEFINE SYMBOL tprec = days
       ENDIF
 
-      LET tt = t[gt=($data_0_var),d=($dset0)]
+
+      DEFINE SYMBOL do_t0 = `($data_0_var)[d=($dset0)],RETURN=taxis`
+      IF `STRINDEX("($do_t0)", "NORMAL") NE 0` THEN 
+         DEFINE SYMBOL do_t0 = 0
+      ELSE 
+         DEFINE SYMBOL do_t0 = 1
+      ENDIF
+      DEFINE SYMBOL do_t1 = `($data_1_var)[d=($dset1)],RETURN=taxis`
+      IF `STRINDEX("($do_t1)", "NORMAL") NE 0` THEN 
+         DEFINE SYMBOL do_t1 = 0
+      ELSE 
+         DEFINE SYMBOL do_t1 = 1
+      ENDIF
+
+      IF ($do_t0) THEN
+         LET tt = t[gt=($data_0_var),d=($dset0)]
+      ELIF ($do_t1) THEN
+         LET tt = t[gt=($data_1_var),d=($dset1)]
+      ENDIF
       LET tlo_coord = tt[t="($region_t_lo)"]
       LET thi_coord = tt[t="($region_t_hi)"]
 
