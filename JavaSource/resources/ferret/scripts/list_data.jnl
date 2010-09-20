@@ -34,4 +34,4 @@ CANCEL MODE INTERPOLATE  ! important when evaluating the size limits
 
 SET LIST/FILE="($result_ferret_listing_filename)"
 
-REPEAT/RANGE=1:($data_count"1")/NAME=ivar (GO list_a_variable `ivar-1`; CANCEL SYMBOL ferret_list_var)
+REPEAT/RANGE=1:($data_count"1")/NAME=outvar (GO list_a_variable `outvar-1`; CANCEL SYMBOL ferret_list_var)
