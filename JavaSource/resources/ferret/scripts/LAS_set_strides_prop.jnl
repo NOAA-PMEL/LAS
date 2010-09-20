@@ -59,11 +59,11 @@ IF ($native_curvilinear_xy"0|*>1") THEN
    LET xsiz = ($clon_imax) - ($clon_imin) + 1
    LET ysiz = ($clat_jmax) - ($clat_jmin) + 1
 
-   LET xx = x[gx=($data_var)[d=($data_num)]]
-   LET ixmax = xx[i=@MAX]
+   LET ii = i[gx=($data_var)[d=($data_num)]]
+   LET ixmax = ii[i=@MAX]
 
-   LET yy = y[gy=($data_var)[d=($data_num)]]
-   LET jymax = yy[j=@MAX]
+   LET jj = j[gy=($data_var)[d=($data_num)]]
+   LET jymax = jj[j=@MAX]
 
    LET ndims = 2
 ELSE
@@ -199,7 +199,6 @@ IF `($region_y_range"0|*>1") GT 0` THEN
 	 IF `(($clat_jmin) + ($clat_jmax)*($ystride)) GT jymax` THEN \
 	    IF `($clat_jmax)-($ystride) GT 0` THEN DEFINE SYMBOL clat_jmax = `($clat_jmax)-($ystride)`
       ENDIF
-
       IF `($ystride) GT 1` THEN DEFINE SYMBOL add_to_title = ($add_to_title) Stride ($ystride) in Y
 ENDIF
       
