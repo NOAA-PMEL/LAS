@@ -94,8 +94,8 @@ SET DATA ($data_url)
 ! Use PPLUS symbol editing to check for units sent in as ""
 PPL SET ulen $LENGTH(data_($num)_units)
 IF `($ulen) LE 2` THEN  
-    PPL SET isquote1 $EXTRACT(1,1,data_0_units)
-    PPL SET isquote2 $EXTRACT(2,1,data_0_units)
+    PPL SET isquote1 $EXTRACT(1,1,data_($num)_units)
+    PPL SET isquote2 $EXTRACT(2,1,data_($num)_units)
     IF  `($isquote1%0|"">1|*>0%) OR ($isquote2%0|"">1|*>0%)` THEN \
       DEFINE SYMBOL units_double_quotes = 1
 ENDIF
@@ -107,7 +107,7 @@ IF `($units_double_quotes"0|*>1") EQ 0` THEN
       DEFINE SYMBOL data_units `SUBSTRING("($data_($num)_units)", 2, ulen-2)`
 ENDIF
 
-IF ($fer_last_error"0|*>1") THEN
+IF ($fer_last_error"0|0|1|*>1") THEN
   DEFINE SYMBOL error_status = ERROR
   DEFINE SYMBOL error_type = DATA
   DEFINE SYMBOL error_string = The ($data_var) source file -- ($data_url) did not open successfully.
@@ -115,3 +115,4 @@ IF ($fer_last_error"0|*>1") THEN
 ENDIF
 
 ! End of $RCSfile ------------LAS_initialize_dataset.jnl--------------------------
+

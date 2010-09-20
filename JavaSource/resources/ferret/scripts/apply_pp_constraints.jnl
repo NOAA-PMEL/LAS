@@ -16,13 +16,16 @@
 DEFINE SYMBOL var_id = ($1)
 DEFINE SYMBOL var_in = ($2)
 LET var_constr_($var_id) = ($var_in)
+DEFINE SYMBOL translate_math = 1
 
 IF ($constraint_0_lhs"0|($data_($var_id)_var)>1|*>0") THEN
    IF `($constraint_0_type"0|variable>1|*>0") EQ 0` THEN EXIT/SCRIPT
    IF `($constraint_1_type"0|variable>1|*>0") EQ 0` THEN EXIT/SCRIPT
    LET constrain_1_($var_id) = IF ($var_in) ($constraint_0_op) ($constraint_0_rhs) THEN ($var_in)
-   IF ($constraint_1_lhs"0|($data_($var_id)_var)>1|*>0") THEN LET var_constr_($var_id) = \
-      IF constrain_1_($var_id) ($constraint_1_op) ($constraint_1_rhs) THEN constrain_1_($var_id)
+   IF ($constraint_1_lhs"0|($data_($var_id)_var)>1|*>0") THEN 
+     LET var_constr_($var_id) = \
+       IF constrain_1_($var_id) ($constraint_1_op) ($constraint_1_rhs) THEN constrain_1_($var_id)
+
 ENDIF
 
 IF ($constraint_2_lhs"0|($data_($var_id)_var)>1|*>0") THEN 
@@ -32,5 +35,7 @@ IF ($constraint_2_lhs"0|($data_($var_id)_var)>1|*>0") THEN
    IF ($constraint_3_lhs"0|($data_($var_id)_var)>1|*>0") THEN LET var_constr_($var_id) = \
       IF constrain_1_($var_id) ($constraint_3_op) ($constraint_3_rhs) THEN  constrain_1_($var_id)
 ENDIF
+
+GO set_constraint_labels
 
 ! End of  ------------- apply_pp_constraints.jnl--------------------------
