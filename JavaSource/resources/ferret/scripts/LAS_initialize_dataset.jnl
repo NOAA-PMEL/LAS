@@ -114,5 +114,9 @@ IF ($fer_last_error"0|0|1|*>1") THEN
   EXIT/SCRIPT
 ENDIF
 
+
+SET DATA "($data_($num)_url)"
+DEFINE SYMBOL dset($num) = `($data_($num)_var),RETURN=dsetnum`
+
 ! End of $RCSfile ------------LAS_initialize_dataset.jnl--------------------------
 

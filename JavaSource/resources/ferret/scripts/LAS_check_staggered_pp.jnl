@@ -9,19 +9,19 @@
 ! the index ranges.
 !
 
-DEFINE SYMBOL xax_1 = `($data_0_var),RETURN=xaxis`
-DEFINE SYMBOL yax_1 = `($data_0_var),RETURN=yaxis`
-DEFINE SYMBOL xax_2 = `($data_1_var),RETURN=xaxis`
-DEFINE SYMBOL yax_2 = `($data_1_var),RETURN=yaxis`
+DEFINE SYMBOL xax_1 = `($data_0_var)[d=($dset0)],RETURN=xaxis`
+DEFINE SYMBOL yax_1 = `($data_0_var)[d=($dset0)],RETURN=yaxis`
+DEFINE SYMBOL xax_2 = `($data_1_var)[d=($dset1)],RETURN=xaxis`
+DEFINE SYMBOL yax_2 = `($data_1_var)[d=($dset1)],RETURN=yaxis`
 
 IF `STRCMP("($xax_1)", "($xax_2)") NE 0` THEN 
    DEFINE SYMBOL ferret_staggered_grid_x = 0
-   LET xsiz = `($data_0_var),RETURN=isize`
+   LET xsiz = `($data_0_var)[d=($dset0)],RETURN=isize`
    IF `($clon_imax) EQ (xsiz+1)` THEN 
       DEFINE SYMBOL clon_imax `xsiz`
       DEFINE SYMBOL ferret_staggered_grid_x = 1
    ENDIF
-   LET xsiz = `($data_1_var),RETURN=isize`
+   LET xsiz = `($data_1_var)[d=($dset1)],RETURN=isize`
    IF `($clon_imax) EQ (xsiz+1)` THEN 
       DEFINE SYMBOL clon_imax `xsiz`
       DEFINE SYMBOL ferret_staggered_grid_x = 1
@@ -30,12 +30,12 @@ ENDIF
 
 IF `STRCMP("($yax_1)", "($yax_2)") NE 0` THEN 
    DEFINE SYMBOL ferret_staggered_grid_y = 0
-   LET ysiz = `($data_0_var),RETURN=jsize`
+   LET ysiz = `($data_0_var)[d=($dset0)],RETURN=jsize`
    IF `($clat_jmax) EQ (ysiz+1)` THEN 
       DEFINE SYMBOL clat_jmax `ysiz`
       DEFINE SYMBOL ferret_staggered_grid_y = 1
    ENDIF
-   LET ysiz = `($data_1_var),RETURN=jsize`
+   LET ysiz = `($data_1_var)[d=($dset1)],RETURN=jsize`
    IF `($clat_jmax) EQ (ysiz+1)` THEN 
       DEFINE SYMBOL clat_jmax `ysiz`
       DEFINE SYMBOL ferret_staggered_grid_y = 1

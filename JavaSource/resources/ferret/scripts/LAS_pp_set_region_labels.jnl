@@ -110,7 +110,7 @@ IF `($have_time_lab"0|*>1") EQ 0` THEN
          DEFINE SYMBOL tprec = days
       ENDIF
 
-      LET tt = t[gt=($data_0_var)]
+      LET tt = t[gt=($data_0_var),d=($dset0)]
       LET tlo_coord = tt[t="($region_t_lo)"]
       LET thi_coord = tt[t="($region_t_hi)"]
 
