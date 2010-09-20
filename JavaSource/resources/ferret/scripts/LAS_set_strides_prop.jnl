@@ -158,7 +158,11 @@ REPEAT/RANGE=1:5 (\
       IF `teststride LE 4` THEN EXIT/LOOP \
    )
 LIST xstride, ystride,zstride,tstride
-LIST xstride* ystride* zstride* tstride
+
+IF `xsiz LE 6` THEN LET xstride = 1
+IF `ysiz LE 6` THEN LET ystride = 1
+IF `zsiz LE 6` THEN LET zstride = 1
+IF `tsiz LE 6` THEN LET ystride = 1
 LIST ($stride_for_mem)
 LIST ($stride_for_mem)/(xstride* ystride* zstride* tstride)
 
@@ -238,4 +242,4 @@ IF ($add_to_title"0|*>1") THEN
 ENDIF
 
 ! End of $RCSfile ------------LAS_set_strides_prop.jnl--------------------------
-
+pause

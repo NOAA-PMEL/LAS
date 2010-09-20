@@ -4,9 +4,9 @@
 
 DEFINE SYMBOL iadd = $1
 
-! If no z axis, get it from another variable
+! If no t axis, get it from another variable
 IF `($region_t"0|*>1") AND (STRINDEX("($shape($iadd))", "T") EQ 0)` THEN 
-   REPEAT/RANGE=1:`nc`/NAME=nvar (\
+   REPEAT/RANGE=0:`nc`/NAME=nvar (\
        DEFINE SYMBOL nvar = `nvar`; \
       IF `(STRINDEX("($shape($nvar))", "T") NE 0)` THEN DEFINE SYMBOL add_to_var($iadd)  0*($data_($nvar)_var); \
       IF `(STRINDEX("($shape($nvar))", "T") NE 0)` THEN EXIT/LOOP)
@@ -23,7 +23,7 @@ ENDIF
 
 ! If no z axis, get it from another variable
 IF `($region_z"0|*>1") AND (STRINDEX("($shape($iadd))", "Z") EQ 0)` THEN 
-   REPEAT/RANGE=1:`nc`/NAME=nvar (\
+   REPEAT/RANGE=0:`nc`/NAME=nvar (\
       DEFINE SYMBOL nvar = `nvar`; \
       IF `(STRINDEX("($shape($nvar))", "Z") NE 0)` THEN DEFINE SYMBOL add_to_var($iadd) 0*($data_($nvar)_var); \
       IF `(STRINDEX("($shape($nvar))", "Z") NE 0)` THEN EXIT/LOOP)
