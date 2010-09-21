@@ -90,7 +90,6 @@ ENDIF
 LET xsize = `($xvar),RETURN=isize`
 LET ysize = `($yvar),RETURN=isize`
 
-
 IF `xsize NE ysize` THEN 
   MESSAGE/ERROR **ERROR The variables must have the same dimensions: ($data_0_var), ($data_1_var)
   EXIT/PROGRAM
@@ -279,15 +278,10 @@ IF ($do_rsquare"1|0|*>1) THEN
 
    PLOT/VS/OVER/NOLAB/LINE/THICK=2/color=($line_color) {`p1`,`p2`}, {`q1`,`q2`}
 
+! Label the rsquare and slope of the line. Put this above the plot.
    IF `rsquare` THEN
-      IF `slope LE 0.` THEN 
-         LABEL/NOUSER `($ppl$xlen)-0.2`,`($ppl$ylen)-0.4`,1, 0, 0.12, @P4@SRR^2 = `rsquare,P=3`
-         LABEL/NOUSER `($ppl$xlen)-0.2`,`($ppl$ylen)-0.6`,1, 0, 0.12, @P4@SRSlope = `slope,P=3`
-      ELSE
-         LABEL/NOUSER `($ppl$xorg)+0.2`,`($ppl$ylen)-0.4`,1, 0, 0.12, @P4@SRR^2 = `rsquare,P=3`
-         LABEL/NOUSER `($ppl$xorg)+0.2`,`($ppl$ylen)-0.6`,1, 0, 0.12, @P4@SRSlope = `slope,P=3`
-      ENDIF
-
+      LABEL/NOUSER `($ppl$xlen)-0.2`,`($ppl$ylen)+0.3`,1, 0, 0.12, @P4@SRR^2 = `rsquare,P=3`
+      LABEL/NOUSER `($ppl$xlen)-0.2`,`($ppl$ylen)+0.1`,1, 0, 0.12, @P4@SRSlope = `slope,P=3`
    ENDIF
 
 ENDIF
