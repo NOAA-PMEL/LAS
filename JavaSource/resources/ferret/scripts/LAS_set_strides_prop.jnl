@@ -148,14 +148,14 @@ LIST xstride, ystride,zstride,tstride
 ! Adjust so that the product of the strides gets close to ($stride_for_mem)
 REPEAT/RANGE=1:5 (\
       LET teststride = `($stride_for_mem)/(xstride* ystride* zstride* tstride)`; \
-      IF `teststride GT 4` THEN LET xstride = `xstride+1`; \
-      IF `teststride GT 4` THEN LET ystride = `ystride+1`; \
-      IF `teststride GT 4` THEN LET tstride = `tstride+1`; \
+      IF `teststride GT 1` THEN LET xstride = `xstride+1`; \
+      IF `teststride GT 1` THEN LET ystride = `ystride+1`; \
+      IF `teststride GT 1` THEN LET tstride = `tstride+1`; \
       LET teststride = `($stride_for_mem)/(xstride* ystride* zstride* tstride)`; \
-      IF `teststride GT 2` THEN LET tstride = `tstride+1`; \
+      IF `teststride GT 1` THEN LET tstride = `tstride+1`; \
       LET teststride = `($stride_for_mem)/(xstride* ystride* zstride* tstride)`; \
-      IF `teststride GT 2` THEN LET tstride = `tstride+1`; \
-      IF `teststride LE 4` THEN EXIT/LOOP \
+      IF `teststride GT 1` THEN LET tstride = `tstride+1`; \
+      IF `teststride LE 1` THEN EXIT/LOOP \
    )
 LIST xstride, ystride,zstride,tstride
 

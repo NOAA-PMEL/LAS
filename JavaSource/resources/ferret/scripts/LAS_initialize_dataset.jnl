@@ -61,13 +61,6 @@ ENDIF
 ! The variables must be the same size. Check and set up a nice message if not.
 
 IF ($add_to_var($num)"0|*>1") THEN 
-   LET xsize = `XSEQUENCE(($data_var)),RETURN=isize`
-   LET ysize = `XSEQUENCE(($add_to_var($num))),RETURN=isize`   
-   IF `xsize NE ysize` THEN 
-      MESSAGE/ERROR **ERROR The variables must have the same dimensions: ($data_0_var), ($data_1_var)
-      EXIT/PROGRAM
-   ENDIF
-
    LET dvar = ($data_var) + ($add_to_var($num))
    DEFINE SYMBOL data_var = dvar
 ENDIF
