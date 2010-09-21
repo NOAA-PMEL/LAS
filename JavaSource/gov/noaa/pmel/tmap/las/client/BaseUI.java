@@ -427,6 +427,12 @@ public class BaseUI implements EntryPoint {
 		xOperationsClickHandler = handler;
 		xOperationsWidget.addClickHandler(handler);
 	}
+	public void addPanelApplyClickHandler(ClickHandler handler) {
+		for (int i = 0; i < xPanelCount; i++ ) {
+			xPanels.get(i).addApplyHandler(handler);
+		}
+		
+	}
 	public void handlePanelShowHide() {
 		if ( xPanelHeaderHidden ) {
 			for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
