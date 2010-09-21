@@ -151,6 +151,7 @@ public class VizGal extends BaseUI {
 		setDatasetSelectionHandler(xVisGalDatasetSelectionHandler);
 		setOperationsClickHandler(xVizGalOperationsClickHandler);
 		setOptionsOkHandler(optionsOkHandler);
+                addPanelApplyClickHandler(panelApplyButtonClick);
 		
 		// Initialize the gallery with an asynchronous call to the server to get variable needed.
 		if ( xDSID != null && xVarID != null & xOperationID != null && xView != null) {
