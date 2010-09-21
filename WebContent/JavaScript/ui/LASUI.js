@@ -1171,7 +1171,16 @@ LASUI.prototype.setOperation = function (evt) {
 				delete this.state.analysis.axes[a];
 			}
 	this.state.view.widgets = view;
-	
+
+
+	//disable buttons (this shodul get broken into its own method)
+        for(var row=0;row<document.getElementById("productButtons").childNodes.length;row++)
+                for(var cell=0;cell<document.getElementById("productButtons").childNodes[row].childNodes.length;cell++)
+                        try {
+                                        document.getElementById("productButtons").childNodes[row].className='top_link_disabled';
+                                        document.getElementById("productButtons").childNodes[row].onclick = function(){};
+                                } catch (e) {}		
+	//enable buttons
 	for(var i=0;i<this.state.operations.getOperationCount();i++) {
 		if(document.getElementById(this.state.operations.getOperationName(i))&&this.state.operations.hasInterval(this.state.operations.getOperationID(i),view)) 
 			this.setOperationNode(this.state.operations.getOperationID(i),this.state.operations.getOperationName(i));	
@@ -1248,8 +1257,19 @@ LASUI.prototype.setOperationList = function (strJson, stop) {
 	if(!this.state.operations.response.operations.error&&!stop)
 		this.setDefaultProductMenu();
 	var varct = document.getElementsByName('variables').length;
+
+        //disable all button nodes first
+        for(var row=0;row<document.getElementById("productButtons").childNodes.length;row++)
+                for(var cell=0;cell<document.getElementById("productButtons").childNodes[row].childNodes.length;cell++)
+                        try {
+                                        document.getElementById("productButtons").childNodes[row].className='top_link_disabled';
+                                        document.getElementById("productButtons").childNodes[row].onclick = function(){};
+                                } catch (e) {}
+
 	
 	if(stop) {
+
+
 		for(var i=0;i<this.state.operations.getOperationCount();i++) {
 			var minvars= 1;
 			var maxvars = 1;
@@ -1786,12 +1806,27 @@ LASUI.prototype.initTConstraint = function (mode,reset) {
 
 
 			switch(mode) {
-				case 'range':
-					document.getElementById("Date").innerHTML="<strong>Date Range:</strong><div id='DWAnchor' />";
+				case 'range': while(document.getElementById("Date").firstChild)
+						document.getElementById("Date").removeChild(document.getElementById("Date").firstChild);
+					
+					var date_label=document.createElement('STRONG');
+					date_label.appendChild(document.createTextNode("Date Range:"));
+                                        document.getElementById("Date").appendChild(date_label);
+					var DWAnchor = document.createElement("DIV");
+					DWAnchor.id="DWAnchor";
+					 document.getElementById("Date").appendChild(DWAnchor);
 					this.refs.DW.render("DWAnchor", DWDisplay, DWDisplay);
 					break;
-				case 'point':
-					document.getElementById("Date").innerHTML="<strong>Date:</strong><div id='DWAnchor' />";
+				case 'point': while(document.getElementById("Date").firstChild)
+                                                document.getElementById("Date").removeChild(document.getElementById("Date").firstChild);
+                                        var date_label=document.createElement('STRONG');
+                                        date_label.appendChild(document.createTextNode("Date:"));
+                                        document.getElementById("Date").appendChild(date_label);
+                                        var DWAnchor = document.createElement("DIV");
+                                        DWAnchor.id="DWAnchor";
+                                         document.getElementById("Date").appendChild(DWAnchor);
+                                        this.refs.DW.render("DWAnchor", DWDisplay, DWDisplay);
+ 
 					this.refs.DW.render("DWAnchor", DWDisplay);
 					break;
 			}
@@ -2142,6 +2177,8 @@ LASUI.prototype.setOptionList = function (strJson,DOMNode,type,reset) {
 
 
 	document.getElementById('plotOptionsButton').className='top_link';
+	document.getElementById('plotOptionsButton').onclick = showPlotOptions;
+
 	var table = document.createElement("TABLE");
 	table.style.margin = "-4pt";
 	table.style.marginLeft = "6pt";
