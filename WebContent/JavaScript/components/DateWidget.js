@@ -313,7 +313,11 @@ function DateWidget_renderToNode(node,menu_set_1,menu_set_2) {
   this.node = node;
   this.menu_set_1 = menu_set_1;
   this.menu_set_2 = menu_set_2;
-    var children = node.childNodes;
+  if(node.childNodes)
+        var children = node.childNodes;
+  else
+        var children = [];
+
   var num_children = children.length;
 
   // Remove any children of this widget
@@ -566,7 +570,10 @@ function DateWidget_render(element_id,menu_set_1,menu_set_2) {
   this.menu_set_2 = menu_set_2;
 
   var node = document.getElementById(this.element_id);
-  var children = node.childNodes;
+  if(node.childNodes)
+  	var children = node.childNodes;
+  else
+	var children = [];
   var num_children = children.length;
 
   // Remove any children of this widget
