@@ -23,8 +23,10 @@ IF ($ferret_view"|xy>1|*>0") THEN
    LET mark_xmax = `xpts[x=@max,y=@max]`
    LET mark_ymin = `ypts[x=@min,y=@min]`
    LET mark_ymax = `ypts[x=@max,y=@max]`
-   LET nx = `xpts,return=isize`
-   LET ny = `xpts,return=jsize`
+   LET xx =  X[GX=mvar]
+   LET yy =  Y[GY=mvar]
+   LET nx = `xx,return=isize`
+   LET ny = `yy,return=jsize`
    LET x_pct = nx*($region_x_range)/(mark_xmax - mark_xmin)
    LET y_pct = ny*($region_y_range)/(mark_ymax - mark_ymin)
 
@@ -49,8 +51,10 @@ IF ($ferret_view"|xy>1|*>0") THEN
       ELSE
          LET xx =  X[GX=mvar]
          LET yy =  Y[GY=mvar]
-         LET xpts =   xx[i=1:`nx-1`:`dx`] + 0*yy[j=1:`ny-1`:`dy`]
-         LET ypts = 0*xx[i=1:`nx-1`:`dx`] +   yy[j=1:`ny-1`:`dy`]
+	 let xsiz = `xx,return=isize`
+	 let ysiz = `yy,return=jsize`
+         LET xpts =   xx[i=1:`nx`:`dx`] + 0*yy[j=1:`ny`:`dy`]
+         LET ypts = 0*xx[i=1:`nx`:`dx`] +   yy[j=1:`ny`:`dy`]
       ENDIF
    ENDIF
 
@@ -58,11 +62,8 @@ IF ($ferret_view"|xy>1|*>0") THEN
 
    ! PLOT/VS does not automatically treat values as modulo 
 
-   IF `mark_xmin LT ($PPL$XMIN)` THEN \
-      PLOT/OVER/VS/COLOR=BLACK/SYMBOL=dot/NOLAB xpts+360, ypts
-
-   IF `mark_xmax GT ($PPL$XMAX)` THEN \
-     PLOT/OVER/VS/COLOR=BLACK/SYMBOL=dot/NOLAB xpts-360, ypts  
+   PLOT/OVER/VS/COLOR=black/SYMBOL=dot/NOLAB xpts+360, ypts
+   PLOT/OVER/VS/COLOR=black/SYMBOL=dot/NOLAB xpts-360, ypts  
 
 ENDIF
 !  XZ view
