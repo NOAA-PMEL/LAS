@@ -65,7 +65,7 @@
   DEFINE SYMBOL ty = `($3)-($5)/2`
 
   !LABEL/[no]user xpos, ypos, center, angle, size   text
-  LABEL/nouser ($tx) ($ty) -1 0 ($5) ($6)
+  LABEL/nouser ($tx) ($ty) -1 0 ($5) @AC($6)
 
 CANCEL SYMBOL xr yr xl yl x1 x2 y1 tx ty
 SET MODE/last verify
