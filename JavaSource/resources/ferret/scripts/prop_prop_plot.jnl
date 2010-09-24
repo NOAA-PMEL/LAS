@@ -280,8 +280,8 @@ IF ($do_rsquare"1|0|*>1) THEN
 
 ! Label the rsquare and slope of the line. Put this above the plot.
    IF `rsquare` THEN
-      LABEL/NOUSER `($ppl$xlen)-0.2`,`($ppl$ylen)+0.3`,1, 0, 0.12, @P4@SRR^2 = `rsquare,P=3`
-      LABEL/NOUSER `($ppl$xlen)-0.2`,`($ppl$ylen)+0.1`,1, 0, 0.12, @P4@SRSlope = `slope,P=3`
+      LABEL/NOUSER `($ppl$xlen)-0.2`,`($ppl$ylen)+0.25`,1, 0, 0.10, @P4@SRR^2 = `rsquare,P=3`
+      LABEL/NOUSER `($ppl$xlen)-0.2`,`($ppl$ylen)+0.1`,1, 0, 0.10, @P4@SRSlope = `slope,P=3`
    ENDIF
 
 ENDIF
