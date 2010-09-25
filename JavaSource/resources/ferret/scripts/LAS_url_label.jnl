@@ -82,17 +82,23 @@ IF `(slen GT linelen)` THEN
 
    IF `last_p1 GT 0` THEN
       IF `last_p1 LT linelen AND last_p2 GT linelen OR last_p1 GT linelen` THEN 
-         LET upper_right_line = SUBSTRING("($upper_right_($n_right_labels))()", `i1`, `last_p1 - 1`)
+         LET upper_right_line = SUBSTRING("($upper_right_($n_right_labels))", `i1`, `last_p1 - 1`)
          DEFINE SYMBOL upper_right_out = `upper_right_line`
-         LET upper_right_line = SUBSTRING("($upper_right_($n_right_labels))()", `last_p1`, `MIN(1,slen-last_p1+1)`)
-         DEFINE SYMBOL  upper_right_line = `upper_right_line`
-         DEFINE SYMBOL upper_right_out = ($upper_right_out)($linebreak)($upper_right_line)
+         CANCEL SYMBOL upper_right_line
+         IF `slen-last_p1+1 GT 0` THEN
+	    LET upper_right_line = SUBSTRING("($upper_right_($n_right_labels))", `last_p1`, `slen-last_p1+1`)
+            DEFINE SYMBOL  upper_right_line = `upper_right_line`
+	    DEFINE SYMBOL upper_right_out = ($upper_right_out)($linebreak)($upper_right_line)
+	 ENDIF
       ELIF `last_p2 LE linelen` THEN 
          LET upper_right_line = SUBSTRING("($upper_right_($n_right_labels))", `i1`, `last_p2+1`)
          DEFINE SYMBOL upper_right_out = `upper_right_line`
-         LET upper_right_line = SUBSTRING("($upper_right_($n_right_labels))", `last_p2+2`, `MIN(1,slen-(last_p2+1))`)
-         DEFINE SYMBOL upper_right_line = `upper_right_line`
-         DEFINE SYMBOL upper_right_out = ($upper_right_out)($linebreak)($upper_right_line)
+	 CANCEL SYMBOL upper_right_line
+	 IF `slen-(last_p2+1) GT 0` THEN
+            LET upper_right_line = SUBSTRING("($upper_right_($n_right_labels))", `last_p2+2`, `slen-(last_p2+1)`)
+            DEFINE SYMBOL upper_right_line = `upper_right_line`
+	    DEFINE SYMBOL upper_right_out = ($upper_right_out)($linebreak)($upper_right_line)
+         ENDIF
       ENDIF
 
       DEFINE SYMBOL upper_right_($n_right_labels) = ($upper_right_out)
