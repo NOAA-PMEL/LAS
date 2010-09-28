@@ -121,7 +121,7 @@ IF `nn EQ n1` THEN
       EXIT/SCRIPT
    ENDIF
 ENDIF
-pause
+
 ! If the season length is 1, we just need to set up some striding.
 
 IF `season_length EQ 1` THEN
