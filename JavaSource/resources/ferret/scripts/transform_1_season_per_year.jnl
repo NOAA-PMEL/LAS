@@ -62,6 +62,12 @@ LET season_length = ($ferret_season_length)
 
 ! The dataset, region and plot variable have already been initialized
 LET S($num)_the_plot_var($var_num) = ($ferret_t_var)
+
+IF `($ferret_plot_var($var_num)"0|*>1") EQ 0` THEN \
+   DEFINE SYMBOL ferret_plot_var($var_num) = ($ferret_plot_var)
+IF `($ferret_plot_var($var_num)_noregion"0|*>1") EQ 0` THEN \
+   DEFINE SYMBOL ferret_plot_var($var_num)_noregion = ($ferret_plot_var_noregion)
+
 LET S($num)_the_plot_var($var_num) = ($ferret_plot_var($var_num))
 IF `season_length EQ 1` THEN LET S($num)_the_plot_var($var_num) = ($ferret_plot_var($var_num))
 LET S($num)_the_plot_var($var_num)_noregion = ($ferret_plot_var($var_num)_noregion)
@@ -115,7 +121,7 @@ IF `nn EQ n1` THEN
       EXIT/SCRIPT
    ENDIF
 ENDIF
-
+pause
 ! If the season length is 1, we just need to set up some striding.
 
 IF `season_length EQ 1` THEN
