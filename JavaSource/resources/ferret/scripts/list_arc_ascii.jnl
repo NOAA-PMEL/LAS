@@ -179,8 +179,8 @@ SET MODE/LAST LAT
 SET MODE/LAST LON
 
 ! make a heading as in this example
-!	ncols 180
-!	nrows 359
+!	ncols 359
+!	nrows 180
 !	xllcorner -89.54166   !!?? corner or center ??
 !	yllcorner 0.4583334
 !	cellsize 1.
