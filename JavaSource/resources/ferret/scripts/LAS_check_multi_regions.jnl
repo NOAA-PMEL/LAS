@@ -97,4 +97,3 @@ IF ($add_region_z"0|*>1") THEN GO LAS_initialize_region
 IF ($add_region_t"0|*>1") THEN GO LAS_initialize_region
 
 ! End of file ------------ LAS_check_multi_regions.jnl-------------------------------
-pause
