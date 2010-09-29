@@ -44,7 +44,7 @@ public class FerretDataSource implements DatasetSource {
      */
     static private Logger log = Logger.getLogger(FerretDataSource.class.getName());
     public NetcdfFile getNetcdfFile(HttpServletRequest req, HttpServletResponse res) throws IOException {
-        StringBuffer jnl = new StringBuffer();
+        StringBuffer jnl = new StringBuffer("define alias letd let/d=1\n");
         
         StringBuffer urlbuf = req.getRequestURL();
         String url = URLDecoder.decode(urlbuf.toString(), "UTF-8");
