@@ -73,6 +73,11 @@ IF `season_length EQ 1` THEN LET S($num)_the_plot_var($var_num) = ($ferret_plot_
 LET S($num)_the_plot_var($var_num)_noregion = ($ferret_plot_var($var_num)_noregion)
 LET S($num)_the_plot_var($var_num)_zt = ($ferret_plot_var($var_num)_noregion)
 
+LET S($num)_the_plot_var = ($ferret_plot_var($var_num))
+IF `season_length EQ 1` THEN LET S($num)_the_plot_var = ($ferret_plot_var)
+LET S($num)_the_plot_var_noregion = ($ferret_plot_var_noregion)
+LET S($num)_the_plot_var_zt = ($ferret_plot_var_noregion)
+
 ! If we have averaged over T then cant do this. Return a message.
 DEFINE SYMBOL op_num = `($data_num) - 1`
 IF ($DATA_($op_num)_ANALYSIS_AXIS_0_OP"0|*>1") THEN 
@@ -139,7 +144,6 @@ IF `season_length EQ 1` THEN
          ENDIF
       ENDIF
 
-!      DEFINE SYMBOL ferret_plot_var($var_num) S($num)_the_plot_var($var_num)[L=`L1`]
       LET S($num)_the_plot_var($var_num) = ($ferret_xyz_var)
       LET S($num)_the_plot_var($var_num)_noregion = ($ferret_plot_var($var_num)_noregion)
 
@@ -149,6 +153,21 @@ IF `season_length EQ 1` THEN
 
       DEFINE SYMBOL ferret_plot_var($var_num)_noregion S($num)_the_plot_var($var_num)_noregion[L=`L1`]
       DEFINE SYMBOL ferret_plot_var($var_num)_zt S($num)_the_plot_var($var_num)_zt
+
+
+
+      LET S($num)_the_plot_var = ($ferret_xyz_var)
+      LET S($num)_the_plot_var_noregion = ($ferret_plot_var_noregion)
+
+      DEFINE SYMBOL ferret_plot_var S($num)_the_plot_var[L=`L1`]
+      DEFINE SYMBOL ferret_plot_var_zt S($num)_the_plot_var[L=`L1`, ($region_z)]
+      LET S($num)_the_plot_var_zt = S($num)_the_plot_var_noregion[L=`L1`, ($region_z)]
+
+      DEFINE SYMBOL ferret_plot_var_noregion S($num)_the_plot_var_noregion[L=`L1`]
+      DEFINE SYMBOL ferret_plot_var_zt S($num)_the_plot_var_zt
+
+
+
       DEFINE SYMBOL ferret_plot_title ($ferret_plot_title) every ($mon1)
       DEFINE SYMBOL region_transform_t L=`L1`
 
@@ -160,6 +179,15 @@ IF `season_length EQ 1` THEN
 
       DEFINE SYMBOL ferret_plot_var($var_num)_noregion S($num)_the_plot_var($var_num)_noregion[L=`L1`:`nn`:12]
       DEFINE SYMBOL ferret_plot_var($var_num)_zt S($num)_the_plot_var($var_num)_noregion[L=`L1`:`nn`:12, ($region_z)]
+
+      
+      DEFINE SYMBOL ferret_plot_var S($num)_the_plot_var[L=`L1`:`nn`:12]
+      LET S($num)_the_plot_var_zt = S($num)_the_plot_var_noregion[L=`L1`, ($region_z)]
+
+      DEFINE SYMBOL ferret_plot_var_noregion S($num)_the_plot_var_noregion[L=`L1`:`nn`:12]
+      DEFINE SYMBOL ferret_plot_var_zt S($num)_the_plot_var_noregion[L=`L1`:`nn`:12, ($region_z)]
+
+      
       DEFINE SYMBOL ferret_plot_title ($ferret_plot_title) every ($mon1)
       DEFINE SYMBOL region_transform_t = L=`L1`:`nn`:12
    ENDIF
@@ -190,6 +218,11 @@ ELSE
       LET theplotvar = "`SUBSTRING("($ferret_xyz_var)", 1, endbracket)`"
       LET S($num)_the_plot_var($var_num) = `theplotvar`,L=`L1`:`nn`]
       LET S($num)_the_plot_var($var_num)_zt = `theplotvar`,L=`L1`:`nn`]
+
+      LET S($num)_the_plot_var = `theplotvar`,L=`L1`:`nn`]
+      LET S($num)_the_plot_var_zt = `theplotvar`,L=`L1`:`nn`]
+
+
       DEFINE SYMBOL n_left_labels = `($n_left_labels"0")+1`
       DEFINE SYMBOL upper_left_($n_left_labels) = "(Data centered nearest ($mon1))"
       DEFINE SYMBOL single_time = 1
@@ -199,7 +232,6 @@ ELSE
 
    IF `nn-n1 LT 24` THEN
       DEFINE SYMBOL ferret_expand_time = 1
-!      LET S($num)_the_plot_var($var_num) = ($ferret_xyz_var)
 
       LET nn = MIN(`tsiz`, `nn + 24`)
       LET n1 = MAX(1, `n1-24`)
@@ -260,6 +292,10 @@ ELSE
    IF ($single_time"0|*>1") THEN DEFINE SYMBOL ferret_plot_var($var_num) S($num)_seas_per_year[($region_t)]
    DEFINE SYMBOL ferret_plot_var($var_num)_noregion S($num)_seas_per_year[($region_t)]
 
+   DEFINE SYMBOL ferret_plot_var S($num)_seas_per_year
+   IF ($single_time"0|*>1") THEN DEFINE SYMBOL ferret_plot_var S($num)_seas_per_year[($region_t)]
+   DEFINE SYMBOL ferret_plot_var_noregion S($num)_seas_per_year[($region_t)]
+
 ! Add information to the title
    DEFINE SYMBOL ferret_plot_title ($ferret_plot_title) (($ferret_season_length)-month ave, Centered ($mon1))
    DEFINE SYMBOL data_var_transform = , (($ferret_season_length)-month ave, Centered ($mon1))
@@ -268,3 +304,185 @@ ENDIF  ! Season length longer than 1
 
 ! End of $RCSfile ------------transform_1_season_per_year.jnl-------------------------------
 
+DEFINE SYMBOL region_t = ($region_transform_t)
+! Now build up all possible multi-axis regions, being careful not to use
+! commas when a region is missing
+
+! region_xy
+IF ($region_x"0|*>1") THEN
+  IF ($region_y"0|*>1") THEN
+    DEFINE SYMBOL region_xy = ($region_x),($region_y)
+  ELSE
+    DEFINE SYMBOL region_xy = ($region_x)
+  ENDIF
+ELSE
+  IF ($region_y"0|*>1") THEN
+    DEFINE SYMBOL region_xy = ($region_y)
+  ENDIF
+ENDIF
+
+! region_xz
+IF ($region_x"0|*>1") THEN
+  IF ($region_z"0|*>1") THEN
+    DEFINE SYMBOL region_xz = ($region_x),($region_z)
+  ELSE
+    DEFINE SYMBOL region_xz = ($region_x)
+  ENDIF
+ELSE
+  IF ($region_z"0|*>1") THEN
+    DEFINE SYMBOL region_xz = ($region_z)
+  ENDIF
+ENDIF
+
+! region_xt
+IF ($region_x"0|*>1") THEN
+  IF ($region_t"0|*>1") THEN
+    DEFINE SYMBOL region_xt = ($region_x),($region_t)
+  ELSE
+    DEFINE SYMBOL region_xt = ($region_x)
+  ENDIF
+ELSE
+  IF ($region_t"0|*>1") THEN
+    DEFINE SYMBOL region_xt = ($region_t)
+  ENDIF
+ENDIF
+
+! region_yz
+IF ($region_y"0|*>1") THEN
+  IF ($region_z"0|*>1") THEN
+    DEFINE SYMBOL region_yz = ($region_y),($region_z)
+  ELSE
+    DEFINE SYMBOL region_yz = ($region_y)
+  ENDIF
+ELSE
+  IF ($region_z"0|*>1") THEN
+    DEFINE SYMBOL region_yz = ($region_z)
+  ENDIF
+ENDIF
+
+! region_yt
+IF ($region_y"0|*>1") THEN
+  IF ($region_t"0|*>1") THEN
+    DEFINE SYMBOL region_yt = ($region_y),($region_t)
+  ELSE
+    DEFINE SYMBOL region_yt = ($region_y)
+  ENDIF
+ELSE
+  IF ($region_t"0|*>1") THEN
+    DEFINE SYMBOL region_yt = ($region_t)
+  ENDIF
+ENDIF
+
+! region_zt
+IF ($region_z"0|*>1") THEN
+  IF ($region_t"0|*>1") THEN
+    DEFINE SYMBOL region_zt = ($region_z),($region_t)
+  ELSE
+    DEFINE SYMBOL region_zt = ($region_z)
+  ENDIF
+ELSE
+  IF ($region_t"0|*>1") THEN
+    DEFINE SYMBOL region_zt = ($region_t)
+  ENDIF
+ENDIF
+
+! region_xyz
+IF ($region_xy"0|*>1") THEN
+  IF ($region_z"0|*>1") THEN
+    DEFINE SYMBOL region_xyz = ($region_xy),($region_z)
+  ELSE
+    DEFINE SYMBOL region_xyz = ($region_xy)
+  ENDIF
+ELSE
+  IF ($region_z"0|*>1") THEN
+    DEFINE SYMBOL region_xyz = ($region_z)
+  ENDIF
+ENDIF
+
+! region_xyt
+IF ($region_xy"0|*>1") THEN
+  IF ($region_t"0|*>1") THEN
+    DEFINE SYMBOL region_xyt = ($region_xy),($region_t)
+  ELSE
+    DEFINE SYMBOL region_xyt = ($region_xy)
+  ENDIF
+ELSE
+  IF ($region_t"0|*>1") THEN
+    DEFINE SYMBOL region_xyt = ($region_t)
+  ENDIF
+ENDIF
+
+! region_yzt
+IF ($region_yz"0|*>1") THEN
+  IF ($region_t"0|*>1") THEN
+    DEFINE SYMBOL region_yzt = ($region_yz),($region_t)
+  ELSE
+    DEFINE SYMBOL region_yzt = ($region_yz)
+  ENDIF
+ELSE
+  IF ($region_t"0|*>1") THEN
+    DEFINE SYMBOL region_yzt = ($region_t)
+  ENDIF
+ENDIF
+
+! region_xyzt
+IF ($region_xyz"0|*>1") THEN
+  IF ($region_t"0|*>1") THEN
+    DEFINE SYMBOL region_xyzt = ($region_xyz),($region_t)
+  ELSE
+    DEFINE SYMBOL region_xyzt = ($region_xyz)
+  ENDIF
+ELSE
+  IF ($region_t"0|*>1") THEN
+    DEFINE SYMBOL region_xyzt = ($region_t)
+  ENDIF
+ENDIF
+
+DEFINE SYMBOL region_full = ($region_xyzt)
+
+
+! For sampling from a curvilinear variable, save the region definitions with
+! the variable number.
+IF ($region_x"0|*>1") THEN DEFINE SYMBOL region_($num)_x = ($region_x)
+IF ($region_y"0|*>1") THEN DEFINE SYMBOL region_($num)_y = ($region_y)
+IF ($region_z"0|*>1") THEN DEFINE SYMBOL region_($num)_z = ($region_z)
+IF ($region_t"0|*>1") THEN DEFINE SYMBOL region_($num)_t = ($region_t)
+IF ($region_xt"0|*>1") THEN DEFINE SYMBOL region_($num)_xt = ($region_xt)
+IF ($region_xy"0|*>1") THEN DEFINE SYMBOL region_($num)_xy = ($region_xy)
+IF ($region_xz"0|*>1") THEN DEFINE SYMBOL region_($num)_xz = ($region_xz)
+IF ($region_yt"0|*>1") THEN DEFINE SYMBOL region_($num)_yt = ($region_yt)
+IF ($region_yz"0|*>1") THEN DEFINE SYMBOL region_($num)_yz = ($region_yz)
+IF ($region_zt"0|*>1") THEN DEFINE SYMBOL region_($num)_zt = ($region_zt)
+
+! For SOCAT server labels, make time symbols w/o the trailing 00:00:00
+
+IF ($region_0_t_lo"0|*>1") THEN
+   DEFINE SYMBOL t_lab_lo = ($region_0_t_lo)
+   LET iz = STRINDEX("($region_0_t_lo)", " 00:00:00")
+   IF `iz GT 0` THEN 
+      DEFINE SYMBOL t_lab_lo = `SUBSTRING("($region_0_t_lo)", 1, iz-1)`
+   ELSE
+      LET iz = STRINDEX("($region_0_t_lo)", ":00:00")
+      IF `iz GT 0` THEN DEFINE SYMBOL t_lab_lo = `SUBSTRING("($region_0_t_lo)", 1, iz-1)`
+   ENDIF
+ENDIF 
+
+IF ($region_0_t_hi"0|*>1") THEN
+   DEFINE SYMBOL t_lab_hi = ($region_0_t_hi)
+   LET iz = STRINDEX("($region_0_t_hi)", " 00:00:00")
+   IF `iz GT 0` THEN 
+      DEFINE SYMBOL t_lab_hi = `SUBSTRING("($region_0_t_hi)", 1, iz-1)`
+   ELSE
+      LET iz = STRINDEX("($region_0_t_hi)", ":00:00")
+      IF `iz GT 0` THEN DEFINE SYMBOL t_lab_hi = `SUBSTRING("($region_0_t_hi)", 1, iz-1)`
+   ENDIF
+ENDIF
+
+! If no regions have been defined then we have an error.
+
+IF ($region_full"1|*>0")  THEN
+  DEFINE SYMBOL error_status = ERROR
+  DEFINE SYMBOL error_type = REGION
+  DEFINE SYMBOL error_string = Region ($region) associated with data_($num) has not been defined.
+  EXIT/SCRIPT
+ENDIF
