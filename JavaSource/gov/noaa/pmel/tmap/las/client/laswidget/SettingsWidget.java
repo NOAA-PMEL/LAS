@@ -9,6 +9,8 @@ import java.util.Map;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.logical.shared.SelectionHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.ClickListener;
 import com.google.gwt.user.client.ui.Composite;
@@ -21,6 +23,7 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.PushButton;
+import com.google.gwt.user.client.ui.TreeItem;
 import com.google.gwt.user.client.ui.TreeListener;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -106,10 +109,6 @@ public class SettingsWidget extends Composite {
 		operations.setOperations(intervals, opID, view, ops);
 	}
 
-	public void addDatasetTreeListener(TreeListener datasetTreeListener) {
-		//datasetButton.addTreeListener(datasetTreeListener);
-	}
-
 	public boolean isUsePanelSettings() {
 		return usePanel;
 	}
@@ -190,7 +189,9 @@ public class SettingsWidget extends Composite {
 		// TODO Auto-generated method stub
 		
 	}
-
+	public HandlerRegistration addSelectionHandler(SelectionHandler<TreeItem> handler) {
+		return datasetButton.addSelectionHandler(handler);
+	}
 
 	public void addOpenHandler(ClickHandler handler) {
 		settingsButton.addClickHandler(handler);

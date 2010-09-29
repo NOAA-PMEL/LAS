@@ -569,4 +569,18 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
 			return null;
 		}
 	}
+	/**
+	 * 
+	 */
+	public List<String> getTributaryServers() {
+		List<String> wiretribs = new ArrayList<String>();
+		LASConfig lasConfig = (LASConfig) getServletContext().getAttribute(LASConfigPlugIn.LAS_CONFIG_KEY);
+		ArrayList<Tributary> tribs = lasConfig.getTributaries();
+		for (Iterator tribIt = tribs.iterator(); tribIt.hasNext();) {
+			Tributary tributary = (Tributary) tribIt.next();
+			String url = tributary.getURL()+"/auth.do";
+			wiretribs.add(url);
+		}
+		return wiretribs;
+	}
 }

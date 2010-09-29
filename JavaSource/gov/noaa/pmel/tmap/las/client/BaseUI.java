@@ -3,12 +3,14 @@ package gov.noaa.pmel.tmap.las.client;
 import gov.noaa.pmel.tmap.las.client.laswidget.AnalysisWidget;
 import gov.noaa.pmel.tmap.las.client.laswidget.AxesWidgetGroup;
 import gov.noaa.pmel.tmap.las.client.laswidget.ComparisonAxisSelector;
+import gov.noaa.pmel.tmap.las.client.laswidget.Constants;
 import gov.noaa.pmel.tmap.las.client.laswidget.DatasetButton;
 import gov.noaa.pmel.tmap.las.client.laswidget.OperationsWidget;
 import gov.noaa.pmel.tmap.las.client.laswidget.OptionsButton;
+import gov.noaa.pmel.tmap.las.client.laswidget.OutputPanel;
 import gov.noaa.pmel.tmap.las.client.serializable.VariableSerializable;
 import gov.noaa.pmel.tmap.las.client.util.Util;
-import gov.noaa.pmel.tmap.las.client.vizgal.VizGalPanel;
+import gov.noaa.pmel.tmap.las.client.laswidget.OutputPanel;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -31,8 +33,6 @@ import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.WindowResizeListener;
-import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.DisclosurePanel;
 import com.google.gwt.user.client.ui.FlexTable;
@@ -49,7 +49,7 @@ public class BaseUI implements EntryPoint {
 	/*
 	 * Contains the visualization panels for this UI.  They are laid out in the xPanelTable
 	 */
-	List<VizGalPanel> xPanels = new ArrayList<VizGalPanel>();
+	List<OutputPanel> xPanels = new ArrayList<OutputPanel>();
 	FlexTable xPanelTable = new FlexTable();
 
 	String xDSID;
@@ -145,7 +145,7 @@ public class BaseUI implements EntryPoint {
 	int xControlsWidth = 290;
 	String xControlsWidthPx = xControlsWidth+"px";
 	
-	
+	String xContainerType = Constants.FRAME;
 
 	/*
 	 * Control widget that sets the size of the image in the panel.
@@ -344,7 +344,8 @@ public class BaseUI implements EntryPoint {
 		
 		
 	};
-	public void init(int numPanels) {
+	public void init(int numPanels, String container_type) {
+		xContainerType = container_type;
 		xPanelCount = numPanels;
 		int col = 0;
 		int row = 0;
@@ -360,7 +361,7 @@ public class BaseUI implements EntryPoint {
 				singlePanel = false;
 			}
 
-			VizGalPanel panel = new VizGalPanel(title, compare_panel, xOperationID, xOptionID, xView, singlePanel);
+			OutputPanel panel = new OutputPanel(title, compare_panel, xOperationID, xOptionID, xView, singlePanel, xContainerType);
 
 			xPanelTable.setWidget(row, col, panel);			
 			xPanels.add(panel);
@@ -436,14 +437,14 @@ public class BaseUI implements EntryPoint {
 	public void handlePanelShowHide() {
 		if ( xPanelHeaderHidden ) {
 			for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
-				VizGalPanel panel = (VizGalPanel) panelIt.next();
+				OutputPanel panel = (OutputPanel) panelIt.next();
 				panel.show();
 			}
 			xMainPanelCellFormatter.setVisible(1, 0, true);
 			resize();
 		} else {
 			for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
-				VizGalPanel panel = (VizGalPanel) panelIt.next();
+				OutputPanel panel = (OutputPanel) panelIt.next();
 				panel.hide();
 			}
 			xMainPanelCellFormatter.setVisible(1, 0, false);	
@@ -456,7 +457,7 @@ public class BaseUI implements EntryPoint {
 		xPanelWidth = getPanelWidth(xPanelCount);
 		if ( xImageSize.getValue(xImageSize.getSelectedIndex()).equals("auto") ) {
 			for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
-				VizGalPanel panel = (VizGalPanel) panelIt.next();
+				OutputPanel panel = (OutputPanel) panelIt.next();
 				panel.setPanelWidth(xPanelWidth);
 			}
 		}
@@ -537,7 +538,7 @@ public class BaseUI implements EntryPoint {
 		int panel_index = 0;
 		for (int i = 0; i < rows; i++) {
 			for (int j = 0; j < cols; j++) {
-				String panel_url = ((VizGalPanel)xPanels.get(panel_index)).getURL();
+				String panel_url = ((OutputPanel)xPanels.get(panel_index)).getURL();
 				final Image image = new Image(panel_url+"&stream=true&stream_ID=plot_image");
 				images[panel_index] = image;
 				plots.setWidget(i+1, j, image);
@@ -547,4 +548,24 @@ public class BaseUI implements EntryPoint {
 		pop.add(plots);
 		pop.show();
 	}
+    private void setMapSelection(double s, double n, double w, double e) {
+        xAxesWidget.getRefMap().setCurrentSelection(s, n, w, e);
+    }
+    private void setCurrentURL(String url) {
+    	for (int i = 0; i < xPanelCount; i++ ) {
+    		OutputPanel panel = xPanels.get(i);
+    		if ( !panel.isUsePanelSettings() ) {
+    		    xPanels.get(i).setURL(url);
+    		}
+    	}
+    }
+    public native void activateNativeHooks()/*-{
+        var localObject = this;
+        $wnd.updateMapSelection = function(slat, nlat, wlon, elon) {        
+            localObject.@gov.noaa.pmel.tmap.las.client.TestUI::setMapSelection(DDDD)(slat, nlat, wlon, elon);
+        }
+        $wnd.updateCurrentURL = function(url) {
+        	localObject.@gov.noaa.pmel.tmap.las.client.TestUI::setCurrentURL(Ljava/lang/String;)(url);
+        }
+    }-*/;
 }
