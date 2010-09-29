@@ -19,14 +19,14 @@ DEFINE SYMBOL num ($1"0")
 IF `($constraint_0_lhs"0|Seasonal_Regridding>1|*>0")` THEN 
    DEFINE SYMBOL data_var_transform = , Seasonal Regridding
    GO transform_seasonal.jnl
-   DEFINE SYMBOL data_dup_varname ($data_var)_regrid
+   DEFINE SYMBOL data_dup_varname ($data_($num)_var)_regrid
 ENDIF
 
 ! Transform to 1-season per year, centered on any month, with season being 1, 3, or 5 months long.
 IF `STRINDEX("($constraint_0_lhs"0")", "Season_length") GT 0` THEN 
    DEFINE SYMBOL data_var_transform = , Season_1_per_year
    GO transform_1_season_per_year ($num)
-   DEFINE SYMBOL data_dup_varname ($data_var)_regrid
+   DEFINE SYMBOL data_dup_varname ($data_($num)_var)_regrid
    DEFINE SYMBOL do_trans_1_seas_per_year = 1
 ENDIF
 
