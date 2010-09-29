@@ -259,7 +259,7 @@ ELSE
    LET tsample = SAMPLEL(tt,L_indx_T[l=1:`nmsk`])
    LOAD tt
    LOAD L_indx_T[l=1:`nmsk`]
-   DEFINE AXIS/T/T0="`tt,RETURN=t0`"/UNITS=`tt,RETURN=tunits` taxis_sampled = tsample
+   DEFINE AXIS/T/T0="`tt,RETURN=t0`"/UNITS=`tt,RETURN=tunits`/CALENDAR=`tt,RETURN=calendar` taxis_sampled = tsample
    LET S($num)_to_average = S($num)_seas_months[gt=taxis_sampled@ASN]
 
 ! Index list, once per year on the correct month
@@ -270,9 +270,17 @@ ELSE
    ELSE 
       LET L1 = MOD(`1+INT(season_length/2) + ($loffset)`,12)
    ENDIF
-   DEFINE AXIS/T/T0="`tt,RETURN=t0`"/UNITS=`tt,RETURN=tunits` timeax_years = tsample[L=`L1`:`NMSK`:($ferret_season_length)]
+   
+! Find the correct month from the axis.
+
+   LET tmon = TAX_MONTH(T[GT=taxis_sampled], T[GT=taxis_sampled])
+   LET tfirst = `tmon[L=@LOC:($ferret_season_center)]`
+   LET LL = L[GT=tmon]
+   LET L1 = LL[T=`tfirst`]
+
+   DEFINE AXIS/T/T0="`tt,RETURN=t0`"/UNITS=`tt,RETURN=tunits`/CALENDAR=`tt,RETURN=calendar` timeax_years = tsample[L=`L1`:`NMSK`:($ferret_season_length)]
    IF `nmsk eq 1` THEN \
-      DEFINE AXIS/T/T0="`tt,RETURN=t0`"/UNITS=`tt,RETURN=tunits` timeax_years = tsample[L=`L1`:`L1`:($ferret_season_length)]
+      DEFINE AXIS/T/T0="`tt,RETURN=t0`"/UNITS=`tt,RETURN=tunits`/CALENDAR=`tt,RETURN=calendar` timeax_years = tsample[L=`L1`:`L1`:($ferret_season_length)]
 
 ! Average from the n-Month-per-year axis to once per year.
 ! Weight by the box sizes from the original time axis.
