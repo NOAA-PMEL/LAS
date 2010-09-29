@@ -1,5 +1,7 @@
 package gov.noaa.pmel.tmap.las.client;
 
+import java.util.List;
+
 import gov.noaa.pmel.tmap.las.client.serializable.ConfigSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.OperationSerializable;
 
@@ -14,5 +16,6 @@ public interface RPCServiceAsync {
     public void getTimeSeries(AsyncCallback timeSeriesCallback);
     public void getConfig(String view, String dsid, String varid, AsyncCallback<ConfigSerializable> timeSeriesCallback);
     public void getPropertyGroup(String name, AsyncCallback propertyGroupCallback);
-	void getOperations(String view, String[] xpath,	AsyncCallback<OperationSerializable[]> callback);
+	public void getOperations(String view, String[] xpath,	AsyncCallback<OperationSerializable[]> callback);
+	public void getTributaryServers(AsyncCallback<List<String>> callback);
 }

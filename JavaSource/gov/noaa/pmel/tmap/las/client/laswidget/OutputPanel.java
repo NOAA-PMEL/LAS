@@ -13,7 +13,6 @@ import gov.noaa.pmel.tmap.las.client.serializable.ConfigSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.GridSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.OperationSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.VariableSerializable;
-import gov.noaa.pmel.tmap.las.client.util.Constants;
 import gov.noaa.pmel.tmap.las.client.util.URLUtil;
 import gov.noaa.pmel.tmap.las.client.util.Util;
 
@@ -27,6 +26,8 @@ import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.logical.shared.SelectionEvent;
+import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestBuilder;
 import com.google.gwt.http.client.RequestCallback;
@@ -70,6 +71,8 @@ public class OutputPanel extends Composite {
     /* TODO When changing a panel to "panel mode" the panel needs to save the state of the panelAxesWidgets including the titles,
      * the view, what's ortho and the axis states (hi, lo and range boolean) and restore that state when the panel is reverted.
      */
+	
+	String containerType = Constants.FRAME;
 	
 	Frame output = new Frame();
 	
@@ -175,19 +178,20 @@ public class OutputPanel extends Composite {
 	/**
 	 * Builds a VizGal panel with a default plot for the variable.  See {@code}VizGal(LASRequest) if you want more options on the initial plot.
 	 */
-	public OutputPanel(String id, boolean comparePanel, String op, String optionID, String view, boolean single) {
+	public OutputPanel(String id, boolean comparePanel, String op, String optionID, String view, boolean single, String container_type) {
 		this.ID = id;
 		this.comparePanel = comparePanel;
 		this.singlePanel = single;
 		this.operationID = op;
 		this.optionID = optionID;
 		this.view = view;
+		this.containerType = container_type;
 		panelAxesWidgets = new AxesWidgetGroup("Plot Axis", "Comparison Axis", "horizontal", "", "Apply To "+ID);
 		String spinImageURL = URLUtil.getImageURL()+"/mozilla_blu.gif";
 		spinImage = new HTML("<img src=\""+spinImageURL+"\" alt=\"Spinner\"/>");
 		spin = new PopupPanel();
 		
-		output.getElement().setId("output");
+		
 		
 		spin.add(spinImage);
 
@@ -204,7 +208,7 @@ public class OutputPanel extends Composite {
 		String title = "Settings";
 		settingsButton = new SettingsWidget(title, ID, operationID, optionID);
 	
-		settingsButton.addDatasetTreeListener(datasetTreeListener);
+		settingsButton.addSelectionHandler(datasetSelctionHandler);
 		settingsButton.addOpenHandler(datasetOpenHandler);
 		settingsButton.addCloseHandler(datasetCloseHandler);
 		settingsButton.addOptionsOkClickListener(optionsOkListener);
@@ -291,14 +295,15 @@ public class OutputPanel extends Composite {
 			switchAxis();
 		}
 		
-		spin.hide();
 		messagePanel.hide();
 		
         lasRequest = getRequest();
         lasRequest.setProperty("ferret", "view", view);
 		lasRequest.setProperty("ferret", "size", ".8333");
 		lasRequest.addProperty("ferret", "image_format", "gif");
-		//lasRequest.addProperty("las", "output_type", "xml");
+		if ( containerType.equals(Constants.IMAGE) ) {
+			lasRequest.addProperty("las", "output_type", "xml");
+		}
 		if ( settingsButton.isUsePanelSettings() || singlePanel ) {
 			// Use panel options if they exist.
 			Map<String, String> panelOptions = settingsButton.getOptions();
@@ -346,22 +351,25 @@ public class OutputPanel extends Composite {
 		
 		if ( !url.equals(currentURL) ) {
 			currentURL = url;
-			if (popup) {
-				spin.setWidget(spinImage);
-//				spin.setPopupPosition(grid.getWidget(1,0).getAbsoluteLeft(), grid.getWidget(1,0).getAbsoluteTop());
-//				spin.show();
-				grid.setWidget(1, 0, spin);
+			if ( containerType.equals(Constants.IMAGE) ) {
+				if (popup) {
+					spin.setWidget(spinImage);
+					spin.setPopupPosition(grid.getWidget(1,0).getAbsoluteLeft(), grid.getWidget(1,0).getAbsoluteTop());
+					spin.show();
+				}
+
+				RequestBuilder sendRequest = new RequestBuilder(RequestBuilder.GET, url);
+				try {
+					sendRequest.sendRequest(null, lasRequestCallback);
+				} catch (RequestException e) {
+					HTML error = new HTML(e.toString());
+					grid.setWidget(1, 0, error);
+				}
+			} else {
+				grid.setWidget(1, 0, spinImage);
+				output.setUrl(url);
+				grid.setWidget(1, 0, output);
 			}
-			
-//			RequestBuilder sendRequest = new RequestBuilder(RequestBuilder.GET, url);
-//			try {
-//				sendRequest.sendRequest(null, lasRequestCallback);
-//			} catch (RequestException e) {
-//				HTML error = new HTML(e.toString());
-//				grid.setWidget(1, 0, error);
-//			}
-			output.setUrl(url);
-			grid.setWidget(1, 0, output);
 		}
 	}
 	public void computeDifference(Map<String, String> options, boolean switchAxis, VariableSerializable variable, String view_in, 
@@ -672,7 +680,9 @@ public class OutputPanel extends Composite {
 		
 		
 		lasRequest.addProperty("ferret", "image_format", "gif");
-		//lasRequest.addProperty("las", "output_type", "xml");
+		if ( containerType.equals(Constants.IMAGE) ) {
+		    lasRequest.addProperty("las", "output_type", "xml");
+		}
 		if ( settingsButton.isUsePanelSettings() || singlePanel ) {
 			// Use the panel options.
 			Map<String, String> panelOptions = settingsButton.getOptions();
@@ -702,18 +712,22 @@ public class OutputPanel extends Composite {
 		
 		if ( !url.equals(currentURL) ) {
 			currentURL = url;
-			
-			spin.setPopupPosition(grid.getWidget(1, 0).getAbsoluteLeft(), grid.getWidget(1, 0).getAbsoluteTop());
-			spin.show();
-			RequestBuilder sendRequest = new RequestBuilder(RequestBuilder.GET, url);
-//			try {
-//				sendRequest.sendRequest(null, lasRequestCallback);
-//			} catch (RequestException e) {
-//				HTML error = new HTML(e.toString());
-//				grid.setWidget(1, 0, error);
-//			}
-			output.setUrl(url);
-			grid.setWidget(1, 0, output);
+			grid.setWidget(1, 0, spinImage);
+			if ( containerType.equals(Constants.IMAGE) ) {
+				spin.setPopupPosition(grid.getWidget(1, 0).getAbsoluteLeft(), grid.getWidget(1, 0).getAbsoluteTop());
+				spin.show();
+				RequestBuilder sendRequest = new RequestBuilder(RequestBuilder.GET, url);
+				try {
+					sendRequest.sendRequest(null, lasRequestCallback);
+				} catch (RequestException e) {
+					HTML error = new HTML(e.toString());
+					grid.setWidget(1, 0, error);
+
+				}
+			} else {
+				output.setUrl(url);
+				grid.setWidget(1, 0, output);
+			}
 		}
 	}
 
@@ -837,113 +851,114 @@ public class OutputPanel extends Composite {
 		}
 		return value;
 	}
-//	private RequestCallback lasRequestCallback = new RequestCallback() {
-//		public void onError(Request request, Throwable exception) {
-//			spin.hide();
-//			HTML error = new HTML(exception.toString());
-//			grid.setWidget(1, 0, error);
-//		}
-//
-//		public void onResponseReceived(Request request, Response response) {
-//			String doc = response.getText();
-//			if ( retryShowing ) {
-//				grid.removeCell(2, 1);
-//				retryShowing = false;
-//			}
-//			// Look at the doc.  If it's not obviously XML, treat it as HTML.
-//			if ( !doc.contains("<?xml") ) {
-//				HTML result = new HTML(doc);
-//				grid.setWidget(1, 0, result);
-//			} else {
-//				doc = doc.replaceAll("\n", "").trim();
-//				Document responseXML = XMLParser.parse(doc);
-//				NodeList results = responseXML.getElementsByTagName("result");
-//				for(int n=0; n<results.getLength();n++) {
-//					if ( results.item(n) instanceof Element ) {
-//						Element result = (Element) results.item(n);
-//						if ( result.getAttribute("type").equals("image") ) {
-//							//HTML image = new HTML("<a target=\"_blank\" href=\""+result.getAttribute("url")+"\"><img width=\"100%\" src=\""+result.getAttribute("url")+"\"></a>");
-//							final String url = result.getAttribute("url");
-//							Image image = new Image(result.getAttribute("url"));
-//							image.addClickListener(new ClickListener() {
-//
-//								public void onClick(Widget sender) {
-//									Window.open(url, "plot", "");
-//
-//								}
-//
-//							});
-//							image.setTitle("  Click to Enlarge.  Images will size with browser.");
-//							grid.setWidget(1, 0 , image);
-//							setImageWidth();
-////							if ( autoZoom ) {
-////							image.setWidth(pwidth+"px");
-////							int h = (int) ((image_h/image_w)*Double.valueOf(pwidth));
-////							image.setHeight(h+"px");
-////							} else {
-////							setImageSize(fixedZoom);
-////							}
-//
-//						} else if ( result.getAttribute("type").equals("map_scale") )  {
-//							final String ms_url = result.getAttribute("url");
-//							RequestBuilder mapScaleRequest = new RequestBuilder(RequestBuilder.GET, ms_url);
-//							try {
-//								mapScaleRequest.sendRequest(null, mapScaleCallBack);
-//							} catch (RequestException e) {
-//								// Don't care.  Just go with the information we have.
-//							}
-//						} else if ( result.getAttribute("type").equals("error") ) {
-//							if ( result.getAttribute("ID").equals("las_message") ) {
-//								Node text = result.getFirstChild();
-//								if ( text instanceof Text ) {
-//									Text t = (Text) text;
-//									HTML error = new HTML(t.getData().toString().trim());
-//									grid.setWidget(1, 0, error);
-//									retryShowing = true;
-//									Button retry = new Button("Retry");
-//									retry.addClickListener(new ClickListener() {
-//										public void onClick(Widget sender) {
-//											
-//											// Just send the same request again to see if it works the second time.
-//											String url = Util.getProductServer()+"?xml="+URL.encode(lasRequest.getXMLText());
-//											RequestBuilder sendRequest = new RequestBuilder(RequestBuilder.GET, url);
-//											try {
-//												sendRequest.sendRequest(null, lasRequestCallback);
-//											} catch (RequestException e) {
-//												HTML error = new HTML(e.toString());
-//												grid.setWidget(1, 0, error);
-//											}
-//										}
-//
-//									});
-//									grid.setWidget(2, 1, retry);
-//								}
-//							}
-//						} else if ( result.getAttribute("type").equals("batch") ) {
-//							String elapsed_time = result.getAttribute("elapsed_time");
-//							HTML batch = new HTML(spinImage.getHTML()+"<br><br>Your request has been processing for "+elapsed_time+" seconds.<br>This panel will refresh automatically.<br><br>");
-//							grid.setWidget(1, 0, batch);
-//							lasRequest.setProperty("product_server", "ui_timeout", "3");
-//							String url = Util.getProductServer()+"?xml="+URL.encode(lasRequest.getXMLText());
-//							RequestBuilder sendRequest = new RequestBuilder(RequestBuilder.GET, url);
-//							try {
-//								sendRequest.sendRequest(null, lasRequestCallback);
-//							} catch (RequestException e) {
-//								HTML error = new HTML(e.toString());
-//								grid.setWidget(1, 0, error);
-//							}
-//						}
-//					}
-//				}
-//			}
-//			spin.hide();
-//		}
-//	};
-//	
+	private RequestCallback lasRequestCallback = new RequestCallback() {
+		public void onError(Request request, Throwable exception) {
+			spin.hide();
+			HTML error = new HTML(exception.toString());
+			grid.setWidget(1, 0, error);
+		}
 
-	TreeListener datasetTreeListener = new TreeListener() {
+		public void onResponseReceived(Request request, Response response) {
+			String doc = response.getText();
+			if ( retryShowing ) {
+				grid.removeCell(2, 1);
+				retryShowing = false;
+			}
+			// Look at the doc.  If it's not obviously XML, treat it as HTML.
+			if ( !doc.substring(0, 100).contains("<?xml") ) {
+				HTML result = new HTML(doc, true);
+				grid.setWidget(1, 0, result);
+			} else {
+				doc = doc.replaceAll("\n", "").trim();
+				Document responseXML = XMLParser.parse(doc);
+				NodeList results = responseXML.getElementsByTagName("result");
+				for(int n=0; n<results.getLength();n++) {
+					if ( results.item(n) instanceof Element ) {
+						Element result = (Element) results.item(n);
+						if ( result.getAttribute("type").equals("image") ) {
+							//HTML image = new HTML("<a target=\"_blank\" href=\""+result.getAttribute("url")+"\"><img width=\"100%\" src=\""+result.getAttribute("url")+"\"></a>");
+							final String url = result.getAttribute("url");
+							Image image = new Image(result.getAttribute("url"));
+							image.addClickListener(new ClickListener() {
 
-		public void onTreeItemSelected(TreeItem item) {
+								public void onClick(Widget sender) {
+									Window.open(url, "plot", "");
+
+								}
+
+							});
+							image.setTitle("  Click to Enlarge.  Images will size with browser.");
+							grid.setWidget(1, 0 , image);
+							setImageWidth();
+//							if ( autoZoom ) {
+//							image.setWidth(pwidth+"px");
+//							int h = (int) ((image_h/image_w)*Double.valueOf(pwidth));
+//							image.setHeight(h+"px");
+//							} else {
+//							setImageSize(fixedZoom);
+//							}
+
+						} else if ( result.getAttribute("type").equals("map_scale") )  {
+							final String ms_url = result.getAttribute("url");
+							RequestBuilder mapScaleRequest = new RequestBuilder(RequestBuilder.GET, ms_url);
+							try {
+								mapScaleRequest.sendRequest(null, mapScaleCallBack);
+							} catch (RequestException e) {
+								// Don't care.  Just go with the information we have.
+							}
+						} else if ( result.getAttribute("type").equals("error") ) {
+							if ( result.getAttribute("ID").equals("las_message") ) {
+								Node text = result.getFirstChild();
+								if ( text instanceof Text ) {
+									Text t = (Text) text;
+									HTML error = new HTML(t.getData().toString().trim());
+									grid.setWidget(1, 0, error);
+									retryShowing = true;
+									Button retry = new Button("Retry");
+									retry.addClickListener(new ClickListener() {
+										public void onClick(Widget sender) {
+											
+											// Just send the same request again to see if it works the second time.
+											String url = Util.getProductServer()+"?xml="+URL.encode(lasRequest.getXMLText());
+											RequestBuilder sendRequest = new RequestBuilder(RequestBuilder.GET, url);
+											try {
+												sendRequest.sendRequest(null, lasRequestCallback);
+											} catch (RequestException e) {
+												HTML error = new HTML(e.toString());
+												grid.setWidget(1, 0, error);
+											}
+										}
+
+									});
+									grid.setWidget(2, 1, retry);
+								}
+							}
+						} else if ( result.getAttribute("type").equals("batch") ) {
+							String elapsed_time = result.getAttribute("elapsed_time");
+							HTML batch = new HTML(spinImage.getHTML()+"<br><br>Your request has been processing for "+elapsed_time+" seconds.<br>This panel will refresh automatically.<br><br>");
+							grid.setWidget(1, 0, batch);
+							lasRequest.setProperty("product_server", "ui_timeout", "3");
+							String url = Util.getProductServer()+"?xml="+URL.encode(lasRequest.getXMLText());
+							RequestBuilder sendRequest = new RequestBuilder(RequestBuilder.GET, url);
+							try {
+								sendRequest.sendRequest(null, lasRequestCallback);
+							} catch (RequestException e) {
+								HTML error = new HTML(e.toString());
+								grid.setWidget(1, 0, error);
+							}
+						}
+					}
+				}
+			}
+			spin.hide();
+		}
+	};
+	
+	SelectionHandler<TreeItem> datasetSelctionHandler = new SelectionHandler<TreeItem>() {
+
+		@Override
+		public void onSelection(SelectionEvent<TreeItem> event) {
+			TreeItem item = (TreeItem) event.getSelectedItem();
 			Object v = item.getUserObject();
 			if ( v instanceof VariableSerializable ) {
 				nvar = (VariableSerializable) v;
@@ -953,13 +968,9 @@ public class OutputPanel extends Composite {
 				Util.getRPCService().getConfig(null, nvar.getDSID(), nvar.getID(), configCallback);
 			}
 		}
-
-		public void onTreeItemStateChanged(TreeItem item) {
-			// TODO Auto-generated method stub
-
-		}
-
+		
 	};
+	
 	public AsyncCallback<ConfigSerializable> configCallback = new AsyncCallback<ConfigSerializable>() {
 
 		@Override
@@ -1346,5 +1357,8 @@ public class OutputPanel extends Composite {
 
 	public String getURL() {
 		return currentURL;
+	}
+	public void setURL(String url) {
+		currentURL = url;
 	}
 }

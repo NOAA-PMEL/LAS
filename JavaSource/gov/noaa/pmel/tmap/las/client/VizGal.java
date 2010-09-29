@@ -1,14 +1,14 @@
 package gov.noaa.pmel.tmap.las.client;
 
+import gov.noaa.pmel.tmap.las.client.laswidget.Constants;
 import gov.noaa.pmel.tmap.las.client.laswidget.OperationRadioButton;
 import gov.noaa.pmel.tmap.las.client.serializable.CategorySerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.ConfigSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.GridSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.OperationSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.VariableSerializable;
-import gov.noaa.pmel.tmap.las.client.util.Constants;
 import gov.noaa.pmel.tmap.las.client.util.Util;
-import gov.noaa.pmel.tmap.las.client.vizgal.VizGalPanel;
+import gov.noaa.pmel.tmap.las.client.laswidget.OutputPanel;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -145,13 +145,13 @@ public class VizGal extends BaseUI {
 		RootPanel.get("vizGal").add(vVizGalPanel);
 		//RootPanel.get("PLOT_LINK").setVisible(false);
 		
-		super.init(4);
+		super.init(4, Constants.IMAGE);
 		
 		// Set the three required handlers
 		setDatasetSelectionHandler(xVisGalDatasetSelectionHandler);
 		setOperationsClickHandler(xVizGalOperationsClickHandler);
 		setOptionsOkHandler(optionsOkHandler);
-                addPanelApplyClickHandler(panelApplyButtonClick);
+		addPanelApplyClickHandler(panelApplyButtonClick);
 		
 		// Initialize the gallery with an asynchronous call to the server to get variable needed.
 		if ( xDSID != null && xVarID != null & xOperationID != null && xView != null) {
@@ -214,7 +214,7 @@ public class VizGal extends BaseUI {
 			// Figure out the compare and fixed axis
 			init();
 			for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
-				VizGalPanel panel = (VizGalPanel) panelIt.next();
+				OutputPanel panel = (OutputPanel) panelIt.next();
 				panel.setPanelColor("regularBackground");
 				panel.setVariable(xVariable);
 				panel.init(false, ops);
@@ -305,14 +305,14 @@ public class VizGal extends BaseUI {
 		init();
 		
 		for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
-			VizGalPanel panel = (VizGalPanel) panelIt.next();
+			OutputPanel panel = (OutputPanel) panelIt.next();
 			panel.setVariable(xVariable);
 			panel.init(false, ops);
 		}
 		
 		if ( xTlo != null && !xTlo.equals("") ) {
 			for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
-				VizGalPanel panel = (VizGalPanel) panelIt.next();
+				OutputPanel panel = (OutputPanel) panelIt.next();
 				if ( xThi != null && !xThi.equals("") ) {
 					panel.setAxisRangeValues("t", xTlo, xThi);
 				} else {
@@ -328,7 +328,7 @@ public class VizGal extends BaseUI {
 		}
 		if ( xZlo != null && !xZlo.equals("") ) {
 			for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
-				VizGalPanel panel = (VizGalPanel) panelIt.next();
+				OutputPanel panel = (OutputPanel) panelIt.next();
 				if ( xZhi != null && !xZhi.equals("") ) {
 					panel.setAxisRangeValues("z", xZlo, xZhi);
 				} else {
@@ -349,7 +349,7 @@ public class VizGal extends BaseUI {
 			 xYlo != null && !xYlo.equals("") && xYhi != null && !xYhi.equals("") ) {
 			xAxesWidget.getRefMap().setCurrentSelection(Double.valueOf(xYlo), Double.valueOf(xYhi), Double.valueOf(xXlo), Double.valueOf(xXhi));
 			for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
-				VizGalPanel panel = (VizGalPanel) panelIt.next();
+				OutputPanel panel = (OutputPanel) panelIt.next();
 				panel.setMapTool(xView);
 				panel.setLatLon(xYlo, xYhi, xXlo, xXhi);
 			}
@@ -359,7 +359,7 @@ public class VizGal extends BaseUI {
 			double tmp_ylo = xAxesWidget.getRefMap().getYlo();
 			double tmp_yhi = xAxesWidget.getRefMap().getYhi();
 			for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
-				VizGalPanel panel = (VizGalPanel) panelIt.next();
+				OutputPanel panel = (OutputPanel) panelIt.next();
 				panel.setMapTool(xView);
 				panel.setLatLon(String.valueOf(tmp_ylo), String.valueOf(tmp_yhi), String.valueOf(tmp_xXlo), String.valueOf(tmp_xhi));
 			}
@@ -471,7 +471,7 @@ public class VizGal extends BaseUI {
 			xAxesWidget.setFixedAxis(xView, xOrtho, compareAxis);
 			
 			for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
-				VizGalPanel panel = (VizGalPanel) panelIt.next();
+				OutputPanel panel = (OutputPanel) panelIt.next();
 				panel.setCompareAxis(xView, xOrtho, compareAxis);
 			}
 			return true;
@@ -502,7 +502,7 @@ public class VizGal extends BaseUI {
 			// Set the value of the fixed axis in all the panels under slide sorter control.
 			xOrtho = Util.setOrthoAxes(xView, xVariable.getGrid());
 			for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
-				VizGalPanel panel = (VizGalPanel) panelIt.next();
+				OutputPanel panel = (OutputPanel) panelIt.next();
 				if ( !panel.isUsePanelSettings() ) {
 					panel.setCompareAxis(xView, xOrtho, compareAxis);
 					panel.setAxisRangeValues(fixedAxis, fixedAxisLoValue, fixedAxisHiValue);
@@ -540,9 +540,9 @@ public class VizGal extends BaseUI {
 				autoContourButton.setDown(false);
 				autoContourTextBox.setText("");
 			}
-			VizGalPanel comparePanel = null;
+			OutputPanel comparePanel = null;
 			for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
-				VizGalPanel panel = (VizGalPanel) panelIt.next();
+				OutputPanel panel = (OutputPanel) panelIt.next();
 				if ( panel.isComparePanel() ) {
 					comparePanel = panel;
 					panel.refreshPlot(xOptionsButton.getState(), switchAxis, true);	
@@ -550,7 +550,7 @@ public class VizGal extends BaseUI {
 			}
 			if ( comparePanel != null ) {
 				for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
-					VizGalPanel panel = (VizGalPanel) panelIt.next();
+					OutputPanel panel = (OutputPanel) panelIt.next();
 					if ( !panel.getID().equals(comparePanel.getID()) ) {
 						String xXlo = "";
 						String xhi = "";
@@ -611,7 +611,7 @@ public class VizGal extends BaseUI {
 			double plot_yhi = -9999.;
 			double plot_ylo = -9999.;
 			for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
-				VizGalPanel panel = (VizGalPanel) panelIt.next();
+				OutputPanel panel = (OutputPanel) panelIt.next();
 				if ( panel.isComparePanel() ) {
 					plot_xXlo = panel.getXlo();
 					plot_xhi = panel.getXhi();
@@ -620,7 +620,7 @@ public class VizGal extends BaseUI {
 				}
 			}
 			for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
-				VizGalPanel panel = (VizGalPanel) panelIt.next();
+				OutputPanel panel = (OutputPanel) panelIt.next();
 
 				// See if the panel settings are being used on this panel, if not
 				// reset the fixed axis and the view axis and the operation to the slide sorter value.
@@ -906,7 +906,7 @@ public class VizGal extends BaseUI {
 	 */
 	private void setMapRanges(double[] cs) {
 		for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
-			VizGalPanel panel = (VizGalPanel) panelIt.next();
+			OutputPanel panel = (OutputPanel) panelIt.next();
 			
 			if (!panel.isUsePanelSettings()) {
 				panel.setMapTool(xView);
@@ -1010,7 +1010,7 @@ public class VizGal extends BaseUI {
 			}
 		}
 		for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
-			VizGalPanel panel = (VizGalPanel) panelIt.next();
+			OutputPanel panel = (OutputPanel) panelIt.next();
 			if ( !panel.isUsePanelSettings() ) {
 				panel.setAxisRangeValues(axis, lo, hi);
 			}
@@ -1031,7 +1031,7 @@ public class VizGal extends BaseUI {
 	private void autoScale() {
 
 		// Use the values from the "compare panel" to set the auto contour levels.
-		VizGalPanel panel = xPanels.get(0);
+		OutputPanel panel = xPanels.get(0);
 
 		if ( panel.getMin() < globalMin ) {
 			globalMin = panel.getMin();
@@ -1155,7 +1155,7 @@ public class VizGal extends BaseUI {
         // This will not be right for the new paradigm.
 		// Set the orthogonal axes to a range in each panel.
 		for (Iterator panelsIt = xPanels.iterator(); panelsIt.hasNext();) {
-			VizGalPanel panel = (VizGalPanel) panelsIt.next();
+			OutputPanel panel = (OutputPanel) panelsIt.next();
 			panel.setOperation(xOperationID, xView);
 			
 			panel.setCompareAxis(xView, xOrtho, compareAxis);
@@ -1207,7 +1207,7 @@ public class VizGal extends BaseUI {
 		historyToken.append("token"+xPanels.get(0).getHistoryToken()+getHistoryToken());
 		
 		for (int i = 1; i < xPanels.size(); i++) {
-			VizGalPanel panel = xPanels.get(i);
+			OutputPanel panel = xPanels.get(i);
 			historyToken.append("token"+panel.getHistoryToken()+panel.getSettingsWidgetHistoryToken());
 		}
        
@@ -1271,7 +1271,7 @@ public class VizGal extends BaseUI {
 			// Panel 0 is the gallery panel...
 			for (int t = 1; t < xPanels.size(); t++) {
 
-				VizGalPanel panel = xPanels.get(t);
+				OutputPanel panel = xPanels.get(t);
 				galleryOnly = galleryOnly && !panel.isUsePanelSettings();
 			}
 

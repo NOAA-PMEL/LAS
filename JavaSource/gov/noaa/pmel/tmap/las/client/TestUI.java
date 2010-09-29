@@ -13,26 +13,35 @@ import gov.noaa.pmel.tmap.las.client.serializable.VariableSerializable;
 import gov.noaa.pmel.tmap.las.client.util.URLUtil;
 import gov.noaa.pmel.tmap.las.client.util.Util;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.LoadEvent;
+import com.google.gwt.event.dom.client.LoadHandler;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
+import com.google.gwt.http.client.Header;
+import com.google.gwt.http.client.Request;
+import com.google.gwt.http.client.RequestCallback;
+import com.google.gwt.http.client.Response;
 import com.google.gwt.http.client.URL;
+import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.Frame;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.TreeItem;
-import com.google.gwt.user.client.ui.TreeListener;
 
 
 public class TestUI extends BaseUI {
@@ -57,12 +66,15 @@ public class TestUI extends BaseUI {
 	
 	OperationsMenu tOperationsMenu = new OperationsMenu();
 	
-
+    List<String> tTribs;
+    int tTribIndex;
+    Map<String, Boolean> tAuthenticated = new HashMap<String, Boolean>();
+	
 	
 	public void onModuleLoad() {
 		
 		super.onModuleLoad();
-		
+		activateNativeHooks();
 		String spinImageURL = URLUtil.getImageURL()+"/mozilla_blu.gif";
 		HTML output = new HTML("<img src=\""+spinImageURL+"\" alt=\"Spinner\"/> Initializing...");
 		initializing.add(output);
@@ -91,16 +103,97 @@ public class TestUI extends BaseUI {
 		
 		RootPanel.get("main").add(uiPanel);	
 		
+		Util.getRPCService().getTributaryServers(tributaryCallback);
 
-		if ( xDSID != null && xVarID != null && xOperationID != null && xView != null && xOptionID != null) {
-			xOptionsButton.setOptions(xOptionID);
-			Util.getRPCService().getCategories(xDSID, initPanelFromParametersCallback);
-		} else {
-			Util.getRPCService().getPropertyGroup("product_server", initPanelFromDefaultsCallback);	
-		}
 		
 	}
-	
+	public AsyncCallback<List<String>> tributaryCallback = new AsyncCallback<List<String>>() {
+
+		@Override
+		public void onFailure(Throwable exception) {
+			
+			// Well, we couldn't authorize, but well let see what happens anyway...
+			
+			if ( xDSID != null && xVarID != null && xOperationID != null && xView != null && xOptionID != null) {
+				xOptionsButton.setOptions(xOptionID);
+				Util.getRPCService().getCategories(xDSID, initPanelFromParametersCallback);
+			} else {
+				Util.getRPCService().getPropertyGroup("product_server", initPanelFromDefaultsCallback);	
+			}
+		}
+
+		@Override
+		public void onSuccess(List<String> result) {
+			tTribs = result;
+			if ( tTribs != null && tTribs.size() > 0 ) {
+//
+//
+//				String url = tTribs.get(0);
+//				RequestBuilder sendRequest = new RequestBuilder(RequestBuilder.GET, url);
+//				try {
+//					tTribIndex = 1;
+//					sendRequest.sendRequest(null, authRequestCallback);
+//				} catch (RequestException e) {
+//					// Warn user...
+//					Window.alert("Unable to authorize sister LAS servers.");
+//				}
+				PopupPanel authPanel = new PopupPanel();
+				Label authLabel = new Label("Authorizing and remote sites...");
+				authPanel.add(authLabel);
+				authPanel.show();
+				for ( int i = 0; i < tTribs.size(); i++ ) {
+					final String url = tTribs.get(i)+"auth.do";
+					tAuthenticated.put(url, new Boolean(false));
+					Frame authFrame = new Frame(tTribs.get(i)) {
+						{
+							addDomHandler(new LoadHandler() {
+								@Override
+								public void onLoad(LoadEvent event) {
+									tAuthenticated.put(url, new Boolean(true));
+									Window.alert("Authorized at "+url);
+								}
+							}, LoadEvent.getType());
+						}
+					};
+					authPanel.add(authFrame);
+				}
+			}
+
+			if ( xDSID != null && xVarID != null && xOperationID != null && xView != null && xOptionID != null) {
+				xOptionsButton.setOptions(xOptionID);
+				Util.getRPCService().getCategories(xDSID, initPanelFromParametersCallback);
+			} else {
+				Util.getRPCService().getPropertyGroup("product_server", initPanelFromDefaultsCallback);	
+			}
+		}
+	};
+	public RequestCallback authRequestCallback = new RequestCallback() {
+
+		@Override
+		public void onError(Request request, Throwable exception) {
+			if ( tTribIndex < tTribs.size()) {
+				//TODO try another
+			}
+			
+		}
+
+		@Override
+		public void onResponseReceived(Request request, Response response) {
+			// TODO Auto-generated method stub
+			Header[] headers = response.getHeaders();
+			for (int i = 0; i < headers.length; i++) {
+				String name = headers[i].getName();
+				if ( name.equals("Set-Cookie") ) {
+					String value = headers[i].getValue();
+					String[] parts = value.split("=");
+					if ( parts[0].equals("esg.openid.saml.cookie") ) {
+						Cookies.setCookie(parts[0], parts[1], new Date(), "blah", "/", false);
+					}
+				}
+			}
+		}
+		
+	};
 	public AsyncCallback initPanelFromDefaultsCallback = new AsyncCallback() {
 
 		@Override
@@ -355,7 +448,7 @@ public class TestUI extends BaseUI {
 			xVariable.setGrid(grid);
 			xAnalysisWidget.setAnalysisAxes(grid);
 			if ( xPanels == null || xPanels.size() == 0 ) {
-		    	TestUI.super.init(1);
+		    	TestUI.super.init(1, Constants.FRAME);
 			}
 			initPanel();
 
@@ -409,5 +502,6 @@ public class TestUI extends BaseUI {
 		}
 
 	};
-	
+
+
 }
