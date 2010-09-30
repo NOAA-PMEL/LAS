@@ -92,10 +92,12 @@ IF ($data_var_transform"0|*>1") THEN
     SET VAR/TITLE="($ferret_list_var)($data_var_transform)" ($ferret_list_var)
     IF ($data_dup_varname"0|*>1") THEN
 
-        LET ($data_dup_varname) = ($ferret_list_var)
+        LET/TITLE=($data_dup_varname) ($data_dup_varname) = ($ferret_list_var)
 !        DEFINE SYMBOL data_dup_varname =  ($data_var)  ! the limits min,max,chunk determine the range
         SET VAR/TITLE="($data_title)($data_var_transform)" ($data_dup_varname)
         SET VAR/UNITS="($data_units)" ($data_dup_varname)
+        DEFINE SYMBOL var_history ($data_dup_varname)($data_var_transform)
+        LET var_hist = "($var_history)"
 
        DEFINE attribute ($data_dup_varname).transform_history  "($data_var)($data_var_transform)"
        SET ATTRIBUTE/OUTPUT ($data_dup_varname).transform_history
