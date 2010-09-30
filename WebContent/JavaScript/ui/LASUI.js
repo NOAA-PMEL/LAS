@@ -1311,7 +1311,7 @@ LASUI.prototype.setOperationList = function (strJson, stop) {
 
 LASUI.prototype.refresh = function() {
          if(!this.updating)
-                if(this.autoupdate||this.submitOnLoad||this.newVariable){
+                if(this.autoupdate){//||this.submitOnLoad||this.newVariable){
                         this.submitOnLoad =false;
                         this.newVariable=false;
                         this.makeRequest();
@@ -1891,8 +1891,8 @@ LASUI.prototype.showUpdateLink = function () {
 		document.getElementById("wait_msg").style.display="none";
 	if(document.getElementById('output'))
 		document.getElementById("output").style.visibility="visible";
-	if(this.newVariable)
-		this.makeRequest();
+	//if(this.newVariable)
+	//	this.makeRequest();
 
 
 }
