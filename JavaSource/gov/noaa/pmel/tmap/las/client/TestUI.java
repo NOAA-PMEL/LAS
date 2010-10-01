@@ -35,12 +35,15 @@ import com.google.gwt.http.client.URL;
 import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.Frame;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.RootPanel;
+import com.google.gwt.user.client.ui.TabPanel;
 import com.google.gwt.user.client.ui.TreeItem;
 
 
@@ -126,21 +129,39 @@ public class TestUI extends BaseUI {
 		public void onSuccess(List<String> result) {
 			tTribs = result;
 			if ( tTribs != null && tTribs.size() > 0 ) {
-//
-//
-//				String url = tTribs.get(0);
-//				RequestBuilder sendRequest = new RequestBuilder(RequestBuilder.GET, url);
-//				try {
-//					tTribIndex = 1;
-//					sendRequest.sendRequest(null, authRequestCallback);
-//				} catch (RequestException e) {
-//					// Warn user...
-//					Window.alert("Unable to authorize sister LAS servers.");
-//				}
-				PopupPanel authPanel = new PopupPanel();
+
+				final PopupPanel authPanel = new PopupPanel(true);
+				int h = Window.getClientHeight();
+				if ( h > 300 ) {
+					h = h - 100;
+				} else {
+					h = h - 10;
+				}
+				int w = Window.getClientWidth();
+				if ( w > 300 ) {
+					w = w - 100;
+				} else {
+					w = w - 10;
+				}
+				authPanel.setWidth(w+"px");
+				authPanel.setHeight(h+"px");
 				Label authLabel = new Label("Authorizing and remote sites...");
-				authPanel.add(authLabel);
+				HorizontalPanel topBar = new HorizontalPanel();
+				topBar.add(authLabel);
+				Button close = new Button("Close");
+				close.addClickHandler(new ClickHandler() {
+
+					@Override
+					public void onClick(ClickEvent arg0) {
+						authPanel.hide();						
+					}
+					
+				});
+				topBar.add(close);
+				authPanel.add(topBar);
 				authPanel.show();
+				TabPanel tabs = new TabPanel();
+				authPanel.add(tabs);
 				for ( int i = 0; i < tTribs.size(); i++ ) {
 					final String url = tTribs.get(i)+"auth.do";
 					tAuthenticated.put(url, new Boolean(false));
@@ -155,7 +176,7 @@ public class TestUI extends BaseUI {
 							}, LoadEvent.getType());
 						}
 					};
-					authPanel.add(authFrame);
+					tabs.add(authFrame);
 				}
 			}
 
