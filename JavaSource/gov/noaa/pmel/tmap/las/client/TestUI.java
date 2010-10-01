@@ -45,9 +45,12 @@ import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.TabPanel;
 import com.google.gwt.user.client.ui.TreeItem;
+import com.google.gwt.user.client.ui.VerticalPanel;
 
 
 public class TestUI extends BaseUI {
+
+        Map<String, Boolean> tAuthenticated = new HashMap<String, Boolean>();
 	
 	String tInitialTime;
 	String tInitialZ;
@@ -71,13 +74,16 @@ public class TestUI extends BaseUI {
 	
     List<String> tTribs;
     int tTribIndex;
-    Map<String, Boolean> tAuthenticated = new HashMap<String, Boolean>();
 	
 	
 	public void onModuleLoad() {
 		
 		super.onModuleLoad();
 		activateNativeHooks();
+	        activateNativeHooks();	
+
+                openid = Util.getParameterString("openid");
+
 		String spinImageURL = URLUtil.getImageURL()+"/mozilla_blu.gif";
 		HTML output = new HTML("<img src=\""+spinImageURL+"\" alt=\"Spinner\"/> Initializing...");
 		initializing.add(output);
@@ -105,30 +111,24 @@ public class TestUI extends BaseUI {
 		xAxesWidget.addApplyHandler(settingsButtonApplyHandler);
 		
 		RootPanel.get("main").add(uiPanel);	
-		
-		Util.getRPCService().getTributaryServers(tributaryCallback);
-
+                Window.alert("Get categories for authentication");
+                Util.getRPCService().getCategories(null, authenticateCallback);
 		
 	}
-	public AsyncCallback<List<String>> tributaryCallback = new AsyncCallback<List<String>>() {
+        public AsyncCallback authenticateCallback = new AsyncCallback() {
+		@Override
+		public void onFailure(Throwable caught) {
+		    if ( xDSID != null && xVarID != null && xOperationID != null && xView != null && xOptionID != null) {
+			    xOptionsButton.setOptions(xOptionID);
+			    Util.getRPCService().getCategories(xDSID, initPanelFromParametersCallback);
+		    } else {
+			    Util.getRPCService().getPropertyGroup("product_server", initPanelFromDefaultsCallback);	
+		    }
+	}
 
 		@Override
-		public void onFailure(Throwable exception) {
-			
-			// Well, we couldn't authorize, but well let see what happens anyway...
-			
-			if ( xDSID != null && xVarID != null && xOperationID != null && xView != null && xOptionID != null) {
-				xOptionsButton.setOptions(xOptionID);
-				Util.getRPCService().getCategories(xDSID, initPanelFromParametersCallback);
-			} else {
-				Util.getRPCService().getPropertyGroup("product_server", initPanelFromDefaultsCallback);	
-			}
-		}
-
-		@Override
-		public void onSuccess(List<String> result) {
-			tTribs = result;
-			if ( tTribs != null && tTribs.size() > 0 ) {
+		public void onSuccess(Object result) {
+			CategorySerializable[] cats = (CategorySerializable[]) result;
 
 				final PopupPanel authPanel = new PopupPanel(true);
 				int h = Window.getClientHeight();
@@ -162,8 +162,9 @@ public class TestUI extends BaseUI {
 				authPanel.show();
 				TabPanel tabs = new TabPanel();
 				authPanel.add(tabs);
-				for ( int i = 0; i < tTribs.size(); i++ ) {
-					final String url = tTribs.get(i)+"auth.do";
+                        for ( int i = 0; i < cats.length; i++ ) {
+
+					final String url = cats[i].getAttributes().get("remote_las");
 					tAuthenticated.put(url, new Boolean(false));
 					Frame authFrame = new Frame(tTribs.get(i)) {
 						{
@@ -176,9 +177,9 @@ public class TestUI extends BaseUI {
 							}, LoadEvent.getType());
 						}
 					};
+                                        Window.alert("Adding frame to panel");
 					tabs.add(authFrame);
 				}
-			}
 
 			if ( xDSID != null && xVarID != null && xOperationID != null && xView != null && xOptionID != null) {
 				xOptionsButton.setOptions(xOptionID);
@@ -186,7 +187,7 @@ public class TestUI extends BaseUI {
 			} else {
 				Util.getRPCService().getPropertyGroup("product_server", initPanelFromDefaultsCallback);	
 			}
-		}
+              }
 	};
 	public RequestCallback authRequestCallback = new RequestCallback() {
 
@@ -523,6 +524,4 @@ public class TestUI extends BaseUI {
 		}
 
 	};
-
-
 }
