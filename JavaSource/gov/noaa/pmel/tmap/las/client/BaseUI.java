@@ -43,6 +43,7 @@ import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.PushButton;
 import com.google.gwt.user.client.ui.TreeItem;
+import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.client.ui.FlexTable.FlexCellFormatter;
 
 public class BaseUI implements EntryPoint {
@@ -320,6 +321,9 @@ public class BaseUI implements EntryPoint {
 
 		});
 
+	}
+	public void addMenuButtons(Widget buttons) {
+		xButtonLayout.setWidget(0, 4, buttons);
 	}
 	ClickHandler xButtonOpenHandler = new ClickHandler() {
 

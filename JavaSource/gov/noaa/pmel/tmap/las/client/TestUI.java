@@ -50,39 +50,43 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 
 public class TestUI extends BaseUI {
 
-        Map<String, Boolean> tAuthenticated = new HashMap<String, Boolean>();
+	Map<String, Boolean> tAuthenticated = new HashMap<String, Boolean>();
+	int xAuthIndex = 0;
+	boolean xAuthDone = false;
+	boolean xAuthNext = true;
+	String[] xAuthURLs;
 	
 	String tInitialTime;
 	String tInitialZ;
-	
+
 	String openid;
-	
+
 	// Keep track of the current operations
-    OperationSerializable[] ops;
-    
-    // Sometimes  you need to keep the current map selection values.
-    double[] cs = null;
+	OperationSerializable[] ops;
+
+	// Sometimes  you need to keep the current map selection values.
+	double[] cs = null;
 
 	PopupPanel initializing = new PopupPanel();
 
 	// This is the main UI Panel
 	FlexTable uiPanel = new FlexTable();
-	
+
 	boolean changeDataset = false;
-	
+
 	OperationsMenu tOperationsMenu = new OperationsMenu();
-	
-    List<String> tTribs;
-    int tTribIndex;
-	
-	
+
+	List<String> tTribs;
+	int tTribIndex;
+
+
 	public void onModuleLoad() {
-		
+
 		super.onModuleLoad();
 		activateNativeHooks();
-	        activateNativeHooks();	
+		activateNativeHooks();	
 
-                openid = Util.getParameterString("openid");
+		openid = Util.getParameterString("openid");
 
 		String spinImageURL = URLUtil.getImageURL()+"/mozilla_blu.gif";
 		HTML output = new HTML("<img src=\""+spinImageURL+"\" alt=\"Spinner\"/> Initializing...");
@@ -96,99 +100,121 @@ public class TestUI extends BaseUI {
 		if ( xOptionID == null ) {
 			xOptionID = "Options_2D_image_contour_xy_7";
 		}
-		
-		
+
+
 		tOperationsMenu.addClickHandler(tExternalOperationClickHandler);
 		uiPanel.setWidget(0, 0, tOperationsMenu);
 		uiPanel.setWidget(1, 0, xMainPanel);
-		
+
 		// Set the required handlers...
 		setOperationsClickHandler(operationsClickHandler);
 		setDatasetSelectionHandler(datasetSelectionHandler);
 		setOptionsOkHandler(optionsOkHandler);
-		
+
 		// Add the apply button handler
 		xAxesWidget.addApplyHandler(settingsButtonApplyHandler);
-		
+
 		RootPanel.get("main").add(uiPanel);	
-                Window.alert("Get categories for authentication");
-                Util.getRPCService().getCategories(null, authenticateCallback);
-		
+
+		Util.getRPCService().getCategories(null, authenticateCallback);
+
+
 	}
-        public AsyncCallback authenticateCallback = new AsyncCallback() {
+
+	public AsyncCallback authenticateCallback = new AsyncCallback() {
 		@Override
 		public void onFailure(Throwable caught) {
-		    if ( xDSID != null && xVarID != null && xOperationID != null && xView != null && xOptionID != null) {
-			    xOptionsButton.setOptions(xOptionID);
-			    Util.getRPCService().getCategories(xDSID, initPanelFromParametersCallback);
-		    } else {
-			    Util.getRPCService().getPropertyGroup("product_server", initPanelFromDefaultsCallback);	
-		    }
-	}
-
-		@Override
-		public void onSuccess(Object result) {
-			CategorySerializable[] cats = (CategorySerializable[]) result;
-
-				final PopupPanel authPanel = new PopupPanel(true);
-				int h = Window.getClientHeight();
-				if ( h > 300 ) {
-					h = h - 100;
-				} else {
-					h = h - 10;
-				}
-				int w = Window.getClientWidth();
-				if ( w > 300 ) {
-					w = w - 100;
-				} else {
-					w = w - 10;
-				}
-				authPanel.setWidth(w+"px");
-				authPanel.setHeight(h+"px");
-				Label authLabel = new Label("Authorizing and remote sites...");
-				HorizontalPanel topBar = new HorizontalPanel();
-				topBar.add(authLabel);
-				Button close = new Button("Close");
-				close.addClickHandler(new ClickHandler() {
-
-					@Override
-					public void onClick(ClickEvent arg0) {
-						authPanel.hide();						
-					}
-					
-				});
-				topBar.add(close);
-				authPanel.add(topBar);
-				authPanel.show();
-				TabPanel tabs = new TabPanel();
-				authPanel.add(tabs);
-                        for ( int i = 0; i < cats.length; i++ ) {
-
-					final String url = cats[i].getAttributes().get("remote_las");
-					tAuthenticated.put(url, new Boolean(false));
-					Frame authFrame = new Frame(tTribs.get(i)) {
-						{
-							addDomHandler(new LoadHandler() {
-								@Override
-								public void onLoad(LoadEvent event) {
-									tAuthenticated.put(url, new Boolean(true));
-									Window.alert("Authorized at "+url);
-								}
-							}, LoadEvent.getType());
-						}
-					};
-                                        Window.alert("Adding frame to panel");
-					tabs.add(authFrame);
-				}
-
 			if ( xDSID != null && xVarID != null && xOperationID != null && xView != null && xOptionID != null) {
 				xOptionsButton.setOptions(xOptionID);
 				Util.getRPCService().getCategories(xDSID, initPanelFromParametersCallback);
 			} else {
 				Util.getRPCService().getPropertyGroup("product_server", initPanelFromDefaultsCallback);	
 			}
-              }
+		}
+
+		@Override
+		public void onSuccess(Object result) {
+			CategorySerializable[] cats = (CategorySerializable[]) result;
+			xAuthURLs = new String[cats.length-1];
+			int urlIndex = 0;
+			for ( int i = 0; i < cats.length; i++ ) {
+				String url = cats[i].getAttributes().get("remote_las");
+				if ( url != null ) {
+					xAuthURLs[urlIndex] = cats[i].getAttributes().get("remote_las");
+					urlIndex++;
+				}
+			}
+			
+			xSettingsHeader.setOpen(false);
+			doNextAuth();			
+		}
 	};
+	private void doNextAuth() {		
+		if ( xAuthIndex < xAuthURLs.length && xAuthURLs[xAuthIndex] != null ) {
+			final PopupPanel authPanel = new PopupPanel(true);
+			final VerticalPanel authInterior = new VerticalPanel();
+			authPanel.add(authInterior);
+			int h = Window.getClientHeight();
+			if ( h > 300 ) {
+				h = h - 100;
+			} else {
+				h = h - 10;
+			}
+			int w = Window.getClientWidth();
+			if ( w > 300 ) {
+				w = w - 100;
+			} else {
+				w = w - 10;
+			}
+			xAuthNext = false;
+			authPanel.setWidth(w+"px");
+			authPanel.setHeight(h+"px");
+			Label authLabel = new Label("Authenticating at remote LAS sites...       ");
+			HorizontalPanel topBar = new HorizontalPanel();
+			topBar.add(authLabel);
+			Button control;
+			if ( xAuthIndex < xAuthURLs.length - 1 ) {
+				control = new Button("Next");
+				control.addClickHandler(new ClickHandler() {
+
+					@Override
+					public void onClick(ClickEvent arg0) {
+						doNextAuth();
+						authPanel.hide();						
+					}
+
+				});
+			} else {
+				control = new Button("Close");
+				control.addClickHandler(new ClickHandler() {
+
+					@Override
+					public void onClick(ClickEvent arg0) {
+						xSettingsHeader.setOpen(false);
+						startUI();
+						authPanel.hide();						
+					}
+
+				});
+			}
+			topBar.add(control);
+			authInterior.add(topBar);
+			authPanel.show();
+
+			tAuthenticated.put(xAuthURLs[xAuthIndex], new Boolean(false));
+			Frame authFrame = new Frame(xAuthURLs[xAuthIndex]);			
+			authInterior.add(authFrame);
+			xAuthIndex++;
+		}
+	}
+	private void startUI() {
+		if ( xDSID != null && xVarID != null && xOperationID != null && xView != null && xOptionID != null) {
+			xOptionsButton.setOptions(xOptionID);
+			Util.getRPCService().getCategories(xDSID, initPanelFromParametersCallback);
+		} else {
+			Util.getRPCService().getPropertyGroup("product_server", initPanelFromDefaultsCallback);	
+		}
+	}
 	public RequestCallback authRequestCallback = new RequestCallback() {
 
 		@Override
@@ -196,7 +222,7 @@ public class TestUI extends BaseUI {
 			if ( tTribIndex < tTribs.size()) {
 				//TODO try another
 			}
-			
+
 		}
 
 		@Override
@@ -214,8 +240,9 @@ public class TestUI extends BaseUI {
 				}
 			}
 		}
-		
+
 	};
+
 	public AsyncCallback initPanelFromDefaultsCallback = new AsyncCallback() {
 
 		@Override
@@ -246,7 +273,7 @@ public class TestUI extends BaseUI {
 					tInitialZ = value;
 				}
 			}
-			
+
 			initializing.hide();
 			if ( xDSID != null && xVarID != null && xOperationID != null && xView != null && xOptionID != null) {
 				xOptionsButton.setOptions(xOptionID);
@@ -256,7 +283,7 @@ public class TestUI extends BaseUI {
 			}
 		}		
 	};
-	// TODO you're going to have to fix this to work, but for now...
+	
 	public AsyncCallback initPanelFromParametersCallback = new AsyncCallback() {
 		public void onSuccess(Object result) {
 			CategorySerializable[] cats = (CategorySerializable[]) result;
@@ -285,7 +312,7 @@ public class TestUI extends BaseUI {
 	private void initPanel() {
 
 		initializing.hide();
-		
+
 		xPanels.get(0).setVariable(xVariable);
 		xPanels.get(0).init(false, ops);
 
@@ -324,7 +351,7 @@ public class TestUI extends BaseUI {
 		xAxesWidget.init(xVariable.getGrid());
 		xAxesWidget.setFixedAxis(xView, xOrtho, null);		
 
-		
+
 		xPanels.get(0).addApplyHandler(panelApply);
 
 		// Move the current state of the axes to the panel
@@ -363,9 +390,9 @@ public class TestUI extends BaseUI {
 			xPanels.get(0).setLatLon(String.valueOf(tmp_ylo), String.valueOf(tmp_yhi), String.valueOf(tmp_xlo), String.valueOf(tmp_xhi));
 		}
 
-		
+
 		xPanels.get(0).refreshPlot(null, false, false);
-		
+
 		resize();
 	}
 	public void applyChange() {
@@ -411,7 +438,7 @@ public class TestUI extends BaseUI {
 			double tmp_yhi = xAxesWidget.getRefMap().getYhi();
 
 			xPanels.get(0).setLatLon(String.valueOf(tmp_ylo), String.valueOf(tmp_yhi), String.valueOf(tmp_xlo), String.valueOf(tmp_xhi));
-			
+
 			Map<String, String> temp_state = xOptionsButton.getState();
 			xPanels.get(0).refreshPlot(temp_state, false, true);
 		}
@@ -438,7 +465,7 @@ public class TestUI extends BaseUI {
 		xView = "xy";
 
 		// Get all the config info.  View is null to get all operations.
-		
+
 		Util.getRPCService().getConfig(null, xVariable.getDSID(), xVariable.getID(), getGridCallback);
 
 	}
@@ -447,7 +474,7 @@ public class TestUI extends BaseUI {
 		public void onClick(ClickEvent event) {
 			applyChange();
 		}
-		
+
 	};
 	ClickHandler settingsButtonApplyHandler = new ClickHandler() {
 
@@ -470,7 +497,7 @@ public class TestUI extends BaseUI {
 			xVariable.setGrid(grid);
 			xAnalysisWidget.setAnalysisAxes(grid);
 			if ( xPanels == null || xPanels.size() == 0 ) {
-		    	TestUI.super.init(1, Constants.FRAME);
+				TestUI.super.init(1, Constants.FRAME);
 			}
 			initPanel();
 

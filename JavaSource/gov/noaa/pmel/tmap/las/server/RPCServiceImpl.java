@@ -570,7 +570,7 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
 		}
 	}
 	/**
-	 * 
+	 * @deprecated
 	 */
 	public List<String> getTributaryServers() {
 		List<String> wiretribs = new ArrayList<String>();
