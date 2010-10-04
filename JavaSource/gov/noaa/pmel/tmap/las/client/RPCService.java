@@ -27,5 +27,4 @@ public interface RPCService extends RemoteService {
 	public CategorySerializable[] getTimeSeries() throws RPCException;
 	public HashMap<String, String> getPropertyGroup(String name) throws RPCException;
 	public ConfigSerializable getConfig(String view, String dsid, String varid) throws RPCException;
-	public List<String> getTributaryServers() throws RPCException;
 }

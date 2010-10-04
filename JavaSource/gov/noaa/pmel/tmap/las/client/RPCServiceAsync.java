@@ -17,5 +17,4 @@ public interface RPCServiceAsync {
     public void getConfig(String view, String dsid, String varid, AsyncCallback<ConfigSerializable> timeSeriesCallback);
     public void getPropertyGroup(String name, AsyncCallback propertyGroupCallback);
 	public void getOperations(String view, String[] xpath,	AsyncCallback<OperationSerializable[]> callback);
-	public void getTributaryServers(AsyncCallback<List<String>> callback);
 }
