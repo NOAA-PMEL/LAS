@@ -209,7 +209,7 @@ public class TestUI extends BaseUI {
 			tAuthenticated.put(xAuthURLs[xAuthIndex], new Boolean(false));
 			String url = xAuthURLs[xAuthIndex];
 			if ( openid != null ) {
-				url = url+"?"+openid;
+				url = url+"?openid="+openid;
 			}
 			Frame authFrame = new Frame(url);			
 			authFrame.setWidth(w-10+"px");
