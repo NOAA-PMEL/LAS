@@ -146,7 +146,12 @@ public class TestUI extends BaseUI {
 			}
 			
 			xSettingsHeader.setOpen(false);
-			doNextAuth();			
+			// At least one auth URL was found.
+			if ( urlIndex > 0 ) {
+				doNextAuth();		
+			} else {
+				startUI();
+			}
 		}
 	};
 	private void doNextAuth() {		
