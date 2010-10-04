@@ -202,7 +202,13 @@ public class TestUI extends BaseUI {
 			authPanel.show();
 
 			tAuthenticated.put(xAuthURLs[xAuthIndex], new Boolean(false));
-			Frame authFrame = new Frame(xAuthURLs[xAuthIndex]);			
+			String url = xAuthURLs[xAuthIndex];
+			if ( openid != null ) {
+				url = url+"?"+openid;
+			}
+			Frame authFrame = new Frame(url);			
+			authFrame.setWidth(w-10+"px");
+			authFrame.setHeight(h-10+"px");
 			authInterior.add(authFrame);
 			xAuthIndex++;
 		}
