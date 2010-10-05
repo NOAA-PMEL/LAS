@@ -222,7 +222,7 @@ public class TestUI extends BaseUI {
 			authFrame.setWidth(w-10+"px");
 			authFrame.setHeight(h-10+"px");
 			authInterior.add(authFrame);
-			xAuthIndex++;
+//			xAuthIndex++;
 		}
 	}
 	private void startUI() {
