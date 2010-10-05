@@ -71,6 +71,14 @@ public class Util {
 	public static String getProductServer() {
 		return URLUtil.getBaseURL() + "ProductServer.do";
 	}
+	public static String[] getParameterStrings(String name) {
+		Map<String, List<String>> parameters = Window.Location.getParameterMap();
+		List param = parameters.get(name);
+		if ( param != null ) {
+			return (String[]) param.toArray();
+		}
+		return null;
+	}
 	public static String getParameterString(String name) {
 		Map<String, List<String>> parameters = Window.Location.getParameterMap();			
 		List param = parameters.get(name);
