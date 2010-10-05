@@ -188,6 +188,9 @@ IF ($expr3"0|*>1") THEN
    DEFINE SYMBOL ferret_plot_title "($expr1) ($data_title) ($expr3) ($data_title) ($expr4) Seasonal Regrid"
 ENDIF
 
+DEFINE SYMBOL ferret_plot_base_var = ($ferret_plot_var)
+DEFINE SYMBOL ferret_plot_base_var_($num) = ($ferret_plot_var)
+
 ! ENDIF  ! not modulo
 DEFINE SYMBOL data_var_transform = , Seasonal Regrid
 
