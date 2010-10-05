@@ -157,9 +157,10 @@ public class TestUI extends BaseUI {
 					doNextAuth();
 				}
 				startUI();
-				//		
+				xSettingsHeader.setOpen(true);	
 			} else {
 				startUI();
+				xSettingsHeader.setOpen(true);
 			}
 		}
 	};
@@ -187,33 +188,21 @@ public class TestUI extends BaseUI {
 			HorizontalPanel topBar = new HorizontalPanel();
 			topBar.add(authLabel);
 			Button control;
-			if ( xAuthIndex < xAuthURLs.length - 1 ) {
-				control = new Button("Next");
-				control.addClickHandler(new ClickHandler() {
-
-					@Override
-					public void onClick(ClickEvent arg0) {
-						doNextAuth();
-						authPanel.hide();						
-					}
-
-				});
-			} else {
+			
 				control = new Button("Close");
 				control.addClickHandler(new ClickHandler() {
 
 					@Override
 					public void onClick(ClickEvent arg0) {
-						xSettingsHeader.setOpen(true);
-						startUI();
+						
 						authPanel.hide();						
 					}
 
 				});
-			}
+			
 			topBar.add(control);
 			authInterior.add(topBar);
-			authPanel.show();
+			authPanel.hide();
 
 			tAuthenticated.put(xAuthURLs[xAuthIndex], new Boolean(false));
 			String url = xAuthURLs[xAuthIndex];
@@ -223,13 +212,12 @@ public class TestUI extends BaseUI {
 			Frame authFrame = new Frame() {
 				public void onBrowserEvent(Event e) {
 					if (e.getType().equals(Event.ONERROR)) {
-						this.setVisible(true);
+						authPanel.show();
 					} else {
 						super.onBrowserEvent(e);
 					}
 				}
 			};
-			authFrame.setVisible(false);
 			authFrame.setUrl(url);
 			authFrame.setWidth(w-10+"px");
 			authFrame.setHeight(h-10+"px");
