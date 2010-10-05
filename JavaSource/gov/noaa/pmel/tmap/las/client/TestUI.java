@@ -27,12 +27,14 @@ import com.google.gwt.event.dom.client.LoadEvent;
 import com.google.gwt.event.dom.client.LoadHandler;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
+import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.http.client.Header;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestCallback;
 import com.google.gwt.http.client.Response;
 import com.google.gwt.http.client.URL;
 import com.google.gwt.user.client.Cookies;
+import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
@@ -116,6 +118,7 @@ public class TestUI extends BaseUI {
 
 		RootPanel.get("main").add(uiPanel);	
 
+		xAuthURLs = Util.getParameterStrings("data_node");
 		Util.getRPCService().getCategories(null, authenticateCallback);
 
 
@@ -146,9 +149,15 @@ public class TestUI extends BaseUI {
 			}
 			
 			xSettingsHeader.setOpen(false);
+			
+			
 			// At least one auth URL was found.
 			if ( urlIndex > 0 ) {
-				doNextAuth();		
+				for ( xAuthIndex = 0; xAuthIndex < xAuthURLs.length; xAuthIndex++) {
+					doNextAuth();
+				}
+				startUI();
+				//		
 			} else {
 				startUI();
 			}
@@ -195,7 +204,7 @@ public class TestUI extends BaseUI {
 
 					@Override
 					public void onClick(ClickEvent arg0) {
-						xSettingsHeader.setOpen(false);
+						xSettingsHeader.setOpen(true);
 						startUI();
 						authPanel.hide();						
 					}
@@ -211,7 +220,17 @@ public class TestUI extends BaseUI {
 			if ( openid != null ) {
 				url = url+"?openid="+openid;
 			}
-			Frame authFrame = new Frame(url);			
+			Frame authFrame = new Frame() {
+				public void onBrowserEvent(Event e) {
+					if (e.getType().equals(Event.ONERROR)) {
+						this.setVisible(true);
+					} else {
+						super.onBrowserEvent(e);
+					}
+				}
+			};
+			authFrame.setVisible(false);
+			authFrame.setUrl(url);
 			authFrame.setWidth(w-10+"px");
 			authFrame.setHeight(h-10+"px");
 			authInterior.add(authFrame);
@@ -226,34 +245,6 @@ public class TestUI extends BaseUI {
 			Util.getRPCService().getPropertyGroup("product_server", initPanelFromDefaultsCallback);	
 		}
 	}
-	public RequestCallback authRequestCallback = new RequestCallback() {
-
-		@Override
-		public void onError(Request request, Throwable exception) {
-			if ( tTribIndex < tTribs.size()) {
-				//TODO try another
-			}
-
-		}
-
-		@Override
-		public void onResponseReceived(Request request, Response response) {
-			// TODO Auto-generated method stub
-			Header[] headers = response.getHeaders();
-			for (int i = 0; i < headers.length; i++) {
-				String name = headers[i].getName();
-				if ( name.equals("Set-Cookie") ) {
-					String value = headers[i].getValue();
-					String[] parts = value.split("=");
-					if ( parts[0].equals("esg.openid.saml.cookie") ) {
-						Cookies.setCookie(parts[0], parts[1], new Date(), "blah", "/", false);
-					}
-				}
-			}
-		}
-
-	};
-
 	public AsyncCallback initPanelFromDefaultsCallback = new AsyncCallback() {
 
 		@Override
