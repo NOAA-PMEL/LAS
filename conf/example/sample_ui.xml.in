@@ -95,6 +95,7 @@
         </menu>
         <menu type="ops" name="Ops_Std2D_xy">
             <item values="Plot_2D_XY,shade,2">Color plot</item>
+            <item values="prop_prop_plot,shade,3">Color plot</item>
             <item values="Plot_2D_XY_SlideSorter,shade,2">Color plot comparison</item>
             <item values="Data_Extract,txt,20">Table of values (text)</item>
             <item values="Data_Extract_netCDF,cdf,20">NetCDF file</item>
