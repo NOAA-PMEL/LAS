@@ -5,6 +5,7 @@ import gov.noaa.pmel.tmap.las.client.serializable.VariableSerializable;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.logical.shared.OpenHandler;
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.maps.client.geom.LatLng;
@@ -93,6 +94,9 @@ public class DatasetButton extends Composite {
 	}
 	public void addCloseClickHandler(ClickHandler handler) {
 		close.addClickHandler(handler);
+	}
+	public HandlerRegistration addOpenHandler(OpenHandler<TreeItem> handler) {
+		return datasetWidget.addOpenHandler(handler);
 	}
 	public void setOpenID(String openid) {
 		datasetWidget.setOpenID(openid);

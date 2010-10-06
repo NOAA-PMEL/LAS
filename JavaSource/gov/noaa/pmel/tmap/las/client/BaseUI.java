@@ -88,13 +88,21 @@ public class BaseUI implements EntryPoint {
 	 */
 	DatasetButton xDatasetButton = new DatasetButton();
 	/*
-	 *  Keep track of the handler so it can be removed 
+	 *  Keep track of the selection handler so it can be removed 
 	 */
-	HandlerRegistration xRegisterDatasetHandler;
+	HandlerRegistration xRegisterDatasetSelectionHandler;
 	/*
 	 * Every UI that wants to extent this base must register their own data set selection handler.
 	 */
 	SelectionHandler<TreeItem> xDatasetSelectionHandler;
+	
+	/*
+	 *  Keep track of the open handler so it can be removed 
+	 */
+	HandlerRegistration xRegisterDatasetOpenHandler;
+	
+	
+	
 	OptionsButton xOptionsButton; 
 	
 	// The default handler when OK is clicked.  Everybody has to implement their own.
@@ -262,7 +270,7 @@ public class BaseUI implements EntryPoint {
 
 		};
 		
-		xRegisterDatasetHandler = xDatasetButton.addSelectionHandler(xDatasetSelectionHandler);
+		xRegisterDatasetSelectionHandler = xDatasetButton.addSelectionHandler(xDatasetSelectionHandler);
 		// This is all to get around the fact that the OpenLayers map is always in front.
 		xDatasetButton.addOpenClickHandler(xButtonOpenHandler);
 		xDatasetButton.addCloseClickHandler(xButtonCloseHandler);
@@ -419,8 +427,15 @@ public class BaseUI implements EntryPoint {
 		return width;
 	}
 	public void setDatasetSelectionHandler(SelectionHandler<TreeItem> handler) {
-		xRegisterDatasetHandler.removeHandler();
-		xRegisterDatasetHandler = xDatasetButton.addSelectionHandler(handler);
+		xRegisterDatasetSelectionHandler.removeHandler();
+		xRegisterDatasetSelectionHandler = xDatasetButton.addSelectionHandler(handler);
+	}
+	public void setDatasetOpenHandler(OpenHandler<TreeItem> handler) {
+		// There is no default open handler, so if it's null don't remove it.
+		if ( xRegisterDatasetOpenHandler != null ) {
+		    xRegisterDatasetOpenHandler.removeHandler();
+		}
+		xRegisterDatasetOpenHandler = xDatasetButton.addOpenHandler(handler);
 	}
 	public void setOptionsOkHandler(ClickHandler handler) {
 		xRegisterOptionsHandler.removeHandler();
