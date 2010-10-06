@@ -220,7 +220,7 @@ public class LASConfig extends LASDocument {
         return comboList;
     }
     public String getIDs(String data_url) throws JDOMException, LASException {
-    	List<Category> categories = getCategories(null);
+    	List<Category> categories = getDatasets();
     	for (Iterator catIt = categories.iterator(); catIt.hasNext();) {
 			Category category = (Category) catIt.next();
 			String ids = findDataURL(data_url, category);
