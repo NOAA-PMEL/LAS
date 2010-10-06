@@ -242,7 +242,7 @@ public class LASConfig extends LASDocument {
     			if ( !url.equals("") ) {						
     				if ( url.startsWith(data_url) || url.endsWith(data_url) ) {
     					// matches the data set, but not the variable...
-    					return "catid="+category.getID()+"&varid="+variable.getID();
+    					return "dsid="+category.getID()+"&varid="+variable.getID();
     				}
     			}
     		}
