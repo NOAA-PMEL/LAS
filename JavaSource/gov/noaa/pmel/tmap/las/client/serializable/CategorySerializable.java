@@ -126,4 +126,7 @@ public class CategorySerializable extends Serializable implements IsSerializable
 		}
 		return 0;
 	}
+	public void setAttribute(String name, String value) {
+		getAttributes().put(name, value);
+	}
 }
