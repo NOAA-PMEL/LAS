@@ -117,6 +117,11 @@ public class TestUI extends BaseUI {
 		xAxesWidget.addApplyHandler(settingsButtonApplyHandler);
 
 		RootPanel.get("main").add(uiPanel);	
+		
+		String initial_auth = Util.getParameterString("auth_url");
+		if ( initial_auth != null ) {
+			doNextAuth(null, initial_auth);
+		}
 
 		startUI();
 
@@ -202,6 +207,7 @@ public class TestUI extends BaseUI {
 
 	}
 	private void testImageLoad(CategorySerializable cat, String url) {
+	    final String auth_url = url;
 		String image_url = url.replace("auth.do", "output/test.png");
 		final String furl = url.replace("auth.do","");
 		final CategorySerializable fcat = cat;
@@ -220,8 +226,11 @@ public class TestUI extends BaseUI {
 
 			@Override
 			public void onLoad(LoadEvent arg0) {
-				
-				fcat.setAttribute("authenticated", "true");
+				if ( fcat != null ) {
+				    fcat.setAttribute("authenticated", "true");
+				} else {
+					xDatasetButton.setAuthenticated(auth_url, "true");
+				}
 				
 			}
 			

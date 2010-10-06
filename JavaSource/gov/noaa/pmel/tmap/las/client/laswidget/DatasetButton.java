@@ -1,6 +1,7 @@
 package gov.noaa.pmel.tmap.las.client.laswidget;
 
 import gov.noaa.pmel.tmap.las.client.RPCServiceAsync;
+import gov.noaa.pmel.tmap.las.client.serializable.CategorySerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.VariableSerializable;
 
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -100,5 +101,18 @@ public class DatasetButton extends Composite {
 	}
 	public void setOpenID(String openid) {
 		datasetWidget.setOpenID(openid);
+	}
+	public void setAuthenticated(String auth_url, String value) {
+		for (int i = 0; i < datasetWidget.getItemCount(); i++ ) {
+			TreeItem item = datasetWidget.getItem(i);
+			Object u = item.getUserObject();
+			if ( u instanceof CategorySerializable ) {
+				CategorySerializable cat = (CategorySerializable) u;
+				String url = cat.getAttributes().get("remote_las");
+				if ( url != null && url.equals(auth_url) ) {
+					cat.setAttribute("authenticated", value);
+				}
+			}
+		}
 	}
 }
