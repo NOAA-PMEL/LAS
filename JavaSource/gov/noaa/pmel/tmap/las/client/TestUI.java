@@ -23,8 +23,12 @@ import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.ErrorEvent;
+import com.google.gwt.event.dom.client.ErrorHandler;
 import com.google.gwt.event.dom.client.LoadEvent;
 import com.google.gwt.event.dom.client.LoadHandler;
+import com.google.gwt.event.logical.shared.OpenEvent;
+import com.google.gwt.event.logical.shared.OpenHandler;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.shared.EventHandler;
@@ -42,6 +46,7 @@ import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.Frame;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.RootPanel;
@@ -51,12 +56,6 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 
 
 public class TestUI extends BaseUI {
-
-	Map<String, Boolean> tAuthenticated = new HashMap<String, Boolean>();
-	int xAuthIndex = 0;
-	boolean xAuthDone = false;
-	boolean xAuthNext = true;
-	String[] xAuthURLs;
 	
 	String tInitialTime;
 	String tInitialZ;
@@ -111,6 +110,7 @@ public class TestUI extends BaseUI {
 		// Set the required handlers...
 		setOperationsClickHandler(operationsClickHandler);
 		setDatasetSelectionHandler(datasetSelectionHandler);
+		setDatasetOpenHandler(datasetOpenHandler);
 		setOptionsOkHandler(optionsOkHandler);
 
 		// Add the apply button handler
@@ -118,54 +118,41 @@ public class TestUI extends BaseUI {
 
 		RootPanel.get("main").add(uiPanel);	
 
-		xAuthURLs = Util.getParameterStrings("data_node");
-		Util.getRPCService().getCategories(null, authenticateCallback);
+		startUI();
 
 
 	}
 
-	public AsyncCallback authenticateCallback = new AsyncCallback() {
-		@Override
-		public void onFailure(Throwable caught) {
-			if ( xDSID != null && xVarID != null && xOperationID != null && xView != null && xOptionID != null) {
-				xOptionsButton.setOptions(xOptionID);
-				Util.getRPCService().getCategories(xDSID, initPanelFromParametersCallback);
-			} else {
-				Util.getRPCService().getPropertyGroup("product_server", initPanelFromDefaultsCallback);	
-			}
-		}
-
-		@Override
-		public void onSuccess(Object result) {
-			CategorySerializable[] cats = (CategorySerializable[]) result;
-			xAuthURLs = new String[cats.length-1];
-			int urlIndex = 0;
-			for ( int i = 0; i < cats.length; i++ ) {
-				String url = cats[i].getAttributes().get("remote_las");
-				if ( url != null ) {
-					xAuthURLs[urlIndex] = cats[i].getAttributes().get("remote_las");
-					urlIndex++;
-				}
-			}
-			
-			xSettingsHeader.setOpen(false);
-			
-			
-			// At least one auth URL was found.
-			if ( urlIndex > 0 ) {
-				for ( xAuthIndex = 0; xAuthIndex < xAuthURLs.length; xAuthIndex++) {
-					doNextAuth();
-				}
-				startUI();
-				xSettingsHeader.setOpen(true);	
-			} else {
-				startUI();
-				xSettingsHeader.setOpen(true);
-			}
-		}
-	};
-	private void doNextAuth() {		
-		if ( xAuthIndex < xAuthURLs.length && xAuthURLs[xAuthIndex] != null ) {
+	//	public AsyncCallback authenticateCallback = new AsyncCallback() {
+//		@Override
+//		public void onFailure(Throwable caught) {
+//			if ( xDSID != null && xVarID != null && xOperationID != null && xView != null && xOptionID != null) {
+//				xOptionsButton.setOptions(xOptionID);
+//				Util.getRPCService().getCategories(xDSID, initPanelFromParametersCallback);
+//			} else {
+//				Util.getRPCService().getPropertyGroup("product_server", initPanelFromDefaultsCallback);	
+//			}
+//		}
+//
+//		@Override
+//		public void onSuccess(Object result) {
+//			CategorySerializable[] cats = (CategorySerializable[]) result;
+//			xAuthURLs = new String[cats.length-1];
+//			int urlIndex = 0;
+//			for ( int i = 0; i < cats.length; i++ ) {
+//				String url = cats[i].getAttributes().get("remote_las");
+//				if ( url != null ) {
+//					xAuthURLs[urlIndex] = cats[i].getAttributes().get("remote_las");
+//					urlIndex++;
+//				}
+//			}
+//			
+//			xSettingsHeader.setOpen(false);
+//			startUI();
+//		}
+//	};
+	private void doNextAuth(CategorySerializable cat, String url) {		
+		
 			final PopupPanel authPanel = new PopupPanel(true);
 			final VerticalPanel authInterior = new VerticalPanel();
 			authPanel.add(authInterior);
@@ -181,49 +168,66 @@ public class TestUI extends BaseUI {
 			} else {
 				w = w - 10;
 			}
-			xAuthNext = false;
+			
 			authPanel.setWidth(w+"px");
 			authPanel.setHeight(h+"px");
 			Label authLabel = new Label("Authenticating at remote LAS sites...       ");
 			HorizontalPanel topBar = new HorizontalPanel();
 			topBar.add(authLabel);
-			Button control;
-			
-				control = new Button("Close");
+			final CategorySerializable rcat = cat;
+			final String rurl = url;
+			Button control = new Button("Close");
 				control.addClickHandler(new ClickHandler() {
 
 					@Override
 					public void onClick(ClickEvent arg0) {
 						
-						authPanel.hide();						
+						authPanel.hide();
+						testImageLoad(rcat, rurl);
 					}
 
 				});
 			
 			topBar.add(control);
 			authInterior.add(topBar);
-			authPanel.hide();
+			authPanel.show();
 
-			tAuthenticated.put(xAuthURLs[xAuthIndex], new Boolean(false));
-			String url = xAuthURLs[xAuthIndex];
 			if ( openid != null ) {
 				url = url+"?openid="+openid;
 			}
-			Frame authFrame = new Frame() {
-				public void onBrowserEvent(Event e) {
-					if (e.getType().equals(Event.ONERROR)) {
-						authPanel.show();
-					} else {
-						super.onBrowserEvent(e);
-					}
-				}
-			};
-			authFrame.setUrl(url);
+			Frame authFrame = new Frame(url);
 			authFrame.setWidth(w-10+"px");
 			authFrame.setHeight(h-10+"px");
 			authInterior.add(authFrame);
-//			xAuthIndex++;
-		}
+
+	}
+	private void testImageLoad(CategorySerializable cat, String url) {
+		String image_url = url.replace("auth.do", "output/test.png");
+		final String furl = url.replace("auth.do","");
+		final CategorySerializable fcat = cat;
+		Image image = new Image();
+		image.addErrorHandler(new ErrorHandler() {
+
+			@Override
+			public void onError(ErrorEvent e) {
+				
+                Window.alert("Failed to authenticate at "+furl+". Plots from this server will not be visible.");
+				
+			}
+			
+		});
+		image.addLoadHandler(new LoadHandler() {
+
+			@Override
+			public void onLoad(LoadEvent arg0) {
+				
+				fcat.setAttribute("authenticated", "true");
+				
+			}
+			
+		});
+		image.setUrl(image_url);
+		RootPanel.get("__esg_authenticateFrame").add(image);
 	}
 	private void startUI() {
 		if ( xDSID != null && xVarID != null && xOperationID != null && xView != null && xOptionID != null) {
@@ -510,8 +514,43 @@ public class TestUI extends BaseUI {
 			if ( u instanceof VariableSerializable ) {
 				xVariable = (VariableSerializable) u;
 				Util.getRPCService().getConfig(xView, xVariable.getDSID(), xVariable.getID(), getGridCallback);
+			} else if ( u instanceof CategorySerializable ) {
+				CategorySerializable cat = (CategorySerializable) u;
+				String remote_url = cat.getAttributes().get("remote_las");
+				if ( remote_url != null ) {
+					String auth = cat.getAttributes().get("authenticated");
+					if ( auth == null ) {
+						doNextAuth(cat, remote_url);
+				    } else if ( !auth.equals("true") ) {
+				    	doNextAuth(cat, remote_url);
+				    }
+				}
 			}
 		}
+	};
+	public OpenHandler<TreeItem> datasetOpenHandler = new OpenHandler<TreeItem>() {
+
+		@Override
+		public void onOpen(OpenEvent<TreeItem> event) {
+			Object u = event.getTarget().getUserObject();
+			if ( u instanceof VariableSerializable ) {
+				xVariable = (VariableSerializable) u;
+				Util.getRPCService().getConfig(xView, xVariable.getDSID(), xVariable.getID(), getGridCallback);
+			} else if ( u instanceof CategorySerializable ) {
+				CategorySerializable cat = (CategorySerializable) u;
+				String remote_url = cat.getAttributes().get("remote_las");
+				if ( remote_url != null ) {
+					String auth = cat.getAttributes().get("authenticated");
+					if ( auth == null ) {
+						doNextAuth(cat, remote_url);
+				    } else if ( !auth.equals("true") ) {
+				    	doNextAuth(cat, remote_url);
+				    }
+				}
+			}
+			
+		}
+		
 	};
 	public ChangeHandler onAxisChange = new ChangeHandler() {
 		@Override
