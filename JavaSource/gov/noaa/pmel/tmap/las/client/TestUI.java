@@ -195,7 +195,8 @@ public class TestUI extends BaseUI {
 			
 			topBar.add(control);
 			authInterior.add(topBar);
-			if ( !cat.getAttributes().get("certificate").equals("signed") ) {
+			
+			if ( cat!=null && !cat.getAttributes().get("certificate").equals("signed") ) {
 			    authPanel.show();
 			}
 
