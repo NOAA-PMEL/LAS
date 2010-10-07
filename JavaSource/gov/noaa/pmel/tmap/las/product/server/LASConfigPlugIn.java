@@ -272,8 +272,6 @@ public class LASConfigPlugIn implements PlugIn {
 			if ( lasConfig.getOutputDir() == null ) {
 				lasConfig.setOutputDir(context.getRealPath("/")+"output");
 			}
-
-			lasConfig.setCertificates();
 			
 			// Create XML stubs from THREDDS or netCDF input.
 			Cache cache = (Cache) context.getAttribute(CACHE_KEY);
