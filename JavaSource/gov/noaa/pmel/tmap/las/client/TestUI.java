@@ -199,17 +199,8 @@ public class TestUI extends BaseUI {
 			topBar.add(control);
 			authInterior.add(topBar);
 			
-			if ( cat == null ) {
-				authPanel.show();
-			} else {
-				String cert = cat.getAttributes().get("certificate");
-				if ( cert == null ) {
-					authPanel.show();
-				} else if (!cert.equals("signed") ) {
-					authPanel.show();
-				}			   
-			}
-
+			authPanel.show();
+			
 			if ( openid != null ) {
 				url = url+"?openid="+openid;
 			}
