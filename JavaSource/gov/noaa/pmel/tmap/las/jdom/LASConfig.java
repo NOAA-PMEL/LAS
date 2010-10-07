@@ -48,8 +48,13 @@ import gov.noaa.pmel.tmap.las.util.View;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.io.Reader;
 import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -4265,6 +4270,30 @@ public class LASConfig extends LASDocument {
 			tributaries.add(tributary);
 		}
 		return tributaries;
+	}
+	public void setCertificates() {
+		List tribElements = getRootElement().getChildren("las_server");
+		for (Iterator tribIt = tribElements.iterator(); tribIt.hasNext();) {
+			Element trib = (Element) tribIt.next();
+			String url_string = trib.getAttributeValue("url");
+			URL url;
+			try {
+				url = new URL(url_string);
+				URLConnection con = url.openConnection();  
+				Reader reader = new InputStreamReader(con.getInputStream());  
+				// Verify we can read one character...
+			    int ch = reader.read();  
+			    trib.setAttribute("certificate", "signed");
+			} catch (MalformedURLException e) {
+				// Leave it to the client to sort out...
+				trib.setAttribute("certificate", "self-signed");
+			} catch (IOException e) {
+				trib.setAttribute("certificate", "self-signed");
+			}  
+		    
+			        
+		}
+		
 	}
 	public Tributary getTributary(String key) {
 		List tribElements = getRootElement().getChildren("las_server");

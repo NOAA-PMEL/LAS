@@ -111,6 +111,7 @@ public class Confluence extends LASAction {
                             Category server_cat = new Category(trib.getName(), trib.getTopLevelCategoryID());
                             if ( openid != null ) {
                             	server_cat.setAttribute("remote_las", trib.getURL()+Constants.GET_AUTH);
+                            	server_cat.setAttribute("certificate", trib.getAttributeValue("certificate"));
 							}
 							categories.add(server_cat);
 						}
