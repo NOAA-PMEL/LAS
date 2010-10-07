@@ -157,7 +157,7 @@ public class TestUI extends BaseUI {
 //		}
 //	};
 	private void doNextAuth(CategorySerializable cat, String url) {		
-		
+		    xSettingsHeader.setOpen(false);
 			final PopupPanel authPanel = new PopupPanel(true);
 			final VerticalPanel authInterior = new VerticalPanel();
 			authPanel.add(authInterior);
@@ -188,6 +188,7 @@ public class TestUI extends BaseUI {
 					public void onClick(ClickEvent arg0) {
 						
 						authPanel.hide();
+						xSettingsHeader.setOpen(true);
 						testImageLoad(rcat, rurl);
 					}
 
