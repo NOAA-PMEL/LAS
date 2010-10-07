@@ -70,6 +70,34 @@ IF ($do_curvi_xy"0|0|*>1") THEN DEFINE SYMBOL ferret_plot_var = ($ferret_plot_ba
 
 DEFINE SYMBOL ferret_plot_var_1 = ($ferret_plot_var)
 
+IF `($data_count"0") EQ 3` THEN ! color by 3rd variable
+
+   ! Initialize the 3rd variable.
+   ! In fact the region and dataset will be the
+   ! same as for var 0 (for now anyway)
+   
+   GO LAS_initialize_region 2
+   GO LAS_initialize_data 2
+   
+   IF ($error_status"0|*>1") THEN
+     MESSAGE/ERROR **ERROR ($error_string)
+     EXIT/PROGRAM
+   ENDIF
+   
+   ! Here is variable 2 title 
+   DEFINE SYMBOL ferret_title_2 = ($ferret_plot_title"($data_var)")
+
+   DEFINE SYMBOL ferret_plot_var_2 = ($ferret_plot_var)
+   IF ($do_curvi_xy"0|0|*>1") THEN DEFINE SYMBOL ferret_plot_var_2 = ($ferret_plot_base_var)
+   IF ($do_curvi_xy"0|0|*>1") THEN DEFINE SYMBOL ferret_plot_var = ($ferret_plot_base_var)
+
+   DEFINE SYMBOL ferret_plot_var_2 = ($ferret_plot_var)
+
+   LET/TITLE="($ferret_title_2)" zvar = XSEQUENCE(($ferret_plot_var_2))
+
+   DEFINE SYMBOL color_by = 1
+ENDIF
+
 GO LAS_set_strides_prop
 
 LET/TITLE="($ferret_title_0)" xvar = XSEQUENCE(($ferret_plot_var_0))
@@ -94,30 +122,6 @@ LET ysize = `($yvar),RETURN=isize`
 IF `xsize NE ysize` THEN 
   MESSAGE/ERROR **ERROR The variables must have the same dimensions: ($data_0_var), ($data_1_var)
   EXIT/PROGRAM
-ENDIF
-
-IF `($data_count"0") EQ 3` THEN ! color by 3rd variable
-
-   ! Initialize the 3rd variable.
-   ! In fact the region and dataset will be the
-   ! same as for var 0 (for now anyway)
-   
-   GO LAS_initialize_region 2
-   GO LAS_initialize_data 2
-   
-   IF ($error_status"0|*>1") THEN
-     MESSAGE/ERROR **ERROR ($error_string)
-     EXIT/PROGRAM
-   ENDIF
-   
-   ! Here is variable 2 title 
-   DEFINE SYMBOL ferret_title_2 = ($ferret_plot_title"($data_var)")
-   
-   IF ($do_curvi_xy"0|*>1") THEN DEFINE SYMBOL ferret_plot_var = ($ferret_plot_base_var_2)
-   IF ($do_curvi_xy"0|*>1") THEN DEFINE SYMBOL ferret_plot_var_2 = ($ferret_plot_base_var_2)
-
-   LET/TITLE="($ferret_title_2)" zvar = XSEQUENCE(($ferret_plot_var_2))
-   DEFINE SYMBOL color_by = 1
 ENDIF
 
 ! Open the window, apply size, scale options
