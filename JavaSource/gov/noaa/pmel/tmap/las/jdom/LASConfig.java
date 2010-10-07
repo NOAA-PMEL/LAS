@@ -4276,24 +4276,22 @@ public class LASConfig extends LASDocument {
 		for (Iterator tribIt = tribElements.iterator(); tribIt.hasNext();) {
 			Element trib = (Element) tribIt.next();
 			String url_string = trib.getAttributeValue("url");
-			URL url;
-			try {
-				url = new URL(url_string);
-				URLConnection con = url.openConnection();  
-				Reader reader = new InputStreamReader(con.getInputStream());  
-				// Verify we can read one character...
-			    int ch = reader.read();  
-			    trib.setAttribute("certificate", "signed");
-			} catch (MalformedURLException e) {
-				// Leave it to the client to sort out...
-				trib.setAttribute("certificate", "self-signed");
-			} catch (IOException e) {
-				trib.setAttribute("certificate", "self-signed");
-			}  
-		    
-			        
-		}
-		
+			if ( url_string != null ) {
+				url_string.replace("auth.do", "output/test.png");
+				URL url;
+				try {
+					url = new URL(url_string);
+					URLConnection con = url.openConnection();  
+					Reader reader = new InputStreamReader(con.getInputStream());  
+					// Verify we can read one character...
+					int ch = reader.read();  
+					trib.setAttribute("certificate", "signed");
+				} catch (Exception e) {
+					trib.setAttribute("certificate", "self-signed");
+				}
+
+			}
+		}	
 	}
 	public Tributary getTributary(String key) {
 		List tribElements = getRootElement().getChildren("las_server");
