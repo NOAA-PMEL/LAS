@@ -1573,8 +1573,10 @@ LASUI.prototype.updateConstraints = function (view) {
 	if(this.state.lastDataset!=this.state.dataset)
 		var reset=true;
 
-	if(!this.initialized)
+	if(!this.initialized) {
 		reset=true;
+		resetXY=true;
+	}
 
 	if(view.indexOf('x')>=0&&view.indexOf('y')>=0)
 		this.initXYSelect("xy",resetXY);
