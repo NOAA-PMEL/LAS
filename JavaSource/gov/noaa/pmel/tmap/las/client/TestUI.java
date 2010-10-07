@@ -121,9 +121,11 @@ public class TestUI extends BaseUI {
 		String initial_auth = Util.getParameterString("auth_url");
 		if ( initial_auth != null ) {
 			doNextAuth(null, initial_auth);
+		} else {
+			startUI();
 		}
 
-		startUI();
+		
 
 
 	}
@@ -240,6 +242,7 @@ public class TestUI extends BaseUI {
 				if ( fcat != null ) {
 				    fcat.setAttribute("authenticated", "true");
 				} else {
+					startUI();
 					xDatasetButton.setAuthenticated(auth_url, "true");
 				}
 				
