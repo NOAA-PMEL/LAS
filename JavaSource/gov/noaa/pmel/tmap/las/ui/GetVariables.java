@@ -1,8 +1,10 @@
 package gov.noaa.pmel.tmap.las.ui;
 
+import gov.noaa.pmel.tmap.las.exception.LASException;
 import gov.noaa.pmel.tmap.las.jdom.LASConfig;
 import gov.noaa.pmel.tmap.las.product.server.LASConfigPlugIn;
 import gov.noaa.pmel.tmap.las.ui.json.JSONUtil;
+import gov.noaa.pmel.tmap.las.util.Dataset;
 import gov.noaa.pmel.tmap.las.util.Variable;
 
 import java.io.IOException;
@@ -60,22 +62,23 @@ public class GetVariables extends Action {
 
 		log.debug("Processing request for variables for dsid="+dsID);
 
-		ArrayList<Variable> variables = new ArrayList<Variable>();
+		Dataset dataset = null;
 		try {
-			variables = lasConfig.getVariables(dsID);
+			dataset = lasConfig.getFullDataset(dsID);
 		} catch (JDOMException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
+		} catch (LASException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 
+		
 		StringBuffer xml = new StringBuffer();
 
-		xml.append("<variables>");
-		for (Iterator varIt = variables.iterator(); varIt.hasNext();) {
-			Variable var = (Variable) varIt.next();
-			xml.append(var.toXML());
-		}
-		xml.append("</variables>");
+		xml.append("<categories><category>");
+		xml.append(dataset.toXML());
+		xml.append("</category></categories>");
 
 		try {
 			PrintWriter respout = response.getWriter();
