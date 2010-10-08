@@ -4349,6 +4349,18 @@ public class LASConfig extends LASDocument {
 		dataset.setVariables(variables);
 		return dataset;
 	}
+	public Dataset getFullDatasetNoGrids(String dsID) throws JDOMException, LASException {
+		Dataset dataset = getDataset(dsID);
+		ArrayList<Variable> variables = getVariables(dsID);
+		ArrayList<Variable> clones = new ArrayList<Variable>();
+		for (Iterator varIt = variables.iterator(); varIt.hasNext();) {
+			Variable var = (Variable) varIt.next();
+			Variable clone_var = new Variable((Element) var.getElement().clone(), var.getDSID(), dataset.getName());
+			clones.add(clone_var);
+		}
+		dataset.setVariables(clones);
+		return dataset;
+	}
 	public String resolveURLS(LASUIRequest lasRequest) throws JDOMException, LASException {
 		// Start looping on the args in the request
 		List vars = lasRequest.getRootElement().getChild("args").getChildren("link");
