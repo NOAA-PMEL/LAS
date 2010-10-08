@@ -26,7 +26,8 @@ function LASUI () {
 		"getGrid" : {"url" : "getGrid.do?"},
 		"getOperations" : {"url" : "getOperations.do?"},
 		"getOptions" : {"url" : "getOptions.do?"},
-		"getMetadata" : {"url" : "getMetadata.do?"}
+		"getMetadata" : {"url" : "getMetadata.do?"},
+		"getVariables" : {"url" : "getVariables.do?"}
 	};
 
 	//application state
@@ -212,17 +213,19 @@ LASUI.prototype.initUI = function (anchorId)
 	if((this.state.dataset!=""||this.state.catid!="")&&this.state.variable!="") {
 
 		if(this.params.catid) {
-			var catid=this.params.catid;
+			var url = this.hrefs.getCategories.url + this.state.extra_args + "catid=" + this.params.catid;
 
 		}
-		else
-			var catid=this.state.dataset;
+		else if (this.params.dsid!="")
+			var url = this.hrefs.getVariables.url + this.state.extra_args + "dsid=" + this.params.dsid;
+
+		
 		if(!document.all)
 			var req = new XMLHttpRequest(this);
 		else
 			var req = new ActiveXObject("Microsoft.XMLHTTP");
 		req.onreadystatechange = this.AJAXhandler.LASBind(this, req, "this.setInitialVariable(req.responseText);");
-		req.open("GET", this.hrefs.getCategories.url + this.state.extra_args + "catid=" + catid);
+		req.open("GET", url);
 		req.send(null);
 	}
 }
