@@ -16,11 +16,15 @@
  */
 package gov.noaa.pmel.tmap.las.client.map;
 
+import java.util.HashMap;
+import java.util.Iterator;
+
 import gov.noaa.pmel.tmap.las.client.openlayers.DrawSingleFeature;
 import gov.noaa.pmel.tmap.las.client.openlayers.DrawSingleFeatureOptions;
 import gov.noaa.pmel.tmap.las.client.openlayers.HorizontalPathHandler;
 import gov.noaa.pmel.tmap.las.client.openlayers.VerticalPathHandler;
 import gov.noaa.pmel.tmap.las.client.openlayers.DrawSingleFeature.FeatureAddedListener;
+import gov.noaa.pmel.tmap.las.client.serializable.RegionSerializable;
 
 import org.gwtopenmaps.openlayers.client.Bounds;
 import org.gwtopenmaps.openlayers.client.LonLat;
@@ -53,8 +57,11 @@ import org.gwtopenmaps.openlayers.client.layer.WMSParams;
 import org.gwtopenmaps.openlayers.client.marker.Box;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.json.client.JSONArray;
+import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.ChangeListener;
 import com.google.gwt.user.client.ui.Composite;
@@ -1339,6 +1346,24 @@ public class OLMapWidget extends Composite {
 		LonLat c = new LonLat(lon, lat);
 		map.setCenter(c, zoom);
 	}
+	public void setRegions(RegionSerializable[] regions) {
+		regionWidget.setRegions(regions);
+	}
+	public void setNamedRegions(JavaScriptObject r) {
+		JSONObject rj = new JSONObject(r);
+		JSONObject rs = (JSONObject) rj.get("Regions");
+		JSONArray regions = (JSONArray) rs.get("Region");
+		RegionSerializable[] wire_regions = new RegionSerializable[regions.size()];
+		for (int i = 0; i < regions.size(); i++) {
+			JSONObject region = (JSONObject) regions.get(i);
+			wire_regions[i] = new RegionSerializable();
+			wire_regions[i].setName(region.get("name").toString());
+			wire_regions[i].setWestLon(Double.valueOf(region.get("xlo").toString()));
+			wire_regions[i].setEastLon(Double.valueOf(region.get("xhi").toString()));
+			wire_regions[i].setSouthLat(Double.valueOf(region.get("ylo").toString()));
+			wire_regions[i].setNorthLat(Double.valueOf(region.get("yhi").toString()));
+		}
+	}
 	public boolean isEditing() {
 		return editing;
 	}
@@ -1379,6 +1404,9 @@ public class OLMapWidget extends Composite {
         $wnd.setMapTool = function(tool) {
         	localMap.@gov.noaa.pmel.tmap.las.client.map.OLMapWidget::setTool(Ljava/lang/String;)(tool);
         }
+        $wnd.setMapRegions = function(regions) {
+        	localMap.@gov.noaa.pmel.tmap.las.client.map.OLMapWidget::setNamedRegions(Lcom/google/gwt/core/client/JavaScriptObject;)(regions);
+        }
         $wnd.setMapDataExtent = function(slat, nlat, wlon, elon, delta) {
         	localMap.@gov.noaa.pmel.tmap.las.client.map.OLMapWidget::setDataExtent(DDDDD)(slat, nlat, wlon, elon, delta);
         }
@@ -1413,5 +1441,4 @@ public class OLMapWidget extends Composite {
         	localMap.@gov.noaa.pmel.tmap.las.client.map.OLMapWidget::panMapToSelection()();
         }
     }-*/;
-	
 }
