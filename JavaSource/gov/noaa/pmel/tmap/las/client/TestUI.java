@@ -9,6 +9,7 @@ import gov.noaa.pmel.tmap.las.client.serializable.ConfigSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.DatasetSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.GridSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.OperationSerializable;
+import gov.noaa.pmel.tmap.las.client.serializable.RegionSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.VariableSerializable;
 import gov.noaa.pmel.tmap.las.client.util.URLUtil;
 import gov.noaa.pmel.tmap.las.client.util.Util;
@@ -501,6 +502,8 @@ public class TestUI extends BaseUI {
 		public void onSuccess(ConfigSerializable config) {
 
 			GridSerializable grid = config.getGrid();
+			RegionSerializable[] regions = config.getRegions();
+			xAxesWidget.getRefMap().setRegions(regions);
 			ops = config.getOperations();
 			xVariable.setGrid(grid);
 			xAnalysisWidget.setAnalysisAxes(grid);

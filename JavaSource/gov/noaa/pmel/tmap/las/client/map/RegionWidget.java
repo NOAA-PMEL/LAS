@@ -16,6 +16,8 @@
  */
 package gov.noaa.pmel.tmap.las.client.map;
 
+import gov.noaa.pmel.tmap.las.client.serializable.RegionSerializable;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -46,6 +48,7 @@ import com.google.gwt.user.client.ui.ListBox;
  */
 public class RegionWidget extends ListBox {
     Map<String, double[]> regions = new HashMap<String, double[]>();
+    String title = "Select Region";
     public RegionWidget() {
     	super();
     	init( null, false);
@@ -70,14 +73,16 @@ public class RegionWidget extends ListBox {
     private void init(String title, boolean global) {
     	
     	if (title == null ) {
-    	    addItem("Select Region", "none");
+    	    addItem(this.title, "none");
     	} else {
-    		addItem(title, "none");
+    		this.title = title;
+    		addItem(this.title, "none");
     	}
 //    	if ( global ) {
 //    		regions.put("global", new double[]{-90., 90, -180., 180.0});
 //    		addItem("Global", "global");
 //    	}
+    	// These are s, n, w, e
     	regions.put("africa", new double[]{-40, 40, -20, 60});
     	addItem("Africa", "africa");
     	regions.put("asia", new double[]{0, 80, 40, 180});
@@ -112,5 +117,18 @@ public class RegionWidget extends ListBox {
 	 */
 	public void setChangeListener(ChangeListener listener) {
 		addChangeListener(listener);
+	}
+	public void setRegions(RegionSerializable[] regions_in) {
+		regions.clear();
+		clear();
+		if (title == null ) {
+    	    addItem(this.title, "none");
+    	} else {
+    		addItem(this.title, "none");
+    	}
+		for( int i = 0; i < regions_in.length; i++) {
+			regions.put(regions_in[i].getName(), new double[]{regions_in[i].getSouthLat(), regions_in[i].getNorthLat(), regions_in[i].getWestLon(), regions_in[i].getEastLon()});
+	    	addItem(regions_in[i].getName(), regions_in[i].getName());
+		}
 	}
 }

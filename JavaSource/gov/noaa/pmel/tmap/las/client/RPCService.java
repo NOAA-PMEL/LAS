@@ -10,6 +10,7 @@ import gov.noaa.pmel.tmap.las.client.serializable.DatasetSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.GridSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.OperationSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.OptionSerializable;
+import gov.noaa.pmel.tmap.las.client.serializable.RegionSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.VariableSerializable;
 
 import com.google.gwt.user.client.rpc.RemoteService;
@@ -26,5 +27,6 @@ public interface RPCService extends RemoteService {
 	public OptionSerializable[] getOptions(String opid) throws RPCException;
 	public CategorySerializable[] getTimeSeries() throws RPCException;
 	public HashMap<String, String> getPropertyGroup(String name) throws RPCException;
+	public RegionSerializable[] getRegions(String dsid, String varid) throws RPCException;
 	public ConfigSerializable getConfig(String view, String dsid, String varid) throws RPCException;
 }
