@@ -406,8 +406,8 @@ function LASGetGridResponse_getMenu(axis) {
   var axis_lc = String(axis).toLowerCase();
   var value = null;
   var menu = null;
-  if (this.getAxis(axis_lc).v) {
-    value = new Array;
+  value = new Array;
+  if (this.getAxis(axis_lc).v && typeof this.getAxis(axis_lc).v == 'array') {
     menu = this.getAxis(axis_lc).v;
 // NOTE:  The <v> object of the response looks like this:
 // NOTE:    "v":[
@@ -436,8 +436,14 @@ function LASGetGridResponse_getMenu(axis) {
       } else {
         value[i] = new Array(menu[i],menu[i]);
       }
-    }
-  }
+    } 
+   } else if (this.getAxis(axis_lc).v) 
+		if(axis_lc=='t') 
+			value[0] = new Array(this.getAxis(axis_lc).v.label,this.getAxis(axis_lc).v.content);
+		else
+			value[0] = new Array(this.getAxis(axis_lc).v, this.getAxis(axis_lc).v);
+	
+  
   return value;
 }
 
