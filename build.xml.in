@@ -387,6 +387,12 @@
            <exclude name="**/Util.java"/>
         </fileset>
      </copy>
+     <copy todir="dist/olmapwidget/src/com/weathertopconsulting/olmapwidget/client/serializable">
+        <fileset dir="JavaSource/gov/noaa/pmel/tmap/las/client/serializable">
+           <include name="**/RegionSerializable.java"/>
+           <include name="**/Serializable.java"/>
+        </fileset>
+     </copy>
      <copy todir="dist/olmapwidget/src/com/weathertopconsulting/olmapwidget/client/openlayers">
         <fileset dir="JavaSource/gov/noaa/pmel/tmap/las/client/openlayers">
            <include name="**/*.java"/>
@@ -422,6 +428,9 @@
            <include name="*.xml"/>
         </fileset>
         <fileset dir="dist/olmapwidget/src/com/weathertopconsulting/olmapwidget/client/map">
+           <include name="*.java"/>
+        </fileset>
+        <fileset dir="dist/olmapwidget/src/com/weathertopconsulting/olmapwidget/client/serializable">
            <include name="*.java"/>
         </fileset>
         <fileset dir="dist/olmapwidget/src/com/weathertopconsulting/olmapwidget/client/util">
