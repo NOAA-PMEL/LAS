@@ -135,7 +135,7 @@ IF `season_length EQ 1` THEN
 
    IF `nn EQ n1` THEN 	
       IF `STRINDEX("($ferret_view)", "t") EQ 0` THEN 
-         LET L1 = n1 + ($loffset) - (first_month_selected-1)
+         LET L1 = n1 + ($loffset)
          IF `ABS( first_month_selected-($ferret_season_center) ) GT 6` THEN  
             IF `first_month_selected GT ($ferret_season_center)` THEN LET L1 = `L1+12`
             IF `first_month_selected LT ($ferret_season_center)` THEN LET L1 = `L1-12`
@@ -173,7 +173,7 @@ IF `season_length EQ 1` THEN
 
    ELSE
       LET L1 = n1 - first_month_selected
-      LET L1 = `n1 + ($loffset) - (first_month_selected-1)`
+      LET L1 = `n1 + ($loffset)`
       DEFINE SYMBOL ferret_plot_var($var_num) S($num)_the_plot_var($var_num)[L=`L1`:`nn`:12]
       LET S($num)_the_plot_var($var_num)_zt = S($num)_the_plot_var($var_num)_noregion[L=`L1`, ($region_z)]
 
@@ -190,6 +190,7 @@ IF `season_length EQ 1` THEN
       
       DEFINE SYMBOL ferret_plot_title ($ferret_plot_title) every ($mon1)
       DEFINE SYMBOL region_transform_t = L=`L1`:`nn`:12
+
    ENDIF
 
 ELSE
