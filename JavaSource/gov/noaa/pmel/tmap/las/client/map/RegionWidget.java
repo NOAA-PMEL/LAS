@@ -130,5 +130,6 @@ public class RegionWidget extends ListBox {
 			regions.put(regions_in[i].getName(), new double[]{regions_in[i].getSouthLat(), regions_in[i].getNorthLat(), regions_in[i].getWestLon(), regions_in[i].getEastLon()});
 	    	addItem(regions_in[i].getName(), regions_in[i].getName());
 		}
+		setVisibleItemCount(regions.size()+1);
 	}
 }

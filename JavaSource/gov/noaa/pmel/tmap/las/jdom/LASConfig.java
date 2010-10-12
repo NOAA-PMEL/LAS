@@ -2557,10 +2557,10 @@ public class LASConfig extends LASDocument {
     			region.setAttribute("ID", name);
     			region.setAttribute("values", values);
     			String[] corners = values.split(",");
-    			region.setAttribute("xhi", corners[0]);
-    			region.setAttribute("xlo", corners[1]);
-    			region.setAttribute("yhi", corners[2]);
-    			region.setAttribute("ylo", corners[3]);
+    			region.setAttribute("xlo", corners[0]);
+    			region.setAttribute("xhi", corners[1]);
+    			region.setAttribute("ylo", corners[2]);
+    			region.setAttribute("yhi", corners[3]);
     			Region reg = new Region(region);
     			regions.add(reg);
     		}
