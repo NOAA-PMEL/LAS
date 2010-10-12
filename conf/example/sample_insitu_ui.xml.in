@@ -179,7 +179,8 @@
 	    <item values="Compare_Data_Extract_File,asc">ASCII difference file</item>
 	</menu>
         <menu type="regions" name="Regions_Default">
-            <item values="-360,360,-90,90">Full Region</item>
+            <item values="-180,180,-90,90">Global (0)</item>
+            <item values="0,360,-90,90">Global (180)</item>
             <item values="-20, 60, -40, 40">Africa</item>
             <item values="40, 180, 0, 80">Asia</item>
             <item values="110, 180, -50, 0">Australia</item>
@@ -190,9 +191,9 @@
             <item values="-80, 20, 0, 70">North Atlantic</item>
             <item values="-80, 20, -30, 30">Equatorial Atlantic</item>
             <item values="-70,25,-75,10">South Atlantic</item>
-            <item values="110, -100, 0, 70">North Pacific</item>
-            <item values="135,-75,-30,30">Equatorial Pacific</item>
-            <item values="150, -70, -75, 0">South Pacific</item>
+            <item values="110, 260, 0, 70">North Pacific</item>
+            <item values="135,285,-30,30">Equatorial Pacific</item>
+            <item values="150, 290, -70, 0">South Pacific</item>
         </menu>
         <menu type="regions" name="Regions_PMELOcean">
             <item values="-360,360,-90,90">Full Region</item>
