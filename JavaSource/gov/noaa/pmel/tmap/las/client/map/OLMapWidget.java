@@ -1352,16 +1352,28 @@ public class OLMapWidget extends Composite {
 	public void setNamedRegions(JavaScriptObject r) {
 		JSONObject rj = new JSONObject(r);
 		JSONObject rs = rj.get("Regions").isObject();
-		JSONArray regions = rs.get("Region").isArray();
-		RegionSerializable[] wire_regions = new RegionSerializable[regions.size()];
-		for (int i = 0; i < regions.size(); i++) {
-			JSONObject region = (JSONObject) regions.get(i).isObject();
-			wire_regions[i] = new RegionSerializable();
-			wire_regions[i].setName(region.get("name").isObject().toString());
-			wire_regions[i].setWestLon(Double.valueOf(region.get("xlo").isObject().toString()));
-			wire_regions[i].setEastLon(Double.valueOf(region.get("xhi").isObject().toString()));
-			wire_regions[i].setSouthLat(Double.valueOf(region.get("ylo").isObject().toString()));
-			wire_regions[i].setNorthLat(Double.valueOf(region.get("yhi").isObject().toString()));
+		if ( rs != null ) {
+			JSONArray regions = rs.get("Region").isArray();
+			if ( regions != null ) {
+				RegionSerializable[] wire_regions = new RegionSerializable[regions.size()];
+				for (int i = 0; i < regions.size(); i++) {
+					JSONObject region = (JSONObject) regions.get(i).isObject();
+					if ( region != null ) {
+						wire_regions[i] = new RegionSerializable();
+						wire_regions[i].setName(region.get("name").isObject().toString());
+						wire_regions[i].setWestLon(Double.valueOf(region.get("xlo").isObject().toString()));
+						wire_regions[i].setEastLon(Double.valueOf(region.get("xhi").isObject().toString()));
+						wire_regions[i].setSouthLat(Double.valueOf(region.get("ylo").isObject().toString()));
+						wire_regions[i].setNorthLat(Double.valueOf(region.get("yhi").isObject().toString()));
+					} else {
+						Window.alert("Region "+i+" was not a JSONObject.");
+					}
+				}
+			} else {
+				Window.alert("Region was not a JSONArray");
+			}
+		} else {
+			Window.alert("Regions was not a JSONObject.");
 		}
 	}
 	public boolean isEditing() {
