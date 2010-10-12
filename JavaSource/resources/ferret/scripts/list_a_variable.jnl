@@ -85,14 +85,14 @@ LET/UNITS="`($ferret_list_var),RETURN=units)`"\
 !SET ATT/LIKE=($data_var) the_list_var
 
 IF ($data_var_transform"0|*>1") THEN 
-    DEFINE attribute ($ferret_list_var).transform_history  "($data_var)($data_var_transform)"
-    SET ATTRIBUTE/OUTPUT ($ferret_list_var).transform_history
-    DEFINE SYMBOL var_history ($ferret_list_var)($data_var_transform)
+    DEFINE attribute the_list_var.transform_history  "($data_var)($data_var_transform)"
+    SET ATTRIBUTE/OUTPUT the_list_var.transform_history
+    DEFINE SYMBOL var_history the_list_var($data_var_transform)
     LET var_hist = "($var_history)"
-    SET VAR/TITLE="($ferret_list_var)($data_var_transform)" ($ferret_list_var)
+    SET VAR/TITLE="($ferret_list_var)($data_var_transform)" the_list_var
     IF ($data_dup_varname"0|*>1") THEN
 
-        LET/TITLE=($data_dup_varname) ($data_dup_varname) = ($ferret_list_var)
+        LET/TITLE=($data_dup_varname) ($data_dup_varname) = the_list_var
 !        DEFINE SYMBOL data_dup_varname =  ($data_var)  ! the limits min,max,chunk determine the range
         SET VAR/TITLE="($data_title)($data_var_transform)" ($data_dup_varname)
         SET VAR/UNITS="($data_units)" ($data_dup_varname)
@@ -252,7 +252,7 @@ IF `size LE max_size` THEN
 
    IF `($data_dup_varname%0|*>1%) GT 0` THEN
 
-      LET ($data_dup_varname) = ($ferret_list_var)
+      LET ($data_dup_varname) = the_list_var
       SET VAR/UNITS="($data_units)" ($data_dup_varname)
       SET VAR/TITLE="($data_title)" ($data_dup_varname)
       !SET ATT/OUTPUT=all ($data_dup_varname)
@@ -274,7 +274,7 @@ IF `size LE max_size` THEN
 !       /BAD=`($ferret_list_var),RETURN=bad` f_plot_var = ($ferret_list_var)
 !      LIST/APPEND/FILE/($frmt) f_plot_var
 
-      LIST/APPEND/FILE/($frmt) ($ferret_list_var)
+      LIST/APPEND/FILE/($frmt) the_list_var
 
    ENDIF
 
@@ -304,7 +304,7 @@ ELSE
      ! IF a duplicate variable name is assigned for netcdf listings, change the name before listing
      
       IF `($data_dup_varname%0|*>1%) GT 0` THEN
-        LET ($data_dup_varname) = ($ferret_list_var)
+        LET ($data_dup_varname) = the_list_var
 !        DEFINE SYMBOL data_dup_varname =  ($data_var)  ! the limits min,max,chunk determine the range
         SET VAR/TITLE="($data_title)($data_var_transform)" ($data_dup_varname)
         SET VAR/UNITS="($data_units)" ($data_dup_varname)
@@ -318,7 +318,7 @@ ELSE
            DEFINE attribute ($data_dup_varname).transform_history  "($data_var)($data_var_transform)"
            SET ATTRIBUTE/OUTPUT ($data_dup_varname).transform_history
 
-           REPEAT/L=($lmin):($lmax):`lchunk` REPEAT/K=($kmin):($kmax):`kchunk`  (LIST/APPEND/FILE/($frmt)/K=`k`:`ktop`/L=`l`:`ltop`/KLIMITS=($kmin):($kmax)/LLIMITS=($lmin):($lmax) ($ferret_list_var); CANC MEM/ALL)
+           REPEAT/L=($lmin):($lmax):`lchunk` REPEAT/K=($kmin):($kmax):`kchunk`  (LIST/APPEND/FILE/($frmt)/K=`k`:`ktop`/L=`l`:`ltop`/KLIMITS=($kmin):($kmax)/LLIMITS=($lmin):($lmax) the_list_var; CANC MEM/ALL)
 
         ELSE
      ! ... netCDF output in chunks
