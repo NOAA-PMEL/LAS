@@ -88,7 +88,7 @@ public class GetRegions extends ConfigService {
             } else {
                 response.setContentType("application/json");
                 //JSONObject json_response = Util.toJSON_keep_array(Regions, "Regions");
-                JSONObject json_response = toJSON(Regions, "Regions");
+                JSONObject json_response = toJSON(Regions, "regions");
                 log.debug(json_response.toString(3));
                 json_response.write(respout);
             }
@@ -107,13 +107,13 @@ public class GetRegions extends ConfigService {
         JSONObject json_response = new JSONObject();
         JSONObject Regions_object = new JSONObject();
         for (Iterator RegionIt = Regions.iterator(); RegionIt.hasNext();) {
-            Region Region = (Region) RegionIt.next();
-            JSONObject Region_object = Region.toJSON();            
-            Regions_object.array_accumulate("Region", Region_object);
+            Region region = (Region) RegionIt.next();
+            JSONObject Region_object = region.toJSON();         
+            Regions_object.array_accumulate("region", Region_object);
         }
         Regions_object.put("status", "ok");
         Regions_object.put("error", "");
-        json_response.put("Regions", Regions_object);
+        json_response.put(wrapper, Regions_object);
         return json_response;
     }
 }
