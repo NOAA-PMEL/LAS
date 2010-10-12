@@ -1360,7 +1360,9 @@ public class OLMapWidget extends Composite {
 					JSONObject region = (JSONObject) regions.get(i).isObject();
 					if ( region != null ) {
 						wire_regions[i] = new RegionSerializable();
+						Window.alert("Set name: "+region.get("name").isObject().toString());
 						wire_regions[i].setName(region.get("name").isObject().toString());
+						Window.alert("Set west: " + region.get("xlo").isObject().toString());
 						wire_regions[i].setWestLon(Double.valueOf(region.get("xlo").isObject().toString()));
 						wire_regions[i].setEastLon(Double.valueOf(region.get("xhi").isObject().toString()));
 						wire_regions[i].setSouthLat(Double.valueOf(region.get("ylo").isObject().toString()));
