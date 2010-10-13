@@ -122,7 +122,7 @@ IF `nn EQ n1` THEN
       DEFINE SYMBOL data_var_transform = \
         , (($ferret_season_length)-month ave, Centered ($mon1))
       DEFINE SYMBOL n_left_labels = `($n_left_labels"0")+1`
-      DEFINE SYMBOL upper_left_($n_left_labels) = "(Data centered nearest ($mon1))"
+      DEFINE SYMBOL upper_left_($n_left_labels) = (Data centered nearest ($mon1))
       EXIT/SCRIPT
    ENDIF
 
@@ -135,14 +135,12 @@ IF `season_length EQ 1` THEN
 ! is closest to the month chosen on the time widget.
 
    IF `nn EQ n1` THEN 	
-      IF `STRINDEX("($ferret_view)", "t") EQ 0` THEN 
-         LET L1 = n1 + ($loffset)
-         IF `ABS( first_month_selected-($ferret_season_center) ) GT 6` THEN  
-            IF `first_month_selected GT ($ferret_season_center)` THEN LET L1 = `L1+12`
-            IF `first_month_selected LT ($ferret_season_center)` THEN LET L1 = `L1-12`
-            IF `L1 GT tsiz` THEN LET L1 = tsiz
-            IF `L1 LT 1` THEN LET L1 = 1
-         ENDIF
+      LET L1 = n1 + ($loffset)
+     IF `ABS( first_month_selected-($ferret_season_center) ) GT 6` THEN  
+         IF `first_month_selected GT ($ferret_season_center)` THEN LET L1 = `L1+12`
+         IF `first_month_selected LT ($ferret_season_center)` THEN LET L1 = `L1-12`
+         IF `L1 GT tsiz` THEN LET L1 = tsiz
+         IF `L1 LT 1` THEN LET L1 = 1
       ENDIF
 
       LET S($num)_the_plot_var($var_num) = ($ferret_xyz_var)
@@ -192,7 +190,7 @@ IF `season_length EQ 1` THEN
       DEFINE SYMBOL ferret_plot_title ($ferret_plot_title) every ($mon1)
 
    ENDIF
-pause
+
 ELSE
 
 ! When there is just one time in the result, redefine S($num)_the_plot_var($var_num) and the 
@@ -231,7 +229,7 @@ ELSE
 
 
       DEFINE SYMBOL n_left_labels = `($n_left_labels"0")+1`
-      DEFINE SYMBOL upper_left_($n_left_labels) = "(Data centered nearest ($mon1))"
+      DEFINE SYMBOL upper_left_($n_left_labels) = (Data centered nearest ($mon1))
       DEFINE SYMBOL single_time = 1
       DEFINE SYMBOL region_transform_t = L=L=`L1`:`nn`
 
@@ -240,10 +238,10 @@ ELSE
    IF `nn-n1 LT 24` THEN
       DEFINE SYMBOL ferret_expand_time = 1
 
-      LET nn = MIN(`tsiz`, `nn + 24`)
-      LET n1 = MAX(1, `n1-24`)
+      LET nn = MIN(`tsiz`, `nn + 24+season_length`)
+      LET n1 = MAX(1, `n1-24-season_length`)
    ENDIF
-   
+   pause
 ! Define a variable containing the indices that correspond to the data we 
 ! need for the seasonal averages. Start with the first month needed; if
 ! centering is at the start of a year, avgs run across the end of a year, 
@@ -308,8 +306,24 @@ ELSE
    DEFINE SYMBOL ferret_plot_var($var_num)_noregion S($num)_seas_per_year[($region_t)]
 
    DEFINE SYMBOL ferret_plot_var S($num)_seas_per_year
-   IF ($single_time"0|*>1") THEN DEFINE SYMBOL ferret_plot_var S($num)_seas_per_year[($region_t)]
    DEFINE SYMBOL ferret_plot_var_noregion S($num)_seas_per_year[($region_t)]
+
+! If request for a single time is are beyond the first or last average that is 
+! defined, return the outermost average available.
+   IF ($single_time"0|*>1") THEN 
+      DEFINE SYMBOL ferret_plot_var S($num)_seas_per_year[($region_t)]
+      DEFINE SYMBOL ferret_plot_var_noregion S($num)_seas_per_year[($region_t)]
+      IF `tt[t=($region_t_lo)] LT t[gt=S($num)_seas_per_year,L=1]` THEN 
+         DEFINE SYMBOL ferret_plot_var S($num)_seas_per_year[L=1]
+         DEFINE SYMBOL ferret_plot_var_noregion S($num)_seas_per_year[L=1]
+      ENDIF
+      IF `tt[t=($region_t_lo)] GT t[gt=S($num)_seas_per_year,L=2]` THEN 
+         DEFINE SYMBOL ferret_plot_var S($num)_seas_per_year[L=2]
+         DEFINE SYMBOL ferret_plot_var_noregion S($num)_seas_per_year[L=2]
+      ENDIF
+   ENDIF
+pause
+
 
 ! Add information to the title
    DEFINE SYMBOL ferret_plot_title ($ferret_plot_title) (($ferret_season_length)-month ave, Centered ($mon1))
@@ -324,3 +338,4 @@ DEFINE SYMBOL ferret_plot_var($var_num) seasonal_var($var_num)
 
 
 ! End of $RCSfile ------------transform_1_season_per_year.jnl-------------------------------
+
