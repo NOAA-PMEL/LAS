@@ -413,7 +413,6 @@ public class VizGal extends BaseUI {
 	public boolean init() {
 
 		xOperationsWidget.setOperations(xVariable.getIntervals(), xOperationID, xView, ops);
-		xOperationsWidget.setOperation(xView, xOperationID);
 		xOptionsButton.setOptions(xOperationsWidget.getCurrentOperation().getOptionsID());
 		GridSerializable ds_grid = xVariable.getGrid();
 		double grid_west = Double.valueOf(ds_grid.getXAxis().getLo());
