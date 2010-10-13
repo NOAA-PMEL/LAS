@@ -461,6 +461,7 @@ public class BaseUI implements EntryPoint {
 				panel.show();
 			}
 			xMainPanelCellFormatter.setVisible(1, 0, true);
+			xPanelHeaderHidden = !xPanelHeaderHidden;
 			resize();
 		} else {
 			for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
@@ -468,9 +469,9 @@ public class BaseUI implements EntryPoint {
 				panel.hide();
 			}
 			xMainPanelCellFormatter.setVisible(1, 0, false);	
+			xPanelHeaderHidden = !xPanelHeaderHidden;
 			resize();
-		}
-		xPanelHeaderHidden = !xPanelHeaderHidden;
+		}		
 	}
 	public void resize() {
 		xPanelWidth = getPanelWidth(xPanelCount);
