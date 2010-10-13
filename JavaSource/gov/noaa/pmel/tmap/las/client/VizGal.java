@@ -20,6 +20,8 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -110,7 +112,7 @@ public class VizGal extends BaseUI {
 		super.onModuleLoad();
 		
 		
-		vVizGalPanel.setWidget(0, 0, buttonLayout);
+		addMenuButtons(buttonLayout);
 		vVizGalPanel.setWidget(1, 0, xMainPanel);
 		
 		initialHistory = getAnchor();
@@ -158,9 +160,20 @@ public class VizGal extends BaseUI {
 			// and initialize the slide sorter with this Ajax call.
 			Util.getRPCService().getVariable(xDSID, xVarID, requestGrid);
 		}
-		
+		History.addValueChangeHandler(historyHandler);
 	}
 	
+	ValueChangeHandler<String> historyHandler = new ValueChangeHandler<String>() {
+
+		@Override
+		public void onValueChange(ValueChangeEvent<String> event) {
+			
+			String tokens = event.getValue();
+			popHistory(tokens);
+			
+		}
+		
+	};
 
 	
 	private String getAnchor() {
@@ -176,7 +189,7 @@ public class VizGal extends BaseUI {
 
 		@Override
 		public void onSelection(SelectionEvent<TreeItem> event) {
-			TreeItem item = (TreeItem) event.getSelectedItem();
+			TreeItem item = event.getSelectedItem();
 			Object v = item.getUserObject();
 			if ( v instanceof VariableSerializable ) {
 				xNewVariable = (VariableSerializable) v;
@@ -1196,7 +1209,7 @@ public class VizGal extends BaseUI {
 	}
 	private String getHistoryToken() {
 		StringBuilder token = new StringBuilder();
-		token.append(";xXlo="+xAxesWidget.getRefMap().getXlo());
+		token.append(";xlo="+xAxesWidget.getRefMap().getXlo());
 		token.append(";xhi="+xAxesWidget.getRefMap().getXhi());
 		token.append(";ylo="+xAxesWidget.getRefMap().getYlo());
 		token.append(";yhi="+xAxesWidget.getRefMap().getYhi());
@@ -1205,8 +1218,8 @@ public class VizGal extends BaseUI {
 			token.append(";view="+xOperationsWidget.getCurrentView());
 		}
 		Map<String, String> options = xOptionsButton.getState();
-		for (Iterator opIt = options.keySet().iterator(); opIt.hasNext();) {
-			String name = (String) opIt.next();
+		for (Iterator<String> opIt = options.keySet().iterator(); opIt.hasNext();) {
+			String name = opIt.next();
 			String value = options.get(name);
 			if ( !value.equalsIgnoreCase("default") ) {
 				token.append(";ferret_"+name+"="+value);

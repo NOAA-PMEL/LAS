@@ -307,6 +307,7 @@ public class BaseUI implements EntryPoint {
 		xButtonLayout.setWidget(0, 2, xOptionsButton);
 		xButtonLayout.setWidget(0, 3, xPrinterFriendlyButton);
 		
+		
 		xMainPanel.setWidget(0, 0, xButtonLayout);
 		xMainPanel.setWidget(1, 0, xNavigationControls);
 		xMainPanel.setWidget(1, 1, xPanelTable);
@@ -470,7 +471,6 @@ public class BaseUI implements EntryPoint {
 			resize();
 		}
 		xPanelHeaderHidden = !xPanelHeaderHidden;
-		pushHistory();
 	}
 	public void resize() {
 		xPanelWidth = getPanelWidth(xPanelCount);
@@ -480,9 +480,6 @@ public class BaseUI implements EntryPoint {
 				panel.setPanelWidth(xPanelWidth);
 			}
 		}
-	}
-	private void pushHistory() {
-		
 	}
 	private void printerFriendly() {
 

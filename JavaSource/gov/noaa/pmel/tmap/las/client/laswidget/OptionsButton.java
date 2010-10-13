@@ -59,7 +59,7 @@ public class OptionsButton extends Composite {
 		}
     };
     public Map<String, String> getState() {
-    	return state;
+    	return options.getState();
     }
 
 	public void setState(Map<String, String> state) {
