@@ -125,6 +125,7 @@ IF `nn EQ n1` THEN
       DEFINE SYMBOL upper_left_($n_left_labels) = "(Data centered nearest ($mon1))"
       EXIT/SCRIPT
    ENDIF
+
 ENDIF
 
 ! If the season length is 1, we just need to set up some striding.
@@ -154,8 +155,6 @@ IF `season_length EQ 1` THEN
       DEFINE SYMBOL ferret_plot_var($var_num)_noregion S($num)_the_plot_var($var_num)_noregion[L=`L1`]
       DEFINE SYMBOL ferret_plot_var($var_num)_zt S($num)_the_plot_var($var_num)_zt
 
-
-
       LET S($num)_the_plot_var = ($ferret_xyz_var)
       LET S($num)_the_plot_var_noregion = ($ferret_plot_var_noregion)
 
@@ -165,8 +164,6 @@ IF `season_length EQ 1` THEN
 
       DEFINE SYMBOL ferret_plot_var_noregion S($num)_the_plot_var_noregion[L=`L1`]
       DEFINE SYMBOL ferret_plot_var_zt S($num)_the_plot_var_zt
-
-
 
       DEFINE SYMBOL ferret_plot_title ($ferret_plot_title) every ($mon1)
       DEFINE SYMBOL region_transform_t L=`L1`
@@ -180,7 +177,6 @@ IF `season_length EQ 1` THEN
       DEFINE SYMBOL ferret_plot_var($var_num)_noregion S($num)_the_plot_var($var_num)_noregion[L=`L1`:`nn`:12]
       DEFINE SYMBOL ferret_plot_var($var_num)_zt S($num)_the_plot_var($var_num)_noregion[L=`L1`:`nn`:12, ($region_z)]
 
-      
       DEFINE SYMBOL ferret_plot_var S($num)_the_plot_var[L=`L1`:`nn`:12]
       LET S($num)_the_plot_var_zt = S($num)_the_plot_var_noregion[L=`L1`, ($region_z)]
 
@@ -311,5 +307,11 @@ ELSE
 
 ENDIF  ! Season length longer than 1
 
+! Define the variable to plot or list w/ no square brackets in the text of ferret_plot_var
+LET seasonal_var = ($ferret_plot_var)
+DEFINE SYMBOL ferret_plot_var = seasonal_var
+
 ! End of $RCSfile ------------transform_1_season_per_year.jnl-------------------------------
+
+
 
