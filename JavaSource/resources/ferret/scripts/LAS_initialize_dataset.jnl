@@ -118,9 +118,12 @@ IF ($fer_last_error"0|0|1|*>1") THEN
   EXIT/SCRIPT
 ENDIF
 
-
 SET DATA "($data_($num)_url)"
 DEFINE SYMBOL dset($num) = `($data_($num)_var),RETURN=dsetnum`
 
+! Here do sanity checks on Ferret properties, such as dep_axis_scale
+
+GO LAS_check_fer_properties
+pause
 ! End of $RCSfile ------------LAS_initialize_dataset.jnl--------------------------
 
