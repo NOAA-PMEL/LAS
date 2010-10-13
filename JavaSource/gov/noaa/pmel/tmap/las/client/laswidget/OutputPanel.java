@@ -331,17 +331,20 @@ public class OutputPanel extends Composite {
 			lasRequest.addProperty("ferret", "fill_levels", fill_levels);
 		}
 		lasRequest.setProperty("product_server", "ui_timeout", "10");	
-        if ( var.getGrid().getTAxis() != null ) {		
+        if ( var.getGrid().hasT() ) {		
         	if ( view.contains("t") && panelAxesWidgets.getTAxis().getFerretDateLo().equals(panelAxesWidgets.getTAxis().getFerretDateHi()) ) {
         		messagePanel.show(grid.getWidget(1, 0).getAbsoluteLeft()+15, grid.getWidget(1,0).getAbsoluteTop()+15, "Set plot range selectors to different values and click the Apply button.");
         		return;
         	}
+        	
+		}
+        if ( var.getGrid().hasZ() ) {
         	if ( view.contains("z") && panelAxesWidgets.getZAxis().getLo().equals(panelAxesWidgets.getZAxis().getHi()) ) {
         		messagePanel.show(grid.getWidget(1, 0).getAbsoluteLeft()+15, grid.getWidget(1,0).getAbsoluteTop()+15, "Set plot range selectors to different values and click the Apply button.");
         		spin.show();
         		return;
         	}
-		}
+        }
         
         if ( lasRequest == null ) {
         	return;
