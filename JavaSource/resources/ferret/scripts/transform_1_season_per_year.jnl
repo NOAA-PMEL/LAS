@@ -97,8 +97,8 @@ LET nn = `S($num)_the_plot_var($var_num),RETURN=lend`
 LET first_month_data = TAX_MONTH(tt[L=1], tt)
 LET first_month_selected = TAX_MONTH(tt[L=`n1`], tt)
 
-DEFINE SYMBOL loffset = `($ferret_season_center) - ( 1+INT(season_length/2) ) - (first_month_data-1)`
-IF `n1+($loffset) LT 0` THEN 
+DEFINE SYMBOL loffset = `($ferret_season_center) - ( 1+INT(season_length/2) ) - (first_month_selected-1)`
+IF `n1+($loffset) LE 0` THEN 
    DEFINE SYMBOL loffset = `($loffset) + 12`
    DEFINE SYMBOL offset_year_1 = 1
 ENDIF
@@ -171,29 +171,39 @@ IF `season_length EQ 1` THEN
    ELSE
       LET L1 = n1 - first_month_selected
       LET L1 = `n1 + ($loffset)`
-      DEFINE SYMBOL ferret_plot_var($var_num) S($num)_the_plot_var($var_num)[L=`L1`:`nn`:12]
+      DEFINE SYMBOL region_transform_t = L=`L1`:`nn`:12
+      DEFINE SYMBOL ferret_plot_var($var_num) S($num)_the_plot_var($var_num)[($region_transform_t)]
       LET S($num)_the_plot_var($var_num)_zt = S($num)_the_plot_var($var_num)_noregion[L=`L1`, ($region_z)]
 
-      DEFINE SYMBOL ferret_plot_var($var_num)_noregion S($num)_the_plot_var($var_num)_noregion[L=`L1`:`nn`:12]
-      DEFINE SYMBOL ferret_plot_var($var_num)_zt S($num)_the_plot_var($var_num)_noregion[L=`L1`:`nn`:12, ($region_z)]
+      DEFINE SYMBOL ferret_plot_var($var_num)_noregion S($num)_the_plot_var($var_num)_noregion[($region_transform_t)]
+      DEFINE SYMBOL ferret_plot_var($var_num)_zt S($num)_the_plot_var($var_num)_noregion[($region_transform_t), ($region_z)]
 
-      DEFINE SYMBOL ferret_plot_var S($num)_the_plot_var[L=`L1`:`nn`:12]
       LET S($num)_the_plot_var_zt = S($num)_the_plot_var_noregion[L=`L1`, ($region_z)]
 
-      DEFINE SYMBOL ferret_plot_var_noregion S($num)_the_plot_var_noregion[L=`L1`:`nn`:12]
-      DEFINE SYMBOL ferret_plot_var_zt S($num)_the_plot_var_noregion[L=`L1`:`nn`:12, ($region_z)]
-
+      DEFINE SYMBOL ferret_plot_var_noregion S($num)_the_plot_var_noregion[($region_transform_t)]
+      DEFINE SYMBOL ferret_plot_var_zt S($num)_the_plot_var_noregion[($region_transform_t), ($region_z)]
       
+      IF ($region_xyz"0|*>1") THEN
+         DEFINE SYMBOL ferret_plot_var S($num)_the_plot_var_noregion[($region_xyz),($region_transform_t)]
+      ELSE
+         DEFINE SYMBOL ferret_plot_var S($num)_the_plot_var_noregion[($region_transform_t)]
+      ENDIF
+
       DEFINE SYMBOL ferret_plot_title ($ferret_plot_title) every ($mon1)
-      DEFINE SYMBOL region_transform_t = L=`L1`:`nn`:12
 
    ENDIF
-
+pause
 ELSE
 
 ! When there is just one time in the result, redefine S($num)_the_plot_var($var_num) and the 
 ! index range for the time axis. The computation will use an expanded time range
 ! and then sample from that the desired output time.
+
+   DEFINE SYMBOL loffset = `($ferret_season_center) - ( 1+INT(season_length/2) ) - (first_month_data-1)`
+   IF `n1+($loffset) LE 0` THEN 
+      DEFINE SYMBOL loffset = `($loffset) + 12`
+      DEFINE SYMBOL offset_year_1 = 1
+   ENDIF
 
    IF `nn EQ n1` THEN
       LET L1 = n1 + ($loffset) - (first_month_selected-1)
@@ -261,7 +271,7 @@ ELSE
 
 ! Index list, once per year on the correct month
 
-   IF `($loffset) LT 0` THEN DEFINE SYMBOL loffset = `($loffset) + 12`
+   IF `($loffset) LE 0` THEN DEFINE SYMBOL loffset = `($loffset) + 12`
    IF ($ferret_expand_time"0") THEN 
       LET L1 = 1+INT(season_length/2) 
    ELSE 
@@ -312,6 +322,3 @@ LET seasonal_var = ($ferret_plot_var)
 DEFINE SYMBOL ferret_plot_var = seasonal_var
 
 ! End of $RCSfile ------------transform_1_season_per_year.jnl-------------------------------
-
-
-
