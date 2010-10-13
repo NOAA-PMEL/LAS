@@ -152,7 +152,6 @@ public class VizGal extends BaseUI {
 		setOperationsClickHandler(xVizGalOperationsClickHandler);
 		setOptionsOkHandler(optionsOkHandler);
 		addPanelApplyClickHandler(panelApplyButtonClick);
-		
 		// Initialize the gallery with an asynchronous call to the server to get variable needed.
 		if ( xDSID != null && xVarID != null & xOperationID != null && xView != null) {
 			// If the proper information was sent to the widget, pull down the variable definition
@@ -421,11 +420,12 @@ public class VizGal extends BaseUI {
 		} else {
 
 			int pos = 0;
+			
 			// Figure out which axis vary in each frame.  Take them in order of t, z, y, x...
-			if ( xOrtho.contains("t") ) {
-				
-				compareAxis = "t";
-				
+
+			xComparisonAxesSelector.setAxes(xOrtho);
+			compareAxis = xComparisonAxesSelector.getValue();
+			if ( compareAxis.equals("t")) {
 				if ( xOrtho.contains("z") ) {
 					fixedAxis = "z";
 				} else if ( xOrtho.contains("y") ) {
@@ -435,11 +435,7 @@ public class VizGal extends BaseUI {
 				} else {
 					fixedAxis = "";
 				}
-		
-			}  else if ( xOrtho.contains("z") ) {
-				
-				compareAxis = "z";
-				
+			} else if ( compareAxis.equals("z") ) {
 				if ( xOrtho.contains("y") ) {
 					fixedAxis = "y";
 				} else if ( xOrtho.contains("x") ) {
@@ -447,26 +443,15 @@ public class VizGal extends BaseUI {
 				} else {
 					fixedAxis = "";
 				}
-				
-			} else if ( xOrtho.contains("y") ) {
-                
-				compareAxis = "y";
-				
-				if ( xOrtho.contains("x") ) {
-					fixedAxis = "x";
+			} else if ( compareAxis.equals("xy") ) {
+				if (xOrtho.contains("t") ) {
+					fixedAxis = "t";
+				} else if ( xOrtho.contains("z") ) {
+					fixedAxis = "z";
 				} else {
 					fixedAxis = "";
 				}
-				
-			} else if ( xOrtho.contains("x") ) {
-				
-				compareAxis = "x";
-				fixedAxis = "";
-				
 			}
-			
-		    
-			xComparisonAxesSelector.setAxes(xOrtho);
 			xAxesWidget.init(xVariable.getGrid());
 			xAxesWidget.setFixedAxis(xView, xOrtho, compareAxis);
 			
@@ -1145,12 +1130,8 @@ public class VizGal extends BaseUI {
 			    autoContourButton.setEnabled(true);
 			}
 		}
-		compareAxis = xOrtho.get(0);
-		if ( xOrtho.size() > 1 ) {
-		    fixedAxis = xOrtho.get(1);
-		} else {
-			fixedAxis = "";
-		}
+
+		compareAxis = xComparisonAxesSelector.getValue();
 		xAxesWidget.setFixedAxis(xView, xOrtho, compareAxis);
         // This will not be right for the new paradigm.
 		// Set the orthogonal axes to a range in each panel.
