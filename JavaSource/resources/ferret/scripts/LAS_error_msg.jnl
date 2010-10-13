@@ -5,6 +5,7 @@
 ! Date: 2010/09
 !
 
+MESSAGE/ERROR " "
 MESSAGE/ERROR **ERROR ($error_string)
 EXIT/PROGRAM
 
