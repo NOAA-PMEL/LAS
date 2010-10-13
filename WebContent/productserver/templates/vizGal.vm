@@ -1,10 +1,10 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <!-- LAS SERVER OK -->
-#set($op="Plot_2D_XY")
+#set($op="Plot_2D_XY_zoom")
 #set($optionid="Options_2D_image_contour_xy_7")
 #if($las_request.getOperation().equals("Plot_2D_XY_SlideSorter"))
-    #set($op="Plot_2D_XY")
+    #set($op="Plot_2D_XY_zoom")
     #set($vid=$las_request.variableIDs.get(0))
 #end
 #set($dsid=$las_request.datasetIDs.get(0))
