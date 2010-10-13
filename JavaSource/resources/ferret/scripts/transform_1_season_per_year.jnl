@@ -318,7 +318,9 @@ ELSE
 ENDIF  ! Season length longer than 1
 
 ! Define the variable to plot or list w/ no square brackets in the text of ferret_plot_var
-LET seasonal_var = ($ferret_plot_var)
-DEFINE SYMBOL ferret_plot_var = seasonal_var
+LET seasonal_var($var_num) = ($ferret_plot_var)
+DEFINE SYMBOL ferret_plot_var = seasonal_var($var_num)
+DEFINE SYMBOL ferret_plot_var($var_num) seasonal_var($var_num)
+
 
 ! End of $RCSfile ------------transform_1_season_per_year.jnl-------------------------------
