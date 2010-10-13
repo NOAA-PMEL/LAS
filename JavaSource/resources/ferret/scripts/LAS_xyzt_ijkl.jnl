@@ -219,7 +219,11 @@ ENDIF   !!! Z region
 IF `STRINDEX("($varshape)", "T") NE 0` THEN
    IF ($region_t_hi"0|*>1") THEN
 
-      LET tpts = t[gt=`($ferret_plot_var),return=taxis`]
+      IF `STRINDEX("($constraint_0_lhs%0%)", "Season") GT 0` THEN
+         LET tpts = t[gt=($ferret_plot_var)]
+      ELSE
+         LET tpts = t[gt=`($ferret_plot_var),return=taxis`] 
+      ENDIF
 
 !      LET tt = `t[gt=tpts,t="($region_t_lo)"]`
       LET tt = `t[gt=($data_var),t="($region_t_lo)"]`
