@@ -413,6 +413,7 @@ public class VizGal extends BaseUI {
 	public boolean init() {
 
 		xOperationsWidget.setOperations(xVariable.getIntervals(), xOperationID, xView, ops);
+		xOperationsWidget.setOperation(xView, xOperationID);
 		xOptionsButton.setOptions(xOperationsWidget.getCurrentOperation().getOptionsID());
 		GridSerializable ds_grid = xVariable.getGrid();
 		double grid_west = Double.valueOf(ds_grid.getXAxis().getLo());
@@ -487,14 +488,18 @@ public class VizGal extends BaseUI {
 			String fixedAxisHiValue = "";
 			if ( compareAxis.equals("t") ) {
 				xAxesWidget.setRange("t", false);
-				fixedAxisLoValue = xAxesWidget.getZAxis().getLo();
-				fixedAxisHiValue = xAxesWidget.getZAxis().getHi();
-				fixed_axis_range = xAxesWidget.getZAxis().isRange();	
+				if ( xVariable.getGrid().hasZ() ) {
+					fixedAxisLoValue = xAxesWidget.getZAxis().getLo();
+					fixedAxisHiValue = xAxesWidget.getZAxis().getHi();
+					fixed_axis_range = xAxesWidget.getZAxis().isRange();
+				}
 			}  else {
 				xAxesWidget.setRange("z", false);
-				fixedAxisLoValue = xAxesWidget.getTAxis().getFerretDateLo();
-				fixedAxisHiValue = xAxesWidget.getTAxis().getFerretDateHi();
-				fixed_axis_range = xAxesWidget.getTAxis().isRange();
+				if ( xVariable.getGrid().hasT() ) {
+					fixedAxisLoValue = xAxesWidget.getTAxis().getFerretDateLo();
+					fixedAxisHiValue = xAxesWidget.getTAxis().getFerretDateHi();
+					fixed_axis_range = xAxesWidget.getTAxis().isRange();
+				}
 			}
 			xAxesWidget.setFixedAxis(xView, xOrtho, compareAxis);
 			// Set the value of the fixed axis in all the panels under slide sorter control.
