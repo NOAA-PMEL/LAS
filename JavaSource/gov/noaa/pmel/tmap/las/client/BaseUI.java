@@ -201,7 +201,7 @@ public class BaseUI implements EntryPoint {
 		xTlo = Util.getParameterString("tlo");
 		xThi = Util.getParameterString("thi");
 
-		xAxesWidget = new AxesWidgetGroup("Plot Axes", "Comparison Axes", "vertical", xControlsWidthPx, "ApplyTo_gallery");
+		xAxesWidget = new AxesWidgetGroup("Plot Axes", "Other Axes", "vertical", xControlsWidthPx, "ApplyTo_gallery");
 
 		xComparisonAxesSelector = new ComparisonAxisSelector(xControlsWidthPx);
 

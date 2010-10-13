@@ -333,11 +333,11 @@ public class OutputPanel extends Composite {
 		lasRequest.setProperty("product_server", "ui_timeout", "10");	
         if ( var.getGrid().getTAxis() != null ) {		
         	if ( view.contains("t") && panelAxesWidgets.getTAxis().getFerretDateLo().equals(panelAxesWidgets.getTAxis().getFerretDateHi()) ) {
-        		messagePanel.show(grid.getWidget(1, 0).getAbsoluteLeft()+15, grid.getWidget(1,0).getAbsoluteTop()+15, "Set plot range selectors to a different values and click the Apply button.");
+        		messagePanel.show(grid.getWidget(1, 0).getAbsoluteLeft()+15, grid.getWidget(1,0).getAbsoluteTop()+15, "Set plot range selectors to different values and click the Apply button.");
         		return;
         	}
         	if ( view.contains("z") && panelAxesWidgets.getZAxis().getLo().equals(panelAxesWidgets.getZAxis().getHi()) ) {
-        		messagePanel.show(grid.getWidget(1, 0).getAbsoluteLeft()+15, grid.getWidget(1,0).getAbsoluteTop()+15, "Set plot range selectors to a different values and click the Apply button.");
+        		messagePanel.show(grid.getWidget(1, 0).getAbsoluteLeft()+15, grid.getWidget(1,0).getAbsoluteTop()+15, "Set plot range selectors to different values and click the Apply button.");
         		spin.show();
         		return;
         	}
