@@ -1491,6 +1491,7 @@ LASUI.prototype.onPlotLoad = function (e) {
                                 var minz = parseFloat(Req.getRangeLo('z'));
                                 var maxt = parseFloat(Req.getRangeHi('t'));
                                 var maxz = parseFloat(Req.getRangeHi('z'));
+				
 				if(!maxx&&minx)maxx=minx;
 				if(!maxy&&minx)maxy=miny;
                                 if(!maxz&&minz)maxz=minz;
@@ -2621,9 +2622,12 @@ LASUI.prototype.setVisualization = function (d, priority) {
 	var stop = false;
 	var bestView ='';
 
+	//best view is the one we currently have
 	var bestView = this.state.view.plot;
-	if(this.state.view.plot.indexOf(d)>=0&&priority!='analysis')
-		 bestView = this.state.view.plot.substr(0,this.state.view.plot.indexOf(d)) + this.state.view.plot.substr(this.state.view.plot.indexOf(d)+d.length,this.state.view.plot.length);
+	
+	//if the method that called this speficied a desired view, consider that
+//	if(this.state.view.plot.indexOf(d)>=0&&priority!='analysis')
+//		 bestView = this.state.view.plot.substr(0,this.state.view.plot.indexOf(d)) + this.state.view.plot.substr(this.state.view.plot.indexOf(d)+d.length,this.state.view.plot.length);
 	
 	if(priority=='analysis')
 		switch(d) {
@@ -2686,7 +2690,19 @@ LASUI.prototype.setVisualization = function (d, priority) {
 					      } break;
 				case 'analysis' : if(minvars==1&&plotView==bestView ){
 						document.getElementsByName("plotType").item(v).checked = true;
-                                                document.getElementsByName("plotType").item(v).onclick({"srcElement" : document.getElementsByName("plotType").item(v)});
+                                                this.state.operation.plot = plotId;
+						//document.getElementsByName("plotType").item(v).onclick({"srcElement" : document.getElementsByName("plotType").item(v)});
+						this.state.view.plot=bestView;
+						this.state.view.widgets=bestView+d;
+					 	var axes = {"x" : "", "y" : "", "z" : "", "t" : ""};
+						for(var i=0;i<this.state.view.widgets.length;i++)
+							 if(axes[this.state.view.widgets[i]]=this.state.view.widgets[i])
+						var newview=""
+						for(var a in axes)
+							newview+=axes[a]; 
+						
+						this.state.view.widgets=newview;
+						this.updateConstraints(this.state.view.widgets);
 						stop=true;
 						}
 					      break;
@@ -2724,6 +2740,7 @@ LASUI.prototype.setVisualization = function (d, priority) {
 		}
 	}
 
+	if(priority!="analysis")
 	if(!stop&&defaultPlot) {
 		if(document.getElementById(defaultPlot)) {
 			document.getElementById(defaultPlot).checked = true;
@@ -2734,7 +2751,9 @@ LASUI.prototype.setVisualization = function (d, priority) {
                 document.getElementsByName("plotType").item(0).onclick({"srcElement" : document.getElementsByName("plotType").item(0)});
 	}	
 
-	if(priority=='analysis')	this.refs.analysis.axes[d].selected=true;
+	if(priority=='analysis')
+		this.refs.analysis.axes[d].selected=true;
+
 }
 /**
  * Method to collapse a tree node
