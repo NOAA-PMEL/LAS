@@ -245,6 +245,7 @@ public class DateTimeWidget extends Composite {
 				for ( int i = 0; i < 5; i++ ) {
 					cellFormatter.setVisible(1, i, true);
 				}
+				checkRangeEndYear();
 			}
 		} else {
 			// Don't want range.  Currently range, do something.
