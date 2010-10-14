@@ -241,7 +241,7 @@ ELSE
       LET nn = MIN(`tsiz`, `nn + 24+season_length`)
       LET n1 = MAX(1, `n1-24-season_length`)
    ENDIF
-   pause
+
 ! Define a variable containing the indices that correspond to the data we 
 ! need for the seasonal averages. Start with the first month needed; if
 ! centering is at the start of a year, avgs run across the end of a year, 
@@ -322,8 +322,6 @@ ELSE
          DEFINE SYMBOL ferret_plot_var_noregion S($num)_seas_per_year[L=2]
       ENDIF
    ENDIF
-pause
-
 
 ! Add information to the title
    DEFINE SYMBOL ferret_plot_title ($ferret_plot_title) (($ferret_season_length)-month ave, Centered ($mon1))
