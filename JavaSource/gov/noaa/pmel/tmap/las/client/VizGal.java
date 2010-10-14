@@ -547,6 +547,7 @@ public class VizGal extends BaseUI {
 				OutputPanel panel = (OutputPanel) panelIt.next();
 				if ( panel.isComparePanel() ) {
 					comparePanel = panel;
+					setPanelAxes(comparePanel, panel);
 					panel.refreshPlot(xOptionsButton.getState(), switchAxis, true);	
 				}
 			}
@@ -608,17 +609,11 @@ public class VizGal extends BaseUI {
 				}
 			}
 		} else {
-			double plot_xXlo = -9999.;
-			double plot_xhi = -9999.;
-			double plot_yhi = -9999.;
-			double plot_ylo = -9999.;
+			OutputPanel comparePanel = null;
 			for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
 				OutputPanel panel = (OutputPanel) panelIt.next();
 				if ( panel.isComparePanel() ) {
-					plot_xXlo = panel.getXlo();
-					plot_xhi = panel.getXhi();
-					plot_ylo = panel.getYlo();
-					plot_yhi = panel.getYhi();
+					comparePanel = panel;					
 				}
 			}
 			for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
@@ -632,196 +627,7 @@ public class VizGal extends BaseUI {
 						panel.setVariable(xVariable);
 						panel.init(false, ops);
 					} 
-					if ( xView.equals("xy") && compareAxis.equals("z") ) {
-						// set x, y, and t in the panel
-						if ( xVariable.getGrid().hasT() ) {
-							panel.setAxisRangeValues("t", xAxesWidget.getTAxis().getFerretDateLo(), xAxesWidget.getTAxis().getFerretDateHi());
-						}
-						panel.setLatLon(String.valueOf(xAxesWidget.getRefMap().getYlo()), 
-								        String.valueOf(xAxesWidget.getRefMap().getYhi()), 
-								        String.valueOf(xAxesWidget.getRefMap().getXlo()), 
-								        String.valueOf(xAxesWidget.getRefMap().getXhi()));
-					} else if ( xView.equals("xy") && compareAxis.equals("t") ) {
-						// set x, y and z in the panel
-						if ( xVariable.getGrid().hasZ() ) {
-							panel.setAxisRangeValues("z", xAxesWidget.getZAxis().getLo(), xAxesWidget.getZAxis().getHi());
-						}
-						panel.setLatLon(String.valueOf(xAxesWidget.getRefMap().getYlo()), 
-						        String.valueOf(xAxesWidget.getRefMap().getYhi()), 
-						        String.valueOf(xAxesWidget.getRefMap().getXlo()), 
-						        String.valueOf(xAxesWidget.getRefMap().getXhi()));
-					} else if ( xView.equals("x") && compareAxis.equals("t") ) {
-						// The map and z are in the fixed axis panel,  take the map value for both x and y and set z. 
-						// ( OR from above )
-						if ( xVariable.getGrid().hasZ() ) {
-							panel.setAxisRangeValues("z", xAxesWidget.getZAxis().getLo(), xAxesWidget.getZAxis().getHi());
-						}
-						panel.setLatLon(String.valueOf(xAxesWidget.getRefMap().getYlo()), 
-						        String.valueOf(xAxesWidget.getRefMap().getYhi()), 
-						        String.valueOf(xAxesWidget.getRefMap().getXlo()), 
-						        String.valueOf(xAxesWidget.getRefMap().getXhi()));
-					} else if ( xView.equals("x") && compareAxis.equals("z") ) {
-						if ( xVariable.getGrid().hasT() ) {
-							panel.setAxisRangeValues("t", xAxesWidget.getTAxis().getFerretDateLo(), xAxesWidget.getTAxis().getFerretDateHi());
-						}
-						panel.setLatLon(String.valueOf(xAxesWidget.getRefMap().getYlo()), 
-						        String.valueOf(xAxesWidget.getRefMap().getYhi()), 
-						        String.valueOf(xAxesWidget.getRefMap().getXlo()), 
-						        String.valueOf(xAxesWidget.getRefMap().getXhi()));
-					} else if ( xView.equals("x") && compareAxis.equals("y") ) {
-						// The map is in the panels.  z and t are in the fixed axes panel.
-						// Take z and t from the global controls and x from the first panel and put back the y from each panel
-						if ( xVariable.getGrid().hasZ() ) {
-							panel.setAxisRangeValues("z", xAxesWidget.getZAxis().getLo(), xAxesWidget.getZAxis().getHi());
-						}
-						if ( xVariable.getGrid().hasT() ) {
-							panel.setAxisRangeValues("t", xAxesWidget.getTAxis().getFerretDateLo(), xAxesWidget.getTAxis().getFerretDateHi());
-						}
-						panel.setLatLon(String.valueOf(panel.getYlo()), 
-						        String.valueOf(panel.getYhi()), 
-						        String.valueOf(plot_xXlo), 
-						        String.valueOf(plot_xhi));
-					} else if ( xView.equals("y") && compareAxis.equals("t") ) {
-						if ( xVariable.getGrid().hasZ() ) {
-							panel.setAxisRangeValues("z", xAxesWidget.getZAxis().getLo(), xAxesWidget.getZAxis().getHi());
-						}
-						panel.setLatLon(String.valueOf(xAxesWidget.getRefMap().getYlo()), 
-						        String.valueOf(xAxesWidget.getRefMap().getYhi()), 
-						        String.valueOf(xAxesWidget.getRefMap().getXlo()), 
-						        String.valueOf(xAxesWidget.getRefMap().getXhi()));
-					} else if ( xView.equals("y") && compareAxis.equals("z") ) {
-						if ( xVariable.getGrid().hasT() ) {
-							panel.setAxisRangeValues("t", xAxesWidget.getTAxis().getFerretDateLo(), xAxesWidget.getTAxis().getFerretDateHi());
-						}
-						panel.setLatLon(String.valueOf(xAxesWidget.getRefMap().getYlo()), 
-						        String.valueOf(xAxesWidget.getRefMap().getYhi()), 
-						        String.valueOf(xAxesWidget.getRefMap().getXlo()), 
-						        String.valueOf(xAxesWidget.getRefMap().getXhi()));
-					} else if ( xView.equals("y") && compareAxis.equals("x") ) {
-						if ( xVariable.getGrid().hasZ() ) {
-							panel.setAxisRangeValues("z", xAxesWidget.getZAxis().getLo(), xAxesWidget.getZAxis().getHi());
-						}
-						if ( xVariable.getGrid().hasT() ) {
-							panel.setAxisRangeValues("t", xAxesWidget.getTAxis().getFerretDateLo(), xAxesWidget.getTAxis().getFerretDateHi());
-						}
-						panel.setLatLon(String.valueOf(plot_ylo), 
-						        String.valueOf(plot_yhi), 
-						        String.valueOf(panel.getXlo()), 
-						        String.valueOf(panel.getXhi()));
-					} else if ( xView.equals("z") && compareAxis.equals("t") ) {
-						if ( xVariable.getGrid().hasZ() ) {
-							panel.setAxisRangeValues("z", xAxesWidget.getZAxis().getLo(), xAxesWidget.getZAxis().getHi());
-						}
-						panel.setLatLon(String.valueOf(xAxesWidget.getRefMap().getYlo()), 
-						        String.valueOf(xAxesWidget.getRefMap().getYhi()), 
-						        String.valueOf(xAxesWidget.getRefMap().getXlo()), 
-						        String.valueOf(xAxesWidget.getRefMap().getXhi()));
-					} else if ( xView.equals("z") && compareAxis.equals("xy") ) {
-						if ( xVariable.getGrid().hasZ() ) {
-							panel.setAxisRangeValues("z", xAxesWidget.getZAxis().getLo(), xAxesWidget.getZAxis().getHi());
-						}
-						if ( xVariable.getGrid().hasT() ) {
-							panel.setAxisRangeValues("t", xAxesWidget.getTAxis().getFerretDateLo(), xAxesWidget.getTAxis().getFerretDateHi());
-						}
-					} else if ( xView.equals("t") && compareAxis.equals("z") ) {
-						if ( xVariable.getGrid().hasT() ) {
-							panel.setAxisRangeValues("t", xAxesWidget.getTAxis().getFerretDateLo(), xAxesWidget.getTAxis().getFerretDateHi());
-						}
-						panel.setLatLon(String.valueOf(xAxesWidget.getRefMap().getYlo()), 
-						        String.valueOf(xAxesWidget.getRefMap().getYhi()), 
-						        String.valueOf(xAxesWidget.getRefMap().getXlo()), 
-						        String.valueOf(xAxesWidget.getRefMap().getXhi()));
-					} else if ( xView.equals("t") && compareAxis.equals("xy") ) {
-						if ( xVariable.getGrid().hasZ() ) {
-							panel.setAxisRangeValues("z", xAxesWidget.getZAxis().getLo(), xAxesWidget.getZAxis().getHi());
-						}
-						if ( xVariable.getGrid().hasT() ) {
-							panel.setAxisRangeValues("t", xAxesWidget.getTAxis().getFerretDateLo(), xAxesWidget.getTAxis().getFerretDateHi());
-						}
-					} else if ( xView.equals("xz") && compareAxis.equals("y") ) {
-						if ( xVariable.getGrid().hasZ() ) {
-							panel.setAxisRangeValues("z", xAxesWidget.getZAxis().getLo(), xAxesWidget.getZAxis().getHi());
-						}
-						if ( xVariable.getGrid().hasT() ) {
-							panel.setAxisRangeValues("t", xAxesWidget.getTAxis().getFerretDateLo(), xAxesWidget.getTAxis().getFerretDateHi());
-						}
-						panel.setLatLon(String.valueOf(panel.getYlo()), 
-						        String.valueOf(panel.getYhi()), 
-						        String.valueOf(plot_xXlo), 
-						        String.valueOf(plot_xhi));
-					} else if ( xView.equals("xz") && compareAxis.equals("t") ) {
-						if ( xVariable.getGrid().hasZ() ) {
-							panel.setAxisRangeValues("z", xAxesWidget.getZAxis().getLo(), xAxesWidget.getZAxis().getHi());
-						}
-						panel.setLatLon(String.valueOf(xAxesWidget.getRefMap().getYlo()), 
-						        String.valueOf(xAxesWidget.getRefMap().getYhi()), 
-						        String.valueOf(xAxesWidget.getRefMap().getXlo()), 
-						        String.valueOf(xAxesWidget.getRefMap().getXhi()));
-					} else if ( xView.equals("yz") && compareAxis.equals("x") ) {
-						if ( xVariable.getGrid().hasZ() ) {
-							panel.setAxisRangeValues("z", xAxesWidget.getZAxis().getLo(), xAxesWidget.getZAxis().getHi());
-						}
-						if ( xVariable.getGrid().hasT() ) {
-							panel.setAxisRangeValues("t", xAxesWidget.getTAxis().getFerretDateLo(), xAxesWidget.getTAxis().getFerretDateHi());
-						}
-						panel.setLatLon(String.valueOf(plot_ylo), 
-						        String.valueOf(plot_yhi), 
-						        String.valueOf(panel.getXlo()), 
-						        String.valueOf(panel.getXhi()));
-					} else if ( xView.equals("yz") && compareAxis.equals("t") ) {
-						if ( xVariable.getGrid().hasZ() ) {
-							panel.setAxisRangeValues("z", xAxesWidget.getZAxis().getLo(), xAxesWidget.getZAxis().getHi());
-						}
-						panel.setLatLon(String.valueOf(xAxesWidget.getRefMap().getYlo()), 
-						        String.valueOf(xAxesWidget.getRefMap().getYhi()), 
-						        String.valueOf(xAxesWidget.getRefMap().getXlo()), 
-						        String.valueOf(xAxesWidget.getRefMap().getXhi()));
-					} else if ( xView.equals("xt") && compareAxis.equals("z") ) {
-						if ( xVariable.getGrid().hasT() ) {
-							panel.setAxisRangeValues("t", xAxesWidget.getTAxis().getFerretDateLo(), xAxesWidget.getTAxis().getFerretDateHi());
-						}
-						panel.setLatLon(String.valueOf(xAxesWidget.getRefMap().getYlo()), 
-						        String.valueOf(xAxesWidget.getRefMap().getYhi()), 
-						        String.valueOf(xAxesWidget.getRefMap().getXlo()), 
-						        String.valueOf(xAxesWidget.getRefMap().getXhi()));
-					} else if ( xView.equals("xt") && compareAxis.equals("y") ) {
-						if ( xVariable.getGrid().hasZ() ) {
-							panel.setAxisRangeValues("z", xAxesWidget.getZAxis().getLo(), xAxesWidget.getZAxis().getHi());
-						}
-						if ( xVariable.getGrid().hasT() ) {
-							panel.setAxisRangeValues("t", xAxesWidget.getTAxis().getFerretDateLo(), xAxesWidget.getTAxis().getFerretDateHi());
-						}
-						panel.setLatLon(String.valueOf(panel.getYlo()), 
-						        String.valueOf(panel.getYhi()), 
-						        String.valueOf(plot_xXlo), 
-						        String.valueOf(plot_xhi));
-					} else if ( xView.equals("yt") && compareAxis.equals("x") ) {
-						if ( xVariable.getGrid().hasZ() ) {
-							panel.setAxisRangeValues("z", xAxesWidget.getZAxis().getLo(), xAxesWidget.getZAxis().getHi());
-						}
-						if ( xVariable.getGrid().hasT() ) {
-							panel.setAxisRangeValues("t", xAxesWidget.getTAxis().getFerretDateLo(), xAxesWidget.getTAxis().getFerretDateHi());
-						}
-						panel.setLatLon(String.valueOf(plot_ylo), 
-						        String.valueOf(plot_yhi), 
-						        String.valueOf(panel.getXlo()), 
-						        String.valueOf(panel.getXhi()));
-					} else if ( xView.equals("yt") && compareAxis.equals("z") ) {
-						if ( xVariable.getGrid().hasT() ) {
-							panel.setAxisRangeValues("t", xAxesWidget.getTAxis().getFerretDateLo(), xAxesWidget.getTAxis().getFerretDateHi());
-						}
-						panel.setLatLon(String.valueOf(xAxesWidget.getRefMap().getYlo()), 
-						        String.valueOf(xAxesWidget.getRefMap().getYhi()), 
-						        String.valueOf(xAxesWidget.getRefMap().getXlo()), 
-						        String.valueOf(xAxesWidget.getRefMap().getXhi()));
-					} else if ( xView.equals("zt") ) {
-						if ( xVariable.getGrid().hasZ() ) {
-							panel.setAxisRangeValues("z", xAxesWidget.getZAxis().getLo(), xAxesWidget.getZAxis().getHi());
-						}
-						if ( xVariable.getGrid().hasT() ) {
-							panel.setAxisRangeValues("t", xAxesWidget.getTAxis().getFerretDateLo(), xAxesWidget.getTAxis().getFerretDateHi());
-						}
-					}
+					setPanelAxes(comparePanel, panel);
 					panel.setOperation(xOperationID, xView);
 				}
 				if ( !panel.getCurrentOperationView().equals(xOperationsWidget.getCurrentView()) ) {
@@ -861,7 +667,207 @@ public class VizGal extends BaseUI {
 			pushHistory();
 		}
 	}
+	private void setPanelAxes(OutputPanel comparePanel, OutputPanel panel) {
+		double plot_xXlo = -9999.;
+		double plot_xhi = -9999.;
+		double plot_yhi = -9999.;
+		double plot_ylo = -9999.;
+		plot_xXlo = comparePanel.getXlo();
+		plot_xhi = comparePanel.getXhi();
+		plot_ylo = comparePanel.getYlo();
+		plot_yhi = comparePanel.getYhi();
 
+		if ( xView.equals("xy") && compareAxis.equals("z") ) {
+			// set x, y, and t in the panel
+			if ( xVariable.getGrid().hasT() ) {
+				panel.setAxisRangeValues("t", xAxesWidget.getTAxis().getFerretDateLo(), xAxesWidget.getTAxis().getFerretDateHi());
+			}
+			panel.setLatLon(String.valueOf(xAxesWidget.getRefMap().getYlo()), 
+					String.valueOf(xAxesWidget.getRefMap().getYhi()), 
+					String.valueOf(xAxesWidget.getRefMap().getXlo()), 
+					String.valueOf(xAxesWidget.getRefMap().getXhi()));
+		} else if ( xView.equals("xy") && compareAxis.equals("t") ) {
+			// set x, y and z in the panel
+			if ( xVariable.getGrid().hasZ() ) {
+				panel.setAxisRangeValues("z", xAxesWidget.getZAxis().getLo(), xAxesWidget.getZAxis().getHi());
+			}
+			panel.setLatLon(String.valueOf(xAxesWidget.getRefMap().getYlo()), 
+					String.valueOf(xAxesWidget.getRefMap().getYhi()), 
+					String.valueOf(xAxesWidget.getRefMap().getXlo()), 
+					String.valueOf(xAxesWidget.getRefMap().getXhi()));
+		} else if ( xView.equals("x") && compareAxis.equals("t") ) {
+			// The map and z are in the fixed axis panel,  take the map value for both x and y and set z. 
+			// ( OR from above )
+			if ( xVariable.getGrid().hasZ() ) {
+				panel.setAxisRangeValues("z", xAxesWidget.getZAxis().getLo(), xAxesWidget.getZAxis().getHi());
+			}
+			panel.setLatLon(String.valueOf(xAxesWidget.getRefMap().getYlo()), 
+					String.valueOf(xAxesWidget.getRefMap().getYhi()), 
+					String.valueOf(xAxesWidget.getRefMap().getXlo()), 
+					String.valueOf(xAxesWidget.getRefMap().getXhi()));
+		} else if ( xView.equals("x") && compareAxis.equals("z") ) {
+			if ( xVariable.getGrid().hasT() ) {
+				panel.setAxisRangeValues("t", xAxesWidget.getTAxis().getFerretDateLo(), xAxesWidget.getTAxis().getFerretDateHi());
+			}
+			panel.setLatLon(String.valueOf(xAxesWidget.getRefMap().getYlo()), 
+					String.valueOf(xAxesWidget.getRefMap().getYhi()), 
+					String.valueOf(xAxesWidget.getRefMap().getXlo()), 
+					String.valueOf(xAxesWidget.getRefMap().getXhi()));
+		} else if ( xView.equals("x") && compareAxis.equals("y") ) {
+			// The map is in the panels.  z and t are in the fixed axes panel.
+			// Take z and t from the global controls and x from the first panel and put back the y from each panel
+			if ( xVariable.getGrid().hasZ() ) {
+				panel.setAxisRangeValues("z", xAxesWidget.getZAxis().getLo(), xAxesWidget.getZAxis().getHi());
+			}
+			if ( xVariable.getGrid().hasT() ) {
+				panel.setAxisRangeValues("t", xAxesWidget.getTAxis().getFerretDateLo(), xAxesWidget.getTAxis().getFerretDateHi());
+			}
+			panel.setLatLon(String.valueOf(panel.getYlo()), 
+					String.valueOf(panel.getYhi()), 
+					String.valueOf(plot_xXlo), 
+					String.valueOf(plot_xhi));
+		} else if ( xView.equals("y") && compareAxis.equals("t") ) {
+			if ( xVariable.getGrid().hasZ() ) {
+				panel.setAxisRangeValues("z", xAxesWidget.getZAxis().getLo(), xAxesWidget.getZAxis().getHi());
+			}
+			panel.setLatLon(String.valueOf(xAxesWidget.getRefMap().getYlo()), 
+					String.valueOf(xAxesWidget.getRefMap().getYhi()), 
+					String.valueOf(xAxesWidget.getRefMap().getXlo()), 
+					String.valueOf(xAxesWidget.getRefMap().getXhi()));
+		} else if ( xView.equals("y") && compareAxis.equals("z") ) {
+			if ( xVariable.getGrid().hasT() ) {
+				panel.setAxisRangeValues("t", xAxesWidget.getTAxis().getFerretDateLo(), xAxesWidget.getTAxis().getFerretDateHi());
+			}
+			panel.setLatLon(String.valueOf(xAxesWidget.getRefMap().getYlo()), 
+					String.valueOf(xAxesWidget.getRefMap().getYhi()), 
+					String.valueOf(xAxesWidget.getRefMap().getXlo()), 
+					String.valueOf(xAxesWidget.getRefMap().getXhi()));
+		} else if ( xView.equals("y") && compareAxis.equals("x") ) {
+			if ( xVariable.getGrid().hasZ() ) {
+				panel.setAxisRangeValues("z", xAxesWidget.getZAxis().getLo(), xAxesWidget.getZAxis().getHi());
+			}
+			if ( xVariable.getGrid().hasT() ) {
+				panel.setAxisRangeValues("t", xAxesWidget.getTAxis().getFerretDateLo(), xAxesWidget.getTAxis().getFerretDateHi());
+			}
+			panel.setLatLon(String.valueOf(plot_ylo), 
+					String.valueOf(plot_yhi), 
+					String.valueOf(panel.getXlo()), 
+					String.valueOf(panel.getXhi()));
+		} else if ( xView.equals("z") && compareAxis.equals("t") ) {
+			if ( xVariable.getGrid().hasZ() ) {
+				panel.setAxisRangeValues("z", xAxesWidget.getZAxis().getLo(), xAxesWidget.getZAxis().getHi());
+			}
+			panel.setLatLon(String.valueOf(xAxesWidget.getRefMap().getYlo()), 
+					String.valueOf(xAxesWidget.getRefMap().getYhi()), 
+					String.valueOf(xAxesWidget.getRefMap().getXlo()), 
+					String.valueOf(xAxesWidget.getRefMap().getXhi()));
+		} else if ( xView.equals("z") && compareAxis.equals("xy") ) {
+			if ( xVariable.getGrid().hasZ() ) {
+				panel.setAxisRangeValues("z", xAxesWidget.getZAxis().getLo(), xAxesWidget.getZAxis().getHi());
+			}
+			if ( xVariable.getGrid().hasT() ) {
+				panel.setAxisRangeValues("t", xAxesWidget.getTAxis().getFerretDateLo(), xAxesWidget.getTAxis().getFerretDateHi());
+			}
+		} else if ( xView.equals("t") && compareAxis.equals("z") ) {
+			if ( xVariable.getGrid().hasT() ) {
+				panel.setAxisRangeValues("t", xAxesWidget.getTAxis().getFerretDateLo(), xAxesWidget.getTAxis().getFerretDateHi());
+			}
+			panel.setLatLon(String.valueOf(xAxesWidget.getRefMap().getYlo()), 
+					String.valueOf(xAxesWidget.getRefMap().getYhi()), 
+					String.valueOf(xAxesWidget.getRefMap().getXlo()), 
+					String.valueOf(xAxesWidget.getRefMap().getXhi()));
+		} else if ( xView.equals("t") && compareAxis.equals("xy") ) {
+			if ( xVariable.getGrid().hasZ() ) {
+				panel.setAxisRangeValues("z", xAxesWidget.getZAxis().getLo(), xAxesWidget.getZAxis().getHi());
+			}
+			if ( xVariable.getGrid().hasT() ) {
+				panel.setAxisRangeValues("t", xAxesWidget.getTAxis().getFerretDateLo(), xAxesWidget.getTAxis().getFerretDateHi());
+			}
+		} else if ( xView.equals("xz") && compareAxis.equals("y") ) {
+			if ( xVariable.getGrid().hasZ() ) {
+				panel.setAxisRangeValues("z", xAxesWidget.getZAxis().getLo(), xAxesWidget.getZAxis().getHi());
+			}
+			if ( xVariable.getGrid().hasT() ) {
+				panel.setAxisRangeValues("t", xAxesWidget.getTAxis().getFerretDateLo(), xAxesWidget.getTAxis().getFerretDateHi());
+			}
+			panel.setLatLon(String.valueOf(panel.getYlo()), 
+					String.valueOf(panel.getYhi()), 
+					String.valueOf(plot_xXlo), 
+					String.valueOf(plot_xhi));
+		} else if ( xView.equals("xz") && compareAxis.equals("t") ) {
+			if ( xVariable.getGrid().hasZ() ) {
+				panel.setAxisRangeValues("z", xAxesWidget.getZAxis().getLo(), xAxesWidget.getZAxis().getHi());
+			}
+			panel.setLatLon(String.valueOf(xAxesWidget.getRefMap().getYlo()), 
+					String.valueOf(xAxesWidget.getRefMap().getYhi()), 
+					String.valueOf(xAxesWidget.getRefMap().getXlo()), 
+					String.valueOf(xAxesWidget.getRefMap().getXhi()));
+		} else if ( xView.equals("yz") && compareAxis.equals("x") ) {
+			if ( xVariable.getGrid().hasZ() ) {
+				panel.setAxisRangeValues("z", xAxesWidget.getZAxis().getLo(), xAxesWidget.getZAxis().getHi());
+			}
+			if ( xVariable.getGrid().hasT() ) {
+				panel.setAxisRangeValues("t", xAxesWidget.getTAxis().getFerretDateLo(), xAxesWidget.getTAxis().getFerretDateHi());
+			}
+			panel.setLatLon(String.valueOf(plot_ylo), 
+					String.valueOf(plot_yhi), 
+					String.valueOf(panel.getXlo()), 
+					String.valueOf(panel.getXhi()));
+		} else if ( xView.equals("yz") && compareAxis.equals("t") ) {
+			if ( xVariable.getGrid().hasZ() ) {
+				panel.setAxisRangeValues("z", xAxesWidget.getZAxis().getLo(), xAxesWidget.getZAxis().getHi());
+			}
+			panel.setLatLon(String.valueOf(xAxesWidget.getRefMap().getYlo()), 
+					String.valueOf(xAxesWidget.getRefMap().getYhi()), 
+					String.valueOf(xAxesWidget.getRefMap().getXlo()), 
+					String.valueOf(xAxesWidget.getRefMap().getXhi()));
+		} else if ( xView.equals("xt") && compareAxis.equals("z") ) {
+			if ( xVariable.getGrid().hasT() ) {
+				panel.setAxisRangeValues("t", xAxesWidget.getTAxis().getFerretDateLo(), xAxesWidget.getTAxis().getFerretDateHi());
+			}
+			panel.setLatLon(String.valueOf(xAxesWidget.getRefMap().getYlo()), 
+					String.valueOf(xAxesWidget.getRefMap().getYhi()), 
+					String.valueOf(xAxesWidget.getRefMap().getXlo()), 
+					String.valueOf(xAxesWidget.getRefMap().getXhi()));
+		} else if ( xView.equals("xt") && compareAxis.equals("y") ) {
+			if ( xVariable.getGrid().hasZ() ) {
+				panel.setAxisRangeValues("z", xAxesWidget.getZAxis().getLo(), xAxesWidget.getZAxis().getHi());
+			}
+			if ( xVariable.getGrid().hasT() ) {
+				panel.setAxisRangeValues("t", xAxesWidget.getTAxis().getFerretDateLo(), xAxesWidget.getTAxis().getFerretDateHi());
+			}
+			panel.setLatLon(String.valueOf(panel.getYlo()), 
+					String.valueOf(panel.getYhi()), 
+					String.valueOf(plot_xXlo), 
+					String.valueOf(plot_xhi));
+		} else if ( xView.equals("yt") && compareAxis.equals("x") ) {
+			if ( xVariable.getGrid().hasZ() ) {
+				panel.setAxisRangeValues("z", xAxesWidget.getZAxis().getLo(), xAxesWidget.getZAxis().getHi());
+			}
+			if ( xVariable.getGrid().hasT() ) {
+				panel.setAxisRangeValues("t", xAxesWidget.getTAxis().getFerretDateLo(), xAxesWidget.getTAxis().getFerretDateHi());
+			}
+			panel.setLatLon(String.valueOf(plot_ylo), 
+					String.valueOf(plot_yhi), 
+					String.valueOf(panel.getXlo()), 
+					String.valueOf(panel.getXhi()));
+		} else if ( xView.equals("yt") && compareAxis.equals("z") ) {
+			if ( xVariable.getGrid().hasT() ) {
+				panel.setAxisRangeValues("t", xAxesWidget.getTAxis().getFerretDateLo(), xAxesWidget.getTAxis().getFerretDateHi());
+			}
+			panel.setLatLon(String.valueOf(xAxesWidget.getRefMap().getYlo()), 
+					String.valueOf(xAxesWidget.getRefMap().getYhi()), 
+					String.valueOf(xAxesWidget.getRefMap().getXlo()), 
+					String.valueOf(xAxesWidget.getRefMap().getXhi()));
+		} else if ( xView.equals("zt") ) {
+			if ( xVariable.getGrid().hasZ() ) {
+				panel.setAxisRangeValues("z", xAxesWidget.getZAxis().getLo(), xAxesWidget.getZAxis().getHi());
+			}
+			if ( xVariable.getGrid().hasT() ) {
+				panel.setAxisRangeValues("t", xAxesWidget.getTAxis().getFerretDateLo(), xAxesWidget.getTAxis().getFerretDateHi());
+			}
+		}
+	}
 	/**
 	 * A little helper method to change data sets.
 	 */
