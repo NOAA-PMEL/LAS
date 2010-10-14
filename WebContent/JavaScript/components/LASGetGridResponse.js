@@ -409,13 +409,6 @@ function LASGetGridResponse_getMenu(axis) {
   value = new Array;
   if (this.getAxis(axis_lc).v && typeof this.getAxis(axis_lc).v == 'object' && !this.getAxis(axis_lc).v.label) {
     menu = this.getAxis(axis_lc).v;
-// NOTE:  The <v> object of the response looks like this:
-// NOTE:    "v":[
-// NOTE:          {"label1":"content1"},
-// NOTE:          {"label2":"content2"},
-// NOTE:          ...
-// NOTE:          {"labelN":"contentN"}],
-
     for (var i=0; i<menu.length; i++) {
       if (axis_lc == 't') {
 //TODO:  Remove this hack after resolution of trac ticket #147.
