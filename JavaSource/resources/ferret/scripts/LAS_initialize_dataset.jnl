@@ -77,6 +77,15 @@ ELSE
    DEFINE SYMBOL data_units ($data_($num)_units)
 ENDIF
 
+! Check for single quotes and remove them. They are
+! not needed on units strings
+
+LET inquote = `STRINDEX("($data_($num)_units)", "'")`
+IF `inquote GT 0` THEN
+   let slen = `STRLEN("($data_($num)_units)")`
+   DEFINE SYMBOL data_($num)_units = `SUBSTRING("($data_($num)_units)", 2, slen-2)`
+ENDIF
+
 IF ($data_units"0|*>1") THEN 
    DEFINE SYMBOL data_units (($data_($num)_units))
    IF `STRINDEX("($data_units)", "((") GT 0` THEN \
@@ -111,6 +120,7 @@ IF `($units_double_quotes"0|*>1") EQ 0` THEN
       DEFINE SYMBOL data_units `SUBSTRING("($data_($num)_units)", 2, ulen-2)`
 ENDIF
 
+
 IF ($fer_last_error"0|0|1|*>1") THEN
   DEFINE SYMBOL error_status = ERROR
   DEFINE SYMBOL error_type = DATA
@@ -124,6 +134,5 @@ DEFINE SYMBOL dset($num) = `($data_($num)_var),RETURN=dsetnum`
 ! Here do sanity checks on Ferret properties, such as dep_axis_scale
 
 GO LAS_check_fer_properties
-pause
-! End of $RCSfile ------------LAS_initialize_dataset.jnl--------------------------
 
+! End of $RCSfile ------------LAS_initialize_dataset.jnl--------------------------
