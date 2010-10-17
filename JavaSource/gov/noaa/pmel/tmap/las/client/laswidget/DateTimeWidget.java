@@ -813,12 +813,15 @@ public class DateTimeWidget extends Composite {
 	};
 	/**
 	 * Helper method to parse ferret dates.
-	 * @param date_string of the form 1998-Jan-15, 1983-Jan-30 12:32 or 1998-Apr-01 12:11:03
+	 * @param date_string of the form 15-Jan-1983, 20-Mar-1997 12:32 or 19-Mar-1962 12:11:03
 	 * @return Date for the parse date
 	 */
 	private static Date parseFerretDate(String date_string) {
 		Date date;
-		if ( date_string.length() == 11 ) {
+		if ( date_string.length() == 6 ) {
+			// A lovely climo date of the form 15-Jan
+			date = shortFerretForm.parse(date_string+"-0001");
+		} else if ( date_string.length() == 11 ) {
 			date = shortFerretForm.parse(date_string);
 		} else if ( date_string.length() == 17 ) {
 			date = mediumFerretForm.parse(date_string);
