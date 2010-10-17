@@ -154,6 +154,7 @@ public class VizGal extends BaseUI {
 		setOperationsClickHandler(xVizGalOperationsClickHandler);
 		setOptionsOkHandler(optionsOkHandler);
 		addPanelApplyClickHandler(panelApplyButtonClick);
+		addPanelRevertClickHandler(panelApplyButtonClick);
 		// Initialize the gallery with an asynchronous call to the server to get variable needed.
 		if ( xDSID != null && xVarID != null & xOperationID != null && xView != null) {
 			// If the proper information was sent to the widget, pull down the variable definition
@@ -314,13 +315,15 @@ public class VizGal extends BaseUI {
 
 		xOrtho.clear();
 		
-		init();
+		
 		
 		for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
 			OutputPanel panel = (OutputPanel) panelIt.next();
 			panel.setVariable(xVariable);
 			panel.init(false, ops);
 		}
+		
+		init();
 		
 		if ( xTlo != null && !xTlo.equals("") ) {
 			for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
@@ -554,6 +557,7 @@ public class VizGal extends BaseUI {
 			if ( comparePanel != null ) {
 				for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
 					OutputPanel panel = (OutputPanel) panelIt.next();
+					panel.setVizGalState(comparePanel.getVariable(), comparePanel.getHistoryToken());
 					if ( !panel.getID().equals(comparePanel.getID()) ) {
 						String xXlo = "";
 						String xhi = "";
@@ -618,7 +622,7 @@ public class VizGal extends BaseUI {
 			}
 			for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
 				OutputPanel panel = (OutputPanel) panelIt.next();
-
+				panel.setVizGalState(comparePanel.getVariable(), comparePanel.getHistoryToken());
 				// See if the panel settings are being used on this panel, if not
 				// reset the fixed axis and the view axis and the operation to the slide sorter value.
 				if ( !panel.isUsePanelSettings() ) {
