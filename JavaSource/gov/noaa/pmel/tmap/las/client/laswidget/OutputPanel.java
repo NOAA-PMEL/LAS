@@ -1,14 +1,6 @@
 package gov.noaa.pmel.tmap.las.client.laswidget;
 
-import gov.noaa.pmel.tmap.las.client.RPCServiceAsync;
-import gov.noaa.pmel.tmap.las.client.laswidget.AxesWidgetGroup;
-import gov.noaa.pmel.tmap.las.client.laswidget.AxisWidget;
-import gov.noaa.pmel.tmap.las.client.laswidget.DateTimeWidget;
-import gov.noaa.pmel.tmap.las.client.laswidget.LASRequestWrapper;
-import gov.noaa.pmel.tmap.las.client.laswidget.OperationRadioButton;
-import gov.noaa.pmel.tmap.las.client.laswidget.SettingsWidget;
 import gov.noaa.pmel.tmap.las.client.map.MapSelectionChangeListener;
-import gov.noaa.pmel.tmap.las.client.map.OLMapWidget;
 import gov.noaa.pmel.tmap.las.client.serializable.ConfigSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.GridSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.OperationSerializable;
@@ -16,13 +8,10 @@ import gov.noaa.pmel.tmap.las.client.serializable.VariableSerializable;
 import gov.noaa.pmel.tmap.las.client.util.URLUtil;
 import gov.noaa.pmel.tmap.las.client.util.Util;
 
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -34,26 +23,19 @@ import com.google.gwt.http.client.RequestCallback;
 import com.google.gwt.http.client.RequestException;
 import com.google.gwt.http.client.Response;
 import com.google.gwt.http.client.URL;
-import com.google.gwt.maps.client.geom.LatLng;
-import com.google.gwt.maps.client.geom.LatLngBounds;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.ChangeListener;
 import com.google.gwt.user.client.ui.ClickListener;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.Frame;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HasVerticalAlignment;
-import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PopupPanel;
-import com.google.gwt.user.client.ui.PushButton;
 import com.google.gwt.user.client.ui.TreeItem;
-import com.google.gwt.user.client.ui.TreeListener;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.xml.client.Document;
 import com.google.gwt.xml.client.Element;
@@ -112,6 +94,31 @@ public class OutputPanel extends Composite {
 	/* Keep track of the optionID, view and operation.  These are passed in as parameters when the pane is created. */
 	String optionID;
 	String operationID;
+	
+	// Keep track of the global values from the compare panel (upper left) so we can revert
+	String prePanelModeState;
+	VariableSerializable prePanelModeVariable;
+	
+	// Keep track of the current vizGal state when you are in panel mode.
+	String vizGalState;
+	VariableSerializable vizGalVariable;
+	
+//	String vizgalView;
+//	List<String> vizgalOrtho;
+//	String vizgalPlotTitle;
+//	String vizgalOrthoTitle;
+//	String vizgalCompareAxis;
+//	double vizgalXlo;
+//	double vizgalXhi;
+//	double vizgalYlo;
+//	double vizgalYhi;
+//	String vizgalZlo;
+//	String vizgalZhi;
+//	String vizgalTlo;
+//	String vizgalThi;
+	
+	// Keep track of the axes that are currently orthogonal to the plot.
+	List<String> ortho;
 	String view;
 
 	/* The current variable in this panel. */
@@ -166,8 +173,7 @@ public class OutputPanel extends Composite {
 	// The current Product URL being displayed in this frame.
 	String currentURL = "";
 	
-	// Keep track of the axes that are currently orthogonal to the plot.
-	List<String> ortho;
+	
 	
 	// Keep track of whether the retry is visible and remove it when the results come back.
 	boolean retryShowing = false;
@@ -273,7 +279,9 @@ public class OutputPanel extends Composite {
 		if ( ds_grid.getZAxis() != null ) {
 			panelAxesWidgets.getZAxis().init(ds_grid.getZAxis());
 		}
-		panelAxesWidgets.setCompareAxis(view, ortho, compareAxis);
+		if ( !settingsButton.isUsePanelSettings() ) {
+		    panelAxesWidgets.setCompareAxis(view, ortho, compareAxis);
+		}
 		if ( !singlePanel ) {
 			// In singlePanel, the controls will be on the left navbar.
 			grid.setWidget(2, 0, panelAxesWidgets);
@@ -992,6 +1000,7 @@ public class OutputPanel extends Composite {
 	};
 	public void setVariable(VariableSerializable v) {
 		var = v;
+		datasetLabel.setText(var.getDSName()+": "+var.getName());
 		panelAxesWidgets.init(var.getGrid());
 	}
 	public void setCompareAxis(String view, List<String> ortho, String compareAxis) {
@@ -1004,9 +1013,14 @@ public class OutputPanel extends Composite {
 			Window.alert("Still fetching grid for new variable.");
 			return;
 		}
-		if (changeDataset) {			
-			var = nvar;
-			datasetLabel.setText(var.getDSName()+": "+var.getName());
+		if (changeDataset) {
+			prePanelModeVariable = var;
+			prePanelModeState = getHistoryToken();
+			
+			setVariable(nvar);
+			
+			panelAxesWidgets.setOrthoTitle("Other Axes");
+			
 			settingsButton.setUsePanel(true);
 			changeDataset = false;
 			init(true, ops);
@@ -1023,7 +1037,44 @@ public class OutputPanel extends Composite {
 			if ( !singlePanel ) {
 				top.remove(revert);
 			}
-			panelAxesWidgets.setCompareAxis(view, ortho, compareAxis);
+			
+			Map<String, String> prePanelTokens = Util.getTokenMap(prePanelModeState);
+			Map<String, String> vizGalTokens = Util.getTokenMap(vizGalState);
+			
+			String pdsid = prePanelTokens.get("dsid");
+			String pvarid = prePanelTokens.get("varid");
+			String vdsid = vizGalTokens.get("dsid");
+			String vvarid = vizGalTokens.get("varid");
+			
+			Map<String, String> tokens;
+			VariableSerializable v;
+			
+			if ( pdsid.equals(vdsid) && pvarid.equals(vvarid) ) {
+				tokens = prePanelTokens;
+				v = prePanelModeVariable;
+			} else {
+				tokens = vizGalTokens;
+				v = vizGalVariable;
+			}
+			
+			
+			// 
+			setVariable(v);
+			setLatLon(tokens.get("ylo"), tokens.get("yhi"), tokens.get("xlo"), tokens.get("xhi"));
+			if ( tokens.get("tlo") != null && tokens.get("thi") != null ) {
+				setAxisRangeValues("t", tokens.get("tlo"), tokens.get("thi"));
+			}
+			if ( tokens.get("zlo") != null && tokens.get("zhi") != null ) {
+				setAxisRangeValues("z", tokens.get("zlo"), tokens.get("zlo"));
+			}
+			panelAxesWidgets.setOrthoTitle(tokens.get("orthoTitle"));
+			
+			
+			// restore the layout
+			compareAxis = tokens.get("compareAxis");
+			panelAxesWidgets.setCompareAxis(tokens.get("view"), Util.setOrthoAxes(tokens.get("view"), v.getGrid()), tokens.get("compareAxis"));
+			
+			
 		}
 		refreshPlot(settingsButton.getOptions(), false, true);
 	}
@@ -1299,6 +1350,9 @@ public class OutputPanel extends Composite {
 		}
 		token.append(";dsid="+var.getDSID());
 		token.append(";varid="+var.getID());
+		token.append(";orthoTitle="+panelAxesWidgets.getOrthoTitle());
+		token.append(";plotTitle="+panelAxesWidgets.getPlotTitle());
+		token.append(getSettingsWidgetHistoryToken());
 		return token.toString();
 	}
 	public String getSettingsWidgetHistoryToken() {
@@ -1363,5 +1417,9 @@ public class OutputPanel extends Composite {
 	}
 	public void setURL(String url) {
 		currentURL = url;
+	}
+	public void setVizGalState(VariableSerializable variable, String historyToken) {
+		this.vizGalVariable = variable;
+		this.vizGalState = historyToken;	
 	}
 }

@@ -454,6 +454,11 @@ public class BaseUI implements EntryPoint {
 		}
 		
 	}
+	public void addPanelRevertClickHandler(ClickHandler handler) {
+		for (int i = 0; i < xPanelCount; i++ ) {
+			xPanels.get(i).addRevertHandler(handler);
+		}
+	}
 	public void handlePanelShowHide() {
 		if ( xPanelHeaderHidden ) {
 			for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {

@@ -37,11 +37,13 @@ public class Util {
 		String[] tokens = token.split(";");
 		HashMap<String, String> tokenMap = new HashMap<String, String>();
 		for( int i=0; i < tokens.length; i++ ) {
-			String[] parts = tokens[i].split("=");
-			String name = parts[0];
-			String value = parts[1];
-			if ( !value.contains("ferret_") ) {
-			    tokenMap.put(name, value);
+			if ( tokens[i].contains("=") ) {
+				String[] parts = tokens[i].split("=");
+				String name = parts[0];
+				String value = parts[1];
+				if ( !value.contains("ferret_") ) {
+					tokenMap.put(name, value);
+				}
 			}
 		}
 		return tokenMap;

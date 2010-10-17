@@ -131,6 +131,12 @@ public class AxesWidgetGroup extends Composite {
 			dateTimeWidget.setVisible(visible);
 		}
 	}
+	public String getOrthoTitle() {
+		return orthoTitle;
+	}
+	public String getPlotTitle() {
+		return plotTitle;
+	}
 	public void setRange(String type, boolean range) {
 		// Does not apply to x and y
 		if ( type.equals("z") ) {
