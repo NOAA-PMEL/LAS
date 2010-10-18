@@ -395,7 +395,7 @@ public class OutputPanel extends Composite {
         spin.hide();
 
 		if ( !view_in.equals(settingsButton.getOperationsWidget().getCurrentView()) ) {
-			messagePanel.show(grid.getWidget(1, 0).getAbsoluteLeft()+15, grid.getWidget(1,0).getAbsoluteTop()+15, "Could not make plot.  Axes set to ranges do not match the upper left panel.");
+			messagePanel.show(grid.getWidget(1, 0).getAbsoluteLeft()+15, grid.getWidget(1,0).getAbsoluteTop()+15, "Could not make plot.  Axes set to ranges that do not match the upper left panel.");
 			return;
 		}
 		
@@ -726,9 +726,7 @@ public class OutputPanel extends Composite {
 			currentURL = url;
 			grid.setWidget(1, 0, spinImage);
 			if ( containerType.equals(Constants.IMAGE) ) {
-				spin.setWidget(spinImage);
-				spin.setPopupPosition(grid.getWidget(1, 0).getAbsoluteLeft(), grid.getWidget(1, 0).getAbsoluteTop());
-				spin.show();
+				
 				RequestBuilder sendRequest = new RequestBuilder(RequestBuilder.GET, url);
 				try {
 					sendRequest.sendRequest(null, lasRequestCallback);
