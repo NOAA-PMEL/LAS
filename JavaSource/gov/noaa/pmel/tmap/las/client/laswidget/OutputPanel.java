@@ -12,6 +12,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.digester.SetTopRule;
+
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -349,7 +351,6 @@ public class OutputPanel extends Composite {
         if ( var.getGrid().hasZ() ) {
         	if ( view.contains("z") && panelAxesWidgets.getZAxis().getLo().equals(panelAxesWidgets.getZAxis().getHi()) ) {
         		messagePanel.show(grid.getWidget(1, 0).getAbsoluteLeft()+15, grid.getWidget(1,0).getAbsoluteTop()+15, "Set plot range selectors to different values and click the Apply button.");
-        		spin.show();
         		return;
         	}
         }
@@ -725,6 +726,7 @@ public class OutputPanel extends Composite {
 			currentURL = url;
 			grid.setWidget(1, 0, spinImage);
 			if ( containerType.equals(Constants.IMAGE) ) {
+				spin.setWidget(spinImage);
 				spin.setPopupPosition(grid.getWidget(1, 0).getAbsoluteLeft(), grid.getWidget(1, 0).getAbsoluteTop());
 				spin.show();
 				RequestBuilder sendRequest = new RequestBuilder(RequestBuilder.GET, url);
@@ -1024,6 +1026,13 @@ public class OutputPanel extends Composite {
 			settingsButton.setUsePanel(true);
 			changeDataset = false;
 			init(true, ops);
+			if ( var.isVector() ) {
+		        setOperation(Constants.DEFAULT_VECTOR_OP, "xy");
+		        panelAxesWidgets.getRefMap().setTool("xy");
+			} else {
+				setOperation(Constants.DEFAULT_SCALER_OP, "xy");
+				panelAxesWidgets.getRefMap().setTool("xy");
+			}
 		}
 		
 		if (settingsButton.isUsePanelSettings()) {
@@ -1074,7 +1083,7 @@ public class OutputPanel extends Composite {
 			compareAxis = tokens.get("compareAxis");
 			panelAxesWidgets.setCompareAxis(tokens.get("view"), Util.setOrthoAxes(tokens.get("view"), v.getGrid()), tokens.get("compareAxis"));
 			
-			
+			setOperation(tokens.get("operation_id"), tokens.get("view"));
 		}
 		refreshPlot(settingsButton.getOptions(), false, true);
 	}
