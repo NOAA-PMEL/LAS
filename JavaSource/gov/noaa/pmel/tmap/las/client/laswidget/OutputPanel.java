@@ -1013,9 +1013,9 @@ public class OutputPanel extends Composite {
 			Window.alert("Still fetching grid for new variable.");
 			return;
 		}
+		
+		
 		if (changeDataset) {
-			prePanelModeVariable = var;
-			prePanelModeState = getHistoryToken();
 			
 			setVariable(nvar);
 			
@@ -1034,12 +1034,16 @@ public class OutputPanel extends Composite {
 		}
 		
 		if (settingsButton.isUsePanelSettings()) {
+			// This just got set and we are headed into panel mode so save the state...
+			prePanelModeVariable = var;
+			prePanelModeState = getHistoryToken();
 			grid.setStyleName("panelSettingsColor");
 			if ( !singlePanel ) {
 				top.setWidget(0, 2, revert);
 			}
 			showAllAxes();
 		} else {
+			// We are headed out of panel mode...
 			grid.setStyleName("regularBackground");
 			if ( !singlePanel ) {
 				top.remove(revert);
@@ -1055,7 +1059,7 @@ public class OutputPanel extends Composite {
 			String vdsid = vizGalTokens.get("dsid");
 			String vvarid = vizGalTokens.get("varid");
 			String vcompareAxis = vizGalTokens.get("comapreAxis");
-			String voperation = vizGalTokens.get("operations_id");
+			String voperation = vizGalTokens.get("operation_id");
 			
 			
 			Map<String, String> tokens;
