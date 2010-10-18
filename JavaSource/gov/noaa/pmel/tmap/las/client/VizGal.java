@@ -1164,18 +1164,20 @@ public class VizGal extends BaseUI {
 		// Set the orthogonal axes to a range in each panel.
 		for (Iterator panelsIt = xPanels.iterator(); panelsIt.hasNext();) {
 			OutputPanel panel = (OutputPanel) panelsIt.next();
-			panel.setOperation(xOperationID, xView);
-			
-			panel.setCompareAxis(xView, xOrtho, compareAxis);
-			if ( xView.contains("t") ) {
-				panel.setPanelAxisRange("t", true);
-			} else {
-				panel.setPanelAxisRange("t", false);
-			}
-			if ( xView.contains("z") ) {
-				panel.setPanelAxisRange("z", true);
-			} else {
-				panel.setPanelAxisRange("z", false);
+			if ( !panel.isUsePanelSettings() ) {
+				panel.setOperation(xOperationID, xView);
+
+				panel.setCompareAxis(xView, xOrtho, compareAxis);
+				if ( xView.contains("t") ) {
+					panel.setPanelAxisRange("t", true);
+				} else {
+					panel.setPanelAxisRange("t", false);
+				}
+				if ( xView.contains("z") ) {
+					panel.setPanelAxisRange("z", true);
+				} else {
+					panel.setPanelAxisRange("z", false);
+				}
 			}
 		}
 		applyChange();
@@ -1187,14 +1189,10 @@ public class VizGal extends BaseUI {
 		historyToken.append("panelHeaderHidden="+xPanelHeaderHidden);
 		historyToken.append(";differences="+differenceButton.isDown());
 		historyToken.append(";compareAxis="+compareAxis);
-		historyToken.append(";fixedAxis="+fixedAxis);
-		if ( fixedAxis.equals("t") ) {
-			historyToken.append(";fixedAxisLo="+xAxesWidget.getTAxis().getFerretDateLo());
-			historyToken.append(";fixedAxisHi="+xAxesWidget.getTAxis().getFerretDateHi());
-		} else if ( fixedAxis.equals("z") ) {
-			historyToken.append(";fixedAxisLo="+xAxesWidget.getZAxis().getLo());
-			historyToken.append(";fixedAxisHi="+xAxesWidget.getZAxis().getHi());
+		if ( fixedAxis != null && !fixedAxis.equals("none") && !fixedAxis.equals("") ){
+			historyToken.append(";fixedAxis="+fixedAxis);
 		}
+		
 		historyToken.append(";autoContour="+autoContourButton.isDown());
 		if ( xPanels.get(0).getMin() < 99999999. ) {
 			historyToken.append(";globalMin="+xPanels.get(0).getMin());
@@ -1227,6 +1225,14 @@ public class VizGal extends BaseUI {
 		token.append(";xhi="+xAxesWidget.getRefMap().getXhi());
 		token.append(";ylo="+xAxesWidget.getRefMap().getYlo());
 		token.append(";yhi="+xAxesWidget.getRefMap().getYhi());
+		if ( xVariable.getGrid().hasT() ) {
+			token.append(";tlo="+xAxesWidget.getTAxis().getFerretDateLo());
+			token.append(";thi="+xAxesWidget.getTAxis().getFerretDateHi());
+		}
+		if ( xVariable.getGrid().hasZ() ) {
+			token.append(";zlo="+xAxesWidget.getZAxis().getLo());
+			token.append(";zhi="+xAxesWidget.getZAxis().getHi());
+		}
 		if ( xOperationsWidget.getCurrentOperation() != null ) {
 			token.append(";operation_id="+xOperationsWidget.getCurrentOperation().getID());
 			token.append(";view="+xOperationsWidget.getCurrentView());
@@ -1370,11 +1376,11 @@ public class VizGal extends BaseUI {
 			}
 			
 			if ( new_fixedAxis.equals("t") ) {
-				xAxesWidget.getTAxis().setLo(tokenMap.get("fixedAxisLo"));
-				xAxesWidget.getTAxis().setHi(tokenMap.get("fixedAxisHi"));
+				xAxesWidget.getTAxis().setLo(tokenMap.get("tlo"));
+				xAxesWidget.getTAxis().setHi(tokenMap.get("thi"));
 			} else if ( new_fixedAxis.equals("z") ) {
-				xAxesWidget.getZAxis().setLo(tokenMap.get("fixedAxisLo"));
-				xAxesWidget.getZAxis().setHi(tokenMap.get("fixedAxisHi"));
+				xAxesWidget.getZAxis().setLo(tokenMap.get("zlo"));
+				xAxesWidget.getZAxis().setHi(tokenMap.get("zhi"));
 			}
 			xAxesWidget.setFixedAxis(xView, xOrtho, compareAxis);
 			// TODO set compare axis in panels?
