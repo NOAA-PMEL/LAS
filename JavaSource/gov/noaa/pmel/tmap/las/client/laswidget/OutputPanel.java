@@ -1050,13 +1050,16 @@ public class OutputPanel extends Composite {
 			
 			String pdsid = prePanelTokens.get("dsid");
 			String pvarid = prePanelTokens.get("varid");
+			String pcomparAxis = prePanelTokens.get("compareAxis");
 			String vdsid = vizGalTokens.get("dsid");
 			String vvarid = vizGalTokens.get("varid");
+			String vcompareAxis = vizGalTokens.get("comapreAxis");
+			
 			
 			Map<String, String> tokens;
 			VariableSerializable v;
 			
-			if ( pdsid.equals(vdsid) && pvarid.equals(vvarid) ) {
+			if ( pcomparAxis != null && vcompareAxis != null && pdsid.equals(vdsid) && pvarid.equals(vvarid) && pcomparAxis.equals(vcompareAxis)) {
 				tokens = prePanelTokens;
 				v = prePanelModeVariable;
 			} else {
@@ -1068,6 +1071,7 @@ public class OutputPanel extends Composite {
 			// 
 			setVariable(v);
 			setLatLon(tokens.get("ylo"), tokens.get("yhi"), tokens.get("xlo"), tokens.get("xhi"));
+			compareAxis = tokens.get("compareAxis");
 			if ( tokens.get("tlo") != null && tokens.get("thi") != null ) {
 				setAxisRangeValues("t", tokens.get("tlo"), tokens.get("thi"));
 			}
@@ -1078,7 +1082,7 @@ public class OutputPanel extends Composite {
 			
 			
 			// restore the layout
-			compareAxis = tokens.get("compareAxis");
+			
 			panelAxesWidgets.setCompareAxis(tokens.get("view"), Util.setOrthoAxes(tokens.get("view"), v.getGrid()), tokens.get("compareAxis"));
 			
 			setOperation(tokens.get("operation_id"), tokens.get("view"));
@@ -1349,12 +1353,16 @@ public class OutputPanel extends Composite {
 	public String getHistoryToken() {
 		StringBuilder token = new StringBuilder();
 		token.append("usePanelSettings="+settingsButton.isUsePanelSettings());
-		if ( compareAxis.equals("t") ) {
-			token.append(";compareAxis=t;compareAxisLo="+panelAxesWidgets.getTAxis().getFerretDateLo()+";compareAxisHi="+panelAxesWidgets.getTAxis().getFerretDateHi());
-			
-		} else if ( compareAxis.equals("z") ) {
-			token.append(";compareAxis=z;compareAxisLo="+panelAxesWidgets.getZAxis().getLo()+";compareAxisHi="+panelAxesWidgets.getZAxis().getHi());
+		if (compareAxis != null &&  !compareAxis.equals("") ) {
+			token.append(";compareAxis="+compareAxis);			
+		} 
+		if ( var.getGrid().hasZ() ) {
+			token.append(";zlo="+panelAxesWidgets.getZAxis().getLo()+";zhi="+panelAxesWidgets.getZAxis().getHi());
 		}
+		if ( var.getGrid().hasT() ) {
+		   token.append(";tlo="+panelAxesWidgets.getTAxis().getFerretDateLo()+";thi="+panelAxesWidgets.getTAxis().getFerretDateHi());
+		}
+
 		token.append(";dsid="+var.getDSID());
 		token.append(";varid="+var.getID());
 		token.append(";orthoTitle="+panelAxesWidgets.getOrthoTitle());
@@ -1373,12 +1381,13 @@ public class OutputPanel extends Composite {
 	}
 	public void setFromHistoryToken(Map<String, String> tokenMap, Map<String, String> optionsMap) {		
 		// Do the panel stuff here.
-		if (tokenMap.get("compareAxis").equals("t") ) {
-			panelAxesWidgets.getTAxis().setLo(tokenMap.get("compareAxisLo"));
-			panelAxesWidgets.getTAxis().setHi(tokenMap.get("compareAxisHi"));
-		} else {
-			panelAxesWidgets.getZAxis().setLo(tokenMap.get("compareAxisLo"));
-			panelAxesWidgets.getZAxis().setHi(tokenMap.get("compareAxisHi"));
+		if ( tokenMap.get("tlo") != null && tokenMap.get("thi") != null ) {
+			panelAxesWidgets.getTAxis().setLo(tokenMap.get("tlo"));
+			panelAxesWidgets.getTAxis().setHi(tokenMap.get("thi"));
+		} 
+        if ( tokenMap.get("zlo") != null && tokenMap.get("zhi") != null ) {
+			panelAxesWidgets.getZAxis().setLo(tokenMap.get("zlo"));
+			panelAxesWidgets.getZAxis().setHi(tokenMap.get("zhi"));
 		}
 		setLatLon(tokenMap.get("ylo"), tokenMap.get("yhi"), tokenMap.get("xlo"), tokenMap.get("xhi"));
 		if (isUsePanelSettings()) {
