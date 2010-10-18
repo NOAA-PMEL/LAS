@@ -1051,15 +1051,19 @@ public class OutputPanel extends Composite {
 			String pdsid = prePanelTokens.get("dsid");
 			String pvarid = prePanelTokens.get("varid");
 			String pcomparAxis = prePanelTokens.get("compareAxis");
+			String poperation = prePanelTokens.get("operation_id");
 			String vdsid = vizGalTokens.get("dsid");
 			String vvarid = vizGalTokens.get("varid");
 			String vcompareAxis = vizGalTokens.get("comapreAxis");
+			String voperation = vizGalTokens.get("operations_id");
 			
 			
 			Map<String, String> tokens;
 			VariableSerializable v;
 			
-			if ( pcomparAxis != null && vcompareAxis != null && pdsid.equals(vdsid) && pvarid.equals(vvarid) && pcomparAxis.equals(vcompareAxis)) {
+			if ( pcomparAxis != null && vcompareAxis != null &&
+			     poperation != null && voperation != null && 
+			     pdsid.equals(vdsid) && pvarid.equals(vvarid) && pcomparAxis.equals(vcompareAxis) && poperation.equals(voperation)) {
 				tokens = prePanelTokens;
 				v = prePanelModeVariable;
 			} else {
