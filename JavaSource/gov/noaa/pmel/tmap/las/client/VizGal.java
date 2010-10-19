@@ -1214,7 +1214,7 @@ public class VizGal extends BaseUI {
 		
 		for (int i = 1; i < xPanels.size(); i++) {
 			OutputPanel panel = xPanels.get(i);
-			historyToken.append("token"+panel.getHistoryToken()+panel.getSettingsWidgetHistoryToken());
+			historyToken.append("token"+panel.getHistoryToken());
 		}
        
 		History.newItem(historyToken.toString(), false);

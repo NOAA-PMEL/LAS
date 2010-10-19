@@ -1052,22 +1052,27 @@ public class OutputPanel extends Composite {
 			Map<String, String> prePanelTokens = Util.getTokenMap(prePanelModeState);
 			Map<String, String> vizGalTokens = Util.getTokenMap(vizGalState);
 			
-			String pdsid = prePanelTokens.get("dsid");
-			String pvarid = prePanelTokens.get("varid");
-			String pcomparAxis = prePanelTokens.get("compareAxis");
-			String poperation = prePanelTokens.get("operation_id");
-			String vdsid = vizGalTokens.get("dsid");
-			String vvarid = vizGalTokens.get("varid");
-			String vcompareAxis = vizGalTokens.get("comapreAxis");
-			String voperation = vizGalTokens.get("operation_id");
+			String panel_dsid = prePanelTokens.get("dsid");
+			String panel_varid = prePanelTokens.get("varid");
+			String panel_comparAxis = prePanelTokens.get("compareAxis");
+			String panel_operation = prePanelTokens.get("operation_id");
+			String vizGal_dsid = vizGalTokens.get("dsid");
+			String vizGal_varid = vizGalTokens.get("varid");
+			String vizGal_compareAxis = vizGalTokens.get("comapreAxis");
+			String vizGal_operation = vizGalTokens.get("operation_id");
 			
 			
 			Map<String, String> tokens;
 			VariableSerializable v;
 			
-			if ( pcomparAxis != null && vcompareAxis != null &&
-			     poperation != null && voperation != null && 
-			     pdsid.equals(vdsid) && pvarid.equals(vvarid) && pcomparAxis.equals(vcompareAxis) && poperation.equals(voperation)) {
+			if ( panel_comparAxis != null && 
+				 vizGal_compareAxis != null &&
+			     panel_operation != null && 
+			     vizGal_operation != null && 
+			     panel_dsid.equals(vizGal_dsid) && 
+			     panel_varid.equals(vizGal_varid) && 
+			     panel_comparAxis.equals(vizGal_compareAxis) && 
+			     panel_operation.equals(vizGal_operation)) {
 				tokens = prePanelTokens;
 				v = prePanelModeVariable;
 			} else {
