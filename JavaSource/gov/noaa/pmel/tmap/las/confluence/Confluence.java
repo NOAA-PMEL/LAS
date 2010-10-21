@@ -192,11 +192,11 @@ public class Confluence extends LASAction {
 						return mapping.findForward(Constants.GET_OPTIONS_KEY);
 					}
 				} catch (HttpException e) {
-					log.error("Unable to fetch options.", e);
+					logerror(request, "Unable to fetch options.", e);
 				} catch (IOException e) {
-					log.error("Unable to fetch options.", e);
+					logerror(request, "Unable to fetch options.", e);
 				} catch (JDOMException e) {
-					log.error("Unable to fetch options.", e);
+					logerror(request, "Unable to fetch options.", e);
 				}
 			} else if (url.contains(Constants.PRODUCT_SERVER)) {
 				String xml = request.getParameter("xml");
@@ -212,7 +212,15 @@ public class Confluence extends LASAction {
 				}
 				ArrayList<String> ids = ui_request.getDatasetIDs();
 				String proxy = lasConfig.getGlobalPropertyValue("product_server", "proxy");
-				if ( ids.size() == 0 ) {
+				String op = ui_request.getOperation();
+				String service = "";
+				try {
+					service = lasConfig.getService(op);
+				} catch (JDOMException e) {
+					logerror(request, "Unable to find service name.", e);
+					return mapping.findForward("error");
+				}
+				if ( ids.size() == 0 || service.equals("template")) {
 					// Forward to the local server...
 					return mapping.findForward("LocalProductServer");
 				} else if ( ids.size() > 1 ) {
