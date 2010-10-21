@@ -1,7 +1,11 @@
 package gov.noaa.pmel.tmap.las.confluence;
 
+import gov.noaa.pmel.tmap.las.exception.LASException;
 import gov.noaa.pmel.tmap.las.jdom.JDOMUtils;
+import gov.noaa.pmel.tmap.las.jdom.LASBackendResponse;
 import gov.noaa.pmel.tmap.las.jdom.LASConfig;
+import gov.noaa.pmel.tmap.las.jdom.LASMapScale;
+import gov.noaa.pmel.tmap.las.jdom.LASRegionIndex;
 import gov.noaa.pmel.tmap.las.jdom.LASUIRequest;
 import gov.noaa.pmel.tmap.las.product.server.LASAction;
 import gov.noaa.pmel.tmap.las.product.server.LASConfigPlugIn;
@@ -10,17 +14,22 @@ import gov.noaa.pmel.tmap.las.ui.LASProxy;
 import gov.noaa.pmel.tmap.las.ui.Util;
 import gov.noaa.pmel.tmap.las.util.Category;
 import gov.noaa.pmel.tmap.las.util.Constants;
+import gov.noaa.pmel.tmap.las.util.Result;
 import gov.noaa.pmel.tmap.las.util.Tributary;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -30,6 +39,7 @@ import org.apache.log4j.Logger;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
+import org.jdom.Element;
 import org.jdom.JDOMException;
 import org.json.JSONException;
 
@@ -79,7 +89,6 @@ public class Confluence extends LASAction {
 				ActionForm form,
 				HttpServletRequest request,
 				HttpServletResponse response){
-
 			
 			String openid = request.getParameter("openid");
 			LASConfig lasConfig = (LASConfig)servlet.getServletContext().getAttribute(LASConfigPlugIn.LAS_CONFIG_KEY);
@@ -199,6 +208,7 @@ public class Confluence extends LASAction {
 					return mapping.findForward("error");
 				}
 				ArrayList<String> ids = ui_request.getDatasetIDs();
+				String proxy = lasConfig.getGlobalPropertyValue("product_server", "proxy");
 				if ( ids.size() == 0 ) {
 					// Forward to the local server...
 					return mapping.findForward("LocalProductServer");
@@ -221,9 +231,14 @@ public class Confluence extends LASAction {
 								return mapping.findForward(Constants.LOCAL_PRODUCT_SERVER_KEY);
 							} else {
 								String las_url = tribs.get(key).getURL();
-								las_url = las_url + Constants.PRODUCT_SERVER + "?" + request.getQueryString();	
-								lasProxy.executeGetMethodAndStreamResult(las_url, response);
-//								response.sendRedirect(las_url);
+								
+								
+								if ( proxy.equalsIgnoreCase("full") ) {
+									return processRequest(mapping, request, response, lasConfig, las_url, key);
+								} else {
+									las_url = las_url + Constants.PRODUCT_SERVER + "?" + request.getQueryString();	
+									lasProxy.executeGetMethodAndStreamResult(las_url, response);
+								}
 							}
 						} else {
 							// Add the special parameter to create product locally using remote analysis and send to local product server.
@@ -237,6 +252,8 @@ public class Confluence extends LASAction {
 						logerror(request, "Unable to fetch product.", e);
 					} catch (IOException e) {
 						logerror(request, "Unable to fetch product.", e);
+					} catch (LASException e) {
+						logerror(request, "Unable to fetch product.", e);
 					}
 				} else {
 					try {
@@ -247,16 +264,21 @@ public class Confluence extends LASAction {
 						}
 						Tributary trib = lasConfig.getTributary(server_key);
 						String las_url = trib.getURL();
-						las_url = las_url + Constants.PRODUCT_SERVER + "?" + request.getQueryString();	
-//						response.sendRedirect(las_url);
-						lasProxy.executeGetMethodAndStreamResult(las_url, response);
+
+						if ( proxy.equalsIgnoreCase("full") ) {
+							return processRequest(mapping, request, response, lasConfig, las_url, server_key);
+						} else {
+							las_url = las_url + Constants.PRODUCT_SERVER + "?" + request.getQueryString();	
+							lasProxy.executeGetMethodAndStreamResult(las_url, response);
+						}
 					} catch (HttpException e) {
 						logerror(request, "Unable to fetch product.", e);
 					} catch (IOException e) {
 						logerror(request, "Unable to fetch product.", e);
 					} catch (JDOMException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
+						logerror(request, "Unable to fetch product.", e);
+					} catch (LASException e) {
+						logerror(request, "Unable to fetch product.", e);
 					}
 				}
 			} else {
@@ -337,5 +359,88 @@ public class Confluence extends LASAction {
 			}
 			return null;
 		}
-		
+		private ActionForward processRequest(ActionMapping mapping, HttpServletRequest request, HttpServletResponse response, LASConfig lasConfig, String las_url, String server_key) throws JDOMException, HttpException, IOException, LASException {
+			String requestXML = request.getParameter("xml");
+			LASUIRequest lasRequest = new LASUIRequest();
+			if ( requestXML != null ) {
+				try {
+	        		String temp = URLDecoder.decode(requestXML, "UTF-8");
+	        		requestXML = temp;
+	        	} catch (UnsupportedEncodingException e) {
+	        		LASAction.logerror(request, "Error decoding the XML request query string.", e);
+	        		return mapping.findForward("error");
+	        	}
+
+	        	try {
+	        		JDOMUtils.XML2JDOM(requestXML, lasRequest);
+	        		// Set the lasRequest object in the HttpServletRequest so the product server does not have to rebuild it.
+	        		request.setAttribute("las_request", lasRequest);
+	        	} catch (Exception e) {
+	        		LASAction.logerror(request, "Error parsing the request XML. ", e);
+	        		return mapping.findForward("error");
+	        	}
+	        }
+			LASUIRequest originalRequest = (LASUIRequest) lasRequest.clone();
+			String op = lasRequest.getOperation();
+			String template = lasConfig.getTemplate(op);
+		    lasRequest.setProperty("las", "output_type", "xml");
+            
+		    las_url = las_url+Constants.PRODUCT_SERVER+"?xml="+lasRequest.toEncodedURLString();
+		    for (Enumeration params = request.getParameterNames(); params.hasMoreElements() ;) {
+				String param = (String) params.nextElement();
+				String value = (String) request.getParameter(param);
+				if ( !param.equals("xml") ) {
+					las_url = las_url + "&" + param + "=" + value;
+				}
+			}
+			
+			String xml_response = lasProxy.executeGetMethodAndReturnResult(las_url).trim();
+			LASBackendResponse resDoc = new LASBackendResponse();
+			JDOMUtils.XML2JDOM(xml_response, resDoc);
+			if ( resDoc.getResultByType("batch") != null ) {
+			    request.setAttribute("las_response", resDoc);
+			    return mapping.findForward("batch");
+			}
+			
+			List<Result> results = resDoc.getResults();
+			LASBackendResponse confluence_response = new LASBackendResponse();
+			for (Iterator resultsIt = results.iterator(); resultsIt.hasNext();) {
+				Result result = (Result) resultsIt.next();
+				String result_file = result.getFile();
+				String result_url = result.getURL();
+				File file = new File(result_file);
+				String filename = lasConfig.getOutputDir()+File.separator+server_key+"_"+file.getName();
+				File outfile = new File(filename);
+				Element cr = new Element("result");
+				// Copy the attributes.
+				Map<String, String> attrs = result.getAttributesAsMap();
+				for (Iterator atIt = attrs.keySet().iterator(); atIt.hasNext();) {
+					String attr = (String) atIt.next();
+					String attrvalue = attrs.get(attr);
+					cr.setAttribute(attr, attrvalue);
+				}
+				// replace file and url.
+				cr.setAttribute("file", filename);
+				cr.setAttribute("url", lasConfig.getBaseServerURL()+"/output/"+outfile.getName());
+				confluence_response.addResult(cr);
+				if ( !outfile.exists() ) {
+					lasProxy.executeGetMethodAndSaveResult(result_url, outfile, response);				
+				}
+				if (result.getType().equals("map_scale") ) {
+					LASMapScale mapscale = new LASMapScale();
+					JDOMUtils.XML2JDOM(outfile, mapscale);
+					request.setAttribute("las_map_scale", mapscale);						
+				} else if ( result.getType().equals("index") ) {
+					LASRegionIndex rindex = new LASRegionIndex();
+					JDOMUtils.XML2JDOM(outfile, rindex);
+					request.setAttribute("las_region_index", rindex);
+				} else if ( result.getType().equals("webrowset") ) {
+					throw new LASException("Confluence server cannot handle webrowset data.");
+				}
+			}
+			request.setAttribute("las_response", confluence_response);
+			request.setAttribute("las_request", originalRequest);
+			request.setAttribute("las_config", lasConfig);
+			return new ActionForward("/productserver/templates/"+template+".vm");
+		}
 }

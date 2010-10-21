@@ -51,10 +51,6 @@ import com.google.gwt.xml.client.XMLParser;
  *
  */
 public class OutputPanel extends Composite {
-
-    /* TODO When changing a panel to "panel mode" the panel needs to save the state of the panelAxesWidgets including the titles,
-     * the view, what's ortho and the axis states (hi, lo and range boolean) and restore that state when the panel is reverted.
-     */
 	
 	String containerType = Constants.FRAME;
 	
@@ -104,20 +100,6 @@ public class OutputPanel extends Composite {
 	// Keep track of the current vizGal state when you are in panel mode.
 	String vizGalState;
 	VariableSerializable vizGalVariable;
-	
-//	String vizgalView;
-//	List<String> vizgalOrtho;
-//	String vizgalPlotTitle;
-//	String vizgalOrthoTitle;
-//	String vizgalCompareAxis;
-//	double vizgalXlo;
-//	double vizgalXhi;
-//	double vizgalYlo;
-//	double vizgalYhi;
-//	String vizgalZlo;
-//	String vizgalZhi;
-//	String vizgalTlo;
-//	String vizgalThi;
 	
 	// Keep track of the axes that are currently orthogonal to the plot.
 	List<String> ortho;

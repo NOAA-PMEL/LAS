@@ -2,6 +2,8 @@ package gov.noaa.pmel.tmap.las.ui;
 
 import gov.noaa.pmel.tmap.las.product.server.ProductServerAction;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -24,6 +26,38 @@ import org.apache.log4j.Logger;
 public class LASProxy {
 	private int streamBufferSize = 8196;
 	private static Logger log = LogManager.getLogger(LASProxy.class.getName());
+	public void executeGetMethodAndSaveResult(String url, File outfile, HttpServletResponse response) throws IOException, HttpException {
+		HttpClient client = new HttpClient();
+		HttpClientParams params = client.getParams();
+		params.setParameter(HttpClientParams.ALLOW_CIRCULAR_REDIRECTS,Boolean.TRUE);
+		client.setParams(params);
+		GetMethod method = new GetMethod(url);
+		method.getParams().setParameter(HttpMethodParams.RETRY_HANDLER, new DefaultHttpMethodRetryHandler(3, false));
+
+		try {
+
+			log.info("method: " + method.getURI());
+
+			int rc = client.executeMethod(method);
+
+			if (rc != HttpStatus.SC_OK) {
+
+				log.error("HttpGet Error Code: "+rc);
+				if ( response == null ) {
+					throw new IOException("Unable to execute method.  RC="+rc);
+				} else {
+					response.sendError(rc);
+				}
+			} 
+			InputStream input = method.getResponseBodyAsStream();
+			OutputStream output = new FileOutputStream(outfile);
+			stream(input, output);
+		} finally {
+
+			method.releaseConnection();
+		}
+
+	}
 	public String executeGetMethodAndReturnResult(String url, HttpServletResponse response) throws IOException, HttpException {
 		
 		HttpClient client = new HttpClient();

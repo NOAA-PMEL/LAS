@@ -2745,9 +2745,15 @@ public class LASConfig extends LASDocument {
         }
         return t;
     }
+    public String getTemplate(String id) throws JDOMException {
+    	/*
+    	 *   Look like this:   /lasdata/operations/operation[@ID='Plot_2D_XY_zoom']
+    	 */
+    	return getTemplateByXPath("/lasdata/operations/operation[@ID='"+id+"']");
+    }
         /**
          * Given the XPath to an operation return the output template that should be processed for this product
-         * @param XPath The path to the operation element
+         * @param XPath The path to the operation element (an XPath looks like this: /lasdata/operations/operation[@ID='Plot_2D_XY_zoom']
          * @return output_template The name of the template (which will be resolve using the class loader and the backend config information)
          * @throws JDOMException
          */
