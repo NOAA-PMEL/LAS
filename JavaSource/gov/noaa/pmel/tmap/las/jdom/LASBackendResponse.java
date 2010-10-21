@@ -9,6 +9,8 @@
  */
 package gov.noaa.pmel.tmap.las.jdom;
 
+import gov.noaa.pmel.tmap.las.util.Result;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -268,12 +270,29 @@ public class LASBackendResponse extends LASDocument {
         
         return false;
     }
+    public List<Result> getResults() {
+    	List<Result> all_results = new ArrayList<Result>();
+    	 List responses = this.getRootElement().getChildren("response");
+         if (responses == null || responses.size() == 0) {
+             return null;
+         }
+         for (Iterator respIt = responses.iterator(); respIt.hasNext();) {
+             Element resp = (Element) respIt.next();
+             List results = resp.getChildren("result");
+             for (Iterator resIt = results.iterator(); resIt.hasNext();) {
+                 Element resultE = (Element) resIt.next();
+                 Result result = new Result((Element) resultE.clone());
+                 all_results.add(result);
+             }
+         }
+    	return all_results;
+    }
     /**
      * Helper function that gets the result element by result type.
      * @param in_type
      * @return resutlt - the result element.
      */
-    private Element getResultByType(String in_type) {
+    public Element getResultByType(String in_type) {
         
         List responses = this.getRootElement().getChildren("response");
         if (responses == null || responses.size() == 0) {
@@ -312,6 +331,15 @@ public class LASBackendResponse extends LASDocument {
         } else {
             return "";
         }
+    }
+    public void addResult(Element result) {
+    	Element response = this.getRootElement().getChild("response");
+    	if ( response == null ) {
+    		response = new Element("response");
+    		setDate(response);
+    		getRootElement().addContent(response);
+    	}
+    	response.addContent(result);
     }
     /**
      * Remove a result.  This is used to eliminate results that did not get created by the backend service for whatever reason.
