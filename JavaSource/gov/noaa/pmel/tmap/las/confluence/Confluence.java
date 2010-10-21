@@ -114,14 +114,17 @@ public class Confluence extends LASAction {
 						// Start with the categories on this server...
 						Category local_cat = new Category(lasConfig.getTitle(), lasConfig.getTopLevelCategoryID()); 
 						categories.add(local_cat);
-
+						String proxy = lasConfig.getGlobalPropertyValue("product_server", "proxy");
+						
 						for (Iterator servIt = servers.iterator(); servIt.hasNext();) {
 							Tributary trib = (Tributary) servIt.next();						
                             Category server_cat = new Category(trib.getName(), trib.getTopLevelCategoryID());
-                            if ( openid != null ) {
-                            	server_cat.setAttribute("remote_las", trib.getURL()+Constants.GET_AUTH);
-							}
-							categories.add(server_cat);
+                            if ( !proxy.equalsIgnoreCase("full") ) {
+                            	if ( openid != null ) {
+                            		server_cat.setAttribute("remote_las", trib.getURL()+Constants.GET_AUTH);
+                            	}
+                            }
+                            categories.add(server_cat);
 						}
 						InputStream is = new ByteArrayInputStream(Util.toJSON(categories, "categories").toString().getBytes("UTF-8"));
 						lasProxy.stream(is, response.getOutputStream());
