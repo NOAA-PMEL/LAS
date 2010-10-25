@@ -1,3 +1,12 @@
+#if ($las_request.getProperty("las", "output_type") == 'json')
+
+$las_response.toJSON()
+
+#elseif ($las_request.getProperty("las", "output_type") == 'xml')
+
+$las_response.toString()
+
+#else
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
 #*  --- this is a multi-line Velocity Template comment
@@ -197,3 +206,4 @@
 		<br>
 	</body>
 </html>
+#end
