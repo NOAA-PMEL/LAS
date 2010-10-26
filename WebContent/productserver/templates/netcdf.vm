@@ -55,4 +55,3 @@ $response.sendRedirect("$las_response.getResult('netcdf')")
 </body>
 </html>
 #end
-#end
