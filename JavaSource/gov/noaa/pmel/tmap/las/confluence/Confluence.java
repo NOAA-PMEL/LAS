@@ -4,6 +4,7 @@ import gov.noaa.pmel.tmap.las.exception.LASException;
 import gov.noaa.pmel.tmap.las.jdom.JDOMUtils;
 import gov.noaa.pmel.tmap.las.jdom.LASBackendResponse;
 import gov.noaa.pmel.tmap.las.jdom.LASConfig;
+import gov.noaa.pmel.tmap.las.jdom.LASKML;
 import gov.noaa.pmel.tmap.las.jdom.LASMapScale;
 import gov.noaa.pmel.tmap.las.jdom.LASRegionIndex;
 import gov.noaa.pmel.tmap.las.jdom.LASUIRequest;
@@ -21,7 +22,9 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
+import java.net.URL;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -100,7 +103,7 @@ public class Confluence extends LASAction {
 			request_format = "";
 			// Process the request...
 			String url = request.getRequestURL().toString();
-
+			String proxy = lasConfig.getGlobalPropertyValue("product_server", "proxy");
 
 			if ( url.contains(Constants.GET_CATEGORIES) ) {
 				ArrayList<Category> categories = new  ArrayList<Category>();
@@ -114,7 +117,6 @@ public class Confluence extends LASAction {
 						// Start with the categories on this server...
 						Category local_cat = new Category(lasConfig.getTitle(), lasConfig.getTopLevelCategoryID()); 
 						categories.add(local_cat);
-						String proxy = lasConfig.getGlobalPropertyValue("product_server", "proxy");
 						
 						for (Iterator servIt = servers.iterator(); servIt.hasNext();) {
 							Tributary trib = (Tributary) servIt.next();						
@@ -211,7 +213,7 @@ public class Confluence extends LASAction {
 					return mapping.findForward("error");
 				}
 				ArrayList<String> ids = ui_request.getDatasetIDs();
-				String proxy = lasConfig.getGlobalPropertyValue("product_server", "proxy");
+				
 				String op = ui_request.getOperation();
 				String service = "";
 				try {
@@ -220,7 +222,7 @@ public class Confluence extends LASAction {
 					logerror(request, "Unable to find service name.", e);
 					return mapping.findForward("error");
 				}
-				if ( ids.size() == 0 || service.equals("template")) {
+				if ( ids.size() == 0 || (service !=null && service.equals("template")) ) {
 					// Forward to the local server...
 					return mapping.findForward("LocalProductServer");
 				} else if ( ids.size() > 1 ) {
@@ -395,7 +397,17 @@ public class Confluence extends LASAction {
 			String op = lasRequest.getOperation();
 			String template = lasConfig.getTemplate(op);
 		    lasRequest.setProperty("las", "output_type", "xml");
-            
+		    // This operation depends on getting a GRID into the template context. 
+		    // Normally it comes from the config object, but in this case it has to come
+		    // over the wire from the remote location.
+		    
+            if ( op.equals(Constants.DOWNLOAD_OP_ID) ) {
+            	String dsid = lasRequest.getDatasetIDs().get(0);
+            	String varid = lasRequest.getVariableIDs().get(0);
+            	String grid_url = las_url+Constants.GET_GRID+"?dsid="+dsid+"&varid="+varid;
+            	String grid_JSON = lasProxy.executeGetMethodAndReturnResult(grid_url);
+            	request.setAttribute("grid_JSON", grid_JSON);
+            }
 		    las_url = las_url+Constants.PRODUCT_SERVER+"?xml="+lasRequest.toEncodedURLString();
 		    for (Enumeration params = request.getParameterNames(); params.hasMoreElements() ;) {
 				String param = (String) params.nextElement();
@@ -404,7 +416,11 @@ public class Confluence extends LASAction {
 					las_url = las_url + "&" + param + "=" + value;
 				}
 			}
-			
+		    if ( op.contains(Constants.GE_OP_ID) ) {
+		    	// Google Earth has a same origin policy (I'm guessing) and needs to authenticate anyway...
+		    	response.sendRedirect(las_url);
+		    	return null;
+		    }
 			String xml_response = lasProxy.executeGetMethodAndReturnResult(las_url).trim();
 			LASBackendResponse resDoc = new LASBackendResponse();
 			JDOMUtils.XML2JDOM(xml_response, resDoc);
@@ -412,7 +428,6 @@ public class Confluence extends LASAction {
 			    request.setAttribute("las_response", resDoc);
 			    return mapping.findForward("batch");
 			}
-			
 			List<Result> results = resDoc.getResults();
 			LASBackendResponse confluence_response = new LASBackendResponse();
 			for (Iterator resultsIt = results.iterator(); resultsIt.hasNext();) {
