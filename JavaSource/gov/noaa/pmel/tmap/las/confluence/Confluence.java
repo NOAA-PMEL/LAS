@@ -396,7 +396,7 @@ public class Confluence extends LASAction {
 		    	// These operations have their own interface and can run off of the data node at the user is authenticated...
 				las_url = las_url+Constants.PRODUCT_SERVER+"?xml="+lasRequest.toEncodedURLString();
 				if ( openid != null && !openid.equals("") ) {
-					las_url = las_url + "?openid=" + openid;
+					las_url = las_url + "&openid=" + openid;
 				}
 		    	response.sendRedirect(las_url);
 		    	return null;
