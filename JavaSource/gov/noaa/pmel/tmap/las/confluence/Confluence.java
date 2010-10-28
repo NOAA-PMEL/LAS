@@ -398,13 +398,13 @@ public class Confluence extends LASAction {
 		    // Normally it comes from the config object, but in this case it has to come
 		    // over the wire from the remote location.
 		    
-            if ( op.equals(Constants.DOWNLOAD_OP_ID) ) {
-            	String dsid = lasRequest.getDatasetIDs().get(0);
-            	String varid = lasRequest.getVariableIDs().get(0);
-            	String grid_url = las_url+Constants.GET_GRID+"?dsid="+dsid+"&varid="+varid;
-            	String grid_JSON = lasProxy.executeGetMethodAndReturnResult(grid_url);
-            	request.setAttribute("grid_JSON", grid_JSON);
-            }
+//            if ( op.equals(Constants.DOWNLOAD_OP_ID) ) {
+//            	String dsid = lasRequest.getDatasetIDs().get(0);
+//            	String varid = lasRequest.getVariableIDs().get(0);
+//            	String grid_url = las_url+Constants.GET_GRID+"?dsid="+dsid+"&varid="+varid;
+//            	String grid_JSON = lasProxy.executeGetMethodAndReturnResult(grid_url);
+//            	request.setAttribute("grid_JSON", grid_JSON);
+//            }
 		    las_url = las_url+Constants.PRODUCT_SERVER+"?xml="+lasRequest.toEncodedURLString();
 		    for (Enumeration params = request.getParameterNames(); params.hasMoreElements() ;) {
 				String param = (String) params.nextElement();
@@ -413,8 +413,8 @@ public class Confluence extends LASAction {
 					las_url = las_url + "&" + param + "=" + value;
 				}
 			}
-		    if ( op.contains(Constants.GE_OP_ID) ) {
-		    	// Google Earth has a same origin policy (I'm guessing) and needs to authenticate anyway...
+		    if ( op.contains(Constants.GE_OP_ID) || op.equals(Constants.DOWNLOAD_OP_ID) || op.contains(Constants.ANIMATION_OP_ID) ) {
+		    	// These operations have their own interface and can run off of the data node at the user is authenticated...
 		    	response.sendRedirect(las_url);
 		    	return null;
 		    }
