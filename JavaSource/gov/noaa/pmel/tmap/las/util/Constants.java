@@ -37,5 +37,6 @@ public class Constants {
 	
 	public static final String GE_OP_ID = "GE";
 	public static final String DOWNLOAD_OP_ID = "Interactive_Download"; // The id of the interactive download operation.
+	public static final String ANIMATION_OP_ID = "Animation";
 	
 }
