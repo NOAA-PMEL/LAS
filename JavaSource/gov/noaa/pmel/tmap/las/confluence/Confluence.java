@@ -394,6 +394,7 @@ public class Confluence extends LASAction {
 			String op = lasRequest.getOperation();
 			if ( op.contains(Constants.GE_OP_ID) || op.equals(Constants.DOWNLOAD_OP_ID) || op.contains(Constants.ANIMATION_OP_ID) ) {
 		    	// These operations have their own interface and can run off of the data node at the user is authenticated...
+				las_url = las_url+Constants.PRODUCT_SERVER+"?xml="+lasRequest.toEncodedURLString();
 		    	response.sendRedirect(las_url);
 		    	return null;
 		    }
