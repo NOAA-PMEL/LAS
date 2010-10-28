@@ -244,7 +244,7 @@ public class Confluence extends LASAction {
 								
 								
 								if ( proxy.equalsIgnoreCase("full") ) {
-									return processRequest(mapping, request, response, lasConfig, las_url, key);
+									return processRequest(mapping, request, response, lasConfig, las_url, key, openid);
 								} else {
 									las_url = las_url + Constants.PRODUCT_SERVER + "?" + request.getQueryString();	
 									lasProxy.executeGetMethodAndStreamResult(las_url, response);
@@ -276,7 +276,7 @@ public class Confluence extends LASAction {
 						String las_url = trib.getURL();
 
 						if ( proxy.equalsIgnoreCase("full") ) {
-							return processRequest(mapping, request, response, lasConfig, las_url, server_key);
+							return processRequest(mapping, request, response, lasConfig, las_url, server_key, openid);
 						} else {
 							las_url = las_url + Constants.PRODUCT_SERVER + "?" + request.getQueryString();	
 							lasProxy.executeGetMethodAndStreamResult(las_url, response);
@@ -369,7 +369,7 @@ public class Confluence extends LASAction {
 			}
 			return null;
 		}
-		private ActionForward processRequest(ActionMapping mapping, HttpServletRequest request, HttpServletResponse response, LASConfig lasConfig, String las_url, String server_key) throws JDOMException, HttpException, IOException, LASException {
+		private ActionForward processRequest(ActionMapping mapping, HttpServletRequest request, HttpServletResponse response, LASConfig lasConfig, String las_url, String server_key, String openid) throws JDOMException, HttpException, IOException, LASException {
 			String requestXML = request.getParameter("xml");
 			LASUIRequest lasRequest = new LASUIRequest();
 			if ( requestXML != null ) {
@@ -395,6 +395,9 @@ public class Confluence extends LASAction {
 			if ( op.contains(Constants.GE_OP_ID) || op.equals(Constants.DOWNLOAD_OP_ID) || op.contains(Constants.ANIMATION_OP_ID) ) {
 		    	// These operations have their own interface and can run off of the data node at the user is authenticated...
 				las_url = las_url+Constants.PRODUCT_SERVER+"?xml="+lasRequest.toEncodedURLString();
+				if ( openid != null && !openid.equals("") ) {
+					las_url = las_url + "?openid=" + openid;
+				}
 		    	response.sendRedirect(las_url);
 		    	return null;
 		    }
