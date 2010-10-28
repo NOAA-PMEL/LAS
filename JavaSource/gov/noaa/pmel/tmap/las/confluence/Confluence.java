@@ -392,6 +392,11 @@ public class Confluence extends LASAction {
 	        }
 			LASUIRequest originalRequest = (LASUIRequest) lasRequest.clone();
 			String op = lasRequest.getOperation();
+			if ( op.contains(Constants.GE_OP_ID) || op.equals(Constants.DOWNLOAD_OP_ID) || op.contains(Constants.ANIMATION_OP_ID) ) {
+		    	// These operations have their own interface and can run off of the data node at the user is authenticated...
+		    	response.sendRedirect(las_url);
+		    	return null;
+		    }
 			String template = lasConfig.getTemplate(op);
 		    lasRequest.setProperty("las", "output_type", "xml");
 		    // This operation depends on getting a GRID into the template context. 
@@ -413,11 +418,7 @@ public class Confluence extends LASAction {
 					las_url = las_url + "&" + param + "=" + value;
 				}
 			}
-		    if ( op.contains(Constants.GE_OP_ID) || op.equals(Constants.DOWNLOAD_OP_ID) || op.contains(Constants.ANIMATION_OP_ID) ) {
-		    	// These operations have their own interface and can run off of the data node at the user is authenticated...
-		    	response.sendRedirect(las_url);
-		    	return null;
-		    }
+		    
 			String xml_response = lasProxy.executeGetMethodAndReturnResult(las_url).trim();
 			LASBackendResponse resDoc = new LASBackendResponse();
 			JDOMUtils.XML2JDOM(xml_response, resDoc);
