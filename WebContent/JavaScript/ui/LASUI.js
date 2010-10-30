@@ -14,7 +14,8 @@ function LASUI () {
 		"DepthWidget" : {"widgetType":null},
 		"analysis" : {"enabled":false},
 		"options": {"plot" :{},"download":{},"external":{}},
-		"operations": {"plot" :{},"download":{},"external":{}}
+		"operations": {"plot" :{},"download":{},"external":{}},
+		"auth_win" : {}
 
 	};
 
@@ -45,7 +46,8 @@ function LASUI () {
 		"xybox" : {},
 		"categorynames" : [],
 		"analysis" : {"type":null,"axes":{}},
-		"selection" : {"x":{"min":null,"max" :null},"y":{"min":null,"max" :null},"z":{"min":null,"max" :null},"t":{"min":null,"max":null}}
+		"selection" : {"x":{"min":null,"max" :null},"y":{"min":null,"max" :null},"z":{"min":null,"max" :null},"t":{"min":null,"max":null}},
+		"authorized" : {}
 	};
 
 	//DOM anchor ids.
@@ -294,49 +296,88 @@ LASUI.prototype.setCategoryTreeNode = function (strJson, node, id) {
 		node.children=[];
 	
 	for(var i=0; i<node.category.getCategorySize();i++) {
-		if(node.category.getChild(i).remote_las) 
-			this.authorizeRemoteLAS(node, i,id)
-		else		
-			this.setCategoryTreeSubNode(node, i,id);
-		
+		this.setCategoryTreeSubNode(node, i,id);
 	}
 	this.expand(node);
 }
 LASUI.prototype.authorizeRemoteLAS=function(node,i,id) {
-	//if(!document.all)
-	//	var req = new XMLHttpRequest(this);
-	//else
-	//	var req = new ActiveXObject("Microsoft.XMLHTTP");
-	
-	var url =node.category.getChild(i).remote_las;
-	if(this.state.extra_args)
-		url+='?'+this.state.extra_args;
-	var auth_frame = document.createElement("IFRAME");
-	auth_frame.onload=this.authorizeRemoteLASHandler.LASBind(this, auth_frame, node, i, id);
-//	req.onreadystatechange = this.authorizeRemoteLASHandler.LASBind(this, req, node, i, id);
-//	req.open("GET", url);
-//	req.send(null);
-	auth_frame.style.height="0px";
-	auth_frame.style.width="0px"
-	 auth_frame.style.position="absolute";
-	auth_frame.src=url;
-	document.body.appendChild(auth_frame);
+		
+	var url = node.category.getChild(i).remote_las;
+	var img = document.createElement('IMG');
+        img.onload = this.remoteAuthSuccess.LASBind(this,url,node,i,id);
+        img.onerror = this.openAuthWindow.LASBind(this,url,node,i,id);
+ 	img.src =  url.replace('auth.do','output/test.png');
 
-	window.status='Authenticating with remote LAS at ' + url;
 }
-LASUI.prototype.authorizeRemoteLASHandler= function(evt) {
+LASUI.prototype.openAuthWindow=function(evt) {
+        var args = arguments;
+        var url = args[1];
+        var node= args[2];
+        var i = args[3];
+        var id = args[4];
+
+	var auth_url = url;
+        if(this.state.extra_args)
+                auth_url+='?'+this.state.extra_args;
+
+	this.refs.auth_win[url] = window.open(auth_url);	
+	if(!document.all){
+		this.refs.auth_win[url].onunload = this.checkRemoteLAS.LASBind(this,url,node,i,id);
+		this.refs.auth_win[url].onload = this.checkRemoteLAS.LASBind(this,url,node,i,id);
+	} else {
+		//IE polling ... so lame
+		setTimeout(	this.checkRemoteLAS(null,url,node,i,id),5000);
+	}
+
+}
+LASUI.prototype.checkRemoteLAS = function(evt) {
 	var args = arguments;
-	var req =args[1]
-	var node = args[2];
+	var url = args[1];
+	var node= args[2];
 	var i = args[3];
 	var id = args[4];
+	if(!this.refs.auth_ct)
+		this.refs.auth_ct={};
+	if(!this.refs.auth_ct[url])
+		this.refs.auth_ct[url]=0	
+	this.refs.auth_ct[url]++;
 	
-	//if(req.readyState == 4) { //validate auth response here
-	//	window.status = '';
-		this.setCategoryTreeSubNode(node, i,id);
-	req.parentNode.removeChild(req);
-	//}
+	var img = document.createElement('IMG');
+	img.onload = this.remoteAuthSuccess.LASBind(this,url,node,i,id); 	
+	//img.onerror = function () {this.src = this.src};
+	//if(document.all&&this.refs.auth_ct[url]<1000) 
+	//	img.onerror = this.checkRemoteLAS.LASBind(this,url,node,i,id);
+	//if(document.all&&this.refs.auth_ct[url]<1000) { 
+	//	setTimeout(img.src = url.replace('auth.do','output/test.png'),1000);
+	//} else if (!document.all)	
+		img.src = url.replace('auth.do','output/test.png');
+	img.style.display = 'none';
+	delete(img);
+//	document.body.appendChild(img);
+	
 }
+LASUI.prototype.remoteAuthSuccess= function(evt) {
+	var args = arguments;
+	var url = args[1]
+	var node= args[2];
+	var i = args[3];
+	var id = args[4];
+	this.expand(node.children[i]);
+	this.state.authorized[url]=true;
+	if(this.refs.auth_win[url]) this.refs.auth_win[url].close();
+	if(!node.children[i].category) {
+		node.children[i].IMGNode.src = "JavaScript/components/mozilla_blu.gif";
+				if(!document.all)
+			var req = new XMLHttpRequest(this);
+		else
+			var req = new ActiveXObject("Microsoft.XMLHTTP");
+		req.onreadystatechange = this.AJAXhandler.LASBind(this, req, "this.setCategoryTreeNode(req.responseText,args[3].children[args[4]],args[3].category.getChild(args[4]));", node, i);
+		req.open("GET", this.hrefs.getCategories.url + this.state.extra_args + "catid=" + node.category.getChildID(i));
+		req.send(null);
+		this.state.catid=node.category.getChildID(i);
+	}
+}
+
 /**
  * Method to show category and variable metadata.
  */
@@ -382,6 +423,7 @@ LASUI.prototype.createCategoryTreeNode = function (node, i, id) {
 	node.children[i].LINode.className = "LASTreeLINode";
 
 	node.children[i].IMGNode =  document.createElement("IMG");
+	node.children[i].IMGNode.id = node.category.getChildID(i);
 	node.children[i].IMGNode.onclick = this.selectCategory.LASBind(this, node, i);
 
 	node.children[i].IMGNode.src = "JavaScript/ui/plus.gif";
@@ -487,9 +529,10 @@ LASUI.prototype.createVariableTreeNode = function (node, i) {
 		node.children[i].INPUTNode.name=node.category.getDatasetID(i);
 	}
 	node.children[i].INPUTNode.type="radio";
+	node.children[i].INPUTNode.id = "/lasdata/datasets/"+node.category.getDatasetID()+"/variables/"+node.category.getChildID(i)+"_radio";
 	node.children[i].className = "LASRadioInputNode";
 	node.children[i].INPUTNode.onclick=this.setVariable.LASBind(this, node, i);
-	node.children[i].INPUTNode.id = node.category.getChildID(i);
+	//node.children[i].INPUTNode.id = node.category.getChildID(i);
 
 	var table = document.createElement("TABLE");
 	table.width="100%";
@@ -540,7 +583,7 @@ LASUI.prototype.onSetVariable = function() {
  			if(varObj) {
 				if(varObj.grid_type!="scattered"&&varObj.grid_type!="vector"&&document.getElementsByName("variables").length==1){
 					if(this.refs.analysis.enabled) {
-						this.hideAnalysis();
+						//this.hideAnalysis();
 						this.showAnalysis();
 					}
 					document.getElementById("analysisWrapper").style.display="";
@@ -792,13 +835,19 @@ LASUI.prototype.selectCategory = function (evt) {
 			this.state.categories = {};
 			this.state.categories[parentNode.category.getChild(i).ID]={};
 		}
+		
 		for(var c=0;c< parentNode.children.length;c++) {
 			this.collapse(parentNode.children[c]);
 			for(var b=0; b<this.state.categorynames.length;b++)
 				if(this.state.categorynames[b]==parentNode.category.getChildName(c))
 					this.state.categorynames.splice(b,this.state.categorynames.length-b);
 		}
-		this.expand(parentNode.children[i]);	//expand the category if it has been selected
+		if(parentNode.category.getChild(i).remote_las&&!this.state.authorized[parentNode.category.getChild(i).remote_las]) {
+                        this.authorizeRemoteLAS(parentNode, i, parentNode.category.getChild(i).ID);
+						
+		} else  {
+			this.expand(parentNode.children[i]);	//expand the category if it has been selected
+		}
 
 		if(parentNode == this.refs.categories)
 			this.state.categorynames = [];
@@ -810,7 +859,7 @@ LASUI.prototype.selectCategory = function (evt) {
 				this.state.categorynames.splice(c,this.state.categorynames.length-c);
 
 	}
-	if(!parentNode.children[i].category) {
+	if(!parentNode.children[i].category&&!parentNode.category.getChild(i).remote_las) {
 		parentNode.children[i].IMGNode.src = "JavaScript/components/mozilla_blu.gif";
 				if(!document.all)
 			var req = new XMLHttpRequest(this);
@@ -2703,6 +2752,10 @@ LASUI.prototype.setVisualization = function (d, priority) {
 						
 						this.state.view.widgets=newview;
 						this.updateConstraints(this.state.view.widgets);
+						try {
+						if(this.state.operations.getOperationByID(plotId).optiondef.IDREF)
+                					this.getOptions(this.state.operations.getOperationByID(plotId).optiondef.IDREF, "plot",false);
+						} catch (e) {}
 						stop=true;
 						}
 					      break;
@@ -2817,3 +2870,10 @@ LASUI.prototype.urlencode = function ( str ) {
         return "%"+m2.toUpperCase();
     });
 }
+LASUI.prototype.pause = function(millis) {
+	var date = new Date();
+	var curDate = null;
+
+	do { curDate = new Date(); } 
+	while(curDate-date < millis);
+} 
