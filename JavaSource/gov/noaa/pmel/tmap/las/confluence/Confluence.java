@@ -101,6 +101,9 @@ public class Confluence extends LASAction {
 			// Process the request...
 			String url = request.getRequestURL().toString();
 			String proxy = lasConfig.getGlobalPropertyValue("product_server", "proxy");
+			if ( proxy == null ) {
+				proxy = "partial";
+			}
 
 			if ( url.contains(Constants.GET_CATEGORIES) ) {
 				ArrayList<Category> categories = new  ArrayList<Category>();
