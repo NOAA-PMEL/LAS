@@ -320,14 +320,20 @@ LASUI.prototype.openAuthWindow=function(evt) {
         if(this.state.extra_args)
                 auth_url+='?'+this.state.extra_args;
 
-	this.refs.auth_win[url] = window.open(auth_url);	
-	if(!document.all){
+	this.refs.auth_win[url] = window.open(auth_url);
+	if(this.refs.auth_win[url] == null) {
+		alert("Please turn off your pop-up blocker to allow this LAS to authenticate with remote LAS servers.");
+		return;
+	}	
+	//if(!document.all){
 		this.refs.auth_win[url].onunload = this.checkRemoteLAS.LASBind(this,url,node,i,id);
 		this.refs.auth_win[url].onload = this.checkRemoteLAS.LASBind(this,url,node,i,id);
-	} else {
+	//} 
+
 		//IE polling ... so lame
-		setTimeout(	this.checkRemoteLAS(null,url,node,i,id),5000);
-	}
+		setTimeout(this.checkRemoteLAS(null,url,node,i,id),5000);
+	
+	
 
 }
 LASUI.prototype.checkRemoteLAS = function(evt) {
