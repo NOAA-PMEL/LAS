@@ -28,13 +28,19 @@ set mode ver:always
 
 IF ($ferret_curvi_coord_mapfile"0|*>1") THEN   DEFINE SYMBOL cf_map_url \"($ferret_curvi_coord_mapfile)\"
 
-IF ($cf_map_($num)_chained"0|1|*>1) THEN
-!  DEFINE SYMBOL cf_map_url \"($ferret_curvi_coord_map2file)\"
-  IF ($constraint_0_rhs"0|*>1) THEN DEFINE SYMBOL cf_map_url \"($ferret_curvi_coord_map($constraint_0_rhs)file)\"
-ELSE
-!  DEFINE SYMBOL cf_map_url ($ferret_curvi_coord_map2file)
-  IF ($constraint_0_rhs"0|*>1) THEN DEFINE SYMBOL cf_map_url \"($ferret_curvi_coord_map($constraint_0_rhs)file)\"
+IF ($ferret_curvi_coord_map($constraint_0_rhs)file"0|*>1") THEN
+   IF ($cf_map_($num)_chained"0|1|*>1) THEN
+   !  DEFINE SYMBOL cf_map_url \"($ferret_curvi_coord_map2file)\"
+     IF ($constraint_0_rhs"0|*>1) THEN DEFINE SYMBOL cf_map_url_test \"($ferret_curvi_coord_map($constraint_0_rhs)file)\"
+   ELSE
+   !  DEFINE SYMBOL cf_map_url ($ferret_curvi_coord_map2file)
+     IF ($constraint_0_rhs"0|*>1) THEN DEFINE SYMBOL cf_map_url_test \"($ferret_curvi_coord_map($constraint_0_rhs)file)\"
+   ENDIF
+   ! See if individual map files exist, else use the one named in ferret_curvi_coord_mapfile
+   LET file_exists = `TEST_OPENDAP("($cf_map_url_test)")`
+   IF `file_exists .EQ. 0` THEN DEFINE SYMBOL cf_map_url = ($cf_map_url_test)
 ENDIF
+
 
 DEFINE SYMBOL cf_map_var = ($ferret_curvi_coord_mapvar)
 USE ($cf_map_url)
@@ -163,11 +169,13 @@ IF `($constraint_0_rhs"0|*>1") EQ 0` THEN
    DEFINE SYMBOL constraint_0_rhs =`XBOX[D=($mapfile_num),GX=map,I=2],P=3`
 ENDIF
 
-DEFINE SYMBOL ferret_plot_title @AC($expr1) ($data_title) ($expr2) ($data_units) Regridded to ($constraint_0_rhs)@IM09@AC Grid
+DEFINE SYMBOL regrid_lab = Regridded to ($constraint_0_rhs)@IM09@AC Grid
+IF ($constraint_0_rhs"0|d>1|*>0") THEN DEFINE SYMBOL regrid_lab Regridded to Rectilinear Grid
+DEFINE SYMBOL ferret_plot_title ($expr1) ($data_title) ($expr2) ($data_units) ($regrid_lab)
 
 IF ($expr3"0|*>1") THEN
    DEFINE SYMBOL ferret_plot_var ($expr1)the_var_rect_region($expr3)the_var_rect_region($expr4)
-   DEFINE SYMBOL ferret_plot_title ($expr1) ($data_title) ($expr3) ($data_title) ($expr4) ($data_units) Regridded to ($constraint_0_rhs)@IM09@AC Grid
+   DEFINE SYMBOL ferret_plot_title ($expr1) ($data_title) ($expr3) ($data_title) ($expr4) ($data_units) ($regrid_lab)
 ENDIF
 
 
@@ -179,11 +187,11 @@ IF ($analysis_def"0|*>1") THEN
    
    DEFINE SYMBOL ferret_plot_base_var ($ferret_plot_var)
    
-   DEFINE SYMBOL ferret_plot_title @AC($expr1) ($data_title) ($expr2) ($data_units) Regridded to ($constraint_0_rhs)@IM09@AC Grid
+   DEFINE SYMBOL ferret_plot_title ($expr1) ($data_title) ($expr2) ($data_units) ($regrid_lab)
    
    IF ($expr3"0|*>1") THEN
       DEFINE SYMBOL ferret_plot_var ($expr1)the_var_rect_region($analysis_def)($expr3)the_var_rect_region($analysis_def)($expr4)
-      DEFINE SYMBOL ferret_plot_title ($expr1) ($data_title) ($expr3) ($data_title) ($expr4) ($data_units) Regridded to ($constraint_0_rhs)@IM09@AC Grid
+      DEFINE SYMBOL ferret_plot_title ($expr1) ($data_title) ($expr3) ($data_title) ($expr4) ($data_units) ($regrid_lab)
    ENDIF
 ENDIF
 
