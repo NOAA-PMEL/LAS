@@ -181,6 +181,8 @@ ENDIF
 
 ! Vector xskip and yskip
 
+LET xs = 1
+LET ys = 1
 IF ($ferret_vector_skip"0|*>1") THEN
    LET comloc = `STRINDEX("($ferret_vector_skip)", ",")`
    LET nlen = `STRLEN("($ferret_vector_skip)")`
@@ -222,24 +224,6 @@ ENDIF
 ! Do the plot. On VECTOR/SET the /XSKIP and /YSKIP are ignored. 
 !
 
-! DEFINE SYMBOL shade_var = ($ferret_vector_x1)
-! !IF ($native_curvilinear_xy"0") THEN DEFINE SYMBOL  shade_var = ($ferret_vector_x1), xcoord, ycoord
-
-! IF ($ferret_curvi_quals"0|*>1") THEN 
-!    IF ($ferret_lon_modulo"1|1|0|yes>1|no>0|*>0") THEN  DEFINE SYMBOL shade_qualifiers = ($shade_qualifiers)/MODULO
-! ENDIF
-
-! SHADE/pal=white/nokey($shade_qualifiers)/TITLE="($ferret_plot_title)"/SET  ($shade_var)
-!    IF ($xform_dms"0|*>1") THEN PPL XFOR (($xform_dms))
-!    IF ($yform_dms"0|*>1") THEN PPL YFOR (($yform_dms))
-!    
-!       if ($labnum_dset"0|*>1") THEN go unlabel ($labnum_dset)
-!       if ($labnum_datitl"0|*>1") THEN go unlabel ($labnum_datitl)
-!       if ($labnum_dods"0|*>1") THEN go unlabel ($labnum_dods)
-!       IF `($title_size%0|*>1%)` THEN PPL LABSET ($title_size)
-! PPL SHADE
-! DEFINE SYMBOL qualifiers ($qualifiers)/OVER/NOLAB
-
 ! use XSKIP and YSKIP as qualifiers if given
 IF ($ferret_vector_skip"0") THEN
 
@@ -253,11 +237,6 @@ IF ($ferret_vector_skip"0") THEN
       VECTOR($qualifiers)/TITLE="($ferret_plot_title)"/XSKIP=`xs`/YSKIP=`ys` \
        ($ferret_diff_var_p360)
 
-   IF `($ferret_vector_style"1|default>1|*>0") GT 0` THEN  
-      DEFINE SYMBOL n_left_labels = `($n_left_labels"0")+1`
-      DEFINE SYMBOL upper_left_($n_left_labels) = Vector xskip=`xs`,yskip=`ys`
-   ENDIF
-
 ELSE
    VECTOR($qualifiers)/TITLE="($ferret_plot_title)"  \
        ($ferret_diff_var)
@@ -268,10 +247,25 @@ ELSE
    VECTOR($qualifiers)/TITLE="($ferret_plot_title)"  \
        ($ferret_diff_var_p360)
 
-!   IF `($ferret_vector_style"1|default>1|*>0") GT 0` THEN  
-!      DEFINE SYMBOL n_left_labels = `($n_left_labels"0")+1`
-!      DEFINE SYMBOL upper_left_($n_left_labels) = Automatic vector xskip,yskip 
-!   ENDIF
+ENDIF
+
+! Label with skip, if style not flowline=1 and if skip >1 in either direction
+IF `($flowline_vectors"0|0|*>1") EQ 0` THEN  
+   IF `( ($PPL_VEC_XSKIP"0") GT 1)  OR (($PPL_VEC_YSKIP"0") GT 1)` THEN DEFINE SYMBOL skiplab = 1
+   IF `(xs GT 1) OR (ys GT 1)` THEN 
+      DEFINE SYMBOL skiplab = 1
+      IF `($PPL_VEC_XSKIP"0|*>1) EQ 0 AND (xs GE 1)` THEN DEFINE SYMBOL PPL_VEC_XSKIP = `xs` 
+      IF `($PPL_VEC_YSKIP"0|*>1) EQ 0 AND (ys GE 1)` THEN DEFINE SYMBOL PPL_VEC_YSKIP = `ys` 
+   ENDIF
+   IF ($skiplab"0|*>1") THEN
+      DEFINE SYMBOL n_left_labels = `($n_left_labels"0")+1`
+      DEFINE SYMBOL upper_left_($n_left_labels) = Vectors subsampled in X by ($PPL_VEC_XSKIP), in Y by ($PPL_VEC_YSKIP) 
+   ENDIF
+ENDIF
+
+IF ($flowline_density"0|*>1") THEN 
+   DEFINE SYMBOL n_left_labels = `($n_left_labels"0")+1`
+   DEFINE SYMBOL upper_left_($n_left_labels) = Flowline density factor ($flowline_density)
 ENDIF
 
 ! Overall header at the very top
@@ -302,4 +296,3 @@ IF ($ferret_mark_grid"0|no>0|all>1|subsample>1|*>0") THEN GO mark_grid
 GO LAS_results box
 
 ! End of $RCSfile -----------------------------------------------------
-
