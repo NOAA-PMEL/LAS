@@ -47,7 +47,8 @@ function LASUI () {
 		"categorynames" : [],
 		"analysis" : {"type":null,"axes":{}},
 		"selection" : {"x":{"min":null,"max" :null},"y":{"min":null,"max" :null},"z":{"min":null,"max" :null},"t":{"min":null,"max":null}},
-		"authorized" : {}
+		"authorized" : {},
+		"authorizing" : {}
 	};
 
 	//DOM anchor ids.
@@ -299,8 +300,8 @@ LASUI.prototype.setCategoryTreeNode = function (strJson, node, id) {
 		this.setCategoryTreeSubNode(node, i,id);
 		if(node.category.getChild(i).remote_las) {
 			var img = document.createElement("IMG");
-			//img.src = node.category.getChild(i).remote_las.replace('auth.do','output/test.png');
-			//img.onload = this.remoteAuthSuccess.LASBind(this,node,i); 
+			img.src = node.category.getChild(i).remote_las.replace('auth.do','output/test.png');
+			img.onload = this.remoteAuthSuccess.LASBind(this,node,i,true); 
 		}
 	}
 	
@@ -360,11 +361,13 @@ LASUI.prototype.remoteAuthSuccess= function(evt) {
 	var args = arguments;
 	var node= args[1];
 	var i = args[2];
+	var initialCheck = args[3];
 	var url = node.category.getChild(i).remote_las;
-	this.expand(node.children[i]);
 	this.state.authorized[url]=true;
+	this.state.authorizing[url]=false;
 	if(this.refs.auth_win[url]) this.refs.auth_win[url].close();
-	if(!node.children[i].category) {
+	if(!node.children[i].category&&!initialCheck) {
+		this.expand(node.children[i]);
 		node.children[i].IMGNode.src = "JavaScript/components/mozilla_blu.gif";
 				if(!document.all)
 			var req = new XMLHttpRequest(this);
@@ -844,8 +847,9 @@ LASUI.prototype.selectCategory = function (evt) {
 		if(parentNode.category.getChild(i).remote_las)
 			this.checkRemoteLAS(null,parentNode,i);
 
-		if(parentNode.category.getChild(i).remote_las&&!this.state.authorized[parentNode.category.getChild(i).remote_las]) {
+		if(parentNode.category.getChild(i).remote_las&&!this.state.authorized[parentNode.category.getChild(i).remote_las]&&!this.state.authorizing[parentNode.category.getChild(i).remote_las]) {
                        //has to go here for chrom popups
+	this.state.authorizing[parentNode.category.getChild(i).remote_las]=true;
         var url = parentNode.category.getChild(i).remote_las;
         var auth_url = url;
         if(this.state.extra_args)
