@@ -135,11 +135,6 @@ IF `($ferret_vector_style"0|default>0|1|*>0") GT 0` THEN
    DEFINE SYMBOL flowline_vectors = 1
 ENDIF
 
-! Vector density for flowline plots
-
-IF `($ferret_vector_density"0|*>1") GT 0` THEN  
-   DEFINE SYMBOL qualifiers = ($qualifiers)/DENSITY=($ferret_vector_density)
-ENDIF
 
 ! Vector length scale
 
@@ -149,6 +144,8 @@ ENDIF
 
 ! Vector xskip and yskip
 
+LET xs = 1
+LET ys = 1
 IF ($ferret_vector_skip"0|*>1") THEN
    LET comloc = `STRINDEX("($ferret_vector_skip)", ",")`
    LET nlen = `STRLEN("($ferret_vector_skip)")`
@@ -170,6 +167,12 @@ IF ($ferret_vector_skip"0|*>1") THEN
 
     DEFINE SYMBOL qualifiers = ($qualifiers)/XSKIP=`xs`/YSKIP=`ys`
 
+! Vector density for flowline plots
+    IF ($flowline_vectors"0|*>1") THEN 
+       DEFINE SYMBOL qualifiers = ($qualifiers)/DENSITY=`xs`
+       DEFINE SYMBOL flowline_density = `xs`
+       CANCEL SYMBOL ferret_vector_skip
+    ENDIF
 ENDIF
 
 ! Line color
@@ -250,17 +253,27 @@ ELSE
 
    ELSE
       VECTOR($qualifiers)/TITLE=" " ($ferret_vector_1), ($ferret_vector_2)
-
+      DEFINE SYMBOL no_dset_label = 1
    ENDIF
 ENDIF
 
 ! Label with skip, if style not flowline=1 and if skip >1 in either direction
-IF `($flowline_vectors"0") EQ 0` THEN  
-   IF `( ($PPL_VEC_XSKIP"0|*>1") GT 1)  OR (($PPL_VEC_YSKIP"0|*>1") GT 1)` THEN
-      DEFINE SYMBOL n_left_labels = `($n_left_labels"0")+1`
-      DEFINE SYMBOL upper_left_($n_left_labels) = \
-      Vector xskip=($PPL_VEC_XSKIP), yskip=($PPL_VEC_YSKIP) 
+IF `($flowline_vectors"0|0|*>1") EQ 0` THEN  
+   IF `( ($PPL_VEC_XSKIP"0") GT 1)  OR (($PPL_VEC_YSKIP"0") GT 1)` THEN DEFINE SYMBOL skiplab = 1
+   IF `(xs GT 1) OR (ys GT 1)` THEN 
+      DEFINE SYMBOL skiplab = 1
+      IF `($PPL_VEC_XSKIP"0|*>1) EQ 0 AND (xs GE 1)` THEN DEFINE SYMBOL PPL_VEC_XSKIP = `xs` 
+      IF `($PPL_VEC_YSKIP"0|*>1) EQ 0 AND (ys GE 1)` THEN DEFINE SYMBOL PPL_VEC_YSKIP = `ys` 
    ENDIF
+   IF ($skiplab"0|*>1") THEN
+      DEFINE SYMBOL n_left_labels = `($n_left_labels"0")+1`
+      DEFINE SYMBOL upper_left_($n_left_labels) = Vectors subsampled in X by ($PPL_VEC_XSKIP), in Y by ($PPL_VEC_YSKIP) 
+   ENDIF
+ENDIF
+
+IF ($flowline_density"0|*>1") THEN 
+   DEFINE SYMBOL n_left_labels = `($n_left_labels"0")+1`
+   DEFINE SYMBOL upper_left_($n_left_labels) = Flowline density factor ($flowline_density)
 ENDIF
 
 ! Overall header at the very top
@@ -282,6 +295,8 @@ ELIF ($ferret_land_type"0|none>0|contour>1|filled>0|*>0") THEN
      GO land  ($ferret_land_arg)
   ENDIF
 ENDIF
+
+IF ($no_dset_label"0|*>1") THEN CANCEL SYMBOL upper_right*
 
 GO labels_above_plot
 
