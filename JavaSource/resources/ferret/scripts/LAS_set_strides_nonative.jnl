@@ -267,7 +267,7 @@ LET need_comma = 0
 IF `($xstride"0|1>0|*>1") + ($ystride"0|1>0|*>1") + ($zstride"0|1>0|*>1") + ($tstride"0|1>0|*>1") GT 0` THEN
 
    DEFINE SYMBOL n_left_labels = `($n_left_labels"0")+1`
-   DEFINE SYMBOL upper_left_($n_left_labels) = Strided 
+   DEFINE SYMBOL upper_left_($n_left_labels) = Subsampled 
 
    IF `($xstride"0|1>0|*>1")` THEN 
       DEFINE SYMBOL upper_left_($n_left_labels) =\
