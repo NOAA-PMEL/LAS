@@ -171,7 +171,7 @@ DEFINE SYMBOL ystride = `ystride`
 DEFINE SYMBOL zstride = `zstride`
 DEFINE SYMBOL tstride = `tstride`
 
-
+DEFINE SYMBOL add_to_title = Points subsampled
 IF `($region_x_range"0|*>1") GT 0` THEN
       DEFINE SYMBOL modax = "`pvar, RETURN=xmod`"
       GO check_modulo_factor x 
@@ -186,7 +186,7 @@ IF `($region_x_range"0|*>1") GT 0` THEN
 
       LET x_strided_var = pvar
 !      IF `STRCMP(($modax), " ") NE 0` THEN SET AXIS/MODULO `($data_var),RETURN=xaxis`
-      IF `($xstride) GT 1` THEN DEFINE SYMBOL add_to_title = Stride ($xstride) in X
+      IF `($xstride) GT 1` THEN DEFINE SYMBOL add_to_title = ($add_to_title) by ($xstride) in X
 ENDIF
 
 IF `($region_y_range"0|*>1") GT 0` THEN 
@@ -199,7 +199,7 @@ IF `($region_y_range"0|*>1") GT 0` THEN
 	 IF `(($clat_jmin) + ($clat_jmax)*($ystride)) GT jymax` THEN \
 	    IF `($clat_jmax)-($ystride) GT 0` THEN DEFINE SYMBOL clat_jmax = `($clat_jmax)-($ystride)`
       ENDIF
-      IF `($ystride) GT 1` THEN DEFINE SYMBOL add_to_title = ($add_to_title) Stride ($ystride) in Y
+      IF `($ystride) GT 1` THEN DEFINE SYMBOL add_to_title = ($add_to_title) by ($ystride) in Y
 ENDIF
       
 IF `($region_z_range"0|*>1") GT 0` THEN
@@ -215,7 +215,7 @@ IF `($region_t"0|*>1") GT 0` THEN
       IF `($tstride) GT 1` THEN
          SET AXIS/STRIDE=($tstride) `($data_var),RETURN=taxis`
          LET t_strided_var = pvar
-         DEFINE SYMBOL add_to_title = ($add_to_title) Stride ($tstride) in T
+         DEFINE SYMBOL add_to_title = ($add_to_title) by ($tstride) in T
       ENDIF
 ENDIF
 
@@ -235,9 +235,12 @@ IF `($do_curvi_xy"0|0|1|*>1") AND (($xstride"0")+($ystride"0) GT 0)` THEN
 
 ENDIF
 
+! If there was any striding, set the label to be plotted.
+IF `($add_to_title"0|Points subsampled>1|*>0")` THEN CANCEL SYMBOL add_to_title
 IF ($add_to_title"0|*>1") THEN
    DEFINE SYMBOL n_left_labels = `($n_left_labels"0") + 1`    
    DEFINE SYMBOL upper_left_($n_left_labels) = ($add_to_title)
 ENDIF
 
 ! End of $RCSfile ------------LAS_set_strides_prop.jnl--------------------------
+
