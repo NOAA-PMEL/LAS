@@ -297,51 +297,51 @@ LASUI.prototype.setCategoryTreeNode = function (strJson, node, id) {
 	
 	for(var i=0; i<node.category.getCategorySize();i++) {
 		this.setCategoryTreeSubNode(node, i,id);
+		if(node.category.getChild(i).remote_las) {
+			var img = document.createElement("IMG");
+			//img.src = node.category.getChild(i).remote_las.replace('auth.do','output/test.png');
+			//img.onload = this.remoteAuthSuccess.LASBind(this,node,i); 
+		}
 	}
+	
 	this.expand(node);
 }
-LASUI.prototype.authorizeRemoteLAS=function(node,i,id) {
-		
+LASUI.prototype.authorizeRemoteLAS=function(evt) {
+        
+	var args = arguments;
+        var node= args[1];
+        var i = args[2];
 	var url = node.category.getChild(i).remote_las;
-	var img = document.createElement('IMG');
-        img.onload = this.remoteAuthSuccess.LASBind(this,url,node,i,id);
-        img.onerror = this.openAuthWindow.LASBind(this,url,node,i,id);
- 	img.src =  url.replace('auth.do','output/test.png');
-
-}
-LASUI.prototype.openAuthWindow=function(evt) {
-        var args = arguments;
-        var url = args[1];
-        var node= args[2];
-        var i = args[3];
-        var id = args[4];
-
 	var auth_url = url;
         if(this.state.extra_args)
                 auth_url+='?'+this.state.extra_args;
 
 	this.refs.auth_win[url] = window.open(auth_url);
-	if(this.refs.auth_win[url] == null) {
+//	this.refs.auth_win[url].className = 'LASPopUpDIVNode';
+//	this.refs.auth_win[url].style.display='';
+	if(!this.refs.auth_win[url]) {
 		alert("Please turn off your pop-up blocker to allow this LAS to authenticate with remote LAS servers.");
 		return;
 	}	
-	//if(!document.all){
-		this.refs.auth_win[url].onunload = this.checkRemoteLAS.LASBind(this,url,node,i,id);
-		this.refs.auth_win[url].onload = this.checkRemoteLAS.LASBind(this,url,node,i,id);
-	//} 
+	if(!document.all){
+		this.refs.auth_win[url].onunload = this.checkRemoteLAS.LASBind(this,node,i);
+		this.refs.auth_win[url].onload = this.checkRemoteLAS.LASBind(this,node,i);
+	} 
 
-		//IE polling ... so lame
-		setTimeout(this.checkRemoteLAS(null,url,node,i,id),5000);
+
+//	this.refs.auth_win[url].src= auth_url;
+	if(document.all)
+		this.checkRemoteLAS(null,node,i);
 	
 	
 
 }
 LASUI.prototype.checkRemoteLAS = function(evt) {
 	var args = arguments;
-	var url = args[1];
-	var node= args[2];
-	var i = args[3];
-	var id = args[4];
+	var node= args[1];
+	var i = args[2];
+	var url = node.category.getChild(i).remote_las;
+	
 	if(!this.refs.auth_ct)
 		this.refs.auth_ct={};
 	if(!this.refs.auth_ct[url])
@@ -349,14 +349,8 @@ LASUI.prototype.checkRemoteLAS = function(evt) {
 	this.refs.auth_ct[url]++;
 	
 	var img = document.createElement('IMG');
-	img.onload = this.remoteAuthSuccess.LASBind(this,url,node,i,id); 	
-	//img.onerror = function () {this.src = this.src};
-	//if(document.all&&this.refs.auth_ct[url]<1000) 
-	//	img.onerror = this.checkRemoteLAS.LASBind(this,url,node,i,id);
-	//if(document.all&&this.refs.auth_ct[url]<1000) { 
-	//	setTimeout(img.src = url.replace('auth.do','output/test.png'),1000);
-	//} else if (!document.all)	
-		img.src = url.replace('auth.do','output/test.png');
+	img.onload = this.remoteAuthSuccess.LASBind(this,node,i); 	
+	img.src = url.replace('auth.do','output/test.png');
 	img.style.display = 'none';
 	delete(img);
 //	document.body.appendChild(img);
@@ -364,10 +358,9 @@ LASUI.prototype.checkRemoteLAS = function(evt) {
 }
 LASUI.prototype.remoteAuthSuccess= function(evt) {
 	var args = arguments;
-	var url = args[1]
-	var node= args[2];
-	var i = args[3];
-	var id = args[4];
+	var node= args[1];
+	var i = args[2];
+	var url = node.category.getChild(i).remote_las;
 	this.expand(node.children[i]);
 	this.state.authorized[url]=true;
 	if(this.refs.auth_win[url]) this.refs.auth_win[url].close();
@@ -848,12 +841,29 @@ LASUI.prototype.selectCategory = function (evt) {
 				if(this.state.categorynames[b]==parentNode.category.getChildName(c))
 					this.state.categorynames.splice(b,this.state.categorynames.length-b);
 		}
+		if(parentNode.category.getChild(i).remote_las)
+			this.checkRemoteLAS(null,parentNode,i);
+
 		if(parentNode.category.getChild(i).remote_las&&!this.state.authorized[parentNode.category.getChild(i).remote_las]) {
-                        this.authorizeRemoteLAS(parentNode, i, parentNode.category.getChild(i).ID);
-						
-		} else  {
-			this.expand(parentNode.children[i]);	//expand the category if it has been selected
-		}
+                       //has to go here for chrom popups
+        var url = parentNode.category.getChild(i).remote_las;
+        var auth_url = url;
+        if(this.state.extra_args)
+                auth_url+='?'+this.state.extra_args;
+
+        this.refs.auth_win[url] = window.open(auth_url);
+        if(!this.refs.auth_win[url]) {
+                alert("Please turn off your pop-up blocker to allow this LAS to authenticate with remote LAS servers.");
+                return;
+        }
+        document.body.appendChild(this.refs.auth_win[url]);
+                this.refs.auth_win[url].onunload = this.checkRemoteLAS.LASBind(this,node,i);
+                this.refs.auth_win[url].onload = this.checkRemoteLAS.LASBind(this,node,i);
+
+
+ 
+	}					
+	//this.expand(parentNode.children[i]);	//expand the category if it has been selected
 
 		if(parentNode == this.refs.categories)
 			this.state.categorynames = [];
@@ -2882,4 +2892,7 @@ LASUI.prototype.pause = function(millis) {
 
 	do { curDate = new Date(); } 
 	while(curDate-date < millis);
-} 
+}
+LASUI.prototype.checkPopups = function() {
+	
+}  
