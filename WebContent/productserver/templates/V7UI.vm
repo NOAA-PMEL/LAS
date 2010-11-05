@@ -102,6 +102,11 @@
 #if ($request.getParameter('openid')!="")
                                 'openid' :'$request.getParameter('openid')',
 #end
+				'auth_url' : [
+
+#foreach ($auth_url in $request.getParameterValues('auth_url'))
+				"$auth_url",
+#end				],
 #if ($request.getParameter('catid')!="")
                                 'catid' :'$request.getParameter('catid')',
 #else
