@@ -879,7 +879,7 @@ LASUI.prototype.selectCategory = function (evt) {
 		if(parentNode.category.getChild(i).remote_las)
 			this.checkRemoteLAS(null,parentNode,i);
 
-		if(parentNode.category.getChild(i).remote_las&&!this.state.authorized[parentNode.category.getChild(i).remote_las]&&(!this.state.authorizing[parentNode.category.getChild(i).remote_las]&&this.refs.auth_win[parentNode.category.getChild(i).remote_las])) {
+		if(parentNode.category.getChild(i).remote_las&&!this.state.authorized[parentNode.category.getChild(i).remote_las]) {
                        //has to go here for chrom popups
 	this.state.authorizing[parentNode.category.getChild(i).remote_las]=true;
         var url = parentNode.category.getChild(i).remote_las;
@@ -899,10 +899,16 @@ LASUI.prototype.selectCategory = function (evt) {
 
  
 	}					
-	//this.expand(parentNode.children[i]);	//expand the category if it has been selected
+	if(parentNode.category.getChild(i).remote_las) {
+		if(this.state.authorized[parentNode.category.getChild(i).remote_las])
+			this.expand(parentNode.children[i]);	//expand the category if it has been selected
+		else
+			return;
+	} else
+		 this.expand(parentNode.children[i]);
 
-		if(parentNode == this.refs.categories)
-			this.state.categorynames = [];
+	if(parentNode == this.refs.categories)
+		this.state.categorynames = [];
 		this.state.categorynames.push(parentNode.category.getChildName(i));
 	} else	{
 		this.collapse(parentNode.children[i]);
