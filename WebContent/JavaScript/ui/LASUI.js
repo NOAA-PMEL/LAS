@@ -142,7 +142,10 @@ LASUI.prototype.initUI = function (anchorId)
                 this.state.catid = "";
 		this.state.dataset = "";
 	}
-
+	if(this.params.auth_url.length>0)
+		for(var i=0;i<this.params.auth_url.length;i++)
+			this.authorizeURL(this.params.auth_url[i]);
+			
 	this.fullXYExtent=true;
 	this.UIMask = document.createElement("DIV");
 	this.UIMask.className = "LASUIMask";
@@ -307,6 +310,35 @@ LASUI.prototype.setCategoryTreeNode = function (strJson, node, id) {
 	
 	this.expand(node);
 }
+LASUI.prototype.authorizeURL=function(url) {
+	var img = document.createElement("img");
+	img.onerror = this.authDialog.LASBind(this,url);
+	img.src=url.replace("auth.do","output/test.png");	
+}
+LASUI.prototype.authDialog= function(evt) {
+	var args = arguments;
+	var url = args[1];
+	var auth_url = url;
+        if(this.state.extra_args)
+                auth_url+='?'+this.state.extra_args;
+	this.toggleUIMask('');
+	var div = document.createElement("DIV");
+	div.className = "LASPopupDIVNode";
+	var text=document.createElement("H3");
+	text.appendChild(document.createTextNode("The LAS at " + url + " requires authentication. Do you want to continue?"));
+	div.appendChild(text);
+	var ok_button = document.createElement('button');
+	ok_button.appendChild(document.createTextNode('Ok'));
+	ok_button.onclick = function() {window.open(auth_url);document.body.removeChild(this.parentNode);LAS.toggleUIMask('none')};
+	div.appendChild(document.createElement("BR"));
+	div.appendChild(ok_button);
+	var cancel_button = document.createElement('button');
+        cancel_button.appendChild(document.createTextNode('Cancel'));
+        cancel_button.onclick = function() {document.body.removeChild(this.parentNode);LAS.toggleUIMask('none')};
+	div.appendChild(cancel_button);
+	document.body.appendChild(div);
+}
+
 LASUI.prototype.authorizeRemoteLAS=function(evt) {
         
 	var args = arguments;
@@ -847,7 +879,7 @@ LASUI.prototype.selectCategory = function (evt) {
 		if(parentNode.category.getChild(i).remote_las)
 			this.checkRemoteLAS(null,parentNode,i);
 
-		if(parentNode.category.getChild(i).remote_las&&!this.state.authorized[parentNode.category.getChild(i).remote_las]&&!this.state.authorizing[parentNode.category.getChild(i).remote_las]) {
+		if(parentNode.category.getChild(i).remote_las&&!this.state.authorized[parentNode.category.getChild(i).remote_las]&&(!this.state.authorizing[parentNode.category.getChild(i).remote_las]&&this.refs.auth_win[parentNode.category.getChild(i).remote_las])) {
                        //has to go here for chrom popups
 	this.state.authorizing[parentNode.category.getChild(i).remote_las]=true;
         var url = parentNode.category.getChild(i).remote_las;
