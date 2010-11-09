@@ -35,7 +35,7 @@ function loadMap (){
                    },
                    'img' : {                                   //the image
                            'src' : "$las_response.getResult("plot_image")",
-                           'width' : $las_map_scale.getXImageSize(),
+			   'width' : $las_map_scale.getXImageSize(),
                            'height' :$las_map_scale.getYImageSize(),
                            'extent' : {                                       //coordinate extent of the image being passed
                                'x' : {

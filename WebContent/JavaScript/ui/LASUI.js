@@ -95,6 +95,11 @@ function LASUI () {
  */
 LASUI.prototype.initUI = function (anchorId)
 {
+        this.UIMask = document.createElement("DIV");
+        this.UIMask.className = "LASUIMask";
+        this.toggleUIMask('none');
+        document.body.appendChild(this.UIMask);
+ 
 	if(this.params.openid)
 		this.state.extra_args+="openid="+this.params.openid+"&";
 	if(this.params.dsid||this.params.catid) {
@@ -143,14 +148,11 @@ LASUI.prototype.initUI = function (anchorId)
 		this.state.dataset = "";
 	}
 	if(this.params.auth_url.length>0)
-		for(var i=0;i<this.params.auth_url.length;i++)
+		for(var i=0;i<this.params.auth_url.length;i++) {
 			this.authorizeURL(this.params.auth_url[i]);
-			
+				
+		}
 	this.fullXYExtent=true;
-	this.UIMask = document.createElement("DIV");
-	this.UIMask.className = "LASUIMask";
-	this.toggleUIMask('none');
-	document.body.appendChild(this.UIMask);
 	this.firstload=true;
 	this.expired=false;
 	this.refs.options.plot.DOMNode = document.getElementById("plotOptions");
@@ -305,6 +307,7 @@ LASUI.prototype.setCategoryTreeNode = function (strJson, node, id) {
 			var img = document.createElement("IMG");
 			img.src = node.category.getChild(i).remote_las.replace('auth.do','output/test.png');
 			img.onload = this.remoteAuthSuccess.LASBind(this,node,i,true); 
+			img.onerror = "javascript:setTimeout('this.src = this.src',2000)}";
 		}
 	}
 	
@@ -312,8 +315,14 @@ LASUI.prototype.setCategoryTreeNode = function (strJson, node, id) {
 }
 LASUI.prototype.authorizeURL=function(url) {
 	var img = document.createElement("img");
-	img.onerror = this.authDialog.LASBind(this,url);
-	img.src=url.replace("auth.do","output/test.png");	
+	if(!url)
+		return;
+	//if(document.all)
+	//	this.authDialog(null,url);
+	//else {
+		img.onerror = this.authDialog.LASBind(this,url);
+		img.src=url.replace("auth.do","output/test.png");	
+	//}
 }
 LASUI.prototype.authDialog= function(evt) {
 	var args = arguments;
@@ -892,9 +901,9 @@ LASUI.prototype.selectCategory = function (evt) {
                 alert("Please turn off your pop-up blocker to allow this LAS to authenticate with remote LAS servers.");
                 return;
         }
-        document.body.appendChild(this.refs.auth_win[url]);
-                this.refs.auth_win[url].onunload = this.checkRemoteLAS.LASBind(this,node,i);
-                this.refs.auth_win[url].onload = this.checkRemoteLAS.LASBind(this,node,i);
+        //document.body.appendChild(this.refs.auth_win[url]);
+                this.refs.auth_win[url].onunload = this.checkRemoteLAS.LASBind(this,parentNode,i);
+                this.refs.auth_win[url].onload = this.checkRemoteLAS.LASBind(this,parentNode,i);
 
 
  
