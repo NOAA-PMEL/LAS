@@ -192,7 +192,8 @@ MapWidget.prototype.initPixelExtents = function(evt) {
 	}
 }
 
-//update the extents to reflect a new DOMNode position/size. Call this when a page change shifts the DOMNode. MapWidget.prototype.updatePixelExtents = function(evt) {
+//update the extents to reflect a new DOMNode position/size. Call this when a page change shifts the DOMNode. 
+MapWidget.prototype.updatePixelExtents = function(evt) {
 	var oldOffsets = this.clone(this.DOMNode.offsets);
 	var selection = this.clone(this.extents.selection.grid);
 	var data = this.extents.data.grid;
@@ -205,13 +206,8 @@ MapWidget.prototype.initPixelExtents = function(evt) {
 		this.displayBox(true);
 		this.displayCentralBox(true);
 	}
-/*	if(this.enabled) {
-		if (this.ondraw) this.ondraw(this);	
-		if (this.onafterdraw) this.onafterdraw(this);
-	}*/
 
 }
-
 
 // set the drawing area to the full plot area
 MapWidget.prototype.setMaxDrawingArea = function() {
@@ -256,7 +252,7 @@ MapWidget.prototype.setViewColor  = function(color) {
   if (this.rubberBand)
     this.rubberBand.style.borderColor = color;
 }
-// get the drawing state
+// get the drawing state
 MapWidget.prototype.getState = function () {
   return this.state;
 }
@@ -406,7 +402,6 @@ MapWidget.prototype.setView = function (view) {
  MapWidget.prototype.setY1 = function (y) {
   this.Y1 = y;
 }
-
 //get the minimum X pixel value for the DOM container
 MapWidget.prototype.getDOMNodePixXMin = function () {
  	return  this.extents.DOMNode.pixel.x.min;
@@ -1149,6 +1144,7 @@ MapWidget.prototype.initImage = function () {
 
 	if (this.img) {
 		this.plot.src = this.img.src;
+		this.plot.onerror = "javascript:setTimeout('this.src = this.src',2000)}";
 		this.plot.width = this.img.width;
 		this.DOMNode.style.width = this.img.width + 'px';
 		this.plot.height =  this.img.height;
@@ -1681,7 +1677,8 @@ MapWidget.prototype.onPlotLoad = function (evt) {
   			m_y0 = m_y - r_h/2;
    	if (m_y - r_h/2 < this.getDataPixYMin())
     		m_y0 =  this.getDataPixYMin();
-  	else if (m_y + r_h/2 > this.getDataPixYMax()) 		m_y0 = this.getDataPixYMax() - r_h;
+  	else if (m_y + r_h/2 > this.getDataPixYMax())
+		m_y0 = this.getDataPixYMax() - r_h;
 	
 	this.Y0 = m_y0;
   	this.Y1 = m_y0 + r_h;
