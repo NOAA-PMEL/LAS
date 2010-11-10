@@ -800,9 +800,13 @@ public class LASConfig extends LASDocument {
                     					!variablesElement.getName().equals("contributor") ) {
                     				boolean composite = false;
                     				List variables = variablesElement.getChildren();
-
+                    				Element cprops = null;
                     				if ( variablesElement.getName().equals("composite") ) {
                     					composite = true;
+                    					cprops = variablesElement.getChild("properties");
+                    					if (cprops != null) {
+            								cprops.setContent(LASDocument.convertProperties(cprops));
+            							}
                     				}
                     				for (Iterator varIt = variables.iterator(); varIt.hasNext();) {
                     					Element var = (Element) varIt.next();
