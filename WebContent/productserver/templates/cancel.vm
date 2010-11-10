@@ -13,7 +13,7 @@
        <hr>
        <h2>$!las_response.getResult("exception_message")</h2>
 <h4>Changed your mind?</h4>
-<form action="javascript:window.location.replace('$server_url?xml=$las_request.toEncodedJavaScriptSafeURLString()&UI_SessionID=$UI_SessionID')" method="POST">
+<form action="javascript:window.location.replace('$server_url?xml=$las_request.toEncodedJavaScriptSafeURLString()&JSESSIONID=$JSESSIONID')" method="POST">
 <INPUT TYPE=SUBMIT NAME="submit" VALUE="Submit Job Again">
 </form>
    </body>
