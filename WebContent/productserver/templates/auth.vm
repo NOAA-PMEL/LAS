@@ -3,6 +3,6 @@
 <!-- LAS SERVER OK -->
 <head>
 <title>LAS Output</title>
-Authenticated at $las_config.getTitle()
+You are authenticated at $las_config.getBaseServerURL().  Close this window, return to the main interface and click the "Update Plot" button.
 </body>
 </html>
