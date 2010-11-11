@@ -4,6 +4,7 @@
 package gov.noaa.pmel.tmap.las.util;
 
 import gov.noaa.pmel.tmap.las.client.serializable.AxisSerializable;
+import gov.noaa.pmel.tmap.las.client.serializable.EnsembleAxisSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.GridSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.TimeAxisSerializable;
 
@@ -31,7 +32,7 @@ public class Grid extends Container implements Cloneable, GridInterface {
         ArrayList<Axis> axes = new ArrayList<Axis>();
         for (Iterator axIt = axesE.iterator(); axIt.hasNext();) {
             Element axis = (Element) axIt.next();
-            if ( !axis.getAttributeValue("type").equals("t")) {
+            if ( !axis.getAttributeValue("type").equals("t") && !axis.getAttributeValue("type").equals("e")) {
                axes.add(new Axis(axis));
             }
         }
@@ -101,6 +102,16 @@ public class Grid extends Container implements Cloneable, GridInterface {
         }
         return false;
     }
+    public boolean hasE() {
+    	List axes = element.getChildren("axis");
+    	for (Iterator axIt = axes.iterator(); axIt.hasNext();) {
+            Element axis = (Element) axIt.next();
+            if ( axis.getAttributeValue("type").equalsIgnoreCase("e") ) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     /* (non-Javadoc)
      * @see gov.noaa.pmel.tmap.las.util.GridInterface#getAxis(java.lang.String)
@@ -130,6 +141,16 @@ public class Grid extends Container implements Cloneable, GridInterface {
         return null;
     }
 
+    public EnsembleAxis getEnsemble() {
+    	 List axes = element.getChildren("axis");
+         for (Iterator axIt = axes.iterator(); axIt.hasNext();) {
+             Element axis = (Element) axIt.next();
+             if ( axis.getAttributeValue("type").equalsIgnoreCase("e") ) {
+                 return new EnsembleAxis(axis);
+             }
+         }
+         return null;
+    }
     /* (non-Javadoc)
      * @see gov.noaa.pmel.tmap.las.util.GridInterface#setTime(gov.noaa.pmel.tmap.las.util.TimeAxis)
      */
@@ -205,6 +226,10 @@ public class Grid extends Container implements Cloneable, GridInterface {
 		if ( hasT() ) {			
 			TimeAxisSerializable a = getTime().getTimeAxisSerializable();
 			g.setTAxis(a);
+		}
+		if ( hasE() ) {
+			EnsembleAxisSerializable a = getEnsemble().getEnsembleAxisSerializable();
+			g.setEAxis(a);
 		}
 		return g;
 	}
