@@ -9,6 +9,7 @@ public class GridSerializable implements IsSerializable {
 	AxisSerializable yAxis;
 	AxisSerializable zAxis;
 	TimeAxisSerializable tAxis;
+	EnsembleAxisSerializable eAxis;
 	/**
 	 * @return the xAxis
 	 */
@@ -32,6 +33,9 @@ public class GridSerializable implements IsSerializable {
 	 */
 	public TimeAxisSerializable getTAxis() {
 		return tAxis;
+	}
+	public EnsembleAxisSerializable getEAxis() {
+		return eAxis;
 	}
 	/**
 	 * @param axis the xAxis to set
@@ -57,6 +61,9 @@ public class GridSerializable implements IsSerializable {
 	public void setTAxis(TimeAxisSerializable axis) {
 		tAxis = axis;
 	}
+	public void setEAxis(EnsembleAxisSerializable axis) {
+		eAxis = axis;
+	}
 	/**
 	 * @return the id
 	 */
@@ -79,6 +86,8 @@ public class GridSerializable implements IsSerializable {
 			return yAxis;
 		} else if ( type.equals("x") ) {
 			return xAxis;
+		} else if ( type.equals("e") ) {
+			return eAxis;
 		} else {
 			return null;
 		}
@@ -94,5 +103,8 @@ public class GridSerializable implements IsSerializable {
 	}
 	public boolean hasX() {
 		return getXAxis() != null;
+	}
+	public boolean hasE() {
+		return getEAxis() != null;
 	}
 }

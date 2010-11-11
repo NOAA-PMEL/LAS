@@ -18,7 +18,7 @@ import com.google.gwt.user.client.rpc.IsSerializable;
  *
  */
 public class DatasetSerializable extends Serializable implements IsSerializable {
-     
+
      VariableSerializable[] variablesSerializable;
 	/**
 	 * 
@@ -41,5 +41,4 @@ public class DatasetSerializable extends Serializable implements IsSerializable 
 			VariableSerializable[] variablesSerializable) {
 		this.variablesSerializable = variablesSerializable;
 	}
-
 }
