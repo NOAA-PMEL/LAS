@@ -96,6 +96,9 @@ public class Variable extends Container implements VariableInterface {
     	Grid grid = new Grid(getElement().getChild("grid"));
     	return grid.getGridSerializable();
     }
+    public Grid getGrid() {
+    	return new Grid(getElement().getChild("grid"));
+    }
 	/**
 	 * @return the dsid
 	 */
