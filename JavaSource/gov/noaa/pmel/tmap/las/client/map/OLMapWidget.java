@@ -16,9 +16,6 @@
  */
 package gov.noaa.pmel.tmap.las.client.map;
 
-import java.util.HashMap;
-import java.util.Iterator;
-
 import gov.noaa.pmel.tmap.las.client.openlayers.DrawSingleFeature;
 import gov.noaa.pmel.tmap.las.client.openlayers.DrawSingleFeatureOptions;
 import gov.noaa.pmel.tmap.las.client.openlayers.HorizontalPathHandler;
@@ -162,9 +159,6 @@ public class OLMapWidget extends Composite {
 	
     Boxes boxes = new Boxes("Valid Region");
 	Box box = null;
-	//public static final String WMS_URL = "http://strider.weathertopconsulting.com:8282/geoserver/wms?";
-    //public static final String WMS_URL = "http://labs.metacarta.com/wms/vmap0";
-	public static final String WMS_URL = "http://vmap0.tiles.osgeo.org/wms/vmap0";
     double delta;
     
     boolean editing = false;
@@ -175,15 +169,20 @@ public class OLMapWidget extends Composite {
     private Attribution attribControl;
     
     private MapSelectionChangeListener mapListener;
-    
+    // public static final String WMS_URL = "http://strider.weathertopconsulting.com:8282/geoserver/wms?";
+    // public static final String WMS_URL = "http://labs.metacarta.com/wms/vmap0";
+    private final static String WMS_URL = "http://vmap0.tiles.osgeo.org/wms/vmap0";
     public OLMapWidget() {
-    	init("128px", "256px");
+    	init("128px", "256px", WMS_URL);
     }
     
 	public OLMapWidget(String height, String width) {
-		init(height, width);
+		init(height, width, WMS_URL);
 	}
-	private void init(String height, String width) {
+	public OLMapWidget(String height, String width, String tile_url) {
+		init(height, width, tile_url);
+	}
+	private void init(String height, String width, String tile_url) {
 		regionWidget.setChangeListener(regionChangeListener);
 		textWidget.addSouthChangeListener(southChangeListener);
 		textWidget.addNorthChangeListener(northChangeListener);
@@ -395,9 +394,12 @@ public class OLMapWidget extends Composite {
         WMSOptions wmsOptions = new WMSOptions();
         wmsOptions.setWrapDateLine(true);
         wmsOptions.setIsBaseLayer(false);
+        if ( tile_url == null || tile_url.equals("") || !tile_url.startsWith("http://")) {
+        	tile_url = WMS_URL;
+        }
 		wmsLayer = new WMS(
 				"Basic WMS",
-				WMS_URL,
+				tile_url,
 				wmsParams,
 				wmsOptions);
 		
@@ -525,6 +527,26 @@ public class OLMapWidget extends Composite {
 	}
 	public Map getMap() {
 		return map;
+	}
+	public void setTileServer(String url) {
+		if ( wmsLayer != null ) {
+			map.removeLayer(wmsLayer);
+		}
+		WMSParams wmsParams = new WMSParams();
+		wmsParams.setFormat("image/png");
+		wmsParams.setLayers("basic");
+        WMSOptions wmsOptions = new WMSOptions();
+        wmsOptions.setWrapDateLine(true);
+        wmsOptions.setIsBaseLayer(false);
+        if ( url == null || url.equals("") || !url.startsWith("http://")) {
+        	url = WMS_URL;
+        }
+		wmsLayer = new WMS(
+				"Basic WMS",
+				url,
+				wmsParams,
+				wmsOptions);
+		map.addLayer(wmsLayer);
 	}
 	public void resizeMap() {
 		// Do a meaningless little calculation to force the map to re-calibrate where it is on the page.
@@ -1402,6 +1424,9 @@ public class OLMapWidget extends Composite {
     }-*/;
 	public native void activateNativeHooks()/*-{
 		var localMap = this;
+		$wnd.setWMSTileServer = function(wms_url) {
+			localMap.@gov.noaa.pmel.tmap.las.client.map.OLMapWidget::setTileServer(Ljava/lang/String;)(wms_url);
+		}
 		$wnd.mapResize = function() {
 			localMap.@gov.noaa.pmel.tmap.las.client.map.OLMapWidget::resizeMap()();
 		}
