@@ -1,7 +1,6 @@
 package gov.noaa.pmel.tmap.las.client.laswidget;
 
 import gov.noaa.pmel.tmap.las.client.map.OLMapWidget;
-import gov.noaa.pmel.tmap.las.client.serializable.EnsembleMemberSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.GridSerializable;
 
 import java.util.ArrayList;
@@ -24,7 +23,6 @@ public class AxesWidgetGroup extends Composite {
 	OLMapWidget refMap;
 	DateTimeWidget dateTimeWidget;
 	AxisWidget zWidget;
-	EnsembleWidget ensembleWidget;
 	FlexTable plotAxesLayout;
 	FlexTable orthoAxesLayout;
 	DisclosurePanel plotPanel;
@@ -66,8 +64,6 @@ public class AxesWidgetGroup extends Composite {
 		zWidget.setVisible(false);
 		dateTimeWidget = new DateTimeWidget();
 		dateTimeWidget.setVisible(false);
-		ensembleWidget = new EnsembleWidget();
-		ensembleWidget.setVisible(false);
 		plotAxesLayout.setWidget(0, 0, plotApplyButton);
 		plotAxesLayout.setWidget(1, 0, refMap);
 		mapLocation = "plot";
@@ -79,7 +75,6 @@ public class AxesWidgetGroup extends Composite {
 		orthoAxesLayout.setWidget(0, 0, orthoApplyButton);
 		orthoAxesLayout.setWidget(1, 0, zWidget);
 		orthoAxesLayout.setWidget(2, 0, dateTimeWidget);
-		orthoAxesLayout.setWidget(3, 0, ensembleWidget);
 		orthoPanel = new DisclosurePanel(ortho_title);
 		orthoPanel.add(orthoAxesLayout);
 		orthoPanel.setOpen(true);
@@ -117,12 +112,6 @@ public class AxesWidgetGroup extends Composite {
 			dateTimeWidget = new DateTimeWidget();
 			dateTimeWidget.setVisible(false);
 		}
-		if ( grid.hasE() ) {
-			ensembleWidget = new EnsembleWidget(grid.getEAxis().getMembers());
-		} else {
-			ensembleWidget = new EnsembleWidget();
-			ensembleWidget.setVisible(false);
-		}
 		if ( grid.hasX() && grid.hasY() ) {
 			refMap.setDataExtent(Double.valueOf(grid.getYAxis().getLo()), 
 					             Double.valueOf(grid.getYAxis().getHi()), 
@@ -142,9 +131,6 @@ public class AxesWidgetGroup extends Composite {
 		}
 		if ( type.equals("t") ) {
 			dateTimeWidget.setVisible(visible);
-		}
-		if ( type.equals("e") ) {
-			ensembleWidget.setVisible(visible);
 		}
 	}
 	public String getOrthoTitle() {
@@ -248,10 +234,6 @@ public class AxesWidgetGroup extends Composite {
     		dateTimeWidget.setVisible(true);
     		dateTimeWidget.setRange(false);
     	}
-    	if ( ortho.contains("e") ) {
-    		orthoAxesLayout.setWidget(orthoAxesRow++, 0, ensembleWidget);
-    		ensembleWidget.setVisible(true);
-    	}
     }
 	public OLMapWidget getRefMap() {
 		return refMap;
@@ -268,9 +250,6 @@ public class AxesWidgetGroup extends Composite {
     public AxisWidget getZAxis() {
     	return zWidget;
     }
-    public EnsembleWidget getEAxis() {
-    	return ensembleWidget;
-    }
     public void setCompareAxis(String view, List<String> ortho, String compareAxis) {
     	arrangeAxes(view, ortho, compareAxis);
     	plotPanel.setVisible(false);
@@ -278,25 +257,21 @@ public class AxesWidgetGroup extends Composite {
     		zWidget.setVisible(false);
     		dateTimeWidget.setVisible(false);
     		refMap.setVisible(true);
-    		ensembleWidget.setVisible(false);
     	}
     	if ( compareAxis.equals("t") ) {
     		zWidget.setVisible(false);
     		dateTimeWidget.setVisible(true);
     		refMap.setVisible(false);
-    		ensembleWidget.setVisible(false);
     	}
     	if ( compareAxis.equals("z") ) {
     		zWidget.setVisible(true);
     		dateTimeWidget.setVisible(false);
     		refMap.setVisible(false);
-    		ensembleWidget.setVisible(false);
     	}
     	if ( compareAxis.equals("e") ) {
     		zWidget.setVisible(false);
     		dateTimeWidget.setVisible(false);
     		refMap.setVisible(false);
-    		ensembleWidget.setVisible(true);
     	}
     }
     public void setFixedAxis(String view, List<String> ortho, String compareAxis) {
@@ -398,9 +373,4 @@ public class AxesWidgetGroup extends Composite {
 		orthoPanel.getHeaderTextAccessor().setText(title);
 	}
 
-	public void initMembers(EnsembleMemberSerializable[] members) {
-		ensembleWidget.init(members);
-		ensembleWidget.setVisible(true);
-		hasE = true;
-	}
 }
