@@ -35,6 +35,16 @@
     <script src="http://maps.google.com/maps?file=api&amp;v=2&amp;key=ABQIAAAAQd8QHM5bG96kv_FdbP2d_xT2yXp_ZAY8_ufC3CFXhHIE1NvwkxRutBJbRgJeVagWzAByU3KazihaXg"
       type="text/javascript"></script>
        -->
+    <!--  If you would like to change the WMS tile server used by the map widget, put your server URL here
+          and un-comment this section...
+          
+          
+    <script type="text/javascript" language="javascript">
+        var OL_map_widget_tile_server = "http://vmap0.tiles.osgeo.org/wms/vmap0";
+    </script>
+     
+    
+    -->
     <script type="text/javascript" language="javascript" src="JavaScript/components/DateWidget.js"></script>
     <script type="text/javascript" language="javascript" src="JavaScript/components/LASRequest.js"></script>
     <script type="text/javascript" language="javascript" src="JavaScript/components/xmldom.js"></script>
@@ -59,7 +69,8 @@
     #parse ("productserver/templates/V7UIHeader.vm")
     <div id="vizGal"></div>
     <!-- OPTIONAL: include this if you want history support -->
-    <iframe src="javascript:''" id="__gwt_historyFrame" tabIndex='-1' style="position:absolute;width:0;height:0;border:0"></iframe>		
+    <iframe src="javascript:''" id="__gwt_historyFrame" tabIndex='-1' style="position:absolute;width:0;height:0;border:0"></iframe>	
+    <iframe id="__printingFrame" style="width:0;height:0;border:0"></iframe>	
     #parse("productserver/templates/V7UIFooter.vm")	
   </body>
 </html>
