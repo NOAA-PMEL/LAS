@@ -8,6 +8,7 @@ import gov.noaa.pmel.tmap.las.client.laswidget.DatasetButton;
 import gov.noaa.pmel.tmap.las.client.laswidget.OperationsWidget;
 import gov.noaa.pmel.tmap.las.client.laswidget.OptionsButton;
 import gov.noaa.pmel.tmap.las.client.laswidget.OutputPanel;
+import gov.noaa.pmel.tmap.las.client.serializable.CategorySerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.VariableSerializable;
 import gov.noaa.pmel.tmap.las.client.util.Util;
 import gov.noaa.pmel.tmap.las.client.laswidget.OutputPanel;
@@ -70,6 +71,10 @@ public class BaseUI implements EntryPoint {
 	String xTlo;
 	String xThi;
 
+	/*
+	 * Get a tile server from the native JavaScript and use it if it has been set.
+	 */
+	String xTileServer;
 	
 	/*
 	 * Keep track of the axes orthogonal to the view.
@@ -186,6 +191,8 @@ public class BaseUI implements EntryPoint {
 	@Override
 	public void onModuleLoad() {
 
+		xTileServer = getTileServer();
+		
 		xDSID = Util.getParameterString("dsid");
 		xVarID = Util.getParameterString("vid");
 		xOperationID = Util.getParameterString("opid");
@@ -201,7 +208,7 @@ public class BaseUI implements EntryPoint {
 		xTlo = Util.getParameterString("tlo");
 		xThi = Util.getParameterString("thi");
 
-		xAxesWidget = new AxesWidgetGroup("Plot Axes", "Other Axes", "vertical", xControlsWidthPx, "ApplyTo_gallery");
+		xAxesWidget = new AxesWidgetGroup("Plot Axes", "Other Axes", "vertical", xControlsWidthPx, "ApplyTo_gallery", xTileServer);
 
 		xComparisonAxesSelector = new ComparisonAxisSelector(xControlsWidthPx);
 
@@ -331,6 +338,13 @@ public class BaseUI implements EntryPoint {
 		});
 
 	}
+	private native String getTileServer()/*-{
+	    if ($wnd.OL_map_widget_tile_server == undefined) {
+	       return "";
+	    } else {
+	        return $wnd.OL_map_widget_tile_server;
+	    }
+	}-*/;
 	public void addMenuButtons(Widget buttons) {
 		xButtonLayout.setWidget(0, 4, buttons);
 	}
@@ -338,14 +352,15 @@ public class BaseUI implements EntryPoint {
 
 		@Override
 		public void onClick(ClickEvent arg0) {
-			
-			xAxesWidget.closePanels();
-			xOperationsPanelIsOpen = xOperationsWidget.isOpen();
-			xOperationsWidget.setOpen(false);
-			
+			closeLeftNav();		
 		}
 		
 	};
+	public void closeLeftNav() {
+		xAxesWidget.closePanels();
+		xOperationsPanelIsOpen = xOperationsWidget.isOpen();
+		xOperationsWidget.setOpen(false);
+	}
 	ClickHandler xButtonCloseHandler = new ClickHandler() {
 
 		@Override
@@ -374,7 +389,7 @@ public class BaseUI implements EntryPoint {
 				singlePanel = false;
 			}
 
-			OutputPanel panel = new OutputPanel(title, compare_panel, xOperationID, xOptionID, xView, singlePanel, xContainerType);
+			OutputPanel panel = new OutputPanel(title, compare_panel, xOperationID, xOptionID, xView, singlePanel, xContainerType, xTileServer);
 
 			xPanelTable.setWidget(row, col, panel);			
 			xPanels.add(panel);
