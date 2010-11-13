@@ -369,7 +369,7 @@ public class OutputPanel extends Composite {
 	}
 	public void computeDifference(Map<String, String> options, boolean switchAxis, VariableSerializable variable, String view_in, 
 			String xlo_in, String xhi_in, String ylo_in, String yhi_in, String zlo_in,
-			String zhi_in, String tlo_in, String thi_in, String ensemble_in) {
+			String zhi_in, String tlo_in, String thi_in) {
 
 		if (switchAxis) {
 			switchAxis();
@@ -398,12 +398,7 @@ public class OutputPanel extends Composite {
 			// Add the first component
 			lasRequest.addVariable(var.getDSID(), var.getComponents().get(0));
 		} else {
-			if ( var.getGrid().hasE() ) {
-				String ensemble_vid = variable.getGrid().getEAxis().getVariableID(ensemble_in, variable.getName());
-				lasRequest.addVariable(ensemble_in, ensemble_vid);
-			} else {
 				lasRequest.addVariable(variable.getDSID(), variable.getID());
-			}
 		}
         lasRequest.addRegion();
 		// From the current slide sorter is this comment:
@@ -456,13 +451,7 @@ public class OutputPanel extends Composite {
 			
 			// The comparison variable and it's region from the panel axes.
 			
-			if ( var.getGrid().hasE() ) {
-				String member = panelAxesWidgets.getEAxis().getValue();
-				String ensemble_vid = var.getGrid().getEAxis().getVariableID(member, var.getName());
-				lasRequest.addVariable(member, ensemble_vid);
-			} else {
 				lasRequest.addVariable(var.getDSID(), var.getID());
-			}
 			lasRequest.addRegion();
 			
 			// For the second variable set all the axes that are not in the view, 
@@ -747,13 +736,7 @@ public class OutputPanel extends Composite {
 			lasRequest.addVariable(var.getDSID(), var.getComponents().get(0));
 			lasRequest.addProperty("ferret", "vector_name", var.getName());
 		} else {
-			if ( var.getGrid().hasE() ) {
-				String member = panelAxesWidgets.getEAxis().getValue();
-				String ensemble_vid = var.getGrid().getEAxis().getVariableID(member, var.getName());
-				lasRequest.addVariable(member, ensemble_vid);
-			} else {
 				lasRequest.addVariable(var.getDSID(), var.getID());
-			}
 		}
 		lasRequest.addRegion();
 		lasRequest.setOperation(operationID, "v7");
@@ -1234,8 +1217,6 @@ public class OutputPanel extends Composite {
 		} else if ( axis.equals("t") ) {
 			panelAxesWidgets.getTAxis().setLo(lo_value);
 			panelAxesWidgets.getTAxis().setHi(hi_value);
-		} else if ( axis.equals("e") ) {
-			panelAxesWidgets.getEAxis().setValue(lo_value);
 		}
 	}
 	public boolean isUsePanelSettings() {
@@ -1452,8 +1433,5 @@ public class OutputPanel extends Composite {
 	public void setVizGalState(VariableSerializable variable, String historyToken) {
 		this.vizGalVariable = variable;
 		this.vizGalState = historyToken;	
-	}
-	public String getEnsembleValue() {
-		return panelAxesWidgets.getEAxis().getValue();
 	}
 }
