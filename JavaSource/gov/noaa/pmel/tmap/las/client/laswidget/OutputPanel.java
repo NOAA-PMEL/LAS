@@ -1,6 +1,7 @@
 package gov.noaa.pmel.tmap.las.client.laswidget;
 
 import gov.noaa.pmel.tmap.las.client.map.MapSelectionChangeListener;
+import gov.noaa.pmel.tmap.las.client.serializable.CategorySerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.ConfigSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.GridSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.OperationSerializable;
@@ -100,7 +101,7 @@ public class OutputPanel extends Composite {
 	// Keep track of the current vizGal state when you are in panel mode.
 	String vizGalState;
 	VariableSerializable vizGalVariable;
-	
+
 	// Keep track of the axes that are currently orthogonal to the plot.
 	List<String> ortho;
 	String view;
@@ -168,7 +169,7 @@ public class OutputPanel extends Composite {
 	/**
 	 * Builds a VizGal panel with a default plot for the variable.  See {@code}VizGal(LASRequest) if you want more options on the initial plot.
 	 */
-	public OutputPanel(String id, boolean comparePanel, String op, String optionID, String view, boolean single, String container_type) {
+	public OutputPanel(String id, boolean comparePanel, String op, String optionID, String view, boolean single, String container_type, String tile_server) {
 		this.ID = id;
 		this.comparePanel = comparePanel;
 		this.singlePanel = single;
@@ -176,7 +177,7 @@ public class OutputPanel extends Composite {
 		this.optionID = optionID;
 		this.view = view;
 		this.containerType = container_type;
-		panelAxesWidgets = new AxesWidgetGroup("Plot Axis", "Comparison Axis", "horizontal", "", "Apply To "+ID);
+		panelAxesWidgets = new AxesWidgetGroup("Plot Axis", "Comparison Axis", "horizontal", "", "Apply To "+ID, tile_server);
 		String spinImageURL = URLUtil.getImageURL()+"/mozilla_blu.gif";
 		spinImage = new HTML("<img src=\""+spinImageURL+"\" alt=\"Spinner\"/>");
 		spin = new PopupPanel();
@@ -368,7 +369,7 @@ public class OutputPanel extends Composite {
 	}
 	public void computeDifference(Map<String, String> options, boolean switchAxis, VariableSerializable variable, String view_in, 
 			String xlo_in, String xhi_in, String ylo_in, String yhi_in, String zlo_in,
-			String zhi_in, String tlo_in, String thi_in) {
+			String zhi_in, String tlo_in, String thi_in, String ensemble_in) {
 
 		if (switchAxis) {
 			switchAxis();
@@ -397,7 +398,12 @@ public class OutputPanel extends Composite {
 			// Add the first component
 			lasRequest.addVariable(var.getDSID(), var.getComponents().get(0));
 		} else {
-	 	    lasRequest.addVariable(variable.getDSID(), variable.getID());
+			if ( var.getGrid().hasE() ) {
+				String ensemble_vid = variable.getGrid().getEAxis().getVariableID(ensemble_in, variable.getName());
+				lasRequest.addVariable(ensemble_in, ensemble_vid);
+			} else {
+				lasRequest.addVariable(variable.getDSID(), variable.getID());
+			}
 		}
         lasRequest.addRegion();
 		// From the current slide sorter is this comment:
@@ -450,7 +456,13 @@ public class OutputPanel extends Composite {
 			
 			// The comparison variable and it's region from the panel axes.
 			
-			lasRequest.addVariable(var.getDSID(), var.getID());
+			if ( var.getGrid().hasE() ) {
+				String member = panelAxesWidgets.getEAxis().getValue();
+				String ensemble_vid = var.getGrid().getEAxis().getVariableID(member, var.getName());
+				lasRequest.addVariable(member, ensemble_vid);
+			} else {
+				lasRequest.addVariable(var.getDSID(), var.getID());
+			}
 			lasRequest.addRegion();
 			
 			// For the second variable set all the axes that are not in the view, 
@@ -735,7 +747,13 @@ public class OutputPanel extends Composite {
 			lasRequest.addVariable(var.getDSID(), var.getComponents().get(0));
 			lasRequest.addProperty("ferret", "vector_name", var.getName());
 		} else {
-			lasRequest.addVariable(var.getDSID(), var.getID());
+			if ( var.getGrid().hasE() ) {
+				String member = panelAxesWidgets.getEAxis().getValue();
+				String ensemble_vid = var.getGrid().getEAxis().getVariableID(member, var.getName());
+				lasRequest.addVariable(member, ensemble_vid);
+			} else {
+				lasRequest.addVariable(var.getDSID(), var.getID());
+			}
 		}
 		lasRequest.addRegion();
 		lasRequest.setOperation(operationID, "v7");
@@ -985,6 +1003,7 @@ public class OutputPanel extends Composite {
 		datasetLabel.setText(var.getDSName()+": "+var.getName());
 		panelAxesWidgets.init(var.getGrid());
 	}
+	
 	public void setCompareAxis(String view, List<String> ortho, String compareAxis) {
 		this.compareAxis = compareAxis;
 		panelAxesWidgets.setCompareAxis(view, ortho, compareAxis);
@@ -1046,7 +1065,7 @@ public class OutputPanel extends Composite {
 			
 			Map<String, String> tokens;
 			VariableSerializable v;
-			
+			CategorySerializable c;
 			if ( panel_comparAxis != null && 
 				 vizGal_compareAxis != null &&
 			     panel_operation != null && 
@@ -1212,9 +1231,11 @@ public class OutputPanel extends Composite {
 		if ( axis.equals("z") ) {
 			panelAxesWidgets.getZAxis().setLo(lo_value);
 			panelAxesWidgets.getZAxis().setHi(hi_value);
-		} else {
+		} else if ( axis.equals("t") ) {
 			panelAxesWidgets.getTAxis().setLo(lo_value);
 			panelAxesWidgets.getTAxis().setHi(hi_value);
+		} else if ( axis.equals("e") ) {
+			panelAxesWidgets.getEAxis().setValue(lo_value);
 		}
 	}
 	public boolean isUsePanelSettings() {
@@ -1224,7 +1245,6 @@ public class OutputPanel extends Composite {
 	public VariableSerializable getVariable() {
 		return var;
 	}
-
 	public void addCompareAxisChangeListener(ChangeHandler compareAxisChangeHandler) {
 		panelAxesWidgets.getTAxis().addChangeHandler(compareAxisChangeHandler);
 		panelAxesWidgets.getZAxis().addChangeHandler(compareAxisChangeHandler);
@@ -1432,5 +1452,8 @@ public class OutputPanel extends Composite {
 	public void setVizGalState(VariableSerializable variable, String historyToken) {
 		this.vizGalVariable = variable;
 		this.vizGalState = historyToken;	
+	}
+	public String getEnsembleValue() {
+		return panelAxesWidgets.getEAxis().getValue();
 	}
 }
