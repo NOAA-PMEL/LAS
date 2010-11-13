@@ -28,7 +28,8 @@ function LASUI () {
 		"getOperations" : {"url" : "getOperations.do?"},
 		"getOptions" : {"url" : "getOptions.do?"},
 		"getMetadata" : {"url" : "getMetadata.do?"},
-		"getVariables" : {"url" : "getVariables.do?"}
+		"getVariables" : {"url" : "getVariables.do?"},
+		"getRegions" : {"url" : "getRegions.do?"}
 	};
 
 	//application state
@@ -525,6 +526,7 @@ LASUI.prototype.createVariableList = function () {
 	
 	var select = document.createElement("SELECT"); 
 	select.onchange = this.getOperations.LASBind(this);
+	select.className="LASVariableList";
 	select.name='variables';
 	
 	if(document.all)
@@ -620,6 +622,21 @@ LASUI.prototype.getCategory = function (parentNode, i) {
 
 	}
 }
+LASUI.prototype.getRegions = function (dsid, varid) {
+                if(!document.all)
+                        var req = new XMLHttpRequest(this);
+                else
+                        var req = new ActiveXObject("Microsoft.XMLHTTP");
+                req.onreadystatechange = this.AJAXhandler.LASBind(this, req, "this.setRegions(req.responseText)");
+                req.open("GET", this.hrefs.getRegions.url + this.state.extra_args + "dsid=" + dsid + "&varid=" + varid);
+                req.send(null);       
+}
+LASUI.prototype.setRegions = function(response) {
+	var obj = eval("("+response+")");
+	if(response&&setMapRegions)
+		setMapRegions(obj);
+		
+}
 LASUI.prototype.onSetVariable = function() {
 		for(var xpath in this.state.xpaths) {
 			var varObj = this.state.xpaths[xpath];
@@ -656,7 +673,7 @@ LASUI.prototype.updateVariableLists = function () {
         while(document.getElementsByName(this.anchors.variables).length<minvars||(document.getElementsByName(this.anchors.variables).length<this.state.variables.length&&document.getElementsByName(this.anchors.variables).length<maxvars&&this.firstload)) {
 		var elm = document.getElementsByName(this.anchors.variables).item(0);
 		var newvar = elm.cloneNode(true);
-		elm.parentNode.insertBefore(newvar,elm);
+		elm.parentNode.appendChild(newvar);
 
 	}
 
@@ -743,7 +760,6 @@ LASUI.prototype.addVariable = function(evt) {
 	
         var newvar = elm.cloneNode(true);
 	elm.parentNode.appendChild(newvar);
-	
 	if(document.getElementsByName('variables').length>=2)
 		for(var i=0;i<document.getElementsByName('del').length;i++)
 			document.getElementsByName('del').item(i).style.visibility='visible';
@@ -806,10 +822,23 @@ LASUI.prototype.addVariable = function(evt) {
 	this.refs.analysis.enabled = false;
 	if(typeof mapResize != "undefined")
 		mapResize();
+
+	//expand the new variable list
+	var last_var = document.getElementsByName('variables').item(document.getElementsByName('variables').length-1);
+	last_var.parentNode.onclick="LAS.collapseVariableLists()";
+        last_var.size=last_var.length;
+	last_var.className="LASVariableList";
+	
 	this.getOperations(true);
 
 }
 
+LASUI.prototype.collapseVariableLists = function () {
+
+	for(var i=0;i<document.getElementsByName('variables').length;i++)
+		document.getElementsByName('variables').item(i).size=1;
+
+}
 
 LASUI.prototype.removeVariable = function(evt) {
 	if(document.getElementsByName('variables').length>=2)
@@ -964,7 +993,7 @@ LASUI.prototype.setVariable = function (evt) {
 		this.state.datasets[datasetID] = dataset;
 	}
 	this.state.variables[0]=variableID;
-	
+	this.getRegions(datasetID,variableID);
 	//clear the breadcrumbs, we dont have cross-dataset multivariable support, yet
 	if(datasetID != this.state.dataset) {
         	while(document.getElementsByName(this.anchors.breadcrumb).length>1)
@@ -1058,9 +1087,13 @@ LASUI.prototype.setVariable = function (evt) {
 
 	this.newVariable=false;
 	if(evt)
-		if(evt.target.nodeName=='INPUT')
+		if(!document.all) {
+			if (evt.target.nodeName=='INPUT')
+				this.newVariable=true;
+		} else if (evt.srcElement.nodeName == 'INPUT')
 			 this.newVariable=true;
 	
+	 
 	//push the boulder off the cliff
 	this.getGrid(datasetID,variableID);
 	this.getDataConstraints(datasetID,variableID);
@@ -1201,6 +1234,9 @@ LASUI.prototype.getOperations = function (evt) {
 				} else 
 					var stop=true;
 
+
+		if(typeof evt == 'object')
+			this.collapseVariableLists();
 	
 		this.state.xpaths=[];	
 		if(document.getElementsByName('variables').length>0) {
@@ -1208,8 +1244,12 @@ LASUI.prototype.getOperations = function (evt) {
 			for (var x=0; x < document.getElementsByName('variables').length;x++) {
 				if (x>0)
 					url+="&"
-				url += 'xpath=' + document.getElementsByName('variables').item(x).options[document.getElementsByName('variables').item(x).selectedIndex].id
-				this.state.xpaths.push(eval("("+document.getElementsByName('variables').item(x).options[document.getElementsByName('variables').item(x).selectedIndex].value+")"));
+				var selectedIndex = document.getElementsByName('variables').item(x).selectedIndex;
+				if(selectedIndex < 0) 
+					selectedIndex = 0;
+				url += 'xpath=' + document.getElementsByName('variables').item(x).options[selectedIndex].id;
+
+				this.state.xpaths.push(eval("("+document.getElementsByName('variables').item(x).options[selectedIndex].value+")"));
 			}
 			try{for(var i=0;i<document.getElementsByName(this.state.dataset).length;i++)
 				if(document.getElementsByName(this.state.dataset).item(i).id==this.state.xpaths[0].ID)

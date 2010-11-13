@@ -1,4 +1,4 @@
-m#if ($las_request.getProperty("las", "output_type") == 'json')
+#if ($las_request.getProperty("las", "output_type") == 'json')
 
 $las_response.toJSON()
 
