@@ -526,6 +526,7 @@ LASUI.prototype.createVariableList = function () {
 	
 	var select = document.createElement("SELECT"); 
 	select.onchange = this.getOperations.LASBind(this);
+		
 	select.className="LASVariableList";
 	select.name='variables';
 	
@@ -533,22 +534,28 @@ LASUI.prototype.createVariableList = function () {
 		select.id='variables'; 
 	else
 		select.id='variable_list_'+document.getElementsByName('variables').length;
+	var noDefault =true;
 	for(var i=0;i<this.state.datasets[this.state.dataset].getCategorySize();i++) {
 		var node = this.state.datasets[this.state.dataset];
-		if(this.state.variables)
-		if(this.state.variables[0]==node.getChildID(i))
+		if(this.state.variables) {
+			if(this.state.variables[0].ID==node.getChildID(i))	
 			var selected = true;
-		else
+		} else
 			var selected = false;
-
-		var OPTIONNode = new Option(node.getChildName(i),node.getChildID(i),false,selected);
+		var OPTIONNode = new Option(node.getChildName(i),node.getChildID(i),false,false);
 		OPTIONNode.value = JSON.stringify(node.getChild(i)); //node.getChildID(i);
+		OPTIONNode.onselect = this.getOperations.LASBind(this);
 		OPTIONNode.id ="/lasdata/datasets/"+node.getDatasetID()+"/variables/"+node.getChildID(i);
 		select.options[select.length] = OPTIONNode;
 	}
 	document.getElementsByName(this.anchors.variables).item(0).appendChild(select);
-	
-
+	//to push the axis labels right, because select 'live' select added above will be absolutely positioned.
+	var select_clone = select.cloneNode(true);
+	select_clone.className='';
+	select_clone.name='';
+	select_clone.style.visibility='hidden';
+	document.getElementsByName(this.anchors.variables).item(0).appendChild(select_clone);
+		
 }
 /**
  * Sub method to create variable tree node and add it to the DOM
@@ -711,13 +718,15 @@ LASUI.prototype.updateVariableLists = function () {
 
 	var variable = eval('('+document.getElementsByName("variables").item(0).options[document.getElementsByName("variables").item(0).selectedIndex].value+')');
 	
-	//hide the add buttons if weve hit the max number of non vector vars, otherwise, show them
+	//hide the add buttons if weve hit the max number of non vector vars, otherwise, show the last one
 	if(document.getElementsByName(this.anchors.variables).length >= ct || variable.grid_type=="vector") {
                 for (var i=0;i<document.getElementsByName('add').length;i++)
                          document.getElementsByName('add').item(i).style.visibility='hidden';
-        } else if (variable.grid_type!="vector")
+        } else if (variable.grid_type!="vector") {
                 for (var i=0;i<document.getElementsByName('add').length;i++)
-                         document.getElementsByName('add').item(i).style.visibility='visible';
+                         document.getElementsByName('add').item(i).style.visibility='hidden';
+		document.getElementsByName('add').item(i-1).style.visibility='visible';	
+	}
 	//show delete buttonsif there are more than one open
 	if(document.getElementsByName(this.anchors.variables).length > 1)
 		for (var i=0;i<document.getElementsByName('del').length;i++)
@@ -784,13 +793,12 @@ LASUI.prototype.addVariable = function(evt) {
 		}
 	}
 
-	if(document.getElementsByName('variables').length >= ct) {
-		for (var i=0;i<document.getElementsByName('add').length;i++)
-			 document.getElementsByName('add').item(i).style.visibility='hidden';		
-	} else
-		for (var i=0;i<document.getElementsByName('add').length;i++)
-			 document.getElementsByName('add').item(i).style.visibility='visible';		
+	for (var i=0;i<document.getElementsByName('add').length;i++)
+                         document.getElementsByName('add').item(i).style.visibility='hidden';
+	if(document.getElementsByName('variables').length < ct) 
+			 document.getElementsByName('add').item(i-1).style.visibility='visible';		
 	
+
 	//show delete buttonsif there are more than one open
         if(document.getElementsByName(this.anchors.variables).length > 1)
                 for (var i=0;i<document.getElementsByName('del').length;i++)
@@ -827,6 +835,7 @@ LASUI.prototype.addVariable = function(evt) {
 	var last_var = document.getElementsByName('variables').item(document.getElementsByName('variables').length-1);
 	last_var.parentNode.onclick="LAS.collapseVariableLists()";
         last_var.size=last_var.length;
+	last_var.selectedIndex=-1;
 	last_var.className="LASVariableList";
 	
 	this.getOperations(true);
@@ -853,12 +862,11 @@ LASUI.prototype.removeVariable = function(evt) {
 			document.getElementsByName("variables").item(0).options[v].disabled=false;
 	}
 
-	if(document.getElementsByName('variables').length >= document.getElementsByName('variables').item(0).options.length) {
-		for (var i=0;i<document.getElementsByName('add').length;i++)
-			 document.getElementsByName('add').item(i).style.visibility='hidden';		
-	} else
-		for (var i=0;i<document.getElementsByName('add').length;i++)
-			 document.getElementsByName('add').item(i).style.visibility='visible';
+	 for (var i=0;i<document.getElementsByName('add').length;i++)
+                         document.getElementsByName('add').item(i).style.visibility='hidden';	
+
+	if(document.getElementsByName('variables').length < document.getElementsByName('variables').item(0).options.length) 
+		document.getElementsByName('add').item(i-1).style.visibility='visible';
 
 	for (var i=0;i<document.getElementsByName('variables').length;i++) {
              document.getElementsByName('add').item(i).onclick = this.addVariable.LASBind(this);
@@ -1835,33 +1843,17 @@ LASUI.prototype.initZConstraint = function (mode, reset) {
 			this.refs.DepthWidget.widgetType = "menu";
 			for(var m=0;m<this.refs.DepthWidget[this.refs.DepthWidget.widgetType].length;m++) {
 				selected = null;
+				if(m=0) selected = this.state.grid.getAxis('z').display_lo;
+				else selected = this.state.grid.getAxis('z').display_hi;  
+				
 				for(var v=0;v<this.state.grid.getMenu('z').length;v++) {
 					var _opt = document.createElement("OPTION");
 					_opt.value = this.state.grid.getMenu('z')[v][1];
 					_opt.className = "LASOptionNode";
 					_opt.appendChild(document.createTextNode(this.state.grid.getMenu('z')[v][0]));
-					if(m==1 && parseFloat(this.state.grid.getMenu('z')[v][0]) >= this.state.selection.z.max){
-						if(selected){
-                                                        if(  parseFloat(this.state.grid.getMenu('z')[v][0])<selected) {
-                                                                _opt.selected=true;
-                                                                selected =  parseFloat(this.state.grid.getMenu('z')[v][0]);
-                                                        }
-                                                } else {
-							 _opt.selected=true;
-                                                        selected= parseFloat(this.state.grid.getMenu('z')[v][0]);
-						}
-					}
-					if(m==0 &&  parseFloat(this.state.grid.getMenu('z')[v][0])<= this.state.selection.z.min){
-					        if(selected) {
-                                                        if(  parseFloat(this.state.grid.getMenu('z')[v][0])>selected) {
-                                                                _opt.selected=true;
-                                                                selected =   parseFloat(this.state.grid.getMenu('z')[v][0]);
-                                                        }
-                                                } else {
-							 _opt.selected=true;
-                                                        selected=  parseFloat(this.state.grid.getMenu('z')[v][0]);
-						}
-					}
+					if(selected)
+                                              if(  parseFloat(this.state.grid.getMenu('z')[v][0])==selected) 
+                                              		_opt.selected=true;
 
 					this.refs.DepthWidget[this.refs.DepthWidget.widgetType][m].appendChild(_opt);
 
@@ -1876,35 +1868,18 @@ LASUI.prototype.initZConstraint = function (mode, reset) {
 			this.refs.DepthWidget.widgetType = "arange";
 			for(var m=0;m<this.refs.DepthWidget[this.refs.DepthWidget.widgetType].length;m++) {
 				this.refs.DepthWidget[this.refs.DepthWidget.widgetType][m].className = "LASSelectNode";
-				var selected = null;
+				var selected = null;	
+                                if(m=0) selected = this.state.grid.getAxis('z').display_lo;
+                                else selected = this.state.grid.getAxis('z').display_hi;
+
 				for(var v=parseFloat(this.state.grid.getLo('z'));v<=parseFloat(this.state.grid.getHi('z'));v+=parseFloat(this.state.grid.getDelta('z'))) {
 					var _opt = document.createElement("option");
 					_opt.value = v;
 					_opt.className = "LASOptionNode";
 					_opt.appendChild(document.createTextNode(v));
-					if(m==1 && v >= this.state.selection.z.max) {
-						if(selected){
-							if(v<selected) {
-								_opt.selected=true;
-								selected = v
-							}
-						} else {
+					if(selected)
+						if(v == selected) 
 							 _opt.selected=true;
-							selected=v;
-						}
-					}
-					if(m==0 && v <= this.state.selection.z.min) {
-						 if(selected){
-                                                        if(v>selected) {
-                                                                _opt.selected=true;
-                                                                selected = v
-                                                        }
-                                                } else {
-                                                        selected=v;
-							 _opt.selected=true;
-						}
-					}
-
 
 					this.refs.DepthWidget[this.refs.DepthWidget.widgetType][m].appendChild(_opt);
 
