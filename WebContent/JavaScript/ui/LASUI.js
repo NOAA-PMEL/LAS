@@ -2718,6 +2718,7 @@ LASUI.prototype.hideAnalysis = function () {
 	this.updateConstraints(this.state.view.plot);
 }
 LASUI.prototype.selectAnalysisType = function (evt) {
+	var changeVis = false;
 	if(evt) {
 		if(evt.target)
 			var DOMNode = evt.target
@@ -2727,21 +2728,33 @@ LASUI.prototype.selectAnalysisType = function (evt) {
 		this.state.analysis.type = DOMNode.options[DOMNode.selectedIndex].value;
 		this.state.analysis.name = DOMNode.options[DOMNode.selectedIndex].innerHTML;	
 	}		
-		 this.state.analysis.enabled = false;
+		this.state.analysis.enabled = false;
 		if(this.state.analysis.type&&this.state.analysis.axes) {
 			
 			for(var axis in this.state.analysis.axes)
-                                if(this.state.analysis.axes[axis])
+                                if(this.state.analysis.axes[axis]) 
                                         this.state.analysis.enabled = true;
+				
+
 			if(this.state.analysis.enabled) {
-				for(var axis in this.state.analysis.axes)
+				var axes = '';
+				for(var axis in this.state.analysis.axes) {
+					if(this.state.analysis.axes[axis])
+						axes+=axis;
 					if(!this.state.view.widgets.indexOf(axis)>=0&&this.state.analysis.axes[axis])
 						this.state.view.widgets+=axis;
+					if(this.state.view.plot.indexOf(axis)>=0&&this.state.analysis.axes[axis])
+						changeVis=true;
+				}
 			} 
 		}
 		
-		if(this.state.analysis.enabled)
+		
+		if(this.state.analysis.enabled) {
          		this.updateConstraints(this.state.view.widgets);
+			if(changeVis)
+				this.setVisualization(axes,"analysis");		
+		}
 	        else
                		this.updateConstraints(this.state.view.plot);
 
@@ -2763,7 +2776,7 @@ LASUI.prototype.selectAnalysisAxis = function (evt) {
 	if((arguments[2]==true||evt)) {
 		//turn the analysis axes on
 		for(var i=0; i< axes.length; i++) {
-			this.state.analysis.axes[axes.charAt(i)] = true;//this.refs.analysis.type.op.value;
+			this.state.analysis.axes[axes.charAt(i)] = true;
 			if(this.state.view.plot.indexOf(axes.charAt(i))>=0&&this.state.analysis.type)
 				changeVis = true;
 
