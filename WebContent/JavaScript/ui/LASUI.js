@@ -844,12 +844,16 @@ LASUI.prototype.addVariable = function(evt) {
 
 LASUI.prototype.collapseVariableLists = function () {
 
-	for(var i=0;i<document.getElementsByName('variables').length;i++)
+	for(var i=0;i<document.getElementsByName('variables').length;i++) {
 		document.getElementsByName('variables').item(i).size=1;
+		if(document.getElementsByName('variables').item(i).selectedIndex<0)
+			document.getElementsByName('variables').item(i).selectedIndex=0;
+	}
 
 }
 
 LASUI.prototype.removeVariable = function(evt) {
+	this.collapseVariableLists();
 	if(document.getElementsByName('variables').length>=2)
 		if(document.all&&!evt.target)
 			evt.srcElement.parentNode.parentNode.removeChild(evt.srcElement.parentNode);
@@ -2107,10 +2111,12 @@ LASUI.prototype.makeRequest = function (evt, type) {
 		var xpaths=[];
 		this.state.variables=[];	
 		for(var v=0;v<document.getElementsByName("variables").length;v++) {
-			xpaths[document.getElementsByName("variables").item(v).options[document.getElementsByName("variables").item(v).selectedIndex].id]=eval("("+document.getElementsByName("variables").item(v).options[document.getElementsByName("variables").item(v).selectedIndex].value+")");
-			var variable = eval("("+document.getElementsByName("variables").item(v).options[document.getElementsByName("variables").item(v).selectedIndex].value+")");
-			this.state.variables.push(variable);
-			this.request.addVariable(this.state.dataset,variable.ID);
+			if(document.getElementsByName("variables").item(v).selectedIndex >= 0) {
+				xpaths[document.getElementsByName("variables").item(v).options[document.getElementsByName("variables").item(v).selectedIndex].id]=eval("("+document.getElementsByName("variables").item(v).options[document.getElementsByName("variables").item(v).selectedIndex].value+")");
+				var variable = eval("("+document.getElementsByName("variables").item(v).options[document.getElementsByName("variables").item(v).selectedIndex].value+")");
+				this.state.variables.push(variable);
+				this.request.addVariable(this.state.dataset,variable.ID);
+			}
 		}
 		
 		
