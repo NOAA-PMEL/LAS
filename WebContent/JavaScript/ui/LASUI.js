@@ -544,7 +544,6 @@ LASUI.prototype.createVariableList = function () {
 			var selected = false;
 		var OPTIONNode = new Option(node.getChildName(i),node.getChildID(i),false,false);
 		OPTIONNode.value = JSON.stringify(node.getChild(i)); //node.getChildID(i);
-		OPTIONNode.onselect = this.getOperations.LASBind(this);
 		OPTIONNode.id ="/lasdata/datasets/"+node.getDatasetID()+"/variables/"+node.getChildID(i);
 		select.options[select.length] = OPTIONNode;
 	}
@@ -1847,17 +1846,33 @@ LASUI.prototype.initZConstraint = function (mode, reset) {
 			this.refs.DepthWidget.widgetType = "menu";
 			for(var m=0;m<this.refs.DepthWidget[this.refs.DepthWidget.widgetType].length;m++) {
 				selected = null;
-				if(m=0) selected = this.state.grid.getAxis('z').display_lo;
-				else selected = this.state.grid.getAxis('z').display_hi;  
-				
 				for(var v=0;v<this.state.grid.getMenu('z').length;v++) {
 					var _opt = document.createElement("OPTION");
 					_opt.value = this.state.grid.getMenu('z')[v][1];
 					_opt.className = "LASOptionNode";
 					_opt.appendChild(document.createTextNode(this.state.grid.getMenu('z')[v][0]));
-					if(selected)
-                                              if(  parseFloat(this.state.grid.getMenu('z')[v][0])==selected) 
-                                              		_opt.selected=true;
+					if(m==1 && parseFloat(this.state.grid.getMenu('z')[v][0]) >= this.state.selection.z.max){
+						if(selected){
+                                                        if(  parseFloat(this.state.grid.getMenu('z')[v][0])<selected) {
+                                                                _opt.selected=true;
+                                                                selected =  parseFloat(this.state.grid.getMenu('z')[v][0]);
+                                                        }
+                                                } else {
+							 _opt.selected=true;
+                                                        selected= parseFloat(this.state.grid.getMenu('z')[v][0]);
+						}
+					}
+					if(m==0 &&  parseFloat(this.state.grid.getMenu('z')[v][0])<= this.state.selection.z.min){
+					        if(selected) {
+                                                        if(  parseFloat(this.state.grid.getMenu('z')[v][0])>selected) {
+                                                                _opt.selected=true;
+                                                                selected =   parseFloat(this.state.grid.getMenu('z')[v][0]);
+                                                        }
+                                                } else {
+							 _opt.selected=true;
+                                                        selected=  parseFloat(this.state.grid.getMenu('z')[v][0]);
+						}
+					}
 
 					this.refs.DepthWidget[this.refs.DepthWidget.widgetType][m].appendChild(_opt);
 
@@ -1872,18 +1887,35 @@ LASUI.prototype.initZConstraint = function (mode, reset) {
 			this.refs.DepthWidget.widgetType = "arange";
 			for(var m=0;m<this.refs.DepthWidget[this.refs.DepthWidget.widgetType].length;m++) {
 				this.refs.DepthWidget[this.refs.DepthWidget.widgetType][m].className = "LASSelectNode";
-				var selected = null;	
-                                if(m=0) selected = this.state.grid.getAxis('z').display_lo;
-                                else selected = this.state.grid.getAxis('z').display_hi;
-
+				var selected = null;
 				for(var v=parseFloat(this.state.grid.getLo('z'));v<=parseFloat(this.state.grid.getHi('z'));v+=parseFloat(this.state.grid.getDelta('z'))) {
 					var _opt = document.createElement("option");
 					_opt.value = v;
 					_opt.className = "LASOptionNode";
 					_opt.appendChild(document.createTextNode(v));
-					if(selected)
-						if(v == selected) 
+					if(m==1 && v >= this.state.selection.z.max) {
+						if(selected){
+							if(v<selected) {
+								_opt.selected=true;
+								selected = v
+							}
+						} else {
 							 _opt.selected=true;
+							selected=v;
+						}
+					}
+					if(m==0 && v <= this.state.selection.z.min) {
+						 if(selected){
+                                                        if(v>selected) {
+                                                                _opt.selected=true;
+                                                                selected = v
+                                                        }
+                                                } else {
+                                                        selected=v;
+							 _opt.selected=true;
+						}
+					}
+
 
 					this.refs.DepthWidget[this.refs.DepthWidget.widgetType][m].appendChild(_opt);
 
