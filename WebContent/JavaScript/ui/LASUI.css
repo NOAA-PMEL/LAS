@@ -185,13 +185,13 @@ font-weight: bold;
 	background-color: #DCDCDC;
 }
 .LASVariableList {
-	position:absolute;
-        z-index:1000;
+        position:absolute;
+	z-index:1000;
 	
 }
 .LASVariableContainer {
-	padding-top:2pt;
-	padding-bottom:4pt;
+	
+	padding-bottom:2pt;
 }
 .leftNav {
 	border-top: 3px solid #436976;
