@@ -532,17 +532,18 @@ LASUI.prototype.createVariableList = function () {
 	
 	if(document.all)
 		select.id='variables'; 
-	else
-		select.id='variable_list_'+document.getElementsByName('variables').length;
-	var noDefault =true;
+	//else
+	//	select.id='variable_list_'+document.getElementsByName('variables').length;
 	for(var i=0;i<this.state.datasets[this.state.dataset].getCategorySize();i++) {
 		var node = this.state.datasets[this.state.dataset];
 		if(this.state.variables) {
-			if(this.state.variables[0].ID==node.getChildID(i))	
-			var selected = true;
+			if(this.state.variables[0]==node.getChildID(i))	
+				var selected = true;
+			else
+				var selected= false;
 		} else
 			var selected = false;
-		var OPTIONNode = new Option(node.getChildName(i),node.getChildID(i),false,false);
+		var OPTIONNode = new Option(node.getChildName(i),node.getChildID(i),false,selected);
 		OPTIONNode.value = JSON.stringify(node.getChild(i)); //node.getChildID(i);
 		OPTIONNode.id ="/lasdata/datasets/"+node.getDatasetID()+"/variables/"+node.getChildID(i);
 		select.options[select.length] = OPTIONNode;
@@ -552,6 +553,7 @@ LASUI.prototype.createVariableList = function () {
 	var select_clone = select.cloneNode(true);
 	select_clone.className='';
 	select_clone.name='';
+	select_clone.id='';
 	select_clone.style.visibility='hidden';
 	document.getElementsByName(this.anchors.variables).item(0).appendChild(select_clone);
 		
@@ -649,7 +651,6 @@ LASUI.prototype.onSetVariable = function() {
  			if(varObj) {
 				if(varObj.grid_type!="scattered"&&varObj.grid_type!="vector"&&document.getElementsByName("variables").length==1){
 					if(this.refs.analysis.enabled) {
-						//this.hideAnalysis();
 						this.showAnalysis();
 					}
 					document.getElementById("analysisWrapper").style.display="";
@@ -2369,7 +2370,7 @@ LASUI.prototype.setOptionList = function (strJson,DOMNode,type,reset) {
 	var response = eval("(" + strJson + ")");
 
 	var setDefault = true;
-	this.state.properties[type] = [];
+	//this.state.properties[type] = [];
 	this.refs.options[type].options = new LASGetOptionsResponse(response);
 	var ct = this.refs.options[type].options.getOptionCount();
 	if(ct)
