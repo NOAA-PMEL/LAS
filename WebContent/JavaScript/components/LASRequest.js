@@ -646,11 +646,12 @@ function LASReq_getAnalysis(index) {
       Analysis.label = String(analysisNode.getAttribute("label"));
       var axisNodes = analysisNode.getElements('axis');
       for (i=0;i<axisNodes.length;i++) {
-        Analysis.axis[i] = Object;
-        Analysis.axis[i].type = String(axisNodes[i].getAttribute("type"));
-        Analysis.axis[i].lo = String(axisNodes[i].getAttribute("lo"));
-        Analysis.axis[i].hi = String(axisNodes[i].getAttribute("hi"));
-        Analysis.axis[i].op = String(axisNodes[i].getAttribute("op"));
+        Analysis.axis.push({
+        	type : String(axisNodes[i].getAttribute("type")),
+        	lo : String(axisNodes[i].getAttribute("lo")),
+        	hi : String(axisNodes[i].getAttribute("hi")),
+        	op : String(axisNodes[i].getAttribute("op"))
+	});
       }
     } else {
       Analysis = null;
