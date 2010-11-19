@@ -10,86 +10,26 @@ IF `($m) eq 1` THEN DEFINE SYMBOL comma = ,
 ! Remove various special characters from this internally-used string.
 
 PPL SET inunits_collapse $EDIT(in_units,COLLAPSE)
-LET ireplace = STRINDEX("($inunits_collapse)", "/")
-IF `ireplace GT 0` THEN
-   DEFINE SYMBOL iu1 = `SUBSTRING("($inunits_collapse)", 1, ireplace-1)`
-   LET slen = STRLEN("($inunits_collapse)")
-   DEFINE SYMBOL iu2 = `SUBSTRING("($inunits_collapse)", ireplace+1, slen-ireplace)`
-   DEFINE SYMBOL inunits_collapse = ($iu1)_rr_($iu2)
-ENDIF
-LET ireplace = STRINDEX("($inunits_collapse)", "/")
-IF `ireplace GT 0` THEN
-   DEFINE SYMBOL iu1 = `SUBSTRING("($inunits_collapse)", 1, ireplace-1)`
-   LET slen = STRLEN("($inunits_collapse)")
-   DEFINE SYMBOL iu2 = `SUBSTRING("($inunits_collapse)", ireplace+1, slen-ireplace)`
-   DEFINE SYMBOL inunits_collapse = ($iu1)_rr_($iu2)
-ENDIF
-LET ireplace = STRINDEX("($inunits_collapse)", "*")
-IF `ireplace GT 0` THEN
-   DEFINE SYMBOL iu1 = `SUBSTRING("($inunits_collapse)", 1, ireplace-1)`
-   LET slen = STRLEN("($inunits_collapse)")
-   DEFINE SYMBOL iu2 = `SUBSTRING("($inunits_collapse)", ireplace+1, slen-ireplace)`
-   DEFINE SYMBOL inunits_collapse = ($iu1)_rr_($iu2)
-ENDIF
-LET ireplace = STRINDEX("($inunits_collapse)", "*")
-IF `ireplace GT 0` THEN
-   DEFINE SYMBOL iu1 = `SUBSTRING("($inunits_collapse)", 1, ireplace-1)`
-   LET slen = STRLEN("($inunits_collapse)")
-   DEFINE SYMBOL iu2 = `SUBSTRING("($inunits_collapse)", ireplace+1, slen-ireplace)`
-   DEFINE SYMBOL inunits_collapse = ($iu1)_rr_($iu2)
-ENDIF
-LET ireplace = STRINDEX("($inunits_collapse)", "^")
-IF `ireplace GT 0` THEN
-   DEFINE SYMBOL iu1 = `SUBSTRING("($inunits_collapse)", 1, ireplace-1)`
-   LET slen = STRLEN("($inunits_collapse)")
-   DEFINE SYMBOL iu2 = `SUBSTRING("($inunits_collapse)", ireplace+1, slen-ireplace)`
-   DEFINE SYMBOL inunits_collapse = ($iu1)_rr_($iu2)
-ENDIF
-LET ireplace = STRINDEX("($inunits_collapse)", "-")
-IF `ireplace GT 0` THEN
-   DEFINE SYMBOL iu1 = `SUBSTRING("($inunits_collapse)", 1, ireplace-1)`
-   LET slen = STRLEN("($inunits_collapse)")
-   DEFINE SYMBOL iu2 = `SUBSTRING("($inunits_collapse)", ireplace+1, slen-ireplace)`
-   DEFINE SYMBOL inunits_collapse = ($iu1)_rr_($iu2)
-ENDIF
-LET ireplace = STRINDEX("($inunits_collapse)", "-")
-IF `ireplace GT 0` THEN
-   DEFINE SYMBOL iu1 = `SUBSTRING("($inunits_collapse)", 1, ireplace-1)`
-   LET slen = STRLEN("($inunits_collapse)")
-   DEFINE SYMBOL iu2 = `SUBSTRING("($inunits_collapse)", ireplace+1, slen-ireplace)`
-   DEFINE SYMBOL inunits_collapse = ($iu1)_rr_($iu2)
-ENDIF
-LET ireplace = STRINDEX("($inunits_collapse)", ",")
-IF `ireplace GT 0` THEN
-   DEFINE SYMBOL iu1 = `SUBSTRING("($inunits_collapse)", 1, ireplace-1)`
-   LET slen = STRLEN("($inunits_collapse)")
-   DEFINE SYMBOL iu2 = `SUBSTRING("($inunits_collapse)", ireplace+1, slen-ireplace)`
-   DEFINE SYMBOL inunits_collapse = ($iu1)_rr_($iu2)
-ENDIF
-LET ireplace = STRINDEX("($inunits_collapse)", ",")
-IF `ireplace GT 0` THEN
-   DEFINE SYMBOL iu1 = `SUBSTRING("($inunits_collapse)", 1, ireplace-1)`
-   LET slen = STRLEN("($inunits_collapse)")
-   DEFINE SYMBOL iu2 = `SUBSTRING("($inunits_collapse)", ireplace+1, slen-ireplace)`
-   DEFINE SYMBOL inunits_collapse = ($iu1)_rr_($iu2)
-ENDIF
-LET ireplace = STRINDEX("($inunits_collapse)", ",")
-IF `ireplace GT 0` THEN
-   DEFINE SYMBOL iu1 = `SUBSTRING("($inunits_collapse)", 1, ireplace-1)`
-   LET slen = STRLEN("($inunits_collapse)")
-   DEFINE SYMBOL iu2 = `SUBSTRING("($inunits_collapse)", ireplace+1, slen-ireplace)`
-   DEFINE SYMBOL inunits_collapse = ($iu1)_rr_($iu2)
-ENDIF
-LET ireplace = STRINDEX("($inunits_collapse)", ",")
-IF `ireplace GT 0` THEN
-   DEFINE SYMBOL iu1 = `SUBSTRING("($inunits_collapse)", 1, ireplace-1)`
-   LET slen = STRLEN("($inunits_collapse)")
-   DEFINE SYMBOL iu2 = `SUBSTRING("($inunits_collapse)", ireplace+1, slen-ireplace)`
-   DEFINE SYMBOL inunits_collapse = ($iu1)_rr_($iu2)
-ENDIF
+DEFINE SYMBOL inunits_up `UPCASE("($inunits_collapse)")
 
 ! If we already have a set of vars with these units then we are done
-IF ($done_($inunits_collapse)%0|*>1%) THEN exit/script
+IF `($n_ustrings"0|*>1") EQ 0` THEN 
+   DEFINE SYMBOL n_ustrings = 1
+   DEFINE SYMBOL ustring_($n_ustrings) = ($inunits_up)
+   EXIT/SCRIPT
+ENDIF
+IF ($done_($n_ustrings)"0|*>1") THEN EXIT/SCRIPT
+
+LET new_string = 0
+REPEAT/RANGE=1:($n_ustrings)/NAME=g (\
+   IF `STRCMP("($inunits_up)", "($ustring_($g))") NE 0` THEN LET new_string = `new_string+1`;\
+)
+IF `new_string EQ 0` THEN 
+   EXIT/SCRIPT
+ELSE
+   DEFINE SYMBOL n_ustrings = `($n_ustrings)+1`
+   DEFINE SYMBOL ustring_($n_ustrings) = ($inunits_up)
+ENDIF
 
 ! For this units, collect the variables.
 REPEAT/RANGE=1:`($data_count)-1`/NAME=g (\
@@ -105,7 +45,7 @@ REPEAT/RANGE=1:`($data_count)-1`/NAME=g (\
  )
 
 ! Mark this units string as being done and prepare for the next one
-DEFINE SYMBOL done_($inunits_collapse) = 1
+DEFINE SYMBOL done_($n_ustrings) = 1
 DEFINE SYMBOL iplot = `($iplot) + 1`
 
 !  ----------------- End of collect_units_var.jnl ------------------------------------
