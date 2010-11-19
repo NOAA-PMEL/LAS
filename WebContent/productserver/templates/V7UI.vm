@@ -46,11 +46,11 @@
 								<strong>Analysis type</strong><br>
 								<select id="analysis_op" name="analysis_op">
 									<option selected="" value="">None</option>
-									<option value="ave">Average</option>
-									<option value="min">Minimum</option>
-									<option value="max">Maximum</option>
-									<option value="sum">Sum</option>
-									<option value="var">Variance</option>
+									<option id="ave_analysis" "value="ave">Average</option>
+									<option id="min_analysis" value="min">Minimum</option>
+									<option id="max_analysis" value="max">Maximum</option>
+									<option id="sum_analysis" value="sum">Sum</option>
+									<option id="var_analysis" value="var">Variance</option>
 								</select><br>
 								<strong>Analysis region type</strong><br>						
 								<select id="analysis_axes">
