@@ -77,6 +77,8 @@ public class RequestInputFilter implements Filter {
     	"auto",
 	"auth_url",    
 	"BBOX", 
+	"stream_id",
+"stream",
     	"cancel",
     	"cancel_button",
     	"catid", 
