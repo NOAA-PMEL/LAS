@@ -64,12 +64,12 @@ function loadMap (){
                   }
 
 	if('$las_map_scale.getAxis_vertical_positive()'=='down') {
-		args.img.extent.y.max = $las_map_scale.getYAxisLowerLeft();
-		args.img.extent.y.min =  $las_map_scale.getYAxisUpperRight();
+		args.img.extent.y.max = parseFloat('$las_map_scale.getYAxisLowerLeft()');
+		args.img.extent.y.min =  parseFloat('$las_map_scale.getYAxisUpperRight()');
 	}
 	if('$las_map_scale.getAxis_horizontal_positive()'=='left') {
-                args.img.extent.x.max = $las_map_scale.getXAxisLowerLeft();
-                args.img.extent.x.min =  $las_map_scale.getXAxisUpperRight();
+                args.img.extent.x.max = parseFloat('$las_map_scale.getXAxisLowerLeft()');
+                args.img.extent.x.min =  parseFloat('$las_map_scale.getXAxisUpperRight()');
         }
 
 
