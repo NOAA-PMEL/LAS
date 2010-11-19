@@ -88,6 +88,15 @@ $las_response.toString()
   reqZLo = initReq.getRangeLo('z');
   reqZHi = initReq.getRangeHi('z');
 
+  if(initReq.getAnalysis(0)) {
+	for(var a=0;a < initReq.getAnalysis(0).axis.length;a++) {
+		if(initReq.getAnalysis(0).axis[a].lo) 
+			eval("(req"+initReq.getAnalysis(0).axis[a].type.toUpperCase()+"Lo='"+initReq.getAnalysis(0).axis[a].lo+"')");
+		if(initReq.getAnalysis(0).axis[a].hi)
+                        eval("(req"+initReq.getAnalysis(0).axis[a].type.toUpperCase()+"Hi='"+initReq.getAnalysis(0).axis[a].hi+"')");
+	}
+  }
+
   if(Grid.hasAxis('t')){
       dataHasT = true;
       dataTLo = Grid.getLo('t');                      //low end of time grid
