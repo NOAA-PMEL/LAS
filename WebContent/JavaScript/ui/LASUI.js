@@ -1061,6 +1061,16 @@ LASUI.prototype.setVariable = function (evt) {
 	}
 	this.state.variables[0]=variableID;
 	this.getRegions(datasetID,variableID);
+	//blow away all variables if we cam in from teh data pick (evt will be an object, not null)
+        if(evt)
+		while(document.getElementsByName(this.anchors.variables).length>1) {
+               		var elm = document.getElementsByName(this.anchors.variables).item(document.getElementsByName(this.anchors.variables).length-1);
+                	elm.parentNode.removeChild(elm);
+
+        }
+
+
+
 	//clear the breadcrumbs, we dont have cross-dataset multivariable support, yet
 	if(datasetID != this.state.dataset) {
         	while(document.getElementsByName(this.anchors.breadcrumb).length>1)
