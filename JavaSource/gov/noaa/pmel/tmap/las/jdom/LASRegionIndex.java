@@ -153,16 +153,32 @@ public class LASRegionIndex extends LASDocument {
         ArrayList sections = getSections();
         HashMap section = (HashMap) sections.get(section_index);
         if ( section.containsKey("t") ) {
-            constraint = constraint+"["+((HashMap)section.get("t")).get("index_lo")+","+((HashMap)section.get("t")).get("index_hi")+"]";
+        	int tlo = Integer.valueOf((String)((HashMap)section.get("t")).get("index_lo")).intValue();
+        	int thi = Integer.valueOf((String)((HashMap)section.get("t")).get("index_hi"));
+        	tlo = tlo - 1;
+        	thi = thi - 1;
+            constraint = constraint+"["+tlo+":1:"+thi+"]";
         }
         if ( section.containsKey("z") ) {
-            constraint = constraint+"["+((HashMap)section.get("z")).get("index_lo")+","+((HashMap)section.get("z")).get("index_hi")+"]";
+        	int zlo = Integer.valueOf((String)((HashMap)section.get("z")).get("index_lo")).intValue();
+        	int zhi = Integer.valueOf((String)((HashMap)section.get("z")).get("index_hi")).intValue();
+        	zlo = zlo - 1;
+        	zhi = zhi - 1;
+            constraint = constraint+"["+zlo+":1:"+zhi+"]";
         }
         if ( section.containsKey("y") ) {
-            constraint = constraint+"["+((HashMap)section.get("y")).get("index_lo")+","+((HashMap)section.get("y")).get("index_hi")+"]";
+        	int ylo = Integer.valueOf((String)((HashMap)section.get("y")).get("index_lo")).intValue();
+        	int yhi = Integer.valueOf((String)((HashMap)section.get("y")).get("index_hi")).intValue();
+        	ylo = ylo - 1;
+        	yhi = yhi - 1;
+            constraint = constraint+"["+ylo+":1:"+yhi+"]";
         }
         if ( section.containsKey("x") ) {
-            constraint = constraint+"["+((HashMap)section.get("x")).get("index_lo")+","+((HashMap)section.get("x")).get("index_hi")+"]";
+        	int xlo = Integer.valueOf((String)((HashMap)section.get("x")).get("index_lo")).intValue();
+        	int xhi = Integer.valueOf((String)((HashMap)section.get("x")).get("index_hi")).intValue();
+        	xlo = xlo - 1;
+        	xhi = xhi - 1;
+            constraint = constraint+"["+xlo+":1:"+xhi+"]";
         }
         return constraint;
     }
