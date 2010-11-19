@@ -25,9 +25,9 @@
 						<div class="top_link_disabled"  ID="Plot to Google Earth">Google Earth&nbsp;</div>
 						<div class="top_link_disabled"  ID="Table of values (text)">Show Values&nbsp;</div>
 						<div class="top_link_disabled"  ID="Desktop application data access scripts">Export to Desktop Application&nbsp;</div>
-						<div class="top_link_disabled"  ID="Interactive Download">Save As ...</div>						
+						<div class="top_link_disabled"  ID="Interactive Download">Save As ...</div>								   
 					</span>
-					<span class="top_link_disabled" onclick="LAS.printPlot()" id="print">Print</span>				
+					<span class="top_link_disabled" onclick="LAS.linkTo()" id="linkto">Link To ...</span>							       <span class="top_link_disabled" onclick="LAS.printPlot()" id="print">Print</span>
 				</div>
 			</div>
 			<div id="message_bar"><img id="wait" style="visibility:hidden;float:right;margin:2pt;padding:2pt;" src="JavaScript/components/mozilla_blu.gif"><div id="breadcrumb" name="breadcrumb"></div><div id="variable_container" name="variable_container" class="LASVariableContainer"></div></div>
