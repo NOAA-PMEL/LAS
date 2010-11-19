@@ -43,6 +43,25 @@ IF `($ferret_diff_var"1|*>0") AND STRINDEX("($op)", "COMPARE_PLOT") NE 0` THEN
    EXIT/SCRIPT
 ENDIF 
 
+! Remove any previous native striding
+
+IF ($xstride"0|1>0|*>1") THEN 
+   CANCEL AXIS/STRIDE `($data_var)[d=($data_num)],RETURN=xaxis`
+   CANCEL SYMBOL xstride
+ENDIF
+IF ($ystride"0|1>0|*>1") THEN 
+   CANCEL AXIS/STRIDE `($data_var)[d=($data_num)],RETURN=yaxis`
+   CANCEL SYMBOL ystride
+ENDIF
+IF ($tstride"0|1>0|*>1") THEN 
+   CANCEL AXIS/STRIDE `($data_var)[d=($data_num)],RETURN=taxis`
+   CANCEL SYMBOL tstride
+ENDIF
+IF ($zstride"0|1>0|*>1") THEN 
+   CANCEL AXIS/STRIDE `($data_var)[d=($data_num)],RETURN=zaxis`
+   CANCEL SYMBOL zstride
+ENDIF
+
 DEFINE SYMBOL ferret_center_levels ($ferret_center_levels"0|1|TRUE>1|*>0")
 
 ! See if centered levels were requested, either by setting the symbol ferret_center_levels
@@ -164,6 +183,7 @@ IF `($xstride"1|1>0|*>0") OR ($no_native_strides_xy"0|*>1")` THEN
         LET strd_hi = `i[gx=pvar,x=($region_x_hi)]`
      ENDIF
      DEFINE SYMBOL index_strides = i=`strd_lo`:`strd_hi`:`INT(xsize/10)`
+     DEFINE SYMBOL xstride = `INT(xsize/10)`
      LET indx_strd_used = 1
    ELSE
       IF `($region_sample"0|*>1") EQ 0` THEN DEFINE SYMBOL  index_strides = ($region_x)
@@ -191,6 +211,7 @@ IF `($ystride"1|1>0|*>0") OR ($no_native_strides_xy"0|*>1")` THEN
      ELSE
         DEFINE SYMBOL index_strides = j=`strd_lo`:`strd_hi`:`INT(ysize/10)`
      ENDIF
+     DEFINE SYMBOL ystride = `INT(ysize/10)`
    ELSE
       IF ($index_strides"0|*>1") THEN
          IF `($region_y"0|*>1") AND ($scat"0|0|1|*>1") EQ 0` THEN \
@@ -223,6 +244,7 @@ IF `($zstride"0|1>0|*>1") OR ($no_native_strides_xy"0|*>1")` THEN
      ELSE
         DEFINE SYMBOL index_strides = k=`strd_lo`:`strd_hi`:`INT(zsize/10)`
      ENDIF
+     DEFINE SYMBOL zstride = `INT(zsize/10)`
    ELSE
 
       IF ($index_strides"0|*>1") THEN
@@ -276,6 +298,10 @@ IF `($tstride"0|1>0|*>1") EQ 0` THEN
    LET tsize = `strd_hi - strd_lo + 1`
    IF ($ferret_time_step"0|*>1") THEN
       LET strd_del = ($ferret_time_step)
+      IF `tsize GT max_size` THEN 
+         LET strd_del = `INT(tsize/10)`
+         IF `strd_del LE 2` THEN LET strd_del = `INT(tsize/5)`
+      ENDIF 
    ELSE
       LET strd_del = 1
       IF `tsize GT max_size` THEN 
@@ -290,6 +316,7 @@ IF `($tstride"0|1>0|*>1") EQ 0` THEN
    ELSE
       IF ($region_t"0|*>1") THEN DEFINE SYMBOL  index_strides = L=`strd_lo`:`strd_hi`:`strd_del`
    ENDIF
+   DEFINE SYMBOL tstride = `strd_del`
 ENDIF
 
 IF `STRINDEX("($data_($num)_grid_type)","scattered") GT 0` THEN CANCEL SYMBOL index_strides
@@ -326,129 +353,102 @@ ENDIF
 
 IF ($do_curvi_xy"0") THEN DEFINE SYMBOL ppvar = pvar
 
+IF `($no_native_strides_xy"0|*>1") EQ 0` THEN 
+   IF `($xstride"0") GT 1` THEN SET AXIS/STRIDE=($xstride) `pvar,RETURN=xaxis`
+   IF `($ystride"0") GT 1` THEN SET AXIS/STRIDE=($ystride) `pvar,RETURN=yaxis`
+   IF `($zstride"0") GT 1` THEN SET AXIS/STRIDE=($zstride) `pvar,RETURN=zaxis`
+   IF `($tstride"0") GT 1` THEN SET AXIS/STRIDE=($tstride) `pvar,RETURN=taxis`
+   DEFINE SYMBOL ppvar = pvar
+ENDIF
+
 ! Use Ferrets variance-based levels.
-IF `STRFLOAT("($FERRET_VERSION)") GE 6.425` THEN
-   LET varxd = ($ppvar)
-   DEFINE SYMBOL shapevar = `varxd,RETURN=shape`
-
-! When we have used striding, RETURN=size doesnt work well
-   LET csiz = 1
-   DEFINE SYMBOL vsiz = 1
-   IF `STRINDEX("($shapevar)", "X") GT 0` THEN 
-      LET cvar = x[gx=varxd]
-      LET csiz = `cvar,RETURN=isize`
-      DEFINE SYMBOL vsiz = `csiz * ($vsiz) `
-   ENDIF
-   IF `STRINDEX("($shapevar)", "Y") GT 0` THEN 
-      LET cvar = y[gy=varxd]
-      LET csiz = `cvar,RETURN=jsize`
-      DEFINE SYMBOL vsiz = `csiz * ($vsiz)`
-   ENDIF
-   IF `STRINDEX("($shapevar)", "Z") GT 0` THEN 
-      LET cvar = z[gz=varxd]
-      LET csiz = `cvar,RETURN=ksize`
-      DEFINE SYMBOL vsiz = `csiz * ($vsiz)`
-   ENDIF
-   IF `STRINDEX("($shapevar)", "T") GT 0` THEN 
-      LET cvar = t[gt=varxd]
-      LET csiz = `cvar,RETURN=lsize`
-      DEFINE SYMBOL vsiz = `csiz * ($vsiz)`
-   ENDIF
-
-
-   LET isqr = INT(($vsiz)^0.5)
+LET varxd = ($ppvar)
+DEFINE SYMBOL shapevar = `varxd,RETURN=shape`
    
-   DEFINE AXIS/y=1:`isqr`:1 yshortaxis
-   DEFINE AXIS/x=1:`INT(($vsiz)/isqr)`:1 xhalfaxis
-   LET varshape = x[gx=xhalfaxis] + y[gy=yshortaxis]
-   LET var1d = XSEQUENCE(($ppvar))
-   LET var2d = RESHAPE(var1d, varshape)
-   IF ($ferret_center_levels) THEN 
-     SHADE/LEV=($num_fine_levels)vc var2d
-   ELSE
-     SHADE/LEV=($num_fine_levels)v var2d
-   ENDIF
+! When we have used striding, RETURN=size doesnt work well
+LET csiz = 1
+DEFINE SYMBOL vsiz = 1
+IF `STRINDEX("($shapevar)", "X") GT 0` THEN 
+   LET cvar = x[gx=varxd]
+   IF `($do_curvi_xy"0|*>1") EQ 0` THEN LET cvar = x[gx=varxd,($region_x)]
+   LET csiz = `cvar,RETURN=isize`
+   DEFINE SYMBOL vsiz = `csiz * ($vsiz) `
+ENDIF
+IF `STRINDEX("($shapevar)", "Y") GT 0` THEN 
+   LET cvar = y[gy=varxd]
+   IF `($do_curvi_xy"0|*>1") EQ 0` THEN LET cvar = y[gy=varxd,($region_y)]
+   LET csiz = `cvar,RETURN=jsize`
+   DEFINE SYMBOL vsiz = `csiz * ($vsiz)`
+ENDIF
+IF `STRINDEX("($shapevar)", "Z") GT 0` THEN 
+   LET cvar = z[gz=varxd]
+   IF `($do_curvi_xy"0|*>1") EQ 0` THEN LET cvar = z[gz=varxd,($region_z)]
+   LET csiz = `cvar,RETURN=ksize`
+   DEFINE SYMBOL vsiz = `csiz * ($vsiz)`
+ENDIF
+IF `STRINDEX("($shapevar)", "T") GT 0` THEN 
+   LET cvar = t[gt=varxd]
+   IF `($do_curvi_xy"0|*>1") EQ 0` THEN LET cvar = LET cvar = t[gt=varxd,($region_t)]
+   LET csiz = `cvar,RETURN=lsize`
+   DEFINE SYMBOL vsiz = `csiz * ($vsiz)`
+ENDIF
+pause
+
+LET isqr = INT(($vsiz)^0.5)
+
+DEFINE AXIS/y=1:`isqr`:1 yshortaxis
+DEFINE AXIS/x=1:`INT(($vsiz)/isqr)`:1 xhalfaxis
+LET varshape = x[gx=xhalfaxis] + y[gy=yshortaxis]
+LET var1d = XSEQUENCE(($ppvar))
+LET var2d = RESHAPE(var1d, varshape)
+IF ($ferret_center_levels) THEN 
+  SHADE/LEV=($num_fine_levels)vc var2d
+ELSE
+
+!!
+!!! If requested with posinteger, create levels that are integers or multiples of 
+!!! integers, suitable for COUNTS.
+!!
+!!      IF ($ferret_fill_levels"0|posinteger>1|*>0") THEN
+!!
+!!         LET pminmax = MINMAX(var2d)
+!!         LET pmin = `INT(pminmax[i=1])`
+!!         LET pmax = `INT(pminmax[i=2]+0.5)`
+!!         IF `pmin LE 0` THEN 
+!!            LET pmin = 0.5
+!!         ELSE 
+!!            LET pmin = `pmin - 0.5`
+!!         ENDIF
+!!         IF `pmax GT 1` THEN
+!!            LET pmax = `pmax + 0.5`
+!!         ELSE 
+!!            LET pmax = 1.5
+!!         ENDIF
+!!         LET pdel = 1
+!!         IF `pmax - pmin GT 30` THEN LET pdel = 5
+!!         IF `pmax - pmin GT 100` THEN LET pdel = 10
+!!         IF `pmax - pmin GT 30` THEN 
+!!            LET pmin = 1
+!!            LET pmax = `pmax - 0.5`
+!!         ENDIF
+!!         DEFINE SYMBOL ferret_fill_levels = (`pmin`, `pmax`, `pdel`)	 
+!!         DEFINE SYMBOL ferret_contour_levels = ($ferret_fill_levels)
+!!
+!!         EXIT/SCRIPT
+!!      ENDIF
+
+  SHADE/LEV=($num_fine_levels)v var2d
+ENDIF
+IF ($LEV_OPNLEVS"0|*>1") THEN 
    DEFINE SYMBOL ferret_fill_levels = ($LEV_OPNLEVS)
    DEFINE SYMBOL ferret_contour_levels = ($LEV_OPNLEVS)
-
-   EXIT/SCRIPT
 ENDIF
 
-! Execute the stat command to load symbols with the variables
-! mean, max, min, std.
-
-DEFINE SYMBOL stat_ngood= 0
-STAT ($ppvar)
-
-IF `($stat_ngood"0") EQ 0` THEN EXIT/SCRIPT
-
-! If the data values are so big we cant compute stats correctly, just
-! set nominal levels and exit
-
-IF `STRINDEX("($stat_std)", "too big") GT 0 OR \
-  STRINDEX("($stat_mean)", "too big") GT 0 OR \
-  STRINDEX("($stat_min)", "too big") GT 0 OR \
-  STRINDEX("($stat_max)", "too big") GT 0 OR \
-  STRINDEX("($stat_std)", "Inf") GT 0 OR \
-  STRINDEX("($stat_mean)", "Inf") GT 0 OR \
-  STRINDEX("($stat_min)", "Inf") GT 0 OR \
-  STRINDEX("($stat_max)", "Inf") GT 0` THEN 
-
-   IF `($input_fill_levels"0|0|1") EQ 0` THEN 
-      DEFINE SYMBOL ferret_fill_levels = 40
-      IF ($ferret_center_levels) THEN DEFINE SYMBOL ferret_fill_levels = 40c
-   ENDIF
-   IF `($input_contour_levels"0|0|1") EQ 0` THEN 
-      DEFINE SYMBOL ferret_contour_levels = 40
-      IF ($ferret_center_levels) THEN DEFINE SYMBOL ferret_contour_levels = 40c
-   ENDIF
-
-   EXIT/SCRIPT
-ENDIF
-
-! Compute rounded-off levels with the PPL %RANGE command.
-
-!!!  Suggestions from Hankin
-! Determine contour levels to use such that a fine density of levels is used within +/- 1 std dev
-! and a coarse density is used out to +/- 2 std dev.
-! The ratio of densities is density_factor = fine/coarse.
-
-LET density_factor = 4
-! fraction_that_are_fine = density_factor/(1+density_factor)
-
-! This can happen if the data is a constant value...
-IF `($stat_min) EQ ($stat_max)` THEN EXIT/SCRIPT
-
-DEFINE SYMBOL num_fine_levels = `(density_factor/(1+density_factor)) * ($num_contour_levels"30")`
-DEFINE SYMBOL num_coarse_levels =  `($num_contour_levels"30") - ($num_fine_levels)`
-DEFINE SYMBOL half_num_coarse_levels = `($num_coarse_levels)/2`
-
-! Compute rounded-off levels with the PPL %RANGE command.
-
-LET nstd = 2*($stat_std)
-LET nstd = 1*($stat_std)
-
-IF ($stat_mean"1|bad>1|*>0") THEN 
-  DEFINE SYMBOL error_string "The ($data_var)[d=($data_num)] variable has no valid data"
-  MESSAGE/ERROR **ERROR ($error_string)
-  EXIT/PROGRAM
-ENDIF
-
-! Use the statistics above to actually compute the levels
-
-DEFINE SYMBOL remove_plus = 1
-IF ($ferret_center_levels) THEN 
-   GO LAS_centered_levels
-ELSE
-   GO LAS_non_centered_levels
-ENDIF
-
-! Use these levels to reset ferret_contour_levels and ferret_fill_levels 
-
-IF `($input_contour_levels"0|0|1") EQ 0` THEN \
-   DEFINE SYMBOL ferret_fill_levels = ($ferret_auto_levels)
-IF `($input_contour_levels"0|0|1") EQ 0` THEN \
-   DEFINE SYMBOL ferret_contour_levels = ($ferret_auto_lines)
+! Restore original axes
+IF `($xstride"0") GT 1` THEN CAN AXIS/STRIDE `anim_stridevar,RETURN=xaxis`
+IF `($ystride"0") GT 1` THEN CAN AXIS/STRIDE `anim_stridevar,RETURN=yaxis`
+IF `($zstride"0") GT 1` THEN CAN AXIS/STRIDE `anim_stridevar,RETURN=zaxis`
+IF `($tstride"0") GT 1` THEN CAN AXIS/STRIDE `anim_stridevar,RETURN=taxis`
 
 ! End of file ------------LAS_auto_levels_animate.jnl--------------------------
 
