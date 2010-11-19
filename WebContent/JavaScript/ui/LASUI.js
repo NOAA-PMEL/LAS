@@ -1438,7 +1438,7 @@ LASUI.prototype.setOperation = function (evt) {
 	}
 	//this.updateConstraints(view);
 
-	if(this.refs.analysis.enabled||!this.state.grid.hasAxis('t')||this.state.operation.plot.indexOf('prop_prop')>=0) {
+	if(this.refs.analysis.enabled||!this.state.grid.hasAxis('t')||this.state.view.plot.indexOf('t')>=0||this.state.operation.plot.indexOf('prop_prop')>=0) {
 		document.getElementById('Animation').className='top_link_disabled';
 		document.getElementById('Animation').onclick=function(){};
 	}
