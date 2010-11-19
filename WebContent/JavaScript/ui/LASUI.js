@@ -121,24 +121,55 @@ LASUI.prototype.initUI = function (anchorId)
 			this.submitOnLoad=false;
 
 	} else if (this.params.request) {
-		this.state.dataset = this.params.request.getDataset();
+	                this.state.dataset = this.params.request.getDataset();
                 this.state.lastDataset = "";
                 this.state.lastVariable = "";
                 this.state.variable = this.params.request.getVariable(0);
-		this.state.variables=[];
-		while(this.params.request.getVariable(this.state.variables.length))
-			this.state.variables.push(this.params.request.getVariable(this.state.variables.length));
+                this.state.variables=[];
+                while(this.params.request.getVariable(this.state.variables.length))
+                        this.state.variables.push(this.params.request.getVariable(this.state.variables.length));
                 this.state.operation.plot = this.params.request.getOperation();
-		if(this.params.request.getProperty('ferret','vector_id')) {
-			this.state.variables=[];
-			 this.state.variables.push(this.params.request.getProperty('ferret','vector_id'));
-			this.state.variable=this.params.request.getProperty('ferret','vector_id');
-		}
+                if(this.params.request.getProperty('ferret','vector_id')) {
+                        this.state.variables=[];
+                        this.state.variables.push(this.params.request.getProperty('ferret','vector_id'));
+                        this.state.variable=this.params.request.getProperty('ferret','vector_id');
+                }
+                for(var i in "xyzt") {
+                        var a = "xyzt"[i];
+                        if(this.params.request.getRangeLo(a))
+                                this.state.selection[a].min=this.params.request.getRangeLo(a);
+                        if(this.params.request.getRangeHi(a))
+                                this.state.selection[a].max=this.params.request.getRangeHi(a);
+
+                }
                 this.state.view.plot = this.params.request.getProperty('ferret','view');
-		this.request = this.params.request;
+                this.state.view.widgets = this.state.view.plot;
+                if(this.params.request.getAnalysis(0)) {
+                        this.refs.analysis.enabled=true;
+                        this.state.analysis.enabled=true;
+                        var analysis_axes="";
+                        for(var i=0; i<this.params.request.getAnalysis(0).axis.length;i++) {
+                                this.state.analysis.axes[this.params.request.getAnalysis(0).axis[i].type]=  true;
+                                if(analysis_axes.indexOf(this.params.request.getAnalysis(0).axis[i].type)<0)
+                                        analysis_axes+=this.params.request.getAnalysis(0).axis[i].type;
+                                this.state.analysis.type=this.params.request.getAnalysis(0).axis[i].op;
+                                this.state.selection[this.params.request.getAnalysis(0).axis[i].type].min=this.params.request.getAnalysis(0).axis[i].lo;
+                                this.state.selection[this.params.request.getAnalysis(0).axis[i].type].max=this.params.request.getAnalysis(0).axis[i].hi; //this UI currently only supports one analysis operation per request ... can take average across x and min across y, for example
+                                if(this.state.view.widgets.indexOf(this.params.request.getAnalysis(0).axis[i].type)<0)
+                                        this.state.view.widgets+=this.params.request.getAnalysis(0).axis[i].type;
+                                document.getElementById(this.params.request.getAnalysis(0).axis[i].op+"_analysis").selected=true;
+                        }
+
+                        if(analysis_axes=="yx")
+                                analysis_axes="xy"
+                        document.getElementById(analysis_axes+"_analysis").selected=true;
+
+                }
+
+                this.request = this.params.request;
                 this.autoupdate = this.params.autoupdate;
                 this.submitOnLoad=false;
-	} else
+} else
 		this.submitOnLoad =false;
 
 	if(this.state.catid==null)
@@ -219,24 +250,25 @@ LASUI.prototype.initUI = function (anchorId)
 		req.send(null);
 	}
 
-	if((this.state.dataset!=""||this.state.catid!="")&&this.state.variable!="") {
+        if((this.state.dataset!=""||this.state.catid!="")&&this.state.variable!="") {
 
-		if(this.params.catid) {
-			var url = this.hrefs.getCategories.url + this.state.extra_args + "catid=" + this.params.catid;
+                if(this.params.catid) {
+                        var url = this.hrefs.getCategories.url + this.state.extra_args + "catid=" + this.params.catid;
 
-		}
-		else if (this.params.dsid!="")
-			var url = this.hrefs.getVariables.url + this.state.extra_args + "dsid=" + this.params.dsid;
+                }
+                else if (this.params.dsid)
+                        var url = this.hrefs.getVariables.url + this.state.extra_args + "dsid=" + this.params.dsid;
+                else if(this.params.request)
+                        var url = this.hrefs.getVariables.url + this.state.extra_args + "dsid=" + this.state.dataset;
+                if(!document.all)
+                        var req = new XMLHttpRequest(this);
+                else
+                        var req = new ActiveXObject("Microsoft.XMLHTTP");
+                req.onreadystatechange = this.AJAXhandler.LASBind(this, req, "this.setInitialVariable(req.responseText);");
+                req.open("GET", url);
+                req.send(null);
+        }
 
-		
-		if(!document.all)
-			var req = new XMLHttpRequest(this);
-		else
-			var req = new ActiveXObject("Microsoft.XMLHTTP");
-		req.onreadystatechange = this.AJAXhandler.LASBind(this, req, "this.setInitialVariable(req.responseText);");
-		req.open("GET", url);
-		req.send(null);
-	}
 }
 LASUI.prototype.setInitialVariable = function(strJson) {
 	var response = eval("(" + strJson + ")");
@@ -258,13 +290,36 @@ LASUI.prototype.setInitialVariable = function(strJson) {
          }
 }
 LASUI.prototype.printPlot = function () {
-	var plot = window.frames[this.anchors.output].document.getElementById('plot');
+	var plot = document.getElementById(this.anchors.output);
 	if(plot != null) {
-		var print_win = window.open(plot.src + "?" + this.state.extra_args);
+		var print_win = window.open(plot.src + "&stream_id=plot_image&" + this.state.extra_args);
 		print_win.onload = function(){this.print()}
 	}
 
 }
+LASUI.prototype.linkTo = function () {
+        var plot = document.getElementById(this.anchors.output).src;
+	var ui = "http://"+document.location.host+document.location.pathname+"?dsid="+this.state.dataset+"&varid="+this.state.variable+'&auto=true';
+	var div = document.createElement('DIV');
+	div.className = 'LASPopupDIVNode';
+	div.id='linkto_popup';
+	var close = document.createElement('button');
+	close.onclick = function() {document.body.removeChild(document.getElementById('linkto_popup'));LAS.toggleUIMask('none')};
+	close.appendChild(document.createTextNode('Close')); 
+	div.appendChild(close);
+	div.appendChild(document.createElement('BR'));div.appendChild(document.createElement('BR'));
+	div.appendChild(document.createTextNode('The following URL will return you to this dataset and variable.'));
+	div.appendChild(document.createElement('BR'));
+	div.appendChild(document.createTextNode(ui));
+	div.appendChild(document.createElement('BR'));div.appendChild(document.createElement('BR'));
+        div.appendChild(document.createTextNode('The following URL represents the plot currently shown.'));
+	div.appendChild(document.createElement('BR'));
+        div.appendChild(document.createTextNode(plot));
+	this.toggleUIMask('');
+	document.body.appendChild(div);
+	
+}
+
 
 LASUI.prototype.getMetadata = function (evt) {
 	window.open(this.hrefs.getMetadata.url + this.state.extra_args + 'dsid=' + this.state.dataset);
@@ -1680,7 +1735,7 @@ LASUI.prototype.onPlotLoad = function (e) {
 	                        if(mint) this.state.selection.t.min = mint;
                                 if(maxt) this.state.selection.t.max = maxt;
 				
-				if(this.state.view.widgets.indexOf('z')>=0) this.initZConstraint('range',true);
+				//if(this.state.view.widgets.indexOf('z')>=0) this.initZConstraint('range',true);
 			}	
 		this.request = Req;
 		 this.uirequest='xml='+this.urlencode(this.request.getXMLText());
@@ -2294,6 +2349,7 @@ LASUI.prototype.makeRequest = function (evt, type) {
 		this.expired=false;	
 		document.getElementById('update').style.color='';
 		document.getElementById('print').className='top_link';
+		document.getElementById('linkto').className='top_link';
 		this.uirequest='xml='+this.urlencode(this.request.getXMLText());
 	}
 
