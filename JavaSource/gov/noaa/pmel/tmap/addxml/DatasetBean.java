@@ -35,6 +35,7 @@ public class DatasetBean extends LasBean {
 	private String created;
 	private String expires;
 	private long nextUpdate;
+	private HashMap<String, HashMap<String, String>> properties = new HashMap<String, HashMap<String, String>>();
 
 	/**
 	 * @return the nextUpdate
@@ -220,7 +221,15 @@ public class DatasetBean extends LasBean {
 	public void setVersion(String version) {
 		this.version = version;
 	}
-
+ 
+	public void setProperty(String group, String name, String value) {
+		HashMap<String, String> groupMap = properties.get(group);
+		if ( groupMap == null ) {
+			groupMap = new HashMap<String, String>();
+			properties.put(group, groupMap);
+		}
+		groupMap.put(name, value);
+	}
 	public Element toXml() {
 		Element dataset = new Element(this.getElement());
 		if ( comment != null ) {
@@ -258,6 +267,22 @@ public class DatasetBean extends LasBean {
 
 		if ( this.getUrl() != null ) {
 			dataset.setAttribute("url", this.getUrl());
+		}
+		if ( properties.size() > 0 ) {
+			Element propertiesE = new Element("properties");
+            for (Iterator groupsIt = properties.keySet().iterator(); groupsIt.hasNext();) {
+				String group = (String) groupsIt.next();
+				HashMap<String, String> groupMap = properties.get(group);
+				Element groupE = new Element(group);
+				for (Iterator nameIt = groupMap.keySet().iterator(); nameIt.hasNext();) {
+					String name = (String) nameIt.next();
+					String value = groupMap.get(name);
+					Element n = new Element(name);
+					n.setText(value);
+					groupE.addContent(n);
+				}
+			}
+			dataset.addContent(propertiesE);
 		}
 		Collections.sort(variables, new ShortNameComparitor());
 		Element variablesElement = new Element("variables");
@@ -421,6 +446,22 @@ public class DatasetBean extends LasBean {
 		defaultElement.setText("file:ui.xml#VecVariable");
 		ui.addContent(defaultElement);
 		properties.addContent(ui);
+		/*
+		 *
+	         <ferret>
+	             <palette>light_centered</palette>
+                 <fill_levels>c</fill_levels>
+             </ferret>
+
+		 */
+		Element ferret = new Element("ferret");
+		Element palette = new Element("palette");
+		palette.setText("light_centered");
+		ferret.addContent(palette);
+		Element fill_levels = new Element("fill_levels");
+		fill_levels.setText("c");
+		ferret.addContent(fill_levels);
+		properties.addContent(ferret);
 		vectorElement.addContent(properties);
 		
 		for ( int i = 0; i < vectors.size(); i++ ) {
