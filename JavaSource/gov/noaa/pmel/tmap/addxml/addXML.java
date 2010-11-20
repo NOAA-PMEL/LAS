@@ -139,7 +139,7 @@ public class addXML {
 	private static DateTimeFormatter ferret_time_formatter = DateTimeFormat.forPattern("dd-MMM-yyyy HH:mm:ss");
 
 	// Constants
-	private static final String Z_VALUES = "z_values";
+	private static final String Z_VALUES = "zvalues";
 	
 	
 	private static boolean verbose;
