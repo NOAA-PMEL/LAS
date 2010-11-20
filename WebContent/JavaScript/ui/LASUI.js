@@ -308,11 +308,16 @@ LASUI.prototype.linkTo = function () {
 	close.appendChild(document.createTextNode('Close')); 
 	div.appendChild(close);
 	div.appendChild(document.createElement('BR'));div.appendChild(document.createElement('BR'));
-	div.appendChild(document.createTextNode('The following URL will return you to this dataset and variable.'));
+	var label = document.createElement("STRONG");
+	label.appendChild(document.createTextNode('The following URL will return you to this dataset and variable.'));
+	div.appendChild(label);
 	div.appendChild(document.createElement('BR'));
 	div.appendChild(document.createTextNode(ui));
-	div.appendChild(document.createElement('BR'));div.appendChild(document.createElement('BR'));
-        div.appendChild(document.createTextNode('The following URL represents the plot currently shown.'));
+	div.appendChild(document.createElement('BR'));
+	div.appendChild(document.createElement('BR'));
+	var label = document.createElement("STRONG");
+        label.appendChild(document.createTextNode('The following URL represents the plot currently shown.'));
+	div.appendChild(label);
 	div.appendChild(document.createElement('BR'));
         div.appendChild(document.createTextNode(plot));
 	this.toggleUIMask('');
@@ -1436,17 +1441,6 @@ LASUI.prototype.setOperation = function (evt) {
 		document.getElementById('plotOptionsButton').className='top_link_disabled';
 		document.getElementById('plotOptionsButton').onclick=function(){};
 	}
-	//this.updateConstraints(view);
-
-	if(this.refs.analysis.enabled||!this.state.grid.hasAxis('t')||this.state.view.plot.indexOf('t')>=0||this.state.operation.plot.indexOf('prop_prop')>=0) {
-		document.getElementById('Animation').className='top_link_disabled';
-		document.getElementById('Animation').onclick=function(){};
-	}
-	if(this.state.operation.plot.indexOf('prop_prop')>=0) {
-		document.getElementById('Plot to Google Earth').className='top_link_disabled';
-		document.getElementById('Plot to Google Earth').onclick=function(){};
-	}
-
 	
 
 	this.state.lastVariable = this.state.variable;
@@ -1545,6 +1539,7 @@ LASUI.prototype.setOperationList = function (strJson, stop) {
                 }
 	} 
 	
+	
 }
 
 LASUI.prototype.refresh = function() {
@@ -1563,12 +1558,23 @@ LASUI.prototype.refresh = function() {
  * @param {string} name The name of the operation
  */
 LASUI.prototype.setOperationNode = function (id, name) {
-
+	//turn on the button
 	var button = document.getElementById(name);
 	if(button) {
 		button.className='top_link';
 		button.onclick=this.doProductIconClick.LASBind(this, id);
 	}
+
+	//hack out buttons we dont want	
+	if(this.refs.analysis.enabled||!this.state.grid.hasAxis('t')||this.state.view.plot.indexOf('t')>=0||this.state.operation.plot.indexOf('prop_prop')>=0) {
+                document.getElementById('Animation').className='top_link_disabled';
+                document.getElementById('Animation').onclick=function(){};
+        }
+        if(this.state.operation.plot.indexOf('prop_prop')>=0) {
+                document.getElementById('Plot to Google Earth').className='top_link_disabled';
+                document.getElementById('Plot to Google Earth').onclick=function(){};
+        }
+
 }
 LASUI.prototype.doProductIconClick = function (evt) {
 	var args = arguments;
@@ -2760,10 +2766,10 @@ LASUI.prototype.hideAnalysis = function () {
 	this.refs.analysis.enabled = false;
 	var reset = false;
 
-	if(!this.state.operations.response.operations.error&&this.state.grid.hasAxis('t'))
-		for(var i=0;i<this.state.operations.getOperationCount();i++)
-			if(this.state.operations.getOperationName(i)=="Animation")
-				document.getElementById('Animation').className='top_link';
+//	if(!this.state.operations.response.operations.error&&this.state.grid.hasAxis('t'))
+//		for(var i=0;i<this.state.operations.getOperationCount();i++)
+//			if(this.state.operations.getOperationName(i)=="Animation")
+//				document.getElementById('Animation').className='top_link';
 
 	document.getElementById(this.anchors.analysis).style.display="none";
 	for(var d=0;d<this.state.grid.response.grid.axis.length;d++)
