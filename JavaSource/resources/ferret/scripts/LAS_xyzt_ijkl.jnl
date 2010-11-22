@@ -229,6 +229,17 @@ IF `STRINDEX("($varshape)", "T") NE 0` THEN
       DEFINE SYMBOL l_lo `l[gt=($data_var),t="($region_t_lo)"]`
       DEFINE SYMBOL l_hi `l[gt=($data_var),t="($region_t_hi)"]`
 
+     ! modulo years may start in year 0001, making the index
+     ! values off by a year, depending on how the dset is configured.
+
+      DEFINE SYMBOl tmodlen = 0`($data_var),RETURN=tmod`  
+      IF ($tmodlen"0|*>1") THEN 
+         LET llen = `($data_var),RETURN=lsize`
+         IF `($l_lo) GT llen` THEN 
+	    DEFINE SYMBOL l_lo `($l_lo) - llen`
+	    DEFINE SYMBOL l_hi `($l_hi) - llen`
+         ENDIF
+
    ENDIF
 ENDIF   !!! T region
 
