@@ -204,7 +204,7 @@ ENDIF    !!! Y region
 
 ! Z region
 
-IF `STRINDEX("($varshape)", "T") NE 0` THEN
+IF `STRINDEX("($varshape)", "Z") NE 0` THEN
 IF ($region_z_hi"0|*>1") THEN
 
    DEFINE SYMBOL z_lo `z[gz=($data_var),z=($region_z_lo)]`
