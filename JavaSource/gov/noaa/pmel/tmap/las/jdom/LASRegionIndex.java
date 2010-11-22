@@ -148,6 +148,67 @@ public class LASRegionIndex extends LASDocument {
             region.addContent(sectionE);
         }
     }
+    public String getStartCount(int section_index) {
+    	String start = "[";
+    	String count = "[";
+    	ArrayList sections = getSections();
+        HashMap section = (HashMap) sections.get(section_index);
+        if ( section.containsKey("t") ) {
+        	int tlo = Integer.valueOf((String)((HashMap)section.get("t")).get("index_lo")).intValue();
+        	int thi = Integer.valueOf((String)((HashMap)section.get("t")).get("index_hi"));
+        	int c = (thi - tlo) + 1;
+        	start = start+tlo;
+        	count = count + c;
+        }
+        if ( section.containsKey("z") ) {
+        	int zlo = Integer.valueOf((String)((HashMap)section.get("z")).get("index_lo")).intValue();
+        	int zhi = Integer.valueOf((String)((HashMap)section.get("z")).get("index_hi")).intValue();
+        	int c = (zhi -zlo) + 1;
+        	if ( start.equals("[") ) {
+        		start = start + zlo;
+        	} else {
+        		start = start + "," + zlo;
+        	}
+        	if ( count.equals("[") ) {
+        		count = count + c;
+        	} else {
+        		count = count + "," + c;
+        	}
+        }
+        if ( section.containsKey("y") ) {
+        	int ylo = Integer.valueOf((String)((HashMap)section.get("y")).get("index_lo")).intValue();
+        	int yhi = Integer.valueOf((String)((HashMap)section.get("y")).get("index_hi")).intValue();
+        	int c = (yhi - ylo ) + 1;
+        	if ( start.equals("[") ) {
+        		start = start + ylo;
+        	} else {
+        		start = start + "," + ylo;
+        	}
+        	if ( count.equals("[") ) {
+        		count = count + c;
+        	} else {
+        		count = count + "," + c;
+        	}
+        }
+        if ( section.containsKey("x") ) {
+        	int xlo = Integer.valueOf((String)((HashMap)section.get("x")).get("index_lo")).intValue();
+        	int xhi = Integer.valueOf((String)((HashMap)section.get("x")).get("index_hi")).intValue();
+        	int c = (xhi - xlo) + 1;
+        	if ( start.equals("[") ) {
+        		start = start + xlo;
+        	} else {
+        		start = start + "," + xlo;
+        	}
+        	if ( count.equals("[") ) {
+        		count = count + c;
+        	} else {
+        		count = count + "," + c;
+        	}
+        }
+        start = start + "]";
+        count = count + "]";
+        return start + "," + count;
+    }
     public String getOPeNDAPConstraint(int section_index) {
         String constraint = "";
         ArrayList sections = getSections();

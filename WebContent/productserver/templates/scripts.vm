@@ -153,34 +153,9 @@ $las_response.toString()
 			#set($i=0)
             #foreach ($section in $sections)             
                #set($vars = $las_request.getVariables())
-	           #foreach ( $var in $vars )                
- 		     #set ($original = $las_region_index.getOriginalRegion())        
-                       #foreach ($key in $original.keySet())
-                          #set ($axis = $original.get($key))
-                            #if ( $key == "x")
-                               #set ($xlo=$axis.get("lo"))
-                               #set ($xhi= $axis.get("hi"))
-                            #end
-                            #if ( $key == "y")
-                               #set ($ylo=$axis.get("lo"))
-                               #set ($yhi= $axis.get("hi"))
-                            #end
-                            #if ( $key == "z")
-                               #set ($zlo=$axis.get("lo"))
-                               #set ($zhi= $axis.get("hi"))
-                            #end
-                            #if ( $key == "t")
-                               #set ($tlo=$axis.get("lo"))
-                               #set ($thi= $axis.get("hi"))
-                               #if ($tlo == $thi)
-                                  #set($timeString = "'$tlo'")
-                               #else
-                                  #set($timeString = "'$tlo','$thi'")
-                               #end
-                            #end
-                       #end
+	           #foreach ( $var in $vars )                		               
 		          url='${las_config.getFTDSURL($var)}';<br>
-                          [${las_config.getVariableName($var)},grid]=nj_subsetGrid(url,'${las_config.getVariableName($var)}',[$xlo $xhi $ylo $yhi ],$timeString) <br>
+                  [${las_config.getVariableName($var)},grid]=nj_subsetGrid(url,'${las_config.getVariableName($var)}',$las_region_index.getStartCount($i)) <br>
 		       #end
 		    #set($i=$i+1)
             #end
