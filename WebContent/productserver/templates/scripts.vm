@@ -149,16 +149,61 @@ $las_response.toString()
 		<blockquote>
 		<br>	
 		<div class="color">
-			#set ($sections = $las_region_index.getSections())
-			#set($i=0)
-            #foreach ($section in $sections)             
-               #set($vars = $las_request.getVariables())
-	           #foreach ( $var in $vars )                		               
-		          url='${las_config.getFTDSURL($var)}';<br>
-                  [${las_config.getVariableName($var)},grid]=nj_subsetGrid(url,'${las_config.getVariableName($var)}',$las_region_index.getStartCount($i)) <br>
-		       #end
-		    #set($i=$i+1)
-            #end
+			## 
+			#if ( $las_region_index.getZ_lo(0) == "" && ($las_region_index.getT_lo(0).trim().length() != 0 && $las_region_index.getT_lo(0).trim().length() > 7) )
+			## No z-axis, use the original coordinate values...
+			## Don't know what matlab does with climo times, so try to only use "real" times in this section.
+			#set($vars = $las_request.getVariables())
+	           #foreach ( $var in $vars )  
+	           #set($vars = $las_request.getVariables())
+                   #foreach ( $var in $vars )                
+                     #set ($original = $las_region_index.getOriginalRegion())        
+                       #foreach ($key in $original.keySet())
+                          #set ($axis = $original.get($key))
+                            #if ( $key == "x")
+                               #set ($xlo=$axis.get("lo"))
+                               #set ($xhi= $axis.get("hi"))
+                            #end
+                            #if ( $key == "y")
+                               #set ($ylo=$axis.get("lo"))
+                               #set ($yhi= $axis.get("hi"))
+                            #end
+                            #if ( $key == "z")
+                               #set ($zlo=$axis.get("lo"))
+                               #set ($zhi= $axis.get("hi"))
+                            #end
+                            #if ( $key == "t")
+                               #set ($tlo=$axis.get("lo"))
+                               #set ($thi= $axis.get("hi"))
+                               #if ($tlo == $thi)
+                                  #set($timeString = "'$tlo'")
+                               #else
+                                  #set($timeString = "'$tlo','$thi'")
+                               #end
+                            #end
+                       #end
+                          url='${las_config.getFTDSURL($var)}';<br>
+                          #if ( $original.keySet().contains("t") )
+                              [${las_config.getVariableName($var)},grid]=nj_subsetGrid(url,'${las_config.getVariableName($var)}',[$xlo $xhi $ylo $yhi ],$timeString) <br>
+                          #else
+                              [${las_config.getVariableName($var)},grid]=nj_subsetGrid(url,'${las_config.getVariableName($var)}',[$xlo $xhi $ylo $yhi ]) <br>
+ 
+                          #end
+                       #end
+	           #end
+			#else
+			## In the case where the z-axis exists we must use the index access...
+			    #set($i=0)
+			    #set ($sections = $las_region_index.getSections())
+                #foreach ($section in $sections)             
+                   #set($vars = $las_request.getVariables())
+	               #foreach ( $var in $vars )                         
+	    	          url='${las_config.getFTDSURL($var)}';<br>
+                      [${las_config.getVariableName($var)},grid]= nj_grid_varget(url,'${las_config.getVariableName($var)}',$las_region_index.getStartCount($i)) <br>
+	    	       #end
+	    	    #set($i=$i+1)
+                #end
+            #end  ## end of has z test
 		</div>
 		</blockquote>
 		<a href="http://www.mathworks.com/products/matlab/" title="Matlab via loaddap">

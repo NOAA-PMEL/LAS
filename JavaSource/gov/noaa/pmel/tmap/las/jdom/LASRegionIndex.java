@@ -510,39 +510,77 @@ public class LASRegionIndex extends LASDocument {
     // Probably won't use these since we need to loop the sections.
     public String getX_lo(int section) {
         List sections = this.getRootElement().getChildren("section");
-        return ((Element)sections.get(section)).getChildTextTrim("x_lo");
+        Element sectionE = (Element) sections.get(section);
+        if ( sectionE != null ) {
+        	return sectionE.getChildTextTrim("x_lo");
+        } else {
+        	return "";
+        }
     }
     public String getX_hi(int section) {
         List sections = this.getRootElement().getChildren("section");
-        return ((Element)sections.get(section)).getChildTextTrim("x_hi");
+        Element sectionE = (Element)sections.get(section);
+        if ( sectionE != null ) {
+        	return sectionE.getChildTextTrim("x_hi");
+        } else {
+        	return "";
+        }
     }
     
     public String getY_lo(int section) {
         List sections = this.getRootElement().getChildren("section");
-        return ((Element)sections.get(section)).getChildTextTrim("y_lo");
+        Element sectionE = (Element) sections.get(section);
+        if ( sectionE != null ) {
+        	return sectionE.getChildTextTrim("y_lo");
+        } else {
+        	return "";
+        }
     }
     public String getY_hi(int section) {
         List sections = this.getRootElement().getChildren("section");
-        return ((Element)sections.get(section)).getChildTextTrim("y_hi");
+        Element sectionE = (Element) sections.get(section);
+        if ( sectionE != null ) {
+        	return sectionE.getChildTextTrim("y_hi");
+        } else {
+        	return "";
+        }
     }
     
     public String getZ_lo(int section) {
         List sections = this.getRootElement().getChildren("section");
-        return ((Element)sections.get(section)).getChildTextTrim("z_lo");
+        Element sectionE = (Element) sections.get(section);
+        if ( sectionE != null ) {
+        	return sectionE.getChildTextTrim("z_lo");
+        } else {
+        	return "";
+        }
     }
     public String getZ_hi(int section) {
         List sections = this.getRootElement().getChildren("section");
-        return ((Element)sections.get(section)).getChildTextTrim("z_hi");
+        Element sectionE = (Element) sections.get(section);
+        if ( sectionE != null ) {
+        	return sectionE.getChildTextTrim("z_hi");
+        } else {
+        	return "";
+        }
     }
     
     public String getT_lo(int section) {
         List sections = this.getRootElement().getChildren("section");
-        return ((Element)sections.get(section)).getChildTextTrim("t_lo");
+        Element sectionE = (Element) sections.get(section);
+        if ( sectionE != null ) {
+        	return  sectionE.getChildTextTrim("t_lo");
+        } else {
+        	return "";
+        }
     }
     public String getT_hi(int section) {
         List sections = this.getRootElement().getChildren("section");
-        return ((Element)sections.get(section)).getChildTextTrim("t_hi");
+        Element sectionE = (Element) sections.get(section);
+        if ( sectionE != null ) {
+        	return sectionE.getChildTextTrim("t_hi");
+        } else {
+        	return "";
+        }
     }
- 
-
 }
