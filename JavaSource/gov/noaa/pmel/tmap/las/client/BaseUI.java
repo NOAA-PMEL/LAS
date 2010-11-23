@@ -148,8 +148,8 @@ public class BaseUI implements EntryPoint {
 	OperationsWidget xOperationsWidget = new OperationsWidget("Operations");
 
 	// Analysis controls in the navigation panel
-	AnalysisWidget xAnalysisWidget = new AnalysisWidget();
-	CheckBox xApplyAnalysis = new CheckBox("Apply Analysis");
+	//AnalysisWidget xAnalysisWidget = new AnalysisWidget();
+	//CheckBox xApplyAnalysis = new CheckBox("Apply Analysis");
 
 	// Controls for the panel sizes and to hide and show the headers.
 	boolean xPanelHeaderHidden = false;
