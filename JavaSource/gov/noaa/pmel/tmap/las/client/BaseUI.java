@@ -244,8 +244,8 @@ public class BaseUI implements EntryPoint {
 		xNavigationControls.setWidget(2, 0, xAxesWidget);
 		xNavigationControls.setWidget(3, 0, xComparisonAxesSelector);
 		xNavigationControls.setWidget(4, 0, xOperationsWidget);
-		xNavigationControls.setWidget(5, 0, xApplyAnalysis);
-		xNavigationControls.setWidget(6, 0, xAnalysisWidget);
+		//xNavigationControls.setWidget(5, 0, xApplyAnalysis);
+		//xNavigationControls.setWidget(6, 0, xAnalysisWidget);
 
 		xHideControls.setOpen(true);
 		xHideControls.addCloseHandler(new CloseHandler<DisclosurePanel>() {
