@@ -1,7 +1,7 @@
 <application>
 	<invoker base_dir="resources/ferret"
                  executable="@FERRET@"
-                 time_limit="200" template_dir="templates" 
+                 time_limit="3600" template_dir="templates" 
                  output_dir="@WEBAPPS@/@APPNAME@/output"
                  http_base_url = "http://@SERVLET_ROOT_URL@/@APPNAME@/output"
                  iosp_script_dir="resources/iosp/scripts"
