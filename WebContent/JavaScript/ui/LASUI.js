@@ -2215,12 +2215,14 @@ LASUI.prototype.makeRequest = function (evt, type) {
 		var xpaths=[];
 		this.state.variables=[];	
 		for(var v=0;v<document.getElementsByName("variables").length;v++) {
-			if(document.getElementsByName("variables").item(v).selectedIndex >= 0) {
-				xpaths[document.getElementsByName("variables").item(v).options[document.getElementsByName("variables").item(v).selectedIndex].id]=eval("("+document.getElementsByName("variables").item(v).options[document.getElementsByName("variables").item(v).selectedIndex].value+")");
-				var variable = eval("("+document.getElementsByName("variables").item(v).options[document.getElementsByName("variables").item(v).selectedIndex].value+")");
-				this.state.variables.push(variable);
-				this.request.addVariable(this.state.dataset,variable.ID);
-			}
+			if(document.getElementsByName("variables").item(v).selectedIndex >= 0) 
+				var selectedIndex=document.getElementsByName("variables").item(v).selectedIndex;
+			else
+				var selectedIndex=0;
+			xpaths[document.getElementsByName("variables").item(v).options[selectedIndex].id]=eval("("+document.getElementsByName("variables").item(v).options[selectedIndex].value+")");
+			var variable = eval("("+document.getElementsByName("variables").item(v).options[selectedIndex].value+")");
+			this.state.variables.push(variable);
+			this.request.addVariable(this.state.dataset,variable.ID);	
 		}
 		
 		
