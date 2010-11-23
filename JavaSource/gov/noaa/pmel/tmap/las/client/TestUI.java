@@ -506,7 +506,7 @@ public class TestUI extends BaseUI {
 			xAxesWidget.getRefMap().setRegions(regions);
 			ops = config.getOperations();
 			xVariable.setGrid(grid);
-			xAnalysisWidget.setAnalysisAxes(grid);
+			//xAnalysisWidget.setAnalysisAxes(grid);
 			if ( xPanels == null || xPanels.size() == 0 ) {
 				TestUI.super.init(1, Constants.FRAME);
 			}
