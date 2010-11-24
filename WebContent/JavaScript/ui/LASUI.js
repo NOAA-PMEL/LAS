@@ -73,7 +73,8 @@ function LASUI () {
 	this.AJAX_cache={};
 	this.request = new LASRequest();
 	this.info_icon=document.createElement("img");
-	this.info_icon.src="images/icon_info.gif";
+	this.info_icon.src="images/info.png";
+	this.info_icon.className="LASInfoIcon";
 	this.autoupdate=false;
 
 	for(var f in this)
