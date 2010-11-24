@@ -40,6 +40,19 @@ IF `($do_curvi_xy"0") OR ($native_curvilinear_xy"0")` THEN
          GO LAS_error_msg
       ENDIF
    ENDIF
+
+! Also check that the region isn't just completely degenerate in x or y
+   IF `STRINDEX("($ferret_view)", "x") GT 0 AND ($region_x_range"-1") EQ 0` THEN 
+      DEFINE SYMBOL error_string = The requested x region is too small. It reduces to a single point. 
+      GO LAS_error_msg
+      EXIT/PROGRAM
+   ENDIF
+   IF `STRINDEX("($ferret_view)", "y") GT 0 AND ($region_y_range"-1") EQ 0` THEN 
+      DEFINE SYMBOL error_string = The requested y region is too small. It reduces to a single point. 
+      GO LAS_error_msg
+      EXIT/PROGRAM
+   ENDIF
+
 ENDIF   	
 IF `($do_curvi_xy"0") AND ($native_curvilinear_xy"0")` THEN EXIT/SCRIPT
 IF `($do_hybrid_z"0") AND ($native_Z_plot"0")` THEN EXIT/SCRIPT
