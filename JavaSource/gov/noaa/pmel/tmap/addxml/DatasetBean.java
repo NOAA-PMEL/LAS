@@ -270,7 +270,7 @@ public class DatasetBean extends LasBean {
 		}
 		if ( properties.size() > 0 ) {
 			Element propertiesE = new Element("properties");
-            for (Iterator groupsIt = properties.keySet().iterator(); groupsIt.hasNext();) {
+			for (Iterator groupsIt = properties.keySet().iterator(); groupsIt.hasNext();) {
 				String group = (String) groupsIt.next();
 				HashMap<String, String> groupMap = properties.get(group);
 				Element groupE = new Element(group);
@@ -293,7 +293,7 @@ public class DatasetBean extends LasBean {
 			variablesElement.addContent(varElement);
 		}
 		dataset.addContent(variablesElement);
-		
+
 		List<String> vectors = new ArrayList<String>();
 		// First do names containing "zonal".
 		for (int v = 0; v < variables.size(); v++ ) {
@@ -332,100 +332,102 @@ public class DatasetBean extends LasBean {
 		}
 		for (int v = 0; v < variables.size(); v++ ) {
 			VariableBean var = (VariableBean) variables.get(v);
-			
+
 			String vname = var.getShortName();
 			int matching_occurance_index = -1;
-			
-			for ( int p = 0; p < Util.vectorPatterns[0].length; p ++ ) {
-				vectors = new ArrayList<String>();
-				// Look for x, X, u or U
-				char c = Util.vectorPatterns[0][p];
-				int count = Util.countOccurrences(vname, c);
-				if (vname.indexOf(c) >= 0) {
-					// if it has an x, X, u or U make pattern that will match any character in place of the x, X, u or U
-					// to find any potential partners (and including itself)
-					int start = vname.indexOf(c);
-					// There might be more than one x, X, u or U so we have to find them all
-					for ( int i = 0; i < count; i++ ) {
-						String match_range = Util.vectorRanges[p];
-						
-						String pattern_string = vname.replace(String.valueOf(c), match_range);
-						
-						
-						if ( vname.length() > 1 ) {
-							if ( start == 0 ) {
-								// Matches the first character	
-								pattern_string = match_range+vname.substring(1);
-							} else if ( start > 0 && start < vname.length()-1  ) {
-								// Matches somewhere in the middle
-								pattern_string = vname.substring(0, start-1)+match_range+vname.substring(start+1);
+			// Don't match mask variables...
+			if ( !vname.contains("mask") ) {
+				for ( int p = 0; p < Util.vectorPatterns[0].length; p ++ ) {
+					vectors = new ArrayList<String>();
+					// Look for x, X, u or U
+					char c = Util.vectorPatterns[0][p];
+					int count = Util.countOccurrences(vname, c);
+					if (vname.indexOf(c) >= 0) {
+						// if it has an x, X, u or U make pattern that will match any character in place of the x, X, u or U
+						// to find any potential partners (and including itself)
+						int start = vname.indexOf(c);
+						// There might be more than one x, X, u or U so we have to find them all
+						for ( int i = 0; i < count; i++ ) {
+							String match_range = Util.vectorRanges[p];
+
+							String pattern_string = vname.replace(String.valueOf(c), match_range);
+
+
+							if ( vname.length() > 1 ) {
+								if ( start == 0 ) {
+									// Matches the first character	
+									pattern_string = match_range+vname.substring(1);
+								} else if ( start > 0 && start < vname.length()-1  ) {
+									// Matches somewhere in the middle
+									pattern_string = vname.substring(0, start-1)+match_range+vname.substring(start+1);
+								} else {
+									// Matches the last character
+									pattern_string = vname.substring(0, vname.length()-1)+match_range;
+								}
 							} else {
-								// Matches the last character
-								pattern_string = vname.substring(0, vname.length()-1)+match_range;
+								pattern_string = match_range;
 							}
-						} else {
-							pattern_string = match_range;
-						}
-						Pattern pattern = Pattern.compile(pattern_string);
-						for (int j = 0; j < variables.size(); j++ ) {
-							VariableBean vVar = variables.get(j);
-							Matcher match = pattern.matcher(vVar.getShortName());
-							if ( match.matches() ) {
-								vectors.add(vVar.getElement());
-								matching_occurance_index = start;
+							Pattern pattern = Pattern.compile(pattern_string);
+							for (int j = 0; j < variables.size(); j++ ) {
+								VariableBean vVar = variables.get(j);
+								Matcher match = pattern.matcher(vVar.getShortName());
+								if ( match.matches() ) {
+									vectors.add(vVar.getElement());
+									matching_occurance_index = start;
+								}
 							}
-						}
-						start = vname.substring(start).indexOf(c);
-					}
-				}
-				// matching index tells me which of the many x, X, u or U characters in the name had potential partners
-				if ( matching_occurance_index >= 0 ) {
-					// Sort everybody
-					
-					int matches = 0;
-					// index p tells me which of x, X, u or U matched.
-					// index i checks the matches to make sure the partners have the corresponding y, Y, v or V and z, Z, w or W 
-					StringBuilder substituion = new StringBuilder();
-					StringBuilder vector_id = new StringBuilder();
-					StringBuilder vector_long_name = new StringBuilder("Vector of ");
-					for ( int i = 0; i < vectors.size(); i++ ) {
-						if ( vectors.get(i).charAt(matching_occurance_index) == Util.vectorPatterns[i][p]) {
-							matches++;
-							substituion.append(Util.vectorPatterns[i][p]);
-							vector_id.append(vectors.get(i));
-							vector_long_name.append(getVariable(vectors.get(i)).getName());
-							if ( i < vectors.size() -1 ) {
-								vector_id.append("_");
-								vector_long_name.append(" and ");
-							}
-							
+							start = vname.substring(start).indexOf(c);
 						}
 					}
-					// This constructs a name based on the netCDF variables names.
-					
-					// I think we should try based on the long names first and see how we like that.
-					if ( matches > 0 && matches == vectors.size() && vectors.size() > 1 ) {
-						
-                        String vector_name = null;
-						// We have some so add it to its parent
-						
-						if ( vectors.get(0).length() > 1 ) {
-							if ( matching_occurance_index == 0 ) {
-								// Matches the first character	
-								vector_name = substituion.toString()+"_"+getVariable(vectors.get(0)).getShortName().substring(1);
-							} else if ( matching_occurance_index > 0 && matching_occurance_index < vectors.get(0).length()-1  ) {
-								// Matches somewhere in the middle
-								vector_name = getVariable(vectors.get(0)).getShortName().substring(0, matching_occurance_index-1)+
-								"_"+substituion.toString()+"_"+
-								vectors.get(0).substring(matching_occurance_index+1);
-							} else {
-								// Matches the last character
-								vector_name = getVariable(vectors.get(0)).getShortName().substring(0, vectors.get(0).length()-1)+"_"+substituion.toString();
+					// matching index tells me which of the many x, X, u or U characters in the name had potential partners
+					if ( matching_occurance_index >= 0 ) {
+						// Sort everybody
+
+						int matches = 0;
+						// index p tells me which of x, X, u or U matched.
+						// index i checks the matches to make sure the partners have the corresponding y, Y, v or V and z, Z, w or W 
+						StringBuilder substituion = new StringBuilder();
+						StringBuilder vector_id = new StringBuilder();
+						StringBuilder vector_long_name = new StringBuilder("Vector of ");
+						for ( int i = 0; i < vectors.size(); i++ ) {
+							if ( vectors.get(i).charAt(matching_occurance_index) == Util.vectorPatterns[i][p]) {
+								matches++;
+								substituion.append(Util.vectorPatterns[i][p]);
+								vector_id.append(vectors.get(i));
+								vector_long_name.append(getVariable(vectors.get(i)).getName());
+								if ( i < vectors.size() -1 ) {
+									vector_id.append("_");
+									vector_long_name.append(" and ");
+								}
+
 							}
-						} else {
-							vector_name = substituion.toString();
 						}
-						addComposite(dataset, vector_long_name.toString(), vector_id.toString(), vectors);
+						// This constructs a name based on the netCDF variables names.
+
+						// I think we should try based on the long names first and see how we like that.
+						if ( matches > 0 && matches == vectors.size() && vectors.size() > 1 ) {
+
+							String vector_name = null;
+							// We have some so add it to its parent
+
+							if ( vectors.get(0).length() > 1 ) {
+								if ( matching_occurance_index == 0 ) {
+									// Matches the first character	
+									vector_name = substituion.toString()+"_"+getVariable(vectors.get(0)).getShortName().substring(1);
+								} else if ( matching_occurance_index > 0 && matching_occurance_index < vectors.get(0).length()-1  ) {
+									// Matches somewhere in the middle
+									vector_name = getVariable(vectors.get(0)).getShortName().substring(0, matching_occurance_index-1)+
+									"_"+substituion.toString()+"_"+
+									vectors.get(0).substring(matching_occurance_index+1);
+								} else {
+									// Matches the last character
+									vector_name = getVariable(vectors.get(0)).getShortName().substring(0, vectors.get(0).length()-1)+"_"+substituion.toString();
+								}
+							} else {
+								vector_name = substituion.toString();
+							}
+							addComposite(dataset, vector_long_name.toString(), vector_id.toString(), vectors);
+						}
 					}
 				}
 			}

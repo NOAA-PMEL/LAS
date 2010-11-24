@@ -11,7 +11,8 @@ public class AllTests {
 				                TestLeetmaa.class, 
 				                TestNGDC.class,
 				                TestOISST.class,
-				                TestNYHOPS.class};
+				                TestNYHOPS.class,
+				                TestMask.class};
 		TestSuite suite= new TestSuite(testClasses);
 		return suite;
 	}
