@@ -49,6 +49,9 @@ font-weight: bold;
 	border:"1pt solid #dddddd";
 	padding:1pt;
 }
+#breadcrumb {
+	vertical-align:middle;
+}
 .LASAnalysis {
 	padding:5pt;
 	margin:5pt;
@@ -208,7 +211,9 @@ font-weight: bold;
 
 .LASTextInputNode {
 }
-
+.LASInfoIcon {
+	vertical-align:middle;
+}
 .LASRadioInputNode {
 }
 
@@ -243,7 +248,8 @@ height: 100%;
 }
 .top_link_disabled {
 	display:block; 
-	float:left; 
+	float:left;
+	height:13px; 
 	color: #DDDDDD; 
 	text-decoration:none; 
 	font-size:11px; 
@@ -260,6 +266,7 @@ height: 100%;
 .top_link {
         display:block;
         float:left;
+	height:13px;
         color:#FFFFFF;
         text-decoration:none;
         font-size:11px;
