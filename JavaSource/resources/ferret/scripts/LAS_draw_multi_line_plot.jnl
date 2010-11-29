@@ -119,7 +119,7 @@ IF `(($all_units_same) EQ 0) AND (($data_count) GT 2)` THEN
    LET xpl = `1 - margin_del* (($iplot)-1)`
    LET ypl = 1
 
-   REPEAT/RANGE=2:($iplot)/NAME=m (\
+   REPEAT/RANGE=2:`($iplot)+1`/NAME=m (\
       DEFINE SYMBOL vm = `m-1`; \
       DEFINE VIEWPORT/X=0:`xpl`/y=0:`ypl` v($vm); \
       SET VIEW v($vm); \

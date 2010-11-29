@@ -10,28 +10,34 @@ IF `($m) eq 1` THEN DEFINE SYMBOL comma = ,
 ! Remove various special characters from this internally-used string.
 
 PPL SET inunits_collapse $EDIT(in_units,COLLAPSE)
-DEFINE SYMBOL inunits_up `UPCASE("($inunits_collapse)")
+DEFINE SYMBOL inunits_up `UPCASE("($inunits_collapse)")`
 
-! If we already have a set of vars with these units then we are done
 IF `($n_ustrings"0|*>1") EQ 0` THEN 
    DEFINE SYMBOL n_ustrings = 1
    DEFINE SYMBOL ustring_($n_ustrings) = ($inunits_up)
+ENDIF
+
+! If we already have a set of vars with these units then we are done
+IF ($done_($inunits_up)"0|*>1") THEN
    EXIT/SCRIPT
 ENDIF
-IF ($done_($n_ustrings)"0|*>1") THEN EXIT/SCRIPT
 
 LET new_string = 0
 REPEAT/RANGE=1:($n_ustrings)/NAME=g (\
+   DEFINE SYMBOL g = `g`;\
    IF `STRCMP("($inunits_up)", "($ustring_($g))") NE 0` THEN LET new_string = `new_string+1`;\
 )
+
 IF `new_string EQ 0` THEN 
-   EXIT/SCRIPT
+!   EXIT/SCRIPT
 ELSE
    DEFINE SYMBOL n_ustrings = `($n_ustrings)+1`
-   DEFINE SYMBOL ustring_($n_ustrings) = ($inunits_up)
+   DEFINE SYMBOL ustring_($n_ustrings) = ($inunits_up)   
+   DEFINE SYMBOL iplot = `($iplot) + 1`
+   DEFINE SYMBOL group_label_($iplot) = ($in_units)
 ENDIF
 
-! For this units, collect the variables.
+! For this units string, collect the variables.
 REPEAT/RANGE=1:`($data_count)-1`/NAME=g (\
    DEFINE SYMBOL g = `g`;\
    DEFINE SYMBOL gg = `g-1`;\
@@ -45,7 +51,6 @@ REPEAT/RANGE=1:`($data_count)-1`/NAME=g (\
  )
 
 ! Mark this units string as being done and prepare for the next one
-DEFINE SYMBOL done_($n_ustrings) = 1
-DEFINE SYMBOL iplot = `($iplot) + 1`
+DEFINE SYMBOL done_($inunits_up) = 1
 
 !  ----------------- End of collect_units_var.jnl ------------------------------------
