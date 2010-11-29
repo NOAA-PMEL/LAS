@@ -22,14 +22,16 @@ IF ($done_($inunits_up)"0|*>1") THEN
    EXIT/SCRIPT
 ENDIF
 
-LET new_string = 0
+LET new_string = 1
 REPEAT/RANGE=1:($n_ustrings)/NAME=g (\
    DEFINE SYMBOL g = `g`;\
-   IF `STRCMP("($inunits_up)", "($ustring_($g))") NE 0` THEN LET new_string = `new_string+1`;\
+   sh sym inunits_up, ustring_($g);\
+   IF `STRCMP("($inunits_up)", "($ustring_($g))") EQ 0` THEN LET new_string = 0;\
+   IF `STRCMP("($inunits_up)", "($ustring_($g))") EQ 0` THEN EXIT/LOOP;\
 )
 
 IF `new_string EQ 0` THEN 
-!   EXIT/SCRIPT
+   EXIT/SCRIPT
 ELSE
    DEFINE SYMBOL n_ustrings = `($n_ustrings)+1`
    DEFINE SYMBOL ustring_($n_ustrings) = ($inunits_up)   
@@ -54,3 +56,8 @@ REPEAT/RANGE=1:`($data_count)-1`/NAME=g (\
 DEFINE SYMBOL done_($inunits_up) = 1
 
 !  ----------------- End of collect_units_var.jnl ------------------------------------
+sh sym iplot
+sh sym ustring*
+sh sym group*
+sh sym plot_vars*
+pause
