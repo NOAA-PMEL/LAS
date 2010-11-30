@@ -302,6 +302,30 @@ public class LASUIRequest extends LASDocument {
         return data == region;
     }
 
+    public HashMap<String, String>  getPropertyGroup(String group_name) {
+        HashMap<String, String> propertyGroup = new HashMap<String, String>();
+      	
+        Element properties = this.getRootElement().getChild("properties");
+        Element group = null;
+        if ( properties != null ) {
+           group = properties.getChild(group_name);
+        }
+	if(group != null) {
+		for(Iterator propIt = group.getChild("property_group").getChildren().iterator(); propIt.hasNext();) {
+			Element property = (Element) propIt.next();
+			propertyGroup.put(property.getName(), property.getValue());
+		}
+		return propertyGroup;
+	}
+	else { 	for(Integer ct = 0; ct <5;) {
+			propertyGroup.put("foo"+ct,"bar");
+			ct++;
+		}
+		return propertyGroup;
+	}
+    }
+
+
     public Element getProperties() {
        return getRootElement().getChild("properties");
     }
