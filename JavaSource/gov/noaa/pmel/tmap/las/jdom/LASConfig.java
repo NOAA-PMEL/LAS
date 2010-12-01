@@ -1359,6 +1359,10 @@ public class LASConfig extends LASDocument {
                         	if ( dataset != null && dataset.getVariables().size() > 0) {
                         		category_container.addContent(dataset.getElement());
                         		category_container.setAttribute("children", "variables");
+                        	} else if ( dataset != null && dataset.getElement().getChild("variables") != null ) {
+                        		// Somebody put in a data set with no variables.  Why?  I don't know, but they did.
+                        		category_container.addContent(dataset.getElement());
+                        		category_container.setAttribute("children", "variables");
                         	}
                         }
                     }
