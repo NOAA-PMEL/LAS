@@ -428,6 +428,7 @@ public class DateTimeWidget extends Composite {
 				String value = lo_day.getValue(d);
 				if ( value.equals(tlo) ) {
 					lo_day.setSelectedIndex(d);
+					loDayChange();
 				}
 			}
 			int lo_i = lo_day.getSelectedIndex();
@@ -438,34 +439,47 @@ public class DateTimeWidget extends Composite {
 		} else {
 			Date lo = parseFerretDate(tlo);
 			
-			if ( hasDay ) {
-				String day = String.valueOf(lo.getDate());
-				for(int d = 0; d < lo_day.getItemCount(); d++) {
-					String value = lo_day.getValue(d);
-					if ( value.equals(day) ) {
-						lo_day.setSelectedIndex(d);
-					}
-				}
-			} 
-			if ( hasMonth ) {
-				String month = MONTHS.get(lo.getMonth());
-				for ( int m = 0; m < lo_month.getItemCount(); m++ ) {
-					String value = lo_month.getValue(m);
-					if ( value.equals(month) ) {
-						lo_month.setSelectedIndex(m);
-					}
-				}
-
-			}
 			if ( hasYear ) {
 				String year = String.valueOf(lo.getYear() + 1900);
 				for ( int y = 0; y < lo_year.getItemCount(); y++ ) {
 					String value = lo_year.getValue(y);
 					if ( value.equals(year) ) {
 						lo_year.setSelectedIndex(y);
+						loYearChange();
 					}
 				}
 			}
+			if ( hasMonth ) {
+				String month = MONTHS.get(lo.getMonth());
+				for ( int m = 0; m < lo_month.getItemCount(); m++ ) {
+					String value = lo_month.getValue(m);
+					if ( value.equals(month) ) {
+						lo_month.setSelectedIndex(m);
+						loMonthChange();
+					}
+				}
+
+			}
+			if ( hasDay ) {
+				String day = String.valueOf(lo.getDate());
+				for(int d = 0; d < lo_day.getItemCount(); d++) {
+					String value = lo_day.getValue(d);
+					if ( value.equals(day) ) {
+						lo_day.setSelectedIndex(d);
+						loDayChange();
+					}
+				}
+			} 
+			if ( hasHour ) {
+				int hour = lo.getHours();
+				int min = lo.getMinutes();
+				String hours_value = GeoUtil.format_two(hour)+":"+GeoUtil.format_two(min);
+				for( int h = 0; h < lo_hour.getItemCount(); h++ ) {
+					String value = lo_hour.getValue(h);
+					lo_hour.setSelectedIndex(h);
+				}
+			}
+			
 			 // The new value is set.  Check the range (even it it's not visible).
 			if ( hasYear ) {
 				checkRangeEndYear();
@@ -494,33 +508,44 @@ public class DateTimeWidget extends Composite {
 			}
 		} else {
 			Date hi = parseFerretDate(thi);
-			
-			if ( hasDay ) {
-				String day = String.valueOf(hi.getDate());
-				for(int d = 0; d < hi_day.getItemCount(); d++) {
-					String value = hi_day.getValue(d);
-					if ( value.equals(day) ) {
-						hi_day.setSelectedIndex(d);
-					}
-				}
-			} 
-			if ( hasMonth ) {
-				String month = MONTHS.get(hi.getMonth());
-				for ( int m = 0; m < hi_month.getItemCount(); m++ ) {
-					String value = hi_month.getValue(m);
-					if ( value.equals(month) ) {
-						hi_month.setSelectedIndex(m);
-					}
-				}
-
-			}
 			if ( hasYear ) {
 				String year = String.valueOf(hi.getYear() + 1900);
 				for ( int y = 0; y < hi_year.getItemCount(); y++ ) {
 					String value = hi_year.getValue(y);
 					if ( value.equals(year) ) {
 						hi_year.setSelectedIndex(y);
+						hiYearChange();
 					}
+				}
+			}
+			if ( hasMonth ) {
+				String month = MONTHS.get(hi.getMonth());
+				for ( int m = 0; m < hi_month.getItemCount(); m++ ) {
+					String value = hi_month.getValue(m);
+					if ( value.equals(month) ) {
+						hi_month.setSelectedIndex(m);
+						hiMonthChange();
+					}
+				}
+
+			}
+			if ( hasDay ) {
+				String day = String.valueOf(hi.getDate());
+				for(int d = 0; d < hi_day.getItemCount(); d++) {
+					String value = hi_day.getValue(d);
+					if ( value.equals(day) ) {
+						hi_day.setSelectedIndex(d);
+						hiDayChange();
+					}
+				}
+			} 	
+			if ( hasHour ) {
+				int hour = hi.getHours();
+				int min = hi.getMinutes();
+				String hours_value = GeoUtil.format_two(hour)+":"+GeoUtil.format_two(min);
+				for( int h = 0; h < hi_hour.getItemCount(); h++ ) {
+					String value = hi_hour.getValue(h);
+					hi_hour.setSelectedIndex(h);
 				}
 			}
             // The new value is set.  Check the range (even it it's not visible).
@@ -712,49 +737,58 @@ public class DateTimeWidget extends Composite {
 	public ChangeHandler loYearHandler = new ChangeHandler() {
 		@Override
 		public void onChange(ChangeEvent arg0) {
-			int year = Integer.valueOf(lo_year.getValue(lo_year.getSelectedIndex())).intValue();
-			int month = MONTHS.indexOf(lo_month.getValue(lo_month.getSelectedIndex()));
-			int day = Integer.valueOf(lo_day.getValue(lo_day.getSelectedIndex())).intValue();
-			int hour = lo_hour.getHour();
-			int min = lo_hour.getMin();
-			loadAndSetMonthDayHour(lo_month, lo_day, lo_hour, year, month, day, hour, min);
-			checkRangeEndYear();
+			loYearChange();
 		}
 	};
+	private void loYearChange() {
+		int year = Integer.valueOf(lo_year.getValue(lo_year.getSelectedIndex())).intValue();
+		int month = MONTHS.indexOf(lo_month.getValue(lo_month.getSelectedIndex()));
+		int day = Integer.valueOf(lo_day.getValue(lo_day.getSelectedIndex())).intValue();
+		int hour = lo_hour.getHour();
+		int min = lo_hour.getMin();
+		loadAndSetMonthDayHour(lo_month, lo_day, lo_hour, year, month, day, hour, min);
+		checkRangeEndYear();
+	}
 	public ChangeHandler loMonthHandler = new ChangeHandler() {
 		@Override
 		public void onChange(ChangeEvent event) {
-			int year = Integer.valueOf(lo_year.getValue(lo_year.getSelectedIndex())).intValue();
-			int month = MONTHS.indexOf(lo_month.getValue(lo_month.getSelectedIndex()));
-			int day = Integer.valueOf(lo_day.getValue(lo_day.getSelectedIndex())).intValue();
-			int hour = lo_hour.getHour();
-			int min = lo_hour.getMin();
-			loadAndSetDayHour(lo_day, lo_hour, year, month, day, hour, min);
-			checkRangeEndMonth();
+			loMonthChange();
 		}	
 	};
+	private void loMonthChange() {
+		int year = Integer.valueOf(lo_year.getValue(lo_year.getSelectedIndex())).intValue();
+		int month = MONTHS.indexOf(lo_month.getValue(lo_month.getSelectedIndex()));
+		int day = Integer.valueOf(lo_day.getValue(lo_day.getSelectedIndex())).intValue();
+		int hour = lo_hour.getHour();
+		int min = lo_hour.getMin();
+		loadAndSetDayHour(lo_day, lo_hour, year, month, day, hour, min);
+		checkRangeEndMonth();
+	}
 	// The loDayListener and hiDayListener are the only ones that should fire when the Widget contains a menu.
 	public ChangeHandler loDayHandler = new ChangeHandler() {
 
 		@Override
 		public void onChange(ChangeEvent arg0) {
-			if ( isMenu ) {
-				int lo_i = lo_day.getSelectedIndex();
-				int hi_i = hi_day.getSelectedIndex();
-				if ( lo_i > hi_i ) {
-					hi_day.setSelectedIndex(lo_i);
-				}
-			} else {
-				int year = Integer.valueOf(lo_year.getValue(lo_year.getSelectedIndex())).intValue();
-				int month = MONTHS.indexOf(lo_month.getValue(lo_month.getSelectedIndex()));
-				int day = Integer.valueOf(lo_day.getValue(lo_day.getSelectedIndex())).intValue();
-				int hour = lo_hour.getHour();
-				int min = lo_hour.getMin();
-				loadAndSetHour(lo_hour, year, month, day, hour, min);
-				checkRangeEndDay();
-			} 
+			loDayChange();
 		}
 	};
+	private void loDayChange() {
+		if ( isMenu ) {
+			int lo_i = lo_day.getSelectedIndex();
+			int hi_i = hi_day.getSelectedIndex();
+			if ( lo_i > hi_i ) {
+				hi_day.setSelectedIndex(lo_i);
+			}
+		} else {
+			int year = Integer.valueOf(lo_year.getValue(lo_year.getSelectedIndex())).intValue();
+			int month = MONTHS.indexOf(lo_month.getValue(lo_month.getSelectedIndex()));
+			int day = Integer.valueOf(lo_day.getValue(lo_day.getSelectedIndex())).intValue();
+			int hour = lo_hour.getHour();
+			int min = lo_hour.getMin();
+			loadAndSetHour(lo_hour, year, month, day, hour, min);
+			checkRangeEndDay();
+		} 
+	}
 	public ChangeHandler loHourHandler = new ChangeHandler() {
 		@Override
 		public void onChange(ChangeEvent arg0) {
@@ -764,37 +798,47 @@ public class DateTimeWidget extends Composite {
 	public ChangeHandler hiYearHandler = new ChangeHandler() {
 		@Override
 		public void onChange(ChangeEvent arg0) {
-			int year = Integer.valueOf(hi_year.getValue(hi_year.getSelectedIndex())).intValue();
-			int month = MONTHS.indexOf(hi_month.getValue(hi_month.getSelectedIndex()));
-			int day = Integer.valueOf(hi_day.getValue(hi_day.getSelectedIndex())).intValue();
-			int hour = hi_hour.getHour();
-			int min = hi_hour.getMin();
-			loadAndSetMonthDayHour(hi_month, hi_day, hi_hour, year, month, day, hour, min);
-			checkRangeStartYear();
+			hiYearChange();
 		}
 	};
+	private void hiYearChange() {
+		int year = Integer.valueOf(hi_year.getValue(hi_year.getSelectedIndex())).intValue();
+		int month = MONTHS.indexOf(hi_month.getValue(hi_month.getSelectedIndex()));
+		int day = Integer.valueOf(hi_day.getValue(hi_day.getSelectedIndex())).intValue();
+		int hour = hi_hour.getHour();
+		int min = hi_hour.getMin();
+		loadAndSetMonthDayHour(hi_month, hi_day, hi_hour, year, month, day, hour, min);
+		checkRangeStartYear();
+	}
 	public ChangeHandler hiMonthHandler = new ChangeHandler() {
 		@Override
 		public void onChange(ChangeEvent arg0) {
-			int year = Integer.valueOf(hi_year.getValue(hi_year.getSelectedIndex())).intValue();
-			int month = MONTHS.indexOf(hi_month.getValue(hi_month.getSelectedIndex()));
-			int day = Integer.valueOf(hi_day.getValue(hi_day.getSelectedIndex())).intValue();
-			int hour = hi_hour.getHour();
-			int	min = hi_hour.getMin();  
-			loadAndSetDayHour(hi_day, hi_hour, year, month, day, hour, min);
-			checkRangeStartMonth();
+			hiMonthChange();
 		}	
 	};
+	private void hiMonthChange() {
+		int year = Integer.valueOf(hi_year.getValue(hi_year.getSelectedIndex())).intValue();
+		int month = MONTHS.indexOf(hi_month.getValue(hi_month.getSelectedIndex()));
+		int day = Integer.valueOf(hi_day.getValue(hi_day.getSelectedIndex())).intValue();
+		int hour = hi_hour.getHour();
+		int	min = hi_hour.getMin();  
+		loadAndSetDayHour(hi_day, hi_hour, year, month, day, hour, min);
+		checkRangeStartMonth();
+	}
 	public ChangeHandler hiDayHandler = new ChangeHandler() {
 		@Override
 		public void onChange(ChangeEvent arg0) {
-			if ( isMenu ) {
-				int lo_i = lo_day.getSelectedIndex();
-				int hi_i = hi_day.getSelectedIndex();
-				if ( lo_i > hi_i ) {
-					lo_day.setSelectedIndex(hi_i);
-				}
-			} else {
+			hiDayChange();
+		}
+	};
+	private void hiDayChange() {
+		if ( isMenu ) {
+			int lo_i = lo_day.getSelectedIndex();
+			int hi_i = hi_day.getSelectedIndex();
+			if ( lo_i > hi_i ) {
+				lo_day.setSelectedIndex(hi_i);
+			}
+		} else {
 			int year = Integer.valueOf(hi_year.getValue(hi_year.getSelectedIndex())).intValue();
 			int month = MONTHS.indexOf(hi_month.getValue(hi_month.getSelectedIndex()));
 			int day = Integer.valueOf(hi_day.getValue(hi_day.getSelectedIndex())).intValue();
@@ -802,9 +846,8 @@ public class DateTimeWidget extends Composite {
 			int	min = hi_hour.getMin();  
 			loadAndSetHour(hi_hour, year, month, day, hour, min);
 			checkRangeStartDay();
-			}
 		}
-	};
+	}
 	public ChangeHandler hiHourHandler = new ChangeHandler() {
 		@Override
 		public void onChange(ChangeEvent arg0) {
