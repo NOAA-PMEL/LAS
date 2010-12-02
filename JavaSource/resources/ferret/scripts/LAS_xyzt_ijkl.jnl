@@ -239,6 +239,7 @@ IF `STRINDEX("($varshape)", "T") NE 0` THEN
 	    DEFINE SYMBOL l_lo `($l_lo) - llen`
 	    DEFINE SYMBOL l_hi `($l_hi) - llen`
          ENDIF
+       ENDIF
 
    ENDIF
 ENDIF   !!! T region
