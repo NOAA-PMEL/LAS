@@ -461,7 +461,7 @@ public class DateTimeWidget extends Composite {
 
 			}
 			if ( hasDay ) {
-				String day = String.valueOf(lo.getDate());
+				String day = GeoUtil.format_two(lo.getDate());
 				for(int d = 0; d < lo_day.getItemCount(); d++) {
 					String value = lo_day.getValue(d);
 					if ( value.equals(day) ) {
@@ -476,7 +476,9 @@ public class DateTimeWidget extends Composite {
 				String hours_value = GeoUtil.format_two(hour)+":"+GeoUtil.format_two(min);
 				for( int h = 0; h < lo_hour.getItemCount(); h++ ) {
 					String value = lo_hour.getValue(h);
-					lo_hour.setSelectedIndex(h);
+					if ( hours_value.equals(value) ) {
+						lo_hour.setSelectedIndex(h);
+					}
 				}
 			}
 			
@@ -530,7 +532,7 @@ public class DateTimeWidget extends Composite {
 
 			}
 			if ( hasDay ) {
-				String day = String.valueOf(hi.getDate());
+				String day = GeoUtil.format_two(hi.getDate());
 				for(int d = 0; d < hi_day.getItemCount(); d++) {
 					String value = hi_day.getValue(d);
 					if ( value.equals(day) ) {
@@ -545,7 +547,9 @@ public class DateTimeWidget extends Composite {
 				String hours_value = GeoUtil.format_two(hour)+":"+GeoUtil.format_two(min);
 				for( int h = 0; h < hi_hour.getItemCount(); h++ ) {
 					String value = hi_hour.getValue(h);
-					hi_hour.setSelectedIndex(h);
+					if ( hours_value.equals(value) ) {
+					    hi_hour.setSelectedIndex(h);
+					}
 				}
 			}
             // The new value is set.  Check the range (even it it's not visible).
