@@ -56,27 +56,27 @@ IF ($clon_imin"0|*>1") THEN
 
    ENDIF
 ENDIF
-LET varsiz `pvar,RETURN=size`
 
-! If its a slice in x or y account for that
-IF `($region_x_range"1|0|*>1") EQ 0 AND ($region_y_range"1|0|*>1") EQ 0` THEN
-   LET pvar = ($expr1)($data_var)[d=($data_num),i=1,j=1]($expr2)
-   IF ($region_zt"0|*>1") THEN LET pvar = ($expr1)($data_var)[d=($data_num),($region_zt),i=1,j=1]($expr2)
-   LET varsiz = MIN(`varsiz`, `pvar,RETURN=size`)
+! Compute strides_for_mem as in LAS_set_strides.jnl
 
-ELIF `($region_x_range"1|0|*>1") EQ 0` THEN 
-   LET pvar = ($expr1)($data_var)[d=($data_num),i=1]
-   IF ($region_zt"0|*>1") THEN LET pvar = ($expr1)($data_var)[d=($data_num),($region_zt),i=1]($expr2)
-   LET varsiz = MIN(`varsiz`, `pvar,RETURN=size`)
+IF `($num"0")+1 EQ ($data_count)` THEN
+   LET ndims = 0
+   LET xsiz = `pvar,RETURN=isize`
+   IF `xsiz GT 1` THEN LET ndims = `ndims + 1`
+   LET ysiz = `pvar,RETURN=jsize`
+   IF `ysiz GT 1` THEN LET ndims = `ndims + 1`
+   LET zsiz = `pvar,RETURN=ksize`
+   IF `zsiz GT 1` THEN LET ndims = `ndims + 1`
+   LET tsiz = `pvar,RETURN=lsize`
+   IF `tsiz GT 1` THEN LET ndims = `ndims + 1`
 
-ELIF `($region_y_range"1|0|*>1") EQ 0` THEN 
-   LET pvar = ($expr1)($data_var)[d=($data_num),j=1]($expr2)
-   IF ($region_zt"0|*>1") THEN LET pvar = ($expr1)($data_var)[d=($data_num),($region_zt),j=1]($expr2)
-   LET varsiz = MIN(`varsiz`, `pvar,RETURN=size`)
+   LET varsiz = xsiz* ysiz* zsiz* tsiz
+   DEFINE SYMBOL stride_for_mem = `INT( 1+ varsiz/(.1*($memsize)) )`
+   IF `ndims EQ 2` THEN DEFINE SYMBOL stride_for_mem = `INT(($stride_for_mem)^0.5)`
+   IF `ndims EQ 3` THEN DEFINE SYMBOL stride_for_mem = `INT(($stride_for_mem)^0.33)`
+   IF `ndims EQ 4` THEN DEFINE SYMBOL stride_for_mem = `INT(($stride_for_mem)^0.25)`
 
 ENDIF
-
-DEFINE SYMBOL stride_for_mem = `INT( 1+ varsiz/(.1*($memsize)) )`
 
 ! If not a graphics product, apply the strides
 
@@ -152,9 +152,7 @@ IF `STRLEN("($ferret_view)") EQ 2` THEN
 
       LET x_pct = ($region_x_range)/($grid_x_range)
       LET pixsize = `nx*x_pct`
-!         LET pixsize = `MAX(pixsize, nx)`  ! comment this out to set strides by region
 
-!         IF `pixsize GT maxpix` THEN DEFINE SYMBOL xstride = `INT((pixsize/maxpix)+1)`
       IF `pixsize GT maxpix` THEN DEFINE SYMBOL xstride = `2*INT((pixsize/maxpix)+1)`
 
       DEFINE SYMBOL xstride = `MAX(($xstride"1"), ($stride_for_mem"1"))`
@@ -185,9 +183,6 @@ IF `STRLEN("($ferret_view)") EQ 2` THEN
       LET y_pct = ($region_y_range)/($grid_y_range)
       LET pixsize = `ny*y_pct`
 
-!         LET pixsize = `MAX(pixsize, ny)`  ! comment this out to set strides by region
-
-!         IF `pixsize GT maxpix` THEN DEFINE SYMBOL ystride = `2*INT((pixsize/maxpix)+1)`
       IF `2*pixsize GT maxpix` THEN DEFINE SYMBOL ystride = `2*INT((pixsize/maxpix)+1)`
       DEFINE SYMBOL ystride = `MAX(($ystride"1"), ($stride_for_mem"1"))`
 
@@ -208,15 +203,15 @@ IF `STRLEN("($ferret_view)") EQ 2` THEN
 
    ELIF `($ferret_curvi_coord_lat"0|*>1") AND (STRINDEX("($ferret_view)", "x") + STRINDEX("($ferret_view)", "y") GT 0) ` THEN
 
-        IF `(STRINDEX("($ferret_view)", "x") GT 0)` THEN 
+        IF `(STRINDEX("($ferret_view)", "x") GT 0) OR (($clon_imax) - ($clon_imin)) GT 0` THEN 
            LET x_pct = ($region_x_range)/($grid_x_range)
            LET pixsize = `nx*x_pct`
-           LET pixsize = `MAX(pixsize, nx)`  ! comment this out to set strides by region
     
            IF `pixsize GT maxpix` THEN 
               DEFINE SYMBOL xstride = `INT((pixsize/maxpix)+1)`
-              DEFINE SYMBOL xstride = `MAX(($xstride"1"), ($stride_for_mem"1"))`
            ENDIF
+	   DEFINE SYMBOL xstride = `MAX(($xstride"1"), ($stride_for_mem"1"))`
+
            IF `($xstride"0") GT 1` THEN 
            
 ! Check whether X axis is modulo. check_modulo_factor.jnl checks whether the
@@ -232,21 +227,20 @@ IF `STRLEN("($ferret_view)") EQ 2` THEN
               DEFINE SYMBOL clon_imin = `INT(($clon_imin)/($xstride))`
               DEFINE SYMBOL clon_imax = `INT(($clon_imax)/($xstride))`
  
-	      IF `(($clon_imin) + ($xoff) + ($clon_imax)*($xstride)) GT ixmax` THEN \
+	      IF `(($clon_imin) + rem + ($clon_imax)*($xstride)) GT ixmax` THEN \
 	         DEFINE SYMBOL clon_imax = `($clon_imax)-($xstride)`
            ENDIF
 
         ENDIF
-  
-        IF `(STRINDEX("($ferret_view)", "y") GT 0)` THEN 
+
+        IF `(STRINDEX("($ferret_view)", "y") GT 0) OR (($clat_jmax) - ($clat_jmin)) GT 0` THEN 
            LET y_pct = ($region_y_range)/($grid_y_range)
            LET pixsize = `ny*y_pct`
-           LET pixsize = `MAX(pixsize, ny)`  ! comment this out to set strides by region
   
            IF `pixsize GT maxpix` THEN 
               DEFINE SYMBOL ystride = `INT((pixsize/maxpix)+1)`
-              DEFINE SYMBOL ystride = `MAX(($ystride"1"), ($stride_for_mem"1"))`
            ENDIF
+	   DEFINE SYMBOL ystride = `MAX(($ystride"1"), ($stride_for_mem"1"))`
 
            IF `($ystride"0") GT 1` THEN 
               LET rem = ( (($clat_jmin)/($ystride)) - int(($clat_jmin)/($ystride)) )* ($ystride)
@@ -256,7 +250,7 @@ IF `STRLEN("($ferret_view)") EQ 2` THEN
 	      LET y_strided_var = ($data_var)[d=($data_num)]
               DEFINE SYMBOL clat_jmin = `INT(($clat_jmin)/($ystride))`
               DEFINE SYMBOL clat_jmax = `INT(($clat_jmax)/($ystride))`
-	      IF `(($clat_jmin) + ($yoff) + ($clat_jmax)*($ystride)) GT ny` THEN \
+	      IF `(($clat_jmin) + rem + ($clat_jmax)*($ystride)) GT ny` THEN \
 	         DEFINE SYMBOL clat_jmax = `($clat_jmax)-($ystride)`
            ENDIF
 
@@ -294,7 +288,6 @@ IF `STRLEN("($ferret_view)") EQ 2` THEN
    ENDIF ! xy or not
 ENDIF  ! 2D plots
 
-
 ! XY and a third dimension for Google Earth placemarks
 
 IF `STRLEN("($ferret_view)") EQ 3 AND STRINDEX("($ferret_view)", "xy") GT 0` THEN
@@ -308,9 +301,6 @@ IF `STRLEN("($ferret_view)") EQ 3 AND STRINDEX("($ferret_view)", "xy") GT 0` THE
 
       LET x_pct = ($region_x_range)/($grid_x_range)
       LET pixsize = `nx*x_pct`
-!         LET pixsize = `MAX(pixsize, nx)`  ! comment this out to set strides by region
-
-!         IF `pixsize GT maxpix` THEN DEFINE SYMBOL xstride = `INT((pixsize/maxpix)+1)`
       IF `pixsize GT maxpix` THEN DEFINE SYMBOL xstride = `2*INT((pixsize/maxpix)+1)`
       DEFINE SYMBOL xstride = `MAX(($xstride"1"), ($stride_for_mem"1"))`
       IF `($xstride"0") GT 1` THEN 
@@ -330,9 +320,6 @@ IF `STRLEN("($ferret_view)") EQ 3 AND STRINDEX("($ferret_view)", "xy") GT 0` THE
       LET y_pct = ($region_y_range)/($grid_y_range)
       LET pixsize = `ny*y_pct`
 
-!         LET pixsize = `MAX(pixsize, ny)`  ! comment this out to set strides by region
-
-!         IF `pixsize GT maxpix` THEN DEFINE SYMBOL ystride = `2*INT((pixsize/maxpix)+1)`
       IF `2*pixsize GT maxpix` THEN DEFINE SYMBOL ystride = `2*INT((pixsize/maxpix)+1)`
       DEFINE SYMBOL ystride = `MAX(($ystride"1"), ($stride_for_mem"1"))`
 
