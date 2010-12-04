@@ -34,7 +34,7 @@ ELSE
    LET del = INT(($($dir)stride)/2)
    REPEAT/RANGE=1:`($($dir)stride)+del`/NAME=m \
         (LET nstride = `($($dir)stride)+m`; IF `MOD(nn,nstride) EQ 0` THEN EXIT/LOOP; \
-         LET nstride = `($($dir)stride)-m`; IF `MOD(nn,nstride) EQ 0` THEN EXIT/LOOP; \
+         LET nstride = `($($dir)stride)-m`; IF `MOD(nn,nstride) EQ 0 AND m GT 2` THEN EXIT/LOOP; \
          IF `nstride LE ($stride_for_mem"1")` THEN EXIT/LOOP)
 
 ! If we found a stride value that is an integer factor of the axis length, 

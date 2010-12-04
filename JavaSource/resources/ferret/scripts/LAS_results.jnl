@@ -154,26 +154,24 @@ IF ($result_map_scale_filename%0|*>1%) THEN
 
 ! Remove striding so we can get the attributes of axes
 
-      IF `($no_native"0|*>1") + ($no_native_strides_xy"0|*>1") EQ 0` THEN
-        IF `($xstride"0") GT 1` THEN CANCEL AXIS/STRIDE `x_strided_var,RETURN=xaxis`
-        IF `($ystride"0") GT 1` THEN CANCEL AXIS/STRIDE `y_strided_var,RETURN=yaxis`
-        IF `($zstride"0") GT 1` THEN CANCEL AXIS/STRIDE `z_strided_var,RETURN=zaxis`
-        IF `($tstride"0") GT 1` THEN CANCEL AXIS/STRIDE `t_strided_var,RETURN=taxis`
-      ENDIF
-
       IF `($native_curvilinear_xy"0") EQ 0` THEN 
 
       IF ($ax_horiz"0|*>1") THEN
          DEFINE SYMBOL the_axis =  `the_plot_var,RETURN=($ax_horiz)axis`
          IF `STRINDEX("($the_axis)", "(") GT 0` THEN 
-            LET attlist = ($the_axis).attnames
-            IF `IS_ELEMENT_OF_STR(attlist, "positive") GT 0` THEN \
-            DEFINE SYMBOL AX_HORIZ_POSTV = `($the_axis).positive`
+	    IF `($($ax_horiz)stride"0") GT 1` THEN 
+	       CANCEL AXIS/STRIDE `($ax_horiz)_strided_var,RETURN=($ax_horiz)axis`
+               DEFINE SYMBOL the_axis =  `($data_var),RETURN=($ax_horiz)axis`
+	       IF `STRINDEX("($the_axis)", "(") EQ 0` THEN
+                  LET attlist = (($the_axis)).attnames
+	       ELSE
+                  LET attlist = ($the_axis).attnames
+	       ENDIF
          ELSE
             LET attlist = (($the_axis)).attnames
-            IF `IS_ELEMENT_OF_STR(attlist, "positive") GT 0` THEN \
-            DEFINE SYMBOL AX_HORIZ_POSTV = `(($the_axis)).positive`
          ENDIF
+         IF `IS_ELEMENT_OF_STR(attlist, "positive") GT 0` THEN \
+         DEFINE SYMBOL AX_HORIZ_POSTV = `($the_axis).positive`
       ELSE
          DEFINE SYMBOL ax_horiz = D
       ENDIF
@@ -181,14 +179,19 @@ IF ($result_map_scale_filename%0|*>1%) THEN
       IF ($ax_vert"0|*>1") THEN
          DEFINE SYMBOL the_axis =  `the_plot_var,RETURN=($ax_vert)axis`
          IF `STRINDEX("($the_axis)", "(") GT 0` THEN 
-            LET attlist = ($the_axis).attnames
-            IF `IS_ELEMENT_OF_STR(attlist, "positive") GT 0` THEN \
-            DEFINE SYMBOL AX_VERT_POSTV = `($the_axis).positive`
+	    IF `($($ax_vert)stride"0") GT 1` THEN 
+	       CANCEL AXIS/STRIDE `($ax_vert)_strided_var,RETURN=($ax_vert)axis`
+               DEFINE SYMBOL the_axis =  `($data_var),RETURN=($ax_vert)axis`
+	       IF `STRINDEX("($the_axis)", "(") EQ 0` THEN
+                  LET attlist = (($the_axis)).attnames
+	       ELSE
+                  LET attlist = ($the_axis).attnames
+	       ENDIF
          ELSE
             LET attlist = (($the_axis)).attnames
-            IF `IS_ELEMENT_OF_STR(attlist, "positive") GT 0` THEN \
-            DEFINE SYMBOL AX_VERT_POSTV = `(($the_axis)).positive`
          ENDIF
+         IF `IS_ELEMENT_OF_STR(attlist, "positive") GT 0` THEN \
+         DEFINE SYMBOL AX_VERT_POSTV = `($the_axis).positive`
       ELSE
          DEFINE SYMBOL ax_vert = D
       ENDIF
