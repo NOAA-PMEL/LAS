@@ -179,7 +179,7 @@ public class FerretIOServiceProvider implements IOServiceProvider {
             JDOMUtils.XML2JDOM(headerFile, header);
         } catch (Exception e) {
         	headerFile.renameTo(new File(headerFile.getAbsoluteFile()+".bad"));
-            log.error("Error processing header file XML");
+            log.error("Error processing header file XML "+e.getLocalizedMessage());
         }
         log.debug("document built "+header.toString());
 
@@ -401,9 +401,6 @@ public class FerretIOServiceProvider implements IOServiceProvider {
             }
         }
         // This creates the data variables form the Ferret XML description.
-        // Only do this if the file does not come from an expression...
-       
-        
         	log.debug("Found "+data.size()+" 'datasets'");
         	ArrayList<String> varNAMES = new ArrayList<String>();
         	for (Iterator dataIt = data.iterator(); dataIt.hasNext();) {
@@ -413,6 +410,7 @@ public class FerretIOServiceProvider implements IOServiceProvider {
         		for (Iterator varIt = vars.iterator(); varIt.hasNext();) {
         			Element var = (Element) varIt.next();
         			String name = var.getAttributeValue("name");
+        			// Maybe I should be ignoring the global names and requiring a data set for each transformed variable.
         			if ( !globalNames.contains(name)) {
         				// Name conflicts should handled in the Ferret script that defines the dataset.
         				// This is not working...  This hack will keep it from crashing -- I think.
@@ -580,60 +578,74 @@ public class FerretIOServiceProvider implements IOServiceProvider {
 
         String cacheKey = JDOMUtils.MD5Encode(jnl);   
         String filename = tool.getTempDir()+cacheKey+File.separator+"data_"+varname+"_"+section.toString()+".nc";
-
+        String temp_filename = filename+".tmp";
         // Simplest form of caching is that the exact file we need already exists.
 
         File datatemp = new File(filename);
+        File temp_file = new File(temp_filename);
         // Create a range section that pulls out the whole block from the temporary data file.
         ArrayList<Range> newsection = new ArrayList<Range>(); 
 
         if ( !datatemp.exists() ) {
-                String slice;
-                StringBuffer indx;
-                if (isCoordinateVariable) {
-                    indx = new StringBuffer("go get_coord \""+filename+"\" "+"\""+dataset+"\" "+varname+" "+direction+" ");
-                } else {
-                    indx = new StringBuffer("go get_datavar \""+filename+"\" "+"\""+dataset+"\" "+varname+" "+direction+" ");
-                }
-                // This is the get_data order XYZT
-                Section ferret_section = new Section(section);
-                
+        	if ( temp_file.exists() ) {
+        		// Somebody else is making this file.  Wait for it.
+        		int trys = 0;
+        		long interval = 2000; // Wait two seconds each time.
+        		long timeout = tool.ferretConfig.getTimeLimit()*1000;  // Time out in seconds, convert to millis
+        		int limit = (int) (timeout/interval);
+        		while ( !datatemp.exists() && trys < limit) {
+        			try {
+						Thread.sleep(2000);
+					} catch (InterruptedException e) {
+						throw new IOException("Interrupted waiting for temporary file "+e.toString());
+					}
+					trys++;
+        		}
+        		if ( !datatemp.exists() ) {
+        			throw new IOException("Temporary data file unavailable after wait");
+        		}
+        	} else {
+        		String slice;
+        		StringBuffer indx;
+        		if (isCoordinateVariable) {
+        			indx = new StringBuffer("go get_coord \""+temp_file+"\" "+"\""+dataset+"\" "+varname+" "+direction+" ");
+        		} else {
+        			indx = new StringBuffer("go get_datavar \""+temp_file+"\" "+"\""+dataset+"\" "+varname+" "+direction+" ");
+        		}
+        		// This is the get_data order XYZT
+        		Section ferret_section = new Section(section);
 
-                for (int s = ferret_section.getRank() - 1; s >= 0 ; s--) {
-                    Range range = (Range) ferret_section.getRange(s);
-                    int start = range.first()+1;
-                    int end = range.last()+1;
-                    indx.append(start+" "+end+" "+range.stride()+" ");
-                }
 
-                // This is the C and Java data order (TZYX).
-                for (Iterator rangeIt = section.getRanges().iterator(); rangeIt.hasNext();) {
-                    Range range = (Range) rangeIt.next();
-                    Range newrange = new Range(0, range.length()-1, 1);
-                    newsection.add(newrange);
-                }
+        		for (int s = ferret_section.getRank() - 1; s >= 0 ; s--) {
+        			Range range = (Range) ferret_section.getRange(s);
+        			int start = range.first()+1;
+        			int end = range.last()+1;
+        			indx.append(start+" "+end+" "+range.stride()+" ");
+        		}
 
-                // Before we go off and run Ferret see if we can get the data from
-                // an existing file.
+        		// Before we go off and run Ferret see if we can get the data from
+        		// an existing file.
 
-                slice = jnl+"\n"+indx.toString();
-                log.debug("Using jnl: "+slice);
-                try {
-                    tool.run("data.jnl", slice, cacheKey, filename);
-                } catch (Exception e) {
-                    throw new IOException("Unable run data extract tool "+e.toString());
-                }  
-                /*
-            }
-                */
-        } else { // if the file exists drop through to here...
-            log.debug("Cache hit on: "+filename);
-            for (Iterator rangeIt = section.getRanges().iterator(); rangeIt.hasNext();) {
-                Range range = (Range) rangeIt.next();
-                Range newrange = new Range(0, range.length()-1, 1);
-                newsection.add(newrange);
-            }
+        		slice = jnl+"\n"+indx.toString();
+        		log.debug("Using jnl: "+slice);
+        		try {
+        			
+        			tool.run("data.jnl", slice, cacheKey, temp_filename, filename);
+        			
+        		} catch (Exception e) {
+        			throw new IOException("Unable run data extract tool "+e.toString());
+        		}       		
+        	}
+        } else {
+        	log.debug("Cache hit on: "+filename);
         }
+        // One way or another we think we have a file.  Try to use it.
+        for (Iterator rangeIt = section.getRanges().iterator(); rangeIt.hasNext();) {
+        	Range range = (Range) rangeIt.next();
+        	Range newrange = new Range(0, range.length()-1, 1);
+        	newsection.add(newrange);
+        }
+
 
         log.debug("Attempting to open data file: "+filename);
         NetcdfFile nds = null;
@@ -655,14 +667,14 @@ public class FerretIOServiceProvider implements IOServiceProvider {
         	a = v.read(newsection);
         	log.debug("Finished reading variable data.");
         } catch (IOException e ) {
-        	log.error("Exception opening netCDF data file.");
+        	log.error("Exception opening netCDF data file. "+e.getLocalizedMessage());
         	throw e;
         } finally {
         	if ( nds != null ) {
         		try {
         			nds.close();
         		} catch (IOException e){
-        			log.error("Exception closing the netCDF data file.");
+        			log.error("Exception closing the netCDF data file."+e.getMessage());
         		}
         	}
         }

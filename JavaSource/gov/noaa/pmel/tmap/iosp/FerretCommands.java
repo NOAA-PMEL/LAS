@@ -28,7 +28,7 @@ public class FerretCommands {
             "ELSE ",
             "ENDIF ",
             "EXIT ",
-//  Has to have at least one other command beside this one since other file type contain this string       "FILE ",
+            "FILE ",
             "FILL ",
             "FRAME ",
             "GO ",
