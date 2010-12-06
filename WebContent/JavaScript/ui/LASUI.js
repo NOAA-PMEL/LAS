@@ -2729,33 +2729,40 @@ LASUI.prototype.showAnalysis = function () {
 	var reset=false;
 	document.getElementById('Animation').className='top_link_disabled';
 	document.getElementById('Animation').onclick = function(){};
-	
+	//turn off all analysis axes
 	for(var a in this.refs.analysis.axes)
-		this.refs.analysis.axes[a].style.display="none";
-
+		try {	this.refs.analysis.axes[a].selected=false;
+			document.getElementById("analysis_axes").removeChild(this.refs.analysis.axes[a])} catch(e) {};
 	document.getElementById("analysis_axes").selectedIndex=0;	
+
+	//turn on area analysis, if we can
+	if(this.state.grid.hasAxis('x')&&this.state.grid.hasAxis('y'))
+        	document.getElementById('analysis_axes').appendChild(this.refs.analysis.axes.xy);
+
 	//turn on the other axes switches
 	for(var d=0;d<this.state.grid.response.grid.axis.length;d++) {
-		this.refs.analysis.axes[this.state.grid.response.grid.axis[d].type.toLowerCase()].style.display="";
-
+			document.getElementById('analysis_axes').appendChild(this.refs.analysis.axes[this.state.grid.response.grid.axis[d].type.toLowerCase()]);
 	}
-	if(this.state.grid.hasAxis('x')&&this.state.grid.hasAxis('y'))
-		this.refs.analysis.axes.xy.style.display="";
+
 	
 	document.getElementById(this.anchors.analysis).style.display="";
 	
-	//select the analysis view	
-	if(this.state.analysis.axes.x&&this.state.analysis.axes.y&&this.state.grid.hasAxis('x')&&this.state.grid.hasAxis('y'))
-		this.selectAnalysisAxis(null,"xy",true);
-	else
-		this.selectAnalysisAxis(null,"xy",false);
-
+	//select the analysis view
+	var cur_analysis = "";	
 	for(var a in this.state.analysis.axes)
-			if(a!='xy')
-				if(this.state.grid.hasAxis(a))
-					this.selectAnalysisAxis(null,a,true);
-				else
-					this.selectAnalysisAxis(null,a,false);
+		cur_analysis+=a
+	if(cur_analysis=="yx")
+		cur_analysis="xy";
+
+	if(document.getElementById(cur_analysis+"_analysis")) {
+	 	document.getElementById(cur_analysis+"_analysis").selected=true;	
+		//this.selectAnalysisAxis(null,cur_analysis,true);
+	}	
+	else if(document.getElementById('analysis_axes').value!="") {
+		for(var i=0;i<document.getElementById('analysis_axes').value.length;i++)
+			this.state.analysis.axes[document.getElementById('analysis_axes').value[i]]=true;
+		//this.selectAnalysisAxis(null,document.getElementById('analysis_axes').value,true);
+	}
 	
 
 	if(this.state.analysis.type)
@@ -2768,11 +2775,6 @@ LASUI.prototype.hideAnalysis = function () {
 
 	this.refs.analysis.enabled = false;
 	var reset = false;
-
-//	if(!this.state.operations.response.operations.error&&this.state.grid.hasAxis('t'))
-//		for(var i=0;i<this.state.operations.getOperationCount();i++)
-//			if(this.state.operations.getOperationName(i)=="Animation")
-//				document.getElementById('Animation').className='top_link';
 
 	document.getElementById(this.anchors.analysis).style.display="none";
 	for(var d=0;d<this.state.grid.response.grid.axis.length;d++)
@@ -2848,6 +2850,10 @@ LASUI.prototype.selectAnalysisAxis = function (evt) {
 	}
         this.state.analysis.axes = {};
 	var changeVis=false;
+
+	//for(var i in this.state.analysis.axes)
+	//	this.state.analysis.axes[i]=false;
+	this.state.view.widgets=this.state.view.plot;
 
 	if((arguments[2]==true||evt)) {
 		//turn the analysis axes on
