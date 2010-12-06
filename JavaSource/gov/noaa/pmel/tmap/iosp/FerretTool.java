@@ -90,7 +90,7 @@ public class FerretTool extends Tool{
      * @param output_filename where to write STDOUT, can be a debug file or the header.xml file.
      * @throws Exception
      */
-    public void run (String driver, String jnl, String cacheKey, String output_filename) throws Exception {
+    public void run (String driver, String jnl, String cacheKey, String temporary_filename, String output_filename) throws Exception {
         log.debug("Running the FerretTool.");
 
         // Set up the runtime environment.
@@ -120,7 +120,7 @@ public class FerretTool extends Tool{
 
         log.debug("Finished creating Ferret journal file.");
 
-        String args[] = new String[]{driver, jnlFile.getAbsolutePath(), output_filename};
+        String args[] = new String[]{driver, jnlFile.getAbsolutePath(), temporary_filename};
 
         log.debug("Creating Ferret task.");
 
@@ -136,8 +136,12 @@ public class FerretTool extends Tool{
 
         log.debug("Running Ferret task.");
 
+        File temp_file = new File(temporary_filename);
+        File out_file = new File(output_filename);
         try {
+        	temp_file.createNewFile();
             ferretTask.run();
+            
         } catch (Exception e) {
             log.error("Ferret did not run correctly. "+e.toString());
         }
@@ -147,7 +151,7 @@ public class FerretTool extends Tool{
         log.debug("Checking for errors.");
 
 
-
+        
         String output = ferretTask.getOutput();
         String stderr = ferretTask.getStderr();
         if ( !ferretTask.getHasError() || stderr.contains("**ERROR: regridding") ) {
@@ -155,7 +159,7 @@ public class FerretTool extends Tool{
 
             log.debug("Ferret task completed without error.");
             log.debug("Output:\n"+output);
-
+            temp_file.renameTo(out_file);
             if ( output_filename != null && !output_filename.equals("") ) {
                 // If it ends with .xml it's the header file and we need to capture it.
                 // If not, its an netCDF file and we catch the output in a log file.
@@ -221,6 +225,7 @@ public class FerretTool extends Tool{
         tempDir = tempDir+cacheKey;
         File cacheDir = new File (tempDir);
         String header_filename = tempDir+File.separator+"header.xml";
+        String header_temp_filename = header_filename+".tmp";
         if ( !cacheDir.isDirectory() ) {
             cacheDir.mkdir();
         } else {
@@ -232,7 +237,7 @@ public class FerretTool extends Tool{
         }
 
         log.debug("Generating the XML header for this data source using "+header_filename);
-        run(driver, jnl, cacheKey, header_filename);
+        run(driver, jnl, cacheKey, header_temp_filename, header_filename);
         
         return header_filename;
     }
