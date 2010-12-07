@@ -17,7 +17,7 @@
 				#else
 					<div id="choose_dataset" class="top_link" width="100%" type="button"  onclick="showDatasetPicker()">Choose dataset&nbsp;</div>		
 					#end	
-					<div  class="top_link_disabled" id="update" onclick="if(this.className!='top_link_disabled')LAS.makeRequest();"><div style="display:inline;vertical-align:top;">Update Plot</div><input type="checkbox" style="border:none;margin:0pt;" #if($request.getParameter('auto')) checked #end  onmousemove="window.status='Check to automatically update the plot.';" onmouseout="window.status='';" onclick="LAS.toggleAutoUpdate(event,this.checked)"></div>
+					<div  class="top_link_disabled" id="update" onclick="if(this.className!='top_link_disabled')LAS.makeRequest();"><div style="display:inline;vertical-align:top;">Update Plot</div><input type="checkbox" id="update_chkbox" #if($request.getParameter('auto')) checked #end  onmousemove="window.status='Check to automatically update the plot.';" onmouseout="window.status='';" onclick="LAS.toggleAutoUpdate(event,this.checked)"></div>
 					<div  class="top_link_disabled" id="plotOptionsButton" onclick="showPlotOptions()">Set plot options&nbsp;</div>
 					<span width="100%" id="productButtons">
 						<div class="top_link_disabled"  ID="Animation">Animate&nbsp;</div>

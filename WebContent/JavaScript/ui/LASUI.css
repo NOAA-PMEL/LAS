@@ -232,7 +232,12 @@ height: 100%;
     position:relative;  
     font-family:arial, verdana, sans-serif;
 }
-
+#update_chkbox {
+	margin:0;
+	padding:0;
+	margin-left:2pt;
+	margin-right:1pt;
+}
 .top_link_title {
 	display:block; 
 	float:left; 
