@@ -167,10 +167,11 @@ IF ($result_map_scale_filename%0|*>1%) THEN
 	       ELSE
                   LET attlist = ($the_axis).attnames
 	       ENDIF
-	    ENDIF
          ELSE
             LET attlist = (($the_axis)).attnames
          ENDIF
+	 IF `STRINDEX("($the_axis)", "(") EQ 0` THEN \
+	   DEFINE SYMBOL the_axis = (($the_axis))
          IF `IS_ELEMENT_OF_STR(attlist, "positive") GT 0` THEN \
          DEFINE SYMBOL AX_HORIZ_POSTV = `($the_axis).positive`
       ELSE
@@ -188,10 +189,12 @@ IF ($result_map_scale_filename%0|*>1%) THEN
 	       ELSE
                   LET attlist = ($the_axis).attnames
 	       ENDIF
-	    ENDIF
+            ENDIF
          ELSE
             LET attlist = (($the_axis)).attnames
          ENDIF
+	 IF `STRINDEX("($the_axis)", "(") EQ 0` THEN \
+	   DEFINE SYMBOL the_axis = (($the_axis))
          IF `IS_ELEMENT_OF_STR(attlist, "positive") GT 0` THEN \
          DEFINE SYMBOL AX_VERT_POSTV = `($the_axis).positive`
       ELSE
