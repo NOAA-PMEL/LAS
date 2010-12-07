@@ -167,6 +167,7 @@ IF ($result_map_scale_filename%0|*>1%) THEN
 	       ELSE
                   LET attlist = ($the_axis).attnames
 	       ENDIF
+	    ENDIF
          ELSE
             LET attlist = (($the_axis)).attnames
          ENDIF
@@ -187,6 +188,7 @@ IF ($result_map_scale_filename%0|*>1%) THEN
 	       ELSE
                   LET attlist = ($the_axis).attnames
 	       ENDIF
+	    ENDIF
          ELSE
             LET attlist = (($the_axis)).attnames
          ENDIF
