@@ -201,6 +201,8 @@ public class FerretTool extends Tool{
             String errorMessage = ferretTask.getErrorMessage();
             log.error(errorMessage+"\n"+stderr+"\n");
             log.error(output);
+            File bad = new File(out_file.getAbsoluteFile()+".bad");
+            temp_file.renameTo(bad);
         }
 
         log.debug("Finished running the FerretTool.");
