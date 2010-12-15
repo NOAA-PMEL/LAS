@@ -392,7 +392,6 @@ IF `STRINDEX("($shapevar)", "T") GT 0` THEN
    LET csiz = `cvar,RETURN=lsize`
    DEFINE SYMBOL vsiz = `csiz * ($vsiz)`
 ENDIF
-pause
 
 LET isqr = INT(($vsiz)^0.5)
 

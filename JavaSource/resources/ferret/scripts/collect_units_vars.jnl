@@ -18,14 +18,14 @@ IF `($n_ustrings"0|*>1") EQ 0` THEN
 ENDIF
 
 ! If we already have a set of vars with these units then we are done
-IF ($done_($inunits_up)"0|*>1") THEN
+IF ($done_($n_ustrings)"0|*>1") THEN
    EXIT/SCRIPT
 ENDIF
 
 LET new_string = 1
 REPEAT/RANGE=1:($n_ustrings)/NAME=g (\
    DEFINE SYMBOL g = `g`;\
-   sh sym inunits_up, ustring_($g);\
+   sh sym n_ustrings, ustring_($g);\
    IF `STRCMP("($inunits_up)", "($ustring_($g))") EQ 0` THEN LET new_string = 0;\
    IF `STRCMP("($inunits_up)", "($ustring_($g))") EQ 0` THEN EXIT/LOOP;\
 )
@@ -53,11 +53,7 @@ REPEAT/RANGE=1:`($data_count)-1`/NAME=g (\
  )
 
 ! Mark this units string as being done and prepare for the next one
-DEFINE SYMBOL done_($inunits_up) = 1
+DEFINE SYMBOL done_($n_ustrings) = 1
 
 !  ----------------- End of collect_units_var.jnl ------------------------------------
-sh sym iplot
-sh sym ustring*
-sh sym group*
-sh sym plot_vars*
-pause
+
