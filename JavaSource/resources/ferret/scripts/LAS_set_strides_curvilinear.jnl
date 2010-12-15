@@ -342,11 +342,15 @@ ENDIF ! GE placemarks
 ! If long/lat index ranges were redefined, and if its a comparision
 ! then we need to redefine ferret_plot_base_var_0
 
-IF `($num) GT 0 and (($xstride"0")+($ystride"0) GT 0)` THEN
+IF `($num) GT 0 and (($xstride"0|1>0")+($ystride"0|1>0") GT 0)` THEN
    DEFINE SYMBOL brkt_loc = `STRLEN("($ferret_plot_var_0_noregion)") - 1` 
-   DEFINE SYMBOL ferret_plot_base_var_0 = `SUBSTRING("($ferret_plot_var_0_noregion)", 1, ($brkt_loc))`\
+   IF ($region_0_zt"0|*>1") THEN 
+      DEFINE SYMBOL ferret_plot_base_var_0 = `SUBSTRING("($ferret_plot_var_0_noregion)", 1, ($brkt_loc))`\
 ,($region_0_zt),i=($clon_imin):($clon_imax),j=($clat_jmin):($clat_jmax)]
-
+   ELSE
+      DEFINE SYMBOL ferret_plot_base_var_0 = `SUBSTRING("($ferret_plot_var_0_noregion)", 1, ($brkt_loc))`\
+,i=($clon_imin):($clon_imax),j=($clat_jmin):($clat_jmax)]
+   ENDIF
 ENDIF
 
 ! Add a label about the striding at the upper left.
