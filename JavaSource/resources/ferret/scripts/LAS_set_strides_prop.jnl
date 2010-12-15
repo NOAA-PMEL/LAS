@@ -51,8 +51,8 @@ ENDIF
 ! IF multiple variables add the sizes.
 DEFINE SYMBOL nvars = ($data_count)
 
-LET pvar = ($ferret_plot_var) 
-DEFINE SYMBOL var_size = ($var_size"0") + `pvar,RETURN=size`
+LET las_plotvar = ($ferret_plot_var) 
+DEFINE SYMBOL var_size = ($var_size"0") + `las_plotvar,RETURN=size`
 
 LET ndims = 0
 IF ($native_curvilinear_xy"0|*>1") THEN
@@ -67,15 +67,15 @@ IF ($native_curvilinear_xy"0|*>1") THEN
 
    LET ndims = 2
 ELSE
-   LET xsiz = `pvar,RETURN=isize`
+   LET xsiz = `las_plotvar,RETURN=isize`
    IF `xsiz GT 1` THEN LET ndims = `ndims + 1`
-   LET ysiz = `pvar,RETURN=jsize`
+   LET ysiz = `las_plotvar,RETURN=jsize`
    IF `ysiz GT 1` THEN LET ndims = `ndims + 1`
 ENDIF
 
-LET zsiz = `pvar,RETURN=ksize`
+LET zsiz = `las_plotvar,RETURN=ksize`
 IF `zsiz GT 1` THEN LET ndims = `ndims + 1`
-LET tsiz = `pvar,RETURN=lsize`
+LET tsiz = `las_plotvar,RETURN=lsize`
 IF `tsiz GT 1` THEN LET ndims = `ndims + 1`
 
 LET varsiz = `xsiz* ysiz* zsiz* tsiz`
@@ -173,7 +173,7 @@ DEFINE SYMBOL tstride = `tstride`
 
 DEFINE SYMBOL add_to_title = Points subsampled
 IF `($region_x_range"0|*>1") GT 0` THEN
-      DEFINE SYMBOL modax = "`pvar, RETURN=xmod`"
+      DEFINE SYMBOL modax = "`las_plotvar, RETURN=xmod`"
       GO check_modulo_factor x 
       SET AXIS/STRIDE=($xstride) `($data_var),RETURN=xaxis`
 
@@ -184,14 +184,14 @@ IF `($region_x_range"0|*>1") GT 0` THEN
 	    IF `($clon_imax)-($xstride) GT 0` THEN DEFINE SYMBOL clon_imax = `($clon_imax)-($xstride)`
       ENDIF
 
-      LET x_strided_var = pvar
+      LET x_strided_var = las_plotvar
 !      IF `STRCMP(($modax), " ") NE 0` THEN SET AXIS/MODULO `($data_var),RETURN=xaxis`
       IF `($xstride) GT 1` THEN DEFINE SYMBOL add_to_title = ($add_to_title) by ($xstride) in X
 ENDIF
 
 IF `($region_y_range"0|*>1") GT 0` THEN 
       SET AXIS/STRIDE=($ystride) `($data_var),RETURN=yaxis`
-      LET y_strided_var = pvar
+      LET y_strided_var = las_plotvar
 
       IF ($do_curvi_xy"0|0|1|*>1") THEN
          DEFINE SYMBOL clat_jmin = `MAX(1, INT(($clat_jmin)/($ystride)) )`
@@ -205,7 +205,7 @@ ENDIF
 IF `($region_z_range"0|*>1") GT 0` THEN
       IF `($zstride) GT 1` THEN
          SET AXIS/STRIDE=($zstride) `($data_var),RETURN=zaxis`
-         LET z_strided_var = pvar
+         LET z_strided_var = las_plotvar
          DEFINE SYMBOL add_to_title = ($add_to_title) Stride ($zstride) in Z
       ENDIF
 ENDIF
@@ -214,7 +214,7 @@ IF `($region_t"0|*>1") GT 0` THEN
       DEFINE SYMBOL modax = "`($data_var),RETURN=tmod`"      
       IF `($tstride) GT 1` THEN
          SET AXIS/STRIDE=($tstride) `($data_var),RETURN=taxis`
-         LET t_strided_var = pvar
+         LET t_strided_var = las_plotvar
          DEFINE SYMBOL add_to_title = ($add_to_title) by ($tstride) in T
       ENDIF
 ENDIF
