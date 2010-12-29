@@ -140,6 +140,7 @@
 				<include name="**.js" />
 				<include name="**.jsp" />
                                 <exclude name="WEB-INF/lib/gwt-dev*.jar"/>
+                                <exclude name="WEB-INF/lib/gwt-user*.jar"/>
 			</fileset>
 			<fileset dir="WebContent/luis/velocity">
 				<include name="**.vm" />
