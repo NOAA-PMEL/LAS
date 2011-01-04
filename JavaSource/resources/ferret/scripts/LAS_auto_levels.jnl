@@ -54,6 +54,45 @@ IF `($ferret_diff_var"1|*>0") AND ($its_gridded_scattered"0|*>1")` THEN
    EXIT/SCRIPT
 ENDIF 
 
+! If requested with posinteger, create levels that are integers or multiples of 
+! integers, suitable for COUNTS.
+
+IF ($ferret_fill_levels"0|posinteger>1|*>0") THEN
+   
+   IF `($ferret_plot_var"0|*>1") EQ 0` THEN EXIT/SCRIPT  !e.g. for insitu plots may not have a plot_var
+
+   IF `($do_curvi_xy"0|*>1") EQ 0` THEN 
+      LET pvar = ($ferret_xyz_var)
+   ELSE
+      DEFINE SYMBOL ferret_plot_var = pvar
+   ENDIF
+
+   IF ($ferret_plot_var"0|sampled_var>1|*>0) THEN LET pvar = ($ferret_plot_var)
+
+   LET pminmax = MINMAX(pvar)
+   LET pmin = `INT(pminmax[i=1])`
+   LET pmax = `INT(pminmax[i=2]+0.5)`
+   IF `pmin LE 0` THEN 
+      LET pmin = 0.5
+   ELSE 
+      LET pmin = `pmin - 0.5`
+   ENDIF
+   IF `pmax GT 1` THEN
+      LET pmax = `pmax + 0.5`
+   ELSE 
+      LET pmax = 1.5
+   ENDIF
+   LET pdel = 1
+   IF `pmax - pmin GT 30` THEN LET pdel = 5
+   IF `pmax - pmin GT 100` THEN LET pdel = 10
+   IF `pmax - pmin GT 30` THEN 
+      LET pmin = 1
+      LET pmax = `pmax - 0.5`
+   ENDIF
+   DEFINE SYMBOL ferret_fill_levels = (`pmin`, `pmax`, `pdel`)
+   EXIT/SCRIPT
+ENDIF
+
 DEFINE SYMBOL ferret_center_levels ($ferret_center_levels"0|1|TRUE>1|*>0")
 
 ! See if centered levels were requested, either by setting the symbol ferret_center_levels
@@ -95,6 +134,7 @@ IF ($ferret_fill_levels"0|*>1") THEN
 
    IF `nc EQ 0` THEN  EXIT/SCRIPT
 ENDIF
+
 
 ! IF fill levels have not been set by the user or in the config, then
 ! use Ferrets auto-open-ended levels

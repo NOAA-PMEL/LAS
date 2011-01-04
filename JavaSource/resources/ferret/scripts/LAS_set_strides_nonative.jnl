@@ -20,22 +20,22 @@ DEFINE SYMBOL memsize = ($FERRET_MEMORY"6.4")* 1.e6
 ! from a curvilienar dataset but working in the rectilinear portion. In 
 ! this case set up index strides.
 
-LET pvar = ($data_var)[d=($data_num),($region_xyzt)]
+LET las_plotvar = ($data_var)[d=($data_num),($region_xyzt)]
 
 DEFINE SYMBOL nvars = ($data_count)
 
 ! If ($data_count) larger than 1 add the size of the variables.
-LET pvar = ($ferret_plot_var) 
-DEFINE SYMBOL var_size = ($var_size"0") + `pvar,RETURN=size`
+LET las_plotvar = ($ferret_plot_var) 
+DEFINE SYMBOL var_size = ($var_size"0") + `las_plotvar,RETURN=size`
 
 ! The exception to the above is side-by-side plots; each var loaded separately
 IF `STRINDEX( "($operation_ID)", "Side" ) NE 0` THEN 
-  DEFINE SYMBOL var_size = `pvar,RETURN=size`
+  DEFINE SYMBOL var_size = `las_plotvar,RETURN=size`
   LET nvars = 1
 ENDIF
 
 IF `($num)+1 EQ ($nvars)` THEN
-   LET varsiz `pvar,RETURN=size`
+   LET varsiz `las_plotvar,RETURN=size`
    DEFINE SYMBOL stride_for_mem = `INT( 1+ varsiz/(.5*($memsize)) )`
 
 ENDIF
@@ -49,8 +49,8 @@ IF `STRINDEX( "($operation_ID)", "Plot" ) EQ 0 AND \
    IF `($stride_for_mem"0") GT 1` THEN
    
       IF `($region_x_range"0|*>1") GT 0` THEN
-         LET strd_lo = `i[gx=pvar,x=($region_x_lo)]`
-         LET strd_hi = `i[gx=pvar,x=($region_x_hi)]`
+         LET strd_lo = `i[gx=las_plotvar,x=($region_x_lo)]`
+         LET strd_hi = `i[gx=las_plotvar,x=($region_x_hi)]`
          DEFINE SYMBOL set_ndx_strides = i=`strd_lo`:`strd_hi`:($stride_for_mem)
          DEFINE SYMBOL add_to_title = Stride ($stride_for_mem) in X
          DEFINE SYMBOL xstride = ($stride_for_mem)
@@ -59,8 +59,8 @@ IF `STRINDEX( "($operation_ID)", "Plot" ) EQ 0 AND \
       ENDIF
    
       IF `($region_y_range"0|*>1") GT 0` THEN
-         LET strd_lo = `j[gy=pvar,y=($region_y_lo)]`
-         LET strd_hi = `j[gy=pvar,y=($region_y_hi)]`
+         LET strd_lo = `j[gy=las_plotvar,y=($region_y_lo)]`
+         LET strd_hi = `j[gy=las_plotvar,y=($region_y_hi)]`
          IF ($set_ndx_strides"0|*>1") THEN
            DEFINE SYMBOL set_ndx_strides = ($set_ndx_strides),j=`strd_lo`:`strd_hi`:($stride_for_mem"1")
          ELSE
@@ -77,8 +77,8 @@ IF `STRINDEX( "($operation_ID)", "Plot" ) EQ 0 AND \
       ENDIF
    
       IF `($region_z_range"0|*>1") GT 0` THEN
-         LET strd_lo = `k[gz=pvar,z=($region_z_lo)]`
-         LET strd_hi = `k[gz=pvar,z=($region_z_hi)]`
+         LET strd_lo = `k[gz=las_plotvar,z=($region_z_lo)]`
+         LET strd_hi = `k[gz=las_plotvar,z=($region_z_hi)]`
          IF ($set_ndx_strides"0|*>1") THEN
            DEFINE SYMBOL set_ndx_strides = ($set_ndx_strides),k=`strd_lo`:`strd_hi`:($stride_for_mem)
          ELSE
@@ -97,8 +97,8 @@ IF `STRINDEX( "($operation_ID)", "Plot" ) EQ 0 AND \
       IF `STRINDEX( "($operation_ID)", "Animation" ) EQ 0` THEN
    
          IF `($region_t"0|*>1") GT 0` THEN 
-            LET strd_lo = `L[gt=pvar,t="($region_t_lo)"]`
-            LET strd_hi = `L[gt=pvar,t="($region_t_hi)"]`
+            LET strd_lo = `L[gt=las_plotvar,t="($region_t_lo)"]`
+            LET strd_hi = `L[gt=las_plotvar,t="($region_t_hi)"]`
             IF ($set_ndx_strides"0|*>1") THEN
                DEFINE SYMBOL set_ndx_strides = ($set_ndx_strides),L=`strd_lo`:`strd_hi`:($stride_for_mem)
             ELSE
@@ -150,8 +150,8 @@ IF `($region_x_range"0|0|*>1")` THEN
    IF `pixsize GT maxpix` THEN DEFINE SYMBOL xstride = `INT((pixsize/maxpix)+1)`
    DEFINE SYMBOL xstride = `MAX(($xstride"1"), ($stride_for_mem"1"))`
    IF `($xstride) GT 1` THEN 
-      LET strd_lo = `i[gx=pvar,x=($region_x_lo)]`
-      LET strd_hi = `i[gx=pvar,x=($region_x_hi)]`
+      LET strd_lo = `i[gx=las_plotvar,x=($region_x_lo)]`
+      LET strd_hi = `i[gx=las_plotvar,x=($region_x_hi)]`
       DEFINE SYMBOL set_ndx_strides = i=`strd_lo`:`strd_hi`:($xstride)
       DEFINE SYMBOL add_to_title = Stride ($xstride) in X
    ELSE
@@ -173,8 +173,8 @@ IF `($region_y_range"0|0|*>1")` THEN
    IF `pixsize GT maxpix` THEN DEFINE SYMBOL ystride = `2*INT((pixsize/maxpix)+1)`
    DEFINE SYMBOL ystride = `MAX(($ystride"1"), ($stride_for_mem"1"))`
    IF `($ystride) GT 1` THEN 
-      LET strd_lo = `j[gy=pvar,y=($region_y_lo)]`
-      LET strd_hi = `j[gy=pvar,y=($region_y_hi)]`
+      LET strd_lo = `j[gy=las_plotvar,y=($region_y_lo)]`
+      LET strd_hi = `j[gy=las_plotvar,y=($region_y_hi)]`
       IF ($set_ndx_strides"0|*>1") THEN
          DEFINE SYMBOL set_ndx_strides = ($set_ndx_strides),j=`strd_lo`:`strd_hi`:($ystride)
       ELSE
@@ -203,8 +203,8 @@ IF ($region_z_range"0|0|*>1") THEN
    IF `pixsize GT maxpix` THEN DEFINE SYMBOL astride = `2*INT((pixsize/maxpix)+1)`
    DEFINE SYMBOL zstride = `MAX(($zstride"1"), ($stride_for_mem"1"))`
    IF `($zstride) GT 1` THEN 
-      LET strd_lo = `k[gz=pvar,z=($region_z_lo)]`
-      LET strd_hi = `k[gz=pvar,z=($region_z_hi)]`
+      LET strd_lo = `k[gz=las_plotvar,z=($region_z_lo)]`
+      LET strd_hi = `k[gz=las_plotvar,z=($region_z_hi)]`
       IF ($set_ndx_strides"0|*>1") THEN
          DEFINE SYMBOL set_ndx_strides = ($set_ndx_strides),k=`strd_lo`:`strd_hi`:($zstride)
       ELSE
@@ -236,8 +236,8 @@ IF `($region_t"0|0|*>1") AND ( ($DO_TRANS_1_SEAS_PER_YEAR"0") EQ 0) AND \
    DEFINE SYMBOL tstride = `INT((pixsize/maxpix)+1)`
    DEFINE SYMBOL tstride = `MAX(($tstride"1"), ($stride_for_mem"1"))`
    IF `($tstride) GT 1` THEN 
-      LET strd_lo = `L[gt=pvar,t="($region_t_lo)"]`
-      LET strd_hi = `L[gt=pvar,t="($region_t_hi)"]`
+      LET strd_lo = `L[gt=las_plotvar,t="($region_t_lo)"]`
+      LET strd_hi = `L[gt=las_plotvar,t="($region_t_hi)"]`
       IF ($set_ndx_strides"0|*>1") THEN
          DEFINE SYMBOL set_ndx_strides = ($set_ndx_strides),L=`strd_lo`:`strd_hi`:($tstride)
       ELSE
@@ -311,7 +311,7 @@ IF ($ferret_google_plot"0|*>1") THEN
 
 ENDIF
 
-LET pvar = ($data_var)[d=($data_num),($set_ndx_strides)]
+LET las_plotvar = ($data_var)[d=($data_num),($set_ndx_strides)]
 
 IF `($num"0|*>1") EQ 0` THEN \
  DEFINE SYMBOL set_ndx_strides_0 =  ($set_ndx_strides)
