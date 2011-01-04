@@ -37,13 +37,13 @@ IF `($ferret_vector_1"0|*>1") EQ 0` THEN EXIT/SCRIPT  ! e.g. for insitu plots ma
 
 LET speed = (($ferret_vector_1_noregion)^2 + ($ferret_vector_1_noregion)^2) ^ 0.5
 
-LET pvar = speed[($region_full)]
+LET las_plotvar = speed[($region_full)]
 IF `($do_curvi_xy"0")` THEN  
-   LET pvar = speed[i=($clon_imin):($clon_imax),j=($clat_jmin):($clat_jmax),($region_zt)]
+   LET las_plotvar = speed[i=($clon_imin):($clon_imax),j=($clat_jmin):($clat_jmax),($region_zt)]
 ENDIF
 
-LET var_size = ABS( `pvar,RETURN=size`)
-DEFINE SYMBOL var_dim = `pvar,RETURN=shape`
+LET var_size = ABS( `las_plotvar,RETURN=size`)
+DEFINE SYMBOL var_dim = `las_plotvar,RETURN=shape`
 LET ndims = STRLEN("($var_dim)")
 
 LET stride_for_speed = `INT( 1+ ((var_size/memsize))/ndims )`
@@ -56,10 +56,10 @@ LET sampled_in_x = 0
 LET sampled_in_y = 0
 
 IF `stride_for_speed GT 1` THEN
-   LET sampled_in_x = STRCMP("`pvar,RETURN=xaxis`", "SAMPLE_XLON") EQ 0 OR\
-                     STRCMP("`pvar,RETURN=xaxis`", "SAMPLE_X") EQ 0
-   LET sampled_in_y = STRCMP("`pvar,RETURN=yaxis`", "SAMPLE_YLAT") EQ 0 OR\
-                     STRCMP("`pvar,RETURN=yaxis`", "SAMPLE_Y") EQ 0
+   LET sampled_in_x = STRCMP("`las_plotvar,RETURN=xaxis`", "SAMPLE_XLON") EQ 0 OR\
+                     STRCMP("`las_plotvar,RETURN=xaxis`", "SAMPLE_X") EQ 0
+   LET sampled_in_y = STRCMP("`las_plotvar,RETURN=yaxis`", "SAMPLE_YLAT") EQ 0 OR\
+                     STRCMP("`las_plotvar,RETURN=yaxis`", "SAMPLE_Y") EQ 0
 ENDIF
 IF ($regrid_fcn"0|*>1") THEN DEFINE SYMBOL no_native_strides_xy = 1
 
@@ -79,17 +79,17 @@ LET indx_strd_used = 0
 IF `($do_curvi_xy"0") EQ 0 AND ($its_insitu"0") NE 1` THEN  
 
 IF `($xstride"1|1>0|*>0") OR ($no_native_strides_xy"0|*>1")` THEN
-   LET xsize  `pvar,RETURN=isize`
+   LET xsize  `las_plotvar,RETURN=isize`
    IF `xsize GT max_size` THEN
      IF ($clon_imin"0|*>1") THEN 
-        LET strd_lo = `i[gx=pvar,i=($clon_imin)]`
-        LET strd_hi = `i[gx=pvar,i=($clon_imax)]`
+        LET strd_lo = `i[gx=las_plotvar,i=($clon_imin)]`
+        LET strd_hi = `i[gx=las_plotvar,i=($clon_imax)]`
      ELIF ($scat"0|0|1|*>1") THEN 
         LET strd_lo = 1
         LET strd_hi = `xsize`
      ELSE
-        LET strd_lo = `i[gx=pvar,x=($region_x_lo)]`
-        LET strd_hi = `i[gx=pvar,x=($region_x_hi)]`
+        LET strd_lo = `i[gx=las_plotvar,x=($region_x_lo)]`
+        LET strd_hi = `i[gx=las_plotvar,x=($region_x_hi)]`
      ENDIF
      DEFINE SYMBOL index_strides = i=`strd_lo`:`strd_hi`:`INT(xsize/10)`
      LET indx_strd_used = 1
@@ -101,17 +101,17 @@ ELSE
 ENDIF
 
 IF `($ystride"1|1>0|*>0") OR ($no_native_strides_xy"0|*>1")` THEN
-   LET ysize  `pvar,RETURN=jsize`
+   LET ysize  `las_plotvar,RETURN=jsize`
    IF `ysize GT max_size` THEN
      IF ($clat_jmin"0|*>1") THEN 
-        LET strd_lo = `j[gx=pvar,j=($clat_jmin)]`
-        LET strd_hi = `j[gx=pvar,j=($clat_jmax)]`
+        LET strd_lo = `j[gx=las_plotvar,j=($clat_jmin)]`
+        LET strd_hi = `j[gx=las_plotvar,j=($clat_jmax)]`
      ELIF ($scat"0|0|1|*>1") THEN 
         LET strd_lo = 1
         LET strd_hi = `ysize`
      ELSE
-        LET strd_lo = `j[gy=pvar,y=($region_y_lo)]`
-        LET strd_hi = `j[gy=pvar,y=($region_y_hi)]`
+        LET strd_lo = `j[gy=las_plotvar,y=($region_y_lo)]`
+        LET strd_hi = `j[gy=las_plotvar,y=($region_y_hi)]`
      ENDIF
      LET indx_strd_used = 1
      IF ($index_strides"0|*>1") THEN
@@ -140,11 +140,11 @@ ELSE
 ENDIF
 
 IF `($zstride"0|1>0|*>1") OR ($no_native_strides_xy"0|*>1")` THEN
-   LET zsize  `pvar,RETURN=ksize`
+   LET zsize  `las_plotvar,RETURN=ksize`
    IF `zsize GT max_size` THEN 
 
-     LET strd_lo = `k[gz=pvar,z=($region_z_lo)]`
-     LET strd_hi = `k[gz=pvar,z=($region_z_hi)]`
+     LET strd_lo = `k[gz=las_plotvar,z=($region_z_lo)]`
+     LET strd_hi = `k[gz=las_plotvar,z=($region_z_hi)]`
      LET indx_strd_used = 1
      IF ($index_strides"0|*>1") THEN
         DEFINE SYMBOL index_strides = ($index_strides),k=`strd_lo`:`strd_hi`:`INT(zsize/10)`
@@ -180,23 +180,23 @@ ENDIF
 !IF `indx_strd_used EQ 0` THEN CANCEL SYMBOL index_strides
 
 IF ($index_strides"0|*>1") THEN 
-   DEFINE SYMBOL ppvar = speed[($index_strides)]
+   DEFINE SYMBOL las_ppvar = speed[($index_strides)]
 ELSE
-   DEFINE SYMBOL ppvar = speed[($region_zt)]
+   DEFINE SYMBOL las_ppvar = speed[($region_zt)]
 ENDIF
 
 ! tstride was not set in LAS_set_stride. Now we are using the whole t region.
 IF `($tstride"0|1>0|*>1") EQ 0` THEN 
-   LET tsize  `($ppvar),RETURN=lsize`   
+   LET tsize  `($las_ppvar),RETURN=lsize`   
 
    LET strd_lo = 1
-   LET anim_timevar = ($ppvar)
+   LET anim_timevar = ($las_ppvar)
    LET tt = t[gt=anim_timevar]
 
    LET strd_hi = `tt,return=lsize`
 
 ! If the incoming t region is the region over which to animate...
-   LET LL = L[gt=pvar]
+   LET LL = L[gt=las_plotvar]
    LET strd_lo = `LL[t="($region_t_lo)"]`
    LET strd_hi = `LL[t="($region_t_hi)"]`
    LET tsize = `strd_hi - strd_lo + 1`
@@ -221,40 +221,40 @@ ENDIF
 IF `STRINDEX("($data_($num)_grid_type)","scattered") GT 0` THEN CANCEL SYMBOL index_strides
 IF `indx_strd_used EQ 0` THEN CANCEL SYMBOL index_strides
 
-   DEFINE SYMBOL ppvar = speed[($index_strides)]
+   DEFINE SYMBOL las_ppvar = speed[($index_strides)]
 
 
 IF ($index_strides"0|*>1") THEN 
-   DEFINE SYMBOL ppvar = speed[($index_strides)]
+   DEFINE SYMBOL las_ppvar = speed[($index_strides)]
    IF `($do_curvi_xy"0") OR ($region_sample"0|*>1")` THEN
-      LET pvar = \
+      LET las_plotvar = \
       speed[i=($clon_imin):($clon_imax)($i_curv_stride),\
       j=($clat_jmin):($clat_jmax)($i_curv_stride),\
       ($index_strides)]
 
-      IF ($region_z"0|*>1") THEN  LET pvar = \
+      IF ($region_z"0|*>1") THEN  LET las_plotvar = \
       speed[i=($clon_imin):($clon_imax)($i_curv_stride),\
       j=($clat_jmin):($clat_jmax)($i_curv_stride),\
       ($region_z),($index_strides)]
    ENDIF
 ELSE
-   DEFINE SYMBOL ppvar = pvar
+   DEFINE SYMBOL las_ppvar = las_plotvar
    IF `($do_curvi_xy"0") OR ($region_sample"0|*>1")` THEN
-      LET pvar = \
+      LET las_plotvar = \
       speed[i=($clon_imin):($clon_imax)($i_curv_stride),\
       j=($clat_jmin):($clat_jmax)($i_curv_stride)]
 
-      IF ($region_z"0|*>1") THEN  LET pvar = \
+      IF ($region_z"0|*>1") THEN  LET las_plotvar = \
       speed[i=($clon_imin):($clon_imax)($i_curv_stride),\
       j=($clat_jmin):($clat_jmax)($i_curv_stride),\
       ($region_z)]
    ENDIF
 ENDIF
 
-IF ($do_curvi_xy"0") THEN DEFINE SYMBOL ppvar = pvar
+IF ($do_curvi_xy"0") THEN DEFINE SYMBOL las_ppvar = las_plotvar
 
 
-LET varxd = ($ppvar)
+LET varxd = ($las_ppvar)
 DEFINE SYMBOL shapevar = `varxd,RETURN=shape`
 
 ! When we have used striding, RETURN=size doesnt work well
@@ -281,7 +281,7 @@ IF `STRINDEX("($shapevar)", "T") GT 0` THEN
    DEFINE SYMBOL vsiz = `csiz * ($vsiz)`
 ENDIF
 
-STAT ($ppvar)
+STAT ($las_ppvar)
 
 LET vec_len = `($stat_mean) + ($stat_std)`
 DEFINE SYMBOL ferret_vector_length = `vec_len,PREC=2`

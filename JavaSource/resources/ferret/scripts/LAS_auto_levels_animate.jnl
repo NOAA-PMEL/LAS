@@ -353,7 +353,7 @@ ENDIF
 
 IF ($do_curvi_xy"0") THEN DEFINE SYMBOL ppvar = pvar
 
-IF `($no_native_strides_xy"0|*>1") EQ 0` THEN 
+IF `($no_native_strides_xy"0|*>1") EQ 0 AND ($index_strides"0|*>1") EQ 0` THEN 
    IF `($xstride"0") GT 1` THEN SET AXIS/STRIDE=($xstride) `pvar,RETURN=xaxis`
    IF `($ystride"0") GT 1` THEN SET AXIS/STRIDE=($ystride) `pvar,RETURN=yaxis`
    IF `($zstride"0") GT 1` THEN SET AXIS/STRIDE=($zstride) `pvar,RETURN=zaxis`
@@ -444,10 +444,11 @@ IF ($LEV_OPNLEVS"0|*>1") THEN
 ENDIF
 
 ! Restore original axes
+IF `($index_strides"0|*>1") EQ 0` THEN 
 IF `($xstride"0") GT 1` THEN CAN AXIS/STRIDE `anim_stridevar,RETURN=xaxis`
 IF `($ystride"0") GT 1` THEN CAN AXIS/STRIDE `anim_stridevar,RETURN=yaxis`
 IF `($zstride"0") GT 1` THEN CAN AXIS/STRIDE `anim_stridevar,RETURN=zaxis`
 IF `($tstride"0") GT 1` THEN CAN AXIS/STRIDE `anim_stridevar,RETURN=taxis`
-
+ENDIF
 ! End of file ------------LAS_auto_levels_animate.jnl--------------------------
 
