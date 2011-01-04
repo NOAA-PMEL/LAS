@@ -37,9 +37,8 @@ IF ($result_plot_image_filename%0|*>1%) THEN FRAME($trans)/FORMAT=gif/FILE="($re
 
 cancel region 
 
-
-IF ($have_pvar"0") THEN 
-         LET the_plot_var = pvar  ! from LAS_auto_levels
+IF ($have_las_plotvar"0") THEN 
+   LET the_plot_var = las_plotvar  ! from LAS_auto_levels
 ELSE
    IF ($native_curvilinear_xy"0|0|*>1") THEN 
       LET the_plot_var = ($ferret_plot_base_var_noregion)
@@ -57,7 +56,6 @@ ELSE
       ENDIF
    ENDIF
 ENDIF
-
 
 ! First list the urls and variable names; the URLs can be so long they make the
 ! commands too long for the Ferret command-line buffer. 
