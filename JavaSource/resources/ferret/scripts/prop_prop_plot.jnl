@@ -254,7 +254,7 @@ LET do_rsquare = 1
 DEFINE SYMBOL  line_color = blue  ! regression line
 IF ($polycolor%0|blue>1|*>0%) THEN DEFINE SYMBOL  line_color = red
 
-GO regressx
+GO LAS_regressx
 
 IF `(p[x=@NGD] LE 1) OR (qhat[x=@NGD] LE 1)` THEN DEFINE SYMBOL do_rsquare = 0
 IF ($do_rsquare"1|0|*>1) THEN 
