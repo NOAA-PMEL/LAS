@@ -1,4 +1,4 @@
 #!/bin/sh
 APPDIR=`dirname $0`;
-java  -Xmx256M -cp "$APPDIR/WebContent/WEB-INF/lib/gwtopenlayers.jar:$APPDIR/JavaSource:$APPDIR/bin:/home/porter/rhs/gwt-maps/gwt-maps.jar:/home/porter/rhs/gwt/gwt-user.jar:/home/porter/rhs/gwt/gwt-dev.jar" com.google.gwt.dev.Compiler -war "$APPDIR/WebContent/JavaScript/components" "$@" gov.noaa.pmel.tmap.las.VizGal;
-java  -Xmx256M -cp "$APPDIR/WebContent/WEB-INF/lib/gwtopenlayers.jar:$APPDIR/JavaSource:$APPDIR/bin:/home/porter/rhs/gwt-maps/gwt-maps.jar:/home/porter/rhs/gwt/gwt-user.jar:/home/porter/rhs/gwt/gwt-dev.jar" com.google.gwt.dev.Compiler -war "$APPDIR/WebContent/JavaScript/components" "$@" gov.noaa.pmel.tmap.las.NativeMapWidget;
+java  -Xmx256M -cp "$APPDIR/WebContent/WEB-INF/lib/gwtopenlayers.jar:$APPDIR/JavaSource:$APPDIR/bin:/home/users/rhs/gwt-maps/gwt-maps.jar:/home/users/rhs/gwt/gwt-user.jar:/home/users/rhs/gwt/gwt-dev.jar" com.google.gwt.dev.Compiler -war "$APPDIR/WebContent/JavaScript/components" "$@" gov.noaa.pmel.tmap.las.VizGal;
+java  -Xmx256M -cp "$APPDIR/WebContent/WEB-INF/lib/gwtopenlayers.jar:$APPDIR/JavaSource:$APPDIR/bin:/home/users/rhs/gwt-maps/gwt-maps.jar:/home/users/rhs/gwt/gwt-user.jar:/home/users/rhs/gwt/gwt-dev.jar" com.google.gwt.dev.Compiler -war "$APPDIR/WebContent/JavaScript/components" "$@" gov.noaa.pmel.tmap.las.NativeMapWidget;
