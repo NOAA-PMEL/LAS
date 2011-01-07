@@ -302,7 +302,7 @@ public class FerretTool extends Tool{
 
         String[] cmd;
 
-        cmd = new String[offset + 7];
+        cmd = new String[offset + 5];
 
 
         if (useNice) {
@@ -312,17 +312,13 @@ public class FerretTool extends Tool{
 
         cmd[offset] = ferretBinary;
 
-        cmd[offset + 1] = "-memsize";
+        cmd[offset + 1] = "-gif";
 
-        cmd[offset + 2] = "16";
+        cmd[offset + 2] = "-server";
 
-        cmd[offset + 3] = "-gif";
+        cmd[offset + 3] = "-script";
 
-        cmd[offset + 4] = "-server";
-
-        cmd[offset + 5] = "-script";
-
-        cmd[offset + 6] = argBuffer.toString();
+        cmd[offset + 4] = argBuffer.toString();
 
 
         String env[] = runTimeEnv.getEnv();
