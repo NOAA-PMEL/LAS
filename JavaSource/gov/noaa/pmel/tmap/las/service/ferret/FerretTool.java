@@ -299,7 +299,7 @@ public class FerretTool extends TemplateTool{
            cmd = new String[offset + 1];
         }
         else {
-            cmd = new String[offset + 7];
+            cmd = new String[offset + 5];
         }
         
         if (useNice) {
@@ -324,18 +324,14 @@ public class FerretTool extends TemplateTool{
         }
         else {
             cmd[offset] = ferretBinary;
-        
-            cmd[offset + 1] = "-memsize";
 
-            cmd[offset + 2] = "16";
+            cmd[offset + 1] = "-gif";
 
-            cmd[offset + 3] = "-gif";
+            cmd[offset + 2] = "-server";
 
-            cmd[offset + 4] = "-server";
+            cmd[offset + 3] = "-script";
 
-            cmd[offset + 5] = "-script";
-
-            cmd[offset + 6] = argBuffer.toString();
+            cmd[offset + 4] = argBuffer.toString();
         }
 
         String env[] = runTimeEnv.getEnv();
