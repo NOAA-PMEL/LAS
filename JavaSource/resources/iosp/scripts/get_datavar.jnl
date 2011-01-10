@@ -23,9 +23,6 @@ set mem/siz=300
 ! Save the dataset number of the current dataset
 SET DATA/SAVE
 
-! First see if there is a dataset.
-SET DATA "($2)"
-
 ! Place the inputs into variables for later convenience. Any that are not
 ! defined are arbitrarily given the value 1.
 

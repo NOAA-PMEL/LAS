@@ -22,9 +22,6 @@ set mem/siz=100
 ! Save the dataset number of the current dataset
 SET DATA/SAVE
 
-! First see if there is a dataset.
-SET DATA "($2)"
-
 ! Place the inputs into variables for later convenience.
 
 LET lo_index_1 = $5"1"
