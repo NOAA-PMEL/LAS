@@ -58,6 +58,7 @@ public class FerretDataSource implements DatasetSource {
         
         String data_path = fiosp.getDataDir();
         
+        jnl.append("DEFINE ALIAS letdeq1 let/d=1\n");
         jnl.append("use \""+base+"\"\n");
         
         if ( expressions.size() == 2 ) {

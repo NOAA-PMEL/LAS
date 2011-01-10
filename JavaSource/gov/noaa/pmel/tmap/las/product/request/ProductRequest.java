@@ -349,7 +349,7 @@ public class ProductRequest {
                                         	String g = "g"+view;
                                         	if (gridTo.isAnalysis()) {
                                         		StringBuffer jnl = gridTo.getJnl();
-                                        		jnl.append("_cr_let "+var+"_"+var_count+"_regrid="+var+"_2[d="+dataset_number+","+g+"="+gridTo.getVar()+"[d=1]]}");
+                                        		jnl.append("_cr_letdeq1 "+var+"_"+var_count+"_transformed="+var+"_2[d="+dataset_number+","+g+"="+gridTo.getVar()+"[d=1]]}");
                                         		// Get the original URL for the gridTo data set and append the new combined analysis and regrid URL.
                                         		String expr = URLEncoder.encode("_expr_{"+encoded+"}{"+jnl.toString(), "UTF-8");
                                         		String comboURL = lasConfig.getFTDSURL(gridTo.getVarXPath())+expr;                                       			
@@ -360,7 +360,7 @@ public class ProductRequest {
                                         	} else {    
                                         		StringBuffer jnl = gridTo.getJnl();
                                         		gridTo.setVar(gridTo.getVar());
-                                                jnl.append("let "+var+"_"+var_count+"_regrid="+var+"_2[d="+dataset_number+","+g+"="+gridTo.getVar()+"[d=1]]");
+                                                jnl.append("letdeq1 "+var+"_"+var_count+"_transformed="+var+"_2[d="+dataset_number+","+g+"="+gridTo.getVar()+"[d=1]]");
                                                 expression = URLEncoder.encode("_expr_{"+encoded+"}{"+jnl.toString()+"}", "UTF-8");
                                                 data.setAttribute("url", gridTo.getURL()+expression);
                                         	}
@@ -368,7 +368,7 @@ public class ProductRequest {
                                             expression = ""; 
                                         }
                                         
-                                        data.setAttribute("var", var+"_"+var_count+"_regrid");
+                                        data.setAttribute("var", var+"_"+var_count+"_transformed");
                                         data.setAttribute("title", lasConfig.getVariableTitle(varXPath)+" on the grid of "+gridTo.getVar()+"[d=1]");
                                     } else {
                                         // It's the same data set so use it as normal except switch it to the F-TDS URL.
@@ -386,7 +386,7 @@ public class ProductRequest {
                                 	gridTo.setJnl(jnl);
                                     gridTo.setURL(data.getAttributeValue("url"));
                                     // This is the variable name that gets constructed in setAnalysis
-                                    String ovar = lasConfig.getVariableName(varXPath)+var_count+"_regrid";
+                                    String ovar = lasConfig.getVariableName(varXPath)+var_count+"_transformed";
                                     gridTo.setVar(ovar);                                   
                                     gridTo.setGridID(lasConfig.getGrid(varXPath).getID());
                                     gridTo.setVarXPath(varXPath);
@@ -405,9 +405,9 @@ public class ProductRequest {
                                     		StringBuffer analysis_jnl = gridTo.getJnl();
                                     		analysis_jnl.append(";"+jnl);
                                     		var = data.getAttributeValue("var");
-                                    		String revar = var+"_"+var_count+"_regrid";
+                                    		String revar = var+"_"+var_count+"_transformed";
                                     		data.setAttribute("var", revar);
-                                    		analysis_jnl.append("_cr_let "+revar+"="+var+"_2[d="+dataset_number+","+g+"="+gridTo.getVar()+"[d=1]]}");
+                                    		analysis_jnl.append("_cr_letdeq1 "+revar+"="+var+"_2[d="+dataset_number+","+g+"="+gridTo.getVar()+"[d=1]]}");
                                     		// Get the original URL for the gridTo data set and append the new combined analysis and regrid URL.
                                     		String expr = URLEncoder.encode("_expr_{"+encoded+"}{"+analysis_jnl.toString(), "UTF-8");
                                     		String comboURL = lasConfig.getFTDSURL(gridTo.getVarXPath())+expr;                                       			
@@ -417,10 +417,10 @@ public class ProductRequest {
                                     		gridTo.setURL(gridTo.getData().getAttributeValue("url"));
                                     	} else {    
                                     		var = data.getAttributeValue("var");
-                                    		jnl.append("_cr_let "+var+"_"+var_count+"_regrid="+var+"_2[d="+dataset_number+","+g+"="+gridTo.getVar()+"[d=1]]");
+                                    		jnl.append("_cr_letdeq1 "+var+"_"+var_count+"_transformed="+var+"_2[d="+dataset_number+","+g+"="+gridTo.getVar()+"[d=1]]");
                                     		expression = URLEncoder.encode("_expr_{"+encoded+"}"+"{"+jnl.toString()+"}", "UTF-8");
                                     		data.setAttribute("url", gridTo.getURL()+expression);
-                                    		data.setAttribute("var", var+"_"+var_count+"_regrid");
+                                    		data.setAttribute("var", var+"_"+var_count+"_transformed");
                                     		//data.setAttribute("title", "Transformed Variable");
                                     		data.setAttribute("title", lasConfig.getVariableTitle(varXPath)+" on the grid of "+gridTo.getVar()+"[d=1]");
                                     	}
@@ -835,9 +835,9 @@ public class ProductRequest {
                 jnl.append("let analysis_mask = if rose_on_grid gt 0 then 1_cr_");           
             }
             jnl.append("let masked_"+var+"="+var+rename_suffix+"[d="+var_count+"]*analysis_mask_cr_");
-            jnl.append("let "+var+"_"+var_count+"_regrid=masked_"+var+"_2[d="+dset+grid+"]_cr_");
+            jnl.append("letdeq1 "+var+"_"+var_count+"_transformed=masked_"+var+"_2[d="+dset+grid+"]_cr_");
         } else {
-            jnl.append("let "+var+"_"+var_count+"_regrid="+var+rename_suffix+"[d="+dset+grid+"]");
+            jnl.append("letdeq1 "+var+"_"+var_count+"_transformed="+var+rename_suffix+"[d="+dset+grid+"]");
         }
 
         String fdsURL = lasConfig.getFTDSURL(varXPath);
@@ -849,7 +849,7 @@ public class ProductRequest {
         }
         fdsURL = fdsURL+expression;
         data.setAttribute("url", fdsURL);
-        data.setAttribute("var",var+"_"+var_count+"_regrid");
+        data.setAttribute("var",var+"_"+var_count+"_transformed");
         String title = analysis.getAttributeValue("label")+" ["+grid+"]";
         // Clean out junk that might make Ferret mad...
         title = title.replaceAll(",", " ");
