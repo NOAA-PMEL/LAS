@@ -20,6 +20,7 @@ public class FerretCommands {
 		"SPAWN"
 	};
     static final String command[] = {
+    	    "LETDEQ1",                 // the special alias for LAS data source requests...
             "ALIAS ", 
             "CANCEL ",
             "CONTOUR ",
