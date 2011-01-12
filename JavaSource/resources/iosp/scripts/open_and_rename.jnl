@@ -23,6 +23,8 @@ use "$1"
 let varnames = ..varnames
 let nvars = `..nvars`
 repeat/range=1:`nvars`/name=m (\
+   define symbol m = `m`; \
    let nam = varnames[i=`m`]; \
-   define symbol ivar = `nam`; \
-   set var/name=($ivar)$2 ($ivar))
+   define symbol ivar = `varnames[i=($m)]`; \
+   define symbol newname = ($ivar)$2; \
+   set var/name="($newname)" ($ivar))

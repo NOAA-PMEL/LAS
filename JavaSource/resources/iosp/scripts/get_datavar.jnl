@@ -23,6 +23,14 @@ set mem/siz=300
 ! Save the dataset number of the current dataset
 SET DATA/SAVE
 
+! First see if there is a dataset.
+! SET DATA "($2)"
+
+! Write output in original upper-or lower-case spelling of variables
+! and axis names
+
+CANCEL MODE UPCASE
+
 ! Place the inputs into variables for later convenience. Any that are not
 ! defined are arbitrarily given the value 1.
 

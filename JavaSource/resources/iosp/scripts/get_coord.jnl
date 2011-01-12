@@ -22,6 +22,14 @@ set mem/siz=100
 ! Save the dataset number of the current dataset
 SET DATA/SAVE
 
+! First see if there is a dataset.
+! SET DATA "($2)"
+
+! Write output in original upper-or lower-case spelling of variables
+! and axis names
+
+CANCEL MODE UPCASE
+
 ! Place the inputs into variables for later convenience.
 
 LET lo_index_1 = $5"1"
@@ -30,7 +38,7 @@ LET stride_1 = $7"1"
 
 
 ! The axis name may be a pseudo-variable X,Y,Z,T (or I,J,K,L ?)
-! If so then we cant use the syntax LET coords = x[gx=$3]
+! If so then we cant use the syntax LET COORDS = x[gx=$3]
 ! Instead find a variable with that axis an use x[gx=($varname)]
 
 LET its_pseudoname = 0
@@ -62,27 +70,27 @@ DEFINE SYMBOL shape = `UPCASE("($4)")`
 
 IF `STRINDEX("($shape)", "I") GT 0` THEN
 ! write the coordinates as X coordinates.
-   LET coords = x[gx=($myvar)]
-   SAVE/FILE="$1"/CLOBBER coords[i=`lo_index_1`:`hi_index_1`:`stride_1`]
+   LET COORDS = x[gx=($myvar)]
+   SAVE/FILE="$1"/CLOBBER COORDS[i=`lo_index_1`:`hi_index_1`:`stride_1`]
 ENDIF
 
 IF `STRINDEX("($shape)", "J") GT 0` THEN
 ! write the coordinates as Y coordinates.
-   LET coords = y[gy=($myvar)]
-   SAVE/FILE="$1"/CLOBBER coords[j=`lo_index_1`:`hi_index_1`:`stride_1`]
+   LET COORDS = y[gy=($myvar)]
+   SAVE/FILE="$1"/CLOBBER COORDS[j=`lo_index_1`:`hi_index_1`:`stride_1`]
 ENDIF
 
 IF `STRINDEX("($shape)", "K") GT 0` THEN
 ! write the coordinates as Y coordinates.
-   LET coords = z[gz=($myvar)]
-   SAVE/FILE="$1"/CLOBBER coords[k=`lo_index_1`:`hi_index_1`:`stride_1`]
+   LET COORDS = z[gz=($myvar)]
+   SAVE/FILE="$1"/CLOBBER COORDS[k=`lo_index_1`:`hi_index_1`:`stride_1`]
 ENDIF
 
 IF `STRINDEX("($shape)", "L") GT 0` THEN
 
 ! write the coordinates as Y coordinates.
-   LET coords = t[gt=($myvar)]
-   SAVE/FILE="$1"/CLOBBER coords[l=`lo_index_1`:`hi_index_1`:`stride_1`]
+   LET COORDS = t[gt=($myvar)]
+   SAVE/FILE="$1"/CLOBBER COORDS[l=`lo_index_1`:`hi_index_1`:`stride_1`]
 ENDIF
 
 ! Done writing data variable. exit
