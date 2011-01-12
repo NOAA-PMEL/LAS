@@ -477,12 +477,9 @@ public class FerretIOServiceProvider implements IOServiceProvider {
         							String aname = attribute.getAttributeValue("name");
         							try {
         								float fvalue = Float.valueOf(value).floatValue();
-                                                                        // TODO A Hack to skip bad scaling information
-                                                                        if ( !aname.equals("add_offset") && !aname.equals("scale_factor") ) {
-        								    dataVar.addAttribute(new Attribute(aname, new Float(fvalue)));
-                                                                        }
+        								dataVar.addAttribute(new Attribute(aname, new Float(fvalue)));
         							} catch (NumberFormatException nfe) {
-        							        dataVar.addAttribute(new Attribute(aname, value));
+        								dataVar.addAttribute(new Attribute(aname, value));
         							}
         						}
         					} else {
@@ -494,11 +491,9 @@ public class FerretIOServiceProvider implements IOServiceProvider {
         								String aname = attribute.getName();
         								try {
         									float fvalue = Float.valueOf(value).floatValue();
-                                                                                if ( !aname.equals("add_offset") && !aname.equals("scale_factor") ) {
-        								    	    dataVar.addAttribute(new Attribute(aname, new Float(fvalue)));
-                                                                                }
+        									dataVar.addAttribute(new Attribute(aname, new Float(fvalue)));
         								} catch (NumberFormatException nfe) {
-        								    dataVar.addAttribute(new Attribute(aname, value));
+        									dataVar.addAttribute(new Attribute(aname, value));
         								}
         							}
         						}
