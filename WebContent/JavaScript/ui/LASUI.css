@@ -306,12 +306,11 @@ height: 100%;
 .top_link:hover {color:#f5ed52;}
 #main  {margin:5pt; padding:5pt;width:1056px;overflow:visible;}
 #header {width:1056px;}
-#output  {overflow : scroll;
+#output  {
+	overflow:visible;
 	min-width:800px;
-	max-width:1200px;
 	min-height:500px;
-	max-height:800px;
-	}
+}
 #constraints {
                         min-height:500px;
                         width: 256px;

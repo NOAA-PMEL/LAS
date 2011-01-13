@@ -201,9 +201,16 @@ LASUI.prototype.initUI = function (anchorId)
 				"t": document.getElementById("t_analysis")
 				};
 
-	this.refs.analysis.type.axes.onchange = this.selectAnalysisAxis.LASBind(this,null,true);
-	
+	this.refs.analysis.type.axes.onchange = this.selectAnalysisAxis.LASBind(this,null,true);	
 	this.refs.analysis.type.op.onchange = this.selectAnalysisType.LASBind(this);
+	if(document.all) {
+		        this.refs.analysis.type.axes.onafterclick = this.selectAnalysisAxis.LASBind(this,null,true);
+		        this.refs.analysis.type.op.onafterclick = this.selectAnalysisType.LASBind(this);
+	} else {
+		this.refs.analysis.type.axes.onchange = this.selectAnalysisAxis.LASBind(this,null,true);
+	        this.refs.analysis.type.op.onchange = this.selectAnalysisType.LASBind(this);
+
+	}
 	
 	if(document.getElementById(this.anchors.output).addEventListener&&!document.all) {
 		document.getElementById(this.anchors.output).addEventListener("load",this.onPlotLoad.LASBind(this),true);
@@ -293,13 +300,15 @@ LASUI.prototype.setInitialVariable = function(strJson) {
 LASUI.prototype.printPlot = function () {
 	var plot = document.getElementById(this.anchors.output);
 	if(plot != null) {
-		var print_win = window.open(plot.src + "&stream_id=plot_image&" + this.state.extra_args);
+		var print_win = window.open(plot.src + "&stream=true&stream_ID=plot_image&" + this.state.extra_args);
 		print_win.onload = function(){this.print()}
 	}
 
 }
 LASUI.prototype.linkTo = function () {
         var plot = document.getElementById(this.anchors.output).src;
+	if(plot.substring(0,4)!='http')
+		plot="http://"+document.location.host+document.location.pathname.replace('getUI.do?','')+plot;
 	var ui = "http://"+document.location.host+document.location.pathname+"?dsid="+this.state.dataset+"&varid="+this.state.variable+'&auto=true';
 	var div = document.createElement('DIV');
 	div.className = 'LASPopupDIVNode';
@@ -702,8 +711,10 @@ LASUI.prototype.getRegions = function (dsid, varid) {
 }
 LASUI.prototype.setRegions = function(response) {
 	var obj = eval("("+response+")");
-	if(response&&setMapRegions)
-		setMapRegions(obj);
+	try{
+		if(obj.status=="ok")
+			setMapRegions(obj);
+	} catch (e) {}
 		
 }
 LASUI.prototype.onSetVariable = function() {
@@ -957,7 +968,7 @@ LASUI.prototype.removeVariable = function(evt) {
 
 	this.state.variables.pop();
         if(typeof mapResize != "undefined")
-                mapResize();
+               mapResize();
 
 	this.getOperations(true);
 }
@@ -1675,7 +1686,8 @@ LASUI.prototype.setDefaultProductMenu = function () {
 			
 
 	if(defaultPlotProduct) {
-		defaultPlotProduct.onclick();
+		//if(!document.all)
+			defaultPlotProduct.onclick(null);
 		defaultPlotProduct.checked="checked";
 		 defaultPlotProduct.selected=true;
 	}
@@ -1702,13 +1714,16 @@ LASUI.prototype.setProductNode = function(id, view, title) {
 		var LINode = document.createElement("LI");
 		LINode.className = "LASPlotType";
 		var title = document.createTextNode(title);
-		var radio = document.createElement("INPUT");
+		if(document.all)
+			var radio = document.createElement("<INPUT type='radio' name='plotType'/>");
+		else {
+			var radio = document.createElement("INPUT");
+			radio.name = "plotType";
+		}
 		radio.type = "radio";
-		radio.name = "visualizations";
 		radio.className = "LASRadioInputNode";
 		radio.value = id;
 		radio.id=id+'_'+view;
-		radio.name = "plotType";
 		radio.onselect = this.setOperation.LASBind(this,id,view,optiondef,"plot" );
 		radio.onclick = this.setOperation.LASBind(this,id,view,optiondef,"plot");
 		LINode.appendChild(radio);
@@ -1745,8 +1760,8 @@ LASUI.prototype.onPlotLoad = function (e) {
 				 setMapCurrentSelection(miny,maxy,minx,maxx);
 				if(minx) this.state.selection.x.min = minx;
 				if(maxx) this.state.selection.x.max = maxx;
-				if(miny) this.state.selection.z.min = miny;
-                                if(maxy) this.state.selection.z.max = maxy;
+				if(miny) this.state.selection.y.min = miny;
+                                if(maxy) this.state.selection.y.max = maxy;
                                 if(minz) this.state.selection.z.min = minz;
                                 if(maxz) this.state.selection.z.max = maxz;
 	                        if(mint) this.state.selection.t.min = mint;
@@ -1961,7 +1976,10 @@ LASUI.prototype.initZConstraint = function (mode, reset) {
 			for(var m=0;m<this.refs.DepthWidget[this.refs.DepthWidget.widgetType].length;m++) {
 				this.refs.DepthWidget[this.refs.DepthWidget.widgetType][m].className = "LASSelectNode";
 				var selected = null;
-				for(var v=parseFloat(this.state.grid.getLo('z'));v<=parseFloat(this.state.grid.getHi('z'));v+=parseFloat(this.state.grid.getDelta('z'))) {
+				var step = parseFloat(this.state.grid.getDelta('z'));
+				if(step<0)
+					step*=-1;
+				for(var v=parseFloat(this.state.grid.getLo('z'));v<=parseFloat(this.state.grid.getHi('z'));v+=step) {
 					var _opt = document.createElement("option");
 					_opt.value = v;
 					_opt.className = "LASOptionNode";
@@ -2166,11 +2184,14 @@ LASUI.prototype.makeRequest = function (evt, type) {
 			this.getOperations(this.state.dataset,this.state.variable,this.state.view.plot)
 			return null;
 		}
-	if(!document.getElementById(this.state.operation.plot+'_'+this.state.view.plot).checked) {
-		document.getElementById(this.state.operation.plot+'_'+this.state.view.plot).checked=true;
-		 document.getElementById(this.state.operation.plot+'_'+this.state.view.plot).onclick();
-		return null;	
-	}
+	 if(!document.getElementById(this.state.operation.plot+'_'+this.state.view.plot))
+		return null;
+
+//	if(!document.getElementById(this.state.operation.plot+'_'+this.state.view.plot).checked) {
+//		document.getElementById(this.state.operation.plot+'_'+this.state.view.plot).checked=true;
+//		 document.getElementById(this.state.operation.plot+'_'+this.state.view.plot).onclick();
+//		return null;	
+//	}
 		document.getElementById('output').height="100%";
 		document.getElementById('output').width="100%";
 		document.getElementById('update').style.visibility='visible';
@@ -2372,6 +2393,11 @@ LASUI.prototype.makeRequest = function (evt, type) {
 		this.uirequest='xml='+this.urlencode(this.request.getXMLText());
 	}
 
+}
+LASUI.prototype.cancelRequest = function () {
+	 try {
+		document.getElementById(this.anchors.output).src = (this.hrefs.getProduct.url + this.state.extra_args + 'xml=' + this.urlencode(this.request.getXMLText()))+"&cancel=true";
+	} catch (e) {}
 }
 /**
  * Method to query the server for an options object and pass json response to setOptionList
@@ -2798,13 +2824,8 @@ LASUI.prototype.hideAnalysis = function () {
 LASUI.prototype.selectAnalysisType = function (evt) {
 	var changeVis = false;
 	if(evt) {
-		if(evt.target)
-			var DOMNode = evt.target
-		else if (evt.srcElement)
-			var DOMNode = evt.srcElement;
-
-		this.state.analysis.type = DOMNode.options[DOMNode.selectedIndex].value;
-		this.state.analysis.name = DOMNode.options[DOMNode.selectedIndex].innerHTML;	
+		this.state.analysis.type = document.getElementById('analysis_op').options[document.getElementById('analysis_op').selectedIndex].value
+		this.state.analysis.name = document.getElementById('analysis_op').options[document.getElementById('analysis_op').selectedIndex].innerHTML;	
 	}		
 		this.state.analysis.enabled = false;
 		if(this.state.analysis.type&&this.state.analysis.axes) {
@@ -2841,13 +2862,16 @@ LASUI.prototype.selectAnalysisType = function (evt) {
 LASUI.prototype.selectAnalysisAxis = function (evt) {
 	var axes =arguments[1];
 	if(axes=="" || axes == {} || axes==null){
-		try {axes =evt.target.value;}
-		catch (e) {axes = ""};
+		axes=document.getElementById("analysis_axes").options[document.getElementById("analysis_axes").selectedIndex].value;
+
+
+//		try {axes =evt.target.value;}
+//		catch (e) {axes = ""};
 	}
-	if(axes=="" || axes == {} || axes==null){
-			try {axes =evt.srcElement.value;}
-			catch (e) {axes = ""};
-	}
+//	if(axes=="" || axes == {} || axes==null){
+//			try {axes =evt.srcElement.value;}
+//			catch (e) {axes = ""};
+//	}
         this.state.analysis.axes = {};
 	var changeVis=false;
 
@@ -2958,17 +2982,16 @@ LASUI.prototype.setVisualization = function (d, priority) {
 				case 'analysis' : if(minvars==1&&plotView==bestView ){
 						document.getElementsByName("plotType").item(v).checked = true;
                                                 this.state.operation.plot = plotId;
-						//document.getElementsByName("plotType").item(v).onclick({"srcElement" : document.getElementsByName("plotType").item(v)});
 						this.state.view.plot=bestView;
 						this.state.view.widgets=bestView+d;
-					 	var axes = {"x" : "", "y" : "", "z" : "", "t" : ""};
-						for(var i=0;i<this.state.view.widgets.length;i++)
-							 if(axes[this.state.view.widgets[i]]=this.state.view.widgets[i])
-						var newview=""
-						for(var a in axes)
-							newview+=axes[a]; 
+					 	//var axes = {"x" : "", "y" : "", "z" : "", "t" : ""};
+						//for(var i=0;i<this.state.view.widgets.length;i++)
+						//	 if(axes[this.state.view.widgets[i]]=this.state.view.widgets[i])
+						//		var newview=""
+						//for(var a in axes)
+						//	newview+=axes[a]; 
 						
-						this.state.view.widgets=newview;
+						//this.state.view.widgets=newview;
 						this.updateConstraints(this.state.view.widgets);
 						try {
 						if(this.state.operations.getOperationByID(plotId).optiondef.IDREF)
