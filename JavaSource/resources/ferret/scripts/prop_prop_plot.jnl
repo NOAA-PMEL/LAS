@@ -97,11 +97,14 @@ IF `($data_count"0") EQ 3` THEN ! color by 3rd variable
 
    DEFINE SYMBOL color_by = 1
 ENDIF
-
+sh var xvar, yvar, zvar 
 GO LAS_set_strides_prop
+
 
 LET/TITLE="($ferret_title_0)" xvar = XSEQUENCE(($ferret_plot_var_0))
 LET/TITLE="($ferret_title_1)" yvar = XSEQUENCE(($ferret_plot_var_1))
+sh var xvar, yvar, zvar
+sh sym ferret_plot_var*
 
 DEFINE SYMBOL xvar = xvar
 DEFINE SYMBOL yvar = yvar
@@ -211,8 +214,14 @@ REPEAT/RANGE=1:`($nmask_labels)`:1/NAME=m (\
 DEFINE SYMBOL plot_arg = ($xvar), ($yvar), ($xvar)
 DEFINE SYMBOL poly_qual = /OVER/NOLAB
 
+
 IF ($color_by"0|*>1") THEN 
    DEFINE SYMBOL plot_arg = ($xvar), ($yvar), zvar
+   let zsize = `zvar,return=isize`
+   IF `zsize NE xsize` THEN
+     MESSAGE/ERROR **ERROR The variables must have the same dimensions: ($data_0_var), ($data_2_var)
+      EXIT/PROGRAM
+   ENDIF
    
 ! Get color-plot qualifiers
    IF ($ferret_fill_levels"0|*>1") THEN 
