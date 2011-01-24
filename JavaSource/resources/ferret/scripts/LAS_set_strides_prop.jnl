@@ -233,6 +233,11 @@ IF `($do_curvi_xy"0|0|1|*>1") AND (($xstride"0")+($ystride"0") GT 0)` THEN
    IF ($region_zt"0|*>1) THEN DEFINE SYMBOL comma = ,
    DEFINE SYMBOL ferret_plot_var_1 = var1_noregion[($region_zt)($comma)i=($clon_imin):($clon_imax),j=($clat_jmin):($clat_jmax)]
 
+   IF ($ferret_plot_var_2"0|*>1") THEN 
+      DEFINE SYMBOL ferret_plot_var_2 = var2_noregion[($region_zt)($comma)i=($clon_imin):($clon_imax),j=($clat_jmin):($clat_jmax)]
+      LET var2_noregion = ($ferret_plot_var_2_noregion)
+      LET/TITLE="($ferret_title_2)" zvar = XSEQUENCE(($ferret_plot_var_2))
+   ENDIF
 ENDIF
 
 ! If there was any striding, set the label to be plotted.
