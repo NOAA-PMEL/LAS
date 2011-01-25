@@ -101,7 +101,7 @@ IF `(slen GT linelen)` THEN
          ENDIF
       ENDIF
 
-      DEFINE SYMBOL upper_right_($n_right_labels) = ($upper_right_out)
+      IF ($upper_right_out"0|*>1") THEN DEFINE SYMBOL upper_right_($n_right_labels) = ($upper_right_out)
       DEFINE SYMBOL long_right_label = 1
       LET nlines = 2
 
