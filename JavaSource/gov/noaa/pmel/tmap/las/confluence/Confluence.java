@@ -149,6 +149,8 @@ public class Confluence extends LASAction {
 						if ( varid != null ) {
 							request.getSession().setAttribute("varid", varid);
 						}
+					} else {
+						response.sendRedirect("localGetUI.do");
 					}
 
 				} else if ( url.contains(Constants.GET_DATASETS) ) {
