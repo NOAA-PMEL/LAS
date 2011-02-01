@@ -1379,6 +1379,8 @@ public class LASConfig extends LASDocument {
                     container_dataset = new Element("dataset");
                 }
                 Element category = new Element("category");
+                category.setAttribute("children", "variables");
+                category.setAttribute("children_dsid", container_dataset.getAttributeValue("ID"));
                 category.addContent(container_dataset);
                 categories.add(new Category(category));
             }
@@ -3828,7 +3830,13 @@ public class LASConfig extends LASDocument {
                 	ID = JDOMUtils.MD5Encode(getBaseServerURL()) + Constants.NAME_SPACE_SPARATOR + ID;
                 }
                 category.setAttribute("ID", ID);
-            }   
+            } else {
+            	// Pre-pend the server key to any existing ID
+            	if ( allowsSisters() ) {
+                	ID = JDOMUtils.MD5Encode(getBaseServerURL()) + Constants.NAME_SPACE_SPARATOR + ID;
+                	category.setAttribute("ID", ID);
+                }          	
+            }
             List subcategories = category.getChildren("category");
             if ( subcategories.size() > 0 ) {
                 setIDs(subcategories);
@@ -4476,10 +4484,18 @@ public class LASConfig extends LASDocument {
 	public boolean allowsSisters() {
 		String allow_sisters = getRootElement().getAttributeValue("allow_sisters");
 		boolean sister = false;
-		if ( allow_sisters != null ) {
+		if ( allow_sisters != null && allow_sisters.equalsIgnoreCase("true") ) {
 			sister = true;
 		}
 		return sister;
+	}
+	public boolean pruneCategories() {
+		String prune_categories = getRootElement().getAttributeValue("prune_categories");
+		boolean prune = false;
+		if ( prune_categories != null && prune_categories.equalsIgnoreCase("true") ) {
+			prune = true;
+		}
+		return prune;
 	}
 	public boolean isLocal(String id) throws UnsupportedEncodingException, JDOMException {
 		boolean local = false;
@@ -4619,6 +4635,7 @@ public class LASConfig extends LASDocument {
 			write(debug);
 		}
 	}
+	
 	public void addRemoteVariables(String JSESSIONID, LASUIRequest lasRequest) throws HttpException, IOException, JDOMException, LASException {
 		ArrayList<String> dsids = lasRequest.getDatasetIDs();
 		ArrayList<String> varids = lasRequest.getVariableIDs();

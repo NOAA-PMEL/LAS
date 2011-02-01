@@ -4,6 +4,7 @@ import gov.noaa.pmel.tmap.las.exception.LASException;
 import gov.noaa.pmel.tmap.las.jdom.JDOMUtils;
 import gov.noaa.pmel.tmap.las.jdom.LASBackendResponse;
 import gov.noaa.pmel.tmap.las.jdom.LASConfig;
+import gov.noaa.pmel.tmap.las.jdom.LASDocument;
 import gov.noaa.pmel.tmap.las.jdom.LASMapScale;
 import gov.noaa.pmel.tmap.las.jdom.LASRegionIndex;
 import gov.noaa.pmel.tmap.las.jdom.LASUIRequest;
@@ -56,13 +57,16 @@ public class Confluence extends LASAction {
 		{  
 			//Unnamed Block.  
 			{  
-				put(Constants.GET_CATEGORIES, new String[]{"catid"});  
+				put(Constants.GET_CATEGORIES, new String[]{"catid"}); 
+				put(Constants.GET_DATASETS, new String[]{"dsid", "varid"});
 				put(Constants.GET_DATACONSTRAINTS, new String[]{"dsid", "varid"});  
 				put(Constants.GET_GRID,  new String[]{"dsid", "varid"});  
 				put(Constants.GET_METADATA, new String[]{"dsid", "catitem", "opendap"});  
 				put(Constants.GET_OPERATIONS, new String[]{"dsid", "varid", "view"}); 
 				put(Constants.GET_OPTIONS, new String[]{"dsid", "opid"});
 				put(Constants.GET_REGIONS, new String[]{"dsid", "varid"});
+				put(Constants.GET_UI, new String[]{"dsid", "varid"});
+				put(Constants.GET_VARIABLES, new String[]{"dsid"});
 				put(Constants.GET_VARIABLE, new String[]{"dsid", "varid"});
 				put(Constants.GET_VIEWS, new String[]{"dsid", "varid"});
 			}  
@@ -74,13 +78,16 @@ public class Confluence extends LASAction {
 				//Unnamed Block.  
 				{  
 					put(Constants.GET_CATEGORIES_KEY, Constants.GET_CATEGORIES);  
+					put(Constants.GET_DATASETS_KEY, Constants.GET_DATASETS);
 					put(Constants.GET_DATACONSTRAINTS_KEY, Constants.GET_DATACONSTRAINTS);  
 					put(Constants.GET_GRID_KEY, Constants.GET_GRID);  
 					put(Constants.GET_METADATA_KEY, Constants.GET_METADATA);  
 					put(Constants.GET_OPERATIONS_KEY, Constants.GET_OPERATIONS); 
 					put(Constants.GET_OPTIONS_KEY, Constants.GET_OPTIONS);
 					put(Constants.GET_REGIONS_KEY, Constants.GET_REGIONS);
-					put(Constants.GET_VARIABLES_KEY, Constants.GET_VARIABLE);
+					put(Constants.GET_UI_KEY, Constants.GET_UI);
+					put(Constants.GET_VARIABLES_KEY, Constants.GET_VARIABLES);
+					put(Constants.GET_VARIABLE_KEY, Constants.GET_VARIABLE);
 					put(Constants.GET_VIEWS_KEY, Constants.GET_VIEWS);
 					put(Constants.GET_AUTH_KEY, Constants.GET_AUTH);
 				}  
@@ -89,7 +96,7 @@ public class Confluence extends LASAction {
 				ActionForm form,
 				HttpServletRequest request,
 				HttpServletResponse response){
-			
+
 			String openid = request.getParameter("openid");
 			LASConfig lasConfig = (LASConfig)servlet.getServletContext().getAttribute(LASConfigPlugIn.LAS_CONFIG_KEY);
 
@@ -104,54 +111,132 @@ public class Confluence extends LASAction {
 			if ( proxy == null ) {
 				proxy = "partial";
 			}
+			try {
+				if ( url.contains(Constants.GET_UI) ) {
+					// Collect the query parameters.
 
-			if ( url.contains(Constants.GET_CATEGORIES) ) {
-				ArrayList<Category> categories = new  ArrayList<Category>();
-				if ( request.getParameter("catid") ==  null) {
-					// The only other possible parameter is the format.
-					if ( request.getParameter("format") != null ) {
-						// Save it.  When use it when we stream the response...
-						request_format = request.getParameter("format");
-					}
-					try {
-						// Start with the categories on this server...
-						Category local_cat = new Category(lasConfig.getTitle(), lasConfig.getTopLevelCategoryID()); 
-						categories.add(local_cat);
-						
-						for (Iterator servIt = servers.iterator(); servIt.hasNext();) {
-							Tributary trib = (Tributary) servIt.next();						
-                            Category server_cat = new Category(trib.getName(), trib.getTopLevelCategoryID());
-                            if ( !proxy.equalsIgnoreCase("full") ) {
-                            	if ( openid != null ) {
-                            		server_cat.setAttribute("remote_las", trib.getURL()+Constants.GET_AUTH);
-                            	}
-                            }
-                            categories.add(server_cat);
+					// Find the first variable in the tree
+
+					// Forward to the local getUI
+					if ( lasConfig.pruneCategories() ) {
+
+
+						String[] catids = request.getParameterValues("catid");
+						String[] dsids = request.getParameterValues("dsid");
+						String varid = request.getParameter("varid");
+
+						if ( catids != null && catids.length > 0 ) {
+							request.getSession().setAttribute("catid", catids);
+							ArrayList<Category> cats = getCategories(catids[0], lasConfig, request);
+							String dsid = null;
+							for (Iterator catsIt = cats.iterator(); catsIt.hasNext();) {
+								Category category = (Category) catsIt.next();
+								dsid = findFirstVariable(category, lasConfig, request);
+							}
+							if ( dsid != null ) {
+								StringBuilder q = new StringBuilder("localGetUI.do?dsid="+dsid);
+								if ( varid != null ) {
+									q.append("&varid="+varid);
+								}
+								response.sendRedirect(q.toString());
+							} else {
+								response.sendRedirect("localGetUI.do");
+							}
 						}
-						InputStream is = new ByteArrayInputStream(Util.toJSON(categories, "categories").toString().getBytes("UTF-8"));
-						lasProxy.stream(is, response.getOutputStream());
-					} catch (JSONException e) {
-						log.error("Unable to get categories", e);
-					} catch (UnsupportedEncodingException e) {
-						log.error("Unable to get categories", e);
-					} catch (IOException e) {
-						log.error("Unable to get categories", e);
-					} catch (JDOMException e) {
-						log.error("Unable to get categories", e);
+						if ( dsids != null && dsids.length > 0 ) {
+							request.getSession().setAttribute("dsid", dsids);
+						}
+						if ( varid != null ) {
+							request.getSession().setAttribute("varid", varid);
+						}
 					}
 
-				} else {
-					String catid = request.getParameter("catid");
-					String format = request.getParameter("format");
-					if ( format == null ) format = "json";
-					String server_key = catid.split(Constants.NAME_SPACE_SPARATOR)[0];
-					try {
+				} else if ( url.contains(Constants.GET_DATASETS) ) {
+					String dsid = request.getParameter("dsid");
+					if ( dsid.contains(Constants.NAME_SPACE_SPARATOR) ) {
+						String[] parts = dsid.split(Constants.NAME_SPACE_SPARATOR);
+						String server_key = parts[0];
 						if ( server_key.equals(lasConfig.getBaseServerURLKey()) ) {
+							return mapping.findForward(Constants.GET_DATASETS_KEY);
+						}
+
+						dsid = parts[1];
+
+						Tributary trib = lasConfig.getTributary(server_key);
+						String las_url = trib.getURL() + Constants.GET_DATASETS + "?dsid=" + dsid;
+						lasProxy.executeGetMethodAndStreamResult(las_url, response);
+					} else {
+						// Send it to the local server which will work most of the time..
+						return mapping.findForward(Constants.GET_DATASETS_KEY);
+					}
+					
+				} else if ( url.contains(Constants.GET_CATEGORIES) ) {
+				
+					ArrayList<Category> categories = new  ArrayList<Category>();
+
+					if ( request.getParameter("catid") ==  null) {
+						// Check to see if this deployment wants the category tree trimmed 
+						// according to the parameters on the initial getUI query string.
+						if ( lasConfig.pruneCategories() ) {
+
+							String [] catids = (String[]) request.getSession().getAttribute("catid");
+							// The getUI class has to deal with these two things
+							String [] dsids = (String[]) request.getSession().getAttribute("dsid");
+							String varid = (String) request.getSession().getAttribute("varid");
 							
+							request.getSession().removeAttribute("catid");
+							request.getSession().removeAttribute("dsid");
+							request.getSession().removeAttribute("varid");
+							
+							// TODO this is working, but the form of the categories coming out of the toJSON are not quite right.
+
+							if ( catids != null ) {
+								// In this case the top level categories are these and only these...
+								for (int i = 0; i < catids.length; i++) {
+									categories.addAll(getCategories(catids[i], lasConfig, request));
+								}
+								log.error(Util.toJSON(categories, "categories"));
+								InputStream is = new ByteArrayInputStream(Util.toJSON(categories, "categories").toString().getBytes("UTF-8"));
+								lasProxy.stream(is, response.getOutputStream());
+							}
+
+						} else {
+							// The only other possible parameter is the format.
+							if ( request.getParameter("format") != null ) {
+								// Save it.  When use it when we stream the response...
+								request_format = request.getParameter("format");
+							}
+
+							// Start with the categories on this server...
+							Category local_cat = new Category(lasConfig.getTitle(), lasConfig.getTopLevelCategoryID()); 
+							categories.add(local_cat);
+
+							for (Iterator servIt = servers.iterator(); servIt.hasNext();) {
+								Tributary trib = (Tributary) servIt.next();						
+								Category server_cat = new Category(trib.getName(), trib.getTopLevelCategoryID());
+								if ( !proxy.equalsIgnoreCase("full") ) {
+									if ( openid != null ) {
+										server_cat.setAttribute("remote_las", trib.getURL()+Constants.GET_AUTH);
+									}
+								}
+								categories.add(server_cat);
+							}
+							InputStream is = new ByteArrayInputStream(Util.toJSON(categories, "categories").toString().getBytes("UTF-8"));
+							lasProxy.stream(is, response.getOutputStream());
+
+						} 
+					} else {
+						String catid = request.getParameter("catid");
+						String format = request.getParameter("format");
+						if ( format == null ) format = "json";
+						String server_key = catid.split(Constants.NAME_SPACE_SPARATOR)[0];
+
+						if ( server_key.equals(lasConfig.getBaseServerURLKey()) ) {
+
 							return mapping.findForward(Constants.GET_CATEGORIES_KEY);
 
 						} else {
-							
+
 							Tributary trib = lasConfig.getTributary(server_key);
 							String las_url = trib.getURL() + Constants.GET_CATEGORIES;					
 
@@ -163,16 +248,10 @@ public class Confluence extends LASAction {
 							}
 							lasProxy.executeGetMethodAndStreamResult(las_url, response);
 						}
-					} catch (HttpException e) {
-						log.error("Unable to fetch categories.", e);
-					} catch (IOException e) {
-						log.error("Unable to fetch categories.", e);
-					} catch (JDOMException e) {
-						log.error("Unable to fetch categories.", e);
-					} 				
-				}
-			} else if (url.contains(Constants.GET_OPTIONS)) {
-				try {
+
+					}
+				} else if (url.contains(Constants.GET_OPTIONS)) {
+
 					// I think there is a bug in the client where it requests the options without the server key initially
 					// so I'm going to throw that request away.
 
@@ -193,49 +272,43 @@ public class Confluence extends LASAction {
 						// Send it to the local server which will work most of the time..
 						return mapping.findForward(Constants.GET_OPTIONS_KEY);
 					}
-				} catch (HttpException e) {
-					logerror(request, "Unable to fetch options.", e);
-				} catch (IOException e) {
-					logerror(request, "Unable to fetch options.", e);
-				} catch (JDOMException e) {
-					logerror(request, "Unable to fetch options.", e);
-				}
-			} else if (url.contains(Constants.PRODUCT_SERVER)) {
-				String xml = request.getParameter("xml");
-				LASUIRequest ui_request = new LASUIRequest();
-				try {
-					JDOMUtils.XML2JDOM(xml, ui_request);
-				} catch (IOException e) {
-					logerror(request, "Failed to parse XML request.", e);
-					return mapping.findForward("error");					
-				} catch (JDOMException e) {
-					logerror(request, "Failed to parse XML request.", e);
-					return mapping.findForward("error");
-				}
-				ArrayList<String> ids = ui_request.getDatasetIDs();
-				
-				String op = ui_request.getOperation();
-				String service = "";
-				try {
-					service = lasConfig.getService(op);
-				} catch (JDOMException e) {
-					logerror(request, "Unable to find service name.", e);
-					return mapping.findForward("error");
-				}
-				if ( ids.size() == 0 || (service !=null && service.equals("template")) ) {
-					// Forward to the local server...
-					return mapping.findForward("LocalProductServer");
-				} else if ( ids.size() > 1 ) {
-					// Check to see how many servers are needed for this product.
-					
-					HashMap<String, Tributary> tribs = new HashMap<String, Tributary>();
-					for (Iterator idsIt = ids.iterator(); idsIt.hasNext();) {
-						String id = (String) idsIt.next();
-						String server_key = id.split(Constants.NAME_SPACE_SPARATOR)[0];
-						Tributary trib = lasConfig.getTributary(server_key);
-						tribs.put(server_key, trib);
-					}
+
+				} else if (url.contains(Constants.PRODUCT_SERVER)) {
+					String xml = request.getParameter("xml");
+					LASUIRequest ui_request = new LASUIRequest();
 					try {
+						JDOMUtils.XML2JDOM(xml, ui_request);
+					} catch (IOException e) {
+						logerror(request, "Failed to parse XML request.", e);
+						return mapping.findForward("error");					
+					} catch (JDOMException e) {
+						logerror(request, "Failed to parse XML request.", e);
+						return mapping.findForward("error");
+					}
+					ArrayList<String> ids = ui_request.getDatasetIDs();
+
+					String op = ui_request.getOperation();
+					String service = "";
+					try {
+						service = lasConfig.getService(op);
+					} catch (JDOMException e) {
+						logerror(request, "Unable to find service name.", e);
+						return mapping.findForward("error");
+					}
+					if ( ids.size() == 0 || (service !=null && service.equals("template")) ) {
+						// Forward to the local server...
+						return mapping.findForward("LocalProductServer");
+					} else if ( ids.size() > 1 ) {
+						// Check to see how many servers are needed for this product.
+
+						HashMap<String, Tributary> tribs = new HashMap<String, Tributary>();
+						for (Iterator idsIt = ids.iterator(); idsIt.hasNext();) {
+							String id = (String) idsIt.next();
+							String server_key = id.split(Constants.NAME_SPACE_SPARATOR)[0];
+							Tributary trib = lasConfig.getTributary(server_key);
+							tribs.put(server_key, trib);
+						}
+
 						if ( tribs.size() == 1 ) {
 							String key = (String) tribs.keySet().toArray()[0];
 							// Multiple variables, but one server so send to the appropriate server.
@@ -244,8 +317,6 @@ public class Confluence extends LASAction {
 								return mapping.findForward(Constants.LOCAL_PRODUCT_SERVER_KEY);
 							} else {
 								String las_url = tribs.get(key).getURL();
-								
-								
 								if ( proxy.equalsIgnoreCase("full") ) {
 									return processRequest(mapping, request, response, lasConfig, las_url, key, openid);
 								} else {
@@ -257,19 +328,8 @@ public class Confluence extends LASAction {
 							// Add the special parameter to create product locally using remote analysis and send to local product server.
 							return new ActionForward(Constants.LOCAL_PRODUCT_SERVER+"?remote_las=true&xml="+xml);
 						}
-					} catch (JDOMException e) {
-						logerror(request, "Unable to fetch product.", e);
-					} catch (UnsupportedEncodingException e) {
-						logerror(request, "Unable to fetch product.", e);
-					} catch (HttpException e) {
-						logerror(request, "Unable to fetch product.", e);
-					} catch (IOException e) {
-						logerror(request, "Unable to fetch product.", e);
-					} catch (LASException e) {
-						logerror(request, "Unable to fetch product.", e);
-					}
-				} else {
-					try {
+					} else {
+
 						// Get the server key and forward to that server...
 						String server_key = ids.get(0).split(Constants.NAME_SPACE_SPARATOR)[0];
 						if ( server_key.equals(lasConfig.getBaseServerURLKey()) ) {
@@ -284,26 +344,17 @@ public class Confluence extends LASAction {
 							las_url = las_url + Constants.PRODUCT_SERVER + "?" + request.getQueryString();	
 							lasProxy.executeGetMethodAndStreamResult(las_url, response);
 						}
-					} catch (HttpException e) {
-						logerror(request, "Unable to fetch product.", e);
-					} catch (IOException e) {
-						logerror(request, "Unable to fetch product.", e);
-					} catch (JDOMException e) {
-						logerror(request, "Unable to fetch product.", e);
-					} catch (LASException e) {
-						logerror(request, "Unable to fetch product.", e);
 					}
-				}
-			} else {
-				String dsid = request.getParameter("dsid");
-				// All xpaths will come from the same data set for now.  :-)
-				// TODO cross-server data set comparisons
-				if ( dsid == null ) {
-					String[] xpaths = request.getParameterValues("xpath");
-					dsid = LASConfig.getDSIDfromXPath(xpaths[0]);
-				}
-				String server_key = dsid.split(Constants.NAME_SPACE_SPARATOR)[0];
-				try {
+				} else {
+					String dsid = request.getParameter("dsid");
+					// All xpaths will come from the same data set for now.  :-)
+					// TODO cross-server data set comparisons
+					if ( dsid == null ) {
+						String[] xpaths = request.getParameterValues("xpath");
+						dsid = LASConfig.getDSIDfromXPath(xpaths[0]);
+					}
+					String server_key = dsid.split(Constants.NAME_SPACE_SPARATOR)[0];
+
 					boolean local = server_key.equals(lasConfig.getBaseServerURLKey());
 					String las_url = null;
 					if ( !local ) {
@@ -314,13 +365,13 @@ public class Confluence extends LASAction {
 						if ( local ) {
 							return mapping.findForward(Constants.GET_DATACONSTRAINTS_KEY);
 						} else {
-						    las_url = las_url + Constants.GET_DATACONSTRAINTS + "?" + request.getQueryString();
+							las_url = las_url + Constants.GET_DATACONSTRAINTS + "?" + request.getQueryString();
 						}
 					} else if ( url.contains(Constants.GET_GRID) ) {
 						if ( local ) {	
 							return mapping.findForward(Constants.GET_GRID_KEY);
 						} else {
-						    las_url = las_url + Constants.GET_GRID + "?" + request.getQueryString();
+							las_url = las_url + Constants.GET_GRID + "?" + request.getQueryString();
 						}
 					} else if ( url.contains(Constants.GET_METADATA) ) {
 						if ( local ) {
@@ -338,39 +389,98 @@ public class Confluence extends LASAction {
 						if ( local ) {
 							return mapping.findForward(Constants.GET_REGIONS_KEY);
 						} else {
-						    las_url = las_url + Constants.GET_REGIONS + "?" + request.getQueryString();
+							las_url = las_url + Constants.GET_REGIONS + "?" + request.getQueryString();
 						}
 					} else if ( url.contains(Constants.GET_VARIABLES) ) {
 						if ( local ) {
 							return mapping.findForward(Constants.GET_VARIABLES_KEY);
 						} else {
-						   las_url = las_url + Constants.GET_VARIABLES + "?" + request.getQueryString();
+							las_url = las_url + Constants.GET_VARIABLES + "?" + request.getQueryString();
 						}
 					} else if ( url.contains(Constants.GET_VARIABLE) ) {
 						if ( local ) {
 							return mapping.findForward(Constants.GET_VARIABLE_KEY);
 						} else {
-						   las_url = las_url + Constants.GET_VARIABLE + "?" + request.getQueryString();
+							las_url = las_url + Constants.GET_VARIABLE + "?" + request.getQueryString();
 						}
 					} else if ( url.contains(Constants.GET_VIEWS) ) {
 						if ( local ) {
 							return mapping.findForward(Constants.GET_VIEWS_KEY);
 						} else {
-						    las_url = las_url + Constants.GET_VIEWS + "?" + request.getQueryString();
+							las_url = las_url + Constants.GET_VIEWS + "?" + request.getQueryString();
 						}
 					}
 					if ( !local ) {
-					    lasProxy.executeGetMethodAndStreamResult(las_url, response);
+						lasProxy.executeGetMethodAndStreamResult(las_url, response);
 					}					
-				} catch (HttpException e) {
-					logerror(request, "Unable to do local request.", e);
-				} catch (IOException e) {
-					logerror(request, "Unable to do local request.", e);
-				} catch (JDOMException e) {
-					logerror(request, "Unable to do local request.", e);
 				}
+			} catch (HttpException e) {
+				logerror(request, "Unable to do process request.", e);
+			} catch (IOException e) {
+				logerror(request, "Unable to do process request.", e);
+			} catch (JDOMException e) {
+				logerror(request, "Unable to do process request.", e);				
+			} catch (LASException e) {
+				logerror(request, "Unable to do process request.", e);
+			} catch (JSONException e) {
+				logerror(request, "Unable to do process request.", e);
 			}
 			return null;
+		}
+		private String findFirstVariable(Category category, LASConfig lasConfig, HttpServletRequest request) throws JDOMException, LASException, UnsupportedEncodingException, HttpException, IOException {
+			String dsid = null;		
+			if ( category.hasVariableChildrenAttribute() ) {
+				if ( category.getDataset() != null && category.getDataset().getID() != null ) {
+					return category.getDataset().getID();
+				}
+				return category.getChildren_DatasetID();
+			} else {
+				ArrayList<Category> cats = getCategories(category.getID(), lasConfig, request);
+				for (Iterator catIt = cats.iterator(); catIt.hasNext();) {
+					Category cat = (Category) catIt.next();
+					dsid = findFirstVariable(cat, lasConfig, request);
+				}
+			}
+			return dsid;
+		}
+		private ArrayList<Category> getCategories(String id, LASConfig lasConfig, HttpServletRequest request) throws UnsupportedEncodingException, HttpException, JDOMException, LASException, IOException {
+			ArrayList<Category> cats = new ArrayList<Category>();
+			String server_key = id.split(Constants.NAME_SPACE_SPARATOR)[0];
+			if ( server_key.equals(lasConfig.getBaseServerURLKey()) ) {
+				cats = lasConfig.getCategories(id);				
+			} else {
+				Tributary trib = lasConfig.getTributary(server_key);
+				String las_url = trib.getURL() + Constants.GET_CATEGORIES;					
+
+				if ( !id.endsWith(Constants.NAME_SPACE_SPARATOR+JDOMUtils.MD5Encode(trib.getName())) ) {
+					// If this is a request of the top level category for this server
+					// the id must be left off the request.  In this case it's not so
+					// add it on.
+					las_url = las_url + "?catid="+id+"&format=xml";
+				}
+				String xml = lasProxy.executeGetMethodAndReturnResult(las_url);
+				LASDocument catD = new LASDocument();
+				JDOMUtils.XML2JDOM(xml, catD);
+				Element catsE = catD.getRootElement();
+				List<Element> catsList = catsE.getChildren("category");
+				for (Iterator catsListIt = catsList.iterator(); catsListIt.hasNext();) {
+					Element c = (Element) catsListIt.next();
+					Category cat = new Category(c);
+					// If the remote LAS has no categories defined, then the category that comes back
+					// has no attributes, so we add them here to match the data set inside the category.
+					if ( cat.getID() == null ) {
+						cat.setID(cat.getChildren_DatasetID());
+						cat.setName(cat.getDataset().getName());
+						// The UI does not expect the data set to be contained in this response and does the wrong thing
+						// when it is included.
+						if ( cat.getDataset() != null ) {
+							cat.setDataset(null);
+						}
+					}
+					cats.add(cat);
+				}
+			}
+			return cats;
 		}
 		private ActionForward processRequest(ActionMapping mapping, HttpServletRequest request, HttpServletResponse response, LASConfig lasConfig, String las_url, String server_key, String openid) throws JDOMException, HttpException, IOException, LASException {
 			String requestXML = request.getParameter("xml");
