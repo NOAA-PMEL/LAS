@@ -67,6 +67,17 @@ public class Category extends Container implements CategoryInterface {
 			return null;
 		}
 	}
+	public void setDataset(Element dataset) {
+		if ( dataset == null ) {
+			// remove it...
+			Element existingDataset = element.getChild("dataset");
+			if ( existingDataset != null ) {
+				element.removeContent(existingDataset);
+			}
+		} else {
+			element.addContent(dataset);
+		}
+	}
 	public JSONObject toJSON() throws JSONException {
 		ArrayList<String> asArrays = new ArrayList<String>();
 		//asArrays.add("dataset");
@@ -137,5 +148,16 @@ public class Category extends Container implements CategoryInterface {
 		datasetSerializable.setProperties(ds.getPropertiesAsMap());
 		datasetSerializable.setVariablesSerializable(ds.getVariablesSerializable());
 		return datasetSerializable;
+	}
+	public String getChildren_DatasetID() {
+		return getAttributeValue("children_dsid");
+	}
+	public boolean hasVariableChildrenAttribute() {
+		String value = getAttributeValue("children");
+		if ( value.equals("variables") ) {
+			return true;
+		} else {
+			return false;
+		}
 	}
 }
