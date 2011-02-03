@@ -99,7 +99,7 @@
               </text>
            </message>
            <message type="startsWith" level="error">
-              <key>STOP -script mode</key>
+              <key>STOP</key>
               <text>
                 An error occurred in the service that was creating your product.
               </text>
