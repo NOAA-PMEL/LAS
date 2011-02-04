@@ -13,6 +13,7 @@ import gov.noaa.pmel.tmap.las.client.serializable.OptionSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.RegionSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.VariableSerializable;
 import gov.noaa.pmel.tmap.las.client.util.Util;
+import gov.noaa.pmel.tmap.las.confluence.Confluence;
 import gov.noaa.pmel.tmap.las.exception.LASException;
 import gov.noaa.pmel.tmap.las.jdom.LASConfig;
 import gov.noaa.pmel.tmap.las.jdom.LASDocument;
@@ -30,7 +31,9 @@ import gov.noaa.pmel.tmap.las.util.Tributary;
 import gov.noaa.pmel.tmap.las.util.Variable;
 import gov.noaa.pmel.tmap.las.util.View;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -40,6 +43,8 @@ import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 
 import org.apache.commons.httpclient.HttpException;
 import org.jdom.Element;
@@ -65,6 +70,8 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
 	 */
 	public CategorySerializable[] getTimeSeries() throws RPCException {
 		LASConfig lasConfig = (LASConfig) getServletContext().getAttribute(LASConfigPlugIn.LAS_CONFIG_KEY);	
+		
+
 		CategorySerializable[] cats = null;
 		// TODO Do we need a confluence implementation of this?
 		
@@ -142,32 +149,48 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
 		if ( lasConfig.allowsSisters() ) {
 			try {
 				if ( id == null ) {
-					Category local_cat = new Category(lasConfig.getTitle(), lasConfig.getTopLevelCategoryID()); 
-					// Do the local top level category
-					ArrayList<Category> local_cats = lasConfig.getCategories(id);
-					for (Iterator catIt = local_cats.iterator(); catIt.hasNext();) {
-						Category category = (Category) catIt.next();
-						local_cat.addCategory(category);
-					}
-					categories.add(local_cat);
-					// Do the remote categories...
+					if ( lasConfig.pruneCategories() ) {
+						HttpServletRequest request = this.getThreadLocalRequest();
+						HttpSession session = request.getSession();
+						String [] catids = (String[]) request.getSession().getAttribute("catid");
+						// The getUI class has to deal with these two things
+						String [] dsids = (String[]) request.getSession().getAttribute("dsid");
+						String varid = (String) request.getSession().getAttribute("varid");
 
-					ArrayList<Tributary> tributaries = lasConfig.getTributaries();
-					for (Iterator tribIt = tributaries.iterator(); tribIt.hasNext();) {
-						Tributary tributary = (Tributary) tribIt.next();
-						Category server_cat = new Category(tributary.getName(), tributary.getTopLevelCategoryID());
-						server_cat.setAttribute("remote_las", tributary.getURL()+Constants.GET_AUTH);
-						String url = tributary.getURL() + Constants.GET_CATEGORIES + "?format=xml";
-						String catxml = lasProxy.executeGetMethodAndReturnResult(url);
-						ArrayList<Category> trib_cats = JDOMUtils.getCategories(catxml);
-						for (Iterator tribCatsIt = trib_cats.iterator(); tribCatsIt.hasNext();) {
-							Category category = (Category) tribCatsIt.next();
-							server_cat.addCategory(category);
+						if ( catids != null ) {
+							// In this case the top level categories are these and only these...
+							for (int i = 0; i < catids.length; i++) {
+								categories.addAll(Confluence.getCategories(catids[i], lasConfig, request));
+							}
 						}
-						categories.add(server_cat);
-					}
+					} else {
+						Category local_cat = new Category(lasConfig.getTitle(), lasConfig.getTopLevelCategoryID()); 
+						// Do the local top level category
+						ArrayList<Category> local_cats = lasConfig.getCategories(id);
+						for (Iterator catIt = local_cats.iterator(); catIt.hasNext();) {
+							Category category = (Category) catIt.next();
+							local_cat.addCategory(category);
+						}
+						categories.add(local_cat);
+						// Do the remote categories...
 
-					Collections.sort(categories, new ContainerComparator("name"));
+						ArrayList<Tributary> tributaries = lasConfig.getTributaries();
+						for (Iterator tribIt = tributaries.iterator(); tribIt.hasNext();) {
+							Tributary tributary = (Tributary) tribIt.next();
+							Category server_cat = new Category(tributary.getName(), tributary.getTopLevelCategoryID());
+							server_cat.setAttribute("remote_las", tributary.getURL()+Constants.GET_AUTH);
+							String url = tributary.getURL() + Constants.GET_CATEGORIES + "?format=xml";
+							String catxml = lasProxy.executeGetMethodAndReturnResult(url);
+							ArrayList<Category> trib_cats = JDOMUtils.getCategories(catxml);
+							for (Iterator tribCatsIt = trib_cats.iterator(); tribCatsIt.hasNext();) {
+								Category category = (Category) tribCatsIt.next();
+								server_cat.addCategory(category);
+							}
+							categories.add(server_cat);
+						}
+
+						Collections.sort(categories, new ContainerComparator("name"));
+					}
 
 				} else {
 					if ( !id.contains(Constants.NAME_SPACE_SPARATOR) || lasConfig.isLocal(id) ) {
@@ -224,6 +247,28 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
 		}
 		return cats;	
 	}
+//	public Map<String, String> getEnembleMembers(String[] dsID) throws RPCException {
+//		LASConfig lasConfig = (LASConfig) getServletContext().getAttribute(LASConfigPlugIn.LAS_CONFIG_KEY);
+//		Map<String, String> members = null;
+//		if ( lasConfig.allowsSisters() ) {
+//			// Group the dsIDS by the node where they reside.
+//			
+//			// Get the local names.
+//			
+//			// Fire a request to each host to get the names that belong on the remote host
+//			
+//			// Collect the lot into a single Map and return the result
+//		} else {
+//			try {
+//				members = lasConfig.getEnsembleMembers(dsID);
+//			} catch (JDOMException e) {
+//				throw new RPCException(e.getMessage());
+//			} catch (LASException e) {
+//				throw new RPCException(e.getMessage());
+//			}
+//		}
+//		return members;
+//	}
 	public GridSerializable getGrid(String dsID, String varID) throws RPCException {
 		return getGridSerializable(dsID, varID);
 	}
