@@ -27,6 +27,9 @@
           <action path="/getGrid" type="gov.noaa.pmel.tmap.las.confluence.Confluence">
    	       	 <forward name="localGetGrid" path="/localGetGrid.do"/>
           </action>
+          <action path="/getDatasets" type="gov.noaa.pmel.tmap.las.confluence.Confluence">
+   	       	 <forward name="localGetDatasets" path="/localGetDatasets.do"/>
+          </action>
           <action path="/getOperations" type="gov.noaa.pmel.tmap.las.confluence.Confluence">
               <forward name="localGetOperations" path="/localGetOperations.do"/>
           </action>
@@ -42,6 +45,13 @@
           <action path="/getDataConstraints" type="gov.noaa.pmel.tmap.las.confluence.Confluence">
               <forward name="localGetDataConstraints" path="/localGetDataConstraints.do"/>
           </action>
+          <action path="/getVariables" type="gov.noaa.pmel.tmap.las.confluence.Confluence">
+              <forward name="localGetVariables" path="/localGetVariables.do"/>
+          </action>
+          <action path="/getUI" type="gov.noaa.pmel.tmap.las.confluence.Confluence">
+              <forward name="localGetUI" path="/localGetUI.do"/>
+              <forward name="lazy_start" path="/productserver/templates/lazy_start.vm" redirect="false"/>
+          </action>
           
           <action path="/LocalProductServer" name="progress" type="gov.noaa.pmel.tmap.las.product.server.ProductServerAction">
 			<forward name="error" path="/productserver/templates/error.vm" redirect="false" />
@@ -56,16 +66,18 @@
           <action path="/localGetViews" type="gov.noaa.pmel.tmap.las.ui.GetViews" />
           <action path="/localGetGrid" type="gov.noaa.pmel.tmap.las.ui.GetGrid" />
           <action path="/localGetOperations" type="gov.noaa.pmel.tmap.las.ui.GetOperations" />
+          <action path="/localGetDatasets" type="gov.noaa.pmel.tmap.las.ui.GetDatasets" />
           <action path="/localGetOptions" type="gov.noaa.pmel.tmap.las.ui.GetOptions" />
           <action path="/localGetCategories" type="gov.noaa.pmel.tmap.las.ui.GetCategories" />
           <action path="/localGetVariable" type="gov.noaa.pmel.tmap.las.ui.GetVariable" />
           <action path="/getFullCategories" type="gov.noaa.pmel.tmap.las.ui.GetFullCategories" />
-          <action path="/getVariables" type="gov.noaa.pmel.tmap.las.ui.GetVariables" />
+          <action path="/localGetVariables" type="gov.noaa.pmel.tmap.las.ui.GetVariables" />
           <action path="/getVariable" type="gov.noaa.pmel.tmap.las.ui.GetVariable" />
           <action path="/getFullVariables" type="gov.noaa.pmel.tmap.las.ui.GetFullVariables"/>
           <action path="getFullDataset" type="gov.noaa.pmel.tmap.las.ui.GetFullDataset"/>
           <action path="/localGetRegions" type="gov.noaa.pmel.tmap.las.ui.GetRegions" />
           <action path="/localGetDataConstraints" type="gov.noaa.pmel.tmap.las.ui.GetDataConstraints" />
+          <action path="/localGetUI" type="gov.noaa.pmel.tmap.las.ui.GetUI"/>
            -->
           
          <!--  End of definitions for confluence server. -->
