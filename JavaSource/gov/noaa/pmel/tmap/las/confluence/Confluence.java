@@ -186,12 +186,6 @@ public class Confluence extends LASAction {
 							String [] dsids = (String[]) request.getSession().getAttribute("dsid");
 							String varid = (String) request.getSession().getAttribute("varid");
 							
-							request.getSession().removeAttribute("catid");
-							request.getSession().removeAttribute("dsid");
-							request.getSession().removeAttribute("varid");
-							
-							// TODO this is working, but the form of the categories coming out of the toJSON are not quite right.
-
 							if ( catids != null ) {
 								// In this case the top level categories are these and only these...
 								for (int i = 0; i < catids.length; i++) {
@@ -445,7 +439,7 @@ public class Confluence extends LASAction {
 			}
 			return dsid;
 		}
-		private ArrayList<Category> getCategories(String id, LASConfig lasConfig, HttpServletRequest request) throws UnsupportedEncodingException, HttpException, JDOMException, LASException, IOException {
+		public static ArrayList<Category> getCategories(String id, LASConfig lasConfig, HttpServletRequest request) throws UnsupportedEncodingException, HttpException, JDOMException, LASException, IOException {
 			ArrayList<Category> cats = new ArrayList<Category>();
 			String server_key = id.split(Constants.NAME_SPACE_SPARATOR)[0];
 			if ( server_key.equals(lasConfig.getBaseServerURLKey()) ) {
