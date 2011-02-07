@@ -38,6 +38,7 @@ public class Constants {
 	public static final String GET_VARIABLE_KEY = "localGetVariable";
 	public static final String GET_VIEWS_KEY = "localGetViews";	
 	public static final String GET_AUTH_KEY = "auth";	
+	public static final String CATEGORIES_REQUIRED_KEY = "categories_required";
 	
 	public static final String GE_OP_ID = "GE";
 	public static final String DOWNLOAD_OP_ID = "Interactive_Download"; // The id of the interactive download operation.
