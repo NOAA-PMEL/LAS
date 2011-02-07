@@ -145,9 +145,27 @@ public class Confluence extends LASAction {
 						}
 						if ( dsids != null && dsids.length > 0 ) {
 							request.getSession().setAttribute("dsid", dsids);
+							StringBuilder q = new StringBuilder("localGetUI.do?dsid="+dsids[0]);
+							for (int i = 1; i < dsids.length; i++) {
+								q.append("&dsid="+dsids[i]);
+							}
+							if ( varid != null ) {
+								q.append("&varid="+varid);
+							}
+							response.sendRedirect(q.toString());
 						}
-						if ( varid != null ) {
+						if ( dsids != null && varid != null ) {
 							request.getSession().setAttribute("varid", varid);
+							request.getSession().setAttribute("dsid", dsids);
+							StringBuilder q = new StringBuilder("localGetUI.do?dsid="+dsids[0]);
+							for (int i = 1; i < dsids.length; i++) {
+								q.append("&dsid="+dsids[i]);
+							}
+							q.append("&varid="+varid);
+							response.sendRedirect(q.toString());
+						}
+						if (catids == null && dsids == null ) {
+							return mapping.findForward(Constants.CATEGORIES_REQUIRED_KEY);
 						}
 					} else {
 						response.sendRedirect("localGetUI.do");
