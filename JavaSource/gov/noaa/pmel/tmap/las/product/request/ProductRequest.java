@@ -349,7 +349,7 @@ public class ProductRequest {
                                         	String g = "g"+view;
                                         	if (gridTo.isAnalysis()) {
                                         		StringBuffer jnl = gridTo.getJnl();
-                                        		jnl.append("_cr_letdeq1 "+var+"_"+var_count+"_transformed="+var+"_2[d="+dataset_number+","+g+"="+gridTo.getVar()+"[d=1]]}");
+                                        		jnl.append("_cr_letdeq1 "+var+"_"+var_count+"_transformed="+var+"_2[d="+dataset_number+","+g+"="+gridTo.getVar()+"[d=1]]_cr_ATTRCMD "+var+" "+var+"_"+var_count+"_transformed}");
                                         		// Get the original URL for the gridTo data set and append the new combined analysis and regrid URL.
                                         		String expr = URLEncoder.encode("_expr_{"+encoded+"}{"+jnl.toString(), "UTF-8");
                                         		String comboURL = lasConfig.getFTDSURL(gridTo.getVarXPath())+expr;                                       			
@@ -360,7 +360,7 @@ public class ProductRequest {
                                         	} else {    
                                         		StringBuffer jnl = gridTo.getJnl();
                                         		gridTo.setVar(gridTo.getVar());
-                                                jnl.append("letdeq1 "+var+"_"+var_count+"_transformed="+var+"_2[d="+dataset_number+","+g+"="+gridTo.getVar()+"[d=1]]");
+                                                jnl.append("letdeq1 "+var+"_"+var_count+"_transformed="+var+"_2[d="+dataset_number+","+g+"="+gridTo.getVar()+"[d=1]]_cr_ATTRCMD "+var+" "+var+"_"+var_count+"_transformed");
                                                 expression = URLEncoder.encode("_expr_{"+encoded+"}{"+jnl.toString()+"}", "UTF-8");
                                                 data.setAttribute("url", gridTo.getURL()+expression);
                                         	}
@@ -417,7 +417,7 @@ public class ProductRequest {
                                     		gridTo.setURL(gridTo.getData().getAttributeValue("url"));
                                     	} else {    
                                     		var = data.getAttributeValue("var");
-                                    		jnl.append("_cr_letdeq1 "+var+"_"+var_count+"_transformed="+var+"_2[d="+dataset_number+","+g+"="+gridTo.getVar()+"[d=1]]");
+                                    		jnl.append("_cr_letdeq1 "+var+"_"+var_count+"_transformed="+var+"_2[d="+dataset_number+","+g+"="+gridTo.getVar()+"[d=1]]_cr_ATTRCMD "+var+" "+var+"_"+var_count+"_transformed");
                                     		expression = URLEncoder.encode("_expr_{"+encoded+"}"+"{"+jnl.toString()+"}", "UTF-8");
                                     		data.setAttribute("url", gridTo.getURL()+expression);
                                     		data.setAttribute("var", var+"_"+var_count+"_transformed");
@@ -837,7 +837,7 @@ public class ProductRequest {
             jnl.append("let masked_"+var+"="+var+rename_suffix+"[d="+var_count+"]*analysis_mask_cr_");
             jnl.append("letdeq1 "+var+"_"+var_count+"_transformed=masked_"+var+"_2[d="+dset+grid+"]_cr_");
         } else {
-            jnl.append("letdeq1 "+var+"_"+var_count+"_transformed="+var+rename_suffix+"[d="+dset+grid+"]");
+            jnl.append("letdeq1 "+var+"_"+var_count+"_transformed="+var+rename_suffix+"[d="+dset+grid+"]_cr_ATTRCMD "+var+" "+var+"_"+var_count+"_transformed");
         }
 
         String fdsURL = lasConfig.getFTDSURL(varXPath);
