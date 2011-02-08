@@ -5,7 +5,7 @@
  * conditions or restrictions in its use, it is expected that appropriate
  * credit be given to its author and to the National Oceanic and Atmospheric
  * Administration should the software be included by the recipient as an
- * element in other product development. 
+ * element in other product development.
  */
 package gov.noaa.pmel.tmap.las.jdom;
 
@@ -213,15 +213,15 @@ public class LASConfig extends LASDocument {
      * @return the combinations
      */
     private static ArrayList<String> combo(String prefix, String s) {
-        ArrayList<String> comboList = new ArrayList<String>(); 
-        
+        ArrayList<String> comboList = new ArrayList<String>();
+
         if (!prefix.equals("")) {
             comboList.add(prefix);
         }
-        
-        if ( s.equals("") ) {  
+
+        if ( s.equals("") ) {
             return comboList;
-        } 
+        }
         for ( int i = 0; i < s.length(); i++ ) {
             comboList.addAll(combo(prefix + s.charAt(i), s.substring(i+1)));
         }
@@ -247,7 +247,7 @@ public class LASConfig extends LASDocument {
     		for (Iterator varsIt = vars.iterator(); varsIt.hasNext();) {
     			Variable variable = (Variable) varsIt.next();
     			String url = getFullDataObjectURL(variable.getDSID(), variable.getID());
-    			if ( !url.equals("") ) {						
+    			if ( !url.equals("") ) {
     				if ( url.startsWith(data_url) || url.endsWith(data_url) ) {
     					// matches the data set, but not the variable...
     					return "dsid="+category.getID()+"&varid="+variable.getID();
@@ -281,7 +281,7 @@ public class LASConfig extends LASDocument {
         for (Iterator datasetsElementIt = datasetsElements.iterator(); datasetsElementIt.hasNext();) {
             Element datasetsE = (Element) datasetsElementIt.next();
             List datasets = datasetsE.getChildren("dataset");
-            
+
             for (Iterator datasetIt = datasets.iterator(); datasetIt.hasNext();) {
                 HashMap<String, String> jnls = new HashMap<String, String>();
                 Element dataset = (Element) datasetIt.next();
@@ -307,12 +307,12 @@ public class LASConfig extends LASDocument {
         return testURLs;
     }
     /**
-     * Take F-TDS server URL and data directory and build the F-TDS URLs for each variable. 
+     * Take F-TDS server URL and data directory and build the F-TDS URLs for each variable.
      * @param fds_base the base URL of the F-TDS server http://server:port/thredds/dodsC
      * @param fds_dir the directory into which the F-TDS journal files will be written
      * @throws LASException
      * @throws JDOMExcption
-     * @throws IOFoundException 
+     * @throws IOFoundException
      */
     public void addFDS(String fds_base, String fds_dir) throws LASException, JDOMException, IOException {
         File datadir = new File(fds_dir);
@@ -333,7 +333,7 @@ public class LASConfig extends LASDocument {
         for (Iterator datasetsElementIt = datasetsElements.iterator(); datasetsElementIt.hasNext();) {
             Element datasetsE = (Element) datasetsElementIt.next();
             List datasets = datasetsE.getChildren("dataset");
-            
+
             for (Iterator datasetIt = datasets.iterator(); datasetIt.hasNext();) {
                 HashMap<String, String> jnls = new HashMap<String, String>();
                 Element dataset = (Element) datasetIt.next();
@@ -364,18 +364,18 @@ public class LASConfig extends LASDocument {
                                 key = url;
                             }
                             if ( key.startsWith("http://") ) {
-                                key = key.substring(6,key.length());                               
-                            } 
+                                key = key.substring(6,key.length());
+                            }
                             key = key.replaceAll("/","_");
                             key = key.replaceAll(":","_");
-                            
+
                             if ( key.startsWith("_") ) {
                             	key = key.substring(1,key.length());
                             }
-                            
+
                             if ( !jnls.containsKey(key) ) {
-                                StringBuffer jnl = new StringBuffer(); 
-                                if ( init != null && !init.equals("") ) {  
+                                StringBuffer jnl = new StringBuffer();
+                                if ( init != null && !init.equals("") ) {
                                 	jnl.append("DEFINE SYMBOL data_url \\\""+url+"\\\"\n");
                                 	jnl.append("DEFINE SYMBOL data_var "+var+"\n");
                                     jnl.append("GO "+init+"\n");
@@ -407,8 +407,8 @@ public class LASConfig extends LASDocument {
     /**
      * Descends the dataset and variable tree and set the grid_type attribute
      * if it is not already set.
-     * @throws LASException 
-     * @throws JDOMException 
+     * @throws LASException
+     * @throws JDOMException
      */
     public void addGridType() throws LASException, JDOMException {
         Element root = getRootElement();
@@ -416,7 +416,7 @@ public class LASConfig extends LASDocument {
         if ( version != null && !version.contains("7.")) {
             throw new LASException("XML is not version 7.0 or above.  Try convertToSeven() first.");
         }
-       
+
         List datasetsElements = root.getChildren("datasets");
         for (Iterator dseIt = datasetsElements.iterator(); dseIt.hasNext();) {
             Element datasetsE = (Element) dseIt.next();
@@ -441,8 +441,8 @@ public class LASConfig extends LASDocument {
      * Adds attributes to all variables that indicate whether or not the variable
      * has a range or a point in the definition of each axis.  Must be a version
      * 7.0 style document before this method is invoked.
-     * @throws LASException 
-     * @throws JDOMException 
+     * @throws LASException
+     * @throws JDOMException
      */
     public void addIntervalsAndPoints() throws LASException, JDOMException {
         Element root = getRootElement();
@@ -474,8 +474,8 @@ public class LASConfig extends LASDocument {
                         		gridE.setAttribute("IDREF", grid.getID());
                         		variable.addContent(gridE);
                         		setPointsAndIntervals(variable, grid);
-                        	}                        	
-                        } else {                      	
+                        	}
+                        } else {
                         	Grid grid = getGrid(dataset.getAttributeValue("ID"), variable.getAttributeValue("ID"));
                         	setPointsAndIntervals(variable, grid);
                         }
@@ -499,7 +499,7 @@ public class LASConfig extends LASDocument {
     			List v = taxis.getVerticies();
     			size = v.size();
     		}
-    		if ( size == 1 ) {				
+    		if ( size == 1 ) {
     			points[3] = "t";
     		} else if ( size > 1 ) {
     			points[3] = "t";
@@ -554,7 +554,7 @@ public class LASConfig extends LASDocument {
     	}
     	if ( existingIntervals == null ) {
     		variable.setAttribute("intervals", intervals[0]+intervals[1]+intervals[2]+intervals[3]);
-    	}    	
+    	}
     }
 
     /**
@@ -565,7 +565,7 @@ public class LASConfig extends LASDocument {
     private void addTimeAxisAttributes(Element axis) throws LASException {
         Element arange = axis.getChild("arange");
         if (arange == null) {
-                            
+
             List v = axis.getChildren("v");
             for (Iterator vIt = v.iterator(); vIt.hasNext();) {
                 Element vE = (Element) vIt.next();
@@ -574,21 +574,21 @@ public class LASConfig extends LASDocument {
                     String content = vE.getTextTrim();
                     vE.setAttribute("label", content);
                 }
-                
+
             }
             Element v0 = (Element) v.get(0);
             String tlo = v0.getTextTrim();
             Element vN = (Element) v.get(v.size()-1);
             String thi = vN.getTextTrim();
-            
+
             axis.setAttribute("lo", tlo);
             axis.setAttribute("hi", thi);
             axis.setAttribute("display_type", "menu");
-            
+
         } else {
-            
+
             axis.setAttribute("display_type", "widget");
-            String tlo = arange.getAttributeValue("start");                   
+            String tlo = arange.getAttributeValue("start");
             String units = axis.getAttributeValue("units");
             double size = Double.valueOf(arange.getAttributeValue("size")).doubleValue();
             double step = Double.valueOf(arange.getAttributeValue("step")).doubleValue();
@@ -605,13 +605,13 @@ public class LASConfig extends LASDocument {
                 }
                 if (found) break;
             }
-            
+
             if ( !found ) {
                 throw new LASException("Time format for "+tlo+" could not be parsed.");
             }
-            
+
             DateTimeFormatter longfmt = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss").withZone(DateTimeZone.UTC);
-            
+
             axis.setAttribute("lo", lodt.toString(longfmt));
             DateTime hidt = new DateTime();
             if ( units.contains("hour") ) {
@@ -621,7 +621,7 @@ public class LASConfig extends LASDocument {
                 axis.setAttribute("yearNeeded", "true");
                 int hours = (int) Math.round((size-1)*step);
                 int minuteInterval = (int) Math.round(step*60.);
-                axis.setAttribute("minuteInterval", String.valueOf(minuteInterval) );                       
+                axis.setAttribute("minuteInterval", String.valueOf(minuteInterval) );
                 hidt = lodt.plus(Period.hours(hours));
                 axis.setAttribute("hi", hidt.toString(longfmt));
             } else if ( units.contains("day") ) {
@@ -644,13 +644,13 @@ public class LASConfig extends LASDocument {
                 axis.setAttribute("hourNeeded", "false");
                 axis.setAttribute("dayNeeded", "false");
                 axis.setAttribute("monthNeeded", "false");
-                axis.setAttribute("yearNeeded", "true");                        
+                axis.setAttribute("yearNeeded", "true");
                 // This is the number of years we need to add
                 int years = (int) Math.round((size-1)*step);
                 hidt = lodt.plus(Period.years(years));
                 axis.setAttribute("hi", hidt.toString(longfmt));
             }
-            
+
             String modulo = axis.getAttributeValue("modulo");
             String climatology = axis.getAttributeValue("climatology");
             if ( modulo != null && modulo.equals("true") ) {
@@ -659,41 +659,41 @@ public class LASConfig extends LASDocument {
             if ( climatology != null && climatology.equals("true") ) {
             	axis.setAttribute("yearNeeded", "false");
             }
-            
+
         }
-        
+
     }
     /**
      * @param fdsURL
      * @param analysis_axes
      * @param jsessionid
-     * @throws JDOMException 
+     * @throws JDOMException
      * We aren't going to do this here.  We're going to keep a session object with the user defined variables.
     public void addAnalysisVariables(Variable var, ArrayList<String> analysis_axes, String jsessionid) throws JDOMException {
-        
+
         Grid grid = getGrid(var.getDSID(), var.getAttributeValue("orig_var_id"));
         Grid analysis_grid = (Grid) grid.clone();
-        
+
         for (Iterator aaIt = analysis_axes.iterator(); aaIt.hasNext();) {
-            String analysis_axis_type = (String) aaIt.next();           
+            String analysis_axis_type = (String) aaIt.next();
             analysis_grid.removeAxis(analysis_axis_type);
-        }  
-        
+        }
+
         analysis_grid.setID( analysis_grid.getID()+"_" +var.getName() + "_" + jsessionid );
-        
+
         var.setGridID(analysis_grid.getID());
-        
-        if ( !containsVariable( var.getDSID(), var.getID() ) ) {        
+
+        if ( !containsVariable( var.getDSID(), var.getID() ) ) {
            getDatasetElement(var.getDSID()).getChild("variables").addContent(var.toElement());
         }
-        
+
         if ( !containsGrid ( analysis_grid.getID() ) ) {
            getRootElement().getChild("grids").addContent(analysis_grid.toElement());
         }
-        
+
         System.out.println(this.toString());
-        
-        
+
+
     } */
     /**
      * See if this config contains a grid with this ID
@@ -701,7 +701,7 @@ public class LASConfig extends LASDocument {
      * @return true if found; false if not
      */
     private boolean containsGrid(String grid_id) {
-        
+
         List gridsElements = getRootElement().getChildren("grids");
         for (Iterator gridsIt = gridsElements.iterator(); gridsIt.hasNext();) {
             Element gridsE = (Element) gridsIt.next();
@@ -722,7 +722,7 @@ public class LASConfig extends LASDocument {
      * @param dsid the data set
      * @param id the variable
      * @return
-     * @throws JDOMException 
+     * @throws JDOMException
      */
     private boolean containsVariable(String dsid, String var_id) throws JDOMException {
     	// Could be done with getElementByXPath, no?
@@ -739,14 +739,14 @@ public class LASConfig extends LASDocument {
     }
     /**
      * Converts to XML that can be validated against a schema, or returns if it detects that XML is already "Version 7".
-     * @throws JDOMException 
-     * @throws UnsupportedEncodingException 
+     * @throws JDOMException
+     * @throws UnsupportedEncodingException
      *
      */
     public void convertToSeven() throws JDOMException, UnsupportedEncodingException {
         Element root = getRootElement();
         String version = root.getAttributeValue("version");
-        
+
         Set<String> datasetsProcessed = new HashSet<String>();
         Set<String> gridsProcessed = new HashSet<String>();
         Set<String> axesProcessed = new HashSet<String>();
@@ -754,7 +754,7 @@ public class LASConfig extends LASDocument {
         List<String> duplicateDatasets = new ArrayList<String>();
         List<String> duplicateGrids = new ArrayList<String>();
         List<String> duplicateAxes = new ArrayList<String>();
-        
+
         if ( version != null && version.contains("7.") && !allowsSisters()) {
             return;
         }
@@ -772,7 +772,7 @@ public class LASConfig extends LASDocument {
                      * If there are other names that must be ignored, the must be
                      * added here and below...
                      */
-                    
+
                     if ( !dataset.getName().equals("properties") &&
                     	 !dataset.getName().equals("documentation") &&
                     	 !dataset.getName().equals("contributor")) {
@@ -824,7 +824,7 @@ public class LASConfig extends LASDocument {
                     								List<Element> varRef = var.getChildren("link");
                     								for (Iterator varRefIt = varRef.iterator(); varRefIt.hasNext();) {
                     									Element element = (Element) varRefIt.next();
-                    									String VARID = element.getAttributeValue("match");											
+                    									String VARID = element.getAttributeValue("match");
                     									VARID = VARID.substring(VARID.lastIndexOf("/")+1);
                     									element.setName("variable");
                     									element.removeAttribute("match");
@@ -867,7 +867,7 @@ public class LASConfig extends LASDocument {
                     		} else {
                     			duplicateDatasets.add(dataset.getAttributeValue("ID"));
                     		}
-                    	
+
                     	}
                     } else if ( dataset.getName().equals("properties") ) {
                         dataset.setContent(LASDocument.convertProperties(dataset));
@@ -904,10 +904,10 @@ public class LASConfig extends LASDocument {
                     		duplicateGrids.add(grid.getAttributeValue("ID"));
                     	}
                     }
-                }               
+                }
             } else if (child.getName().equalsIgnoreCase("axes")) {
-                List axes = child.getChildren();        
-                for (Iterator axesIt = axes.iterator(); axesIt.hasNext();) {                    
+                List axes = child.getChildren();
+                for (Iterator axesIt = axes.iterator(); axesIt.hasNext();) {
                 	Element axis = (Element) axesIt.next();
                 	// If it does not have an ID assume it needs to be converted. Otherwise, ignore it.
                 	if ( axis.getAttributeValue("ID") == null ) {
@@ -926,7 +926,7 @@ public class LASConfig extends LASDocument {
                 				for (Iterator vIt = v.iterator(); vIt.hasNext();) {
                 					Element ve = (Element) vIt.next();
                 					String value = ve.getTextTrim();
-                					if ( value.equalsIgnoreCase("jan") || value.equalsIgnoreCase("feb") || 
+                					if ( value.equalsIgnoreCase("jan") || value.equalsIgnoreCase("feb") ||
                 							value.equalsIgnoreCase("mar") || value.equalsIgnoreCase("apr") ||
                 							value.equalsIgnoreCase("may") || value.equalsIgnoreCase("jun") ||
                 							value.equalsIgnoreCase("jul") || value.equalsIgnoreCase("aug") ||
@@ -956,8 +956,8 @@ public class LASConfig extends LASDocument {
             } else if ( child.getName().equalsIgnoreCase("properties")) {
                 child.setContent(LASDocument.convertProperties(child));
             } else if ( child.getName().equalsIgnoreCase("las_categories") ) {
-                List categories = child.getChildren("category"); 
-                setIDs(categories);                     
+                List categories = child.getChildren("category");
+                setIDs(categories);
             }
 
         }
@@ -1013,7 +1013,7 @@ public class LASConfig extends LASDocument {
     }
     /**
      * Helper method to recursively extract the options.
-     * @throws JDOMException 
+     * @throws JDOMException
      */
     public ArrayList<Option> extractOptions (String optionID) throws JDOMException {
         ArrayList<Option> options = new ArrayList<Option>();
@@ -1051,7 +1051,7 @@ public class LASConfig extends LASDocument {
      * @return the category element
      * @throws JDOMException
      */
-    private Element findCategory(String catid) throws JDOMException {      
+    private Element findCategory(String catid) throws JDOMException {
         CategoryFilter filter = new CategoryFilter(catid);
         Iterator catIt= getRootElement().getDescendants(filter);
         return (Element) catIt.next();
@@ -1061,7 +1061,7 @@ public class LASConfig extends LASDocument {
      * @return base url of the LAS server family.
      * @throws JDOMException
      */
-    
+
     public String getBaseServerURL() throws JDOMException {
         Element ops = getElementByXPath("/lasdata/operations");
         String server = ops.getAttributeValue("url");
@@ -1086,10 +1086,10 @@ public class LASConfig extends LASDocument {
     	} else {
     		return new ArrayList<DataConstraint>();
     	}
-    } 
+    }
     /**
      * Get any constraints from the named UI default.
-     * 
+     *
      * @param ui_default
      * @return the constraints
      * @throws JDOMException
@@ -1102,19 +1102,19 @@ public class LASConfig extends LASDocument {
     	for (Iterator consIt = cons.iterator(); consIt.hasNext();) {
     		// Get the reference to the constraint...
 			Element constraint = (Element) consIt.next();
-			
+
 		    String type = constraint.getAttributeValue("type");
 		    String name = constraint.getAttributeValue("name");
 		    String ID = constraint.getAttributeValue("ID");
 		    if ( type.equals("variable") ) {
 		    	DataConstraint vc = getVariableConstraint(dsID, varID);
-		    	
+
 		    	if ( name != null ) {
 		    	    vc.setName(name);
 		    	} else {
 		    		vc.setName("variable");
 		    	}
-		    	
+
 		    	if ( ID != null ) {
 		    		vc.setID(ID);
 		    	}
@@ -1175,7 +1175,7 @@ public class LASConfig extends LASDocument {
     	menu.setAttribute("type", "constraint");
 		menu.setAttribute("name","variable_"+dsID);
     	for (Iterator varIt = vars.iterator(); varIt.hasNext();) {
-			Variable var = (Variable) varIt.next();			
+			Variable var = (Variable) varIt.next();
 			Element item = new Element("item");
 			item.setAttribute("values", var.getID());
 			item.setText(var.getName());
@@ -1186,39 +1186,39 @@ public class LASConfig extends LASDocument {
     	menu.setAttribute("position", "ops");
     	menu.setAttribute("type", "constraint");
 		menu.setAttribute("name","variable_"+dsID);
-    	
+
 		Element item = new Element("item");
     	item.setAttribute("values",">=");
     	item.setText(">=");
     	menu.addContent(item);
-    	
+
     	item = new Element("item");
     	item.setAttribute("values",">");
     	item.setText(">");
     	menu.addContent(item);
-		
+
 		item = new Element("item");
     	item.setAttribute("values","=");
     	item.setText("=");
     	menu.addContent(item);
-    	
+
     	item = new Element("item");
     	item.setAttribute("values","!=");
     	item.setText("!=");
     	menu.addContent(item);
-    	
+
     	item = new Element("item");
     	item.setAttribute("values","<");
     	item.setText("<");
     	menu.addContent(item);
-    	
+
     	item = new Element("item");
     	item.setAttribute("values","<=");
     	item.setText("<=");
     	menu.addContent(item);
-    	
+
     	constraint.addContent(menu);
-    	
+
     	return new DataConstraint(constraint);
     }
     public CategorySerializable[] getCategorySerializable(ArrayList<Category> categories) throws LASException, JDOMException {
@@ -1259,7 +1259,7 @@ public class LASConfig extends LASDocument {
      * @param catid
      * @return
      * @throws JDOMException
-     * @throws LASException 
+     * @throws LASException
      */
     public ArrayList<Category> getCategories(String catid) throws JDOMException, LASException {
         ArrayList<Category> categories = new ArrayList<Category>();
@@ -1323,7 +1323,7 @@ public class LASConfig extends LASDocument {
                             cat_nokids.setAttribute(attr.getName(), attr.getValue());
                         }
                         List filters = cat.getChildren("filter");
-                        if ( filters.size() > 0 ) {  
+                        if ( filters.size() > 0 ) {
                         	Element filter = (Element)filters.get(0);
                         	List<Dataset> datasets = getDataset(filter);
                         	if ( datasets != null && datasets.size() > 0 ) {
@@ -1367,7 +1367,7 @@ public class LASConfig extends LASDocument {
                         }
                     }
                     categories.add(new Category(category_container));
-                }               
+                }
             } else {
                 // This config has no "categories", just datasets and variables.  Use them.
                 Element dataset = getDatasetElement(catid);
@@ -1384,21 +1384,21 @@ public class LASConfig extends LASDocument {
                 category.addContent(container_dataset);
                 categories.add(new Category(category));
             }
-        }           
+        }
         return categories;
     }
     /**
      * Get data access URL.  If fds is set to true, then the FDS URL will be
-     * returned in every case.  If the fds boolean is set to false, then the 
+     * returned in every case.  If the fds boolean is set to false, then the
      * actual OPeNDAP URL of the remote data set will be returned where available.
      * If no remote URL is available, the the FDS URL will be returned.
      * @param xpath the XPath of the variable
      * @param fds true if FDS URL is required
-     * @throws JDOMException 
-     * @throws LASException 
+     * @throws JDOMException
+     * @throws LASException
      */
     public String getDataAccessURL(String xpath, boolean fds) throws LASException, JDOMException {
-        String url = "";      
+        String url = "";
         String dataObjectURL = getDataObjectURL(xpath);
         if (dataObjectURL == null || dataObjectURL.equals("")) {
             return url;
@@ -1432,14 +1432,14 @@ public class LASConfig extends LASDocument {
     }
     /**
      * Get data access URL.  If fds is set to true, then the FDS URL will be
-     * returned in every case.  If the fds boolean is set to false, then the 
+     * returned in every case.  If the fds boolean is set to false, then the
      * actual OPeNDAP URL of the remote data set will be returned where available.
      * If no remote URL is available, the the FDS URL will be returned.
      * @param dsID the Dataset ID
      * @param varID the Variable ID
      * @param fds true if FDS URL is required
-     * @throws JDOMException 
-     * @throws LASException 
+     * @throws JDOMException
+     * @throws LASException
      */
     public String getDataAccessURL(String dsID, String varID, boolean fds) throws LASException, JDOMException {
         return getDataAccessURL("/lasdata/datasets/dataset[@ID='"+dsID+"']/variables/variable[@ID='"+varID+"']", fds);
@@ -1477,10 +1477,10 @@ public class LASConfig extends LASDocument {
     }
     /**
      * Returns the OPeNDAP ready data access URL for a particular variable via the XPath of the variable (strips off the #var)
-     * @param xpathValue The XPath of the variable 
+     * @param xpathValue The XPath of the variable
      * @return url The access ready URL OPeNDAP URL or filename.
-     * @throws JDOMException 
-     * @throws LASException 
+     * @throws JDOMException
+     * @throws LASException
      */
     public String getDataObjectURL(String xpathValue) throws LASException, JDOMException {
         String url = getFullDataObjectURL(xpathValue);
@@ -1556,7 +1556,7 @@ public class LASConfig extends LASDocument {
 												member.addContent(var);
 										    }
 										}
-									}										
+									}
 								}
 							}
 						}
@@ -1579,7 +1579,7 @@ public class LASConfig extends LASDocument {
         String name_equals = filter.getAttributeValue("equals");
         String tag_contains = filter.getAttributeValue("contains-tag");
         String tag_equals = filter.getAttributeValue("equals-tag");
-        
+
         if ( action.equals("apply-dataset") ) {
 
             List datasets = getRootElement().getChildren("datasets");
@@ -1604,16 +1604,16 @@ public class LASConfig extends LASDocument {
             List datasets = getRootElement().getChildren("datasets");
             Element container_dataset_element = null;
             for (Iterator datasetsIt = datasets.iterator(); datasetsIt.hasNext();) {
-                
+
                 Element datasetsE = (Element) datasetsIt.next();
                 List memberDatasets = datasetsE.getChildren("dataset");
-                
+
                 for (Iterator memberDSIt = memberDatasets.iterator(); memberDSIt.hasNext();) {
-                    Element dataset = (Element) memberDSIt.next();  
-                   
+                    Element dataset = (Element) memberDSIt.next();
+
                     	container_dataset_element = (Element) dataset.clone();
                     	container_dataset_element.removeChildren("variables");
-                    
+
                         List memberVariables = dataset.getChild("variables").getChildren("variable");
                         Element varsElementContainer = new Element("variables");
                         boolean hasVariable = false;
@@ -1625,7 +1625,7 @@ public class LASConfig extends LASDocument {
                             if ( (name_contains != null && name.contains(name_contains)) ||
                                  (name_equals != null && name.equals(name_equals)) ||
                                  (tag_contains != null && ID.contains(tag_contains)) ||
-                                 (tag_equals != null && ID.equals(tag_equals)) ) { 
+                                 (tag_equals != null && ID.equals(tag_equals)) ) {
                             	 varsElementContainer.addContent(container_variable);
                                  hasVariable = true;
                         }
@@ -1636,17 +1636,17 @@ public class LASConfig extends LASDocument {
                         dataset_list.add(container_dataset);
                     }
                 }
-                
+
             }
         }
         return dataset_list;
     }
-    
+
     /**
 	 * Get all of the attributes from the parent data set element.
 	 * @param varXPath the variable whose parent data set will be used
 	 * @return the attributes
-	 * @throws JDOMException 
+	 * @throws JDOMException
 	 */
 	public HashMap <String, String> getDatasetAttributes(String varXPath) throws JDOMException {
 	    HashMap<String, String> attrs = new HashMap<String, String>();
@@ -1655,7 +1655,7 @@ public class LASConfig extends LASDocument {
 	        // Throw away index 0 since the string has a leading "/".
 	        varXPath = "/"+parts[1]+"/"+parts[2]+"/dataset[@ID='"+parts[3]+"']/"+parts[4]+"/variable[@ID='"+parts[5]+"']";
 	    }
-	    
+
 	    Element variable = getElementByXPath(varXPath);
 	    Element dataset = variable.getParentElement().getParentElement();
 	    List attributes = dataset.getAttributes();
@@ -1673,7 +1673,7 @@ public class LASConfig extends LASDocument {
      * Get the &lt;dataset&gt; element from this config that matches this ID
      * @param dsid
      * @return
-     * @throws JDOMException 
+     * @throws JDOMException
      */
     private Element getDatasetElement(String dsid) throws JDOMException {
         String xPath = "/lasdata/datasets/dataset[@ID='"+dsid+"']";
@@ -1696,8 +1696,8 @@ public class LASConfig extends LASDocument {
     /**
      * Returns all the datasets as gov.noaa.pmel.tmap.las.util.Dataset objects.
      * @return ArrayList of dataset objects
-     * @throws LASException 
-     * @throws JDOMException 
+     * @throws LASException
+     * @throws JDOMException
      */
     public ArrayList<Category> getDatasets(boolean full) throws JDOMException, LASException {
         ArrayList<Category> datasets = new ArrayList<Category>();
@@ -1707,7 +1707,7 @@ public class LASConfig extends LASDocument {
             Element dataset = (Element) dsIt.next();
             Element ds_novars = (Element)dataset.clone();
             ds_novars.setName("category");
-            
+
             if ( full ) {
             	ArrayList<Variable> variables = getFullVariables(dataset.getAttributeValue("ID"));
             	ds_novars.getChild("variables").removeChildren("variable");
@@ -1725,26 +1725,26 @@ public class LASConfig extends LASDocument {
             	ArrayList<String> remove = new ArrayList<String>();
             	for (Iterator childIt = children.iterator(); childIt.hasNext();) {
             		Element child = (Element) childIt.next();
-            		if (!child.getName().equals("properties") && 
-            				!child.getName().equals("documentation") && 
+            		if (!child.getName().equals("properties") &&
+            				!child.getName().equals("documentation") &&
             				!child.getName().equals("contributor") ) {
-            			remove.add(child.getName());                  
+            			remove.add(child.getName());
             		}
-            	}     
+            	}
             	for (int i=0; i < remove.size(); i++) {
             		ds_novars.removeChild(remove.get(i));
-            	}          	
+            	}
             }
             ds_novars.setAttribute("children", "variables");
         	ds_novars.setAttribute("children_dsid", ds_novars.getAttributeValue("ID"));
-        	Category ds = new Category(ds_novars);                
+        	Category ds = new Category(ds_novars);
         	datasets.add(ds);
         }
         return datasets;
     }
     /**
      * Return all datasets as a single "datasets" element.
-     * 
+     *
      */
     public Element getDatasetsAsElement() {
         Element datasets = new Element("datasets");
@@ -1761,10 +1761,10 @@ public class LASConfig extends LASDocument {
     }
     /**
      * Get a &lt;dataset&gt; element base on the data set id
-     * @param dsID the id of the dataset 
+     * @param dsID the id of the dataset
      * @return the data set element
      * @throws JDOMException
-     * @throws LASException 
+     * @throws LASException
      */
     public Dataset getDataset(String dsID) throws JDOMException, LASException {
     	String xpathValue = "/lasdata/datasets/dataset[@ID='"+dsID+"']";
@@ -1788,7 +1788,7 @@ public class LASConfig extends LASDocument {
 			varE.removeChild("grid");  // Get rid of the old grid with just the IDREF and replace it with the grid and axes.
 			Grid grid = getGrid(var.getDSID(), var.getID());
 			varE.addContent((Element)grid.getElement().clone());
-		}    	
+		}
 		dataset.setVariables(clones);
 		return dataset;
     }
@@ -1873,7 +1873,7 @@ public class LASConfig extends LASDocument {
      * Returns the full data URL for a particular variable (as identified by its XPath) including the #var (netCDF variable name convention used by LAS)
      * @param xpathValue The XPath of the variable whose data access URL is desired
      * @return url The access URL (either a /path/path/filename#var or http://opendap_url#var).
-     * @throws JDOMException 
+     * @throws JDOMException
      * @throws LASException
      */
     public String getFullDataObjectURL(String xpathValue) throws LASException, JDOMException {
@@ -1899,7 +1899,7 @@ public class LASConfig extends LASDocument {
                 url = varURL;
             } else {
                 url = dsURL + varURL;
-            }         
+            }
         } else if ( varURL != null && dsURL == null ) {
             url = varURL;
         } else if ( varURL == null && dsURL != null ) {
@@ -1907,12 +1907,12 @@ public class LASConfig extends LASDocument {
         } else if ( varURL == null && dsURL == null ) {
             url = null;
         }
-        
+
         if ( url == null ) {
         	log.warn("URL for "+xpathValue+" is empty.");
         	url = "none";
         }
-        
+
         if (url.startsWith("file://")) {
             url = url.substring(6, url.length());
         }
@@ -1952,7 +1952,7 @@ public class LASConfig extends LASDocument {
         }
         return value;
     }
-    
+
     public HashMap<String, String> getGlobalPropertyGroupAsHashMap(String name) throws LASException {
     	HashMap<String, String> property_group_hash = new HashMap<String, String>();
     	Element properties = getRootElement().getChild("properties");
@@ -1973,7 +1973,7 @@ public class LASConfig extends LASDocument {
         }
     	return property_group_hash;
     }
-    
+
     /**
      * Get the grid of a variable from its XPath
      * @param varXPath
@@ -1991,13 +1991,13 @@ public class LASConfig extends LASDocument {
         ArrayList<Element> axes_list = new ArrayList<Element>();
         Element gridE = null;
         if (variable != null) {
-            String ID = variable.getChild("grid").getAttributeValue("IDREF");          
+            String ID = variable.getChild("grid").getAttributeValue("IDREF");
             Element gt = getElementByXPath("/lasdata/grids/grid[@ID='"+ID+"']");
             if ( gt == null ) return null;
-            gridE = (Element) gt.clone();          
-            List axes = gridE.getChildren("axis");           
+            gridE = (Element) gt.clone();
+            List axes = gridE.getChildren("axis");
             for (Iterator axisIt = axes.iterator(); axisIt.hasNext();) {
-                Element axis_ref = (Element) axisIt.next();                
+                Element axis_ref = (Element) axisIt.next();
                 String axisID = axis_ref.getAttributeValue("IDREF");
                 Element axisE = (Element) getElementByXPath("/lasdata/axes/axis[@ID='"+axisID+"']").clone();
                 String type = axisE.getAttributeValue("type");
@@ -2021,11 +2021,11 @@ public class LASConfig extends LASDocument {
     }
     /**
      * Get grid for a particular dataset and variable.
-     * 
+     *
      * @param dsid the id of the desired data set
      * @param varid the id if the desired variable
      * @return grid the Grid object with up to for Axes
-     * @throws JDOMException 
+     * @throws JDOMException
      */
     public Grid getGrid(String dsID, String varID) throws JDOMException, LASException {
         return getGrid("/lasdata/datasets/dataset[@ID='"+dsID+"']/variables/variable[@ID='"+varID+"']");
@@ -2034,16 +2034,16 @@ public class LASConfig extends LASDocument {
 	 * Get the grid_type for the variable (regular, scattered, ...)
 	 * @param dsID
 	 * @param varID
-	 * @throws JDOMException 
+	 * @throws JDOMException
 	 */
 	public String getGridType(String dsID, String varID) throws JDOMException {
 	    String grid_type="";
-	    
+
 	    // Try to get a variable with this ID:
-	    
+
 	    String varXPath = "/lasdata/datasets/dataset[@ID='"+dsID+"']/variables/variable[@ID='"+varID+"']";
 	    Element var = getElementByXPath(varXPath);
-	    
+
 	    // If it's null try to get a composite with this ID.
 	    if ( var == null ) {
 	    	varXPath = "/lasdata/datasets/dataset[@ID='"+dsID+"']/composite/variable[@ID='"+varID+"']";
@@ -2061,7 +2061,7 @@ public class LASConfig extends LASDocument {
      * Get hi value for a particular axis type for the specified variable
      * @param varpath XPath to the variable
      * @param type which axis x,y,z or t
-     * 
+     *
      */
     public String getHi(String type, String varpath) throws JDOMException {
         String hi = null;
@@ -2115,11 +2115,11 @@ public class LASConfig extends LASDocument {
         return new Institution(institution);
     }
 	/**
-     * Get lo value for a particular axis type for the specified variable.  If it's 
+     * Get lo value for a particular axis type for the specified variable.  If it's
      * the T axis you get a string with the low value, but you might want a TimeSelector instead.
      * @param varpath XPath to the variable
-     * @param type which axis x,y,z or t 
-     * 
+     * @param type which axis x,y,z or t
+     *
      */
     public String getLo(String type, String varpath) throws JDOMException {
         String lo = null;
@@ -2168,7 +2168,7 @@ public class LASConfig extends LASDocument {
 	 * @return datasetElement The same element with all of the new properites folded in to each variable.
 	 */
 	public Element getMergedProperties(Element dsE) {
-	    
+
 	    // The colleciton is a HashMap of HashMaps.
 	    // TODO these should be lists and loop through the list and combine any
 	    // stray property groups...
@@ -2179,10 +2179,10 @@ public class LASConfig extends LASDocument {
 	    // Same as above, plus the parent of the particular dataset tag is <datasets> and
 	    // the parent of that is <lasdata>
 	    Element globalPropsE = dsE.getParentElement().getParentElement().getParentElement().getParentElement().getChild("properties");
-	    
-	    
+
+
 	    HashMap<String, HashMap<String, String>> propertyGroups = propertiesToHashMap(globalPropsE);
-	    
+
 	    // If the group already exists any properties from this element
 	    // replace the properites from the "global" properties.
 	    if (datasetPropsE != null) {
@@ -2205,7 +2205,7 @@ public class LASConfig extends LASDocument {
 	                    group.put(propName, propValue);
 	                }
 	            }
-	            
+
 	            propertyGroups.put(propGroupE.getAttributeValue("type"), group);
 	        }
 	    }
@@ -2229,13 +2229,13 @@ public class LASConfig extends LASDocument {
 	                    group.put(propName, propValue);
 	                } else if (currentValue.equals("default")) {
 	                    group.put(propName, propValue);
-	                }                    
+	                }
 	            }
-	            
+
 	            propertyGroups.put(propGroupE.getAttributeValue("type"), group);
 	        }
 	    }
-	    
+
 	    Element properties = new Element("properties");
 	    Element dsGroupE = null;
 	    for (Iterator propertyGroupKeyIterator = propertyGroups.keySet()
@@ -2259,10 +2259,10 @@ public class LASConfig extends LASDocument {
 	        }
 	        properties.addContent(dsGroupE);
 	    }
-	    
+
 	    return properties;
 	}
-	
+
 	/**
 	 * Helper method to convert a "new" style properties element into a HashMap of property group hashes.
 	 * @param properties
@@ -2270,9 +2270,9 @@ public class LASConfig extends LASDocument {
 	 */
 	private HashMap<String, HashMap<String, String>> propertiesToHashMap(Element properties) {
 		HashMap<String, HashMap<String, String>> propertyGroups = new HashMap<String, HashMap<String, String>>();
-	    if (properties != null) {               
+	    if (properties != null) {
 	        // All children should be elements of the form <property_group type="name">
-	        List propGroups = properties.getChildren();                
+	        List propGroups = properties.getChildren();
 	        for (Iterator pgIt = propGroups.iterator(); pgIt.hasNext();) {
 	            Element propGroupE = (Element) pgIt.next();
 	            // All children should be elements of the form <property><name>thename</name><value>thevalue</value></property>
@@ -2298,7 +2298,7 @@ public class LASConfig extends LASDocument {
      * @return Element The varaible element with the properties merged into it.
      * @throws JDOMException
      */
- 
+
         public Element getMergedProperties(String xpathValue) throws JDOMException {
             /*
              * We know this is a variable XPath.  If it's "old style" fix it.
@@ -2312,7 +2312,7 @@ public class LASConfig extends LASDocument {
         }
     /**
 	 * Get operations for a data set and variable, either by the associated default or by the interval.
-	 * @throws JDOMException 
+	 * @throws JDOMException
 	 */
 	public ArrayList<Operation> getOperations(String view, String dsID, String varID) throws JDOMException {
 		ArrayList<Operation> operations = new ArrayList<Operation>();
@@ -2374,7 +2374,7 @@ public class LASConfig extends LASDocument {
 		if ( xpath.length == 1 ) {
 			operations.addAll(getOperations(view, xpath[0]));
 		} else {
-			
+
 			String ui_default = "";
 
 			for (int i = 0; i < xpath.length; i++) {
@@ -2391,7 +2391,7 @@ public class LASConfig extends LASDocument {
 					} else {
 						ui_default = current_ui_default;
 					}
-				} 
+				}
 			}
 			for (int i = 0; i < xpath.length; i++) {
 				operations.addAll(getOperations(view, xpath[i]));
@@ -2447,13 +2447,13 @@ public class LASConfig extends LASDocument {
 	 * Get the operations that are include with a particular UI default
 	 * @param ui_default
 	 * @return operations JSONObject with the operations that are defined for this "default".
-	 * @throws JDOMException 
+	 * @throws JDOMException
 	 */
 	public ArrayList<Operation> getOperationsByDefault(String view, String ui_default) throws JDOMException {
 		ArrayList<Operation> operations = new ArrayList<Operation>();
 		Element def = getUIDefault(ui_default);
 		if ( def != null ) {
-			Element map = getUIMap(def, "ops");               
+			Element map = getUIMap(def, "ops");
 			if (map != null) {
 				List ifmenusElements = map.getChildren("ifmenu");
 				for (Iterator ifmenusIt = ifmenusElements.iterator(); ifmenusIt
@@ -2464,7 +2464,7 @@ public class LASConfig extends LASDocument {
 					// TODO handle distinctions for comparison mode
 
 					String ifmenu_view = ifmenu.getAttributeValue("view");
-					
+
 					if ( ifmenu_view != null ) {
 						boolean match = false;
 						// This attribute can be a comma separated list...
@@ -2507,7 +2507,7 @@ public class LASConfig extends LASDocument {
 						}
 					}
 				}
-			}                
+			}
 		}
 		return operations;
 	}
@@ -2521,7 +2521,7 @@ public class LASConfig extends LASDocument {
 
 	    ArrayList<Operation> matchingOperations = new ArrayList<Operation>();
 	    List operationsElements = getRootElement().getChildren("operations");
-	    for (Iterator opsElementsIt = operationsElements.iterator(); opsElementsIt.hasNext();) {               
+	    for (Iterator opsElementsIt = operationsElements.iterator(); opsElementsIt.hasNext();) {
 	        Element opsElement = (Element) opsElementsIt.next();
 	        List opElements = opsElement.getChildren("operation");
 	        for (Iterator opIt = opElements.iterator(); opIt.hasNext(); ) {
@@ -2561,16 +2561,16 @@ public class LASConfig extends LASDocument {
 	                    matchingOperations.add(op);
 	                }
 	            }
-	        }                
+	        }
 	    }
 	    return matchingOperations;
 	}
     /**
      * Selects operations that use interval inputs on the axes listed in the view
-     * 
+     *
      * @param view a string containing an ordered subset of xyzt.
      * @return operations a list of operation elements that use this view
-     * @throws JDOMException 
+     * @throws JDOMException
      * @deprecated
      */
     public ArrayList<NameValuePair> getOperationsByView(String view) throws JDOMException {
@@ -2583,13 +2583,13 @@ public class LASConfig extends LASDocument {
         }
         return ops;
     }
-    
+
 
     /**
      * Returns the options associated with this option ID
      * @param optionID option ID
      * @return options the options for this id.
-     * @throws JDOMException 
+     * @throws JDOMException
      */
     public ArrayList<Option> getOptions(String optionID) throws JDOMException {
         ArrayList<Option> options = new ArrayList<Option>();
@@ -2601,7 +2601,7 @@ public class LASConfig extends LASDocument {
      * Returns the options associated with this operation ID
      * @param operationID operation ID
      * @return options the options for this operation.
-     * @throws JDOMException 
+     * @throws JDOMException
      */
     public ArrayList<Option> getOptionsByOperationID(String operationID) throws JDOMException {
     	ArrayList<Option> options = new ArrayList<Option>();
@@ -2637,11 +2637,18 @@ public class LASConfig extends LASDocument {
 	public String getOutputDir() {
 	    return this.getRootElement().getChildText("output_dir");
 	}
+	/**
+	 * Get the readonly attribute. This is for SOCAT and is assumed false if attribute is not present.
+	 * @return readonly attribute.
+	 */
+	public Boolean getReadonly() {
+		return Boolean.parseBoolean(this.getRootElement().getChildText("readonly"));
+    }
     /**
      * Get xy region for a particular variable
      * @param varpath XPath to variable
      * @return region ArrayList of NameValueBeans with x_lo, x_hi, y_lo and y_hi
-     * @throws JDOMException 
+     * @throws JDOMException
      */
     public ArrayList<NameValuePair> getRangeForXY(String varpath) throws JDOMException {
         ArrayList<NameValuePair> region = new ArrayList<NameValuePair>();
@@ -2700,13 +2707,13 @@ public class LASConfig extends LASDocument {
         }
         return region;
     }
-    
+
     /**
      * Get the pre-defined regions, by UI default based on the data set and variable.
      * @param dsID
      * @param varID
      * @return
-     * @throws JDOMException 
+     * @throws JDOMException
      */
     public ArrayList<Region> getRegions(String dsID, String varID) throws JDOMException {
     	ArrayList<Region> regions = new ArrayList<Region>();
@@ -2749,7 +2756,7 @@ public class LASConfig extends LASDocument {
         for (Iterator vseIt = variablesElements.iterator(); vseIt.hasNext();) {
             Element variablesElement = (Element) vseIt.next();
             List vars = variablesElement.getChildren("variable");
-            for (Iterator varIt = vars.iterator(); varIt.hasNext();) {             
+            for (Iterator varIt = vars.iterator(); varIt.hasNext();) {
                 Element variable = (Element) varIt.next();
                 String grid_type = variable.getAttributeValue("grid_type");
                 if (grid_type.equals("regular")) {
@@ -2764,21 +2771,21 @@ public class LASConfig extends LASDocument {
     /**
      * Get the URL of the product server.  This URL should be correct even if the
      * server is being proxied through Apache.
-     * @throws JDOMException 
+     * @throws JDOMException
      */
-    
+
     public String getServerURL() throws JDOMException {
         String server = "";
         Element ops = getElementByXPath("/lasdata/operations");
         server = ops.getAttributeValue("url");
         return server;
     }
-    
+
     /**
      * Get the name of the service based on the operation ID.
      * @param opID the ID of the operation
      * @return service the name of the service associated with this operation
-     * @throws JDOMException 
+     * @throws JDOMException
      */
     public String getService(String opID) throws JDOMException {
         String service = null;
@@ -2791,12 +2798,12 @@ public class LASConfig extends LASDocument {
         }
         return service;
     }
-       
+
     /**
      * Get time selector object the specified variable
-     * @param varpath XPath to the variable 
-     * @throws JDOMException 
-     * 
+     * @param varpath XPath to the variable
+     * @throws JDOMException
+     *
      */
     public TimeSelector getT(String varpath) throws JDOMException {
         TimeSelector t = new TimeSelector();
@@ -2834,12 +2841,12 @@ public class LASConfig extends LASDocument {
                     Element vN = (Element) v.get(v.size()-1);
                     String thi = vN.getTextTrim();
                     t.setLo(tlo);
-                    t.setCurrent_lo(tlo);                   
+                    t.setCurrent_lo(tlo);
                     if ( default_display != null && default_display.equals("last") ) {
                         t.setCurrent_hi(thi);
                     } else {
                         t.setCurrent_hi(tlo);
-                    }                    
+                    }
                     StateNameValueList vs = new StateNameValueList();
                     for (Iterator vIt = v.iterator(); vIt.hasNext();) {
                         Element vElement = (Element) vIt.next();
@@ -2852,7 +2859,7 @@ public class LASConfig extends LASDocument {
                     }
                 } else {
                     t.setType("widget");
-                    String tlo = arange.getAttributeValue("start");                   
+                    String tlo = arange.getAttributeValue("start");
                     String units = axis.getAttributeValue("units");
                     double size = Double.valueOf(arange.getAttributeValue("size")).doubleValue();
                     double step = Double.valueOf(arange.getAttributeValue("step")).doubleValue();
@@ -2875,7 +2882,7 @@ public class LASConfig extends LASDocument {
                         t.setYearNeeded(true);
                         int hours = (int) Math.round((size-1)*step);
                         int minuteInterval = (int) Math.round(step*60.);
-                        t.setMinuteInterval(minuteInterval);                       
+                        t.setMinuteInterval(minuteInterval);
                         hidt = lodt.plus(Period.hours(hours));
                         t.setHi(hidt.toString(longfmt));
                     } else if ( units.contains("day") ) {
@@ -2898,7 +2905,7 @@ public class LASConfig extends LASDocument {
                         t.setHourNeeded(false);
                         t.setDayNeeded(false);
                         t.setMonthNeeded(false);
-                        t.setYearNeeded(true);                        
+                        t.setYearNeeded(true);
                         double start = Double.valueOf(tlo).doubleValue();
                         int years = (int) Math.round(start + (size-1)*step);
                         hidt = lodt.plus(Period.years(years));
@@ -2908,7 +2915,7 @@ public class LASConfig extends LASDocument {
                         t.setCurrent_hi(hidt.toString(longfmt));
                     } else {
                         t.setCurrent_hi(lodt.toString(longfmt));
-                    } 
+                    }
                 }
             }
         }
@@ -2935,7 +2942,7 @@ public class LASConfig extends LASDocument {
                 return "output";
             }
         }
-        
+
         /**
          * Get the F-TDS URL for this variable
 		 * @param variable the variable element
@@ -2944,7 +2951,7 @@ public class LASConfig extends LASDocument {
 		 */
         public String getFTDSURL(Element variable) {
         	String ftds_url = "";
-        	if ( variable != null ) { 
+        	if ( variable != null ) {
         		ftds_url = variable.getAttributeValue("ftds_url");
         		if ( ftds_url != null ) {
         			return ftds_url;
@@ -2955,7 +2962,7 @@ public class LASConfig extends LASDocument {
         		return "";
         	}
         }
-        
+
         /**
          * Get the F-TDS URL for the variable specified by the XPath
 		 * @param varXPath the XPath of the variable
@@ -3001,23 +3008,23 @@ public class LASConfig extends LASDocument {
 		        return t;
 		    }
 		    List axes = grid.getChildren("axis");
-		    
+
 		    for (Iterator axIt = axes.iterator(); axIt.hasNext();) {
 		        Element axis = (Element) axIt.next();
 		        String axisID = axis.getAttributeValue("IDREF");
 		        axis = getElementByXPath("/lasdata/axes/axis[@ID='"+axisID+"']");
 		        String type = axis.getAttributeValue("type");
 		        if ( type.equals("t") ) {
-		            
+
 		            Element arange = axis.getChild("arange");
 		            if (arange == null) {
-		                                
+
 		                List v = axis.getChildren("v");
 		                Element v0 = (Element) v.get(0);
 		                String tlo = v0.getTextTrim();
 		                Element vN = (Element) v.get(v.size()-1);
 		                String thi = vN.getTextTrim();
-		                
+
 		                ArrayList<NameValuePair> vs = new ArrayList<NameValuePair>();
 		                for (Iterator vIt = v.iterator(); vIt.hasNext();) {
 		                    Element vElement = (Element) vIt.next();
@@ -3031,11 +3038,11 @@ public class LASConfig extends LASDocument {
 		                t.setLo(tlo);
 		                t.setHi(thi);
 		                t.setDisplay_type("menu");
-		                
+
 		            } else {
 		                t = new TimeAxis(axis);
 		                t.setDisplay_type("widget");
-		                String tlo = arange.getAttributeValue("start");                   
+		                String tlo = arange.getAttributeValue("start");
 		                String units = axis.getAttributeValue("units");
 		                double size = Double.valueOf(arange.getAttributeValue("size")).doubleValue();
 		                double step = Double.valueOf(arange.getAttributeValue("step")).doubleValue();
@@ -3052,11 +3059,11 @@ public class LASConfig extends LASDocument {
 		                    }
 		                    if (found) break;
 		                }
-		                
+
 		                if ( !found ) {
 		                    throw new LASException("Time format for "+tlo+" could not be parsed.");
 		                }
-		                
+
 		                t.setLo(lodt.toString(fmt));
 		                DateTime hidt = new DateTime();
 		                if ( units.contains("hour") ) {
@@ -3066,7 +3073,7 @@ public class LASConfig extends LASDocument {
 		                    t.setYearNeeded(true);
 		                    int hours = (int) Math.round((size-1)*step);
 		                    int minuteInterval = (int) Math.round(step*60.);
-		                    t.setMinuteInterval(minuteInterval);                       
+		                    t.setMinuteInterval(minuteInterval);
 		                    hidt = lodt.plus(Period.hours(hours));
 		                    t.setHi(hidt.toString(fmt));
 		                } else if ( units.contains("day") ) {
@@ -3089,7 +3096,7 @@ public class LASConfig extends LASDocument {
 		                    t.setHourNeeded(false);
 		                    t.setDayNeeded(false);
 		                    t.setMonthNeeded(false);
-		                    t.setYearNeeded(true);                        
+		                    t.setYearNeeded(true);
 		                    double start = Double.valueOf(tlo).doubleValue();
 		                    int years = (int) Math.round(start + (size-1)*step);
 		                    hidt = lodt.plus(Period.years(years));
@@ -3102,12 +3109,12 @@ public class LASConfig extends LASDocument {
 		}
         /**
 		 * Get time selector object the specified variable
-		 * @param varpath XPath to the variable 
-		 * @throws LASException 
-		 * 
+		 * @param varpath XPath to the variable
+		 * @throws LASException
+		 *
 		 */
 		public TimeAxis getTime(String varpath) throws JDOMException, LASException {
-		    
+
 		    /*
 		     * We know this is a variable XPath.  If it's "old style" fix it.
 		     */
@@ -3116,10 +3123,10 @@ public class LASConfig extends LASDocument {
 		        // Throw away index 0 since the string has a leading "/".
 		        varpath = "/"+parts[1]+"/"+parts[2]+"/dataset[@ID='"+parts[3]+"']/"+parts[4]+"/variable[@ID='"+parts[5]+"']";
 		    }
-		    
+
 		    Element variable = getElementByXPath(varpath);
 		    return getTime(variable);
-		    
+
 		}
         /**
 		 * Extracts the LAS title from the configuration
@@ -3427,10 +3434,10 @@ public class LASConfig extends LASDocument {
      * Returns a Variable object from a LAS XML variable Element.
      * @param variable - the varible element
      * @return var - the variable object
-     * 
+     *
      * Probably won't need this method!!
-     * 
-     * 
+     *
+     *
      *
     public Variable getVariable(Element variable) {
         List attributes = variable.getAttributes();
@@ -3447,9 +3454,9 @@ public class LASConfig extends LASDocument {
             } else {
                 exattrs.add(new NameValuePair(attr.getName(), attr.getValue()));
             }
-        }               
+        }
         var.setAttributes(exattrs);
-        Element propertiesE = variable.getChild("properties");               
+        Element propertiesE = variable.getChild("properties");
         if ( propertiesE != null ) {
             List groups = propertiesE.getChildren("property_group");
             HashMap<String, ArrayList<NameValuePair>> props = new HashMap<String, ArrayList<NameValuePair>>();
@@ -3469,7 +3476,7 @@ public class LASConfig extends LASDocument {
                 props.put(group_name, group_props);
             }
             var.setProperties(props);
-        }     
+        }
         Element grid = variable.getChild("grid");
         var.setGridID(grid.getAttributeValue("IDREF"));
         return var;
@@ -3533,7 +3540,7 @@ public class LASConfig extends LASDocument {
      * @param dsid
      * @param varids
      * @return
-     * @throws JDOMException 
+     * @throws JDOMException
      */
     public Variable getVectorVariable(String dsid, ArrayList<String> varids ) throws JDOMException {
     	ArrayList<Variable> variables = getVariables(dsid);
@@ -3587,7 +3594,7 @@ public class LASConfig extends LASDocument {
     public ArrayList<View> getViewsByDatasetAndVariable(String dsID, String varID) throws JDOMException, LASException {
         String variableXPath = "/lasdata/datasets/dataset[@ID='"+dsID+"']/variables/variable[@ID='"+varID+"']";
         String ui_default = "";
-        
+
         ui_default = getVariablePropertyValue(variableXPath,"ui", "default");
 
         ArrayList<View> views = new ArrayList<View>();
@@ -3597,7 +3604,7 @@ public class LASConfig extends LASDocument {
             // will not be modified.  The installer is responsible for picking sensible
             // views for the data.
             ui_default = ui_default.substring(ui_default.indexOf("#")+1, ui_default.length());
-            views = getViewsByDefault(ui_default); 
+            views = getViewsByDefault(ui_default);
         } else {
             // This returns all possible views.
             ui_default = null;
@@ -3605,24 +3612,24 @@ public class LASConfig extends LASDocument {
             // Now filter them according to the places where the data variable
             // is defined on an interval.
             String intervals = getVariableIntervals(variableXPath);
-            
+
             // Create an ArrayList with all combinations
             ArrayList<String> combos = combo(intervals);
-            
+
             for (Iterator viewIt = allViews.iterator(); viewIt.hasNext();) {
                 View view = (View) viewIt.next();
                 String view_value = view.getValue();
-                
+
                 // If the combination of interval axes matches one of the
                 // views add it to the collection of acceptable views.
-                
+
                 for (Iterator comboIt = combos.iterator(); comboIt.hasNext();) {
                     String combo = (String) comboIt.next();
                     if ( combo.equals(view_value) ) {
                         views.add(view);
                     }
                 }
-                
+
             }
         }
         if ( views.size() <= 0 ) {
@@ -3639,7 +3646,7 @@ public class LASConfig extends LASDocument {
      * @return
      */
     public ArrayList<View> getViewsByDefault(String ui_default) throws JDOMException {
-        ArrayList <View> views = new ArrayList<View>(); 
+        ArrayList <View> views = new ArrayList<View>();
         Element def = getUIDefault(ui_default);
         if ( def != null ) {
             Element map = getUIMap(def, "views");
@@ -3668,10 +3675,10 @@ public class LASConfig extends LASDocument {
         }
         return views;
     }
-    /** 
+    /**
      * Returns true if a T axis is defined for this variable.
      * @param varpath XPath of the variable to check
-     * @return hasZ boolean  
+     * @return hasZ boolean
      */
     public boolean hasT(String varpath) throws JDOMException {
         /*
@@ -3703,21 +3710,21 @@ public class LASConfig extends LASDocument {
         }
         return false;
     }
-    /** 
+    /**
      * Returns true if a T axis is defined for this variable.
      * @param dsID ID of the dataset to check
      * @param varID ID of the variable to check
-     * @return hasZ boolean  
+     * @return hasZ boolean
      */
     public boolean hasT(String dsID, String varID) throws JDOMException {
         String varpath = "/lasdata/datasets/dataset[@ID='"+dsID+"']/variables/variable[@ID='"+varID+"']";
         return hasT(varpath);
     }
-    /** 
+    /**
      * Returns true if a Z axis is defined for this variable.
      * @param varpath XPath of the variable to check
-     * @return hasZ boolean  
-     * @throws JDOMException 
+     * @return hasZ boolean
+     * @throws JDOMException
      */
     public boolean hasZ(String varpath) throws JDOMException {
         /*
@@ -3749,17 +3756,17 @@ public class LASConfig extends LASDocument {
         }
         return false;
     }
-    /** 
+    /**
      * Returns true if a Z axis is defined for this variable.
      * @param dsID ID of the dataset to check
      * @param varID ID of the variable to check
-     * @return hasZ boolean  
+     * @return hasZ boolean
      */
     public boolean hasZ(String dsID, String varID) throws JDOMException {
         String varpath = "/lasdata/datasets/dataset[@ID='"+dsID+"']/variables/variable[@ID='"+varID+"']";
         return hasZ(varpath);
     }
-    
+
     public boolean isRegular(String dsID, String varID) throws JDOMException {
         boolean reg = false;
         Element variable = getElementByXPath("/lasdata/datasets/dataset[@ID='"+dsID+"']"+"/variables/variable"+"[@ID='"+varID+"']");
@@ -3786,7 +3793,7 @@ public class LASConfig extends LASDocument {
                     Element varTag = (Element)varTagsIt.next();
                     List variables = varTag.getChildren();
                     for (Iterator varsIt = variables.iterator(); varsIt.hasNext();) {
-                        Element var = (Element) varsIt.next();    
+                        Element var = (Element) varsIt.next();
                         Element properties = var.getChild("properties");
                         if ( properties != null ) {
                             var.setContent(var.indexOf(properties), getMergedProperties(var));
@@ -3801,7 +3808,7 @@ public class LASConfig extends LASDocument {
     /**
      * Descends the dataset and variable tree and set the grid_type attribute
      * if it is not already set.
-     * @throws JDOMException 
+     * @throws JDOMException
      */
     public void setGridType(Element variable) throws JDOMException {
         String grid_type = variable.getAttributeValue("grid_type");
@@ -3835,7 +3842,7 @@ public class LASConfig extends LASDocument {
             	if ( allowsSisters() ) {
                 	ID = JDOMUtils.MD5Encode(getBaseServerURL()) + Constants.NAME_SPACE_SPARATOR + ID;
                 	category.setAttribute("ID", ID);
-                }          	
+                }
             }
             List subcategories = category.getChildren("category");
             if ( subcategories.size() > 0 ) {
@@ -3868,7 +3875,7 @@ public class LASConfig extends LASDocument {
 	   }
 	   output_dir.setText(dir);
 	}
-	
+
 	public ArrayList<Category> getTimeSeriesDatasets() throws LASException {
 		ArrayList<Category> time_series = new ArrayList<Category>();
 		if (hasCategories()) {
@@ -3925,10 +3932,10 @@ public class LASConfig extends LASDocument {
 		return time_series;
 	}
 	/**
-     * Extract data sets based on a &lt;filter&gt; element from the config, used for group_type="time_series" and group_type="ensemble" categories. 
+     * Extract data sets based on a &lt;filter&gt; element from the config, used for group_type="time_series" and group_type="ensemble" categories.
      * @param filter A category filter element to be used to select variables from the configuration.
      * @return the data set that matches the filter
-	 * @throws LASException 
+	 * @throws LASException
      */
     private List<Dataset> getDatasets(Element filter) throws LASException {
         List<Dataset> container_datasets = new ArrayList<Dataset>();
@@ -3938,11 +3945,11 @@ public class LASConfig extends LASDocument {
         String name_equals = filter.getAttributeValue("equals");
         String tag_contains = filter.getAttributeValue("contains-tag");
         String tag_equals = filter.getAttributeValue("equals-tag");
-        
+
         if ( action.equals("apply-dataset") ) {
 
             List datasets = getRootElement().getChildren("datasets");
-            
+
             for (Iterator datasetsIt = datasets.iterator(); datasetsIt.hasNext();) {
                 Element datasetsE = (Element) datasetsIt.next();
                 List memberDatasets = datasetsE.getChildren("dataset");
@@ -3978,12 +3985,12 @@ public class LASConfig extends LASDocument {
 	 * The resulting HashMap
 	 */
 	private HashMap<String, String> addXMLProperties(Element properties) {
-		
+
 		HashMap<String, String> addXMLproperties = new HashMap<String, String>();
-		
+
 		List groups = convertProperties(properties);
-		
-		
+
+
 		for (Iterator grpIt = groups.iterator(); grpIt.hasNext();) {
 			Element group = (Element) grpIt.next();
 			if (group.getAttributeValue("type").equals("addXML")) {
@@ -4008,7 +4015,7 @@ public class LASConfig extends LASDocument {
 	 * @throws JDOMException
 	 */
 	public long addXML(boolean update, Cache cache) throws IOException, JDOMException {
-		
+
 		DateTimeFormatter df = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
 		DateTimeFormatter ymd = DateTimeFormat.forPattern("yyyy-MM-dd");
 		ArrayList<Element> src_datasets = new ArrayList<Element>();
@@ -4030,23 +4037,23 @@ public class LASConfig extends LASDocument {
 					String src_type = dataset.getAttributeValue("src_type");
 					String update_time = dataset.getAttributeValue("update_time");
 					String update_interval = dataset.getAttributeValue("update_interval");
-					
+
 					/* property edits for addXML configuration... */
 					HashMap<String, String> addXMLprops = new HashMap<String, String>();
 					Element properties = dataset.getChild("properties");
 					if ( properties != null ) {
 						addXMLprops = addXMLProperties(properties);
 					}
-					
+
 					if (src != null && src_type != null ) {
 						String src_key = JDOMUtils.MD5Encode(src);
 						String ds_filename = getOutputDir()+File.separator+"las_datasets_"+src_key+".xml";
 						String grids_filename = getOutputDir()+File.separator+"las_grids_"+src_key+".xml";
 						String axes_filename = getOutputDir()+File.separator+"las_axes_"+src_key+".xml";
-						
+
 						boolean reconstruct = false;
 						if ( update_time != null && update_interval != null ) {
-							
+
 							File ds_file = cache.getFile(ds_filename, Cache.GET_CACHE);
 							if ( ds_file != null ) {
 								LASDocument ds_doc = new LASDocument();
@@ -4063,7 +4070,7 @@ public class LASConfig extends LASDocument {
 										nextUpdate = Math.min(n, nextUpdate);
 										if ( src_type.equalsIgnoreCase("netCDF") ) {
 											if ( addXMLprops.get("category") != null && addXMLprops.get("category").equalsIgnoreCase("true") ) {
-												categoryList.addAll(makeCategories(dgab));	
+												categoryList.addAll(makeCategories(dgab));
 											}
 										}
 									}
@@ -4071,7 +4078,7 @@ public class LASConfig extends LASDocument {
 										categoryList.addAll(makeCategoriesFromTHREDDS(src));
 									}
 								} else {
-									// reconstruct src from ds, grid and axes file 
+									// reconstruct src from ds, grid and axes file
 									reconstruct = true;
 								}
 							}
@@ -4091,12 +4098,12 @@ public class LASConfig extends LASDocument {
 								JDOMUtils.XML2JDOM(ds_file, ds_doc);
 								JDOMUtils.XML2JDOM(grids_file, grids_doc);
 								JDOMUtils.XML2JDOM(axes_file, axes_doc);
-								
+
 								getRootElement().addContent((Element) ds_doc.getRootElement().clone());
 								getRootElement().addContent((Element) grids_doc.getRootElement().clone());
 								getRootElement().addContent((Element) axes_doc.getRootElement().clone());
-								
-								
+
+
 							} else {
 								Vector<DatasetsGridsAxesBean> dgabs = updateSrc(src, src_type, update_time, update_interval, addXMLprops);
 								int src_index = 1;
@@ -4107,7 +4114,7 @@ public class LASConfig extends LASDocument {
 									nextUpdate = Math.min(n, nextUpdate);
 									if ( src_type.equalsIgnoreCase("netCDF") ) {
 										if ( addXMLprops.get("categories") != null && addXMLprops.get("categories").equalsIgnoreCase("true") ) {
-											categoryList.addAll(makeCategories(dgab));	
+											categoryList.addAll(makeCategories(dgab));
 										}
 									}
 								}
@@ -4122,7 +4129,7 @@ public class LASConfig extends LASDocument {
 		} else {
 			// Since we're looping the XML we have accumulate new content (like these categories) and add it
 			// outside the loop.
-			
+
 			// Create all the XML stubs if they are not in the cache or if they are out of date.
 			List datasets = getRootElement().getChildren("datasets");
 			for (Iterator datasetsIt = datasets.iterator(); datasetsIt.hasNext();) {
@@ -4151,7 +4158,7 @@ public class LASConfig extends LASDocument {
 	                        nextUpdate = Math.min(n, nextUpdate);
 	                        if ( src_type.equalsIgnoreCase("netCDF") ) {
 								if ( addXMLprops.get("categories") != null && addXMLprops.get("categories").equalsIgnoreCase("true") ) {
-									categoryList.addAll(makeCategories(dgab));	
+									categoryList.addAll(makeCategories(dgab));
 								}
 							}
 						}
@@ -4161,14 +4168,14 @@ public class LASConfig extends LASDocument {
 					}
 				}
 			}
-		}	
+		}
 		EmptySrcDatasetFilter src_dataset_filter = new EmptySrcDatasetFilter();
 		List remove_datasets = getRootElement().getChildren("datasets");
 		for (Iterator datasetsIt = remove_datasets.iterator(); datasetsIt.hasNext();) {
 			Element datasetsE = (Element) datasetsIt.next();
 			datasetsE.removeContent(src_dataset_filter);
 		}
-		
+
 		for (Iterator src_dsIt = src_datasets.iterator(); src_dsIt.hasNext();) {
 			Element ds = (Element) src_dsIt.next();
 			List dsets = ds.getChildren();
@@ -4200,7 +4207,7 @@ public class LASConfig extends LASDocument {
 			addCategories(categoryList);
 		}
 		return nextUpdate;
-		
+
 	}
 	/**
 	 * Makes and adds categories from a DatasetsGridsAxesBean probably from a single netCDF data source.
@@ -4212,7 +4219,7 @@ public class LASConfig extends LASDocument {
 		for (Iterator dsbIt = dsbeans.iterator(); dsbIt.hasNext();) {
 			DatasetBean dsb = (DatasetBean) dsbIt.next();
 			CategoryBean cat = new CategoryBean();
-			cat.setName(dsb.getName());												
+			cat.setName(dsb.getName());
 			FilterBean filter = new FilterBean();
 			filter.setAction("apply-dataset");
 			filter.setContainstag(dsb.getElement());
@@ -4276,13 +4283,13 @@ public class LASConfig extends LASDocument {
 				kids.add(child);
 			}
 			ds_children.put(dsb.getElement(), kids);
-			
+
 			dsetsE.addContent(datasetFromSrc);
 			if ( !src_datasets.contains(dsetsE) ) {
 			    src_datasets.add(dsetsE);
 			}
 		}
-		
+
 		Vector<GridBean> g_beans = dgab.getGrids();
 		Element grids = new Element("grids");
 		for (Iterator gbIt = g_beans.iterator(); gbIt.hasNext();) {
@@ -4290,7 +4297,7 @@ public class LASConfig extends LASDocument {
 			grids.addContent(gb.toXml());
 		}
 		src_grids.add(grids);
-		
+
 		Vector<AxisBean> a_beans = dgab.getAxes();
 		Element axes = new Element("axes");
 		for (Iterator abIt = a_beans.iterator(); abIt.hasNext();) {
@@ -4298,7 +4305,7 @@ public class LASConfig extends LASDocument {
 			axes.addContent(ab.toXml());
 		}
 		src_axes.add(axes);
-		
+
 		org.jdom.Document doc = addXML.createXMLfromDatasetsGridsAxesBean(dgab);
 		String ds_filename = getOutputDir()+File.separator+"las_datasets_"+src_key+"_"+src_index+".xml";
 		String grids_filename = getOutputDir()+File.separator+"las_grids_"+src_key+"_"+src_index+".xml";
@@ -4319,7 +4326,7 @@ public class LASConfig extends LASDocument {
 		myAddXML.setOptions(options);
 		Vector<DatasetsGridsAxesBean> beans = new Vector<DatasetsGridsAxesBean>();
 		if ( src_type.equalsIgnoreCase("netcdf") ) {
-			
+
 			try {
 				//String url = DODSNetcdfFile.canonicalURL(src);
 				NetcdfDataset ncds = NetcdfDataset.openDataset(src);
@@ -4328,15 +4335,15 @@ public class LASConfig extends LASDocument {
 			} catch (IOException e) {
 				log.error("Unable to create config for:" + src);
 			}
-			
+
 			String created = null;
 			String expires = null;
 			long next_update = -1;
 			if ( update_time != null && update_interval != null ) {
-				try {							
+				try {
 					DateTime nt = new DateTime();
 					created = df.print(nt);
-					
+
 					String expire_time = ymd.print(nt) + " " + update_time+":00";
 					if ( update_interval.toLowerCase().contains("milli") ||
 						 update_interval.toLowerCase().contains("sec") ||
@@ -4369,13 +4376,13 @@ public class LASConfig extends LASDocument {
 							expires_dt = expires_dt.plus(p);
 						}
 						expires = df.print(expires_dt);
-						
+
 						if ( start_dt.isAfter(nt) ) {
 							next_update = expires_dt.getMillis()-start_dt.getMillis();
 						} else {
 							next_update = expires_dt.getMillis()-nt.getMillis();
 						}
-						
+
 					}
 				} catch (Exception e) {
                     log.error("Unable to set update creation update times");
@@ -4402,7 +4409,7 @@ public class LASConfig extends LASDocument {
 			else {
 				top.setName(catalog.getUriString());
 			}
-			
+
 			Vector CategoryBeans = new Vector();
 
 			List ThreddsDatasets = catalog.getDatasets();
@@ -4420,7 +4427,7 @@ public class LASConfig extends LASDocument {
 			while (di.hasNext()) {
 				InvDataset ThreddsDataset = (InvDataset) di.next();
 				beans.addAll(myAddXML.processDatasets(ThreddsDataset));
-			}			
+			}
 		}
 		return beans;
 	}
@@ -4447,7 +4454,7 @@ public class LASConfig extends LASDocument {
 		List tribElements = getRootElement().getChildren("las_server");
 		for (Iterator tribIt = tribElements.iterator(); tribIt.hasNext();) {
 			Element trib = (Element) tribIt.next();
-			Tributary tributary = new Tributary(trib);			
+			Tributary tributary = new Tributary(trib);
 			tributaries.add(tributary);
 		}
 		return tributaries;
@@ -4465,19 +4472,19 @@ public class LASConfig extends LASDocument {
 	public void addServerID() throws UnsupportedEncodingException, JDOMException {
 		if ( allowsSisters() ) {
 			List operationsElements = getRootElement().getChildren("operations");
-		    for (Iterator opsElementsIt = operationsElements.iterator(); opsElementsIt.hasNext();) {   
+		    for (Iterator opsElementsIt = operationsElements.iterator(); opsElementsIt.hasNext();) {
 		    	Element opsParent = (Element) opsElementsIt.next();
 		    	List ops = opsParent.getChildren("operation");
 		    	for (Iterator opsIt = ops.iterator(); opsIt.hasNext();) {
 					Element op = (Element) opsIt.next();
-					Element optiondef = op.getChild("optiondef");	
+					Element optiondef = op.getChild("optiondef");
 					// Maybe null for old operations or those without options
 					if ( optiondef != null ) {
 						String IDREF = optiondef.getAttributeValue("IDREF");
 						IDREF = JDOMUtils.MD5Encode(getBaseServerURL()) + Constants.NAME_SPACE_SPARATOR + IDREF;
 						optiondef.setAttribute("IDREF", IDREF);
 					}
-				}		    	
+				}
 		    }
 		}
 	}
@@ -4610,7 +4617,7 @@ public class LASConfig extends LASDocument {
 					// This gets called by the session listener which is not allowed to throw an
 					// exception.  The best we can do is log the error.
 					log.error("Unable to remove "+xpath);
-				}			
+				}
 			}
 
 			// Remove the dataset it it's empty.
@@ -4635,7 +4642,7 @@ public class LASConfig extends LASDocument {
 			write(debug);
 		}
 	}
-	
+
 	public void addRemoteVariables(String JSESSIONID, LASUIRequest lasRequest) throws HttpException, IOException, JDOMException, LASException {
 		ArrayList<String> dsids = lasRequest.getDatasetIDs();
 		ArrayList<String> varids = lasRequest.getVariableIDs();
@@ -4643,13 +4650,13 @@ public class LASConfig extends LASDocument {
 		Iterator varIt = varids.iterator();
 		for (Iterator dsidIt = dsids.iterator(); dsidIt.hasNext();) {
 			String dsid = (String) dsidIt.next();
-			String varid = (String) varIt.next();			
+			String varid = (String) varIt.next();
 			if ( dsid.contains(Constants.NAME_SPACE_SPARATOR) ) {
 				String server_key = dsid.split(Constants.NAME_SPACE_SPARATOR)[0];
 
 				// Only add if it is not local data...
 				if ( !server_key.equals(getBaseServerURLKey()) ) {
-					
+
 					// Get the data set list for this session from the and add the data set id.
 					HashSet<String> remove_var_xpaths = remoteData.get(JSESSIONID);
 					if ( remove_var_xpaths == null ) {
@@ -4657,8 +4664,8 @@ public class LASConfig extends LASDocument {
 					}
 					remove_var_xpaths.add("/lasdata/datasets/dataset[@ID='"+dsid+"']/variables/variable[@ID='"+varid+"']");
 					remoteData.put(JSESSIONID, remove_var_xpaths);
-					
-					
+
+
 					ArrayList<String[]> grid_ids_for_key = new ArrayList<String[]>();
 					Tributary trib = getTributary(server_key);
 					String las_url = trib.getURL()+Constants.GET_CATEGORIES+"?format=xml&catid="+dsid;
@@ -4671,7 +4678,7 @@ public class LASConfig extends LASDocument {
 					for (Iterator varElementIt = variableElements.iterator(); varElementIt.hasNext();) {
 						Element var = (Element) varElementIt.next();
 						if ( var.getAttributeValue("ID").equals(varid)) {
-							variable = (Element) var.clone();	
+							variable = (Element) var.clone();
 						}
 					}
 					// Found it.  Add it to the local config.
@@ -4702,7 +4709,7 @@ public class LASConfig extends LASDocument {
 
 							String[] idpair = new String[] {dsid, variable.getAttributeValue("ID")};
 							grid_ids_for_key.add(idpair);
-						}			    	
+						}
 					}
 					grid_ids.put(server_key, grid_ids_for_key);
 
@@ -4757,7 +4764,7 @@ public class LASConfig extends LASDocument {
 									axis.setAttribute("IDREF", zid);
 									gridE.addContent(axis);
 								}
-								getRootElement().getChild("grids").addContent(gridE);				
+								getRootElement().getChild("grids").addContent(gridE);
 							}
 						}
 					}
