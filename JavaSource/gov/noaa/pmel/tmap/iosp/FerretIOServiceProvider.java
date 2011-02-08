@@ -688,37 +688,42 @@ public class FerretIOServiceProvider implements IOServiceProvider {
 				FerretAttribute fa = new FerretAttribute();
 
 				// Look for old style attribute XML and use it 
+				String value = null;
+				String aname = null;
+				String atype = null;
 				if ( attribute.getChildTextNormalize("value") == null ) {					
-                    String value = attribute.getTextNormalize();
-                    String aname = attribute.getName();
+                    value = attribute.getAttributeValue("value");
+                    aname = attribute.getAttributeValue("name");
                     // All we we can do is try to treat it as a number since we don't know the type.
+                    // This is an in exact science
                     try {
-                    	double dvalue = Double.valueOf(value).doubleValue();
-                    	fa.setValue(value);
-                    	fa.setType("double");
-                    	fa.setName(aname);
+                    	
+                    	if ( value.matches("[0-9]*") ) {
+                    		int ivalue = Integer.valueOf(value).intValue();
+                    		atype = "short";
+                    	} else {
+                    		double dvalue = Double.valueOf(value).doubleValue();
+                    		atype = "double";
+                    	}
                     } catch (NumberFormatException nfe) {
-                    	fa.setValue(value);
-                    	fa.setType("string");
-                    	fa.setName(aname);
+                    	atype = "string";
                     }
 				} else {
 					// This is must be the new attribute XML....
-					String value = attribute.getChildTextNormalize("value").trim();
-					String aname = attribute.getAttributeValue("name").trim();
-					String atype = attribute.getAttributeValue("type").trim()
+					value = attribute.getChildTextNormalize("value").trim();
+					aname = attribute.getAttributeValue("name").trim();
+					atype = attribute.getAttributeValue("type").trim()
 					.toLowerCase();
-					if (value != null && !value.equals("")) {
-						fa.setValue(value);
-					}
-					if (aname != null && !aname.equals("")) {
-						fa.setName(aname);
-					}
-					if (atype != null && !atype.equals("")) {
-						fa.setType(atype);
-					}
-					ferretAttributes.put(aname, fa);
+					
 				}
+				if ( value != null && !value.equals("") && 
+					 aname != null && !aname.equals("") && 
+					 atype != null && !atype.equals("") ) {
+					fa.setValue(value);
+					fa.setName(aname);
+					fa.setType(atype);
+					ferretAttributes.put(aname, fa);
+				}			
 			}
 		}
 		return ferretAttributes;
