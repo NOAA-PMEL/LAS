@@ -32,58 +32,6 @@
     <servlet-name>action</servlet-name>
   </filter-mapping>
 <!-- End of LAS input filters -->
-	<filter>
-		<filter-name>ExceptionFilter</filter-name>
-		<filter-class>
-			gov.noaa.pmel.tmap.las.luis.ExceptionFilter
-		</filter-class>
-	</filter>
-
-	<filter>
-		<filter-name>SessionFilter</filter-name>
-		<filter-class>
-			gov.noaa.pmel.tmap.las.luis.SessionFilter
-		</filter-class>
-	</filter>
-
-	<filter>
-		<filter-name>FormFilter</filter-name>
-		<filter-class>
-			gov.noaa.pmel.tmap.las.luis.FormFilter
-		</filter-class>
-	</filter>
-
-
-	<filter-mapping>
-		<filter-name>ExceptionFilter</filter-name>
-		<url-pattern>/servlets/*</url-pattern>
-	</filter-mapping>
-
-	<filter-mapping>
-		<filter-name>SessionFilter</filter-name>
-		<url-pattern>/servlets/*</url-pattern>
-	</filter-mapping>
-
-	<filter-mapping>
-		<filter-name>FormFilter</filter-name>
-		<url-pattern>/servlets/*</url-pattern>
-	</filter-mapping>
-	
-	<filter-mapping>
-		<filter-name>ExceptionFilter</filter-name>
-		<url-pattern>/v6/*</url-pattern>
-	</filter-mapping>
-
-	<filter-mapping>
-		<filter-name>SessionFilter</filter-name>
-		<url-pattern>/v6/*</url-pattern>
-	</filter-mapping>
-
-	<filter-mapping>
-		<filter-name>FormFilter</filter-name>
-		<url-pattern>/v6/*</url-pattern>
-	</filter-mapping>
-
 	<servlet>
 		<servlet-name>AxisServlet</servlet-name>
 		<servlet-class>
@@ -144,16 +92,6 @@
 			<param-value>/WEB-INF/velocity.properties</param-value>
 		</init-param>
 		<load-on-startup>10</load-on-startup>
-	</servlet>
-	<servlet>
-		<servlet-name>TemplateServlet</servlet-name>
-		<servlet-class>
-			gov.noaa.pmel.tmap.las.luis.TemplateServlet
-		</servlet-class>
-		<init-param>
-			<param-name>java.awt.headless</param-name>
-			<param-value>true</param-value>
-		</init-param>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>AxisServlet</servlet-name>
@@ -230,16 +168,6 @@
 		<url-pattern>/wms_legend</url-pattern>
 	</servlet-mapping>
 	<!-- /WMS -->
-
-	<servlet-mapping>
-		<servlet-name>TemplateServlet</servlet-name>
-		<url-pattern>/servlets/*</url-pattern>
-	</servlet-mapping>
-	<servlet-mapping>
-		<servlet-name>TemplateServlet</servlet-name>
-		<url-pattern>/v6/*</url-pattern>
-	</servlet-mapping>
-	
 
 	<!-- currently the W3C havent settled on a media type for WSDL;
 		http://www.w3.org/TR/2003/WD-wsdl12-20030303/#ietf-draft
