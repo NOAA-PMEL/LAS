@@ -674,8 +674,8 @@ public class FerretIOServiceProvider implements IOServiceProvider {
 					var.addAttribute(new Attribute(aname, value));
 				}
 			} else {
+				var.addAttribute(new Attribute(aname, value));
 			}
-			var.addAttribute(new Attribute(aname, value));
 		}
 	}
 
