@@ -378,7 +378,7 @@ public class BaseUI implements EntryPoint {
 		int col = 0;
 		int row = 0;
 		for(int i = 0; i < numPanels; i++ ) {
-			String title = "Panel "+i;
+			String title = "Panel-"+i;
 			boolean compare_panel = false;
 			if ( i == 0 ) {
 				compare_panel = true;
@@ -599,10 +599,10 @@ public class BaseUI implements EntryPoint {
     public native void activateNativeHooks()/*-{
         var localObject = this;
         $wnd.updateMapSelection = function(slat, nlat, wlon, elon) {        
-            localObject.@gov.noaa.pmel.tmap.las.client.TestUI::setMapSelection(DDDD)(slat, nlat, wlon, elon);
+            localObject.@gov.noaa.pmel.tmap.las.client.BaseUI::setMapSelection(DDDD)(slat, nlat, wlon, elon);
         }
         $wnd.updateCurrentURL = function(url) {
-        	localObject.@gov.noaa.pmel.tmap.las.client.TestUI::setCurrentURL(Ljava/lang/String;)(url);
+        	localObject.@gov.noaa.pmel.tmap.las.client.BaseUI::setCurrentURL(Ljava/lang/String;)(url);
         }
     }-*/;
 }
