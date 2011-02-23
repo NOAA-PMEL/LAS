@@ -386,7 +386,7 @@
      <copy file="WebContent/OLMapWidget/mapwidget.html" todir="dist/olmapwidget/war/OLMapWidget"/>
      <copy file="build.xml.in" tofile="dist/olmapwidget/build.xml"/>
      <copy file="bin/ol-compile.sh" todir="dist/olmapwidget/bin"/>
-     <copy file="WebContent/WEB-INF/lib/gwtopenlayers.jar" todir="dist/olmapwidget/lib"/>
+     <copy file="WebContent/WEB-INF/lib/gwt-openlayers-client-0.5.jar" todir="dist/olmapwidget/lib"/>
      <chmod file="dist/olmapwidget/bin/ol-compile.sh" perm="755" />
      <replaceregexp byline="true">
         <regexp pattern="gov.noaa.pmel.tmap.las.client"/>
