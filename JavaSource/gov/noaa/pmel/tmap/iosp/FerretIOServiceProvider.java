@@ -34,12 +34,14 @@ import ucar.ma2.IndexIterator;
 import ucar.ma2.InvalidRangeException;
 import ucar.ma2.Range;
 import ucar.ma2.Section;
+import ucar.ma2.StructureDataIterator;
 import ucar.nc2.Attribute;
 import ucar.nc2.Dimension;
 
 import ucar.nc2.NCdump;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.ParsedSectionSpec;
+import ucar.nc2.Structure;
 import ucar.nc2.Variable;
 import ucar.nc2.dataset.NetcdfDataset;
 import ucar.nc2.iosp.IOServiceProvider;
@@ -871,6 +873,13 @@ public class FerretIOServiceProvider implements IOServiceProvider {
 				}
 			}
 		}
+	}
+
+	@Override
+	public StructureDataIterator getStructureIterator(Structure arg0, int arg1)
+			throws IOException {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }
