@@ -4,7 +4,7 @@
 	<property name="app.name" value="@APPNAME@" />
 	<property name="jakarta.home" value="@JAKARTA_HOME@" />
 	<property name="jakarta.lib" value="@JAKARTA_LIB@" />
-        <property name="map_version" value="1.0"/>
+        <property name="map_version" value="1.1"/>
         <property name="version" value="7.2.2"/>
 	<property name="deploy.home"
 		value="${jakarta.home}/webapps/${app.name}" />
