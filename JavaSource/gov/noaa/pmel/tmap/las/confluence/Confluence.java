@@ -8,6 +8,7 @@ import gov.noaa.pmel.tmap.las.jdom.LASDocument;
 import gov.noaa.pmel.tmap.las.jdom.LASMapScale;
 import gov.noaa.pmel.tmap.las.jdom.LASRegionIndex;
 import gov.noaa.pmel.tmap.las.jdom.LASUIRequest;
+import gov.noaa.pmel.tmap.las.product.server.InitThread;
 import gov.noaa.pmel.tmap.las.product.server.LASAction;
 import gov.noaa.pmel.tmap.las.product.server.LASConfigPlugIn;
 import gov.noaa.pmel.tmap.las.ui.GetMetadata;
@@ -97,6 +98,14 @@ public class Confluence extends LASAction {
 				HttpServletRequest request,
 				HttpServletResponse response){
 
+			String lazy_start = (String) servlet.getServletContext().getAttribute(LASConfigPlugIn.LAS_LAZY_START_KEY);
+	        if ( lazy_start != null && lazy_start.equals("true") ) {
+	        	// Start the initialization and forward to lazy start page
+	        	InitThread thread = new InitThread(servlet.getServletContext());
+	        	thread.start();
+	        	return mapping.findForward("lazy_start");
+	        }
+			
 			String openid = request.getParameter("openid");
 			LASConfig lasConfig = (LASConfig)servlet.getServletContext().getAttribute(LASConfigPlugIn.LAS_CONFIG_KEY);
 

@@ -31,6 +31,7 @@ public class CategoryBean {
 	private Vector filters;
 	private Vector categories;
 	private Vector contributors;
+	private String id;
 
 	public CategoryBean() {
 		filters = new Vector();
@@ -73,6 +74,10 @@ public class CategoryBean {
 	public void setFilters(Vector filters) {
 		this.filters = filters;
 	}
+	
+	public void setID(String id) {
+		this.id = id;
+	}
 
 	public void addFilter(FilterBean filter) {
 		filters.add(filter);
@@ -88,6 +93,10 @@ public class CategoryBean {
 
 	public String getName() {
 		return name;
+	}
+	
+	public String getID() {
+		return id;
 	}
 
 	public String getDoc() {
@@ -146,6 +155,9 @@ public class CategoryBean {
 			category.addContent(contributor);
 		}
 		category.setAttribute("name", name);
+		if ( id != null && !id.equals("") ) {
+			category.setAttribute("ID", id);
+		}
 		if (doc != null && !doc.equals("")) {
 			category.setAttribute("doc", doc);
 		}

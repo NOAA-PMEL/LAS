@@ -1330,14 +1330,13 @@ public class addXML {
 		String name = ThreddsDataset.getName();
 		if (name != null) {
 			cb.setName(ThreddsDataset.getName());
+			cb.setID(ThreddsDataset.getID());
 		}
 		else {
 			cb.setName("THREDDS Dataset");
 		}
 		if (ThreddsDataset.hasAccess()) {
-			// This will create a filter that doesn't match anything.
-			// The LAS interface generator will ignore this category.
-			String url = "yadayada";
+			String url = "empty";
 			InvAccess access = null;
 			for (Iterator ait = ThreddsDataset.getAccess().iterator(); ait.hasNext(); ) {
 				access = (InvAccess) ait.next();
