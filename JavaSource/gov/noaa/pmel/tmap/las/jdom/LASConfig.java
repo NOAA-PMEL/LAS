@@ -4449,6 +4449,14 @@ public class LASConfig extends LASDocument {
 			    las_categoriesE.addContent(catE);
 			}
 		}
+		LASDocument categoryDoc = new LASDocument((Element) las_categoriesE.clone());
+		try {
+			categoryDoc.write(getOutputDir()+File.separator+"las_categories_"+getBaseServerURLKey()+".xml");
+		} catch (UnsupportedEncodingException e) {
+			// This is primarily debug output, so if we don't get it we don't really care.
+		} catch (JDOMException e) {
+			// This is primarily debug output, so if we don't get it we don't really care.
+		}
 	}
 	public ArrayList<Tributary> getTributaries() {
 		ArrayList<Tributary> tributaries = new ArrayList<Tributary>();
