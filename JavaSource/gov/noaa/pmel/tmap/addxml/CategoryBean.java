@@ -20,152 +20,152 @@ import org.jdom.*;
 
 
 public class CategoryBean {
-  private String name;
-  private String doc;
-  private String category_include;
-  private String variable_include;
-  private String constrain_include;
-  private String category_include_header;
-  private String variable_include_header;
-  private String constrain_include_header;
-  private Vector filters;
-  private Vector categories;
-  private Vector contributors;
+	private String name;
+	private String doc;
+	private String category_include;
+	private String variable_include;
+	private String constrain_include;
+	private String category_include_header;
+	private String variable_include_header;
+	private String constrain_include_header;
+	private Vector filters;
+	private Vector categories;
+	private Vector contributors;
 
-  public CategoryBean() {
-    filters = new Vector();
-    categories = new Vector();
-    contributors = new Vector();
-  }
+	public CategoryBean() {
+		filters = new Vector();
+		categories = new Vector();
+		contributors = new Vector();
+	}
 
-  public void setName(String name) {
-    this.name = name;
-  }
+	public void setName(String name) {
+		this.name = name;
+	}
 
-  public void setDoc(String doc) {
-    this.doc = doc;
-  }
+	public void setDoc(String doc) {
+		this.doc = doc;
+	}
 
-  public void setCategory_include(String category_include) {
-    this.category_include = category_include;
-  }
+	public void setCategory_include(String category_include) {
+		this.category_include = category_include;
+	}
 
-  public void setVariable_include(String variable_include) {
-    this.variable_include = variable_include;
-  }
+	public void setVariable_include(String variable_include) {
+		this.variable_include = variable_include;
+	}
 
-  public void setConstrain_include(String constrain_include) {
-    this.constrain_include = constrain_include;
-  }
+	public void setConstrain_include(String constrain_include) {
+		this.constrain_include = constrain_include;
+	}
 
-  public void setCategory_include_header(String category_include_header) {
-    this.category_include_header = category_include_header;
-  }
+	public void setCategory_include_header(String category_include_header) {
+		this.category_include_header = category_include_header;
+	}
 
-  public void setVariable_include_header(String variable_include_header) {
-    this.variable_include_header = variable_include_header;
-  }
+	public void setVariable_include_header(String variable_include_header) {
+		this.variable_include_header = variable_include_header;
+	}
 
-  public void setConstrain_include_header(String constrain_include_header) {
-    this.constrain_include_header = constrain_include_header;
-  }
+	public void setConstrain_include_header(String constrain_include_header) {
+		this.constrain_include_header = constrain_include_header;
+	}
 
-  public void setFilters(Vector filters) {
-    this.filters = filters;
-  }
+	public void setFilters(Vector filters) {
+		this.filters = filters;
+	}
 
-  public void addFilter(FilterBean filter) {
-    filters.add(filter);
-  }
+	public void addFilter(FilterBean filter) {
+		filters.add(filter);
+	}
 
-  public void setCategories(Vector categories) {
-    this.categories = categories;
-  }
+	public void setCategories(Vector categories) {
+		this.categories = categories;
+	}
 
-  public void setContributors(Vector contributors) {
-    this.contributors = contributors;
-  }
+	public void setContributors(Vector contributors) {
+		this.contributors = contributors;
+	}
 
-  public String getName() {
-    return name;
-  }
+	public String getName() {
+		return name;
+	}
 
-  public String getDoc() {
-    return doc;
-  }
+	public String getDoc() {
+		return doc;
+	}
 
-  public String getCategory_include() {
-    return category_include;
-  }
+	public String getCategory_include() {
+		return category_include;
+	}
 
-  public String getVariable_include() {
-    return variable_include;
-  }
+	public String getVariable_include() {
+		return variable_include;
+	}
 
-  public String getConstrain_include() {
-    return constrain_include;
-  }
+	public String getConstrain_include() {
+		return constrain_include;
+	}
 
-  public String getCategory_include_header() {
-    return category_include_header;
-  }
+	public String getCategory_include_header() {
+		return category_include_header;
+	}
 
-  public String getVariable_include_header() {
-    return variable_include_header;
-  }
+	public String getVariable_include_header() {
+		return variable_include_header;
+	}
 
-  public String getConstrain_include_header() {
-    return constrain_include_header;
-  }
+	public String getConstrain_include_header() {
+		return constrain_include_header;
+	}
 
-  public Vector getFilters() {
-    return filters;
-  }
+	public Vector getFilters() {
+		return filters;
+	}
 
-  public Vector getCategories() {
-    return categories;
-  }
+	public Vector getCategories() {
+		return categories;
+	}
 
-  public Vector getContributors() {
-    return contributors;
-  }
+	public Vector getContributors() {
+		return contributors;
+	}
 
-  /**
-   * toXml
-   *
-   * @return Element
-   */
-  public Element toXml() {
+	/**
+	 * toXml
+	 *
+	 * @return Element
+	 */
+	public Element toXml() {
 
-    Element category = new Element("category");
+		Element category = new Element("category");
 
-    for (Iterator contribIt = contributors.iterator(); contribIt.hasNext(); ) {
-      ContributorBean contribBean = (ContributorBean) contribIt.next();
-      Element contributor = contribBean.toXml();
+		for (Iterator contribIt = contributors.iterator(); contribIt.hasNext(); ) {
+			ContributorBean contribBean = (ContributorBean) contribIt.next();
+			Element contributor = contribBean.toXml();
 
-      category.addContent(contributor);
-    }
-    category.setAttribute("name", name);
-    if (doc != null && !doc.equals("")) {
-      category.setAttribute("doc", doc);
-    }
-    Iterator subCatsIt = categories.iterator();
-    while (subCatsIt.hasNext()) {
-      CategoryBean scb = (CategoryBean) subCatsIt.next();
-      Element subCatE = scb.toXml();
-      if ( subCatE != null ) {
-          category.addContent(subCatE);
-      }
-    }
-    if (filters.size() > 0) {
-      Iterator filterIt = filters.iterator();
-      while (filterIt.hasNext()) {
-        FilterBean fb = (FilterBean) filterIt.next();
-        Element filterE = fb.toXml(); 
+			category.addContent(contributor);
+		}
+		category.setAttribute("name", name);
+		if (doc != null && !doc.equals("")) {
+			category.setAttribute("doc", doc);
+		}
+		Iterator subCatsIt = categories.iterator();
+		while (subCatsIt.hasNext()) {
+			CategoryBean scb = (CategoryBean) subCatsIt.next();
+			Element subCatE = scb.toXml();
+			if ( subCatE != null ) {
+				category.addContent(subCatE);
+			}
+		}
+		if (filters.size() > 0) {
+			Iterator filterIt = filters.iterator();
+			while (filterIt.hasNext()) {
+				FilterBean fb = (FilterBean) filterIt.next();
+				Element filterE = fb.toXml(); 
 
-        category.addContent(filterE);
-      }
-    }    
-    return category;
-  }
+				category.addContent(filterE);
+			}
+		}    
+		return category;
+	}
 }
