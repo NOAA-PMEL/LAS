@@ -75,6 +75,7 @@ import org.jdom.Content;
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.JDOMException;
+import org.jdom.output.XMLOutputter;
 import org.jdom.xpath.XPath;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
@@ -4118,7 +4119,7 @@ public class LASConfig extends LASDocument {
 										}
 									}
 								}
-								if ( src_type.equalsIgnoreCase("THREDDS") && addXMLprops.get("categories") != null && addXMLprops.get("categories").equalsIgnoreCase("true") ) {
+								if ( src_type.equalsIgnoreCase("THREDDS") && addXMLprops.get("category") != null && addXMLprops.get("category").equalsIgnoreCase("true") ) {
 									categoryList.addAll(makeCategoriesFromTHREDDS(src));
 								}
 							}
@@ -4162,7 +4163,7 @@ public class LASConfig extends LASDocument {
 								}
 							}
 						}
-						if ( src_type.equalsIgnoreCase("THREDDS") && addXMLprops.get("categories") != null && addXMLprops.get("categories").equalsIgnoreCase("true") ) {
+						if ( src_type.equalsIgnoreCase("THREDDS") && addXMLprops.get("category") != null && addXMLprops.get("category").equalsIgnoreCase("true") ) {
 							categoryList.addAll(makeCategoriesFromTHREDDS(src));
 						}
 					}
@@ -4306,7 +4307,7 @@ public class LASConfig extends LASDocument {
 		}
 		src_axes.add(axes);
 
-		org.jdom.Document doc = addXML.createXMLfromDatasetsGridsAxesBean(dgab);
+		org.jdom.Document doc = addXML.createXMLfromDatasetsGridsAxesBean(dgab);  
 		String ds_filename = getOutputDir()+File.separator+"las_datasets_"+src_key+"_"+src_index+".xml";
 		String grids_filename = getOutputDir()+File.separator+"las_grids_"+src_key+"_"+src_index+".xml";
 		String axes_filename = getOutputDir()+File.separator+"las_axes_"+src_key+"_"+src_index+".xml";
