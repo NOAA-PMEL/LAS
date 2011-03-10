@@ -599,7 +599,11 @@ public class OLMapWidget extends Composite {
 	public void zoomMap() {	
 		int zoom = map.getZoomForExtent(dataBounds, false);
 		if ( box != null ) {
-		    boxes.removeMarker(box);
+			try {
+				boxes.removeMarker(box);
+			} catch (Exception e) {
+				// Ok.  If the marker has not be set this is throwing an NPE.  Give me a break.
+			}
 		}
 		if ( !modulo ) {
 			box = new Box(dataBounds);
