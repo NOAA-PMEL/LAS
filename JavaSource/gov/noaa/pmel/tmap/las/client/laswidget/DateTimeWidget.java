@@ -167,7 +167,7 @@ public class DateTimeWidget extends Composite {
 	 */
 	private void hours(HourListBox hours, int start_hour, int start_minute, int end_hour, int end_minute) {
 		hours.clear();
-		if ( delta < 0 ) {
+		if ( delta < 0 || (start_hour == 0 && end_hour == 0) ) {
             hours.addItem("00:00", "00:00");
 		} else {
 			int current = start_hour*60 + start_minute;
