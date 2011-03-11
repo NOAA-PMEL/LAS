@@ -4275,7 +4275,10 @@ public class LASConfig extends LASDocument {
 				Attribute attr = (Attribute) attrIt.next();
 				String name = attr.getName();
 				String value = attr.getValue();
-				datasetFromSrc.setAttribute(name, value);
+				// The name you get from the data source should be better, so keep it.
+				if ( !name.equals("name") ) {
+					datasetFromSrc.setAttribute(name, value);
+				} 
 			}
 			// save in a hash and add at the very end.  Grrrr.
 			ArrayList<Element> kids = new ArrayList<Element>();

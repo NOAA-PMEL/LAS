@@ -628,4 +628,9 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
 		}
 		return wiretribs;
 	}
+	@Override
+	protected void checkPermutationStrongName() throws SecurityException {
+		// we are going to completely forego this check...
+	}
+	
 }
