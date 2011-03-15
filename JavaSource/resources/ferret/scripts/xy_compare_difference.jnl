@@ -238,11 +238,7 @@ ENDIF
 
 ! Overlay additional cartography data (land mask, outlines, rivers, ...)
 
-IF ($ferret_land_type"1|none>0|contour>0|filled>1|default>1|*>0") THEN
-  GO LAS_fland 
-ELIF ($ferret_land_type"0|none>0|contour>1|filled>0|*>0") THEN
-  GO LAS_land 
-ENDIF
+GO land_overlay
 
 ! Mark grid points. Options are no, subsample (tests if subsampling needed)
 ! or all to force marking all points.
