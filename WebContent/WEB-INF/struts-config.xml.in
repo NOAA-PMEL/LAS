@@ -126,6 +126,7 @@
           
           
           <!--  Not affected by confluence configuration... -->
+          <action path="/getConfig" type="gov.noaa.pmel.tmap.las.ui.GetConfig"/>
           <action path="/auth" type="org.apache.struts.actions.ForwardAction" parameter="/productserver/templates/auth.vm"/>
           <action path="/GEServer" type="gov.noaa.pmel.tmap.las.service.kml.GEServerAction"/>
 	       <action path="/getUI"  type="gov.noaa.pmel.tmap.las.ui.GetUI">
