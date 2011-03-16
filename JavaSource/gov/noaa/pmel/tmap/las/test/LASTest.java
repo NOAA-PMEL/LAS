@@ -95,7 +95,7 @@ public class LASTest{
     	LASCLIOptions cliOptions = new LASCLIOptions();
     	CommandLineParser parser = new GnuParser();
     	CommandLine cl = null;
-    	int width = 100;
+    	int width = 110;
     	try {
 			cl = parser.parse(new LASCLIOptions(), args, true);
 		} catch (Exception e) {
