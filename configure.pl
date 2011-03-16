@@ -396,6 +396,7 @@ if ( !(-d $tds_dynadata) ) {
 my @Scripts = qw(build.xml
                  bin/initialize_check.sh
                  bin/addXML.sh
+                 bin/lasTest.sh
                  conf/example/sample_las.xml
                  conf/example/sample_ui.xml
                  conf/example/sample_insitu_las.xml
@@ -407,14 +408,18 @@ my @Scripts = qw(build.xml
                  WebContent/WEB-INF/struts-config.xml
                  WebContent/WEB-INF/web.xml
                  WebContent/TestLinks.html
-                 test/LASTest/las_test_config.xml
                  );
 my $mode = 0644;
+my $xmode = 0755;
 foreach my $script (@Scripts){
     my $template = "$script.in";
     open INSCRIPT, $template or die "Can't open template file $template";
     if (-f $script){
-        chmod $mode, '$script';
+        if ( $script =~ "\.sh" ) {
+           chmod $xmode, '$script';
+        } else {
+           chmod $mode, '$script';
+        }
     }
     open OUTSCRIPT, ">$script" or die "Can't create output file $script";
     my $cust_name = $LasConfig{custom_name};
@@ -454,7 +459,11 @@ foreach my $script (@Scripts){
     }
     close INSCRIPT;
     close OUTSCRIPT;
-    chmod $mode, '$script';
+    if ( $script =~ "\.sh" ) {
+       chmod $xmode, "$script";
+    } else {
+       chmod $mode, "$script";
+    }
 }
 
 
