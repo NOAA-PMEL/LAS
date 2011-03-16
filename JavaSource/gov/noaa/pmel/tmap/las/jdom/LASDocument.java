@@ -129,8 +129,7 @@ public class LASDocument extends Document {
     public void write(File file) {
         try {
             FileWriter xmlout = new FileWriter(file);
-            org.jdom.output.Format format = org.jdom.output.Format
-            .getPrettyFormat();
+            org.jdom.output.Format format = org.jdom.output.Format.getPrettyFormat();
             format.setLineSeparator(System.getProperty("line.separator"));
             XMLOutputter outputter = new XMLOutputter(format);
             outputter.output(this, xmlout);
@@ -141,6 +140,22 @@ public class LASDocument extends Document {
             e.printStackTrace();
         }
         
+    }
+    
+    public String write() {
+    	String xml = null;
+    	try {
+    		StringWriter xmlout = new StringWriter();
+    		org.jdom.output.Format format = org.jdom.output.Format.getPrettyFormat();
+    		format.setLineSeparator(System.getProperty("line.separator"));
+    		XMLOutputter outputter = new XMLOutputter(format);
+    		outputter.output(this, xmlout);
+    		xml = xmlout.toString();
+    		xmlout.close();
+    		return xml;
+    	} catch (Exception e) {
+    		return null;
+    	}
     }
     
     public Element findProperty(Element group, String name) throws LASException {
