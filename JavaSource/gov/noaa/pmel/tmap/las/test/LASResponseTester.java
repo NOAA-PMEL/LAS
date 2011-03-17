@@ -334,7 +334,7 @@ public class LASResponseTester{
                  	System.out.println(sbuf.toString());
                     } 
                     inProgress = false;
-                    if(lto.exitFirst()){System.exit(0);}
+                    if(lto.exitFirst()){System.exit(-1);}
                 }else if(sbuf.toString().contains("Progress") || sbuf.toString().contains("progress")){
                     inProgress = true;
                     noProgress++;
