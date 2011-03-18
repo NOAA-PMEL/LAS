@@ -33,15 +33,29 @@ public class LASTest{
     public LASTest(LASTestOptions l){
 
     	lto = l;
-        
+    	String url = l.getLAS();
+    	if ( !url.startsWith("http://") ) {
+    		url = "http://"+url;
+    	}
+    	if ( !url.endsWith("/") ) {
+    		url = url+"/";
+    	}
+    
         try{
-        
-        	String config = lasProxy.executeGetMethodAndReturnResult(l.getLAS()+"/getConfig.do?format=xml");
+        	     	
+        	String config = lasProxy.executeGetMethodAndReturnResult(url+"getConfig.do?format=xml");
         	JDOMUtils.XML2JDOM(config, lasConfig);
         	
-        	
         } catch (Exception e){
-            e.printStackTrace();
+            
+        	try {
+        		String config = lasProxy.executeGetMethodAndReturnResult(url+"/output/lasV7.xml");
+        		JDOMUtils.XML2JDOM(config, lasConfig);
+        	} catch (Exception exp){
+        		System.err.println("Unable to get configuration information from "+l.getLAS()+".  Is the server running?");
+        		System.exit(-1);
+        	}
+        	
         }
     }
 
@@ -96,6 +110,12 @@ public class LASTest{
     	CommandLineParser parser = new GnuParser();
     	CommandLine cl = null;
     	int width = 110;
+    	
+    	System.setProperty("log4j.logger.org.apache.http", "ERROR");
+    	System.setProperty("log4j.logger.org.apache.http.wire", "ERROR");
+
+
+    	
     	try {
 			cl = parser.parse(new LASCLIOptions(), args, true);
 		} catch (Exception e) {
