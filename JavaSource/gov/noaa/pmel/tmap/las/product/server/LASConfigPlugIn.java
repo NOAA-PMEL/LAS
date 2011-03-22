@@ -23,6 +23,7 @@ import org.apache.struts.action.PlugIn;
 import org.apache.struts.config.ModuleConfig;
 import org.jdom.Element;
 import org.jdom.JDOMException;
+import org.jdom.Namespace;
 
 public class LASConfigPlugIn implements PlugIn {
 
@@ -48,6 +49,7 @@ public class LASConfigPlugIn implements PlugIn {
 	public final static String LAS_UI_CONFIG_FILENAME_KEY = "ui_config_filename";
 	public final static String LAS_LAZY_START_KEY = "lazy_start";
 	public final static String LAS_LOCK_KEY = "lock";
+	public final static String LAS_SISTERS_CONFIG_FILENAME_KEY = "las_servers_filename";
 	
 	/*
 	 * This is the key where we will store a boolean with the results of an F-TDS test.
@@ -105,7 +107,16 @@ public class LASConfigPlugIn implements PlugIn {
 		this.lasUIFileName = lasUIFileName;
 	}
 
-
+    /*
+     * File name for the las_servers.xml file
+     */
+	private String lasServersFileName;
+	public String getLasServersFileName() {
+		return lasServersFileName;
+	}
+	public void setLasServersFileName(String lasServersFileName) {
+		this.lasServersFileName = lasServersFileName;
+	}
 
 	/**
 	 *  Initialize the LASConfig
@@ -125,6 +136,10 @@ public class LASConfigPlugIn implements PlugIn {
 		} else {
 			// Store in the servlet context for use by reinit method
 			context.setAttribute(LAS_CONFIG_FILENAME_KEY, configFileName);
+		}
+		
+		if ( lasServersFileName != null && lasServersFileName.length() > 0 ) {
+			context.setAttribute(LAS_SISTERS_CONFIG_FILENAME_KEY, lasServersFileName);
 		}
 
 		/* Set up the serverConfig for this server. */
@@ -166,6 +181,7 @@ public class LASConfigPlugIn implements PlugIn {
 		serverConfigFileName = (String) reinitContext.getAttribute(LAS_SERVER_CONFIG_FILENAME_KEY);
 		v7OperationsFileName = (String) reinitContext.getAttribute(LAS_OPERATIONS_CONFIG_FILENAME_KEY);
 		lasUIFileName = (String) reinitContext.getAttribute(LAS_UI_CONFIG_FILENAME_KEY);
+		lasServersFileName = (String) reinitContext.getAttribute(LAS_SISTERS_CONFIG_FILENAME_KEY);
 
 		if ((configFileName == null || configFileName.length() == 0)) {
 			throw new ServletException("No LAS configuration file specified.");
@@ -205,6 +221,35 @@ public class LASConfigPlugIn implements PlugIn {
 			JDOMUtils.XML2JDOM(configFile, lasConfig);
 		} catch (Exception e) {
 			log.error("Could not parse the las config file "+configFileName);
+		}
+		
+		if ( lasServersFileName != null && lasConfig.allowsSisters() ) {
+		    File sistersFile = new File(lasServersFileName);
+		    LASDocument sistersDoc = new LASDocument();
+		    try {
+		    	JDOMUtils.XML2JDOM(sistersFile, sistersDoc);
+		    	Element las_servers = sistersDoc.getRootElement();
+		    	
+		    	Element las_serversE = lasConfig.getRootElement().getChild("las_servers");
+		    	if ( las_serversE == null ) {
+		    		las_serversE = new Element("las_servers");
+		    		lasConfig.getRootElement().addContent(las_serversE);
+		    	}
+		    	Namespace ns = Namespace.getNamespace("http://ferret.pmel.noaa.gov/las");
+		    	List servers = las_servers.getChildren("las_server", ns);
+		    	if ( servers.size() == 0 ) {
+		    		servers = las_servers.getChildren("las_server");
+		    	}
+		    	for (Iterator serversIt = servers.iterator(); serversIt.hasNext();) {
+					Element server = (Element) serversIt.next();
+					server.setNamespace(null);
+					las_serversE.addContent((Element)server.clone());
+				}
+		    	
+		    } catch (Exception e) {
+		    	// We'll live without our sisters.
+		    	log.warn("Could not read the las_servers.xml file.");
+		    }
 		}
 
 		File serverConfigFile = new File(serverConfigFileName);
@@ -259,7 +304,6 @@ public class LASConfigPlugIn implements PlugIn {
 			} catch (Exception e) {
 				log.error("Could not parse the v7 operations file "+v7OperationsFileName, e);
 			}
-
 
 			List v7operations = v7operationsDoc.getRootElement().getChildren("operation");
 			Element operations = lasConfig.getRootElement().getChild("operations");

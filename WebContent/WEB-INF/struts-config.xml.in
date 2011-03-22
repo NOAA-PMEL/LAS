@@ -153,5 +153,7 @@
                         value="@JAKARTA_HOME@/content/@APPNAME@/conf/server/ui.xml" />
 		<set-property property="serverConfigFileName"
 			value="@JAKARTA_HOME@/content/@APPNAME@/conf/server/productserver.xml" />
+			<set-property property="lasServersFileName"
+			value="@JAKARTA_HOME@/content/@APPNAME@/conf/server/las_servers.xml" />
 	</plug-in>
 </struts-config>

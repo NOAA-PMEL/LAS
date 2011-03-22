@@ -4463,20 +4463,28 @@ public class LASConfig extends LASDocument {
 	}
 	public ArrayList<Tributary> getTributaries() {
 		ArrayList<Tributary> tributaries = new ArrayList<Tributary>();
-		List tribElements = getRootElement().getChildren("las_server");
-		for (Iterator tribIt = tribElements.iterator(); tribIt.hasNext();) {
-			Element trib = (Element) tribIt.next();
-			Tributary tributary = new Tributary(trib);
-			tributaries.add(tributary);
+		List servers = getRootElement().getChildren("las_servers");
+		for (Iterator servIt = servers.iterator(); servIt.hasNext();) {
+			Element server = (Element) servIt.next();
+			List tribElements = server.getChildren("las_server");
+			for (Iterator tribIt = tribElements.iterator(); tribIt.hasNext();) {
+				Element trib = (Element) tribIt.next();
+				Tributary tributary = new Tributary(trib);
+				tributaries.add(tributary);
+			}
 		}
 		return tributaries;
 	}
 	public Tributary getTributary(String key) {
-		List tribElements = getRootElement().getChildren("las_server");
-		for (Iterator tribIt = tribElements.iterator(); tribIt.hasNext();) {
-			Element trib = (Element) tribIt.next();
-			if ( trib.getAttributeValue("ID").equals(key) ) {
-				return new Tributary((Element) trib.clone());
+		List servers = getRootElement().getChildren("las_servers");
+		for (Iterator servIt = servers.iterator(); servIt.hasNext();) {
+			Element server = (Element) servIt.next();
+			List tribElements = server.getChildren("las_server");
+			for (Iterator tribIt = tribElements.iterator(); tribIt.hasNext();) {
+				Element trib = (Element) tribIt.next();
+				if ( trib.getAttributeValue("ID").equals(key) ) {
+					return new Tributary((Element) trib.clone());
+				}
 			}
 		}
 		return null;
