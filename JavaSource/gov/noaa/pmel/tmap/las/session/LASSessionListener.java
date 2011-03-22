@@ -20,7 +20,9 @@ public class LASSessionListener implements HttpSessionListener {
 		LASConfig lasConfig = (LASConfig) context.getAttribute(LASConfigPlugIn.LAS_CONFIG_KEY);
 		context.setAttribute(LASConfigPlugIn.LAS_LOCK_KEY, "true");
         String JSESSIONID = event.getSession().getId();       
-        lasConfig.removeRemoteVariables(JSESSIONID);
+        if ( lasConfig != null ) {
+        	lasConfig.removeRemoteVariables(JSESSIONID);
+        }
         context.removeAttribute(LASConfigPlugIn.LAS_LOCK_KEY);
 	}
 
