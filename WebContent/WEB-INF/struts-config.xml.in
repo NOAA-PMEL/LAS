@@ -51,6 +51,7 @@
           <action path="/getUI" type="gov.noaa.pmel.tmap.las.confluence.Confluence">
               <forward name="localGetUI" path="/localGetUI.do"/>
               <forward name="lazy_start" path="/productserver/templates/lazy_start.vm" redirect="false"/>
+              <forward name="categories_required" path="/productserver/templates/categories_required.vm" redirect="false"/>
           </action>
           
           <action path="/LocalProductServer" name="progress" type="gov.noaa.pmel.tmap.las.product.server.ProductServerAction">
@@ -109,14 +110,6 @@
           <action path="/getFullDataset" type="gov.noaa.pmel.tmap.las.ui.GetFullDataset" />
           <action path="/getRegions" type="gov.noaa.pmel.tmap.las.ui.GetRegions" />
           <action path="/getDataConstraints" type="gov.noaa.pmel.tmap.las.ui.GetDataConstraints" />
-          <action path="/GEServer" type="gov.noaa.pmel.tmap.las.service.kml.GEServerAction"/>
-	      <action path="/admin" type="org.apache.struts.actions.ForwardAction" parameter="/productserver/templates/admin.vm"/>
-          <action path="/ReInit" type="gov.noaa.pmel.tmap.las.ui.ReInit">
-              <forward name="reinit" path="/productserver/templates/reinit.vm"/>
-          </action>
-          <action path="/CacheManager" name="cacheForm" type="gov.noaa.pmel.tmap.las.ui.CacheManager">
-              <forward name="cache" path="/productserver/templates/cache.vm"/>
-          </action>
           
           <!--  End of definitions for normal operation. -->
           
@@ -129,9 +122,6 @@
           <action path="/getConfig" type="gov.noaa.pmel.tmap.las.ui.GetConfig"/>
           <action path="/auth" type="org.apache.struts.actions.ForwardAction" parameter="/productserver/templates/auth.vm"/>
           <action path="/GEServer" type="gov.noaa.pmel.tmap.las.service.kml.GEServerAction"/>
-	       <action path="/getUI"  type="gov.noaa.pmel.tmap.las.ui.GetUI">
-	           <forward name="lazy_start" path="/productserver/templates/lazy_start.vm" redirect="false"/>
-	      </action>
 	      <action path="/admin" type="org.apache.struts.actions.ForwardAction" parameter="/productserver/templates/admin.vm"/>
           <action path="/ReInit" type="gov.noaa.pmel.tmap.las.ui.ReInit">
               <forward name="reinit" path="/productserver/templates/reinit.vm"/>
