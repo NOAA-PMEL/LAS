@@ -238,6 +238,11 @@ public class LASConfigPlugIn implements PlugIn {
 		    	Namespace ns = Namespace.getNamespace("http://ferret.pmel.noaa.gov/las");
 		    	List servers = las_servers.getChildren("las_server", ns);
 		    	if ( servers.size() == 0 ) {
+		    		// If the ESG Registry built this file, it will be under this namespace.  :-)
+		    		ns = Namespace.getNamespace("http://www.esgf.org/registry");
+		    		servers = las_servers.getChildren("las_server", ns);
+		    	}
+		    	if ( servers.size() == 0 ) {
 		    		servers = las_servers.getChildren("las_server");
 		    	}
 		    	for (Iterator serversIt = servers.iterator(); serversIt.hasNext();) {
