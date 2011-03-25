@@ -36,6 +36,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.client.ui.FlexTable.FlexCellFormatter;
 
 /**
+ * The Google Maps based Time Series UI.
  * @author rhs
  *
  */

@@ -1,5 +1,6 @@
 package gov.noaa.pmel.tmap.las.client;
 
+import gov.noaa.pmel.tmap.las.client.laswidget.CheckBoxPanel;
 import gov.noaa.pmel.tmap.las.client.laswidget.DateTimeWidget;
 import gov.noaa.pmel.tmap.las.client.laswidget.LASDateWidget;
 import gov.noaa.pmel.tmap.las.client.laswidget.LASRequestWrapper;
@@ -46,7 +47,7 @@ import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
- * Entry point classes define <code>onModuleLoad()</code>.
+ * The OpenLaysers based Time Series UI.
  */
 public class TimeSeries implements EntryPoint {
 

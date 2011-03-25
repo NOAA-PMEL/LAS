@@ -1,6 +1,5 @@
 package gov.noaa.pmel.tmap.las.client;
 
-import gov.noaa.pmel.tmap.las.client.laswidget.AnalysisWidget;
 import gov.noaa.pmel.tmap.las.client.laswidget.AxesWidgetGroup;
 import gov.noaa.pmel.tmap.las.client.laswidget.ComparisonAxisSelector;
 import gov.noaa.pmel.tmap.las.client.laswidget.Constants;
@@ -8,10 +7,8 @@ import gov.noaa.pmel.tmap.las.client.laswidget.DatasetButton;
 import gov.noaa.pmel.tmap.las.client.laswidget.OperationsWidget;
 import gov.noaa.pmel.tmap.las.client.laswidget.OptionsButton;
 import gov.noaa.pmel.tmap.las.client.laswidget.OutputPanel;
-import gov.noaa.pmel.tmap.las.client.serializable.CategorySerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.VariableSerializable;
 import gov.noaa.pmel.tmap.las.client.util.Util;
-import gov.noaa.pmel.tmap.las.client.laswidget.OutputPanel;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -34,7 +31,6 @@ import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.DisclosurePanel;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
@@ -46,7 +42,12 @@ import com.google.gwt.user.client.ui.PushButton;
 import com.google.gwt.user.client.ui.TreeItem;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.client.ui.FlexTable.FlexCellFormatter;
-
+/**
+ * This is the base class for an LAS user interface. It populates a left-hand navigation all of the LAS controls
+ * and places one or more OutputPanels on the screen to catch and display the output from LAS.
+ * @author rhs
+ *
+ */
 public class BaseUI implements EntryPoint {
 	/*
 	 * Contains the visualization panels for this UI.  They are laid out in the xPanelTable

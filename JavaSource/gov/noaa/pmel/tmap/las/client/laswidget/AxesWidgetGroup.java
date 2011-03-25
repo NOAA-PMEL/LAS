@@ -15,7 +15,11 @@ import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.PushButton;
-
+/**
+ * This widget will create a map and a set of axes widgets to control all of the XYZT and E(nsemble) dimensions for a given view.
+ * @author rhs
+ *
+ */
 public class AxesWidgetGroup extends Composite {
 	// Apply button only used in the horizontal layout.
 	PushButton plotApplyButton;
@@ -41,7 +45,7 @@ public class AxesWidgetGroup extends Composite {
 	int mapCol;
 	List<String> viewAxes = new ArrayList<String>();   // This is just the view, but individual axes
 	/**
-	 * A widget to hold a set of x, y, z and t axis controls and to display them in groups according to the view.  Initially the map
+	 * A widget to hold a set of x, y, z, t, and e(nsemble) axis controls and to display them in groups according to the view.  Initially the map
 	 * is at the top and z and t are below, but this can be switched.
 	 * @param plot_title
 	 * @param ortho_title

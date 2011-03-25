@@ -16,7 +16,12 @@ import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.client.ui.FlexTable.FlexCellFormatter;
 
-
+/**
+ * A simple widget that will display a list of axes names.  Used mostly to allow vizGal users to select 
+ * which axis is used as the comparison axis in the panels.
+ * @author rhs
+ *
+ */
 public class ComparisonAxisSelector extends Composite {
 	FlexTable flex;
 	FlexTable layout;

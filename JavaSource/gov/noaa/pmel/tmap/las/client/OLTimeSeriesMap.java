@@ -19,21 +19,12 @@ import gov.noaa.pmel.tmap.las.client.serializable.VariableSerializable;
 import java.util.HashMap;
 import java.util.Iterator;
 
-import org.gwtopenmaps.openlayers.client.Bounds;
 import org.gwtopenmaps.openlayers.client.LonLat;
 import org.gwtopenmaps.openlayers.client.Map;
 import org.gwtopenmaps.openlayers.client.MapOptions;
-import org.gwtopenmaps.openlayers.client.MapWidget;
 import org.gwtopenmaps.openlayers.client.Marker;
-import org.gwtopenmaps.openlayers.client.Style;
-import org.gwtopenmaps.openlayers.client.feature.VectorFeature;
 import org.gwtopenmaps.openlayers.client.geometry.Point;
 import org.gwtopenmaps.openlayers.client.layer.Markers;
-import org.gwtopenmaps.openlayers.client.layer.Vector;
-
-import com.google.gwt.maps.client.event.MapClickHandler;
-import com.google.gwt.maps.client.event.MarkerClickHandler;
-
 
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.ClickListener;
@@ -44,6 +35,8 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.client.ui.FlexTable.FlexCellFormatter;
 
 /**
+ * An OpenLayers based map for displaying time series points that are connected to an LAS for plotting of
+ * time series graphs.
  * @author rhs
  *
  */

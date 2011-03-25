@@ -4,7 +4,12 @@ import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.user.client.ui.RootPanel;
 
 import gov.noaa.pmel.tmap.las.client.laswidget.DateTimeWidget;
-
+/**
+ * A GWT EntryPoint class for testing the GWT implementation of the data time widgets.
+ * TODO: Add no leap, all leap and 360-day calendars.  Consider GODA Time or others for implementation.
+ * @author rhs
+ *
+ */
 public class DateWidgetTest implements EntryPoint {
     DateTimeWidget dateWidget;
     DateTimeWidget dateWidget2;
