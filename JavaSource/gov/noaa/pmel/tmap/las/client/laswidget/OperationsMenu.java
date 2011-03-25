@@ -13,7 +13,11 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.MenuBar;
 import com.google.gwt.user.client.ui.MenuItem;
-
+/**
+ * A widget that shows the "non-plot" operations from an LAS (like Google Earth, animation, etc).
+ * @author rhs
+ *
+ */
 public class OperationsMenu extends Composite {
 	// In the configuration should have metadata that indicates that the operation goes in the button bar and that it is the default
 	// operation of that type for that view.  This way we could construct these "on the fly" and keep them in a ArrayList and add them

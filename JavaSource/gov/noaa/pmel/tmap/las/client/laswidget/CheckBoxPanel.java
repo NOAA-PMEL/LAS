@@ -27,6 +27,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
+ * Used in the Time Series interfaces to control a group of check boxes.
  * @author rhs
  *
  */

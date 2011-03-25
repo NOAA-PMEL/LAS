@@ -9,7 +9,6 @@
  */
 package gov.noaa.pmel.tmap.las.client.laswidget;
 
-import gov.noaa.pmel.tmap.las.client.RPCServiceAsync;
 import gov.noaa.pmel.tmap.las.client.serializable.OptionSerializable;
 import gov.noaa.pmel.tmap.las.client.util.Util;
 
@@ -37,6 +36,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
+ * A widget that will pull down the options for a particular operation and will return a map of the current state.
  * @author rhs
  *
  */

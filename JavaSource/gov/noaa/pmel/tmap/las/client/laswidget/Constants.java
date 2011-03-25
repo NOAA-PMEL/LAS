@@ -1,5 +1,9 @@
 package gov.noaa.pmel.tmap.las.client.laswidget;
-
+/**
+ * A bunch of constants to keep from making typos when referring to certain Strings.
+ * @author rhs
+ *
+ */
 public class Constants {
 
 	public static final String DEFAULT_DSID = "default_dsid";

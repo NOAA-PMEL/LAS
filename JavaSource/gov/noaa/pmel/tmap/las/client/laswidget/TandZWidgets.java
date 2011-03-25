@@ -3,7 +3,12 @@ package gov.noaa.pmel.tmap.las.client.laswidget;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HorizontalPanel;
-
+/**
+ * T and Z widget for a panel... Need all axes in the panel.
+ * @deprecated
+ * @author rhs
+ *
+ */
 public class TandZWidgets extends Composite {
 	HorizontalPanel layout = new HorizontalPanel();
 	DateTimeWidget dateTimeWidget = new DateTimeWidget();

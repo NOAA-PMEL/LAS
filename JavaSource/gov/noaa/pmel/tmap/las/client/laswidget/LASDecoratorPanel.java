@@ -15,7 +15,11 @@ import com.google.gwt.user.client.ui.ToggleButton;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.client.ui.FlexTable.FlexCellFormatter;
 import com.google.gwt.user.client.ui.HTMLTable.CellFormatter;
-
+/**
+ * A widget that allows for a consistent look and feel for collapsible panels in LAS.  Might not need this.
+ * @author rhs
+ *
+ */
 public class LASDecoratorPanel extends Composite {
 
 	DecoratorPanel myPanel = new DecoratorPanel();

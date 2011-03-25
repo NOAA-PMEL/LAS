@@ -1,24 +1,20 @@
 package gov.noaa.pmel.tmap.las.client.laswidget;
 
 
-import gov.noaa.pmel.tmap.las.client.RPCServiceAsync;
 import gov.noaa.pmel.tmap.las.client.serializable.CategorySerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.DatasetSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.VariableSerializable;
 import gov.noaa.pmel.tmap.las.client.util.Util;
 
-import com.google.gwt.user.client.DOM;
-import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.Frame;
-import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.Tree;
 import com.google.gwt.user.client.ui.TreeItem;
 import com.google.gwt.user.client.ui.TreeListener;
 
 /**
- * Entry point classes define <code>onModuleLoad()</code>.
+ * A tree Widget that is the data set picker for GWT LAS clients which understands how to initialize itself and is used 
+ * by the {@link gov.noaa.pmel.tmap.las.client.laswidget.DatasetButton}
  */
 public class DatasetWidget extends Tree implements TreeListener {
     TreeItem currentlySelected = null;

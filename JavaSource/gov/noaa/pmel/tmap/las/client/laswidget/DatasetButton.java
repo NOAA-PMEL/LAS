@@ -23,7 +23,12 @@ import com.google.gwt.user.client.ui.TreeItem;
 import com.google.gwt.user.client.ui.TreeListener;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
-
+/**
+ * A button that will open a data picker that has automatically initialized itself via RPC with the data sets
+ * for the LAS.
+ * @author rhs
+ *
+ */
 public class DatasetButton extends Composite {
 	PushButton choose;
 	PopupPanel datasetPanel;
