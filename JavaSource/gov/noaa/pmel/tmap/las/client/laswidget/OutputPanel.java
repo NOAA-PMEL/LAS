@@ -282,7 +282,13 @@ public class OutputPanel extends Composite {
 //		fixedAxis = temp;
 //		panelAxesWidgets.setCompareAxis(view, ortho, compareAxis);
 	}
-	// The SliderSorter needs to pass in which axis it is controlling and the value it should have...
+	/**
+	 * Send a request to the LAS server to create a new plot, you must have already pushed the operation and axes values from the main left-hand
+	 * controls to the panel and you can pass in the current "global" plot options.
+	 * @param options
+	 * @param switchAxis
+	 * @param popup
+	 */
 	public void refreshPlot(Map<String, String> options, boolean switchAxis, boolean popup) {
 		if (switchAxis) {
 			switchAxis();

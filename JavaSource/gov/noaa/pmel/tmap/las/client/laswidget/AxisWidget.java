@@ -11,7 +11,11 @@ import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
-
+/**
+ * A generic axis widget suitable for a simple numeric access like x, y, or z.  Chances are what you really want to work with is an {@link gov.noaa.pmel.tmap.las.client.laswidget.AxesWidgetGroup}
+ * @author rhs
+ *
+ */
 public class AxisWidget extends Composite {
 	String type;
 	Label lo_label = new Label();
@@ -24,6 +28,10 @@ public class AxisWidget extends Composite {
     FlexTable layout = new FlexTable();
     NumberFormat format = NumberFormat.getFormat("###.##");
     boolean range;
+    /**
+     * Construct an axis using a AxisSerializable object.  
+     * @param ax
+     */
     public AxisWidget(AxisSerializable ax) {
     	    init(ax);
         	initWidget(layout); 	

@@ -14,11 +14,12 @@ import gov.noaa.pmel.tmap.las.client.serializable.RegionSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.VariableSerializable;
 
 import com.google.gwt.user.client.rpc.RemoteService;
-
+/**
+ * GWT RPC Defintions for LAS.
+ * @author rhs
+ *
+ */
 public interface RPCService extends RemoteService {
-	/**
-	 * 
-	 */
 	public CategorySerializable[] getCategories(String id) throws RPCException;
 	public VariableSerializable getVariable(String dsid, String varid) throws RPCException;
 	public GridSerializable getGrid(String dsID, String varID) throws RPCException;

@@ -6,7 +6,11 @@ import gov.noaa.pmel.tmap.las.client.serializable.ConfigSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.OperationSerializable;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
-
+/**
+ * GWT RPC Async definitions for LAS.
+ * @author rhs
+ *
+ */
 public interface RPCServiceAsync {
 	public void getCategories(String id, AsyncCallback categoryCallback);
 	public void getVariable(String dsid, String varid, AsyncCallback getVariableCallback);
