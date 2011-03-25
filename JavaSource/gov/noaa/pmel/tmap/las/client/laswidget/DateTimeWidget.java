@@ -23,7 +23,11 @@ import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.client.ui.HTMLTable.CellFormatter;
-
+/**
+ * A pure GWT implementation of the LAS Date Widget.
+ * @author rhs
+ *
+ */
 public class DateTimeWidget extends Composite {
 	
 	private static final DateTimeFormat longForm = DateTimeFormat.getFormat("yyyy-MM-dd HH:mm:ss");

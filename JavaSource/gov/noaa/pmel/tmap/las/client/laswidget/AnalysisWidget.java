@@ -14,7 +14,11 @@ import com.google.gwt.user.client.ui.DisclosurePanel;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
-
+/**
+ * A widget for setting up an analysis Widget in LAS --- NOT YET WORKING.
+ * @author rhs
+ *
+ */
 public class AnalysisWidget extends Composite {
 	ListBox analysisType = new ListBox();
 	DisclosurePanel disclosurePanel = new DisclosurePanel("Define Analysis");

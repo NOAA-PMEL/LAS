@@ -3,7 +3,12 @@ package gov.noaa.pmel.tmap.las.client.laswidget;
 import gov.noaa.pmel.tmap.las.client.serializable.OperationSerializable;
 
 import com.google.gwt.user.client.ui.RadioButton;
-
+/**
+ * A radio button used to build the operations selection interface since it keeps track of the
+ * operation that it is associated with.
+ * @author rhs
+ *
+ */
 public class OperationRadioButton extends RadioButton {
     OperationSerializable operation;
     String view;

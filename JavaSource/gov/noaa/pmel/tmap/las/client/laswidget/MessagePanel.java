@@ -7,7 +7,11 @@ import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.Widget;
-
+/**
+ * A popup panel with a close button that can take a message.  Like and Alert, but not as ugly.
+ * @author rhs
+ *
+ */
 public class MessagePanel extends Composite {
 	PopupPanel messagePanel;
 	Grid messageGrid;

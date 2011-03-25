@@ -13,7 +13,11 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.PushButton;
 import com.google.gwt.user.client.ui.Widget;
-
+/**
+ * A button that opens up an options plot options widget.
+ * @author rhs
+ *
+ */
 public class OptionsButton extends Composite {
 	PushButton optionsButton = new PushButton("Plot Options");
 	DialogBox optionsDialog = new DialogBox(false);

@@ -12,6 +12,8 @@ package gov.noaa.pmel.tmap.las.client.laswidget;
 import com.google.gwt.core.client.JavaScriptObject;
 
 /**
+ * A wrapper around the LAS JavaScript DatePicker which does evil things 
+ * to the DOM and doesn't play nice with GWT.
  * @author rhs
  *
  */

@@ -19,7 +19,11 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.StackPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
-
+/**
+ * The high level widget that displays all of the operations associated with a particular data set and variable.
+ * @author rhs
+ *
+ */
 public class OperationsWidget extends Composite {
 	boolean isOpen;
 	FlexTable layout = new FlexTable();
