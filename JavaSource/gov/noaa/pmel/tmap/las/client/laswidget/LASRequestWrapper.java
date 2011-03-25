@@ -1,7 +1,46 @@
 package gov.noaa.pmel.tmap.las.client.laswidget;
 
-import com.google.gwt.core.client.JavaScriptObject;
+import gov.noaa.pmel.tmap.las.client.util.Util;
 
+import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.http.client.RequestBuilder;
+import com.google.gwt.http.client.RequestException;
+import com.google.gwt.http.client.URL;
+import com.google.gwt.user.client.ui.HTML;
+/**
+ * This code wraps the native JavaScript request object and allows easy access to this object in GWT applications.
+ * You MUST play a little game of creating the object and removing stuff from it when initializing this Widget since the 
+ * underlying JavaScript implementation requires it.  It looks something like this:
+ * <pre>
+ *      {@code
+ * 		LASRequestWrapper lasRequest = new LASRequestWrapper();
+ *      lasRequest.removeRegion(0);
+ *      lasRequest.removeVariables();
+ *      lasRequest.removePropertyGroup("ferret");
+ *      lasRequest.addVariable("my_dsid", "my_varid");
+ *      lasRequest.addRegion();
+ *      lasRequest.setOperation(operationID, "v7");
+ *      // You'll likely be getting the values of x and y from the map in your AxesWidgetGroup
+ *      // xlo = axesWidgets.getRefMap().getXlo()
+ *      lasRequest.setRange("x", -180, 180, 0); // The last zero is the "region id", namely the first region in the object
+ *      lasRequest.setRange("y", -90, 90, 0);
+ *      // You'll likely get the dates from your AxisWidgetGroup as well.
+ *      lasRequest.setRange("t", axesWidgets.getTAxis().getFerretDateLo(), axesWidgets.getTAxis().getFerretDateHi(), 0)
+ *      String url = Util.getProductServer()+"?xml="+URL.encode(lasRequest.getXMLText());
+ *      RequestBuilder sendRequest = new RequestBuilder(RequestBuilder.GET, url);
+ *      try {
+ *                                        // The AsynCallback that handles the result from the request.
+ *          sendRequest.sendRequest(null, lasRequestCallback);
+ *      } catch (RequestException e) {
+ *          // Do something
+ *      }
+ *      }
+ * <pre>
+ * @see gov.noaa.pmel.tmap.las.client.laswidget.AxesWidgetGroup
+ * @see gov.noaa.pmel.tmap.las.client.util.Util
+ * @author rhs
+ *
+ */
 public class LASRequestWrapper {
 	private JavaScriptObject lasRequest;
 	/**
@@ -15,8 +54,8 @@ public class LASRequestWrapper {
         return lasRequest;
     }-*/;
 	/**
-	 * Construct a native JavaScript LASRequest Object.
-	 * @param xml
+	 * Construct a native JavaScript LASRequest Object initializing it with the request XML contained in the parameter.
+	 * @param xml - any legal LAS UI Request XML as a string.
 	 */
 	public LASRequestWrapper(String xml) {
 		lasRequest = init(xml);
