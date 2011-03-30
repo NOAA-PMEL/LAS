@@ -79,7 +79,7 @@ public class GetDatasets extends ConfigService {
                 
         ArrayList<Category> datasets = new ArrayList<Category>();
 		try {
-			datasets = lasConfig.getDatasets();
+			datasets = lasConfig.getDatasetsAsCategories(false);
 		} catch (JDOMException e) {
 			sendError(response, "<datasets>", format, e.getMessage());
 		} catch (LASException e) {
