@@ -4,14 +4,20 @@ package gov.noaa.pmel.tmap.las.test;
 import gov.noaa.pmel.tmap.addxml.JDOMUtils;
 import gov.noaa.pmel.tmap.las.jdom.LASConfig;
 import gov.noaa.pmel.tmap.las.jdom.LASDocument;
+import gov.noaa.pmel.tmap.las.jdom.LASTestResults;
 import gov.noaa.pmel.tmap.las.ui.LASProxy;
 import gov.noaa.pmel.tmap.las.util.Category;
 import gov.noaa.pmel.tmap.las.util.Dataset;
 import gov.noaa.pmel.tmap.las.util.Variable;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
@@ -45,53 +51,84 @@ public class LASDatasetTester{
      * Test remote OPeNDAP URLs
      *
      */
-    public void testDataset(){
-        
-        ArrayList<Category> categories = new ArrayList<Category>();
-        ArrayList<Variable> variables = new ArrayList<Variable>();
+    public void testDataset(boolean web_output){
 
-        try{
-            //get datasets
-            categories = lasConfig.getDatasets(false);
-            //loop over each dataset
-            for(Iterator catIt = categories.iterator(); catIt.hasNext();) {
-            	Category cat = (Category) catIt.next();
-            	ArrayList<Dataset> datasets = cat.getAllDatasets();
-            	if ( datasets != null ) {
-            		for (Iterator dsIt = cat.getAllDatasets().iterator(); dsIt.hasNext();) {
-            			Dataset dataset = (Dataset) dsIt.next();
-            			Variable var = dataset.getVariables().get(0);
+    	String test_output_file = null;
+    	LASTestResults testResults = new LASTestResults();
+    	ArrayList<Dataset> datasets = new ArrayList<Dataset>();
+    	ArrayList<Variable> variables = new ArrayList<Variable>();
 
-            			//get the data URL
-            			String dsURL = lasConfig.getFullDataObjectURL(dataset.getID(), var.getID());
+    	try{
+    		if ( web_output ) {
+    			test_output_file = lasConfig.getOutputDir()+File.separator+LASTest.TEST_RESULTS_FILE;
+    			File c = new File(test_output_file);
+    			if ( c.exists() ) {
+    				JDOMUtils.XML2JDOM(new File(test_output_file), testResults);
+    			}
+    			Date now = new Date();
+    			testResults.putTest(LASTest.TEST_DIRECT_OPENDAP, now.getTime());
+    		}
 
-            			//if url is in format of ....xyz.nc#var
-            			if(dsURL.contains("#")){
-            				String[] tmp = dsURL.split("#");
-            				dsURL = tmp[0];
-            			}
+    		//get datasets
+    		datasets = lasConfig.getDatasets(true);
+    		//loop over each dataset
 
-            			//get dds for a remote dataset
-            			if(dsURL != null && dsURL.contains("http")){
-            				String ds = lto.getDataset();
-            				if( (ds == null) || ((ds != null)&&(dsURL.contains(ds))) ){                
-            					getDDS(dsURL);
-            				}
-            			}
-            		}
-            	}
 
-            }
-        } catch (Exception e){
-            e.printStackTrace();
-        }
+
+    		for (Iterator dsIt = datasets.iterator(); dsIt.hasNext();) {
+    			Dataset dataset = (Dataset) dsIt.next();
+    			if ( dataset.getVariables().size() > 0 ) {
+    				Variable var = dataset.getVariables().get(0);
+
+    				if ( web_output ) {
+    					testResults.putDataset(LASTest.TEST_DIRECT_OPENDAP, dataset.getName(), dataset.getID());
+    				}
+
+    				//get the data URL
+    				String dsURL = lasConfig.getFullDataObjectURL(dataset.getID(), var.getID());
+
+    				//if url is in format of ....xyz.nc#var
+    				if(dsURL.contains("#")){
+    					String[] tmp = dsURL.split("#");
+    					dsURL = tmp[0];
+    				}
+
+    				//get dds for a remote dataset
+    				if(dsURL != null && dsURL.contains("http")){
+    					String ds = lto.getDataset();
+    					if( (ds == null) || ((ds != null)&&(dsURL.contains(ds))) ) {
+
+    						if ( !web_output ) {
+    							System.out.println("---- Check dataset: " + dsURL);
+    						}
+    						String status = "passed";
+    						if ( !getDDS(dsURL) ) {
+    							status = "failed";
+    						}
+    						if ( web_output ) {
+    							testResults.addResult(LASTest.TEST_DIRECT_OPENDAP, dataset.getID(), dsURL, status);
+    						} else {
+    							if ( status.equals("passed") ) {
+    								System.out.println("OK!");
+    							}
+    						}
+    					}
+    				}
+    			}
+    		}
+    		if ( web_output ) {
+    			testResults.write(test_output_file);
+    		}
+    	} catch (Exception e){
+    		e.printStackTrace();
+    	}
     }
 
     /**
      * Test F-TDS URLs
      *
      */
-    public void testFTDS(){
+    public void testFTDS(boolean web_output){
         String dsID;
         String varID;
         String varpath;
@@ -99,17 +136,31 @@ public class LASDatasetTester{
         ArrayList<Dataset> datasets = new ArrayList<Dataset>();
         ArrayList<Variable> variables = new ArrayList<Variable>();
 
+        String test_output_file = null;
+    	LASTestResults testResults = new LASTestResults();
+        
         try{
             //get datasets
             Element datasetsE = lasConfig.getDatasetsAsElement();
             List datasetElements = datasetsE.getChildren("dataset");
 
+            if ( web_output ) {
+                test_output_file = lasConfig.getOutputDir()+File.separator+LASTest.TEST_RESULTS_FILE;
+                File c = new File(test_output_file);
+                if ( c.exists() ) {
+                    JDOMUtils.XML2JDOM(c, testResults);
+                }
+                Date date = new Date();
+                testResults.putTest(LASTest.TEST_F_TDS_OPENDAP, date.getTime());
+            }
 
             //loop over each dataset
             for(Iterator dsIt = datasetElements.iterator(); dsIt.hasNext();){
                 Element datasetE = (Element) dsIt.next();
                 dsID = datasetE.getAttributeValue("ID");
 
+                testResults.putDataset(LASTest.TEST_F_TDS_OPENDAP, datasetE.getAttributeValue("name"), dsID);
+                
                 //get first variable of this dataset
                 variables = lasConfig.getVariables(dsID);
                 varID = variables.get(0).getID();
@@ -121,8 +172,25 @@ public class LASDatasetTester{
                 String ftdsURL= lasConfig.getDataAccessURL(varpath, true);
                 
                 if(ftdsURL != null && ! ftdsURL.equals("") && ftdsURL.contains("http")){ 
-                    getDDS(ftdsURL);
+                	
+                	if ( !web_output ) {
+					    System.out.println("---- Check dataset: " + ftdsURL);
+                	}
+                	String status = "passed";
+                	if ( !getDDS(ftdsURL) ) {
+						status = "failed";
+					}
+                	if ( web_output ) {
+						testResults.addResult(LASTest.TEST_F_TDS_OPENDAP, dsID, ftdsURL, status);
+                	} else {
+                		if ( status.equals("passed") ) {
+							System.out.println("OK!");
+						}
+                	}             	
                 }
+            }
+            if ( web_output ) {
+            	testResults.write(test_output_file);
             }
         } catch (Exception e){
             e.printStackTrace();
@@ -146,28 +214,27 @@ public class LASDatasetTester{
      * @param url URL of the dataset
      *
      */
-    public void getDDS(String url) throws Exception{
-        //DConnect dc = new DConnect(url);
-        //DDS mydds = dc.getDDS();
-
+    public boolean getDDS(String url) throws Exception{
+       
         boolean printDDS = lto.showDDS();
 
-        System.out.println("---- Check dataset: " + url);
+        
         try{
             DConnect dc = new DConnect(url);
             DDS mydds = dc.getDDS();
-
+            
             if(printDDS){
                 mydds.print(System.out);
-            }else{
-                System.out.println("OK!");
             }
+
+            return true;
 
         }catch (MalformedURLException e){
             //java.net.MalformedURLException - if the URL given to the constructor has an error
             System.out.println("The URL given to the constructor has an error.");
             //e.printStackTrace();
             System.out.println(e.getMessage());
+            return false;
 
         }catch (IOException e){
             //java.io.IOException - if an error connecting to the remote server
@@ -178,20 +245,24 @@ public class LASDatasetTester{
             //dods.dap.parser.ParseException - if the DDS parser returned an error
             System.out.println("The DDS parser returned an error.");
             System.out.println(e.getMessage());
+            return false;
 
         }catch (DDSException e){
             //dods.dap.DDSException - on an error constructing the DDS
             System.out.println("An error occurs when constructing the DDS.");
             System.out.println(e.getErrorMessage());
+            return false;
 
         }catch (DODSException e){
             //dods.dap.DODSException - if an error returned by the remote server
             System.out.println("An error was returned by the remote server.");
             System.out.println(e.getErrorMessage());
+            return false;
         }catch (Exception e){
             System.out.println("An error occurs when connecting to the data server.");
             e.printStackTrace();
+            return false;
         }
-
+        return false;
     }
 }
