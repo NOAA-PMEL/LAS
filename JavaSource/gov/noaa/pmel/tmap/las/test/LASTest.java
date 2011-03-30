@@ -24,12 +24,21 @@ import org.jdom.Element;
  *
  */
 public class LASTest{
+	
+	public static String TEST_DIRECT_OPENDAP = "Direct OPeNDAP Access Test";
+	public static String TEST_F_TDS_OPENDAP = "F-TDS OPeNDAP Access Test";
+	public static String TEST_PRODUCT_RESPONSE = "Product Response Test";
+	public static String TEST_RESULTS_FILE = "testResults.xml";
 
 	private static LASProxy lasProxy = new LASProxy();
 	
     private LASConfig lasConfig = new LASConfig();
     private LASTestOptions lto;
     
+    public LASTest(LASTestOptions l, LASConfig c) {
+    	lto = l;
+    	lasConfig = c;
+    }
     public LASTest(LASTestOptions l){
 
     	lto = l;
@@ -58,50 +67,31 @@ public class LASTest{
         	
         }
     }
-
-    /**
-     * Test datasets are alive or not
-     *
-     */
-    public void testDataset(){
-        LASDatasetTester ltd = new LASDatasetTester(lasConfig, lto);
-        ltd.testDataset();
-    }
-
-    public void testFTDS(){
-        LASDatasetTester ltd = new LASDatasetTester(lasConfig, lto);
-        ltd.testFTDS();
-    }
-
-    /**
-     * Test whether responses from product server are correct
-     *
-     */
-    public void testResponse(){
-        //LASResponseTester ltr = new LASResponseTester(las_config,las_operationsV7,las_options, lto);
-        LASResponseTester ltr = new LASResponseTester(lasConfig, lto);
-        ltr.testResponse();
-    } 
-
-    public void runTest(LASTestOptions lto){
+    public void runTest(LASTestOptions lto, boolean web_output){
 
     	//test OPeNDAP URLs 
     	if(lto.testConn()){
-            System.out.println("==== LAS test: Are the datasets alive? =================");
-            testDataset();
+    		if ( !web_output ) System.out.println("==== LAS test: Are the datasets alive? =================");
+    		LASDatasetTester ltd = new LASDatasetTester(lasConfig, lto);
+    	    ltd.testDataset(web_output);
         }
         System.out.println();
         //test F-TDS URLs 
         if(lto.testFTDS()){
-            System.out.println("==== LAS test: Are the FTDS URLs working? =================");
-            testFTDS();
+        	if ( !web_output ) System.out.println("==== LAS test: Are the FTDS URLs working? =================");
+        	 LASDatasetTester ltd = new LASDatasetTester(lasConfig, lto);
+             ltd.testFTDS(web_output);
         }
         System.out.println();
         //test product response
         if(lto.testResp()){
-            System.out.println("==== LAS test: Are the product reponses correct? =======");
-            testResponse();
+        	if ( !web_output ) System.out.println("==== LAS test: Are the product reponses correct? =======");
+        	LASResponseTester ltr = new LASResponseTester(lasConfig, lto);
+            ltr.testResponse(web_output);
         }
+    }
+    public void runTest(LASTestOptions lto) {
+    	runTest(lto, false);
     }
     public static void main(String [] args){
 

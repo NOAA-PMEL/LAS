@@ -229,7 +229,7 @@ public class LASConfig extends LASDocument {
         return comboList;
     }
     public String getIDs(String data_url) throws JDOMException, LASException {
-    	List<Category> categories = getDatasets();
+    	List<Category> categories = getDatasetsAsCategories(false);
     	for (Iterator catIt = categories.iterator(); catIt.hasNext();) {
 			Category category = (Category) catIt.next();
 			String ids = findDataURL(data_url, category);
@@ -1296,7 +1296,7 @@ public class LASConfig extends LASDocument {
                     }
                 }
             } else {
-            	categories = getDatasets();
+            	categories = getDatasetsAsCategories(false);
             }
         } else {
             // There are categories in the config, use them...
@@ -1688,19 +1688,13 @@ public class LASConfig extends LASDocument {
     	String xPath = "/lasdata/axes/axis[@ID='"+aid+"']";
     	return getElementByXPath(xPath);
     }
-    public ArrayList<Category> getFullDatasets() throws JDOMException, LASException {
-    	return getDatasets(true);
-    }
-    public ArrayList<Category> getDatasets() throws JDOMException, LASException {
-    	return getDatasets(false);
-    }
     /**
      * Returns all the datasets as gov.noaa.pmel.tmap.las.util.Dataset objects.
      * @return ArrayList of dataset objects
      * @throws LASException
      * @throws JDOMException
      */
-    public ArrayList<Category> getDatasets(boolean full) throws JDOMException, LASException {
+    public ArrayList<Category> getDatasetsAsCategories(boolean full) throws JDOMException, LASException {
         ArrayList<Category> datasets = new ArrayList<Category>();
         Element datasetsE = getDatasetsAsElement();
         List datasetElements = datasetsE.getChildren("dataset");
@@ -1739,6 +1733,58 @@ public class LASConfig extends LASDocument {
             ds_novars.setAttribute("children", "variables");
         	ds_novars.setAttribute("children_dsid", ds_novars.getAttributeValue("ID"));
         	Category ds = new Category(ds_novars);
+        	datasets.add(ds);
+        }
+        return datasets;
+    }
+    public ArrayList<Dataset> getFullDatasets() throws JDOMException, LASException {
+    	return getDatasets(true);
+    }
+    public ArrayList<Dataset> getDatasets() throws JDOMException, LASException {
+    	return getDatasets(false);
+    }
+    /**
+     * Returns all the datasets as gov.noaa.pmel.tmap.las.util.Dataset objects.
+     * @return ArrayList of dataset objects
+     * @throws LASException
+     * @throws JDOMException
+     */
+    public ArrayList<Dataset> getDatasets(boolean full) throws JDOMException, LASException {
+        ArrayList<Dataset> datasets = new ArrayList<Dataset>();
+        Element datasetsE = getDatasetsAsElement();
+        List datasetElements = datasetsE.getChildren("dataset");
+        for (Iterator dsIt = datasetElements.iterator(); dsIt.hasNext();) {
+            Element dataset = (Element) dsIt.next();
+            Element ds_novars = (Element)dataset.clone();
+
+            if ( full ) {
+            	ArrayList<Variable> variables = getFullVariables(dataset.getAttributeValue("ID"));
+            	ds_novars.getChild("variables").removeChildren("variable");
+            	for (Iterator varIt = variables.iterator(); varIt.hasNext();) {
+					Variable variable = (Variable) varIt.next();
+					ds_novars.getChild("variables").addContent((Element)variable.getElement().clone());
+				}
+            } else {
+            	/*
+                 * For, the JavaScript UI, we want to strip out the children.
+                 * we'll remove every things that's not properties.  However, we will
+                 * keep the contributor and documentation elements.
+                 */
+            	List children = ds_novars.getChildren();
+            	ArrayList<String> remove = new ArrayList<String>();
+            	for (Iterator childIt = children.iterator(); childIt.hasNext();) {
+            		Element child = (Element) childIt.next();
+            		if (!child.getName().equals("properties") &&
+            				!child.getName().equals("documentation") &&
+            				!child.getName().equals("contributor") ) {
+            			remove.add(child.getName());
+            		}
+            	}
+            	for (int i=0; i < remove.size(); i++) {
+            		ds_novars.removeChild(remove.get(i));
+            	}
+            }
+        	Dataset ds = new Dataset(ds_novars);
         	datasets.add(ds);
         }
         return datasets;
