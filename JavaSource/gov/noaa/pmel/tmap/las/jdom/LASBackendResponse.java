@@ -523,6 +523,16 @@ public class LASBackendResponse extends LASDocument {
         LASDocument transformedRowset = new LASDocument(transformer.transform(rowset));
         return transformedRowset.toString();
     }
+    public String getTextResultTransformedByXSL(String ID, String stylesheet) throws IOException, JDOMException {
+    	if ( !stylesheet.endsWith(".xsl")) {
+            stylesheet = stylesheet+".xsl";
+        }
+        String xslFile = JDOMUtils.getResourcePath(this, "resources/productserver/stylesheets/"+stylesheet);
+        LASDocument rowset = new LASDocument();
+        JDOMUtils.XML2JDOM(new File(getResultAsFile(ID)), rowset);       
+        XSLTransformer transformer = new XSLTransformer(xslFile);
+        return transformer.transform(rowset).getRootElement().getText();
+    }
     /**
      * Get the contents of an XML file transformed by an XSLT stylesheet.
      *
