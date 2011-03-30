@@ -53,6 +53,7 @@ IF ($n_right_labels"0|0|*>1") THEN
    ELSE
       LET labyloc = `labyloc + labdel*($n_right_labels)`
    ENDIF
+   LET labyloc = `labyloc + ($extra_y_space"0")`
    IF ($its_prop_prop_plot"0") THEN LET labyloc = MAX(`labyloc`, `($ppl$ylen) + 0.7`)
 
 
