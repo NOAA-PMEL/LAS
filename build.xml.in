@@ -5,7 +5,7 @@
 	<property name="jakarta.home" value="@JAKARTA_HOME@" />
 	<property name="jakarta.lib" value="@JAKARTA_LIB@" />
         <property name="map_version" value="1.1"/>
-        <property name="version" value="7.2.2"/>
+        <property name="version" value="7.3"/>
 	<property name="deploy.home"
 		value="${jakarta.home}/webapps/${app.name}" />
 	<property name="dist.war"
@@ -110,6 +110,7 @@
 	</target>
 
 	<target name="dist" depends="prepare,compile">
+	    <echo file="WebContent/WEB-INF/classes/resources/version.txt" message="${version}"/>
 		<war jarfile="${app.name}.war"
 			webxml="WebContent/WEB-INF/web.xml">
 			<classes dir="WebContent/WEB-INF/classes" includes="**" />
