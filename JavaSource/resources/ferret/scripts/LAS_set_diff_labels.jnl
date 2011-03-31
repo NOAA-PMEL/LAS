@@ -102,40 +102,40 @@ DEFINE SYMBOL plotshape = $1
 IF `STRINDEX("($plotshape)", "X") EQ 0` THEN
    IF ($region_0_x_lo"0|*>1") THEN
       DEFINE SYMBOL n_left_labels = `($n_left_labels)+1`
-      DEFINE SYMBOL upper_left_($n_left_labels) = "Longitude(1): ($region_0_x_lo) ($ipen)Longitude(2): ($region_1_x_lo)"
+      DEFINE SYMBOL upper_left_($n_left_labels) = Longitude(1): ($region_0_x_lo) ($ipen)Longitude(2): ($region_1_x_lo)
    ELIF ($region_1_x_lo"0|*>1") THEN 
       DEFINE SYMBOL n_left_labels = `($n_left_labels)+1`
-      DEFINE SYMBOL upper_left_($n_left_labels) = "Longitude(2): ($region_1_x_lo)"
+      DEFINE SYMBOL upper_left_($n_left_labels) = Longitude(2): ($region_1_x_lo)
    ENDIF
 ENDIF
 
 IF `STRINDEX("($plotshape)", "Y") EQ 0` THEN
    IF ($region_0_y_lo"0|*>1") THEN 
       DEFINE SYMBOL n_left_labels = `($n_left_labels)+1`
-      DEFINE SYMBOL upper_left_($n_left_labels) = "Latitude(1): ($region_0_y_lo) ($ipen)Latitude(2): ($region_1_y_lo)"
+      DEFINE SYMBOL upper_left_($n_left_labels) = Latitude(1): ($region_0_y_lo) ($ipen)Latitude(2): ($region_1_y_lo)
    ELIF ($region_1_y_lo"0|*>1") THEN 
       DEFINE SYMBOL n_left_labels = `($n_left_labels)+1`
-      DEFINE SYMBOL upper_left_($n_left_labels) = "Latitude(2): ($region_1_y_lo)"
+      DEFINE SYMBOL upper_left_($n_left_labels) = Latitude(2): ($region_1_y_lo)
    ENDIF
 ENDIF
 
 IF `STRINDEX("($plotshape)", "Z") EQ 0` THEN   
    IF ($region_0_z_lo"0|*>1") THEN
       DEFINE SYMBOL n_left_labels = `($n_left_labels)+1`
-      DEFINE SYMBOL upper_left_($n_left_labels) = "Depth(1): ($region_0_z_lo) ($ipen)Depth(2): ($region_1_z_lo)"
+      DEFINE SYMBOL upper_left_($n_left_labels) = Depth(1): ($region_0_z_lo) ($ipen)Depth(2): ($region_1_z_lo)
    ELIF ($region_1_z_lo"0|*>1") THEN 
       DEFINE SYMBOL n_left_labels = `($n_left_labels)+1`
-      DEFINE SYMBOL upper_left_($n_left_labels) = "Depth(2): ($region_1_z_lo)"
+      DEFINE SYMBOL upper_left_($n_left_labels) = Depth(2): ($region_1_z_lo)
    ENDIF
 ENDIF
 
 IF `STRINDEX("($plotshape)", "T") EQ 0` THEN   
    IF ($region_0_t_lo"0|*>1") THEN 
       DEFINE SYMBOL n_left_labels = `($n_left_labels)+1`
-      DEFINE SYMBOL upper_left_($n_left_labels) = "Time(1): ($region_0_t_lo) ($ipen)Time(2): ($region_1_t_lo)"
+      DEFINE SYMBOL upper_left_($n_left_labels) = Time(1): ($region_0_t_lo) ($ipen)Time(2): ($region_1_t_lo)
    ELIF ($region_1_t_lo"0|*>1") THEN 
       DEFINE SYMBOL n_left_labels = `($n_left_labels)+1`
-      DEFINE SYMBOL upper_left_($n_left_labels) = "TIME(2): ($region_1_t_lo)"
+      DEFINE SYMBOL upper_left_($n_left_labels) = TIME(2): ($region_1_t_lo)
    ENDIF
 ENDIF
 
