@@ -6,8 +6,12 @@ import gov.noaa.pmel.tmap.las.jdom.LASConfig;
 import gov.noaa.pmel.tmap.las.jdom.LASDocument;
 import gov.noaa.pmel.tmap.las.jdom.ServerConfig;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.Iterator;
 import java.util.List;
@@ -50,6 +54,7 @@ public class LASConfigPlugIn implements PlugIn {
 	public final static String LAS_LAZY_START_KEY = "lazy_start";
 	public final static String LAS_LOCK_KEY = "lock";
 	public final static String LAS_SISTERS_CONFIG_FILENAME_KEY = "las_servers_filename";
+	public final static String LAS_VERSION_KEY = "las_version";
 	
 	/*
 	 * This is the key where we will store a boolean with the results of an F-TDS test.
@@ -130,6 +135,18 @@ public class LASConfigPlugIn implements PlugIn {
 	throws ServletException {
 
 		context = servlet.getServletContext();
+		
+		String version;
+		try {
+			BufferedReader reader = new BufferedReader(new FileReader(new File(context.getRealPath("WEB-INF/classes/resources/version.txt"))));
+			version = reader.readLine();
+		} catch (FileNotFoundException e) {
+			version = "7";
+		} catch (IOException e) {
+			version = "7";
+		}
+		
+		context.setAttribute(LAS_VERSION_KEY, version);
 
 		if ((configFileName == null || configFileName.length() == 0)) {
 			throw new ServletException("No LAS configuration file specified.");
@@ -173,6 +190,12 @@ public class LASConfigPlugIn implements PlugIn {
 		} catch (UnsupportedEncodingException e) {
 			log.error("Could not parse the las config file "+configFileName);
 		}
+		
+		// Server is up and ready to go...  Set up regular testing...
+		
+		TestTask testTask = new TestTask(context);
+		Timer testTimer = new Timer("LASTest Timer", true);
+		testTimer.schedule(testTask, 0, 1000*60*60*24);
 	}
 	
 	public void reinit(ServletContext reinitContext) throws ServletException {

@@ -97,6 +97,11 @@ public final class ProductServerAction extends LASAction {
         ServerConfig serverConfig = (ServerConfig)servlet.getServletContext().getAttribute(ServerConfigPlugIn.SERVER_CONFIG_KEY);
         // Get the global cache object.
         Cache cache = (Cache) servlet.getServletContext().getAttribute(ServerConfigPlugIn.CACHE_KEY);
+        // Get the version string
+        String version = (String) servlet.getServletContext().getAttribute(LASConfigPlugIn.LAS_VERSION_KEY);
+        if ( version == null ) {
+        	version = "7";
+        }
         
         boolean ftds_up = Boolean.valueOf((String) servlet.getServletContext().getAttribute(LASConfigPlugIn.LAS_FTDS_UP_KEY));
         
@@ -225,6 +230,8 @@ public final class ProductServerAction extends LASAction {
         		return mapping.findForward("error");
         	}
         }
+        
+        lasRequest.setProperty("product_server", "version", version);
         
         if ( lasRequest.isAnalysisRequest() ) {
         	// This request will require F-TDS...
