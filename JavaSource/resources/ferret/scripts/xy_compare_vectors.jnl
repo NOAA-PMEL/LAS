@@ -177,22 +177,22 @@ ENDIF
 
 ! Vector xskip and yskip
 
-IF ($ferret_vector_skip"0|*>1") THEN
-   LET comloc = `STRINDEX("($ferret_vector_skip)", ",")`
-   LET nlen = `STRLEN("($ferret_vector_skip)")`
+IF ($ferret_vector_subsampling"0|*>1") THEN
+   LET comloc = `STRINDEX("($ferret_vector_subsampling)", ",")`
+   LET nlen = `STRLEN("($ferret_vector_subsampling)")`
    IF `comloc GT 1` THEN
-       DEFINE SYMBOL xskp = `SUBSTRING ("($ferret_vector_skip)", 1, comloc-1)`
-       DEFINE SYMBOL yskp = `SUBSTRING ("($ferret_vector_skip)", comloc+1, nlen-comloc)`
+       DEFINE SYMBOL xskp = `SUBSTRING ("($ferret_vector_subsampling)", 1, comloc-1)`
+       DEFINE SYMBOL yskp = `SUBSTRING ("($ferret_vector_subsampling)", comloc+1, nlen-comloc)`
     ELSE
-       DEFINE SYMBOL xskp = ($ferret_vector_skip)
-       DEFINE SYMBOL yskp = ($ferret_vector_skip)
+       DEFINE SYMBOL xskp = ($ferret_vector_subsampling)
+       DEFINE SYMBOL yskp = ($ferret_vector_subsampling)
     ENDIF
 
     LET xs = STRFLOAT ("($xskp)")
     LET ys = STRFLOAT ("($yskp)")
 
     IF ($error_status"0|*>1") THEN
-       MESSAGE/ERROR **ERROR format of vector skip is xskip,yskip
+       MESSAGE/ERROR **ERROR format of vector subsampling is xsub,ysub
        EXIT/PROGRAM
     ENDIF
 
@@ -216,58 +216,86 @@ IF `($ferret_line_thickness%0|default>1|*>1%)` THEN
 ENDIF
 
 ! Do the plot. On VECTOR/SET the /XSKIP and /YSKIP are ignored. 
-!
 
-! DEFINE SYMBOL shade_var = ($ferret_vector_x1)
-! !IF ($native_curvilinear_xy"0") THEN DEFINE SYMBOL  shade_var = ($ferret_vector_x1), xcoord, ycoord
+IF ($ferret_vector_skip"0|*>1") THEN DEFINE SYMBOL ferret_vector_subsampling = ($ferret_vector_skip)
 
-! IF ($ferret_curvi_quals"0|*>1") THEN 
-!    IF ($ferret_lon_modulo"1|1|0|yes>1|no>0|*>0") THEN  DEFINE SYMBOL shade_qualifiers = ($shade_qualifiers)/MODULO
-! ENDIF
+IF ($ferret_vector_subsampling"0") THEN
 
-! SHADE/pal=white/nokey($shade_qualifiers)/TITLE="($ferret_plot_title)"/SET  ($shade_var)
-!    IF ($xform_dms"0|*>1") THEN PPL XFOR (($xform_dms))
-!    IF ($yform_dms"0|*>1") THEN PPL YFOR (($yform_dms))
-!    
-!       if ($labnum_dset"0|*>1") THEN go unlabel ($labnum_dset)
-!       if ($labnum_datitl"0|*>1") THEN go unlabel ($labnum_datitl)
-!       if ($labnum_dods"0|*>1") THEN go unlabel ($labnum_dods)
-!       IF `($title_size%0|*>1%)` THEN PPL LABSET ($title_size)
-! PPL SHADE
-! DEFINE SYMBOL qualifiers ($qualifiers)/OVER/NOLAB
-
-! use XSKIP and YSKIP as qualifiers if given
-IF ($ferret_vector_skip"0") THEN
-
-   VECTOR($qualifiers)/TITLE="($ferret_plot_title)"/XSKIP=`xs`/YSKIP=`ys` \
+   VECTOR($qualifiers)/TITLE="($ferret_plot_title)"/XSKIP=`xs`/YSKIP=`ys`/SET \
        ($ferret_diff_var)
+       IF ($xform_dms"0|*>1") THEN PPL XFOR (($xform_dms))
+       IF ($yform_dms"0|*>1") THEN PPL YFOR (($yform_dms))
+       IF ($labnum_dset"0|*>1") THEN go unlabel ($labnum_dset)
+       IF ($labnum_datitl"0|*>1") THEN go unlabel ($labnum_datitl)
+       IF ($labnum_dods"0|*>1") THEN go unlabel ($labnum_dods)
+       IF ($labnum_z"0|*>1") THEN go unlabel ($labnum_z)
+       IF ($labnum_t"0|*>1") THEN go unlabel ($labnum_t)
+      PPL VECTOR,`xs`,`ys`
        
    IF ($native_curvilinear_xy"0|*>1") THEN \
-      VECTOR($qualifiers)/TITLE="($ferret_plot_title)"/XSKIP=`xs`/YSKIP=`ys` \
+      VECTOR($qualifiers)/OVER/NOLAB/TITLE="($ferret_plot_title)"/XSKIP=`xs`/YSKIP=`ys`/SET \
        ($ferret_diff_var_m360)
-   IF ($native_curvilinear_xy"0|*>1") THEN \
-      VECTOR($qualifiers)/TITLE="($ferret_plot_title)"/XSKIP=`xs`/YSKIP=`ys` \
-       ($ferret_diff_var_p360)
+       IF ($xform_dms"0|*>1") THEN PPL XFOR (($xform_dms))
+       IF ($yform_dms"0|*>1") THEN PPL YFOR (($yform_dms))
+       IF ($labnum_dset"0|*>1") THEN go unlabel ($labnum_dset)
+       IF ($labnum_datitl"0|*>1") THEN go unlabel ($labnum_datitl)
+       IF ($labnum_dods"0|*>1") THEN go unlabel ($labnum_dods)
+       IF ($labnum_z"0|*>1") THEN go unlabel ($labnum_z)
+       IF ($labnum_t"0|*>1") THEN go unlabel ($labnum_t)
+      PPL VECTOR/over,`xs`,`ys` 
 
-   IF `($ferret_vector_style"1|default>1|*>0") GT 0` THEN  
-      DEFINE SYMBOL n_left_labels = `($n_left_labels"0")+1`
-      DEFINE SYMBOL upper_left_($n_left_labels) = Vector xskip=`xs`,yskip=`ys`
-   ENDIF
+   IF ($native_curvilinear_xy"0|*>1") THEN \
+      VECTOR($qualifiers)/OVER/NOLAB/TITLE="($ferret_plot_title)"/XSKIP=`xs`/YSKIP=`ys`/SET \
+       ($ferret_diff_var_p360)
+       IF ($xform_dms"0|*>1") THEN PPL XFOR (($xform_dms))
+       IF ($yform_dms"0|*>1") THEN PPL YFOR (($yform_dms))
+       IF ($labnum_dset"0|*>1") THEN go unlabel ($labnum_dset)
+       IF ($labnum_datitl"0|*>1") THEN go unlabel ($labnum_datitl)
+       IF ($labnum_dods"0|*>1") THEN go unlabel ($labnum_dods)
+       IF ($labnum_z"0|*>1") THEN go unlabel ($labnum_z)
+       IF ($labnum_t"0|*>1") THEN go unlabel ($labnum_t)
+      PPL VECTOR/over,`xs`,`ys`
 
 ELSE
-   VECTOR($qualifiers)/TITLE="($ferret_plot_title)"  \
-       ($ferret_diff_var)
-   IF ($native_curvilinear_xy"0|*>1") THEN \
-   VECTOR($qualifiers)/TITLE="($ferret_plot_title)"  \
-       ($ferret_diff_var_m360)
-   IF ($native_curvilinear_xy"0|*>1") THEN \
-   VECTOR($qualifiers)/TITLE="($ferret_plot_title)"  \
-       ($ferret_diff_var_p360)
 
-!   IF `($ferret_vector_style"1|default>1|*>0") GT 0` THEN  
-!      DEFINE SYMBOL n_left_labels = `($n_left_labels"0")+1`
-!      DEFINE SYMBOL upper_left_($n_left_labels) = Automatic vector xskip,yskip 
-!   ENDIF
+   ! Get the automatic vector skip values, then plot, making PPL settings.
+      VECTOR($qualifiers)/TITLE=" "/NOLAB/COLOR=white ($ferret_diff_var)
+
+   VECTOR($qualifiers)/TITLE="($ferret_plot_title)"/XSKIP=($PPL_VEC_XSKIP)/YSKIP=($PPL_VEC_XSKIP)/SET  \
+       ($ferret_diff_var)
+       IF ($xform_dms"0|*>1") THEN PPL XFOR (($xform_dms))
+       IF ($yform_dms"0|*>1") THEN PPL YFOR (($yform_dms))
+       IF ($labnum_dset"0|*>1") THEN go unlabel ($labnum_dset)
+       IF ($labnum_datitl"0|*>1") THEN go unlabel ($labnum_datitl)
+       IF ($labnum_dods"0|*>1") THEN go unlabel ($labnum_dods)
+       IF ($labnum_z"0|*>1") THEN go unlabel ($labnum_z)
+       IF ($labnum_t"0|*>1") THEN go unlabel ($labnum_t)
+      PPL VECTOR, ($PPL_VEC_XSKIP), ($PPL_VEC_YSKIP)
+
+   IF ($native_curvilinear_xy"0|*>1") THEN \
+   VECTOR($qualifiers)/OVER/NOLAB/TITLE="($ferret_plot_title)"/XSKIP=($PPL_VEC_XSKIP)/YSKIP=($PPL_VEC_XSKIP)/SET  \
+       ($ferret_diff_var_m360)
+       IF ($xform_dms"0|*>1") THEN PPL XFOR (($xform_dms))
+       IF ($yform_dms"0|*>1") THEN PPL YFOR (($yform_dms))
+       IF ($labnum_dset"0|*>1") THEN go unlabel ($labnum_dset)
+       IF ($labnum_datitl"0|*>1") THEN go unlabel ($labnum_datitl)
+       IF ($labnum_dods"0|*>1") THEN go unlabel ($labnum_dods)
+       IF ($labnum_z"0|*>1") THEN go unlabel ($labnum_z)
+       IF ($labnum_t"0|*>1") THEN go unlabel ($labnum_t)
+      PPL VECTOR, ($PPL_VEC_XSKIP), ($PPL_VEC_YSKIP)
+
+   IF ($native_curvilinear_xy"0|*>1") THEN \
+   VECTOR($qualifiers)/OVER/NOLAB/TITLE="($ferret_plot_title)"/XSKIP=($PPL_VEC_XSKIP)/YSKIP=($PPL_VEC_XSKIP)/SET  \
+       ($ferret_diff_var_p360)
+       IF ($xform_dms"0|*>1") THEN PPL XFOR (($xform_dms))
+       IF ($yform_dms"0|*>1") THEN PPL YFOR (($yform_dms))
+       IF ($labnum_dset"0|*>1") THEN go unlabel ($labnum_dset)
+       IF ($labnum_datitl"0|*>1") THEN go unlabel ($labnum_datitl)
+       IF ($labnum_dods"0|*>1") THEN go unlabel ($labnum_dods)
+       IF ($labnum_z"0|*>1") THEN go unlabel ($labnum_z)
+       IF ($labnum_t"0|*>1") THEN go unlabel ($labnum_t)
+      PPL VECTOR, ($PPL_VEC_XSKIP), ($PPL_VEC_YSKIP)
+
 ENDIF
 
 ! Overall header at the very top
@@ -278,7 +306,12 @@ IF `($flowline_vectors"0") EQ 0` THEN
    IF `( ($PPL_VEC_XSKIP"0") GT 1)  OR (($PPL_VEC_YSKIP"0") GT 1)` THEN
       DEFINE SYMBOL n_left_labels = `($n_left_labels"0")+1`
       DEFINE SYMBOL upper_left_($n_left_labels) = \
-      Vector xskip=($PPL_VEC_XSKIP), yskip=($PPL_VEC_YSKIP) 
+      Vector subsampling x=($PPL_VEC_XSKIP), y=($PPL_VEC_YSKIP) 
+   ELIF ($ferret_vector_subsampling"0") THEN
+      DEFINE SYMBOL n_left_labels = `($n_left_labels"0")+1`
+      DEFINE SYMBOL upper_left_($n_left_labels) = \
+      Vector subsampling x=`xs`, y=`ys`
+
    ENDIF
 ENDIF
 

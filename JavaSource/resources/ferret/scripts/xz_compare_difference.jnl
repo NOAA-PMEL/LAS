@@ -172,6 +172,8 @@ IF ($shade_underlay) THEN
       if ($labnum_datitl"0|*>1") THEN go unlabel ($labnum_datitl)
       if ($labnum_dods"0|*>1") THEN go unlabel ($labnum_dods)
       IF `($title_size%0|*>1%)` THEN PPL LABSET ($title_size)
+      IF ($labnum_y"0|*>1") THEN go unlabel ($labnum_y)
+      IF ($labnum_t"0|*>1") THEN go unlabel ($labnum_t)
    PPL SHADE
    IF `($LEV_NUM"0") GT 245/2` THEN PPL SHASET RESET
    ($plot_type)($qualifiers)/OVER/NOLAB ($ferret_diff_var)
@@ -188,6 +190,8 @@ ELSE
       if ($labnum_datitl"0|*>1") THEN go unlabel ($labnum_datitl)
       if ($labnum_dods"0|*>1") THEN go unlabel ($labnum_dods)
       IF `($title_size%0|*>1%)` THEN PPL LABSET ($title_size)
+      IF ($labnum_y"0|*>1") THEN go unlabel ($labnum_y)
+      IF ($labnum_t"0|*>1") THEN go unlabel ($labnum_t)
    PPL ($plot_type)
 ENDIF
 
