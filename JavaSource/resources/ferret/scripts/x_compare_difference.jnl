@@ -173,7 +173,7 @@ IF ($ferret_deg_min_sec"0|false>0|*>1") THEN GO LAS_set_deg_min_sec.jnl
 
 ! Do the plot. 
 
-PLOT($qualifiers)/set/title = "($ferret_diff_title)" ($ferret_diff_var)
+PLOT($qualifiers)/set/title = "($ferret_diff_title)"/SET ($ferret_diff_var)
 IF ($xform_dms"0|*>1") THEN PPL XFOR (($xform_dms))
 IF `($labnum_y%0|*>1%)` THEN GO unlabel ($labnum_y)
 IF `($labnum_z%0|*>1%)` THEN GO unlabel ($labnum_z)

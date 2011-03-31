@@ -170,7 +170,7 @@ ENDIF
 
 ! Do the plot. 
 
-PLOT($qualifiers)/title = "($ferret_diff_title)" ($ferret_diff_var)
+PLOT($qualifiers)/title="($ferret_diff_title)"/SET ($ferret_diff_var)
 IF `($labnum_x%0|*>1%)` THEN GO unlabel ($labnum_x)
 IF `($labnum_y%0|*>1%)` THEN GO unlabel ($labnum_y)
 IF `($labnum_z%0|*>1%)` THEN GO unlabel ($labnum_z)  
