@@ -255,13 +255,18 @@ ELSE
        PPL VECTOR/over, ($PPL_VEC_XSKIP), ($PPL_VEC_YSKIP)
 
    ELSE
+   ! Get the automatic vector skip values, then plot, making PPL settings.
+      VECTOR($qualifiers)/TITLE=" "/NOLAB/COLOR=white \
+      ($ferret_plot_base_var_0), ($ferret_plot_base_var_1)
+
       VECTOR($qualifiers)/TITLE=" "/SET ($ferret_vector_1), ($ferret_vector_2)
        IF ($xform_dms"0|*>1") THEN PPL XFOR (($xform_dms))
        IF ($yform_dms"0|*>1") THEN PPL YFOR (($yform_dms))
        IF ($labnum_dset"0|*>1") THEN go unlabel ($labnum_dset)
        IF ($labnum_datitl"0|*>1") THEN go unlabel ($labnum_datitl)
        IF ($labnum_dods"0|*>1") THEN go unlabel ($labnum_dods)
-       PPL VECTOR
+       PPL VECTOR, ($PPL_VEC_XSKIP), ($PPL_VEC_YSKIP)
+
 
    ENDIF
 ENDIF
@@ -278,7 +283,7 @@ IF `($flowline_vectors"0") EQ 0` THEN
       Vector subsampling x=`xs`, y=`ys`
    ENDIF
 ENDIF
-pause
+
 ! Overall header at the very top
 GO LAS_ferret_las_version_header
 
