@@ -600,15 +600,18 @@ public class OLMapWidget extends Composite {
 		int zoom = map.getZoomForExtent(dataBounds, false);
 		if ( box != null ) {
 			try {
-				boxes.removeMarker(box);
+				boxes.destroy();
 			} catch (Exception e) {
 				// Ok.  If the marker has not be set this is throwing an NPE.  Give me a break.
 			}
 		}
 		if ( !modulo ) {
+			//map.removeLayer(boxes);
+			boxes = new Boxes("Valid Region");
+			map.addLayer(boxes);
 			box = new Box(dataBounds);
 			boxes.addMarker(box);
-			map.addLayer(boxes);
+			
 		}
 //		mapOptions = new MapOptions();
 //		map.setOptions(mapOptions);		
