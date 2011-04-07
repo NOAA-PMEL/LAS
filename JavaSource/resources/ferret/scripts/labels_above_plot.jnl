@@ -11,6 +11,22 @@
 ! Add labels at the top for the location of overlaid lines,
 ! transformations, and for URLs if they exist  
 
+! 4/2011
+! If a special marker location has been sent in (nuclear reactor location) 
+! plot a marker. The value of the location should be x,y
+
+!DEFINE SYMBOL ferret_xy_location_mark = 141.03291,37.422974
+
+IF ($ferret_xy_location_mark"0|*>1") THEN
+   LET xylocn = STRLEN("($ferret_xy_location_mark)")
+   LET xylocc = STRINDEX("($ferret_xy_location_mark)", ",")
+   DEFINE SYMBOL xyloccx = `SUBSTRING("($ferret_xy_location_mark)", 1, xylocc-1)`
+   DEFINE SYMBOL xyloccy = `SUBSTRING("($ferret_xy_location_mark)", xylocc+1, xylocn-xylocc)`
+   GO polymark POLY/OVER/LINE/color=red/PAL=yellow/NOLAB {($xyloccx)}, {($xyloccy)}, {($xyloccx)}, star, 1.2
+   GO polymark POLY/OVER/LINE/color=black/NOLAB {($xyloccx)}, {($xyloccy)}, {($xyloccx)}, star, 1.6
+
+ENDIF
+
 LET labdel = 0.2
 LET labsiz = 0.1
 
