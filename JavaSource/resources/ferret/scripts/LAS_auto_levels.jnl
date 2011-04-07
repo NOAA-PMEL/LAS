@@ -57,7 +57,7 @@ ENDIF
 ! If requested with posinteger, create levels that are integers or multiples of 
 ! integers, suitable for COUNTS.
 
-IF ($ferret_fill_levels"0|posinteger>1|*>0") THEN
+IF ($ferret_fill_levels"0|posinteger>1|*>0" ) THEN
    
    IF `($ferret_plot_var"0|*>1") EQ 0` THEN EXIT/SCRIPT  !e.g. for insitu plots may not have a plot_var
 
@@ -68,6 +68,11 @@ IF ($ferret_fill_levels"0|posinteger>1|*>0") THEN
    ENDIF
 
    IF ($ferret_plot_var"0|sampled_var>1|*>0) THEN LET pvar = ($ferret_plot_var)
+
+   IF `pvar[i=@ngd,j=@ngd,k=@ngd,L=@ngd] EQ 0` THEN  ! no valid data
+      DEFINE SYMBOL ferret_fill_levels = (0, 0, 1)
+      EXIT/SCRIPT
+   ENDIF
 
    LET pminmax = MINMAX(pvar)
    LET pmin = `INT(pminmax[i=1])`

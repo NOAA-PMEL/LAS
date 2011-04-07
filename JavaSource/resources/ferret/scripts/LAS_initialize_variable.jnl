@@ -24,6 +24,8 @@ DEFINE SYMBOL data_var_only = `UPCASE("($data_var)")`
 
 IF ($ferret_bad_flag"0|*>1") THEN SET VAR/BAD=($ferret_bad_flag) ($data_var)
 
+IF ($ferret_timelab_res"0|*>1") THEN SET MODE CALENDAR:($ferret_timelab_res)
+
 ! setup for analysis ops on curvilinear grids 
 IF `IS_ELEMENT_OF_STR (attlist, "ferret_definition") GT 0 AND\
     ($ferret_curvi_coord_lon"0|*>1")` THEN
