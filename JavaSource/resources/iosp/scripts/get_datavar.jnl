@@ -18,7 +18,10 @@
 ! After this script is run, the value of the Ferret symbol $fer_last_error contains 
 ! an error string if an unexpected error was encountered.
 
-set mem/siz=300
+! acm 4/6/2011
+! With this command, Ferret crashes on making a transformed variable on a global
+! grid, long time range, i=360,j=180,L=480. Without set mem, it works.
+!set mem/siz=300
 
 ! Save the dataset number of the current dataset
 SET DATA/SAVE
