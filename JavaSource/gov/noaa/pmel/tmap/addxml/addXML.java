@@ -44,6 +44,7 @@ import java.security.NoSuchAlgorithmException;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.Formatter;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -65,13 +66,10 @@ import org.joda.time.Chronology;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeFieldType;
 import org.joda.time.DateTimeZone;
-import org.joda.time.Days;
 import org.joda.time.Duration;
 import org.joda.time.DurationFieldType;
 import org.joda.time.Hours;
-import org.joda.time.Months;
 import org.joda.time.Period;
-import org.joda.time.Years;
 import org.joda.time.chrono.GJChronology;
 import org.joda.time.chrono.GregorianChronology;
 import org.joda.time.chrono.JulianChronology;
@@ -85,22 +83,22 @@ import thredds.catalog.InvCatalogFactory;
 import thredds.catalog.InvDataset;
 import thredds.catalog.InvDocumentation;
 import thredds.catalog.ServiceType;
-import thredds.catalog.ThreddsMetadata.GeospatialCoverage;
 import thredds.catalog.ThreddsMetadata.Range;
 import thredds.catalog.ThreddsMetadata.Variable;
 import thredds.catalog.ThreddsMetadata.Variables;
+import thredds.catalog.ThreddsMetadata.GeospatialCoverage;
 import ucar.nc2.Attribute;
+
 import ucar.nc2.constants.FeatureType;
 import ucar.nc2.dataset.CoordinateAxis;
 import ucar.nc2.dataset.CoordinateAxis1D;
+import ucar.nc2.dataset.CoordinateAxis1DTime;
 import ucar.nc2.dataset.CoordinateAxis2D;
 import ucar.nc2.dataset.NetcdfDataset;
-import ucar.nc2.dods.DODSNetcdfFile;
 import ucar.nc2.dt.GridDatatype;
-import ucar.nc2.dt.TypedDatasetFactory;
-import ucar.nc2.dt.grid.GeoGrid;
 import ucar.nc2.dt.grid.GridCoordSys;
 import ucar.nc2.dt.grid.GridDataset;
+import ucar.nc2.ft.FeatureDatasetFactoryManager;
 import ucar.nc2.units.DateRange;
 import ucar.nc2.units.DateType;
 import ucar.nc2.units.DateUnit;
@@ -355,16 +353,8 @@ public class addXML {
 		for (int id = 0; id < data.length; id++) {
 
 			DatasetsGridsAxesBean dgab = null;
-			try {
-				String url = DODSNetcdfFile.canonicalURL(data[id]);
-				NetcdfDataset ncds = ucar.nc2.dataset.NetcdfDataset.openDataset(url);
-				dgab = createBeansFromNetcdfDataset(ncds, data[id], false, null);
-				ncds.close();
-			}
-			catch (IOException e) {
-				log.error("IO error = " + e);
-				System.exit(-1);
-			}
+			
+			dgab = createBeansFromNetcdfDataset(data[id], false, null);
 			Vector db = (Vector) dgab.getDatasets();
 			if (db != null && db.size() > 0) {
 
@@ -873,7 +863,7 @@ public class addXML {
 		DatasetsGridsAxesBean dgab = new DatasetsGridsAxesBean();
 
 		String url = access.getStandardUrlName();
-		try {
+
 			if ( esg ) {
 				if ( url.contains("aggregation") ) {
 					// Try to get metadata from the catalog.
@@ -896,17 +886,8 @@ public class addXML {
 					}
 				}
 			} else {
-				String dods = url.replaceAll("http", "dods");
-				NetcdfDataset ncds = ucar.nc2.dataset.NetcdfDataset.openDataset(dods);
-				dgab = createBeansFromNetcdfDataset(ncds, url, false, null);
-				ncds.close();
+				dgab = createBeansFromNetcdfDataset(url, false, null);
 			}
-		}
-		catch (IOException e) {
-			dgab.setError(e.getMessage());
-			log.error("IO error = " + e.getMessage());
-		}
-
 		return dgab;
 	}
 
@@ -1348,9 +1329,8 @@ public class addXML {
 					if ( generate_names ) {
 						StringBuilder dataset_name = new StringBuilder();
 						try {
-							NetcdfDataset ncds = NetcdfDataset.openDataset(url);
-							StringBuilder error = new StringBuilder();
-							GridDataset gds = (GridDataset) TypedDatasetFactory.open(FeatureType.GRID, ncds, null, error);
+							Formatter error = new Formatter();
+							GridDataset gds = (GridDataset) FeatureDatasetFactoryManager.open(FeatureType.GRID, url, null, error);   
 							List<GridDatatype> grids = gds.getGrids();
 							if ( grids != null && grids.size() > 0 ) {
 								GridDatatype grid = (GridDatatype) grids.get(0);
@@ -1403,7 +1383,6 @@ public class addXML {
 	 * @return Document
 	 */
 	public static DatasetsGridsAxesBean createBeansFromNetcdfDataset(
-			NetcdfDataset ncds,
 			String url, boolean esg, InvDataset threddsDataset) {
 
 		DatasetsGridsAxesBean dagb = new DatasetsGridsAxesBean();
@@ -1421,7 +1400,19 @@ public class addXML {
 		dataset.setCreator(addXML.class.getName());
 
 		if (verbose) {
-			log.error("Processing netCDF dataset: " + url);
+			log.info("Processing netCDF dataset: " + url);
+		}
+		Formatter error = new Formatter();
+		GridDataset gridDs = null;
+		try {
+			gridDs = (GridDataset) FeatureDatasetFactoryManager.open(FeatureType.GRID, url, null, error);
+		} catch (IOException e) {
+			log.error("Unable to open dataset at "+url);
+			return null;
+		}
+		if ( gridDs == null ) {
+			log.error("Unable to read dataset at "+url);
+			return null;
 		}
 
 		String name = null;
@@ -1430,13 +1421,13 @@ public class addXML {
 		} else {
 			Attribute nameAttribute = null;
 			if (global_title_attribute == null) {
-				nameAttribute = ncds.findGlobalAttributeIgnoreCase("long_name");
+				nameAttribute = gridDs.findGlobalAttributeIgnoreCase("long_name");
 				if (nameAttribute == null) {
-					nameAttribute = ncds.findGlobalAttributeIgnoreCase("title");
+					nameAttribute = gridDs.findGlobalAttributeIgnoreCase("title");
 				}
 			}
 			else {
-				nameAttribute = ncds.findGlobalAttributeIgnoreCase(global_title_attribute);
+				nameAttribute = gridDs.findGlobalAttributeIgnoreCase(global_title_attribute);
 			}
 
 
@@ -1453,14 +1444,7 @@ public class addXML {
 			}
 		}
 
-		GridDataset gridDs = null;
-		StringBuilder error = new StringBuilder();
-		try {
-			gridDs = (GridDataset) TypedDatasetFactory.open(FeatureType.GRID, ncds, null, error);
-		} catch (IOException e) {
-			log.error("I/O Error converting data source to GridDataset");
-		}
-			//new GridDataset(ncds);
+		//new GridDataset(ncds);
 		if (name == null) {
 			name = url;
 		}
@@ -1480,12 +1464,9 @@ public class addXML {
 		dataset.setElement(elementName);
 		dataset.setUrl(url);
 
-		List grids = new ArrayList();
+		List<GridDatatype> grids = new ArrayList();
 		if ( gridDs != null ) {
 		    grids = gridDs.getGrids();
-		}
-		if ( grids.size() == 0 ) {
-			grids = gridDs.getGridsets();
 		}
 
 		if (grids.size() == 0) {
@@ -1508,7 +1489,7 @@ public class addXML {
 
 			UniqueVector GridAxisBeans = new UniqueVector();
 
-			GridDatatype geogrid = (GeoGrid) grids.get(i);
+			GridDatatype geogrid = grids.get(i);
 
 			VariableBean variable = new VariableBean();
 			variable.setUrl("#" + geogrid.getName());
@@ -1544,12 +1525,12 @@ public class addXML {
 			}
 			grid_name = grid_name + "-" + xAxis.getShortName();
 			if (verbose) {
-				log.error("\t Variable: " + geogrid.getName());
-				log.error("\t\t Longitude axis: ");
+				log.info("\t Variable: " + geogrid.getName());
+				log.info("\t\t Longitude axis: ");
 			}
 			GridAxisBeans.addUnique(xaxis);
 			if (verbose) {
-				log.error(xaxis.toString());
+				log.info(xaxis.toString());
 			}
 
 			CoordinateAxis yAxis = gcs.getYHorizAxis();
@@ -1565,44 +1546,44 @@ public class addXML {
 
 			grid_name = grid_name + "-" + yAxis.getShortName();
 			if (verbose) {
-				log.error("\t\t Latitude axis: ");
+				log.info("\t\t Latitude axis: ");
 			}
 
 			GridAxisBeans.addUnique(yaxis);
 			if (verbose) {
-				log.error(yaxis.toString());
+				log.info(yaxis.toString());
 			}
 			if (gcs.hasVerticalAxis()) {
 				CoordinateAxis1D zAxis = gcs.getVerticalAxis();
 				grid_name = grid_name + "-" + zAxis.getShortName();
 				if (verbose) {
-					log.error("\t\t Vertical axis: ");
+					log.info("\t\t Vertical axis: ");
 				}
 				AxisBean zaxis = makeGeoAxis(zAxis, "z", elementName);
 				GridAxisBeans.addUnique(zaxis);
 				if (verbose) {
-					log.error(zaxis.toString());
+					log.info(zaxis.toString());
 				}
 
 			}
 			else {
 				if (verbose) {
-					log.error("\t\t No vertical axis");
+					log.info("\t\t No vertical axis");
 				}
 			}
 
-			CoordinateAxis1D tAxis = gcs.getTimeAxis1D();
+			CoordinateAxis1DTime tAxis = gcs.getTimeAxis1D();
 
 			if (tAxis != null) {
 				grid_name = grid_name + "-" + tAxis.getShortName();
 				if (verbose) {
-					log.error("\t\t Time axis: ");
+					log.info("\t\t Time axis: ");
 				}
 				AxisBean taxis = makeTimeAxis(tAxis, elementName);
 				if ( taxis != null ) {
 					GridAxisBeans.addUnique(taxis);
 					if (verbose) {
-						log.error(taxis.toString());
+						log.info(taxis.toString());
 					}
 				}
 			}
@@ -1618,13 +1599,13 @@ public class addXML {
 
 			if (verbose) {
 				if (proj instanceof LatLonProjection) {
-					log.error("\t\t Grid has LatLonProjection.");
+					log.info("\t\t Grid has LatLonProjection.");
 				}
 				else if (proj instanceof LambertConformal) {
-					log.error("\t\t Grid has Lambert Conformal projection...");
+					log.info("\t\t Grid has Lambert Conformal projection...");
 				}
 				else {
-					log.error("\t\t Grid has unknown projection...");
+					log.info("\t\t Grid has unknown projection...");
 				}
 			}
 
@@ -1640,13 +1621,22 @@ public class addXML {
 		dagb.setDatasets(DatasetBeans);
 		dagb.setGrids(GridBeans);
 		dagb.setAxes(AxisBeans);
+		try {
+			gridDs.close();
+		} catch (IOException e) {
+			log.error("Unable to close "+url);
+		}
 		return dagb;
 	}
 
 	public org.jdom.Document createXMLfromNetcdfDataset(NetcdfDataset
 			ncds,
 			String url) {
-		DatasetsGridsAxesBean beans = createBeansFromNetcdfDataset(ncds, url, false, null);
+		DatasetsGridsAxesBean beans = createBeansFromNetcdfDataset(url, false, null);
+		if ( beans == null ) {
+			log.error("Unable to create XML for "+url);
+			return null;
+		}
 		DatasetBean dataset = (DatasetBean) beans.getDatasets().get(0);
 		Vector GridBeans = (Vector) beans.getGrids();
 		Vector AxisBeans = (Vector) beans.getAxes();
@@ -1720,7 +1710,7 @@ public class addXML {
 
 	} // end of createXMLfromDatasetsGridsAxesBean
 
-	static private AxisBean makeTimeAxis(CoordinateAxis1D axis, String id) {
+	static private AxisBean makeTimeAxis(CoordinateAxis1DTime axis, String id) {
 
 		// LAS only understands time units of: 'year', 'month', 'day', and 'hour'
 
@@ -2020,7 +2010,7 @@ public class addXML {
 
 	private static DateTime makeDate(double d, DateUnit dateUnit, Chronology chrono) {
 		// Extract the bits and pieces from the dataUnit
-		String pstring = dateUnit.getTimeUnitString().toLowerCase();
+		String pstring = dateUnit.getUnitsString().toLowerCase();
 		int years = 0;
 		int months = 0;
 		int weeks = 0;

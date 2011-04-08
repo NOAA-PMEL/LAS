@@ -285,15 +285,8 @@ public class DatasetBean extends LasBean {
 			dataset.addContent(propertiesE);
 		}
 		Collections.sort(variables, new ShortNameComparitor());
+		
 		Element variablesElement = new Element("variables");
-		Iterator vars = variables.iterator();
-		while (vars.hasNext()) {
-			VariableBean var = (VariableBean) vars.next();
-			Element varElement = var.toXml();
-			variablesElement.addContent(varElement);
-		}
-		dataset.addContent(variablesElement);
-
 		List<String> vectors = new ArrayList<String>();
 		// First do names containing "zonal".
 		for (int v = 0; v < variables.size(); v++ ) {
@@ -427,11 +420,29 @@ public class DatasetBean extends LasBean {
 								vector_name = substituion.toString();
 							}
 							addComposite(dataset, vector_long_name.toString(), vector_id.toString(), vectors);
+							
+							// These have been added to a vector composite so we know they are indeed vector components.
+							// So add the centered pallette property.
+							for (Iterator vectIt = vectors.iterator(); vectIt.hasNext();) {
+								String id = (String) vectIt.next();
+								VariableBean varB = getVariable(id);
+								varB.setProperty("ferret", "pallette", "light_centered");
+								varB.setProperty("ferret", "fill_levels", "c");
+							}
 						}
 					}
 				}
 			}
 		}
+		Iterator vars = variables.iterator();
+		while (vars.hasNext()) {
+			VariableBean var = (VariableBean) vars.next();
+			Element varElement = var.toXml();
+			variablesElement.addContent(varElement);
+		}
+		dataset.addContent(variablesElement);
+
+
 		return dataset;
 	}
 
@@ -448,22 +459,7 @@ public class DatasetBean extends LasBean {
 		defaultElement.setText("file:ui.xml#VecVariable");
 		ui.addContent(defaultElement);
 		properties.addContent(ui);
-		/*
-		 *
-	         <ferret>
-	             <palette>light_centered</palette>
-                 <fill_levels>c</fill_levels>
-             </ferret>
-
-		 */
-		Element ferret = new Element("ferret");
-		Element palette = new Element("palette");
-		palette.setText("light_centered");
-		ferret.addContent(palette);
-		Element fill_levels = new Element("fill_levels");
-		fill_levels.setText("c");
-		ferret.addContent(fill_levels);
-		properties.addContent(ferret);
+		
 		vectorElement.addContent(properties);
 		
 		for ( int i = 0; i < vectors.size(); i++ ) {
