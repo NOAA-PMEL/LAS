@@ -422,7 +422,7 @@ public class FerretIOServiceProvider implements IOServiceProvider {
 
 		String cacheKey = JDOMUtils.MD5Encode(jnl);
 		String filename = tool.getTempDir() + cacheKey + File.separator
-				+ "data_" + varname + "_" + section.toString() + ".nc";
+				+ "data_" + varname + "_" + sectionToString(section) + ".nc";
 		String temp_filename = filename + ".tmp";
 		// Simplest form of caching is that the exact file we need already
 		// exists.
@@ -549,6 +549,19 @@ public class FerretIOServiceProvider implements IOServiceProvider {
 			}
 		}
 		return a;
+	}
+
+	private String sectionToString(Section section) {
+		if ( section != null ) {
+			String name = section.toString();
+			if ( name != null ) {
+			    return name.replace(",", "_").replace(":","-");
+			} else {
+				return "";
+			}
+		} else {
+			return "";
+		}
 	}
 
 	/*
