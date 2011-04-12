@@ -327,9 +327,10 @@ public class DatasetBean extends LasBean {
 			VariableBean var = (VariableBean) variables.get(v);
 
 			String vname = var.getShortName();
+			String name = var.getName();
 			int matching_occurance_index = -1;
 			// Don't match mask variables...
-			if ( !vname.contains("mask") ) {
+			if ( !name.toLowerCase().contains("mask") ) {
 				for ( int p = 0; p < Util.vectorPatterns[0].length; p ++ ) {
 					vectors = new ArrayList<String>();
 					// Look for x, X, u or U
