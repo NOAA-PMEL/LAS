@@ -100,6 +100,7 @@ public class LASConfig extends LASDocument {
     private static Logger log = LogManager.getLogger(LASConfig.class.getName());
     private static HashMap<String, HashSet<String>> remoteData = new HashMap<String, HashSet<String>>();
     private static LASProxy lasProxy = new LASProxy();
+    private static String FILENAME = "/home/users/koyuk/socat/tomcat/webapps/socat/output/";
     private static String time_formats[] = {
             "yyyy-MM-dd HH:mm:ss",
             "yyyy-MM-dd HH:mm",
@@ -2692,6 +2693,12 @@ public class LASConfig extends LASDocument {
 		return Boolean.parseBoolean(this.getRootElement().getChildText("readonly"));
     }
     /**
+	 * Sets the permissions for the tomcat/.../output folder so that data downloads won't experience a permissions error
+	 */
+	public void setPermissions() {
+		Runtime.getRuntime().exec("chmod 664 "+FILENAME);
+    }
+    /**
      * Get xy region for a particular variable
      * @param varpath XPath to variable
      * @return region ArrayList of NameValueBeans with x_lo, x_hi, y_lo and y_hi
@@ -4324,7 +4331,7 @@ public class LASConfig extends LASDocument {
 				// The name you get from the data source should be better, so keep it.
 				if ( !name.equals("name") ) {
 					datasetFromSrc.setAttribute(name, value);
-				} 
+				}
 			}
 			// save in a hash and add at the very end.  Grrrr.
 			ArrayList<Element> kids = new ArrayList<Element>();
@@ -4356,7 +4363,7 @@ public class LASConfig extends LASDocument {
 		}
 		src_axes.add(axes);
 
-		org.jdom.Document doc = addXML.createXMLfromDatasetsGridsAxesBean(dgab);  
+		org.jdom.Document doc = addXML.createXMLfromDatasetsGridsAxesBean(dgab);
 		String ds_filename = getOutputDir()+File.separator+"las_datasets_"+src_key+"_"+src_index+".xml";
 		String grids_filename = getOutputDir()+File.separator+"las_grids_"+src_key+"_"+src_index+".xml";
 		String axes_filename = getOutputDir()+File.separator+"las_axes_"+src_key+"_"+src_index+".xml";
