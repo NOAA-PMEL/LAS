@@ -423,11 +423,11 @@ public class DatasetBean extends LasBean {
 							addComposite(dataset, vector_long_name.toString(), vector_id.toString(), vectors);
 							
 							// These have been added to a vector composite so we know they are indeed vector components.
-							// So add the centered pallette property.
+							// So add the centered palette property.
 							for (Iterator vectIt = vectors.iterator(); vectIt.hasNext();) {
 								String id = (String) vectIt.next();
 								VariableBean varB = getVariable(id);
-								varB.setProperty("ferret", "pallette", "light_centered");
+								varB.setProperty("ferret", "palette", "light_centered");
 								varB.setProperty("ferret", "fill_levels", "c");
 							}
 						}
