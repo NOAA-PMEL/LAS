@@ -344,8 +344,7 @@ public class FerretTool extends TemplateTool{
         
         Task task = new Task(cmd, env, workDirFile, cancel, timeLimit, errors);
 
-        System.out.println("command line for task is:\n"
-                    + task.getCmd());
+        log.debug("command line for task is:\n" + task.getCmd());
         return task;
 
     }
