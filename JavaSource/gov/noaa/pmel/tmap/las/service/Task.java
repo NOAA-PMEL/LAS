@@ -217,7 +217,7 @@ public class Task {
                             + timeLimit + " sec");
                 }
                 if (cancel != null && cancel.exists()) {
-                    log.info("Backend request canceled: "+cmdString);
+                    log.debug("Backend request canceled: "+cmdString);
                     process.destroy();
                     cancel.delete();
                     throw new LASException("Process canceled.");

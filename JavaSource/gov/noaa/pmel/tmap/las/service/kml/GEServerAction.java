@@ -57,7 +57,7 @@ public final class GEServerAction extends Action {
             HttpServletResponse response) 
     throws ServletException, IOException{
 
-        log.info("entering GEServerAction");
+        log.info("START: GEServerAction");
         LASConfig lasConfig = (LASConfig)servlet.getServletContext().getAttribute(LASConfigPlugIn.LAS_CONFIG_KEY);
 
         //use Google Earth Mime type
@@ -72,8 +72,9 @@ public final class GEServerAction extends Action {
             out.println(kmlString);
         }else{
             //should ouput an error message to GE
-            log.info("error while generting the plot kml");
+            log.error("error while generting the plot kml");
         }
+        log.info("END: GEServerAction");
         return null;
     }
 
@@ -90,7 +91,7 @@ public final class GEServerAction extends Action {
         try{
             JDOMUtils.XML2JDOM(lasInitRequestXML, lasUIRequest);
         } catch (Exception e){
-            log.info("error while create LASUIRequest: " + e.toString());
+            log.error("error while create LASUIRequest: " + e.toString());
         }
 
         if(lasUIRequest.getProperty("ferret", "ge_overlay_style").equals("dynamic")){
@@ -113,7 +114,7 @@ public final class GEServerAction extends Action {
         try{
             JDOMUtils.XML2JDOM(lasInitRequestXML, lasUIRequest);
         } catch (Exception e){
-            log.info("error while create LASUIRequest: " + e.toString());
+            log.error("error while create LASUIRequest: " + e.toString());
         }
         return lasUIRequest;
     }
@@ -131,7 +132,7 @@ public final class GEServerAction extends Action {
 
             //BBOX is defined as [longitude_west, latitude_south, longitude_east, latitude_north]
             if (coords==null || coords==""){
-                log.info("There is no BBOX information in this request.");
+                log.warn("There is no BBOX information in this request.");
                 return null;
             }
             String[] coParts= coords.split(",");
@@ -213,7 +214,7 @@ public final class GEServerAction extends Action {
                 requestURL = serverURL+"?xml="+lasUIRequest.toEncodedURLString();
             }
         } catch (Exception e){
-            log.info("error while building LAS Request: " + e.toString());
+            log.error("error while building LAS Request: " + e.toString());
         }
 
         if( (requestURL != "") && (requestURL != null)){

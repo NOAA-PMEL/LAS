@@ -192,7 +192,7 @@ public class ProductLocalService extends ProductService {
             } catch (Exception e) {
                 lasBackendResponse.setError("fiveMinutes backend failed to cancel request. ", e);
             }
-            log.info("Java backend request canceled: "+lasBackendRequest.toCompactString());
+            log.debug("Java backend request canceled: "+lasBackendRequest.toCompactString());
             setResponseXML(lasBackendResponse.toString());
             return;
         }

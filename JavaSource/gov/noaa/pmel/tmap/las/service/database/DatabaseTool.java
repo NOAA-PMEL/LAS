@@ -59,7 +59,7 @@ public class DatabaseTool extends TemplateTool {
         ti = 0;   
         if (lasBackendRequest.isCanceled()) {
             lasBackendResponse.setError("Request canceled", "Request canceled.");
-            log.info("Request cancelled:"+lasBackendRequest.toCompactString());
+            log.debug("Request cancelled:"+lasBackendRequest.toCompactString());
             return lasBackendResponse;
         }
         log.debug("Timing "+ti+" : "+lasBackendRequest.getResultAsFile("db_debug")+": Reading database properties.");
@@ -122,7 +122,7 @@ public class DatabaseTool extends TemplateTool {
         log.debug("About to create sqlFile");
         if (lasBackendRequest.isCanceled()) {
             lasBackendResponse.setError("Request canceled.");
-            log.info("Request cancelled:"+lasBackendRequest.toCompactString());
+            log.debug("Request cancelled:"+lasBackendRequest.toCompactString());
             return lasBackendResponse;
         }
         try {
@@ -135,7 +135,7 @@ public class DatabaseTool extends TemplateTool {
         log.debug("Created sqlFile"); //debug
         if (lasBackendRequest.isCanceled()) {
             lasBackendResponse.setError("Request canceled", "Request canceled.");
-            log.info("Request cancelled:"+lasBackendRequest.toCompactString());
+            log.debug("Request cancelled:"+lasBackendRequest.toCompactString());
             return lasBackendResponse;
         }
         log.debug("Timing "+ti+" : "+lasBackendRequest.getResultAsFile("db_debug")+": Finished merging database template.");
@@ -155,7 +155,7 @@ public class DatabaseTool extends TemplateTool {
         log.debug("Statement ready: "+statement);
         if (lasBackendRequest.isCanceled()) {
             lasBackendResponse.setError("Request canceled", "Request canceled.");
-            log.info("Request cancelled:"+lasBackendRequest.toCompactString());
+            log.debug("Request cancelled:"+lasBackendRequest.toCompactString());
             return lasBackendResponse;
         }
         log.debug("Timing "+ti+" : "+lasBackendRequest.getResultAsFile("db_debug")+": Finished reading database template.");
@@ -215,7 +215,6 @@ public class DatabaseTool extends TemplateTool {
 	    } else {
 		int rows = stmt.getUpdateCount();
 		log.debug("Executed "+statement+" which affected "+rows+" rows.");
-		log.info("Executed "+statement+" which affected "+rows+" rows.");
 	    }    
 	
             log.debug("Timing "+ti+" : "+lasBackendRequest.getResultAsFile("db_debug")+": Finished executing database query.");
@@ -226,7 +225,7 @@ public class DatabaseTool extends TemplateTool {
         }
         if (lasBackendRequest.isCanceled()) {
             lasBackendResponse.setError("Request canceled", "Request canceled.");
-            log.info("Request cancelled:"+lasBackendRequest.toCompactString());
+            log.debug("Request cancelled:"+lasBackendRequest.toCompactString());
             return lasBackendResponse;
         }
         
@@ -235,7 +234,7 @@ public class DatabaseTool extends TemplateTool {
         log.debug("Got netcdf filename: "+ netcdfFilename); // debug
         if (lasBackendRequest.isCanceled()) {
             lasBackendResponse.setError("Request canceled","Request canceled.");
-            log.info("Request cancelled:"+lasBackendRequest.toCompactString());
+            log.debug("Request cancelled:"+lasBackendRequest.toCompactString());
             return lasBackendResponse;
         }
         
@@ -253,7 +252,7 @@ public class DatabaseTool extends TemplateTool {
             
             if (lasBackendRequest.isCanceled()) {
                 lasBackendResponse.setError("Request canceled.");
-                log.info("Request cancelled:"+lasBackendRequest.toCompactString());
+                log.debug("Request cancelled:"+lasBackendRequest.toCompactString());
                 return lasBackendResponse;
             }
 
@@ -315,7 +314,7 @@ public class DatabaseTool extends TemplateTool {
         
         if (lasBackendRequest.isCanceled()) {
             lasBackendResponse.setError("Request canceled.");
-            log.info("Request cancelled:"+lasBackendRequest.toCompactString());
+            log.debug("Request cancelled:"+lasBackendRequest.toCompactString());
             return lasBackendResponse;
         }
         // The service just wrote the file to the requested location so
@@ -386,7 +385,7 @@ public class DatabaseTool extends TemplateTool {
          
         context.put("las_backendrequest", lasBackendRequest);
         // Guaranteed to be set by the Product Server
-        log.info("Velocity resource path: "+ve.getProperty("file.resource.loader.path"));
+        log.debug("Velocity resource path: "+ve.getProperty("file.resource.loader.path"));
         ve.mergeTemplate(template,"ISO-8859-1", context, templateWriter);
         templateWriter.flush();
         templateWriter.close();

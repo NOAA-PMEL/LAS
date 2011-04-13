@@ -15,12 +15,12 @@ public class InitThread extends Thread {
 	public void run() {
 		LASConfigPlugIn plugin = new LASConfigPlugIn();
 		try {
-                        log.info("Starting server initialization.");
+			log.info("START: Server initialization.");
 			plugin.reinit(context);
 		} catch (ServletException e) {
 			log.error("Error in LAS init thread.");
 		}
 		context.removeAttribute(LASConfigPlugIn.LAS_LAZY_START_KEY);
-                log.info("Initialization complete.  Server ready for requests.");
+		log.info("END: Initialization complete.  Server ready for requests.");
 	}
 }

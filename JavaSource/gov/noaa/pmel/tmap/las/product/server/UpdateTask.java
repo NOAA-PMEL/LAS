@@ -20,9 +20,9 @@ public class UpdateTask extends TimerTask {
 	public void run() {
 		LASConfigPlugIn plugin = new LASConfigPlugIn();
 		try {
-			log.info("Update started.");
+			log.info("START: Config update.");
 			plugin.update(context);
-			log.info("Update finished.");
+			log.info("END: Config update.");
 		} catch (ServletException e) {
 			// Log the error and continue.
 			log.error("Could not update configuration: "+e.toString());

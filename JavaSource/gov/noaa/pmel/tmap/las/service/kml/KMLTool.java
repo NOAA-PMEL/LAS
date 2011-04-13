@@ -124,7 +124,7 @@ public class KMLTool extends TemplateTool  {
         if (is == null) {
             if ( template != null ) {
                 // Can't find properties file.  Set where we look for templates.
-                log.info("Setting template path to default "+template);
+                log.debug("Setting template path to default "+template);
                 p.setProperty("file.resource.loader.path", template);
             } else {
                 throw new LASException("Cannot find kml backend templates directory.");
@@ -135,7 +135,7 @@ public class KMLTool extends TemplateTool  {
         if ( p.getProperty("file.resource.loader.path") == null ) {
             if ( template != null ) {
                 // Can't find properties file.  Set where we look for templates.
-                log.info("Template path not found in properties file.  Setting to default"+template);
+                log.warn("Template path not found in properties file.  Setting to default"+template);
                 p.setProperty("file.resource.loader.path", template);
             } else {
                 throw new LASException("Cannot find kml templates directory.");
@@ -209,7 +209,7 @@ public class KMLTool extends TemplateTool  {
                 colorbar_file = lasBackendRequest.getChainedDataFile("colorbar");
                 colorbar_URL = kmlBackendConfig.getHttpBaseURL() + "/" + colorbar_file.substring(colorbar_file.lastIndexOf(File.separator), colorbar_file.length());
             }catch(NullPointerException e){
-                log.info("color bar is either not defined in operation or not created correctly");
+                log.warn("color bar is either not defined in operation or not created correctly");
             }
 
             if(colorbar_file != null && colorbar_file != ""){
@@ -239,7 +239,7 @@ public class KMLTool extends TemplateTool  {
       */
     private LASBackendResponse makePlacemarksKML(LASBackendRequest lasBackendRequest,VelocityContext context)
     throws Exception {
-        log.info("enter makePlacemarksKML");
+        log.debug("enter makePlacemarksKML");
 
         LASBackendResponse lasBackendResponse = new LASBackendResponse();
         String output = lasBackendRequest.getResultAsFile("kml");
@@ -296,7 +296,7 @@ public class KMLTool extends TemplateTool  {
         }
         context.put("allPlacemarks", allPlacemarks);
 
-        log.info("finish creating allPlacemarks");
+        log.debug("finish creating allPlacemarks");
 
         PrintWriter kmlWriter = null;
         try {

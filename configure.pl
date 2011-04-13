@@ -346,6 +346,15 @@ if ($LasConfig{proxy} eq "yes") {
 } else {
     $servlet_root_url = $LasConfig{tomcat_hostname} . ":" . $servlet_port;
 }
+
+# Make the log directory
+
+my $logdir = $LasConfig{jakarta_home}."/content".$LasConfig{uipath}."/logs";
+    if ( !(-d $logdir) ) {
+       &File::Path::mkpath($logdir);
+       print "Creating the $logdir directory.\n";
+    }
+
 # Get info about the TDS installation.
 
     my $serverConf = $LasConfig{jakarta_home}."/content".$LasConfig{uipath}."/conf/server";
@@ -407,6 +416,7 @@ my @Scripts = qw(build.xml
                  JavaSource/resources/database/DatabaseBackendConfig.xml
                  WebContent/WEB-INF/struts-config.xml
                  WebContent/WEB-INF/web.xml
+                 JavaSource/log4j.xml
                  WebContent/TestLinks.html
                  );
 my $mode = 0644;

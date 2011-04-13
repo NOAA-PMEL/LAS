@@ -11,7 +11,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.Iterator;
 import java.util.List;
@@ -20,8 +19,13 @@ import java.util.Timer;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 
+import org.apache.log4j.Appender;
+import org.apache.log4j.DailyRollingFileAppender;
+import org.apache.log4j.FileAppender;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
+import org.apache.log4j.PropertyConfigurator;
+import org.apache.log4j.RollingFileAppender;
 import org.apache.struts.action.ActionServlet;
 import org.apache.struts.action.PlugIn;
 import org.apache.struts.config.ModuleConfig;
@@ -135,6 +139,13 @@ public class LASConfigPlugIn implements PlugIn {
 	throws ServletException {
 
 		context = servlet.getServletContext();
+		
+		try {
+			PropertyConfigurator.configure(context.getRealPath("WEB-INF/classes/log4j.xml"));
+		} catch (Exception e) {
+			// Couldn't set up logging, but we're moving on...
+			e.getMessage();
+		}
 		
 		String version;
 		try {

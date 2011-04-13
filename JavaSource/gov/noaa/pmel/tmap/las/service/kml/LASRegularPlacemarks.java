@@ -123,7 +123,7 @@ public class LASRegularPlacemarks implements LASPlacemarks{
         } catch (IOException e) {
             e.printStackTrace();
         } catch (Exception e){
-            log.info("noplacemarks");
+            log.warn("noplacemarks");
         }
     }
 
