@@ -16,7 +16,8 @@ public class FerretBackendService extends BackendService {
        
         LASBackendRequest lasBackendRequest = new LASBackendRequest();      
         JDOMUtils.XML2JDOM(backendRequestXML, lasBackendRequest);
-        log.info("START: "+lasBackendRequest.toCompactString());
+        log.info("START: "+lasBackendRequest.getServiceAction());
+        log.debug("Starting request: "+lasBackendRequest.toCompactString());
         String debug = lasBackendRequest.getProperty("las", "debug");
         
         setLogLevel(debug);
@@ -35,7 +36,8 @@ public class FerretBackendService extends BackendService {
         if ( lasBackendResponse.getError() != null && !lasBackendResponse.getError().equals("") ) {
           log.error("Ferret backend request failed: "+lasBackendResponse.getError());
         }
-        log.info("END:   "+lasBackendRequest.toCompactString());
+        log.debug("Ending request: "+lasBackendRequest.toCompactString());
+        log.info("END:   "+lasBackendRequest.getServiceAction());
         return lasBackendResponse.toString();
     }
 }
