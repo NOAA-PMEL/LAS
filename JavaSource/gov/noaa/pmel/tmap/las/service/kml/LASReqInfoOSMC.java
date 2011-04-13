@@ -67,7 +67,7 @@ public class LASReqInfoOSMC{
                 }
 
         } catch (Exception e){
-            log.info("error while reading las request info: " + e.toString());
+            log.error("error while reading las request info: " + e.toString());
         }
         System.out.println("after read las req info");
         return initLASReq;

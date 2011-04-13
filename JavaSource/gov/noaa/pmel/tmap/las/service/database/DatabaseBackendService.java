@@ -30,14 +30,14 @@ public class DatabaseBackendService extends BackendService {
         
         if ( lasBackendRequest.isCancelRequest()) {
             lasBackendResponse.setError("Database backend request canceled.");
-            log.info("Database backend request canceled: "+lasBackendRequest.toCompactString());
+            log.debug("Database backend request canceled: "+lasBackendRequest.toCompactString());
             return lasBackendResponse.toString();
         }
         DatabaseTool databaseTool = new DatabaseTool();
-        log.info("Running database tool.");
+        log.debug("Running database tool.");
         lasBackendResponse = databaseTool.run(lasBackendRequest);
         if ( lasBackendResponse.getError() != null && !lasBackendResponse.getError().equals("") ) {
-            log.info("Database backend request failed: "+lasBackendResponse.getError());
+            log.error("Database backend request failed: "+lasBackendResponse.getError());
           } 
         return lasBackendResponse.toString();
     }

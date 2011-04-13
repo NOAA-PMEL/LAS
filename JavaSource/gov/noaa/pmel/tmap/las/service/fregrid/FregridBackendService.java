@@ -26,13 +26,13 @@ public class FregridBackendService extends BackendService {
         LASBackendResponse lasBackendResponse = new LASBackendResponse();    
         if ( lasBackendRequest.isCancelRequest()) {           
             lasBackendResponse.setError("Fregrid backend request canceled.");
-            log.info("Fregrid backend request canceled: "+lasBackendRequest.toCompactString());
+            log.debug("Fregrid backend request canceled: "+lasBackendRequest.toCompactString());
             return lasBackendResponse.toString();
         }
         FregridTool fregridTool = new FregridTool();
         lasBackendResponse = fregridTool.run(lasBackendRequest);
         if ( lasBackendResponse.getError() != null && !lasBackendResponse.getError().equals("") ) {
-          log.info("Fregrid backend request failed: "+lasBackendResponse.getError());
+          log.error("Fregrid backend request failed: "+lasBackendResponse.getError());
         } 
         return lasBackendResponse.toString();
     }

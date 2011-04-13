@@ -197,7 +197,7 @@ public class ProductServerRunner  extends Thread  {
                 }
 
                 if (cancel) {     
-                    log.info("Request cancelled:"+backendRequestDocument.toCompactString());
+                    log.debug("Request cancelled:"+backendRequestDocument.toCompactString());
                     break;
                 }
 
@@ -210,7 +210,7 @@ public class ProductServerRunner  extends Thread  {
                 }
 
                 if (cancel) {
-                    log.info("Request cancelled:"+backendRequestDocument.toCompactString());
+                    log.debug("Request cancelled:"+backendRequestDocument.toCompactString());
                     break;
                 }
 
@@ -221,7 +221,7 @@ public class ProductServerRunner  extends Thread  {
                 File responseFile = null;
 
                 if (cancel) {
-                    log.info("Request cancelled:"+backendRequestDocument.toCompactString());
+                    log.debug("Request cancelled:"+backendRequestDocument.toCompactString());
                     break;
                 }
 
@@ -234,7 +234,7 @@ public class ProductServerRunner  extends Thread  {
                 }
 
                 if (cancel) {
-                    log.info("Request cancelled:"+backendRequestDocument.toCompactString());
+                    log.debug("Request cancelled:"+backendRequestDocument.toCompactString());
                     break;
                 }
                 boolean isHit;
@@ -260,7 +260,7 @@ public class ProductServerRunner  extends Thread  {
                 }
 
                 if (cancel) {
-                    log.info("Request cancelled:"+backendRequestDocument.toCompactString());
+                    log.debug("Request cancelled:"+backendRequestDocument.toCompactString());
                     break;
                 }
                 // Not in the cache or don't use the cache...
@@ -330,7 +330,7 @@ public class ProductServerRunner  extends Thread  {
                         }
                     }                    
                     if (cancel) {
-                        log.info("Request cancelled:"+backendRequestDocument.toCompactString());
+                        log.debug("Request cancelled:"+backendRequestDocument.toCompactString());
                         break;
                     }   
                     try {
@@ -340,7 +340,7 @@ public class ProductServerRunner  extends Thread  {
                         break;
                     }
                     if (cancel) {
-                        log.info("Request cancelled:"+backendRequestDocument.toCompactString());
+                        log.debug("Request cancelled:"+backendRequestDocument.toCompactString());
                         break;
                     }
                 }
@@ -358,7 +358,7 @@ public class ProductServerRunner  extends Thread  {
                     cache.addToCache(lasResponse, responseFileName);
                 }
                 if (cancel) {
-                    log.info("Request cancelled:"+backendRequestDocument.toCompactString());
+                    log.debug("Request cancelled:"+backendRequestDocument.toCompactString());
                     break;
                 }
                 if ( !hit ) {
@@ -373,7 +373,7 @@ public class ProductServerRunner  extends Thread  {
                     break;
                 }
                 if (cancel) {
-                    log.info("Request cancelled:"+backendRequestDocument.toCompactString());
+                    log.debug("Request cancelled:"+backendRequestDocument.toCompactString());
                     break;
                 }
                 log.debug("Finished request " + request);

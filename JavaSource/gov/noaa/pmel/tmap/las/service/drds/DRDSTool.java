@@ -106,7 +106,7 @@ public class DRDSTool extends TemplateTool {
         log.debug("Got netcdf filename: "+ netcdfFilename); // debug
         if ( lasBackendRequest.isCanceled() ) {
             lasBackendResponse.setError("Request canceled.");
-            log.info("Request cancelled:"+lasBackendRequest.toCompactString());
+            log.debug("Request cancelled:"+lasBackendRequest.toCompactString());
             return lasBackendResponse;
         }
         
@@ -262,7 +262,7 @@ public class DRDSTool extends TemplateTool {
 
             if (lasBackendRequest.isCanceled()) {
                 lasBackendResponse.setError("Request canceled.");
-                log.info("Request cancelled:"+lasBackendRequest.toCompactString());
+                log.debug("Request cancelled:"+lasBackendRequest.toCompactString());
                 return lasBackendResponse;
             }
             

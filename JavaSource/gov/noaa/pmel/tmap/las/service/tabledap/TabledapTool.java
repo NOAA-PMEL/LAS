@@ -104,7 +104,7 @@ public class TabledapTool extends TemplateTool {
                 causeOfError = "Tabledap lasBackendRequest failed to cancel request: ";
                 File cancel = new File(lasBackendRequest.getResult("cancel"));
                 cancel.createNewFile();
-                log.info("Tabledap backend request canceled: " + lasBackendRequest.toCompactString());
+                log.debug("Tabledap backend request canceled: " + lasBackendRequest.toCompactString());
                 return lasBackendResponse;
             }
 
@@ -283,7 +283,7 @@ public class TabledapTool extends TemplateTool {
 
         } catch (Exception e) {
             //System.out.println("TabledapTool is processing the exception.");
-            log.info(MustBe.throwableToString(e));
+            log.warn(MustBe.throwableToString(e));
             lasBackendResponse.setError(causeOfError, e);
         }
 
@@ -331,7 +331,7 @@ public class TabledapTool extends TemplateTool {
         //was the request canceled?
         if (cancel != null && cancel.exists()) {
             lasBackendResponse.setError("Request canceled.");
-            log.info("Request cancelled:" + lasBackendRequest.toCompactString());
+            log.debug("Request cancelled:" + lasBackendRequest.toCompactString());
             return true;
         }
         return false;

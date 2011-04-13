@@ -126,7 +126,7 @@ public class DapperTool extends TemplateTool {
                 causeOfError = "Dapper backendRequest failed to cancel request: ";
                 File cancel = new File(dapperBackendRequest.getResultAsFile("cancel"));
                 cancel.createNewFile();
-                log.info("Dapper backend request canceled: " + dapperBackendRequest.toCompactString());
+                log.debug("Dapper backend request canceled: " + dapperBackendRequest.toCompactString());
                 return lasBackendResponse;
             }
 
@@ -140,7 +140,7 @@ public class DapperTool extends TemplateTool {
             //then standard check can be done any time
             if (cancel != null && cancel.exists()) {
                 lasBackendResponse.setError("Request canceled.");
-                log.info("Request canceled:" + dapperBackendRequest.toCompactString());
+                log.debug("Request canceled:" + dapperBackendRequest.toCompactString());
                 return lasBackendResponse;
             }
 
@@ -210,7 +210,7 @@ public class DapperTool extends TemplateTool {
             //was the request canceled?
             if (cancel != null && cancel.exists()) {
                 lasBackendResponse.setError("Request canceled.");
-                log.info("Request cancelled:" + dapperBackendRequest.toCompactString());
+                log.debug("Request cancelled:" + dapperBackendRequest.toCompactString());
                 return lasBackendResponse;
             }
             
@@ -249,7 +249,7 @@ public class DapperTool extends TemplateTool {
             lasBackendResponse.addResponseFromRequest(dapperBackendRequest);
 
         } catch (Exception e) {
-            log.info(MustBe.throwableToString(e)); //e.toString + "\n" + String2.toNewlineString(e.getStackTrace()));
+            log.error(MustBe.throwableToString(e)); //e.toString + "\n" + String2.toNewlineString(e.getStackTrace()));
             lasBackendResponse.setError(causeOfError, e);
         }
 

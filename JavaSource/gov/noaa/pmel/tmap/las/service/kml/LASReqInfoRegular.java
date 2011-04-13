@@ -161,7 +161,7 @@ public class LASReqInfoRegular{
             }
 
         } catch (Exception e){
-            log.info("error while reading las request info: " + e.toString());
+            log.error("error while reading las request info: " + e.toString());
         }
 
         return initLASReq;

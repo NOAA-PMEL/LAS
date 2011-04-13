@@ -24,13 +24,13 @@ public class ShapeFileService extends BackendService {
 	        LASBackendResponse lasBackendResponse = new LASBackendResponse();    
 	        if ( lasBackendRequest.isCancelRequest()) {           
 	            lasBackendResponse.setError("ShapeFile backend request canceled.");
-	            log.info("ShapeFile backend request canceled: "+lasBackendRequest.toCompactString());
+	            log.debug("ShapeFile backend request canceled: "+lasBackendRequest.toCompactString());
 	            return lasBackendResponse.toString();
 	        }
 	        ShapeFileTool shapeTool = new ShapeFileTool();
 	        lasBackendResponse = shapeTool.run(lasBackendRequest);
 	        if ( lasBackendResponse.getError() != null && !lasBackendResponse.getError().equals("") ) {
-	          log.info("ShapeFile backend request failed: "+lasBackendResponse.getError());
+	          log.debug("ShapeFile backend request failed: "+lasBackendResponse.getError());
 	        } 
 	        return lasBackendResponse.toString();
 	    }

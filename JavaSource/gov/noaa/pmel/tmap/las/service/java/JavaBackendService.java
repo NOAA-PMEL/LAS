@@ -54,7 +54,7 @@ public class JavaBackendService {
             } catch (Exception e) {
                 lasBackendResponse.setError("fiveMinutes backend failed to cancel request. ", e);
             }
-            log.info("Java backend request canceled: "+lasBackendRequest.toCompactString());
+            log.debug("Java backend request canceled: "+lasBackendRequest.toCompactString());
             return lasBackendResponse.toString();
         }
         // If it's not the cancel job, sleep for 30 then look for the cancel job.  Repeat for 5 minutes.

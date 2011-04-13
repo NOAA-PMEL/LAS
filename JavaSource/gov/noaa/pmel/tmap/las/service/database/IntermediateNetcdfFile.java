@@ -302,7 +302,7 @@ public class IntermediateNetcdfFile {
         }
         
         
-        log.info("filling netcdf file"); //debug
+        log.debug("filling netcdf file"); //debug
         fill(resultSet);
     }
     

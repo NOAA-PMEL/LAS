@@ -36,13 +36,13 @@ public class DRDSBackendService extends BackendService {
         LASBackendResponse lasBackendResponse = new LASBackendResponse();    
         if ( lasBackendRequest.isCancelRequest()) {           
             lasBackendResponse.setError("DRDS backend request canceled.");       
-            log.info("DRDS backend request canceled: "+lasBackendRequest.toCompactString());
+            log.debug("DRDS backend request canceled: "+lasBackendRequest.toCompactString());
             return lasBackendResponse.toString();
         }
         DRDSTool tool = new DRDSTool();
         lasBackendResponse = tool.run(lasBackendRequest);
         if ( lasBackendResponse.getError() != null && !lasBackendResponse.getError().equals("") ) {
-          log.info("DRDS backend request failed: "+lasBackendResponse.getError());
+          log.debug("DRDS backend request failed: "+lasBackendResponse.getError());
         } 
         return lasBackendResponse.toString();
     }
