@@ -100,7 +100,6 @@ public class LASConfig extends LASDocument {
     private static Logger log = LogManager.getLogger(LASConfig.class.getName());
     private static HashMap<String, HashSet<String>> remoteData = new HashMap<String, HashSet<String>>();
     private static LASProxy lasProxy = new LASProxy();
-    private static String FILENAME = "/home/users/koyuk/socat/tomcat/webapps/socat/output/";
     private static String time_formats[] = {
             "yyyy-MM-dd HH:mm:ss",
             "yyyy-MM-dd HH:mm",
@@ -2693,12 +2692,6 @@ public class LASConfig extends LASDocument {
 		return Boolean.parseBoolean(this.getRootElement().getChildText("readonly"));
     }
     /**
-	 * Sets the permissions for the tomcat/.../output folder so that data downloads won't experience a permissions error
-	 */
-	public void setPermissions() {
-		Runtime.getRuntime().exec("chmod 664 "+FILENAME);
-    }
-    /**
      * Get xy region for a particular variable
      * @param varpath XPath to variable
      * @return region ArrayList of NameValueBeans with x_lo, x_hi, y_lo and y_hi
@@ -4384,14 +4377,13 @@ public class LASConfig extends LASDocument {
 		Vector<DatasetsGridsAxesBean> beans = new Vector<DatasetsGridsAxesBean>();
 		if ( src_type.equalsIgnoreCase("netcdf") ) {
 
-			try {
-				//String url = DODSNetcdfFile.canonicalURL(src);
-				NetcdfDataset ncds = NetcdfDataset.openDataset(src);
-				dgab = myAddXML.createBeansFromNetcdfDataset(ncds, src, false, null);
-				ncds.close();
-			} catch (IOException e) {
-				log.error("Unable to create config for:" + src);
+		
+			dgab = myAddXML.createBeansFromNetcdfDataset(src, false, null);
+			if ( dgab == null ) {
+				log.error("Unable to make configuration from "+src);
+				return beans;
 			}
+			
 
 			String created = null;
 			String expires = null;
