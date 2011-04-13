@@ -611,8 +611,8 @@ if ( getYesOrNo("Do you want to install the example data set configuration") ) {
     }
  }
 
-    print "Building servlet war file.\n";
-    system("ant deploy");
+    print "Building addXML and the servlet war file.\n";
+    system("ant addxml-build; ant deploy");
 
     print "\n\n";
 
