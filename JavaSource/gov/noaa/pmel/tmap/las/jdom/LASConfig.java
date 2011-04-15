@@ -962,7 +962,7 @@ public class LASConfig extends LASDocument {
             }
 
         }
-        List las_serverElements = root.getChildren("las_server");
+        List las_serverElements = root.getChild("las_servers").getChildren("las_server");
         for (Iterator lsIt = las_serverElements.iterator(); lsIt.hasNext();) {
         	Element las_server = (Element) lsIt.next();
         	String url = las_server.getAttributeValue("url");
