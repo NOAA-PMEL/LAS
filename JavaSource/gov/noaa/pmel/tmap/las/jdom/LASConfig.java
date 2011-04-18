@@ -962,17 +962,20 @@ public class LASConfig extends LASDocument {
             }
 
         }
-        List las_serverElements = root.getChild("las_servers").getChildren("las_server");
-        for (Iterator lsIt = las_serverElements.iterator(); lsIt.hasNext();) {
-        	Element las_server = (Element) lsIt.next();
-        	String url = las_server.getAttributeValue("url");
-        	if ( url == null ) {
-        		log.warn("<las_server> configured without a url attribute.");
-        	} else {
-        		String ID = las_server.getAttributeValue("ID");
-        		if ( ID == null ) {
-        			ID = JDOMUtils.MD5Encode(url);
-        			las_server.setAttribute("ID", ID);
+        Element serversE = root.getChild("las_servers");
+        if ( serversE != null ) {
+        	List las_serverElements = serversE.getChildren("las_server");
+        	for (Iterator lsIt = las_serverElements.iterator(); lsIt.hasNext();) {
+        		Element las_server = (Element) lsIt.next();
+        		String url = las_server.getAttributeValue("url");
+        		if ( url == null ) {
+        			log.warn("<las_server> configured without a url attribute.");
+        		} else {
+        			String ID = las_server.getAttributeValue("ID");
+        			if ( ID == null ) {
+        				ID = JDOMUtils.MD5Encode(url);
+        				las_server.setAttribute("ID", ID);
+        			}
         		}
         	}
         }
@@ -2246,9 +2249,7 @@ public class LASConfig extends LASDocument {
 	                String propName = prop.getChildTextNormalize("name");
 	                String propValue = prop.getChildTextNormalize("value");
 	                String currentValue = group.get(propName);
-	                if (currentValue == null) {
-	                    group.put(propName, propValue);
-	                } else if (currentValue.equals("default")) {
+	                if (propValue != null && propName != null ) {
 	                    group.put(propName, propValue);
 	                }
 	            }
@@ -2272,11 +2273,9 @@ public class LASConfig extends LASDocument {
 	                String propName = prop.getChildTextNormalize("name");
 	                String propValue = prop.getChildTextNormalize("value");
 	                String currentValue = group.get(propName);
-	                if (currentValue == null) {
+	                if (propValue != null && propName != null ) {
 	                    group.put(propName, propValue);
-	                } else if (currentValue.equals("default")) {
-	                    group.put(propName, propValue);
-	                }
+	                } 
 	            }
 
 	            propertyGroups.put(propGroupE.getAttributeValue("type"), group);
