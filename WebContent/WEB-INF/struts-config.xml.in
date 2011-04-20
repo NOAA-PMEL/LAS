@@ -97,6 +97,10 @@
           <action path="/getUI"  type="gov.noaa.pmel.tmap.las.ui.GetUI">
 	           <forward name="lazy_start" path="/productserver/templates/lazy_start.vm" redirect="false"/>
 	      </action>
+	      <action path="/getTestResults" type="gov.noaa.pmel.tmap.las.ui.GetTestResults">
+	          <forward name="test_results" path="/productserver/templates/test_results.vm" redirect="false"/>
+	          <forward name="ui" path="/getUI.do"/>
+	      </action>
           <action path="/getMetadata" type="gov.noaa.pmel.tmap.las.ui.GetMetadata"/>
           <action path="/resolveURL" type="gov.noaa.pmel.tmap.las.ui.ResolveURL"/>
           <action path="/getViews" type="gov.noaa.pmel.tmap.las.ui.GetViews" />
