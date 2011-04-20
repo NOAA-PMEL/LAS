@@ -137,7 +137,8 @@ public class addXML {
 	private static DateTimeFormatter ferret_time_formatter = DateTimeFormat.forPattern("dd-MMM-yyyy HH:mm:ss");
 
 	// Constants
-	private static final String Z_VALUES = "zvalues";
+	private static final String Z_VALUES = "z_values";
+	private static final String ZVALUES = "zvalues";
 	
 	
 	private static boolean verbose;
@@ -977,7 +978,18 @@ public class addXML {
 								double zsize = z.getSize();
 								double zresolution = z.getResolution();
 								double zstart = z.getStart();
-								zvalues = threddsDataset.findProperty(Z_VALUES).trim();
+								try {
+									zvalues = threddsDataset.findProperty(Z_VALUES);
+								} catch (Exception e) {
+									try {
+									    zvalues = threddsDataset.findProperty(ZVALUES);
+									} catch (Exception e1) {
+										zvalues = null;
+									}
+								}
+								if ( zvalues != null ) {
+									zvalues = zvalues.trim();
+								}
 								if ( ( Double.isNaN(zsize) || Double.isNaN(zresolution) || Double.isNaN(zstart) ) &&
 										zvalues == null ) {
 									readZ = true;
@@ -1085,7 +1097,12 @@ public class addXML {
 									String zunits = z.getUnits();
 									zAxis.setType("z");
 									zAxis.setUnits(zunits);
-									String[] zvs = zvalues.split("\\s+");								
+									String[] zvs = zvalues.split("\\s+");
+									DecimalFormat format = new DecimalFormat("###############.###############");
+									for (int zi = 0; zi < zvs.length; zi++ ) {
+										double zd = Double.valueOf(zvs[zi]).doubleValue();
+										zvs[zi] = format.format(zd);
+									}
 									zAxis.setV(zvs);
 								} else {
 									log.info("Loading Z without property metadata: "+elementName);
