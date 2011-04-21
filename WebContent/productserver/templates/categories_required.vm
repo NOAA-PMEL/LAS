@@ -3,9 +3,9 @@
 <!-- LAS SERVER OK -->
 <head><title>LAS Output</title></head>
 <body bgcolor="white">
-<h3>The Live Access Server you are attempting to access has been configure to operate with an ESG Gateway.</h3>
+<h3>The Live Access Server you are attempting to access has been configured to operate as part of a federation.</h3>
 <hr>
-You must select the data sets you want to explore from the gateway interface.
+You must select the data sets you want to explore from the search interface.
 </body>
 </html>
 
