@@ -707,10 +707,12 @@ public class addXML {
 			InvDataset ThreddsDataset = (InvDataset) di.next();
 			if (ThreddsDataset.hasNestedDatasets()) {
 				CategoryBean cb = processCategories(ThreddsDataset);
-				CategoryBeans.add(cb);
+				if ( cb.getCategories().size() > 0 || cb.getFilters().size() > 0 ) {
+				    CategoryBeans.add(cb);
+				}
 			}
 		}
-
+     
 		// Discover and process all the THREDDS dataset elements that actually
 		// connect to a data source.
 
@@ -821,7 +823,6 @@ public class addXML {
 		doc.setRootElement(lasdata);
 		return doc;
 	}
-
 	/**
 	 * processDataset
 	 *
@@ -1380,12 +1381,13 @@ public class addXML {
 		}
 
 		Vector subCats = new Vector();
-		for (Iterator subDatasetsIt = ThreddsDataset.getDatasets().iterator();
-		subDatasetsIt.hasNext(); ) {
+		for (Iterator subDatasetsIt = ThreddsDataset.getDatasets().iterator(); subDatasetsIt.hasNext(); ) {
 			InvDataset subDataset = (InvDataset) subDatasetsIt.next();
 			// Process the sub-categories
 			CategoryBean subCat = processCategories(subDataset);
-			subCats.add(subCat);
+			if ( subCat.getCategories().size() > 0 || subCat.getFilters().size() > 0 ) {
+			    subCats.add(subCat);
+			}
 		}
 		cb.setCategories(subCats);
 
