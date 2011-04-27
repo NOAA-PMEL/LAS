@@ -2,8 +2,8 @@ package gov.noaa.pmel.tmap.las.server;
 
 
 import gov.noaa.pmel.tmap.las.jdom.JDOMUtils;
-import gov.noaa.pmel.tmap.las.client.RPCException;
-import gov.noaa.pmel.tmap.las.client.RPCService;
+import gov.noaa.pmel.tmap.las.client.rpc.RPCException;
+import gov.noaa.pmel.tmap.las.client.rpc.RPCService;
 import gov.noaa.pmel.tmap.las.client.serializable.CategorySerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.ConfigSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.DatasetSerializable;
@@ -11,13 +11,17 @@ import gov.noaa.pmel.tmap.las.client.serializable.GridSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.OperationSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.OptionSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.RegionSerializable;
+import gov.noaa.pmel.tmap.las.client.serializable.TestSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.VariableSerializable;
+import gov.noaa.pmel.tmap.las.client.test.TestConstants;
 import gov.noaa.pmel.tmap.las.client.util.Util;
 import gov.noaa.pmel.tmap.las.confluence.Confluence;
 import gov.noaa.pmel.tmap.las.exception.LASException;
 import gov.noaa.pmel.tmap.las.jdom.LASConfig;
 import gov.noaa.pmel.tmap.las.jdom.LASDocument;
+import gov.noaa.pmel.tmap.las.jdom.LASTestResults;
 import gov.noaa.pmel.tmap.las.product.server.LASConfigPlugIn;
+import gov.noaa.pmel.tmap.las.test.LASTest;
 import gov.noaa.pmel.tmap.las.ui.LASProxy;
 import gov.noaa.pmel.tmap.las.util.Category;
 import gov.noaa.pmel.tmap.las.util.Constants;
@@ -32,6 +36,7 @@ import gov.noaa.pmel.tmap.las.util.Variable;
 import gov.noaa.pmel.tmap.las.util.View;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
@@ -63,6 +68,28 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
 			throw new RPCException(e.getLocalizedMessage());
 		}
 		return property_group;
+	}
+	public TestSerializable[] getTestResults(String test_key) throws RPCException {
+		LASTestResults testResults = new LASTestResults();
+		LASConfig lasConfig = (LASConfig) getServletContext().getAttribute(LASConfigPlugIn.LAS_CONFIG_KEY);
+		String test_output_file = lasConfig.getOutputDir()+File.separator+TestConstants.TEST_RESULTS_FILE;
+		File c = new File(test_output_file);
+		if ( c.exists() ) {
+			try {
+				JDOMUtils.XML2JDOM(new File(test_output_file), testResults);
+			} catch (IOException e) {
+				throw new RPCException(e.getMessage());
+			} catch (JDOMException e) {
+				throw new RPCException(e.getMessage());
+			}
+		}
+		if ( test_key == null ) {
+			return testResults.getTests();
+		} else {
+			TestSerializable[] tests = new TestSerializable[1];
+			tests[0] = testResults.getTest(test_key);
+			return tests;
+		}
 	}
 	/**
 	 * @throws RPCException 
@@ -546,7 +573,7 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
 	}
 	/**
 	 * (non-Javadoc)
-	 * @see gov.noaa.pmel.tmap.las.client.RPCService#getOptions(java.lang.String)
+	 * @see gov.noaa.pmel.tmap.las.client.rpc.RPCService#getOptions(java.lang.String)
 	 * 
 	 */
 	public OptionSerializable[] getOptions(String opid) throws RPCException {

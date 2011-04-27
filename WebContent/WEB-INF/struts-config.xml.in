@@ -99,6 +99,9 @@
 	      </action>
 	      <action path="/getTestResults" type="gov.noaa.pmel.tmap.las.ui.GetTestResults">
 	          <forward name="test_results" path="/productserver/templates/test_results.vm" redirect="false"/>
+	          <forward name="full_test_results" path="/productserver/templates/test_results_full.vm" redirect="false"/>
+	          <forward name="test_result" path="/productserver/templates/test_result.vm" redirect="false"/>
+	          <forward name="test_result_full" path="/productserver/templates/test_result_full.vm" redirect="false"/>
 	          <forward name="ui" path="/getUI.do"/>
 	      </action>
           <action path="/getMetadata" type="gov.noaa.pmel.tmap.las.ui.GetMetadata"/>

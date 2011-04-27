@@ -16,16 +16,19 @@ import gov.noaa.pmel.tmap.addxml.DatasetsGridsAxesBean;
 import gov.noaa.pmel.tmap.addxml.FilterBean;
 import gov.noaa.pmel.tmap.addxml.GridBean;
 import gov.noaa.pmel.tmap.addxml.addXML;
-import gov.noaa.pmel.tmap.las.client.RPCException;
+import gov.noaa.pmel.tmap.las.client.rpc.RPCException;
 import gov.noaa.pmel.tmap.las.client.serializable.CategorySerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.DatasetSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.EnsembleMemberSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.VariableSerializable;
+import gov.noaa.pmel.tmap.las.client.test.TestConstants;
 import gov.noaa.pmel.tmap.las.exception.LASException;
 import gov.noaa.pmel.tmap.las.jdom.filter.AttributeFilter;
 import gov.noaa.pmel.tmap.las.jdom.filter.CategoryFilter;
 import gov.noaa.pmel.tmap.las.jdom.filter.EmptySrcDatasetFilter;
 import gov.noaa.pmel.tmap.las.product.server.Cache;
+import gov.noaa.pmel.tmap.las.test.LASTest;
+import gov.noaa.pmel.tmap.las.test.LASTestOptions;
 import gov.noaa.pmel.tmap.las.ui.LASProxy;
 import gov.noaa.pmel.tmap.las.ui.state.StateNameValueList;
 import gov.noaa.pmel.tmap.las.ui.state.TimeSelector;
@@ -4846,5 +4849,77 @@ public class LASConfig extends LASDocument {
 			names.put(dsID[i], d.getName());
 		}
 		return names;
+	}
+	/**
+	 * Read the test options from the configuration, if there are none return null.
+	 * Options are:
+	 * <tests>
+	 *     <test type="OPeNDAP"/> <!-- Test all OPeNDAP connections. -->
+	 *     <test type="F-TDS"/>   <!-- Test all F-TDS connections. -->
+	 *     
+	 *     <!-- Test generation of products, 
+	 *          default view is "xy" and 
+	 *          default is to test the first variable, set to "all" to test all and
+	 *          default is all dataset, use an ID to test a particular dataset.  -->
+	 *     <test type="Products" view="xy" variable="all" dataset="DSID"> 
+	 * </tests>
+	 * @return
+	 */
+	public LASTestOptions getTestOptions() {
+		LASTestOptions lto = null;
+		Element testsE = getRootElement().getChild("tests");
+		if ( testsE != null ) {
+			lto = new LASTestOptions();
+			List tests = testsE.getChildren("test");
+			String delay = testsE.getAttributeValue("delay");
+			
+			if ( delay != null ) {
+				try {
+					long d = Long.valueOf(delay).longValue();
+					lto.setDelay(d);
+				} catch (Exception e) {
+					// Oh, well...
+				}
+			}
+			String period = testsE.getAttributeValue("period");
+			if ( period != null ) {
+				try {
+					long p = Long.valueOf(period).longValue();
+					lto.setPeriod(p);
+				} catch (Exception e) {
+					// Oh, well...
+				}
+			}
+			for (Iterator testsIt = tests.iterator(); testsIt.hasNext();) {
+				Element test = (Element) testsIt.next();
+				String type = test.getAttributeValue("type");
+				if ( type != null ) {
+					if ( type.equals(TestConstants.KEY_TEST_DIRECT_OPENDAP)) {
+						lto.setConnectionOnly();
+					} else if ( type.equals(TestConstants.KEY_TEST_F_TDS_OPENDAP) ) {
+						lto.setTestFTDS();
+					} else if ( type.equals(TestConstants.KEY_TEST_PRODUCT) ) {
+						lto.setResponseOnly();
+						// If the view is set use it, default to "xy"
+						String view = test.getAttributeValue("view");
+						if ( view != null ) {
+							lto.setView(view);
+						} else {
+						   lto.setView("xy");
+						}
+						String variable = test.getAttributeValue("varaible");
+						// The choices are "all", "first" or the default which is first.
+						if ( variable != null && variable.equals("all") ) {
+							lto.setAllVariable();
+						}
+						String dataset = test.getAttributeValue("dataset");
+						if ( dataset != null ) {
+							lto.setDataset(dataset);
+						}
+					}
+				}
+			}
+		}
+		return lto;
 	}
 }

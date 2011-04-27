@@ -104,6 +104,7 @@ public class RequestInputFilter implements Filter {
 		"REQUEST", 
 		"stream",
 		"stream_ID", 
+		"test",
 		"varid",
 		"view",
 		"xml",
@@ -291,7 +292,18 @@ public class RequestInputFilter implements Filter {
 			return true;
 		}
 		if ( value.length > 1 ) return false;
-		if ( !value[0].equals("json") && !value[0].equals("xml") ) return false;
+		if ( !value[0].equals("json") && !value[0].equals("xml") &&  !value[0].equals("full")) return false;
+		return true;
+	}
+	private boolean validTest(HttpServletRequest request) {
+		String value[] = request.getParameterValues("test");
+		if ( value == null || value.length == 0 ) {
+			return true;
+		}
+		if ( value.length > 1 ) return false;
+		if ( !value[0].equals("ftds") && !value[0].equals("opendap") && !value[0].equals("product") && 
+			 !value[0].equals("ftds_full") && !value[0].equals("opendap_full") && !value[0].equals("product_full") &&
+			 !value[0].equals("full") && !value.equals("all") ) return false;
 		return true;
 	}
 	private boolean validBBOX(HttpServletRequest request) {

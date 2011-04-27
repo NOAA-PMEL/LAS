@@ -23,14 +23,17 @@ public class TestTask extends TimerTask {
 	@Override
 	public void run() {
 		LASConfig lasConfig = (LASConfig) context.getAttribute(LASConfigPlugIn.LAS_CONFIG_KEY);
-		LASTestOptions l = new LASTestOptions();
-		
-		//TODO get testing parameters from the config and set up the right tests...
-		
-		// For now just do an F-TDS test...
-		l.setTestFTDS();
-		
-		LASTest lasTest = new LASTest(l, lasConfig);
-		lasTest.runTest(l, true);
+        // If this is null, we're lazy starting so we'll skip it for now.
+		if ( lasConfig != null ) {
+			
+			
+			LASTestOptions l = lasConfig.getTestOptions();
+            if ( l != null ) {
+            	// If tests were configured, run them...
+            	LASTest lasTest = new LASTest(l, lasConfig);
+    			lasTest.runTest(l, true);
+            }
+			
+		}
 	}
 }

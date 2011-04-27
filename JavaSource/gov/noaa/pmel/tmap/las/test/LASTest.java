@@ -24,11 +24,6 @@ import org.jdom.Element;
  *
  */
 public class LASTest{
-	
-	public static String TEST_DIRECT_OPENDAP = "Direct OPeNDAP Access Test";
-	public static String TEST_F_TDS_OPENDAP = "F-TDS OPeNDAP Access Test";
-	public static String TEST_PRODUCT_RESPONSE = "Product Response Test";
-	public static String TEST_RESULTS_FILE = "testResults.xml";
 
 	private static LASProxy lasProxy = new LASProxy();
 	
@@ -75,14 +70,14 @@ public class LASTest{
     		LASDatasetTester ltd = new LASDatasetTester(lasConfig, lto);
     	    ltd.testDataset(web_output);
         }
-        System.out.println();
+    	if ( !web_output ) System.out.println();
         //test F-TDS URLs 
         if(lto.testFTDS()){
         	if ( !web_output ) System.out.println("==== LAS test: Are the FTDS URLs working? =================");
         	 LASDatasetTester ltd = new LASDatasetTester(lasConfig, lto);
              ltd.testFTDS(web_output);
         }
-        System.out.println();
+        if ( !web_output ) System.out.println();
         //test product response
         if(lto.testResp()){
         	if ( !web_output ) System.out.println("==== LAS test: Are the product reponses correct? =======");
