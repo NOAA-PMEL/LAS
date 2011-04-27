@@ -14,8 +14,12 @@ public class LASTestOptions{
     private boolean testResponse;
     private boolean verbose;  
     private boolean testFTDS;
+    private String productTime;
     
-    private String las;
+	private long delay = 0;
+    private long period = 86400000;   // 24 hours
+
+	private String las;
   
     public LASTestOptions(){
         dds       = false;
@@ -130,7 +134,31 @@ public class LASTestOptions{
 //    }
 
     
-    public boolean showHelp(){
+    public long getDelay() {
+		return delay;
+	}
+
+	public void setDelay(long delay) {
+		this.delay = delay;
+	}
+
+	public long getPeriod() {
+		return period;
+	}
+
+	public void setPeriod(long period) {
+		this.period = period;
+	}
+
+	public String getProductTime() {
+		return productTime;
+	}
+
+	public void setProductTime(String productTime) {
+		this.productTime = productTime;
+	}
+
+	public boolean showHelp(){
     	return help;
     }
     

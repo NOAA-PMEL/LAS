@@ -5,6 +5,7 @@ import gov.noaa.pmel.tmap.las.jdom.JDOMUtils;
 import gov.noaa.pmel.tmap.las.jdom.LASConfig;
 import gov.noaa.pmel.tmap.las.jdom.LASDocument;
 import gov.noaa.pmel.tmap.las.jdom.ServerConfig;
+import gov.noaa.pmel.tmap.las.test.LASTestOptions;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -197,11 +198,7 @@ public class LASConfigPlugIn implements PlugIn {
 			log.error("Could not parse the las config file "+configFileName);
 		}
 		
-		// Server is up and ready to go...  Set up regular testing...
-		
-		TestTask testTask = new TestTask(context);
-		Timer testTimer = new Timer("LASTest Timer", true);
-		testTimer.schedule(testTask, 0, 1000*60*60*24);
+
 	}
 	
 	public void reinit(ServletContext reinitContext) throws ServletException {
@@ -492,6 +489,18 @@ public class LASConfigPlugIn implements PlugIn {
 		
 		// Unlock the product server and start accepting new requests...
 		context.setAttribute(LAS_LOCK_KEY, "false");
+		
+		// Server is up and ready to go...  Set up regular testing...
+		LASTestOptions lto = lasConfig.getTestOptions();
+		TestTask testTask = new TestTask(context);
+		Timer testTimer = new Timer("LASTest Timer", true);
+		double d = lto.getDelay();
+		if ( d < 0 ) d = 0;
+		double p = lto.getPeriod();
+		// Not more than twice a day.  
+		if ( p < 43200000 ) p = 43200000;
+		testTimer.schedule(testTask, lto.getDelay(), lto.getPeriod());
+		
 	}
 	public void destroy() {
 

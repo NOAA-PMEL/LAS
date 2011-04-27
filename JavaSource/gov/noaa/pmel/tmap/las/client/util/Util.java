@@ -1,7 +1,7 @@
 package gov.noaa.pmel.tmap.las.client.util;
 
-import gov.noaa.pmel.tmap.las.client.RPCService;
-import gov.noaa.pmel.tmap.las.client.RPCServiceAsync;
+import gov.noaa.pmel.tmap.las.client.rpc.RPCService;
+import gov.noaa.pmel.tmap.las.client.rpc.RPCServiceAsync;
 import gov.noaa.pmel.tmap.las.client.serializable.GridSerializable;
 
 import java.util.ArrayList;

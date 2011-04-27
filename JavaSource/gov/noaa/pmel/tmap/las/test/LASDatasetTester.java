@@ -2,6 +2,7 @@ package gov.noaa.pmel.tmap.las.test;
 
 
 import gov.noaa.pmel.tmap.addxml.JDOMUtils;
+import gov.noaa.pmel.tmap.las.client.test.TestConstants;
 import gov.noaa.pmel.tmap.las.jdom.LASConfig;
 import gov.noaa.pmel.tmap.las.jdom.LASDocument;
 import gov.noaa.pmel.tmap.las.jdom.LASTestResults;
@@ -60,13 +61,13 @@ public class LASDatasetTester{
 
     	try{
     		if ( web_output ) {
-    			test_output_file = lasConfig.getOutputDir()+File.separator+LASTest.TEST_RESULTS_FILE;
+    			test_output_file = lasConfig.getOutputDir()+File.separator+TestConstants.TEST_RESULTS_FILE;
     			File c = new File(test_output_file);
     			if ( c.exists() ) {
     				JDOMUtils.XML2JDOM(new File(test_output_file), testResults);
     			}
     			Date now = new Date();
-    			testResults.putTest(LASTest.TEST_DIRECT_OPENDAP, now.getTime());
+    			testResults.putTest(TestConstants.TEST_DIRECT_OPENDAP, now.getTime());
     		}
 
     		//get datasets
@@ -80,9 +81,7 @@ public class LASDatasetTester{
     			if ( dataset.getVariables().size() > 0 ) {
     				Variable var = dataset.getVariables().get(0);
 
-    				if ( web_output ) {
-    					testResults.putDataset(LASTest.TEST_DIRECT_OPENDAP, dataset.getName(), dataset.getID());
-    				}
+    				
 
     				//get the data URL
     				String dsURL = lasConfig.getFullDataObjectURL(dataset.getID(), var.getID());
@@ -95,9 +94,13 @@ public class LASDatasetTester{
 
     				//get dds for a remote dataset
     				if(dsURL != null && dsURL.contains("http")){
+    					
     					String ds = lto.getDataset();
     					if( (ds == null) || ((ds != null)&&(dsURL.contains(ds))) ) {
-
+    						// Only add it to the test results if we're going to test it.
+    						if ( web_output ) {
+            					testResults.putDataset(TestConstants.TEST_DIRECT_OPENDAP, dataset.getName(), dataset.getID());
+            				}
     						if ( !web_output ) {
     							System.out.println("---- Check dataset: " + dsURL);
     						}
@@ -106,7 +109,7 @@ public class LASDatasetTester{
     							status = "failed";
     						}
     						if ( web_output ) {
-    							testResults.addResult(LASTest.TEST_DIRECT_OPENDAP, dataset.getID(), dsURL, status);
+    							testResults.addResult(TestConstants.TEST_DIRECT_OPENDAP, dataset.getID(), dsURL, status);
     						} else {
     							if ( status.equals("passed") ) {
     								System.out.println("OK!");
@@ -145,13 +148,13 @@ public class LASDatasetTester{
             List datasetElements = datasetsE.getChildren("dataset");
 
             if ( web_output ) {
-                test_output_file = lasConfig.getOutputDir()+File.separator+LASTest.TEST_RESULTS_FILE;
+                test_output_file = lasConfig.getOutputDir()+File.separator+TestConstants.TEST_RESULTS_FILE;
                 File c = new File(test_output_file);
                 if ( c.exists() ) {
                     JDOMUtils.XML2JDOM(c, testResults);
                 }
                 Date date = new Date();
-                testResults.putTest(LASTest.TEST_F_TDS_OPENDAP, date.getTime());
+                testResults.putTest(TestConstants.TEST_F_TDS_OPENDAP, date.getTime());
             }
 
             //loop over each dataset
@@ -159,7 +162,7 @@ public class LASDatasetTester{
                 Element datasetE = (Element) dsIt.next();
                 dsID = datasetE.getAttributeValue("ID");
 
-                testResults.putDataset(LASTest.TEST_F_TDS_OPENDAP, datasetE.getAttributeValue("name"), dsID);
+                testResults.putDataset(TestConstants.TEST_F_TDS_OPENDAP, datasetE.getAttributeValue("name"), dsID);
                 
                 //get first variable of this dataset
                 variables = lasConfig.getVariables(dsID);
@@ -181,7 +184,7 @@ public class LASDatasetTester{
 						status = "failed";
 					}
                 	if ( web_output ) {
-						testResults.addResult(LASTest.TEST_F_TDS_OPENDAP, dsID, ftdsURL, status);
+						testResults.addResult(TestConstants.TEST_F_TDS_OPENDAP, dsID, ftdsURL, status);
                 	} else {
                 		if ( status.equals("passed") ) {
 							System.out.println("OK!");

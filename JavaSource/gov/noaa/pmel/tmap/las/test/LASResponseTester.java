@@ -2,6 +2,7 @@ package gov.noaa.pmel.tmap.las.test;
 
 
 import gov.noaa.pmel.tmap.addxml.JDOMUtils;
+import gov.noaa.pmel.tmap.las.client.test.TestConstants;
 import gov.noaa.pmel.tmap.las.jdom.LASConfig;
 import gov.noaa.pmel.tmap.las.jdom.LASDocument;
 import gov.noaa.pmel.tmap.las.jdom.LASTestResults;
@@ -74,13 +75,13 @@ public class LASResponseTester{
 
 		try{
 			if ( web_output ) {
-				test_output_file = lasConfig.getOutputDir()+File.separator+LASTest.TEST_RESULTS_FILE;
+				test_output_file = lasConfig.getOutputDir()+File.separator+TestConstants.TEST_RESULTS_FILE;
 				File c = new File(test_output_file);
 				if ( c.exists() ) {
 					JDOMUtils.XML2JDOM(new File(test_output_file), testResults);
 				}
 				Date date = new Date();
-				testResults.putTest(LASTest.TEST_PRODUCT_RESPONSE, date.getTime());
+				testResults.putTest(TestConstants.TEST_PRODUCT_RESPONSE, date.getTime());
 			}
 
 			productServerURL = lasConfig.getServerURL();
@@ -98,7 +99,7 @@ public class LASResponseTester{
 				Element datasetE = (Element) dsIt.next();
 				dsID = datasetE.getAttributeValue("ID");
 				if ( web_output ) {
-					testResults.putDataset(LASTest.TEST_PRODUCT_RESPONSE, datasetE.getAttributeValue("name"), dsID);
+					testResults.putDataset(TestConstants.TEST_PRODUCT_RESPONSE, datasetE.getAttributeValue("name"), dsID);
 				}
 				//get first variable of this dataset
 				variables = lasConfig.getVariables(dsID);
@@ -149,7 +150,7 @@ public class LASResponseTester{
 
 			if(dsURL == null && dsURL == ""){
 				if ( web_output ) {
-					testResults.addProductResult(LASTest.TEST_PRODUCT_RESPONSE, dsID, dsURL, "n/a", "n/a", "n/a", "failed - dataset invalid");
+					testResults.addProductResult(TestConstants.TEST_PRODUCT_RESPONSE, dsID, dsURL, "n/a", "n/a", "n/a", "failed - dataset invalid");
 				} else {
 					System.out.println("The dataset URL is not valid.");
 				}
@@ -266,7 +267,7 @@ public class LASResponseTester{
 					}
 				}else{
 					if ( web_output ) {
-						testResults.addProductResult(LASTest.TEST_PRODUCT_RESPONSE, dsID, dsURL, "n/a", "n/a", "n/a", "failed - dataset unavailable");
+						testResults.addProductResult(TestConstants.TEST_PRODUCT_RESPONSE, dsID, dsURL, "n/a", "n/a", "n/a", "failed - dataset unavailable");
 					} else {
 						System.out.println("        ******** WARNING ******** The dataset is not available");
 					}
@@ -379,7 +380,7 @@ public class LASResponseTester{
 				if(sbuf.toString().contains("error")){
 					String debugFile = extractDebugFile(sbuf.toString());
 					if ( web_output ) {
-						testResults.addProductResult(LASTest.TEST_PRODUCT_RESPONSE, dsID, requestURL, viewtype, lr.getOperation(), lr.getThi(), "failed");
+						testResults.addProductResult(TestConstants.TEST_PRODUCT_RESPONSE, dsID, requestURL, viewtype, lr.getOperation(), lr.getThi(), "failed");
 					} else {
 						System.out.println("              ---------- ERROR !!!");
 					}
@@ -402,7 +403,7 @@ public class LASResponseTester{
 				}else{//correct response (hope so!)
 					inProgress = false;
 					if ( web_output ) {
-						testResults.addProductResult(LASTest.TEST_PRODUCT_RESPONSE, dsID, requestURL, viewtype, lr.getOperation(), lr.getThi(), "passed");
+						testResults.addProductResult(TestConstants.TEST_PRODUCT_RESPONSE, dsID, requestURL, viewtype, lr.getOperation(), lr.getThi(), "passed");
 					} else {
 						System.out.println("              ---------- PASS!");
 					}
@@ -423,7 +424,7 @@ public class LASResponseTester{
 				URLConnection conn = url.openConnection();
 				conn.connect();
 				if ( web_output ) {
-					testResults.addProductResult(LASTest.TEST_PRODUCT_RESPONSE, dsID, requestURL, viewtype, lr.getOperation(), lr.getThi(), "canceled");
+					testResults.addProductResult(TestConstants.TEST_PRODUCT_RESPONSE, dsID, requestURL, viewtype, lr.getOperation(), lr.getThi(), "canceled");
 				} else {
 					System.out.println("The request either takes too long or may have error --- cancel it!");
 				}
