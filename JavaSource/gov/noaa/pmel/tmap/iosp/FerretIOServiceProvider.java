@@ -25,6 +25,7 @@ import java.util.Map;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
+import org.apache.tools.ant.types.selectors.TypeSelector.FileType;
 import org.jdom.Document;
 import org.jdom.Element;
 
@@ -634,18 +635,15 @@ public class FerretIOServiceProvider implements IOServiceProvider {
 	}
 
 	public String getFileTypeDescription() {
-		// TODO Auto-generated method stub
-		return null;
+		return "Ferret I/O Service Provider and Server-side Analysis";
 	}
 
 	public String getFileTypeId() {
-		// TODO Auto-generated method stub
-		return null;
+		return "F-TDS";
 	}
 
 	public String getFileTypeVersion() {
-		// TODO Auto-generated method stub
-		return null;
+		return "7.3";
 	}
 
 	private void putAttributes(Variable var,
