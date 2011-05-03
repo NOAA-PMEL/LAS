@@ -54,6 +54,9 @@ ENDIF
 ! Here is the variable we will list out, with the region specified.
 DEFINE SYMBOL ferret_list_var = ($ferret_plot_var)
 
+! The arcgrid format has Y reversed relative to what Ferret LIST would do.
+! Will take care of that when the data is listed.
+
 SET LIST/FILE="($result_ferret_listing_filename)"
 LET expr_var = ($ferret_plot_var_noregion)
 LET expr = expr_var[($region_x)]
@@ -77,19 +80,28 @@ IF ($varshape"1|XY>0|*>1") THEN
   EXIT/PROGRAM
 ENDIF
 
-! SCRIPT IS ONLY APPLICABLE WHERE X and Y spacings are equal
+
+DEFINE SYMBOL x_axis_out = `($data_var),return=xaxis`
+DEFINE SYMBOL y_axis_out = `($data_var),return=yaxis`
+
+! Require that X and Y spacings are equal
+
 ! size of grid cells
 LET xcell_size = XBOX[gx=expr,X=($region_x_lo)]
 LET ycell_size = YBOX[gy=expr,Y=($region_y_lo)]
 
 LET cell_size = (xcell_size+ycell_size)/2
 
+LET newy = 0
+
 IF `ABS(xcell_size-ycell_size)/(xcell_size+ycell_size) GT 1E-6` THEN
-  DEFINE SYMBOL error_status = ERROR
-  DEFINE SYMBOL error_action = running Ferret scripts for ($operation_ID) arc_ascii
-  DEFINE SYMBOL error_string "Cell sizes in X and Y differ: `xcell_size`, `ycell_size`. You can only obtain GIS output for equally-spaced XY maps"
-  MESSAGE/ERROR **ERROR ($error_string)
-  EXIT/PROGRAM
+  DEFINE SYMBOL note_regrid 1
+  LET yy = y[gy=expr]
+  LET y1 = `yy[y=@min]`
+  LET yn = `yy[y=@max]`
+  DEFINE AXIS/Y=`y1`:`yn`:`xcell_size`/units="`($data_var),return=yunits`" y_axis_regrid
+  DEFINE SYMBOL y_axis_out = y_axis_regrid
+  LET newy = 1
 ENDIF
 
 ! Subscript limits in XY plane
@@ -108,11 +120,15 @@ LET xbounds = xboxlo[gx=expr]
 LET ybounds = yboxlo[gy=expr]
 
 ! size of grid cells
+
 LET xcell_size = XBOX[gx=expr,X=($region_x_lo)]
 LET ycell_size = YBOX[gy=expr,Y=($region_y_lo)]
 
 LET cell_size = (xcell_size+ycell_size)/2
 ! Check for regularly-spaced data
+
+LET to_reg = 0
+
 CANCEL MODE LAT
 CANCEL MODE LON
 LET del = XBOX[GX=expr,X=($region_x_lo)]
@@ -122,40 +138,58 @@ IF `Ni GT 2` THEN
     (LET reg = XBOX[gx=expr,i=`m`] EQ del; IF `reg EQ 0` THEN EXIT/LOOP ) 
 ENDIF
 IF `reg EQ 0` THEN
-  DEFINE SYMBOL error_status = ERROR
-  DEFINE SYMBOL error_action = running Ferret scripts for ($operation_ID) arc_ascii
-  DEFINE SYMBOL error_string "Cells are not regularly-spaced: you can only obtain GIS output for equally-spaced XY maps"
-  MESSAGE/ERROR **ERROR ($error_string)
-  EXIT/PROGRAM
+  DEFINE SYMBOL note_regrid 1
+  LET xx = x[gx=expr]
+  LET x1 = `xx[x=@min]`
+  LET xn = `xx[x=@max]`
+  DEFINE AXIS/X=`x1`:`xn`:`xcell_size`/units="`($data_var),return=xunits`" x_axis_regrid
+  DEFINE SYMBOL x_axis_out = x_axis_regrid
+  LET to_reg = 1
 ENDIF
 
-IF `Nj GT 2` THEN
+LET reg = 1
+IF `Nj GT 2 AND newy EQ 0` THEN
    REPEAT/NAME=m/RANGE=`jstart+1`:`jend` \
     ( LET reg = YBOX[gy=expr,j=`m`] EQ del; IF `reg EQ 0` THEN EXIT/LOOP ) 
 ENDIF
 IF `reg EQ 0` THEN
-  DEFINE SYMBOL error_status = ERROR
-  DEFINE SYMBOL error_action = running Ferret scripts for ($operation_ID) arc_ascii
-  DEFINE SYMBOL error_string "Cells are not regularly-spaced: you can only obtain GIS output for equally-spaced XY maps"
-  MESSAGE/ERROR **ERROR ($error_string)
-  EXIT/PROGRAM
+  DEFINE SYMBOL note_regrid 1
+  LET yy = y[gy=expr]
+  LET y1 = `yy[y=@min]`
+  LET yn = `yy[y=@max]`
+  DEFINE AXIS/Y=`y1`:`yn`:`xcell_size`/units="`($data_var),return=yunits`" y_axis_regrid  LET to_reg = 1
+  DEFINE SYMBOL y_axis_out = y_axis_regrid
+  LET to_reg = 1
+
 ENDIF
 
-! Check again whether X and Y spacings are equal; the test at the start of the script 
-! tested only the first delta-x and delta-y
+IF `(newy GT 0) OR (to_reg GT 0)` THEN
+  LET invar = `expr_var.long_name`
+  CANCEL VAR expr_var
+  LET expr_var = invar[gx=($x_axis_out), gy=($y_axis_out)]
+ENDIF
+
+! size of grid cells
 LET xcell_size = XBOX[gx=expr,X=($region_x_lo)]
 LET ycell_size = YBOX[gy=expr,Y=($region_y_lo)]
 
 LET cell_size = (xcell_size+ycell_size)/2
 
-IF `ABS(xcell_size-ycell_size)/(xcell_size+ycell_size) GT 1E-6` THEN
-  DEFINE SYMBOL error_status = ERROR
-  DEFINE SYMBOL error_action = running Ferret scripts for ($operation_ID) arc_ascii
-  DEFINE SYMBOL error_string "Cell sizes in X and Y differ: `xcell_size`, `ycell_size`. You can only obtain GIS output for equally-spaced XY maps"
-  MESSAGE/ERROR **ERROR ($error_string)
-  EXIT/PROGRAM
-ENDIF
 
+! Subscript limits in XY plane
+LET istart `i[gx=expr,x=($region_x_lo)]`
+LET iend `i[gx=expr,x=($region_x_hi)]`
+
+LET jstart `j[gy=expr,y=($region_y_lo)]`
+LET jend `j[gy=expr,y=($region_y_hi)]`
+
+! size of grid
+LET Ni = `($ferret_list_var),RETURN=isize`
+LET Nj = `($ferret_list_var),RETURN=jsize`
+
+! lower cell bounds arrays
+LET xbounds = xboxlo[gx=expr]
+LET ybounds = yboxlo[gy=expr]
 
 ! lower cell bounds of grid
 ! Make sure West long is < 0, change both hi & lo if xlo is > 180
@@ -194,6 +228,13 @@ LET mybad = -1*(`expr,RETURN=bad`)
 IF `mybad EQ 0` THEN LET mybad = 1.
 SET VAR/BAD=`mybad` nodata
 
+IF ($note_regrid"0|*>1") THEN
+  LET aout = "NOTE: Regridded to equally-spaced XY grid. In original datset,"
+  LIST/FILE/NOHEAD/APPEND/FORMAT="(A)" aout
+  LET aout = "cell sizes in X and Y differ or cells not regularly spaced."
+  LIST/FILE/NOHEAD/APPEND/FORMAT="(A)" aout
+
+ENDIF
 ! ncols and nrows need to be integer
 ! LIST/FILE/NOHEAD/APPEND/FORMAT="('ncols',1PG15.7)" Ni
 ! LIST/FILE/NOHEAD/APPEND/FORMAT="('nrows',1PG15.7)" Nj
@@ -231,4 +272,3 @@ REPEAT/NAME=m/RANGE=`jend`:`jstart`:-1 \
    LIST/APPEND/FILE/NOHEAD/NOROWHEAD/FORMAT="(1PG15.7)" expr[y=`this_y`])
 
 SET MODE/LAST VERIFY
-
