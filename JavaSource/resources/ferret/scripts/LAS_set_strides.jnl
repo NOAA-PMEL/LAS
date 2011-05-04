@@ -170,6 +170,7 @@ IF `(STRINDEX("($ferret_view)","x") NE 0) AND \
          SET AXIS/STRIDE=($xstride) ($axname)
 	 LET x_strided_var = ($data_var)[d=($data_num)]
          DEFINE SYMBOL axis_stride_($axname) = ($xstride)
+         DEFINE SYMBOL axis_stride_x = ($xstride)
       ENDIF
    ENDIF
    
@@ -200,6 +201,7 @@ IF `(STRINDEX("($ferret_view)","y") NE 0) AND \
          SET AXIS/STRIDE=($ystride) ($axname)
 	 LET y_strided_var = ($data_var)[d=($data_num)]
          DEFINE SYMBOL axis_stride_($axname) = ($ystride)
+         DEFINE SYMBOL axis_stride_y = ($ystride)
       ENDIF
    ENDIF
    IF ($SYMBOL no_region_y_range"0|*>1") THEN CANCEL SYMBOL region_y_range
@@ -223,6 +225,7 @@ IF `(STRINDEX("($ferret_view)","z") NE 0) AND \
          SET AXIS/STRIDE=($zstride) ($axname)
 	 LET z_strided_var = ($data_var)[d=($data_num)]
          DEFINE SYMBOL axis_stride_($axname) = ($zstride)
+         DEFINE SYMBOL axis_stride_z = ($zstride)
       ENDIF
    ENDIF
 ENDIF
@@ -254,6 +257,7 @@ IF `(STRINDEX("($ferret_view)","t") NE 0) AND \
          SET AXIS/STRIDE=($tstride) ($axname)
 	 LET t_strided_var = ($data_var)[d=($data_num)]
          DEFINE SYMBOL axis_stride_($axname) = ($tstride)
+         DEFINE SYMBOL axis_stride_t = ($tstride)
       ENDIF
    ENDIF
 ENDIF

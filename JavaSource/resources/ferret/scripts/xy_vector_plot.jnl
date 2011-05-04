@@ -135,7 +135,7 @@ IF `($ferret_vector_length"0") GT 0` THEN
    DEFINE SYMBOL qualifiers = ($qualifiers)/LENGTH=($ferret_vector_length)
 ENDIF
 
-! Vector xskip and yskip
+! Vector xskip and yskip set by the user
 IF ($ferret_vector_skip"0|*>1") THEN DEFINE SYMBOL ferret_vector_subsampling = ($ferret_vector_skip)
 
 IF ($ferret_vector_subsampling"0|*>1") THEN
@@ -271,16 +271,36 @@ ELSE
    ENDIF
 ENDIF
 
-! Label with skip, if style not flowline=1 and if skip >1 in either direction
+! Label with skip, if style not flowline=1 and if skip >1 in either direction.
+! If striding and subsampling have both been done, combine for one label.
+
 IF `($flowline_vectors"0") EQ 0` THEN  
    IF `( ($PPL_VEC_XSKIP"0") GT 1)  OR (($PPL_VEC_YSKIP"0") GT 1)` THEN
-      DEFINE SYMBOL n_left_labels = `($n_left_labels"0")+1`
-      DEFINE SYMBOL upper_left_($n_left_labels) = \
-      Vector subsampling x=($PPL_VEC_XSKIP), y=($PPL_VEC_YSKIP) 
-   ELIF ($ferret_vector_subsampling"0") THEN
+
+      LET xs = ($PPL_VEC_XSKIP)
+      LET ys = ($PPL_VEC_YSKIP)
+      IF `STRINDEX("($upper_left_($n_left_labels))", "Subsampled") GT 0` THEN
+         DEFINE SYMBOL n_left_labels = `($n_left_labels"0")-1`
+         IF `($AXIS_STRIDE_Y"0|*>1") GT 0` THEN LET ys = `ys* ($AXIS_STRIDE_Y)`
+         IF `($AXIS_STRIDE_X"0|*>1") GT 0` THEN LET xs = `xs* ($AXIS_STRIDE_X)`
+      ENDIF
+
       DEFINE SYMBOL n_left_labels = `($n_left_labels"0")+1`
       DEFINE SYMBOL upper_left_($n_left_labels) = \
       Vector subsampling x=`xs`, y=`ys`
+
+   ELIF ($ferret_vector_subsampling"0") THEN
+
+      IF `STRINDEX("($upper_left_($n_left_labels))", "Subsampled") GT 0` THEN
+         DEFINE SYMBOL n_left_labels = `($n_left_labels"0")-1`
+         IF `($AXIS_STRIDE_Y"0|*>1") GT 0` THEN LET ys = `ys* ($AXIS_STRIDE_Y)`
+         IF `($AXIS_STRIDE_X"0|*>1") GT 0` THEN LET xs = `xs* ($AXIS_STRIDE_X)`
+      ENDIF
+
+      DEFINE SYMBOL n_left_labels = `($n_left_labels"0")+1`
+      DEFINE SYMBOL upper_left_($n_left_labels) = \
+      Vector subsampling x=`xs`, y=`ys`
+
    ENDIF
 ENDIF
 
