@@ -281,6 +281,7 @@ public class OLMapWidget extends Composite {
 		resetButton.setTitle("Reset Map");
 		resetButton.setStylePrimaryName("OL_MAP-PushButton");
 		help = new Frame(GWT.getModuleBaseURL()+"../css/maphelp.html");
+		help.setHeight("300px");
 		helpInterior.add(helpClose);
 		helpInterior.add(help); 
 		helpPanel.add(helpInterior);
