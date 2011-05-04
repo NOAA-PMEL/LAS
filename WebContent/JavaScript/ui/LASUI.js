@@ -101,7 +101,7 @@ LASUI.prototype.initUI = function (anchorId)
         this.UIMask.className = "LASUIMask";
         this.toggleUIMask('none');
         document.body.appendChild(this.UIMask);
- 
+
 	if(this.params.openid)
 		this.state.extra_args+="openid="+this.params.openid+"&";
 	if(this.params.dsid||this.params.catid) {
@@ -112,7 +112,7 @@ LASUI.prototype.initUI = function (anchorId)
 		if(this.params.varid) this.state.variable = this.params.varid;
 		this.state.operation.plot = this.params.plot;
 		this.state.view.plot = this.params.view;
-	
+
 		this.autoupdate = this.params.autoupdate;
 		if((this.state.dataset!=""||this.params.catid!="")&&this.state.variable!="") {
 			this.submitOnLoad=true;
@@ -175,7 +175,7 @@ LASUI.prototype.initUI = function (anchorId)
 
 	if(this.state.catid==null)
 		this.state.catid = this.state.dataset;
-	
+
 	if(this.state.catid==null) {
                 this.state.catid = "";
 		this.state.dataset = "";
@@ -183,7 +183,7 @@ LASUI.prototype.initUI = function (anchorId)
 	if(this.params.auth_url.length>0)
 		for(var i=0;i<this.params.auth_url.length;i++) {
 			this.authorizeURL(this.params.auth_url[i]);
-				
+
 		}
 	this.fullXYExtent=true;
 	this.firstload=true;
@@ -201,7 +201,7 @@ LASUI.prototype.initUI = function (anchorId)
 				"t": document.getElementById("t_analysis")
 				};
 
-	this.refs.analysis.type.axes.onchange = this.selectAnalysisAxis.LASBind(this,null,true);	
+	this.refs.analysis.type.axes.onchange = this.selectAnalysisAxis.LASBind(this,null,true);
 	this.refs.analysis.type.op.onchange = this.selectAnalysisType.LASBind(this);
 	if(document.all) {
 		        this.refs.analysis.type.axes.onafterclick = this.selectAnalysisAxis.LASBind(this,null,true);
@@ -211,7 +211,7 @@ LASUI.prototype.initUI = function (anchorId)
 	        this.refs.analysis.type.op.onchange = this.selectAnalysisType.LASBind(this);
 
 	}
-	
+
 	if(document.getElementById(this.anchors.output).addEventListener&&!document.all) {
 		document.getElementById(this.anchors.output).addEventListener("load",this.onPlotLoad.LASBind(this),true);
 	} else if (document.getElementById(this.anchors.output).attachEvent&&!document.all) {
@@ -284,7 +284,7 @@ LASUI.prototype.setInitialVariable = function(strJson) {
 	if(response.categories.status)
 	if(response.categories.status=="ok") {
 	var category = new LASGetCategoriesResponse(response);
-	
+
 	this.state.dataset = category.getDatasetID(0);
 	this.state.datasets[this.state.dataset] = category;
 	if(this.state.variable&&category.getCategoryType()=="dataset")
@@ -293,7 +293,7 @@ LASUI.prototype.setInitialVariable = function(strJson) {
 				this.setVariable(null,category,i);
 				return;
 			}
-	
+
 	 this.setVariable(null,category,0);
          }
 }
@@ -315,7 +315,7 @@ LASUI.prototype.linkTo = function () {
 	div.id='linkto_popup';
 	var close = document.createElement('button');
 	close.onclick = function() {document.body.removeChild(document.getElementById('linkto_popup'));LAS.toggleUIMask('none')};
-	close.appendChild(document.createTextNode('Close')); 
+	close.appendChild(document.createTextNode('Close'));
 	div.appendChild(close);
 	div.appendChild(document.createElement('BR'));div.appendChild(document.createElement('BR'));
 	var label = document.createElement("STRONG");
@@ -332,7 +332,7 @@ LASUI.prototype.linkTo = function () {
         div.appendChild(document.createTextNode(plot));
 	this.toggleUIMask('');
 	document.body.appendChild(div);
-	
+
 }
 
 
@@ -371,17 +371,17 @@ LASUI.prototype.setCategoryTreeNode = function (strJson, node, id) {
 
 	if(node.category.getCategoryType()=="category")
 		node.children=[];
-	
+
 	for(var i=0; i<node.category.getCategorySize();i++) {
 		this.setCategoryTreeSubNode(node, i,id);
 		if(node.category.getChild(i).remote_las) {
 			var img = document.createElement("IMG");
 			img.src = node.category.getChild(i).remote_las.replace('auth.do','output/test.png');
-			img.onload = this.remoteAuthSuccess.LASBind(this,node,i,true); 
+			img.onload = this.remoteAuthSuccess.LASBind(this,node,i,true);
 			img.onerror = "javascript:setTimeout('this.src = this.src',2000)}";
 		}
 	}
-	
+
 	this.expand(node);
 }
 LASUI.prototype.authorizeURL=function(url) {
@@ -392,7 +392,7 @@ LASUI.prototype.authorizeURL=function(url) {
 	//	this.authDialog(null,url);
 	//else {
 		img.onerror = this.authDialog.LASBind(this,url);
-		img.src=url.replace("auth.do","output/test.png");	
+		img.src=url.replace("auth.do","output/test.png");
 	//}
 }
 LASUI.prototype.authDialog= function(evt) {
@@ -420,7 +420,7 @@ LASUI.prototype.authDialog= function(evt) {
 }
 
 LASUI.prototype.authorizeRemoteLAS=function(evt) {
-        
+
 	var args = arguments;
         var node= args[1];
         var i = args[2];
@@ -435,18 +435,18 @@ LASUI.prototype.authorizeRemoteLAS=function(evt) {
 	if(!this.refs.auth_win[url]) {
 		alert("Please turn off your pop-up blocker to allow this LAS to authenticate with remote LAS servers.");
 		return;
-	}	
+	}
 	if(!document.all){
 		this.refs.auth_win[url].onunload = this.checkRemoteLAS.LASBind(this,node,i);
 		this.refs.auth_win[url].onload = this.checkRemoteLAS.LASBind(this,node,i);
-	} 
+	}
 
 
 //	this.refs.auth_win[url].src= auth_url;
 	if(document.all)
 		this.checkRemoteLAS(null,node,i);
-	
-	
+
+
 
 }
 LASUI.prototype.checkRemoteLAS = function(evt) {
@@ -454,20 +454,20 @@ LASUI.prototype.checkRemoteLAS = function(evt) {
 	var node= args[1];
 	var i = args[2];
 	var url = node.category.getChild(i).remote_las;
-	
+
 	if(!this.refs.auth_ct)
 		this.refs.auth_ct={};
 	if(!this.refs.auth_ct[url])
-		this.refs.auth_ct[url]=0	
+		this.refs.auth_ct[url]=0
 	this.refs.auth_ct[url]++;
-	
+
 	var img = document.createElement('IMG');
-	img.onload = this.remoteAuthSuccess.LASBind(this,node,i); 	
+	img.onload = this.remoteAuthSuccess.LASBind(this,node,i);
 	img.src = url.replace('auth.do','output/test.png');
 	img.style.display = 'none';
 	delete(img);
 //	document.body.appendChild(img);
-	
+
 }
 LASUI.prototype.remoteAuthSuccess= function(evt) {
 	var args = arguments;
@@ -593,21 +593,21 @@ LASUI.prototype.createCategoryTreeNode = function (node, i, id) {
 		this.selectCategory(null,node,i);
 }
 LASUI.prototype.createVariableList = function () {
-	
-	var select = document.createElement("SELECT"); 
+
+	var select = document.createElement("SELECT");
 	select.onchange = this.getOperations.LASBind(this);
-		
+
 	select.className="LASVariableList";
 	select.name='variables';
-	
+
 	if(document.all)
-		select.id='variables'; 
+		select.id='variables';
 	//else
 	//	select.id='variable_list_'+document.getElementsByName('variables').length;
 	for(var i=0;i<this.state.datasets[this.state.dataset].getCategorySize();i++) {
 		var node = this.state.datasets[this.state.dataset];
 		if(this.state.variables) {
-			if(this.state.variables[0]==node.getChildID(i))	
+			if(this.state.variables[0]==node.getChildID(i))
 				var selected = true;
 			else
 				var selected= false;
@@ -626,7 +626,7 @@ LASUI.prototype.createVariableList = function () {
 	select_clone.id='';
 	select_clone.style.visibility='hidden';
 	document.getElementsByName(this.anchors.variables).item(0).appendChild(select_clone);
-		
+
 }
 /**
  * Sub method to create variable tree node and add it to the DOM
@@ -675,7 +675,7 @@ LASUI.prototype.createVariableTreeNode = function (node, i) {
 	tbody.appendChild(tr);
 	table.appendChild(tbody);
 	node.children[i].LINode.appendChild(table);
-	
+
 
 	if(this.state.variable==node.category.getChildID(i))
 		node.children[i].INPUTNode.checked=true;
@@ -707,7 +707,7 @@ LASUI.prototype.getRegions = function (dsid, varid) {
                         var req = new ActiveXObject("Microsoft.XMLHTTP");
                 req.onreadystatechange = this.AJAXhandler.LASBind(this, req, "this.setRegions(req.responseText)");
                 req.open("GET", this.hrefs.getRegions.url + this.state.extra_args + "dsid=" + dsid + "&varid=" + varid);
-                req.send(null);       
+                req.send(null);
 }
 LASUI.prototype.setRegions = function(response) {
 	var obj = eval("("+response+")");
@@ -715,7 +715,7 @@ LASUI.prototype.setRegions = function(response) {
 		if(obj.status=="ok")
 			setMapRegions(obj);
 	} catch (e) {}
-		
+
 }
 LASUI.prototype.onSetVariable = function() {
 		for(var xpath in this.state.xpaths) {
@@ -734,7 +734,7 @@ LASUI.prototype.onSetVariable = function() {
 					document.getElementById("V6").href="servlets/datasets?dset=" + this.urlencode(categories + "/" + varObj.name);
 			}
 		}
-		 document.getElementById("ol_map_widget").onmouseover = null;	
+		 document.getElementById("ol_map_widget").onmouseover = null;
 		this.refresh();
 }
 LASUI.prototype.updateVariableLists = function () {
@@ -768,17 +768,17 @@ LASUI.prototype.updateVariableLists = function () {
                 for(var i=0;i<document.getElementsByName('del').length;i++)
                         document.getElementsByName('del').item(i).style.display='';
 
-	for(var i=0; i< document.getElementsByName('add').length;i++) 
+	for(var i=0; i< document.getElementsByName('add').length;i++)
                         document.getElementsByName('add').item(i).onclick = this.addVariable.LASBind(this);
         for(var i=0; i< document.getElementsByName('del').length;i++)
 			document.getElementsByName('del').item(i).onclick = this.removeVariable.LASBind(this);
-        for(var i=0; i< document.getElementsByName('variables').length;i++)                
+        for(var i=0; i< document.getElementsByName('variables').length;i++)
 		 document.getElementsByName('variables').item(i).onchange = this.getOperations.LASBind(this);
 
-	//hide vectors if necessary	
+	//hide vectors if necessary
 	if(document.getElementsByName("variables").length>1)
 		for(var i=0; i<document.getElementsByName("variables").length;i++) {
-			var ct=0; 
+			var ct=0;
         	        for(var v=0;v<document.getElementsByName("variables").item(i).options.length;v++) {
                 	        var variable = eval('('+document.getElementsByName("variables").item(i).options[v].value+')');
                 	        if(variable.grid_type=='vector')
@@ -789,7 +789,7 @@ LASUI.prototype.updateVariableLists = function () {
 		}
 
 	var variable = eval('('+document.getElementsByName("variables").item(0).options[document.getElementsByName("variables").item(0).selectedIndex].value+')');
-	
+
 	//hide the add buttons if weve hit the max number of non vector vars, otherwise, show the last one
 	if(document.getElementsByName(this.anchors.variables).length >= ct || variable.grid_type=="vector") {
                 for (var i=0;i<document.getElementsByName('add').length;i++)
@@ -797,7 +797,7 @@ LASUI.prototype.updateVariableLists = function () {
         } else if (variable.grid_type!="vector") {
                 for (var i=0;i<document.getElementsByName('add').length;i++)
                          document.getElementsByName('add').item(i).style.visibility='hidden';
-		document.getElementsByName('add').item(i-1).style.visibility='visible';	
+		document.getElementsByName('add').item(i-1).style.visibility='visible';
 	}
 	//show delete buttonsif there are more than one open
 	if(document.getElementsByName(this.anchors.variables).length > 1)
@@ -838,7 +838,7 @@ LASUI.prototype.addVariable = function(evt) {
 		var elm = evt.srcElement.parentNode;
 	else
 		var elm = evt.target.parentNode;
-	
+
         var newvar = elm.cloneNode(true);
 	elm.parentNode.appendChild(newvar);
 	if(document.getElementsByName('variables').length>=2)
@@ -846,7 +846,7 @@ LASUI.prototype.addVariable = function(evt) {
 			document.getElementsByName('del').item(i).style.visibility='visible';
         for(var i=0; i<newvar.children.length;i++) {
 		if(newvar.children.item(i).name=="add")
-			newvar.children.item(i).onclick = this.addVariable.LASBind(this);	
+			newvar.children.item(i).onclick = this.addVariable.LASBind(this);
                 if(newvar.children.item(i).name=="del")
                         newvar.children.item(i).onclick = this.removeVariable.LASBind(this);
 		if(newvar.children.item(i).name=="variables")
@@ -867,9 +867,9 @@ LASUI.prototype.addVariable = function(evt) {
 
 	for (var i=0;i<document.getElementsByName('add').length;i++)
                          document.getElementsByName('add').item(i).style.visibility='hidden';
-	if(document.getElementsByName('variables').length < ct) 
-			 document.getElementsByName('add').item(i-1).style.visibility='visible';		
-	
+	if(document.getElementsByName('variables').length < ct)
+			 document.getElementsByName('add').item(i-1).style.visibility='visible';
+
 
 	//show delete buttonsif there are more than one open
         if(document.getElementsByName(this.anchors.variables).length > 1)
@@ -895,9 +895,9 @@ LASUI.prototype.addVariable = function(evt) {
         } catch(e) {}
         if(document.getElementsByName('variables').length<minvars||document.getElementsByName('variables').length>maxvars)
                 this.state.operation.plot="";
-	
+
 	if(this.state.operation.plot!="") this.updateAxisLabels();
-	
+
 	document.getElementById("analysisWrapper").style.display="none";
 	this.refs.analysis.enabled = false;
 	if(typeof mapResize != "undefined")
@@ -909,7 +909,7 @@ LASUI.prototype.addVariable = function(evt) {
         last_var.size=last_var.length;
 	last_var.selectedIndex=-1;
 	last_var.className="LASVariableList";
-	
+
 	this.getOperations(true);
 
 }
@@ -939,16 +939,16 @@ LASUI.prototype.removeVariable = function(evt) {
 	}
 
 	 for (var i=0;i<document.getElementsByName('add').length;i++)
-                         document.getElementsByName('add').item(i).style.visibility='hidden';	
+                         document.getElementsByName('add').item(i).style.visibility='hidden';
 
-	if(document.getElementsByName('variables').length < document.getElementsByName('variables').item(0).options.length) 
+	if(document.getElementsByName('variables').length < document.getElementsByName('variables').item(0).options.length)
 		document.getElementsByName('add').item(i-1).style.visibility='visible';
 
 	for (var i=0;i<document.getElementsByName('variables').length;i++) {
              document.getElementsByName('add').item(i).onclick = this.addVariable.LASBind(this);
 	     document.getElementsByName('del').item(i).onclick = this.removeVariable.LASBind(this);
 	     document.getElementsByName('variables').item(i).onchange = this.getOperations.LASBind(this);
-	}		
+	}
 
 	this.updateAxisLabels();
 	//get rid of the current op if it doesnt support the current number of variables
@@ -958,7 +958,7 @@ LASUI.prototype.removeVariable = function(evt) {
 		if(this.state.operations.getOperationByID(this.state.operation.plot).minvars)
 			minvars = parseInt(this.state.operations.getOperationByID(this.state.operation.plot).minvars);
 		if(this.state.operations.getOperationByID(this.state.operation.plot).maxvars)
-                	maxvars = parseInt(this.state.operations.getOperationByID(this.state.operation.plot).maxvars);  
+                	maxvars = parseInt(this.state.operations.getOperationByID(this.state.operation.plot).maxvars);
 	} catch(e) {}
 	if(document.getElementsByName('variables').length<minvars||document.getElementsByName('variables').length>maxvars)
 		this.state.operation.plot="";
@@ -990,7 +990,7 @@ LASUI.prototype.selectCategory = function (evt) {
 			this.state.categories = {};
 			this.state.categories[parentNode.category.getChild(i).ID]={};
 		}
-		
+
 		for(var c=0;c< parentNode.children.length;c++) {
 			this.collapse(parentNode.children[c]);
 			for(var b=0; b<this.state.categorynames.length;b++)
@@ -1018,8 +1018,8 @@ LASUI.prototype.selectCategory = function (evt) {
                 this.refs.auth_win[url].onload = this.checkRemoteLAS.LASBind(this,parentNode,i);
 
 
- 
-	}					
+
+	}
 	if(parentNode.category.getChild(i).remote_las) {
 		if(this.state.authorized[parentNode.category.getChild(i).remote_las])
 			this.expand(parentNode.children[i]);	//expand the category if it has been selected
@@ -1070,7 +1070,7 @@ LASUI.prototype.setVariable = function (evt) {
 	this.state.datasets[datasetID] = dataset.category;
 	dataset=dataset.category;
 	} else
-	{       
+	{
 		var datasetID = dataset.getDatasetID(i);
         	var variableID = dataset.getChildID(i);
         	var variable = dataset.getChild(i);
@@ -1094,7 +1094,7 @@ LASUI.prototype.setVariable = function (evt) {
         	        document.getElementsByName(this.anchors.breadcrumb).item(document.getElementsByName(this.anchors.breadcrumb).length-1).parentNode.removeChild(document.getElementsByName(this.anchors.breadcrumb).item(document.getElementsByName(this.anchors.breadcrumb).length-1));
         	while(document.getElementsByName(this.anchors.variables).length>1)
         	        document.getElementsByName(this.anchors.variables).item(document.getElementsByName(this.anchors.variables).length-1).parentNode.removeChild(document.getElementsByName(this.anchors.variables).item(document.getElementsByName(this.anchors.variables).length-1));
-			
+
 	}
 
 	//start an array of selected variables for this dataset this.state.datasets[this.state.dataset] if we havent already
@@ -1136,22 +1136,22 @@ LASUI.prototype.setVariable = function (evt) {
 	addvar.alt="Click to add another variable.";
 	addvar.title="Click to add another variable.";
 	addvar.href="javascript:"
-	addvar.onclick = this.addVariable.LASBind(this); 
+	addvar.onclick = this.addVariable.LASBind(this);
 	addvar.appendChild(document.createTextNode('+'));
 	var axis_labels = document.createElement("a");
 	axis_labels.id="axis_labels";
 	axis_labels.name="axis_labels";
-	
+
 	if(dataset.getCategorySize()==1) {
 		addvar.style.visibility='hidden';
 		delvar.style.visibility='hidden';
 	}
-	
+
 	if(variable.grid_type=="vector") {
 		addvar.style.visibility="hidden";
 		document.getElementById("analysisWrapper").style.display='none';
 	}
-	
+
 	var cats = document.createElement("TEXT");
 	cats.innerHTML= categories;
 
@@ -1164,12 +1164,12 @@ LASUI.prototype.setVariable = function (evt) {
 		document.getElementsByName(this.anchors.breadcrumb).item(0).appendChild(document.createTextNode('\u00a0'));
 		document.getElementsByName(this.anchors.breadcrumb).item(0).appendChild(cats);
 		//document.getElementsByName(this.anchors.breadcrumb).item(0).appendChild(document.createTextNode('\u00a0'));
-	}	
+	}
 
 
 	//populate the first variable
 	while(document.getElementsByName(this.anchors.variables).item(0).firstChild)
-		document.getElementsByName(this.anchors.variables).item(0).removeChild(document.getElementsByName(this.anchors.variables).item(0).firstChild)	
+		document.getElementsByName(this.anchors.variables).item(0).removeChild(document.getElementsByName(this.anchors.variables).item(0).firstChild)
         document.getElementsByName(this.anchors.variables).item(0).appendChild(addvar);
 	document.getElementsByName(this.anchors.variables).item(0).appendChild(document.createTextNode('\u00a0'));
 	document.getElementsByName(this.anchors.variables).item(0).appendChild(delvar);
@@ -1186,12 +1186,12 @@ LASUI.prototype.setVariable = function (evt) {
 				this.newVariable=true;
 		} else if (evt.srcElement.nodeName == 'INPUT')
 			 this.newVariable=true;
-	
-	 
+
+
 	//push the boulder off the cliff
 	this.getGrid(datasetID,variableID);
 	this.getDataConstraints(datasetID,variableID);
-	
+
 }
 /**
  * Method to query the server for a category
@@ -1214,7 +1214,7 @@ LASUI.prototype.getDataConstraints = function (dataset, variable) {
 			req.send(null);
 		} else if (this.AJAX_cache[url]!="waiting")
 				this.setDataConstraints(this.AJAX_cache[url]);
-			
+
 }
 /**
  * Method to query the server for a category
@@ -1268,7 +1268,7 @@ LASUI.prototype.setDataConstraints = function (strJson) {
 						option.appendChild(document.createTextNode(this.state.constraints.constraint[c].constraint.menu[m].item[i].content));
 						eval('constraint.' + this.state.constraints.constraint[c].constraint.menu[m].position + '.appendChild(option)');
 					}
-				
+
 			}
 			if(constraint.lhs)DIVNode.appendChild(constraint.lhs);
 			if(constraint.ops)DIVNode.appendChild(constraint.ops);
@@ -1301,45 +1301,45 @@ LASUI.prototype.getOperations = function (evt) {
 		else
 			var req = new ActiveXObject("Microsoft.XMLHTTP");
 		if(!view) var view = this.state.view.plot;
-	
+
 		var url = this.hrefs.getOperations.url + this.state.extra_args;// + 'view=' +view;
 		var stop =false;
 		//check to see if seelected variable is a vector, if so, disable other variables ... or something
 
-	
 
-		if(evt) 
-			if(evt.target) 
+
+		if(evt)
+			if(evt.target)
 				try {
 					if(evt.target.options[evt.target.selectedIndex].value)
 					var selectedVariable=eval("("+evt.target.options[evt.target.selectedIndex].value+")");
-									
+
 					if(selectedVariable.grid_type=="vector"&&document.getElementsByName("add").length==1)
 						document.getElementsByName("add").item(0).style.visibility="hidden";
 
 					if(evt.target == document.getElementsByName('variables').item(0)) {
 						this.setVariable(null,this.state.datasets[this.state.dataset],document.getElementsByName("variables").item(0).selectedIndex);
 						return;
-					} 
+					}
 				} catch(e) {}
 			else if (document.getElementsByName('variables').length == 1) {
 					this.setVariable(null,this.state.datasets[this.state.dataset],document.getElementsByName("variables").item(0).selectedIndex);
 					return
-				} else 
+				} else
 					var stop=true;
 
 
 		if(typeof evt == 'object')
 			this.collapseVariableLists();
-	
-		this.state.xpaths=[];	
+
+		this.state.xpaths=[];
 		if(document.getElementsByName('variables').length>0) {
 			this.state.xpaths=[];
 			for (var x=0; x < document.getElementsByName('variables').length;x++) {
 				if (x>0)
 					url+="&"
 				var selectedIndex = document.getElementsByName('variables').item(x).selectedIndex;
-				if(selectedIndex < 0) 
+				if(selectedIndex < 0)
 					selectedIndex = 0;
 				url += 'xpath=' + document.getElementsByName('variables').item(x).options[selectedIndex].id;
 
@@ -1350,7 +1350,7 @@ LASUI.prototype.getOperations = function (evt) {
 					document.getElementsByName(this.state.dataset).item(i).checked=true;
 				if(this.state.xpaths[0].grid_type=='vector')
 					document.getElementById('analysisWrapper').style.display='none';
-			} catch(e) {}		
+			} catch(e) {}
 			if(!this.AJAX_cache[url]) {
 				this.AJAX_cache[url]="waiting";
 				req.onreadystatechange = this.AJAXhandler.LASBind(this, req, "this.AJAX_cache['"+url+"'] = req.responseText; this.setOperationList(req.responseText,"+stop+");");
@@ -1359,7 +1359,7 @@ LASUI.prototype.getOperations = function (evt) {
 			} else if(this.AJAX_cache[url]!="waiting")
 				this.setOperationList(this.AJAX_cache[url],stop);
 		}
-		
+
 
 }
 
@@ -1377,21 +1377,24 @@ LASUI.prototype.setOperation = function (evt) {
 	var type = args[4];
 	if(!type) {
 		type="plot";
-		
+
 	}
 	if (type == "plot" && id !="init")
 		try {
+			// clear the current plot options to their defaults
+			this.resetOptions("plot");
+			this.setChangedOptions("plot");
 			if(this.state.operations)
 				if(this.state.operations.getOperationByID(id).optiondef)
 				if(this.state.operations.getOperationByID(id).optiondef.IDREF)
 					optiondef = this.state.operations.getOperationByID(id).optiondef.IDREF;
 		} catch (e) {}
 	//for ie radio button bug
- 	if(type=="plot"&&document.all&&evt) 
+ 	if(type=="plot"&&document.all&&evt)
 		if(evt.srcElement) {
  		for(var i=0;i<document.getElementsByName("plotType").length;i++)
  				document.getElementsByName("plotType").item(i).checked=false;
-		
+
 		evt.srcElement.checked=true;
 
 	}
@@ -1405,7 +1408,7 @@ LASUI.prototype.setOperation = function (evt) {
 	this.state.view[type] = view;
 	this.updateVariableLists();
 	if(document.getElementsByName("variables").length==1) {
-		
+
 	}
 	if(document.getElementsByName("variables").length==1&&this.state.xpaths[0].grid_type!='vector'&&this.state.xpaths[0].grid_type!='scattered'&&id!="prop_prop_plot") {
 		document.getElementById("analysisWrapper").style.display="";
@@ -1434,13 +1437,13 @@ LASUI.prototype.setOperation = function (evt) {
                         try {
                                         document.getElementById("productButtons").childNodes[row].className='top_link_disabled';
                                         document.getElementById("productButtons").childNodes[row].onclick = function(){};
-                                } catch (e) {}		
+                                } catch (e) {}
 	//enable buttons
 	for(var i=0;i<this.state.operations.getOperationCount();i++) {
-		if(document.getElementById(this.state.operations.getOperationName(i))&&this.state.operations.hasInterval(this.state.operations.getOperationID(i),view)) 
-			this.setOperationNode(this.state.operations.getOperationID(i),this.state.operations.getOperationName(i));	
+		if(document.getElementById(this.state.operations.getOperationName(i))&&this.state.operations.hasInterval(this.state.operations.getOperationID(i),view))
+			this.setOperationNode(this.state.operations.getOperationID(i),this.state.operations.getOperationName(i));
 	}
-	
+
 	this.updateConstraints(view);
 	if(this.state.operations.getOperationByID(this.state.operation.plot).optiondef) {
 		if(this.state.operations.getOperationByID(this.state.operation.plot).optiondef.IDREF) {
@@ -1448,22 +1451,22 @@ LASUI.prototype.setOperation = function (evt) {
 		} else {
 			document.getElementById('plotOptionsButton').className='top_link_disabled';
 			document.getElementById('plotOptionsButton').onclick=function(){};
-		} 
+		}
 	} else {
 		document.getElementById('plotOptionsButton').className='top_link_disabled';
 		document.getElementById('plotOptionsButton').onclick=function(){};
 	}
-	
+
 
 	this.state.lastVariable = this.state.variable;
 	this.state.lastDataset = this.state.dataset;
 	if(optiondef)
 		this.getOptions(optiondef, "plot",false);
 	else if(this.newVariable&&this.onSetVariable)
-		this.onSetVariable();	
+		this.onSetVariable();
 
-	
-	
+
+
 	this.firstload=false;
 
 
@@ -1510,7 +1513,7 @@ LASUI.prototype.setOperationList = function (strJson, stop) {
                                         document.getElementById("productButtons").childNodes[row].onclick = function(){};
                                 } catch (e) {}
 
-	
+
 	if(stop) {
 
 
@@ -1534,13 +1537,13 @@ LASUI.prototype.setOperationList = function (strJson, stop) {
                     maxvars=parseInt(this.state.operations.getOperationByID(this.state.operation.plot).maxvars);
 		} catch(e) {}
 		if(document.getElementsByName("variables").length>maxvars||document.getElementsByName("variables").length<minvars)
-			this.setVisualization(this.state.view.plot,"varct");	
+			this.setVisualization(this.state.view.plot,"varct");
 	} else {
 
 	                for(var i=0;i<this.state.operations.getOperationCount();i++) {
                         var minvars= 1;
 			var maxvars = 1;
-                        try { 
+                        try {
 				if(this.state.operations.getOperation(i).minvars)
                         		minvars=parseInt(this.state.operations.getOperation(i).minvars);
                         	if(this.state.operations.getOperation(i).maxvars)
@@ -1549,9 +1552,9 @@ LASUI.prototype.setOperationList = function (strJson, stop) {
                         if(this.state.operations.hasInterval(this.state.operations.getOperationID(i),this.state.view.plot)&&document.getElementsByName("variables").length<=maxvars&&document.getElementsByName("variables").length>=minvars)
                                     this.setOperationNode(this.state.operations.getOperationID(i),this.state.operations.getOperationName(i));
                 }
-	} 
-	
-	
+	}
+
+
 }
 
 LASUI.prototype.refresh = function() {
@@ -1577,7 +1580,7 @@ LASUI.prototype.setOperationNode = function (id, name) {
 		button.onclick=this.doProductIconClick.LASBind(this, id);
 	}
 
-	//hack out buttons we dont want	
+	//hack out buttons we dont want
 	if(this.refs.analysis.enabled||!this.state.grid.hasAxis('t')||this.state.view.plot.indexOf('t')>=0||this.state.operation.plot.indexOf('prop_prop')>=0) {
                 document.getElementById('Animation').className='top_link_disabled';
                 document.getElementById('Animation').onclick=function(){};
@@ -1615,7 +1618,7 @@ LASUI.prototype.doProductIconClick = function (evt) {
 LASUI.prototype.getGrid = function (dataset, variable) {
 
 		var url = this.hrefs.getGrid.url + this.state.extra_args + 'dsid=' + dataset + '&varid=' + variable;
-		
+
 		if(!this.AJAX_cache[url]) {
 			this.AJAX_cache[url]="waiting";
 			if(!document.all)
@@ -1654,14 +1657,14 @@ LASUI.prototype.setDefaultProductMenu = function () {
 	//clear the menu
 	while(document.getElementById("plotTypes").firstChild)
 		document.getElementById("plotTypes").removeChild(document.getElementById("plotTypes").firstChild);
-	
+
 	var setPlotDefault = "true";
 	var setDownloadDefault = "true";
 	var defaultPlotProduct = null;
 	var defaultDownloadProduct = null;
 	var varct=document.getElementsByName('variables').length;
 
-	//for each product category, cycle through the views it contains, and the operations that 
+	//for each product category, cycle through the views it contains, and the operations that
 	for (var type in this.state.operations.getAllOperationTypes())
 		for(var op in this.state.operations.getOperationsByType(type))
 			for(var view in  this.state.operations.getOperationIntervals(op))
@@ -1677,13 +1680,13 @@ LASUI.prototype.setDefaultProductMenu = function () {
 						if(!document.getElementById(type))
 	                                        	this.setProductTypeNode(type);
 						if(!defaultPlotProduct||(this.state.operation.plot==op&&this.state.view.plot==view))
-							defaultPlotProduct=this.setProductNode(op, view, this.state.operations.getOperationIntervals(op)[view].title);				       
+							defaultPlotProduct=this.setProductNode(op, view, this.state.operations.getOperationIntervals(op)[view].title);
 						else if(!document.getElementById(op+"_"+view))
 							this.setProductNode(op, view, this.state.operations.getOperationIntervals(op)[view].title);
-					
+
 					} }catch(e){}
 				}
-			
+
 
 	if(defaultPlotProduct) {
 		//if(!document.all)
@@ -1691,7 +1694,7 @@ LASUI.prototype.setDefaultProductMenu = function () {
 		defaultPlotProduct.checked="checked";
 		 defaultPlotProduct.selected=true;
 	}
-	
+
 	if(this.refs.analysis.enabled)
 		this.showAnalysis();
 
@@ -1710,7 +1713,7 @@ LASUI.prototype.setProductNode = function(id, view, title) {
                                 var optiondef = this.state.operations.getOperationByID(id).optiondef.IDREF;
                 else
                                 var optiondef = "";
- 
+
 		var LINode = document.createElement("LI");
 		LINode.className = "LASPlotType";
 		var title = document.createTextNode(title);
@@ -1732,7 +1735,7 @@ LASUI.prototype.setProductNode = function(id, view, title) {
 		return radio;
 }
 LASUI.prototype.onPlotLoad = function (e) {
-	
+
 	var urlArr = window.frames[this.anchors.output].document.location.search.replace("?","").split("&");
 	for(var i=0;i<urlArr.length;i++)
 		if(urlArr[i].substr(0,3)=="xml")
@@ -1748,14 +1751,14 @@ LASUI.prototype.onPlotLoad = function (e) {
                                 var minz = parseFloat(Req.getRangeLo('z'));
                                 var maxt = parseFloat(Req.getRangeHi('t'));
                                 var maxz = parseFloat(Req.getRangeHi('z'));
-				
+
 				if(!maxx&&minx)maxx=minx;
 				if(!maxy&&minx)maxy=miny;
                                 if(!maxz&&minz)maxz=minz;
                                 if(!maxt&&mint)maxt=mint;
-				if(minz>maxz){var z = minz; minz = maxz; maxz = z}			
-	
-				
+				if(minz>maxz){var z = minz; minz = maxz; maxz = z}
+
+
 				if(miny&&minx&&maxy&&maxx)
 				 setMapCurrentSelection(miny,maxy,minx,maxx);
 				if(minx) this.state.selection.x.min = minx;
@@ -1766,9 +1769,9 @@ LASUI.prototype.onPlotLoad = function (e) {
                                 if(maxz) this.state.selection.z.max = maxz;
 	                        if(mint) this.state.selection.t.min = mint;
                                 if(maxt) this.state.selection.t.max = maxt;
-				
+
 				//if(this.state.view.widgets.indexOf('z')>=0) this.initZConstraint('range',true);
-			}	
+			}
 		this.request = Req;
 		 this.uirequest='xml='+this.urlencode(this.request.getXMLText());
 	}
@@ -1776,13 +1779,13 @@ LASUI.prototype.onPlotLoad = function (e) {
 		document.getElementById("wait").style.visibility="hidden";
 	if(document.getElementById("wait_msg"))
 		document.getElementById("wait_msg").style.display="none";
-	if(document.getElementById('output')) 
+	if(document.getElementById('output'))
 		document.getElementById("output").style.visibility="visible";
 	 if(document.getElementById('update')) {
 		document.getElementById('update').className='top_link';
 		document.getElementById('update').style.color='';
 	}
-	
+
 }
 LASUI.prototype.onPlotUnload = function (e) {
 
@@ -1896,10 +1899,10 @@ LASUI.prototype.updateConstraints = function (view) {
  */
 LASUI.prototype.initXYSelect = function (mode, reset) {
 	if(this.state.grid.getAxis('x') && this.state.grid.getAxis('y') && reset)
-	 {	
+	 {
 		setMapTool(mode);
         setMapDataExtent(parseFloat(this.state.grid.getLo('y')), parseFloat(this.state.grid.getHi('y')), parseFloat(this.state.grid.getLo('x')), parseFloat(this.state.grid.getHi('x')),parseFloat(this.state.grid.getDelta('x')));
-		
+
 	} else {
 		setMapTool(mode);
 	}
@@ -2074,7 +2077,7 @@ LASUI.prototype.initTConstraint = function (mode,reset) {
 			switch(mode) {
 				case 'range': while(document.getElementById("Date").firstChild)
 						document.getElementById("Date").removeChild(document.getElementById("Date").firstChild);
-					
+
 					var date_label=document.createElement('STRONG');
 					date_label.appendChild(document.createTextNode("Date Range:"));
                                         document.getElementById("Date").appendChild(date_label);
@@ -2092,7 +2095,7 @@ LASUI.prototype.initTConstraint = function (mode,reset) {
                                         DWAnchor.id="DWAnchor";
                                          document.getElementById("Date").appendChild(DWAnchor);
                                         this.refs.DW.render("DWAnchor", DWDisplay, DWDisplay);
- 
+
 					this.refs.DW.render("DWAnchor", DWDisplay);
 					break;
 			}
@@ -2190,12 +2193,12 @@ LASUI.prototype.makeRequest = function (evt, type) {
 //	if(!document.getElementById(this.state.operation.plot+'_'+this.state.view.plot).checked) {
 //		document.getElementById(this.state.operation.plot+'_'+this.state.view.plot).checked=true;
 //		 document.getElementById(this.state.operation.plot+'_'+this.state.view.plot).onclick();
-//		return null;	
+//		return null;
 //	}
 		document.getElementById('output').height="100%";
 		document.getElementById('output').width="100%";
 		document.getElementById('update').style.visibility='visible';
-		
+
 		this.request = null;
 		this.uirequest = '';
 		this.request = new LASRequest('');
@@ -2233,30 +2236,30 @@ LASUI.prototype.makeRequest = function (evt, type) {
 		this.request.removeRegion();
 
 		//add the variables
-			
+
 		var xpaths=[];
-		this.state.variables=[];	
+		this.state.variables=[];
 		for(var v=0;v<document.getElementsByName("variables").length;v++) {
-			if(document.getElementsByName("variables").item(v).selectedIndex >= 0) 
+			if(document.getElementsByName("variables").item(v).selectedIndex >= 0)
 				var selectedIndex=document.getElementsByName("variables").item(v).selectedIndex;
 			else
 				var selectedIndex=0;
 			xpaths[document.getElementsByName("variables").item(v).options[selectedIndex].id]=eval("("+document.getElementsByName("variables").item(v).options[selectedIndex].value+")");
 			var variable = eval("("+document.getElementsByName("variables").item(v).options[selectedIndex].value+")");
 			this.state.variables.push(variable);
-			this.request.addVariable(this.state.dataset,variable.ID);	
+			this.request.addVariable(this.state.dataset,variable.ID);
 		}
-		
-		
-		for(xpath in xpaths) 
+
+
+		for(xpath in xpaths)
                 	if(xpaths[xpath].grid_type=="vector") {
-				this.request.removeVariables(); 	
+				this.request.removeVariables();
 		       		this.request.addVariable(this.state.dataset,xpaths[xpath].variable[0].IDREF);
 	        		this.request.addVariable(this.state.dataset,xpaths[xpath].variable[1].IDREF);
 				this.request.addProperty("ferret","vector_name",xpaths[xpath].name);
 				this.request.addProperty("ferret","vector_id",xpaths[xpath].ID);
 		        }
-		
+
 
 
 		this.request.addRegion();
@@ -2352,9 +2355,9 @@ LASUI.prototype.makeRequest = function (evt, type) {
 		}
 		 document.getElementById("ol_map_widget").onmouseover = null;
 
-		
+
 		if(type=="external"&&this.state.operation.external == "Interactive_Download")
-			var window_options = "height=500,width=400,status=no,toolbar=no,menubar=no,location=no"; 
+			var window_options = "height=500,width=400,status=no,toolbar=no,menubar=no,location=no";
 		else
 			var window_options = "";
 
@@ -2386,7 +2389,7 @@ LASUI.prototype.makeRequest = function (evt, type) {
 
 
 	if(type=='plot') {
-		this.expired=false;	
+		this.expired=false;
 		document.getElementById('update').style.color='';
 		document.getElementById('print').className='top_link';
 		document.getElementById('linkto').className='top_link';
@@ -2408,7 +2411,7 @@ LASUI.prototype.getOptions = function (optiondef, type, reset) {
 
 	var url =  this.hrefs.getOptions.url + this.state.extra_args + 'opid=' + optiondef;
 
-	
+
 		var submit = document.createElement("INPUT");
 		var cancel = document.createElement("INPUT");
 
@@ -2416,10 +2419,10 @@ LASUI.prototype.getOptions = function (optiondef, type, reset) {
 		submit.value=	"OK";
 		submit.className = "LASSubmitInputNode";
 		var strHandler = "this.setChangedOptions('"+ type+ "');this.hideOptions('"+ type+ "')";
-		if(type!="plot") 
+		if(type!="plot")
 			strHandler += ";this.makeRequest({},'"+type+"')"
 		submit.onclick = this.genericHandler.LASBind(this,strHandler);
-	
+
 		cancel.type = "submit";
 		cancel.value=	"Cancel";
 		cancel.className = "LASSubmitInputNode";
@@ -2434,7 +2437,7 @@ LASUI.prototype.getOptions = function (optiondef, type, reset) {
 		this.refs.options[type].DOMNode.appendChild(submit);
 		this.refs.options[type].DOMNode.appendChild(resetbutton);
 		this.refs.options[type].DOMNode.appendChild(cancel);
-	
+
 
 	if(!this.AJAX_cache[url]) {
 		this.AJAX_cache[url]="waiting";
@@ -2480,7 +2483,7 @@ LASUI.prototype.setOptionList = function (strJson,DOMNode,type,reset) {
 
 	if(this.newVariable&&this.onSetVariable)
                this.onSetVariable();
-		 
+
 }
 /**
  * Method to create an option tree node and add it to the DOM
@@ -2580,7 +2583,7 @@ LASUI.prototype.hideOptions= function(type)  {
 }
 LASUI.prototype.resetOptions= function(type)  {
 	if(type != "plot")
-	{	
+	{
 		while(this.refs.options[type].DOMNode.firstChild)
 			this.refs.options[type].DOMNode.removeChild(this.refs.options[type].DOMNode.firstChild);
 
@@ -2607,7 +2610,7 @@ LASUI.prototype.resetOptions= function(type)  {
 			}
 			else if(element.INPUTNode)
 				element.INPUTNode.value = this.state.properties[type][id].default_value;
-		}	
+		}
 	}
 
 }
@@ -2684,7 +2687,7 @@ LASUI.prototype.setChangedOptions = function (type) {
 			ct++;
 		}
 	}
-	
+
 	if(!this.updating&&type=="plot"&&ct>0)
 		if(this.autoupdate)
 			this.makeRequest();
@@ -2802,7 +2805,7 @@ LASUI.prototype.showAnalysis = function () {
 	for(var a in this.refs.analysis.axes)
 		try {	this.refs.analysis.axes[a].selected=false;
 			document.getElementById("analysis_axes").removeChild(this.refs.analysis.axes[a])} catch(e) {};
-	document.getElementById("analysis_axes").selectedIndex=0;	
+	document.getElementById("analysis_axes").selectedIndex=0;
 
 	//turn on area analysis, if we can
 	if(this.state.grid.hasAxis('x')&&this.state.grid.hasAxis('y'))
@@ -2813,26 +2816,26 @@ LASUI.prototype.showAnalysis = function () {
 			document.getElementById('analysis_axes').appendChild(this.refs.analysis.axes[this.state.grid.response.grid.axis[d].type.toLowerCase()]);
 	}
 
-	
+
 	document.getElementById(this.anchors.analysis).style.display="";
-	
+
 	//select the analysis view
-	var cur_analysis = "";	
+	var cur_analysis = "";
 	for(var a in this.state.analysis.axes)
 		cur_analysis+=a
 	if(cur_analysis=="yx")
 		cur_analysis="xy";
 
 	if(document.getElementById(cur_analysis+"_analysis")) {
-	 	document.getElementById(cur_analysis+"_analysis").selected=true;	
+	 	document.getElementById(cur_analysis+"_analysis").selected=true;
 		//this.selectAnalysisAxis(null,cur_analysis,true);
-	}	
+	}
 	else if(document.getElementById('analysis_axes').value!="") {
 		for(var i=0;i<document.getElementById('analysis_axes').value.length;i++)
 			this.state.analysis.axes[document.getElementById('analysis_axes').value[i]]=true;
 		//this.selectAnalysisAxis(null,document.getElementById('analysis_axes').value,true);
 	}
-	
+
 
 	if(this.state.analysis.type)
 		this.selectAnalysisType(null,this.state.analysis.type,true);
@@ -2868,15 +2871,15 @@ LASUI.prototype.selectAnalysisType = function (evt) {
 	var changeVis = false;
 	if(evt) {
 		this.state.analysis.type = document.getElementById('analysis_op').options[document.getElementById('analysis_op').selectedIndex].value
-		this.state.analysis.name = document.getElementById('analysis_op').options[document.getElementById('analysis_op').selectedIndex].innerHTML;	
-	}		
+		this.state.analysis.name = document.getElementById('analysis_op').options[document.getElementById('analysis_op').selectedIndex].innerHTML;
+	}
 		this.state.analysis.enabled = false;
 		if(this.state.analysis.type&&this.state.analysis.axes) {
-			
+
 			for(var axis in this.state.analysis.axes)
-                                if(this.state.analysis.axes[axis]) 
+                                if(this.state.analysis.axes[axis])
                                         this.state.analysis.enabled = true;
-				
+
 
 			if(this.state.analysis.enabled) {
 				var axes = '';
@@ -2888,19 +2891,19 @@ LASUI.prototype.selectAnalysisType = function (evt) {
 					if(this.state.view.plot.indexOf(axis)>=0&&this.state.analysis.axes[axis])
 						changeVis=true;
 				}
-			} 
+			}
 		}
-		
-		
+
+
 		if(this.state.analysis.enabled) {
          		this.updateConstraints(this.state.view.widgets);
 			if(changeVis)
-				this.setVisualization(axes,"analysis");		
+				this.setVisualization(axes,"analysis");
 		}
 	        else
                		this.updateConstraints(this.state.view.plot);
 
-			
+
 }
 LASUI.prototype.selectAnalysisAxis = function (evt) {
 	var axes =arguments[1];
@@ -2932,15 +2935,15 @@ LASUI.prototype.selectAnalysisAxis = function (evt) {
 			if(this.state.view.widgets.indexOf(axes.charAt(i))<0&&this.state.analysis.type)
 				this.state.view.widgets+=axes.charAt(i);
 		}
-		
+
 	}
 
-	this.state.analysis.enabled = false; 
+	this.state.analysis.enabled = false;
 	if(this.state.analysis.type&&this.state.analysis.axes) {
                         for(var axis in this.state.analysis.axes)
 				if(this.state.analysis.axes[axis])
 					this.state.analysis.enabled = true;
-        } 
+        }
 
 	if(this.state.analysis.enabled)
 		this.updateConstraints(this.state.view.widgets);
@@ -2958,11 +2961,11 @@ LASUI.prototype.setVisualization = function (d, priority) {
 
 	//best view is the one we currently have
 	var bestView = this.state.view.plot;
-	
+
 	//if the method that called this speficied a desired view, consider that
 //	if(this.state.view.plot.indexOf(d)>=0&&priority!='analysis')
 //		 bestView = this.state.view.plot.substr(0,this.state.view.plot.indexOf(d)) + this.state.view.plot.substr(this.state.view.plot.indexOf(d)+d.length,this.state.view.plot.length);
-	
+
 	if(priority=='analysis')
 		switch(d) {
 			case 'xy' : if(this.state.grid.hasAxis('t') )
@@ -2995,11 +2998,11 @@ LASUI.prototype.setVisualization = function (d, priority) {
                                         bestView ='z';
                                         break;
 
-		}		
+		}
 
 	if(document.getElementById(this.state.operation.plot+'_'+bestView)&&priority!='analysis') {
 		document.getElementById(this.state.operation.plot+'_'+bestView).checked=true;
-		document.getElementById(this.state.operation.plot+'_'+bestView).onclick({srcElement : document.getElementById(this.state.operation.plot+'_'+bestView)})	
+		document.getElementById(this.state.operation.plot+'_'+bestView).onclick({srcElement : document.getElementById(this.state.operation.plot+'_'+bestView)})
 	} else { for(var v=0; v< document.getElementsByName("plotType").length; v++) {
 			var plotView = document.getElementsByName("plotType").item(v).id.substr(document.getElementsByName("plotType").item(v).id.lastIndexOf('_')+1,document.getElementsByName("plotType").item(v).id.length);
 			var plotId = document.getElementsByName("plotType").item(v).id.substr(0,document.getElementsByName("plotType").item(v).id.lastIndexOf('_'));
@@ -3015,7 +3018,7 @@ LASUI.prototype.setVisualization = function (d, priority) {
 						document.getElementsByName("plotType").item(v).checked = true;
 						document.getElementsByName("plotType").item(v).onclick({"srcElement" : document.getElementsByName("plotType").item(v)})
 						stop = true;
-					     } 
+					     }
 					     break;
 				case 'varct': if(varct<=maxvars&&varct>=minvars&&this.state.operation.plot==plotId) {
 						document.getElementsByName("plotType").item(v).checked = true;
@@ -3032,8 +3035,8 @@ LASUI.prototype.setVisualization = function (d, priority) {
 						//	 if(axes[this.state.view.widgets[i]]=this.state.view.widgets[i])
 						//		var newview=""
 						//for(var a in axes)
-						//	newview+=axes[a]; 
-						
+						//	newview+=axes[a];
+
 						//this.state.view.widgets=newview;
 						this.updateConstraints(this.state.view.widgets);
 						try {
@@ -3086,7 +3089,7 @@ LASUI.prototype.setVisualization = function (d, priority) {
 	} else if(!stop) {
 		document.getElementsByName("plotType").item(0).checked = true;
                 document.getElementsByName("plotType").item(0).onclick({"srcElement" : document.getElementsByName("plotType").item(0)});
-	}	
+	}
 
 	if(priority=='analysis')
 		this.refs.analysis.axes[d].selected=true;
@@ -3098,7 +3101,7 @@ LASUI.prototype.setVisualization = function (d, priority) {
  */
 LASUI.prototype.collapse = function (obj) {
 		if(obj.ULNode) obj.ULNode.style.display = "none";
-		if(obj.IMGNode) 
+		if(obj.IMGNode)
 			if(obj.IMGNode.src != "JavaScript/ui/plus.gif")
 				obj.IMGNode.src = "JavaScript/ui/plus.gif";
 		obj.isExpanded = false;
@@ -3109,7 +3112,7 @@ LASUI.prototype.collapse = function (obj) {
  */
 LASUI.prototype.expand = function (obj) {
 	if(obj.ULNode) obj.ULNode.style.display = "";
-	if(obj.IMGNode) 
+	if(obj.IMGNode)
 		if(obj.IMGNode.src != "JavaScript/ui/minus.gif")
 			obj.IMGNode.src = "JavaScript/ui/minus.gif";
 	obj.isExpanded = true;
@@ -3158,9 +3161,9 @@ LASUI.prototype.pause = function(millis) {
 	var date = new Date();
 	var curDate = null;
 
-	do { curDate = new Date(); } 
+	do { curDate = new Date(); }
 	while(curDate-date < millis);
 }
 LASUI.prototype.checkPopups = function() {
-	
-}  
+
+}
