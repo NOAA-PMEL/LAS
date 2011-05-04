@@ -2424,15 +2424,15 @@ LASUI.prototype.getOptions = function (optiondef, type, reset) {
 		cancel.value=	"Cancel";
 		cancel.className = "LASSubmitInputNode";
 		cancel.onclick = this.genericHandler.LASBind(this,"this.cancelChangedOptions('"+ type+ "');this.hideOptions('"+ type+ "')");
-		var reset = document.createElement("INPUT");
-		reset.type = "submit";
-		reset.onclick =  this.genericHandler.LASBind(this,"this.resetOptions('" +type + "')");
-		reset.name = "Reset";
-		reset.value = "Reset";
+		var resetbutton = document.createElement("INPUT");
+		resetbutton.type = "submit";
+		resetbutton.onclick =  this.genericHandler.LASBind(this,"this.resetOptions('" +type + "')");
+		resetbutton.name = "Reset";
+		resetbutton.value = "Reset";
 		while(this.refs.options[type].DOMNode.firstChild)
 			this.refs.options[type].DOMNode.removeChild(this.refs.options[type].DOMNode.firstChild);
 		this.refs.options[type].DOMNode.appendChild(submit);
-		this.refs.options[type].DOMNode.appendChild(reset);
+		this.refs.options[type].DOMNode.appendChild(resetbutton);
 		this.refs.options[type].DOMNode.appendChild(cancel);
 	
 
@@ -2502,7 +2502,7 @@ LASUI.prototype.setOptionTRNode = function (id,TBODYNode,type,reset) {
 			this.refs.options.cache[id].SELECTNode = document.createElement("SELECT");
 			this.refs.options.cache[id].SELECTNode.setAttribute('name', id);
   			if(!this.state.properties[type][id])
-  				this.state.properties[type][id] = {"type" : "ferret", "value" : this.refs.options.cache[id].menu.item[0].values};
+  				this.state.properties[type][id] = {"type" : "ferret", "value" : this.refs.options.cache[id].menu.item[0].values, "default_value" : this.refs.options.cache[id].menu.item[0].values};
   			for (var i=0;i<this.refs.options.cache[id].menu.item.length;i++) {
    				var option = document.createElement("OPTION");
      				option.value=this.refs.options.cache[id].menu.item[i].values;
@@ -2513,7 +2513,7 @@ LASUI.prototype.setOptionTRNode = function (id,TBODYNode,type,reset) {
 			this.refs.options.cache[id].TD2.appendChild(this.refs.options.cache[id].SELECTNode);
 		} else {
 			if(!this.state.properties[type][id])
-  				this.state.properties[type][id] = {"type" : "ferret", "value" : ""};
+  				this.state.properties[type][id] = {"type" : "ferret", "value" : "", "default_value" : ""};
 			this.refs.options.cache[id].INPUTNode = document.createElement("INPUT");
 			this.refs.options.cache[id].INPUTNode.type = "text";
 			this.refs.options.cache[id].INPUTNode.className="LASTextInputNode";
@@ -2579,12 +2579,41 @@ LASUI.prototype.hideOptions= function(type)  {
 
 }
 LASUI.prototype.resetOptions= function(type)  {
-	while(this.refs.options[type].DOMNode.firstChild)
-		this.refs.options[type].DOMNode.removeChild(this.refs.options[type].DOMNode.firstChild);
+	if(type != "plot")
+	{	
+		while(this.refs.options[type].DOMNode.firstChild)
+			this.refs.options[type].DOMNode.removeChild(this.refs.options[type].DOMNode.firstChild);
 
-	this.getOptions(this.state.operations.getOperationByID(this.state.operation[type]).optiondef.IDREF, type,true);
-	this.showOptions(type);
+		this.getOptions(this.state.operations.getOperationByID(this.state.operation[type]).optiondef.IDREF, type,true);
+		this.showOptions(type);
+	}
+	else
+	{
+		for(id in this.state.properties[type])
+		{
+			if(this.state.properties[type][id].value != this.state.properties[type][id].default_value)
+				this.state.newproperties[type][id] = this.copyProperty(this.state.properties[type][id], this.state.properties[type][id].default_value);
+			else
+				this.state.newproperties[type][id] = null;
 
+			var element = this.refs.options.cache[id];
+			if(element.SELECTNode){
+				for (var i=0;i<element.SELECTNode.options.length;i++) {
+					if (element.SELECTNode.options[i].value == this.state.properties[type][id].default_value){
+						element.SELECTNode.selectedIndex = i;
+						element.SELECTNode.options[i].selected = true;
+					}
+				}
+			}
+			else if(element.INPUTNode)
+				element.INPUTNode.value = this.state.properties[type][id].default_value;
+		}	
+	}
+
+}
+LASUI.prototype.copyProperty = function(property, newvalue){
+	var newproperty = {"type" : "ferret", "value" : newvalue, "default_value" : property.default_value};
+	return newproperty;
 }
 LASUI.prototype.showOptionInfo = function(evt) {
 	if(this.optionInfo)
@@ -2627,21 +2656,35 @@ LASUI.prototype.setOption = function (evt) {
 	else
 		return;
 
-
-
+	var type = args[2];
+	var original_value = this.state.properties[type][id].value;
 	if(args[3].SELECTNode)
-		this.state.newproperties[args[2]][id]={"type" : "ferret", "value" : node.options[node.selectedIndex].value};
+	{
+		if(node.options[node.selectedIndex].value != original_value){
+			this.state.newproperties[type][id]=this.copyProperty(this.state.properties[type][id], node.options[node.selectedIndex].value);
+		}
+		else
+			this.state.newproperties[type][id] = null;
+	}
 	else
-		this.state.newproperties[args[2]][id]={"type" : "ferret", "value" : node.value};
+	{
+		if(node.value != original_value){
+			this.state.newproperties[type][id]=this.copyProperty(this.state.properties[type][id], node.value);
+		}
+		else
+			this.state.newproperties[type][id] = null;
+	}
 
 }
 LASUI.prototype.setChangedOptions = function (type) {
 	var ct = 0;
 	for(var id in this.state.newproperties[type]) {
-		this.state.properties[type][id]=this.state.newproperties[type][id];
-		ct++;
+		if(this.state.newproperties[type][id] != null){
+			this.state.properties[type][id]=this.state.newproperties[type][id];
+			ct++;
+		}
 	}
-
+	
 	if(!this.updating&&type=="plot"&&ct>0)
 		if(this.autoupdate)
 			this.makeRequest();
@@ -2651,8 +2694,8 @@ LASUI.prototype.setChangedOptions = function (type) {
 
 }
 LASUI.prototype.cancelChangedOptions = function () {
-	for(var type in this.state.newproperties)
-		for(var id in this.state.newproperties[type]) {
+	for(var type in this.state.properties)
+		for(var id in this.state.properties[type]) {
 			if(this.refs.options.cache[id]&&this.state.properties[type][id]) {
 				if(this.refs.options.cache[id].SELECTNode) {
 					for(var i=0; i< this.refs.options.cache[id].SELECTNode.length;i++)
