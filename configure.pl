@@ -344,7 +344,11 @@ if ($LasConfig{proxy} eq "yes") {
     $LasConfig{hostname} = $hostname;
     $servlet_root_url = $LasConfig{hostname};
 } else {
-    $servlet_root_url = $LasConfig{tomcat_hostname} . ":" . $servlet_port;
+    if ( $servlet_port != 80 ) {
+        $servlet_root_url = $LasConfig{tomcat_hostname} . ":" . $servlet_port;
+    } else {
+        $servlet_root_url = $LasConfig{tomcat_hostname};
+    }
 }
 
 # Make the log directory
