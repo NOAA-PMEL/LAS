@@ -492,15 +492,16 @@ public class LASConfigPlugIn implements PlugIn {
 		
 		// Server is up and ready to go...  Set up regular testing...
 		LASTestOptions lto = lasConfig.getTestOptions();
-		TestTask testTask = new TestTask(context);
-		Timer testTimer = new Timer("LASTest Timer", true);
-		double d = lto.getDelay();
-		if ( d < 0 ) d = 0;
-		double p = lto.getPeriod();
-		// Not more than twice a day.  
-		if ( p < 43200000 ) p = 43200000;
-		testTimer.schedule(testTask, lto.getDelay(), lto.getPeriod());
-		
+		if ( lto != null ) {
+			TestTask testTask = new TestTask(context);
+			Timer testTimer = new Timer("LASTest Timer", true);
+			double d = lto.getDelay();
+			if ( d < 0 ) d = 0;
+			double p = lto.getPeriod();
+			// Not more than twice a day.  
+			if ( p < 43200000 ) p = 43200000;
+			testTimer.schedule(testTask, lto.getDelay(), lto.getPeriod());
+		}
 	}
 	public void destroy() {
 
