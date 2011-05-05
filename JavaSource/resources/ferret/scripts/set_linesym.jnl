@@ -1,0 +1,16 @@
+! set_linesym.jnl
+! set plot type: line, symbols, or both.  By default,
+! if there are up to 120 points use line-and-symbol.
+
+
+LET plotvar  = ($ferret_plot_var)
+LET filledvar = missing(plotvar,0)
+LET npoints = `plotvar[($ferret_view)=@ngd]`
+
+IF `npoints LT 120` THEN
+   DEFINE SYMBOL qualifiers = ($qualifiers)($ferret_line_or_sym%/LINE/SYM=($plotsymbol)|default>/LINE/SYM=($plotsymbol)|line>/LINE|both>/LINE/SYM=($plotsymbol)|sym>/SYM=($plotsymbol)%)
+   DEFINE SYMBOL legend_qual = ($legend_qual)($ferret_line_or_sym%/LINE/SYM=($plotsymbol)|default>/LINE/SYM=($plotsymbol)|line>/LINE|both>/LINE/SYM=($plotsymbol)|sym>/SYM=($plotsymbol)%)
+ELSE 
+   DEFINE SYMBOL qualifiers = ($qualifiers)($ferret_line_or_sym%/LINE|default>/LINE|line>/LINE|both>/LINE/SYM=($plotsymbol)|sym>/SYM=($plotsymbol)%)
+   DEFINE SYMBOL legend_qual = ($legend_qual)($ferret_line_or_sym%/LINE|default>/LINE|line>/LINE|both>/LINE/SYM=($plotsymbol)|sym>/SYM=($plotsymbol)%)
+ENDIF
