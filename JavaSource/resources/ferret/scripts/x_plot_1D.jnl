@@ -90,8 +90,7 @@ IF `($ferret_line_thickness%0|default>1|*>1%)` THEN
    ENDIF
 ENDIF
 
-! symbols and/or line
-GO set_linesym
+! symbols 
 
 DEFINE SYMBOL qualifiers = ($qualifiers)($ferret_line_or_sym%/LINE|default>/LINE|line>/LINE|both>/LINE/SYM=($plotsymbol)|sym>/SYM=($plotsymbol)%)
 DEFINE SYMBOL legend_qual = ($legend_qual)($ferret_line_or_sym%/LINE|default>/LINE|line>/LINE|both>/LINE/SYM=($plotsymbol)|sym>/SYM=($plotsymbol)%)
