@@ -108,6 +108,11 @@ IF `STRINDEX( "($operation_ID)", "Plot" ) EQ 0 AND \
    EXIT/SCRIPT
 ENDIF
 
+! If its a vector plot, let Ferret or a user setting of xskip,yskip decimate the vectors
+
+IF `STRINDEX( "($operation_ID)", "vector" ) NE 0` THEN EXIT/SCRIPT
+
+
 ! ---------------------------------------------------------------------
 ! Now for graphics or GE products, do striding by pixel size, often larger stride than
 ! needed to fit in Ferret memory
