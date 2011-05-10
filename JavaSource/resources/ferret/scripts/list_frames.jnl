@@ -31,7 +31,7 @@
 GO LAS_initialize_region 0
 GO LAS_initialize_data 0
 
-set mem/siz=100
+IF `($FERRET_MEMORY"25") LT 100` THEN SET MEM/SIZ=100
 
 ! Here is the variable we will list out, with the region specified.
 DEFINE SYMBOL ferret_list_var = ($ferret_plot_var)
