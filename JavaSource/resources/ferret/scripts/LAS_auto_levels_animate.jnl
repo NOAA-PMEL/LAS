@@ -401,7 +401,7 @@ LET varshape = x[gx=xhalfaxis] + y[gy=yshortaxis]
 LET var1d = XSEQUENCE(($ppvar))
 LET var2d = RESHAPE(var1d, varshape)
 IF ($ferret_center_levels) THEN 
-  SHADE/SET/LEV=($num_fine_levels)vc var2d
+  SHADE/LEV=($num_fine_levels)vc var2d
 ELSE
 
 !!
@@ -436,7 +436,7 @@ ELSE
 !!         EXIT/SCRIPT
 !!      ENDIF
 
-  SHADE/SET/LEV=($num_fine_levels)v var2d
+  SHADE/LEV=($num_fine_levels)v var2d
 ENDIF
 IF ($LEV_OPNLEVS"0|*>1") THEN 
    DEFINE SYMBOL ferret_fill_levels = ($LEV_OPNLEVS)
