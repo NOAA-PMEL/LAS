@@ -131,16 +131,16 @@ public class addXML {
 		"yyyy-MM-dd", "yyyy-MM-dd", "yyyy-MM-dd", "yyyy-MM-dd",
 		"yyyy-MM-dd HH:mm:ss", "yyyy-MM-dd HH:mm:ss",
 		"yyyy-MM-dd HH:mm:ss", "yyyy-MM-dd HH:mm:ss"};
-	
+
 	private static final String pattern_with_hours = "yyyy-MM-dd HH:mm:ss";
-	
+
 	private static DateTimeFormatter ferret_time_formatter = DateTimeFormat.forPattern("dd-MMM-yyyy HH:mm:ss");
 
 	// Constants
 	private static final String Z_VALUES = "z_values";
 	private static final String ZVALUES = "zvalues";
-	
-	
+
+
 	private static boolean verbose;
 	private static boolean generate_names;
 	private static int fileCount;
@@ -278,7 +278,7 @@ public class addXML {
 		}
 
 		// Register the credentials provider.
-//		ucar.nc2.dataset.HttpClientManager.init(provider_obj,"addXML-" + version_string);	
+		//		ucar.nc2.dataset.HttpClientManager.init(provider_obj,"addXML-" + version_string);	
 
 		int total = data.length + thredds.length;
 		if (!oneDataset && total > 1) {
@@ -353,95 +353,95 @@ public class addXML {
 
 		for (int id = 0; id < data.length; id++) {
 
-			DatasetsGridsAxesBean dgab = null;
-			
-			dgab = createBeansFromNetcdfDataset(data[id], false, null);
-			Vector db = (Vector) dgab.getDatasets();
-			if (db != null && db.size() > 0) {
+			DatasetsGridsAxesBean dgab = createBeansFromNetcdfDataset(data[id], false, null);
+			if ( dgab != null ) {
+				Vector db = (Vector) dgab.getDatasets();
+				if (db != null && db.size() > 0) {
 
-				if (oneDataset) {
-					// We're only going to use one data set.  Accumulate all the info
-					// into that one data set.
-					DatasetBean databean = (DatasetBean) dgab.getDatasets().get(0);
+					if (oneDataset) {
+						// We're only going to use one data set.  Accumulate all the info
+						// into that one data set.
+						DatasetBean databean = (DatasetBean) dgab.getDatasets().get(0);
 
-					// Check to see if the name has been set.
-					if (oneDb.getName() == null || oneDb.getName() == "") {
-						oneDb.setName(databean.getName());
-						// If the data set name wasn't set neither was the category
-						oneCat.setName(databean.getName());
+						// Check to see if the name has been set.
+						if (oneDb.getName() == null || oneDb.getName() == "") {
+							oneDb.setName(databean.getName());
+							// If the data set name wasn't set neither was the category
+							oneCat.setName(databean.getName());
+						}
+						// Set the category filter to include this data set.
+						FilterBean filter = new FilterBean();
+						filter.setAction("apply-dataset");
+						filter.setContainstag(databean.getElement());
+						oneCat.addFilter(filter);
+
+						ArrayList variables = (ArrayList) databean.getVariables();
+						// All the URL's must be fixed to not be relative to the data set
+						// URL
+						Iterator vit = variables.iterator();
+						while (vit.hasNext()) {
+							VariableBean vb = (VariableBean) vit.next();
+							String url = databean.getUrl() + vb.getUrl();
+							vb.setUrl(url);
+						}
+						oneDb.addAllVariables(variables);
+						if (oneDb.getElement() == null || oneDb.getElement() == "") {
+							oneDb.setElement(databean.getElement());
+						}
+
+						Vector grids = dgab.getGrids();
+						Vector existingGrids = oneDgab.getGrids();
+						if (existingGrids == null) {
+							existingGrids = new Vector();
+						}
+						existingGrids.addAll(grids);
+						oneDgab.setGrids(existingGrids);
+
+						Vector axes = dgab.getAxes();
+						Vector existingAxes = oneDgab.getAxes();
+						if (existingAxes == null) {
+							existingAxes = new Vector();
+						}
+						existingAxes.addAll(axes);
+						oneDgab.setAxes(existingAxes);
+
 					}
-					// Set the category filter to include this data set.
-					FilterBean filter = new FilterBean();
-					filter.setAction("apply-dataset");
-					filter.setContainstag(databean.getElement());
-					oneCat.addFilter(filter);
+					else {
 
-					ArrayList variables = (ArrayList) databean.getVariables();
-					// All the URL's must be fixed to not be relative to the data set
-					// URL
-					Iterator vit = variables.iterator();
-					while (vit.hasNext()) {
-						VariableBean vb = (VariableBean) vit.next();
-						String url = databean.getUrl() + vb.getUrl();
-						vb.setUrl(url);
-					}
-					oneDb.addAllVariables(variables);
-					if (oneDb.getElement() == null || oneDb.getElement() == "") {
-						oneDb.setElement(databean.getElement());
-					}
+						Document lasdoc = createXMLfromDatasetsGridsAxesBean(dgab);
 
-					Vector grids = dgab.getGrids();
-					Vector existingGrids = oneDgab.getGrids();
-					if (existingGrids == null) {
-						existingGrids = new Vector();
-					}
-					existingGrids.addAll(grids);
-					oneDgab.setGrids(existingGrids);
+						String ofile = getOutfileName(basename);
+						if (inputLasDoc != null) {
 
-					Vector axes = dgab.getAxes();
-					Vector existingAxes = oneDgab.getAxes();
-					if (existingAxes == null) {
-						existingAxes = new Vector();
-					}
-					existingAxes.addAll(axes);
-					oneDgab.setAxes(existingAxes);
+							String entityName = getEntityName(ofile);
 
-				}
-				else {
+							// Add an entity reference to the input document if it exists.
+							EntityRef entityReference = new EntityRef(entityName, ofile);
+							addEntityRef(inputLasDoc, entityName, ofile, entityReference);
+						}
+						Element lasdata = lasdoc.getRootElement();
+						Element datasets = lasdata.getChild("datasets");
+						numNetcdf = datasets.getChildren().size();
 
-					Document lasdoc = createXMLfromDatasetsGridsAxesBean(dgab);
-
-					String ofile = getOutfileName(basename);
-					if (inputLasDoc != null) {
-
-						String entityName = getEntityName(ofile);
-
-						// Add an entity reference to the input document if it exists.
-						EntityRef entityReference = new EntityRef(entityName, ofile);
-						addEntityRef(inputLasDoc, entityName, ofile, entityReference);
-					}
-					Element lasdata = lasdoc.getRootElement();
-					Element datasets = lasdata.getChild("datasets");
-					numNetcdf = datasets.getChildren().size();
-
-					if (numNetcdf > 0) {
-						outputXML(ofile, datasets, false);
-						Element grids = lasdata.getChild("grids");
-						outputXML(ofile, grids, true);
-						Element axes = lasdata.getChild("axes");
-						outputXML(ofile, axes, true);
-						if (category) {
-							for (Iterator cit = datasets.getChildren().iterator(); cit.hasNext(); ) {
-								Element datasetElem = (Element) cit.next();
-								CategoryBean ds_category = new CategoryBean();
-								ds_category.setName(datasetElem.getAttribute("name").getValue());
-								FilterBean filter = new FilterBean();
-								filter.setAction("apply-dataset");
-								filter.setContainstag(datasetElem.getName());
-								ds_category.addFilter(filter);
-								Element lc = new Element("las_categories");
-								lc.addContent(ds_category.toXml());
-								outputXML(ofile, lc, true);
+						if (numNetcdf > 0) {
+							outputXML(ofile, datasets, false);
+							Element grids = lasdata.getChild("grids");
+							outputXML(ofile, grids, true);
+							Element axes = lasdata.getChild("axes");
+							outputXML(ofile, axes, true);
+							if (category) {
+								for (Iterator cit = datasets.getChildren().iterator(); cit.hasNext(); ) {
+									Element datasetElem = (Element) cit.next();
+									CategoryBean ds_category = new CategoryBean();
+									ds_category.setName(datasetElem.getAttribute("name").getValue());
+									FilterBean filter = new FilterBean();
+									filter.setAction("apply-dataset");
+									filter.setContainstag(datasetElem.getName());
+									ds_category.addFilter(filter);
+									Element lc = new Element("las_categories");
+									lc.addContent(ds_category.toXml());
+									outputXML(ofile, lc, true);
+								}
 							}
 						}
 					}
@@ -706,13 +706,18 @@ public class addXML {
 		while (di.hasNext()) {
 			InvDataset ThreddsDataset = (InvDataset) di.next();
 			if (ThreddsDataset.hasNestedDatasets()) {
-				CategoryBean cb = processCategories(ThreddsDataset);
+				CategoryBean cb;
+				if ( esg ) {
+					cb = processESGCategories(ThreddsDataset);
+				} else {
+				    cb = processCategories(ThreddsDataset);
+				}
 				if ( cb.getCategories().size() > 0 || cb.getFilters().size() > 0 ) {
-				    CategoryBeans.add(cb);
+					CategoryBeans.add(cb);
 				}
 			}
 		}
-     
+
 		// Discover and process all the THREDDS dataset elements that actually
 		// connect to a data source.
 
@@ -866,30 +871,30 @@ public class addXML {
 
 		String url = access.getStandardUrlName();
 
-			if ( esg ) {
-				if ( url.contains("aggregation") ) {
-					// Try to get metadata from the catalog.
-					dgab = createBeansFromThreddsMetadata(ThreddsDataset, url);
-					if ( dgab == null ) {
-					  /* 
-					   * Doing the initialization from the files is just too expensive.
-					   * If we can't get it from the metadata, then forget it.
-					   * 
-					   
+		if ( esg ) {
+			if ( url.contains("aggregation") ) {
+				// Try to get metadata from the catalog.
+				dgab = createBeansFromThreddsMetadata(ThreddsDataset, url);
+				if ( dgab == null ) {
+					/* 
+					 * Doing the initialization from the files is just too expensive.
+					 * If we can't get it from the metadata, then forget it.
+					 * 
+
 						// Else open the aggregation and get it from there
 						String dods = url.replaceAll("http", "dods");
 						NetcdfDataset ncds = ucar.nc2.dataset.NetcdfDataset.openDataset(dods);
 						dgab = createBeansFromNetcdfDataset(ncds, url, esg, ThreddsDataset);
 						ncds.close();
-						*
-						* Log the data set and move on...
-						*/
-						log.warn("Not enough metadata to create LAS configuration for "+ThreddsDataset.getName()+".  Skipping...");
-					}
+					 *
+					 * Log the data set and move on...
+					 */
+					log.warn("Not enough metadata to create LAS configuration for "+ThreddsDataset.getName()+".  Skipping...");
 				}
-			} else {
-				dgab = createBeansFromNetcdfDataset(url, false, null);
 			}
+		} else {
+			dgab = createBeansFromNetcdfDataset(url, false, null);
+		}
 		return dgab;
 	}
 
@@ -912,7 +917,7 @@ public class addXML {
 		dataset.setCreated((new DateTime()).toString());
 		dataset.setUrl(url);
 		List<Variables> variables = threddsDataset.getVariables();
-		
+
 		if ( variables.size() == 0 ) {
 			// See if the variables list is in the parent data set.
 			InvDataset parent = threddsDataset.getParent();
@@ -972,7 +977,7 @@ public class addXML {
 							boolean hasZ = false;
 							boolean readZ = false;
 							String zvalues = null;
-													
+
 							Range z = coverage.getUpDownRange();
 							if ( z != null ) {	
 								hasZ = true;
@@ -983,7 +988,7 @@ public class addXML {
 									zvalues = threddsDataset.findProperty(Z_VALUES);
 								} catch (Exception e) {
 									try {
-									    zvalues = threddsDataset.findProperty(ZVALUES);
+										zvalues = threddsDataset.findProperty(ZVALUES);
 									} catch (Exception e1) {
 										zvalues = null;
 									}
@@ -996,7 +1001,7 @@ public class addXML {
 									readZ = true;
 								}
 							}
-							
+
 							// One of these axes is not sufficiently specified in the metadata so prepare read the data out of the aggregation.
 							NetcdfDataset ncds = null;
 							GridDataset gridsDs = null;
@@ -1142,7 +1147,7 @@ public class addXML {
 								tdelta = time_parts[0];
 								tunits = time_parts[1];
 							}
-							
+
 
 							// Use this chronology and the UTC Time Zone
 							Chronology chrono = GJChronology.getInstance(DateTimeZone.UTC);
@@ -1166,74 +1171,74 @@ public class addXML {
 							}
 
 							String esg_formats[] = {"yyyy-MM-dd HH:mm:ss.s",
-								                    "yyyy-MM-dd HH:mm:s.s",
-									                "yyyy-MM-dd HH:m:ss.s",
-								                    "yyyy-MM-dd HH:m:s.s",
-								                    
-							
-								                    "yyyy-MM-dd HH:mm:ss.s",
-								                    "yyyy-MM-dd HH:mm:s.s",
-									                "yyyy-MM-dd HH:m:ss.s",
-								                    "yyyy-MM-dd HH:m:s.s",
-								                    "yyyy-MM-dd H:mm:ss.s",
-								                    "yyyy-MM-dd H:mm:s.s",
-									                "yyyy-MM-dd H:m:ss.s",
-								                    "yyyy-MM-dd H:m:s.s",
-								                    
-									                "yyyy-MM-dd HH:mm:ss.s",
-								                    "yyyy-MM-dd HH:mm:s.s",
-									                "yyyy-MM-dd HH:m:ss.s",
-								                    "yyyy-MM-dd HH:m:s.s",
-								                    "yyyy-MM-dd H:mm:ss.s",
-								                    "yyyy-MM-dd H:mm:s.s",
-									                "yyyy-MM-dd H:m:ss.s",
-								                    "yyyy-MM-dd H:m:s.s",
-									                
-									                "yyyy-MM-d HH:mm:ss.s",
-								                    "yyyy-MM-d HH:mm:s.s",
-									                "yyyy-MM-d HH:m:ss.s",
-								                    "yyyy-MM-d HH:m:s.s",
-								                    "yyyy-MM-d H:mm:ss.s",
-								                    "yyyy-MM-d H:mm:s.s",
-									                "yyyy-MM-d H:m:ss.s",
-								                    "yyyy-MM-d H:m:s.s",                
-									                
-									                "yyyy-MM-dd HH:mm:ss.s",
-								                    "yyyy-MM-dd HH:mm:s.s",
-									                "yyyy-MM-dd HH:m:ss.s",
-								                    "yyyy-MM-dd HH:m:s.s",
-								                    "yyyy-MM-dd H:mm:ss.s",
-								                    "yyyy-MM-dd H:mm:s.s",
-									                "yyyy-MM-dd H:m:ss.s",
-								                    "yyyy-MM-dd H:m:s.s",
-									                
-									                "yyyy-MM-d HH:mm:ss.s",
-								                    "yyyy-MM-d HH:mm:s.s",
-									                "yyyy-MM-d HH:m:ss.s",
-								                    "yyyy-MM-d HH:m:s.s",
-								                    "yyyy-MM-d H:mm:ss.s",
-								                    "yyyy-MM-d H:mm:s.s",
-									                "yyyy-MM-d H:m:ss.s",
-								                    "yyyy-MM-d H:m:s.s", 
-								                    
-									                "yyyy-M-dd HH:mm:ss.s",
-								                    "yyyy-M-dd HH:mm:s.s",
-									                "yyyy-M-dd HH:m:ss.s",
-								                    "yyyy-M-dd HH:m:s.s",
-								                    "yyyy-M-dd H:mm:ss.s",
-								                    "yyyy-M-dd H:mm:s.s",
-									                "yyyy-M-dd H:m:ss.s",
-								                    "yyyy-M-dd H:m:s.s",
-									                
-									                "yyyy-M-d HH:mm:ss.s",
-								                    "yyyy-M-d HH:mm:s.s",
-									                "yyyy-M-d HH:m:ss.s",
-								                    "yyyy-M-d HH:m:s.s",
-								                    "yyyy-M-d H:mm:ss.s",
-								                    "yyyy-M-d H:mm:s.s",
-									                "yyyy-M-d H:m:ss.s",
-								                    "yyyy-M-d H:m:s.s"				
-							
+									"yyyy-MM-dd HH:mm:s.s",
+									"yyyy-MM-dd HH:m:ss.s",
+									"yyyy-MM-dd HH:m:s.s",
+
+
+									"yyyy-MM-dd HH:mm:ss.s",
+									"yyyy-MM-dd HH:mm:s.s",
+									"yyyy-MM-dd HH:m:ss.s",
+									"yyyy-MM-dd HH:m:s.s",
+									"yyyy-MM-dd H:mm:ss.s",
+									"yyyy-MM-dd H:mm:s.s",
+									"yyyy-MM-dd H:m:ss.s",
+									"yyyy-MM-dd H:m:s.s",
+
+									"yyyy-MM-dd HH:mm:ss.s",
+									"yyyy-MM-dd HH:mm:s.s",
+									"yyyy-MM-dd HH:m:ss.s",
+									"yyyy-MM-dd HH:m:s.s",
+									"yyyy-MM-dd H:mm:ss.s",
+									"yyyy-MM-dd H:mm:s.s",
+									"yyyy-MM-dd H:m:ss.s",
+									"yyyy-MM-dd H:m:s.s",
+
+									"yyyy-MM-d HH:mm:ss.s",
+									"yyyy-MM-d HH:mm:s.s",
+									"yyyy-MM-d HH:m:ss.s",
+									"yyyy-MM-d HH:m:s.s",
+									"yyyy-MM-d H:mm:ss.s",
+									"yyyy-MM-d H:mm:s.s",
+									"yyyy-MM-d H:m:ss.s",
+									"yyyy-MM-d H:m:s.s",                
+
+									"yyyy-MM-dd HH:mm:ss.s",
+									"yyyy-MM-dd HH:mm:s.s",
+									"yyyy-MM-dd HH:m:ss.s",
+									"yyyy-MM-dd HH:m:s.s",
+									"yyyy-MM-dd H:mm:ss.s",
+									"yyyy-MM-dd H:mm:s.s",
+									"yyyy-MM-dd H:m:ss.s",
+									"yyyy-MM-dd H:m:s.s",
+
+									"yyyy-MM-d HH:mm:ss.s",
+									"yyyy-MM-d HH:mm:s.s",
+									"yyyy-MM-d HH:m:ss.s",
+									"yyyy-MM-d HH:m:s.s",
+									"yyyy-MM-d H:mm:ss.s",
+									"yyyy-MM-d H:mm:s.s",
+									"yyyy-MM-d H:m:ss.s",
+									"yyyy-MM-d H:m:s.s", 
+
+									"yyyy-M-dd HH:mm:ss.s",
+									"yyyy-M-dd HH:mm:s.s",
+									"yyyy-M-dd HH:m:ss.s",
+									"yyyy-M-dd HH:m:s.s",
+									"yyyy-M-dd H:mm:ss.s",
+									"yyyy-M-dd H:mm:s.s",
+									"yyyy-M-dd H:m:ss.s",
+									"yyyy-M-dd H:m:s.s",
+
+									"yyyy-M-d HH:mm:ss.s",
+									"yyyy-M-d HH:mm:s.s",
+									"yyyy-M-d HH:m:ss.s",
+									"yyyy-M-d HH:m:s.s",
+									"yyyy-M-d H:mm:ss.s",
+									"yyyy-M-d H:mm:s.s",
+									"yyyy-M-d H:m:ss.s",
+									"yyyy-M-d H:m:s.s"				
+
 							};
 							DateTime s = null;
 							for ( int i = 0; i < esg_formats.length; i++) {
@@ -1245,7 +1250,7 @@ public class addXML {
 									// Try again...
 								}
 							}							
-							
+
 							log.info("Loading T from metadata: "+elementName);
 							AxisBean tAxis = new AxisBean();
 							if ( calendar_name != null ) {
@@ -1303,15 +1308,7 @@ public class addXML {
 		if ( dt.endsWith("Z") ) return dt.substring(0, dt.length() - 1);
 		return dt;
 	}
-	/**
-	 * processCategories
-	 *
-	 * @param ThreddsDataset InvDataset
-	 * @return CategoryBean
-	 */
-	public static CategoryBean processCategories(InvDataset ThreddsDataset) {
-		CategoryBean cb = new CategoryBean();
-		// Make any THREDDS documentation links into LAS contributor links.
+	private static Vector getContributors(InvDataset ThreddsDataset) {
 		List docs = ThreddsDataset.getDocumentation();
 		Vector contribs = new Vector();
 		for (Iterator dit = docs.iterator(); dit.hasNext(); ) {
@@ -1324,7 +1321,79 @@ public class addXML {
 				contribs.add(contributor);
 			}
 		}
-		cb.setContributors(contribs);
+		return contribs;
+	}
+	/**
+	 * processESGCategories
+	 * 
+	 * @param ThreddsDataset InvDataset
+	 * @return CategoryBean
+	 */
+	public static CategoryBean processESGCategories(InvDataset ThreddsDataset) {
+		CategoryBean cb = new CategoryBean();
+		cb.setName(ThreddsDataset.getName());
+		cb.setID(ThreddsDataset.getID());
+		// This is the top level...
+		cb.setContributors(getContributors(ThreddsDataset));
+		Vector topCats = new Vector();
+		for (Iterator topLevelIt = ThreddsDataset.getDatasets().iterator(); topLevelIt.hasNext(); ) {
+			InvDataset topDS = (InvDataset) topLevelIt.next();
+			CategoryBean topCB = new CategoryBean();
+			topCB.setName(topDS.getName());
+			topCB.setID(topDS.getID());
+			
+			Vector subCats = new Vector();
+			for (Iterator subDatasetsIt = topDS.getDatasets().iterator(); subDatasetsIt.hasNext(); ) {
+				InvDataset subDataset = (InvDataset) subDatasetsIt.next();
+				CategoryBean subCB = new CategoryBean();
+				subCB.setName(subDataset.getName());
+				subCB.setID(subDataset.getID());
+				
+				// These will be the catalog containers that will contain the aggregations...
+				for (Iterator grandChildrenIt = subDataset.getDatasets().iterator(); grandChildrenIt.hasNext(); ) {
+					InvDataset grandChild = (InvDataset) grandChildrenIt.next();
+					if ( grandChild.hasAccess() && grandChild.getName().contains("aggregation")) {
+						// We are done.
+						String url = null;
+						InvAccess access = null;
+						for (Iterator ait = grandChild.getAccess().iterator(); ait.hasNext(); ) {
+							access = (InvAccess) ait.next();
+							if (access.getService().getServiceType() == ServiceType.DODS ||
+									access.getService().getServiceType() == ServiceType.OPENDAP ||
+									access.getService().getServiceType() == ServiceType.NETCDF) {
+								url = access.getStandardUrlName();
+							}
+						}
+						if ( url != null && url.contains("aggregation") ){
+							FilterBean filter = new FilterBean();
+							filter.setAction("apply-dataset");
+							String tag = grandChild.getID();
+							filter.setContainstag(tag);
+							topCB.addFilter(filter);
+
+						}
+					} 
+				}
+			}
+			if ( topCB.getFilters().size() > 0 ) {
+				topCats.add(topCB);
+			}
+		}
+		if ( topCats.size() > 0 ) {
+			cb.setCategories(topCats);
+		}
+		return cb;
+	}
+	/**
+	 * processCategories
+	 *
+	 * @param ThreddsDataset InvDataset
+	 * @return CategoryBean
+	 */
+	public static CategoryBean processCategories(InvDataset ThreddsDataset) {
+		CategoryBean cb = new CategoryBean();
+		// Make any THREDDS documentation links into LAS contributor links.
+		cb.setContributors(getContributors(ThreddsDataset));
 
 		String name = ThreddsDataset.getName();
 		if (name != null) {
@@ -1372,7 +1441,7 @@ public class addXML {
 				if ( esg ) {
 					tag = ThreddsDataset.getID();
 				} else {
-				    tag = encodeID(url);
+					tag = encodeID(url);
 				}
 
 				filter.setContainstag(tag);
@@ -1386,7 +1455,7 @@ public class addXML {
 			// Process the sub-categories
 			CategoryBean subCat = processCategories(subDataset);
 			if ( subCat.getCategories().size() > 0 || subCat.getFilters().size() > 0 ) {
-			    subCats.add(subCat);
+				subCats.add(subCat);
 			}
 		}
 		cb.setCategories(subCats);
@@ -1423,14 +1492,18 @@ public class addXML {
 		}
 		Formatter error = new Formatter();
 		GridDataset gridDs = null;
+		
 		try {
 			gridDs = (GridDataset) FeatureDatasetFactoryManager.open(FeatureType.GRID, url, null, error);
+			if ( gridDs == null ) {
+				gridDs = (GridDataset) FeatureDatasetFactoryManager.open(FeatureType.FMRC, url, null, error);
+			}
 		} catch (IOException e) {
 			log.error("Unable to open dataset at "+url);
 			return null;
 		}
 		if ( gridDs == null ) {
-			log.error("Unable to read dataset at "+url);
+			log.error("Unable to read dataset at "+url+" with "+error.toString());
 			return null;
 		}
 
@@ -1467,7 +1540,7 @@ public class addXML {
 		if (name == null) {
 			name = url;
 		}
-        log.debug("TypedDatasetFactory message " + error.toString());
+		log.debug("TypedDatasetFactory message " + error.toString());
 		String elementName;
 		if ( esg ) {
 			elementName = threddsDataset.getID();
@@ -1485,7 +1558,7 @@ public class addXML {
 
 		List<GridDatatype> grids = new ArrayList();
 		if ( gridDs != null ) {
-		    grids = gridDs.getGrids();
+			grids = gridDs.getGrids();
 		}
 
 		if (grids.size() == 0) {
@@ -1857,7 +1930,7 @@ public class addXML {
 				// Get the entire span of time
 				t1 = axis.getCoordValue(length-1);
 				jodaDate2 = makeDate(t1, dateUnit, chrono);
-				
+
 				Duration duration = new Duration(jodaDate1, jodaDate2);
 				Period period = duration.toPeriod();
 				Hours hours = period.toStandardHours();
@@ -1871,15 +1944,15 @@ public class addXML {
 				axisbean.setUnits("hour");
 				axisbean.setArange(arange);
 			} else {
-				
-				
+
+
 				// Returns the number of years, months, weeks, days,
-				  // hours, minutes, seconds, and millis between these
-				  // two dates.
+				// hours, minutes, seconds, and millis between these
+				// two dates.
 
 				// Only one should be greater than 0.
-				
-				
+
+
 				if ( unitsString.contains("0001") || unitsString.contains("1-1-1") ) {
 					// ESRL/PSD climo hack...
 					int year1 = jodaDate1.get(DateTimeFieldType.year());
@@ -1889,7 +1962,7 @@ public class addXML {
 						axisbean.setModulo(true);
 					}
 				}
-				
+
 				int step = 0;
 				Period period =	new Period(jodaDate1.withZone(DateTimeZone.UTC), jodaDate2.withZone(DateTimeZone.UTC));
 				int numPeriods = 0;
@@ -1909,7 +1982,7 @@ public class addXML {
 							if ( jodaDate1.get(DateTimeFieldType.hourOfDay()) > 0 )  {
 								fmt = DateTimeFormat.forPattern(pattern_with_hours);
 							} else {
-							    fmt = DateTimeFormat.forPattern(patterns[i]);
+								fmt = DateTimeFormat.forPattern(patterns[i]);
 							}
 						}
 						step = values[i];
@@ -1970,7 +2043,7 @@ public class addXML {
 						double t[] = axis.getCoordValues();
 						String ts[] = new String[t.length];
 						// We don't know what these times look like.  Use a format with everything.
-						
+
 						for (int i = 0; i < t.length; i++) {
 							DateTime dt = makeDate(t[i], dateUnit, chrono);
 							ts[i] = ferret_time_formatter.print(dt.withZone(DateTimeZone.UTC));
@@ -1995,12 +2068,12 @@ public class addXML {
 					}
 					arange.setSize(String.valueOf(axis.getSize()));
 					String str = fmt.print(jodaDate1.withZone(DateTimeZone.UTC));
-					
+
 					if ( str.startsWith("-") ) {
-						
-						    str = str.substring(1, str.length());
-						    str = str.replace("0001", "0000");
-						    axisbean.setModulo(true);
+
+						str = str.substring(1, str.length());
+						str = str.replace("0001", "0000");
+						axisbean.setModulo(true);
 					}
 					arange.setStart(str);
 					axisbean.setArange(arange);
@@ -2039,7 +2112,7 @@ public class addXML {
 		int seconds = 0;
 		int millis = 0;
 		Period period = new Period(years, months, weeks, days, hours, minutes, seconds, millis);
-		
+
 		// Years
 		if (pstring.contains("year") ) {
 			years = Double.valueOf(d).intValue();
@@ -2067,7 +2140,7 @@ public class addXML {
 			Double remainder_min = 0.;
 			if ( ceiling > double_hour ) {
 				if ( double_hour > 0 ) {
-				    remainder_min = (double_hour - Math.floor(double_hour))*60.;
+					remainder_min = (double_hour - Math.floor(double_hour))*60.;
 				} else {
 					remainder_min = (Math.floor(double_hour) - double_hour)*60.;
 				}
@@ -2091,7 +2164,7 @@ public class addXML {
 
 		DateTime origin = getOrigin(dateUnit, chrono);
 
-		 
+
 		DateTime date = new DateTime(chrono);
 		date = (origin).plus(period).withChronology(chrono);
 		return date;
@@ -2150,7 +2223,7 @@ public class addXML {
 		double min = axis.getMinValue();
 		double max = axis.getMaxValue();
 		double diff = Math.abs(max - min);
-        // divide the range into 50 equal increments...
+		// divide the range into 50 equal increments...
 		ArangeBean arange = new ArangeBean();
 		axisbean.setUnits(axis.getUnitsString());
 		arange.setSize("50");
@@ -2230,10 +2303,10 @@ public class addXML {
 		return result.toString();
 	}
 
-//	========================================================= reverse
-//	Stolen directly off the web from:
-//	http://leepoint.net/notes-java/data/arrays/34arrayreverse.html
-//	Converted from int array to double...
+	//	========================================================= reverse
+	//	Stolen directly off the web from:
+	//	http://leepoint.net/notes-java/data/arrays/34arrayreverse.html
+	//	Converted from int array to double...
 	public static void reverse(double[] b) {
 		int left = 0; // index of leftmost element
 		int right = b.length - 1; // index of rightmost element
@@ -2394,6 +2467,159 @@ public class addXML {
 		if ( esgOption != null && (esgOption.equalsIgnoreCase("true") || esgOption.equalsIgnoreCase("false")) ) {
 			esg = Boolean.valueOf(esgOption).booleanValue();
 		}
+	}
+
+	public static DateTimeFormatter getFerret_time_formatter() {
+		return ferret_time_formatter;
+	}
+
+	public static void setFerret_time_formatter(
+			DateTimeFormatter ferretTimeFormatter) {
+		ferret_time_formatter = ferretTimeFormatter;
+	}
+
+	public static boolean isVerbose() {
+		return verbose;
+	}
+
+	public static void setVerbose(boolean verbose) {
+		addXML.verbose = verbose;
+	}
+
+	public static boolean isGenerate_names() {
+		return generate_names;
+	}
+
+	public static void setGenerate_names(boolean generateNames) {
+		generate_names = generateNames;
+	}
+
+	public static int getFileCount() {
+		return fileCount;
+	}
+
+	public static void setFileCount(int fileCount) {
+		addXML.fileCount = fileCount;
+	}
+
+	public static HashMap<String, Boolean> getForceAxes() {
+		return forceAxes;
+	}
+
+	public static void setForceAxes(HashMap<String, Boolean> forceAxes) {
+		addXML.forceAxes = forceAxes;
+	}
+
+	public static String getTitle() {
+		return title;
+	}
+
+	public static void setTitle(String title) {
+		addXML.title = title;
+	}
+
+	public static String getVersion_string() {
+		return version_string;
+	}
+
+	public static void setVersion_string(String versionString) {
+		version_string = versionString;
+	}
+
+	public static String getGlobal_title_attribute() {
+		return global_title_attribute;
+	}
+
+	public static void setGlobal_title_attribute(String globalTitleAttribute) {
+		global_title_attribute = globalTitleAttribute;
+	}
+
+	public static String getFormat() {
+		return format;
+	}
+
+	public static void setFormat(String format) {
+		addXML.format = format;
+	}
+
+	public static String getUnits_format() {
+		return units_format;
+	}
+
+	public static void setUnits_format(String unitsFormat) {
+		units_format = unitsFormat;
+	}
+
+	public static String getGroup_type() {
+		return group_type;
+	}
+
+	public static void setGroup_type(String groupType) {
+		group_type = groupType;
+	}
+
+	public static String getGroup_name() {
+		return group_name;
+	}
+
+	public static void setGroup_name(String groupName) {
+		group_name = groupName;
+	}
+
+	public static boolean isGroup() {
+		return group;
+	}
+
+	public static void setGroup(boolean group) {
+		addXML.group = group;
+	}
+
+	public static boolean isCategory() {
+		return category;
+	}
+
+	public static void setCategory(boolean category) {
+		addXML.category = category;
+	}
+
+	public static boolean isUse_suffix() {
+		return use_suffix;
+	}
+
+	public static void setUse_suffix(boolean useSuffix) {
+		use_suffix = useSuffix;
+	}
+
+	public static boolean isOneDataset() {
+		return oneDataset;
+	}
+
+	public static void setOneDataset(boolean oneDataset) {
+		addXML.oneDataset = oneDataset;
+	}
+
+	public static boolean isIrregular() {
+		return irregular;
+	}
+
+	public static void setIrregular(boolean irregular) {
+		addXML.irregular = irregular;
+	}
+
+	public static boolean isEsg() {
+		return esg;
+	}
+
+	public static void setEsg(boolean esg) {
+		addXML.esg = esg;
+	}
+
+	public static String[] getPatterns() {
+		return patterns;
+	}
+
+	public static String getPatternWithHours() {
+		return pattern_with_hours;
 	}
 
 } // end of class

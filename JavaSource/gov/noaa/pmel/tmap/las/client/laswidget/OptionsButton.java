@@ -2,7 +2,7 @@ package gov.noaa.pmel.tmap.las.client.laswidget;
 
 import java.util.Map;
 
-import gov.noaa.pmel.tmap.las.client.RPCServiceAsync;
+import gov.noaa.pmel.tmap.las.client.rpc.RPCServiceAsync;
 import gov.noaa.pmel.tmap.las.client.serializable.OptionSerializable;
 
 import com.google.gwt.event.dom.client.ClickHandler;

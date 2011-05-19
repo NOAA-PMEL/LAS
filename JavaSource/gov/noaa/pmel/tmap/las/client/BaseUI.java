@@ -194,12 +194,24 @@ public class BaseUI implements EntryPoint {
 
 		xTileServer = getTileServer();
 		
-		xDSID = Util.getParameterString("dsid");
-		xVarID = Util.getParameterString("vid");
-		xOperationID = Util.getParameterString("opid");
-		xOptionID = Util.getParameterString("optionid");
-		xView = Util.getParameterString("view");
+		// Somebody might have already set these.  Only get them from the query string if they are null.
+		if ( xDSID == null ) {
+			xDSID = Util.getParameterString("dsid");
+		}
+		if ( xVarID == null ) {
+			xVarID = Util.getParameterString("vid");
+		}
+		if ( xOperationID == null ) {
+			xOperationID = Util.getParameterString("opid");
+		}
+		if ( xOptionID == null ) {
+			xOptionID = Util.getParameterString("optionid");
+		}
+		if ( xView == null ) {
+			xView = Util.getParameterString("view");
+		}
 
+		// Probably same here...
 		xXlo = Util.getParameterString("xlo");
 		xXhi = Util.getParameterString("xhi");
 		xYlo = Util.getParameterString("ylo");
