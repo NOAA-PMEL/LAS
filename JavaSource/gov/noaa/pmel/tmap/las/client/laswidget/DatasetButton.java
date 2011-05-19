@@ -1,6 +1,6 @@
 package gov.noaa.pmel.tmap.las.client.laswidget;
 
-import gov.noaa.pmel.tmap.las.client.RPCServiceAsync;
+import gov.noaa.pmel.tmap.las.client.rpc.RPCServiceAsync;
 import gov.noaa.pmel.tmap.las.client.serializable.CategorySerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.VariableSerializable;
 

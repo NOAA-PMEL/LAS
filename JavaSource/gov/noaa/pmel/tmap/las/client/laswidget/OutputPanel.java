@@ -9,11 +9,10 @@ import gov.noaa.pmel.tmap.las.client.serializable.VariableSerializable;
 import gov.noaa.pmel.tmap.las.client.util.URLUtil;
 import gov.noaa.pmel.tmap.las.client.util.Util;
 
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
-import org.apache.commons.digester.SetTopRule;
 
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -158,6 +157,8 @@ public class OutputPanel extends Composite {
 	// The current Product URL being displayed in this frame.
 	String currentURL = "";
 	
+	// The panel with the plot annotations hidded at the top of the frame...
+	LASAnnotationsPanel lasAnnotationsPanel = new LASAnnotationsPanel();
 	
 	
 	// Keep track of whether the retry is visible and remove it when the results come back.
@@ -207,7 +208,7 @@ public class OutputPanel extends Composite {
 		revert.addClickListener(revertListener);
 		revert.setTitle("Cancel Panel Settings for "+ID);
 
-		top.setWidget(0, 0, datasetLabel);
+		top.setWidget(0, 0, lasAnnotationsPanel);
 		//top.getCellFormatter().setWordWrap(0, 0, false);
 		top.getColumnFormatter().setWidth(0, "85%");
 		top.getCellFormatter().setHeight(0, 0, "30px");
@@ -361,6 +362,8 @@ public class OutputPanel extends Composite {
 
 				RequestBuilder sendRequest = new RequestBuilder(RequestBuilder.GET, url);
 				try {
+					lasAnnotationsPanel.setTitle("Plot annotations...");
+					lasAnnotationsPanel.setError("Fetching plot annotations...");
 					sendRequest.sendRequest(null, lasRequestCallback);
 				} catch (RequestException e) {
 					HTML error = new HTML(e.toString());
@@ -851,6 +854,31 @@ public class OutputPanel extends Composite {
 		}
 		return value;
 	}
+	private RequestCallback annotationsCallback = new RequestCallback() {
+
+		@Override
+		public void onError(Request request, Throwable exception) {
+			lasAnnotationsPanel.setError("Unable to get annotations from the LAS server.");
+		}
+
+		@Override
+		public void onResponseReceived(Request request, Response response) {
+			Map<String, String> lasAnnotations = new HashMap<String, String>();
+			String annotationsString = response.getText();
+			String[] lines = annotationsString.split("\n");
+			String inputLine;			
+				for (int i = 0; i < lines.length; i++) {
+					inputLine = lines[i].trim();
+					if ( inputLine.startsWith("\"")) inputLine = inputLine.substring(1);
+					if ( inputLine.endsWith("\"")) inputLine = inputLine.substring(0, inputLine.length()-1);
+					String[] parts = inputLine.split("===");
+					lasAnnotations.put(parts[0], parts[1]);
+
+				}
+				lasAnnotationsPanel.init(lasAnnotations);
+			
+		}
+	};
 	private RequestCallback lasRequestCallback = new RequestCallback() {
 		public void onError(Request request, Throwable exception) {
 			spin.hide();
@@ -877,27 +905,9 @@ public class OutputPanel extends Composite {
 						Element result = (Element) results.item(n);
 						if ( result.getAttribute("type").equals("image") ) {
 							//HTML image = new HTML("<a target=\"_blank\" href=\""+result.getAttribute("url")+"\"><img width=\"100%\" src=\""+result.getAttribute("url")+"\"></a>");
-							final String url = result.getAttribute("url");
-							Image image = new Image(result.getAttribute("url"));
-							image.addClickListener(new ClickListener() {
-
-								public void onClick(Widget sender) {
-									Window.open(url, "plot", "");
-
-								}
-
-							});
-							image.setTitle("  Click to Enlarge.  Images will size with browser.");
-							grid.setWidget(1, 0 , image);
+							String url = result.getAttribute("url");
+							setImage(url);
 							setImageWidth();
-//							if ( autoZoom ) {
-//							image.setWidth(pwidth+"px");
-//							int h = (int) ((image_h/image_w)*Double.valueOf(pwidth));
-//							image.setHeight(h+"px");
-//							} else {
-//							setImageSize(fixedZoom);
-//							}
-
 						} else if ( result.getAttribute("type").equals("map_scale") )  {
 							final String ms_url = result.getAttribute("url");
 							RequestBuilder mapScaleRequest = new RequestBuilder(RequestBuilder.GET, ms_url);
@@ -905,6 +915,14 @@ public class OutputPanel extends Composite {
 								mapScaleRequest.sendRequest(null, mapScaleCallBack);
 							} catch (RequestException e) {
 								// Don't care.  Just go with the information we have.
+							}
+						} else if ( result.getAttribute("type").equals("annotations") ) {
+							final String ann_url = result.getAttribute("url");
+							RequestBuilder annotationsRequest = new RequestBuilder(RequestBuilder.GET, ann_url);
+							try {
+								annotationsRequest.sendRequest(null, annotationsCallback);
+							} catch (RequestException e) {
+								lasAnnotationsPanel.setError("Unable to get annotations from the LAS server.");
 							}
 						} else if ( result.getAttribute("type").equals("error") ) {
 							if ( result.getAttribute("ID").equals("las_message") ) {
@@ -1440,4 +1458,25 @@ public class OutputPanel extends Composite {
 		this.vizGalVariable = variable;
 		this.vizGalState = historyToken;	
 	}
+	public void setImage(String urlin) {
+		final String url = urlin;
+		Image image = new Image(url);
+		image.addClickHandler(new ClickHandler() {
+
+			@Override
+			public void onClick(ClickEvent event) {
+				
+				Window.open(url, "plot", "");
+				
+			}
+
+		});
+		image.setTitle("  Click to Enlarge.  Images will size with browser.");
+		grid.setWidget(1, 0 , image);
+	}
+	// This is for mock up user interface and are not used with "real" UI's.
+	public void setAnnotationsURL(String url) {
+		lasAnnotationsPanel.setAnnotationsURL(url);
+	}
+	
 }
