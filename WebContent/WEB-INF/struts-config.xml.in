@@ -83,7 +83,8 @@
           
          <!--  End of definitions for confluence server. -->
 
-          <!-- The definitions for nomal operations -->
+          <!-- The definitions for normal operations -->
+          <action path="/getAnnotations" type="gov.noaa.pmel.tmap.las.ui.GetAnnotations"/>
           <action path="/ProductServer" name="progress" type="gov.noaa.pmel.tmap.las.product.server.ProductServerAction">
 		      <forward name="error" path="/productserver/templates/error.vm" redirect="false" />
 	          <forward name="batch_error" path="/productserver/templates/batch_error.vm" redirect="false" />
