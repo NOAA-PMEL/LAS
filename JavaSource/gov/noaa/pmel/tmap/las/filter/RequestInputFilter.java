@@ -75,10 +75,10 @@ public class RequestInputFilter implements Filter {
     // All LAS query parameters.
     private final static String[] p = {
     	"auto",
-	"auth_url",    
-	"BBOX", 
-	"stream_id",
-"stream",
+	    "auth_url",    
+	    "BBOX", 
+	    "stream_id",
+        "stream",
     	"cancel",
     	"cancel_button",
     	"catid", 
@@ -93,6 +93,7 @@ public class RequestInputFilter implements Filter {
     	"email",
     	"embutton",
     	"format",
+    	"file",
     	"JSESSIONID",
     	"key",
 		"log_level",
