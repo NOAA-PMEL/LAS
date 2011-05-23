@@ -1475,8 +1475,10 @@ public class OutputPanel extends Composite {
 		grid.setWidget(1, 0 , image);
 	}
 	// This is for mock up user interface and are not used with "real" UI's.
-	public void setAnnotationsURL(String url) {
-		lasAnnotationsPanel.setAnnotationsURL(url);
+	public void setAnnotationsXMLURL(String url) {
+		lasAnnotationsPanel.setAnnotationsXMLURL(url);
 	}
-	
+	public void setAnnotationsHTMLURL(String url) {
+		lasAnnotationsPanel.setAnnotationsHTMLURL(url);
+	}
 }
