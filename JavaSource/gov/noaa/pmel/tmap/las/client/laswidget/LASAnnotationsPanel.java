@@ -11,6 +11,7 @@ import com.google.gwt.http.client.Response;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.DisclosurePanel;
 import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.xml.client.CDATASection;
@@ -108,14 +109,27 @@ public class LASAnnotationsPanel extends Composite {
 		mainPanel.getHeaderTextAccessor().setText(title);
 	}
 	
-	public void setAnnotationsURL(String url) {
+	public void setAnnotationsXMLURL(String url) {
 		RequestBuilder sendRequest = new RequestBuilder(RequestBuilder.GET, url);
 		
 		try {
-			sendRequest.sendRequest(null, annotationsCallback);
+			sendRequest.sendRequest(null, annotationsXMLCallback);
 		} catch (RequestException e) {
 			
 		}
+	}
+	public void setAnnotationsHTMLURL(String url) {
+		RequestBuilder sendRequest = new RequestBuilder(RequestBuilder.GET, url);
+		try {
+			sendRequest.sendRequest(null, annotationsHTMLCallback);
+		} catch (RequestException e) {
+			
+		}
+	}
+	public void setAnnotationsHTML(String html) {
+		HTML annotations = new HTML(html);
+		layoutPanel.clear();
+		layoutPanel.add(annotations);
 	}
 	public void setAnnotations(String xml) {
 		layoutPanel.clear();
@@ -206,7 +220,7 @@ public class LASAnnotationsPanel extends Composite {
 			layoutPanel.add(tables.get(TYPE_LAS));
 		}
 	}
-	RequestCallback annotationsCallback = new RequestCallback() {
+	RequestCallback annotationsXMLCallback = new RequestCallback() {
 
 		@Override
 		public void onError(Request request, Throwable exception) {
@@ -219,6 +233,23 @@ public class LASAnnotationsPanel extends Composite {
 			
 			String text = response.getText();
 			setAnnotations(text);
+			
+		}
+		
+	};
+	RequestCallback annotationsHTMLCallback = new RequestCallback() {
+
+		@Override
+		public void onError(Request request, Throwable exception) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void onResponseReceived(Request request, Response response) {
+			
+			String text = response.getText();
+			setAnnotationsHTML(text);
 			
 		}
 		

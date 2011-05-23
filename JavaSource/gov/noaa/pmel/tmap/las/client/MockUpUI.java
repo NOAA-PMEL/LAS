@@ -20,7 +20,7 @@ import com.google.gwt.user.client.ui.RootPanel;
 
 public class MockUpUI extends VizGal {
 	
-	PushButton xmlButton = new PushButton("Change XML");
+	PushButton xmlButton = new PushButton("Change Annotations");
 	PushButton imageButton = new PushButton("Change Image");
 	PopupTextPanel xmlPanel = new PopupTextPanel("URL of the new annotations XML.");
 	PopupTextPanel imagePanel = new PopupTextPanel("URL of the new image.");
@@ -83,7 +83,12 @@ public class MockUpUI extends VizGal {
 			
 			for (Iterator panelsIt = xPanels.iterator(); panelsIt.hasNext();) {
 				OutputPanel p = (OutputPanel) panelsIt.next();
-				p.setAnnotationsURL(xmlPanel.getText());
+				String url = xmlPanel.getText();
+				if ( url.contains(".do") ) {
+					p.setAnnotationsHTMLURL(url);
+				} else {
+					p.setAnnotationsXMLURL(url);
+				}
 			}
 			
 		}
