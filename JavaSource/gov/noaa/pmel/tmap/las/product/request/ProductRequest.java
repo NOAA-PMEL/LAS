@@ -685,6 +685,27 @@ public class ProductRequest {
                 result.setAttribute("key", key);
                 index++;
             }
+            // Add the annotations file if the property is set to file.
+            if ( lasRequest.getProperty("ferret", "annotations").equalsIgnoreCase("file") || 
+            		backendRequestDocument.getProperty("ferret", "annotations").equalsIgnoreCase("file") ) {
+            	Element annotations = new Element("result");
+            	annotations.setAttribute("type", "annotations");
+            	annotations.setAttribute("ID", "annotations");
+            	String annotationsFile = outputDir + File.separator + key+ "_annotations.xml";
+            	annotations.setAttribute("file", annotationsFile);
+            	annotations.setAttribute("key", key);
+            	backendResponse.addContent(annotations);
+            }
+            // Add the cancel file
+
+            Element cancel = new Element("result");
+            cancel.setAttribute("type", "cancel");
+            cancel.setAttribute("ID", "cancel");
+            String cancelFile = outputDir + File.separator + key+ "_cancel.txt";
+            cancel.setAttribute("file", cancelFile);
+            cancel.setAttribute("key", key);
+            backendResponse.addContent(cancel);
+
             // Automatically add an RSS Feed result.  This is keyed to the entire request, not the individual requests.
             Element feed = new Element("result");
             feed.setAttribute("type", "rss");
