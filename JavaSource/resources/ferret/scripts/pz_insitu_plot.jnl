@@ -93,6 +93,7 @@ IF ($region_x_lo"0|*>1") THEN
       IF `($region_x_hi) LT 0` THEN DEFINE SYMBOL letter2 = W
       DEFINE SYMBOL upper_left Longitude: `ABS(($region_x_lo))`($letter) to `ABS(($region_x_hi))`($letter2)
    ENDIF
+   DEFINE SYMBOL longitude_lab = ($upper_left)
    LABEL/NOUSER 0, `labyloc`, -1, 0.0, `labsiz`, ($upper_left)
 ENDIF
 
@@ -110,6 +111,7 @@ IF ($region_y_lo"0|*>1") THEN
       IF `($region_x_hi) LT 0` THEN DEFINE SYMBOL letter2 = S
       DEFINE SYMBOL upper_left Latitude: `ABS(($region_y_lo))`($letter) to `ABS(($region_y_hi))`($letter2)
    ENDIF
+   DEFINE SYMBOL latitude_lab = ($upper_left)
    LABEL/NOUSER 0, `labyloc`, -1, 0.0, `labsiz`, ($upper_left)
 ENDIF
 
@@ -121,6 +123,7 @@ IF ($region_t_lo"0|*>1") THEN
    ELSE
       DEFINE SYMBOL upper_left Date: ($region_t_lo) to ($region_t_hi)
    ENDIF
+   DEFINE SYMBOL time_lab = ($upper_left)
    LABEL/NOUSER 0, `labyloc`, -1, 0.0, `labsiz`, ($upper_left)
 ENDIF
 
@@ -134,6 +137,10 @@ IF `($pstride"0") GT 0` THEN
    LET labyloc = `($ppl$ylen) + labdel*4 ` 
 
    LABEL/NOUSER `labxloc`, `labyloc`, 1, 0.0, `labsiz`, @P2@AC($p_npts) points subsampled at every ($pstride) point
+
+   DEFINE SYMBOL note_num = `($note_num"0") + 1`
+   DEFINE SYMBOL note_($note_num)_lab = ($p_npts) points subsampled at every ($pstride) point
+
 ENDIF 
 
 ! Overall header at the very top

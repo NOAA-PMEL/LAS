@@ -299,6 +299,9 @@ IF `($xstride"0|1>0|*>1") + ($ystride"0|1>0|*>1") + ($zstride"0|1>0|*>1") + ($ts
       LET need_comma = 1
    ENDIF
 
+   DEFINE SYMBOL note_num = `($note_num"0") + 1`
+   DEFINE SYMBOL note_($note_num)_lab = ($upper_left_($n_left_labels))
+
 ENDIF
 
 ! Set this for list_grid

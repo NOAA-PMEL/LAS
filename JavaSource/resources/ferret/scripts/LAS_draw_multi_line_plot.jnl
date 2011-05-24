@@ -189,6 +189,7 @@ ENDIF ! same units for all
 IF ($labnum_calend%0|*>1%) THEN
    DEFINE SYMBOL n_left_labels = `($n_left_labels"0") + 1`
    DEFINE SYMBOL upper_left_($n_left_labels) = ($lab($labnum_calend))
+   DEFINE SYMBOL calendar_lab = ($upper_left_($n_left_labels"0"))
 ENDIF
 
 DEFINE SYMBOL ax_vert_save = ($ax_vert"D")

@@ -46,6 +46,9 @@ IF `($ferret_staggered_grid_x"0") OR ($ferret_staggered_grid_y"0")` THEN
    DEFINE SYMBOL ferret_staggered_grid = 1
 !   DEFINE SYMBOL n_left_labels = `($n_left_labels"0") + 1`
 !   DEFINE SYMBOL upper_left_($n_left_labels) = Variables on staggered grids
+!
+!   DEFINE SYMBOL note_num = `($note_num"0") + 1`
+!   DEFINE SYMBOL note_($note_num)_lab = ($upper_left_($n_left_labels))
 
 ! redefine region symbols using the index ranges.
    GO LAS_define_region_curvi_indices

@@ -25,6 +25,9 @@ IF `STRCMP("($region_t_lo)", "($region_t_hi)") EQ 0` THEN
     DEFINE SYMBOL ferret_interpolate_data = 0
 ENDIF
 
+! See if a regridding operation was sent in. If not use defalt linear regridding.
+IF ($ferret_seasonal_transform"0|*>1") THEN DEFINE SYMBOL regrid_op = @($ferret_seasonal_transform)
+
 ! First check whether the incoming time axis is a modulo axis...
 ! If there is a modulo attribute, check that its value isnt  = NO
 
@@ -85,7 +88,7 @@ IF `tmod` THEN
       ELSE
 
          LET the_var_tseas($var_num)_mod = ($ferret_xyz_var)
-         LET regrid_var_tseas($var_num)_mod = the_var_tseas($var_num)_mod[GT=tseas, T=($region_t_lo)]
+         LET regrid_var_tseas($var_num)_mod = the_var_tseas($var_num)_mod[GT=tseas($regrid_op), T=($region_t_lo)]
 
       ENDIF
    ENDIF
@@ -143,8 +146,8 @@ ENDIF
 
 ! Define the regridded variable
 
-LET regrid_var_tseas($var_num) = the_var_tseas($var_num)[GT=tseas]
-LET regrid_var_tseas($var_num)_noregion = the_var_tseas($var_num)_noregion[GT=tseas]
+LET regrid_var_tseas($var_num) = the_var_tseas($var_num)[GT=tseas($regrid_op)]
+LET regrid_var_tseas($var_num)_noregion = the_var_tseas($var_num)_noregion[GT=tseas($regrid_op)]
 
 ! When this is an XY, XZ, or XZ plot, with no time dependence, we want to regrid 
 ! the requested month and surrounding months to the seasonal point requested,
@@ -168,11 +171,11 @@ IF `STRCMP("($region_t_lo)", "($region_t_hi)") EQ 0` THEN
       LET the_var_tseas($var_num) = ($ferret_xyz_var)
 
       LET the_var_expanded_t = the_var_tseas($var_num)[L=`L1`:`LN`]
-      LET regrid_var_tseas($var_num) = the_var_expanded_t[T=($region_t_lo),GT=tseas]
+      LET regrid_var_tseas($var_num) = the_var_expanded_t[T=($region_t_lo),GT=tseas($regrid_op)]
 
       LET the_var_tseas($var_num)_noregion = ($ferret_plot_var_noregion)
       LET the_var_expanded_t_noregion = the_var_tseas($var_num)_noregion[L=`L1`:`LN`]
-      LET regrid_var_tseas($var_num)_noregion = the_var_expanded_t_noregion[T=($region_t_lo),GT=tseas]
+      LET regrid_var_tseas($var_num)_noregion = the_var_expanded_t_noregion[T=($region_t_lo),GT=tseas($regrid_op)]
 
 
    ENDIF

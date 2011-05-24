@@ -123,6 +123,8 @@ IF `nn EQ n1` THEN
         , (($ferret_season_length)-month ave, Centered ($mon1))
       DEFINE SYMBOL n_left_labels = `($n_left_labels"0")+1`
       DEFINE SYMBOL upper_left_($n_left_labels) = (Data centered nearest ($mon1))
+      DEFINE SYMBOL note_num = `($note_num"0") + 1`
+      DEFINE SYMBOL note_($note_num)_lab = ($upper_left_($n_left_labels))
       EXIT/SCRIPT
    ENDIF
 
@@ -230,6 +232,8 @@ ELSE
 
       DEFINE SYMBOL n_left_labels = `($n_left_labels"0")+1`
       DEFINE SYMBOL upper_left_($n_left_labels) = (Data centered nearest ($mon1))
+      DEFINE SYMBOL note_num = `($note_num"0") + 1`
+      DEFINE SYMBOL note_($note_num)_lab = ($upper_left_($n_left_labels))
       DEFINE SYMBOL single_time = 1
       DEFINE SYMBOL region_transform_t = L=L=`L1`:`nn`
 

@@ -275,6 +275,7 @@ IF `($xstride"0|1>0|*>1") + ($ystride"0|1>0|*>1") + ($zstride"0|1>0|*>1") + ($ts
    DEFINE SYMBOL n_left_labels = `($n_left_labels"0")+1`
    DEFINE SYMBOL upper_left_($n_left_labels) = Subsampled 
 
+   CANCEL SYMBOL need_comma
    IF `($xstride"0|1>0|*>1")` THEN 
       DEFINE SYMBOL upper_left_($n_left_labels) =\
          ($upper_left_($n_left_labels)) ($xstride) in X
@@ -304,6 +305,9 @@ IF `($xstride"0|1>0|*>1") + ($ystride"0|1>0|*>1") + ($zstride"0|1>0|*>1") + ($ts
          ($upper_left_($n_left_labels)) ($tstride) in T
       LET need_comma = 1
    ENDIF
+
+   DEFINE SYMBOL note_num = `($note_num"0") + 1`
+   DEFINE SYMBOL note_($note_num)_lab = ($upper_left_($n_left_labels))
 
 ENDIF
 

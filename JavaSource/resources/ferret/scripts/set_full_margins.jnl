@@ -1,0 +1,22 @@
+! Set up for small margins, color key at the top
+
+can view
+define symbol text_scale = 0.6
+
+define view/axes/text=($text_scale)/x=0.04:0.99/y=0.04:0.95 full_view
+
+if ($ferret_view%0|yt>1|zt>1|t>1|*>0%) then \
+define view/axes/text=($text_scale)/x=0.04:0.99/y=0.06:0.95  full_view
+
+if ($ferret_view%0|xt>1|*>0%) then \
+define view/axes/text=($text_scale)/x=0.06:0.99/y=0.04:0.95  full_view
+
+if ($ferret_view%0|t>1|*>0%) then \
+define view/axes/text=($text_scale)/x=0.04:0.99/y=0.06:0.99  full_view
+
+if ($ferret_view%0|x>1|x>1|*>0%) then \
+define view/axes/text=($text_scale)/x=0.04:0.99/y=0.04:0.99  full_view
+
+set view full_view
+keymark 1
+ppl tics,,,,,1,1

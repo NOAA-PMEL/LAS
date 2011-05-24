@@ -30,6 +30,8 @@ ENDIF
 LET labdel = 0.2
 LET labsiz = 0.1
 
+IF ($ferret_annotations%0|*>1%) THEN EXIT/SCRIPT
+
 sh sym n_left_labels
 sh sym n_right_labels
 DEFINE SYMBOL num_labels = `MAX(($n_left_labels"0"), ($n_right_labels"0"))`

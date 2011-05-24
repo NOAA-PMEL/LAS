@@ -25,8 +25,10 @@ IF `($have_lon_lab"0|*>1") EQ 0` THEN
       DEFINE SYMBOL zf = `-1*($region_x_lo"0")`
       IF `($region_x_lo"0") EQ ($region_x_hi"($zf)")` THEN
          DEFINE SYMBOL upper_left_($n_left_labels) = Longitude: `xq,RETURN=xstart,PREC=4`
+	 DEFINE SYMBOL longitude_lab = ($upper_left_($n_left_labels"0"))
       ELSE
          DEFINE SYMBOL upper_left_($n_left_labels) = Longitude: `xq,RETURN=xstart,PREC=4` to `xq,RETURN=xend,PREC=4`
+	 DEFINE SYMBOL longitude_lab = ($upper_left_($n_left_labels"0"))
       ENDIF
       DEFINE SYMBOL have_lon_lab = 1
       CANCEL VAR xq
@@ -47,6 +49,7 @@ IF `($have_lat_lab"0|*>1") EQ 0` THEN
       ELSE
          DEFINE SYMBOL upper_left_($n_left_labels) = Latitude: `yq,RETURN=ystart,PREC=4` to `yq,RETURN=yend,PREC=4`
       ENDIF
+      DEFINE SYMBOL latitude_lab = ($upper_left_($n_left_labels"0"))
 
       DEFINE SYMBOL have_lat_lab = 1
       CANCEL VAR yq
@@ -82,6 +85,7 @@ IF `($have_z_lab"0|*>1") EQ 0` THEN
       ELSE
          DEFINE SYMBOL upper_left_($n_left_labels) = ($zlabel): `zq,RETURN=zstart,PREC=4` to `zq,RETURN=zend,PREC=4` `($ferret_plot_var),RETURN=zunits`
       ENDIF
+      DEFINE SYMBOL depth_lab = ($upper_left_($n_left_labels"0"))
 
       DEFINE SYMBOL have_z_lab = 1
       CANCEL VAR zq
@@ -137,6 +141,7 @@ IF `($have_time_lab"0|*>1") EQ 0` THEN
       ELSE
          DEFINE SYMBOL upper_left_($n_left_labels) = `TAX_DATESTRING(tlo_coord, tt, "($tprec)")` to `TAX_DATESTRING(thi_coord, tt, "($tprec)")`
       ENDIF
+      DEFINE SYMBOL time_lab = ($upper_left_($n_left_labels"0"))
 
       DEFINE SYMBOL have_time_lab = 1
    
@@ -154,6 +159,11 @@ IF `(($have_year_lab"0|*>1") EQ 0) AND (L_time GT 1)` THEN
          DEFINE SYMBOL n_left_labels = `($n_left_labels"0") + 1`
          DEFINE SYMBOL upper_left_($n_left_labels) = ($lab($labnum_year))
          DEFINE SYMBOL have_year_lab = 1
+      ENDIF
+      IF ($time_lab"0|*>1") THEN 
+         DEFINE SYMBOL time_lab ($time_lab) ($upper_left_($n_left_labels"0"))
+      ELSE
+         DEFINE SYMBOL time_lab ($upper_left_($n_left_labels"0"))
       ENDIF
 
    ENDIF

@@ -231,6 +231,10 @@ IF ($result_map_scale_filename%0|*>1%) THEN
 
 ENDIF
 
+IF ($ferret_annotations%0|*>1%) THEN
+   GO LAS_annotations_xml
+ENDIF 
+
 ! Result "colorbar" is the legend of the plot_image...only for Google Earth
 IF ($result_colorbar_filename%0|*>1%) THEN GO colorbar
 
