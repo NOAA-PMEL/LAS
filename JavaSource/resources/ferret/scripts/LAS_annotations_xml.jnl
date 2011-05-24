@@ -1,0 +1,111 @@
+! LAS_annotations_xml.jnl
+! write xml for annotations that are taken off the plot
+! and given back to LAS for display
+
+!CANCEL MODE VERIFY
+
+DEFINE SYMBOL out = <?xml version=\"1.0\" encoding=\"ISO-8859-1\" ?>
+MESSAGE/QUIET/CONTINUE/OUTFILE="($result_annotations_filename)"/CLOBBER ($out)
+
+DEFINE SYMBOL lquals = /NOHEAD/NOROWLAB/FILE="($result_annotations_filename)"/FORMAT=(a)/APPEND
+DEFINE SYMBOL out = <annotations>
+GO write_to_xml
+
+DEFINE SYMBOL out = 	<annotation_group type="orthogonal_axes">
+GO write_to_xml
+IF ($longitude_lab%0|*>1%) THEN 
+   DEFINE SYMBOL out = <annotation type="x-axis">
+   GO write_to_xml
+   DEFINE SYMBOL out = `LIST_VALUE_XML("label", "($longitude_lab)", 1, "($result_annotations_filename)" )`
+   DEFINE SYMBOL out = `LIST_VALUE_XML("value", "($longitude_value)", 1, "($result_annotations_filename)" )`
+   DEFINE SYMBOL out = </annotation>
+   GO write_to_xml
+ ENDIF
+IF ($latitude_lab%0|*>1%) THEN 
+   DEFINE SYMBOL out = <annotation type="y-axis">
+   GO write_to_xml
+   DEFINE SYMBOL out = `LIST_VALUE_XML("label", "($latitude_lab)", 1, "($result_annotations_filename)" )`
+   DEFINE SYMBOL out = `LIST_VALUE_XML("value", "($latitude_value)", 1, "($result_annotations_filename)" )`
+   DEFINE SYMBOL out = </annotation>
+   GO write_to_xml
+ ENDIF
+IF ($depth_lab%0|*>1%) THEN 
+   DEFINE SYMBOL out = <annotation type="z-axis">
+   GO write_to_xml
+   DEFINE SYMBOL out = `LIST_VALUE_XML("label", "($depth_lab)", 1, "($result_annotations_filename)" )`
+   DEFINE SYMBOL out = `LIST_VALUE_XML("value", "($depth_value)", 1, "($result_annotations_filename)" )`
+   DEFINE SYMBOL out = </annotation>
+   GO write_to_xml
+ ENDIF
+IF ($time_lab%0|*>1%) THEN 
+   DEFINE SYMBOL out = <annotation type="z-axis">
+   GO write_to_xml
+   DEFINE SYMBOL out = `LIST_VALUE_XML("label", "($time_lab)", 1, "($result_annotations_filename)" )`
+   DEFINE SYMBOL out = `LIST_VALUE_XML("value", "($time_value)", 1, "($result_annotations_filename)" )`
+   DEFINE SYMBOL out = </annotation>
+   GO write_to_xml
+ENDIF
+
+DEFINE SYMBOL out = </annotation_group>
+GO write_to_xml
+
+DEFINE SYMBOL out = <annotation_group type="data">
+GO write_to_xml
+
+IF ($ferret_plot_title"0|*>1") THEN
+   DEFINE SYMBOL out = <annotation type="variable_title">
+   GO write_to_xml
+   DEFINE SYMBOL out = `LIST_VALUE_XML("value", "($ferret_plot_title)", 1, "($result_annotations_filename)" )`
+   DEFINE SYMBOL out = </annotation>
+   GO write_to_xml
+ENDIF
+
+IF ($dataset_title($dset_count)_lab"0|*>1") THEN
+   DEFINE SYMBOL out = <annotation type="dataset_title">
+   GO write_to_xml
+   DEFINE SYMBOL out = `LIST_VALUE_XML("value", "($dataset_title($dset_count)_lab)", 1, "($result_annotations_filename)" )`
+   DEFINE SYMBOL out = </annotation>
+   GO write_to_xml
+ENDIF
+DEFINE SYMBOL out = </annotation_group>
+GO write_to_xml
+
+
+IF ($las_ferret_header_label"0|*>1") THEN
+
+   DEFINE SYMBOL out = <annotation_group type="las">
+   GO write_to_xml
+   DEFINE SYMBOL out = <annotation type="header">
+   GO write_to_xml
+   DEFINE SYMBOL out = `LIST_VALUE_XML("value", "($las_ferret_header_label)", 1, "($result_annotations_filename)" )`
+   DEFINE SYMBOL out = </annotation>
+   GO write_to_xml
+   DEFINE SYMBOL out = </annotation_group>
+   GO write_to_xml
+ENDIF
+
+IF `($note_num"0") GT 0 OR ($calendar_lab"0|*>1")` THEN
+   DEFINE SYMBOL out = <annotation_group type="notes">
+   go write_to_xml
+   REPEAT/RANGE=1:($note_num)/NAME=m (\
+      DEFINE SYMBOL mnote = `m`; \
+      DEFINE SYMBOL out = <annotation type="note">; \
+      GO write_to_xml; \
+      DEFINE SYMBOL out = `LIST_VALUE_XML("value", "($note_($mnote))", 1, "($result_annotations_filename)" )`; \
+      DEFINE SYMBOL out = </annotation>; \
+      GO write_to_xml; \
+    )
+    IF ($calendar_lab"0|*>1")` THEN
+      DEFINE SYMBOL out = <annotation type="note">
+      GO write_to_xml
+      DEFINE SYMBOL out = `LIST_VALUE_XML("value", "($calendar_lab)", 1, "($result_annotations_filename)" )`
+      DEFINE SYMBOL out = </annotation>
+      GO write_to_xml;
+   ENDIF
+
+   DEFINE SYMBOL out = </annotation_group>
+   GO write_to_xml
+ENDIF
+DEFINE SYMBOL out = </annotations>
+GO write_to_xml
+

@@ -110,38 +110,60 @@ GO LAS_url_label 0
 
 ! Draw the plot and we are done
 
-IF `($data_count"0") EQ 1` THEN
-   DEFINE SYMBOL split_title = ($ferret_plot_title)
-   GO LAS_split_title
-   DEFINE SYMBOL ferret_plot_title = ($split_title)
+IF ($ferret_small_margins"0|*>1) THEN
+   GO set_full_margins
+   DEFINE SYMBOL qualifiers ($qualifiers)/NOLAB
 
-   IF ($shade_underlay) THEN 
-      SHADE($qualifiers)/TRIM/TITLE="($ferret_plot_title)"/SET ($ferret_var_0)
-         IF ($axlab_command"0|*>1") THEN PPL ($axlab_command)
-         IF ($axtic_command"0|*>1") THEN PPL ($axtic_command)
-         IF ($axlen_command"0|*>1") THEN PPL ($axlen_command)
-         IF ($axtype_command"0|*>1") THEN PPL ($axtype_command)
-         if ($labnum_dset"0|*>1") THEN go unlabel ($labnum_dset)
-         if ($labnum_datitl"0|*>1") THEN go unlabel ($labnum_datitl)
-         if ($labnum_dods"0|*>1") THEN go unlabel ($labnum_dods)
-	 IF `($ppl$zmin) GE 1.e35 AND ($ppl$zmax) LE -1.e35` THEN DEFINE SYMBOL nokey = 1
-	 IF `($nokey"0") EQ 0` THEN PPL SHAKEY 1,,,,,,,,,,1
-      PPL SHADE
+   IF `($data_count"0") EQ 1` THEN
+     DEFINE SYMBOL split_title = ($ferret_plot_title)
+      GO LAS_split_title
+      DEFINE SYMBOL ferret_plot_title = ($split_title)
+
+      IF ($shade_underlay) THEN 
+         SHADE($qualifiers)/TRIM/TITLE="($ferret_plot_title)"/SET ($ferret_var_0)
+         GO reset_labels 
+         IF ($ferret_annotations"0|*>1") THEN GO key_at_top
+         PPL SHADE
+         IF `($LEV_NUM"0") GT 245/2` THEN PPL SHASET RESET
+         ($plot_type)($qualifiers)/OVER/NOLAB ($ferret_var_0)
+      ELSE
+      ($plot_type)($qualifiers)/TITLE="($ferret_plot_title)"/SET ($ferret_var_0)
+         GO reset_labels 
+         IF ($ferret_annotations"0|*>1") THEN GO key_at_top
+         PPL ($plot_type)
+      ENDIF
+
+      IF ($ferret_contour_style"0|default>0|color_filled_plus_lines>1|raster_plus_lines>1|*>0") THEN
+         IF ($ferret_contour_levels"0|*>1") THEN 
+            DEFINE SYMBOL levsym = /LEVELS=($ferret_contour_levels)
+          ELSE
+            IF ($ferret_fill_levels"0|*>1") THEN DEFINE SYMBOL levsym = /LEVELS=($ferret_fill_levels)
+         ENDIF
+        CONTOUR/OVER/NOLAB($levsym) ($ferret_var_0)
+      ENDIF
+   
+! One of the results is the data min and max. Save those here.
+      DEFINE SYMBOL data_plotted_min = ($ppl$zmin)
+      DEFINE SYMBOL data_plotted_max = ($ppl$zmax)
+
+   ENDIF
+
+ELSE
+
+   IF `($data_count"0") EQ 1` THEN
+      DEFINE SYMBOL split_title = ($ferret_plot_title)
+      GO LAS_split_title
+      DEFINE SYMBOL ferret_plot_title = ($split_title)
+
+      IF ($shade_underlay) THEN 
+         SHADE($qualifiers)/TRIM/TITLE="($ferret_plot_title)"/SET ($ferret_var_0)
+         GO reset_labels          
+         PPL SHADE
       IF `($LEV_NUM"0") GT 245/2` THEN PPL SHASET RESET
-      ($plot_type)($qualifiers)/OVER/NOLAB ($ferret_var_0)
+         ($plot_type)($qualifiers)/OVER/NOLAB ($ferret_var_0)
    ELSE
       ($plot_type)($qualifiers)/TITLE="($ferret_plot_title)"/SET ($ferret_var_0)
-         IF ($axlab_command"0|*>1") THEN PPL ($axlab_command)
-         IF ($tnmlab_command"0|*>1") THEN PPL ($tnmlab_command)  
-
-         IF ($axtic_command"0|*>1") THEN PPL ($axtic_command)
-         IF ($axlen_command"0|*>1") THEN PPL ($axlen_command)
-         IF ($axtype_command"0|*>1") THEN PPL ($axtype_command)
-         if ($labnum_dset"0|*>1") THEN go unlabel ($labnum_dset)
-         if ($labnum_datitl"0|*>1") THEN go unlabel ($labnum_datitl)
-         if ($labnum_dods"0|*>1") THEN go unlabel ($labnum_dods)
-	 IF `($ppl$zmin) GE 1.e35 AND ($ppl$zmax) LE -1.e35` THEN DEFINE SYMBOL nokey = 1
-	 IF `($nokey"0") EQ 0` THEN PPL SHAKEY 1,,,,,,,,,,1
+      GO reset_labels          
       PPL ($plot_type)
    ENDIF
 

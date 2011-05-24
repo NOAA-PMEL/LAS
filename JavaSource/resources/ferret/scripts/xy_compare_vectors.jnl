@@ -307,10 +307,17 @@ IF `($flowline_vectors"0") EQ 0` THEN
       DEFINE SYMBOL n_left_labels = `($n_left_labels"0")+1`
       DEFINE SYMBOL upper_left_($n_left_labels) = \
       Vector subsampling x=($PPL_VEC_XSKIP), y=($PPL_VEC_YSKIP) 
+      
+      DEFINE SYMBOL note_num = `($note_num"0") + 1`
+      DEFINE SYMBOL note_($note_num)_lab = ($upper_left_($n_left_labels))
+
    ELIF ($ferret_vector_subsampling"0") THEN
       DEFINE SYMBOL n_left_labels = `($n_left_labels"0")+1`
       DEFINE SYMBOL upper_left_($n_left_labels) = \
       Vector subsampling x=`xs`, y=`ys`
+
+      DEFINE SYMBOL note_num = `($note_num"0") + 1`
+      DEFINE SYMBOL note_($note_num)_lab = ($upper_left_($n_left_labels))
 
    ENDIF
 ENDIF

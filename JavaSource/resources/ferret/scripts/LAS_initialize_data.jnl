@@ -41,6 +41,8 @@ IF ($ferret_init_commands"0|*>1") THEN
 ENDIF
 
 GO LAS_initialize_variable 
+DEFINE SYMBOL variable_($1"0")_lab = ($ferret_plot_title)
+IF `($1"0") EQ 0` THEN DEFINE SYMBOL variable_lab = ($ferret_plot_title)
 
 ! End of $RCSfile ------------LAS_initialize_data.jnl--------------------------
 

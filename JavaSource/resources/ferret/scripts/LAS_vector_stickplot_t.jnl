@@ -26,7 +26,10 @@ IF `lls EQ lle` THEN
    DEFINE SYMBOL n_left_labels = `($n_left_labels"0")+1`
    DEFINE SYMBOL upper_left_($n_left_labels"0") = @CR[The requested T region is smaller than 1 grid cell]
    DEFINE SYMBOL region_small_($n_left_labels"0") = yes
-   
+
+   DEFINE SYMBOL note_num = `($note_num"0") + 1`
+   DEFINE SYMBOL note_($note_num)_lab = ($upper_left_($n_left_labels))
+
    ! Make a nominal plot and put the -no-valid-region lable on  it.
    GO margins 2 2 2 2
    PLOT/I=1:2/NOLAB/NOAX/VLIM=10:11 i

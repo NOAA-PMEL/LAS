@@ -98,6 +98,11 @@ ELSE
    IF ($data_($num)_var"0|*>1") THEN DEFINE SYMBOL data_title ($data_($num)_var)
 ENDIF
 
+DEFINE SYMBOL variable_lab = ($data_title)
+IF `($num) GT 0` THEN DEFINE SYMBOL variable_($num)_lab = ($data_title)
+DEFINE SYMBOL units_lab = ($data_units)
+IF `($num) GT 0` THEN DEFINE SYMBOL units_($num)_lab = ($data_units)
+
 DEFINE SYMBOL ferret_plot_title "($data_title) ($data_units)"
 
 ! SET DATA and check for errors

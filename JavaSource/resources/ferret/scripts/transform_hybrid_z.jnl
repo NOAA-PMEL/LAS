@@ -98,7 +98,7 @@ ELSE  ! Native_Z_section requested, so set up to do a section plot in xz or yz o
          DEFINE SYMBOL south_region_y_lo = `-1* ($region_y_lo)`
          DEFINE SYMBOL upper_left_($n_left_labels"0") = "Latitude: ($south_region_y_lo)S"
       ENDIF
-
+      DEFINE SYMBOL latitude_lab = ($upper_left_($n_left_labels"0"))
    ENDIF
 
    IF ($ferret_view"|yz>1|*>0") THEN
@@ -125,6 +125,7 @@ ELSE  ! Native_Z_section requested, so set up to do a section plot in xz or yz o
          DEFINE SYMBOL west_region_x_lo = `-1* ($region_x_lo)`
          DEFINE SYMBOL upper_left_($n_left_labels"0") = "Longitude: ($west_region_x_lo)W"
       ENDIF
+      DEFINE SYMBOL longitude_lab = ($upper_left_($n_left_labels"0"))
    ENDIF
 
 ! This makes wierd fill plots in examples seen so far.
@@ -146,6 +147,8 @@ ELSE  ! Native_Z_section requested, so set up to do a section plot in xz or yz o
          DEFINE SYMBOL west_region_x_lo = `-1* ($region_x_lo)`
          DEFINE SYMBOL upper_left_($n_left_labels"0") = "Longitude: ($west_region_x_lo)W"
       ENDIF
+      DEFINE SYMBOL longitude_lab = ($upper_left_($n_left_labels"0"))
+
 
       DEFINE SYMBOL n_left_labels = `($n_left_labels"0")+1`
       DEFINE SYMBOL upper_left_($n_left_labels"0") = "Latitude: ($region_y_lo)N"
@@ -153,6 +156,8 @@ ELSE  ! Native_Z_section requested, so set up to do a section plot in xz or yz o
          DEFINE SYMBOL south_region_y_lo = `-1* ($region_y_lo)`
          DEFINE SYMBOL upper_left_($n_left_labels"0") = "Latitude: ($south_region_y_lo)S"
       ENDIF
+      DEFINE SYMBOL latitude_lab = ($upper_left_($n_left_labels"0"))
+
 
    ENDIF 
 

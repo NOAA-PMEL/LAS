@@ -1,0 +1,42 @@
+IF ($xform_dms"0|*>1") THEN PPL XFOR (($xform_dms))
+IF ($yform_dms"0|*>1") THEN PPL YFOR (($yform_dms))
+IF ($axlab_command"0|*>1") THEN PPL ($axlab_command)
+IF ($tnmlab_command"0|*>1") THEN PPL ($tnmlab_command)  
+IF ($axtic_command"0|*>1") THEN PPL ($axtic_command)
+IF ($axlen_command"0|*>1") THEN PPL ($axlen_command)
+IF ($axtype_command"0|*>1") THEN PPL ($axtype_command)
+if ($labnum_dset"0|*>1") THEN go unlabel ($labnum_dset)
+if ($labnum_datitl"0|*>1") THEN go unlabel ($labnum_datitl)
+if ($labnum_dods"0|*>1") THEN go unlabel ($labnum_dods)
+IF `($ppl$zmin) GE 1.e35 AND ($ppl$zmax) LE -1.e35` THEN DEFINE SYMBOL nokey = 1
+IF `($nokey"0") EQ 0` THEN PPL SHAKEY 1,,,,,,,,,,1
+
+IF ($labnum_x"0|*>1") THEN 
+   let nc = STRINDEX("($lab($labnum_x))", ":")
+   DEFINE SYMBOL longitude_lab `SUBSTRING("($lab($labnum_x))", 1, nc+1)`
+   let slen = STRLEN("($lab($labnum_x))")
+   DEFINE SYMBOL longitude_value `SUBSTRING("($lab($labnum_x))", nc+2, slen - nc-1)`
+ENDIF
+IF ($labnum_y"0|*>1") THEN 
+   let nc = STRINDEX("($lab($labnum_y))", ":")
+   DEFINE SYMBOL latitude_lab `SUBSTRING("($lab($labnum_y))", 1, nc+1)`
+   let slen = STRLEN("($lab($labnum_y))")
+   DEFINE SYMBOL latitude_value `SUBSTRING("($lab($labnum_y))", nc+2, slen - nc-1)`
+ENDIF
+IF ($labnum_z"0|*>1") THEN
+   let nc = STRINDEX("($lab($labnum_z))", ":")
+   DEFINE SYMBOL depth_lab `SUBSTRING("($lab($labnum_z))", 1, nc+1)`
+   let slen = STRLEN("($lab($labnum_z))")
+   DEFINE SYMBOL depth_value `SUBSTRING("($lab($labnum_z))", nc+2, slen - nc-1)`
+ENDIF
+IF ($labnum_t"0|*>1") THEN
+   let nc = STRINDEX("($lab($labnum_t))", ":")
+   DEFINE SYMBOL depth_lab `SUBSTRING("($lab($labnum_t))", 1, nc+1)`
+   let slen = STRLEN("($lab($labnum_t))")
+   DEFINE SYMBOL time_value `SUBSTRING("($lab($labnum_t))", nc+2, slen - nc-1)`
+ENDIF
+
+
+IF ($labnum_calend"0|*>1") THEN
+   DEFINE SYMBOL calendar_lab ($lab($labnum_calend))
+ENDIF
