@@ -69,7 +69,7 @@ $las_response.toString()
   var reqZLo;
   var reqZHi;
 
-  var dataFormat = 0; //0:netCDF,1:ascii,2:arcgrid
+  var dataFormat = 0; //0:netCDF,1:ascii,2:csv:3,arcgrid:4,shapeFile (not used)
 
   var newReq;
 
@@ -125,7 +125,8 @@ $las_response.toString()
     fmt += " <SELECT NAME='download_format' onChange='setDataFormat(this.selectedIndex)'> ";
     fmt += " <OPTION SELECTED VALUE=0>NetCDF ";
     fmt += " <OPTION VALUE=1>ASCII ";
-    fmt += " <OPTION VALUE=1>arcGrid ";
+    fmt += " <OPTION VALUE=2>CSV ";
+    fmt += " <OPTION VALUE=3>arcGrid ";
     fmt += " </SELECT><br><br>";
     document.getElementById("format").innerHTML = fmt;
   }
@@ -170,7 +171,7 @@ $las_response.toString()
     dataFormat = index;
     //reset date and depth widget
     getWidgetState(); 
-    if ( index == 3) {
+    if ( index == 4) {
       document.getElementById('DateWidgetRange').style.visibility="hidden";
       document.getElementById('DepthWidgetStart').style.visibility="hidden";
       if (document.getElementById('DepthWidgetEnd')) {
@@ -208,7 +209,7 @@ $las_response.toString()
     //set user selected date range
     if(dataHasT){
       if(tDisplayType == 'widget'){
-        if(dataFormat == 2){//arcGrid
+        if(dataFormat == 3){//arcGrid
           req.setRange('t', DW.getDate1_Ferret(), DW.getDate1_Ferret());
         }else{
           req.setRange('t', DW.getDate1_Ferret(), DW.getDate2_Ferret());
@@ -216,7 +217,7 @@ $las_response.toString()
         reqTLo = DW.getDate1();
         reqTHi = DW.getDate2();
       }else if(tDisplayType == 'menu'){
-        if(dataFormat == 2){//arcGrid
+        if(dataFormat == 3){//arcGrid
           req.setRange('t', MW1.getValue(), MW1.getValue());
         }else{
           req.setRange('t', MW1.getValue(), MW2.getValue());
@@ -228,7 +229,7 @@ $las_response.toString()
 
     //set user selected depth range
     if(dataHasZ){
-      if(dataFormat == 2){//arcGri
+      if(dataFormat == 3){//arcGri
         req.setRange('z', dpMW1.getValue(), dpMW1.getValue());
       }else{
         req.setRange('z', dpMW1.getValue(), dpMW2.getValue());
@@ -253,11 +254,13 @@ $las_response.toString()
     }
 
     //arcGrid: only for xy map
-    if(dataFormat == 2 || dataFormat == 3){req.setProperty('ferret', 'view', 'xy');}
+    if(dataFormat == 3 || dataFormat == 4){req.setProperty('ferret', 'view', 'xy');}
 
     //set output format for ascii, 'tsv' for tab seperated
     if(dataFormat == 1){
       req.setProperty('ferret','data_format','tsv');
+    } else if(dataFormat == 2) {
+      req.setProperty('ferret','data_format','csv');
     }
 
     //set operation
@@ -266,8 +269,10 @@ $las_response.toString()
     }else if(dataFormat == 1){
       req.setOperation('Data_Extract_File');
     }else if(dataFormat == 2){
-      req.setOperation('Data_Extract_ArcView');
+      req.setOperation('Data_Extract_File');
     }else if(dataFormat == 3){
+      req.setOperation('Data_Extract_ArcView');
+    }else if(dataFormat == 4){
       req.setOperation('Shape_File');
     }
 
@@ -288,7 +293,7 @@ $las_response.toString()
     var dpWidget = document.getElementById("depthWidget");
 
     var dpw = "<div id='DepthWidgetStart' ></div><br>";
-    if(dataFormat != 2){dpw += "<div id='DepthWidgetEnd' ></div><br>";}
+    if(dataFormat != 3){dpw += "<div id='DepthWidgetEnd' ></div><br>";}
     dpWidget.innerHTML = dpw;
 
     menu = Grid.getMenu('z');
@@ -301,7 +306,7 @@ $las_response.toString()
       dpMW1.setValue(dataZLo);
     }
 
-    if(dataFormat != 2){
+    if(dataFormat != 3){
       dpMW2 = new MenuWidget(menu);
       dpMW2.render('DepthWidgetEnd');
       if(reqZHi != null){
@@ -325,7 +330,7 @@ $las_response.toString()
       dtw += "<br><div id='DateWidgetRange' ></div><br>";
     }else if(tDisplayType == 'menu'){
       var dtw = "<div id='DateWidgetStart' ></div>";
-      if(dataFormat != 2){//for arcGrid, no need of end date
+      if(dataFormat != 3){//for arcGrid, no need of end date
         dtw += "<div id='DateWidgetEnd' ></div><br>";
       }
     }
@@ -341,7 +346,7 @@ $las_response.toString()
         }else{
             MW1.setValueByIndex(0);
         }
-        if(dataFormat != 2){
+        if(dataFormat != 3){
             MW2 = new MenuWidget(menu);
             MW2.render('DateWidgetEnd');
             if(reqTHi != null) {
@@ -368,13 +373,13 @@ $las_response.toString()
         }
 
         if(tRenderFmt == '' && tUnits == "month"){
-            if(dataFormat == 2){//arcGrid
+            if(dataFormat == 3){//arcGrid
               DW.render('DateWidgetRange', 'M');
             }else{
               DW.render('DateWidgetRange', 'M', 'M');
             }
         }else{
-            if(dataFormat == 2){//arcGrid
+            if(dataFormat == 3){//arcGrid
               DW.render('DateWidgetRange', tRenderFmt);
             }else{
               DW.render('DateWidgetRange', tRenderFmt, tRenderFmt);
@@ -387,7 +392,7 @@ $las_response.toString()
             DW.setValue(dataTLo, 1);
         }
 
-        if(dataFormat != 2){
+        if(dataFormat != 3){
           if(reqTHi != null && reqTHi != ""){
             DW.setValue(reqTHi, 2);
           }else{
