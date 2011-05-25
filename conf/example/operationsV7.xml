@@ -977,6 +977,38 @@ streamable="true" mime_type="application/postscript"/> -->
         </grid_types>
         <optiondef IDREF="Options_Data_file"/>
     </operation>
+    <operation ID="Data_Extract_File" default="true" name="CSV file"
+        output_template="csv"
+        service_action="Data_Extract_File" order="0400" category="file">
+        <service>ferret</service>
+        <response ID="Data_Extract_File_Response">
+            <result type="csv" ID="ferret_listing" streamable="true"
+                mime_type="ascii/text" file_suffix=".csv"/>
+            <result type="debug" ID="debug" file_suffix=".txt"/>
+        </response>
+        <region>
+            <intervals name="x" />
+            <intervals name="y" />
+            <intervals name="z" />
+            <intervals name="t" />
+            <intervals name="xy" />
+            <intervals name="xz" />
+            <intervals name="xt" />
+            <intervals name="yz" />
+            <intervals name="yt" />
+            <intervals name="zt" />
+            <intervals name="xyz" />
+            <intervals name="xyt" />
+            <intervals name="xzt" />
+            <intervals name="yzt" />
+            <intervals name="xyzt" />
+            <degenerate/>
+        </region>
+        <grid_types>
+            <grid_type name="regular" />
+        </grid_types>
+        <optiondef IDREF="Options_Data_file"/>
+    </operation>
     <operation name="ArcView gridded"
         ID="Data_Extract_ArcView" output_template="arcview"
         service_action="Data_Extract_ArcView" order="0800" category="file">
