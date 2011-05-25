@@ -1,0 +1,6 @@
+IF ($xform_dms"0|*>1") THEN PPL XFOR (($xform_dms))
+IF ($yform_dms"0|*>1") THEN PPL YFOR (($yform_dms))
+IF ($labnum_dset"0|*>1") THEN go unlabel ($labnum_dset)
+IF ($labnum_datitl"0|*>1") THEN go unlabel ($labnum_datitl)
+IF ($labnum_dods"0|*>1") THEN go unlabel ($labnum_dods)
+IF ($ferret_annotations%0|*>1%) THEN PPL VECKEY/NOUSER, 2,`($ppl$ylen)+0.2`
