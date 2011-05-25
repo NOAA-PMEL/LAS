@@ -91,7 +91,7 @@ IF `($note_num"0") GT 0 OR ($calendar_lab"0|*>1")` THEN
       DEFINE SYMBOL mnote = `m`; \
       DEFINE SYMBOL out = <annotation type="note">; \
       GO write_to_xml; \
-      DEFINE SYMBOL out = `LIST_VALUE_XML("value", "($note_($mnote))", 1, "($result_annotations_filename)" )`; \
+      DEFINE SYMBOL out = `LIST_VALUE_XML("value", "($note_($mnote)_lab)", 1, "($result_annotations_filename)" )`; \
       DEFINE SYMBOL out = </annotation>; \
       GO write_to_xml; \
     )
