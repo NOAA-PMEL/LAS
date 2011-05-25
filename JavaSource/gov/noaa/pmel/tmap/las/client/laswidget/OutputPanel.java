@@ -301,6 +301,7 @@ public class OutputPanel extends Composite {
         lasRequest.setProperty("ferret", "view", view);
 		lasRequest.setProperty("ferret", "size", ".8333");
 		lasRequest.addProperty("ferret", "image_format", "gif");
+		lasRequest.addProperty("ferret", "annotations", "file");
 		if ( containerType.equals(Constants.IMAGE) ) {
 			lasRequest.addProperty("las", "output_type", "xml");
 		}
@@ -854,31 +855,6 @@ public class OutputPanel extends Composite {
 		}
 		return value;
 	}
-	private RequestCallback annotationsCallback = new RequestCallback() {
-
-		@Override
-		public void onError(Request request, Throwable exception) {
-			lasAnnotationsPanel.setError("Unable to get annotations from the LAS server.");
-		}
-
-		@Override
-		public void onResponseReceived(Request request, Response response) {
-			Map<String, String> lasAnnotations = new HashMap<String, String>();
-			String annotationsString = response.getText();
-			String[] lines = annotationsString.split("\n");
-			String inputLine;			
-				for (int i = 0; i < lines.length; i++) {
-					inputLine = lines[i].trim();
-					if ( inputLine.startsWith("\"")) inputLine = inputLine.substring(1);
-					if ( inputLine.endsWith("\"")) inputLine = inputLine.substring(0, inputLine.length()-1);
-					String[] parts = inputLine.split("===");
-					lasAnnotations.put(parts[0], parts[1]);
-
-				}
-				lasAnnotationsPanel.init(lasAnnotations);
-			
-		}
-	};
 	private RequestCallback lasRequestCallback = new RequestCallback() {
 		public void onError(Request request, Throwable exception) {
 			spin.hide();
@@ -918,12 +894,7 @@ public class OutputPanel extends Composite {
 							}
 						} else if ( result.getAttribute("type").equals("annotations") ) {
 							final String ann_url = result.getAttribute("url");
-							RequestBuilder annotationsRequest = new RequestBuilder(RequestBuilder.GET, ann_url);
-							try {
-								annotationsRequest.sendRequest(null, annotationsCallback);
-							} catch (RequestException e) {
-								lasAnnotationsPanel.setError("Unable to get annotations from the LAS server.");
-							}
+							lasAnnotationsPanel.setAnnotationsHTMLURL(Util.getAnnotationService(ann_url));
 						} else if ( result.getAttribute("type").equals("error") ) {
 							if ( result.getAttribute("ID").equals("las_message") ) {
 								Node text = result.getFirstChild();
