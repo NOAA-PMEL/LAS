@@ -14,7 +14,7 @@ font-family: Verdana, Arial, Helvetica, sans-serif;
 font-size: .75em;
 color: #000000;
 font-weight: bold;
-text-align:center;
+text-align:left;
 }
 .footer {
 font-family: Verdana, Arial, Helvetica, sans-serif;
@@ -32,9 +32,20 @@ text-align:left;
   </head>
   
   <body>
+  	<div class="title">
+    	#foreach ( $title in $las_annotations.getDatasetTitles() )
+    		$title<br>
+	    #end
+    </div>
+  </body>
     <div class="title">
     	#foreach ( $title in $las_annotations.getVariableTitles() )
     		$title<br>
+	    #end
+    </div>
+    <div class="title">
+    	#foreach ( $url in $las_annotations.getDatasetURLs() )
+    		$url<br>
 	    #end
     </div>
     <div class="regular">
@@ -49,14 +60,8 @@ text-align:left;
     	#end
     	</ul>
 	</div>
-	<div class="regular">
-		Calendar Information:<br>
-		#foreach ($calendar in $las_annotations.getCalendar() )
-			$calendar<br>
-		#end
-	</div>
 	<div class="footer">
-		$las_annotations.getFooter()
+		$las_annotations.getHeader()
 	</div>
   </body>
 </html>

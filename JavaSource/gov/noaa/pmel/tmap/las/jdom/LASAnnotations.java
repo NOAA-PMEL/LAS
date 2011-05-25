@@ -28,6 +28,11 @@ public class LASAnnotations extends LASDocument {
 	private static final String TYPE_UNITS = "units";
 	private static final String TYPE_FERRET_VERSION = "ferret_version";
 	private static final String TYPE_LAS_VERSION = "las_version";
+	private static final String TYPE_DATA = "data";
+	private static final String TYPE_DATASET_URL = "dataset_url";
+	private static final String TYPE_VARIABLE_TITLE = "variable_title";
+	private static final String TYPE_DATASET_TITLE = "dataset_title";
+	private static final String TYPE_HEADER = "header";
 	
 	private static final long serialVersionUID = 5934613476516539108L;
 	/**
@@ -38,51 +43,63 @@ public class LASAnnotations extends LASDocument {
         super();
     }
     public List<String> getVariableTitles() {
-    	List<String> titles = new ArrayList<String>();
-    	List<Element> datasets = getAnnotationGroups(TYPE_DATASET);
-    	if ( datasets.size() > 0 ) {
-    		for (int d = 0; d < datasets.size(); d++) {
-    			Element dataset = datasets.get(d);
-    			// Find the first variable groups inside the dataset group.
-    			Element variableGroup = null;
-    			if ( dataset != null ) {
-    				List<Element> variables = getAnnotationGroups(dataset, TYPE_VARIABLE);
-    				for (int v = 0; v < variables.size(); v++ ) {
-    					StringBuffer title = new StringBuffer();
-    					variableGroup = variables.get(v);
-    					String t = null;
-    					String u = "";
-    					if ( variableGroup != null ) {
-    						// Gets the first, there should only be one.
-    						List<Element> annotations = getAnnotations(variableGroup, TYPE_TITLE);
-    						if ( annotations.size() > 0 ) {
-    							t = getValue(annotations.get(0));
-    						}
-    						annotations = getAnnotations(variableGroup, TYPE_UNITS);
-    						if ( annotations.size() > 0 ) {
-    							u = getValue(annotations.get(0));
-    						}
-    					}
-    					if ( t != null ) {
-    						title.append(t);
-    					}
-    					if ( u != null ) {
-    						title.append(" (");
-    						title.append(u);
-    						title.append(")");
-    					}
-    					titles.add(title.toString());
-    				}
-    			}
-    		}
-    	}
-    	return titles;
+    	return getAnnotationValues(getRootElement(), TYPE_DATA, TYPE_VARIABLE_TITLE);
     }
+    public List<String> getDatasetTitles() {
+    	return getAnnotationValues(getRootElement(), TYPE_DATA, TYPE_DATASET_TITLE);
+    }
+//    public List<String> getVariableTitles() {
+//    	List<String> titles = new ArrayList<String>();
+//    	List<Element> datasets = getAnnotationGroups(TYPE_DATASET);
+//    	if ( datasets.size() > 0 ) {
+//    		for (int d = 0; d < datasets.size(); d++) {
+//    			Element dataset = datasets.get(d);
+//    			// Find the first variable groups inside the dataset group.
+//    			Element variableGroup = null;
+//    			if ( dataset != null ) {
+//    				List<Element> variables = getAnnotationGroups(dataset, TYPE_VARIABLE);
+//    				for (int v = 0; v < variables.size(); v++ ) {
+//    					StringBuffer title = new StringBuffer();
+//    					variableGroup = variables.get(v);
+//    					String t = null;
+//    					String u = "";
+//    					if ( variableGroup != null ) {
+//    						// Gets the first, there should only be one.
+//    						List<Element> annotations = getAnnotations(variableGroup, TYPE_TITLE);
+//    						if ( annotations.size() > 0 ) {
+//    							t = getValue(annotations.get(0));
+//    						}
+//    						annotations = getAnnotations(variableGroup, TYPE_UNITS);
+//    						if ( annotations.size() > 0 ) {
+//    							u = getValue(annotations.get(0));
+//    						}
+//    					}
+//    					if ( t != null ) {
+//    						title.append(t);
+//    					}
+//    					if ( u != null ) {
+//    						title.append(" (");
+//    						title.append(u);
+//    						title.append(")");
+//    					}
+//    					titles.add(title.toString());
+//    				}
+//    			}
+//    		}
+//    	}
+//    	return titles;
+//    }
     public List<String> getNotes() {
     	return getAnnotationValues(getRootElement(), TYPE_NOTES, TYPE_NOTE);
     }
     public List<String> getOrthogonalAxes() {
     	return getAnnotationLabelsAndValues(getRootElement(), TYPE_ORTHOGONAL_AXES, null);
+    }
+    public String getHeader() {
+    	return getAnnotationValues(getRootElement(), TYPE_LAS, TYPE_HEADER).get(0);
+    }
+    public List<String> getDatasetURLs() {
+    	return getAnnotationValues(getRootElement(), TYPE_DATA, TYPE_DATASET_URL);
     }
     public String getFooter() {
     	StringBuilder footer = new StringBuilder();
