@@ -89,4 +89,8 @@ public class Util {
 		}
 		return null;
 	}
+	public static String getAnnotationService(String annUrl) {
+		String file = annUrl.substring(annUrl.lastIndexOf("/"), annUrl.length());
+		return URLUtil.getBaseURL() + "getAnnotations.do?file="+file;
+	}
 }
