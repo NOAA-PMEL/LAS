@@ -16,6 +16,15 @@ set mode ver:always
 !   DEFINE SYMBOL constraint_0_rhs = DJF or JFM or FMA
 !   DEFINE SYMBOL constraint_0_type = text
 
+
+! If there is no T axis (a time-averaged variable) then return an error.
+IF `($region_t_lo"0|*>1") EQ 0` THEN 
+   DEFINE SYMBOL error_string = Cannot define seasonal averaged variable from time-averaged variable.
+   MESSAGE/ERROR **ERROR ($error_string)
+   EXIT/SCRIPT
+ENDIF
+
+
 ! When this is an XY, XZ, or XZ plot, with no time dependence, cancel mode interpolate.
 ! We still define a seasonal time axis and regrid to it, and then sample that at the requested
 ! time. The sampling cannot be done via interpolation when we really just have one time step
