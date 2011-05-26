@@ -169,37 +169,27 @@ IF ($ferret_deg_min_sec"0|false>0|*>1") THEN GO LAS_set_deg_min_sec.jnl
 ! Draw the plot
 IF ($shade_underlay) THEN 
    SHADE($qualifiers)/TRIM/TITLE="($ferret_plot_title)"/SET ($ferret_diff_var)
-      IF ($xform_dms"0|*>1") THEN PPL XFOR (($xform_dms))
-      IF ($yform_dms"0|*>1") THEN PPL YFOR (($yform_dms))
-      IF ($axlab_command"0|*>1") THEN PPL ($axlab_command)
-      IF ($tnmlab_command"0|*>1") THEN PPL ($tnmlab_command)  
-      IF ($axtic_command"0|*>1") THEN PPL ($axtic_command)
-      IF ($axlen_command"0|*>1") THEN PPL ($axlen_command)
-      IF ($axtype_command"0|*>1") THEN PPL ($axtype_command)
-      if ($labnum_dset"0|*>1") THEN go unlabel ($labnum_dset)
-      if ($labnum_datitl"0|*>1") THEN go unlabel ($labnum_datitl)
-      if ($labnum_dods"0|*>1") THEN go unlabel ($labnum_dods)
-      IF `($title_size%0|*>1%)` THEN PPL LABSET ($title_size)
-      IF ($labnum_x"0|*>1") THEN go unlabel ($labnum_x)
-      IF ($labnum_y"0|*>1") THEN go unlabel ($labnum_y)
+      GO reset_labels
+      IF ($ferret_annotations"0|*>1") THEN 
+	 GO key_at_top
+      ELSE
+         IF `($title_size%0|*>1%)` THEN PPL LABSET ($title_size)
+         IF ($labnum_x"0|*>1") THEN go unlabel ($labnum_x)
+         IF ($labnum_y"0|*>1") THEN go unlabel ($labnum_y)
+      ENDIF
    PPL SHADE
    IF `($LEV_NUM"0") GT 245/2` THEN PPL SHASET RESET
    ($plot_type)($qualifiers)/OVER/NOLAB ($ferret_diff_var)
 ELSE
    ($plot_type)($qualifiers)/TITLE="($ferret_plot_title)"/SET ($ferret_diff_var)
-      IF ($xform_dms"0|*>1") THEN PPL XFOR (($xform_dms))
-      IF ($yform_dms"0|*>1") THEN PPL YFOR (($yform_dms))
-      IF ($axlab_command"0|*>1") THEN PPL ($axlab_command)
-      IF ($tnmlab_command"0|*>1") THEN PPL ($tnmlab_command)  
-      IF ($axtic_command"0|*>1") THEN PPL ($axtic_command)
-      IF ($axlen_command"0|*>1") THEN PPL ($axlen_command)
-      IF ($axtype_command"0|*>1") THEN PPL ($axtype_command)
-      if ($labnum_dset"0|*>1") THEN go unlabel ($labnum_dset)
-      if ($labnum_datitl"0|*>1") THEN go unlabel ($labnum_datitl)
-      if ($labnum_dods"0|*>1") THEN go unlabel ($labnum_dods)
-      IF `($title_size%0|*>1%)` THEN PPL LABSET ($title_size)
-      IF ($labnum_x"0|*>1") THEN go unlabel ($labnum_x)
-      IF ($labnum_y"0|*>1") THEN go unlabel ($labnum_y)
+      GO reset_labels
+      IF ($ferret_annotations"0|*>1") THEN 
+	 GO key_at_top
+      ELSE
+         IF `($title_size%0|*>1%)` THEN PPL LABSET ($title_size)
+         IF ($labnum_x"0|*>1") THEN go unlabel ($labnum_x)
+         IF ($labnum_y"0|*>1") THEN go unlabel ($labnum_y)
+      ENDIF
    PPL ($plot_type)
 ENDIF
 
