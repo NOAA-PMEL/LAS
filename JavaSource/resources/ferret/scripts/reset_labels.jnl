@@ -1,3 +1,7 @@
+! reset_labels.jnl
+! remove lots of labels as they are relocated by the scripts
+! Define symbols used by the annotations xml
+
 IF ($xform_dms"0|*>1") THEN PPL XFOR (($xform_dms))
 IF ($yform_dms"0|*>1") THEN PPL YFOR (($yform_dms))
 IF ($axlab_command"0|*>1") THEN PPL ($axlab_command)
@@ -35,7 +39,6 @@ IF ($labnum_t"0|*>1") THEN
    let slen = STRLEN("($lab($labnum_t))")
    DEFINE SYMBOL time_value `SUBSTRING("($lab($labnum_t))", nc+2, slen - nc-1)`
 ENDIF
-
 
 IF ($labnum_calend"0|*>1") THEN
    DEFINE SYMBOL calendar_lab ($lab($labnum_calend))
