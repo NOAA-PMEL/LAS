@@ -19,7 +19,7 @@ set mode ver:always
 
 ! If there is no T axis (a time-averaged variable) then return an error.
 IF `($region_t_lo"0|*>1") EQ 0` THEN 
-   DEFINE SYMBOL error_string = Cannot define seasonal averaged variable from time-averaged variable.
+   DEFINE SYMBOL error_string = Sorry. This server cannot yet perform a time analysis and a seasonal constraint together.
    MESSAGE/ERROR **ERROR ($error_string)
    EXIT/SCRIPT
 ENDIF
