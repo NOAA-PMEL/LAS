@@ -152,11 +152,8 @@ ELSE
    DEFINE SYMBOL ferret_title_0 = ($split_title)
 
    PLOT($qualifiers)/NOKEY/SET/TITLE="($ferret_title_0)" ($plot_arg)
-      IF `($xform_dms"0|*>1")` THEN PPL XFOR (($xform_dms))
       IF `($ferret_dep_axis_scale"0|*>1")` THEN PPL YAXIS ($ferret_dep_axis_scale)
-      IF `($labnum_dset%0|*>1%)` THEN GO unlabel ($labnum_dset)
-      IF `($labnum_datitl%0|*>1%)` THEN GO unlabel ($labnum_datitl)
-      IF `($labnum_dods%0|*>1%)` THEN GO unlabel ($labnum_dods)
+      GO reset_labels
    PPL PLOT
 
    GO LAS_url_label 0
