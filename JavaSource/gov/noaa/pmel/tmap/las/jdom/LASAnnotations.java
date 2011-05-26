@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.jdom.CDATA;
 import org.jdom.Element;
 
 
@@ -217,4 +218,19 @@ public class LASAnnotations extends LASDocument {
     private List<Element> getAnnotationGroups(String type) {
     	return getAnnotationGroups(getRootElement(), type);
     }
+	public void setDatasetTitle(String string) {
+		Element group = new Element(ELEMENT_ANNOTATION_GROUP);
+		group.setAttribute("type", "data");
+		Element ann = new Element(ELEMENT_ANNOTATION);
+		ann.setAttribute("type", "dataset_title");
+		Element value = new Element(ELEMENT_VALUE);
+		CDATA text = new CDATA(string);
+		value.addContent(text);
+		ann.addContent(value);
+		group.addContent(ann);
+		getRootElement().addContent(group);
+	}
+	public void clear() {
+		getRootElement().removeContent();
+	}
 }
