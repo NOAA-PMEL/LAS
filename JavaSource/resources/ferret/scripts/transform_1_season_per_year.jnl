@@ -28,7 +28,15 @@
 ! The script can handle any season length between 1 and 12, but limit it here to 1, 3, 5
 
 ! If there is no T axis (a time-averaged variable) then just don't do this operation.
-IF `($region_t_lo"0|*>1") EQ 0` THEN EXIT/SCRIPT
+IF `($region_t_lo"0|*>1") EQ 0` THEN 
+   IF ($CONSTRAINT_0_LHS"Season_length_1>1|*>0) THEN 
+      DEFINE SYMBOL error_string = Cannot define single-month variable from time-averaged variable.
+   ELSE
+      DEFINE SYMBOL error_string = Cannot define seasonal variable from time-averaged variable.
+   ENDIF
+   MESSAGE/ERROR **ERROR ($error_string)
+   EXIT/SCRIPT
+ENDIF
 
 ! The lhs constraint contains Season_length_1, Season_length_3, Season_length_5, ..., Season_length_11
 LET ilen = STRLEN("($constraint_0_lhs)")
