@@ -1,0 +1,32 @@
+DEFINE SYMBOL out = 	<annotation_group type="orthogonal_axes">
+GO write_to_xml
+IF ($longitude_lab%0|*>1%) THEN 
+   DEFINE SYMBOL out = <annotation type="x-axis">
+   GO write_to_xml
+   DEFINE SYMBOL out = `LIST_VALUE_XML("value", "($longitude_lab)", 1, "($result_annotations_filename)" )`
+   DEFINE SYMBOL out = </annotation>
+   GO write_to_xml
+ ENDIF
+IF ($latitude_lab%0|*>1%) THEN 
+   DEFINE SYMBOL out = <annotation type="y-axis">
+   GO write_to_xml
+   DEFINE SYMBOL out = `LIST_VALUE_XML("value", "($latitude_lab)", 1, "($result_annotations_filename)" )`
+   DEFINE SYMBOL out = </annotation>
+   GO write_to_xml
+ ENDIF
+IF ($depth_lab%0|*>1%) THEN 
+   DEFINE SYMBOL out = <annotation type="z-axis">
+   GO write_to_xml
+   DEFINE SYMBOL out = `LIST_VALUE_XML("value", "($depth_lab)", 1, "($result_annotations_filename)" )`
+   DEFINE SYMBOL out = </annotation>
+   GO write_to_xml
+ ENDIF
+IF ($time_lab%0|*>1%) THEN 
+   DEFINE SYMBOL out = <annotation type="z-axis">
+   GO write_to_xml
+   DEFINE SYMBOL out = `LIST_VALUE_XML("value", "($time_lab)", 1, "($result_annotations_filename)" )`
+   DEFINE SYMBOL out = </annotation>
+   GO write_to_xml
+ENDIF
+DEFINE SYMBOL out = </annotation_group>
+GO write_to_xml
