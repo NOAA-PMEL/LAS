@@ -100,7 +100,12 @@ public class LASAnnotations extends LASDocument {
     	return getAnnotationLabelsAndValues(getRootElement(), TYPE_ORTHOGONAL_AXES, null);
     }
     public String getHeader() {
-    	return getAnnotationValues(getRootElement(), TYPE_LAS, TYPE_HEADER).get(0);
+    	List<String> headers = getAnnotationValues(getRootElement(), TYPE_LAS, TYPE_HEADER);
+    	if ( headers.size() > 0 ) {
+    	    return headers.get(0);
+    	} else {
+    		return "";
+    	}
     }
     public List<String> getDatasetURLs() {
     	return getAnnotationValues(getRootElement(), TYPE_DATA, TYPE_DATASET_URL);
