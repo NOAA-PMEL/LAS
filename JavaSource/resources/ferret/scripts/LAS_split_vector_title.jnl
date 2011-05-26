@@ -2,6 +2,9 @@
 
 ! If a title is long, split into multiple lines at the location of an addition
 ! to the title.
+
+IF ($ferret_annotations"0|*>1") THEN  EXIT/SCRIPT
+
    
 LET slen = STRLEN ("($split_title)")
 DEFINE SYMBOL split_string = ($split_string%Regridded%)
