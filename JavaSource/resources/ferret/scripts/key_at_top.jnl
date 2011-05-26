@@ -6,4 +6,6 @@ let x1 = `($ppl$xorg)+0.8`
 let x2 = `($ppl$xorg)+($ppl$xlen)-0.8`
 let y1 = `($ppl$yorg)+($ppl$ylen)+0.025`
 let y2 = `y1+0.2`
-ppl shakey ,0,`-1*key_label_size`,2,,,`x1`,`x2`,`y1`,`y2`
+ppl shakey ,0,`-1*key_label_size`,4,,,`x1`,`x2`,`y1`,`y2`
+
+ppl title
