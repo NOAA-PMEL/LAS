@@ -50,23 +50,27 @@ public class GetAnnotations extends ConfigService {
 	private static Logger log = LogManager.getLogger(GetAnnotations.class.getName());
 	public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request, HttpServletResponse response) throws Exception {    
 		log.info("START: "+request.getRequestURL());
-		LASConfig lasConfig = (LASConfig)servlet.getServletContext().getAttribute(LASConfigPlugIn.LAS_CONFIG_KEY);
 		LASAnnotations lasAnnotations = new LASAnnotations();
 		String template = request.getParameter("template");
 		if ( template == null ) {
 			template = "annotations.vm";
 		}
 		String file = request.getParameter("file");
-		if ( file != null ) {
-			try {
+		try {
+			LASConfig lasConfig = (LASConfig)servlet.getServletContext().getAttribute(LASConfigPlugIn.LAS_CONFIG_KEY);
+			if ( file != null ) {
 				File f = new File(lasConfig.getOutputDir()+File.separator+file);
 				JDOMUtils.XML2JDOM(f, lasAnnotations);
-			} catch (IOException e) {
-				// Send it on to the template empty.
 			}
-
+			// Put these objects in the context so the output template can use them.
+		} catch ( Exception e ) {
+			lasAnnotations.clear();
+			lasAnnotations.setDatasetTitle("Error processing annotations file.");
+			request.setAttribute("las_annotations", lasAnnotations);
+			log.error("Unable to process annontations."+e.getMessage());
+			log.info("END:   "+request.getRequestURL());
+			return new ActionForward("/productserver/templates/"+template);
 		}
-		// Put these objects in the context so the output template can use them.
 		request.setAttribute("las_annotations", lasAnnotations);
 		log.info("END:   "+request.getRequestURL());
 		return new ActionForward("/productserver/templates/"+template);
