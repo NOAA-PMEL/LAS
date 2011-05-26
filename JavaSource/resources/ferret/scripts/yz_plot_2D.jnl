@@ -108,7 +108,6 @@ IF ($plot_type"0|FILL>1|*>0) THEN DEFINE SYMBOL shade_underlay = TRUE
 
 ! Set the URL label for the first dataset.
 GO LAS_url_label 0
-pause
 
 ! Draw the plot and we are done
 

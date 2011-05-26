@@ -164,21 +164,30 @@ ENDIF
 
 ! line thickness
 
+DEFINE SYMBOL plotsymbol = 25
+DEFINE SYMBOL thicknum = 0
+
 IF `($ferret_line_thickness%0|default>1|*>1%)` THEN
    DEFINE SYMBOL qualifiers = ($qualifiers)($ferret_line_thickness%/THICK=1|default>/THICK=1|1>/THICK=1|2>/THICK=2|3>/THICK=3|*>/THICK=1%)
+   IF `($ferret_line_thickness%1|1|2|3|*>1%) EQ 2` THEN 
+      DEFINE SYMBOL plotsymbol = 17/SIZ=0.12
+      DEFINE SYMBOL thicknum = 1
+   ENDIF
+
+   IF `($ferret_line_thickness%1|1|2|3|*>1%) EQ 3` THEN 
+      DEFINE SYMBOL plotsymbol = 27/SIZ=0.15
+      DEFINE SYMBOL thicknum = 2
+   ENDIF
 ENDIF
+
+! symbols and/or line
+GO set_linesym
 
 ! Do the plot. 
 
 PLOT($qualifiers)/title="($ferret_diff_title)"/SET ($ferret_diff_var)
-IF `($labnum_x%0|*>1%)` THEN GO unlabel ($labnum_x)
-IF `($labnum_y%0|*>1%)` THEN GO unlabel ($labnum_y)
-IF `($labnum_z%0|*>1%)` THEN GO unlabel ($labnum_z)  
-IF `($title_size%0|*>1%)` THEN PPL LABSET ($title_size)
-IF `($labnum_dset%0|*>1%)` THEN GO unlabel ($labnum_dset)
-IF `($labnum_datitl%0|*>1%)` THEN GO unlabel ($labnum_datitl)
-IF `($labnum_dods%0|*>1%)` THEN GO unlabel ($labnum_dods)
-IF `($ferret_dep_axis_scale"0|*>1")` THEN PPL YAXIS ($ferret_dep_axis_scale)
+   GO reset_labels
+   IF `($ferret_dep_axis_scale"0|*>1")` THEN PPL YAXIS ($ferret_dep_axis_scale)
 PPL plot
 
 ! Overall header at the very top

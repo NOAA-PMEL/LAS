@@ -18,28 +18,16 @@ IF `STRLEN("($ferret_view)") EQ 2` THEN
 ENDIF
 
 IF ($labnum_x"0|*>1") THEN 
-   let nc = STRINDEX("($lab($labnum_x))", ":")
-   DEFINE SYMBOL longitude_lab `SUBSTRING("($lab($labnum_x))", 1, nc+1)`
-   let slen = STRLEN("($lab($labnum_x))")
-   DEFINE SYMBOL longitude_value `SUBSTRING("($lab($labnum_x))", nc+2, slen - nc-1)`
+   DEFINE SYMBOL longitude_lab ($lab($labnum_x))
 ENDIF
 IF ($labnum_y"0|*>1") THEN 
-   let nc = STRINDEX("($lab($labnum_y))", ":")
-   DEFINE SYMBOL latitude_lab `SUBSTRING("($lab($labnum_y))", 1, nc+1)`
-   let slen = STRLEN("($lab($labnum_y))")
-   DEFINE SYMBOL latitude_value `SUBSTRING("($lab($labnum_y))", nc+2, slen - nc-1)`
+   DEFINE SYMBOL latitude_lab ($lab($labnum_y))
 ENDIF
 IF ($labnum_z"0|*>1") THEN
-   let nc = STRINDEX("($lab($labnum_z))", ":")
-   DEFINE SYMBOL depth_lab `SUBSTRING("($lab($labnum_z))", 1, nc+1)`
-   let slen = STRLEN("($lab($labnum_z))")
-   DEFINE SYMBOL depth_value `SUBSTRING("($lab($labnum_z))", nc+2, slen - nc-1)`
+   DEFINE SYMBOL depth_lab ($lab($labnum_z))
 ENDIF
 IF ($labnum_t"0|*>1") THEN
-   let nc = STRINDEX("($lab($labnum_t))", ":")
-   DEFINE SYMBOL depth_lab `SUBSTRING("($lab($labnum_t))", 1, nc+1)`
-   let slen = STRLEN("($lab($labnum_t))")
-   DEFINE SYMBOL time_value `SUBSTRING("($lab($labnum_t))", nc+2, slen - nc-1)`
+   DEFINE SYMBOL time_lab ($lab($labnum_t))
 ENDIF
 
 IF ($labnum_calend"0|*>1") THEN

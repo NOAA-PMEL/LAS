@@ -1,0 +1,28 @@
+DEFINE SYMBOL out = <annotation_group type="data">
+GO write_to_xml
+
+IF ($variable_lab"0|*>1") THEN
+   DEFINE SYMBOL out = <annotation type="variable_title">
+   GO write_to_xml
+   DEFINE SYMBOL out = `LIST_VALUE_XML("value", "($variable_lab)", 1, "($result_annotations_filename)" )`
+   DEFINE SYMBOL out = </annotation>
+   GO write_to_xml
+ENDIF
+
+IF ($dataset_title_lab"0|*>1") THEN
+   DEFINE SYMBOL out = <annotation type="dataset_title">
+   GO write_to_xml
+   DEFINE SYMBOL out = `LIST_VALUE_XML("value", "($dataset_title($dset_count)_lab)", 1, "($result_annotations_filename)" )`
+   DEFINE SYMBOL out = </annotation>
+   GO write_to_xml
+ENDIF
+IF ($dataset_url_lab"0|*>1") THEN
+   DEFINE SYMBOL out = <annotation type="dataset_url">
+   GO write_to_xml
+   DEFINE SYMBOL out = `LIST_VALUE_XML("value", "($dataset_url_lab)", 1, "($result_annotations_filename)" )`
+   DEFINE SYMBOL out = </annotation>
+   GO write_to_xml
+ENDIF
+DEFINE SYMBOL out = </annotation_group>
+GO write_to_xml
+
