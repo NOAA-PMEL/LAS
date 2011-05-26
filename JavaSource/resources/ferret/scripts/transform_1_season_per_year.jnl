@@ -86,15 +86,6 @@ IF `season_length EQ 1` THEN LET S($num)_the_plot_var = ($ferret_plot_var)
 LET S($num)_the_plot_var_noregion = ($ferret_plot_var_noregion)
 LET S($num)_the_plot_var_zt = ($ferret_plot_var_noregion)
 
-! If we have averaged over T then cant do this. Return a message.
-DEFINE SYMBOL op_num = `($data_num) - 1`
-IF ($DATA_($op_num)_ANALYSIS_AXIS_0_OP"0|*>1") THEN 
-   DEFINE SYMBOL error_status = ERROR
-   DEFINE SYMBOL error_type = TRANSFORM
-   DEFINE SYMBOL error_string Cannot do seasonal average on a time-averaged variable
-  EXIT/SCRIPT
-ENDIF
-
 LET tt = t[gt=S($num)_the_plot_var($var_num)]
 LET tsiz = `tt,RETURN=lsize`
 
