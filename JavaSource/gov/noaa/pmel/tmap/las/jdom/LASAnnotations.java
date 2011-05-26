@@ -12,6 +12,7 @@ import org.jdom.Element;
 
 public class LASAnnotations extends LASDocument {
    
+	private static final String ELEMENT_ANNOTATIONS = "annotations";
 	private static final String ELEMENT_ANNOTATION_GROUP = "annotation_group";
 	private static final String ELEMENT_ANNOTATION = "annotation";
 	private static final String ELEMENT_LABEL = "label";
@@ -42,6 +43,8 @@ public class LASAnnotations extends LASDocument {
     
     public LASAnnotations() {
         super();
+        Element annotations = new Element(ELEMENT_ANNOTATIONS);
+        addContent(annotations);
     }
     public List<String> getVariableTitles() {
     	return getAnnotationValues(getRootElement(), TYPE_DATA, TYPE_VARIABLE_TITLE);
