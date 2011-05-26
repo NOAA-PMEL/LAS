@@ -12,8 +12,10 @@ IF ($axtype_command"0|*>1") THEN PPL ($axtype_command)
 if ($labnum_dset"0|*>1") THEN go unlabel ($labnum_dset)
 if ($labnum_datitl"0|*>1") THEN go unlabel ($labnum_datitl)
 if ($labnum_dods"0|*>1") THEN go unlabel ($labnum_dods)
-IF `($ppl$zmin) GE 1.e35 AND ($ppl$zmax) LE -1.e35` THEN DEFINE SYMBOL nokey = 1
-IF `($nokey"0") EQ 0` THEN PPL SHAKEY 1,,,,,,,,,,1
+IF `STRLEN("($ferret_view)") EQ 2` THEN
+   IF `($ppl$zmin) GE 1.e35 AND ($ppl$zmax) LE -1.e35` THEN DEFINE SYMBOL nokey = 1
+   IF `($nokey"0") EQ 0` THEN PPL SHAKEY 1,,,,,,,,,,1
+ENDIF
 
 IF ($labnum_x"0|*>1") THEN 
    let nc = STRINDEX("($lab($labnum_x))", ":")
@@ -42,4 +44,10 @@ ENDIF
 
 IF ($labnum_calend"0|*>1") THEN
    DEFINE SYMBOL calendar_lab ($lab($labnum_calend))
+ENDIF
+
+IF ($ferret_annotations"0|*>1") THEN 
+   PPL TITLE
+   PPL XLAB
+   PPL YLAB
 ENDIF
