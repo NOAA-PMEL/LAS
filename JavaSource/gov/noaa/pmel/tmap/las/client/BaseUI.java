@@ -191,7 +191,10 @@ public class BaseUI implements EntryPoint {
 
 	@Override
 	public void onModuleLoad() {
-
+		initialize();
+	}
+	public void initialize() {
+		
 		xTileServer = getTileServer();
 		
 		// Somebody might have already set these.  Only get them from the query string if they are null.
@@ -349,7 +352,6 @@ public class BaseUI implements EntryPoint {
 			}
 
 		});
-
 	}
 	private native String getTileServer()/*-{
 	    if ($wnd.OL_map_widget_tile_server == undefined) {
@@ -505,6 +507,18 @@ public class BaseUI implements EntryPoint {
 			xPanelHeaderHidden = !xPanelHeaderHidden;
 			resize();
 		}		
+	}
+	public void addAnnotationsOpenHandler(OpenHandler<DisclosurePanel> handler) {
+		for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
+			OutputPanel panel = (OutputPanel) panelIt.next();
+			panel.addAnnotationsOpenHandler(handler);
+		}
+	}
+	public void addAnnotationsCloseHandler(CloseHandler<DisclosurePanel> handler) {
+		for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
+			OutputPanel panel = (OutputPanel) panelIt.next();
+			panel.addAnnotationsCloseHandler(handler);
+		}
 	}
 	public void resize() {
 		xPanelWidth = getPanelWidth(xPanelCount);
