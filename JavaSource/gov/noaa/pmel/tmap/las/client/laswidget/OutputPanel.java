@@ -17,6 +17,8 @@ import java.util.Map;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.logical.shared.CloseHandler;
+import com.google.gwt.event.logical.shared.OpenHandler;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.http.client.Request;
@@ -30,6 +32,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.ClickListener;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.DisclosurePanel;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.Frame;
 import com.google.gwt.user.client.ui.Grid;
@@ -1445,6 +1448,17 @@ public class OutputPanel extends Composite {
 		image.setTitle("  Click to Enlarge.  Images will size with browser.");
 		grid.setWidget(1, 0 , image);
 	}
+	public void addAnnotationsCloseHandler(CloseHandler<DisclosurePanel> handler) {
+		lasAnnotationsPanel.addCloseHandler(handler);
+	}
+	public void addAnnotationsOpenHandler(OpenHandler<DisclosurePanel> handler) {
+		lasAnnotationsPanel.addOpenHandler(handler);
+	}
+	
+	public void setAnnotationsOpen(boolean open) {
+		lasAnnotationsPanel.setOpen(open);
+	}
+	
 	// This is for mock up user interface and are not used with "real" UI's.
 	public void setAnnotationsXMLURL(String url) {
 		lasAnnotationsPanel.setAnnotationsXMLURL(url);

@@ -5,6 +5,7 @@ package gov.noaa.pmel.tmap.las.product.server;
 
 import gov.noaa.pmel.tmap.las.exception.LASException;
 import gov.noaa.pmel.tmap.las.jdom.JDOMUtils;
+import gov.noaa.pmel.tmap.las.jdom.LASAnnotations;
 import gov.noaa.pmel.tmap.las.jdom.LASBackendRequest;
 import gov.noaa.pmel.tmap.las.jdom.LASBackendResponse;
 import gov.noaa.pmel.tmap.las.jdom.LASConfig;
@@ -32,8 +33,10 @@ import java.net.URL;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 
 import javax.imageio.ImageIO;
 import javax.servlet.ServletOutputStream;
@@ -614,7 +617,63 @@ public final class ProductServerAction extends LASAction {
         LASBackendResponse compoundResponse = productServerRunner.getCompoundResponse();
         
         // It finished.  Return the product.
+        log.debug("Preparing the annotations file.");
+        // Create a LASAnnotations object.
+        LASAnnotations lasAnnotations = new LASAnnotations();
+        if ( compoundResponse.isResultByTypeRemote("annotations")) {
+            String annotations_url = compoundResponse.getResult("annotations");
+            StringBuilder xml = new StringBuilder();
+            if ( annotations_url != null && !annotations_url.equals("") ) {
+                
+                try {
+                    URL annotations = new URL(annotations_url);
+                    BufferedReader in = new BufferedReader(
+                            new InputStreamReader(
+                                    annotations.openStream()));
 
+                    String inputLine;
+
+                    while ((inputLine = in.readLine()) != null) {
+                    	inputLine = inputLine.trim();
+                    	xml.append(inputLine);
+                    	
+                    }
+
+                    in.close();
+        			JDOMUtils.XML2JDOM(xml.toString(), lasAnnotations);
+
+                } catch (MalformedURLException e) {
+                    logerror(request, "Error parsing the annotations file.", e);
+                    return mapping.findForward("error");
+                } catch (IOException e) {
+                    logerror(request, "Error parsing the annotations file.", e);
+                    return mapping.findForward("error");
+                } catch (JDOMException e) {
+                	logerror(request, "Error parsing the annotations file.", e);
+                    return mapping.findForward("error");
+				}
+                
+                // Put these objects in the context so the output template can use them.
+                request.setAttribute("las_annotations", lasAnnotations);
+            }
+        } else {
+        	String annotations_filename = compoundResponse.getResultAsFileByType("annotations");
+        	if ( !annotations_filename.equals("")) {
+        		try {
+        			File file = new File(annotations_filename);
+        			JDOMUtils.XML2JDOM(file, lasAnnotations);
+        		} catch (IOException e) {
+        			logerror(request, "Error parsing the annotations file.", e);
+        			return mapping.findForward("error");
+        		} catch (JDOMException e) {
+        			logerror(request, "Error parsing the annotations file.", e);
+        			return mapping.findForward("error");
+				}
+        		// Put these objects in the context so the output template can use them.
+        		request.setAttribute("las_annotations", lasAnnotations);
+        	}
+        }
+        
         log.debug("Preparing the map scale file.");
         // Create a lasMapScale object.
         LASMapScale lasMapScale = new LASMapScale();

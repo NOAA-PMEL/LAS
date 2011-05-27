@@ -3,6 +3,9 @@ package gov.noaa.pmel.tmap.las.client.laswidget;
 import java.util.HashMap;
 import java.util.Map;
 
+
+import com.google.gwt.event.logical.shared.CloseHandler;
+import com.google.gwt.event.logical.shared.OpenHandler;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestBuilder;
 import com.google.gwt.http.client.RequestCallback;
@@ -220,6 +223,18 @@ public class LASAnnotationsPanel extends Composite {
 			layoutPanel.add(tables.get(TYPE_LAS));
 		}
 	}
+	
+	public void setOpen(boolean open) {
+		mainPanel.setOpen(open);
+	}
+	
+	public void addOpenHandler(OpenHandler<DisclosurePanel> handler) {
+		mainPanel.addOpenHandler(handler);
+	}
+	public void addCloseHandler(CloseHandler<DisclosurePanel> handler) {
+		mainPanel.addCloseHandler(handler);
+	}
+	
 	RequestCallback annotationsXMLCallback = new RequestCallback() {
 
 		@Override

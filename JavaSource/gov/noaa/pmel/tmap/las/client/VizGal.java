@@ -18,6 +18,10 @@ import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.logical.shared.CloseEvent;
+import com.google.gwt.event.logical.shared.CloseHandler;
+import com.google.gwt.event.logical.shared.OpenEvent;
+import com.google.gwt.event.logical.shared.OpenHandler;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -27,6 +31,7 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.ChangeListener;
 import com.google.gwt.user.client.ui.ClickListener;
+import com.google.gwt.user.client.ui.DisclosurePanel;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.RootPanel;
@@ -155,6 +160,8 @@ public class VizGal extends BaseUI {
 		setOptionsOkHandler(optionsOkHandler);
 		addPanelApplyClickHandler(panelApplyButtonClick);
 		addPanelRevertClickHandler(panelApplyButtonClick);
+		addAnnotationsCloseHandler(annotationsClose);
+		addAnnotationsOpenHandler(annotationsOpen);
 		// Initialize the gallery with an asynchronous call to the server to get variable needed.
 		if ( xDSID != null && xVarID != null & xOperationID != null && xView != null) {
 			// If the proper information was sent to the widget, pull down the variable definition
@@ -1261,6 +1268,7 @@ public class VizGal extends BaseUI {
 	private void popHistory(String historyToken) {
 		if ( historyToken.equals("") ) {
 			xVariable = initial_var;
+			super.initialize();
 			initPanels();
 		} else {
 			// First split out the panel history
@@ -1409,6 +1417,32 @@ public class VizGal extends BaseUI {
 		return switch_axis;
 	}
 
+	OpenHandler<DisclosurePanel> annotationsOpen = new OpenHandler<DisclosurePanel> () {
+
+		@Override
+		public void onOpen(OpenEvent<DisclosurePanel> event) {
+			
+			for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
+				OutputPanel panel = (OutputPanel) panelIt.next();
+				panel.setAnnotationsOpen(true);
+			}
+			
+		}
+		
+	};
 	
+	CloseHandler<DisclosurePanel> annotationsClose = new CloseHandler<DisclosurePanel>() {
+
+		@Override
+		public void onClose(CloseEvent<DisclosurePanel> event) {
+			
+			for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
+				OutputPanel panel = (OutputPanel) panelIt.next();
+				panel.setAnnotationsOpen(false);
+			}
+			
+		}
+		
+	};
 
 }
