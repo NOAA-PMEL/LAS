@@ -366,7 +366,7 @@ public class OutputPanel extends Composite {
 
 				RequestBuilder sendRequest = new RequestBuilder(RequestBuilder.GET, url);
 				try {
-					lasAnnotationsPanel.setTitle("Plot annotations...");
+					lasAnnotationsPanel.setTitle("Plot Annotations");
 					lasAnnotationsPanel.setError("Fetching plot annotations...");
 					sendRequest.sendRequest(null, lasRequestCallback);
 				} catch (RequestException e) {
