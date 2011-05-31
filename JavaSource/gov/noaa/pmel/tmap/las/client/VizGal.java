@@ -111,6 +111,8 @@ public class VizGal extends BaseUI {
      // Keep track of the current operations
      OperationSerializable[] ops;
      
+     DisclosurePanel annotationsControl = new DisclosurePanel("Annotations");
+     
      // Everybody that sub-classes BaseUI must implement three handlers for options OK, operations clicks and data set selections.
    
 	public void onModuleLoad() {
@@ -160,8 +162,10 @@ public class VizGal extends BaseUI {
 		setOptionsOkHandler(optionsOkHandler);
 		addPanelApplyClickHandler(panelApplyButtonClick);
 		addPanelRevertClickHandler(panelApplyButtonClick);
-		addAnnotationsCloseHandler(annotationsClose);
-		addAnnotationsOpenHandler(annotationsOpen);
+		annotationsControl.addOpenHandler(annotationsOpen);
+		annotationsControl.addCloseHandler(annotationsClose);
+		buttonLayout.setWidget(0, 3, annotationsControl);
+		
 		// Initialize the gallery with an asynchronous call to the server to get variable needed.
 		if ( xDSID != null && xVarID != null & xOperationID != null && xView != null) {
 			// If the proper information was sent to the widget, pull down the variable definition
@@ -418,7 +422,7 @@ public class VizGal extends BaseUI {
 			differenceButton.setDown(false);
 		}
 		differenceButton.setEnabled(diff);
-		refresh(false, false);
+		refresh(false, true);
 	}
 	public boolean init() {
 
