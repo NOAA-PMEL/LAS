@@ -90,7 +90,7 @@ IF `STRLEN("($varshape)") GT 1` THEN
 	 IF `(STRCMP("($fview%A%)", "X") NE 0) AND ($have_lon_lab"0|0|1|*>1") EQ 0` THEN
 	    DEFINE SYMBOL n_left_labels = `($n_left_labels"0") + 1`
 	    DEFINE SYMBOL upper_left_($n_left_labels"0") = Longitude `($data_var),RETURN=xstart`
-	    DEFINE SYMBOL longitude_lab = ($upper_left_($n_left_labels"0"))
+	    DEFINE SYMBOL longitude_0_lab = ($upper_left_($n_left_labels"0"))
 	 ENDIF
       ENDIF
       IF ($missing_y"0|*>1") THEN 
@@ -107,7 +107,7 @@ IF `STRLEN("($varshape)") GT 1` THEN
 	 IF `(STRCMP("($fview%A%)", "X") NE 0) AND ($have_lon_lab"0|0|1|*>1") EQ 0` THEN
 	    DEFINE SYMBOL n_left_labels = `($n_left_labels"0") + 1`
 	    DEFINE SYMBOL upper_left_($n_left_labels"0") = Latitude `($data_var),RETURN=ystart`
-	    DEFINE SYMBOL latitude_lab = ($upper_left_($n_left_labels"0"))
+	    DEFINE SYMBOL latitude_0_lab = ($upper_left_($n_left_labels"0"))
 	 ENDIF
       ENDIF
       IF ($missing_z"0|*>1") THEN 
@@ -117,10 +117,10 @@ IF `STRLEN("($varshape)") GT 1` THEN
  	    DEFINE SYMBOL n_left_labels = `($n_left_labels"0") + 1`
 	    DEFINE SYMBOL upper_left_($n_left_labels"0") = Depth `($data_var),RETURN=zstart` (`($data_var),RETURN=zunits`)
 	    DEFINE SYMBOL have_z_lab = 1
-	    DEFINE SYMBOL depth_lab = ($upper_left_($n_left_labels"0"))
+	    DEFINE SYMBOL depth_0_lab = ($upper_left_($n_left_labels"0"))
 	 ENDIF
       ENDIF
-      sh sym missing_t, have_time_lab
+
       IF ($missing_t"0|*>1") THEN 
          DEFINE SYMBOL region_full ($region_full),L=1
 	 DEFINE SYMBOL region_t ($region_t),L=1
@@ -129,7 +129,7 @@ IF `STRLEN("($varshape)") GT 1` THEN
 	    DEFINE SYMBOL upper_left_($n_left_labels"0") = `($data_var),return=tstart,prec=5`
 	    DEFINE SYMBOL have_time_lab = 1
 	    DEFINE SYMBOL have_year_lab = 1
-	    DEFINE SYMBOL time_lab = ($upper_left_($n_left_labels"0"))
+	    DEFINE SYMBOL time_0_lab = ($upper_left_($n_left_labels"0"))
 	 ENDIF
       ENDIF
       GO LAS_redefine_variable

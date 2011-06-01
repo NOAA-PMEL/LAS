@@ -99,28 +99,40 @@ IF `($n_left_labels"0|*>1") EQ 0` THEN DEFINE SYMBOL n_left_labels = 0
 
 DEFINE SYMBOL plotshape = $1
 
+SHADE($qualifiers)($shade_qualifiers)/TITLE="($ferret_title_0)"/SET ($ferret_var_0)
+
+IF ($labnum_x"0|*>1") THEN DEFINE SYMBOL longitude_0_lab ($lab($labnum_x))
+IF ($labnum_y"0|*>1") THEN DEFINE SYMBOL latitude_0_lab ($lab($labnum_y))
+IF ($labnum_z"0|*>1") THEN DEFINE SYMBOL depth_0_lab ($lab($labnum_z))
+IF ($labnum_t"0|*>1") THEN DEFINE SYMBOL time_0_lab ($lab($labnum_t))
+
+IF `($data_count"1") GT 1` THEN
+   REPEAT/RANGE=2:`($data_count"1")`/NAME=ivar (\
+     DEFINE SYMBOL ivar = `ivar-1`;\
+     SHADE($qualifiers)($shade_qualifiers)/TITLE="($ferret_title_($ivar))"/SET ($ferret_var_($ivar));\
+     IF ($labnum_x"0|*>1") THEN DEFINE SYMBOL longitude_($ivar)_lab ($lab($labnum_x));\
+     IF ($labnum_y"0|*>1") THEN DEFINE SYMBOL latitude_($ivar)_lab ($lab($labnum_y));\
+     IF ($labnum_z"0|*>1") THEN DEFINE SYMBOL depth_($ivar)_lab ($lab($labnum_z));\
+     IF ($labnum_t"0|*>1") THEN DEFINE SYMBOL time_($ivar)_lab ($lab($labnum_t));\
+     sh sym labnum*;\
+  )
+
 IF `STRINDEX("($plotshape)", "X") EQ 0` THEN
    IF ($region_0_x_lo"0|*>1") THEN
       DEFINE SYMBOL n_left_labels = `($n_left_labels)+1`
       DEFINE SYMBOL upper_left_($n_left_labels) = LONGITUDE(1): ($region_0_x_lo) ($ipen)LONGITUDE(2): ($region_1_x_lo)
-      DEFINE SYMBOL longitude_lab LONGITUDE: ($region_0_x_lo)
-      DEFINE SYMBOL longitude_1_lab LONGITUDE: ($region_1_x_lo)
    ELIF ($region_1_x_lo"0|*>1") THEN 
       DEFINE SYMBOL n_left_labels = `($n_left_labels)+1`
       DEFINE SYMBOL upper_left_($n_left_labels) = LONGITUDE(2): ($region_1_x_lo)
-      DEFINE SYMBOL longitude_1_lab LONGITUDE: ($region_1_x_lo)
    ENDIF
 ENDIF
 
 IF `STRINDEX("($plotshape)", "Y") EQ 0` THEN
    IF ($region_0_y_lo"0|*>1") THEN 
       DEFINE SYMBOL n_left_labels = `($n_left_labels)+1`
-      DEFINE SYMBOL latitude_lab = LATITUDE: ($region_0_y_lo)
-      DEFINE SYMBOL latitude_1_lab = LATITUDE: ($region_1_y_lo)
    ELIF ($region_1_y_lo"0|*>1") THEN 
       DEFINE SYMBOL n_left_labels = `($n_left_labels)+1`
       DEFINE SYMBOL upper_left_($n_left_labels) = LATITUDE(2): ($region_1_y_lo)
-      DEFINE SYMBOL latitude_1_lab = LATITUDE: ($region_1_y_lo)
    ENDIF
 ENDIF
 
@@ -128,12 +140,9 @@ IF `STRINDEX("($plotshape)", "Z") EQ 0` THEN
    IF ($region_0_z_lo"0|*>1") THEN
       DEFINE SYMBOL n_left_labels = `($n_left_labels)+1`
       DEFINE SYMBOL upper_left_($n_left_labels) = Depth(1): ($region_0_z_lo) ($ipen)Depth(2): ($region_1_z_lo)
-      DEFINE SYMBOL depth_lab = DEPTH: ($region_0_z_lo) 
-      DEFINE SYMBOL depth_1_lab = DEPTH: ($region_1_z_lo)
    ELIF ($region_1_z_lo"0|*>1") THEN 
       DEFINE SYMBOL n_left_labels = `($n_left_labels)+1`
       DEFINE SYMBOL upper_left_($n_left_labels) = Depth(2): ($region_1_z_lo)
-      DEFINE SYMBOL depth_1_lab = ($region_1_z_lo)
    ENDIF
 ENDIF
 
@@ -141,12 +150,9 @@ IF `STRINDEX("($plotshape)", "T") EQ 0` THEN
    IF ($region_0_t_lo"0|*>1") THEN 
       DEFINE SYMBOL n_left_labels = `($n_left_labels)+1`
       DEFINE SYMBOL upper_left_($n_left_labels) = Time(1): ($region_0_t_lo) ($ipen)Time(2): ($region_1_t_lo)
-      DEFINE SYMBOL time_lab = TIME: ($region_0_t_lo)
-      DEFINE SYMBOL time_1_lab = TIME: ($region_1_t_lo)
    ELIF ($region_1_t_lo"0|*>1") THEN 
       DEFINE SYMBOL n_left_labels = `($n_left_labels)+1`
       DEFINE SYMBOL upper_left_($n_left_labels) = TIME(2): ($region_1_t_lo)
-      DEFINE SYMBOL time_1_lab = TIME: ($region_1_t_lo)
    ENDIF
 ENDIF
 

@@ -4,6 +4,31 @@
 
 !CANCEL MODE VERIFY
 
+! Remove duplicate labels
+!  If dataset name and URL are the same, list just once
+IF ($dataset_url_lab%0|($dataset_title_lab)>1|*>0%) THEN CAN SYM dataset_url_lab
+IF ($dataset_url_0_lab%0|($dataset_title_0_lab)>1|*>0%) THEN CAN SYM dataset_url_0_lab
+
+!  If information for 2 variables is identical, list just once
+IF `($data_count"1") GT 1` THEN
+   REPEAT/RANGE=2:`($data_count"1")`/NAME=ivar (\
+     DEFINE SYMBOL ivar = `ivar-1`;\
+     IF ($longitude_($ivar)_lab%0|($longitude_0_lab)>1|*>0%) THEN CAN SYM longitude_($ivar)_lab;\
+     IF ($latitude_($ivar)_lab%0|($latitude_0_lab)>1|*>0%) THEN CAN SYM latitude_($ivar)_lab;\
+     IF ($depth_($ivar)_lab%0|($depth_0_lab)>1|*>0%) THEN CAN SYM depth_($ivar)_la);\
+     IF ($time_($ivar)_lab%0|($time_0_lab)>1|*>0%) THEN CAN SYM time_($ivar)_lab;\
+     IF ($dataset_title_($ivar)_lab%0|($dataset_title_0_lab)>1|*>0%) THEN CAN SYM dataset_title_($ivar)_lab;\
+     IF ($dataset_url_($ivar)_lab%0|($dataset_title_($ivar)_lab)>1|*>0%) THEN CAN SYM dataset_url_($ivar)_lab;\
+     IF ($dataset_url_($ivar)_lab%0|($dataset_url_0_lab)>1|*>0%) THEN CAN SYM dataset_url_($ivar)_lab )
+ENDIF
+
+! If its multi-variable and vector, things are a bit different...
+IF `($data_count"1") GT 1` THEN
+   REPEAT/RANGE=2:`($data_count"1")`/NAME=ivar (\
+     DEFINE SYMBOL ivar = `ivar-1`;\
+     IF `STRCMP("($variable_($ivar)_lab%0%)", "($variable_0_lab)") EQ 0` THEN CAN SYM variable_($ivar)_lab  )
+ENDIF
+
 DEFINE SYMBOL out = <?xml version=\"1.0\" encoding=\"ISO-8859-1\" ?>
 MESSAGE/QUIET/CONTINUE/OUTFILE="($result_annotations_filename)"/CLOBBER ($out)
 
@@ -12,26 +37,41 @@ DEFINE SYMBOL out = <annotations>
 GO write_to_xml
 
 IF `($data_count"1") EQ 1` THEN
-   GO annotation_orthogonal_axes
-   GO annotation_data
+   CAN SYM longitude_lab; CAN SYM latitude_lab; CAN SYM depth_lab;CAN SYM time_lab
+   IF ($longitude_0_lab%0|*>1%) THEN DEFINE SYMBOL longitude_lab = ($longitude_0_lab)
+   IF ($latitude_0_lab%0|*>1%) THEN DEFINE SYMBOL latitude_lab = ($latitude_0_lab)
+   IF ($depth_0_lab%0|*>1%) THEN DEFINE SYMBOL depth_lab = ($depth_0_lab)
+   IF ($time_0_lab%0|*>1%) THEN DEFINE SYMBOL time_lab = ($time_0_lab)
+   IF `($longitude_lab%0|*>1%)+($latitude_lab%0|*>1%)+($depth_lab%0|*>1%)+($time_lab%0|*>1%) GT 0` THEN \
+    GO annotation_orthogonal_axes 
+
+   CAN SYM variable_lab; CAN SYM dataset_title_lab; CAN SYM dataset_url_lab
+   IF ($variable_0_lab%0|*>1%) THEN DEFINE SYMBOL variable_lab = ($variable_0_lab)
+   IF ($dataset_title_0_lab%0|*>1%) THEN DEFINE SYMBOL dataset_title_lab = ($dataset_title_0_lab)
+   IF ($dataset_url_0_lab%0|*>1%) THEN DEFINE SYMBOL dataset_url_lab = ($dataset_url_0_lab)
+   IF `($variable_lab%0|*>1%)+($dataset_title_lab%0|*>1%)+($dataset_url_lab%0|*>1%) GT 0` THEN \
+    GO annotation_data
 
 ELSE 
   REPEAT/RANGE=1:`($data_count"1")`/NAME=ivar (\
+     CAN SYM longitude_lab; CAN SYM latitude_lab; CAN SYM depth_lab;CAN SYM time_lab;\
      DEFINE SYMBOL ivar = `ivar-1`;\
      IF ($longitude_($ivar)_lab%0|*>1%) THEN DEFINE SYMBOL longitude_lab = ($longitude_($ivar)_lab);\
      IF ($latitude_($ivar)_lab%0|*>1%) THEN DEFINE SYMBOL latitude_lab = ($latitude_($ivar)_lab);\
      IF ($depth_($ivar)_lab%0|*>1%) THEN DEFINE SYMBOL depth_lab = ($depth_($ivar)_lab);\
      IF ($time_($ivar)_lab%0|*>1%) THEN DEFINE SYMBOL time_lab = ($time_($ivar)_lab);\
-     GO annotation_orthogonal_axes)
+     IF `($longitude_lab%0|*>1%)+($latitude_lab%0|*>1%)+($depth_lab%0|*>1%)+($time_lab%0|*>1%) GT 0` THEN \
+    GO annotation_orthogonal_axes)
 
   REPEAT/RANGE=1:`($data_count"1")`/NAME=ivar (\
+     CAN SYM variable_lab; CAN SYM dataset_title_lab; CAN SYM dataset_url_lab;\
      DEFINE SYMBOL ivar = `ivar-1`;\
      IF ($variable_($ivar)_lab%0|*>1%) THEN DEFINE SYMBOL variable_lab = ($variable_($ivar)_lab);\
      IF ($dataset_title_($ivar)_lab%0|*>1%) THEN DEFINE SYMBOL dataset_title_lab = ($dataset_title_($ivar)_lab);\
      IF ($dataset_url_($ivar)_lab%0|*>1%) THEN DEFINE SYMBOL dataset_url_lab = ($dataset_url_($ivar)_lab);\
-     GO annotation_data)
+     IF `($variable_lab%0|*>1%)+($dataset_title_lab%0|*>1%)+($dataset_url_lab%0|*>1%) GT 0` THEN \
+    GO annotation_data)
 ENDIF
-
 
 IF ($las_ferret_header_label"0|*>1") THEN
    DEFINE SYMBOL out = <annotation_group type="las">
@@ -68,8 +108,6 @@ IF `($note_num"0") GT 0 OR ($calendar_lab"0|*>1")` THEN
    DEFINE SYMBOL out = </annotation_group>
    GO write_to_xml
 ENDIF
-
-
 
 DEFINE SYMBOL out = </annotations>
 GO write_to_xml
