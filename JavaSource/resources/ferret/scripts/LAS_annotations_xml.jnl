@@ -11,11 +11,12 @@ DEFINE SYMBOL lquals = /NOHEAD/NOROWLAB/FILE="($result_annotations_filename)"/FO
 DEFINE SYMBOL out = <annotations>
 GO write_to_xml
 
-GO annotation_orthogonal_axes
-GO annotation_data
+IF `($data_count"1") EQ 1` THEN
+   GO annotation_orthogonal_axes
+   GO annotation_data
 
-IF `($data_count"1") GT 1` THEN
-  REPEAT/RANGE=2:`($data_count"1")`/NAME=ivar (\
+ELSE 
+  REPEAT/RANGE=1:`($data_count"1")`/NAME=ivar (\
      DEFINE SYMBOL ivar = `ivar-1`;\
      IF ($longitude_($ivar)_lab%0|*>1%) THEN DEFINE SYMBOL longitude_lab = ($longitude_($ivar)_lab);\
      IF ($latitude_($ivar)_lab%0|*>1%) THEN DEFINE SYMBOL latitude_lab = ($latitude_($ivar)_lab);\
@@ -23,16 +24,14 @@ IF `($data_count"1") GT 1` THEN
      IF ($time_($ivar)_lab%0|*>1%) THEN DEFINE SYMBOL time_lab = ($time_($ivar)_lab);\
      GO annotation_orthogonal_axes)
 
-
-ENDIF
-IF `($data_count"1") GT 1` THEN
-  REPEAT/RANGE=2:`($data_count"1")`/NAME=ivar (\
+  REPEAT/RANGE=1:`($data_count"1")`/NAME=ivar (\
      DEFINE SYMBOL ivar = `ivar-1`;\
      IF ($variable_($ivar)_lab%0|*>1%) THEN DEFINE SYMBOL variable_lab = ($variable_($ivar)_lab);\
      IF ($dataset_title_($ivar)_lab%0|*>1%) THEN DEFINE SYMBOL dataset_title_lab = ($dataset_title_($ivar)_lab);\
      IF ($dataset_url_($ivar)_lab%0|*>1%) THEN DEFINE SYMBOL dataset_url_lab = ($dataset_url_($ivar)_lab);\
      GO annotation_data)
 ENDIF
+
 
 IF ($las_ferret_header_label"0|*>1") THEN
    DEFINE SYMBOL out = <annotation_group type="las">
@@ -45,6 +44,7 @@ IF ($las_ferret_header_label"0|*>1") THEN
    DEFINE SYMBOL out = </annotation_group>
    GO write_to_xml
 ENDIF
+
 
 IF `($note_num"0") GT 0 OR ($calendar_lab"0|*>1")` THEN
    DEFINE SYMBOL out = <annotation_group type="notes">
@@ -68,6 +68,7 @@ IF `($note_num"0") GT 0 OR ($calendar_lab"0|*>1")` THEN
    DEFINE SYMBOL out = </annotation_group>
    GO write_to_xml
 ENDIF
+
 
 
 DEFINE SYMBOL out = </annotations>
