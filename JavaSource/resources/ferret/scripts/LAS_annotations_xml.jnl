@@ -7,7 +7,7 @@
 ! Remove duplicate labels
 !  If dataset name and URL are the same, list just once
 IF ($dataset_url_lab%0|($dataset_title_lab)>1|*>0%) THEN CAN SYM dataset_url_lab
-IF ($dataset_url_0_lab%0|($dataset_title_0_lab)>1|*>0%) THEN CAN SYM dataset_url_0_lab
+     IF `STRCMP("($dataset_url_0_lab%0%)", "($dataset_title_0_lab%99%)") EQ 0` THEN CAN SYM dataset_url_0_lab
 
 !  If information for 2 variables is identical, list just once
 IF `($data_count"1") GT 1` THEN
