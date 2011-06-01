@@ -3,4 +3,23 @@ IF ($yform_dms"0|*>1") THEN PPL YFOR (($yform_dms))
 IF ($labnum_dset"0|*>1") THEN go unlabel ($labnum_dset)
 IF ($labnum_datitl"0|*>1") THEN go unlabel ($labnum_datitl)
 IF ($labnum_dods"0|*>1") THEN go unlabel ($labnum_dods)
+
 IF ($ferret_annotations%0|*>1%) THEN PPL VECKEY/NOUSER, 2,`($ppl$ylen)+0.2`
+
+IF ($ferret_diff_var%0|*>1%) THEN 
+   IF ($labnum_z"0|*>1") THEN go unlabel ($labnum_z)
+   IF ($labnum_t"0|*>1") THEN go unlabel ($labnum_t)
+ENDIF
+
+IF ($labnum_x"0|*>1") THEN 
+   DEFINE SYMBOL longitude_($num)_lab ($lab($labnum_x))
+ENDIF
+IF ($labnum_y"0|*>1") THEN 
+   DEFINE SYMBOL latitude_($num)_lab ($lab($labnum_y))
+ENDIF
+IF ($labnum_z"0|*>1") THEN
+   DEFINE SYMBOL depth_($num)_lab ($lab($labnum_z))
+ENDIF
+IF ($labnum_t"0|*>1") THEN
+   DEFINE SYMBOL time_($num)_lab ($lab($labnum_t))
+ENDIF

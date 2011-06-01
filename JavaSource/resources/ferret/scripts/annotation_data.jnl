@@ -8,7 +8,6 @@ IF ($variable_lab"0|*>1") THEN
    DEFINE SYMBOL out = </annotation>
    GO write_to_xml
 ENDIF
-pause
 
 IF ($dataset_title_lab"0|*>1") THEN
    DEFINE SYMBOL out = <annotation type="dataset_title">

@@ -110,6 +110,11 @@ DEFINE SYMBOL ferret_vector_xdiff = ($ferret_vector_x1)-($ferret_vector_x2)
 DEFINE SYMBOL ferret_vector_ydiff = ($ferret_vector_y1)-($ferret_vector_y2)
 DEFINE SYMBOL ferret_diff_var = ($ferret_vector_xdiff), ($ferret_vector_ydiff)
 
+! For defining annotations
+DEFINE SYMBOL ferret_var_0 = ($ferret_vector_x1), ($ferret_vector_y1)
+DEFINE SYMBOL ferret_var_1 = ($ferret_vector_x2), ($ferret_vector_y2)
+
+
 IF ($native_curvilinear_xy"0|*>1") THEN 
   DEFINE SYMBOL ferret_vector_base_xdiff = ($ferret_plot_base_var_2)-($ferret_plot_base_var_0)
   DEFINE SYMBOL ferret_vector_base_ydiff = ($ferret_plot_base_var_3)-($ferret_plot_base_var_1)
@@ -223,37 +228,19 @@ IF ($ferret_vector_subsampling"0") THEN
 
    VECTOR($qualifiers)/TITLE="($ferret_plot_title)"/XSKIP=`xs`/YSKIP=`ys`/SET \
        ($ferret_diff_var)
-       IF ($xform_dms"0|*>1") THEN PPL XFOR (($xform_dms))
-       IF ($yform_dms"0|*>1") THEN PPL YFOR (($yform_dms))
-       IF ($labnum_dset"0|*>1") THEN go unlabel ($labnum_dset)
-       IF ($labnum_datitl"0|*>1") THEN go unlabel ($labnum_datitl)
-       IF ($labnum_dods"0|*>1") THEN go unlabel ($labnum_dods)
-       IF ($labnum_z"0|*>1") THEN go unlabel ($labnum_z)
-       IF ($labnum_t"0|*>1") THEN go unlabel ($labnum_t)
+      GO vector_labels_reset
       PPL VECTOR,`xs`,`ys`
        
    IF ($native_curvilinear_xy"0|*>1") THEN \
       VECTOR($qualifiers)/OVER/NOLAB/TITLE="($ferret_plot_title)"/XSKIP=`xs`/YSKIP=`ys`/SET \
        ($ferret_diff_var_m360)
-       IF ($xform_dms"0|*>1") THEN PPL XFOR (($xform_dms))
-       IF ($yform_dms"0|*>1") THEN PPL YFOR (($yform_dms))
-       IF ($labnum_dset"0|*>1") THEN go unlabel ($labnum_dset)
-       IF ($labnum_datitl"0|*>1") THEN go unlabel ($labnum_datitl)
-       IF ($labnum_dods"0|*>1") THEN go unlabel ($labnum_dods)
-       IF ($labnum_z"0|*>1") THEN go unlabel ($labnum_z)
-       IF ($labnum_t"0|*>1") THEN go unlabel ($labnum_t)
+      GO vector_labels_reset
       PPL VECTOR/over,`xs`,`ys` 
 
    IF ($native_curvilinear_xy"0|*>1") THEN \
       VECTOR($qualifiers)/OVER/NOLAB/TITLE="($ferret_plot_title)"/XSKIP=`xs`/YSKIP=`ys`/SET \
        ($ferret_diff_var_p360)
-       IF ($xform_dms"0|*>1") THEN PPL XFOR (($xform_dms))
-       IF ($yform_dms"0|*>1") THEN PPL YFOR (($yform_dms))
-       IF ($labnum_dset"0|*>1") THEN go unlabel ($labnum_dset)
-       IF ($labnum_datitl"0|*>1") THEN go unlabel ($labnum_datitl)
-       IF ($labnum_dods"0|*>1") THEN go unlabel ($labnum_dods)
-       IF ($labnum_z"0|*>1") THEN go unlabel ($labnum_z)
-       IF ($labnum_t"0|*>1") THEN go unlabel ($labnum_t)
+      GO vector_labels_reset
       PPL VECTOR/over,`xs`,`ys`
 
 ELSE
@@ -263,37 +250,19 @@ ELSE
 
    VECTOR($qualifiers)/TITLE="($ferret_plot_title)"/XSKIP=($PPL_VEC_XSKIP)/YSKIP=($PPL_VEC_XSKIP)/SET  \
        ($ferret_diff_var)
-       IF ($xform_dms"0|*>1") THEN PPL XFOR (($xform_dms))
-       IF ($yform_dms"0|*>1") THEN PPL YFOR (($yform_dms))
-       IF ($labnum_dset"0|*>1") THEN go unlabel ($labnum_dset)
-       IF ($labnum_datitl"0|*>1") THEN go unlabel ($labnum_datitl)
-       IF ($labnum_dods"0|*>1") THEN go unlabel ($labnum_dods)
-       IF ($labnum_z"0|*>1") THEN go unlabel ($labnum_z)
-       IF ($labnum_t"0|*>1") THEN go unlabel ($labnum_t)
+      GO vector_labels_reset
       PPL VECTOR, ($PPL_VEC_XSKIP), ($PPL_VEC_YSKIP)
 
    IF ($native_curvilinear_xy"0|*>1") THEN \
    VECTOR($qualifiers)/OVER/NOLAB/TITLE="($ferret_plot_title)"/XSKIP=($PPL_VEC_XSKIP)/YSKIP=($PPL_VEC_XSKIP)/SET  \
        ($ferret_diff_var_m360)
-       IF ($xform_dms"0|*>1") THEN PPL XFOR (($xform_dms))
-       IF ($yform_dms"0|*>1") THEN PPL YFOR (($yform_dms))
-       IF ($labnum_dset"0|*>1") THEN go unlabel ($labnum_dset)
-       IF ($labnum_datitl"0|*>1") THEN go unlabel ($labnum_datitl)
-       IF ($labnum_dods"0|*>1") THEN go unlabel ($labnum_dods)
-       IF ($labnum_z"0|*>1") THEN go unlabel ($labnum_z)
-       IF ($labnum_t"0|*>1") THEN go unlabel ($labnum_t)
+      GO vector_labels_reset
       PPL VECTOR, ($PPL_VEC_XSKIP), ($PPL_VEC_YSKIP)
 
    IF ($native_curvilinear_xy"0|*>1") THEN \
    VECTOR($qualifiers)/OVER/NOLAB/TITLE="($ferret_plot_title)"/XSKIP=($PPL_VEC_XSKIP)/YSKIP=($PPL_VEC_XSKIP)/SET  \
        ($ferret_diff_var_p360)
-       IF ($xform_dms"0|*>1") THEN PPL XFOR (($xform_dms))
-       IF ($yform_dms"0|*>1") THEN PPL YFOR (($yform_dms))
-       IF ($labnum_dset"0|*>1") THEN go unlabel ($labnum_dset)
-       IF ($labnum_datitl"0|*>1") THEN go unlabel ($labnum_datitl)
-       IF ($labnum_dods"0|*>1") THEN go unlabel ($labnum_dods)
-       IF ($labnum_z"0|*>1") THEN go unlabel ($labnum_z)
-       IF ($labnum_t"0|*>1") THEN go unlabel ($labnum_t)
+      GO vector_labels_reset
       PPL VECTOR, ($PPL_VEC_XSKIP), ($PPL_VEC_YSKIP)
 
 ENDIF
