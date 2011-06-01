@@ -93,7 +93,7 @@ IF ($region_x_lo"0|*>1") THEN
       IF `($region_x_hi) LT 0` THEN DEFINE SYMBOL letter2 = W
       DEFINE SYMBOL upper_left Longitude: `ABS(($region_x_lo))`($letter) to `ABS(($region_x_hi))`($letter2)
    ENDIF
-   DEFINE SYMBOL longitude_lab = ($upper_left)
+   DEFINE SYMBOL longitude_0_lab = ($upper_left)
    LABEL/NOUSER 0, `labyloc`, -1, 0.0, `labsiz`, ($upper_left)
 ENDIF
 
@@ -111,7 +111,7 @@ IF ($region_y_lo"0|*>1") THEN
       IF `($region_x_hi) LT 0` THEN DEFINE SYMBOL letter2 = S
       DEFINE SYMBOL upper_left Latitude: `ABS(($region_y_lo))`($letter) to `ABS(($region_y_hi))`($letter2)
    ENDIF
-   DEFINE SYMBOL latitude_lab = ($upper_left)
+   DEFINE SYMBOL latitude_0_lab = ($upper_left)
    LABEL/NOUSER 0, `labyloc`, -1, 0.0, `labsiz`, ($upper_left)
 ENDIF
 
@@ -123,7 +123,7 @@ IF ($region_t_lo"0|*>1") THEN
    ELSE
       DEFINE SYMBOL upper_left Date: ($region_t_lo) to ($region_t_hi)
    ENDIF
-   DEFINE SYMBOL time_lab = ($upper_left)
+   DEFINE SYMBOL time_0_lab = ($upper_left)
    LABEL/NOUSER 0, `labyloc`, -1, 0.0, `labsiz`, ($upper_left)
 ENDIF
 

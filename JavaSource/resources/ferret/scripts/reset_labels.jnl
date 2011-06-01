@@ -18,16 +18,16 @@ IF `STRLEN("($ferret_view)") EQ 2` THEN
 ENDIF
 
 IF ($labnum_x"0|*>1") THEN 
-   DEFINE SYMBOL longitude_lab ($lab($labnum_x))
+   DEFINE SYMBOL longitude_($num)_lab ($lab($labnum_x))
 ENDIF
 IF ($labnum_y"0|*>1") THEN 
-   DEFINE SYMBOL latitude_lab ($lab($labnum_y))
+   DEFINE SYMBOL latitude_($num)_lab ($lab($labnum_y))
 ENDIF
 IF ($labnum_z"0|*>1") THEN
-   DEFINE SYMBOL depth_lab ($lab($labnum_z))
+   DEFINE SYMBOL depth_($num)_lab ($lab($labnum_z))
 ENDIF
 IF ($labnum_t"0|*>1") THEN
-   DEFINE SYMBOL time_lab ($lab($labnum_t))
+   DEFINE SYMBOL time_($num)_lab ($lab($labnum_t))
 ENDIF
 
 IF ($labnum_calend"0|*>1") THEN
