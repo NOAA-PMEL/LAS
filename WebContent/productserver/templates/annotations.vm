@@ -11,55 +11,66 @@
 <style>
 .title {
 font-family: Verdana, Arial, Helvetica, sans-serif;
-font-size: .75em;
+font-size: .7em;
 color: #000000;
-font-weight: bold;
+font-weight: normal;
+text-align:left;
+}
+.url {
+font-family: Verdana, Arial, Helvetica, sans-serif;
+font-size: .5em;
+color: #000000;
 text-align:left;
 }
 .footer {
 font-family: Verdana, Arial, Helvetica, sans-serif;
-font-size: .75em;
+font-size: .5em;
 color: #000000;
-text-align:center;
+text-align:right;
 }
 .regular {
 font-family: Verdana, Arial, Helvetica, sans-serif;
-font-size: .75em;
+font-size: .7em;
 color: #000000;
 text-align:left;
 }
 </style>
   </head>
   
-  <body>
-  	<div class="title">
-    	#foreach ( $title in $las_annotations.getDatasetTitles() )
-    		$title<br>
-	    #end
-    </div>
-  </body>
-    <div class="title">
-    	#foreach ( $title in $las_annotations.getVariableTitles() )
-    		$title<br>
-	    #end
-    </div>
-    <div class="title">
+  <body >
+     <table width="100%" style="background-color:#FAFAFA; border: 1px solid #000;">
+      
     	#foreach ( $url in $las_annotations.getDatasetURLs() )
-    		$url<br>
+           <tr width="100%">
+    		<td width="100%"class="url" >$url</td>
+           </tr>
 	    #end
-    </div>
-    <div class="regular">
+    	#foreach ( $title in $las_annotations.getDatasetTitles() )
+           <tr  width="100%">
+    		<td class="title">$title</td>
+           </tr>
+	    #end
+    	#foreach ( $title in $las_annotations.getVariableTitles() )
+           <tr width="100%">
+    		<td class="title">VARIABLE: $title</td>
+           <tr>
+	    #end
     	#foreach ( $axis in $las_annotations.getOrthogonalAxes() )
-    		$axis<br>
+           <tr width="100%">
+    		<td class="regular">$axis</td>
+           </tr>
 	    #end
-    </div>
-    <div class="regular">
-    	<ul>
+           <tr width="100%">
+             <td class="regular">
+       	     <ul>
 	    #foreach ($note in $las_annotations.getNotes() )
-	    	<li>$note</li>
-    	#end
-    	</ul>
-	</div>
+	        <li>$note</li>
+    	    #end
+       	    </ul>
+           </td>
+          </tr>
+
+   </table>
 	<div class="footer">
 		$las_annotations.getHeader()
 	</div>
