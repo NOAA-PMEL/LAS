@@ -46,7 +46,7 @@ IF `got_dataset_label EQ 0` THEN
       ELSE
          DEFINE SYMBOL data_$1_urlpath = ($data_$1_url)
       ENDIF
-   
+
       DEFINE SYMBOL n_right_labels = `($n_right_labels)+1`
       DEFINE SYMBOL upper_right_($n_right_labels) = OPeNDAP URL: ($data_$1_urlpath)
       DEFINE SYMBOL upper_right_text_($n_right_labels) = OPeNDAP URL ($data_$1_urlpath)
@@ -61,7 +61,7 @@ ENDIF
 
 ! If labels are not going to be on the plots, save the url
 
-IF `STRINDEX("($data_$1_url)","http") NE 0` THEN
+IF `STRINDEX("($data_$1_dataset_url)","http") NE 0` THEN
 
    IF ($data_$1_dataset_url"0|*>1") THEN 
       DEFINE SYMBOL data_$1_urlpath = ($data_$1_dataset_url)
@@ -71,7 +71,7 @@ IF `STRINDEX("($data_$1_url)","http") NE 0` THEN
 
    DEFINE SYMBOL dataset_url_($num)_lab = OPeNDAP URL: ($data_$1_urlpath)
 ELSE
-   DEFINE SYMBOL dataset_url_($num)_lab = DATA SET: ($data_$1_url)
+   DEFINE SYMBOL dataset_url_($num)_lab = DATA SET: ($data_$1_dataset_url)
 ENDIF
 
 ! If the dataset name or URL and is really long, split into multiple lines.
