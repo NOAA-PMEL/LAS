@@ -13,13 +13,13 @@ IF ($dataset_url_0_lab%0|($dataset_title_0_lab)>1|*>0%) THEN CAN SYM dataset_url
 IF `($data_count"1") GT 1` THEN
    REPEAT/RANGE=2:`($data_count"1")`/NAME=ivar (\
      DEFINE SYMBOL ivar = `ivar-1`;\
-     IF ($longitude_($ivar)_lab%0|($longitude_0_lab)>1|*>0%) THEN CAN SYM longitude_($ivar)_lab;\
-     IF ($latitude_($ivar)_lab%0|($latitude_0_lab)>1|*>0%) THEN CAN SYM latitude_($ivar)_lab;\
-     IF ($depth_($ivar)_lab%0|($depth_0_lab)>1|*>0%) THEN CAN SYM depth_($ivar)_la);\
-     IF ($time_($ivar)_lab%0|($time_0_lab)>1|*>0%) THEN CAN SYM time_($ivar)_lab;\
-     IF ($dataset_title_($ivar)_lab%0|($dataset_title_0_lab)>1|*>0%) THEN CAN SYM dataset_title_($ivar)_lab;\
-     IF ($dataset_url_($ivar)_lab%0|($dataset_title_($ivar)_lab)>1|*>0%) THEN CAN SYM dataset_url_($ivar)_lab;\
-     IF ($dataset_url_($ivar)_lab%0|($dataset_url_0_lab)>1|*>0%) THEN CAN SYM dataset_url_($ivar)_lab )
+     IF `STRCMP("($longitude_($ivar)_lab%0%)", "($longitude_0_lab)") EQ 0` THEN CAN SYM longitude_($ivar)_lab  )
+     IF `STRCMP("($latitude_($ivar)_lab%0%)", "($latitude_0_lab)") EQ 0` THEN CAN SYM latitude_($ivar)_lab  )
+     IF `STRCMP("($depth_($ivar)_lab%0%)", "($depth_0_lab)") EQ 0` THEN CAN SYM depth_($ivar)_lab  )
+     IF `STRCMP("($time_($ivar)_lab%0%)", "($time_0_lab)") EQ 0` THEN CAN SYM time_($ivar)_lab  )
+     IF `STRCMP("($dataset_title_($ivar)_lab%0%)", "($dataset_title_0_lab)") EQ 0` THEN CAN SYM dataset_title_($ivar)_lab  )
+     IF `STRCMP("($dataset_url_($ivar)_lab%0%)", "($dataset_title_($ivar)_lab%99%)") EQ 0` THEN CAN SYM dataset_url_($ivar)_lab  )
+     IF `STRCMP("($dataset_url_($ivar)_lab%0%)", "($dataset_url_0_lab)") EQ 0` THEN CAN SYM dataset_url_($ivar)_lab  )
 ENDIF
 
 ! If its multi-variable and vector, things are a bit different...
