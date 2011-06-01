@@ -29,6 +29,18 @@ IF `($data_count"1") GT 1` THEN
      IF `STRCMP("($variable_($ivar)_lab%0%)", "($variable_0_lab)") EQ 0` THEN CAN SYM variable_($ivar)_lab  )
 ENDIF
 
+IF `($data_count"1") GT 2` THEN
+   REPEAT/RANGE=3:`($data_count"1")`/NAME=ivar (\
+     DEFINE SYMBOL ivar = `ivar-1`;\
+     IF `STRCMP("($variable_($ivar)_lab%0%)", "($variable_1_lab)") EQ 0` THEN CAN SYM variable_($ivar)_lab  )
+ENDIF
+
+IF `($data_count"1") GT 3` THEN
+   REPEAT/RANGE=4:`($data_count"1")`/NAME=ivar (\
+     DEFINE SYMBOL ivar = `ivar-1`;\
+     IF `STRCMP("($variable_($ivar)_lab%0%)", "($variable_2_lab)") EQ 0` THEN CAN SYM variable_($ivar)_lab  )
+ENDIF
+
 DEFINE SYMBOL out = <?xml version=\"1.0\" encoding=\"ISO-8859-1\" ?>
 MESSAGE/QUIET/CONTINUE/OUTFILE="($result_annotations_filename)"/CLOBBER ($out)
 
