@@ -655,6 +655,7 @@ public final class ProductServerAction extends LASAction {
                 
                 // Put these objects in the context so the output template can use them.
                 request.setAttribute("las_annotations", lasAnnotations);
+                
             }
         } else {
         	String annotations_filename = compoundResponse.getResultAsFileByType("annotations");
@@ -671,6 +672,7 @@ public final class ProductServerAction extends LASAction {
 				}
         		// Put these objects in the context so the output template can use them.
         		request.setAttribute("las_annotations", lasAnnotations);
+        		request.setAttribute("annotations_URL", "getAnnotations.do?file="+annotations_filename.substring(annotations_filename.lastIndexOf("/")+1, annotations_filename.length()));
         	}
         }
         
