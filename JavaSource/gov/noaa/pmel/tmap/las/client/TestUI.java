@@ -57,6 +57,7 @@ import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.TabPanel;
 import com.google.gwt.user.client.ui.TreeItem;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.ibm.icu.impl.duration.impl.Utils;
 
 
 public class TestUI extends BaseUI {
@@ -646,13 +647,13 @@ public class TestUI extends BaseUI {
 
 		@Override
 		public void onClick(ClickEvent event) {
-			// Only add N-1 additional variables...
-			
-			
-			// listbox.getElement().getFirstChildElement().setAttribute("disabled" ,"disabled" )
+           
+			// When the first variable is added get rid of the vectors in the list.
 			if ( tAdditionalVariables.size() == 0 ) {
 				tVariables.removeVectors();
 			}
+			
+			// Only add N-1 additional variables...
 			if ( tAdditionalVariables.size() < tVariables.getItemCount() - 1 ) {
 				UserListBox listBox = new UserListBox();
 				int count = tVariables.getItemCount();
@@ -701,8 +702,41 @@ public class TestUI extends BaseUI {
                     
 				}
 			}
+			
+			// We changed the number of variables, so get the operations...
+			String xpaths[] = new String[tAdditionalVariables.size()+1];
+			xpaths[0] = Util.getVariableXPATH(xVariable.getDSID(), xVariable.getID());
+			int index = 0;
+			for (Iterator varIt = tAdditionalVariables.iterator(); varIt.hasNext();) {
+				UserListBox lb = (UserListBox) varIt.next();
+				VariableSerializable v = lb.getUserObject(index);
+				xpaths[index+1] = Util.getVariableXPATH(xVariable.getDSID(), v.getID());
+				index++;
+			}
+			Util.getRPCService().getOperations(xView, xpaths, getOperationsCallback);
+			
 		}
 		
+	};
+	AsyncCallback<OperationSerializable[]> getOperationsCallback = new AsyncCallback<OperationSerializable[]>() {
+		public void onSuccess(OperationSerializable[] multi_var_ops) {
+			
+			ops = multi_var_ops;
+			//setOperations(String intervals, String opID, String view, OperationSerializable[] ops) {
+			xOperationID = ops[0].getID();
+			xOperationsWidget.setOperations(xVariable.getIntervals(), ops[0].getID(), xView, ops);
+			tOperationsMenu.setMenus(ops, xView);
+			
+
+		}
+
+		@Override
+		public void onFailure(Throwable caught) {
+			initializing.hide();
+			Window.alert("Could not fetch multi-variable operations.  "+caught.getLocalizedMessage());
+
+		}
+
 	};
 	private boolean isSelected(int i) {
 		for (Iterator lbIt = tAdditionalVariables.iterator(); lbIt.hasNext();) {
