@@ -301,7 +301,7 @@ public class OutputPanel extends Composite {
 		messagePanel.hide();
 		
         lasRequest = getRequest();
-        lasRequest.setProperty("ferret", "view", view);
+        
 		lasRequest.setProperty("ferret", "size", ".8333");
 		lasRequest.addProperty("ferret", "image_format", "gif");
 		lasRequest.addProperty("ferret", "annotations", "file");
@@ -796,7 +796,7 @@ public class OutputPanel extends Composite {
 			}
 
 		}
-
+		lasRequest.setProperty("ferret", "view", view);
 		return lasRequest;
 	}
 	public boolean isComparePanel() {
