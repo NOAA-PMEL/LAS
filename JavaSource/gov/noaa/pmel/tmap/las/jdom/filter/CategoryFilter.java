@@ -9,6 +9,9 @@
  */
 package gov.noaa.pmel.tmap.las.jdom.filter;
 
+import java.util.Iterator;
+import java.util.List;
+
 import org.jdom.Element;
 import org.jdom.filter.Filter;
 
@@ -41,8 +44,14 @@ public class CategoryFilter implements Filter {
         if (element.getName().equals("category")) {
             if (element.getAttributeValue("ID").equals(ID)) {
                 return true;
-            }
-            else {
+            } else {
+            	List<Element> catids = element.getChildren("catid");
+            	for (Iterator catidIt = catids.iterator(); catidIt.hasNext();) {
+					Element catid = (Element) catidIt.next();
+					if ( catid.getAttributeValue("ID").equals(ID) ) {
+						return true;
+					}
+				}
                 return false;
             }
         } else {

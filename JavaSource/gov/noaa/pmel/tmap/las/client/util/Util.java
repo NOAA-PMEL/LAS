@@ -15,7 +15,13 @@ import com.google.gwt.user.client.rpc.ServiceDefTarget;
 
 public class Util {
 	public static String getVariableXPATH(String dsid, String varid) {
-		return "/lasdata/datasaets/"+dsid+"/variables/"+varid;
+		return "/lasdata/datasets/"+dsid+"/variables/"+varid;
+	}
+	public static String getDSID(String xpath) {
+		return xpath.substring(xpath.indexOf("/lasdata/datasets/")+1, xpath.indexOf("/variables"));
+	}
+	public static String getVarID(String xpath) {
+		return xpath.substring(xpath.indexOf("/variables/")+1, xpath.length());
 	}
 	public static List<String> setOrthoAxes(String view, GridSerializable grid) {
 		List<String> ortho = new ArrayList<String>();

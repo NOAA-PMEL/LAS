@@ -1059,9 +1059,13 @@ public class LASConfig extends LASDocument {
      * @throws JDOMException
      */
     private Element findCategory(String catid) throws JDOMException {
-        CategoryFilter filter = new CategoryFilter(catid);
-        Iterator catIt= getRootElement().getDescendants(filter);
-        return (Element) catIt.next();
+    	CategoryFilter filter = new CategoryFilter(catid);
+    	Iterator catIt= getRootElement().getDescendants(filter);
+    	if ( catIt != null && catIt.hasNext() ) {
+    		return (Element) catIt.next();
+    	} else {
+    		return null;
+    	}
     }
     /**
      * Get the base url of this LAS server (the server host, port and context path).
@@ -1313,6 +1317,10 @@ public class LASConfig extends LASDocument {
                 // the next level down.  Therefore we copy the attributes and add
                 // the child categories without the grandchildren.
                 Element category = findCategory(catid);
+                if ( category == null ) {
+                	// return the empty list
+                	return categories;
+                }
                 Element category_container = new Element("category");
                 List attributes = category.getAttributes();
                 for (Iterator attrIt = attributes.iterator(); attrIt.hasNext();) {
@@ -1391,6 +1399,7 @@ public class LASConfig extends LASDocument {
                 category.addContent(container_dataset);
                 categories.add(new Category(category));
             }
+            
         }
         return categories;
     }
@@ -3873,6 +3882,13 @@ public class LASConfig extends LASDocument {
     private void setIDs(List categories) throws UnsupportedEncodingException, JDOMException {
         for (Iterator catIt = categories.iterator(); catIt.hasNext();) {
             Element category = (Element) catIt.next();
+            List<Element> catids = category.getChildren("catid");
+            for (Iterator catidIt = catids.iterator(); catidIt.hasNext();) {
+				Element catid = (Element) catidIt.next();
+				String id = catid.getAttributeValue("ID");
+				id = JDOMUtils.MD5Encode(getBaseServerURL()) + Constants.NAME_SPACE_SPARATOR + id;
+				catid.setAttribute("ID", id);
+			}
             String ID = category.getAttributeValue("ID");
             if ( ID == null ) {
                 String name = category.getAttributeValue("name");
@@ -4124,7 +4140,12 @@ public class LASConfig extends LASDocument {
 										}
 									}
 									if ( src_type.equalsIgnoreCase("THREDDS") && addXMLprops.get("category") != null && addXMLprops.get("category").equalsIgnoreCase("true") ) {
-										categoryList.addAll(makeCategoriesFromTHREDDS(src));
+										String esgS = addXMLprops.get("esg");
+										boolean esg = false;
+										if ( esgS != null ) {
+											esg = Boolean.valueOf(esgS).booleanValue();
+										}
+										categoryList.addAll(makeCategoriesFromTHREDDS(src, esg));
 									}
 								} else {
 									// reconstruct src from ds, grid and axes file
@@ -4168,7 +4189,12 @@ public class LASConfig extends LASDocument {
 									}
 								}
 								if ( src_type.equalsIgnoreCase("THREDDS") && addXMLprops.get("category") != null && addXMLprops.get("category").equalsIgnoreCase("true") ) {
-									categoryList.addAll(makeCategoriesFromTHREDDS(src));
+									String esgS = addXMLprops.get("esg");
+									boolean esg = false;
+									if ( esgS != null ) {
+										esg = Boolean.valueOf(esgS).booleanValue();
+									}
+									categoryList.addAll(makeCategoriesFromTHREDDS(src, esg));
 								}
 							}
 						}
@@ -4212,7 +4238,12 @@ public class LASConfig extends LASDocument {
 							}
 						}
 						if ( src_type.equalsIgnoreCase("THREDDS") && addXMLprops.get("category") != null && addXMLprops.get("category").equalsIgnoreCase("true") ) {
-							categoryList.addAll(makeCategoriesFromTHREDDS(src));
+							String esgS = addXMLprops.get("esg");
+							boolean esg = false;
+							if ( esgS != null ) {
+								esg = Boolean.valueOf(esgS).booleanValue();
+							}
+							categoryList.addAll(makeCategoriesFromTHREDDS(src, esg));
 						}
 					}
 				}
@@ -4281,7 +4312,7 @@ public class LASConfig extends LASDocument {
 	 * Reads a THREDDS catalog and makes the categories to match the catalog.
 	 * @param src
 	 */
-	public ArrayList<CategoryBean> makeCategoriesFromTHREDDS(String src) {
+	public ArrayList<CategoryBean> makeCategoriesFromTHREDDS(String src, boolean esg) {
 		InvCatalogFactory factory = new InvCatalogFactory("default", false);
 		InvCatalog catalog = (InvCatalog) factory.readXML(src);
 		CategoryBean top = new CategoryBean();
@@ -4300,7 +4331,8 @@ public class LASConfig extends LASDocument {
 			InvDataset ThreddsDataset = (InvDataset) di.next();
 			if (ThreddsDataset.hasNestedDatasets()) {
 				// Don't need any optins, use the static method.
-				CategoryBean cb = addXML.processCategories(ThreddsDataset);
+				CategoryBean cb;
+				cb = addXML.processCategories(ThreddsDataset, esg);		 
 				categories.add(cb);
 			}
 		}
@@ -4468,7 +4500,8 @@ public class LASConfig extends LASDocument {
 			while (di.hasNext()) {
 				InvDataset ThreddsDataset = (InvDataset) di.next();
 				if (ThreddsDataset.hasNestedDatasets()) {
-					CategoryBean cb = myAddXML.processCategories(ThreddsDataset);
+					CategoryBean cb;
+					cb = myAddXML.processCategories(ThreddsDataset, myAddXML.isEsg());
 					CategoryBeans.add(cb);
 				}
 			}
@@ -4477,7 +4510,9 @@ public class LASConfig extends LASDocument {
 			di = ThreddsDatasets.iterator();
 			while (di.hasNext()) {
 				InvDataset ThreddsDataset = (InvDataset) di.next();
-				beans.addAll(myAddXML.processDatasets(ThreddsDataset));
+				if ( ThreddsDataset.hasNestedDatasets() ) {
+					beans.addAll(myAddXML.processDatasets(ThreddsDataset, myAddXML.isEsg()));
+				}
 			}
 		}
 		return beans;
