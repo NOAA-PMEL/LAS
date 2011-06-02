@@ -4,6 +4,7 @@ import gov.noaa.pmel.tmap.las.client.laswidget.Constants;
 import gov.noaa.pmel.tmap.las.client.laswidget.LASRequestWrapper;
 import gov.noaa.pmel.tmap.las.client.laswidget.OperationPushButton;
 import gov.noaa.pmel.tmap.las.client.laswidget.OperationsMenu;
+import gov.noaa.pmel.tmap.las.client.laswidget.UserListBox;
 import gov.noaa.pmel.tmap.las.client.serializable.CategorySerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.ConfigSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.DatasetSerializable;
@@ -14,6 +15,7 @@ import gov.noaa.pmel.tmap.las.client.serializable.VariableSerializable;
 import gov.noaa.pmel.tmap.las.client.util.URLUtil;
 import gov.noaa.pmel.tmap.las.client.util.Util;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -49,6 +51,7 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.TabPanel;
@@ -78,6 +81,12 @@ public class TestUI extends BaseUI {
 
 	OperationsMenu tOperationsMenu = new OperationsMenu();
 
+	VerticalPanel tTopPanel = new VerticalPanel();
+	Label tBreadCrumb = new Label("Select a data set...");
+	
+	UserListBox tVariables = new UserListBox(false);
+	List<UserListBox> tAdditionalVariables = new ArrayList<UserListBox>();
+	
 	List<String> tTribs;
 	int tTribIndex;
 
@@ -85,7 +94,6 @@ public class TestUI extends BaseUI {
 	public void onModuleLoad() {
 
 		super.onModuleLoad();
-		activateNativeHooks();
 		activateNativeHooks();	
 
 		openid = Util.getParameterString("openid");
@@ -105,7 +113,26 @@ public class TestUI extends BaseUI {
 
 
 		tOperationsMenu.addClickHandler(tExternalOperationClickHandler);
-		uiPanel.setWidget(0, 0, tOperationsMenu);
+		
+		tVariables.addItem("Variables", "varid");
+		tVariables.addChangeHandler(new ChangeHandler() {
+
+			@Override
+			public void onChange(ChangeEvent event) {
+				int index = tVariables.getSelectedIndex();
+				xVariable = (VariableSerializable) tVariables.getUserObject(index);
+				tBreadCrumb.setText(xVariable.getDSName()+": "+xVariable.getName());
+				Util.getRPCService().getConfig(xView, xVariable.getDSID(), xVariable.getID(), getGridCallback);
+			}
+			
+		});
+		
+		tTopPanel.add(tOperationsMenu);
+		tTopPanel.add(tBreadCrumb);
+		tTopPanel.add(tVariables);
+		tVariables.addAddButtonClickHandler(tAddVariableClickHandler);
+		
+		uiPanel.setWidget(0, 0, tTopPanel);
 		uiPanel.setWidget(1, 0, xMainPanel);
 
 		// Set the required handlers...
@@ -302,14 +329,17 @@ public class TestUI extends BaseUI {
 				if ( cats[0].isVariableChildren() ) {
 					DatasetSerializable ds = cats[0].getDatasetSerializable();
 					VariableSerializable[] vars = ds.getVariablesSerializable();
-
+                    tVariables.clear();
 					for (int i=0; i < vars.length; i++ ) {
+						tVariables.addItem(vars[i].getName(), vars[i].getID());
+						tVariables.addUserObject(vars[i]);
 						if ( vars[i].getID().equals(xVarID) ) {
 							xVariable = vars[i];
 							// View is null to get all operations
 							Util.getRPCService().getConfig(null, xVariable.getDSID(), xVariable.getID(), getGridCallback);
 						}
 					}
+					tBreadCrumb.setText(ds.getName()+": "+xVariable.getName());
 				}
 			}
 		}
@@ -527,9 +557,24 @@ public class TestUI extends BaseUI {
 
 		@Override
 		public void onSelection(SelectionEvent<TreeItem> event) {
+			
 			Object u = event.getSelectedItem().getUserObject();
 			if ( u instanceof VariableSerializable ) {
 				xVariable = (VariableSerializable) u;
+				tBreadCrumb.setText(xVariable.getDSName()+": "+xVariable.getName());
+				int index = 0;
+				TreeItem parent = event.getSelectedItem().getParentItem();
+				tVariables.clear();
+				for (int c = 0; c < parent.getChildCount(); c++) {
+					TreeItem sibling = parent.getChild(c);
+					VariableSerializable sibling_var = (VariableSerializable) sibling.getUserObject();
+					if ( sibling_var.getName().equals(xVariable.getName()) ) {
+						index = c;
+					}
+					tVariables.addUserObject(sibling_var);
+				    tVariables.addItem(sibling_var.getName(), sibling_var.getID());	
+				}
+				tVariables.setSelectedIndex(index);
 				Util.getRPCService().getConfig(xView, xVariable.getDSID(), xVariable.getID(), getGridCallback);
 			} else if ( u instanceof CategorySerializable ) {
 				CategorySerializable cat = (CategorySerializable) u;
@@ -597,4 +642,75 @@ public class TestUI extends BaseUI {
 		}
 
 	};
+	public ClickHandler tAddVariableClickHandler = new ClickHandler() {
+
+		@Override
+		public void onClick(ClickEvent event) {
+			// Only add N-1 additional variables...
+			
+			
+			// listbox.getElement().getFirstChildElement().setAttribute("disabled" ,"disabled" )
+			if ( tAdditionalVariables.size() == 0 ) {
+				tVariables.removeVectors();
+			}
+			if ( tAdditionalVariables.size() < tVariables.getItemCount() - 1 ) {
+				UserListBox listBox = new UserListBox();
+				int count = tVariables.getItemCount();
+				for (int c = 0; c < count; c++ ) {
+					listBox.addItem(tVariables.getName(c), tVariables.getValue(c));
+					listBox.addUserObject(tVariables.getUserObject(c));
+				}
+				
+				tTopPanel.add(listBox);
+				tAdditionalVariables.add(listBox);
+				listBox.addAddButtonClickHandler(tAddVariableClickHandler);	
+				listBox.setRemoveButtonVisible(true);
+				if ( tAdditionalVariables.size() < tVariables.getItemCount() - 1 ) {
+					listBox.setAddButtonVisible(true);
+				} else { 
+					listBox.setAddButtonVisible(false);
+				}
+				final int i = tAdditionalVariables.size() - 1;
+				listBox.addRemoveButtonClickHandler(new ClickHandler() {
+
+					@Override
+					public void onClick(ClickEvent event) {
+
+						tTopPanel.remove(tAdditionalVariables.get(i));
+						tAdditionalVariables.remove(i);
+						if ( i > 0 ) {
+							tAdditionalVariables.get(i-1).setAddButtonVisible(true);
+							tAdditionalVariables.get(i-1).setRemoveButtonVisible(true);
+						} else {
+							tVariables.setAddButtonVisible(true);
+							tVariables.addVectors();
+						}
+
+					}
+
+				});
+				int l = 0;
+				boolean done = false;
+				while ( !done ) {
+
+					if ( tVariables.getSelectedIndex() != l && !isSelected(l) || l >= tVariables.getItemCount() - 1  ) {
+						listBox.setSelectedIndex(l);
+						done = true;
+					}
+                    l++;
+                    
+				}
+			}
+		}
+		
+	};
+	private boolean isSelected(int i) {
+		for (Iterator lbIt = tAdditionalVariables.iterator(); lbIt.hasNext();) {
+			UserListBox lb = (UserListBox) lbIt.next();
+			if ( lb.getSelectedIndex() == i ) {
+				return true;
+			}
+		}
+		return false;
+	}
 }

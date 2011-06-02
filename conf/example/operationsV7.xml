@@ -1448,7 +1448,7 @@ streamable="true" mime_type="application/postscript"/> -->
     </operation>
     <!--end: placemarks for OSMC -->
     <operation ID="Shape_File" output_template="output_shape_file"
-    	category="file">
+    	category="file" name="Shape File Output">
     	<operation name="NetCDF file" ID="Data_Extract_netCDF"
     		output_template="netcdf" service_action="Data_Extract_netCDF"
     		order="0500" category="file">
