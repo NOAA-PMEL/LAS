@@ -113,6 +113,18 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
 		
 		return cats;
 	}
+	public ConfigSerializable getConfig(String view, String[] xpaths) throws RPCException {
+		ConfigSerializable wire_config = new ConfigSerializable();
+		String dsid = Util.getDSID(xpaths[0]);
+		String varid = Util.getVarID(xpaths[0]);
+		GridSerializable wire_grid = getGridSerializable(dsid, varid);
+		wire_config.setGrid(wire_grid);
+		OperationSerializable[] wire_operations = getOperations(view, xpaths);
+		wire_config.setOperations(wire_operations);
+		RegionSerializable[] wire_regions = getRegionsSerializable(dsid, varid);
+		wire_config.setRegions(wire_regions);
+		return wire_config;
+	}
 	public ConfigSerializable getConfig(String view, String dsid, String varid) throws RPCException {
 		ConfigSerializable wire_config = new ConfigSerializable();
 		GridSerializable wire_grid = getGridSerializable(dsid, varid);

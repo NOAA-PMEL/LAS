@@ -39,6 +39,7 @@ package gov.noaa.pmel.tmap.addxml;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.DecimalFormat;
@@ -706,12 +707,7 @@ public class addXML {
 		while (di.hasNext()) {
 			InvDataset ThreddsDataset = (InvDataset) di.next();
 			if (ThreddsDataset.hasNestedDatasets()) {
-				CategoryBean cb;
-				if ( esg ) {
-					cb = processESGCategories(ThreddsDataset);
-				} else {
-				    cb = processCategories(ThreddsDataset);
-				}
+				CategoryBean cb = processCategories(ThreddsDataset, esg);
 				if ( cb.getCategories().size() > 0 || cb.getFilters().size() > 0 ) {
 					CategoryBeans.add(cb);
 				}
@@ -828,6 +824,13 @@ public class addXML {
 		doc.setRootElement(lasdata);
 		return doc;
 	}
+	public static Vector processDatasets(InvDataset ThreddsDataset, boolean esg) {
+		if ( esg ) {
+			return processESGDatasets(ThreddsDataset);
+		} else {
+			return processDatasets(ThreddsDataset);
+		}
+	}
 	/**
 	 * processDataset
 	 *
@@ -858,7 +861,61 @@ public class addXML {
 		}
 		return beans;
 	}
-
+    public static Vector processESGDatasets(InvDataset ThreddsDataset) {
+		Vector beans = new Vector();
+		DatasetsGridsAxesBean bean = new DatasetsGridsAxesBean();
+		DatasetBean ds = new DatasetBean();
+		Vector datasets = new Vector();
+		ArrayList<VariableBean> variables = new ArrayList<VariableBean>();
+		String id = ThreddsDataset.getID();
+		if ( id == null ) {
+			try {
+				id = "id_"+JDOMUtils.MD5Encode(ThreddsDataset.getName());
+			} catch (UnsupportedEncodingException e) {
+				id = "id_"+String.valueOf(Math.random());
+			}
+		}
+		ds.setElement(id);
+		ds.setName(ThreddsDataset.getName());
+		for (Iterator topLevelIt = ThreddsDataset.getDatasets().iterator(); topLevelIt.hasNext(); ) {
+			InvDataset topDS = (InvDataset) topLevelIt.next();
+			ds.setName(topDS.getName());
+			for (Iterator subDatasetsIt = topDS.getDatasets().iterator(); subDatasetsIt.hasNext(); ) {
+				InvDataset subDataset = (InvDataset) subDatasetsIt.next();
+				
+                // These will be the catalog containers that will contain the aggregations...
+				for (Iterator grandChildrenIt = subDataset.getDatasets().iterator(); grandChildrenIt.hasNext(); ) {
+					InvDataset grandChild = (InvDataset) grandChildrenIt.next();
+					if ( grandChild.hasAccess() && grandChild.getName().contains("aggregation")) {
+						// We are done.
+						String url = null;
+						InvAccess access = null;
+						for (Iterator ait = grandChild.getAccess().iterator(); ait.hasNext(); ) {
+							access = (InvAccess) ait.next();
+							if (access.getService().getServiceType() == ServiceType.DODS ||
+									access.getService().getServiceType() == ServiceType.OPENDAP ||
+									access.getService().getServiceType() == ServiceType.NETCDF) {
+								url = access.getStandardUrlName();
+							}
+						}
+						DatasetsGridsAxesBean dgab = createBeansFromThreddsMetadata(grandChild, url);
+						
+						for (Iterator dsit = dgab.getDatasets().iterator(); dsit.hasNext();) {
+							DatasetBean dsb = (DatasetBean) dsit.next();
+							variables.addAll(dsb.getVariables());
+						}
+						bean.getGrids().addAll(dgab.getGrids());
+						bean.getAxes().addAll(dgab.getAxes());
+					} 
+				}
+			}
+		}
+		ds.setVariables(variables);
+		datasets.add(ds);
+		bean.setDatasets(datasets);
+		beans.add(bean);
+		return beans;
+	}
 	/**
 	 * createDatasetBeanFromThreddsDataset
 	 *
@@ -1340,15 +1397,20 @@ public class addXML {
 			InvDataset topDS = (InvDataset) topLevelIt.next();
 			CategoryBean topCB = new CategoryBean();
 			topCB.setName(topDS.getName());
-			topCB.setID(topDS.getID());
+			String id = topDS.getID();
+			if ( id == null ) {
+				try {
+					id = "id_"+JDOMUtils.MD5Encode(topDS.getName());
+				} catch (UnsupportedEncodingException e) {
+					id = "id_"+String.valueOf(Math.random());
+				}
+			}
+			topCB.setID(id);
 			
-			Vector subCats = new Vector();
+			
 			for (Iterator subDatasetsIt = topDS.getDatasets().iterator(); subDatasetsIt.hasNext(); ) {
 				InvDataset subDataset = (InvDataset) subDatasetsIt.next();
-				CategoryBean subCB = new CategoryBean();
-				subCB.setName(subDataset.getName());
-				subCB.setID(subDataset.getID());
-				
+				topCB.addCatID(subDataset.getID());
 				// These will be the catalog containers that will contain the aggregations...
 				for (Iterator grandChildrenIt = subDataset.getDatasets().iterator(); grandChildrenIt.hasNext(); ) {
 					InvDataset grandChild = (InvDataset) grandChildrenIt.next();
@@ -1366,11 +1428,11 @@ public class addXML {
 						}
 						if ( url != null && url.contains("aggregation") ){
 							FilterBean filter = new FilterBean();
-							filter.setAction("apply-dataset");
+							filter.setAction("apply-variable");
 							String tag = grandChild.getID();
 							filter.setContainstag(tag);
 							topCB.addFilter(filter);
-
+							topCB.addCatID(grandChild.getID());
 						}
 					} 
 				}
@@ -1383,6 +1445,19 @@ public class addXML {
 			cb.setCategories(topCats);
 		}
 		return cb;
+	}
+	/**
+	 * Convenience methods to choose how to process the categories.
+	 * @param ThreddsDataset
+	 * @param esg
+	 * @return
+	 */
+	public static CategoryBean processCategories(InvDataset ThreddsDataset, boolean esg) {
+		if ( esg ) {
+			return processESGCategories(ThreddsDataset);
+		} else {
+			return processCategories(ThreddsDataset);
+		}
 	}
 	/**
 	 * processCategories

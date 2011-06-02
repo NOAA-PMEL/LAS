@@ -32,6 +32,8 @@ public class CategoryBean {
 	private Vector categories;
 	private Vector contributors;
 	private String id;
+	// In esg we eliminate some sub-categories which we have to track.
+	private Set<String> catids = new HashSet<String>();
 
 	public CategoryBean() {
 		filters = new Vector();
@@ -138,7 +140,9 @@ public class CategoryBean {
 	public Vector getContributors() {
 		return contributors;
 	}
-
+	public void addCatID(String catid) {
+		catids.add(catid);
+	}
 	/**
 	 * toXml
 	 *
@@ -148,6 +152,12 @@ public class CategoryBean {
 
 		Element category = new Element("category");
 
+		for (Iterator catidIt = catids.iterator(); catidIt.hasNext();) {
+			String id = (String) catidIt.next();
+			Element catid = new Element("catid");
+			catid.setAttribute("ID", id);
+			category.addContent(catid);
+		}
 		for (Iterator contribIt = contributors.iterator(); contribIt.hasNext(); ) {
 			ContributorBean contribBean = (ContributorBean) contribIt.next();
 			Element contributor = contribBean.toXml();
@@ -180,4 +190,6 @@ public class CategoryBean {
 		}    
 		return category;
 	}
+
+	
 }
