@@ -67,8 +67,8 @@ ENDIF
 
 ! Line color. Ignore if this is a multi-var plot.
 
-IF `($ferret_line_color%0|default>0|*>1%) AND ($data_count) EQ 1` THEN
-  DEFINE SYMBOL qualifiers = ($qualifiers)/COLOR=($ferret_line_color%0|default>black|red|blue|green|lightblue|purple|*>black%)
+IF `($data_count) EQ 1` THEN
+  DEFINE SYMBOL qualifiers = ($qualifiers)/COLOR=($ferret_line_color%blue|default>blue|black|red|blue|green|lightblue|purple|*>blue%)
 ENDIF
 
 ! line thickness

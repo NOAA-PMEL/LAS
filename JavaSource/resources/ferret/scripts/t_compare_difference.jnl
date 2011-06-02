@@ -152,9 +152,7 @@ ENDIF
 
 ! Line color
 
-IF `($ferret_line_color%0|default>0|*>1%)` THEN
-  DEFINE SYMBOL qualifiers = ($qualifiers)/COLOR=($ferret_line_color%0|default>black|red|blue|green|lightblue|purple|*>black%)
-ENDIF
+DEFINE SYMBOL qualifiers = ($qualifiers)/COLOR=($ferret_line_color%red|default>red|black|red|blue|green|lightblue|purple|*>red%)
 
 ! symbols
 
