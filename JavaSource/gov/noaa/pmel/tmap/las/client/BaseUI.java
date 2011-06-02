@@ -88,6 +88,7 @@ public class BaseUI implements EntryPoint {
 	 */
 	VariableSerializable xVariable;
 	VariableSerializable xNewVariable;
+	List<VariableSerializable> xAdditionalVariables = new ArrayList<VariableSerializable>();
 
 	/*
 	 * Every Plot UI must have a data set and a plot options button
@@ -157,7 +158,7 @@ public class BaseUI implements EntryPoint {
 	int xPanelWidth;
 	int xRightPad = 45;
 	int xTopPad = 90;
-	int xControlsWidth = 290;
+	int xControlsWidth = 258;
 	String xControlsWidthPx = xControlsWidth+"px";
 	
 	String xContainerType = Constants.FRAME;
@@ -623,13 +624,25 @@ public class BaseUI implements EntryPoint {
     		}
     	}
     }
+    private void setAnnotationsHTMLURL(String url) {
+    	
+    	for (int i = 0; i < xPanelCount; i++ ) {
+    		OutputPanel panel = xPanels.get(i);
+    		if ( !panel.isUsePanelSettings() ) {
+    		    xPanels.get(i).setAnnotationsHTMLURL(url);
+    		}
+    	}
+    }
     public native void activateNativeHooks()/*-{
         var localObject = this;
         $wnd.updateMapSelection = function(slat, nlat, wlon, elon) {        
-            localObject.@gov.noaa.pmel.tmap.las.client.BaseUI::setMapSelection(DDDD)(slat, nlat, wlon, elon);
+            $entry(localObject.@gov.noaa.pmel.tmap.las.client.BaseUI::setMapSelection(DDDD)(slat, nlat, wlon, elon));
         }
         $wnd.updateCurrentURL = function(url) {
-        	localObject.@gov.noaa.pmel.tmap.las.client.BaseUI::setCurrentURL(Ljava/lang/String;)(url);
+        	$entry(localObject.@gov.noaa.pmel.tmap.las.client.BaseUI::setCurrentURL(Ljava/lang/String;)(url));
+        }
+        $wnd.setAnnotationURLfromJS = function(url) {
+        	$entry(localObject.@gov.noaa.pmel.tmap.las.client.BaseUI::setAnnotationsHTMLURL(Ljava/lang/String;)(url));
         }
     }-*/;
 }
