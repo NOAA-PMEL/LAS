@@ -51,6 +51,8 @@ import java.util.HashMap;
 import java.util.Properties;
 import java.util.ArrayList;
 import java.util.regex.Pattern;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
@@ -73,7 +75,6 @@ import org.jdom.Element;
 
 import java.util.Iterator;
 
-import ucar.nc2.NetcdfFile;
 import ucar.nc2.*;
 
 /**
@@ -170,6 +171,7 @@ public class KMLTool extends TemplateTool  {
         LASBackendResponse lasBackendResponse = new LASBackendResponse();
 
         String output = lasBackendRequest.getResultAsFile("kml");
+        String kmz = lasBackendRequest.getResultAsFile("kmz");
         String map_scale_file = lasBackendRequest.getChainedDataFile("map_scale");
         String map_scale_URL = kmlBackendConfig.getHttpBaseURL() + "/" + map_scale_file.substring(map_scale_file.lastIndexOf(File.separator), map_scale_file.length());
         String plot_image_file = lasBackendRequest.getChainedDataFile("plot_image");
@@ -230,6 +232,7 @@ public class KMLTool extends TemplateTool  {
         }
         ve.mergeTemplate(kml,"ISO-8859-1", context, kmlWriter);
         kmlWriter.close();
+        writeKMZ(kmz, output);
         lasBackendResponse.addResponseFromRequest(lasBackendRequest);
         return lasBackendResponse;
     }
@@ -243,6 +246,7 @@ public class KMLTool extends TemplateTool  {
 
         LASBackendResponse lasBackendResponse = new LASBackendResponse();
         String output = lasBackendRequest.getResultAsFile("kml");
+        String kmz = lasBackendRequest.getResultAsFile("kmz");
         String baseURL = kmlBackendConfig.getHttpBaseURL();
 
         //get the files written by the Ferret backend service (last step of the compound operation)
@@ -306,8 +310,40 @@ public class KMLTool extends TemplateTool  {
         }
         ve.mergeTemplate(kml,"ISO-8859-1", context, kmlWriter);
         kmlWriter.close();
+        
+        writeKMZ(kmz, output);
+        
         lasBackendResponse.addResponseFromRequest(lasBackendRequest);
 
         return lasBackendResponse;
+    }
+    private void writeKMZ(String kmz, String kml) {
+    	final int BUFFER = 2048;
+        byte data[] = new byte[BUFFER];
+        if ( kmz != null ) {
+        	try {
+				ZipOutputStream out = new ZipOutputStream(new FileOutputStream(kmz));
+				FileInputStream in = new FileInputStream(kml);
+				out.putNextEntry(new ZipEntry(kml));
+				// Transfer bytes from the file to the ZIP file
+				int len;
+				while ((len = in.read(data)) > 0) {
+					out.write(data, 0, len);
+				}
+
+				// Complete the entry
+				out.closeEntry();
+				in.close();
+
+				// Complete the ZIP file
+				out.close();
+			} catch (FileNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+        }
     }
 }

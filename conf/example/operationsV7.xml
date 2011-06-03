@@ -443,6 +443,7 @@ streamable="true" mime_type="application/postscript"/> -->
           </args>
           <response ID="PlotResp" type="HTML" index="1">
             <result type="kml" ID="kml" streamable="true" mime_type="application/vnd.google-earth.kml+xml" file_suffix=".kml"/>
+            <result type="kmz" ID="kmz" streamable="true" mime_type="application/vnd.google-earth.kmz" file_suffix=".kmz"/>            
           </response>
           <service>kml</service>
       </operation>
@@ -475,6 +476,7 @@ streamable="true" mime_type="application/postscript"/> -->
         </args>
         <response ID="PlotResp" type="HTML" index="1">
           <result type="kml" ID="kml" streamable="true" mime_type="application/vnd.google-earth.kml+xml" file_suffix=".kml"/>
+          <result type="kmz" ID="kmz" streamable="true" mime_type="application/vnd.google-earth.kmz" file_suffix=".kmz"/>
         </response>
         <service>kml</service>
       </operation>
@@ -507,6 +509,7 @@ streamable="true" mime_type="application/postscript"/> -->
         </args>
         <response ID="KMLResp" type="HTML" index="1">
           <result type="kml" ID="kml" streamable="true" mime_type="application/vnd.google-earth.kml+xml" file_suffix=".kml"/>
+          <result type="kmz" ID="kmz" streamable="true" mime_type="application/vnd.google-earth.kmz" file_suffix=".kmz"/>
         </response>
         <service>kml</service>
       </operation>
@@ -1436,6 +1439,7 @@ streamable="true" mime_type="application/postscript"/> -->
             </args>
             <response ID="KMLResp" type="HTML" index="1">
               <result type="kml" ID="kml" streamable="true" mime_type="application/vnd.google-earth.kml+xml" file_suffix=".kml"/>
+              <result type="kmz" ID="kmz" streamable="true" mime_type="application/vnd.google-earth.kmz" file_suffix=".kmz"/>
             </response>
             <service>kml</service>
           </operation>
