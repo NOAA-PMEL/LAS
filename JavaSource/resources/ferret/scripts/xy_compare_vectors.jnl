@@ -266,6 +266,7 @@ ELSE
       PPL VECTOR, ($PPL_VEC_XSKIP), ($PPL_VEC_YSKIP)
 
 ENDIF
+sh sym ferret_diff_var; pause
 
 ! Overall header at the very top
 GO LAS_ferret_las_version_header

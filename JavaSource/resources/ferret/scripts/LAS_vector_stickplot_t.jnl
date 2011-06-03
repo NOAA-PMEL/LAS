@@ -99,6 +99,8 @@ LET yloc = `-0.7`
 IF `STRINDEX("($ferret_plot_title)", "<NL>") GT 0` THEN LET yloc = -0.5
 LABEL/NOUSER `($ppl$xlen)/2`,`yloc`, 0, 0, 0.14, ($ferret_plot_title)
 
+GO vector_labels_reset
+
 ! Overall header at the very top
 GO LAS_ferret_las_version_header
 

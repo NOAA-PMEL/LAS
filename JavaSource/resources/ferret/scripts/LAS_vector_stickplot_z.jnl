@@ -176,6 +176,8 @@ REPEAT/RANGE=`ks+delta_z`:`ke`:`delta_z`/NAME=m (  \
  PLOT/NOY/K=`M`/AXES=0,0,0,1($qualifiers)/set ($ferret_vector_1_noz), ($ferret_vector_2_noz); \
    PPL YAXIS ($yaxis_setting);  PPL tics,0,0,0,0; PPL axlsze,0,0; PPL PLOTUV 0 1) 
 
+GO vector_labels_reset
+
 ! Make a key: a stick of the length of half the vertical axis; labeled with
 ! the length of the corresponding vector.
 

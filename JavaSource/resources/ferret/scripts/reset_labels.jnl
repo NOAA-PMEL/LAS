@@ -17,21 +17,23 @@ IF `STRLEN("($ferret_view)") EQ 2` THEN
    IF `($nokey"0") EQ 0` THEN PPL SHAKEY 1,,,,,,,,,,1
 ENDIF
 
-IF ($labnum_x"0|*>1") THEN 
-   DEFINE SYMBOL longitude_($num)_lab ($lab($labnum_x))
-ENDIF
-IF ($labnum_y"0|*>1") THEN 
-   DEFINE SYMBOL latitude_($num)_lab ($lab($labnum_y))
-ENDIF
-IF ($labnum_z"0|*>1") THEN
-   DEFINE SYMBOL depth_($num)_lab ($lab($labnum_z))
-ENDIF
-IF ($labnum_t"0|*>1") THEN
-   DEFINE SYMBOL time_($num)_lab ($lab($labnum_t))
-ENDIF
-
-IF ($labnum_calend"0|*>1") THEN
-   DEFINE SYMBOL calendar_lab ($lab($labnum_calend))
+IF `($data_count"1") EQ 1` THEN
+   IF ($labnum_x"0|*>1") THEN 
+      DEFINE SYMBOL longitude_lab ($lab($labnum_x))
+   ENDIF
+   IF ($labnum_y"0|*>1") THEN 
+      DEFINE SYMBOL latitude_lab ($lab($labnum_y))
+   ENDIF
+   IF ($labnum_z"0|*>1") THEN
+      DEFINE SYMBOL depth_lab ($lab($labnum_z))
+   ENDIF
+   IF ($labnum_t"0|*>1") THEN
+      DEFINE SYMBOL time_lab ($lab($labnum_t))
+   ENDIF
+   
+   IF ($labnum_calend"0|*>1") THEN
+      DEFINE SYMBOL calendar_lab ($lab($labnum_calend))
+   ENDIF
 ENDIF
 
 IF ($ferret_annotations"0|*>1") THEN 
@@ -39,3 +41,10 @@ IF ($ferret_annotations"0|*>1") THEN
    PPL XLAB
    PPL YLAB
 ENDIF
+
+
+LET add_urls = 1
+IF `STRCMP("($data_0_dataset_name)", "($data_0_dataset_url)") EQ 0` THEN LET add_urls = 0
+DEFINE SYMBOL dataset_title_lab = DATASET: ($data_0_dataset_name)
+
+
