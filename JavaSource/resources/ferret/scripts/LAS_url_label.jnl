@@ -1,6 +1,5 @@
 ! LAS_url_label.jnl
 
-
 ! Define upper-right labels with the url; the URL is not plotted automatically when the var is
 ! (the same thing may be done in transform scripts or in differencing setup; that is ok
 ! 1/2010 fix ticket 745 - immediate-mode expressions where the string contains an = sign
@@ -27,15 +26,17 @@ IF `got_dataset_label EQ 0` THEN
      DEFINE SYMBOL upper_right_text_($n_right_labels) = DATA SET: ($data_$1_dataset_id)
      LET got_dataset_label = 1
      DEFINE SYMBOL dataset_title_($num)_lab = ($upper_right_text_($n_right_labels))
+     DEFINE SYMBOL dataset_title_lab = ($upper_right_text_($n_right_labels))
    ENDIF
    IF ($data_$1_dataset_name"0|*>1") THEN
      DEFINE SYMBOL upper_right_($n_right_labels) = DATA SET: ($data_$1_dataset_name)
      DEFINE SYMBOL upper_right_text_($n_right_labels) = DATA SET: ($data_$1_dataset_name)
      LET got_dataset_label = 1
      DEFINE SYMBOL dataset_title_($num)_lab = ($upper_right_text_($n_right_labels))
+     DEFINE SYMBOL dataset_title_lab = ($upper_right_text_($n_right_labels))
    ENDIF
 ENDIF
-
+pause
 ! If we didnt get a label from the above, use the URL
 
 IF `got_dataset_label EQ 0` THEN
@@ -58,7 +59,7 @@ IF `got_dataset_label EQ 0` THEN
    ENDIF
    
 ENDIF
-
+pause
 ! If labels are not going to be on the plots, save the url
 
 IF `STRINDEX("($data_$1_dataset_url)","http") NE 0` THEN
@@ -72,6 +73,16 @@ IF `STRINDEX("($data_$1_dataset_url)","http") NE 0` THEN
    DEFINE SYMBOL dataset_url_($num)_lab = OPeNDAP URL: ($data_$1_urlpath)
 ELSE
    DEFINE SYMBOL dataset_url_($num)_lab = DATA SET: ($data_$1_dataset_url)
+ENDIF
+
+IF `($num) GT 1` THEN
+   IF `($add_0_url"0|*>1") EQ 0` THEN 
+      DEFINE SYMBOL dataset_url_lab ($dataset_url_0_lab) (1)
+      DEFINE SYMBOL add_0_url = 1
+   ENDIF
+   DEFINE SYMBOL dataset_url_lab ($dataset_url_lab) ($dataset_url_($num)_lab) (`($num)+1`)
+ELSE
+   DEFINE SYMBOL dataset_url_lab ($dataset_url_0_lab)
 ENDIF
 
 ! If the dataset name or URL and is really long, split into multiple lines.
@@ -224,3 +235,4 @@ IF `got_dataset_label EQ 0` THEN
 ENDIF
 
 ! End of $RCSfile ------------LAS_url_label.jnl-------------------------- 
+

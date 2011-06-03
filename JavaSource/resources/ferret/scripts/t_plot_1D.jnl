@@ -71,7 +71,6 @@ ENDIF
 IF `($data_count) EQ 1` THEN
   DEFINE SYMBOL qualifiers = ($qualifiers)/COLOR=($ferret_line_color%blue|default>blue|black|red|blue|green|lightblue|purple|*>blue%)
 ENDIF
-pause
 
 ! line thickness
 

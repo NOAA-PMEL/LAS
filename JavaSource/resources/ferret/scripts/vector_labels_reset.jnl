@@ -11,15 +11,18 @@ IF ($ferret_diff_var%0|*>1%) THEN
    IF ($labnum_t"0|*>1") THEN go unlabel ($labnum_t)
 ENDIF
 
-IF ($labnum_x"0|*>1") THEN 
-   DEFINE SYMBOL longitude_($num)_lab ($lab($labnum_x))
-ENDIF
-IF ($labnum_y"0|*>1") THEN 
-   DEFINE SYMBOL latitude_($num)_lab ($lab($labnum_y))
-ENDIF
-IF ($labnum_z"0|*>1") THEN
-   DEFINE SYMBOL depth_($num)_lab ($lab($labnum_z))
-ENDIF
-IF ($labnum_t"0|*>1") THEN
-   DEFINE SYMBOL time_($num)_lab ($lab($labnum_t))
+
+IF `($data_count"1") EQ 2` THEN  ! non-difference vector plot.
+   IF ($labnum_x"0|*>1") THEN 
+      DEFINE SYMBOL longitude_lab ($lab($labnum_x))
+   ENDIF
+   IF ($labnum_y"0|*>1") THEN 
+      DEFINE SYMBOL latitude_lab ($lab($labnum_y))
+   ENDIF
+   IF ($labnum_z"0|*>1") THEN
+      DEFINE SYMBOL depth_lab ($lab($labnum_z))
+   ENDIF
+   IF ($labnum_t"0|*>1") THEN
+      DEFINE SYMBOL time_lab ($lab($labnum_t))
+   ENDIF
 ENDIF

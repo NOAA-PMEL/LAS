@@ -42,6 +42,8 @@ GO LAS_initialize_data 1
 DEFINE SYMBOL ferret_vector_2 ($ferret_plot_var)
 DEFINE SYMBOL ferret_plot_title "($ferret_plot_title_1), ($data_title) ($data_units)"
 DEFINE SYMBOL ferret_vector_2_noregion ($ferret_plot_var_1_noregion)
+DEFINE SYMBOL variable_lab ($ferret_plot_title)
+pause
 
 ! See if the vector components are on staggered grids
 GO LAS_check_staggered
