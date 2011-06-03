@@ -36,7 +36,7 @@ IF `got_dataset_label EQ 0` THEN
      DEFINE SYMBOL dataset_title_lab = ($upper_right_text_($n_right_labels))
    ENDIF
 ENDIF
-pause
+
 ! If we didnt get a label from the above, use the URL
 
 IF `got_dataset_label EQ 0` THEN
@@ -59,7 +59,7 @@ IF `got_dataset_label EQ 0` THEN
    ENDIF
    
 ENDIF
-pause
+
 ! If labels are not going to be on the plots, save the url
 
 IF `STRINDEX("($data_$1_dataset_url)","http") NE 0` THEN
