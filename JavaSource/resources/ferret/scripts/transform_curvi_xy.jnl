@@ -8,12 +8,16 @@ DEFINE SYMBOL which_var ($num)
 
 IF `($constraint_0_lhs"0|Curv_to_Rect_Regridding>1|*>0")` THEN 
    DEFINE SYMBOL data_var_transform = , Regridded Curvilinear to Rectilinear ($constraint_0_rhs)-degree Grid,
-      DEFINE SYMBOL data_dup_varname ($data_var)_regrid
+   DEFINE SYMBOL data_dup_varname ($data_var)_regrid
+   DEFINE SYMBOL note_num = `($note_num"0") + 1`
+   DEFINE SYMBOL note_($note_num)_lab = Regridded Curvilinear to Rectilinear ($constraint_0_rhs)-degree Grid
 
 ELIF  `STRINDEX("($ferret_view)", "xy") EQ 0` THEN
    IF ($ferret_interpolate_data%0|false>0|true>1|1|0|*>1%) THEN 
       DEFINE SYMBOL data_var_transform = , Interpolated from Curvilinear coordinates
       DEFINE SYMBOL data_dup_varname ($data_var)_sample
+      DEFINE SYMBOL note_num = `($note_num"0") + 1`
+      DEFINE SYMBOL note_($note_num)_lab = Interpolated from Curvilinear coordinates
    ENDIF
 
 ELSE
@@ -161,7 +165,16 @@ IF ($ferret_view"|xy>1|*>0") THEN
 
 ! Unless its a prop/prop plot, label as a native curv plot.
    DEFINE SYMBOL native_lab = Native Curvilinear Plot
-   IF ($its_prop_prop_plot"0|*>1") THEN CANCEL SYMBOL native_lab 
+   IF ($its_prop_prop_plot"0|*>1") THEN 
+      CANCEL SYMBOL native_lab 
+   ELSE
+      IF `($curvi_note"0|*>1") EQ 0` THEN
+         DEFINE SYMBOL note_num = `($note_num"0") + 1`
+         DEFINE SYMBOL note_($note_num)_lab = ($native_lab)
+	 DEFINE SYMBOL curvi_note = 1
+      ENDIF
+      IF ($ferret_annotations"0|*>1") THEN CANCEL SYMBOL native_lab
+   ENDIF
 
    DEFINE SYMBOL native_curvilinear_xy = 1
 
@@ -193,6 +206,7 @@ IF ($ferret_view"|xy>1|*>0") THEN
       DEFINE SYMBOL ferret_plot_var ($expr1)plot_var[d=($data_num)]($expr2), xcoord, ycoord
       DEFINE SYMBOL ferret_plot_var_m360 ($expr1)plot_var[d=($data_num)]($expr2), xcoord-360, ycoord
    ENDIF
+
    DEFINE SYMBOL ferret_plot_title "($expr1)($data_title)($expr2) ($data_units) ($native_lab)"
 
    IF ($expr3"0|*>1") THEN
@@ -237,6 +251,9 @@ ELIF `STRLEN ("($ferret_view)") LE 2` THEN
    IF ($ferret_interpolate_data%0|false>0|true>1|1|0|*>1%) THEN 
       GO curvi_sample_slice.jnl
       DEFINE SYMBOL data_var_transform = , Interpolated from Curvilinear coordinates
+      DEFINE SYMBOL note_num = `($note_num"0") + 1`
+      DEFINE SYMBOL note_($note_num)_lab = Interpolated from Curvilinear coordinates
+
    ELSE
       GO curvi_nrst_slice.jnl
    ENDIF
