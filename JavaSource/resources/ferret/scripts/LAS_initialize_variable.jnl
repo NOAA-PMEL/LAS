@@ -9,6 +9,9 @@
 ! 3/2008 ACM Use SHADE/TRIM for shade underlays of FILL plots (Ferret v6.1),
 !            so no need to call LAS_define_region_plus_1.jnl
 ! 10-Jul-2008 ACM Define ferret_x_var, needed for listing data to files
+!  3-Jun-2011 ACM Allow configuration to send in ferret_factor and 
+!             ferret_factor_label to apply factor to variables and to add
+!             a nice label to the title/units string.
 
 ! this is the second part of LAS_initialize_data.jnl
 
