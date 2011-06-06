@@ -74,7 +74,13 @@ IF `nz GT num_levels` THEN
 ENDIF
 
 LET y2 = 0.88
-LET del = `0.8/enz`
+LET upper_vpx = 0.9
+IF ($ferret_annotations"0|*>1") THEN 
+   LET upper_vpx = 0.98
+   LET y2 = 0.98
+ENDIF
+
+LET del = `(y2 - 0.08)/enz`
 LET y1 = `y2 - del` + 0.02
 
 !GO LAS_auto_veclen_animate
@@ -91,7 +97,9 @@ DEFINE SYMBOL yaxis_setting `-1*($ferret_vector_length)` ($ferret_vector_length)
 ! This viewport will be used to draw the axis at the bottom 
 ! and to label the t axis.
 
-DEF VIEW/AXES/XLIM=0.1:0.9/YLIM=0.095:0.85 bigview
+LET upper_vpx = 0.9
+IF ($ferret_annotations"0|*>1") THEN LET upper_vpx = 0.98
+DEF VIEW/AXES/XLIM=0.1:`upper_vpx`/YLIM=0.095:0.85 bigview
 
 ! This viewport will contain the key with the standard arrow length.
 
@@ -107,8 +115,8 @@ DEF VIEW/AXES/XLIM=0.:1./YLIM=0.01:0.095 keyview
 
 REPEAT/RANGE=`ks`:`ke`:`delta_z`/NAME=m (\
  IF `m GT ke` THEN EXIT/LOOP;  \
- DEF VIEW/AXES/XLIM=0.1:0.9/YLIM=`y1`:`y2` rt_`m`; \
- DEF VIEW/AXES/XLIM=0.1:0.9/YLIM=`y1`:`y2` lf_`m`; \
+ DEF VIEW/AXES/XLIM=0.1:`upper_vpx`/YLIM=`y1`:`y2` rt_`m`; \
+ DEF VIEW/AXES/XLIM=0.1:`upper_vpx`/YLIM=`y1`:`y2` lf_`m`; \
  LET y1 = `y1 - del`; LET y2 = `y2 - del`)
 
 ! Draw the horizontal axis by plotting a variable having no data in the vertical range.
@@ -119,10 +127,13 @@ LET/BAD=9999 all_zero = IF MISSING(($ferret_vector_1),0) THEN 0 ELSE 0*($ferret_
 PLOT/NOY/AX=0,1,0,0/k=`ke`/VLIM=100:200/TITLE=" "/NOLAB all_zero 
 
 ! Put on the title. If the title was split into two lines, move it up a bit.
-LET yloc = `-0.7`
-IF `STRINDEX("($ferret_plot_title)", "<NL>") GT 0` THEN LET yloc = -0.5
-LABEL/NOUSER `($ppl$xlen)/2`,`yloc`, 0, 0, 0.14, ($ferret_plot_title)
-LABEL/NOUSER -0.7, `($ppl$ylen)/2`, 0, 90, 0.12 "Depth (`($ferret_vector_1),return=zunits`)"
+
+IF `($ferret_annotations"0|*>1") EQ 0` THEN 
+   LET yloc = `-0.7`
+   IF `STRINDEX("($ferret_plot_title)", "<NL>") GT 0` THEN LET yloc = -0.5
+   LABEL/NOUSER `($ppl$xlen)/2`,`yloc`, 0, 0, 0.14, ($ferret_plot_title)
+   LABEL/NOUSER -0.7, `($ppl$ylen)/2`, 0, 90, 0.12 "Depth (`($ferret_vector_1),return=zunits`)"
+ENDIF
 
 ! Overall header at the very top
 GO LAS_ferret_las_version_header
