@@ -44,6 +44,8 @@ public class AxesWidgetGroup extends Composite {
 	int mapRow;
 	int mapCol;
 	List<String> viewAxes = new ArrayList<String>();   // This is just the view, but individual axes
+	List<ChangeHandler> zChangeHandlers = new ArrayList<ChangeHandler>();
+	List<ChangeHandler> tChangeHandlers = new ArrayList<ChangeHandler>();
 	/**
 	 * A widget to hold a set of x, y, z, t, and e(nsemble) axis controls and to display them in groups according to the view.  Initially the map
 	 * is at the top and z and t are below, but this can be switched.
@@ -58,8 +60,10 @@ public class AxesWidgetGroup extends Composite {
 		plotApplyButton.setTitle(panel_title);
 		plotApplyButton.setWidth("35px");
 		orthoApplyButton = new PushButton("Apply");
+		plotApplyButton.setVisible(false);
 		orthoApplyButton.setTitle(ortho_title);
 		orthoApplyButton.setWidth("35px");
+		orthoApplyButton.setVisible(false);
 		plotAxesLayout = new FlexTable();
 		orthoAxesLayout = new FlexTable();
 		refMap = new OLMapWidget("128px", "256px", tile_server);
@@ -122,6 +126,8 @@ public class AxesWidgetGroup extends Composite {
 					             Double.valueOf(grid.getXAxis().getLo()), 
 					             Double.valueOf(grid.getXAxis().getHi()));
 		}
+		addTChangeHandlersToWidget();
+		addZChangeHandlersToWidget();
 	}
 	private void setAxisVisible(String type, boolean visible) {
 		if ( type.contains("x") ) {
@@ -242,11 +248,23 @@ public class AxesWidgetGroup extends Composite {
 	public OLMapWidget getRefMap() {
 		return refMap;
 	}
-    public void setZChangeHandler(ChangeHandler zchange) {
-    	zWidget.addChangeHandler(zchange);
+    public void addZChangeHandler(ChangeHandler zchange) {
+    	zChangeHandlers.add(zchange);
     }
-    public void setTChangeHandler(ChangeHandler tchange) {
-    	dateTimeWidget.addChangeHandler(tchange);
+    public void addTChangeHandler(ChangeHandler tchange) {
+    	tChangeHandlers.add(tchange);
+    }
+    private void addTChangeHandlersToWidget() {
+    	for (Iterator changeIt = tChangeHandlers.iterator(); changeIt.hasNext();) {
+			ChangeHandler handler = (ChangeHandler) changeIt.next();
+			dateTimeWidget.addChangeHandler(handler);
+		}
+    }
+    private void addZChangeHandlersToWidget() {
+    	for (Iterator changeIt = zChangeHandlers.iterator(); changeIt.hasNext();) {
+			ChangeHandler handler = (ChangeHandler) changeIt.next();
+			zWidget.addChangeHandler(handler);
+		}
     }
     public DateTimeWidget getTAxis() {
     	return dateTimeWidget;
@@ -349,6 +367,8 @@ public class AxesWidgetGroup extends Composite {
     public void addApplyHandler(ClickHandler handler) {
     	plotApplyButton.addClickHandler(handler);
     	orthoApplyButton.addClickHandler(handler);
+    	plotApplyButton.setVisible(true);
+    	orthoApplyButton.setVisible(true);
     }
     public List<String> getViewAxes() {
     	return viewAxes;

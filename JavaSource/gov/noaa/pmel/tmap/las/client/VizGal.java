@@ -34,6 +34,7 @@ import com.google.gwt.user.client.ui.ClickListener;
 import com.google.gwt.user.client.ui.DisclosurePanel;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.ListBox;
+import com.google.gwt.user.client.ui.PushButton;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.ToggleButton;
@@ -48,13 +49,10 @@ import com.google.gwt.user.client.ui.FlexTable.FlexCellFormatter;
  */
 public class VizGal extends BaseUI {
 	
-	
-	
 	/*
 	 * The main panel for this UI, has custom vizGal Buttons and the BaseUI main panel
 	 */
 	FlexTable vVizGalPanel = new FlexTable();
-
 
 	/*
 	 * Keep track of which axis is in the plot panels.
@@ -118,12 +116,14 @@ public class VizGal extends BaseUI {
 	public void onModuleLoad() {
 		super.onModuleLoad();
 		
+		int col = 0;
 		
 		addMenuButtons(buttonLayout);
 		vVizGalPanel.setWidget(1, 0, xMainPanel);
 		
 		initialHistory = getAnchor();
 		
+		addApplyHandler(settingsButtonApplyHandler);
 		
 		// Button to turn on and off difference mode.
 		differenceButton = new ToggleButton("Difference Mode");
@@ -131,10 +131,13 @@ public class VizGal extends BaseUI {
 		differenceButton.setTitle("Toggle Difference Mode");
 		differenceButton.addClickListener(differencesClick);
 		
-		buttonLayout.setWidget(0, 0, differenceButton);
 		
+		buttonLayout.setWidget(0, col++, differenceButton);
 		
-		xAxesWidget.addApplyHandler(settingsButtonApplyHandler);
+		xAxesWidget.addTChangeHandler(needApply);
+		xAxesWidget.addZChangeHandler(needApply);
+		
+		// xAxesWidget.addApplyHandler(settingsButtonApplyHandler);
 		// Comparison Axes Selector
 		
 		xComparisonAxesSelector.addAxesChangeHandler(compareAxisChangeHandler);
@@ -145,11 +148,12 @@ public class VizGal extends BaseUI {
 		autoContourButton.setTitle("Set consistent contour levels for all panels.");
 		autoContourButton.addClickListener(autoContour);
 		
-		buttonLayout.setWidget(0, 1, autoContourButton);
+		buttonLayout.setWidget(0, col++, autoContourButton);
+		
 		autoContourTextBox = new TextBox();
 		autoContourTextBox.ensureDebugId("autoContourTextBox");
-		buttonLayout.setWidget(0, 2, autoContourTextBox);
-
+		buttonLayout.setWidget(0, col++, autoContourTextBox);
+		
 		
 		RootPanel.get("vizGal").add(vVizGalPanel);
 		//RootPanel.get("PLOT_LINK").setVisible(false);
@@ -160,11 +164,13 @@ public class VizGal extends BaseUI {
 		setDatasetSelectionHandler(xVisGalDatasetSelectionHandler);
 		setOperationsClickHandler(xVizGalOperationsClickHandler);
 		setOptionsOkHandler(optionsOkHandler);
-		addPanelApplyClickHandler(panelApplyButtonClick);
+		addPanelTAxesChangeHandler(needApply);
+		addPanelZAxesChangeHandler(needApply);
+		addPanelMapChangeHandler(mapListener);
 		addPanelRevertClickHandler(panelApplyButtonClick);
 		annotationsControl.addOpenHandler(annotationsOpen);
 		annotationsControl.addCloseHandler(annotationsClose);
-		buttonLayout.setWidget(0, 3, annotationsControl);
+		buttonLayout.setWidget(0, col++, annotationsControl);
 		
 		// Initialize the gallery with an asynchronous call to the server to get variable needed.
 		if ( xDSID != null && xVarID != null & xOperationID != null && xView != null) {
@@ -548,6 +554,8 @@ public class VizGal extends BaseUI {
 	};
 	private void refresh(boolean switchAxis, boolean history) {
 
+		applyButton.removeStyleDependentName("APPLY-NEEDED");
+		
 		if (autoContourTextBox.getText().equals(Constants.NO_MIN_MAX) ) {
 			autoContourTextBox.setText("");
 		}
