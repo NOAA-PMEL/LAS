@@ -406,6 +406,7 @@ public class OutputPanel extends Composite {
 		}
 		lasRequest.setProperty("ferret", "view", view);
 		lasRequest.setProperty("ferret", "size", ".8333");
+		lasRequest.addProperty("ferret", "annotations", "file");
 		// Add the variable in the upper left panel
 		if ( variable.isVector() ) {
 			// Add the first component
@@ -1019,7 +1020,7 @@ public class OutputPanel extends Composite {
 			// This just got set and we are headed into panel mode so save the state...
 			prePanelModeVariable = var;
 			prePanelModeState = getHistoryToken();
-			grid.setStyleName("panelSettingsColor");
+			grid.setStyleName("panelBackground");
 			if ( !singlePanel ) {
 				top.setWidget(0, 2, revert);
 			}
@@ -1465,5 +1466,14 @@ public class OutputPanel extends Composite {
 	}
 	public void setAnnotationsHTMLURL(String url) {
 		lasAnnotationsPanel.setAnnotationsHTMLURL(url);
+	}
+	public void addTChangeHandler(ChangeHandler handler) {
+		panelAxesWidgets.addTChangeHandler(handler);
+	}
+	public void addZChangeHandler(ChangeHandler handler) {
+		panelAxesWidgets.addZChangeHandler(handler);
+	}
+	public void setMapSelectionChangeLister(MapSelectionChangeListener handler) {
+		panelAxesWidgets.getRefMap().setMapListener(handler);
 	}
 }
