@@ -98,7 +98,7 @@ ENDIF
 
 DEFINE SYMBOL ferret_plot_title "($data_title) ($data_units)"
 IF ($ferret_factor_label"0|*>1") THEN 
-   DEFINE SYMBOL ferret_plot_title  "@CR($data_title) ($data_units) ($ferret_factor_label)"
+   DEFINE SYMBOL ferret_plot_title  "($data_title) ($data_units) ($ferret_factor_label)"
    IF `($num) GT 0` THEN DEFINE SYMBOL ferret_plot_title  "($data_title) ($data_units) ($ferret_factor_label)"
 ELIF ($ferret_factor"0|*>1") THEN 
    DEFINE SYMBOL ferret_plot_title  "($data_title) ($data_units) (x($ferret_factor))"
