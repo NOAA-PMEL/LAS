@@ -1,3 +1,14 @@
+
+! Get orthogonal-axis labels.
+
+IF `STRCMP("($ferret_view)", "xy") NE 0` THEN
+   IF `($do_curvi_xy%0|*>1%) EQ 0` THEN
+      shade/set ($data_0_var)[($region_full)]
+   ELSE
+         shade/set ($ferret_plot_var)
+   ENDIF
+ENDIF
+
 IF ($xform_dms"0|*>1") THEN PPL XFOR (($xform_dms))
 IF ($yform_dms"0|*>1") THEN PPL YFOR (($yform_dms))
 IF ($labnum_dset"0|*>1") THEN go unlabel ($labnum_dset)
@@ -26,3 +37,5 @@ IF `($data_count"1") EQ 2` THEN  ! non-difference vector plot.
       DEFINE SYMBOL time_lab ($lab($labnum_t))
    ENDIF
 ENDIF
+
+
