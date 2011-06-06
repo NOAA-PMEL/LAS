@@ -177,6 +177,10 @@ public class KMLTool extends TemplateTool  {
         String plot_image_file = lasBackendRequest.getChainedDataFile("plot_image");
         String plot_image_URL = kmlBackendConfig.getHttpBaseURL() + "/" + plot_image_file.substring(plot_image_file.lastIndexOf(File.separator), plot_image_file.length());
 
+        if ( output.equals("") ) {
+        	output = kmz.replaceAll("kmz", "kml");
+        }
+        
         String kml = lasBackendRequest.getServiceAction();
         if (!kml.endsWith(".vm")) {
             kml = kml+".vm";
@@ -248,6 +252,12 @@ public class KMLTool extends TemplateTool  {
         String output = lasBackendRequest.getResultAsFile("kml");
         String kmz = lasBackendRequest.getResultAsFile("kmz");
         String baseURL = kmlBackendConfig.getHttpBaseURL();
+        
+
+        if ( output.equals("") ) {
+        	output = kmz.replaceAll("kmz", "kml");
+        }
+        
 
         //get the files written by the Ferret backend service (last step of the compound operation)
         String ferret_listing_file = lasBackendRequest.getChainedDataFile("ferret_listing");
@@ -324,7 +334,9 @@ public class KMLTool extends TemplateTool  {
         	try {
 				ZipOutputStream out = new ZipOutputStream(new FileOutputStream(kmz));
 				FileInputStream in = new FileInputStream(kml);
-				out.putNextEntry(new ZipEntry(kml));
+				File file = new File(kml);
+				String entry = file.getName();
+				out.putNextEntry(new ZipEntry(entry));
 				// Transfer bytes from the file to the ZIP file
 				int len;
 				while ((len = in.read(data)) > 0) {
