@@ -7,6 +7,7 @@ import gov.noaa.pmel.tmap.las.client.laswidget.DatasetButton;
 import gov.noaa.pmel.tmap.las.client.laswidget.OperationsWidget;
 import gov.noaa.pmel.tmap.las.client.laswidget.OptionsButton;
 import gov.noaa.pmel.tmap.las.client.laswidget.OutputPanel;
+import gov.noaa.pmel.tmap.las.client.map.MapSelectionChangeListener;
 import gov.noaa.pmel.tmap.las.client.serializable.VariableSerializable;
 import gov.noaa.pmel.tmap.las.client.util.Util;
 
@@ -54,6 +55,11 @@ public class BaseUI implements EntryPoint {
 	 */
 	List<OutputPanel> xPanels = new ArrayList<OutputPanel>();
 	FlexTable xPanelTable = new FlexTable();
+	
+	/*
+	 * A global "apply" control
+	 */
+	PushButton applyButton = new PushButton("Apply");
 
 	String xDSID;
 	String xVarID;
@@ -196,6 +202,8 @@ public class BaseUI implements EntryPoint {
 	}
 	public void initialize() {
 		
+		applyButton.setWidth("35px");
+		
 		xTileServer = getTileServer();
 		
 		// Somebody might have already set these.  Only get them from the query string if they are null.
@@ -226,6 +234,8 @@ public class BaseUI implements EntryPoint {
 		xThi = Util.getParameterString("thi");
 
 		xAxesWidget = new AxesWidgetGroup("Plot Axes", "Other Axes", "vertical", xControlsWidthPx, "ApplyTo_gallery", xTileServer);
+		
+		xAxesWidget.getRefMap().setMapListener(mapListener);
 
 		xComparisonAxesSelector = new ComparisonAxisSelector(xControlsWidthPx);
 
@@ -256,6 +266,10 @@ public class BaseUI implements EntryPoint {
 		xMainPanelCellFormatter.setVerticalAlignment(1, 1, HasVerticalAlignment.ALIGN_TOP);
 
 		xNavigationControls.setWidget(0, 0, xSettingsHeader);		
+		
+		// Make it visible only if it has a handler attached.
+		applyButton.setVisible(false);
+		xNavigationControls.setWidget(1, 0, applyButton);
 		
 		// This are bumped down one for the grow shrink experiment...
 		xNavigationControls.setWidget(2, 0, xAxesWidget);
@@ -485,6 +499,21 @@ public class BaseUI implements EntryPoint {
 		}
 		
 	}
+	public void addPanelTAxesChangeHandler(ChangeHandler handler) {
+		for (int i = 0; i < xPanelCount; i++ ) {
+			xPanels.get(i).addTChangeHandler(handler);
+		}
+	}
+	public void addPanelMapChangeHandler(MapSelectionChangeListener handler) {
+		for (int i = 0; i < xPanelCount; i++ ) {
+			xPanels.get(i).setMapSelectionChangeLister(handler);
+		}	
+	}
+	public void addPanelZAxesChangeHandler(ChangeHandler handler) {
+		for (int i = 0; i < xPanelCount; i++ ) {
+			xPanels.get(i).addZChangeHandler(handler);
+		}
+	}
 	public void addPanelRevertClickHandler(ClickHandler handler) {
 		for (int i = 0; i < xPanelCount; i++ ) {
 			xPanels.get(i).addRevertHandler(handler);
@@ -613,6 +642,25 @@ public class BaseUI implements EntryPoint {
 		pop.add(plots);
 		pop.show();
 	}
+	public void addApplyHandler (ClickHandler handler) {
+		applyButton.setVisible(true);
+		applyButton.addClickHandler(handler);
+	}
+	public ChangeHandler needApply = new ChangeHandler() {
+
+		@Override
+		public void onChange(ChangeEvent event) {
+			applyButton.addStyleDependentName("APPLY-NEEDED");
+		}
+		
+	};
+	protected MapSelectionChangeListener mapListener = new MapSelectionChangeListener() {
+		
+		@Override
+		public void onFeatureChanged() {
+            applyButton.addStyleDependentName("APPLY-NEEDED");			
+		}
+	};
     private void setMapSelection(double s, double n, double w, double e) {
         xAxesWidget.getRefMap().setCurrentSelection(s, n, w, e);
     }
