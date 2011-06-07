@@ -59,7 +59,7 @@ public class BaseUI implements EntryPoint {
 	/*
 	 * A global "apply" control
 	 */
-	PushButton applyButton = new PushButton("Apply");
+	PushButton applyButton = new PushButton("Update Plots");
 
 	String xDSID;
 	String xVarID;
@@ -202,8 +202,6 @@ public class BaseUI implements EntryPoint {
 	}
 	public void initialize() {
 		
-		applyButton.setWidth("35px");
-		
 		xTileServer = getTileServer();
 		
 		// Somebody might have already set these.  Only get them from the query string if they are null.
@@ -265,18 +263,18 @@ public class BaseUI implements EntryPoint {
 		xMainPanelCellFormatter.setVerticalAlignment(1, 0, HasVerticalAlignment.ALIGN_TOP);
 		xMainPanelCellFormatter.setVerticalAlignment(1, 1, HasVerticalAlignment.ALIGN_TOP);
 
-		xNavigationControls.setWidget(0, 0, xSettingsHeader);		
+		int navControlIndex = 0;
+		xNavigationControls.setWidget(navControlIndex++, 0, xSettingsHeader);		
 		
 		// Make it visible only if it has a handler attached.
 		applyButton.setVisible(false);
-		xNavigationControls.setWidget(1, 0, applyButton);
 		
 		// This are bumped down one for the grow shrink experiment...
-		xNavigationControls.setWidget(2, 0, xAxesWidget);
-		xNavigationControls.setWidget(3, 0, xComparisonAxesSelector);
-		xNavigationControls.setWidget(4, 0, xOperationsWidget);
-		//xNavigationControls.setWidget(5, 0, xApplyAnalysis);
-		//xNavigationControls.setWidget(6, 0, xAnalysisWidget);
+		xNavigationControls.setWidget(navControlIndex++, 0, xAxesWidget);
+		xNavigationControls.setWidget(navControlIndex++, 0, xComparisonAxesSelector);
+		xNavigationControls.setWidget(navControlIndex++, 0, xOperationsWidget);
+		//xNavigationControls.setWidget(navControlIndex++, 0, xApplyAnalysis);
+		//xNavigationControls.setWidget(navControlIndex++, 0, xAnalysisWidget);
 
 		xHideControls.setOpen(true);
 		xHideControls.addCloseHandler(new CloseHandler<DisclosurePanel>() {
@@ -340,10 +338,12 @@ public class BaseUI implements EntryPoint {
 	    	
 	    });
 	    
-		xButtonLayout.setWidget(0, 0, xHideControls);
-		xButtonLayout.setWidget(0, 1, xDatasetButton);
-		xButtonLayout.setWidget(0, 2, xOptionsButton);
-		xButtonLayout.setWidget(0, 3, xPrinterFriendlyButton);
+		int buttonLayoutIndex = 0;
+		xButtonLayout.setWidget(0, buttonLayoutIndex++, xHideControls);
+		xButtonLayout.setWidget(0, buttonLayoutIndex++, applyButton);
+		xButtonLayout.setWidget(0, buttonLayoutIndex++, xDatasetButton);
+		xButtonLayout.setWidget(0, buttonLayoutIndex++, xOptionsButton);
+		xButtonLayout.setWidget(0, buttonLayoutIndex++, xPrinterFriendlyButton);
 		
 		
 		xMainPanel.setWidget(0, 0, xButtonLayout);
