@@ -407,6 +407,11 @@ public class BaseUI implements EntryPoint {
 		xPanelCount = numPanels;
 		int col = 0;
 		int row = 0;
+		if ( xPanelCount == 1 ) {
+			applyButton.setText("Update Plot");
+		} else {
+			applyButton.setText("Update Plots");
+		}
 		for(int i = 0; i < numPanels; i++ ) {
 			String title = "Panel-"+i;
 			boolean compare_panel = false;
@@ -521,18 +526,18 @@ public class BaseUI implements EntryPoint {
 	}
 	public void handlePanelShowHide() {
 		if ( xPanelHeaderHidden ) {
-			for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
-				OutputPanel panel = (OutputPanel) panelIt.next();
-				panel.show();
-			}
+//			for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
+//				OutputPanel panel = (OutputPanel) panelIt.next();
+//				panel.show();
+//			}
 			xMainPanelCellFormatter.setVisible(1, 0, true);
 			xPanelHeaderHidden = !xPanelHeaderHidden;
 			resize();
 		} else {
-			for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
-				OutputPanel panel = (OutputPanel) panelIt.next();
-				panel.hide();
-			}
+//			for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
+//				OutputPanel panel = (OutputPanel) panelIt.next();
+//				panel.hide();
+//			}
 			xMainPanelCellFormatter.setVisible(1, 0, false);	
 			xPanelHeaderHidden = !xPanelHeaderHidden;
 			resize();

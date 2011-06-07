@@ -213,12 +213,13 @@ public class OutputPanel extends Composite {
 
 		top.setWidget(0, 0, lasAnnotationsPanel);
 		//top.getCellFormatter().setWordWrap(0, 0, false);
-		top.getColumnFormatter().setWidth(0, "85%");
+		top.getColumnFormatter().setWidth(0, "80%");
+		top.getColumnFormatter().setWidth(1, "80px");
 		top.getCellFormatter().setHeight(0, 0, "30px");
 		top.getColumnFormatter().addStyleName(1, "las-align-right");
 		
 		if ( comparePanel ) {
-			Label gs = new Label("(See left)");
+			Label gs = new Label("   ");
 			top.setWidget(0, 1, gs);
 		} else {
 			top.setWidget(0, 1, settingsButton);
