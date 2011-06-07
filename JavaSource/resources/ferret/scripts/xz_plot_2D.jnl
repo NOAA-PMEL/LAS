@@ -110,6 +110,14 @@ IF ($plot_type"0|FILL>1|*>0) THEN DEFINE SYMBOL shade_underlay = TRUE
 ! Set the URL label for the first dataset.
 GO LAS_url_label 0
 
+! Make a plot,needed to get the number of levels (SHADE/SET doesnt do it.)
+
+IF ($ferret_annotations"0|*>1") THEN
+   SHADE($qualifiers)($shade_qualifiers)/TITLE="($ferret_plot_title)" ($ferret_var_0)
+   CANCEL VIEW
+   SET VIEW full_view
+ENDIF
+
 ! Draw the plot and we are done
 
 IF `($data_count"0") EQ 1` THEN
@@ -120,14 +128,12 @@ IF `($data_count"0") EQ 1` THEN
    IF ($shade_underlay) THEN 
       SHADE($qualifiers)/TRIM/TITLE="($ferret_plot_title)"/SET ($ferret_var_0)
       GO reset_labels 
-      IF ($ferret_annotations"0|*>1") THEN GO key_at_top
       PPL SHADE
       IF `($LEV_NUM"0") GT 245/2` THEN PPL SHASET RESET
       ($plot_type)($qualifiers)/OVER/NOLAB ($ferret_var_0)
    ELSE
       ($plot_type)($qualifiers)/TITLE="($ferret_plot_title)"/SET ($ferret_var_0)
       GO reset_labels 
-      IF ($ferret_annotations"0|*>1") THEN GO key_at_top
       PPL ($plot_type)
    ENDIF
 

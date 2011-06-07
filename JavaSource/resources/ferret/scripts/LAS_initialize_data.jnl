@@ -44,5 +44,6 @@ GO LAS_initialize_variable
 DEFINE SYMBOL variable_($1"0")_lab = ($ferret_plot_title)
 IF `($1"0") EQ 0` THEN DEFINE SYMBOL variable_lab = ($ferret_plot_title)
 
-! End of $RCSfile ------------LAS_initialize_data.jnl--------------------------
+IF `STRLEN("($ferret_view)") GT 1` THEN DEFINE SYMBOL qualifiers = ($qualifiers)/KEY=CONT
 
+! End of $RCSfile ------------LAS_initialize_data.jnl--------------------------

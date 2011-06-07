@@ -182,6 +182,14 @@ ENDIF
 DEFINE SYMBOL shade_underlay = FALSE
 IF ($plot_type"0|FILL>1|*>0) THEN DEFINE SYMBOL shade_underlay = TRUE
 
+! Make a plot,needed to get the number of levels (SHADE/SET doesnt do it.)
+
+IF ($ferret_annotations"0|*>1") THEN
+   SHADE($qualifiers)/TRIM/TITLE="($ferret_plot_title)" ($ferret_diff_var)
+   CANCEL VIEW
+   SET VIEW full_view
+ENDIF
+
 ! Draw the plot
 IF ($shade_underlay) THEN 
 
@@ -190,9 +198,7 @@ IF ($shade_underlay) THEN
 
       SHADE($qualifiers)($shade_qualifiers)/TITLE="($ferret_plot_title)"/SET ($ferret_diff_var)
       GO reset_labels
-      IF ($ferret_annotations"0|*>1") THEN 
-	 GO key_at_top
-      ELSE
+      IF `($ferret_annotations"0|*>1") EQ 0` THEN 
          IF ($labnum_z"0|*>1") THEN go unlabel ($labnum_z)
          IF ($labnum_t"0|*>1") THEN go unlabel ($labnum_t)
       ENDIF
@@ -203,9 +209,7 @@ IF ($shade_underlay) THEN
 ELSE
    ($plot_type)($qualifiers)/TITLE="($ferret_plot_title)"/SET ($ferret_diff_var)
       GO reset_labels
-      IF ($ferret_annotations"0|*>1") THEN 
-	 GO key_at_top
-      ELSE
+      IF `($ferret_annotations"0|*>1") EQ 0` THEN 
          IF ($labnum_z"0|*>1") THEN go unlabel ($labnum_z)
          IF ($labnum_t"0|*>1") THEN go unlabel ($labnum_t)
       ENDIF
