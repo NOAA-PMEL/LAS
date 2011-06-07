@@ -165,13 +165,19 @@ IF ($plot_type"0|FILL>1|*>0) THEN DEFINE SYMBOL shade_underlay = TRUE
 
 IF ($ferret_deg_min_sec"0|false>0|*>1") THEN GO LAS_set_deg_min_sec.jnl
 
+! Make a plot,needed to get the number of levels (SHADE/SET doesnt do it.)
+
+IF ($ferret_annotations"0|*>1") THEN
+   SHADE($qualifiers)/TRIM/TITLE="($ferret_plot_title)" ($ferret_diff_var)
+   CANCEL VIEW
+   SET VIEW full_view
+ENDIF
+
 ! Draw the plot
 IF ($shade_underlay) THEN 
    SHADE($qualifiers)/TRIM/TITLE="($ferret_plot_title)"/SET ($ferret_diff_var)
       GO reset_labels
-      IF ($ferret_annotations"0|*>1") THEN 
-	 GO key_at_top
-      ELSE
+      IF `($ferret_annotations"0|*>1") EQ 0` THEN 
          IF ($labnum_x"0|*>1") THEN go unlabel ($labnum_x)
          IF ($labnum_z"0|*>1") THEN go unlabel ($labnum_z)
       ENDIF
@@ -181,9 +187,7 @@ IF ($shade_underlay) THEN
 ELSE
    ($plot_type)($qualifiers)/TITLE="($ferret_plot_title)"/SET ($ferret_diff_var)
       GO reset_labels
-      IF ($ferret_annotations"0|*>1") THEN 
-	 GO key_at_top
-      ELSE
+      IF `($ferret_annotations"0|*>1") EQ 0` THEN 
          IF ($labnum_x"0|*>1") THEN go unlabel ($labnum_x)
          IF ($labnum_z"0|*>1") THEN go unlabel ($labnum_z)
       ENDIF

@@ -2,6 +2,7 @@
 ! remove lots of labels as they are relocated by the scripts
 ! Define symbols used by the annotations xml
 
+
 IF ($xform_dms"0|*>1") THEN PPL XFOR (($xform_dms))
 IF ($yform_dms"0|*>1") THEN PPL YFOR (($yform_dms))
 IF ($axlab_command"0|*>1") THEN PPL ($axlab_command)
@@ -42,6 +43,7 @@ IF ($ferret_annotations"0|*>1") THEN
    PPL YLAB
 ENDIF
 
+IF ($ferret_annotations"0|*>1") THEN GO key_at_top
 
 LET add_urls = 1
 IF `STRCMP("($data_0_dataset_name)", "($data_0_dataset_url)") EQ 0` THEN LET add_urls = 0

@@ -137,13 +137,20 @@ IF ($plot_type"0|FILL>1|*>0) THEN DEFINE SYMBOL shade_underlay = TRUE
 ! Set the URL label for the first dataset.
 GO LAS_url_label 0
 
-! Draw the plot and we are done
-
 IF ($ferret_curvi_quals"0|*>1") THEN 
    IF ($ferret_lon_modulo"1|1|0|yes>1|no>0|*>0") THEN  DEFINE SYMBOL shade_qualifiers = ($shade_qualifiers)/MODULO
 ENDIF
 
-! Turn on the key annotation (but only if there is data: 1.e35 is PPLUS tag for missing data)
+! Make a plot,needed to get the number of levels (SHADE/SET doesnt do it.)
+
+IF ($ferret_annotations"0|*>1") THEN
+   SHADE($qualifiers)($shade_qualifiers)/TITLE="($ferret_plot_title)" ($ferret_var_0)
+   CANCEL VIEW
+   SET VIEW full_view
+ENDIF
+
+! Draw the plot and we are done
+
 IF `($data_count"0") EQ 1` THEN
    DEFINE SYMBOL split_title = ($ferret_plot_title)
    GO LAS_split_title
@@ -155,7 +162,6 @@ IF `($data_count"0") EQ 1` THEN
 
       SHADE($qualifiers)($shade_qualifiers)/TITLE="($ferret_plot_title)"/SET ($ferret_var_0)
          GO reset_labels
-	 IF ($ferret_annotations"0|*>1") THEN GO key_at_top
          PPL SHADE
       IF `($LEV_NUM"0") GT 245/2` THEN PPL SHASET RESET
       ($plot_type)($qualifiers)/OVER/NOLAB ($ferret_var_0)
@@ -168,7 +174,6 @@ IF `($data_count"0") EQ 1` THEN
    
       ($plot_type)($qualifiers)/TITLE="($ferret_plot_title)"/SET ($ferret_var_0)
          GO reset_labels
-	 IF ($ferret_annotations"0|*>1") THEN GO key_at_top
          PPL ($plot_type)
       IF ($native_curvilinear_xy"0|*>1") THEN 
          PPL SHASET RESET
