@@ -37,10 +37,16 @@ IF `($data_count"1") EQ 1` THEN
    ENDIF
 ENDIF
 
+
 IF ($ferret_annotations"0|*>1") THEN 
    PPL TITLE
    PPL XLAB
    PPL YLAB
+   IF ($labnum_x"0|*>1") THEN GO unlabel ($labnum_x)
+   IF ($labnum_y"0|*>1") THEN GO unlabel ($labnum_y)
+   IF ($labnum_z"0|*>1") THEN GO unlabel ($labnum_z)
+   IF ($labnum_t"0|*>1") THEN GO unlabel ($labnum_t)
+   IF ($labnum_calend"0|*>1") THEN GO unlabel ($labnum_calend)
 ENDIF
 
 IF ($ferret_annotations"0|*>1") THEN GO key_at_top
@@ -48,5 +54,3 @@ IF ($ferret_annotations"0|*>1") THEN GO key_at_top
 LET add_urls = 1
 IF `STRCMP("($data_0_dataset_name)", "($data_0_dataset_url)") EQ 0` THEN LET add_urls = 0
 DEFINE SYMBOL dataset_title_lab = DATASET: ($data_0_dataset_name)
-
-
