@@ -24,12 +24,12 @@ DEFINE SYMBOL data_($num)_num = `($data_var),RETURN=dsetnum`
 
 ! If a factor has been passed in, apply it
 IF ($ferret_factor"0|*>1") THEN
-   IF `($redefined_var_by_factor"0|*>1") EQ 0` THEN
+   IF `($redefined_($data_($num)_var)_factor"0|*>1") EQ 0` THEN
       SET var/name=input_($data_($num)_var) ($data_($num)_var)
       LET/D=($data_num) ($data_($num)_var) = ($ferret_factor)* input_($data_($num)_var)
    ENDIF
    SET ATT/like=input_($data_($num)_var) ($data_($num)_var)  ! will annotate units explicitly, below.
-   DEFINE SYMBOL redefined_var_by_factor = 1
+   DEFINE SYMBOL redefined_($data_($num)_var)_factor = 1
 ENDIF
 
 LET attlist = ($data_var).attnames
