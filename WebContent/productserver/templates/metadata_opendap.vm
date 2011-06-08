@@ -73,10 +73,9 @@
          #set($grid = $las_config.getGrid($dsID, $var.ID))
          <td rowspan="2" bgcolor="#dddddd">$var.name</td>
          <td colspan="$colspan" bgcolor="#c0cbe7">
-         
+         #set($varID = $var.ID)
          LAS F-TDS URL:&nbsp;<a href="${las_config.getFTDSURL($dsID, $varID)}.html">$las_config.getFTDSURL($dsID, $varID)</a>
-         #if ( "$las_config.getDataAccessURL($dsID, $varID, false)" !=  "${las_config.getFTDSURL($dsID, $varID)}" &&
-                $las_config.getDataAccessURL($dsID, $varID, false).startsWith("http") )
+         #if ( "$las_config.getDataAccessURL($dsID, $varID, false)" !=  "${las_config.getFTDSURL($dsID, $varID)}" && $las_config.getDataAccessURL($dsID, $varID, false).startsWith("http") )
                 <br>Original OPeNDAP URL:&nbsp;<a href="${las_config.getDataAccessURL($dsID, $varID, false)}.html">$las_config.getDataAccessURL($dsID, $varID, false)</a>
          #end
          </td>
