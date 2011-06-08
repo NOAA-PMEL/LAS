@@ -16,6 +16,7 @@
 
 IF ($ferret_interpolate_data%0|false>0|true>1|1|0|*>1%) THEN SET MODE INTERPOLATE
 
+DEFINE SYMBOL itsa_vector_plot = 1
 DEFINE SYMBOL fview = `UPCASE("($ferret_view)")`
 
 ! If levels werent sent in, set to use centered levels.

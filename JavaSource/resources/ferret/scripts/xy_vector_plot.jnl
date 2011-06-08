@@ -22,6 +22,8 @@
 
 IF ($ferret_interpolate_data%0|false>0|true>1|1|0|*>1%) THEN SET MODE INTERPOLATE
 
+DEFINE SYMBOL itsa_vector_plot = 1
+
 DEFINE SYMBOL fview = `UPCASE("($ferret_view)")`
 
 ! Define symbols associated with the regign and data and perform any
