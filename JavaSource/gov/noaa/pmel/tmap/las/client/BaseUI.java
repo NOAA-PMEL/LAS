@@ -543,18 +543,7 @@ public class BaseUI implements EntryPoint {
 			resize();
 		}		
 	}
-	public void addAnnotationsOpenHandler(OpenHandler<DisclosurePanel> handler) {
-		for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
-			OutputPanel panel = (OutputPanel) panelIt.next();
-			panel.addAnnotationsOpenHandler(handler);
-		}
-	}
-	public void addAnnotationsCloseHandler(CloseHandler<DisclosurePanel> handler) {
-		for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
-			OutputPanel panel = (OutputPanel) panelIt.next();
-			panel.addAnnotationsCloseHandler(handler);
-		}
-	}
+
 	public void resize() {
 		xPanelWidth = getPanelWidth(xPanelCount);
 		if ( xImageSize.getValue(xImageSize.getSelectedIndex()).equals("auto") ) {

@@ -160,7 +160,7 @@ public class OutputPanel extends Composite {
 	// The current Product URL being displayed in this frame.
 	String currentURL = "";
 	
-	// The panel with the plot annotations hidded at the top of the frame...
+	// The panel with the plot annotations hidden at the top of the frame...
 	LASAnnotationsPanel lasAnnotationsPanel = new LASAnnotationsPanel();
 	
 	
@@ -1450,21 +1450,13 @@ public class OutputPanel extends Composite {
 		image.setTitle("  Click to Enlarge.  Images will size with browser.");
 		grid.setWidget(1, 0 , image);
 	}
-	public void addAnnotationsCloseHandler(CloseHandler<DisclosurePanel> handler) {
-		lasAnnotationsPanel.addCloseHandler(handler);
-	}
-	public void addAnnotationsOpenHandler(OpenHandler<DisclosurePanel> handler) {
-		lasAnnotationsPanel.addOpenHandler(handler);
-	}
+	
 	
 	public void setAnnotationsOpen(boolean open) {
 		lasAnnotationsPanel.setOpen(open);
 	}
 	
 	// This is for mock up user interface and are not used with "real" UI's.
-	public void setAnnotationsXMLURL(String url) {
-		lasAnnotationsPanel.setAnnotationsXMLURL(url);
-	}
 	public void setAnnotationsHTMLURL(String url) {
 		lasAnnotationsPanel.setAnnotationsHTMLURL(url);
 	}
