@@ -3,7 +3,9 @@ package gov.noaa.pmel.tmap.las.client.laswidget;
 import java.util.HashMap;
 import java.util.Map;
 
-
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.event.logical.shared.OpenHandler;
 import com.google.gwt.http.client.Request;
@@ -15,7 +17,10 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.DisclosurePanel;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.PopupPanel;
+import com.google.gwt.user.client.ui.ToggleButton;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.xml.client.CDATASection;
 import com.google.gwt.xml.client.Document;
@@ -50,76 +55,29 @@ public class LASAnnotationsPanel extends Composite {
 	private static final String TYPE_LAS = "las";
 	private static final String TYPE_NOTES = "notes";
 	
-	DisclosurePanel mainPanel = new DisclosurePanel("Plot Annotations");
+	ToggleButton annotationsButton;
+	PopupPanel mainPanel = new PopupPanel(false);
 	VerticalPanel layoutPanel = new VerticalPanel();
 	
 	public LASAnnotationsPanel() {
 		mainPanel.add(layoutPanel);
-		initWidget(mainPanel);
-	}
-	public void init(Map<String, String> lasAnnotations) {
-		String title = lasAnnotations.get(LAB_TITLE);
-		if ( title != null && !title.equals("") ) {
-			mainPanel.getHeaderTextAccessor().setText(title);
-		}
-		layoutPanel.clear();
-		String variable = lasAnnotations.get(LAB_VARIABLE);
-		if ( variable != null && !variable.equals("") ) {
-			layoutPanel.add(new Label(variable));
-		}		
-		String longitude = lasAnnotations.get(LAB_LONGITUDE);
-		if ( longitude != null && !longitude.equals("") ) {
-			layoutPanel.add(new Label(longitude));
-		}
-		String latitude = lasAnnotations.get(LAB_LATITUDE);
-		if ( latitude != null && !latitude.equals("") ) {
-			layoutPanel.add(new Label(latitude));
-		}
-		String depth = lasAnnotations.get(LAB_DEPTH);
-		if ( depth != null && !depth.equals("") ) {
-			layoutPanel.add(new Label(depth));
-		}
-		String time = lasAnnotations.get(LAB_TIME);
-		if ( time != null && !time.equals("") ) {
-			layoutPanel.add(new Label(time));
-		}
-		String calendar = lasAnnotations.get(LAB_CALENDAR);
-		if ( calendar != null && !calendar.equals("") ) {
-			layoutPanel.add(new Label(calendar));
-		}
-		String url = lasAnnotations.get(LAB_URL);
-		if ( url != null && !url.equals("") ) {
-			layoutPanel.add(new Label(url));
-		}
-		String note1 = lasAnnotations.get(LAB_NOTE_1);
-		if ( note1 != null && !note1.equals("") ) {
-			layoutPanel.add(new Label(note1));
-		}
-		String note2 = lasAnnotations.get(LAB_NOTE_2);
-		if ( note2 != null && !note2.equals("") ) {
-			layoutPanel.add(new Label(note2));
-		}
-		String note3 = lasAnnotations.get(LAB_NOTE_3);
-		if ( note3 != null && !note3.equals("") ) {
-			layoutPanel.add(new Label(note3));
-		}
-	}
-	public void setError(String error) {
-		layoutPanel.clear();
-		layoutPanel.add(new Label(error));	
-	}
-	public void setTitle(String title) {
-		mainPanel.getHeaderTextAccessor().setText(title);
-	}
-	
-	public void setAnnotationsXMLURL(String url) {
-		RequestBuilder sendRequest = new RequestBuilder(RequestBuilder.GET, url);
-		
-		try {
-			sendRequest.sendRequest(null, annotationsXMLCallback);
-		} catch (RequestException e) {
+		annotationsButton = new ToggleButton(new Image(GWT.getModuleBaseURL()+"../images/i_off.png"), 
+				new Image(GWT.getModuleBaseURL()+"../images/i_on.png"), new ClickHandler() {
+
+					@Override
+					public void onClick(ClickEvent event) {
+						if ( annotationsButton.isDown() ) {	
+							setOpen(true);
+						} else {
+							setOpen(false);
+						}						
+					}
 			
-		}
+		});
+		annotationsButton.setTitle("Plot Annotations");
+		annotationsButton.setWidth("22px");
+		annotationsButton.setStylePrimaryName("OL_MAP-PushButton");
+		initWidget(annotationsButton);
 	}
 	public void setAnnotationsHTMLURL(String url) {
 		RequestBuilder sendRequest = new RequestBuilder(RequestBuilder.GET, url);
@@ -130,6 +88,11 @@ public class LASAnnotationsPanel extends Composite {
 		}
 	}
 	public void setAnnotationsHTML(String html) {
+		HTML annotations = new HTML(html);
+		layoutPanel.clear();
+		layoutPanel.add(annotations);
+	}
+	public void setError(String html) {
 		HTML annotations = new HTML(html);
 		layoutPanel.clear();
 		layoutPanel.add(annotations);
@@ -225,16 +188,15 @@ public class LASAnnotationsPanel extends Composite {
 	}
 	
 	public void setOpen(boolean open) {
-		mainPanel.setOpen(open);
+		if ( open ) {
+			if ( !annotationsButton.isDown() ) annotationsButton.setDown(true);
+			mainPanel.setPopupPosition(annotationsButton.getAbsoluteLeft(), annotationsButton.getAbsoluteTop() + 32 );
+			mainPanel.show();
+		} else {
+			if ( annotationsButton.isDown() ) annotationsButton.setDown(false);
+			mainPanel.hide();
+		}
 	}
-	
-	public void addOpenHandler(OpenHandler<DisclosurePanel> handler) {
-		mainPanel.addOpenHandler(handler);
-	}
-	public void addCloseHandler(CloseHandler<DisclosurePanel> handler) {
-		mainPanel.addCloseHandler(handler);
-	}
-	
 	RequestCallback annotationsXMLCallback = new RequestCallback() {
 
 		@Override

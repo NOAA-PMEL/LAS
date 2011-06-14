@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -33,6 +34,7 @@ import com.google.gwt.user.client.ui.ChangeListener;
 import com.google.gwt.user.client.ui.ClickListener;
 import com.google.gwt.user.client.ui.DisclosurePanel;
 import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.PushButton;
 import com.google.gwt.user.client.ui.RootPanel;
@@ -109,7 +111,7 @@ public class VizGal extends BaseUI {
      // Keep track of the current operations
      OperationSerializable[] ops;
      
-     DisclosurePanel annotationsControl = new DisclosurePanel("Annotations");
+     ToggleButton annotationsControl = new ToggleButton();
      
      // Everybody that sub-classes BaseUI must implement three handlers for options OK, operations clicks and data set selections.
    
@@ -168,8 +170,29 @@ public class VizGal extends BaseUI {
 		addPanelZAxesChangeHandler(needApply);
 		addPanelMapChangeHandler(mapListener);
 		addPanelRevertClickHandler(panelApplyButtonClick);
-		annotationsControl.addOpenHandler(annotationsOpen);
-		annotationsControl.addCloseHandler(annotationsClose);
+		annotationsControl = new ToggleButton(new Image(GWT.getModuleBaseURL()+"../images/i_off.png"), 
+				new Image(GWT.getModuleBaseURL()+"../images/i_on.png"), new ClickHandler() {
+
+					@Override
+					public void onClick(ClickEvent event) {
+						if ( annotationsControl.isDown() ) {
+							for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
+								OutputPanel panel = (OutputPanel) panelIt.next();
+								panel.setAnnotationsOpen(true);
+							}
+						} else {
+							for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
+								OutputPanel panel = (OutputPanel) panelIt.next();
+								panel.setAnnotationsOpen(false);
+							}
+						}
+						
+					}
+			
+		});
+		annotationsControl.setTitle("Plot Annotations");
+		annotationsControl.setWidth("22px");
+		annotationsControl.setStylePrimaryName("OL_MAP-PushButton");
 		buttonLayout.setWidget(0, col++, annotationsControl);
 		
 		// Initialize the gallery with an asynchronous call to the server to get variable needed.
