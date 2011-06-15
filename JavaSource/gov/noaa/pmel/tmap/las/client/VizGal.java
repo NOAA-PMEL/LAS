@@ -148,12 +148,14 @@ public class VizGal extends BaseUI {
 		autoContourButton = new ToggleButton("Auto Colors");
 		autoContourButton.ensureDebugId("autoContourButton");
 		autoContourButton.setTitle("Set consistent contour levels for all panels.");
-		autoContourButton.addClickListener(autoContour);
+		autoContourButton.addClickHandler(autoContour);
+		autoContourButton.addClickHandler(needApplyClick);
 		
 		buttonLayout.setWidget(0, col++, autoContourButton);
 		
 		autoContourTextBox = new TextBox();
 		autoContourTextBox.ensureDebugId("autoContourTextBox");
+		autoContourTextBox.addChangeHandler(needApply);
 		buttonLayout.setWidget(0, col++, autoContourTextBox);
 		
 		
@@ -697,10 +699,7 @@ public class VizGal extends BaseUI {
 
 				// Get the current state of the options...
 				Map<String, String> ts = xOptionsButton.getState();
-				if ( autoContourButton.isDown() ) {
-					// If the auto button is down, it wins...
-					autoScale();
-				} else {
+				if ( !autoContourButton.isDown() ) {
 					// If it's not down, the current options value will be used.
 					autoContourTextBox.setText("");
 				}
@@ -1077,9 +1076,15 @@ public class VizGal extends BaseUI {
 		}
 		
 	};
-	ClickListener autoContour = new ClickListener() {
-		public void onClick(Widget sender) {
-			refresh(false, true);
+	ClickHandler autoContour = new ClickHandler() {
+
+		@Override
+		public void onClick(ClickEvent event) {
+			if ( autoContourButton.isDown() ) {
+				autoScale();
+			} else {
+				autoContourTextBox.setText("");
+			}
 		}	
 	};
 	private void autoScale() {
@@ -1145,7 +1150,7 @@ public class VizGal extends BaseUI {
 		// Only use 4 significant digits
 
 		// Modify the optionTextField and submit the request
-		String fill_levels = "(-inf)(" + uminr + "," + umaxr + "," + dint + ")(inf)";
+		String fill_levels = "(" + uminr + "," + umaxr + "," + dint + ")";
 
 		// These are pretty close to zero.  I think the min/max did not come back from the server, so stop
 		if ( (uminr + .00001 < .0001 && umaxr + .00001 < .0001) || globalMax < -9999999. && globalMin > 9999999. ) {

@@ -648,6 +648,14 @@ public class BaseUI implements EntryPoint {
 		}
 		
 	};
+	public ClickHandler needApplyClick = new ClickHandler() {
+
+		@Override
+		public void onClick(ClickEvent event) {
+			applyButton.addStyleDependentName("APPLY-NEEDED");
+		}
+		
+	};
 	protected MapSelectionChangeListener mapListener = new MapSelectionChangeListener() {
 		
 		@Override
