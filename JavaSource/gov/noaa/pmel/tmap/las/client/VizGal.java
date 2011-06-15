@@ -711,6 +711,7 @@ public class VizGal extends BaseUI {
 		if ( history ) {
 			pushHistory();
 		}
+		resize();
 	}
 	private void setPanelAxes(OutputPanel comparePanel, OutputPanel panel) {
 		double plot_xXlo = -9999.;
