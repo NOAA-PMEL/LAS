@@ -164,7 +164,7 @@ public class BaseUI implements EntryPoint {
 	int xPanelWidth;
 	int xRightPad = 45;
 	int xTopPad = 90;
-	int xControlsWidth = 258;
+	int xControlsWidth = 280;
 	String xControlsWidthPx = xControlsWidth+"px";
 	
 	String xContainerType = Constants.FRAME;
