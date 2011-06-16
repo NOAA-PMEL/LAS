@@ -129,8 +129,11 @@ ELSE
    DEFINE SYMBOL dataset_title_lab = DATASET: ($data_0_dataset_name)
 ENDIF
 
+
 DEFINE SYMBOL variable_lab = \
-    ($ferret_title_0)(1) - ($ferret_title_1)(2)
+    Difference of ($ferret_title_0) - ($ferret_title_1)
+IF `STRCMP("($ferret_title_0)", "($ferret_title_1)") EQ 0` THEN \
+   DEFINE SYMBOL variable_lab = Difference of ($ferret_title_0) at:
 
 ! For data listings, a title without formatting information.
 DEFINE SYMBOL ferret_diff_list_title = ($dataset_title_lab)
@@ -164,10 +167,15 @@ IF `STRINDEX("($plotshape)", "X") EQ 0` THEN
       DEFINE SYMBOL n_left_labels = `($n_left_labels)+1`
       DEFINE SYMBOL upper_left_($n_left_labels) = Longitude(1): ($longlab1) ($ipen)Longitude(2): ($longlab2)
       DEFINE SYMBOL longitude_lab = LONGITUDE(1): ($longlab1) Longitude(2): ($longlab2)
+      IF `(STRCMP("($longlab1)", "($longlab2)") NE 0)` THEN 
+         DEFINE SYMBOL longitude_lab = LONGITUDE: ($longlab1) - ($longlab2)
+      ELSE
+         DEFINE SYMBOL longitude_lab = LONGITUDE: ($longlab2)
+      ENDIF
    ELIF ($region_1_x_lo"0|*>1") THEN 
       DEFINE SYMBOL n_left_labels = `($n_left_labels)+1`
       DEFINE SYMBOL upper_left_($n_left_labels) = Longitude(2): ($longlab2)
-      DEFINE SYMBOL longitude_lab = LONGITUDE(2): ($longlab2)
+      DEFINE SYMBOL longitude_lab = LONGITUDE: ($longlab2)
    ENDIF
 ENDIF
 
@@ -176,10 +184,15 @@ IF `STRINDEX("($plotshape)", "Y") EQ 0` THEN
       DEFINE SYMBOL n_left_labels = `($n_left_labels)+1`
       DEFINE SYMBOL upper_left_($n_left_labels) = Latitude(1): ($latlab1) ($ipen)Latitude(2): ($latlab2)
       DEFINE SYMBOL latitude_lab = LATITUDE(1): ($latlab1) Latitude(2): ($latlab2)
+      IF `(STRCMP("($latlab1)", "($latlab2)") NE 0)` THEN 
+         DEFINE SYMBOL latitude_lab = LATITUDE: ($latlab1) - ($latlab2)	
+      ELSE
+         DEFINE SYMBOL latitude_lab = LATITUDE: ($latlab2)
+      ENDIF
    ELIF ($region_1_y_lo"0|*>1") THEN 
       DEFINE SYMBOL n_left_labels = `($n_left_labels)+1`
       DEFINE SYMBOL upper_left_($n_left_labels) = Latitude(2): ($latlab2)
-      DEFINE SYMBOL latitude_lab = LATITUDE(2): ($latlab2)
+      DEFINE SYMBOL latitude_lab = LATITUDE: ($latlab2)
    ENDIF
 ENDIF
 
@@ -188,10 +201,15 @@ IF `STRINDEX("($plotshape)", "Z") EQ 0` THEN
       DEFINE SYMBOL n_left_labels = `($n_left_labels)+1`
       DEFINE SYMBOL upper_left_($n_left_labels) = DEPTH ($depthunits)(1): ($depthlab1) ($ipen)DEPTH ($depthunits)(2): ($depthlab2)
       DEFINE SYMBOL depth_lab = DEPTH ($depthunits)(1): ($depthlab1) DEPTH ($depthunits)(2): ($depthlab2)
+      IF `(STRCMP("($depthlab1)", "($depthlab2)") NE 0)` THEN 
+         DEFINE SYMBOL depth_lab = DEPTH ($depthunits): ($depthlab1) - ($depthlab2)
+      ELSE
+         DEFINE SYMBOL depth_lab = DEPTH ($depthunits): ($depthlab1)
+      ENDIF
    ELIF ($region_1_z_lo"0|*>1") THEN 
       DEFINE SYMBOL n_left_labels = `($n_left_labels)+1`
       DEFINE SYMBOL upper_left_($n_left_labels) = DEPTH ($depthunits)(2): ($depthlab2)
-      DEFINE SYMBOL depth_lab = DEPTH ($depthunits)(2): ($depthlab2)
+      DEFINE SYMBOL depth_lab = DEPTH ($depthunits): ($depthlab2)
    ENDIF
 ENDIF
 
@@ -199,11 +217,16 @@ IF `STRINDEX("($plotshape)", "T") EQ 0` THEN
    IF ($region_0_t_lo"0|*>1") THEN 
       DEFINE SYMBOL n_left_labels = `($n_left_labels)+1`
       DEFINE SYMBOL upper_left_($n_left_labels) = Time(1): ($timelab1) ($ipen)Time(2): ($timelab2)
-      DEFINE SYMBOL time_lab = TIME(1): ($timelab1) Time(2): ($timelab2)
+      DEFINE SYMBOL time_lab = Time(1): ($timelab1) Time(2): ($timelab2)
+      IF `(STRCMP("($timelab1)", "($timelab2)") NE 0)` THEN 
+         DEFINE SYMBOL time_lab = TIME: ($timelab1) - ($timelab2)	
+      ELSE
+         DEFINE SYMBOL time_lab = TIME: ($timelab2)
+      ENDIF
    ELIF ($region_1_t_lo"0|*>1") THEN 
       DEFINE SYMBOL n_left_labels = `($n_left_labels)+1`
       DEFINE SYMBOL upper_left_($n_left_labels) = TIME(2): ($timelab2)
-      DEFINE SYMBOL time_lab = TIME(2): ($timelab2)
+      DEFINE SYMBOL time_lab = TIME: ($timelab2)
    ENDIF
 ENDIF
 
