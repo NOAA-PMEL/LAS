@@ -38,7 +38,7 @@ text-align:left;
   </head>
   
   <body >
-     <table width="100%" style="background-color:#FAFAFA; border: 1px solid #000;">
+     <table width="100%" style="background-color:#FFF;">
       
     	#foreach ( $url in $las_annotations.getDatasetURLs() )
            <tr width="100%">
