@@ -133,7 +133,7 @@ ENDIF
 DEFINE SYMBOL variable_lab = \
     Difference of ($ferret_title_0) - ($ferret_title_1)
 IF `STRCMP("($ferret_title_0)", "($ferret_title_1)") EQ 0` THEN \
-   DEFINE SYMBOL variable_lab = Difference of ($ferret_title_0) at:
+   DEFINE SYMBOL variable_lab = Difference of ($ferret_title_0)
 
 ! For data listings, a title without formatting information.
 DEFINE SYMBOL ferret_diff_list_title = ($dataset_title_lab)
