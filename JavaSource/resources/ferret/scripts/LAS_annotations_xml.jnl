@@ -56,23 +56,32 @@ IF ($las_ferret_header_label"0|*>1") THEN
    GO write_to_xml
 ENDIF
 
-IF `($note_num"0") GT 0 OR ($calendar_lab"0|*>1")` THEN
+IF `($note_num"0") GT 0 OR ($calendar_lab"0|*>1") OR ($dataset_institute_lab"0|*>1")` THEN
    DEFINE SYMBOL out = <annotation_group type="notes">
    go write_to_xml
-   REPEAT/RANGE=1:($note_num)/NAME=m (\
-      DEFINE SYMBOL mnote = `m`; \
-      DEFINE SYMBOL out = <annotation type="note">; \
-      GO write_to_xml; \
-      DEFINE SYMBOL out = `LIST_VALUE_XML("value", "($note_($mnote)_lab)", 1, "($result_annotations_filename)" )`; \
-      DEFINE SYMBOL out = </annotation>; \
-      GO write_to_xml; \
-    )
+   IF `($note_num"0") GT 0` THEN
+      REPEAT/RANGE=1:($note_num)/NAME=m (\
+         DEFINE SYMBOL mnote = `m`; \
+         DEFINE SYMBOL out = <annotation type="note">; \
+         GO write_to_xml; \
+         DEFINE SYMBOL out = `LIST_VALUE_XML("value", "($note_($mnote)_lab)", 1, "($result_annotations_filename)" )`; \
+         DEFINE SYMBOL out = </annotation>; \
+         GO write_to_xml; \
+       )
+    ENDIF
     IF ($calendar_lab"0|*>1") THEN
       DEFINE SYMBOL out = <annotation type="note">
       GO write_to_xml
       DEFINE SYMBOL out = `LIST_VALUE_XML("value", "($calendar_lab)", 1, "($result_annotations_filename)" )`
       DEFINE SYMBOL out = </annotation>
       GO write_to_xml;
+   ENDIF
+   IF ($dataset_institute_lab"0|*>1") THEN
+      DEFINE SYMBOL out = <annotation type="note">
+      GO write_to_xml
+      DEFINE SYMBOL out = `LIST_VALUE_XML("value", "Institution: ($dataset_institute_lab)", 1, "($result_annotations_filename)" )`
+      DEFINE SYMBOL out = </annotation>
+      GO write_to_xml
    ENDIF
 
    DEFINE SYMBOL out = </annotation_group>

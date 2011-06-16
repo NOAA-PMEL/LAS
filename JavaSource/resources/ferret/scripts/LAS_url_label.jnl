@@ -85,6 +85,20 @@ ELSE
    IF `($dataset_url_0_lab"0|*>1")` THEN DEFINE SYMBOL dataset_url_lab ($dataset_url_0_lab)
 ENDIF
 
+IF ($data_0_dataset_institution"0|*>1") THEN
+
+   IF `($num) GT 1` THEN
+      IF `($add_0_institut"0|*>1") EQ 0 AND ($data_0_dataset_institution"0|*>1")` THEN 
+         DEFINE SYMBOL dataset_institute_lab ($data_0_dataset_institution) (1)
+         DEFINE SYMBOL add_0_institut = 1
+      ENDIF
+      DEFINE SYMBOL dataset_institute_lab ($dataset_institute_lab) ($data_($num)_dataset_institution) (`($num)+1`)
+   ELSE
+      IF `($data_0_dataset_institution"0|*>1")` THEN DEFINE SYMBOL dataset_institute_lab ($data_0_dataset_institution)
+   ENDIF
+
+ENDIF
+
 ! If the dataset name or URL and is really long, split into multiple lines.
 ! Split if longer than 50, but if really long, use fewer 80-character lines.
    
