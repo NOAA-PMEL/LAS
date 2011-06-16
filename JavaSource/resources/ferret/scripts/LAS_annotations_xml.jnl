@@ -13,37 +13,25 @@ IF ($dataset_title_lab%0|*>1%) THEN
   IF `STRINDEX("($dataset_url_lab%0%)", "http") EQ 0` THEN CANCEL SYMBOL dataset_url_lab
 ENDIF
 
-! If its multi-variable and vector, things are a bit different...
-IF `($data_count"1") GT 1` THEN
-   REPEAT/RANGE=2:`($data_count"1")`/NAME=ivar (\
-     DEFINE SYMBOL ivar = `ivar-1`;\
-     IF `STRCMP("($variable_($ivar)_lab%0%)", "($variable_0_lab)") EQ 0` THEN CAN SYM variable_($ivar)_lab  )
-ENDIF
-
-IF `($data_count"1") GT 2` THEN
-   REPEAT/RANGE=3:`($data_count"1")`/NAME=ivar (\
-     DEFINE SYMBOL ivar = `ivar-1`;\
-     IF `STRCMP("($variable_($ivar)_lab%0%)", "($variable_1_lab)") EQ 0` THEN CAN SYM variable_($ivar)_lab  )
-ENDIF
-
-IF `($data_count"1") GT 3` THEN
-   REPEAT/RANGE=4:`($data_count"1")`/NAME=ivar (\
-     DEFINE SYMBOL ivar = `ivar-1`;\
-     IF `STRCMP("($variable_($ivar)_lab%0%)", "($variable_2_lab)") EQ 0` THEN CAN SYM variable_($ivar)_lab  )
-ENDIF
+! Write the header line
 
 DEFINE SYMBOL out = <?xml version=\"1.0\" encoding=\"ISO-8859-1\" ?>
 MESSAGE/QUIET/CONTINUE/OUTFILE="($result_annotations_filename)"/CLOBBER ($out)
 
+! Set up list qualifiers
 DEFINE SYMBOL lquals = /NOHEAD/NOROWLAB/FILE="($result_annotations_filename)"/FORMAT=(a)/APPEND
 DEFINE SYMBOL out = <annotations>
 GO write_to_xml
 
+! orthogonal axis labels
 IF `($longitude_lab%0|*>1%)+($latitude_lab%0|*>1%)+($depth_lab%0|*>1%)+($time_lab%0|*>1%) GT 0` THEN \
     GO annotation_orthogonal_axes 
+
+! variable and dataset labels
 IF `($variable_lab%0|*>1%)+($dataset_title_lab%0|*>1%)+($dataset_url_lab%0|*>1%) GT 0` THEN \
     GO annotation_data
 
+! LAS/Ferret version header line
 IF ($las_ferret_header_label"0|*>1") THEN
    DEFINE SYMBOL out = <annotation_group type="las">
    GO write_to_xml
@@ -56,6 +44,7 @@ IF ($las_ferret_header_label"0|*>1") THEN
    GO write_to_xml
 ENDIF
 
+! Other notes that may have been set up
 IF `($note_num"0") GT 0 OR ($calendar_lab"0|*>1") OR ($dataset_institute_lab"0|*>1")` THEN
    DEFINE SYMBOL out = <annotation_group type="notes">
    go write_to_xml
@@ -88,5 +77,6 @@ IF `($note_num"0") GT 0 OR ($calendar_lab"0|*>1") OR ($dataset_institute_lab"0|*
    GO write_to_xml
 ENDIF
 
+! closing tag
 DEFINE SYMBOL out = </annotations>
 GO write_to_xml
