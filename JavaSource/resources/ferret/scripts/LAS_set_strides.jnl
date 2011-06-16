@@ -16,6 +16,13 @@
 ! TODO: When there's going to be a transformation or something, then these 
 ! calculations may not be sufficient. Might be better done by the transform script.
 
+
+! Ferret property subsample_t can be set to zero or false and
+! prevent subsampling in time.
+
+IF `($ferret_subsample_t"1|0|1|true>1|false>0|*>1") EQ 0 AND ($ferret_view"|t>1|T>1|*>0")` THEN EXIT/SCRIPT
+
+
 ! If the operation is writing a netCDF file, that is done in chunks. Do not use strides
 
 IF `(STRINDEX( "($operation_ID)", "Data_Extract" ) NE 0) AND \
@@ -30,6 +37,7 @@ IF ($do_hybrid_z"0|0|1|*>1") THEN  EXIT/SCRIPT
 
 ! Property-property plots have their own version of striding
 IF ($its_prop_prop_plot"0|0|1|*>1") THEN  EXIT/SCRIPT 
+
 
 ! ---------------------------------------------------------------------
 ! Determine striding based on the memory allocation
@@ -111,6 +119,7 @@ ENDIF
 ! If its a vector plot, let Ferret or a user setting of xskip,yskip decimate the vectors
 
 IF `STRINDEX( "($operation_ID)", "vector" ) NE 0` THEN EXIT/SCRIPT
+
 
 
 ! ---------------------------------------------------------------------
