@@ -67,7 +67,7 @@ public class OutputPanel extends Composite {
 	FlexTable grid;
 	
 	/* The top bar of widgets... */
-	Grid top;
+	FlexTable top;
 
 	/* A widget to return panel to the slide sorter control */
 	PushButton revert = new PushButton("Revert");
@@ -199,7 +199,7 @@ public class OutputPanel extends Composite {
 		//grid.getCellFormatter().setHeight(0, 0, panelHeader);
 		datasetLabel = new Label();
 
-		top = new Grid(1,3);
+		top = new FlexTable();
 
 		String title = "Settings";
 		settingsButton = new SettingsWidget(title, ID, operationID, optionID);
@@ -213,11 +213,6 @@ public class OutputPanel extends Composite {
 		revert.setTitle("Cancel Panel Settings for "+ID);
 
 		top.setWidget(0, 0, lasAnnotationsPanel);
-		//top.getCellFormatter().setWordWrap(0, 0, false);
-		top.getColumnFormatter().setWidth(0, "80%");
-		top.getColumnFormatter().setWidth(1, "80px");
-		top.getCellFormatter().setHeight(0, 0, "30px");
-		top.getColumnFormatter().addStyleName(1, "las-align-right");
 		
 		if ( comparePanel ) {
 			Label gs = new Label("   ");
