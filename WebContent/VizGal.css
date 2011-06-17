@@ -6,6 +6,26 @@
 
 }
 
+.gwt-PushButton-SMALLER {
+	padding: 0px;
+	font-size: .8em;
+}
+
+.gwt-ToggleButton-SMALLER {
+	padding: 0px;
+	font-size: .8em;
+}
+
+.OL_MAP-ToggleButton-WIDTH {
+  margin: 0;
+  width: 22px;
+}
+
+.gwt.TextBox-SMALLER {
+	padding: 0px;
+	font-size: .8em;
+}
+
 .regularBackground {
     background-color: #ACE;
 }

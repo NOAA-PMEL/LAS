@@ -134,7 +134,7 @@ public class VizGal extends BaseUI {
 		differenceButton.addClickListener(differencesClick);
 		
 		
-		buttonLayout.setWidget(0, col++, differenceButton);
+	
 		
 		xAxesWidget.addTChangeHandler(needApply);
 		xAxesWidget.addZChangeHandler(needApply);
@@ -151,13 +151,17 @@ public class VizGal extends BaseUI {
 		autoContourButton.addClickHandler(autoContour);
 		autoContourButton.addClickHandler(needApplyClick);
 		
-		buttonLayout.setWidget(0, col++, autoContourButton);
-		
 		autoContourTextBox = new TextBox();
 		autoContourTextBox.ensureDebugId("autoContourTextBox");
 		autoContourTextBox.addChangeHandler(needApply);
-		buttonLayout.setWidget(0, col++, autoContourTextBox);
 		
+		differenceButton.addStyleDependentName("SMALLER");
+		autoContourButton.addStyleDependentName("SMALLER");
+		autoContourTextBox.addStyleDependentName("SMALLER");
+		
+		buttonLayout.setWidget(0, col++, differenceButton);
+		buttonLayout.setWidget(0, col++, autoContourButton);
+		buttonLayout.setWidget(0, col++, autoContourTextBox);
 		
 		RootPanel.get("vizGal").add(vVizGalPanel);
 		//RootPanel.get("PLOT_LINK").setVisible(false);
@@ -193,8 +197,8 @@ public class VizGal extends BaseUI {
 			
 		});
 		annotationsControl.setTitle("Plot Annotations");
-		annotationsControl.setWidth("22px");
 		annotationsControl.setStylePrimaryName("OL_MAP-PushButton");
+		annotationsControl.addStyleDependentName("WIDTH");
 		buttonLayout.setWidget(0, col++, annotationsControl);
 		
 		// Initialize the gallery with an asynchronous call to the server to get variable needed.

@@ -27,8 +27,8 @@ public class OptionsButton extends Composite {
     public OptionsButton (String opid, int offset) {
     	this.offset = offset;
     	options = new OptionsWidget(opid, okClick, cancelClick);
+    	optionsButton.addStyleDependentName("SMALLER");
     	optionsButton.addClickListener(openClick);
-    	optionsButton.setWidth("75px");
     	optionsDialog.add(options);
     	optionsDialog.setText("Set Plot Options for all Plots.");
     	initWidget(optionsButton);
@@ -37,8 +37,8 @@ public class OptionsButton extends Composite {
     public OptionsButton (int offset) {
     	this.offset = offset;
     	options = new OptionsWidget(okClick, cancelClick);
+    	optionsButton.addStyleDependentName("SMALLER");
     	optionsButton.addClickListener(openClick);
-    	optionsButton.setWidth("75px");
     	optionsDialog.add(options);
     	optionsDialog.setText("Set Plot Options for all Plots.");
     	initWidget(optionsButton);

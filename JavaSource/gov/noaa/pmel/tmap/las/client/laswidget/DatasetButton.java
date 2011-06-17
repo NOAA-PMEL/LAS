@@ -43,7 +43,7 @@ public class DatasetButton extends Composite {
 	int offset = 0;
 	public DatasetButton () {
 		choose = new PushButton("Data Set");
-		choose.setWidth("55px");
+		choose.addStyleDependentName("SMALLER");
 		choose.addClickHandler(openClick);
 		datasetPanel = new PopupPanel(false);
 		datasetWidget = new DatasetWidget();
