@@ -227,11 +227,10 @@ public class OutputPanel extends Composite {
 
 		grid.setWidget(0, 0, top);
 		HTML plot = new HTML();
-		plot.setHTML(spinImage.getHTML());
+		//plot.setHTML(spinImage.getHTML());
+		plot.setHTML("<br>");
 		grid.setWidget(1, 0, plot);
 		initWidget(grid);	
-
-
 	}
 	public void init(boolean usePanel, OperationSerializable[] ops) {
 		this.ops = ops;
@@ -1180,16 +1179,21 @@ public class OutputPanel extends Composite {
 	}
 	public void setImageWidth() {
 		Widget w = grid.getWidget(1, 0);
+		// Piggy back setting the annotations width onto this method.
 		if ( autoZoom ) {
 			if ( pwidth < image_w ) {
 				// If the panel is less than the image, shrink the image.
 				int h = (int) ((image_h/image_w)*Double.valueOf(pwidth));
 				w.setWidth(pwidth+"px");
 				w.setHeight(h+"px");
+				int a = pwidth - 18;
+				lasAnnotationsPanel.setPopupWidth(a+"px");
 			} else {
 				// Just use the exact image size.
 				w.setWidth(image_w+"px");
 				w.setHeight(image_h+"px");
+				int a = (int) (image_w - 25);
+				lasAnnotationsPanel.setPopupWidth(a+"px");
 			}
 		} else {
 			setImageSize(fixedZoom);
@@ -1197,6 +1201,7 @@ public class OutputPanel extends Composite {
 		if ( spin.isVisible() ) {
 			spin.setPopupPosition(w.getAbsoluteLeft(), w.getAbsoluteTop());
 		}
+		
 	}
 	public void setPanelHeight(int height) {
 		autoZoom = true;
