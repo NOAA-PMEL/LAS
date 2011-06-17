@@ -41,7 +41,7 @@ public class SettingsWidget extends Composite {
 	protected String optionID;
 	boolean usePanel = false;
 
-	protected Button settingsButton;
+	protected PushButton settingsButton;
 	protected PopupPanel settingsPopup;
 	
 
@@ -52,6 +52,7 @@ public class SettingsWidget extends Composite {
 		this.optionID = optionID;
 		
 		closeButton = new PushButton("Close");
+		closeButton.addStyleDependentName("SMALLER");
 		closeButton.setTitle("Close settings panel for "+panelID);
 		closeButton.addClickListener(closeClick);
 		buttonBar = new HorizontalPanel();
@@ -64,7 +65,8 @@ public class SettingsWidget extends Composite {
 		operations = new OperationsWidget(title);
 		operations.addClickHandler(operationsClickHandler);
 	
-		settingsButton = new Button (title);
+		settingsButton = new PushButton (title);
+		settingsButton.addStyleDependentName("SMALLER");
 		settingsButton.addClickListener(settingsButtonClick);
 		settingsPopup = new PopupPanel(true);
 

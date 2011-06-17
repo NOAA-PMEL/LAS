@@ -40,6 +40,7 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PopupPanel;
+import com.google.gwt.user.client.ui.PushButton;
 import com.google.gwt.user.client.ui.TreeItem;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.xml.client.Document;
@@ -69,7 +70,7 @@ public class OutputPanel extends Composite {
 	Grid top;
 
 	/* A widget to return panel to the slide sorter control */
-	Button revert = new Button("Revert");
+	PushButton revert = new PushButton("Revert");
 
 	/* The current data set and variable.  */
 	Label datasetLabel;
@@ -202,13 +203,13 @@ public class OutputPanel extends Composite {
 
 		String title = "Settings";
 		settingsButton = new SettingsWidget(title, ID, operationID, optionID);
-	
 		settingsButton.addSelectionHandler(datasetSelctionHandler);
 		settingsButton.addOpenHandler(datasetOpenHandler);
 		settingsButton.addCloseHandler(datasetCloseHandler);
 		settingsButton.addOptionsOkClickListener(optionsOkListener);
 		settingsButton.addOperationClickHandler(operationsClickHandler);
-		revert.addClickListener(revertListener);
+		revert.addStyleDependentName("SMALLER");
+		revert.addClickHandler(revertHandler);
 		revert.setTitle("Cancel Panel Settings for "+ID);
 
 		top.setWidget(0, 0, lasAnnotationsPanel);
@@ -907,7 +908,8 @@ public class OutputPanel extends Composite {
 									HTML error = new HTML(t.getData().toString().trim());
 									grid.setWidget(1, 0, error);
 									retryShowing = true;
-									Button retry = new Button("Retry");
+									PushButton retry = new PushButton("Retry");
+									retry.addStyleDependentName("SMALLER");
 									retry.addClickListener(new ClickListener() {
 										public void onClick(Widget sender) {
 											
@@ -1241,13 +1243,15 @@ public class OutputPanel extends Composite {
 	public double getMax() {
 		return max;
 	}
-	public ClickListener revertListener = new ClickListener() {
-		public void onClick(Widget sender) {
+    public ClickHandler revertHandler = new ClickHandler() {
+
+		@Override
+		public void onClick(ClickEvent event) {
 			settingsButton.setUsePanel(false);
 			applyChanges();
 		}
-	};
-
+    	
+    };
 	public void addRevertHandler(ClickHandler handler) {
 		revert.addClickHandler(handler);
 	}

@@ -75,8 +75,8 @@ public class LASAnnotationsPanel extends Composite {
 			
 		});
 		annotationsButton.setTitle("Plot Annotations");
-		annotationsButton.setWidth("22px");
-		annotationsButton.setStylePrimaryName("OL_MAP-PushButton");
+		annotationsButton.setStylePrimaryName("OL_MAP-ToggleButton");
+		annotationsButton.addStyleDependentName("WIDTH");
 		initWidget(annotationsButton);
 	}
 	public void setAnnotationsHTMLURL(String url) {

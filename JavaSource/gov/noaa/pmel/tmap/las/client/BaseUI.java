@@ -339,6 +339,9 @@ public class BaseUI implements EntryPoint {
 	    });
 	    
 		int buttonLayoutIndex = 0;
+		applyButton.addStyleDependentName("SMALLER");
+		xPrinterFriendlyButton.addStyleDependentName("SMALLER");
+		// Other buttons have their style handled in the widget itself.
 		xButtonLayout.setWidget(0, buttonLayoutIndex++, xHideControls);
 		xButtonLayout.setWidget(0, buttonLayoutIndex++, applyButton);
 		xButtonLayout.setWidget(0, buttonLayoutIndex++, xDatasetButton);
