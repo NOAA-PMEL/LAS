@@ -68,7 +68,7 @@ public class SettingsWidget extends Composite {
 		settingsButton = new PushButton (title);
 		settingsButton.addStyleDependentName("SMALLER");
 		settingsButton.addClickListener(settingsButtonClick);
-		settingsPopup = new PopupPanel(true);
+		settingsPopup = new PopupPanel(false);
 
 		buttonBar.add(datasetButton);
 		buttonBar.add(optionsButton);
