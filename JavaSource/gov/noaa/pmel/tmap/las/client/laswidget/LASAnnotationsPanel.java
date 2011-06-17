@@ -197,6 +197,9 @@ public class LASAnnotationsPanel extends Composite {
 			mainPanel.hide();
 		}
 	}
+	public void setPopupWidth(String width) {
+		mainPanel.setWidth(width);
+	}
 	RequestCallback annotationsXMLCallback = new RequestCallback() {
 
 		@Override
