@@ -16,100 +16,225 @@ DEFINE SYMBOL frmt = FORMAT=comma/NOROW
 LET its_curvi = `( ($ferret_curvi_coord_lat"0|*>1) + STRINDEX("($ferret_view)", "xy") ) GT 1`
 IF ($constraint_($num)_lhs"0|Curv_to_Rect_Regridding>1|*>0") THEN LET its_curvi = 0
 
-IF `its_curvi` THEN
-   MESSAGE/ERROR ERROR: LIST CSV cannot list data on curvilienar grid 
-   EXIT/SCRIPT
-ENDIF
 
 ! Initialize data and define 1-d lists of variables to write out
+! Save the original variable name and use it in the listing.
 
-REPEAT/RANGE=0:`($data_count)-1`/NAME=outvar (define symbol var_num = `outvar`;; \
+REPEAT/RANGE=0:`($data_count)-1`/NAME=outvar (DEFINE SYMBOL var_num = `outvar`;; \
   GO LAS_initialize_region ($var_num); \
+  GO LAS_initialize_data ($var_num);\
+  SET VAR/NAME=($data_($var_num)_var)_in ($data_($var_num)_var);\
+  DEFINE SYMBOL data_($var_num)_var_orig ($data_($var_num)_var);\
+  DEFINE SYMBOL data_($var_num)_var ($data_($var_num)_var)_in;\
   GO LAS_initialize_data ($var_num);\
   DEFINE SYMBOL ferret_plot_var_($var_num) =($ferret_plot_var); \
   LET ferret_list_var_($var_num) = XSEQUENCE(($ferret_plot_var)); \
   DEFINE SYMBOL ferret_list_var_($var_num) = ferret_list_var_($var_num); \
   DEFINE SYMBOL size_($var_num)= `($ferret_list_var_($var_num)),return=isize`); \
-  IF `($var_num) GT 0` THEN if `size_($var_num) NE size_0` THEN MESSAGE/ERROR ERROR: Variables different sizes;\
-  IF `($var_num) GT 0` THEN if `size_($var_num) NE size_0` THEN exit/program )
+  IF `($var_num) GT 0` THEN if `($size_($var_num)) NE ($size_0)` THEN MESSAGE/ERROR ERROR: Variables different sizes;\
+  IF `($var_num) GT 0` THEN if `($size_($var_num)) NE ($size_0)` THEN exit/program )
+
+IF `its_curvi` THEN
+   GO list_csv_curvi_data
+   EXIT/SCRIPT
+ENDIF
+
+! For requests that encompass 360 deg of longitude Ferret returns N points if
+! the range boundaries lie exactly on grid cell boundaries and N+1 points 
+! otherwise.  Folks requesting data downloads don't want to have their their
+! first data point (sometimes) repeated so we test for that here and switch 
+! to index space.
+
+IF ($region_x"0|*>1") THEN
+   IF `($region_x_range"0|0|*>1") GT 0` THEN
+      LET the_coords = x[gx=($data_var),($region_x)]
+      DEFINE SYMBOL user_istart `the_coords,RETURN=istart`
+      DEFINE SYMBOL user_iend `the_coords,RETURN=iend`
+      CANCEL REGION/X
+      DEFINE SYMBOL data_isize `the_coords,RETURN=isize`
+      IF `($user_iend) - ($user_istart) + 1 - ($data_isize) GT 0` THEN
+         DEFINE SYMBOL new_iend `($user_iend) - 1`
+      ELSE 
+         DEFINE SYMBOL new_iend `($user_iend)`
+      ENDIF
+      SET REGION/I=($user_istart):($new_iend)
+
+! Now get the start, stop and size information
+
+     DEFINE SYMBOL imin `the_coords,RETURN=istart`
+     DEFINE SYMBOL imax `the_coords,RETURN=iend`
+     DEFINE SYMBOL isize `the_coords,RETURN=isize`
+
+   ELSE  ! range is 0
+      DEFINE SYMBOL imin 1
+      DEFINE SYMBOL imax 1
+      DEFINE SYMBOL isize 1
+   ENDIF 
+
+ENDIF  ! region_x
+
+! Now get the start, stop and size information for other dimensions.
+
+IF ($region_y"0|*>1") THEN
+   IF `($region_y_range"0|0|*>1") GT 0` THEN
+      LET the_coords = y[gy=($data_var),($region_y)]
+      DEFINE SYMBOL jmin `the_coords,RETURN=jstart`
+      DEFINE SYMBOL jmax `the_coords,RETURN=jend`
+      DEFINE SYMBOL jsize `the_coords,RETURN=jsize`
+   ELSE  ! range is 0
+      DEFINE SYMBOL jmin 1
+      DEFINE SYMBOL jmax 1
+      DEFINE SYMBOL jsize 1
+   ENDIF 
+ENDIF  ! region_y
+
+IF ($region_z"0|*>1") THEN
+   IF `($region_z_range"0|0|*>1") GT 0` THEN
+      LET the_coords = z[gz=($data_var),($region_z)]
+      DEFINE SYMBOL kmin `the_coords,RETURN=kstart`
+      DEFINE SYMBOL kmax `the_coords,RETURN=kend`
+      DEFINE SYMBOL ksize `the_coords,RETURN=ksize`
+   ELSE  ! range is 0
+      DEFINE SYMBOL kmin 1
+      DEFINE SYMBOL kmax 1 
+      DEFINE SYMBOL ksize 1
+   ENDIF
+ENDIF  ! region_z
+
+IF ($region_t"0|*>1") THEN
+      LET the_coords = t[gt=($data_var),($region_t)]
+      DEFINE SYMBOL lmin `the_coords,RETURN=lstart`
+      DEFINE SYMBOL lmax `the_coords,RETURN=lend`
+      DEFINE SYMBOL lsize `the_coords,RETURN=lsize`
+ENDIF  ! region_t
+
+! RETURN=*start returns 0 IF the axis is an undefined axis
+! A few more lines of code to handle this.
+
+!  Modulo x axis may have negative indices.
+! IF `($imin"0") lt 1` THEN DEFINE SYMBOL imin 1
+! IF `($imax"0") lt 1` THEN DEFINE SYMBOL imax 1
+
+IF `(($imin"0") EQ 0) AND (($imax"0") EQ 0)` THEN
+   DEFINE SYMBOL imin 1
+   DEFINE SYMBOL imax 1
+ENDIF
+IF `($isize"0") lt 1` THEN DEFINE SYMBOL isize 1
+IF `($jmin"0") lt 1` THEN DEFINE SYMBOL jmin 1
+IF `($jmax"0") lt 1` THEN DEFINE SYMBOL jmax 1
+IF `($jsize"0") lt 1` THEN DEFINE SYMBOL jsize 1
+IF `($kmin"0") lt 1` THEN DEFINE SYMBOL kmin 1
+IF `($kmax"0") lt 1` THEN DEFINE SYMBOL kmax 1
+IF `($ksize"0") lt 1` THEN DEFINE SYMBOL ksize 1
+IF `($lmin"0") lt 1` THEN DEFINE SYMBOL lmin 1
+IF `($lmax"0") lt 1` THEN DEFINE SYMBOL lmax 1
+IF `($lsize"0") lt 1` THEN DEFINE SYMBOL lsize 1
+CANCEL REGION/X
+IF `STRINDEX("($ferret_view)", "x") GT 0` THEN \
+   DEFINE SYMBOL region_x I=($imin):($imax)
+IF `STRINDEX("($ferret_view)", "y") GT 0` THEN \
+   DEFINE SYMBOL region_y J=($jmin):($jmax)
+IF `STRINDEX("($ferret_view)", "z") GT 0` THEN \
+   DEFINE SYMBOL region_z K=($kmin):($kmax)
+IF `STRINDEX("($ferret_view)", "t") GT 0` THEN \
+   DEFINE SYMBOL region_t L=($lmin):($lmax)
 
 DEFINE SYMBOL xx = 0
 DEFINE SYMBOL yy = 0
 DEFINE SYMBOL zz = 0
 DEFINE SYMBOL tt = 0
+
 IF `STRINDEX("($ferret_view)", "x") GT 0` THEN \
-   DEFINE SYMBOL xx = x[gx=($ferret_plot_var_($var_num)),($region_0_x)]
+   DEFINE SYMBOL xx = x[gx=($data_var),($region_x)]
 IF `STRINDEX("($ferret_view)", "y") GT 0` THEN \
-   DEFINE SYMBOL yy = y[gy=($ferret_plot_var_($var_num))),($region_0_y)]
+   DEFINE SYMBOL yy = y[gy=($data_var),($region_y)]
 IF `STRINDEX("($ferret_view)", "z") GT 0` THEN \
-   DEFINE SYMBOL zz = z[gz=($ferret_plot_var_($var_num))),($region_0_z)]
+   DEFINE SYMBOL zz = z[gz=($data_var),($region_z)]
 IF `STRINDEX("($ferret_view)", "t") GT 0` THEN \
-   DEFINE SYMBOL tt = t[gt=($ferret_plot_var_($var_num))),($region_0_t)]
+   DEFINE SYMBOL tt = t[gt=($data_var),($region_t)]
 
 IF `STRINDEX("($ferret_view)", "x") GT 0` THEN 
    LET longitude = XSEQUENCE(($xx) + 0*($yy) + 0*($zz) + 0*($tt)) 
-   LET/UNITS="`($data_0_var),RETURN=xunits`" LON = longitude 
+   LET/UNITS="`($data_0_var),RETURN=xunits`"/TITLE=Longitude LON = longitude 
    DEFINE SYMBOL xlist = LON, 
 ENDIF
+
 IF `STRINDEX("($ferret_view)", "y") GT 0` THEN 
    LET latitude = XSEQUENCE( 0*($xx) + ($yy) + 0*($zz) + 0*($tt))
-   LET/UNITS="`($data_0_var),RETURN=yunits`" LAT = latitude
+   LET/UNITS="`($data_0_var),RETURN=yunits`"/TITLE=Latitude LAT = latitude
    DEFINE SYMBOL ylist = lat, 
 ENDIF
+
 IF `STRINDEX("($ferret_view)", "z") GT 0` THEN 
    IF `($data_0_var),RETURN=isdepth` THEN
       LET depth = XSEQUENCE(0*($xx) + 0*($yy) + ($zz) + 0*($tt))
-      LET/UNITS="`($data_0_var),RETURN=zunits`" dep = depth
-      DEFINE SYMBOL zlist = depth, 
+      LET/UNITS="`($data_0_var),RETURN=zunits`"/TITLE=depth dep = depth
+      DEFINE SYMBOL zlist = dep, 
    ELSE
       LET height = XSEQUENCE(0*($xx) + 0*($yy) + ($zz) + 0*($tt))
-      LET/UNITS="`($data_0_var),RETURN=zunits`" ht = height
-      DEFINE SYMBOL zlist = height, 
+      LET/UNITS="`($data_0_var),RETURN=zunits`"/TITLE=height ht = height
+      DEFINE SYMBOL zlist = ht, 
    ENDIF
 ENDIF
+
+! Do we want the date string or the date coordinate?  List both.
 IF `STRINDEX("($ferret_view)", "t") GT 0` THEN 
    IF `($ferret_timelab_res"0|*>1") EQ 0` THEN DEFINE SYMBOL ferret_timelab_res = day
    LET ttime = XSEQUENCE(0*($xx) + 0*($yy) + 0*($zz) + ($tt)) 
-   LET/UNITS="`($data_0_var),RETURN=tunits` since `($data_0_var),RETURN=t0`" TIME = ttime
-   LET datetime = TAX_DATESTRING (ttime, t[gt=($data_0_var)], "($ferret_timelab_res)")
-   IF ($ferret_timelab_res"|year>1|month>1|*>0") THEN LET TIME = datetime
-   DEFINE SYMBOL tlist = TIME, 
+   LET/UNITS="`($data_0_var),RETURN=tunits` since `($data_0_var),RETURN=t0`"/TITLE="Time Coordinates" time = ttime
+   LET/TITLE="Time String" datetime = TAX_DATESTRING (ttime, t[gt=($data_0_var)], "($ferret_timelab_res%hour%)")
+!   IF ($ferret_timelab_res"|year>1|month>1|*>0") THEN LET TIME = datetime
+!   LET TIME = datetime
+   DEFINE SYMBOL tlist = datetime, time,
 ENDIF
 
+LET/units="($data_($var_num)_units)"/TITLE="`($data_0_var),RETURN=title`" ($data_0_var_orig) = ($ferret_list_var_($var_num))
+DEFINE SYMBOL vars_out = ($tlist) ($xlist) ($ylist) ($zlist) ($data_0_var_orig)
 
-LET/units="($data_0_units)" ($data_0_var)_list = ($ferret_list_var_0)
-DEFINE SYMBOL vars_out = ($tlist) ($xlist) ($ylist) ($zlist) ($data_0_var)_list
 IF `($data_count"1") GT 1` THEN
-   REPEAT/RANGE=1:($data_count"1")/NAME=outvar )\
-      DEFINE SYMBOL var_num = `outvar`; \
-      LET/units="($data_($var_num)_units)" data_($var_num)_var)_list = ($ferret_list_var_($var_num)); \
-      DEFINE SYMBOL vars_out = ($vars_out), data_($var_num)_var)_list )
+   REPEAT/RANGE=1:`($data_count"1")-1`/NAME=outvar \
+      (DEFINE SYMBOL var_num = `outvar`; \
+      LET/units="($data_($var_num)_units)"/TITLE="`($data_($var_num)_var),RETURN=title`"  ($data_($var_num)_var_orig) = ($ferret_list_var_($var_num)); \
+      DEFINE SYMBOL vars_out = ($vars_out), ($data_($var_num)_var_orig) )
 ENDIF
+
+LET ndims = `STRLEN("($ferret_view)")`
+LET nlist = ndims + ($data_count)
 
 ! the default is set under 1/4 of Ferret's memory allowing for LET definitions 
 LET use_size = 1000000*($ferret_memory)/4.
 LET max_size = ($MAX_LIST_SIZE"`use_size`")
 
-LET ndims = `STRLEN("($ferret_view)")`
-LET nlist = ndims + ($data_count)
+! Size of the data variable 
 
-IF `($size_0)* nlist GT max_size` THEN
+LET size = ($isize)*($jsize)*($ksize)*($lsize)
+
+IF `size* nlist GT max_size` THEN
    SET MEM/SIZ=300
    LET use_size = 1000000*($ferret_memory)/4.
 ENDIF
 
-IF `($size_0)* nlist LE max_size` THEN
+IF `size* nlist LE max_size` THEN
+! 
+! ... list in one big chunk
+!
+   IF `($ferret_format"0|asc>1|*>0") + ($ferret_format"0|txt>1|*>0") GT 0` THEN  
+      IF ($var_history"0|*>1") THEN LIST/APPEND/NOHEAD/FORMAT=(A)/FILE="($result_ferret_listing_filename)" var_hist
+   ENDIF
 
-   ! ... list in one big chunk
-
-      IF `($ferret_format"0|asc>1|*>0") + ($ferret_format"0|txt>1|*>0") GT 0` THEN  
-         IF ($var_history"0|*>1") THEN LIST/APPEND/NOHEAD/FORMAT=(A)/FILE="($result_ferret_listing_filename)" var_hist
-      ENDIF
-
-      LIST/APPEND/FILE/($frmt) ($vars_out)
+   LIST/APPEND/FILE/($frmt) ($vars_out)
 
 ELSE
-   MESSAGE/ERROR **ERROR too much data for csv listing
+   LET ichunk = INT(size/ max_size)
+   LET i1 = 1
+   LET i2 = `ichunk`
+   REPEAT/RANGE=1:($size):`ichunk` (SET REGION/I=`i1`:`i2`; \
+     LIST/APPEND/FILE/($frmt)/L=($ll) ($vars_out); \
+     CANC MEM/ALL; \
+     LET i1 = i2+1; \
+     LET i2 = i2+ichunk; \
+     IF i1 GT size THEN EXIT/LOOP; \
+     IF i2 GT size then LET i2 = size)
 
 ENDIF
 ! End of script ---------- list_csv_data.jnl----------------------------
