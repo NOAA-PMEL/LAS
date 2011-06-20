@@ -214,27 +214,36 @@ IF `size* nlist GT max_size` THEN
    LET use_size = 1000000*($ferret_memory)/4.
 ENDIF
 
+SET LIST/FILE="($result_ferret_listing_filename)"
+LIST/NOHEAD/NOROW/FILE/CLOBBER/FORMAT=("Total Number of Records", F16.0) SIZE
+
+DEFINE SYMBOL list_quals = APPEND
+
 IF `size* nlist LE max_size` THEN
 ! 
 ! ... list in one big chunk
 !
    IF `($ferret_format"0|asc>1|*>0") + ($ferret_format"0|txt>1|*>0") GT 0` THEN  
-      IF ($var_history"0|*>1") THEN LIST/APPEND/NOHEAD/FORMAT=(A)/FILE="($result_ferret_listing_filename)" var_hist
+      IF ($var_history"0|*>1") THEN LIST/($list_quals)/NOHEAD/FORMAT=(A) var_hist
+      DEFINE SYMBOL list_quals = APPEND
    ENDIF
 
-   LIST/APPEND/FILE/($frmt) ($vars_out)
+   LIST/($list_quals)/FILE/($frmt) ($vars_out)
 
 ELSE
-   LET ichunk = INT(size/ max_size)
+   LET nchunk = INT(size/ max_size)
+   IF `nchunk LT 2` THEN LET nchunk = 2
+   LET ichunk = INT(size/ nchunk) 
    LET i1 = 1
    LET i2 = `ichunk`
-   REPEAT/RANGE=1:($size):`ichunk` (SET REGION/I=`i1`:`i2`; \
-     LIST/APPEND/FILE/($frmt)/L=($ll) ($vars_out); \
+   REPEAT/RANGE=1:`nchunk+1` ( \
+     LIST/($list_quals)/FILE/($frmt)/I=`i1`:`i2` ($vars_out); \
      CANC MEM/ALL; \
-     LET i1 = i2+1; \
-     LET i2 = i2+ichunk; \
-     IF i1 GT size THEN EXIT/LOOP; \
-     IF i2 GT size then LET i2 = size)
+     DEFINE SYMBOL list_quals = APPEND/NOHEAD; \
+     LET i1 = `i2+1`; \
+     LET i2 = `i2+ichunk`; \
+     IF `i1 GT size` THEN EXIT/LOOP; \
+     IF `i2 GT size` then LET i2 = size)
 
 ENDIF
 ! End of script ---------- list_csv_data.jnl----------------------------
