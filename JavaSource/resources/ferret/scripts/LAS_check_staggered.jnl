@@ -29,7 +29,7 @@ IF `($ferret_staggered_grid"0|default>1|*>1") GT 0` THEN
       LET vec1 = ($ferret_plot_var_0_noregion)
       LET vec1_regrid = vec1[gxy=xcoord]   ! whichever curvi coords got sent (!)
       DEFINE SYMBOL ferret_plot_base_var_0 = vec1_regrid[($region_full)]
-      LET vec2 = ($ferret_plot_var_0_noregion)
+      LET vec2 = ($ferret_plot_var_1_noregion)
       LET vec2_regrid = vec2[gxy=xcoord]   ! whichever curvi coords got sent (!)
       DEFINE SYMBOL ferret_plot_base_var_1 = vec2_regrid[($region_full)]
    ELSE
