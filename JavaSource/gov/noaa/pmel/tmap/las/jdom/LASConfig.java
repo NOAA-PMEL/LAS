@@ -1297,6 +1297,9 @@ public class LASConfig extends LASDocument {
                         	if ( datasets != null && datasets.size() > 0 ) {
                         		Dataset dataset = datasets.get(0);
                         	    category_container.setAttribute("children_dsid", dataset.getAttributeValue("ID"));
+                        	    if ( dataset.getAttributeValue("doc") != null &&  !dataset.getAttributeValue("doc").equals("")) {
+                        	    	category_container.setAttribute("doc", dataset.getAttributeValue("doc"));
+                        	    }
                         	}
                             category_container.setAttribute("children", "variables");
                         } else {
@@ -1347,6 +1350,9 @@ public class LASConfig extends LASDocument {
                         		// Add only if the filter returns a dataset.  It's possible to create
                         		// a filter that returns an empty list.
                         	    cat_nokids.setAttribute("children_dsid", dataset.getAttributeValue("ID"));
+                        	    if ( dataset.getAttributeValue("doc") != null && !dataset.getAttributeValue("doc").equals("") ) {
+                        	    	cat_nokids.setAttribute("doc", dataset.getAttributeValue("doc"));
+                        	    }
                         	}
                             cat_nokids.setAttribute("children", "variables");
                         } else {
@@ -1396,6 +1402,9 @@ public class LASConfig extends LASDocument {
                 Element category = new Element("category");
                 category.setAttribute("children", "variables");
                 category.setAttribute("children_dsid", container_dataset.getAttributeValue("ID"));
+                if ( dataset.getAttributeValue("doc") != null && !dataset.getAttributeValue("doc").equals("") ) {
+                	category.setAttribute("doc", dataset.getAttributeValue("doc"));
+                }
                 category.addContent(container_dataset);
                 categories.add(new Category(category));
             }
@@ -1747,6 +1756,9 @@ public class LASConfig extends LASDocument {
             }
             ds_novars.setAttribute("children", "variables");
         	ds_novars.setAttribute("children_dsid", ds_novars.getAttributeValue("ID"));
+        	if ( ds_novars.getAttributeValue("doc") != null && !ds_novars.getAttributeValue("").equals("") ) {
+        		ds_novars.setAttribute("doc", ds_novars.getAttributeValue("doc"));
+        	}
         	Category ds = new Category(ds_novars);
         	datasets.add(ds);
         }

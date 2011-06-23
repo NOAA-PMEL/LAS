@@ -7,6 +7,7 @@ import gov.noaa.pmel.tmap.las.client.serializable.VariableSerializable;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.OpenHandler;
+import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.maps.client.geom.LatLng;
@@ -47,16 +48,17 @@ public class DatasetButton extends Composite {
 		choose.addClickHandler(openClick);
 		datasetPanel = new PopupPanel(false);
 		datasetWidget = new DatasetWidget();
-		datasetWidget.addTreeListener(new TreeListener() {
-			public void onTreeItemSelected(TreeItem item) {
+		datasetWidget.addSelectionHandler(new SelectionHandler() {
+			@Override
+			public void onSelection(SelectionEvent event) {
+				TreeItem item = (TreeItem) event.getSelectedItem();
 				Object u = item.getUserObject();
 				if ( u instanceof VariableSerializable ) {
 					selectedVariable = (VariableSerializable) u;
 					dataset_name.setText(selectedVariable.getDSName());
 					variable_name.setText(selectedVariable.getName());
-				}		
-			}
-			public void onTreeItemStateChanged(TreeItem item) {
+				}	
+				
 			}
 			
 		});
@@ -106,6 +108,10 @@ public class DatasetButton extends Composite {
 	}
 	public void setOpenID(String openid) {
 		datasetWidget.setOpenID(openid);
+	}
+	public void setSelectedText(String dataset, String variable) {
+		dataset_name.setText(dataset);
+		variable_name.setText(variable);
 	}
 	public void setAuthenticated(String auth_url, String value) {
 		for (int i = 0; i < datasetWidget.getItemCount(); i++ ) {
