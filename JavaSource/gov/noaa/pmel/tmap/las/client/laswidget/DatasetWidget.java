@@ -3,14 +3,28 @@ package gov.noaa.pmel.tmap.las.client.laswidget;
 
 import gov.noaa.pmel.tmap.las.client.serializable.CategorySerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.DatasetSerializable;
+import gov.noaa.pmel.tmap.las.client.serializable.Serializable;
 import gov.noaa.pmel.tmap.las.client.serializable.VariableSerializable;
 import gov.noaa.pmel.tmap.las.client.util.Util;
 
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.LinkElement;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Anchor;
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.Grid;
+import com.google.gwt.user.client.ui.Hyperlink;
+import com.google.gwt.user.client.ui.Image;
+import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.Tree;
 import com.google.gwt.user.client.ui.TreeItem;
 import com.google.gwt.user.client.ui.TreeListener;
+import com.google.gwt.user.client.ui.VerticalPanel;
 
 /**
  * A tree Widget that is the data set picker for GWT LAS clients which understands how to initialize itself and is used 
@@ -54,10 +68,10 @@ public class DatasetWidget extends Tree implements TreeListener {
 				if ( currentlySelected == null ) {
 					for (int i = 0; i < cats.length; i++) {
 						CategorySerializable cat = cats[i];
-						String name = cat.getName();
 						TreeItem item = new TreeItem();
 						item.addItem("Loading...");
-						item.setText(name);
+						InnerItem inner = new InnerItem(cat);
+						item.setWidget(inner);
 						item.setUserObject(cat);
 						addItem(item);
 					}
@@ -73,7 +87,8 @@ public class DatasetWidget extends Tree implements TreeListener {
 								item = new TreeItem();
 							}
 							item.addItem("Loading...");
-							item.setText(name);
+							InnerItem inner = new InnerItem(cat);
+							item.setWidget(inner);
 							item.setUserObject(cat);
 							if ( i > 0 ) {
 								currentlySelected.addItem(item);
@@ -137,5 +152,55 @@ public class DatasetWidget extends Tree implements TreeListener {
 
 	public void setOpenID(String openid) {
 		this.openid = openid;
+	}
+	
+	public class InnerItem extends Composite {
+		Grid grid = new Grid(1,2);
+		Label label = new Label("Loading data...");
+		Image image = new Image(GWT.getModuleBaseURL()+"../images/info.png");
+		PopupPanel inner = new PopupPanel(true);
+		Button close = new Button("Close");
+		VerticalPanel innerLayout = new VerticalPanel();
+        public InnerItem(Serializable s) {
+        	close.addStyleDependentName("SMALLER");
+        	close.addClickHandler(new ClickHandler(){
+
+				@Override
+				public void onClick(ClickEvent event) {
+					inner.hide();
+				}
+        		
+        	});
+        	innerLayout.add(close);
+        	grid.getCellFormatter().setWidth(0, 0, "85%");
+        	grid.getCellFormatter().setWidth(0, 1, "5%");
+        	label.setText(s.getName());
+        	grid.setWidget(0, 0, label);
+        	if ( s instanceof CategorySerializable) {
+        		CategorySerializable c = (CategorySerializable) s;
+        		if ( c.getDoc() != null || c.getAttributes().get("children_dsid") != null) {
+        			image.addClickHandler(new ClickHandler() {
+        				@Override
+        				public void onClick(ClickEvent event) {
+        					inner.setPopupPosition(image.getAbsoluteLeft(), image.getAbsoluteTop());
+        					inner.show();
+        				}
+        			});
+        			grid.setWidget(0, 1, image);
+        			if ( c.getDoc() != null ) {
+        				String url = c.getDoc();
+        				Anchor link = new Anchor("Documentation", url, "_blank");
+        				innerLayout.add(link);
+        			}
+        			if ( c.getAttributes().get("children_dsid") != null ) {
+        				Anchor meta = new Anchor("Variable and Grid Description", "getMetadata.do?dsid="+c.getAttributes().get("children_dsid"), "_blank");
+        				innerLayout.add(meta);
+        			}
+        			inner.add(innerLayout);
+        		}
+        	}
+        	initWidget(grid);
+        }
+		
 	}
 }

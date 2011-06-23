@@ -129,4 +129,17 @@ public class CategorySerializable extends Serializable implements IsSerializable
 	public void setAttribute(String name, String value) {
 		getAttributes().put(name, value);
 	}
+	public String getDoc() {
+		String doc = getAttributes().get("doc");
+		if ( doc == null || doc.equals("") ) {
+			DatasetSerializable ds = getDatasetSerializable();
+			if ( ds != null ) {
+			    doc = ds.getAttributes().get("doc");
+			    if ( doc != null && doc.equals("") ) {
+			    	doc = null;
+			    }
+			}
+		}
+		return doc;
+	}
 }
