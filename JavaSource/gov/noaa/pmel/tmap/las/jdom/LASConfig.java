@@ -1756,7 +1756,7 @@ public class LASConfig extends LASDocument {
             }
             ds_novars.setAttribute("children", "variables");
         	ds_novars.setAttribute("children_dsid", ds_novars.getAttributeValue("ID"));
-        	if ( ds_novars.getAttributeValue("doc") != null && !ds_novars.getAttributeValue("").equals("") ) {
+        	if ( ds_novars.getAttributeValue("doc") != null && !ds_novars.getAttributeValue("doc").equals("") ) {
         		ds_novars.setAttribute("doc", ds_novars.getAttributeValue("doc"));
         	}
         	Category ds = new Category(ds_novars);
