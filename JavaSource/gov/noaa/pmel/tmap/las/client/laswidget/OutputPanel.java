@@ -946,8 +946,8 @@ public class OutputPanel extends Composite {
 						}
 					}
 				}
-				currentPrintURL = Util.getAnnotationsService(annourl, imageurl);
-				setImage(imageurl, currentPrintURL);
+				currentPrintURL = Util.getAnnotationsFrag(annourl, imageurl);
+				setImage(imageurl, Util.getAnnotationsService(annourl, imageurl));
 				setImageWidth();
 			}
 			spin.hide();
