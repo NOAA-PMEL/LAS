@@ -566,88 +566,13 @@ public class BaseUI implements EntryPoint {
 		}
 	}
 	private void printerFriendly() {
-
-		final double image_h = 631.;
-		final double image_w = 998.;
-		final PopupPanel pop = new PopupPanel(false);
-		final boolean panelHidden = xPanelHeaderHidden;
-		final PrintPanel[] images = new PrintPanel[xPanels.size()];
-		final ListBox size = new ListBox();
-		size.addItem("100%", "1.0");
-		size.addItem(" 90%", ".9");
-		size.addItem(" 80%", ".8");
-		size.addItem(" 70%", ".7");
-		size.addItem(" 60%", ".6");
-		size.addItem(" 50%", ".5");
-		size.addItem(" 40%", ".4");
-		size.addItem(" 30%", ".3");
-		size.addChangeHandler(new ChangeHandler() {
-
-			@Override
-			public void onChange(ChangeEvent event) {
-                double px = image_w * Double.valueOf(size.getValue(size.getSelectedIndex()));
-				int pw = (int) px;
-				for(int i = 0; i < images.length; i++ ) {
-					images[i].setWidth(pw+"px");
-				}
-
-			}
-
-		});
-		Label imageSizeLabel= new Label("Image Size: ");
-		if ( !panelHidden ) {
-			handlePanelShowHide();
+		StringBuilder urlfrag = new StringBuilder("getAnnotations.do?template=images_w_annotations.vm&");
+		for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
+			OutputPanel panel = (OutputPanel) panelIt.next();
+			urlfrag.append(panel.getPrintURL());
+			if ( panelIt.hasNext() ) urlfrag.append("&");
 		}
-		PushButton close = new PushButton("Close");
-		close.addClickHandler(new ClickHandler() {
-
-			@Override
-			public void onClick(ClickEvent event) {
-				
-				pop.hide();
-				if ( !panelHidden ) {
-					handlePanelShowHide();
-				}
-				
-			}
-			
-		});
-		
-		PushButton print = new PushButton("Print");
-		print.addClickHandler(new ClickHandler() {
-
-			@Override
-			public void onClick(ClickEvent arg0) {
-				Print.it(pop);
-			}
-			
-		});
-		
-		FlexTable buttons = new FlexTable();
-		buttons.setWidget(0, 0, close);
-		buttons.setWidget(0, 1, print);
-		buttons.setWidget(0, 2, imageSizeLabel);
-		buttons.setWidget(0, 3, size);
-		FlexTable plots = new FlexTable();
-		FlexCellFormatter formatter =  plots.getFlexCellFormatter();
-		formatter.setColSpan(0, 0, 2);
-		plots.setWidget(0, 0, buttons);
-		pop.setGlassEnabled(true);
-		int rows = xPanels.size()/2;
-		int cols = 2;
-		int panel_index = 0;
-		for (int i = 0; i < rows; i++) {
-			for (int j = 0; j < cols; j++) {
-				String panel_url = ((OutputPanel)xPanels.get(panel_index)).getPrintURL();
-				final PrintPanel image = new PrintPanel(panel_url);
-				image.setWidth(image_w+"px");
-				images[panel_index] = image;
-				plots.setWidget(i+1, j, image);
-				panel_index++;
-			}
-		}
-		pop.add(plots);
-		pop.show();
+		Window.open(urlfrag.toString(), "print", null);
 	}
 	public void addApplyHandler (ClickHandler handler) {
 		applyButton.setVisible(true);
