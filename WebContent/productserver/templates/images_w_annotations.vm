@@ -43,25 +43,31 @@ text-align:left;
   </head>
   
   <body >
-     
+  	 #foreach($image_file in $image_files)
+  	   Panel $velocityCount
+  	  <br/>
+   	  <br/>
+  	   #set( $index = $velocityCount - 1 )
+       #set($anno = $las_annotation_files.get($index))
+       
      <table width="100%" style="background-color:#FFF;border-style:solid;border-width:2px;">
-      
-    	#foreach ( $url in $las_annotations.getDatasetURLs() )
+        
+    	#foreach ( $url in $anno.getDatasetURLs() )
            <tr width="100%">
     		<td width="100%"class="url" >$url</td>
            </tr>
 	    #end
-    	#foreach ( $title in $las_annotations.getDatasetTitles() )
+    	#foreach ( $title in $anno.getDatasetTitles() )
            <tr  width="100%">
     		<td class="title">$title</td>
            </tr>
 	    #end
-    	#foreach ( $title in $las_annotations.getVariableTitles() )
+    	#foreach ( $title in $anno.getVariableTitles() )
            <tr width="100%">
     		<td class="title">VARIABLE: $title</td>
            <tr>
 	    #end
-    	#foreach ( $axis in $las_annotations.getOrthogonalAxes() )
+    	#foreach ( $axis in $anno.getOrthogonalAxes() )
            <tr width="100%">
     		<td class="regular">$axis</td>
            </tr>
@@ -69,7 +75,7 @@ text-align:left;
            <tr width="100%">
              <td class="regular">
        	     <ul>
-	    #foreach ($note in $las_annotations.getNotes() )
+	    #foreach ($note in $anno.getNotes() )
 	        <li>$note</li>
     	    #end
        	    </ul>
@@ -79,8 +85,10 @@ text-align:left;
    </table>
    
 	<div class="footer">
-		$las_annotations.getHeader()
+		$anno.getHeader()
 	</div>
-	<img class="plotImage" src="output/$image_file" alt="Plot Image">
+	<img class="plotImage" id="plotImage" src="output/$image_file" alt="Plot Image">
+	<P style="page-break-before: always">
+	#end
   </body>
 </html>

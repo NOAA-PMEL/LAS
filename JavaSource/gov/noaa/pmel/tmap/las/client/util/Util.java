@@ -104,4 +104,9 @@ public class Util {
 		String image = imageUrl.substring(imageUrl.lastIndexOf("/")+1, imageUrl.length());
 		return url+"&image="+image+"&template=image_w_annotations.vm";
 	}
+	public static String getAnnotationsFrag(String annUrl, String imageUrl) {
+		String file = annUrl.substring(annUrl.lastIndexOf("/")+1, annUrl.length());
+		String image = imageUrl.substring(imageUrl.lastIndexOf("/")+1, imageUrl.length());
+		return "file="+file+"&image="+image;
+	}
 }

@@ -12,8 +12,10 @@ import gov.noaa.pmel.tmap.las.product.server.LASConfigPlugIn;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.ServletContext;
@@ -50,13 +52,47 @@ public class GetAnnotations extends ConfigService {
 	private static Logger log = LogManager.getLogger(GetAnnotations.class.getName());
 	public ActionForward execute(ActionMapping mapping, ActionForm form, HttpServletRequest request, HttpServletResponse response) throws Exception {    
 		log.info("START: "+request.getRequestURL());
-		LASAnnotations lasAnnotations = new LASAnnotations();
+	
+	
 		String template = request.getParameter("template");
 		if ( template == null ) {
 			template = "annotations.vm";
 		}
-		String file = request.getParameter("file");
-		String image = request.getParameter("image");
+		String[] files = request.getParameterValues("file");
+		String[] images = request.getParameterValues("image");
+		
+		if ( files != null ) {
+			if ( files.length == 1 ) {			
+				LASAnnotations lasAnnotations = new LASAnnotations();
+				loadAnnotations(files[0], lasAnnotations);
+				request.setAttribute("las_annotations", lasAnnotations);
+				if ( images != null && !images[0].equals("") ) {
+					request.setAttribute("image_file", images[0]);
+				}
+			} else {
+				List<LASAnnotations> annotations = new ArrayList<LASAnnotations>();
+				for ( int i = 0; i < files.length; i++ ) {
+					LASAnnotations lasAnnotations = new LASAnnotations();
+					loadAnnotations(files[i], lasAnnotations);
+					annotations.add(lasAnnotations);
+				}
+				request.setAttribute("las_annotation_files", annotations);
+				if ( images != null && !images[0].equals("") ) {
+					request.setAttribute("image_files", images);
+				}
+			}
+			log.info("END:   "+request.getRequestURL());
+			return new ActionForward("/productserver/templates/"+template);
+		} else {
+			LASAnnotations lasAnnotations = new LASAnnotations();
+			lasAnnotations.setDatasetTitle("Error processing annotations file.");
+			request.setAttribute("las_annotations", lasAnnotations);
+			log.error("Unable to process annontations.");
+			log.info("END:   "+request.getRequestURL());
+			return new ActionForward("/productserver/templates/"+template);
+		}
+	}
+	private void loadAnnotations(String file, LASAnnotations lasAnnotations) {
 		try {
 			LASConfig lasConfig = (LASConfig)servlet.getServletContext().getAttribute(LASConfigPlugIn.LAS_CONFIG_KEY);
 			if ( file != null ) {
@@ -67,16 +103,7 @@ public class GetAnnotations extends ConfigService {
 		} catch ( Exception e ) {
 			lasAnnotations.clear();
 			lasAnnotations.setDatasetTitle("Error processing annotations file.");
-			request.setAttribute("las_annotations", lasAnnotations);
-			log.error("Unable to process annontations."+e.getMessage());
-			log.info("END:   "+request.getRequestURL());
-			return new ActionForward("/productserver/templates/"+template);
+			log.error("Unable to process annontations."+e.getMessage());			
 		}
-		if ( image != null && !image.equals("") ) {
-			request.setAttribute("image_file", image);
-		}
-		request.setAttribute("las_annotations", lasAnnotations);
-		log.info("END:   "+request.getRequestURL());
-		return new ActionForward("/productserver/templates/"+template);
 	}
 }
