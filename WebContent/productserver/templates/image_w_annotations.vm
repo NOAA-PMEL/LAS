@@ -10,10 +10,6 @@
     <!--<link rel="stylesheet" type="text/css" href="./styles.css">-->
 <style>
 
-.plotImage {
-  width: 100%;
-  height: auto;
-}
 .title {
 font-family: Verdana, Arial, Helvetica, sans-serif;
 font-size: 1.em;
@@ -81,6 +77,6 @@ text-align:left;
 	<div class="footer">
 		$las_annotations.getHeader()
 	</div>
-	<img class="plotImage" src="output/$image_file" alt="Plot Image">
+	<img src="output/$image_file" alt="Plot Image">
   </body>
 </html>
