@@ -189,8 +189,10 @@ public class DatasetWidget extends Tree implements TreeListener {
         			grid.setWidget(0, 1, image);
         			if ( c.getDoc() != null ) {
         				String url = c.getDoc();
-        				Anchor link = new Anchor("Documentation", url, "_blank");
-        				innerLayout.add(link);
+        				if ( !c.getDoc().equals("") ) {
+        					Anchor link = new Anchor("Documentation", url, "_blank");
+        					innerLayout.add(link);
+        				}
         			}
         			if ( c.getAttributes().get("children_dsid") != null ) {
         				Anchor meta = new Anchor("Variable and Grid Description", "getMetadata.do?dsid="+c.getAttributes().get("children_dsid"), "_blank");

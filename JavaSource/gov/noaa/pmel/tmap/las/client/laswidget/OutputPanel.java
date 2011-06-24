@@ -9,10 +9,13 @@ import gov.noaa.pmel.tmap.las.client.serializable.VariableSerializable;
 import gov.noaa.pmel.tmap.las.client.util.URLUtil;
 import gov.noaa.pmel.tmap.las.client.util.Util;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
+import org.apache.tools.ant.taskdefs.Basename;
 
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -57,6 +60,9 @@ import com.google.gwt.xml.client.XMLParser;
 public class OutputPanel extends Composite {
 	
 	String containerType = Constants.FRAME;
+	
+	/* Keep track of the URL that will give the "print" page... */
+	String currentPrintURL = "";
 	
 	Frame output = new Frame();
 	
@@ -876,14 +882,15 @@ public class OutputPanel extends Composite {
 				doc = doc.replaceAll("\n", "").trim();
 				Document responseXML = XMLParser.parse(doc);
 				NodeList results = responseXML.getElementsByTagName("result");
+				String annourl = "";
+				String imageurl = "";
 				for(int n=0; n<results.getLength();n++) {
 					if ( results.item(n) instanceof Element ) {
 						Element result = (Element) results.item(n);
 						if ( result.getAttribute("type").equals("image") ) {
 							//HTML image = new HTML("<a target=\"_blank\" href=\""+result.getAttribute("url")+"\"><img width=\"100%\" src=\""+result.getAttribute("url")+"\"></a>");
-							String url = result.getAttribute("url");
-							setImage(url);
-							setImageWidth();
+							imageurl = result.getAttribute("url");
+							
 						} else if ( result.getAttribute("type").equals("map_scale") )  {
 							final String ms_url = result.getAttribute("url");
 							RequestBuilder mapScaleRequest = new RequestBuilder(RequestBuilder.GET, ms_url);
@@ -893,8 +900,8 @@ public class OutputPanel extends Composite {
 								// Don't care.  Just go with the information we have.
 							}
 						} else if ( result.getAttribute("type").equals("annotations") ) {
-							final String ann_url = result.getAttribute("url");
-							lasAnnotationsPanel.setAnnotationsHTMLURL(Util.getAnnotationService(ann_url));
+							annourl = result.getAttribute("url");
+							lasAnnotationsPanel.setAnnotationsHTMLURL(Util.getAnnotationService(annourl));
 						} else if ( result.getAttribute("type").equals("error") ) {
 							if ( result.getAttribute("ID").equals("las_message") ) {
 								Node text = result.getFirstChild();
@@ -939,6 +946,9 @@ public class OutputPanel extends Composite {
 						}
 					}
 				}
+				currentPrintURL = Util.getAnnotationsService(annourl, imageurl);
+				setImage(imageurl, currentPrintURL);
+				setImageWidth();
 			}
 			spin.hide();
 		}
@@ -1438,9 +1448,9 @@ public class OutputPanel extends Composite {
 		this.vizGalVariable = variable;
 		this.vizGalState = historyToken;	
 	}
-	public void setImage(String urlin) {
-		final String url = urlin;
-		Image image = new Image(url);
+	public void setImage(String image_url, String link_url) {
+		final String url = link_url;
+		Image image = new Image(image_url);
 		image.addClickHandler(new ClickHandler() {
 
 			@Override
@@ -1454,7 +1464,9 @@ public class OutputPanel extends Composite {
 		image.setTitle("  Click to Enlarge.  Images will size with browser.");
 		grid.setWidget(1, 0 , image);
 	}
-	
+	public String getPrintURL() {
+		return currentPrintURL;
+	}
 	
 	public void setAnnotationsOpen(boolean open) {
 		lasAnnotationsPanel.setOpen(open);
