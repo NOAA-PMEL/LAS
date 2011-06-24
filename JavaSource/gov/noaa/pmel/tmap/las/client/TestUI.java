@@ -263,7 +263,7 @@ public class TestUI extends BaseUI {
 				    fcat.setAttribute("authenticated", "true");
 				} else {
 					startUI();
-					xDatasetButton.setAuthenticated(auth_url, "true");
+					//xDatasetButton.setAuthenticated(auth_url, "true");
 				}
 				
 			}

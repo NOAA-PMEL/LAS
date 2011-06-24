@@ -96,7 +96,12 @@ public class Util {
 		return null;
 	}
 	public static String getAnnotationService(String annUrl) {
-		String file = annUrl.substring(annUrl.lastIndexOf("/"), annUrl.length());
+		String file = annUrl.substring(annUrl.lastIndexOf("/")+1, annUrl.length());
 		return URLUtil.getBaseURL() + "getAnnotations.do?file="+file;
+	}
+	public static String getAnnotationsService(String annUrl, String imageUrl) {
+		String url = getAnnotationService(annUrl);
+		String image = imageUrl.substring(imageUrl.lastIndexOf("/")+1, imageUrl.length());
+		return url+"&image="+image+"&template=image_w_annotations.vm";
 	}
 }

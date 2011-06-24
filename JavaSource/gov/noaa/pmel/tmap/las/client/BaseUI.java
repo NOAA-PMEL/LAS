@@ -7,6 +7,7 @@ import gov.noaa.pmel.tmap.las.client.laswidget.DatasetButton;
 import gov.noaa.pmel.tmap.las.client.laswidget.OperationsWidget;
 import gov.noaa.pmel.tmap.las.client.laswidget.OptionsButton;
 import gov.noaa.pmel.tmap.las.client.laswidget.OutputPanel;
+import gov.noaa.pmel.tmap.las.client.laswidget.PrintPanel;
 import gov.noaa.pmel.tmap.las.client.map.MapSelectionChangeListener;
 import gov.noaa.pmel.tmap.las.client.serializable.VariableSerializable;
 import gov.noaa.pmel.tmap.las.client.util.Util;
@@ -34,6 +35,7 @@ import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.DisclosurePanel;
 import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.Frame;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
@@ -160,7 +162,9 @@ public class BaseUI implements EntryPoint {
 	//CheckBox xApplyAnalysis = new CheckBox("Apply Analysis");
 
 	// Controls for the panel sizes and to hide and show the headers.
+	
 	boolean xPanelHeaderHidden = false;
+	int xDefaultImageWidth = 765;
 	int xPanelWidth;
 	int xRightPad = 45;
 	int xTopPad = 90;
@@ -190,6 +194,11 @@ public class BaseUI implements EntryPoint {
 	 */
 	PushButton xPrinterFriendlyButton;
 	
+	/*
+	 * Keep track of where you are in the button panel for when sub-classes add to it.
+	 */
+	
+	int xButtonLayoutIndex = 0;
 
 	/*
 	 * (non-Javadoc)
@@ -338,15 +347,15 @@ public class BaseUI implements EntryPoint {
 	    	
 	    });
 	    
-		int buttonLayoutIndex = 0;
+		xButtonLayoutIndex = 0;
 		applyButton.addStyleDependentName("SMALLER");
 		xPrinterFriendlyButton.addStyleDependentName("SMALLER");
 		// Other buttons have their style handled in the widget itself.
-		xButtonLayout.setWidget(0, buttonLayoutIndex++, xHideControls);
-		xButtonLayout.setWidget(0, buttonLayoutIndex++, applyButton);
-		xButtonLayout.setWidget(0, buttonLayoutIndex++, xDatasetButton);
-		xButtonLayout.setWidget(0, buttonLayoutIndex++, xOptionsButton);
-		xButtonLayout.setWidget(0, buttonLayoutIndex++, xPrinterFriendlyButton);
+		xButtonLayout.setWidget(0, xButtonLayoutIndex++, xHideControls);
+		xButtonLayout.setWidget(0, xButtonLayoutIndex++, applyButton);
+		xButtonLayout.setWidget(0, xButtonLayoutIndex++, xDatasetButton);
+		xButtonLayout.setWidget(0, xButtonLayoutIndex++, xOptionsButton);
+		xButtonLayout.setWidget(0, xButtonLayoutIndex++, xPrinterFriendlyButton);
 		
 		
 		xMainPanel.setWidget(0, 0, xButtonLayout);
@@ -379,7 +388,7 @@ public class BaseUI implements EntryPoint {
 	    }
 	}-*/;
 	public void addMenuButtons(Widget buttons) {
-		xButtonLayout.setWidget(0, 4, buttons);
+		xButtonLayout.setWidget(0, xButtonLayoutIndex++, buttons);
 	}
 	ClickHandler xButtonOpenHandler = new ClickHandler() {
 
@@ -562,7 +571,7 @@ public class BaseUI implements EntryPoint {
 		final double image_w = 998.;
 		final PopupPanel pop = new PopupPanel(false);
 		final boolean panelHidden = xPanelHeaderHidden;
-		final Image[] images = new Image[xPanels.size()];
+		final PrintPanel[] images = new PrintPanel[xPanels.size()];
 		final ListBox size = new ListBox();
 		size.addItem("100%", "1.0");
 		size.addItem(" 90%", ".9");
@@ -629,8 +638,8 @@ public class BaseUI implements EntryPoint {
 		int panel_index = 0;
 		for (int i = 0; i < rows; i++) {
 			for (int j = 0; j < cols; j++) {
-				String panel_url = ((OutputPanel)xPanels.get(panel_index)).getURL();
-				final Image image = new Image(panel_url+"&stream=true&stream_ID=plot_image");
+				String panel_url = ((OutputPanel)xPanels.get(panel_index)).getPrintURL();
+				final PrintPanel image = new PrintPanel(panel_url);
 				images[panel_index] = image;
 				plots.setWidget(i+1, j, image);
 				panel_index++;
