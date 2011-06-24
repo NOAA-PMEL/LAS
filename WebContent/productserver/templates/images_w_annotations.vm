@@ -10,10 +10,6 @@
     <!--<link rel="stylesheet" type="text/css" href="./styles.css">-->
 <style>
 
-.plotImage {
-  width: 100%;
-  height: auto;
-}
 .title {
 font-family: Verdana, Arial, Helvetica, sans-serif;
 font-size: 1.em;
@@ -87,7 +83,7 @@ text-align:left;
 	<div class="footer">
 		$anno.getHeader()
 	</div>
-	<img class="plotImage" id="plotImage" src="output/$image_file" alt="Plot Image">
+	<img src="output/$image_file" alt="Plot Image">
 	<P style="page-break-before: always">
 	#end
   </body>
