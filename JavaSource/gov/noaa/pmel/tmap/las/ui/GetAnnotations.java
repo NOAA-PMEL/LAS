@@ -56,6 +56,7 @@ public class GetAnnotations extends ConfigService {
 			template = "annotations.vm";
 		}
 		String file = request.getParameter("file");
+		String image = request.getParameter("image");
 		try {
 			LASConfig lasConfig = (LASConfig)servlet.getServletContext().getAttribute(LASConfigPlugIn.LAS_CONFIG_KEY);
 			if ( file != null ) {
@@ -70,6 +71,9 @@ public class GetAnnotations extends ConfigService {
 			log.error("Unable to process annontations."+e.getMessage());
 			log.info("END:   "+request.getRequestURL());
 			return new ActionForward("/productserver/templates/"+template);
+		}
+		if ( image != null && !image.equals("") ) {
+			request.setAttribute("image_file", image);
 		}
 		request.setAttribute("las_annotations", lasAnnotations);
 		log.info("END:   "+request.getRequestURL());
