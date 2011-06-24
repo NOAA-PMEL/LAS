@@ -640,6 +640,7 @@ public class BaseUI implements EntryPoint {
 			for (int j = 0; j < cols; j++) {
 				String panel_url = ((OutputPanel)xPanels.get(panel_index)).getPrintURL();
 				final PrintPanel image = new PrintPanel(panel_url);
+				image.setWidth(image_w+"px");
 				images[panel_index] = image;
 				plots.setWidget(i+1, j, image);
 				panel_index++;
