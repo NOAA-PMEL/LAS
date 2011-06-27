@@ -88,8 +88,14 @@ $las_response.toString()
   reqZLo = initReq.getRangeLo('z');
   reqZHi = initReq.getRangeHi('z');
 
+  // Only show the z and/or t control if those axes have not be transformed away...
+  var showt = true;
+  var showz = true;  
+
   if(initReq.getAnalysis(0)) {
 	for(var a=0;a < initReq.getAnalysis(0).axis.length;a++) {
+	    if ( initReq.getAnalysis(0).axis[a].type == "t" ) showt = false;
+	    if ( initReq.getAnalysis(0).axis[a].type == "z" ) showz = false;
 		if(initReq.getAnalysis(0).axis[a].lo) 
 			eval("(req"+initReq.getAnalysis(0).axis[a].type.toUpperCase()+"Lo='"+initReq.getAnalysis(0).axis[a].lo+"')");
 		if(initReq.getAnalysis(0).axis[a].hi)
@@ -97,7 +103,7 @@ $las_response.toString()
 	}
   }
 
-  if(Grid.hasAxis('t')){
+  if(Grid.hasAxis('t') && showt ){
       dataHasT = true;
       dataTLo = Grid.getLo('t');                      //low end of time grid
       dataTHi = Grid.getHi('t');                      //high end of time grid
@@ -107,7 +113,7 @@ $las_response.toString()
       tDelta = Grid.getDelta('t');
   }
 
-  if(Grid.hasAxis('z')){
+  if(Grid.hasAxis('z') && showz){
       dataHasZ = true;
       dataZLo = Grid.getLo('z');                     
       dataZHi = Grid.getHi('z');                      
