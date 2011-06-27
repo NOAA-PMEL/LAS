@@ -412,9 +412,9 @@ public class OutputPanel extends Composite {
 		// Add the variable in the upper left panel
 		if ( variable.isVector() ) {
 			// Add the first component
-			lasRequest.addVariable(var.getDSID(), var.getComponents().get(0));
+			lasRequest.addVariable(variable.getDSID(), variable.getComponents().get(0));
 		} else {
-				lasRequest.addVariable(variable.getDSID(), variable.getID());
+			lasRequest.addVariable(variable.getDSID(), variable.getID());
 		}
         lasRequest.addRegion();
 		// From the current slide sorter is this comment:
