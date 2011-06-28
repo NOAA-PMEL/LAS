@@ -890,7 +890,9 @@ public class OutputPanel extends Composite {
 						if ( result.getAttribute("type").equals("image") ) {
 							//HTML image = new HTML("<a target=\"_blank\" href=\""+result.getAttribute("url")+"\"><img width=\"100%\" src=\""+result.getAttribute("url")+"\"></a>");
 							imageurl = result.getAttribute("url");
-							
+							currentPrintURL = Util.getAnnotationsFrag(annourl, imageurl);
+							setImage(imageurl, Util.getAnnotationsService(annourl, imageurl));
+							setImageWidth();
 						} else if ( result.getAttribute("type").equals("map_scale") )  {
 							final String ms_url = result.getAttribute("url");
 							RequestBuilder mapScaleRequest = new RequestBuilder(RequestBuilder.GET, ms_url);
@@ -946,9 +948,6 @@ public class OutputPanel extends Composite {
 						}
 					}
 				}
-				currentPrintURL = Util.getAnnotationsFrag(annourl, imageurl);
-				setImage(imageurl, Util.getAnnotationsService(annourl, imageurl));
-				setImageWidth();
 			}
 			spin.hide();
 		}
