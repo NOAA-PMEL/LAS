@@ -11,7 +11,12 @@
 ! dimension.
 !
 
-DEFINE SYMBOL ferret_palette light_centered 
+! Ferret v6.7.1+ includes new palette no_white_greenpink_centered
+IF `($ferret_version"0") GT 6.7` THEN
+   DEFINE SYMBOL ferret_palette no_white_greenpink_centered 
+ELSE
+   DEFINE SYMBOL ferret_palette light_centered 
+ENDIF
 
 IF ($ferret_view"|xt>1|*>0") THEN
 
