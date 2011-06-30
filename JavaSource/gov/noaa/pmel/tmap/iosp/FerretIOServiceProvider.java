@@ -481,7 +481,7 @@ public class FerretIOServiceProvider implements IOServiceProvider {
 							+ direction + " ");
 				} else {
 					indx = new StringBuffer("go get_datavar \"" + temp_file
-							+ "\" " + "\"" + dataset_index + "\" " + varname + " "
+							+ "\" " + dataset_index + " " + varname + " "
 							+ direction + " ");
 				}
 				// This is the get_data order XYZT
