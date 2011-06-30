@@ -8,12 +8,21 @@
 ! second component to be regridded to the grid of the first.
 !
 
-!IF ($native_curvilinear_xy"0") THEN EXIT/SCRIPT
+! If we are just computing auto-vector length for an animation, this is not needed.
 
-DEFINE SYMBOL xax_vec_1 = `($ferret_plot_base_var_0),RETURN=xaxis`
-DEFINE SYMBOL yax_vec_1 = `($ferret_plot_base_var_0),RETURN=yaxis`
-DEFINE SYMBOL xax_vec_2 = `($ferret_plot_base_var_1),RETURN=xaxis`
-DEFINE SYMBOL yax_vec_2 = `($ferret_plot_base_var_1),RETURN=yaxis`
+IF ($its_autolev_animate"0|*>1") THEN EXIT/SCRIPT
+
+IF ($native_curvilinear_xy"0") THEN
+   DEFINE SYMBOL xax_vec_1 = `($ferret_plot_var_0_noregion),RETURN=xaxis`
+   DEFINE SYMBOL yax_vec_1 = `($ferret_plot_var_0_noregion),RETURN=yaxis`
+   DEFINE SYMBOL xax_vec_2 = `($ferret_plot_var_1_noregion),RETURN=xaxis`
+   DEFINE SYMBOL yax_vec_2 = `($ferret_plot_var_1_noregion),RETURN=yaxis`
+ELSE
+   DEFINE SYMBOL xax_vec_1 = `($ferret_plot_base_var_0),RETURN=xaxis`
+   DEFINE SYMBOL yax_vec_1 = `($ferret_plot_base_var_0),RETURN=yaxis`
+   DEFINE SYMBOL xax_vec_2 = `($ferret_plot_base_var_1),RETURN=xaxis`
+   DEFINE SYMBOL yax_vec_2 = `($ferret_plot_base_var_1),RETURN=yaxis`
+ENDIF
 
 IF `STRCMP("($xax_vec_1)", "($xax_vec_2)") NE 0` THEN DEFINE SYMBOL ferret_staggered_grid = 1
 IF `STRCMP("($yax_vec_1)", "($yax_vec_2)") NE 0` THEN DEFINE SYMBOL ferret_staggered_grid = 1
