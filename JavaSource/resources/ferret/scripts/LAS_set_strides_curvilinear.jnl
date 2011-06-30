@@ -7,6 +7,14 @@
 ! When native striding is used for curvilinear data, be sure the range
 ! of index values requested wont go beyond the index range of the grid.
 
+
+IF `($ferret_subsample_t"1|0|1|true>1|false>0|*>1") EQ 0 AND ($ferret_view"|t>1|T>1|*>0")` THEN EXIT/SCRIPT
+
+! If we are computing auto-levels for an animation, striding is done in that script. 
+! no need for it here.
+
+IF ($its_autolev_animate"0|*>1") THEN EXIT/SCRIPT
+
 ! cannot do native striding if this is a descriptor dataset. 
 
 IF ($data_var_only"0|*>1") THEN 

@@ -45,22 +45,14 @@ ENDIF
 
 ! Remove any previous native striding
 
-IF ($xstride"0|1>0|*>1") THEN 
-   CANCEL AXIS/STRIDE `($data_var)[d=($data_num)],RETURN=xaxis`
-   CANCEL SYMBOL xstride
-ENDIF
-IF ($ystride"0|1>0|*>1") THEN 
-   CANCEL AXIS/STRIDE `($data_var)[d=($data_num)],RETURN=yaxis`
-   CANCEL SYMBOL ystride
-ENDIF
-IF ($tstride"0|1>0|*>1") THEN 
-   CANCEL AXIS/STRIDE `($data_var)[d=($data_num)],RETURN=taxis`
-   CANCEL SYMBOL tstride
-ENDIF
-IF ($zstride"0|1>0|*>1") THEN 
-   CANCEL AXIS/STRIDE `($data_var)[d=($data_num)],RETURN=zaxis`
-   CANCEL SYMBOL zstride
-ENDIF
+IF ($xstride"0|1>0|*>1") THEN CANCEL AXIS/STRIDE `($data_var)[d=($data_num)],RETURN=xaxis`
+IF ($ystride"0|1>0|*>1") THEN CANCEL AXIS/STRIDE `($data_var)[d=($data_num)],RETURN=yaxis`
+IF ($tstride"0|1>0|*>1") THEN CANCEL AXIS/STRIDE `($data_var)[d=($data_num)],RETURN=taxis`
+IF ($zstride"0|1>0|*>1") THEN CANCEL AXIS/STRIDE `($data_var)[d=($data_num)],RETURN=zaxis`
+CANCEL SYMBOL xstride
+CANCEL SYMBOL ystride
+CANCEL SYMBOL tstride
+CANCEL SYMBOL zstride
 
 DEFINE SYMBOL ferret_center_levels ($ferret_center_levels"0|1|TRUE>1|*>0")
 
@@ -126,152 +118,42 @@ ENDIF
 IF `($ferret_plot_var"0|*>1") EQ 0` THEN EXIT/SCRIPT  !e.g. for insitu plots may not have a plot_var
 
 IF `($do_curvi_xy"0|*>1") EQ 0` THEN 
+   LET var_size = ABS( `pvar,RETURN=size`)
+   DEFINE SYMBOL var_dim = `pvar,RETURN=shape`
+   LET ndims = STRLEN("($var_dim)")
+
+   LET max_size = `INT( 1+ ((var_size/memsize))/ndims )`
    LET pvar = ($ferret_xyz_var)
 ELSE
    DEFINE SYMBOL ferret_plot_var = pvar
+   LET max_size = 50
 ENDIF
 
-IF ($ferret_plot_var"0|sampled_var>1|*>0) THEN LET pvar = ($ferret_plot_var)
+! Apply native striding if possible
 
-LET var_size = ABS( `pvar,RETURN=size`)
-DEFINE SYMBOL var_dim = `pvar,RETURN=shape`
-LET ndims = STRLEN("($var_dim)")
-
-LET stride_for_speed = `INT( 1+ ((var_size/memsize))/ndims )`
-LET stride_for_speed = `INT( 1+ ((var_size/memsize)) )`
-
-! If axes are not already strided, apply simple striding which
-! we will undo later.
-
-LET sampled_in_x = 0
-LET sampled_in_y = 0
-
-IF `stride_for_speed GT 1` THEN
-   LET sampled_in_x = STRCMP("`pvar,RETURN=xaxis`", "SAMPLE_XLON") EQ 0 OR\
-                     STRCMP("`pvar,RETURN=xaxis`", "SAMPLE_X") EQ 0
-   LET sampled_in_y = STRCMP("`pvar,RETURN=yaxis`", "SAMPLE_YLAT") EQ 0 OR\
-                     STRCMP("`pvar,RETURN=yaxis`", "SAMPLE_Y") EQ 0
-ENDIF
-IF ($regrid_fcn"0|*>1") THEN DEFINE SYMBOL no_native_strides_xy = 1
-
-! If already strided, dont do index strides.
-
-LET max_size = 50
-DEFINE SYMBOL scat = 0
-IF ($data_x_var"0|*>1") THEN 
-   DEFINE SYMBOL scat = 1
-   LET max_size = 10000  ! striding on in-situ data
-ENDIF
+IF ($regrid_fcn"0|*>1") THEN 
+   DEFINE SYMBOL no_native_strides_xy = 1
+   GO LAS_autolev_regridded_from_curv
+ELSE  !!! regrid_fcn
 
 ! region syms dont apply to native curv grid directly
-! region syms also dont apply to insitu data (they are just on an abstract axis)
-
-LET indx_strd_used = 0
-IF `($do_curvi_xy"0") EQ 0 AND ($its_insitu"0") NE 1` THEN  
-
-IF `($xstride"1|1>0|*>0") OR ($no_native_strides_xy"0|*>1")` THEN
-   LET xsize  `pvar,RETURN=isize`
-   IF `xsize GT max_size` THEN
-     IF ($clon_imin"0|*>1") THEN 
-        LET strd_lo = `i[gx=pvar,i=($clon_imin)]`
-        LET strd_hi = `i[gx=pvar,i=($clon_imax)]`
-     ELIF ($scat"0|0|1|*>1") THEN 
-        LET strd_lo = 1
-        LET strd_hi = `xsize`
-     ELSE
-        LET strd_lo = `i[gx=pvar,x=($region_x_lo)]`
-        LET strd_hi = `i[gx=pvar,x=($region_x_hi)]`
-     ENDIF
-     DEFINE SYMBOL index_strides = i=`strd_lo`:`strd_hi`:`INT(xsize/10)`
-     DEFINE SYMBOL xstride = `INT(xsize/10)`
-     LET indx_strd_used = 1
-   ELSE
-      IF `($region_sample"0|*>1") EQ 0` THEN DEFINE SYMBOL  index_strides = ($region_x)
-   ENDIF
-ELSE
-   IF `($region_sample"0|*>1") EQ 0` THEN DEFINE SYMBOL  index_strides = ($region_x)
-ENDIF
-
-IF `($ystride"1|1>0|*>0") OR ($no_native_strides_xy"0|*>1")` THEN
-   LET ysize  `pvar,RETURN=jsize`
-   IF `ysize GT max_size` THEN
-     IF ($clat_jmin"0|*>1") THEN 
-        LET strd_lo = `j[gx=pvar,j=($clat_jmin)]`
-        LET strd_hi = `j[gx=pvar,j=($clat_jmax)]`
-     ELIF ($scat"0|0|1|*>1") THEN 
-        LET strd_lo = 1
-        LET strd_hi = `ysize`
-     ELSE
-        LET strd_lo = `j[gy=pvar,y=($region_y_lo)]`
-        LET strd_hi = `j[gy=pvar,y=($region_y_hi)]`
-     ENDIF
-     LET indx_strd_used = 1
-     IF ($index_strides"0|*>1") THEN
-        DEFINE SYMBOL index_strides = ($index_strides),j=`strd_lo`:`strd_hi`:`INT(ysize/10)`
-     ELSE
-        DEFINE SYMBOL index_strides = j=`strd_lo`:`strd_hi`:`INT(ysize/10)`
-     ENDIF
-     DEFINE SYMBOL ystride = `INT(ysize/10)`
-   ELSE
-      IF ($index_strides"0|*>1") THEN
-         IF `($region_y"0|*>1") AND ($scat"0|0|1|*>1") EQ 0` THEN \
-         DEFINE SYMBOL index_strides = ($index_strides),($region_y)
-      ELSE
-         IF `($region_sample"0|*>1") EQ 0 AND ($region_y"0|*>1") AND ($scat"0|0|1|*>1") EQ 0` THEN \
-         DEFINE SYMBOL  index_strides = ($region_y)
-      ENDIF
-   ENDIF
-   
-ELSE
-   IF ($index_strides"0|*>1") THEN
-      IF `($region_y"0|*>1") AND ($scat"0|0|1|*>1") EQ 0` THEN \
-      DEFINE SYMBOL index_strides = ($index_strides),($region_y)
-   ELSE
-      IF `($region_sample"0|*>1") EQ 0 AND ($region_y"0|*>1") AND ($scat"0|0|1|*>1") EQ 0` THEN \
-      DEFINE SYMBOL  index_strides = ($region_y)
-   ENDIF
-ENDIF
-
-IF `($zstride"0|1>0|*>1") OR ($no_native_strides_xy"0|*>1")` THEN
-   LET zsize  `pvar,RETURN=ksize`
-   IF `zsize GT max_size` THEN 
-
-     LET strd_lo = `k[gz=pvar,z=($region_z_lo)]`
-     LET strd_hi = `k[gz=pvar,z=($region_z_hi)]`
-     LET indx_strd_used = 1
-     IF ($index_strides"0|*>1") THEN
-        DEFINE SYMBOL index_strides = ($index_strides),k=`strd_lo`:`strd_hi`:`INT(zsize/10)`
-     ELSE
-        DEFINE SYMBOL index_strides = k=`strd_lo`:`strd_hi`:`INT(zsize/10)`
-     ENDIF
-     DEFINE SYMBOL zstride = `INT(zsize/10)`
-   ELSE
-
-      IF ($index_strides"0|*>1") THEN
-         IF `($region_z"0|*>1") AND ($scat"0|0|1|*>1") EQ 0` THEN DEFINE SYMBOL index_strides = ($index_strides),($region_z)
-      ELSE
-         IF `($region_z"0|*>1") AND ($scat"0|0|1|*>1") EQ 0` THEN DEFINE SYMBOL index_strides = ($region_z)
-      ENDIF
-   ENDIF
-   
-ELSE
-   IF ($index_strides"0|*>1") THEN
-      IF `($region_z"0|*>1") AND ($scat"0|0|1|*>1") EQ 0` THEN DEFINE SYMBOL index_strides = ($index_strides),($region_z)
-   ELSE
-      IF `($region_z"0|*>1") AND ($scat"0|0|1|*>1") EQ 0` THEN DEFINE SYMBOL index_strides = ($region_z)
-   ENDIF
-ENDIF
-
-ENDIF ! region syms dont apply to native curv grid directly
 
 IF `($do_curvi_xy"0")` THEN
-   LET xsize = ($clon_imax) - ($clon_imin)
-   LET ysize = ($clat_jmax) - ($clat_jmin)
-   IF `xsize GT max_size` THEN DEFINE SYMBOL i_curv_stride = :`INT(xsize/10)`
-   IF `ysize GT max_size` THEN DEFINE SYMBOL j_curv_stride = :`INT(ysize/10)`
-ENDIF
+   GO LAS_autolev_curvi
 
-!IF `indx_strd_used EQ 0` THEN CANCEL SYMBOL index_strides
+ELSE
+   LET xsize = `pvar,RETURN=isize`
+   DEFINE SYMBOL xstride = `INT(xsize/10)`
+   IF `($xstride) LT 2` THEN CANCEL SYMBOL xstride
+   
+   LET ysize = `pvar,RETURN=jsize`
+   DEFINE SYMBOL ystride = `INT(ysize/10)`
+   IF `($ystride) LT 2` THEN CANCEL SYMBOL ystride
+
+ENDIF ! do_curvi_xy
+
+ENDIF  !!! regrid_fcn
+
 
 IF ($index_strides"0|*>1") THEN 
    DEFINE SYMBOL ppvar = ($data_var)[d=($data_num),($index_strides)]
@@ -281,85 +163,62 @@ ELSE
    DEFINE SYMBOL ppvar = pvar
 ENDIF
 
-! tstride was not set in LAS_set_stride. Now we are using the whole t region.
-IF `($tstride"0|1>0|*>1") EQ 0` THEN 
-   LET tsize  `($ppvar),RETURN=lsize`   
+! Can always use native strides in z and t
 
-   LET strd_lo = 1
-   LET anim_timevar = ($ppvar)
-   LET tt = t[gt=anim_timevar]
+! Should be only one Z anyway for xy animations, but this wont hurt,
+LET zsize  `pvar,RETURN=ksize`
+DEFINE SYMBOL zstride = `INT(zsize/10)`
+IF `($zstride) LT 2` THEN CANCEL SYMBOL zstride
 
-   LET strd_hi = `tt,return=lsize`
+! The time range specifies the whole t region.
+LET tsize  `($ppvar),RETURN=lsize`   
 
-! If the incoming t region is the region over which to animate...
-   LET LL = L[gt=($data_var)[d=($data_num)]]
-   LET strd_lo = `LL[t="($region_t_lo)"]`
-   LET strd_hi = `LL[t="($region_t_hi)"]`
-   LET tsize = `strd_hi - strd_lo + 1`
-   IF ($ferret_time_step"0|*>1") THEN
-      LET strd_del = ($ferret_time_step)
-      IF `tsize GT max_size` THEN 
-         LET strd_del = `INT(tsize/10)`
-         IF `strd_del LE 2` THEN LET strd_del = `INT(tsize/5)`
-      ENDIF 
-   ELSE
-      LET strd_del = 1
-      IF `tsize GT max_size` THEN 
-         LET strd_del = `INT(tsize/10)`
-         IF `strd_del LE 2` THEN LET strd_del = `INT(tsize/5)`
-      ENDIF 
-   ENDIF
+LET strd_lo = 1
+LET anim_timevar = ($ppvar)
+LET tt = t[gt=anim_timevar]
 
-   LET indx_strd_used = 1
-   IF ($index_strides"0|*>1") THEN
-      IF ($region_t"0|*>1") THEN DEFINE SYMBOL index_strides = ($index_strides),L=`strd_lo`:`strd_hi`:`strd_del`
-   ELSE
-      IF ($region_t"0|*>1") THEN DEFINE SYMBOL  index_strides = L=`strd_lo`:`strd_hi`:`strd_del`
-   ENDIF
-   DEFINE SYMBOL tstride = `strd_del`
+LET strd_hi = `tt,return=lsize`
+
+! The incoming t region is the region over which to animate...
+LET LL = L[gt=($data_var)[d=($data_num)]]
+LET strd_lo = `LL[t="($region_t_lo)"]`
+LET strd_hi = `LL[t="($region_t_hi)"]`
+LET tsize = `strd_hi - strd_lo + 1`
+
+IF ($ferret_time_step"0|*>1") THEN
+   LET strd_del = ($ferret_time_step)
+   IF `(tsize/strd_del) GT max_size` THEN 
+      LET strd_test = tsize/max_size
+      LET strd_fact = INT(strd_test/($ferret_time_step))
+      LET strd_del = ($ferret_time_step)* strd_fact
+      IF `strd_del LE 2` THEN LET strd_del = 2
+   ENDIF 
+ELSE
+   LET strd_del = 1
+   IF `tsize GT max_size` THEN 
+      LET strd_del = `INT(tsize/10)`
+      IF `strd_del LE 2` THEN LET strd_del = 2
+   ENDIF 
 ENDIF
 
-IF `STRINDEX("($data_($num)_grid_type)","scattered") GT 0` THEN CANCEL SYMBOL index_strides
-IF `indx_strd_used EQ 0` THEN CANCEL SYMBOL index_strides
+DEFINE SYMBOL tstride = `strd_del`
+
 
 IF ($index_strides"0|*>1") THEN 
    DEFINE SYMBOL ppvar = ($data_var)[d=($data_num),($index_strides)]
    LET anim_stridevar = ($ferret_plot_var_noregion)
    DEFINE SYMBOL ppvar = anim_stridevar[($index_strides)]
-   IF `($do_curvi_xy"0") OR ($region_sample"0|*>1")` THEN
-      LET pvar = \
-      ($data_var)[d=($data_num),i=($clon_imin):($clon_imax)($i_curv_stride),\
-      j=($clat_jmin):($clat_jmax)($i_curv_stride),\
-      ($index_strides)]
-
-      IF ($region_z"0|*>1") THEN  LET pvar = \
-      ($data_var)[d=($data_num),i=($clon_imin):($clon_imax)($i_curv_stride),\
-      j=($clat_jmin):($clat_jmax)($i_curv_stride),\
-      ($region_z),($index_strides)]
-   ENDIF
 ELSE
    DEFINE SYMBOL ppvar = pvar
-   IF `($do_curvi_xy"0") OR ($region_sample"0|*>1")` THEN
-      LET pvar = \
-      ($data_var)[d=($data_num),i=($clon_imin):($clon_imax)($i_curv_stride),\
-      j=($clat_jmin):($clat_jmax)($i_curv_stride)]
-
-      IF ($region_z"0|*>1") THEN  LET pvar = \
-      ($data_var)[d=($data_num),i=($clon_imin):($clon_imax)($i_curv_stride),\
-      j=($clat_jmin):($clat_jmax)($i_curv_stride),\
-      ($region_z)]
-   ENDIF
 ENDIF
 
-IF ($do_curvi_xy"0") THEN DEFINE SYMBOL ppvar = pvar
-
-IF `($no_native_strides_xy"0|*>1") EQ 0 AND ($index_strides"0|*>1") EQ 0` THEN 
+IF `($index_strides"0|*>1") EQ 0` THEN 
    IF `($xstride"0") GT 1` THEN SET AXIS/STRIDE=($xstride) `pvar,RETURN=xaxis`
    IF `($ystride"0") GT 1` THEN SET AXIS/STRIDE=($ystride) `pvar,RETURN=yaxis`
-   IF `($zstride"0") GT 1` THEN SET AXIS/STRIDE=($zstride) `pvar,RETURN=zaxis`
-   IF `($tstride"0") GT 1` THEN SET AXIS/STRIDE=($tstride) `pvar,RETURN=taxis`
    DEFINE SYMBOL ppvar = pvar
 ENDIF
+IF `($zstride"0") GT 1` THEN SET AXIS/STRIDE=($zstride) `pvar,RETURN=zaxis`
+IF `($tstride"0") GT 1` THEN SET AXIS/STRIDE=($tstride) `pvar,RETURN=taxis`
 
 ! Use Ferrets variance-based levels.
 LET varxd = ($ppvar)
@@ -404,40 +263,9 @@ IF ($ferret_center_levels) THEN
   SHADE/LEV=($num_fine_levels)vc var2d
 ELSE
 
-!!
-!!! If requested with posinteger, create levels that are integers or multiples of 
-!!! integers, suitable for COUNTS.
-!!
-!!      IF ($ferret_fill_levels"0|posinteger>1|*>0") THEN
-!!
-!!         LET pminmax = MINMAX(var2d)
-!!         LET pmin = `INT(pminmax[i=1])`
-!!         LET pmax = `INT(pminmax[i=2]+0.5)`
-!!         IF `pmin LE 0` THEN 
-!!            LET pmin = 0.5
-!!         ELSE 
-!!            LET pmin = `pmin - 0.5`
-!!         ENDIF
-!!         IF `pmax GT 1` THEN
-!!            LET pmax = `pmax + 0.5`
-!!         ELSE 
-!!            LET pmax = 1.5
-!!         ENDIF
-!!         LET pdel = 1
-!!         IF `pmax - pmin GT 30` THEN LET pdel = 5
-!!         IF `pmax - pmin GT 100` THEN LET pdel = 10
-!!         IF `pmax - pmin GT 30` THEN 
-!!            LET pmin = 1
-!!            LET pmax = `pmax - 0.5`
-!!         ENDIF
-!!         DEFINE SYMBOL ferret_fill_levels = (`pmin`, `pmax`, `pdel`)	 
-!!         DEFINE SYMBOL ferret_contour_levels = ($ferret_fill_levels)
-!!
-!!         EXIT/SCRIPT
-!!      ENDIF
-
   SHADE/LEV=($num_fine_levels)v var2d
 ENDIF
+
 IF ($LEV_OPNLEVS"0|*>1") THEN 
    DEFINE SYMBOL ferret_fill_levels = ($LEV_OPNLEVS)
    DEFINE SYMBOL ferret_contour_levels = ($LEV_OPNLEVS)
@@ -445,10 +273,23 @@ ENDIF
 
 ! Restore original axes
 IF `($index_strides"0|*>1") EQ 0` THEN 
-IF `($xstride"0") GT 1` THEN CAN AXIS/STRIDE `anim_stridevar,RETURN=xaxis`
-IF `($ystride"0") GT 1` THEN CAN AXIS/STRIDE `anim_stridevar,RETURN=yaxis`
-IF `($zstride"0") GT 1` THEN CAN AXIS/STRIDE `anim_stridevar,RETURN=zaxis`
-IF `($tstride"0") GT 1` THEN CAN AXIS/STRIDE `anim_stridevar,RETURN=taxis`
+
+IF `($xstride"0") GT 1` THEN 
+  CANCEL AXIS/STRIDE `pvar,RETURN=xaxis`
+  CANCEL SYMBOL xstride
+ENDIF
+IF `($ystride"0") GT 1` THEN 
+  CANCEL AXIS/STRIDE `pvar,RETURN=yaxis`
+  CANCEL SYMBOL ystride
+ENDIF
+IF `($zstride"0") GT 1` THEN 
+  CANCEL AXIS/STRIDE `pvar,RETURN=zaxis`
+  CANCEL SYMBOL zstride
+ENDIF
+IF `($tstride"0") GT 1` THEN 
+  CANCEL AXIS/STRIDE `pvar,RETURN=taxis`
+  CANCEL SYMBOL tstride
+ENDIF
+
 ENDIF
 ! End of file ------------LAS_auto_levels_animate.jnl--------------------------
-
