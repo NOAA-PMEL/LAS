@@ -273,6 +273,7 @@ public class FerretIOServiceProvider implements IOServiceProvider {
 		// This creates the data variables form the Ferret XML description.
 		log.debug("Found " + data.size() + " 'datasets'");
 		ArrayList<String> varNAMES = new ArrayList<String>();
+		int ds_index = 1;
 		for (Iterator dataIt = data.iterator(); dataIt.hasNext();) {
 			Element dataset = (Element) dataIt.next();
 			String dataset_name = dataset.getAttributeValue("name");
@@ -348,10 +349,13 @@ public class FerretIOServiceProvider implements IOServiceProvider {
 					// types in DataType.???
 
 					dataVar.addAttribute(new Attribute("dataset", dataset_name));
+					dataVar.addAttribute(new Attribute("dataset_index", String.valueOf(ds_index)));
+					
 					ncfile.addVariable(null, dataVar);
 				}
 
 			}
+			ds_index++;
 		}
 
 		ncfile.addAttribute(null, new Attribute("Conventions", "COARDS"));
@@ -387,6 +391,13 @@ public class FerretIOServiceProvider implements IOServiceProvider {
 			dataset = dataset_attr.getStringValue();
 
 		}
+		
+		Attribute dataset_index_attr = v2.findAttribute("dataset_index");
+		String dataset_index = "1";
+		if ( dataset_index_attr != null ) {
+			dataset_index = dataset_index_attr.getStringValue();
+		}
+		
 
 		String direction = "";
 		Attribute direction_attr = v2.findAttribute("direction");
@@ -470,7 +481,7 @@ public class FerretIOServiceProvider implements IOServiceProvider {
 							+ direction + " ");
 				} else {
 					indx = new StringBuffer("go get_datavar \"" + temp_file
-							+ "\" " + "\"" + dataset + "\" " + varname + " "
+							+ "\" " + "\"" + dataset_index + "\" " + varname + " "
 							+ direction + " ");
 				}
 				// This is the get_data order XYZT

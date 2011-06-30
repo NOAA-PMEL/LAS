@@ -23,8 +23,8 @@
 ! Save the dataset number of the current dataset
 SET DATA/SAVE
 
-! First see if there is a dataset.
-! SET DATA "($2)"
+! The IOSP will supply an integer value for this argument.
+SET DATA ($2)
 
 ! Write output in original upper-or lower-case spelling of variables
 ! and axis names
