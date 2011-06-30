@@ -317,7 +317,7 @@ public class ProductRequest {
                             } else if ( !regrid && do_analysis ) {
                             	// Send in all the gridTo junk, but it won't get used.  
                             	// This will all be redone in the next implementation when this moves to it's own service/class.
-                                setAnalysisURL(analysis, data, lasConfig, lasRequest, varXPath, var_count, dataset_number, regrid, "");                               
+                                setAnalysisURL(analysis, data, lasConfig, lasRequest, varXPath, var_count, dataset_number, regrid);                               
                             } else if ( regrid && !do_analysis ) {
                             	
                                 if ( dataObjectsE.getChildren("data").size() <= 0 ) {
@@ -349,7 +349,7 @@ public class ProductRequest {
                                         	String g = "g"+view;
                                         	if (gridTo.isAnalysis()) {
                                         		StringBuffer jnl = gridTo.getJnl();
-                                        		jnl.append("_cr_letdeq1 "+var+"_"+var_count+"_transformed="+var+"_2[d="+dataset_number+","+g+"="+gridTo.getVar()+"[d=1]]_cr_ATTRCMD "+var+" "+var+"_"+var_count+"_transformed}");
+                                        		jnl.append("_cr_letdeq1 "+var+"_"+var_count+"_transformed="+var+"[d="+dataset_number+","+g+"="+gridTo.getVar()+"[d=1]]");
                                         		// Get the original URL for the gridTo data set and append the new combined analysis and regrid URL.
                                         		String expr = URLEncoder.encode("_expr_{"+encoded+"}{"+jnl.toString(), "UTF-8");
                                         		String comboURL = lasConfig.getFTDSURL(gridTo.getVarXPath())+expr;                                       			
@@ -360,7 +360,7 @@ public class ProductRequest {
                                         	} else {    
                                         		StringBuffer jnl = gridTo.getJnl();
                                         		gridTo.setVar(gridTo.getVar());
-                                                jnl.append("letdeq1 "+var+"_"+var_count+"_transformed="+var+"_2[d="+dataset_number+","+g+"="+gridTo.getVar()+"[d=1]]_cr_ATTRCMD "+var+" "+var+"_"+var_count+"_transformed");
+                                                jnl.append("letdeq1 "+var+"_"+var_count+"_transformed="+var+"[d="+dataset_number+","+g+"="+gridTo.getVar()+"[d=1]]");
                                                 expression = URLEncoder.encode("_expr_{"+encoded+"}{"+jnl.toString()+"}", "UTF-8");
                                                 data.setAttribute("url", gridTo.getURL()+expression);
                                         	}
@@ -381,7 +381,7 @@ public class ProductRequest {
 
                             } else if ( regrid && do_analysis ) {
                             	// Create the analyzed variable then set the gridTo information to use it.
-                            	StringBuffer jnl = setAnalysisURL(analysis, data, lasConfig, lasRequest, varXPath, var_count, dataset_number, regrid, "_2");
+                            	StringBuffer jnl = setAnalysisURL(analysis, data, lasConfig, lasRequest, varXPath, var_count, dataset_number, regrid);
                                 if ( dataObjectsE.getChildren("data").size() <= 0 ) {
                                 	gridTo.setJnl(jnl);
                                     gridTo.setURL(data.getAttributeValue("url"));
@@ -407,7 +407,7 @@ public class ProductRequest {
                                     		var = data.getAttributeValue("var");
                                     		String revar = var+"_"+var_count+"_transformed";
                                     		data.setAttribute("var", revar);
-                                    		analysis_jnl.append("_cr_letdeq1 "+revar+"="+var+"_2[d="+dataset_number+","+g+"="+gridTo.getVar()+"[d=1]]}");
+                                    		analysis_jnl.append("_cr_letdeq1 "+revar+"="+var+"[d="+dataset_number+","+g+"="+gridTo.getVar()+"[d=1]]}");
                                     		// Get the original URL for the gridTo data set and append the new combined analysis and regrid URL.
                                     		String expr = URLEncoder.encode("_expr_{"+encoded+"}{"+analysis_jnl.toString(), "UTF-8");
                                     		String comboURL = lasConfig.getFTDSURL(gridTo.getVarXPath())+expr;                                       			
@@ -417,7 +417,7 @@ public class ProductRequest {
                                     		gridTo.setURL(gridTo.getData().getAttributeValue("url"));
                                     	} else {    
                                     		var = data.getAttributeValue("var");
-                                    		jnl.append("_cr_letdeq1 "+var+"_"+var_count+"_transformed="+var+"_2[d="+dataset_number+","+g+"="+gridTo.getVar()+"[d=1]]_cr_ATTRCMD "+var+" "+var+"_"+var_count+"_transformed");
+                                    		jnl.append("_cr_letdeq1 "+var+"_"+var_count+"_transformed="+var+"[d="+dataset_number+","+g+"="+gridTo.getVar()+"[d=1]]");
                                     		expression = URLEncoder.encode("_expr_{"+encoded+"}"+"{"+jnl.toString()+"}", "UTF-8");
                                     		data.setAttribute("url", gridTo.getURL()+expression);
                                     		data.setAttribute("var", var+"_"+var_count+"_transformed");
@@ -741,7 +741,7 @@ public class ProductRequest {
      * @throws LASException
      * @throws UnsupportedEncodingException
      */
-    private StringBuffer setAnalysisURL(Element analysis, Element data, LASConfig lasConfig, LASUIRequest lasRequest, String varXPath, int var_count, int dataset_number, boolean regrid, String rename_suffix) throws JDOMException, LASException, UnsupportedEncodingException {
+    private StringBuffer setAnalysisURL(Element analysis, Element data, LASConfig lasConfig, LASUIRequest lasRequest, String varXPath, int var_count, int dataset_number, boolean regrid) throws JDOMException, LASException, UnsupportedEncodingException {
         int dset = dataset_number;
     	if ( !regrid ) {
     		dset = 1;
@@ -855,10 +855,10 @@ public class ProductRequest {
             } else if ( ocean_mask != null) {
                 jnl.append("let analysis_mask = if rose_on_grid gt 0 then 1_cr_");           
             }
-            jnl.append("let masked_"+var+"="+var+rename_suffix+"[d="+var_count+"]*analysis_mask_cr_");
-            jnl.append("letdeq1 "+var+"_"+var_count+"_transformed=masked_"+var+"_2[d="+dset+grid+"]_cr_");
+            jnl.append("let masked_"+var+"="+var+"[d="+var_count+"]*analysis_mask_cr_");
+            jnl.append("letdeq1 "+var+"_"+var_count+"_transformed=masked_"+var+"[d="+dset+grid+"]_cr_");
         } else {
-            jnl.append("letdeq1 "+var+"_"+var_count+"_transformed="+var+rename_suffix+"[d="+dset+grid+"]_cr_ATTRCMD "+var+" "+var+"_"+var_count+"_transformed");
+            jnl.append("letdeq1 "+var+"_"+var_count+"_transformed="+var+"[d="+dset+grid+"]_cr_ATTRCMD "+var+" "+var+"_"+var_count+"_transformed");
         }
 
         String fdsURL = lasConfig.getFTDSURL(varXPath);
