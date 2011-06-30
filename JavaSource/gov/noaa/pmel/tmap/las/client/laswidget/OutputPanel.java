@@ -884,15 +884,14 @@ public class OutputPanel extends Composite {
 				NodeList results = responseXML.getElementsByTagName("result");
 				String annourl = "";
 				String imageurl = "";
+				boolean image_ready = false;
 				for(int n=0; n<results.getLength();n++) {
 					if ( results.item(n) instanceof Element ) {
 						Element result = (Element) results.item(n);
 						if ( result.getAttribute("type").equals("image") ) {
 							//HTML image = new HTML("<a target=\"_blank\" href=\""+result.getAttribute("url")+"\"><img width=\"100%\" src=\""+result.getAttribute("url")+"\"></a>");
+							image_ready = true;
 							imageurl = result.getAttribute("url");
-							setImage(imageurl, Util.getAnnotationsService(annourl, imageurl));
-							setImageWidth();
-							spin.hide();
 						} else if ( result.getAttribute("type").equals("map_scale") )  {
 							final String ms_url = result.getAttribute("url");
 							RequestBuilder mapScaleRequest = new RequestBuilder(RequestBuilder.GET, ms_url);
@@ -914,9 +913,10 @@ public class OutputPanel extends Composite {
 									retryShowing = true;
 									PushButton retry = new PushButton("Retry");
 									retry.addStyleDependentName("SMALLER");
-									retry.addClickListener(new ClickListener() {
-										public void onClick(Widget sender) {
-											
+									retry.addClickHandler(new ClickHandler() {
+										
+										@Override
+										public void onClick(ClickEvent event) {
 											// Just send the same request again to see if it works the second time.
 											String url = Util.getProductServer()+"?xml="+URL.encode(lasRequest.getXMLText());
 											RequestBuilder sendRequest = new RequestBuilder(RequestBuilder.GET, url);
@@ -949,8 +949,11 @@ public class OutputPanel extends Composite {
 						}
 					}
 				}
-				if ( !annourl.equals("") && !imageurl.equals("") ) {
+				if ( image_ready ) {
 				    currentPrintURL = Util.getAnnotationsFrag(annourl, imageurl);
+				    setImage(imageurl, Util.getAnnotationsService(annourl, imageurl));
+				    setImageWidth();
+				    spin.hide();
 				}
 			}
 		}
