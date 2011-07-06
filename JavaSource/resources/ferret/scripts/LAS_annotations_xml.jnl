@@ -3,7 +3,6 @@
 ! and given back to LAS for display
 
 !CANCEL MODE VERIFY
-
 ! Remove duplicate labels
 !  If dataset name and URL are the same, list just once
 IF `STRCMP("($dataset_url_lab%0)", "($dataset_title_lab%99%)") EQ 0` THEN CAN SYM dataset_url_lab
@@ -12,6 +11,10 @@ IF `STRCMP("($dataset_url_lab%0)", "($dataset_title_lab%99%)") EQ 0` THEN CAN SY
 IF ($dataset_title_lab%0|*>1%) THEN
   IF `STRINDEX("($dataset_url_lab%0%)", "http") EQ 0` THEN CANCEL SYMBOL dataset_url_lab
 ENDIF
+
+! IF there is a dataset-difference title, use it.
+IF ($ferret_diff_list_title"0|*>1") THEN DEFINE SYMBOL dataset_title_lab = ($ferret_diff_list_title)
+
 
 ! Write the header line
 

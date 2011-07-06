@@ -125,10 +125,11 @@ ENDIF
 IF `STRCMP("($data_0_dataset_name)", "($data_1_dataset_name%99%)") NE 0` THEN
    DEFINE SYMBOL dataset_title_lab = \
     DATASETS: ($data_0_dataset_name)(1)  ($data_1_dataset_name)(2)
+   IF ($ferret_annotations"0|*>1") THEN DEFINE SYMBOL dataset_title_lab = \
+    DATASETS: ($data_0_dataset_name) minus ($data_1_dataset_name)
 ELSE
    DEFINE SYMBOL dataset_title_lab = DATASET: ($data_0_dataset_name)
 ENDIF
-
 
 DEFINE SYMBOL variable_lab = \
     Difference of ($ferret_title_0) minus ($ferret_title_1)
@@ -137,6 +138,10 @@ IF `STRCMP("($ferret_title_0)", "($ferret_title_1)") EQ 0` THEN \
 
 ! For data listings, a title without formatting information.
 DEFINE SYMBOL ferret_diff_list_title = ($dataset_title_lab)
+
+! For annotations, without the (1) and (2)
+IF ($ferret_annotations"0|*>1") THEN \
+  DEFINE SYMBOL ferret_diff_list_title = ($dataset_title_lab)
 
 IF `STRLEN("($ferret_diff_title)") GT 150` THEN
 
@@ -170,7 +175,7 @@ IF `STRINDEX("($plotshape)", "X") EQ 0` THEN
       IF `(STRCMP("($longlab1)", "($longlab2)") NE 0)` THEN 
          DEFINE SYMBOL longitude_lab = LONGITUDE: ($longlab1) minus ($longlab2)
       ELSE
-         DEFINE SYMBOL longitude_lab = LONGITUDE: ($longlab2)
+         DEFINE SYMBOL longitude_lab = LONGITUDE: ($longlab1)
       ENDIF
    ELIF ($region_1_x_lo"0|*>1") THEN 
       DEFINE SYMBOL n_left_labels = `($n_left_labels)+1`
@@ -187,7 +192,7 @@ IF `STRINDEX("($plotshape)", "Y") EQ 0` THEN
       IF `(STRCMP("($latlab1)", "($latlab2)") NE 0)` THEN 
          DEFINE SYMBOL latitude_lab = LATITUDE: ($latlab1) minus ($latlab2)	
       ELSE
-         DEFINE SYMBOL latitude_lab = LATITUDE: ($latlab2)
+         DEFINE SYMBOL latitude_lab = LATITUDE: ($latlab1)
       ENDIF
    ELIF ($region_1_y_lo"0|*>1") THEN 
       DEFINE SYMBOL n_left_labels = `($n_left_labels)+1`
