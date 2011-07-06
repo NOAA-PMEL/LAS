@@ -78,6 +78,7 @@ IF ($($region)_z_lo"0|*>1") THEN
   ENDIF
 ENDIF
 IF ($add_region_z"0|*>1") THEN
+   IF ($($region)_z_lo"0|*>1") THEN DEFINE SYMBOL add_region_z = z=($($region)_z_lo)
    DEFINE SYMBOL region_z = ($add_region_z)
    DEFINE SYMBOL region_z_range = 0
 ENDIF
@@ -93,6 +94,7 @@ IF ($($region)_t_lo"0|*>1") THEN
   DEFINE SYMBOL region_t T=\"($region_t_lo)\":\"($region_t_hi)\"
 ENDIF
 IF ($add_region_t"0|*>1") THEN
+   IF ($($region)_t_lo"0|*>1") THEN DEFINE SYMBOL add_region_t = t=($($region)_t_lo)
    DEFINE SYMBOL region_t = ($add_region_t)
 ENDIF
 
