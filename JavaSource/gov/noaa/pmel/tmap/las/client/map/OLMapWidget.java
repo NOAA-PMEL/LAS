@@ -389,23 +389,8 @@ public class OLMapWidget extends Composite {
 		MapWidget mapWidget = new MapWidget(width, height, wmsMapOptions);
 		map = mapWidget.getMap();
 		//Add a WMS layer for a little background
-		WMSParams wmsParams = new WMSParams();
-		wmsParams.setFormat("image/png");
-		wmsParams.setLayers("basic");
-        WMSOptions wmsOptions = new WMSOptions();
-        wmsOptions.setWrapDateLine(true);
-        wmsOptions.setIsBaseLayer(false);
-        if ( tile_url == null || tile_url.equals("") || !tile_url.startsWith("http://")) {
-        	tile_url = WMS_URL;
-        }
-		wmsLayer = new WMS(
-				"Basic WMS",
-				tile_url,
-				wmsParams,
-				wmsOptions);
-		
 		map.addLayer(wrapLayer);
-		map.addLayer(wmsLayer);
+		setTileServer("Base Layer", WMS_URL, "image/png", "basic");
 		map.addLayer(boxLayer);
 		map.addLayer(lineLayer);
 		
@@ -529,13 +514,13 @@ public class OLMapWidget extends Composite {
 	public Map getMap() {
 		return map;
 	}
-	public void setTileServer(String url) {
+	public void setTileServer(String name, String url, String format, String layers) {
 		if ( wmsLayer != null ) {
 			map.removeLayer(wmsLayer);
 		}
 		WMSParams wmsParams = new WMSParams();
-		wmsParams.setFormat("image/png");
-		wmsParams.setLayers("basic");
+		wmsParams.setFormat(format);
+		wmsParams.setLayers(layers);
         WMSOptions wmsOptions = new WMSOptions();
         wmsOptions.setWrapDateLine(true);
         wmsOptions.setIsBaseLayer(false);
@@ -543,7 +528,7 @@ public class OLMapWidget extends Composite {
         	url = WMS_URL;
         }
 		wmsLayer = new WMS(
-				"Basic WMS",
+				name,
 				url,
 				wmsParams,
 				wmsOptions);
@@ -1432,8 +1417,8 @@ public class OLMapWidget extends Composite {
     }-*/;
 	public native void activateNativeHooks()/*-{
 		var localMap = this;
-		$wnd.setWMSTileServer = function(wms_url) {
-			localMap.@gov.noaa.pmel.tmap.las.client.map.OLMapWidget::setTileServer(Ljava/lang/String;)(wms_url);
+		$wnd.setWMSTileServer = function(name,wms_url,format,layers) {
+			localMap.@gov.noaa.pmel.tmap.las.client.map.OLMapWidget::setTileServer(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)(name,wms_url,format,layers);
 		}
 		$wnd.mapResize = function() {
 			localMap.@gov.noaa.pmel.tmap.las.client.map.OLMapWidget::resizeMap()();
