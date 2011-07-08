@@ -521,6 +521,33 @@ EOF
        printENV($ferretConfig, @EnvVars);
 }
 
+# Regardless of whether the examples are to be installed, get the latest operations file.
+
+
+    my $ops_in = "conf/example/operationsV7.xml";
+    my $ops_out = $serverConf."/operationsV7.xml";
+
+    if ( -f $ops_out ) { 
+         print "You already have an operationsV7.xml file for your\n";
+         print "product server in $ops_out.\n";
+         my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(time);
+         $year += 1900;
+         my @abbr = qw( Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec );
+         my $m = $mday;
+         if ( $mday < 10 ) {
+              $m = "0".$mday;
+         }
+         my $ops_date = $year."-".$abbr[$mon]."-".$m;
+         my $ops_bak = $ops_out."-".$ops_date.".bak";
+         print "Creating an back up in $ops_bak.\n";
+         if (!copy($ops_out, $ops_bak)){
+             print "Couldn't copy $ops_out to $ops_bak\n";
+             exit 1;
+         }
+     }
+     if (!copy($ops_in, $ops_out)){
+         print "Couldn't copy $ops_in to $ops_out\n";
+     }
 
 if ( getYesOrNo("Do you want to install the example data set configuration") ) {
 
@@ -534,20 +561,18 @@ if ( getYesOrNo("Do you want to install the example data set configuration") ) {
     $sample_out[0] = $serverConf."/las.xml";
     $sample_in[1] = "conf/example/productserver.xml";
     $sample_out[1] = $serverConf."/productserver.xml";
-    $sample_in[2] = "conf/example/operationsV7.xml";
-    $sample_out[2] = $serverConf."/operationsV7.xml";
-    $sample_in[3] = "conf/example/sample_ui.xml";
-    $sample_out[3]= $serverConf."/ui.xml";
-    $sample_in[4] = "conf/example/coads.xml";
-    $sample_out[4] = $serverConf."/coads.xml";
-    $sample_in[5] = "conf/example/DODS_IRI_NOAA_NCEP_EMC_CMB_Pac_ocean.xml";
-    $sample_out[5] = $serverConf."/DODS_IRI_NOAA_NCEP_EMC_CMB_Pac_ocean.xml";
-    $sample_in[6] = "conf/example/levitus.xml";
-    $sample_out[6] = $serverConf."/levitus.xml";
-    $sample_in[7] = "conf/example/ocean_atlas_subset.xml";
-    $sample_out[7] = $serverConf."/ocean_atlas_subset.xml";
-    $sample_in[8] = "conf/example/options.xml";
-    $sample_out[8] = $serverConf."/options.xml";
+    $sample_in[2] = "conf/example/sample_ui.xml";
+    $sample_out[2]= $serverConf."/ui.xml";
+    $sample_in[3] = "conf/example/coads.xml";
+    $sample_out[3] = $serverConf."/coads.xml";
+    $sample_in[4] = "conf/example/DODS_IRI_NOAA_NCEP_EMC_CMB_Pac_ocean.xml";
+    $sample_out[4] = $serverConf."/DODS_IRI_NOAA_NCEP_EMC_CMB_Pac_ocean.xml";
+    $sample_in[5] = "conf/example/levitus.xml";
+    $sample_out[5] = $serverConf."/levitus.xml";
+    $sample_in[6] = "conf/example/ocean_atlas_subset.xml";
+    $sample_out[6] = $serverConf."/ocean_atlas_subset.xml";
+    $sample_in[7] = "conf/example/options.xml";
+    $sample_out[7] = $serverConf."/options.xml";
 
     $insitu_in[0] = "conf/example/insitu_demo_1.xml";
     $insitu_out[0] = $serverConf."/insitu_demo_1.xml";
@@ -575,6 +600,7 @@ if ( getYesOrNo("Do you want to install the example data set configuration") ) {
        if (getYesOrNo("Are the sample in-situ datasets loaded into your mySQL database")) {
           $insitu=1;
        }
+
 
     for ( my $i = 0; $i <= $#sample_in; $i++ ) {
        if ( -f $sample_out[$i] ) {
