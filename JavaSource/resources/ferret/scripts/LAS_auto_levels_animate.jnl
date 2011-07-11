@@ -117,12 +117,15 @@ ENDIF
 
 IF `($ferret_plot_var"0|*>1") EQ 0` THEN EXIT/SCRIPT  !e.g. for insitu plots may not have a plot_var
 
+
+LET max_size = 50
 IF `($do_curvi_xy"0|0|*>1") EQ 0` THEN 
    LET pvar = ($ferret_xyz_var)
    LET var_size = ABS( `pvar,RETURN=size`)
    DEFINE SYMBOL var_dim = `pvar,RETURN=shape`
    LET ndims = STRLEN("($var_dim)")
-
+   
+   IF `var_size GT memsize` THEN \
    LET max_size = `INT( 1+ ((var_size/memsize))/ndims )`
 ELSE
    DEFINE SYMBOL ferret_plot_var = pvar
@@ -247,7 +250,7 @@ IF `STRINDEX("($shapevar)", "Z") GT 0` THEN
 ENDIF
 IF `STRINDEX("($shapevar)", "T") GT 0` THEN 
    LET cvar = t[gt=varxd]
-   IF `($do_curvi_xy"0|*>1") EQ 0` THEN LET cvar = LET cvar = t[gt=varxd,($region_t)]
+   IF `($do_curvi_xy"0|0|*>1") EQ 0` THEN LET cvar = t[gt=varxd,($region_t)]
    LET csiz = `cvar,RETURN=lsize`
    DEFINE SYMBOL vsiz = `csiz * ($vsiz)`
 ENDIF
