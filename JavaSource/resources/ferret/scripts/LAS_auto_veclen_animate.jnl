@@ -156,5 +156,27 @@ ELSE
 ENDIF
 DEFINE SYMBOL ferret_vector_length = `vec_len,PREC=2`
 
+
+! Restore original axes
+IF `($index_strides"0|*>1") EQ 0` THEN 
+
+IF `($xstride"0") GT 1` THEN 
+  CANCEL AXIS/STRIDE `pvar,RETURN=xaxis`
+  CANCEL SYMBOL xstride
+ENDIF
+IF `($ystride"0") GT 1` THEN 
+  CANCEL AXIS/STRIDE `pvar,RETURN=yaxis`
+  CANCEL SYMBOL ystride
+ENDIF
+IF `($zstride"0") GT 1` THEN 
+  CANCEL AXIS/STRIDE `pvar,RETURN=zaxis`
+  CANCEL SYMBOL zstride
+ENDIF
+IF `($tstride"0") GT 1` THEN 
+  CANCEL AXIS/STRIDE `pvar,RETURN=taxis`
+  CANCEL SYMBOL tstride
+ENDIF
+
+
 ! End of file ------------LAS_auto_veclen_animate.jnl--------------------------
 
