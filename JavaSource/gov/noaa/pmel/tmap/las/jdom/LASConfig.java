@@ -3242,7 +3242,9 @@ public class LASConfig extends LASDocument {
 	     * @throws JDOMException
 	     */
 	    public Element getUIDefault(String dsID, String varID) throws JDOMException {
-	    	return getUIDefault(getUIDefaultName(dsID, varID));
+	    	String ui_default = getUIDefaultName(dsID, varID);
+	    	ui_default = ui_default.substring(ui_default.indexOf("#")+1, ui_default.length());
+	    	return getUIDefault(ui_default);
 	    }
 	    /**
 	     * Get the default element based on its name
