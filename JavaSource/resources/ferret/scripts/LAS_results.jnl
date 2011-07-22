@@ -65,6 +65,7 @@ ENDIF
 ! exist, it returns 2.  IF it does exist (but of course its not a valid OPeNDAP 
 ! datset), it returns -51.
 
+LET map_scale_exists = 0
 IF ($result_map_scale_filename%0|*>1%) THEN 
    LET map_scale_exists = `TEST_OPENDAP("($result_map_scale_filename)") NE 2`
 ENDIF
