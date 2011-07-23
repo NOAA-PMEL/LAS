@@ -9,9 +9,6 @@
 ! In the new UI it's likely we'll define one operation per
 ! dimension.
 !
-DEFINE SYMBOL ferret_contour_style = default
-IF ($ferret_fill_type"0|*>1") THEN DEFINE SYMBOL ferret_contour_style = ($ferret_fill_type)
-
 IF ($ferret_view"|xt>1|*>0") THEN
 
    !! Make a plot in XT...
