@@ -138,7 +138,7 @@ public class RequestInputFilter implements Filter {
     };
 	
     private final static Set<String> LAS_ID_PARAMETERS = new HashSet<String>(Arrays.asList(lp));
-    private final static Pattern ID_PATTERN = Pattern.compile("[A-Za-z0-9._-]+");
+    private final static Pattern ID_PATTERN = Pattern.compile("[A-Za-z0-9._-/]+");
     // Match 4 floating point numbers separated by a comma
     private final static Pattern BBOX_PATTERN = Pattern.compile("[-+]?[0-9]*\\.?[0-9]+,[-+]?[0-9]*\\.?[0-9]+,[-+]?[0-9]*\\.?[0-9]+,[-+]?[0-9]*\\.?[0-9]+");
     
