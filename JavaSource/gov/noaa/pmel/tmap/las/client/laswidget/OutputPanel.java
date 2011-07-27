@@ -1410,7 +1410,29 @@ public class OutputPanel extends Composite {
 		}
 		
 	}
-	
+	public void setPanelModeFromHistoryToken(Map<String, String> tokenMap, Map<String, String> optionsMap, boolean change) {
+		String pmvarid = tokenMap.get("varid");
+		String pmdsid = tokenMap.get("dsid");
+		changeDataset = change;
+		settingsButton.setUsePanel(true);
+		Util.getRPCService().getVariable(pmdsid, pmvarid, variableCallback);
+	}
+	public AsyncCallback<VariableSerializable> variableCallback = new AsyncCallback<VariableSerializable>() {
+
+		@Override
+		public void onFailure(Throwable caught) {
+			
+			Window.alert("Could not initialize panel from URL history.");
+			
+		}
+
+		@Override
+		public void onSuccess(VariableSerializable result) {
+			nvar = result;
+			Util.getRPCService().getConfig(null, nvar.getDSID(), nvar.getID(), configCallback);			
+		}
+		
+	};
 	public MapSelectionChangeListener mapListener = new MapSelectionChangeListener() {
 
 		@Override

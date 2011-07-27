@@ -450,13 +450,14 @@ public class VizGal extends BaseUI {
 				}
 				xPanels.get(t).setFromHistoryToken(panelTokenMap, optionsMap);
 			}
-
+			applyTokensToPanelModePanels(settings);
 		}
 		boolean diff = !xView.contains(compareAxis);	
 		if ( !diff ) {
 			differenceButton.setDown(false);
 		}
 		differenceButton.setEnabled(diff);
+		
 		refresh(false, true);
 	}
 	public boolean init() {
@@ -1389,19 +1390,30 @@ public class VizGal extends BaseUI {
             // TODO what about the options for the gallery............................??
 			refresh(switch_axis, false);
 			// If necessary restore panels in usePanelSettings mode...
-			/*
-			for (int t = 1; t < panels.size(); t++) {
-				HashMap<String, String> tokenMap = Util.getTokenMap(settings[t]);
-				HashMap<String, String> optionsMap = Util.getOptionsMap(settings[t]);
-				// If this history token has a panel that is using it's own settings, update witht the token.
-				if ( tokenMap.get("usePanelSettings").equals("true") ) { 
-					panel.setFromHistoryToken(settings[t]);
-				} else {
-					// If not force the ds and var from the gallery to the panel, then set from the compareAxis hi and lo from the token
-				}
-				t++;
+			applyTokensToPanelModePanels(settings);		
+		}
+	}
+	private void applyTokensToPanelModePanels(String[] settings) {
+		/*
+		 * There are 5 sets of tokens.
+		 * 0. Gallery
+		 * 1. Panel 0 (upper left) never in "panel" mode.
+		 * 2. Panel 1 (upper right)
+		 * 3. Panel 2 (lower left)
+		 * 4. Panel 3 (lower right)
+		 */
+		
+		for (int t = 2; t < settings.length; t++) {
+			HashMap<String, String> panelTokenMap = Util.getTokenMap(settings[t]);
+			HashMap<String, String> optionsMap = Util.getOptionsMap(settings[t]);
+			OutputPanel panel = xPanels.get(t-1);
+			// If this history token has a panel that is using it's own settings, update witht the token.
+			if ( panelTokenMap.get("usePanelSettings").equals("true") ) { 
+				String did = panelTokenMap.get("dsid");
+				String vid = panelTokenMap.get("varid");
+				boolean change = ((!did.equals(xVariable.getDSID()) ) || (!vid.equals(xVariable.getID())));
+				panel.setPanelModeFromHistoryToken(panelTokenMap, optionsMap, change);
 			}
-			 */
 		}
 	}
 	private boolean applyHistory(Map<String, String> tokenMap) {
