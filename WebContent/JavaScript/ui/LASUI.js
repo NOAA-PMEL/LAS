@@ -76,6 +76,7 @@ function LASUI () {
 	this.info_icon.src="images/info.png";
 	this.info_icon.className="LASInfoIcon";
 	this.autoupdate=false;
+	this.lastuirequest = "";
 
 	for(var f in this)
 		if(typeof this[f] == "function")
@@ -300,10 +301,12 @@ LASUI.prototype.setInitialVariable = function(strJson) {
 LASUI.prototype.printPlot = function () {
 	var plot = document.getElementById(this.anchors.output);
 	if(plot != null) {
-		var print_win = window.open(plot.src + "&stream=true&stream_ID=plot_image&" + this.state.extra_args);
+		var print_win = window.open(this.hrefs.getProduct.url + "&stream=true&stream_ID=plot_image&" + this.state.extra_args + 'xml=' + this.urlencode(this.request.getXMLText()));
 		print_win.onload = function(){this.print()}
 	}
-
+	else{
+		alert("There was an error printing the plot");
+	}
 }
 LASUI.prototype.linkTo = function () {
         var plot = document.getElementById(this.anchors.output).src;
@@ -2200,6 +2203,7 @@ LASUI.prototype.makeRequest = function (evt, type) {
 		document.getElementById('update').style.visibility='visible';
 
 		this.request = null;
+		this.lastuirequest = this.uirequest;
 		this.uirequest = '';
 		this.request = new LASRequest('');
 		this.state.view.download=this.state.view.plot;
@@ -2399,7 +2403,7 @@ LASUI.prototype.makeRequest = function (evt, type) {
 }
 LASUI.prototype.cancelRequest = function () {
 	 try {
-		document.getElementById(this.anchors.output).src = (this.hrefs.getProduct.url + this.state.extra_args + 'xml=' + this.urlencode(this.request.getXMLText()))+"&cancel=true";
+		document.getElementById(this.anchors.output).src = (this.hrefs.getProduct.url + this.state.extra_args + ((this.lastuirequest=="" || this.lastuirequest==null) ? 'xml=' + this.urlencode(this.request.getXMLText()) : this.lastuirequest));
 	} catch (e) {}
 }
 /**
