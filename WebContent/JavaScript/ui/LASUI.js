@@ -76,7 +76,6 @@ function LASUI () {
 	this.info_icon.src="images/info.png";
 	this.info_icon.className="LASInfoIcon";
 	this.autoupdate=false;
-	this.lastuirequest = "";
 
 	for(var f in this)
 		if(typeof this[f] == "function")
@@ -2203,7 +2202,6 @@ LASUI.prototype.makeRequest = function (evt, type) {
 		document.getElementById('update').style.visibility='visible';
 
 		this.request = null;
-		this.lastuirequest = this.uirequest;
 		this.uirequest = '';
 		this.request = new LASRequest('');
 		this.state.view.download=this.state.view.plot;
@@ -2403,7 +2401,7 @@ LASUI.prototype.makeRequest = function (evt, type) {
 }
 LASUI.prototype.cancelRequest = function () {
 	 try {
-		document.getElementById(this.anchors.output).src = (this.hrefs.getProduct.url + this.state.extra_args + ((this.lastuirequest=="" || this.lastuirequest==null) ? 'xml=' + this.urlencode(this.request.getXMLText()) : this.lastuirequest));
+		document.getElementById(this.anchors.output).src = (this.hrefs.getProduct.url + this.state.extra_args + 'xml=' + this.urlencode(this.request.getXMLText()))+"&cancel=true";
 	} catch (e) {}
 }
 /**
