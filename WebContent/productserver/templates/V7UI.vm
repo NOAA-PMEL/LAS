@@ -6,7 +6,7 @@
 		<stylesheet src="JavaScript/frameworks/OpenLayersExtension/OLMapWidget.css"></stylesheet>
 		<style media="all" type="text/css">
 			@import "JavaScript/ui/LASUI.css";
-		</style>	
+		</style>
 	<body onload="this.height=document.innerHeight;">
 		<div style="display:none" class="LASPopupDIVNode" id="categories"></div>
 		<div id="main">
@@ -21,11 +21,11 @@
 					<div  class="top_link_disabled" id="plotOptionsButton" onclick="showPlotOptions()">Set plot options&nbsp;</div>
 					<span width="100%" id="productButtons">
 						<div class="top_link_disabled"  ID="Animation">Animate&nbsp;</div>
-						<div class="top_link_disabled"  ID="Comparison">Compare&nbsp;</div>							
+						<div class="top_link_disabled"  ID="Comparison">Compare&nbsp;</div>
 						<div class="top_link_disabled"  ID="Plot to Google Earth">Google Earth&nbsp;</div>
 						<div class="top_link_disabled"  ID="Table of values (text)">Show Values&nbsp;</div>
 						<div class="top_link_disabled"  ID="Desktop application data access scripts">Export to Desktop Application&nbsp;</div>
-						<div class="top_link_disabled"  ID="Interactive Download">Save As ...</div>								   
+						<div class="top_link_disabled"  ID="Interactive Download">Save As ...</div>
 					</span>
 					<span class="top_link_disabled" onclick="LAS.linkTo()" id="linkto">Link To ...</span>							       <span class="top_link_disabled" onclick="LAS.printPlot()" id="print">Print</span>
 				</div>
@@ -66,7 +66,7 @@
 						<div id="DataConstraints"></div>
 					</div>					
 				</div></td><td  style="vertical-align:top">
-				<div style="display:none;" id="wait_msg">Please wait while the plot loads...</div>
+				<div style="display:none;" id="wait_msg">Please wait while the plot loads or <a href="javascript:" onclick="LAS.cancelRequest()">click here to cancel</a></div>
 				<iframe   
 					                #if($las_request)
 								src='ProductServer.do?xml=$las_request.toEncodedURLString()'  
@@ -82,7 +82,7 @@
 		<div id="externalOptions" class="LASPopupDIVNode" style="display:none;"></div>
 	</body>
                 
-#if ($request.getParameter("debug")=="true")
+#if ($request.getParameter("debug") && $request.getParameter("debug")=="true")
 	<script type="text/javascript" language="javascript" src="JavaScript/ui/LASUI.js"></script>
 	#include("JavaScript/ui/LASUI_includes.vm")
 #else
@@ -99,7 +99,7 @@
                  <script type="text/javascript" language="javascript">
                 var LAS = new LASUI();
                      	LAS.params = {
-#if ($request.getParameter('openid')!="")
+#if (( $request.getParameter('openid') ) && ($request.getParameter('openid') != ""))                     	
                                 'openid' :'$request.getParameter('openid')',
 #end
 				'auth_url' : [
@@ -107,17 +107,17 @@
 #foreach ($auth_url in $request.getParameterValues('auth_url'))
 				"$auth_url",
 #end				],
-#if ($request.getParameter('catid')!="")
+#if ($request.getParameter('catid') && $request.getParameter('catid')!="")
                                 'catid' :'$request.getParameter('catid')',
 #else
                                 'catid' : null,
 #end
-#if  ($request.getParameter("dsid")!="")
+#if  ($request.getParameter("dsid") && $request.getParameter("dsid")!="")
                                 'dsid' : '$request.getParameter("dsid")',
 #else
                                 'dsid' : null,
 #end
-#if  ($request.getParameter("varid")!="")
+#if  ($request.getParameter("varid") && $request.getParameter("varid")!="")
                                 'varid' : '$request.getParameter("varid")',
 #else
                                 'varid' : null,
