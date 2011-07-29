@@ -60,17 +60,7 @@ ENDIF
 ! First list the urls and variable names; the URLs can be so long they make the
 ! commands too long for the Ferret command-line buffer. 
 
-! Test to see if the map_scale file already exists. If it does, dont write it.
-! the TEST_OPENDAP function tries to open an OPeNDAP dataset. If the file doesnt
-! exist, it returns 2.  IF it does exist (but of course its not a valid OPeNDAP 
-! datset), it returns -51.
-
-LET map_scale_exists = 0
-IF ($result_map_scale_filename%0|*>1%) THEN 
-   LET map_scale_exists = `TEST_OPENDAP("($result_map_scale_filename)") NE 2`
-ENDIF
-
-IF `($result_map_scale_filename%0|*>1%) AND map_scale_exists EQ 0` THEN 
+! Always write the map_scale file.
 
    LET syms_names = {"DATA_0_URL"}
    LET syms_vals = {"($DATA_0_URL)"}
@@ -239,8 +229,7 @@ IF `($result_map_scale_filename%0|*>1%) AND map_scale_exists EQ 0` THEN
       
       LIST/APPEND/FILE="($result_map_scale_filename)"/NOHEAD/NOROWLAB syms_names, syms_vals
    ENDIF
-
-ENDIF
+! Done with map scale file
 
 IF ($ferret_annotations%0|*>1%) THEN
    GO LAS_annotations_xml
