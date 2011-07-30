@@ -996,7 +996,7 @@ public class addXML {
 						} else {
 							las_var.setUnits("no units");
 						}
-						las_var.setUrl("#"+variable.getName());
+						las_var.setUrl(url+"#"+variable.getName());
 						log.info("Processing ESG THREDDS variable: " + variable.getName());
 
 						GeospatialCoverage coverage = threddsDataset.getGeospatialCoverage();
