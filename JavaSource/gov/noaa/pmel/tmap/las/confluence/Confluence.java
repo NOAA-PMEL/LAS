@@ -143,7 +143,7 @@ public class Confluence extends LASAction {
 								dsid = findFirstVariable(category, lasConfig, request);
 							}
 							if ( dsid != null ) {
-								StringBuilder q = new StringBuilder("localGetUI.do?dsid="+dsid);
+								StringBuilder q = new StringBuilder("localGetUI.do?auto=true&dsid="+dsid);
 								if ( varid != null ) {
 									q.append("&varid="+varid);
 								}
@@ -154,7 +154,7 @@ public class Confluence extends LASAction {
 						}
 						if ( dsids != null && dsids.length > 0 ) {
 							request.getSession().setAttribute("dsid", dsids);
-							StringBuilder q = new StringBuilder("localGetUI.do?dsid="+dsids[0]);
+							StringBuilder q = new StringBuilder("localGetUI.do?auto=true&dsid="+dsids[0]);
 							for (int i = 1; i < dsids.length; i++) {
 								q.append("&dsid="+dsids[i]);
 							}
@@ -166,7 +166,7 @@ public class Confluence extends LASAction {
 						if ( dsids != null && varid != null ) {
 							request.getSession().setAttribute("varid", varid);
 							request.getSession().setAttribute("dsid", dsids);
-							StringBuilder q = new StringBuilder("localGetUI.do?dsid="+dsids[0]);
+							StringBuilder q = new StringBuilder("localGetUI.do?auto=true&dsid="+dsids[0]);
 							for (int i = 1; i < dsids.length; i++) {
 								q.append("&dsid="+dsids[i]);
 							}
