@@ -525,7 +525,7 @@ EOF
 # Set up DODS Configuration and Cache stuff
 #
 
-my $dodsConfDir = $serverConf."conf/server/dods";
+my $dodsConfDir = $serverConf."/dods";
 if (! -d $dodsConfDir){
    mkdir $dodsConfDir, 0775 or die "Can't create directory $dodsConfDir: $!\n";
 }
@@ -543,7 +543,7 @@ if (! -f $dodsConf){
    print DOUT "MAX_CACHE_SIZE=100\n";
    print DOUT "MAX_CACHED_OBJ=5\n";
    print DOUT "IGNORE_EXPIRES=0\n";
-   print DOUT "CACHE_ROOT=$ENV{PWD}/$dodsCacheDir\n";
+   print DOUT "CACHE_ROOT=$dodsCacheDir\n";
    print DOUT "DEFAULT_EXPIRES=86400\n";
    print DOUT "ALWAYS_VALIDATE=0\n";
    close DOUT;
@@ -559,7 +559,7 @@ if (! -f $dodsConf_no_cache){
    print DOUT "MAX_CACHE_SIZE=100\n";
    print DOUT "MAX_CACHED_OBJ=5\n";
    print DOUT "IGNORE_EXPIRES=0\n";
-   print DOUT "CACHE_ROOT=$ENV{PWD}/$dodsCacheDir\n";
+   print DOUT "CACHE_ROOT=$dodsCacheDir\n";
    print DOUT "DEFAULT_EXPIRES=86400\n";
    print DOUT "ALWAYS_VALIDATE=0\n";
    close DOUT;
