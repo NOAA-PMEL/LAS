@@ -141,7 +141,7 @@ public class TemplateTool extends Tool {
                         }
                     }
                 }
-                line = stderr_reader.readLine();
+                line = stderr_reader.readLine().trim();
             }
         }
         return stderr;
