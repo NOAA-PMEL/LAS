@@ -521,6 +521,50 @@ EOF
        printENV($ferretConfig, @EnvVars);
 }
 
+
+# Set up DODS Configuration and Cache stuff
+#
+
+my $dodsConfDir = $serverConf."conf/server/dods";
+if (! -d $dodsConfDir){
+   mkdir $dodsConfDir, 0775 or die "Can't create directory $dodsConfDir: $!\n";
+}
+my $dodsCacheDir = "$dodsConfDir/.dods_cache";
+if (! -d $dodsCacheDir){
+   mkdir $dodsCacheDir, 0775 or die "Can't create directory $dodsCacheDir: $!\n";
+}
+
+my $dodsConf = "$dodsConfDir/.dodsrc";
+if (! -f $dodsConf){
+   open DOUT, ">$dodsConf" or die "Can't open $dodsConf for writing";
+   print DOUT "\# DODS client configuration file. See the DODS\n";
+   print DOUT "\# users guide for information.\n";
+   print DOUT "USE_CACHE=1\n";
+   print DOUT "MAX_CACHE_SIZE=100\n";
+   print DOUT "MAX_CACHED_OBJ=5\n";
+   print DOUT "IGNORE_EXPIRES=0\n";
+   print DOUT "CACHE_ROOT=$ENV{PWD}/$dodsCacheDir\n";
+   print DOUT "DEFAULT_EXPIRES=86400\n";
+   print DOUT "ALWAYS_VALIDATE=0\n";
+   close DOUT;
+}
+
+my $dodsConf_no_cache = "$dodsConfDir/.dodsrc_no_cache";
+if (! -f $dodsConf_no_cache){
+   open DOUT, ">$dodsConf_no_cache" or die "Can't open $dodsConf_no_cache for writing";
+   print DOUT "\# DODS client configuration file. See the DODS\n";
+   print DOUT "\# users guide for information.  This version of the\n";
+   print DOUT "\# file has caching turned off.\n";
+   print DOUT "USE_CACHE=0\n";
+   print DOUT "MAX_CACHE_SIZE=100\n";
+   print DOUT "MAX_CACHED_OBJ=5\n";
+   print DOUT "IGNORE_EXPIRES=0\n";
+   print DOUT "CACHE_ROOT=$ENV{PWD}/$dodsCacheDir\n";
+   print DOUT "DEFAULT_EXPIRES=86400\n";
+   print DOUT "ALWAYS_VALIDATE=0\n";
+   close DOUT;
+}
+
 # Regardless of whether the examples are to be installed, get the latest operations file.
 
 
