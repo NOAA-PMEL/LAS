@@ -114,6 +114,20 @@ public class LASBackendConfig extends LASDocument {
 	        }
 	        return false;
 	    }
+	    public List<String> getArgs() {
+	    	List<String> args = new ArrayList<String>();
+	    	Element invoker = this.getRootElement().getChild("invoker");
+	    	if ( invoker != null ) {
+	    		List configured_args = invoker.getChildren("arg");
+	    		for (Iterator argIt = configured_args.iterator(); argIt.hasNext();) {
+					Element arg = (Element) argIt.next();
+					String a = arg.getTextTrim();
+					args.add(a);
+				}
+	    		
+	    	}
+	    	return args;
+	    }
 	    public String getInterpreter() {
 	        Element invoker = this.getRootElement().getChild("invoker");
 	        if ( invoker != null ) {

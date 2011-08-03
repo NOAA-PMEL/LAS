@@ -9,7 +9,11 @@
                  iosp_data_dir="@TDS_DYNADATA@"
                  las_tfds_data_dir="@TDS_DATA@"
                  iosp_base_dir="resources/iosp"
-                 opendap_base_url = "http://@SERVLET_ROOT_URL@/thredds/dodsC/output"/>
+                 opendap_base_url = "http://@SERVLET_ROOT_URL@/thredds/dodsC/output">
+        <arg>-gif</arg>
+        <arg>-server</arg>
+        <arg>-script</arg>
+    </invoker>
 	<cacher dataset="true" dataset_queue_size="10000" dataset_size="40"
 		subset="true" subset_queue_size="10000" meta="true"
 		meta_queue_size="10000" />
