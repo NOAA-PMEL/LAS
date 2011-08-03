@@ -24,6 +24,7 @@ import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Properties;
 
 import org.apache.log4j.Logger;
@@ -290,17 +291,19 @@ public class FerretTool extends TemplateTool{
         boolean useNice = lasFerretBackendConfig.getUseNice();
         String interpreter = lasFerretBackendConfig.getInterpreter();
         String ferretBinary = lasFerretBackendConfig.getExecutable();
+        List<String> configured_args = lasFerretBackendConfig.getArgs();
+        
         int offset = (useNice) ? 1 : 0;
         if ( (interpreter != null && !interpreter.equals("")) ) {
             offset = offset + 1;
         }
         String[] cmd;
-        if ( (interpreter != null && !interpreter.equals("")) ) {
-           cmd = new String[offset + 1];
-        }
-        else {
-            cmd = new String[offset + 5];
-        }
+        
+        // The number of arguments:
+        // The offset for the nice command and the interpreter if these are being used.
+        // The arguments passed in via the configuration.
+        // The executable or interpreted script and the arguments to the -script at the from the argsBuffer (+2)
+        cmd = new String[offset + configured_args.size() + 2];
         
         if (useNice) {
             cmd[0] = "nice";
@@ -321,17 +324,19 @@ public class FerretTool extends TemplateTool{
                String perlCmd = arg.substring(arg.indexOf(" ")+1,arg.length());
                cmd[offset] = "\""+perlCmd+"\"";
            }
-        }
-        else {
+        } else {
             cmd[offset] = ferretBinary;
+            
+            
+            
+            int index = 1;
+            for (Iterator argsIt = configured_args.iterator(); argsIt.hasNext();) {
+				String arg = (String) argsIt.next();
+				cmd[offset + index] = arg;
+				index++;
+			}
 
-            cmd[offset + 1] = "-gif";
-
-            cmd[offset + 2] = "-server";
-
-            cmd[offset + 3] = "-script";
-
-            cmd[offset + 4] = argBuffer.toString();
+            cmd[offset + index ] = argBuffer.toString();
         }
 
         String env[] = runTimeEnv.getEnv();
