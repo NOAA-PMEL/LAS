@@ -43,7 +43,6 @@ DEFINE SYMBOL ferret_plot_var ($expr1)($data_var)[d=($data_num),($region_full)](
 DEFINE SYMBOL ferret_plot_var_noregion ($expr1)($data_var)[d=($data_num)]($expr2)
 DEFINE SYMBOL ferret_plot_title ($expr1) ($data_title) ($expr2)
 
-
 DEFINE SYMBOL ferret_xyz_var = ($expr1)($data_var)[d=($data_num),($region_xyz)]($expr2)
 DEFINE SYMBOL ferret_t_var = ($expr1)($data_var)[d=($data_num),($region_t)]($expr2)
 
@@ -73,6 +72,6 @@ ENDIF
 ! Define upper-right labels with the url; the URL is not plotted automatically when the var is
 ! (the same thing may be done in transform scripts or in differencing setup; that is ok
 
-GO LAS_url_label ($num)
+!GO LAS_url_label ($num)
 
 ! End of $RCSfile ------------LAS_expression.jnl--------------------------
