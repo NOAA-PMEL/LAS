@@ -287,41 +287,53 @@ public class DatasetBean extends LasBean {
 		Collections.sort(variables, new ShortNameComparitor());
 		
 		Element variablesElement = new Element("variables");
-		List<String> vectors = new ArrayList<String>();
+		List<List<String>> vectors = new ArrayList<List<String>>();
 		// First do names containing "zonal".
 		for (int v = 0; v < variables.size(); v++ ) {
 			VariableBean var = (VariableBean) variables.get(v);
 			String vname = var.getShortName();
 			if ( vname.toLowerCase().contains(Util.zonal) ) {
-				vectors.add(var.getElement());
-				String match_name = vname.replace(Util.zonal, Util.meridional);
+				List<String> vector = new ArrayList<String>();
+				vector.add(var.getElement());
+				String match_name = vname.toLowerCase().replace(Util.zonal, Util.meridional);
 				for (int j = 0; j < variables.size(); j++ ) {
 					VariableBean vVar = variables.get(j);
 					if ( vVar.getShortName().toLowerCase().equals(match_name) ) {
-						vectors.add(vVar.getElement());
+						vector.add(vVar.getElement());
 					}
 					// look for vertical dimension
 					for ( int k = 0; k < Util.verticalComponentNames.length; k++) {
 						String vertical_match = vname.replace(Util.zonal, Util.verticalComponentNames[k]);
 						if ( vVar.getShortName().toLowerCase().equals(vertical_match) ) {
-							vectors.add(vVar.getElement());
+							vector.add(vVar.getElement());
 						}
 					}
 				}
+				vectors.add(vector);
 			}
 		}
 		if ( vectors.size() > 1 ) {
 			StringBuilder vector_id = new StringBuilder();
 			StringBuilder vector_long_name = new StringBuilder("Vector of ");
-			for ( int i = 0; i < vectors.size(); i++ ) {
-				vector_id.append(vectors.get(i));
-				vector_long_name.append(getVariable(vectors.get(i)).getName());
-				if ( i < vectors.size() -1 ) {
-					vector_id.append("_");
-					vector_long_name.append(" and ");
+			for ( int v = 0; v < vectors.size(); v++ ) {
+				List<String> vector = vectors.get(v);
+				for (int i = 0; i < vector.size(); i++ ) {
+					vector_id.append(vector.get(i));
+					vector_long_name.append(getVariable(vector.get(i)).getName());
+					if ( i < vectors.size() -1 ) {
+						vector_id.append("_");
+						vector_long_name.append(" and ");
+					}
+
+					String id = (String) vector.get(i);
+					VariableBean varB = getVariable(id);
+					varB.setProperty("ferret", "palette", "light_centered");
+					varB.setProperty("ferret", "fill_levels", "c");
+
 				}
+				addComposite(dataset, vector_long_name.toString(), vector_id.toString(), vector);
 			}
-			addComposite(dataset, vector_long_name.toString(), vector_id.toString(), vectors);
+
 		}
 		for (int v = 0; v < variables.size(); v++ ) {
 			VariableBean var = (VariableBean) variables.get(v);
@@ -332,7 +344,7 @@ public class DatasetBean extends LasBean {
 			// Don't match mask variables...
 			if ( !name.toLowerCase().contains("mask") ) {
 				for ( int p = 0; p < Util.vectorPatterns[0].length; p ++ ) {
-					vectors = new ArrayList<String>();
+					List<String> uv_vectors = new ArrayList<String>();
 					// Look for x, X, u or U
 					char c = Util.vectorPatterns[0][p];
 					int count = Util.countOccurrences(vname, c);
@@ -366,7 +378,7 @@ public class DatasetBean extends LasBean {
 								VariableBean vVar = variables.get(j);
 								Matcher match = pattern.matcher(vVar.getShortName());
 								if ( match.matches() ) {
-									vectors.add(vVar.getElement());
+									uv_vectors.add(vVar.getElement());
 									matching_occurance_index = start;
 								}
 							}
@@ -383,13 +395,13 @@ public class DatasetBean extends LasBean {
 						StringBuilder substituion = new StringBuilder();
 						StringBuilder vector_id = new StringBuilder();
 						StringBuilder vector_long_name = new StringBuilder("Vector of ");
-						for ( int i = 0; i < vectors.size(); i++ ) {
-							if ( vectors.get(i).charAt(matching_occurance_index) == Util.vectorPatterns[i][p]) {
+						for ( int i = 0; i < uv_vectors.size(); i++ ) {
+							if ( uv_vectors.get(i).charAt(matching_occurance_index) == Util.vectorPatterns[i][p]) {
 								matches++;
 								substituion.append(Util.vectorPatterns[i][p]);
-								vector_id.append(vectors.get(i));
-								vector_long_name.append(getVariable(vectors.get(i)).getName());
-								if ( i < vectors.size() -1 ) {
+								vector_id.append(uv_vectors.get(i));
+								vector_long_name.append(getVariable(uv_vectors.get(i)).getName());
+								if ( i < uv_vectors.size() -1 ) {
 									vector_id.append("_");
 									vector_long_name.append(" and ");
 								}
@@ -399,32 +411,32 @@ public class DatasetBean extends LasBean {
 						// This constructs a name based on the netCDF variables names.
 
 						// I think we should try based on the long names first and see how we like that.
-						if ( matches > 0 && matches == vectors.size() && vectors.size() > 1 ) {
+						if ( matches > 0 && matches == uv_vectors.size() && uv_vectors.size() > 1 ) {
 
 							String vector_name = null;
 							// We have some so add it to its parent
 
-							if ( vectors.get(0).length() > 1 ) {
+							if ( uv_vectors.get(0).length() > 1 ) {
 								if ( matching_occurance_index == 0 ) {
 									// Matches the first character	
-									vector_name = substituion.toString()+"_"+getVariable(vectors.get(0)).getShortName().substring(1);
-								} else if ( matching_occurance_index > 0 && matching_occurance_index < vectors.get(0).length()-1  ) {
+									vector_name = substituion.toString()+"_"+getVariable(uv_vectors.get(0)).getShortName().substring(1);
+								} else if ( matching_occurance_index > 0 && matching_occurance_index < uv_vectors.get(0).length()-1  ) {
 									// Matches somewhere in the middle
-									vector_name = getVariable(vectors.get(0)).getShortName().substring(0, matching_occurance_index-1)+
+									vector_name = getVariable(uv_vectors.get(0)).getShortName().substring(0, matching_occurance_index-1)+
 									"_"+substituion.toString()+"_"+
-									vectors.get(0).substring(matching_occurance_index+1);
+									uv_vectors.get(0).substring(matching_occurance_index+1);
 								} else {
 									// Matches the last character
-									vector_name = getVariable(vectors.get(0)).getShortName().substring(0, vectors.get(0).length()-1)+"_"+substituion.toString();
+									vector_name = getVariable(uv_vectors.get(0)).getShortName().substring(0, uv_vectors.get(0).length()-1)+"_"+substituion.toString();
 								}
 							} else {
 								vector_name = substituion.toString();
 							}
-							addComposite(dataset, vector_long_name.toString(), vector_id.toString(), vectors);
+							addComposite(dataset, vector_long_name.toString(), vector_id.toString(), uv_vectors);
 							
 							// These have been added to a vector composite so we know they are indeed vector components.
 							// So add the centered palette property.
-							for (Iterator vectIt = vectors.iterator(); vectIt.hasNext();) {
+							for (Iterator vectIt = uv_vectors.iterator(); vectIt.hasNext();) {
 								String id = (String) vectIt.next();
 								VariableBean varB = getVariable(id);
 								varB.setProperty("ferret", "palette", "light_centered");
