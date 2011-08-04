@@ -43,6 +43,10 @@ DEFINE SYMBOL ferret_vector_1_noregion ($ferret_plot_var_0_noregion)
 GO LAS_initialize_data 1
 DEFINE SYMBOL ferret_vector_2 ($ferret_plot_var)
 DEFINE SYMBOL ferret_plot_title "($ferret_plot_title_1), ($data_title) ($data_units)"
+
+! If an expression was defined, note that in the title
+IF ($expr1"0|*>1") THEN DEFINE SYMBOL ferret_plot_title ($expr1) {($ferret_plot_title)} ($expr2)
+
 DEFINE SYMBOL ferret_vector_2_noregion ($ferret_plot_var_1_noregion)
 DEFINE SYMBOL variable_lab ($ferret_plot_title)
 
@@ -228,7 +232,7 @@ IF ($ferret_vector_subsampling"0") THEN
 ELSE
    IF ($native_curvilinear_xy"0") THEN 
    ! Get the automatic vector skip values, then plot, making PPL settings.
-      VECTOR($qualifiers)/TITLE=" "/NOLAB/COLOR=white \
+      VECTOR($qualifiers)/TITLE=" "/NOLAB/NOAX/COLOR=white \
       ($ferret_plot_base_var_0), ($ferret_plot_base_var_1), xcoord, ycoord
 
       VECTOR($qualifiers)/TITLE=" "/SET \
@@ -243,7 +247,7 @@ ELSE
 
    ELSE
    ! Get the automatic vector skip values, then plot, making PPL settings.
-      VECTOR($qualifiers)/TITLE=" "/NOLAB/COLOR=white \
+      VECTOR($qualifiers)/TITLE=" "/NOLAB/NOAX/COLOR=white \
       ($ferret_plot_base_var_0), ($ferret_plot_base_var_1)
 
       VECTOR($qualifiers)/TITLE=" "/SET ($ferret_vector_1), ($ferret_vector_2)
@@ -279,7 +283,6 @@ GO LAS_ferret_las_version_header
 
 IF `($ferret_annotations"0|*>1") EQ 0` THEN \
 LABEL/NOUSER `($ppl$xlen)/2`,-0.8, 0, 0, 0.13, ($ferret_plot_title)
-
 
 ! Overlay additional cartography data (land mask, outlines, rivers, ...)
 
