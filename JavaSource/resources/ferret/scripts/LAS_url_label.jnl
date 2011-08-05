@@ -84,10 +84,10 @@ IF `($num) GT 0` THEN
    IF ($ferret_annotations"0|*>1") THEN 
       IF `($add_0_url"0|*>1") EQ 0 AND ($dataset_url_0_lab"0|*>1")` THEN 
          DEFINE SYMBOL dataset_url_lab ($dataset_url_0_lab)
-         IF ($diffurl"0|*>1") THEN DEFINE SYMBOL dataset_url_lab ($dataset_url_lab) minus
+         IF ($diffurl"0|*>1") THEN DEFINE SYMBOL dataset_url_lab ($dataset_url_($num)_lab) minus
          DEFINE SYMBOL add_0_url = 1
       ENDIF
-      IF ($diffurl"0|*>1") THEN DEFINE SYMBOL dataset_url_lab ($dataset_url_lab) ($dataset_url_($num)_lab) 
+      IF ($diffurl"0|*>1") THEN DEFINE SYMBOL dataset_url_lab ($dataset_url_lab) ($dataset_url_lab"($dataset_url_($num)_lab)") 
 
    ELSE
       IF `($add_0_url"0|*>1") EQ 0 AND ($dataset_url_0_lab"0|*>1")` THEN 
@@ -95,7 +95,7 @@ IF `($num) GT 0` THEN
          IF ($diffurl"0|*>1") THEN DEFINE SYMBOL dataset_url_lab ($dataset_url_0_lab) (1)
          DEFINE SYMBOL add_0_url = 1
       ENDIF
-      IF ($diffurl"0|*>1") THEN DEFINE SYMBOL dataset_url_lab ($dataset_url_lab) 
+      IF ($diffurl"0|*>1") THEN DEFINE SYMBOL dataset_url_lab ($dataset_url_lab"($dataset_url_($num)_lab)")
    ENDIF
 
 ELSE
@@ -266,3 +266,4 @@ IF `got_dataset_label EQ 0` THEN
 ENDIF
 
 ! End of $RCSfile ------------LAS_url_label.jnl-------------------------- 
+
