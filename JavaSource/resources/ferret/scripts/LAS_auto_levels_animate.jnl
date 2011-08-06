@@ -120,7 +120,8 @@ IF `($ferret_plot_var"0|*>1") EQ 0` THEN EXIT/SCRIPT  !e.g. for insitu plots may
 
 LET max_size = 50
 IF `($do_curvi_xy"0|0|*>1") EQ 0` THEN 
-   LET pvar = ($ferret_xyz_var)
+
+   LET pvar = ($ferret_plot_var)
    LET var_size = ABS( `pvar,RETURN=size`)
    DEFINE SYMBOL var_dim = `pvar,RETURN=shape`
    LET ndims = STRLEN("($var_dim)")
@@ -196,6 +197,11 @@ IF ($ferret_time_step"0|*>1") THEN
       LET strd_del = ($ferret_time_step)* strd_fact
       IF `strd_del LE 2` THEN LET strd_del = 2
    ENDIF 
+
+   IF `strd_del LT 10` THEN 
+      LET strd_del = `INT(10/($ferret_time_step))* ($ferret_time_step)`
+      IF `strd_del LE 2` THEN LET strd_del = 2
+   ENDIF
 ELSE
    LET strd_del = 1
    IF `tsize GT max_size` THEN 
