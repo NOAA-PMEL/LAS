@@ -1,9 +1,11 @@
 ! make_c_lab.jnl
-! Called by set_contsratint_labels. 
+! Called by set_constraint_labels. 
 !
 ! Make the label from constraints. Calld as a second
 ! script as the command line from a single REPEAT
 ! statement containing all the commands could get too long.
+! Fix to let the rhs for month ranges have multiple items, 
+! given in a comma-separated list
 
 IF `STRINDEX("($rhs)", "'") GT 0` THEN
    LET slen = `STRLEN("($rhs)")`
@@ -11,7 +13,45 @@ IF `STRINDEX("($rhs)", "'") GT 0` THEN
    DEFINE SYMBOL rhs = `SUBSTRING("($rhs)", s1+1, slen-2)`
 ENDIF
 
-DEFINE SYMBOL nmask_labels = `($nmask_labels"0") + 1` 
+IF `($lhs"0|ident_ID>1|*>0") AND ($do_icons"0|1|*>0") EQ 1` THEN EXIT/SCRIPT
+
+! RHS for month ranges may be a comma-separated list
+IF ($lhs"0|month>1|*>0") THEN 
+   IF `STRINDEX("($rhs)", ",") EQ 0` THEN 
+     DEFINE SYMBOL nmask_labels = `($nmask_labels"0") + 1` 
+     DEFINE SYMBOL mask_title_($nmask_labels) = Months `month_labels[i=($rhs)]`
+   ELSE
+     LET rhslen = `STRLEN("($rhs)")`
+     LET commaloc = `STRINDEX("($rhs)", ",") `
+     DEFINE SYMBOL m1 = `SUBSTRING("($rhs)", 1, commaloc-1)`
+    DEFINE SYMBOL nmask_labels = `($nmask_labels"0") + 1` 
+     DEFINE SYMBOL mask_title_($nmask_labels) = Months `month_labels[i=($m1)]`
+     DEFINE SYMBOL rhs2 = `SUBSTRING("($rhs)", commaloc+1, rhslen-commaloc+1)`
+
+     DEFINE SYMBOL mask_label_long = 0
+     REPEAT/RANGE=1:`rhslen` (\
+     LET rhslen = `STRLEN("($rhs2)")` ;\
+     LET commaloc = `STRINDEX("($rhs2)", ",") ` ;\
+     IF `commaloc EQ 0` THEN DEFINE SYMBOL m1 = ($rhs2);\
+     IF `commaloc NE 0` THEN DEFINE SYMBOL m1 = `SUBSTRING("($rhs2)", 1, commaloc-1)` ;\
+     DEFINE SYMBOL mask_title_($nmask_labels) = ($mask_title_($nmask_labels)), `month_labels[i=($m1)]` ;\
+     IF `commaloc EQ 0` THEN EXIT/LOOP ;\
+     IF `STRLEN("($mask_title_($nmask_labels))") GT 100 AND ($mask_label_long) EQ 0` THEN DEFINE SYMBOL mask_title_($nmask_labels) = ($mask_title_($nmask_labels))<NL>;\
+     IF `STRLEN("($mask_title_($nmask_labels))") GT 100` THEN DEFINE SYMBOL mask_label_long = 1;\
+     DEFINE SYMBOL rhs2 = `SUBSTRING("($rhs2)", commaloc+1, rhslen-commaloc+1)` ;\
+     )
+     IF ($mask_label_long"0|*>1") THENDEFINE SYMBOL nmask_labels = `($nmask_labels"0") + 1`  ! add space for extra line
+     pause
+   ENDIF
+
+
+ELIF ($lhs"0|ident_ID>1|*>0") THEN 
+  DEFINE SYMBOL nmask_labels = `($nmask_labels"0") + 1` 
+   DEFINE SYMBOL mask_title_($nmask_labels) = Data from ID ($c_s) @AS($rhs)
+   IF ($math_sym_convert"0|no_convert>1") THEN DEFINE SYMBOL mask_title_($nmask_labels) = Data from ID ($c_s) ($rhs)
+
+ELSE 
+DEFINE SYMBOL nmask_labels = `($nmask_labels) + 1` 
 GO remove_underscores ($lhs)
 DEFINE SYMBOL lhs = ($Var_Lab) 
 IF ($op"0|*>1") THEN DEFINE SYMBOL op = `UPCASE("($op)")` 
@@ -22,4 +62,4 @@ IF `STRCMP("($lhs_last)", "($lhs% %)") EQ 0` THEN GO combine_titles
 DEFINE SYMBOL lhs_last = ($lhs)
 DEFINE SYMBOL op_last = ($op)
 DEFINE SYMBOL rhs_last = ($rhs) 
-
+ENDIF

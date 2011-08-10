@@ -97,8 +97,8 @@ LET newy = 0
 IF `ABS(xcell_size-ycell_size)/(xcell_size+ycell_size) GT 1E-6` THEN
   DEFINE SYMBOL note_regrid 1
   LET yy = y[gy=expr]
-  LET y1 = `yy[y=@min]`
-  LET yn = `yy[y=@max]`
+  LET y1 = `yy[y=@min]*1.0001`
+  LET yn = `yy[y=@max]*0.9999`
   DEFINE AXIS/Y=`y1`:`yn`:`xcell_size`/units="`($data_var),return=yunits`" y_axis_regrid
   DEFINE SYMBOL y_axis_out = y_axis_regrid
   LET newy = 1
@@ -108,8 +108,8 @@ ENDIF
 LET istart `i[gx=expr,x=($region_x_lo)]`
 LET iend `i[gx=expr,x=($region_x_hi)]`
 
-LET jstart `j[gy=expr,y=($region_y_lo)]`
-LET jend `j[gy=expr,y=($region_y_hi)]`
+LET jstart `j[gy=($ferret_list_var),y=($region_y_lo)]`
+LET jend `j[gy=($ferret_list_var),y=($region_y_hi)]`
 
 ! size of grid
 LET Ni = `($ferret_list_var),RETURN=isize`
@@ -140,8 +140,8 @@ ENDIF
 IF `reg EQ 0` THEN
   DEFINE SYMBOL note_regrid 1
   LET xx = x[gx=expr]
-  LET x1 = `xx[x=@min]`
-  LET xn = `xx[x=@max]`
+  LET x1 = `xx[x=@min]*1.0001`
+  LET xn = `xx[x=@max]*0.9999`
   DEFINE AXIS/X=`x1`:`xn`:`xcell_size`/units="`($data_var),return=xunits`" x_axis_regrid
   DEFINE SYMBOL x_axis_out = x_axis_regrid
   LET to_reg = 1
@@ -267,6 +267,7 @@ LIST/FILE/NOHEAD/APPEND/FORMAT="('nodata_value',1PG15.7)"  nodata
 ! List the data to the file, with northernmost data first.
 
 LET yy = y[gy=expr]
+
 REPEAT/NAME=m/RANGE=`jend`:`jstart`:-1 \
   (LET this_y = yy[j=`m`];\
    LIST/APPEND/FILE/NOHEAD/NOROWHEAD/FORMAT="(1PG15.7)" expr[y=`this_y`])
