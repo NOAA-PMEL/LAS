@@ -20,7 +20,8 @@ IF `($ferret_curvi_coord_lat"0|*>1") + ($constraint_0_lhs"1|Curv_to_Rect_Regridd
          DEFINE SYMBOL use_dms 1
          LET coord_lo = ($ferret_curvi_coord_lon)[d=($data_num),x=@min,y=@min]
          LET coord_hi = ($ferret_curvi_coord_lon)[d=($data_num),x=@max,y=@max]
-         IF `coord_hi - coord_lo LT 1` THEN DEFINE SYMBOL xform_dms = dms
+         IF `coord_hi - coord_lo LT 0.5` THEN DEFINE SYMBOL xform_dms = dms
+         IF `coord_hi - coord_lo GE 5` THEN CANCEL SYMBOL xform_dms
      ENDIF
   ENDIF
 
@@ -32,7 +33,8 @@ IF `($ferret_curvi_coord_lat"0|*>1") + ($constraint_0_lhs"1|Curv_to_Rect_Regridd
          DEFINE SYMBOL use_dms 1
          LET coord_lo = ($ferret_curvi_coord_lat)[d=($data_num),x=@min,y=@min]
          LET coord_hi = ($ferret_curvi_coord_lat)[d=($data_num),x=@max,y=@max]
-         IF `coord_hi - coord_lo LT 1` THEN DEFINE SYMBOL yform_dms = dms
+         IF `coord_hi - coord_lo LT 0.5` THEN DEFINE SYMBOL yform_dms = dms
+         IF `coord_hi - coord_lo GE 5` THEN CANCEL SYMBOL yform_dms
      ENDIF
   ENDIF
 
@@ -49,8 +51,10 @@ ELSE
       DEFINE SYMBOL use_dms 1
       LET coord_lo = `($ferret_plot_base_var),RETURN=($direc)start`
       LET coord_hi = `($ferret_plot_base_var),RETURN=($direc)end`
-      IF `coord_hi - coord_lo LT 1` THEN DEFINE SYMBOL xform_dms = dms
-   
+      IF `coord_hi - coord_lo LT 0.5` THEN DEFINE SYMBOL xform_dms = dms
+      IF `coord_hi - coord_lo GE 5` THEN CANCEL SYMBOL xform_dms
+
+         list coord_lo, coord_hi, coord_hi - coord_lo
 ! For 2D plots, a YT plot will have the Y axis in the horizontal direction
       IF `STRINDEX("($data_shape)", "YT") GT 0` THEN
          DEFINE SYMBOL yform_dms ($xform_dms)
@@ -69,11 +73,11 @@ ELSE
          DEFINE SYMBOL use_dms 1
          LET coord_lo = `($ferret_plot_base_var),RETURN=($direc)start`
          LET coord_hi = `($ferret_plot_base_var),RETURN=($direc)end`
-         IF `coord_hi - coord_lo LT 1` THEN DEFINE SYMBOL yform_dms = dms
+         IF `coord_hi - coord_lo LT 0.5` THEN DEFINE SYMBOL yform_dms = dms
+         IF `coord_hi - coord_lo GE 5` THEN CANCEL SYMBOL yform_dms
       ENDIF
    ENDIF
 
 ENDIF
-
 SET MODE/LAST LONG
 SET MODE/LAST LAT
