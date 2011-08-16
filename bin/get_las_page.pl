@@ -43,7 +43,7 @@ if ($response->is_success) {
     unlink $cookie_file;
     open (OUT,">$output_file");
     my $stuff = $response->content;
-    print OUT "\n$stuff\n";
+    print OUT "$stuff";
     close OUT;
 }else{
     my $status_line = $response->status_line;
