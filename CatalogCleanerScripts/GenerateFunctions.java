@@ -814,7 +814,7 @@ $$ LANGUAGE plpgsql;
 		String id = camelCase(tablename) + "Id";
 		tablename = capitalize(camelCase(tablename));
 
-		String st = "\tpublic static int delete" + functionname + "(int " + id;
+		String st = "\tpublic static int delete" + capitalize(camelCase(functionname)) + "(int " + id;
 
 		st += ") throws Exception{\n\n";
 		st += "\t\tPreparedStatement ps = null;\n";
