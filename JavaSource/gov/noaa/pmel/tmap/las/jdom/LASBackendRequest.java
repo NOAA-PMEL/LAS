@@ -5,7 +5,7 @@
  * conditions or restrictions in its use, it is expected that appropriate
  * credit be given to its author and to the National Oceanic and Atmospheric
  * Administration should the software be included by the recipient as an
- * element in other product development. 
+ * element in other product development.
  */
 package gov.noaa.pmel.tmap.las.jdom;
 
@@ -45,21 +45,21 @@ import org.apache.log4j.Logger;
  *
  */
 public class LASBackendRequest extends LASDocument {
-    
+
     /*
-	 * Any number that uniquely identifies the version of this class' code.  
+	 * Any number that uniquely identifies the version of this class' code.
 	 * The Eclipse IDE will generate it automatically for you.  We do not depend on this
 	 * since we do not serialize our code across the wire.
 	 */
     private static final long serialVersionUID = 8177345236093847495L;
-    
+
     private static Logger log = LogManager.getLogger(LASBackendRequest.class.getName());
     /**
      * A convenience method that will report if the &lt;cancel&gt; element is present
      * in the request.  If so the service is supposed to stop processing any request it
      * has currently that has the same cache key.
      * @return true if this is a cancel request.
-     * @throws IOException 
+     * @throws IOException
      */
     public boolean isCancelRequest () throws IOException {
         Element cancel = this.getRootElement().getChild("cancel");
@@ -90,7 +90,7 @@ public class LASBackendRequest extends LASDocument {
                 return true;
             }
         }
-        
+
         return canceled;
     }
     /**
@@ -138,7 +138,7 @@ public class LASBackendRequest extends LASDocument {
                     if ( analysis != null ) {
                         String analysis_name = analysis.getAttributeValue("label");
                         if ( analysis_name != null ) {
-                            analysis_name = analysis_name.replaceAll(" ", "_");                    
+                            analysis_name = analysis_name.replaceAll(" ", "_");
                         } else {
                             analysis_name = "analysis_"+index+"_variable";
                         }
@@ -163,7 +163,7 @@ public class LASBackendRequest extends LASDocument {
                                     String atname = attr.getName();
                                     String atvalue = attr.getValue();
                                     symbols.put(prefix+"axis_"+axis_index+"_"+atname, atvalue);
-                                } 
+                                }
                             }
                             axis_index++;
                         }
@@ -261,7 +261,7 @@ public class LASBackendRequest extends LASDocument {
             value = region.getChildText("y_hi");
             if (value != null) {
                 regions.put(regionID+"_"+"y_hi", value);
-            } 
+            }
             value = region.getChildText("z_lo");
             if (value != null) {
                 regions.put(regionID+"_"+"z_lo", value);
@@ -269,7 +269,7 @@ public class LASBackendRequest extends LASDocument {
             value = region.getChildText("z_hi");
             if (value != null) {
                 regions.put(regionID+"_"+"z_hi", value);
-            }        
+            }
             value = region.getChildText("t_lo");
             if (value != null) {
                 regions.put(regionID+"_"+"t_lo", value);
@@ -277,11 +277,11 @@ public class LASBackendRequest extends LASDocument {
             value = region.getChildText("t_hi");
             if (value != null) {
                 regions.put(regionID+"_"+"t_hi", value);
-            } 
+            }
         }
         return regions;
     }
-    
+
     /**
      * Get any properties that are not assigned to a particular data set as a HashMap
      * @return the properties as a HashMap of names and values.
@@ -291,7 +291,7 @@ public class LASBackendRequest extends LASDocument {
         List propertiesList = this.getRootElement().getChildren("properties");
         for (Iterator props = propertiesList.iterator(); props.hasNext();) {
             Element properties = (Element) props.next();
-            List propertyGroups = properties.getChildren("property_group");            
+            List propertyGroups = properties.getChildren("property_group");
             for (Iterator pgIt = propertyGroups.iterator(); pgIt.hasNext();) {
                 Element group = (Element) pgIt.next();
                 String type = group.getAttributeValue("type");
@@ -310,26 +310,26 @@ public class LASBackendRequest extends LASDocument {
                 }
             }
         }
-        return symbols;       
+        return symbols;
     }
     public HashMap<String, String>  getPropertyGroup(String group_name) {
 
         HashMap<String, String> propertyGroup = new HashMap<String, String>();
        	ArrayList groups = findPropertyGroupList(group_name);
-        
+
 	if(groups != null) {
 		for(Iterator grpIt = groups.iterator(); grpIt.hasNext();) {
 			Element grp = (Element) grpIt.next();
 			for(Iterator propIt = grp.getChildren().iterator(); propIt.hasNext();) {
 				Element property = (Element) propIt.next();
 				propertyGroup.put(property.getChild("name").getValue(), property.getChild("value").getValue());
-						
+
 			}
 		}
 		return propertyGroup;
 	}
 	else return null;
-	
+
     }
 
     /**
@@ -354,7 +354,7 @@ public class LASBackendRequest extends LASDocument {
     /**
      * A helper routine that pulls the properties out of a property group element.
      * @param group the group element
-     * @param index the index of the data object that gets added to the symbol name. 
+     * @param index the index of the data object that gets added to the symbol name.
      * @return the symbols in a HashMap of name and value
      */
     public HashMap<String, String> getSymbols (Element group, int index) {
@@ -369,7 +369,7 @@ public class LASBackendRequest extends LASDocument {
         }
         return symbols;
     }
-    
+
      /**
       * For a given dataObject data element pull out the property groups, then get each property and flatten it all into a symbol for Ferret.
       * @param data the data element to process
@@ -381,7 +381,7 @@ public class LASBackendRequest extends LASDocument {
         List properties = data.getChildren("properties");
         for (Iterator pIt = properties.iterator(); pIt.hasNext();) {
             Element props = (Element) pIt.next();
-            List propertyGroups = props.getChildren("property_group");            
+            List propertyGroups = props.getChildren("property_group");
             for (Iterator pgIt = propertyGroups.iterator(); pgIt.hasNext();) {
                 Element group = (Element) pgIt.next();
                 symbols.putAll(getSymbols(group, index));
@@ -394,10 +394,10 @@ public class LASBackendRequest extends LASDocument {
      * @return a hashmap of symbol names and values
      */
     public HashMap<String, String> getFerretSymbols() {
-        
+
         HashMap<String, String> symbols = new HashMap<String, String>();
         // Translate the results symbols for use by Ferret.
-        
+
         int count = getResultCount();
         symbols.put("result_count", Integer.valueOf(count).toString());
         for (int index=0; index < count; index++ ) {
@@ -408,13 +408,13 @@ public class LASBackendRequest extends LASDocument {
             symbols.put("result_"+ID+"_type", type);
             symbols.put("result_"+ID+"_ID", ID);
         }
-        
+
         // Global properties
         symbols.putAll(getSymbols());
-        
+
         // Data symbols
         symbols.putAll(getDataSymbols());
-        
+
         for ( int i = 0; i < getDataCount(); i++ ) {
             // Post-process the database_access properties for cruiseID, profID, latitude, longitude, time and depth
             // to get rid of any table names that appear since the netCDF file will have variable
@@ -456,19 +456,19 @@ public class LASBackendRequest extends LASDocument {
                 symbols.put(key, profile_id_name);
             }
         }
-        
+
         // Add a count symbol
         symbols.put("data_count", String.valueOf(getDataCount()));
-        
+
         // Data regions
         symbols.putAll(getRegionsAsSymbols());
-        
+
         // Data objects
         symbols.putAll(getDataAsSymbols());
-        
-        // Constraints       
+
+        // Constraints
         symbols.putAll(getConstraintsAsSymbols());
-        
+
         return symbols;
     }
     /**
@@ -523,7 +523,7 @@ public class LASBackendRequest extends LASDocument {
      */
     public String getResultURL(int i) {
         List results = this.getRootElement().getChild("response").getChildren("result");
-        return ((Element)results.get(i)).getAttributeValue("url");       
+        return ((Element)results.get(i)).getAttributeValue("url");
     }
     /**
      * Get the file name of the result at a particular index
@@ -532,7 +532,7 @@ public class LASBackendRequest extends LASDocument {
      */
     public String getResultFileName(int i) {
         List results = this.getRootElement().getChild("response").getChildren("result");
-        return ((Element)results.get(i)).getAttributeValue("file");       
+        return ((Element)results.get(i)).getAttributeValue("file");
     }
     /**
      * Get the MIME type of the result at a particular index
@@ -550,7 +550,7 @@ public class LASBackendRequest extends LASDocument {
      */
     public String getResultID(int i) {
         List results = this.getRootElement().getChild("response").getChildren("result");
-        return ((Element)results.get(i)).getAttributeValue("ID");   
+        return ((Element)results.get(i)).getAttributeValue("ID");
     }
     /**
      * Get the URL of a result by ID
@@ -580,8 +580,8 @@ public class LASBackendRequest extends LASDocument {
                 }
             }
         }
-        
-        return "";    
+
+        return "";
     }
     /**
      * Returns the file name of the result with the given ID.
@@ -611,8 +611,8 @@ public class LASBackendRequest extends LASDocument {
                 }
             }
         }
-        
-        return "";    
+
+        return "";
     }
     /**
      * Pull out the file name of a result according to type.
@@ -641,8 +641,8 @@ public class LASBackendRequest extends LASDocument {
                 }
             }
         }
-        
-        return "";    
+
+        return "";
     }
     /**
      * Get the service used by the backend service request
@@ -662,9 +662,9 @@ public class LASBackendRequest extends LASDocument {
      */
     public String getServiceAction() throws JDOMException, LASException {
         Element operationProperties = getElementByXPath("/backend_request/properties/property_group[@type='operation']");
-        return findPropertyValue(operationProperties, "service_action");       
+        return findPropertyValue(operationProperties, "service_action");
     }
-    
+
     /**
      * Returns a list of variable names in this request.
      * @return variables an ArrayList of String objects
@@ -680,7 +680,7 @@ public class LASBackendRequest extends LASDocument {
         }
         return variables;
     }
-    
+
     /**
      * Returns an SQL formatted string containing the list of variable names separated by commas.
      * @return variablesString SQL formatted string
@@ -767,7 +767,7 @@ public class LASBackendRequest extends LASDocument {
             String missingValue = findPropertyValue(db_access, "missing");
             if (missingValue.length() > 0 ) {
                // We have no way of knowing at this point how each variable is stored
-               // in the database.  For float values we must use 'fuzzy matching' 
+               // in the database.  For float values we must use 'fuzzy matching'
                // when testing for the missing value.  For string values an exact
                // match is appropriate.
                // We add a special case for the standard Ferret missing value of -1.0E34
@@ -834,7 +834,7 @@ public class LASBackendRequest extends LASDocument {
         } else {
             return "";
         }
-    }    
+    }
     /**
      * Get the high time value with no formatting applied
      * @return the high value of the time range
@@ -1025,7 +1025,7 @@ public class LASBackendRequest extends LASDocument {
 
             if ( time_type == null && time_type.equals("") ) {
                 throw new LASException("Cannot find time_type database property");
-            } 
+            }
             if ( time_type.equalsIgnoreCase("string") ) {
                 quotes = true;
             }
@@ -1070,7 +1070,7 @@ public class LASBackendRequest extends LASDocument {
 
             if ( time_type == null && time_type.equals("") ) {
                 throw new LASException("Cannot find time_type database property");
-            } 
+            }
             if ( time_type.equalsIgnoreCase("string") ) {
                 quotes = true;
             }
@@ -1103,20 +1103,20 @@ public class LASBackendRequest extends LASDocument {
 
         if ( time_type == null && time_type.equals("") ) {
             throw new LASException("Cannot find time_type database property");
-        } 
+        }
 
         if ( time_type.equalsIgnoreCase("string") ) {
             quotes = true;
         }
-        String timeAxis = axisConstraint(getDatabaseProperty("time"), "t", 
-                getDatabaseTime(tlo), 
+        String timeAxis = axisConstraint(getDatabaseProperty("time"), "t",
+                getDatabaseTime(tlo),
                 getDatabaseTime(thi), quotes);
 
         String region_constraint = "";
 
         if (lonAxis != "" ) {
             region_constraint = lonAxis;
-        }     
+        }
         if ( latAxis != "" ) {
             if (region_constraint != "" ) {
                 region_constraint = region_constraint+" AND "+latAxis;
@@ -1149,38 +1149,38 @@ public class LASBackendRequest extends LASDocument {
      * @throws LASException
      */
     public String getDatabaseTime(String time) throws LASException {
-        
-        
+
+
         String time_type = getDatabaseProperty("time_type");
         if ( time_type == null || time_type.equals("") ) {
             throw new LASException("Cannot find time_type database property");
-        } 
-        
+        }
+
         String time_units = getDatabaseProperty("time_units");
         if ( time_units == null || time_units.equals("") ) {
             throw new LASException("Cannot find time_units database property");
-        } 
-        
+        }
+
         if (time_type.equalsIgnoreCase("double") ) {
-            return String.valueOf(getDatabaseTimeAsDouble(time, time_units));       
+            return String.valueOf(getDatabaseTimeAsDouble(time, time_units));
         } else {
             String target_format = getDatabaseProperty("time_format");
             if ( target_format == null || target_format.equals("") ) {
                 throw new LASException("Cannot find time_format database property");
-            } 
+            }
             return getDatabaseTime(time, target_format);
         }
-        
+
     }
     /**
      * Given a UDUNITS-style time unit (hours since 1990-01-01 00:00:00) and a formatted time string get the double value
      * @param time the formatted time string
      * @param time_units the UDUNITS-style units string
      * @return the double value representing the time
-     * @throws Exception 
+     * @throws Exception
      */
     public double getDatabaseTimeAsDouble(String time, String time_units) throws LASException {
-        
+
         DateTimeFormatter short_fmt = DateTimeFormat.forPattern("dd-MMM-yyyy").withZone(DateTimeZone.UTC);
         DateTimeFormatter long_fmt = DateTimeFormat.forPattern("dd-MMM-yyyy HH:mm:ss").withZone(DateTimeZone.UTC);
         DateUnit dateUnit;
@@ -1189,8 +1189,8 @@ public class LASBackendRequest extends LASDocument {
 		} catch (Exception e) {
 			throw new LASException(e.toString());
 		}
-        
-     
+
+
         DateTime dt;
         if (time.length() > 11) {
             dt = long_fmt.withZone(DateTimeZone.UTC).parseDateTime(time);
@@ -1207,11 +1207,11 @@ public class LASBackendRequest extends LASDocument {
      * @throws LASException
      */
     public String getDatabaseTime(String time, String target_format) throws LASException {
-        
+
         DateTimeFormatter short_fmt = DateTimeFormat.forPattern("dd-MMM-yyyy").withZone(DateTimeZone.UTC).withLocale(Locale.US);
         DateTimeFormatter long_fmt = DateTimeFormat.forPattern("dd-MMM-yyyy HH:mm:ss").withZone(DateTimeZone.UTC).withLocale(Locale.US);
         DateTimeFormatter target_fmt = DateTimeFormat.forPattern(target_format).withZone(DateTimeZone.UTC).withLocale(Locale.US);
-     
+
         DateTime dt;
         if (time.length() > 11) {
             dt = long_fmt.parseDateTime(time);
@@ -1243,7 +1243,7 @@ public class LASBackendRequest extends LASDocument {
                 // The whole globe was selected (and the values wrap around) so we don't need this constraint.
                 return axisConstraints;
             } else if ( Float.valueOf(hi).floatValue() < Float.valueOf(lo).floatValue() ) {
-               /* 
+               /*
                 *             ------------------------------
                 *             |                            |
                 * xhi < xlo   |----x                 x-----|
@@ -1251,21 +1251,21 @@ public class LASBackendRequest extends LASDocument {
                 * xlo < xhi   |    x-----------------x     |
                 *             |                            |
                 *             ------------------------------
-                *             
+                *
                 */
                 String constraint = "";
                 if (lo != null && !lo.equals("")) {
                     constraint = table+"."+column+">="+lo;
                     axisConstraints.add(constraint);
                 }
-                if (hi != null && !hi.equals("")) {                    
+                if (hi != null && !hi.equals("")) {
                     constraint = table+"."+column+"<="+hi;
                     axisConstraints.add(constraint);
                 }
                 return axisConstraints;
-            } 
+            }
         }
-        
+
         String constraint = "";
         if (lo != null && !lo.equals("")) {
             constraint = table+"."+column+">="+lo;
@@ -1276,7 +1276,7 @@ public class LASBackendRequest extends LASDocument {
             } else {
                 constraint = table+"."+column+"<="+hi;
             }
-        } 
+        }
         if ( constraint != "" ) {
            axisConstraints.add(constraint);
         }
@@ -1300,17 +1300,17 @@ public class LASBackendRequest extends LASDocument {
     	String glue = "AND";
 
     	if ( type.equals("x")) {
-    		
+
     		if ( Float.valueOf(lo).floatValue() + .01 > Float.valueOf(hi).floatValue() &&
                  Float.valueOf(lo).floatValue() - .01 < Float.valueOf(hi).floatValue() ) {
           // The whole globe was selected (and the values wrap around) so we don't need this constraint.
     			return axisConstraint;
     		} else if ( Float.valueOf(hi).floatValue() < Float.valueOf(lo).floatValue() ) {
-          // The region selected cross the edge of the map so we need the two outside sections 
+          // The region selected cross the edge of the map so we need the two outside sections
     			// (not the middle between the values)
-    			glue = "OR";   			
-    		} 
-    	}    		
+    			glue = "OR";
+    		}
+    	}
     	if ( quotes ) {
     		if (lo != null && !lo.equals("")) {
     			axisConstraint = "("+column+">=\""+lo+"\")";
@@ -1332,12 +1332,12 @@ public class LASBackendRequest extends LASDocument {
     			} else {
     				axisConstraint = "("+column+"<="+hi+")";
     			}
-    		} 
+    		}
     	}
     	return axisConstraint;
 
     }
- 
+
     /**
      * Returns an array list of gov.noaa.pmel.tmap.las.util.Constraint objects
      * @return constraints an ArrayList of gov.noaa.pmel.tmap.las.util.Constraint objects
@@ -1357,12 +1357,12 @@ public class LASBackendRequest extends LASDocument {
     }
     /**
      * Get the value (right-hand side) of the constraint based on the value of the left-hand side (the name of the constratain).
-     * @param lhs     the "name" (left-hand side) of the constraint 
+     * @param lhs     the "name" (left-hand side) of the constraint
      * @return rhs    the "value" (right-hand side) of the constraint
      */
     public String getConstraintRHS(String lhs) {
         List constraints = this.getRootElement().getChildren("constraint");
-        
+
         for (Iterator cIt = constraints.iterator(); cIt.hasNext();) {
             Element constraint = (Element) cIt.next();
             String rhsString = constraint.getChildText("rhs");
@@ -1376,11 +1376,11 @@ public class LASBackendRequest extends LASDocument {
 
     /**
      * Get the a constraint based on the value of the left-hand side (the name of the constratain).
-     * @param lhs            the "name" (left-hand side) of the constraint 
+     * @param lhs            the "name" (left-hand side) of the constraint
      * @return constraint    the constraint (won't be null, but can contain empty strings)
      */
-    public Constraint getConstraint(String lhs) {        
-        List constraints = this.getRootElement().getChildren("constraint");       
+    public Constraint getConstraint(String lhs) {
+        List constraints = this.getRootElement().getChildren("constraint");
         for (Iterator cIt = constraints.iterator(); cIt.hasNext();) {
             Element constraintElement = (Element) cIt.next();
             String rhsString = constraintElement.getChildText("rhs");
@@ -1448,6 +1448,13 @@ public class LASBackendRequest extends LASDocument {
         return con;
     }
     /**
+	 * Get the readonly attribute. This is for SOCAT and is assumed false if attribute is not present.
+	 * @return readonly attribute.
+	 */
+	public Boolean getReadonly() {
+		return Boolean.parseBoolean(this.getRootElement().getChildText("readonly"));
+    }
+    /**
      * Get the "ui_timeout" property value.  If this time out is reach, LAS should send a message to the client indicating that
      * it is still working on the request.
      * @return the value of the time out (specified in seconds in the config)
@@ -1456,7 +1463,7 @@ public class LASBackendRequest extends LASDocument {
         // The semantics of the this is known.  If there is more
         // than one, get all of them and return the biggest.
         long timeout = 0;
-        
+
         ArrayList groups = this.findPropertyGroupList("product_server");
         for (Iterator pgIt = groups.iterator(); pgIt.hasNext();) {
             Element group = (Element) pgIt.next();
@@ -1479,7 +1486,7 @@ public class LASBackendRequest extends LASDocument {
      * @return the time out value (specified in seconds in the config)
      */
     public long getProductTimeout() {
-        
+
         long timeout = 0;
         ArrayList groups = this.findPropertyGroupList("product_server");
         for (Iterator pgIt = groups.iterator(); pgIt.hasNext();) {
@@ -1522,7 +1529,7 @@ public class LASBackendRequest extends LASDocument {
         Element root = getRootElement();
         Element remote = new Element("remote");
         root.addContent(remote);
-    }   
+    }
     /**
      * Check for the existence of the <remote> element and return true if found.
      * @return true if the service is running remotely
@@ -1553,12 +1560,12 @@ public class LASBackendRequest extends LASDocument {
      * @throws JDOMException
      */
     public void setLocalFileNames(String output_dir, String http_base_url, String opendap_base_url) throws JDOMException {
-        log.debug("setting local file names..."); 
-        Element response = getElementByXPath("/backend_request/response");        
+        log.debug("setting local file names...");
+        Element response = getElementByXPath("/backend_request/response");
         List results = response.getChildren("result");
         for (Iterator resIt = results.iterator(); resIt.hasNext();) {
             Element result = (Element) resIt.next();
-                String file = result.getAttributeValue("file");               
+                String file = result.getAttributeValue("file");
                 // Java on windows can deal with "/" in the path.
                 // Java on Unix cannot deal with a "\".  So always use "/" and everybody's happy.
                 if ( file.contains("\\") ) {
@@ -1577,7 +1584,7 @@ public class LASBackendRequest extends LASDocument {
                 result.setAttribute("url", remote_url);
                 result.setAttribute("remote", "true");
         }
-        
+
     }
     /**
      * Set the URL for a particular result type. This is used for the RSS feed URL since that result "belongs" to the product server.
@@ -1597,10 +1604,10 @@ public class LASBackendRequest extends LASDocument {
                     return;
                 }
                 String url = result.getAttributeValue("url");
-                // Replace the URL value if it's not already set by the backend service.               
+                // Replace the URL value if it's not already set by the backend service.
                 if ( url == null || url.equals("") ) {
                     if (type.equals(resultType)) {
-                        String newurl = result.getAttributeValue("file");                    
+                        String newurl = result.getAttributeValue("file");
                         newurl = newurl.substring(newurl.lastIndexOf(File.separator) + 1, newurl.length());
                         newurl = serverURL + "/output/" + newurl;
                         result.setAttribute("url", newurl);
@@ -1608,7 +1615,7 @@ public class LASBackendRequest extends LASDocument {
 
                 }
             }
-        }       
+        }
     }
     /** For each variable in this request get the list of axes that are to be transformed by an analysis request.  The HashMap is keyed
      * by the XPath of the variable and the value is an array list of axis types (x, y, z, t).
@@ -1658,9 +1665,9 @@ public class LASBackendRequest extends LASDocument {
      */
 	public boolean removeProperty(String group, String property) throws LASException {
 		Element groupE = findPropertyGroup(group);
-                if(groupE != null){ 
+                if(groupE != null){
 		    Element propE = findProperty(groupE, property);
-                    if(propE != null){ 
+                    if(propE != null){
 		        boolean remove = groupE.removeContent(propE);
 		        return remove;
                     }
