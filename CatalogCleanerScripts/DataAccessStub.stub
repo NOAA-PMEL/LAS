@@ -1,0 +1,224 @@
+package gov.noaa.pmel.tmap.catalogcleaner;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Properties;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import gov.noaa.pmel.tmap.catalogcleaner.data.*;
+
+public class DataAccess {
+
+	private static Properties configFile = null;
+	private static Logger log = LoggerFactory.getLogger(DataAccess.class);
+	private static Connection pgCache = null;
+
+
+	public static void init(Parser parser){
+		configFile = new Properties();
+		try{
+			configFile.load(parser.getClass().getClassLoader().getResourceAsStream("myconfig.properties"));
+			pgCache = DriverManager.getConnection(configFile.getProperty("PGURL"), configFile.getProperty("PGUSERNAME"), configFile.getProperty("PGPASSWORD"));
+			//			boolean iic = pgCache.isClosed();
+			//			System.out.println(iic);
+			//			pgCache.close();
+			//			iic = pgCache.isClosed();
+			//			System.out.println(iic);
+		}
+		catch(Exception e){
+			// do something
+			System.out.println("Error: " + e.getMessage());
+		}
+	}
+	public void printTest(){
+		System.out.println(configFile.getProperty("PGURL"));
+	}
+
+	public static void main(String[] args){
+		DataAccess da = new DataAccess();
+		da.printTest();
+		log.info("testing");
+	}
+
+	public static Collection<String> getCatalogItems(){
+		// just a stub to get started
+		ArrayList<String> list = new ArrayList<String>();
+		return list;
+	}
+	public static String getOrder(int num){
+		// just a stub to get started
+		return "Some Order";
+	}
+	/**
+	 * This won't be called when an out of memory exception is thrown.
+	 */
+	@Override
+	protected void finalize() throws Exception {
+		saveState();
+	}
+
+	/** Force the cache to save its state now.
+	 *
+	 * @TODO Determine if this is needed.
+	 * @throws Exception
+	 */
+	public static void saveState() throws Exception {
+
+		if (pgCache != null) {
+			pgCache.close();
+			pgCache = null;
+		}
+
+		System.out.println("Closing PG connection");
+	}
+	public static PreparedStatement setPreparedStatement(String functionName) throws Exception{
+
+		PreparedStatement ps = null;
+		//	try {
+		String insert = "select " + functionName + "()";
+	
+		ps = pgCache.prepareStatement(insert);
+
+		return ps;
+	}
+	public static PreparedStatement setPreparedStatement(String functionName, int[] theInts) throws Exception{
+
+		if(theInts.length == 0)
+			throw new Exception("Invalid int length");
+
+		PreparedStatement ps = null;
+
+		String insert = "select " + functionName + " (";
+		int intSize = theInts.length;
+		for(int i = 0; i<intSize-1; i++){
+			insert += "?, ";
+		}
+		insert += "?)";
+		ps = pgCache.prepareStatement(insert);
+
+		for(int i = 0; i<intSize; i++){
+			int theNum = theInts[i];				
+			ps.setInt(i+1, theNum);
+		}
+
+		return ps;
+	}
+	public static PreparedStatement setPreparedStatement(String functionName, String[] theList) throws Exception{
+
+		if(theList.length == 0)
+			throw new Exception("Invalid vars length");
+
+		PreparedStatement ps = null;
+		int size = theList.length;
+		//	try {
+		String insert = "select " + functionName + " (";
+		for(int i = 0; i<size-1; i++){
+			insert += "?, ";
+		}
+		insert += "?)";
+		ps = pgCache.prepareStatement(insert);
+		for(int i = 0; i<size; i++){
+			String name = theList[i];				
+			if(name == null || name.isEmpty())
+				ps.setNull(i+1, java.sql.Types.VARCHAR);
+			else
+				ps.setString(i+1, name);
+		}
+
+		return ps;
+	}
+	public static PreparedStatement setPreparedStatement(String functionName, String[] theList, int[] theInts) throws Exception{
+
+		// just to make sure
+		if(theInts.length == 0)
+			throw new Exception("Invalid vars length");
+		// just to make sure
+		else if(theList.length == 0)
+			throw new Exception("Invalid vars length");
+
+		PreparedStatement ps = null;
+		int strSize = theList.length;
+		//	try {
+		String insert = "select " + functionName + " (";
+		for(int i = 0; i<strSize; i++){
+			insert += "?, ";
+		}
+		int intSize = theInts.length;
+		for(int i = 0; i<intSize-1; i++){
+			insert += "?, ";
+		}
+		insert += "?)";
+		ps = pgCache.prepareStatement(insert);
+		for(int i = 0; i<strSize; i++){
+			String name = theList[i];				
+			if(name == null || name.isEmpty())
+				ps.setNull(i+1, java.sql.Types.VARCHAR);
+			else
+				ps.setString(i+1, name);
+		}
+		for(int i = 0; i<intSize; i++){
+			int theNum = theInts[i];				
+			ps.setInt(i+1, theNum);
+		}
+
+		return ps;
+	}
+
+	public static Catalog getCatalog(String uri) throws Exception{
+
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		Catalog catalog = null;
+
+		try {
+			ps = pgCache.prepareStatement("select * from Catalog where xmlns=?");
+			ps.setString(1, uri);
+			log.debug("About to send: {} to the database.", ps.toString());
+			rs = ps.executeQuery();
+			while (rs.next()) {
+				int catalogId = rs.getInt("catalog_id");
+				String xmlns = rs.getString("xmlns");
+				String name = rs.getString("name");
+				String base = rs.getString("base");
+				String version = rs.getString("version");
+				String expires = rs.getString("expires");
+				String status = rs.getString("status");
+				catalog = new Catalog(catalogId, xmlns, name, base, version, expires, status);
+			}
+		}
+		catch (SQLException e) {
+			log.error("Caching: Could not access the database/cache. {}", e);
+			throw new Exception("SQLException: " + e.getMessage());
+		} 
+		catch(Exception e){
+			if(e.getMessage().equals("null")){
+				// is this how postgres deals with null? 
+			}
+			else{
+				log.error("Error. {}", e);
+				throw new Exception("Exception: " + e.getMessage());
+			}
+		}finally {
+			try {
+				ps.close();
+//					rs.close();
+			}
+			catch (SQLException e) {
+				log.error("Cache read: Could not close the prepared statement. {}", e);
+			}
+		}
+		return catalog;
+	}
+	
+	
+	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	// begin generated functions
+	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
