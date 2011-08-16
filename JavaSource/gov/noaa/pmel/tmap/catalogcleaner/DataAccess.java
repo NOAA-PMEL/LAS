@@ -21,10 +21,10 @@ public class DataAccess {
 	private static Connection pgCache = null;
 
 
-	public static void init(Parser parser){
+	public static void init(Controller controller){
 		configFile = new Properties();
 		try{
-			configFile.load(parser.getClass().getClassLoader().getResourceAsStream("myconfig.properties"));
+			configFile.load(controller.getClass().getClassLoader().getResourceAsStream("myconfig.properties"));
 			pgCache = DriverManager.getConnection(configFile.getProperty("PGURL"), configFile.getProperty("PGUSERNAME"), configFile.getProperty("PGPASSWORD"));
 			//			boolean iic = pgCache.isClosed();
 			//			System.out.println(iic);
