@@ -1448,13 +1448,6 @@ public class LASBackendRequest extends LASDocument {
         return con;
     }
     /**
-	 * Get the readonly attribute. This is for SOCAT and is assumed false if attribute is not present.
-	 * @return readonly attribute.
-	 */
-	public Boolean getReadonly() {
-		return Boolean.parseBoolean(this.getRootElement().getChildText("readonly"));
-    }
-    /**
      * Get the "ui_timeout" property value.  If this time out is reach, LAS should send a message to the client indicating that
      * it is still working on the request.
      * @return the value of the time out (specified in seconds in the config)
