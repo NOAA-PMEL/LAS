@@ -21,10 +21,10 @@ public class DataAccess {
 	private static Connection pgCache = null;
 
 
-	public static void init(Controller controller){
+	public static void init(Parser parser){
 		configFile = new Properties();
 		try{
-			configFile.load(controller.getClass().getClassLoader().getResourceAsStream("myconfig.properties"));
+			configFile.load(parser.getClass().getClassLoader().getResourceAsStream("myconfig.properties"));
 			pgCache = DriverManager.getConnection(configFile.getProperty("PGURL"), configFile.getProperty("PGUSERNAME"), configFile.getProperty("PGPASSWORD"));
 			//			boolean iic = pgCache.isClosed();
 			//			System.out.println(iic);
@@ -4843,7 +4843,7 @@ public class DataAccess {
 		return servicePropertyId;
 	}
 
-	public static int insertServiceService(int parentId, int childId) throws Exception{
+	public static int insertServiceService(int childId, int parentId) throws Exception{
 
 		PreparedStatement ps = null;
 		ResultSet rs = null;
@@ -7639,7 +7639,7 @@ public class DataAccess {
 
 	/*begin delete methods*/
 
-	public static int deletecatalog(int catalogId) throws Exception{
+	public static int deleteCatalog(int catalogId) throws Exception{
 
 		PreparedStatement ps = null;
 		ResultSet rs = null;
@@ -7667,7 +7667,7 @@ public class DataAccess {
 		return catalogId;
 	}
 
-	public static int deletecatalog_dataset(int catalogDatasetId) throws Exception{
+	public static int deleteCatalogDataset(int catalogDatasetId) throws Exception{
 
 		PreparedStatement ps = null;
 		ResultSet rs = null;
@@ -7695,7 +7695,7 @@ public class DataAccess {
 		return catalogDatasetId;
 	}
 
-	public static int deletecatalog_property(int catalogPropertyId) throws Exception{
+	public static int deleteCatalogProperty(int catalogPropertyId) throws Exception{
 
 		PreparedStatement ps = null;
 		ResultSet rs = null;
@@ -7723,7 +7723,7 @@ public class DataAccess {
 		return catalogPropertyId;
 	}
 
-	public static int deletecatalog_service(int catalogServiceId) throws Exception{
+	public static int deleteCatalogService(int catalogServiceId) throws Exception{
 
 		PreparedStatement ps = null;
 		ResultSet rs = null;
@@ -7751,7 +7751,7 @@ public class DataAccess {
 		return catalogServiceId;
 	}
 
-	public static int deletecatalog_xlink(int catalogXlinkId) throws Exception{
+	public static int deleteCatalogXlink(int catalogXlinkId) throws Exception{
 
 		PreparedStatement ps = null;
 		ResultSet rs = null;
@@ -7779,7 +7779,7 @@ public class DataAccess {
 		return catalogXlinkId;
 	}
 
-	public static int deletecatalogref(int catalogrefId) throws Exception{
+	public static int deleteCatalogref(int catalogrefId) throws Exception{
 
 		PreparedStatement ps = null;
 		ResultSet rs = null;
@@ -7807,7 +7807,7 @@ public class DataAccess {
 		return catalogrefId;
 	}
 
-	public static int deletecatalogref_documentation(int catalogrefDocumentationId) throws Exception{
+	public static int deleteCatalogrefDocumentation(int catalogrefDocumentationId) throws Exception{
 
 		PreparedStatement ps = null;
 		ResultSet rs = null;
@@ -7835,7 +7835,7 @@ public class DataAccess {
 		return catalogrefDocumentationId;
 	}
 
-	public static int deletecatalogref_documentation_namespace(int catalogrefDocumentationNamespaceId) throws Exception{
+	public static int deleteCatalogrefDocumentationNamespace(int catalogrefDocumentationNamespaceId) throws Exception{
 
 		PreparedStatement ps = null;
 		ResultSet rs = null;
@@ -7863,7 +7863,7 @@ public class DataAccess {
 		return catalogrefDocumentationNamespaceId;
 	}
 
-	public static int deletecatalogref_documentation_xlink(int catalogrefDocumentationXlinkId) throws Exception{
+	public static int deleteCatalogrefDocumentationXlink(int catalogrefDocumentationXlinkId) throws Exception{
 
 		PreparedStatement ps = null;
 		ResultSet rs = null;
@@ -7891,7 +7891,7 @@ public class DataAccess {
 		return catalogrefDocumentationXlinkId;
 	}
 
-	public static int deletecatalogref_xlink(int catalogrefXlinkId) throws Exception{
+	public static int deleteCatalogrefXlink(int catalogrefXlinkId) throws Exception{
 
 		PreparedStatement ps = null;
 		ResultSet rs = null;
@@ -7919,7 +7919,7 @@ public class DataAccess {
 		return catalogrefXlinkId;
 	}
 
-	public static int deletedataset(int datasetId) throws Exception{
+	public static int deleteDataset(int datasetId) throws Exception{
 
 		PreparedStatement ps = null;
 		ResultSet rs = null;
@@ -7947,7 +7947,7 @@ public class DataAccess {
 		return datasetId;
 	}
 
-	public static int deletedataset_access(int datasetAccessId) throws Exception{
+	public static int deleteDatasetAccess(int datasetAccessId) throws Exception{
 
 		PreparedStatement ps = null;
 		ResultSet rs = null;
@@ -7975,7 +7975,7 @@ public class DataAccess {
 		return datasetAccessId;
 	}
 
-	public static int deletedataset_access_datasize(int datasetAccessDatasizeId) throws Exception{
+	public static int deleteDatasetAccessDatasize(int datasetAccessDatasizeId) throws Exception{
 
 		PreparedStatement ps = null;
 		ResultSet rs = null;
@@ -8003,7 +8003,7 @@ public class DataAccess {
 		return datasetAccessDatasizeId;
 	}
 
-	public static int deletedataset_catalogref(int datasetCatalogrefId) throws Exception{
+	public static int deleteDatasetCatalogref(int datasetCatalogrefId) throws Exception{
 
 		PreparedStatement ps = null;
 		ResultSet rs = null;
@@ -8031,7 +8031,7 @@ public class DataAccess {
 		return datasetCatalogrefId;
 	}
 
-	public static int deletedataset_dataset(int datasetDatasetId) throws Exception{
+	public static int deleteDatasetDataset(int datasetDatasetId) throws Exception{
 
 		PreparedStatement ps = null;
 		ResultSet rs = null;
@@ -8059,7 +8059,7 @@ public class DataAccess {
 		return datasetDatasetId;
 	}
 
-	public static int deletedataset_ncml(int datasetNcmlId) throws Exception{
+	public static int deleteDatasetNcml(int datasetNcmlId) throws Exception{
 
 		PreparedStatement ps = null;
 		ResultSet rs = null;
@@ -8087,7 +8087,7 @@ public class DataAccess {
 		return datasetNcmlId;
 	}
 
-	public static int deletedataset_property(int datasetPropertyId) throws Exception{
+	public static int deleteDatasetProperty(int datasetPropertyId) throws Exception{
 
 		PreparedStatement ps = null;
 		ResultSet rs = null;
@@ -8115,7 +8115,7 @@ public class DataAccess {
 		return datasetPropertyId;
 	}
 
-	public static int deletedataset_service(int datasetServiceId) throws Exception{
+	public static int deleteDatasetService(int datasetServiceId) throws Exception{
 
 		PreparedStatement ps = null;
 		ResultSet rs = null;
@@ -8143,7 +8143,7 @@ public class DataAccess {
 		return datasetServiceId;
 	}
 
-	public static int deletedataset_tmg(int datasetTmgId) throws Exception{
+	public static int deleteDatasetTmg(int datasetTmgId) throws Exception{
 
 		PreparedStatement ps = null;
 		ResultSet rs = null;
@@ -8171,7 +8171,7 @@ public class DataAccess {
 		return datasetTmgId;
 	}
 
-	public static int deletemetadata(int metadataId) throws Exception{
+	public static int deleteMetadata(int metadataId) throws Exception{
 
 		PreparedStatement ps = null;
 		ResultSet rs = null;
@@ -8199,7 +8199,7 @@ public class DataAccess {
 		return metadataId;
 	}
 
-	public static int deletemetadata_namespace(int metadataNamespaceId) throws Exception{
+	public static int deleteMetadataNamespace(int metadataNamespaceId) throws Exception{
 
 		PreparedStatement ps = null;
 		ResultSet rs = null;
@@ -8227,7 +8227,7 @@ public class DataAccess {
 		return metadataNamespaceId;
 	}
 
-	public static int deletemetadata_tmg(int metadataTmgId) throws Exception{
+	public static int deleteMetadataTmg(int metadataTmgId) throws Exception{
 
 		PreparedStatement ps = null;
 		ResultSet rs = null;
@@ -8255,7 +8255,7 @@ public class DataAccess {
 		return metadataTmgId;
 	}
 
-	public static int deletemetadata_xlink(int metadataXlinkId) throws Exception{
+	public static int deleteMetadataXlink(int metadataXlinkId) throws Exception{
 
 		PreparedStatement ps = null;
 		ResultSet rs = null;
@@ -8283,7 +8283,7 @@ public class DataAccess {
 		return metadataXlinkId;
 	}
 
-	public static int deleteservice(int serviceId) throws Exception{
+	public static int deleteService(int serviceId) throws Exception{
 
 		PreparedStatement ps = null;
 		ResultSet rs = null;
@@ -8311,7 +8311,7 @@ public class DataAccess {
 		return serviceId;
 	}
 
-	public static int deleteservice_datasetroot(int serviceDatasetrootId) throws Exception{
+	public static int deleteServiceDatasetroot(int serviceDatasetrootId) throws Exception{
 
 		PreparedStatement ps = null;
 		ResultSet rs = null;
@@ -8339,7 +8339,7 @@ public class DataAccess {
 		return serviceDatasetrootId;
 	}
 
-	public static int deleteservice_property(int servicePropertyId) throws Exception{
+	public static int deleteServiceProperty(int servicePropertyId) throws Exception{
 
 		PreparedStatement ps = null;
 		ResultSet rs = null;
@@ -8367,7 +8367,7 @@ public class DataAccess {
 		return servicePropertyId;
 	}
 
-	public static int deleteservice_service(int serviceServiceId) throws Exception{
+	public static int deleteServiceService(int serviceServiceId) throws Exception{
 
 		PreparedStatement ps = null;
 		ResultSet rs = null;
@@ -8395,7 +8395,7 @@ public class DataAccess {
 		return serviceServiceId;
 	}
 
-	public static int deletetmg(int tmgId) throws Exception{
+	public static int deleteTmg(int tmgId) throws Exception{
 
 		PreparedStatement ps = null;
 		ResultSet rs = null;
@@ -8423,7 +8423,7 @@ public class DataAccess {
 		return tmgId;
 	}
 
-	public static int deletetmg_authority(int tmgAuthorityId) throws Exception{
+	public static int deleteTmgAuthority(int tmgAuthorityId) throws Exception{
 
 		PreparedStatement ps = null;
 		ResultSet rs = null;
@@ -8451,7 +8451,7 @@ public class DataAccess {
 		return tmgAuthorityId;
 	}
 
-	public static int deletetmg_contributor(int tmgContributorId) throws Exception{
+	public static int deleteTmgContributor(int tmgContributorId) throws Exception{
 
 		PreparedStatement ps = null;
 		ResultSet rs = null;
@@ -8479,7 +8479,7 @@ public class DataAccess {
 		return tmgContributorId;
 	}
 
-	public static int deletetmg_creator(int tmgCreatorId) throws Exception{
+	public static int deleteTmgCreator(int tmgCreatorId) throws Exception{
 
 		PreparedStatement ps = null;
 		ResultSet rs = null;
@@ -8507,7 +8507,7 @@ public class DataAccess {
 		return tmgCreatorId;
 	}
 
-	public static int deletetmg_creator_contact(int tmgCreatorContactId) throws Exception{
+	public static int deleteTmgCreatorContact(int tmgCreatorContactId) throws Exception{
 
 		PreparedStatement ps = null;
 		ResultSet rs = null;
@@ -8535,7 +8535,7 @@ public class DataAccess {
 		return tmgCreatorContactId;
 	}
 
-	public static int deletetmg_creator_name(int tmgCreatorNameId) throws Exception{
+	public static int deleteTmgCreatorName(int tmgCreatorNameId) throws Exception{
 
 		PreparedStatement ps = null;
 		ResultSet rs = null;
@@ -8563,7 +8563,7 @@ public class DataAccess {
 		return tmgCreatorNameId;
 	}
 
-	public static int deletetmg_dataformat(int tmgDataformatId) throws Exception{
+	public static int deleteTmgDataformat(int tmgDataformatId) throws Exception{
 
 		PreparedStatement ps = null;
 		ResultSet rs = null;
@@ -8591,7 +8591,7 @@ public class DataAccess {
 		return tmgDataformatId;
 	}
 
-	public static int deletetmg_datasize(int tmgDatasizeId) throws Exception{
+	public static int deleteTmgDatasize(int tmgDatasizeId) throws Exception{
 
 		PreparedStatement ps = null;
 		ResultSet rs = null;
@@ -8619,7 +8619,7 @@ public class DataAccess {
 		return tmgDatasizeId;
 	}
 
-	public static int deletetmg_datatype(int tmgDatatypeId) throws Exception{
+	public static int deleteTmgDatatype(int tmgDatatypeId) throws Exception{
 
 		PreparedStatement ps = null;
 		ResultSet rs = null;
@@ -8647,7 +8647,7 @@ public class DataAccess {
 		return tmgDatatypeId;
 	}
 
-	public static int deletetmg_date(int tmgDateId) throws Exception{
+	public static int deleteTmgDate(int tmgDateId) throws Exception{
 
 		PreparedStatement ps = null;
 		ResultSet rs = null;
@@ -8675,7 +8675,7 @@ public class DataAccess {
 		return tmgDateId;
 	}
 
-	public static int deletetmg_documentation(int tmgDocumentationId) throws Exception{
+	public static int deleteTmgDocumentation(int tmgDocumentationId) throws Exception{
 
 		PreparedStatement ps = null;
 		ResultSet rs = null;
@@ -8703,7 +8703,7 @@ public class DataAccess {
 		return tmgDocumentationId;
 	}
 
-	public static int deletetmg_documentation_namespace(int tmgDocumentationNamespaceId) throws Exception{
+	public static int deleteTmgDocumentationNamespace(int tmgDocumentationNamespaceId) throws Exception{
 
 		PreparedStatement ps = null;
 		ResultSet rs = null;
@@ -8731,7 +8731,7 @@ public class DataAccess {
 		return tmgDocumentationNamespaceId;
 	}
 
-	public static int deletetmg_documentation_xlink(int tmgDocumentationXlinkId) throws Exception{
+	public static int deleteTmgDocumentationXlink(int tmgDocumentationXlinkId) throws Exception{
 
 		PreparedStatement ps = null;
 		ResultSet rs = null;
@@ -8759,7 +8759,7 @@ public class DataAccess {
 		return tmgDocumentationXlinkId;
 	}
 
-	public static int deletetmg_geospatialcoverage(int tmgGeospatialcoverageId) throws Exception{
+	public static int deleteTmgGeospatialcoverage(int tmgGeospatialcoverageId) throws Exception{
 
 		PreparedStatement ps = null;
 		ResultSet rs = null;
@@ -8787,7 +8787,7 @@ public class DataAccess {
 		return tmgGeospatialcoverageId;
 	}
 
-	public static int deletetmg_geospatialcoverage_eastwest(int tmgGeospatialcoverageEastwestId) throws Exception{
+	public static int deleteTmgGeospatialcoverageEastwest(int tmgGeospatialcoverageEastwestId) throws Exception{
 
 		PreparedStatement ps = null;
 		ResultSet rs = null;
@@ -8815,7 +8815,7 @@ public class DataAccess {
 		return tmgGeospatialcoverageEastwestId;
 	}
 
-	public static int deletetmg_geospatialcoverage_name(int tmgGeospatialcoverageNameId) throws Exception{
+	public static int deleteTmgGeospatialcoverageName(int tmgGeospatialcoverageNameId) throws Exception{
 
 		PreparedStatement ps = null;
 		ResultSet rs = null;
@@ -8843,7 +8843,7 @@ public class DataAccess {
 		return tmgGeospatialcoverageNameId;
 	}
 
-	public static int deletetmg_geospatialcoverage_northsouth(int tmgGeospatialcoverageNorthsouthId) throws Exception{
+	public static int deleteTmgGeospatialcoverageNorthsouth(int tmgGeospatialcoverageNorthsouthId) throws Exception{
 
 		PreparedStatement ps = null;
 		ResultSet rs = null;
@@ -8871,7 +8871,7 @@ public class DataAccess {
 		return tmgGeospatialcoverageNorthsouthId;
 	}
 
-	public static int deletetmg_geospatialcoverage_updown(int tmgGeospatialcoverageUpdownId) throws Exception{
+	public static int deleteTmgGeospatialcoverageUpdown(int tmgGeospatialcoverageUpdownId) throws Exception{
 
 		PreparedStatement ps = null;
 		ResultSet rs = null;
@@ -8899,7 +8899,7 @@ public class DataAccess {
 		return tmgGeospatialcoverageUpdownId;
 	}
 
-	public static int deletetmg_keyword(int tmgKeywordId) throws Exception{
+	public static int deleteTmgKeyword(int tmgKeywordId) throws Exception{
 
 		PreparedStatement ps = null;
 		ResultSet rs = null;
@@ -8927,7 +8927,7 @@ public class DataAccess {
 		return tmgKeywordId;
 	}
 
-	public static int deletetmg_metadata(int tmgMetadataId) throws Exception{
+	public static int deleteTmgMetadata(int tmgMetadataId) throws Exception{
 
 		PreparedStatement ps = null;
 		ResultSet rs = null;
@@ -8955,7 +8955,7 @@ public class DataAccess {
 		return tmgMetadataId;
 	}
 
-	public static int deletetmg_project(int tmgProjectId) throws Exception{
+	public static int deleteTmgProject(int tmgProjectId) throws Exception{
 
 		PreparedStatement ps = null;
 		ResultSet rs = null;
@@ -8983,7 +8983,7 @@ public class DataAccess {
 		return tmgProjectId;
 	}
 
-	public static int deletetmg_property(int tmgPropertyId) throws Exception{
+	public static int deleteTmgProperty(int tmgPropertyId) throws Exception{
 
 		PreparedStatement ps = null;
 		ResultSet rs = null;
@@ -9011,7 +9011,7 @@ public class DataAccess {
 		return tmgPropertyId;
 	}
 
-	public static int deletetmg_publisher(int tmgPublisherId) throws Exception{
+	public static int deleteTmgPublisher(int tmgPublisherId) throws Exception{
 
 		PreparedStatement ps = null;
 		ResultSet rs = null;
@@ -9039,7 +9039,7 @@ public class DataAccess {
 		return tmgPublisherId;
 	}
 
-	public static int deletetmg_publisher_contact(int tmgPublisherContactId) throws Exception{
+	public static int deleteTmgPublisherContact(int tmgPublisherContactId) throws Exception{
 
 		PreparedStatement ps = null;
 		ResultSet rs = null;
@@ -9067,7 +9067,7 @@ public class DataAccess {
 		return tmgPublisherContactId;
 	}
 
-	public static int deletetmg_publisher_name(int tmgPublisherNameId) throws Exception{
+	public static int deleteTmgPublisherName(int tmgPublisherNameId) throws Exception{
 
 		PreparedStatement ps = null;
 		ResultSet rs = null;
@@ -9095,7 +9095,7 @@ public class DataAccess {
 		return tmgPublisherNameId;
 	}
 
-	public static int deletetmg_servicename(int tmgServicenameId) throws Exception{
+	public static int deleteTmgServicename(int tmgServicenameId) throws Exception{
 
 		PreparedStatement ps = null;
 		ResultSet rs = null;
@@ -9123,7 +9123,7 @@ public class DataAccess {
 		return tmgServicenameId;
 	}
 
-	public static int deletetmg_timecoverage(int tmgTimecoverageId) throws Exception{
+	public static int deleteTmgTimecoverage(int tmgTimecoverageId) throws Exception{
 
 		PreparedStatement ps = null;
 		ResultSet rs = null;
@@ -9151,7 +9151,7 @@ public class DataAccess {
 		return tmgTimecoverageId;
 	}
 
-	public static int deletetmg_timecoverage_duration(int tmgTimecoverageDurationId) throws Exception{
+	public static int deleteTmgTimecoverageDuration(int tmgTimecoverageDurationId) throws Exception{
 
 		PreparedStatement ps = null;
 		ResultSet rs = null;
@@ -9179,7 +9179,7 @@ public class DataAccess {
 		return tmgTimecoverageDurationId;
 	}
 
-	public static int deletetmg_timecoverage_end(int tmgTimecoverageEndId) throws Exception{
+	public static int deleteTmgTimecoverageEnd(int tmgTimecoverageEndId) throws Exception{
 
 		PreparedStatement ps = null;
 		ResultSet rs = null;
@@ -9207,7 +9207,7 @@ public class DataAccess {
 		return tmgTimecoverageEndId;
 	}
 
-	public static int deletetmg_timecoverage_resolution(int tmgTimecoverageResolutionId) throws Exception{
+	public static int deleteTmgTimecoverageResolution(int tmgTimecoverageResolutionId) throws Exception{
 
 		PreparedStatement ps = null;
 		ResultSet rs = null;
@@ -9235,7 +9235,7 @@ public class DataAccess {
 		return tmgTimecoverageResolutionId;
 	}
 
-	public static int deletetmg_timecoverage_start(int tmgTimecoverageStartId) throws Exception{
+	public static int deleteTmgTimecoverageStart(int tmgTimecoverageStartId) throws Exception{
 
 		PreparedStatement ps = null;
 		ResultSet rs = null;
@@ -9263,7 +9263,7 @@ public class DataAccess {
 		return tmgTimecoverageStartId;
 	}
 
-	public static int deletetmg_variables(int tmgVariablesId) throws Exception{
+	public static int deleteTmgVariables(int tmgVariablesId) throws Exception{
 
 		PreparedStatement ps = null;
 		ResultSet rs = null;
@@ -9291,7 +9291,7 @@ public class DataAccess {
 		return tmgVariablesId;
 	}
 
-	public static int deletetmg_variables_variable(int tmgVariablesVariableId) throws Exception{
+	public static int deleteTmgVariablesVariable(int tmgVariablesVariableId) throws Exception{
 
 		PreparedStatement ps = null;
 		ResultSet rs = null;
@@ -9319,7 +9319,7 @@ public class DataAccess {
 		return tmgVariablesVariableId;
 	}
 
-	public static int deletetmg_variables_variablemap(int tmgVariablesVariablemapId) throws Exception{
+	public static int deleteTmgVariablesVariablemap(int tmgVariablesVariablemapId) throws Exception{
 
 		PreparedStatement ps = null;
 		ResultSet rs = null;
