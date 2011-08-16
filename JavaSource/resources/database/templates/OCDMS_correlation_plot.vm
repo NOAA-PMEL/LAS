@@ -18,6 +18,7 @@
 #set ($region=$las_backendrequest.getRegionAsConstraint())
 #set ($var = $las_backendrequest.getVariablesAsString())
 #set ($con = $las_backendrequest.getConstraintString("AND"))
+#set ($readonly = $las_backendrequest.getReadonly())
 
 
 #parse("OCDMS_data_options.vm")
@@ -37,7 +38,7 @@
 ## TODO:  Configure datasets to identify 'cruiseID' and then use '$cruiseID' below
 
 ## NOTE:  Get an additional variable for property/property plots
-#set ($prop_var=$las_backendrequest.getProperty("ferret","prop_var"))
+#set ($prop_var=$las_backendrequest.getProperty("prop_var","prop_var"))
 
 ## NOTE 1:  Use Velocity formal references for ${table} so that the '.metadata' coming immediately
 ## NOTE 1:  afterward won't be interpreted as a property of the $table object.
@@ -45,48 +46,64 @@
 ## NOTE 2:  The data must be orderd by cruise_ID in order to properly calculate the # of cruises
 ## Hack to allow anomoly from gridded data.
 
-#if ($var == "pCO2_anomaly")
-   #set ($var = "pCO2_sw")
-#end
-#if ($var == "flag" || $var == "region_ID")
-   #set ($subquery = "ASCII($var)")
-#elseif ($var == "metadata_ID")
-   #set ($subquery = "${table}.metadata_ID")
-#elseif ($var == "coord_time")
-   #set ($subquery = "hours_1970")
+
+#if ($var == "coord_time")
+   #set ($var = "hours_1970")
 #elseif ($var == "coord_lat")
-   #set ($subquery = "latitude")
+   #set ($var = "latitude")
 #elseif ($var == "coord_lon")
-   #set ($subquery = "longitude")
+   #set ($var = "longitude")
+#end
+
+#if ($var == "metadata_ID")
+   #set ($subquery = "${table}.metadata_ID")
+#elseif ($var == "flag" || $var == "region_ID")
+   #set ($subquery = "ASCII($var)")
 #else
    #set ($subquery = $var)
 #end
 
-#if ($prop_var == "flag" || $prop_var == "region_ID")
-   #set ($propsubquery = "ASCII($prop_var)")
-#elseif ($prop_var == "metadata_ID")
-   #set ($propsubquery = "${table}.metadata_ID")
-#elseif ($prop_var == "coord_time")
-   #set ($propsubquery = "hours_1970")
+#if ($prop_var == "coord_time")
+   #set ($prop_var = "hours_1970")
 #elseif ($prop_var == "coord_lat")
-   #set ($propsubquery = "latitude")
+   #set ($prop_var = "latitude")
 #elseif ($prop_var == "coord_lon")
-   #set ($propsubquery = "longitude")
+   #set ($prop_var = "longitude")
+#end
+
+#if ($prop_var == "metadata_ID")
+   #set ($propsubquery = "${table}.metadata_ID")
+#elseif ($prop_var == "flag" || $prop_var == "region_ID")
+   #set ($propsubquery = "ASCII($prop_var)")
 #else
-   #set ($propsubquery = $prop_var)
+ 	#set ($propsubquery = $prop_var)
 #end
 
 #if ($prop_var == "")
-SELECT cruise_ID, subsample, IFNULL($subquery,$missing) AS $var
+SELECT ${table}.cruise_ID as cruise_ID, metadata.cruise_name, subsample, IFNULL($subquery,$missing) AS $var
 #elseif ($prop_var == $var)
-SELECT cruise_ID, subsample, IFNULL($subquery,$missing) AS $var
+SELECT ${table}.cruise_ID, metadata.cruise_name, subsample, IFNULL($subquery,$missing) AS $var
 #else
-SELECT cruise_ID, subsample, IFNULL($subquery,$missing) AS $var,IFNULL($propsubquery,$missing) AS $prop_var
+SELECT ${table}.cruise_ID as cruise_ID, metadata.cruise_name, subsample, IFNULL($subquery,$missing) AS $var, IFNULL($propsubquery,$missing) AS $prop_var
 #end
 FROM $table
-LEFT JOIN metadata ON 
+##if ($var == "WOCE_flag" || $prop_var == "WOCE_flag" || $data_options.indexOf('WOCE_flag') >=0)
+LEFT JOIN WOCE_flags ON
+${table}.data_ID = WOCE_flags.data_ID
+##end
+LEFT JOIN metadata ON
 ${table}.metadata_ID = metadata.metadata_ID
-WHERE $region $data_options.replace("coord_lat", "latitude").replace("coord_lon","longitude").replace("coord_time","hours_1970") 
-ORDER BY ${table}.metadata_ID, $time
-LIMIT 120005
+#if ($data_options.indexOf('WOCE_flag') >=0 )
+LEFT JOIN WOCE_flags w on
+${table}.data_ID = w.data_ID
+#end
+WHERE $region $data_options.replace("coord_lat", "latitude").replace("coord_lon","longitude").replace("coord_time","hours_1970")
+
+#if ($readonly == false)
+	and metadata.flag <> 'R'
+#else
+	and metadata.flag in ('A', 'B', 'C', 'D')
+#end
+
+ORDER BY ${table}.cruise_ID, $time
 
