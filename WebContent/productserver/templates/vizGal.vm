@@ -13,11 +13,11 @@
     #set($vid=$las_config.getVectorVariable($dsid, $las_request.variableIDs).getID())
 #end
 #if ($las_request.getOperation().equals("Plot_2D_SlideSorter"))
-    #set($op="Plot_2D")
+    #set($op="Plot_2D_zoom")
      #set($vid=$las_request.variableIDs.get(0))
  #end
  #if ($las_request.getOperation().equals("Plot_1D_SlideSorter"))
-    #set($op="Plot_1D")
+    #set($op="Plot_1D_zoom")
      #set($vid=$las_request.variableIDs.get(0))
  #end
   #if ($las_request.getOperation().equals("Plot_1D_SlideSorter_Vector"))
