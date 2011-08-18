@@ -1,20 +1,20 @@
 /**
  * MapWidget.js
  * author: Jeremy Malczyk
- * A tool to allow rubberbanding on images and other DOM objects.
+ * A tool to allow rubberbanding on images and other DOM objects. 
  */
 
 /**
  * The MapWidget class
  */
 function MapWidget(args) {
-  	for(var f in this)
+  	for(var f in this)	
 		if(typeof this[f] == "function")
 			this[f].bindAsEventListener = function(object) {
 		var __method = this;
-		var args = [];
+		var args = [];	
 		for (var i = 0, length = arguments.length; i < length; i++)
-      			args.push(arguments[i]);
+      			args.push(arguments[i]);	
 		var object = args.shift();
 		return function(event) {
 			return __method.apply(object, [event || window.event].concat(args));
@@ -23,24 +23,24 @@ function MapWidget(args) {
 
    if(typeof args != 'object')
    	args={};
-
-   if(args.DOMNode)
+   
+   if(args.DOMNode)	
    	this.DOMNode = args.DOMNode;
 	else
 		this.DOMNode = document.createElement("DIV");
-
+	
 	if(args.img)
 		this.img = args.img;
 	else
 		this.img = null;
 	if(args.plot_area)
 		this.plot_area = args.plot_area;
-	else
-		this.plot_area = {};
-
+	else 
+		this.plot_area = {};	
+						
    if(!this.plot_area.offX)
   		this.plot_area.offX = 0;
-
+  
    if(!this.plot_area.offY)
  	 	this.plot_area.offY = 0;
 
@@ -49,29 +49,23 @@ function MapWidget(args) {
 
   	if(!this.plot_area.height)
   		this.plot_area.height = this.DOMNode.clientHeight;
-
+  						
  	if(args.view)
   		this.setView(args.view);
    else
   		this.setView("xy");
-
-  	// hack. Sigh.
-	this.isInteractivePlot=args.isInteractivePlot;
-
+   
    this.pan = false;
    this.panned = {'x' : 0, 'y' : 0};
-
+	
 	this.g_box   = "xy";			//"views" ... these are actually MapWidget selection types, not true views.
-	this.g_vLine = "y";
+	this.g_vLine = "y";			
 	this.g_hLine = "x";
 	this.g_point = "point";
 	this.g_vRange = "y_range";
 	this.g_hRange = "x_range";
 
-	this.sideColumn = args.sideColumn;
-	this.topRow = args.topRow;
-
-
+	
 	//object to keep track of pixel and grid coordinates
 	this.extents = {
 		DOMNode : { //area of the widget
@@ -79,21 +73,20 @@ function MapWidget(args) {
 		},
 		plot  : { //area of the plot
 			pixel : {x : {min : null,max : null},y : {min : null,max : null}},
-			grid  : {x : {min : null,max : null},y : {min : null,max : null}}
+			grid  : {x : {min : null,max : null},y : {min : null,max : null}} 
 		},
 		data : { //area the data exists in
 			pixel : {x : {min : null,max : null},y : {min : null,max : null}},
-			grid  : {x : {min : null,max : null},y : {min : null,max : null}}
+			grid  : {x : {min : null,max : null},y : {min : null,max : null}} 
 		},
 		selection : { //the selected area covered by the rubberBand object
 			pixel : {x : {min : null,max : null},y : {min : null,max : null}},
-			grid  : {x : {min : null,max : null},y : {min : null,max : null}}
+			grid  : {x : {min : null,max : null},y : {min : null,max : null}} 
 		}
 	}
-
+ 
    	this.DOMNode.style.overflow = "hidden";
    	this.rubberBand = document.createElement('DIV');
-   	this.rubberBand.id='rubberband';
    	this.rubberBand.style.border = "1px solid black";
    	this.rubberBand.style.position = "absolute";
    	this.rubberBand.style.visibility = "hidden";
@@ -103,7 +96,7 @@ function MapWidget(args) {
    	this.rubberBand.style.opacity = 0.50;
 	this.rubberBand.style.filter = "alpha(opacity=50)";
    	this.rubberBand_c = document.createElement('DIV');
-   	this.rubberBand_c.style.border = "1px solid black";
+   	this.rubberBand_c.style.border = "1px solid black";   
 	this.rubberBand_c.style.position = "absolute";
 	this.rubberBand_c.style.visibility = "hidden";
 	this.rubberBand_c.style.zIndex =1;
@@ -111,17 +104,14 @@ function MapWidget(args) {
 	this.rubberBand_c.style.backgroundColor = "black";
 	this.rubberBand.appendChild(this.rubberBand_c);
 	this.DOMNode.appendChild(this.rubberBand);
-
+ 
   	window.onbeforeresize = this.onbeforeresize.bindAsEventListener(this);
    	window.onresize = this.onafterresize.bindAsEventListener(this);
-
+  
 	this.initImage();
 	this.setMaxDrawingArea();
 	this.enable();
-
-	// sizing isn't working right until this is called. Total hack.
-	this.setDataGridBBox(this.extents.data.grid);
-
+	
 	if (args.ondraw)
 	 	this.ondraw = args.ondraw;
 	else
@@ -130,8 +120,8 @@ function MapWidget(args) {
 	if (args.onafterdraw)
 	 	this.onafterdraw = args.onafterdraw;
 	else
-		this.onafterdraw = function () {};
-
+		this.onafterdraw = function () {};  
+	
 	if (args.onmarginclick)
 	 	this.onmarginclick = args.onmarginclick;
 	else
@@ -165,41 +155,35 @@ MapWidget.prototype.destroy = function() {
 		//delete this.rubberBand;
 	}
 
-	this.DOMNode.innerHTML = "";
+	this.DOMNode.innerHTML = "";			
 	this.DOMNode.onmousedown = null;
 	this.DOMNode.onmouseup = null;
 	this.DOMNode.onmousemove = null;
 	document.onmousedown = null;
 	document.onmouseup = null;
 	document.onmousemove = null;
-
+	
 }
 
 
 //set the initial extents, this should be called once the image is loaded and page has rendered
 MapWidget.prototype.initPixelExtents = function(evt) {
-
+	
 	this.getDOMNodeOffsets();
-
+	
 	this.setDOMNodePixXMin(this.DOMNode.offsets[0]);
 	this.setDOMNodePixXMax(this.getDOMNodePixXMin()+this.DOMNode.offsetWidth);
 	this.setDOMNodePixYMin(this.DOMNode.offsets[1]);
 	this.setDOMNodePixYMax(this.getDOMNodePixYMin()+this.DOMNode.offsetHeight);
 
-	if(this.isInteractivePlot && document.all)
-		this.setPlotPixXMin(this.plot_area.offX);
-	else
-		this.setPlotPixXMin(this.getDOMNodePixXMin()+this.plot_area.offX);
+	this.setPlotPixXMin(this.getDOMNodePixXMin()+this.plot_area.offX);
 	this.setPlotPixXMax(this.getPlotPixXMin()+this.plot_area.width);
-	if(this.isInteractivePlot && document.all)
-		this.setPlotPixYMin(this.plot_area.offY);
-	else
-		this.setPlotPixYMin(this.getDOMNodePixYMin()+this.plot_area.offY);
+	this.setPlotPixYMin(this.getDOMNodePixXMin()+this.plot_area.offY);
 	this.setPlotPixYMax(this.getPlotPixXMin()+this.plot_area.height);
-
+	
 	//clone for the selection and data pixel extents.
 	//TODO: these should be settable from the args object
-
+	
 	this.extents.data.pixel = this.clone(this.extents.plot.pixel);
 	this.extents.selection.pixel = this.clone(this.extents.plot.pixel);
 	if (this.rubberBand.style.visibility != 'hidden') {
@@ -208,7 +192,7 @@ MapWidget.prototype.initPixelExtents = function(evt) {
 	}
 }
 
-//update the extents to reflect a new DOMNode position/size. Call this when a page change shifts the DOMNode.
+//update the extents to reflect a new DOMNode position/size. Call this when a page change shifts the DOMNode. 
 MapWidget.prototype.updatePixelExtents = function(evt) {
 	var oldOffsets = this.clone(this.DOMNode.offsets);
 	var selection = this.clone(this.extents.selection.grid);
@@ -239,12 +223,12 @@ MapWidget.prototype.setMaxDrawingArea = function() {
 // set the drawing area to specific area (the data region)
 MapWidget.prototype.setDrawingArea = function(minX, minY,maxX,maxY) {
    if(minY>maxY) {
-		var temp = maxY;
+		var temp = maxY;	
 		maxY = minY;
 		minY = temp;
 	}
 	if(minX>maxX) {
-		var temp = maxX;
+		var temp = maxX;	
 		maxX = minX;
 		minX = temp;
 	}
@@ -262,7 +246,7 @@ MapWidget.prototype.setDrawingArea = function(minX, minY,maxX,maxY) {
 	this.setDataPixYMin(minY);
 	this.setDataPixYMax(maxY);
 }
-
+	
 // set the rubberband color
 MapWidget.prototype.setViewColor  = function(color) {
   if (this.rubberBand)
@@ -283,14 +267,14 @@ MapWidget.prototype.getState = function () {
 MapWidget.prototype.startMoving = function (evt) {
 		//this.resetDrawingArea();
 		this.setState('moving');
-		document.onmousemove = this.moveBox.bindAsEventListener(this);
-		document.onmouseup = this.stopMoving.bindAsEventListener(this);
+		document.onmousemove = this.moveBox.bindAsEventListener(this); 
+		document.onmouseup = this.stopMoving.bindAsEventListener(this); 
 		return false;
 }
 
 //stop moving the selection box
 MapWidget.prototype.stopMoving = function (evt) {
-		this.setState(null);
+		this.setState(null); 
 
 		if (this.onafterdraw) this.onafterdraw(this);
 }
@@ -299,104 +283,104 @@ MapWidget.prototype.stopMoving = function (evt) {
 MapWidget.prototype.getView = function () {
   return this.view;
 }
-
+ 
 
 //sets a new view, and remembers a little about the last one
 MapWidget.prototype.setView = function (view) {
  	 	if(this.rubberBand && this.rubberBand_c)
-  	{
+  	{	
   		if (!this.last)
   			this.last = {};
   		if(this.X0&&this.X1&&this.Y0&&this.Y1)
 	  		switch (view) {
   				case this.g_vLine:
-  					if (this.X0!=this.X1) {
+  					if (this.X0!=this.X1) { 
   						this.last.X0 = this.X0;
-  						this.last.X1 = this.X1;
+  						this.last.X1 = this.X1;	
   					}
   					this.X0 = this.X1 = (this.X1+this.X0)/2;
-  					if(this.Y0==this.Y1||(this.Y0==this.getDataPixYMin()&&this.Y1==this.getDataPixYMax())&&this.last.Y0&&this.last.Y1) {
+  					if(this.Y0==this.Y1||(this.Y0==this.getDataPixYMin()&&this.Y1==this.getDataPixYMax())&&this.last.Y0&&this.last.Y1) { 
   						this.last.Y0 = this.Y0;
-  						this.last.Y1 = this.Y1;
+  						this.last.Y1 = this.Y1;	
   					}
   					break;
   				case this.g_hLine:
-  					if (this.Y0 != this.Y1) {
+  					if (this.Y0 != this.Y1) { 
   						this.last.Y0 = this.Y0;
-  						this.last.Y1 = this.Y1;
+  						this.last.Y1 = this.Y1;	
   					}
   					this.Y0 = this.Y1 = (this.Y1+this.Y0)/2;
-  					if(this.X0==this.X1||(this.X0==this.getDataPixXMin()&&this.X1==this.getDataPixXMax())&&this.last.X0&&this.last.X1){
+  					if(this.X0==this.X1||(this.X0==this.getDataPixXMin()&&this.X1==this.getDataPixXMax())&&this.last.X0&&this.last.X1){ 
   						this.last.X0 = this.X0;
-  						this.last.X1 = this.X1;
+  						this.last.X1 = this.X1;	
   					}
   					break;
   				case this.g_hRange:
-  					if (this.Y0 != this.Y1) {
+  					if (this.Y0 != this.Y1) { 
   						this.last.Y0 = this.Y0;
-  						this.last.Y1 = this.Y1;
+  						this.last.Y1 = this.Y1;	
   					}
   					this.Y0 = this.getDataPixYMin();
   					this.Y1 = this.getDataPixYMax();
-  					if(this.X0==this.X1||(this.X0==this.getDataPixXMin()&&this.X1==this.getDataPixXMax())&&this.last.X0&&this.last.X1) {
+  					if(this.X0==this.X1||(this.X0==this.getDataPixXMin()&&this.X1==this.getDataPixXMax())&&this.last.X0&&this.last.X1) { 
   						this.last.X0 = this.X0;
-  						this.last.X1 = this.X1;
+  						this.last.X1 = this.X1;	
   					}
 			  		break;
   				case this.g_vRange:
-  					if (this.X0 != this.X1) {
+  					if (this.X0 != this.X1) { 
   						this.last.X0 = this.X0;
-  						this.last.X1 = this.X1;
+  						this.last.X1 = this.X1;	
   					}
   					this.X0 = this.getDataPixXMin();
   					this.X1 = this.getDataPixXMax();
-  					if(this.Y0==this.Y1||(this.Y0==this.getDataPixYMin()&&this.Y1==this.getDataPixYMax())&&this.last.Y0&&this.last.Y1) {
+  					if(this.Y0==this.Y1||(this.Y0==this.getDataPixYMin()&&this.Y1==this.getDataPixYMax())&&this.last.Y0&&this.last.Y1) { 
   						this.last.Y0 = this.Y0;
-  						this.last.Y1 = this.Y1;
+  						this.last.Y1 = this.Y1;	
   					}
   					break;
   				case this.g_point:
-  					if (this.X0 != this.X1) {
+  					if (this.X0 != this.X1) { 
   						this.last.X0 = this.X0;
-  						this.last.X1 = this.X1;
+  						this.last.X1 = this.X1;	
   					}
-
-  					if (this.Y0 != this.Y1) {
+  						
+  					if (this.Y0 != this.Y1) { 
   						this.last.Y0 = this.Y0;
-  						this.last.Y1 = this.Y1;
+  						this.last.Y1 = this.Y1;	
   					}
-
+  					
   					this.X0 = this.X1 = (this.X1+this.X0)/2;
   					this.Y0 = this.Y1 = (this.Y1+this.Y0)/2;
   					break;
   				case this.g_box:
-  					if(this.Y0==this.Y1||(this.Y0==this.getDataPixYMin()&&this.Y1==this.getDataPixYMax())&&this.last.Y0&&this.last.Y1) {
+  					if(this.Y0==this.Y1||(this.Y0==this.getDataPixYMin()&&this.Y1==this.getDataPixYMax())&&this.last.Y0&&this.last.Y1) { 
   						this.last.Y0 = this.Y0;
-  						this.last.Y1 = this.Y1;
+  						this.last.Y1 = this.Y1;	
   					}
-
-					if(this.X0==this.X1||(this.X0==this.getDataPixXMin()&&this.X1==this.getDataPixXMax())&&this.last.X0&&this.last.X1) {
+						
+					if(this.X0==this.X1||(this.X0==this.getDataPixXMin()&&this.X1==this.getDataPixXMax())&&this.last.X0&&this.last.X1) { 
   						this.last.X0 = this.X0;
-  						this.last.X1 = this.X1;
+  						this.last.X1 = this.X1;	
   					}
-
+										
  					break;
   			}
-
+  			
   			this.setSelectionPixXMin(this.X0);
   			this.setSelectionPixXMax(this.X1);
   			this.setSelectionPixYMin(this.Y0);
   			this.setSelectionPixYMax(this.Y1);
-  			this.getSelectionGrid();
-
+  			this.getSelectionGrid();  			
+  			
   			//if(this.rubberBand.style.visibility != "hidden") {
-
+	  			
   				this.displayBox(true);
   				this.displayCentralBox(true);
   			//}
-
-  	 		 //if(this.ondraw && this.rubberBand.style.visibility != 'hidden')
-  	 		 	this.ondraw(this);
+		
+  	 		 //if(this.ondraw && this.rubberBand.style.visibility != 'hidden') 
+  	 		 	this.ondraw(this);		 
   		}
   	  this.view = view;
 }
@@ -418,17 +402,13 @@ MapWidget.prototype.setView = function (view) {
  MapWidget.prototype.setY1 = function (y) {
   this.Y1 = y;
 }
-
-
-
-
 //get the minimum X pixel value for the DOM container
 MapWidget.prototype.getDOMNodePixXMin = function () {
  	return  this.extents.DOMNode.pixel.x.min;
 }
 
 //set the minimum X pixel value for the DOM container
-MapWidget.prototype.setDOMNodePixXMin = function (x) {
+MapWidget.prototype.setDOMNodePixXMin = function (x) {	
     this.extents.DOMNode.pixel.x.min = x;
 }
 
@@ -461,16 +441,13 @@ MapWidget.prototype.getDOMNodePixXMax = function () {
   this.extents.DOMNode.pixel.y.max = y;
 }
 
-
-
-
 //get the minimum X pixel value for the plot area
 MapWidget.prototype.getPlotPixXMin = function () {
  	return  this.extents.plot.pixel.x.min;
 }
 
 //set the minimum X pixel value for the plot area
-MapWidget.prototype.setPlotPixXMin = function (x) {
+MapWidget.prototype.setPlotPixXMin = function (x) {	
     this.extents.plot.pixel.x.min = x;
 }
 
@@ -503,17 +480,12 @@ MapWidget.prototype.getPlotPixXMax = function () {
   this.extents.plot.pixel.y.max = y;
 }
 
-
-
-
-
-//get the minimum X pixel value for the data region
-MapWidget.prototype.getDataPixXMin = function () {
+//get the minimum X pixel value for the data regionMapWidget.prototype.getDataPixXMin = function () {
  	return  this.extents.data.pixel.x.min;
 }
 
 //set the minimum X pixel value for the data region
-MapWidget.prototype.setDataPixXMin = function (x) {
+MapWidget.prototype.setDataPixXMin = function (x) {	
     this.extents.data.pixel.x.min = x;
 }
 
@@ -547,17 +519,12 @@ MapWidget.prototype.getDataPixXMax = function () {
 }
 
 
-
-
-
-
-//get the minimum X pixel value for the selected region
-MapWidget.prototype.getSelectionPixXMin = function () {
+//get the minimum X pixel value for the selected regionMapWidget.prototype.getSelectionPixXMin = function () {
  	return  this.extents.selection.pixel.x.min;
 }
 
 //set the minimum X pixel value for the selected region
-MapWidget.prototype.setSelectionPixXMin = function (x) {
+MapWidget.prototype.setSelectionPixXMin = function (x) {	
     this.extents.selection.pixel.x.min = x;
 }
 
@@ -590,19 +557,13 @@ MapWidget.prototype.setSelectionPixYMax = function (y) {
   this.extents.selection.pixel.y.max = y;
 }
 
-
-
-
-
-
-
 //get the minimum X grid value for the plot area
 MapWidget.prototype.getPlotGridXMin = function () {
  	return  this.extents.plot.grid.x.min;
 }
 
 //set the minimum X grid value for the plot area
-MapWidget.prototype.setPlotGridXMin = function (x) {
+MapWidget.prototype.setPlotGridXMin = function (x) {	
     this.extents.plot.grid.x.min = x;
 }
 
@@ -635,18 +596,12 @@ MapWidget.prototype.setPlotGridXMax = function (x) {
   this.extents.plot.grid.y.max = y;
 }
 
-
-
-
-
-
-//get the minimum X grid value for the data region
-MapWidget.prototype.getDataGridXMin = function () {
+//get the minimum X grid value for the data regionMapWidget.prototype.getDataGridXMin = function () {
  	return  this.extents.data.grid.x.min;
 }
 
 //set the minimum X grid value for the data region
-MapWidget.prototype.setDataGridXMin = function (x) {
+MapWidget.prototype.setDataGridXMin = function (x) {	
     this.extents.data.grid.x.min = x;
 }
 
@@ -680,16 +635,12 @@ MapWidget.prototype.getDataGridXMax = function () {
 }
 
 
-
-
-
-//get the minimum X grid value for the selected region
-MapWidget.prototype.getSelectionGridXMin = function () {
+//get the minimum X grid value for the selected regionMapWidget.prototype.getSelectionGridXMin = function () {
  	return  this.extents.selection.grid.x.min;
 }
 
 //set the minimum X grid value for the selected region
-MapWidget.prototype.setSelectionGridXMin = function (x) {
+MapWidget.prototype.setSelectionGridXMin = function (x) {	
     this.extents.selection.grid.x.min = x;
 }
 
@@ -734,7 +685,7 @@ MapWidget.prototype.setBoxStartPosition = function (r, left, top) {
 MapWidget.prototype.setBoxSize = function (r, w, h) {
   if (r != null) {
 			r.style.width = w + 'px';
-     		r.style.height = h + 'px';
+     		r.style.height = h + 'px'; 
   }
 }
 
@@ -752,24 +703,21 @@ MapWidget.prototype.setBoxVisible = function (r, showIt) {
 MapWidget.prototype.getX = function (evt) {
    this.getDOMNodeOffsets();
    var x = null;
-
+   
  	if(document.all)
- 		x = evt.clientX;
+ 		x = evt.clientX + document.documentElement.scrollLeft;
 	else
 		x = evt.clientX + scrollX;
-
+	
 	switch(window.navigator.appName) {
-    	case "Microsoft Internet Explorer":
-    	x-= this.DOMNode.offsetLeft;
-    	x+= this.findPageOffsetX();
-    	break;
+    	case "Microsoft Internet Explorer": x-=2;break;
    	case "Netscape":break;
    	case "Safari": break;
-  }
-
-  // if (x < this.getDataPixXMin())
+  }	
+				
+  // if (x < this.getDataPixXMin()) 
   //    x = this.getDataPixXMin();
-  // else if (x  > this.getDataPixXMax())
+  // else if (x  > this.getDataPixXMax())  	  
   // 	x = this.getDataPixXMax();
    return x;
 }
@@ -777,44 +725,41 @@ MapWidget.prototype.getX = function (evt) {
 //get the Y position of the mouse, within the context of this widget
  MapWidget.prototype.getY = function (evt) {
    this.getDOMNodeOffsets();
-
+   
    var y = null;
 	if(document.all)
-      y = evt.clientY;
+      y = evt.clientY + document.documentElement.scrollTop;
 	else
 		y= evt.clientY + scrollY;
-
+   
    switch(window.navigator.appName) {
-    	case "Microsoft Internet Explorer":
-    		y-= this.DOMNode.offsetTop;
-    		y+= this.findPageOffsetY();
-    		break;
+    	case "Microsoft Internet Explorer": y-=2;break;
    	case "Netscape":break;
    	case "Safari": break;
-   }
-
-  // if (y < this.getDataPixYMin())
+   }	
+   
+  // if (y < this.getDataPixYMin()) 
 //		y = this.getDataPixYMin();
- //  else if (y > this.getDataPixYMax())
+ //  else if (y > this.getDataPixYMax()) 
    //   y = this.getDataPixYMax();
    return y;
-}
+} 
 
 //display the rubberband box
 MapWidget.prototype.displayBox = function (showIt) {
-
+  
   //check to make sure we have pixel start and end coordinates and if not, use the current selection
   if(this.X0==null||this.X1==null||this.Y0==null||this.Y1==null) {
   		this.X0 = this.getSelectionPixXMin();
   		this.X1 = this.getSelectionPixXMax();
-   		this.Y0 = this.getSelectionPixYMin();
-   		this.Y1 = this.getSelectionPixYMax();
-	}
+   	this.Y0 = this.getSelectionPixYMin(); 
+   	this.Y1 = this.getSelectionPixYMax();
+	} 
    this.setSelectionPixXMin(Math.min(this.X0, this.X1));
    this.setSelectionPixXMax(Math.max(this.X0, this.X1));
    this.setSelectionPixYMin(Math.min(this.Y0, this.Y1));
    this.setSelectionPixYMax(Math.max(this.Y0, this.Y1));
-
+   
    var left =  this.getSelectionPixXMin();
    var top = this.getSelectionPixYMin();
    var w = Math.abs(this.getSelectionPixXMax() - this.getSelectionPixXMin());
@@ -822,12 +767,12 @@ MapWidget.prototype.displayBox = function (showIt) {
 
    this.setBoxStartPosition(this.rubberBand, left, top);
    this.setBoxSize(this.rubberBand, w, h);
-
+   		
    this.setBoxBorderStyle(this.rubberBand, "solid");
    this.setBoxVisible(this.rubberBand, showIt);
-
+ 
    this.getSelectionGrid();
-
+		
 }
 
 // get the left pixel of an object
@@ -864,7 +809,7 @@ MapWidget.prototype.getBoxStartY = function (o) {
 }
 
  MapWidget.prototype.setCBoxSize = function (w) {
-
+  
   if (this.rubberBand_c) {
       this.rubberBand_c.style.height = w + "px";
       this.rubberBand_c.style.width = w + "px";
@@ -874,7 +819,7 @@ MapWidget.prototype.getBoxStartY = function (o) {
 }
 
  MapWidget.prototype.displayCentralBox = function (showIt) {
-   if(this.extents.selection.pixel.x.min==null||this.extents.selection.pixel.x.max==null||this.extents.selection.pixel.y.min==null||this.extents.selection.pixel.y.max==null)
+   if(this.extents.selection.pixel.x.min==null||this.extents.selection.pixel.x.max==null||this.extents.selection.pixel.y.min==null||this.extents.selection.pixel.y.max==null) 
   	return false;
   var s = this.getCBoxSize(this.rubberBand_c);
   if (Math.abs(this.extents.selection.pixel.x.max - this.extents.selection.pixel.x.min) < s && Math.abs(this.extents.selection.pixel.y.max - this.extents.selection.pixel.y.min) < s) {
@@ -886,17 +831,17 @@ MapWidget.prototype.getBoxStartY = function (o) {
   }
   this.setBoxStartPosition(this.rubberBand_c, x, y);
   this.setBoxVisible(this.rubberBand_c, showIt);
-
+ 
 }
 
 // draw the selection box
 MapWidget.prototype.drawBox = function (evt) {
    if (this.getState() == null || this.view != this.g_box)
 	return;
-
-  	this.displayBox(true);
-   	this.displayCentralBox(true);
-
+   	
+  	this.displayBox(true);   
+   	this.displayCentralBox(true);	
+  	
   	if (this.ondraw) this.ondraw(this);
 }
 
@@ -906,12 +851,12 @@ MapWidget.prototype.drawHLine = function (evt) {
 
    if (this.getState() == null || this.getView() != this.g_hLine)
 	return;
-
+   
    this.Y1 = this.Y0;
-
-   this.displayBox(true);
+   
+   this.displayBox(true);   
    this.displayCentralBox(true);
-
+  
   	if (this.ondraw) this.ondraw(this);
 
 }
@@ -922,13 +867,13 @@ MapWidget.prototype.drawVLine = function (evt) {
 
    if (this.getState() == null || this.getView() != this.g_vLine)
 	return;
-
+   
    this.X1 = this.X0;
-
-   this.displayBox(true);
+   
+   this.displayBox(true);   
    this.displayCentralBox(true);
 
-
+  	
   	if (this.ondraw) this.ondraw(this);
 }
 
@@ -940,10 +885,10 @@ MapWidget.prototype.drawPoint = function (evt) {
 	return;
    this.X0 = this.X1;
    this.Y0 = this.Y1;
-
+   
    this.displayBox(true);
 	this.displayCentralBox(true);
-
+  
   	if (this.ondraw) this.ondraw(this);
 }
 
@@ -955,20 +900,20 @@ MapWidget.prototype.drawPoint = function (evt) {
      alert("incorrect view");
      return;
    }
-
-
+   
+   
    if (view == this.g_vRange) {
      this.X0 = this.getDataPixelXMin();
-     this.X1 = this.getDataPixelXMax();
+     this.X1 = this.getDataPixelXMax();     
      this.Y1 = this.getY(evt);
    } else {
      this.Y0 = this.getDataPixelYMin();
      this.Y1 = this.getDataPixelYMax();
      this.X1 = this.getX(evt);
    }
-
+	
 	this.displayBox(true);
-   this.displayCentralBox(true);
+   this.displayCentralBox(true);  
   	if (this.ondraw) this.ondraw(this);
 }
 
@@ -986,7 +931,7 @@ MapWidget.prototype.setBoxBorderColor = function (obj, c) {
 MapWidget.prototype.start = function (evt) {
 	switch(this.getState()){
 		case null:
-			if(document.all) {
+			if(document.all) { 
 				if(this.getX(evt)> this.rubberBand.offsetLeft + this.rubberBand_c.offsetLeft &&
 					this.getX(evt)< this.rubberBand.offsetLeft + this.rubberBand_c.offsetLeft + this.rubberBand_c.offsetWidth &&
 					this.getY(evt)> this.rubberBand.offsetTop + this.rubberBand_c.offsetTop &&
@@ -995,7 +940,7 @@ MapWidget.prototype.start = function (evt) {
 					else
 						this.startDrawing(evt);
 					}
-			else if(evt.target == this.rubberBand_c)
+			else if(evt.target == this.rubberBand_c) 
 				this.startMoving(evt);
 			else
 				this.startDrawing(evt);
@@ -1018,35 +963,35 @@ MapWidget.prototype.start = function (evt) {
     	evt.cancelBubble = true;
     	//alert(evt.type);
     }
-   else {evt.preventDefault(); evt.stopPropagation()};
-   if (this.getState() == "moving") {
+   else {evt.preventDefault(); evt.stopPropagation()};	
+   if (this.getState() == "moving") {	 
     	 document.onmousemove = this.moveBox.bindAsEventListener(this);
     	 return false;
    }
-	//this.resetDrawingArea();
+	//this.resetDrawingArea(); 
 	this.setState("drawing");
-   document.onmouseup = this.stopDrawing.bindAsEventListener(this);
+   document.onmouseup = this.stopDrawing.bindAsEventListener(this);        
    this.X0 = this.getX(evt);
-   this.Y0 = this.getY(evt);
+   this.Y0 = this.getY(evt);  
 	if(this.X0 > this.getDataPixXMax() || this.X0 < this.getDataPixXMin()  || this.Y0 > this.getDataPixYMax() || this.Y0 < this.getDataPixYMin()) {
 		if(this.onmarginclick) this.onmarginclick();
 		this.stopDrawing();
 		return;
 	}
-
-
+		
+	
 	this.displayCentralBox(false);
 	this.setBoxStartPosition(this.rubberBand, this.X0, this.Y0);
-   this.setBoxSize(this.rubberBand, 0, 0);
+   this.setBoxSize(this.rubberBand, 0, 0);  
    this.setBoxVisible(this.rubberBand, true);
    //this.clipOverflow();
    if (this.getView()==this.g_point)
 		this.drawPoint(evt);
 	else
 		document.onmousemove = this.draw.bindAsEventListener(this);
-
+	
 	return false;
-
+	
 }
 
 // draw a selection feature
@@ -1074,13 +1019,13 @@ MapWidget.prototype.draw = function (evt) {
 	if (this.view == this.g_box)
      this.drawBox(evt);
    else if (this.view == this.g_hLine)
-  		this.drawHLine(evt);
+  		this.drawHLine(evt);   
    else if (this.view == this.g_vLine)
-     	this.drawVLine(evt);
+     	this.drawVLine(evt);     
    else if (this.view == this.g_point)
      	this.drawPoint(evt);
    else if (this.view == this.g_hRange || this.view == this.g_vRange)
-   	this.drawRange(evt);
+   	this.drawRange(evt); 
    else
      alert("unknown view");
    return false;
@@ -1091,11 +1036,11 @@ MapWidget.prototype.stopDrawing = function (evt) {
    if (this.getState() == "moving") {
      this.setState(null);
      return;
-   }
+   }   
 
    this.setState(null);
-   document.onmousemove = null;
-	document.onmouseup = null;
+   document.onmousemove = null; 
+	document.onmouseup = null; 
 	if (this.onafterdraw) this.onafterdraw(this);
 }
 
@@ -1120,37 +1065,36 @@ MapWidget.prototype.stop = function (evt) {
    var r_h = this.getBoxHeight(this.rubberBand);
    var m_x = this.getX(evt);
    var m_y = this.getY(evt);
-
+   
    //This is needed for the FireFox
    r_w = isNaN(r_w)? 0 : r_w;
-   r_h = isNaN(r_h)? 0 : r_h;
+   r_h = isNaN(r_h)? 0 : r_h;   
 
    //moving the box
    m_x0 = m_x - r_w/2;
-   if (m_x - r_w/2 < this.getDataPixXMin())
+   if (m_x - r_w/2 < this.getDataPixXMin())   
   	  m_x0 = this.getDataPixXMin();
-   else if (m_x + r_w/2 > this.getDataPixXMax())
+   else if (m_x + r_w/2 > this.getDataPixXMax()) 
 	m_x0 =this.getDataPixXMax() - r_w;
-
-
+   
+   
    m_y0 = m_y - r_h/2;
    if (m_y - r_h/2 < this.getDataPixYMin())
      m_y0 =  this.getDataPixYMin();
-   else if (m_y + r_h/2 > this.getDataPixYMax())
-		m_y0 = this.getDataPixYMax() - r_h;
-
+   else if (m_y + r_h/2 > this.getDataPixYMax()) 		m_y0 = this.getDataPixYMax() - r_h;
+   
    this.Y0 = m_y0;
    this.Y1 = m_y0 + r_h;
 	this.X0 = m_x0;
    this.X1 = m_x0 + r_w;
-
+   
    this.displayBox(true);
    this.displayCentralBox(true);
-
-	 if (this.ondraw) this.ondraw(this);
-
-    document.onmouseup = null;
-
+    
+	 if (this.ondraw) this.ondraw(this); 
+   
+    document.onmouseup = null; 
+  
 }
 //clip to the plot area
  MapWidget.prototype.clipOverflow = function () {
@@ -1158,7 +1102,7 @@ MapWidget.prototype.stop = function (evt) {
 	this.clipOverflow(this.rubberBand_c);
 
 }
- MapWidget.prototype.clipBoxOverflow = function (obj) {
+ MapWidget.prototype.clipBoxOverflow = function (obj) {	
    var r_x0 = obj.offsetLeft;
    var r_y0 = obj.offsetTop;
    var r_w = this.getBoxWidth(obj);
@@ -1169,17 +1113,17 @@ MapWidget.prototype.stop = function (evt) {
    	clipStr += (this.DOMNode.offsets[1]+this.plot_area.offY - r_y0) + "px ";
    else
    	clipStr += "auto ";
-
+  
     if(r_x0 + r_w > this.DOMNode.offsets[0]+this.plot_area.offX+this.plot_area.width)
    	clipStr += (this.DOMNode.offsets[0]+this.plot_area.offX+this.plot_area.width-r_x0) + "px ";
    else
    	clipStr += "auto ";
-
+   	
    if(r_y0 + r_h > this.DOMNode.offsets[1]+this.plot_area.offY+this.plot_area.height)
    	clipStr += (this.DOMNode.offsets[1]+this.plot_area.offY+this.plot_area.height-r_y0) + "px ";
    else
    	clipStr += "auto ";
-
+   	
 
    if(r_x0 < this.DOMNode.offsets[0]+this.plot_area.offX)
    	clipStr += (this.DOMNode.offsets[0]+this.plot_area.offX - r_x0) + "px)";
@@ -1187,7 +1131,7 @@ MapWidget.prototype.stop = function (evt) {
    	clipStr += "auto)";
 
 	obj.style.clip = clipStr;
-
+   	
 }
 
 // initialize an image, or grab a default inmage from ferret
@@ -1195,7 +1139,7 @@ MapWidget.prototype.initImage = function () {
 	if(!this.plot) {
 		this.plot = document.createElement("IMG");
 		this.DOMNode.appendChild(this.plot);
-	}
+	}	
 	 this.plot.id='plot';
 
 	if (this.img) {
@@ -1210,7 +1154,7 @@ MapWidget.prototype.initImage = function () {
 		this.plot.GALLERYIMG="no";
 		this.plot.onload=this.updatePixelExtents.bindAsEventListener(this);
 		this.plot.style.zIndex = 2;
-		this.extents.selection.grid = this.clone(this.img.extent);
+		this.extents.selection.grid = this.clone(this.img.extent); 
 		this.extents.data.grid = this.clone(this.img.extent);
 		this.extents.plot.grid = this.clone(this.img.extent);
 	}
@@ -1219,7 +1163,7 @@ MapWidget.prototype.initImage = function () {
 		this.plot.width = this.DOMNode.clientWidth;
 		this.plot.height = this.DOMNode.clientHeight;
 		this.plot.onload=this.updatePixelExtents.bindAsEventListener(this);
-		this.plot.GALLERYIMG="no";
+		this.plot.GALLERYIMG="no"; 
 		this.extents.plot.grid = {
 			'x' : {'min' : -180, 'max' :180},
 			'y' : {'min' : -90, 'max' :90}
@@ -1232,18 +1176,12 @@ MapWidget.prototype.initImage = function () {
 			'x' : {'min' : -180, 'max' :180},
 			'y' : {'min' : -90, 'max' :90}
 		}
-
+		
 	}
-
+	
 	this.initPixelExtents();
-	if(this.isInteractivePlot && document.all)
-		this.setPlotPixXMin(this.plot_area.offX + this.findPageOffsetX());
-	else
-		this.setPlotPixXMin(this.getDOMNodePixXMin() + this.plot_area.offX);
-	if(this.isInteractivePlot && document.all)
-		this.setPlotPixYMin(this.plot_area.offY + this.findPageOffsetY());
-	else
-		this.setPlotPixYMin(this.getDOMNodePixYMin()+this.plot_area.offY);
+	this.setPlotPixXMin(this.getDOMNodePixXMin() + this.plot_area.offX);
+	this.setPlotPixYMin(this.getDOMNodePixYMin() + this.plot_area.offY);
 	this.setPlotPixXMax(this.getPlotPixXMin() + this.plot_area.width);
 	this.setPlotPixYMax(this.getPlotPixYMin() + this.plot_area.height);
 	this.extents.data.pixel = this.clone(this.extents.plot.pixel);
@@ -1252,7 +1190,7 @@ MapWidget.prototype.initImage = function () {
 
 //get and set the selection area grid coordinates
 MapWidget.prototype.getSelectionGrid = function () {
-
+	
 	if(this.plot_area.invertX){
 		this.setSelectionGridXMin((Math.round((this.getPlotGridXMin() + (this.getSelectionPixXMax()-this.getPlotPixXMax())*-1*this.getXPixRes())*10000))/10000);
 		this.setSelectionGridXMax((Math.round((this.getPlotGridXMin() + (this.getSelectionPixXMin()-this.getPlotPixXMax())*-1*this.getXPixRes())*10000))/10000);
@@ -1261,14 +1199,14 @@ MapWidget.prototype.getSelectionGrid = function () {
 		this.setSelectionGridXMin((Math.round((this.getPlotGridXMin() + (this.getSelectionPixXMin()-this.getPlotPixXMin())*this.getXPixRes())*1000))/1000);
 		this.setSelectionGridXMax((Math.round((this.getPlotGridXMin() + (this.getSelectionPixXMax()-this.getPlotPixXMin())*this.getXPixRes())*1000))/1000);
 	}
-
+	
 	if(this.plot_area.invertY){
 		this.setSelectionGridYMax((Math.round((this.getPlotGridYMax() - (this.getSelectionPixYMax()-this.getPlotPixYMax())*-1*this.getYPixRes())*1000))/1000);
 		this.setSelectionGridYMin((Math.round((this.getPlotGridYMax() - (this.getSelectionPixYMin()-this.getPlotPixYMax())*-1*this.getYPixRes())*1000))/1000);
 	} else {
 		this.setSelectionGridYMax((Math.round((this.getPlotGridYMax() - (this.getSelectionPixYMin()-this.getPlotPixYMin())*this.getYPixRes())*1000))/1000);
 		this.setSelectionGridYMin((Math.round((this.getPlotGridYMax() - (this.getSelectionPixYMax()-this.getPlotPixYMin())*this.getYPixRes())*1000))/1000);
-	}
+	}	
 	return this.extents.selection.grid;
 }
 
@@ -1297,32 +1235,25 @@ MapWidget.prototype.getDOMNodeOffsets = function () {
 	var curleft = 0;
 	var curtop = 0;
 	if (this.DOMNode.offsetParent) {
-		curleft = this.DOMNode.offsetLeft;
-		curtop = this.DOMNode.offsetTop;
+		curleft = this.DOMNode.offsetLeft
+		curtop = this.DOMNode.offsetTop
 		var obj = this.DOMNode;
 		while (obj = obj.offsetParent) {
-			curleft += obj.offsetLeft;
-			curtop += obj.offsetTop;
+			curleft += obj.offsetLeft
+			curtop += obj.offsetTop
 		}
 	}
 	this.DOMNode.offsets = [curleft,curtop];
-
+	
 	this.setDOMNodePixXMin(this.DOMNode.offsets[0]);
 	this.setDOMNodePixXMax(this.DOMNode.offsets[0] + this.DOMNode.offsetWidth);
 	this.setDOMNodePixYMin(this.DOMNode.offsets[1]);
 	this.setDOMNodePixYMax(this.DOMNode.offsets[1] + this.DOMNode.offsetHeight);
-
-	// this is a total hack, but it only works one way on one page in IE and the other way on the other page and I have already spent too long trying to get it to work on IE.
-	if(this.isInteractivePlot && document.all)
-		this.setPlotPixXMin(this.plot_area.offX);
-	else
-		this.setPlotPixXMin(this.getDOMNodePixXMin()+this.plot_area.offX);
+	
+	this.setPlotPixXMin(this.getDOMNodePixXMin()+this.plot_area.offX);
 	this.setPlotPixXMax(this.getPlotPixXMin() + this.plot_area.width);
-	if(this.isInteractivePlot && document.all)
-		this.setPlotPixYMin(this.plot_area.offY);
-	else
-		this.setPlotPixYMin(this.getDOMNodePixYMin()+this.plot_area.offY);
-	this.setPlotPixYMax(this.getPlotPixYMin() + this.plot_area.height);
+	this.setPlotPixYMin(this.getDOMNodePixYMin()+this.plot_area.offY);
+	this.setPlotPixYMax(this.getPlotPixYMin() + this.plot_area.height);	
 }
 
 //update the selection region min y grid and pixel coordinates for a given grid coordinate v
@@ -1331,7 +1262,7 @@ MapWidget.prototype.updateSelectionGridYMin = function (v) {
 	this.Y0 = null;
 	this.X1 = null;
 	this.Y1 = null;
-
+	
 	var Y =  this.getPlotPixYMax()-(v-this.getPlotGridYMin())/this.getYPixRes();
 	if (Y >  this.getDataPixYMax()) {
 		Y = this.getDataPixYMax();
@@ -1340,32 +1271,32 @@ MapWidget.prototype.updateSelectionGridYMin = function (v) {
 		Y = this.getDataPixYMin();
 		v = this.getDataGridYMax();
 	}
-
-
+		
+	
 	if(Y<this.getSelectionPixYMin()) {
 		this.setSelectionPixYMax(this.getSelectionPixYMin());
-		this.setSelectionGridYMin(this.getSelectionGridYMax());
-		this.setSelectionGridYMax(v)
+		this.setSelectionGridYMin(this.getSelectionGridYMax());		
+		this.setSelectionGridYMax(v)		
 		this.setSelectionPixYMin(Y);
-
+	
 	}
 	else {
 		this.setSelectionPixYMax(Y);
-		this.setSelectionGridYMin(v);
+		this.setSelectionGridYMin(v);	
 	}
 
 	if (this.view==this.g_point || this.view == this.g_hLine) {
 		this.setSelectionPixYMax(Y);
 		this.setSelectionPixYMin(Y);
 		this.setSelectionGridYMax(v);
-		this.setSelectionGridYMin(v);
+		this.setSelectionGridYMin(v);	
 	}
 
 	this.displayBox(true);
 	this.displayCentralBox(true);
-
+	
 	if (this.ondraw) this.ondraw(this);
-	if (this.onafterdraw) this.onafterdraw(this);
+	if (this.onafterdraw) this.onafterdraw(this);	
 
 }
 
@@ -1377,34 +1308,34 @@ MapWidget.prototype.updateSelectionGridYMax = function (v) {
 	this.X1 = null;
 	this.Y1 = null;
 
-
+	
 	var Y = this.getPlotPixYMax()-(v-this.getPlotGridYMin())/this.getYPixRes();
 	if (Y > this.getDataPixYMax()) {
 		Y = this.getDataPixYMax();
-		v = this.getDataGridYMin();
+		v = this.getDataGridYMin();	
 	}
 	else if (Y < this.getDOMNodePixYMin())
 		Y = this.getDataPixYMin();
-
+	
 	if(Y>this.getSelectionPixYMax()) {
 		this.setSelectionPixYMin(this.getSelectionPixYMax());
-		this.setSelectionPixYMax(Y);
+		this.setSelectionPixYMax(Y);	
 	}
-	else
+	else 
 		this.setSelectionPixYMin(Y);
 
 	if (this.view==this.g_point || this.view == this.g_hLine) {
 		this.setSelectionPixYMax(Y);
 		this.setSelectionPixYMin(Y);
 		this.setSelectionGridYMax(v);
-		this.setSelectionGridYMin(v);
+		this.setSelectionGridYMin(v);	
 	}
-
+	
 	this.displayBox(true);
 	this.displayCentralBox(true);
-
+	
 	if (this.ondraw) this.ondraw(this);
-	if (this.onafterdraw) this.onafterdraw(this);
+	if (this.onafterdraw) this.onafterdraw(this);	
 
 }
 
@@ -1415,25 +1346,25 @@ MapWidget.prototype.updateSelectionGridXMax = function (v) {
 	this.X1 = null;
 	this.Y1 = null;
 
-
+	
 	var X = this.getPlotPixXMax()+(v-this.getPlotGridXMax())/this.getXPixRes();
 	if (X > this.getDataPixXMax()){
 		X = this.getDataPixXMax();
-		v = this.getDataGridXMax();
+		v = this.getDataGridXMax();	
 	}
 	else if (X < this.getDataPixXMin()) {
 		X = this.getDataPixXMin();
-		v = this.getDataGridXMin();
+		v = this.getDataGridXMin();	
 	}
-
+	
 	if(X<this.getSelectionPixXMin()) {
 		this.setSelectionPixXMax(this.getSelectionPixXMin());
 		this.setSelectionPixXMin(X);
-		this.setSelectionGridXMin(v);
+		this.setSelectionGridXMin(v);	
 	}
 	else  {
 		this.setSelectionPixXMax(X);
-		this.setSelectionGridXMax(v);
+		this.setSelectionGridXMax(v);	
 	}
 
 	if (this.view==this.g_point || this.view == this.g_vLine) {
@@ -1442,12 +1373,12 @@ MapWidget.prototype.updateSelectionGridXMax = function (v) {
 		this.setSelectionGridXMin(v);
 		this.setSelectionGridXMax(v);
 	}
-
+		
 	this.displayBox(true);
 	this.displayCentralBox(true);
-
+	
 	if (this.ondraw) this.ondraw(this);
-	if (this.onafterdraw) this.onafterdraw(this);
+	if (this.onafterdraw) this.onafterdraw(this);	
 }
 MapWidget.prototype.updateSelectionGridXMin = function (v) {
 	this.X0 = null;
@@ -1455,7 +1386,7 @@ MapWidget.prototype.updateSelectionGridXMin = function (v) {
 	this.X1 = null;
 	this.Y1 = null;
 
-
+	
 	var X = this.getPlotPixXMax()+(v-this.getPlotGridXMax())/this.getXPixRes();
 	if (X > this.getDataPixXMax()) {
 		X = this.getDataPixXMax();
@@ -1465,17 +1396,17 @@ MapWidget.prototype.updateSelectionGridXMin = function (v) {
 		X = this.getDataPixXMin();
 		v = this.getDataGridXMin();
 	}
-
+	
 	if(X>this.getSelectionPixXMax()) {
 		this.setSelectionPixXMin(this.getSelectionPixXMax());
 		this.setSelectionPixXMax(X);
-		this.setSelectionGridXMax(v);
+		this.setSelectionGridXMax(v);	
 	}
 	else  {
 		this.setSelectionPixXMin(X);
 		this.setSelectionGridXMin(v);
 	}
-
+	
 	if (this.view==this.g_point || this.view == this.g_vLine) {
 		this.setSelectionPixXMax(X);
 		this.setSelectionPixXMin(X);
@@ -1485,28 +1416,28 @@ MapWidget.prototype.updateSelectionGridXMin = function (v) {
 
 	this.displayBox(true);
 	this.displayCentralBox(true);
-
+	
 	if (this.ondraw) this.ondraw(this);
-	if (this.onafterdraw) this.onafterdraw(this);
+	if (this.onafterdraw) this.onafterdraw(this);	
 }
 
 MapWidget.prototype.setSelectionGridBBox = function (bbox) {
 	if(!bbox) return false;
-
+	
 	this.extents.selection.grid = this.clone(bbox);
-
+	
 	var X0 = this.extents.plot.pixel.x.max+(this.getSelectionGridXMin()-this.extents.plot.grid.x.max)/this.getXPixRes();
 	var X1 = this.extents.plot.pixel.x.max+(this.getSelectionGridXMax()-this.extents.plot.grid.x.max)/this.getXPixRes();
 	var Y1 = this.extents.plot.pixel.y.max-(this.getSelectionGridYMin()-this.extents.plot.grid.y.min)/this.getYPixRes();
 	var Y0 = this.extents.plot.pixel.y.max-(this.getSelectionGridYMax()-this.extents.plot.grid.y.min)/this.getYPixRes();
-
+	
 	if(Y0>Y1) {
-		var temp = Y1
+		var temp = Y1	
 		Y1 = Y0;
 		Y0 = temp;
 	}
 	if(X0>X1) {
-		var temp = X1
+		var temp = X1	
 		X1 = X0;
 		X0 = temp;
 	}
@@ -1514,9 +1445,9 @@ MapWidget.prototype.setSelectionGridBBox = function (bbox) {
 	this.X1 = X1;
 	this.Y0 = Y0;
 	this.Y1 = Y1;
-
+	
 	//refresh the view
-	//var view = this.view;
+	//var view = this.view;	
 	//this.view = "";
 	//this.setView(view);
 	if (this.rubberBand.style)
@@ -1532,7 +1463,7 @@ MapWidget.prototype.setSelectionGridBBox = function (bbox) {
 
 //recenter the map on bbox (TODO recenter and zoom on bbox)
 MapWidget.prototype.zoomOnBBox = function (bbox) {
-
+  
 	var bbox_width  = (bbox.x.max-bbox.x.min);
 	var bbox_height =  (bbox.y.max-bbox.y.min);
 	var plot_width  =(this.getPlotGridXMax()-this.getPlotGridXMin());
@@ -1544,27 +1475,27 @@ MapWidget.prototype.zoomOnBBox = function (bbox) {
 	var bbox_cx = (bbox.x.max+bbox.x.min)/2;
 	var bbox_cy = (bbox.y.max+bbox.y.min)/2;
 
-
+	
 	if(bbox_screen_aspect>plot_screen_aspect) {
 		this.setPlotGridYMin(bbox.y.min);
 	        this.setPlotGridYMax(bbox.y.max);
 		this.setPlotGridXMin(bbox_cx-bbox_height/(plot_aspect*2));
-		this.setPlotGridXMax(bbox_cx+bbox_height/(plot_aspect*2));
+		this.setPlotGridXMax(bbox_cx+bbox_height/(plot_aspect*2));	
 		//this.setDataGridYMin(bbox.y.min);
 	        //this.setDataGridYMax(bbox.y.max);
 		//this.setDataGridXMin(bbox_cx-bbox_height/(plot_aspect*2));
-		//this.setDataGridXMax(bbox_cx+bbox_height/(plot_aspect*2));
+		//this.setDataGridXMax(bbox_cx+bbox_height/(plot_aspect*2));	
 	} else {
 		this.setPlotGridXMin(bbox.x.min);
 		this.setPlotGridXMax(bbox.x.max);
 		this.setPlotGridYMin(bbox_cy-bbox_width*(plot_aspect/2));
-		this.setPlotGridYMax(bbox_cy+bbox_width*(plot_aspect/2));
+		this.setPlotGridYMax(bbox_cy+bbox_width*(plot_aspect/2));	
 		//this.setDataGridXMin(bbox.x.min);
 		//this.setDataGridXMax(bbox.x.max);
 		//this.setDataGridYMin(bbox_cy-bbox_width*(plot_aspect/2));
-		//this.setDataGridYMax(bbox_cy+bbox_width*(plot_aspect/2));
+		//this.setDataGridYMax(bbox_cy+bbox_width*(plot_aspect/2));	
 	}
-
+	
         var selection = {"x":{},"y":{}};
 	if(this.extents.plot.grid.x.min>this.extents.selection.grid.x.min)
 		selection.x.min=this.extents.plot.grid.x.min;
@@ -1589,23 +1520,23 @@ MapWidget.prototype.zoomOnBBox = function (bbox) {
 	this.setSelectionGridBBox(selection);
 	this.setView(this.view);
         var req = new LASRequest();
-
+	
 	req.removeVariables();
 	req.removeRegion();
 	req.setOperation("xy_map");
 	req.setRange("x",this.getPlotGridXMin(),this.getPlotGridXMax());
 	req.setRange("y",this.getPlotGridYMin(),this.getPlotGridYMax());
 	this.plot.src = "ProductServer.do?xml=" + escape(req.getXMLText()) + "&stream=true&stream_ID=plot_image";
-
+	
    this.plot.onload = this.updatePixelExtents.bindAsEventListener(this);
-
-
+   
+	
 }
 
 //set the data region to bbox. shrink selection box to fit
 MapWidget.prototype.setDataGridBBox = function (bbox) {
 	if(!bbox) return false;
-
+	
 
 	var minx = this.getPlotPixXMax()+(bbox.x.min-this.getPlotGridXMax())/this.getXPixRes();
 	var maxx = this.getPlotPixXMax()+(bbox.x.max-this.getPlotGridXMax())/this.getXPixRes();
@@ -1617,17 +1548,17 @@ MapWidget.prototype.setDataGridBBox = function (bbox) {
 		y : {min : miny, max :maxy}
 	}
 	if(minx<this.getPlotPixXMin())
-		minx=this.clone(this.extents.plot.pixel.x.min);
+		minx=this.clone(this.extents.plot.pixel.x.min);	
 	if(miny<this.getPlotPixYMin())
-		miny=this.clone(this.extents.plot.pixel.y.min);
+		miny=this.clone(this.extents.plot.pixel.y.min);	
 	if(maxx>this.getPlotPixXMax())
-		minx=this.clone(this.extents.plot.pixel.x.max);
+		minx=this.clone(this.extents.plot.pixel.x.max);	
 	if(maxy>this.getPlotPixYMax())
-		minx=this.clone(this.extents.plot.pixel.y.max);
+		minx=this.clone(this.extents.plot.pixel.y.max);	
 
 	this.setDrawingArea(minx,miny,maxx,maxy);
 	this.showDataMask();
-
+	
 }
 // block out the data free region
 MapWidget.prototype.showDataMask = function () {
@@ -1638,10 +1569,10 @@ MapWidget.prototype.showDataMask = function () {
 	   this.drawingMask.style.opacity = 0.7;
 	   this.drawingMask.style.filter="alpha(opacity=70)";
 		this.drawingMask.style.position = 'absolute';
-		this.DOMNode.appendChild(this.drawingMask);
+		this.DOMNode.appendChild(this.drawingMask);	
 	}
-
-	if(Math.round(this.getDataPixYMin()-this.getPlotPixYMin())>1)
+	
+	if(Math.round(this.getDataPixYMin()-this.getPlotPixYMin())>1)		
 		this.drawingMask.style.borderTop = Math.round(this.getDataPixYMin()-this.getPlotPixYMin()) + "px solid gray";
 	else
 		this.drawingMask.style.borderTop = "0pt";
@@ -1657,7 +1588,7 @@ MapWidget.prototype.showDataMask = function () {
 		//alert("this.drawingMask.style.borderBottom= " + Math.round(this.getPlotPixYMax()-this.getDataPixYMax()) + "px solid gray");
 		this.drawingMask.style.borderBottom= Math.round(this.getPlotPixYMax()-this.getDataPixYMax()) + "px solid gray";
 	}
-	else
+	else 
 		{
 		this.drawingMask.style.borderBottom= "0pt";
 	}
@@ -1665,7 +1596,7 @@ MapWidget.prototype.showDataMask = function () {
 	this.drawingMask.style.height = Math.round(this.getDataPixYMax() - this.getDataPixYMin()) + 'px';
 	this.drawingMask.style.left = Math.round(this.getPlotPixXMin()) +  'px';
 	this.drawingMask.style.top = Math.round(this.getPlotPixYMin()) + 'px';
-
+	
 }
 
 //generic function to clone objects
@@ -1673,7 +1604,7 @@ MapWidget.prototype.clone = function (obj) {
 	if(typeof obj !='object')
 		return obj;
 	var myclone = new Object();
-
+	
 	for(var i in obj)
 		myclone[i] = this.clone(obj[i]);
 	return myclone;
@@ -1686,7 +1617,7 @@ MapWidget.prototype.onbeforeresize = function(evt) {
 }
 
 MapWidget.prototype.onafterresize = function(evt) {
-	this.disable();
+	this.disable();	
 	this.updatePixelExtents();
 	this.enable();
 }
@@ -1696,8 +1627,8 @@ MapWidget.prototype.panPlot = function (dx,dy) {
    this.updating=true;
     var pix_dx = this.getXPixRes()*dx;
     var pix_dy = this.getYPixRes()*dy;
-
-    if((this.getDataGridXMax()-this.getDataGridXMin())<355 && ((this.getPlotGridXMin() + dx) < this.getDataGridXMin() || (this.getPlotGridXMax() + dx) > this.getDataGridXMax() || (this.getPlotGridYMin() + dy) < this.getDataGridYMin() || (this.getPlotGridYMax() + dy) > this.getDataGridYMax()))
+	
+    if((this.getDataGridXMax()-this.getDataGridXMin())<355 && ((this.getPlotGridXMin() + dx) < this.getDataGridXMin() || (this.getPlotGridXMax() + dx) > this.getDataGridXMax() || (this.getPlotGridYMin() + dy) < this.getDataGridYMin() || (this.getPlotGridYMax() + dy) > this.getDataGridYMax())) 
 		return false;
 
 
@@ -1707,9 +1638,9 @@ MapWidget.prototype.panPlot = function (dx,dy) {
 	//reset the plot grid coord
 	this.setPlotGridYMin(this.getPlotGridYMin() + dy);
 	this.setPlotGridYMax(this.getPlotGridYMax() + dy);
-
+	
    var req = new LASRequest();
-
+	
 
 	req.removeVariables();
 	req.removeRegion();
@@ -1719,46 +1650,46 @@ MapWidget.prototype.panPlot = function (dx,dy) {
 	  if((this.getDataGridXMax()-this.getDataGridXMin())>355) {
    	this.extents.data.grid.x.min+=dx;
    	this.extents.data.grid.x.max+=dx;
-	}
+	}  
 	this.plot.onload = this.onPlotLoad.bindAsEventListener(this);
 	this.plot.src = "ProductServer.do?xml=" + escape(req.getXMLText()) + "&stream=true&stream_ID=plot_image";
  	this.updating=false;
 }
-MapWidget.prototype.onPlotLoad = function (evt) {
+MapWidget.prototype.onPlotLoad = function (evt) { 		
 		//this.setDataGridBBox(this.extents.data.grid);
 		this.setSelectionGridBBox(this.extents.selection.grid);
-
+	
 		var r_w = this.getBoxWidth(this.rubberBand);
    	var r_h = this.getBoxHeight(this.rubberBand);
    	var m_x = (this.getSelectionPixXMin()+this.getSelectionPixXMax())/2;
    	var m_y = (this.getSelectionPixYMin()+this.getSelectionPixYMax())/2;
-
+   
    	//This is needed for the FireFox
   		r_w = isNaN(r_w)? 0 : r_w;
-	   r_h = isNaN(r_h)? 0 : r_h;
+	   r_h = isNaN(r_h)? 0 : r_h;   
 
    	//moving the box
   	 	m_x0 = m_x - r_w/2;
-  	 	if (m_x - r_w/2 < this.getDataPixXMin())
+  	 	if (m_x - r_w/2 < this.getDataPixXMin())   
   	  		m_x0 = this.getDataPixXMin();
-  		else if (m_x + r_w/2 > this.getDataPixXMax())
+  		else if (m_x + r_w/2 > this.getDataPixXMax()) 
 			m_x0 =this.getDataPixXMax() - r_w;
   			m_y0 = m_y - r_h/2;
    	if (m_y - r_h/2 < this.getDataPixYMin())
     		m_y0 =  this.getDataPixYMin();
   	else if (m_y + r_h/2 > this.getDataPixYMax())
 		m_y0 = this.getDataPixYMax() - r_h;
-
+	
 	this.Y0 = m_y0;
   	this.Y1 = m_y0 + r_h;
 	this.X0 = m_x0;
   	this.X1 = m_x0 + r_w;
-
+   
   	if (this.enabled) {
  		this.displayBox(true);
   	 	this.displayCentralBox(true);
 		if(!this.updating) {
-			if (this.ondraw) this.ondraw(this);
+			if (this.ondraw) this.ondraw(this);	
 			if (this.onafterdraw) this.onafterdraw(this);
 		}
 	}
@@ -1767,21 +1698,21 @@ MapWidget.prototype.onPlotLoad = function (evt) {
  * Zoom the map by zoom factor f on the selected region, or center of data region.
  */
 MapWidget.prototype.zoom = function (f) {
-
+	
 	if(f>0&&this.extents.selection.grid==this.extents.plot.grid) {
 		var bbox = this.clone(this.extents.plot.grid);
 		var width = (bbox.x.max-bbox.x.min);
 		var height = (bbox.y.max-bbox.y.min);
 		var cx = (bbox.x.min+bbox.x.max)/2;
 		var cy = (bbox.y.min+bbox.y.max)/2;
-		bbox.x.min = cx - width/(2*f);
-		bbox.x.max = cx + width/(2*f);
+		bbox.x.min = cx - width/(2*f);	
+		bbox.x.max = cx + width/(2*f);	
 		bbox.y.min = cy - height/(2*f);
-		bbox.y.max = cy + height/(2*f);
+		bbox.y.max = cy + height/(2*f);	
 		if(!this.extents.last)
 			this.extents.last = [];
 		this.extents.last.push(this.clone(this.extents.plot.grid));
-	}
+	} 		
 	else if (f>0){
 		var bbox = this.clone(this.extents.selection.grid);
 		if(!this.extents.last)
@@ -1790,33 +1721,12 @@ MapWidget.prototype.zoom = function (f) {
 	}
 	else
 		if (this.extents.last) {
-			if (this.extents.last.length>0)
+			if (this.extents.last.length>0) 
 				var bbox = this.extents.last.pop();
 		} else
 			var bbox = this.clone(this.extents.data.grid);
-	if(bbox)
+	if(bbox)	
 		this.zoomOnBBox(bbox);
 	this.displayBox(true);
-
-}
-MapWidget.prototype.findPageOffsetX = function(){
-  if (document.all||document.getElementById){
-  	if(this.isInteractivePlot)
-  		return document.body.scrollLeft;
-  	else
-    	return document.documentElement.scrollLeft;
-  } else if (document.layers){
-    return pageXOffset
-  }
-}
-
-MapWidget.prototype.findPageOffsetY = function(){
-  if (document.all||document.getElementById){
-  	if(this.isInteractivePlot)
-    	return document.body.scrollTop;
-  	else
-    	return document.documentElement.scrollTop;
-  } else if (document.layers){
-    return pageYOffset
-  }
+	
 }
