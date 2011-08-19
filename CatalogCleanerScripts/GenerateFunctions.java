@@ -97,8 +97,10 @@ class GenerateFunctions {
 			String oneline = "";
 			String tablename = "";
 			ArrayList<String> textvars = new ArrayList<String>();
-			ArrayList<String> intvars = new ArrayList<String>();
+			//ArrayList<String> intvars = new ArrayList<String>();
 			ArrayList<String> userdefined = new ArrayList<String>();
+			String child_id = "";
+			String parent_id = "";
 			String childName = "";
 			String parentName = "";
 			while ((oneline=br.readLine()) != null) {
@@ -108,11 +110,17 @@ class GenerateFunctions {
 				if(tablename.equals(""))
 					tablename = newTablename;
 				else if(!tablename.equals(newTablename)){
+					if(parent_id.equals(child_id)){
+						parent_id="parent_id";
+						child_id="child_id";
+					}
+					else if((parentName + "_" + parentName).equals(childName))
+						childName = parentName;
 					if(doFunctions){
-						String function = writeInsertFunction(tablename, textvars, intvars, userdefined);
+						String function = writeInsertFunction(tablename, textvars, userdefined, parent_id, child_id);
 						bw_insert_functions.write(function);
 						if(!jointables.contains(tablename)){
-							function = writeUpdateFunction(tablename, textvars, intvars, userdefined);
+							function = writeUpdateFunction(tablename, textvars, userdefined, parent_id, child_id);
 							bw_update_functions.write(function);
 							function = writeDeleteFunction(tablename);
 							bw_delete_functions.write(function);
@@ -123,14 +131,16 @@ class GenerateFunctions {
 						}
 					}
 					if(doMethods){
-						String method = writeInsertMethod(tablename, textvars, intvars, userdefined);
+						String method = writeInsertMethod(tablename, textvars, userdefined, parent_id, child_id);
 						bw_insert_methods.write(method);
-						method = writeUpdateMethod(tablename, textvars, intvars, userdefined);
-						bw_update_methods.write(method);
+						if(!jointables.contains(tablename)){
+							method = writeUpdateMethod(tablename, textvars, userdefined, parent_id, child_id);
+							bw_update_methods.write(method);
+						}
 						method = writeDeleteMethod(tablename);
 						bw_delete_methods.write(method);
 						if(!jointables.contains(tablename)){
-							method = writeGetMethod(tablename, textvars, intvars, userdefined);
+							method = writeGetMethod(tablename, textvars, userdefined, parent_id, child_id);
 							bw_get_methods.write(method);
 							if(!parentName.equals("")){
 								method = writeGetBelonging(childName, parentName, tablename);
@@ -143,16 +153,14 @@ class GenerateFunctions {
 								bw_get_methods.write(method);
 							}
 						}
-						childName = "";
-						parentName = "";
 					}
 					if(dropFunctions){
-						String function = dropFunction(tablename, textvars, intvars, userdefined);
+						String function = dropFunction(tablename, textvars, userdefined, parent_id, child_id);
 						bw_dropfunctions.write(function);
 					}
 					if(doClasses){
 						if(!jointables.contains(tablename)){
-							String jclass = writeClass(tablename, textvars, intvars, userdefined);
+							String jclass = writeClass(tablename, textvars, userdefined, parent_id, child_id);
 							bw_classes = new BufferedWriter(new FileWriter("JavaSource/gov/noaa/pmel/tmap/catalogcleaner/data/" + capitalize(camelCase(tablename)) + ".java"));
 							bw_classes.write(jclass);
 							bw_classes.close();
@@ -169,8 +177,11 @@ class GenerateFunctions {
 					}
 					tablename = newTablename.trim();
 					textvars = new ArrayList<String>();
-					intvars = new ArrayList<String>();
 					userdefined = new ArrayList<String>();
+					child_id = "";
+					parent_id = "";
+					childName = "";
+					parentName = "";
 				}
 				String var = st.nextToken();
 				String type = st.nextToken();
@@ -180,12 +191,15 @@ class GenerateFunctions {
 				}
 				else if(type.equals("integer")){
 					if(!var.equals(tablename + "_id")){
-						intvars.add(var);
-						if(tablename.indexOf('_') > 0 && !tablename.equals("catalogref")){	// <-- catalogref is problematic in all sorts of ways!
+						if(tablename.indexOf('_') > 0){	
 							parentName = tablename.substring(0, tablename.lastIndexOf('_'));
+							parent_id = parentName + "_id";
 							childName = tablename.substring(tablename.lastIndexOf('_') + 1, tablename.length());
+							child_id = childName + "_id";
 						}
 					}
+					else
+						child_id = var;
 				}
 				else if (type.equals("USER-DEFINED"))
 					userdefined.add(var);
@@ -318,9 +332,17 @@ class GenerateFunctions {
 	END;
 	$$ LANGUAGE plpgsql;
 	*/
-    public static String writeInsertFunction(String tablename, ArrayList<String> textvars, ArrayList<String> intvars, ArrayList<String> userdefined){
+    public static String writeInsertFunction(String tablename, ArrayList<String> textvars, ArrayList<String> userdefined, String parent_id, String child_id){
 		String st = "CREATE OR REPLACE FUNCTION insert_" + tablename +"(";
 		boolean hasParams = false;
+		if(!parent_id.isEmpty()){
+			st += "p_" + parent_id + " int, ";
+			hasParams = true;
+		}
+		if(jointables.contains(tablename)){
+			st += "p_" + child_id + " int, ";
+			hasParams = true;
+		}
 		for(int i = 0; i<textvars.size(); i++){
 			String ii = textvars.get(i);
 			if(!ii.equals("not_empty")){
@@ -332,24 +354,37 @@ class GenerateFunctions {
 			st += "p_" + userdefined.get(i) + " text, ";
 			hasParams = true;
 		}
-		for(int i = 0; i<intvars.size(); i++){
-			st += "p_" + intvars.get(i) + " int, ";
-			hasParams = true;
-		}
 		if(hasParams)
 			st = st.substring(0, st.length()-2);
 		st += ") ";
 		st += "RETURNS int ";
 		st += "AS $$\nDECLARE\n\tid int;\nBEGIN\n";
 		st += "\t\tinsert into " + tablename + "(";
+		boolean addNotEmpty = true;
+		if(!parent_id.isEmpty())
+			st += "\"" + parent_id + "\", ";
+		if(jointables.contains(tablename)){
+			st += "\"" + child_id + "\", ";
+		}
+		
 		for(int i = 0; i<textvars.size(); i++){
 			st += "\"" + textvars.get(i) + "\", ";
+			if(textvars.get(i).equals("not_empty"))
+				addNotEmpty=false;
 		}
-		for(int i = 0; i<intvars.size(); i++){
-			st += "\"" + intvars.get(i) + "\", ";
-		}
-		st = st.substring(0, st.length()-2);
+		if(hasParams || addNotEmpty==false)
+			st = st.substring(0, st.length()-2);
+		else
+			if(addNotEmpty)
+				st += "\"not_empty\"";
 		st += ") values (";
+		
+		if(!parent_id.isEmpty())
+			st += "p_" + parent_id + ", ";
+		if(jointables.contains(tablename)){
+			st += "p_" + child_id + ", ";
+		}
+		
 		for(int i = 0; i<textvars.size(); i++){
 			String ii = textvars.get(i);
 			if(!ii.equals("not_empty"))
@@ -357,10 +392,10 @@ class GenerateFunctions {
 			else
 				st += "'true', ";
 		}
-		for(int i = 0; i<intvars.size(); i++){
-			st += "p_" + intvars.get(i) + ", ";
-		}
-		st = st.substring(0, st.length()-2);
+		if(hasParams || addNotEmpty==false)
+			st = st.substring(0, st.length()-2);
+		else
+			st += "'true'";
 		st += ");\n";
 		if(!jointables.contains(tablename))
 			st += "\t\tselect currval('" + tablename + "_" + tablename + "_" + "id_seq') into id;\n";
@@ -408,18 +443,18 @@ BEGIN
 		return id;
 END;
 $$ LANGUAGE plpgsql;*/
-	public static String writeUpdateFunction(String tablename, ArrayList<String> textvars, ArrayList<String> intvars, ArrayList<String> userdefined){
+	public static String writeUpdateFunction(String tablename, ArrayList<String> textvars, ArrayList<String> userdefined, String parent_id, String child_id){
 		if(textvars.contains("not_empty"))
 			textvars.remove("not_empty");	// update doesn't use this, it's just a placeholder used to get an ID back in the database initially
-		String st = "CREATE OR REPLACE FUNCTION update_" + tablename +"(p_" + tablename + "_id int, ";
+		String st = "CREATE OR REPLACE FUNCTION update_" + tablename +"(";
+		if(!parent_id.isEmpty())
+			st += "p_" + parent_id + " int, ";
+		st += "p_" + tablename + " int, ";
 		for(int i = 0; i<textvars.size(); i++){
 			st += "p_" + textvars.get(i) + " text, ";
 		}
 		for(int i = 0; i<userdefined.size(); i++){
 			st += "p_" + userdefined.get(i) + " text, ";
-		}
-		for(int i = 0; i<intvars.size(); i++){
-			st += "p_" + intvars.get(i) + " int, ";
 		}
 		st = st.substring(0, st.length()-2);
 		st += ") ";
@@ -431,13 +466,14 @@ $$ LANGUAGE plpgsql;*/
 			st += "\t\t\treturn -1;\n";
 			st += "\t\tend if;\n";
 		}
-		if(textvars.size() + intvars.size() > 0){
+		if(textvars.size() > 0 || !parent_id.isEmpty()){
 			st += "\t\tupdate " + tablename + " set ";
+
+			if(!parent_id.isEmpty())
+				st += "\"" + parent_id + "\"=p_" + parent_id +", ";
+			
 			for(int i = 0; i<textvars.size(); i++){
 				st += "\"" + textvars.get(i) + "\"=p_" + textvars.get(i)+", ";
-			}
-			for(int i = 0; i<intvars.size(); i++){
-				st += "\"" + intvars.get(i) + "\"=p_" + intvars.get(i)+", ";
 			}
 			st = st.substring(0, st.length()-2);
 			st += " where " + tablename + "_id=id;\n";
@@ -539,30 +575,29 @@ $$ LANGUAGE plpgsql;
 	}
 
 	//DROP FUNCTION IF EXISTS insert_catalogref_documentation_xlink(text, text, text, integer);
-	public static String dropFunction(String tablename, ArrayList<String> textvars, ArrayList<String> intvars, ArrayList<String> userdefined){
+	public static String dropFunction(String tablename, ArrayList<String> textvars, ArrayList<String> userdefined, String parent_id, String child_id){
 			String st = "DROP FUNCTION IF EXISTS insert_" + tablename +"(";
+			if(!parent_id.isEmpty())
+				st += "int, ";
+			if(!child_id.isEmpty())
+				st += "int, ";
 			for(int i = 0; i<textvars.size(); i++){
 				st += "text, ";
 			}
 			for(int i = 0; i<userdefined.size(); i++){
 				st += "text, ";
 			}
-			for(int i = 0; i<intvars.size(); i++){
-				st += "int, ";
-			}
-			if(textvars.size() + userdefined.size() + intvars.size() > 0)
+			if(textvars.size() + userdefined.size() > 0 || !parent_id.isEmpty())
 				st = st.substring(0, st.length()-2);
 			st += ");\n";
 			if(!jointables.contains(tablename)){
-				st += "DROP FUNCTION IF EXISTS update_" + tablename +"(int, ";
-				for(int i = 0; i<textvars.size(); i++){
-					st += "text, ";
-				}
+				st += "DROP FUNCTION IF EXISTS update_" + tablename +"(";
+				if(!parent_id.isEmpty())
+					st += "int, ";
+				if(!child_id.isEmpty())
+					st += "int, ";
 				for(int i = 0; i<userdefined.size(); i++){
 					st += "text, ";
-				}
-				for(int i = 0; i<intvars.size(); i++){
-					st += "int, ";
 				}
 				st = st.substring(0, st.length()-2);
 				st += ");\n";
@@ -604,20 +639,26 @@ $$ LANGUAGE plpgsql;
 			return tmg_variables_variablemap_id;
 	}
     */
-	public static String writeInsertMethod(String tablename, ArrayList<String> textvars, ArrayList<String> intvars, ArrayList<String> userdefined) throws Exception{
+	public static String writeInsertMethod(String tablename, ArrayList<String> textvars, ArrayList<String> userdefined, String parent_id, String child_id) throws Exception{
 		String functionname = tablename;
 		if(textvars.contains("not_empty"))
 			textvars.remove("not_empty");	// front end doesn't use this, it's just a placeholder used to get an ID back in the database
 		boolean hasParams = false;
-		String id = camelCase(tablename) + "Id";
 		tablename = capitalize(camelCase(tablename));
 		textvars = camelCase(textvars);
-		intvars = camelCase(intvars);
 		userdefined = camelCase(userdefined);
 
 		String st = "\tpublic static int insert" + tablename + "(";
 
 		//String name, String base, String suffix, String description, String serviceType, String status
+		if(!parent_id.isEmpty()){
+			st += "int " + camelCase(parent_id) + ", ";
+			hasParams = true;
+		}
+		if(jointables.contains(functionname)){
+			st += "int " + camelCase(child_id) + ", ";
+			hasParams = true;
+		}
 		for(int i = 0; i<textvars.size(); i++){
 			st += "String " + textvars.get(i) + ", ";
 			hasParams = true;
@@ -626,23 +667,28 @@ $$ LANGUAGE plpgsql;
 			st += "String " + userdefined.get(i) + ", ";
 			hasParams = true;
 		}
-		for(int i = 0; i<intvars.size(); i++){
-			st += "int " + intvars.get(i) + ", ";
-			hasParams = true;
-		}
 		if(hasParams)
 			st = st.substring(0, st.length()-2);
 
 		st += ") throws Exception{\n\n";
 		st += "\t\tPreparedStatement ps = null;\n";
 		st += "\t\tResultSet rs = null;\n";
-		st += "\t\tint " + id + " = -1;\n";
+		if(!jointables.contains(functionname))
+			st += "\t\tint " + camelCase(child_id) + " = -1;\n";
 		st += "\n\t\ttry {\n\t\t\tps = ";
 		st += "setPreparedStatement";
 
 
 		st += "(\"insert_" + functionname + "\", ";
+		if(jointables.contains(functionname)){
+			st += "new int[]{" + camelCase(parent_id) + ", " + camelCase(child_id) + "}";
+		}
+		else if(!parent_id.isEmpty()){
+			st += "new int[]{" + camelCase(parent_id) + "}";
+		}
 		if(textvars.size() + userdefined.size() > 0){
+			if(!parent_id.isEmpty())
+				st += ", ";
 			st += "new String[]{";
 
 			//name, base, suffix, description, serviceType, status
@@ -651,17 +697,6 @@ $$ LANGUAGE plpgsql;
 			}
 			for(int i = 0; i<userdefined.size(); i++){
 				st += userdefined.get(i) + ", ";
-			}
-			st = st.substring(0, st.length()-2);
-			st += "}";
-			if(intvars.size() > 0)
-				st += ", ";
-		}
-
-		if(intvars.size() > 0){
-			st += "new int[]{";
-			for(int i = 0; i<intvars.size(); i++){
-				st += intvars.get(i) + ", ";
 			}
 			st = st.substring(0, st.length()-2);
 			st += "}";
@@ -675,7 +710,7 @@ $$ LANGUAGE plpgsql;
 		st += "\t\t\tlog.debug(\"About to send: {} to the database.\", ps.toString());\n";
 		st += "\t\t\trs = ps.executeQuery();\n";
 		st += "\t\t\trs.next();\n";
-		st += "\t\t\t" + id + " = rs.getInt(1);\n";
+		st += "\t\t\t" + camelCase(child_id) + " = rs.getInt(1);\n";
 		st += "\t\t}\n";
 		st += "\t\tcatch (SQLException e) {\n";
 		st += "\t\t\tlog.error(\"Caching: Could not access the database/cache. {}\", e);\n";
@@ -689,7 +724,7 @@ $$ LANGUAGE plpgsql;
 		st += "\t\t\t\tlog.error(\"Cache read: Could not close the prepared statement. {}\", e);\n";
 		st += "\t\t\t}\n";
 		st += "\t\t}\n";
-		st += "\t\treturn " + id + ";\n";
+		st += "\t\treturn " + camelCase(child_id) + ";\n";
 		st += "\t}\n\n";
 		return st;
 	}
@@ -723,20 +758,22 @@ $$ LANGUAGE plpgsql;
 			return tmg_variables_variablemap_id;
 	}
 */
-	public static String writeUpdateMethod(String tablename, ArrayList<String> textvars, ArrayList<String> intvars, ArrayList<String> userdefined) throws Exception{
+	public static String writeUpdateMethod(String tablename, ArrayList<String> textvars, ArrayList<String> userdefined, String parent_id, String child_id) throws Exception{
 		String functionname = tablename;
 		if(textvars.contains("not_empty"))
 			textvars.remove("not_empty");	// front end doesn't use this, it's just a placeholder used to get an ID back in the database
 		boolean hasParams = false;
-		String id = camelCase(tablename) + "Id";
 		tablename = capitalize(camelCase(tablename));
 		textvars = camelCase(textvars);
-		intvars = camelCase(intvars);
 		userdefined = camelCase(userdefined);
 
 		String st = "\tpublic static int update" + capitalize(camelCase(functionname)) + "(";
 
 		//String name, String base, String suffix, String description, String serviceType, String status
+		if(!parent_id.isEmpty()){
+			st += "int " + camelCase(parent_id) + ", ";
+			hasParams = true;
+		}
 		for(int i = 0; i<textvars.size(); i++){
 			st += "String " + textvars.get(i) + ", ";
 			hasParams = true;
@@ -745,21 +782,22 @@ $$ LANGUAGE plpgsql;
 			st += "String " + userdefined.get(i) + ", ";
 			hasParams = true;
 		}
-		for(int i = 0; i<intvars.size(); i++){
-			st += "int " + intvars.get(i) + ", ";
-			hasParams = true;
-		}
 		if(hasParams)
 			st = st.substring(0, st.length()-2);
 
 		st += ") throws Exception{\n\n";
-		st += "\t\tPreparedStatement ps = null;\n\t\tResultSet rs = null;\n\t\tint " + id + " = -1;\n";
+		st += "\t\tPreparedStatement ps = null;\n\t\tResultSet rs = null;\n\t\tint " + camelCase(child_id) + " = -1;\n";
 		st += "\n\t\ttry {\n\t\t\tps = ";
 		st += "setPreparedStatement";
 
 
 		st += "(\"update_" + functionname + "\", ";
+		if(!parent_id.isEmpty()){
+			st += "new int[]{" + camelCase(parent_id) + "}";
+		}
 		if(textvars.size() + userdefined.size() > 0){
+			if(!parent_id.isEmpty())
+				st += ", ";
 			st += "new String[]{";
 
 			//name, base, suffix, description, serviceType, status
@@ -771,17 +809,6 @@ $$ LANGUAGE plpgsql;
 			}
 			st = st.substring(0, st.length()-2);
 			st += "}";
-			if(intvars.size() > 0)
-				st += ", ";
-		}
-
-		if(intvars.size() > 0){
-			st += "new int[]{";
-			for(int i = 0; i<intvars.size(); i++){
-				st += intvars.get(i) + ", ";
-			}
-			st = st.substring(0, st.length()-2);
-			st += "}";
 		}
 		if(!hasParams)
 			st = st.substring(0, st.length()-2);
@@ -790,7 +817,7 @@ $$ LANGUAGE plpgsql;
 		st += "\t\t\tlog.debug(\"About to send: {} to the database.\", ps.toString());\n";
 		st += "\t\t\trs = ps.executeQuery();\n";
 		st += "\t\t\trs.next();\n";
-		st += "\t\t\t" + id + " = rs.getInt(1);\n";
+		st += "\t\t\t" + camelCase(child_id) + " = rs.getInt(1);\n";
 		st += "\t\t}\n";
 		st += "\t\tcatch (SQLException e) {\n";
 		st += "\t\t\tlog.error(\"Caching: Could not access the database/cache. {}\", e);\n";
@@ -804,7 +831,7 @@ $$ LANGUAGE plpgsql;
 		st += "\t\t\t\tlog.error(\"Cache read: Could not close the prepared statement. {}\", e);\n";
 		st += "\t\t\t}\n";
 		st += "\t\t}\n";
-		st += "\t\treturn " + id + ";\n";
+		st += "\t\treturn " + camelCase(child_id) + ";\n";
 		st += "\t}\n\n";
 		return st;
 	}
@@ -894,20 +921,26 @@ public class Catalog {
 	}
 }
 */
-	public static String writeClass(String tablename, ArrayList<String> textvars, ArrayList<String> intvars, ArrayList<String> userdefined) throws Exception{
+	public static String writeClass(String tablename, ArrayList<String> textvars, ArrayList<String> userdefined, String parent_id, String child_id) throws Exception{
+		String functionname = tablename;
 		if(textvars.contains("not_empty"))
 			textvars.remove("not_empty");	// front end doesn't use this, it's just a placeholder used to get an ID back in the database
-		String id = camelCase(tablename) + "Id";
 		tablename = capitalize(camelCase(tablename));
 		textvars = camelCase(textvars);
-		intvars = camelCase(intvars);
 		userdefined = camelCase(userdefined);
 		String st = "package gov.noaa.pmel.tmap.catalogcleaner.data;\n";
 		st += "\n";
 		st += "public class " + tablename + " {\n";
-		st += "\tprotected int " + id + ";\n";
-		for(int i = 0; i<intvars.size(); i++){
-			st += "\tprotected int "+ intvars.get(i) + ";\n";
+
+		
+		if(!parent_id.isEmpty()){
+			st += "\tprotected int " + camelCase(parent_id) + ";\n";
+		}
+		if(jointables.contains(functionname)){
+			st += "\tprotected int " + camelCase(child_id) + ";\n";
+		}
+		else{
+			st += "\tprotected int " + camelCase(functionname) + "Id" + ";\n";
 		}
 		for(int i = 0; i<textvars.size(); i++){
 			st += "\tprotected String "+ textvars.get(i) + ";\n";
@@ -916,10 +949,19 @@ public class Catalog {
 			st += "\tprotected String "+ userdefined.get(i) + ";\n";
 		}
 
-		for(int i = 0; i<intvars.size(); i++){
-			String ii = intvars.get(i);
-			st += "\tpublic void set" + capitalize(ii) + "(int " + ii + "){\n";
-			st += "\t\tthis." + ii + " = " + ii + ";\n";
+		if(!parent_id.isEmpty()){
+			st += "\tpublic void set" + capitalize(camelCase(parent_id)) + "(int " + camelCase(parent_id) + "){\n";
+			st += "\t\tthis." + camelCase(parent_id) + " = " + camelCase(parent_id) + ";\n";
+			st += "\t}\n";
+		}
+		if(jointables.contains(functionname)){
+			st += "\tpublic void set" + capitalize(camelCase(child_id)) + "(int " + camelCase(child_id) + "){\n";
+			st += "\t\tthis." + camelCase(child_id) + " = " + camelCase(child_id) + ";\n";
+			st += "\t}\n";
+		}
+		else{
+			st += "\tpublic void set" + capitalize(camelCase(functionname)) + "Id(int " + camelCase(functionname) + "Id){\n";
+			st += "\t\tthis." + camelCase(functionname) + "Id = " + camelCase(functionname) + "Id;\n";
 			st += "\t}\n";
 		}
 		for(int i = 0; i<textvars.size(); i++){
@@ -934,14 +976,19 @@ public class Catalog {
 			st += "\t\tthis." + ii + " = " + ii + ";\n";
 			st += "\t}\n";
 		}
-		st += "\tpublic int get" + capitalize(id) + "(){\n";
-		st += "\t\treturn this." + id + ";\n";
-		st += "\t}\n";
-
-		for(int i = 0; i<intvars.size(); i++){
-			String ii = intvars.get(i);
-			st += "\tpublic int get" + capitalize(ii) + "(){\n";
-			st += "\t\treturn this." + ii + ";\n";
+		if(!parent_id.isEmpty()){
+			st += "\tpublic int get" + capitalize(camelCase(parent_id)) + "(){\n";
+			st += "\t\treturn this." + camelCase(parent_id) + ";\n";
+			st += "\t}\n";
+		}
+		if(jointables.contains(functionname)){
+			st += "\tpublic int get" + capitalize(camelCase(child_id)) + "(){\n";
+			st += "\t\treturn this." + camelCase(child_id) + ";\n";
+			st += "\t}\n";
+		}
+		else{
+			st += "\tpublic int get" + capitalize(camelCase(functionname)) + "Id(){\n";
+			st += "\t\treturn this." + camelCase(functionname) + "Id;\n";
 			st += "\t}\n";
 		}
 		for(int i = 0; i<textvars.size(); i++){
@@ -957,23 +1004,44 @@ public class Catalog {
 			st += "\t}\n";
 		}
 		st += "\n";
-		st += "\tpublic " + tablename + "(int id){\n";
-		st += "\t\tthis." + id + "=id;\n";
+		if(jointables.contains(functionname)){
+			st += "\tpublic " + tablename + "(int " + camelCase(child_id) + "){\n";
+			st += "\t\tthis." + camelCase(child_id) + " = " + camelCase(child_id) + ";\n";
+		}
+		else{
+			st += "\tpublic " + tablename + "(int " + camelCase(functionname) + "){\n";
+			st += "\t\tthis." + camelCase(functionname) + "Id = " + camelCase(functionname) + ";\n";
+		}
 		st += "\t}\n";
-		if(textvars.size() + userdefined.size() + intvars.size() > 0){
-			st += "\tpublic " + tablename + "(int " + id + ", ";
+		if(textvars.size() + userdefined.size() > 0 || !parent_id.isEmpty()){
+			st += "\tpublic " + tablename + "(";
+			if(!parent_id.isEmpty()){
+				st += "int " + camelCase(parent_id) + ", ";
+			}
+			if(jointables.contains(functionname)){
+				st += "int " + camelCase(child_id) + ", ";
+			}
+			else{
+				st += "int " + camelCase(functionname) + "Id, ";
+			}
 			for(int i = 0; i<textvars.size(); i++){
 				st += "String " + textvars.get(i) + ", ";
 			}
 			for(int i = 0; i<userdefined.size(); i++){
 				st += "String " + userdefined.get(i) + ", ";
 			}
-			for(int i = 0; i<intvars.size(); i++){
-				st += "int " + intvars.get(i) + ", ";
-			}
 			st = st.substring(0, st.length() - 2);
 			st += "){\n";
-			st += "\t\tthis." + id + "=" + id + ";\n";
+
+			if(!parent_id.isEmpty()){
+				st += "\t\tthis." + camelCase(parent_id) + " = " + camelCase(parent_id) + ";\n";
+			}
+			if(jointables.contains(functionname)){
+				st += "\t\tthis." + camelCase(child_id) + " = " + camelCase(child_id) + ";\n";
+			}
+			else{
+				st += "\t\tthis." + camelCase(functionname) + "Id = " + camelCase(functionname) + "Id;\n";
+			}
 			for(int i = 0; i<textvars.size(); i++){
 				String ii = textvars.get(i);
 				st += "\t\tthis." + ii + "=" + ii + ";\n";
@@ -982,11 +1050,7 @@ public class Catalog {
 				String ii = userdefined.get(i);
 				st += "\t\tthis." + ii + "=" + ii + ";\n";
 			}
-			for(int i = 0; i<intvars.size(); i++){
-				String ii = intvars.get(i);
-				if(ii.indexOf("clean")!=0)
-					st += "\t\tthis." + ii + "=" + ii + ";\n";
-			}
+
 			st += "\t}\n";
 		}
 		st += "}\n";
@@ -1027,6 +1091,10 @@ public class ServiceService extends Service {
 		st += "\n";
 		st += "\tpublic int getParentId(){\n";
 		st += "\t\treturn this." + parentId + ";\n";
+		st += "\t}\n";
+		st += "\n";
+		st += "\tpublic int getChildId(){\n";
+		st += "\t\treturn this." + childId + ";\n";
 		st += "\t}\n";
 		st += "\n";
 		st += "\tpublic " + parentClassName + childClassName + "(int " + parentId + ", int " + childId + "){\n";
@@ -1090,7 +1158,7 @@ public class ServiceService extends Service {
 		return catalog;
 	}
  */
-	public static String writeGetMethod(String tablename, ArrayList<String> textvars, ArrayList<String> intvars, ArrayList<String> userdefined) throws Exception{
+	public static String writeGetMethod(String tablename, ArrayList<String> textvars, ArrayList<String> userdefined, String parent_id, String child_id) throws Exception{
 		String objname = tablename;
 		String id = camelCase(tablename) + "Id";
 		tablename = capitalize(camelCase(tablename));
@@ -1109,6 +1177,9 @@ public class ServiceService extends Service {
 		st += "\t\t\tlog.debug(\"About to send: {} to the database.\", ps.toString());\n";
 		st += "\t\t\trs = ps.executeQuery();\n";
 		st += "\t\t\twhile (rs.next()) {\n";
+		if(!parent_id.isEmpty()){
+			st += "\t\t\t\tint " + camelCase(parent_id) + " = rs.getInt(\"" + parent_id + "\");\n";
+		}
 		for(int i = 0; i<textvars.size(); i++){
 			String ii = textvars.get(i);
 			st += "\t\t\t\tString " + camelCase(ii) + " = rs.getString(\"" + ii + "\");\n";
@@ -1125,22 +1196,17 @@ public class ServiceService extends Service {
 			st += "\t\t\t\tif (" + camelCase(ii) + " == null)\n";
 			st += "\t\t\t\t\t" + camelCase(ii) + " = \"\";\n";
 		}
-		for(int i = 0; i<intvars.size(); i++){
-			String ii = intvars.get(i);
-			if(!ii.equals(objname + "_id"))
-				st += "\t\t\t\tint " + camelCase(ii) + " = rs.getInt(\"" + ii + "\");\n";
+		st += "\t\t\t\t" + camelCase(objname) + " = new " + tablename + "(";
+		if(!parent_id.isEmpty()){
+			st += camelCase(parent_id) + ", ";
 		}
-		st += "\t\t\t\t" + camelCase(objname) + " = new " + tablename + "(" + id + ", ";
+		st += id + ", ";
 		for(int i = 0; i<textvars.size(); i++){
 			String ii = textvars.get(i);
 			st += camelCase(ii) + ", ";
 		}
 		for(int i = 0; i<userdefined.size(); i++){
 			String ii = userdefined.get(i);
-			st += camelCase(ii) + ", ";
-		}
-		for(int i = 0; i<intvars.size(); i++){
-			String ii = intvars.get(i);
 			st += camelCase(ii) + ", ";
 		}
 		st = st.substring(0, st.length() - 2);
@@ -1218,8 +1284,8 @@ public class ServiceService extends Service {
 		else{
 			className = capitalize(camelCase(childName));
 		}
-		String childId = camelCase(childName) + "Id";
-		String parentId = camelCase(parentName) + "Id";
+		String childId = camelCase(child_id);
+		String parentId = camelCase(parent_id);
 		String childArray = camelCase(childName) + "s";
 		String parent_name = parentName;
 		parentName = capitalize(camelCase(parentName));
@@ -1240,7 +1306,10 @@ public class ServiceService extends Service {
 		st += "\t\t\tlog.debug(\"About to send: {} to the database.\", ps.toString());\n";
 		st += "\t\t\trs = ps.executeQuery();\n";
 		st += "\t\t\twhile (rs.next()) {\n";
-		st += "\t\t\t\t" + childId + "s.add(rs.getInt(\"" + child_id + "\"));\n";
+		st += "\t\t\t\t" + childId + "s.add(rs.getInt(\"";
+		if(!isJoin)
+			st += parent_name + "_";
+		st += child_id + "\"));\n";
 		st += "\t\t\t}\t\t\n";
 		st += "\t\t}\n";
 		st += "\t\tcatch (SQLException e) {\n";

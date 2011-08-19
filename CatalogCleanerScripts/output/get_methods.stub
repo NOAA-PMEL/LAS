@@ -92,14 +92,14 @@
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			while (rs.next()) {
+				int catalogId = rs.getInt("catalog_id");
 				String name = rs.getString("name");
 				if (name == null)
 					name = "";
 				String value = rs.getString("value");
 				if (value == null)
 					value = "";
-				int catalogId = rs.getInt("catalog_id");
-				catalogProperty = new CatalogProperty(catalogPropertyId, name, value, catalogId);
+				catalogProperty = new CatalogProperty(catalogId, catalogPropertyId, name, value);
 			}
 		}
 		catch (SQLException e) {
@@ -130,7 +130,7 @@
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			while (rs.next()) {
-				propertyIds.add(rs.getInt("property_id"));
+				propertyIds.add(rs.getInt("catalog_property_id"));
 			}		
 		}
 		catch (SQLException e) {
@@ -197,6 +197,7 @@
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			while (rs.next()) {
+				int catalogId = rs.getInt("catalog_id");
 				String value = rs.getString("value");
 				if (value == null)
 					value = "";
@@ -205,8 +206,7 @@
 					xlink = rs.getString("xlink_nonstandard");
 				if (xlink == null)
 					xlink = "";
-				int catalogId = rs.getInt("catalog_id");
-				catalogXlink = new CatalogXlink(catalogXlinkId, value, xlink, catalogId);
+				catalogXlink = new CatalogXlink(catalogId, catalogXlinkId, value, xlink);
 			}
 		}
 		catch (SQLException e) {
@@ -237,7 +237,7 @@
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			while (rs.next()) {
-				xlinkIds.add(rs.getInt("xlink_id"));
+				xlinkIds.add(rs.getInt("catalog_xlink_id"));
 			}		
 		}
 		catch (SQLException e) {
@@ -270,9 +270,7 @@
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			while (rs.next()) {
-				int childId = rs.getInt("child_id");
-				int parentId = rs.getInt("parent_id");
-				catalogref = new Catalogref(catalogrefId, childId, parentId);
+				catalogref = new Catalogref(catalogrefId);
 			}
 		}
 		catch (SQLException e) {
@@ -302,6 +300,7 @@
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			while (rs.next()) {
+				int catalogrefId = rs.getInt("catalogref_id");
 				String value = rs.getString("value");
 				if (value == null)
 					value = "";
@@ -310,8 +309,7 @@
 					documentationenum = rs.getString("documentationenum_nonstandard");
 				if (documentationenum == null)
 					documentationenum = "";
-				int catalogrefId = rs.getInt("catalogref_id");
-				catalogrefDocumentation = new CatalogrefDocumentation(catalogrefDocumentationId, value, documentationenum, catalogrefId);
+				catalogrefDocumentation = new CatalogrefDocumentation(catalogrefId, catalogrefDocumentationId, value, documentationenum);
 			}
 		}
 		catch (SQLException e) {
@@ -342,7 +340,7 @@
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			while (rs.next()) {
-				documentationIds.add(rs.getInt("documentation_id"));
+				documentationIds.add(rs.getInt("catalogref_documentation_id"));
 			}		
 		}
 		catch (SQLException e) {
@@ -375,11 +373,11 @@
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			while (rs.next()) {
+				int catalogrefDocumentationId = rs.getInt("catalogref_documentation_id");
 				String namespace = rs.getString("namespace");
 				if (namespace == null)
 					namespace = "";
-				int catalogrefDocumentationId = rs.getInt("catalogref_documentation_id");
-				catalogrefDocumentationNamespace = new CatalogrefDocumentationNamespace(catalogrefDocumentationNamespaceId, namespace, catalogrefDocumentationId);
+				catalogrefDocumentationNamespace = new CatalogrefDocumentationNamespace(catalogrefDocumentationId, catalogrefDocumentationNamespaceId, namespace);
 			}
 		}
 		catch (SQLException e) {
@@ -410,7 +408,7 @@
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			while (rs.next()) {
-				namespaceIds.add(rs.getInt("namespace_id"));
+				namespaceIds.add(rs.getInt("catalogref_documentation_namespace_id"));
 			}		
 		}
 		catch (SQLException e) {
@@ -443,6 +441,7 @@
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			while (rs.next()) {
+				int catalogrefDocumentationId = rs.getInt("catalogref_documentation_id");
 				String value = rs.getString("value");
 				if (value == null)
 					value = "";
@@ -451,8 +450,7 @@
 					xlink = rs.getString("xlink_nonstandard");
 				if (xlink == null)
 					xlink = "";
-				int catalogrefDocumentationId = rs.getInt("catalogref_documentation_id");
-				catalogrefDocumentationXlink = new CatalogrefDocumentationXlink(catalogrefDocumentationXlinkId, value, xlink, catalogrefDocumentationId);
+				catalogrefDocumentationXlink = new CatalogrefDocumentationXlink(catalogrefDocumentationId, catalogrefDocumentationXlinkId, value, xlink);
 			}
 		}
 		catch (SQLException e) {
@@ -483,7 +481,7 @@
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			while (rs.next()) {
-				xlinkIds.add(rs.getInt("xlink_id"));
+				xlinkIds.add(rs.getInt("catalogref_documentation_xlink_id"));
 			}		
 		}
 		catch (SQLException e) {
@@ -516,6 +514,7 @@
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			while (rs.next()) {
+				int catalogrefId = rs.getInt("catalogref_id");
 				String value = rs.getString("value");
 				if (value == null)
 					value = "";
@@ -524,8 +523,7 @@
 					xlink = rs.getString("xlink_nonstandard");
 				if (xlink == null)
 					xlink = "";
-				int catalogrefId = rs.getInt("catalogref_id");
-				catalogrefXlink = new CatalogrefXlink(catalogrefXlinkId, value, xlink, catalogrefId);
+				catalogrefXlink = new CatalogrefXlink(catalogrefId, catalogrefXlinkId, value, xlink);
 			}
 		}
 		catch (SQLException e) {
@@ -556,7 +554,7 @@
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			while (rs.next()) {
-				xlinkIds.add(rs.getInt("xlink_id"));
+				xlinkIds.add(rs.getInt("catalogref_xlink_id"));
 			}		
 		}
 		catch (SQLException e) {
@@ -661,6 +659,7 @@
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			while (rs.next()) {
+				int datasetId = rs.getInt("dataset_id");
 				String urlpath = rs.getString("urlpath");
 				if (urlpath == null)
 					urlpath = "";
@@ -672,8 +671,7 @@
 					dataformat = rs.getString("dataformat_nonstandard");
 				if (dataformat == null)
 					dataformat = "";
-				int datasetId = rs.getInt("dataset_id");
-				datasetAccess = new DatasetAccess(datasetAccessId, urlpath, servicename, dataformat, datasetId);
+				datasetAccess = new DatasetAccess(datasetId, datasetAccessId, urlpath, servicename, dataformat);
 			}
 		}
 		catch (SQLException e) {
@@ -704,7 +702,7 @@
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			while (rs.next()) {
-				accessIds.add(rs.getInt("access_id"));
+				accessIds.add(rs.getInt("dataset_access_id"));
 			}		
 		}
 		catch (SQLException e) {
@@ -737,6 +735,7 @@
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			while (rs.next()) {
+				int datasetAccessId = rs.getInt("dataset_access_id");
 				String value = rs.getString("value");
 				if (value == null)
 					value = "";
@@ -745,8 +744,7 @@
 					units = rs.getString("units_nonstandard");
 				if (units == null)
 					units = "";
-				int datasetAccessId = rs.getInt("dataset_access_id");
-				datasetAccessDatasize = new DatasetAccessDatasize(datasetAccessDatasizeId, value, units, datasetAccessId);
+				datasetAccessDatasize = new DatasetAccessDatasize(datasetAccessId, datasetAccessDatasizeId, value, units);
 			}
 		}
 		catch (SQLException e) {
@@ -777,7 +775,7 @@
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			while (rs.next()) {
-				datasizeIds.add(rs.getInt("datasize_id"));
+				datasizeIds.add(rs.getInt("dataset_access_datasize_id"));
 			}		
 		}
 		catch (SQLException e) {
@@ -832,20 +830,20 @@
 		return catalogrefs;
 	}
 
-	public static ArrayList<Dataset> getDatasetBDataset(int datasetId) throws Exception{
+	public static ArrayList<Dataset> getDatasetBDataset(int parentId) throws Exception{
 		PreparedStatement ps = null;
 		ResultSet rs = null;
-		ArrayList<Integer> datasetIds = new ArrayList<Integer>();
+		ArrayList<Integer> childIds = new ArrayList<Integer>();
 		ArrayList<Dataset> datasets = new ArrayList<Dataset>();
 		String select = "select child_id from dataset_dataset where ";
 		select+= "parent_id=?";
 		try {
 			ps = pgCache.prepareStatement(select);
-			ps.setInt(1, datasetId);
+			ps.setInt(1, parentId);
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			while (rs.next()) {
-				datasetIds.add(rs.getInt("child_id"));
+				childIds.add(rs.getInt("child_id"));
 			}		
 		}
 		catch (SQLException e) {
@@ -860,8 +858,8 @@
 				log.error("Cache read: Could not close the prepared statement. {}", e);
 			}
 		}
-		for(int i=0; i<datasetIds.size(); i++){
-			datasets.add(getDataset(datasetIds.get(i)));
+		for(int i=0; i<childIds.size(); i++){
+			datasets.add(getDataset(childIds.get(i)));
 		}
 		return datasets;
 	}
@@ -879,7 +877,7 @@
 			rs = ps.executeQuery();
 			while (rs.next()) {
 				int datasetId = rs.getInt("dataset_id");
-				datasetNcml = new DatasetNcml(datasetNcmlId, datasetId);
+				datasetNcml = new DatasetNcml(datasetId, datasetNcmlId);
 			}
 		}
 		catch (SQLException e) {
@@ -910,7 +908,7 @@
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			while (rs.next()) {
-				ncmlIds.add(rs.getInt("ncml_id"));
+				ncmlIds.add(rs.getInt("dataset_ncml_id"));
 			}		
 		}
 		catch (SQLException e) {
@@ -943,14 +941,14 @@
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			while (rs.next()) {
+				int datasetId = rs.getInt("dataset_id");
 				String name = rs.getString("name");
 				if (name == null)
 					name = "";
 				String value = rs.getString("value");
 				if (value == null)
 					value = "";
-				int datasetId = rs.getInt("dataset_id");
-				datasetProperty = new DatasetProperty(datasetPropertyId, name, value, datasetId);
+				datasetProperty = new DatasetProperty(datasetId, datasetPropertyId, name, value);
 			}
 		}
 		catch (SQLException e) {
@@ -981,7 +979,7 @@
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			while (rs.next()) {
-				propertyIds.add(rs.getInt("property_id"));
+				propertyIds.add(rs.getInt("dataset_property_id"));
 			}		
 		}
 		catch (SQLException e) {
@@ -1122,11 +1120,11 @@
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			while (rs.next()) {
+				int metadataId = rs.getInt("metadata_id");
 				String namespace = rs.getString("namespace");
 				if (namespace == null)
 					namespace = "";
-				int metadataId = rs.getInt("metadata_id");
-				metadataNamespace = new MetadataNamespace(metadataNamespaceId, namespace, metadataId);
+				metadataNamespace = new MetadataNamespace(metadataId, metadataNamespaceId, namespace);
 			}
 		}
 		catch (SQLException e) {
@@ -1157,7 +1155,7 @@
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			while (rs.next()) {
-				namespaceIds.add(rs.getInt("namespace_id"));
+				namespaceIds.add(rs.getInt("metadata_namespace_id"));
 			}		
 		}
 		catch (SQLException e) {
@@ -1224,6 +1222,7 @@
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			while (rs.next()) {
+				int metadataId = rs.getInt("metadata_id");
 				String value = rs.getString("value");
 				if (value == null)
 					value = "";
@@ -1232,8 +1231,7 @@
 					xlink = rs.getString("xlink_nonstandard");
 				if (xlink == null)
 					xlink = "";
-				int metadataId = rs.getInt("metadata_id");
-				metadataXlink = new MetadataXlink(metadataXlinkId, value, xlink, metadataId);
+				metadataXlink = new MetadataXlink(metadataId, metadataXlinkId, value, xlink);
 			}
 		}
 		catch (SQLException e) {
@@ -1264,7 +1262,7 @@
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			while (rs.next()) {
-				xlinkIds.add(rs.getInt("xlink_id"));
+				xlinkIds.add(rs.getInt("metadata_xlink_id"));
 			}		
 		}
 		catch (SQLException e) {
@@ -1347,14 +1345,14 @@
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			while (rs.next()) {
+				int serviceId = rs.getInt("service_id");
 				String path = rs.getString("path");
 				if (path == null)
 					path = "";
 				String location = rs.getString("location");
 				if (location == null)
 					location = "";
-				int serviceId = rs.getInt("service_id");
-				serviceDatasetroot = new ServiceDatasetroot(serviceDatasetrootId, path, location, serviceId);
+				serviceDatasetroot = new ServiceDatasetroot(serviceId, serviceDatasetrootId, path, location);
 			}
 		}
 		catch (SQLException e) {
@@ -1385,7 +1383,7 @@
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			while (rs.next()) {
-				datasetrootIds.add(rs.getInt("datasetroot_id"));
+				datasetrootIds.add(rs.getInt("service_datasetroot_id"));
 			}		
 		}
 		catch (SQLException e) {
@@ -1418,14 +1416,14 @@
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			while (rs.next()) {
+				int serviceId = rs.getInt("service_id");
 				String value = rs.getString("value");
 				if (value == null)
 					value = "";
 				String name = rs.getString("name");
 				if (name == null)
 					name = "";
-				int serviceId = rs.getInt("service_id");
-				serviceProperty = new ServiceProperty(servicePropertyId, value, name, serviceId);
+				serviceProperty = new ServiceProperty(serviceId, servicePropertyId, value, name);
 			}
 		}
 		catch (SQLException e) {
@@ -1456,7 +1454,7 @@
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			while (rs.next()) {
-				propertyIds.add(rs.getInt("property_id"));
+				propertyIds.add(rs.getInt("service_property_id"));
 			}		
 		}
 		catch (SQLException e) {
@@ -1477,20 +1475,20 @@
 		return propertys;
 	}
 
-	public static ArrayList<Service> getServiceBService(int serviceId) throws Exception{
+	public static ArrayList<Service> getServiceBService(int parentId) throws Exception{
 		PreparedStatement ps = null;
 		ResultSet rs = null;
-		ArrayList<Integer> serviceIds = new ArrayList<Integer>();
+		ArrayList<Integer> childIds = new ArrayList<Integer>();
 		ArrayList<Service> services = new ArrayList<Service>();
 		String select = "select child_id from service_service where ";
 		select+= "parent_id=?";
 		try {
 			ps = pgCache.prepareStatement(select);
-			ps.setInt(1, serviceId);
+			ps.setInt(1, parentId);
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			while (rs.next()) {
-				serviceIds.add(rs.getInt("child_id"));
+				childIds.add(rs.getInt("child_id"));
 			}		
 		}
 		catch (SQLException e) {
@@ -1505,8 +1503,8 @@
 				log.error("Cache read: Could not close the prepared statement. {}", e);
 			}
 		}
-		for(int i=0; i<serviceIds.size(); i++){
-			services.add(getService(serviceIds.get(i)));
+		for(int i=0; i<childIds.size(); i++){
+			services.add(getService(childIds.get(i)));
 		}
 		return services;
 	}
@@ -1553,11 +1551,11 @@
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			while (rs.next()) {
+				int tmgId = rs.getInt("tmg_id");
 				String authority = rs.getString("authority");
 				if (authority == null)
 					authority = "";
-				int tmgId = rs.getInt("tmg_id");
-				tmgAuthority = new TmgAuthority(tmgAuthorityId, authority, tmgId);
+				tmgAuthority = new TmgAuthority(tmgId, tmgAuthorityId, authority);
 			}
 		}
 		catch (SQLException e) {
@@ -1588,7 +1586,7 @@
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			while (rs.next()) {
-				authorityIds.add(rs.getInt("authority_id"));
+				authorityIds.add(rs.getInt("tmg_authority_id"));
 			}		
 		}
 		catch (SQLException e) {
@@ -1621,14 +1619,14 @@
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			while (rs.next()) {
+				int tmgId = rs.getInt("tmg_id");
 				String role = rs.getString("role");
 				if (role == null)
 					role = "";
 				String name = rs.getString("name");
 				if (name == null)
 					name = "";
-				int tmgId = rs.getInt("tmg_id");
-				tmgContributor = new TmgContributor(tmgContributorId, role, name, tmgId);
+				tmgContributor = new TmgContributor(tmgId, tmgContributorId, role, name);
 			}
 		}
 		catch (SQLException e) {
@@ -1659,7 +1657,7 @@
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			while (rs.next()) {
-				contributorIds.add(rs.getInt("contributor_id"));
+				contributorIds.add(rs.getInt("tmg_contributor_id"));
 			}		
 		}
 		catch (SQLException e) {
@@ -1693,7 +1691,7 @@
 			rs = ps.executeQuery();
 			while (rs.next()) {
 				int tmgId = rs.getInt("tmg_id");
-				tmgCreator = new TmgCreator(tmgCreatorId, tmgId);
+				tmgCreator = new TmgCreator(tmgId, tmgCreatorId);
 			}
 		}
 		catch (SQLException e) {
@@ -1724,7 +1722,7 @@
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			while (rs.next()) {
-				creatorIds.add(rs.getInt("creator_id"));
+				creatorIds.add(rs.getInt("tmg_creator_id"));
 			}		
 		}
 		catch (SQLException e) {
@@ -1757,14 +1755,14 @@
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			while (rs.next()) {
+				int tmgCreatorId = rs.getInt("tmg_creator_id");
 				String email = rs.getString("email");
 				if (email == null)
 					email = "";
 				String url = rs.getString("url");
 				if (url == null)
 					url = "";
-				int tmgCreatorId = rs.getInt("tmg_creator_id");
-				tmgCreatorContact = new TmgCreatorContact(tmgCreatorContactId, email, url, tmgCreatorId);
+				tmgCreatorContact = new TmgCreatorContact(tmgCreatorId, tmgCreatorContactId, email, url);
 			}
 		}
 		catch (SQLException e) {
@@ -1795,7 +1793,7 @@
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			while (rs.next()) {
-				contactIds.add(rs.getInt("contact_id"));
+				contactIds.add(rs.getInt("tmg_creator_contact_id"));
 			}		
 		}
 		catch (SQLException e) {
@@ -1828,14 +1826,14 @@
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			while (rs.next()) {
+				int tmgCreatorId = rs.getInt("tmg_creator_id");
 				String value = rs.getString("value");
 				if (value == null)
 					value = "";
 				String vocabulary = rs.getString("vocabulary");
 				if (vocabulary == null)
 					vocabulary = "";
-				int tmgCreatorId = rs.getInt("tmg_creator_id");
-				tmgCreatorName = new TmgCreatorName(tmgCreatorNameId, value, vocabulary, tmgCreatorId);
+				tmgCreatorName = new TmgCreatorName(tmgCreatorId, tmgCreatorNameId, value, vocabulary);
 			}
 		}
 		catch (SQLException e) {
@@ -1866,7 +1864,7 @@
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			while (rs.next()) {
-				nameIds.add(rs.getInt("name_id"));
+				nameIds.add(rs.getInt("tmg_creator_name_id"));
 			}		
 		}
 		catch (SQLException e) {
@@ -1899,13 +1897,13 @@
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			while (rs.next()) {
+				int tmgId = rs.getInt("tmg_id");
 				String dataformat = rs.getString("dataformat");
 				if (dataformat == null)
 					dataformat = rs.getString("dataformat_nonstandard");
 				if (dataformat == null)
 					dataformat = "";
-				int tmgId = rs.getInt("tmg_id");
-				tmgDataformat = new TmgDataformat(tmgDataformatId, dataformat, tmgId);
+				tmgDataformat = new TmgDataformat(tmgId, tmgDataformatId, dataformat);
 			}
 		}
 		catch (SQLException e) {
@@ -1936,7 +1934,7 @@
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			while (rs.next()) {
-				dataformatIds.add(rs.getInt("dataformat_id"));
+				dataformatIds.add(rs.getInt("tmg_dataformat_id"));
 			}		
 		}
 		catch (SQLException e) {
@@ -1969,6 +1967,7 @@
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			while (rs.next()) {
+				int tmgId = rs.getInt("tmg_id");
 				String value = rs.getString("value");
 				if (value == null)
 					value = "";
@@ -1977,8 +1976,7 @@
 					units = rs.getString("units_nonstandard");
 				if (units == null)
 					units = "";
-				int tmgId = rs.getInt("tmg_id");
-				tmgDatasize = new TmgDatasize(tmgDatasizeId, value, units, tmgId);
+				tmgDatasize = new TmgDatasize(tmgId, tmgDatasizeId, value, units);
 			}
 		}
 		catch (SQLException e) {
@@ -2009,7 +2007,7 @@
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			while (rs.next()) {
-				datasizeIds.add(rs.getInt("datasize_id"));
+				datasizeIds.add(rs.getInt("tmg_datasize_id"));
 			}		
 		}
 		catch (SQLException e) {
@@ -2042,13 +2040,13 @@
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			while (rs.next()) {
+				int tmgId = rs.getInt("tmg_id");
 				String datatype = rs.getString("datatype");
 				if (datatype == null)
 					datatype = rs.getString("datatype_nonstandard");
 				if (datatype == null)
 					datatype = "";
-				int tmgId = rs.getInt("tmg_id");
-				tmgDatatype = new TmgDatatype(tmgDatatypeId, datatype, tmgId);
+				tmgDatatype = new TmgDatatype(tmgId, tmgDatatypeId, datatype);
 			}
 		}
 		catch (SQLException e) {
@@ -2079,7 +2077,7 @@
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			while (rs.next()) {
-				datatypeIds.add(rs.getInt("datatype_id"));
+				datatypeIds.add(rs.getInt("tmg_datatype_id"));
 			}		
 		}
 		catch (SQLException e) {
@@ -2112,6 +2110,7 @@
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			while (rs.next()) {
+				int tmgId = rs.getInt("tmg_id");
 				String format = rs.getString("format");
 				if (format == null)
 					format = "";
@@ -2123,8 +2122,7 @@
 					dateenum = rs.getString("dateenum_nonstandard");
 				if (dateenum == null)
 					dateenum = "";
-				int tmgId = rs.getInt("tmg_id");
-				tmgDate = new TmgDate(tmgDateId, format, value, dateenum, tmgId);
+				tmgDate = new TmgDate(tmgId, tmgDateId, format, value, dateenum);
 			}
 		}
 		catch (SQLException e) {
@@ -2155,7 +2153,7 @@
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			while (rs.next()) {
-				dateIds.add(rs.getInt("date_id"));
+				dateIds.add(rs.getInt("tmg_date_id"));
 			}		
 		}
 		catch (SQLException e) {
@@ -2188,6 +2186,7 @@
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			while (rs.next()) {
+				int tmgId = rs.getInt("tmg_id");
 				String value = rs.getString("value");
 				if (value == null)
 					value = "";
@@ -2196,8 +2195,7 @@
 					documentationenum = rs.getString("documentationenum_nonstandard");
 				if (documentationenum == null)
 					documentationenum = "";
-				int tmgId = rs.getInt("tmg_id");
-				tmgDocumentation = new TmgDocumentation(tmgDocumentationId, value, documentationenum, tmgId);
+				tmgDocumentation = new TmgDocumentation(tmgId, tmgDocumentationId, value, documentationenum);
 			}
 		}
 		catch (SQLException e) {
@@ -2228,7 +2226,7 @@
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			while (rs.next()) {
-				documentationIds.add(rs.getInt("documentation_id"));
+				documentationIds.add(rs.getInt("tmg_documentation_id"));
 			}		
 		}
 		catch (SQLException e) {
@@ -2261,11 +2259,11 @@
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			while (rs.next()) {
+				int tmgDocumentationId = rs.getInt("tmg_documentation_id");
 				String namespace = rs.getString("namespace");
 				if (namespace == null)
 					namespace = "";
-				int tmgDocumentationId = rs.getInt("tmg_documentation_id");
-				tmgDocumentationNamespace = new TmgDocumentationNamespace(tmgDocumentationNamespaceId, namespace, tmgDocumentationId);
+				tmgDocumentationNamespace = new TmgDocumentationNamespace(tmgDocumentationId, tmgDocumentationNamespaceId, namespace);
 			}
 		}
 		catch (SQLException e) {
@@ -2296,7 +2294,7 @@
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			while (rs.next()) {
-				namespaceIds.add(rs.getInt("namespace_id"));
+				namespaceIds.add(rs.getInt("tmg_documentation_namespace_id"));
 			}		
 		}
 		catch (SQLException e) {
@@ -2329,6 +2327,7 @@
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			while (rs.next()) {
+				int tmgDocumentationId = rs.getInt("tmg_documentation_id");
 				String value = rs.getString("value");
 				if (value == null)
 					value = "";
@@ -2337,8 +2336,7 @@
 					xlink = rs.getString("xlink_nonstandard");
 				if (xlink == null)
 					xlink = "";
-				int tmgDocumentationId = rs.getInt("tmg_documentation_id");
-				tmgDocumentationXlink = new TmgDocumentationXlink(tmgDocumentationXlinkId, value, xlink, tmgDocumentationId);
+				tmgDocumentationXlink = new TmgDocumentationXlink(tmgDocumentationId, tmgDocumentationXlinkId, value, xlink);
 			}
 		}
 		catch (SQLException e) {
@@ -2369,7 +2367,7 @@
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			while (rs.next()) {
-				xlinkIds.add(rs.getInt("xlink_id"));
+				xlinkIds.add(rs.getInt("tmg_documentation_xlink_id"));
 			}		
 		}
 		catch (SQLException e) {
@@ -2402,13 +2400,13 @@
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			while (rs.next()) {
+				int tmgId = rs.getInt("tmg_id");
 				String upordown = rs.getString("upordown");
 				if (upordown == null)
 					upordown = rs.getString("upordown_nonstandard");
 				if (upordown == null)
 					upordown = "";
-				int tmgId = rs.getInt("tmg_id");
-				tmgGeospatialcoverage = new TmgGeospatialcoverage(tmgGeospatialcoverageId, upordown, tmgId);
+				tmgGeospatialcoverage = new TmgGeospatialcoverage(tmgId, tmgGeospatialcoverageId, upordown);
 			}
 		}
 		catch (SQLException e) {
@@ -2439,7 +2437,7 @@
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			while (rs.next()) {
-				geospatialcoverageIds.add(rs.getInt("geospatialcoverage_id"));
+				geospatialcoverageIds.add(rs.getInt("tmg_geospatialcoverage_id"));
 			}		
 		}
 		catch (SQLException e) {
@@ -2472,6 +2470,7 @@
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			while (rs.next()) {
+				int tmgGeospatialcoverageId = rs.getInt("tmg_geospatialcoverage_id");
 				String size = rs.getString("size");
 				if (size == null)
 					size = "";
@@ -2484,8 +2483,7 @@
 				String resolution = rs.getString("resolution");
 				if (resolution == null)
 					resolution = "";
-				int tmgGeospatialcoverageId = rs.getInt("tmg_geospatialcoverage_id");
-				tmgGeospatialcoverageEastwest = new TmgGeospatialcoverageEastwest(tmgGeospatialcoverageEastwestId, size, units, start, resolution, tmgGeospatialcoverageId);
+				tmgGeospatialcoverageEastwest = new TmgGeospatialcoverageEastwest(tmgGeospatialcoverageId, tmgGeospatialcoverageEastwestId, size, units, start, resolution);
 			}
 		}
 		catch (SQLException e) {
@@ -2516,7 +2514,7 @@
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			while (rs.next()) {
-				eastwestIds.add(rs.getInt("eastwest_id"));
+				eastwestIds.add(rs.getInt("tmg_geospatialcoverage_eastwest_id"));
 			}		
 		}
 		catch (SQLException e) {
@@ -2549,14 +2547,14 @@
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			while (rs.next()) {
+				int tmgGeospatialcoverageId = rs.getInt("tmg_geospatialcoverage_id");
 				String vocabulary = rs.getString("vocabulary");
 				if (vocabulary == null)
 					vocabulary = "";
 				String value = rs.getString("value");
 				if (value == null)
 					value = "";
-				int tmgGeospatialcoverageId = rs.getInt("tmg_geospatialcoverage_id");
-				tmgGeospatialcoverageName = new TmgGeospatialcoverageName(tmgGeospatialcoverageNameId, vocabulary, value, tmgGeospatialcoverageId);
+				tmgGeospatialcoverageName = new TmgGeospatialcoverageName(tmgGeospatialcoverageId, tmgGeospatialcoverageNameId, vocabulary, value);
 			}
 		}
 		catch (SQLException e) {
@@ -2587,7 +2585,7 @@
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			while (rs.next()) {
-				nameIds.add(rs.getInt("name_id"));
+				nameIds.add(rs.getInt("tmg_geospatialcoverage_name_id"));
 			}		
 		}
 		catch (SQLException e) {
@@ -2620,6 +2618,7 @@
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			while (rs.next()) {
+				int tmgGeospatialcoverageId = rs.getInt("tmg_geospatialcoverage_id");
 				String size = rs.getString("size");
 				if (size == null)
 					size = "";
@@ -2632,8 +2631,7 @@
 				String units = rs.getString("units");
 				if (units == null)
 					units = "";
-				int tmgGeospatialcoverageId = rs.getInt("tmg_geospatialcoverage_id");
-				tmgGeospatialcoverageNorthsouth = new TmgGeospatialcoverageNorthsouth(tmgGeospatialcoverageNorthsouthId, size, resolution, start, units, tmgGeospatialcoverageId);
+				tmgGeospatialcoverageNorthsouth = new TmgGeospatialcoverageNorthsouth(tmgGeospatialcoverageId, tmgGeospatialcoverageNorthsouthId, size, resolution, start, units);
 			}
 		}
 		catch (SQLException e) {
@@ -2664,7 +2662,7 @@
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			while (rs.next()) {
-				northsouthIds.add(rs.getInt("northsouth_id"));
+				northsouthIds.add(rs.getInt("tmg_geospatialcoverage_northsouth_id"));
 			}		
 		}
 		catch (SQLException e) {
@@ -2697,6 +2695,7 @@
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			while (rs.next()) {
+				int tmgGeospatialcoverageId = rs.getInt("tmg_geospatialcoverage_id");
 				String start = rs.getString("start");
 				if (start == null)
 					start = "";
@@ -2709,8 +2708,7 @@
 				String units = rs.getString("units");
 				if (units == null)
 					units = "";
-				int tmgGeospatialcoverageId = rs.getInt("tmg_geospatialcoverage_id");
-				tmgGeospatialcoverageUpdown = new TmgGeospatialcoverageUpdown(tmgGeospatialcoverageUpdownId, start, resolution, size, units, tmgGeospatialcoverageId);
+				tmgGeospatialcoverageUpdown = new TmgGeospatialcoverageUpdown(tmgGeospatialcoverageId, tmgGeospatialcoverageUpdownId, start, resolution, size, units);
 			}
 		}
 		catch (SQLException e) {
@@ -2741,7 +2739,7 @@
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			while (rs.next()) {
-				updownIds.add(rs.getInt("updown_id"));
+				updownIds.add(rs.getInt("tmg_geospatialcoverage_updown_id"));
 			}		
 		}
 		catch (SQLException e) {
@@ -2774,14 +2772,14 @@
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			while (rs.next()) {
+				int tmgId = rs.getInt("tmg_id");
 				String value = rs.getString("value");
 				if (value == null)
 					value = "";
 				String vocabulary = rs.getString("vocabulary");
 				if (vocabulary == null)
 					vocabulary = "";
-				int tmgId = rs.getInt("tmg_id");
-				tmgKeyword = new TmgKeyword(tmgKeywordId, value, vocabulary, tmgId);
+				tmgKeyword = new TmgKeyword(tmgId, tmgKeywordId, value, vocabulary);
 			}
 		}
 		catch (SQLException e) {
@@ -2812,7 +2810,7 @@
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			while (rs.next()) {
-				keywordIds.add(rs.getInt("keyword_id"));
+				keywordIds.add(rs.getInt("tmg_keyword_id"));
 			}		
 		}
 		catch (SQLException e) {
@@ -2879,14 +2877,14 @@
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			while (rs.next()) {
+				int tmgId = rs.getInt("tmg_id");
 				String value = rs.getString("value");
 				if (value == null)
 					value = "";
 				String vocabulary = rs.getString("vocabulary");
 				if (vocabulary == null)
 					vocabulary = "";
-				int tmgId = rs.getInt("tmg_id");
-				tmgProject = new TmgProject(tmgProjectId, value, vocabulary, tmgId);
+				tmgProject = new TmgProject(tmgId, tmgProjectId, value, vocabulary);
 			}
 		}
 		catch (SQLException e) {
@@ -2917,7 +2915,7 @@
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			while (rs.next()) {
-				projectIds.add(rs.getInt("project_id"));
+				projectIds.add(rs.getInt("tmg_project_id"));
 			}		
 		}
 		catch (SQLException e) {
@@ -2950,14 +2948,14 @@
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			while (rs.next()) {
+				int tmgId = rs.getInt("tmg_id");
 				String name = rs.getString("name");
 				if (name == null)
 					name = "";
 				String value = rs.getString("value");
 				if (value == null)
 					value = "";
-				int tmgId = rs.getInt("tmg_id");
-				tmgProperty = new TmgProperty(tmgPropertyId, name, value, tmgId);
+				tmgProperty = new TmgProperty(tmgId, tmgPropertyId, name, value);
 			}
 		}
 		catch (SQLException e) {
@@ -2988,7 +2986,7 @@
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			while (rs.next()) {
-				propertyIds.add(rs.getInt("property_id"));
+				propertyIds.add(rs.getInt("tmg_property_id"));
 			}		
 		}
 		catch (SQLException e) {
@@ -3022,7 +3020,7 @@
 			rs = ps.executeQuery();
 			while (rs.next()) {
 				int tmgId = rs.getInt("tmg_id");
-				tmgPublisher = new TmgPublisher(tmgPublisherId, tmgId);
+				tmgPublisher = new TmgPublisher(tmgId, tmgPublisherId);
 			}
 		}
 		catch (SQLException e) {
@@ -3053,7 +3051,7 @@
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			while (rs.next()) {
-				publisherIds.add(rs.getInt("publisher_id"));
+				publisherIds.add(rs.getInt("tmg_publisher_id"));
 			}		
 		}
 		catch (SQLException e) {
@@ -3086,14 +3084,14 @@
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			while (rs.next()) {
+				int tmgPublisherId = rs.getInt("tmg_publisher_id");
 				String url = rs.getString("url");
 				if (url == null)
 					url = "";
 				String email = rs.getString("email");
 				if (email == null)
 					email = "";
-				int tmgPublisherId = rs.getInt("tmg_publisher_id");
-				tmgPublisherContact = new TmgPublisherContact(tmgPublisherContactId, url, email, tmgPublisherId);
+				tmgPublisherContact = new TmgPublisherContact(tmgPublisherId, tmgPublisherContactId, url, email);
 			}
 		}
 		catch (SQLException e) {
@@ -3124,7 +3122,7 @@
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			while (rs.next()) {
-				contactIds.add(rs.getInt("contact_id"));
+				contactIds.add(rs.getInt("tmg_publisher_contact_id"));
 			}		
 		}
 		catch (SQLException e) {
@@ -3157,14 +3155,14 @@
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			while (rs.next()) {
+				int tmgPublisherId = rs.getInt("tmg_publisher_id");
 				String value = rs.getString("value");
 				if (value == null)
 					value = "";
 				String vocabulary = rs.getString("vocabulary");
 				if (vocabulary == null)
 					vocabulary = "";
-				int tmgPublisherId = rs.getInt("tmg_publisher_id");
-				tmgPublisherName = new TmgPublisherName(tmgPublisherNameId, value, vocabulary, tmgPublisherId);
+				tmgPublisherName = new TmgPublisherName(tmgPublisherId, tmgPublisherNameId, value, vocabulary);
 			}
 		}
 		catch (SQLException e) {
@@ -3195,7 +3193,7 @@
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			while (rs.next()) {
-				nameIds.add(rs.getInt("name_id"));
+				nameIds.add(rs.getInt("tmg_publisher_name_id"));
 			}		
 		}
 		catch (SQLException e) {
@@ -3228,11 +3226,11 @@
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			while (rs.next()) {
+				int tmgId = rs.getInt("tmg_id");
 				String servicename = rs.getString("servicename");
 				if (servicename == null)
 					servicename = "";
-				int tmgId = rs.getInt("tmg_id");
-				tmgServicename = new TmgServicename(tmgServicenameId, servicename, tmgId);
+				tmgServicename = new TmgServicename(tmgId, tmgServicenameId, servicename);
 			}
 		}
 		catch (SQLException e) {
@@ -3263,7 +3261,7 @@
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			while (rs.next()) {
-				servicenameIds.add(rs.getInt("servicename_id"));
+				servicenameIds.add(rs.getInt("tmg_servicename_id"));
 			}		
 		}
 		catch (SQLException e) {
@@ -3296,11 +3294,11 @@
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			while (rs.next()) {
+				int tmgId = rs.getInt("tmg_id");
 				String resolution = rs.getString("resolution");
 				if (resolution == null)
 					resolution = "";
-				int tmgId = rs.getInt("tmg_id");
-				tmgTimecoverage = new TmgTimecoverage(tmgTimecoverageId, resolution, tmgId);
+				tmgTimecoverage = new TmgTimecoverage(tmgId, tmgTimecoverageId, resolution);
 			}
 		}
 		catch (SQLException e) {
@@ -3331,7 +3329,7 @@
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			while (rs.next()) {
-				timecoverageIds.add(rs.getInt("timecoverage_id"));
+				timecoverageIds.add(rs.getInt("tmg_timecoverage_id"));
 			}		
 		}
 		catch (SQLException e) {
@@ -3364,11 +3362,11 @@
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			while (rs.next()) {
+				int tmgTimecoverageId = rs.getInt("tmg_timecoverage_id");
 				String duration = rs.getString("duration");
 				if (duration == null)
 					duration = "";
-				int tmgTimecoverageId = rs.getInt("tmg_timecoverage_id");
-				tmgTimecoverageDuration = new TmgTimecoverageDuration(tmgTimecoverageDurationId, duration, tmgTimecoverageId);
+				tmgTimecoverageDuration = new TmgTimecoverageDuration(tmgTimecoverageId, tmgTimecoverageDurationId, duration);
 			}
 		}
 		catch (SQLException e) {
@@ -3399,7 +3397,7 @@
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			while (rs.next()) {
-				durationIds.add(rs.getInt("duration_id"));
+				durationIds.add(rs.getInt("tmg_timecoverage_duration_id"));
 			}		
 		}
 		catch (SQLException e) {
@@ -3432,6 +3430,7 @@
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			while (rs.next()) {
+				int tmgTimecoverageId = rs.getInt("tmg_timecoverage_id");
 				String format = rs.getString("format");
 				if (format == null)
 					format = "";
@@ -3443,8 +3442,7 @@
 					dateenum = rs.getString("dateenum_nonstandard");
 				if (dateenum == null)
 					dateenum = "";
-				int tmgTimecoverageId = rs.getInt("tmg_timecoverage_id");
-				tmgTimecoverageEnd = new TmgTimecoverageEnd(tmgTimecoverageEndId, format, value, dateenum, tmgTimecoverageId);
+				tmgTimecoverageEnd = new TmgTimecoverageEnd(tmgTimecoverageId, tmgTimecoverageEndId, format, value, dateenum);
 			}
 		}
 		catch (SQLException e) {
@@ -3475,7 +3473,7 @@
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			while (rs.next()) {
-				endIds.add(rs.getInt("end_id"));
+				endIds.add(rs.getInt("tmg_timecoverage_end_id"));
 			}		
 		}
 		catch (SQLException e) {
@@ -3508,11 +3506,11 @@
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			while (rs.next()) {
+				int tmgTimecoverageId = rs.getInt("tmg_timecoverage_id");
 				String duration = rs.getString("duration");
 				if (duration == null)
 					duration = "";
-				int tmgTimecoverageId = rs.getInt("tmg_timecoverage_id");
-				tmgTimecoverageResolution = new TmgTimecoverageResolution(tmgTimecoverageResolutionId, duration, tmgTimecoverageId);
+				tmgTimecoverageResolution = new TmgTimecoverageResolution(tmgTimecoverageId, tmgTimecoverageResolutionId, duration);
 			}
 		}
 		catch (SQLException e) {
@@ -3543,7 +3541,7 @@
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			while (rs.next()) {
-				resolutionIds.add(rs.getInt("resolution_id"));
+				resolutionIds.add(rs.getInt("tmg_timecoverage_resolution_id"));
 			}		
 		}
 		catch (SQLException e) {
@@ -3576,6 +3574,7 @@
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			while (rs.next()) {
+				int tmgTimecoverageId = rs.getInt("tmg_timecoverage_id");
 				String format = rs.getString("format");
 				if (format == null)
 					format = "";
@@ -3587,8 +3586,7 @@
 					dateenum = rs.getString("dateenum_nonstandard");
 				if (dateenum == null)
 					dateenum = "";
-				int tmgTimecoverageId = rs.getInt("tmg_timecoverage_id");
-				tmgTimecoverageStart = new TmgTimecoverageStart(tmgTimecoverageStartId, format, value, dateenum, tmgTimecoverageId);
+				tmgTimecoverageStart = new TmgTimecoverageStart(tmgTimecoverageId, tmgTimecoverageStartId, format, value, dateenum);
 			}
 		}
 		catch (SQLException e) {
@@ -3619,7 +3617,7 @@
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			while (rs.next()) {
-				startIds.add(rs.getInt("start_id"));
+				startIds.add(rs.getInt("tmg_timecoverage_start_id"));
 			}		
 		}
 		catch (SQLException e) {
@@ -3652,13 +3650,13 @@
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			while (rs.next()) {
+				int tmgId = rs.getInt("tmg_id");
 				String vocabulary = rs.getString("vocabulary");
 				if (vocabulary == null)
 					vocabulary = rs.getString("vocabulary_nonstandard");
 				if (vocabulary == null)
 					vocabulary = "";
-				int tmgId = rs.getInt("tmg_id");
-				tmgVariables = new TmgVariables(tmgVariablesId, vocabulary, tmgId);
+				tmgVariables = new TmgVariables(tmgId, tmgVariablesId, vocabulary);
 			}
 		}
 		catch (SQLException e) {
@@ -3689,7 +3687,7 @@
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			while (rs.next()) {
-				variablesIds.add(rs.getInt("variables_id"));
+				variablesIds.add(rs.getInt("tmg_variables_id"));
 			}		
 		}
 		catch (SQLException e) {
@@ -3722,6 +3720,7 @@
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			while (rs.next()) {
+				int tmgVariablesId = rs.getInt("tmg_variables_id");
 				String units = rs.getString("units");
 				if (units == null)
 					units = "";
@@ -3731,8 +3730,7 @@
 				String vocabularyName = rs.getString("vocabulary_name");
 				if (vocabularyName == null)
 					vocabularyName = "";
-				int tmgVariablesId = rs.getInt("tmg_variables_id");
-				tmgVariablesVariable = new TmgVariablesVariable(tmgVariablesVariableId, units, name, vocabularyName, tmgVariablesId);
+				tmgVariablesVariable = new TmgVariablesVariable(tmgVariablesId, tmgVariablesVariableId, units, name, vocabularyName);
 			}
 		}
 		catch (SQLException e) {
@@ -3763,7 +3761,7 @@
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			while (rs.next()) {
-				variableIds.add(rs.getInt("variable_id"));
+				variableIds.add(rs.getInt("tmg_variables_variable_id"));
 			}		
 		}
 		catch (SQLException e) {
@@ -3796,6 +3794,7 @@
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			while (rs.next()) {
+				int tmgVariablesId = rs.getInt("tmg_variables_id");
 				String value = rs.getString("value");
 				if (value == null)
 					value = "";
@@ -3804,8 +3803,7 @@
 					xlink = rs.getString("xlink_nonstandard");
 				if (xlink == null)
 					xlink = "";
-				int tmgVariablesId = rs.getInt("tmg_variables_id");
-				tmgVariablesVariablemap = new TmgVariablesVariablemap(tmgVariablesVariablemapId, value, xlink, tmgVariablesId);
+				tmgVariablesVariablemap = new TmgVariablesVariablemap(tmgVariablesId, tmgVariablesVariablemapId, value, xlink);
 			}
 		}
 		catch (SQLException e) {
@@ -3836,7 +3834,7 @@
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			while (rs.next()) {
-				variablemapIds.add(rs.getInt("variablemap_id"));
+				variablemapIds.add(rs.getInt("tmg_variables_variablemap_id"));
 			}		
 		}
 		catch (SQLException e) {

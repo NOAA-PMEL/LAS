@@ -20,11 +20,11 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION insert_catalog_property(p_name text, p_value text, p_catalog_id int) RETURNS int AS $$
+CREATE OR REPLACE FUNCTION insert_catalog_property(p_catalog_id int, p_name text, p_value text) RETURNS int AS $$
 DECLARE
 	id int;
 BEGIN
-		insert into catalog_property("name", "value", "catalog_id") values (p_name, p_value, p_catalog_id);
+		insert into catalog_property("catalog_id", "name", "value") values (p_catalog_id, p_name, p_value);
 		select currval('catalog_property_catalog_property_id_seq') into id;
 
 		return id;
@@ -41,11 +41,11 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION insert_catalog_xlink(p_value text, p_xlink text, p_catalog_id int) RETURNS int AS $$
+CREATE OR REPLACE FUNCTION insert_catalog_xlink(p_catalog_id int, p_value text, p_xlink text) RETURNS int AS $$
 DECLARE
 	id int;
 BEGIN
-		insert into catalog_xlink("value", "catalog_id") values (p_value, p_catalog_id);
+		insert into catalog_xlink("catalog_id", "value") values (p_catalog_id, p_value);
 		select currval('catalog_xlink_catalog_xlink_id_seq') into id;
 		BEGIN
 			update catalog_xlink set xlink = cast(p_xlink as xlink) where catalog_xlink_id=id;
@@ -58,22 +58,22 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION insert_catalogref(p_child_id int, p_parent_id int) RETURNS int AS $$
+CREATE OR REPLACE FUNCTION insert_catalogref() RETURNS int AS $$
 DECLARE
 	id int;
 BEGIN
-		insert into catalogref("child_id", "parent_id") values (p_child_id, p_parent_id);
+		insert into catalogref("not_empty") values ('true');
 		select currval('catalogref_catalogref_id_seq') into id;
 
 		return id;
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION insert_catalogref_documentation(p_value text, p_documentationenum text, p_catalogref_id int) RETURNS int AS $$
+CREATE OR REPLACE FUNCTION insert_catalogref_documentation(p_catalogref_id int, p_value text, p_documentationenum text) RETURNS int AS $$
 DECLARE
 	id int;
 BEGIN
-		insert into catalogref_documentation("value", "catalogref_id") values (p_value, p_catalogref_id);
+		insert into catalogref_documentation("catalogref_id", "value") values (p_catalogref_id, p_value);
 		select currval('catalogref_documentation_catalogref_documentation_id_seq') into id;
 		BEGIN
 			update catalogref_documentation set documentationenum = cast(p_documentationenum as documentationenum) where catalogref_documentation_id=id;
@@ -86,22 +86,22 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION insert_catalogref_documentation_namespace(p_namespace text, p_catalogref_documentation_id int) RETURNS int AS $$
+CREATE OR REPLACE FUNCTION insert_catalogref_documentation_namespace(p_catalogref_documentation_id int, p_namespace text) RETURNS int AS $$
 DECLARE
 	id int;
 BEGIN
-		insert into catalogref_documentation_namespace("namespace", "catalogref_documentation_id") values (p_namespace, p_catalogref_documentation_id);
+		insert into catalogref_documentation_namespace("catalogref_documentation_id", "namespace") values (p_catalogref_documentation_id, p_namespace);
 		select currval('catalogref_documentation_namespace_catalogref_documentation_namespace_id_seq') into id;
 
 		return id;
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION insert_catalogref_documentation_xlink(p_value text, p_xlink text, p_catalogref_documentation_id int) RETURNS int AS $$
+CREATE OR REPLACE FUNCTION insert_catalogref_documentation_xlink(p_catalogref_documentation_id int, p_value text, p_xlink text) RETURNS int AS $$
 DECLARE
 	id int;
 BEGIN
-		insert into catalogref_documentation_xlink("value", "catalogref_documentation_id") values (p_value, p_catalogref_documentation_id);
+		insert into catalogref_documentation_xlink("catalogref_documentation_id", "value") values (p_catalogref_documentation_id, p_value);
 		select currval('catalogref_documentation_xlink_catalogref_documentation_xlink_id_seq') into id;
 		BEGIN
 			update catalogref_documentation_xlink set xlink = cast(p_xlink as xlink) where catalogref_documentation_xlink_id=id;
@@ -114,11 +114,11 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION insert_catalogref_xlink(p_value text, p_xlink text, p_catalogref_id int) RETURNS int AS $$
+CREATE OR REPLACE FUNCTION insert_catalogref_xlink(p_catalogref_id int, p_value text, p_xlink text) RETURNS int AS $$
 DECLARE
 	id int;
 BEGIN
-		insert into catalogref_xlink("value", "catalogref_id") values (p_value, p_catalogref_id);
+		insert into catalogref_xlink("catalogref_id", "value") values (p_catalogref_id, p_value);
 		select currval('catalogref_xlink_catalogref_xlink_id_seq') into id;
 		BEGIN
 			update catalogref_xlink set xlink = cast(p_xlink as xlink) where catalogref_xlink_id=id;
@@ -161,11 +161,11 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION insert_dataset_access(p_urlpath text, p_servicename text, p_dataformat text, p_dataset_id int) RETURNS int AS $$
+CREATE OR REPLACE FUNCTION insert_dataset_access(p_dataset_id int, p_urlpath text, p_servicename text, p_dataformat text) RETURNS int AS $$
 DECLARE
 	id int;
 BEGIN
-		insert into dataset_access("urlpath", "servicename", "dataset_id") values (p_urlpath, p_servicename, p_dataset_id);
+		insert into dataset_access("dataset_id", "urlpath", "servicename") values (p_dataset_id, p_urlpath, p_servicename);
 		select currval('dataset_access_dataset_access_id_seq') into id;
 		BEGIN
 			update dataset_access set dataformat = cast(p_dataformat as dataformat) where dataset_access_id=id;
@@ -178,11 +178,11 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION insert_dataset_access_datasize(p_value text, p_units text, p_dataset_access_id int) RETURNS int AS $$
+CREATE OR REPLACE FUNCTION insert_dataset_access_datasize(p_dataset_access_id int, p_value text, p_units text) RETURNS int AS $$
 DECLARE
 	id int;
 BEGIN
-		insert into dataset_access_datasize("value", "dataset_access_id") values (p_value, p_dataset_access_id);
+		insert into dataset_access_datasize("dataset_access_id", "value") values (p_dataset_access_id, p_value);
 		select currval('dataset_access_datasize_dataset_access_datasize_id_seq') into id;
 		BEGIN
 			update dataset_access_datasize set units = cast(p_units as units) where dataset_access_datasize_id=id;
@@ -195,11 +195,11 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION insert_dataset_catalogref(p_catalogref_id int, p_dataset_id int) RETURNS int AS $$
+CREATE OR REPLACE FUNCTION insert_dataset_catalogref(p_dataset_id int, p_catalogref_id int) RETURNS int AS $$
 DECLARE
 	id int;
 BEGIN
-		insert into dataset_catalogref("catalogref_id", "dataset_id") values (p_catalogref_id, p_dataset_id);
+		insert into dataset_catalogref("dataset_id", "catalogref_id") values (p_dataset_id, p_catalogref_id);
 
 		return 1;
 END;
@@ -226,11 +226,11 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION insert_dataset_property(p_name text, p_value text, p_dataset_id int) RETURNS int AS $$
+CREATE OR REPLACE FUNCTION insert_dataset_property(p_dataset_id int, p_name text, p_value text) RETURNS int AS $$
 DECLARE
 	id int;
 BEGIN
-		insert into dataset_property("name", "value", "dataset_id") values (p_name, p_value, p_dataset_id);
+		insert into dataset_property("dataset_id", "name", "value") values (p_dataset_id, p_name, p_value);
 		select currval('dataset_property_dataset_property_id_seq') into id;
 
 		return id;
@@ -280,32 +280,32 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION insert_metadata_namespace(p_namespace text, p_metadata_id int) RETURNS int AS $$
+CREATE OR REPLACE FUNCTION insert_metadata_namespace(p_metadata_id int, p_namespace text) RETURNS int AS $$
 DECLARE
 	id int;
 BEGIN
-		insert into metadata_namespace("namespace", "metadata_id") values (p_namespace, p_metadata_id);
+		insert into metadata_namespace("metadata_id", "namespace") values (p_metadata_id, p_namespace);
 		select currval('metadata_namespace_metadata_namespace_id_seq') into id;
 
 		return id;
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION insert_metadata_tmg(p_tmg_id int, p_metadata_id int) RETURNS int AS $$
+CREATE OR REPLACE FUNCTION insert_metadata_tmg(p_metadata_id int, p_tmg_id int) RETURNS int AS $$
 DECLARE
 	id int;
 BEGIN
-		insert into metadata_tmg("tmg_id", "metadata_id") values (p_tmg_id, p_metadata_id);
+		insert into metadata_tmg("metadata_id", "tmg_id") values (p_metadata_id, p_tmg_id);
 
 		return 1;
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION insert_metadata_xlink(p_value text, p_xlink text, p_metadata_id int) RETURNS int AS $$
+CREATE OR REPLACE FUNCTION insert_metadata_xlink(p_metadata_id int, p_value text, p_xlink text) RETURNS int AS $$
 DECLARE
 	id int;
 BEGIN
-		insert into metadata_xlink("value", "metadata_id") values (p_value, p_metadata_id);
+		insert into metadata_xlink("metadata_id", "value") values (p_metadata_id, p_value);
 		select currval('metadata_xlink_metadata_xlink_id_seq') into id;
 		BEGIN
 			update metadata_xlink set xlink = cast(p_xlink as xlink) where metadata_xlink_id=id;
@@ -336,33 +336,33 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION insert_service_datasetroot(p_path text, p_location text, p_service_id int) RETURNS int AS $$
+CREATE OR REPLACE FUNCTION insert_service_datasetroot(p_service_id int, p_path text, p_location text) RETURNS int AS $$
 DECLARE
 	id int;
 BEGIN
-		insert into service_datasetroot("path", "location", "service_id") values (p_path, p_location, p_service_id);
+		insert into service_datasetroot("service_id", "path", "location") values (p_service_id, p_path, p_location);
 		select currval('service_datasetroot_service_datasetroot_id_seq') into id;
 
 		return id;
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION insert_service_property(p_value text, p_name text, p_service_id int) RETURNS int AS $$
+CREATE OR REPLACE FUNCTION insert_service_property(p_service_id int, p_value text, p_name text) RETURNS int AS $$
 DECLARE
 	id int;
 BEGIN
-		insert into service_property("value", "name", "service_id") values (p_value, p_name, p_service_id);
+		insert into service_property("service_id", "value", "name") values (p_service_id, p_value, p_name);
 		select currval('service_property_service_property_id_seq') into id;
 
 		return id;
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION insert_service_service(p_child_id int, p_parent_id int) RETURNS int AS $$
+CREATE OR REPLACE FUNCTION insert_service_service(p_parent_id int, p_child_id int) RETURNS int AS $$
 DECLARE
 	id int;
 BEGIN
-		insert into service_service("child_id", "parent_id") values (p_child_id, p_parent_id);
+		insert into service_service("parent_id", "child_id") values (p_parent_id, p_child_id);
 
 		return 1;
 END;
@@ -379,22 +379,22 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION insert_tmg_authority(p_authority text, p_tmg_id int) RETURNS int AS $$
+CREATE OR REPLACE FUNCTION insert_tmg_authority(p_tmg_id int, p_authority text) RETURNS int AS $$
 DECLARE
 	id int;
 BEGIN
-		insert into tmg_authority("authority", "tmg_id") values (p_authority, p_tmg_id);
+		insert into tmg_authority("tmg_id", "authority") values (p_tmg_id, p_authority);
 		select currval('tmg_authority_tmg_authority_id_seq') into id;
 
 		return id;
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION insert_tmg_contributor(p_role text, p_name text, p_tmg_id int) RETURNS int AS $$
+CREATE OR REPLACE FUNCTION insert_tmg_contributor(p_tmg_id int, p_role text, p_name text) RETURNS int AS $$
 DECLARE
 	id int;
 BEGIN
-		insert into tmg_contributor("role", "name", "tmg_id") values (p_role, p_name, p_tmg_id);
+		insert into tmg_contributor("tmg_id", "role", "name") values (p_tmg_id, p_role, p_name);
 		select currval('tmg_contributor_tmg_contributor_id_seq') into id;
 
 		return id;
@@ -412,29 +412,29 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION insert_tmg_creator_contact(p_email text, p_url text, p_tmg_creator_id int) RETURNS int AS $$
+CREATE OR REPLACE FUNCTION insert_tmg_creator_contact(p_tmg_creator_id int, p_email text, p_url text) RETURNS int AS $$
 DECLARE
 	id int;
 BEGIN
-		insert into tmg_creator_contact("email", "url", "tmg_creator_id") values (p_email, p_url, p_tmg_creator_id);
+		insert into tmg_creator_contact("tmg_creator_id", "email", "url") values (p_tmg_creator_id, p_email, p_url);
 		select currval('tmg_creator_contact_tmg_creator_contact_id_seq') into id;
 
 		return id;
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION insert_tmg_creator_name(p_value text, p_vocabulary text, p_tmg_creator_id int) RETURNS int AS $$
+CREATE OR REPLACE FUNCTION insert_tmg_creator_name(p_tmg_creator_id int, p_value text, p_vocabulary text) RETURNS int AS $$
 DECLARE
 	id int;
 BEGIN
-		insert into tmg_creator_name("value", "vocabulary", "tmg_creator_id") values (p_value, p_vocabulary, p_tmg_creator_id);
+		insert into tmg_creator_name("tmg_creator_id", "value", "vocabulary") values (p_tmg_creator_id, p_value, p_vocabulary);
 		select currval('tmg_creator_name_tmg_creator_name_id_seq') into id;
 
 		return id;
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION insert_tmg_dataformat(p_dataformat text, p_tmg_id int) RETURNS int AS $$
+CREATE OR REPLACE FUNCTION insert_tmg_dataformat(p_tmg_id int, p_dataformat text) RETURNS int AS $$
 DECLARE
 	id int;
 BEGIN
@@ -451,11 +451,11 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION insert_tmg_datasize(p_value text, p_units text, p_tmg_id int) RETURNS int AS $$
+CREATE OR REPLACE FUNCTION insert_tmg_datasize(p_tmg_id int, p_value text, p_units text) RETURNS int AS $$
 DECLARE
 	id int;
 BEGIN
-		insert into tmg_datasize("value", "tmg_id") values (p_value, p_tmg_id);
+		insert into tmg_datasize("tmg_id", "value") values (p_tmg_id, p_value);
 		select currval('tmg_datasize_tmg_datasize_id_seq') into id;
 		BEGIN
 			update tmg_datasize set units = cast(p_units as units) where tmg_datasize_id=id;
@@ -468,7 +468,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION insert_tmg_datatype(p_datatype text, p_tmg_id int) RETURNS int AS $$
+CREATE OR REPLACE FUNCTION insert_tmg_datatype(p_tmg_id int, p_datatype text) RETURNS int AS $$
 DECLARE
 	id int;
 BEGIN
@@ -485,11 +485,11 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION insert_tmg_date(p_format text, p_value text, p_dateenum text, p_tmg_id int) RETURNS int AS $$
+CREATE OR REPLACE FUNCTION insert_tmg_date(p_tmg_id int, p_format text, p_value text, p_dateenum text) RETURNS int AS $$
 DECLARE
 	id int;
 BEGIN
-		insert into tmg_date("format", "value", "tmg_id") values (p_format, p_value, p_tmg_id);
+		insert into tmg_date("tmg_id", "format", "value") values (p_tmg_id, p_format, p_value);
 		select currval('tmg_date_tmg_date_id_seq') into id;
 		BEGIN
 			update tmg_date set dateenum = cast(p_dateenum as dateenum) where tmg_date_id=id;
@@ -502,11 +502,11 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION insert_tmg_documentation(p_value text, p_documentationenum text, p_tmg_id int) RETURNS int AS $$
+CREATE OR REPLACE FUNCTION insert_tmg_documentation(p_tmg_id int, p_value text, p_documentationenum text) RETURNS int AS $$
 DECLARE
 	id int;
 BEGIN
-		insert into tmg_documentation("value", "tmg_id") values (p_value, p_tmg_id);
+		insert into tmg_documentation("tmg_id", "value") values (p_tmg_id, p_value);
 		select currval('tmg_documentation_tmg_documentation_id_seq') into id;
 		BEGIN
 			update tmg_documentation set documentationenum = cast(p_documentationenum as documentationenum) where tmg_documentation_id=id;
@@ -519,22 +519,22 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION insert_tmg_documentation_namespace(p_namespace text, p_tmg_documentation_id int) RETURNS int AS $$
+CREATE OR REPLACE FUNCTION insert_tmg_documentation_namespace(p_tmg_documentation_id int, p_namespace text) RETURNS int AS $$
 DECLARE
 	id int;
 BEGIN
-		insert into tmg_documentation_namespace("namespace", "tmg_documentation_id") values (p_namespace, p_tmg_documentation_id);
+		insert into tmg_documentation_namespace("tmg_documentation_id", "namespace") values (p_tmg_documentation_id, p_namespace);
 		select currval('tmg_documentation_namespace_tmg_documentation_namespace_id_seq') into id;
 
 		return id;
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION insert_tmg_documentation_xlink(p_value text, p_xlink text, p_tmg_documentation_id int) RETURNS int AS $$
+CREATE OR REPLACE FUNCTION insert_tmg_documentation_xlink(p_tmg_documentation_id int, p_value text, p_xlink text) RETURNS int AS $$
 DECLARE
 	id int;
 BEGIN
-		insert into tmg_documentation_xlink("value", "tmg_documentation_id") values (p_value, p_tmg_documentation_id);
+		insert into tmg_documentation_xlink("tmg_documentation_id", "value") values (p_tmg_documentation_id, p_value);
 		select currval('tmg_documentation_xlink_tmg_documentation_xlink_id_seq') into id;
 		BEGIN
 			update tmg_documentation_xlink set xlink = cast(p_xlink as xlink) where tmg_documentation_xlink_id=id;
@@ -547,7 +547,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION insert_tmg_geospatialcoverage(p_upordown text, p_tmg_id int) RETURNS int AS $$
+CREATE OR REPLACE FUNCTION insert_tmg_geospatialcoverage(p_tmg_id int, p_upordown text) RETURNS int AS $$
 DECLARE
 	id int;
 BEGIN
@@ -564,55 +564,55 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION insert_tmg_geospatialcoverage_eastwest(p_size text, p_units text, p_start text, p_resolution text, p_tmg_geospatialcoverage_id int) RETURNS int AS $$
+CREATE OR REPLACE FUNCTION insert_tmg_geospatialcoverage_eastwest(p_tmg_geospatialcoverage_id int, p_size text, p_units text, p_start text, p_resolution text) RETURNS int AS $$
 DECLARE
 	id int;
 BEGIN
-		insert into tmg_geospatialcoverage_eastwest("size", "units", "start", "resolution", "tmg_geospatialcoverage_id") values (p_size, p_units, p_start, p_resolution, p_tmg_geospatialcoverage_id);
+		insert into tmg_geospatialcoverage_eastwest("tmg_geospatialcoverage_id", "size", "units", "start", "resolution") values (p_tmg_geospatialcoverage_id, p_size, p_units, p_start, p_resolution);
 		select currval('tmg_geospatialcoverage_eastwest_tmg_geospatialcoverage_eastwest_id_seq') into id;
 
 		return id;
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION insert_tmg_geospatialcoverage_name(p_vocabulary text, p_value text, p_tmg_geospatialcoverage_id int) RETURNS int AS $$
+CREATE OR REPLACE FUNCTION insert_tmg_geospatialcoverage_name(p_tmg_geospatialcoverage_id int, p_vocabulary text, p_value text) RETURNS int AS $$
 DECLARE
 	id int;
 BEGIN
-		insert into tmg_geospatialcoverage_name("vocabulary", "value", "tmg_geospatialcoverage_id") values (p_vocabulary, p_value, p_tmg_geospatialcoverage_id);
+		insert into tmg_geospatialcoverage_name("tmg_geospatialcoverage_id", "vocabulary", "value") values (p_tmg_geospatialcoverage_id, p_vocabulary, p_value);
 		select currval('tmg_geospatialcoverage_name_tmg_geospatialcoverage_name_id_seq') into id;
 
 		return id;
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION insert_tmg_geospatialcoverage_northsouth(p_size text, p_resolution text, p_start text, p_units text, p_tmg_geospatialcoverage_id int) RETURNS int AS $$
+CREATE OR REPLACE FUNCTION insert_tmg_geospatialcoverage_northsouth(p_tmg_geospatialcoverage_id int, p_size text, p_resolution text, p_start text, p_units text) RETURNS int AS $$
 DECLARE
 	id int;
 BEGIN
-		insert into tmg_geospatialcoverage_northsouth("size", "resolution", "start", "units", "tmg_geospatialcoverage_id") values (p_size, p_resolution, p_start, p_units, p_tmg_geospatialcoverage_id);
+		insert into tmg_geospatialcoverage_northsouth("tmg_geospatialcoverage_id", "size", "resolution", "start", "units") values (p_tmg_geospatialcoverage_id, p_size, p_resolution, p_start, p_units);
 		select currval('tmg_geospatialcoverage_northsouth_tmg_geospatialcoverage_northsouth_id_seq') into id;
 
 		return id;
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION insert_tmg_geospatialcoverage_updown(p_start text, p_resolution text, p_size text, p_units text, p_tmg_geospatialcoverage_id int) RETURNS int AS $$
+CREATE OR REPLACE FUNCTION insert_tmg_geospatialcoverage_updown(p_tmg_geospatialcoverage_id int, p_start text, p_resolution text, p_size text, p_units text) RETURNS int AS $$
 DECLARE
 	id int;
 BEGIN
-		insert into tmg_geospatialcoverage_updown("start", "resolution", "size", "units", "tmg_geospatialcoverage_id") values (p_start, p_resolution, p_size, p_units, p_tmg_geospatialcoverage_id);
+		insert into tmg_geospatialcoverage_updown("tmg_geospatialcoverage_id", "start", "resolution", "size", "units") values (p_tmg_geospatialcoverage_id, p_start, p_resolution, p_size, p_units);
 		select currval('tmg_geospatialcoverage_updown_tmg_geospatialcoverage_updown_id_seq') into id;
 
 		return id;
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION insert_tmg_keyword(p_value text, p_vocabulary text, p_tmg_id int) RETURNS int AS $$
+CREATE OR REPLACE FUNCTION insert_tmg_keyword(p_tmg_id int, p_value text, p_vocabulary text) RETURNS int AS $$
 DECLARE
 	id int;
 BEGIN
-		insert into tmg_keyword("value", "vocabulary", "tmg_id") values (p_value, p_vocabulary, p_tmg_id);
+		insert into tmg_keyword("tmg_id", "value", "vocabulary") values (p_tmg_id, p_value, p_vocabulary);
 		select currval('tmg_keyword_tmg_keyword_id_seq') into id;
 
 		return id;
@@ -629,22 +629,22 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION insert_tmg_project(p_value text, p_vocabulary text, p_tmg_id int) RETURNS int AS $$
+CREATE OR REPLACE FUNCTION insert_tmg_project(p_tmg_id int, p_value text, p_vocabulary text) RETURNS int AS $$
 DECLARE
 	id int;
 BEGIN
-		insert into tmg_project("value", "vocabulary", "tmg_id") values (p_value, p_vocabulary, p_tmg_id);
+		insert into tmg_project("tmg_id", "value", "vocabulary") values (p_tmg_id, p_value, p_vocabulary);
 		select currval('tmg_project_tmg_project_id_seq') into id;
 
 		return id;
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION insert_tmg_property(p_name text, p_value text, p_tmg_id int) RETURNS int AS $$
+CREATE OR REPLACE FUNCTION insert_tmg_property(p_tmg_id int, p_name text, p_value text) RETURNS int AS $$
 DECLARE
 	id int;
 BEGIN
-		insert into tmg_property("name", "value", "tmg_id") values (p_name, p_value, p_tmg_id);
+		insert into tmg_property("tmg_id", "name", "value") values (p_tmg_id, p_name, p_value);
 		select currval('tmg_property_tmg_property_id_seq') into id;
 
 		return id;
@@ -662,66 +662,66 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION insert_tmg_publisher_contact(p_url text, p_email text, p_tmg_publisher_id int) RETURNS int AS $$
+CREATE OR REPLACE FUNCTION insert_tmg_publisher_contact(p_tmg_publisher_id int, p_url text, p_email text) RETURNS int AS $$
 DECLARE
 	id int;
 BEGIN
-		insert into tmg_publisher_contact("url", "email", "tmg_publisher_id") values (p_url, p_email, p_tmg_publisher_id);
+		insert into tmg_publisher_contact("tmg_publisher_id", "url", "email") values (p_tmg_publisher_id, p_url, p_email);
 		select currval('tmg_publisher_contact_tmg_publisher_contact_id_seq') into id;
 
 		return id;
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION insert_tmg_publisher_name(p_value text, p_vocabulary text, p_tmg_publisher_id int) RETURNS int AS $$
+CREATE OR REPLACE FUNCTION insert_tmg_publisher_name(p_tmg_publisher_id int, p_value text, p_vocabulary text) RETURNS int AS $$
 DECLARE
 	id int;
 BEGIN
-		insert into tmg_publisher_name("value", "vocabulary", "tmg_publisher_id") values (p_value, p_vocabulary, p_tmg_publisher_id);
+		insert into tmg_publisher_name("tmg_publisher_id", "value", "vocabulary") values (p_tmg_publisher_id, p_value, p_vocabulary);
 		select currval('tmg_publisher_name_tmg_publisher_name_id_seq') into id;
 
 		return id;
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION insert_tmg_servicename(p_servicename text, p_tmg_id int) RETURNS int AS $$
+CREATE OR REPLACE FUNCTION insert_tmg_servicename(p_tmg_id int, p_servicename text) RETURNS int AS $$
 DECLARE
 	id int;
 BEGIN
-		insert into tmg_servicename("servicename", "tmg_id") values (p_servicename, p_tmg_id);
+		insert into tmg_servicename("tmg_id", "servicename") values (p_tmg_id, p_servicename);
 		select currval('tmg_servicename_tmg_servicename_id_seq') into id;
 
 		return id;
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION insert_tmg_timecoverage(p_resolution text, p_tmg_id int) RETURNS int AS $$
+CREATE OR REPLACE FUNCTION insert_tmg_timecoverage(p_tmg_id int, p_resolution text) RETURNS int AS $$
 DECLARE
 	id int;
 BEGIN
-		insert into tmg_timecoverage("resolution", "tmg_id") values (p_resolution, p_tmg_id);
+		insert into tmg_timecoverage("tmg_id", "resolution") values (p_tmg_id, p_resolution);
 		select currval('tmg_timecoverage_tmg_timecoverage_id_seq') into id;
 
 		return id;
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION insert_tmg_timecoverage_duration(p_duration text, p_tmg_timecoverage_id int) RETURNS int AS $$
+CREATE OR REPLACE FUNCTION insert_tmg_timecoverage_duration(p_tmg_timecoverage_id int, p_duration text) RETURNS int AS $$
 DECLARE
 	id int;
 BEGIN
-		insert into tmg_timecoverage_duration("duration", "tmg_timecoverage_id") values (p_duration, p_tmg_timecoverage_id);
+		insert into tmg_timecoverage_duration("tmg_timecoverage_id", "duration") values (p_tmg_timecoverage_id, p_duration);
 		select currval('tmg_timecoverage_duration_tmg_timecoverage_duration_id_seq') into id;
 
 		return id;
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION insert_tmg_timecoverage_end(p_format text, p_value text, p_dateenum text, p_tmg_timecoverage_id int) RETURNS int AS $$
+CREATE OR REPLACE FUNCTION insert_tmg_timecoverage_end(p_tmg_timecoverage_id int, p_format text, p_value text, p_dateenum text) RETURNS int AS $$
 DECLARE
 	id int;
 BEGIN
-		insert into tmg_timecoverage_end("format", "value", "tmg_timecoverage_id") values (p_format, p_value, p_tmg_timecoverage_id);
+		insert into tmg_timecoverage_end("tmg_timecoverage_id", "format", "value") values (p_tmg_timecoverage_id, p_format, p_value);
 		select currval('tmg_timecoverage_end_tmg_timecoverage_end_id_seq') into id;
 		BEGIN
 			update tmg_timecoverage_end set dateenum = cast(p_dateenum as dateenum) where tmg_timecoverage_end_id=id;
@@ -734,22 +734,22 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION insert_tmg_timecoverage_resolution(p_duration text, p_tmg_timecoverage_id int) RETURNS int AS $$
+CREATE OR REPLACE FUNCTION insert_tmg_timecoverage_resolution(p_tmg_timecoverage_id int, p_duration text) RETURNS int AS $$
 DECLARE
 	id int;
 BEGIN
-		insert into tmg_timecoverage_resolution("duration", "tmg_timecoverage_id") values (p_duration, p_tmg_timecoverage_id);
+		insert into tmg_timecoverage_resolution("tmg_timecoverage_id", "duration") values (p_tmg_timecoverage_id, p_duration);
 		select currval('tmg_timecoverage_resolution_tmg_timecoverage_resolution_id_seq') into id;
 
 		return id;
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION insert_tmg_timecoverage_start(p_format text, p_value text, p_dateenum text, p_tmg_timecoverage_id int) RETURNS int AS $$
+CREATE OR REPLACE FUNCTION insert_tmg_timecoverage_start(p_tmg_timecoverage_id int, p_format text, p_value text, p_dateenum text) RETURNS int AS $$
 DECLARE
 	id int;
 BEGIN
-		insert into tmg_timecoverage_start("format", "value", "tmg_timecoverage_id") values (p_format, p_value, p_tmg_timecoverage_id);
+		insert into tmg_timecoverage_start("tmg_timecoverage_id", "format", "value") values (p_tmg_timecoverage_id, p_format, p_value);
 		select currval('tmg_timecoverage_start_tmg_timecoverage_start_id_seq') into id;
 		BEGIN
 			update tmg_timecoverage_start set dateenum = cast(p_dateenum as dateenum) where tmg_timecoverage_start_id=id;
@@ -762,7 +762,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION insert_tmg_variables(p_vocabulary text, p_tmg_id int) RETURNS int AS $$
+CREATE OR REPLACE FUNCTION insert_tmg_variables(p_tmg_id int, p_vocabulary text) RETURNS int AS $$
 DECLARE
 	id int;
 BEGIN
@@ -779,22 +779,22 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION insert_tmg_variables_variable(p_units text, p_name text, p_vocabulary_name text, p_tmg_variables_id int) RETURNS int AS $$
+CREATE OR REPLACE FUNCTION insert_tmg_variables_variable(p_tmg_variables_id int, p_units text, p_name text, p_vocabulary_name text) RETURNS int AS $$
 DECLARE
 	id int;
 BEGIN
-		insert into tmg_variables_variable("units", "name", "vocabulary_name", "tmg_variables_id") values (p_units, p_name, p_vocabulary_name, p_tmg_variables_id);
+		insert into tmg_variables_variable("tmg_variables_id", "units", "name", "vocabulary_name") values (p_tmg_variables_id, p_units, p_name, p_vocabulary_name);
 		select currval('tmg_variables_variable_tmg_variables_variable_id_seq') into id;
 
 		return id;
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION insert_tmg_variables_variablemap(p_value text, p_xlink text, p_tmg_variables_id int) RETURNS int AS $$
+CREATE OR REPLACE FUNCTION insert_tmg_variables_variablemap(p_tmg_variables_id int, p_value text, p_xlink text) RETURNS int AS $$
 DECLARE
 	id int;
 BEGIN
-		insert into tmg_variables_variablemap("value", "tmg_variables_id") values (p_value, p_tmg_variables_id);
+		insert into tmg_variables_variablemap("tmg_variables_id", "value") values (p_tmg_variables_id, p_value);
 		select currval('tmg_variables_variablemap_tmg_variables_variablemap_id_seq') into id;
 		BEGIN
 			update tmg_variables_variablemap set xlink = cast(p_xlink as xlink) where tmg_variables_variablemap_id=id;
@@ -809,7 +809,7 @@ $$ LANGUAGE plpgsql;
 
 
 
-CREATE OR REPLACE FUNCTION update_catalog(p_catalog_id int, p_name text, p_expires text, p_version text, p_base text, p_xmlns text, p_status text) RETURNS int AS $$
+CREATE OR REPLACE FUNCTION update_catalog(p_catalog int, p_name text, p_expires text, p_version text, p_base text, p_xmlns text, p_status text) RETURNS int AS $$
 DECLARE
 	id int;
 BEGIN
@@ -824,7 +824,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION update_catalog_property(p_catalog_property_id int, p_name text, p_value text, p_catalog_id int) RETURNS int AS $$
+CREATE OR REPLACE FUNCTION update_catalog_property(p_catalog_id int, p_catalog_property int, p_name text, p_value text) RETURNS int AS $$
 DECLARE
 	id int;
 BEGIN
@@ -832,13 +832,13 @@ BEGIN
 		if(id is null) then
 			return -1;
 		end if;
-		update catalog_property set "name"=p_name, "value"=p_value, "catalog_id"=p_catalog_id where catalog_property_id=id;
+		update catalog_property set "catalog_id"=p_catalog_id, "name"=p_name, "value"=p_value where catalog_property_id=id;
 
 		return id;
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION update_catalog_xlink(p_catalog_xlink_id int, p_value text, p_xlink text, p_catalog_id int) RETURNS int AS $$
+CREATE OR REPLACE FUNCTION update_catalog_xlink(p_catalog_id int, p_catalog_xlink int, p_value text, p_xlink text) RETURNS int AS $$
 DECLARE
 	id int;
 BEGIN
@@ -846,7 +846,7 @@ BEGIN
 		if(id is null) then
 			return -1;
 		end if;
-		update catalog_xlink set "value"=p_value, "catalog_id"=p_catalog_id where catalog_xlink_id=id;
+		update catalog_xlink set "catalog_id"=p_catalog_id, "value"=p_value where catalog_xlink_id=id;
 		BEGIN
 			update catalog_xlink set xlink = cast(p_xlink as xlink) where catalog_xlink_id=id;
 		EXCEPTION
@@ -858,7 +858,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION update_catalogref(p_catalogref_id int, p_child_id int, p_parent_id int) RETURNS int AS $$
+CREATE OR REPLACE FUNCTION update_catalogref(p_catalogref int) RETURNS int AS $$
 DECLARE
 	id int;
 BEGIN
@@ -866,13 +866,12 @@ BEGIN
 		if(id is null) then
 			return -1;
 		end if;
-		update catalogref set "child_id"=p_child_id, "parent_id"=p_parent_id where catalogref_id=id;
 
 		return id;
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION update_catalogref_documentation(p_catalogref_documentation_id int, p_value text, p_documentationenum text, p_catalogref_id int) RETURNS int AS $$
+CREATE OR REPLACE FUNCTION update_catalogref_documentation(p_catalogref_id int, p_catalogref_documentation int, p_value text, p_documentationenum text) RETURNS int AS $$
 DECLARE
 	id int;
 BEGIN
@@ -880,7 +879,7 @@ BEGIN
 		if(id is null) then
 			return -1;
 		end if;
-		update catalogref_documentation set "value"=p_value, "catalogref_id"=p_catalogref_id where catalogref_documentation_id=id;
+		update catalogref_documentation set "catalogref_id"=p_catalogref_id, "value"=p_value where catalogref_documentation_id=id;
 		BEGIN
 			update catalogref_documentation set documentationenum = cast(p_documentationenum as documentationenum) where catalogref_documentation_id=id;
 		EXCEPTION
@@ -892,7 +891,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION update_catalogref_documentation_namespace(p_catalogref_documentation_namespace_id int, p_namespace text, p_catalogref_documentation_id int) RETURNS int AS $$
+CREATE OR REPLACE FUNCTION update_catalogref_documentation_namespace(p_catalogref_documentation_id int, p_catalogref_documentation_namespace int, p_namespace text) RETURNS int AS $$
 DECLARE
 	id int;
 BEGIN
@@ -900,13 +899,13 @@ BEGIN
 		if(id is null) then
 			return -1;
 		end if;
-		update catalogref_documentation_namespace set "namespace"=p_namespace, "catalogref_documentation_id"=p_catalogref_documentation_id where catalogref_documentation_namespace_id=id;
+		update catalogref_documentation_namespace set "catalogref_documentation_id"=p_catalogref_documentation_id, "namespace"=p_namespace where catalogref_documentation_namespace_id=id;
 
 		return id;
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION update_catalogref_documentation_xlink(p_catalogref_documentation_xlink_id int, p_value text, p_xlink text, p_catalogref_documentation_id int) RETURNS int AS $$
+CREATE OR REPLACE FUNCTION update_catalogref_documentation_xlink(p_catalogref_documentation_id int, p_catalogref_documentation_xlink int, p_value text, p_xlink text) RETURNS int AS $$
 DECLARE
 	id int;
 BEGIN
@@ -914,7 +913,7 @@ BEGIN
 		if(id is null) then
 			return -1;
 		end if;
-		update catalogref_documentation_xlink set "value"=p_value, "catalogref_documentation_id"=p_catalogref_documentation_id where catalogref_documentation_xlink_id=id;
+		update catalogref_documentation_xlink set "catalogref_documentation_id"=p_catalogref_documentation_id, "value"=p_value where catalogref_documentation_xlink_id=id;
 		BEGIN
 			update catalogref_documentation_xlink set xlink = cast(p_xlink as xlink) where catalogref_documentation_xlink_id=id;
 		EXCEPTION
@@ -926,7 +925,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION update_catalogref_xlink(p_catalogref_xlink_id int, p_value text, p_xlink text, p_catalogref_id int) RETURNS int AS $$
+CREATE OR REPLACE FUNCTION update_catalogref_xlink(p_catalogref_id int, p_catalogref_xlink int, p_value text, p_xlink text) RETURNS int AS $$
 DECLARE
 	id int;
 BEGIN
@@ -934,7 +933,7 @@ BEGIN
 		if(id is null) then
 			return -1;
 		end if;
-		update catalogref_xlink set "value"=p_value, "catalogref_id"=p_catalogref_id where catalogref_xlink_id=id;
+		update catalogref_xlink set "catalogref_id"=p_catalogref_id, "value"=p_value where catalogref_xlink_id=id;
 		BEGIN
 			update catalogref_xlink set xlink = cast(p_xlink as xlink) where catalogref_xlink_id=id;
 		EXCEPTION
@@ -946,7 +945,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION update_dataset(p_dataset_id int, p_harvest text, p_name text, p_alias text, p_authority text, p_d_id text, p_servicename text, p_urlpath text, p_resourcecontrol text, p_collectiontype text, p_status text, p_datatype text, p_datasize_unit text) RETURNS int AS $$
+CREATE OR REPLACE FUNCTION update_dataset(p_dataset int, p_harvest text, p_name text, p_alias text, p_authority text, p_d_id text, p_servicename text, p_urlpath text, p_resourcecontrol text, p_collectiontype text, p_status text, p_datatype text, p_datasize_unit text) RETURNS int AS $$
 DECLARE
 	id int;
 BEGIN
@@ -979,7 +978,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION update_dataset_access(p_dataset_access_id int, p_urlpath text, p_servicename text, p_dataformat text, p_dataset_id int) RETURNS int AS $$
+CREATE OR REPLACE FUNCTION update_dataset_access(p_dataset_id int, p_dataset_access int, p_urlpath text, p_servicename text, p_dataformat text) RETURNS int AS $$
 DECLARE
 	id int;
 BEGIN
@@ -987,7 +986,7 @@ BEGIN
 		if(id is null) then
 			return -1;
 		end if;
-		update dataset_access set "urlpath"=p_urlpath, "servicename"=p_servicename, "dataset_id"=p_dataset_id where dataset_access_id=id;
+		update dataset_access set "dataset_id"=p_dataset_id, "urlpath"=p_urlpath, "servicename"=p_servicename where dataset_access_id=id;
 		BEGIN
 			update dataset_access set dataformat = cast(p_dataformat as dataformat) where dataset_access_id=id;
 		EXCEPTION
@@ -999,7 +998,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION update_dataset_access_datasize(p_dataset_access_datasize_id int, p_value text, p_units text, p_dataset_access_id int) RETURNS int AS $$
+CREATE OR REPLACE FUNCTION update_dataset_access_datasize(p_dataset_access_id int, p_dataset_access_datasize int, p_value text, p_units text) RETURNS int AS $$
 DECLARE
 	id int;
 BEGIN
@@ -1007,7 +1006,7 @@ BEGIN
 		if(id is null) then
 			return -1;
 		end if;
-		update dataset_access_datasize set "value"=p_value, "dataset_access_id"=p_dataset_access_id where dataset_access_datasize_id=id;
+		update dataset_access_datasize set "dataset_access_id"=p_dataset_access_id, "value"=p_value where dataset_access_datasize_id=id;
 		BEGIN
 			update dataset_access_datasize set units = cast(p_units as units) where dataset_access_datasize_id=id;
 		EXCEPTION
@@ -1019,7 +1018,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION update_dataset_ncml(p_dataset_ncml_id int, p_dataset_id int) RETURNS int AS $$
+CREATE OR REPLACE FUNCTION update_dataset_ncml(p_dataset_id int, p_dataset_ncml int) RETURNS int AS $$
 DECLARE
 	id int;
 BEGIN
@@ -1033,7 +1032,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION update_dataset_property(p_dataset_property_id int, p_name text, p_value text, p_dataset_id int) RETURNS int AS $$
+CREATE OR REPLACE FUNCTION update_dataset_property(p_dataset_id int, p_dataset_property int, p_name text, p_value text) RETURNS int AS $$
 DECLARE
 	id int;
 BEGIN
@@ -1041,13 +1040,13 @@ BEGIN
 		if(id is null) then
 			return -1;
 		end if;
-		update dataset_property set "name"=p_name, "value"=p_value, "dataset_id"=p_dataset_id where dataset_property_id=id;
+		update dataset_property set "dataset_id"=p_dataset_id, "name"=p_name, "value"=p_value where dataset_property_id=id;
 
 		return id;
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION update_metadata(p_metadata_id int, p_metadatatype text, p_inherited text) RETURNS int AS $$
+CREATE OR REPLACE FUNCTION update_metadata(p_metadata int, p_metadatatype text, p_inherited text) RETURNS int AS $$
 DECLARE
 	id int;
 BEGIN
@@ -1072,7 +1071,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION update_metadata_namespace(p_metadata_namespace_id int, p_namespace text, p_metadata_id int) RETURNS int AS $$
+CREATE OR REPLACE FUNCTION update_metadata_namespace(p_metadata_id int, p_metadata_namespace int, p_namespace text) RETURNS int AS $$
 DECLARE
 	id int;
 BEGIN
@@ -1080,13 +1079,13 @@ BEGIN
 		if(id is null) then
 			return -1;
 		end if;
-		update metadata_namespace set "namespace"=p_namespace, "metadata_id"=p_metadata_id where metadata_namespace_id=id;
+		update metadata_namespace set "metadata_id"=p_metadata_id, "namespace"=p_namespace where metadata_namespace_id=id;
 
 		return id;
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION update_metadata_xlink(p_metadata_xlink_id int, p_value text, p_xlink text, p_metadata_id int) RETURNS int AS $$
+CREATE OR REPLACE FUNCTION update_metadata_xlink(p_metadata_id int, p_metadata_xlink int, p_value text, p_xlink text) RETURNS int AS $$
 DECLARE
 	id int;
 BEGIN
@@ -1094,7 +1093,7 @@ BEGIN
 		if(id is null) then
 			return -1;
 		end if;
-		update metadata_xlink set "value"=p_value, "metadata_id"=p_metadata_id where metadata_xlink_id=id;
+		update metadata_xlink set "metadata_id"=p_metadata_id, "value"=p_value where metadata_xlink_id=id;
 		BEGIN
 			update metadata_xlink set xlink = cast(p_xlink as xlink) where metadata_xlink_id=id;
 		EXCEPTION
@@ -1106,7 +1105,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION update_service(p_service_id int, p_suffix text, p_name text, p_base text, p_desc text, p_servicetype text, p_status text) RETURNS int AS $$
+CREATE OR REPLACE FUNCTION update_service(p_service int, p_suffix text, p_name text, p_base text, p_desc text, p_servicetype text, p_status text) RETURNS int AS $$
 DECLARE
 	id int;
 BEGIN
@@ -1127,7 +1126,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION update_service_datasetroot(p_service_datasetroot_id int, p_path text, p_location text, p_service_id int) RETURNS int AS $$
+CREATE OR REPLACE FUNCTION update_service_datasetroot(p_service_id int, p_service_datasetroot int, p_path text, p_location text) RETURNS int AS $$
 DECLARE
 	id int;
 BEGIN
@@ -1135,13 +1134,13 @@ BEGIN
 		if(id is null) then
 			return -1;
 		end if;
-		update service_datasetroot set "path"=p_path, "location"=p_location, "service_id"=p_service_id where service_datasetroot_id=id;
+		update service_datasetroot set "service_id"=p_service_id, "path"=p_path, "location"=p_location where service_datasetroot_id=id;
 
 		return id;
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION update_service_property(p_service_property_id int, p_value text, p_name text, p_service_id int) RETURNS int AS $$
+CREATE OR REPLACE FUNCTION update_service_property(p_service_id int, p_service_property int, p_value text, p_name text) RETURNS int AS $$
 DECLARE
 	id int;
 BEGIN
@@ -1149,13 +1148,13 @@ BEGIN
 		if(id is null) then
 			return -1;
 		end if;
-		update service_property set "value"=p_value, "name"=p_name, "service_id"=p_service_id where service_property_id=id;
+		update service_property set "service_id"=p_service_id, "value"=p_value, "name"=p_name where service_property_id=id;
 
 		return id;
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION update_tmg(p_tmg_id int) RETURNS int AS $$
+CREATE OR REPLACE FUNCTION update_tmg(p_tmg int) RETURNS int AS $$
 DECLARE
 	id int;
 BEGIN
@@ -1168,7 +1167,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION update_tmg_authority(p_tmg_authority_id int, p_authority text, p_tmg_id int) RETURNS int AS $$
+CREATE OR REPLACE FUNCTION update_tmg_authority(p_tmg_id int, p_tmg_authority int, p_authority text) RETURNS int AS $$
 DECLARE
 	id int;
 BEGIN
@@ -1176,13 +1175,13 @@ BEGIN
 		if(id is null) then
 			return -1;
 		end if;
-		update tmg_authority set "authority"=p_authority, "tmg_id"=p_tmg_id where tmg_authority_id=id;
+		update tmg_authority set "tmg_id"=p_tmg_id, "authority"=p_authority where tmg_authority_id=id;
 
 		return id;
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION update_tmg_contributor(p_tmg_contributor_id int, p_role text, p_name text, p_tmg_id int) RETURNS int AS $$
+CREATE OR REPLACE FUNCTION update_tmg_contributor(p_tmg_id int, p_tmg_contributor int, p_role text, p_name text) RETURNS int AS $$
 DECLARE
 	id int;
 BEGIN
@@ -1190,13 +1189,13 @@ BEGIN
 		if(id is null) then
 			return -1;
 		end if;
-		update tmg_contributor set "role"=p_role, "name"=p_name, "tmg_id"=p_tmg_id where tmg_contributor_id=id;
+		update tmg_contributor set "tmg_id"=p_tmg_id, "role"=p_role, "name"=p_name where tmg_contributor_id=id;
 
 		return id;
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION update_tmg_creator(p_tmg_creator_id int, p_tmg_id int) RETURNS int AS $$
+CREATE OR REPLACE FUNCTION update_tmg_creator(p_tmg_id int, p_tmg_creator int) RETURNS int AS $$
 DECLARE
 	id int;
 BEGIN
@@ -1210,7 +1209,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION update_tmg_creator_contact(p_tmg_creator_contact_id int, p_email text, p_url text, p_tmg_creator_id int) RETURNS int AS $$
+CREATE OR REPLACE FUNCTION update_tmg_creator_contact(p_tmg_creator_id int, p_tmg_creator_contact int, p_email text, p_url text) RETURNS int AS $$
 DECLARE
 	id int;
 BEGIN
@@ -1218,13 +1217,13 @@ BEGIN
 		if(id is null) then
 			return -1;
 		end if;
-		update tmg_creator_contact set "email"=p_email, "url"=p_url, "tmg_creator_id"=p_tmg_creator_id where tmg_creator_contact_id=id;
+		update tmg_creator_contact set "tmg_creator_id"=p_tmg_creator_id, "email"=p_email, "url"=p_url where tmg_creator_contact_id=id;
 
 		return id;
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION update_tmg_creator_name(p_tmg_creator_name_id int, p_value text, p_vocabulary text, p_tmg_creator_id int) RETURNS int AS $$
+CREATE OR REPLACE FUNCTION update_tmg_creator_name(p_tmg_creator_id int, p_tmg_creator_name int, p_value text, p_vocabulary text) RETURNS int AS $$
 DECLARE
 	id int;
 BEGIN
@@ -1232,13 +1231,13 @@ BEGIN
 		if(id is null) then
 			return -1;
 		end if;
-		update tmg_creator_name set "value"=p_value, "vocabulary"=p_vocabulary, "tmg_creator_id"=p_tmg_creator_id where tmg_creator_name_id=id;
+		update tmg_creator_name set "tmg_creator_id"=p_tmg_creator_id, "value"=p_value, "vocabulary"=p_vocabulary where tmg_creator_name_id=id;
 
 		return id;
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION update_tmg_dataformat(p_tmg_dataformat_id int, p_dataformat text, p_tmg_id int) RETURNS int AS $$
+CREATE OR REPLACE FUNCTION update_tmg_dataformat(p_tmg_id int, p_tmg_dataformat int, p_dataformat text) RETURNS int AS $$
 DECLARE
 	id int;
 BEGIN
@@ -1258,7 +1257,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION update_tmg_datasize(p_tmg_datasize_id int, p_value text, p_units text, p_tmg_id int) RETURNS int AS $$
+CREATE OR REPLACE FUNCTION update_tmg_datasize(p_tmg_id int, p_tmg_datasize int, p_value text, p_units text) RETURNS int AS $$
 DECLARE
 	id int;
 BEGIN
@@ -1266,7 +1265,7 @@ BEGIN
 		if(id is null) then
 			return -1;
 		end if;
-		update tmg_datasize set "value"=p_value, "tmg_id"=p_tmg_id where tmg_datasize_id=id;
+		update tmg_datasize set "tmg_id"=p_tmg_id, "value"=p_value where tmg_datasize_id=id;
 		BEGIN
 			update tmg_datasize set units = cast(p_units as units) where tmg_datasize_id=id;
 		EXCEPTION
@@ -1278,7 +1277,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION update_tmg_datatype(p_tmg_datatype_id int, p_datatype text, p_tmg_id int) RETURNS int AS $$
+CREATE OR REPLACE FUNCTION update_tmg_datatype(p_tmg_id int, p_tmg_datatype int, p_datatype text) RETURNS int AS $$
 DECLARE
 	id int;
 BEGIN
@@ -1298,7 +1297,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION update_tmg_date(p_tmg_date_id int, p_format text, p_value text, p_dateenum text, p_tmg_id int) RETURNS int AS $$
+CREATE OR REPLACE FUNCTION update_tmg_date(p_tmg_id int, p_tmg_date int, p_format text, p_value text, p_dateenum text) RETURNS int AS $$
 DECLARE
 	id int;
 BEGIN
@@ -1306,7 +1305,7 @@ BEGIN
 		if(id is null) then
 			return -1;
 		end if;
-		update tmg_date set "format"=p_format, "value"=p_value, "tmg_id"=p_tmg_id where tmg_date_id=id;
+		update tmg_date set "tmg_id"=p_tmg_id, "format"=p_format, "value"=p_value where tmg_date_id=id;
 		BEGIN
 			update tmg_date set dateenum = cast(p_dateenum as dateenum) where tmg_date_id=id;
 		EXCEPTION
@@ -1318,7 +1317,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION update_tmg_documentation(p_tmg_documentation_id int, p_value text, p_documentationenum text, p_tmg_id int) RETURNS int AS $$
+CREATE OR REPLACE FUNCTION update_tmg_documentation(p_tmg_id int, p_tmg_documentation int, p_value text, p_documentationenum text) RETURNS int AS $$
 DECLARE
 	id int;
 BEGIN
@@ -1326,7 +1325,7 @@ BEGIN
 		if(id is null) then
 			return -1;
 		end if;
-		update tmg_documentation set "value"=p_value, "tmg_id"=p_tmg_id where tmg_documentation_id=id;
+		update tmg_documentation set "tmg_id"=p_tmg_id, "value"=p_value where tmg_documentation_id=id;
 		BEGIN
 			update tmg_documentation set documentationenum = cast(p_documentationenum as documentationenum) where tmg_documentation_id=id;
 		EXCEPTION
@@ -1338,7 +1337,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION update_tmg_documentation_namespace(p_tmg_documentation_namespace_id int, p_namespace text, p_tmg_documentation_id int) RETURNS int AS $$
+CREATE OR REPLACE FUNCTION update_tmg_documentation_namespace(p_tmg_documentation_id int, p_tmg_documentation_namespace int, p_namespace text) RETURNS int AS $$
 DECLARE
 	id int;
 BEGIN
@@ -1346,13 +1345,13 @@ BEGIN
 		if(id is null) then
 			return -1;
 		end if;
-		update tmg_documentation_namespace set "namespace"=p_namespace, "tmg_documentation_id"=p_tmg_documentation_id where tmg_documentation_namespace_id=id;
+		update tmg_documentation_namespace set "tmg_documentation_id"=p_tmg_documentation_id, "namespace"=p_namespace where tmg_documentation_namespace_id=id;
 
 		return id;
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION update_tmg_documentation_xlink(p_tmg_documentation_xlink_id int, p_value text, p_xlink text, p_tmg_documentation_id int) RETURNS int AS $$
+CREATE OR REPLACE FUNCTION update_tmg_documentation_xlink(p_tmg_documentation_id int, p_tmg_documentation_xlink int, p_value text, p_xlink text) RETURNS int AS $$
 DECLARE
 	id int;
 BEGIN
@@ -1360,7 +1359,7 @@ BEGIN
 		if(id is null) then
 			return -1;
 		end if;
-		update tmg_documentation_xlink set "value"=p_value, "tmg_documentation_id"=p_tmg_documentation_id where tmg_documentation_xlink_id=id;
+		update tmg_documentation_xlink set "tmg_documentation_id"=p_tmg_documentation_id, "value"=p_value where tmg_documentation_xlink_id=id;
 		BEGIN
 			update tmg_documentation_xlink set xlink = cast(p_xlink as xlink) where tmg_documentation_xlink_id=id;
 		EXCEPTION
@@ -1372,7 +1371,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION update_tmg_geospatialcoverage(p_tmg_geospatialcoverage_id int, p_upordown text, p_tmg_id int) RETURNS int AS $$
+CREATE OR REPLACE FUNCTION update_tmg_geospatialcoverage(p_tmg_id int, p_tmg_geospatialcoverage int, p_upordown text) RETURNS int AS $$
 DECLARE
 	id int;
 BEGIN
@@ -1392,7 +1391,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION update_tmg_geospatialcoverage_eastwest(p_tmg_geospatialcoverage_eastwest_id int, p_size text, p_units text, p_start text, p_resolution text, p_tmg_geospatialcoverage_id int) RETURNS int AS $$
+CREATE OR REPLACE FUNCTION update_tmg_geospatialcoverage_eastwest(p_tmg_geospatialcoverage_id int, p_tmg_geospatialcoverage_eastwest int, p_size text, p_units text, p_start text, p_resolution text) RETURNS int AS $$
 DECLARE
 	id int;
 BEGIN
@@ -1400,13 +1399,13 @@ BEGIN
 		if(id is null) then
 			return -1;
 		end if;
-		update tmg_geospatialcoverage_eastwest set "size"=p_size, "units"=p_units, "start"=p_start, "resolution"=p_resolution, "tmg_geospatialcoverage_id"=p_tmg_geospatialcoverage_id where tmg_geospatialcoverage_eastwest_id=id;
+		update tmg_geospatialcoverage_eastwest set "tmg_geospatialcoverage_id"=p_tmg_geospatialcoverage_id, "size"=p_size, "units"=p_units, "start"=p_start, "resolution"=p_resolution where tmg_geospatialcoverage_eastwest_id=id;
 
 		return id;
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION update_tmg_geospatialcoverage_name(p_tmg_geospatialcoverage_name_id int, p_vocabulary text, p_value text, p_tmg_geospatialcoverage_id int) RETURNS int AS $$
+CREATE OR REPLACE FUNCTION update_tmg_geospatialcoverage_name(p_tmg_geospatialcoverage_id int, p_tmg_geospatialcoverage_name int, p_vocabulary text, p_value text) RETURNS int AS $$
 DECLARE
 	id int;
 BEGIN
@@ -1414,13 +1413,13 @@ BEGIN
 		if(id is null) then
 			return -1;
 		end if;
-		update tmg_geospatialcoverage_name set "vocabulary"=p_vocabulary, "value"=p_value, "tmg_geospatialcoverage_id"=p_tmg_geospatialcoverage_id where tmg_geospatialcoverage_name_id=id;
+		update tmg_geospatialcoverage_name set "tmg_geospatialcoverage_id"=p_tmg_geospatialcoverage_id, "vocabulary"=p_vocabulary, "value"=p_value where tmg_geospatialcoverage_name_id=id;
 
 		return id;
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION update_tmg_geospatialcoverage_northsouth(p_tmg_geospatialcoverage_northsouth_id int, p_size text, p_resolution text, p_start text, p_units text, p_tmg_geospatialcoverage_id int) RETURNS int AS $$
+CREATE OR REPLACE FUNCTION update_tmg_geospatialcoverage_northsouth(p_tmg_geospatialcoverage_id int, p_tmg_geospatialcoverage_northsouth int, p_size text, p_resolution text, p_start text, p_units text) RETURNS int AS $$
 DECLARE
 	id int;
 BEGIN
@@ -1428,13 +1427,13 @@ BEGIN
 		if(id is null) then
 			return -1;
 		end if;
-		update tmg_geospatialcoverage_northsouth set "size"=p_size, "resolution"=p_resolution, "start"=p_start, "units"=p_units, "tmg_geospatialcoverage_id"=p_tmg_geospatialcoverage_id where tmg_geospatialcoverage_northsouth_id=id;
+		update tmg_geospatialcoverage_northsouth set "tmg_geospatialcoverage_id"=p_tmg_geospatialcoverage_id, "size"=p_size, "resolution"=p_resolution, "start"=p_start, "units"=p_units where tmg_geospatialcoverage_northsouth_id=id;
 
 		return id;
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION update_tmg_geospatialcoverage_updown(p_tmg_geospatialcoverage_updown_id int, p_start text, p_resolution text, p_size text, p_units text, p_tmg_geospatialcoverage_id int) RETURNS int AS $$
+CREATE OR REPLACE FUNCTION update_tmg_geospatialcoverage_updown(p_tmg_geospatialcoverage_id int, p_tmg_geospatialcoverage_updown int, p_start text, p_resolution text, p_size text, p_units text) RETURNS int AS $$
 DECLARE
 	id int;
 BEGIN
@@ -1442,13 +1441,13 @@ BEGIN
 		if(id is null) then
 			return -1;
 		end if;
-		update tmg_geospatialcoverage_updown set "start"=p_start, "resolution"=p_resolution, "size"=p_size, "units"=p_units, "tmg_geospatialcoverage_id"=p_tmg_geospatialcoverage_id where tmg_geospatialcoverage_updown_id=id;
+		update tmg_geospatialcoverage_updown set "tmg_geospatialcoverage_id"=p_tmg_geospatialcoverage_id, "start"=p_start, "resolution"=p_resolution, "size"=p_size, "units"=p_units where tmg_geospatialcoverage_updown_id=id;
 
 		return id;
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION update_tmg_keyword(p_tmg_keyword_id int, p_value text, p_vocabulary text, p_tmg_id int) RETURNS int AS $$
+CREATE OR REPLACE FUNCTION update_tmg_keyword(p_tmg_id int, p_tmg_keyword int, p_value text, p_vocabulary text) RETURNS int AS $$
 DECLARE
 	id int;
 BEGIN
@@ -1456,13 +1455,13 @@ BEGIN
 		if(id is null) then
 			return -1;
 		end if;
-		update tmg_keyword set "value"=p_value, "vocabulary"=p_vocabulary, "tmg_id"=p_tmg_id where tmg_keyword_id=id;
+		update tmg_keyword set "tmg_id"=p_tmg_id, "value"=p_value, "vocabulary"=p_vocabulary where tmg_keyword_id=id;
 
 		return id;
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION update_tmg_project(p_tmg_project_id int, p_value text, p_vocabulary text, p_tmg_id int) RETURNS int AS $$
+CREATE OR REPLACE FUNCTION update_tmg_project(p_tmg_id int, p_tmg_project int, p_value text, p_vocabulary text) RETURNS int AS $$
 DECLARE
 	id int;
 BEGIN
@@ -1470,13 +1469,13 @@ BEGIN
 		if(id is null) then
 			return -1;
 		end if;
-		update tmg_project set "value"=p_value, "vocabulary"=p_vocabulary, "tmg_id"=p_tmg_id where tmg_project_id=id;
+		update tmg_project set "tmg_id"=p_tmg_id, "value"=p_value, "vocabulary"=p_vocabulary where tmg_project_id=id;
 
 		return id;
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION update_tmg_property(p_tmg_property_id int, p_name text, p_value text, p_tmg_id int) RETURNS int AS $$
+CREATE OR REPLACE FUNCTION update_tmg_property(p_tmg_id int, p_tmg_property int, p_name text, p_value text) RETURNS int AS $$
 DECLARE
 	id int;
 BEGIN
@@ -1484,13 +1483,13 @@ BEGIN
 		if(id is null) then
 			return -1;
 		end if;
-		update tmg_property set "name"=p_name, "value"=p_value, "tmg_id"=p_tmg_id where tmg_property_id=id;
+		update tmg_property set "tmg_id"=p_tmg_id, "name"=p_name, "value"=p_value where tmg_property_id=id;
 
 		return id;
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION update_tmg_publisher(p_tmg_publisher_id int, p_tmg_id int) RETURNS int AS $$
+CREATE OR REPLACE FUNCTION update_tmg_publisher(p_tmg_id int, p_tmg_publisher int) RETURNS int AS $$
 DECLARE
 	id int;
 BEGIN
@@ -1504,7 +1503,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION update_tmg_publisher_contact(p_tmg_publisher_contact_id int, p_url text, p_email text, p_tmg_publisher_id int) RETURNS int AS $$
+CREATE OR REPLACE FUNCTION update_tmg_publisher_contact(p_tmg_publisher_id int, p_tmg_publisher_contact int, p_url text, p_email text) RETURNS int AS $$
 DECLARE
 	id int;
 BEGIN
@@ -1512,13 +1511,13 @@ BEGIN
 		if(id is null) then
 			return -1;
 		end if;
-		update tmg_publisher_contact set "url"=p_url, "email"=p_email, "tmg_publisher_id"=p_tmg_publisher_id where tmg_publisher_contact_id=id;
+		update tmg_publisher_contact set "tmg_publisher_id"=p_tmg_publisher_id, "url"=p_url, "email"=p_email where tmg_publisher_contact_id=id;
 
 		return id;
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION update_tmg_publisher_name(p_tmg_publisher_name_id int, p_value text, p_vocabulary text, p_tmg_publisher_id int) RETURNS int AS $$
+CREATE OR REPLACE FUNCTION update_tmg_publisher_name(p_tmg_publisher_id int, p_tmg_publisher_name int, p_value text, p_vocabulary text) RETURNS int AS $$
 DECLARE
 	id int;
 BEGIN
@@ -1526,13 +1525,13 @@ BEGIN
 		if(id is null) then
 			return -1;
 		end if;
-		update tmg_publisher_name set "value"=p_value, "vocabulary"=p_vocabulary, "tmg_publisher_id"=p_tmg_publisher_id where tmg_publisher_name_id=id;
+		update tmg_publisher_name set "tmg_publisher_id"=p_tmg_publisher_id, "value"=p_value, "vocabulary"=p_vocabulary where tmg_publisher_name_id=id;
 
 		return id;
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION update_tmg_servicename(p_tmg_servicename_id int, p_servicename text, p_tmg_id int) RETURNS int AS $$
+CREATE OR REPLACE FUNCTION update_tmg_servicename(p_tmg_id int, p_tmg_servicename int, p_servicename text) RETURNS int AS $$
 DECLARE
 	id int;
 BEGIN
@@ -1540,13 +1539,13 @@ BEGIN
 		if(id is null) then
 			return -1;
 		end if;
-		update tmg_servicename set "servicename"=p_servicename, "tmg_id"=p_tmg_id where tmg_servicename_id=id;
+		update tmg_servicename set "tmg_id"=p_tmg_id, "servicename"=p_servicename where tmg_servicename_id=id;
 
 		return id;
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION update_tmg_timecoverage(p_tmg_timecoverage_id int, p_resolution text, p_tmg_id int) RETURNS int AS $$
+CREATE OR REPLACE FUNCTION update_tmg_timecoverage(p_tmg_id int, p_tmg_timecoverage int, p_resolution text) RETURNS int AS $$
 DECLARE
 	id int;
 BEGIN
@@ -1554,13 +1553,13 @@ BEGIN
 		if(id is null) then
 			return -1;
 		end if;
-		update tmg_timecoverage set "resolution"=p_resolution, "tmg_id"=p_tmg_id where tmg_timecoverage_id=id;
+		update tmg_timecoverage set "tmg_id"=p_tmg_id, "resolution"=p_resolution where tmg_timecoverage_id=id;
 
 		return id;
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION update_tmg_timecoverage_duration(p_tmg_timecoverage_duration_id int, p_duration text, p_tmg_timecoverage_id int) RETURNS int AS $$
+CREATE OR REPLACE FUNCTION update_tmg_timecoverage_duration(p_tmg_timecoverage_id int, p_tmg_timecoverage_duration int, p_duration text) RETURNS int AS $$
 DECLARE
 	id int;
 BEGIN
@@ -1568,13 +1567,13 @@ BEGIN
 		if(id is null) then
 			return -1;
 		end if;
-		update tmg_timecoverage_duration set "duration"=p_duration, "tmg_timecoverage_id"=p_tmg_timecoverage_id where tmg_timecoverage_duration_id=id;
+		update tmg_timecoverage_duration set "tmg_timecoverage_id"=p_tmg_timecoverage_id, "duration"=p_duration where tmg_timecoverage_duration_id=id;
 
 		return id;
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION update_tmg_timecoverage_end(p_tmg_timecoverage_end_id int, p_format text, p_value text, p_dateenum text, p_tmg_timecoverage_id int) RETURNS int AS $$
+CREATE OR REPLACE FUNCTION update_tmg_timecoverage_end(p_tmg_timecoverage_id int, p_tmg_timecoverage_end int, p_format text, p_value text, p_dateenum text) RETURNS int AS $$
 DECLARE
 	id int;
 BEGIN
@@ -1582,7 +1581,7 @@ BEGIN
 		if(id is null) then
 			return -1;
 		end if;
-		update tmg_timecoverage_end set "format"=p_format, "value"=p_value, "tmg_timecoverage_id"=p_tmg_timecoverage_id where tmg_timecoverage_end_id=id;
+		update tmg_timecoverage_end set "tmg_timecoverage_id"=p_tmg_timecoverage_id, "format"=p_format, "value"=p_value where tmg_timecoverage_end_id=id;
 		BEGIN
 			update tmg_timecoverage_end set dateenum = cast(p_dateenum as dateenum) where tmg_timecoverage_end_id=id;
 		EXCEPTION
@@ -1594,7 +1593,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION update_tmg_timecoverage_resolution(p_tmg_timecoverage_resolution_id int, p_duration text, p_tmg_timecoverage_id int) RETURNS int AS $$
+CREATE OR REPLACE FUNCTION update_tmg_timecoverage_resolution(p_tmg_timecoverage_id int, p_tmg_timecoverage_resolution int, p_duration text) RETURNS int AS $$
 DECLARE
 	id int;
 BEGIN
@@ -1602,13 +1601,13 @@ BEGIN
 		if(id is null) then
 			return -1;
 		end if;
-		update tmg_timecoverage_resolution set "duration"=p_duration, "tmg_timecoverage_id"=p_tmg_timecoverage_id where tmg_timecoverage_resolution_id=id;
+		update tmg_timecoverage_resolution set "tmg_timecoverage_id"=p_tmg_timecoverage_id, "duration"=p_duration where tmg_timecoverage_resolution_id=id;
 
 		return id;
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION update_tmg_timecoverage_start(p_tmg_timecoverage_start_id int, p_format text, p_value text, p_dateenum text, p_tmg_timecoverage_id int) RETURNS int AS $$
+CREATE OR REPLACE FUNCTION update_tmg_timecoverage_start(p_tmg_timecoverage_id int, p_tmg_timecoverage_start int, p_format text, p_value text, p_dateenum text) RETURNS int AS $$
 DECLARE
 	id int;
 BEGIN
@@ -1616,7 +1615,7 @@ BEGIN
 		if(id is null) then
 			return -1;
 		end if;
-		update tmg_timecoverage_start set "format"=p_format, "value"=p_value, "tmg_timecoverage_id"=p_tmg_timecoverage_id where tmg_timecoverage_start_id=id;
+		update tmg_timecoverage_start set "tmg_timecoverage_id"=p_tmg_timecoverage_id, "format"=p_format, "value"=p_value where tmg_timecoverage_start_id=id;
 		BEGIN
 			update tmg_timecoverage_start set dateenum = cast(p_dateenum as dateenum) where tmg_timecoverage_start_id=id;
 		EXCEPTION
@@ -1628,7 +1627,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION update_tmg_variables(p_tmg_variables_id int, p_vocabulary text, p_tmg_id int) RETURNS int AS $$
+CREATE OR REPLACE FUNCTION update_tmg_variables(p_tmg_id int, p_tmg_variables int, p_vocabulary text) RETURNS int AS $$
 DECLARE
 	id int;
 BEGIN
@@ -1648,7 +1647,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION update_tmg_variables_variable(p_tmg_variables_variable_id int, p_units text, p_name text, p_vocabulary_name text, p_tmg_variables_id int) RETURNS int AS $$
+CREATE OR REPLACE FUNCTION update_tmg_variables_variable(p_tmg_variables_id int, p_tmg_variables_variable int, p_units text, p_name text, p_vocabulary_name text) RETURNS int AS $$
 DECLARE
 	id int;
 BEGIN
@@ -1656,13 +1655,13 @@ BEGIN
 		if(id is null) then
 			return -1;
 		end if;
-		update tmg_variables_variable set "units"=p_units, "name"=p_name, "vocabulary_name"=p_vocabulary_name, "tmg_variables_id"=p_tmg_variables_id where tmg_variables_variable_id=id;
+		update tmg_variables_variable set "tmg_variables_id"=p_tmg_variables_id, "units"=p_units, "name"=p_name, "vocabulary_name"=p_vocabulary_name where tmg_variables_variable_id=id;
 
 		return id;
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION update_tmg_variables_variablemap(p_tmg_variables_variablemap_id int, p_value text, p_xlink text, p_tmg_variables_id int) RETURNS int AS $$
+CREATE OR REPLACE FUNCTION update_tmg_variables_variablemap(p_tmg_variables_id int, p_tmg_variables_variablemap int, p_value text, p_xlink text) RETURNS int AS $$
 DECLARE
 	id int;
 BEGIN
@@ -1670,7 +1669,7 @@ BEGIN
 		if(id is null) then
 			return -1;
 		end if;
-		update tmg_variables_variablemap set "value"=p_value, "tmg_variables_id"=p_tmg_variables_id where tmg_variables_variablemap_id=id;
+		update tmg_variables_variablemap set "tmg_variables_id"=p_tmg_variables_id, "value"=p_value where tmg_variables_variablemap_id=id;
 		BEGIN
 			update tmg_variables_variablemap set xlink = cast(p_xlink as xlink) where tmg_variables_variablemap_id=id;
 		EXCEPTION
