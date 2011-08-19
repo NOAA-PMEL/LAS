@@ -1,0 +1,56 @@
+<menus>
+    <menu type="views" name="Views_StdSurface_XY">
+	    <ifitem view="xy" values="xy">Longitude-Latitude map (xy)</ifitem>
+	</menu>
+	<menu type="ops" name="Trajectory_operations_XY">
+        <item values="Trajectory_interactive_plot,gif">map</item>
+        <item values="OCDMS_correlation_plot,gif">map</item>
+    </menu>
+</menus>
+<maps>
+	<map type="options" name="Trajectory_ColorOptions">
+		<ifoptions op="Trajectory_interactive_plot" href="#Trajectory_Options" />
+	</map>
+	<map type="ops" name="Trajectory_Operations">
+        <ifmenu view="xy" href="#Trajectory_operations_XY"/>
+        <constraint type="variable"/>
+    </map>
+    <map type="views" name="Trajectory_Views">
+        <menu href="#Views_StdSurface_XY"/>
+    </map>
+</maps>
+<options>
+	<optiondef name="Trajectory_palette">
+		<option>
+			<help>Set the color palette for the plot. </help>
+			<title>Palette</title>
+			<menu type="options" name="Trajectory_palette">
+				<item values="rainbow">rainbow</item>
+				<item values="rainbow">temperature rainbow</item>
+				<item values="light_rainbow">pastel rainbow</item>
+				<item values="rainbow_by_levels">rainbow by levels</item>
+				<item values="ocean_temp">ocean temperature</item>
+				<item values="light_centered">anomaly</item>
+				<item values="bluescale">range of blues</item>
+				<item values="inverse_bluescale">inverse range of blues</item>
+				<item values="redscale">range of reds</item>
+				<item values="inverse_redscale">inverse range of reds</item>
+				<item values="greenscale">range of greens</item>
+				<item values="inverse_greenscale">inverse range of greens</item>
+				<item values="grayscale">range of grays</item>
+				<item values="inverse_grayscale">inverse range of grays</item>
+			</menu>
+		</option>
+	</optiondef>
+	<optiondef name="Trajectory_Options"
+		inherit="#Trajectory_palette,#size,#margins,#deg_min_sec,#set_aspect,#use_graticules,#poly_levels" />
+</options>
+<defaults>
+	<default name="Trajectories">
+		<map href="#Trajectory_Operations" />
+		<map href="#Trajectory_Views" />
+		<map href="#DefaultLivemap" />
+		<map href="#Trajectory_ColorOptions" />
+	</default>
+</defaults>
+

@@ -5,6 +5,10 @@
 <!ENTITY insitu_ui SYSTEM "insitu_ui.xml">
 <!ENTITY insitu_options SYSTEM "insitu_options.xml">
 
+<!--  Uncomment the line below and &trajectory_ui; use below for Trajectory UI behavior 
+      UI Configuration for Trajectory Plots -->
+<!--<!ENTITY trajectory_ui SYSTEM "trajectory.xml">-->
+
 <!-- UI elements specific to the LAS_insitu_demo -->
 <!--<!ENTITY insitu_demo_ui SYSTEM "insitu_demo_ui.xml">-->
 
@@ -24,6 +28,9 @@
 <lasui title="@TITLE@">
    <ui url="http://@SERVLET_ROOT_URL@/@APPNAME@/servlets/"/>
     &StdOptions;
+<!-- Uncomment this line to get the trajectories UI behavior
+    &trajectory_ui;
+-->
 <!-- Uncomment these next lines to get insitu UI behavior and options.
     &insitu_ui;
     &insitu_options;
