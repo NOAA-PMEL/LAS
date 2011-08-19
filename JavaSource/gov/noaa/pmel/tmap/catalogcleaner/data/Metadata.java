@@ -4,6 +4,9 @@ public class Metadata {
 	protected int metadataId;
 	protected String metadatatype;
 	protected String inherited;
+	public void setMetadataId(int metadataId){
+		this.metadataId = metadataId;
+	}
 	public void setMetadatatype(String metadatatype){
 		this.metadatatype = metadatatype;
 	}
@@ -20,11 +23,11 @@ public class Metadata {
 		return this.inherited;
 	}
 
-	public Metadata(int id){
-		this.metadataId=id;
+	public Metadata(int metadata){
+		this.metadataId = metadata;
 	}
 	public Metadata(int metadataId, String metadatatype, String inherited){
-		this.metadataId=metadataId;
+		this.metadataId = metadataId;
 		this.metadatatype=metadatatype;
 		this.inherited=inherited;
 	}

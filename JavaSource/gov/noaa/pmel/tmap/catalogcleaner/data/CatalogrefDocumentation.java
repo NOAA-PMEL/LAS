@@ -1,12 +1,15 @@
 package gov.noaa.pmel.tmap.catalogcleaner.data;
 
 public class CatalogrefDocumentation {
-	protected int catalogrefDocumentationId;
 	protected int catalogrefId;
+	protected int catalogrefDocumentationId;
 	protected String value;
 	protected String documentationenum;
 	public void setCatalogrefId(int catalogrefId){
 		this.catalogrefId = catalogrefId;
+	}
+	public void setCatalogrefDocumentationId(int catalogrefDocumentationId){
+		this.catalogrefDocumentationId = catalogrefDocumentationId;
 	}
 	public void setValue(String value){
 		this.value = value;
@@ -14,11 +17,11 @@ public class CatalogrefDocumentation {
 	public void setDocumentationenum(String documentationenum){
 		this.documentationenum = documentationenum;
 	}
-	public int getCatalogrefDocumentationId(){
-		return this.catalogrefDocumentationId;
-	}
 	public int getCatalogrefId(){
 		return this.catalogrefId;
+	}
+	public int getCatalogrefDocumentationId(){
+		return this.catalogrefDocumentationId;
 	}
 	public String getValue(){
 		return this.value;
@@ -27,13 +30,13 @@ public class CatalogrefDocumentation {
 		return this.documentationenum;
 	}
 
-	public CatalogrefDocumentation(int id){
-		this.catalogrefDocumentationId=id;
+	public CatalogrefDocumentation(int catalogrefDocumentation){
+		this.catalogrefDocumentationId = catalogrefDocumentation;
 	}
-	public CatalogrefDocumentation(int catalogrefDocumentationId, String value, String documentationenum, int catalogrefId){
-		this.catalogrefDocumentationId=catalogrefDocumentationId;
+	public CatalogrefDocumentation(int catalogrefId, int catalogrefDocumentationId, String value, String documentationenum){
+		this.catalogrefId = catalogrefId;
+		this.catalogrefDocumentationId = catalogrefDocumentationId;
 		this.value=value;
 		this.documentationenum=documentationenum;
-		this.catalogrefId=catalogrefId;
 	}
 }

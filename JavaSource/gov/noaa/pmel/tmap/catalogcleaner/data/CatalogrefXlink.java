@@ -1,12 +1,15 @@
 package gov.noaa.pmel.tmap.catalogcleaner.data;
 
 public class CatalogrefXlink {
-	protected int catalogrefXlinkId;
 	protected int catalogrefId;
+	protected int catalogrefXlinkId;
 	protected String value;
 	protected String xlink;
 	public void setCatalogrefId(int catalogrefId){
 		this.catalogrefId = catalogrefId;
+	}
+	public void setCatalogrefXlinkId(int catalogrefXlinkId){
+		this.catalogrefXlinkId = catalogrefXlinkId;
 	}
 	public void setValue(String value){
 		this.value = value;
@@ -14,11 +17,11 @@ public class CatalogrefXlink {
 	public void setXlink(String xlink){
 		this.xlink = xlink;
 	}
-	public int getCatalogrefXlinkId(){
-		return this.catalogrefXlinkId;
-	}
 	public int getCatalogrefId(){
 		return this.catalogrefId;
+	}
+	public int getCatalogrefXlinkId(){
+		return this.catalogrefXlinkId;
 	}
 	public String getValue(){
 		return this.value;
@@ -27,13 +30,13 @@ public class CatalogrefXlink {
 		return this.xlink;
 	}
 
-	public CatalogrefXlink(int id){
-		this.catalogrefXlinkId=id;
+	public CatalogrefXlink(int catalogrefXlink){
+		this.catalogrefXlinkId = catalogrefXlink;
 	}
-	public CatalogrefXlink(int catalogrefXlinkId, String value, String xlink, int catalogrefId){
-		this.catalogrefXlinkId=catalogrefXlinkId;
+	public CatalogrefXlink(int catalogrefId, int catalogrefXlinkId, String value, String xlink){
+		this.catalogrefId = catalogrefId;
+		this.catalogrefXlinkId = catalogrefXlinkId;
 		this.value=value;
 		this.xlink=xlink;
-		this.catalogrefId=catalogrefId;
 	}
 }

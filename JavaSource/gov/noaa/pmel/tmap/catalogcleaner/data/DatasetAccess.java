@@ -1,13 +1,16 @@
 package gov.noaa.pmel.tmap.catalogcleaner.data;
 
 public class DatasetAccess {
-	protected int datasetAccessId;
 	protected int datasetId;
+	protected int datasetAccessId;
 	protected String urlpath;
 	protected String servicename;
 	protected String dataformat;
 	public void setDatasetId(int datasetId){
 		this.datasetId = datasetId;
+	}
+	public void setDatasetAccessId(int datasetAccessId){
+		this.datasetAccessId = datasetAccessId;
 	}
 	public void setUrlpath(String urlpath){
 		this.urlpath = urlpath;
@@ -18,11 +21,11 @@ public class DatasetAccess {
 	public void setDataformat(String dataformat){
 		this.dataformat = dataformat;
 	}
-	public int getDatasetAccessId(){
-		return this.datasetAccessId;
-	}
 	public int getDatasetId(){
 		return this.datasetId;
+	}
+	public int getDatasetAccessId(){
+		return this.datasetAccessId;
 	}
 	public String getUrlpath(){
 		return this.urlpath;
@@ -34,14 +37,14 @@ public class DatasetAccess {
 		return this.dataformat;
 	}
 
-	public DatasetAccess(int id){
-		this.datasetAccessId=id;
+	public DatasetAccess(int datasetAccess){
+		this.datasetAccessId = datasetAccess;
 	}
-	public DatasetAccess(int datasetAccessId, String urlpath, String servicename, String dataformat, int datasetId){
-		this.datasetAccessId=datasetAccessId;
+	public DatasetAccess(int datasetId, int datasetAccessId, String urlpath, String servicename, String dataformat){
+		this.datasetId = datasetId;
+		this.datasetAccessId = datasetAccessId;
 		this.urlpath=urlpath;
 		this.servicename=servicename;
 		this.dataformat=dataformat;
-		this.datasetId=datasetId;
 	}
 }

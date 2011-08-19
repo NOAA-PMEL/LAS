@@ -8,6 +8,9 @@ public class Catalog {
 	protected String base;
 	protected String xmlns;
 	protected String status;
+	public void setCatalogId(int catalogId){
+		this.catalogId = catalogId;
+	}
 	public void setName(String name){
 		this.name = name;
 	}
@@ -48,11 +51,11 @@ public class Catalog {
 		return this.status;
 	}
 
-	public Catalog(int id){
-		this.catalogId=id;
+	public Catalog(int catalog){
+		this.catalogId = catalog;
 	}
 	public Catalog(int catalogId, String name, String expires, String version, String base, String xmlns, String status){
-		this.catalogId=catalogId;
+		this.catalogId = catalogId;
 		this.name=name;
 		this.expires=expires;
 		this.version=version;

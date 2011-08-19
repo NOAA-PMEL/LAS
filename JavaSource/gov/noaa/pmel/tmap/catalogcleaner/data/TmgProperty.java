@@ -1,12 +1,15 @@
 package gov.noaa.pmel.tmap.catalogcleaner.data;
 
 public class TmgProperty {
-	protected int tmgPropertyId;
 	protected int tmgId;
+	protected int tmgPropertyId;
 	protected String name;
 	protected String value;
 	public void setTmgId(int tmgId){
 		this.tmgId = tmgId;
+	}
+	public void setTmgPropertyId(int tmgPropertyId){
+		this.tmgPropertyId = tmgPropertyId;
 	}
 	public void setName(String name){
 		this.name = name;
@@ -14,11 +17,11 @@ public class TmgProperty {
 	public void setValue(String value){
 		this.value = value;
 	}
-	public int getTmgPropertyId(){
-		return this.tmgPropertyId;
-	}
 	public int getTmgId(){
 		return this.tmgId;
+	}
+	public int getTmgPropertyId(){
+		return this.tmgPropertyId;
 	}
 	public String getName(){
 		return this.name;
@@ -27,13 +30,13 @@ public class TmgProperty {
 		return this.value;
 	}
 
-	public TmgProperty(int id){
-		this.tmgPropertyId=id;
+	public TmgProperty(int tmgProperty){
+		this.tmgPropertyId = tmgProperty;
 	}
-	public TmgProperty(int tmgPropertyId, String name, String value, int tmgId){
-		this.tmgPropertyId=tmgPropertyId;
+	public TmgProperty(int tmgId, int tmgPropertyId, String name, String value){
+		this.tmgId = tmgId;
+		this.tmgPropertyId = tmgPropertyId;
 		this.name=name;
 		this.value=value;
-		this.tmgId=tmgId;
 	}
 }

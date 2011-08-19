@@ -7,6 +7,10 @@ public class DatasetDataset extends Dataset {
 		return this.parentId;
 	}
 
+	public int getChildId(){
+		return this.datasetId;
+	}
+
 	public DatasetDataset(int parentId, int datasetId){
 		super(datasetId);
 		this.parentId = parentId;

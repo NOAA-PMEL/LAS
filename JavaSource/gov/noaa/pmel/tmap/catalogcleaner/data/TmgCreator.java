@@ -1,23 +1,26 @@
 package gov.noaa.pmel.tmap.catalogcleaner.data;
 
 public class TmgCreator {
-	protected int tmgCreatorId;
 	protected int tmgId;
+	protected int tmgCreatorId;
 	public void setTmgId(int tmgId){
 		this.tmgId = tmgId;
 	}
-	public int getTmgCreatorId(){
-		return this.tmgCreatorId;
+	public void setTmgCreatorId(int tmgCreatorId){
+		this.tmgCreatorId = tmgCreatorId;
 	}
 	public int getTmgId(){
 		return this.tmgId;
 	}
-
-	public TmgCreator(int id){
-		this.tmgCreatorId=id;
+	public int getTmgCreatorId(){
+		return this.tmgCreatorId;
 	}
-	public TmgCreator(int tmgCreatorId, int tmgId){
-		this.tmgCreatorId=tmgCreatorId;
-		this.tmgId=tmgId;
+
+	public TmgCreator(int tmgCreator){
+		this.tmgCreatorId = tmgCreator;
+	}
+	public TmgCreator(int tmgId, int tmgCreatorId){
+		this.tmgId = tmgId;
+		this.tmgCreatorId = tmgCreatorId;
 	}
 }

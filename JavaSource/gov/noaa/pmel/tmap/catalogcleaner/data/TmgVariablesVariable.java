@@ -1,13 +1,16 @@
 package gov.noaa.pmel.tmap.catalogcleaner.data;
 
 public class TmgVariablesVariable {
-	protected int tmgVariablesVariableId;
 	protected int tmgVariablesId;
+	protected int tmgVariablesVariableId;
 	protected String units;
 	protected String name;
 	protected String vocabularyName;
 	public void setTmgVariablesId(int tmgVariablesId){
 		this.tmgVariablesId = tmgVariablesId;
+	}
+	public void setTmgVariablesVariableId(int tmgVariablesVariableId){
+		this.tmgVariablesVariableId = tmgVariablesVariableId;
 	}
 	public void setUnits(String units){
 		this.units = units;
@@ -18,11 +21,11 @@ public class TmgVariablesVariable {
 	public void setVocabularyName(String vocabularyName){
 		this.vocabularyName = vocabularyName;
 	}
-	public int getTmgVariablesVariableId(){
-		return this.tmgVariablesVariableId;
-	}
 	public int getTmgVariablesId(){
 		return this.tmgVariablesId;
+	}
+	public int getTmgVariablesVariableId(){
+		return this.tmgVariablesVariableId;
 	}
 	public String getUnits(){
 		return this.units;
@@ -34,14 +37,14 @@ public class TmgVariablesVariable {
 		return this.vocabularyName;
 	}
 
-	public TmgVariablesVariable(int id){
-		this.tmgVariablesVariableId=id;
+	public TmgVariablesVariable(int tmgVariablesVariable){
+		this.tmgVariablesVariableId = tmgVariablesVariable;
 	}
-	public TmgVariablesVariable(int tmgVariablesVariableId, String units, String name, String vocabularyName, int tmgVariablesId){
-		this.tmgVariablesVariableId=tmgVariablesVariableId;
+	public TmgVariablesVariable(int tmgVariablesId, int tmgVariablesVariableId, String units, String name, String vocabularyName){
+		this.tmgVariablesId = tmgVariablesId;
+		this.tmgVariablesVariableId = tmgVariablesVariableId;
 		this.units=units;
 		this.name=name;
 		this.vocabularyName=vocabularyName;
-		this.tmgVariablesId=tmgVariablesId;
 	}
 }

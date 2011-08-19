@@ -1,23 +1,26 @@
 package gov.noaa.pmel.tmap.catalogcleaner.data;
 
 public class TmgPublisher {
-	protected int tmgPublisherId;
 	protected int tmgId;
+	protected int tmgPublisherId;
 	public void setTmgId(int tmgId){
 		this.tmgId = tmgId;
 	}
-	public int getTmgPublisherId(){
-		return this.tmgPublisherId;
+	public void setTmgPublisherId(int tmgPublisherId){
+		this.tmgPublisherId = tmgPublisherId;
 	}
 	public int getTmgId(){
 		return this.tmgId;
 	}
-
-	public TmgPublisher(int id){
-		this.tmgPublisherId=id;
+	public int getTmgPublisherId(){
+		return this.tmgPublisherId;
 	}
-	public TmgPublisher(int tmgPublisherId, int tmgId){
-		this.tmgPublisherId=tmgPublisherId;
-		this.tmgId=tmgId;
+
+	public TmgPublisher(int tmgPublisher){
+		this.tmgPublisherId = tmgPublisher;
+	}
+	public TmgPublisher(int tmgId, int tmgPublisherId){
+		this.tmgId = tmgId;
+		this.tmgPublisherId = tmgPublisherId;
 	}
 }

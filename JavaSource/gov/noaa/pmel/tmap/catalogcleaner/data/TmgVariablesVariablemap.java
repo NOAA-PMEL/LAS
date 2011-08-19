@@ -1,12 +1,15 @@
 package gov.noaa.pmel.tmap.catalogcleaner.data;
 
 public class TmgVariablesVariablemap {
-	protected int tmgVariablesVariablemapId;
 	protected int tmgVariablesId;
+	protected int tmgVariablesVariablemapId;
 	protected String value;
 	protected String xlink;
 	public void setTmgVariablesId(int tmgVariablesId){
 		this.tmgVariablesId = tmgVariablesId;
+	}
+	public void setTmgVariablesVariablemapId(int tmgVariablesVariablemapId){
+		this.tmgVariablesVariablemapId = tmgVariablesVariablemapId;
 	}
 	public void setValue(String value){
 		this.value = value;
@@ -14,11 +17,11 @@ public class TmgVariablesVariablemap {
 	public void setXlink(String xlink){
 		this.xlink = xlink;
 	}
-	public int getTmgVariablesVariablemapId(){
-		return this.tmgVariablesVariablemapId;
-	}
 	public int getTmgVariablesId(){
 		return this.tmgVariablesId;
+	}
+	public int getTmgVariablesVariablemapId(){
+		return this.tmgVariablesVariablemapId;
 	}
 	public String getValue(){
 		return this.value;
@@ -27,13 +30,13 @@ public class TmgVariablesVariablemap {
 		return this.xlink;
 	}
 
-	public TmgVariablesVariablemap(int id){
-		this.tmgVariablesVariablemapId=id;
+	public TmgVariablesVariablemap(int tmgVariablesVariablemap){
+		this.tmgVariablesVariablemapId = tmgVariablesVariablemap;
 	}
-	public TmgVariablesVariablemap(int tmgVariablesVariablemapId, String value, String xlink, int tmgVariablesId){
-		this.tmgVariablesVariablemapId=tmgVariablesVariablemapId;
+	public TmgVariablesVariablemap(int tmgVariablesId, int tmgVariablesVariablemapId, String value, String xlink){
+		this.tmgVariablesId = tmgVariablesId;
+		this.tmgVariablesVariablemapId = tmgVariablesVariablemapId;
 		this.value=value;
 		this.xlink=xlink;
-		this.tmgVariablesId=tmgVariablesId;
 	}
 }
