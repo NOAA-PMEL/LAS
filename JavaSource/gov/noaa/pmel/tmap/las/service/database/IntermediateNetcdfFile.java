@@ -10,6 +10,10 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
@@ -44,7 +48,7 @@ public class IntermediateNetcdfFile {
     protected boolean needsProfID = true;
     protected NetcdfFileWriteable netcdfFile = null;
     protected boolean has_cruise_id = false;
-    
+    protected boolean trajectory = true;
     public IntermediateNetcdfFile (String filename, boolean fill) throws LASException {
         log.debug("Create new empty netCDF file.");
         try {
@@ -56,6 +60,16 @@ public class IntermediateNetcdfFile {
     public void create(ResultSet resultSet, LASBackendRequest lasBackendRequest) throws SQLException, IOException, InvalidRangeException, LASException {
 
         ResultSetMetaData resultSetMetadata = resultSet.getMetaData();
+        
+    	List variables = lasBackendRequest.getVariables();
+    	for (Iterator varIt = variables.iterator(); varIt.hasNext();) {
+			String name = (String) varIt.next();
+			String grid = lasBackendRequest.getDataAttribute(name, "grid_type");
+			if ( grid != null ) {
+				trajectory = trajectory && grid.toLowerCase().equals("trajectory");
+			}
+		}
+    
         boolean hasResults = resultSet.last();
         int indexSize = resultSet.getRow();
         resultSet.beforeFirst();
@@ -114,29 +128,35 @@ public class IntermediateNetcdfFile {
         String time_origin = fmt.withZone(DateTimeZone.UTC).print(dt);
 
         Dimension index = netcdfFile.addDimension("index", indexSize);
-        Dimension dim_one = netcdfFile.addDimension("dim_one", 1);
-        Dimension trdim = netcdfFile.addDimension("trdim", 2);
         
-        dimList.clear();
-        dimList.add(trdim);
+        // These are part of the PMEL "intermediate netcdf file" and are not needed for CF featureType files...
+        // The only feature type we can deal with currently is a trajectory.
+        if ( !trajectory ) {
+        	Dimension dim_one = netcdfFile.addDimension("dim_one", 1);
+        	Dimension trdim = netcdfFile.addDimension("trdim", 2);
 
-        netcdfFile.addVariable("trdim", DataType.DOUBLE, dimList);
-        netcdfFile.addVariableAttribute("trdim", "units", time_units);
-        netcdfFile.addVariableAttribute("trdim", "time_origin", time_origin);
-        
-        netcdfFile.addVariable("trange", DataType.DOUBLE, dimList);
-        netcdfFile.addVariableAttribute("trange", "units", "hours");
-        
-        dimList.clear();
-        dimList.add(dim_one);
-        
-        netcdfFile.addVariable("NUMPROFS", DataType.FLOAT, dimList);
-        netcdfFile.addVariableAttribute("NUMPROFS", "long_name", "Number of Profiles");
-        netcdfFile.addVariableAttribute("NUMPROFS", "units", "unitless");
-        
-        netcdfFile.addVariable("NUMOBS", DataType.FLOAT, dimList);
-        netcdfFile.addVariableAttribute("NUMOBS", "long_name", "Number of Observations");
-        netcdfFile.addVariableAttribute("NUMOBS", "units", "unitless");
+        	dimList.clear();
+        	dimList.add(trdim);
+
+        	netcdfFile.addVariable("trdim", DataType.DOUBLE, dimList);
+        	netcdfFile.addVariableAttribute("trdim", "units", time_units);
+        	netcdfFile.addVariableAttribute("trdim", "time_origin", time_origin);
+
+        	netcdfFile.addVariable("trange", DataType.DOUBLE, dimList);
+        	netcdfFile.addVariableAttribute("trange", "units", "hours");
+
+        	dimList.clear();
+        	dimList.add(dim_one);
+
+
+        	netcdfFile.addVariable("NUMPROFS", DataType.FLOAT, dimList);
+        	netcdfFile.addVariableAttribute("NUMPROFS", "long_name", "Number of Profiles");
+        	netcdfFile.addVariableAttribute("NUMPROFS", "units", "unitless");
+
+        	netcdfFile.addVariable("NUMOBS", DataType.FLOAT, dimList);
+        	netcdfFile.addVariableAttribute("NUMOBS", "long_name", "Number of Observations");
+        	netcdfFile.addVariableAttribute("NUMOBS", "units", "unitless");
+        }
         
         dimList.clear();
         dimList.add(index);
@@ -148,7 +168,43 @@ public class IntermediateNetcdfFile {
         
         missing=Double.valueOf(miss_string).doubleValue();
         varNames = new String[resultSetMetadata.getColumnCount()];
-
+        // Find the coordinate variable names.
+        for (int col = 1; col <= resultSetMetadata.getColumnCount(); col++) {
+        	String colName = resultSetMetadata.getColumnName(col);
+        	String variable = getVariableName(colName, lasBackendRequest, col);
+        	if ( variable.equals("xax")) {
+        		xname = colName;
+        	} else if ( variable.equals("yax")) {
+        		yname = colName;
+        	} else if ( variable.equals("tax")) {
+        		tname = colName;
+        	} else if ( variable.equals("zax")) {
+        		zname = colName;
+        	}
+        }
+        StringBuffer coordinates = new StringBuffer();
+        if ( !tname.equals("") ) {
+        	coordinates.append(tname);
+        }
+        if ( !xname.equals("") ) {
+        	if (coordinates.length() > 0 ) {
+        		coordinates.append(",");
+        	}
+        	coordinates.append(xname);
+        }
+        if ( !yname.equals("") ) {
+        	if ( coordinates.length() > 0 ) {
+        		coordinates.append(",");
+        	}
+        	coordinates.append(yname);
+        }
+        if ( !zname.equals("") ) {
+        	if ( coordinates.length()> 0 ) {
+        		coordinates.append(",");
+        	}
+        	coordinates.append(zname);
+        }
+        // Create the variables.
         for (int col = 1; col <= resultSetMetadata.getColumnCount(); col++) {
             String colName = resultSetMetadata.getColumnName(col);
             String variable = getVariableName(colName, lasBackendRequest, col);
@@ -169,7 +225,7 @@ public class IntermediateNetcdfFile {
                 netcdfFile.addVariableAttribute(colName, "long_name", "Longitude");
                 netcdfFile.addVariableAttribute(colName, "database_table", resultSetMetadata.getTableName(col));
                 netcdfFile.addVariableAttribute(colName, "_CoordinateAxisType", "Lon");
-                xname = colName;
+               
                 
             } else if ( variable.equals("yax")) {
                 dimList.clear();
@@ -188,7 +244,7 @@ public class IntermediateNetcdfFile {
                 netcdfFile.addVariableAttribute(colName, "missing", new Double(missing));
                 netcdfFile.addVariableAttribute(colName, "database_table", resultSetMetadata.getTableName(col));
                 netcdfFile.addVariableAttribute(colName, "_CoordinateAxisType", "Lat");
-                yname = colName;
+               
                 
             } else if ( variable.equals("tax")) {
                 // Always a "double"; hours since...
@@ -208,7 +264,7 @@ public class IntermediateNetcdfFile {
                 netcdfFile.addVariableAttribute(colName, "missing", new Double(missing));
                 netcdfFile.addVariableAttribute(colName, "database_table", resultSetMetadata.getTableName(col));
                 netcdfFile.addVariableAttribute(colName, "_CoordinateAxisType", "Time");
-                tname = colName;
+               
             } else if ( variable.equals("zax")) {
                 dimList.clear();
                 dimList.add(index);
@@ -224,57 +280,62 @@ public class IntermediateNetcdfFile {
                     netcdfFile.addVariableAttribute(colName, "positive", down);
                     netcdfFile.addVariableAttribute(colName, "_CoordinateAxisType", "Depth");
                 }
-                zname = colName;
-            } else {
-                String long_name="";
-                String units="";
-                
-                if (variable.equals("CRUISE_ID")) {
-                    long_name = "CRUISE ID";
-                    units = "unitless";
-                    has_cruise_id = true;
-                }
-                if (variable.equals("PROF_ID")) {
-                    long_name = "Profile ID";
-                    units = "unitless";
-                    needsProfID = false;
-                }
-                
-                if (lasBackendRequest.hasVariable(variable) ) {
-                    long_name = lasBackendRequest.getDataAttribute(variable, "title");
-                    String dsUnits = lasBackendRequest.getDataAttribute(variable, "units");
-                    if (dsUnits != null) {
-                        units = dsUnits;
-                    }
-                }
-                if ( netcdfTypeFromJDBCType(col, resultSetMetadata) == DataType.CHAR ) {
-                    dimList.clear();
-                    dimList.add(index);
-                    int width = resultSetMetadata.getPrecision(col);
-                    if ( width <= 0 ) {
-                        width = resultSetMetadata.getColumnDisplaySize(col);
-                    }
-                    Dimension char_var_width = netcdfFile.addDimension(resultSetMetadata.getColumnName(col)+"_width", width);
-                    dimList.add(char_var_width);                                       
-                    netcdfFile.addVariable(variable, netcdfTypeFromJDBCType(col, resultSetMetadata), dimList);
-                    netcdfFile.addVariableAttribute(variable, "long_name", long_name);
-                    netcdfFile.addVariableAttribute(variable, "units", units);
-                    netcdfFile.addVariableAttribute(variable, "missing_value", "");
-                    netcdfFile.addVariableAttribute(variable, "database_table", resultSetMetadata.getTableName(col));
-                } else {
-                    dimList.clear();
-                    dimList.add(index);
-                    netcdfFile.addVariable(variable, netcdfTypeFromJDBCType(col, resultSetMetadata), dimList);
-                    netcdfFile.addVariableAttribute(variable, "long_name", long_name);
-                    netcdfFile.addVariableAttribute(variable, "units", units);
-                    netcdfFile.addVariableAttribute(variable, "missing_value", new Double(missing));
-                    netcdfFile.addVariableAttribute(variable, "database_table", resultSetMetadata.getTableName(col));
-                }
                
+            } else {
+            	String long_name="";
+            	String units="";
+
+            	if (variable.equals("CRUISE_ID")) {
+            		long_name = "CRUISE ID";
+            		units = "unitless";
+            		has_cruise_id = true;
+
+            	}
+            	if (variable.equals("PROF_ID")) {
+            		long_name = "Profile ID";
+            		units = "unitless";
+            		needsProfID = false;
+            	}
+
+            	if (lasBackendRequest.hasVariable(variable) ) {
+            		long_name = lasBackendRequest.getDataAttribute(variable, "title");
+            		String dsUnits = lasBackendRequest.getDataAttribute(variable, "units");
+            		if (dsUnits != null) {
+            			units = dsUnits;
+            		}
+            	}
+            	// If it's a trajectory file don't write the cruise id as a separate variable.
+            	if ( !variable.equals("CRUISE_ID") || (variable.equals("CRUISE_ID") && !trajectory ) ) {
+            		if ( netcdfTypeFromJDBCType(col, resultSetMetadata) == DataType.CHAR ) {
+            			dimList.clear();
+            			dimList.add(index);
+            			int width = resultSetMetadata.getPrecision(col);
+            			if ( width <= 0 ) {
+            				width = resultSetMetadata.getColumnDisplaySize(col);
+            			}
+            			Dimension char_var_width = netcdfFile.addDimension(resultSetMetadata.getColumnName(col)+"_width", width);
+            			dimList.add(char_var_width);                                       
+            			netcdfFile.addVariable(variable, netcdfTypeFromJDBCType(col, resultSetMetadata), dimList);
+            			netcdfFile.addVariableAttribute(variable, "long_name", long_name);
+            			netcdfFile.addVariableAttribute(variable, "units", units);
+            			netcdfFile.addVariableAttribute(variable, "missing_value", "");
+            			netcdfFile.addVariableAttribute(variable, "database_table", resultSetMetadata.getTableName(col));
+            			netcdfFile.addVariableAttribute(variable, "coordinates", coordinates.toString());
+            		} else {
+            			dimList.clear();
+            			dimList.add(index);
+            			netcdfFile.addVariable(variable, netcdfTypeFromJDBCType(col, resultSetMetadata), dimList);
+            			netcdfFile.addVariableAttribute(variable, "long_name", long_name);
+            			netcdfFile.addVariableAttribute(variable, "units", units);
+            			netcdfFile.addVariableAttribute(variable, "missing_value", new Double(missing));
+            			netcdfFile.addVariableAttribute(variable, "database_table", resultSetMetadata.getTableName(col));
+            			netcdfFile.addVariableAttribute(variable, "coordinates", coordinates.toString());
+            		}
+            	}
             }
 
         }
-        if ( needsProfID ) {
+        if ( needsProfID && !trajectory) {
             dimList.clear();
             dimList.add(index);
             netcdfFile.addVariable("PROF_ID", DataType.DOUBLE, dimList);
@@ -283,8 +344,7 @@ public class IntermediateNetcdfFile {
             netcdfFile.addVariableAttribute("PROF_ID", "missing_value", new Double(-999.));
         }
         
-        netcdfFile.addAttribute(null, new Attribute("Conventions", "LAS Intermediate netCDF File, Unidata Observation Dataset v1.0"));
-        netcdfFile.addAttribute(null, new Attribute("observationDimension", "index"));
+
         if ( has_cruise_id ) {
             /*
              * Seems to me that we should conform to this convention by listing
@@ -296,7 +356,15 @@ public class IntermediateNetcdfFile {
             * 
             * for now go with Point data.
             */
-            netcdfFile.addGlobalAttribute("cdm_datatype", "Point");
+        	
+            if ( trajectory ) {
+            	netcdfFile.addGlobalAttribute("featureType", "trajectory");
+            	netcdfFile.addGlobalAttribute("Conventions", "CF-1.6");
+            } else {
+            	netcdfFile.addGlobalAttribute("cdm_datatype", "Point");
+                netcdfFile.addAttribute(null, new Attribute("Conventions", "LAS Intermediate netCDF File, Unidata Observation Dataset v1.0"));
+                netcdfFile.addAttribute(null, new Attribute("observationDimension", "index"));
+            }
         } else {
             netcdfFile.addGlobalAttribute("cdm_datatype", "Point");
         }
@@ -407,297 +475,383 @@ public class IntermediateNetcdfFile {
         }
     }
     
-   public void fill(ResultSet resultSet) throws LASException, SQLException, IOException, InvalidRangeException {
-        ArrayDouble.D1 PROF_ID = null;
-        float prof_id_num = 1.0f;
-        
-        ResultSetMetaData resultSetMetadata = resultSet.getMetaData();
-        
-        resultSet.last();
-        int indexSize = resultSet.getRow();
-        resultSet.beforeFirst();
-        ArrayList<Array> columns = new ArrayList<Array>();
-        for (int col = 1; col <= resultSetMetadata.getColumnCount(); col++) {
-            DataType type = netcdfTypeFromJDBCType(col, resultSetMetadata);
-            if ( varNames[col-1].equals(tname) ) {
-                ArrayDouble.D1 data = new ArrayDouble.D1(indexSize);
-                columns.add(data);
-            } 
-            // Force lat lon to float unless they are doubles,
-            // then use double
-            else if ( varNames[col-1].equals(xname) ||
-                      varNames[col-1].equals(yname) ) {
-               if ( type == DataType.DOUBLE ) {
-                   ArrayDouble.D1 data = new ArrayDouble.D1(indexSize);
-                   columns.add(data);
-               } else {
-                   ArrayFloat.D1 data = new ArrayFloat.D1(indexSize);
-                   columns.add(data);
-               }
+    public void fill(ResultSet resultSet) throws LASException, SQLException, IOException, InvalidRangeException {
 
-            }
-            else {
-                if ( type == DataType.DOUBLE) {
-                    ArrayDouble.D1 data = new ArrayDouble.D1(indexSize);
-                    columns.add(data);
-                } else if (type == DataType.FLOAT) {
-                    ArrayFloat.D1 data = new ArrayFloat.D1(indexSize);
-                    columns.add(data);
-                } else if (type == DataType.INT) {
-                    ArrayInt.D1 data = new ArrayInt.D1(indexSize);
-                    columns.add(data);
-                } else if (type == DataType.CHAR) {
-                    ArrayChar.D2 data = new ArrayChar.D2(indexSize, resultSetMetadata.getPrecision(col));
-                    columns.add(data);
-                }
-            }
-        }
-        
-        if ( needsProfID ) {
-            PROF_ID = new ArrayDouble.D1(indexSize);
-        }
-        
-        ArrayDouble.D1 trdim = new ArrayDouble.D1(2);
-        trdim.set(0, 999999999.);
-        trdim.set(1, -999999999);
-        
-        ArrayDouble.D1 trange = new ArrayDouble.D1(2);
-        trange.set(0, 999999999.);
-        trange.set(1, -999999999.);
-        
-        int index = 0;
-        DateTimeFormatter fmt = DateTimeFormat.forPattern(time_format).withZone(DateTimeZone.UTC);
-        DateUnit dateUnit;
-		try {
-			dateUnit = new DateUnit(time_units);
-		} catch (Exception e) {
-			throw new LASException(e.toString());
-		}
-        double geospatial_lat_min =  9999.0;
-        double geospatial_lat_max = -9999.0;
-        double geospatial_lon_min =  9999.0;
-        double geospatial_lon_max = -9999.0;        
-        double time_coverage_start = 999999999.0;
-        double time_coverage_end = -999999999.0;
-        while (resultSet.next()) {
-            for (int col = 1; col <= resultSetMetadata.getColumnCount(); col++) {                
-                DataType type = netcdfTypeFromJDBCType(col, resultSetMetadata);
-                if ( varNames[col-1].equals(tname) ) {
-                    ArrayDouble.D1 data = (ArrayDouble.D1)columns.get(col-1);
-                    Double time;
-                    if ( convert_time ) {
-                        String time_string = resultSet.getString(col);
-                        if (time_string == null ) {
-                            time = new Double(missing);
-                        } else {
-                            DateTime datetime = fmt.parseDateTime(time_string).withZone(DateTimeZone.UTC);
-                            double t = dateUnit.makeValue(datetime.toDate());
-                            time = new Double(t);
-                        }
-                    }
-                    else {
-                        time = resultSet.getDouble(col);
-                        data.set(index, time);
-                    }
-                    data.set(index, time);
-                    columns.set(col-1, data);
-                    if ( time.doubleValue() < trdim.get(0)) {
-                        trdim.set(0, time);
-                        trange.set(0, time);
-                    }
-                    if ( time.doubleValue() > trdim.get(1)) {
-                        trdim.set(1, time);
-                        trange.set(1,time);
-                    }
-                    if ( time.doubleValue() < time_coverage_start ) {
-                        time_coverage_start = time.doubleValue();
-                    }
-                    if ( time.doubleValue() > time_coverage_end ) {
-                        time_coverage_end = time.doubleValue();
-                    }
-                }
-                else if (varNames[col-1].equals(xname) || 
-                         varNames[col-1].equals(yname) ) {
-                   if (type == DataType.DOUBLE ) {
-                       ArrayDouble.D1 data = (ArrayDouble.D1)columns.get(col-1); 
-                       Double d = resultSet.getDouble(col);
-                       if ( d==null ) {
-                          d = new Double(missing);
-                       }
-                       data.set(index,d);
-                       columns.set(col-1, data);
-                       if (varNames[col-1].equals(xname) ) {
-                           if ( d.doubleValue() > geospatial_lon_max ) {
-                               geospatial_lon_max = d.doubleValue();
-                           }
-                           if ( d.doubleValue() < geospatial_lon_min ) {
-                               geospatial_lon_min = d.doubleValue();
-                           }
-                       } else if ( varNames[col-1].equals(yname) ) {
-                           if ( d.doubleValue() > geospatial_lat_max ) {
-                               geospatial_lat_max = d.doubleValue();
-                           }
-                           if ( d.doubleValue() < geospatial_lat_min ) {
-                               geospatial_lat_min = d.doubleValue();
-                           }
-                       }
-                   } else {
-                       ArrayFloat.D1 data = (ArrayFloat.D1)columns.get(col-1); 
-                       Float d = resultSet.getFloat(col);
-                       if ( d==null ) {
-                          d = new Float(missing);
-                       }
-                       data.set(index,d);
-                       columns.set(col-1, data);
-                       if (varNames[col-1].equals(xname) ) {
-                           if ( d.doubleValue() > geospatial_lon_max ) {
-                               geospatial_lon_max = d.doubleValue();
-                           }
-                           if ( d.doubleValue() < geospatial_lon_min ) {
-                               geospatial_lon_min = d.doubleValue();
-                           }
-                       } else if ( varNames[col-1].equals(yname) ) {
-                           if ( d.doubleValue() > geospatial_lat_max ) {
-                               geospatial_lat_max = d.doubleValue();
-                           }
-                           if ( d.doubleValue() < geospatial_lat_min ) {
-                               geospatial_lat_min = d.doubleValue();
-                           }
-                       }
-                   }
-                   
-                }
-                else {
-                    if ( type == DataType.DOUBLE) {
-                        ArrayDouble.D1 data = (ArrayDouble.D1)columns.get(col-1);
-                        Double d = resultSet.getDouble(col);
-                        if (d==null) {
-                            d = new Double(missing);
-                        }
-                        data.set(index, d);
-                        columns.set(col-1, data);
-                        if (zname.equals(varNames[col-1]) && needsProfID ) {
-                            if ( index == 0 ) {
-                                PROF_ID.set(index, prof_id_num);
-                            } else {
-                                if ( data.get(index) <= data.get(index-1)) {
-                                    prof_id_num = prof_id_num + 1.f;
-                                }
-                                PROF_ID.set(index, prof_id_num);
-                            }
-                        }    
-                    } else if (type == DataType.FLOAT) {
-                        ArrayFloat.D1 data = (ArrayFloat.D1)columns.get(col-1);
-                        Float f = resultSet.getFloat(col);
-                        if ( f==null) {
-                            f = new Float(missing);
-                        }
-                        data.set(index, f);
-                        columns.set(col-1, data);
-                        if (zname.equals(varNames[col-1]) && needsProfID ) {
-                            if ( index == 0 ) {
-                                PROF_ID.set(index, prof_id_num);
-                            } else {
-                                if ( data.get(index) <= data.get(index-1)) {
-                                    prof_id_num = prof_id_num + 1.f;
-                                }
-                                PROF_ID.set(index, prof_id_num);
-                            }
-                        }
-                    } else if (type == DataType.INT) {
-                        ArrayInt.D1 data = (ArrayInt.D1)columns.get(col-1);
-                        Integer i = resultSet.getInt(col);
-                        if ( i==null) {
-                            i = new Integer(Integer.MIN_VALUE);
-                        }
-                        data.set(index, i);
-                        columns.set(col-1, data);
-                        if (zname.equals(varNames[col-1]) && needsProfID ) {
-                            if ( index == 0 ) {
-                                PROF_ID.set(index, prof_id_num);
-                            } else {
-                                if ( data.get(index) <= data.get(index-1)) {
-                                    prof_id_num = prof_id_num + 1.f;
-                                }
-                                PROF_ID.set(index, prof_id_num);
-                            }
-                        }
-                    } else if (type == DataType.CHAR) {
-                        ArrayChar.D2 data = (ArrayChar.D2)columns.get(col-1);
-                        String value = resultSet.getString(col);
-                        if (value==null) {
-                            value="";
-                        }
-                        data.setString(index, value);
-                        columns.set(col-1,data);
-                    }
-                }
-            }
-            index++;
-        }
-        // Write the minimal data discovery attributes for "Unidata Observation Dataset v1.0" conventions then create the file.
-        
-        netcdfFile.addGlobalAttribute("geospatial_lat_min", geospatial_lat_min);
-        netcdfFile.addGlobalAttribute("geospatial_lat_max", geospatial_lat_max);
-        netcdfFile.addGlobalAttribute("geospatial_lon_min", geospatial_lon_min);
-        netcdfFile.addGlobalAttribute("geospatial_lon_max", geospatial_lon_max);
-        netcdfFile.addGlobalAttribute("time_coverage_start", time_coverage_start + " " + time_units);
-        netcdfFile.addGlobalAttribute("time_coverage_end", time_coverage_end + " " + time_units);
-        
-        netcdfFile.create();
-        
-        // Write out the data to the newly created netCDF file.
-        
-        for (int col = 1; col <= resultSetMetadata.getColumnCount(); col++) {
-            DataType type = netcdfTypeFromJDBCType(col, resultSetMetadata);
-            String var = varNames[col-1];           
-            if ( var.equals(tname) ) {
-                ArrayDouble.D1 array = (ArrayDouble.D1) columns.get(col-1);
-                netcdfFile.write(var, array);
-            }
-            else if ( var.equals(xname) ||
-                      var.equals(yname) ) {
-                if (type == DataType.DOUBLE ) {
-                    ArrayDouble.D1 array = (ArrayDouble.D1)columns.get(col-1); 
-                    netcdfFile.write(var, array);
-                } else {
-                    ArrayFloat.D1 array = (ArrayFloat.D1)columns.get(col-1); 
-                    netcdfFile.write(var, array);
-                }
-            } 
-            else {
-                if ( type == DataType.DOUBLE) {
-                    ArrayDouble.D1 array = (ArrayDouble.D1) columns.get(col-1);
-                    netcdfFile.write(var, array);
-                } else if (type == DataType.FLOAT) {
-                    ArrayFloat.D1 array = (ArrayFloat.D1)columns.get(col-1);
-                    netcdfFile.write(var, array);
-                } else if (type == DataType.INT) {
-                    ArrayInt.D1 array = (ArrayInt.D1)columns.get(col-1);
-                    netcdfFile.write(var, array);
-                } else if (type == DataType.CHAR) {
-                    ArrayChar.D2 array = (ArrayChar.D2)columns.get(col-1);
-                    netcdfFile.write(var, array);
-                }   
-            }
-        }
-        // TODO Need to count profiles if profile column exists.
-        // TODO Neet to set PROF_ID to 1 for all profiles if zax does not exist.
-        if (needsProfID) {
-            netcdfFile.write("PROF_ID", PROF_ID);
-        }
-        
-        ArrayFloat.D1 value = new ArrayFloat.D1(1);
+    	// Count the number of obs that belong to each trajectory...
+    	int current_count = 0;
+    	// Keep the list of ids in order
+    	List<Object> trajectory_ids = new ArrayList<Object>();
+    	// Store the number of obs by id...
+    	Map<Object, Integer> trajectory_counts = new HashMap<Object, Integer>();
+    	DataType trajectory_data_type = null;
+        int cruise_id_width = 0;
 
-        value.set(0, indexSize);
-        netcdfFile.write("NUMOBS", value);
-        
-        value.set(0, prof_id_num);
-        netcdfFile.write("NUMPROFS", value);
-        
-        netcdfFile.write("trdim", trdim);
-        
-        netcdfFile.write("trange", trange);
+    	ArrayDouble.D1 PROF_ID = null;
+    	float prof_id_num = 1.0f;
+
+    	ResultSetMetaData resultSetMetadata = resultSet.getMetaData();
+
+    	resultSet.last();
+    	int indexSize = resultSet.getRow();
+    	resultSet.beforeFirst();
+    	ArrayList<Array> columns = new ArrayList<Array>();
+    	for (int col = 1; col <= resultSetMetadata.getColumnCount(); col++) {
+    		DataType type = netcdfTypeFromJDBCType(col, resultSetMetadata);
+    		if ( varNames[col-1].equals(tname) ) {
+    			ArrayDouble.D1 data = new ArrayDouble.D1(indexSize);
+    			columns.add(data);
+    		} 
+    		// Force lat lon to float unless they are doubles,
+    		// then use double
+    		else if ( varNames[col-1].equals(xname) ||
+    				varNames[col-1].equals(yname) ) {
+    			if ( type == DataType.DOUBLE ) {
+    				ArrayDouble.D1 data = new ArrayDouble.D1(indexSize);
+    				columns.add(data);
+    			} else {
+    				ArrayFloat.D1 data = new ArrayFloat.D1(indexSize);
+    				columns.add(data);
+    			}
+
+    		}
+    		else {
+    			if ( type == DataType.DOUBLE) {
+    				ArrayDouble.D1 data = new ArrayDouble.D1(indexSize);
+    				columns.add(data);
+    			} else if (type == DataType.FLOAT) {
+    				ArrayFloat.D1 data = new ArrayFloat.D1(indexSize);
+    				columns.add(data);
+    			} else if (type == DataType.INT) {
+    				ArrayInt.D1 data = new ArrayInt.D1(indexSize);
+    				columns.add(data);
+    			} else if (type == DataType.CHAR) {
+    				// Save the cruise_id width...
+    				if ( varNames[col-1].equals("CRUISE_ID") ) {
+    					cruise_id_width = resultSetMetadata.getPrecision(col);
+    				}
+    				ArrayChar.D2 data = new ArrayChar.D2(indexSize, resultSetMetadata.getPrecision(col));
+    				columns.add(data);
+    			}
+    		}
+    	}
+
+    	if ( needsProfID ) {
+    		PROF_ID = new ArrayDouble.D1(indexSize);
+    	}
+
+    	ArrayDouble.D1 trdim = new ArrayDouble.D1(2);
+    	trdim.set(0, 999999999.);
+    	trdim.set(1, -999999999);
+
+    	ArrayDouble.D1 trange = new ArrayDouble.D1(2);
+    	trange.set(0, 999999999.);
+    	trange.set(1, -999999999.);
+
+    	int index = 0;
+    	DateTimeFormatter fmt = DateTimeFormat.forPattern(time_format).withZone(DateTimeZone.UTC);
+    	DateUnit dateUnit;
+    	try {
+    		dateUnit = new DateUnit(time_units);
+    	} catch (Exception e) {
+    		throw new LASException(e.toString());
+    	}
+    	double geospatial_lat_min =  9999.0;
+    	double geospatial_lat_max = -9999.0;
+    	double geospatial_lon_min =  9999.0;
+    	double geospatial_lon_max = -9999.0;        
+    	double time_coverage_start = 999999999.0;
+    	double time_coverage_end = -999999999.0;
+    	while (resultSet.next()) {
+    		for (int col = 1; col <= resultSetMetadata.getColumnCount(); col++) {                
+    			DataType type = netcdfTypeFromJDBCType(col, resultSetMetadata);
+    			if ( varNames[col-1].equals(tname) ) {
+    				ArrayDouble.D1 data = (ArrayDouble.D1)columns.get(col-1);
+    				Double time;
+    				if ( convert_time ) {
+    					String time_string = resultSet.getString(col);
+    					if (time_string == null ) {
+    						time = new Double(missing);
+    					} else {
+    						DateTime datetime = fmt.parseDateTime(time_string).withZone(DateTimeZone.UTC);
+    						double t = dateUnit.makeValue(datetime.toDate());
+    						time = new Double(t);
+    					}
+    				}
+    				else {
+    					time = resultSet.getDouble(col);
+    					data.set(index, time);
+    				}
+    				data.set(index, time);
+    				columns.set(col-1, data);
+    				if ( time.doubleValue() < trdim.get(0)) {
+    					trdim.set(0, time);
+    					trange.set(0, time);
+    				}
+    				if ( time.doubleValue() > trdim.get(1)) {
+    					trdim.set(1, time);
+    					trange.set(1,time);
+    				}
+    				if ( time.doubleValue() < time_coverage_start ) {
+    					time_coverage_start = time.doubleValue();
+    				}
+    				if ( time.doubleValue() > time_coverage_end ) {
+    					time_coverage_end = time.doubleValue();
+    				}
+    			} else if (varNames[col-1].equals(xname) || 
+    					varNames[col-1].equals(yname) ) {
+    				if (type == DataType.DOUBLE ) {
+    					ArrayDouble.D1 data = (ArrayDouble.D1)columns.get(col-1); 
+    					Double d = resultSet.getDouble(col);
+    					if ( d==null ) {
+    						d = new Double(missing);
+    					}
+    					data.set(index,d);
+    					columns.set(col-1, data);
+    					if (varNames[col-1].equals(xname) ) {
+    						if ( d.doubleValue() > geospatial_lon_max ) {
+    							geospatial_lon_max = d.doubleValue();
+    						}
+    						if ( d.doubleValue() < geospatial_lon_min ) {
+    							geospatial_lon_min = d.doubleValue();
+    						}
+    					} else if ( varNames[col-1].equals(yname) ) {
+    						if ( d.doubleValue() > geospatial_lat_max ) {
+    							geospatial_lat_max = d.doubleValue();
+    						}
+    						if ( d.doubleValue() < geospatial_lat_min ) {
+    							geospatial_lat_min = d.doubleValue();
+    						}
+    					}
+    				} else {
+    					ArrayFloat.D1 data = (ArrayFloat.D1)columns.get(col-1); 
+    					Float d = resultSet.getFloat(col);
+    					if ( d==null ) {
+    						d = new Float(missing);
+    					}
+    					data.set(index,d);
+    					columns.set(col-1, data);
+    					if (varNames[col-1].equals(xname) ) {
+    						if ( d.doubleValue() > geospatial_lon_max ) {
+    							geospatial_lon_max = d.doubleValue();
+    						}
+    						if ( d.doubleValue() < geospatial_lon_min ) {
+    							geospatial_lon_min = d.doubleValue();
+    						}
+    					} else if ( varNames[col-1].equals(yname) ) {
+    						if ( d.doubleValue() > geospatial_lat_max ) {
+    							geospatial_lat_max = d.doubleValue();
+    						}
+    						if ( d.doubleValue() < geospatial_lat_min ) {
+    							geospatial_lat_min = d.doubleValue();
+    						}
+    					}
+    				}
+
+    			} else {
+    				boolean count_trajectory = false;
+
+    				if ( varNames[col-1].equals("CRUISE_ID") && trajectory ) {
+    					count_trajectory = true;
+    				}
+    				if ( type == DataType.DOUBLE) {
+    					ArrayDouble.D1 data = (ArrayDouble.D1)columns.get(col-1);
+    					Double d = resultSet.getDouble(col);
+    					if (d==null) {
+    						d = new Double(missing);
+    					}
+    					if ( count_trajectory && !trajectory_ids.contains(d) ) {
+    						trajectory_data_type = DataType.DOUBLE;
+    						trajectory_ids.add(d);
+    						trajectory_counts.put(d, 1);
+    					} else if ( count_trajectory && trajectory_ids.contains(d) ) {
+    						int c = trajectory_counts.get(d).intValue();
+    						c++;
+    						trajectory_counts.put(d, c);
+    					}	
+    					data.set(index, d);
+    					columns.set(col-1, data);
+    					if (zname.equals(varNames[col-1]) && needsProfID ) {
+    						if ( index == 0 ) {
+    							PROF_ID.set(index, prof_id_num);
+    						} else {
+    							if ( data.get(index) <= data.get(index-1)) {
+    								prof_id_num = prof_id_num + 1.f;
+    							}
+    							PROF_ID.set(index, prof_id_num);
+    						}
+    					}    
+    				} else if (type == DataType.FLOAT) {
+    					ArrayFloat.D1 data = (ArrayFloat.D1)columns.get(col-1);
+    					Float f = resultSet.getFloat(col);
+    					if ( f==null) {
+    						f = new Float(missing);
+    					}
+    					data.set(index, f);
+    					columns.set(col-1, data);
+    					if (zname.equals(varNames[col-1]) && needsProfID ) {
+    						if ( index == 0 ) {
+    							PROF_ID.set(index, prof_id_num);
+    						} else {
+    							if ( data.get(index) <= data.get(index-1)) {
+    								prof_id_num = prof_id_num + 1.f;
+    							}
+    							PROF_ID.set(index, prof_id_num);
+    						}
+    					}
+    				} else if (type == DataType.INT) {
+    					ArrayInt.D1 data = (ArrayInt.D1)columns.get(col-1);
+    					Integer i = resultSet.getInt(col);
+    					if ( i==null) {
+    						i = new Integer(Integer.MIN_VALUE);
+    					}
+    					data.set(index, i);
+    					columns.set(col-1, data);
+    					if (zname.equals(varNames[col-1]) && needsProfID ) {
+    						if ( index == 0 ) {
+    							PROF_ID.set(index, prof_id_num);
+    						} else {
+    							if ( data.get(index) <= data.get(index-1)) {
+    								prof_id_num = prof_id_num + 1.f;
+    							}
+    							PROF_ID.set(index, prof_id_num);
+    						}
+    					}
+    				} else if (type == DataType.CHAR) {
+    					ArrayChar.D2 data = (ArrayChar.D2)columns.get(col-1);
+    					String value = resultSet.getString(col);
+    					if (value==null) {
+    						value="";
+    					}
+    					if ( count_trajectory && !trajectory_ids.contains(value) ) {
+    						trajectory_data_type = DataType.CHAR;
+    						trajectory_ids.add(value);
+    						trajectory_counts.put(value, 1);
+    					} else if ( count_trajectory && trajectory_ids.contains(value) ) {
+    						int c = trajectory_counts.get(value).intValue();
+    						c++;
+    						trajectory_counts.put(value, c);
+    					}
+    					data.setString(index, value);
+    					columns.set(col-1,data);
+    				}
+    			}
+    		}
+    		index++;
+    	}
+    	// Create the trajectory related dimensions and variables
+    	ArrayChar.D2 trajectory_id_char_data = null;
+		ArrayInt.D1 trajectory_count_data = null;
+    	if ( trajectory ) {  		
+    		Dimension trajectory_dim = netcdfFile.addDimension("trajectory", trajectory_ids.size());
+    		if ( trajectory_data_type.equals(DataType.DOUBLE) ) {
+    			
+    		} else if ( trajectory_data_type.equals(DataType.CHAR) ) {
+    			trajectory_id_char_data = new ArrayChar.D2(trajectory_ids.size(), cruise_id_width);
+    			trajectory_count_data = new ArrayInt.D1(trajectory_ids.size());
+    			int inx = 0;
+    			for (Iterator idIt = trajectory_ids.iterator(); idIt.hasNext();) {
+					String key = (String) idIt.next();
+					int c = trajectory_counts.get(key);	
+    				trajectory_id_char_data.setString(inx, key);
+    				trajectory_count_data.set(inx, c);
+    				inx++;
+    			}
+    			List<Dimension> dimList = new ArrayList<Dimension>();
+    			dimList.add(trajectory_dim);
+    			Dimension width = netcdfFile.addDimension("trajectory_width", cruise_id_width);
+    			dimList.add(width);
+    			netcdfFile.addVariable("trajectories", DataType.CHAR, dimList);
+    			netcdfFile.addVariableAttribute("trajectories", "cf_role", "trajectory_id");	
+    			dimList.clear();
+    			dimList.add(trajectory_dim);
+    			netcdfFile.addVariable("trajectory_counts", DataType.INT, dimList);
+    			netcdfFile.addVariableAttribute("trajectory_counts", "trajectory_dimension", "index");
+    			netcdfFile.addVariableAttribute("trajectory_counts", "long_name", "Number of observations in this trajectory.");
+    		}
+    		
+    	}
+    	// Write the minimal data discovery attributes for "Unidata Observation Dataset v1.0" conventions then create the file.
+
+    	// These don't appear in the CF standard so leave them out.
+    	
+    	if ( !trajectory ) {
+    		netcdfFile.addGlobalAttribute("geospatial_lat_min", geospatial_lat_min);
+    		netcdfFile.addGlobalAttribute("geospatial_lat_max", geospatial_lat_max);
+    		netcdfFile.addGlobalAttribute("geospatial_lon_min", geospatial_lon_min);
+    		netcdfFile.addGlobalAttribute("geospatial_lon_max", geospatial_lon_max);
+    		netcdfFile.addGlobalAttribute("time_coverage_start", time_coverage_start + " " + time_units);
+    		netcdfFile.addGlobalAttribute("time_coverage_end", time_coverage_end + " " + time_units);
+    	}
+    	
+    	netcdfFile.create();
+    	// Fill the trajectory related variables.
+    	if ( trajectory ) {
+    		if ( trajectory_data_type.equals(DataType.DOUBLE) ) {
+    			
+    		} else if ( trajectory_data_type.equals(DataType.CHAR) ) {
+    			netcdfFile.write("trajectories", trajectory_id_char_data);  
+    		}
+    		netcdfFile.write("trajectory_counts", trajectory_count_data);
+    	}
+    	
+    	// Write out the data to the newly created netCDF file.
+
+    	for (int col = 1; col <= resultSetMetadata.getColumnCount(); col++) {
+    		DataType type = netcdfTypeFromJDBCType(col, resultSetMetadata);
+    		String var = varNames[col-1];           
+    		if ( var.equals(tname) ) {
+    			ArrayDouble.D1 array = (ArrayDouble.D1) columns.get(col-1);
+    			netcdfFile.write(var, array);
+    		}
+    		else if ( var.equals(xname) ||
+    				var.equals(yname) ) {
+    			if (type == DataType.DOUBLE ) {
+    				ArrayDouble.D1 array = (ArrayDouble.D1)columns.get(col-1); 
+    				netcdfFile.write(var, array);
+    			} else {
+    				ArrayFloat.D1 array = (ArrayFloat.D1)columns.get(col-1); 
+    				netcdfFile.write(var, array);
+    			}
+    		} 
+    		else {
+    			// For trajectory data, don't write the cruise id as a separate variable.  It's already taken care...
+    			if (!var.equals("CRUISE_ID") || (var.equals("CRUISE_ID") && !trajectory ) ) {
+    				if ( type == DataType.DOUBLE) {
+    					ArrayDouble.D1 array = (ArrayDouble.D1) columns.get(col-1);
+    					netcdfFile.write(var, array);
+    				} else if (type == DataType.FLOAT) {
+    					ArrayFloat.D1 array = (ArrayFloat.D1)columns.get(col-1);
+    					netcdfFile.write(var, array);
+    				} else if (type == DataType.INT) {
+    					ArrayInt.D1 array = (ArrayInt.D1)columns.get(col-1);
+    					netcdfFile.write(var, array);
+    				} else if (type == DataType.CHAR) {
+    					ArrayChar.D2 array = (ArrayChar.D2)columns.get(col-1);
+    					netcdfFile.write(var, array);
+    				}   
+    			}
+    		}
+    	}
+    	// TODO Need to count profiles if profile column exists.
+    	// TODO Neet to set PROF_ID to 1 for all profiles if zax does not exist.
+    	
+    	// We don't create a PROF_ID in a trajectory file...
+    	if (needsProfID && !trajectory) {
+    		netcdfFile.write("PROF_ID", PROF_ID);
+    	}
+
+    	ArrayFloat.D1 value = new ArrayFloat.D1(1);
+    	if ( !trajectory ) {
+    		value.set(0, indexSize);
+    		netcdfFile.write("NUMOBS", value);
+
+    		value.set(0, prof_id_num);
+    		netcdfFile.write("NUMPROFS", value);
+
+    		netcdfFile.write("trdim", trdim);
+
+    		netcdfFile.write("trange", trange);
+    	}
     }
    
    public void create() throws IOException {
