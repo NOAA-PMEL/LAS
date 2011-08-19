@@ -7,6 +7,10 @@ public class DatasetService extends Service {
 		return this.parentId;
 	}
 
+	public int getChildId(){
+		return this.serviceId;
+	}
+
 	public DatasetService(int parentId, int serviceId){
 		super(serviceId);
 		this.parentId = parentId;

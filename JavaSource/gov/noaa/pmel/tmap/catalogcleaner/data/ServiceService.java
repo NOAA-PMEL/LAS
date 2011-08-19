@@ -7,6 +7,10 @@ public class ServiceService extends Service {
 		return this.parentId;
 	}
 
+	public int getChildId(){
+		return this.serviceId;
+	}
+
 	public ServiceService(int parentId, int serviceId){
 		super(serviceId);
 		this.parentId = parentId;

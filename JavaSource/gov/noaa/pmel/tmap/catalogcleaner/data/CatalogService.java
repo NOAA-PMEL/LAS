@@ -7,6 +7,10 @@ public class CatalogService extends Service {
 		return this.parentId;
 	}
 
+	public int getChildId(){
+		return this.serviceId;
+	}
+
 	public CatalogService(int parentId, int serviceId){
 		super(serviceId);
 		this.parentId = parentId;

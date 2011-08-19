@@ -7,6 +7,10 @@ public class CatalogDataset extends Dataset {
 		return this.parentId;
 	}
 
+	public int getChildId(){
+		return this.datasetId;
+	}
+
 	public CatalogDataset(int parentId, int datasetId){
 		super(datasetId);
 		this.parentId = parentId;

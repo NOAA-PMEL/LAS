@@ -39,7 +39,7 @@ public class Writer {
 		TransformerFactory transformerFactory = TransformerFactory.newInstance();
 		Transformer transformer = transformerFactory.newTransformer();
 		DOMSource source = new DOMSource(doc);
-	    StreamResult result = new StreamResult(new File("text.xml").getPath());
+	    StreamResult result = new StreamResult(new File("testing_xml.xml").getPath());
  
 		// Output to console for testing
 	    // StreamResult result = new StreamResult(System.out);
@@ -211,6 +211,7 @@ public class Writer {
 			TmgCreatorContact child = it.next();
 			appendTmgCreatorContact(doc, creatorElement, child);
 		}
+		node.appendChild(creatorElement);
 		return node;
 	}
 	public Element appendTmgCreatorName(Document doc, Element node, TmgCreatorName name){

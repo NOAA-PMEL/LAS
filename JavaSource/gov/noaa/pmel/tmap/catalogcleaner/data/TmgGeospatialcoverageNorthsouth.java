@@ -1,14 +1,17 @@
 package gov.noaa.pmel.tmap.catalogcleaner.data;
 
 public class TmgGeospatialcoverageNorthsouth {
-	protected int tmgGeospatialcoverageNorthsouthId;
 	protected int tmgGeospatialcoverageId;
+	protected int tmgGeospatialcoverageNorthsouthId;
 	protected String size;
 	protected String resolution;
 	protected String start;
 	protected String units;
 	public void setTmgGeospatialcoverageId(int tmgGeospatialcoverageId){
 		this.tmgGeospatialcoverageId = tmgGeospatialcoverageId;
+	}
+	public void setTmgGeospatialcoverageNorthsouthId(int tmgGeospatialcoverageNorthsouthId){
+		this.tmgGeospatialcoverageNorthsouthId = tmgGeospatialcoverageNorthsouthId;
 	}
 	public void setSize(String size){
 		this.size = size;
@@ -22,11 +25,11 @@ public class TmgGeospatialcoverageNorthsouth {
 	public void setUnits(String units){
 		this.units = units;
 	}
-	public int getTmgGeospatialcoverageNorthsouthId(){
-		return this.tmgGeospatialcoverageNorthsouthId;
-	}
 	public int getTmgGeospatialcoverageId(){
 		return this.tmgGeospatialcoverageId;
+	}
+	public int getTmgGeospatialcoverageNorthsouthId(){
+		return this.tmgGeospatialcoverageNorthsouthId;
 	}
 	public String getSize(){
 		return this.size;
@@ -41,15 +44,15 @@ public class TmgGeospatialcoverageNorthsouth {
 		return this.units;
 	}
 
-	public TmgGeospatialcoverageNorthsouth(int id){
-		this.tmgGeospatialcoverageNorthsouthId=id;
+	public TmgGeospatialcoverageNorthsouth(int tmgGeospatialcoverageNorthsouth){
+		this.tmgGeospatialcoverageNorthsouthId = tmgGeospatialcoverageNorthsouth;
 	}
-	public TmgGeospatialcoverageNorthsouth(int tmgGeospatialcoverageNorthsouthId, String size, String resolution, String start, String units, int tmgGeospatialcoverageId){
-		this.tmgGeospatialcoverageNorthsouthId=tmgGeospatialcoverageNorthsouthId;
+	public TmgGeospatialcoverageNorthsouth(int tmgGeospatialcoverageId, int tmgGeospatialcoverageNorthsouthId, String size, String resolution, String start, String units){
+		this.tmgGeospatialcoverageId = tmgGeospatialcoverageId;
+		this.tmgGeospatialcoverageNorthsouthId = tmgGeospatialcoverageNorthsouthId;
 		this.size=size;
 		this.resolution=resolution;
 		this.start=start;
 		this.units=units;
-		this.tmgGeospatialcoverageId=tmgGeospatialcoverageId;
 	}
 }

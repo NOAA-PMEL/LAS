@@ -8,6 +8,9 @@ public class Service {
 	protected String desc;
 	protected String servicetype;
 	protected String status;
+	public void setServiceId(int serviceId){
+		this.serviceId = serviceId;
+	}
 	public void setSuffix(String suffix){
 		this.suffix = suffix;
 	}
@@ -48,11 +51,11 @@ public class Service {
 		return this.status;
 	}
 
-	public Service(int id){
-		this.serviceId=id;
+	public Service(int service){
+		this.serviceId = service;
 	}
 	public Service(int serviceId, String suffix, String name, String base, String desc, String servicetype, String status){
-		this.serviceId=serviceId;
+		this.serviceId = serviceId;
 		this.suffix=suffix;
 		this.name=name;
 		this.base=base;

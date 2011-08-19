@@ -14,6 +14,9 @@ public class Dataset {
 	protected String status;
 	protected String datatype;
 	protected String datasizeUnit;
+	public void setDatasetId(int datasetId){
+		this.datasetId = datasetId;
+	}
 	public void setHarvest(String harvest){
 		this.harvest = harvest;
 	}
@@ -90,11 +93,11 @@ public class Dataset {
 		return this.datasizeUnit;
 	}
 
-	public Dataset(int id){
-		this.datasetId=id;
+	public Dataset(int dataset){
+		this.datasetId = dataset;
 	}
 	public Dataset(int datasetId, String harvest, String name, String alias, String authority, String dId, String servicename, String urlpath, String resourcecontrol, String collectiontype, String status, String datatype, String datasizeUnit){
-		this.datasetId=datasetId;
+		this.datasetId = datasetId;
 		this.harvest=harvest;
 		this.name=name;
 		this.alias=alias;

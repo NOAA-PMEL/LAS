@@ -1,12 +1,15 @@
 package gov.noaa.pmel.tmap.catalogcleaner.data;
 
 public class TmgCreatorContact {
-	protected int tmgCreatorContactId;
 	protected int tmgCreatorId;
+	protected int tmgCreatorContactId;
 	protected String email;
 	protected String url;
 	public void setTmgCreatorId(int tmgCreatorId){
 		this.tmgCreatorId = tmgCreatorId;
+	}
+	public void setTmgCreatorContactId(int tmgCreatorContactId){
+		this.tmgCreatorContactId = tmgCreatorContactId;
 	}
 	public void setEmail(String email){
 		this.email = email;
@@ -14,11 +17,11 @@ public class TmgCreatorContact {
 	public void setUrl(String url){
 		this.url = url;
 	}
-	public int getTmgCreatorContactId(){
-		return this.tmgCreatorContactId;
-	}
 	public int getTmgCreatorId(){
 		return this.tmgCreatorId;
+	}
+	public int getTmgCreatorContactId(){
+		return this.tmgCreatorContactId;
 	}
 	public String getEmail(){
 		return this.email;
@@ -27,13 +30,13 @@ public class TmgCreatorContact {
 		return this.url;
 	}
 
-	public TmgCreatorContact(int id){
-		this.tmgCreatorContactId=id;
+	public TmgCreatorContact(int tmgCreatorContact){
+		this.tmgCreatorContactId = tmgCreatorContact;
 	}
-	public TmgCreatorContact(int tmgCreatorContactId, String email, String url, int tmgCreatorId){
-		this.tmgCreatorContactId=tmgCreatorContactId;
+	public TmgCreatorContact(int tmgCreatorId, int tmgCreatorContactId, String email, String url){
+		this.tmgCreatorId = tmgCreatorId;
+		this.tmgCreatorContactId = tmgCreatorContactId;
 		this.email=email;
 		this.url=url;
-		this.tmgCreatorId=tmgCreatorId;
 	}
 }

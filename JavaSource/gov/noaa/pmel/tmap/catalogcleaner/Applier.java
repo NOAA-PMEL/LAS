@@ -24,37 +24,41 @@ import thredds.catalog.InvMetadata;
 import thredds.catalog.InvService;
 import thredds.catalog.ServiceType;
 import thredds.catalog.ThreddsMetadata.Source;
+import org.w3c.dom.Attr;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 // TODO: replace with a real rules engine
 public class Applier {
+	
+	private static InvCatalog rawCatalog;
 
-	public static int applyCatalogRules(InvCatalog rawCatalog) throws Exception{
-		String xmlns = rawCatalog.getUriString();
-		String name = rawCatalog.getName();
-		String base = "";
-		String version = rawCatalog.getVersion();
-		String expires = "";
-		if(rawCatalog.getExpires() != null)
-			expires = rawCatalog.getExpires().toString();
+	public static int applyCatalogRules(Element parent, InvCatalog crawCatalog) throws Exception{
+		rawCatalog = crawCatalog;
+		String xmlns = parent.getAttribute("xmlns");		// works
+		String name = parent.getAttribute("name");			// works
+		String base = parent.getAttribute("base");
+		String version = parent.getAttribute("version");	// works
+		String expires = parent.getAttribute("expires");
 		String status = "new";
 		
 		// apply rules
 		
 		// end apply rules
 		
-		int catalogId = DataAccess.insertCatalog(xmlns, name, base, version, expires, status);
+		int catalogId = DataAccess.insertCatalog(name, expires, version, base, xmlns, status);
 		//Catalog catalog = new Catalog(catalogId, xmlns, name, base, version, expires, status);	
 		return catalogId;
 	} 
-	public static int applyCatalogServiceRules(int parentId, InvService child) throws Exception{
-		String name = child.getName();
-		String base = child.getBase();
-		String servicetype = child.getServiceType().toString();
-		String suffix = child.getSuffix();
-		String desc = child.getDescription();
+	public static int applyCatalogServiceRules(int parentId, Element child) throws Exception{
+		String name = child.getAttribute("name");	// works
+		String base = child.getAttribute("base");	// works
+		String servicetype = child.getAttribute("serviceType");	// works
+		String suffix = child.getAttribute("suffix");
+		String desc = child.getAttribute("desc");
 		int childId = -1;
 		// begin rules
-		if(child.getServiceType() != ServiceType.COMPOUND){	// todo: this would be a rule applied
+		if(!servicetype.equals("COMPOUND")){	// todo: this would be a rule applied
 			name = "ct2009";		// TODO: dynamically generate new name, determine other fields
 			base = "";
 			servicetype = "COMPOUND";
@@ -92,35 +96,38 @@ public class Applier {
 		childId = DataAccess.insertService("", name, base, "", serviceType, "new");
 		DataAccess.insertServiceService(serviceId, childId);
 	}
-	public static int applyServiceServiceRules(int parentId, InvService child) throws Exception{
-		String name = child.getName();
-		String base = child.getBase();
-		String servicetype = child.getServiceType().toString();
-		String suffix = child.getSuffix();
-		String desc = child.getDescription();
+	public static int applyServiceServiceRules(int parentId, Element child) throws Exception{
+		String name = child.getAttribute("name");	// works
+		String base = child.getAttribute("base");	// works
+		String servicetype = child.getAttribute("serviceType"); 	// works
+		String suffix = child.getAttribute("suffix");
+		String desc = child.getAttribute("desc");
 		
 		// apply rules
 
-		int childId = DataAccess.insertService(base, name, suffix, desc, "new", servicetype);
+		int childId = DataAccess.insertService(suffix, name, base, desc, servicetype, "new");
 		DataAccess.insertServiceService(parentId, childId);
 		return childId;
 	}
-	public static int applyCatalogDatasetRules(int parentId, InvDataset child) throws Exception{
-		String alias = ""; 	//??
-		String harvest = ""; //?
-		String resourcecontrol = ""; //??
-		String urlpath = child.getCatalogUrl(); // wrong. But urlPath is private and there appears to be no access method... even more incentive to just parse the xml directly...
-		String servicename = child.getServiceDefault().getName(); //??
-		String dId = child.getID();
-		String authority = child.getAuthority();
-		String datatype = child.getDataType().toString(); //?
-		String collectiontype = "";
+	public static int applyCatalogDatasetRules(int parentId, Element child) throws Exception{
+		String dId = child.getAttribute("ID");						// works
+		InvDataset d = rawCatalog.findDatasetByID(dId);
+		String alias = child.getAttribute("alias");
+		String harvest = child.getAttribute("harvest");
+		String resourcecontrol = child.getAttribute("resourcecontrol");
+		String urlpath = child.getAttribute("urlPath");				// works
+		//String servicename = child.getAttribute("serviceName");
+		String servicename = d.getServiceDefault().getName();
+		String authority = child.getAttribute("authority");
+		//String datatype = child.getAttribute("dataType");
+		String datatype = d.getDataType().toString();
+		String collectiontype = child.getAttribute("collectiontype");
 //		if(!datasetT.getCollectionType().equals(""))
 //			collectiontype = datasetT.getCollectionType().toString();
-		String datasizeUnit = "";
+		String datasizeUnit = child.getAttribute("datasizeUnit");
 ////		if(!datasetT.getDataFormatType().equals(""))
 //			datasizeUnit = datasetT.getDataFormatType().toString();
-		String name = child.getName();
+		String name = child.getAttribute("name");					// works
 		String status = "new";
 		
 		// apply rules
@@ -140,42 +147,48 @@ public class Applier {
 		DataAccess.insertDatasetTmg(parentId, childId);
 		return childId;
 	}
-	public static int applyTmgMetadataRules(int parentId, InvMetadata child) throws Exception{
-		String inherited = child.isInherited() ? "true" : "false";
-		String metadatatype = child.getMetadataType();
+	public static int applyTmgMetadataRules(int parentId, Element child) throws Exception{
+		String inherited = child.getAttribute("inherited");
+		//String metadatatype = child.getAttribute("metadatatype");
+		InvDataset d = rawCatalog.findDatasetByID("ct_flux"); // TODO: obviously, make this not hard-coded
 		
 		// apply rules
 		int childId = DataAccess.insertMetadata(metadatatype, inherited);
 		DataAccess.insertTmgMetadata(parentId, childId);
 		return childId;
 	}
-	public static int applyTmgDocumentationRules(int parentId, InvDocumentation child) throws Exception{
-		String documentationenum = child.getType();
-		String value = child.getInlineContent();
+	public static int applyTmgDocumentationRules(int parentId, Element child) throws Exception{
+		String documentationenum = child.getAttribute("type");
+		String value = child.getFirstChild().getTextContent();
 		
 		// apply rules
-		int childId = DataAccess.insertTmgDocumentation(value, documentationenum, parentId);
+		int childId = DataAccess.insertTmgDocumentation(parentId, value, documentationenum);
 		return childId;
 	}
-	public static int applyTmgCreatorRules(int parentId, Source child) throws Exception{
+	public static int applyTmgCreatorRules(int parentId, Element child) throws Exception{
 		// apply rules
 		int tmgCreatorId = DataAccess.insertTmgCreator(parentId);
-		applyTmgCreatorNameRules(parentId, child);
-		applyTmgCreatorContactRules(parentId, child);
-		
 		return tmgCreatorId;
 	}
-	public static int applyTmgCreatorNameRules(int parentId, Source child) throws Exception{
-		String value = child.getName();
-		String vocabulary = child.getNameVocab().toString();
-		int childId = DataAccess.insertTmgCreatorName(vocabulary, value, parentId);
+	public static int applyTmgCreatorNameRules(int parentId, Element child) throws Exception{
+		String value = child.getFirstChild().getTextContent();
+		String vocabulary = child.getAttribute("vocabulary");
+		int childId = DataAccess.insertTmgCreatorName(parentId, value, vocabulary);
 		return childId;
 		
 	}
-	public static int applyTmgCreatorContactRules(int parentId, Source child) throws Exception{
-		String url = child.getUrl();
-		String email = child.getEmail();
-		int childId = DataAccess.insertTmgCreatorContact(email, url, parentId);
+	public static int applyTmgCreatorContactRules(int parentId, Element child) throws Exception{
+		String url = child.getAttribute("url");
+		String email = child.getAttribute("email");
+		int childId = DataAccess.insertTmgCreatorContact(parentId, email, url);
+		return childId;
+	}
+	public static int applyMetadataTmgRules(int parentId) throws Exception {
+		int childId = DataAccess.insertTmg();
+		
+		// apply rules
+		
+		DataAccess.insertMetadataTmg(parentId, childId);
 		return childId;
 	}
 }

@@ -7,6 +7,10 @@ public class MetadataTmg extends Tmg {
 		return this.parentId;
 	}
 
+	public int getChildId(){
+		return this.tmgId;
+	}
+
 	public MetadataTmg(int parentId, int tmgId){
 		super(tmgId);
 		this.parentId = parentId;
