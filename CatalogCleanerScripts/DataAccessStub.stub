@@ -21,10 +21,10 @@ public class DataAccess {
 	private static Connection pgCache = null;
 
 
-	public static void init(Parser parser){
+	public static void init(CatalogCleaner cleaner){
 		configFile = new Properties();
 		try{
-			configFile.load(parser.getClass().getClassLoader().getResourceAsStream("myconfig.properties"));
+			configFile.load(cleaner.getClass().getClassLoader().getResourceAsStream("myconfig.properties"));
 			pgCache = DriverManager.getConnection(configFile.getProperty("PGURL"), configFile.getProperty("PGUSERNAME"), configFile.getProperty("PGPASSWORD"));
 			//			boolean iic = pgCache.isClosed();
 			//			System.out.println(iic);
@@ -134,7 +134,7 @@ public class DataAccess {
 
 		return ps;
 	}
-	public static PreparedStatement setPreparedStatement(String functionName, String[] theList, int[] theInts) throws Exception{
+	public static PreparedStatement setPreparedStatement(String functionName, int[] theInts, String[] theList) throws Exception{
 
 		// just to make sure
 		if(theInts.length == 0)
@@ -144,28 +144,28 @@ public class DataAccess {
 			throw new Exception("Invalid vars length");
 
 		PreparedStatement ps = null;
-		int strSize = theList.length;
-		//	try {
 		String insert = "select " + functionName + " (";
-		for(int i = 0; i<strSize; i++){
+		int intSize = theInts.length;
+		for(int i = 0; i<intSize; i++){
 			insert += "?, ";
 		}
-		int intSize = theInts.length;
-		for(int i = 0; i<intSize-1; i++){
+		int strSize = theList.length;
+		//	try {
+		for(int i = 0; i<strSize - 1; i++){
 			insert += "?, ";
 		}
 		insert += "?)";
 		ps = pgCache.prepareStatement(insert);
-		for(int i = 0; i<strSize; i++){
-			String name = theList[i];				
-			if(name == null || name.isEmpty())
-				ps.setNull(i+1, java.sql.Types.VARCHAR);
-			else
-				ps.setString(i+1, name);
-		}
 		for(int i = 0; i<intSize; i++){
 			int theNum = theInts[i];				
 			ps.setInt(i+1, theNum);
+		}
+		for(int i = 0; i<strSize; i++){
+			String name = theList[i];				
+			if(name == null || name.isEmpty())
+				ps.setNull(i+1 + intSize, java.sql.Types.VARCHAR);
+			else
+				ps.setString(i+1+ intSize, name);
 		}
 
 		return ps;

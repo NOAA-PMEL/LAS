@@ -31,7 +31,6 @@
 
 		PreparedStatement ps = null;
 		ResultSet rs = null;
-		int catalogDatasetId = -1;
 
 		try {
 			ps = setPreparedStatement("insert_catalog_dataset", new int[]{catalogId, datasetId});
@@ -39,7 +38,7 @@
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			rs.next();
-			catalogDatasetId = rs.getInt(1);
+			datasetId = rs.getInt(1);
 		}
 		catch (SQLException e) {
 			log.error("Caching: Could not access the database/cache. {}", e);
@@ -53,22 +52,22 @@
 				log.error("Cache read: Could not close the prepared statement. {}", e);
 			}
 		}
-		return catalogDatasetId;
+		return datasetId;
 	}
 
-	public static int insertCatalogProperty(String name, String value, int catalogId) throws Exception{
+	public static int insertCatalogProperty(int catalogId, String name, String value) throws Exception{
 
 		PreparedStatement ps = null;
 		ResultSet rs = null;
-		int catalogPropertyId = -1;
+		int propertyId = -1;
 
 		try {
-			ps = setPreparedStatement("insert_catalog_property", new String[]{name, value}, new int[]{catalogId});
+			ps = setPreparedStatement("insert_catalog_property", new int[]{catalogId}, new String[]{name, value});
 
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			rs.next();
-			catalogPropertyId = rs.getInt(1);
+			propertyId = rs.getInt(1);
 		}
 		catch (SQLException e) {
 			log.error("Caching: Could not access the database/cache. {}", e);
@@ -82,14 +81,13 @@
 				log.error("Cache read: Could not close the prepared statement. {}", e);
 			}
 		}
-		return catalogPropertyId;
+		return propertyId;
 	}
 
 	public static int insertCatalogService(int catalogId, int serviceId) throws Exception{
 
 		PreparedStatement ps = null;
 		ResultSet rs = null;
-		int catalogServiceId = -1;
 
 		try {
 			ps = setPreparedStatement("insert_catalog_service", new int[]{catalogId, serviceId});
@@ -97,7 +95,7 @@
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			rs.next();
-			catalogServiceId = rs.getInt(1);
+			serviceId = rs.getInt(1);
 		}
 		catch (SQLException e) {
 			log.error("Caching: Could not access the database/cache. {}", e);
@@ -111,22 +109,22 @@
 				log.error("Cache read: Could not close the prepared statement. {}", e);
 			}
 		}
-		return catalogServiceId;
+		return serviceId;
 	}
 
-	public static int insertCatalogXlink(String value, String xlink, int catalogId) throws Exception{
+	public static int insertCatalogXlink(int catalogId, String value, String xlink) throws Exception{
 
 		PreparedStatement ps = null;
 		ResultSet rs = null;
-		int catalogXlinkId = -1;
+		int xlinkId = -1;
 
 		try {
-			ps = setPreparedStatement("insert_catalog_xlink", new String[]{value, xlink}, new int[]{catalogId});
+			ps = setPreparedStatement("insert_catalog_xlink", new int[]{catalogId}, new String[]{value, xlink});
 
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			rs.next();
-			catalogXlinkId = rs.getInt(1);
+			xlinkId = rs.getInt(1);
 		}
 		catch (SQLException e) {
 			log.error("Caching: Could not access the database/cache. {}", e);
@@ -140,17 +138,17 @@
 				log.error("Cache read: Could not close the prepared statement. {}", e);
 			}
 		}
-		return catalogXlinkId;
+		return xlinkId;
 	}
 
-	public static int insertCatalogref(int childId, int parentId) throws Exception{
+	public static int insertCatalogref() throws Exception{
 
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 		int catalogrefId = -1;
 
 		try {
-			ps = setPreparedStatement("insert_catalogref", new int[]{childId, parentId});
+			ps = setPreparedStatement("insert_catalogref");
 
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
@@ -172,14 +170,14 @@
 		return catalogrefId;
 	}
 
-	public static int insertCatalogrefDocumentation(String value, String documentationenum, int catalogrefId) throws Exception{
+	public static int insertCatalogrefDocumentation(int catalogrefId, String value, String documentationenum) throws Exception{
 
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 		int catalogrefDocumentationId = -1;
 
 		try {
-			ps = setPreparedStatement("insert_catalogref_documentation", new String[]{value, documentationenum}, new int[]{catalogrefId});
+			ps = setPreparedStatement("insert_catalogref_documentation", new int[]{catalogrefId}, new String[]{value, documentationenum});
 
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
@@ -201,14 +199,14 @@
 		return catalogrefDocumentationId;
 	}
 
-	public static int insertCatalogrefDocumentationNamespace(String namespace, int catalogrefDocumentationId) throws Exception{
+	public static int insertCatalogrefDocumentationNamespace(int catalogrefDocumentationId, String namespace) throws Exception{
 
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 		int catalogrefDocumentationNamespaceId = -1;
 
 		try {
-			ps = setPreparedStatement("insert_catalogref_documentation_namespace", new String[]{namespace}, new int[]{catalogrefDocumentationId});
+			ps = setPreparedStatement("insert_catalogref_documentation_namespace", new int[]{catalogrefDocumentationId}, new String[]{namespace});
 
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
@@ -230,19 +228,19 @@
 		return catalogrefDocumentationNamespaceId;
 	}
 
-	public static int insertCatalogrefDocumentationXlink(String value, String xlink, int catalogrefDocumentationId) throws Exception{
+	public static int insertCatalogrefDocumentationXlink(int catalogrefDocumentationId, String value, String xlink) throws Exception{
 
 		PreparedStatement ps = null;
 		ResultSet rs = null;
-		int catalogrefDocumentationXlinkId = -1;
+		int xlinkId = -1;
 
 		try {
-			ps = setPreparedStatement("insert_catalogref_documentation_xlink", new String[]{value, xlink}, new int[]{catalogrefDocumentationId});
+			ps = setPreparedStatement("insert_catalogref_documentation_xlink", new int[]{catalogrefDocumentationId}, new String[]{value, xlink});
 
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			rs.next();
-			catalogrefDocumentationXlinkId = rs.getInt(1);
+			xlinkId = rs.getInt(1);
 		}
 		catch (SQLException e) {
 			log.error("Caching: Could not access the database/cache. {}", e);
@@ -256,22 +254,22 @@
 				log.error("Cache read: Could not close the prepared statement. {}", e);
 			}
 		}
-		return catalogrefDocumentationXlinkId;
+		return xlinkId;
 	}
 
-	public static int insertCatalogrefXlink(String value, String xlink, int catalogrefId) throws Exception{
+	public static int insertCatalogrefXlink(int catalogrefId, String value, String xlink) throws Exception{
 
 		PreparedStatement ps = null;
 		ResultSet rs = null;
-		int catalogrefXlinkId = -1;
+		int xlinkId = -1;
 
 		try {
-			ps = setPreparedStatement("insert_catalogref_xlink", new String[]{value, xlink}, new int[]{catalogrefId});
+			ps = setPreparedStatement("insert_catalogref_xlink", new int[]{catalogrefId}, new String[]{value, xlink});
 
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			rs.next();
-			catalogrefXlinkId = rs.getInt(1);
+			xlinkId = rs.getInt(1);
 		}
 		catch (SQLException e) {
 			log.error("Caching: Could not access the database/cache. {}", e);
@@ -285,7 +283,7 @@
 				log.error("Cache read: Could not close the prepared statement. {}", e);
 			}
 		}
-		return catalogrefXlinkId;
+		return xlinkId;
 	}
 
 	public static int insertDataset(String harvest, String name, String alias, String authority, String dId, String servicename, String urlpath, String resourcecontrol, String collectiontype, String status, String datatype, String datasizeUnit) throws Exception{
@@ -317,14 +315,14 @@
 		return datasetId;
 	}
 
-	public static int insertDatasetAccess(String urlpath, String servicename, String dataformat, int datasetId) throws Exception{
+	public static int insertDatasetAccess(int datasetId, String urlpath, String servicename, String dataformat) throws Exception{
 
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 		int datasetAccessId = -1;
 
 		try {
-			ps = setPreparedStatement("insert_dataset_access", new String[]{urlpath, servicename, dataformat}, new int[]{datasetId});
+			ps = setPreparedStatement("insert_dataset_access", new int[]{datasetId}, new String[]{urlpath, servicename, dataformat});
 
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
@@ -346,14 +344,14 @@
 		return datasetAccessId;
 	}
 
-	public static int insertDatasetAccessDatasize(String value, String units, int datasetAccessId) throws Exception{
+	public static int insertDatasetAccessDatasize(int datasetAccessId, String value, String units) throws Exception{
 
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 		int datasetAccessDatasizeId = -1;
 
 		try {
-			ps = setPreparedStatement("insert_dataset_access_datasize", new String[]{value, units}, new int[]{datasetAccessId});
+			ps = setPreparedStatement("insert_dataset_access_datasize", new int[]{datasetAccessId}, new String[]{value, units});
 
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
@@ -375,19 +373,18 @@
 		return datasetAccessDatasizeId;
 	}
 
-	public static int insertDatasetCatalogref(int catalogrefId, int datasetId) throws Exception{
+	public static int insertDatasetCatalogref(int datasetId, int catalogrefId) throws Exception{
 
 		PreparedStatement ps = null;
 		ResultSet rs = null;
-		int datasetCatalogrefId = -1;
 
 		try {
-			ps = setPreparedStatement("insert_dataset_catalogref", new int[]{catalogrefId, datasetId});
+			ps = setPreparedStatement("insert_dataset_catalogref", new int[]{datasetId, catalogrefId});
 
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			rs.next();
-			datasetCatalogrefId = rs.getInt(1);
+			catalogrefId = rs.getInt(1);
 		}
 		catch (SQLException e) {
 			log.error("Caching: Could not access the database/cache. {}", e);
@@ -401,14 +398,13 @@
 				log.error("Cache read: Could not close the prepared statement. {}", e);
 			}
 		}
-		return datasetCatalogrefId;
+		return catalogrefId;
 	}
 
 	public static int insertDatasetDataset(int parentId, int childId) throws Exception{
 
 		PreparedStatement ps = null;
 		ResultSet rs = null;
-		int datasetDatasetId = -1;
 
 		try {
 			ps = setPreparedStatement("insert_dataset_dataset", new int[]{parentId, childId});
@@ -416,7 +412,7 @@
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			rs.next();
-			datasetDatasetId = rs.getInt(1);
+			childId = rs.getInt(1);
 		}
 		catch (SQLException e) {
 			log.error("Caching: Could not access the database/cache. {}", e);
@@ -430,7 +426,7 @@
 				log.error("Cache read: Could not close the prepared statement. {}", e);
 			}
 		}
-		return datasetDatasetId;
+		return childId;
 	}
 
 	public static int insertDatasetNcml(int datasetId) throws Exception{
@@ -462,14 +458,14 @@
 		return datasetNcmlId;
 	}
 
-	public static int insertDatasetProperty(String name, String value, int datasetId) throws Exception{
+	public static int insertDatasetProperty(int datasetId, String name, String value) throws Exception{
 
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 		int datasetPropertyId = -1;
 
 		try {
-			ps = setPreparedStatement("insert_dataset_property", new String[]{name, value}, new int[]{datasetId});
+			ps = setPreparedStatement("insert_dataset_property", new int[]{datasetId}, new String[]{name, value});
 
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
@@ -495,7 +491,6 @@
 
 		PreparedStatement ps = null;
 		ResultSet rs = null;
-		int datasetServiceId = -1;
 
 		try {
 			ps = setPreparedStatement("insert_dataset_service", new int[]{datasetId, serviceId});
@@ -503,7 +498,7 @@
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			rs.next();
-			datasetServiceId = rs.getInt(1);
+			serviceId = rs.getInt(1);
 		}
 		catch (SQLException e) {
 			log.error("Caching: Could not access the database/cache. {}", e);
@@ -517,14 +512,13 @@
 				log.error("Cache read: Could not close the prepared statement. {}", e);
 			}
 		}
-		return datasetServiceId;
+		return serviceId;
 	}
 
 	public static int insertDatasetTmg(int datasetId, int tmgId) throws Exception{
 
 		PreparedStatement ps = null;
 		ResultSet rs = null;
-		int datasetTmgId = -1;
 
 		try {
 			ps = setPreparedStatement("insert_dataset_tmg", new int[]{datasetId, tmgId});
@@ -532,7 +526,7 @@
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			rs.next();
-			datasetTmgId = rs.getInt(1);
+			tmgId = rs.getInt(1);
 		}
 		catch (SQLException e) {
 			log.error("Caching: Could not access the database/cache. {}", e);
@@ -546,7 +540,7 @@
 				log.error("Cache read: Could not close the prepared statement. {}", e);
 			}
 		}
-		return datasetTmgId;
+		return tmgId;
 	}
 
 	public static int insertMetadata(String metadatatype, String inherited) throws Exception{
@@ -578,19 +572,19 @@
 		return metadataId;
 	}
 
-	public static int insertMetadataNamespace(String namespace, int metadataId) throws Exception{
+	public static int insertMetadataNamespace(int metadataId, String namespace) throws Exception{
 
 		PreparedStatement ps = null;
 		ResultSet rs = null;
-		int metadataNamespaceId = -1;
+		int namespaceId = -1;
 
 		try {
-			ps = setPreparedStatement("insert_metadata_namespace", new String[]{namespace}, new int[]{metadataId});
+			ps = setPreparedStatement("insert_metadata_namespace", new int[]{metadataId}, new String[]{namespace});
 
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			rs.next();
-			metadataNamespaceId = rs.getInt(1);
+			namespaceId = rs.getInt(1);
 		}
 		catch (SQLException e) {
 			log.error("Caching: Could not access the database/cache. {}", e);
@@ -604,22 +598,21 @@
 				log.error("Cache read: Could not close the prepared statement. {}", e);
 			}
 		}
-		return metadataNamespaceId;
+		return namespaceId;
 	}
 
-	public static int insertMetadataTmg(int tmgId, int metadataId) throws Exception{
+	public static int insertMetadataTmg(int metadataId, int tmgId) throws Exception{
 
 		PreparedStatement ps = null;
 		ResultSet rs = null;
-		int metadataTmgId = -1;
 
 		try {
-			ps = setPreparedStatement("insert_metadata_tmg", new int[]{tmgId, metadataId});
+			ps = setPreparedStatement("insert_metadata_tmg", new int[]{metadataId, tmgId});
 
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			rs.next();
-			metadataTmgId = rs.getInt(1);
+			tmgId = rs.getInt(1);
 		}
 		catch (SQLException e) {
 			log.error("Caching: Could not access the database/cache. {}", e);
@@ -633,22 +626,22 @@
 				log.error("Cache read: Could not close the prepared statement. {}", e);
 			}
 		}
-		return metadataTmgId;
+		return tmgId;
 	}
 
-	public static int insertMetadataXlink(String value, String xlink, int metadataId) throws Exception{
+	public static int insertMetadataXlink(int metadataId, String value, String xlink) throws Exception{
 
 		PreparedStatement ps = null;
 		ResultSet rs = null;
-		int metadataXlinkId = -1;
+		int xlinkId = -1;
 
 		try {
-			ps = setPreparedStatement("insert_metadata_xlink", new String[]{value, xlink}, new int[]{metadataId});
+			ps = setPreparedStatement("insert_metadata_xlink", new int[]{metadataId}, new String[]{value, xlink});
 
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			rs.next();
-			metadataXlinkId = rs.getInt(1);
+			xlinkId = rs.getInt(1);
 		}
 		catch (SQLException e) {
 			log.error("Caching: Could not access the database/cache. {}", e);
@@ -662,7 +655,7 @@
 				log.error("Cache read: Could not close the prepared statement. {}", e);
 			}
 		}
-		return metadataXlinkId;
+		return xlinkId;
 	}
 
 	public static int insertService(String suffix, String name, String base, String desc, String servicetype, String status) throws Exception{
@@ -694,14 +687,14 @@
 		return serviceId;
 	}
 
-	public static int insertServiceDatasetroot(String path, String location, int serviceId) throws Exception{
+	public static int insertServiceDatasetroot(int serviceId, String path, String location) throws Exception{
 
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 		int serviceDatasetrootId = -1;
 
 		try {
-			ps = setPreparedStatement("insert_service_datasetroot", new String[]{path, location}, new int[]{serviceId});
+			ps = setPreparedStatement("insert_service_datasetroot", new int[]{serviceId}, new String[]{path, location});
 
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
@@ -723,19 +716,19 @@
 		return serviceDatasetrootId;
 	}
 
-	public static int insertServiceProperty(String value, String name, int serviceId) throws Exception{
+	public static int insertServiceProperty(int serviceId, String value, String name) throws Exception{
 
 		PreparedStatement ps = null;
 		ResultSet rs = null;
-		int servicePropertyId = -1;
+		int propertyId = -1;
 
 		try {
-			ps = setPreparedStatement("insert_service_property", new String[]{value, name}, new int[]{serviceId});
+			ps = setPreparedStatement("insert_service_property", new int[]{serviceId}, new String[]{value, name});
 
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			rs.next();
-			servicePropertyId = rs.getInt(1);
+			propertyId = rs.getInt(1);
 		}
 		catch (SQLException e) {
 			log.error("Caching: Could not access the database/cache. {}", e);
@@ -749,22 +742,21 @@
 				log.error("Cache read: Could not close the prepared statement. {}", e);
 			}
 		}
-		return servicePropertyId;
+		return propertyId;
 	}
 
-	public static int insertServiceService(int childId, int parentId) throws Exception{
+	public static int insertServiceService(int parentId, int childId) throws Exception{
 
 		PreparedStatement ps = null;
 		ResultSet rs = null;
-		int serviceServiceId = -1;
 
 		try {
-			ps = setPreparedStatement("insert_service_service", new int[]{childId, parentId});
+			ps = setPreparedStatement("insert_service_service", new int[]{parentId, childId});
 
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			rs.next();
-			serviceServiceId = rs.getInt(1);
+			childId = rs.getInt(1);
 		}
 		catch (SQLException e) {
 			log.error("Caching: Could not access the database/cache. {}", e);
@@ -778,7 +770,7 @@
 				log.error("Cache read: Could not close the prepared statement. {}", e);
 			}
 		}
-		return serviceServiceId;
+		return childId;
 	}
 
 	public static int insertTmg() throws Exception{
@@ -810,19 +802,19 @@
 		return tmgId;
 	}
 
-	public static int insertTmgAuthority(String authority, int tmgId) throws Exception{
+	public static int insertTmgAuthority(int tmgId, String authority) throws Exception{
 
 		PreparedStatement ps = null;
 		ResultSet rs = null;
-		int tmgAuthorityId = -1;
+		int authorityId = -1;
 
 		try {
-			ps = setPreparedStatement("insert_tmg_authority", new String[]{authority}, new int[]{tmgId});
+			ps = setPreparedStatement("insert_tmg_authority", new int[]{tmgId}, new String[]{authority});
 
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			rs.next();
-			tmgAuthorityId = rs.getInt(1);
+			authorityId = rs.getInt(1);
 		}
 		catch (SQLException e) {
 			log.error("Caching: Could not access the database/cache. {}", e);
@@ -836,17 +828,17 @@
 				log.error("Cache read: Could not close the prepared statement. {}", e);
 			}
 		}
-		return tmgAuthorityId;
+		return authorityId;
 	}
 
-	public static int insertTmgContributor(String role, String name, int tmgId) throws Exception{
+	public static int insertTmgContributor(int tmgId, String role, String name) throws Exception{
 
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 		int tmgContributorId = -1;
 
 		try {
-			ps = setPreparedStatement("insert_tmg_contributor", new String[]{role, name}, new int[]{tmgId});
+			ps = setPreparedStatement("insert_tmg_contributor", new int[]{tmgId}, new String[]{role, name});
 
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
@@ -872,7 +864,7 @@
 
 		PreparedStatement ps = null;
 		ResultSet rs = null;
-		int tmgCreatorId = -1;
+		int creatorId = -1;
 
 		try {
 			ps = setPreparedStatement("insert_tmg_creator", new int[]{tmgId});
@@ -880,7 +872,7 @@
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			rs.next();
-			tmgCreatorId = rs.getInt(1);
+			creatorId = rs.getInt(1);
 		}
 		catch (SQLException e) {
 			log.error("Caching: Could not access the database/cache. {}", e);
@@ -894,17 +886,17 @@
 				log.error("Cache read: Could not close the prepared statement. {}", e);
 			}
 		}
-		return tmgCreatorId;
+		return creatorId;
 	}
 
-	public static int insertTmgCreatorContact(String email, String url, int tmgCreatorId) throws Exception{
+	public static int insertTmgCreatorContact(int tmgCreatorId, String email, String url) throws Exception{
 
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 		int tmgCreatorContactId = -1;
 
 		try {
-			ps = setPreparedStatement("insert_tmg_creator_contact", new String[]{email, url}, new int[]{tmgCreatorId});
+			ps = setPreparedStatement("insert_tmg_creator_contact", new int[]{tmgCreatorId}, new String[]{email, url});
 
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
@@ -926,19 +918,19 @@
 		return tmgCreatorContactId;
 	}
 
-	public static int insertTmgCreatorName(String value, String vocabulary, int tmgCreatorId) throws Exception{
+	public static int insertTmgCreatorName(int tmgCreatorId, String value, String vocabulary) throws Exception{
 
 		PreparedStatement ps = null;
 		ResultSet rs = null;
-		int tmgCreatorNameId = -1;
+		int nameId = -1;
 
 		try {
-			ps = setPreparedStatement("insert_tmg_creator_name", new String[]{value, vocabulary}, new int[]{tmgCreatorId});
+			ps = setPreparedStatement("insert_tmg_creator_name", new int[]{tmgCreatorId}, new String[]{value, vocabulary});
 
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			rs.next();
-			tmgCreatorNameId = rs.getInt(1);
+			nameId = rs.getInt(1);
 		}
 		catch (SQLException e) {
 			log.error("Caching: Could not access the database/cache. {}", e);
@@ -952,22 +944,22 @@
 				log.error("Cache read: Could not close the prepared statement. {}", e);
 			}
 		}
-		return tmgCreatorNameId;
+		return nameId;
 	}
 
-	public static int insertTmgDataformat(String dataformat, int tmgId) throws Exception{
+	public static int insertTmgDataformat(int tmgId, String dataformat) throws Exception{
 
 		PreparedStatement ps = null;
 		ResultSet rs = null;
-		int tmgDataformatId = -1;
+		int dataformatId = -1;
 
 		try {
-			ps = setPreparedStatement("insert_tmg_dataformat", new String[]{dataformat}, new int[]{tmgId});
+			ps = setPreparedStatement("insert_tmg_dataformat", new int[]{tmgId}, new String[]{dataformat});
 
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			rs.next();
-			tmgDataformatId = rs.getInt(1);
+			dataformatId = rs.getInt(1);
 		}
 		catch (SQLException e) {
 			log.error("Caching: Could not access the database/cache. {}", e);
@@ -981,17 +973,17 @@
 				log.error("Cache read: Could not close the prepared statement. {}", e);
 			}
 		}
-		return tmgDataformatId;
+		return dataformatId;
 	}
 
-	public static int insertTmgDatasize(String value, String units, int tmgId) throws Exception{
+	public static int insertTmgDatasize(int tmgId, String value, String units) throws Exception{
 
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 		int tmgDatasizeId = -1;
 
 		try {
-			ps = setPreparedStatement("insert_tmg_datasize", new String[]{value, units}, new int[]{tmgId});
+			ps = setPreparedStatement("insert_tmg_datasize", new int[]{tmgId}, new String[]{value, units});
 
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
@@ -1013,19 +1005,19 @@
 		return tmgDatasizeId;
 	}
 
-	public static int insertTmgDatatype(String datatype, int tmgId) throws Exception{
+	public static int insertTmgDatatype(int tmgId, String datatype) throws Exception{
 
 		PreparedStatement ps = null;
 		ResultSet rs = null;
-		int tmgDatatypeId = -1;
+		int datatypeId = -1;
 
 		try {
-			ps = setPreparedStatement("insert_tmg_datatype", new String[]{datatype}, new int[]{tmgId});
+			ps = setPreparedStatement("insert_tmg_datatype", new int[]{tmgId}, new String[]{datatype});
 
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			rs.next();
-			tmgDatatypeId = rs.getInt(1);
+			datatypeId = rs.getInt(1);
 		}
 		catch (SQLException e) {
 			log.error("Caching: Could not access the database/cache. {}", e);
@@ -1039,22 +1031,22 @@
 				log.error("Cache read: Could not close the prepared statement. {}", e);
 			}
 		}
-		return tmgDatatypeId;
+		return datatypeId;
 	}
 
-	public static int insertTmgDate(String format, String value, String dateenum, int tmgId) throws Exception{
+	public static int insertTmgDate(int tmgId, String format, String value, String dateenum) throws Exception{
 
 		PreparedStatement ps = null;
 		ResultSet rs = null;
-		int tmgDateId = -1;
+		int dateId = -1;
 
 		try {
-			ps = setPreparedStatement("insert_tmg_date", new String[]{format, value, dateenum}, new int[]{tmgId});
+			ps = setPreparedStatement("insert_tmg_date", new int[]{tmgId}, new String[]{format, value, dateenum});
 
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			rs.next();
-			tmgDateId = rs.getInt(1);
+			dateId = rs.getInt(1);
 		}
 		catch (SQLException e) {
 			log.error("Caching: Could not access the database/cache. {}", e);
@@ -1068,17 +1060,17 @@
 				log.error("Cache read: Could not close the prepared statement. {}", e);
 			}
 		}
-		return tmgDateId;
+		return dateId;
 	}
 
-	public static int insertTmgDocumentation(String value, String documentationenum, int tmgId) throws Exception{
+	public static int insertTmgDocumentation(int tmgId, String value, String documentationenum) throws Exception{
 
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 		int tmgDocumentationId = -1;
 
 		try {
-			ps = setPreparedStatement("insert_tmg_documentation", new String[]{value, documentationenum}, new int[]{tmgId});
+			ps = setPreparedStatement("insert_tmg_documentation", new int[]{tmgId}, new String[]{value, documentationenum});
 
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
@@ -1100,14 +1092,14 @@
 		return tmgDocumentationId;
 	}
 
-	public static int insertTmgDocumentationNamespace(String namespace, int tmgDocumentationId) throws Exception{
+	public static int insertTmgDocumentationNamespace(int tmgDocumentationId, String namespace) throws Exception{
 
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 		int tmgDocumentationNamespaceId = -1;
 
 		try {
-			ps = setPreparedStatement("insert_tmg_documentation_namespace", new String[]{namespace}, new int[]{tmgDocumentationId});
+			ps = setPreparedStatement("insert_tmg_documentation_namespace", new int[]{tmgDocumentationId}, new String[]{namespace});
 
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
@@ -1129,19 +1121,19 @@
 		return tmgDocumentationNamespaceId;
 	}
 
-	public static int insertTmgDocumentationXlink(String value, String xlink, int tmgDocumentationId) throws Exception{
+	public static int insertTmgDocumentationXlink(int tmgDocumentationId, String value, String xlink) throws Exception{
 
 		PreparedStatement ps = null;
 		ResultSet rs = null;
-		int tmgDocumentationXlinkId = -1;
+		int xlinkId = -1;
 
 		try {
-			ps = setPreparedStatement("insert_tmg_documentation_xlink", new String[]{value, xlink}, new int[]{tmgDocumentationId});
+			ps = setPreparedStatement("insert_tmg_documentation_xlink", new int[]{tmgDocumentationId}, new String[]{value, xlink});
 
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			rs.next();
-			tmgDocumentationXlinkId = rs.getInt(1);
+			xlinkId = rs.getInt(1);
 		}
 		catch (SQLException e) {
 			log.error("Caching: Could not access the database/cache. {}", e);
@@ -1155,22 +1147,22 @@
 				log.error("Cache read: Could not close the prepared statement. {}", e);
 			}
 		}
-		return tmgDocumentationXlinkId;
+		return xlinkId;
 	}
 
-	public static int insertTmgGeospatialcoverage(String upordown, int tmgId) throws Exception{
+	public static int insertTmgGeospatialcoverage(int tmgId, String upordown) throws Exception{
 
 		PreparedStatement ps = null;
 		ResultSet rs = null;
-		int tmgGeospatialcoverageId = -1;
+		int geospatialcoverageId = -1;
 
 		try {
-			ps = setPreparedStatement("insert_tmg_geospatialcoverage", new String[]{upordown}, new int[]{tmgId});
+			ps = setPreparedStatement("insert_tmg_geospatialcoverage", new int[]{tmgId}, new String[]{upordown});
 
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			rs.next();
-			tmgGeospatialcoverageId = rs.getInt(1);
+			geospatialcoverageId = rs.getInt(1);
 		}
 		catch (SQLException e) {
 			log.error("Caching: Could not access the database/cache. {}", e);
@@ -1184,17 +1176,17 @@
 				log.error("Cache read: Could not close the prepared statement. {}", e);
 			}
 		}
-		return tmgGeospatialcoverageId;
+		return geospatialcoverageId;
 	}
 
-	public static int insertTmgGeospatialcoverageEastwest(String size, String units, String start, String resolution, int tmgGeospatialcoverageId) throws Exception{
+	public static int insertTmgGeospatialcoverageEastwest(int tmgGeospatialcoverageId, String size, String units, String start, String resolution) throws Exception{
 
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 		int tmgGeospatialcoverageEastwestId = -1;
 
 		try {
-			ps = setPreparedStatement("insert_tmg_geospatialcoverage_eastwest", new String[]{size, units, start, resolution}, new int[]{tmgGeospatialcoverageId});
+			ps = setPreparedStatement("insert_tmg_geospatialcoverage_eastwest", new int[]{tmgGeospatialcoverageId}, new String[]{size, units, start, resolution});
 
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
@@ -1216,14 +1208,14 @@
 		return tmgGeospatialcoverageEastwestId;
 	}
 
-	public static int insertTmgGeospatialcoverageName(String vocabulary, String value, int tmgGeospatialcoverageId) throws Exception{
+	public static int insertTmgGeospatialcoverageName(int tmgGeospatialcoverageId, String vocabulary, String value) throws Exception{
 
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 		int tmgGeospatialcoverageNameId = -1;
 
 		try {
-			ps = setPreparedStatement("insert_tmg_geospatialcoverage_name", new String[]{vocabulary, value}, new int[]{tmgGeospatialcoverageId});
+			ps = setPreparedStatement("insert_tmg_geospatialcoverage_name", new int[]{tmgGeospatialcoverageId}, new String[]{vocabulary, value});
 
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
@@ -1245,14 +1237,14 @@
 		return tmgGeospatialcoverageNameId;
 	}
 
-	public static int insertTmgGeospatialcoverageNorthsouth(String size, String resolution, String start, String units, int tmgGeospatialcoverageId) throws Exception{
+	public static int insertTmgGeospatialcoverageNorthsouth(int tmgGeospatialcoverageId, String size, String resolution, String start, String units) throws Exception{
 
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 		int tmgGeospatialcoverageNorthsouthId = -1;
 
 		try {
-			ps = setPreparedStatement("insert_tmg_geospatialcoverage_northsouth", new String[]{size, resolution, start, units}, new int[]{tmgGeospatialcoverageId});
+			ps = setPreparedStatement("insert_tmg_geospatialcoverage_northsouth", new int[]{tmgGeospatialcoverageId}, new String[]{size, resolution, start, units});
 
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
@@ -1274,19 +1266,19 @@
 		return tmgGeospatialcoverageNorthsouthId;
 	}
 
-	public static int insertTmgGeospatialcoverageUpdown(String start, String resolution, String size, String units, int tmgGeospatialcoverageId) throws Exception{
+	public static int insertTmgGeospatialcoverageUpdown(int tmgGeospatialcoverageId, String start, String resolution, String size, String units) throws Exception{
 
 		PreparedStatement ps = null;
 		ResultSet rs = null;
-		int tmgGeospatialcoverageUpdownId = -1;
+		int updownId = -1;
 
 		try {
-			ps = setPreparedStatement("insert_tmg_geospatialcoverage_updown", new String[]{start, resolution, size, units}, new int[]{tmgGeospatialcoverageId});
+			ps = setPreparedStatement("insert_tmg_geospatialcoverage_updown", new int[]{tmgGeospatialcoverageId}, new String[]{start, resolution, size, units});
 
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			rs.next();
-			tmgGeospatialcoverageUpdownId = rs.getInt(1);
+			updownId = rs.getInt(1);
 		}
 		catch (SQLException e) {
 			log.error("Caching: Could not access the database/cache. {}", e);
@@ -1300,22 +1292,22 @@
 				log.error("Cache read: Could not close the prepared statement. {}", e);
 			}
 		}
-		return tmgGeospatialcoverageUpdownId;
+		return updownId;
 	}
 
-	public static int insertTmgKeyword(String value, String vocabulary, int tmgId) throws Exception{
+	public static int insertTmgKeyword(int tmgId, String value, String vocabulary) throws Exception{
 
 		PreparedStatement ps = null;
 		ResultSet rs = null;
-		int tmgKeywordId = -1;
+		int keywordId = -1;
 
 		try {
-			ps = setPreparedStatement("insert_tmg_keyword", new String[]{value, vocabulary}, new int[]{tmgId});
+			ps = setPreparedStatement("insert_tmg_keyword", new int[]{tmgId}, new String[]{value, vocabulary});
 
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			rs.next();
-			tmgKeywordId = rs.getInt(1);
+			keywordId = rs.getInt(1);
 		}
 		catch (SQLException e) {
 			log.error("Caching: Could not access the database/cache. {}", e);
@@ -1329,14 +1321,13 @@
 				log.error("Cache read: Could not close the prepared statement. {}", e);
 			}
 		}
-		return tmgKeywordId;
+		return keywordId;
 	}
 
 	public static int insertTmgMetadata(int tmgId, int metadataId) throws Exception{
 
 		PreparedStatement ps = null;
 		ResultSet rs = null;
-		int tmgMetadataId = -1;
 
 		try {
 			ps = setPreparedStatement("insert_tmg_metadata", new int[]{tmgId, metadataId});
@@ -1344,7 +1335,7 @@
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			rs.next();
-			tmgMetadataId = rs.getInt(1);
+			metadataId = rs.getInt(1);
 		}
 		catch (SQLException e) {
 			log.error("Caching: Could not access the database/cache. {}", e);
@@ -1358,17 +1349,17 @@
 				log.error("Cache read: Could not close the prepared statement. {}", e);
 			}
 		}
-		return tmgMetadataId;
+		return metadataId;
 	}
 
-	public static int insertTmgProject(String value, String vocabulary, int tmgId) throws Exception{
+	public static int insertTmgProject(int tmgId, String value, String vocabulary) throws Exception{
 
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 		int tmgProjectId = -1;
 
 		try {
-			ps = setPreparedStatement("insert_tmg_project", new String[]{value, vocabulary}, new int[]{tmgId});
+			ps = setPreparedStatement("insert_tmg_project", new int[]{tmgId}, new String[]{value, vocabulary});
 
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
@@ -1390,14 +1381,14 @@
 		return tmgProjectId;
 	}
 
-	public static int insertTmgProperty(String name, String value, int tmgId) throws Exception{
+	public static int insertTmgProperty(int tmgId, String name, String value) throws Exception{
 
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 		int tmgPropertyId = -1;
 
 		try {
-			ps = setPreparedStatement("insert_tmg_property", new String[]{name, value}, new int[]{tmgId});
+			ps = setPreparedStatement("insert_tmg_property", new int[]{tmgId}, new String[]{name, value});
 
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
@@ -1423,7 +1414,7 @@
 
 		PreparedStatement ps = null;
 		ResultSet rs = null;
-		int tmgPublisherId = -1;
+		int publisherId = -1;
 
 		try {
 			ps = setPreparedStatement("insert_tmg_publisher", new int[]{tmgId});
@@ -1431,7 +1422,7 @@
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			rs.next();
-			tmgPublisherId = rs.getInt(1);
+			publisherId = rs.getInt(1);
 		}
 		catch (SQLException e) {
 			log.error("Caching: Could not access the database/cache. {}", e);
@@ -1445,22 +1436,22 @@
 				log.error("Cache read: Could not close the prepared statement. {}", e);
 			}
 		}
-		return tmgPublisherId;
+		return publisherId;
 	}
 
-	public static int insertTmgPublisherContact(String url, String email, int tmgPublisherId) throws Exception{
+	public static int insertTmgPublisherContact(int tmgPublisherId, String url, String email) throws Exception{
 
 		PreparedStatement ps = null;
 		ResultSet rs = null;
-		int tmgPublisherContactId = -1;
+		int contactId = -1;
 
 		try {
-			ps = setPreparedStatement("insert_tmg_publisher_contact", new String[]{url, email}, new int[]{tmgPublisherId});
+			ps = setPreparedStatement("insert_tmg_publisher_contact", new int[]{tmgPublisherId}, new String[]{url, email});
 
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			rs.next();
-			tmgPublisherContactId = rs.getInt(1);
+			contactId = rs.getInt(1);
 		}
 		catch (SQLException e) {
 			log.error("Caching: Could not access the database/cache. {}", e);
@@ -1474,22 +1465,22 @@
 				log.error("Cache read: Could not close the prepared statement. {}", e);
 			}
 		}
-		return tmgPublisherContactId;
+		return contactId;
 	}
 
-	public static int insertTmgPublisherName(String value, String vocabulary, int tmgPublisherId) throws Exception{
+	public static int insertTmgPublisherName(int tmgPublisherId, String value, String vocabulary) throws Exception{
 
 		PreparedStatement ps = null;
 		ResultSet rs = null;
-		int tmgPublisherNameId = -1;
+		int nameId = -1;
 
 		try {
-			ps = setPreparedStatement("insert_tmg_publisher_name", new String[]{value, vocabulary}, new int[]{tmgPublisherId});
+			ps = setPreparedStatement("insert_tmg_publisher_name", new int[]{tmgPublisherId}, new String[]{value, vocabulary});
 
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			rs.next();
-			tmgPublisherNameId = rs.getInt(1);
+			nameId = rs.getInt(1);
 		}
 		catch (SQLException e) {
 			log.error("Caching: Could not access the database/cache. {}", e);
@@ -1503,17 +1494,17 @@
 				log.error("Cache read: Could not close the prepared statement. {}", e);
 			}
 		}
-		return tmgPublisherNameId;
+		return nameId;
 	}
 
-	public static int insertTmgServicename(String servicename, int tmgId) throws Exception{
+	public static int insertTmgServicename(int tmgId, String servicename) throws Exception{
 
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 		int tmgServicenameId = -1;
 
 		try {
-			ps = setPreparedStatement("insert_tmg_servicename", new String[]{servicename}, new int[]{tmgId});
+			ps = setPreparedStatement("insert_tmg_servicename", new int[]{tmgId}, new String[]{servicename});
 
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
@@ -1535,14 +1526,14 @@
 		return tmgServicenameId;
 	}
 
-	public static int insertTmgTimecoverage(String resolution, int tmgId) throws Exception{
+	public static int insertTmgTimecoverage(int tmgId, String resolution) throws Exception{
 
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 		int tmgTimecoverageId = -1;
 
 		try {
-			ps = setPreparedStatement("insert_tmg_timecoverage", new String[]{resolution}, new int[]{tmgId});
+			ps = setPreparedStatement("insert_tmg_timecoverage", new int[]{tmgId}, new String[]{resolution});
 
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
@@ -1564,19 +1555,19 @@
 		return tmgTimecoverageId;
 	}
 
-	public static int insertTmgTimecoverageDuration(String duration, int tmgTimecoverageId) throws Exception{
+	public static int insertTmgTimecoverageDuration(int tmgTimecoverageId, String duration) throws Exception{
 
 		PreparedStatement ps = null;
 		ResultSet rs = null;
-		int tmgTimecoverageDurationId = -1;
+		int durationId = -1;
 
 		try {
-			ps = setPreparedStatement("insert_tmg_timecoverage_duration", new String[]{duration}, new int[]{tmgTimecoverageId});
+			ps = setPreparedStatement("insert_tmg_timecoverage_duration", new int[]{tmgTimecoverageId}, new String[]{duration});
 
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			rs.next();
-			tmgTimecoverageDurationId = rs.getInt(1);
+			durationId = rs.getInt(1);
 		}
 		catch (SQLException e) {
 			log.error("Caching: Could not access the database/cache. {}", e);
@@ -1590,17 +1581,17 @@
 				log.error("Cache read: Could not close the prepared statement. {}", e);
 			}
 		}
-		return tmgTimecoverageDurationId;
+		return durationId;
 	}
 
-	public static int insertTmgTimecoverageEnd(String format, String value, String dateenum, int tmgTimecoverageId) throws Exception{
+	public static int insertTmgTimecoverageEnd(int tmgTimecoverageId, String format, String value, String dateenum) throws Exception{
 
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 		int tmgTimecoverageEndId = -1;
 
 		try {
-			ps = setPreparedStatement("insert_tmg_timecoverage_end", new String[]{format, value, dateenum}, new int[]{tmgTimecoverageId});
+			ps = setPreparedStatement("insert_tmg_timecoverage_end", new int[]{tmgTimecoverageId}, new String[]{format, value, dateenum});
 
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
@@ -1622,19 +1613,19 @@
 		return tmgTimecoverageEndId;
 	}
 
-	public static int insertTmgTimecoverageResolution(String duration, int tmgTimecoverageId) throws Exception{
+	public static int insertTmgTimecoverageResolution(int tmgTimecoverageId, String duration) throws Exception{
 
 		PreparedStatement ps = null;
 		ResultSet rs = null;
-		int tmgTimecoverageResolutionId = -1;
+		int resolutionId = -1;
 
 		try {
-			ps = setPreparedStatement("insert_tmg_timecoverage_resolution", new String[]{duration}, new int[]{tmgTimecoverageId});
+			ps = setPreparedStatement("insert_tmg_timecoverage_resolution", new int[]{tmgTimecoverageId}, new String[]{duration});
 
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			rs.next();
-			tmgTimecoverageResolutionId = rs.getInt(1);
+			resolutionId = rs.getInt(1);
 		}
 		catch (SQLException e) {
 			log.error("Caching: Could not access the database/cache. {}", e);
@@ -1648,17 +1639,17 @@
 				log.error("Cache read: Could not close the prepared statement. {}", e);
 			}
 		}
-		return tmgTimecoverageResolutionId;
+		return resolutionId;
 	}
 
-	public static int insertTmgTimecoverageStart(String format, String value, String dateenum, int tmgTimecoverageId) throws Exception{
+	public static int insertTmgTimecoverageStart(int tmgTimecoverageId, String format, String value, String dateenum) throws Exception{
 
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 		int tmgTimecoverageStartId = -1;
 
 		try {
-			ps = setPreparedStatement("insert_tmg_timecoverage_start", new String[]{format, value, dateenum}, new int[]{tmgTimecoverageId});
+			ps = setPreparedStatement("insert_tmg_timecoverage_start", new int[]{tmgTimecoverageId}, new String[]{format, value, dateenum});
 
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
@@ -1680,19 +1671,19 @@
 		return tmgTimecoverageStartId;
 	}
 
-	public static int insertTmgVariables(String vocabulary, int tmgId) throws Exception{
+	public static int insertTmgVariables(int tmgId, String vocabulary) throws Exception{
 
 		PreparedStatement ps = null;
 		ResultSet rs = null;
-		int tmgVariablesId = -1;
+		int variablesId = -1;
 
 		try {
-			ps = setPreparedStatement("insert_tmg_variables", new String[]{vocabulary}, new int[]{tmgId});
+			ps = setPreparedStatement("insert_tmg_variables", new int[]{tmgId}, new String[]{vocabulary});
 
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			rs.next();
-			tmgVariablesId = rs.getInt(1);
+			variablesId = rs.getInt(1);
 		}
 		catch (SQLException e) {
 			log.error("Caching: Could not access the database/cache. {}", e);
@@ -1706,17 +1697,17 @@
 				log.error("Cache read: Could not close the prepared statement. {}", e);
 			}
 		}
-		return tmgVariablesId;
+		return variablesId;
 	}
 
-	public static int insertTmgVariablesVariable(String units, String name, String vocabularyName, int tmgVariablesId) throws Exception{
+	public static int insertTmgVariablesVariable(int tmgVariablesId, String units, String name, String vocabularyName) throws Exception{
 
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 		int tmgVariablesVariableId = -1;
 
 		try {
-			ps = setPreparedStatement("insert_tmg_variables_variable", new String[]{units, name, vocabularyName}, new int[]{tmgVariablesId});
+			ps = setPreparedStatement("insert_tmg_variables_variable", new int[]{tmgVariablesId}, new String[]{units, name, vocabularyName});
 
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
@@ -1738,19 +1729,19 @@
 		return tmgVariablesVariableId;
 	}
 
-	public static int insertTmgVariablesVariablemap(String value, String xlink, int tmgVariablesId) throws Exception{
+	public static int insertTmgVariablesVariablemap(int tmgVariablesId, String value, String xlink) throws Exception{
 
 		PreparedStatement ps = null;
 		ResultSet rs = null;
-		int tmgVariablesVariablemapId = -1;
+		int variablemapId = -1;
 
 		try {
-			ps = setPreparedStatement("insert_tmg_variables_variablemap", new String[]{value, xlink}, new int[]{tmgVariablesId});
+			ps = setPreparedStatement("insert_tmg_variables_variablemap", new int[]{tmgVariablesId}, new String[]{value, xlink});
 
 			log.debug("About to send: {} to the database.", ps.toString());
 			rs = ps.executeQuery();
 			rs.next();
-			tmgVariablesVariablemapId = rs.getInt(1);
+			variablemapId = rs.getInt(1);
 		}
 		catch (SQLException e) {
 			log.error("Caching: Could not access the database/cache. {}", e);
@@ -1764,6 +1755,6 @@
 				log.error("Cache read: Could not close the prepared statement. {}", e);
 			}
 		}
-		return tmgVariablesVariablemapId;
+		return variablemapId;
 	}
 
