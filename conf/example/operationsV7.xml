@@ -1,4 +1,84 @@
 <operations>
+!-- BEGIN trajectory operations -->
+    <!--  This is the default XY plot. -->
+	<operation name="Trajectory Plot" ID="Trajectory_interactive_plot"
+		output_template="zoom" default="true" category="visualization">
+		<operation name="Database Extraction" ID="DBExtract"
+			output_template="ascii" service_action="Trajectory_interactive_plot">
+			<response ID="DBExtractResponse">
+				<result type="debug" ID="db_debug" file_suffix=".txt" />
+				<result type="netCDF" ID="netcdf" file_suffix=".nc" />
+				<result type="cancel" ID="cancel" />
+			</response>
+			<service>database</service>
+		</operation>
+		<operation chained="true" name="Trajectory Map" ID="Trajectory_2D_poly"
+			output_template="output" service_action="Trajectory_2D_poly">
+			<args>
+				<arg chained="true" type="variable" index="1" operation="DBExtract"
+					result="netcdf" file_suffix=".nc" />
+				<arg type="region" index="1" ID="in-situ-Region" />
+			</args>
+			<response ID="PlotResp" type="HTML" index="1">
+				<result type="image" ID="plot_image" streamable="true"
+					mime_type="image/png" file_suffix=".gif" />
+				<result type="ps" ID="plot_postscript" streamable="true"
+					mime_type="application/postscript" file_suffix=".ps" />
+				<result type="map_scale" ID="map_scale" file_suffix=".xml" />
+				<result type="js_total" ID="js_total" file_suffix=".js" />
+				<result type="map_data" ID="map_data" file_suffix=".txt" />
+				<result type="image" ID="ref_map" file_suffix=".gif" />
+				<result type="debug" ID="debug" file_suffix=".txt" />
+				<result type="cancel" ID="cancel" />
+				<result type="xml" ID="webrowset" file_suffix=".xml" />
+			</response>
+			<service>ferret</service>
+		</operation>
+		<region>
+			<intervals name="xyt" type="Maps" title="Latitude-Longitude" />
+		</region>
+	</operation>
+
+    <!-- END Trajectory_interactive_plot -->
+    <!-- This is the separate property-property viewer operation. -->
+      <operation name="Correlation Plot" ID="OCDMS_correlation_plot" output_template="OCDMS_correlation_plot" default="true" category="file">
+	  <backend_service><exclude>ferret,propprop</exclude></backend_service>
+          <operation name="Database Extraction" ID="DBExtract" service_action="Trajectory_correlation_plot">
+               <response ID="DBExtractResponse">
+                    <result type="debug" ID="db_debug" file_suffix=".txt"/>
+                    <result type="netCDF" ID="netcdf" file_suffix=".nc"/>
+		     <result type="cancel" ID="cancel" />
+               </response>
+               <service>database</service>
+	        <properties>
+                  <property_group type="backend_request">
+                     <property>
+                        <name>exclude</name>
+                        <value>ferret,prop_hist</value>
+                     </property>
+                  </property_group>
+               </properties>
+          </operation>
+          <operation chained="true" name="OCDMS CorrelationPlot" ID="OCDMS_correlation" service_action="OCDMS_correlation">
+               <args>
+                    <arg chained="true" type="variable" index="1" operation="DBExtract" result="netcdf" file_suffix=".nc"/>
+                    <arg type="region" index="1" ID="in-situ-Region"/>
+               </args>
+               <response ID="PlotResp" type="HTML" index="1">
+		    <result type="map_scale" ID="map_scale" file_suffix=".xml"/>
+                    <result type="image" ID="plot_image" streamable="true" mime_type="image/png" file_suffix=".gif"/>
+                    <result type="debug" ID="debug" file_suffix=".txt"/>
+	            <result type="xml" ID="webrowset" file_suffix=".xml"/>	
+		    <result type="cancel" ID="cancel" />
+               </response>
+               <service>ferret</service>
+          </operation>
+          <region>
+			<intervals name="xy" />
+		</region>
+    </operation>
+    <!-- End of trajectory operations -->
+
     <operation ID="Plot_2D_XY_zoom" default="true" name="Color plot"  output_template="zoom"
         service_action="Plot_2D_XY" order="0001" category="visualization" isZoomable="true">
         <service>ferret</service>

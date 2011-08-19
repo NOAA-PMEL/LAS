@@ -8,6 +8,9 @@
 <!-- UI elements specific to the LAS_insitu_demo -->
 <!ENTITY insitu_demo_ui SYSTEM "insitu_demo_ui.xml">
 
+<!-- UI Configuration for Trajectory Plots -->
+<!ENTITY trajectory_ui SYSTEM "trajectory.xml">
+
 ]>
 <lasui title="@TITLE@">
    <ui url="http://@SERVLET_ROOT_URL@/@APPNAME@/servlets/"/>
@@ -15,6 +18,7 @@
     &insitu_ui;
     &insitu_options;
     &insitu_demo_ui;
+    &trajectory_ui;
 
     <images>
         <image name="Image_StdWorld" url="gifs/java_0_world.gif" 
