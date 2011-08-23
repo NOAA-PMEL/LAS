@@ -11,7 +11,15 @@
 #set($var = $las_backendrequest.getVariablesAsString())
 #set($con = $las_backendrequest.getConstraintString("AND"))
 #if ( $con != "")
-SELECT $var FROM $table WHERE $region AND $con
+    #if ( $var.equals($lon) || $var.equals($lat) || $var.equals($time) )
+        SELECT $cruiseID, $lat, $lon, $time FROM $table WHERE $region AND $con
+    #else
+        SELECT $cruiseID, $lat, $lon, $time, $var FROM $table WHERE $region AND $con
+    #end
 #else
-SELECT $cruiseID, $lat, $lon, $time, $var FROM $table WHERE $region
+    #if ( $var.equals($lon) || $var.equals($lat) || $var.equals($time) )
+        SELECT $cruiseID, $lat, $lon, $time FROM $table WHERE $region
+    #else
+        SELECT $cruiseID, $lat, $lon, $time, $var FROM $table WHERE $region
+    #end
 #end
