@@ -7,7 +7,7 @@
 
 <!--  Uncomment the line below and &trajectory_ui; use below for Trajectory UI behavior 
       UI Configuration for Trajectory Plots -->
-<!--<!ENTITY trajectory_ui SYSTEM "trajectory.xml">-->
+<!--<!ENTITY trajectory_ui SYSTEM "trajectory_ui.xml">-->
 
 <!-- UI elements specific to the LAS_insitu_demo -->
 <!--<!ENTITY insitu_demo_ui SYSTEM "insitu_demo_ui.xml">-->

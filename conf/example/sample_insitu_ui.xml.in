@@ -9,7 +9,7 @@
 <!ENTITY insitu_demo_ui SYSTEM "insitu_demo_ui.xml">
 
 <!-- UI Configuration for Trajectory Plots -->
-<!ENTITY trajectory_ui SYSTEM "trajectory.xml">
+<!ENTITY trajectory_ui SYSTEM "trajectory_ui.xml">
 
 ]>
 <lasui title="@TITLE@">
