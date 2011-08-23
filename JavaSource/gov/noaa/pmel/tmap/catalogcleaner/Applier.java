@@ -30,7 +30,7 @@ import org.w3c.dom.Element;
 
 // TODO: replace with a real rules engine
 public class Applier {
-	
+
 	private static InvCatalog rawCatalog;
 
 	public static int applyCatalogRules(Element parent, InvCatalog crawCatalog) throws Exception{
@@ -41,15 +41,15 @@ public class Applier {
 		String version = parent.getAttribute("version");	// works
 		String expires = parent.getAttribute("expires");
 		String status = "new";
-		
+
 		// apply rules
-		
+
 		// end apply rules
-		
+
 		int catalogId = DataAccess.insertCatalog(name, expires, version, base, xmlns, status);
-		//Catalog catalog = new Catalog(catalogId, xmlns, name, base, version, expires, status);	
+		//Catalog catalog = new Catalog(catalogId, xmlns, name, base, version, expires, status);
 		return catalogId;
-	} 
+	}
 	public static int applyCatalogServiceRules(int parentId, Element child) throws Exception{
 		String name = child.getAttribute("name");	// works
 		String base = child.getAttribute("base");	// works
@@ -71,7 +71,7 @@ public class Applier {
 		else{
 			childId = DataAccess.insertService(suffix, name, base, desc, servicetype, "new");
 			DataAccess.insertCatalogService(parentId, childId);
-			
+
 		}
 		// end rules
 
@@ -102,7 +102,7 @@ public class Applier {
 		String servicetype = child.getAttribute("serviceType"); 	// works
 		String suffix = child.getAttribute("suffix");
 		String desc = child.getAttribute("desc");
-		
+
 		// apply rules
 
 		int childId = DataAccess.insertService(suffix, name, base, desc, servicetype, "new");
@@ -129,10 +129,10 @@ public class Applier {
 //			datasizeUnit = datasetT.getDataFormatType().toString();
 		String name = child.getAttribute("name");					// works
 		String status = "new";
-		
+
 		// apply rules
 		int childId = DataAccess.insertDataset(harvest, name, alias, authority, dId, servicename, urlpath, resourcecontrol, collectiontype, status, datatype, datasizeUnit);
-		
+
 		DataAccess.insertCatalogDataset(parentId, childId);
 		//Dataset dataset = new Dataset(datasetId, alias, harvest, resourcecontrol, urlpath, servicename, dId, authority, name, datatype, status, collectiontype, datasizeUnit);
 		return childId;
@@ -141,17 +141,17 @@ public class Applier {
 		// nothing to check here, just insert new tmg for this dataset
 		//int datasetId = dataset.getDatasetId();
 		int childId = DataAccess.insertTmg();
-		
+
 		// apply rules
-		
+
 		DataAccess.insertDatasetTmg(parentId, childId);
 		return childId;
 	}
 	public static int applyTmgMetadataRules(int parentId, Element child) throws Exception{
 		String inherited = child.getAttribute("inherited");
-		//String metadatatype = child.getAttribute("metadatatype");
+		String metadatatype = child.getAttribute("metadatatype");
 		InvDataset d = rawCatalog.findDatasetByID("ct_flux"); // TODO: obviously, make this not hard-coded
-		
+
 		// apply rules
 		int childId = DataAccess.insertMetadata(metadatatype, inherited);
 		DataAccess.insertTmgMetadata(parentId, childId);
@@ -160,7 +160,7 @@ public class Applier {
 	public static int applyTmgDocumentationRules(int parentId, Element child) throws Exception{
 		String documentationenum = child.getAttribute("type");
 		String value = child.getFirstChild().getTextContent();
-		
+
 		// apply rules
 		int childId = DataAccess.insertTmgDocumentation(parentId, value, documentationenum);
 		return childId;
@@ -175,7 +175,7 @@ public class Applier {
 		String vocabulary = child.getAttribute("vocabulary");
 		int childId = DataAccess.insertTmgCreatorName(parentId, value, vocabulary);
 		return childId;
-		
+
 	}
 	public static int applyTmgCreatorContactRules(int parentId, Element child) throws Exception{
 		String url = child.getAttribute("url");
@@ -185,9 +185,9 @@ public class Applier {
 	}
 	public static int applyMetadataTmgRules(int parentId) throws Exception {
 		int childId = DataAccess.insertTmg();
-		
+
 		// apply rules
-		
+
 		DataAccess.insertMetadataTmg(parentId, childId);
 		return childId;
 	}
