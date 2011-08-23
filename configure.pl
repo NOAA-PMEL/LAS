@@ -617,6 +617,10 @@ if ( getYesOrNo("Do you want to install the example data set configuration") ) {
     $sample_out[6] = $serverConf."/ocean_atlas_subset.xml";
     $sample_in[7] = "conf/example/options.xml";
     $sample_out[7] = $serverConf."/options.xml";
+    $sample_in[8] = "conf/example/trajectory_ui.xml";
+    $sample_out[8] = $serverConf."/trajectory_ui.xml";
+
+    $insitu_in[0] = "conf/example/insitu_demo_1.xml";
 
     $insitu_in[0] = "conf/example/insitu_demo_1.xml";
     $insitu_out[0] = $serverConf."/insitu_demo_1.xml";
