@@ -303,6 +303,22 @@ public class ProductRequest {
                             String current_dsID = lasConfig.getVariableByXPath(varXPath).getDSID();
                             String current_gridID = lasConfig.getGrid(varXPath).getID();
                             
+                            // If the data variable is curvilinear and the analysis is in X or Y, we want to fail now.
+                            if ( do_analysis ) {
+                            	boolean fail = false;
+                            	List axes = analysis.getChildren("axis");
+                                for (Iterator axisIt = axes.iterator(); axisIt.hasNext();) {
+                                    Element axis = (Element) axisIt.next();
+                                    String type = axis.getAttributeValue("type");
+                                    fail = fail || type.equals("x") || type.equals("y");
+                                }
+                                String curvi = lasConfig.getVariablePropertyValue(varXPath, "ferret", "curvi_coord_lon");
+                                fail = fail && (!curvi.equals(""));
+                                if (fail) {
+                                	throw new LASException(" At this time we are unable to process analysis requests in X or Y on curvilinear data sets.");
+                                }
+                            }
+                            
                             if ( !datasetList.contains(current_ftds_url) ) {
                             	datasetList.add(current_ftds_url);
                             } 
