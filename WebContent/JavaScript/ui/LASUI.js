@@ -68,7 +68,8 @@ function LASUI () {
 			"minX" : "input_minX",
 			"minY" : "input_minY"
 		 },
-		"analysis" : "analysis"
+		"analysis" : "analysis",
+		"plot" : "output"
 	};
 	this.AJAX_cache={};
 	this.request = new LASRequest();
@@ -298,9 +299,10 @@ LASUI.prototype.setInitialVariable = function(strJson) {
          }
 }
 LASUI.prototype.printPlot = function () {
-	var plot = document.getElementById(this.anchors.output);
+	this.makeRequest();
+	var plot = this.anchors.plot;
 	if(plot != null) {
-		var print_win = window.open(this.hrefs.getProduct.url + "&stream=true&stream_ID=plot_image&" + this.state.extra_args + 'xml=' + this.urlencode(this.request.getXMLText()));
+		var print_win = window.open(plot.src + "&stream=true&stream_ID=plot_image&" + this.state.extra_args + 'xml=' + this.urlencode(this.request.getXMLText()));
 		print_win.onload = function(){this.print()}
 	}
 	else{
@@ -308,7 +310,8 @@ LASUI.prototype.printPlot = function () {
 	}
 }
 LASUI.prototype.linkTo = function () {
-        var plot = document.getElementById(this.anchors.output).src;
+	this.makeRequest();
+    var plot = this.anchors.plot.src;
 	if(plot.substring(0,4)!='http')
 		plot="http://"+document.location.host+document.location.pathname.replace('getUI.do?','')+plot;
 	var ui = "http://"+document.location.host+document.location.pathname+"?dsid="+this.state.dataset+"&varid="+this.state.variable+'&auto=true';
@@ -2370,6 +2373,7 @@ LASUI.prototype.makeRequest = function (evt, type) {
 				document.getElementById("wait_msg").style.display="";
 			document.getElementById(this.anchors.output).style.visibility="hidden";
 			document.getElementById(this.anchors.output).src = (this.hrefs.getProduct.url + this.state.extra_args + 'xml=' + this.urlencode(this.request.getXMLText()));
+			this.anchors.plot=document.getElementById(this.anchors.output);
 		} else
 			window.open(this.hrefs.getProduct.url + this.state.extra_args + 'xml=' +  this.urlencode(this.request.getXMLText()),null,window_options);
 	}
