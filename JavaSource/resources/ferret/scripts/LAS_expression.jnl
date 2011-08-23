@@ -69,6 +69,10 @@ IF `esecond GT 0` THEN
    DEFINE SYMBOL ferret_plot_title ($expr1) ($data_title) ($expr3) ($data_title) ($expr4)
 ENDIF
 
+! Define with curvilinear coordiate variables if applicable.
+IF ($native_curvilinear_xy"0|1|*>1") THEN \
+   DEFINE SYMBOL ferret_plot_var ($ferret_plot_var), xcoord, ycoord
+
 ! Define upper-right labels with the url; the URL is not plotted automatically when the var is
 ! (the same thing may be done in transform scripts or in differencing setup; that is ok
 
