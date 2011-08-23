@@ -41,7 +41,7 @@
 
     <!-- END Trajectory_interactive_plot -->
     <!-- This is the separate property-property viewer operation. -->
-      <operation name="Correlation Plot" ID="OCDMS_correlation_plot" output_template="OCDMS_correlation_plot" default="true" category="file">
+      <operation name="Correlation Plot" ID="Trajectory_correlation_plot" output_template="Trajectory_correlation_plot" default="true" category="file">
 	  <backend_service><exclude>ferret,propprop</exclude></backend_service>
           <operation name="Database Extraction" ID="DBExtract" service_action="Trajectory_correlation_plot">
                <response ID="DBExtractResponse">
@@ -59,7 +59,7 @@
                   </property_group>
                </properties>
           </operation>
-          <operation chained="true" name="OCDMS CorrelationPlot" ID="OCDMS_correlation" service_action="OCDMS_correlation">
+          <operation chained="true" name="Trajectory Correlation Plot" ID="Trajectgory_correlation" service_action="Trajectory_correlation">
                <args>
                     <arg chained="true" type="variable" index="1" operation="DBExtract" result="netcdf" file_suffix=".nc"/>
                     <arg type="region" index="1" ID="in-situ-Region"/>
@@ -74,7 +74,7 @@
                <service>ferret</service>
           </operation>
           <region>
-			<intervals name="xy" />
+			<intervals name="xyt" />
 		</region>
     </operation>
     <!-- End of trajectory operations -->
