@@ -307,7 +307,7 @@ public final class ProductServerAction extends LASAction {
         try {
             productRequest = new ProductRequest(lasConfig, lasRequest, debug, JSESSIONID);
         } catch ( LASException e ) {
-            logerror(request, "Error creating the product request.", e);
+            logerror(request, e.getMessage(), e);
             return mapping.findForward("error");
         } catch ( UnsupportedEncodingException e) {
             logerror(request, "Error creating the product request.", e);
