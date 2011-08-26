@@ -1,0 +1,195 @@
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! LAS_initialize_data_insitu.jnl
+!
+! 
+! Author: ansley 
+! Date: 2006/07/10 21:06:04 
+! 30-May-2008 ACM resolve #435 (and #336) if there is a query_result
+!             attribute get that string and use it in the abort script
+!
+! ACM 5/09 May not have the variables longitude and latitude in the
+! intermediate file.  
+!
+! The LAS_initialize_data_insitu.jnl script takes care of everything having to
+! do with initializing a datset for later use.
+!
+! LAS_initialize_data_insitu.jnl takes an argument that specifies which data
+! item [0|1|2|3|...] to create symbols for. 
+
+!ACM_note: if we use a loop in the plot routine, we are not 
+! limited to 9 data items
+! DEFINE SYMBOL num ($1"0|0|1|2|3|4|5|6|7|8|9")
+
+DEFINE SYMBOL num ($1"0")
+
+! The x and y locations for insitu plots
+! ACM note: These are assumed to be in the same dataset, along
+!           with data_($num)_var if it exists, but we could
+!           extend to different data sets with further symbols
+
+DEFINE SYMBOL data_x_var = ($database_access_($num)_longitude)
+DEFINE SYMBOL data_y_var = ($database_access_($num)_latitude)
+DEFINE SYMBOL data_z_var = ($database_access_($num)_depth"undefined")
+DEFINE SYMBOL data_t_var = ($database_access_($num)_time"undefined")
+
+DEFINE SYMBOL data_($num)_dataset_id = ($database_access_($num)_db_title)
+
+! The variable at the x and y locations
+
+IF ($data_($num)_var"0|1|*>1") THEN DEFINE SYMBOL data_var ($data_($num)_var)
+IF ($data_($num)_title"0|1|*>1") THEN DEFINE SYMBOL data_title ($data_($num)_title)
+
+IF ($data_($num)_name"0|1|*>1") THEN DEFINE SYMBOL data_name ($data_($num)_name)
+IF ($data_($num)_units"0|1|*>1") THEN DEFINE SYMBOL data_units ($data_($num)_units)
+
+DEFINE SYMBOL ferret_plot_title ($data_title)
+IF ($data_units"0|*>1") THEN DEFINE SYMBOL ferret_plot_title ($data_title) (($data_units))
+
+! SET DATA and check for errors
+
+SET DATA "($data_($num)_url)"
+
+IF ($fer_last_error"0|*>1") THEN
+  DEFINE SYMBOL error_status = ERROR
+  DEFINE SYMBOL error_type = DATA
+  DEFINE SYMBOL error_string = The ($data_x_var) source file -- ($data_url) did not open successfully.
+  EXIT/SCRIPT
+ENDIF
+
+! Check for the global attribute query_result, and see if
+! it contains a string No data found or other message
+
+LET nglobal_atts = ..nattrs
+LET global_attnames = ..attnames
+IF `is_element_of_str(global_attnames, "query_result")` THEN
+   DEFINE SYMBOL data_query_string = `..query_result`
+   GO Jons_abort_no_data
+ENDIF
+
+LET data_num = `($data_0_var),return=dsetnum`
+DEFINE SYMBOL data_num = `data_num`
+
+! Define symbols rounding out the range of the data so points are 
+! not plotted on top of the axes.
+
+! For property-property plots the longitude and latitude variables
+! may or may not be in the intermediate netCDF file.
+
+LET allvars = ..varnames
+
+IF `IS_ELEMENT_OF_STR(allvars, "($data_x_var)")` THEN 
+   STAT ($data_x_var)
+   PPL %RANGE `($stat_min)`, `($stat_max)`, 10
+   DEFINE SYMBOL x_rounded_range = ($ppl$range_low):($ppl$range_high)
+ENDIF
+
+IF `IS_ELEMENT_OF_STR(allvars, "($data_y_var)")` THEN 
+   STAT ($data_y_var)
+   PPL %RANGE `($stat_min)`, `($stat_max)`, 10
+   DEFINE SYMBOL y_rounded_range = ($ppl$range_low):($ppl$range_high)
+ENDIF
+
+IF ($ferret_init_script"0|*>1") THEN GO ($ferret_init_script) ($1"0")
+
+! There may be a variable representing measurements to use in coloring 
+! a track plot, etc.
+
+
+IF ($data_var"0|*>1") THEN
+   DEFINE SYMBOL ferret_plot_var = ($data_var)
+
+! The variable may be requested to be masked by a range
+! on a second variable.
+
+   IF ($ferret_mask_var"0|*>1") THEN
+      LET masking_var_1 = if ($ferret_mask_var) LE ($ferret_mask_max) THEN ($ferret_mask_var)
+      LET masking_var = if masking_var_1 GE ($ferret_mask_min) THEN 1
+      DEFINE SYMBOL ferret_plot_var = ($ferret_plot_var)* masking_var
+
+      DEFINE SYMBOL msk_min = `($ferret_mask_min),prec=3`
+      DEFINE SYMBOL msk_max = `($ferret_mask_max),prec=3`
+
+      DEFINE SYMBOL mask_title = <NL>@ACwhere ($ferret_mask_var) is in [($msk_min),($msk_max)]
+
+      DEFINE SYMBOL ferret_plot_title = ($ferret_plot_title)($mask_title)
+      DEFINE SYMBOL data_title = ($data_title)($mask_title)
+   ENDIF
+
+ENDIF
+
+IF ($ferret_plot_title"0|*>1") THEN 
+   SET VAR/TITLE="($ferret_plot_title)" ($data_var)[d=`data_num`] 
+   SET VAR/TITLE="($ferret_plot_title)" ($ferret_plot_var)[d=`data_num`] 
+ELSE
+   IF ($data_title"0|*>1") THEN 
+      SET VAR/TITLE="($data_title)" ($data_var)[d=`data_num`]
+      SET VAR/TITLE="($data_title)" ($ferret_plot_var)[d=`data_num`]
+   ENDIF
+ENDIF
+
+! Mark whether there are contour levels set on first entry. 
+! Compute automatic open-ended levels.
+
+IF `data_num EQ 1` THEN
+  IF ($ferret_fill_levels"0|*>1") THEN DEFINE SYMBOL input_fill_levels = 1
+   IF ($ferret_poly_levels"0|*>1") THEN 
+      DEFINE SYMBOL ferret_fill_levels ($ferret_poly_levels)
+      DEFINE SYMBOL input_fill_levels = 1
+   ENDIF
+
+   LET its_plot = `STRINDEX(UPCASE("($operation_ID)"), "PLOT") GT 0`
+   IF `STRLEN("($ferret_view)") EQ 2 AND its_plot GT 0` THEN 
+     IF ($ferret_fill_levels"1|closed>0|*>1") THEN GO LAS_auto_levels  
+   ENDIF
+   IF `STRLEN("($ferret_view)") EQ 2 AND STRINDEX("($operation_ID)", "poly") GT 0` THEN 
+     IF ($ferret_fill_levels"1|closed>0|*>1") THEN GO LAS_auto_levels  
+   ENDIF
+   IF ($ferret_fill_levels"0|closed>1|*>0") THEN CANCEL SYMBOL ferret_poly_levels
+   IF ($ferret_fill_levels"0|closed>1|*>0") THEN CANCEL SYMBOL input_fill_levels
+   IF ($ferret_fill_levels"0|closed>1|*>0") THEN CANCEL SYMBOL ferret_fill_levels
+
+   IF `($ferret_poly_levels"0|*>1") EQ 0` THEN \
+      IF ($ferret_fill_levels"0|*>1") THEN DEFINE SYMBOL ferret_poly_levels ($ferret_fill_levels)
+ENDIF
+
+! Apply the expression in ferret_expression. $ represents the variable.
+
+IF ($ferret_expression"0|*>1") THEN 
+   LET ev = STRINDEX("($ferret_expression)", "$")
+   IF `ev EQ 0` THEN
+      DEFINE SYMBOL error_status = ERROR
+      DEFINE SYMBOL error_type = EXPRESSION
+      DEFINE SYMBOL error_string = The expression ($ferret_expression) must contain at least one $.
+      EXIT/SCRIPT
+   ENDIF
+
+   LET en = STRLEN("($ferret_expression)")
+   LET e1 = ev - 1
+   LET e2 = ev + 1
+   IF `e1 GT 0` THEN DEFINE SYMBOL expr1 = `SUBSTRING("($ferret_expression)", 1, e1)`
+   IF `e2 LT en` THEN DEFINE SYMBOL expr2 = `SUBSTRING("($ferret_expression)", e2, en)`
+
+   DEFINE SYMBOL ferret_plot_var ($expr1)($data_var)($expr2)
+   DEFINE SYMBOL ferret_plot_title ($expr1)($data_title)($expr2)
+
+! This works except if the expression has spaces around the $ characters.
+! Otherwise Ferret seems to be looking for script arguments.
+
+   LET esecond = STRINDEX("($expr2)", "$") 
+   IF `esecond GT 0` THEN
+
+      LET ev = STRINDEX("($expr2)", "$")
+      LET en = STRLEN("($expr2)")
+      LET e1 = ev - 1
+      LET e2 = ev + 1
+      IF `e1 GT 0` THEN DEFINE SYMBOL expr3 = `SUBSTRING("($expr2)", 1, e1)`
+      IF `e2 LT en` THEN DEFINE SYMBOL expr4 = `SUBSTRING("($expr2)", e2, en)`
+
+      DEFINE SYMBOL ferret_plot_var ($expr1)($data_var)($expr3)($data_var)($expr4)
+      DEFINE SYMBOL ferret_plot_title ($expr1)($data_var)($expr3)($data_var)($expr4)
+   ENDIF
+ENDIF
+
+CANCEL VAR data_num
+
+
