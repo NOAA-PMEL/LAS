@@ -66,7 +66,7 @@ IF `is_element_of_str(global_attnames, "query_result")` THEN
    GO Jons_abort_no_data
 ENDIF
 
-LET data_num = `($data_0_var),return=dsetnum`
+LET data_num = `($data_($num)_var),return=dsetnum`
 DEFINE SYMBOL data_num = `data_num`
 
 ! Define symbols rounding out the range of the data so points are 
