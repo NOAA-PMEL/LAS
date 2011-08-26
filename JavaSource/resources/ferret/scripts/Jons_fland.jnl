@@ -1,0 +1,49 @@
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! $RCSfile: Jons_fland.jnl,v $
+! $Revision: 1.1 $
+! 
+! $Author: ansley $
+! $Date: 2006/07/06 17:54:11 $
+!
+! LAS_fland.jnl automatically adjusts the resolution
+!
+! $1 = ignore the user specified resolution
+! $2 = palette
+! $3 = overlay_style - "basemap", "transparent", or "overlay" (default)
+! $4 = detailed - may be "detailed", "all" or "solid"  default=solid
+
+DEFINE SYMBOL fland_palette = ($2"gray")
+
+DEFINE SYMBOL fland_area = `( ($region_x_range) * ($region_y_range) ) / (360 * 180)`
+
+! ACM use higher resolution 
+
+DEFINE SYMBOL fland_resolution 20
+IF `($fland_area) LT 0.25` THEN DEFINE SYMBOL fland_resolution 05
+
+! For more-zoomed-in plots use special landmask dataset.
+
+IF `($basemap_area) LT 0.1` THEN
+!   USE "/home/porter/ansley/landmask02.nc"
+   USE "http://ferret.pmel.noaa.gov/thredds/dodsC/data/PMEL/landmask02.nc"
+   DEFINE SYMBOL xlo_hack ($xaxis_min%0%)
+   DEFINE SYMBOL xhi_hack ($xaxis_max%360%)
+   DEFINE SYMBOL map_reg = [x=($xlo_hack):($xhi_hack)]
+   LET landvar = landmask($map_reg)
+
+   IF ($topo_regrid"0|*>1") THEN 
+      USE "http://ferret.pmel.noaa.gov/thredds/dodsC/data/PMEL/landmask02.nc"
+      LET landvar = landmask[GX=x_super_fine,GY=y_super_fine]
+   ENDIF
+
+   SHADE/NOLAB/NOKEY/LEV=(0,10,10)/PAL=green_deep/OVERLAY  landvar
+   CANCEL DATA landmask02
+   SET DATA/RESTORE
+ELSE
+   GO fland ($fland_resolution) ($fland_palette) ($3"overlay") ($4"solid")
+ENDIF
+
+CANCEL MEMORY
+
+! End of $RCSfile: LAS_fland.jnl,v $ -----------------------------------------------------
+
