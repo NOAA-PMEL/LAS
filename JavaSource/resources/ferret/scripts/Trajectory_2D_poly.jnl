@@ -37,7 +37,6 @@ GO LAS_url_label 0
 
 
 ! Create the trajectory variables and symbols
-! Create a new title that includes subsampling info
 
 GO LAS_initialize_traj_id
 
@@ -233,9 +232,6 @@ IF `($ferret_label"1|0|1|*>1") EQ 1` THEN
    ! Add the plot title on the bottom
    ! Nudge things down a little for 'yt and 'zt views because the time axis
    ! has years labeled beneath the months.
-   
-   ! If subsampling is *none* Then no addition to the title
-   IF ($data_title"0|*>1") THEN DEFINE SYMBOL ferret_plot_title = ($data_title)
    
    IF ($ferret_view"0|yt>1|zt>1|*>0") THEN
      LABEL/NOUSER `($ppl$xlen)/2`, `-0.6*($ppl$yorg)`, 0, 0, 0.14, @AC($ferret_plot_title) 
