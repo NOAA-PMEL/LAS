@@ -1,0 +1,103 @@
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! $Header$
+! LAS_initialize_traj_id.jnl
+!
+! Define variables and symbols based on trajectory identification variables
+!
+! TRAJECTORIES      - unique identifier for each cruise
+! TRAJECTORY_COUNTS - number of points per trajectory
+
+SET MEM/siz=200
+
+! Create the 'traj_evnt' variable which increments for each new trajectory.
+
+! NOTE:  The calculation of individual cruises only works if the 
+! NOTE:  intermediate netCDF files is ordered by cruise_ID.  Make sure that
+! NOTE:  the SQL query ends with:  'ORDER BY cruise_ID'.
+
+DEFINE SYMBOL traj_max_labels = 200
+DEFINE SYMBOL numobs `($ferret_plot_var),return = isize`
+
+! If (for prop-prop plots) there are mask-by settings, apply them
+GO LAS_mask_by_var ($data_var)
+IF `nmask_labels GT 0` THEN
+   LET dvar_to_mask = ($data_var)
+   DEFINE SYMBOL data_var = mask_on_var* dvar_to_mask
+ENDIF
+
+IF `($numobs) EQ 1` THEN
+   DEFINE SYMBOL traj_max = 1
+   
+   LET traj_mask = x[i=1:1]
+   LET traj_evnt = x[i=1:1]
+   LET ntrajs = 1
+   LET traj_numbers = x[i=1:1]
+   LET longest = 1
+
+   LET data_var_z =  EXPNDI_BY_Z(($data_var), traj_mask,`longest`)
+   LET traj_mask_z = EXPNDI_BY_Z(traj_evnt,traj_mask,`longest`)
+
+   LET traj_n = x[i=1:1]
+   LET traj_count = x[i=1:1]
+   LET subset_mask = x[i=1:1]
+
+ELSE
+
+   LET trajvar = XSEQUENCE(trajectory_counts)
+   LET ntrajs = `trajvar,RETURN=isize`
+   LET traj_numbers = x[i=1:`ntrajs`]
+
+   LET longest = trajvar[i=@max]+2
+
+   LET data_var_z =  EXPNDI_BY_Z_COUNTS(($data_var), trajvar,`longest`)
+
+! If  a subset of cruise ids is given then only plot those on a Prop/Prop 
+! plot, but using the symbols and colors as determined by the whole dataset.
+
+!!   IF ($ferret_traj_list"0|*>1") THEN
+!!      LET subset_ids = {($ferret_traj_list)}
+!!      LET n_subset = `subset_ids,RETURN=isize`
+!!
+!!! Define a mask to use on the entire list of values: plot or not to plot
+!!! the polygons on the prop-prop plot.
+!!     
+!!      LET subm_ids = IF ELEMENT_INDEX(traj_numbers,subset_ids) THEN 1
+!!      LET subset_mask = subm_ids + 0*x[x=1:`ntrajs`]  ! put it on a non-abstract axis.
+!!
+!!! apply mask as data_var_z* subset_mask
+!!
+!!      DEFINE SYMBOL cruises_shown = `n_subset`
+!!   ELSE
+      LET subset_mask = 1 + 0*i[i=1:($traj_max)]
+!!   ENDIF
+
+ENDIF
+
+! Make time symbols w/o the trailing 00:00:00
+
+IF ($region_0_t_lo"0|*>1") THEN
+   DEFINE SYMBOL t_lab_lo = ($region_0_t_lo)
+   LET iz = STRINDEX("($region_0_t_lo)", " 00:00:00")
+   IF `iz GT 0` THEN 
+      DEFINE SYMBOL t_lab_lo = `SUBSTRING("($region_0_t_lo)", 1, iz-1)`
+   ELSE
+      LET iz = STRINDEX("($region_0_t_lo)", ":00:00")
+      IF `iz GT 0` THEN DEFINE SYMBOL t_lab_lo = `SUBSTRING("($region_0_t_lo)", 1, iz-1)`
+   ENDIF
+ENDIF 
+
+IF `STRCMP("($region_0_t_lo)", "($region_0_t_hi)") EQ 0` THEN  EXIT/SCRIPT
+
+IF ($region_0_t_hi"0|*>1") THEN
+   DEFINE SYMBOL t_lab_hi = ($region_0_t_hi)
+   LET iz = STRINDEX("($region_0_t_hi)", " 00:00:00")
+   IF `iz GT 0` THEN 
+      DEFINE SYMBOL t_lab_hi = `SUBSTRING("($region_0_t_hi)", 1, iz-1)`
+   ELSE
+      LET iz = STRINDEX("($region_0_t_hi)", ":00:00")
+      IF `iz GT 0` THEN DEFINE SYMBOL t_lab_hi = `SUBSTRING("($region_0_t_hi)", 1, iz-1)`
+   ENDIF
+ENDIF
+
+!---------------- end of LAS_initialize_traj_id.jnl -------------------------
+
