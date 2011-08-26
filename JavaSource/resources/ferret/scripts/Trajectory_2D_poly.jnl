@@ -1,0 +1,271 @@
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! $Header$
+! Trajectory_2D_poly.jnl
+!
+! Creates a 2D plot with a blank 'basemap' and an overlay of points
+! colored by the ($ferret_plot_var) defined in LAS_initialize_data_insitu.
+!
+! 1/2010 acm - For Cruise ID, thin out the icons which are too dense to see well.
+!              leave a thin dotted line at the original density
+!              add to the title, "from data sampled every xxx"
+!
+! Initialize the region and data.
+! Many useful symbols are defined by these two scripts.
+!
+
+!!! for testing; see ticket http://porter.pmel.noaa.gov/trac/las/ticket/746 !!!
+! DEFINE SYMBOL ferret_label = 0
+
+
+SET MODE verify:always  ! allows for debugging
+
+DEFINE SYMBOL its_insitu = 1
+GO LAS_initialize_region 0
+
+GO Jons_initialize_data_insitu 0
+
+
+! Check for errors (They often occur during dataset initialization.)
+
+IF ($error_status"0|*>1") THEN
+  MESSAGE/ERROR **ERROR ($error_string)
+  EXIT/PROGRAM
+ENDIF
+
+! Set the URL label for the first dataset.
+GO LAS_url_label 0
+
+
+! Create the trajectory variables and symbols
+! Create a new title that includes subsampling info
+
+GO LAS_initialize_traj_id
+
+!!! When making icons for a trajectory plot, plotting icons very near the 
+!!! plot boundary can cause lines outside the plot area. Extend the area slightly.
+!!IF `($data_var"0|metadata_ID>1|*>0") AND (($cruise_max) LE ($cruise_max_labels))` THEN
+!!   LET del = `($REGION_X_RANGE)* 0.0001`
+!!   IF `($REGION_X_RANGE) GE 359.8` THEN LET del = (360-($REGION_X_RANGE)) /100.
+!!   DEFINE SYMBOL region_0_x_hi = `($region_0_x_hi) + del`
+!!   DEFINE SYMBOL region_0_x_lo = `($region_0_x_lo) - del`
+!!
+!!   LET del = `($REGION_Y_RANGE)* 0.0001`
+!!   DEFINE SYMBOL region_0_y_hi = `MIN(  90, ($region_0_y_hi)+del )`
+!!   DEFINE SYMBOL region_0_y_lo = `MAX( -90, ($region_0_y_lo)-del )`
+!!   GO LAS_initialize_region 0
+!!ENDIF
+
+! If the variable is TIME then  symbols are
+!  DATA_VAR = "coord_time", DATA_T_VAR = "hours_1970"  ??
+! 
+! In this case we can set up a time axis, and call polymark_datekey 
+
+IF ($ferret_plot_key"0|date_key>1|*>0") THEN
+
+   LET tmin = ($data_t_var)[i=@MIN]
+   LET tmax = ($data_t_var)[i=@MAX]
+
+   LET since_loc = STRINDEX("`($data_t_var).units`","since") - 2
+   IF `since_loc GT 1` THEN 
+      LET tunits = SUBSTRING("`($data_t_var).units`",1,`since_loc`)
+      DEFINE SYMBOL tunits = `tunits`
+   ENDIF
+   DEFINE AXIS/T=`tmin`:`tmax`:1/T0="`($data_t_var).time_origin`"/units=($tunits) time_axis 
+   DEFINE SYMBOL polymark_script = polymark_datekey
+
+! Define time variable for last arg.
+! yes?  GO polymark_datekey polygon_command xpts ypts [values] [shape] [scale] timevar
+
+   LET ttvar = t[gt=time_axis]
+   DEFINE SYMBOL datekey_time_arg = ttvar
+
+   DEFINE SYMBOL margin = 1
+   DEFINE SYMBOL ferret_poly_levels = 30
+
+ENDIF
+
+! Open the window
+
+SET WINDOW/SIZE = ($ferret_size"0.5")
+
+! For XY plots we can set the aspect ratio or request a WMS style
+! plot with no axes.
+
+IF `($ferret_view"0|xy>1|*>0") OR ($ferret_view"0|xyt>1|*>0")` THEN
+
+  LET no_range = `($region_X_range) EQ 0 OR ($region_Y_range) EQ 0`
+  IF `no_range` THEN 
+     IF ($ferret_set_aspect"1|default>1|no>0|yes>1|0|1") THEN SET WINDOW/ASPECT = 1:axis
+  ELSE
+     IF ($ferret_set_aspect"1|default>1|no>0|yes>1|0|1") THEN SET WINDOW/ASPECT = `($region_Y_range)/($region_X_range)`:axis
+
+! Set a viewport to make room for the labels on the date key
+     IF ($margin"0|*>1") THEN
+        CANCEL VIEW 
+	DEFINE VIEW/X=0:0.9/Y=0:1 xspace
+     ELSE
+        DEFINE VIEW/X=0:0.95/Y=0:1 xspace
+     ENDIF
+     SET VIEW xspace
+  ENDIF
+
+ENDIF
+
+! Create the blank plot with bathymetries,
+! coastlines, EEZ's, etc.
+
+DEFINE SYMBOL basemap_palette = grayscale
+DEFINE SYMBOL basemap_levels = (-10000,-1000,1000)(-1000,0,100)
+GO LAS_XY_overlay_basemap
+
+PPL SHASET PROTECT
+
+! Note argument 1 is ignored by Jons_fland.jnl. It determines the resoultion itself.
+!  GO Jons_fland 20 black
+!  GO Jons_fland 20 navy
+!  GO Jons_fland 20 brown_dark
+
+GO Jons_fland 20 green_deep
+PPL SHASET PROTECT
+
+! Turn on annotate_key, which persists until turned off
+! (unless key_annoatate property tells us otherwise).
+
+IF ($ferret_key_annotate"1|0|1|*>1") THEN
+   KEYMARK 1
+ELSE
+   KEYMARK 0
+ENDIF
+
+! Define plot qualifiers for polygon overlay
+
+CANCEL SYMBOL qualifiers 
+DEFINE SYMBOL qualifiers = /OVER/NOLAB
+
+! If undefined, set polygon scale according to number of points
+IF ($ferret_poly_scale"1|*>0") THEN 
+   GO LAS_set_poly_scale
+   DEFINE SYMBOL ferret_poly_scale 0.5*($ferret_poly_scale)
+ENDIF
+
+! Color key for the variable values.
+! If there is no plot variable defined (only plotting locations),
+! do not plot the key.
+
+IF ($ferret_plot_var"1|*>0") THEN DEFINE SYMBOL ferret_plot_key = 0
+
+IF ($ferret_plot_key"1|0|1|nokey>0|*>1") THEN
+   DEFINE SYMBOL qualifiers = ($qualifiers)/KEY
+ELSE
+   DEFINE SYMBOL qualifiers = ($qualifiers)/NOKEY
+ENDIF
+
+IF ($ferret_poly_levels"0|*>1") THEN 
+   DEFINE SYMBOL qualifiers = ($qualifiers)/LEVELS=($ferret_poly_levels)
+ENDIF
+
+IF `($ferret_poly_scale) GE 0.6` THEN DEFINE SYMBOL qualifiers = ($qualifiers)/LINE/FILL
+
+! Make the polygon overlay plot
+
+! When the data crosses the branch cut, replicate the lon,lat,var variables with lon+360,
+! and contcatenate with the original points before plotting.
+
+
+IF `STRINDEX("($ferret_view"0")", "x") GT 0` THEN
+  STAT ($data_x_var)
+  IF `($STAT_MIN) GE ($REGION_X_LO)` THEN
+    LET x_var_data = ($data_x_var)
+    IF ($data_y_var"0|*>1") THEN LET y_var_data = ($data_y_var)
+    IF ($data_z_var"0|*>1") THEN LET z_var_data = ($data_z_var)
+    IF ($data_t_var"0|*>1") THEN LET t_var_data = ($data_t_var)
+    LET var_data = ($ferret_plot_var)
+
+  ELSE
+    LET x_var_data   = XCAT( ($data_x_var), ($data_x_var)+360 )
+    IF ($data_y_var"0|*>1") THEN LET y_var_data  = XCAT( ($data_y_var), ($data_y_var) )
+    IF ($data_z_var"0|*>1") THEN LET z_var_data  = XCAT( ($data_z_var), ($data_z_var) )
+    IF ($data_t_var"0|*>1") THEN LET t_var_data  = XCAT( ($data_t_var), ($data_t_var) )
+    LET var_data   = XCAT( ($ferret_plot_var), ($ferret_plot_var) )
+  ENDIF
+ENDIF
+
+! Points will mark location of missing data
+LET missing_flag = -9999999
+LET x_loc_bad = IF MISSING(var_data,missing_flag) EQ missing_flag THEN x_var_data 
+LET y_loc_bad = IF MISSING(var_data,missing_flag) EQ missing_flag THEN y_var_data 
+
+! Use color=1 for black...
+PLOT/OVER/VS/NOLAB/SYM=2/COLOR=1/SIZ=0.02 x_loc_bad,y_loc_bad 
+
+LET ng = var_data[x=@ngd]
+IF `ng EQ 0` THEN DEFINE SYMBOL poly_command ($poly_command)/NOKEY
+
+DEFINE SYMBOL do_icons = 0
+!!IF `($data_var"0|metadata_ID>1|*>0") AND (($cruise_max) LE ($cruise_max_labels))` THEN
+!!   GO OCDMS_map_icons
+!!   DEFINE SYMBOL do_icons = 1
+!!
+!!ELSE
+
+   ! Set the palette
+   ! If there is no variable, only locations, and if a palette is not 
+   ! defined by ferret_palette, use black.
+
+   IF ($ferret_plot_var"0|*>1") THEN
+      DEFINE SYMBOL qualifiers = ($qualifiers)/PALETTE=($ferret_palette"rainbow|default>rainbow|*>*")
+   ELSE
+      DEFINE SYMBOL qualifiers = ($qualifiers)/PALETTE=($ferret_palette"black|default>black|*>*")/NOKEY
+   ENDIF
+
+   DEFINE SYMBOL poly_command poly($qualifiers)
+
+   GO ($polymark_script"polymark") ($poly_command) x_var_data y_var_data var_data ($ferret_poly_shape"square|triangle|delta|square|diamond|pentagon|hexagon|circle|star|plus|ex|*>square") ($ferret_poly_scale) ($datekey_time_arg)
+!!ENDIF
+
+! Set the shape to what is used above it will be the same on the key
+DEFINE SYMBOL ferret_poly_shape = ($ferret_poly_shape%square|delta|triangle|diamond|pentagon|hexagon|circle|star|plus|ex|*>square%)
+
+! Add labels; unless all labels have been turned off
+
+IF `($ferret_label"1|0|1|*>1") EQ 1` THEN 
+   
+   ! Add the plot title on the bottom
+   ! Nudge things down a little for 'yt and 'zt views because the time axis
+   ! has years labeled beneath the months.
+   
+   ! If subsampling is *none* Then no addition to the title
+   IF ($data_title"0|*>1") THEN DEFINE SYMBOL ferret_plot_title = ($data_title)
+   
+   IF ($ferret_view"0|yt>1|zt>1|*>0") THEN
+     LABEL/NOUSER `($ppl$xlen)/2`, `-0.6*($ppl$yorg)`, 0, 0, 0.14, @AC($ferret_plot_title) 
+   ELSE
+     LABEL/NOUSER `($ppl$xlen)/2`, `-0.5*($ppl$yorg)`, 0, 0, 0.14, @AC($ferret_plot_title) 
+   ENDIF
+   
+   IF ($t_lab_lo"0|*>1") THEN \
+     LABEL/NOUSER 0, `($ppl$ylen)+0.4`, -1, 0, 0.12, @AS($t_lab_lo) to ($t_lab_hi)
+
+ENDIF ! ferret_label
+
+! Add labels at the top for the dataset name etc if they exist  
+
+GO labels_above_plot
+
+! Add labels for the 'data options' (aka 'constraints')
+
+!! GO OCDMS_labels  (see this script if masking is used to select trajectories)
+
+GO LAS_split_title
+
+! restore key-annotation setting: keys not annotated
+KEYMARK 0
+
+! Save the results
+
+!! IF `($do_icons) AND ($result_webrowset_filename"0|*>1")` THEN  GO OCDMS_cruise_key
+
+GO LAS_results box
+
+
+! End of file ------------Trajectory_2D_poly.jnl--------------------------
