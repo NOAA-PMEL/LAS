@@ -2,7 +2,7 @@
 <html>
 <!-- LAS SERVER OK -->
 <title>LAS Output -- $las_config.getTitle()</title>
-<META http-equiv="refresh" content="0;URL=productserver/templates/Correlation_plot.vm?gwt.codesvr=127.0.0.1:9997&xml=$las_request.toEncodedURLString()"> 
+<META http-equiv="refresh" content="0;URL=productserver/templates/Correlation_plot.vm?xml=$las_request.toEncodedURLString()"> 
 </head>
 <body>
 </body>
