@@ -224,7 +224,7 @@ public class Correlation implements EntryPoint {
 			lasRequest.setProperty("product_server", "ui_timeout", "20");
 			lasRequest.addProperty("las", "output_type", "xml");
 			lasRequest.setOperation(operationID, operationType);
-			
+			lasRequest.removeConstraints();
 			if ( useXConstraint.getValue() ) {
 				String min = xminBox.getText();
 				String max = xmaxBox.getText();
