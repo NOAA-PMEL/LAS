@@ -32,4 +32,5 @@ public interface RPCService extends RemoteService {
 	public RegionSerializable[] getRegions(String dsid, String varid) throws RPCException;
 	public ConfigSerializable getConfig(String view, String dsid, String varid) throws RPCException;
 	public TestSerializable[] getTestResults(String test_key) throws RPCException;
+	public DatasetSerializable getFullDataset(String id) throws RPCException;
 }

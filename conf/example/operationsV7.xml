@@ -76,9 +76,29 @@
           <region>
 			<intervals name="xyt" />
 		</region>
+		<grid_types>
+		    <grid_type name="trajectory"/>
+		</grid_types>
     </operation>
     <!-- End of trajectory operations -->
-
+	<operation name="Correlation Plot" ID="Grid_correlation"
+		service_action="" default="true" category="file" output_template="Correlation">
+		<response ID="PlotResp" type="HTML" index="1">
+			<result type="map_scale" ID="map_scale" file_suffix=".xml" />
+			<result type="image" ID="plot_image" streamable="true"
+				mime_type="image/png" file_suffix=".gif" />
+			<result type="debug" ID="debug" file_suffix=".txt" />
+			<result type="xml" ID="webrowset" file_suffix=".xml" />
+			<result type="cancel" ID="cancel" />
+		</response>
+		<service>template</service>
+		<region>
+			<intervals name="xy" />
+		</region>
+		<grid_types>
+			<grid_type name="regular" />
+		</grid_types>
+	</operation>
     <operation ID="Plot_2D_XY_zoom" default="true" name="Color plot"  output_template="zoom"
         service_action="Plot_2D_XY" order="0001" category="visualization" isZoomable="true">
         <service>ferret</service>
