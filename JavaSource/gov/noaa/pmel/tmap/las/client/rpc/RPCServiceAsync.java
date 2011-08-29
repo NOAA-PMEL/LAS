@@ -24,4 +24,5 @@ public interface RPCServiceAsync {
     public void getRegions(String dsid, String varid, AsyncCallback regionCallback);
 	public void getOperations(String view, String[] xpath,	AsyncCallback<OperationSerializable[]> callback);
 	public void getTestResults(String test_key, AsyncCallback<TestSerializable[]> callback);
+	public void getFullDataset(String id, AsyncCallback datasetCallback);
 }

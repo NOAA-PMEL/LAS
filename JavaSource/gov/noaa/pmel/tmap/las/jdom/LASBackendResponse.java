@@ -878,5 +878,9 @@ public class LASBackendResponse extends LASDocument {
 		getRootElement().setAttribute("openid", openid);
 		
 	}
+	public void addMapScale(LASMapScale lasMapScale) {
+		Element result = getResultByType("map_scale");
+		result.addContent((Element)lasMapScale.getRootElement().clone());	
+	}
 }
 
