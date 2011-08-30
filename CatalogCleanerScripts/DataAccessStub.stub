@@ -4,9 +4,11 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Hashtable;
 import java.util.Properties;
 
 import org.slf4j.Logger;
@@ -110,7 +112,7 @@ public class DataAccess {
 
 		return ps;
 	}
-	public static PreparedStatement setPreparedStatement(String functionName, String[] theList) throws Exception{
+	public static PreparedStatement setPreparedStatement(String functionName, Datavalue[] theList) throws Exception{
 
 		if(theList.length == 0)
 			throw new Exception("Invalid vars length");
@@ -125,16 +127,16 @@ public class DataAccess {
 		insert += "?)";
 		ps = pgCache.prepareStatement(insert);
 		for(int i = 0; i<size; i++){
-			String name = theList[i];				
-			if(name == null || name.isEmpty())
+			Datavalue name = theList[i];				
+			if(name.isNull())
 				ps.setNull(i+1, java.sql.Types.VARCHAR);
 			else
-				ps.setString(i+1, name);
+				ps.setString(i+1, name.getValue());
 		}
 
 		return ps;
 	}
-	public static PreparedStatement setPreparedStatement(String functionName, int[] theInts, String[] theList) throws Exception{
+	public static PreparedStatement setPreparedStatement(String functionName, int[] theInts, Datavalue[] theList) throws Exception{
 
 		// just to make sure
 		if(theInts.length == 0)
@@ -161,15 +163,142 @@ public class DataAccess {
 			ps.setInt(i+1, theNum);
 		}
 		for(int i = 0; i<strSize; i++){
-			String name = theList[i];				
-			if(name == null || name.isEmpty())
+			Datavalue name = theList[i];				
+			if(name.isNull())
 				ps.setNull(i+1 + intSize, java.sql.Types.VARCHAR);
 			else
-				ps.setString(i+1+ intSize, name);
+				ps.setString(i+1+ intSize, name.getValue());
 		}
 
 		return ps;
 	}
+	
+	public static int runStatement(PreparedStatement ps) throws Exception{
+		ResultSet rs = null;
+		int id = -1;
+
+		try{
+			log.debug("About to send: {} to the database.", ps.toString());
+			rs = ps.executeQuery();
+			rs.next();
+			id = rs.getInt(1);
+		}
+		catch (SQLException e) {
+			log.error("Caching: Could not access the database/cache. {}", e);
+			throw new Exception("SQLException: " + e.getMessage());
+		} finally {
+			try {
+				ps.close();
+	//			rs.close();
+			}
+			catch (SQLException e) {
+				log.error("Cache read: Could not close the prepared statement. {}", e);
+			}
+		}
+		return id;
+	}
+	public static Hashtable<String, String> getObject(String tablename, int id) throws Exception{
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		Hashtable<String, String> h = new Hashtable<String, String>();
+		try {
+			ps = pgCache.prepareStatement("select * from " + tablename + " where " + tablename + "_id=?");
+			ps.setInt(1, id);
+			log.debug("About to send: {} to the database.", ps.toString());
+			rs = ps.executeQuery();
+			
+			 // Get result set meta data
+		    ResultSetMetaData rsmd = rs.getMetaData();
+		    int numColumns = rsmd.getColumnCount();
+			
+			rs.next();
+			
+		    // Get the column names; column indices start from 1
+		     for (int i=1; i<numColumns+1; i++) {
+		        String columnName = rsmd.getColumnName(i);
+		        String columnType = rsmd.getColumnTypeName(i);
+		        if(columnType.indexOf("int") > -1)
+		        	h.put(columnName, rs.getInt(i) + "");
+		        else
+		        	if(rs.getString(i) != null)
+		        		h.put(columnName, rs.getString(i));
+
+		    }
+			
+		}
+		catch (SQLException e) {
+			log.error("Caching: Could not access the database/cache. {}", e);
+			throw new Exception("SQLException: " + e.getMessage());
+		} finally {
+			try {
+				ps.close();
+//					rs.close();
+			}
+			catch (SQLException e) {
+				log.error("Cache read: Could not close the prepared statement. {}", e);
+			}
+		}
+		return h;
+	}
+	public static ArrayList<Integer> getObjects(String tablename, String parenttable, int parentId) throws Exception{
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		ArrayList<Integer> startIds = new ArrayList<Integer>();
+		String select = "select " + tablename + "_id from " + tablename + " where ";
+		select+= parenttable + "_id=?";
+		try {
+			ps = pgCache.prepareStatement(select);
+			ps.setInt(1, parentId);
+			log.debug("About to send: {} to the database.", ps.toString());
+			rs = ps.executeQuery();
+			while (rs.next()) {
+				startIds.add(rs.getInt(tablename + "_id"));
+			}		
+		}
+		catch (SQLException e) {
+			log.error("Caching: Could not access the database/cache. {}", e);
+			throw new Exception("SQLException: " + e.getMessage());
+		} finally {
+			try {
+				ps.close();
+//					rs.close();
+			}
+			catch (SQLException e) {
+				log.error("Cache read: Could not close the prepared statement. {}", e);
+			}
+		}
+		return startIds;
+	}
+	public static ArrayList<Integer> getObjects(String tablename, String parenttable, String childtable, int parentId) throws Exception{
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		ArrayList<Integer> startIds = new ArrayList<Integer>();
+		String select = "select " + childtable + "_id from " + tablename + " where ";
+		select+= parenttable + "_id=?";
+		try {
+			ps = pgCache.prepareStatement(select);
+			ps.setInt(1, parentId);
+			log.debug("About to send: {} to the database.", ps.toString());
+			rs = ps.executeQuery();
+			while (rs.next()) {
+				startIds.add(rs.getInt(childtable + "_id"));
+			}		
+		}
+		catch (SQLException e) {
+			log.error("Caching: Could not access the database/cache. {}", e);
+			throw new Exception("SQLException: " + e.getMessage());
+		} finally {
+			try {
+				ps.close();
+//					rs.close();
+			}
+			catch (SQLException e) {
+				log.error("Cache read: Could not close the prepared statement. {}", e);
+			}
+		}
+		return startIds;
+	}
+	
 
 	public static Catalog getCatalog(String uri) throws Exception{
 
@@ -184,13 +313,13 @@ public class DataAccess {
 			rs = ps.executeQuery();
 			while (rs.next()) {
 				int catalogId = rs.getInt("catalog_id");
-				String xmlns = rs.getString("xmlns");
-				String name = rs.getString("name");
-				String base = rs.getString("base");
-				String version = rs.getString("version");
-				String expires = rs.getString("expires");
-				String status = rs.getString("status");
-				catalog = new Catalog(catalogId, xmlns, name, base, version, expires, status);
+				Datavalue xmlns = new Datavalue(rs.getString("xmlns"));
+				Datavalue name = new Datavalue(rs.getString("name"));
+				Datavalue base = new Datavalue(rs.getString("base"));
+				Datavalue version = new Datavalue(rs.getString("version"));
+				Datavalue expires = new Datavalue(rs.getString("expires"));
+				Datavalue status = new Datavalue(rs.getString("status"));
+				catalog = new Catalog(catalogId, xmlns, name, base, version, expires, new Datavalue(null), status);
 			}
 		}
 		catch (SQLException e) {
@@ -217,8 +346,3 @@ public class DataAccess {
 		return catalog;
 	}
 	
-	
-	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	// begin generated functions
-	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-

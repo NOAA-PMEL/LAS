@@ -1,3857 +1,1010 @@
 	public static Catalog getCatalog(int catalogId) throws Exception{
 
-		PreparedStatement ps = null;
-		ResultSet rs = null;
 		Catalog catalog = null;
-
-		try {
-			ps = pgCache.prepareStatement("select * from catalog where catalog_id=?");
-			ps.setInt(1, catalogId);
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			while (rs.next()) {
-				String name = rs.getString("name");
-				if (name == null)
-					name = "";
-				String expires = rs.getString("expires");
-				if (expires == null)
-					expires = "";
-				String version = rs.getString("version");
-				if (version == null)
-					version = "";
-				String base = rs.getString("base");
-				if (base == null)
-					base = "";
-				String xmlns = rs.getString("xmlns");
-				if (xmlns == null)
-					xmlns = "";
-				String status = rs.getString("status");
-				if (status == null)
-					status = "";
-				catalog = new Catalog(catalogId, name, expires, version, base, xmlns, status);
-			}
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-				ps.close();
-//					rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
+		Hashtable<String, String> hash = getObject("catalog", catalogId);
+		Datavalue cleanCatalogId = new Datavalue(hash.get("cleanCatalogId"));
+		Datavalue base = new Datavalue(hash.get("base"));
+		Datavalue expires = new Datavalue(hash.get("expires"));
+		Datavalue name = new Datavalue(hash.get("name"));
+		Datavalue version = new Datavalue(hash.get("version"));
+		Datavalue xmlns = new Datavalue(hash.get("xmlns"));
+		Datavalue status = new Datavalue(hash.get("status"));
+		catalog = new Catalog(catalogId, cleanCatalogId, base, expires, name, version, xmlns, status);
 		return catalog;
 	}
-
 	public static ArrayList<Dataset> getDatasetBCatalog(int catalogId) throws Exception{
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-		ArrayList<Integer> datasetIds = new ArrayList<Integer>();
 		ArrayList<Dataset> datasets = new ArrayList<Dataset>();
-		String select = "select dataset_id from catalog_dataset where ";
-		select+= "catalog_id=?";
-		try {
-			ps = pgCache.prepareStatement(select);
-			ps.setInt(1, catalogId);
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			while (rs.next()) {
-				datasetIds.add(rs.getInt("dataset_id"));
-			}		
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-				ps.close();
-//					rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
+		ArrayList<Integer> datasetIds = getObjects("catalog_dataset", "catalog", "dataset", catalogId);
 		for(int i=0; i<datasetIds.size(); i++){
 			datasets.add(getDataset(datasetIds.get(i)));
 		}
 		return datasets;
 	}
-
 	public static CatalogProperty getCatalogProperty(int catalogPropertyId) throws Exception{
 
-		PreparedStatement ps = null;
-		ResultSet rs = null;
 		CatalogProperty catalogProperty = null;
-
-		try {
-			ps = pgCache.prepareStatement("select * from catalog_property where catalog_property_id=?");
-			ps.setInt(1, catalogPropertyId);
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			while (rs.next()) {
-				int catalogId = rs.getInt("catalog_id");
-				String name = rs.getString("name");
-				if (name == null)
-					name = "";
-				String value = rs.getString("value");
-				if (value == null)
-					value = "";
-				catalogProperty = new CatalogProperty(catalogId, catalogPropertyId, name, value);
-			}
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-				ps.close();
-//					rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
+		Hashtable<String, String> hash = getObject("catalog_property", catalogPropertyId);
+		int catalogId = Integer.parseInt(hash.get("catalog_id"));
+		Datavalue name = new Datavalue(hash.get("name"));
+		Datavalue value = new Datavalue(hash.get("value"));
+		catalogProperty = new CatalogProperty(catalogId, catalogPropertyId, name, value);
 		return catalogProperty;
 	}
-
 	public static ArrayList<CatalogProperty> getCatalogPropertyBCatalog(int catalogId) throws Exception{
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-		ArrayList<Integer> propertyIds = new ArrayList<Integer>();
 		ArrayList<CatalogProperty> propertys = new ArrayList<CatalogProperty>();
-		String select = "select catalog_property_id from catalog_property where ";
-		select+= "catalog_id=?";
-		try {
-			ps = pgCache.prepareStatement(select);
-			ps.setInt(1, catalogId);
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			while (rs.next()) {
-				propertyIds.add(rs.getInt("catalog_property_id"));
-			}		
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-				ps.close();
-//					rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
+		ArrayList<Integer> propertyIds = getObjects("catalog_property", "catalog", catalogId);
 		for(int i=0; i<propertyIds.size(); i++){
 			propertys.add(getCatalogProperty(propertyIds.get(i)));
 		}
 		return propertys;
 	}
-
 	public static ArrayList<Service> getServiceBCatalog(int catalogId) throws Exception{
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-		ArrayList<Integer> serviceIds = new ArrayList<Integer>();
 		ArrayList<Service> services = new ArrayList<Service>();
-		String select = "select service_id from catalog_service where ";
-		select+= "catalog_id=?";
-		try {
-			ps = pgCache.prepareStatement(select);
-			ps.setInt(1, catalogId);
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			while (rs.next()) {
-				serviceIds.add(rs.getInt("service_id"));
-			}		
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-				ps.close();
-//					rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
+		ArrayList<Integer> serviceIds = getObjects("catalog_service", "catalog", "service", catalogId);
 		for(int i=0; i<serviceIds.size(); i++){
 			services.add(getService(serviceIds.get(i)));
 		}
 		return services;
 	}
-
 	public static CatalogXlink getCatalogXlink(int catalogXlinkId) throws Exception{
 
-		PreparedStatement ps = null;
-		ResultSet rs = null;
 		CatalogXlink catalogXlink = null;
-
-		try {
-			ps = pgCache.prepareStatement("select * from catalog_xlink where catalog_xlink_id=?");
-			ps.setInt(1, catalogXlinkId);
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			while (rs.next()) {
-				int catalogId = rs.getInt("catalog_id");
-				String value = rs.getString("value");
-				if (value == null)
-					value = "";
-				String xlink = rs.getString("xlink");
-				if (xlink == null)
-					xlink = rs.getString("xlink_nonstandard");
-				if (xlink == null)
-					xlink = "";
-				catalogXlink = new CatalogXlink(catalogId, catalogXlinkId, value, xlink);
-			}
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-				ps.close();
-//					rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
+		Hashtable<String, String> hash = getObject("catalog_xlink", catalogXlinkId);
+		int catalogId = Integer.parseInt(hash.get("catalog_id"));
+		Datavalue value = new Datavalue(hash.get("value"));
+		Datavalue xlink = new Datavalue(hash.get("xlink"));
+		if (xlink.isNull())
+			xlink = new Datavalue(hash.get("xlink_nonstandard"));
+		catalogXlink = new CatalogXlink(catalogId, catalogXlinkId, value, xlink);
 		return catalogXlink;
 	}
-
 	public static ArrayList<CatalogXlink> getCatalogXlinkBCatalog(int catalogId) throws Exception{
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-		ArrayList<Integer> xlinkIds = new ArrayList<Integer>();
 		ArrayList<CatalogXlink> xlinks = new ArrayList<CatalogXlink>();
-		String select = "select catalog_xlink_id from catalog_xlink where ";
-		select+= "catalog_id=?";
-		try {
-			ps = pgCache.prepareStatement(select);
-			ps.setInt(1, catalogId);
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			while (rs.next()) {
-				xlinkIds.add(rs.getInt("catalog_xlink_id"));
-			}		
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-				ps.close();
-//					rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
+		ArrayList<Integer> xlinkIds = getObjects("catalog_xlink", "catalog", catalogId);
 		for(int i=0; i<xlinkIds.size(); i++){
 			xlinks.add(getCatalogXlink(xlinkIds.get(i)));
 		}
 		return xlinks;
 	}
-
 	public static Catalogref getCatalogref(int catalogrefId) throws Exception{
 
-		PreparedStatement ps = null;
-		ResultSet rs = null;
 		Catalogref catalogref = null;
-
-		try {
-			ps = pgCache.prepareStatement("select * from catalogref where catalogref_id=?");
-			ps.setInt(1, catalogrefId);
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			while (rs.next()) {
-				catalogref = new Catalogref(catalogrefId);
-			}
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-				ps.close();
-//					rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
+		Hashtable<String, String> hash = getObject("catalogref", catalogrefId);
+		catalogref = new Catalogref(catalogrefId);
 		return catalogref;
 	}
-
 	public static CatalogrefDocumentation getCatalogrefDocumentation(int catalogrefDocumentationId) throws Exception{
 
-		PreparedStatement ps = null;
-		ResultSet rs = null;
 		CatalogrefDocumentation catalogrefDocumentation = null;
-
-		try {
-			ps = pgCache.prepareStatement("select * from catalogref_documentation where catalogref_documentation_id=?");
-			ps.setInt(1, catalogrefDocumentationId);
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			while (rs.next()) {
-				int catalogrefId = rs.getInt("catalogref_id");
-				String value = rs.getString("value");
-				if (value == null)
-					value = "";
-				String documentationenum = rs.getString("documentationenum");
-				if (documentationenum == null)
-					documentationenum = rs.getString("documentationenum_nonstandard");
-				if (documentationenum == null)
-					documentationenum = "";
-				catalogrefDocumentation = new CatalogrefDocumentation(catalogrefId, catalogrefDocumentationId, value, documentationenum);
-			}
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-				ps.close();
-//					rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
+		Hashtable<String, String> hash = getObject("catalogref_documentation", catalogrefDocumentationId);
+		int catalogrefId = Integer.parseInt(hash.get("catalogref_id"));
+		Datavalue value = new Datavalue(hash.get("value"));
+		Datavalue documentationenum = new Datavalue(hash.get("documentationenum"));
+		if (documentationenum.isNull())
+			documentationenum = new Datavalue(hash.get("documentationenum_nonstandard"));
+		catalogrefDocumentation = new CatalogrefDocumentation(catalogrefId, catalogrefDocumentationId, value, documentationenum);
 		return catalogrefDocumentation;
 	}
-
 	public static ArrayList<CatalogrefDocumentation> getCatalogrefDocumentationBCatalogref(int catalogrefId) throws Exception{
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-		ArrayList<Integer> documentationIds = new ArrayList<Integer>();
 		ArrayList<CatalogrefDocumentation> documentations = new ArrayList<CatalogrefDocumentation>();
-		String select = "select catalogref_documentation_id from catalogref_documentation where ";
-		select+= "catalogref_id=?";
-		try {
-			ps = pgCache.prepareStatement(select);
-			ps.setInt(1, catalogrefId);
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			while (rs.next()) {
-				documentationIds.add(rs.getInt("catalogref_documentation_id"));
-			}		
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-				ps.close();
-//					rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
+		ArrayList<Integer> documentationIds = getObjects("catalogref_documentation", "catalogref", catalogrefId);
 		for(int i=0; i<documentationIds.size(); i++){
 			documentations.add(getCatalogrefDocumentation(documentationIds.get(i)));
 		}
 		return documentations;
 	}
-
 	public static CatalogrefDocumentationNamespace getCatalogrefDocumentationNamespace(int catalogrefDocumentationNamespaceId) throws Exception{
 
-		PreparedStatement ps = null;
-		ResultSet rs = null;
 		CatalogrefDocumentationNamespace catalogrefDocumentationNamespace = null;
-
-		try {
-			ps = pgCache.prepareStatement("select * from catalogref_documentation_namespace where catalogref_documentation_namespace_id=?");
-			ps.setInt(1, catalogrefDocumentationNamespaceId);
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			while (rs.next()) {
-				int catalogrefDocumentationId = rs.getInt("catalogref_documentation_id");
-				String namespace = rs.getString("namespace");
-				if (namespace == null)
-					namespace = "";
-				catalogrefDocumentationNamespace = new CatalogrefDocumentationNamespace(catalogrefDocumentationId, catalogrefDocumentationNamespaceId, namespace);
-			}
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-				ps.close();
-//					rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
+		Hashtable<String, String> hash = getObject("catalogref_documentation_namespace", catalogrefDocumentationNamespaceId);
+		int catalogrefDocumentationId = Integer.parseInt(hash.get("catalogref_documentation_id"));
+		Datavalue namespace = new Datavalue(hash.get("namespace"));
+		catalogrefDocumentationNamespace = new CatalogrefDocumentationNamespace(catalogrefDocumentationId, catalogrefDocumentationNamespaceId, namespace);
 		return catalogrefDocumentationNamespace;
 	}
-
 	public static ArrayList<CatalogrefDocumentationNamespace> getCatalogrefDocumentationNamespaceBCatalogrefDocumentation(int catalogrefDocumentationId) throws Exception{
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-		ArrayList<Integer> namespaceIds = new ArrayList<Integer>();
 		ArrayList<CatalogrefDocumentationNamespace> namespaces = new ArrayList<CatalogrefDocumentationNamespace>();
-		String select = "select catalogref_documentation_namespace_id from catalogref_documentation_namespace where ";
-		select+= "catalogref_documentation_id=?";
-		try {
-			ps = pgCache.prepareStatement(select);
-			ps.setInt(1, catalogrefDocumentationId);
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			while (rs.next()) {
-				namespaceIds.add(rs.getInt("catalogref_documentation_namespace_id"));
-			}		
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-				ps.close();
-//					rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
+		ArrayList<Integer> namespaceIds = getObjects("catalogref_documentation_namespace", "catalogref_documentation", catalogrefDocumentationId);
 		for(int i=0; i<namespaceIds.size(); i++){
 			namespaces.add(getCatalogrefDocumentationNamespace(namespaceIds.get(i)));
 		}
 		return namespaces;
 	}
-
 	public static CatalogrefDocumentationXlink getCatalogrefDocumentationXlink(int catalogrefDocumentationXlinkId) throws Exception{
 
-		PreparedStatement ps = null;
-		ResultSet rs = null;
 		CatalogrefDocumentationXlink catalogrefDocumentationXlink = null;
-
-		try {
-			ps = pgCache.prepareStatement("select * from catalogref_documentation_xlink where catalogref_documentation_xlink_id=?");
-			ps.setInt(1, catalogrefDocumentationXlinkId);
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			while (rs.next()) {
-				int catalogrefDocumentationId = rs.getInt("catalogref_documentation_id");
-				String value = rs.getString("value");
-				if (value == null)
-					value = "";
-				String xlink = rs.getString("xlink");
-				if (xlink == null)
-					xlink = rs.getString("xlink_nonstandard");
-				if (xlink == null)
-					xlink = "";
-				catalogrefDocumentationXlink = new CatalogrefDocumentationXlink(catalogrefDocumentationId, catalogrefDocumentationXlinkId, value, xlink);
-			}
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-				ps.close();
-//					rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
+		Hashtable<String, String> hash = getObject("catalogref_documentation_xlink", catalogrefDocumentationXlinkId);
+		int catalogrefDocumentationId = Integer.parseInt(hash.get("catalogref_documentation_id"));
+		Datavalue value = new Datavalue(hash.get("value"));
+		Datavalue xlink = new Datavalue(hash.get("xlink"));
+		if (xlink.isNull())
+			xlink = new Datavalue(hash.get("xlink_nonstandard"));
+		catalogrefDocumentationXlink = new CatalogrefDocumentationXlink(catalogrefDocumentationId, catalogrefDocumentationXlinkId, value, xlink);
 		return catalogrefDocumentationXlink;
 	}
-
 	public static ArrayList<CatalogrefDocumentationXlink> getCatalogrefDocumentationXlinkBCatalogrefDocumentation(int catalogrefDocumentationId) throws Exception{
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-		ArrayList<Integer> xlinkIds = new ArrayList<Integer>();
 		ArrayList<CatalogrefDocumentationXlink> xlinks = new ArrayList<CatalogrefDocumentationXlink>();
-		String select = "select catalogref_documentation_xlink_id from catalogref_documentation_xlink where ";
-		select+= "catalogref_documentation_id=?";
-		try {
-			ps = pgCache.prepareStatement(select);
-			ps.setInt(1, catalogrefDocumentationId);
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			while (rs.next()) {
-				xlinkIds.add(rs.getInt("catalogref_documentation_xlink_id"));
-			}		
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-				ps.close();
-//					rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
+		ArrayList<Integer> xlinkIds = getObjects("catalogref_documentation_xlink", "catalogref_documentation", catalogrefDocumentationId);
 		for(int i=0; i<xlinkIds.size(); i++){
 			xlinks.add(getCatalogrefDocumentationXlink(xlinkIds.get(i)));
 		}
 		return xlinks;
 	}
-
 	public static CatalogrefXlink getCatalogrefXlink(int catalogrefXlinkId) throws Exception{
 
-		PreparedStatement ps = null;
-		ResultSet rs = null;
 		CatalogrefXlink catalogrefXlink = null;
-
-		try {
-			ps = pgCache.prepareStatement("select * from catalogref_xlink where catalogref_xlink_id=?");
-			ps.setInt(1, catalogrefXlinkId);
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			while (rs.next()) {
-				int catalogrefId = rs.getInt("catalogref_id");
-				String value = rs.getString("value");
-				if (value == null)
-					value = "";
-				String xlink = rs.getString("xlink");
-				if (xlink == null)
-					xlink = rs.getString("xlink_nonstandard");
-				if (xlink == null)
-					xlink = "";
-				catalogrefXlink = new CatalogrefXlink(catalogrefId, catalogrefXlinkId, value, xlink);
-			}
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-				ps.close();
-//					rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
+		Hashtable<String, String> hash = getObject("catalogref_xlink", catalogrefXlinkId);
+		int catalogrefId = Integer.parseInt(hash.get("catalogref_id"));
+		Datavalue value = new Datavalue(hash.get("value"));
+		Datavalue xlink = new Datavalue(hash.get("xlink"));
+		if (xlink.isNull())
+			xlink = new Datavalue(hash.get("xlink_nonstandard"));
+		catalogrefXlink = new CatalogrefXlink(catalogrefId, catalogrefXlinkId, value, xlink);
 		return catalogrefXlink;
 	}
-
 	public static ArrayList<CatalogrefXlink> getCatalogrefXlinkBCatalogref(int catalogrefId) throws Exception{
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-		ArrayList<Integer> xlinkIds = new ArrayList<Integer>();
 		ArrayList<CatalogrefXlink> xlinks = new ArrayList<CatalogrefXlink>();
-		String select = "select catalogref_xlink_id from catalogref_xlink where ";
-		select+= "catalogref_id=?";
-		try {
-			ps = pgCache.prepareStatement(select);
-			ps.setInt(1, catalogrefId);
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			while (rs.next()) {
-				xlinkIds.add(rs.getInt("catalogref_xlink_id"));
-			}		
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-				ps.close();
-//					rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
+		ArrayList<Integer> xlinkIds = getObjects("catalogref_xlink", "catalogref", catalogrefId);
 		for(int i=0; i<xlinkIds.size(); i++){
 			xlinks.add(getCatalogrefXlink(xlinkIds.get(i)));
 		}
 		return xlinks;
 	}
-
 	public static Dataset getDataset(int datasetId) throws Exception{
 
-		PreparedStatement ps = null;
-		ResultSet rs = null;
 		Dataset dataset = null;
-
-		try {
-			ps = pgCache.prepareStatement("select * from dataset where dataset_id=?");
-			ps.setInt(1, datasetId);
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			while (rs.next()) {
-				String harvest = rs.getString("harvest");
-				if (harvest == null)
-					harvest = "";
-				String name = rs.getString("name");
-				if (name == null)
-					name = "";
-				String alias = rs.getString("alias");
-				if (alias == null)
-					alias = "";
-				String authority = rs.getString("authority");
-				if (authority == null)
-					authority = "";
-				String dId = rs.getString("d_id");
-				if (dId == null)
-					dId = "";
-				String servicename = rs.getString("servicename");
-				if (servicename == null)
-					servicename = "";
-				String urlpath = rs.getString("urlpath");
-				if (urlpath == null)
-					urlpath = "";
-				String resourcecontrol = rs.getString("resourcecontrol");
-				if (resourcecontrol == null)
-					resourcecontrol = "";
-				String collectiontype = rs.getString("collectiontype");
-				if (collectiontype == null)
-					collectiontype = rs.getString("collectiontype_nonstandard");
-				if (collectiontype == null)
-					collectiontype = "";
-				String status = rs.getString("status");
-				if (status == null)
-					status = "";
-				String datatype = rs.getString("datatype");
-				if (datatype == null)
-					datatype = rs.getString("datatype_nonstandard");
-				if (datatype == null)
-					datatype = "";
-				String datasizeUnit = rs.getString("datasize_unit");
-				if (datasizeUnit == null)
-					datasizeUnit = rs.getString("datasize_unit_nonstandard");
-				if (datasizeUnit == null)
-					datasizeUnit = "";
-				dataset = new Dataset(datasetId, harvest, name, alias, authority, dId, servicename, urlpath, resourcecontrol, collectiontype, status, datatype, datasizeUnit);
-			}
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-				ps.close();
-//					rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
+		Hashtable<String, String> hash = getObject("dataset", datasetId);
+		Datavalue alias = new Datavalue(hash.get("alias"));
+		Datavalue authority = new Datavalue(hash.get("authority"));
+		Datavalue dId = new Datavalue(hash.get("d_id"));
+		Datavalue harvest = new Datavalue(hash.get("harvest"));
+		Datavalue name = new Datavalue(hash.get("name"));
+		Datavalue resourcecontrol = new Datavalue(hash.get("resourcecontrol"));
+		Datavalue serviceName = new Datavalue(hash.get("serviceName"));
+		Datavalue urlPath = new Datavalue(hash.get("urlPath"));
+		Datavalue collectiontype = new Datavalue(hash.get("collectiontype"));
+		if (collectiontype.isNull())
+			collectiontype = new Datavalue(hash.get("collectiontype_nonstandard"));
+		Datavalue datasizeUnit = new Datavalue(hash.get("datasize_unit"));
+		if (datasizeUnit.isNull())
+			datasizeUnit = new Datavalue(hash.get("datasize_unit_nonstandard"));
+		Datavalue dataType = new Datavalue(hash.get("dataType"));
+		if (dataType.isNull())
+			dataType = new Datavalue(hash.get("dataType_nonstandard"));
+		Datavalue status = new Datavalue(hash.get("status"));
+		dataset = new Dataset(datasetId, alias, authority, dId, harvest, name, resourcecontrol, serviceName, urlPath, collectiontype, datasizeUnit, dataType, status);
 		return dataset;
 	}
-
 	public static DatasetAccess getDatasetAccess(int datasetAccessId) throws Exception{
 
-		PreparedStatement ps = null;
-		ResultSet rs = null;
 		DatasetAccess datasetAccess = null;
-
-		try {
-			ps = pgCache.prepareStatement("select * from dataset_access where dataset_access_id=?");
-			ps.setInt(1, datasetAccessId);
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			while (rs.next()) {
-				int datasetId = rs.getInt("dataset_id");
-				String urlpath = rs.getString("urlpath");
-				if (urlpath == null)
-					urlpath = "";
-				String servicename = rs.getString("servicename");
-				if (servicename == null)
-					servicename = "";
-				String dataformat = rs.getString("dataformat");
-				if (dataformat == null)
-					dataformat = rs.getString("dataformat_nonstandard");
-				if (dataformat == null)
-					dataformat = "";
-				datasetAccess = new DatasetAccess(datasetId, datasetAccessId, urlpath, servicename, dataformat);
-			}
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-				ps.close();
-//					rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
+		Hashtable<String, String> hash = getObject("dataset_access", datasetAccessId);
+		int datasetId = Integer.parseInt(hash.get("dataset_id"));
+		Datavalue servicename = new Datavalue(hash.get("servicename"));
+		Datavalue urlpath = new Datavalue(hash.get("urlpath"));
+		Datavalue dataformat = new Datavalue(hash.get("dataformat"));
+		if (dataformat.isNull())
+			dataformat = new Datavalue(hash.get("dataformat_nonstandard"));
+		datasetAccess = new DatasetAccess(datasetId, datasetAccessId, servicename, urlpath, dataformat);
 		return datasetAccess;
 	}
-
 	public static ArrayList<DatasetAccess> getDatasetAccessBDataset(int datasetId) throws Exception{
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-		ArrayList<Integer> accessIds = new ArrayList<Integer>();
 		ArrayList<DatasetAccess> accesss = new ArrayList<DatasetAccess>();
-		String select = "select dataset_access_id from dataset_access where ";
-		select+= "dataset_id=?";
-		try {
-			ps = pgCache.prepareStatement(select);
-			ps.setInt(1, datasetId);
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			while (rs.next()) {
-				accessIds.add(rs.getInt("dataset_access_id"));
-			}		
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-				ps.close();
-//					rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
+		ArrayList<Integer> accessIds = getObjects("dataset_access", "dataset", datasetId);
 		for(int i=0; i<accessIds.size(); i++){
 			accesss.add(getDatasetAccess(accessIds.get(i)));
 		}
 		return accesss;
 	}
-
 	public static DatasetAccessDatasize getDatasetAccessDatasize(int datasetAccessDatasizeId) throws Exception{
 
-		PreparedStatement ps = null;
-		ResultSet rs = null;
 		DatasetAccessDatasize datasetAccessDatasize = null;
-
-		try {
-			ps = pgCache.prepareStatement("select * from dataset_access_datasize where dataset_access_datasize_id=?");
-			ps.setInt(1, datasetAccessDatasizeId);
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			while (rs.next()) {
-				int datasetAccessId = rs.getInt("dataset_access_id");
-				String value = rs.getString("value");
-				if (value == null)
-					value = "";
-				String units = rs.getString("units");
-				if (units == null)
-					units = rs.getString("units_nonstandard");
-				if (units == null)
-					units = "";
-				datasetAccessDatasize = new DatasetAccessDatasize(datasetAccessId, datasetAccessDatasizeId, value, units);
-			}
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-				ps.close();
-//					rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
+		Hashtable<String, String> hash = getObject("dataset_access_datasize", datasetAccessDatasizeId);
+		int datasetAccessId = Integer.parseInt(hash.get("dataset_access_id"));
+		Datavalue value = new Datavalue(hash.get("value"));
+		Datavalue units = new Datavalue(hash.get("units"));
+		if (units.isNull())
+			units = new Datavalue(hash.get("units_nonstandard"));
+		datasetAccessDatasize = new DatasetAccessDatasize(datasetAccessId, datasetAccessDatasizeId, value, units);
 		return datasetAccessDatasize;
 	}
-
 	public static ArrayList<DatasetAccessDatasize> getDatasetAccessDatasizeBDatasetAccess(int datasetAccessId) throws Exception{
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-		ArrayList<Integer> datasizeIds = new ArrayList<Integer>();
 		ArrayList<DatasetAccessDatasize> datasizes = new ArrayList<DatasetAccessDatasize>();
-		String select = "select dataset_access_datasize_id from dataset_access_datasize where ";
-		select+= "dataset_access_id=?";
-		try {
-			ps = pgCache.prepareStatement(select);
-			ps.setInt(1, datasetAccessId);
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			while (rs.next()) {
-				datasizeIds.add(rs.getInt("dataset_access_datasize_id"));
-			}		
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-				ps.close();
-//					rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
+		ArrayList<Integer> datasizeIds = getObjects("dataset_access_datasize", "dataset_access", datasetAccessId);
 		for(int i=0; i<datasizeIds.size(); i++){
 			datasizes.add(getDatasetAccessDatasize(datasizeIds.get(i)));
 		}
 		return datasizes;
 	}
-
 	public static ArrayList<Catalogref> getCatalogrefBDataset(int datasetId) throws Exception{
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-		ArrayList<Integer> catalogrefIds = new ArrayList<Integer>();
 		ArrayList<Catalogref> catalogrefs = new ArrayList<Catalogref>();
-		String select = "select catalogref_id from dataset_catalogref where ";
-		select+= "dataset_id=?";
-		try {
-			ps = pgCache.prepareStatement(select);
-			ps.setInt(1, datasetId);
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			while (rs.next()) {
-				catalogrefIds.add(rs.getInt("catalogref_id"));
-			}		
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-				ps.close();
-//					rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
+		ArrayList<Integer> catalogrefIds = getObjects("dataset_catalogref", "dataset", "catalogref", datasetId);
 		for(int i=0; i<catalogrefIds.size(); i++){
 			catalogrefs.add(getCatalogref(catalogrefIds.get(i)));
 		}
 		return catalogrefs;
 	}
-
 	public static ArrayList<Dataset> getDatasetBDataset(int parentId) throws Exception{
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-		ArrayList<Integer> childIds = new ArrayList<Integer>();
 		ArrayList<Dataset> datasets = new ArrayList<Dataset>();
-		String select = "select child_id from dataset_dataset where ";
-		select+= "parent_id=?";
-		try {
-			ps = pgCache.prepareStatement(select);
-			ps.setInt(1, parentId);
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			while (rs.next()) {
-				childIds.add(rs.getInt("child_id"));
-			}		
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-				ps.close();
-//					rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
+		ArrayList<Integer> childIds = getObjects("dataset_dataset", "parent", "child", parentId);
 		for(int i=0; i<childIds.size(); i++){
 			datasets.add(getDataset(childIds.get(i)));
 		}
 		return datasets;
 	}
-
 	public static DatasetNcml getDatasetNcml(int datasetNcmlId) throws Exception{
 
-		PreparedStatement ps = null;
-		ResultSet rs = null;
 		DatasetNcml datasetNcml = null;
-
-		try {
-			ps = pgCache.prepareStatement("select * from dataset_ncml where dataset_ncml_id=?");
-			ps.setInt(1, datasetNcmlId);
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			while (rs.next()) {
-				int datasetId = rs.getInt("dataset_id");
-				datasetNcml = new DatasetNcml(datasetId, datasetNcmlId);
-			}
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-				ps.close();
-//					rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
+		Hashtable<String, String> hash = getObject("dataset_ncml", datasetNcmlId);
+		int datasetId = Integer.parseInt(hash.get("dataset_id"));
+		datasetNcml = new DatasetNcml(datasetId, datasetNcmlId);
 		return datasetNcml;
 	}
-
 	public static ArrayList<DatasetNcml> getDatasetNcmlBDataset(int datasetId) throws Exception{
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-		ArrayList<Integer> ncmlIds = new ArrayList<Integer>();
 		ArrayList<DatasetNcml> ncmls = new ArrayList<DatasetNcml>();
-		String select = "select dataset_ncml_id from dataset_ncml where ";
-		select+= "dataset_id=?";
-		try {
-			ps = pgCache.prepareStatement(select);
-			ps.setInt(1, datasetId);
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			while (rs.next()) {
-				ncmlIds.add(rs.getInt("dataset_ncml_id"));
-			}		
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-				ps.close();
-//					rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
+		ArrayList<Integer> ncmlIds = getObjects("dataset_ncml", "dataset", datasetId);
 		for(int i=0; i<ncmlIds.size(); i++){
 			ncmls.add(getDatasetNcml(ncmlIds.get(i)));
 		}
 		return ncmls;
 	}
-
 	public static DatasetProperty getDatasetProperty(int datasetPropertyId) throws Exception{
 
-		PreparedStatement ps = null;
-		ResultSet rs = null;
 		DatasetProperty datasetProperty = null;
-
-		try {
-			ps = pgCache.prepareStatement("select * from dataset_property where dataset_property_id=?");
-			ps.setInt(1, datasetPropertyId);
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			while (rs.next()) {
-				int datasetId = rs.getInt("dataset_id");
-				String name = rs.getString("name");
-				if (name == null)
-					name = "";
-				String value = rs.getString("value");
-				if (value == null)
-					value = "";
-				datasetProperty = new DatasetProperty(datasetId, datasetPropertyId, name, value);
-			}
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-				ps.close();
-//					rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
+		Hashtable<String, String> hash = getObject("dataset_property", datasetPropertyId);
+		int datasetId = Integer.parseInt(hash.get("dataset_id"));
+		Datavalue name = new Datavalue(hash.get("name"));
+		Datavalue value = new Datavalue(hash.get("value"));
+		datasetProperty = new DatasetProperty(datasetId, datasetPropertyId, name, value);
 		return datasetProperty;
 	}
-
 	public static ArrayList<DatasetProperty> getDatasetPropertyBDataset(int datasetId) throws Exception{
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-		ArrayList<Integer> propertyIds = new ArrayList<Integer>();
 		ArrayList<DatasetProperty> propertys = new ArrayList<DatasetProperty>();
-		String select = "select dataset_property_id from dataset_property where ";
-		select+= "dataset_id=?";
-		try {
-			ps = pgCache.prepareStatement(select);
-			ps.setInt(1, datasetId);
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			while (rs.next()) {
-				propertyIds.add(rs.getInt("dataset_property_id"));
-			}		
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-				ps.close();
-//					rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
+		ArrayList<Integer> propertyIds = getObjects("dataset_property", "dataset", datasetId);
 		for(int i=0; i<propertyIds.size(); i++){
 			propertys.add(getDatasetProperty(propertyIds.get(i)));
 		}
 		return propertys;
 	}
-
 	public static ArrayList<Service> getServiceBDataset(int datasetId) throws Exception{
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-		ArrayList<Integer> serviceIds = new ArrayList<Integer>();
 		ArrayList<Service> services = new ArrayList<Service>();
-		String select = "select service_id from dataset_service where ";
-		select+= "dataset_id=?";
-		try {
-			ps = pgCache.prepareStatement(select);
-			ps.setInt(1, datasetId);
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			while (rs.next()) {
-				serviceIds.add(rs.getInt("service_id"));
-			}		
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-				ps.close();
-//					rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
+		ArrayList<Integer> serviceIds = getObjects("dataset_service", "dataset", "service", datasetId);
 		for(int i=0; i<serviceIds.size(); i++){
 			services.add(getService(serviceIds.get(i)));
 		}
 		return services;
 	}
-
 	public static ArrayList<Tmg> getTmgBDataset(int datasetId) throws Exception{
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-		ArrayList<Integer> tmgIds = new ArrayList<Integer>();
 		ArrayList<Tmg> tmgs = new ArrayList<Tmg>();
-		String select = "select tmg_id from dataset_tmg where ";
-		select+= "dataset_id=?";
-		try {
-			ps = pgCache.prepareStatement(select);
-			ps.setInt(1, datasetId);
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			while (rs.next()) {
-				tmgIds.add(rs.getInt("tmg_id"));
-			}		
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-				ps.close();
-//					rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
+		ArrayList<Integer> tmgIds = getObjects("dataset_tmg", "dataset", "tmg", datasetId);
 		for(int i=0; i<tmgIds.size(); i++){
 			tmgs.add(getTmg(tmgIds.get(i)));
 		}
 		return tmgs;
 	}
-
 	public static Metadata getMetadata(int metadataId) throws Exception{
 
-		PreparedStatement ps = null;
-		ResultSet rs = null;
 		Metadata metadata = null;
-
-		try {
-			ps = pgCache.prepareStatement("select * from metadata where metadata_id=?");
-			ps.setInt(1, metadataId);
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			while (rs.next()) {
-				String metadatatype = rs.getString("metadatatype");
-				if (metadatatype == null)
-					metadatatype = rs.getString("metadatatype_nonstandard");
-				if (metadatatype == null)
-					metadatatype = "";
-				String inherited = rs.getString("inherited");
-				if (inherited == null)
-					inherited = rs.getString("inherited_nonstandard");
-				if (inherited == null)
-					inherited = "";
-				metadata = new Metadata(metadataId, metadatatype, inherited);
-			}
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-				ps.close();
-//					rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
+		Hashtable<String, String> hash = getObject("metadata", metadataId);
+		Datavalue inherited = new Datavalue(hash.get("inherited"));
+		if (inherited.isNull())
+			inherited = new Datavalue(hash.get("inherited_nonstandard"));
+		Datavalue metadatatype = new Datavalue(hash.get("metadatatype"));
+		if (metadatatype.isNull())
+			metadatatype = new Datavalue(hash.get("metadatatype_nonstandard"));
+		metadata = new Metadata(metadataId, inherited, metadatatype);
 		return metadata;
 	}
-
 	public static MetadataNamespace getMetadataNamespace(int metadataNamespaceId) throws Exception{
 
-		PreparedStatement ps = null;
-		ResultSet rs = null;
 		MetadataNamespace metadataNamespace = null;
-
-		try {
-			ps = pgCache.prepareStatement("select * from metadata_namespace where metadata_namespace_id=?");
-			ps.setInt(1, metadataNamespaceId);
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			while (rs.next()) {
-				int metadataId = rs.getInt("metadata_id");
-				String namespace = rs.getString("namespace");
-				if (namespace == null)
-					namespace = "";
-				metadataNamespace = new MetadataNamespace(metadataId, metadataNamespaceId, namespace);
-			}
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-				ps.close();
-//					rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
+		Hashtable<String, String> hash = getObject("metadata_namespace", metadataNamespaceId);
+		int metadataId = Integer.parseInt(hash.get("metadata_id"));
+		Datavalue namespace = new Datavalue(hash.get("namespace"));
+		metadataNamespace = new MetadataNamespace(metadataId, metadataNamespaceId, namespace);
 		return metadataNamespace;
 	}
-
 	public static ArrayList<MetadataNamespace> getMetadataNamespaceBMetadata(int metadataId) throws Exception{
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-		ArrayList<Integer> namespaceIds = new ArrayList<Integer>();
 		ArrayList<MetadataNamespace> namespaces = new ArrayList<MetadataNamespace>();
-		String select = "select metadata_namespace_id from metadata_namespace where ";
-		select+= "metadata_id=?";
-		try {
-			ps = pgCache.prepareStatement(select);
-			ps.setInt(1, metadataId);
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			while (rs.next()) {
-				namespaceIds.add(rs.getInt("metadata_namespace_id"));
-			}		
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-				ps.close();
-//					rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
+		ArrayList<Integer> namespaceIds = getObjects("metadata_namespace", "metadata", metadataId);
 		for(int i=0; i<namespaceIds.size(); i++){
 			namespaces.add(getMetadataNamespace(namespaceIds.get(i)));
 		}
 		return namespaces;
 	}
-
 	public static ArrayList<Tmg> getTmgBMetadata(int metadataId) throws Exception{
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-		ArrayList<Integer> tmgIds = new ArrayList<Integer>();
 		ArrayList<Tmg> tmgs = new ArrayList<Tmg>();
-		String select = "select tmg_id from metadata_tmg where ";
-		select+= "metadata_id=?";
-		try {
-			ps = pgCache.prepareStatement(select);
-			ps.setInt(1, metadataId);
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			while (rs.next()) {
-				tmgIds.add(rs.getInt("tmg_id"));
-			}		
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-				ps.close();
-//					rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
+		ArrayList<Integer> tmgIds = getObjects("metadata_tmg", "metadata", "tmg", metadataId);
 		for(int i=0; i<tmgIds.size(); i++){
 			tmgs.add(getTmg(tmgIds.get(i)));
 		}
 		return tmgs;
 	}
-
 	public static MetadataXlink getMetadataXlink(int metadataXlinkId) throws Exception{
 
-		PreparedStatement ps = null;
-		ResultSet rs = null;
 		MetadataXlink metadataXlink = null;
-
-		try {
-			ps = pgCache.prepareStatement("select * from metadata_xlink where metadata_xlink_id=?");
-			ps.setInt(1, metadataXlinkId);
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			while (rs.next()) {
-				int metadataId = rs.getInt("metadata_id");
-				String value = rs.getString("value");
-				if (value == null)
-					value = "";
-				String xlink = rs.getString("xlink");
-				if (xlink == null)
-					xlink = rs.getString("xlink_nonstandard");
-				if (xlink == null)
-					xlink = "";
-				metadataXlink = new MetadataXlink(metadataId, metadataXlinkId, value, xlink);
-			}
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-				ps.close();
-//					rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
+		Hashtable<String, String> hash = getObject("metadata_xlink", metadataXlinkId);
+		int metadataId = Integer.parseInt(hash.get("metadata_id"));
+		Datavalue value = new Datavalue(hash.get("value"));
+		Datavalue xlink = new Datavalue(hash.get("xlink"));
+		if (xlink.isNull())
+			xlink = new Datavalue(hash.get("xlink_nonstandard"));
+		metadataXlink = new MetadataXlink(metadataId, metadataXlinkId, value, xlink);
 		return metadataXlink;
 	}
-
 	public static ArrayList<MetadataXlink> getMetadataXlinkBMetadata(int metadataId) throws Exception{
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-		ArrayList<Integer> xlinkIds = new ArrayList<Integer>();
 		ArrayList<MetadataXlink> xlinks = new ArrayList<MetadataXlink>();
-		String select = "select metadata_xlink_id from metadata_xlink where ";
-		select+= "metadata_id=?";
-		try {
-			ps = pgCache.prepareStatement(select);
-			ps.setInt(1, metadataId);
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			while (rs.next()) {
-				xlinkIds.add(rs.getInt("metadata_xlink_id"));
-			}		
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-				ps.close();
-//					rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
+		ArrayList<Integer> xlinkIds = getObjects("metadata_xlink", "metadata", metadataId);
 		for(int i=0; i<xlinkIds.size(); i++){
 			xlinks.add(getMetadataXlink(xlinkIds.get(i)));
 		}
 		return xlinks;
 	}
-
 	public static Service getService(int serviceId) throws Exception{
 
-		PreparedStatement ps = null;
-		ResultSet rs = null;
 		Service service = null;
-
-		try {
-			ps = pgCache.prepareStatement("select * from service where service_id=?");
-			ps.setInt(1, serviceId);
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			while (rs.next()) {
-				String suffix = rs.getString("suffix");
-				if (suffix == null)
-					suffix = "";
-				String name = rs.getString("name");
-				if (name == null)
-					name = "";
-				String base = rs.getString("base");
-				if (base == null)
-					base = "";
-				String desc = rs.getString("desc");
-				if (desc == null)
-					desc = "";
-				String servicetype = rs.getString("servicetype");
-				if (servicetype == null)
-					servicetype = rs.getString("servicetype_nonstandard");
-				if (servicetype == null)
-					servicetype = "";
-				String status = rs.getString("status");
-				if (status == null)
-					status = "";
-				service = new Service(serviceId, suffix, name, base, desc, servicetype, status);
-			}
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-				ps.close();
-//					rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
+		Hashtable<String, String> hash = getObject("service", serviceId);
+		Datavalue base = new Datavalue(hash.get("base"));
+		Datavalue desc = new Datavalue(hash.get("desc"));
+		Datavalue name = new Datavalue(hash.get("name"));
+		Datavalue suffix = new Datavalue(hash.get("suffix"));
+		Datavalue serviceType = new Datavalue(hash.get("serviceType"));
+		if (serviceType.isNull())
+			serviceType = new Datavalue(hash.get("serviceType_nonstandard"));
+		Datavalue status = new Datavalue(hash.get("status"));
+		service = new Service(serviceId, base, desc, name, suffix, serviceType, status);
 		return service;
 	}
-
 	public static ServiceDatasetroot getServiceDatasetroot(int serviceDatasetrootId) throws Exception{
 
-		PreparedStatement ps = null;
-		ResultSet rs = null;
 		ServiceDatasetroot serviceDatasetroot = null;
-
-		try {
-			ps = pgCache.prepareStatement("select * from service_datasetroot where service_datasetroot_id=?");
-			ps.setInt(1, serviceDatasetrootId);
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			while (rs.next()) {
-				int serviceId = rs.getInt("service_id");
-				String path = rs.getString("path");
-				if (path == null)
-					path = "";
-				String location = rs.getString("location");
-				if (location == null)
-					location = "";
-				serviceDatasetroot = new ServiceDatasetroot(serviceId, serviceDatasetrootId, path, location);
-			}
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-				ps.close();
-//					rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
+		Hashtable<String, String> hash = getObject("service_datasetroot", serviceDatasetrootId);
+		int serviceId = Integer.parseInt(hash.get("service_id"));
+		Datavalue location = new Datavalue(hash.get("location"));
+		Datavalue path = new Datavalue(hash.get("path"));
+		serviceDatasetroot = new ServiceDatasetroot(serviceId, serviceDatasetrootId, location, path);
 		return serviceDatasetroot;
 	}
-
 	public static ArrayList<ServiceDatasetroot> getServiceDatasetrootBService(int serviceId) throws Exception{
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-		ArrayList<Integer> datasetrootIds = new ArrayList<Integer>();
 		ArrayList<ServiceDatasetroot> datasetroots = new ArrayList<ServiceDatasetroot>();
-		String select = "select service_datasetroot_id from service_datasetroot where ";
-		select+= "service_id=?";
-		try {
-			ps = pgCache.prepareStatement(select);
-			ps.setInt(1, serviceId);
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			while (rs.next()) {
-				datasetrootIds.add(rs.getInt("service_datasetroot_id"));
-			}		
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-				ps.close();
-//					rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
+		ArrayList<Integer> datasetrootIds = getObjects("service_datasetroot", "service", serviceId);
 		for(int i=0; i<datasetrootIds.size(); i++){
 			datasetroots.add(getServiceDatasetroot(datasetrootIds.get(i)));
 		}
 		return datasetroots;
 	}
-
 	public static ServiceProperty getServiceProperty(int servicePropertyId) throws Exception{
 
-		PreparedStatement ps = null;
-		ResultSet rs = null;
 		ServiceProperty serviceProperty = null;
-
-		try {
-			ps = pgCache.prepareStatement("select * from service_property where service_property_id=?");
-			ps.setInt(1, servicePropertyId);
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			while (rs.next()) {
-				int serviceId = rs.getInt("service_id");
-				String value = rs.getString("value");
-				if (value == null)
-					value = "";
-				String name = rs.getString("name");
-				if (name == null)
-					name = "";
-				serviceProperty = new ServiceProperty(serviceId, servicePropertyId, value, name);
-			}
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-				ps.close();
-//					rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
+		Hashtable<String, String> hash = getObject("service_property", servicePropertyId);
+		int serviceId = Integer.parseInt(hash.get("service_id"));
+		Datavalue name = new Datavalue(hash.get("name"));
+		Datavalue value = new Datavalue(hash.get("value"));
+		serviceProperty = new ServiceProperty(serviceId, servicePropertyId, name, value);
 		return serviceProperty;
 	}
-
 	public static ArrayList<ServiceProperty> getServicePropertyBService(int serviceId) throws Exception{
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-		ArrayList<Integer> propertyIds = new ArrayList<Integer>();
 		ArrayList<ServiceProperty> propertys = new ArrayList<ServiceProperty>();
-		String select = "select service_property_id from service_property where ";
-		select+= "service_id=?";
-		try {
-			ps = pgCache.prepareStatement(select);
-			ps.setInt(1, serviceId);
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			while (rs.next()) {
-				propertyIds.add(rs.getInt("service_property_id"));
-			}		
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-				ps.close();
-//					rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
+		ArrayList<Integer> propertyIds = getObjects("service_property", "service", serviceId);
 		for(int i=0; i<propertyIds.size(); i++){
 			propertys.add(getServiceProperty(propertyIds.get(i)));
 		}
 		return propertys;
 	}
-
 	public static ArrayList<Service> getServiceBService(int parentId) throws Exception{
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-		ArrayList<Integer> childIds = new ArrayList<Integer>();
 		ArrayList<Service> services = new ArrayList<Service>();
-		String select = "select child_id from service_service where ";
-		select+= "parent_id=?";
-		try {
-			ps = pgCache.prepareStatement(select);
-			ps.setInt(1, parentId);
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			while (rs.next()) {
-				childIds.add(rs.getInt("child_id"));
-			}		
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-				ps.close();
-//					rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
+		ArrayList<Integer> childIds = getObjects("service_service", "parent", "child", parentId);
 		for(int i=0; i<childIds.size(); i++){
 			services.add(getService(childIds.get(i)));
 		}
 		return services;
 	}
-
 	public static Tmg getTmg(int tmgId) throws Exception{
 
-		PreparedStatement ps = null;
-		ResultSet rs = null;
 		Tmg tmg = null;
-
-		try {
-			ps = pgCache.prepareStatement("select * from tmg where tmg_id=?");
-			ps.setInt(1, tmgId);
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			while (rs.next()) {
-				tmg = new Tmg(tmgId);
-			}
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-				ps.close();
-//					rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
+		Hashtable<String, String> hash = getObject("tmg", tmgId);
+		tmg = new Tmg(tmgId);
 		return tmg;
 	}
-
 	public static TmgAuthority getTmgAuthority(int tmgAuthorityId) throws Exception{
 
-		PreparedStatement ps = null;
-		ResultSet rs = null;
 		TmgAuthority tmgAuthority = null;
-
-		try {
-			ps = pgCache.prepareStatement("select * from tmg_authority where tmg_authority_id=?");
-			ps.setInt(1, tmgAuthorityId);
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			while (rs.next()) {
-				int tmgId = rs.getInt("tmg_id");
-				String authority = rs.getString("authority");
-				if (authority == null)
-					authority = "";
-				tmgAuthority = new TmgAuthority(tmgId, tmgAuthorityId, authority);
-			}
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-				ps.close();
-//					rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
+		Hashtable<String, String> hash = getObject("tmg_authority", tmgAuthorityId);
+		int tmgId = Integer.parseInt(hash.get("tmg_id"));
+		Datavalue authority = new Datavalue(hash.get("authority"));
+		tmgAuthority = new TmgAuthority(tmgId, tmgAuthorityId, authority);
 		return tmgAuthority;
 	}
-
 	public static ArrayList<TmgAuthority> getTmgAuthorityBTmg(int tmgId) throws Exception{
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-		ArrayList<Integer> authorityIds = new ArrayList<Integer>();
 		ArrayList<TmgAuthority> authoritys = new ArrayList<TmgAuthority>();
-		String select = "select tmg_authority_id from tmg_authority where ";
-		select+= "tmg_id=?";
-		try {
-			ps = pgCache.prepareStatement(select);
-			ps.setInt(1, tmgId);
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			while (rs.next()) {
-				authorityIds.add(rs.getInt("tmg_authority_id"));
-			}		
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-				ps.close();
-//					rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
+		ArrayList<Integer> authorityIds = getObjects("tmg_authority", "tmg", tmgId);
 		for(int i=0; i<authorityIds.size(); i++){
 			authoritys.add(getTmgAuthority(authorityIds.get(i)));
 		}
 		return authoritys;
 	}
-
 	public static TmgContributor getTmgContributor(int tmgContributorId) throws Exception{
 
-		PreparedStatement ps = null;
-		ResultSet rs = null;
 		TmgContributor tmgContributor = null;
-
-		try {
-			ps = pgCache.prepareStatement("select * from tmg_contributor where tmg_contributor_id=?");
-			ps.setInt(1, tmgContributorId);
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			while (rs.next()) {
-				int tmgId = rs.getInt("tmg_id");
-				String role = rs.getString("role");
-				if (role == null)
-					role = "";
-				String name = rs.getString("name");
-				if (name == null)
-					name = "";
-				tmgContributor = new TmgContributor(tmgId, tmgContributorId, role, name);
-			}
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-				ps.close();
-//					rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
+		Hashtable<String, String> hash = getObject("tmg_contributor", tmgContributorId);
+		int tmgId = Integer.parseInt(hash.get("tmg_id"));
+		Datavalue name = new Datavalue(hash.get("name"));
+		Datavalue role = new Datavalue(hash.get("role"));
+		tmgContributor = new TmgContributor(tmgId, tmgContributorId, name, role);
 		return tmgContributor;
 	}
-
 	public static ArrayList<TmgContributor> getTmgContributorBTmg(int tmgId) throws Exception{
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-		ArrayList<Integer> contributorIds = new ArrayList<Integer>();
 		ArrayList<TmgContributor> contributors = new ArrayList<TmgContributor>();
-		String select = "select tmg_contributor_id from tmg_contributor where ";
-		select+= "tmg_id=?";
-		try {
-			ps = pgCache.prepareStatement(select);
-			ps.setInt(1, tmgId);
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			while (rs.next()) {
-				contributorIds.add(rs.getInt("tmg_contributor_id"));
-			}		
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-				ps.close();
-//					rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
+		ArrayList<Integer> contributorIds = getObjects("tmg_contributor", "tmg", tmgId);
 		for(int i=0; i<contributorIds.size(); i++){
 			contributors.add(getTmgContributor(contributorIds.get(i)));
 		}
 		return contributors;
 	}
-
 	public static TmgCreator getTmgCreator(int tmgCreatorId) throws Exception{
 
-		PreparedStatement ps = null;
-		ResultSet rs = null;
 		TmgCreator tmgCreator = null;
-
-		try {
-			ps = pgCache.prepareStatement("select * from tmg_creator where tmg_creator_id=?");
-			ps.setInt(1, tmgCreatorId);
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			while (rs.next()) {
-				int tmgId = rs.getInt("tmg_id");
-				tmgCreator = new TmgCreator(tmgId, tmgCreatorId);
-			}
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-				ps.close();
-//					rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
+		Hashtable<String, String> hash = getObject("tmg_creator", tmgCreatorId);
+		int tmgId = Integer.parseInt(hash.get("tmg_id"));
+		tmgCreator = new TmgCreator(tmgId, tmgCreatorId);
 		return tmgCreator;
 	}
-
 	public static ArrayList<TmgCreator> getTmgCreatorBTmg(int tmgId) throws Exception{
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-		ArrayList<Integer> creatorIds = new ArrayList<Integer>();
 		ArrayList<TmgCreator> creators = new ArrayList<TmgCreator>();
-		String select = "select tmg_creator_id from tmg_creator where ";
-		select+= "tmg_id=?";
-		try {
-			ps = pgCache.prepareStatement(select);
-			ps.setInt(1, tmgId);
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			while (rs.next()) {
-				creatorIds.add(rs.getInt("tmg_creator_id"));
-			}		
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-				ps.close();
-//					rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
+		ArrayList<Integer> creatorIds = getObjects("tmg_creator", "tmg", tmgId);
 		for(int i=0; i<creatorIds.size(); i++){
 			creators.add(getTmgCreator(creatorIds.get(i)));
 		}
 		return creators;
 	}
-
 	public static TmgCreatorContact getTmgCreatorContact(int tmgCreatorContactId) throws Exception{
 
-		PreparedStatement ps = null;
-		ResultSet rs = null;
 		TmgCreatorContact tmgCreatorContact = null;
-
-		try {
-			ps = pgCache.prepareStatement("select * from tmg_creator_contact where tmg_creator_contact_id=?");
-			ps.setInt(1, tmgCreatorContactId);
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			while (rs.next()) {
-				int tmgCreatorId = rs.getInt("tmg_creator_id");
-				String email = rs.getString("email");
-				if (email == null)
-					email = "";
-				String url = rs.getString("url");
-				if (url == null)
-					url = "";
-				tmgCreatorContact = new TmgCreatorContact(tmgCreatorId, tmgCreatorContactId, email, url);
-			}
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-				ps.close();
-//					rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
+		Hashtable<String, String> hash = getObject("tmg_creator_contact", tmgCreatorContactId);
+		int tmgCreatorId = Integer.parseInt(hash.get("tmg_creator_id"));
+		Datavalue email = new Datavalue(hash.get("email"));
+		Datavalue url = new Datavalue(hash.get("url"));
+		tmgCreatorContact = new TmgCreatorContact(tmgCreatorId, tmgCreatorContactId, email, url);
 		return tmgCreatorContact;
 	}
-
 	public static ArrayList<TmgCreatorContact> getTmgCreatorContactBTmgCreator(int tmgCreatorId) throws Exception{
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-		ArrayList<Integer> contactIds = new ArrayList<Integer>();
 		ArrayList<TmgCreatorContact> contacts = new ArrayList<TmgCreatorContact>();
-		String select = "select tmg_creator_contact_id from tmg_creator_contact where ";
-		select+= "tmg_creator_id=?";
-		try {
-			ps = pgCache.prepareStatement(select);
-			ps.setInt(1, tmgCreatorId);
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			while (rs.next()) {
-				contactIds.add(rs.getInt("tmg_creator_contact_id"));
-			}		
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-				ps.close();
-//					rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
+		ArrayList<Integer> contactIds = getObjects("tmg_creator_contact", "tmg_creator", tmgCreatorId);
 		for(int i=0; i<contactIds.size(); i++){
 			contacts.add(getTmgCreatorContact(contactIds.get(i)));
 		}
 		return contacts;
 	}
-
 	public static TmgCreatorName getTmgCreatorName(int tmgCreatorNameId) throws Exception{
 
-		PreparedStatement ps = null;
-		ResultSet rs = null;
 		TmgCreatorName tmgCreatorName = null;
-
-		try {
-			ps = pgCache.prepareStatement("select * from tmg_creator_name where tmg_creator_name_id=?");
-			ps.setInt(1, tmgCreatorNameId);
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			while (rs.next()) {
-				int tmgCreatorId = rs.getInt("tmg_creator_id");
-				String value = rs.getString("value");
-				if (value == null)
-					value = "";
-				String vocabulary = rs.getString("vocabulary");
-				if (vocabulary == null)
-					vocabulary = "";
-				tmgCreatorName = new TmgCreatorName(tmgCreatorId, tmgCreatorNameId, value, vocabulary);
-			}
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-				ps.close();
-//					rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
+		Hashtable<String, String> hash = getObject("tmg_creator_name", tmgCreatorNameId);
+		int tmgCreatorId = Integer.parseInt(hash.get("tmg_creator_id"));
+		Datavalue value = new Datavalue(hash.get("value"));
+		Datavalue vocabulary = new Datavalue(hash.get("vocabulary"));
+		tmgCreatorName = new TmgCreatorName(tmgCreatorId, tmgCreatorNameId, value, vocabulary);
 		return tmgCreatorName;
 	}
-
 	public static ArrayList<TmgCreatorName> getTmgCreatorNameBTmgCreator(int tmgCreatorId) throws Exception{
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-		ArrayList<Integer> nameIds = new ArrayList<Integer>();
 		ArrayList<TmgCreatorName> names = new ArrayList<TmgCreatorName>();
-		String select = "select tmg_creator_name_id from tmg_creator_name where ";
-		select+= "tmg_creator_id=?";
-		try {
-			ps = pgCache.prepareStatement(select);
-			ps.setInt(1, tmgCreatorId);
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			while (rs.next()) {
-				nameIds.add(rs.getInt("tmg_creator_name_id"));
-			}		
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-				ps.close();
-//					rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
+		ArrayList<Integer> nameIds = getObjects("tmg_creator_name", "tmg_creator", tmgCreatorId);
 		for(int i=0; i<nameIds.size(); i++){
 			names.add(getTmgCreatorName(nameIds.get(i)));
 		}
 		return names;
 	}
-
 	public static TmgDataformat getTmgDataformat(int tmgDataformatId) throws Exception{
 
-		PreparedStatement ps = null;
-		ResultSet rs = null;
 		TmgDataformat tmgDataformat = null;
-
-		try {
-			ps = pgCache.prepareStatement("select * from tmg_dataformat where tmg_dataformat_id=?");
-			ps.setInt(1, tmgDataformatId);
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			while (rs.next()) {
-				int tmgId = rs.getInt("tmg_id");
-				String dataformat = rs.getString("dataformat");
-				if (dataformat == null)
-					dataformat = rs.getString("dataformat_nonstandard");
-				if (dataformat == null)
-					dataformat = "";
-				tmgDataformat = new TmgDataformat(tmgId, tmgDataformatId, dataformat);
-			}
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-				ps.close();
-//					rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
+		Hashtable<String, String> hash = getObject("tmg_dataformat", tmgDataformatId);
+		int tmgId = Integer.parseInt(hash.get("tmg_id"));
+		Datavalue dataformat = new Datavalue(hash.get("dataformat"));
+		if (dataformat.isNull())
+			dataformat = new Datavalue(hash.get("dataformat_nonstandard"));
+		tmgDataformat = new TmgDataformat(tmgId, tmgDataformatId, dataformat);
 		return tmgDataformat;
 	}
-
 	public static ArrayList<TmgDataformat> getTmgDataformatBTmg(int tmgId) throws Exception{
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-		ArrayList<Integer> dataformatIds = new ArrayList<Integer>();
 		ArrayList<TmgDataformat> dataformats = new ArrayList<TmgDataformat>();
-		String select = "select tmg_dataformat_id from tmg_dataformat where ";
-		select+= "tmg_id=?";
-		try {
-			ps = pgCache.prepareStatement(select);
-			ps.setInt(1, tmgId);
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			while (rs.next()) {
-				dataformatIds.add(rs.getInt("tmg_dataformat_id"));
-			}		
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-				ps.close();
-//					rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
+		ArrayList<Integer> dataformatIds = getObjects("tmg_dataformat", "tmg", tmgId);
 		for(int i=0; i<dataformatIds.size(); i++){
 			dataformats.add(getTmgDataformat(dataformatIds.get(i)));
 		}
 		return dataformats;
 	}
-
 	public static TmgDatasize getTmgDatasize(int tmgDatasizeId) throws Exception{
 
-		PreparedStatement ps = null;
-		ResultSet rs = null;
 		TmgDatasize tmgDatasize = null;
-
-		try {
-			ps = pgCache.prepareStatement("select * from tmg_datasize where tmg_datasize_id=?");
-			ps.setInt(1, tmgDatasizeId);
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			while (rs.next()) {
-				int tmgId = rs.getInt("tmg_id");
-				String value = rs.getString("value");
-				if (value == null)
-					value = "";
-				String units = rs.getString("units");
-				if (units == null)
-					units = rs.getString("units_nonstandard");
-				if (units == null)
-					units = "";
-				tmgDatasize = new TmgDatasize(tmgId, tmgDatasizeId, value, units);
-			}
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-				ps.close();
-//					rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
+		Hashtable<String, String> hash = getObject("tmg_datasize", tmgDatasizeId);
+		int tmgId = Integer.parseInt(hash.get("tmg_id"));
+		Datavalue value = new Datavalue(hash.get("value"));
+		Datavalue units = new Datavalue(hash.get("units"));
+		if (units.isNull())
+			units = new Datavalue(hash.get("units_nonstandard"));
+		tmgDatasize = new TmgDatasize(tmgId, tmgDatasizeId, value, units);
 		return tmgDatasize;
 	}
-
 	public static ArrayList<TmgDatasize> getTmgDatasizeBTmg(int tmgId) throws Exception{
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-		ArrayList<Integer> datasizeIds = new ArrayList<Integer>();
 		ArrayList<TmgDatasize> datasizes = new ArrayList<TmgDatasize>();
-		String select = "select tmg_datasize_id from tmg_datasize where ";
-		select+= "tmg_id=?";
-		try {
-			ps = pgCache.prepareStatement(select);
-			ps.setInt(1, tmgId);
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			while (rs.next()) {
-				datasizeIds.add(rs.getInt("tmg_datasize_id"));
-			}		
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-				ps.close();
-//					rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
+		ArrayList<Integer> datasizeIds = getObjects("tmg_datasize", "tmg", tmgId);
 		for(int i=0; i<datasizeIds.size(); i++){
 			datasizes.add(getTmgDatasize(datasizeIds.get(i)));
 		}
 		return datasizes;
 	}
-
 	public static TmgDatatype getTmgDatatype(int tmgDatatypeId) throws Exception{
 
-		PreparedStatement ps = null;
-		ResultSet rs = null;
 		TmgDatatype tmgDatatype = null;
-
-		try {
-			ps = pgCache.prepareStatement("select * from tmg_datatype where tmg_datatype_id=?");
-			ps.setInt(1, tmgDatatypeId);
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			while (rs.next()) {
-				int tmgId = rs.getInt("tmg_id");
-				String datatype = rs.getString("datatype");
-				if (datatype == null)
-					datatype = rs.getString("datatype_nonstandard");
-				if (datatype == null)
-					datatype = "";
-				tmgDatatype = new TmgDatatype(tmgId, tmgDatatypeId, datatype);
-			}
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-				ps.close();
-//					rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
+		Hashtable<String, String> hash = getObject("tmg_datatype", tmgDatatypeId);
+		int tmgId = Integer.parseInt(hash.get("tmg_id"));
+		Datavalue datatype = new Datavalue(hash.get("datatype"));
+		if (datatype.isNull())
+			datatype = new Datavalue(hash.get("datatype_nonstandard"));
+		tmgDatatype = new TmgDatatype(tmgId, tmgDatatypeId, datatype);
 		return tmgDatatype;
 	}
-
 	public static ArrayList<TmgDatatype> getTmgDatatypeBTmg(int tmgId) throws Exception{
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-		ArrayList<Integer> datatypeIds = new ArrayList<Integer>();
 		ArrayList<TmgDatatype> datatypes = new ArrayList<TmgDatatype>();
-		String select = "select tmg_datatype_id from tmg_datatype where ";
-		select+= "tmg_id=?";
-		try {
-			ps = pgCache.prepareStatement(select);
-			ps.setInt(1, tmgId);
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			while (rs.next()) {
-				datatypeIds.add(rs.getInt("tmg_datatype_id"));
-			}		
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-				ps.close();
-//					rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
+		ArrayList<Integer> datatypeIds = getObjects("tmg_datatype", "tmg", tmgId);
 		for(int i=0; i<datatypeIds.size(); i++){
 			datatypes.add(getTmgDatatype(datatypeIds.get(i)));
 		}
 		return datatypes;
 	}
-
 	public static TmgDate getTmgDate(int tmgDateId) throws Exception{
 
-		PreparedStatement ps = null;
-		ResultSet rs = null;
 		TmgDate tmgDate = null;
-
-		try {
-			ps = pgCache.prepareStatement("select * from tmg_date where tmg_date_id=?");
-			ps.setInt(1, tmgDateId);
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			while (rs.next()) {
-				int tmgId = rs.getInt("tmg_id");
-				String format = rs.getString("format");
-				if (format == null)
-					format = "";
-				String value = rs.getString("value");
-				if (value == null)
-					value = "";
-				String dateenum = rs.getString("dateenum");
-				if (dateenum == null)
-					dateenum = rs.getString("dateenum_nonstandard");
-				if (dateenum == null)
-					dateenum = "";
-				tmgDate = new TmgDate(tmgId, tmgDateId, format, value, dateenum);
-			}
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-				ps.close();
-//					rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
+		Hashtable<String, String> hash = getObject("tmg_date", tmgDateId);
+		int tmgId = Integer.parseInt(hash.get("tmg_id"));
+		Datavalue format = new Datavalue(hash.get("format"));
+		Datavalue value = new Datavalue(hash.get("value"));
+		Datavalue dateenum = new Datavalue(hash.get("dateenum"));
+		if (dateenum.isNull())
+			dateenum = new Datavalue(hash.get("dateenum_nonstandard"));
+		tmgDate = new TmgDate(tmgId, tmgDateId, format, value, dateenum);
 		return tmgDate;
 	}
-
 	public static ArrayList<TmgDate> getTmgDateBTmg(int tmgId) throws Exception{
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-		ArrayList<Integer> dateIds = new ArrayList<Integer>();
 		ArrayList<TmgDate> dates = new ArrayList<TmgDate>();
-		String select = "select tmg_date_id from tmg_date where ";
-		select+= "tmg_id=?";
-		try {
-			ps = pgCache.prepareStatement(select);
-			ps.setInt(1, tmgId);
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			while (rs.next()) {
-				dateIds.add(rs.getInt("tmg_date_id"));
-			}		
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-				ps.close();
-//					rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
+		ArrayList<Integer> dateIds = getObjects("tmg_date", "tmg", tmgId);
 		for(int i=0; i<dateIds.size(); i++){
 			dates.add(getTmgDate(dateIds.get(i)));
 		}
 		return dates;
 	}
-
 	public static TmgDocumentation getTmgDocumentation(int tmgDocumentationId) throws Exception{
 
-		PreparedStatement ps = null;
-		ResultSet rs = null;
 		TmgDocumentation tmgDocumentation = null;
-
-		try {
-			ps = pgCache.prepareStatement("select * from tmg_documentation where tmg_documentation_id=?");
-			ps.setInt(1, tmgDocumentationId);
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			while (rs.next()) {
-				int tmgId = rs.getInt("tmg_id");
-				String value = rs.getString("value");
-				if (value == null)
-					value = "";
-				String documentationenum = rs.getString("documentationenum");
-				if (documentationenum == null)
-					documentationenum = rs.getString("documentationenum_nonstandard");
-				if (documentationenum == null)
-					documentationenum = "";
-				tmgDocumentation = new TmgDocumentation(tmgId, tmgDocumentationId, value, documentationenum);
-			}
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-				ps.close();
-//					rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
+		Hashtable<String, String> hash = getObject("tmg_documentation", tmgDocumentationId);
+		int tmgId = Integer.parseInt(hash.get("tmg_id"));
+		Datavalue value = new Datavalue(hash.get("value"));
+		Datavalue documentationenum = new Datavalue(hash.get("documentationenum"));
+		if (documentationenum.isNull())
+			documentationenum = new Datavalue(hash.get("documentationenum_nonstandard"));
+		tmgDocumentation = new TmgDocumentation(tmgId, tmgDocumentationId, value, documentationenum);
 		return tmgDocumentation;
 	}
-
 	public static ArrayList<TmgDocumentation> getTmgDocumentationBTmg(int tmgId) throws Exception{
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-		ArrayList<Integer> documentationIds = new ArrayList<Integer>();
 		ArrayList<TmgDocumentation> documentations = new ArrayList<TmgDocumentation>();
-		String select = "select tmg_documentation_id from tmg_documentation where ";
-		select+= "tmg_id=?";
-		try {
-			ps = pgCache.prepareStatement(select);
-			ps.setInt(1, tmgId);
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			while (rs.next()) {
-				documentationIds.add(rs.getInt("tmg_documentation_id"));
-			}		
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-				ps.close();
-//					rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
+		ArrayList<Integer> documentationIds = getObjects("tmg_documentation", "tmg", tmgId);
 		for(int i=0; i<documentationIds.size(); i++){
 			documentations.add(getTmgDocumentation(documentationIds.get(i)));
 		}
 		return documentations;
 	}
-
 	public static TmgDocumentationNamespace getTmgDocumentationNamespace(int tmgDocumentationNamespaceId) throws Exception{
 
-		PreparedStatement ps = null;
-		ResultSet rs = null;
 		TmgDocumentationNamespace tmgDocumentationNamespace = null;
-
-		try {
-			ps = pgCache.prepareStatement("select * from tmg_documentation_namespace where tmg_documentation_namespace_id=?");
-			ps.setInt(1, tmgDocumentationNamespaceId);
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			while (rs.next()) {
-				int tmgDocumentationId = rs.getInt("tmg_documentation_id");
-				String namespace = rs.getString("namespace");
-				if (namespace == null)
-					namespace = "";
-				tmgDocumentationNamespace = new TmgDocumentationNamespace(tmgDocumentationId, tmgDocumentationNamespaceId, namespace);
-			}
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-				ps.close();
-//					rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
+		Hashtable<String, String> hash = getObject("tmg_documentation_namespace", tmgDocumentationNamespaceId);
+		int tmgDocumentationId = Integer.parseInt(hash.get("tmg_documentation_id"));
+		Datavalue namespace = new Datavalue(hash.get("namespace"));
+		tmgDocumentationNamespace = new TmgDocumentationNamespace(tmgDocumentationId, tmgDocumentationNamespaceId, namespace);
 		return tmgDocumentationNamespace;
 	}
-
 	public static ArrayList<TmgDocumentationNamespace> getTmgDocumentationNamespaceBTmgDocumentation(int tmgDocumentationId) throws Exception{
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-		ArrayList<Integer> namespaceIds = new ArrayList<Integer>();
 		ArrayList<TmgDocumentationNamespace> namespaces = new ArrayList<TmgDocumentationNamespace>();
-		String select = "select tmg_documentation_namespace_id from tmg_documentation_namespace where ";
-		select+= "tmg_documentation_id=?";
-		try {
-			ps = pgCache.prepareStatement(select);
-			ps.setInt(1, tmgDocumentationId);
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			while (rs.next()) {
-				namespaceIds.add(rs.getInt("tmg_documentation_namespace_id"));
-			}		
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-				ps.close();
-//					rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
+		ArrayList<Integer> namespaceIds = getObjects("tmg_documentation_namespace", "tmg_documentation", tmgDocumentationId);
 		for(int i=0; i<namespaceIds.size(); i++){
 			namespaces.add(getTmgDocumentationNamespace(namespaceIds.get(i)));
 		}
 		return namespaces;
 	}
-
 	public static TmgDocumentationXlink getTmgDocumentationXlink(int tmgDocumentationXlinkId) throws Exception{
 
-		PreparedStatement ps = null;
-		ResultSet rs = null;
 		TmgDocumentationXlink tmgDocumentationXlink = null;
-
-		try {
-			ps = pgCache.prepareStatement("select * from tmg_documentation_xlink where tmg_documentation_xlink_id=?");
-			ps.setInt(1, tmgDocumentationXlinkId);
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			while (rs.next()) {
-				int tmgDocumentationId = rs.getInt("tmg_documentation_id");
-				String value = rs.getString("value");
-				if (value == null)
-					value = "";
-				String xlink = rs.getString("xlink");
-				if (xlink == null)
-					xlink = rs.getString("xlink_nonstandard");
-				if (xlink == null)
-					xlink = "";
-				tmgDocumentationXlink = new TmgDocumentationXlink(tmgDocumentationId, tmgDocumentationXlinkId, value, xlink);
-			}
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-				ps.close();
-//					rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
+		Hashtable<String, String> hash = getObject("tmg_documentation_xlink", tmgDocumentationXlinkId);
+		int tmgDocumentationId = Integer.parseInt(hash.get("tmg_documentation_id"));
+		Datavalue value = new Datavalue(hash.get("value"));
+		Datavalue xlink = new Datavalue(hash.get("xlink"));
+		if (xlink.isNull())
+			xlink = new Datavalue(hash.get("xlink_nonstandard"));
+		tmgDocumentationXlink = new TmgDocumentationXlink(tmgDocumentationId, tmgDocumentationXlinkId, value, xlink);
 		return tmgDocumentationXlink;
 	}
-
 	public static ArrayList<TmgDocumentationXlink> getTmgDocumentationXlinkBTmgDocumentation(int tmgDocumentationId) throws Exception{
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-		ArrayList<Integer> xlinkIds = new ArrayList<Integer>();
 		ArrayList<TmgDocumentationXlink> xlinks = new ArrayList<TmgDocumentationXlink>();
-		String select = "select tmg_documentation_xlink_id from tmg_documentation_xlink where ";
-		select+= "tmg_documentation_id=?";
-		try {
-			ps = pgCache.prepareStatement(select);
-			ps.setInt(1, tmgDocumentationId);
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			while (rs.next()) {
-				xlinkIds.add(rs.getInt("tmg_documentation_xlink_id"));
-			}		
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-				ps.close();
-//					rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
+		ArrayList<Integer> xlinkIds = getObjects("tmg_documentation_xlink", "tmg_documentation", tmgDocumentationId);
 		for(int i=0; i<xlinkIds.size(); i++){
 			xlinks.add(getTmgDocumentationXlink(xlinkIds.get(i)));
 		}
 		return xlinks;
 	}
-
 	public static TmgGeospatialcoverage getTmgGeospatialcoverage(int tmgGeospatialcoverageId) throws Exception{
 
-		PreparedStatement ps = null;
-		ResultSet rs = null;
 		TmgGeospatialcoverage tmgGeospatialcoverage = null;
-
-		try {
-			ps = pgCache.prepareStatement("select * from tmg_geospatialcoverage where tmg_geospatialcoverage_id=?");
-			ps.setInt(1, tmgGeospatialcoverageId);
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			while (rs.next()) {
-				int tmgId = rs.getInt("tmg_id");
-				String upordown = rs.getString("upordown");
-				if (upordown == null)
-					upordown = rs.getString("upordown_nonstandard");
-				if (upordown == null)
-					upordown = "";
-				tmgGeospatialcoverage = new TmgGeospatialcoverage(tmgId, tmgGeospatialcoverageId, upordown);
-			}
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-				ps.close();
-//					rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
+		Hashtable<String, String> hash = getObject("tmg_geospatialcoverage", tmgGeospatialcoverageId);
+		int tmgId = Integer.parseInt(hash.get("tmg_id"));
+		Datavalue upordown = new Datavalue(hash.get("upordown"));
+		if (upordown.isNull())
+			upordown = new Datavalue(hash.get("upordown_nonstandard"));
+		tmgGeospatialcoverage = new TmgGeospatialcoverage(tmgId, tmgGeospatialcoverageId, upordown);
 		return tmgGeospatialcoverage;
 	}
-
 	public static ArrayList<TmgGeospatialcoverage> getTmgGeospatialcoverageBTmg(int tmgId) throws Exception{
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-		ArrayList<Integer> geospatialcoverageIds = new ArrayList<Integer>();
 		ArrayList<TmgGeospatialcoverage> geospatialcoverages = new ArrayList<TmgGeospatialcoverage>();
-		String select = "select tmg_geospatialcoverage_id from tmg_geospatialcoverage where ";
-		select+= "tmg_id=?";
-		try {
-			ps = pgCache.prepareStatement(select);
-			ps.setInt(1, tmgId);
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			while (rs.next()) {
-				geospatialcoverageIds.add(rs.getInt("tmg_geospatialcoverage_id"));
-			}		
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-				ps.close();
-//					rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
+		ArrayList<Integer> geospatialcoverageIds = getObjects("tmg_geospatialcoverage", "tmg", tmgId);
 		for(int i=0; i<geospatialcoverageIds.size(); i++){
 			geospatialcoverages.add(getTmgGeospatialcoverage(geospatialcoverageIds.get(i)));
 		}
 		return geospatialcoverages;
 	}
-
 	public static TmgGeospatialcoverageEastwest getTmgGeospatialcoverageEastwest(int tmgGeospatialcoverageEastwestId) throws Exception{
 
-		PreparedStatement ps = null;
-		ResultSet rs = null;
 		TmgGeospatialcoverageEastwest tmgGeospatialcoverageEastwest = null;
-
-		try {
-			ps = pgCache.prepareStatement("select * from tmg_geospatialcoverage_eastwest where tmg_geospatialcoverage_eastwest_id=?");
-			ps.setInt(1, tmgGeospatialcoverageEastwestId);
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			while (rs.next()) {
-				int tmgGeospatialcoverageId = rs.getInt("tmg_geospatialcoverage_id");
-				String size = rs.getString("size");
-				if (size == null)
-					size = "";
-				String units = rs.getString("units");
-				if (units == null)
-					units = "";
-				String start = rs.getString("start");
-				if (start == null)
-					start = "";
-				String resolution = rs.getString("resolution");
-				if (resolution == null)
-					resolution = "";
-				tmgGeospatialcoverageEastwest = new TmgGeospatialcoverageEastwest(tmgGeospatialcoverageId, tmgGeospatialcoverageEastwestId, size, units, start, resolution);
-			}
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-				ps.close();
-//					rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
+		Hashtable<String, String> hash = getObject("tmg_geospatialcoverage_eastwest", tmgGeospatialcoverageEastwestId);
+		int tmgGeospatialcoverageId = Integer.parseInt(hash.get("tmg_geospatialcoverage_id"));
+		Datavalue resolution = new Datavalue(hash.get("resolution"));
+		Datavalue size = new Datavalue(hash.get("size"));
+		Datavalue start = new Datavalue(hash.get("start"));
+		Datavalue units = new Datavalue(hash.get("units"));
+		tmgGeospatialcoverageEastwest = new TmgGeospatialcoverageEastwest(tmgGeospatialcoverageId, tmgGeospatialcoverageEastwestId, resolution, size, start, units);
 		return tmgGeospatialcoverageEastwest;
 	}
-
 	public static ArrayList<TmgGeospatialcoverageEastwest> getTmgGeospatialcoverageEastwestBTmgGeospatialcoverage(int tmgGeospatialcoverageId) throws Exception{
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-		ArrayList<Integer> eastwestIds = new ArrayList<Integer>();
 		ArrayList<TmgGeospatialcoverageEastwest> eastwests = new ArrayList<TmgGeospatialcoverageEastwest>();
-		String select = "select tmg_geospatialcoverage_eastwest_id from tmg_geospatialcoverage_eastwest where ";
-		select+= "tmg_geospatialcoverage_id=?";
-		try {
-			ps = pgCache.prepareStatement(select);
-			ps.setInt(1, tmgGeospatialcoverageId);
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			while (rs.next()) {
-				eastwestIds.add(rs.getInt("tmg_geospatialcoverage_eastwest_id"));
-			}		
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-				ps.close();
-//					rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
+		ArrayList<Integer> eastwestIds = getObjects("tmg_geospatialcoverage_eastwest", "tmg_geospatialcoverage", tmgGeospatialcoverageId);
 		for(int i=0; i<eastwestIds.size(); i++){
 			eastwests.add(getTmgGeospatialcoverageEastwest(eastwestIds.get(i)));
 		}
 		return eastwests;
 	}
-
 	public static TmgGeospatialcoverageName getTmgGeospatialcoverageName(int tmgGeospatialcoverageNameId) throws Exception{
 
-		PreparedStatement ps = null;
-		ResultSet rs = null;
 		TmgGeospatialcoverageName tmgGeospatialcoverageName = null;
-
-		try {
-			ps = pgCache.prepareStatement("select * from tmg_geospatialcoverage_name where tmg_geospatialcoverage_name_id=?");
-			ps.setInt(1, tmgGeospatialcoverageNameId);
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			while (rs.next()) {
-				int tmgGeospatialcoverageId = rs.getInt("tmg_geospatialcoverage_id");
-				String vocabulary = rs.getString("vocabulary");
-				if (vocabulary == null)
-					vocabulary = "";
-				String value = rs.getString("value");
-				if (value == null)
-					value = "";
-				tmgGeospatialcoverageName = new TmgGeospatialcoverageName(tmgGeospatialcoverageId, tmgGeospatialcoverageNameId, vocabulary, value);
-			}
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-				ps.close();
-//					rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
+		Hashtable<String, String> hash = getObject("tmg_geospatialcoverage_name", tmgGeospatialcoverageNameId);
+		int tmgGeospatialcoverageId = Integer.parseInt(hash.get("tmg_geospatialcoverage_id"));
+		Datavalue value = new Datavalue(hash.get("value"));
+		Datavalue vocabulary = new Datavalue(hash.get("vocabulary"));
+		tmgGeospatialcoverageName = new TmgGeospatialcoverageName(tmgGeospatialcoverageId, tmgGeospatialcoverageNameId, value, vocabulary);
 		return tmgGeospatialcoverageName;
 	}
-
 	public static ArrayList<TmgGeospatialcoverageName> getTmgGeospatialcoverageNameBTmgGeospatialcoverage(int tmgGeospatialcoverageId) throws Exception{
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-		ArrayList<Integer> nameIds = new ArrayList<Integer>();
 		ArrayList<TmgGeospatialcoverageName> names = new ArrayList<TmgGeospatialcoverageName>();
-		String select = "select tmg_geospatialcoverage_name_id from tmg_geospatialcoverage_name where ";
-		select+= "tmg_geospatialcoverage_id=?";
-		try {
-			ps = pgCache.prepareStatement(select);
-			ps.setInt(1, tmgGeospatialcoverageId);
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			while (rs.next()) {
-				nameIds.add(rs.getInt("tmg_geospatialcoverage_name_id"));
-			}		
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-				ps.close();
-//					rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
+		ArrayList<Integer> nameIds = getObjects("tmg_geospatialcoverage_name", "tmg_geospatialcoverage", tmgGeospatialcoverageId);
 		for(int i=0; i<nameIds.size(); i++){
 			names.add(getTmgGeospatialcoverageName(nameIds.get(i)));
 		}
 		return names;
 	}
-
 	public static TmgGeospatialcoverageNorthsouth getTmgGeospatialcoverageNorthsouth(int tmgGeospatialcoverageNorthsouthId) throws Exception{
 
-		PreparedStatement ps = null;
-		ResultSet rs = null;
 		TmgGeospatialcoverageNorthsouth tmgGeospatialcoverageNorthsouth = null;
-
-		try {
-			ps = pgCache.prepareStatement("select * from tmg_geospatialcoverage_northsouth where tmg_geospatialcoverage_northsouth_id=?");
-			ps.setInt(1, tmgGeospatialcoverageNorthsouthId);
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			while (rs.next()) {
-				int tmgGeospatialcoverageId = rs.getInt("tmg_geospatialcoverage_id");
-				String size = rs.getString("size");
-				if (size == null)
-					size = "";
-				String resolution = rs.getString("resolution");
-				if (resolution == null)
-					resolution = "";
-				String start = rs.getString("start");
-				if (start == null)
-					start = "";
-				String units = rs.getString("units");
-				if (units == null)
-					units = "";
-				tmgGeospatialcoverageNorthsouth = new TmgGeospatialcoverageNorthsouth(tmgGeospatialcoverageId, tmgGeospatialcoverageNorthsouthId, size, resolution, start, units);
-			}
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-				ps.close();
-//					rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
+		Hashtable<String, String> hash = getObject("tmg_geospatialcoverage_northsouth", tmgGeospatialcoverageNorthsouthId);
+		int tmgGeospatialcoverageId = Integer.parseInt(hash.get("tmg_geospatialcoverage_id"));
+		Datavalue resolution = new Datavalue(hash.get("resolution"));
+		Datavalue size = new Datavalue(hash.get("size"));
+		Datavalue start = new Datavalue(hash.get("start"));
+		Datavalue units = new Datavalue(hash.get("units"));
+		tmgGeospatialcoverageNorthsouth = new TmgGeospatialcoverageNorthsouth(tmgGeospatialcoverageId, tmgGeospatialcoverageNorthsouthId, resolution, size, start, units);
 		return tmgGeospatialcoverageNorthsouth;
 	}
-
 	public static ArrayList<TmgGeospatialcoverageNorthsouth> getTmgGeospatialcoverageNorthsouthBTmgGeospatialcoverage(int tmgGeospatialcoverageId) throws Exception{
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-		ArrayList<Integer> northsouthIds = new ArrayList<Integer>();
 		ArrayList<TmgGeospatialcoverageNorthsouth> northsouths = new ArrayList<TmgGeospatialcoverageNorthsouth>();
-		String select = "select tmg_geospatialcoverage_northsouth_id from tmg_geospatialcoverage_northsouth where ";
-		select+= "tmg_geospatialcoverage_id=?";
-		try {
-			ps = pgCache.prepareStatement(select);
-			ps.setInt(1, tmgGeospatialcoverageId);
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			while (rs.next()) {
-				northsouthIds.add(rs.getInt("tmg_geospatialcoverage_northsouth_id"));
-			}		
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-				ps.close();
-//					rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
+		ArrayList<Integer> northsouthIds = getObjects("tmg_geospatialcoverage_northsouth", "tmg_geospatialcoverage", tmgGeospatialcoverageId);
 		for(int i=0; i<northsouthIds.size(); i++){
 			northsouths.add(getTmgGeospatialcoverageNorthsouth(northsouthIds.get(i)));
 		}
 		return northsouths;
 	}
-
 	public static TmgGeospatialcoverageUpdown getTmgGeospatialcoverageUpdown(int tmgGeospatialcoverageUpdownId) throws Exception{
 
-		PreparedStatement ps = null;
-		ResultSet rs = null;
 		TmgGeospatialcoverageUpdown tmgGeospatialcoverageUpdown = null;
-
-		try {
-			ps = pgCache.prepareStatement("select * from tmg_geospatialcoverage_updown where tmg_geospatialcoverage_updown_id=?");
-			ps.setInt(1, tmgGeospatialcoverageUpdownId);
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			while (rs.next()) {
-				int tmgGeospatialcoverageId = rs.getInt("tmg_geospatialcoverage_id");
-				String start = rs.getString("start");
-				if (start == null)
-					start = "";
-				String resolution = rs.getString("resolution");
-				if (resolution == null)
-					resolution = "";
-				String size = rs.getString("size");
-				if (size == null)
-					size = "";
-				String units = rs.getString("units");
-				if (units == null)
-					units = "";
-				tmgGeospatialcoverageUpdown = new TmgGeospatialcoverageUpdown(tmgGeospatialcoverageId, tmgGeospatialcoverageUpdownId, start, resolution, size, units);
-			}
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-				ps.close();
-//					rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
+		Hashtable<String, String> hash = getObject("tmg_geospatialcoverage_updown", tmgGeospatialcoverageUpdownId);
+		int tmgGeospatialcoverageId = Integer.parseInt(hash.get("tmg_geospatialcoverage_id"));
+		Datavalue resolution = new Datavalue(hash.get("resolution"));
+		Datavalue size = new Datavalue(hash.get("size"));
+		Datavalue start = new Datavalue(hash.get("start"));
+		Datavalue units = new Datavalue(hash.get("units"));
+		tmgGeospatialcoverageUpdown = new TmgGeospatialcoverageUpdown(tmgGeospatialcoverageId, tmgGeospatialcoverageUpdownId, resolution, size, start, units);
 		return tmgGeospatialcoverageUpdown;
 	}
-
 	public static ArrayList<TmgGeospatialcoverageUpdown> getTmgGeospatialcoverageUpdownBTmgGeospatialcoverage(int tmgGeospatialcoverageId) throws Exception{
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-		ArrayList<Integer> updownIds = new ArrayList<Integer>();
 		ArrayList<TmgGeospatialcoverageUpdown> updowns = new ArrayList<TmgGeospatialcoverageUpdown>();
-		String select = "select tmg_geospatialcoverage_updown_id from tmg_geospatialcoverage_updown where ";
-		select+= "tmg_geospatialcoverage_id=?";
-		try {
-			ps = pgCache.prepareStatement(select);
-			ps.setInt(1, tmgGeospatialcoverageId);
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			while (rs.next()) {
-				updownIds.add(rs.getInt("tmg_geospatialcoverage_updown_id"));
-			}		
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-				ps.close();
-//					rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
+		ArrayList<Integer> updownIds = getObjects("tmg_geospatialcoverage_updown", "tmg_geospatialcoverage", tmgGeospatialcoverageId);
 		for(int i=0; i<updownIds.size(); i++){
 			updowns.add(getTmgGeospatialcoverageUpdown(updownIds.get(i)));
 		}
 		return updowns;
 	}
-
 	public static TmgKeyword getTmgKeyword(int tmgKeywordId) throws Exception{
 
-		PreparedStatement ps = null;
-		ResultSet rs = null;
 		TmgKeyword tmgKeyword = null;
-
-		try {
-			ps = pgCache.prepareStatement("select * from tmg_keyword where tmg_keyword_id=?");
-			ps.setInt(1, tmgKeywordId);
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			while (rs.next()) {
-				int tmgId = rs.getInt("tmg_id");
-				String value = rs.getString("value");
-				if (value == null)
-					value = "";
-				String vocabulary = rs.getString("vocabulary");
-				if (vocabulary == null)
-					vocabulary = "";
-				tmgKeyword = new TmgKeyword(tmgId, tmgKeywordId, value, vocabulary);
-			}
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-				ps.close();
-//					rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
+		Hashtable<String, String> hash = getObject("tmg_keyword", tmgKeywordId);
+		int tmgId = Integer.parseInt(hash.get("tmg_id"));
+		Datavalue value = new Datavalue(hash.get("value"));
+		Datavalue vocabulary = new Datavalue(hash.get("vocabulary"));
+		tmgKeyword = new TmgKeyword(tmgId, tmgKeywordId, value, vocabulary);
 		return tmgKeyword;
 	}
-
 	public static ArrayList<TmgKeyword> getTmgKeywordBTmg(int tmgId) throws Exception{
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-		ArrayList<Integer> keywordIds = new ArrayList<Integer>();
 		ArrayList<TmgKeyword> keywords = new ArrayList<TmgKeyword>();
-		String select = "select tmg_keyword_id from tmg_keyword where ";
-		select+= "tmg_id=?";
-		try {
-			ps = pgCache.prepareStatement(select);
-			ps.setInt(1, tmgId);
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			while (rs.next()) {
-				keywordIds.add(rs.getInt("tmg_keyword_id"));
-			}		
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-				ps.close();
-//					rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
+		ArrayList<Integer> keywordIds = getObjects("tmg_keyword", "tmg", tmgId);
 		for(int i=0; i<keywordIds.size(); i++){
 			keywords.add(getTmgKeyword(keywordIds.get(i)));
 		}
 		return keywords;
 	}
-
 	public static ArrayList<Metadata> getMetadataBTmg(int tmgId) throws Exception{
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-		ArrayList<Integer> metadataIds = new ArrayList<Integer>();
 		ArrayList<Metadata> metadatas = new ArrayList<Metadata>();
-		String select = "select metadata_id from tmg_metadata where ";
-		select+= "tmg_id=?";
-		try {
-			ps = pgCache.prepareStatement(select);
-			ps.setInt(1, tmgId);
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			while (rs.next()) {
-				metadataIds.add(rs.getInt("metadata_id"));
-			}		
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-				ps.close();
-//					rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
+		ArrayList<Integer> metadataIds = getObjects("tmg_metadata", "tmg", "metadata", tmgId);
 		for(int i=0; i<metadataIds.size(); i++){
 			metadatas.add(getMetadata(metadataIds.get(i)));
 		}
 		return metadatas;
 	}
-
 	public static TmgProject getTmgProject(int tmgProjectId) throws Exception{
 
-		PreparedStatement ps = null;
-		ResultSet rs = null;
 		TmgProject tmgProject = null;
-
-		try {
-			ps = pgCache.prepareStatement("select * from tmg_project where tmg_project_id=?");
-			ps.setInt(1, tmgProjectId);
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			while (rs.next()) {
-				int tmgId = rs.getInt("tmg_id");
-				String value = rs.getString("value");
-				if (value == null)
-					value = "";
-				String vocabulary = rs.getString("vocabulary");
-				if (vocabulary == null)
-					vocabulary = "";
-				tmgProject = new TmgProject(tmgId, tmgProjectId, value, vocabulary);
-			}
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-				ps.close();
-//					rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
+		Hashtable<String, String> hash = getObject("tmg_project", tmgProjectId);
+		int tmgId = Integer.parseInt(hash.get("tmg_id"));
+		Datavalue value = new Datavalue(hash.get("value"));
+		Datavalue vocabulary = new Datavalue(hash.get("vocabulary"));
+		tmgProject = new TmgProject(tmgId, tmgProjectId, value, vocabulary);
 		return tmgProject;
 	}
-
 	public static ArrayList<TmgProject> getTmgProjectBTmg(int tmgId) throws Exception{
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-		ArrayList<Integer> projectIds = new ArrayList<Integer>();
 		ArrayList<TmgProject> projects = new ArrayList<TmgProject>();
-		String select = "select tmg_project_id from tmg_project where ";
-		select+= "tmg_id=?";
-		try {
-			ps = pgCache.prepareStatement(select);
-			ps.setInt(1, tmgId);
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			while (rs.next()) {
-				projectIds.add(rs.getInt("tmg_project_id"));
-			}		
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-				ps.close();
-//					rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
+		ArrayList<Integer> projectIds = getObjects("tmg_project", "tmg", tmgId);
 		for(int i=0; i<projectIds.size(); i++){
 			projects.add(getTmgProject(projectIds.get(i)));
 		}
 		return projects;
 	}
-
 	public static TmgProperty getTmgProperty(int tmgPropertyId) throws Exception{
 
-		PreparedStatement ps = null;
-		ResultSet rs = null;
 		TmgProperty tmgProperty = null;
-
-		try {
-			ps = pgCache.prepareStatement("select * from tmg_property where tmg_property_id=?");
-			ps.setInt(1, tmgPropertyId);
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			while (rs.next()) {
-				int tmgId = rs.getInt("tmg_id");
-				String name = rs.getString("name");
-				if (name == null)
-					name = "";
-				String value = rs.getString("value");
-				if (value == null)
-					value = "";
-				tmgProperty = new TmgProperty(tmgId, tmgPropertyId, name, value);
-			}
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-				ps.close();
-//					rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
+		Hashtable<String, String> hash = getObject("tmg_property", tmgPropertyId);
+		int tmgId = Integer.parseInt(hash.get("tmg_id"));
+		Datavalue name = new Datavalue(hash.get("name"));
+		Datavalue value = new Datavalue(hash.get("value"));
+		tmgProperty = new TmgProperty(tmgId, tmgPropertyId, name, value);
 		return tmgProperty;
 	}
-
 	public static ArrayList<TmgProperty> getTmgPropertyBTmg(int tmgId) throws Exception{
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-		ArrayList<Integer> propertyIds = new ArrayList<Integer>();
 		ArrayList<TmgProperty> propertys = new ArrayList<TmgProperty>();
-		String select = "select tmg_property_id from tmg_property where ";
-		select+= "tmg_id=?";
-		try {
-			ps = pgCache.prepareStatement(select);
-			ps.setInt(1, tmgId);
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			while (rs.next()) {
-				propertyIds.add(rs.getInt("tmg_property_id"));
-			}		
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-				ps.close();
-//					rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
+		ArrayList<Integer> propertyIds = getObjects("tmg_property", "tmg", tmgId);
 		for(int i=0; i<propertyIds.size(); i++){
 			propertys.add(getTmgProperty(propertyIds.get(i)));
 		}
 		return propertys;
 	}
-
 	public static TmgPublisher getTmgPublisher(int tmgPublisherId) throws Exception{
 
-		PreparedStatement ps = null;
-		ResultSet rs = null;
 		TmgPublisher tmgPublisher = null;
-
-		try {
-			ps = pgCache.prepareStatement("select * from tmg_publisher where tmg_publisher_id=?");
-			ps.setInt(1, tmgPublisherId);
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			while (rs.next()) {
-				int tmgId = rs.getInt("tmg_id");
-				tmgPublisher = new TmgPublisher(tmgId, tmgPublisherId);
-			}
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-				ps.close();
-//					rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
+		Hashtable<String, String> hash = getObject("tmg_publisher", tmgPublisherId);
+		int tmgId = Integer.parseInt(hash.get("tmg_id"));
+		tmgPublisher = new TmgPublisher(tmgId, tmgPublisherId);
 		return tmgPublisher;
 	}
-
 	public static ArrayList<TmgPublisher> getTmgPublisherBTmg(int tmgId) throws Exception{
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-		ArrayList<Integer> publisherIds = new ArrayList<Integer>();
 		ArrayList<TmgPublisher> publishers = new ArrayList<TmgPublisher>();
-		String select = "select tmg_publisher_id from tmg_publisher where ";
-		select+= "tmg_id=?";
-		try {
-			ps = pgCache.prepareStatement(select);
-			ps.setInt(1, tmgId);
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			while (rs.next()) {
-				publisherIds.add(rs.getInt("tmg_publisher_id"));
-			}		
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-				ps.close();
-//					rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
+		ArrayList<Integer> publisherIds = getObjects("tmg_publisher", "tmg", tmgId);
 		for(int i=0; i<publisherIds.size(); i++){
 			publishers.add(getTmgPublisher(publisherIds.get(i)));
 		}
 		return publishers;
 	}
-
 	public static TmgPublisherContact getTmgPublisherContact(int tmgPublisherContactId) throws Exception{
 
-		PreparedStatement ps = null;
-		ResultSet rs = null;
 		TmgPublisherContact tmgPublisherContact = null;
-
-		try {
-			ps = pgCache.prepareStatement("select * from tmg_publisher_contact where tmg_publisher_contact_id=?");
-			ps.setInt(1, tmgPublisherContactId);
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			while (rs.next()) {
-				int tmgPublisherId = rs.getInt("tmg_publisher_id");
-				String url = rs.getString("url");
-				if (url == null)
-					url = "";
-				String email = rs.getString("email");
-				if (email == null)
-					email = "";
-				tmgPublisherContact = new TmgPublisherContact(tmgPublisherId, tmgPublisherContactId, url, email);
-			}
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-				ps.close();
-//					rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
+		Hashtable<String, String> hash = getObject("tmg_publisher_contact", tmgPublisherContactId);
+		int tmgPublisherId = Integer.parseInt(hash.get("tmg_publisher_id"));
+		Datavalue email = new Datavalue(hash.get("email"));
+		Datavalue url = new Datavalue(hash.get("url"));
+		tmgPublisherContact = new TmgPublisherContact(tmgPublisherId, tmgPublisherContactId, email, url);
 		return tmgPublisherContact;
 	}
-
 	public static ArrayList<TmgPublisherContact> getTmgPublisherContactBTmgPublisher(int tmgPublisherId) throws Exception{
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-		ArrayList<Integer> contactIds = new ArrayList<Integer>();
 		ArrayList<TmgPublisherContact> contacts = new ArrayList<TmgPublisherContact>();
-		String select = "select tmg_publisher_contact_id from tmg_publisher_contact where ";
-		select+= "tmg_publisher_id=?";
-		try {
-			ps = pgCache.prepareStatement(select);
-			ps.setInt(1, tmgPublisherId);
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			while (rs.next()) {
-				contactIds.add(rs.getInt("tmg_publisher_contact_id"));
-			}		
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-				ps.close();
-//					rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
+		ArrayList<Integer> contactIds = getObjects("tmg_publisher_contact", "tmg_publisher", tmgPublisherId);
 		for(int i=0; i<contactIds.size(); i++){
 			contacts.add(getTmgPublisherContact(contactIds.get(i)));
 		}
 		return contacts;
 	}
-
 	public static TmgPublisherName getTmgPublisherName(int tmgPublisherNameId) throws Exception{
 
-		PreparedStatement ps = null;
-		ResultSet rs = null;
 		TmgPublisherName tmgPublisherName = null;
-
-		try {
-			ps = pgCache.prepareStatement("select * from tmg_publisher_name where tmg_publisher_name_id=?");
-			ps.setInt(1, tmgPublisherNameId);
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			while (rs.next()) {
-				int tmgPublisherId = rs.getInt("tmg_publisher_id");
-				String value = rs.getString("value");
-				if (value == null)
-					value = "";
-				String vocabulary = rs.getString("vocabulary");
-				if (vocabulary == null)
-					vocabulary = "";
-				tmgPublisherName = new TmgPublisherName(tmgPublisherId, tmgPublisherNameId, value, vocabulary);
-			}
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-				ps.close();
-//					rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
+		Hashtable<String, String> hash = getObject("tmg_publisher_name", tmgPublisherNameId);
+		int tmgPublisherId = Integer.parseInt(hash.get("tmg_publisher_id"));
+		Datavalue value = new Datavalue(hash.get("value"));
+		Datavalue vocabulary = new Datavalue(hash.get("vocabulary"));
+		tmgPublisherName = new TmgPublisherName(tmgPublisherId, tmgPublisherNameId, value, vocabulary);
 		return tmgPublisherName;
 	}
-
 	public static ArrayList<TmgPublisherName> getTmgPublisherNameBTmgPublisher(int tmgPublisherId) throws Exception{
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-		ArrayList<Integer> nameIds = new ArrayList<Integer>();
 		ArrayList<TmgPublisherName> names = new ArrayList<TmgPublisherName>();
-		String select = "select tmg_publisher_name_id from tmg_publisher_name where ";
-		select+= "tmg_publisher_id=?";
-		try {
-			ps = pgCache.prepareStatement(select);
-			ps.setInt(1, tmgPublisherId);
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			while (rs.next()) {
-				nameIds.add(rs.getInt("tmg_publisher_name_id"));
-			}		
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-				ps.close();
-//					rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
+		ArrayList<Integer> nameIds = getObjects("tmg_publisher_name", "tmg_publisher", tmgPublisherId);
 		for(int i=0; i<nameIds.size(); i++){
 			names.add(getTmgPublisherName(nameIds.get(i)));
 		}
 		return names;
 	}
-
 	public static TmgServicename getTmgServicename(int tmgServicenameId) throws Exception{
 
-		PreparedStatement ps = null;
-		ResultSet rs = null;
 		TmgServicename tmgServicename = null;
-
-		try {
-			ps = pgCache.prepareStatement("select * from tmg_servicename where tmg_servicename_id=?");
-			ps.setInt(1, tmgServicenameId);
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			while (rs.next()) {
-				int tmgId = rs.getInt("tmg_id");
-				String servicename = rs.getString("servicename");
-				if (servicename == null)
-					servicename = "";
-				tmgServicename = new TmgServicename(tmgId, tmgServicenameId, servicename);
-			}
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-				ps.close();
-//					rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
+		Hashtable<String, String> hash = getObject("tmg_servicename", tmgServicenameId);
+		int tmgId = Integer.parseInt(hash.get("tmg_id"));
+		Datavalue servicename = new Datavalue(hash.get("servicename"));
+		tmgServicename = new TmgServicename(tmgId, tmgServicenameId, servicename);
 		return tmgServicename;
 	}
-
 	public static ArrayList<TmgServicename> getTmgServicenameBTmg(int tmgId) throws Exception{
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-		ArrayList<Integer> servicenameIds = new ArrayList<Integer>();
 		ArrayList<TmgServicename> servicenames = new ArrayList<TmgServicename>();
-		String select = "select tmg_servicename_id from tmg_servicename where ";
-		select+= "tmg_id=?";
-		try {
-			ps = pgCache.prepareStatement(select);
-			ps.setInt(1, tmgId);
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			while (rs.next()) {
-				servicenameIds.add(rs.getInt("tmg_servicename_id"));
-			}		
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-				ps.close();
-//					rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
+		ArrayList<Integer> servicenameIds = getObjects("tmg_servicename", "tmg", tmgId);
 		for(int i=0; i<servicenameIds.size(); i++){
 			servicenames.add(getTmgServicename(servicenameIds.get(i)));
 		}
 		return servicenames;
 	}
-
 	public static TmgTimecoverage getTmgTimecoverage(int tmgTimecoverageId) throws Exception{
 
-		PreparedStatement ps = null;
-		ResultSet rs = null;
 		TmgTimecoverage tmgTimecoverage = null;
-
-		try {
-			ps = pgCache.prepareStatement("select * from tmg_timecoverage where tmg_timecoverage_id=?");
-			ps.setInt(1, tmgTimecoverageId);
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			while (rs.next()) {
-				int tmgId = rs.getInt("tmg_id");
-				String resolution = rs.getString("resolution");
-				if (resolution == null)
-					resolution = "";
-				tmgTimecoverage = new TmgTimecoverage(tmgId, tmgTimecoverageId, resolution);
-			}
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-				ps.close();
-//					rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
+		Hashtable<String, String> hash = getObject("tmg_timecoverage", tmgTimecoverageId);
+		int tmgId = Integer.parseInt(hash.get("tmg_id"));
+		Datavalue resolution = new Datavalue(hash.get("resolution"));
+		tmgTimecoverage = new TmgTimecoverage(tmgId, tmgTimecoverageId, resolution);
 		return tmgTimecoverage;
 	}
-
 	public static ArrayList<TmgTimecoverage> getTmgTimecoverageBTmg(int tmgId) throws Exception{
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-		ArrayList<Integer> timecoverageIds = new ArrayList<Integer>();
 		ArrayList<TmgTimecoverage> timecoverages = new ArrayList<TmgTimecoverage>();
-		String select = "select tmg_timecoverage_id from tmg_timecoverage where ";
-		select+= "tmg_id=?";
-		try {
-			ps = pgCache.prepareStatement(select);
-			ps.setInt(1, tmgId);
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			while (rs.next()) {
-				timecoverageIds.add(rs.getInt("tmg_timecoverage_id"));
-			}		
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-				ps.close();
-//					rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
+		ArrayList<Integer> timecoverageIds = getObjects("tmg_timecoverage", "tmg", tmgId);
 		for(int i=0; i<timecoverageIds.size(); i++){
 			timecoverages.add(getTmgTimecoverage(timecoverageIds.get(i)));
 		}
 		return timecoverages;
 	}
-
 	public static TmgTimecoverageDuration getTmgTimecoverageDuration(int tmgTimecoverageDurationId) throws Exception{
 
-		PreparedStatement ps = null;
-		ResultSet rs = null;
 		TmgTimecoverageDuration tmgTimecoverageDuration = null;
-
-		try {
-			ps = pgCache.prepareStatement("select * from tmg_timecoverage_duration where tmg_timecoverage_duration_id=?");
-			ps.setInt(1, tmgTimecoverageDurationId);
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			while (rs.next()) {
-				int tmgTimecoverageId = rs.getInt("tmg_timecoverage_id");
-				String duration = rs.getString("duration");
-				if (duration == null)
-					duration = "";
-				tmgTimecoverageDuration = new TmgTimecoverageDuration(tmgTimecoverageId, tmgTimecoverageDurationId, duration);
-			}
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-				ps.close();
-//					rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
+		Hashtable<String, String> hash = getObject("tmg_timecoverage_duration", tmgTimecoverageDurationId);
+		int tmgTimecoverageId = Integer.parseInt(hash.get("tmg_timecoverage_id"));
+		Datavalue duration = new Datavalue(hash.get("duration"));
+		tmgTimecoverageDuration = new TmgTimecoverageDuration(tmgTimecoverageId, tmgTimecoverageDurationId, duration);
 		return tmgTimecoverageDuration;
 	}
-
 	public static ArrayList<TmgTimecoverageDuration> getTmgTimecoverageDurationBTmgTimecoverage(int tmgTimecoverageId) throws Exception{
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-		ArrayList<Integer> durationIds = new ArrayList<Integer>();
 		ArrayList<TmgTimecoverageDuration> durations = new ArrayList<TmgTimecoverageDuration>();
-		String select = "select tmg_timecoverage_duration_id from tmg_timecoverage_duration where ";
-		select+= "tmg_timecoverage_id=?";
-		try {
-			ps = pgCache.prepareStatement(select);
-			ps.setInt(1, tmgTimecoverageId);
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			while (rs.next()) {
-				durationIds.add(rs.getInt("tmg_timecoverage_duration_id"));
-			}		
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-				ps.close();
-//					rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
+		ArrayList<Integer> durationIds = getObjects("tmg_timecoverage_duration", "tmg_timecoverage", tmgTimecoverageId);
 		for(int i=0; i<durationIds.size(); i++){
 			durations.add(getTmgTimecoverageDuration(durationIds.get(i)));
 		}
 		return durations;
 	}
-
 	public static TmgTimecoverageEnd getTmgTimecoverageEnd(int tmgTimecoverageEndId) throws Exception{
 
-		PreparedStatement ps = null;
-		ResultSet rs = null;
 		TmgTimecoverageEnd tmgTimecoverageEnd = null;
-
-		try {
-			ps = pgCache.prepareStatement("select * from tmg_timecoverage_end where tmg_timecoverage_end_id=?");
-			ps.setInt(1, tmgTimecoverageEndId);
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			while (rs.next()) {
-				int tmgTimecoverageId = rs.getInt("tmg_timecoverage_id");
-				String format = rs.getString("format");
-				if (format == null)
-					format = "";
-				String value = rs.getString("value");
-				if (value == null)
-					value = "";
-				String dateenum = rs.getString("dateenum");
-				if (dateenum == null)
-					dateenum = rs.getString("dateenum_nonstandard");
-				if (dateenum == null)
-					dateenum = "";
-				tmgTimecoverageEnd = new TmgTimecoverageEnd(tmgTimecoverageId, tmgTimecoverageEndId, format, value, dateenum);
-			}
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-				ps.close();
-//					rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
+		Hashtable<String, String> hash = getObject("tmg_timecoverage_end", tmgTimecoverageEndId);
+		int tmgTimecoverageId = Integer.parseInt(hash.get("tmg_timecoverage_id"));
+		Datavalue format = new Datavalue(hash.get("format"));
+		Datavalue value = new Datavalue(hash.get("value"));
+		Datavalue dateenum = new Datavalue(hash.get("dateenum"));
+		if (dateenum.isNull())
+			dateenum = new Datavalue(hash.get("dateenum_nonstandard"));
+		tmgTimecoverageEnd = new TmgTimecoverageEnd(tmgTimecoverageId, tmgTimecoverageEndId, format, value, dateenum);
 		return tmgTimecoverageEnd;
 	}
-
 	public static ArrayList<TmgTimecoverageEnd> getTmgTimecoverageEndBTmgTimecoverage(int tmgTimecoverageId) throws Exception{
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-		ArrayList<Integer> endIds = new ArrayList<Integer>();
 		ArrayList<TmgTimecoverageEnd> ends = new ArrayList<TmgTimecoverageEnd>();
-		String select = "select tmg_timecoverage_end_id from tmg_timecoverage_end where ";
-		select+= "tmg_timecoverage_id=?";
-		try {
-			ps = pgCache.prepareStatement(select);
-			ps.setInt(1, tmgTimecoverageId);
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			while (rs.next()) {
-				endIds.add(rs.getInt("tmg_timecoverage_end_id"));
-			}		
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-				ps.close();
-//					rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
+		ArrayList<Integer> endIds = getObjects("tmg_timecoverage_end", "tmg_timecoverage", tmgTimecoverageId);
 		for(int i=0; i<endIds.size(); i++){
 			ends.add(getTmgTimecoverageEnd(endIds.get(i)));
 		}
 		return ends;
 	}
-
 	public static TmgTimecoverageResolution getTmgTimecoverageResolution(int tmgTimecoverageResolutionId) throws Exception{
 
-		PreparedStatement ps = null;
-		ResultSet rs = null;
 		TmgTimecoverageResolution tmgTimecoverageResolution = null;
-
-		try {
-			ps = pgCache.prepareStatement("select * from tmg_timecoverage_resolution where tmg_timecoverage_resolution_id=?");
-			ps.setInt(1, tmgTimecoverageResolutionId);
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			while (rs.next()) {
-				int tmgTimecoverageId = rs.getInt("tmg_timecoverage_id");
-				String duration = rs.getString("duration");
-				if (duration == null)
-					duration = "";
-				tmgTimecoverageResolution = new TmgTimecoverageResolution(tmgTimecoverageId, tmgTimecoverageResolutionId, duration);
-			}
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-				ps.close();
-//					rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
+		Hashtable<String, String> hash = getObject("tmg_timecoverage_resolution", tmgTimecoverageResolutionId);
+		int tmgTimecoverageId = Integer.parseInt(hash.get("tmg_timecoverage_id"));
+		Datavalue duration = new Datavalue(hash.get("duration"));
+		tmgTimecoverageResolution = new TmgTimecoverageResolution(tmgTimecoverageId, tmgTimecoverageResolutionId, duration);
 		return tmgTimecoverageResolution;
 	}
-
 	public static ArrayList<TmgTimecoverageResolution> getTmgTimecoverageResolutionBTmgTimecoverage(int tmgTimecoverageId) throws Exception{
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-		ArrayList<Integer> resolutionIds = new ArrayList<Integer>();
 		ArrayList<TmgTimecoverageResolution> resolutions = new ArrayList<TmgTimecoverageResolution>();
-		String select = "select tmg_timecoverage_resolution_id from tmg_timecoverage_resolution where ";
-		select+= "tmg_timecoverage_id=?";
-		try {
-			ps = pgCache.prepareStatement(select);
-			ps.setInt(1, tmgTimecoverageId);
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			while (rs.next()) {
-				resolutionIds.add(rs.getInt("tmg_timecoverage_resolution_id"));
-			}		
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-				ps.close();
-//					rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
+		ArrayList<Integer> resolutionIds = getObjects("tmg_timecoverage_resolution", "tmg_timecoverage", tmgTimecoverageId);
 		for(int i=0; i<resolutionIds.size(); i++){
 			resolutions.add(getTmgTimecoverageResolution(resolutionIds.get(i)));
 		}
 		return resolutions;
 	}
-
 	public static TmgTimecoverageStart getTmgTimecoverageStart(int tmgTimecoverageStartId) throws Exception{
 
-		PreparedStatement ps = null;
-		ResultSet rs = null;
 		TmgTimecoverageStart tmgTimecoverageStart = null;
-
-		try {
-			ps = pgCache.prepareStatement("select * from tmg_timecoverage_start where tmg_timecoverage_start_id=?");
-			ps.setInt(1, tmgTimecoverageStartId);
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			while (rs.next()) {
-				int tmgTimecoverageId = rs.getInt("tmg_timecoverage_id");
-				String format = rs.getString("format");
-				if (format == null)
-					format = "";
-				String value = rs.getString("value");
-				if (value == null)
-					value = "";
-				String dateenum = rs.getString("dateenum");
-				if (dateenum == null)
-					dateenum = rs.getString("dateenum_nonstandard");
-				if (dateenum == null)
-					dateenum = "";
-				tmgTimecoverageStart = new TmgTimecoverageStart(tmgTimecoverageId, tmgTimecoverageStartId, format, value, dateenum);
-			}
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-				ps.close();
-//					rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
+		Hashtable<String, String> hash = getObject("tmg_timecoverage_start", tmgTimecoverageStartId);
+		int tmgTimecoverageId = Integer.parseInt(hash.get("tmg_timecoverage_id"));
+		Datavalue format = new Datavalue(hash.get("format"));
+		Datavalue value = new Datavalue(hash.get("value"));
+		Datavalue dateenum = new Datavalue(hash.get("dateenum"));
+		if (dateenum.isNull())
+			dateenum = new Datavalue(hash.get("dateenum_nonstandard"));
+		tmgTimecoverageStart = new TmgTimecoverageStart(tmgTimecoverageId, tmgTimecoverageStartId, format, value, dateenum);
 		return tmgTimecoverageStart;
 	}
-
 	public static ArrayList<TmgTimecoverageStart> getTmgTimecoverageStartBTmgTimecoverage(int tmgTimecoverageId) throws Exception{
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-		ArrayList<Integer> startIds = new ArrayList<Integer>();
 		ArrayList<TmgTimecoverageStart> starts = new ArrayList<TmgTimecoverageStart>();
-		String select = "select tmg_timecoverage_start_id from tmg_timecoverage_start where ";
-		select+= "tmg_timecoverage_id=?";
-		try {
-			ps = pgCache.prepareStatement(select);
-			ps.setInt(1, tmgTimecoverageId);
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			while (rs.next()) {
-				startIds.add(rs.getInt("tmg_timecoverage_start_id"));
-			}		
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-				ps.close();
-//					rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
+		ArrayList<Integer> startIds = getObjects("tmg_timecoverage_start", "tmg_timecoverage", tmgTimecoverageId);
 		for(int i=0; i<startIds.size(); i++){
 			starts.add(getTmgTimecoverageStart(startIds.get(i)));
 		}
 		return starts;
 	}
-
 	public static TmgVariables getTmgVariables(int tmgVariablesId) throws Exception{
 
-		PreparedStatement ps = null;
-		ResultSet rs = null;
 		TmgVariables tmgVariables = null;
-
-		try {
-			ps = pgCache.prepareStatement("select * from tmg_variables where tmg_variables_id=?");
-			ps.setInt(1, tmgVariablesId);
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			while (rs.next()) {
-				int tmgId = rs.getInt("tmg_id");
-				String vocabulary = rs.getString("vocabulary");
-				if (vocabulary == null)
-					vocabulary = rs.getString("vocabulary_nonstandard");
-				if (vocabulary == null)
-					vocabulary = "";
-				tmgVariables = new TmgVariables(tmgId, tmgVariablesId, vocabulary);
-			}
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-				ps.close();
-//					rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
+		Hashtable<String, String> hash = getObject("tmg_variables", tmgVariablesId);
+		int tmgId = Integer.parseInt(hash.get("tmg_id"));
+		Datavalue vocabulary = new Datavalue(hash.get("vocabulary"));
+		if (vocabulary.isNull())
+			vocabulary = new Datavalue(hash.get("vocabulary_nonstandard"));
+		tmgVariables = new TmgVariables(tmgId, tmgVariablesId, vocabulary);
 		return tmgVariables;
 	}
-
 	public static ArrayList<TmgVariables> getTmgVariablesBTmg(int tmgId) throws Exception{
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-		ArrayList<Integer> variablesIds = new ArrayList<Integer>();
 		ArrayList<TmgVariables> variabless = new ArrayList<TmgVariables>();
-		String select = "select tmg_variables_id from tmg_variables where ";
-		select+= "tmg_id=?";
-		try {
-			ps = pgCache.prepareStatement(select);
-			ps.setInt(1, tmgId);
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			while (rs.next()) {
-				variablesIds.add(rs.getInt("tmg_variables_id"));
-			}		
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-				ps.close();
-//					rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
+		ArrayList<Integer> variablesIds = getObjects("tmg_variables", "tmg", tmgId);
 		for(int i=0; i<variablesIds.size(); i++){
 			variabless.add(getTmgVariables(variablesIds.get(i)));
 		}
 		return variabless;
 	}
-
 	public static TmgVariablesVariable getTmgVariablesVariable(int tmgVariablesVariableId) throws Exception{
 
-		PreparedStatement ps = null;
-		ResultSet rs = null;
 		TmgVariablesVariable tmgVariablesVariable = null;
-
-		try {
-			ps = pgCache.prepareStatement("select * from tmg_variables_variable where tmg_variables_variable_id=?");
-			ps.setInt(1, tmgVariablesVariableId);
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			while (rs.next()) {
-				int tmgVariablesId = rs.getInt("tmg_variables_id");
-				String units = rs.getString("units");
-				if (units == null)
-					units = "";
-				String name = rs.getString("name");
-				if (name == null)
-					name = "";
-				String vocabularyName = rs.getString("vocabulary_name");
-				if (vocabularyName == null)
-					vocabularyName = "";
-				tmgVariablesVariable = new TmgVariablesVariable(tmgVariablesId, tmgVariablesVariableId, units, name, vocabularyName);
-			}
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-				ps.close();
-//					rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
+		Hashtable<String, String> hash = getObject("tmg_variables_variable", tmgVariablesVariableId);
+		int tmgVariablesId = Integer.parseInt(hash.get("tmg_variables_id"));
+		Datavalue name = new Datavalue(hash.get("name"));
+		Datavalue units = new Datavalue(hash.get("units"));
+		Datavalue vocabularyName = new Datavalue(hash.get("vocabulary_name"));
+		tmgVariablesVariable = new TmgVariablesVariable(tmgVariablesId, tmgVariablesVariableId, name, units, vocabularyName);
 		return tmgVariablesVariable;
 	}
-
 	public static ArrayList<TmgVariablesVariable> getTmgVariablesVariableBTmgVariables(int tmgVariablesId) throws Exception{
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-		ArrayList<Integer> variableIds = new ArrayList<Integer>();
 		ArrayList<TmgVariablesVariable> variables = new ArrayList<TmgVariablesVariable>();
-		String select = "select tmg_variables_variable_id from tmg_variables_variable where ";
-		select+= "tmg_variables_id=?";
-		try {
-			ps = pgCache.prepareStatement(select);
-			ps.setInt(1, tmgVariablesId);
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			while (rs.next()) {
-				variableIds.add(rs.getInt("tmg_variables_variable_id"));
-			}		
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-				ps.close();
-//					rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
+		ArrayList<Integer> variableIds = getObjects("tmg_variables_variable", "tmg_variables", tmgVariablesId);
 		for(int i=0; i<variableIds.size(); i++){
 			variables.add(getTmgVariablesVariable(variableIds.get(i)));
 		}
 		return variables;
 	}
-
 	public static TmgVariablesVariablemap getTmgVariablesVariablemap(int tmgVariablesVariablemapId) throws Exception{
 
-		PreparedStatement ps = null;
-		ResultSet rs = null;
 		TmgVariablesVariablemap tmgVariablesVariablemap = null;
-
-		try {
-			ps = pgCache.prepareStatement("select * from tmg_variables_variablemap where tmg_variables_variablemap_id=?");
-			ps.setInt(1, tmgVariablesVariablemapId);
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			while (rs.next()) {
-				int tmgVariablesId = rs.getInt("tmg_variables_id");
-				String value = rs.getString("value");
-				if (value == null)
-					value = "";
-				String xlink = rs.getString("xlink");
-				if (xlink == null)
-					xlink = rs.getString("xlink_nonstandard");
-				if (xlink == null)
-					xlink = "";
-				tmgVariablesVariablemap = new TmgVariablesVariablemap(tmgVariablesId, tmgVariablesVariablemapId, value, xlink);
-			}
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-				ps.close();
-//					rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
+		Hashtable<String, String> hash = getObject("tmg_variables_variablemap", tmgVariablesVariablemapId);
+		int tmgVariablesId = Integer.parseInt(hash.get("tmg_variables_id"));
+		Datavalue value = new Datavalue(hash.get("value"));
+		Datavalue xlink = new Datavalue(hash.get("xlink"));
+		if (xlink.isNull())
+			xlink = new Datavalue(hash.get("xlink_nonstandard"));
+		tmgVariablesVariablemap = new TmgVariablesVariablemap(tmgVariablesId, tmgVariablesVariablemapId, value, xlink);
 		return tmgVariablesVariablemap;
 	}
-
 	public static ArrayList<TmgVariablesVariablemap> getTmgVariablesVariablemapBTmgVariables(int tmgVariablesId) throws Exception{
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-		ArrayList<Integer> variablemapIds = new ArrayList<Integer>();
 		ArrayList<TmgVariablesVariablemap> variablemaps = new ArrayList<TmgVariablesVariablemap>();
-		String select = "select tmg_variables_variablemap_id from tmg_variables_variablemap where ";
-		select+= "tmg_variables_id=?";
-		try {
-			ps = pgCache.prepareStatement(select);
-			ps.setInt(1, tmgVariablesId);
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			while (rs.next()) {
-				variablemapIds.add(rs.getInt("tmg_variables_variablemap_id"));
-			}		
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-				ps.close();
-//					rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
+		ArrayList<Integer> variablemapIds = getObjects("tmg_variables_variablemap", "tmg_variables", tmgVariablesId);
 		for(int i=0; i<variablemapIds.size(); i++){
 			variablemaps.add(getTmgVariablesVariablemap(variablemapIds.get(i)));
 		}
 		return variablemaps;
 	}
-
