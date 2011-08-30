@@ -1,10 +1,11 @@
 package gov.noaa.pmel.tmap.catalogcleaner.data;
 
+import gov.noaa.pmel.tmap.catalogcleaner.Datavalue;
 public class DatasetProperty {
 	protected int datasetId;
 	protected int datasetPropertyId;
-	protected String name;
-	protected String value;
+	protected Datavalue name = new Datavalue(null);
+	protected Datavalue value = new Datavalue(null);
 	public void setDatasetId(int datasetId){
 		this.datasetId = datasetId;
 	}
@@ -12,10 +13,10 @@ public class DatasetProperty {
 		this.datasetPropertyId = datasetPropertyId;
 	}
 	public void setName(String name){
-		this.name = name;
+		this.name = new Datavalue(name);
 	}
 	public void setValue(String value){
-		this.value = value;
+		this.value = new Datavalue(value);
 	}
 	public int getDatasetId(){
 		return this.datasetId;
@@ -23,20 +24,27 @@ public class DatasetProperty {
 	public int getDatasetPropertyId(){
 		return this.datasetPropertyId;
 	}
-	public String getName(){
+	public Datavalue getName(){
 		return this.name;
 	}
-	public String getValue(){
+	public Datavalue getValue(){
 		return this.value;
 	}
 
+	public DatasetProperty(){
+		this.datasetPropertyId = -1;
+	}
 	public DatasetProperty(int datasetProperty){
 		this.datasetPropertyId = datasetProperty;
 	}
-	public DatasetProperty(int datasetId, int datasetPropertyId, String name, String value){
+	public DatasetProperty(int datasetId, int datasetPropertyId, Datavalue name, Datavalue value){
 		this.datasetId = datasetId;
 		this.datasetPropertyId = datasetPropertyId;
 		this.name=name;
 		this.value=value;
+	}
+	public DatasetProperty clone(){
+		DatasetProperty clone = new DatasetProperty(this.datasetId, -1, this.name, this.value);
+		return clone;
 	}
 }

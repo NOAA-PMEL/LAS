@@ -1,10 +1,11 @@
 package gov.noaa.pmel.tmap.catalogcleaner.data;
 
+import gov.noaa.pmel.tmap.catalogcleaner.Datavalue;
 public class TmgProperty {
 	protected int tmgId;
 	protected int tmgPropertyId;
-	protected String name;
-	protected String value;
+	protected Datavalue name = new Datavalue(null);
+	protected Datavalue value = new Datavalue(null);
 	public void setTmgId(int tmgId){
 		this.tmgId = tmgId;
 	}
@@ -12,10 +13,10 @@ public class TmgProperty {
 		this.tmgPropertyId = tmgPropertyId;
 	}
 	public void setName(String name){
-		this.name = name;
+		this.name = new Datavalue(name);
 	}
 	public void setValue(String value){
-		this.value = value;
+		this.value = new Datavalue(value);
 	}
 	public int getTmgId(){
 		return this.tmgId;
@@ -23,20 +24,27 @@ public class TmgProperty {
 	public int getTmgPropertyId(){
 		return this.tmgPropertyId;
 	}
-	public String getName(){
+	public Datavalue getName(){
 		return this.name;
 	}
-	public String getValue(){
+	public Datavalue getValue(){
 		return this.value;
 	}
 
+	public TmgProperty(){
+		this.tmgPropertyId = -1;
+	}
 	public TmgProperty(int tmgProperty){
 		this.tmgPropertyId = tmgProperty;
 	}
-	public TmgProperty(int tmgId, int tmgPropertyId, String name, String value){
+	public TmgProperty(int tmgId, int tmgPropertyId, Datavalue name, Datavalue value){
 		this.tmgId = tmgId;
 		this.tmgPropertyId = tmgPropertyId;
 		this.name=name;
 		this.value=value;
+	}
+	public TmgProperty clone(){
+		TmgProperty clone = new TmgProperty(this.tmgId, -1, this.name, this.value);
+		return clone;
 	}
 }

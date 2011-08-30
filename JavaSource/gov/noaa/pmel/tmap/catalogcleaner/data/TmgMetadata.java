@@ -1,5 +1,6 @@
 package gov.noaa.pmel.tmap.catalogcleaner.data;
 
+import gov.noaa.pmel.tmap.catalogcleaner.Datavalue;
 public class TmgMetadata extends Metadata {
 	private int parentId;
 
@@ -15,8 +16,8 @@ public class TmgMetadata extends Metadata {
 		super(metadataId);
 		this.parentId = parentId;
 	}
-	public TmgMetadata(int parentId, int metadataId, String metadatatype, String inherited){
-		super(metadataId, metadatatype, inherited);
+	public TmgMetadata(int parentId, int metadataId, Datavalue inherited, Datavalue metadatatype){
+		super(metadataId, inherited, metadatatype);
 		this.parentId = parentId;
 	}
 }

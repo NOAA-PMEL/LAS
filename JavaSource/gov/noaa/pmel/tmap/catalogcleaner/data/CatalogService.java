@@ -1,5 +1,6 @@
 package gov.noaa.pmel.tmap.catalogcleaner.data;
 
+import gov.noaa.pmel.tmap.catalogcleaner.Datavalue;
 public class CatalogService extends Service {
 	private int parentId;
 
@@ -15,8 +16,8 @@ public class CatalogService extends Service {
 		super(serviceId);
 		this.parentId = parentId;
 	}
-	public CatalogService(int parentId, int serviceId, String suffix, String name, String base, String desc, String servicetype, String status){
-		super(serviceId, suffix, name, base, desc, servicetype, status);
+	public CatalogService(int parentId, int serviceId, Datavalue base, Datavalue desc, Datavalue name, Datavalue suffix, Datavalue serviceType, Datavalue status){
+		super(serviceId, base, desc, name, suffix, serviceType, status);
 		this.parentId = parentId;
 	}
 }

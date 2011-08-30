@@ -1,29 +1,30 @@
 package gov.noaa.pmel.tmap.catalogcleaner.data;
 
+import gov.noaa.pmel.tmap.catalogcleaner.Datavalue;
 public class TmgGeospatialcoverageEastwest {
 	protected int tmgGeospatialcoverageId;
 	protected int tmgGeospatialcoverageEastwestId;
-	protected String size;
-	protected String units;
-	protected String start;
-	protected String resolution;
+	protected Datavalue resolution = new Datavalue(null);
+	protected Datavalue size = new Datavalue(null);
+	protected Datavalue start = new Datavalue(null);
+	protected Datavalue units = new Datavalue(null);
 	public void setTmgGeospatialcoverageId(int tmgGeospatialcoverageId){
 		this.tmgGeospatialcoverageId = tmgGeospatialcoverageId;
 	}
 	public void setTmgGeospatialcoverageEastwestId(int tmgGeospatialcoverageEastwestId){
 		this.tmgGeospatialcoverageEastwestId = tmgGeospatialcoverageEastwestId;
 	}
-	public void setSize(String size){
-		this.size = size;
+	public void setResolution(String resolution){
+		this.resolution = new Datavalue(resolution);
 	}
-	public void setUnits(String units){
-		this.units = units;
+	public void setSize(String size){
+		this.size = new Datavalue(size);
 	}
 	public void setStart(String start){
-		this.start = start;
+		this.start = new Datavalue(start);
 	}
-	public void setResolution(String resolution){
-		this.resolution = resolution;
+	public void setUnits(String units){
+		this.units = new Datavalue(units);
 	}
 	public int getTmgGeospatialcoverageId(){
 		return this.tmgGeospatialcoverageId;
@@ -31,28 +32,35 @@ public class TmgGeospatialcoverageEastwest {
 	public int getTmgGeospatialcoverageEastwestId(){
 		return this.tmgGeospatialcoverageEastwestId;
 	}
-	public String getSize(){
-		return this.size;
-	}
-	public String getUnits(){
-		return this.units;
-	}
-	public String getStart(){
-		return this.start;
-	}
-	public String getResolution(){
+	public Datavalue getResolution(){
 		return this.resolution;
 	}
+	public Datavalue getSize(){
+		return this.size;
+	}
+	public Datavalue getStart(){
+		return this.start;
+	}
+	public Datavalue getUnits(){
+		return this.units;
+	}
 
+	public TmgGeospatialcoverageEastwest(){
+		this.tmgGeospatialcoverageEastwestId = -1;
+	}
 	public TmgGeospatialcoverageEastwest(int tmgGeospatialcoverageEastwest){
 		this.tmgGeospatialcoverageEastwestId = tmgGeospatialcoverageEastwest;
 	}
-	public TmgGeospatialcoverageEastwest(int tmgGeospatialcoverageId, int tmgGeospatialcoverageEastwestId, String size, String units, String start, String resolution){
+	public TmgGeospatialcoverageEastwest(int tmgGeospatialcoverageId, int tmgGeospatialcoverageEastwestId, Datavalue resolution, Datavalue size, Datavalue start, Datavalue units){
 		this.tmgGeospatialcoverageId = tmgGeospatialcoverageId;
 		this.tmgGeospatialcoverageEastwestId = tmgGeospatialcoverageEastwestId;
-		this.size=size;
-		this.units=units;
-		this.start=start;
 		this.resolution=resolution;
+		this.size=size;
+		this.start=start;
+		this.units=units;
+	}
+	public TmgGeospatialcoverageEastwest clone(){
+		TmgGeospatialcoverageEastwest clone = new TmgGeospatialcoverageEastwest(this.tmgGeospatialcoverageId, -1, this.resolution, this.size, this.start, this.units);
+		return clone;
 	}
 }

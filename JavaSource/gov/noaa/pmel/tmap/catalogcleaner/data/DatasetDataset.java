@@ -1,5 +1,6 @@
 package gov.noaa.pmel.tmap.catalogcleaner.data;
 
+import gov.noaa.pmel.tmap.catalogcleaner.Datavalue;
 public class DatasetDataset extends Dataset {
 	private int parentId;
 
@@ -15,8 +16,8 @@ public class DatasetDataset extends Dataset {
 		super(datasetId);
 		this.parentId = parentId;
 	}
-	public DatasetDataset(int parentId, int datasetId, String harvest, String name, String alias, String authority, String d_id, String servicename, String urlpath, String resourcecontrol, String collectiontype, String status, String datatype, String datasize_unit){
-		super(datasetId, harvest, name, alias, authority, d_id, servicename, urlpath, resourcecontrol, collectiontype, status, datatype, datasize_unit);
+	public DatasetDataset(int parentId, int datasetId, Datavalue alias, Datavalue authority, Datavalue d_id, Datavalue harvest, Datavalue name, Datavalue resourcecontrol, Datavalue serviceName, Datavalue urlPath, Datavalue collectiontype, Datavalue datasize_unit, Datavalue dataType, Datavalue status){
+		super(datasetId, alias, authority, d_id, harvest, name, resourcecontrol, serviceName, urlPath, collectiontype, datasize_unit, dataType, status);
 		this.parentId = parentId;
 	}
 }

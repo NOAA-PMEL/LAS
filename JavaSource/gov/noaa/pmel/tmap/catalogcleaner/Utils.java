@@ -5,3 +5,4 @@ import thredds.catalog.InvCatalogFactory;
 public class Utils {
 	public static InvCatalogFactory FACTORY = new InvCatalogFactory("default", false);
 }
+

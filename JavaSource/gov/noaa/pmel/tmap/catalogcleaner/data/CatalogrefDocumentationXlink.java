@@ -1,10 +1,11 @@
 package gov.noaa.pmel.tmap.catalogcleaner.data;
 
+import gov.noaa.pmel.tmap.catalogcleaner.Datavalue;
 public class CatalogrefDocumentationXlink {
 	protected int catalogrefDocumentationId;
 	protected int catalogrefDocumentationXlinkId;
-	protected String value;
-	protected String xlink;
+	protected Datavalue value = new Datavalue(null);
+	protected Datavalue xlink = new Datavalue(null);
 	public void setCatalogrefDocumentationId(int catalogrefDocumentationId){
 		this.catalogrefDocumentationId = catalogrefDocumentationId;
 	}
@@ -12,10 +13,10 @@ public class CatalogrefDocumentationXlink {
 		this.catalogrefDocumentationXlinkId = catalogrefDocumentationXlinkId;
 	}
 	public void setValue(String value){
-		this.value = value;
+		this.value = new Datavalue(value);
 	}
 	public void setXlink(String xlink){
-		this.xlink = xlink;
+		this.xlink = new Datavalue(xlink);
 	}
 	public int getCatalogrefDocumentationId(){
 		return this.catalogrefDocumentationId;
@@ -23,20 +24,27 @@ public class CatalogrefDocumentationXlink {
 	public int getCatalogrefDocumentationXlinkId(){
 		return this.catalogrefDocumentationXlinkId;
 	}
-	public String getValue(){
+	public Datavalue getValue(){
 		return this.value;
 	}
-	public String getXlink(){
+	public Datavalue getXlink(){
 		return this.xlink;
 	}
 
+	public CatalogrefDocumentationXlink(){
+		this.catalogrefDocumentationXlinkId = -1;
+	}
 	public CatalogrefDocumentationXlink(int catalogrefDocumentationXlink){
 		this.catalogrefDocumentationXlinkId = catalogrefDocumentationXlink;
 	}
-	public CatalogrefDocumentationXlink(int catalogrefDocumentationId, int catalogrefDocumentationXlinkId, String value, String xlink){
+	public CatalogrefDocumentationXlink(int catalogrefDocumentationId, int catalogrefDocumentationXlinkId, Datavalue value, Datavalue xlink){
 		this.catalogrefDocumentationId = catalogrefDocumentationId;
 		this.catalogrefDocumentationXlinkId = catalogrefDocumentationXlinkId;
 		this.value=value;
 		this.xlink=xlink;
+	}
+	public CatalogrefDocumentationXlink clone(){
+		CatalogrefDocumentationXlink clone = new CatalogrefDocumentationXlink(this.catalogrefDocumentationId, -1, this.value, this.xlink);
+		return clone;
 	}
 }

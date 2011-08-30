@@ -1,10 +1,11 @@
 package gov.noaa.pmel.tmap.catalogcleaner.data;
 
+import gov.noaa.pmel.tmap.catalogcleaner.Datavalue;
 public class TmgDocumentation {
 	protected int tmgId;
 	protected int tmgDocumentationId;
-	protected String value;
-	protected String documentationenum;
+	protected Datavalue value = new Datavalue(null);
+	protected Datavalue documentationenum = new Datavalue(null);
 	public void setTmgId(int tmgId){
 		this.tmgId = tmgId;
 	}
@@ -12,10 +13,10 @@ public class TmgDocumentation {
 		this.tmgDocumentationId = tmgDocumentationId;
 	}
 	public void setValue(String value){
-		this.value = value;
+		this.value = new Datavalue(value);
 	}
 	public void setDocumentationenum(String documentationenum){
-		this.documentationenum = documentationenum;
+		this.documentationenum = new Datavalue(documentationenum);
 	}
 	public int getTmgId(){
 		return this.tmgId;
@@ -23,20 +24,27 @@ public class TmgDocumentation {
 	public int getTmgDocumentationId(){
 		return this.tmgDocumentationId;
 	}
-	public String getValue(){
+	public Datavalue getValue(){
 		return this.value;
 	}
-	public String getDocumentationenum(){
+	public Datavalue getDocumentationenum(){
 		return this.documentationenum;
 	}
 
+	public TmgDocumentation(){
+		this.tmgDocumentationId = -1;
+	}
 	public TmgDocumentation(int tmgDocumentation){
 		this.tmgDocumentationId = tmgDocumentation;
 	}
-	public TmgDocumentation(int tmgId, int tmgDocumentationId, String value, String documentationenum){
+	public TmgDocumentation(int tmgId, int tmgDocumentationId, Datavalue value, Datavalue documentationenum){
 		this.tmgId = tmgId;
 		this.tmgDocumentationId = tmgDocumentationId;
 		this.value=value;
 		this.documentationenum=documentationenum;
+	}
+	public TmgDocumentation clone(){
+		TmgDocumentation clone = new TmgDocumentation(this.tmgId, -1, this.value, this.documentationenum);
+		return clone;
 	}
 }

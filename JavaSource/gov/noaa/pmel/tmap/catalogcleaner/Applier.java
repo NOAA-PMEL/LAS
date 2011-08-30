@@ -1,194 +1,299 @@
 package gov.noaa.pmel.tmap.catalogcleaner;
 
-import gov.noaa.pmel.tmap.catalogcleaner.data.Catalog;
-import gov.noaa.pmel.tmap.catalogcleaner.data.CatalogService;
-import gov.noaa.pmel.tmap.catalogcleaner.data.DatasetTmg;
-import gov.noaa.pmel.tmap.catalogcleaner.data.ServiceService;
-import gov.noaa.pmel.tmap.catalogcleaner.data.TmgCreator;
-import gov.noaa.pmel.tmap.catalogcleaner.data.TmgCreatorContact;
-import gov.noaa.pmel.tmap.catalogcleaner.data.TmgCreatorName;
-import gov.noaa.pmel.tmap.catalogcleaner.data.TmgDocumentation;
-import gov.noaa.pmel.tmap.catalogcleaner.data.TmgMetadata;
+import gov.noaa.pmel.tmap.catalogcleaner.Datavalue;
+import gov.noaa.pmel.tmap.catalogcleaner.data.*;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.Iterator;
 import java.util.List;
 
-import thredds.catalog.InvCatalog;
-import thredds.catalog.InvCatalogImpl;
-import thredds.catalog.InvDataset;
-import thredds.catalog.InvDatasetImpl;
-import thredds.catalog.InvDocumentation;
-import thredds.catalog.InvMetadata;
-import thredds.catalog.InvService;
-import thredds.catalog.ServiceType;
-import thredds.catalog.ThreddsMetadata.Source;
-import org.w3c.dom.Attr;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
+import org.jdom.*;
 
+import thredds.catalog.InvCatalog;
 // TODO: replace with a real rules engine
 public class Applier {
 
-	private static InvCatalog rawCatalog;
+	public static Catalog applyCatalogRules(Catalog cleanCatalog) throws Exception{
 
-	public static int applyCatalogRules(Element parent, InvCatalog crawCatalog) throws Exception{
-		rawCatalog = crawCatalog;
-		String xmlns = parent.getAttribute("xmlns");		// works
-		String name = parent.getAttribute("name");			// works
-		String base = parent.getAttribute("base");
-		String version = parent.getAttribute("version");	// works
-		String expires = parent.getAttribute("expires");
-		String status = "new";
 
-		// apply rules
-
-		// end apply rules
-
-		int catalogId = DataAccess.insertCatalog(name, expires, version, base, xmlns, status);
-		//Catalog catalog = new Catalog(catalogId, xmlns, name, base, version, expires, status);
-		return catalogId;
+		return cleanCatalog;
 	}
-	public static int applyCatalogServiceRules(int parentId, Element child) throws Exception{
-		String name = child.getAttribute("name");	// works
-		String base = child.getAttribute("base");	// works
-		String servicetype = child.getAttribute("serviceType");	// works
-		String suffix = child.getAttribute("suffix");
-		String desc = child.getAttribute("desc");
-		int childId = -1;
+	public static Service applyCatalogServiceRules(int cleanCatalogId, Service cleanService) throws Exception{
+
 		// begin rules
-		if(!servicetype.equals("COMPOUND")){	// todo: this would be a rule applied
-			name = "ct2009";		// TODO: dynamically generate new name, determine other fields
-			base = "";
-			servicetype = "COMPOUND";
-			suffix = "";
-			desc = "";
-			childId = DataAccess.insertService(suffix, name, base, desc, servicetype, "new");
-			DataAccess.insertCatalogService(parentId, childId);
-			addCompoundServices(childId);
+		if(!cleanService.getServiceType().equals("COMPOUND")){	// todo: this would be a rule applied
+			cleanService = new Service(cleanService.getServiceId());
+			cleanService.setName("ct2009");		// TODO: dynamically generate new name, determine other fields
+			cleanService.setServiceType("COMPOUND");
+			cleanService.setBase("");
+			cleanService.setStatus("new");
+
+			addCompoundServices(cleanService.getServiceId());
 		}
 		else{
-			childId = DataAccess.insertService(suffix, name, base, desc, servicetype, "new");
-			DataAccess.insertCatalogService(parentId, childId);
 
 		}
 		// end rules
-
-		//catalogService = new CatalogService(catalogId, serviceId, base, name, suffix, desc, "new", servicetype);
-		return childId;
+		return cleanService;
 	}
 	// this would be defined in a rule
 	public static void addCompoundServices(int serviceId) throws Exception{
-		String name="odap";
-		String serviceType="OpenDAP";
-		String base="http://dunkel.pmel.noaa.gov:8780/thredds/dodsC/";
-		int childId = DataAccess.insertService("", name, base, "", serviceType, "new");
+		Service newChild = new Service();
+		newChild.setName("odap");
+		newChild.setServiceType("OpenDAP");
+		newChild.setBase("http://dunkel.pmel.noaa.gov:8780/thredds/dodsC/");
+		newChild.setStatus("new");
+		int childId = DataAccess.insertService(newChild);
 		DataAccess.insertServiceService(serviceId, childId);
-		name="http";
-		serviceType="HTTPServer";
-		base="/thredds/fileServer/";	// TODO: dynamically determine which services are available on their server, use them
-		childId = DataAccess.insertService("", name, base, "", serviceType, "new");
-		DataAccess.insertServiceService(serviceId, childId);
-		name="wms";
-		serviceType="WMS";
-		base="/thredds/wms/";	// TODO: dynamically determine which services are available on their server, use them
-		childId = DataAccess.insertService("", name, base, "", serviceType, "new");
-		DataAccess.insertServiceService(serviceId, childId);
-	}
-	public static int applyServiceServiceRules(int parentId, Element child) throws Exception{
-		String name = child.getAttribute("name");	// works
-		String base = child.getAttribute("base");	// works
-		String servicetype = child.getAttribute("serviceType"); 	// works
-		String suffix = child.getAttribute("suffix");
-		String desc = child.getAttribute("desc");
 
+		Service newChild2 = new Service();
+		newChild2.setName("http");
+		newChild2.setServiceType("HTTPServer");
+		newChild2.setBase("/thredds/fileServer/");	// TODO: dynamically determine which services are available on their server, use them
+		newChild2.setStatus("new");
+		int childId2 = DataAccess.insertService(newChild2);
+		DataAccess.insertServiceService(serviceId, childId2);
+
+		Service newChild3 = new Service();
+		newChild3.setName("wms");
+		newChild3.setServiceType("WMS");
+		newChild3.setBase("/thredds/wms/");	// TODO: dynamically determine which services are available on their server, use them
+		newChild3.setStatus("new");
+		int childId3 = DataAccess.insertService(newChild2);
+		DataAccess.insertServiceService(serviceId, childId3);
+	}
+	public static Service applyServiceServiceRules(int parentId, Service child) throws Exception{
 		// apply rules
 
-		int childId = DataAccess.insertService(suffix, name, base, desc, servicetype, "new");
-		DataAccess.insertServiceService(parentId, childId);
-		return childId;
+		return child;
 	}
-	public static int applyCatalogDatasetRules(int parentId, Element child) throws Exception{
-		String dId = child.getAttribute("ID");						// works
-		InvDataset d = rawCatalog.findDatasetByID(dId);
-		String alias = child.getAttribute("alias");
-		String harvest = child.getAttribute("harvest");
-		String resourcecontrol = child.getAttribute("resourcecontrol");
-		String urlpath = child.getAttribute("urlPath");				// works
-		//String servicename = child.getAttribute("serviceName");
-		String servicename = d.getServiceDefault().getName();
-		String authority = child.getAttribute("authority");
-		//String datatype = child.getAttribute("dataType");
-		String datatype = d.getDataType().toString();
-		String collectiontype = child.getAttribute("collectiontype");
-//		if(!datasetT.getCollectionType().equals(""))
-//			collectiontype = datasetT.getCollectionType().toString();
-		String datasizeUnit = child.getAttribute("datasizeUnit");
-////		if(!datasetT.getDataFormatType().equals(""))
-//			datasizeUnit = datasetT.getDataFormatType().toString();
-		String name = child.getAttribute("name");					// works
-		String status = "new";
+	public static Dataset applyCatalogDatasetRules(int parentId, Dataset child) throws Exception{
 
-		// apply rules
-		int childId = DataAccess.insertDataset(harvest, name, alias, authority, dId, servicename, urlpath, resourcecontrol, collectiontype, status, datatype, datasizeUnit);
-
-		DataAccess.insertCatalogDataset(parentId, childId);
-		//Dataset dataset = new Dataset(datasetId, alias, harvest, resourcecontrol, urlpath, servicename, dId, authority, name, datatype, status, collectiontype, datasizeUnit);
-		return childId;
+		return child;
 	}
-	public static int applyDatasetTmgRules(int parentId) throws Exception{
+	public static Tmg applyDatasetTmgRules(int parentId, Tmg child) throws Exception{
 		// nothing to check here, just insert new tmg for this dataset
-		//int datasetId = dataset.getDatasetId();
-		int childId = DataAccess.insertTmg();
 
-		// apply rules
+		return child;
+	}
+	public static Metadata applyTmgMetadataRules(int parentId, Metadata child) throws Exception{
 
-		DataAccess.insertDatasetTmg(parentId, childId);
-		return childId;
+		return child;
 	}
-	public static int applyTmgMetadataRules(int parentId, Element child) throws Exception{
-		String inherited = child.getAttribute("inherited");
-		String metadatatype = child.getAttribute("metadatatype");
-		InvDataset d = rawCatalog.findDatasetByID("ct_flux"); // TODO: obviously, make this not hard-coded
+	public static TmgDocumentation applyTmgDocumentationRules(int parentId, TmgDocumentation child) throws Exception{
 
-		// apply rules
-		int childId = DataAccess.insertMetadata(metadatatype, inherited);
-		DataAccess.insertTmgMetadata(parentId, childId);
-		return childId;
+		return child;
 	}
-	public static int applyTmgDocumentationRules(int parentId, Element child) throws Exception{
-		String documentationenum = child.getAttribute("type");
-		String value = child.getFirstChild().getTextContent();
+	public static TmgCreator applyTmgCreatorRules(int parentId, TmgCreator child) throws Exception{
 
-		// apply rules
-		int childId = DataAccess.insertTmgDocumentation(parentId, value, documentationenum);
-		return childId;
+		return child;
 	}
-	public static int applyTmgCreatorRules(int parentId, Element child) throws Exception{
-		// apply rules
-		int tmgCreatorId = DataAccess.insertTmgCreator(parentId);
-		return tmgCreatorId;
-	}
-	public static int applyTmgCreatorNameRules(int parentId, Element child) throws Exception{
-		String value = child.getFirstChild().getTextContent();
-		String vocabulary = child.getAttribute("vocabulary");
-		int childId = DataAccess.insertTmgCreatorName(parentId, value, vocabulary);
-		return childId;
+	public static TmgCreatorName applyTmgCreatorNameRules(int parentId, TmgCreatorName child) throws Exception{
+
+		return child;
 
 	}
-	public static int applyTmgCreatorContactRules(int parentId, Element child) throws Exception{
-		String url = child.getAttribute("url");
-		String email = child.getAttribute("email");
-		int childId = DataAccess.insertTmgCreatorContact(parentId, email, url);
-		return childId;
+	public static TmgCreatorContact applyTmgCreatorContactRules(int parentId, TmgCreatorContact child) throws Exception{
+
+		return child;
 	}
-	public static int applyMetadataTmgRules(int parentId) throws Exception {
-		int childId = DataAccess.insertTmg();
+	public static Tmg applyMetadataTmgRules(int parentId, Tmg child) throws Exception {
 
-		// apply rules
+		return child;
+	}
+	public static TmgGeospatialcoverageUpdown applyTmgGeospatialcoverageUpdownRules(int parentId, TmgGeospatialcoverageUpdown child) {
 
-		DataAccess.insertMetadataTmg(parentId, childId);
-		return childId;
+		// TODO Auto-generated method stub
+		return child;
+	}
+	public static TmgGeospatialcoverageNorthsouth applyTmgGeospatialcoverageNorthsouthRules(int parentId, TmgGeospatialcoverageNorthsouth child) {
+
+		// TODO Auto-generated method stub
+		return child;
+	}
+	public static TmgGeospatialcoverageName applyTmgGeospatialcoverageNameRules(int parentId, TmgGeospatialcoverageName child) {
+
+		// TODO Auto-generated method stub
+		return child;
+	}
+	public static TmgGeospatialcoverageEastwest applyTmgGeospatialcoverageEastwestRules(int parentId, TmgGeospatialcoverageEastwest child) {
+
+		// TODO Auto-generated method stub
+		return child;
+	}
+	public static TmgVariables applyTmgVariablesRules(int parentId, TmgVariables child) {
+		// TODO Auto-generated method stub
+		return child;
+	}
+	public static TmgGeospatialcoverage applyTmgGeospatialcoverageRules(int parentId, TmgGeospatialcoverage child) {
+
+		// TODO Auto-generated method stub
+		return child;
+	}
+	public static TmgKeyword applyTmgKeywordRules(int parentId, TmgKeyword child) {
+		// TODO Auto-generated method stub
+		return child;
+	}
+	public static TmgProject applyTmgProjectRules(int parentId, TmgProject child) {
+		// TODO Auto-generated method stub
+		return child;
+	}
+	public static TmgPublisher applyTmgPublisherRules(int parentId, TmgPublisher child) {
+		// TODO Auto-generated method stub
+		return child;
+	}
+	public static TmgTimecoverage applyTmgTimecoverageRules(int parentId, TmgTimecoverage child) {
+		// TODO Auto-generated method stub
+		return child;
+	}
+	public static TmgServicename applyTmgServicenameRules(int parentId, TmgServicename child) {
+		// TODO Auto-generated method stub
+		return child;
+	}
+	public static TmgProperty applyTmgPropertyRules(int parentId, TmgProperty child) {
+		// TODO Auto-generated method stub
+		return child;
+	}
+	public static TmgDate applyTmgDateRules(int parentId, TmgDate child) {
+		// TODO Auto-generated method stub
+		return child;
+	}
+	public static TmgDatatype applyTmgDatatypeRules(int parentId, TmgDatatype child) {
+		// TODO Auto-generated method stub
+		return child;
+	}
+	public static TmgDatasize applyTmgDatasizeRules(int parentId, TmgDatasize child) {
+		// TODO Auto-generated method stub
+		return child;
+	}
+	public static TmgDataformat applyTmgDataformatRules(int parentId, TmgDataformat child) {
+		// TODO Auto-generated method stub
+		return child;
+	}
+	public static TmgContributor applyTmgContributorRules(int parentId, TmgContributor child) {
+		// TODO Auto-generated method stub
+		return child;
+	}
+	public static TmgAuthority applyTmgAuthorityRules(int parentId, TmgAuthority child) {
+		// TODO Auto-generated method stub
+		return child;
+	}
+	public static TmgDocumentationXlink applyTmgDocumentationXlinkRules(int parentId, TmgDocumentationXlink child) {
+
+		// TODO Auto-generated method stub
+		return child;
+	}
+	public static TmgDocumentationNamespace applyTmgDocumentationNamespaceRules(int parentId, TmgDocumentationNamespace child) {
+
+		// TODO Auto-generated method stub
+		return child;
+	}
+	public static DatasetTmg applyDatasetTmgRules(int parentId, DatasetTmg child) {
+		// TODO Auto-generated method stub
+		return child;
+	}
+	public static Service applyDatasetServiceRules(int parentId, Service child) {
+		// TODO Auto-generated method stub
+		return child;
+	}
+	public static DatasetProperty applyDatasetPropertyRules(int parentId, DatasetProperty child) {
+		// TODO Auto-generated method stub
+		return child;
+	}
+	public static DatasetNcml applyDatasetNcmlRules(int parentId, DatasetNcml child) {
+		// TODO Auto-generated method stub
+		return child;
+	}
+	public static Dataset applyDatasetDatasetRules(int parentId, Dataset child) {
+		// TODO Auto-generated method stub
+		return child;
+	}
+	public static DatasetAccess applyDatasetAccessRules(int parentId, DatasetAccess child) {
+		// TODO Auto-generated method stub
+		return child;
+	}
+	public static TmgPublisherName applyTmgPublisherNameRules(int parentId, TmgPublisherName child) {
+		// TODO Auto-generated method stub
+		return child;
+	}
+	public static TmgPublisherContact applyTmgPublisherContactRules(int parentId, TmgPublisherContact child) {
+		// TODO Auto-generated method stub
+		return child;
+	}
+	public static CatalogrefDocumentationXlink applyCatalogrefDocumentationXlinkRules(int parentId, CatalogrefDocumentationXlink child) {
+
+		// TODO Auto-generated method stub
+		return child;
+	}
+	public static CatalogrefDocumentationNamespace applyCatalogrefDocumentationNamespaceRules(int parentId, CatalogrefDocumentationNamespace child) {
+
+		// TODO Auto-generated method stub
+		return child;
+	}
+	public static CatalogrefXlink applyCatalogrefXlinkRules(int parentId, CatalogrefXlink child) {
+		// TODO Auto-generated method stub
+		return child;
+	}
+	public static CatalogrefDocumentation applyCatalogrefDocumentationRules(int parentId, CatalogrefDocumentation child) {
+
+		// TODO Auto-generated method stub
+		return child;
+	}
+	public static CatalogXlink applyCatalogXlinkRules(int parentId, CatalogXlink child) {
+		// TODO Auto-generated method stub
+		return child;
+	}
+	public static CatalogProperty applyCatalogPropertyRules(int parentId, CatalogProperty child) {
+		// TODO Auto-generated method stub
+		return child;
+	}
+	public static DatasetAccessDatasize applyDatasetAccessDatasizeRules(int parentId, DatasetAccessDatasize child) {
+
+		// TODO Auto-generated method stub
+		return child;
+	}
+	public static ServiceProperty applyServicePropertyRules(int parentId, ServiceProperty child) {
+		// TODO Auto-generated method stub
+		return child;
+	}
+	public static ServiceDatasetroot applyServiceDatasetrootRules(int parentId, ServiceDatasetroot child) {
+		// TODO Auto-generated method stub
+		return child;
+	}
+	public static TmgVariablesVariablemap applyTmgVariablesVariablemapRules(int parentId, TmgVariablesVariablemap child) {
+
+		// TODO Auto-generated method stub
+		return child;
+	}
+	public static TmgVariablesVariable applyTmgVariablesVariableRules(int parentId, TmgVariablesVariable child) {
+		// TODO Auto-generated method stub
+		return child;
+	}
+	public static MetadataXlink applyMetadataXlinkRules(int parentId, MetadataXlink child) {
+		// TODO Auto-generated method stub
+		return child;
+	}
+	public static MetadataTmg applyMetadataTmgRules(int parentId, MetadataTmg child) {
+		// TODO Auto-generated method stub
+		return child;
+	}
+	public static MetadataNamespace applyMetadataNamespaceRules(int parentId, MetadataNamespace child) {
+		// TODO Auto-generated method stub
+		return child;
+	}
+	public static TmgTimecoverageStart applyTmgTimecoverageStartRules(int parentId, TmgTimecoverageStart child) {
+		// TODO Auto-generated method stub
+		return child;
+	}
+	public static TmgTimecoverageResolution applyTmgTimecoverageResolutionRules(int parentId, TmgTimecoverageResolution child) {
+
+		// TODO Auto-generated method stub
+		return child;
+	}
+	public static TmgTimecoverageEnd applyTmgTimecoverageEndRules(int parentId, TmgTimecoverageEnd child) {
+		// TODO Auto-generated method stub
+		return child;
+	}
+	public static TmgTimecoverageDuration applyTmgTimecoverageDurationRules(int parentId, TmgTimecoverageDuration child) {
+		// TODO Auto-generated method stub
+		return child;
 	}
 }

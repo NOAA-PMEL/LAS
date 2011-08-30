@@ -1,9 +1,10 @@
 package gov.noaa.pmel.tmap.catalogcleaner.data;
 
+import gov.noaa.pmel.tmap.catalogcleaner.Datavalue;
 public class TmgVariables {
 	protected int tmgId;
 	protected int tmgVariablesId;
-	protected String vocabulary;
+	protected Datavalue vocabulary = new Datavalue(null);
 	public void setTmgId(int tmgId){
 		this.tmgId = tmgId;
 	}
@@ -11,7 +12,7 @@ public class TmgVariables {
 		this.tmgVariablesId = tmgVariablesId;
 	}
 	public void setVocabulary(String vocabulary){
-		this.vocabulary = vocabulary;
+		this.vocabulary = new Datavalue(vocabulary);
 	}
 	public int getTmgId(){
 		return this.tmgId;
@@ -19,16 +20,23 @@ public class TmgVariables {
 	public int getTmgVariablesId(){
 		return this.tmgVariablesId;
 	}
-	public String getVocabulary(){
+	public Datavalue getVocabulary(){
 		return this.vocabulary;
 	}
 
+	public TmgVariables(){
+		this.tmgVariablesId = -1;
+	}
 	public TmgVariables(int tmgVariables){
 		this.tmgVariablesId = tmgVariables;
 	}
-	public TmgVariables(int tmgId, int tmgVariablesId, String vocabulary){
+	public TmgVariables(int tmgId, int tmgVariablesId, Datavalue vocabulary){
 		this.tmgId = tmgId;
 		this.tmgVariablesId = tmgVariablesId;
 		this.vocabulary=vocabulary;
+	}
+	public TmgVariables clone(){
+		TmgVariables clone = new TmgVariables(this.tmgId, -1, this.vocabulary);
+		return clone;
 	}
 }
