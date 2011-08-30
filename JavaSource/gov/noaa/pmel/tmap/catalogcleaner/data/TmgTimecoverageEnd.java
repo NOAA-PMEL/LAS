@@ -1,11 +1,12 @@
 package gov.noaa.pmel.tmap.catalogcleaner.data;
 
+import gov.noaa.pmel.tmap.catalogcleaner.Datavalue;
 public class TmgTimecoverageEnd {
 	protected int tmgTimecoverageId;
 	protected int tmgTimecoverageEndId;
-	protected String format;
-	protected String value;
-	protected String dateenum;
+	protected Datavalue format = new Datavalue(null);
+	protected Datavalue value = new Datavalue(null);
+	protected Datavalue dateenum = new Datavalue(null);
 	public void setTmgTimecoverageId(int tmgTimecoverageId){
 		this.tmgTimecoverageId = tmgTimecoverageId;
 	}
@@ -13,13 +14,13 @@ public class TmgTimecoverageEnd {
 		this.tmgTimecoverageEndId = tmgTimecoverageEndId;
 	}
 	public void setFormat(String format){
-		this.format = format;
+		this.format = new Datavalue(format);
 	}
 	public void setValue(String value){
-		this.value = value;
+		this.value = new Datavalue(value);
 	}
 	public void setDateenum(String dateenum){
-		this.dateenum = dateenum;
+		this.dateenum = new Datavalue(dateenum);
 	}
 	public int getTmgTimecoverageId(){
 		return this.tmgTimecoverageId;
@@ -27,24 +28,31 @@ public class TmgTimecoverageEnd {
 	public int getTmgTimecoverageEndId(){
 		return this.tmgTimecoverageEndId;
 	}
-	public String getFormat(){
+	public Datavalue getFormat(){
 		return this.format;
 	}
-	public String getValue(){
+	public Datavalue getValue(){
 		return this.value;
 	}
-	public String getDateenum(){
+	public Datavalue getDateenum(){
 		return this.dateenum;
 	}
 
+	public TmgTimecoverageEnd(){
+		this.tmgTimecoverageEndId = -1;
+	}
 	public TmgTimecoverageEnd(int tmgTimecoverageEnd){
 		this.tmgTimecoverageEndId = tmgTimecoverageEnd;
 	}
-	public TmgTimecoverageEnd(int tmgTimecoverageId, int tmgTimecoverageEndId, String format, String value, String dateenum){
+	public TmgTimecoverageEnd(int tmgTimecoverageId, int tmgTimecoverageEndId, Datavalue format, Datavalue value, Datavalue dateenum){
 		this.tmgTimecoverageId = tmgTimecoverageId;
 		this.tmgTimecoverageEndId = tmgTimecoverageEndId;
 		this.format=format;
 		this.value=value;
 		this.dateenum=dateenum;
+	}
+	public TmgTimecoverageEnd clone(){
+		TmgTimecoverageEnd clone = new TmgTimecoverageEnd(this.tmgTimecoverageId, -1, this.format, this.value, this.dateenum);
+		return clone;
 	}
 }

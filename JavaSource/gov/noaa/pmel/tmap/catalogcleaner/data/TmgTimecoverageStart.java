@@ -1,11 +1,12 @@
 package gov.noaa.pmel.tmap.catalogcleaner.data;
 
+import gov.noaa.pmel.tmap.catalogcleaner.Datavalue;
 public class TmgTimecoverageStart {
 	protected int tmgTimecoverageId;
 	protected int tmgTimecoverageStartId;
-	protected String format;
-	protected String value;
-	protected String dateenum;
+	protected Datavalue format = new Datavalue(null);
+	protected Datavalue value = new Datavalue(null);
+	protected Datavalue dateenum = new Datavalue(null);
 	public void setTmgTimecoverageId(int tmgTimecoverageId){
 		this.tmgTimecoverageId = tmgTimecoverageId;
 	}
@@ -13,13 +14,13 @@ public class TmgTimecoverageStart {
 		this.tmgTimecoverageStartId = tmgTimecoverageStartId;
 	}
 	public void setFormat(String format){
-		this.format = format;
+		this.format = new Datavalue(format);
 	}
 	public void setValue(String value){
-		this.value = value;
+		this.value = new Datavalue(value);
 	}
 	public void setDateenum(String dateenum){
-		this.dateenum = dateenum;
+		this.dateenum = new Datavalue(dateenum);
 	}
 	public int getTmgTimecoverageId(){
 		return this.tmgTimecoverageId;
@@ -27,24 +28,31 @@ public class TmgTimecoverageStart {
 	public int getTmgTimecoverageStartId(){
 		return this.tmgTimecoverageStartId;
 	}
-	public String getFormat(){
+	public Datavalue getFormat(){
 		return this.format;
 	}
-	public String getValue(){
+	public Datavalue getValue(){
 		return this.value;
 	}
-	public String getDateenum(){
+	public Datavalue getDateenum(){
 		return this.dateenum;
 	}
 
+	public TmgTimecoverageStart(){
+		this.tmgTimecoverageStartId = -1;
+	}
 	public TmgTimecoverageStart(int tmgTimecoverageStart){
 		this.tmgTimecoverageStartId = tmgTimecoverageStart;
 	}
-	public TmgTimecoverageStart(int tmgTimecoverageId, int tmgTimecoverageStartId, String format, String value, String dateenum){
+	public TmgTimecoverageStart(int tmgTimecoverageId, int tmgTimecoverageStartId, Datavalue format, Datavalue value, Datavalue dateenum){
 		this.tmgTimecoverageId = tmgTimecoverageId;
 		this.tmgTimecoverageStartId = tmgTimecoverageStartId;
 		this.format=format;
 		this.value=value;
 		this.dateenum=dateenum;
+	}
+	public TmgTimecoverageStart clone(){
+		TmgTimecoverageStart clone = new TmgTimecoverageStart(this.tmgTimecoverageId, -1, this.format, this.value, this.dateenum);
+		return clone;
 	}
 }

@@ -1,10 +1,11 @@
 package gov.noaa.pmel.tmap.catalogcleaner.data;
 
+import gov.noaa.pmel.tmap.catalogcleaner.Datavalue;
 public class CatalogProperty {
 	protected int catalogId;
 	protected int catalogPropertyId;
-	protected String name;
-	protected String value;
+	protected Datavalue name = new Datavalue(null);
+	protected Datavalue value = new Datavalue(null);
 	public void setCatalogId(int catalogId){
 		this.catalogId = catalogId;
 	}
@@ -12,10 +13,10 @@ public class CatalogProperty {
 		this.catalogPropertyId = catalogPropertyId;
 	}
 	public void setName(String name){
-		this.name = name;
+		this.name = new Datavalue(name);
 	}
 	public void setValue(String value){
-		this.value = value;
+		this.value = new Datavalue(value);
 	}
 	public int getCatalogId(){
 		return this.catalogId;
@@ -23,20 +24,27 @@ public class CatalogProperty {
 	public int getCatalogPropertyId(){
 		return this.catalogPropertyId;
 	}
-	public String getName(){
+	public Datavalue getName(){
 		return this.name;
 	}
-	public String getValue(){
+	public Datavalue getValue(){
 		return this.value;
 	}
 
+	public CatalogProperty(){
+		this.catalogPropertyId = -1;
+	}
 	public CatalogProperty(int catalogProperty){
 		this.catalogPropertyId = catalogProperty;
 	}
-	public CatalogProperty(int catalogId, int catalogPropertyId, String name, String value){
+	public CatalogProperty(int catalogId, int catalogPropertyId, Datavalue name, Datavalue value){
 		this.catalogId = catalogId;
 		this.catalogPropertyId = catalogPropertyId;
 		this.name=name;
 		this.value=value;
+	}
+	public CatalogProperty clone(){
+		CatalogProperty clone = new CatalogProperty(this.catalogId, -1, this.name, this.value);
+		return clone;
 	}
 }

@@ -1,66 +1,74 @@
 package gov.noaa.pmel.tmap.catalogcleaner.data;
 
+import gov.noaa.pmel.tmap.catalogcleaner.Datavalue;
 public class Service {
 	protected int serviceId;
-	protected String suffix;
-	protected String name;
-	protected String base;
-	protected String desc;
-	protected String servicetype;
-	protected String status;
+	protected Datavalue base = new Datavalue(null);
+	protected Datavalue desc = new Datavalue(null);
+	protected Datavalue name = new Datavalue(null);
+	protected Datavalue suffix = new Datavalue(null);
+	protected Datavalue serviceType = new Datavalue(null);
+	protected Datavalue status = new Datavalue(null);
 	public void setServiceId(int serviceId){
 		this.serviceId = serviceId;
 	}
-	public void setSuffix(String suffix){
-		this.suffix = suffix;
-	}
-	public void setName(String name){
-		this.name = name;
-	}
 	public void setBase(String base){
-		this.base = base;
+		this.base = new Datavalue(base);
 	}
 	public void setDesc(String desc){
-		this.desc = desc;
+		this.desc = new Datavalue(desc);
 	}
-	public void setServicetype(String servicetype){
-		this.servicetype = servicetype;
+	public void setName(String name){
+		this.name = new Datavalue(name);
+	}
+	public void setSuffix(String suffix){
+		this.suffix = new Datavalue(suffix);
+	}
+	public void setServiceType(String serviceType){
+		this.serviceType = new Datavalue(serviceType);
 	}
 	public void setStatus(String status){
-		this.status = status;
+		this.status = new Datavalue(status);
 	}
 	public int getServiceId(){
 		return this.serviceId;
 	}
-	public String getSuffix(){
-		return this.suffix;
-	}
-	public String getName(){
-		return this.name;
-	}
-	public String getBase(){
+	public Datavalue getBase(){
 		return this.base;
 	}
-	public String getDesc(){
+	public Datavalue getDesc(){
 		return this.desc;
 	}
-	public String getServicetype(){
-		return this.servicetype;
+	public Datavalue getName(){
+		return this.name;
 	}
-	public String getStatus(){
+	public Datavalue getSuffix(){
+		return this.suffix;
+	}
+	public Datavalue getServiceType(){
+		return this.serviceType;
+	}
+	public Datavalue getStatus(){
 		return this.status;
 	}
 
+	public Service(){
+		this.serviceId = -1;
+	}
 	public Service(int service){
 		this.serviceId = service;
 	}
-	public Service(int serviceId, String suffix, String name, String base, String desc, String servicetype, String status){
+	public Service(int serviceId, Datavalue base, Datavalue desc, Datavalue name, Datavalue suffix, Datavalue serviceType, Datavalue status){
 		this.serviceId = serviceId;
-		this.suffix=suffix;
-		this.name=name;
 		this.base=base;
 		this.desc=desc;
-		this.servicetype=servicetype;
+		this.name=name;
+		this.suffix=suffix;
+		this.serviceType=serviceType;
 		this.status=status;
+	}
+	public Service clone(){
+		Service clone = new Service(-1, this.base, this.desc, this.name, this.suffix, this.serviceType, this.status);
+		return clone;
 	}
 }

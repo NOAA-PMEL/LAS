@@ -75,15 +75,16 @@ public class CatalogCleaner {
 			//			}
 
 			
-		//}
-		DataAccess.init(this);
-		// todo: remove from database if exists
-		//Crawler crawler = new Crawler();
-		Crawler crawler = new Crawler();
-		int catalogId = crawler.crawlNew(uri, rawCatalog);
-		Writer ccwriter = new Writer();
-		ccwriter.run(catalogId);
-	}
+			//}
+			DataAccess.init(this);
+			// todo: remove from database if exists
+			//Crawler crawler = new Crawler();
+			Crawler crawler = new Crawler();
+			Catalog raw = crawler.crawlNewCatalog(uri);
+			int cleanCatalogId = crawler.crawlRawCatalog(raw);
+			Writer ccwriter = new Writer();
+			ccwriter.run(cleanCatalogId);
+		}
 	}
 
 }

@@ -18,6 +18,7 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
  
+import org.jdom.Namespace;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -51,20 +52,22 @@ public class Writer {
 	}
 	
 	public Document writeCatalog(Document doc, Catalog catalog) throws Exception{
-		Element catalogElement = doc.createElement("catalog");
-		if(!catalog.getXmlns().equals("")){
-			Attr xmlns = doc.createAttribute("xmlns");
-			xmlns.setValue(catalog.getXmlns());
-			catalogElement.setAttributeNode(xmlns);
+		Element catalogElement = doc.createElementNS(catalog.getXmlns().getValue(), "catalog");
+			
+		ArrayList<CatalogXlink> xlinks = DataAccess.getCatalogXlinkBCatalog(catalog.getCatalogId());
+		for(int i = 0; i<xlinks.size(); i++){
+			Attr xlink = doc.createAttribute("xmlns:" + xlinks.get(i).getXlink().getValue());
+			xlink.setValue(xlinks.get(i).getValue().getValue());
+			catalogElement.setAttributeNode(xlink);
 		}
-		if(!catalog.getName().equals("")){
+		if(!catalog.getName().isNull()){
 			Attr name = doc.createAttribute("name");
-			name.setValue(catalog.getName());
+			name.setValue(catalog.getName().getValue());
 			catalogElement.setAttributeNode(name);
 		}
-		if(!catalog.getVersion().equals("")){
+		if(!catalog.getVersion().isNull()){
 			Attr version = doc.createAttribute("version");
-			version.setValue(catalog.getVersion());
+			version.setValue(catalog.getVersion().getValue());
 			catalogElement.setAttributeNode(version);
 		}
 		
@@ -84,21 +87,21 @@ public class Writer {
 	}
 	
 	public Element appendService(Document doc, Element node, Service service) throws Exception{
-		Element serviceElement = doc.createElement("service");
+		Element serviceElement = doc.createElementNS(null, "service");
 
-		if(!service.getName().equals("")){
+		if(!service.getName().isNull()){
 			Attr name = doc.createAttribute("name");
-			name.setValue(service.getName());
+			name.setValue(service.getName().getValue());
 			serviceElement.setAttributeNode(name);
 		}
-		if(!service.getServicetype().equals("")){
+		if(!service.getServiceType().isNull()){
 			Attr servicetype = doc.createAttribute("serviceType");
-			servicetype.setValue(service.getServicetype());
+			servicetype.setValue(service.getServiceType().getValue());
 			serviceElement.setAttributeNode(servicetype);
 		}
-		if(!service.getBase().equals("")){
+		if(!service.getBase().isNull()){
 			Attr base = doc.createAttribute("base");
-			base.setValue(service.getBase());
+			base.setValue(service.getBase().getValue());
 			serviceElement.setAttributeNode(base);
 		}
 		
@@ -114,29 +117,29 @@ public class Writer {
 	public Element appendDataset(Document doc, Element node, Dataset dataset) throws Exception{
 		Element datasetElement = doc.createElement("dataset");
 		
-		if(!dataset.getName().equals("")){
+		if(!dataset.getName().isNull()){
 			Attr name = doc.createAttribute("name");
-			name.setValue(dataset.getName());
+			name.setValue(dataset.getName().getValue());
 			datasetElement.setAttributeNode(name);
 		}
-		if(!dataset.getDId().equals("")){
+		if(!dataset.getDId().isNull()){
 			Attr dID = doc.createAttribute("ID");
-			dID.setValue(dataset.getDId());
+			dID.setValue(dataset.getDId().getValue());
 			datasetElement.setAttributeNode(dID);
 		}
-		if(!dataset.getUrlpath().equals("")){
+		if(!dataset.getUrlPath().isNull()){
 			Attr urlPath = doc.createAttribute("urlPath");
-			urlPath.setValue(dataset.getUrlpath());
+			urlPath.setValue(dataset.getUrlPath().getValue());
 			datasetElement.setAttributeNode(urlPath);
 		}
-		if(!dataset.getServicename().equals("")){
+		if(!dataset.getServiceName().isNull()){
 			Attr serviceName = doc.createAttribute("serviceName");
-			serviceName.setValue(dataset.getServicename());
+			serviceName.setValue(dataset.getServiceName().getValue());
 			datasetElement.setAttributeNode(serviceName);
 		}
-		if(!dataset.getDatatype().equals("")){
+		if(!dataset.getDataType().isNull()){
 			Attr dataType = doc.createAttribute("dataType");
-			dataType.setValue(dataset.getDatatype());
+			dataType.setValue(dataset.getDataType().getValue());
 			datasetElement.setAttributeNode(dataType);
 		}
 		ArrayList<Tmg> tmgs = DataAccess.getTmgBDataset(dataset.getDatasetId());
@@ -172,9 +175,9 @@ public class Writer {
 	public Element appendMetadata(Document doc, Element node, Metadata metadata) throws Exception{
 		Element metadataElement = doc.createElement("metadata");
 		
-		if(!metadata.getInherited().equals("")){
+		if(!metadata.getInherited().isNull()){
 			Attr inherited = doc.createAttribute("inherited");
-			inherited.setValue(metadata.getInherited());
+			inherited.setValue(metadata.getInherited().getValue());
 			metadataElement.setAttributeNode(inherited);
 		}
 		ArrayList<Tmg> tmgs = DataAccess.getTmgBMetadata(metadata.getMetadataId());
@@ -189,12 +192,12 @@ public class Writer {
 	public Element appendTmgDocumentation(Document doc, Element node, TmgDocumentation documentation){
 		Element documentationElement = doc.createElement("documentation");
 
-		if(!documentation.getDocumentationenum().equals("")){
+		if(!documentation.getDocumentationenum().isNull()){
 			Attr type = doc.createAttribute("type");
-			type.setValue(documentation.getDocumentationenum());
+			type.setValue(documentation.getDocumentationenum().getValue());
 			documentationElement.setAttributeNode(type);
 		}
-		documentationElement.setTextContent(documentation.getValue());
+		documentationElement.setTextContent(documentation.getValue().getValue());
 		node.appendChild(documentationElement);
 		return node;
 	}
@@ -216,25 +219,25 @@ public class Writer {
 	}
 	public Element appendTmgCreatorName(Document doc, Element node, TmgCreatorName name){
 		Element nameElement = doc.createElement("name");
-		if(!name.getVocabulary().equals("")){
+		if(!name.getVocabulary().isNull()){
 			Attr vocabulary = doc.createAttribute("vocabulary");
-			vocabulary.setValue(name.getVocabulary());
+			vocabulary.setValue(name.getVocabulary().getValue());
 			nameElement.setAttributeNode(vocabulary);
 		}
-		nameElement.setTextContent(name.getValue());
+		nameElement.setTextContent(name.getValue().getValue());
 		node.appendChild(nameElement);
 		return node;
 	}
 	public Element appendTmgCreatorContact(Document doc, Element node, TmgCreatorContact contact){
 		Element contactElement = doc.createElement("contact");
-		if(!contact.getUrl().equals("")){
+		if(!contact.getUrl().isNull()){
 			Attr url = doc.createAttribute("url");
-			url.setValue(contact.getUrl());
+			url.setValue(contact.getUrl().getValue());
 			contactElement.setAttributeNode(url);
 		}
-		if(!contact.getEmail().equals("")){
+		if(!contact.getEmail().isNull()){
 			Attr email = doc.createAttribute("email");
-			email.setValue(contact.getEmail());
+			email.setValue(contact.getEmail().getValue());
 			contactElement.setAttributeNode(email);
 		}
 		node.appendChild(contactElement);

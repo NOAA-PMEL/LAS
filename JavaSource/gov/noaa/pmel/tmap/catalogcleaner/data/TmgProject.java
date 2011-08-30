@@ -1,10 +1,11 @@
 package gov.noaa.pmel.tmap.catalogcleaner.data;
 
+import gov.noaa.pmel.tmap.catalogcleaner.Datavalue;
 public class TmgProject {
 	protected int tmgId;
 	protected int tmgProjectId;
-	protected String value;
-	protected String vocabulary;
+	protected Datavalue value = new Datavalue(null);
+	protected Datavalue vocabulary = new Datavalue(null);
 	public void setTmgId(int tmgId){
 		this.tmgId = tmgId;
 	}
@@ -12,10 +13,10 @@ public class TmgProject {
 		this.tmgProjectId = tmgProjectId;
 	}
 	public void setValue(String value){
-		this.value = value;
+		this.value = new Datavalue(value);
 	}
 	public void setVocabulary(String vocabulary){
-		this.vocabulary = vocabulary;
+		this.vocabulary = new Datavalue(vocabulary);
 	}
 	public int getTmgId(){
 		return this.tmgId;
@@ -23,20 +24,27 @@ public class TmgProject {
 	public int getTmgProjectId(){
 		return this.tmgProjectId;
 	}
-	public String getValue(){
+	public Datavalue getValue(){
 		return this.value;
 	}
-	public String getVocabulary(){
+	public Datavalue getVocabulary(){
 		return this.vocabulary;
 	}
 
+	public TmgProject(){
+		this.tmgProjectId = -1;
+	}
 	public TmgProject(int tmgProject){
 		this.tmgProjectId = tmgProject;
 	}
-	public TmgProject(int tmgId, int tmgProjectId, String value, String vocabulary){
+	public TmgProject(int tmgId, int tmgProjectId, Datavalue value, Datavalue vocabulary){
 		this.tmgId = tmgId;
 		this.tmgProjectId = tmgProjectId;
 		this.value=value;
 		this.vocabulary=vocabulary;
+	}
+	public TmgProject clone(){
+		TmgProject clone = new TmgProject(this.tmgId, -1, this.value, this.vocabulary);
+		return clone;
 	}
 }
