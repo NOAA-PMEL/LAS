@@ -1,15 +1,3 @@
-CREATE OR REPLACE FUNCTION insert_catalog(p_name text, p_expires text, p_version text, p_base text, p_xmlns text, p_status text) RETURNS int AS $$
-DECLARE
-	id int;
-BEGIN
-		insert into catalog("name", "expires", "version", "base", "xmlns") values (p_name, p_expires, p_version, p_base, p_xmlns);
-		select currval('catalog_catalog_id_seq') into id;
-		update catalog set status = cast(p_status as status) where catalog_id=id;
-
-		return id;
-END;
-$$ LANGUAGE plpgsql;
-
 CREATE OR REPLACE FUNCTION insert_catalog_dataset(p_catalog_id int, p_dataset_id int) RETURNS int AS $$
 DECLARE
 	id int;
@@ -48,10 +36,10 @@ BEGIN
 		insert into catalog_xlink("catalog_id", "value") values (p_catalog_id, p_value);
 		select currval('catalog_xlink_catalog_xlink_id_seq') into id;
 		BEGIN
-			update catalog_xlink set xlink = cast(p_xlink as xlink) where catalog_xlink_id=id;
+			update catalog_xlink set "xlink" = cast(p_xlink as xlink) where catalog_xlink_id=id;
 		EXCEPTION
 			when others then
-				update catalog_xlink set xlink_nonstandard = p_xlink where catalog_xlink_id=id;
+				update catalog_xlink set "xlink_nonstandard" = p_xlink where catalog_xlink_id=id;
 		END;
 
 		return id;
@@ -76,10 +64,10 @@ BEGIN
 		insert into catalogref_documentation("catalogref_id", "value") values (p_catalogref_id, p_value);
 		select currval('catalogref_documentation_catalogref_documentation_id_seq') into id;
 		BEGIN
-			update catalogref_documentation set documentationenum = cast(p_documentationenum as documentationenum) where catalogref_documentation_id=id;
+			update catalogref_documentation set "documentationenum" = cast(p_documentationenum as documentationenum) where catalogref_documentation_id=id;
 		EXCEPTION
 			when others then
-				update catalogref_documentation set documentationenum_nonstandard = p_documentationenum where catalogref_documentation_id=id;
+				update catalogref_documentation set "documentationenum_nonstandard" = p_documentationenum where catalogref_documentation_id=id;
 		END;
 
 		return id;
@@ -104,10 +92,10 @@ BEGIN
 		insert into catalogref_documentation_xlink("catalogref_documentation_id", "value") values (p_catalogref_documentation_id, p_value);
 		select currval('catalogref_documentation_xlink_catalogref_documentation_xlink_id_seq') into id;
 		BEGIN
-			update catalogref_documentation_xlink set xlink = cast(p_xlink as xlink) where catalogref_documentation_xlink_id=id;
+			update catalogref_documentation_xlink set "xlink" = cast(p_xlink as xlink) where catalogref_documentation_xlink_id=id;
 		EXCEPTION
 			when others then
-				update catalogref_documentation_xlink set xlink_nonstandard = p_xlink where catalogref_documentation_xlink_id=id;
+				update catalogref_documentation_xlink set "xlink_nonstandard" = p_xlink where catalogref_documentation_xlink_id=id;
 		END;
 
 		return id;
@@ -121,57 +109,57 @@ BEGIN
 		insert into catalogref_xlink("catalogref_id", "value") values (p_catalogref_id, p_value);
 		select currval('catalogref_xlink_catalogref_xlink_id_seq') into id;
 		BEGIN
-			update catalogref_xlink set xlink = cast(p_xlink as xlink) where catalogref_xlink_id=id;
+			update catalogref_xlink set "xlink" = cast(p_xlink as xlink) where catalogref_xlink_id=id;
 		EXCEPTION
 			when others then
-				update catalogref_xlink set xlink_nonstandard = p_xlink where catalogref_xlink_id=id;
+				update catalogref_xlink set "xlink_nonstandard" = p_xlink where catalogref_xlink_id=id;
 		END;
 
 		return id;
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION insert_dataset(p_harvest text, p_name text, p_alias text, p_authority text, p_d_id text, p_servicename text, p_urlpath text, p_resourcecontrol text, p_collectiontype text, p_status text, p_datatype text, p_datasize_unit text) RETURNS int AS $$
+CREATE OR REPLACE FUNCTION insert_dataset(p_alias text, p_authority text, p_d_id text, p_harvest text, p_name text, p_resourcecontrol text, p_serviceName text, p_urlPath text, p_collectiontype text, p_datasize_unit text, p_dataType text, p_status text) RETURNS int AS $$
 DECLARE
 	id int;
 BEGIN
-		insert into dataset("harvest", "name", "alias", "authority", "d_id", "servicename", "urlpath", "resourcecontrol") values (p_harvest, p_name, p_alias, p_authority, p_d_id, p_servicename, p_urlpath, p_resourcecontrol);
+		insert into dataset("alias", "authority", "d_id", "harvest", "name", "resourcecontrol", "serviceName", "urlPath") values (p_alias, p_authority, p_d_id, p_harvest, p_name, p_resourcecontrol, p_serviceName, p_urlPath);
 		select currval('dataset_dataset_id_seq') into id;
 		BEGIN
-			update dataset set collectiontype = cast(p_collectiontype as collectiontype) where dataset_id=id;
+			update dataset set "collectiontype" = cast(p_collectiontype as collectiontype) where dataset_id=id;
 		EXCEPTION
 			when others then
-				update dataset set collectiontype_nonstandard = p_collectiontype where dataset_id=id;
-		END;
-		update dataset set status = cast(p_status as status) where dataset_id=id;
-		BEGIN
-			update dataset set datatype = cast(p_datatype as datatype) where dataset_id=id;
-		EXCEPTION
-			when others then
-				update dataset set datatype_nonstandard = p_datatype where dataset_id=id;
+				update dataset set "collectiontype_nonstandard" = p_collectiontype where dataset_id=id;
 		END;
 		BEGIN
-			update dataset set datasize_unit = cast(p_datasize_unit as datasize_unit) where dataset_id=id;
+			update dataset set "datasize_unit" = cast(p_datasize_unit as datasize_unit) where dataset_id=id;
 		EXCEPTION
 			when others then
-				update dataset set datasize_unit_nonstandard = p_datasize_unit where dataset_id=id;
+				update dataset set "datasize_unit_nonstandard" = p_datasize_unit where dataset_id=id;
 		END;
+		BEGIN
+			update dataset set "dataType" = cast(p_dataType as dataType) where dataset_id=id;
+		EXCEPTION
+			when others then
+				update dataset set "dataType_nonstandard" = p_dataType where dataset_id=id;
+		END;
+		update dataset set "status" = cast(p_status as status) where dataset_id=id;
 
 		return id;
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION insert_dataset_access(p_dataset_id int, p_urlpath text, p_servicename text, p_dataformat text) RETURNS int AS $$
+CREATE OR REPLACE FUNCTION insert_dataset_access(p_dataset_id int, p_servicename text, p_urlpath text, p_dataformat text) RETURNS int AS $$
 DECLARE
 	id int;
 BEGIN
-		insert into dataset_access("dataset_id", "urlpath", "servicename") values (p_dataset_id, p_urlpath, p_servicename);
+		insert into dataset_access("dataset_id", "servicename", "urlpath") values (p_dataset_id, p_servicename, p_urlpath);
 		select currval('dataset_access_dataset_access_id_seq') into id;
 		BEGIN
-			update dataset_access set dataformat = cast(p_dataformat as dataformat) where dataset_access_id=id;
+			update dataset_access set "dataformat" = cast(p_dataformat as dataformat) where dataset_access_id=id;
 		EXCEPTION
 			when others then
-				update dataset_access set dataformat_nonstandard = p_dataformat where dataset_access_id=id;
+				update dataset_access set "dataformat_nonstandard" = p_dataformat where dataset_access_id=id;
 		END;
 
 		return id;
@@ -185,10 +173,10 @@ BEGIN
 		insert into dataset_access_datasize("dataset_access_id", "value") values (p_dataset_access_id, p_value);
 		select currval('dataset_access_datasize_dataset_access_datasize_id_seq') into id;
 		BEGIN
-			update dataset_access_datasize set units = cast(p_units as units) where dataset_access_datasize_id=id;
+			update dataset_access_datasize set "units" = cast(p_units as units) where dataset_access_datasize_id=id;
 		EXCEPTION
 			when others then
-				update dataset_access_datasize set units_nonstandard = p_units where dataset_access_datasize_id=id;
+				update dataset_access_datasize set "units_nonstandard" = p_units where dataset_access_datasize_id=id;
 		END;
 
 		return id;
@@ -257,23 +245,23 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION insert_metadata(p_metadatatype text, p_inherited text) RETURNS int AS $$
+CREATE OR REPLACE FUNCTION insert_metadata(p_inherited text, p_metadatatype text) RETURNS int AS $$
 DECLARE
 	id int;
 BEGIN
 		insert into metadata("not_empty") values ('true');
 		select currval('metadata_metadata_id_seq') into id;
 		BEGIN
-			update metadata set metadatatype = cast(p_metadatatype as metadatatype) where metadata_id=id;
+			update metadata set "inherited" = cast(p_inherited as inherited) where metadata_id=id;
 		EXCEPTION
 			when others then
-				update metadata set metadatatype_nonstandard = p_metadatatype where metadata_id=id;
+				update metadata set "inherited_nonstandard" = p_inherited where metadata_id=id;
 		END;
 		BEGIN
-			update metadata set inherited = cast(p_inherited as inherited) where metadata_id=id;
+			update metadata set "metadatatype" = cast(p_metadatatype as metadatatype) where metadata_id=id;
 		EXCEPTION
 			when others then
-				update metadata set inherited_nonstandard = p_inherited where metadata_id=id;
+				update metadata set "metadatatype_nonstandard" = p_metadatatype where metadata_id=id;
 		END;
 
 		return id;
@@ -308,50 +296,50 @@ BEGIN
 		insert into metadata_xlink("metadata_id", "value") values (p_metadata_id, p_value);
 		select currval('metadata_xlink_metadata_xlink_id_seq') into id;
 		BEGIN
-			update metadata_xlink set xlink = cast(p_xlink as xlink) where metadata_xlink_id=id;
+			update metadata_xlink set "xlink" = cast(p_xlink as xlink) where metadata_xlink_id=id;
 		EXCEPTION
 			when others then
-				update metadata_xlink set xlink_nonstandard = p_xlink where metadata_xlink_id=id;
+				update metadata_xlink set "xlink_nonstandard" = p_xlink where metadata_xlink_id=id;
 		END;
 
 		return id;
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION insert_service(p_suffix text, p_name text, p_base text, p_desc text, p_servicetype text, p_status text) RETURNS int AS $$
+CREATE OR REPLACE FUNCTION insert_service(p_base text, p_desc text, p_name text, p_suffix text, p_serviceType text, p_status text) RETURNS int AS $$
 DECLARE
 	id int;
 BEGIN
-		insert into service("suffix", "name", "base", "desc") values (p_suffix, p_name, p_base, p_desc);
+		insert into service("base", "desc", "name", "suffix") values (p_base, p_desc, p_name, p_suffix);
 		select currval('service_service_id_seq') into id;
 		BEGIN
-			update service set servicetype = cast(p_servicetype as servicetype) where service_id=id;
+			update service set "serviceType" = cast(p_serviceType as serviceType) where service_id=id;
 		EXCEPTION
 			when others then
-				update service set servicetype_nonstandard = p_servicetype where service_id=id;
+				update service set "serviceType_nonstandard" = p_serviceType where service_id=id;
 		END;
-		update service set status = cast(p_status as status) where service_id=id;
+		update service set "status" = cast(p_status as status) where service_id=id;
 
 		return id;
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION insert_service_datasetroot(p_service_id int, p_path text, p_location text) RETURNS int AS $$
+CREATE OR REPLACE FUNCTION insert_service_datasetroot(p_service_id int, p_location text, p_path text) RETURNS int AS $$
 DECLARE
 	id int;
 BEGIN
-		insert into service_datasetroot("service_id", "path", "location") values (p_service_id, p_path, p_location);
+		insert into service_datasetroot("service_id", "location", "path") values (p_service_id, p_location, p_path);
 		select currval('service_datasetroot_service_datasetroot_id_seq') into id;
 
 		return id;
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION insert_service_property(p_service_id int, p_value text, p_name text) RETURNS int AS $$
+CREATE OR REPLACE FUNCTION insert_service_property(p_service_id int, p_name text, p_value text) RETURNS int AS $$
 DECLARE
 	id int;
 BEGIN
-		insert into service_property("service_id", "value", "name") values (p_service_id, p_value, p_name);
+		insert into service_property("service_id", "name", "value") values (p_service_id, p_name, p_value);
 		select currval('service_property_service_property_id_seq') into id;
 
 		return id;
@@ -390,11 +378,11 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION insert_tmg_contributor(p_tmg_id int, p_role text, p_name text) RETURNS int AS $$
+CREATE OR REPLACE FUNCTION insert_tmg_contributor(p_tmg_id int, p_name text, p_role text) RETURNS int AS $$
 DECLARE
 	id int;
 BEGIN
-		insert into tmg_contributor("tmg_id", "role", "name") values (p_tmg_id, p_role, p_name);
+		insert into tmg_contributor("tmg_id", "name", "role") values (p_tmg_id, p_name, p_role);
 		select currval('tmg_contributor_tmg_contributor_id_seq') into id;
 
 		return id;
@@ -441,10 +429,10 @@ BEGIN
 		insert into tmg_dataformat("tmg_id") values (p_tmg_id);
 		select currval('tmg_dataformat_tmg_dataformat_id_seq') into id;
 		BEGIN
-			update tmg_dataformat set dataformat = cast(p_dataformat as dataformat) where tmg_dataformat_id=id;
+			update tmg_dataformat set "dataformat" = cast(p_dataformat as dataformat) where tmg_dataformat_id=id;
 		EXCEPTION
 			when others then
-				update tmg_dataformat set dataformat_nonstandard = p_dataformat where tmg_dataformat_id=id;
+				update tmg_dataformat set "dataformat_nonstandard" = p_dataformat where tmg_dataformat_id=id;
 		END;
 
 		return id;
@@ -458,10 +446,10 @@ BEGIN
 		insert into tmg_datasize("tmg_id", "value") values (p_tmg_id, p_value);
 		select currval('tmg_datasize_tmg_datasize_id_seq') into id;
 		BEGIN
-			update tmg_datasize set units = cast(p_units as units) where tmg_datasize_id=id;
+			update tmg_datasize set "units" = cast(p_units as units) where tmg_datasize_id=id;
 		EXCEPTION
 			when others then
-				update tmg_datasize set units_nonstandard = p_units where tmg_datasize_id=id;
+				update tmg_datasize set "units_nonstandard" = p_units where tmg_datasize_id=id;
 		END;
 
 		return id;
@@ -475,10 +463,10 @@ BEGIN
 		insert into tmg_datatype("tmg_id") values (p_tmg_id);
 		select currval('tmg_datatype_tmg_datatype_id_seq') into id;
 		BEGIN
-			update tmg_datatype set datatype = cast(p_datatype as datatype) where tmg_datatype_id=id;
+			update tmg_datatype set "datatype" = cast(p_datatype as datatype) where tmg_datatype_id=id;
 		EXCEPTION
 			when others then
-				update tmg_datatype set datatype_nonstandard = p_datatype where tmg_datatype_id=id;
+				update tmg_datatype set "datatype_nonstandard" = p_datatype where tmg_datatype_id=id;
 		END;
 
 		return id;
@@ -492,10 +480,10 @@ BEGIN
 		insert into tmg_date("tmg_id", "format", "value") values (p_tmg_id, p_format, p_value);
 		select currval('tmg_date_tmg_date_id_seq') into id;
 		BEGIN
-			update tmg_date set dateenum = cast(p_dateenum as dateenum) where tmg_date_id=id;
+			update tmg_date set "dateenum" = cast(p_dateenum as dateenum) where tmg_date_id=id;
 		EXCEPTION
 			when others then
-				update tmg_date set dateenum_nonstandard = p_dateenum where tmg_date_id=id;
+				update tmg_date set "dateenum_nonstandard" = p_dateenum where tmg_date_id=id;
 		END;
 
 		return id;
@@ -509,10 +497,10 @@ BEGIN
 		insert into tmg_documentation("tmg_id", "value") values (p_tmg_id, p_value);
 		select currval('tmg_documentation_tmg_documentation_id_seq') into id;
 		BEGIN
-			update tmg_documentation set documentationenum = cast(p_documentationenum as documentationenum) where tmg_documentation_id=id;
+			update tmg_documentation set "documentationenum" = cast(p_documentationenum as documentationenum) where tmg_documentation_id=id;
 		EXCEPTION
 			when others then
-				update tmg_documentation set documentationenum_nonstandard = p_documentationenum where tmg_documentation_id=id;
+				update tmg_documentation set "documentationenum_nonstandard" = p_documentationenum where tmg_documentation_id=id;
 		END;
 
 		return id;
@@ -537,10 +525,10 @@ BEGIN
 		insert into tmg_documentation_xlink("tmg_documentation_id", "value") values (p_tmg_documentation_id, p_value);
 		select currval('tmg_documentation_xlink_tmg_documentation_xlink_id_seq') into id;
 		BEGIN
-			update tmg_documentation_xlink set xlink = cast(p_xlink as xlink) where tmg_documentation_xlink_id=id;
+			update tmg_documentation_xlink set "xlink" = cast(p_xlink as xlink) where tmg_documentation_xlink_id=id;
 		EXCEPTION
 			when others then
-				update tmg_documentation_xlink set xlink_nonstandard = p_xlink where tmg_documentation_xlink_id=id;
+				update tmg_documentation_xlink set "xlink_nonstandard" = p_xlink where tmg_documentation_xlink_id=id;
 		END;
 
 		return id;
@@ -554,54 +542,54 @@ BEGIN
 		insert into tmg_geospatialcoverage("tmg_id") values (p_tmg_id);
 		select currval('tmg_geospatialcoverage_tmg_geospatialcoverage_id_seq') into id;
 		BEGIN
-			update tmg_geospatialcoverage set upordown = cast(p_upordown as upordown) where tmg_geospatialcoverage_id=id;
+			update tmg_geospatialcoverage set "upordown" = cast(p_upordown as upordown) where tmg_geospatialcoverage_id=id;
 		EXCEPTION
 			when others then
-				update tmg_geospatialcoverage set upordown_nonstandard = p_upordown where tmg_geospatialcoverage_id=id;
+				update tmg_geospatialcoverage set "upordown_nonstandard" = p_upordown where tmg_geospatialcoverage_id=id;
 		END;
 
 		return id;
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION insert_tmg_geospatialcoverage_eastwest(p_tmg_geospatialcoverage_id int, p_size text, p_units text, p_start text, p_resolution text) RETURNS int AS $$
+CREATE OR REPLACE FUNCTION insert_tmg_geospatialcoverage_eastwest(p_tmg_geospatialcoverage_id int, p_resolution text, p_size text, p_start text, p_units text) RETURNS int AS $$
 DECLARE
 	id int;
 BEGIN
-		insert into tmg_geospatialcoverage_eastwest("tmg_geospatialcoverage_id", "size", "units", "start", "resolution") values (p_tmg_geospatialcoverage_id, p_size, p_units, p_start, p_resolution);
+		insert into tmg_geospatialcoverage_eastwest("tmg_geospatialcoverage_id", "resolution", "size", "start", "units") values (p_tmg_geospatialcoverage_id, p_resolution, p_size, p_start, p_units);
 		select currval('tmg_geospatialcoverage_eastwest_tmg_geospatialcoverage_eastwest_id_seq') into id;
 
 		return id;
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION insert_tmg_geospatialcoverage_name(p_tmg_geospatialcoverage_id int, p_vocabulary text, p_value text) RETURNS int AS $$
+CREATE OR REPLACE FUNCTION insert_tmg_geospatialcoverage_name(p_tmg_geospatialcoverage_id int, p_value text, p_vocabulary text) RETURNS int AS $$
 DECLARE
 	id int;
 BEGIN
-		insert into tmg_geospatialcoverage_name("tmg_geospatialcoverage_id", "vocabulary", "value") values (p_tmg_geospatialcoverage_id, p_vocabulary, p_value);
+		insert into tmg_geospatialcoverage_name("tmg_geospatialcoverage_id", "value", "vocabulary") values (p_tmg_geospatialcoverage_id, p_value, p_vocabulary);
 		select currval('tmg_geospatialcoverage_name_tmg_geospatialcoverage_name_id_seq') into id;
 
 		return id;
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION insert_tmg_geospatialcoverage_northsouth(p_tmg_geospatialcoverage_id int, p_size text, p_resolution text, p_start text, p_units text) RETURNS int AS $$
+CREATE OR REPLACE FUNCTION insert_tmg_geospatialcoverage_northsouth(p_tmg_geospatialcoverage_id int, p_resolution text, p_size text, p_start text, p_units text) RETURNS int AS $$
 DECLARE
 	id int;
 BEGIN
-		insert into tmg_geospatialcoverage_northsouth("tmg_geospatialcoverage_id", "size", "resolution", "start", "units") values (p_tmg_geospatialcoverage_id, p_size, p_resolution, p_start, p_units);
+		insert into tmg_geospatialcoverage_northsouth("tmg_geospatialcoverage_id", "resolution", "size", "start", "units") values (p_tmg_geospatialcoverage_id, p_resolution, p_size, p_start, p_units);
 		select currval('tmg_geospatialcoverage_northsouth_tmg_geospatialcoverage_northsouth_id_seq') into id;
 
 		return id;
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION insert_tmg_geospatialcoverage_updown(p_tmg_geospatialcoverage_id int, p_start text, p_resolution text, p_size text, p_units text) RETURNS int AS $$
+CREATE OR REPLACE FUNCTION insert_tmg_geospatialcoverage_updown(p_tmg_geospatialcoverage_id int, p_resolution text, p_size text, p_start text, p_units text) RETURNS int AS $$
 DECLARE
 	id int;
 BEGIN
-		insert into tmg_geospatialcoverage_updown("tmg_geospatialcoverage_id", "start", "resolution", "size", "units") values (p_tmg_geospatialcoverage_id, p_start, p_resolution, p_size, p_units);
+		insert into tmg_geospatialcoverage_updown("tmg_geospatialcoverage_id", "resolution", "size", "start", "units") values (p_tmg_geospatialcoverage_id, p_resolution, p_size, p_start, p_units);
 		select currval('tmg_geospatialcoverage_updown_tmg_geospatialcoverage_updown_id_seq') into id;
 
 		return id;
@@ -662,11 +650,11 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION insert_tmg_publisher_contact(p_tmg_publisher_id int, p_url text, p_email text) RETURNS int AS $$
+CREATE OR REPLACE FUNCTION insert_tmg_publisher_contact(p_tmg_publisher_id int, p_email text, p_url text) RETURNS int AS $$
 DECLARE
 	id int;
 BEGIN
-		insert into tmg_publisher_contact("tmg_publisher_id", "url", "email") values (p_tmg_publisher_id, p_url, p_email);
+		insert into tmg_publisher_contact("tmg_publisher_id", "email", "url") values (p_tmg_publisher_id, p_email, p_url);
 		select currval('tmg_publisher_contact_tmg_publisher_contact_id_seq') into id;
 
 		return id;
@@ -724,10 +712,10 @@ BEGIN
 		insert into tmg_timecoverage_end("tmg_timecoverage_id", "format", "value") values (p_tmg_timecoverage_id, p_format, p_value);
 		select currval('tmg_timecoverage_end_tmg_timecoverage_end_id_seq') into id;
 		BEGIN
-			update tmg_timecoverage_end set dateenum = cast(p_dateenum as dateenum) where tmg_timecoverage_end_id=id;
+			update tmg_timecoverage_end set "dateenum" = cast(p_dateenum as dateenum) where tmg_timecoverage_end_id=id;
 		EXCEPTION
 			when others then
-				update tmg_timecoverage_end set dateenum_nonstandard = p_dateenum where tmg_timecoverage_end_id=id;
+				update tmg_timecoverage_end set "dateenum_nonstandard" = p_dateenum where tmg_timecoverage_end_id=id;
 		END;
 
 		return id;
@@ -752,10 +740,10 @@ BEGIN
 		insert into tmg_timecoverage_start("tmg_timecoverage_id", "format", "value") values (p_tmg_timecoverage_id, p_format, p_value);
 		select currval('tmg_timecoverage_start_tmg_timecoverage_start_id_seq') into id;
 		BEGIN
-			update tmg_timecoverage_start set dateenum = cast(p_dateenum as dateenum) where tmg_timecoverage_start_id=id;
+			update tmg_timecoverage_start set "dateenum" = cast(p_dateenum as dateenum) where tmg_timecoverage_start_id=id;
 		EXCEPTION
 			when others then
-				update tmg_timecoverage_start set dateenum_nonstandard = p_dateenum where tmg_timecoverage_start_id=id;
+				update tmg_timecoverage_start set "dateenum_nonstandard" = p_dateenum where tmg_timecoverage_start_id=id;
 		END;
 
 		return id;
@@ -769,21 +757,21 @@ BEGIN
 		insert into tmg_variables("tmg_id") values (p_tmg_id);
 		select currval('tmg_variables_tmg_variables_id_seq') into id;
 		BEGIN
-			update tmg_variables set vocabulary = cast(p_vocabulary as vocabulary) where tmg_variables_id=id;
+			update tmg_variables set "vocabulary" = cast(p_vocabulary as vocabulary) where tmg_variables_id=id;
 		EXCEPTION
 			when others then
-				update tmg_variables set vocabulary_nonstandard = p_vocabulary where tmg_variables_id=id;
+				update tmg_variables set "vocabulary_nonstandard" = p_vocabulary where tmg_variables_id=id;
 		END;
 
 		return id;
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION insert_tmg_variables_variable(p_tmg_variables_id int, p_units text, p_name text, p_vocabulary_name text) RETURNS int AS $$
+CREATE OR REPLACE FUNCTION insert_tmg_variables_variable(p_tmg_variables_id int, p_name text, p_units text, p_vocabulary_name text) RETURNS int AS $$
 DECLARE
 	id int;
 BEGIN
-		insert into tmg_variables_variable("tmg_variables_id", "units", "name", "vocabulary_name") values (p_tmg_variables_id, p_units, p_name, p_vocabulary_name);
+		insert into tmg_variables_variable("tmg_variables_id", "name", "units", "vocabulary_name") values (p_tmg_variables_id, p_name, p_units, p_vocabulary_name);
 		select currval('tmg_variables_variable_tmg_variables_variable_id_seq') into id;
 
 		return id;
@@ -797,10 +785,10 @@ BEGIN
 		insert into tmg_variables_variablemap("tmg_variables_id", "value") values (p_tmg_variables_id, p_value);
 		select currval('tmg_variables_variablemap_tmg_variables_variablemap_id_seq') into id;
 		BEGIN
-			update tmg_variables_variablemap set xlink = cast(p_xlink as xlink) where tmg_variables_variablemap_id=id;
+			update tmg_variables_variablemap set "xlink" = cast(p_xlink as xlink) where tmg_variables_variablemap_id=id;
 		EXCEPTION
 			when others then
-				update tmg_variables_variablemap set xlink_nonstandard = p_xlink where tmg_variables_variablemap_id=id;
+				update tmg_variables_variablemap set "xlink_nonstandard" = p_xlink where tmg_variables_variablemap_id=id;
 		END;
 
 		return id;

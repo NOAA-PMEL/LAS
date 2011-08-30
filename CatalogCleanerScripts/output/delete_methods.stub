@@ -1,1708 +1,480 @@
 	public static int deleteCatalog(int catalogId) throws Exception{
-
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-
-		try {
-			ps = setPreparedStatement("delete_catalog", new int[]{catalogId});
-
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			rs.next();
-			catalogId = rs.getInt(1);
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-			ps.close();
-//				rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
-		return catalogId;
+		PreparedStatement ps = setPreparedStatement("delete_catalog", new int[]{catalogId});
+		return runStatement(ps);
 	}
-
-	public static int deleteCatalogDataset(int catalogDatasetId) throws Exception{
-
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-
-		try {
-			ps = setPreparedStatement("delete_catalog_dataset", new int[]{catalogDatasetId});
-
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			rs.next();
-			catalogDatasetId = rs.getInt(1);
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-			ps.close();
-//				rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
-		return catalogDatasetId;
+	public static int deleteCatalog(Catalog catalog) throws Exception{
+		PreparedStatement ps = setPreparedStatement("delete_catalog", new int[]{catalog.getCatalogId()});
+		return runStatement(ps);
 	}
-
+	public static int deleteCatalogDataset(int parentId, int childId) throws Exception{
+		PreparedStatement ps = setPreparedStatement("delete_catalog_dataset", new int[]{parentId, childId});
+		return runStatement(ps);
+	}
+	public static int deleteCatalogDataset(CatalogDataset catalogDataset) throws Exception{
+		PreparedStatement ps = setPreparedStatement("delete_catalog_dataset", new int[]{catalogDataset.getParentId(), catalogDataset.getChildId()});
+		return runStatement(ps);
+	}
 	public static int deleteCatalogProperty(int catalogPropertyId) throws Exception{
-
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-
-		try {
-			ps = setPreparedStatement("delete_catalog_property", new int[]{catalogPropertyId});
-
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			rs.next();
-			catalogPropertyId = rs.getInt(1);
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-			ps.close();
-//				rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
-		return catalogPropertyId;
+		PreparedStatement ps = setPreparedStatement("delete_catalog_property", new int[]{catalogPropertyId});
+		return runStatement(ps);
 	}
-
-	public static int deleteCatalogService(int catalogServiceId) throws Exception{
-
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-
-		try {
-			ps = setPreparedStatement("delete_catalog_service", new int[]{catalogServiceId});
-
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			rs.next();
-			catalogServiceId = rs.getInt(1);
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-			ps.close();
-//				rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
-		return catalogServiceId;
+	public static int deleteCatalogProperty(CatalogProperty catalogProperty) throws Exception{
+		PreparedStatement ps = setPreparedStatement("delete_catalog_property", new int[]{catalogProperty.getCatalogPropertyId()});
+		return runStatement(ps);
 	}
-
+	public static int deleteCatalogService(int parentId, int childId) throws Exception{
+		PreparedStatement ps = setPreparedStatement("delete_catalog_service", new int[]{parentId, childId});
+		return runStatement(ps);
+	}
+	public static int deleteCatalogService(CatalogService catalogService) throws Exception{
+		PreparedStatement ps = setPreparedStatement("delete_catalog_service", new int[]{catalogService.getParentId(), catalogService.getChildId()});
+		return runStatement(ps);
+	}
 	public static int deleteCatalogXlink(int catalogXlinkId) throws Exception{
-
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-
-		try {
-			ps = setPreparedStatement("delete_catalog_xlink", new int[]{catalogXlinkId});
-
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			rs.next();
-			catalogXlinkId = rs.getInt(1);
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-			ps.close();
-//				rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
-		return catalogXlinkId;
+		PreparedStatement ps = setPreparedStatement("delete_catalog_xlink", new int[]{catalogXlinkId});
+		return runStatement(ps);
 	}
-
+	public static int deleteCatalogXlink(CatalogXlink catalogXlink) throws Exception{
+		PreparedStatement ps = setPreparedStatement("delete_catalog_xlink", new int[]{catalogXlink.getCatalogXlinkId()});
+		return runStatement(ps);
+	}
 	public static int deleteCatalogref(int catalogrefId) throws Exception{
-
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-
-		try {
-			ps = setPreparedStatement("delete_catalogref", new int[]{catalogrefId});
-
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			rs.next();
-			catalogrefId = rs.getInt(1);
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-			ps.close();
-//				rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
-		return catalogrefId;
+		PreparedStatement ps = setPreparedStatement("delete_catalogref", new int[]{catalogrefId});
+		return runStatement(ps);
 	}
-
+	public static int deleteCatalogref(Catalogref catalogref) throws Exception{
+		PreparedStatement ps = setPreparedStatement("delete_catalogref", new int[]{catalogref.getCatalogrefId()});
+		return runStatement(ps);
+	}
 	public static int deleteCatalogrefDocumentation(int catalogrefDocumentationId) throws Exception{
-
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-
-		try {
-			ps = setPreparedStatement("delete_catalogref_documentation", new int[]{catalogrefDocumentationId});
-
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			rs.next();
-			catalogrefDocumentationId = rs.getInt(1);
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-			ps.close();
-//				rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
-		return catalogrefDocumentationId;
+		PreparedStatement ps = setPreparedStatement("delete_catalogref_documentation", new int[]{catalogrefDocumentationId});
+		return runStatement(ps);
 	}
-
+	public static int deleteCatalogrefDocumentation(CatalogrefDocumentation catalogrefDocumentation) throws Exception{
+		PreparedStatement ps = setPreparedStatement("delete_catalogref_documentation", new int[]{catalogrefDocumentation.getCatalogrefDocumentationId()});
+		return runStatement(ps);
+	}
 	public static int deleteCatalogrefDocumentationNamespace(int catalogrefDocumentationNamespaceId) throws Exception{
-
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-
-		try {
-			ps = setPreparedStatement("delete_catalogref_documentation_namespace", new int[]{catalogrefDocumentationNamespaceId});
-
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			rs.next();
-			catalogrefDocumentationNamespaceId = rs.getInt(1);
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-			ps.close();
-//				rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
-		return catalogrefDocumentationNamespaceId;
+		PreparedStatement ps = setPreparedStatement("delete_catalogref_documentation_namespace", new int[]{catalogrefDocumentationNamespaceId});
+		return runStatement(ps);
 	}
-
+	public static int deleteCatalogrefDocumentationNamespace(CatalogrefDocumentationNamespace catalogrefDocumentationNamespace) throws Exception{
+		PreparedStatement ps = setPreparedStatement("delete_catalogref_documentation_namespace", new int[]{catalogrefDocumentationNamespace.getCatalogrefDocumentationNamespaceId()});
+		return runStatement(ps);
+	}
 	public static int deleteCatalogrefDocumentationXlink(int catalogrefDocumentationXlinkId) throws Exception{
-
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-
-		try {
-			ps = setPreparedStatement("delete_catalogref_documentation_xlink", new int[]{catalogrefDocumentationXlinkId});
-
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			rs.next();
-			catalogrefDocumentationXlinkId = rs.getInt(1);
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-			ps.close();
-//				rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
-		return catalogrefDocumentationXlinkId;
+		PreparedStatement ps = setPreparedStatement("delete_catalogref_documentation_xlink", new int[]{catalogrefDocumentationXlinkId});
+		return runStatement(ps);
 	}
-
+	public static int deleteCatalogrefDocumentationXlink(CatalogrefDocumentationXlink catalogrefDocumentationXlink) throws Exception{
+		PreparedStatement ps = setPreparedStatement("delete_catalogref_documentation_xlink", new int[]{catalogrefDocumentationXlink.getCatalogrefDocumentationXlinkId()});
+		return runStatement(ps);
+	}
 	public static int deleteCatalogrefXlink(int catalogrefXlinkId) throws Exception{
-
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-
-		try {
-			ps = setPreparedStatement("delete_catalogref_xlink", new int[]{catalogrefXlinkId});
-
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			rs.next();
-			catalogrefXlinkId = rs.getInt(1);
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-			ps.close();
-//				rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
-		return catalogrefXlinkId;
+		PreparedStatement ps = setPreparedStatement("delete_catalogref_xlink", new int[]{catalogrefXlinkId});
+		return runStatement(ps);
 	}
-
+	public static int deleteCatalogrefXlink(CatalogrefXlink catalogrefXlink) throws Exception{
+		PreparedStatement ps = setPreparedStatement("delete_catalogref_xlink", new int[]{catalogrefXlink.getCatalogrefXlinkId()});
+		return runStatement(ps);
+	}
 	public static int deleteDataset(int datasetId) throws Exception{
-
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-
-		try {
-			ps = setPreparedStatement("delete_dataset", new int[]{datasetId});
-
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			rs.next();
-			datasetId = rs.getInt(1);
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-			ps.close();
-//				rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
-		return datasetId;
+		PreparedStatement ps = setPreparedStatement("delete_dataset", new int[]{datasetId});
+		return runStatement(ps);
 	}
-
+	public static int deleteDataset(Dataset dataset) throws Exception{
+		PreparedStatement ps = setPreparedStatement("delete_dataset", new int[]{dataset.getDatasetId()});
+		return runStatement(ps);
+	}
 	public static int deleteDatasetAccess(int datasetAccessId) throws Exception{
-
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-
-		try {
-			ps = setPreparedStatement("delete_dataset_access", new int[]{datasetAccessId});
-
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			rs.next();
-			datasetAccessId = rs.getInt(1);
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-			ps.close();
-//				rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
-		return datasetAccessId;
+		PreparedStatement ps = setPreparedStatement("delete_dataset_access", new int[]{datasetAccessId});
+		return runStatement(ps);
 	}
-
+	public static int deleteDatasetAccess(DatasetAccess datasetAccess) throws Exception{
+		PreparedStatement ps = setPreparedStatement("delete_dataset_access", new int[]{datasetAccess.getDatasetAccessId()});
+		return runStatement(ps);
+	}
 	public static int deleteDatasetAccessDatasize(int datasetAccessDatasizeId) throws Exception{
-
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-
-		try {
-			ps = setPreparedStatement("delete_dataset_access_datasize", new int[]{datasetAccessDatasizeId});
-
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			rs.next();
-			datasetAccessDatasizeId = rs.getInt(1);
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-			ps.close();
-//				rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
-		return datasetAccessDatasizeId;
+		PreparedStatement ps = setPreparedStatement("delete_dataset_access_datasize", new int[]{datasetAccessDatasizeId});
+		return runStatement(ps);
 	}
-
-	public static int deleteDatasetCatalogref(int datasetCatalogrefId) throws Exception{
-
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-
-		try {
-			ps = setPreparedStatement("delete_dataset_catalogref", new int[]{datasetCatalogrefId});
-
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			rs.next();
-			datasetCatalogrefId = rs.getInt(1);
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-			ps.close();
-//				rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
-		return datasetCatalogrefId;
+	public static int deleteDatasetAccessDatasize(DatasetAccessDatasize datasetAccessDatasize) throws Exception{
+		PreparedStatement ps = setPreparedStatement("delete_dataset_access_datasize", new int[]{datasetAccessDatasize.getDatasetAccessDatasizeId()});
+		return runStatement(ps);
 	}
-
-	public static int deleteDatasetDataset(int datasetDatasetId) throws Exception{
-
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-
-		try {
-			ps = setPreparedStatement("delete_dataset_dataset", new int[]{datasetDatasetId});
-
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			rs.next();
-			datasetDatasetId = rs.getInt(1);
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-			ps.close();
-//				rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
-		return datasetDatasetId;
+	public static int deleteDatasetDataset(int parentId, int childId) throws Exception{
+		PreparedStatement ps = setPreparedStatement("delete_dataset_dataset", new int[]{parentId, childId});
+		return runStatement(ps);
 	}
-
+	public static int deleteDatasetDataset(DatasetDataset datasetDataset) throws Exception{
+		PreparedStatement ps = setPreparedStatement("delete_dataset_dataset", new int[]{datasetDataset.getParentId(), datasetDataset.getChildId()});
+		return runStatement(ps);
+	}
 	public static int deleteDatasetNcml(int datasetNcmlId) throws Exception{
-
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-
-		try {
-			ps = setPreparedStatement("delete_dataset_ncml", new int[]{datasetNcmlId});
-
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			rs.next();
-			datasetNcmlId = rs.getInt(1);
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-			ps.close();
-//				rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
-		return datasetNcmlId;
+		PreparedStatement ps = setPreparedStatement("delete_dataset_ncml", new int[]{datasetNcmlId});
+		return runStatement(ps);
 	}
-
+	public static int deleteDatasetNcml(DatasetNcml datasetNcml) throws Exception{
+		PreparedStatement ps = setPreparedStatement("delete_dataset_ncml", new int[]{datasetNcml.getDatasetNcmlId()});
+		return runStatement(ps);
+	}
 	public static int deleteDatasetProperty(int datasetPropertyId) throws Exception{
-
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-
-		try {
-			ps = setPreparedStatement("delete_dataset_property", new int[]{datasetPropertyId});
-
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			rs.next();
-			datasetPropertyId = rs.getInt(1);
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-			ps.close();
-//				rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
-		return datasetPropertyId;
+		PreparedStatement ps = setPreparedStatement("delete_dataset_property", new int[]{datasetPropertyId});
+		return runStatement(ps);
 	}
-
-	public static int deleteDatasetService(int datasetServiceId) throws Exception{
-
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-
-		try {
-			ps = setPreparedStatement("delete_dataset_service", new int[]{datasetServiceId});
-
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			rs.next();
-			datasetServiceId = rs.getInt(1);
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-			ps.close();
-//				rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
-		return datasetServiceId;
+	public static int deleteDatasetProperty(DatasetProperty datasetProperty) throws Exception{
+		PreparedStatement ps = setPreparedStatement("delete_dataset_property", new int[]{datasetProperty.getDatasetPropertyId()});
+		return runStatement(ps);
 	}
-
-	public static int deleteDatasetTmg(int datasetTmgId) throws Exception{
-
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-
-		try {
-			ps = setPreparedStatement("delete_dataset_tmg", new int[]{datasetTmgId});
-
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			rs.next();
-			datasetTmgId = rs.getInt(1);
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-			ps.close();
-//				rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
-		return datasetTmgId;
+	public static int deleteDatasetService(int parentId, int childId) throws Exception{
+		PreparedStatement ps = setPreparedStatement("delete_dataset_service", new int[]{parentId, childId});
+		return runStatement(ps);
 	}
-
+	public static int deleteDatasetService(DatasetService datasetService) throws Exception{
+		PreparedStatement ps = setPreparedStatement("delete_dataset_service", new int[]{datasetService.getParentId(), datasetService.getChildId()});
+		return runStatement(ps);
+	}
+	public static int deleteDatasetTmg(int parentId, int childId) throws Exception{
+		PreparedStatement ps = setPreparedStatement("delete_dataset_tmg", new int[]{parentId, childId});
+		return runStatement(ps);
+	}
+	public static int deleteDatasetTmg(DatasetTmg datasetTmg) throws Exception{
+		PreparedStatement ps = setPreparedStatement("delete_dataset_tmg", new int[]{datasetTmg.getParentId(), datasetTmg.getChildId()});
+		return runStatement(ps);
+	}
 	public static int deleteMetadata(int metadataId) throws Exception{
-
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-
-		try {
-			ps = setPreparedStatement("delete_metadata", new int[]{metadataId});
-
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			rs.next();
-			metadataId = rs.getInt(1);
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-			ps.close();
-//				rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
-		return metadataId;
+		PreparedStatement ps = setPreparedStatement("delete_metadata", new int[]{metadataId});
+		return runStatement(ps);
 	}
-
+	public static int deleteMetadata(Metadata metadata) throws Exception{
+		PreparedStatement ps = setPreparedStatement("delete_metadata", new int[]{metadata.getMetadataId()});
+		return runStatement(ps);
+	}
 	public static int deleteMetadataNamespace(int metadataNamespaceId) throws Exception{
-
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-
-		try {
-			ps = setPreparedStatement("delete_metadata_namespace", new int[]{metadataNamespaceId});
-
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			rs.next();
-			metadataNamespaceId = rs.getInt(1);
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-			ps.close();
-//				rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
-		return metadataNamespaceId;
+		PreparedStatement ps = setPreparedStatement("delete_metadata_namespace", new int[]{metadataNamespaceId});
+		return runStatement(ps);
 	}
-
-	public static int deleteMetadataTmg(int metadataTmgId) throws Exception{
-
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-
-		try {
-			ps = setPreparedStatement("delete_metadata_tmg", new int[]{metadataTmgId});
-
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			rs.next();
-			metadataTmgId = rs.getInt(1);
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-			ps.close();
-//				rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
-		return metadataTmgId;
+	public static int deleteMetadataNamespace(MetadataNamespace metadataNamespace) throws Exception{
+		PreparedStatement ps = setPreparedStatement("delete_metadata_namespace", new int[]{metadataNamespace.getMetadataNamespaceId()});
+		return runStatement(ps);
 	}
-
+	public static int deleteMetadataTmg(int parentId, int childId) throws Exception{
+		PreparedStatement ps = setPreparedStatement("delete_metadata_tmg", new int[]{parentId, childId});
+		return runStatement(ps);
+	}
+	public static int deleteMetadataTmg(MetadataTmg metadataTmg) throws Exception{
+		PreparedStatement ps = setPreparedStatement("delete_metadata_tmg", new int[]{metadataTmg.getParentId(), metadataTmg.getChildId()});
+		return runStatement(ps);
+	}
 	public static int deleteMetadataXlink(int metadataXlinkId) throws Exception{
-
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-
-		try {
-			ps = setPreparedStatement("delete_metadata_xlink", new int[]{metadataXlinkId});
-
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			rs.next();
-			metadataXlinkId = rs.getInt(1);
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-			ps.close();
-//				rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
-		return metadataXlinkId;
+		PreparedStatement ps = setPreparedStatement("delete_metadata_xlink", new int[]{metadataXlinkId});
+		return runStatement(ps);
 	}
-
+	public static int deleteMetadataXlink(MetadataXlink metadataXlink) throws Exception{
+		PreparedStatement ps = setPreparedStatement("delete_metadata_xlink", new int[]{metadataXlink.getMetadataXlinkId()});
+		return runStatement(ps);
+	}
 	public static int deleteService(int serviceId) throws Exception{
-
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-
-		try {
-			ps = setPreparedStatement("delete_service", new int[]{serviceId});
-
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			rs.next();
-			serviceId = rs.getInt(1);
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-			ps.close();
-//				rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
-		return serviceId;
+		PreparedStatement ps = setPreparedStatement("delete_service", new int[]{serviceId});
+		return runStatement(ps);
 	}
-
+	public static int deleteService(Service service) throws Exception{
+		PreparedStatement ps = setPreparedStatement("delete_service", new int[]{service.getServiceId()});
+		return runStatement(ps);
+	}
 	public static int deleteServiceDatasetroot(int serviceDatasetrootId) throws Exception{
-
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-
-		try {
-			ps = setPreparedStatement("delete_service_datasetroot", new int[]{serviceDatasetrootId});
-
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			rs.next();
-			serviceDatasetrootId = rs.getInt(1);
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-			ps.close();
-//				rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
-		return serviceDatasetrootId;
+		PreparedStatement ps = setPreparedStatement("delete_service_datasetroot", new int[]{serviceDatasetrootId});
+		return runStatement(ps);
 	}
-
+	public static int deleteServiceDatasetroot(ServiceDatasetroot serviceDatasetroot) throws Exception{
+		PreparedStatement ps = setPreparedStatement("delete_service_datasetroot", new int[]{serviceDatasetroot.getServiceDatasetrootId()});
+		return runStatement(ps);
+	}
 	public static int deleteServiceProperty(int servicePropertyId) throws Exception{
-
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-
-		try {
-			ps = setPreparedStatement("delete_service_property", new int[]{servicePropertyId});
-
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			rs.next();
-			servicePropertyId = rs.getInt(1);
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-			ps.close();
-//				rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
-		return servicePropertyId;
+		PreparedStatement ps = setPreparedStatement("delete_service_property", new int[]{servicePropertyId});
+		return runStatement(ps);
 	}
-
-	public static int deleteServiceService(int serviceServiceId) throws Exception{
-
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-
-		try {
-			ps = setPreparedStatement("delete_service_service", new int[]{serviceServiceId});
-
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			rs.next();
-			serviceServiceId = rs.getInt(1);
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-			ps.close();
-//				rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
-		return serviceServiceId;
+	public static int deleteServiceProperty(ServiceProperty serviceProperty) throws Exception{
+		PreparedStatement ps = setPreparedStatement("delete_service_property", new int[]{serviceProperty.getServicePropertyId()});
+		return runStatement(ps);
 	}
-
+	public static int deleteServiceService(int parentId, int childId) throws Exception{
+		PreparedStatement ps = setPreparedStatement("delete_service_service", new int[]{parentId, childId});
+		return runStatement(ps);
+	}
+	public static int deleteServiceService(ServiceService serviceService) throws Exception{
+		PreparedStatement ps = setPreparedStatement("delete_service_service", new int[]{serviceService.getParentId(), serviceService.getChildId()});
+		return runStatement(ps);
+	}
 	public static int deleteTmg(int tmgId) throws Exception{
-
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-
-		try {
-			ps = setPreparedStatement("delete_tmg", new int[]{tmgId});
-
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			rs.next();
-			tmgId = rs.getInt(1);
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-			ps.close();
-//				rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
-		return tmgId;
+		PreparedStatement ps = setPreparedStatement("delete_tmg", new int[]{tmgId});
+		return runStatement(ps);
 	}
-
+	public static int deleteTmg(Tmg tmg) throws Exception{
+		PreparedStatement ps = setPreparedStatement("delete_tmg", new int[]{tmg.getTmgId()});
+		return runStatement(ps);
+	}
 	public static int deleteTmgAuthority(int tmgAuthorityId) throws Exception{
-
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-
-		try {
-			ps = setPreparedStatement("delete_tmg_authority", new int[]{tmgAuthorityId});
-
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			rs.next();
-			tmgAuthorityId = rs.getInt(1);
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-			ps.close();
-//				rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
-		return tmgAuthorityId;
+		PreparedStatement ps = setPreparedStatement("delete_tmg_authority", new int[]{tmgAuthorityId});
+		return runStatement(ps);
 	}
-
+	public static int deleteTmgAuthority(TmgAuthority tmgAuthority) throws Exception{
+		PreparedStatement ps = setPreparedStatement("delete_tmg_authority", new int[]{tmgAuthority.getTmgAuthorityId()});
+		return runStatement(ps);
+	}
 	public static int deleteTmgContributor(int tmgContributorId) throws Exception{
-
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-
-		try {
-			ps = setPreparedStatement("delete_tmg_contributor", new int[]{tmgContributorId});
-
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			rs.next();
-			tmgContributorId = rs.getInt(1);
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-			ps.close();
-//				rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
-		return tmgContributorId;
+		PreparedStatement ps = setPreparedStatement("delete_tmg_contributor", new int[]{tmgContributorId});
+		return runStatement(ps);
 	}
-
+	public static int deleteTmgContributor(TmgContributor tmgContributor) throws Exception{
+		PreparedStatement ps = setPreparedStatement("delete_tmg_contributor", new int[]{tmgContributor.getTmgContributorId()});
+		return runStatement(ps);
+	}
 	public static int deleteTmgCreator(int tmgCreatorId) throws Exception{
-
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-
-		try {
-			ps = setPreparedStatement("delete_tmg_creator", new int[]{tmgCreatorId});
-
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			rs.next();
-			tmgCreatorId = rs.getInt(1);
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-			ps.close();
-//				rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
-		return tmgCreatorId;
+		PreparedStatement ps = setPreparedStatement("delete_tmg_creator", new int[]{tmgCreatorId});
+		return runStatement(ps);
 	}
-
+	public static int deleteTmgCreator(TmgCreator tmgCreator) throws Exception{
+		PreparedStatement ps = setPreparedStatement("delete_tmg_creator", new int[]{tmgCreator.getTmgCreatorId()});
+		return runStatement(ps);
+	}
 	public static int deleteTmgCreatorContact(int tmgCreatorContactId) throws Exception{
-
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-
-		try {
-			ps = setPreparedStatement("delete_tmg_creator_contact", new int[]{tmgCreatorContactId});
-
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			rs.next();
-			tmgCreatorContactId = rs.getInt(1);
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-			ps.close();
-//				rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
-		return tmgCreatorContactId;
+		PreparedStatement ps = setPreparedStatement("delete_tmg_creator_contact", new int[]{tmgCreatorContactId});
+		return runStatement(ps);
 	}
-
+	public static int deleteTmgCreatorContact(TmgCreatorContact tmgCreatorContact) throws Exception{
+		PreparedStatement ps = setPreparedStatement("delete_tmg_creator_contact", new int[]{tmgCreatorContact.getTmgCreatorContactId()});
+		return runStatement(ps);
+	}
 	public static int deleteTmgCreatorName(int tmgCreatorNameId) throws Exception{
-
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-
-		try {
-			ps = setPreparedStatement("delete_tmg_creator_name", new int[]{tmgCreatorNameId});
-
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			rs.next();
-			tmgCreatorNameId = rs.getInt(1);
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-			ps.close();
-//				rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
-		return tmgCreatorNameId;
+		PreparedStatement ps = setPreparedStatement("delete_tmg_creator_name", new int[]{tmgCreatorNameId});
+		return runStatement(ps);
 	}
-
+	public static int deleteTmgCreatorName(TmgCreatorName tmgCreatorName) throws Exception{
+		PreparedStatement ps = setPreparedStatement("delete_tmg_creator_name", new int[]{tmgCreatorName.getTmgCreatorNameId()});
+		return runStatement(ps);
+	}
 	public static int deleteTmgDataformat(int tmgDataformatId) throws Exception{
-
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-
-		try {
-			ps = setPreparedStatement("delete_tmg_dataformat", new int[]{tmgDataformatId});
-
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			rs.next();
-			tmgDataformatId = rs.getInt(1);
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-			ps.close();
-//				rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
-		return tmgDataformatId;
+		PreparedStatement ps = setPreparedStatement("delete_tmg_dataformat", new int[]{tmgDataformatId});
+		return runStatement(ps);
 	}
-
+	public static int deleteTmgDataformat(TmgDataformat tmgDataformat) throws Exception{
+		PreparedStatement ps = setPreparedStatement("delete_tmg_dataformat", new int[]{tmgDataformat.getTmgDataformatId()});
+		return runStatement(ps);
+	}
 	public static int deleteTmgDatasize(int tmgDatasizeId) throws Exception{
-
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-
-		try {
-			ps = setPreparedStatement("delete_tmg_datasize", new int[]{tmgDatasizeId});
-
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			rs.next();
-			tmgDatasizeId = rs.getInt(1);
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-			ps.close();
-//				rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
-		return tmgDatasizeId;
+		PreparedStatement ps = setPreparedStatement("delete_tmg_datasize", new int[]{tmgDatasizeId});
+		return runStatement(ps);
 	}
-
+	public static int deleteTmgDatasize(TmgDatasize tmgDatasize) throws Exception{
+		PreparedStatement ps = setPreparedStatement("delete_tmg_datasize", new int[]{tmgDatasize.getTmgDatasizeId()});
+		return runStatement(ps);
+	}
 	public static int deleteTmgDatatype(int tmgDatatypeId) throws Exception{
-
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-
-		try {
-			ps = setPreparedStatement("delete_tmg_datatype", new int[]{tmgDatatypeId});
-
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			rs.next();
-			tmgDatatypeId = rs.getInt(1);
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-			ps.close();
-//				rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
-		return tmgDatatypeId;
+		PreparedStatement ps = setPreparedStatement("delete_tmg_datatype", new int[]{tmgDatatypeId});
+		return runStatement(ps);
 	}
-
+	public static int deleteTmgDatatype(TmgDatatype tmgDatatype) throws Exception{
+		PreparedStatement ps = setPreparedStatement("delete_tmg_datatype", new int[]{tmgDatatype.getTmgDatatypeId()});
+		return runStatement(ps);
+	}
 	public static int deleteTmgDate(int tmgDateId) throws Exception{
-
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-
-		try {
-			ps = setPreparedStatement("delete_tmg_date", new int[]{tmgDateId});
-
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			rs.next();
-			tmgDateId = rs.getInt(1);
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-			ps.close();
-//				rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
-		return tmgDateId;
+		PreparedStatement ps = setPreparedStatement("delete_tmg_date", new int[]{tmgDateId});
+		return runStatement(ps);
 	}
-
+	public static int deleteTmgDate(TmgDate tmgDate) throws Exception{
+		PreparedStatement ps = setPreparedStatement("delete_tmg_date", new int[]{tmgDate.getTmgDateId()});
+		return runStatement(ps);
+	}
 	public static int deleteTmgDocumentation(int tmgDocumentationId) throws Exception{
-
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-
-		try {
-			ps = setPreparedStatement("delete_tmg_documentation", new int[]{tmgDocumentationId});
-
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			rs.next();
-			tmgDocumentationId = rs.getInt(1);
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-			ps.close();
-//				rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
-		return tmgDocumentationId;
+		PreparedStatement ps = setPreparedStatement("delete_tmg_documentation", new int[]{tmgDocumentationId});
+		return runStatement(ps);
 	}
-
+	public static int deleteTmgDocumentation(TmgDocumentation tmgDocumentation) throws Exception{
+		PreparedStatement ps = setPreparedStatement("delete_tmg_documentation", new int[]{tmgDocumentation.getTmgDocumentationId()});
+		return runStatement(ps);
+	}
 	public static int deleteTmgDocumentationNamespace(int tmgDocumentationNamespaceId) throws Exception{
-
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-
-		try {
-			ps = setPreparedStatement("delete_tmg_documentation_namespace", new int[]{tmgDocumentationNamespaceId});
-
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			rs.next();
-			tmgDocumentationNamespaceId = rs.getInt(1);
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-			ps.close();
-//				rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
-		return tmgDocumentationNamespaceId;
+		PreparedStatement ps = setPreparedStatement("delete_tmg_documentation_namespace", new int[]{tmgDocumentationNamespaceId});
+		return runStatement(ps);
 	}
-
+	public static int deleteTmgDocumentationNamespace(TmgDocumentationNamespace tmgDocumentationNamespace) throws Exception{
+		PreparedStatement ps = setPreparedStatement("delete_tmg_documentation_namespace", new int[]{tmgDocumentationNamespace.getTmgDocumentationNamespaceId()});
+		return runStatement(ps);
+	}
 	public static int deleteTmgDocumentationXlink(int tmgDocumentationXlinkId) throws Exception{
-
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-
-		try {
-			ps = setPreparedStatement("delete_tmg_documentation_xlink", new int[]{tmgDocumentationXlinkId});
-
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			rs.next();
-			tmgDocumentationXlinkId = rs.getInt(1);
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-			ps.close();
-//				rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
-		return tmgDocumentationXlinkId;
+		PreparedStatement ps = setPreparedStatement("delete_tmg_documentation_xlink", new int[]{tmgDocumentationXlinkId});
+		return runStatement(ps);
 	}
-
+	public static int deleteTmgDocumentationXlink(TmgDocumentationXlink tmgDocumentationXlink) throws Exception{
+		PreparedStatement ps = setPreparedStatement("delete_tmg_documentation_xlink", new int[]{tmgDocumentationXlink.getTmgDocumentationXlinkId()});
+		return runStatement(ps);
+	}
 	public static int deleteTmgGeospatialcoverage(int tmgGeospatialcoverageId) throws Exception{
-
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-
-		try {
-			ps = setPreparedStatement("delete_tmg_geospatialcoverage", new int[]{tmgGeospatialcoverageId});
-
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			rs.next();
-			tmgGeospatialcoverageId = rs.getInt(1);
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-			ps.close();
-//				rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
-		return tmgGeospatialcoverageId;
+		PreparedStatement ps = setPreparedStatement("delete_tmg_geospatialcoverage", new int[]{tmgGeospatialcoverageId});
+		return runStatement(ps);
 	}
-
+	public static int deleteTmgGeospatialcoverage(TmgGeospatialcoverage tmgGeospatialcoverage) throws Exception{
+		PreparedStatement ps = setPreparedStatement("delete_tmg_geospatialcoverage", new int[]{tmgGeospatialcoverage.getTmgGeospatialcoverageId()});
+		return runStatement(ps);
+	}
 	public static int deleteTmgGeospatialcoverageEastwest(int tmgGeospatialcoverageEastwestId) throws Exception{
-
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-
-		try {
-			ps = setPreparedStatement("delete_tmg_geospatialcoverage_eastwest", new int[]{tmgGeospatialcoverageEastwestId});
-
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			rs.next();
-			tmgGeospatialcoverageEastwestId = rs.getInt(1);
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-			ps.close();
-//				rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
-		return tmgGeospatialcoverageEastwestId;
+		PreparedStatement ps = setPreparedStatement("delete_tmg_geospatialcoverage_eastwest", new int[]{tmgGeospatialcoverageEastwestId});
+		return runStatement(ps);
 	}
-
+	public static int deleteTmgGeospatialcoverageEastwest(TmgGeospatialcoverageEastwest tmgGeospatialcoverageEastwest) throws Exception{
+		PreparedStatement ps = setPreparedStatement("delete_tmg_geospatialcoverage_eastwest", new int[]{tmgGeospatialcoverageEastwest.getTmgGeospatialcoverageEastwestId()});
+		return runStatement(ps);
+	}
 	public static int deleteTmgGeospatialcoverageName(int tmgGeospatialcoverageNameId) throws Exception{
-
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-
-		try {
-			ps = setPreparedStatement("delete_tmg_geospatialcoverage_name", new int[]{tmgGeospatialcoverageNameId});
-
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			rs.next();
-			tmgGeospatialcoverageNameId = rs.getInt(1);
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-			ps.close();
-//				rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
-		return tmgGeospatialcoverageNameId;
+		PreparedStatement ps = setPreparedStatement("delete_tmg_geospatialcoverage_name", new int[]{tmgGeospatialcoverageNameId});
+		return runStatement(ps);
 	}
-
+	public static int deleteTmgGeospatialcoverageName(TmgGeospatialcoverageName tmgGeospatialcoverageName) throws Exception{
+		PreparedStatement ps = setPreparedStatement("delete_tmg_geospatialcoverage_name", new int[]{tmgGeospatialcoverageName.getTmgGeospatialcoverageNameId()});
+		return runStatement(ps);
+	}
 	public static int deleteTmgGeospatialcoverageNorthsouth(int tmgGeospatialcoverageNorthsouthId) throws Exception{
-
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-
-		try {
-			ps = setPreparedStatement("delete_tmg_geospatialcoverage_northsouth", new int[]{tmgGeospatialcoverageNorthsouthId});
-
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			rs.next();
-			tmgGeospatialcoverageNorthsouthId = rs.getInt(1);
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-			ps.close();
-//				rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
-		return tmgGeospatialcoverageNorthsouthId;
+		PreparedStatement ps = setPreparedStatement("delete_tmg_geospatialcoverage_northsouth", new int[]{tmgGeospatialcoverageNorthsouthId});
+		return runStatement(ps);
 	}
-
+	public static int deleteTmgGeospatialcoverageNorthsouth(TmgGeospatialcoverageNorthsouth tmgGeospatialcoverageNorthsouth) throws Exception{
+		PreparedStatement ps = setPreparedStatement("delete_tmg_geospatialcoverage_northsouth", new int[]{tmgGeospatialcoverageNorthsouth.getTmgGeospatialcoverageNorthsouthId()});
+		return runStatement(ps);
+	}
 	public static int deleteTmgGeospatialcoverageUpdown(int tmgGeospatialcoverageUpdownId) throws Exception{
-
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-
-		try {
-			ps = setPreparedStatement("delete_tmg_geospatialcoverage_updown", new int[]{tmgGeospatialcoverageUpdownId});
-
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			rs.next();
-			tmgGeospatialcoverageUpdownId = rs.getInt(1);
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-			ps.close();
-//				rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
-		return tmgGeospatialcoverageUpdownId;
+		PreparedStatement ps = setPreparedStatement("delete_tmg_geospatialcoverage_updown", new int[]{tmgGeospatialcoverageUpdownId});
+		return runStatement(ps);
 	}
-
+	public static int deleteTmgGeospatialcoverageUpdown(TmgGeospatialcoverageUpdown tmgGeospatialcoverageUpdown) throws Exception{
+		PreparedStatement ps = setPreparedStatement("delete_tmg_geospatialcoverage_updown", new int[]{tmgGeospatialcoverageUpdown.getTmgGeospatialcoverageUpdownId()});
+		return runStatement(ps);
+	}
 	public static int deleteTmgKeyword(int tmgKeywordId) throws Exception{
-
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-
-		try {
-			ps = setPreparedStatement("delete_tmg_keyword", new int[]{tmgKeywordId});
-
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			rs.next();
-			tmgKeywordId = rs.getInt(1);
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-			ps.close();
-//				rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
-		return tmgKeywordId;
+		PreparedStatement ps = setPreparedStatement("delete_tmg_keyword", new int[]{tmgKeywordId});
+		return runStatement(ps);
 	}
-
-	public static int deleteTmgMetadata(int tmgMetadataId) throws Exception{
-
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-
-		try {
-			ps = setPreparedStatement("delete_tmg_metadata", new int[]{tmgMetadataId});
-
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			rs.next();
-			tmgMetadataId = rs.getInt(1);
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-			ps.close();
-//				rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
-		return tmgMetadataId;
+	public static int deleteTmgKeyword(TmgKeyword tmgKeyword) throws Exception{
+		PreparedStatement ps = setPreparedStatement("delete_tmg_keyword", new int[]{tmgKeyword.getTmgKeywordId()});
+		return runStatement(ps);
 	}
-
+	public static int deleteTmgMetadata(int parentId, int childId) throws Exception{
+		PreparedStatement ps = setPreparedStatement("delete_tmg_metadata", new int[]{parentId, childId});
+		return runStatement(ps);
+	}
+	public static int deleteTmgMetadata(TmgMetadata tmgMetadata) throws Exception{
+		PreparedStatement ps = setPreparedStatement("delete_tmg_metadata", new int[]{tmgMetadata.getParentId(), tmgMetadata.getChildId()});
+		return runStatement(ps);
+	}
 	public static int deleteTmgProject(int tmgProjectId) throws Exception{
-
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-
-		try {
-			ps = setPreparedStatement("delete_tmg_project", new int[]{tmgProjectId});
-
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			rs.next();
-			tmgProjectId = rs.getInt(1);
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-			ps.close();
-//				rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
-		return tmgProjectId;
+		PreparedStatement ps = setPreparedStatement("delete_tmg_project", new int[]{tmgProjectId});
+		return runStatement(ps);
 	}
-
+	public static int deleteTmgProject(TmgProject tmgProject) throws Exception{
+		PreparedStatement ps = setPreparedStatement("delete_tmg_project", new int[]{tmgProject.getTmgProjectId()});
+		return runStatement(ps);
+	}
 	public static int deleteTmgProperty(int tmgPropertyId) throws Exception{
-
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-
-		try {
-			ps = setPreparedStatement("delete_tmg_property", new int[]{tmgPropertyId});
-
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			rs.next();
-			tmgPropertyId = rs.getInt(1);
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-			ps.close();
-//				rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
-		return tmgPropertyId;
+		PreparedStatement ps = setPreparedStatement("delete_tmg_property", new int[]{tmgPropertyId});
+		return runStatement(ps);
 	}
-
+	public static int deleteTmgProperty(TmgProperty tmgProperty) throws Exception{
+		PreparedStatement ps = setPreparedStatement("delete_tmg_property", new int[]{tmgProperty.getTmgPropertyId()});
+		return runStatement(ps);
+	}
 	public static int deleteTmgPublisher(int tmgPublisherId) throws Exception{
-
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-
-		try {
-			ps = setPreparedStatement("delete_tmg_publisher", new int[]{tmgPublisherId});
-
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			rs.next();
-			tmgPublisherId = rs.getInt(1);
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-			ps.close();
-//				rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
-		return tmgPublisherId;
+		PreparedStatement ps = setPreparedStatement("delete_tmg_publisher", new int[]{tmgPublisherId});
+		return runStatement(ps);
 	}
-
+	public static int deleteTmgPublisher(TmgPublisher tmgPublisher) throws Exception{
+		PreparedStatement ps = setPreparedStatement("delete_tmg_publisher", new int[]{tmgPublisher.getTmgPublisherId()});
+		return runStatement(ps);
+	}
 	public static int deleteTmgPublisherContact(int tmgPublisherContactId) throws Exception{
-
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-
-		try {
-			ps = setPreparedStatement("delete_tmg_publisher_contact", new int[]{tmgPublisherContactId});
-
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			rs.next();
-			tmgPublisherContactId = rs.getInt(1);
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-			ps.close();
-//				rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
-		return tmgPublisherContactId;
+		PreparedStatement ps = setPreparedStatement("delete_tmg_publisher_contact", new int[]{tmgPublisherContactId});
+		return runStatement(ps);
 	}
-
+	public static int deleteTmgPublisherContact(TmgPublisherContact tmgPublisherContact) throws Exception{
+		PreparedStatement ps = setPreparedStatement("delete_tmg_publisher_contact", new int[]{tmgPublisherContact.getTmgPublisherContactId()});
+		return runStatement(ps);
+	}
 	public static int deleteTmgPublisherName(int tmgPublisherNameId) throws Exception{
-
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-
-		try {
-			ps = setPreparedStatement("delete_tmg_publisher_name", new int[]{tmgPublisherNameId});
-
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			rs.next();
-			tmgPublisherNameId = rs.getInt(1);
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-			ps.close();
-//				rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
-		return tmgPublisherNameId;
+		PreparedStatement ps = setPreparedStatement("delete_tmg_publisher_name", new int[]{tmgPublisherNameId});
+		return runStatement(ps);
 	}
-
+	public static int deleteTmgPublisherName(TmgPublisherName tmgPublisherName) throws Exception{
+		PreparedStatement ps = setPreparedStatement("delete_tmg_publisher_name", new int[]{tmgPublisherName.getTmgPublisherNameId()});
+		return runStatement(ps);
+	}
 	public static int deleteTmgServicename(int tmgServicenameId) throws Exception{
-
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-
-		try {
-			ps = setPreparedStatement("delete_tmg_servicename", new int[]{tmgServicenameId});
-
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			rs.next();
-			tmgServicenameId = rs.getInt(1);
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-			ps.close();
-//				rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
-		return tmgServicenameId;
+		PreparedStatement ps = setPreparedStatement("delete_tmg_servicename", new int[]{tmgServicenameId});
+		return runStatement(ps);
 	}
-
+	public static int deleteTmgServicename(TmgServicename tmgServicename) throws Exception{
+		PreparedStatement ps = setPreparedStatement("delete_tmg_servicename", new int[]{tmgServicename.getTmgServicenameId()});
+		return runStatement(ps);
+	}
 	public static int deleteTmgTimecoverage(int tmgTimecoverageId) throws Exception{
-
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-
-		try {
-			ps = setPreparedStatement("delete_tmg_timecoverage", new int[]{tmgTimecoverageId});
-
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			rs.next();
-			tmgTimecoverageId = rs.getInt(1);
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-			ps.close();
-//				rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
-		return tmgTimecoverageId;
+		PreparedStatement ps = setPreparedStatement("delete_tmg_timecoverage", new int[]{tmgTimecoverageId});
+		return runStatement(ps);
 	}
-
+	public static int deleteTmgTimecoverage(TmgTimecoverage tmgTimecoverage) throws Exception{
+		PreparedStatement ps = setPreparedStatement("delete_tmg_timecoverage", new int[]{tmgTimecoverage.getTmgTimecoverageId()});
+		return runStatement(ps);
+	}
 	public static int deleteTmgTimecoverageDuration(int tmgTimecoverageDurationId) throws Exception{
-
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-
-		try {
-			ps = setPreparedStatement("delete_tmg_timecoverage_duration", new int[]{tmgTimecoverageDurationId});
-
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			rs.next();
-			tmgTimecoverageDurationId = rs.getInt(1);
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-			ps.close();
-//				rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
-		return tmgTimecoverageDurationId;
+		PreparedStatement ps = setPreparedStatement("delete_tmg_timecoverage_duration", new int[]{tmgTimecoverageDurationId});
+		return runStatement(ps);
 	}
-
+	public static int deleteTmgTimecoverageDuration(TmgTimecoverageDuration tmgTimecoverageDuration) throws Exception{
+		PreparedStatement ps = setPreparedStatement("delete_tmg_timecoverage_duration", new int[]{tmgTimecoverageDuration.getTmgTimecoverageDurationId()});
+		return runStatement(ps);
+	}
 	public static int deleteTmgTimecoverageEnd(int tmgTimecoverageEndId) throws Exception{
-
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-
-		try {
-			ps = setPreparedStatement("delete_tmg_timecoverage_end", new int[]{tmgTimecoverageEndId});
-
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			rs.next();
-			tmgTimecoverageEndId = rs.getInt(1);
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-			ps.close();
-//				rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
-		return tmgTimecoverageEndId;
+		PreparedStatement ps = setPreparedStatement("delete_tmg_timecoverage_end", new int[]{tmgTimecoverageEndId});
+		return runStatement(ps);
 	}
-
+	public static int deleteTmgTimecoverageEnd(TmgTimecoverageEnd tmgTimecoverageEnd) throws Exception{
+		PreparedStatement ps = setPreparedStatement("delete_tmg_timecoverage_end", new int[]{tmgTimecoverageEnd.getTmgTimecoverageEndId()});
+		return runStatement(ps);
+	}
 	public static int deleteTmgTimecoverageResolution(int tmgTimecoverageResolutionId) throws Exception{
-
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-
-		try {
-			ps = setPreparedStatement("delete_tmg_timecoverage_resolution", new int[]{tmgTimecoverageResolutionId});
-
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			rs.next();
-			tmgTimecoverageResolutionId = rs.getInt(1);
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-			ps.close();
-//				rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
-		return tmgTimecoverageResolutionId;
+		PreparedStatement ps = setPreparedStatement("delete_tmg_timecoverage_resolution", new int[]{tmgTimecoverageResolutionId});
+		return runStatement(ps);
 	}
-
+	public static int deleteTmgTimecoverageResolution(TmgTimecoverageResolution tmgTimecoverageResolution) throws Exception{
+		PreparedStatement ps = setPreparedStatement("delete_tmg_timecoverage_resolution", new int[]{tmgTimecoverageResolution.getTmgTimecoverageResolutionId()});
+		return runStatement(ps);
+	}
 	public static int deleteTmgTimecoverageStart(int tmgTimecoverageStartId) throws Exception{
-
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-
-		try {
-			ps = setPreparedStatement("delete_tmg_timecoverage_start", new int[]{tmgTimecoverageStartId});
-
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			rs.next();
-			tmgTimecoverageStartId = rs.getInt(1);
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-			ps.close();
-//				rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
-		return tmgTimecoverageStartId;
+		PreparedStatement ps = setPreparedStatement("delete_tmg_timecoverage_start", new int[]{tmgTimecoverageStartId});
+		return runStatement(ps);
 	}
-
+	public static int deleteTmgTimecoverageStart(TmgTimecoverageStart tmgTimecoverageStart) throws Exception{
+		PreparedStatement ps = setPreparedStatement("delete_tmg_timecoverage_start", new int[]{tmgTimecoverageStart.getTmgTimecoverageStartId()});
+		return runStatement(ps);
+	}
 	public static int deleteTmgVariables(int tmgVariablesId) throws Exception{
-
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-
-		try {
-			ps = setPreparedStatement("delete_tmg_variables", new int[]{tmgVariablesId});
-
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			rs.next();
-			tmgVariablesId = rs.getInt(1);
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-			ps.close();
-//				rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
-		return tmgVariablesId;
+		PreparedStatement ps = setPreparedStatement("delete_tmg_variables", new int[]{tmgVariablesId});
+		return runStatement(ps);
 	}
-
+	public static int deleteTmgVariables(TmgVariables tmgVariables) throws Exception{
+		PreparedStatement ps = setPreparedStatement("delete_tmg_variables", new int[]{tmgVariables.getTmgVariablesId()});
+		return runStatement(ps);
+	}
 	public static int deleteTmgVariablesVariable(int tmgVariablesVariableId) throws Exception{
-
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-
-		try {
-			ps = setPreparedStatement("delete_tmg_variables_variable", new int[]{tmgVariablesVariableId});
-
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			rs.next();
-			tmgVariablesVariableId = rs.getInt(1);
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-			ps.close();
-//				rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
-		return tmgVariablesVariableId;
+		PreparedStatement ps = setPreparedStatement("delete_tmg_variables_variable", new int[]{tmgVariablesVariableId});
+		return runStatement(ps);
 	}
-
+	public static int deleteTmgVariablesVariable(TmgVariablesVariable tmgVariablesVariable) throws Exception{
+		PreparedStatement ps = setPreparedStatement("delete_tmg_variables_variable", new int[]{tmgVariablesVariable.getTmgVariablesVariableId()});
+		return runStatement(ps);
+	}
 	public static int deleteTmgVariablesVariablemap(int tmgVariablesVariablemapId) throws Exception{
-
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-
-		try {
-			ps = setPreparedStatement("delete_tmg_variables_variablemap", new int[]{tmgVariablesVariablemapId});
-
-			log.debug("About to send: {} to the database.", ps.toString());
-			rs = ps.executeQuery();
-			rs.next();
-			tmgVariablesVariablemapId = rs.getInt(1);
-		}
-		catch (SQLException e) {
-			log.error("Caching: Could not access the database/cache. {}", e);
-			throw new Exception("SQLException: " + e.getMessage());
-		} finally {
-			try {
-			ps.close();
-//				rs.close();
-			}
-			catch (SQLException e) {
-				log.error("Cache read: Could not close the prepared statement. {}", e);
-			}
-		}
-		return tmgVariablesVariablemapId;
+		PreparedStatement ps = setPreparedStatement("delete_tmg_variables_variablemap", new int[]{tmgVariablesVariablemapId});
+		return runStatement(ps);
 	}
-
+	public static int deleteTmgVariablesVariablemap(TmgVariablesVariablemap tmgVariablesVariablemap) throws Exception{
+		PreparedStatement ps = setPreparedStatement("delete_tmg_variables_variablemap", new int[]{tmgVariablesVariablemap.getTmgVariablesVariablemapId()});
+		return runStatement(ps);
+	}
