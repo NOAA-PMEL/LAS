@@ -40,7 +40,7 @@ IF ($lhs"0|month>1|*>0") THEN
      IF `STRLEN("($mask_title_($nmask_labels))") GT 100` THEN DEFINE SYMBOL mask_label_long = 1;\
      DEFINE SYMBOL rhs2 = `SUBSTRING("($rhs2)", commaloc+1, rhslen-commaloc+1)` ;\
      )
-     IF ($mask_label_long"0|*>1") THENDEFINE SYMBOL nmask_labels = `($nmask_labels"0") + 1`  ! add space for extra line
+     IF ($mask_label_long"0|*>1") THEN DEFINE SYMBOL nmask_labels = `($nmask_labels"0") + 1`  ! add space for extra line
      pause
    ENDIF
 
@@ -51,7 +51,7 @@ ELIF ($lhs"0|ident_ID>1|*>0") THEN
    IF ($math_sym_convert"0|no_convert>1") THEN DEFINE SYMBOL mask_title_($nmask_labels) = Data from ID ($c_s) ($rhs)
 
 ELSE 
-DEFINE SYMBOL nmask_labels = `($nmask_labels) + 1` 
+DEFINE SYMBOL nmask_labels = `($nmask_labels"0") + 1`
 GO remove_underscores ($lhs)
 DEFINE SYMBOL lhs = ($Var_Lab) 
 IF ($op"0|*>1") THEN DEFINE SYMBOL op = `UPCASE("($op)")` 
