@@ -1,16 +1,21 @@
 package gov.noaa.pmel.tmap.las.client;
 
+import gov.noaa.pmel.tmap.las.client.laswidget.LASRequest;
 import gov.noaa.pmel.tmap.las.client.laswidget.LASRequestWrapper;
 import gov.noaa.pmel.tmap.las.client.laswidget.VariableListBox;
 import gov.noaa.pmel.tmap.las.client.serializable.DatasetSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.VariableSerializable;
+import gov.noaa.pmel.tmap.las.client.util.URLUtil;
 import gov.noaa.pmel.tmap.las.client.util.Util;
+
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 import com.google.gwt.canvas.client.Canvas;
 import com.google.gwt.canvas.dom.client.Context2d;
 import com.google.gwt.canvas.dom.client.CssColor;
 import com.google.gwt.core.client.EntryPoint;
-import com.google.gwt.dom.client.CanvasElement;
 import com.google.gwt.dom.client.ImageElement;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
@@ -22,10 +27,10 @@ import com.google.gwt.event.dom.client.MouseDownEvent;
 import com.google.gwt.event.dom.client.MouseDownHandler;
 import com.google.gwt.event.dom.client.MouseMoveEvent;
 import com.google.gwt.event.dom.client.MouseMoveHandler;
-import com.google.gwt.event.dom.client.MouseOutEvent;
-import com.google.gwt.event.dom.client.MouseOutHandler;
 import com.google.gwt.event.dom.client.MouseUpEvent;
 import com.google.gwt.event.dom.client.MouseUpHandler;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestBuilder;
 import com.google.gwt.http.client.RequestCallback;
@@ -33,6 +38,7 @@ import com.google.gwt.http.client.RequestException;
 import com.google.gwt.http.client.Response;
 import com.google.gwt.http.client.URL;
 import com.google.gwt.i18n.client.NumberFormat;
+import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.CheckBox;
@@ -53,6 +59,9 @@ import com.google.gwt.xml.client.Text;
 import com.google.gwt.xml.client.XMLParser;
 
 public class Correlation implements EntryPoint {
+	PopupPanel spin;
+	HTML spinImage;
+	HorizontalPanel coloredBy = new HorizontalPanel();
 	FlexTable constraintsLayout = new FlexTable();
 	TextBox xminBox = new TextBox();
 	TextBox xmaxBox = new TextBox();
@@ -63,23 +72,17 @@ public class Correlation implements EntryPoint {
 	CheckBox useXConstraint = new CheckBox();
 	CheckBox useYConstraint = new CheckBox();
 	NumberFormat dFormat = NumberFormat.getFormat("########.##");
-	PopupPanel box = new PopupPanel();
-	FlexTable boxLayout = new FlexTable();
 	Label selection = new Label("Current selection:");
 	Label horizontalLabel = new Label("Horizontal: ");
 	Label verticalLabel = new Label("Vertical: ");
-	Label chorizontalLabel = new Label("Horizontal: ");
-	Label cverticalLabel = new Label("Vertical: ");
-	Label horizontalValue = new Label("nada");
-	Label verticalValue = new Label("nada");
 	FlexTable topPanel = new FlexTable();
-	FlexTable uiPanel = new FlexTable();
+	FlexTable outputPanel = new FlexTable();
     VariableListBox xVariables = new VariableListBox();
     VariableListBox yVariables = new VariableListBox();
     VariableListBox colorVariables = new VariableListBox();
     PushButton update = new PushButton("Update Plot");
-    CheckBox colorCheckBox = new CheckBox("Use color variable");
-    LASRequestWrapper lasRequest;
+    CheckBox colorCheckBox = new CheckBox();
+    LASRequest lasRequest;
     String dsid;
     String varid;
 	String currentURL;
@@ -114,38 +117,122 @@ public class Correlation implements EntryPoint {
 	protected double y_per_pixel;
     @Override
 	public void onModuleLoad() {
+    	String spinImageURL = URLUtil.getImageURL()+"/mozilla_blu.gif";
+		spinImage = new HTML("<img src=\""+spinImageURL+"\" alt=\"Spinner\"/>");
+		spin = new PopupPanel();
+		spin.add(spinImage);
+    	update.addStyleDependentName("SMALLER");
+    	update.setWidth("60px");
     	
-    	constraintsLayout.setWidget(0, 0, cverticalLabel);
-    	constraintsLayout.setWidget(0, 1, yminBox);
-    	constraintsLayout.setWidget(0, 2, yVariableLabel);
-    	constraintsLayout.setWidget(0, 3, ymaxBox);
-    	constraintsLayout.setWidget(0, 4, useYConstraint);
+    	useXConstraint.addClickHandler(new ClickHandler() {
+
+			@Override
+			public void onClick(ClickEvent event) {
+				
+				setConstraints();
+				
+			}
+    		
+    	});
+    	useYConstraint.addClickHandler(new ClickHandler() {
+			
+			@Override
+			public void onClick(ClickEvent event) {
+				
+				setConstraints();
+				
+			}
+		});
     	
-    	constraintsLayout.setWidget(1, 0, chorizontalLabel);
-    	constraintsLayout.setWidget(1, 1, xminBox);
-    	constraintsLayout.setWidget(1, 2, xVariableLabel);
-    	constraintsLayout.setWidget(1, 3, xmaxBox);
-    	constraintsLayout.setWidget(1, 4, useXConstraint);
+    	xminBox.addChangeHandler(new ChangeHandler() {
+			
+			@Override
+			public void onChange(ChangeEvent event) {
+				useXConstraint.setValue(true);
+				setConstraints();
+			}
+		});
+    	xmaxBox.addChangeHandler(new ChangeHandler() {
+			
+			@Override
+			public void onChange(ChangeEvent event) {
+				useXConstraint.setValue(true);
+				setConstraints();
+			}
+		});
+    	yminBox.addChangeHandler(new ChangeHandler() {
+			
+			@Override
+			public void onChange(ChangeEvent event) {
+				useYConstraint.setValue(true);
+				setConstraints();
+			}
+		});
+    	ymaxBox.addChangeHandler(new ChangeHandler() {
+			
+			@Override
+			public void onChange(ChangeEvent event) {	
+				useYConstraint.setValue(true);
+				setConstraints();
+			}
+		});
+    	constraintsLayout.setWidget(0, 0, new HTML("<b>Data Constraints:</b>"));
+    	constraintsLayout.getFlexCellFormatter().setColSpan(0, 0, 4);
+    	constraintsLayout.setWidget(1, 0, yminBox);
+    	constraintsLayout.setWidget(1, 1, yVariableLabel);
+    	constraintsLayout.setWidget(1, 2, ymaxBox);
+    	constraintsLayout.setWidget(1, 3, useYConstraint);
+
+    	constraintsLayout.setWidget(2, 0, xminBox);
+    	constraintsLayout.setWidget(2, 1, xVariableLabel);
+    	constraintsLayout.setWidget(2, 2, xmaxBox);
+    	constraintsLayout.setWidget(2, 3, useXConstraint);
+    	constraintsLayout.setVisible(false);
+    	constraintsLayout.setWidget(3, 0, new HTML("<b>Help: </b> Enter values and select the check boxes, or click and drag on the plot."));
+    	constraintsLayout.getFlexCellFormatter().setColSpan(3, 0, 4);
     	
-    	boxLayout.setWidget(0, 0, selection);
-    	boxLayout.setWidget(1, 0, horizontalLabel);
-    	boxLayout.setWidget(1, 1, horizontalValue);
-    	boxLayout.setWidget(2, 0, verticalLabel);
-    	boxLayout.setWidget(2, 1, verticalValue);
-    	box.add(boxLayout);
-		topPanel.setWidget(0, 0, yVariables);
-		topPanel.setWidget(0, 1, new Label("Y as a function of"));
-		topPanel.setWidget(0, 2, xVariables);
-		topPanel.setWidget(0, 3, update);
-		topPanel.setWidget(1, 0, new Label("Colored By"));
-		topPanel.setWidget(1, 1, colorVariables);
-		topPanel.setWidget(1, 2, colorCheckBox);
-		uiPanel.setWidget(0, 0, topPanel);
-		uiPanel.setWidget(1, 0, constraintsLayout);
+    	
+    	topPanel.setWidget(0, 0, new HTML("<b>Data Selection: </b>"));
+		topPanel.getFlexCellFormatter().setColSpan(0, 0, 4);
+    	topPanel.setWidget(1, 0, yVariables);
+		topPanel.setWidget(1, 1, new Label(" as a function of "));
+		topPanel.setWidget(1, 2, xVariables);
+		topPanel.setWidget(1, 3, update);	
+		colorCheckBox.addClickHandler(new ClickHandler() {
+
+			@Override
+			public void onClick(ClickEvent event) {
+				
+				if ( colorCheckBox.getValue() ) {
+					colorVariables.setEnabled(true);
+				} else {
+					colorVariables.setEnabled(false);
+				}
+				setVariables();
+			}
+			
+		});
+		coloredBy.add(new Label("Colored By "));
+		coloredBy.add(colorCheckBox);
+		topPanel.setWidget(2, 1, coloredBy);
+		topPanel.setWidget(2, 2, colorVariables);	
+		topPanel.getFlexCellFormatter().setColSpan(3, 0, 4);
+		topPanel.setWidget(3, 0, new HTML("<b>Help:</b> Choose the variables you want to plot from the drop down menus.  To color the plot by another variable check the \"Color by\" and select a variable from the drop down.  Click \"Update Plot\""));
+		colorVariables.setEnabled(false);
+		colorVariables.addChangeHandler(new ChangeHandler() {
+
+			@Override
+			public void onChange(ChangeEvent event) {
+				
+				setVariables();
+
+			}
+			
+		});
 		update.addClickHandler(updateClick);
 		String xml = Util.getParameterString("xml");
 		if ( xml != null && !xml.equals("") ) {
-			lasRequest = new LASRequestWrapper(xml);
+			lasRequest = new LASRequest(xml);
 			dsid = lasRequest.getDataset(0);		
 			varid = lasRequest.getVariable(0);
 			Util.getRPCService().getFullDataset(dsid, datasetCallback);
@@ -159,8 +246,10 @@ public class Correlation implements EntryPoint {
 				
 				String varY = yVariables.getVariable(yVariables.getSelectedIndex()).getName();
 				yVariableLabel.setText("<= "+varY+" <=");
-				
-				
+			
+				setVariables();
+				resetConstraints("y");
+
 			}
 		});
 		xVariables.addChangeHandler(new ChangeHandler() {
@@ -169,118 +258,113 @@ public class Correlation implements EntryPoint {
 			public void onChange(ChangeEvent event) {
 				String varX = xVariables.getVariable(xVariables.getSelectedIndex()).getName();
 				xVariableLabel.setText("<= "+varX+" <=");
+
+				setVariables();
+				resetConstraints("x");
+			
 			}
 		});
-		RootPanel.get("correlation").add(uiPanel);
+		RootPanel.get("data_selection").add(topPanel);
+		RootPanel.get("data_constraints").add(constraintsLayout);
+		RootPanel.get("correlation").add(outputPanel);
+		History.addValueChangeHandler(historyHandler);
 	}
-	ClickHandler updateClick = new ClickHandler() {
+    ClickHandler updateClick = new ClickHandler() {
 
-		@Override
-		public void onClick(ClickEvent event) {
-			lasRequest.removeVariables();
-			String varY = yVariables.getVariable(yVariables.getSelectedIndex()).getID();
-			lasRequest.addVariable(dsid, varY);
-			String varX = xVariables.getVariable(xVariables.getSelectedIndex()).getID();
-			lasRequest.addVariable(dsid, varX);
-			if ( colorCheckBox.getValue() ) {
-				String varColor = colorVariables.getVariable(colorVariables.getSelectedIndex()).getID();
-				lasRequest.addVariable(dsid, varColor);
-			}
-			String tlo = lasRequest.getRangeHi("t", 0);
-			String thi = lasRequest.getRangeLo("t", 0);
-			String xlo = lasRequest.getRangeHi("x", 0);
-			String xhi = lasRequest.getRangeLo("x", 0);
-			String yhi = lasRequest.getRangeHi("y", 0);
-			String ylo = lasRequest.getRangeLo("y", 0);
-			String zhi = lasRequest.getRangeHi("z", 0);
-			String zlo = lasRequest.getRangeLo("z", 0);
-			lasRequest.removeRegion(0);
-			
-			// If it's defined it will be in the hi or both.
-			if ( tlo != null && thi != null ) {
-				lasRequest.setRange("t", tlo, thi, 0);
-			} else if ( thi != null ) {
-				lasRequest.setRange("t", thi, thi, 0);
-			}
+    	@Override
+    	public void onClick(ClickEvent event) {
+    		updatePlot(true);		
+    	}
+
+    };
+	private void updatePlot(boolean addHistory) {
+		spin.setPopupPosition(outputPanel.getAbsoluteLeft(), outputPanel.getAbsoluteTop());
+		spin.show();
+		String tlo = lasRequest.getRangeLo("t", 0);
+		String thi = lasRequest.getRangeHi("t", 0);
+		String xlo = lasRequest.getRangeLo("x", 0);
+		String xhi = lasRequest.getRangeHi("x", 0);
+		String ylo = lasRequest.getRangeLo("y", 0);
+		String yhi = lasRequest.getRangeHi("y", 0);
+		String zlo = lasRequest.getRangeLo("z", 0);
+		String zhi = lasRequest.getRangeHi("z", 0);
+
+		// If it's defined it will be in the hi or both.
+		if ( tlo != null && thi != null ) {
+			lasRequest.setRange("t", tlo, thi, 0);
+		} else if ( thi != null ) {
+			lasRequest.setRange("t", thi, thi, 0);
+		}
+
+		if ( xlo != null && xhi != null ) {
+			lasRequest.setRange("x", xlo, xhi, 0);
+		} else if ( thi != null ) {
+			lasRequest.setRange("x", xhi, xhi, 0);
+		}
+
+		if ( ylo != null && yhi != null ) {
+			lasRequest.setRange("y", ylo, yhi, 0);
+		} else if ( yhi != null ) {
+			lasRequest.setRange("y", yhi, yhi, 0);
+		}
+
+		if ( zlo != null && zhi != null ) {
+			lasRequest.setRange("z", zlo, zhi, 0);
+		} else if ( zhi != null ) {
+			lasRequest.setRange("z", zhi, zhi, 0);
+		}
+
+		lasRequest.setProperty("product_server", "ui_timeout", "20");
+		lasRequest.setProperty("las", "output_type", "xml");
+		lasRequest.setOperation(operationID, operationType);
+
+
+		frontCanvas = Canvas.createIfSupported();
+		frontCanvasContext = frontCanvas.getContext2d();
+
+		int rndRedColor = 190;
+		int rndGreenColor = 40;
+		int rndBlueColor = 40;
+		double rndAlpha = .25;
+
+		randomColor = CssColor.make("rgba(" + rndRedColor + ", " + rndGreenColor + "," + rndBlueColor + ", " + rndAlpha + ")");
+
+		String url = Util.getProductServer()+"?xml="+URL.encode(lasRequest.toString());
+
+		currentURL = url;
 		
-			if ( xlo != null && xhi != null ) {
-				lasRequest.setRange("x", xlo, xhi, 0);
-			} else if ( thi != null ) {
-				lasRequest.setRange("x", xhi, xhi, 0);
-			}
-			
-			if ( ylo != null && yhi != null ) {
-				lasRequest.setRange("y", ylo, yhi, 0);
-			} else if ( yhi != null ) {
-				lasRequest.setRange("y", yhi, yhi, 0);
-			}
-			
-			if ( zlo != null && zhi != null ) {
-				lasRequest.setRange("z", zlo, zhi, 0);
-			} else if ( zhi != null ) {
-				lasRequest.setRange("z", zhi, zhi, 0);
-			}
-			
-			lasRequest.setProperty("product_server", "ui_timeout", "20");
-			lasRequest.addProperty("las", "output_type", "xml");
-			lasRequest.setOperation(operationID, operationType);
-			lasRequest.removeConstraints();
-			if ( useXConstraint.getValue() ) {
-				String min = xminBox.getText();
-				String max = xmaxBox.getText();
-			    lasRequest.addVariableConstraint(dsid, varX, "gt", min);
-			    lasRequest.addVariableConstraint(dsid, varX, "le", max);
-			}
-			
-			if ( useYConstraint.getValue() ) {
-				String min = yminBox.getText();
-				String max = ymaxBox.getText();
-				lasRequest.addVariableConstraint(dsid, varY, "gt", min);
-				lasRequest.addVariableConstraint(dsid, varX, "le", max);
-			}
-			
-			frontCanvas = Canvas.createIfSupported();
-			frontCanvasContext = frontCanvas.getContext2d();
-			
-			int rndRedColor = 190;
-			int rndGreenColor = 40;
-			int rndBlueColor = 40;
-			double rndAlpha = .25;
-
-			randomColor = CssColor.make("rgba(" + rndRedColor + ", " + rndGreenColor + "," + rndBlueColor + ", " + rndAlpha + ")");
-			
-			String url = Util.getProductServer()+"?xml="+URL.encode(lasRequest.getXMLText());
-			
-				currentURL = url;
-				RequestBuilder sendRequest = new RequestBuilder(RequestBuilder.GET, url);
-				try {
-					sendRequest.sendRequest(null, lasRequestCallback);
-				} catch (RequestException e) {
-					HTML error = new HTML(e.toString());
-					uiPanel.setWidget(2, 0, error);
-				}
-			
+		if ( addHistory ) {
+			pushHistory(lasRequest.toString());
 		}
 		
-	};
-	
+		RequestBuilder sendRequest = new RequestBuilder(RequestBuilder.GET, url);
+		try {
+			sendRequest.sendRequest(null, lasRequestCallback);
+		} catch (RequestException e) {
+			HTML error = new HTML(e.toString());
+			outputPanel.setWidget(0, 0, error);
+		}
+
+	}
 	RequestCallback lasRequestCallback = new RequestCallback() {
 
 		@Override
 		public void onError(Request request, Throwable exception) {
-
+			
+			spin.hide();
 			Window.alert("Product request failed.");
 
 		}
 
 		@Override
 		public void onResponseReceived(Request request, Response response) {
+			spin.hide();
 			String doc = response.getText();
 			String imageurl = "";
 			// Look at the doc.  If it's not obviously XML, treat it as HTML.
 			if ( !doc.substring(0, 100).contains("<?xml") ) {
 				HTML result = new HTML(doc, true);
-				uiPanel.setWidget(2, 0, result);
+				outputPanel.setWidget(0, 0, result);
 			} else {
 				doc = doc.replaceAll("\n", "").trim();
 				Document responseXML = XMLParser.parse(doc);
@@ -297,7 +381,7 @@ public class Correlation implements EntryPoint {
 								if ( text instanceof Text ) {
 									Text t = (Text) text;
 									HTML error = new HTML(t.getData().toString().trim());
-									uiPanel.setWidget(2, 0, error);
+									outputPanel.setWidget(0, 0, error);
 								}
 							}
 						} else if ( result.getAttribute("type").equals("map_scale") ) {
@@ -346,7 +430,7 @@ public class Correlation implements EntryPoint {
 					x_per_pixel = (x_axis_upper_right - x_axis_lower_left)/Double.valueOf(x_plot_size);
 					y_per_pixel = (y_axis_upper_right - y_axis_lower_left)/Double.valueOf(y_plot_size);
 
-					uiPanel.setWidget(2, 0, image);
+					outputPanel.setWidget(1, 0, image);
 					if ( frontCanvas != null ) {
 						image.setVisible(false);
 						image.addLoadHandler(new LoadHandler() {
@@ -381,8 +465,6 @@ public class Correlation implements EntryPoint {
 											useXConstraint.setValue(true);
 											useYConstraint.setValue(true);
 											
-											box.setPopupPosition(frontCanvas.getAbsoluteLeft(), frontCanvas.getAbsoluteTop());
-											box.show();
 										}
 									}
 								});
@@ -405,8 +487,6 @@ public class Correlation implements EntryPoint {
 										if ( draw ) {
 											world_endx = x_axis_lower_left + (currentx - x_offset_from_left)*x_per_pixel;
 											world_endy = y_axis_lower_left + ((y_image_size-currenty)-y_offset_from_bottom)*y_per_pixel;
-											horizontalValue.setText(dFormat.format(world_startx)+" to "+dFormat.format(world_endx));
-											verticalValue.setText(dFormat.format(world_starty)+" to "+ dFormat.format(world_endy));
 											setTextValues();
 											frontCanvasContext.setFillStyle(randomColor);
 											frontCanvasContext.drawImage(ImageElement.as(image.getElement()), 0, 0);
@@ -414,8 +494,7 @@ public class Correlation implements EntryPoint {
 										}
 									}
 								});
-								uiPanel.setWidget(2, 0, frontCanvas);
-
+								outputPanel.setWidget(0, 0, frontCanvas);
 							}
 
 						});
@@ -428,8 +507,9 @@ public class Correlation implements EntryPoint {
 									endx = event.getX();
 									endy = event.getY();
 								}
-								box.hide();
 								draw = false;
+								setConstraints();
+
 							}
 						});
 					}
@@ -444,17 +524,15 @@ public class Correlation implements EntryPoint {
 	};
 	private void setTextValues() {
 
+		constraintsLayout.setVisible(true);
+		
 		if ( world_startx <= world_endx ) {
-			
-			horizontalValue.setText(dFormat.format(world_startx)+" to "+dFormat.format(world_endx));
 		
 			xminBox.setText(dFormat.format(world_startx));
 			xmaxBox.setText(dFormat.format(world_endx));
 				
 		} else {
-			
-			horizontalValue.setText(dFormat.format(world_endx)+" to "+dFormat.format(world_startx));
-			
+						
 			xminBox.setText(dFormat.format(world_endx));
 			xmaxBox.setText(dFormat.format(world_startx));	
 			
@@ -462,15 +540,11 @@ public class Correlation implements EntryPoint {
 		
 		if ( world_starty <= world_endy ) {
 			
-			verticalValue.setText(dFormat.format(world_starty)+" to "+ dFormat.format(world_endy));
-			
 			yminBox.setText(dFormat.format(world_starty));
 			ymaxBox.setText(dFormat.format(world_endy));
 			
 		} else {
-			
-			verticalValue.setText(dFormat.format(world_endy)+" to "+ dFormat.format(world_starty));
-			
+						
 			yminBox.setText(dFormat.format(world_endy));
 			ymaxBox.setText(dFormat.format(world_starty));
 			
@@ -490,11 +564,13 @@ public class Correlation implements EntryPoint {
 			VariableSerializable variables[] = result.getVariablesSerializable();
 			int index = -1;
 			for (int i = 0; i < variables.length; i++) {
-				xVariables.addItem(variables[i]);
-				yVariables.addItem(variables[i]);
-				colorVariables.addItem(variables[i]);
-				if ( variables[i].getID().equals(varid) ) {
-					index = i;
+				if ( !variables[i].getAttributes().get("grid_type").equals("vector") ) {
+					xVariables.addItem(variables[i]);
+					yVariables.addItem(variables[i]);
+					colorVariables.addItem(variables[i]);
+					if ( variables[i].getID().equals(varid) ) {
+						index = i;
+					}
 				}
 			}
 			if ( index > 0 ) {
@@ -510,6 +586,7 @@ public class Correlation implements EntryPoint {
 			yVariableLabel.setText("<= "+varY+" <=");
 			String varX = xVariables.getVariable(xVariables.getSelectedIndex()).getName();
 			xVariableLabel.setText("<= "+varX+" <=");
+			setVariables();
 		}
     	
     };
@@ -530,5 +607,154 @@ public class Correlation implements EntryPoint {
 		} else {
 			return -999.;
 		}
+	}
+	ValueChangeHandler<String> historyHandler = new ValueChangeHandler<String>() {
+
+		@Override
+		public void onValueChange(ValueChangeEvent<String> event) {
+			
+			String xml = event.getValue();
+			if ( !xml.equals("") ) {
+				popHistory(xml);
+			} else {
+				outputPanel.removeCell(0, 0);
+				xVariables.setSelectedIndex(0);
+				yVariables.setSelectedIndex(0);
+				resetConstraints("xy");
+				constraintsLayout.setVisible(false);
+			}
+			
+		}
+		
+	};
+	private void setVariables() {			
+		String vix = xVariables.getVariable(xVariables.getSelectedIndex()).getID();
+		String viy = yVariables.getVariable(yVariables.getSelectedIndex()).getID();
+		lasRequest.removeVariables();
+		lasRequest.addVariable(dsid, vix, 0);
+		lasRequest.addVariable(dsid, viy, 0);
+		if ( colorCheckBox.getValue() ) {
+			String varColor = colorVariables.getVariable(colorVariables.getSelectedIndex()).getID();
+			lasRequest.addVariable(dsid, varColor, 0);
+		}
+	}
+	private void resetConstraints(String vars) {
+		useXConstraint.setValue(false);
+		useYConstraint.setValue(false);
+		if ( vars.contains("x") ) {
+			xminBox.setText("");
+			xmaxBox.setText("");
+		}
+		if ( vars.contains("y") ) {
+			yminBox.setText("");
+			ymaxBox.setText("");
+		}
+	}
+	private void setConstraints() {
+		lasRequest.removeConstraints();
+		String varY = yVariables.getVariable(yVariables.getSelectedIndex()).getID();
+		String varX = xVariables.getVariable(xVariables.getSelectedIndex()).getID();
+		if ( useXConstraint.getValue() ) {
+			String min = xminBox.getText();
+			String max = xmaxBox.getText();
+		    lasRequest.addVariableConstraint(dsid, varX, "gt", min, "minx");
+		    lasRequest.addVariableConstraint(dsid, varX, "le", max, "maxx");
+		}
+		
+		if ( useYConstraint.getValue() ) {
+			String min = yminBox.getText();
+			String max = ymaxBox.getText();
+			lasRequest.addVariableConstraint(dsid, varY, "gt", min, "miny");
+			lasRequest.addVariableConstraint(dsid, varY, "le", max, "maxy");
+		}
+	}
+	private void clearConstraint(String axis) {
+		if ( axis.equals("y") ) {
+			yminBox.setText("");
+			ymaxBox.setText("");
+			useYConstraint.setValue(false);
+		} else if ( axis.equals("x") ) {
+			xminBox.setText("");
+			xmaxBox.setText("");
+			useXConstraint.setValue(false);
+		}
+	}
+	private void popHistory(String xml) {
+		lasRequest = new LASRequest(xml);
+		
+		String vx = lasRequest.getVariable(0);
+		String vy = lasRequest.getVariable(1);
+		String vc = lasRequest.getVariable(2);
+		if ( vx != null && !vx.equals("") ) {
+			xVariables.setSelectedVariable(vx);
+			String varX = xVariables.getVariable(xVariables.getSelectedIndex()).getName();
+			xVariableLabel.setText("<= "+varX+" <=");
+		}
+		if ( vy != null && !vy.equals("") ) {
+			yVariables.setSelectedVariable(vy);
+			String varY = yVariables.getVariable(yVariables.getSelectedIndex()).getName();
+			yVariableLabel.setText("<= "+varY+" <=");
+			
+		}
+		if ( vc != null && !vc.equals("") ) {
+			colorVariables.setSelectedVariable(vc);
+			colorCheckBox.setValue(true);
+		} else {
+			colorCheckBox.setValue(false);
+		}
+
+		List<Map<String, String>> vcons= lasRequest.getVariableConstraints();
+		if ( vcons.size() > 0 ) {
+			for (Iterator vconsIt = vcons.iterator(); vconsIt.hasNext();) {
+				Map<String, String> con = (Map<String, String>) vconsIt.next();
+				String varid = con.get("varID");
+				String op = con.get("op");
+				String value = con.get("value");
+				String id = con.get("id");
+				if ( id.equals("minx") ) {
+					if ( varid.equals(vx) ) {
+						xminBox.setText(value);
+						useXConstraint.setValue(true);
+					} else {
+						clearConstraint("x");
+					}
+				}
+				if ( id.equals("maxx") ) {
+					if ( varid.equals(vx) ) {
+						xmaxBox.setText(value);
+						useXConstraint.setValue(true);
+					} else {
+						clearConstraint("x");
+					}
+				}
+				if ( id.equals("miny") ) {
+					if ( varid.equals(vy) ) {
+						yminBox.equals(vy);
+						useYConstraint.setValue(true);
+					} else {
+						clearConstraint("y");
+					}
+				}
+				if ( id.equals("maxy") ) {
+					if ( varid.equals(vy) ) {
+						ymaxBox.equals(vy);
+						useYConstraint.setValue(true);
+					} else {
+						clearConstraint("y");
+					}
+				}
+			} 
+		} else {
+			useXConstraint.setValue(false);
+			useYConstraint.setValue(false);
+		}
+		
+		setVariables();
+		
+		updatePlot(false);
+
+	}
+	private void pushHistory(String xml) {
+		History.newItem(xml, false);
 	}
 }
