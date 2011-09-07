@@ -277,75 +277,78 @@ public class Correlation implements EntryPoint {
     	}
 
     };
-	private void updatePlot(boolean addHistory) {
-		spin.setPopupPosition(outputPanel.getAbsoluteLeft(), outputPanel.getAbsoluteTop());
-		spin.show();
-		String tlo = lasRequest.getRangeLo("t", 0);
-		String thi = lasRequest.getRangeHi("t", 0);
-		String xlo = lasRequest.getRangeLo("x", 0);
-		String xhi = lasRequest.getRangeHi("x", 0);
-		String ylo = lasRequest.getRangeLo("y", 0);
-		String yhi = lasRequest.getRangeHi("y", 0);
-		String zlo = lasRequest.getRangeLo("z", 0);
-		String zhi = lasRequest.getRangeHi("z", 0);
+    private void updatePlot(boolean addHistory) {
+    	if ( xVariables.getSelectedIndex() == yVariables.getSelectedIndex() ) {
+    		Window.alert("The same variable on both axes is going to be a straight line.  I just can't bring myself to plot that.");
+    	} else {
+    		spin.setPopupPosition(outputPanel.getAbsoluteLeft(), outputPanel.getAbsoluteTop());
+    		spin.show();
+    		String tlo = lasRequest.getRangeLo("t", 0);
+    		String thi = lasRequest.getRangeHi("t", 0);
+    		String xlo = lasRequest.getRangeLo("x", 0);
+    		String xhi = lasRequest.getRangeHi("x", 0);
+    		String ylo = lasRequest.getRangeLo("y", 0);
+    		String yhi = lasRequest.getRangeHi("y", 0);
+    		String zlo = lasRequest.getRangeLo("z", 0);
+    		String zhi = lasRequest.getRangeHi("z", 0);
 
-		// If it's defined it will be in the hi or both.
-		if ( tlo != null && thi != null ) {
-			lasRequest.setRange("t", tlo, thi, 0);
-		} else if ( thi != null ) {
-			lasRequest.setRange("t", thi, thi, 0);
-		}
+    		// If it's defined it will be in the hi or both.
+    		if ( tlo != null && thi != null ) {
+    			lasRequest.setRange("t", tlo, thi, 0);
+    		} else if ( thi != null ) {
+    			lasRequest.setRange("t", thi, thi, 0);
+    		}
 
-		if ( xlo != null && xhi != null ) {
-			lasRequest.setRange("x", xlo, xhi, 0);
-		} else if ( thi != null ) {
-			lasRequest.setRange("x", xhi, xhi, 0);
-		}
+    		if ( xlo != null && xhi != null ) {
+    			lasRequest.setRange("x", xlo, xhi, 0);
+    		} else if ( thi != null ) {
+    			lasRequest.setRange("x", xhi, xhi, 0);
+    		}
 
-		if ( ylo != null && yhi != null ) {
-			lasRequest.setRange("y", ylo, yhi, 0);
-		} else if ( yhi != null ) {
-			lasRequest.setRange("y", yhi, yhi, 0);
-		}
+    		if ( ylo != null && yhi != null ) {
+    			lasRequest.setRange("y", ylo, yhi, 0);
+    		} else if ( yhi != null ) {
+    			lasRequest.setRange("y", yhi, yhi, 0);
+    		}
 
-		if ( zlo != null && zhi != null ) {
-			lasRequest.setRange("z", zlo, zhi, 0);
-		} else if ( zhi != null ) {
-			lasRequest.setRange("z", zhi, zhi, 0);
-		}
+    		if ( zlo != null && zhi != null ) {
+    			lasRequest.setRange("z", zlo, zhi, 0);
+    		} else if ( zhi != null ) {
+    			lasRequest.setRange("z", zhi, zhi, 0);
+    		}
 
-		lasRequest.setProperty("product_server", "ui_timeout", "20");
-		lasRequest.setProperty("las", "output_type", "xml");
-		lasRequest.setOperation(operationID, operationType);
+    		lasRequest.setProperty("product_server", "ui_timeout", "20");
+    		lasRequest.setProperty("las", "output_type", "xml");
+    		lasRequest.setOperation(operationID, operationType);
 
 
-		frontCanvas = Canvas.createIfSupported();
-		frontCanvasContext = frontCanvas.getContext2d();
+    		frontCanvas = Canvas.createIfSupported();
+    		frontCanvasContext = frontCanvas.getContext2d();
 
-		int rndRedColor = 190;
-		int rndGreenColor = 40;
-		int rndBlueColor = 40;
-		double rndAlpha = .25;
+    		int rndRedColor = 190;
+    		int rndGreenColor = 40;
+    		int rndBlueColor = 40;
+    		double rndAlpha = .25;
 
-		randomColor = CssColor.make("rgba(" + rndRedColor + ", " + rndGreenColor + "," + rndBlueColor + ", " + rndAlpha + ")");
+    		randomColor = CssColor.make("rgba(" + rndRedColor + ", " + rndGreenColor + "," + rndBlueColor + ", " + rndAlpha + ")");
 
-		String url = Util.getProductServer()+"?xml="+URL.encode(lasRequest.toString());
+    		String url = Util.getProductServer()+"?xml="+URL.encode(lasRequest.toString());
 
-		currentURL = url;
-		
-		if ( addHistory ) {
-			pushHistory(lasRequest.toString());
-		}
-		
-		RequestBuilder sendRequest = new RequestBuilder(RequestBuilder.GET, url);
-		try {
-			sendRequest.sendRequest(null, lasRequestCallback);
-		} catch (RequestException e) {
-			HTML error = new HTML(e.toString());
-			outputPanel.setWidget(0, 0, error);
-		}
+    		currentURL = url;
 
-	}
+    		if ( addHistory ) {
+    			pushHistory(lasRequest.toString());
+    		}
+
+    		RequestBuilder sendRequest = new RequestBuilder(RequestBuilder.GET, url);
+    		try {
+    			sendRequest.sendRequest(null, lasRequestCallback);
+    		} catch (RequestException e) {
+    			HTML error = new HTML(e.toString());
+    			outputPanel.setWidget(0, 0, error);
+    		}
+    	}
+    }
 	RequestCallback lasRequestCallback = new RequestCallback() {
 
 		@Override
@@ -580,7 +583,7 @@ public class Correlation implements EntryPoint {
 			if ( grid_type.equals("regular") ) {
 				operationID = "prop_prop_plot";
 			} else if ( grid_type.equals("trajectory") ) {
-				operationID = "Trajectory_correlation";
+				operationID = "Trajectory_correlation_plot";
 			}
 			String varY = yVariables.getVariable(yVariables.getSelectedIndex()).getName();
 			yVariableLabel.setText("<= "+varY+" <=");

@@ -40,8 +40,8 @@
 	</operation>
 
     <!-- END Trajectory_interactive_plot -->
-    <!-- This is the separate property-property viewer operation. -->
-      <operation name="Correlation Plot" ID="Trajectory_correlation_plot" output_template="Trajectory_correlation_plot" default="true" category="file">
+    <!-- This is the property-property operation for trajectory in-situ data. It gets called from the Correlation view defined below.  -->
+      <operation name="Correlation Plot" ID="Trajectory_correlation_plot" default="true" category="file" output_template="zoom">
 	  <backend_service><exclude>ferret,propprop</exclude></backend_service>
           <operation name="Database Extraction" ID="DBExtract" service_action="Trajectory_correlation_plot">
                <response ID="DBExtractResponse">
@@ -81,8 +81,8 @@
 		</grid_types>
     </operation>
     <!-- End of trajectory operations -->
-	<operation name="Correlation Plot" ID="Grid_correlation"
-		service_action="" default="true" category="file" output_template="Correlation">
+	<operation name="Correlation Plot" ID="Grid_c	<operation name="Correlation Plot" ID="Correlation"
+ile" output_template="Correlation">
 		<response ID="PlotResp" type="HTML" index="1">
 			<result type="map_scale" ID="map_scale" file_suffix=".xml" />
 			<result type="image" ID="plot_image" streamable="true"
@@ -95,11 +95,12 @@
 		<region>
 			<intervals name="xy" />
 		</region>
-		<grid_types>
-			<grid_type name="regular" />
+					<intervals name="xyt" />
+name="regular" />
 		</grid_types>
 	</operation>
-    <operation ID="Plot_2D_XY_zoom" default="true" name="Color plot"  output_template="zoom"
+    <operati			<grid_type name="trajectory" />
+on ID="Plot_2D_XY_zoom" default="true" name="Color plot"  output_template="zoom"
         service_action="Plot_2D_XY" order="0001" category="visualization" isZoomable="true">
         <service>ferret</service>
         <response ID="PlotResp">

@@ -19,9 +19,11 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 import org.jdom.Attribute;
 import org.jdom.Content;
@@ -682,18 +684,23 @@ public class LASBackendRequest extends LASDocument {
     }
 
     /**
-     * Returns an SQL formatted string containing the list of variable names separated by commas.
+     * Returns an SQL formatted string containing the list of variable names with no duplicates separated by commas.
      * @return variablesString SQL formatted string
      */
     public String getVariablesAsString() {
         String variables = "";
         List data = this.getRootElement().getChild("dataObjects").getChildren("data");
+        Set<String> uniques = new HashSet<String>();
         for (Iterator varIt = data.iterator(); varIt.hasNext();) {
             Element variable = (Element) varIt.next();
-            variables = variables+variable.getAttributeValue("var");
-            if (varIt.hasNext()) {
-                variables = variables + ",";
-            }
+            uniques.add(variable.getAttributeValue("var"));
+        }
+        for (Iterator varIt = uniques.iterator(); varIt.hasNext();) {
+        	String variable = (String) varIt.next();
+        	variables = variables+variable;
+        	if (varIt.hasNext()) {
+        		variables = variables + ",";
+        	}
         }
         return variables;
     }
