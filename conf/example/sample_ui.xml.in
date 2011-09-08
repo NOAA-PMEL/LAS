@@ -14,6 +14,7 @@
 
 <!-- UI elements specific to the LAS_seasonal_regridding_demo -->
 <!ENTITY Regrid_to_Seasonal_ui SYSTEM "Regrid_to_Seasonal_ui.xml">
+<!ENTITY Regrid_to_1_Season_ui SYSTEM "Regrid_to_1_Season_ui.xml">
 
 <!-- UI elements specific to the LAS_curv_to_rect_regridding_demo -->
 <!ENTITY Regrid_Curv_Rect_ui SYSTEM "Regrid_Curv_Rect_ui.xml">
@@ -43,6 +44,7 @@
      curvilinear to rectilinear, Hybrid Z regridding.
 -->
     &Regrid_to_Seasonal_ui;
+    &Regrid_to_1_Season_ui;
     &Regrid_Curv_Rect_ui;
     &Hybrid_Z_ui;
     &HYCOM_Hybrid_Z_ui;
