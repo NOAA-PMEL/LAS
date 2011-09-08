@@ -1,0 +1,54 @@
+! OCDMS_is_range
+!  called by OCDMS_xytvar_setup
+!
+! Given a min and max variables defined, see if they are valid data
+! and use them to define axis min,max, delta. If min and max are not
+! valid then return nominal 0:100 and set an error flag.
+
+LET baddat = 0
+
+CANCEL SYMBOL dm_labels
+
+LET ax_lo = `$1`
+LET ax_hi = `$2`
+DEFINE SYMBOL ax_lo = `$1`
+DEFINE SYMBOL ax_hi = `$2`
+
+IF `($ax_lo"0|bad>1|*>0") OR ($ax_hi"0|bad>1|*>0")` THEN 
+  LET ax_lo = 0
+  LET ax_hi = 100
+  LET del_ax = 100
+  LET baddat = 1
+  PPL axlabp,0,0
+  PPL TICS,0,0,0,0
+  DEFINE SYMBOL put_label = Data All Missing or Inconsistent Variable Constraints
+  EXIT/SCRIPT ! Data All Missing or Inconsistent Variable Constraints
+ENDIF 
+
+IF ($is_time"0|0|*>1") THEN
+   IF `ABS(ax_lo-ax_hi) LT 1` THEN
+      LET ax_lo = `ax_lo - 15`
+      LET ax_hi = `ax_hi + 15`
+   ENDIF
+   LET del_ax = 24
+   IF `ax_hi - ax_lo LT 26` THEN LET del_ax = 1
+ELSE
+   IF `ax_lo EQ ax_hi` THEN
+      LET ax_lo = `ax_lo - 0.5`
+      LET ax_hi = `ax_hi + 0.5`  
+   ENDIF
+   
+   PPL %RANGE `ax_lo`, `ax_hi`, 10
+   IF `($ppl$range_low) EQ ($ppl$range_high)` THEN
+      LET del_ax = `(ax_hi - ax_lo)/10`
+   ELSE
+      LET ax_lo = ($ppl$range_low)
+      LET ax_hi = ($ppl$range_high)
+      LET del_ax = ($ppl$range_inc)
+   ENDIF
+   say `ABS(ax_hi - ax_lo)`
+   IF `ABS(ax_hi - ax_lo) LT 1` THEN DEFINE SYMBOL dm_labels = dm
+   IF `ABS(ax_hi - ax_lo) LT 0.06` THEN DEFINE SYMBOL dm_labels = dms
+
+ENDIF
+! End of file ------------ OCDMS_is_range.jnl--------------------------

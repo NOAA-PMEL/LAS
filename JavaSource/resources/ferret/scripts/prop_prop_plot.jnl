@@ -190,9 +190,9 @@ DEFINE SYMBOL qualifiers ($qualifiers)/NOKEY/NOLAB
 
 ! Draw the plot underlay
 
-PLOT($qualifiers)/TITLE="($ferret_title)" ($plot_arg)
-LABEL/NOUSER `($ppl$xlen)/2`, -0.6, 0, 0, 0.14 ($ferret_title_0)
-LABEL/NOUSER -0.8, `($ppl$ylen)/2`, 0, 90, 0.14 ($ferret_title_1)
+!!! PLOT($qualifiers)/TITLE="($ferret_title)" ($plot_arg)
+!!! LABEL/NOUSER `($ppl$xlen)/2`, -0.6, 0, 0, 0.14 ($ferret_title_0)
+!!! LABEL/NOUSER -0.8, `($ppl$ylen)/2`, 0, 90, 0.14 ($ferret_title_1)
 
 ! add any constraint labels in the lower left.
 IF `($nmask_labels"0|*>1") EQ 0` THEN DEFINE SYMBOL nmask_labels = 1
@@ -245,6 +245,22 @@ ELSE
    DEFINE SYMBOL poly_qual = ($poly_qual)/palette=($polycolor)
 ENDIF
 
+! Formatting of lon, lat, time axes if appropriate
+LET p = ($xvar) 
+LET q = ($yvar)
+
+DEFINE SYMBOL ferret_prop_var = ($ferret_plot_var_0)
+DEFINE SYMBOL ferret_plot_var = ($ferret_plot_var_1)
+IF `STRINDEX( UPCASE("($ferret_plot_var_0)"), "TIME") GT 0` THEN DEFINE SYMBOL tunits = ($data_0_units)
+IF `STRINDEX( UPCASE("($ferret_plot_var_1)"), "TIME") GT 0` THEN DEFINE SYMBOL tunits = ($data_1_units)
+
+GO LAS_xytvar_setup
+
+LABEL/NOUSER `($ppl$xlen)/2`, -0.6, 0, 0, 0.14 ($ferret_title_0)
+LABEL/NOUSER -0.8, `($ppl$ylen)/2`, 0, 90, 0.14 ($ferret_title_1)
+
+DEFINE SYMBOL poly_qual = ($poly_qual)/OVER
+
 DEFINE SYMBOL poly_command POLYGON($poly_qual)
 GO polymark ($poly_command) ($plot_arg), ($polyshape), ($polysize)
 
@@ -260,6 +276,7 @@ IF ($color_by_title"0|*>1") THEN LABEL/NOUSER `($ppl$width)-($ppl$xorg)-0.2`, -0
 LET p = ($xvar)  ! for regression line
 LET q = ($yvar)
 LET do_rsquare = 1
+
 
 DEFINE SYMBOL  line_color = blue  ! regression line
 IF ($polycolor%0|blue>1|*>0%) THEN DEFINE SYMBOL  line_color = red
