@@ -42,7 +42,7 @@ GO LAS_initialize_traj_id
 
 !!! When making icons for a trajectory plot, plotting icons very near the 
 !!! plot boundary can cause lines outside the plot area. Extend the area slightly.
-!!IF `($data_var"0|metadata_ID>1|*>0") AND (($cruise_max) LE ($cruise_max_labels))` THEN
+!!IF `($data_var"0|metadata_ID>1|*>0") AND (($traj_max) LE ($traj_max_labels))` THEN
 !!   LET del = `($REGION_X_RANGE)* 0.0001`
 !!   IF `($REGION_X_RANGE) GE 359.8` THEN LET del = (360-($REGION_X_RANGE)) /100.
 !!   DEFINE SYMBOL region_0_x_hi = `($region_0_x_hi) + del`
@@ -58,6 +58,29 @@ GO LAS_initialize_traj_id
 !  DATA_VAR = "coord_time", DATA_T_VAR = "hours_1970"  ??
 ! 
 ! In this case we can set up a time axis, and call polymark_datekey 
+
+! When the data crosses the branch cut, replicate the lon,lat,var variables with lon+360,
+! and contcatenate with the original points before plotting.
+
+
+IF `STRINDEX("($ferret_view"0")", "x") GT 0` THEN
+  STAT ($data_x_var)
+  IF `($STAT_MIN) GE ($REGION_X_LO)` THEN
+    LET x_var_data = ($data_x_var)
+    IF ($data_y_var"0|*>1") THEN LET y_var_data = ($data_y_var)
+    IF ($data_z_var"0|*>1") THEN LET z_var_data = ($data_z_var)
+    IF ($data_t_var"0|*>1") THEN LET t_var_data = ($data_t_var)
+    LET var_data = ($ferret_plot_var)
+
+  ELSE
+    DEFINE SYMBOL do_wrap = 1
+    LET x_var_data   = XCAT( ($data_x_var), ($data_x_var)+360 )
+    IF ($data_y_var"0|*>1") THEN LET y_var_data  = XCAT( ($data_y_var), ($data_y_var) )
+    IF ($data_z_var"0|*>1") THEN LET z_var_data  = XCAT( ($data_z_var), ($data_z_var) )
+    IF ($data_t_var"0|*>1") THEN LET t_var_data  = XCAT( ($data_t_var), ($data_t_var) )
+    LET var_data   = XCAT( ($ferret_plot_var), ($ferret_plot_var) )
+  ENDIF
+ENDIF
 
 IF ($ferret_plot_key"0|date_key>1|*>0") THEN
 
@@ -81,6 +104,18 @@ IF ($ferret_plot_key"0|date_key>1|*>0") THEN
    DEFINE SYMBOL margin = 1
    DEFINE SYMBOL ferret_poly_levels = 30
 
+ENDIF
+
+IF ($ferret_by_id"0|*>1") THEN
+   DEFINE SYMBOL ferret_palette = more_by_levels
+   DEFINE SYMBOL ferret_poly_levels = `trajectory_counts,RETURN=lsize`
+   LET id_data = COMPRESSI(XSEQUENCE(TRANSPOSE_XZ(id_by_z)))
+   LET var_data = id_data[i=1:`($data_x_var),RETURN=isize`]
+   IF ($do_wrap"0|*>1") THEN 
+      LET vdata = id_data[i=1:`($data_x_var),RETURN=isize`]
+      LET var_data  = XCAT( vdata, vdata )
+   ENDIF
+   DEFINE SYMBOL ferret_plot_title Colored by Trajectory Number
 ENDIF
 
 ! Open the window
@@ -167,28 +202,6 @@ IF `($ferret_poly_scale) GE 0.6` THEN DEFINE SYMBOL qualifiers = ($qualifiers)/L
 
 ! Make the polygon overlay plot
 
-! When the data crosses the branch cut, replicate the lon,lat,var variables with lon+360,
-! and contcatenate with the original points before plotting.
-
-
-IF `STRINDEX("($ferret_view"0")", "x") GT 0` THEN
-  STAT ($data_x_var)
-  IF `($STAT_MIN) GE ($REGION_X_LO)` THEN
-    LET x_var_data = ($data_x_var)
-    IF ($data_y_var"0|*>1") THEN LET y_var_data = ($data_y_var)
-    IF ($data_z_var"0|*>1") THEN LET z_var_data = ($data_z_var)
-    IF ($data_t_var"0|*>1") THEN LET t_var_data = ($data_t_var)
-    LET var_data = ($ferret_plot_var)
-
-  ELSE
-    LET x_var_data   = XCAT( ($data_x_var), ($data_x_var)+360 )
-    IF ($data_y_var"0|*>1") THEN LET y_var_data  = XCAT( ($data_y_var), ($data_y_var) )
-    IF ($data_z_var"0|*>1") THEN LET z_var_data  = XCAT( ($data_z_var), ($data_z_var) )
-    IF ($data_t_var"0|*>1") THEN LET t_var_data  = XCAT( ($data_t_var), ($data_t_var) )
-    LET var_data   = XCAT( ($ferret_plot_var), ($ferret_plot_var) )
-  ENDIF
-ENDIF
-
 ! Points will mark location of missing data
 LET missing_flag = -9999999
 LET x_loc_bad = IF MISSING(var_data,missing_flag) EQ missing_flag THEN x_var_data 
@@ -200,11 +213,12 @@ PLOT/OVER/VS/NOLAB/SYM=2/COLOR=1/SIZ=0.02 x_loc_bad,y_loc_bad
 LET ng = var_data[x=@ngd]
 IF `ng EQ 0` THEN DEFINE SYMBOL poly_command ($poly_command)/NOKEY
 
+
 DEFINE SYMBOL do_icons = 0
-!!IF `($data_var"0|metadata_ID>1|*>0") AND (($cruise_max) LE ($cruise_max_labels))` THEN
+!!IF `($data_var"0|metadata_ID>1|*>0") AND (($traj_max) LE ($traj_max_labels))` THEN
 !!   GO OCDMS_map_icons
 !!   DEFINE SYMBOL do_icons = 1
-!!
+
 !!ELSE
 
    ! Set the palette
