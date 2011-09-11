@@ -93,6 +93,7 @@
 		</response>
 		<service>template</service>
 		<region>
+		    <intervals name="xy" />
 			<intervals name="xyt" />
 		</region>
 		<grid_types>
