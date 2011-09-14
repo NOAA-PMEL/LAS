@@ -10,16 +10,32 @@
 #set($missing=$las_backendrequest.getMissingConstraint())
 #set($var = $las_backendrequest.getVariablesAsString())
 #set($con = $las_backendrequest.getConstraintString("AND"))
-#if ( $con != "")
-    #if ( $var.equals($lon) || $var.equals($lat) || $var.equals($time) )
-        SELECT $cruiseID, $lat, $lon, $time FROM $table WHERE $region AND $con
-    #else
-        SELECT $cruiseID, $lat, $lon, $time, $var FROM $table WHERE $region AND $con
-    #end
+#if ( $var.contains($cruiseID) ) 
+	#set($cruiseID = "")
 #else
-    #if ( $var.equals($lon) || $var.equals($lat) || $var.equals($time) )
-        SELECT $cruiseID, $lat, $lon, $time FROM $table WHERE $region
-    #else
-        SELECT $cruiseID, $lat, $lon, $time, $var FROM $table WHERE $region
-    #end
+	#set($cruiseID = $cruiseID + ",")
+#end
+#if ( $var.contains($lat) )
+	#set($lat = "")
+#else
+    #set($lat = $lat + ",")
+#end
+#if ( $var.contains($lon) )
+	#set($lon = "")
+#else
+    #set($lon = $lon + ",")
+#end
+#if ( $var.contains($time) )
+	#set($time = "")
+#else
+    #set($time = $time + ",")
+#end
+#if ( $con != "")
+    
+        SELECT $cruiseID $lat $lon $time $var FROM $table WHERE $region AND $con
+   
+#else
+   
+        SELECT $cruiseID $lat $lon $time $var FROM $table WHERE $region
+    
 #end
