@@ -716,18 +716,36 @@ public class addXML {
 
 		// Discover and process all the THREDDS dataset elements that actually
 		// connect to a data source.
-
+		top.setCategories(CategoryBeans);
+		// create las_categories and datasets elements at this level
+		Document doc = new Document();
+		Element lasdata = new Element("lasdata");
+		Element datasetsElement = new Element("datasets");
+		Element gridsElement = new Element("grids");
+		Element axesElement = new Element("axes");
+		Element las_categories = new Element("las_categories");
+		Element topElement = top.toXml();
+		las_categories.addContent(topElement);
+		lasdata.addContent(datasetsElement);
+		lasdata.addContent(gridsElement);
+		lasdata.addContent(axesElement);
+		lasdata.addContent(las_categories);
+		doc.setRootElement(lasdata);
 		ThreddsDatasets = catalog.getDatasets();
 		di = ThreddsDatasets.iterator();
 		while (di.hasNext()) {
 			InvDataset ThreddsDataset = (InvDataset) di.next();
-			DGABeans.addAll(processDatasets(ThreddsDataset));
+			if ( esg ) {
+				processESGDatasets(ThreddsDataset, doc);
+			} else {
+				DGABeans.addAll(processDatasets(ThreddsDataset));
+			}
 		}
 
 		// Each THREDDS "dataset" is a separate LAS data set.
 		// If oneDataset is true, combine them before making the XML.
 
-		if (oneDataset) {
+		if (oneDataset && !esg) {
 			Vector newDAGBVector = new Vector();
 			DatasetsGridsAxesBean newDAGB = new DatasetsGridsAxesBean();
 			GridBean theGrid = (GridBean)(((DatasetsGridsAxesBean)DGABeans.get(0)).getGrids()).get(0);
@@ -774,16 +792,17 @@ public class addXML {
 			newDAGBVector.add(newDAGB);
 			DGABeans = newDAGBVector;
 		}
-
-		top.setCategories(CategoryBeans);
-		// create las_categories and datasets elements at this level
-		Document doc = new Document();
-		Element lasdata = new Element("lasdata");
-		Element datasetsElement = new Element("datasets");
-		Element gridsElement = new Element("grids");
-		Element axesElement = new Element("axes");
-
+		if ( !esg ) {
+			addBeansToDoc(DGABeans, doc);
+		}
+		return doc;
+	}
+	private static void addBeansToDoc(Vector DGABeans, Document doc) {
 		Iterator dgabit = DGABeans.iterator();
+		Element lasdata = doc.getRootElement();
+		Element datasetsElement = lasdata.getChild("datasets");
+		Element gridsElement = lasdata.getChild("grids");
+		Element axesElement = lasdata.getChild("axes");
 		while (dgabit.hasNext()) {
 			DatasetsGridsAxesBean dgab_temp = (DatasetsGridsAxesBean) dgabit.next();
 			if (dgab_temp.getError() != null) {
@@ -812,23 +831,6 @@ public class addXML {
 					axesElement.addContent(aE);
 				}
 			}
-		}
-
-		Element las_categories = new Element("las_categories");
-		Element topElement = top.toXml();
-		las_categories.addContent(topElement);
-		lasdata.addContent(datasetsElement);
-		lasdata.addContent(gridsElement);
-		lasdata.addContent(axesElement);
-		lasdata.addContent(las_categories);
-		doc.setRootElement(lasdata);
-		return doc;
-	}
-	public static Vector processDatasets(InvDataset ThreddsDataset, boolean esg) {
-		if ( esg ) {
-			return processESGDatasets(ThreddsDataset);
-		} else {
-			return processDatasets(ThreddsDataset);
 		}
 	}
 	/**
@@ -861,7 +863,7 @@ public class addXML {
 		}
 		return beans;
 	}
-    public static Vector processESGDatasets(InvDataset ThreddsDataset) {
+    public static void processESGDatasets(InvDataset ThreddsDataset, Document doc) {
 		Vector beans = new Vector();
 		DatasetsGridsAxesBean bean = new DatasetsGridsAxesBean();
 		DatasetBean ds = new DatasetBean();
@@ -914,7 +916,7 @@ public class addXML {
 		datasets.add(ds);
 		bean.setDatasets(datasets);
 		beans.add(bean);
-		return beans;
+		addBeansToDoc(beans, doc);
 	}
 	/**
 	 * createDatasetBeanFromThreddsDataset
