@@ -723,9 +723,10 @@ public final class ProductServerAction extends LASAction {
                 }
                 // Put these objects in the context so the output template can use them.
                 request.setAttribute("las_map_scale", lasMapScale);
+                compoundResponse.addMapScale(lasMapScale);
             }
         }
-        compoundResponse.addMapScale(lasMapScale);
+       
         log.debug("Preparing the range index file.");
         LASRegionIndex lasRegionIndex = new LASRegionIndex();
         if ( compoundResponse.isResultByTypeRemote("index")) {
