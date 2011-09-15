@@ -313,9 +313,10 @@ public class DatasetBean extends LasBean {
 			}
 		}
 		if ( vectors.size() > 1 ) {
-			StringBuilder vector_id = new StringBuilder();
-			StringBuilder vector_long_name = new StringBuilder("Vector of ");
+			
 			for ( int v = 0; v < vectors.size(); v++ ) {
+				StringBuilder vector_id = new StringBuilder();
+				StringBuilder vector_long_name = new StringBuilder("Vector of ");
 				List<String> vector = vectors.get(v);
 				for (int i = 0; i < vector.size(); i++ ) {
 					vector_id.append(vector.get(i));
