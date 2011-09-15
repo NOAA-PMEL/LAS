@@ -51,6 +51,7 @@ import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.PushButton;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.TextBox;
+import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.xml.client.Document;
 import com.google.gwt.xml.client.Element;
 import com.google.gwt.xml.client.Node;
@@ -63,6 +64,7 @@ public class Correlation implements EntryPoint {
 	HTML spinImage;
 	HorizontalPanel coloredBy = new HorizontalPanel();
 	FlexTable constraintsLayout = new FlexTable();
+	VerticalPanel constraintsPanel = new VerticalPanel();
 	TextBox xminBox = new TextBox();
 	TextBox xmaxBox = new TextBox();
 	TextBox yminBox = new TextBox();
@@ -75,7 +77,8 @@ public class Correlation implements EntryPoint {
 	Label selection = new Label("Current selection:");
 	Label horizontalLabel = new Label("Horizontal: ");
 	Label verticalLabel = new Label("Vertical: ");
-	FlexTable topPanel = new FlexTable();
+	FlexTable controlPanel = new FlexTable();
+	VerticalPanel topPanel = new VerticalPanel();
 	FlexTable outputPanel = new FlexTable();
     VariableListBox xVariables = new VariableListBox();
     VariableListBox yVariables = new VariableListBox();
@@ -122,7 +125,7 @@ public class Correlation implements EntryPoint {
 		spin = new PopupPanel();
 		spin.add(spinImage);
     	update.addStyleDependentName("SMALLER");
-    	update.setWidth("60px");
+    	update.setWidth("80px");
     	
     	useXConstraint.addClickHandler(new ClickHandler() {
 
@@ -187,17 +190,18 @@ public class Correlation implements EntryPoint {
     	constraintsLayout.setWidget(2, 1, xVariableLabel);
     	constraintsLayout.setWidget(2, 2, xmaxBox);
     	constraintsLayout.setWidget(2, 3, useXConstraint);
-    	constraintsLayout.setVisible(false);
-    	constraintsLayout.setWidget(3, 0, new HTML("<b>Help: </b> Enter values and select the check boxes, or click and drag on the plot."));
-    	constraintsLayout.getFlexCellFormatter().setColSpan(3, 0, 4);
+    	    	
+    	constraintsPanel.add(constraintsLayout);
+    	constraintsPanel.add(new HTML("<b>Help: </b> Enter values and select the check boxes, or click and drag on the plot."));
     	
+    	constraintsPanel.setVisible(false);
     	
-    	topPanel.setWidget(0, 0, new HTML("<b>Data Selection: </b>"));
-		topPanel.getFlexCellFormatter().setColSpan(0, 0, 4);
-    	topPanel.setWidget(1, 0, yVariables);
-		topPanel.setWidget(1, 1, new Label(" as a function of "));
-		topPanel.setWidget(1, 2, xVariables);
-		topPanel.setWidget(1, 3, update);	
+    	controlPanel.setWidget(0, 0, new HTML("<b>Data Selection: </b>"));
+		controlPanel.getFlexCellFormatter().setColSpan(0, 0, 4);
+    	controlPanel.setWidget(1, 0, yVariables);
+		controlPanel.setWidget(1, 1, new Label(" as a function of "));
+		controlPanel.setWidget(1, 2, xVariables);
+		controlPanel.setWidget(1, 3, update);	
 		colorCheckBox.addClickHandler(new ClickHandler() {
 
 			@Override
@@ -214,10 +218,10 @@ public class Correlation implements EntryPoint {
 		});
 		coloredBy.add(new Label("Colored By "));
 		coloredBy.add(colorCheckBox);
-		topPanel.setWidget(2, 1, coloredBy);
-		topPanel.setWidget(2, 2, colorVariables);	
-		topPanel.getFlexCellFormatter().setColSpan(3, 0, 4);
-		topPanel.setWidget(3, 0, new HTML("<b>Help:</b> Choose the variables you want to plot from the drop down menus.  To color the plot by another variable check the \"Color by\" and select a variable from the drop down.  Click \"Update Plot\""));
+		controlPanel.setWidget(2, 1, coloredBy);
+		controlPanel.setWidget(2, 2, colorVariables);	
+		topPanel.add(controlPanel);
+		topPanel.add(new HTML("<b>Help:</b> Choose the variables you want to plot from the drop down menus.  To color the plot by another variable check the \"Color by\" and select a variable from the drop down.  Click \"Update Plot\""));
 		colorVariables.setEnabled(false);
 		colorVariables.addChangeHandler(new ChangeHandler() {
 
@@ -265,7 +269,7 @@ public class Correlation implements EntryPoint {
 			}
 		});
 		RootPanel.get("data_selection").add(topPanel);
-		RootPanel.get("data_constraints").add(constraintsLayout);
+		RootPanel.get("data_constraints").add(constraintsPanel);
 		RootPanel.get("correlation").add(outputPanel);
 		History.addValueChangeHandler(historyHandler);
 	}
@@ -278,6 +282,7 @@ public class Correlation implements EntryPoint {
 
     };
     private void updatePlot(boolean addHistory) {
+    	update.removeStyleDependentName("APPLY-NEEDED");
     	if ( xVariables.getSelectedIndex() == yVariables.getSelectedIndex() ) {
     		Window.alert("The same variable on both axes is going to be a straight line.  I just can't bring myself to plot that.");
     	} else {
@@ -433,8 +438,8 @@ public class Correlation implements EntryPoint {
 					x_per_pixel = (x_axis_upper_right - x_axis_lower_left)/Double.valueOf(x_plot_size);
 					y_per_pixel = (y_axis_upper_right - y_axis_lower_left)/Double.valueOf(y_plot_size);
 
-					outputPanel.setWidget(1, 0, image);
 					if ( frontCanvas != null ) {
+						outputPanel.setWidget(1, 0, image);
 						image.setVisible(false);
 						image.addLoadHandler(new LoadHandler() {
 
@@ -515,6 +520,9 @@ public class Correlation implements EntryPoint {
 
 							}
 						});
+					} else {
+						// Browser cannot handle a canvas tag, so just put up the image.
+						outputPanel.setWidget(0, 0, image);
 					}
 				}
 				world_startx = x_axis_lower_left;
@@ -527,7 +535,7 @@ public class Correlation implements EntryPoint {
 	};
 	private void setTextValues() {
 
-		constraintsLayout.setVisible(true);
+		constraintsPanel.setVisible(true);
 		
 		if ( world_startx <= world_endx ) {
 		
@@ -624,13 +632,14 @@ public class Correlation implements EntryPoint {
 				xVariables.setSelectedIndex(0);
 				yVariables.setSelectedIndex(0);
 				resetConstraints("xy");
-				constraintsLayout.setVisible(false);
+				constraintsPanel.setVisible(false);
 			}
 			
 		}
 		
 	};
 	private void setVariables() {			
+		update.addStyleDependentName("APPLY-NEEDED");
 		String vix = xVariables.getVariable(xVariables.getSelectedIndex()).getID();
 		String viy = yVariables.getVariable(yVariables.getSelectedIndex()).getID();
 		lasRequest.removeVariables();
@@ -654,6 +663,7 @@ public class Correlation implements EntryPoint {
 		}
 	}
 	private void setConstraints() {
+		update.addStyleDependentName("APPLY-NEEDED");
 		lasRequest.removeConstraints();
 		String varY = yVariables.getVariable(yVariables.getSelectedIndex()).getID();
 		String varX = xVariables.getVariable(xVariables.getSelectedIndex()).getID();
