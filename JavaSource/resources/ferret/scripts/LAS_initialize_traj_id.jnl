@@ -52,7 +52,7 @@ LET id_by_z =  EXPNDI_ID_BY_Z_COUNTS(trajvar,`longest`)
 !!
 !!      DEFINE SYMBOL cruises_shown = `n_subset`
 !!   ELSE
-      LET subset_mask = 1 + 0*i[i=1:($traj_max)]
+      LET subset_mask = 1 + 0*i[i=1:`ntrajs`]
 !!   ENDIF
 
 

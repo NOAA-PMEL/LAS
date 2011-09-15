@@ -7,13 +7,18 @@
 ! Fix to let the rhs for month ranges have multiple items, 
 ! given in a comma-separated list
 
+IF ($ferret_annotations%0|*>1%) THEN DEFINE SYMBOL translate_math = 0
+
+
 IF `STRINDEX("($rhs)", "'") GT 0` THEN
    LET slen = `STRLEN("($rhs)")`
    LET s1 = `STRINDEX("($rhs)", "'")`
    DEFINE SYMBOL rhs = `SUBSTRING("($rhs)", s1+1, slen-2)`
 ENDIF
 
+
 IF `($lhs"0|ident_ID>1|*>0") AND ($do_icons"0|1|*>0") EQ 1` THEN EXIT/SCRIPT
+
 
 ! RHS for month ranges may be a comma-separated list
 IF ($lhs"0|month>1|*>0") THEN 
@@ -41,7 +46,7 @@ IF ($lhs"0|month>1|*>0") THEN
      DEFINE SYMBOL rhs2 = `SUBSTRING("($rhs2)", commaloc+1, rhslen-commaloc+1)` ;\
      )
      IF ($mask_label_long"0|*>1") THEN DEFINE SYMBOL nmask_labels = `($nmask_labels"0") + 1`  ! add space for extra line
-     pause
+     
    ENDIF
 
 
@@ -58,8 +63,23 @@ IF ($op"0|*>1") THEN DEFINE SYMBOL op = `UPCASE("($op)")`
 DEFINE SYMBOL math_op_sym = ($op)
 IF ($math_sym_convert"1|no_convert>0") THEN GO op_math_sym ($translate_math) ($op) 
 DEFINE SYMBOL mask_title_($nmask_labels) = Where ($lhs) ($math_op_sym) ($rhs)
+
+
+IF `($lhs"|time>1|TIME>1|*>0")` THEN 
+   let tt = t[gt=($timeaxis)]
+   DEFINE SYMBOL date = `TAX_DATESTRING( tt[t=($rhs)], tt, "hours")`
+   DEFINE SYMBOL mask_title_($nmask_labels) = Where ($lhs) ($math_op_sym) ($date)
+ENDIF
+
 IF `STRCMP("($lhs_last)", "($lhs% %)") EQ 0` THEN GO combine_titles 
-DEFINE SYMBOL lhs_last = ($lhs)
-DEFINE SYMBOL op_last = ($op)
-DEFINE SYMBOL rhs_last = ($rhs) 
+   DEFINE SYMBOL lhs_last = ($lhs)
+   DEFINE SYMBOL op_last = ($op)
+   DEFINE SYMBOL rhs_last = ($rhs) 
+ENDIF
+
+IF `($nmask_labels"0") GT 0` THEN
+REPEAT/RANGE=1:($nmask_labels) (\
+ DEFINE SYMBOL note_num `($note_num"0") + 1`; \
+ IF ($mask_title_($note_num)"0|*>1") THEN DEFINE SYMBOL note_($note_num)_lab =  ($mask_title_($note_num)); \
+ )
 ENDIF

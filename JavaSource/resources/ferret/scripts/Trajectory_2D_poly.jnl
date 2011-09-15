@@ -35,7 +35,6 @@ ENDIF
 ! Set the URL label for the first dataset.
 GO LAS_url_label 0
 
-
 ! Create the trajectory variables and symbols
 
 GO LAS_initialize_traj_id
@@ -120,7 +119,7 @@ ENDIF
 
 ! Open the window
 
-SET WINDOW/SIZE = ($ferret_size"0.5")
+GO LAS_open_window
 
 ! For XY plots we can set the aspect ratio or request a WMS style
 ! plot with no axes.
@@ -139,7 +138,7 @@ IF `($ferret_view"0|xy>1|*>0") OR ($ferret_view"0|xyt>1|*>0")` THEN
 	DEFINE VIEW/X=0:0.9/Y=0:1 xspace
      ELSE
         DEFINE VIEW/X=0:0.95/Y=0:1 xspace
-     ENDIF
+	     ENDIF
      SET VIEW xspace
   ENDIF
 
@@ -215,11 +214,13 @@ IF `ng EQ 0` THEN DEFINE SYMBOL poly_command ($poly_command)/NOKEY
 
 
 DEFINE SYMBOL do_icons = 0
-!!IF `($data_var"0|metadata_ID>1|*>0") AND (($traj_max) LE ($traj_max_labels))` THEN
-!!   GO OCDMS_map_icons
-!!   DEFINE SYMBOL do_icons = 1
+IF ($data_var"0|metadata_ID>1|*>0") THEN
+   IF (ntrajs LE ($traj_max_labels)) THEN
+      GO OCDMS_map_icons
+      DEFINE SYMBOL do_icons = 1
+   ENDIF
 
-!!ELSE
+ELSE
 
    ! Set the palette
    ! If there is no variable, only locations, and if a palette is not 
@@ -234,7 +235,7 @@ DEFINE SYMBOL do_icons = 0
    DEFINE SYMBOL poly_command poly($qualifiers)
 
    GO ($polymark_script"polymark") ($poly_command) x_var_data y_var_data var_data ($ferret_poly_shape"square|triangle|delta|square|diamond|pentagon|hexagon|circle|star|plus|ex|*>square") ($ferret_poly_scale) ($datekey_time_arg)
-!!ENDIF
+ENDIF
 
 ! Set the shape to what is used above it will be the same on the key
 DEFINE SYMBOL ferret_poly_shape = ($ferret_poly_shape%square|delta|triangle|diamond|pentagon|hexagon|circle|star|plus|ex|*>square%)
@@ -247,14 +248,20 @@ IF `($ferret_label"1|0|1|*>1") EQ 1` THEN
    ! Nudge things down a little for 'yt and 'zt views because the time axis
    ! has years labeled beneath the months.
    
-   IF ($ferret_view"0|yt>1|zt>1|*>0") THEN
-     LABEL/NOUSER `($ppl$xlen)/2`, `-0.6*($ppl$yorg)`, 0, 0, 0.14, @AC($ferret_plot_title) 
-   ELSE
-     LABEL/NOUSER `($ppl$xlen)/2`, `-0.5*($ppl$yorg)`, 0, 0, 0.14, @AC($ferret_plot_title) 
+   IF `($ferret_annotations"0|*>1") EQ 0` THEN
+      IF ($ferret_view"0|yt>1|zt>1|*>0") THEN
+        LABEL/NOUSER `($ppl$xlen)/2`, `-0.6*($ppl$yorg)`, 0, 0, 0.14, @AC($ferret_plot_title) 
+      ELSE
+        LABEL/NOUSER `($ppl$xlen)/2`, `-0.5*($ppl$yorg)`, 0, 0, 0.14, @AC($ferret_plot_title) 
+      ENDIF
    ENDIF
    
-   IF ($t_lab_lo"0|*>1") THEN \
-     LABEL/NOUSER 0, `($ppl$ylen)+0.4`, -1, 0, 0.12, @AS($t_lab_lo) to ($t_lab_hi)
+   IF ($t_lab_lo"0|*>1") THEN 
+      DEFINE SYMBOL n_left_labels `($n_left_labels"0") + 1`
+      DEFINE SYMBOL upper_left_($n_left_labels) ($t_lab_lo)
+      IF ($t_lab_hi"0|*>1") THEN DEFINE SYMBOL upper_left_($n_left_labels) ($t_lab_lo) to ($t_lab_hi)
+      DEFINE SYMBOL time_lab ($upper_left_($n_left_labels))
+   ENDIF
 
 ENDIF ! ferret_label
 
@@ -262,20 +269,13 @@ ENDIF ! ferret_label
 
 GO labels_above_plot
 
-! Add labels for the 'data options' (aka 'constraints')
-
-!! GO OCDMS_labels  (see this script if masking is used to select trajectories)
-
-GO LAS_split_title
-
 ! restore key-annotation setting: keys not annotated
 KEYMARK 0
 
 ! Save the results
 
-!! IF `($do_icons) AND ($result_webrowset_filename"0|*>1")` THEN  GO OCDMS_cruise_key
+IF `($do_icons) AND ($result_webrowset_filename"0|*>1")` THEN  GO OCDMS_cruise_key
 
 GO LAS_results box
-
 
 ! End of file ------------Trajectory_2D_poly.jnl--------------------------

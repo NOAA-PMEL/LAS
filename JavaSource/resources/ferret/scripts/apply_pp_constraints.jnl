@@ -36,6 +36,6 @@ IF ($constraint_2_lhs"0|($data_($var_id)_var)>1|*>0") THEN
       IF constrain_1_($var_id) ($constraint_3_op) ($constraint_3_rhs) THEN  constrain_1_($var_id)
 ENDIF
 
-GO set_constraint_labels
+! GO set_constraint_labels  ! call this later
 
 ! End of  ------------- apply_pp_constraints.jnl--------------------------
