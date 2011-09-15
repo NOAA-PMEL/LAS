@@ -158,6 +158,7 @@ IF `($ferret_prop_var"0|time>1|TIME>1|*>0") OR ($is_time_prop"0|0|1|*>0")` THEN
          DEFINE SYMBOL tunits = `tunits`
       ENDIF
       DEFINE AXIS/T=`ax_lo`:`ax_hi`:`del_ax`/T0="`($data_t_var).time_origin`"/units=($tunits) haxis
+      DEFINE SYMBOL timeaxis = haxis
       DEFINE AXIS/x=`ax_lo`:`ax_hi`:`del_ax` haxis1 
       LET tt = t[gt=haxis]
 
@@ -279,6 +280,7 @@ IF `($ferret_plot_var"0|time>1|TIME>1|*>0") OR ($is_time_plot"0|0|1|*>0")` THEN
          DEFINE SYMBOL tunits = `tunits`
       ENDIF
       DEFINE AXIS/T=`ax_lo`:`ax_hi`:`del_ax`/T0="`($data_t_var).time_origin`"/units=($tunits) vaxis
+      DEFINE SYMBOL timeaxis = vaxis
       DEFINE AXIS/Y=`ax_lo`:`ax_hi`:`del_ax` vaxis1
       LET tt = t[gt=vaxis]
 

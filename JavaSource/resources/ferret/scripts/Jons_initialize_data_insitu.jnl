@@ -45,6 +45,15 @@ IF ($data_($num)_units"0|1|*>1") THEN DEFINE SYMBOL data_units ($data_($num)_uni
 DEFINE SYMBOL ferret_plot_title ($data_title)
 IF ($data_units"0|*>1") THEN DEFINE SYMBOL ferret_plot_title ($data_title) (($data_units))
 
+IF `($1"0") EQ 0` THEN 
+   DEFINE SYMBOL variable_lab = ($ferret_plot_title)
+ELSE
+   IF `($1"0") EQ 1` THEN DEFINE SYMBOL variable_lab = \
+   ($ferret_plot_title) vs ($variable_lab)
+   IF `($1"0") EQ 2` THEN DEFINE SYMBOL variable_lab = \
+   ($variable_lab) colored by ($ferret_plot_title)
+ENDIF
+
 ! SET DATA and check for errors
 
 SET DATA "($data_($num)_url)"

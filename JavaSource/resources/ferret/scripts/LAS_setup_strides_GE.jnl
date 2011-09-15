@@ -30,11 +30,6 @@ ENDIF
 
 ! End of $RCSfile ------------LAS_setup_strides_GE.jnl--------------------------
 
-sh sym *siz*
-sh var *siz*
-sh sym *range*
-pause
-
 !   let xydel = xycoord
 !   let npts = xsiz
 !   let xrange = range_GE
