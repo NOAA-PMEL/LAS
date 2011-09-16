@@ -9,7 +9,7 @@
 ! If all labeling turned off just exit.
 IF `($ferret_label"1|0|1|*>1") EQ 0` THEN EXIT/SCRIPT
 
-IF ($ferret_prop_var"0|*>1") THEN
+IF ($data_prop_var"0|*>1") THEN
 
 REPEAT/RANGE=0:3:1/NAME=num ( \
   DEFINE SYMBOL num = `num`; \
@@ -17,7 +17,7 @@ REPEAT/RANGE=0:3:1/NAME=num ( \
   DEFINE SYMBOL lhs = ($constraint_($num)_lhs); \
   IF ($lhs"0|($data_0_var)>1|*>0") THEN EXIT/CYCLE;\
   IF ($lhs"0|($data_1_var)>1|*>0") THEN EXIT/CYCLE;\
-  IF ($lhs"0|($ferret_prop_var)>1|*>0") THEN EXIT/CYCLE;\
+  IF ($lhs"0|($data_prop_var)>1|*>0") THEN EXIT/CYCLE;\
   DEFINE SYMBOL op = ($constraint_($num)_op); \
   DEFINE SYMBOL rhs = ($constraint_($num)_rhs); \
   IF `($lhs"99|*>0") EQ 99` THEN EXIT/CYCLE; \

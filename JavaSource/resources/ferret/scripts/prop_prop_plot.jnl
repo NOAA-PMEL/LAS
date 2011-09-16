@@ -240,10 +240,11 @@ ENDIF
 LET p = ($xvar) 
 LET q = ($yvar)
 
+DEFINE SYMBOL data_prop_var = ($data_0_var)
 DEFINE SYMBOL ferret_prop_var = ($ferret_plot_var_0)
 DEFINE SYMBOL ferret_plot_var = ($ferret_plot_var_1)
-IF `STRINDEX( UPCASE("($ferret_plot_var_0)"), "TIME") GT 0` THEN DEFINE SYMBOL tunits = ($data_0_units)
-IF `STRINDEX( UPCASE("($ferret_plot_var_1)"), "TIME") GT 0` THEN DEFINE SYMBOL tunits = ($data_1_units)
+IF `STRINDEX( UPCASE("($data_0_var)"), "TIME") GT 0` THEN DEFINE SYMBOL tunits = ($data_0_units)
+IF `STRINDEX( UPCASE("($data_1_var)"), "TIME") GT 0` THEN DEFINE SYMBOL tunits = ($data_1_units)
 
 GO LAS_xytvar_setup
 
