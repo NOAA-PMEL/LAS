@@ -42,8 +42,8 @@ public class HelpPanel extends Composite {
 	
 	public HelpPanel() {
 		mainPanel.add(layoutPanel);
-		helpButton = new ToggleButton(new Image(GWT.getModuleBaseURL()+"../images/info_off.png"), 
-				new Image(GWT.getModuleBaseURL()+"../images/info_on.png"), new ClickHandler() {
+		helpButton = new ToggleButton(new Image(GWT.getModuleBaseURL()+"../images/question_off.png"), 
+				new Image(GWT.getModuleBaseURL()+"../images/question_on.png"), new ClickHandler() {
 
 					@Override
 					public void onClick(ClickEvent event) {
