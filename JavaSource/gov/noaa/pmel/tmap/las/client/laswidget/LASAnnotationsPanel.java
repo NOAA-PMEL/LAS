@@ -54,7 +54,8 @@ public class LASAnnotationsPanel extends Composite {
 	private static final String TYPE_ORTHOGONAL_AXES = "orthogonal_axes";
 	private static final String TYPE_LAS = "las";
 	private static final String TYPE_NOTES = "notes";
-	
+	private int popupLeft = -999;
+	private int popupTop = -999;
 	ToggleButton annotationsButton;
 	PopupPanel mainPanel = new PopupPanel(false);
 	VerticalPanel layoutPanel = new VerticalPanel();
@@ -190,12 +191,22 @@ public class LASAnnotationsPanel extends Composite {
 	public void setOpen(boolean open) {
 		if ( open ) {
 			if ( !annotationsButton.isDown() ) annotationsButton.setDown(true);
-			mainPanel.setPopupPosition(annotationsButton.getAbsoluteLeft(), annotationsButton.getAbsoluteTop() + 32 );
+			if ( popupTop == -999 || popupLeft == -999 ) {
+				mainPanel.setPopupPosition(annotationsButton.getAbsoluteLeft(), annotationsButton.getAbsoluteTop() + 32 );
+			} else {
+				mainPanel.setPopupPosition(popupLeft, popupTop);
+			}
 			mainPanel.show();
 		} else {
 			if ( annotationsButton.isDown() ) annotationsButton.setDown(false);
 			mainPanel.hide();
 		}
+	}
+	public void setPopupTop( int top ) {
+		popupTop = top;
+	}
+	public void setPopupLeft( int left ) {
+		popupLeft = left;
 	}
 	public void setPopupWidth(String width) {
 		mainPanel.setWidth(width);

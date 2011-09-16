@@ -1,5 +1,7 @@
 package gov.noaa.pmel.tmap.las.client;
 
+import gov.noaa.pmel.tmap.las.client.laswidget.HelpPanel;
+import gov.noaa.pmel.tmap.las.client.laswidget.LASAnnotationsPanel;
 import gov.noaa.pmel.tmap.las.client.laswidget.LASRequest;
 import gov.noaa.pmel.tmap.las.client.laswidget.LASRequestWrapper;
 import gov.noaa.pmel.tmap.las.client.laswidget.VariableListBox;
@@ -60,11 +62,16 @@ import com.google.gwt.xml.client.Text;
 import com.google.gwt.xml.client.XMLParser;
 
 public class Correlation implements EntryPoint {
+	LASAnnotationsPanel lasAnnotationsPanel = new LASAnnotationsPanel();
+	HorizontalPanel topRow = new HorizontalPanel();
+	HelpPanel help = new HelpPanel();
 	PopupPanel spin;
 	HTML spinImage;
 	HorizontalPanel coloredBy = new HorizontalPanel();
+	HorizontalPanel corTopRow = new HorizontalPanel();
 	FlexTable constraintsLayout = new FlexTable();
 	VerticalPanel constraintsPanel = new VerticalPanel();
+	HelpPanel corHelp = new HelpPanel();
 	TextBox xminBox = new TextBox();
 	TextBox xmaxBox = new TextBox();
 	TextBox yminBox = new TextBox();
@@ -179,7 +186,9 @@ public class Correlation implements EntryPoint {
 				setConstraints();
 			}
 		});
-    	constraintsLayout.setWidget(0, 0, new HTML("<b>Data Constraints:</b>"));
+    	corTopRow.add(corHelp);
+    	corTopRow.add(new HTML("<b>&nbsp;&nbsp;Data Constraints:</b>"));
+    	constraintsLayout.setWidget(0, 0, corTopRow);
     	constraintsLayout.getFlexCellFormatter().setColSpan(0, 0, 4);
     	constraintsLayout.setWidget(1, 0, yminBox);
     	constraintsLayout.setWidget(1, 1, yVariableLabel);
@@ -192,16 +201,20 @@ public class Correlation implements EntryPoint {
     	constraintsLayout.setWidget(2, 3, useXConstraint);
     	    	
     	constraintsPanel.add(constraintsLayout);
-    	constraintsPanel.add(new HTML("<b>Help: </b> Enter values and select the check boxes, or click and drag on the plot."));
-    	
+    	corHelp.setPopupWidth("550px");
+    	corHelp.setPopupHeight("550px");
+    	corHelp.setHelpURL("../css/constraint_help.html");
     	constraintsPanel.setVisible(false);
     	
-    	controlPanel.setWidget(0, 0, new HTML("<b>Data Selection: </b>"));
-		controlPanel.getFlexCellFormatter().setColSpan(0, 0, 4);
+    	topRow.add(help);
+    	topRow.add(new HTML("<b>&nbsp;&nbsp;Data Selection: </b>"));
+    	controlPanel.setWidget(0, 0, topRow);
+		controlPanel.getFlexCellFormatter().setColSpan(0, 0, 5);
     	controlPanel.setWidget(1, 0, yVariables);
 		controlPanel.setWidget(1, 1, new Label(" as a function of "));
 		controlPanel.setWidget(1, 2, xVariables);
 		controlPanel.setWidget(1, 3, update);	
+		controlPanel.setWidget(1, 4, lasAnnotationsPanel);
 		colorCheckBox.addClickHandler(new ClickHandler() {
 
 			@Override
@@ -221,7 +234,9 @@ public class Correlation implements EntryPoint {
 		controlPanel.setWidget(2, 1, coloredBy);
 		controlPanel.setWidget(2, 2, colorVariables);	
 		topPanel.add(controlPanel);
-		topPanel.add(new HTML("<b>Help:</b> Choose the variables you want to plot from the drop down menus.  To color the plot by another variable check the \"Color by\" and select a variable from the drop down.  Click \"Update Plot\""));
+		help.setPopupWidth("550px");
+		help.setPopupHeight("550px");
+		help.setHelpURL("../css/correlation_help.html");
 		colorVariables.setEnabled(false);
 		colorVariables.addChangeHandler(new ChangeHandler() {
 
@@ -271,6 +286,10 @@ public class Correlation implements EntryPoint {
 		RootPanel.get("data_selection").add(topPanel);
 		RootPanel.get("data_constraints").add(constraintsPanel);
 		RootPanel.get("correlation").add(outputPanel);
+		lasAnnotationsPanel.setPopupLeft(outputPanel.getAbsoluteLeft());
+		lasAnnotationsPanel.setPopupTop(outputPanel.getAbsoluteTop());
+		lasAnnotationsPanel.setTitle("Plot Annotations");
+		lasAnnotationsPanel.setError("Click \"Update plot\" to refresh the plot.&nbsp;");
 		History.addValueChangeHandler(historyHandler);
 	}
     ClickHandler updateClick = new ClickHandler() {
@@ -283,6 +302,8 @@ public class Correlation implements EntryPoint {
     };
     private void updatePlot(boolean addHistory) {
     	update.removeStyleDependentName("APPLY-NEEDED");
+    	lasAnnotationsPanel.setTitle("Plot Annotations");
+		lasAnnotationsPanel.setError("Fetching plot annotations...");
     	if ( xVariables.getSelectedIndex() == yVariables.getSelectedIndex() ) {
     		Window.alert("The same variable on both axes is going to be a straight line.  I just can't bring myself to plot that.");
     	} else {
@@ -325,7 +346,7 @@ public class Correlation implements EntryPoint {
     		lasRequest.setProperty("product_server", "ui_timeout", "20");
     		lasRequest.setProperty("las", "output_type", "xml");
     		lasRequest.setOperation(operationID, operationType);
-
+    		lasRequest.setProperty("ferret", "annotations", "file");
 
     		frontCanvas = Canvas.createIfSupported();
     		frontCanvasContext = frontCanvas.getContext2d();
@@ -369,6 +390,7 @@ public class Correlation implements EntryPoint {
 			spin.hide();
 			String doc = response.getText();
 			String imageurl = "";
+			String annourl = "";
 			// Look at the doc.  If it's not obviously XML, treat it as HTML.
 			if ( !doc.substring(0, 100).contains("<?xml") ) {
 				HTML result = new HTML(doc, true);
@@ -392,6 +414,9 @@ public class Correlation implements EntryPoint {
 									outputPanel.setWidget(0, 0, error);
 								}
 							}
+						} else if ( result.getAttribute("type").equals("annotations") ) {
+								annourl = result.getAttribute("url");
+								lasAnnotationsPanel.setAnnotationsHTMLURL(Util.getAnnotationService(annourl));
 						} else if ( result.getAttribute("type").equals("map_scale") ) {
 							NodeList map_scale = result.getElementsByTagName("map_scale");
 							for ( int m = 0; m < map_scale.getLength(); m++ ) {
@@ -437,7 +462,7 @@ public class Correlation implements EntryPoint {
 					final Image image = new Image(imageurl);
 					x_per_pixel = (x_axis_upper_right - x_axis_lower_left)/Double.valueOf(x_plot_size);
 					y_per_pixel = (y_axis_upper_right - y_axis_lower_left)/Double.valueOf(y_plot_size);
-
+                    
 					if ( frontCanvas != null ) {
 						outputPanel.setWidget(1, 0, image);
 						image.setVisible(false);
@@ -445,7 +470,10 @@ public class Correlation implements EntryPoint {
 
 							@Override
 							public void onLoad(LoadEvent event) {
-								
+								String w = image.getWidth() - 18 + "px";
+			                    lasAnnotationsPanel.setPopupWidth(w);
+			                    lasAnnotationsPanel.setPopupLeft(outputPanel.getAbsoluteLeft());
+			            		lasAnnotationsPanel.setPopupTop(outputPanel.getAbsoluteTop());
 								frontCanvas.setCoordinateSpaceHeight(image.getHeight());
 								frontCanvas.setCoordinateSpaceWidth(image.getWidth());
 								frontCanvasContext.drawImage(ImageElement.as(image.getElement()), 0, 0);
@@ -523,6 +551,17 @@ public class Correlation implements EntryPoint {
 					} else {
 						// Browser cannot handle a canvas tag, so just put up the image.
 						outputPanel.setWidget(0, 0, image);
+						image.addLoadHandler(new LoadHandler() {
+
+							@Override
+							public void onLoad(LoadEvent event) {
+								String w = image.getWidth() - 18 + "px";
+								lasAnnotationsPanel.setPopupLeft(outputPanel.getAbsoluteLeft());
+								lasAnnotationsPanel.setPopupTop(outputPanel.getAbsoluteTop());
+			                    lasAnnotationsPanel.setPopupWidth(w);
+							}
+						});
+						
 					}
 				}
 				world_startx = x_axis_lower_left;
