@@ -22,6 +22,14 @@ SET MODE verify:always  ! allows for debugging
 DEFINE SYMBOL its_insitu = 1
 GO LAS_initialize_region 0
 
+IF ($data_0_var"0|vid>1|*>0")  THEN 
+   DEFINE SYMBOL ferret_by_id = 1
+   USE "($data_0_url)"
+   LET varnames = ..varnames
+
+   DEFINE SYMBOL data_0_var = `varnames[i=1]`
+   CANCEL DATA "($data_0_url)"
+ENDIF
 GO Jons_initialize_data_insitu 0
 
 
