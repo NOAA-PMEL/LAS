@@ -4525,11 +4525,19 @@ public class LASConfig extends LASDocument {
 			while (di.hasNext()) {
 				InvDataset ThreddsDataset = (InvDataset) di.next();
 				if ( ThreddsDataset.hasNestedDatasets() ) {
-					beans.addAll(myAddXML.processDatasets(ThreddsDataset, myAddXML.isEsg()));
+					if ( myAddXML.isEsg() ) {
+						myAddXML.processESGDatasets(ThreddsDataset, this);
+					} else {
+						beans.addAll(myAddXML.processDatasets(ThreddsDataset));
+					}
 				}
 			}
 		}
-		return beans;
+		if ( myAddXML.isEsg() ) {
+			return new Vector<DatasetsGridsAxesBean>();
+		} else {
+			return beans;
+		}
 	}
 	/**
 	 * Adds the contents of a category bean from addXML to the config, creating the las_categories element if necessary.
