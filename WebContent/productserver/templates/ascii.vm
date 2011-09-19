@@ -22,7 +22,7 @@ $response.sendRedirect("$las_response.getResult('ferret_listing')")
 <!-- LAS SERVER OK -->
 <head><title>LAS Output</title></head>
 <body bgcolor="white">
-        Could not find a result with your netcdf file
+        Could not find a result with your ascii file
 
 #if ( $debug=="true" || $debug=="debug" )
         Debug Output (including symbols from the request).<br>
