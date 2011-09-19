@@ -91,6 +91,7 @@ public class Correlation implements EntryPoint {
     VariableListBox yVariables = new VariableListBox();
     VariableListBox colorVariables = new VariableListBox();
     PushButton update = new PushButton("Update Plot");
+    PushButton print = new PushButton("Print");
     CheckBox colorCheckBox = new CheckBox();
     LASRequest lasRequest;
     String dsid;
@@ -125,6 +126,7 @@ public class Correlation implements EntryPoint {
 	protected double world_endy;
 	protected double x_per_pixel;
 	protected double y_per_pixel;
+	protected String printURL;
     @Override
 	public void onModuleLoad() {
     	String spinImageURL = URLUtil.getImageURL()+"/mozilla_blu.gif";
@@ -205,16 +207,26 @@ public class Correlation implements EntryPoint {
     	corHelp.setPopupHeight("550px");
     	corHelp.setHelpURL("../css/constraint_help.html");
     	constraintsPanel.setVisible(false);
-    	
+    	print.addStyleDependentName("SMALLER");
+    	print.addClickHandler(new ClickHandler() {
+
+			@Override
+			public void onClick(ClickEvent arg0) {
+				printerFriendly();
+			}
+    		
+    	});
+    	print.setEnabled(false);
     	topRow.add(help);
     	topRow.add(new HTML("<b>&nbsp;&nbsp;Data Selection: </b>"));
     	controlPanel.setWidget(0, 0, topRow);
-		controlPanel.getFlexCellFormatter().setColSpan(0, 0, 5);
+		controlPanel.getFlexCellFormatter().setColSpan(0, 0, 6);
     	controlPanel.setWidget(1, 0, yVariables);
 		controlPanel.setWidget(1, 1, new Label(" as a function of "));
 		controlPanel.setWidget(1, 2, xVariables);
 		controlPanel.setWidget(1, 3, update);	
-		controlPanel.setWidget(1, 4, lasAnnotationsPanel);
+		controlPanel.setWidget(1, 4, print);
+		controlPanel.setWidget(1, 5, lasAnnotationsPanel);
 		colorCheckBox.addClickHandler(new ClickHandler() {
 
 			@Override
@@ -300,6 +312,11 @@ public class Correlation implements EntryPoint {
     	}
 
     };
+    private void printerFriendly() {
+    	StringBuilder urlfrag = new StringBuilder(URLUtil.getBaseURL()+"getAnnotations.do?template=image_w_annotations.vm&");
+    	urlfrag.append(printURL);
+    	Window.open(urlfrag.toString(), "print", null);
+    }
     private void updatePlot(boolean addHistory) {
     	update.removeStyleDependentName("APPLY-NEEDED");
     	lasAnnotationsPanel.setTitle("Plot Annotations");
@@ -388,6 +405,7 @@ public class Correlation implements EntryPoint {
 		@Override
 		public void onResponseReceived(Request request, Response response) {
 			spin.hide();
+			print.setEnabled(true);
 			String doc = response.getText();
 			String imageurl = "";
 			String annourl = "";
@@ -569,6 +587,7 @@ public class Correlation implements EntryPoint {
                 world_starty = y_axis_lower_left;
                 world_endy = y_axis_upper_right;
                 setTextValues();
+                printURL = Util.getAnnotationsFrag(annourl, imageurl);
 			}
 		}
 	};
@@ -667,6 +686,7 @@ public class Correlation implements EntryPoint {
 			if ( !xml.equals("") ) {
 				popHistory(xml);
 			} else {
+				print.setEnabled(false);
 				outputPanel.removeCell(0, 0);
 				xVariables.setSelectedIndex(0);
 				yVariables.setSelectedIndex(0);
