@@ -4,6 +4,7 @@
 package gov.noaa.pmel.tmap.las.jdom;
 
 import gov.noaa.pmel.tmap.las.ui.state.OptionBean;
+import gov.noaa.pmel.tmap.las.util.VariableConstraint;
 
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
@@ -674,4 +675,20 @@ public class LASUIRequest extends LASDocument {
         }
         return gridid;
 	}
+	/**
+     * 
+     * @return The constraints at an ArrayList<VariableConstraints>
+     */
+    public List<VariableConstraint> getVariableConstraints() {
+        List<VariableConstraint> cons = new ArrayList<VariableConstraint>();
+    	List constraints = this.getRootElement().getChild("args").getChildren("constraint");
+        for (Iterator conIt = constraints.iterator(); conIt.hasNext();) {
+            Element con = (Element) conIt.next();
+            if ( con.getAttributeValue("type").equals("variable") ) {
+            	VariableConstraint d = new VariableConstraint(con);
+            	cons.add(d);
+            }
+        }
+    	return cons;
+    }
 }
