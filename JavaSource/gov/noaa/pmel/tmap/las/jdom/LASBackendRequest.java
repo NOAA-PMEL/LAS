@@ -10,7 +10,6 @@
 package gov.noaa.pmel.tmap.las.jdom;
 
 import gov.noaa.pmel.tmap.las.exception.LASException;
-import gov.noaa.pmel.tmap.las.ui.GetCategories;
 import gov.noaa.pmel.tmap.las.util.Constraint;
 
 import java.io.File;
@@ -25,9 +24,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import org.jdom.Attribute;
-import org.jdom.Content;
-import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.JDOMException;
 import org.joda.time.DateTime;
@@ -36,11 +35,6 @@ import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
 import ucar.nc2.units.DateUnit;
-import ucar.nc2.units.SimpleUnit;
-
-
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
 /**
  * An instantiation of the LAS Backend Request XML.
  * @author Roland Schweitzer
@@ -495,6 +489,7 @@ public class LASBackendRequest extends LASDocument {
         }
         return symbols;
     }
+    
     /**
      * Count the number of results in the expected response
      * @return the count
