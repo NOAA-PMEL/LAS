@@ -1,5 +1,135 @@
 <operations>
 !-- BEGIN trajectory operations -->
+   <operation name="ASCII file"
+        ID="Trajectory_Data_Extract_File" output_template="netcdf"
+        service_action="Trajectory_Data_Extract_netCDF" order="0500" category="file">
+        <operation name="Database Extraction" ID="DBExtract"
+            output_template="ascii" service_action="Trajectory_interactive_plot">
+            <response ID="DBExtractResponse">
+                <result type="debug" ID="db_debug" file_suffix=".txt" />
+                <result type="netCDF" ID="netcdf" file_suffix=".nc" />
+                <result type="cancel" ID="cancel" />
+            </response>
+            <service>database</service>
+        </operation>
+        <operation name="ASCII file"
+        ID="Trajectory_Data_Extract_File" output_template="ascii"
+        service_action="Trajectory_Data_Convert_File" order="0500" category="file">
+        <args>
+                <arg chained="true" type="variable" index="1" operation="DBExtract"
+                    result="netcdf" file_suffix=".nc" />
+                <arg type="region" index="1" ID="in-situ-Region" />
+            </args>
+        <service>ferret</service>
+        <response ID="Data_Extract_netCDF_Response">
+            <result type="ascii" ID="ferret_listing" streamable="true" mime_type="ascii/text" file_suffix=".txt"/>
+            <result type="debug" ID="debug" file_suffix=".txt"/>
+        </response>
+        <region>
+            <intervals name="x" />
+            <intervals name="y" />
+            <intervals name="z" />
+            <intervals name="t" />
+            <intervals name="xy" />
+            <intervals name="xz" />
+            <intervals name="xt" />
+            <intervals name="yz" />
+            <intervals name="yt" />
+            <intervals name="zt" />
+            <intervals name="xyz" />
+            <intervals name="xyt" />
+            <intervals name="xzt" />
+            <intervals name="yzt" />
+            <intervals name="xyzt" />
+            <degenerate/>
+        </region>
+        <grid_types>
+            <grid_type name="trajectory" />
+        </grid_types>
+        <optiondef IDREF="Options_Data"/>
+    </operation>
+    </operation>
+   <operation name="NetCDF file"
+        ID="Trajectory_Data_Extract_netCDF" output_template="netcdf"
+        service_action="Trajectory_Data_Extract_netCDF" order="0500" category="file">
+        <operation name="Database Extraction" ID="DBExtract"
+			output_template="ascii" service_action="Trajectory_interactive_plot">
+			<response ID="DBExtractResponse">
+				<result type="debug" ID="db_debug" file_suffix=".txt" />
+				<result type="netCDF" ID="netcdf" file_suffix=".nc" />
+				<result type="cancel" ID="cancel" />
+			</response>
+			<service>database</service>
+		</operation>
+		<operation name="NetCDF file"
+        ID="Trajectory_Data_Extract_netCDF" output_template="netcdf"
+        service_action="Data_Download" order="0500" category="file">
+        <args>
+				<arg chained="true" type="variable" index="1" operation="DBExtract"
+					result="netcdf" file_suffix=".nc" />
+				<arg type="region" index="1" ID="in-situ-Region" />
+			</args>
+        <!-- A bit of a kludge...  No service is really needed, but the ProductServer is not expecting the template service in the second operation of a compound operation... -->
+        <service>ferret</service>
+        <response ID="Data_Extract_netCDF_Response">
+            <result type="netcdf" ID="ferret_listing" file_suffix=".nc"/>
+            <result type="debug" ID="debug" file_suffix=".txt"/>
+        </response>
+        <region>
+            <intervals name="x" />
+            <intervals name="y" />
+            <intervals name="z" />
+            <intervals name="t" />
+            <intervals name="xy" />
+            <intervals name="xz" />
+            <intervals name="xt" />
+            <intervals name="yz" />
+            <intervals name="yt" />
+            <intervals name="zt" />
+            <intervals name="xyz" />
+            <intervals name="xyt" />
+            <intervals name="xzt" />
+            <intervals name="yzt" />
+            <intervals name="xyzt" />
+            <degenerate/>
+        </region>
+        <grid_types>
+            <grid_type name="trajectory" />
+        </grid_types>
+        <optiondef IDREF="Options_Data"/>
+    </operation>
+    </operation>
+   <operation ID="Trajectory_Interactive_Download" default="true" minvars="1" maxvars="100000" name="Interactive Download"
+        output_template="trajectory_interactive_download" service_action="" order="0300" category="table">
+        <service>template</service>
+        <response ID="Data_Download_Response">
+            <result type="text" ID="ferret_listing" streamable="true"
+                mime_type="text/plain" />
+            <result type="debug" ID="debug" file_suffix=".txt"/>
+        </response>
+        <region>
+            <intervals name="x" />
+            <intervals name="y" />
+            <intervals name="z" />
+            <intervals name="t" />
+            <intervals name="xy" />
+            <intervals name="xz" />
+            <intervals name="xt" />
+            <intervals name="yz" />
+            <intervals name="yt" />
+            <intervals name="zt" />
+            <intervals name="xyz" />
+            <intervals name="xyt" />
+            <intervals name="xzt" />
+            <intervals name="yzt" />
+            <intervals name="xyzt" />
+            <degenerate/>
+        </region>
+        <grid_types>
+            <grid_type name="trajectory" />
+        </grid_types>
+   
+    </operation>
     <!--  This is the default XY plot. -->
 	<operation name="Trajectory Plot" ID="Trajectory_interactive_plot"
 		output_template="zoom" default="true" category="visualization">
@@ -984,8 +1114,7 @@ streamable="true" mime_type="application/postscript"/> -->
         </grid_types>
    
     </operation>
-
-
+    
     <!-- End: interactive download -->
     <operation ID="Data_Extract" default="true" name="Table of values (text)"
         output_template="table" service_action="Data_Extract" order="0300" category="table" minvars="1" maxvars="9999">
