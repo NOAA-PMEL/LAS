@@ -12,7 +12,7 @@
             </response>
             <service>database</service>
         </operation>
-        <operation name="ASCII file"
+        <operation name="ASCII file" chained="true"
         ID="Trajectory_Data_Extract_File" output_template="ascii"
         service_action="Trajectory_Data_Convert_File" order="0500" category="file">
         <args>
@@ -134,7 +134,7 @@
 	<operation name="Trajectory Plot" ID="Trajectory_interactive_plot"
 		output_template="zoom" default="true" category="visualization">
 		<operation name="Database Extraction" ID="DBExtract"
-			output_template="ascii" service_action="Trajectory_interactive_plot">
+			output_template="" service_action="Trajectory_interactive_plot">
 			<response ID="DBExtractResponse">
 				<result type="debug" ID="db_debug" file_suffix=".txt" />
 				<result type="netCDF" ID="netcdf" file_suffix=".nc" />
