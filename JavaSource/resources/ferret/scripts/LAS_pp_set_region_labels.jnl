@@ -99,6 +99,7 @@ DEFINE SYMBOL do_t = `($ferret_plot_var),RETURN=taxis`
 !
 IF `STRINDEX("($do_t)", "NORMAL") NE 0` THEN 
    DEFINE SYMBOL do_t = 0
+   IF ($its_trajectory_corr"0|*>1") THEN DEFINE SYMBOL do_t = 1
 ELSE 
    DEFINE SYMBOL do_t = 1
 ENDIF
@@ -114,34 +115,39 @@ IF `($have_time_lab"0|*>1") EQ 0` THEN
          DEFINE SYMBOL tprec = days
       ENDIF
 
-
-      DEFINE SYMBOL do_t0 = `($data_0_var)[d=($dset0)],RETURN=taxis`
-      IF `STRINDEX("($do_t0)", "NORMAL") NE 0` THEN 
-         DEFINE SYMBOL do_t0 = 0
-      ELSE 
-         DEFINE SYMBOL do_t0 = 1
-      ENDIF
-      DEFINE SYMBOL do_t1 = `($data_1_var)[d=($dset1)],RETURN=taxis`
-      IF `STRINDEX("($do_t1)", "NORMAL") NE 0` THEN 
-         DEFINE SYMBOL do_t1 = 0
-      ELSE 
-         DEFINE SYMBOL do_t1 = 1
-      ENDIF
-
-      IF ($do_t0) THEN
-         LET tt = t[gt=($data_0_var),d=($dset0)]
-      ELIF ($do_t1) THEN
-         LET tt = t[gt=($data_1_var),d=($dset1)]
-      ENDIF
-      LET tlo_coord = tt[t="($region_t_lo)"]
-      LET thi_coord = tt[t="($region_t_hi)"]
-
-      IF `STRCMP("($region_t_lo"0")", "($region_t_hi%-999%)") EQ 0` THEN
-         DEFINE SYMBOL upper_left_($n_left_labels) = `TAX_DATESTRING(tlo_coord, tt, "($tprec)")`
+      IF ($its_trajectory_corr"0|*>1") THEN  ! trajectory plots, just use the region as given
+         IF ($region_t"0|*>1") THEN  DEFINE SYMBOL time_0_lab = ($region_t_lo):($region_t_hi)
       ELSE
-         DEFINE SYMBOL upper_left_($n_left_labels) = `TAX_DATESTRING(tlo_coord, tt, "($tprec)")` to `TAX_DATESTRING(thi_coord, tt, "($tprec)")`
+
+         DEFINE SYMBOL do_t0 = `($data_0_var)[d=($dset0)],RETURN=taxis`
+         IF `STRINDEX("($do_t0)", "NORMAL") NE 0` THEN 
+            DEFINE SYMBOL do_t0 = 0
+         ELSE 
+            DEFINE SYMBOL do_t0 = 1
+         ENDIF
+         DEFINE SYMBOL do_t1 = `($data_1_var)[d=($dset1)],RETURN=taxis`
+         IF `STRINDEX("($do_t1)", "NORMAL") NE 0` THEN 
+            DEFINE SYMBOL do_t1 = 0
+         ELSE 
+            DEFINE SYMBOL do_t1 = 1
+         ENDIF
+   
+         IF ($do_t0) THEN
+            LET tt = t[gt=($data_0_var),d=($dset0)]
+         ELIF ($do_t1) THEN
+            LET tt = t[gt=($data_1_var),d=($dset1)]
+         ENDIF
+         LET tlo_coord = tt[t="($region_t_lo)"]
+         LET thi_coord = tt[t="($region_t_hi)"]
+   
+         IF `STRCMP("($region_t_lo"0")", "($region_t_hi%-999%)") EQ 0` THEN
+            DEFINE SYMBOL upper_left_($n_left_labels) = `TAX_DATESTRING(tlo_coord, tt, "($tprec)")`
+         ELSE
+            DEFINE SYMBOL upper_left_($n_left_labels) = `TAX_DATESTRING(tlo_coord, tt, "($tprec)")` to `TAX_DATESTRING(thi_coord, tt, "($tprec)")`
+         ENDIF
+         DEFINE SYMBOL time_0_lab = ($upper_left_($n_left_labels"0"))
+
       ENDIF
-      DEFINE SYMBOL time_0_lab = ($upper_left_($n_left_labels"0"))
 
       DEFINE SYMBOL have_time_lab = 1
    
@@ -168,6 +174,13 @@ IF `(($have_year_lab"0|*>1") EQ 0) AND (L_time GT 1)` THEN
 
    ENDIF
 ENDIF
+
+
+IF ($longitude_0_lab"0|*>1") THEN DEFINE SYMBOL longitude_lab ($longitude_0_lab)
+IF ($latitude_0_lab"0|*>1") THEN DEFINE SYMBOL  latitude_lab ($latitude_0_lab)
+IF ($depth_0_lab"0|*>1") THEN DEFINE SYMBOL depth_lab ($depth_0_lab)
+IF ($time_0_lab"0|*>1") THEN DEFINE SYMBOL time_lab ($time_0_lab)
+
 
 ! End of LAS_pp_set_region_labels.jnl -----------------------------------------
 
