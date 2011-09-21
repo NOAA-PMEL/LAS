@@ -14,7 +14,7 @@
 LET nlist = 0
 REPEAT/RANGE=0:`($data_count)-1`/NAME=outvar (DEFINE SYMBOL var_num = `outvar`;; \
   GO LAS_initialize_region ($var_num); \
-  GO LAS_initialize_data ($var_num);\
+  GO Jons_initialize_data_insitu ($var_num);\
   DEFINE SYMBOL varlist = , ($data_($num)_var);\
   LET nlist = `nlist+1`;\
   )
