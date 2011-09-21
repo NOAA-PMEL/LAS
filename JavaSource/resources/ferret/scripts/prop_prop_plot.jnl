@@ -97,7 +97,17 @@ IF `($data_count"0") EQ 3` THEN ! color by 3rd variable
    LET/TITLE="($ferret_title_2)" zvar = XSEQUENCE(($ferret_plot_var_2))
 
    DEFINE SYMBOL color_by = 1
+
 ENDIF
+
+IF `STRINDEX("($variable_lab%0%)", "vs") EQ 0` THEN \
+   DEFINE SYMBOL variable_lab = ($variable_1_lab) vs ($variable_0_lab)
+
+IF  ($color_by"0") THEN 
+   IF `STRINDEX("($variable_lab%0%)", "colored") EQ 0` THEN \
+      DEFINE SYMBOL variable_lab = ($variable_lab) colored by ($ferret_title_2)
+ENDIF
+
 GO LAS_set_strides_prop
 
 
