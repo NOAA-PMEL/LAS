@@ -93,7 +93,7 @@ IF ($data_($num)_var"0|vid>1|*>0")  THEN
 
    DEFINE SYMBOL ferret_poly_levels = `trajectory_counts,RETURN=lsize`
    LET id_data = COMPRESSI(XSEQUENCE(TRANSPOSE_XZ(id_by_z)))
-   LET var_data = id_data[i=1:`($data_x_var),RETURN=isize`]
+   LET/TITLE="($data_($num)_name%ID%)" var_data = id_data[i=1:`($data_x_var),RETURN=isize`]
    DEFINE SYMBOL data_($num)_var = var_data
    DEFINE SYMBOL data_var = var_data
    DEFINE SYMBOL ferret_plot_var = var_data
@@ -106,6 +106,7 @@ IF ($data_($num)_var"0|vid>1|*>0")  THEN
 
    DEFINE SYMBOL ferret_plot_title ($data_title)
    IF ($data_($num)_units"0|1|*>1") THEN DEFINE SYMBOL ferret_plot_title ($data_title) ($data_($num)_units)
+
    EXIT/SCRIPT  ! dont need the rest of the setup
 ENDIF
 
