@@ -7,6 +7,7 @@
 ! TRAJECTORIES      - unique identifier for each cruise
 ! TRAJECTORY_COUNTS - number of points per trajectory
 
+IF ($nodata"0|*>1") THEN EXIT/SCRIPT
 SET MEM/siz=200
 
 ! Create the 'traj_evnt' variable which increments for each new trajectory.

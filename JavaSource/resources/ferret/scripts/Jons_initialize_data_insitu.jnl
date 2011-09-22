@@ -1,25 +1,15 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! LAS_initialize_data_insitu.jnl
+! Jons_initialize_data_insitu.jnl
 !
 ! 
 ! Author: ansley 
 ! Date: 2006/07/10 21:06:04 
-! 30-May-2008 ACM resolve #435 (and #336) if there is a query_result
-!             attribute get that string and use it in the abort script
-!
 ! ACM 5/09 May not have the variables longitude and latitude in the
 ! intermediate file.  
 !
-! The LAS_initialize_data_insitu.jnl script takes care of everything having to
+! The Jons_initialize_data_insitu.jnl script takes care of everything having to
 ! do with initializing a datset for later use.
 !
-! LAS_initialize_data_insitu.jnl takes an argument that specifies which data
-! item [0|1|2|3|...] to create symbols for. 
-
-!ACM_note: if we use a loop in the plot routine, we are not 
-! limited to 9 data items
-! DEFINE SYMBOL num ($1"0|0|1|2|3|4|5|6|7|8|9")
-
 DEFINE SYMBOL num ($1"0")
 
 ! The x and y locations for insitu plots
@@ -68,17 +58,34 @@ ENDIF
 
 ! Check for the global attribute query_result, and see if
 ! it contains a string No data found or other message
+! Make assignments so that a blank plot will be drawn
 
 LET nglobal_atts = ..nattrs
 LET global_attnames = ..attnames
 IF `is_element_of_str(global_attnames, "query_result")` THEN
-   DEFINE SYMBOL data_query_string = `..query_result`
-   GO Jons_abort_no_data
+   LET/D=1/title="no data found for this query"/units=" " latitude = `1,return=bad`
+   LET/D=1/title="no data found for this query"/units=" " longitude = `1,return=bad`
+   DEFINE SYMBOL data_0_var = longitude
+   CANCEL SYMBOL data_0_units
+   DEFINE SYMBOL data_1_var = latitude
+   CANCEL SYMBOL data_1_units
+   DEFINE SYMBOL data_2_var = latitude
+   CANCEL SYMBOL data_2_units
+
+   
+   DEFINE SYMBOL data_var = ($data_($num)_var)
+   DEFINE SYMBOL ferret_plot_var = ($data_($num)_var)
+
+   DEFINE SYMBOL nodata = 1
+   DEFINE SYMBOL ferret_plot_key = nokey
+   CANCEL SYMBOL ferret_by_id
+   DEFINE SYMBOL ferret_plot_title No data found to match this request
+   CANCEL SYMBOL variable_lab
+
 ENDIF
 
-
 ! If the plot is colored by trajectory ID then fake that variable, and exit
-IF ($data_($num)_var"0|vid>1|*>0")  THEN 
+IF `($data_($num)_var"0|vid>1|*>0") AND ($nodata"0|*>1) EQ 0`  THEN 
    USE "($data_($num)_url)"
    LET varnames = ..varnames
 
@@ -236,4 +243,10 @@ ENDIF
 
 CANCEL VAR data_num
 
+IF ($nodata"0|*>1") THEN
+   DEFINE SYMBOL ferret_plot_title No data found to match this request
+   CANCEL SYMBOL variable_lab
+ENDIF
+
+!---------------- end of Jons_initialize_data_insitu.jnl -------------------------
 

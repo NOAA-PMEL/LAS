@@ -71,7 +71,12 @@ GO LAS_initialize_traj_id
 
 
 IF `STRINDEX("($ferret_view"0")", "x") GT 0` THEN
-  STAT ($data_x_var)
+  IF `($nodata"0|*>1") EQ 0` THEN 
+     STAT ($data_x_var)
+  ELSE
+     DEFINE SYMBOL stat_min ($region_x_lo)
+  ENDIF
+  
   IF `($STAT_MIN) GE ($REGION_X_LO)` THEN
     LET x_var_data = ($data_x_var)
     IF ($data_y_var"0|*>1") THEN LET y_var_data = ($data_y_var)
