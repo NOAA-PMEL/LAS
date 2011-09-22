@@ -172,19 +172,30 @@ DEFINE SYMBOL qualifiers = ($qualifiers)/VS/COLOR=WHITE
 ! Expand the horizontal and vertical scale a bit data is not on top of
 ! the plot axes.
 
-STAT ($xvar)
-PPL %RANGE `($stat_min)`, `($stat_max)`, 10
+DEFINE SYMBOL nx = `($xvar)[x=@ngd]`
+IF `STRCMP("($nx)", "bad") NE 0 AND STRCMP("($nx)", "0") NE 0` THEN
+   STAT ($xvar)
+   PPL %RANGE `($stat_min)`, `($stat_max)`, 10
+ELSE
+   PPL %RANGE `($region_0_x_lo)`, `($region_0_x_hi)`, 10
+ENDIF
+
 IF `($ppl$range_high) EQ ($ppl$range_low)`  THEN 
    DEFINE SYMBOL ppl$range_low = `($ppl$range_low) - 1`
    DEFINE SYMBOL ppl$range_high = `($ppl$range_high) + 1`
    DEFINE SYMBOL ppl$range_inc = 1
 ENDIF
 DEFINE SYMBOL ferret_indep_axis_scale ($ppl$range_low),($ppl$range_high),($ppl$range_inc)
-   
 DEFINE SYMBOL qualifiers ($qualifiers)/HLIM=($ppl$range_low):($ppl$range_high)
 
-STAT ($yvar)
-PPL %RANGE `($stat_min)`, `($stat_max)`, 10
+DEFINE SYMBOL ny = `($yvar)[x=@ngd]`
+IF `STRCMP("($ny)", "bad") NE 0 AND STRCMP("($ny)", "0") NE 0` THEN
+   STAT ($yvar)
+   PPL %RANGE `($stat_min)`, `($stat_may)`, 10
+ELSE
+   PPL %RANGE `($region_0_y_lo)`, `($region_0_y_hi)`, 10
+ENDIF
+
 IF `($ppl$range_high) EQ ($ppl$range_low)`  THEN 
    DEFINE SYMBOL ppl$range_low = `($ppl$range_low) - 1`
    DEFINE SYMBOL ppl$range_high = `($ppl$range_high) + 1`
