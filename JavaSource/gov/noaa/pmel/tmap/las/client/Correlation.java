@@ -263,9 +263,23 @@ public class Correlation implements EntryPoint {
 		update.addClickHandler(updateClick);
 		String xml = Util.getParameterString("xml");
 		if ( xml != null && !xml.equals("") ) {
+			xml = URL.decode(xml);
+			
+			// for the time being we are just going to remove the incoming constraint...
+			
+			// Get rid of the entity values for > and <
+//			xml = xml.replace("&gt;", ">");
+//			xml = xml.replace("&lt;", "<");
+			// Replace the op value with gt ge eq lt le as needed.
+//			xml = xml.replace("op=\">=\"", "op=\"ge\"");
+//			xml = xml.replace("op=\">\"", "op=\"gt\"");
+//			xml = xml.replace("op=\"=\"", "op=\"eq\"");
+//			xml = xml.replace("op=\"<=\"", "op=\"le\"");
+//			xml = xml.replace("op=\"<\"", "op=\"lt\"");
 			lasRequest = new LASRequest(xml);
 			dsid = lasRequest.getDataset(0);		
 			varid = lasRequest.getVariable(0);
+			lasRequest.removeConstraints();
 			Util.getRPCService().getFullDataset(dsid, datasetCallback);
 		} else {
 			
