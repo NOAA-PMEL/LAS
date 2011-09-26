@@ -1,0 +1,51 @@
+-- Function: insert_catalog(text, text, text, text, text, text, text)
+
+-- DROP FUNCTION insert_catalog(text, text, text, text, text, text, text);
+
+CREATE OR REPLACE FUNCTION insert_catalog(p_clean_catalog_id text, p_base text, p_expires text, p_name text, p_version text, p_xmlns text, p_status text)
+  RETURNS integer AS
+$BODY$
+DECLARE
+	id int;
+BEGIN
+		insert into catalog("name", "expires", "version", "base", "xmlns") values (p_name, p_expires, p_version, p_base, p_xmlns);
+		select currval('catalog_catalog_id_seq') into id;
+		update catalog set status = cast(p_status as status) where catalog_id=id;
+		if(length(p_clean_catalog_id) > 0 and p_clean_catalog_id <> '-1') then
+			update catalog set clean_catalog_id=cast(p_clean_catalog_id as int) where catalog_id=id;
+		end if;
+
+		return id;
+END;
+$BODY$
+  LANGUAGE plpgsql VOLATILE
+  COST 100;
+ALTER FUNCTION insert_catalog(text, text, text, text, text, text, text) OWNER TO postgres;
+
+-- Function: update_catalog(integer, text, text, text, text, text, text, text)
+
+-- DROP FUNCTION update_catalog(integer, text, text, text, text, text, text, text);
+
+CREATE OR REPLACE FUNCTION update_catalog(p_catalog_id integer, p_clean_catalog_id text, p_base text, p_expires text, p_name text, p_version text, p_xmlns text, p_status text)
+  RETURNS integer AS
+$BODY$
+DECLARE
+	id int;
+BEGIN
+		select catalog_id into id from catalog where catalog_id=p_catalog_id;
+		if(id is null) then
+			return -1;
+		end if;
+		update catalog set "name"=p_name, "expires"=p_expires, "version"=p_version, "base"=p_base, "xmlns"=p_xmlns where catalog_id=id;
+		update catalog set status = cast(p_status as status) where catalog_id=id;
+		if(length(p_clean_catalog_id) > 0 and p_clean_catalog_id <> '-1') then
+			update catalog set clean_catalog_id=cast(p_clean_catalog_id as int) where catalog_id=id;
+		end if;
+
+		return id;
+END;
+$BODY$
+  LANGUAGE plpgsql VOLATILE
+  COST 100;
+ALTER FUNCTION update_catalog(integer, text, text, text, text, text, text, text) OWNER TO postgres;
+
