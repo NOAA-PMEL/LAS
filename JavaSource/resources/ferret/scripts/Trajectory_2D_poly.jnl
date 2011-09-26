@@ -47,6 +47,12 @@ GO LAS_url_label 0
 
 GO LAS_initialize_traj_id
 
+! if constraints are shown via constraint_0_lhs etc, define labels for those
+IF `($ferret_PC1_var"0|*>1") EQ 0` THEN
+   GO set_constraint_labels
+ENDIF
+
+
 !!! When making icons for a trajectory plot, plotting icons very near the 
 !!! plot boundary can cause lines outside the plot area. Extend the area slightly.
 !!IF `($data_var"0|metadata_ID>1|*>0") AND (($traj_max) LE ($traj_max_labels))` THEN
@@ -281,6 +287,24 @@ ENDIF ! ferret_label
 ! Add labels at the top for the dataset name etc if they exist  
 
 GO labels_above_plot
+
+
+! add any constraint labels in the lower left.
+IF `($ferret_annotations%0|*>1%) EQ 0` THEN
+
+   IF `($nmask_labels"0|*>1") EQ 0` THEN DEFINE SYMBOL nmask_labels = 1
+   DEFINE SYMBOL label_y = `-0.95*($ppl$yorg) + 0.2*(($nmask_labels)-1)`
+
+   DEFINE SYMBOL label_x = `-0.95*($ppl$xorg)`
+   DEFINE SYMBOL label_y = `-0.95*($ppl$yorg) + 0.2*(($nmask_labels)-1)`
+
+   REPEAT/RANGE=1:`($nmask_labels)`:1/NAME=m (\
+      DEFINE SYMBOL mmask = `m`;\
+      IF ($mask_title_($mmask)"0|*>1) THEN ; \
+        LABEL/NOUSER `($label_x)`, `($label_y)`, -1, 0, 0.12, ($mask_title_($mmask)) ; \
+        DEFINE SYMBOL label_y = `($label_y) - 0.2`; \
+      ENDIF)
+ENDIF
 
 ! restore key-annotation setting: keys not annotated
 KEYMARK 0

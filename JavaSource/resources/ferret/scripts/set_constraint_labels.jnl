@@ -3,15 +3,13 @@
 ! script as the command line from a single REPEAT
 ! statement containing all the commands could get too long.
 
-! For prop-prop plots, dont make labels about constraining
-! the variables that make up the 2 axes of the plot.
-
 ! If all labeling turned off just exit.
 IF `($ferret_label"1|0|1|*>1") EQ 0` THEN EXIT/SCRIPT
 
-IF ($data_prop_var"0|*>1") THEN
+! How many constraints could there be?  Should probably get 
+! this from the server...
 
-REPEAT/RANGE=0:3:1/NAME=num ( \
+REPEAT/RANGE=0:101:1/NAME=num ( \
   DEFINE SYMBOL num = `num`; \
   IF ($constraint_($num)_lhs"1|*>0") THEN EXIT/LOOP ; \
   DEFINE SYMBOL lhs = ($constraint_($num)_lhs); \
@@ -19,20 +17,6 @@ REPEAT/RANGE=0:3:1/NAME=num ( \
   DEFINE SYMBOL rhs = ($constraint_($num)_rhs); \
   IF `($lhs"99|*>0") EQ 99` THEN EXIT/CYCLE; \
   GO make_c_lab)
-ELSE
-
-REPEAT/RANGE=0:3:1/NAME=num ( \
-  DEFINE SYMBOL num = `num`; \
-  IF ($constraint_($num)_lhs"1|*>0") THEN EXIT/LOOP ; \
-  DEFINE SYMBOL lhs = ($constraint_($num)_lhs); \
-  DEFINE SYMBOL op = ($constraint_($num)_op); \
-  DEFINE SYMBOL rhs = ($constraint_($num)_rhs); \
-  IF `($lhs"99|*>0") EQ 99` THEN EXIT/CYCLE; \
-  GO make_c_lab)
-
-ENDIF
-
-
 
 IF `($nmask_labels"0") GT 0` THEN
    REPEAT/RANGE=1:($nmask_labels) (\
