@@ -15,9 +15,6 @@ REPEAT/RANGE=0:3:1/NAME=num ( \
   DEFINE SYMBOL num = `num`; \
   IF ($constraint_($num)_lhs"1|*>0") THEN EXIT/LOOP ; \
   DEFINE SYMBOL lhs = ($constraint_($num)_lhs); \
-  IF ($lhs"0|($data_0_var)>1|*>0") THEN EXIT/CYCLE;\
-  IF ($lhs"0|($data_1_var)>1|*>0") THEN EXIT/CYCLE;\
-  IF ($lhs"0|($data_prop_var)>1|*>0") THEN EXIT/CYCLE;\
   DEFINE SYMBOL op = ($constraint_($num)_op); \
   DEFINE SYMBOL rhs = ($constraint_($num)_rhs); \
   IF `($lhs"99|*>0") EQ 99` THEN EXIT/CYCLE; \
@@ -35,4 +32,14 @@ REPEAT/RANGE=0:3:1/NAME=num ( \
 
 ENDIF
 
+
+
+IF `($nmask_labels"0") GT 0` THEN
+   REPEAT/RANGE=1:($nmask_labels) (\
+   DEFINE SYMBOL note_num `($note_num"0") + 1`; \
+   IF ($mask_title_($note_num)"0|*>1") THEN DEFINE SYMBOL note_($note_num)_lab =  ($mask_title_($note_num)); \
+   )
+ENDIF
+
 !-----------------End of set_constraint_labels ---------------------------------
+

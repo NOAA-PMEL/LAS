@@ -76,10 +76,3 @@ IF `STRCMP("($lhs_last)", "($lhs% %)") EQ 0` THEN GO combine_titles
    DEFINE SYMBOL op_last = ($op)
    DEFINE SYMBOL rhs_last = ($rhs) 
 ENDIF
-
-IF `($nmask_labels"0") GT 0` THEN
-REPEAT/RANGE=1:($nmask_labels) (\
- DEFINE SYMBOL note_num `($note_num"0") + 1`; \
- IF ($mask_title_($note_num)"0|*>1") THEN DEFINE SYMBOL note_($note_num)_lab =  ($mask_title_($note_num)); \
- )
-ENDIF

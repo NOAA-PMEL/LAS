@@ -207,20 +207,22 @@ DEFINE SYMBOL qualifiers ($qualifiers)/VLIM=($ppl$range_low):($ppl$range_high)
 DEFINE SYMBOL qualifiers ($qualifiers)/NOKEY/NOLAB
 
 ! add any constraint labels in the lower left.
-IF `($nmask_labels"0|*>1") EQ 0` THEN DEFINE SYMBOL nmask_labels = 1
-IF `($nmask_labels) GT 2` THEN DEFINE SYMBOL nmask_labels = 2
-DEFINE SYMBOL label_y = `-0.95*($ppl$yorg) + 0.2*(($nmask_labels)-1)`
+IF `($ferret_annotations%0|*>1%) EQ 0` THEN
 
-DEFINE SYMBOL label_x = `-0.95*($ppl$xorg)`
-DEFINE SYMBOL label_y = `-0.95*($ppl$yorg) + 0.2*(($nmask_labels)-1)`
+   IF `($nmask_labels"0|*>1") EQ 0` THEN DEFINE SYMBOL nmask_labels = 1
+   IF `($nmask_labels) GT 2` THEN DEFINE SYMBOL nmask_labels = 2
+   DEFINE SYMBOL label_y = `-0.95*($ppl$yorg) + 0.2*(($nmask_labels)-1)`
 
-REPEAT/RANGE=1:`($nmask_labels)`:1/NAME=m (\
-   DEFINE SYMBOL mmask = `m`;\
-   IF ($mask_title_($mmask)"0|*>1) THEN ; \
-      LABEL/NOUSER `($label_x)`, `($label_y)`, -1, 0, 0.12, ($mask_title_($mmask)) ; \
-      DEFINE SYMBOL label_y = `($label_y) - 0.2`; \
-   ENDIF \
-   )
+   DEFINE SYMBOL label_x = `-0.95*($ppl$xorg)`
+   DEFINE SYMBOL label_y = `-0.95*($ppl$yorg) + 0.2*(($nmask_labels)-1)`
+
+   REPEAT/RANGE=1:`($nmask_labels)`:1/NAME=m (\
+      DEFINE SYMBOL mmask = `m`;\
+      IF ($mask_title_($mmask)"0|*>1) THEN ; \
+        LABEL/NOUSER `($label_x)`, `($label_y)`, -1, 0, 0.12, ($mask_title_($mmask)) ; \
+        DEFINE SYMBOL label_y = `($label_y) - 0.2`; \
+      ENDIF)
+ENDIF
 
 ! Polygon plot
 
