@@ -13,6 +13,7 @@ import gov.noaa.pmel.tmap.addxml.AxisBean;
 import gov.noaa.pmel.tmap.addxml.CategoryBean;
 import gov.noaa.pmel.tmap.addxml.DatasetBean;
 import gov.noaa.pmel.tmap.addxml.DatasetsGridsAxesBean;
+import gov.noaa.pmel.tmap.addxml.ESGCatalogHandler;
 import gov.noaa.pmel.tmap.addxml.FilterBean;
 import gov.noaa.pmel.tmap.addxml.GridBean;
 import gov.noaa.pmel.tmap.addxml.addXML;
@@ -70,6 +71,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
+
 import org.apache.commons.httpclient.HttpException;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
@@ -86,6 +91,7 @@ import org.joda.time.Interval;
 import org.joda.time.Period;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
+import org.xml.sax.SAXException;
 
 import thredds.catalog.InvCatalog;
 import thredds.catalog.InvCatalogFactory;
@@ -1639,7 +1645,12 @@ public class LASConfig extends LASDocument {
                     	container_dataset_element = (Element) dataset.clone();
                     	container_dataset_element.removeChildren("variables");
 
-                        List memberVariables = dataset.getChild("variables").getChildren("variable");
+                        Element varsE = dataset.getChild("variables");
+                        
+                        List memberVariables = new ArrayList<Element>();
+                        if ( varsE != null ) {
+                            memberVariables = varsE.getChildren("variable");
+                        }
                         Element varsElementContainer = new Element("variables");
                         boolean hasVariable = false;
                         for (Iterator varIt = memberVariables.iterator(); varIt.hasNext();) {
@@ -4327,27 +4338,74 @@ public class LASConfig extends LASDocument {
 	 * @param src
 	 */
 	public ArrayList<CategoryBean> makeCategoriesFromTHREDDS(String src, boolean esg) {
-		InvCatalogFactory factory = new InvCatalogFactory("default", false);
-		InvCatalog catalog = (InvCatalog) factory.readXML(src);
-		CategoryBean top = new CategoryBean();
-		String topName = catalog.getName();
-		if (topName != null) {
-			top.setName(catalog.getName());
-		}
-		else {
-			top.setName(catalog.getUriString());
-		}
-
 		Vector categories = new Vector();
-		List ThreddsDatasets = catalog.getDatasets();
-		Iterator di = ThreddsDatasets.iterator();
-		while (di.hasNext()) {
-			InvDataset ThreddsDataset = (InvDataset) di.next();
-			if (ThreddsDataset.hasNestedDatasets()) {
-				// Don't need any optins, use the static method.
-				CategoryBean cb;
-				cb = addXML.processCategories(ThreddsDataset, esg);		 
-				categories.add(cb);
+		CategoryBean top = new CategoryBean();
+		if ( esg ) {
+			top.setName("ESG Catalog");
+			String base = src.substring(0, src.lastIndexOf("/")+1);
+			SAXParserFactory factory = SAXParserFactory.newInstance();
+			ESGCatalogHandler esgCatalogHandler = new ESGCatalogHandler();
+			SAXParser parser;
+			try {
+				parser = factory.newSAXParser();			
+				parser.parse(src, esgCatalogHandler);
+			} catch (ParserConfigurationException e) {
+				log.error("Unable to make ESG Categories: "+e.getMessage());
+			} catch (SAXException e) {
+				log.error("Unable to make ESG Categories: "+e.getMessage());
+			} catch (IOException e) {
+				log.error("Unable to make ESG Categories: "+e.getMessage());
+			}
+			Map<String, String> catalogs = esgCatalogHandler.getCatalogs();
+			Map<String, String> lasCatalogs = new HashMap<String, String>();
+			for (Iterator catIt = catalogs.keySet().iterator(); catIt.hasNext();) {
+				String name = (String) catIt.next();
+				String url = (String) catalogs.get(name);
+				InvCatalogFactory thredds_factory = new InvCatalogFactory("default", false);
+				InvCatalog catalog = (InvCatalog) thredds_factory.readXML(base+url);
+				if ( addXML.containsLASDatasets(catalog) ) {
+					lasCatalogs.put(name, url);
+				}
+			}
+			System.out.println(lasCatalogs.size()+" out of "+catalogs.size()+" contain LAS data.");
+			for (Iterator catIt = lasCatalogs.keySet().iterator(); catIt.hasNext();) {
+				String name = (String) catIt.next();
+				String url = (String) lasCatalogs.get(name);
+				System.out.println(name+","+url);
+			}
+			for (Iterator catIt = lasCatalogs.keySet().iterator(); catIt.hasNext();) {
+				
+				String name = (String) catIt.next();
+				String url = (String) lasCatalogs.get(name);
+				InvCatalogFactory thredds_factory = new InvCatalogFactory("default", false);
+				InvCatalog catalog = (InvCatalog) thredds_factory.readXML(base+url);
+				CategoryBean cb = addXML.processESGCategories(catalog);
+				categories.add(cb);				
+			}			
+		} else {
+			InvCatalogFactory factory = new InvCatalogFactory("default", false);
+			InvCatalog catalog = (InvCatalog) factory.readXML(src);
+
+			String topName = catalog.getName();
+			if (topName != null) {
+				top.setName(catalog.getName());
+			}
+			else {
+				top.setName(catalog.getUriString());
+			}
+
+
+			List ThreddsDatasets = catalog.getDatasets();
+			Iterator di = ThreddsDatasets.iterator();
+		
+			while (di.hasNext() ) {
+				InvDataset ThreddsDataset = (InvDataset) di.next();
+				if (ThreddsDataset.hasNestedDatasets()) {
+					
+					CategoryBean cb = addXML.processCategories(ThreddsDataset);		 
+					categories.add(cb);
+					
+				}
 			}
 		}
 		top.setCategories(categories);
@@ -4363,6 +4421,7 @@ public class LASConfig extends LASDocument {
 			if ( dsb.getNextUpdate() > 0 && dsb.getNextUpdate() < nextUpdate ) {
 				nextUpdate = dsb.getNextUpdate();
 			}
+			System.out.println("Converting source data set to XML: "+dsb.getElement());
 			Element datasetFromSrc = dsb.toXml();
 			List attributes = dataset.getAttributes();
 			for (Iterator attrIt = attributes.iterator(); attrIt.hasNext();) {
@@ -4496,48 +4555,62 @@ public class LASConfig extends LASDocument {
 			}
 			beans.add(dgab);
 		} else if ( src_type.equalsIgnoreCase("THREDDS") ) {
-			InvCatalogFactory factory = new InvCatalogFactory("default", false);
-			InvCatalog catalog = (InvCatalog) factory.readXML(src);
-			CategoryBean top = new CategoryBean();
-			String topName = catalog.getName();
-			if (topName != null) {
-				top.setName(catalog.getName());
-			}
-			else {
-				top.setName(catalog.getUriString());
-			}
-
-			Vector CategoryBeans = new Vector();
-
-			List ThreddsDatasets = catalog.getDatasets();
-			Iterator di = ThreddsDatasets.iterator();
-			while (di.hasNext()) {
-				InvDataset ThreddsDataset = (InvDataset) di.next();
-				if (ThreddsDataset.hasNestedDatasets()) {
-					CategoryBean cb;
-					cb = myAddXML.processCategories(ThreddsDataset, myAddXML.isEsg());
-					CategoryBeans.add(cb);
+			InvCatalogFactory thredds_factory = new InvCatalogFactory("default", false);
+			if ( myAddXML.isEsg() ) {
+				String base = src.substring(0, src.lastIndexOf("/")+1);
+				SAXParserFactory factory = SAXParserFactory.newInstance();
+				ESGCatalogHandler esgCatalogHandler = new ESGCatalogHandler();
+				SAXParser parser;
+				try {
+					parser = factory.newSAXParser();			
+					parser.parse(src, esgCatalogHandler);
+				} catch (ParserConfigurationException e) {
+					log.error("Error parsing the ESG THREDDS catalog."+e.getMessage());
+				} catch (SAXException e) {
+					log.error("Error parsing the ESG THREDDS catalog."+e.getMessage());
+				} catch (IOException e) {
+					log.error("Error parsing the ESG THREDDS catalog."+e.getMessage());
 				}
-			}
-
-			ThreddsDatasets = catalog.getDatasets();
-			di = ThreddsDatasets.iterator();
-			while (di.hasNext()) {
-				InvDataset ThreddsDataset = (InvDataset) di.next();
-				if ( ThreddsDataset.hasNestedDatasets() ) {
-					if ( myAddXML.isEsg() ) {
-						myAddXML.processESGDatasets(ThreddsDataset, this);
-					} else {
+				Map<String, String> catalogs = esgCatalogHandler.getCatalogs();
+				Map<String, String> lasCatalogs = new HashMap<String, String>();
+				for (Iterator catIt = catalogs.keySet().iterator(); catIt.hasNext();) {
+					String name = (String) catIt.next();
+					String url = catalogs.get(name);
+					InvCatalog catalog = (InvCatalog) thredds_factory.readXML(base+url);
+					if (myAddXML.containsLASDatasets(catalog) ) {
+						lasCatalogs.put(name, url);
+					}
+				}
+				System.out.println(lasCatalogs.size()+" out of "+catalogs.size()+" contain LAS data.");
+				for (Iterator catIt = lasCatalogs.keySet().iterator(); catIt.hasNext();) {
+					String name = (String) catIt.next();
+					String url = (String) lasCatalogs.get(name);
+					System.out.println(name+","+url);
+				}
+				for (Iterator catIt = lasCatalogs.keySet().iterator(); catIt.hasNext();) {					
+					String name = (String) catIt.next();
+					String url = catalogs.get(name);
+					InvCatalog catalog = (InvCatalog) thredds_factory.readXML(base+url);
+					System.out.println("Processing datasets for "+name);
+					beans.addAll(myAddXML.processESGDatasets(catalog));
+				}
+			} else {
+				
+				InvCatalog catalog = (InvCatalog) thredds_factory.readXML(src);
+				List ThreddsDatasets = catalog.getDatasets();
+				Iterator di = ThreddsDatasets.iterator();
+				
+				ThreddsDatasets = catalog.getDatasets();
+				di = ThreddsDatasets.iterator();
+				while (di.hasNext() ) {
+					InvDataset ThreddsDataset = (InvDataset) di.next();
+					if ( ThreddsDataset.hasNestedDatasets() ) {
 						beans.addAll(myAddXML.processDatasets(ThreddsDataset));
 					}
 				}
 			}
 		}
-		if ( myAddXML.isEsg() ) {
-			return new Vector<DatasetsGridsAxesBean>();
-		} else {
-			return beans;
-		}
+		return beans;
 	}
 	/**
 	 * Adds the contents of a category bean from addXML to the config, creating the las_categories element if necessary.

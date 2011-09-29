@@ -707,7 +707,13 @@ public class addXML {
 		while (di.hasNext()) {
 			InvDataset ThreddsDataset = (InvDataset) di.next();
 			if (ThreddsDataset.hasNestedDatasets()) {
-				CategoryBean cb = processCategories(ThreddsDataset, esg);
+				CategoryBean cb;
+				if ( esg ) {
+					// TODO fix for ESG from the command line: cb = processESGCategories(ThreddsDataset);
+					cb = null;
+				} else {
+					cb = processCategories(ThreddsDataset);
+				} 
 				if ( cb.getCategories().size() > 0 || cb.getFilters().size() > 0 ) {
 					CategoryBeans.add(cb);
 				}
@@ -826,7 +832,9 @@ public class addXML {
 	}
 	public static Vector processDatasets(InvDataset ThreddsDataset, boolean esg) {
 		if ( esg ) {
-			return processESGDatasets(ThreddsDataset);
+			// TODO fix for command line access...
+			return null;
+			// return processESGDatasets(ThreddsDataset);
 		} else {
 			return processDatasets(ThreddsDataset);
 		}
@@ -861,52 +869,103 @@ public class addXML {
 		}
 		return beans;
 	}
-    public static Vector processESGDatasets(InvDataset ThreddsDataset) {
+	public static boolean containsLASDatasets(InvCatalog subCatalog) {
+		boolean hasData = false;
+		for (Iterator topLevelIt = subCatalog.getDatasets().iterator(); topLevelIt.hasNext(); ) {
+			InvDataset topDS = (InvDataset) topLevelIt.next();
+			for (Iterator subDatasetsIt = topDS.getDatasets().iterator(); subDatasetsIt.hasNext(); ) {
+				InvDataset subDataset = (InvDataset) subDatasetsIt.next();
+				if ( !subDataset.hasNestedDatasets() && subDataset.hasAccess() && subDataset.getName().contains("aggregation")) {
+					InvAccess access = null;
+					for (Iterator ait = subDataset.getAccess().iterator(); ait.hasNext(); ) {
+						access = (InvAccess) ait.next();
+						if (access.getService().getServiceType() == ServiceType.DODS ||
+								access.getService().getServiceType() == ServiceType.OPENDAP ||
+								access.getService().getServiceType() == ServiceType.NETCDF) {
+							return true;
+						}
+					}
+				} else {
+					for (Iterator grandChildrenIt = subDataset.getDatasets().iterator(); grandChildrenIt.hasNext(); ) {
+						InvDataset grandChild = (InvDataset) grandChildrenIt.next();
+						if ( grandChild.hasAccess() && grandChild.getName().contains("aggregation")) {
+							InvAccess access = null;
+							for (Iterator ait = grandChild.getAccess().iterator(); ait.hasNext(); ) {
+								access = (InvAccess) ait.next();
+								if (access.getService().getServiceType() == ServiceType.DODS ||
+										access.getService().getServiceType() == ServiceType.OPENDAP ||
+										access.getService().getServiceType() == ServiceType.NETCDF) {
+									return true;
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		return hasData;
+	}
+	public static Vector processESGDatasets(InvCatalog subCatalog) {
+
 		Vector beans = new Vector();
 		DatasetsGridsAxesBean bean = new DatasetsGridsAxesBean();
 		DatasetBean ds = new DatasetBean();
 		Vector datasets = new Vector();
 		ArrayList<VariableBean> variables = new ArrayList<VariableBean>();
-		String id = ThreddsDataset.getID();
-		if ( id == null ) {
-			try {
-				id = "id_"+JDOMUtils.MD5Encode(ThreddsDataset.getName());
-			} catch (UnsupportedEncodingException e) {
-				id = "id_"+String.valueOf(Math.random());
-			}
-		}
-		ds.setElement(id);
-		ds.setName(ThreddsDataset.getName());
-		for (Iterator topLevelIt = ThreddsDataset.getDatasets().iterator(); topLevelIt.hasNext(); ) {
+		for (Iterator topLevelIt = subCatalog.getDatasets().iterator(); topLevelIt.hasNext(); ) {
 			InvDataset topDS = (InvDataset) topLevelIt.next();
 			ds.setName(topDS.getName());
+			ds.setElement(topDS.getID());
 			for (Iterator subDatasetsIt = topDS.getDatasets().iterator(); subDatasetsIt.hasNext(); ) {
 				InvDataset subDataset = (InvDataset) subDatasetsIt.next();
-				
-                // These will be the catalog containers that will contain the aggregations...
-				for (Iterator grandChildrenIt = subDataset.getDatasets().iterator(); grandChildrenIt.hasNext(); ) {
-					InvDataset grandChild = (InvDataset) grandChildrenIt.next();
-					if ( grandChild.hasAccess() && grandChild.getName().contains("aggregation")) {
-						// We are done.
-						String url = null;
-						InvAccess access = null;
-						for (Iterator ait = grandChild.getAccess().iterator(); ait.hasNext(); ) {
-							access = (InvAccess) ait.next();
-							if (access.getService().getServiceType() == ServiceType.DODS ||
-									access.getService().getServiceType() == ServiceType.OPENDAP ||
-									access.getService().getServiceType() == ServiceType.NETCDF) {
-								url = access.getStandardUrlName();
+				if ( !subDataset.hasNestedDatasets() && subDataset.hasAccess() && subDataset.getName().contains("aggregation")) {
+					// We are done.
+					String url = null;
+					InvAccess access = null;
+					for (Iterator ait = subDataset.getAccess().iterator(); ait.hasNext(); ) {
+						access = (InvAccess) ait.next();
+						if (access.getService().getServiceType() == ServiceType.DODS ||
+								access.getService().getServiceType() == ServiceType.OPENDAP ||
+								access.getService().getServiceType() == ServiceType.NETCDF) {
+							url = access.getStandardUrlName();
+						}
+					}
+					DatasetsGridsAxesBean dgab = createBeansFromThreddsMetadata(subDataset, url);
+                    if ( dgab != null ) {
+                    	for (Iterator dsit = dgab.getDatasets().iterator(); dsit.hasNext();) {
+                    		DatasetBean dsb = (DatasetBean) dsit.next();
+                    		variables.addAll(dsb.getVariables());
+                    	}
+                    	bean.getGrids().addAll(dgab.getGrids());
+                    	bean.getAxes().addAll(dgab.getAxes());
+                    }
+				} else {
+					// These will be the catalog containers that will contain the aggregations...
+					for (Iterator grandChildrenIt = subDataset.getDatasets().iterator(); grandChildrenIt.hasNext(); ) {
+						InvDataset grandChild = (InvDataset) grandChildrenIt.next();
+						if ( grandChild.hasAccess() && grandChild.getName().contains("aggregation")) {
+							// We are done.
+							String url = null;
+							InvAccess access = null;
+							for (Iterator ait = grandChild.getAccess().iterator(); ait.hasNext(); ) {
+								access = (InvAccess) ait.next();
+								if (access.getService().getServiceType() == ServiceType.DODS ||
+										access.getService().getServiceType() == ServiceType.OPENDAP ||
+										access.getService().getServiceType() == ServiceType.NETCDF) {
+									url = access.getStandardUrlName();
+								}
 							}
-						}
-						DatasetsGridsAxesBean dgab = createBeansFromThreddsMetadata(grandChild, url);
-						
-						for (Iterator dsit = dgab.getDatasets().iterator(); dsit.hasNext();) {
-							DatasetBean dsb = (DatasetBean) dsit.next();
-							variables.addAll(dsb.getVariables());
-						}
-						bean.getGrids().addAll(dgab.getGrids());
-						bean.getAxes().addAll(dgab.getAxes());
-					} 
+							DatasetsGridsAxesBean dgab = createBeansFromThreddsMetadata(grandChild, url);
+							if ( dgab != null ) {
+								for (Iterator dsit = dgab.getDatasets().iterator(); dsit.hasNext();) {
+									DatasetBean dsb = (DatasetBean) dsit.next();
+									variables.addAll(dsb.getVariables());
+								}
+								bean.getGrids().addAll(dgab.getGrids());
+								bean.getAxes().addAll(dgab.getAxes());
+							}
+						} 
+					}
 				}
 			}
 		}
@@ -1063,39 +1122,13 @@ public class addXML {
 							NetcdfDataset ncds = null;
 							GridDataset gridsDs = null;
 							GridCoordSys gcs = null;
-							if ( readX || readY || readZ ) {
-								String dods = url.replaceAll("http", "dods");
-
-								try {
-									ncds = ucar.nc2.dataset.NetcdfDataset.openDataset(dods);
-									gridsDs = new GridDataset(ncds);
-									if ( ncds != null ) {
-										ncds.close();
-									}
-
-								} catch (IOException e) {
-									log.error("unable to read netcdf data set.");
+							
+								if ( readX || readY || readZ ) {
 									return null;
 								}
-								GridDatatype geogrid = gridsDs.findGridDatatype(variable.getName());
-								gcs = (GridCoordSys) geogrid.getCoordinateSystem();
-							}
-							String elementName = threddsDataset.getID()+"-x-axis";
-							AxisBean xAxis = new AxisBean();
-							if ( readX && ncds != null && gridsDs != null ) {
-								log.info("Reading X "+elementName);
-								CoordinateAxis x = gcs.getXHorizAxis();
-								if ( x instanceof CoordinateAxis1D ) {
-									CoordinateAxis1D x_1d = (CoordinateAxis1D) gcs.getXHorizAxis();
-									xAxis = makeGeoAxis(x_1d, "x", elementName);
-								} else {
-									CoordinateAxis2D x_2d = (CoordinateAxis2D) gcs.getXHorizAxis();
-									xAxis = makeGeoAxisFrom2D(x_2d, "x", elementName);
-									las_var.setProperty("ferret", "curvi_coord_lon", x.getName());
-									las_var.setProperty("ferret", "curv_lon_min", String.valueOf(x.getMinValue()));
-									las_var.setProperty("ferret", "curv_lon_max", String.valueOf(x.getMaxValue()));
-								}							  
-							} else {
+								String elementName = threddsDataset.getID()+"-x-axis";
+								AxisBean xAxis = new AxisBean();
+								
 								// Get the X Axis information...
 								log.info("Loading X from metadata: "+elementName);
 								xAxis.setElement(elementName);
@@ -1109,241 +1142,228 @@ public class addXML {
 								xr.setStart(String.valueOf(xstart));
 								xAxis.setArange(xr);
 
-							}
-							if ( !AxisBeans.contains(xAxis) ) {
-								AxisBeans.add(xAxis);
-							} else {
-								xAxis.setElement(AxisBeans.getMatchingID(xAxis));
-							}
-							elementName = threddsDataset.getID()+"-y-axis";
-							AxisBean yAxis = new AxisBean();
-							if ( readY ) {
-								log.info("Reading Y "+elementName);
-								CoordinateAxis y = gcs.getYHorizAxis();
-								if ( y instanceof CoordinateAxis1D ) {
-									CoordinateAxis1D y_1d = (CoordinateAxis1D) gcs.getYHorizAxis();
-									yAxis = makeGeoAxis(y_1d, "y", elementName);
+								
+								if ( !AxisBeans.contains(xAxis) ) {
+									AxisBeans.add(xAxis);
 								} else {
-									CoordinateAxis2D y_2d = (CoordinateAxis2D) gcs.getYHorizAxis();
-									yAxis = makeGeoAxisFrom2D(y_2d, "y", elementName);
-									las_var.setProperty("ferret", "curvi_coord_lat", y.getName());
+									xAxis.setElement(AxisBeans.getMatchingID(xAxis));
 								}
-							} else {
-								log.info("Loading Y from metadata: "+elementName);
-								// Get the Y Axis information...
-								yAxis.setElement(elementName);
-								grid_name.append("-y-axis");
-								yAxis.setType("y");
-								yAxis.setUnits(yunits);
-								int ysizei = (int)(ysize/yresolution);
-								ArangeBean yr = new ArangeBean();
-								yr.setSize(String.valueOf(ysizei));
-								yr.setStep(String.valueOf(yresolution));
-								yr.setStart(String.valueOf(ystart));
-								yAxis.setArange(yr);
-							}
-							if ( !AxisBeans.contains(yAxis) ) {
-								AxisBeans.add(yAxis);
-							} else {
-								yAxis.setElement(AxisBeans.getMatchingID(yAxis));
-							}
-							elementName = threddsDataset.getID()+"-z-axis";
-							AxisBean zAxis = new AxisBean();
-							if ( hasZ ) {
-								if ( readZ ) {
-									log.info("Reading Z "+elementName);
-									CoordinateAxis1D z_1d = gcs.getVerticalAxis();
-									zAxis = makeGeoAxis(z_1d, "z", elementName);
-								} else if ( zvalues != null ) {
-									log.info("Loading Z from property metadata: "+elementName);
-									zAxis.setElement(elementName);
-									String zunits = z.getUnits();
-									zAxis.setType("z");
-									zAxis.setUnits(zunits);
-									String[] zvs = zvalues.split("\\s+");
-									DecimalFormat format = new DecimalFormat("###############.###############");
-									for (int zi = 0; zi < zvs.length; zi++ ) {
-										double zd = Double.valueOf(zvs[zi]).doubleValue();
-										zvs[zi] = format.format(zd);
-									}
-									zAxis.setV(zvs);
+								elementName = threddsDataset.getID()+"-y-axis";
+								AxisBean yAxis = new AxisBean();
+								
+									log.info("Loading Y from metadata: "+elementName);
+									// Get the Y Axis information...
+									yAxis.setElement(elementName);
+									grid_name.append("-y-axis");
+									yAxis.setType("y");
+									yAxis.setUnits(yunits);
+									int ysizei = (int)(ysize/yresolution);
+									ArangeBean yr = new ArangeBean();
+									yr.setSize(String.valueOf(ysizei));
+									yr.setStep(String.valueOf(yresolution));
+									yr.setStart(String.valueOf(ystart));
+									yAxis.setArange(yr);
+								
+								if ( !AxisBeans.contains(yAxis) ) {
+									AxisBeans.add(yAxis);
 								} else {
-									log.info("Loading Z without property metadata: "+elementName);
-									zAxis.setElement(elementName);
-									grid_name.append("-z-axis");
-									double zsize = z.getSize();
-									double zresolution = z.getResolution();
-									double zstart = z.getStart();
-									if ( !Double.isNaN(zsize) && !Double.isNaN(zresolution) && !Double.isNaN(zstart) ) {
+									yAxis.setElement(AxisBeans.getMatchingID(yAxis));
+								}
+								elementName = threddsDataset.getID()+"-z-axis";
+								AxisBean zAxis = new AxisBean();
+								if ( hasZ ) {
+									if ( zvalues != null ) {
+										log.info("Loading Z from property metadata: "+elementName);
+										zAxis.setElement(elementName);
 										String zunits = z.getUnits();
 										zAxis.setType("z");
 										zAxis.setUnits(zunits);
-										ArangeBean zr = new ArangeBean();
-										int zsizei = (int)(zsize/zresolution);
-										zr.setSize(String.valueOf(zsizei));
-										zr.setStep(String.valueOf(zresolution));
-										zr.setStart(String.valueOf(zstart));
-										zAxis.setArange(zr);
+										String[] zvs = zvalues.split("\\s+");
+										DecimalFormat format = new DecimalFormat("###############.###############");
+										for (int zi = 0; zi < zvs.length; zi++ ) {
+											double zd = Double.valueOf(zvs[zi]).doubleValue();
+											zvs[zi] = format.format(zd);
+										}
+										zAxis.setV(zvs);
+									} else {
+										log.info("Loading Z without property metadata: "+elementName);
+										zAxis.setElement(elementName);
+										grid_name.append("-z-axis");
+										double zsize = z.getSize();
+										double zresolution = z.getResolution();
+										double zstart = z.getStart();
+										if ( !Double.isNaN(zsize) && !Double.isNaN(zresolution) && !Double.isNaN(zstart) ) {
+											String zunits = z.getUnits();
+											zAxis.setType("z");
+											zAxis.setUnits(zunits);
+											ArangeBean zr = new ArangeBean();
+											int zsizei = (int)(zsize/zresolution);
+											zr.setSize(String.valueOf(zsizei));
+											zr.setStep(String.valueOf(zresolution));
+											zr.setStart(String.valueOf(zstart));
+											zAxis.setArange(zr);
 
-									} 
+										} 
+									}
+									if ( !AxisBeans.contains(zAxis) ) {
+										AxisBeans.add(zAxis);
+									} else {
+										zAxis.setElement(AxisBeans.getMatchingID(zAxis));
+									}
 								}
-								if ( !AxisBeans.contains(zAxis) ) {
-									AxisBeans.add(zAxis);
+								String start_time = threddsDataset.findProperty("start");
+								String time_length = threddsDataset.findProperty("time_length");
+								String time_delta = threddsDataset.findProperty("time_delta");
+								String calendar = threddsDataset.findProperty("calendar");
+								String tdelta = "1";
+								String tunits = "month";
+								if ( time_delta != null && time_delta.contains(" ") ) {
+									String[] time_parts = time_delta.split("\\s+");
+									tdelta = time_parts[0];
+									tunits = time_parts[1];
+								}
+
+
+								String calendar_name = null;
+								// Use this chronology and the UTC Time Zone
+								Chronology chrono = GJChronology.getInstance(DateTimeZone.UTC);
+								if ( calendar != null ) {
+
+									// If calendar attribute is set, use appropriate Chronology.
+									if (calendar.equals("proleptic_gregorian") ) {
+										calendar_name = "proleptic_gregorian";
+										chrono = GregorianChronology.getInstance(DateTimeZone.UTC);
+									} else if (calendar.equals("noleap") || calendar.equals("365_day") ) {
+										chrono = NoLeapChronology.getInstanceUTC();
+										calendar_name = "noleap";
+									} else if (calendar.equals("julian") ) {
+										calendar_name = "julian";
+										chrono = JulianChronology.getInstanceUTC();
+									} else if ( calendar.equals("all_leap") || calendar.equals("366_day") ) {
+										chrono = AllLeapChronology.getInstanceUTC();
+										calendar_name = "all_leap";
+									} else if ( calendar.equals("360_day") ) {  /* aggiunto da lele */
+										chrono = ThreeSixtyDayChronology.getInstanceUTC();
+										calendar_name = "360_day";
+									}
+								}
+
+								String esg_formats[] = {"yyyy-MM-dd HH:mm:ss.s",
+										"yyyy-MM-dd HH:mm:s.s",
+										"yyyy-MM-dd HH:m:ss.s",
+										"yyyy-MM-dd HH:m:s.s",
+
+
+										"yyyy-MM-dd HH:mm:ss.s",
+										"yyyy-MM-dd HH:mm:s.s",
+										"yyyy-MM-dd HH:m:ss.s",
+										"yyyy-MM-dd HH:m:s.s",
+										"yyyy-MM-dd H:mm:ss.s",
+										"yyyy-MM-dd H:mm:s.s",
+										"yyyy-MM-dd H:m:ss.s",
+										"yyyy-MM-dd H:m:s.s",
+
+										"yyyy-MM-dd HH:mm:ss.s",
+										"yyyy-MM-dd HH:mm:s.s",
+										"yyyy-MM-dd HH:m:ss.s",
+										"yyyy-MM-dd HH:m:s.s",
+										"yyyy-MM-dd H:mm:ss.s",
+										"yyyy-MM-dd H:mm:s.s",
+										"yyyy-MM-dd H:m:ss.s",
+										"yyyy-MM-dd H:m:s.s",
+
+										"yyyy-MM-d HH:mm:ss.s",
+										"yyyy-MM-d HH:mm:s.s",
+										"yyyy-MM-d HH:m:ss.s",
+										"yyyy-MM-d HH:m:s.s",
+										"yyyy-MM-d H:mm:ss.s",
+										"yyyy-MM-d H:mm:s.s",
+										"yyyy-MM-d H:m:ss.s",
+										"yyyy-MM-d H:m:s.s",                
+
+										"yyyy-MM-dd HH:mm:ss.s",
+										"yyyy-MM-dd HH:mm:s.s",
+										"yyyy-MM-dd HH:m:ss.s",
+										"yyyy-MM-dd HH:m:s.s",
+										"yyyy-MM-dd H:mm:ss.s",
+										"yyyy-MM-dd H:mm:s.s",
+										"yyyy-MM-dd H:m:ss.s",
+										"yyyy-MM-dd H:m:s.s",
+
+										"yyyy-MM-d HH:mm:ss.s",
+										"yyyy-MM-d HH:mm:s.s",
+										"yyyy-MM-d HH:m:ss.s",
+										"yyyy-MM-d HH:m:s.s",
+										"yyyy-MM-d H:mm:ss.s",
+										"yyyy-MM-d H:mm:s.s",
+										"yyyy-MM-d H:m:ss.s",
+										"yyyy-MM-d H:m:s.s", 
+
+										"yyyy-M-dd HH:mm:ss.s",
+										"yyyy-M-dd HH:mm:s.s",
+										"yyyy-M-dd HH:m:ss.s",
+										"yyyy-M-dd HH:m:s.s",
+										"yyyy-M-dd H:mm:ss.s",
+										"yyyy-M-dd H:mm:s.s",
+										"yyyy-M-dd H:m:ss.s",
+										"yyyy-M-dd H:m:s.s",
+
+										"yyyy-M-d HH:mm:ss.s",
+										"yyyy-M-d HH:mm:s.s",
+										"yyyy-M-d HH:m:ss.s",
+										"yyyy-M-d HH:m:s.s",
+										"yyyy-M-d H:mm:ss.s",
+										"yyyy-M-d H:mm:s.s",
+										"yyyy-M-d H:m:ss.s",
+										"yyyy-M-d H:m:s.s"				
+
+								};
+								DateTime s = null;
+								for ( int i = 0; i < esg_formats.length; i++) {
+									try {
+										DateTimeFormatter f = DateTimeFormat.forPattern(esg_formats[i]).withChronology(chrono);
+										s = f.parseDateTime(start_time).withChronology(chrono);
+										break;
+									} catch (Exception e) {
+										// Try again...
+									}
+								}							
+
+								log.info("Loading T from metadata: "+elementName);
+								AxisBean tAxis = new AxisBean();
+								if ( calendar_name != null ) {
+									tAxis.setCalendar(calendar_name);
+								}
+								tAxis.setElement(threddsDataset.getID()+"-t-axis");
+								grid_name.append("-t-axis");
+								tAxis.setType("t");
+								tAxis.setUnits(tunits);
+								ArangeBean tr = new ArangeBean();
+								DateTimeFormatter fmt = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
+								log.debug("Using start time: "+fmt.print(s)+ " from input "+start_time);
+								tr.setStart(fmt.print(s));
+								tr.setStep(tdelta);
+								tr.setSize(time_length);
+								tAxis.setArange(tr);
+								if ( !AxisBeans.contains(tAxis) ) {
+									AxisBeans.addUnique(tAxis);
 								} else {
-									zAxis.setElement(AxisBeans.getMatchingID(zAxis));
+									tAxis.setElement(AxisBeans.getMatchingID(tAxis));
 								}
-							}
-							String start_time = threddsDataset.findProperty("start");
-							String time_length = threddsDataset.findProperty("time_length");
-							String time_delta = threddsDataset.findProperty("time_delta");
-							String calendar = threddsDataset.findProperty("calendar");
-							String tdelta = "1";
-							String tunits = "month";
-							if ( time_delta.contains(" ") ) {
-								String[] time_parts = time_delta.split("\\s+");
-								tdelta = time_parts[0];
-								tunits = time_parts[1];
-							}
 
-
-							// Use this chronology and the UTC Time Zone
-							Chronology chrono = GJChronology.getInstance(DateTimeZone.UTC);
-							String calendar_name = null;
-							// If calendar attribute is set, use appropriate Chronology.
-							if (calendar.equals("proleptic_gregorian") ) {
-								calendar_name = "proleptic_gregorian";
-								chrono = GregorianChronology.getInstance(DateTimeZone.UTC);
-							} else if (calendar.equals("noleap") || calendar.equals("365_day") ) {
-								chrono = NoLeapChronology.getInstanceUTC();
-								calendar_name = "noleap";
-							} else if (calendar.equals("julian") ) {
-								calendar_name = "julian";
-								chrono = JulianChronology.getInstanceUTC();
-							} else if ( calendar.equals("all_leap") || calendar.equals("366_day") ) {
-								chrono = AllLeapChronology.getInstanceUTC();
-								calendar_name = "all_leap";
-							} else if ( calendar.equals("360_day") ) {  /* aggiunto da lele */
-								chrono = ThreeSixtyDayChronology.getInstanceUTC();
-								calendar_name = "360_day";
-							}
-
-							String esg_formats[] = {"yyyy-MM-dd HH:mm:ss.s",
-									"yyyy-MM-dd HH:mm:s.s",
-									"yyyy-MM-dd HH:m:ss.s",
-									"yyyy-MM-dd HH:m:s.s",
-
-
-									"yyyy-MM-dd HH:mm:ss.s",
-									"yyyy-MM-dd HH:mm:s.s",
-									"yyyy-MM-dd HH:m:ss.s",
-									"yyyy-MM-dd HH:m:s.s",
-									"yyyy-MM-dd H:mm:ss.s",
-									"yyyy-MM-dd H:mm:s.s",
-									"yyyy-MM-dd H:m:ss.s",
-									"yyyy-MM-dd H:m:s.s",
-
-									"yyyy-MM-dd HH:mm:ss.s",
-									"yyyy-MM-dd HH:mm:s.s",
-									"yyyy-MM-dd HH:m:ss.s",
-									"yyyy-MM-dd HH:m:s.s",
-									"yyyy-MM-dd H:mm:ss.s",
-									"yyyy-MM-dd H:mm:s.s",
-									"yyyy-MM-dd H:m:ss.s",
-									"yyyy-MM-dd H:m:s.s",
-
-									"yyyy-MM-d HH:mm:ss.s",
-									"yyyy-MM-d HH:mm:s.s",
-									"yyyy-MM-d HH:m:ss.s",
-									"yyyy-MM-d HH:m:s.s",
-									"yyyy-MM-d H:mm:ss.s",
-									"yyyy-MM-d H:mm:s.s",
-									"yyyy-MM-d H:m:ss.s",
-									"yyyy-MM-d H:m:s.s",                
-
-									"yyyy-MM-dd HH:mm:ss.s",
-									"yyyy-MM-dd HH:mm:s.s",
-									"yyyy-MM-dd HH:m:ss.s",
-									"yyyy-MM-dd HH:m:s.s",
-									"yyyy-MM-dd H:mm:ss.s",
-									"yyyy-MM-dd H:mm:s.s",
-									"yyyy-MM-dd H:m:ss.s",
-									"yyyy-MM-dd H:m:s.s",
-
-									"yyyy-MM-d HH:mm:ss.s",
-									"yyyy-MM-d HH:mm:s.s",
-									"yyyy-MM-d HH:m:ss.s",
-									"yyyy-MM-d HH:m:s.s",
-									"yyyy-MM-d H:mm:ss.s",
-									"yyyy-MM-d H:mm:s.s",
-									"yyyy-MM-d H:m:ss.s",
-									"yyyy-MM-d H:m:s.s", 
-
-									"yyyy-M-dd HH:mm:ss.s",
-									"yyyy-M-dd HH:mm:s.s",
-									"yyyy-M-dd HH:m:ss.s",
-									"yyyy-M-dd HH:m:s.s",
-									"yyyy-M-dd H:mm:ss.s",
-									"yyyy-M-dd H:mm:s.s",
-									"yyyy-M-dd H:m:ss.s",
-									"yyyy-M-dd H:m:s.s",
-
-									"yyyy-M-d HH:mm:ss.s",
-									"yyyy-M-d HH:mm:s.s",
-									"yyyy-M-d HH:m:ss.s",
-									"yyyy-M-d HH:m:s.s",
-									"yyyy-M-d H:mm:ss.s",
-									"yyyy-M-d H:mm:s.s",
-									"yyyy-M-d H:m:ss.s",
-									"yyyy-M-d H:m:s.s"				
-
-							};
-							DateTime s = null;
-							for ( int i = 0; i < esg_formats.length; i++) {
-								try {
-									DateTimeFormatter f = DateTimeFormat.forPattern(esg_formats[i]).withChronology(chrono);
-									s = f.parseDateTime(start_time).withChronology(chrono);
-									break;
-								} catch (Exception e) {
-									// Try again...
+								dgab.setAxes(AxisBeans);
+								GridBean grid = new GridBean();
+								grid.setElement(grid_name.toString());
+								grid.setAxes(AxisBeans);
+								if ( !GridBeans.contains(grid) ) {
+									GridBeans.add(grid);
+								} else {
+									grid.setElement(GridBeans.getMatchingID(grid));
 								}
-							}							
 
-							log.info("Loading T from metadata: "+elementName);
-							AxisBean tAxis = new AxisBean();
-							if ( calendar_name != null ) {
-								tAxis.setCalendar(calendar_name);
-							}
-							tAxis.setElement(threddsDataset.getID()+"-t-axis");
-							grid_name.append("-t-axis");
-							tAxis.setType("t");
-							tAxis.setUnits(tunits);
-							ArangeBean tr = new ArangeBean();
-							DateTimeFormatter fmt = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
-							log.debug("Using start time: "+fmt.print(s)+ " from input "+start_time);
-							tr.setStart(fmt.print(s));
-							tr.setStep(tdelta);
-							tr.setSize(time_length);
-							tAxis.setArange(tr);
-							if ( !AxisBeans.contains(tAxis) ) {
-								AxisBeans.addUnique(tAxis);
-							} else {
-								tAxis.setElement(AxisBeans.getMatchingID(tAxis));
-							}
-
-							dgab.setAxes(AxisBeans);
-							GridBean grid = new GridBean();
-							grid.setElement(grid_name.toString());
-							grid.setAxes(AxisBeans);
-							if ( !GridBeans.contains(grid) ) {
-								GridBeans.add(grid);
-							} else {
-								grid.setElement(GridBeans.getMatchingID(grid));
-							}
-
-
-
-							las_var.setGrid(grid);
-							dataset.addVariable(las_var);
+								las_var.setGrid(grid);
+								dataset.addVariable(las_var);
+							
 
 						} // coverage != null
 					} // for variables;
@@ -1386,78 +1406,76 @@ public class addXML {
 	 * @param ThreddsDataset InvDataset
 	 * @return CategoryBean
 	 */
-	public static CategoryBean processESGCategories(InvDataset ThreddsDataset) {
-		CategoryBean cb = new CategoryBean();
-		cb.setName(ThreddsDataset.getName());
-		cb.setID(ThreddsDataset.getID());
+	public static CategoryBean processESGCategories(InvCatalog subCatalog) {
 		// This is the top level...
-		cb.setContributors(getContributors(ThreddsDataset));
 		Vector topCats = new Vector();
-		for (Iterator topLevelIt = ThreddsDataset.getDatasets().iterator(); topLevelIt.hasNext(); ) {
+		CategoryBean topCB = new CategoryBean();
+		for (Iterator topLevelIt = subCatalog.getDatasets().iterator(); topLevelIt.hasNext(); ) {
 			InvDataset topDS = (InvDataset) topLevelIt.next();
-			CategoryBean topCB = new CategoryBean();
+			
+			topCB.setContributors(getContributors(topDS));
 			topCB.setName(topDS.getName());
 			String id = topDS.getID();
-			if ( id == null ) {
-				try {
-					id = "id_"+JDOMUtils.MD5Encode(topDS.getName());
-				} catch (UnsupportedEncodingException e) {
-					id = "id_"+String.valueOf(Math.random());
-				}
-			}
 			topCB.setID(id);
 			
 			
 			for (Iterator subDatasetsIt = topDS.getDatasets().iterator(); subDatasetsIt.hasNext(); ) {
 				InvDataset subDataset = (InvDataset) subDatasetsIt.next();
-				topCB.addCatID(subDataset.getID());
-				// These will be the catalog containers that will contain the aggregations...
-				for (Iterator grandChildrenIt = subDataset.getDatasets().iterator(); grandChildrenIt.hasNext(); ) {
-					InvDataset grandChild = (InvDataset) grandChildrenIt.next();
-					if ( grandChild.hasAccess() && grandChild.getName().contains("aggregation")) {
-						// We are done.
-						String url = null;
-						InvAccess access = null;
-						for (Iterator ait = grandChild.getAccess().iterator(); ait.hasNext(); ) {
-							access = (InvAccess) ait.next();
-							if (access.getService().getServiceType() == ServiceType.DODS ||
-									access.getService().getServiceType() == ServiceType.OPENDAP ||
-									access.getService().getServiceType() == ServiceType.NETCDF) {
-								url = access.getStandardUrlName();
+				if ( !subDataset.hasNestedDatasets() && subDataset.hasAccess() && subDataset.getName().contains("aggregation") ) {
+					String url = null;
+					InvAccess access = null;
+					for (Iterator ait = subDataset.getAccess().iterator(); ait.hasNext(); ) {
+						access = (InvAccess) ait.next();
+						if (access.getService().getServiceType() == ServiceType.DODS ||
+								access.getService().getServiceType() == ServiceType.OPENDAP ||
+								access.getService().getServiceType() == ServiceType.NETCDF) {
+							url = access.getStandardUrlName();
+						}
+					}
+					if ( url != null && url.contains("aggregation") ){
+						FilterBean filter = new FilterBean();
+						filter.setAction("apply-variable");
+						String tag = subDataset.getID();
+						filter.setContainstag(tag);
+						topCB.addFilter(filter);
+						topCB.addCatID(subDataset.getID());
+					}
+				} else {
+					
+
+					// These will be the catalog containers that will contain the aggregations...
+					for (Iterator grandChildrenIt = subDataset.getDatasets().iterator(); grandChildrenIt.hasNext(); ) {
+						InvDataset grandChild = (InvDataset) grandChildrenIt.next();
+						if ( grandChild.hasAccess() && grandChild.getName().contains("aggregation")) {
+							topCB.addCatID(subDataset.getID());
+							// We are done.
+							String url = null;
+							InvAccess access = null;
+							for (Iterator ait = grandChild.getAccess().iterator(); ait.hasNext(); ) {
+								access = (InvAccess) ait.next();
+								if (access.getService().getServiceType() == ServiceType.DODS ||
+										access.getService().getServiceType() == ServiceType.OPENDAP ||
+										access.getService().getServiceType() == ServiceType.NETCDF) {
+									url = access.getStandardUrlName();
+								}
 							}
-						}
-						if ( url != null && url.contains("aggregation") ){
-							FilterBean filter = new FilterBean();
-							filter.setAction("apply-variable");
-							String tag = grandChild.getID();
-							filter.setContainstag(tag);
-							topCB.addFilter(filter);
-							topCB.addCatID(grandChild.getID());
-						}
-					} 
+							if ( url != null && url.contains("aggregation") ){
+								FilterBean filter = new FilterBean();
+								filter.setAction("apply-variable");
+								String tag = grandChild.getID();
+								filter.setContainstag(tag);
+								topCB.addFilter(filter);
+								topCB.addCatID(grandChild.getID());
+							}
+						} 
+					}
 				}
 			}
 			if ( topCB.getFilters().size() > 0 ) {
 				topCats.add(topCB);
 			}
 		}
-		if ( topCats.size() > 0 ) {
-			cb.setCategories(topCats);
-		}
-		return cb;
-	}
-	/**
-	 * Convenience methods to choose how to process the categories.
-	 * @param ThreddsDataset
-	 * @param esg
-	 * @return
-	 */
-	public static CategoryBean processCategories(InvDataset ThreddsDataset, boolean esg) {
-		if ( esg ) {
-			return processESGCategories(ThreddsDataset);
-		} else {
-			return processCategories(ThreddsDataset);
-		}
+		return topCB;
 	}
 	/**
 	 * processCategories

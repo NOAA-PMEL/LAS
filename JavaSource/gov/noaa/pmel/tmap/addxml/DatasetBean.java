@@ -231,7 +231,16 @@ public class DatasetBean extends LasBean {
 		groupMap.put(name, value);
 	}
 	public Element toXml() {
-		Element dataset = new Element(this.getElement());
+		String e = this.getElement();
+		boolean null_bean = false;
+		if ( e == null ) {
+			e = "empty_"+String.valueOf(new Date().getTime());
+			null_bean = true;
+		}
+		Element dataset = new Element(e);
+		if ( null_bean ) {
+			return dataset;
+		}
 		if ( comment != null ) {
 			dataset.addContent(new Comment(comment));
 		}
@@ -375,12 +384,17 @@ public class DatasetBean extends LasBean {
 								pattern_string = match_range;
 							}
 							Pattern pattern = Pattern.compile(pattern_string);
+							List<String> short_names = new ArrayList<String>();
 							for (int j = 0; j < variables.size(); j++ ) {
 								VariableBean vVar = variables.get(j);
 								Matcher match = pattern.matcher(vVar.getShortName());
+								String short_name = vVar.getShortName();
 								if ( match.matches() ) {
-									uv_vectors.add(vVar.getElement());
-									matching_occurance_index = start;
+									if ( !uv_vectors.contains(vVar.getElement()) && !short_names.contains(short_name) ) {
+										short_names.add(vVar.getShortName());
+										uv_vectors.add(vVar.getElement());
+										matching_occurance_index = start;
+									}
 								}
 							}
 							start = vname.substring(start).indexOf(c);
