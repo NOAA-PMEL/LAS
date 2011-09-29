@@ -121,18 +121,18 @@ public class AxisBean extends LasBean {
 		if (arange != null) {
 			Element arangeElement = new Element("arange");
 			if ( this.arange.getStart() == null ) {
-				System.err.println("Axis has no start value.  Setting to -999999.0.  Check output.");
-				this.arange.setStart("-999999.0");
+				System.err.println("Axis has no start value.  Setting to 1.  Check output.");
+				this.arange.setStart("1");
 			}
 			arangeElement.setAttribute("start", this.arange.getStart());
 			if ( this.arange.getSize() == null ) {
-				System.err.println("Axis has no size value.  Setting to -999999.0.  Check output.");
-				this.arange.setSize("-999999.0");
+				System.err.println("Axis has no size value.  Setting to 1.  Check output.");
+				this.arange.setSize("1");
 			}
 			arangeElement.setAttribute("size", this.arange.getSize());
 			if ( this.arange.getStep() == null ) {
-				System.err.println("Axis has no step value.  Setting to -999999.0.  Check output.");
-				this.arange.setStep("-999999.0");
+				System.err.println("Axis has no step value.  Setting to 1.  Check output.");
+				this.arange.setStep("1");
 			}
 			arangeElement.setAttribute("step", this.arange.getStep());
 			axis.addContent(arangeElement);

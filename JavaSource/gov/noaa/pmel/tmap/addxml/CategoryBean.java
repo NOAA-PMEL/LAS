@@ -164,7 +164,9 @@ public class CategoryBean {
 
 			category.addContent(contributor);
 		}
-		category.setAttribute("name", name);
+		if ( name != null && !name.equals("") ) {
+			category.setAttribute("name", name);
+		}
 		if ( id != null && !id.equals("") ) {
 			category.setAttribute("ID", id);
 		}
