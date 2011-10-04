@@ -250,13 +250,15 @@ public class LASRequest {
 	public String getVariable(int index) {
 		Element args = getArgsElement();
 		NodeList variables = args.getElementsByTagName("link");
+		int counter = 0;
 	    for (int i = 0; i < variables.getLength(); i++) {
 		    Element var = (Element) variables.item(i);
 		    // ByTagName gets children, grandchildren and below.  Check that it is a child of "args".
 			if ( var.getParentNode().getNodeName().equals("args") ) {
-				if ( i == index ) {
+				if ( counter == index ) {
 					return getVariableId(var.getAttribute("match"));
 				}				
+				counter++;
 			}	
 		}
 		return null;

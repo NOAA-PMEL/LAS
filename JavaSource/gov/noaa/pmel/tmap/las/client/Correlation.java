@@ -4,12 +4,16 @@ import gov.noaa.pmel.tmap.las.client.laswidget.HelpPanel;
 import gov.noaa.pmel.tmap.las.client.laswidget.LASAnnotationsPanel;
 import gov.noaa.pmel.tmap.las.client.laswidget.LASRequest;
 import gov.noaa.pmel.tmap.las.client.laswidget.LASRequestWrapper;
+import gov.noaa.pmel.tmap.las.client.laswidget.VariableConstraintLayout;
+import gov.noaa.pmel.tmap.las.client.laswidget.VariableConstraintWidget;
 import gov.noaa.pmel.tmap.las.client.laswidget.VariableListBox;
 import gov.noaa.pmel.tmap.las.client.serializable.DatasetSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.VariableSerializable;
 import gov.noaa.pmel.tmap.las.client.util.URLUtil;
 import gov.noaa.pmel.tmap.las.client.util.Util;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -62,24 +66,18 @@ import com.google.gwt.xml.client.Text;
 import com.google.gwt.xml.client.XMLParser;
 
 public class Correlation implements EntryPoint {
+	Map<String, VariableSerializable> xDatasetVariables = new HashMap<String, VariableSerializable>();
 	LASAnnotationsPanel lasAnnotationsPanel = new LASAnnotationsPanel();
 	HorizontalPanel topRow = new HorizontalPanel();
+	HorizontalPanel output = new HorizontalPanel();
 	HelpPanel help = new HelpPanel();
 	PopupPanel spin;
 	HTML spinImage;
-	HorizontalPanel coloredBy = new HorizontalPanel();
-	HorizontalPanel corTopRow = new HorizontalPanel();
-	FlexTable constraintsLayout = new FlexTable();
-	VerticalPanel constraintsPanel = new VerticalPanel();
-	HelpPanel corHelp = new HelpPanel();
-	TextBox xminBox = new TextBox();
-	TextBox xmaxBox = new TextBox();
-	TextBox yminBox = new TextBox();
-	TextBox ymaxBox = new TextBox();
-	Label xVariableLabel = new Label("x");
-	Label yVariableLabel = new Label("y");
-	CheckBox useXConstraint = new CheckBox();
-	CheckBox useYConstraint = new CheckBox();
+	HorizontalPanel coloredBy = new HorizontalPanel();	
+	VariableConstraintLayout constraintsLayout = new VariableConstraintLayout("Plot Data Constraints:");
+	VariableConstraintLayout otherConstraintsLayout = new VariableConstraintLayout("Additional Data Constraints:");
+	VariableConstraintWidget xVariableConstraint = new VariableConstraintWidget();
+	VariableConstraintWidget yVariableConstraint = new VariableConstraintWidget();
 	NumberFormat dFormat = NumberFormat.getFormat("########.##");
 	Label selection = new Label("Current selection:");
 	Label horizontalLabel = new Label("Horizontal: ");
@@ -90,6 +88,7 @@ public class Correlation implements EntryPoint {
     VariableListBox xVariables = new VariableListBox();
     VariableListBox yVariables = new VariableListBox();
     VariableListBox colorVariables = new VariableListBox();
+    VariableListBox constraintVariables = new VariableListBox();
     PushButton update = new PushButton("Update Plot");
     PushButton print = new PushButton("Print");
     CheckBox colorCheckBox = new CheckBox();
@@ -136,77 +135,15 @@ public class Correlation implements EntryPoint {
     	update.addStyleDependentName("SMALLER");
     	update.setWidth("80px");
     	
-    	useXConstraint.addClickHandler(new ClickHandler() {
-
-			@Override
-			public void onClick(ClickEvent event) {
-				
-				setConstraints();
-				
-			}
-    		
-    	});
-    	useYConstraint.addClickHandler(new ClickHandler() {
-			
-			@Override
-			public void onClick(ClickEvent event) {
-				
-				setConstraints();
-				
-			}
-		});
-    	
-    	xminBox.addChangeHandler(new ChangeHandler() {
-			
-			@Override
-			public void onChange(ChangeEvent event) {
-				useXConstraint.setValue(true);
-				setConstraints();
-			}
-		});
-    	xmaxBox.addChangeHandler(new ChangeHandler() {
-			
-			@Override
-			public void onChange(ChangeEvent event) {
-				useXConstraint.setValue(true);
-				setConstraints();
-			}
-		});
-    	yminBox.addChangeHandler(new ChangeHandler() {
-			
-			@Override
-			public void onChange(ChangeEvent event) {
-				useYConstraint.setValue(true);
-				setConstraints();
-			}
-		});
-    	ymaxBox.addChangeHandler(new ChangeHandler() {
-			
-			@Override
-			public void onChange(ChangeEvent event) {	
-				useYConstraint.setValue(true);
-				setConstraints();
-			}
-		});
-    	corTopRow.add(corHelp);
-    	corTopRow.add(new HTML("<b>&nbsp;&nbsp;Data Constraints:</b>"));
-    	constraintsLayout.setWidget(0, 0, corTopRow);
-    	constraintsLayout.getFlexCellFormatter().setColSpan(0, 0, 4);
-    	constraintsLayout.setWidget(1, 0, yminBox);
-    	constraintsLayout.setWidget(1, 1, yVariableLabel);
-    	constraintsLayout.setWidget(1, 2, ymaxBox);
-    	constraintsLayout.setWidget(1, 3, useYConstraint);
-
-    	constraintsLayout.setWidget(2, 0, xminBox);
-    	constraintsLayout.setWidget(2, 1, xVariableLabel);
-    	constraintsLayout.setWidget(2, 2, xmaxBox);
-    	constraintsLayout.setWidget(2, 3, useXConstraint);
+    	xVariableConstraint.addChangeHandler(constraintChange);
+    	yVariableConstraint.addChangeHandler(constraintChange);
+    	xVariableConstraint.addApplyHandler(applyHandler);
+    	yVariableConstraint.addApplyHandler(applyHandler);
+    	constraintsLayout.addWidget(yVariableConstraint);
+    	constraintsLayout.addWidget(xVariableConstraint);
     	    	
-    	constraintsPanel.add(constraintsLayout);
-    	corHelp.setPopupWidth("550px");
-    	corHelp.setPopupHeight("550px");
-    	corHelp.setHelpURL("../css/constraint_help.html");
-    	constraintsPanel.setVisible(false);
+    	constraintsLayout.setVisible(false);
+    	otherConstraintsLayout.setVisible(false);
     	print.addStyleDependentName("SMALLER");
     	print.addClickHandler(new ClickHandler() {
 
@@ -220,13 +157,13 @@ public class Correlation implements EntryPoint {
     	topRow.add(help);
     	topRow.add(new HTML("<b>&nbsp;&nbsp;Data Selection: </b>"));
     	controlPanel.setWidget(0, 0, topRow);
-		controlPanel.getFlexCellFormatter().setColSpan(0, 0, 6);
+		controlPanel.getFlexCellFormatter().setColSpan(0, 0, 5);
     	controlPanel.setWidget(1, 0, yVariables);
 		controlPanel.setWidget(1, 1, new Label(" as a function of "));
 		controlPanel.setWidget(1, 2, xVariables);
 		controlPanel.setWidget(1, 3, update);	
 		controlPanel.setWidget(1, 4, print);
-		controlPanel.setWidget(1, 5, lasAnnotationsPanel);
+		
 		colorCheckBox.addClickHandler(new ClickHandler() {
 
 			@Override
@@ -241,10 +178,37 @@ public class Correlation implements EntryPoint {
 			}
 			
 		});
+		constraintVariables.addChangeHandler(new ChangeHandler() {
+
+			@Override
+			public void onChange(ChangeEvent event) {
+				String value = constraintVariables.getValue(constraintVariables.getSelectedIndex());
+				VariableSerializable v = xDatasetVariables.get(value);
+				if ( v != null ) {
+					VariableConstraintWidget c = new VariableConstraintWidget(true);
+					c.addRemoveHandler(new ClickHandler() {
+						@Override
+						public void onClick(ClickEvent event) {
+							removeHandlerHelper(event);
+						}
+					});
+					c.setVariable(v);
+					c.addApplyHandler(applyHandler);
+					c.addChangeHandler(constraintChange);
+					otherConstraintsLayout.addWidget(c);
+					otherConstraintsLayout.setVisible(true);
+					setConstraints();
+				}
+				
+			}
+			
+		});
 		coloredBy.add(new Label("Colored By "));
 		coloredBy.add(colorCheckBox);
 		controlPanel.setWidget(2, 1, coloredBy);
 		controlPanel.setWidget(2, 2, colorVariables);	
+		controlPanel.setWidget(3, 1, new Label("Add a data constraint for: "));
+		controlPanel.setWidget(3, 2, constraintVariables);
 		topPanel.add(controlPanel);
 		help.setPopupWidth("550px");
 		help.setPopupHeight("550px");
@@ -265,21 +229,18 @@ public class Correlation implements EntryPoint {
 		if ( xml != null && !xml.equals("") ) {
 			xml = URL.decode(xml);
 			
-			// for the time being we are just going to remove the incoming constraint...
-			
 			// Get rid of the entity values for > and <
-//			xml = xml.replace("&gt;", ">");
-//			xml = xml.replace("&lt;", "<");
+			xml = xml.replace("&gt;", ">");
+			xml = xml.replace("&lt;", "<");
 			// Replace the op value with gt ge eq lt le as needed.
-//			xml = xml.replace("op=\">=\"", "op=\"ge\"");
-//			xml = xml.replace("op=\">\"", "op=\"gt\"");
-//			xml = xml.replace("op=\"=\"", "op=\"eq\"");
-//			xml = xml.replace("op=\"<=\"", "op=\"le\"");
-//			xml = xml.replace("op=\"<\"", "op=\"lt\"");
+			xml = xml.replace("op=\">=\"", "op=\"ge\"");
+			xml = xml.replace("op=\">\"", "op=\"gt\"");
+			xml = xml.replace("op=\"=\"", "op=\"eq\"");
+			xml = xml.replace("op=\"<=\"", "op=\"le\"");
+			xml = xml.replace("op=\"<\"", "op=\"lt\"");
 			lasRequest = new LASRequest(xml);
 			dsid = lasRequest.getDataset(0);		
 			varid = lasRequest.getVariable(0);
-			lasRequest.removeConstraints();
 			Util.getRPCService().getFullDataset(dsid, datasetCallback);
 		} else {
 			
@@ -289,29 +250,83 @@ public class Correlation implements EntryPoint {
 			@Override
 			public void onChange(ChangeEvent event) {
 				
-				String varY = yVariables.getVariable(yVariables.getSelectedIndex()).getName();
-				yVariableLabel.setText("<= "+varY+" <=");
+				VariableSerializable varY = yVariables.getVariable(yVariables.getSelectedIndex());
+				yVariableConstraint.setVariable(varY);
 			
 				setVariables();
 				resetConstraints("y");
-
+				List<VariableConstraintWidget> remove = new ArrayList<VariableConstraintWidget>();
+				for (Iterator vcwIt = otherConstraintsLayout.getWidgets().iterator(); vcwIt.hasNext();) {
+					VariableConstraintWidget vcw = (VariableConstraintWidget) vcwIt.next();
+					if ( vcw.getVariable().getID().equals(varY.getID()) ) {
+						String min = vcw.getMin();
+						String max = vcw.getMax();
+						if ( min != null && !min.equals("") ) {
+							yVariableConstraint.setMin(min);
+							yVariableConstraint.setApply(true);
+						}
+						if ( max != null && !max.equals("") ) {
+							yVariableConstraint.setMax(max);
+							yVariableConstraint.setApply(true);
+						}
+						remove.add(vcw);
+					}
+				}
+				if ( remove.size() > 0 ) resetConstraints("y");
+				for (Iterator vcwIt = remove.iterator(); vcwIt.hasNext();) {
+					VariableConstraintWidget vcw = (VariableConstraintWidget) vcwIt.next();
+					otherConstraintsLayout.removeWidget(vcw);
+				}
+		        if ( otherConstraintsLayout.getWidgets().size() == 0 ) otherConstraintsLayout.setVisible(false);		
+		        
+		        // Now the the constraint widgets are set, set the constraints in the request object.
+		        setConstraints();
+				
 			}
 		});
 		xVariables.addChangeHandler(new ChangeHandler() {
 			
 			@Override
 			public void onChange(ChangeEvent event) {
-				String varX = xVariables.getVariable(xVariables.getSelectedIndex()).getName();
-				xVariableLabel.setText("<= "+varX+" <=");
+				VariableSerializable varX = xVariables.getVariable(xVariables.getSelectedIndex());
+				xVariableConstraint.setVariable(varX);
 
 				setVariables();
 				resetConstraints("x");
-			
+				List<VariableConstraintWidget> remove = new ArrayList<VariableConstraintWidget>();
+				for (Iterator vcwIt = otherConstraintsLayout.getWidgets().iterator(); vcwIt.hasNext();) {
+					VariableConstraintWidget vcw = (VariableConstraintWidget) vcwIt.next();
+					if ( vcw.getVariable().getID().equals(varX.getID())) {
+						String min = vcw.getMin();
+						String max = vcw.getMax();
+						if ( min != null && !min.equals("") ) {
+							xVariableConstraint.setMin(min);
+							xVariableConstraint.setApply(true);
+						}
+						if ( max != null && !max.equals("") ) {
+							xVariableConstraint.setMax(max);
+							xVariableConstraint.setApply(true);
+						}
+						remove.add(vcw);
+					}
+				}
+				if ( remove.size() > 0 ) resetConstraints("x");
+				for (Iterator vcwIt = remove.iterator(); vcwIt.hasNext();) {
+					VariableConstraintWidget vcw = (VariableConstraintWidget) vcwIt.next();
+					otherConstraintsLayout.removeWidget(vcw);
+				}
+		        if ( otherConstraintsLayout.getWidgets().size() == 0 ) otherConstraintsLayout.setVisible(false);		
+		        
+		        // Now the the constraint widgets are set, set the constraints in the request object.
+		        setConstraints();
 			}
 		});
+		output.add(lasAnnotationsPanel);
+		output.add(outputPanel);
 		RootPanel.get("data_selection").add(topPanel);
-		RootPanel.get("data_constraints").add(constraintsPanel);
-		RootPanel.get("correlation").add(outputPanel);
+		RootPanel.get("data_constraints").add(constraintsLayout);
+		RootPanel.get("additional_data_constraints").add(otherConstraintsLayout);
+		RootPanel.get("correlation").add(output);
 		lasAnnotationsPanel.setPopupLeft(outputPanel.getAbsoluteLeft());
 		lasAnnotationsPanel.setPopupTop(outputPanel.getAbsoluteTop());
 		lasAnnotationsPanel.setTitle("Plot Annotations");
@@ -334,77 +349,75 @@ public class Correlation implements EntryPoint {
     private void updatePlot(boolean addHistory) {
     	update.removeStyleDependentName("APPLY-NEEDED");
     	lasAnnotationsPanel.setTitle("Plot Annotations");
-		lasAnnotationsPanel.setError("Fetching plot annotations...");
-    	if ( xVariables.getSelectedIndex() == yVariables.getSelectedIndex() ) {
-    		Window.alert("The same variable on both axes is going to be a straight line.  I just can't bring myself to plot that.");
-    	} else {
-    		spin.setPopupPosition(outputPanel.getAbsoluteLeft(), outputPanel.getAbsoluteTop());
-    		spin.show();
-    		String tlo = lasRequest.getRangeLo("t", 0);
-    		String thi = lasRequest.getRangeHi("t", 0);
-    		String xlo = lasRequest.getRangeLo("x", 0);
-    		String xhi = lasRequest.getRangeHi("x", 0);
-    		String ylo = lasRequest.getRangeLo("y", 0);
-    		String yhi = lasRequest.getRangeHi("y", 0);
-    		String zlo = lasRequest.getRangeLo("z", 0);
-    		String zhi = lasRequest.getRangeHi("z", 0);
+    	lasAnnotationsPanel.setError("Fetching plot annotations...");
 
-    		// If it's defined it will be in the hi or both.
-    		if ( tlo != null && thi != null ) {
-    			lasRequest.setRange("t", tlo, thi, 0);
-    		} else if ( thi != null ) {
-    			lasRequest.setRange("t", thi, thi, 0);
-    		}
+    	spin.setPopupPosition(outputPanel.getAbsoluteLeft(), outputPanel.getAbsoluteTop());
+    	spin.show();
+    	String tlo = lasRequest.getRangeLo("t", 0);
+    	String thi = lasRequest.getRangeHi("t", 0);
+    	String xlo = lasRequest.getRangeLo("x", 0);
+    	String xhi = lasRequest.getRangeHi("x", 0);
+    	String ylo = lasRequest.getRangeLo("y", 0);
+    	String yhi = lasRequest.getRangeHi("y", 0);
+    	String zlo = lasRequest.getRangeLo("z", 0);
+    	String zhi = lasRequest.getRangeHi("z", 0);
 
-    		if ( xlo != null && xhi != null ) {
-    			lasRequest.setRange("x", xlo, xhi, 0);
-    		} else if ( thi != null ) {
-    			lasRequest.setRange("x", xhi, xhi, 0);
-    		}
-
-    		if ( ylo != null && yhi != null ) {
-    			lasRequest.setRange("y", ylo, yhi, 0);
-    		} else if ( yhi != null ) {
-    			lasRequest.setRange("y", yhi, yhi, 0);
-    		}
-
-    		if ( zlo != null && zhi != null ) {
-    			lasRequest.setRange("z", zlo, zhi, 0);
-    		} else if ( zhi != null ) {
-    			lasRequest.setRange("z", zhi, zhi, 0);
-    		}
-
-    		lasRequest.setProperty("product_server", "ui_timeout", "20");
-    		lasRequest.setProperty("las", "output_type", "xml");
-    		lasRequest.setOperation(operationID, operationType);
-    		lasRequest.setProperty("ferret", "annotations", "file");
-
-    		frontCanvas = Canvas.createIfSupported();
-    		frontCanvasContext = frontCanvas.getContext2d();
-
-    		int rndRedColor = 190;
-    		int rndGreenColor = 40;
-    		int rndBlueColor = 40;
-    		double rndAlpha = .25;
-
-    		randomColor = CssColor.make("rgba(" + rndRedColor + ", " + rndGreenColor + "," + rndBlueColor + ", " + rndAlpha + ")");
-
-    		String url = Util.getProductServer()+"?xml="+URL.encode(lasRequest.toString());
-
-    		currentURL = url;
-
-    		if ( addHistory ) {
-    			pushHistory(lasRequest.toString());
-    		}
-
-    		RequestBuilder sendRequest = new RequestBuilder(RequestBuilder.GET, url);
-    		try {
-    			sendRequest.sendRequest(null, lasRequestCallback);
-    		} catch (RequestException e) {
-    			HTML error = new HTML(e.toString());
-    			outputPanel.setWidget(0, 0, error);
-    		}
+    	// If it's defined it will be in the hi or both.
+    	if ( tlo != null && thi != null ) {
+    		lasRequest.setRange("t", tlo, thi, 0);
+    	} else if ( thi != null ) {
+    		lasRequest.setRange("t", thi, thi, 0);
     	}
+
+    	if ( xlo != null && xhi != null ) {
+    		lasRequest.setRange("x", xlo, xhi, 0);
+    	} else if ( thi != null ) {
+    		lasRequest.setRange("x", xhi, xhi, 0);
+    	}
+
+    	if ( ylo != null && yhi != null ) {
+    		lasRequest.setRange("y", ylo, yhi, 0);
+    	} else if ( yhi != null ) {
+    		lasRequest.setRange("y", yhi, yhi, 0);
+    	}
+
+    	if ( zlo != null && zhi != null ) {
+    		lasRequest.setRange("z", zlo, zhi, 0);
+    	} else if ( zhi != null ) {
+    		lasRequest.setRange("z", zhi, zhi, 0);
+    	}
+
+    	lasRequest.setProperty("product_server", "ui_timeout", "20");
+    	lasRequest.setProperty("las", "output_type", "xml");
+    	lasRequest.setOperation(operationID, operationType);
+    	lasRequest.setProperty("ferret", "annotations", "file");
+
+    	frontCanvas = Canvas.createIfSupported();
+    	frontCanvasContext = frontCanvas.getContext2d();
+
+    	int rndRedColor = 190;
+    	int rndGreenColor = 40;
+    	int rndBlueColor = 40;
+    	double rndAlpha = .25;
+
+    	randomColor = CssColor.make("rgba(" + rndRedColor + ", " + rndGreenColor + "," + rndBlueColor + ", " + rndAlpha + ")");
+
+    	String url = Util.getProductServer()+"?xml="+URL.encode(lasRequest.toString());
+
+    	currentURL = url;
+
+    	if ( addHistory ) {
+    		pushHistory(lasRequest.toString());
+    	}
+
+    	RequestBuilder sendRequest = new RequestBuilder(RequestBuilder.GET, url);
+    	try {
+    		sendRequest.sendRequest(null, lasRequestCallback);
+    	} catch (RequestException e) {
+    		HTML error = new HTML(e.toString());
+    		outputPanel.setWidget(0, 0, error);
+    	}
+
     }
 	RequestCallback lasRequestCallback = new RequestCallback() {
 
@@ -530,8 +543,8 @@ public class Correlation implements EntryPoint {
 											world_endy = world_starty;
 											
 											setTextValues();
-											useXConstraint.setValue(true);
-											useYConstraint.setValue(true);
+											xVariableConstraint.setApply(true);
+											yVariableConstraint.setApply(true);
 											
 										}
 									}
@@ -607,29 +620,22 @@ public class Correlation implements EntryPoint {
 	};
 	private void setTextValues() {
 
-		constraintsPanel.setVisible(true);
+		constraintsLayout.setVisible(true);
 		
 		if ( world_startx <= world_endx ) {
 		
-			xminBox.setText(dFormat.format(world_startx));
-			xmaxBox.setText(dFormat.format(world_endx));
+			xVariableConstraint.setConstraint(dFormat.format(world_startx), dFormat.format(world_endx));
 				
 		} else {
 						
-			xminBox.setText(dFormat.format(world_endx));
-			xmaxBox.setText(dFormat.format(world_startx));	
+			xVariableConstraint.setConstraint(dFormat.format(world_endx), dFormat.format(world_startx));	
 			
 		}
 		
 		if ( world_starty <= world_endy ) {
-			
-			yminBox.setText(dFormat.format(world_starty));
-			ymaxBox.setText(dFormat.format(world_endy));
-			
+			yVariableConstraint.setConstraint(dFormat.format(world_starty), dFormat.format(world_endy));
 		} else {
-						
-			yminBox.setText(dFormat.format(world_endy));
-			ymaxBox.setText(dFormat.format(world_starty));
+            yVariableConstraint.setConstraint(dFormat.format(world_endy), dFormat.format(world_starty));
 			
 		}
 	}
@@ -646,18 +652,28 @@ public class Correlation implements EntryPoint {
 		public void onSuccess(DatasetSerializable result) {
 			VariableSerializable variables[] = result.getVariablesSerializable();
 			int index = -1;
+			int time_index = -1;
+			constraintVariables.setHeader("Select a variable...");
 			for (int i = 0; i < variables.length; i++) {
 				if ( !variables[i].getAttributes().get("grid_type").equals("vector") ) {
+					xDatasetVariables.put(variables[i].getID(), variables[i]);
 					xVariables.addItem(variables[i]);
 					yVariables.addItem(variables[i]);
 					colorVariables.addItem(variables[i]);
+					constraintVariables.addItem(variables[i]);
 					if ( variables[i].getID().equals(varid) ) {
 						index = i;
+					}
+					if ( variables[i].getName().toLowerCase().contains("time") ) {
+						time_index = i;
 					}
 				}
 			}
 			if ( index > 0 ) {
 				yVariables.setSelectedIndex(index);
+			}
+			if ( time_index > 0 ) {
+				xVariables.setSelectedIndex(time_index);
 			}
 			String grid_type = xVariables.getVariable(0).getAttributes().get("grid_type");
 			if ( grid_type.equals("regular") ) {
@@ -665,11 +681,74 @@ public class Correlation implements EntryPoint {
 			} else if ( grid_type.equals("trajectory") ) {
 				operationID = "Trajectory_correlation_plot";
 			}
-			String varY = yVariables.getVariable(yVariables.getSelectedIndex()).getName();
-			yVariableLabel.setText("<= "+varY+" <=");
-			String varX = xVariables.getVariable(xVariables.getSelectedIndex()).getName();
-			xVariableLabel.setText("<= "+varX+" <=");
+			VariableSerializable varY = yVariables.getVariable(yVariables.getSelectedIndex());
+			yVariableConstraint.setVariable(varY);
+			VariableSerializable varX = xVariables.getVariable(xVariables.getSelectedIndex());
+			xVariableConstraint.setVariable(varX);
 			setVariables();
+			List<Map<String, String>> vcs = lasRequest.getVariableConstraints();
+			for (Iterator vcIt = vcs.iterator(); vcIt.hasNext();) {
+				Map<String, String> con = (Map<String, String>) vcIt.next();
+				String varid = con.get("varID");
+				String op = con.get("op");
+				String value = con.get("value");
+				String id = con.get("id");
+				String plotv = plotVariable(varid);
+				if ( plotv.equals("x") ) {
+					xVariableConstraint.setApply(true);
+					if ( op.equals("gt") || op.equals("ge") ) {
+						xVariableConstraint.setMin(value);
+					} else if ( op.equals("eq") ) {
+						xVariableConstraint.setMin(value);
+						xVariableConstraint.setMax(value);
+					} else {
+						xVariableConstraint.setMax(value);
+					}
+					constraintsLayout.setVisible(true);
+				
+				} else if ( plotv.equals("y") ){
+					yVariableConstraint.setApply(true);
+					if ( op.equals("gt") || op.equals("ge") ) {
+						yVariableConstraint.setMin(value);
+					} else if ( op.equals("eq") ) {
+						yVariableConstraint.setMin(value);
+						yVariableConstraint.setMax(value);
+					} else {
+						yVariableConstraint.setMax(value);
+					}
+					constraintsLayout.setVisible(true);
+					
+				} else {
+					VariableConstraintWidget c = new VariableConstraintWidget(true);
+					c.addRemoveHandler(new ClickHandler() {
+
+						@Override
+						public void onClick(ClickEvent event) {
+							removeHandlerHelper(event);
+						}
+						
+					});
+					c.addApplyHandler(applyHandler);
+					c.addChangeHandler(constraintChange);
+					VariableSerializable v = xDatasetVariables.get(varid);
+					if ( v != null ) {
+						c.setVariable(v);
+						c.setApply(true);
+						if ( op.equals("gt") || op.equals("ge") ) {
+							c.setMin(value);
+						} else if ( op.equals("eq") ) {
+							c.setMin(value);
+							c.setMax(value);
+						} else {
+							c.setMax(value);
+						}
+					}
+					otherConstraintsLayout.addWidget(c);
+					otherConstraintsLayout.setVisible(true);
+				}
+				setConstraints();
+			}
+			updatePlot(true);
 		}
     	
     };
@@ -705,7 +784,7 @@ public class Correlation implements EntryPoint {
 				xVariables.setSelectedIndex(0);
 				yVariables.setSelectedIndex(0);
 				resetConstraints("xy");
-				constraintsPanel.setVisible(false);
+				constraintsLayout.setVisible(false);
 			}
 			
 		}
@@ -724,15 +803,13 @@ public class Correlation implements EntryPoint {
 		}
 	}
 	private void resetConstraints(String vars) {
-		useXConstraint.setValue(false);
-		useYConstraint.setValue(false);
+		xVariableConstraint.setApply(false);
+		yVariableConstraint.setApply(false);
 		if ( vars.contains("x") ) {
-			xminBox.setText("");
-			xmaxBox.setText("");
+			xVariableConstraint.setConstraint("", "");
 		}
 		if ( vars.contains("y") ) {
-			yminBox.setText("");
-			ymaxBox.setText("");
+			yVariableConstraint.setConstraint("", "");
 		}
 	}
 	private void setConstraints() {
@@ -740,29 +817,59 @@ public class Correlation implements EntryPoint {
 		lasRequest.removeConstraints();
 		String varY = yVariables.getVariable(yVariables.getSelectedIndex()).getID();
 		String varX = xVariables.getVariable(xVariables.getSelectedIndex()).getID();
-		if ( useXConstraint.getValue() ) {
-			String min = xminBox.getText();
-			String max = xmaxBox.getText();
-		    lasRequest.addVariableConstraint(dsid, varX, "gt", min, "minx");
-		    lasRequest.addVariableConstraint(dsid, varX, "le", max, "maxx");
+		if ( xVariableConstraint.getApply().getValue() ) {
+			String min = xVariableConstraint.getMin();
+			String max = xVariableConstraint.getMax();
+			if ( min != null && !min.equals("") ) {
+				lasRequest.addVariableConstraint(dsid, varX, "gt", min, "minx");
+			}
+			if ( max != null && !max.equals("") ) {
+				lasRequest.addVariableConstraint(dsid, varX, "le", max, "maxx");
+			}
 		}
 		
-		if ( useYConstraint.getValue() ) {
-			String min = yminBox.getText();
-			String max = ymaxBox.getText();
-			lasRequest.addVariableConstraint(dsid, varY, "gt", min, "miny");
-			lasRequest.addVariableConstraint(dsid, varY, "le", max, "maxy");
+		if ( yVariableConstraint.getApply().getValue() ) {
+			String min = yVariableConstraint.getMin();
+			String max = yVariableConstraint.getMax();
+			if ( min != null && !min.equals("") ) {
+				lasRequest.addVariableConstraint(dsid, varY, "gt", min, "miny");
+			}
+			if ( max != null && !max.equals("") ) {
+				lasRequest.addVariableConstraint(dsid, varY, "le", max, "maxy");
+			}
 		}
+		List<VariableConstraintWidget> oc = otherConstraintsLayout.getWidgets();
+		for (Iterator cwIt = oc.iterator(); cwIt.hasNext();) {
+			VariableConstraintWidget cw = (VariableConstraintWidget) cwIt.next();
+			if ( cw.getApply().getValue() ) {
+				String min = cw.getMin();
+				String max = cw.getMax();
+				String id = cw.getVariable().getID();
+				if ( min != null && !min.equals("") ) {
+					lasRequest.addVariableConstraint(dsid, id, "gt", min, min+"_"+id);
+				}
+				if ( max != null && !max.equals("") ) {
+					lasRequest.addVariableConstraint(dsid, id, "le", max, max+"_"+id);
+				}
+			}
+		}
+		// Remove any variables already showing as constraints from the list.
+		constraintVariables.restore();
+		constraintVariables.removeItem(xVariableConstraint.getVariable());
+		constraintVariables.removeItem(yVariableConstraint.getVariable());
+		for (Iterator cwIt = oc.iterator(); cwIt.hasNext();) {
+			VariableConstraintWidget cw = (VariableConstraintWidget) cwIt.next();
+			constraintVariables.removeItem(cw.getVariable());
+		}
+		
 	}
 	private void clearConstraint(String axis) {
 		if ( axis.equals("y") ) {
-			yminBox.setText("");
-			ymaxBox.setText("");
-			useYConstraint.setValue(false);
+			yVariableConstraint.setConstraint("", "");
+			yVariableConstraint.setApply(false);
 		} else if ( axis.equals("x") ) {
-			xminBox.setText("");
-			xmaxBox.setText("");
-			useXConstraint.setValue(false);
+			xVariableConstraint.setConstraint("", "");
+			xVariableConstraint.setApply(false);
 		}
 	}
 	private void popHistory(String xml) {
@@ -773,13 +880,13 @@ public class Correlation implements EntryPoint {
 		String vc = lasRequest.getVariable(2);
 		if ( vx != null && !vx.equals("") ) {
 			xVariables.setSelectedVariable(vx);
-			String varX = xVariables.getVariable(xVariables.getSelectedIndex()).getName();
-			xVariableLabel.setText("<= "+varX+" <=");
+			VariableSerializable varX = xVariables.getVariable(xVariables.getSelectedIndex());
+			xVariableConstraint.setVariable(varX);
 		}
 		if ( vy != null && !vy.equals("") ) {
 			yVariables.setSelectedVariable(vy);
-			String varY = yVariables.getVariable(yVariables.getSelectedIndex()).getName();
-			yVariableLabel.setText("<= "+varY+" <=");
+			VariableSerializable varY = yVariables.getVariable(yVariables.getSelectedIndex());
+			yVariableConstraint.setVariable(varY);
 			
 		}
 		if ( vc != null && !vc.equals("") ) {
@@ -790,6 +897,8 @@ public class Correlation implements EntryPoint {
 		}
 
 		List<Map<String, String>> vcons= lasRequest.getVariableConstraints();
+		otherConstraintsLayout.setWidgets(new ArrayList<VariableConstraintWidget>());
+		otherConstraintsLayout.setVisible(false);
 		if ( vcons.size() > 0 ) {
 			for (Iterator vconsIt = vcons.iterator(); vconsIt.hasNext();) {
 				Map<String, String> con = (Map<String, String>) vconsIt.next();
@@ -799,40 +908,58 @@ public class Correlation implements EntryPoint {
 				String id = con.get("id");
 				if ( id.equals("minx") ) {
 					if ( varid.equals(vx) ) {
-						xminBox.setText(value);
-						useXConstraint.setValue(true);
+						xVariableConstraint.setMin(value);
+						xVariableConstraint.setApply(true);
 					} else {
 						clearConstraint("x");
 					}
-				}
-				if ( id.equals("maxx") ) {
+				} else if ( id.equals("maxx") ) {
 					if ( varid.equals(vx) ) {
-						xmaxBox.setText(value);
-						useXConstraint.setValue(true);
+						xVariableConstraint.setMax(value);
+						xVariableConstraint.setApply(true);
 					} else {
 						clearConstraint("x");
 					}
-				}
-				if ( id.equals("miny") ) {
+				} else if ( id.equals("miny") ) {
 					if ( varid.equals(vy) ) {
-						yminBox.equals(vy);
-						useYConstraint.setValue(true);
+						yVariableConstraint.setMin(value);
+						yVariableConstraint.setApply(true);
 					} else {
 						clearConstraint("y");
 					}
-				}
-				if ( id.equals("maxy") ) {
+				} else if ( id.equals("maxy") ) {
 					if ( varid.equals(vy) ) {
-						ymaxBox.equals(vy);
-						useYConstraint.setValue(true);
+						yVariableConstraint.setMax(value);
+						yVariableConstraint.setApply(true);
 					} else {
 						clearConstraint("y");
+					}
+				} else {
+					// This is an additional constraint that must be reconstructed...
+					VariableConstraintWidget vcw = new VariableConstraintWidget(true);
+					vcw.addRemoveHandler(new ClickHandler() {
+
+						@Override
+						public void onClick(ClickEvent event) {
+							removeHandlerHelper(event);
+						}
+						
+					});
+					vcw.setVariable(xDatasetVariables.get(varid));
+					otherConstraintsLayout.setVisible(true);
+					otherConstraintsLayout.addWidget(vcw);
+					if ( id.contains("max") ) {
+						vcw.setMax(value);
+						vcw.setApply(true);
+					} else {
+						vcw.setMin(value);
+						vcw.setApply(true);
 					}
 				}
 			} 
 		} else {
-			useXConstraint.setValue(false);
-			useYConstraint.setValue(false);
+			xVariableConstraint.setApply(false);
+			yVariableConstraint.setApply(false);
 		}
 		
 		setVariables();
@@ -840,7 +967,57 @@ public class Correlation implements EntryPoint {
 		updatePlot(false);
 
 	}
+	private void removeHandlerHelper(ClickEvent event) {
+		PushButton source = (PushButton) event.getSource();
+		String id = source.getElement().getId();
+		List<VariableConstraintWidget> remove = new ArrayList<VariableConstraintWidget>();
+		for (Iterator vcwIt = otherConstraintsLayout.getWidgets().iterator(); vcwIt.hasNext();) {
+			VariableConstraintWidget vcw = (VariableConstraintWidget) vcwIt.next();
+			String vid = "other-"+ vcw.getVariable().getID();
+			if (vid.equals(id) ) {
+				remove.add(vcw);
+			}
+		}
+		for (Iterator vcwIt = remove.iterator(); vcwIt.hasNext();) {
+			VariableConstraintWidget vcw = (VariableConstraintWidget) vcwIt.next();
+			otherConstraintsLayout.removeWidget(vcw);
+		}
+        if ( otherConstraintsLayout.getWidgets().size() == 0 ) otherConstraintsLayout.setVisible(false);		
+        
+        // Now the the constraint widgets are set, set the constraints in the request object.
+        setConstraints();
+	}
 	private void pushHistory(String xml) {
 		History.newItem(xml, false);
 	}
+	private String plotVariable(String id) {
+		VariableSerializable varX = xVariables.getVariable(xVariables.getSelectedIndex());
+		VariableSerializable varY = yVariables.getVariable(yVariables.getSelectedIndex());
+		if ( varX.getID().equals(id) ) return "x";
+		if ( varY.getID().equals(id) ) return "y";
+		return "";
+	}
+	ChangeHandler constraintChange = new ChangeHandler() {
+
+		@Override
+		public void onChange(ChangeEvent event) {
+			TextBox w = (TextBox) event.getSource();
+			String id = w.getElement().getId();
+			int index = Integer.valueOf(id.substring(id.indexOf("-")+1, id.length()));
+			VariableConstraintLayout vl = (VariableConstraintLayout) ((FlexTable) w.getParent()).getParent();
+			vl.setApply(index, true);
+			setConstraints();				
+		}
+		
+	};
+	
+	ClickHandler applyHandler = new ClickHandler() {
+
+		@Override
+		public void onClick(ClickEvent arg0) {
+			update.addStyleDependentName("APPLY-NEEDED");
+			setConstraints();
+		}
+		
+	};
 }
