@@ -49,8 +49,9 @@
   <!-- to create a completely dynamic UI.        -->
   <!--                                           -->
   <body>
-    <div class="regularBackground regularBorder" id="data_selection"></div>
-    <div class="regularBackground noTopBorder" id="data_constraints"></div>
+    <div class="regularBackground noBottomBorder" id="data_selection"></div>
+    <div class="regularBackground noTopBottomBorder" id="data_constraints"></div>
+    <div class="regularBackground noTopBorder" id="additional_data_constraints"></div>
     <div id="correlation"></div>
     <!-- OPTIONAL: include this if you want history support -->
     <iframe src="javascript:''" id="__gwt_historyFrame" tabIndex='-1' style="position:absolute;width:0;height:0;border:0"></iframe>			
