@@ -83,7 +83,7 @@ public class GetDataConstraints extends ConfigService {
 			PrintWriter respout = response.getWriter();
 			if ( format.equals("xml") ) {
 				response.setContentType("application/xml");
-				respout.print(Util.toXML(constraints, "constraintss"));
+				respout.print(Util.toXML(constraints, "constraints"));
 			} else {
 				response.setContentType("application/json");
 				//JSONObject json_response = Util.toJSON_keep_array(constraints, "constraints");
