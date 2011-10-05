@@ -36,9 +36,9 @@ text-align:left;
 }
 </style>
   </head>
-  
+  <div style="background-color:#FFF;border:2px solid black;padding:4px"
   <body >
-     <table width="100%" style="background-color:#FFF;">
+     <table width="100%">
       
     	#foreach ( $url in $las_annotations.getDatasetURLs() )
            <tr width="100%">
@@ -74,5 +74,6 @@ text-align:left;
 	<div class="footer">
 		$las_annotations.getHeader()
 	</div>
+  </div>
   </body>
 </html>
