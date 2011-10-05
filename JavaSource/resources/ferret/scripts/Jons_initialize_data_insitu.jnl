@@ -81,6 +81,7 @@ IF `is_element_of_str(global_attnames, "query_result")` THEN
    CANCEL SYMBOL ferret_by_id
    DEFINE SYMBOL ferret_plot_title No data found to match this request
    CANCEL SYMBOL variable_lab
+   DEFINE SYMBOL translate_math = 1
 
 ENDIF
 
