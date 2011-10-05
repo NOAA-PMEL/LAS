@@ -218,15 +218,17 @@ public class OutputPanel extends Composite {
 		revert.addClickHandler(revertHandler);
 		revert.setTitle("Cancel Panel Settings for "+ID);
 
-		top.setWidget(0, 0, lasAnnotationsPanel);
+		
 		
 		if ( comparePanel ) {
 			Label gs = new Label("   ");
-			top.setWidget(0, 1, gs);
+			gs.setHeight("25px");
+			top.setWidget(0, 0, gs);
 		} else {
-			top.setWidget(0, 1, settingsButton);
+			settingsButton.setWidth("50px");
+			top.setWidget(0, 0, settingsButton);
 		} 
-
+		top.setWidget(1, 0, lasAnnotationsPanel);
 		grid.setWidget(0, 0, top);
 		HTML plot = new HTML();
 		//plot.setHTML(spinImage.getHTML());
