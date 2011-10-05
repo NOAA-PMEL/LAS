@@ -846,10 +846,10 @@ public class Correlation implements EntryPoint {
 				String max = cw.getMax();
 				String id = cw.getVariable().getID();
 				if ( min != null && !min.equals("") ) {
-					lasRequest.addVariableConstraint(dsid, id, "gt", min, min+"_"+id);
+					lasRequest.addVariableConstraint(dsid, id, "gt", min, "min_"+id);
 				}
 				if ( max != null && !max.equals("") ) {
-					lasRequest.addVariableConstraint(dsid, id, "le", max, max+"_"+id);
+					lasRequest.addVariableConstraint(dsid, id, "le", max, "max_"+id);
 				}
 			}
 		}
@@ -935,19 +935,31 @@ public class Correlation implements EntryPoint {
 						clearConstraint("y");
 					}
 				} else {
-					// This is an additional constraint that must be reconstructed...
-					VariableConstraintWidget vcw = new VariableConstraintWidget(true);
-					vcw.addRemoveHandler(new ClickHandler() {
-
-						@Override
-						public void onClick(ClickEvent event) {
-							removeHandlerHelper(event);
+					// This is an additional constraint.  
+					// First see if it's there already.
+					VariableConstraintWidget vcw = null;
+					for (Iterator varsIt = otherConstraintsLayout.getWidgets().iterator(); varsIt.hasNext();) {
+						VariableConstraintWidget v = (VariableConstraintWidget) varsIt.next();
+						if ( v.getVariable().getID().equals(varid) ) {
+							vcw = v;
 						}
-						
-					});
-					vcw.setVariable(xDatasetVariables.get(varid));
-					otherConstraintsLayout.setVisible(true);
-					otherConstraintsLayout.addWidget(vcw);
+					}
+					// If not, build it.
+					if ( vcw == null ) {
+						vcw = new VariableConstraintWidget(true);
+						vcw.addRemoveHandler(new ClickHandler() {
+
+							@Override
+							public void onClick(ClickEvent event) {
+								removeHandlerHelper(event);
+							}
+
+						});
+
+						vcw.setVariable(xDatasetVariables.get(varid));
+						otherConstraintsLayout.setVisible(true);
+						otherConstraintsLayout.addWidget(vcw);
+					}
 					if ( id.contains("max") ) {
 						vcw.setMax(value);
 						vcw.setApply(true);
