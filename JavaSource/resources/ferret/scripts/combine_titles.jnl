@@ -9,11 +9,11 @@
 !
 ! where 2 < lon < 12
 
+IF ($rhsdate"0|*>1") THEN 
 
 IF `STRINDEX("($op_last)", "G") GT 0 AND STRINDEX("($op)", "L") GT 0` THEN 
    DEFINE SYMBOL letter2 = `SUBSTRING("($op_last)", 2, 1)`
    DEFINE SYMBOL reverse = `STRCAT("L", "($letter2)")`
-
 
    DEFINE SYMBOL math_op_sym = ($reverse)
    IF ($math_sym_convert"1|no_convert>0") THEN GO op_math_sym ($translate_math) ($reverse)
@@ -24,7 +24,12 @@ IF `STRINDEX("($op_last)", "G") GT 0 AND STRINDEX("($op)", "L") GT 0` THEN
    DEFINE SYMBOL opB = ($math_op_sym)
    CANCEL SYMBOL mask_title_($nmask_labels)
    DEFINE SYMBOL nmask_labels = `($nmask_labels) - 1` 
-   DEFINE SYMBOL mask_title_($nmask_labels) = Where `($rhs_last),prec=3` ($opA) ($lhs_last) ($opB) `($rhs),prec=3`
+   
+   IF ($rhsdate"0|*>1") THEN 
+      DEFINE SYMBOL mask_title_($nmask_labels) = Where ($rhs_last) ($opA) ($lhs_last) ($opB) ($rhs)
+   ELSE
+      DEFINE SYMBOL mask_title_($nmask_labels) = Where `($rhs_last),prec=3` ($opA) ($lhs_last) ($opB) `($rhs),prec=3`
+   ENDIF
 ENDIF
 IF `STRINDEX("($op_last)", "L") GT 0 AND STRINDEX("($op)", "G") GT 0` THEN 
    DEFINE SYMBOL letter2 = `SUBSTRING("($op)", 2, 1)`
@@ -39,7 +44,11 @@ IF `STRINDEX("($op_last)", "L") GT 0 AND STRINDEX("($op)", "G") GT 0` THEN
    DEFINE SYMBOL opB = ($math_op_sym)
    CANCEL SYMBOL mask_title_($nmask_labels)
    DEFINE SYMBOL nmask_labels = `($nmask_labels) - 1` 
-   DEFINE SYMBOL  mask_title_($nmask_labels) = Where `($rhs),prec=3` ($opA) ($lhs_last) ($opB) `($rhs_last),prec=3`
+   IF ($rhsdate"0|*>1") THEN 
+      DEFINE SYMBOL  mask_title_($nmask_labels) = Where ($rhs) ($opA) ($lhs_last) ($opB) ($rhs_last)
+   ELSE
+      DEFINE SYMBOL  mask_title_($nmask_labels) = Where `($rhs),prec=3` ($opA) ($lhs_last) ($opB) `($rhs_last),prec=3`
+   ENDIF
 ENDIF
 
 ! ----- End of combine_titles.jnl ------------------------------------------------

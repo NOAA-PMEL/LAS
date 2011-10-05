@@ -64,11 +64,23 @@ DEFINE SYMBOL math_op_sym = ($op)
 IF ($math_sym_convert"1|no_convert>0") THEN GO op_math_sym ($translate_math) ($op) 
 DEFINE SYMBOL mask_title_($nmask_labels) = Where ($lhs) ($math_op_sym) ($rhs)
 
-
-IF `($lhs"|time>1|TIME>1|*>0")` THEN 
-   let tt = t[gt=($timeaxis)]
-   DEFINE SYMBOL date = `TAX_DATESTRING( tt[t=($rhs)], tt, "hours")`
-   DEFINE SYMBOL mask_title_($nmask_labels) = Where ($lhs) ($math_op_sym) ($date)
+IF `($lhs"|time>1|TIME>1|*>0")` THEN
+   CANCEL SYMBOL rhsdate
+   LET tt = t[gt=($timeaxis)]
+   LET nt = `tt,RETURN=lsize`
+   LET tn = tt[L=`nt`]
+   DEFINE SYMBOL tn = `tn`
+   IF `($rhs) GE tt[L=1] AND ($rhs) LE ($tn)` THEN
+      DEFINE SYMBOL rhsdate = `TAX_DATESTRING( tt[t=($rhs)], tt, "hours")`
+      DEFINE SYMBOL mask_title_($nmask_labels) = Where ($lhs) ($math_op_sym) ($rhsdate)
+   ELIF `($rhs) LT tt[L=1]` THEN
+      DEFINE SYMBOL rhsdate = `TAX_DATESTRING( tt[L=1], tt, "hours")`
+      DEFINE SYMBOL mask_title_($nmask_labels) = Where ($lhs) ($math_op_sym) ($rhsdate)
+   ELIF `($rhs) GT ($tn)` THEN
+      DEFINE SYMBOL rhsdate = `TAX_DATESTRING( ($tn), tt, "hours")`
+      DEFINE SYMBOL mask_title_($nmask_labels) = Where ($lhs) ($math_op_sym) ($rhsdate)
+   ENDIF
+   IF ($rhsdate"0|*>1") THEN DEFINE SYMBOL rhs ($rhsdate)
 ENDIF
 
 IF `STRCMP("($lhs_last)", "($lhs% %)") EQ 0` THEN GO combine_titles 
