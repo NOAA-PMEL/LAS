@@ -139,6 +139,21 @@ ENDIF
 ! assume we are running Ferret v5.81 or higher with /NOROWLAB qualifier on LIST command
    LIST/APPEND/FILE="($result_map_scale_filename)"/NOHEAD/NOROWLAB syms_names, syms_vals
 
+! If symbols for formatted time-axis ends have been defined, write those.
+! These are used by correlation plots.
+
+   IF ($HAXIS_tstart"0|*>1") THEN
+      LET syms_names = {"HAXIS_TSTART", "HAXIS_TEND"}
+      LET syms_vals = {"($HAXIS_TSTART)", "($HAXIS_TEND)"}
+      LIST/APPEND/FILE="($result_map_scale_filename)"/NOHEAD/NOROWLAB syms_names, syms_vals
+   ENDIF
+
+   IF ($VAXIS_tstart"0|*>1") THEN
+      LET syms_names = {"VAXIS_TSTART", "VAXIS_TEND"}
+      LET syms_vals = {"($VAXIS_TSTART)", "($VAXIS_TEND)"}
+      LIST/APPEND/FILE="($result_map_scale_filename)"/NOHEAD/NOROWLAB syms_names, syms_vals
+   ENDIF
+
 ! Assume we are running Ferret v6.07+ or higher with symbols AX_HORIZ and AX_VERT 
 ! defined for 2D plots. Write to the XML the horizontal and vertical axis and any
 ! attribute positive=
