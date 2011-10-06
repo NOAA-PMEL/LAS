@@ -3,7 +3,6 @@ package gov.noaa.pmel.tmap.las.client;
 import gov.noaa.pmel.tmap.las.client.laswidget.HelpPanel;
 import gov.noaa.pmel.tmap.las.client.laswidget.LASAnnotationsPanel;
 import gov.noaa.pmel.tmap.las.client.laswidget.LASRequest;
-import gov.noaa.pmel.tmap.las.client.laswidget.LASRequestWrapper;
 import gov.noaa.pmel.tmap.las.client.laswidget.VariableConstraintLayout;
 import gov.noaa.pmel.tmap.las.client.laswidget.VariableConstraintWidget;
 import gov.noaa.pmel.tmap.las.client.laswidget.VariableListBox;
@@ -22,6 +21,7 @@ import com.google.gwt.canvas.client.Canvas;
 import com.google.gwt.canvas.dom.client.Context2d;
 import com.google.gwt.canvas.dom.client.CssColor;
 import com.google.gwt.core.client.EntryPoint;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.ImageElement;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
@@ -57,6 +57,7 @@ import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.PushButton;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.TextBox;
+import com.google.gwt.user.client.ui.ToggleButton;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.xml.client.Document;
 import com.google.gwt.xml.client.Element;
@@ -67,6 +68,7 @@ import com.google.gwt.xml.client.XMLParser;
 
 public class Correlation implements EntryPoint {
 	Map<String, VariableSerializable> xDatasetVariables = new HashMap<String, VariableSerializable>();
+	ToggleButton annotationsButton;
 	LASAnnotationsPanel lasAnnotationsPanel = new LASAnnotationsPanel();
 	HorizontalPanel topRow = new HorizontalPanel();
 	HorizontalPanel output = new HorizontalPanel();
@@ -74,8 +76,8 @@ public class Correlation implements EntryPoint {
 	PopupPanel spin;
 	HTML spinImage;
 	HorizontalPanel coloredBy = new HorizontalPanel();	
-	VariableConstraintLayout constraintsLayout = new VariableConstraintLayout("Plot Data Constraints:");
-	VariableConstraintLayout otherConstraintsLayout = new VariableConstraintLayout("Additional Data Constraints:");
+	VariableConstraintLayout constraintsLayout = new VariableConstraintLayout("Plot Data Constraints:", false);
+	VariableConstraintLayout otherConstraintsLayout = new VariableConstraintLayout("Additional Data Constraints:", true);
 	VariableConstraintWidget xVariableConstraint = new VariableConstraintWidget();
 	VariableConstraintWidget yVariableConstraint = new VariableConstraintWidget();
 	NumberFormat dFormat = NumberFormat.getFormat("########.##");
@@ -88,7 +90,6 @@ public class Correlation implements EntryPoint {
     VariableListBox xVariables = new VariableListBox();
     VariableListBox yVariables = new VariableListBox();
     VariableListBox colorVariables = new VariableListBox();
-    VariableListBox constraintVariables = new VariableListBox();
     PushButton update = new PushButton("Update Plot");
     PushButton print = new PushButton("Print");
     CheckBox colorCheckBox = new CheckBox();
@@ -129,6 +130,22 @@ public class Correlation implements EntryPoint {
     @Override
 	public void onModuleLoad() {
     	String spinImageURL = URLUtil.getImageURL()+"/mozilla_blu.gif";
+    	annotationsButton = new ToggleButton(new Image(GWT.getModuleBaseURL()+"../images/i_off.png"), 
+				new Image(GWT.getModuleBaseURL()+"../images/i_on.png"), new ClickHandler() {
+
+					@Override
+					public void onClick(ClickEvent event) {
+						if ( annotationsButton.isDown() ) {	
+							lasAnnotationsPanel.setOpen(true);
+						} else {
+							lasAnnotationsPanel.setOpen(false);
+						}						
+					}
+			
+		});
+    	annotationsButton.setTitle("Plot Annotations");
+		annotationsButton.setStylePrimaryName("OL_MAP-ToggleButton");
+		annotationsButton.addStyleDependentName("WIDTH");
 		spinImage = new HTML("<img src=\""+spinImageURL+"\" alt=\"Spinner\"/>");
 		spin = new PopupPanel();
 		spin.add(spinImage);
@@ -143,7 +160,6 @@ public class Correlation implements EntryPoint {
     	constraintsLayout.addWidget(xVariableConstraint);
     	    	
     	constraintsLayout.setVisible(false);
-    	otherConstraintsLayout.setVisible(false);
     	print.addStyleDependentName("SMALLER");
     	print.addClickHandler(new ClickHandler() {
 
@@ -178,11 +194,11 @@ public class Correlation implements EntryPoint {
 			}
 			
 		});
-		constraintVariables.addChangeHandler(new ChangeHandler() {
+		otherConstraintsLayout.addChangeHandler(new ChangeHandler() {
 
 			@Override
 			public void onChange(ChangeEvent event) {
-				String value = constraintVariables.getValue(constraintVariables.getSelectedIndex());
+				String value = otherConstraintsLayout.getValue(otherConstraintsLayout.getSelectedIndex());
 				VariableSerializable v = xDatasetVariables.get(value);
 				if ( v != null ) {
 					VariableConstraintWidget c = new VariableConstraintWidget(true);
@@ -196,7 +212,6 @@ public class Correlation implements EntryPoint {
 					c.addApplyHandler(applyHandler);
 					c.addChangeHandler(constraintChange);
 					otherConstraintsLayout.addWidget(c);
-					otherConstraintsLayout.setVisible(true);
 					setConstraints();
 				}
 				
@@ -207,8 +222,6 @@ public class Correlation implements EntryPoint {
 		coloredBy.add(colorCheckBox);
 		controlPanel.setWidget(2, 1, coloredBy);
 		controlPanel.setWidget(2, 2, colorVariables);	
-		controlPanel.setWidget(3, 1, new Label("Add a data constraint for: "));
-		controlPanel.setWidget(3, 2, constraintVariables);
 		topPanel.add(controlPanel);
 		help.setPopupWidth("550px");
 		help.setPopupHeight("550px");
@@ -277,7 +290,7 @@ public class Correlation implements EntryPoint {
 					VariableConstraintWidget vcw = (VariableConstraintWidget) vcwIt.next();
 					otherConstraintsLayout.removeWidget(vcw);
 				}
-		        if ( otherConstraintsLayout.getWidgets().size() == 0 ) otherConstraintsLayout.setVisible(false);		
+		       
 		        
 		        // Now the the constraint widgets are set, set the constraints in the request object.
 		        setConstraints();
@@ -315,13 +328,13 @@ public class Correlation implements EntryPoint {
 					VariableConstraintWidget vcw = (VariableConstraintWidget) vcwIt.next();
 					otherConstraintsLayout.removeWidget(vcw);
 				}
-		        if ( otherConstraintsLayout.getWidgets().size() == 0 ) otherConstraintsLayout.setVisible(false);		
-		        
+		       
 		        // Now the the constraint widgets are set, set the constraints in the request object.
 		        setConstraints();
 			}
 		});
-		output.add(lasAnnotationsPanel);
+		outputPanel.setWidget(0, 0, lasAnnotationsPanel);
+		output.add(annotationsButton);
 		output.add(outputPanel);
 		RootPanel.get("data_selection").add(topPanel);
 		RootPanel.get("data_constraints").add(constraintsLayout);
@@ -415,7 +428,7 @@ public class Correlation implements EntryPoint {
     		sendRequest.sendRequest(null, lasRequestCallback);
     	} catch (RequestException e) {
     		HTML error = new HTML(e.toString());
-    		outputPanel.setWidget(0, 0, error);
+    		outputPanel.setWidget(1, 0, error);
     	}
 
     }
@@ -439,7 +452,7 @@ public class Correlation implements EntryPoint {
 			// Look at the doc.  If it's not obviously XML, treat it as HTML.
 			if ( !doc.substring(0, 100).contains("<?xml") ) {
 				HTML result = new HTML(doc, true);
-				outputPanel.setWidget(0, 0, result);
+				outputPanel.setWidget(1, 0, result);
 			} else {
 				doc = doc.replaceAll("\n", "").trim();
 				Document responseXML = XMLParser.parse(doc);
@@ -456,7 +469,7 @@ public class Correlation implements EntryPoint {
 								if ( text instanceof Text ) {
 									Text t = (Text) text;
 									HTML error = new HTML(t.getData().toString().trim());
-									outputPanel.setWidget(0, 0, error);
+									outputPanel.setWidget(1, 0, error);
 								}
 							}
 						} else if ( result.getAttribute("type").equals("annotations") ) {
@@ -509,7 +522,7 @@ public class Correlation implements EntryPoint {
 					y_per_pixel = (y_axis_upper_right - y_axis_lower_left)/Double.valueOf(y_plot_size);
                     
 					if ( frontCanvas != null ) {
-						outputPanel.setWidget(1, 0, image);
+						outputPanel.setWidget(2, 0, image);
 						image.setVisible(false);
 						image.addLoadHandler(new LoadHandler() {
 
@@ -575,7 +588,7 @@ public class Correlation implements EntryPoint {
 										}
 									}
 								});
-								outputPanel.setWidget(0, 0, frontCanvas);
+								outputPanel.setWidget(1, 0, frontCanvas);
 							}
 
 						});
@@ -595,7 +608,7 @@ public class Correlation implements EntryPoint {
 						});
 					} else {
 						// Browser cannot handle a canvas tag, so just put up the image.
-						outputPanel.setWidget(0, 0, image);
+						outputPanel.setWidget(1, 0, image);
 						image.addLoadHandler(new LoadHandler() {
 
 							@Override
@@ -653,14 +666,14 @@ public class Correlation implements EntryPoint {
 			VariableSerializable variables[] = result.getVariablesSerializable();
 			int index = -1;
 			int time_index = -1;
-			constraintVariables.setHeader("Select a variable...");
+			otherConstraintsLayout.setHeader("Select a variable...");
 			for (int i = 0; i < variables.length; i++) {
 				if ( !variables[i].getAttributes().get("grid_type").equals("vector") ) {
 					xDatasetVariables.put(variables[i].getID(), variables[i]);
 					xVariables.addItem(variables[i]);
 					yVariables.addItem(variables[i]);
 					colorVariables.addItem(variables[i]);
-					constraintVariables.addItem(variables[i]);
+					otherConstraintsLayout.addItem(variables[i]);
 					if ( variables[i].getID().equals(varid) ) {
 						index = i;
 					}
@@ -744,7 +757,6 @@ public class Correlation implements EntryPoint {
 						}
 					}
 					otherConstraintsLayout.addWidget(c);
-					otherConstraintsLayout.setVisible(true);
 				}
 				setConstraints();
 			}
@@ -780,7 +792,7 @@ public class Correlation implements EntryPoint {
 				popHistory(xml);
 			} else {
 				print.setEnabled(false);
-				outputPanel.removeCell(0, 0);
+				outputPanel.removeCell(1, 0);
 				xVariables.setSelectedIndex(0);
 				yVariables.setSelectedIndex(0);
 				resetConstraints("xy");
@@ -854,12 +866,12 @@ public class Correlation implements EntryPoint {
 			}
 		}
 		// Remove any variables already showing as constraints from the list.
-		constraintVariables.restore();
-		constraintVariables.removeItem(xVariableConstraint.getVariable());
-		constraintVariables.removeItem(yVariableConstraint.getVariable());
+		otherConstraintsLayout.restore();
+		otherConstraintsLayout.removeItem(xVariableConstraint.getVariable());
+		otherConstraintsLayout.removeItem(yVariableConstraint.getVariable());
 		for (Iterator cwIt = oc.iterator(); cwIt.hasNext();) {
 			VariableConstraintWidget cw = (VariableConstraintWidget) cwIt.next();
-			constraintVariables.removeItem(cw.getVariable());
+			otherConstraintsLayout.removeItem(cw.getVariable());
 		}
 		
 	}
@@ -898,7 +910,6 @@ public class Correlation implements EntryPoint {
 
 		List<Map<String, String>> vcons= lasRequest.getVariableConstraints();
 		otherConstraintsLayout.setWidgets(new ArrayList<VariableConstraintWidget>());
-		otherConstraintsLayout.setVisible(false);
 		if ( vcons.size() > 0 ) {
 			for (Iterator vconsIt = vcons.iterator(); vconsIt.hasNext();) {
 				Map<String, String> con = (Map<String, String>) vconsIt.next();
@@ -957,7 +968,6 @@ public class Correlation implements EntryPoint {
 						});
 
 						vcw.setVariable(xDatasetVariables.get(varid));
-						otherConstraintsLayout.setVisible(true);
 						otherConstraintsLayout.addWidget(vcw);
 					}
 					if ( id.contains("max") ) {
@@ -994,8 +1004,7 @@ public class Correlation implements EntryPoint {
 			VariableConstraintWidget vcw = (VariableConstraintWidget) vcwIt.next();
 			otherConstraintsLayout.removeWidget(vcw);
 		}
-        if ( otherConstraintsLayout.getWidgets().size() == 0 ) otherConstraintsLayout.setVisible(false);		
-        
+       
         // Now the the constraint widgets are set, set the constraints in the request object.
         setConstraints();
 	}
