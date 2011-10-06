@@ -3,6 +3,15 @@
 ! For land outline, if the region is smaller than 60 degrees in x or 30 degrees in y,
 ! use the more-detailed land outline script land_detail.jnl
 
+! Save any levels symbols from the plot thats been drawn,
+! so they can be output to the result map file.
+
+IF ($LEV_NUM"0|*>1") THEN
+   IF ($LEV_OPNLEVS"0|*>1") THEN DEFINE SYMBOL SAVE_OPNLEVS = ($LEV_OPNLEVS)
+   IF ($LEV_MIN"0|*>1") THEN DEFINE SYMBOL SAVE_MINLEV = ($LEV_MIN)
+   IF ($LEV_MAX"0|*>1") THEN DEFINE SYMBOL SAVE_MAXLEV = ($LEV_MAX)
+   IF ($LEV_DEL"0|*>1") THEN DEFINE SYMBOL SAVE_DELLEV = ($LEV_DEL)
+ENDIF
 
 
 ! Setup when doing Vector plots on Google Earth
@@ -27,3 +36,11 @@ ELIF ($ferret_land_type"0|none>0|contour>1|filled>0|*>0") THEN
   ENDIF
 ENDIF
 
+! Restore levels symbols 
+
+IF ($LEV_NUM"0|*>1") THEN
+   IF ($SAVE_OPNLEVS"0|*>1") THEN DEFINE SYMBOL LEV_OPNLEVS = ($SAVE_OPNLEVS)
+   IF ($SAVE_MINLEV"0|*>1") THEN DEFINE SYMBOL LEV_MIN = ($SAVE_MINLEV)
+   IF ($SAVE_MAXLEV"0|*>1") THEN DEFINE SYMBOL LEV_MAX = ($SAVE_MAXLEV)
+   IF ($SAVE_DELLEV"0|*>1") THEN DEFINE SYMBOL LEV_DEL = ($SAVE_DELLEV)
+ENDIF

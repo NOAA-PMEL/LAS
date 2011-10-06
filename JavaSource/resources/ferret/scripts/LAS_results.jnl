@@ -16,7 +16,6 @@
 !
 ! The argument is the refmap type "box", "xline", "yline", or "point"
 
-
 ! Result "plot_image" is the the image file result_plot_image_filename
 
 ! For Google Earth plots, use transparency for white background if the 
@@ -244,6 +243,24 @@ ENDIF
       
       LIST/APPEND/FILE="($result_map_scale_filename)"/NOHEAD/NOROWLAB syms_names, syms_vals
    ENDIF
+
+
+! If it was a color plot write the string needed to put into a /LEVELS qualifier,
+! to duplicate the color levels from this plot.
+
+   IF ($LEV_NUM"0|*>1") THEN
+      LET syms_names = "LEVELS_STRING"
+      IF ($LEV_OPNLEVS"0|*>1") THEN 
+         LET syms_vals = "($LEV_OPNLEVS)"
+      ELIF `(($LEV_MIN"0|*>1") + ($LEV_MAX"0|*>1") + ($LEV_DEL"0|*>1")) EQ 3` THEN
+         LET syms_vals = "(($LEV_MIN),($LEV_MAX),($LEV_DEL))"
+      ELSE
+         LET syms_vals = "($LEV_TEXT%v%)"
+      ENDIF
+      LIST/APPEND/FILE="($result_map_scale_filename)"/NOHEAD/NOROWLAB syms_names, syms_vals
+   ENDIF
+
+
 ! Done with map scale file
 
 IF ($ferret_annotations%0|*>1%) THEN
