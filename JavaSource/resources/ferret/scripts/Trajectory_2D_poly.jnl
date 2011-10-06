@@ -157,7 +157,7 @@ IF `($ferret_view"0|xy>1|*>0") OR ($ferret_view"0|xyt>1|*>0")` THEN
 	DEFINE VIEW/X=0:0.9/Y=0:1 xspace
      ELSE
         DEFINE VIEW/X=0:0.95/Y=0:1 xspace
-	     ENDIF
+     ENDIF
      SET VIEW xspace
   ENDIF
 
