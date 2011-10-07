@@ -49,12 +49,14 @@
   <!-- to create a completely dynamic UI.        -->
   <!--                                           -->
   <body>
+  #parse ("productserver/templates/V7UIHeader.vm")
   <div style="padding:10px">
     <div style="padding:10px" class="regularBackground noBottomBorder" id="data_selection"></div>
     <div style="padding:0px 10px 10px 10px" class="regularBackground noTopBottomBorder" id="data_constraints"></div>
     <div style="padding:0px 10px 10px 10px" class="regularBackground noTopBorder" id="additional_data_constraints"></div>
     <div style="padding:10px" id="correlation"></div>
  </div>
+ #parse("productserver/templates/V7UIFooter.vm")
     <!-- OPTIONAL: include this if you want history support -->
     <iframe src="javascript:''" id="__gwt_historyFrame" tabIndex='-1' style="position:absolute;width:0;height:0;border:0"></iframe>			
   </body>
