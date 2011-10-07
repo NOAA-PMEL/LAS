@@ -279,7 +279,7 @@ DEFINE SYMBOL poly_qual = ($poly_qual)/OVER/SET
 
 DEFINE SYMBOL poly_command POLYGON($poly_qual)
 GO polymark ($poly_command) ($plot_arg), ($polyshape), ($polysize)
-GO key_at_top
+IF ($ferret_annotations%0|*>1%) THEN GO key_at_top
 PPL POLYGON
 
 IF `($color_by_title"0|*>1") AND ($ferret_annotations%0|*>1%) EQ 0` THEN \ 
