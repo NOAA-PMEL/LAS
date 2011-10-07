@@ -727,7 +727,13 @@ public class addXML {
 		di = ThreddsDatasets.iterator();
 		while (di.hasNext()) {
 			InvDataset ThreddsDataset = (InvDataset) di.next();
-			DGABeans.addAll(processDatasets(ThreddsDataset));
+			Vector d = processDatasets(ThreddsDataset);
+			for (Iterator dIt = d.iterator(); dIt.hasNext();) {
+				DatasetsGridsAxesBean bean = (DatasetsGridsAxesBean) dIt.next();
+				if ( bean != null ) {
+					DGABeans.add(bean);
+				}
+			}
 		}
 
 		// Each THREDDS "dataset" is a separate LAS data set.
@@ -1976,6 +1982,9 @@ public class addXML {
 		}
 		DateUnit dateUnit = null;
 		try {
+			// Why, oh why would somebody do this, but they did.
+			if (unitsString.startsWith("\"") ) unitsString = unitsString.substring(1, unitsString.length());
+			if (unitsString.endsWith("\"") ) unitsString = unitsString.substring(0, unitsString.length()-1);
 			dateUnit = new DateUnit(unitsString);
 		} catch (Exception e) {
 
