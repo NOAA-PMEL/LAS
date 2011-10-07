@@ -41,6 +41,7 @@
     <script type="text/javascript" language="javascript" src="../../JavaScript/components/gov.noaa.pmel.tmap.las.Correlation/gov.noaa.pmel.tmap.las.Correlation.nocache.js"></script>
     <link rel="stylesheet" href="../../JavaScript/components/css/OLMapWidget.css" type="text/css">
     <link rel="stylesheet" href="../../VizGal.css" type="text/css">
+    <link rel="stylesheet" href="../../JavaScript/ui/LASUI.css" type="text/css"/>
   </head>
 
   <!--                                           -->
