@@ -15,7 +15,8 @@ IF ($labnum_dset"0|*>1") THEN go unlabel ($labnum_dset)
 IF ($labnum_datitl"0|*>1") THEN go unlabel ($labnum_datitl)
 IF ($labnum_dods"0|*>1") THEN go unlabel ($labnum_dods)
 
-IF ($ferret_annotations%0|*>1%) THEN PPL VECKEY/NOUSER, 2,`($ppl$ylen)+0.2`
+IF `($ferret_annotations%0|*>1%) AND ($flowline_vectors"0") EQ 0` THEN \
+  PPL VECKEY/NOUSER, 2,`($ppl$ylen)+0.2`
 
 IF ($ferret_diff_var%0|*>1%) THEN 
    IF ($labnum_z"0|*>1") THEN go unlabel ($labnum_z)
@@ -40,3 +41,4 @@ IF ($ferret_annotations"0|*>1") THEN
    IF ($labnum_z"0|*>1") THEN GO unlabel ($labnum_z)
    IF ($labnum_t"0|*>1") THEN GO unlabel ($labnum_t)
 ENDIF
+

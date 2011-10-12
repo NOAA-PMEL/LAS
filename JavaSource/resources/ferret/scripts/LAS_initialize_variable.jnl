@@ -158,20 +158,6 @@ IF ($data_0_analysis_label"0|*>1") THEN
    ENDIF
 ENDIF
 
-! 2D fill style
-IF `STRLEN("($ferret_view)") EQ 2` THEN
-
-! If ferret_contour_style is specified (from Plot Options on the UI), use that. 
-! Else if ferret_fill_type is specified, (comes from configuration), use that. 
-! Else use the default in the plot script
-
-IF `($ferret_contour_style"0|default>1|raster>1|shade>1|color_filled_contours>1|fill>1|color_filled_plus_lines>1|contour_lines>1|raster_plus_lines>1|*>0") EQ 0` THEN 
-
-  IF ($ferret_fill_type"0|default>1|raster>1|shade>1|color_filled_contours>1|fill>1|color_filled_plus_lines>1|contour>1|contour_lines>1|raster_plus_lines>1|*>0") THEN\
-   DEFINE SYMBOL ferret_contour_style = ($ferret_fill_type"default|shade>raster|fill>default|contour>contour_lines|color_filled_plus_lines|*>default")
-
-ENDIF
-
 
 ! (check for Google Earth plots is inside LAS_set_strides)
 IF `($num)+1 EQ ($data_count)` THEN GO LAS_set_strides.jnl

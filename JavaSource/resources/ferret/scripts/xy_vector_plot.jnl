@@ -99,8 +99,8 @@ ENDIF
 ! Open the window, apply size, scale options
 GO LAS_open_window
 
-
-! Build up the plot qualifiers
+! Use Ferret properties to set up the plot qualifiers
+GO LAS_set_plot_qualifiers
 
 ! Always use /ASPECT adjusts scaling based upon the ratio of the 
 ! axis scale factors (meters on the Earth to inches on the plot) and 
@@ -114,72 +114,6 @@ IF `($ferret_line_color%0|default>1|*>2%) LT 2` THEN DEFINE SYMBOL ferret_line_c
 IF ($ferret_curvi_quals"0|*>1") THEN
   DEFINE SYMBOL qualifiers = ($qualifiers)($ferret_curvi_quals)
 ENDIF
-
-IF ($ferret_use_graticules"1|0|*>1) THEN
-  SET MODE GRATICULE:(DASH,COLOR=black)
-ENDIF
-
-! Set up for degrees-minutes-seconds labels on axes with units of degrees
-
-IF ($ferret_deg_min_sec"0|false>0|*>1") THEN GO LAS_set_deg_min_sec.jnl
-
-! Vector style arrow (default) or flowline=1
-DEFINE SYMBOL flowline_vectors = 0
-IF `($ferret_vector_style"0|default>0|1|*>0") GT 0` THEN  
-   DEFINE SYMBOL qualifiers = ($qualifiers)/FLOWLINE
-   DEFINE SYMBOL flowline_vectors = 1
-ENDIF
-
-! Vector density for flowline plots
-
-IF `($ferret_vector_density"0|*>1") GT 0` THEN  
-   DEFINE SYMBOL qualifiers = ($qualifiers)/DENSITY=($ferret_vector_density)
-ENDIF
-
-! Vector length scale
-
-IF `($ferret_vector_length"0") GT 0` THEN  
-   DEFINE SYMBOL qualifiers = ($qualifiers)/LENGTH=($ferret_vector_length)
-ENDIF
-
-! Vector xskip and yskip set by the user
-IF ($ferret_vector_skip"0|*>1") THEN DEFINE SYMBOL ferret_vector_subsampling = ($ferret_vector_skip)
-
-IF ($ferret_vector_subsampling"0|*>1") THEN
-   LET comloc = `STRINDEX("($ferret_vector_subsampling)", ",")`
-   LET nlen = `STRLEN("($ferret_vector_subsampling)")`
-   IF `comloc GT 1` THEN
-       DEFINE SYMBOL xskp = `SUBSTRING ("($ferret_vector_subsampling)", 1, comloc-1)`
-       DEFINE SYMBOL yskp = `SUBSTRING ("($ferret_vector_subsampling)", comloc+1, nlen-comloc)`
-    ELSE
-       DEFINE SYMBOL xskp = ($ferret_vector_subsampling)
-       DEFINE SYMBOL yskp = ($ferret_vector_subsampling)
-    ENDIF
-
-    LET xs = STRFLOAT ("($xskp)")
-    LET ys = STRFLOAT ("($yskp)")
-
-    IF ($error_status"0|*>1") THEN
-       MESSAGE/ERROR **ERROR format of vector subsampling is xsub,ysub
-       EXIT/PROGRAM
-    ENDIF
-
-    DEFINE SYMBOL qualifiers = ($qualifiers)/XSKIP=`xs`/YSKIP=`ys`
-
-ENDIF
-
-! Line color
-
-IF `($ferret_line_color%0|default>0|*>1%)` THEN
-  DEFINE SYMBOL qualifiers = ($qualifiers)/COLOR=($ferret_line_color%0|default>black|red|blue|green|lightblue|purple|7|*>black%)
-ENDIF
-
-! line thickness
-
-IF `($ferret_line_thickness%0|default>1|*>1%)` THEN
-   DEFINE SYMBOL qualifiers = ($qualifiers)($ferret_line_thickness%/THICK=1|default>/THICK=1|1>/THICK=1|2>/THICK=2|3>/THICK=3|*>/THICK=1%)
-ENDIF
-
 ! Set the URL label for the first dataset.
 GO LAS_url_label 0
 
@@ -189,94 +123,17 @@ DEFINE SYMBOL split_string = ($data_title)
 GO LAS_split_vector_title.jnl 
 DEFINE SYMBOL ferret_plot_title ($split_title)
 
-! Draw  the plot. On VECTOR/SET the /XSKIP and /YSKIP are ignored. 
+! Draw  the plot. 
 
-IF ($its_GE"0|*>1") THEN
-   CANCEL MODE nodata_lab
-
-! Do a shade underlay for GE plots
- 	
-   DEFINE SYMBOL shade_var = ($ferret_vector_1)
-   IF ($native_curvilinear_xy"0") THEN DEFINE SYMBOL  shade_var = ($ferret_plot_base_var_0)
- 	
-   SHADE/pal=white/nokey/TITLE=" "/SET  ($shade_var)
-      IF ($xform_dms"0|*>1") THEN PPL XFOR (($xform_dms))
-      IF ($yform_dms"0|*>1") THEN PPL YFOR (($yform_dms))
-   PPL SHADE
-
-   DEFINE SYMBOL qualifiers = ($qualifiers)/OVER/NOLAB
-
-ENDIF
-
-! use XSKIP and YSKIP as qualifiers if given
-IF ($ferret_vector_subsampling"0") THEN
-
-   IF ($native_curvilinear_xy"0") THEN 
-
-      VECTOR($qualifiers)/TITLE=" "/XSKIP=`xs`/YSKIP=`ys`/SET \
-       ($ferret_plot_base_var_0), ($ferret_plot_base_var_1), xcoord, ycoord
-       GO vector_labels_reset
-       PPL VECTOR,`xs`,`ys` 
-      
-      VECTOR($qualifiers)/TITLE=" "/XSKIP=`xs`/YSKIP=`ys`/OVER/NOLAB \
-       ($ferret_plot_base_var_0), ($ferret_plot_base_var_1), xcoord-360, ycoord
-
-   ELSE
-      VECTOR($qualifiers)/TITLE=" "/XSKIP=`xs`/YSKIP=`ys`/SET \
-       ($ferret_vector_1), ($ferret_vector_2)
-       GO vector_labels_reset
-       PPL VECTOR,`xs`,`ys` 
-
-   ENDIF
-
+IF ($native_curvilinear_xy"0|*>1") THEN 
+   IF ($ferret_plot_base_var_0"0|*>1") THEN \
+    DEFINE SYMBOL ferret_curvi_base_var = ($ferret_plot_base_var_0), ($ferret_plot_base_var_1)
 ELSE
-   IF ($native_curvilinear_xy"0") THEN 
-   ! Get the automatic vector skip values, then plot, making PPL settings.
-      VECTOR($qualifiers)/TITLE=" "/NOLAB/NOAX/COLOR=white \
-      ($ferret_plot_base_var_0), ($ferret_plot_base_var_1), xcoord, ycoord
-
-      VECTOR($qualifiers)/TITLE=" "/SET \
-      ($ferret_plot_base_var_0), ($ferret_plot_base_var_1), xcoord, ycoord
-       GO vector_labels_reset
-       PPL VECTOR, ($PPL_VEC_XSKIP), ($PPL_VEC_YSKIP)
-
-      VECTOR($qualifiers)/TITLE=" "/OVER/NOLAB/SET \
-       ($ferret_plot_base_var_0), ($ferret_plot_base_var_1), xcoord-360, ycoord
-       GO vector_labels_reset
-       PPL VECTOR/over, ($PPL_VEC_XSKIP), ($PPL_VEC_YSKIP)
-
-   ELSE
-   ! Get the automatic vector skip values, then plot, making PPL settings.
-      VECTOR($qualifiers)/TITLE=" "/NOLAB/NOAX/COLOR=white \
-      ($ferret_plot_base_var_0), ($ferret_plot_base_var_1)
-
-      VECTOR($qualifiers)/TITLE=" "/SET ($ferret_vector_1), ($ferret_vector_2)
-       GO vector_labels_reset
-       PPL VECTOR, ($PPL_VEC_XSKIP), ($PPL_VEC_YSKIP)
-
-   ENDIF
+   IF ($ferret_vector_1"0|*>1") THEN \
+    DEFINE SYMBOL ferret_vector_variable = ($ferret_vector_1), ($ferret_vector_2)
 ENDIF
 
-! Label with skip, if style not flowline=1 and if skip >1 in either direction
-IF `($flowline_vectors"0") EQ 0` THEN  
-   IF `( ($PPL_VEC_XSKIP"0") GT 1)  OR (($PPL_VEC_YSKIP"0") GT 1)` THEN
-      DEFINE SYMBOL n_left_labels = `($n_left_labels"0")+1`
-      DEFINE SYMBOL upper_left_($n_left_labels) = \
-      Vector subsampling x=($PPL_VEC_XSKIP), y=($PPL_VEC_YSKIP) 
-
-      DEFINE SYMBOL note_num = `($note_num"0") + 1`
-      DEFINE SYMBOL note_($note_num)_lab = ($upper_left_($n_left_labels))
-
-   ELIF ($ferret_vector_subsampling"0") THEN
-      DEFINE SYMBOL n_left_labels = `($n_left_labels"0")+1`
-      DEFINE SYMBOL upper_left_($n_left_labels) = \
-      Vector subsampling x=`xs`, y=`ys`
-
-      DEFINE SYMBOL note_num = `($note_num"0") + 1`
-      DEFINE SYMBOL note_($note_num)_lab = ($upper_left_($n_left_labels))
-
-   ENDIF
-ENDIF
+GO LAS_draw_xy_vector_plot
 
 ! Overall header at the very top
 GO LAS_ferret_las_version_header
@@ -286,7 +143,7 @@ LABEL/NOUSER `($ppl$xlen)/2`,-0.8, 0, 0, 0.13, ($ferret_plot_title)
 
 ! Overlay additional cartography data (land mask, outlines, rivers, ...)
 
-go land_overlay
+GO land_overlay
 
 GO labels_above_plot
 

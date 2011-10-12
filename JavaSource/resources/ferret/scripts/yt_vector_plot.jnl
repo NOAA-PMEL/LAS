@@ -50,31 +50,11 @@ ENDIF
 ! Open the window, apply size, scale options
 GO LAS_open_window
 
-! Build up the plot qualifiers
+! Use Ferret properties to set up the plot qualifiers
+GO LAS_set_plot_qualifiers
 
 DEFINE SYMBOL qualifiers = ($qualifiers)/NOLAB
 
-IF ($ferret_plot_key"0|0|nokey>0|*>1") THEN
-  DEFINE SYMBOL qualifiers = ($qualifiers)/NOKEY
-ENDIF
-
-! Set up for degrees-minutes-seconds labels on axes with units of degrees
-
-IF ($ferret_deg_min_sec"0|false>0|*>1") THEN GO LAS_set_deg_min_sec.jnl
-
-! Line color
-
-IF `($ferret_line_color%0|default>1|*>2%) LT 2` THEN DEFINE SYMBOL ferret_line_color = blue
-
-IF `($ferret_line_color%0|default>0|*>1%)` THEN
-  DEFINE SYMBOL qualifiers = ($qualifiers)/COLOR=($ferret_line_color%0|default>black|red|blue|green|lightblue|purple|*>black%)
-ENDIF
-
-! line thickness
-
-IF `($ferret_line_thickness%0|default>1|*>1%)` THEN
-   DEFINE SYMBOL qualifiers = ($qualifiers)($ferret_line_thickness%/THICK=1|default>/THICK=1|1>/THICK=1|2>/THICK=2|3>/THICK=3|*>/THICK=1%)
-ENDIF
 ! Set the URL label for the first dataset.
 GO LAS_url_label 0
 

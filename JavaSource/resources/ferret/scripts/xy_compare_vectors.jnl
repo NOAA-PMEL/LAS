@@ -45,13 +45,6 @@ DEFINE SYMBOL ferret_title_0 "($ferret_plot_title_x1), ($data_title) ($data_unit
 
 ! Check for errors (They often occur during dataset initialization.)
 
-IF ($error_status"0|*>1") THEN
-  MESSAGE/ERROR **ERROR ($error_string)
-  EXIT/PROGRAM
-ENDIF
-
-
-! Check for errors 
 IF ($error_status"0|ERROR>1") THEN
   MESSAGE/ERROR **ERROR ($error_string)
   EXIT/PROGRAM
@@ -62,7 +55,6 @@ ENDIF
 
 ! Apply any expression only to the first variable not to this one.
 CANCEL SYMBOL ferret_expression 
-
 
 GO LAS_initialize_region 2
 DEFINE SYMBOL region_1_t_lo ($region_2_t_lo)  ! so that LAS_set_diff_label can be used.
@@ -85,7 +77,6 @@ IF ($error_status"0|*>1") THEN
    MESSAGE/ERROR **ERROR ($error_string)
    EXIT/PROGRAM
 ENDIF
-
 
 ! If we are using index strides then apply the correct ones to 
 ! the first variable.
@@ -115,7 +106,6 @@ DEFINE SYMBOL ferret_diff_var = ($ferret_vector_xdiff), ($ferret_vector_ydiff)
 DEFINE SYMBOL ferret_var_0 = ($ferret_vector_x1), ($ferret_vector_y1)
 DEFINE SYMBOL ferret_var_1 = ($ferret_vector_x2), ($ferret_vector_y2)
 
-
 IF ($native_curvilinear_xy"0|*>1") THEN 
   DEFINE SYMBOL ferret_vector_base_xdiff = ($ferret_plot_base_var_2)-($ferret_plot_base_var_0)
   DEFINE SYMBOL ferret_vector_base_ydiff = ($ferret_plot_base_var_3)-($ferret_plot_base_var_1)
@@ -123,19 +113,6 @@ IF ($native_curvilinear_xy"0|*>1") THEN
   DEFINE SYMBOL ferret_diff_var_m360 = ($ferret_vector_base_xdiff),($ferret_vector_base_ydiff), xcoord-360, ycoord
   DEFINE SYMBOL ferret_diff_var_p360 = ($ferret_vector_base_xdiff),($ferret_vector_base_ydiff), xcoord+360, ycoord
 ENDIF
-
-! Line color
-DEFINE SYMBOL pencolor = 2
-
-! or define our own color
-! But if we do this, do the same for labels on other difference plots.
-
-! SET MODE LINECOLORS:7
-! PPL COLOR,7,75,0,0  ! dark red 
-! DEFINE SYMBOL pencolor = 7
-! IF `($ferret_line_color%1|default>1|*>2%) EQ 1` THEN DEFINE SYMBOL ferret_line_color=7
-
-IF `($ferret_line_color%0|default>1|*>2%) LT 2` THEN DEFINE SYMBOL ferret_line_color = ($pencolor)
 
 ! Set the title, and the labels for the upper left listing the locations
 ! and time in directions normal to the plot, and in the upper right listing
@@ -147,150 +124,32 @@ DEFINE SYMBOL ferret_plot_title ($ferret_diff_title)
 ! Open the window, apply size, scale options
 GO LAS_open_window
 
-! TODO:  Should the creation of the ($qualifiers) symbol for standard
-! TODO:  2D plots be separated out in a separate script called:
-! TODO:    LAS_2D_plot_qualifiers.jnl
-!
-! Build up the plot qualifiers
+! set difference-vector color to red. Ignore incoming value of ferret_line_color
+DEFINE SYMBOL pencolor = 2
+DEFINE SYMBOL ferret_line_color = ($pencolor)
+
+! Use Ferret properties to set up the plot qualifiers
+GO LAS_set_plot_qualifiers
 
 ! Curvilinear plots may have more qualifiers. 
 IF ($native_curvilinear_xy"0|*>1") THEN
   DEFINE SYMBOL qualifiers = ($qualifiers)($ferret_curvi_quals)
 ENDIF
 
+! Draw  the plot. 
 
-! Set up for degrees-minutes-seconds labels on axes with units of degrees
-
-IF ($ferret_deg_min_sec"0|false>0|*>1") THEN GO LAS_set_deg_min_sec.jnl
-
-! Vector style arrow (default) or flowline
-
-IF `($ferret_vector_style"0|default>0|1|*>0") GT 0` THEN  
-   DEFINE SYMBOL qualifiers = ($qualifiers)/FLOWLINE
-ENDIF
-
-! Vector density for flowline plots
-
-IF `($ferret_vector_density"0|*>1") GT 0` THEN  
-   DEFINE SYMBOL qualifiers = ($qualifiers)/DENSITY=($ferret_vector_density)
-ENDIF
-
-! Vector length scale
-
-IF `($ferret_vector_length"0") GT 0` THEN  
-   DEFINE SYMBOL qualifiers = ($qualifiers)/LENGTH=($ferret_vector_length)
-ENDIF
-
-! Vector xskip and yskip
-
-IF ($ferret_vector_subsampling"0|*>1") THEN
-   LET comloc = `STRINDEX("($ferret_vector_subsampling)", ",")`
-   LET nlen = `STRLEN("($ferret_vector_subsampling)")`
-   IF `comloc GT 1` THEN
-       DEFINE SYMBOL xskp = `SUBSTRING ("($ferret_vector_subsampling)", 1, comloc-1)`
-       DEFINE SYMBOL yskp = `SUBSTRING ("($ferret_vector_subsampling)", comloc+1, nlen-comloc)`
-    ELSE
-       DEFINE SYMBOL xskp = ($ferret_vector_subsampling)
-       DEFINE SYMBOL yskp = ($ferret_vector_subsampling)
-    ENDIF
-
-    LET xs = STRFLOAT ("($xskp)")
-    LET ys = STRFLOAT ("($yskp)")
-
-    IF ($error_status"0|*>1") THEN
-       MESSAGE/ERROR **ERROR format of vector subsampling is xsub,ysub
-       EXIT/PROGRAM
-    ENDIF
-
-    DEFINE SYMBOL qualifiers = ($qualifiers)/XSKIP=`xs`/YSKIP=`ys`
-
-ENDIF
-
-IF ($ferret_use_graticules"1|0|*>1) THEN
-  SET MODE GRATICULE:(DASH,COLOR=black)
-ENDIF
-
-
-IF `($ferret_line_color%0|default>0|*>1%)` THEN
-  DEFINE SYMBOL qualifiers = ($qualifiers)/COLOR=($ferret_line_color%black|default>black|*%)
-ENDIF
-
-! line thickness
-
-IF `($ferret_line_thickness%0|default>1|*>1%)` THEN
-   DEFINE SYMBOL qualifiers = ($qualifiers)($ferret_line_thickness%/THICK=1|default>/THICK=1|1>/THICK=1|2>/THICK=2|3>/THICK=3|*>/THICK=1%)
-ENDIF
-
-! Do the plot. On VECTOR/SET the /XSKIP and /YSKIP are ignored. 
-
-IF ($ferret_vector_skip"0|*>1") THEN DEFINE SYMBOL ferret_vector_subsampling = ($ferret_vector_skip)
-
-IF ($ferret_vector_subsampling"0") THEN
-
-   VECTOR($qualifiers)/TITLE="($ferret_plot_title)"/XSKIP=`xs`/YSKIP=`ys`/SET \
-       ($ferret_diff_var)
-      GO vector_labels_reset
-      PPL VECTOR,`xs`,`ys`
-       
-   IF ($native_curvilinear_xy"0|*>1") THEN \
-      VECTOR($qualifiers)/OVER/NOLAB/TITLE="($ferret_plot_title)"/XSKIP=`xs`/YSKIP=`ys`/SET \
-       ($ferret_diff_var_m360)
-      GO vector_labels_reset
-      PPL VECTOR/over,`xs`,`ys` 
-
-   IF ($native_curvilinear_xy"0|*>1") THEN \
-      VECTOR($qualifiers)/OVER/NOLAB/TITLE="($ferret_plot_title)"/XSKIP=`xs`/YSKIP=`ys`/SET \
-       ($ferret_diff_var_p360)
-      GO vector_labels_reset
-      PPL VECTOR/over,`xs`,`ys`
-
+IF ($native_curvilinear_xy"0|*>1") THEN 
+   IF ($ferret_vector_base_xdiff"0|*>1") THEN \
+    DEFINE SYMBOL ferret_curvi_base_var = ($ferret_vector_base_xdiff),($ferret_vector_base_ydiff)
 ELSE
-
-   ! Get the automatic vector skip values, then plot, making PPL settings.
-      VECTOR($qualifiers)/TITLE=" "/NOLAB/COLOR=white ($ferret_diff_var)
-
-   VECTOR($qualifiers)/TITLE="($ferret_plot_title)"/XSKIP=($PPL_VEC_XSKIP)/YSKIP=($PPL_VEC_XSKIP)/SET  \
-       ($ferret_diff_var)
-      GO vector_labels_reset
-      PPL VECTOR, ($PPL_VEC_XSKIP), ($PPL_VEC_YSKIP)
-
-   IF ($native_curvilinear_xy"0|*>1") THEN \
-   VECTOR($qualifiers)/OVER/NOLAB/TITLE="($ferret_plot_title)"/XSKIP=($PPL_VEC_XSKIP)/YSKIP=($PPL_VEC_XSKIP)/SET  \
-       ($ferret_diff_var_m360)
-      GO vector_labels_reset
-      PPL VECTOR, ($PPL_VEC_XSKIP), ($PPL_VEC_YSKIP)
-
-   IF ($native_curvilinear_xy"0|*>1") THEN \
-   VECTOR($qualifiers)/OVER/NOLAB/TITLE="($ferret_plot_title)"/XSKIP=($PPL_VEC_XSKIP)/YSKIP=($PPL_VEC_XSKIP)/SET  \
-       ($ferret_diff_var_p360)
-      GO vector_labels_reset
-      PPL VECTOR, ($PPL_VEC_XSKIP), ($PPL_VEC_YSKIP)
-
+   IF ($ferret_diff_var"0|*>1") THEN \
+    DEFINE SYMBOL ferret_vector_variable ($ferret_diff_var)
 ENDIF
+
+GO LAS_draw_xy_vector_plot
 
 ! Overall header at the very top
 GO LAS_ferret_las_version_header
-
-! Label with skip, if style not flowline=1 and if skip >1 in either direction
-IF `($flowline_vectors"0") EQ 0` THEN  
-   IF `( ($PPL_VEC_XSKIP"0") GT 1)  OR (($PPL_VEC_YSKIP"0") GT 1)` THEN
-      DEFINE SYMBOL n_left_labels = `($n_left_labels"0")+1`
-      DEFINE SYMBOL upper_left_($n_left_labels) = \
-      Vector subsampling x=($PPL_VEC_XSKIP), y=($PPL_VEC_YSKIP) 
-      
-      DEFINE SYMBOL note_num = `($note_num"0") + 1`
-      DEFINE SYMBOL note_($note_num)_lab = ($upper_left_($n_left_labels))
-
-   ELIF ($ferret_vector_subsampling"0") THEN
-      DEFINE SYMBOL n_left_labels = `($n_left_labels"0")+1`
-      DEFINE SYMBOL upper_left_($n_left_labels) = \
-      Vector subsampling x=`xs`, y=`ys`
-
-      DEFINE SYMBOL note_num = `($note_num"0") + 1`
-      DEFINE SYMBOL note_($note_num)_lab = ($upper_left_($n_left_labels))
-
-   ENDIF
-ENDIF
 
 ! Put the labels for time/location in the upper left
 
