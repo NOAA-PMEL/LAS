@@ -50,4 +50,3 @@ ELSE
   say " **ERROR: Attempt to make a plot in ($ferret_view) with 2D vector plot script."
 ENDIF
 
-

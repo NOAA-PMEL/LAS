@@ -20,13 +20,8 @@ IF ($ferret_interpolate_data%0|false>0|true>1|1|0|*>1%) THEN SET MODE INTERPOLAT
 
 DEFINE SYMBOL fview = `UPCASE("($ferret_view)")`
 
-
 ! Define symbols associated with the regiogn and data and perform any
 ! initialization needed for this dataset.
-!
-! NOTE:  Adding support for a 'base layer' variable would mean passing
-! NOTE:  some other argument.  For now, though, we always use 'data_0'
-! NOTE:  for the base layer and region.
 
 GO LAS_initialize_region 0
 GO LAS_initialize_data 0
@@ -56,38 +51,11 @@ LET title_len = STRLEN("($ferret_title_0)")
 ! Open the window, apply size, scale options
 GO LAS_open_window
 
-! TODO:  Should the creation of the ($qualifiers) symbol for standard
-! TODO:  1D plots be separated out int a separate script called:
-! TODO:    LAS_1D_plot_qualifiers.jnl
-!
-! Build up the plot qualifiers
+! Ignore line color if this is a multi-var plot.
+IF `($data_count) GT 1` THEN DEFINE SYMBOL itsa_multi_lineplot = 1
 
-IF ($ferret_use_graticules"1|0|*>1) THEN
-  SET MODE GRATICULE:(DASH,COLOR=black)
-ENDIF
-
-! Line color. Ignore if this is a multi-var plot.
-
-IF `($data_count) EQ 1` THEN
-  DEFINE SYMBOL qualifiers = ($qualifiers)/COLOR=($ferret_line_color%blue|default>blue|black|red|blue|green|lightblue|purple|*>blue%)
-ENDIF
-
-! line thickness
-
-DEFINE SYMBOL plotsymbol = 25
-DEFINE SYMBOL thicknum = 0
-
-IF `($ferret_line_thickness%0|default>1|*>1%)` THEN
-   DEFINE SYMBOL qualifiers = ($qualifiers)($ferret_line_thickness%/THICK=1|default>/THICK=1|1>/THICK=1|2>/THICK=2|3>/THICK=3|*>/THICK=1%)
-   IF `($ferret_line_thickness%1|1|2|3|*>1%) EQ 2` THEN 
-      DEFINE SYMBOL plotsymbol = 17/SIZ=0.12
-      DEFINE SYMBOL thicknum = 1
-   ENDIF
-   IF `($ferret_line_thickness%1|1|2|3|*>1%) EQ 3` THEN 
-      DEFINE SYMBOL plotsymbol = 27/SIZ=0.15
-      DEFINE SYMBOL thicknum = 2
-   ENDIF
-ENDIF
+! Use Ferret properties to set up the plot qualifiers
+GO LAS_set_plot_qualifiers
 
 ! symbols and/or line
 GO set_linesym
@@ -100,38 +68,6 @@ DEFINE SYMBOL plot_title = ($ferret_plot_title)
 
 ! Apply any expression only to the first variable not to subsequent ones
 CANCEL SYMBOL ferret_expression 
-
-! If the user gave dependent axis scaling, 
-! 1) remove any surrounding parentheses
-! 2) check for third argument and add it if needed.
-
-IF ($ferret_dep_axis_scale"0|*>1") THEN
-
-  IF `STRINDEX("($ferret_dep_axis_scale)", "(") GT 0` THEN
-     LET paren = `STRINDEX("($ferret_dep_axis_scale)", "(")`
-     LET slen = `STRLEN("($ferret_dep_axis_scale)")`
-     DEFINE SYMBOL ferret_dep_axis_scale = `SUBSTRING("($ferret_dep_axis_scale)", paren+1, slen-1)`
-     
-     LET paren = `STRINDEX("($ferret_dep_axis_scale)", ")")`
-     LET slen = `STRLEN("($ferret_dep_axis_scale)")`
-     DEFINE SYMBOL ferret_dep_axis_scale = `SUBSTRING("($ferret_dep_axis_scale)", 1, slen-1)`
-  ENDIF
-
-  LET slen = STRLEN("($ferret_dep_axis_scale)")
-  LET nc = 0
-  REPEAT/RANGE=2:`slen`/NAME=m (let c = `m`; \
-     DEFINE SYMBOL next = `SUBSTRING("($ferret_dep_axis_scale)", c, 1)`; sh sym next; \
-     IF `STRCMP("($next)", ",") EQ 0` THEN let nc = `nc+1`)
-
- IF `nc EQ 1` THEN   
-     LET c = STRINDEX ("($ferret_dep_axis_scale)", ",")
-     DEFINE SYMBOL lo_ax = `SUBSTRING("($ferret_dep_axis_scale)", 1, c-1)`
-     DEFINE SYMBOL hi_ax = `SUBSTRING("($ferret_dep_axis_scale)", c+1, slen)`
-     PPL %RANGE ($lo_ax), ($hi_ax), 10
-     DEFINE SYMBOL ferret_dep_axis_scale = ($ferret_dep_axis_scale),($ppl$range_inc)
-  ENDIF
-
-ENDIF
 
 ! Draw the plot
 

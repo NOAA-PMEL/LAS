@@ -97,6 +97,7 @@ ENDIF
 ! have been changed to another modulo longitude branch. If so
 ! then the x axis min and max need to be reset.
 
+
    DEFINE SYMBOL xaxlo = ($XAXIS_MIN)
    DEFINE SYMBOL xaxhi = ($XAXIS_MAX)
    IF ($region_0_x_lo_orig"0|*>1") THEN

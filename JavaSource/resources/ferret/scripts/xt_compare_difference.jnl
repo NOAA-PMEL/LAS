@@ -56,14 +56,6 @@ DEFINE SYMBOL ferret_title_0 = ($ferret_plot_title"($data_var)")
 
 ! Initialize next dataset. 
 
-IF `($data_count"0") LE 0` THEN
-   DEFINE SYMBOL error_status = ERROR
-   DEFINE SYMBOL error_type = DATA
-   DEFINE SYMBOL error_string = This script requires two data variables
-   MESSAGE/ERROR **ERROR ($error_string)
-   EXIT/PROGRAM
-ENDIF
-
 ! Apply any expression only to the first variable not to this one.
 CANCEL SYMBOL ferret_expression 
 
@@ -113,69 +105,29 @@ DEFINE SYMBOL ferret_diff_var = ($ferret_var_0) - ($ferret_var_1)
 ! and time in directions normal to the plot.
 
 GO LAS_set_diff_labels ($fview)
+DEFINE SYMBOL ferret_plot_title ($ferret_diff_title)
 
 ! Open the window, apply size, scale options
 GO LAS_open_window
 
-! TODO:  Should the creation of the ($qualifiers) symbol for standard
-! TODO:  2D plots be separated out in a separate script called:
-! TODO:    LAS_2D_plot_qualifiers.jnl
-!
-! Build up the plot qualifiers
-
 ! Get levels based on ferret_diff_var
 GO LAS_auto_levels
 
-IF ($ferret_contour_style"0|contour_lines>1|*>0") THEN
-   IF ($ferret_contour_levels"0|*>1") THEN
-     DEFINE SYMBOL qualifiers = ($qualifiers)/LEVELS=($ferret_contour_levels)
-   ENDIF
-ELSE
-   IF ($ferret_fill_levels"0|*>1") THEN
-     DEFINE SYMBOL qualifiers = ($qualifiers)/LEVELS=($ferret_fill_levels)
-   ENDIF
-ENDIF
-
-IF ($ferret_plot_key"0|0|nokey>0|*>1") THEN
-  DEFINE SYMBOL qualifiers = ($qualifiers)/NOKEY
-ENDIF
-
-IF ($ferret_use_graticules"1|0|*>1) THEN
-  SET MODE GRATICULE:(DASH,COLOR=black)
-ENDIF
-
-DEFINE SYMBOL qualifiers = ($qualifiers)/PALETTE=($ferret_palette"rainbow|default>rainbow|*>*)
-
-! Do the plot (SHADE or CONTOUR)
-!
-!ACM note: restore more types. Filled should be FILL plot; RASTER should be shade.
-! DEFINE SYMBOL plot_type = ($ferret_contour_style"contour_lines>CONTOUR|*>SHADE")
-
-DEFINE SYMBOL plot_type =($ferret_contour_style"FILL|default>FILL|raster>SHADE|color_filled_contours>FILL|color_filled_plus_lines>FILL|contour_lines>CONTOUR|raster_plus_lines>SHADE")
-
-
-! For all FILL plots, we will first do a SHADE underlay to get the plot to 
-! draw all the way to the edges.
-
-DEFINE SYMBOL shade_underlay = FALSE
-IF ($plot_type"0|FILL>1|*>0) THEN DEFINE SYMBOL shade_underlay = TRUE
-
-! Set up for degrees-minutes-seconds labels on independent variable axis
-! If this was not requested, the script just returns.
-
-IF ($ferret_deg_min_sec"0|false>0|*>1") THEN GO LAS_set_deg_min_sec.jnl
+! Use Ferret properties to set up the plot qualifiers
+GO LAS_set_plot_qualifiers
 
 ! Make a plot,needed to get the number of levels (SHADE/SET doesnt do it.)
-
+IF ($plot_type"0|CONTOUR>0|*>1") THEN
 IF ($ferret_annotations"0|*>1") THEN
-   SHADE($qualifiers)/TRIM/TITLE="($ferret_plot_title)" ($ferret_diff_var)
+   SHADE($qualifiers)($shade_qualifiers)/TITLE="($ferret_plot_title)" ($ferret_diff_var)
    CANCEL VIEW
    SET VIEW full_view
+ENDIF
 ENDIF
 
 ! Draw the plot
 IF ($shade_underlay) THEN 
-   SHADE($qualifiers)/TRIM/TITLE="($ferret_plot_title)"/SET ($ferret_diff_var)
+   SHADE($qualifiers)($shade_qualifiers)/TITLE="($ferret_plot_title)"/SET ($ferret_diff_var)
       GO reset_labels
       IF `($ferret_annotations"0|*>1") EQ 0` THEN 
          IF ($labnum_y"0|*>1") THEN go unlabel ($labnum_y)

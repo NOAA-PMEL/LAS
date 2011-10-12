@@ -24,7 +24,6 @@
 ! TODO:  if this were handled in the UI so that ($data_0_...) always
 ! TODO:  referred to the base layer.
 
-
 ! Set any Ferret modes
 !
 ! NOTE:  Should we support any of the following Ferrt modes?
@@ -78,7 +77,6 @@ DEFINE SYMBOL ferret_var_0 = ($ferret_plot_var)
 DEFINE SYMBOL ferret_title_0 = ($ferret_plot_title"($data_var)")
 IF ($ferret_plot_var_m360"0|*>1") THEN DEFINE SYMBOL ferret_var_m360_0 = ($ferret_plot_var_m360)
 
-
 ! Open the window, apply size, scale and WMS view options
 GO LAS_open_window
 
@@ -90,63 +88,29 @@ IF ($ferret_koppen_var_2"0|*>1") THEN
    EXIT/SCRIPT
 ENDIF
 
-! TODO:  Should the creation of the ($qualifiers) symbol for standard
-! TODO:  2D plots be separated out in a separate script called:
-! TODO:    LAS_2D_plot_qualifiers.jnl
-!
-! Build up the plot qualifiers
+! Use Ferret properties to set up the plot qualifiers
+GO LAS_set_plot_qualifiers
 
-!ACM note: All color plots use $ferret_fill_levels. Contour plots use $ferret_contour_levels.
+! Curvilinear plots may have more qualifiers. 
 
-IF ($ferret_contour_style"0|contour_lines>1|*>0") THEN
-   IF ($ferret_contour_levels"0|*>1") THEN
-     DEFINE SYMBOL qualifiers = ($qualifiers)/LEVELS=($ferret_contour_levels)
-   ENDIF
-ELSE
-   IF ($ferret_fill_levels"0|*>1") THEN
-     DEFINE SYMBOL qualifiers = ($qualifiers)/LEVELS=($ferret_fill_levels)
-   ENDIF
-ENDIF
-
-IF ($ferret_plot_key"0|0|nokey>0|*>1") THEN
-  DEFINE SYMBOL qualifiers = ($qualifiers)/NOKEY
-ENDIF
-
-IF ($ferret_use_graticules"1|0|*>1) THEN
-  SET MODE GRATICULE:(DASH,COLOR=black)
-ENDIF
-
-DEFINE SYMBOL qualifiers = ($qualifiers)/PALETTE=($ferret_palette"rainbow|default>rainbow|*>*)
-
-IF ($ferret_curvi_quals"0|*>1") THEN
+IF ($native_curvilinear_xy"0|*>1") THEN
   DEFINE SYMBOL qualifiers = ($qualifiers)($ferret_curvi_quals)
+
+   IF ($ferret_curvi_quals"0|*>1") THEN \
+   IF ($ferret_lon_modulo"1|1|0|yes>1|no>0|*>0") THEN  DEFINE SYMBOL shade_qualifiers = ($shade_qualifiers)/MODULO
 ENDIF
-
-! Set up for degrees-minutes-seconds labels on axes with units of degrees
-
-IF ($ferret_deg_min_sec"0|false>0|*>1") THEN GO LAS_set_deg_min_sec.jnl
-
-! Set the plot type (SHADE or CONTOUR)
-
-DEFINE SYMBOL plot_type =($ferret_contour_style"FILL|default>FILL|raster>SHADE|color_filled_contours>FILL|color_filled_plus_lines>FILL|contour_lines>CONTOUR|raster_plus_lines>SHADE")
-
-! For all FILL plots, we will first do a SHADE underlay to get the plot to draw all the way to the edges.
-DEFINE SYMBOL shade_underlay = FALSE
-IF ($plot_type"0|FILL>1|*>0) THEN DEFINE SYMBOL shade_underlay = TRUE
 
 ! Set the URL label for the first dataset.
 GO LAS_url_label 0
 
-IF ($ferret_curvi_quals"0|*>1") THEN 
-   IF ($ferret_lon_modulo"1|1|0|yes>1|no>0|*>0") THEN  DEFINE SYMBOL shade_qualifiers = ($shade_qualifiers)/MODULO
-ENDIF
-
 ! Make a plot,needed to get the number of levels (SHADE/SET doesnt do it.)
 
+IF ($plot_type"0|CONTOUR>0|*>1") THEN
 IF ($ferret_annotations"0|*>1") THEN
    SHADE($qualifiers)($shade_qualifiers)/TITLE="($ferret_plot_title)" ($ferret_var_0)
    CANCEL VIEW
    SET VIEW full_view
+ENDIF
 ENDIF
 
 ! Draw the plot and we are done
@@ -157,12 +121,10 @@ IF `($data_count"0") EQ 1` THEN
    DEFINE SYMBOL ferret_plot_title = ($split_title)
 
    IF ($shade_underlay) THEN 
-      IF `($ferret_google_plot"0") EQ 0` THEN \
-         DEFINE SYMBOL shade_qualifiers = ($shade_qualifiers)/TRIM
 
       SHADE($qualifiers)($shade_qualifiers)/TITLE="($ferret_plot_title)"/SET ($ferret_var_0)
-         GO reset_labels
-         PPL SHADE
+        GO reset_labels
+      PPL SHADE
       IF `($LEV_NUM"0") GT 245/2` THEN PPL SHASET RESET
       ($plot_type)($qualifiers)/OVER/NOLAB ($ferret_var_0)
       IF ($native_curvilinear_xy"0|*>1") THEN 
@@ -186,13 +148,7 @@ IF `($data_count"0") EQ 1` THEN
    DEFINE SYMBOL data_plotted_min = ($ppl$zmin)
    DEFINE SYMBOL data_plotted_max = ($ppl$zmax)
 
-   IF ($ferret_contour_style"0|default>0|color_filled_plus_lines>1|raster_plus_lines>1|*>0") THEN
-      IF ($ferret_contour_levels"0|*>1") THEN 
-         DEFINE SYMBOL levsym = /LEVELS=($ferret_contour_levels)
-      ELSE
-         IF ($ferret_fill_levels"0|*>1") THEN DEFINE SYMBOL levsym = /LEVELS=($ferret_fill_levels)
-      ENDIF
-
+   IF ($contour_over"0|*>1") THEN
       IF ($ferret_curvi_quals"0|*>1") THEN
          CONTOUR/OVER($ferret_curvi_quals)/COLOR=black/NOLAB($levsym) ($ferret_var_0)
       ELSE
@@ -228,5 +184,4 @@ IF ($ferret_mark_grid"0|no>0|all>1|subsample>1|*>0") THEN GO mark_grid
 GO LAS_results box
 
 ! End of $RCSfile -----------------------------------------------------
-
 

@@ -22,7 +22,6 @@
 ! TODO:  if this were handled in the UI so that ($data_0_...) always
 ! TODO:  referred to the base layer.
 
-
 ! Set any Ferret modes
 !
 ! NOTE:  Should we support any of the following Ferrt modes?
@@ -66,134 +65,63 @@ DEFINE SYMBOL ferret_title_0 = ($ferret_plot_title"($data_var)")
 ! Open the window, apply size, scale and WMS view options
 GO LAS_open_window
 
-! TODO:  Should the creation of the ($qualifiers) symbol for standard
-! TODO:  2D plots be separated out in a separate script called:
-! TODO:    LAS_2D_plot_qualifiers.jnl
-!
-! Build up the plot qualifiers
-
-!ACM note: All color plots use $ferret_fill_levels. Contour plots use $ferret_contour_levels.
-
-IF ($ferret_contour_style"0|contour_lines>1|*>0") THEN
-   IF ($ferret_contour_levels"0|*>1") THEN
-     DEFINE SYMBOL qualifiers = ($qualifiers)/LEVELS=($ferret_contour_levels)
-   ENDIF
-ELSE
-   IF ($ferret_fill_levels"0|*>1") THEN
-     DEFINE SYMBOL qualifiers = ($qualifiers)/LEVELS=($ferret_fill_levels)
-   ENDIF
-ENDIF
-
-IF ($ferret_plot_key"0|0|nokey>0|*>1") THEN
-  DEFINE SYMBOL qualifiers = ($qualifiers)/NOKEY
-ENDIF
-
-! TODO:  For time plots, either the configurer or the script might want to turn on 
-! TODO:  graticules at the small tic marks.  /GRATICULE=(DASH)="small, large"
-
-IF ($ferret_use_graticules"1|0|*>1) THEN
-  SET MODE GRATICULE:(DASH,COLOR=black)
-ENDIF
-
-DEFINE SYMBOL qualifiers = ($qualifiers)/PALETTE=($ferret_palette"rainbow|default>rainbow|*>*)
-
-! set the plot type (SHADE or CONTOUR)
-
-DEFINE SYMBOL plot_type =($ferret_contour_style"FILL|default>FILL|raster>SHADE|color_filled_contours>FILL|color_filled_plus_lines>FILL|contour_lines>CONTOUR|raster_plus_lines>SHADE")
-
-! For all FILL plots, we will first do a SHADE underlay to get the plot to draw all the way to the edges.
-DEFINE SYMBOL shade_underlay = FALSE
-IF ($plot_type"0|FILL>1|*>0) THEN DEFINE SYMBOL shade_underlay = TRUE
+! Use Ferret properties to set up the plot qualifiers
+GO LAS_set_plot_qualifiers
 
 ! Set the URL label for the first dataset.
 GO LAS_url_label 0
 
 ! Make a plot,needed to get the number of levels (SHADE/SET doesnt do it.)
-
+IF ($plot_type"0|CONTOUR>0|*>1") THEN
 IF ($ferret_annotations"0|*>1") THEN
    SHADE($qualifiers)($shade_qualifiers)/TITLE="($ferret_plot_title)" ($ferret_var_0)
    CANCEL VIEW
    SET VIEW full_view
 ENDIF
+ENDIF
 
 ! Draw the plot and we are done
 
-IF ($ferret_small_margins"0|*>1) THEN
-   GO set_full_margins
-   DEFINE SYMBOL qualifiers ($qualifiers)/NOLAB
+IF `($data_count"0") EQ 1` THEN
+   DEFINE SYMBOL split_title = ($ferret_plot_title)
+   GO LAS_split_title
+   DEFINE SYMBOL ferret_plot_title = ($split_title)
 
-   IF `($data_count"0") EQ 1` THEN
-     DEFINE SYMBOL split_title = ($ferret_plot_title)
-      GO LAS_split_title
-      DEFINE SYMBOL ferret_plot_title = ($split_title)
-
-      IF ($shade_underlay) THEN 
-         SHADE($qualifiers)/TRIM/TITLE="($ferret_plot_title)"/SET ($ferret_var_0)
-         GO reset_labels 
-         PPL SHADE
-         IF `($LEV_NUM"0") GT 245/2` THEN PPL SHASET RESET
-         ($plot_type)($qualifiers)/OVER/NOLAB ($ferret_var_0)
-      ELSE
-      ($plot_type)($qualifiers)/TITLE="($ferret_plot_title)"/SET ($ferret_var_0)
-         GO reset_labels 
-         PPL ($plot_type)
-      ENDIF
-
-      IF ($ferret_contour_style"0|default>0|color_filled_plus_lines>1|raster_plus_lines>1|*>0") THEN
-         IF ($ferret_contour_levels"0|*>1") THEN 
-            DEFINE SYMBOL levsym = /LEVELS=($ferret_contour_levels)
-          ELSE
-            IF ($ferret_fill_levels"0|*>1") THEN DEFINE SYMBOL levsym = /LEVELS=($ferret_fill_levels)
-         ENDIF
-        CONTOUR/OVER/NOLAB($levsym) ($ferret_var_0)
-      ENDIF
-   
-! One of the results is the data min and max. Save those here.
-      DEFINE SYMBOL data_plotted_min = ($ppl$zmin)
-      DEFINE SYMBOL data_plotted_max = ($ppl$zmax)
-
-   ENDIF
-
-ELSE
-
-   IF `($data_count"0") EQ 1` THEN
-      DEFINE SYMBOL split_title = ($ferret_plot_title)
-      GO LAS_split_title
-      DEFINE SYMBOL ferret_plot_title = ($split_title)
-
-      IF ($shade_underlay) THEN 
-         SHADE($qualifiers)/TRIM/TITLE="($ferret_plot_title)"/SET ($ferret_var_0)
-         GO reset_labels          
-         PPL SHADE
-      IF `($LEV_NUM"0") GT 245/2` THEN PPL SHASET RESET
-         ($plot_type)($qualifiers)/OVER/NOLAB ($ferret_var_0)
-   ELSE
-      ($plot_type)($qualifiers)/TITLE="($ferret_plot_title)"/SET ($ferret_var_0)
+   IF ($shade_underlay) THEN 
+      SHADE($shade_qualifiers)/TITLE="($ferret_plot_title)"/SET ($ferret_var_0)
       GO reset_labels          
-      PPL ($plot_type)
-   ENDIF
-
-   IF ($ferret_contour_style"0|default>0|color_filled_plus_lines>1|raster_plus_lines>1|*>0") THEN
-      IF ($ferret_contour_levels"0|*>1") THEN 
-         DEFINE SYMBOL levsym = /LEVELS=($ferret_contour_levels)
-      ELSE
-         IF ($ferret_fill_levels"0|*>1") THEN DEFINE SYMBOL levsym = /LEVELS=($ferret_fill_levels)
-      ENDIF
-     CONTOUR/OVER/NOLAB($levsym) ($ferret_var_0)
+      PPL SHADE
+      IF `($LEV_NUM"0") GT 245/2` THEN PPL SHASET RESET
+      DEFINE SYMBOL qualifiers ($qualifiers)/OVER/NOLAB
    ENDIF
    
-! One of the results is the data min and max. Save those here.
-   DEFINE SYMBOL data_plotted_min = ($ppl$zmin)
-   DEFINE SYMBOL data_plotted_max = ($ppl$zmax)
-
+   ($plot_type)($qualifiers) ($ferret_var_0)
+ELSE
+   ($plot_type)($qualifiers)/TITLE="($ferret_plot_title)"/SET ($ferret_var_0)
+   GO reset_labels          
+   PPL ($plot_type)
 ENDIF
+
+! IF there are contour lines, draw or overlay the contours.
+IF ($ferret_contour_style"0|default>0|color_filled_plus_lines>1|raster_plus_lines>1|*>0") THEN
+   IF ($ferret_contour_levels"0|*>1") THEN 
+      DEFINE SYMBOL levsym = /LEVELS=($ferret_contour_levels)
+   ELSE
+      IF ($ferret_fill_levels"0|*>1") THEN DEFINE SYMBOL levsym = /LEVELS=($ferret_fill_levels)
+   ENDIF
+  CONTOUR/OVER/NOLAB($levsym) ($ferret_var_0)
+ENDIF
+
+! One of the results is the data min and max. Save those here.
+DEFINE SYMBOL data_plotted_min = ($ppl$zmin)
+DEFINE SYMBOL data_plotted_max = ($ppl$zmax)
 
 ! Overall header at the very top
 GO LAS_ferret_las_version_header
 
 ! Add labels at the top for the location of overlaid lines
 ! and for URLs if they exist  
-   
+
 GO labels_above_plot
 
 ! Mark grid points. Options are no, subsample (tests if subsampling needed)

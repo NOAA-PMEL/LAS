@@ -24,11 +24,6 @@ CANCEL MODE INTERPOLATE  ! important when evaluating the size limits
 
 SET LIST/FILE="($result_ferret_listing_filename)"
 
-IF `($data_count"1|2|*>0") NE 2` THEN
-  MESSAGE/ERROR **ERROR List difference requires two variables
-  EXIT/PROGRAM
-ENDIF
-
 GO LAS_initialize_region 0
 
 GO LAS_initialize_data 0

@@ -147,7 +147,7 @@ IF `(($all_units_same) EQ 0) AND (($data_count) GT 2)` THEN
 ELSE
 
 IF `($ferret_line_or_sym%0|sym>1|*>0%)` THEN  
-   PLOT($qualifiers)/NOKEY/SET/COLOR=WHITE ($plot_arg)
+   PLOT/NOKEY/SET/COLOR=WHITE ($plot_arg)
       IF `($labnum_x%0|*>1%)` THEN GO unlabel ($labnum_x)
       IF `($labnum_z%0|*>1%)` THEN GO unlabel ($labnum_z)
       IF `($labnum_t%0|*>1%)` THEN GO unlabel ($labnum_t)
