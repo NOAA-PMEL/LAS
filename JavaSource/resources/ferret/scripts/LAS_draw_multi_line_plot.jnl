@@ -132,7 +132,7 @@ IF `(($all_units_same) EQ 0) AND (($data_count) GT 2)` THEN
 
 ! Draw the other plot axes scaled for each set of variables with common units
 ! Plot axis with first set of units will be on the left.
-! Draw the plots for other sets of variables as /SYM=dot/COLOR=white (COLOR=8) so that
+! Draw the plots for other sets of variables as /SYM=dot/COLOR=8 (COLOR=white) so that
 ! only the axis shows. The variables will be plotted individually below
 ! so that we can control the line color.
 

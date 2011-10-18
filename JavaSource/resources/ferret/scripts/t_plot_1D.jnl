@@ -48,17 +48,21 @@ ENDIF
 DEFINE SYMBOL ferret_title_0 = ($ferret_plot_title"($data_var)")
 LET title_len = STRLEN("($ferret_title_0)")
 
-! Open the window, apply size, scale options
-GO LAS_open_window
-
 ! Ignore line color if this is a multi-var plot.
-IF `($data_count) GT 1` THEN DEFINE SYMBOL itsa_multi_lineplot = 1
+! Also ignore any request for trend-line plots.
+IF `($data_count) GT 1` THEN 
+   DEFINE SYMBOL itsa_multi_lineplot = 1
+   CANCEL SYMBOL ferret_trend_line
+ENDIF
 
 ! Use Ferret properties to set up the plot qualifiers
 GO LAS_set_plot_qualifiers
 
 ! symbols and/or line
 GO set_linesym
+
+! Open the window, apply size, scale options
+GO LAS_open_window
 
 ! Set the plot argument. If there are multiple variables, plot them
 ! all at once to get Ferret auto-scaling of the dependent axis.
@@ -82,10 +86,18 @@ ELSE
    GO LAS_split_title
    DEFINE SYMBOL ferret_title_0 = ($split_title)
 
-   PLOT($qualifiers)/NOKEY/SET/TITLE="($ferret_title_0)" ($plot_arg)
-      IF `($ferret_dep_axis_scale"0|*>1")` THEN PPL YAXIS ($ferret_dep_axis_scale)
-      GO reset_labels
-   PPL PLOT
+   IF ($ferret_trend_line"0|*>1") THEN  
+
+      GO trend_line
+
+   ELSE
+
+      PLOT($qualifiers)/NOKEY/SET/TITLE="($ferret_title_0)" ($plot_arg)
+         IF `($ferret_dep_axis_scale"0|*>1")` THEN PPL YAXIS ($ferret_dep_axis_scale)
+         GO reset_labels
+      PPL PLOT
+
+   ENDIF
 
    GO LAS_url_label 0
 
@@ -98,6 +110,9 @@ GO labels_above_plot
 
 ! Overall header at the very top
 GO LAS_ferret_las_version_header
+
+! Set up so zooming works on plots with trend lines.
+IF ($ferret_trend_line"0|1|2>1") THEN GO reset_after_trend
 
 ! Save the results
 GO LAS_results point
