@@ -63,6 +63,7 @@ GO LAS_open_window
 IF ($ferret_use_graticules"1|default>1|*>0) THEN DEFINE SYMBOL ferret_use_graticules = none
 
 GO LAS_set_plot_qualifiers
+DEFINE SYMBOL qualifiers = ($qualifiers)/NOLAB
 
 ! Set the URL label for the first dataset.
 GO LAS_url_label 0
