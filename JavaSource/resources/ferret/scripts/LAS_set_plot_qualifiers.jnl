@@ -18,20 +18,42 @@ IF ($ferret_plot_key"0|0|nokey>0|*>1") THEN
   DEFINE SYMBOL qualifiers = ($qualifiers)/NOKEY
 ENDIF
 
-! Graticule lines
+! Graticule lines. For 1D plots, make them gray.
 
 ! TODO:  For time plots, either the configurer or the script might want to turn on 
 ! TODO:  graticules at the small tic marks.  /GRATICULE=(DASH)="small, large"
 
-IF ($ferret_use_graticules"1|0|*>1) THEN
-  SET MODE GRATICULE:(DASH,COLOR=black)
+!IF ($ferret_use_graticules"1|0|*>1) THEN
+!  DEFINE SYMBOL graticuleColor = black
+!  IF ($oneDplot"0|*>1") THEN
+!     SET MODE LINECOLORS:7
+!     PPL COLOR,7,70,70,70  ! gray
+!     DEFINE SYMBOL graticuleColor = 7
+!  ENDIF
+!  SET MODE GRATICULE:(DASH,COLOR=($graticuleColor))
+!ENDIF
+
+
+SET MODE LINECOLORS:8
+PPL COLOR,7,70,70,70  ! gray
+PPL COLOR,8,100,100,100  ! white
+
+IF ($ferret_use_graticules"1|none>0|*>1) THEN
+  DEFINE SYMBOL graticuleColor = black
+  IF ($ferret_use_graticules"1|default>1|gray>1|*>0) THEN
+     DEFINE SYMBOL graticuleColor = 7
+  ELIF ($ferret_use_graticules"0|white>1|*>0) THEN
+     DEFINE SYMBOL graticuleColor = 8
+  ELIF ($ferret_use_graticules"0|black>1|*>0) THEN
+     DEFINE SYMBOL graticuleColor = 1
+  ENDIF
+  SET MODE GRATICULE:(DASH,COLOR=($graticuleColor))
 ENDIF
 
 ! Set up for degrees-minutes-seconds labels on independent variable axis
 ! If this was not requested, the script just returns.
 
 IF ($ferret_deg_min_sec"0|false>0|*>1") THEN GO LAS_set_deg_min_sec.jnl
-
 
 ! -------- Options for 2D single-variable plots
 
@@ -52,6 +74,11 @@ IF ($twoDplot"0|*>1") THEN
        DEFINE SYMBOL qualifiers = ($qualifiers)/LEVELS=($ferret_fill_levels)
    ENDIF
 
+   ! Set the plot type (SHADE or CONTOUR)
+
+   DEFINE SYMBOL plot_type =($ferret_contour_style"FILL|default>FILL|raster>SHADE|\
+color_filled_contours>FILL|color_filled_plus_lines>FILL|contour_lines>CONTOUR|raster_plus_lines>SHADE")
+
    ! For all FILL plots, we will first do a SHADE underlay to 
    ! get the plot to draw all the way to the edges.
 
@@ -66,12 +93,6 @@ IF ($twoDplot"0|*>1") THEN
 
    IF ($ferret_palette"0|*>1") THEN DEFINE SYMBOL qualifiers = \
     ($qualifiers)/PALETTE=($ferret_palette"rainbow|default>rainbow|*>*)
-
-   ! Set the plot type (SHADE or CONTOUR)
-
-   DEFINE SYMBOL plot_type =($ferret_contour_style"FILL|default>FILL|raster>SHADE|\
-color_filled_contours>FILL|color_filled_plus_lines>FILL|contour_lines>CONTOUR|raster_plus_lines>SHADE")
-
 
    ! 2D fill style  (from las_initialize_variable
 
@@ -177,6 +198,10 @@ IF ($oneDplot"0|*>1") THEN
 
 ENDIF   ! end of options for oneDplot, dependent axis scale setup
 
+! ---------------- sanity check on ferret_trend_line.
+
+IF `($ferret_trend_line"0|1|2|*>0") EQ 0` THEN \
+   CANCEL SYMBOL ferret_trend_line
 
 ! ---------------- Settings for XY vector and XY vector difference plots.
 
