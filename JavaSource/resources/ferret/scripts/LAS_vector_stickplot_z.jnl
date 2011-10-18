@@ -149,7 +149,7 @@ GO labels_above_plot
 SET VIEW lf_`ks`
 PPL tics,0,0,0,0
 PPL axlsze,0,0
-PLOT/SET_UP/NOY/AXES=0,0,1,0/NOLAB/COLOR=white/k=`ks` ($ferret_vector_1)*0
+PLOT/SET_UP/NOY/AXES=0,0,1,0/NOLAB/color=8/k=`ks` ($ferret_vector_1)*0
    PPL PLOT
 LET zlab = zz[k=`ks`]
 LABEL/NOUSER `-1*0.1*($ppl$xorg)`, `($ppl$ylen)/2`, 1, 0, 0.13, "`zlab`"
@@ -173,7 +173,7 @@ REPEAT/RANGE=`ks+delta_z`:`ke`:`delta_z`/NAME=m (  \
  IF `m GT ke` THEN EXIT/LOOP;  \
  SET VIEW lf_`m`; \
  PPL tics,0,0,0,0; PPL axlsze,0,0; \
-     PLOT/SET_UP/NOY/AXES=0,0,1,0/NOLAB/COLOR=white/K=`ks` ($ferret_vector_1_noz)*0; \
+     PLOT/SET_UP/NOY/AXES=0,0,1,0/NOLAB/color=8/K=`ks` ($ferret_vector_1_noz)*0; \
      PPL PLOT; \
  LET zlab = zz[k=`m`]; \
  LABEL/NOUSER `-1*0.1*($ppl$xorg)`, `($ppl$ylen)/2`, 1, 0, 0.13, "`zlab`"; \

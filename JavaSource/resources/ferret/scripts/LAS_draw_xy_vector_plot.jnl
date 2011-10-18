@@ -63,7 +63,7 @@ IF ($ferret_vector_subsampling"0") THEN
 ELSE
    IF ($native_curvilinear_xy"0") THEN 
    ! Get the automatic vector skip values, then plot, making PPL settings.
-      VECTOR($qualifiers)/TITLE=" "/NOLAB/NOAX/COLOR=white \
+      VECTOR($qualifiers)/TITLE=" "/NOLAB/NOAX/color=8 \
       ($ferret_curvi_base_var), xcoord, ycoord
 
       VECTOR($qualifiers)/TITLE=" "/SET \
@@ -79,7 +79,7 @@ ELSE
    ELSE
 
       ! Get the automatic vector skip values, then plot, making PPL settings.
-      VECTOR($qualifiers)/TITLE=" "/NOLAB/NOAX/COLOR=white \
+      VECTOR($qualifiers)/TITLE=" "/NOLAB/NOAX/color=8 \
          ($ferret_vector_variable)
 
       VECTOR($qualifiers)/TITLE=" "/SET ($ferret_vector_variable)
