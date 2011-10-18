@@ -124,7 +124,7 @@ GO labels_above_plot
 SET VIEW lf_`lls`
 PPL TICS,0,0,0,0
 PPL AXLSZE,0,0
-PLOT/SET_UP/NOY/AXES=0,0,1,0/NOLAB/COLOR=white/L=`lls` ($ferret_vector_1)*0
+PLOT/SET_UP/NOY/AXES=0,0,1,0/NOLAB/color=8/L=`lls` ($ferret_vector_1)*0
    PPL PLOT
 LET tlab = TAX_DATESTRING(tt[l=`lls`], tt,"day")
 LABEL/NOUSER `-1*0.1*($ppl$xorg)`, `($ppl$ylen)/2`, 1, 0, 0.12, "`tlab`"
@@ -149,7 +149,7 @@ REPEAT/RANGE=`lls+delta_t`:`lle`:`delta_t`/NAME=m (  \
    IF `count GT ent` THEN EXIT/LOOP;  \
    SET VIEW lf_`m`; \
    PPL TICS,0,0,0,0; PPL AXLSZE,0,0; \
-     PLOT/SET_UP/NOY/AXES=0,0,1,0/NOLAB/COLOR=white/l=`lls` ($ferret_vector_1)*0; \
+     PLOT/SET_UP/NOY/AXES=0,0,1,0/NOLAB/color=8/l=`lls` ($ferret_vector_1)*0; \
      PPL PLOT; \
    LET tlab = TAX_DATESTRING(tt[l=`m`], tt,"day") ; \
    LABEL/NOUSER `-1*0.1*($ppl$xorg)`, `($ppl$ylen)/2`, 1, 0, 0.12, "`tlab`"; \
