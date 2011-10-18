@@ -146,13 +146,13 @@ IF `STRLEN("($ferret_view)") EQ 2` THEN
 ! if the number of points looks like it will be large.
 
 
-      LET xx = x[gx=($data_var)[d=($data_num)]]
+      LET ii = i[gx=($data_var)[d=($data_num)]]
       LET nx = ($clon_imax) - ($clon_imin)
-      let ixmax = INT(xx[i=@max])
+      let ixmax = ii[i=@max]
 
-      LET yy = y[gy=($data_var)[d=($data_num)]]
+      LET jj = j[gy=($data_var)[d=($data_num)]]
       LET ny = ($clat_jmax) - ($clat_jmin)
-      let jymax = INT(yy[j=@max])
+      let jymax = jj[j=@max]
 
 ! Curvilinear and XY plot
 
