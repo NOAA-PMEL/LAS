@@ -170,7 +170,7 @@ DEFINE SYMBOL ferret_plot_title = " "
 DEFINE SYMBOL plot_arg = ($xvar), ($yvar)
 
 ! The underlying plot is a PLOT/VS
-DEFINE SYMBOL qualifiers = ($qualifiers)/VS/COLOR=WHITE
+DEFINE SYMBOL qualifiers = ($qualifiers)/VS/color=8
 
 ! Expand the horizontal and vertical scale a bit data is not on top of
 ! the plot axes.
