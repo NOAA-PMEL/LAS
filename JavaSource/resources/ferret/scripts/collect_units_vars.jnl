@@ -33,6 +33,9 @@ REPEAT/RANGE=1:($n_ustrings)/NAME=g (\
 IF `new_string EQ 0` THEN 
    EXIT/SCRIPT
 ELSE
+
+! Mark this units string as being done and prepare for the next one
+   DEFINE SYMBOL done_($n_ustrings) = 1
    DEFINE SYMBOL n_ustrings = `($n_ustrings)+1`
    DEFINE SYMBOL ustring_($n_ustrings) = ($inunits_up)   
    DEFINE SYMBOL iplot = `($iplot) + 1`
@@ -44,16 +47,10 @@ REPEAT/RANGE=1:`($data_count)-1`/NAME=g (\
    DEFINE SYMBOL g = `g`;\
    DEFINE SYMBOL gg = `g-1`;\
    DEFINE SYMBOL this_units = `UPCASE("($data_($g)_units)")`; \
-   sh sym this_units; \
-   sh sym in_units; \
    LET match_units = `STRCMP("($this_units)", "($in_units)") EQ 0`; \
    IF `match_units` THEN DEFINE SYMBOL plot_vars_($iplot) = ($plot_vars_($iplot))($comma) ($ferret_plot_var_($g));\
    IF `match_units` THEN DEFINE SYMBOL comma = , ;\
    IF `match_units` THEN DEFINE SYMBOL group_label_($iplot) = ($data_($g)_units) \
  )
 
-! Mark this units string as being done and prepare for the next one
-DEFINE SYMBOL done_($n_ustrings) = 1
-
 !  ----------------- End of collect_units_var.jnl ------------------------------------
-

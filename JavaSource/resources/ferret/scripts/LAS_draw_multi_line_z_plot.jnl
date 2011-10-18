@@ -2,15 +2,29 @@
 !  Do a multi-line 1-D plot in z. 
 ! 7/2010    ACM updates for V7.2 multi-variable plots
 
-! By default dont use graticules. They can be a mess.
-! The user can turn them on if desired.
 set mode ver:always
 
-CANCEL MODE GRATICULE
-IF ($ferret_use_graticules"0|0|1|*>1) THEN
-  SET MODE GRATICULE:(DASH,COLOR=black)
-ENDIF
+! By default use graticules only the independent axis. 
+! Dependent-axis ones can be a mess. The user can turn them on 
+! if desired.  If explicitly turned off, do not draw them.
 
+
+!SET MODE LINECOLORS:8
+!PPL COLOR,7,70,70,70  ! gray
+!PPL COLOR,8,100,100,100  ! white
+!DEFINE SYMBOL graticuleColor = 7
+
+!CANCEL MODE GRATICULE
+!IF ($ferret_use_graticules"0|none>0|default>0|*>1) THEN
+!  SET MODE GRATICULE:(DASH,COLOR=($graticuleColor))
+!ELSE
+!   DEFINE SYMBOL qualifiers_0 = /HGRATICULE=DASH,COLOR=($graticuleColor))
+!   IF `($ferret_use_graticules"1|0|default>1|1|*>1) EQ 0` THEN CANCEL SYMBOL qualifiers_0
+!ENDIF
+
+CANCEL MODE GRATICULE
+DEFINE SYMBOL qualifiers_0 = /HGRATICULE=DASH,COLOR=($graticuleColor))
+IF `($ferret_use_graticules"1|none>0|*>1) EQ 0` THEN CANCEL SYMBOL qualifiers_0
 
 GO LAS_pp_set_region_labels  ! for first dataset/variable
 
@@ -47,6 +61,13 @@ REPEAT/range=1:`($data_count)-1`/NAME=qdat (  \
   GO LAS_pp_set_region_labels \
 )
 
+! If default graticules setting, and units are all the same, put
+! graticules on both axes.
+IF `($all_units_same"0|0|*>1") AND ($qualifiers_0"0|*>1")` THEN 
+   CANCEL SYMBOL qualifiers_0
+   SET MODE GRATICULE:(DASH,COLOR=($graticuleColor))
+ENDIF
+
 ! No title; variable names and units are listed in the legend.
 DEFINE SYMBOL qualifiers = ($qualifiers)/TITLE=" "
 
@@ -54,7 +75,6 @@ DEFINE SYMBOL qualifiers = ($qualifiers)/TITLE=" "
 ! one dependent axis on the left an the other on the right.
 
 IF `(($data_count"0") EQ 2) AND (STRCMP("($units_0)", "($units_1)") NE 0)` THEN 
-   CANCEL MODE GRATICULE  ! graticules are a mess if two dependent axes!
 
 ! Plot second variable in red, with its axis on the right.
 
@@ -116,7 +136,7 @@ IF `(($all_units_same) EQ 0) AND (($data_count) GT 2)` THEN
 
 ! Draw the other plot axes scaled for each set of variables with common units
 ! Plot axis with first set of units will be on the left.
-! Draw the plots for other sets of variables as /SYM/COLOR=white so that
+! Draw the plots for other sets of variables as /SYM/COLOR=8 (white) so that
 ! only the axis shows. The variables will be plotted individually below
 ! so that we can control the line color.
 
@@ -124,14 +144,16 @@ IF `(($all_units_same) EQ 0) AND (($data_count) GT 2)` THEN
    LET xpl = 1
    LET ypl = `1 - margin_del* (($iplot)-1)`
 
-   REPEAT/RANGE=2:($iplot)/NAME=m (\
+   REPEAT/RANGE=2:`($iplot)+1`/NAME=m (\
       DEFINE SYMBOL vm = `m-1`; \
       DEFINE VIEWPORT/X=0:`xpl`/y=0:`ypl` v($vm); \
       SET VIEW v($vm); \
-      PLOT/AXES=1,0,0,0/SYM/COLOR=white/NOLAB ($plot_vars_($vm));\
+      PLOT/AXES=1,0,0,0/SYM=dot/COLOR=8/NOLAB ($plot_vars_($vm));\
       LABEL/NOUSER `($ppl$xlen)/2`, `($ppl$ylen) + 0.5`, 0, 0, 0.12, @AC($group_label_($vm)); \
       LET ypl = `ypl + margin_del` \
    )
+
+   DEFINE SYMBOL y_top_loc = ($ppl$ylen)
 
 ! Draw the lines each in its own viewport
 
@@ -141,18 +163,23 @@ IF `(($all_units_same) EQ 0) AND (($data_count) GT 2)` THEN
    DEFINE SYMBOL vm = 0
    DEFINE VIEWPORT/X=0:`xpl`/y=0:`ypl` v0_($vm)
    SET VIEW v0_0
-   PLOT($qualifiers)/AXES=0,1,1,1/COLOR=($color($vm))/NOLAB ($ferret_plot_var_($vm)); \
-   LABEL/NOUSER `($ppl$xlen)/2`, `-0.5`, 0, 0, 0.12, @AC($group_label_($vm)); \
+   PLOT($qualifiers)($qualifiers_0)/AXES=0,1,1,1/COLOR=($color($vm))/NOLAB ($ferret_plot_var_($vm))
+   LABEL/NOUSER `($ppl$xlen)/2`, `-0.5`, 0, 0, 0.12, @AC($group_label_($vm))
 
    REPEAT/RANGE=2:($data_count)/name=m (\
       DEFINE SYMBOL vm = `m-1`; \
       DEFINE VIEWPORT/X=0:`xpl`/y=0:`ypl` v0_($vm);\
       SET VIEW v0_($vm);\
-      PLOT($qualifiers)/AXES=0,0,0,0/COLOR=($color($vm))/NOLAB ($ferret_plot_var_($vm)) )
+      PLOT($qualifiers)/AXES=0,0,0,0/COLOR=($color($vm))/NOLAB ($ferret_plot_var_($vm)) \
+   )
+
+   ! space for labels above the top axis.
+   DEFINE SYMBOL extra_y_space = `($Y_TOP_LOC) - ($ppl$ylen) - 0.2` 
 ELSE
 
+SET VIEW FULL
 IF `($ferret_line_or_sym%0|sym>1|*>0%)` THEN  
-   PLOT/NOKEY/SET/COLOR=WHITE ($plot_arg)
+   PLOT($qualifiers_0)/NOKEY/SET/COLOR=8 ($plot_arg)
       IF `($labnum_x%0|*>1%)` THEN GO unlabel ($labnum_x)
       IF `($labnum_x%0|*>1%)` THEN GO unlabel ($labnum_y)
       IF `($labnum_z%0|*>1%)` THEN GO unlabel ($labnum_z)
@@ -164,6 +191,8 @@ IF `($ferret_line_or_sym%0|sym>1|*>0%)` THEN
       IF `($labnum_calend%0|*>1%)` THEN GO unlabel ($labnum_calend)
       IF `($title_size%0|*>1%)` THEN PPL LABSET ($title_size)
       IF `($ferret_dep_axis_scale"0|*>1")` THEN PPL XAXIS ($ferret_dep_axis_scale)
+      PPL ylab
+      PPL xlab ($data_0_units)
    PPL PLOT
 
    PLOT($qualifiers)/NOKEY/NOLAB/OVER/COLOR=black ($ferret_plot_var_0)
@@ -172,9 +201,10 @@ IF `($ferret_line_or_sym%0|sym>1|*>0%)` THEN
    IF `($data_count"0") GT 3` THEN PLOT($qualifiers)/NOKEY/OVER/COLOR=blue ($ferret_plot_var_3)
    IF `($data_count"0") GT 4` THEN PLOT($qualifiers)/NOKEY/OVER/COLOR=lightblue ($ferret_plot_var_4)
    IF `($data_count"0") GT 5` THEN PLOT($qualifiers)/NOKEY/OVER/COLOR=purple ($ferret_plot_var_5)
+
 ELSE
 
-   PLOT($qualifiers)/NOKEY/SET ($plot_arg)
+   PLOT($qualifiers)($qualifiers_0)/NOKEY/SET ($plot_arg)
       IF `($labnum_x%0|*>1%)` THEN GO unlabel ($labnum_x)
       IF `($labnum_y%0|*>1%)` THEN GO unlabel ($labnum_y)
       IF `($labnum_z%0|*>1%)` THEN GO unlabel ($labnum_z)
@@ -186,6 +216,8 @@ ELSE
       IF `($labnum_calend%0|*>1%)` THEN GO unlabel ($labnum_calend)
       IF `($title_size%0|*>1%)` THEN PPL LABSET ($title_size)
       IF `($ferret_dep_axis_scale"0|*>1")` THEN PPL YAXIS ($ferret_dep_axis_scale)
+      PPL ylab
+      PPL xlab ($data_0_units)
    PPL PLOT
 ENDIF
 
@@ -200,14 +232,18 @@ ENDIF
 DEFINE SYMBOL ax_vert_save = ($ax_vert"D")
 DEFINE SYMBOL ax_horiz_save = ($ax_horiz"D")
 
+DEFINE SYMBOL yaxis_min_save = ($yaxis_min)
+DEFINE SYMBOL yaxis_max_save = ($yaxis_max)
+
 ! Draw the legend.
 
 ! Make an invisible xy plot. The legline script doesnt work well with z and t plots.
 IF `($two_axes"0") EQ 1` THEN DEFINE SYMBOL data_count = 2
 
 DEFINE VIEWPORT/x=0:1/y=0:1 overview
+show view
 SET VIEW overview
-PLOT/NOLAB/NOAX/I=1:2/VLIM=100:102 i
+PLOT/NOLAB/NOAX/I=1:2/VLIM=100:102 i/0
 
 ! The start (x,y) position for each line drawn on the key
 LET x1 = -0.2
@@ -239,6 +275,9 @@ DEFINE SYMBOL ax_vert = ($ax_vert_save)
 IF ($ax_vert"|D>1|*>0") THEN CANCEL SYMBOL ax_vert
 DEFINE SYMBOL ax_horiz = ($ax_horiz_save)
 IF ($ax_horiz"|D>1|*>0") THEN CANCEL SYMBOL ax_horiz
+
+DEFINE SYMBOL yaxis_min = ($yaxis_min_save)
+DEFINE SYMBOL yaxis_max = ($yaxis_max_save)
 
 ! --------------- End of LAS_draw_multi_line_z_plot  ---------------------------
 
