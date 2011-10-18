@@ -17,7 +17,7 @@ DEFINE SYMBOL header_lab = (NOAA/PMEL)
 
 IF ($ferret_annotations%0|*>1%) THEN EXIT/SCRIPT
 
-LABEL/NOUSER `($ppl$xlen)/2`, `($ppl$ylen)+1.2`, 0, 0, 0.12, ($las_ferret_header_label)
+LABEL/NOUSER `($ppl$xlen)/2`, `($ppl$ylen)+1.2+0.2*($extra_y_space"0")`, 0, 0, 0.12, ($las_ferret_header_label)
 
 
 
