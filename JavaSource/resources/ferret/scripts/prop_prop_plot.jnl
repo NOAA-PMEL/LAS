@@ -135,6 +135,9 @@ IF `xsize NE ysize` THEN
   EXIT/PROGRAM
 ENDIF
 
+! Plot qualifiers (graticule lines etc)
+GO LAS_set_plot_qualifiers 
+
 ! Open the window, apply size, scale options
 
 ! dont want to set the aspect ratio using xy region, so reset
