@@ -4,9 +4,9 @@ import gov.noaa.pmel.tmap.las.client.serializable.VariableSerializable;
 
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PushButton;
 import com.google.gwt.user.client.ui.TextBox;
@@ -21,7 +21,10 @@ public class VariableConstraintWidget extends Composite {
 	TextBox maxTextBox = new TextBox();
 	boolean removeable = false;
 	PushButton xRemove = new PushButton("Remove");
-	
+	NumberFormat dFormat = NumberFormat.getFormat("########.##");
+	double min;
+	double max;
+	boolean active = true;
 	public VariableConstraintWidget(boolean removable) {
 		this.removeable = removable;
 		xRemove.addStyleDependentName("SMALLER");
@@ -45,7 +48,11 @@ public class VariableConstraintWidget extends Composite {
 		}
 		initWidget(bucket);
 	}
-
+    public void setConstraint(double min, double max) {
+    	this.min = min;
+    	this.max = max;
+    	setConstraint(dFormat.format(min), dFormat.format(max));
+    }
 	public void setConstraint(String min, String max) {
 		minTextBox.setValue(min);
 		maxTextBox.setValue(max);
@@ -67,10 +74,10 @@ public class VariableConstraintWidget extends Composite {
 		xApply.addClickHandler(applyHandler);
 	}
 	public String getMin() {
-		return minTextBox.getText();
+		return dFormat.format(min);
 	}
 	public String getMax() {
-		return maxTextBox.getText();
+		return dFormat.format(max);
 	}
 	public void setMin(String min) {
 		minTextBox.setText(min);
@@ -104,5 +111,18 @@ public class VariableConstraintWidget extends Composite {
 	}
 	public void addRemoveHandler(ClickHandler clickHandler) {
 		xRemove.addClickHandler(clickHandler);	
+	}
+	public void setActive(boolean a) {
+		this.active = a;
+	}
+	public boolean isActive() {
+		return this.active;
+	}	
+	public void setVisible(boolean visible) {
+		xApply.setVisible(visible);
+		xLabel.setVisible(visible);
+		minTextBox.setVisible(visible);
+		maxTextBox.setVisible(visible);
+	    xRemove.setVisible(visible);
 	}
 }

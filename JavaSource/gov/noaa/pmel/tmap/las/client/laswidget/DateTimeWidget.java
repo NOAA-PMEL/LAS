@@ -2,7 +2,6 @@ package gov.noaa.pmel.tmap.las.client.laswidget;
 
 import gov.noaa.pmel.tmap.las.client.map.GeoUtil;
 import gov.noaa.pmel.tmap.las.client.serializable.TimeAxisSerializable;
-import gov.noaa.pmel.tmap.las.client.util.Util;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -11,18 +10,17 @@ import java.util.List;
 
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
-import com.google.gwt.i18n.client.NumberFormat;
+import com.google.gwt.maps.jsio.rebind.LongFragmentGenerator;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Grid;
-import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.HTMLTable.CellFormatter;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
-import com.google.gwt.user.client.ui.VerticalPanel;
-import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.user.client.ui.HTMLTable.CellFormatter;
+import com.google.gwt.user.client.ui.PushButton;
 /**
  * A pure GWT implementation of the LAS Date Widget.
  * @author rhs
@@ -40,14 +38,10 @@ public class DateTimeWidget extends Composite {
 	Date lo;
 	Date hi;
     
-	Label dt_label = new Label("Date/Time: ");
-	Label d_label = new Label("Date: ");
 	
-	Label dt_label_lo_range = new Label("Start date/Time: ");
-	Label d_label_lo_range = new Label("Start date: ");
-	
-	Label dt_label_hi_range = new Label("End date/Time: ");
-	Label d_label_hi_range = new Label("End date: ");
+	Label d_label = new Label("Time: ");
+	Label d_label_lo_range = new Label("Start time: ");
+	Label d_label_hi_range = new Label("End time: ");
 	
 	ListBox lo_year = new ListBox();
 	ListBox lo_month = new ListBox();
@@ -59,7 +53,7 @@ public class DateTimeWidget extends Composite {
 	ListBox hi_day = new ListBox();
 	HourListBox hi_hour = new HourListBox();
     
-	Grid dateTimeWidget = new Grid(2, 5);
+	Grid dateTimeWidget = new Grid(2, 6);
 
 	boolean hasYear = false;
 	boolean hasMonth = false;
@@ -89,6 +83,36 @@ public class DateTimeWidget extends Composite {
 	public DateTimeWidget() {
 		setListeners();
 		initWidget(dateTimeWidget);
+	}
+	public String getFerretDateMin() {
+		if ( climatology ) {
+			StringBuilder date = new StringBuilder();
+			date.append(GeoUtil.format_two(lo.getDate()));
+			date.append("-"+MONTHS.get(lo.getMonth()));
+			date.append("-0001"); 
+			return date.toString();
+		} else {
+			if ( hasHour ) {
+				return mediumFerretForm.format(lo);
+			} else {
+				return shortFerretForm.format(lo);
+			}
+		}
+	}
+	public String getFerretDateMax() {
+		if ( climatology ) {
+			StringBuilder date = new StringBuilder();
+			date.append(GeoUtil.format_two(hi.getDate()));
+			date.append("-"+MONTHS.get(hi.getMonth()));
+			date.append("-0001"); 
+			return date.toString();
+		} else {
+			if ( hasHour ) {
+				return mediumFerretForm.format(hi);
+			} else {
+				return shortFerretForm.format(hi);
+			}
+		}
 	}
 	public void init(TimeAxisSerializable tAxis, boolean range) {
 		dateTimeWidget.clear();
@@ -129,6 +153,15 @@ public class DateTimeWidget extends Composite {
 			}
 		}
 			
+	}
+	public void reinit() {
+		if ( isMenu ) {
+			lo_day.setSelectedIndex(0);
+			hi_day.setSelectedIndex(hi_day.getItemCount() - 1);
+		} else {
+			setLo(longFerretForm.format(lo));
+			setHi(longFerretForm.format(hi));
+		}
 	}
 	public void setListeners() {
 		lo_year.addChangeHandler(loYearHandler);
@@ -195,14 +228,10 @@ public class DateTimeWidget extends Composite {
 			dateTimeWidget.setWidget(1, 0, d_label_hi_range);
 			dateTimeWidget.setWidget(1, 1, hi_day);
 		} else {
-			if ( render.toLowerCase().contains("t") ) {
-				dateTimeWidget.setWidget(0, 0, dt_label_lo_range);
-				dateTimeWidget.setWidget(1, 0, dt_label_hi_range);
-
-			} else {
-				dateTimeWidget.setWidget(0, 0, d_label_lo_range);
-				dateTimeWidget.setWidget(1, 0, d_label_hi_range);
-			}
+			
+			dateTimeWidget.setWidget(0, 0, d_label_lo_range);
+			dateTimeWidget.setWidget(1, 0, d_label_hi_range);
+			
 			
 			if ( render.toLowerCase().contains("y") ) {
 				dateTimeWidget.setWidget(0, 1, lo_year);
