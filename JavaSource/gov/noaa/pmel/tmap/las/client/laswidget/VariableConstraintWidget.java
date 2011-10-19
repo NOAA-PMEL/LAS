@@ -21,9 +21,6 @@ public class VariableConstraintWidget extends Composite {
 	TextBox maxTextBox = new TextBox();
 	boolean removeable = false;
 	PushButton xRemove = new PushButton("Remove");
-	NumberFormat dFormat = NumberFormat.getFormat("########.##");
-	double min;
-	double max;
 	boolean active = true;
 	public VariableConstraintWidget(boolean removable) {
 		this.removeable = removable;
@@ -48,11 +45,6 @@ public class VariableConstraintWidget extends Composite {
 		}
 		initWidget(bucket);
 	}
-    public void setConstraint(double min, double max) {
-    	this.min = min;
-    	this.max = max;
-    	setConstraint(dFormat.format(min), dFormat.format(max));
-    }
 	public void setConstraint(String min, String max) {
 		minTextBox.setValue(min);
 		maxTextBox.setValue(max);
@@ -74,10 +66,10 @@ public class VariableConstraintWidget extends Composite {
 		xApply.addClickHandler(applyHandler);
 	}
 	public String getMin() {
-		return dFormat.format(min);
+		return minTextBox.getText();
 	}
 	public String getMax() {
-		return dFormat.format(max);
+		return maxTextBox.getText();
 	}
 	public void setMin(String min) {
 		minTextBox.setText(min);
