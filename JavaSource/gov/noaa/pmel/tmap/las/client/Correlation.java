@@ -160,6 +160,7 @@ public class Correlation implements EntryPoint {
 			@Override
 			public void onClick(ClickEvent event) {
 				timeConstraint.reinit();
+				update.addStyleDependentName("APPLY-NEEDED");
 			}
     		
     	});
@@ -868,7 +869,33 @@ public class Correlation implements EntryPoint {
 				String value = con.get("value");
 				String id = con.get("id");
 				String plotv = plotVariable(varid);
-				if ( plotv.equals("x") ) {
+				VariableSerializable v = xDatasetVariables.get(varid);
+				if ( v != null && v.getName().toLowerCase().equals("latitude") ) {
+					if ( op.equals("gt") || op.equals("ge") ) {
+						mapConstraint.setCurrentSelection(Double.valueOf(value), Double.valueOf(yhi), Double.valueOf(xlo), Double.valueOf(xhi));
+					} else if ( op.equals("eq") ) {
+						mapConstraint.setCurrentSelection(Double.valueOf(value), Double.valueOf(value), Double.valueOf(xlo), Double.valueOf(xhi));
+					} else {
+						mapConstraint.setCurrentSelection(Double.valueOf(ylo), Double.valueOf(value), Double.valueOf(xlo), Double.valueOf(xhi));
+					}
+				} else if ( v != null &&  v.getName().toLowerCase().equals("longitude") ) {	
+					if ( op.equals("gt") || op.equals("ge") ) {
+						mapConstraint.setCurrentSelection(Double.valueOf(ylo), Double.valueOf(yhi), Double.valueOf(value), Double.valueOf(xhi));
+					} else if ( op.equals("eq") ) {
+						mapConstraint.setCurrentSelection(Double.valueOf(ylo), Double.valueOf(yhi), Double.valueOf(value), Double.valueOf(value));
+					} else {
+						mapConstraint.setCurrentSelection(Double.valueOf(ylo), Double.valueOf(yhi), Double.valueOf(xlo), Double.valueOf(value));
+					}
+				} else if ( v != null && v.getName().toLowerCase().equals("time") ) {
+					if ( op.equals("gt") || op.equals("ge") ) {
+						timeConstraint.setLo(value);
+					} else if ( op.equals("eq") ) {
+						timeConstraint.setLo(value);
+						timeConstraint.setHi(value);
+					} else {
+						timeConstraint.setHi(value);
+					}
+				} else if ( v != null && plotv.equals("x") ) {
 					xVariableConstraint.setApply(true);
 					if ( op.equals("gt") || op.equals("ge") ) {
 						xVariableConstraint.setMin(value);
@@ -904,7 +931,7 @@ public class Correlation implements EntryPoint {
 					});
 					c.addApplyHandler(applyHandler);
 					c.addChangeHandler(constraintChange);
-					VariableSerializable v = xDatasetVariables.get(varid);
+					
 					if ( v != null ) {
 						c.setVariable(v);
 						c.setApply(true);
@@ -923,7 +950,6 @@ public class Correlation implements EntryPoint {
 			}
 			updatePlot(true);
 		}
-    	
     };
 	private int getNumber(Node firstChild) {
 		if ( firstChild instanceof Text ) {
@@ -1081,6 +1107,28 @@ public class Correlation implements EntryPoint {
 			colorCheckBox.setValue(true);
 		} else {
 			colorCheckBox.setValue(false);
+		}
+		
+		String xlo = lasRequest.getRangeLo("x", 0);
+		String xhi = lasRequest.getRangeHi("x", 0);
+		String ylo = lasRequest.getRangeLo("y", 0);
+		String yhi = lasRequest.getRangeHi("y", 0);
+		if ( xlo != null && !xlo.equals("") && xhi != null && !xhi.equals("") && ylo != null && !ylo.equals("") && yhi != null && !yhi.equals("") ) {
+			mapConstraint.setCurrentSelection(Double.valueOf(ylo), Double.valueOf(yhi), Double.valueOf(xlo), Double.valueOf(xhi));
+		}
+		
+		String tlo = lasRequest.getRangeLo("t", 0);
+		String thi = lasRequest.getRangeHi("t", 0);
+		if (  tlo != null && !tlo.equals("") && thi != null && !thi.equals("") ) {
+			timeConstraint.setLo(tlo);
+			timeConstraint.setHi(thi);
+		}
+		
+		String zlo = lasRequest.getRangeLo("t", 0);
+		String zhi = lasRequest.getRangeHi("t", 0);
+		if (  zlo != null && !zlo.equals("") && zhi != null && !zhi.equals("") ) {
+			zAxisWidget.setLo(zlo);
+			zAxisWidget.setHi(zhi);
 		}
 
 		List<Map<String, String>> vcons= lasRequest.getVariableConstraints();
