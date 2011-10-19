@@ -48,6 +48,7 @@ import com.google.gwt.http.client.RequestCallback;
 import com.google.gwt.http.client.RequestException;
 import com.google.gwt.http.client.Response;
 import com.google.gwt.http.client.URL;
+import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -71,6 +72,7 @@ import com.google.gwt.xml.client.Text;
 import com.google.gwt.xml.client.XMLParser;
 
 public class Correlation implements EntryPoint {
+	NumberFormat dFormat = NumberFormat.getFormat("########.##");
 	FlexTable timePanel = new FlexTable();
 	PushButton reset = new PushButton("Reset");
 	DateTimeWidget timeConstraint = new DateTimeWidget();
@@ -165,7 +167,7 @@ public class Correlation implements EntryPoint {
     		
     	});
     	reset.addStyleDependentName("SMALLER");
-    	
+    	reset.setTitle("Reset time to the full range.");
     	String spinImageURL = URLUtil.getImageURL()+"/mozilla_blu.gif";
     	
     	annotationsButton = new ToggleButton(new Image(GWT.getModuleBaseURL()+"../images/i_off.png"), 
@@ -727,21 +729,21 @@ public class Correlation implements EntryPoint {
 
 		if ( world_startx <= world_endx ) {
 
-			xVariableConstraint.setConstraint(world_startx, world_endx);
+			xVariableConstraint.setConstraint(dFormat.format(world_startx), dFormat.format(world_endx));
 
 		} else {
 
-			xVariableConstraint.setConstraint(world_endx, world_startx);	
+			xVariableConstraint.setConstraint(dFormat.format(world_endx), dFormat.format(world_startx));	
 
 		}
 
 		if ( world_starty <= world_endy ) {
 			
-			yVariableConstraint.setConstraint(world_starty, world_endy);
+			yVariableConstraint.setConstraint(dFormat.format(world_starty), dFormat.format(world_endy));
 			
 		} else {
 			
-			yVariableConstraint.setConstraint(world_endy, world_starty);
+			yVariableConstraint.setConstraint(dFormat.format(world_endy), dFormat.format(world_starty));
 
 		}
 	}
