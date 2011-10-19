@@ -38,6 +38,11 @@
     <script type="text/javascript" language="javascript" src="../../JavaScript/components/DateWidget.js"></script>
     <script type="text/javascript" language="javascript" src="../../JavaScript/components/LASRequest.js"></script>
     <script type="text/javascript" language="javascript" src="../../JavaScript/components/xmldom.js"></script>
+    <script type="text/javascript" language="javascript" src="../../JavaScript/frameworks/OpenLayers/OpenLayers.js"></script>
+    <script type="text/javascript" language="javascript" src="../../JavaScript/frameworks/OpenLayersExtensions/DrawSingleFeature.js"></script>
+    <script type="text/javascript" language="javascript" src="../../JavaScript/frameworks/OpenLayersExtensions/HorizontalPath.js"></script>
+    <script type="text/javascript" language="javascript" src="../../JavaScript/frameworks/OpenLayersExtensions/VerticalPath.js"></script>
+ 
     <script type="text/javascript" language="javascript" src="../../JavaScript/components/gov.noaa.pmel.tmap.las.Correlation/gov.noaa.pmel.tmap.las.Correlation.nocache.js"></script>
     <link rel="stylesheet" href="../../JavaScript/components/css/OLMapWidget.css" type="text/css">
     <link rel="stylesheet" href="../../VizGal.css" type="text/css">
@@ -51,12 +56,19 @@
   <!--                                           -->
   <body>
   #parse ("productserver/templates/V7UIHeader.vm")
-  <div style="padding:10px">
-    <div style="padding:10px" class="regularBackground noBottomBorder" id="data_selection"></div>
+  <table class="regularBackground allBorder" >
+  <tr>
+  <td style="vertical-align:top;">
+    <div style="padding:0px 10px 10px 10px"  class="regularBackground" id="button_panel"></div>
+    <div style="padding:0px 10px 10px 10px" class="regularBackground noBottomBorder" id="data_selection"></div>
     <div style="padding:0px 10px 10px 10px" class="regularBackground noTopBottomBorder" id="data_constraints"></div>
     <div style="padding:0px 10px 10px 10px" class="regularBackground noTopBorder" id="additional_data_constraints"></div>
-    <div style="padding:10px" id="correlation"></div>
- </div>
+  <td style="vertical-align:top;">
+  <div style="padding:10px" id="space_time_constraints"></div>
+  <td>
+  </tr>
+ </table>
+ <div style="padding:10px" id="correlation"></div>
  #parse("productserver/templates/V7UIFooter.vm")
     <!-- OPTIONAL: include this if you want history support -->
     <iframe src="javascript:''" id="__gwt_historyFrame" tabIndex='-1' style="position:absolute;width:0;height:0;border:0"></iframe>			
