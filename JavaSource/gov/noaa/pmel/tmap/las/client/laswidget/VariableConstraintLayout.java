@@ -1,5 +1,6 @@
 package gov.noaa.pmel.tmap.las.client.laswidget;
 
+import gov.noaa.pmel.tmap.las.client.map.OLMapWidget;
 import gov.noaa.pmel.tmap.las.client.serializable.VariableSerializable;
 
 import java.util.ArrayList;
@@ -7,6 +8,8 @@ import java.util.Iterator;
 import java.util.List;
 
 import com.google.gwt.event.dom.client.ChangeHandler;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
@@ -14,12 +17,16 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
 public class VariableConstraintLayout extends Composite {
-	VerticalPanel mainPanel = new VerticalPanel();
+	VerticalPanel widgetPanel = new VerticalPanel();
 	HorizontalPanel topRow = new HorizontalPanel();
 	FlexTable layout = new FlexTable();
 	HelpPanel help = new HelpPanel();
 	VariableListBox constraintVariables = new VariableListBox();
 	List<VariableConstraintWidget> widgets = new ArrayList<VariableConstraintWidget>();
+	VariableConstraintWidget xConstraintWidget;
+	VariableConstraintWidget yConstraintWidget;
+	boolean xOn = false;
+	boolean yOn = false;
 	public VariableConstraintLayout(String title, boolean show_variables) {
 		help.setPopupWidth("550px");
 		help.setPopupHeight("550px");
@@ -29,14 +36,27 @@ public class VariableConstraintLayout extends Composite {
 		if ( show_variables ) {
 			topRow.add(constraintVariables);
 		}
-		mainPanel.add(topRow);
-		mainPanel.add(layout);
-		initWidget(mainPanel);
+		widgetPanel.add(topRow);
+		widgetPanel.add(layout);
+		initWidget(widgetPanel);
 	}
 	public void addWidget(VariableConstraintWidget widget) {
 		widgets.add(widget);
-		int row = widgets.size();
-		int index = row - 1;
+		int row = widgets.size() + 2;
+		int index = widgets.size() + 1;
+		layoutWidget(widget, index, row);
+	}
+	public void addWidgetForX(VariableConstraintWidget widget) {
+		int row = 1;
+		int index = 1; 
+		layoutWidget(widget, index, row);
+	}
+	public void addWidgetForY(VariableConstraintWidget widget) {
+		int row = 0;
+		int index = 0;
+		layoutWidget(widget, index, row);
+	}
+	private void layoutWidget(VariableConstraintWidget widget, int index, int row) {
 		widget.getApply().getElement().setId("apply-"+index);
 		widget.getMaxTextBox().getElement().setId("max-"+index);
 		widget.getMinTextBox().getElement().setId("min-"+index);
@@ -66,7 +86,7 @@ public class VariableConstraintLayout extends Composite {
 			i++;
 		}
 		if ( index >= 0 ) {
-			layout.removeRow(index+1);
+			layout.removeRow(index+3);
 			widgets.remove(index);
 		}
 	}
