@@ -438,6 +438,7 @@ public class Correlation implements EntryPoint {
     	Window.open(urlfrag.toString(), "print", null);
     }
     private void updatePlot(boolean addHistory) {
+    	setConstraints();
     	update.removeStyleDependentName("APPLY-NEEDED");
     	lasAnnotationsPanel.setTitle("Plot Annotations");
     	lasAnnotationsPanel.setError("Fetching plot annotations...");
@@ -1107,8 +1108,10 @@ public class Correlation implements EntryPoint {
 		if ( vc != null && !vc.equals("") ) {
 			colorVariables.setSelectedVariable(vc);
 			colorCheckBox.setValue(true);
+			colorVariables.setEnabled(true);
 		} else {
 			colorCheckBox.setValue(false);
+			colorVariables.setEnabled(false);
 		}
 		
 		String xlo = lasRequest.getRangeLo("x", 0);
@@ -1134,7 +1137,8 @@ public class Correlation implements EntryPoint {
 		}
 
 		List<Map<String, String>> vcons= lasRequest.getVariableConstraints();
-		constraintsLayout.setWidgets(new ArrayList<VariableConstraintWidget>());
+		constraintsLayout.reset();
+		
 		if ( vcons.size() > 0 ) {
 			for (Iterator vconsIt = vcons.iterator(); vconsIt.hasNext();) {
 				Map<String, String> con = (Map<String, String>) vconsIt.next();
