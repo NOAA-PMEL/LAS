@@ -171,8 +171,8 @@ the current variable; you must have at least one &lt;b&gt;$&lt;/b&gt; in your ex
       <title>Show graticule</title>
       <menu type="options" name="use_graticules">
         <item values="default">Default</item>
-        <item values="gray">Gray</item>
         <item values="black">Black</item>
+        <item values="gray">Gray</item>
         <item values="white">White</item>
         <item values="none">None</item>
       </menu>
@@ -239,7 +239,7 @@ at the edges of the plot (WMS-style plots). By default margins are shown.
 
   <optiondef name="trend_line">
     <option>
-      <help>Overlay a trend line. For the option "Trend Line and Detrended", a second panel is added, showing the variable minus mean and variable minus mean and trend. Note that the slope of the trend is computed using the units of the independent axis. A monthly axis may have underlying units of days, so in such a case the slope will be data_units/days. Line color choices are ignored in this style. The plots may be zoomed - for 2-panel plots zoom on the upper or left panel.</help>
+      <help>Overlay a trend line computed by least-squares. For the option "Trend Line and Detrended", a second panel is added, showing the variable minus mean and variable minus mean and trend. Note that the slope of the trend is computed using the units of the independent axis. A monthly axis may have underlying units of days, so in such a case the slope will be data_units/days. Line color choices are ignored in this style. The plots may be zoomed - for 2-panel plots zoom on the upper or left panel.</help>
       <title>Trend Line</title>
       <menu type="options" name="trend_line">
         <item values="0">Default</item>
