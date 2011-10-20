@@ -96,6 +96,11 @@ public class VariableConstraintLayout extends Composite {
 	public void setHeader(String header) {
 		constraintVariables.setHeader(header);
 	}
+	public void removeAll() {
+		for (int i = 0; i < widgets.size(); i++) {
+			layout.removeRow(i + 3);
+		}
+	}
 	public void restore() {
 		constraintVariables.restore();
 	}
@@ -110,5 +115,10 @@ public class VariableConstraintLayout extends Composite {
 	}
 	public String getValue(int index) {
 		return constraintVariables.getValue(index);
+	}
+	public void reset() {
+		removeAll();
+		setWidgets(new ArrayList<VariableConstraintWidget>());
+		restore();		
 	}
 }
