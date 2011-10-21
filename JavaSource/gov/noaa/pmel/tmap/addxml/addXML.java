@@ -96,10 +96,12 @@ import ucar.nc2.dataset.CoordinateAxis1D;
 import ucar.nc2.dataset.CoordinateAxis1DTime;
 import ucar.nc2.dataset.CoordinateAxis2D;
 import ucar.nc2.dataset.NetcdfDataset;
+import ucar.nc2.dods.DODSNetcdfFile;
 import ucar.nc2.dt.GridDatatype;
 import ucar.nc2.dt.grid.GridCoordSys;
 import ucar.nc2.dt.grid.GridDataset;
 import ucar.nc2.ft.FeatureDatasetFactoryManager;
+import ucar.nc2.stream.CdmRemote;
 import ucar.nc2.units.DateRange;
 import ucar.nc2.units.DateType;
 import ucar.nc2.units.DateUnit;
@@ -706,7 +708,6 @@ public class addXML {
 		Iterator di = ThreddsDatasets.iterator();
 		while (di.hasNext()) {
 			InvDataset ThreddsDataset = (InvDataset) di.next();
-			if (ThreddsDataset.hasNestedDatasets()) {
 				CategoryBean cb;
 				if ( esg ) {
 					// TODO fix for ESG from the command line: cb = processESGCategories(ThreddsDataset);
@@ -717,7 +718,6 @@ public class addXML {
 				if ( cb.getCategories().size() > 0 || cb.getFilters().size() > 0 ) {
 					CategoryBeans.add(cb);
 				}
-			}
 		}
 
 		// Discover and process all the THREDDS dataset elements that actually
@@ -1585,24 +1585,25 @@ public class addXML {
 		}
 		dataset.setVersion(version_string);
 		dataset.setCreator(addXML.class.getName());
-
+        url = DODSNetcdfFile.canonicalURL(url);
 		if (verbose) {
 			log.info("Processing netCDF dataset: " + url);
 		}
 		Formatter error = new Formatter();
-		GridDataset gridDs = null;
+		 
+		 GridDataset gridDs = null;
 		
 		try {
 			gridDs = (GridDataset) FeatureDatasetFactoryManager.open(FeatureType.GRID, url, null, error);
 			if ( gridDs == null ) {
-				gridDs = (GridDataset) FeatureDatasetFactoryManager.open(FeatureType.FMRC, url, null, error);
+				gridDs = (GridDataset) FeatureDatasetFactoryManager.open(FeatureType.FMRC, CdmRemote.canonicalURL(url), null, error);
 			}
 		} catch (IOException e) {
-			log.error("Unable to open dataset at "+url);
+			log.error("Unable to open dataset at "+CdmRemote.canonicalURL(url));
 			return null;
 		}
 		if ( gridDs == null ) {
-			log.error("Unable to read dataset at "+url+" with "+error.toString());
+			log.error("Unable to read dataset at "+url+" "+error.toString());
 			return null;
 		}
 
