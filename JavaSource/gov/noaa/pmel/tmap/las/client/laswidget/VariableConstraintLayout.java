@@ -60,13 +60,7 @@ public class VariableConstraintLayout extends Composite {
 		widget.getApply().getElement().setId("apply-"+index);
 		widget.getMaxTextBox().getElement().setId("max-"+index);
 		widget.getMinTextBox().getElement().setId("min-"+index);
-		layout.setWidget(row, 0, widget.getApply());
-		layout.setWidget(row, 1, widget.getMinTextBox());
-		layout.setWidget(row, 2, widget.getLabel());
-		layout.setWidget(row, 3, widget.getMaxTextBox());
-		if ( widget.isRemoveable() ) {
-			layout.setWidget(row, 4, widget.getRemoveButton());
-		}
+		layout.setWidget(row, 0, widget);
 	}
 	public void setApply(int index, boolean value) {
 		widgets.get(index).setApply(value);
