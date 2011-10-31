@@ -7,16 +7,20 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PushButton;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
 public class VariableConstraintWidget extends Composite {
-	VerticalPanel bucket = new VerticalPanel();
+	FlexTable layout = new FlexTable();
 	VariableSerializable xVariable;
 	CheckBox xApply = new CheckBox("Apply");
-	Label xLabel = new Label("variable");
+	HTML xLabel = new HTML("variable");
+	Label greaterThan = new Label("<");
+	Label lessThanEqual = new Label("<=");
 	TextBox minTextBox = new TextBox();
 	TextBox maxTextBox = new TextBox();
 	boolean removeable = false;
@@ -24,26 +28,28 @@ public class VariableConstraintWidget extends Composite {
 	boolean active = true;
 	public VariableConstraintWidget(boolean removable) {
 		this.removeable = removable;
-		xRemove.addStyleDependentName("SMALLER");
-		bucket.add(xApply);
-		bucket.add(xLabel);
-		bucket.add(minTextBox);
-		bucket.add(maxTextBox);
-		if ( removeable ) {
-			bucket.add(xRemove);
-		}
-		initWidget(bucket);
+		init();
+		initWidget(layout);
 	}
 	public VariableConstraintWidget() {
+		init();
+		initWidget(layout);
+	}
+	private void init() {
 		xRemove.addStyleDependentName("SMALLER");
-		bucket.add(xApply);
-		bucket.add(xLabel);
-		bucket.add(minTextBox);
-		bucket.add(maxTextBox);
+		xLabel.setWidth("220px");
+		minTextBox.setWidth("80px");
+		maxTextBox.setWidth("80px");
+		layout.setWidget(0, 0, xApply);
+		layout.setWidget(0, 1, minTextBox);
+		layout.setWidget(0, 2, greaterThan);
+		layout.setWidget(0, 3, xLabel);
+		layout.setWidget(0, 4, lessThanEqual);
+		layout.setWidget(0, 5, maxTextBox);
+		xLabel.addStyleName("hideextra");
 		if ( removeable ) {
-			bucket.add(xRemove);
+			layout.setWidget(0, 6, xRemove);
 		}
-		initWidget(bucket);
 	}
 	public void setConstraint(String min, String max) {
 		minTextBox.setValue(min);
@@ -51,7 +57,8 @@ public class VariableConstraintWidget extends Composite {
 	}
 	public void setVariable(VariableSerializable var) {
 		this.xVariable = var;
-		xLabel.setText("< "+xVariable.getName()+" <=");
+		xLabel.setText(xVariable.getName());
+		xLabel.setTitle(xVariable.getName());
 		xRemove.getElement().setId("other-"+var.getID());
 	}
     /**
@@ -116,5 +123,7 @@ public class VariableConstraintWidget extends Composite {
 		minTextBox.setVisible(visible);
 		maxTextBox.setVisible(visible);
 	    xRemove.setVisible(visible);
+	    lessThanEqual.setVisible(visible);
+	    greaterThan.setVisible(visible);
 	}
 }
