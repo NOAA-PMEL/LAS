@@ -62,11 +62,11 @@ ENDIF
 DEFINE SYMBOL ferret_var_0 = ($ferret_plot_var)
 DEFINE SYMBOL ferret_title_0 = ($ferret_plot_title"($data_var)")
 
-! Open the window, apply size, scale and WMS view options
-GO LAS_open_window
-
 ! Use Ferret properties to set up the plot qualifiers
 GO LAS_set_plot_qualifiers
+
+! Open the window, apply size, scale and WMS view options
+GO LAS_open_window
 
 ! Set the URL label for the first dataset.
 GO LAS_url_label 0

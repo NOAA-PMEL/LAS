@@ -4,6 +4,10 @@
 ! Get the category of the plot: 1D, 2D non-vector, and vector
 ! plots already have a symbol itsa_vector_plot.
 
+! This script should be called BEFORE LAS_open_window.jnl because
+! it sets LINECOLORS. The LINECOLORS setting needs a SET WIN to
+! take effect.
+
 IF `STRLEN("($ferret_view)") EQ 1` THEN  DEFINE SYMBOL oneDplot = 1
 IF `STRLEN("($ferret_view)") EQ 1 AND ($data_count"1") EQ 1` THEN  DEFINE SYMBOL oneD_1var = 1
 
@@ -184,7 +188,7 @@ IF ($oneDplot"0|*>1") THEN
      LET slen = STRLEN("($ferret_dep_axis_scale)")
      LET nc = 0
      REPEAT/RANGE=2:`slen`/NAME=m (let c = `m`; \
-        DEFINE SYMBOL next = `SUBSTRING("($ferret_dep_axis_scale)", c, 1)`; sh sym next; \
+        DEFINE SYMBOL next = `SUBSTRING("($ferret_dep_axis_scale)", c, 1)`; \
         IF `STRCMP("($next)", ",") EQ 0` THEN let nc = `nc+1`)
 
     IF `nc EQ 1` THEN   

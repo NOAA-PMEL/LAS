@@ -118,9 +118,6 @@ ENDIF
 GO LAS_set_diff_labels ($fview)
 DEFINE SYMBOL ferret_plot_title ($ferret_diff_title)
 
-! Open the window, apply size, scale options
-GO LAS_open_window
-
 ! Use Ferret properties to set up the plot qualifiers
 
 ! Get levels based on ferret_diff_var
@@ -136,6 +133,9 @@ IF ($native_curvilinear_xy"0|*>1") THEN
    IF ($ferret_curvi_quals"0|*>1") THEN \
    IF ($ferret_lon_modulo"1|1|0|yes>1|no>0|*>0") THEN  DEFINE SYMBOL shade_qualifiers = ($shade_qualifiers)/MODULO
 ENDIF
+
+! Open the window, apply size, scale options
+GO LAS_open_window
 
 ! Make a plot,needed to get the number of levels (SHADE/SET doesnt do it.)
 IF ($plot_type"0|CONTOUR>0|*>1") THEN

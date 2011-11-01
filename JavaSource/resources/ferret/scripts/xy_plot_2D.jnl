@@ -77,8 +77,8 @@ DEFINE SYMBOL ferret_var_0 = ($ferret_plot_var)
 DEFINE SYMBOL ferret_title_0 = ($ferret_plot_title"($data_var)")
 IF ($ferret_plot_var_m360"0|*>1") THEN DEFINE SYMBOL ferret_var_m360_0 = ($ferret_plot_var_m360)
 
-! Open the window, apply size, scale and WMS view options
-GO LAS_open_window
+! Use Ferret properties to set up the plot qualifiers
+GO LAS_set_plot_qualifiers
 
 IF ($ferret_koppen_var_2"0|*>1") THEN
    GO xy_koppen_plots
@@ -88,9 +88,6 @@ IF ($ferret_koppen_var_2"0|*>1") THEN
    EXIT/SCRIPT
 ENDIF
 
-! Use Ferret properties to set up the plot qualifiers
-GO LAS_set_plot_qualifiers
-
 ! Curvilinear plots may have more qualifiers. 
 
 IF ($native_curvilinear_xy"0|*>1") THEN
@@ -99,6 +96,9 @@ IF ($native_curvilinear_xy"0|*>1") THEN
    IF ($ferret_curvi_quals"0|*>1") THEN \
    IF ($ferret_lon_modulo"1|1|0|yes>1|no>0|*>0") THEN  DEFINE SYMBOL shade_qualifiers = ($shade_qualifiers)/MODULO
 ENDIF
+
+! Open the window, apply size, scale and WMS view options
+GO LAS_open_window
 
 ! Set the URL label for the first dataset.
 GO LAS_url_label 0

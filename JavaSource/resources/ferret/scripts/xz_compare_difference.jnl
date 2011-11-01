@@ -101,14 +101,14 @@ DEFINE SYMBOL ferret_diff_var = ($ferret_var_0) - ($ferret_var_1)
 GO LAS_set_diff_labels ($fview)
 DEFINE SYMBOL ferret_plot_title ($ferret_diff_title)
 
-! Open the window, apply size, scale options
-GO LAS_open_window
-
 ! Get levels based on ferret_diff_var
 GO LAS_auto_levels
 
 ! Use Ferret properties to set up the plot qualifiers
 GO LAS_set_plot_qualifiers
+
+! Open the window, apply size, scale options
+GO LAS_open_window
 
 ! Make a plot,needed to get the number of levels (SHADE/SET doesnt do it.)
 IF ($plot_type"0|CONTOUR>0|*>1") THEN
