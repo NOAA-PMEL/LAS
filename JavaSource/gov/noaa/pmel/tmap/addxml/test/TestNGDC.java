@@ -5,6 +5,8 @@ import gov.noaa.pmel.tmap.addxml.addXML;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import junit.framework.TestCase;
 
@@ -38,7 +40,9 @@ public class TestNGDC extends TestCase {
 					Element arange = (Element) arangeIt.next();
 					String start = arange.getAttributeValue("start");
 					if ( start.length() > 6) {
-						assertTrue(start.endsWith("17:00:00"));
+						Pattern pattern = Pattern.compile(".*[0-9][0-9]:[0-9][0-9]:[0-9][0-9]");
+						Matcher matcher = pattern.matcher(start);
+						assertTrue(matcher.matches());
 					}
 				}
 			} catch (IOException e) {

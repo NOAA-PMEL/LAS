@@ -12,7 +12,8 @@ public class AllTests {
 				                TestNGDC.class,
 				                TestOISST.class,
 				                TestNYHOPS.class,
-				                TestMask.class};
+				                // Data set off line ...  TestMask.class
+				                };
 		TestSuite suite= new TestSuite(testClasses);
 		return suite;
 	}

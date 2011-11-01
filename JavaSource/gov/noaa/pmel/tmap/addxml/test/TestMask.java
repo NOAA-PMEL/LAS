@@ -19,8 +19,7 @@ import ucar.nc2.dods.DODSNetcdfFile;
 public class TestMask extends TestCase {
 	@Test
 	public final void testOISST() {
-		// This is a test of the hack in the code to identify an climatology from ESRL/PSD.  There should be a modulo=true attribute
-		// on the time axis.
+		// This is a test to see if we skip the mask in the composite...  Datasets are offline.
 		String url = DODSNetcdfFile.canonicalURL("http://oos.soest.hawaii.edu/thredds/dodsC/hioos/roms_forec/hiig/HI-ROMS_Forecast_Model_Run_Collection_best.ncd");
 		NetcdfDataset ncds;
 		try {
