@@ -1015,7 +1015,7 @@ public class addXML {
 				}
 			}
 		} else {
-			dgab = createBeansFromNetcdfDataset(url, false, null);
+			dgab = createBeansFromNetcdfDataset(url, false, ThreddsDataset);
 		}
 		return dgab;
 	}
@@ -1496,11 +1496,14 @@ public class addXML {
 
 		String name = ThreddsDataset.getName();
 		if (name != null) {
-			cb.setName(ThreddsDataset.getName());
-			cb.setID(ThreddsDataset.getID());
+			cb.setName(ThreddsDataset.getName());	
 		}
 		else {
 			cb.setName("THREDDS Dataset");
+		}
+		String id = ThreddsDataset.getID();
+		if ( id != null && !id.equals("") ) {
+		    cb.setID(id);
 		}
 		if (ThreddsDataset.hasAccess()) {
 			String url = "empty";
@@ -1511,6 +1514,7 @@ public class addXML {
 						access.getService().getServiceType() == ServiceType.OPENDAP ||
 						access.getService().getServiceType() == ServiceType.NETCDF) {
 					url = access.getStandardUrlName();
+					String curl = DODSNetcdfFile.canonicalURL(url);
 					// Replace the name with a bunch of stuff from the file if possible...
 					if ( generate_names ) {
 						StringBuilder dataset_name = new StringBuilder();
@@ -1540,7 +1544,11 @@ public class addXML {
 				if ( esg ) {
 					tag = ThreddsDataset.getID();
 				} else {
-					tag = encodeID(url);
+					if ( id != null ) {
+					    tag = id;
+					} else {
+						tag = encodeID(url);
+					}
 				}
 
 				filter.setContainstag(tag);
@@ -1585,7 +1593,7 @@ public class addXML {
 		}
 		dataset.setVersion(version_string);
 		dataset.setCreator(addXML.class.getName());
-        url = DODSNetcdfFile.canonicalURL(url);
+        String curl = DODSNetcdfFile.canonicalURL(url);
 		if (verbose) {
 			log.info("Processing netCDF dataset: " + url);
 		}
@@ -1594,12 +1602,12 @@ public class addXML {
 		 GridDataset gridDs = null;
 		
 		try {
-			gridDs = (GridDataset) FeatureDatasetFactoryManager.open(FeatureType.GRID, url, null, error);
+			gridDs = (GridDataset) FeatureDatasetFactoryManager.open(FeatureType.GRID, curl, null, error);
 			if ( gridDs == null ) {
 				gridDs = (GridDataset) FeatureDatasetFactoryManager.open(FeatureType.FMRC, CdmRemote.canonicalURL(url), null, error);
 			}
 		} catch (IOException e) {
-			log.error("Unable to open dataset at "+CdmRemote.canonicalURL(url));
+			log.error("Unable to open dataset at "+DODSNetcdfFile.canonicalURL(url));
 			return null;
 		}
 		if ( gridDs == null ) {
