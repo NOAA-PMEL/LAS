@@ -96,7 +96,6 @@ IF ($check_for_pseudonames"0|*>1") THEN
    ENDIF
 ENDIF
 
-DEFINE SYMBOL ferret_plot_title "($data_title) ($data_units)"
 IF ($ferret_factor_label"0|*>1") THEN 
    DEFINE SYMBOL ferret_plot_title  "($data_title) ($data_units) ($ferret_factor_label)"
    IF `($num) GT 0` THEN DEFINE SYMBOL ferret_plot_title  "($data_title) ($data_units) ($ferret_factor_label)"

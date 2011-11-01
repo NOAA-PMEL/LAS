@@ -96,11 +96,11 @@ IF `($its_GE"0|*>1") ` THEN
 
 ENDIF
 
-! Open the window, apply size, scale options
-GO LAS_open_window
-
 ! Use Ferret properties to set up the plot qualifiers
 GO LAS_set_plot_qualifiers
+
+! Open the window, apply size, scale options
+GO LAS_open_window
 
 ! Always use /ASPECT adjusts scaling based upon the ratio of the 
 ! axis scale factors (meters on the Earth to inches on the plot) and 

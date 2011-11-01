@@ -47,9 +47,6 @@ IF ($error_status"0|ERROR>1") THEN
   EXIT/PROGRAM
 ENDIF
 
-! Open the window, apply size, scale options
-GO LAS_open_window
-
 ! Use Ferret properties to set up the plot qualifiers
 ! By default do not draw graticules, but user may turn them on.
 
@@ -57,6 +54,9 @@ IF ($ferret_use_graticules"1|default>1|*>0) THEN DEFINE SYMBOL ferret_use_gratic
 
 GO LAS_set_plot_qualifiers
 DEFINE SYMBOL qualifiers = ($qualifiers)/NOLAB
+
+! Open the window, apply size, scale options
+GO LAS_open_window
 
 ! Set the URL label for the first dataset.
 GO LAS_url_label 0

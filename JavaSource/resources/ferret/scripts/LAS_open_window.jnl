@@ -7,6 +7,8 @@
 ! The LAS_open_windw.jnl script takes care of everything having to
 ! do with starting the window.
 !
+!  This script should be called AFTER LAS_set_plot_qualifiers.jnl,
+!  if the set-qualifiers script is called. 
 !
 ! - Open the window with the desired size
 ! - Issue CANCEL MODE LOGO command
@@ -14,7 +16,6 @@
 !   ratio to match the region
 ! - If no margins (WMS style plot) is requested, set that up, 
 !   including the /NOYADJUST plot qualifier.
-
 
 SET WINDOW/SIZE = ($ferret_size"0.5")
 CANCEL MODE LOGO

@@ -121,9 +121,6 @@ ENDIF
 GO LAS_set_diff_labels ($fview) ($pencolor)
 DEFINE SYMBOL ferret_plot_title ($ferret_diff_title)
 
-! Open the window, apply size, scale options
-GO LAS_open_window
-
 ! set difference-vector color to red. Ignore incoming value of ferret_line_color
 DEFINE SYMBOL pencolor = 2
 DEFINE SYMBOL ferret_line_color = ($pencolor)
@@ -135,6 +132,9 @@ GO LAS_set_plot_qualifiers
 IF ($native_curvilinear_xy"0|*>1") THEN
   DEFINE SYMBOL qualifiers = ($qualifiers)($ferret_curvi_quals)
 ENDIF
+
+! Open the window, apply size, scale options
+GO LAS_open_window
 
 ! Draw  the plot. 
 

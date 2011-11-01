@@ -96,14 +96,14 @@ DEFINE SYMBOL ferret_diff_var = ($ferret_var_0)  -  ($ferret_var_1)
 
 GO LAS_set_diff_labels ($fview)
 
-! Open the window, apply size, scale options
-GO LAS_open_window
-
 ! Use Ferret properties to set up the plot qualifiers
 GO LAS_set_plot_qualifiers
 
 ! symbols and/or line
 GO set_linesym
+
+! Open the window, apply size, scale options
+GO LAS_open_window
 
 ! Do the plot. 
 
