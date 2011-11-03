@@ -80,18 +80,30 @@ LAS was trying to access these servers:
 </ol>
 
 #end
-    <span class="smallErrorText">Advanced users may <a  href="ProductServer.do?xml=$las_request.toEncodedURLString()&debug=true">request</a> more technical information</span><br>
+    <span class="smallErrorText">Advanced users may <a  id="displayText" href="javascript:toggle();">
+#if ( $debug=="true" || $debug=="debug" )
+hide
+#else
+see
+#end
+</a> more technical information.
+                                 Try your <a  href="ProductServer.do?xml=$las_request.toEncodedURLString()&debug=true">request</a> again.</span><br>
 #if ("$!institution.getContact()" != "")
 <p><a href="mailto:$institution.getContact()?subject=LAS Error&body=Type message and paste the URL here.">Email to the site administrator.</a>
 #end
+
 #if ( $debug=="true" || $debug=="debug" )
+<div id="debug_text" style="display: block">
+#else
+<div id="debug_text" style="display: none">
+#end
 <hr>
 #parse("/productserver/templates/revision.vm")
 Server at Revision r${revision}
 <pre>
 $las_response.getResult("exception_message")
 </pre>
-#end
+</div>
 </body>
 <script type="text/javascript">
         function resizeme() {
@@ -101,6 +113,18 @@ $las_response.getResult("exception_message")
                         parent.document.getElementById("output").width=window.screen.width+20;
                 }
         }
+function toggle() {
+	var ele = document.getElementById("debug_text");
+	var text = document.getElementById("displayText");
+	if(ele.style.display == "block") {
+    		ele.style.display = "none";
+		text.innerHTML = "see";
+  	}
+	else {
+		ele.style.display = "block";
+		text.innerHTML = "hide";
+	}
+} 
 </script>
 
 </html>
