@@ -14,6 +14,14 @@ IF `STRLEN("($ferret_view)") EQ 1 AND ($data_count"1") EQ 1` THEN  DEFINE SYMBOL
 IF `STRLEN("($ferret_view)") GT 1 AND ($itsa_vector_plot"0|*>1") EQ 0` THEN \
  DEFINE SYMBOL twoDplot = 1
 
+! Define the gif filename (preventing collisions of .gif file in VizGal)
+IF `($FERRET_VERSION"0") GE 6.721` THEN 
+   IF ($result_plot_image_filename%0|*>1%) THEN 
+      IF `STRINDEX("($result_plot_image_filename)", "gif") GT 0` THEN\
+ SET GIFFILE "($result_plot_image_filename)"
+   ENDIF
+ENDIF
+
 ! -------- Options for all plots: key, graticules, axis labels
 
 ! Option to turn off the plot key
