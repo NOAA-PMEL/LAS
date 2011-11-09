@@ -113,8 +113,8 @@ IF `($ferret_is_socat"0|0|1|*>0") AND (($data_count) EQ 1)` THEN \
 
 SET DATA ($data_url)
 
-! Use PPLUS symbol editing to check for units sent in as ""
-PPL SET ulen $LENGTH(data_($num)_units)
+! Check for units sent in as ""
+DEFINE SYMBOL ulen `STRLEN("(data_($num)_units)")`
 IF `($ulen) LE 2` THEN  
     PPL SET isquote1 $EXTRACT(1,1,data_($num)_units)
     PPL SET isquote2 $EXTRACT(2,1,data_($num)_units)

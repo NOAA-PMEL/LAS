@@ -11,10 +11,12 @@
 ! check for pseutonames. If the variable name is a pseudo-var name, 
 ! write out name_1 e.g. Z_1 with all the same attributes.
 
+DEFINE SYMBOL data_initialization_script = Jons_initialize_data_insitu
+
 LET nlist = 0
 REPEAT/RANGE=0:`($data_count)-1`/NAME=outvar (DEFINE SYMBOL var_num = `outvar`;; \
   GO LAS_initialize_region ($var_num); \
-  GO Jons_initialize_data_insitu ($var_num);\
+  GO LAS_initialize_data ($var_num);\
   DEFINE SYMBOL varlist = , ($data_($num)_var);\
   LET nlist = `nlist+1`;\
   )

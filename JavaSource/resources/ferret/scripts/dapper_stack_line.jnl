@@ -19,8 +19,11 @@
 LET max_lines = 12
 
 ! The script donesnt really use any region info but this doesnt hurt.
+
+DEFINE SYMBOL data_initialization_script = LAS_initialize_data_dapper
+
 GO LAS_initialize_region 0
-GO LAS_initialize_data_dapper 0
+GO LAS_initialize_data 0
 
 ! Check for errors (They often occur during dataset initialization.)
 

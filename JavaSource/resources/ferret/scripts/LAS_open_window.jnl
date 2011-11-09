@@ -46,3 +46,4 @@ ENDIF
 ! set up the viewport for small margins around the edge.
 IF ($ferret_annotations"0|*>1") THEN GO set_full_margins
 
+

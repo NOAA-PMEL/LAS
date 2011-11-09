@@ -16,7 +16,9 @@
 ! changes will need to be made to annotate that info on the plot.
 
 set mode ver:always
-IF `($initialize_script"0|*>1") EQ 0` THEN DEFINE SYMBOL initialize_script LAS_initialize_data
+! This may already have been set by e.g. Trajectory_correlation.jnl
+
+IF `($data_initialization_script"0|*>1") EQ 0` THEN DEFINE SYMBOL data_initialization_script LAS_initialize_data
 
 IF `($data_count"0") LT 2` THEN
   MESSAGE/ERROR **ERROR Expecting two variables, but only received ($data_count)
@@ -29,7 +31,7 @@ DEFINE SYMBOL its_prop_prop_plot = 1  ! used in setting titles and in RESULTS
 ! initialization needed for this dataset.
 
 GO LAS_initialize_region 0
-GO ($initialize_script) 0
+GO LAS_initialize_data 0
 
 ! Check for errors (They often occur during dataset initialization.)
 
@@ -55,7 +57,7 @@ GO LAS_pp_set_region_labels
 ! same as for var 0 (for now anyway)
 
 GO LAS_initialize_region 1
-GO ($initialize_script) 1
+GO LAS_initialize_data 1
 
 IF ($error_status"0|*>1") THEN
   MESSAGE/ERROR **ERROR ($error_string)
@@ -78,7 +80,7 @@ IF `($data_count"0") EQ 3` THEN ! color by 3rd variable
    ! same as for var 0 (for now anyway)
    
    GO LAS_initialize_region 2
-   GO ($initialize_script) 2
+   GO LAS_initialize_data 2
    
    IF ($error_status"0|*>1") THEN
      MESSAGE/ERROR **ERROR ($error_string)

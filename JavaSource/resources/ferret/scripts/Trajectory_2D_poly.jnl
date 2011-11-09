@@ -10,10 +10,9 @@
 !              add to the title, "from data sampled every xxx"
 !
 ! Initialize the region and data.
-! Many useful symbols are defined by these two scripts.
-!
 
-!!! for testing; see ticket http://porter.pmel.noaa.gov/trac/las/ticket/746 !!!
+DEFINE SYMBOL data_initialization_script = Jons_initialize_data_insitu
+
 ! DEFINE SYMBOL ferret_label = 0
 
 
@@ -31,8 +30,7 @@ IF ($data_0_var"0|vid>1|*>0")  THEN
    DEFINE SYMBOL data_0_var = `varnames[i=1]`
    CANCEL DATA "($data_0_url)"
 ENDIF
-GO Jons_initialize_data_insitu 0
-
+GO LAS_initialize_data 0
 
 ! Check for errors (They often occur during dataset initialization.)
 
