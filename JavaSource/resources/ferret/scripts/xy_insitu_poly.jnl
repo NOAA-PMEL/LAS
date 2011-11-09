@@ -15,8 +15,10 @@
 
 ! 2/5/2007 ACM additions to handle modulo replication of the X variable.
 
+DEFINE SYMBOL data_initialization_script = LAS_initialize_data_insitu
+
 GO LAS_initialize_region 0
-GO LAS_initialize_data_insitu 0
+GO LAS_initialize_data 0
 
 ! Check for errors (They often occur during dataset initialization.)
 
