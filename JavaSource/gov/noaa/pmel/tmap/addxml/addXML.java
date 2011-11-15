@@ -1033,7 +1033,9 @@ public class addXML {
 		}
 
 		dataset.setName(threddsDataset.getFullName());
-		dataset.setElement(threddsDataset.getID());
+		String id = threddsDataset.getID();
+		id = id.replace("/", ".");
+		dataset.setElement(id);
 		dataset.setVersion(version_string);
 		dataset.setCreator(addXML.class.getName());
 		dataset.setCreated((new DateTime()).toString());
@@ -1054,7 +1056,7 @@ public class addXML {
 						Variable variable = (Variable) varIt.next();
 
 						VariableBean las_var = new VariableBean();
-						las_var.setElement(threddsDataset.getID()+"-"+variable.getName());
+						las_var.setElement(id+"-"+variable.getName());
 						las_var.setName(variable.getName());
 						if ( variable.getUnits() != null && !variable.getUnits().equals("") ) {
 							las_var.setUnits(variable.getUnits());
@@ -1067,7 +1069,7 @@ public class addXML {
 						GeospatialCoverage coverage = threddsDataset.getGeospatialCoverage();
 						DateRange dateRange = threddsDataset.getTimeCoverage();
 
-						StringBuilder grid_name = new StringBuilder(threddsDataset.getID()+"-grid");
+						StringBuilder grid_name = new StringBuilder(id+"-grid");
 						if (coverage != null ) {
 
 							boolean readX = false;
@@ -1132,7 +1134,7 @@ public class addXML {
 								if ( readX || readY || readZ ) {
 									return null;
 								}
-								String elementName = threddsDataset.getID()+"-x-axis";
+								String elementName = id+"-x-axis";
 								AxisBean xAxis = new AxisBean();
 								
 								// Get the X Axis information...
@@ -1154,7 +1156,7 @@ public class addXML {
 								} else {
 									xAxis.setElement(AxisBeans.getMatchingID(xAxis));
 								}
-								elementName = threddsDataset.getID()+"-y-axis";
+								elementName = id+"-y-axis";
 								AxisBean yAxis = new AxisBean();
 								
 									log.info("Loading Y from metadata: "+elementName);
@@ -1175,7 +1177,7 @@ public class addXML {
 								} else {
 									yAxis.setElement(AxisBeans.getMatchingID(yAxis));
 								}
-								elementName = threddsDataset.getID()+"-z-axis";
+								elementName = id+"-z-axis";
 								AxisBean zAxis = new AxisBean();
 								if ( hasZ ) {
 									if ( zvalues != null ) {
@@ -1340,7 +1342,7 @@ public class addXML {
 								if ( calendar_name != null ) {
 									tAxis.setCalendar(calendar_name);
 								}
-								tAxis.setElement(threddsDataset.getID()+"-t-axis");
+								tAxis.setElement(id+"-t-axis");
 								grid_name.append("-t-axis");
 								tAxis.setType("t");
 								tAxis.setUnits(tunits);
@@ -1503,6 +1505,7 @@ public class addXML {
 		}
 		String id = ThreddsDataset.getID();
 		if ( id != null && !id.equals("") ) {
+			id = id.replace("/", ".");
 		    cb.setID(id);
 		}
 		if (ThreddsDataset.hasAccess()) {
@@ -1655,6 +1658,7 @@ public class addXML {
 		} else {
 			if ( threddsDataset != null && threddsDataset.getID() != null && !threddsDataset.getID().equals("") ) {
 				elementName = threddsDataset.getID();
+				elementName = elementName.replace("/", ".");
 			} else {
 				elementName = encodeID(url);
 			}
