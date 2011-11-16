@@ -1,7 +1,11 @@
 package gov.noaa.pmel.tmap.las.client.laswidget;
 
+import gov.noaa.pmel.tmap.las.client.serializable.AnalysisAxisSerializable;
+import gov.noaa.pmel.tmap.las.client.serializable.AnalysisSerializable;
+
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -16,6 +20,7 @@ public class LASRequest {
     Document document;
 	public LASRequest() {
 		super();
+		document = XMLParser.parse("<?xml version=\"1.0\"?><lasRequest href=\"file:las.xml\"></lasRequest>");
 	}
 	public LASRequest(String xml) {
 		document = XMLParser.parse(xml);
@@ -30,7 +35,11 @@ public class LASRequest {
 			NodeList l = document.getDocumentElement().getElementsByTagName("link");
 			Element op = null;
 			if ( l != null && l.getLength() > 0 ) {
-				op = (Element) l.item(0);
+				// This might be a variable in the <args> element.  Check it's parent.
+				Element link = (Element) l.item(0);
+				if ( !link.getParentNode().getNodeName().equals("args") ) {
+					op = (Element) l.item(0);
+				}
 			}
 			if ( op != null ) {
 				op.setAttribute("match", "/lasdata/operations/operation[@ID='"+operation+"']");
@@ -164,7 +173,8 @@ public class LASRequest {
 				range.setAttribute("high", hi);
 				region.appendChild(range);
 			}
-			Element args = (Element) document.getDocumentElement().getElementsByTagName("args");
+			NodeList argsL = document.getDocumentElement().getElementsByTagName("args");
+			Element args = (Element) argsL.item(0);
 			args.appendChild(region);
 		}
 	}
@@ -181,6 +191,10 @@ public class LASRequest {
     	Element link = link(dsID, varID);
     	NodeList l = document.getDocumentElement().getElementsByTagName("args");
     	Element args = (Element) l.item(0);
+    	if ( args == null ) {
+    		args = document.createElement("args");
+    		document.getDocumentElement().appendChild(args);
+    	}
     	NodeList regions = document.getElementsByTagName("region");
 		if ( region_index >= 0 && region_index < regions.getLength() ) {
 			Element region = (Element) regions.item(region_index);
@@ -372,5 +386,35 @@ public class LASRequest {
 	private String getDatasetId(String match) {
 		String ds = match.substring(match.indexOf("/lasdata/datasets/"), match.indexOf("/variables/"));
 		return ds.substring(ds.lastIndexOf("/")+1, ds.length());
+	}
+	public void setAnalysis(AnalysisSerializable analysis, int index) {
+		Element args = getArgsElement();
+		NodeList variables = args.getElementsByTagName("link");
+		int counter = 0;
+	    for (int i = 0; i < variables.getLength(); i++) {
+		    Element var = (Element) variables.item(i);
+		    // ByTagName gets children, grandchildren and below.  Check that it is a child of "args".
+			if ( var.getParentNode().getNodeName().equals("args") ) {
+				if ( counter == index ) {
+					// Found it, set the analysis.
+					Element anE = document.createElement("analysis");
+					anE.setAttribute("label", analysis.getLabel());
+					Map<String, AnalysisAxisSerializable> map = analysis.getAxes();
+					for (Iterator mapIt = map.keySet().iterator(); mapIt.hasNext();) {
+						String key = (String) mapIt.next();
+						if ( analysis.isActive(key) ) {
+							AnalysisAxisSerializable a = map.get(key);
+							Element axE = document.createElement("axis");
+							axE.setAttribute("type", a.getType());
+							axE.setAttribute("op", a.getOp());
+							axE.setAttribute("lo", a.getLo());
+							axE.setAttribute("hi", a.getHi());
+							anE.appendChild(axE);
+						}
+					}
+					var.appendChild(anE);
+				}
+			}
+	    }
 	}
 }

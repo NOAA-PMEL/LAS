@@ -1,6 +1,8 @@
 package gov.noaa.pmel.tmap.las.client.laswidget;
 
 import gov.noaa.pmel.tmap.las.client.map.MapSelectionChangeListener;
+import gov.noaa.pmel.tmap.las.client.serializable.AnalysisAxisSerializable;
+import gov.noaa.pmel.tmap.las.client.serializable.AnalysisSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.CategorySerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.ConfigSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.GridSerializable;
@@ -44,6 +46,7 @@ import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.PushButton;
+import com.google.gwt.user.client.ui.ToggleButton;
 import com.google.gwt.user.client.ui.TreeItem;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.xml.client.Document;
@@ -58,6 +61,8 @@ import com.google.gwt.xml.client.XMLParser;
  *
  */
 public class OutputPanel extends Composite {
+	/* An object that when set causes the request to contain an analysis request.  It should be null when no analysis is active.  */
+	AnalysisSerializable analysis = null;
 	
 	String containerType = Constants.FRAME;
 	
@@ -82,7 +87,7 @@ public class OutputPanel extends Composite {
 	Label datasetLabel;
 
 	/* This is the request.  It is either built from scratch or passed in via the constructor.  */
-	LASRequestWrapper lasRequest = new LASRequestWrapper();
+	LASRequest lasRequest = new LASRequest();
 
 	// Keep track of the values that are currently being used as the fixed axis and compare axis
 	String compareAxis;
@@ -168,8 +173,7 @@ public class OutputPanel extends Composite {
 	String currentURL = "";
 	
 	// The panel with the plot annotations hidden at the top of the frame...
-	LASAnnotationsPanel lasAnnotationsPanel = new LASAnnotationsPanel();
-	
+	LASAnnotationsButtonPanel lasAnnotationsPanel = new LASAnnotationsButtonPanel();
 	
 	// Keep track of whether the retry is visible and remove it when the results come back.
 	boolean retryShowing = false;
@@ -219,16 +223,15 @@ public class OutputPanel extends Composite {
 		revert.setTitle("Cancel Panel Settings for "+ID);
 
 		
-		
 		if ( comparePanel ) {
 			Label gs = new Label("   ");
 			gs.setHeight("25px");
 			top.setWidget(0, 0, gs);
 		} else {
-			settingsButton.setWidth("50px");
 			top.setWidget(0, 0, settingsButton);
 		} 
-		top.setWidget(1, 0, lasAnnotationsPanel);
+		top.setWidget(0, 1, lasAnnotationsPanel);		
+		
 		grid.setWidget(0, 0, top);
 		HTML plot = new HTML();
 		//plot.setHTML(spinImage.getHTML());
@@ -307,10 +310,10 @@ public class OutputPanel extends Composite {
         lasRequest = getRequest();
         
 		lasRequest.setProperty("ferret", "size", ".8333");
-		lasRequest.addProperty("ferret", "image_format", "gif");
-		lasRequest.addProperty("ferret", "annotations", "file");
+		lasRequest.setProperty("ferret", "image_format", "gif");
+		lasRequest.setProperty("ferret", "annotations", "file");
 		if ( containerType.equals(Constants.IMAGE) ) {
-			lasRequest.addProperty("las", "output_type", "xml");
+			lasRequest.setProperty("las", "output_type", "xml");
 		}
 		if ( settingsButton.isUsePanelSettings() || singlePanel ) {
 			// Use panel options if they exist.
@@ -319,7 +322,7 @@ public class OutputPanel extends Composite {
 				String key = (String) opIt.next();
 				String value = panelOptions.get(key);
 				if ( !value.toLowerCase().equals("default") && !value.equals("") ) {
-					lasRequest.addProperty("ferret", key, value);
+					lasRequest.setProperty("ferret", key, value);
 				}
 			}
 		} else {
@@ -329,14 +332,14 @@ public class OutputPanel extends Composite {
 					String key = (String) opIt.next();
 					String value = options.get(key);
 					if ( !value.toLowerCase().equals("default") && !value.equals("") ) {
-						lasRequest.addProperty("ferret", key, value);
+						lasRequest.setProperty("ferret", key, value);
 					}
 				}
 			}			
 		}
 		// Now force in the auto contour settings if it exists.
 		if ( fill_levels != null && !fill_levels.equals("") && !fill_levels.equals(Constants.NO_MIN_MAX) ) {
-			lasRequest.addProperty("ferret", "fill_levels", fill_levels);
+			lasRequest.setProperty("ferret", "fill_levels", fill_levels);
 		}
 		lasRequest.setProperty("product_server", "ui_timeout", "10");	
         if ( var.getGrid().hasT() ) {		
@@ -357,7 +360,7 @@ public class OutputPanel extends Composite {
         	return;
         }
         
-		String url = Util.getProductServer()+"?xml="+URL.encode(lasRequest.getXMLText());
+		String url = Util.getProductServer()+"?xml="+URL.encode(lasRequest.toString());
 		
 		if ( !url.equals(currentURL) ) {
 			currentURL = url;
@@ -399,10 +402,7 @@ public class OutputPanel extends Composite {
 			return;
 		}
 		
-		lasRequest = new LASRequestWrapper();
-		lasRequest.removeRegion(0);
-		lasRequest.removeVariables();
-		lasRequest.removePropertyGroup("ferret");
+		lasRequest = new LASRequest();
 		if ( variable.isVector() ) {
 			lasRequest.setOperation("Compare_Vectors", "v7");
 		} else {
@@ -410,27 +410,16 @@ public class OutputPanel extends Composite {
 		}
 		lasRequest.setProperty("ferret", "view", view);
 		lasRequest.setProperty("ferret", "size", ".8333");
-		lasRequest.addProperty("ferret", "annotations", "file");
+		lasRequest.setProperty("ferret", "annotations", "file");
 		// Add the variable in the upper left panel
 		if ( variable.isVector() ) {
 			// Add the first component
-			lasRequest.addVariable(variable.getDSID(), variable.getComponents().get(0));
+			lasRequest.addVariable(variable.getDSID(), variable.getComponents().get(0), 0);
 		} else {
-			lasRequest.addVariable(variable.getDSID(), variable.getID());
+			lasRequest.addVariable(variable.getDSID(), variable.getID(), 0);
 		}
-        lasRequest.addRegion();
-		// From the current slide sorter is this comment:
-		//
-		// Need to add a dummy variable here because the addRegion/AddVariable
-		// methods of LASRequest.js will not always add at the end of the <args>
-		// node list when there are duplicate <link ...> or <region ...> nodes.
-		// Using 'DUMMY' guarantees that addRegion will place the new region at
-		// the end.  Then we just replace 'DUMMY'.
-		// All this is necessary because order is important in comparison 
-		// requests.
-		//
-		// mimic this action here....
-
+        
+	
 		// For the first variable set the region according to the values passed in...
 		if ( xlo_in != null && xhi_in != null && !xlo_in.equals("") && !xhi_in.equals("") ) {
 			lasRequest.setRange("x", xlo_in, xhi_in, 0);
@@ -449,9 +438,9 @@ public class OutputPanel extends Composite {
 		
 		if ( variable.isVector() ) {
 			// Add the second component and its region to match the first component.
-			lasRequest.addProperty("ferret", "vector_name", variable.getName());
-			lasRequest.addVariable(variable.getDSID(), variable.getComponents().get(1));
-			lasRequest.addRegion();
+			lasRequest.setProperty("ferret", "vector_name", variable.getName());
+			lasRequest.addVariable(variable.getDSID(), variable.getComponents().get(1), 1);
+			
 			// For the second component variable set the region according to the values passed in...
 			if ( xlo_in != null && xhi_in != null && !xlo_in.equals("") && !xhi_in.equals("") ) {
 				lasRequest.setRange("x", xlo_in, xhi_in, 1);
@@ -469,8 +458,7 @@ public class OutputPanel extends Composite {
 			
 			// The comparison variable and it's region from the panel axes.
 			
-				lasRequest.addVariable(var.getDSID(), var.getID());
-			lasRequest.addRegion();
+			lasRequest.addVariable(var.getDSID(), var.getID(), 0);
 			
 			// For the second variable set all the axes that are not in the view, 
 			// either from the fixed in the slide sorter and the comparison axis in the panel
@@ -550,7 +538,7 @@ public class OutputPanel extends Composite {
 			messagePanel.show(grid.getWidget(1, 0).getAbsoluteLeft()+15, grid.getWidget(1,0).getAbsoluteTop()+15, "Could not make plot.  Variable in panel must also be a vector.");
             return;
 		} else if ( variable.isVector() && var.isVector() ){
-			lasRequest.addVariable(var.getDSID(), var.getComponents().get(0));
+			lasRequest.addVariable(var.getDSID(), var.getComponents().get(0), 0);
 			if ( isUsePanelSettings() || singlePanel ) {
 				if ( !view.contains("x") ) {
 					if ( var.getGrid().hasX() ) {
@@ -619,7 +607,7 @@ public class OutputPanel extends Composite {
 
 				}		
 			}
-			lasRequest.addVariable(var.getDSID(), var.getComponents().get(1));
+			lasRequest.addVariable(var.getDSID(), var.getComponents().get(1), 1);
 			if ( isUsePanelSettings() || singlePanel ) {
 				if ( !view.contains("x") ) {
 					if ( var.getGrid().hasX() ) {
@@ -692,9 +680,9 @@ public class OutputPanel extends Composite {
 		
 		
 		
-		lasRequest.addProperty("ferret", "image_format", "gif");
+		lasRequest.setProperty("ferret", "image_format", "gif");
 		if ( containerType.equals(Constants.IMAGE) ) {
-		    lasRequest.addProperty("las", "output_type", "xml");
+		    lasRequest.setProperty("las", "output_type", "xml");
 		}
 		if ( settingsButton.isUsePanelSettings() || singlePanel ) {
 			// Use the panel options.
@@ -704,7 +692,7 @@ public class OutputPanel extends Composite {
 					String key = (String) opIt.next();
 					String value = panelOptions.get(key);
 					if ( !value.toLowerCase().equals("default") && !value.equals("") ) {
-						lasRequest.addProperty("ferret", key, value);
+						lasRequest.setProperty("ferret", key, value);
 					}
 				}
 			}
@@ -715,13 +703,13 @@ public class OutputPanel extends Composite {
 					String key = (String) opIt.next();
 					String value = options.get(key);
 					if ( !value.toLowerCase().equals("default") && !value.equals("") ) {
-						lasRequest.addProperty("ferret", key, value);
+						lasRequest.setProperty("ferret", key, value);
 					}
 				}
 			}
 		}
 		lasRequest.setProperty("product_server", "ui_timeout", "20");
-		String url = Util.getProductServer()+"?xml="+URL.encode(lasRequest.getXMLText());
+		String url = Util.getProductServer()+"?xml="+URL.encode(lasRequest.toString());
 		
 		if ( !url.equals(currentURL) ) {
 			currentURL = url;
@@ -743,45 +731,64 @@ public class OutputPanel extends Composite {
 		}
 	}
 
-	public LASRequestWrapper getRequest() {
-		LASRequestWrapper lasRequest = new LASRequestWrapper();
-		lasRequest.removeRegion(0);
-		lasRequest.removeVariables();
-		lasRequest.removePropertyGroup("ferret");
-
+	public LASRequest getRequest() {
+		LASRequest lasRequest = new LASRequest();
+		
 		if ( var.isVector() ) {
 			// Add the first component
-			lasRequest.addVariable(var.getDSID(), var.getComponents().get(0));
-			lasRequest.addProperty("ferret", "vector_name", var.getName());
+			lasRequest.addVariable(var.getDSID(), var.getComponents().get(0), 0);
+			lasRequest.setProperty("ferret", "vector_name", var.getName());
 		} else {
-				lasRequest.addVariable(var.getDSID(), var.getID());
+				lasRequest.addVariable(var.getDSID(), var.getID(), 0);
 		}
-		lasRequest.addRegion();
+
 		lasRequest.setOperation(operationID, "v7");
 
 		// If its a vector plot add the second variable.
 
-
-		if ( var.getGrid().getTAxis() != null ) {
-			lasRequest.setRange("t", panelAxesWidgets.getTAxis().getFerretDateLo(), panelAxesWidgets.getTAxis().getFerretDateHi(), 0);
-		}
+        
 
 		xlo = String.valueOf(panelAxesWidgets.getRefMap().getXlo());
 		xhi = String.valueOf(panelAxesWidgets.getRefMap().getXhi());
 		ylo = String.valueOf(panelAxesWidgets.getRefMap().getYlo());
 		yhi = String.valueOf(panelAxesWidgets.getRefMap().getYhi());
 
-		lasRequest.setRange("x", xlo, xhi, 0);
-		lasRequest.setRange("y", ylo, yhi, 0);
+		if ( analysis != null ) {
+			
+			if ( var.getGrid().getTAxis() != null ) {
+				if ( !analysis.isActive("t") ) {
+				    lasRequest.setRange("t", panelAxesWidgets.getTAxis().getFerretDateLo(), panelAxesWidgets.getTAxis().getFerretDateHi(), 0);
+				}
+			}
+			
+			if ( !analysis.isActive("x") ) {
+				lasRequest.setRange("x", xlo, xhi, 0);
+			}
 
-		if ( var.getGrid().getZAxis() != null ) {
-			lasRequest.setRange("z", panelAxesWidgets.getZAxis().getLo(), panelAxesWidgets.getZAxis().getHi(), 0);
+			if (!analysis.isActive("y") ) {
+				lasRequest.setRange("y", ylo, yhi, 0);
+			}
+
+			if ( var.getGrid().getZAxis() != null ) {
+				if ( !analysis.isActive("z") ) {
+					lasRequest.setRange("z", panelAxesWidgets.getZAxis().getLo(), panelAxesWidgets.getZAxis().getHi(), 0);
+				}
+			}
+		} else {
+			lasRequest.setRange("x", xlo, xhi, 0);
+			lasRequest.setRange("y", ylo, yhi, 0);
+			if ( var.getGrid().getZAxis() != null ) {
+				lasRequest.setRange("z", panelAxesWidgets.getZAxis().getLo(), panelAxesWidgets.getZAxis().getHi(), 0);
+			} 
+			if ( var.getGrid().getTAxis() != null ) {
+				lasRequest.setRange("t", panelAxesWidgets.getTAxis().getFerretDateLo(), panelAxesWidgets.getTAxis().getFerretDateHi(), 0);
+			}
 		}
-
+		
 		if ( var.isVector() ) {
 			// Add the second component...
-			lasRequest.addVariable(var.getDSID(), var.getComponents().get(1));
-			lasRequest.addRegion();
+			lasRequest.addVariable(var.getDSID(), var.getComponents().get(1), 1);
+			
 			// TODO you will need to determine which component you need from the view!
 			
 			if ( var.getGrid().getTAxis() != null ) {
@@ -800,6 +807,11 @@ public class OutputPanel extends Composite {
 				lasRequest.setRange("z", panelAxesWidgets.getZAxis().getLo(), panelAxesWidgets.getZAxis().getHi(), 1);
 			}
 
+		}
+		if ( analysis != null ) {
+			
+		  lasRequest.setAnalysis(analysis, 0);
+			
 		}
 		lasRequest.setProperty("ferret", "view", view);
 		return lasRequest;
@@ -920,7 +932,7 @@ public class OutputPanel extends Composite {
 										@Override
 										public void onClick(ClickEvent event) {
 											// Just send the same request again to see if it works the second time.
-											String url = Util.getProductServer()+"?xml="+URL.encode(lasRequest.getXMLText());
+											String url = Util.getProductServer()+"?xml="+URL.encode(lasRequest.toString());
 											RequestBuilder sendRequest = new RequestBuilder(RequestBuilder.GET, url);
 											try {
 												sendRequest.sendRequest(null, lasRequestCallback);
@@ -940,7 +952,7 @@ public class OutputPanel extends Composite {
 							HTML batch = new HTML(spinImage.getHTML()+"<br><br>Your request has been processing for "+elapsed_time+" seconds.<br>This panel will refresh automatically.<br><br>");
 							grid.setWidget(1, 0, batch);
 							lasRequest.setProperty("product_server", "ui_timeout", "3");
-							String url = Util.getProductServer()+"?xml="+URL.encode(lasRequest.getXMLText());
+							String url = Util.getProductServer()+"?xml="+URL.encode(lasRequest.toString());
 							RequestBuilder sendRequest = new RequestBuilder(RequestBuilder.GET, url);
 							try {
 								sendRequest.sendRequest(null, lasRequestCallback);
@@ -1201,13 +1213,11 @@ public class OutputPanel extends Composite {
 				w.setWidth(pwidth+"px");
 				w.setHeight(h+"px");
 				int a = pwidth - 18;
-				lasAnnotationsPanel.setPopupWidth(a+"px");
 			} else {
 				// Just use the exact image size.
 				w.setWidth(image_w+"px");
 				w.setHeight(image_h+"px");
 				int a = (int) (image_w - 25);
-				lasAnnotationsPanel.setPopupWidth(a+"px");
 			}
 		} else {
 			setImageSize(fixedZoom);
@@ -1345,7 +1355,12 @@ public class OutputPanel extends Composite {
 		view = v;
 		panelAxesWidgets.getRefMap().setTool(view);
 	}
-
+    public void setOperationOnly(String id, String v) {
+    	// The map might be being used for the analysis, so only set the operation...
+    	settingsButton.setOperation(id, v);
+    	operationID = id;
+    	view = v;
+    }
 	public void addSettingsButtonListener(ClickListener clickListener) {
 		settingsButton.addClickListener(clickListener);
 	}
@@ -1500,7 +1515,12 @@ public class OutputPanel extends Composite {
 	public void setAnnotationsOpen(boolean open) {
 		lasAnnotationsPanel.setOpen(open);
 	}
-	
+	public void addAnnotationsClickHandler(ClickHandler clickHandler) {
+		lasAnnotationsPanel.addClickHandler(clickHandler);
+	}
+	public void setAnnotationsButtonDown(boolean down) {
+		lasAnnotationsPanel.setButtonDown(down);
+	}
 	// This is for mock up user interface and are not used with "real" UI's.
 	public void setAnnotationsHTMLURL(String url) {
 		lasAnnotationsPanel.setAnnotationsHTMLURL(url);
@@ -1513,5 +1533,8 @@ public class OutputPanel extends Composite {
 	}
 	public void setMapSelectionChangeLister(MapSelectionChangeListener handler) {
 		panelAxesWidgets.getRefMap().setMapListener(handler);
+	}
+	public void setAnalysis(AnalysisSerializable analysisSerializable) {
+		this.analysis = analysisSerializable;
 	}
 }

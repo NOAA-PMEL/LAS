@@ -37,6 +37,12 @@ public class OperationsMenu extends Composite {
 	public OperationsMenu() {
 		buttonBar = new HorizontalPanel();
         turnOffButtons();
+        animationButton.addStyleDependentName("SMALLER");
+        compareButton.addStyleDependentName("SMALLER");
+        googleEarthButton.addStyleDependentName("SMALLER");
+        showValuesButton.addStyleDependentName("SMALLER");
+        exportToDesktopButton.addStyleDependentName("SMALLER");
+        saveAsButton.addStyleDependentName("SMALLER");
 		buttonBar.add(animationButton);
 		buttonBar.add(compareButton);
 		buttonBar.add(googleEarthButton);

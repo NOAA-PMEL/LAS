@@ -65,12 +65,14 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.DockPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Frame;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.PushButton;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.ToggleButton;
+import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 public class OLMapWidget extends Composite {
@@ -167,6 +169,9 @@ public class OLMapWidget extends Composite {
     private Navigation navControl;
     private ArgParser argParser;
     private Attribution attribControl;
+    
+    private VerticalPanel main = new VerticalPanel();
+	private HTML hint = new HTML("A Map");
     
     private MapSelectionChangeListener mapListener;
     // public static final String WMS_URL = "http://strider.weathertopconsulting.com:8282/geoserver/wms?";
@@ -506,10 +511,13 @@ public class OLMapWidget extends Composite {
 		map.setCenter(new LonLat(0, 0), 0);
 		map.setOptions(wrapMapOptions);		
 		map.addMapMoveListener(mapMoveListener);
+		hint.setStyleName("TinyBlue");
+		main.add(hint);
+		main.add(dockPanel);
 		dockPanel.add(buttonPanel, DockPanel.NORTH);
 		dockPanel.add(mapWidget, DockPanel.CENTER);
 		dockPanel.add(textWidget, DockPanel.SOUTH);
-		initWidget(dockPanel);
+		initWidget(main);
 	}
 	public Map getMap() {
 		return map;
@@ -786,24 +794,28 @@ public class OLMapWidget extends Composite {
 			
 			Bounds b;
 			if ( tool.equals("t") || tool.equals("z") || tool.equals("zt") || tool.equals("pt") ) {	
+				hint.setText("Select a lat/lon point for the plot in "+tool+".");
 				drawButtonUp.setUrl(GWT.getModuleBaseURL()+"../images/draw_pt_off.png");
 				drawButtonDown.setUrl(GWT.getModuleBaseURL()+"../images/draw_pt_on.png");
 				if ( drawButton.isDown() ) {
 					drawPoint.activate();
 				}
 			} else if ( tool.equals("x") || tool.equals("xz") || tool.equals("xt") ) {
+				hint.setText("Select a line of longitude for the plot in "+tool+".");
 				drawButtonUp.setUrl(GWT.getModuleBaseURL()+"../images/draw_x_line_off.png");
 				drawButtonDown.setUrl(GWT.getModuleBaseURL()+"../images/draw_x_line_on.png");
 				if ( drawButton.isDown() ) {
 					drawXLine.activate();
 				}
 			} else if ( tool.equals("y") || tool.equals("yz") || tool.equals("yt") ) {
+				hint.setText("Select a line of latitude for the plot in "+tool+".");
 				drawButtonUp.setUrl(GWT.getModuleBaseURL()+"../images/draw_y_line_off.png");
 				drawButtonDown.setUrl(GWT.getModuleBaseURL()+"../images/draw_y_line_on.png");
 				if ( drawButton.isDown() ) {
 					drawYLine.activate();
 				}
 			} else {
+				hint.setText("Select a lat/lon area for the plot in "+tool+".");
 				drawButtonUp.setUrl(GWT.getModuleBaseURL()+"../images/draw_off.png");
 				drawButtonDown.setUrl(GWT.getModuleBaseURL()+"../images/draw_on.png");
 				if ( drawButton.isDown() ) {
@@ -825,6 +837,17 @@ public class OLMapWidget extends Composite {
 				editButton.setEnabled(false);
 			} else {
 				editButton.setEnabled(true);
+			}
+		} else {
+			// Even if the tool didn't change, set the hint in case it was reset by the analysis widget.
+			if ( tool.equals("t") || tool.equals("z") || tool.equals("zt") || tool.equals("pt") ) {	
+				hint.setText("Select a lat/lon point for the plot in "+tool+".");
+			} else if ( tool.equals("x") || tool.equals("xz") || tool.equals("xt") ) {
+				hint.setText("Select a line of longitude for the plot in "+tool+".");
+			} else if ( tool.equals("y") || tool.equals("yz") || tool.equals("yt") ) {
+				hint.setText("Select a line of latitude for the plot in "+tool+".");
+			} else {
+				hint.setText("Select a lat/lon area for the plot in "+tool+".");
 			}
 		}
 	}
@@ -1385,6 +1408,20 @@ public class OLMapWidget extends Composite {
 				regionWidget.setRegions(wire_regions);
 			}
 		}
+	}
+	public void sync(String axis, double lo, double hi ) {
+		if ( axis.equals("x") ) {
+			double ylo = getYlo();
+			double yhi = getYhi();
+		    setCurrentSelection(ylo, yhi, lo, hi);
+		} else if ( axis.equals("y") ) {
+			double xlo = getXlo();
+			double xhi = getXhi();
+			setCurrentSelection(lo, hi, xlo, xhi);
+		}
+	}
+	public void setHint(String html) {
+		hint.setText(html);
 	}
 	public boolean isEditing() {
 		return editing;

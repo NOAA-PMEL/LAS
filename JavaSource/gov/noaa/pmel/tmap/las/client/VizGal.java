@@ -111,8 +111,6 @@ public class VizGal extends BaseUI {
      // Keep track of the current operations
      OperationSerializable[] ops;
      
-     ToggleButton annotationsControl = new ToggleButton();
-     
      // Everybody that sub-classes BaseUI must implement three handlers for options OK, operations clicks and data set selections.
    
 	public void onModuleLoad() {
@@ -176,28 +174,9 @@ public class VizGal extends BaseUI {
 		addPanelZAxesChangeHandler(needApply);
 		addPanelMapChangeHandler(mapListener);
 		addPanelRevertClickHandler(panelApplyButtonClick);
-		annotationsControl = new ToggleButton(new Image(GWT.getModuleBaseURL()+"../images/i_off.png"), 
-				new Image(GWT.getModuleBaseURL()+"../images/i_on.png"), new ClickHandler() {
-
-					@Override
-					public void onClick(ClickEvent event) {
-						if ( annotationsControl.isDown() ) {
-							for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
-								OutputPanel panel = (OutputPanel) panelIt.next();
-								panel.setAnnotationsOpen(true);
-							}
-						} else {
-							for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
-								OutputPanel panel = (OutputPanel) panelIt.next();
-								panel.setAnnotationsOpen(false);
-							}
-						}
-						
-					}
-			
-		});
+		annotationsControl = new ToggleButton(new Image(GWT.getModuleBaseURL()+"../images/i_off.png"), new Image(GWT.getModuleBaseURL()+"../images/i_on.png"), annotationsClickHandler);
 		annotationsControl.setTitle("Plot Annotations");
-		annotationsControl.setStylePrimaryName("OL_MAP-PushButton");
+		annotationsControl.setStylePrimaryName("OL_MAP-ToggleButton");
 		annotationsControl.addStyleDependentName("WIDTH");
 		buttonLayout.setWidget(0, col++, annotationsControl);
 		
