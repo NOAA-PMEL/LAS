@@ -79,6 +79,7 @@ public class SettingsWidget extends Composite {
 
 
 		settingsPopup.add(settingsLayout);
+		settingsButton.setWidth("65px");
 		initWidget(settingsButton);	
 
 	}

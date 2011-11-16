@@ -9,22 +9,25 @@
 .gwt-PushButton-SMALLER {
 	padding: 0px;
 	font-size: .8em;
+	white-space:nowrap;
 }
 
 .gwt-ToggleButton-SMALLER {
 	padding: 0px;
 	font-size: .8em;
+	white-space:nowrap;
 }
 
 .OL_MAP-ToggleButton-WIDTH {
   margin: 0;
-  width: 18px;
-  height: 18px;
+  width: 30px;
+  height: 30px;
 }
+
 
 .gwt.TextBox-SMALLER {
 	padding: 0px;
-	font-size: .8em;
+	font-size: 1.0em;
 }
 
 .regularBackground {
@@ -35,6 +38,36 @@
 	background-color: #CAE;
 }
 
+.noBottomBorder {
+	border-top: 1px solid blue;
+	border-left: 1px solid blue;
+	border-right: 1px solid blue;
+	border-bottom: none;
+}
+
+.noTopBottomBorder {
+	border-top: none;
+	border-left: 1px solid blue;
+	border-right: 1px solid blue;
+	border-bottom: none;
+}
+.noTopBorder {
+	border-top: none;
+	border-left: 1px solid blue;
+	border-right: 1px solid blue;
+	border-bottom: 1px solid blue;
+}
+.allBorder {
+	border-top: 1px solid blue;
+	border-left: 1px solid blue;
+	border-right: 1px solid blue;
+	border-bottom: 1px solid blue;
+}
+.padding30 {
+	padding: 30px;
+}
 .las-align-right {
     text-align: right;
 }
+
+.hideextra { white-space: nowrap; overflow: hidden; text-overflow:ellipsis; padding:5px; }

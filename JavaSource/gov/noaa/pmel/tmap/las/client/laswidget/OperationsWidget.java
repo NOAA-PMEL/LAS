@@ -293,11 +293,11 @@ public class OperationsWidget extends Composite {
 		for (Iterator buttonId = buttons.iterator(); buttonId.hasNext();) {
 			OperationRadioButton button = (OperationRadioButton) buttonId.next();
 			if ( button.getOperation().getID().equals(id) && button.getView().equals(view) ) {
-				button.setChecked(true);
+				button.setValue(true);
 				currentOperation = button.getOperation();
 				currentView = button.getView();
 			} else {
-				button.setChecked(false);
+				button.setValue(false);
 			}
 		}
 	}
@@ -310,5 +310,17 @@ public class OperationsWidget extends Composite {
 	}
 	public boolean isOpen() {
 		return isOpen;
+	}
+	public String setZero(String view) {
+		currentView = view;
+		for (Iterator buttonIt = buttons.iterator(); buttonIt.hasNext();) {
+			OperationRadioButton zero = (OperationRadioButton) buttonIt.next();
+			if ( zero.getOperation().getViews().contains(view) ) {
+				currentOperation = zero.getOperation();
+				zero.setValue(true);
+				return currentOperation.getID();
+			}
+		}
+		return buttons.get(0).getOperation().getID();
 	}
 }

@@ -1,10 +1,14 @@
 package gov.noaa.pmel.tmap.las.client;
 
 import gov.noaa.pmel.tmap.las.client.laswidget.Constants;
+import gov.noaa.pmel.tmap.las.client.laswidget.LASRequest;
 import gov.noaa.pmel.tmap.las.client.laswidget.LASRequestWrapper;
 import gov.noaa.pmel.tmap.las.client.laswidget.OperationPushButton;
 import gov.noaa.pmel.tmap.las.client.laswidget.OperationsMenu;
 import gov.noaa.pmel.tmap.las.client.laswidget.UserListBox;
+import gov.noaa.pmel.tmap.las.client.map.MapSelectionChangeListener;
+import gov.noaa.pmel.tmap.las.client.serializable.AnalysisAxisSerializable;
+import gov.noaa.pmel.tmap.las.client.serializable.AnalysisSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.CategorySerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.ConfigSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.DatasetSerializable;
@@ -40,11 +44,13 @@ import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestCallback;
 import com.google.gwt.http.client.Response;
 import com.google.gwt.http.client.URL;
+import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.Frame;
 import com.google.gwt.user.client.ui.HTML;
@@ -98,7 +104,18 @@ public class TestUI extends BaseUI {
 		activateNativeHooks();	
 
 		openid = Util.getParameterString("openid");
-
+		
+		xAnalysisWidget.addAnalysisAxesChangeHandler(analysisAxesChange);
+		xAnalysisWidget.addAnalysisCheckHandler(analysisActiveChange);
+		xAnalysisWidget.addAnalysisOpChangeHandler(analysisOpChange);
+		
+		// Keep the two maps in sync...
+		// When the refmap changes, push the change to the Analysis Map...
+		xAxesWidget.getRefMap().setMapListener(syncAnalysisMapListener);
+		
+		// When the analysis map changes, update the regular map...
+		xAnalysisWidget.getRefMap().setMapListener(syncAnalysisMapListener);
+		
 		String spinImageURL = URLUtil.getImageURL()+"/mozilla_blu.gif";
 		HTML output = new HTML("<img src=\""+spinImageURL+"\" alt=\"Spinner\"/> Initializing...");
 		initializing.add(output);
@@ -120,15 +137,17 @@ public class TestUI extends BaseUI {
 
 			@Override
 			public void onChange(ChangeEvent event) {
+
 				int index = tVariables.getSelectedIndex();
 				xVariable = (VariableSerializable) tVariables.getUserObject(index);
 				tBreadCrumb.setText(xVariable.getDSName()+": "+xVariable.getName());
 				Util.getRPCService().getConfig(xView, xVariable.getDSID(), xVariable.getID(), getGridCallback);
+				
 			}
 			
 		});
 		
-		tTopPanel.add(tOperationsMenu);
+		xButtonLayout.setWidget(0, xButtonLayoutIndex++, tOperationsMenu);
 		tTopPanel.add(tBreadCrumb);
 		tTopPanel.add(tVariables);
 		tVariables.addAddButtonClickHandler(tAddVariableClickHandler);
@@ -143,7 +162,15 @@ public class TestUI extends BaseUI {
 		setOptionsOkHandler(optionsOkHandler);
 
 		// Add the apply button handler
-		xAxesWidget.addApplyHandler(settingsButtonApplyHandler);
+		//xAxesWidget.addApplyHandler(settingsButtonApplyHandler);
+		
+		xAxesWidget.addTChangeHandler(needApply);
+		xAxesWidget.addZChangeHandler(needApply);
+		
+		xAnalysisWidget.addTChangeHandler(needApply);
+		xAnalysisWidget.addZChangeHandler(needApply);
+		
+		addApplyHandler(settingsButtonApplyHandler);
 
 		RootPanel.get("main").add(uiPanel);	
 		
@@ -369,6 +396,8 @@ public class TestUI extends BaseUI {
 		double delta = Math.abs(Double.valueOf(ds_grid.getXAxis().getArangeSerializable().getStep()));
 		xAxesWidget.getRefMap().setTool(xView);
 		xAxesWidget.getRefMap().setDataExtent(grid_south, grid_north, grid_west, grid_east, delta);
+		xAnalysisWidget.getRefMap().setTool(xView);
+		xAnalysisWidget.getRefMap().setDataExtent(grid_south, grid_north, grid_west, grid_east, delta);
 		xOperationsWidget.setOperations(xVariable.getIntervals(), xVariable.getDSID(), xVariable.getID(), xOperationID, xView);
 		tOperationsMenu.setMenus(ops, xView);
 		// Examine the variable axes and determine which are orthogonal to the view. 
@@ -391,10 +420,12 @@ public class TestUI extends BaseUI {
 		xAxesWidget.init(xVariable.getGrid());
 		xAxesWidget.setFixedAxis(xView, xOrtho, null);		
 
+		// Init the axes wiget that lives in the analysis Widget...
+		xAnalysisWidget.init(xVariable.getGrid());
 
 		xPanels.get(0).addApplyHandler(panelApply);
 
-		// Move the current state of the axes to the panel
+		// Move the current state of the axes to the panel (and the analysis widget)
 		if ( xTlo != null && !xTlo.equals("") ) {
 			xPanels.get(0).setAxisRangeValues("t", xTlo, xThi);
 			xAxesWidget.getTAxis().setLo(xTlo);
@@ -436,11 +467,15 @@ public class TestUI extends BaseUI {
 		resize();
 	}
 	public void applyChange() {
+		applyButton.removeStyleDependentName("APPLY-NEEDED");
 		if ( changeDataset ) {
 			cs = xAxesWidget.getRefMap().getCurrentSelection();
 			// This involves a jump across the wire, so the finishApply gets called in the callback from the getGrid.
 			changeDataset();
 		} else {
+			AnalysisSerializable analysis = null;
+			if ( xAnalysisWidget.isActive() ) analysis = xAnalysisWidget.getAnalysisSerializable();
+			
 			// No jump required, just finish up now.
 			String op_id = xOperationsWidget.getCurrentOperation().getID();
 			String op_view = xOperationsWidget.getCurrentView();
@@ -448,37 +483,69 @@ public class TestUI extends BaseUI {
 				xOperationID = op_id;
 				xView = op_view;
 			}
-			// The view may have changed if the operation changed before the apply.
+			
 			xAxesWidget.getRefMap().setTool(xView);
+			
 			if ( xVariable.getGrid().hasT() ) {
-				if ( xView.contains("t") ) {
-					xAxesWidget.getTAxis().setRange(true);
-					xPanels.get(0).setPanelAxisRange("t", true);
+				if ( analysis != null && analysis.isActive("t") ) {
+					AnalysisAxisSerializable analysisAxisSerializable = analysis.getAxes().get("t");
+					analysisAxisSerializable.setLo(xAnalysisWidget.getTAxis().getFerretDateLo());
+					analysisAxisSerializable.setHi(xAnalysisWidget.getTAxis().getFerretDateHi());
 				} else {
-					xAxesWidget.getTAxis().setRange(false);
-					xPanels.get(0).setPanelAxisRange("t", false);
-				}				
-				xPanels.get(0).setAxisRangeValues("t", xAxesWidget.getTAxis().getFerretDateLo(), xAxesWidget.getTAxis().getFerretDateHi());
+					if ( xView.contains("t") ) {
+						xAxesWidget.getTAxis().setRange(true);
+						xPanels.get(0).setPanelAxisRange("t", true);
+					} else {
+						xAxesWidget.getTAxis().setRange(false);
+						xPanels.get(0).setPanelAxisRange("t", false);
+					}				
+					xPanels.get(0).setAxisRangeValues("t", xAxesWidget.getTAxis().getFerretDateLo(), xAxesWidget.getTAxis().getFerretDateHi());
+				}
 			}
 			if ( xVariable.getGrid().hasZ() ) {
-				if ( xView.contains("z") ) {
-					xAxesWidget.getZAxis().setRange(true);
-					xPanels.get(0).setPanelAxisRange("z", true);
+				if ( analysis != null && analysis.isActive("z") ) {
+					AnalysisAxisSerializable analysisAxisSerializable = analysis.getAxes().get("z");
+					analysisAxisSerializable.setLo(xAnalysisWidget.getZAxis().getLo());
+					analysisAxisSerializable.setHi(xAnalysisWidget.getZAxis().getHi());
 				} else {
-					xAxesWidget.getZAxis().setRange(false);
-					xPanels.get(0).setPanelAxisRange("z", false);
-				}
-				xPanels.get(0).setAxisRangeValues("z", xAxesWidget.getZAxis().getLo(), xAxesWidget.getZAxis().getHi());
+					if ( xView.contains("z") ) {
+						xAxesWidget.getZAxis().setRange(true);
+						xPanels.get(0).setPanelAxisRange("z", true);
+					} else {
+						xAxesWidget.getZAxis().setRange(false);
+						xPanels.get(0).setPanelAxisRange("z", false);
+					}
+					xPanels.get(0).setAxisRangeValues("z", xAxesWidget.getZAxis().getLo(), xAxesWidget.getZAxis().getHi());
+				} 
 			}
 
 			double tmp_xlo = xAxesWidget.getRefMap().getXlo();
 			double tmp_xhi = xAxesWidget.getRefMap().getXhi();
-
 			double tmp_ylo = xAxesWidget.getRefMap().getYlo();
 			double tmp_yhi = xAxesWidget.getRefMap().getYhi();
 
 			xPanels.get(0).setLatLon(String.valueOf(tmp_ylo), String.valueOf(tmp_yhi), String.valueOf(tmp_xlo), String.valueOf(tmp_xhi));
-
+			NumberFormat format2 = NumberFormat.getFormat("####.##");
+			String analysis_xlo = format2.format(xAnalysisWidget.getRefMap().getXlo());
+			String analysis_xhi = format2.format(xAnalysisWidget.getRefMap().getXhi());
+			if ( analysis != null && analysis.isActive("x") ) {
+				AnalysisAxisSerializable analysisAxisSerializable = analysis.getAxes().get("x");
+				analysisAxisSerializable.setLo(analysis_xlo);
+				analysisAxisSerializable.setHi(analysis_xhi);
+			}
+			String analysis_ylo = format2.format(xAnalysisWidget.getRefMap().getYlo());
+			String analysis_yhi = format2.format(xAnalysisWidget.getRefMap().getYhi());
+			if (analysis != null && analysis.isActive("y") ) {
+				AnalysisAxisSerializable analysisAxisSerializable = analysis.getAxes().get("y");
+				analysisAxisSerializable.setLo(analysis_ylo);
+				analysisAxisSerializable.setHi(analysis_yhi);
+			}
+			
+			xAnalysisWidget.setLabel(xVariable.getName());
+			
+			// May be null... 
+			xPanels.get(0).setAnalysis(analysis);
+			
 			Map<String, String> temp_state = xOptionsButton.getState();
 			xPanels.get(0).refreshPlot(temp_state, false, true);
 		}
@@ -537,9 +604,9 @@ public class TestUI extends BaseUI {
 			xAxesWidget.getRefMap().setRegions(regions);
 			ops = config.getOperations();
 			xVariable.setGrid(grid);
-			//xAnalysisWidget.setAnalysisAxes(grid);
+			xAnalysisWidget.setAnalysisAxes(grid);
 			if ( xPanels == null || xPanels.size() == 0 ) {
-				TestUI.super.init(1, Constants.FRAME);
+				TestUI.super.init(1, Constants.IMAGE);
 			}
 			initPanel();
 
@@ -636,10 +703,10 @@ public class TestUI extends BaseUI {
 		public void onClick(ClickEvent event) {
 			OperationPushButton b = (OperationPushButton) event.getSource();
 			OperationSerializable xOperationID = b.getOperation();
-			LASRequestWrapper lasRequest = xPanels.get(0).getRequest();
+			LASRequest lasRequest = xPanels.get(0).getRequest();
 			lasRequest.setOperation(xOperationID.getID(), "v7");
 			String features = "toolbar=1,location=1,directories=1,status=1,menubar=1,scrollbars=1,resizable=1"; 
-			Window.open(Util.getProductServer()+"?xml="+URL.encode(lasRequest.getXMLText()), xOperationID.getName(), features);
+			Window.open(Util.getProductServer()+"?xml="+URL.encode(lasRequest.toString()), xOperationID.getName(), features);
 		}
 
 	};
@@ -702,32 +769,36 @@ public class TestUI extends BaseUI {
                     
 				}
 			}
-			
 			// We changed the number of variables, so get the operations...
-			String xpaths[] = new String[tAdditionalVariables.size()+1];
-			xpaths[0] = Util.getVariableXPATH(xVariable.getDSID(), xVariable.getID());
-			int index = 0;
-			for (Iterator varIt = tAdditionalVariables.iterator(); varIt.hasNext();) {
-				UserListBox lb = (UserListBox) varIt.next();
-				VariableSerializable v = lb.getUserObject(index);
-				xpaths[index+1] = Util.getVariableXPATH(xVariable.getDSID(), v.getID());
-				index++;
-			}
-			Util.getRPCService().getOperations(xView, xpaths, getOperationsCallback);
+			getOperations();
 			
 		}
 		
 	};
+	private void getOperations() {
+		
+		String xpaths[] = new String[tAdditionalVariables.size()+1];
+		xpaths[0] = Util.getVariableXPATH(xVariable.getDSID(), xVariable.getID());
+		int index = 0;
+		for (Iterator varIt = tAdditionalVariables.iterator(); varIt.hasNext();) {
+			UserListBox lb = (UserListBox) varIt.next();
+			VariableSerializable v = lb.getUserObject(index);
+			xpaths[index+1] = Util.getVariableXPATH(xVariable.getDSID(), v.getID());
+			index++;
+		}
+		Util.getRPCService().getOperations(xView, xpaths, getOperationsCallback);
+		
+	}
+	private void setOperations(String intervals) {
+		xOperationID = ops[0].getID();
+		xOperationsWidget.setOperations(intervals, ops[0].getID(), xView, ops);
+		setOperationsClickHandler(operationsClickHandler);
+		tOperationsMenu.setMenus(ops, xView);
+	}
 	AsyncCallback<OperationSerializable[]> getOperationsCallback = new AsyncCallback<OperationSerializable[]>() {
 		public void onSuccess(OperationSerializable[] multi_var_ops) {
-			
 			ops = multi_var_ops;
-			//setOperations(String intervals, String opID, String view, OperationSerializable[] ops) {
-			xOperationID = ops[0].getID();
-			xOperationsWidget.setOperations(xVariable.getIntervals(), ops[0].getID(), xView, ops);
-			tOperationsMenu.setMenus(ops, xView);
-			
-
+			setOperations(xVariable.getIntervals());
 		}
 
 		@Override
@@ -737,6 +808,144 @@ public class TestUI extends BaseUI {
 
 		}
 
+	};
+	public ChangeHandler analysisAxesChange = new ChangeHandler() {
+
+		@Override
+		public void onChange(ChangeEvent event) {
+			if ( xAnalysisWidget.isActive() ) {
+				applyButton.addStyleDependentName("APPLY-NEEDED");
+				ListBox analysisAxis = (ListBox) event.getSource();
+				String v = analysisAxis.getValue(analysisAxis.getSelectedIndex());
+				setAnalysisAxes(v);
+			}
+		}
+    	
+    };
+    public ClickHandler analysisActiveChange = new ClickHandler() {
+
+		@Override
+		public void onClick(ClickEvent event) {
+			CheckBox analysis = (CheckBox) event.getSource();
+			applyButton.addStyleDependentName("APPLY-NEEDED");
+			String v = xAnalysisWidget.getAnalysisAxis();
+			if ( analysis.getValue() ) {
+				setAnalysisAxes(v);
+			} else {
+				xPanels.get(0).setAnalysis(null);
+				setOperations(xVariable.getIntervals());
+				xView = "xy";
+				xOperationID = xOperationsWidget.setZero(xView);
+				xAxesWidget.getRefMap().setTool(xView);
+				xPanels.get(0).setOperation(xOperationID, xView);
+				GridSerializable grid = xVariable.getGrid();
+				if ( grid.hasZ() ) {
+					xAxesWidget.setRange("z", false);
+				}
+				if ( grid.hasT() ) {
+					xAxesWidget.setRange("t", false);
+				}
+			}
+		}
+    };
+    public ChangeHandler analysisOpChange = new ChangeHandler() {
+
+		@Override
+		public void onChange(ChangeEvent event) {
+			applyButton.addStyleDependentName("APPLY-NEEDED");
+		}
+    };
+    private void setAnalysisAxes(String v) {
+    	
+		// Eliminate the transformed axis from the acceptable intervals for the variable.
+		String intervals = xVariable.getIntervals().replace(v, "");
+		// Eliminate the transformed axis from the view.
+		String view = xView.replace(v, "");
+		// If the view goes blank, find the next best view.
+		if ( view.equals("") ) {
+			if ( intervals.contains("xy") ) {
+				xView = "xy";
+			} else if ( intervals.contains("t") && xVariable.getGrid().hasT() ) {
+				xView = "t";
+			} else if (intervals.contains("z") && xVariable.getGrid().hasZ() ) {
+				xView = "z";
+			} else if ( intervals.contains("x") ) {
+				xView = "x";
+			} else if ( intervals.contains("y") ) {
+				xView = "y";
+			}
+		} else {
+			xView = view;
+		}
+		
+		// Get set the new operations that apply to the remaining views.
+		setOperations(intervals);
+		
+		// Set the default operation.
+		xOperationID = xOperationsWidget.setZero(xView);
+		xPanels.get(0).setOperationOnly(xOperationID, xView);
+		
+		// Set the axis controls for the remaining views.
+		List<String> o = new ArrayList<String>();
+		String oax = intervals.replace(xView, "");
+		if ( oax.contains("x") ) o.add("x");
+		if ( oax.contains("y") ) o.add("y");
+		if ( oax.contains("z") ) o.add("z");
+		if ( oax.contains("t") ) o.add("t");
+		xAxesWidget.setFixedAxis(xView, o, "");
+		xAxesWidget.getRefMap().setTool(xView);
+		
+		// Provide axes controls for the axis to be transformed.
+		xAnalysisWidget.setAxes(v);
+		if ( v.equals("x") ) {
+			xAnalysisWidget.getRefMap().setTool(v);
+			xAnalysisWidget.getRefMap().setHint("Select a longitude range over which the analysis will be computed.");
+			if ( xView.contains("z") || xView.contains("t") ) {
+				xAxesWidget.getRefMap().setHint("Select a latitude point at which to make the plot.");
+			}
+		} else if ( v.equals("y") ) {
+			xAnalysisWidget.getRefMap().setTool(v);
+			xAnalysisWidget.getRefMap().setHint("Select a latitude range over which the analysis will be computed.");
+			if ( xView.contains("z") || xView.contains("t") ) {
+				xAxesWidget.getRefMap().setHint("Select a longitude point at which to make the plot.");
+			}
+		} else if ( v.equals("xy") ) {
+			xAnalysisWidget.getRefMap().setTool(v);
+			xAnalysisWidget.getRefMap().setHint("Select a lat/lon region over which the analysis will be computed.");
+		}
+		if ( v.contains("z") ) {
+			xAnalysisWidget.setRange("z", xAxesWidget.getZAxis().getLo(), xAxesWidget.getZAxis().getHi());
+		}
+		if ( v.contains("t") ) {
+			xAnalysisWidget.setRange("t", xAxesWidget.getTAxis().getFerretDateLo(), xAxesWidget.getTAxis().getFerretDateHi());
+		}
+    }
+    
+	protected MapSelectionChangeListener syncAnalysisMapListener = new MapSelectionChangeListener() {
+
+		@Override
+		public void onFeatureChanged() {
+			 applyButton.addStyleDependentName("APPLY-NEEDED");
+			 if ( xAnalysisWidget.isActive() ) {
+				 if ( xAnalysisWidget.getAnalysisSerializable().isActive("y") && !xAnalysisWidget.getAnalysisSerializable().isActive("x") && !xView.equals("xy") ) {
+					 double xlo = xAxesWidget.getRefMap().getXlo();
+					 double xhi = xAxesWidget.getRefMap().getXhi();
+					 xAnalysisWidget.getRefMap().sync("x", xlo, xhi);
+					 double ylo = xAnalysisWidget.getRefMap().getYlo();
+					 double yhi = xAnalysisWidget.getRefMap().getYhi();
+					 xAxesWidget.getRefMap().sync("y", ylo, yhi);
+				 }
+				 if (xAnalysisWidget.getAnalysisSerializable().isActive("x") && !xAnalysisWidget.getAnalysisSerializable().isActive("y") && !xView.equals("xy") ) {
+					 double ylo = xAxesWidget.getRefMap().getYlo();
+					 double yhi = xAxesWidget.getRefMap().getYhi();
+					 xAnalysisWidget.getRefMap().sync("y", ylo, yhi);
+					 double xlo = xAnalysisWidget.getRefMap().getXlo();
+					 double xhi = xAnalysisWidget.getRefMap().getXhi();
+					 xAxesWidget.getRefMap().sync("x", xlo, xhi);
+				 }
+			 }
+		}
+		
 	};
 	private boolean isSelected(int i) {
 		for (Iterator lbIt = tAdditionalVariables.iterator(); lbIt.hasNext();) {

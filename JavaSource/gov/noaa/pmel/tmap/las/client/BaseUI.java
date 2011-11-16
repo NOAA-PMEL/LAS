@@ -1,5 +1,6 @@
 package gov.noaa.pmel.tmap.las.client;
 
+import gov.noaa.pmel.tmap.las.client.laswidget.AnalysisWidget;
 import gov.noaa.pmel.tmap.las.client.laswidget.AxesWidgetGroup;
 import gov.noaa.pmel.tmap.las.client.laswidget.ComparisonAxisSelector;
 import gov.noaa.pmel.tmap.las.client.laswidget.Constants;
@@ -42,7 +43,9 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.PushButton;
+import com.google.gwt.user.client.ui.ToggleButton;
 import com.google.gwt.user.client.ui.TreeItem;
+import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.client.ui.FlexTable.FlexCellFormatter;
 /**
@@ -138,11 +141,11 @@ public class BaseUI implements EntryPoint {
 	// Number of panels, controls behavior of some listeners.
 	int xPanelCount;
 
-	// Main panel, contains the navigation controls,
-	// the buttons across the top and the results panel.
+	// Main panel, contains the navigation controls, and the results panel
 	FlexTable xMainPanel = new FlexTable();
 	FlexCellFormatter xMainPanelCellFormatter;
 
+	
 	// Left-side navigation widgets
 	FlexTable xNavigationControls = new FlexTable();
 
@@ -156,10 +159,15 @@ public class BaseUI implements EntryPoint {
 	AxesWidgetGroup xAxesWidget;
 	ComparisonAxisSelector xComparisonAxesSelector;
 	OperationsWidget xOperationsWidget = new OperationsWidget("Operations");
+	AnalysisWidget xAnalysisWidget;
 
 	// Analysis controls in the navigation panel
 	//AnalysisWidget xAnalysisWidget = new AnalysisWidget();
 	//CheckBox xApplyAnalysis = new CheckBox("Apply Analysis");
+	
+	// A "global" annotations toggle button.  If you want it in your UI, place it somewhere in the layout.
+	// Having it in the superclass allows it to be toggled in the handler for any annotations button push.
+	ToggleButton annotationsControl = new ToggleButton();
 
 	// Controls for the panel sizes and to hide and show the headers.
 	
@@ -212,7 +220,7 @@ public class BaseUI implements EntryPoint {
 	public void initialize() {
 		
 		xTileServer = getTileServer();
-		
+		xAnalysisWidget = new AnalysisWidget(xControlsWidthPx, xTileServer);
 		// Somebody might have already set these.  Only get them from the query string if they are null.
 		if ( xDSID == null ) {
 			xDSID = Util.getParameterString("dsid");
@@ -281,10 +289,11 @@ public class BaseUI implements EntryPoint {
 		// This are bumped down one for the grow shrink experiment...
 		xNavigationControls.setWidget(navControlIndex++, 0, xAxesWidget);
 		xNavigationControls.setWidget(navControlIndex++, 0, xComparisonAxesSelector);
+		xNavigationControls.setWidget(navControlIndex++, 0, xAnalysisWidget);
 		xNavigationControls.setWidget(navControlIndex++, 0, xOperationsWidget);
-		//xNavigationControls.setWidget(navControlIndex++, 0, xApplyAnalysis);
-		//xNavigationControls.setWidget(navControlIndex++, 0, xAnalysisWidget);
-
+		
+		xAnalysisWidget.getRefMap().setMapListener(mapListener);
+		
 		xHideControls.setOpen(true);
 		xHideControls.addCloseHandler(new CloseHandler<DisclosurePanel>() {
 			@Override
@@ -357,11 +366,10 @@ public class BaseUI implements EntryPoint {
 		xButtonLayout.setWidget(0, xButtonLayoutIndex++, xOptionsButton);
 		xButtonLayout.setWidget(0, xButtonLayoutIndex++, xPrinterFriendlyButton);
 		
-		
-		xMainPanel.setWidget(0, 0, xButtonLayout);
+		xMainPanel.setWidget(0, 0, xButtonLayout);	
 		xMainPanel.setWidget(1, 0, xNavigationControls);
 		xMainPanel.setWidget(1, 1, xPanelTable);
-		
+	    
 		
 		
 		Window.addResizeHandler(new ResizeHandler() {
@@ -437,6 +445,7 @@ public class BaseUI implements EntryPoint {
 			}
 
 			OutputPanel panel = new OutputPanel(title, compare_panel, xOperationID, xOptionID, xView, singlePanel, xContainerType, xTileServer);
+			panel.addAnnotationsClickHandler(annotationsClickHandler);
 
 			xPanelTable.setWidget(row, col, panel);			
 			xPanels.add(panel);
@@ -594,6 +603,30 @@ public class BaseUI implements EntryPoint {
 		}
 		
 	};
+	public ClickHandler annotationsClickHandler = new ClickHandler() {
+
+		@Override
+		public void onClick(ClickEvent event) {
+			ToggleButton annotationsControl = (ToggleButton) event.getSource();
+			if ( annotationsControl.isDown() ) {
+				for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
+					OutputPanel panel = (OutputPanel) panelIt.next();
+					panel.setAnnotationsOpen(true);
+					panel.setAnnotationsButtonDown(true);
+					annotationsControl.setDown(true);
+				}
+			} else {
+				for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
+					OutputPanel panel = (OutputPanel) panelIt.next();
+					panel.setAnnotationsOpen(false);
+					panel.setAnnotationsButtonDown(false);
+					annotationsControl.setDown(false);
+				}
+			}
+			
+		}
+    };
+    
 	protected MapSelectionChangeListener mapListener = new MapSelectionChangeListener() {
 		
 		@Override
