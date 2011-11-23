@@ -14,10 +14,11 @@
 ! started.
 
 ! Define the gif filename (preventing collisions of file named ".gif" in VizGal)
-IF `($FERRET_VERSION"0") GE 6.721` THEN 
+IF `($reset_gifname"0|*>1") AND ($FERRET_VERSION"0") GE 6.721` THEN 
    IF ($result_plot_image_filename%0|*>1%) THEN 
       IF `STRINDEX("($result_plot_image_filename)", "gif") GT 0` THEN\
  SET GIFFILE "($result_plot_image_filename)"
+      DEFINE SYMBOL reset_gifname = 1
    ENDIF
 ENDIF
 
