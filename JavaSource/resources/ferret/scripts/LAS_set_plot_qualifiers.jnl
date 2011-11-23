@@ -8,6 +8,15 @@
 ! it sets LINECOLORS. The LINECOLORS setting needs a SET WIN to
 ! take effect.
 
+! Define the gif filename (preventing collisions of .gif file in VizGal)
+sh sym ferret_version
+IF `($FERRET_VERSION"0") GE 6.721` THEN 
+   IF ($result_plot_image_filename%0|*>1%) THEN 
+      IF `STRINDEX("($result_plot_image_filename)", "gif") GT 0` THEN\
+ SET GIFFILE "($result_plot_image_filename)"
+   ENDIF
+ENDIF
+
 IF `STRLEN("($ferret_view)") EQ 1` THEN  DEFINE SYMBOL oneDplot = 1
 IF `STRLEN("($ferret_view)") EQ 1 AND ($data_count"1") EQ 1` THEN  DEFINE SYMBOL oneD_1var = 1
 
@@ -27,19 +36,8 @@ ENDIF
 ! TODO:  For time plots, either the configurer or the script might want to turn on 
 ! TODO:  graticules at the small tic marks.  /GRATICULE=(DASH)="small, large"
 
-!IF ($ferret_use_graticules"1|0|*>1) THEN
-!  DEFINE SYMBOL graticuleColor = black
-!  IF ($oneDplot"0|*>1") THEN
-!     SET MODE LINECOLORS:7
-!     PPL COLOR,7,70,70,70  ! gray
-!     DEFINE SYMBOL graticuleColor = 7
-!  ENDIF
-!  SET MODE GRATICULE:(DASH,COLOR=($graticuleColor))
-!ENDIF
-
-
 SET MODE LINECOLORS:8
-PPL COLOR,7,70,70,70  ! gray
+PPL COLOR,7,70,70,70     ! gray
 PPL COLOR,8,100,100,100  ! white
 
 IF ($ferret_use_graticules"1|none>0|*>1) THEN

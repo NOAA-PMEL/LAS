@@ -18,8 +18,6 @@
 set mode ver:always
 ! This may already have been set by e.g. Trajectory_correlation.jnl
 
-IF `($data_initialization_script"0|*>1") EQ 0` THEN DEFINE SYMBOL data_initialization_script LAS_initialize_data
-
 IF `($data_count"0") LT 2` THEN
   MESSAGE/ERROR **ERROR Expecting two variables, but only received ($data_count)
   EXIT/PROGRAM

@@ -25,6 +25,8 @@
 
 ! If we want a different color than red for the second color, send it in as $2
 
+! This script issues plot commands, so it needs to be called AFTER LAS_open_window.
+
 IF $2"0|*>1" THEN 
    DEFINE SYMBOL ipen = @P$2
 ELSE
@@ -34,7 +36,7 @@ ENDIF
 ! Get the region symbols as they would be drawn on the plot.
 
 IF `($ferret_vector_1"0|*>1") OR ($ferret_vector_x1"0|*>1")` THEN 
-   DEFINE SYMBOL plot_type = VECTOR
+   DEFINE SYMBOL plt_command = VECTOR
    DEFINE SYMBOL test_plot_1 = ($ferret_vector_x1), ($ferret_vector_y1)
    DEFINE SYMBOL test_plot_2 = ($ferret_vector_x2), ($ferret_vector_y2)
 
@@ -43,8 +45,8 @@ IF `($ferret_vector_1"0|*>1") OR ($ferret_vector_x1"0|*>1")` THEN
       DEFINE SYMBOL test_plot_2 = ($ferret_plot_base_var_0),  ($ferret_plot_base_var_0), xcoord, ycoord
    ENDIF
 ELSE
-   DEFINE SYMBOL plot_type = SHADE
-   IF `STRLEN("($ferret_view)") EQ 1` THEN DEFINE SYMBOL plot_type = PLOT
+   DEFINE SYMBOL plt_command = SHADE
+   IF `STRLEN("($ferret_view)") EQ 1` THEN DEFINE SYMBOL plt_command = PLOT
    DEFINE SYMBOL test_plot_1 = ($ferret_var_0)
    DEFINE SYMBOL test_plot_2 = ($ferret_var_1)
 
@@ -55,7 +57,7 @@ ELSE
 
 ENDIF
 
-($plot_type)/SET ($test_plot_1)
+($plt_command)/SET ($test_plot_1)
    IF ($labnum_x"0|*>1") THEN
 	 LET nc = STRINDEX("($lab($labnum_x))", ":")
 	 LET llen = STRLEN("($lab($labnum_x))")
@@ -80,7 +82,7 @@ ENDIF
 	 DEFINE SYMBOL timelab1 = `SUBSTRING("($lab($labnum_t))", nc+1, llen-nc)`
    ENDIF
 
-($plot_type)/SET ($test_plot_2)
+($plt_command)/SET ($test_plot_2)
    IF ($labnum_x"0|*>1") THEN
 	 LET nc = STRINDEX("($lab($labnum_x))", ":")
 	 LET llen = STRLEN("($lab($labnum_x))")
