@@ -38,7 +38,7 @@ IF `STRLEN("($ferret_view)") EQ 2` THEN
 ! Run the difference-plot script. XY has extra details for 
 ! curvilienar data and land, so it is a separate script.
 
-   IF ($ferret_view"xy>1|*>0") THEN
+   IF ($ferret_view"0|xy>1|*>0") THEN
       go xy_compare_difference
    ELSE
       go twoD_compare_difference
