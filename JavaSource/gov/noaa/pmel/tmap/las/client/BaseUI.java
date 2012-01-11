@@ -5,6 +5,7 @@ import gov.noaa.pmel.tmap.las.client.laswidget.AxesWidgetGroup;
 import gov.noaa.pmel.tmap.las.client.laswidget.ComparisonAxisSelector;
 import gov.noaa.pmel.tmap.las.client.laswidget.Constants;
 import gov.noaa.pmel.tmap.las.client.laswidget.DatasetButton;
+import gov.noaa.pmel.tmap.las.client.laswidget.NavAxesGroup;
 import gov.noaa.pmel.tmap.las.client.laswidget.OperationsWidget;
 import gov.noaa.pmel.tmap.las.client.laswidget.OptionsButton;
 import gov.noaa.pmel.tmap.las.client.laswidget.OutputPanel;
@@ -54,7 +55,7 @@ import com.google.gwt.user.client.ui.FlexTable.FlexCellFormatter;
  * @author rhs
  *
  */
-public class BaseUI implements EntryPoint {
+public class BaseUI {
 	/*
 	 * Contains the visualization panels for this UI.  They are laid out in the xPanelTable
 	 */
@@ -156,7 +157,7 @@ public class BaseUI implements EntryPoint {
 	DisclosurePanel xSettingsHeader = new DisclosurePanel("Settings");
 
 	// The controls themselves
-	AxesWidgetGroup xAxesWidget;
+	NavAxesGroup xAxesWidget;
 	ComparisonAxisSelector xComparisonAxesSelector;
 	OperationsWidget xOperationsWidget = new OperationsWidget("Operations");
 	AnalysisWidget xAnalysisWidget;
@@ -213,10 +214,7 @@ public class BaseUI implements EntryPoint {
 	 * @see com.google.gwt.core.client.EntryPoint#onModuleLoad()
 	 */
 
-	@Override
-	public void onModuleLoad() {
-		initialize();
-	}
+	
 	public void initialize() {
 		
 		xTileServer = getTileServer();
@@ -248,7 +246,7 @@ public class BaseUI implements EntryPoint {
 		xTlo = Util.getParameterString("tlo");
 		xThi = Util.getParameterString("thi");
 
-		xAxesWidget = new AxesWidgetGroup("Plot Axes", "Other Axes", "vertical", xControlsWidthPx, "ApplyTo_gallery", xTileServer);
+		xAxesWidget = new NavAxesGroup("Coordinates", xControlsWidthPx, xTileServer);
 		
 		xAxesWidget.getRefMap().setMapListener(mapListener);
 
@@ -289,10 +287,8 @@ public class BaseUI implements EntryPoint {
 		// This are bumped down one for the grow shrink experiment...
 		xNavigationControls.setWidget(navControlIndex++, 0, xAxesWidget);
 		xNavigationControls.setWidget(navControlIndex++, 0, xComparisonAxesSelector);
-		xNavigationControls.setWidget(navControlIndex++, 0, xAnalysisWidget);
+		//xNavigationControls.setWidget(navControlIndex++, 0, xAnalysisWidget);
 		xNavigationControls.setWidget(navControlIndex++, 0, xOperationsWidget);
-		
-		xAnalysisWidget.getRefMap().setMapListener(mapListener);
 		
 		xHideControls.setOpen(true);
 		xHideControls.addCloseHandler(new CloseHandler<DisclosurePanel>() {
@@ -467,7 +463,7 @@ public class BaseUI implements EntryPoint {
 		}
 		if ( numPanels == 1 ) {
 			xComparisonAxesSelector.setVisible(false);
-			xAxesWidget.setOrthoTitle("Other Axes");
+			//xAxesWidget.setOrthoTitle("Other Axes");
 		} else {
 			xComparisonAxesSelector.setVisible(true);
 		}
@@ -518,12 +514,6 @@ public class BaseUI implements EntryPoint {
 		// Right now it seems to unwieldy to keep track of them all so I'll just check that I have one.
 		xOperationsClickHandler = handler;
 		xOperationsWidget.addClickHandler(handler);
-	}
-	public void addPanelApplyClickHandler(ClickHandler handler) {
-		for (int i = 0; i < xPanelCount; i++ ) {
-			xPanels.get(i).addApplyHandler(handler);
-		}
-		
 	}
 	public void addPanelTAxesChangeHandler(ChangeHandler handler) {
 		for (int i = 0; i < xPanelCount; i++ ) {

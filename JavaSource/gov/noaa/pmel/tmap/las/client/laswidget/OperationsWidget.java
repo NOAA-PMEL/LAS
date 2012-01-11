@@ -315,7 +315,7 @@ public class OperationsWidget extends Composite {
 		currentView = view;
 		for (Iterator buttonIt = buttons.iterator(); buttonIt.hasNext();) {
 			OperationRadioButton zero = (OperationRadioButton) buttonIt.next();
-			if ( zero.getOperation().getViews().contains(view) ) {
+			if ( zero.getOperation().getViews().contains(view) && zero.getView().equals(view) ) {
 				currentOperation = zero.getOperation();
 				zero.setValue(true);
 				return currentOperation.getID();

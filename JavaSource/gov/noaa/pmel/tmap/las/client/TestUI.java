@@ -100,7 +100,7 @@ public class TestUI extends BaseUI {
 
 	public void onModuleLoad() {
 
-		super.onModuleLoad();
+		super.initialize();
 		activateNativeHooks();	
 
 		openid = Util.getParameterString("openid");
@@ -108,13 +108,6 @@ public class TestUI extends BaseUI {
 		xAnalysisWidget.addAnalysisAxesChangeHandler(analysisAxesChange);
 		xAnalysisWidget.addAnalysisCheckHandler(analysisActiveChange);
 		xAnalysisWidget.addAnalysisOpChangeHandler(analysisOpChange);
-		
-		// Keep the two maps in sync...
-		// When the refmap changes, push the change to the Analysis Map...
-		xAxesWidget.getRefMap().setMapListener(syncAnalysisMapListener);
-		
-		// When the analysis map changes, update the regular map...
-		xAnalysisWidget.getRefMap().setMapListener(syncAnalysisMapListener);
 		
 		String spinImageURL = URLUtil.getImageURL()+"/mozilla_blu.gif";
 		HTML output = new HTML("<img src=\""+spinImageURL+"\" alt=\"Spinner\"/> Initializing...");
@@ -166,9 +159,6 @@ public class TestUI extends BaseUI {
 		
 		xAxesWidget.addTChangeHandler(needApply);
 		xAxesWidget.addZChangeHandler(needApply);
-		
-		xAnalysisWidget.addTChangeHandler(needApply);
-		xAnalysisWidget.addZChangeHandler(needApply);
 		
 		addApplyHandler(settingsButtonApplyHandler);
 
@@ -380,6 +370,9 @@ public class TestUI extends BaseUI {
 
 		initializing.hide();
 
+		xAnalysisWidget.setActive(false);
+		turnOffAnalysis();
+		
 		xPanels.get(0).setVariable(xVariable);
 		xPanels.get(0).init(false, ops);
 
@@ -396,8 +389,6 @@ public class TestUI extends BaseUI {
 		double delta = Math.abs(Double.valueOf(ds_grid.getXAxis().getArangeSerializable().getStep()));
 		xAxesWidget.getRefMap().setTool(xView);
 		xAxesWidget.getRefMap().setDataExtent(grid_south, grid_north, grid_west, grid_east, delta);
-		xAnalysisWidget.getRefMap().setTool(xView);
-		xAnalysisWidget.getRefMap().setDataExtent(grid_south, grid_north, grid_west, grid_east, delta);
 		xOperationsWidget.setOperations(xVariable.getIntervals(), xVariable.getDSID(), xVariable.getID(), xOperationID, xView);
 		tOperationsMenu.setMenus(ops, xView);
 		// Examine the variable axes and determine which are orthogonal to the view. 
@@ -418,13 +409,7 @@ public class TestUI extends BaseUI {
 
 
 		xAxesWidget.init(xVariable.getGrid());
-		xAxesWidget.setFixedAxis(xView, xOrtho, null);		
-
-		// Init the axes wiget that lives in the analysis Widget...
-		xAnalysisWidget.init(xVariable.getGrid());
-
-		xPanels.get(0).addApplyHandler(panelApply);
-
+		
 		// Move the current state of the axes to the panel (and the analysis widget)
 		if ( xTlo != null && !xTlo.equals("") ) {
 			xPanels.get(0).setAxisRangeValues("t", xTlo, xThi);
@@ -469,6 +454,8 @@ public class TestUI extends BaseUI {
 	public void applyChange() {
 		applyButton.removeStyleDependentName("APPLY-NEEDED");
 		if ( changeDataset ) {
+			xAnalysisWidget.setActive(false);
+			turnOffAnalysis();
 			cs = xAxesWidget.getRefMap().getCurrentSelection();
 			// This involves a jump across the wire, so the finishApply gets called in the callback from the getGrid.
 			changeDataset();
@@ -483,14 +470,26 @@ public class TestUI extends BaseUI {
 				xOperationID = op_id;
 				xView = op_view;
 			}
-			
-			xAxesWidget.getRefMap().setTool(xView);
-			
+			if ( analysis != null ) {
+				String mapTool = "";
+				if ( xView.contains("x") || analysis.isActive("x") ) {
+					mapTool = "x";
+				}
+				if ( xView.contains("y") || analysis.isActive("y") ) {
+					mapTool = mapTool + "y";
+				}
+				if ( mapTool.equals("") ) mapTool = "pt";
+				xAxesWidget.getRefMap().setTool(mapTool);
+				setMessage();
+			} else {
+				xAxesWidget.getRefMap().setTool(xView);
+			}
 			if ( xVariable.getGrid().hasT() ) {
 				if ( analysis != null && analysis.isActive("t") ) {
+					xAxesWidget.setRange("t", true);
 					AnalysisAxisSerializable analysisAxisSerializable = analysis.getAxes().get("t");
-					analysisAxisSerializable.setLo(xAnalysisWidget.getTAxis().getFerretDateLo());
-					analysisAxisSerializable.setHi(xAnalysisWidget.getTAxis().getFerretDateHi());
+					analysisAxisSerializable.setLo(xAxesWidget.getTAxis().getFerretDateLo());
+					analysisAxisSerializable.setHi(xAxesWidget.getTAxis().getFerretDateHi());
 				} else {
 					if ( xView.contains("t") ) {
 						xAxesWidget.getTAxis().setRange(true);
@@ -504,9 +503,10 @@ public class TestUI extends BaseUI {
 			}
 			if ( xVariable.getGrid().hasZ() ) {
 				if ( analysis != null && analysis.isActive("z") ) {
+					xAxesWidget.setRange("z", true);
 					AnalysisAxisSerializable analysisAxisSerializable = analysis.getAxes().get("z");
-					analysisAxisSerializable.setLo(xAnalysisWidget.getZAxis().getLo());
-					analysisAxisSerializable.setHi(xAnalysisWidget.getZAxis().getHi());
+					analysisAxisSerializable.setLo(xAxesWidget.getZAxis().getLo());
+					analysisAxisSerializable.setHi(xAxesWidget.getZAxis().getHi());
 				} else {
 					if ( xView.contains("z") ) {
 						xAxesWidget.getZAxis().setRange(true);
@@ -526,15 +526,15 @@ public class TestUI extends BaseUI {
 
 			xPanels.get(0).setLatLon(String.valueOf(tmp_ylo), String.valueOf(tmp_yhi), String.valueOf(tmp_xlo), String.valueOf(tmp_xhi));
 			NumberFormat format2 = NumberFormat.getFormat("####.##");
-			String analysis_xlo = format2.format(xAnalysisWidget.getRefMap().getXlo());
-			String analysis_xhi = format2.format(xAnalysisWidget.getRefMap().getXhi());
+			String analysis_xlo = format2.format(xAxesWidget.getRefMap().getXlo());
+			String analysis_xhi = format2.format(xAxesWidget.getRefMap().getXhi());
 			if ( analysis != null && analysis.isActive("x") ) {
 				AnalysisAxisSerializable analysisAxisSerializable = analysis.getAxes().get("x");
 				analysisAxisSerializable.setLo(analysis_xlo);
 				analysisAxisSerializable.setHi(analysis_xhi);
 			}
-			String analysis_ylo = format2.format(xAnalysisWidget.getRefMap().getYlo());
-			String analysis_yhi = format2.format(xAnalysisWidget.getRefMap().getYhi());
+			String analysis_ylo = format2.format(xAxesWidget.getRefMap().getYlo());
+			String analysis_yhi = format2.format(xAxesWidget.getRefMap().getYhi());
 			if (analysis != null && analysis.isActive("y") ) {
 				AnalysisAxisSerializable analysisAxisSerializable = analysis.getAxes().get("y");
 				analysisAxisSerializable.setLo(analysis_ylo);
@@ -608,7 +608,11 @@ public class TestUI extends BaseUI {
 			if ( xPanels == null || xPanels.size() == 0 ) {
 				TestUI.super.init(1, Constants.IMAGE);
 			}
-			initPanel();
+			if ( changeDataset ) {
+				applyChange();
+			} else {
+				initPanel();
+			}
 
 		}
 
@@ -628,22 +632,25 @@ public class TestUI extends BaseUI {
 			
 			Object u = event.getSelectedItem().getUserObject();
 			if ( u instanceof VariableSerializable ) {
-				xVariable = (VariableSerializable) u;
-				tBreadCrumb.setText(xVariable.getDSName()+": "+xVariable.getName());
+				xNewVariable = (VariableSerializable) u;
+				if ( !xNewVariable.getDSID().equals(xVariable.getDSID()) ) {
+					changeDataset = true;
+				}
+				tBreadCrumb.setText(xNewVariable.getDSName()+": "+xNewVariable.getName());
 				int index = 0;
 				TreeItem parent = event.getSelectedItem().getParentItem();
 				tVariables.clear();
 				for (int c = 0; c < parent.getChildCount(); c++) {
 					TreeItem sibling = parent.getChild(c);
 					VariableSerializable sibling_var = (VariableSerializable) sibling.getUserObject();
-					if ( sibling_var.getName().equals(xVariable.getName()) ) {
+					if ( sibling_var.getName().equals(xNewVariable.getName()) ) {
 						index = c;
 					}
 					tVariables.addUserObject(sibling_var);
 				    tVariables.addItem(sibling_var.getName(), sibling_var.getID());	
 				}
 				tVariables.setSelectedIndex(index);
-				Util.getRPCService().getConfig(xView, xVariable.getDSID(), xVariable.getID(), getGridCallback);
+				Util.getRPCService().getConfig(xView, xNewVariable.getDSID(), xNewVariable.getID(), getGridCallback);
 			} else if ( u instanceof CategorySerializable ) {
 				CategorySerializable cat = (CategorySerializable) u;
 				String remote_url = cat.getAttributes().get("remote_las");
@@ -771,7 +778,7 @@ public class TestUI extends BaseUI {
 			}
 			// We changed the number of variables, so get the operations...
 			getOperations();
-			
+			xAxesWidget.getRefMap().resizeMap();
 		}
 		
 	};
@@ -832,19 +839,7 @@ public class TestUI extends BaseUI {
 			if ( analysis.getValue() ) {
 				setAnalysisAxes(v);
 			} else {
-				xPanels.get(0).setAnalysis(null);
-				setOperations(xVariable.getIntervals());
-				xView = "xy";
-				xOperationID = xOperationsWidget.setZero(xView);
-				xAxesWidget.getRefMap().setTool(xView);
-				xPanels.get(0).setOperation(xOperationID, xView);
-				GridSerializable grid = xVariable.getGrid();
-				if ( grid.hasZ() ) {
-					xAxesWidget.setRange("z", false);
-				}
-				if ( grid.hasT() ) {
-					xAxesWidget.setRange("t", false);
-				}
+				turnOffAnalysis();
 			}
 		}
     };
@@ -855,6 +850,24 @@ public class TestUI extends BaseUI {
 			applyButton.addStyleDependentName("APPLY-NEEDED");
 		}
     };
+    private void turnOffAnalysis() {
+    	xPanels.get(0).setAnalysis(null);
+		setOperations(xVariable.getIntervals());
+		xView = "xy";
+		xOperationID = xOperationsWidget.setZero(xView);
+		xAxesWidget.getRefMap().setTool(xView);
+		xPanels.get(0).setOperation(xOperationID, xView);
+		GridSerializable grid = xVariable.getGrid();
+		if ( grid.hasZ() ) {
+			xAxesWidget.setRange("z", false);
+		}
+		if ( grid.hasT() ) {
+			xAxesWidget.setRange("t", false);
+		}
+		xAxesWidget.setMessage("");
+		xAxesWidget.showMessage(false);
+		xAxesWidget.getRefMap().resizeMap();
+    }
     private void setAnalysisAxes(String v) {
     	
 		// Eliminate the transformed axis from the acceptable intervals for the variable.
@@ -878,6 +891,8 @@ public class TestUI extends BaseUI {
 			xView = view;
 		}
 		
+		setMessage();
+		
 		// Get set the new operations that apply to the remaining views.
 		setOperations(intervals);
 		
@@ -885,68 +900,57 @@ public class TestUI extends BaseUI {
 		xOperationID = xOperationsWidget.setZero(xView);
 		xPanels.get(0).setOperationOnly(xOperationID, xView);
 		
-		// Set the axis controls for the remaining views.
-		List<String> o = new ArrayList<String>();
-		String oax = intervals.replace(xView, "");
-		if ( oax.contains("x") ) o.add("x");
-		if ( oax.contains("y") ) o.add("y");
-		if ( oax.contains("z") ) o.add("z");
-		if ( oax.contains("t") ) o.add("t");
-		xAxesWidget.setFixedAxis(xView, o, "");
-		xAxesWidget.getRefMap().setTool(xView);
-		
 		// Provide axes controls for the axis to be transformed.
-		xAnalysisWidget.setAxes(v);
-		if ( v.equals("x") ) {
-			xAnalysisWidget.getRefMap().setTool(v);
-			xAnalysisWidget.getRefMap().setHint("Select a longitude range over which the analysis will be computed.");
-			if ( xView.contains("z") || xView.contains("t") ) {
-				xAxesWidget.getRefMap().setHint("Select a latitude point at which to make the plot.");
-			}
-		} else if ( v.equals("y") ) {
-			xAnalysisWidget.getRefMap().setTool(v);
-			xAnalysisWidget.getRefMap().setHint("Select a latitude range over which the analysis will be computed.");
-			if ( xView.contains("z") || xView.contains("t") ) {
-				xAxesWidget.getRefMap().setHint("Select a longitude point at which to make the plot.");
-			}
-		} else if ( v.equals("xy") ) {
-			xAnalysisWidget.getRefMap().setTool(v);
-			xAnalysisWidget.getRefMap().setHint("Select a lat/lon region over which the analysis will be computed.");
+	
+		if (xView.contains("z") ||  v.contains("z") ) {
+			xAxesWidget.setRange("z", true);
 		}
-		if ( v.contains("z") ) {
-			xAnalysisWidget.setRange("z", xAxesWidget.getZAxis().getLo(), xAxesWidget.getZAxis().getHi());
+		if ( xView.contains("t") || v.contains("t") ) {
+			xAxesWidget.setRange("t", true);
 		}
-		if ( v.contains("t") ) {
-			xAnalysisWidget.setRange("t", xAxesWidget.getTAxis().getFerretDateLo(), xAxesWidget.getTAxis().getFerretDateHi());
+		String mapTool = "";
+		if ( xView.contains("x") || v.contains("x") ) {
+			mapTool = "x";
 		}
+		if ( xView.contains("y") || v.contains("y") ) {
+			mapTool = mapTool + "y";
+		}
+		if ( mapTool.equals("") ) mapTool = "pt";
+		xAxesWidget.getRefMap().setTool(mapTool);
     }
-    
-	protected MapSelectionChangeListener syncAnalysisMapListener = new MapSelectionChangeListener() {
+    private void setMessage() {
 
-		@Override
-		public void onFeatureChanged() {
-			 applyButton.addStyleDependentName("APPLY-NEEDED");
-			 if ( xAnalysisWidget.isActive() ) {
-				 if ( xAnalysisWidget.getAnalysisSerializable().isActive("y") && !xAnalysisWidget.getAnalysisSerializable().isActive("x") && !xView.equals("xy") ) {
-					 double xlo = xAxesWidget.getRefMap().getXlo();
-					 double xhi = xAxesWidget.getRefMap().getXhi();
-					 xAnalysisWidget.getRefMap().sync("x", xlo, xhi);
-					 double ylo = xAnalysisWidget.getRefMap().getYlo();
-					 double yhi = xAnalysisWidget.getRefMap().getYhi();
-					 xAxesWidget.getRefMap().sync("y", ylo, yhi);
-				 }
-				 if (xAnalysisWidget.getAnalysisSerializable().isActive("x") && !xAnalysisWidget.getAnalysisSerializable().isActive("y") && !xView.equals("xy") ) {
-					 double ylo = xAxesWidget.getRefMap().getYlo();
-					 double yhi = xAxesWidget.getRefMap().getYhi();
-					 xAnalysisWidget.getRefMap().sync("y", ylo, yhi);
-					 double xlo = xAnalysisWidget.getRefMap().getXlo();
-					 double xhi = xAnalysisWidget.getRefMap().getXhi();
-					 xAxesWidget.getRefMap().sync("x", xlo, xhi);
-				 }
-			 }
+    	String v = xAnalysisWidget.getAnalysisAxis();
+		StringBuilder message = new StringBuilder();
+		message.append("<b style=\"margin:0\">Plot coordinates:</b><ul style=\"margin:0\">");
+		if ( xView.contains("x") ) message.append("<li>Longitude</li>");
+		if ( xView.contains("y") ) message.append("<li>Latitude</li>");
+		if ( xView.contains("z") ) message.append("<li>Height/Depth</li>");
+		if ( xView.contains("t") ) message.append("<li>Time</li>");
+		message.append("</ul>");
+		
+		message.append("<b style=\"margin:0\">Analysis coordinates:</b><ul style=\"margin:0\">");
+		if ( v.contains("x") ) message.append("<li>Longitude</li>");
+		if ( v.contains("y") ) message.append("<li>Latitude</li>");
+		if ( v.contains("z") ) message.append("<li>Height/Depth</li>");
+		if ( v.contains("t") ) message.append("<li>Time</li>");
+		message.append("</ul>");
+		
+		StringBuilder fixed = new StringBuilder();
+		if ( xVariable.getGrid().hasX() && !xView.contains("x") && !v.contains("x") ) fixed.append("<li>Longitude</li>");
+		if ( xVariable.getGrid().hasY() && !xView.contains("y") && !v.contains("y") ) fixed.append("<li>Latitude</li>");
+		if ( xVariable.getGrid().hasZ() && !xView.contains("z") && !v.contains("z") ) fixed.append("<li>Height/Depth</li>");
+		if ( xVariable.getGrid().hasT() && !xView.contains("t") && !v.contains("t") ) fixed.append("<li>Time</li>");
+		
+		if ( fixed.length() > 0 ) {
+			message.append("<b style=\"margin:0\">Fixed coordinates:</b><ul style=\"margin:0\">");
+			message.append(fixed.toString());
+			message.append("</ul>");
 		}
 		
-	};
+		xAxesWidget.setMessage(message.toString());
+		xAxesWidget.getRefMap().resizeMap();
+    }
 	private boolean isSelected(int i) {
 		for (Iterator lbIt = tAdditionalVariables.iterator(); lbIt.hasNext();) {
 			UserListBox lb = (UserListBox) lbIt.next();

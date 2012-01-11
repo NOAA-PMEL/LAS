@@ -458,7 +458,7 @@ public class OutputPanel extends Composite {
 			
 			// The comparison variable and it's region from the panel axes.
 			
-			lasRequest.addVariable(var.getDSID(), var.getID(), 0);
+			lasRequest.addVariable(var.getDSID(), var.getID(), 1);
 			
 			// For the second variable set all the axes that are not in the view, 
 			// either from the fixed in the slide sorter and the comparison axis in the panel
@@ -916,7 +916,7 @@ public class OutputPanel extends Composite {
 							}
 						} else if ( result.getAttribute("type").equals("annotations") ) {
 							annourl = result.getAttribute("url");
-							lasAnnotationsPanel.setAnnotationsHTMLURL(Util.getAnnotationService(annourl));
+							lasAnnotationsPanel.setAnnotationsHTMLURL(Util.getAnnotationService(annourl)+"&catid="+var.getDSID());
 						} else if ( result.getAttribute("type").equals("error") ) {
 							if ( result.getAttribute("ID").equals("las_message") ) {
 								Node text = result.getFirstChild();
@@ -1125,12 +1125,6 @@ public class OutputPanel extends Composite {
 	public String getID() {
 		return ID;
 	}
-	
-	public void addApplyHandler(ClickHandler applyClick) {
-		//settingsButton.addApplyClickListener(applyClick);
-		panelAxesWidgets.addApplyHandler(applyClick);
-	}
-
 	public String getThi() {
 		return panelAxesWidgets.getTAxis().getFerretDateHi();
 	}
