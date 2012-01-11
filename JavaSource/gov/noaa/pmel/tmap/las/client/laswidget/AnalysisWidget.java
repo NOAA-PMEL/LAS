@@ -42,14 +42,9 @@ public class AnalysisWidget extends Composite {
 	
 	// The container
 	AnalysisSerializable analysis = new AnalysisSerializable();
-	
-	AxesWidgetGroup axes;
 
 	
 	public AnalysisWidget(String width, String tile_server) {
-		
-		axes = new AxesWidgetGroup("Analysis Axes", "none", "vertical", width, "Analysis", tile_server);
-		axes.setVisible(false);
 		
 		disclosurePanel.setTitle("Select a statistic to compute and the space and time dimensions over which to compute it");
 		
@@ -67,7 +62,7 @@ public class AnalysisWidget extends Composite {
         layoutPanel.setWidget(2, 0, new Label("over:"));
         layoutPanel.setWidget(2, 1, analysisAxis);
         layoutPanel.getFlexCellFormatter().setColSpan(3, 0, 2);
-        layoutPanel.setWidget(3, 0, axes);
+        
         disclosurePanel.add(layoutPanel);		
         
         analysis.getAxes().put("x", xAxis);
@@ -78,7 +73,6 @@ public class AnalysisWidget extends Composite {
         analysisAxis.addChangeHandler(axisChangeHandler);
         
         apply.addClickHandler(applyClickHandler);
-        axes.setFixedAxis("", new ArrayList<String>(), "");
 		initWidget(disclosurePanel);
 		
 		
@@ -167,43 +161,8 @@ public class AnalysisWidget extends Composite {
 			tAxis.setType("t");
 			tAxis.setOp(op);
 		}
-		if ( isActive() ) {
-			axes.setVisible(true);
-			axes.setFixedAxis(axis, new ArrayList<String>(), "");
-		} else {
-			axes.setVisible(false);
-		}
 	}
-	public void setAxes(String v) {
-		axes.setFixedAxis(v, new ArrayList<String>(), "");
-	}
-	public OLMapWidget getRefMap() {
-		return axes.getRefMap();
-	}
-	public void setRange(String ax, String lo, String hi) {
-		if ( ax.equals("z") ) {
-			axes.setRange("z", true);
-			axes.getZAxis().setLo(lo);
-			axes.getZAxis().setHi(hi);
-		} else if (ax.equals("t") ) {
-			axes.setRange("t", true);
-			axes.getTAxis().setLo(lo);
-			axes.getTAxis().setHi(hi);
-		}
-	}
-	public void init(GridSerializable grid) {
-		axes.init(grid);
-	}
-	public DateTimeWidget getTAxis() {
-		return axes.getTAxis();
-	}
-	public AxisWidget getZAxis() {
-		return axes.getZAxis();
-	}
-	public void addTChangeHandler(ChangeHandler tchange) {
-		axes.addTChangeHandler(tchange);
-	}
-	public void addZChangeHandler(ChangeHandler zchange) {
-		axes.addZChangeHandler(zchange);
+	public void setActive(boolean b) {
+		apply.setValue(b);
 	}
 }
