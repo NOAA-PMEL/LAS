@@ -223,13 +223,13 @@ public class DateTimeWidget extends Composite {
 	private void loadWidget() {
 		dateTimeWidget.clear();
 		if ( isMenu ) {
-			dateTimeWidget.setWidget(0, 0, d_label_lo_range);
+			dateTimeWidget.setWidget(0, 0, d_label);
 			dateTimeWidget.setWidget(0, 1, lo_day);
 			dateTimeWidget.setWidget(1, 0, d_label_hi_range);
 			dateTimeWidget.setWidget(1, 1, hi_day);
 		} else {
 			
-			dateTimeWidget.setWidget(0, 0, d_label_lo_range);
+			dateTimeWidget.setWidget(0, 0, d_label);
 			dateTimeWidget.setWidget(1, 0, d_label_hi_range);
 			
 			
@@ -278,6 +278,7 @@ public class DateTimeWidget extends Composite {
 				for ( int i = 0; i < 5; i++ ) {
 					cellFormatter.setVisible(1, i, true);
 				}
+				dateTimeWidget.setWidget(0, 0, d_label_lo_range);
 				checkRangeEndYear();
 			}
 		} else {
@@ -288,6 +289,7 @@ public class DateTimeWidget extends Composite {
 				for ( int i = 0; i < 5; i++ ) {
 					cellFormatter.setVisible(1, i, false);
 				}
+				dateTimeWidget.setWidget(0, 0, d_label);
 			}
 		}
 	}

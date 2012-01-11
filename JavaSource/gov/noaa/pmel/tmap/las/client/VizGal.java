@@ -1,5 +1,6 @@
 package gov.noaa.pmel.tmap.las.client;
 
+import gov.noaa.pmel.tmap.las.client.laswidget.AxesWidgetGroup;
 import gov.noaa.pmel.tmap.las.client.laswidget.Constants;
 import gov.noaa.pmel.tmap.las.client.laswidget.OperationRadioButton;
 import gov.noaa.pmel.tmap.las.client.serializable.CategorySerializable;
@@ -111,10 +112,11 @@ public class VizGal extends BaseUI {
      // Keep track of the current operations
      OperationSerializable[] ops;
      
+    
      // Everybody that sub-classes BaseUI must implement three handlers for options OK, operations clicks and data set selections.
    
 	public void onModuleLoad() {
-		super.onModuleLoad();
+		super.initialize();
 		
 		int col = 0;
 		

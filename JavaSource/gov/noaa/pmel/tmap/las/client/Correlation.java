@@ -1,6 +1,7 @@
 package gov.noaa.pmel.tmap.las.client;
 
 import gov.noaa.pmel.tmap.las.client.laswidget.AxisWidget;
+import gov.noaa.pmel.tmap.las.client.laswidget.CruiseIconWidget;
 import gov.noaa.pmel.tmap.las.client.laswidget.DateTimeWidget;
 import gov.noaa.pmel.tmap.las.client.laswidget.HelpPanel;
 import gov.noaa.pmel.tmap.las.client.laswidget.LASAnnotationsPanel;
@@ -73,6 +74,7 @@ import com.google.gwt.xml.client.XMLParser;
 
 public class Correlation implements EntryPoint {
 	NumberFormat dFormat = NumberFormat.getFormat("########.##");
+	CruiseIconWidget cruiseIcons = new CruiseIconWidget();
 	FlexTable timePanel = new FlexTable();
 	PushButton reset = new PushButton("Reset");
 	DateTimeWidget timeConstraint = new DateTimeWidget();
@@ -298,6 +300,8 @@ public class Correlation implements EntryPoint {
 			tlo = lasRequest.getRangeLo("t", 0);
 			thi = lasRequest.getRangeHi("t", 0);
 			Util.getRPCService().getFullDataset(dsid, datasetCallback);
+			// Up above we need to get the icons widget init url and use it here.  :-)
+			cruiseIcons.init(lasRequest, varid);
 		} else {
 			
 		}
@@ -398,6 +402,7 @@ public class Correlation implements EntryPoint {
 		spaceTimeConstraints.add(mapConstraint);
 		spaceTimeConstraints.add(timePanel);
 		spaceTimeConstraints.add(zAxisWidget);
+		RootPanel.get("icons").add(cruiseIcons);
 		RootPanel.get("button_panel").add(buttonPanel);
 		RootPanel.get("data_selection").add(topPanel);
 		RootPanel.get("data_constraints").add(constraintsLayout);
