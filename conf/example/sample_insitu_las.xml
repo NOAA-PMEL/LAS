@@ -1,0 +1,71 @@
+<?xml version='1.0' ?>
+<!DOCTYPE spec SYSTEM "spec.dtd" [
+
+<!-- Declaration of operations files to be included -->
+<!ENTITY operations SYSTEM "operations.xml">
+
+<!ENTITY insitu_operations SYSTEM "insitu_operations.xml">
+
+<!-- Declaration of dataset files to be included -->
+<!-- Default LAS datasets -->
+<!ENTITY coads SYSTEM "coads.xml">
+<!ENTITY levitus SYSTEM "levitus.xml">
+<!ENTITY paco SYSTEM "DODS_IRI_NOAA_NCEP_EMC_CMB_Pac_ocean.xml">
+<!ENTITY ocean_atlas_subset SYSTEM "ocean_atlas_subset.xml">
+
+<!-- Sample insitu datasets -->
+<!ENTITY insitu_demo_1 SYSTEM "insitu_demo_1.xml">
+<!ENTITY insitu_demo_2 SYSTEM "insitu_demo_2.xml">
+<!ENTITY nwioos_hake98 SYSTEM "nwioos_hake98.xml">
+<!--<!ENTITY pfeg SYSTEM "pfeg.xml">-->
+
+]>
+
+
+<lasdata>
+
+ <output_dir>/home/rhs/tomcat/webapps/baker/output</output_dir>
+ <institution name="Pacific Marine Environmental Lab"
+              contact="Roland.Schweitzer@gmail.com"
+              url="http://www.pmel.noaa.gov"/>
+
+ <!-- Default properties for this server -->
+ <properties>
+
+  <product_server>
+   <ui_timeout>20</ui_timeout>
+   <ps_timeout>3600</ps_timeout>
+   <use_cache>true</use_cache>
+   <default_dsid>ocean_atlas_subset</default_dsid>
+   <default_varid>TEMP-ocean_atlas_subset</default_varid>
+   <default_operation>Plot_2D_XY_zoom</default_operation>
+   <default_option>Options_2D_image_contour_xy_7</default_option>
+   <default_view>xy</default_view>
+  </product_server>
+
+  <ferret>
+   <land_type>contour</land_type>
+   <fill_type>fill</fill_type>
+  </ferret>
+
+ </properties>
+
+ <!-- Operations supported by this server -->
+ <operations url="http://gazelle.weathertopconsulting.com:8282/baker/ProductServer.do">
+   &operations;
+   &insitu_operations;
+ </operations>
+
+ <!-- Datasets provided by this server -->
+ <!-- Default gridded LAS datasets -->
+ &coads;
+ &levitus;
+ &paco;
+ &ocean_atlas_subset;
+ <!-- Example scattered LAS datasets -->
+ &insitu_demo_1;
+ &insitu_demo_2;
+ &nwioos_hake98;
+ <!-- &pfeg; -->
+
+</lasdata>
