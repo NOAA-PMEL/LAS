@@ -444,7 +444,7 @@ public class LASBackendResponse extends LASDocument {
             return "No result found with ID="+ID;
         }
         String type = result.getAttributeValue("type");
-        if (type.equals("xml")) {
+        if (type.equals("xml") || type.equals("webrowset")) {
            LASDocument doc = new LASDocument();
            JDOMUtils.XML2JDOM(new File(getResultAsFile(ID)), doc);
            return doc.toString();
@@ -881,6 +881,13 @@ public class LASBackendResponse extends LASDocument {
 	public void addMapScale(LASMapScale lasMapScale) {
 		Element result = getResultByType("map_scale");
 		result.addContent((Element)lasMapScale.getRootElement().clone());	
+	}
+	public void makeResult(String absolutePath) {
+		Element result = new Element("result");
+		result.setAttribute("file", absolutePath);
+		result.setAttribute("ID", absolutePath);
+		result.setAttribute("type", "ClimateAnalysisPlot");
+		addResult(result);
 	}
 }
 

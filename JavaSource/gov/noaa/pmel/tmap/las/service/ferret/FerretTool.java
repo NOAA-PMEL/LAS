@@ -106,7 +106,7 @@ public class FerretTool extends TemplateTool{
         }
         
         String tempDir   = lasFerretBackendConfig.getTempDir();
-        if ( tempDir == "" ) {
+        if ( tempDir.equals("") ) {
             tempDir = getResourcePath("resources/ferret/temp");
         }
         
