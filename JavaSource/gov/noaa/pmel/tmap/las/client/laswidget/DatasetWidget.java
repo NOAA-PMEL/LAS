@@ -1,6 +1,10 @@
 package gov.noaa.pmel.tmap.las.client.laswidget;
 
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 import gov.noaa.pmel.tmap.las.client.serializable.CategorySerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.DatasetSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.Serializable;
@@ -11,6 +15,8 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.LinkElement;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.logical.shared.SelectionEvent;
+import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
@@ -30,7 +36,10 @@ import com.google.gwt.user.client.ui.VerticalPanel;
  * A tree Widget that is the data set picker for GWT LAS clients which understands how to initialize itself and is used 
  * by the {@link gov.noaa.pmel.tmap.las.client.laswidget.DatasetButton}
  */
-public class DatasetWidget extends Tree implements TreeListener {
+public class DatasetWidget extends Tree implements SelectionHandler {
+	
+	List<DatasetFilter> filters = new ArrayList<DatasetFilter>();
+	
     TreeItem currentlySelected = null;
     String openid;
 	/* (non-Javadoc)
@@ -54,13 +63,20 @@ public class DatasetWidget extends Tree implements TreeListener {
 			Util.getRPCService().getCategories(cat.getID(), categoryCallback);
 		}
 	}
+	
 	/**
 	 * Set up the tree and the associated RPC.
 	 */
 	public void init() {
 		Util.getRPCService().getCategories(null, categoryCallback);
-		addTreeListener(this);	
+		addSelectionHandler(this);	
 	}
+	 public void addFilter( DatasetFilter filter ) {
+     	filters.add(filter);
+     }
+     public void removeFilter( DatasetFilter filter ) {
+     	filters.remove(filter);
+     }
 	AsyncCallback categoryCallback = new AsyncCallback() {
 		public void onSuccess(Object result) {
 			CategorySerializable[] cats = (CategorySerializable[]) result;
@@ -68,12 +84,14 @@ public class DatasetWidget extends Tree implements TreeListener {
 				if ( currentlySelected == null ) {
 					for (int i = 0; i < cats.length; i++) {
 						CategorySerializable cat = cats[i];
-						TreeItem item = new TreeItem();
-						item.addItem("Loading...");
-						InnerItem inner = new InnerItem(cat);
-						item.setWidget(inner);
-						item.setUserObject(cat);
-						addItem(item);
+						if ( applyFilters(cat) ) {
+							TreeItem item = new TreeItem();
+							item.addItem("Loading...");
+							InnerItem inner = new InnerItem(cat);
+							item.setWidget(inner);
+							item.setUserObject(cat);
+							addItem(item);
+						}
 					}
 				} else {
 					for (int i = 0; i < cats.length; i++) {
@@ -116,7 +134,36 @@ public class DatasetWidget extends Tree implements TreeListener {
 				}
 			}
 		}
-        
+       
+		private boolean applyFilters(CategorySerializable cat) {
+			// Apply any filters.
+			boolean include = true;
+			if ( filters.size() > 0 ) {
+				for (Iterator filterIt = filters.iterator(); filterIt.hasNext();) {
+					DatasetFilter filter = (DatasetFilter) filterIt.next();
+
+					// This should be done with introspection, but for now do a big cheat
+					String name = "x";
+					String value = "y";
+					if ( filter.getAttribute().equals("name") ) {
+						name = cat.getName().toLowerCase();
+						value = filter.getValue().toLowerCase();
+
+					} else if ( filter.getAttribute().equals("ID") ) {
+						name = cat.getID();
+						value = filter.getValue();
+					}
+					if ( name.contains(value) ) {
+						include = include && filter.isInclude();
+					} else {
+						include = include && !filter.isInclude();
+					}
+				} 
+			}
+
+			return include;
+		}
+
 		public void onFailure(Throwable caught) {
 			Window.alert("Server Request Failed: "+caught.getMessage());
 		}
@@ -204,5 +251,14 @@ public class DatasetWidget extends Tree implements TreeListener {
         	initWidget(grid);
         }
 		
+	}
+
+	@Override
+	public void onSelection(SelectionEvent event) {
+		currentlySelected = (TreeItem) event.getSelectedItem();
+		if ( currentlySelected.getChild(0).getText().equals("Loading...") ) {
+			CategorySerializable cat = (CategorySerializable) currentlySelected.getUserObject();
+			Util.getRPCService().getCategories(cat.getID(), categoryCallback);
+		}
 	}
 }
