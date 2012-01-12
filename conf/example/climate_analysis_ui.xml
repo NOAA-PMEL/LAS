@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<menus>
         <menu type="ops" name="Ops_Std2D_xy_climate_analysis">
             <item values="Plot_2D_XY,shade,2">Color plot</item>
             <item values="prop_prop_plot,shade,3">Color plot</item>
@@ -24,6 +25,8 @@
             <item values="Interactive_Download,txt,20">Interactive Download</item>
             <item values="Climate_Analysis,txt,20">Climate Analysis</item>
         </menu>
+</menus>
+<maps>
         <map type="ops" name="climate_analysisOperations">
             <ifmenu mode="comparison" href="#Ops_StdCompare"/>
             <ifmenu view="x,y,z" href="#Ops_Std1D"/>
@@ -36,6 +39,8 @@
             <ifmenu view="xyt" href="#Ops_Std3D_xyt_climate_analysis"/>
             <ifmenu view="xyzt" href="#Ops_Std4D"/>
         </map>
+</maps>
+<defaults>
         <default name="climate_analysis">
             <map href="#climate_analysisOperations"/>
             <map href="#DefaultViews"/>
@@ -43,6 +48,7 @@
             <map href="#DefaultOptions"/>
             <map href="#DefaultAnalysis"/>
         </default>
+ </defaults>
         
         
         
