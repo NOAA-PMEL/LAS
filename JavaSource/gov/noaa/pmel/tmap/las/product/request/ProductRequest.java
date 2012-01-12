@@ -9,6 +9,7 @@ import gov.noaa.pmel.tmap.las.jdom.LASUIRequest;
 import gov.noaa.pmel.tmap.las.product.server.ProductServerAction;
 import gov.noaa.pmel.tmap.las.util.Grid;
 import gov.noaa.pmel.tmap.las.util.GridTo;
+import gov.noaa.pmel.tmap.las.util.Variable;
 
 import java.io.File;
 import java.io.UnsupportedEncodingException;
@@ -443,7 +444,18 @@ public class ProductRequest {
                                     } 
                                 }
                             }
-
+                            String prop_var = lasRequest.getProperty("ferret", "prop_var");
+                            if ( prop_var != null && !prop_var.equals("") ) {
+                                Variable var = lasConfig.getVariableByXPath(varXPath);
+                                List<Variable> vars = lasConfig.getVariables(var.getDSID());
+                                for (Iterator varsIt = vars.iterator(); varsIt.hasNext();) {
+                                   Variable variable = (Variable) varsIt.next();
+                                   if ( variable.getID() != null && variable.getID().equals(prop_var)) {
+                                       addProperty(mergedProperties, "ferret", "prop_var_title", variable.getName());
+                                       addProperty(mergedProperties, "ferret", "prop_var_units", variable.getUnits());
+                                   }
+                                }
+                             }
 
                             // Add all the attributes from the parent data set element to this data object.
                             HashMap <String, String> dataset_attrs = lasConfig.getDatasetAttributes(varXPath);
@@ -701,16 +713,19 @@ public class ProductRequest {
                 result.setAttribute("key", key);
                 index++;
             }
-            // Add the annotations file if the property is set to file.
-            if ( lasRequest.getProperty("ferret", "annotations").equalsIgnoreCase("file") || 
-            		backendRequestDocument.getProperty("ferret", "annotations").equalsIgnoreCase("file") ) {
-            	Element annotations = new Element("result");
-            	annotations.setAttribute("type", "annotations");
-            	annotations.setAttribute("ID", "annotations");
-            	String annotationsFile = outputDir + File.separator + key+ "_annotations.xml";
-            	annotations.setAttribute("file", annotationsFile);
-            	annotations.setAttribute("key", key);
-            	backendResponse.addContent(annotations);
+            String ap = lasRequest.getProperty("ferret", "annotations");
+            if ( ap != null && !ap.equals("") ) {
+            	// Add the annotations file if the property is set to file.
+            	if ( lasRequest.getProperty("ferret", "annotations").equalsIgnoreCase("file") || 
+            			backendRequestDocument.getProperty("ferret", "annotations").equalsIgnoreCase("file") ) {
+            		Element annotations = new Element("result");
+            		annotations.setAttribute("type", "annotations");
+            		annotations.setAttribute("ID", "annotations");
+            		String annotationsFile = outputDir + File.separator + key+ "_annotations.xml";
+            		annotations.setAttribute("file", annotationsFile);
+            		annotations.setAttribute("key", key);
+            		backendResponse.addContent(annotations);
+            	}
             }
             // Add the cancel file
 
@@ -790,7 +805,7 @@ public class ProductRequest {
             String lo = axis.getAttributeValue("lo");
             String hi = axis.getAttributeValue("hi");
             if ( type.equals("t") ) {
-            	grid = grid+","+type+"=\""+lo+"\":\""+hi+"\"@"+op;
+            	grid = grid+","+type+"=_q-t_"+lo+"_q-t_:_q-t_"+hi+"_q-t_@"+op;
             } else {
             	grid = grid+","+type+"="+lo+":"+hi+"@"+op;
             }
@@ -887,7 +902,7 @@ public class ProductRequest {
         fdsURL = fdsURL+expression;
         data.setAttribute("url", fdsURL);
         data.setAttribute("var",var+"_"+var_count+"_transformed");
-        String title = analysis.getAttributeValue("label")+" ["+grid+"]";
+        String title = analysis.getAttributeValue("label")+" ["+grid.replaceAll("_q-t_", "\"")+"]";
         // Clean out junk that might make Ferret mad...
         title = title.replaceAll(",", " ");
         title = title.replaceAll("\""," ");
