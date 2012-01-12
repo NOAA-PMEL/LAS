@@ -99,6 +99,7 @@ public class ClimateAnalysisTool extends TemplateTool {
 			String outputdir = findOutput(output);
 			if ( outputdir.equals("") ) {
 				lasResponse.setError("Unable to find output directory", new Exception("Output parsed and output directory not found."));
+				log.error("Output not found: "+output+"\n"+stderr);
 			} else {
 				List<File> files = FileListing.getFileListing(new File(outputdir));
 				for (Iterator filesIt = files.iterator(); filesIt.hasNext();) {
