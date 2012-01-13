@@ -608,8 +608,8 @@ public class LASBackendResponse extends LASDocument {
                     // Replace the URL value if it's not already set by the backend service.               
                     if ( url == null || url.equals("") ) {
                         String newurl = result.getAttributeValue("file");
-                        newurl = newurl.substring(newurl.lastIndexOf(File.separator) + 1, newurl.length());
-                        newurl = serverURL + "/output/" + newurl;
+                        newurl = newurl.substring(newurl.lastIndexOf("/output/"), newurl.length());
+                        newurl = serverURL + newurl;
                         result.setAttribute("url", newurl);
                     }
                 }
