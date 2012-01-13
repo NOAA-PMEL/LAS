@@ -140,7 +140,7 @@ public class ClimateAnalysisTool extends TemplateTool {
 		try {
             while ((line = in.readLine()) != null) {
             	if (line.contains("Figures output to directory:")) {
-            		return line.substring(line.indexOf(": "), line.length());
+            		return line.substring(line.indexOf(": ")+2, line.length());
             	}
             }
             return "";
