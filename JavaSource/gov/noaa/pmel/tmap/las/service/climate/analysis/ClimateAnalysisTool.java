@@ -73,6 +73,7 @@ public class ClimateAnalysisTool extends TemplateTool {
 		String[] env = runTimeEnv.getEnv();
         Task task = new Task(cmd, env, new File(tempDir), 100000l, errorKeys);
         try {
+            log.debug("Running Climate Analysis task.");
             task.run();
         } catch (Exception e) {
         	lasResponse.setError("Climate Analysis did not run correctly. ", e);
@@ -95,16 +96,20 @@ public class ClimateAnalysisTool extends TemplateTool {
 
 		}
 
+                log.debug("Task finished.  Looking for output.");
 		if ( !task.getHasError() ) {
 			String outputdir = findOutput(output);
 			if ( outputdir.equals("") ) {
 				lasResponse.setError("Unable to find output directory", new Exception("Output parsed and output directory not found."));
 				log.error("Output not found: "+output+"\n"+stderr);
 			} else {
+				log.debug("Output found: "+outputdir);
 				List<File> files = FileListing.getFileListing(new File(outputdir));
+                                log.debug("Found "+files.size()+" output files.");
 				for (Iterator filesIt = files.iterator(); filesIt.hasNext();) {
 					File file = (File) filesIt.next();
 					if ( file.getAbsolutePath().endsWith(".ps.gz")) {
+                                                log.debug("Adding "+file.getAbsolutePath());
 						// For each plot make a result
 						lasResponse.makeResult(file.getAbsolutePath());
 					}
