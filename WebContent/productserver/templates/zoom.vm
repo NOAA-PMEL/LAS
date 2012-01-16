@@ -29,9 +29,9 @@ var Req = {}; //Same goes for the LAS request object
 var axisLow = "";
 var axisHi = "";
 #if($request.getParameter('openid')!='')
-var openid = '$request.getParameter('openid')'
+var openid = "$request.getParameter('openid')";
 #else
-var openid =  ''
+var openid =  "";
 #end
 /* 
 *  load the initial XY image that was requested from LAS
