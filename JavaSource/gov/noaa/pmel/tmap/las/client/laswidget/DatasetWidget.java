@@ -15,6 +15,8 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.LinkElement;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.logical.shared.OpenEvent;
+import com.google.gwt.event.logical.shared.OpenHandler;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.user.client.Window;
@@ -36,7 +38,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
  * A tree Widget that is the data set picker for GWT LAS clients which understands how to initialize itself and is used 
  * by the {@link gov.noaa.pmel.tmap.las.client.laswidget.DatasetButton}
  */
-public class DatasetWidget extends Tree implements SelectionHandler {
+public class DatasetWidget extends Tree {
 	
 	List<DatasetFilter> filters = new ArrayList<DatasetFilter>();
 	
@@ -56,20 +58,34 @@ public class DatasetWidget extends Tree implements SelectionHandler {
 	/* (non-Javadoc)
 	 * @see com.google.gwt.user.client.ui.TreeListener#onTreeItemStateChanged(com.google.gwt.user.client.ui.TreeItem)
 	 */
-	public void onTreeItemStateChanged(TreeItem item) {
-		currentlySelected = item;
-		if ( item.getChild(0).getText().equals("Loading...") ) {
-			CategorySerializable cat = (CategorySerializable) item.getUserObject();
-			Util.getRPCService().getCategories(cat.getID(), categoryCallback);
+//	public void onTreeItemStateChanged(TreeItem item) {
+//		currentlySelected = item;
+//		if ( item.getChild(0).getText().equals("Loading...") ) {
+//			CategorySerializable cat = (CategorySerializable) item.getUserObject();
+//			Util.getRPCService().getCategories(cat.getID(), categoryCallback);
+//		}
+//	}
+	OpenHandler<TreeItem> open = new OpenHandler<TreeItem>() {
+
+		@Override
+		public void onOpen(OpenEvent<TreeItem> event) {
+			TreeItem item = event.getTarget();
+			currentlySelected = item;
+			if ( item.getChild(0).getText().equals("Loading...") ) {
+				CategorySerializable cat = (CategorySerializable) item.getUserObject();
+				Util.getRPCService().getCategories(cat.getID(), categoryCallback);
+			}
 		}
-	}
+		
+	};
 	
 	/**
 	 * Set up the tree and the associated RPC.
 	 */
 	public void init() {
 		Util.getRPCService().getCategories(null, categoryCallback);
-		addSelectionHandler(this);	
+//		addSelectionHandler(this);	
+		addOpenHandler(open);
 	}
 	 public void addFilter( DatasetFilter filter ) {
      	filters.add(filter);
@@ -253,12 +269,12 @@ public class DatasetWidget extends Tree implements SelectionHandler {
 		
 	}
 
-	@Override
-	public void onSelection(SelectionEvent event) {
-		currentlySelected = (TreeItem) event.getSelectedItem();
-		if ( currentlySelected.getChild(0).getText().equals("Loading...") ) {
-			CategorySerializable cat = (CategorySerializable) currentlySelected.getUserObject();
-			Util.getRPCService().getCategories(cat.getID(), categoryCallback);
-		}
-	}
+//	@Override
+//	public void onSelection(SelectionEvent event) {
+//		currentlySelected = (TreeItem) event.getSelectedItem();
+//		if ( currentlySelected.getChild(0).getText().equals("Loading...") ) {
+//			CategorySerializable cat = (CategorySerializable) currentlySelected.getUserObject();
+//			Util.getRPCService().getCategories(cat.getID(), categoryCallback);
+//		}
+//	}
 }
