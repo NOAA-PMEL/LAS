@@ -1,5 +1,8 @@
 package gov.noaa.pmel.tmap.las.client;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import gov.noaa.pmel.tmap.las.client.laswidget.DatasetFilter;
 import gov.noaa.pmel.tmap.las.client.laswidget.DatasetWidget;
 import gov.noaa.pmel.tmap.las.client.laswidget.DateTimeWidget;
@@ -10,6 +13,8 @@ import gov.noaa.pmel.tmap.las.client.serializable.VariableSerializable;
 import gov.noaa.pmel.tmap.las.client.util.Util;
 
 import com.google.gwt.core.client.EntryPoint;
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.SelectionEvent;
@@ -26,7 +31,7 @@ import com.google.gwt.user.client.ui.TreeItem;
 public class ClimateAnalysis implements EntryPoint {
     DatasetWidget xDatasetWidget = new DatasetWidget();
     Label xCurrentDataset = new Label("none");
-    Label xSecondDataset = new Label("Select a data set below...");
+    Label xSecondDataset = new Label("...");
     ListBox xAnalysisType = new ListBox();
     PushButton xSubmit = new PushButton("Submit");
     DateTimeWidget xDateWidget = new DateTimeWidget();
@@ -41,13 +46,28 @@ public class ClimateAnalysis implements EntryPoint {
 	String xSecondVarID = xInitialId;
 	String xTlo;
 	String xThi;
+	String[] panelIDs = {"DatasetSelection", "AnalysisSelection", "DateSelection", "SubmitSelection"};
+	String[] selectionIDs = {"DatasetWidget", "AnalysisType", "DateRange", "Submit"};
+	String highLightStyle = "highlightSelection";
+	String selectionStyle = "selection";
+	Set<Integer> set = new HashSet<Integer>();
 	@Override
 	public void onModuleLoad() {	
+		set.clear();
 		xSubmit.addClickHandler(xSubmitClick);
 		xSubmit.setWidth("80px");
 		RootPanel.get("Submit").add(xSubmit);
 		xAnalysisType.setVisibleItemCount(1);
 		xAnalysisType.addItem("Temperature Average Spectrum", "tave_spectrum");
+		xAnalysisType.addClickHandler(new ClickHandler(){
+
+			@Override
+			public void onClick(ClickEvent arg0) {
+				set.add(1);
+				setBackground(2);
+			}
+			
+		});
 		RootPanel.get("AnalysisType").add(xAnalysisType);
 		xDatasetWidget.addFilter(cimp5filter);
 		String xml = Util.getParameterString("xml");
@@ -59,6 +79,15 @@ public class ClimateAnalysis implements EntryPoint {
 		xThi = Util.getParameterString("thi");
 		xDateWidget.init(xTlo, xThi, "y", false);
 		xDateWidget.setRange(true);
+		xDateWidget.addChangeHandler(new ChangeHandler() {
+
+			@Override
+			public void onChange(ChangeEvent arg0) {
+				set.add(2);
+				setBackground(3);
+			}
+			
+		});
 		RootPanel.get("DateRange").add(xDateWidget);
 		RootPanel.get("SecondDataset").add(xSecondDataset);
 		RootPanel.get("CurrentDataset").add(xCurrentDataset);
@@ -92,6 +121,7 @@ public class ClimateAnalysis implements EntryPoint {
 			} else if ( xSecondVarID.equals(xInitialId) ) {
 				Window.alert("Second variable not set, try again in a moment.");
 			} else {
+				set.clear();
 				lasRequest = new LASRequest();
 				lasRequest.setOperation("Climate_Analysis_Plot", "V7");
 				lasRequest.addVariable(xFirstID, xFirstVarID, 0);
@@ -116,6 +146,9 @@ public class ClimateAnalysis implements EntryPoint {
 				xSecondID = v.getDSID();
 				xSecondVarID = v.getID();
 				xSecondDataset.setText(xSecondName);
+				set.add(0);
+				setBackground(1);
+
 			} else if ( uo instanceof CategorySerializable) {
 				CategorySerializable c = (CategorySerializable) uo;
 				// Category children, open it up.
@@ -146,8 +179,30 @@ public class ClimateAnalysis implements EntryPoint {
 				xSecondID = vars[0].getDSID();
 				xSecondVarID = vars[0].getID();
 				xSecondDataset.setText(xSecondName);
+				set.add(0);
+				setBackground(1);
 			}
 		}
 		
 	};
+	private void setBackground(int id) {
+		for (int i = 0; i < panelIDs.length; i++) {
+			RootPanel.get(panelIDs[i]).removeStyleName(highLightStyle);
+			RootPanel.get(selectionIDs[i]).removeStyleName(selectionStyle);
+		}
+		if ( set.contains(0) && set.contains(1) && set.contains(2) ) {
+			RootPanel.get(panelIDs[3]).addStyleName(highLightStyle);
+			RootPanel.get(selectionIDs[3]).addStyleName(selectionStyle);
+		} else {
+			if ( xSecondID.equals(xInitialId) ) {
+				RootPanel.get("DatasetSelection").addStyleName(highLightStyle);
+				RootPanel.get("DatasetWidget").addStyleName(selectionStyle);
+			} else{ 
+				if ( !set.contains(id) ) {
+					RootPanel.get(panelIDs[id]).addStyleName(highLightStyle);
+					RootPanel.get(selectionIDs[id]).addStyleName(selectionStyle);
+				}
+			}
+		}
+	}
 }
