@@ -79,13 +79,27 @@ public class DatasetWidget extends Tree {
 		
 	};
 	
+	SelectionHandler<TreeItem> selection = new SelectionHandler<TreeItem>() {
+
+		@Override
+		public void onSelection(SelectionEvent<TreeItem> event) {
+			TreeItem item = event.getSelectedItem();
+			currentlySelected = item;
+			if ( item.getChild(0).getText().equals("Loading...") ) {
+				CategorySerializable cat = (CategorySerializable) item.getUserObject();
+				Util.getRPCService().getCategories(cat.getID(), categoryCallback);
+			}
+		}
+		
+	};
+	
 	/**
 	 * Set up the tree and the associated RPC.
 	 */
 	public void init() {
 		Util.getRPCService().getCategories(null, categoryCallback);
-//		addSelectionHandler(this);	
 		addOpenHandler(open);
+		addSelectionHandler(selection);
 	}
 	 public void addFilter( DatasetFilter filter ) {
      	filters.add(filter);
@@ -203,12 +217,6 @@ public class DatasetWidget extends Tree {
 			}
 		}
 	};
-	/* Work around for focus on tree in scroll panel scrolling to the top bug.  #369
-	public void onBrowserEvent(Event event) {
-		if (DOM.eventGetType(event) == Event.ONCLICK) return;
-		super.onBrowserEvent(event);
-	}
-	*/
 	public Object getCurrentlySelected() {
 		return currentlySelected.getUserObject();
 	}
