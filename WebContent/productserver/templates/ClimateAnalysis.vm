@@ -50,7 +50,8 @@
   #parse ("productserver/templates/V7UIHeader.vm")
   <h1>CMIP5 Climate Analysis</h1>
   <p>Using this page you can create comparison graphs between two CMIP5 data sets for various climate analysis algorithms.</p>
-  <h3>Select the data sets to be compared:</h3>
+  <div id="DatasetSelection" class="highlightSelection">
+  <h3>Step 1: Select the data sets to be compared:</h3>
   <p>You have currently selected: 
   <ul>
   <li><div style="margin-left=20px" id="CurrentDataset"></div></li>
@@ -61,13 +62,20 @@
   <div style="padding-left=20px" id="SecondDataset"></div></p>
   </li>
   </ul>
-  <p>Now select another CMIP5 Data Set from the list below to compare with the current selection.</p>
-  <div id="DatasetWidget"></div>
-  <h3>Select the Analysis Type.</h3>
+  <p>Select another CMIP5 Data Set from the list below to compare with the current selection.</p>
+  <div class="selection" id="DatasetWidget"></div>
+  </div>
+  <div id="AnalysisSelection">
+  <h3>Step 2: Select the Analysis Type.</h3>
   <div id="AnalysisType"></div>
-  <h3>Select the Year Range to be compared.</h3>
+  </div>
+  <div id="DateSelection">
+  <h3>Step 3: Select the Year Range to be compared.</h3>
   <div id="DateRange"></div>
+  </div>
+  <div id="SubmitSelection">
   <center><div id="Submit"></div></center>
+  </div>
   #parse("productserver/templates/V7UIFooter.vm")
     <!-- OPTIONAL: include this if you want history support -->
     <iframe src="javascript:''" id="__gwt_historyFrame" tabIndex='-1' style="position:absolute;width:0;height:0;border:0"></iframe>			
