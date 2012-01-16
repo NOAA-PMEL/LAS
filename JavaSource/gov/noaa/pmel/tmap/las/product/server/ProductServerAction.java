@@ -948,7 +948,6 @@ public final class ProductServerAction extends LASAction {
             return null;
         } else {            
             // Send control to the template specified in the LASRequest.     	
-        	request.setAttribute("util", gov.noaa.pmel.tmap.las.service.Util.class);
             request.setAttribute("las_response", compoundResponse);
             String output_template = productRequest.getTemplate();
             
