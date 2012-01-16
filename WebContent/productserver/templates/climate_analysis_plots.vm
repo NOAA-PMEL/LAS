@@ -13,18 +13,34 @@ $las_response.toString()
 <!-- LAS SERVER OK -->
 <head>
 <title>LAS Output -- $las_config.getTitle()</title>
-<body onload="resizeme()">
-         <img alt="Plot Image" id="plot" border="0" src="$las_response.getResult("plot_image")">
+<body>
+    #set($results = $las_response.getResults())
+    #set($result = $results.get(0))
+    #set($parts = $result.getFile().split("/"))
+
+    <h1>CMIP5 Climate Analysis</h1>
+    #set($titles = $parts[9].split("Vs"))
+    <h2>Comparing $titles[0] vs $titles[1]</h2>
+    <h3>$parts[15] $parts[12] $parts[13]</h3> 
+
+    #set($region="xxx")
+    #set($ul="")
+    <ul> 
+    #foreach ($result in $results)
+        #set($p = $result.getFile().split("/"))
+        #if( $region != $p[16] )
+            $ul
+            #set($region = $p[16])
+            <li><strong>$region</strong></li>
+            <ul>
+            #set($ul="</ul>")
+        #end
+            <li>
+            <a href="$result.getURL()">$p[17]</a>
+            </li>
+    #end
+    </ul>
 </body>
-<script type="text/javascript">
-	function resizeme() {
-	        if(parent!=self)
-	         if(parent.document.getElementById("output")) {
-                        parent.document.getElementById("output").height=window.screen.height+20;
-                        parent.document.getElementById("output").width=window.screen.width+20;
-        	}
-	}
-</script>
 </html>
 
 #end
