@@ -38,6 +38,14 @@
 	background-color: #CAE;
 }
 
+.highlightSelection {
+	background-color: #F5DEB3;
+}
+
+.selection {
+	background-color: #D2B48C;
+}
+
 .noBottomBorder {
 	border-top: 1px solid blue;
 	border-left: 1px solid blue;
@@ -71,3 +79,8 @@
 }
 
 .hideextra { white-space: nowrap; overflow: hidden; text-overflow:ellipsis; padding:5px; }
+
+.TinyBlue {
+	background-color: #ACE;
+    font-size: .75em;	
+}
