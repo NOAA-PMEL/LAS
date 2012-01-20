@@ -52,6 +52,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.StringTokenizer;
 import java.util.Vector;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
@@ -161,6 +163,7 @@ public class addXML {
 	private static boolean oneDataset = false;
 	private static boolean irregular = false;
 	private static boolean esg = false;
+	private static String[] regex;
 
 	public addXML() {
 		try {
@@ -186,6 +189,7 @@ public class addXML {
 			command_parser.errorout(command_parameters);
 		}
 
+		regex = command_parameters.getStringArray("in_regex");
 		String[] data = command_parameters.getStringArray("in_netcdf");
 		String[] thredds = command_parameters.getStringArray("in_thredds");
 		String in_xml = command_parameters.getString("in_xml");
@@ -235,6 +239,7 @@ public class addXML {
 		generate_names = command_parameters.getBoolean("generate_names");
 		boolean version = command_parameters.getBoolean("version");
 		irregular = command_parameters.getBoolean("irregular");
+		
 
 		esg = command_parameters.getBoolean("esg");
 
@@ -372,12 +377,14 @@ public class addXML {
 							// If the data set name wasn't set neither was the category
 							oneCat.setName(databean.getName());
 						}
-						// Set the category filter to include this data set.
-						FilterBean filter = new FilterBean();
-						filter.setAction("apply-dataset");
-						filter.setContainstag(databean.getElement());
-						oneCat.addFilter(filter);
-
+						
+						if ( category ) {
+							// Set the category filter to include this data set.
+							FilterBean filter = new FilterBean();
+							filter.setAction("apply-dataset");
+							filter.setContainstag(databean.getElement());
+							oneCat.addFilter(filter);
+						}
 						ArrayList variables = (ArrayList) databean.getVariables();
 						// All the URL's must be fixed to not be relative to the data set
 						// URL
@@ -1035,6 +1042,7 @@ public class addXML {
 		dataset.setName(threddsDataset.getFullName());
 		String id = threddsDataset.getID();
 		id = id.replace("/", ".");
+		if ( id.startsWith("[0-9")) id = id + "dataset-";
 		dataset.setElement(id);
 		dataset.setVersion(version_string);
 		dataset.setCreator(addXML.class.getName());
@@ -1523,7 +1531,11 @@ public class addXML {
 						StringBuilder dataset_name = new StringBuilder();
 						try {
 							Formatter error = new Formatter();
-							GridDataset gds = (GridDataset) FeatureDatasetFactoryManager.open(FeatureType.GRID, url, null, error);   
+							GridDataset gds = (GridDataset) FeatureDatasetFactoryManager.open(FeatureType.GRID, curl, null, error);   
+							if ( gds == null ) {
+								log.error("Unable to read dataset at "+url+" "+error.toString());
+								return null;
+							}
 							List<GridDatatype> grids = gds.getGrids();
 							if ( grids != null && grids.size() > 0 ) {
 								GridDatatype grid = (GridDatatype) grids.get(0);
@@ -1583,6 +1595,7 @@ public class addXML {
 	public static DatasetsGridsAxesBean createBeansFromNetcdfDataset(
 			String url, boolean esg, InvDataset threddsDataset) {
 
+		
 		DatasetsGridsAxesBean dagb = new DatasetsGridsAxesBean();
 		Vector DatasetBeans = new Vector();
 		DatasetBean dataset = new DatasetBean();
@@ -1602,9 +1615,26 @@ public class addXML {
 		}
 		Formatter error = new Formatter();
 		 
-		 GridDataset gridDs = null;
+		GridDataset gridDs = null;
 		
-		try {
+		// Check if the URL matches the regexs on input if supplied.
+		boolean match = true;
+		if ( regex.length > 0 ) {
+			match = false;
+			
+			for (int i = 0; i < regex.length; i++) {
+				String rx = regex[i];
+				if ( regex[i].startsWith( "\"" ) && regex[i].endsWith( "\"" ) )
+				      rx = regex[i].substring( 1, regex[i].length( ) - 1 ); 
+				match = match || Pattern.matches(rx, curl);
+			}
+
+		}
+		if (!match) {
+			log.debug("No match found for URL patterns.  Not icluding this data set.");
+			return dagb;
+		}
+		 try {
 			gridDs = (GridDataset) FeatureDatasetFactoryManager.open(FeatureType.GRID, curl, null, error);
 			if ( gridDs == null ) {
 				gridDs = (GridDataset) FeatureDatasetFactoryManager.open(FeatureType.FMRC, CdmRemote.canonicalURL(url), null, error);
@@ -1659,11 +1689,12 @@ public class addXML {
 			if ( threddsDataset != null && threddsDataset.getID() != null && !threddsDataset.getID().equals("") ) {
 				elementName = threddsDataset.getID();
 				elementName = elementName.replace("/", ".");
+			    if ( elementName.startsWith("[0-9")) elementName = "dataset-" + elementName;
 			} else {
 				elementName = encodeID(url);
 			}
 		}
-
+       
 		dataset.setName(name);
 		dataset.setElement(elementName);
 		dataset.setUrl(url);
@@ -1703,7 +1734,9 @@ public class addXML {
 			else {
 				variable.setName(geogrid.getName());
 			}
-			variable.setElement(geogrid.getName() + "-" + elementName);
+			String gn = geogrid.getName();
+			if ( gn.startsWith("[0-9]") ) gn = "variable" + gn;
+			variable.setElement(gn + "-" + elementName);
 			if ( geogrid.getUnitsString() != null && !geogrid.getUnitsString().equals("") ) {
 				variable.setUnits(geogrid.getUnitsString());
 			} else {
@@ -1794,7 +1827,7 @@ public class addXML {
 			else {
 				log.error("\t\t No time axis");
 			}
-
+            
 			grid.setElement(grid_name + "-" + elementName);
 			grid.setAxes(GridAxisBeans);
 			variable.setGrid(grid);
