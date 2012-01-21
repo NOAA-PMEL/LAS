@@ -1,6 +1,6 @@
 package gov.noaa.pmel.tmap.addxml.test;
 
-import gov.noaa.pmel.tmap.addxml.addXML;
+import gov.noaa.pmel.tmap.addxml.ADDXMLProcessor;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -23,7 +23,7 @@ public class TestMask extends TestCase {
 		String url = DODSNetcdfFile.canonicalURL("http://oos.soest.hawaii.edu/thredds/dodsC/hioos/roms_forec/hiig/HI-ROMS_Forecast_Model_Run_Collection_best.ncd");
 		NetcdfDataset ncds;
 		try {
-			addXML addxml = new addXML();
+			ADDXMLProcessor addxml = new ADDXMLProcessor();
 			HashMap<String, String> options= new HashMap<String, String>();
 			addxml.setOptions(options);
 			ncds = ucar.nc2.dataset.NetcdfDataset.openDataset(url);

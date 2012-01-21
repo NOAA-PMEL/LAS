@@ -1,6 +1,6 @@
 package gov.noaa.pmel.tmap.addxml.test;
 
-import gov.noaa.pmel.tmap.addxml.addXML;
+import gov.noaa.pmel.tmap.addxml.ADDXMLProcessor;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -28,7 +28,7 @@ public class TestNGDC extends TestCase {
 	    	String url = DODSNetcdfFile.canonicalURL("http://www.ngdc.noaa.gov/thredds/dodsC/sst-100km-aggregation");
 			NetcdfDataset ncds;
 			try {
-				addXML addxml = new addXML();
+				ADDXMLProcessor addxml = new ADDXMLProcessor();
 				HashMap<String, String> options= new HashMap<String, String>();
 				options.put("force","t");
 				addxml.setOptions(options);
