@@ -154,15 +154,5 @@ public class JDOMUtils {
         return content;
     }
 
-	public static ArrayList<Category> getCategories(String catxml) throws IOException, JDOMException {
-		LASDocument catdoc = new LASDocument();
-		ArrayList<Category> cats = new ArrayList<Category>();
-		XML2JDOM(catxml, catdoc);
-		List catElements = catdoc.getRootElement().getChildren("category");
-		for (Iterator catIt = catElements.iterator(); catIt.hasNext();) {
-			Element catE = (Element) catIt.next();
-			cats.add(new Category(catE));		
-		}
-		return cats;
-	}
+	
 }
