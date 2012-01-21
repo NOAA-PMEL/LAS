@@ -1043,6 +1043,7 @@ public class addXML {
 		String id = threddsDataset.getID();
 		id = id.replace("/", ".");
 		if ( id.startsWith("[0-9")) id = id + "dataset-";
+		id = id.replaceAll(" ", "-");
 		dataset.setElement(id);
 		dataset.setVersion(version_string);
 		dataset.setCreator(addXML.class.getName());
@@ -1500,6 +1501,7 @@ public class addXML {
 	 * @return CategoryBean
 	 */
 	public static CategoryBean processCategories(InvDataset ThreddsDataset) {
+		log.debug("Processing "+ThreddsDataset.getFullName());
 		CategoryBean cb = new CategoryBean();
 		// Make any THREDDS documentation links into LAS contributor links.
 		cb.setContributors(getContributors(ThreddsDataset));
@@ -1690,6 +1692,7 @@ public class addXML {
 				elementName = threddsDataset.getID();
 				elementName = elementName.replace("/", ".");
 			    if ( elementName.startsWith("[0-9")) elementName = "dataset-" + elementName;
+			    elementName = elementName.replaceAll(" ", "-");
 			} else {
 				elementName = encodeID(url);
 			}
@@ -1736,6 +1739,7 @@ public class addXML {
 			}
 			String gn = geogrid.getName();
 			if ( gn.startsWith("[0-9]") ) gn = "variable" + gn;
+			gn = gn.replaceAll(" ", "-");
 			variable.setElement(gn + "-" + elementName);
 			if ( geogrid.getUnitsString() != null && !geogrid.getUnitsString().equals("") ) {
 				variable.setUnits(geogrid.getUnitsString());
