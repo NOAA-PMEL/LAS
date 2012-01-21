@@ -119,6 +119,16 @@ public class LAS_JSAP
 
     in_data.setHelp(
         "The file name or OPeNDAP URL of the netCDF file to be added.");
+    
+    FlaggedOption in_regex = new FlaggedOption("in_regex")
+    .setStringParser(new StringStringParser())
+    .setAllowMultipleDeclarations(true)
+    .setRequired(false)
+    .setShortFlag('r')
+    .setLongFlag("regex");
+
+    in_data.setHelp(
+       "A regular expression which if present must match the OPeNDAP URL in order for that URL to be included.  Handy for finding aggregations from among a bunch of files.");
 
     FlaggedOption format = new FlaggedOption("format")
     .setStringParser(new StringStringParser())
@@ -205,6 +215,7 @@ public class LAS_JSAP
     try {
       this.registerParameter(in_thredds);
       this.registerParameter(in_data);
+      this.registerParameter(in_regex);
       this.registerParameter(category);
       this.registerParameter(dataset);
       this.registerParameter(in_xml);
