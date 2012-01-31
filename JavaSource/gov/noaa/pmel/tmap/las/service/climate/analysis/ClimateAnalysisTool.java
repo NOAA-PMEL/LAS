@@ -108,7 +108,7 @@ public class ClimateAnalysisTool extends TemplateTool {
                                 log.debug("Found "+files.size()+" output files.");
 				for (Iterator filesIt = files.iterator(); filesIt.hasNext();) {
 					File file = (File) filesIt.next();
-					if ( file.getAbsolutePath().endsWith(".ps.gz")) {
+					if ( file.getAbsolutePath().endsWith(".ps.gz") || file.getAbsolutePath().endsWith(".nc") ) {
                                                 log.debug("Adding "+file.getAbsolutePath());
 						// For each plot make a result
 						lasResponse.makeResult(file.getAbsolutePath());
