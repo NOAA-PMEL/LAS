@@ -60,7 +60,7 @@ public class ClimateAnalysis implements EntryPoint {
 		xSubmit.setWidth("80px");
 		RootPanel.get("Submit").add(xSubmit);
 		xAnalysisType.setVisibleItemCount(1);
-		xAnalysisType.addItem("Temperature Average Spectrum", "tave_spectrum");
+		xAnalysisType.addItem("Time Averaged Spectrum", "tave_spectrum");
 		xAnalysisType.addClickHandler(new ClickHandler(){
 
 			@Override
