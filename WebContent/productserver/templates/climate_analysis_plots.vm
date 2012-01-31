@@ -27,17 +27,30 @@ $las_response.toString()
     #set($ul="")
     <ul> 
     #foreach ($result in $results)
-        #set($p = $result.getFile().split("/"))
-        #if( $region != $p[16] )
-            $ul
-            #set($region = $p[16])
-            <li><strong>$region</strong></li>
-            <ul>
-            #set($ul="</ul>")
+        #if ( $result.getFile().endsWith("gz") )
+            #set($p = $result.getFile().split("/"))
+            #if( $region != $p[16] )
+                $ul
+                #set($region = $p[16])
+                <li><strong>$region</strong></li>
+                <ul>
+                #set($ul="</ul>")
+            #end
+                <li>
+                <a href="$result.getURL()">$p[17]</a>
+               </li>
         #end
+    #end
+    </ul>
+    <h3>netCDF files</h3>
+    <ul>
+    #foreach ($result in $results)
+        #if ( $result.getFile().endsWith("nc") )
+            #set($p = $result.getFile().split("/"))
             <li>
-            <a href="$result.getURL()">$p[17]</a>
+            <a href="$result.getURL()">$p[18]</a>
             </li>
+        #end
     #end
     </ul>
 </body>
