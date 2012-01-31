@@ -9,6 +9,7 @@ import gov.noaa.pmel.tmap.las.client.laswidget.DateTimeWidget;
 import gov.noaa.pmel.tmap.las.client.laswidget.LASRequest;
 import gov.noaa.pmel.tmap.las.client.serializable.CategorySerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.DatasetSerializable;
+import gov.noaa.pmel.tmap.las.client.serializable.GridSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.VariableSerializable;
 import gov.noaa.pmel.tmap.las.client.util.Util;
 
@@ -35,6 +36,7 @@ public class ClimateAnalysis implements EntryPoint {
     ListBox xAnalysisType = new ListBox();
     PushButton xSubmit = new PushButton("Submit");
     DateTimeWidget xDateWidget = new DateTimeWidget();
+    DateTimeWidget xDateWidgetTwo = new DateTimeWidget();
     LASRequest lasRequest = new LASRequest();
     DatasetFilter cimp5filter = new DatasetFilter(true, "name", "cmip5");
 	String xFirstName = "none";
@@ -46,8 +48,8 @@ public class ClimateAnalysis implements EntryPoint {
 	String xSecondVarID = xInitialId;
 	String xTlo;
 	String xThi;
-	String[] panelIDs = {"DatasetSelection", "AnalysisSelection", "DateSelection", "SubmitSelection"};
-	String[] selectionIDs = {"DatasetWidget", "AnalysisType", "DateRange", "Submit"};
+	String[] panelIDs = {"DatasetSelection", "AnalysisSelection", "DateSelection", "DateSelection", "SubmitSelection"};
+	String[] selectionIDs = {"DatasetWidget", "AnalysisType", "DateRange", "DateRange2", "Submit"};
 	String highLightStyle = "highlightSelection";
 	String selectionStyle = "selection";
 	Set<Integer> set = new HashSet<Integer>();
@@ -88,7 +90,17 @@ public class ClimateAnalysis implements EntryPoint {
 			}
 			
 		});
+		xDateWidgetTwo.addChangeHandler(new ChangeHandler() {
+
+			@Override
+			public void onChange(ChangeEvent arg0) {
+				set.add(3);
+				setBackground(4);	
+			}
+			
+		});
 		RootPanel.get("DateRange").add(xDateWidget);
+		RootPanel.get("DateRange2").add(xDateWidgetTwo);
 		RootPanel.get("SecondDataset").add(xSecondDataset);
 		RootPanel.get("CurrentDataset").add(xCurrentDataset);
 		if ( xml != null && !xml.equals("") ) {
@@ -127,6 +139,7 @@ public class ClimateAnalysis implements EntryPoint {
 				lasRequest.addVariable(xFirstID, xFirstVarID, 0);
 				lasRequest.addVariable(xSecondID, xSecondVarID, 0);
 				lasRequest.setRange("t", xDateWidget.getFerretDateLo(), xDateWidget.getFerretDateHi(), 0);
+				lasRequest.setRange("t", xDateWidgetTwo.getFerretDateLo(), xDateWidgetTwo.getFerretDateHi(), 1);
 				String type = xAnalysisType.getValue(xAnalysisType.getSelectedIndex());
 				lasRequest.setProperty("climate_analysis", "type", type);
 				Window.open(Util.getProductServer()+"?xml="+URL.encode(lasRequest.toString()), "_blank", "");
@@ -148,6 +161,7 @@ public class ClimateAnalysis implements EntryPoint {
 				xSecondDataset.setText(xSecondName);
 				set.add(0);
 				setBackground(1);
+				Util.getRPCService().getGrid(xSecondID, xSecondVarID, gridCallback);
 
 			} else if ( uo instanceof CategorySerializable) {
 				CategorySerializable c = (CategorySerializable) uo;
@@ -156,6 +170,21 @@ public class ClimateAnalysis implements EntryPoint {
 				// Variable children, dagnabit.  We need the variable, so let's go get it.
 				Util.getRPCService().getCategories(c.getID(), categoryCallback);
 			}
+		}
+		
+	};
+	AsyncCallback gridCallback = new AsyncCallback() {
+
+		@Override
+		public void onFailure(Throwable e) {
+			Window.alert("Could not get the grid for the second data set. "+e.getLocalizedMessage());
+		}
+
+		@Override
+		public void onSuccess(Object result) {
+			GridSerializable grid = (GridSerializable) result;
+			xDateWidgetTwo.init(grid.getTAxis().getLo(), grid.getTAxis().getHi(), "y", false);
+			xDateWidgetTwo.setRange(true);
 		}
 		
 	};
@@ -175,10 +204,12 @@ public class ClimateAnalysis implements EntryPoint {
 			} else {
 				DatasetSerializable ds = cat.getDatasetSerializable();
 				VariableSerializable[] vars = ds.getVariablesSerializable();	
+				// TODO -- this should be "ts" not the first variable...
 				xSecondName = vars[0].getDSName();
 				xSecondID = vars[0].getDSID();
 				xSecondVarID = vars[0].getID();
 				xSecondDataset.setText(xSecondName);
+				Util.getRPCService().getGrid(xSecondID, xSecondVarID, gridCallback);
 				set.add(0);
 				setBackground(1);
 			}
@@ -190,9 +221,9 @@ public class ClimateAnalysis implements EntryPoint {
 			RootPanel.get(panelIDs[i]).removeStyleName(highLightStyle);
 			RootPanel.get(selectionIDs[i]).removeStyleName(selectionStyle);
 		}
-		if ( set.contains(0) && set.contains(1) && set.contains(2) ) {
-			RootPanel.get(panelIDs[3]).addStyleName(highLightStyle);
-			RootPanel.get(selectionIDs[3]).addStyleName(selectionStyle);
+		if ( set.contains(0) && set.contains(1) && set.contains(2) && set.contains(3)) {
+			RootPanel.get(panelIDs[4]).addStyleName(highLightStyle);
+			RootPanel.get(selectionIDs[4]).addStyleName(selectionStyle);
 		} else {
 			if ( xSecondID.equals(xInitialId) ) {
 				RootPanel.get("DatasetSelection").addStyleName(highLightStyle);

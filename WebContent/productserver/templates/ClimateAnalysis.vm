@@ -71,7 +71,10 @@
   </div>
   <div id="DateSelection">
   <h3>Step 3: Select the Year Range to be compared.</h3>
-  <div id="DateRange"></div>
+  <table padding="8px" border="1">
+  <tr><th>Year range for the first data set.</th><th>Year range for the second data set.</th></tr>
+  <tr><td><div id="DateRange"></div></td><td><div id="DateRange2"></div></td></tr>
+  </table>
   </div>
   <div id="SubmitSelection">
   <center><div id="Submit"></div></center>
