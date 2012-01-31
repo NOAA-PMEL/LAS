@@ -850,6 +850,44 @@ public class LASBackendRequest extends LASDocument {
            return "";
         }
     }
+    public String getTlo(int i) {
+    	String tlo = "";
+    	List<Element> r = this.getRootElement().getChildren("region");
+    	for (Iterator rIt = r.iterator(); rIt.hasNext();) {
+			Element region = (Element) rIt.next();
+			if ( region.getAttributeValue("ID").equals("region_"+i)) {
+				tlo = region.getChildText("t_lo");
+			}
+		}
+    	if ( tlo != null ) {
+    		return tlo;
+    	} else {
+    		return "";
+    	}
+    }
+    public String getTlo(int i, String format) throws LASException {
+    	String t = getTlo(i);
+    	return getDatabaseTime(t, format);
+    }
+    public String getThi(int i, String format) throws LASException {
+    	String t = getThi(i);
+    	return getDatabaseTime(t, format);
+    }
+    public String getThi(int i) {
+    	String tlo = "";
+    	List<Element> r = this.getRootElement().getChildren("region");
+    	for (Iterator rIt = r.iterator(); rIt.hasNext();) {
+			Element region = (Element) rIt.next();
+			if ( region.getAttributeValue("ID").equals("region_"+i)) {
+				tlo = region.getChildText("t_hi");
+			}
+		}
+    	if ( tlo != null ) {
+    		return tlo;
+    	} else {
+    		return "";
+    	}
+    }
     /**
      * Get the low time value with no formatting applied
      * @return the high value of the time range
