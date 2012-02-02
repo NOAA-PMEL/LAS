@@ -783,12 +783,17 @@ public class ADDXMLProcessor {
 						}
 						String durl = dsb.getUrl();
 						String vurl = var.getUrl();
-						var.setUrl(durl+vurl);
+						if ( vurl.startsWith("#") ) {
+							var.setUrl(durl+vurl);
+						} else {
+							var.setUrl(vurl);
+						}
+						
 						newVariables.add(var);
 					}
 					
 					
-					
+					newDSB.setUrl(null);
 					newDSB.addAllVariables(newVariables);
 				}
 			}
