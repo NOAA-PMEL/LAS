@@ -157,7 +157,21 @@ public class LASDocument extends Document {
     		return null;
     	}
     }
-    
+    public void writeElement(String element, File file, boolean append) {
+    	try {
+            FileWriter xmlout = new FileWriter(file, append);
+            if (append) xmlout.write("\n");
+            org.jdom.output.Format format = org.jdom.output.Format.getPrettyFormat();
+            format.setLineSeparator(System.getProperty("line.separator"));
+            XMLOutputter outputter = new XMLOutputter(format);
+            outputter.output(this.getRootElement().getChild(element), xmlout);
+            // Close the FileWriter
+            xmlout.close();
+        } catch (java.io.IOException e) {
+            System.out.println(e.getMessage());
+            e.printStackTrace();
+        }
+    }
     public Element findProperty(Element group, String name) throws LASException {
         Filter propertyFilter = new FindPropertyFilter(name);       
         Iterator propsIt = group.getDescendants(propertyFilter);
