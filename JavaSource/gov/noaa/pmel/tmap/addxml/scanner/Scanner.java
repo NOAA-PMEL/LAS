@@ -89,19 +89,11 @@ public class Scanner {
 					if ( noregex || Pattern.matches(regex, catalogURL)) {
 						InvCatalog catalog = (InvCatalog) catfactory.readXML(catalogURL);
 						LASDocument las = (LASDocument) addxml.createXMLfromTHREDDSCatalog(catalog);
-						
 						// I just want the datasets, grids and axes stubs written to a file...
-						Element datasets = (Element) las.getRootElement().getChild("datasets").clone();
-						LASDocument dsDoc = new LASDocument(datasets);
-						Element grids = (Element) las.getRootElement().getChild("grids").clone();
-						LASDocument gridsDoc = new LASDocument(grids);
-						Element axes = (Element) las.getRootElement().getChild("axes").clone();
-						LASDocument axesDoc = new LASDocument(axes);						
-						FileWriter xmlout = new FileWriter(filename);
-						String dsout = dsDoc.toString().replace("<?xml version=\"1.0\" encoding=\"UTF-8\"?>", "");
-						String gout = gridsDoc.toString().replace("<?xml version=\"1.0\" encoding=\"UTF-8\"?>", "");
-						String aout = axesDoc.toString().replace("<?xml version=\"1.0\" encoding=\"UTF-8\"?>", "");
-						xmlout.write(dsout+gout+aout);
+						File file = new File(filename);
+						las.writeElement("datasets", file, false);
+						las.writeElement("grids", file, true);
+						las.writeElement("axes", file, true);
 					}
 				}
 			}
@@ -111,8 +103,6 @@ public class Scanner {
 			System.err.println("Catalog parsing failed for: "+catalogURL);
 		} catch (SAXException e) {
 			System.err.println("Catalog parsing failed for: "+catalogURL);
-		} catch (IOException e) {
-			System.err.println("File writing failed for: "+catalogURL);
 		}
 	    
 	}
