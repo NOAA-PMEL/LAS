@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import gov.noaa.pmel.tmap.addxml.ADDXMLProcessor;
 import gov.noaa.pmel.tmap.addxml.CatalogRefHandler;
@@ -41,13 +42,16 @@ public class Scanner {
 	    	CommandLineParser parser = new GnuParser();
 	        CommandLine line = parser.parse( scannerOptions, args );
 	        String scan = line.getOptionValue("scan");
+	        String regex = line.getOptionValue("regex");
+	        boolean noregex = false;
+	        if ( regex == null || regex.equals("") ) noregex = true;
 	        if ( scan == null ) {
 	        	HelpFormatter formatter = new HelpFormatter();
 	        	formatter.printHelp("scanner", scannerOptions);
 	        	System.exit(1);
 	        }
 		    String host = scan.substring(scan.indexOf("http://")+7);
-		    String base = "http://"+host.substring(0, host.indexOf("/"));
+		    String base = "http://"+host.substring(0, host.lastIndexOf("/"));
 			SAXParserFactory factory = SAXParserFactory.newInstance();
 			CatalogRefHandler esgCatalogHandler = new CatalogRefHandler();
 			SAXParser xmlparser = factory.newSAXParser();			
@@ -62,14 +66,17 @@ public class Scanner {
 			addxml.setVerbose(true);
 			HashMap<String, String> addxmlOptions = new HashMap<String, String>();
 			addxmlOptions.put("force", "t");
+			addxmlOptions.put("oneDataset", "true");
+			addxmlOptions.put("category", "false");
+			addxmlOptions.put("esg", "true");
 			addxml.setOptions(addxmlOptions);
 			for (Iterator catIt = catalogs.keySet().iterator(); catIt.hasNext();) {
 				catalogName = (String) catIt.next();
 				catalogURL = catalogs.get(catalogName);
 				String filename;
 				if ( !catalogURL.startsWith("http://") ) {
-					filename = "LAS"+catalogURL.replaceAll("/", "-");
-					catalogURL = base + catalogURL;
+					filename = "LAS-"+catalogURL.replaceAll("/", "-");
+					catalogURL = base + "/" + catalogURL;
 				} else {
 					filename = "LAS-"+catalogURL.substring(catalogURL.indexOf("http://"+7)).replaceAll("/", "-");
 				}
@@ -77,10 +84,11 @@ public class Scanner {
 				
 				File outfile = new File(filename);
 				if ( !outfile.exists() ) {
-					
-					InvCatalog catalog = (InvCatalog) catfactory.readXML(catalogURL);
-					LASDocument las = (LASDocument) addxml.createXMLfromTHREDDSCatalog(catalog);
-					las.write(filename);
+					if ( noregex || Pattern.matches(regex, catalogURL)) {
+						InvCatalog catalog = (InvCatalog) catfactory.readXML(catalogURL);
+						LASDocument las = (LASDocument) addxml.createXMLfromTHREDDSCatalog(catalog);
+						las.write(filename);
+					}
 				}
 			}
 	    } catch( ParseException exp ) {
