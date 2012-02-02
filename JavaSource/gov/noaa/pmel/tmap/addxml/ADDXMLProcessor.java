@@ -41,7 +41,6 @@ import gov.noaa.pmel.tmap.las.jdom.LASDocument;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.DecimalFormat;
@@ -54,7 +53,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.StringTokenizer;
 import java.util.Vector;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.log4j.LogManager;
@@ -88,12 +86,11 @@ import thredds.catalog.InvCatalogFactory;
 import thredds.catalog.InvDataset;
 import thredds.catalog.InvDocumentation;
 import thredds.catalog.ServiceType;
+import thredds.catalog.ThreddsMetadata.GeospatialCoverage;
 import thredds.catalog.ThreddsMetadata.Range;
 import thredds.catalog.ThreddsMetadata.Variable;
 import thredds.catalog.ThreddsMetadata.Variables;
-import thredds.catalog.ThreddsMetadata.GeospatialCoverage;
 import ucar.nc2.Attribute;
-
 import ucar.nc2.constants.FeatureType;
 import ucar.nc2.dataset.CoordinateAxis;
 import ucar.nc2.dataset.CoordinateAxis1D;
@@ -369,7 +366,7 @@ public class ADDXMLProcessor {
 						DatasetBean databean = (DatasetBean) dgab.getDatasets().get(0);
 
 						// Check to see if the name has been set.
-						if (oneDb.getName() == null || oneDb.getName() == "") {
+						if (oneDb.getName() == null || oneDb.getName().equals("")) {
 							oneDb.setName(databean.getName());
 							// If the data set name wasn't set neither was the category
 							oneCat.setName(databean.getName());
@@ -708,21 +705,24 @@ public class ADDXMLProcessor {
 		Vector DGABeans = new Vector();
 		Vector CategoryBeans = new Vector();
 
-		List ThreddsDatasets = catalog.getDatasets();
-		Iterator di = ThreddsDatasets.iterator();
-		while (di.hasNext()) {
-			InvDataset ThreddsDataset = (InvDataset) di.next();
-				CategoryBean cb;
-				if ( esg ) {
-					// TODO fix for ESG from the command line: cb = processESGCategories(ThreddsDataset);
-					cb = null;
-				} else {
-					cb = processCategories(ThreddsDataset);
-				} 
-				if ( cb.getCategories().size() > 0 || cb.getFilters().size() > 0 ) {
-					CategoryBeans.add(cb);
+		
+			List ThreddsDatasets = catalog.getDatasets();
+			Iterator di = ThreddsDatasets.iterator();
+			if ( category ) {
+				while (di.hasNext()) {
+					InvDataset ThreddsDataset = (InvDataset) di.next();
+					CategoryBean cb;
+					if ( esg ) {
+						// TODO fix for ESG from the command line: cb = processESGCategories(ThreddsDataset);
+						cb = null;
+					} else {
+						cb = processCategories(ThreddsDataset);
+					} 
+					if ( cb.getCategories().size() > 0 || cb.getFilters().size() > 0 ) {
+						CategoryBeans.add(cb);
+					}
 				}
-		}
+			}
 
 		// Discover and process all the THREDDS dataset elements that actually
 		// connect to a data source.
@@ -743,14 +743,10 @@ public class ADDXMLProcessor {
 		// Each THREDDS "dataset" is a separate LAS data set.
 		// If oneDataset is true, combine them before making the XML.
 
-		if (oneDataset) {
+		if (oneDataset && DGABeans.size() > 0) {
 			Vector newDAGBVector = new Vector();
 			DatasetsGridsAxesBean newDAGB = new DatasetsGridsAxesBean();
-			GridBean theGrid = (GridBean)(((DatasetsGridsAxesBean)DGABeans.get(0)).getGrids()).get(0);
-			Vector newGrids = new Vector();
-			newGrids.add(theGrid);
-			newDAGB.setGrids(newGrids);
-			newDAGB.setAxes(theGrid.getAxes());
+			
 			DatasetBean newDSB = new DatasetBean();
 			if (group) {
 				newDSB.setGroup_name(group_name);
@@ -762,7 +758,8 @@ public class ADDXMLProcessor {
 				newDSB.setName(title);
 			}
 
-
+			Vector newGrids = new Vector();
+			Vector newAxes = new Vector();
 			for (Iterator dgabIter = DGABeans.iterator(); dgabIter.hasNext();) {
 				DatasetsGridsAxesBean aDAGB = (DatasetsGridsAxesBean) dgabIter.next();
 				Vector datasets = aDAGB.getDatasets();            
@@ -771,28 +768,43 @@ public class ADDXMLProcessor {
 					if (newDSB.getElement() == null) {
 						newDSB.setElement(dsb.getElement());
 					}
+					newDSB.setName(dsb.getName());
 					ArrayList oldVars = dsb.getVariables();
 					ArrayList newVariables = new ArrayList();
+			
 					for (Iterator ovIt = oldVars.iterator(); ovIt.hasNext();) {
 						VariableBean var = (VariableBean) ovIt.next();
+						GridBean g = var.getGrid();
+						if (!newGrids.contains(g)) newGrids.add(g);
+						Vector axes = g.getAxes();
+						for (Iterator axesIt = axes.iterator(); axesIt.hasNext(); ) {
+							AxisBean a = (AxisBean) axesIt.next();
+							if ( !newAxes.contains(a) ) newAxes.add(a);
+						}
 						String durl = dsb.getUrl();
 						String vurl = var.getUrl();
 						var.setUrl(durl+vurl);
-						var.setGrid(theGrid);
 						newVariables.add(var);
 					}
+					
+					
+					
 					newDSB.addAllVariables(newVariables);
 				}
 			}
 			Vector newDatasets = new Vector();
 			newDatasets.add(newDSB);
 			newDAGB.setDatasets(newDatasets);
+			newDAGB.setGrids(newGrids);
+			newDAGB.setAxes(newAxes);
 			newDAGBVector.add(newDAGB);
 			DGABeans = newDAGBVector;
 		}
 
-		top.setCategories(CategoryBeans);
-		// create las_categories and datasets elements at this level
+		if ( category ) {
+			top.setCategories(CategoryBeans);
+			// create las_categories and datasets elements at this level
+		}
 		LASDocument doc = new LASDocument();
 		Element lasdata = new Element("lasdata");
 		Element datasetsElement = new Element("datasets");
@@ -829,14 +841,15 @@ public class ADDXMLProcessor {
 				}
 			}
 		}
-
-		Element las_categories = new Element("las_categories");
-		Element topElement = top.toXml();
-		las_categories.addContent(topElement);
+		if ( category ) {
+			Element las_categories = new Element("las_categories");
+			Element topElement = top.toXml();
+			las_categories.addContent(topElement);
+			lasdata.addContent(las_categories);
+		}
 		lasdata.addContent(datasetsElement);
 		lasdata.addContent(gridsElement);
 		lasdata.addContent(axesElement);
-		lasdata.addContent(las_categories);
 		doc.setRootElement(lasdata);
 		return doc;
 	}
@@ -2572,6 +2585,11 @@ public class ADDXMLProcessor {
 			format = formatOption;
 		}
 
+		String regexOption = options.get("regex");
+		if ( regexOption != null && !regexOption.equals("") ) {
+			regex = new String[]{"regexOption"};
+		}
+		
 		String units_formatOption = options.get("units_format");
 		if ( units_formatOption != null && !units_formatOption.equals("") ) {
 			units_format = units_formatOption;
