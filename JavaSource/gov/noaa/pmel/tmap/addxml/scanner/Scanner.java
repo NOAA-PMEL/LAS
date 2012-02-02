@@ -1,6 +1,7 @@
 package gov.noaa.pmel.tmap.addxml.scanner;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -22,6 +23,7 @@ import org.apache.commons.cli.GnuParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.ParseException;
 import org.jdom.Document;
+import org.jdom.Element;
 import org.xml.sax.SAXException;
 
 import thredds.catalog.InvCatalog;
@@ -87,7 +89,19 @@ public class Scanner {
 					if ( noregex || Pattern.matches(regex, catalogURL)) {
 						InvCatalog catalog = (InvCatalog) catfactory.readXML(catalogURL);
 						LASDocument las = (LASDocument) addxml.createXMLfromTHREDDSCatalog(catalog);
-						las.write(filename);
+						
+						// I just want the datasets, grids and axes stubs written to a file...
+						Element datasets = (Element) las.getRootElement().getChild("datasets").clone();
+						LASDocument dsDoc = new LASDocument(datasets);
+						Element grids = (Element) las.getRootElement().getChild("grids").clone();
+						LASDocument gridsDoc = new LASDocument(grids);
+						Element axes = (Element) las.getRootElement().getChild("axes").clone();
+						LASDocument axesDoc = new LASDocument(axes);						
+						FileWriter xmlout = new FileWriter(filename);
+						String dsout = dsDoc.toString().replace("<?xml version=\"1.0\" encoding=\"UTF-8\"?>", "");
+						String gout = gridsDoc.toString().replace("<?xml version=\"1.0\" encoding=\"UTF-8\"?>", "");
+						String aout = axesDoc.toString().replace("<?xml version=\"1.0\" encoding=\"UTF-8\"?>", "");
+						xmlout.write(dsout+gout+aout);
 					}
 				}
 			}
@@ -97,6 +111,8 @@ public class Scanner {
 			System.err.println("Catalog parsing failed for: "+catalogURL);
 		} catch (SAXException e) {
 			System.err.println("Catalog parsing failed for: "+catalogURL);
+		} catch (IOException e) {
+			System.err.println("File writing failed for: "+catalogURL);
 		}
 	    
 	}
