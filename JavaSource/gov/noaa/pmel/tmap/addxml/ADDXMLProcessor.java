@@ -713,12 +713,12 @@ public class ADDXMLProcessor {
 					InvDataset ThreddsDataset = (InvDataset) di.next();
 					CategoryBean cb;
 					if ( esg ) {
-						// TODO fix for ESG from the command line: cb = processESGCategories(ThreddsDataset);
 						cb = null;
+						// Do this below for ESG...
 					} else {
 						cb = processCategories(ThreddsDataset);
 					} 
-					if ( cb.getCategories().size() > 0 || cb.getFilters().size() > 0 ) {
+					if ( cb != null && (cb.getCategories().size() > 0 || cb.getFilters().size() > 0 )) {
 						CategoryBeans.add(cb);
 					}
 				}
@@ -2509,8 +2509,11 @@ public class ADDXMLProcessor {
 	}
 
 	static public void outputXML(String outfile, Element element, boolean append) {
+		File outputFile = new File(outfile);
+		outputXML(outputFile, element, append);
+	}
+	static public void outputXML(File outputFile, Element element, boolean append) {
 		try {
-			File outputFile = new File(outfile);
 			FileWriter xmlout = new FileWriter(outputFile, append);
 			org.jdom.output.Format format = org.jdom.output.Format.getPrettyFormat();
 			format.setLineSeparator(System.getProperty("line.separator"));
