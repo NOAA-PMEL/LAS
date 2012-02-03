@@ -193,5 +193,9 @@ public class CategoryBean {
 		return category;
 	}
 
+	public void addCategory(CategoryBean c) {
+		categories.add(c);		
+	}
+
 	
 }
