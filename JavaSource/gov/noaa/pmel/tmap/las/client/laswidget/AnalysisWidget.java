@@ -44,7 +44,7 @@ public class AnalysisWidget extends Composite {
 	AnalysisSerializable analysis = new AnalysisSerializable();
 
 	
-	public AnalysisWidget(String width, String tile_server) {
+	public AnalysisWidget(String width) {
 		
 		disclosurePanel.setTitle("Select a statistic to compute and the space and time dimensions over which to compute it");
 		

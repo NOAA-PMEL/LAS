@@ -36,9 +36,11 @@ public class LASRequest {
 			Element op = null;
 			if ( l != null && l.getLength() > 0 ) {
 				// This might be a variable in the <args> element.  Check it's parent.
-				Element link = (Element) l.item(0);
-				if ( !link.getParentNode().getNodeName().equals("args") ) {
-					op = (Element) l.item(0);
+				for(int i = 0; i < l.getLength(); i++) {
+					Element link = (Element) l.item(i);
+					if ( op == null && !link.getParentNode().getNodeName().equals("args") ) {
+						op = (Element) l.item(i);
+					}
 				}
 			}
 			if ( op != null ) {

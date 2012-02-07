@@ -371,7 +371,7 @@ public class TestUI extends BaseUI {
 		initializing.hide();
 
 		xAnalysisWidget.setActive(false);
-		turnOffAnalysis();
+		//turnOffAnalysis();
 		
 		xPanels.get(0).setVariable(xVariable);
 		xPanels.get(0).init(false, ops);
@@ -455,7 +455,7 @@ public class TestUI extends BaseUI {
 		applyButton.removeStyleDependentName("APPLY-NEEDED");
 		if ( changeDataset ) {
 			xAnalysisWidget.setActive(false);
-			turnOffAnalysis();
+			//turnOffAnalysis();
 			cs = xAxesWidget.getRefMap().getCurrentSelection();
 			// This involves a jump across the wire, so the finishApply gets called in the callback from the getGrid.
 			changeDataset();
@@ -839,7 +839,7 @@ public class TestUI extends BaseUI {
 			if ( analysis.getValue() ) {
 				setAnalysisAxes(v);
 			} else {
-				turnOffAnalysis();
+//				turnOffAnalysis();
 			}
 		}
     };
