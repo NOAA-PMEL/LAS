@@ -39,9 +39,9 @@ public class DateTimeWidget extends Composite {
 	Date hi;
     
 	
-	Label d_label = new Label("Time: ");
-	Label d_label_lo_range = new Label("Start time: ");
-	Label d_label_hi_range = new Label("End time: ");
+	Label d_label = new Label("Date/Time: ");
+	Label d_label_lo_range = new Label("Start date/time: ");
+	Label d_label_hi_range = new Label("End date/time: ");
 	
 	ListBox lo_year = new ListBox();
 	ListBox lo_month = new ListBox();

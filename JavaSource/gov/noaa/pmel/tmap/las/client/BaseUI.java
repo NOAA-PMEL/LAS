@@ -35,6 +35,7 @@ import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.DisclosurePanel;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.Frame;
@@ -160,11 +161,11 @@ public class BaseUI {
 	NavAxesGroup xAxesWidget;
 	ComparisonAxisSelector xComparisonAxesSelector;
 	OperationsWidget xOperationsWidget = new OperationsWidget("Operations");
-	AnalysisWidget xAnalysisWidget;
+	
 
 	// Analysis controls in the navigation panel
-	//AnalysisWidget xAnalysisWidget = new AnalysisWidget();
-	//CheckBox xApplyAnalysis = new CheckBox("Apply Analysis");
+	AnalysisWidget xAnalysisWidget;
+	CheckBox xApplyAnalysis = new CheckBox("Apply Analysis");
 	
 	// A "global" annotations toggle button.  If you want it in your UI, place it somewhere in the layout.
 	// Having it in the superclass allows it to be toggled in the handler for any annotations button push.
@@ -218,7 +219,7 @@ public class BaseUI {
 	public void initialize() {
 		
 		xTileServer = getTileServer();
-		xAnalysisWidget = new AnalysisWidget(xControlsWidthPx, xTileServer);
+		xAnalysisWidget = new AnalysisWidget(xControlsWidthPx);
 		// Somebody might have already set these.  Only get them from the query string if they are null.
 		if ( xDSID == null ) {
 			xDSID = Util.getParameterString("dsid");
@@ -287,7 +288,7 @@ public class BaseUI {
 		// This are bumped down one for the grow shrink experiment...
 		xNavigationControls.setWidget(navControlIndex++, 0, xAxesWidget);
 		xNavigationControls.setWidget(navControlIndex++, 0, xComparisonAxesSelector);
-		//xNavigationControls.setWidget(navControlIndex++, 0, xAnalysisWidget);
+		xNavigationControls.setWidget(navControlIndex++, 0, xAnalysisWidget);
 		xNavigationControls.setWidget(navControlIndex++, 0, xOperationsWidget);
 		
 		xHideControls.setOpen(true);

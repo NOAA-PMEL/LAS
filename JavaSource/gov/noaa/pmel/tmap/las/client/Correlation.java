@@ -227,6 +227,7 @@ public class Correlation implements EntryPoint {
 				
 				if ( colorCheckBox.getValue() ) {
 					colorVariables.setEnabled(true);
+					warn();
 				} else {
 					colorVariables.setEnabled(false);
 				}
@@ -300,8 +301,6 @@ public class Correlation implements EntryPoint {
 			tlo = lasRequest.getRangeLo("t", 0);
 			thi = lasRequest.getRangeHi("t", 0);
 			Util.getRPCService().getFullDataset(dsid, datasetCallback);
-			// Up above we need to get the icons widget init url and use it here.  :-)
-			cruiseIcons.init(lasRequest, varid);
 		} else {
 			
 		}
@@ -453,23 +452,26 @@ public class Correlation implements EntryPoint {
 
 
     	//TODO get these from the map and the widget in the spaceTimeConstraint panel.
-    	String tlo = timeConstraint.getFerretDateLo();
-    	String thi = timeConstraint.getFerretDateHi();
+    	String tlo = null;
+    	String thi = null;
+    	if ( timeConstraint.isVisible() ) {
+    		tlo = timeConstraint.getFerretDateLo();
+    		thi = timeConstraint.getFerretDateHi();
+    	}
     	String xlo = String.valueOf(mapConstraint.getXlo());
     	String xhi = String.valueOf(mapConstraint.getXhi());
     	String ylo = String.valueOf(mapConstraint.getYlo());
     	String yhi = String.valueOf(mapConstraint.getYhi());
-    	String zlo = lasRequest.getRangeLo("z", 0);
-    	String zhi = lasRequest.getRangeHi("z", 0);
-
+    	String zlo = null;
+		String zhi = null;
+    	if ( zAxisWidget.isVisible() ) {
+    		zlo = zAxisWidget.getLo();
+    		zhi = zAxisWidget.getHi();
+    	}
     	String vix = xVariables.getVariable(xVariables.getSelectedIndex()).getID();
     	GridSerializable grid = xDatasetVariables.get(vix).getGrid();
 
         if ( tlo != null && thi != null ) {
-    	   lasRequest.setRange("t", tlo, thi, 0);
-        } else if ( thi != null ) {
-        	lasRequest.setRange("t", thi, thi, 0);
-        } else {
      	   lasRequest.setRange("t", timeConstraint.getFerretDateMin(), timeConstraint.getFerretDateMax(), 0);
         }
 
@@ -573,6 +575,9 @@ public class Correlation implements EntryPoint {
 						} else if ( result.getAttribute("type").equals("annotations") ) {
 								annourl = result.getAttribute("url");
 								lasAnnotationsPanel.setAnnotationsHTMLURL(Util.getAnnotationService(annourl));
+						} else if ( result.getAttribute("type").equals("icon_webrowset") ) {
+							String iconurl = result.getAttribute("url");
+							cruiseIcons.init(iconurl);
 						} else if ( result.getAttribute("type").equals("map_scale") ) {
 							NodeList map_scale = result.getElementsByTagName("map_scale");
 							for ( int m = 0; m < map_scale.getLength(); m++ ) {
@@ -839,7 +844,7 @@ public class Correlation implements EntryPoint {
 			
 			GridSerializable grid = varX.getGrid();
 			mapConstraint.setTool("xy");
-			mapConstraint.setDataExtent(Double.valueOf(grid.getYAxis().getLo()), Double.valueOf(grid.getYAxis().getHi()), Double.valueOf(grid.getXAxis().getLo()), Double.valueOf(grid.getXAxis().getHi()));
+			mapConstraint.setDataExtent(Double.valueOf(grid.getYAxis().getLo()), Double.valueOf(grid.getYAxis().getHi()), Double.valueOf(grid.getXAxis().getLo()), Double.valueOf(grid.getXAxis().getHi()), 1.0);
 			if  ( xlo != null && xhi != null && ylo != null && yhi != null ) {
 				mapConstraint.setCurrentSelection(Double.valueOf(ylo), Double.valueOf(yhi), Double.valueOf(xlo), Double.valueOf(xhi));
 			}
@@ -859,6 +864,7 @@ public class Correlation implements EntryPoint {
 			if ( grid.hasZ() ) {
 				zAxisWidget.init(grid.getZAxis());
 				zAxisWidget.setVisible(true);
+				zAxisWidget.setRange(true);
 			} else {
 				zAxisWidget.setVisible(false);
 			}
@@ -1252,6 +1258,19 @@ public class Correlation implements EntryPoint {
 		if ( varX.getID().equals(id) ) return "x";
 		if ( varY.getID().equals(id) ) return "y";
 		return "";
+	}
+	private void warn() {
+		PopupPanel warning = new PopupPanel(true);
+		PushButton ok = new PushButton("Ok");
+		PushButton cancel = new PushButton("Cancel");
+		Label warnText = new Label("This operation will require new data to be extracted from the database.  It may take a while.  Do you want to continue?");
+		FlexTable layout = new FlexTable();
+		layout.getFlexCellFormatter().setColSpan(0, 0, 2);
+		layout.setWidget(0, 0, warnText);
+		layout.setWidget(1, 0, ok);
+		layout.setWidget(1, 1, cancel);
+		warning.add(layout);
+		warning.show();
 	}
 	ChangeHandler constraintChange = new ChangeHandler() {
 
