@@ -150,7 +150,7 @@ ENDIF
       LIST/APPEND/FILE="($result_map_scale_filename)"/NOHEAD/NOROWLAB syms_names, syms_vals
    ELSE
       IF ($ax_horiz"0|T>1|*>0") THEN
-         LET tt= t[GT=($data_0_var)]
+         LET tt= t[GT=($data_0_var),d=($dset0%1%)]
 	 LET t1 = tboxlo[gt=tt,t=($xaxis_min%($ppl$xmin1)%)]
 	 LET t2 = tboxhi[gt=tt,t=($xaxis_max%($ppl$xmax1)%)]
 	 DEFINE SYMBOL haxis_tstart = `TAX_DATESTRING(t1, tt, "seconds")`
@@ -167,7 +167,7 @@ ENDIF
       LIST/APPEND/FILE="($result_map_scale_filename)"/NOHEAD/NOROWLAB syms_names, syms_vals
    ELSE
       IF ($ax_vert"0|T>1|*>0") THEN
-         LET tt= t[GT=($data_0_var)]
+         LET tt= t[GT=($data_0_var),d=($dset0%1%)]
 	 LET t1 = tboxlo[gt=tt,t=($yaxis_min%($ppl$ymin1)%)]
 	 LET t2 = tboxhi[gt=tt,t=($yaxis_max%($ppl$ymax1)%)]
 	 DEFINE SYMBOL vaxis_tstart = `TAX_DATESTRING(t1, tt, "seconds")`
