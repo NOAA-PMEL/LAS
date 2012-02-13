@@ -58,6 +58,9 @@
   #parse ("productserver/templates/V7UIHeader.vm")
   <table class="allBorder" >
   <tr>
+  <td style="vertical-align:top;">
+     <div style="padding:10px" id="icons"></div>
+  </td>
   <td class="regularBackground" width="40%" style="vertical-align:top;">
     <div style="padding:0px 10px 10px 10px"  class="regularBackground" id="button_panel"></div>
     <div style="padding:10px" id="space_time_constraints"></div>
