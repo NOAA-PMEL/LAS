@@ -66,8 +66,12 @@
   <div class="selection" id="DatasetWidget"></div>
   </div>
   <div id="AnalysisSelection">
-  <h3>Step 2: Select the Analysis Type.</h3>
+  <h3>Step 2: Select the Plot Type.</h3>
   <div id="AnalysisType"></div>
+  </div>
+  <div id="RegionSelection">
+  <h3>Step 3: Select the Variables and/or Regions.</h3>
+  <div id="Regions"></div>
   </div>
   <div id="DateSelection">
   <h3>Step 3: Select the Year Range to be compared.</h3>
