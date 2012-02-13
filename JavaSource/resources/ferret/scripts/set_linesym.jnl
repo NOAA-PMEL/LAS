@@ -1,11 +1,13 @@
 ! set_linesym.jnl
 ! set plot type: line, symbols, or both.  By default,
 ! if there are up to 120 points use line-and-symbol.
-
+! Use STAT rather than @NGD to get number of points.
+! NGD caused some requests with curvi grids to hang.
 
 LET plotvar  = ($ferret_plot_var)
 LET filledvar = missing(plotvar,0)
-LET npoints = `plotvar[($ferret_view)=@ngd]`
+STAT plotvar
+LET npoints = ($stat_ngood)
 
 IF `npoints LT 120` THEN
    DEFINE SYMBOL qualifiers = ($qualifiers)($ferret_line_or_sym%/LINE/SYM=($plotsymbol)|default>/LINE/SYM=($plotsymbol)|line>/LINE|both>/LINE/SYM=($plotsymbol)|sym>/SYM=($plotsymbol)%)
