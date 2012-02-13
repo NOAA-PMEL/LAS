@@ -91,7 +91,10 @@ public class DateTimeWidget extends Composite {
 			date.append("-"+MONTHS.get(lo.getMonth()));
 			date.append("-0001"); 
 			return date.toString();
+		} else if ( isMenu ) {
+			return lo_day.getValue(0);
 		} else {
+		
 			if ( hasHour ) {
 				return mediumFerretForm.format(lo);
 			} else {
@@ -106,7 +109,9 @@ public class DateTimeWidget extends Composite {
 			date.append("-"+MONTHS.get(hi.getMonth()));
 			date.append("-0001"); 
 			return date.toString();
-		} else {
+		} else if ( isMenu ) { 
+			return hi_day.getValue(hi_day.getItemCount()-1);
+		} else  {
 			if ( hasHour ) {
 				return mediumFerretForm.format(hi);
 			} else {
