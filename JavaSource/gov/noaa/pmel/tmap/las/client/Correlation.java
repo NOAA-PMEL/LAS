@@ -227,7 +227,7 @@ public class Correlation implements EntryPoint {
 				
 				if ( colorCheckBox.getValue() ) {
 					colorVariables.setEnabled(true);
-					warn();
+					//warn();
 				} else {
 					colorVariables.setEnabled(false);
 				}
