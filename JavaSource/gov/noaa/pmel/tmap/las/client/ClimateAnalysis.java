@@ -433,6 +433,8 @@ public class ClimateAnalysis implements EntryPoint {
 
 				@Override
 				public void onClick(ClickEvent event) {
+					set.add(2);
+					setBackground(3);
 					boolean v = cb_all.getValue();
 					for (Iterator tsIt = ts.iterator(); tsIt.hasNext();) {
 						CheckBox cb = (CheckBox) tsIt.next();
