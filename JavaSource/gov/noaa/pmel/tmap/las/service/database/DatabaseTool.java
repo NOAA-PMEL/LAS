@@ -347,8 +347,10 @@ public class DatabaseTool extends TemplateTool {
             ti++;
         } catch (Exception e) {
         	if ( e instanceof LASRowLimitException ) {
+        		log.debug("Got a row limit exception: "+e.getMessage());
                 throw e;
         	} else {
+        		log.debug("Caught an exception while creating the netCDF file: "+e.getMessage());
                 throw new Exception("Could not create intermediate netCDF file stub with result set: "+e.toString());
         	}
         } finally {
