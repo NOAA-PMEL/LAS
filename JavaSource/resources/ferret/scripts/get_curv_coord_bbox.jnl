@@ -47,16 +47,16 @@ IF `($ferret_curv_lat_max%0|*>1%) EQ 0` THEN \
 
 LET ncurv_x = `($ferret_curvi_coord_lon),RETURN=isize`
 LET ncurv_y = `($ferret_curvi_coord_lon),RETURN=jsize`
-LET del_x = (($ferret_curv_lon_max) - ($ferret_curv_lon_min))/(ncurv_x/2)
-LET del_y = (($ferret_curv_lat_max) - ($ferret_curv_lat_min))/(ncurv_y/2)
+LET del_x = (($ferret_curv_lon_max) - (($ferret_curv_lon_min)) )/(ncurv_x/2)
+LET del_y = (($ferret_curv_lat_max) - (($ferret_curv_lat_min)) )/(ncurv_y/2)
 
 ! If the whole grid, or nearly the whole grid, is specified, we are done.
 IF ($ferret_curv_lon_min"0|*>1") THEN
 
-   LET xlodiff =  ABS(($ferret_curv_lon_min) - ($region_x_lo) )
-   LET xhidiff =  ABS(($ferret_curv_lon_max) - ($region_x_hi) )
-   LET ylodiff =  ABS(($ferret_curv_lat_min) - ($region_y_lo) )
-   LET yhidiff =  ABS(($ferret_curv_lat_max) - ($region_y_hi) )
+   LET xlodiff =  ABS(($ferret_curv_lon_min) - (($region_x_lo)) )
+   LET xhidiff =  ABS(($ferret_curv_lon_max) - (($region_x_hi)) )
+   LET ylodiff =  ABS(($ferret_curv_lat_min) - (($region_y_lo)) )
+   LET yhidiff =  ABS(($ferret_curv_lat_max) - (($region_y_hi)) )
 
    LET ndel_x = del_x
    IF `ncurv_x GT 6` THEN LET ndel_x = 5*del_x
