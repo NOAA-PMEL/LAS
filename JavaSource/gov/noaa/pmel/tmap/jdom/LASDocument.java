@@ -1,11 +1,11 @@
 /**
  * 
  */
-package gov.noaa.pmel.tmap.las.jdom;
+package gov.noaa.pmel.tmap.jdom;
 
-import gov.noaa.pmel.tmap.las.exception.LASException;
-import gov.noaa.pmel.tmap.las.jdom.filter.FindPropertyFilter;
-import gov.noaa.pmel.tmap.las.jdom.filter.FindPropertyGroupFilter;
+import gov.noaa.pmel.tmap.exception.LASException;
+import gov.noaa.pmel.tmap.jdom.filter.FindPropertyFilter;
+import gov.noaa.pmel.tmap.jdom.filter.FindPropertyGroupFilter;
 
 import java.io.File;
 import java.io.FileWriter;

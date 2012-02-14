@@ -3,6 +3,8 @@
  */
 package gov.noaa.pmel.tmap.las.jdom;
 
+import gov.noaa.pmel.tmap.jdom.LASDocument;
+
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.JDOMException;

@@ -3,8 +3,8 @@ package gov.noaa.pmel.tmap.las.jdom;
 import org.jdom.Element;
 import org.jdom.JDOMException;
 
-import gov.noaa.pmel.tmap.las.exception.LASException;
-import gov.noaa.pmel.tmap.las.jdom.LASDocument;
+import gov.noaa.pmel.tmap.exception.LASException;
+import gov.noaa.pmel.tmap.jdom.LASDocument;
 
 public class LASDatabaseBackendConfig extends LASDocument {
 

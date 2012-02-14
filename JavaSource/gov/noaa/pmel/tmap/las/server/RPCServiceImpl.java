@@ -1,7 +1,8 @@
 package gov.noaa.pmel.tmap.las.server;
 
 
-import gov.noaa.pmel.tmap.las.jdom.JDOMUtils;
+import gov.noaa.pmel.tmap.exception.LASException;
+import gov.noaa.pmel.tmap.jdom.LASDocument;
 import gov.noaa.pmel.tmap.las.client.rpc.RPCException;
 import gov.noaa.pmel.tmap.las.client.rpc.RPCService;
 import gov.noaa.pmel.tmap.las.client.serializable.CategorySerializable;
@@ -16,12 +17,11 @@ import gov.noaa.pmel.tmap.las.client.serializable.VariableSerializable;
 import gov.noaa.pmel.tmap.las.client.test.TestConstants;
 import gov.noaa.pmel.tmap.las.client.util.Util;
 import gov.noaa.pmel.tmap.las.confluence.Confluence;
-import gov.noaa.pmel.tmap.las.exception.LASException;
+import gov.noaa.pmel.tmap.las.jdom.JDOMUtils;
 import gov.noaa.pmel.tmap.las.jdom.LASConfig;
-import gov.noaa.pmel.tmap.las.jdom.LASDocument;
+import gov.noaa.pmel.tmap.las.jdom.LASJDOMUtils;
 import gov.noaa.pmel.tmap.las.jdom.LASTestResults;
 import gov.noaa.pmel.tmap.las.product.server.LASConfigPlugIn;
-import gov.noaa.pmel.tmap.las.test.LASTest;
 import gov.noaa.pmel.tmap.las.ui.LASProxy;
 import gov.noaa.pmel.tmap.las.util.Category;
 import gov.noaa.pmel.tmap.las.util.Constants;
@@ -35,10 +35,8 @@ import gov.noaa.pmel.tmap.las.util.Tributary;
 import gov.noaa.pmel.tmap.las.util.Variable;
 import gov.noaa.pmel.tmap.las.util.View;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -47,7 +45,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
@@ -209,7 +206,7 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
 						if ( catids != null ) {
 							// In this case the top level categories are these and only these...
 							for (int i = 0; i < catids.length; i++) {
-								categories.addAll(Confluence.getCategories(catids[i], lasConfig, request));
+								categories.addAll(Confluence.getCategories(catids[i], lasConfig, request, true));
 							}
 						}
 					} else {
@@ -230,7 +227,7 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
 							server_cat.setAttribute("remote_las", tributary.getURL()+Constants.GET_AUTH);
 							String url = tributary.getURL() + Constants.GET_CATEGORIES + "?format=xml";
 							String catxml = lasProxy.executeGetMethodAndReturnResult(url);
-							ArrayList<Category> trib_cats = JDOMUtils.getCategories(catxml);
+							ArrayList<Category> trib_cats = LASJDOMUtils.getCategories(catxml);
 							for (Iterator tribCatsIt = trib_cats.iterator(); tribCatsIt.hasNext();) {
 								Category category = (Category) tribCatsIt.next();
 								server_cat.addCategory(category);
@@ -255,7 +252,7 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
 								Tributary trib = lasConfig.getTributary(server_key);
 								String las_url = trib.getURL() + Constants.GET_CATEGORIES + "?format=xml&catid="+id;
 								String catxml = lasProxy.executeGetMethodAndReturnResult(las_url);
-								ArrayList<Category> trib_cats = JDOMUtils.getCategories(catxml);
+								ArrayList<Category> trib_cats = LASJDOMUtils.getCategories(catxml);
 								for (Iterator tribCatsIt = trib_cats.iterator(); tribCatsIt.hasNext();) {
 									Category category = (Category) tribCatsIt.next();
 									categories.add(category);

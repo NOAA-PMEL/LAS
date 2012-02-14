@@ -27,8 +27,6 @@ import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.jdom.JDOMException;
 
-import ucar.nc2.ui.DatasetTreeView;
-
 public class CacheManager extends Action {
 	private static Logger log = LogManager.getLogger(CacheManager.class.getName());
 	/* (non-Javadoc)
