@@ -14,7 +14,7 @@ import gov.noaa.pmel.tmap.addxml.CatalogRefHandler;
 import gov.noaa.pmel.tmap.addxml.CategoryBean;
 import gov.noaa.pmel.tmap.addxml.FilterBean;
 import gov.noaa.pmel.tmap.addxml.addXML;
-import gov.noaa.pmel.tmap.las.jdom.LASDocument;
+import gov.noaa.pmel.tmap.jdom.LASDocument;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
