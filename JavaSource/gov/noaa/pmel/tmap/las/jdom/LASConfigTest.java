@@ -1,6 +1,7 @@
 package gov.noaa.pmel.tmap.las.jdom;
 
-import gov.noaa.pmel.tmap.las.exception.LASException;
+import gov.noaa.pmel.tmap.exception.LASException;
+import gov.noaa.pmel.tmap.jdom.LASDocument;
 import gov.noaa.pmel.tmap.las.util.NameValuePair;
 import gov.noaa.pmel.tmap.las.util.Option;
 import gov.noaa.pmel.tmap.las.util.Option;

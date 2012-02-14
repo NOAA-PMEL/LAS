@@ -7,7 +7,7 @@
  * Administration should the software be included by the recipient as an
  * element in other product development. 
  */
-package gov.noaa.pmel.tmap.las.jdom.filter;
+package gov.noaa.pmel.tmap.jdom.filter;
 
 import org.jdom.Element;
 import org.jdom.filter.Filter;

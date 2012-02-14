@@ -13,20 +13,21 @@ import gov.noaa.pmel.tmap.addxml.AxisBean;
 import gov.noaa.pmel.tmap.addxml.CategoryBean;
 import gov.noaa.pmel.tmap.addxml.DatasetBean;
 import gov.noaa.pmel.tmap.addxml.DatasetsGridsAxesBean;
-import gov.noaa.pmel.tmap.addxml.ESGCatalogHandler;
+import gov.noaa.pmel.tmap.addxml.CatalogRefHandler;
 import gov.noaa.pmel.tmap.addxml.FilterBean;
 import gov.noaa.pmel.tmap.addxml.GridBean;
-import gov.noaa.pmel.tmap.addxml.addXML;
+import gov.noaa.pmel.tmap.addxml.ADDXMLProcessor;
+import gov.noaa.pmel.tmap.exception.LASException;
+import gov.noaa.pmel.tmap.jdom.LASDocument;
+import gov.noaa.pmel.tmap.jdom.filter.AttributeFilter;
+import gov.noaa.pmel.tmap.jdom.filter.CategoryFilter;
+import gov.noaa.pmel.tmap.jdom.filter.EmptySrcDatasetFilter;
 import gov.noaa.pmel.tmap.las.client.rpc.RPCException;
 import gov.noaa.pmel.tmap.las.client.serializable.CategorySerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.DatasetSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.EnsembleMemberSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.VariableSerializable;
 import gov.noaa.pmel.tmap.las.client.test.TestConstants;
-import gov.noaa.pmel.tmap.las.exception.LASException;
-import gov.noaa.pmel.tmap.las.jdom.filter.AttributeFilter;
-import gov.noaa.pmel.tmap.las.jdom.filter.CategoryFilter;
-import gov.noaa.pmel.tmap.las.jdom.filter.EmptySrcDatasetFilter;
 import gov.noaa.pmel.tmap.las.product.server.Cache;
 import gov.noaa.pmel.tmap.las.test.LASTest;
 import gov.noaa.pmel.tmap.las.test.LASTestOptions;
@@ -4344,7 +4345,7 @@ public class LASConfig extends LASDocument {
 			top.setName("ESG Catalog");
 			String base = src.substring(0, src.lastIndexOf("/")+1);
 			SAXParserFactory factory = SAXParserFactory.newInstance();
-			ESGCatalogHandler esgCatalogHandler = new ESGCatalogHandler();
+			CatalogRefHandler esgCatalogHandler = new CatalogRefHandler();
 			SAXParser parser;
 			try {
 				parser = factory.newSAXParser();			
@@ -4363,7 +4364,7 @@ public class LASConfig extends LASDocument {
 				String url = (String) catalogs.get(name);
 				InvCatalogFactory thredds_factory = new InvCatalogFactory("default", false);
 				InvCatalog catalog = (InvCatalog) thredds_factory.readXML(base+url);
-				if ( addXML.containsLASDatasets(catalog) ) {
+				if ( ADDXMLProcessor.containsLASDatasets(catalog) ) {
 					lasCatalogs.put(name, url);
 				}
 			}
@@ -4379,7 +4380,7 @@ public class LASConfig extends LASDocument {
 				String url = (String) lasCatalogs.get(name);
 				InvCatalogFactory thredds_factory = new InvCatalogFactory("default", false);
 				InvCatalog catalog = (InvCatalog) thredds_factory.readXML(base+url);
-				CategoryBean cb = addXML.processESGCategories(catalog);
+				CategoryBean cb = ADDXMLProcessor.processESGCategories(catalog);
 				categories.add(cb);				
 			}			
 		} else {
@@ -4402,7 +4403,7 @@ public class LASConfig extends LASDocument {
 				InvDataset ThreddsDataset = (InvDataset) di.next();
 				if (ThreddsDataset.hasNestedDatasets()) {
 					
-					CategoryBean cb = addXML.processCategories(ThreddsDataset);		 
+					CategoryBean cb = ADDXMLProcessor.processCategories(ThreddsDataset);		 
 					categories.add(cb);
 					
 				}
@@ -4463,7 +4464,7 @@ public class LASConfig extends LASDocument {
 		}
 		src_axes.add(axes);
 
-		org.jdom.Document doc = addXML.createXMLfromDatasetsGridsAxesBean(dgab);
+		org.jdom.Document doc = ADDXMLProcessor.createXMLfromDatasetsGridsAxesBean(dgab);
 		String ds_filename = getOutputDir()+File.separator+"las_datasets_"+src_key+"_"+src_index+".xml";
 		String grids_filename = getOutputDir()+File.separator+"las_grids_"+src_key+"_"+src_index+".xml";
 		String axes_filename = getOutputDir()+File.separator+"las_axes_"+src_key+"_"+src_index+".xml";
@@ -4479,7 +4480,7 @@ public class LASConfig extends LASDocument {
 		DateTimeFormatter df = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
 		DateTimeFormatter ymd = DateTimeFormat.forPattern("yyyy-MM-dd");
 		DatasetsGridsAxesBean dgab = null;
-		addXML myAddXML = new addXML();
+		ADDXMLProcessor myAddXML = new ADDXMLProcessor();
 		myAddXML.setOptions(options);
 		Vector<DatasetsGridsAxesBean> beans = new Vector<DatasetsGridsAxesBean>();
 		if ( src_type.equalsIgnoreCase("netcdf") ) {
@@ -4559,7 +4560,7 @@ public class LASConfig extends LASDocument {
 			if ( myAddXML.isEsg() ) {
 				String base = src.substring(0, src.lastIndexOf("/")+1);
 				SAXParserFactory factory = SAXParserFactory.newInstance();
-				ESGCatalogHandler esgCatalogHandler = new ESGCatalogHandler();
+				CatalogRefHandler esgCatalogHandler = new CatalogRefHandler();
 				SAXParser parser;
 				try {
 					parser = factory.newSAXParser();			

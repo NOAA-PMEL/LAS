@@ -17,6 +17,7 @@ public class Constants {
 	public static final String GET_VARIABLES = "/getVariables.do";
 	public static final String GET_VIEWS = "/getViews.do";
 	public static final String GET_AUTH = "/auth.do";
+	public static final String GET_ANNOTATIONS = "/getAnnotations.do";
 	public static final String RESOLVE_URL = "/resolveURL.do";
 	
     public static final String GE_SERVLET = "/GEServer.do";
@@ -37,6 +38,7 @@ public class Constants {
 	public static final String GET_VARIABLES_KEY = "localGetVariables";
 	public static final String GET_VARIABLE_KEY = "localGetVariable";
 	public static final String GET_VIEWS_KEY = "localGetViews";	
+	public static final String GET_ANNOTATIONS_KEY = "localGetAnnotations";
 	public static final String GET_AUTH_KEY = "auth";	
 	public static final String CATEGORIES_REQUIRED_KEY = "categories_required";
 	

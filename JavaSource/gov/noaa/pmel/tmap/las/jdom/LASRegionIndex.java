@@ -1,5 +1,7 @@
 package gov.noaa.pmel.tmap.las.jdom;
 
+import gov.noaa.pmel.tmap.jdom.LASDocument;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;

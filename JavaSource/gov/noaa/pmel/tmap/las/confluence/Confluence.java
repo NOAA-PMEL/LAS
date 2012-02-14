@@ -1,10 +1,10 @@
 package gov.noaa.pmel.tmap.las.confluence;
 
-import gov.noaa.pmel.tmap.las.exception.LASException;
+import gov.noaa.pmel.tmap.exception.LASException;
+import gov.noaa.pmel.tmap.jdom.LASDocument;
 import gov.noaa.pmel.tmap.las.jdom.JDOMUtils;
 import gov.noaa.pmel.tmap.las.jdom.LASBackendResponse;
 import gov.noaa.pmel.tmap.las.jdom.LASConfig;
-import gov.noaa.pmel.tmap.las.jdom.LASDocument;
 import gov.noaa.pmel.tmap.las.jdom.LASMapScale;
 import gov.noaa.pmel.tmap.las.jdom.LASRegionIndex;
 import gov.noaa.pmel.tmap.las.jdom.LASUIRequest;
@@ -70,6 +70,7 @@ public class Confluence extends LASAction {
 				put(Constants.GET_VARIABLES, new String[]{"dsid"});
 				put(Constants.GET_VARIABLE, new String[]{"dsid", "varid"});
 				put(Constants.GET_VIEWS, new String[]{"dsid", "varid"});
+				put(Constants.GET_ANNOTATIONS, new String[]{"dsid", "file"});
 			}  
 		};
 		
@@ -91,6 +92,7 @@ public class Confluence extends LASAction {
 					put(Constants.GET_VARIABLE_KEY, Constants.GET_VARIABLE);
 					put(Constants.GET_VIEWS_KEY, Constants.GET_VIEWS);
 					put(Constants.GET_AUTH_KEY, Constants.GET_AUTH);
+					put(Constants.GET_ANNOTATIONS_KEY, Constants.GET_ANNOTATIONS);
 				}  
 			};
 		public ActionForward execute(ActionMapping mapping,
@@ -136,7 +138,7 @@ public class Confluence extends LASAction {
 
 						if ( catids != null && catids.length > 0 ) {
 							request.getSession().setAttribute("catid", catids);
-							ArrayList<Category> cats = getCategories(catids[0], lasConfig, request);
+							ArrayList<Category> cats = getCategories(catids[0], lasConfig, request, true);
 							String dsid = null;
 							for (Iterator catsIt = cats.iterator(); catsIt.hasNext();) {
 								Category category = (Category) catsIt.next();
@@ -214,12 +216,19 @@ public class Confluence extends LASAction {
 							String varid = (String) request.getSession().getAttribute("varid");
 							
 							if ( catids != null ) {
-								// In this case the top level categories are these and only these...
-								for (int i = 0; i < catids.length; i++) {
-									categories.addAll(getCategories(catids[i], lasConfig, request));
+								if ( catids.length > 1 ) {
+									// In this case the top level categories are these and only these...
+									for (int i = 0; i < catids.length; i++) {
+										categories.addAll(getCategories(catids[i], lasConfig, request, false));
+									}
+								} else { 
+									categories.addAll(getCategories(catids[0], lasConfig, request, false));
 								}
-								log.error(Util.toJSON(categories, "categories"));
-								InputStream is = new ByteArrayInputStream(Util.toJSON(categories, "categories").toString().getBytes("UTF-8"));
+
+								
+								String out = Util.toJSON(categories, "categories").toString();
+								log.error(out);
+								InputStream is = new ByteArrayInputStream(out.getBytes("UTF-8"));
 								lasProxy.stream(is, response.getOutputStream());
 							}
 
@@ -295,9 +304,32 @@ public class Confluence extends LASAction {
 						// Send it to the local server which will work most of the time..
 						return mapping.findForward(Constants.GET_OPTIONS_KEY);
 					}
-
+				} else if ( url.contains(Constants.GET_ANNOTATIONS) ) {
+					String catid = request.getParameter("catid");
+					if ( catid != null ) {
+						String server_key = catid.split(Constants.NAME_SPACE_SPARATOR)[0];
+						if ( server_key != null ) {
+							if ( server_key.equals(lasConfig.getBaseServerURLKey()) ) {
+								// Process here as normal...
+								return mapping.findForward(Constants.GET_ANNOTATIONS_KEY);
+							} else {
+								Tributary trib = lasConfig.getTributary(server_key);
+								String las_url = trib.getURL();
+								if ( proxy.equalsIgnoreCase("full") ) {
+									return processRequest(mapping, request, response, lasConfig, las_url, server_key, openid);
+								} else {
+									las_url = las_url + Constants.PRODUCT_SERVER + "?" + request.getQueryString();	
+									lasProxy.executeGetMethodAndStreamResult(las_url, response);
+								}
+							}
+						}
+					}
 				} else if (url.contains(Constants.PRODUCT_SERVER)) {
 					String xml = request.getParameter("xml");
+					if ( xml == null ) {
+						// Local request for the info page...
+						return mapping.findForward("LocalProductServer");
+					}
 					LASUIRequest ui_request = new LASUIRequest();
 					try {
 						JDOMUtils.XML2JDOM(xml, ui_request);
@@ -458,7 +490,7 @@ public class Confluence extends LASAction {
 				}
 				return category.getChildren_DatasetID();
 			} else {
-				ArrayList<Category> cats = getCategories(category.getID(), lasConfig, request);
+				ArrayList<Category> cats = getCategories(category.getID(), lasConfig, request, true);
 				for (Iterator catIt = cats.iterator(); catIt.hasNext();) {
 					Category cat = (Category) catIt.next();
 					dsid = findFirstVariable(cat, lasConfig, request);
@@ -466,11 +498,18 @@ public class Confluence extends LASAction {
 			}
 			return dsid;
 		}
-		public static ArrayList<Category> getCategories(String id, LASConfig lasConfig, HttpServletRequest request) throws UnsupportedEncodingException, HttpException, JDOMException, LASException, IOException {
+		public static ArrayList<Category> getCategories(String id, LASConfig lasConfig, HttpServletRequest request, boolean include_dataset) 
+		    throws UnsupportedEncodingException, HttpException, JDOMException, LASException, IOException {
 			ArrayList<Category> cats = new ArrayList<Category>();
 			String server_key = id.split(Constants.NAME_SPACE_SPARATOR)[0];
 			if ( server_key.equals(lasConfig.getBaseServerURLKey()) ) {
-				cats = lasConfig.getCategories(id);				
+				cats = lasConfig.getCategories(id);	
+				for (Iterator catsIt = cats.iterator(); catsIt.hasNext();) {
+					Category category = (Category) catsIt.next();
+					if ( category.getDataset() != null && !include_dataset) {
+						category.setDataset(null);
+					}
+				}
 			} else {
 				Tributary trib = lasConfig.getTributary(server_key);
 				String las_url = trib.getURL() + Constants.GET_CATEGORIES;					
@@ -493,12 +532,15 @@ public class Confluence extends LASAction {
 					// has no attributes, so we add them here to match the data set inside the category.
 					if ( cat.getID() == null ) {
 						cat.setID(cat.getChildren_DatasetID());
+					}
+					if ( cat.getName() == null ) {
 						cat.setName(cat.getDataset().getName());
-						// The UI does not expect the data set to be contained in this response and does the wrong thing
-						// when it is included.
-						if ( cat.getDataset() != null ) {
-							cat.setDataset(null);
-						}
+					}
+					// The UI does not expect the data set to be contained in this response and does the wrong thing
+					// when it is included.
+					if ( !include_dataset && cat.getDataset() != null ) {
+						cat.setAttribute("children_dsid", cat.getDataset().getID());
+						cat.setDataset(null);
 					}
 					cats.add(cat);
 				}

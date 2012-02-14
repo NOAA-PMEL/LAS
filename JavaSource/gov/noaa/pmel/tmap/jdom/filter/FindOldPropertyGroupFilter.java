@@ -1,4 +1,4 @@
-package gov.noaa.pmel.tmap.las.jdom.filter;
+package gov.noaa.pmel.tmap.jdom.filter;
 
 import org.jdom.Element;
 import org.jdom.filter.Filter;
