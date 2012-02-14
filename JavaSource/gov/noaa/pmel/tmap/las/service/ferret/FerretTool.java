@@ -1,6 +1,6 @@
 package gov.noaa.pmel.tmap.las.service.ferret;
 
-import gov.noaa.pmel.tmap.las.exception.LASException;
+import gov.noaa.pmel.tmap.exception.LASException;
 import gov.noaa.pmel.tmap.las.jdom.JDOMUtils;
 import gov.noaa.pmel.tmap.las.jdom.LASBackendConfig;
 import gov.noaa.pmel.tmap.las.jdom.LASBackendRequest;

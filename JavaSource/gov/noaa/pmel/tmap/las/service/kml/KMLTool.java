@@ -60,7 +60,8 @@ import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
 import org.jdom.JDOMException;
 
-import gov.noaa.pmel.tmap.las.exception.LASException;
+import gov.noaa.pmel.tmap.exception.LASException;
+import gov.noaa.pmel.tmap.jdom.LASDocument;
 import gov.noaa.pmel.tmap.las.jdom.JDOMUtils;
 import gov.noaa.pmel.tmap.las.jdom.LASBackendRequest;
 import gov.noaa.pmel.tmap.las.jdom.LASBackendResponse;
@@ -68,7 +69,6 @@ import gov.noaa.pmel.tmap.las.jdom.LASFerretBackendConfig;
 import gov.noaa.pmel.tmap.las.jdom.LASKMLBackendConfig;
 import gov.noaa.pmel.tmap.las.jdom.LASMapScale;
 import gov.noaa.pmel.tmap.las.service.TemplateTool;
-import gov.noaa.pmel.tmap.las.jdom.LASDocument;
 
 import org.jdom.Document;
 import org.jdom.Element;

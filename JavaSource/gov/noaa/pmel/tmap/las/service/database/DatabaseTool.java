@@ -1,7 +1,7 @@
 package gov.noaa.pmel.tmap.las.service.database;
 
-import gov.noaa.pmel.tmap.las.exception.LASException;
-import gov.noaa.pmel.tmap.las.exception.LASRowLimitException;
+import gov.noaa.pmel.tmap.exception.LASException;
+import gov.noaa.pmel.tmap.exception.LASRowLimitException;
 import gov.noaa.pmel.tmap.las.jdom.JDOMUtils;
 import gov.noaa.pmel.tmap.las.jdom.LASBackendRequest;
 import gov.noaa.pmel.tmap.las.jdom.LASBackendResponse;
