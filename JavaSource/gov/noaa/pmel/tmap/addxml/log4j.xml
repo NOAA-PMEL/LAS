@@ -14,7 +14,7 @@
     </layout>
   </appender>
   <logger name="gov.noaa.pmel.tmap.addxml.addXML">
-    <level value="info"/>
+    <level value="DEBUG"/>
     <appender-ref ref="STDOUT"/>
   </logger>
   <logger name="org.apache.commons.httpclient">

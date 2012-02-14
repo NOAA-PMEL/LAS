@@ -36,7 +36,7 @@ package gov.noaa.pmel.tmap.addxml;
 
 //Standard Java stuff.
 
-import gov.noaa.pmel.tmap.las.jdom.LASDocument;
+import gov.noaa.pmel.tmap.jdom.LASDocument;
 
 import java.io.File;
 import java.io.FileWriter;
