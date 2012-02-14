@@ -1,9 +1,9 @@
 package gov.noaa.pmel.tmap.las.test;
 
 
+import gov.noaa.pmel.tmap.jdom.LASDocument;
 import gov.noaa.pmel.tmap.las.jdom.JDOMUtils;
 import gov.noaa.pmel.tmap.las.jdom.LASConfig;
-import gov.noaa.pmel.tmap.las.jdom.LASDocument;
 import gov.noaa.pmel.tmap.las.ui.LASProxy;
 
 import java.io.File;
