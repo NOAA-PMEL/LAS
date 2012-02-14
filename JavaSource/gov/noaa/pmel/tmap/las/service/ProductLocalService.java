@@ -3,12 +3,12 @@
  */
 package gov.noaa.pmel.tmap.las.service;
 
-import gov.noaa.pmel.tmap.las.exception.LASException;
+import gov.noaa.pmel.tmap.exception.LASException;
+import gov.noaa.pmel.tmap.jdom.LASDocument;
 import gov.noaa.pmel.tmap.las.jdom.JDOMUtils;
 import gov.noaa.pmel.tmap.las.jdom.LASBackendRequest;
 import gov.noaa.pmel.tmap.las.jdom.LASBackendResponse;
 import gov.noaa.pmel.tmap.las.jdom.LASConfig;
-import gov.noaa.pmel.tmap.las.jdom.LASDocument;
 import gov.noaa.pmel.tmap.las.jdom.ServerConfig;
 import gov.noaa.pmel.tmap.las.util.Category;
 import gov.noaa.pmel.tmap.las.util.NameValuePair;

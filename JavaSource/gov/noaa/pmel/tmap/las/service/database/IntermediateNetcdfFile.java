@@ -1,8 +1,9 @@
 package gov.noaa.pmel.tmap.las.service.database;
 
-import gov.noaa.pmel.tmap.las.exception.LASException;
-import gov.noaa.pmel.tmap.las.exception.LASRowLimitException;
+import gov.noaa.pmel.tmap.exception.LASException;
+import gov.noaa.pmel.tmap.exception.LASRowLimitException;
 import gov.noaa.pmel.tmap.las.jdom.LASBackendRequest;
+import gov.noaa.pmel.tmap.las.jdom.LASIconWebRowSet;
 
 import java.io.IOException;
 import java.sql.ResultSet;
@@ -11,12 +12,15 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
+import org.jdom.Document;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.format.DateTimeFormat;
@@ -49,6 +53,7 @@ public class IntermediateNetcdfFile {
     protected NetcdfFileWriteable netcdfFile = null;
     protected boolean has_cruise_id = false;
     protected boolean trajectory = true;
+    String icon_webrowset_filename;
     public IntermediateNetcdfFile (String filename, boolean fill) throws LASException {
         log.debug("Create new empty netCDF file.");
         try {
@@ -60,6 +65,8 @@ public class IntermediateNetcdfFile {
     public void create(ResultSet resultSet, LASBackendRequest lasBackendRequest) throws SQLException, IOException, InvalidRangeException, LASException {
 
         ResultSetMetaData resultSetMetadata = resultSet.getMetaData();
+        
+        icon_webrowset_filename = lasBackendRequest.getResultAsFile("icon_webrowset");
         
     	List variables = lasBackendRequest.getVariables();
     	for (Iterator varIt = variables.iterator(); varIt.hasNext();) {
@@ -106,6 +113,10 @@ public class IntermediateNetcdfFile {
             netcdfFile.addGlobalAttribute("query_result", "No data found to match this request.");
             netcdfFile.create();
             netcdfFile.write(time_name, data);
+            if ( trajectory ) {
+            	LASIconWebRowSet icon_webrowset = new LASIconWebRowSet();
+            	icon_webrowset.write(icon_webrowset_filename);
+            }
             return;
         }
         time_units = lasBackendRequest.getDatabaseProperty("time_units");
@@ -741,7 +752,8 @@ public class IntermediateNetcdfFile {
     	// Create the trajectory related dimensions and variables
     	ArrayChar.D2 trajectory_id_char_data = null;
 		ArrayInt.D1 trajectory_count_data = null;
-    	if ( trajectory ) {  		
+    	if ( trajectory ) {  
+    		LASIconWebRowSet icon_webrowset = new LASIconWebRowSet();
     		Dimension trajectory_dim = netcdfFile.addDimension("trajectory", trajectory_ids.size());
     		if ( trajectory_data_type.equals(DataType.DOUBLE) ) {
     			
@@ -751,6 +763,7 @@ public class IntermediateNetcdfFile {
     			int inx = 0;
     			for (Iterator idIt = trajectory_ids.iterator(); idIt.hasNext();) {
 					String key = (String) idIt.next();
+					icon_webrowset.addId(key);
 					int c = trajectory_counts.get(key);	
     				trajectory_id_char_data.setString(inx, key);
     				trajectory_count_data.set(inx, c);
@@ -768,7 +781,7 @@ public class IntermediateNetcdfFile {
     			netcdfFile.addVariableAttribute("trajectory_counts", "trajectory_dimension", "index");
     			netcdfFile.addVariableAttribute("trajectory_counts", "long_name", "Number of observations in this trajectory.");
     		}
-    		
+    		icon_webrowset.write(icon_webrowset_filename);
     	}
     	// Write the minimal data discovery attributes for "Unidata Observation Dataset v1.0" conventions then create the file.
 

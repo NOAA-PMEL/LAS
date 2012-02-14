@@ -20,7 +20,7 @@ import ucar.nc2.dt.grid.GeoGrid;
 import ucar.nc2.dt.grid.GridCoordSys;
 import ucar.nc2.dt.grid.GridDataset;
 
-import gov.noaa.pmel.tmap.las.exception.LASException;
+import gov.noaa.pmel.tmap.exception.LASException;
 import gov.noaa.pmel.tmap.las.jdom.JDOMUtils;
 import gov.noaa.pmel.tmap.las.jdom.LASBackendRequest;
 import gov.noaa.pmel.tmap.las.jdom.LASBackendResponse;

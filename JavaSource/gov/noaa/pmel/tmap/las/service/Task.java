@@ -1,6 +1,6 @@
 package gov.noaa.pmel.tmap.las.service;
 
-import gov.noaa.pmel.tmap.las.exception.LASException;
+import gov.noaa.pmel.tmap.exception.LASException;
 
 import java.io.BufferedReader;
 import java.io.File;

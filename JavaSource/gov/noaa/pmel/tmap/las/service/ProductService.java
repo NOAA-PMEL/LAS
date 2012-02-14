@@ -11,11 +11,11 @@ import java.net.URLDecoder;
 import java.util.Map;
 import java.util.Properties;
 
-import gov.noaa.pmel.tmap.las.exception.LASException;
+import gov.noaa.pmel.tmap.exception.LASException;
+import gov.noaa.pmel.tmap.jdom.LASDocument;
 import gov.noaa.pmel.tmap.las.jdom.JDOMUtils;
 import gov.noaa.pmel.tmap.las.jdom.LASBackendRequest;
 import gov.noaa.pmel.tmap.las.jdom.LASBackendResponse;
-import gov.noaa.pmel.tmap.las.jdom.LASDocument;
 
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;

@@ -3,9 +3,9 @@
  */
 package gov.noaa.pmel.tmap.las.service;
 
-import gov.noaa.pmel.tmap.las.exception.LASException;
+import gov.noaa.pmel.tmap.exception.LASException;
+import gov.noaa.pmel.tmap.jdom.LASDocument;
 import gov.noaa.pmel.tmap.las.jdom.LASBackendRequest;
-import gov.noaa.pmel.tmap.las.jdom.LASDocument;
 
 import java.io.IOException;
 import java.net.MalformedURLException;

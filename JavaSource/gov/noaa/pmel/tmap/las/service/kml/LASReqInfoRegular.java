@@ -3,7 +3,7 @@ package gov.noaa.pmel.tmap.las.service.kml;
 import java.util.HashMap;
 import java.util.Hashtable;
 
-import gov.noaa.pmel.tmap.las.jdom.LASDocument;
+import gov.noaa.pmel.tmap.jdom.LASDocument;
 import gov.noaa.pmel.tmap.las.jdom.JDOMUtils;
 import org.jdom.Document;
 import org.jdom.Element;
