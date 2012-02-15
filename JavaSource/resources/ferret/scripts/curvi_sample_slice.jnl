@@ -27,202 +27,20 @@ GO get_curv_coord_bbox
 
 ! Y line, or YZ, YT slice
 LET yslice = ($ferret_view"|y>1|*>0") + ($ferret_view"|yz>1|*>0") + ($ferret_view"|yt>1|*>0")
-IF `yslice GT 0` THEN
-
-! Define a set of x and y points to sample at (all on one value of X)
-
-   LET npts = `($ferret_curvi_coord_lon)[d=($data_num)],return=jsize` 
-   let npts = 50
-   DEFINE AXIS/Y=($region_y_lo):($region_y_hi)/NPOINTS=`npts`/UNITS=degrees sample_ylat
-   LET sample_ypts = y[gy=sample_ylat]
-   LET sample_xpts = ($region_x_lo) + 0*sample_ypts
-
-   LET fer_plot_var = SAMPLEXY_CURV_AVG( \
-     ($data_var)[d=($data_num),i=($clon_imin):($clon_imax), j=($clat_jmin):($clat_jmax)($region_sample)], \
-     ($ferret_curvi_coord_lon)[d=($data_num),i=($clon_imin):($clon_imax), j=($clat_jmin):($clat_jmax)], \
-     ($ferret_curvi_coord_lat)[d=($data_num),i=($clon_imin):($clon_imax), j=($clat_jmin):($clat_jmax)], \
-     sample_xpts, sample_ypts)
-
-! Reshape to the grid of the sampled variable, with the sample Y latitudes
-! and the correct region of the world, so that time and location labels will
-! appear on the plot.
-
-   IF ($ferret_view"|y>1|*>0") THEN 
-      DEFINE AXIS/X=($region_x_lo):`($region_x_lo)+1`:1/MODULO/UNITS=degrees sample_x
-      LET sample_var($var_num) = y[gy=sample_ylat] + x[gx=sample_x,x=($region_x_lo)]  
-
-      IF ($region_t"0|*>1") THEN LET sample_var($var_num) = y[gy=sample_ylat] + \
-         x[gx=sample_x,x=($region_x_lo)] + \
-         t[gt=fer_plot_var,($region_t)]
-
-      IF ($region_z"0|*>1") THEN LET sample_var($var_num) = y[gy=sample_ylat] + \
-        x[gx=sample_x,x=($region_x_lo)] + \
-         z[gz=fer_plot_var,($region_z)]+t[gt=fer_plot_var]
-         
-      IF `($region_t"0|*>1") + ($region_z"0|*>1") EQ 2` THEN LET sample_var($var_num) = y[gy=sample_ylat] + \
-         x[gx=sample_x,x=($region_x_lo)] + \
-         z[gz=fer_plot_var,($region_z)] + t[gt=fer_plot_var,($region_t)]
-
-      LET/units="($data_($var_num)_units)" sampled_var($var_num) = RESHAPE(fer_plot_var, sample_var($var_num))
-
-      DEFINE SYMBOL needs_url 1
-
-   ELIF ($ferret_view"|yz>1|*>0") THEN 
-      DEFINE AXIS/X=($region_x_lo):`($region_x_lo)+1`:1/MODULO/UNITS=degrees sample_x
-      LET sample_var($var_num) = y[gy=sample_ylat] + x[gx=sample_x,x=($region_x_lo)] + \
-         z[gz=fer_plot_var]
-
-      IF ($region_t"0|*>1") THEN LET sample_var($var_num) = y[gy=sample_ylat] + \
-         x[gx=sample_x,x=($region_x_lo)]  + \
-         z[gz=fer_plot_var]+t[gt=fer_plot_var,($region_t)]
-
-      LET/units="($data_($var_num)_units)" sampled_var($var_num) = RESHAPE(fer_plot_var, sample_var($var_num))
-      DEFINE SYMBOL needs_url 1
-
-   ELIF ($ferret_view"|yt>1|*>0") THEN 
-      DEFINE AXIS/X=($region_x_lo):`($region_x_lo)+1`:1/MODULO/UNITS=degrees sample_x
-      LET sample_var($var_num) = y[gy=sample_ylat] + x[gx=sample_x,x=($region_x_lo)] + \
-         t[gt=fer_plot_var]
-
-      IF ($region_z"0|*>1") THEN LET sample_var($var_num) = y[gy=sample_ylat] + \
-         x[gx=sample_x,x=($region_x_lo)]  + \
-         z[gz=fer_plot_var,($region_z)]+t[gt=fer_plot_var]
-
-      LET/units="($data_($var_num)_units)" sampled_var($var_num) = RESHAPE(fer_plot_var, sample_var($var_num))
-      DEFINE SYMBOL needs_url 1
-   ENDIF
-
-ENDIF
+IF `yslice GT 0` THEN GO curvi_sample_yslice.jnl
 
 ! X line, or XZ, XT slice
 LET xslice = ($ferret_view"|x>1|*>0") + ($ferret_view"|xz>1|*>0") + ($ferret_view"|xt>1|*>0")
-IF `xslice GT 0` THEN
-
-! Define a set of x and y points to sample at (all on one value of Y)
-
-   LET npts = `($ferret_curvi_coord_lat)[d=($data_num)],return=isize` 
-   let npts = 50
-   DEFINE AXIS/X=($region_x_lo):($region_x_hi)/NPOINTS=`npts`/UNITS=degrees/MODULO sample_xlon
-   LET sample_xpts = x[gx=sample_xlon]
-   LET sample_ypts = ($region_y_lo) + 0*sample_xpts
-
-   LET fer_plot_var = SAMPLEXY_CURV_AVG( \
-     ($data_var)[d=($data_num),i=($clon_imin):($clon_imax), j=($clat_jmin):($clat_jmax)($region_sample)], \
-     ($ferret_curvi_coord_lon)[d=($data_num),i=($clon_imin):($clon_imax), j=($clat_jmin):($clat_jmax)], \
-     ($ferret_curvi_coord_lat)[d=($data_num),i=($clon_imin):($clon_imax), j=($clat_jmin):($clat_jmax)], \
-     sample_xpts, sample_ypts)
-   LET/units="($data_($var_num)_units)" sampled_var($var_num) = fer_plot_var[gx=sample_xlon@asn]
-
-! Reshape to the grid of the sampled variable, with the sample Y latitudes
-! and the correct region of the world, so that time and location labels will
-! appear on the plot.
-
-   IF ($ferret_view"|x>1|*>0") THEN 
-      DEFINE AXIS/Y=($region_y_lo):`($region_y_lo)+1`:1/MODULO/UNITS=degrees sample_y
-      LET sample_var($var_num) = x[gx=sample_xlon] + y[gx=sample_y,y=($region_y_lo)]  
-
-      IF ($region_t"0|*>1") THEN LET sample_var($var_num) = x[gx=sample_xlon] + \
-         y[gy=sample_y,y=($region_y_lo)]  + \
-         t[gt=fer_plot_var,($region_t)]
-
-      IF ($region_z"0|*>1") THEN LET sample_var($var_num) = x[gx=sample_xlon] + \
-         y[gy=sample_y,y=($region_y_lo)]  + \
-         z[gz=fer_plot_var,($region_z)]
-         
-      IF `($region_t"0|*>1") + ($region_z"0|*>1") EQ 2` THEN LET sample_var($var_num) = x[gx=sample_xlon] + \
-         y[gy=sample_y,y=($region_y_lo)]  + \
-         z[gz=fer_plot_var,($region_z)] + t[gt=fer_plot_var,($region_t)]
-
-      LET/units="($data_($var_num)_units)" sampled_var($var_num) = RESHAPE(fer_plot_var, sample_var($var_num))
-      DEFINE SYMBOL needs_url 1
-
-   ELIF ($ferret_view"|xz>1|*>0") THEN 
-      DEFINE AXIS/Y=($region_y_lo):`($region_y_lo)+1`:1/MODULO/UNITS=degrees sample_y
-      LET sample_var($var_num) = x[gx=sample_xlon] + y[gy=sample_y,y=($region_y_lo)]  + \
-         z[gz=fer_plot_var]
-
-      IF ($region_t"0|*>1") THEN LET sample_var($var_num) = x[gx=sample_xlon] + \
-         y[gy=sample_y,y=($region_y_lo)]  + \
-         z[gz=fer_plot_var]+t[gt=fer_plot_var,($region_t)]
-
-      LET/units="($data_($var_num)_units)" sampled_var($var_num) = RESHAPE(fer_plot_var, sample_var($var_num))
-      DEFINE SYMBOL needs_url 1
-
-   ELIF ($ferret_view"|xt>1|*>0") THEN 
-      DEFINE AXIS/Y=($region_y_lo):`($region_y_lo)+1`:1/MODULO/UNITS=degrees sample_y
-      LET sample_var($var_num) = x[gx=sample_xlon] + y[gy=sample_y,y=($region_y_lo)]  + \
-         t[gt=fer_plot_var]
-
-      IF ($region_z"0|*>1") THEN LET sample_var($var_num) = x[gx=sample_xlon] + \
-         y[gy=sample_y,y=($region_y_lo)]  + \
-         z[gz=fer_plot_var,($region_z)]+t[gt=fer_plot_var]
-
-      LET/units="($data_($var_num)_units)" sampled_var($var_num) = RESHAPE(fer_plot_var, sample_var($var_num))
-      DEFINE SYMBOL needs_url 1
-   ENDIF
-
-ENDIF
+IF `xslice GT 0` THEN GO curvi_sample_xslice.jnl
 
 ! T line
 LET tslice = ($ferret_view"|t>1|*>0") 
-IF `tslice GT 0` THEN
-
-! Define single x y point to sample at
-
-   LET sample_xpts = {($region_x_lo)}
-   LET sample_ypts = {($region_y_lo)}
-
-   LET fer_plot_var = SAMPLEXY_CURV_AVG( \
-     ($data_var)[d=($data_num),i=($clon_imin):($clon_imax), j=($clat_jmin):($clat_jmax)($region_sample)], \
-     ($ferret_curvi_coord_lon)[d=($data_num),i=($clon_imin):($clon_imax), j=($clat_jmin):($clat_jmax)], \
-     ($ferret_curvi_coord_lat)[d=($data_num),i=($clon_imin):($clon_imax), j=($clat_jmin):($clat_jmax)], \
-     sample_xpts, sample_ypts)
-
-   DEFINE AXIS/X=($region_x_lo):`($region_x_lo)+1`:1/MODULO/UNITS=degrees sample_x
-   DEFINE AXIS/Y=($region_y_lo):`($region_y_lo)+1`:1/MODULO/UNITS=degrees sample_y
-
-   LET sample_var($var_num) = x[gx=sample_x,x=($region_x_lo)] + y[gy=sample_y,y=($region_y_lo)]  + \
-         t[gt=fer_plot_var]
-         
-   IF ($region_z"0|*>1") THEN LET sample_var($var_num) = x[gx=sample_x,x=($region_x_lo)] + \
-         y[gy=sample_y,y=($region_y_lo)]  + \
-         t[gt=fer_plot_var] + z[gz=fer_plot_var,($region_z)]
-
-   LET/units="($data_($var_num)_units)" sampled_var($var_num) = RESHAPE(fer_plot_var, sample_var($var_num))
-   DEFINE SYMBOL needs_url 1
-
-ENDIF
+IF `tslice GT 0` THEN GO curvi_sample_tslice.jnl
 
 
 ! Z line
 LET zslice = ($ferret_view"|z>1|*>0") 
-IF `zslice GT 0` THEN
-
-! Define single x y point to sample at
-
-   LET sample_xpts = {($region_x_lo)}
-   LET sample_ypts = {($region_y_lo)}
-
-   LET fer_plot_var = SAMPLEXY_CURV_AVG( \
-     ($data_var)[d=($data_num),i=($clon_imin):($clon_imax), j=($clat_jmin):($clat_jmax)($region_sample)], \
-     ($ferret_curvi_coord_lon)[d=($data_num),i=($clon_imin):($clon_imax), j=($clat_jmin):($clat_jmax)], \
-     ($ferret_curvi_coord_lat)[d=($data_num),i=($clon_imin):($clon_imax), j=($clat_jmin):($clat_jmax)], \
-     sample_xpts, sample_ypts)
-
-   DEFINE AXIS/X=($region_x_lo):`($region_x_lo)+1`:1/MODULO/UNITS=degrees sample_x
-   DEFINE AXIS/Y=($region_y_lo):`($region_y_lo)+1`:1/MODULO/UNITS=degrees sample_y
-
-   LET sample_var($var_num) = x[gx=sample_x,x=($region_x_lo)] + y[gy=sample_y,y=($region_y_lo)]  + \
-         z[gz=fer_plot_var]
-         
-   IF ($region_t"0|*>1") THEN LET sample_var($var_num) = x[gx=sample_x,x=($region_x_lo)] + \
-         y[gy=sample_y,y=($region_y_lo)]  + \
-         t[gt=fer_plot_var,($region_t)] + z[gz=fer_plot_var]
-
-   LET/units="($data_($var_num)_units)" sampled_var($var_num) = RESHAPE(fer_plot_var, sample_var($var_num))
-   DEFINE SYMBOL needs_url 1
-
-ENDIF
+IF `zslice GT 0` GO curvi_sample_zslice.jnl
 
 DEFINE SYMBOL ferret_plot_var = ($expr1)sampled_var($var_num)($expr2)
 DEFINE SYMBOL ferret_plot_title "($expr1) ($data_title) ($expr2) ($data_units) Sampled from curvilinear grid"
