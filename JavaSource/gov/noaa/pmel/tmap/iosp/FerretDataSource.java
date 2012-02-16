@@ -78,6 +78,7 @@ public class FerretDataSource implements DatasetSource {
                     cmds = expressions.get(1).split(";");
                 }
                 for ( int i = 0; i < cmds.length; i++ ) {
+                	cmds[i] = cmds[i].replaceAll("_q-t_", "\"");
                 	if ( !FerretCommands.containsForbiddenCommand(cmds[i])) {
                        jnl.append(cmds[i]+"\n");
                 	}
