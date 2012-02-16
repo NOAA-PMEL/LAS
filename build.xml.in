@@ -257,7 +257,7 @@
 		<unjar src="WebContent/WEB-INF/lib/log4j-1.2.13.jar"
 			dest="${addxml-build}" />
 		<javac
-			srcdir=""${addxml-src}/gov/noaa/pmel/tmap/exception:${addxml-src}/gov/noaa/pmel/tmap/jdom:${addxml-src}/gov/noaa/pmel/tmap/addxml:${addxml-src}/uk/ac/rdg/resc/edal"
+			srcdir="${addxml-src}/gov/noaa/pmel/tmap/exception:${addxml-src}/gov/noaa/pmel/tmap/jdom:${addxml-src}/gov/noaa/pmel/tmap/addxml:${addxml-src}/uk/ac/rdg/resc/edal"
 			destdir="${addxml-build}">
 			<classpath>
 				<fileset id="addxml-libs"
