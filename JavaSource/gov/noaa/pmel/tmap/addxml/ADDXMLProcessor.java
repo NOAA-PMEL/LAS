@@ -1243,6 +1243,8 @@ public class ADDXMLProcessor {
 										zAxis.setElement(AxisBeans.getMatchingID(zAxis));
 									}
 								}
+								
+								
 								String start_time = threddsDataset.findProperty("start");
 								String time_length = threddsDataset.findProperty("time_length");
 								String time_delta = threddsDataset.findProperty("time_delta");
@@ -1279,7 +1281,16 @@ public class ADDXMLProcessor {
 										calendar_name = "360_day";
 									}
 								}
-
+								// DEBUG!
+								
+								// Get the date time from the metadata TimeCoverage if it exists...
+								DateType sd = dateRange.getStart();
+								DateTime metadata_sd = null;
+								if ( sd != null ) {
+									String date = sd.getText();
+									DateTimeFormatter f = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss").withChronology(chrono);
+									metadata_sd = f.parseDateTime(sd.getText()).withChronology(chrono);
+								}
 								String esg_formats[] = {"yyyy-MM-dd HH:mm:ss.s",
 										"yyyy-MM-dd HH:mm:s.s",
 										"yyyy-MM-dd HH:m:ss.s",
@@ -1313,6 +1324,7 @@ public class ADDXMLProcessor {
 										"yyyy-MM-d H:m:ss.s",
 										"yyyy-MM-d H:m:s.s",                
 
+										"yyyy-MM-dd'T'HH:mm:ss",
 										"yyyy-MM-dd HH:mm:ss.s",
 										"yyyy-MM-dd HH:mm:s.s",
 										"yyyy-MM-dd HH:m:ss.s",
@@ -1347,9 +1359,11 @@ public class ADDXMLProcessor {
 										"yyyy-M-d H:mm:ss.s",
 										"yyyy-M-d H:mm:s.s",
 										"yyyy-M-d H:m:ss.s",
-										"yyyy-M-d H:m:s.s"				
+										"yyyy-M-d H:m:s.s"
+										
 
 								};
+								// Find the date time start using the property...
 								DateTime s = null;
 								for ( int i = 0; i < esg_formats.length; i++) {
 									try {
@@ -1360,7 +1374,10 @@ public class ADDXMLProcessor {
 										// Try again...
 									}
 								}							
-
+								// If it's defined in the metadata TimeCoverage use that instead.
+								if ( metadata_sd != null ) {
+									s = metadata_sd;
+								}
 								log.info("Loading T from metadata: "+elementName);
 								AxisBean tAxis = new AxisBean();
 								if ( calendar_name != null ) {
