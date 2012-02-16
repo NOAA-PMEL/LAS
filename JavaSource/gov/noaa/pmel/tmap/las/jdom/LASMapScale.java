@@ -228,7 +228,8 @@ public class LASMapScale extends LASDocument {
         map_scaleE.addContent(makeElement("data_exists", data_exists));
         map_scaleE.addContent(makeElement("xstride", scale.get("XSTRIDE")));
         map_scaleE.addContent(makeElement("ystride", scale.get("YSTRIDE")));
-        
+        if ( f != null ) f.close();
+        if (scaleReader != null ) scaleReader.close();
     }
     
     private Element makeElement(String name, float value) {
