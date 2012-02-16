@@ -50,7 +50,7 @@ public class Scanner {
 	        String regex = line.getOptionValue("regex");
 	        boolean esg = line.hasOption("esg");
 	        String catoption = line.getOptionValue("catregex");
-	        String[] catregex = catoption.split(",");
+	        
 	        boolean noregex = false;
 	        if ( regex == null || regex.equals("") ) noregex = true;
 	        if ( scan == null ) {
@@ -78,10 +78,14 @@ public class Scanner {
 			addxmlOptions.put("category", "true");
 			addxmlOptions.put("esg", String.valueOf(esg));
 			Map<String, CategoryBean> cats = new HashMap<String, CategoryBean>();
-			for (int i = 0; i < catregex.length; i++) {
-				CategoryBean cb = new CategoryBean();
-				cb.setName(catregex[i]);
-				cats.put(catregex[i], cb);
+			String[] catregex = new String[0];
+			if ( catoption != null ) {
+				catregex = catoption.split(",");
+				for (int i = 0; i < catregex.length; i++) {
+					CategoryBean cb = new CategoryBean();
+					cb.setName(catregex[i]);
+					cats.put(catregex[i], cb);
+				}
 			}
 			addxml.setOptions(addxmlOptions);
 			for (Iterator catIt = catalogs.keySet().iterator(); catIt.hasNext();) {
