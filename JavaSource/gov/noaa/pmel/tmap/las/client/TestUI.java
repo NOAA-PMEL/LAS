@@ -839,7 +839,7 @@ public class TestUI extends BaseUI {
 			if ( analysis.getValue() ) {
 				setAnalysisAxes(v);
 			} else {
-//				turnOffAnalysis();
+				turnOffAnalysis();
 			}
 		}
     };
