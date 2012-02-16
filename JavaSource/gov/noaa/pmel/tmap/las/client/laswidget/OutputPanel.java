@@ -200,6 +200,7 @@ public class OutputPanel extends Composite {
 		
 		
 		spin.add(spinImage);
+		spin.setSize("18px", "18px");
 
 		messagePanel = new MessagePanel();
 		
