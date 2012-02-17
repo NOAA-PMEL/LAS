@@ -195,6 +195,7 @@ public class OutputPanel extends Composite {
 		panelAxesWidgets = new AxesWidgetGroup("Plot Axis", "Comparison Axis", "horizontal", "", "Apply To "+ID, tile_server);
 		String spinImageURL = URLUtil.getImageURL()+"/mozilla_blu.gif";
 		spinImage = new HTML("<img src=\""+spinImageURL+"\" alt=\"Spinner\"/>");
+		spinImage.setSize("18px", "18px");
 		spin = new PopupPanel();
 		
 		
