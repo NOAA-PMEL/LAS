@@ -368,7 +368,6 @@ public class OutputPanel extends Composite {
 			currentURL = url;
 			if ( containerType.equals(Constants.IMAGE) ) {
 				if (popup) {
-					spin.setWidget(spinImage);
 					spin.setPopupPosition(grid.getWidget(1,0).getAbsoluteLeft(), grid.getWidget(1,0).getAbsoluteTop());
 					spin.show();
 				}
