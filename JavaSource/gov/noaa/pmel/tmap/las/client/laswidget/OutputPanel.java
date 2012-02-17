@@ -714,7 +714,7 @@ public class OutputPanel extends Composite {
 		
 		if ( !url.equals(currentURL) ) {
 			currentURL = url;
-			grid.setWidget(1, 0, spinImage);
+			spin.show();
 			if ( containerType.equals(Constants.IMAGE) ) {
 				
 				RequestBuilder sendRequest = new RequestBuilder(RequestBuilder.GET, url);
