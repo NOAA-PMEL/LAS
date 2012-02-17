@@ -19,6 +19,7 @@ import java.util.Map;
 
 import org.apache.tools.ant.taskdefs.Basename;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -125,7 +126,7 @@ public class OutputPanel extends Composite {
 
 	// Some widgets to show when a panel is being refreshed.
 	PopupPanel spin;
-	HTML spinImage;
+	Image spinImage;
 
 	// The view will have at most two axes,  these hold the ranges for those axes.
 	String xlo;
@@ -193,8 +194,7 @@ public class OutputPanel extends Composite {
 		this.view = view;
 		this.containerType = container_type;
 		panelAxesWidgets = new AxesWidgetGroup("Plot Axis", "Comparison Axis", "horizontal", "", "Apply To "+ID, tile_server);
-		String spinImageURL = URLUtil.getImageURL()+"/mozilla_blu.gif";
-		spinImage = new HTML("<img src=\""+spinImageURL+"\" alt=\"Spinner\"/>");
+		spinImage = new Image(URLUtil.getImageURL()+"/mozilla_blu.gif");
 		spinImage.setSize("18px", "18px");
 		spin = new PopupPanel();
 		
@@ -950,7 +950,7 @@ public class OutputPanel extends Composite {
 							spin.hide();
 						} else if ( result.getAttribute("type").equals("batch") ) {
 							String elapsed_time = result.getAttribute("elapsed_time");
-							HTML batch = new HTML(spinImage.getHTML()+"<br><br>Your request has been processing for "+elapsed_time+" seconds.<br>This panel will refresh automatically.<br><br>");
+							HTML batch = new HTML("<br><br>Your request has been processing for "+elapsed_time+" seconds.<br>This panel will refresh automatically.<br><br>");
 							grid.setWidget(1, 0, batch);
 							lasRequest.setProperty("product_server", "ui_timeout", "3");
 							String url = Util.getProductServer()+"?xml="+URL.encode(lasRequest.toString());
