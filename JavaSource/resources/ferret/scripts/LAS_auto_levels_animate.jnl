@@ -189,27 +189,26 @@ LET strd_lo = `LL[t="($region_t_lo)"]`
 LET strd_hi = `LL[t="($region_t_hi)"]`
 LET tsize = `strd_hi - strd_lo + 1`
 
-IF ($ferret_time_step"0|*>1") THEN
+IF ($ferret_time_step"0|1>0|*>1") THEN
    LET strd_del = ($ferret_time_step)
    IF `(tsize/strd_del) GT max_size` THEN 
       LET strd_test = tsize/max_size
       LET strd_fact = INT(strd_test/($ferret_time_step))
       LET strd_del = ($ferret_time_step)* strd_fact
-      IF `strd_del LE 1` THEN LET strd_del = 1
+      IF `strd_del LE 2` THEN LET strd_del = 2
    ENDIF 
 
    IF `strd_del LT 10` THEN 
       LET strd_del = `INT(10/($ferret_time_step))* ($ferret_time_step)`
-      IF `strd_del LE 1` THEN LET strd_del = 1
+      IF `strd_del LE 2` THEN LET strd_del = 2
    ENDIF
-
-   IF `INT(tsize/strd_del) LT 3` THEN LET strd_del = 1
+   IF `INT(tsize/strd_del) LT 2` THEN LET strd_del = 2
 
 ELSE
    LET strd_del = 1
    IF `tsize GT max_size` THEN 
       LET strd_del = `INT(tsize/10)`
-      IF `strd_del LE 1` THEN LET strd_del = 1
+      IF `strd_del LE 2` THEN LET strd_del = 2
    ENDIF 
 ENDIF
 
