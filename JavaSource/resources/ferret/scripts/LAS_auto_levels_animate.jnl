@@ -195,23 +195,25 @@ IF ($ferret_time_step"0|*>1") THEN
       LET strd_test = tsize/max_size
       LET strd_fact = INT(strd_test/($ferret_time_step))
       LET strd_del = ($ferret_time_step)* strd_fact
-      IF `strd_del LE 2` THEN LET strd_del = 2
+      IF `strd_del LE 1` THEN LET strd_del = 1
    ENDIF 
 
    IF `strd_del LT 10` THEN 
       LET strd_del = `INT(10/($ferret_time_step))* ($ferret_time_step)`
-      IF `strd_del LE 2` THEN LET strd_del = 2
+      IF `strd_del LE 1` THEN LET strd_del = 1
    ENDIF
+
+   IF `INT(tsize/strd_del) LT 3` THEN LET strd_del = 1
+
 ELSE
    LET strd_del = 1
    IF `tsize GT max_size` THEN 
       LET strd_del = `INT(tsize/10)`
-      IF `strd_del LE 2` THEN LET strd_del = 2
+      IF `strd_del LE 1` THEN LET strd_del = 1
    ENDIF 
 ENDIF
 
 DEFINE SYMBOL tstride = `strd_del`
-
 
 IF ($index_strides"0|*>1") THEN 
    DEFINE SYMBOL ppvar = ($data_var)[d=($data_num),($index_strides)]
