@@ -63,9 +63,12 @@ public class TemplateTool extends Tool {
                 throw new LASException("Cannot find database templates directory.");
             }
         }
-           
+        if ( p.getProperty("runtime.log") == null ) {
+        	log.debug("Setting runtime velocity log to /dev/null.");
+        	p.setProperty("runtime.log", "/dev/null");
+        }
         try {
-            log.debug("Setting loader path to: "+p.getProperty("file.resource.loader.path"));
+            log.debug("Setting log to /dev/null and loader path to: "+p.getProperty("file.resource.loader.path"));
             ve.init(p);
         } catch (Exception e) {
             throw new LASException("Cannot initialize the velocity engine.");
