@@ -4,6 +4,8 @@
       <inherits name='com.google.gwt.user.User'/>
       <inherits name="com.google.gwt.i18n.I18N"/>
       <inherits name='org.gwtopenmaps.openlayers.OpenLayers'/>
+      <inherits name="com.google.gwt.user.Debug" />
+      <inherits name="com.google.gwt.json.JSON" />
        <!--  The nifty printing utility -->
       <inherits name='br.com.freller.tool.PrintTest'/>
       
@@ -16,7 +18,8 @@
       <!-- <inherits name="com.google.gwt.user.theme.chrome.Chrome"/> -->
       <!-- <inherits name="com.google.gwt.user.theme.dark.Dark"/>     -->
       
-      
+      <!-- GWT Joda Time implementation. -->
+      <inherits name='org.gwttime.Time' />      
 
       <!-- Other module inherits                                      -->
       <inherits name="com.google.gwt.maps.GoogleMaps" />
@@ -27,7 +30,7 @@
 
       <!-- Specify the app entry point class.                         -->
       <entry-point class='gov.noaa.pmel.tmap.las.client.DateWidgetTest'/>
-    
+      
       <!-- Specify the application specific style sheet.     
       <stylesheet src='DateWidgetTest.css' />
       -->
