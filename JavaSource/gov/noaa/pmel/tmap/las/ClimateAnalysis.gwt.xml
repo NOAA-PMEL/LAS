@@ -21,6 +21,9 @@
 
     <!--  The nifty printing utility -->
     <inherits name='br.com.freller.tool.PrintTest' />
+    
+    <!-- GWT Joda Time implementation. -->
+    <inherits name='org.gwttime.Time'/>
 
     <!-- Specify the app entry point class.                         -->
     <entry-point class='gov.noaa.pmel.tmap.las.client.ClimateAnalysis' />

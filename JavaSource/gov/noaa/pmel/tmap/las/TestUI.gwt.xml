@@ -14,7 +14,8 @@
       <!-- <inherits name="com.google.gwt.user.theme.chrome.Chrome"/> -->
       <!-- <inherits name="com.google.gwt.user.theme.dark.Dark"/>     -->
       
-      
+      <!-- GWT Joda Time implementation. -->
+      <inherits name='org.gwttime.Time' />      
 
       <!-- Other module inherits.  -->
       <inherits name="com.google.gwt.maps.GoogleMaps" />                   
