@@ -7,6 +7,7 @@ import gov.noaa.pmel.tmap.las.client.laswidget.OperationPushButton;
 import gov.noaa.pmel.tmap.las.client.laswidget.OperationsMenu;
 import gov.noaa.pmel.tmap.las.client.laswidget.UserListBox;
 import gov.noaa.pmel.tmap.las.client.map.MapSelectionChangeListener;
+import gov.noaa.pmel.tmap.las.client.map.OLMapWidget;
 import gov.noaa.pmel.tmap.las.client.serializable.AnalysisAxisSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.AnalysisSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.CategorySerializable;
@@ -170,9 +171,6 @@ public class TestUI extends BaseUI {
 		} else {
 			startUI();
 		}
-
-		
-
 
 	}
 
@@ -375,6 +373,11 @@ public class TestUI extends BaseUI {
 		
 		xPanels.get(0).setVariable(xVariable);
 		xPanels.get(0).init(false, ops);
+
+		List<Mouse> mice = new ArrayList<Mouse>();
+		Mouse mouse = new Mouse();
+		mice.add(mouse);
+		xPanels.get(0).setMouseMoves(mice);
 
 		if ( xView == null ) {
 			xView = "xy";

@@ -97,8 +97,6 @@ public class TimeSeries implements EntryPoint {
 		RootPanel.get("z_label").add(z_label);
 		z_label.setVisible(false);
 		z_label.setStyleName("small-banner");
-		dates.init("1990-01-01", "2000-01-01", 1, "YMDT", false);
-		dates.setRange(true);
 		RootPanel.get("dates").add(dates);
 		RootPanel.get("dates_label").add(dates_label);
 		dates.setVisible(false);
@@ -164,10 +162,7 @@ public class TimeSeries implements EntryPoint {
 	public void showDateWidgets(String varID) {
 		if (variables.isFirst() ) {
 			TimeAxisSerializable tAxis = cat.getVariable(varID).getGrid().getTAxis();
-			String hi = tAxis.getHi();
-			String lo = tAxis.getLo();
-			int delta = (int) tAxis.getMinuteInterval();
-			dates.init(lo, hi, delta, "YMDT", false);
+			dates.init(tAxis, false);
 			dates.setVisible(true);
 			AxisSerializable zAxis = cat.getVariable(varID).getGrid().getZAxis();
 			if ( zAxis != null ) {

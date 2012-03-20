@@ -1,6 +1,7 @@
 package gov.noaa.pmel.tmap.las.client.serializable;
 
 
+import java.util.HashMap;
 import java.util.Map;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
@@ -76,5 +77,14 @@ public class TimeAxisSerializable extends AxisSerializable implements IsSerializ
 		}
 		return render.toString();
 	}
-	
+	public String getCalendar() {
+		return getAttributes().get("calendar");
+	}
+	public void setCalendar(String calendar) {
+		Map<String, String> attributes = getAttributes();
+		if ( attributes == null ) {
+			this.attributes = new HashMap<String, String>();
+		}
+		getAttributes().put("calendar", calendar);
+	}
 }

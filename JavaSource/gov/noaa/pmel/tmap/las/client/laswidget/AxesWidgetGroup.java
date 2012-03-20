@@ -21,28 +21,19 @@ import com.google.gwt.user.client.ui.PushButton;
  *
  */
 public class AxesWidgetGroup extends Composite {
-	// Apply button only used in the horizontal layout.
-	PushButton plotApplyButton;
-	PushButton orthoApplyButton;
+	
 	OLMapWidget refMap;
 	DateTimeWidget dateTimeWidget;
 	AxisWidget zWidget;
-	FlexTable plotAxesLayout;
-	FlexTable orthoAxesLayout;
-	DisclosurePanel plotPanel;
-	DisclosurePanel orthoPanel;
-	FlexTable panelLayout;
+	FlexTable layout;
+	DisclosurePanel panel;
+	
 	HTML plotAxisMessage;
-	String plotTitle;
-	String orthoTitle;
+	String title;
 	boolean hasZ;
 	boolean hasT;
 	boolean hasE;
-	boolean plotPanelIsOpen = true;
-	boolean orthoPanelIsOpen = true;
-	String mapLocation;
-	int mapRow;
-	int mapCol;
+	boolean panelIsOpen = true;
 	List<String> viewAxes = new ArrayList<String>();   // This is just the view, but individual axes
 	List<ChangeHandler> zChangeHandlers = new ArrayList<ChangeHandler>();
 	List<ChangeHandler> tChangeHandlers = new ArrayList<ChangeHandler>();
@@ -53,55 +44,23 @@ public class AxesWidgetGroup extends Composite {
 	 * @param ortho_title
 	 * @param layout
 	 */
-	public AxesWidgetGroup(String plot_title, String ortho_title, String layout, String width, String panel_title, String tile_server) {
-		plotTitle = plot_title;
-		orthoTitle = ortho_title;
-		plotApplyButton = new PushButton("Apply");
-		plotApplyButton.setTitle(panel_title);
-		plotApplyButton.setWidth("35px");
-		orthoApplyButton = new PushButton("Apply");
-		plotApplyButton.setVisible(false);
-		orthoApplyButton.setTitle(ortho_title);
-		orthoApplyButton.setWidth("35px");
-		orthoApplyButton.setVisible(false);
-		plotAxesLayout = new FlexTable();
-		orthoAxesLayout = new FlexTable();
+	public AxesWidgetGroup(String title, String orientation, String width, String panel_title, String tile_server) {		
+		layout = new FlexTable();
 		refMap = new OLMapWidget("128px", "256px", tile_server);
 		refMap.activateNativeHooks();
 		zWidget = new AxisWidget();
 		zWidget.setVisible(false);
 		dateTimeWidget = new DateTimeWidget();
 		dateTimeWidget.setVisible(false);
-		plotAxesLayout.setWidget(0, 0, plotApplyButton);
-		plotAxesLayout.setWidget(1, 0, refMap);
-		mapLocation = "plot";
-		mapRow = 1;
-		mapCol = 0;
-		plotPanel = new DisclosurePanel(plot_title);
-		plotPanel.add(plotAxesLayout);
-		plotPanel.setOpen(true);
-		orthoAxesLayout.setWidget(0, 0, orthoApplyButton);
-		orthoAxesLayout.setWidget(1, 0, zWidget);
-		orthoAxesLayout.setWidget(2, 0, dateTimeWidget);
-		orthoPanel = new DisclosurePanel(ortho_title);
-		orthoPanel.add(orthoAxesLayout);
-		orthoPanel.setOpen(true);
-		panelLayout = new FlexTable();
-		panelLayout.getCellFormatter().setVerticalAlignment(0, 0, HasVerticalAlignment.ALIGN_TOP);
-		panelLayout.addStyleDependentName("vizgal-align-top");
-		panelLayout.setWidget(0, 0, plotPanel);
-		if ( layout != null && layout.equals("horizontal") ) {
-			panelLayout.setWidget(0, 1, orthoPanel);
-			panelLayout.getCellFormatter().setVerticalAlignment(0, 1, HasVerticalAlignment.ALIGN_TOP);
-		} else {
-			panelLayout.setWidget(1, 0, orthoPanel);
-			panelLayout.getCellFormatter().setVerticalAlignment(1, 0, HasVerticalAlignment.ALIGN_TOP);
-		}
-		if ( width != null && !width.equals("") ) {
-		    plotPanel.setWidth(width);
-		    orthoPanel.setWidth(width);
-		}	
-		initWidget(panelLayout);
+		layout.setWidget(0, 0, refMap);
+		panel = new DisclosurePanel(title);
+		panel.add(layout);
+		panel.setOpen(true);
+		layout.setWidget(0, 1, zWidget);
+		layout.setWidget(1, 1, dateTimeWidget);
+		layout.getCellFormatter().setVerticalAlignment(0, 0, HasVerticalAlignment.ALIGN_TOP);
+		layout.getFlexCellFormatter().setRowSpan(0, 0, 2);	
+		initWidget(panel);
 	}
 
 	
@@ -109,15 +68,17 @@ public class AxesWidgetGroup extends Composite {
 		hasZ = grid.hasZ();
 		hasT = grid.hasT();
 		if ( grid.hasZ() ) {
-			zWidget = new AxisWidget(grid.getZAxis());
+			zWidget.init(grid.getZAxis());
+//			zWidget = new AxisWidget(grid.getZAxis());
 		} else {
-			zWidget = new AxisWidget();
+//			zWidget = new AxisWidget();
 			zWidget.setVisible(false);
 		}
 		if ( grid.hasT() ) {
-			dateTimeWidget = new DateTimeWidget(grid.getTAxis(), false);
+			dateTimeWidget.init(grid.getTAxis(), false);
+//			dateTimeWidget = new DateTimeWidget(grid.getTAxis(), false);
 		} else {
-			dateTimeWidget = new DateTimeWidget();
+//			dateTimeWidget = new DateTimeWidget();
 			dateTimeWidget.setVisible(false);
 		}
 		if ( grid.hasX() && grid.hasY() ) {
@@ -143,12 +104,7 @@ public class AxesWidgetGroup extends Composite {
 			dateTimeWidget.setVisible(visible);
 		}
 	}
-	public String getOrthoTitle() {
-		return orthoTitle;
-	}
-	public String getPlotTitle() {
-		return plotTitle;
-	}
+	
 	public void setRange(String type, boolean range) {
 		// Does not apply to x and y
 		if ( type.equals("z") ) {
@@ -158,93 +114,6 @@ public class AxesWidgetGroup extends Composite {
 			dateTimeWidget.setRange(range);
 		}
 	}
-    private void arrangeAxes(String view, List<String> ortho, String compareAxis) {
-       
-    	// First put all of the axes into the correct panels.
-    	plotAxesLayout.clear();
-    	orthoAxesLayout.clear();
-    	viewAxes.clear();
-    	plotAxesLayout.setWidget(0, 0, plotApplyButton);
-    	orthoAxesLayout.setWidget(0, 0, orthoApplyButton);
-    	int plotAxesRow = 1;
-    	if ( view.contains("x") || view.contains("y") ) {
-    		plotAxesLayout.setWidget(plotAxesRow, 0, refMap);
-    		mapLocation = "plot";
-    		mapRow = plotAxesRow;
-    		mapCol = 0;
-    		refMap.setVisible(true);
-    		plotAxesRow++;
-    		if ( view.contains("x") ) {
-    			viewAxes.add("x");
-    		}
-    		if ( view.contains("y") ) {
-    			viewAxes.add("y");
-    		}
-    	}
-    	
-    	if ( view.contains("z") ) {
-    		plotAxesLayout.setWidget(plotAxesRow, 0, zWidget);
-    		zWidget.setVisible(true);
-    		zWidget.setRange(true);
-    		plotAxesRow++;
-    		viewAxes.add("z");
-    	}
-    	
-    	if ( view.contains("t") ) {
-    		plotAxesLayout.setWidget(plotAxesRow, 0, dateTimeWidget);
-    		dateTimeWidget.setVisible(true);
-    		dateTimeWidget.setRange(true);
-    		plotAxesRow++;
-    		viewAxes.add("t");
-    	}
-    	/*
-    	 If x a plot axis the plot and y is not then really the value of x should vary as a range and the range should be
-    	 set in the controls for all plots and the value of Y should be allowed to vary in the plots if that is the selected
-         "compare" axis which makes the interface pretty wild.
-         
-         Maybe the range value should be set with a slider with two handles, but for a simple interface it could be a map
-         that only allows x to vary or a couple of text boxes.
-        */
-    	
-    	int orthoAxesRow = 1;
-    	if ( ortho.contains("x") || ortho.contains("y") || ortho.contains("xy") ) {
-    		orthoAxesLayout.setWidget(orthoAxesRow, 0, refMap);
-    		mapLocation = "ortho";
-    		mapRow = orthoAxesRow;
-    		mapCol = 0;
-    		if ( view.contains("x") && !view.contains("y") ) {
-    			if ( compareAxis.equals("y") ) {
-    				plotAxisMessage = new HTML("(The longitude range is set in the map in the upper left panel.)");
-    			} else {
-    			    plotAxisMessage = new HTML("(The longitude range is set in the map below.)");
-    			    orthoPanel.setOpen(true);
-    			}
-    			
-    			plotAxesLayout.setWidget(orthoAxesRow, 0, plotAxisMessage);
-    		}
-    		if ( view.contains("y") && !view.contains("x") ) {
-    			if ( compareAxis.equals("x") ) {
-    				plotAxisMessage = new HTML("(The latitude range is set in the map in the upper left panel.)");
-    			} else {
-    			    plotAxisMessage = new HTML("(The latitude range is set in the map below.)");
-    			    orthoPanel.setOpen(true);
-    			}
-    			plotAxesLayout.setWidget(orthoAxesRow, 0, plotAxisMessage);
-    		}
-    		orthoAxesRow++;
-    	}
-    	
-    	if ( ortho.contains("z") ) {
-    		orthoAxesLayout.setWidget(orthoAxesRow++, 0, zWidget);
-    		zWidget.setVisible(true);
-    		zWidget.setRange(false);
-    	}
-    	if ( ortho.contains("t") ) {
-    		orthoAxesLayout.setWidget(orthoAxesRow++, 0, dateTimeWidget);
-    		dateTimeWidget.setVisible(true);
-    		dateTimeWidget.setRange(false);
-    	}
-    }
 	public OLMapWidget getRefMap() {
 		return refMap;
 	}
@@ -272,129 +141,28 @@ public class AxesWidgetGroup extends Composite {
     public AxisWidget getZAxis() {
     	return zWidget;
     }
-    public void setCompareAxis(String view, List<String> ortho, String compareAxis) {
-    	arrangeAxes(view, ortho, compareAxis);
-    	plotPanel.setVisible(false);
-    	if ( compareAxis.equals("xy") || compareAxis.equals("y") || compareAxis.equals("x") ) {
-    		zWidget.setVisible(false);
-    		dateTimeWidget.setVisible(false);
-    		refMap.setVisible(true);
+    
+    public void showOrthoAxes(String view, List<String> ortho) {
+    	for (Iterator orthoIt = ortho.iterator(); orthoIt.hasNext();) {
+    		String ax = (String) orthoIt.next();
+    		setAxisVisible(ax, true);
     	}
-    	if ( compareAxis.equals("t") ) {
-    		zWidget.setVisible(false);
-    		dateTimeWidget.setVisible(true);
-    		refMap.setVisible(false);
-    	}
-    	if ( compareAxis.equals("z") ) {
-    		zWidget.setVisible(true);
-    		dateTimeWidget.setVisible(false);
-    		refMap.setVisible(false);
-    	}
-    	if ( compareAxis.equals("e") ) {
-    		zWidget.setVisible(false);
-    		dateTimeWidget.setVisible(false);
-    		refMap.setVisible(false);
-    	}
-    }
-    public void setFixedAxis(String view, List<String> ortho, String compareAxis) {
-        arrangeAxes(view, ortho, compareAxis);
-        boolean showFixedPanel = false;
-        // Hide the compare axis in this axis group if it is specified.
-        if ( compareAxis != null ) {
-        	for (Iterator orthoIt = ortho.iterator(); orthoIt.hasNext();) {
-        		String ax = (String) orthoIt.next();
-        		if ( !compareAxis.contains(ax) ) {
-        			setAxisVisible(ax, true);
-        			showFixedPanel = true;
-        		} else {
-        			setAxisVisible(ax, false);
-        		}
-        	}
-        } else {
-        	// Otherwise just show all the orthogonal axes
-        	for (Iterator orthoIt = ortho.iterator(); orthoIt.hasNext();) {
-        		String ax = (String) orthoIt.next();
-        		setAxisVisible(ax, true);
-        	}
-        	showFixedPanel = true;
-        }
-        orthoPanel.setVisible(showFixedPanel);
-    }
-    public void showAll(String view, List<String> ortho) {
-    	
-    	arrangeAxes(view, ortho, "");
-       
-    	plotPanel.setVisible(true);
-    	orthoPanel.setVisible(true);
-    	plotPanel.setOpen(true);
-    	orthoPanel.setVisible(true);
-
-        if ( mapLocation.equals("plot") ) {
-    		plotAxesLayout.remove(refMap);
-    	} else {
-    		orthoAxesLayout.remove(refMap);
-    	}
-        
-        refMap = new OLMapWidget();
-    	refMap.setVisible(true);
-      
-        if ( mapLocation.equals("plot") ) {
-        	plotAxesLayout.setWidget(mapRow, mapCol, refMap);
-        } else {
-        	orthoAxesLayout.setWidget(mapRow, mapCol, refMap);
-        }
-
-    	
-    	
-    	
-    	if ( hasZ ) {
-    		zWidget.setVisible(true);
-    		if ( view.contains("z") ) {
-    			zWidget.setRange(true);
-    		} else {
-    			zWidget.setRange(false);
-    		}
-    	}
-    	if ( hasT ) {
-    		dateTimeWidget.setVisible(true);
-    		if ( view.contains("t") ) {
-    			dateTimeWidget.setRange(true);
-    		} else {
-    			dateTimeWidget.setRange(false);
-    		}
-    	}
-    }
-    public void addApplyHandler(ClickHandler handler) {
-    	plotApplyButton.addClickHandler(handler);
-    	orthoApplyButton.addClickHandler(handler);
-    	plotApplyButton.setVisible(true);
-    	orthoApplyButton.setVisible(true);
+		for (int i = 0; i < view.length(); i++) {
+			setAxisVisible(view.substring(i, i+1), false);
+		}
     }
     public List<String> getViewAxes() {
     	return viewAxes;
     }
-    public void setWidth(String width) {
-    	plotPanel.setWidth(width);
-    	orthoPanel.setWidth(width);
-    }
-
 	public void setOpen(boolean b) {
-		plotPanel.setOpen(b);
-		orthoPanel.setOpen(b);
+		panel.setOpen(b);
 	}
 
 	public void closePanels() {
-		plotPanelIsOpen = plotPanel.isOpen();
-		orthoPanelIsOpen = orthoPanel.isOpen();
-		plotPanel.setOpen(false);
-		orthoPanel.setOpen(false);
+		panelIsOpen = panel.isOpen();
+		panel.setOpen(false);
 	}
 	public void restorePanels() {
-		plotPanel.setOpen(plotPanelIsOpen);
-		orthoPanel.setOpen(orthoPanelIsOpen);
+		panel.setOpen(panelIsOpen);
 	}
-	public void setOrthoTitle(String title) {
-		orthoPanel.getHeaderTextAccessor().setText(title);
-	}
-
 }
