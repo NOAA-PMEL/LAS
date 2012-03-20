@@ -1,7 +1,8 @@
 package gov.noaa.pmel.tmap.las.client.laswidget;
 
+import gov.noaa.pmel.tmap.las.client.BaseUI.Mouse;
 import gov.noaa.pmel.tmap.las.client.map.MapSelectionChangeListener;
-import gov.noaa.pmel.tmap.las.client.serializable.AnalysisAxisSerializable;
+import gov.noaa.pmel.tmap.las.client.map.OLMapWidget;
 import gov.noaa.pmel.tmap.las.client.serializable.AnalysisSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.CategorySerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.ConfigSerializable;
@@ -11,20 +12,27 @@ import gov.noaa.pmel.tmap.las.client.serializable.VariableSerializable;
 import gov.noaa.pmel.tmap.las.client.util.URLUtil;
 import gov.noaa.pmel.tmap.las.client.util.Util;
 
-import java.io.File;
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.tools.ant.taskdefs.Basename;
-
-import com.google.gwt.core.client.GWT;
+import com.google.gwt.canvas.client.Canvas;
+import com.google.gwt.canvas.dom.client.Context2d;
+import com.google.gwt.canvas.dom.client.CssColor;
+import com.google.gwt.canvas.dom.client.ImageData;
+import com.google.gwt.dom.client.ImageElement;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.logical.shared.CloseHandler;
-import com.google.gwt.event.logical.shared.OpenHandler;
+import com.google.gwt.event.dom.client.LoadEvent;
+import com.google.gwt.event.dom.client.LoadHandler;
+import com.google.gwt.event.dom.client.MouseDownEvent;
+import com.google.gwt.event.dom.client.MouseDownHandler;
+import com.google.gwt.event.dom.client.MouseMoveEvent;
+import com.google.gwt.event.dom.client.MouseMoveHandler;
+import com.google.gwt.event.dom.client.MouseUpEvent;
+import com.google.gwt.event.dom.client.MouseUpHandler;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.http.client.Request;
@@ -35,19 +43,15 @@ import com.google.gwt.http.client.Response;
 import com.google.gwt.http.client.URL;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.ClickListener;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.DisclosurePanel;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.Frame;
-import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.PushButton;
-import com.google.gwt.user.client.ui.ToggleButton;
 import com.google.gwt.user.client.ui.TreeItem;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.xml.client.Document;
@@ -182,6 +186,42 @@ public class OutputPanel extends Composite {
 	// Keep track of the current operations set
 	OperationSerializable[] ops;
 	
+	// Canvas to allow drawing on the plot for zooming.
+	Context2d frontCanvasContext;
+	Canvas frontCanvas;
+	CssColor randomColor;
+	
+	// Drawing parameters from the map scale response
+	protected int x_image_size;
+	protected int y_image_size;
+	protected int x_plot_size;
+	protected int y_plot_size;
+	protected int x_offset_from_left;
+	protected int y_offset_from_bottom;
+	protected int x_offset_from_right;
+	protected int y_offset_from_top;
+	protected double x_axis_lower_left;
+	protected double y_axis_lower_left;
+	protected double x_axis_upper_right;
+	protected double y_axis_upper_right;
+	protected double world_startx;
+	protected double world_starty;
+	protected double world_endx;
+	protected double world_endy;
+	protected double x_per_pixel;
+	protected double y_per_pixel;
+	
+	// Drawing start position
+	int startx = -1;
+	int starty = -1;
+	int endx;
+	int endy;
+	boolean draw = false;
+	
+	List<Mouse> mouseMoves = new ArrayList<Mouse>();
+	
+	Image plotImage = null;
+	
 	/**
 	 * Builds a VizGal panel with a default plot for the variable.  See {@code}VizGal(LASRequest) if you want more options on the initial plot.
 	 */
@@ -193,7 +233,7 @@ public class OutputPanel extends Composite {
 		this.optionID = optionID;
 		this.view = view;
 		this.containerType = container_type;
-		panelAxesWidgets = new AxesWidgetGroup("Plot Axis", "Comparison Axis", "horizontal", "", "Apply To "+ID, tile_server);
+		panelAxesWidgets = new AxesWidgetGroup("Orthogonal Coordinates", "horizontal", "", "Apply To "+ID, tile_server);
 		spinImage = new Image(URLUtil.getImageURL()+"/mozilla_blu.gif");
 		spinImage.setSize("18px", "18px");
 		spin = new PopupPanel();
@@ -277,13 +317,24 @@ public class OutputPanel extends Composite {
 		if ( ds_grid.getZAxis() != null ) {
 			panelAxesWidgets.getZAxis().init(ds_grid.getZAxis());
 		}
-		if ( !settingsButton.isUsePanelSettings() ) {
-		    panelAxesWidgets.setCompareAxis(view, ortho, compareAxis);
-		}
+		
 		if ( !singlePanel ) {
 			// In singlePanel, the controls will be on the left navbar.
-			grid.setWidget(2, 0, panelAxesWidgets);
+			grid.setWidget(3, 0, panelAxesWidgets);
 		} 
+		frontCanvas = Canvas.createIfSupported();
+    	frontCanvasContext = frontCanvas.getContext2d();
+
+    	int rndRedColor = 244;
+    	int rndGreenColor = 154;
+    	int rndBlueColor = 0;
+    	double rndAlpha = .45;
+
+    	randomColor = CssColor.make("rgba(" + rndRedColor + ", " + rndGreenColor + "," + rndBlueColor + ", " + rndAlpha + ")");
+    	
+    	setImageWidth();
+    	grid.setWidget(2, 0, plotImage);
+        	
 	}
 	public void setMapTool(String view) {
 		panelAxesWidgets.getRefMap().setTool(view);
@@ -422,19 +473,31 @@ public class OutputPanel extends Composite {
         
 	
 		// For the first variable set the region according to the values passed in...
+		// or the local widget value...
 		if ( xlo_in != null && xhi_in != null && !xlo_in.equals("") && !xhi_in.equals("") ) {
 			lasRequest.setRange("x", xlo_in, xhi_in, 0);
+		} else {
+			lasRequest.setRange("x", panelAxesWidgets.getRefMap().getXloFormatted(), panelAxesWidgets.getRefMap().getXhiFormatted(), 0);
 		}
 		if ( ylo_in != null && yhi_in != null && !ylo_in.equals("") && !yhi_in.equals("") ) {
 			lasRequest.setRange("y", ylo_in, yhi_in, 0);
+		} else {
+			lasRequest.setRange("y", panelAxesWidgets.getRefMap().getYloFormatted(), panelAxesWidgets.getRefMap().getYhiFormatted(), 0);
 		}
-		if ( zlo_in != null && zhi_in != null && !zlo_in.equals("") && !zhi_in.equals("") ) {
-			lasRequest.setRange("z", zlo_in, zhi_in, 0);
+		if ( variable.getGrid().hasZ() ) {
+			if ( zlo_in != null && zhi_in != null && !zlo_in.equals("") && !zhi_in.equals("") ) {
+				lasRequest.setRange("z", zlo_in, zhi_in, 0);
+			} else {
+				lasRequest.setRange("z", panelAxesWidgets.getZAxis().getLo(), panelAxesWidgets.getZAxis().getHi(), 0);
+			}
 		}
-		if ( tlo_in != null && thi_in != null && !tlo_in.equals("") && !thi_in.equals("") ) {
-			lasRequest.setRange("t", tlo_in, thi_in, 0);
+		if ( variable.getGrid().hasT() ) {
+			if ( tlo_in != null && thi_in != null && !tlo_in.equals("") && !thi_in.equals("") ) {
+				lasRequest.setRange("t", tlo_in, thi_in, 0);
+			} else {
+				lasRequest.setRange("t", panelAxesWidgets.getTAxis().getFerretDateLo(), panelAxesWidgets.getTAxis().getFerretDateHi(), 0);
+			}
 		}
-		
 		
 		
 		if ( variable.isVector() ) {
@@ -445,15 +508,23 @@ public class OutputPanel extends Composite {
 			// For the second component variable set the region according to the values passed in...
 			if ( xlo_in != null && xhi_in != null && !xlo_in.equals("") && !xhi_in.equals("") ) {
 				lasRequest.setRange("x", xlo_in, xhi_in, 1);
+			} else {
+				lasRequest.setRange("x", panelAxesWidgets.getRefMap().getXloFormatted(), panelAxesWidgets.getRefMap().getXhiFormatted(), 1);
 			}
 			if ( ylo_in != null && yhi_in != null && !ylo_in.equals("") && !yhi_in.equals("") ) {
 				lasRequest.setRange("y", ylo_in, yhi_in, 1);
+			} else {
+				lasRequest.setRange("y", panelAxesWidgets.getRefMap().getYloFormatted(), panelAxesWidgets.getRefMap().getYhiFormatted(), 1);
 			}
 			if ( zlo_in != null && zhi_in != null && !zlo_in.equals("") && !zhi_in.equals("") ) {
 				lasRequest.setRange("z", zlo_in, zhi_in, 1);
+			} else {
+				lasRequest.setRange("z", panelAxesWidgets.getZAxis().getLo(), panelAxesWidgets.getZAxis().getHi(), 1);
 			}
 			if ( tlo_in != null && thi_in != null && !tlo_in.equals("") && !thi_in.equals("") ) {
 				lasRequest.setRange("t", tlo_in, thi_in, 1);
+			} else {
+				lasRequest.setRange("t", panelAxesWidgets.getTAxis().getFerretDateLo(), panelAxesWidgets.getTAxis().getFerretDateHi(), 1);
 			}
 		} else {
 			
@@ -464,7 +535,7 @@ public class OutputPanel extends Composite {
 			// For the second variable set all the axes that are not in the view, 
 			// either from the fixed in the slide sorter and the comparison axis in the panel
 			// or from the panel settings.
-			if ( isUsePanelSettings() || singlePanel ) {
+//			if ( isUsePanelSettings() || singlePanel ) {
 				if ( !view.contains("x") ) {
 					if ( var.getGrid().hasX() ) {
 						lasRequest.setRange("x", String.valueOf(panelAxesWidgets.getRefMap().getXlo()), String.valueOf(panelAxesWidgets.getRefMap().getXhi()), 1);
@@ -485,53 +556,53 @@ public class OutputPanel extends Composite {
 						lasRequest.setRange("t", panelAxesWidgets.getTAxis().getFerretDateLo(), panelAxesWidgets.getTAxis().getFerretDateHi(), 1);
 					}
 				}
-			} else {
-				if ( !view.contains("x") ) {
-					if ( var.getGrid().hasX() ) {
-						if ( compareAxis.contains("x") ) {
-							lasRequest.setRange("x", String.valueOf(panelAxesWidgets.getRefMap().getXlo()), String.valueOf(panelAxesWidgets.getRefMap().getXhi()), 1);
-						} else {
-							lasRequest.setRange("x", xlo_in, xhi_in, 1);
-						}
-					}
-				}
-				if ( !view.contains("y") ) {
-					if ( var.getGrid().hasY() ) {
-						if ( compareAxis.contains("y") ) {
-							lasRequest.setRange("y", String.valueOf(panelAxesWidgets.getRefMap().getYlo()), String.valueOf(panelAxesWidgets.getRefMap().getYhi()), 1);
-						} else {
-							lasRequest.setRange("y", ylo_in, yhi_in, 1);
-						}
-					}
-				}
-				if ( !view.contains("z") ) {
-					if ( var.getGrid().hasZ() ) {
-						if ( compareAxis.equals("z") ) {
-							// Use the panel's compare axis widget.
-							lasRequest.setRange("z", panelAxesWidgets.getZAxis().getLo(), panelAxesWidgets.getZAxis().getHi(), 1);
-						} else {
-							//Use the fixed axis in the slide sorter (the passed in value) if it applies to this data set.
-							if ( zlo_in != null && zhi_in != null && !zlo_in.equals("") && !zhi_in.equals("") ) {
-								lasRequest.setRange("z", zlo_in, zhi_in, 1);
-							}
-						}				
-					}
-				}
-				if ( !view.contains("t") ) {
-					if ( var.getGrid().getTAxis() != null ) {
-						if ( compareAxis.equals("t") ) {
-							// Use the panel's compare axis widget.
-							lasRequest.setRange("t", panelAxesWidgets.getTAxis().getFerretDateLo(), panelAxesWidgets.getTAxis().getFerretDateHi(), 1);
-						} else {
-							//Use the fixed axis in the slide sorter (the passed in value) if it applies to this data set.
-							if ( tlo_in != null && thi_in != null && !tlo_in.equals("") && !thi_in.equals("") ) {
-								lasRequest.setRange("t", tlo_in, thi_in, 1);
-							}
-						}	
-					}
-
-				}		
-			}
+//			} else {
+//				if ( !view.contains("x") ) {
+//					if ( var.getGrid().hasX() ) {
+//						if ( compareAxis.contains("x") ) {
+//							lasRequest.setRange("x", String.valueOf(panelAxesWidgets.getRefMap().getXlo()), String.valueOf(panelAxesWidgets.getRefMap().getXhi()), 1);
+//						} else {
+//							lasRequest.setRange("x", xlo_in, xhi_in, 1);
+//						}
+//					}
+//				}
+//				if ( !view.contains("y") ) {
+//					if ( var.getGrid().hasY() ) {
+//						if ( compareAxis.contains("y") ) {
+//							lasRequest.setRange("y", String.valueOf(panelAxesWidgets.getRefMap().getYlo()), String.valueOf(panelAxesWidgets.getRefMap().getYhi()), 1);
+//						} else {
+//							lasRequest.setRange("y", ylo_in, yhi_in, 1);
+//						}
+//					}
+//				}
+//				if ( !view.contains("z") ) {
+//					if ( var.getGrid().hasZ() ) {
+//						if ( compareAxis.equals("z") ) {
+//							// Use the panel's compare axis widget.
+//							lasRequest.setRange("z", panelAxesWidgets.getZAxis().getLo(), panelAxesWidgets.getZAxis().getHi(), 1);
+//						} else {
+//							//Use the fixed axis in the slide sorter (the passed in value) if it applies to this data set.
+//							if ( zlo_in != null && zhi_in != null && !zlo_in.equals("") && !zhi_in.equals("") ) {
+//								lasRequest.setRange("z", zlo_in, zhi_in, 1);
+//							}
+//						}				
+//					}
+//				}
+//				if ( !view.contains("t") ) {
+//					if ( var.getGrid().getTAxis() != null ) {
+//						if ( compareAxis.equals("t") ) {
+//							// Use the panel's compare axis widget.
+//							lasRequest.setRange("t", panelAxesWidgets.getTAxis().getFerretDateLo(), panelAxesWidgets.getTAxis().getFerretDateHi(), 1);
+//						} else {
+//							//Use the fixed axis in the slide sorter (the passed in value) if it applies to this data set.
+//							if ( tlo_in != null && thi_in != null && !tlo_in.equals("") && !thi_in.equals("") ) {
+//								lasRequest.setRange("t", tlo_in, thi_in, 1);
+//							}
+//						}	
+//					}
+//
+//				}		
+//			}
 		}
 		
 		// If the passed in variable is a vector, then the panel variable must also be a vector.  Right?
@@ -540,59 +611,56 @@ public class OutputPanel extends Composite {
             return;
 		} else if ( variable.isVector() && var.isVector() ){
 			lasRequest.addVariable(var.getDSID(), var.getComponents().get(0), 0);
-			if ( isUsePanelSettings() || singlePanel ) {
+//			if ( isUsePanelSettings() || singlePanel ) {
+//				if ( !view.contains("x") ) {
+//					if ( var.getGrid().hasX() ) {
+//						lasRequest.setRange("x", String.valueOf(panelAxesWidgets.getRefMap().getXlo()), String.valueOf(panelAxesWidgets.getRefMap().getXhi()), 2);
+//					}
+//				}
+//				if ( !view.contains("y") ) {
+//					if ( var.getGrid().hasY() ) {
+//						lasRequest.setRange("y", String.valueOf(panelAxesWidgets.getRefMap().getYlo()), String.valueOf(panelAxesWidgets.getRefMap().getYhi()), 2);
+//					}
+//				}
+//				if ( !view.contains("z") ) {
+//					if ( var.getGrid().hasZ() ) {
+//						lasRequest.setRange("z", panelAxesWidgets.getZAxis().getLo(), panelAxesWidgets.getZAxis().getHi(), 2);
+//					}
+//				}
+//				if ( !view.contains("t") ) {
+//					if ( var.getGrid().hasT() ) {
+//						lasRequest.setRange("t", panelAxesWidgets.getTAxis().getFerretDateLo(), panelAxesWidgets.getTAxis().getFerretDateHi(), 2);
+//					}
+//				}
+//			} else {
+			if ( var.getGrid().hasX() ) {
 				if ( !view.contains("x") ) {
-					if ( var.getGrid().hasX() ) {
-						lasRequest.setRange("x", String.valueOf(panelAxesWidgets.getRefMap().getXlo()), String.valueOf(panelAxesWidgets.getRefMap().getXhi()), 2);
-					}
+
+
+					lasRequest.setRange("x", String.valueOf(panelAxesWidgets.getRefMap().getXlo()), String.valueOf(panelAxesWidgets.getRefMap().getXhi()), 2);
+				} else {
+					lasRequest.setRange("x", xlo_in, xhi_in, 2);
 				}
+			}
+
+			if ( var.getGrid().hasY() ) {
 				if ( !view.contains("y") ) {
-					if ( var.getGrid().hasY() ) {
-						lasRequest.setRange("y", String.valueOf(panelAxesWidgets.getRefMap().getYlo()), String.valueOf(panelAxesWidgets.getRefMap().getYhi()), 2);
-					}
+					lasRequest.setRange("y", String.valueOf(panelAxesWidgets.getRefMap().getYlo()), String.valueOf(panelAxesWidgets.getRefMap().getYhi()), 2);
+				} else {
+					lasRequest.setRange("y", ylo_in, yhi_in, 2);
 				}
-				if ( !view.contains("z") ) {
-					if ( var.getGrid().hasZ() ) {
-						lasRequest.setRange("z", panelAxesWidgets.getZAxis().getLo(), panelAxesWidgets.getZAxis().getHi(), 2);
+			}
+			if ( var.getGrid().hasZ() ) {
+				if ( !view.contains("z") ) {	
+					// Use the panel's compare axis widget.
+					lasRequest.setRange("z", panelAxesWidgets.getZAxis().getLo(), panelAxesWidgets.getZAxis().getHi(), 2);
+				} else {
+					//Use the fixed axis in the slide sorter (the passed in value) if it applies to this data set.
+					if ( zlo_in != null && zhi_in != null && !zlo_in.equals("") && !zhi_in.equals("") ) {
+						lasRequest.setRange("z", zlo_in, zhi_in, 2);
 					}
-				}
-				if ( !view.contains("t") ) {
-					if ( var.getGrid().hasT() ) {
-						lasRequest.setRange("t", panelAxesWidgets.getTAxis().getFerretDateLo(), panelAxesWidgets.getTAxis().getFerretDateHi(), 2);
-					}
-				}
-			} else {
-				if ( !view.contains("x") ) {
-					if ( var.getGrid().hasX() ) {
-						if ( compareAxis.contains("x") ) {
-							lasRequest.setRange("x", String.valueOf(panelAxesWidgets.getRefMap().getXlo()), String.valueOf(panelAxesWidgets.getRefMap().getXhi()), 2);
-						} else {
-							lasRequest.setRange("x", xlo_in, xhi_in, 2);
-						}
-					}
-				}
-				if ( !view.contains("y") ) {
-					if ( var.getGrid().hasY() ) {
-						if ( compareAxis.contains("y") ) {
-							lasRequest.setRange("y", String.valueOf(panelAxesWidgets.getRefMap().getYlo()), String.valueOf(panelAxesWidgets.getRefMap().getYhi()), 2);
-						} else {
-							lasRequest.setRange("y", ylo_in, yhi_in, 2);
-						}
-					}
-				}
-				if ( !view.contains("z") ) {
-					if ( var.getGrid().hasZ() ) {
-						if ( compareAxis.equals("z") ) {
-							// Use the panel's compare axis widget.
-							lasRequest.setRange("z", panelAxesWidgets.getZAxis().getLo(), panelAxesWidgets.getZAxis().getHi(), 2);
-						} else {
-							//Use the fixed axis in the slide sorter (the passed in value) if it applies to this data set.
-							if ( zlo_in != null && zhi_in != null && !zlo_in.equals("") && !zhi_in.equals("") ) {
-								lasRequest.setRange("z", zlo_in, zhi_in, 2);
-							}
-						}				
-					}
-				}
+				}				
+			}
 				if ( !view.contains("t") ) {
 					if ( var.getGrid().getTAxis() != null ) {
 						if ( compareAxis.equals("t") ) {
@@ -607,7 +675,7 @@ public class OutputPanel extends Composite {
 					}
 
 				}		
-			}
+//			}
 			lasRequest.addVariable(var.getDSID(), var.getComponents().get(1), 1);
 			if ( isUsePanelSettings() || singlePanel ) {
 				if ( !view.contains("x") ) {
@@ -880,6 +948,8 @@ public class OutputPanel extends Composite {
 		public void onError(Request request, Throwable exception) {
 			spin.hide();
 			HTML error = new HTML(exception.toString());
+			Widget size = grid.getWidget(1, 0);
+			error.setSize(image_w+"px", image_h+"px");
 			grid.setWidget(1, 0, error);
 		}
 
@@ -892,6 +962,7 @@ public class OutputPanel extends Composite {
 			// Look at the doc.  If it's not obviously XML, treat it as HTML.
 			if ( !doc.substring(0, 100).contains("<?xml") ) {
 				HTML result = new HTML(doc, true);
+				result.setSize(image_w+"px", image_h+"px");
 				grid.setWidget(1, 0, result);
 			} else {
 				doc = doc.replaceAll("\n", "").trim();
@@ -907,23 +978,58 @@ public class OutputPanel extends Composite {
 							//HTML image = new HTML("<a target=\"_blank\" href=\""+result.getAttribute("url")+"\"><img width=\"100%\" src=\""+result.getAttribute("url")+"\"></a>");
 							image_ready = true;
 							imageurl = result.getAttribute("url");
-						} else if ( result.getAttribute("type").equals("map_scale") )  {
-							final String ms_url = result.getAttribute("url");
-							RequestBuilder mapScaleRequest = new RequestBuilder(RequestBuilder.GET, ms_url);
-							try {
-								mapScaleRequest.sendRequest(null, mapScaleCallBack);
-							} catch (RequestException e) {
-								// Don't care.  Just go with the information we have.
-							}
 						} else if ( result.getAttribute("type").equals("annotations") ) {
 							annourl = result.getAttribute("url");
 							lasAnnotationsPanel.setAnnotationsHTMLURL(Util.getAnnotationService(annourl)+"&catid="+var.getDSID());
+						} else if ( result.getAttribute("type").equals("map_scale") ) {
+							NodeList map_scale = result.getElementsByTagName("map_scale");
+							for ( int m = 0; m < map_scale.getLength(); m++ ) {
+								if ( map_scale.item(m) instanceof Element ) {
+									Element map = (Element) map_scale.item(m);
+									NodeList children = map.getChildNodes();
+									for ( int l = 0; l < children.getLength(); l++ ) {
+										if ( children.item(l) instanceof Element ) {
+											Element child = (Element) children.item(l);
+											if ( child.getNodeName().equals("x_image_size") ) {
+												x_image_size = getNumber(child.getFirstChild());
+											} else if ( child.getNodeName().equals("y_image_size") ) {
+												y_image_size = getNumber(child.getFirstChild());
+											} else if ( child.getNodeName().equals("x_plot_size") ) {
+												x_plot_size = getNumber(child.getFirstChild());
+											} else if ( child.getNodeName().equals("y_plot_size") ) {
+												y_plot_size = getNumber(child.getFirstChild());
+											} else if ( child.getNodeName().equals("x_offset_from_left") ) {
+												x_offset_from_left = getNumber(child.getFirstChild());
+											} else if ( child.getNodeName().equals("y_offset_from_bottom") ) {
+												y_offset_from_bottom = getNumber(child.getFirstChild());
+											} else if ( child.getNodeName().equals("x_offset_from_right") ) {
+												x_offset_from_right = getNumber(child.getFirstChild());
+											} else if ( child.getNodeName().equals("y_offset_from_top") ) {
+												y_offset_from_top = getNumber(child.getFirstChild());
+											} else if ( child.getNodeName().equals("x_axis_lower_left") ) {
+												x_axis_lower_left = getDouble(child.getFirstChild());
+											} else if ( child.getNodeName().equals("y_axis_lower_left") ) {
+												y_axis_lower_left = getDouble(child.getFirstChild());
+											} else if ( child.getNodeName().equals("x_axis_upper_right") ) {
+												x_axis_upper_right = getDouble(child.getFirstChild());
+											} else if ( child.getNodeName().equals("y_axis_upper_right") ) {
+												y_axis_upper_right = getDouble(child.getFirstChild());
+											} else if ( child.getNodeName().equals("data_min") ) {
+												min = getDouble(child.getFirstChild());
+											} else if ( child.getNodeName().equals("data_max") ) {
+												max = getDouble(child.getFirstChild());
+											}
+										}
+									}
+								}
+							}
 						} else if ( result.getAttribute("type").equals("error") ) {
 							if ( result.getAttribute("ID").equals("las_message") ) {
 								Node text = result.getFirstChild();
 								if ( text instanceof Text ) {
 									Text t = (Text) text;
 									HTML error = new HTML(t.getData().toString().trim());
+									error.setSize(image_w+"px", image_h+"px");
 									grid.setWidget(1, 0, error);
 									retryShowing = true;
 									PushButton retry = new PushButton("Retry");
@@ -939,6 +1045,7 @@ public class OutputPanel extends Composite {
 												sendRequest.sendRequest(null, lasRequestCallback);
 											} catch (RequestException e) {
 												HTML error = new HTML(e.toString());
+												error.setSize(image_w+"px", image_h+"px");
 												grid.setWidget(1, 0, error);
 											}
 										}
@@ -947,10 +1054,12 @@ public class OutputPanel extends Composite {
 									grid.setWidget(2, 1, retry);
 								}
 							}
-							spin.hide();
+							image_w = x_image_size;
+							image_h = y_image_size;
 						} else if ( result.getAttribute("type").equals("batch") ) {
 							String elapsed_time = result.getAttribute("elapsed_time");
 							HTML batch = new HTML("<br><br>Your request has been processing for "+elapsed_time+" seconds.<br>This panel will refresh automatically.<br><br>");
+							batch.setSize(image_w+"px", image_h+"px");
 							grid.setWidget(1, 0, batch);
 							lasRequest.setProperty("product_server", "ui_timeout", "3");
 							String url = Util.getProductServer()+"?xml="+URL.encode(lasRequest.toString());
@@ -959,16 +1068,58 @@ public class OutputPanel extends Composite {
 								sendRequest.sendRequest(null, lasRequestCallback);
 							} catch (RequestException e) {
 								HTML error = new HTML(e.toString());
+								error.setSize(image_w+"px", image_h+"px");
 								grid.setWidget(1, 0, error);
 							}
 						}
 					}
 				}
 				if ( image_ready ) {
-				    currentPrintURL = Util.getAnnotationsFrag(annourl, imageurl);
-				    setImage(imageurl, Util.getAnnotationsService(annourl, imageurl));
-				    setImageWidth();
-				    spin.hide();
+					
+				    
+				    // set the canvas with the image and get to drawin'
+				    
+				    if ( !imageurl.equals("") ) {
+						plotImage = new Image(imageurl);
+						x_per_pixel = (x_axis_upper_right - x_axis_lower_left)/Double.valueOf(x_plot_size);
+						y_per_pixel = (y_axis_upper_right - y_axis_lower_left)/Double.valueOf(y_plot_size);
+	                    
+						if ( frontCanvas != null ) {
+							grid.setWidget(2, 0 , plotImage);
+							plotImage.setVisible(false);
+							plotImage.addLoadHandler(imageLoadHandler);
+							frontCanvas.addMouseUpHandler(new MouseUpHandler() {
+								
+								@Override
+								public void onMouseUp(MouseUpEvent event) {
+									// If we're still drawing when the mouse goes up, record the position.
+									if ( draw ) {
+										endx = event.getX();
+										endy = event.getY();
+									}
+									draw = false;
+									for (Iterator mouseIt = mouseMoves.iterator(); mouseIt.hasNext();) {
+										Mouse mouse = (Mouse) mouseIt.next();
+										mouse.applyNeeded();
+									}
+								}
+							});
+						} else {
+							// Browser cannot handle a canvas tag, so just put up the image.
+							// The old stuff if there is no canvas...
+						    currentPrintURL = Util.getAnnotationsFrag(annourl, imageurl);
+						    setImage(imageurl, Util.getAnnotationsService(annourl, imageurl));
+						    setImageWidth();
+						    spin.hide();
+							
+							
+						}
+					}
+					world_startx = x_axis_lower_left;
+	                world_endx = x_axis_upper_right;
+	                world_starty = y_axis_lower_left;
+	                world_endy = y_axis_upper_right;
+					spin.hide();
 				}
 			}
 		}
@@ -1012,10 +1163,8 @@ public class OutputPanel extends Composite {
 		datasetLabel.setText(var.getDSName()+": "+var.getName());
 		panelAxesWidgets.init(var.getGrid());
 	}
-	
-	public void setCompareAxis(String view, List<String> ortho, String compareAxis) {
-		this.compareAxis = compareAxis;
-		panelAxesWidgets.setCompareAxis(view, ortho, compareAxis);
+	public void showOrthoAxes(String view, List<String> ortho) {
+		panelAxesWidgets.showOrthoAxes(view, ortho);
 	}
 	private void applyChanges() {
 		
@@ -1026,11 +1175,7 @@ public class OutputPanel extends Composite {
 		
 		
 		if (changeDataset) {
-			
-			setVariable(nvar);
-			
-			panelAxesWidgets.setOrthoTitle("Other Axes");
-			
+			setVariable(nvar);			
 			settingsButton.setUsePanel(true);
 			changeDataset = false;
 			init(true, ops);
@@ -1101,12 +1246,11 @@ public class OutputPanel extends Composite {
 			if ( tokens.get("zlo") != null && tokens.get("zhi") != null ) {
 				setAxisRangeValues("z", tokens.get("zlo"), tokens.get("zlo"));
 			}
-			panelAxesWidgets.setOrthoTitle(tokens.get("orthoTitle"));
 			
 			
-			// restore the layout
+			//TODO what needs to be done to restore the state?
 			
-			panelAxesWidgets.setCompareAxis(tokens.get("view"), Util.setOrthoAxes(tokens.get("view"), v.getGrid()), tokens.get("compareAxis"));
+//			panelAxesWidgets.setCompareAxis(tokens.get("view"), Util.setOrthoAxes(tokens.get("view"), v.getGrid()), tokens.get("compareAxis"));
 			
 			setOperation(tokens.get("operation_id"), tokens.get("view"));
 		}
@@ -1202,18 +1346,13 @@ public class OutputPanel extends Composite {
 		Widget w = grid.getWidget(1, 0);
 		// Piggy back setting the annotations width onto this method.
 		if ( autoZoom ) {
+			double scale = 1.;
 			if ( pwidth < image_w ) {
 				// If the panel is less than the image, shrink the image.
 				int h = (int) ((image_h/image_w)*Double.valueOf(pwidth));
-				w.setWidth(pwidth+"px");
-				w.setHeight(h+"px");
-				int a = pwidth - 18;
-			} else {
-				// Just use the exact image size.
-				w.setWidth(image_w+"px");
-				w.setHeight(image_h+"px");
-				int a = (int) (image_w - 25);
+				scale = h/image_h;
 			}
+			if (plotImage != null ) scaleImage(plotImage, scale);
 		} else {
 			setImageSize(fixedZoom);
 		}
@@ -1329,7 +1468,7 @@ public class OutputPanel extends Composite {
         int zoom = panelAxesWidgets.getRefMap().getZoom();
         double[] center = panelAxesWidgets.getRefMap().getCenterLatLon();
         
-		panelAxesWidgets.showAll(view, Util.setOrthoAxes(view, var.getGrid()));
+		//TODO what needs to be done here? panelAxesWidgets.showAll(view, Util.setOrthoAxes(view, var.getGrid()));
 		
 		panelAxesWidgets.getRefMap().setTool(view);
 		panelAxesWidgets.getRefMap().setCenter(center[0], center[1], zoom);
@@ -1392,8 +1531,6 @@ public class OutputPanel extends Composite {
 
 		token.append(";dsid="+var.getDSID());
 		token.append(";varid="+var.getID());
-		token.append(";orthoTitle="+panelAxesWidgets.getOrthoTitle());
-		token.append(";plotTitle="+panelAxesWidgets.getPlotTitle());
 		token.append(getSettingsWidgetHistoryToken());
 		return token.toString();
 	}
@@ -1531,5 +1668,147 @@ public class OutputPanel extends Composite {
 	}
 	public void setAnalysis(AnalysisSerializable analysisSerializable) {
 		this.analysis = analysisSerializable;
+	}
+	private int getNumber(Node firstChild) {
+		if ( firstChild instanceof Text ) {
+			Text content = (Text) firstChild;
+			String value = content.getData().toString().trim();
+			return Double.valueOf(value).intValue();
+		} else {
+			return -999;
+		}
+	}
+	private double getDouble(Node firstChild) {
+		if ( firstChild instanceof Text ) {
+			Text content = (Text) firstChild;
+			String value = content.getData().toString().trim();
+			return Double.valueOf(value).doubleValue();
+		} else {
+			return -999.;
+		}
+	}
+	public void setMouseMoves(List<Mouse> mouse) {
+		mouseMoves = mouse;
+	}
+	public void setRanges(String xView, List<String> xOrtho) {
+		for (int i = 0; i < xView.length(); i++) {
+			String type = xView.substring(i, i+1);
+			panelAxesWidgets.setRange(type, true);
+		}
+		for (Iterator<String> oIt = xOrtho.iterator(); oIt.hasNext(); ) {
+			String type = (String) oIt.next();
+			panelAxesWidgets.setRange(type, false);
+		}
+	}
+	LoadHandler imageLoadHandler =  new LoadHandler() {
+
+		@Override
+		public void onLoad(LoadEvent event) {
+			String w = plotImage.getWidth() - 18 + "px";
+            lasAnnotationsPanel.setPopupWidth(w);
+			frontCanvasContext.drawImage(ImageElement.as(plotImage.getElement()), 0, 0);
+			setImageWidth();
+			frontCanvas.addMouseDownHandler(new MouseDownHandler() {
+				@Override
+				public void onMouseDown(MouseDownEvent event) {
+					
+					startx = event.getX();
+					starty = event.getY();
+					if ( startx > x_offset_from_left && 
+						 starty > y_offset_from_top &&
+						 startx < x_offset_from_left + x_plot_size && 
+						 starty < y_offset_from_top + y_plot_size      ) {
+						
+						draw = true;
+						frontCanvasContext.drawImage(ImageElement.as(plotImage.getElement()), 0, 0);
+						world_startx = x_axis_lower_left + (startx - x_offset_from_left)*x_per_pixel;
+						world_starty = y_axis_lower_left + ((y_image_size-starty)-y_offset_from_bottom)*y_per_pixel;
+						
+						world_endx = world_startx;
+						world_endy = world_starty;										
+					}
+				}
+			});
+			frontCanvas.addMouseMoveHandler(new MouseMoveHandler() {
+
+				@Override
+				public void onMouseMove(MouseMoveEvent event) {
+					int currentx = event.getX();
+					int currenty = event.getY();
+					// If you drag it out, we'll stop drawing.
+					if ( currentx < x_offset_from_left || 
+					     currenty < y_offset_from_top ||
+						 currentx > x_offset_from_left + x_plot_size || 
+					     currenty > y_offset_from_top + y_plot_size      ) {
+						
+						draw = false;
+						endx = currentx;
+						endy = currenty;
+					}
+					if ( draw ) {
+						world_endx = x_axis_lower_left + (currentx - x_offset_from_left)*x_per_pixel;
+						world_endy = y_axis_lower_left + ((y_image_size-currenty)-y_offset_from_bottom)*y_per_pixel;
+						frontCanvasContext.setFillStyle(randomColor);
+						frontCanvasContext.drawImage(ImageElement.as(plotImage.getElement()), 0, 0);
+						frontCanvasContext.fillRect(startx, starty, currentx - startx, currenty-starty);
+						for (Iterator mouseIt = mouseMoves.iterator(); mouseIt.hasNext();) {
+							Mouse mouse = (Mouse) mouseIt.next();
+							mouse.updateMap(world_starty, world_endy, world_startx, world_endx);
+						}
+					}
+				}
+			});
+			grid.setWidget(1, 0 , frontCanvas);
+		}
+
+	};
+	private void scale(Image img) {
+	    ImageData imageData = scaleImage(img, .1);
+	    drawToScreen(imageData);
+	}
+
+	private ImageData scaleImage(Image image, double scaleToRatio) {
+	    
+	    Canvas canvasTmp = Canvas.createIfSupported();
+	    Context2d context = canvasTmp.getContext2d();
+
+	    double ch = (image.getHeight() * scaleToRatio);
+	    double cw = (image.getWidth() * scaleToRatio);
+
+	    canvasTmp.setCoordinateSpaceHeight((int) ch);
+	    canvasTmp.setCoordinateSpaceWidth((int) cw);
+	    
+	    ImageElement imageElement = ImageElement.as(image.getElement());
+	   
+	    // s = source
+	    // d = destination 
+	    double sx = 0;
+	    double sy = 0;
+	    double sw = imageElement.getWidth();
+	    double sh = imageElement.getHeight();
+	    
+	    double dx = 0;
+	    double dy = 0;
+	    double dw = imageElement.getWidth();
+	    double dh = imageElement.getHeight();
+	    
+	    // tell it to scale image
+	    context.scale(scaleToRatio, scaleToRatio);
+	    
+	    // draw image to canvas
+	    context.drawImage(imageElement, sx, sy, sw, sh, dx, dy, dw, dh);
+	    
+	    // get image data
+	    double w = dw * scaleToRatio;
+	    double h = dh * scaleToRatio;
+	    ImageData imageData = context.getImageData(0, 0, w, h);
+	    
+	    frontCanvas.setCoordinateSpaceHeight((int)h+10);
+	    frontCanvas.setCoordinateSpaceWidth((int)w+10);	    
+	    return imageData;
+	}
+
+	private void drawToScreen(ImageData imageData) {
+	    if ( frontCanvasContext != null ) frontCanvasContext.putImageData(imageData, 0, 0);
 	}
 }

@@ -159,7 +159,7 @@ public class BaseUI {
 
 	// The controls themselves
 	NavAxesGroup xAxesWidget;
-	ComparisonAxisSelector xComparisonAxesSelector;
+//	ComparisonAxisSelector xComparisonAxesSelector;
 	OperationsWidget xOperationsWidget = new OperationsWidget("Operations");
 	
 
@@ -247,11 +247,11 @@ public class BaseUI {
 		xTlo = Util.getParameterString("tlo");
 		xThi = Util.getParameterString("thi");
 
-		xAxesWidget = new NavAxesGroup("Coordinates", xControlsWidthPx, xTileServer);
+		xAxesWidget = new NavAxesGroup("Plot Coordinates", xControlsWidthPx, xTileServer);
 		
 		xAxesWidget.getRefMap().setMapListener(mapListener);
 
-		xComparisonAxesSelector = new ComparisonAxisSelector(xControlsWidthPx);
+//		xComparisonAxesSelector = new ComparisonAxisSelector(xControlsWidthPx);
 
 		xSettingsHeader.setOpen(true);		
 		xSettingsHeader.addCloseHandler(new CloseHandler<DisclosurePanel> () {
@@ -259,7 +259,7 @@ public class BaseUI {
 			@Override
 			public void onClose(CloseEvent<DisclosurePanel> event) {
 				xOperationsWidget.setOpen(false);
-				xComparisonAxesSelector.setOpen(false);
+//				xComparisonAxesSelector.setOpen(false);
 				xAxesWidget.setOpen(false);
 			}
 
@@ -269,7 +269,7 @@ public class BaseUI {
 			@Override
 			public void onOpen(OpenEvent<DisclosurePanel> arg0) {
 				xOperationsWidget.setOpen(true);
-				xComparisonAxesSelector.setOpen(true);
+//				xComparisonAxesSelector.setOpen(true);
 				xAxesWidget.setOpen(true);
 			}
 
@@ -287,7 +287,7 @@ public class BaseUI {
 		
 		// This are bumped down one for the grow shrink experiment...
 		xNavigationControls.setWidget(navControlIndex++, 0, xAxesWidget);
-		xNavigationControls.setWidget(navControlIndex++, 0, xComparisonAxesSelector);
+//		xNavigationControls.setWidget(navControlIndex++, 0, xComparisonAxesSelector);
 		xNavigationControls.setWidget(navControlIndex++, 0, xAnalysisWidget);
 		xNavigationControls.setWidget(navControlIndex++, 0, xOperationsWidget);
 		
@@ -462,12 +462,12 @@ public class BaseUI {
 			panel.setPanelWidth(xPanelWidth);
 
 		}
-		if ( numPanels == 1 ) {
-			xComparisonAxesSelector.setVisible(false);
-			//xAxesWidget.setOrthoTitle("Other Axes");
-		} else {
-			xComparisonAxesSelector.setVisible(true);
-		}
+//		if ( numPanels == 1 ) {
+//			xComparisonAxesSelector.setVisible(false);
+//			//xAxesWidget.setOrthoTitle("Other Axes");
+//		} else {
+//			xComparisonAxesSelector.setVisible(true);
+//		}
 		xImageSize.addItem("Auto", "auto");
 		xImageSize.addItem("100%", "100");
 		xImageSize.addItem(" 90%", "90");
@@ -479,7 +479,10 @@ public class BaseUI {
 		xImageSize.addItem(" 30%", "30");
 	}
 	public int getPanelWidth(int count) {
-		int cols = count/2;
+		int cols = 1;
+		if ( count > 1 ) {
+			cols = 2;
+		}
 		if ( cols <= 0 ) {
 			cols = 1;
 		}
@@ -555,7 +558,14 @@ public class BaseUI {
 			resize();
 		}		
 	}
-
+	public class Mouse {
+		public void updateMap(double ylo, double yhi, double xlo, double xhi) {
+			xAxesWidget.getRefMap().setCurrentSelection(ylo, yhi, xlo, xhi);
+		}
+		public void applyNeeded() {
+			applyButton.addStyleDependentName("APPLY-NEEDED");
+		}
+	}
 	public void resize() {
 		xPanelWidth = getPanelWidth(xPanelCount);
 		if ( xImageSize.getValue(xImageSize.getSelectedIndex()).equals("auto") ) {

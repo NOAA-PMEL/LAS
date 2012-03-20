@@ -197,7 +197,7 @@ public class ClimateAnalysis implements EntryPoint {
 		@Override
 		public void onSuccess(Object result) {
 			GridSerializable grid = (GridSerializable) result;
-			xDateWidgetTwo.init(grid.getTAxis().getLo(), grid.getTAxis().getHi(), "y", false);
+			xDateWidgetTwo.init(grid.getTAxis(), false);
 			xDateWidgetTwo.setRange(true);
 		}
 		

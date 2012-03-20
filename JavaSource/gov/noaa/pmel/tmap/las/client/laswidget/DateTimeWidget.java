@@ -2,17 +2,23 @@ package gov.noaa.pmel.tmap.las.client.laswidget;
 
 import gov.noaa.pmel.tmap.las.client.map.GeoUtil;
 import gov.noaa.pmel.tmap.las.client.serializable.TimeAxisSerializable;
+import gov.noaa.pmel.tmap.las.client.time.AllLeapChronology;
+import gov.noaa.pmel.tmap.las.client.time.NoLeapChronology;
+import gov.noaa.pmel.tmap.las.client.time.ThreeSixtyDayChronology;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import org.gwttime.time.Chronology;
+import org.gwttime.time.DateTime;
+import org.gwttime.time.DateTimeZone;
+import org.gwttime.time.format.DateTimeFormat;
+import org.gwttime.time.format.DateTimeFormatter;
+import org.gwttime.time.chrono.GregorianChronology;
+import org.gwttime.time.chrono.JulianChronology;
 
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.maps.jsio.rebind.LongFragmentGenerator;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Composite;
@@ -28,15 +34,15 @@ import com.google.gwt.user.client.ui.PushButton;
  */
 public class DateTimeWidget extends Composite {
 	
-	private static final DateTimeFormat longForm = DateTimeFormat.getFormat("yyyy-MM-dd HH:mm:ss");
-	private static final DateTimeFormat mediumForm = DateTimeFormat.getFormat("yyyy-MM-dd HH:mm");
-	private static final DateTimeFormat shortForm = DateTimeFormat.getFormat("yyyy-MM-dd");
-	private static final DateTimeFormat shortFerretForm = DateTimeFormat.getFormat("dd-MMM-yyyy");
-	private static final DateTimeFormat mediumFerretForm = DateTimeFormat.getFormat("dd-MMM-yyyy HH:mm"); 
-	private static final DateTimeFormat longFerretForm = DateTimeFormat.getFormat("dd-MMM-yyyy HH:mm:ss"); 
+	private DateTimeFormatter longForm;
+	private DateTimeFormatter mediumForm;
+	private DateTimeFormatter shortForm;
+	private DateTimeFormatter shortFerretForm;
+	private DateTimeFormatter mediumFerretForm;
+	private DateTimeFormatter longFerretForm; 
 	
-	Date lo;
-	Date hi;
+	DateTime lo;
+	DateTime hi;
     
 	
 	Label d_label = new Label("Date/Time: ");
@@ -71,8 +77,12 @@ public class DateTimeWidget extends Composite {
 	String hi_date;
 	
 	int delta;
-
-	private static final List<String> MONTHS = new ArrayList<String>(Arrays.asList("Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"));
+	
+	Chronology chrono;
+	
+	DateTimeFormatter monthFormat;
+	
+	private static final String[] MONTHS = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
 	
 	//public DateTimeWidget(String lo_date, String hi_date, int deltaMinutes, int minuteOffset, String render, boolean range, boolean climatology) {
 	public DateTimeWidget(TimeAxisSerializable tAxis, boolean range) {
@@ -87,8 +97,8 @@ public class DateTimeWidget extends Composite {
 	public String getFerretDateMin() {
 		if ( climatology ) {
 			StringBuilder date = new StringBuilder();
-			date.append(GeoUtil.format_two(lo.getDate()));
-			date.append("-"+MONTHS.get(lo.getMonth()));
+			date.append(GeoUtil.format_two(lo.getDayOfMonth()));
+			date.append("-"+monthFormat.print(lo.getMillis()));
 			date.append("-0001"); 
 			return date.toString();
 		} else if ( isMenu ) {
@@ -96,26 +106,26 @@ public class DateTimeWidget extends Composite {
 		} else {
 		
 			if ( hasHour ) {
-				return mediumFerretForm.format(lo);
+				return mediumFerretForm.print(lo.getMillis());
 			} else {
-				return shortFerretForm.format(lo);
+				return shortFerretForm.print(lo.getMillis());
 			}
 		}
 	}
 	public String getFerretDateMax() {
 		if ( climatology ) {
 			StringBuilder date = new StringBuilder();
-			date.append(GeoUtil.format_two(hi.getDate()));
-			date.append("-"+MONTHS.get(hi.getMonth()));
+			date.append(GeoUtil.format_two(hi.getDayOfMonth()));
+			date.append("-"+monthFormat.print(hi.getMillis()));
 			date.append("-0001"); 
 			return date.toString();
 		} else if ( isMenu ) { 
 			return hi_day.getValue(hi_day.getItemCount()-1);
 		} else  {
 			if ( hasHour ) {
-				return mediumFerretForm.format(hi);
+				return mediumFerretForm.print(hi.getMillis());
 			} else {
-				return shortFerretForm.format(hi);
+				return shortFerretForm.print(hi.getMillis());
 			}
 		}
 	}
@@ -128,6 +138,31 @@ public class DateTimeWidget extends Composite {
 		isMenu = false;
 		this.range = range;
 		
+		String calendar = tAxis.getCalendar();
+		
+        chrono = GregorianChronology.getInstance(DateTimeZone.UTC);
+		
+		if ( calendar != null && !calendar.equals("") )	{
+			if ( calendar.equalsIgnoreCase("proleptic_gregorian") ) {
+				chrono = GregorianChronology.getInstance(DateTimeZone.UTC);
+			} else if ( calendar.equalsIgnoreCase("noleap") || calendar.equals("365_day") ) {
+				chrono = NoLeapChronology.getInstanceUTC();
+			} else if (calendar.equals("julian") ) {
+				chrono = JulianChronology.getInstanceUTC();
+			} else if ( calendar.equals("all_leap") || calendar.equals("366_day") ) {
+				chrono = AllLeapChronology.getInstanceUTC();
+			} else if ( calendar.equals("360_day") ) {
+				chrono = ThreeSixtyDayChronology.getInstanceUTC();
+			}
+		} 
+				
+		monthFormat = DateTimeFormat.forPattern("MMM").withChronology(chrono).withZone(DateTimeZone.UTC);
+		longForm = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss").withChronology(chrono).withZone(DateTimeZone.UTC);
+		mediumForm = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm").withChronology(chrono).withZone(DateTimeZone.UTC);
+		shortForm = DateTimeFormat.forPattern("yyyy-MM-dd").withChronology(chrono).withZone(DateTimeZone.UTC);
+		shortFerretForm = DateTimeFormat.forPattern("dd-MMM-yyyy").withChronology(chrono).withZone(DateTimeZone.UTC);
+		mediumFerretForm = DateTimeFormat.forPattern("dd-MMM-yyyy HH:mm").withChronology(chrono).withZone(DateTimeZone.UTC);
+		longFerretForm = DateTimeFormat.forPattern("dd-MMM-yyyy HH:mm:ss").withChronology(chrono).withZone(DateTimeZone.UTC);
 		
 		if (tAxis.getNames() != null && tAxis.getNames().length > 0 ) {
 			
@@ -164,8 +199,8 @@ public class DateTimeWidget extends Composite {
 			lo_day.setSelectedIndex(0);
 			hi_day.setSelectedIndex(hi_day.getItemCount() - 1);
 		} else {
-			setLo(longFerretForm.format(lo));
-			setHi(longFerretForm.format(hi));
+			setLo(longFerretForm.print(lo.getMillis()));
+			setHi(longFerretForm.print(hi.getMillis()));
 		}
 	}
 	public void setListeners() {
@@ -179,7 +214,11 @@ public class DateTimeWidget extends Composite {
 		hi_day.addChangeHandler(hiDayHandler);
 		hi_hour.addChangeHandler(hiHourHandler);
 	}
+	public void init(String lo_date, String hi_date, String render, boolean climo) {
+		init(lo_date, hi_date, -1, render, climo);
+	}
 	public void init(String lo_date, String hi_date, int delta, String render, boolean climo) {
+        
 		this.render = render;
 		this.climatology = climo;
         this.delta = delta;
@@ -187,12 +226,12 @@ public class DateTimeWidget extends Composite {
         hi = parseDate(hi_date);
 		years(lo, hi, lo_year);
 		years(lo, hi, hi_year);
-		months(lo_month, lo.getYear()+1900);
-		months(hi_month, hi.getYear()+1900);
-		days(lo_day, lo.getYear()+1900, lo.getMonth());
-		days(hi_day, hi.getYear()+1900, hi.getMonth());
-	    hours(lo_hour, lo.getHours(), lo.getMinutes(), 24, 0);
-		hours(hi_hour, 0, 0, hi.getHours(), lo.getMinutes());
+		months(lo_month, lo.getYear());
+		months(hi_month, hi.getYear());
+		days(lo_day, lo.getYear(), lo.getMonthOfYear());
+		days(hi_day, hi.getYear(), hi.getMonthOfYear());
+	    hours(lo_hour, lo.getHourOfDay(), lo.getMinuteOfHour(), 24, 0);
+		hours(hi_hour, 0, 0, hi.getHourOfDay(), lo.getMinuteOfHour());
 		hi_year.setSelectedIndex(hi_year.getItemCount() - 1);
 		hi_month.setSelectedIndex(hi_month.getItemCount() - 1);
 		hi_day.setSelectedIndex(hi_day.getItemCount() - 1);
@@ -222,9 +261,7 @@ public class DateTimeWidget extends Composite {
 			}
 		}
 	}
-	public void init(String lo_date, String hi_date, String render, boolean climo) {
-		init(lo_date, hi_date, -1, render, climo);
-	}
+	
 	private void loadWidget() {
 		dateTimeWidget.clear();
 		if ( isMenu ) {
@@ -303,21 +340,21 @@ public class DateTimeWidget extends Composite {
 	}
 	private void days(ListBox day, int year, int month) {
 		day.clear();
-		int lo_year = lo.getYear() + 1900;
-		int hi_year = hi.getYear() + 1900;
+		int lo_year = lo.getYear();
+		int hi_year = hi.getYear();
 		
-		int lo_month = lo.getMonth();
-		int hi_month = hi.getMonth();
+		int lo_month = lo.getMonthOfYear();
+		int hi_month = hi.getMonthOfYear();
 		
 		int start = 1;
 		int end = maxDays(year, month);
 		
 		if ( lo_year == year && lo_month == month ) {
-			start = lo.getDate();
+			start = lo.getDayOfMonth();
 			end = maxDays(year, month);
 			
 		} else if ( hi_year == year && hi_month == month ) {
-			end = hi.getDate();
+			end = hi.getDayOfMonth();
 		}
 		for ( int i = start; i <= end; i++) {
 			day.addItem(GeoUtil.format_two(i), GeoUtil.format_two(i));
@@ -325,47 +362,41 @@ public class DateTimeWidget extends Composite {
 	}
 	
 	private int maxDays(int year, int month) {
-		if ( month == 0 || month == 2 || month == 4 || month == 6 || month == 7 || month == 9 || month == 11) {
-			return 31;
-		} else if ( month == 1 ) {
-			int max = 28; 
-			if ( (year%4) == 0 ) {
-				max = 29;
-				if ( (year%100) == 0 ) {
-					max = 28;
-					if ( (year%400) == 0 ) {
-						max = 29;
-					}
-				}
-			}
-			return max;
-		} else {
-			return 30;
-		}
+		DateTime dt = new DateTime(year, month, 1, 0, 0, 0, chrono);
+		return dt.dayOfMonth().getMaximumValue();
 	}
 	private void months(ListBox month, int year) {
 		month.clear();
-		int lo_year = lo.getYear() + 1900;
-		int hi_year = hi.getYear() + 1900;
+		int lo_year = lo.getYear();
+		int hi_year = hi.getYear();
 		
-		int start = 0;
+		int start = 1;
 		int end = 12;
 		
 		if  ( lo_year == year ) {
-			start = lo.getMonth();
+			start = lo.getMonthOfYear();
 		} 
 		if ( hi_year == year ) {
-			end = hi.getMonth() + 1;
+			end = hi.getMonthOfYear();
 		}
-		for (int m = start; m < end; m++ ) {
-			month.addItem(MONTHS.get(m), MONTHS.get(m));
+		
+//		DateTime startDate = new DateTime(year, start, 1, 0, 0, DateTimeZone.UTC).withChronology(chrono);
+//		DateTime endDate = new DateTime(year, end, 1, 0, 0, DateTimeZone.UTC).withChronology(chrono);
+		
+		DateTime startDate = lo.withYear(year).withMonthOfYear(start).withDayOfMonth(1);
+		DateTime endDate = hi.withYear(year).withMonthOfYear(end).withDayOfMonth(1);
+		
+		
+		while (startDate.isBefore(endDate.getMillis()) || startDate.equals(endDate)) {
+			month.addItem(monthFormat.print(startDate.getMillis()));
+			startDate = startDate.plusMonths(1);
 		}
 	}
 	
-	private void years(Date lo, Date hi, ListBox year) {
+	private void years(DateTime lo, DateTime hi, ListBox year) {
         year.clear();
-		int start = lo.getYear() + 1900;
-		int end = hi.getYear() + 1900;
+		int start = lo.getYear();
+		int end = hi.getYear();
 		for ( int y = start; y <= end; y++ ) {
 			year.addItem(GeoUtil.format_four(y), GeoUtil.format_four(y));
 		}
@@ -393,12 +424,12 @@ public class DateTimeWidget extends Composite {
 			if ( hasDay ) {
 				date.append(lo_day.getValue(lo_day.getSelectedIndex()));
 			} else {
-				date.append(GeoUtil.format_two(lo.getDate()));
+				date.append(GeoUtil.format_two(lo.getDayOfMonth()));
 			}
 			if ( hasMonth ) {
 				date.append("-"+lo_month.getValue(lo_month.getSelectedIndex()));
 			} else {
-				date.append("-"+MONTHS.get(lo.getMonth()));
+				date.append("-"+monthFormat.print(lo.getMillis()));
 			}
 
 			if ( climatology ) {
@@ -425,12 +456,12 @@ public class DateTimeWidget extends Composite {
 				if ( hasDay ) {
 					date.append(hi_day.getValue(hi_day.getSelectedIndex()));
 				} else {				
-					date.append(GeoUtil.format_two(lo.getDate()));
+					date.append(GeoUtil.format_two(lo.getDayOfMonth()));
 				}
 				if ( hasMonth ) {
 					date.append("-"+hi_month.getValue(hi_month.getSelectedIndex()));
 				} else {
-					date.append("-"+MONTHS.get(lo.getMonth()));
+					date.append("-"+monthFormat.print(lo.getMillis()));
 				}
 
 				if ( climatology ) {
@@ -477,10 +508,10 @@ public class DateTimeWidget extends Composite {
 				hi_day.setSelectedIndex(lo_i);
 			}
 		} else {
-			Date lo = parseFerretDate(tlo);
+			DateTime lo = parseFerretDate(tlo);
 			
 			if ( hasYear ) {
-				String year = String.valueOf(lo.getYear() + 1900);
+				String year = String.valueOf(lo.getYear());
 				for ( int y = 0; y < lo_year.getItemCount(); y++ ) {
 					String value = lo_year.getValue(y);
 					if ( value.equals(year) ) {
@@ -490,7 +521,7 @@ public class DateTimeWidget extends Composite {
 				}
 			}
 			if ( hasMonth ) {
-				String month = MONTHS.get(lo.getMonth());
+				String month = monthFormat.print(lo.getMillis());
 				for ( int m = 0; m < lo_month.getItemCount(); m++ ) {
 					String value = lo_month.getValue(m);
 					if ( value.equals(month) ) {
@@ -501,7 +532,7 @@ public class DateTimeWidget extends Composite {
 
 			}
 			if ( hasDay ) {
-				String day = GeoUtil.format_two(lo.getDate());
+				String day = GeoUtil.format_two(lo.getDayOfMonth());
 				for(int d = 0; d < lo_day.getItemCount(); d++) {
 					String value = lo_day.getValue(d);
 					if ( value.equals(day) ) {
@@ -511,8 +542,8 @@ public class DateTimeWidget extends Composite {
 				}
 			} 
 			if ( hasHour ) {
-				int hour = lo.getHours();
-				int min = lo.getMinutes();
+				int hour = lo.getHourOfDay();
+				int min = lo.getMinuteOfDay();
 				String hours_value = GeoUtil.format_two(hour)+":"+GeoUtil.format_two(min);
 				for( int h = 0; h < lo_hour.getItemCount(); h++ ) {
 					String value = lo_hour.getValue(h);
@@ -549,9 +580,9 @@ public class DateTimeWidget extends Composite {
 				lo_day.setSelectedIndex(hi_i);
 			}
 		} else {
-			Date hi = parseFerretDate(thi);
+			DateTime hi = parseFerretDate(thi);
 			if ( hasYear ) {
-				String year = String.valueOf(hi.getYear() + 1900);
+				String year = String.valueOf(hi.getYear());
 				for ( int y = 0; y < hi_year.getItemCount(); y++ ) {
 					String value = hi_year.getValue(y);
 					if ( value.equals(year) ) {
@@ -561,7 +592,7 @@ public class DateTimeWidget extends Composite {
 				}
 			}
 			if ( hasMonth ) {
-				String month = MONTHS.get(hi.getMonth());
+				String month = monthFormat.print(hi.getMillis());
 				for ( int m = 0; m < hi_month.getItemCount(); m++ ) {
 					String value = hi_month.getValue(m);
 					if ( value.equals(month) ) {
@@ -572,7 +603,7 @@ public class DateTimeWidget extends Composite {
 
 			}
 			if ( hasDay ) {
-				String day = GeoUtil.format_two(hi.getDate());
+				String day = GeoUtil.format_two(hi.getDayOfMonth());
 				for(int d = 0; d < hi_day.getItemCount(); d++) {
 					String value = hi_day.getValue(d);
 					if ( value.equals(day) ) {
@@ -582,8 +613,8 @@ public class DateTimeWidget extends Composite {
 				}
 			} 	
 			if ( hasHour ) {
-				int hour = hi.getHours();
-				int min = hi.getMinutes();
+				int hour = hi.getHourOfDay();
+				int min = hi.getMinuteOfHour();
 				String hours_value = GeoUtil.format_two(hour)+":"+GeoUtil.format_two(min);
 				for( int h = 0; h < hi_hour.getItemCount(); h++ ) {
 					String value = hi_hour.getValue(h);
@@ -609,12 +640,17 @@ public class DateTimeWidget extends Composite {
 		// Load the valid months for this year.
 		months(month_list, year);
 
+		int low_month_number = monthToInt(month_list.getValue(0));
+		int hi_month_number = monthToInt(month_list.getValue(month_list.getItemCount() - 1));
+		
+		DateTime requested_instance = new DateTime(year, month, day, hour, min, chrono).withZone(DateTimeZone.UTC);
+		String month_name = monthFormat.print(requested_instance.getMillis());
 
-		if ( month < MONTHS.indexOf(month_list.getValue(0)) ) {
+		if ( month < low_month_number ) {
 			// If the current month is before the first month in the list
 			// set to the first month.
 			month_list.setSelectedIndex(0);
-		} else if ( month > MONTHS.indexOf(month_list.getValue(month_list.getItemCount() - 1))) {
+		} else if ( month > hi_month_number) {
 			// If the current month is after the last month in the list
 			// set to the last month.
 			month_list.setSelectedIndex(month_list.getItemCount() - 1);
@@ -622,13 +658,15 @@ public class DateTimeWidget extends Composite {
 			// Else set to that month
 			for (int i = 0; i < month_list.getItemCount(); i++) {
 				String v = month_list.getValue(i);
-				if ( v.equals(MONTHS.get(month)) ) {
+				if ( v.equals(month_name) ) {
 					month_list.setSelectedIndex(i);
 				}
 			}
 		}
+
 		
-		loadAndSetDayHour(day_list, hour_list, year, MONTHS.indexOf(month_list.getValue(month_list.getSelectedIndex())), day, hour, min);	
+		int selected_month = monthToInt(month_list.getValue(month_list.getSelectedIndex()));
+		loadAndSetDayHour(day_list, hour_list, year, selected_month, day, hour, min);	
 	}
 	
 	public void loadAndSetDayHour(ListBox day_list, HourListBox hour_list, int year, int month, int day, int hour, int min) {
@@ -653,17 +691,17 @@ public class DateTimeWidget extends Composite {
 		
 	}
 	public void loadAndSetHour(HourListBox hour_list, int year, int month, int day, int hour, int min) {
-		int start_year = lo.getYear() + 1900;
-		int start_month = lo.getMonth();
-		int start_day = lo.getDate();
-		int start_hour = lo.getHours();
-		int start_min = lo.getMinutes();
+		int start_year = lo.getYear();
+		int start_month = lo.getMonthOfYear();
+		int start_day = lo.getDayOfMonth();
+		int start_hour = lo.getHourOfDay();
+		int start_min = lo.getMinuteOfHour();
 		
-		int end_year = hi.getYear() + 1900;
-		int end_month = hi.getMonth();
-		int end_day = hi.getDate();
-		int end_hour = hi.getHours();
-		int end_min = hi.getMinutes();
+		int end_year = hi.getYear();
+		int end_month = hi.getMonthOfYear();
+		int end_day = hi.getDayOfMonth();
+		int end_hour = hi.getHourOfDay();
+		int end_min = hi.getMinuteOfHour();
 		if ( start_year == year && start_month == month && start_day == day ) {
 			hours(hour_list, start_hour, start_min, 24, 0);
 		} else if ( end_year == year && end_month == month && end_day == day ) {
@@ -676,14 +714,15 @@ public class DateTimeWidget extends Composite {
 		String current_lo = getFerretDateLo();
 		String current_hi = getFerretDateHi();
 		
-		Date clo = parseFerretDate(current_lo);
-		Date chi = parseFerretDate(current_hi);
+		DateTime clo = parseFerretDate(current_lo);
+		DateTime chi = parseFerretDate(current_hi);
 		
 		// Set the hi year to the lo year and check the month...
-		if ( clo.after(chi) ) {
+		if ( clo.isAfter(chi) ) {
 			int year = Integer.valueOf(lo_year.getValue(lo_year.getSelectedIndex()));
 			hi_year.setSelectedIndex(lo_year.getSelectedIndex());
-			loadAndSetMonthDayHour(hi_month, hi_day, hi_hour, year, MONTHS.indexOf(hi_month.getValue(hi_month.getSelectedIndex())), Integer.valueOf(hi_day.getValue(hi_day.getSelectedIndex())).intValue(), hi_hour.getHour(), hi_hour.getMin());
+			
+			loadAndSetMonthDayHour(hi_month, hi_day, hi_hour, year, monthToInt(hi_month.getValue(hi_month.getSelectedIndex())), Integer.valueOf(hi_day.getValue(hi_day.getSelectedIndex())).intValue(), hi_hour.getHour(), hi_hour.getMin());
 			checkRangeEndMonth();
 		}
 		
@@ -692,12 +731,12 @@ public class DateTimeWidget extends Composite {
 		String current_lo = getFerretDateLo();
 		String current_hi = getFerretDateHi();
 		
-		Date clo = parseFerretDate(current_lo);
-		Date chi = parseFerretDate(current_hi);
+		DateTime clo = parseFerretDate(current_lo);
+		DateTime chi = parseFerretDate(current_hi);
 		
-		if ( clo.after(chi) ) {
+		if ( clo.isAfter(chi) ) {
 			int ny = Integer.valueOf(hi_year.getValue(hi_year.getSelectedIndex()));
-			int month = MONTHS.indexOf(lo_month.getValue(lo_month.getSelectedIndex()));
+			int month = monthToInt(lo_month.getValue(lo_month.getSelectedIndex()));
 			int day = Integer.valueOf(hi_day.getValue(hi_day.getSelectedIndex()));
 			hi_month.setSelectedIndex(lo_month.getSelectedIndex());
 			int hour = hi_hour.getHour();
@@ -710,10 +749,10 @@ public class DateTimeWidget extends Composite {
 		String current_lo = getFerretDateLo();
 		String current_hi = getFerretDateHi();
 		
-		Date clo = parseFerretDate(current_lo);
-		Date chi = parseFerretDate(current_hi);
+		DateTime clo = parseFerretDate(current_lo);
+		DateTime chi = parseFerretDate(current_hi);
 		
-		if ( clo.after(chi) ) {
+		if ( clo.isAfter(chi) ) {
 			hi_day.setSelectedIndex(lo_day.getSelectedIndex());
 			checkRangeEndHour();
 		}
@@ -722,10 +761,10 @@ public class DateTimeWidget extends Composite {
 		String current_lo = getFerretDateLo();
 		String current_hi = getFerretDateHi();
 		
-		Date clo = parseFerretDate(current_lo);
-		Date chi = parseFerretDate(current_hi);
+		DateTime clo = parseFerretDate(current_lo);
+		DateTime chi = parseFerretDate(current_hi);
 		
-		if ( clo.after(chi) ) {
+		if ( clo.isAfter(chi) ) {
 			hi_hour.setSelectedIndex(lo_hour.getSelectedIndex());
 		}
 	}
@@ -733,11 +772,11 @@ public class DateTimeWidget extends Composite {
 		String current_lo = getFerretDateLo();
 		String current_hi = getFerretDateHi();
 		
-		Date clo = parseFerretDate(current_lo);
-		Date chi = parseFerretDate(current_hi);
+		DateTime clo = parseFerretDate(current_lo);
+		DateTime chi = parseFerretDate(current_hi);
 		
 		// Set the hi year to the lo year and check the month...
-		if ( clo.after(chi) ) {
+		if ( clo.isAfter(chi) ) {
 			lo_year.setSelectedIndex(hi_year.getSelectedIndex());
 			checkRangeStartMonth();
 		}
@@ -747,10 +786,10 @@ public class DateTimeWidget extends Composite {
 		String current_lo = getFerretDateLo();
 		String current_hi = getFerretDateHi();
 		
-		Date clo = parseFerretDate(current_lo);
-		Date chi = parseFerretDate(current_hi);
+		DateTime clo = parseFerretDate(current_lo);
+		DateTime chi = parseFerretDate(current_hi);
 
-		if ( clo.after(chi) ) {
+		if ( clo.isAfter(chi) ) {
 			lo_month.setSelectedIndex(hi_month.getSelectedIndex());
 			checkRangeStartDay();
 		}
@@ -759,10 +798,10 @@ public class DateTimeWidget extends Composite {
 		String current_lo = getFerretDateLo();
 		String current_hi = getFerretDateHi();
 		
-		Date clo = parseFerretDate(current_lo);
-		Date chi = parseFerretDate(current_hi);
+		DateTime clo = parseFerretDate(current_lo);
+		DateTime chi = parseFerretDate(current_hi);
 		
-		if ( clo.after(chi) ) {
+		if ( clo.isAfter(chi) ) {
 			lo_day.setSelectedIndex(hi_day.getSelectedIndex());
 			checkRangeStartHour();
 		}
@@ -771,10 +810,10 @@ public class DateTimeWidget extends Composite {
 		String current_lo = getFerretDateLo();
 		String current_hi = getFerretDateHi();
 		
-		Date clo = parseFerretDate(current_lo);
-		Date chi = parseFerretDate(current_hi);
+		DateTime clo = parseFerretDate(current_lo);
+		DateTime chi = parseFerretDate(current_hi);
 		
-		if ( clo.after(chi) ) {
+		if ( clo.isAfter(chi) ) {
 			lo_hour.setSelectedIndex(hi_hour.getSelectedIndex());
 		}
 	}
@@ -786,7 +825,7 @@ public class DateTimeWidget extends Composite {
 	};
 	private void loYearChange() {
 		int year = Integer.valueOf(lo_year.getValue(lo_year.getSelectedIndex())).intValue();
-		int month = MONTHS.indexOf(lo_month.getValue(lo_month.getSelectedIndex()));
+		int month = monthToInt(lo_month.getValue(lo_month.getSelectedIndex()));
 		int day = Integer.valueOf(lo_day.getValue(lo_day.getSelectedIndex())).intValue();
 		int hour = lo_hour.getHour();
 		int min = lo_hour.getMin();
@@ -801,7 +840,7 @@ public class DateTimeWidget extends Composite {
 	};
 	private void loMonthChange() {
 		int year = Integer.valueOf(lo_year.getValue(lo_year.getSelectedIndex())).intValue();
-		int month = MONTHS.indexOf(lo_month.getValue(lo_month.getSelectedIndex()));
+		int month = monthToInt(lo_month.getValue(lo_month.getSelectedIndex()));
 		int day = Integer.valueOf(lo_day.getValue(lo_day.getSelectedIndex())).intValue();
 		int hour = lo_hour.getHour();
 		int min = lo_hour.getMin();
@@ -825,7 +864,7 @@ public class DateTimeWidget extends Composite {
 			}
 		} else {
 			int year = Integer.valueOf(lo_year.getValue(lo_year.getSelectedIndex())).intValue();
-			int month = MONTHS.indexOf(lo_month.getValue(lo_month.getSelectedIndex()));
+			int month = monthToInt(lo_month.getValue(lo_month.getSelectedIndex()));
 			int day = Integer.valueOf(lo_day.getValue(lo_day.getSelectedIndex())).intValue();
 			int hour = lo_hour.getHour();
 			int min = lo_hour.getMin();
@@ -847,7 +886,7 @@ public class DateTimeWidget extends Composite {
 	};
 	private void hiYearChange() {
 		int year = Integer.valueOf(hi_year.getValue(hi_year.getSelectedIndex())).intValue();
-		int month = MONTHS.indexOf(hi_month.getValue(hi_month.getSelectedIndex()));
+		int month = monthToInt(hi_month.getValue(hi_month.getSelectedIndex()));
 		int day = Integer.valueOf(hi_day.getValue(hi_day.getSelectedIndex())).intValue();
 		int hour = hi_hour.getHour();
 		int min = hi_hour.getMin();
@@ -862,7 +901,7 @@ public class DateTimeWidget extends Composite {
 	};
 	private void hiMonthChange() {
 		int year = Integer.valueOf(hi_year.getValue(hi_year.getSelectedIndex())).intValue();
-		int month = MONTHS.indexOf(hi_month.getValue(hi_month.getSelectedIndex()));
+		int month = monthToInt(hi_month.getValue(hi_month.getSelectedIndex()));
 		int day = Integer.valueOf(hi_day.getValue(hi_day.getSelectedIndex())).intValue();
 		int hour = hi_hour.getHour();
 		int	min = hi_hour.getMin();  
@@ -884,7 +923,7 @@ public class DateTimeWidget extends Composite {
 			}
 		} else {
 			int year = Integer.valueOf(hi_year.getValue(hi_year.getSelectedIndex())).intValue();
-			int month = MONTHS.indexOf(hi_month.getValue(hi_month.getSelectedIndex()));
+			int month = monthToInt(hi_month.getValue(hi_month.getSelectedIndex()));
 			int day = Integer.valueOf(hi_day.getValue(hi_day.getSelectedIndex())).intValue();
 			int hour = hi_hour.getHour();
 			int	min = hi_hour.getMin();  
@@ -903,17 +942,17 @@ public class DateTimeWidget extends Composite {
 	 * @param date_string of the form 15-Jan-1983, 20-Mar-1997 12:32 or 19-Mar-1962 12:11:03
 	 * @return Date for the parse date
 	 */
-	private static Date parseFerretDate(String date_string) {
-		Date date;
+	private DateTime parseFerretDate(String date_string) {
+		DateTime date;
 		if ( date_string.length() == 6 ) {
 			// A lovely climo date of the form 15-Jan
-			date = shortFerretForm.parse(date_string+"-0001");
+			date = shortFerretForm.parseDateTime(date_string+"-0001");
 		} else if ( date_string.length() == 11 ) {
-			date = shortFerretForm.parse(date_string);
+			date = shortFerretForm.parseDateTime(date_string);
 		} else if ( date_string.length() == 17 ) {
-			date = mediumFerretForm.parse(date_string);
+			date = mediumFerretForm.parseDateTime(date_string);
 		} else {
-			date = longFerretForm.parse(date_string);
+			date = longFerretForm.parseDateTime(date_string);
 		}
 		return date;
 	}
@@ -922,16 +961,16 @@ public class DateTimeWidget extends Composite {
 	 * @param date_string of the form 1998-11-05, 1998-12-31 11:02 or 1923-11-14 04:13:21
 	 * @return
 	 */
-	private static Date parseDate(String date_string) {
-		Date date;
+	private DateTime parseDate(String date_string) {
+		DateTime date;
 		 try {
-	        	date = longForm.parse(date_string);
+	        	date = longForm.parseDateTime(date_string);
 	        } catch (IllegalArgumentException e) {
 	        	try {
-	        		 date = mediumForm.parse(date_string);
+	        		 date = mediumForm.parseDateTime(date_string);
 	        	} catch (IllegalArgumentException e1) {
 	        		try{
-	        			date = shortForm.parse(date_string);
+	        			date = shortForm.parseDateTime(date_string);
 	        		} catch (IllegalArgumentException e2) {
 	        			date = null;
 	        			Window.alert("Date parsing failed for "+date_string);
@@ -939,5 +978,10 @@ public class DateTimeWidget extends Composite {
 	        	}
 	        }
 		return date;
+	}
+	// In the weird calendars, the short names don't work so well so we force the issue a little bit.
+	private int monthToInt(String month_name) {
+		DateTime dt = monthFormat.parseDateTime(month_name);
+		return dt.getMonthOfYear();
 	}
 }

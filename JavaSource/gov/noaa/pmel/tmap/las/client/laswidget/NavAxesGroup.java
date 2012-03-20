@@ -124,6 +124,18 @@ public class NavAxesGroup extends Composite {
 	public void showMessage(boolean b) {
 		message.setVisible(b);
 	}
+	public void showViewAxes(String xView, List<String> ortho) {
+		for (int i = 0; i < xView.length(); i++) {
+			String type = xView.substring(i, i+1);
+			setAxisVisible(type, true);
+			setRange(type, true);
+		}
+		for (Iterator orthoIt = ortho.iterator(); orthoIt.hasNext();) {
+    		String ax = (String) orthoIt.next();
+    		setAxisVisible(ax, false);
+			setRange(ax, true);
+		}
+	}
 	public void setFixedAxis(String xView, List<String> ortho, String compareAxis) {
 		if ( compareAxis != null ) {
         	for (Iterator orthoIt = ortho.iterator(); orthoIt.hasNext();) {

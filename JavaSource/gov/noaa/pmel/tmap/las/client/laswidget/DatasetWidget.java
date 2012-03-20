@@ -85,7 +85,8 @@ public class DatasetWidget extends Tree {
 		public void onSelection(SelectionEvent<TreeItem> event) {
 			TreeItem item = event.getSelectedItem();
 			currentlySelected = item;
-			if ( item.getChild(0).getText().equals("Loading...") ) {
+			TreeItem child = item.getChild(0);
+			if ( child != null && child.getText().equals("Loading...") ) {
 				CategorySerializable cat = (CategorySerializable) item.getUserObject();
 				Util.getRPCService().getCategories(cat.getID(), categoryCallback);
 			}
