@@ -221,6 +221,8 @@ public class OutputPanel extends Composite {
 	List<Mouse> mouseMoves = new ArrayList<Mouse>();
 	
 	Image plotImage = null;
+	ImageData scaledImage; // The scaled image data.
+	double imageScaleRatio; // Keep track of the factor by which the image has been scaled.
 	
 	/**
 	 * Builds a VizGal panel with a default plot for the variable.  See {@code}VizGal(LASRequest) if you want more options on the initial plot.
@@ -949,7 +951,7 @@ public class OutputPanel extends Composite {
 			spin.hide();
 			HTML error = new HTML(exception.toString());
 			Widget size = grid.getWidget(1, 0);
-			error.setSize(image_w+"px", image_h+"px");
+			error.setSize(image_w*imageScaleRatio+"px", image_h*imageScaleRatio+"px");
 			grid.setWidget(1, 0, error);
 		}
 
@@ -1029,7 +1031,7 @@ public class OutputPanel extends Composite {
 								if ( text instanceof Text ) {
 									Text t = (Text) text;
 									HTML error = new HTML(t.getData().toString().trim());
-									error.setSize(image_w+"px", image_h+"px");
+									error.setSize(image_w*imageScaleRatio+"px", image_h*imageScaleRatio+"px");
 									grid.setWidget(1, 0, error);
 									retryShowing = true;
 									PushButton retry = new PushButton("Retry");
@@ -1045,7 +1047,7 @@ public class OutputPanel extends Composite {
 												sendRequest.sendRequest(null, lasRequestCallback);
 											} catch (RequestException e) {
 												HTML error = new HTML(e.toString());
-												error.setSize(image_w+"px", image_h+"px");
+												error.setSize(image_w*imageScaleRatio+"px", image_h*imageScaleRatio+"px");
 												grid.setWidget(1, 0, error);
 											}
 										}
@@ -1059,7 +1061,7 @@ public class OutputPanel extends Composite {
 						} else if ( result.getAttribute("type").equals("batch") ) {
 							String elapsed_time = result.getAttribute("elapsed_time");
 							HTML batch = new HTML("<br><br>Your request has been processing for "+elapsed_time+" seconds.<br>This panel will refresh automatically.<br><br>");
-							batch.setSize(image_w+"px", image_h+"px");
+							batch.setSize(image_w*imageScaleRatio+"px", image_h*imageScaleRatio+"px");
 							grid.setWidget(1, 0, batch);
 							lasRequest.setProperty("product_server", "ui_timeout", "3");
 							String url = Util.getProductServer()+"?xml="+URL.encode(lasRequest.toString());
@@ -1068,7 +1070,7 @@ public class OutputPanel extends Composite {
 								sendRequest.sendRequest(null, lasRequestCallback);
 							} catch (RequestException e) {
 								HTML error = new HTML(e.toString());
-								error.setSize(image_w+"px", image_h+"px");
+								error.setSize(image_w*imageScaleRatio+"px", image_h*imageScaleRatio+"px");
 								grid.setWidget(1, 0, error);
 							}
 						}
@@ -1346,13 +1348,13 @@ public class OutputPanel extends Composite {
 		Widget w = grid.getWidget(1, 0);
 		// Piggy back setting the annotations width onto this method.
 		if ( autoZoom ) {
-			double scale = 1.;
+			imageScaleRatio = 1.;
 			if ( pwidth < image_w ) {
 				// If the panel is less than the image, shrink the image.
 				int h = (int) ((image_h/image_w)*Double.valueOf(pwidth));
-				scale = h/image_h;
+				imageScaleRatio = h/image_h;
 			}
-			if (plotImage != null ) scaleImage(plotImage, scale);
+			if (plotImage != null ) scale(plotImage, imageScaleRatio);
 		} else {
 			setImageSize(fixedZoom);
 		}
@@ -1704,7 +1706,8 @@ public class OutputPanel extends Composite {
 
 		@Override
 		public void onLoad(LoadEvent event) {
-			String w = plotImage.getWidth() - 18 + "px";
+			int wt = (int)((plotImage.getWidth() - 100)*imageScaleRatio);
+			String w = wt + "px";
             lasAnnotationsPanel.setPopupWidth(w);
 			frontCanvasContext.drawImage(ImageElement.as(plotImage.getElement()), 0, 0);
 			setImageWidth();
@@ -1720,9 +1723,11 @@ public class OutputPanel extends Composite {
 						 starty < y_offset_from_top + y_plot_size      ) {
 						
 						draw = true;
-						frontCanvasContext.drawImage(ImageElement.as(plotImage.getElement()), 0, 0);
-						world_startx = x_axis_lower_left + (startx - x_offset_from_left)*x_per_pixel;
-						world_starty = y_axis_lower_left + ((y_image_size-starty)-y_offset_from_bottom)*y_per_pixel;
+						drawToScreen(scaledImage); //frontCanvasContext.drawImage(ImageElement.as(plotImage.getElement()), 0, 0);
+						double scaled_x_per_pixel = x_per_pixel/imageScaleRatio;
+						double scaled_y_per_pixel = y_per_pixel/imageScaleRatio;
+						world_startx = x_axis_lower_left + (startx - x_offset_from_left*imageScaleRatio)*scaled_x_per_pixel;
+						world_starty = y_axis_lower_left + ((y_image_size*imageScaleRatio-starty)-y_offset_from_bottom*imageScaleRatio)*scaled_y_per_pixel;
 						
 						world_endx = world_startx;
 						world_endy = world_starty;										
@@ -1746,10 +1751,12 @@ public class OutputPanel extends Composite {
 						endy = currenty;
 					}
 					if ( draw ) {
-						world_endx = x_axis_lower_left + (currentx - x_offset_from_left)*x_per_pixel;
-						world_endy = y_axis_lower_left + ((y_image_size-currenty)-y_offset_from_bottom)*y_per_pixel;
+						double scaled_x_per_pixel = x_per_pixel/imageScaleRatio;
+						double scaled_y_per_pixel = y_per_pixel/imageScaleRatio;
+						world_endx = x_axis_lower_left + (currentx - x_offset_from_left*imageScaleRatio)*scaled_x_per_pixel;
+						world_endy = y_axis_lower_left + ((y_image_size*imageScaleRatio-currenty)-y_offset_from_bottom*imageScaleRatio)*scaled_y_per_pixel;
 						frontCanvasContext.setFillStyle(randomColor);
-						frontCanvasContext.drawImage(ImageElement.as(plotImage.getElement()), 0, 0);
+						drawToScreen(scaledImage); //frontCanvasContext.drawImage(ImageElement.as(plotImage.getElement()), 0, 0);
 						frontCanvasContext.fillRect(startx, starty, currentx - startx, currenty-starty);
 						for (Iterator mouseIt = mouseMoves.iterator(); mouseIt.hasNext();) {
 							Mouse mouse = (Mouse) mouseIt.next();
@@ -1762,9 +1769,9 @@ public class OutputPanel extends Composite {
 		}
 
 	};
-	private void scale(Image img) {
-	    ImageData imageData = scaleImage(img, .1);
-	    drawToScreen(imageData);
+	private void scale(Image img, double scaleRatio) {
+	    scaledImage = scaleImage(img, scaleRatio);
+	    drawToScreen(scaledImage);
 	}
 
 	private ImageData scaleImage(Image image, double scaleToRatio) {
