@@ -245,7 +245,7 @@ public class OutputPanel extends Composite {
 		this.optionID = optionID;
 		this.view = view;
 		this.containerType = container_type;
-		panelAxesWidgets = new AxesWidgetGroup("Orthogonal Coordinates", "horizontal", "", "Apply To "+ID, tile_server);
+		panelAxesWidgets = new AxesWidgetGroup("Coordinates Orthogonal to the Plot", "horizontal", "", "Apply To "+ID, tile_server);
 		spinImage = new Image(URLUtil.getImageURL()+"/mozilla_blu.gif");
 		spinImage.setSize("18px", "18px");
 		spin = new PopupPanel();
