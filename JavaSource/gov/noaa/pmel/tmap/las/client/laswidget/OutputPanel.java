@@ -428,6 +428,7 @@ public class OutputPanel extends Composite {
 					lasAnnotationsPanel.setError("Fetching plot annotations...");
 					sendRequest.sendRequest(null, lasRequestCallback);
 				} catch (RequestException e) {
+					spin.hide();
 					HTML error = new HTML(e.toString());
 					grid.setWidget(1, 0, error);
 				}
@@ -468,61 +469,31 @@ public class OutputPanel extends Composite {
 			lasRequest.addVariable(vizGalVariable.getDSID(), vizGalVariable.getID(), 0);
 		}
         
-	
 		// For the first variable set the region according to the values passed in...
 		// or the local widget value...
-		if ( view.contains("x") ) {
-			lasRequest.setRange("x", xlo, xhi, 0);
-		} else {
-			lasRequest.setRange("x", panelAxesWidgets.getRefMap().getXloFormatted(), panelAxesWidgets.getRefMap().getXhiFormatted(), 0);
-		}
-		if ( view.contains("y") ) {
-			lasRequest.setRange("y", ylo, yhi, 0);
-		} else {
-			lasRequest.setRange("y", panelAxesWidgets.getRefMap().getYloFormatted(), panelAxesWidgets.getRefMap().getYhiFormatted(), 0);
-		}
+		
+		lasRequest.setRange("x", xlo, xhi, 0);		
+		lasRequest.setRange("y", ylo, yhi, 0);
+	
 		if ( vizGalVariable.getGrid().hasZ() ) {
-			if ( view.contains("z") ) {
-				lasRequest.setRange("z", zlo, zhi, 0);
-			} else {
-				lasRequest.setRange("z", panelAxesWidgets.getZAxis().getLo(), panelAxesWidgets.getZAxis().getHi(), 0);
-			}
+			lasRequest.setRange("z", zlo, zhi, 0);
 		}
 		if ( vizGalVariable.getGrid().hasT() ) {
-			if ( view.contains("t") ) {
-				lasRequest.setRange("t", tlo, thi, 0);
-			} else {
-				lasRequest.setRange("t", panelAxesWidgets.getTAxis().getFerretDateLo(), panelAxesWidgets.getTAxis().getFerretDateHi(), 0);
-			}
+			lasRequest.setRange("t", tlo, thi, 0);
 		}
-		
 		
 		if ( vizGalVariable.isVector() ) {
 			// Add the second component and its region to match the first component.
 			lasRequest.setProperty("ferret", "vector_name", vizGalVariable.getName());
 			lasRequest.addVariable(vizGalVariable.getDSID(), vizGalVariable.getComponents().get(1), 1);
-			
-			// For the second component variable set the region according to the values passed in...
-			if ( view.contains("x") ) {
-				lasRequest.setRange("x", xlo, xhi, 1);
-			} else {
-				lasRequest.setRange("x", panelAxesWidgets.getRefMap().getXloFormatted(), panelAxesWidgets.getRefMap().getXhiFormatted(), 1);
-			}
-			if ( view.contains("y") ) {
-				lasRequest.setRange("y", ylo, yhi, 1);
-			} else {
-				lasRequest.setRange("y", panelAxesWidgets.getRefMap().getYloFormatted(), panelAxesWidgets.getRefMap().getYhiFormatted(), 1);
-			}
-			if ( view.contains("z") ) {
+			lasRequest.setRange("x", xlo, xhi, 1);
+			lasRequest.setRange("y", ylo, yhi, 1);
+			if ( vizGalVariable.getGrid().hasZ() ) {
 				lasRequest.setRange("z", zlo, zhi, 1);
-			} else {
-				lasRequest.setRange("z", panelAxesWidgets.getZAxis().getLo(), panelAxesWidgets.getZAxis().getHi(), 1);
 			}
-			if ( view.contains("t") ) {
+			if ( vizGalVariable.getGrid().hasT() ) {
 				lasRequest.setRange("t", tlo, thi, 1);
-			} else {
-				lasRequest.setRange("t", panelAxesWidgets.getTAxis().getFerretDateLo(), panelAxesWidgets.getTAxis().getFerretDateHi(), 1);
-			}
+			} 
 		} else {
 
 			// The comparison variable and it's region from the panel axes.
@@ -653,6 +624,7 @@ public class OutputPanel extends Composite {
 				try {
 					sendRequest.sendRequest(null, lasRequestCallback);
 				} catch (RequestException e) {
+					spin.hide();
 					HTML error = new HTML(e.toString());
 					grid.setWidget(1, 0, error);
 
@@ -956,6 +928,7 @@ public class OutputPanel extends Composite {
 							if ( result.getAttribute("ID").equals("las_message") ) {
 								Node text = result.getFirstChild();
 								if ( text instanceof Text ) {
+									spin.hide();
 									Text t = (Text) text;
 									HTML error = new HTML(t.getData().toString().trim());
 									error.setSize(image_w*imageScaleRatio+"px", image_h*imageScaleRatio+"px");
