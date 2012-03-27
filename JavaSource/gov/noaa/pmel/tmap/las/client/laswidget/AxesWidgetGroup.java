@@ -14,6 +14,7 @@ import com.google.gwt.user.client.ui.DisclosurePanel;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.PushButton;
 /**
  * This widget will create a map and a set of axes widgets to control all of the XYZT and E(nsemble) dimensions for a given view.
@@ -25,7 +26,8 @@ public class AxesWidgetGroup extends Composite {
 	OLMapWidget refMap;
 	DateTimeWidget dateTimeWidget;
 	AxisWidget zWidget;
-	FlexTable layout;
+	HorizontalPanel layout;
+	FlexTable menuWidgets;
 	DisclosurePanel panel;
 	
 	HTML plotAxisMessage;
@@ -45,21 +47,23 @@ public class AxesWidgetGroup extends Composite {
 	 * @param layout
 	 */
 	public AxesWidgetGroup(String title, String orientation, String width, String panel_title, String tile_server) {		
-		layout = new FlexTable();
+		layout = new HorizontalPanel();
+		menuWidgets = new FlexTable();
 		refMap = new OLMapWidget("128px", "256px", tile_server);
 		refMap.activateNativeHooks();
 		zWidget = new AxisWidget();
 		zWidget.setVisible(false);
 		dateTimeWidget = new DateTimeWidget();
 		dateTimeWidget.setVisible(false);
-		layout.setWidget(0, 0, refMap);
+		layout.add(refMap);
 		panel = new DisclosurePanel(title);
 		panel.add(layout);
 		panel.setOpen(true);
-		layout.setWidget(0, 1, zWidget);
-		layout.setWidget(1, 1, dateTimeWidget);
-		layout.getCellFormatter().setVerticalAlignment(0, 0, HasVerticalAlignment.ALIGN_TOP);
-		layout.getFlexCellFormatter().setRowSpan(0, 0, 2);	
+		menuWidgets.setWidget(0, 0, zWidget);
+		menuWidgets.setWidget(1, 0, dateTimeWidget);
+		menuWidgets.getCellFormatter().setVerticalAlignment(0, 0, HasVerticalAlignment.ALIGN_TOP);
+		menuWidgets.getCellFormatter().setVerticalAlignment(0, 1, HasVerticalAlignment.ALIGN_TOP);
+        layout.add(menuWidgets);
 		initWidget(panel);
 	}
 
@@ -143,13 +147,13 @@ public class AxesWidgetGroup extends Composite {
     }
     
     public void showOrthoAxes(String view, List<String> ortho) {
+    	for (int i = 0; i < view.length(); i++) {
+			setAxisVisible(view.substring(i, i+1), false);
+		}
     	for (Iterator orthoIt = ortho.iterator(); orthoIt.hasNext();) {
     		String ax = (String) orthoIt.next();
     		setAxisVisible(ax, true);
     	}
-		for (int i = 0; i < view.length(); i++) {
-			setAxisVisible(view.substring(i, i+1), false);
-		}
     }
     public List<String> getViewAxes() {
     	return viewAxes;

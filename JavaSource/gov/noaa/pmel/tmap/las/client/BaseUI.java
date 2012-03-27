@@ -641,18 +641,18 @@ public class BaseUI {
     private void setCurrentURL(String url) {
     	for (int i = 0; i < xPanelCount; i++ ) {
     		OutputPanel panel = xPanels.get(i);
-    		if ( !panel.isUsePanelSettings() ) {
+    		
     		    xPanels.get(i).setURL(url);
-    		}
+    		
     	}
     }
     private void setAnnotationsHTMLURL(String url) {
     	
     	for (int i = 0; i < xPanelCount; i++ ) {
     		OutputPanel panel = xPanels.get(i);
-    		if ( !panel.isUsePanelSettings() ) {
+    		
     		    xPanels.get(i).setAnnotationsHTMLURL(url);
-    		}
+    		
     	}
     }
     public native void activateNativeHooks()/*-{
