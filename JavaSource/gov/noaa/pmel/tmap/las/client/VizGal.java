@@ -502,7 +502,7 @@ public class VizGal extends BaseUI {
 				OutputPanel panel = (OutputPanel) panelIt.next();
 				if ( panel.isComparePanel() ) {
 					comparePanel = panel;
-					setPanelAxes(comparePanel, panel);
+					panel.setVizGalState(xVariable, getHistoryToken());
 					panel.refreshPlot(xOptionsButton.getState(), switchAxis, true);	
 				}
 			}
@@ -543,7 +543,8 @@ public class VizGal extends BaseUI {
 							zlo = null;
 							zhi = null;
 						}
-						panel.computeDifference(xOptionsButton.getState(), switchAxis, comparePanel.getVariable(), xOperationsWidget.getCurrentView(), xXlo, xhi, ylo, yhi, zlo, zhi, tlo, thi);
+						panel.setVizGalState(xVariable, getHistoryToken());
+						panel.computeDifference(xOptionsButton.getState(), switchAxis);
 					}
 				}
 			}
@@ -560,19 +561,16 @@ public class VizGal extends BaseUI {
 				panel.setVizGalState(comparePanel.getVariable(), comparePanel.getHistoryToken());
 				// See if the panel settings are being used on this panel, if not
 				// reset the fixed axis and the view axis and the operation to the slide sorter value.
-				if ( !panel.isUsePanelSettings() ) {
-					VariableSerializable v = panel.getVariable();
-					if ( !v.getID().equals(xVariable.getID()) || !v.getDSID().equals(xVariable.getDSID() ) ) {
-						panel.setVariable(xVariable);
-						panel.init(false, ops);
-					} 
-					setPanelAxes(comparePanel, panel);
-					panel.setOperation(xOperationID, xView);
-				}
-				if ( !panel.getCurrentOperationView().equals(xOperationsWidget.getCurrentView()) ) {
-					differenceButton.setDown(false);
-					differenceButton.setEnabled(false);
-				} else {
+				
+//					VariableSerializable v = panel.getVariable();
+//					if ( !v.getID().equals(xVariable.getID()) || !v.getDSID().equals(xVariable.getDSID() ) ) {
+//						panel.setVariable(xVariable);
+//						panel.init(false, ops);
+//					} 
+					panel.setVizGalState(xVariable, getHistoryToken());
+//					panel.setOperation(xOperationID, xView);
+				
+
 					if ( xVariable.isVector() ) {
 						if ( !xView.equals("xy") ) {
 							differenceButton.setDown(false);
@@ -585,7 +583,7 @@ public class VizGal extends BaseUI {
 				  	    differenceButton.setDown(false);
 					    differenceButton.setEnabled(true);
 					}
-				}
+				
 
 
 				// Get the current state of the options...
@@ -604,112 +602,49 @@ public class VizGal extends BaseUI {
 		}
 		resize();
 	}
-	private void setPanelAxes(OutputPanel comparePanel, OutputPanel panel) {
-		double plot_xlo = -9999.;
-		double plot_xhi = -9999.;
-		double plot_yhi = -9999.;
-		double plot_ylo = -9999.;
-		plot_xlo = comparePanel.getXlo();
-		plot_xhi = comparePanel.getXhi();
-		plot_ylo = comparePanel.getYlo();
-		plot_yhi = comparePanel.getYhi();
-
-		if ( xView.equals("xy") ) {
-			// Set X and Y in the panel
-			panel.setLatLon(String.valueOf(xAxesWidget.getRefMap().getYlo()), 
-					String.valueOf(xAxesWidget.getRefMap().getYhi()), 
-					String.valueOf(xAxesWidget.getRefMap().getXlo()), 
-					String.valueOf(xAxesWidget.getRefMap().getXhi()));
-		} else if ( xView.equals("x") || xView.equals("y") ) {
-			panel.setLatLon(String.valueOf(xAxesWidget.getRefMap().getYlo()), 
-					String.valueOf(xAxesWidget.getRefMap().getYhi()), 
-					String.valueOf(xAxesWidget.getRefMap().getXlo()), 
-					String.valueOf(xAxesWidget.getRefMap().getXhi()));
-		} else if ( xView.equals("z") ) {
-			if ( xVariable.getGrid().hasZ() ) {
-				panel.setAxisRangeValues("z", xAxesWidget.getZAxis().getLo(), xAxesWidget.getZAxis().getHi());
-			}
-	
-		} else if ( xView.equals("t") ) {
-			if ( xVariable.getGrid().hasT() ) {
-				panel.setAxisRangeValues("t", xAxesWidget.getTAxis().getFerretDateLo(), xAxesWidget.getTAxis().getFerretDateHi());
-			}
-//		} else if ( xView.equals("xz") && compareAxis.equals("y") ) {
-//			if ( xVariable.getGrid().hasZ() ) {
-//				panel.setAxisRangeValues("z", xAxesWidget.getZAxis().getLo(), xAxesWidget.getZAxis().getHi());
-//			}
-//			if ( xVariable.getGrid().hasT() ) {
-//				panel.setAxisRangeValues("t", xAxesWidget.getTAxis().getFerretDateLo(), xAxesWidget.getTAxis().getFerretDateHi());
-//			}
-//			panel.setLatLon(String.valueOf(panel.getYlo()), 
-//					String.valueOf(panel.getYhi()), 
-//					String.valueOf(plot_xlo), 
-//					String.valueOf(plot_xhi));
-//		} else if ( xView.equals("xz") && compareAxis.equals("t") ) {
-//			if ( xVariable.getGrid().hasZ() ) {
-//				panel.setAxisRangeValues("z", xAxesWidget.getZAxis().getLo(), xAxesWidget.getZAxis().getHi());
-//			}
+//	private void setPanelAxes(OutputPanel comparePanel, OutputPanel panel) {
+//		double plot_xlo = -9999.;
+//		double plot_xhi = -9999.;
+//		double plot_yhi = -9999.;
+//		double plot_ylo = -9999.;
+//		plot_xlo = comparePanel.getXlo();
+//		plot_xhi = comparePanel.getXhi();
+//		plot_ylo = comparePanel.getYlo();
+//		plot_yhi = comparePanel.getYhi();
+//
+//		if ( xView.equals("xy") ) {
+//			// Set X and Y in the panel
 //			panel.setLatLon(String.valueOf(xAxesWidget.getRefMap().getYlo()), 
-//					String.valueOf(xAxesWidget.getRefMap().getYhi()), 
-//					String.valueOf(xAxesWidget.getRefMap().getXlo()), 
-//					String.valueOf(xAxesWidget.getRefMap().getXhi()));
-//		} else if ( xView.equals("yz") && compareAxis.equals("x") ) {
+//				        	String.valueOf(xAxesWidget.getRefMap().getYhi()), 
+//					        String.valueOf(xAxesWidget.getRefMap().getXlo()), 
+//					        String.valueOf(xAxesWidget.getRefMap().getXhi()));
+//		} else if ( xView.equals("x") ) {
+//			panel.setLon(String.valueOf(xAxesWidget.getRefMap().getXlo()), String.valueOf(xAxesWidget.getRefMap().getXhi()));
+//		} else if ( xView.equals("y") ) {
+//			panel.setLat(String.valueOf(xAxesWidget.getRefMap().getYlo()), String.valueOf(xAxesWidget.getRefMap().getYhi()));
+//		} else if ( xView.equals("z") ) {
 //			if ( xVariable.getGrid().hasZ() ) {
 //				panel.setAxisRangeValues("z", xAxesWidget.getZAxis().getLo(), xAxesWidget.getZAxis().getHi());
 //			}
+//		} else if ( xView.equals("t") ) {
 //			if ( xVariable.getGrid().hasT() ) {
 //				panel.setAxisRangeValues("t", xAxesWidget.getTAxis().getFerretDateLo(), xAxesWidget.getTAxis().getFerretDateHi());
 //			}
-//			panel.setLatLon(String.valueOf(plot_ylo), 
-//					String.valueOf(plot_yhi), 
-//					String.valueOf(panel.getXlo()), 
-//					String.valueOf(panel.getXhi()));
-//		} else if ( xView.equals("yz") && compareAxis.equals("t") ) {
+//		} else if ( xView.equals("xz") ) {
 //			if ( xVariable.getGrid().hasZ() ) {
 //				panel.setAxisRangeValues("z", xAxesWidget.getZAxis().getLo(), xAxesWidget.getZAxis().getHi());
 //			}
-//			panel.setLatLon(String.valueOf(xAxesWidget.getRefMap().getYlo()), 
-//					String.valueOf(xAxesWidget.getRefMap().getYhi()), 
-//					String.valueOf(xAxesWidget.getRefMap().getXlo()), 
-//					String.valueOf(xAxesWidget.getRefMap().getXhi()));
-//		} else if ( xView.equals("xt") && compareAxis.equals("z") ) {
+//			panel.setLon(String.valueOf(xAxesWidget.getRefMap().getXlo()), String.valueOf(xAxesWidget.getRefMap().getXhi()));
+//		} else if ( xView.equals("xt") ) {
 //			if ( xVariable.getGrid().hasT() ) {
 //				panel.setAxisRangeValues("t", xAxesWidget.getTAxis().getFerretDateLo(), xAxesWidget.getTAxis().getFerretDateHi());
 //			}
-//			panel.setLatLon(String.valueOf(xAxesWidget.getRefMap().getYlo()), 
-//					String.valueOf(xAxesWidget.getRefMap().getYhi()), 
-//					String.valueOf(xAxesWidget.getRefMap().getXlo()), 
-//					String.valueOf(xAxesWidget.getRefMap().getXhi()));
-//		} else if ( xView.equals("xt") && compareAxis.equals("y") ) {
-//			if ( xVariable.getGrid().hasZ() ) {
-//				panel.setAxisRangeValues("z", xAxesWidget.getZAxis().getLo(), xAxesWidget.getZAxis().getHi());
-//			}
+//			panel.setLon(String.valueOf(xAxesWidget.getRefMap().getXlo()), String.valueOf(xAxesWidget.getRefMap().getXhi()));
+//		} else if ( xView.equals("yt") ) {
 //			if ( xVariable.getGrid().hasT() ) {
 //				panel.setAxisRangeValues("t", xAxesWidget.getTAxis().getFerretDateLo(), xAxesWidget.getTAxis().getFerretDateHi());
 //			}
-//			panel.setLatLon(String.valueOf(panel.getYlo()), 
-//					String.valueOf(panel.getYhi()), 
-//					String.valueOf(plot_xlo), 
-//					String.valueOf(plot_xhi));
-//		} else if ( xView.equals("yt") && compareAxis.equals("x") ) {
-//			if ( xVariable.getGrid().hasZ() ) {
-//				panel.setAxisRangeValues("z", xAxesWidget.getZAxis().getLo(), xAxesWidget.getZAxis().getHi());
-//			}
-//			if ( xVariable.getGrid().hasT() ) {
-//				panel.setAxisRangeValues("t", xAxesWidget.getTAxis().getFerretDateLo(), xAxesWidget.getTAxis().getFerretDateHi());
-//			}
-//			panel.setLatLon(String.valueOf(plot_ylo), 
-//					String.valueOf(plot_yhi), 
-//					String.valueOf(panel.getXlo()), 
-//					String.valueOf(panel.getXhi()));
-//		} else if ( xView.equals("yt") && compareAxis.equals("z") ) {
-//			if ( xVariable.getGrid().hasT() ) {
-//				panel.setAxisRangeValues("t", xAxesWidget.getTAxis().getFerretDateLo(), xAxesWidget.getTAxis().getFerretDateHi());
-//			}
-//			panel.setLatLon(String.valueOf(xAxesWidget.getRefMap().getYlo()), 
-//					String.valueOf(xAxesWidget.getRefMap().getYhi()), 
-//					String.valueOf(xAxesWidget.getRefMap().getXlo()), 
-//					String.valueOf(xAxesWidget.getRefMap().getXhi()));
+//			panel.setLat(String.valueOf(xAxesWidget.getRefMap().getYlo()), String.valueOf(xAxesWidget.getRefMap().getYhi()));
 //		} else if ( xView.equals("zt") ) {
 //			if ( xVariable.getGrid().hasZ() ) {
 //				panel.setAxisRangeValues("z", xAxesWidget.getZAxis().getLo(), xAxesWidget.getZAxis().getHi());
@@ -717,8 +652,8 @@ public class VizGal extends BaseUI {
 //			if ( xVariable.getGrid().hasT() ) {
 //				panel.setAxisRangeValues("t", xAxesWidget.getTAxis().getFerretDateLo(), xAxesWidget.getTAxis().getFerretDateHi());
 //			}
-		}
-	}
+//		}
+//	}
 	/**
 	 * A little helper method to change data sets.
 	 */
@@ -767,7 +702,7 @@ public class VizGal extends BaseUI {
 		for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
 			OutputPanel panel = (OutputPanel) panelIt.next();
 			
-			if (!panel.isUsePanelSettings()) {
+			
 				panel.setMapTool(xView);
 				if ( cs == null ) {
 				    panel.setLatLon(String.valueOf(xAxesWidget.getRefMap().getYlo()), String.valueOf(xAxesWidget.getRefMap().getYhi()), String.valueOf(xAxesWidget.getRefMap().getXlo()), String.valueOf(xAxesWidget.getRefMap().getXhi()));
@@ -775,7 +710,7 @@ public class VizGal extends BaseUI {
 					//cs contains s, n, w, e
 					panel.setLatLon(String.valueOf(cs[0]), String.valueOf(cs[1]), String.valueOf(cs[2]), String.valueOf(cs[3]));
 				}
-			}
+			
 		}
 	}
 	public void applyChange() {
@@ -870,9 +805,9 @@ public class VizGal extends BaseUI {
 		}
 		for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
 			OutputPanel panel = (OutputPanel) panelIt.next();
-			if ( !panel.isUsePanelSettings() ) {
+			
 				panel.setAxisRangeValues(axis, lo, hi);
-			}
+			
 		}
 	}
 	ClickHandler optionsOkHandler = new ClickHandler() {
@@ -1013,11 +948,11 @@ public class VizGal extends BaseUI {
 		xAxesWidget.showViewAxes(xView, xOrtho);
 		for (Iterator panelsIt = xPanels.iterator(); panelsIt.hasNext();) {
 			OutputPanel panel = (OutputPanel) panelsIt.next();
-			if ( !panel.isUsePanelSettings() ) {
+			
 				panel.setOperation(xOperationID, xView);
 				panel.showOrthoAxes(xView, xOrtho);
 				panel.setRanges(xView, xOrtho);
-			}
+			
 		}
 		applyChange();
 	}	
@@ -1116,14 +1051,14 @@ public class VizGal extends BaseUI {
 			// Check to see if the the variable is the same as before and that no panels are in usePanel mode.
 			// This variable will be true if the settings only apply to the gallery state and not the variable
 			// or panels in usePanelMode
-			boolean galleryOnly = true;
-
-			// Panel 0 is the gallery panel...
-			for (int t = 1; t < xPanels.size(); t++) {
-
-				OutputPanel panel = xPanels.get(t);
-				galleryOnly = galleryOnly && !panel.isUsePanelSettings();
-			}
+//			boolean galleryOnly = true;
+//
+//			// Panel 0 is the gallery panel...
+//			for (int t = 1; t < xPanels.size(); t++) {
+//
+//				OutputPanel panel = xPanels.get(t);
+//				galleryOnly = galleryOnly && !panel.isUsePanelSettings();
+//			}
 
 
 
@@ -1169,7 +1104,6 @@ public class VizGal extends BaseUI {
 					Util.getRPCService().getGrid(tokenMap.get("xDSID"), tokenMap.get("vid"), requestGridForHistory);
 				}
 			}
-            // TODO what about the options for the gallery............................??
 			refresh(switch_axis, false);
 			// If necessary restore panels in usePanelSettings mode...
 			applyTokensToPanelModePanels(settings);		
