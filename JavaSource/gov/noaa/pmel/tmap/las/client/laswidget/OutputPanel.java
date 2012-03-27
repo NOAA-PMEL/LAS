@@ -682,14 +682,14 @@ public class OutputPanel extends Composite {
 		
 		// If the axis is in the view, the state comes from the global vizGal state which are store in the member variables.
 		// Otherwise it gets its axis value from the local widget.
-		String local_xlo;
-		String local_xhi;
-		String local_ylo;
-		String local_yhi;
-		String local_zlo;
-		String local_zhi;
-		String local_tlo;
-		String local_thi;
+		String local_xlo = null;
+		String local_xhi = null;
+		String local_ylo = null;
+		String local_yhi = null;
+		String local_zlo = null;
+		String local_zhi = null;
+		String local_tlo = null;
+		String local_thi = null;
 		
 		
 		
@@ -713,17 +713,20 @@ public class OutputPanel extends Composite {
 			local_zlo = zlo;
 			local_zhi = zhi;
 		} else {
-			local_zlo = panelAxesWidgets.getZAxis().getLo();
-			local_zhi = panelAxesWidgets.getZAxis().getHi();
-
+			if ( var.getGrid().hasZ() ) {
+				local_zlo = panelAxesWidgets.getZAxis().getLo();
+				local_zhi = panelAxesWidgets.getZAxis().getHi();
+			}
 		}
 		
 		if ( view.contains("t") ) {
 			local_tlo = tlo;
 			local_thi = thi;
 		} else {
-			local_tlo = panelAxesWidgets.getTAxis().getFerretDateLo();
-			local_thi = panelAxesWidgets.getTAxis().getFerretDateHi();
+			if ( var.getGrid().hasT() ) {
+				local_tlo = panelAxesWidgets.getTAxis().getFerretDateLo();
+				local_thi = panelAxesWidgets.getTAxis().getFerretDateHi();
+			}
 		}
 
 		if ( analysis != null ) {
@@ -749,10 +752,10 @@ public class OutputPanel extends Composite {
 		} else {
 			lasRequest.setRange("x", local_xlo, local_xhi, 0);
 			lasRequest.setRange("y", local_ylo, local_yhi, 0);
-			if ( var.getGrid().getZAxis() != null ) {
+			if ( var.getGrid().hasZ() ) {
 				lasRequest.setRange("z", local_zlo, local_zhi, 0);
 			} 
-			if ( var.getGrid().getTAxis() != null ) {
+			if ( var.getGrid().hasT() ) {
 				lasRequest.setRange("t", local_tlo, local_thi, 0);
 			}
 		}
