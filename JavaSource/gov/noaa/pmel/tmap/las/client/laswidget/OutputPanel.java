@@ -118,7 +118,8 @@ public class OutputPanel extends Composite {
 	VariableSerializable prePanelModeVariable;
 	
 	// Keep track of the current vizGal state when you are in panel mode.
-	String vizGalState;
+	String vizGalState;       // These are the values for the axes that are in the view
+	String comparePanelState; // These are the values for the axes that are in the compare panel (orthogonal to the view, but for the comparison variable only)
 	VariableSerializable vizGalVariable;
 
 	// Keep track of the axes that are currently orthogonal to the plot.
@@ -131,19 +132,6 @@ public class OutputPanel extends Composite {
 	// Some widgets to show when a panel is being refreshed.
 	PopupPanel spin;
 	Image spinImage;
-
-	// These hold the axis values from the parent which must always be applied for whatever axes are in the current view.
-	String xlo;
-	String xhi;
-
-	String ylo;
-	String yhi;
-	
-	String zlo;
-	String zhi;
-	
-	String tlo;
-	String thi;
 
 	String ID;
 
@@ -345,13 +333,6 @@ public class OutputPanel extends Composite {
 	public void setMapTool(String view) {
 		panelAxesWidgets.getRefMap().setTool(view);
 	}
-	private void switchAxis() {
-		// Already done by the ComparisonAxisSelector...
-//		String temp = compareAxis;
-//		compareAxis = fixedAxis;
-//		fixedAxis = temp;
-//		panelAxesWidgets.setCompareAxis(view, ortho, compareAxis);
-	}
 	/**
 	 * Send a request to the LAS server to create a new plot, you must have already pushed the operation and axes values from the main left-hand
 	 * controls to the panel and you can pass in the current "global" plot options.
@@ -364,280 +345,10 @@ public class OutputPanel extends Composite {
 		// When called from vizGal this means the button is off...
 		
 		difference = false;
-		if (switchAxis) {
-			switchAxis();
-		}
 		
 		messagePanel.hide();
 		
-        lasRequest = getRequest();
-        
-		lasRequest.setProperty("ferret", "size", ".8333");
-		lasRequest.setProperty("ferret", "image_format", "gif");
-		lasRequest.setProperty("ferret", "annotations", "file");
-		if ( containerType.equals(Constants.IMAGE) ) {
-			lasRequest.setProperty("las", "output_type", "xml");
-		}
-
-		if ( options != null ) {
-			for (Iterator opIt = options.keySet().iterator(); opIt.hasNext();) {
-				String key = (String) opIt.next();
-				String value = options.get(key);
-				if ( !value.toLowerCase().equals("default") && !value.equals("") ) {
-					lasRequest.setProperty("ferret", key, value);
-				}
-			}
-		}			
-		
-		// Now force in the auto contour settings if it exists.
-		if ( fill_levels != null && !fill_levels.equals("") && !fill_levels.equals(Constants.NO_MIN_MAX) ) {
-			lasRequest.setProperty("ferret", "fill_levels", fill_levels);
-		}
-		lasRequest.setProperty("product_server", "ui_timeout", "10");	
-        if ( var.getGrid().hasT() ) {		
-        	if ( view.contains("t") && tlo.equals(thi) ) {
-        		messagePanel.show(grid.getWidget(1, 0).getAbsoluteLeft()+15, grid.getWidget(1,0).getAbsoluteTop()+15, "Set plot range selectors to different values and click the Apply button.");
-        		return;
-        	}
-        	
-		}
-        if ( var.getGrid().hasZ() ) {
-        	if ( view.contains("z") && zlo.equals(zhi) ) {
-        		messagePanel.show(grid.getWidget(1, 0).getAbsoluteLeft()+15, grid.getWidget(1,0).getAbsoluteTop()+15, "Set plot range selectors to different values and click the Apply button.");
-        		return;
-        	}
-        }
-        
-        if ( lasRequest == null ) {
-        	return;
-        }
-        
-		String url = Util.getProductServer()+"?xml="+URL.encode(lasRequest.toString());
-		
-		if ( !url.equals(currentURL) ) {
-			currentURL = url;
-			if ( containerType.equals(Constants.IMAGE) ) {
-				if (popup) {
-					spin.setPopupPosition(grid.getWidget(1,0).getAbsoluteLeft(), grid.getWidget(1,0).getAbsoluteTop());
-					spin.show();
-				}
-
-				RequestBuilder sendRequest = new RequestBuilder(RequestBuilder.GET, url);
-				try {
-					lasAnnotationsPanel.setTitle("Plot Annotations");
-					lasAnnotationsPanel.setError("Fetching plot annotations...");
-					sendRequest.sendRequest(null, lasRequestCallback);
-				} catch (RequestException e) {
-					spin.hide();
-					HTML error = new HTML(e.toString());
-					grid.setWidget(1, 0, error);
-				}
-			} else {
-				grid.setWidget(1, 0, spinImage);
-				output.setUrl(url);
-				grid.setWidget(1, 0, output);
-			}
-		}
-	}
-	public void computeDifference(Map<String, String> options, boolean switchAxis) {
-
-		// When called from vizGal the button is down
-		difference = true;
-		setAxesFromState();
-				
-		if (switchAxis) {
-			switchAxis();
-		}
-		
-        spin.hide();
-		
-		lasRequest = new LASRequest();
-		
-		if ( vizGalVariable.isVector() ) {
-			lasRequest.setOperation("Compare_Vectors", "v7");
-		} else {
-		    lasRequest.setOperation("Compare_Plot", "v7");
-		}
-		lasRequest.setProperty("ferret", "view", view);
-		lasRequest.setProperty("ferret", "size", ".8333");
-		lasRequest.setProperty("ferret", "annotations", "file");
-		// Add the variable in the upper left panel
-		if ( vizGalVariable.isVector() ) {
-			// Add the first component
-			lasRequest.addVariable(vizGalVariable.getDSID(), vizGalVariable.getComponents().get(0), 0);
-		} else {
-			lasRequest.addVariable(vizGalVariable.getDSID(), vizGalVariable.getID(), 0);
-		}
-        
-		// For the first variable set the region according to the values passed in...
-		// or the local widget value...
-		
-		lasRequest.setRange("x", xlo, xhi, 0);		
-		lasRequest.setRange("y", ylo, yhi, 0);
-	
-		if ( vizGalVariable.getGrid().hasZ() ) {
-			lasRequest.setRange("z", zlo, zhi, 0);
-		}
-		if ( vizGalVariable.getGrid().hasT() ) {
-			lasRequest.setRange("t", tlo, thi, 0);
-		}
-		
-		if ( vizGalVariable.isVector() ) {
-			// Add the second component and its region to match the first component.
-			lasRequest.setProperty("ferret", "vector_name", vizGalVariable.getName());
-			lasRequest.addVariable(vizGalVariable.getDSID(), vizGalVariable.getComponents().get(1), 1);
-			lasRequest.setRange("x", xlo, xhi, 1);
-			lasRequest.setRange("y", ylo, yhi, 1);
-			if ( vizGalVariable.getGrid().hasZ() ) {
-				lasRequest.setRange("z", zlo, zhi, 1);
-			}
-			if ( vizGalVariable.getGrid().hasT() ) {
-				lasRequest.setRange("t", tlo, thi, 1);
-			} 
-		} else {
-
-			// The comparison variable and it's region from the panel axes.
-
-			lasRequest.addVariable(var.getDSID(), var.getID(), 1);
-
-			// For the second variable set all the axes that are not in the view, 
-			// either from the fixed in the slide sorter and the comparison axis in the panel
-			// or from the panel settings.
-			if ( !view.contains("x") ) {
-				if ( var.getGrid().hasX() ) {
-					lasRequest.setRange("x", String.valueOf(panelAxesWidgets.getRefMap().getXlo()), String.valueOf(panelAxesWidgets.getRefMap().getXhi()), 1);
-				}
-			}
-			if ( !view.contains("y") ) {
-				if ( var.getGrid().hasY() ) {
-					lasRequest.setRange("y", String.valueOf(panelAxesWidgets.getRefMap().getYlo()), String.valueOf(panelAxesWidgets.getRefMap().getYhi()), 1);
-				}
-			}
-			if ( !view.contains("z") ) {
-				if ( var.getGrid().hasZ() ) {
-					lasRequest.setRange("z", panelAxesWidgets.getZAxis().getLo(), panelAxesWidgets.getZAxis().getHi(), 1);
-				}
-			}
-			if ( !view.contains("t") ) {
-				if ( var.getGrid().hasT() ) {
-					lasRequest.setRange("t", panelAxesWidgets.getTAxis().getFerretDateLo(), panelAxesWidgets.getTAxis().getFerretDateHi(), 1);
-				}
-			}
-		}
-		
-		// If the passed in variable is a vector, then the panel variable must also be a vector.  Right?
-		if ( vizGalVariable.isVector() && !var.isVector() ) {
-			messagePanel.show(grid.getWidget(1, 0).getAbsoluteLeft()+15, grid.getWidget(1,0).getAbsoluteTop()+15, "Could not make plot.  Variable in panel must also be a vector.");
-            return;
-		} else if ( vizGalVariable.isVector() && var.isVector() ) {
-			lasRequest.addVariable(var.getDSID(), var.getComponents().get(0), 0);
-			if ( var.getGrid().hasX() ) {
-				if ( view.contains("x") ) {
-					lasRequest.setRange("x", xlo, xhi, 2);
-				} else {
-					lasRequest.setRange("x", String.valueOf(panelAxesWidgets.getRefMap().getXlo()), String.valueOf(panelAxesWidgets.getRefMap().getXhi()), 2);
-				}
-			}
-
-			if ( var.getGrid().hasY() ) {
-				if ( view.contains("y") ) {
-					lasRequest.setRange("y", ylo, yhi, 2);
-				} else {
-					lasRequest.setRange("y", String.valueOf(panelAxesWidgets.getRefMap().getYlo()), String.valueOf(panelAxesWidgets.getRefMap().getYhi()), 2);
-
-				}
-			}
-			if ( var.getGrid().hasZ() ) {
-				if ( view.contains("z") ) {	
-					lasRequest.setRange("z", zlo, zhi, 2);
-				} else {
-					lasRequest.setRange("z", panelAxesWidgets.getZAxis().getLo(), panelAxesWidgets.getZAxis().getHi(), 2);
-				}				
-			}
-			if ( var.getGrid().hasT() ) {
-				if ( view.contains("t") ) {
-					lasRequest.setRange("t", tlo, thi, 2);
-				} else {
-					lasRequest.setRange("t", panelAxesWidgets.getTAxis().getFerretDateLo(), panelAxesWidgets.getTAxis().getFerretDateHi(), 2);
-				}	
-			}
-
-			//			}
-			lasRequest.addVariable(var.getDSID(), var.getComponents().get(1), 1);
-			if ( var.getGrid().hasX() ) {
-				if ( view.contains("x") ) {
-					lasRequest.setRange("x", xlo, xhi, 3);
-				} else {
-					lasRequest.setRange("x", String.valueOf(panelAxesWidgets.getRefMap().getXlo()), String.valueOf(panelAxesWidgets.getRefMap().getXhi()), 3);
-				}
-			}
-
-			if ( var.getGrid().hasY() ) {
-				if ( view.contains("y") ) {
-					lasRequest.setRange("y", ylo, yhi, 3);
-				} else {
-					lasRequest.setRange("y", String.valueOf(panelAxesWidgets.getRefMap().getYlo()), String.valueOf(panelAxesWidgets.getRefMap().getYhi()), 3);
-
-				}
-			}
-			if ( var.getGrid().hasZ() ) {
-				if ( view.contains("z") ) {	
-					lasRequest.setRange("z", zlo, zhi, 3);
-				} else {
-					lasRequest.setRange("z", panelAxesWidgets.getZAxis().getLo(), panelAxesWidgets.getZAxis().getHi(), 3);
-				}				
-			}
-			if ( var.getGrid().hasT() ) {
-				if ( view.contains("t") ) {
-					lasRequest.setRange("t", tlo, thi, 3);
-				} else {
-					lasRequest.setRange("t", panelAxesWidgets.getTAxis().getFerretDateLo(), panelAxesWidgets.getTAxis().getFerretDateHi(), 3);
-				}	
-			}	
-		}
-		
-		lasRequest.setProperty("ferret", "image_format", "gif");
-		if ( containerType.equals(Constants.IMAGE) ) {
-		    lasRequest.setProperty("las", "output_type", "xml");
-		}
-
-		// Use the global options.
-		if ( options != null ) {
-			for (Iterator opIt = options.keySet().iterator(); opIt.hasNext();) {
-				String key = (String) opIt.next();
-				String value = options.get(key);
-				if ( !value.toLowerCase().equals("default") && !value.equals("") ) {
-					lasRequest.setProperty("ferret", key, value);
-				}
-			}
-		}
-
-		lasRequest.setProperty("product_server", "ui_timeout", "20");
-		String url = Util.getProductServer()+"?xml="+URL.encode(lasRequest.toString());
-		
-		if ( !url.equals(currentURL) ) {
-			currentURL = url;
-			spin.show();
-			if ( containerType.equals(Constants.IMAGE) ) {
-				
-				RequestBuilder sendRequest = new RequestBuilder(RequestBuilder.GET, url);
-				try {
-					sendRequest.sendRequest(null, lasRequestCallback);
-				} catch (RequestException e) {
-					spin.hide();
-					HTML error = new HTML(e.toString());
-					grid.setWidget(1, 0, error);
-
-				}
-			} else {
-				output.setUrl(url);
-				grid.setWidget(1, 0, output);
-			}
-		}
-	}
-
-	public LASRequest getRequest() {
-		LASRequest lasRequest = new LASRequest();
+        lasRequest = new LASRequest();
 		
 		if ( var.isVector() ) {
 			// Add the first component
@@ -649,8 +360,7 @@ public class OutputPanel extends Composite {
 
 		lasRequest.setOperation(operationID, "v7");
 		
-		setAxesFromState();
-
+		Map<String, String> vgState = Util.getTokenMap(vizGalState);
 		
 		// If the axis is in the view, the state comes from the global vizGal state which are store in the member variables.
 		// Otherwise it gets its axis value from the local widget.
@@ -663,27 +373,25 @@ public class OutputPanel extends Composite {
 		String local_tlo = null;
 		String local_thi = null;
 		
-		
-		
 		if ( view.contains("x") ) {
-			local_xlo = xlo;
-			local_xhi = xhi;
+			local_xlo = vgState.get("xlo");
+			local_xhi = vgState.get("xhi");
 		} else {
 			local_xlo = String.valueOf(panelAxesWidgets.getRefMap().getXlo());
 			local_xhi = String.valueOf(panelAxesWidgets.getRefMap().getXhi());
 		}
 		
 		if ( view.contains("y") ) {
-			local_ylo = ylo;
-			local_yhi = yhi;
+			local_ylo = vgState.get("ylo");
+			local_yhi = vgState.get("yhi");
 		} else {
 			local_ylo = String.valueOf(panelAxesWidgets.getRefMap().getYlo());
 			local_yhi = String.valueOf(panelAxesWidgets.getRefMap().getYhi());
 		}
         
 		if ( view.contains("z") ) {
-			local_zlo = zlo;
-			local_zhi = zhi;
+			local_zlo = vgState.get("zlo");
+			local_zhi = vgState.get("zhi");
 		} else {
 			if ( var.getGrid().hasZ() ) {
 				local_zlo = panelAxesWidgets.getZAxis().getLo();
@@ -692,8 +400,8 @@ public class OutputPanel extends Composite {
 		}
 		
 		if ( view.contains("t") ) {
-			local_tlo = tlo;
-			local_thi = thi;
+			local_tlo = vgState.get("tlo");
+			local_thi = vgState.get("thi");
 		} else {
 			if ( var.getGrid().hasT() ) {
 				local_tlo = panelAxesWidgets.getTAxis().getFerretDateLo();
@@ -754,38 +462,280 @@ public class OutputPanel extends Composite {
 			
 		}
 		lasRequest.setProperty("ferret", "view", view);
-		return lasRequest;
-	}
-	private void setAxesFromState() {
-		//
-		Map<String, String> vgState = Util.getTokenMap(vizGalState);
+        
+		lasRequest.setProperty("ferret", "size", ".8333");
+		lasRequest.setProperty("ferret", "image_format", "gif");
+		lasRequest.setProperty("ferret", "annotations", "file");
+		if ( containerType.equals(Constants.IMAGE) ) {
+			lasRequest.setProperty("las", "output_type", "xml");
+		}
+
+		if ( options != null ) {
+			for (Iterator opIt = options.keySet().iterator(); opIt.hasNext();) {
+				String key = (String) opIt.next();
+				String value = options.get(key);
+				if ( !value.toLowerCase().equals("default") && !value.equals("") ) {
+					lasRequest.setProperty("ferret", key, value);
+				}
+			}
+		}			
 		
-		// Update the state of the vizGal axes widgets...
-		if ( vgState.containsKey("xlo") ) {
-			xlo = vgState.get("xlo");
+		// Now force in the auto contour settings if it exists.
+		if ( fill_levels != null && !fill_levels.equals("") && !fill_levels.equals(Constants.NO_MIN_MAX) ) {
+			lasRequest.setProperty("ferret", "fill_levels", fill_levels);
 		}
-		if ( vgState.containsKey("xhi") ) {
-			xhi = vgState.get("xhi");
+		lasRequest.setProperty("product_server", "ui_timeout", "10");	
+        if ( var.getGrid().hasT() ) {		
+        	if ( view.contains("t") && local_tlo.equals(local_thi) ) {
+        		messagePanel.show(grid.getWidget(1, 0).getAbsoluteLeft()+15, grid.getWidget(1,0).getAbsoluteTop()+15, "Set plot range selectors to different values and click the Apply button.");
+        		return;
+        	}
+        	
 		}
-		if ( vgState.containsKey("ylo") ) {
-			ylo = vgState.get("ylo");
-		}
-		if ( vgState.containsKey("yhi") ) {
-			yhi = vgState.get("yhi");
-		}
-		if ( vgState.containsKey("zlo") ) {
-			zlo = vgState.get("zlo");
-		}
-		if ( vgState.containsKey("zhi") ) {
-			zhi = vgState.get("zhi");
-		}
-		if ( vgState.containsKey("tlo") ) {
-			tlo = vgState.get("tlo");
-		}
-		if ( vgState.containsKey("thi") ) {
-			thi = vgState.get("thi");
+        if ( var.getGrid().hasZ() ) {
+        	if ( view.contains("z") && local_zlo.equals(local_zhi) ) {
+        		messagePanel.show(grid.getWidget(1, 0).getAbsoluteLeft()+15, grid.getWidget(1,0).getAbsoluteTop()+15, "Set plot range selectors to different values and click the Apply button.");
+        		return;
+        	}
+        }
+        
+        if ( lasRequest == null ) {
+        	return;
+        }
+        
+		String url = Util.getProductServer()+"?xml="+URL.encode(lasRequest.toString());
+		
+		if ( !url.equals(currentURL) ) {
+			currentURL = url;
+			if ( containerType.equals(Constants.IMAGE) ) {
+				if (popup) {
+					spin.setPopupPosition(grid.getWidget(1,0).getAbsoluteLeft(), grid.getWidget(1,0).getAbsoluteTop());
+					spin.show();
+				}
+
+				RequestBuilder sendRequest = new RequestBuilder(RequestBuilder.GET, url);
+				try {
+					lasAnnotationsPanel.setTitle("Plot Annotations");
+					lasAnnotationsPanel.setError("Fetching plot annotations...");
+					sendRequest.sendRequest(null, lasRequestCallback);
+				} catch (RequestException e) {
+					spin.hide();
+					HTML error = new HTML(e.toString());
+					grid.setWidget(1, 0, error);
+				}
+			} else {
+				grid.setWidget(1, 0, spinImage);
+				output.setUrl(url);
+				grid.setWidget(1, 0, output);
+			}
 		}
 	}
+	public void computeDifference(Map<String, String> options, boolean switchAxis) {
+
+		// When called from vizGal the button is down
+		difference = true;
+
+		spin.hide();
+
+		lasRequest = new LASRequest();
+
+		if ( vizGalVariable.isVector() ) {
+			lasRequest.setOperation("Compare_Vectors", "v7");
+		} else {
+			lasRequest.setOperation("Compare_Plot", "v7");
+		}
+		lasRequest.setProperty("ferret", "view", view);
+		lasRequest.setProperty("ferret", "size", ".8333");
+		lasRequest.setProperty("ferret", "annotations", "file");
+		// Add the variable in the upper left panel
+		if ( vizGalVariable.isVector() ) {
+			// Add the first component
+			lasRequest.addVariable(vizGalVariable.getDSID(), vizGalVariable.getComponents().get(0), 0);
+		} else {
+			lasRequest.addVariable(vizGalVariable.getDSID(), vizGalVariable.getID(), 0);
+		}
+
+
+		Map<String, String> vgState = Util.getTokenMap(vizGalState);
+		Map<String, String> cpState = Util.getTokenMap(comparePanelState);
+
+		// Set the region of the first variable according to the global state or the compare panel state...
+
+
+		if ( view.contains("x") ) {
+			lasRequest.setRange("x", vgState.get("xlo"), vgState.get("xhi"), 0);
+		} else {
+			lasRequest.setRange("x", cpState.get("xlo"), cpState.get("xhi"), 0);
+		}
+
+		if ( view.contains("y") ) {
+			lasRequest.setRange("y", vgState.get("ylo"), vgState.get("yhi"), 0);
+		} else {
+			lasRequest.setRange("y", cpState.get("ylo"), cpState.get("yhi"), 0);
+		}
+		if ( vizGalVariable.getGrid().hasZ() ) {
+			if ( view.contains("z") ) {
+				lasRequest.setRange("z", vgState.get("zlo"), vgState.get("zhi"), 0);
+			} else {
+				lasRequest.setRange("z", cpState.get("zlo"), cpState.get("zhi"), 0);
+			}
+		}
+		if ( vizGalVariable.getGrid().hasT() ) {
+			if ( view.contains("t") ) {
+				lasRequest.setRange("t", vgState.get("tlo"), vgState.get("thi"), 0);
+			} else {
+				lasRequest.setRange("t", cpState.get("tlo"), cpState.get("thi"), 0);
+			}
+		}
+
+		if ( vizGalVariable.isVector() ) {
+			// Add the second component and its region to match the first component.
+			lasRequest.setProperty("ferret", "vector_name", vizGalVariable.getName());
+			lasRequest.addVariable(vizGalVariable.getDSID(), vizGalVariable.getComponents().get(1), 1);
+			if ( view.contains("x") ) {
+				lasRequest.setRange("x", vgState.get("xlo"), vgState.get("xhi"), 1);
+			} else {
+				lasRequest.setRange("x", cpState.get("xlo"), cpState.get("xhi"), 1);
+			}
+
+			if ( view.contains("y") ) {
+				lasRequest.setRange("y", vgState.get("ylo"), vgState.get("yhi"), 1);
+			} else {
+				lasRequest.setRange("y", cpState.get("ylo"), cpState.get("yhi"), 1);
+			}
+			if ( var.getGrid().hasZ() ) {
+				if ( view.contains("z") ) {
+					lasRequest.setRange("z", vgState.get("zlo"), vgState.get("zhi"), 1);
+				} else {
+					lasRequest.setRange("z", cpState.get("zlo"), cpState.get("zhi"), 1);
+				}
+			}
+			if ( var.getGrid().hasT() ) {
+				if ( view.contains("t") ) {
+					lasRequest.setRange("t", vgState.get("tlo"), vgState.get("thi"), 1);
+				} else {
+					lasRequest.setRange("t", cpState.get("tlo"), cpState.get("thi"), 1);
+				}
+			}
+		} else {
+
+			// The local variable only set what is unique to this variable.  I.e. what's not in the view.
+
+			lasRequest.addVariable(var.getDSID(), var.getID(), 1);
+
+			if ( !view.contains("x") ) {
+				if ( var.getGrid().hasX() ) {
+					lasRequest.setRange("x", String.valueOf(panelAxesWidgets.getRefMap().getXlo()), String.valueOf(panelAxesWidgets.getRefMap().getXhi()), 1);
+				}
+			}
+			if ( !view.contains("y") ) {
+				if ( var.getGrid().hasY() ) {
+					lasRequest.setRange("y", String.valueOf(panelAxesWidgets.getRefMap().getYlo()), String.valueOf(panelAxesWidgets.getRefMap().getYhi()), 1);
+				}
+			}
+			if ( !view.contains("z") ) {
+				if ( var.getGrid().hasZ() ) {
+					lasRequest.setRange("z", panelAxesWidgets.getZAxis().getLo(), panelAxesWidgets.getZAxis().getHi(), 1);
+				}
+			}
+			if ( !view.contains("t") ) {
+				if ( var.getGrid().hasT() ) {
+					lasRequest.setRange("t", panelAxesWidgets.getTAxis().getFerretDateLo(), panelAxesWidgets.getTAxis().getFerretDateHi(), 1);
+				}
+			}
+		}
+
+		// If the passed in variable is a vector, then the panel variable must also be a vector.  Right?
+		if ( vizGalVariable.isVector() && !var.isVector() ) {
+			messagePanel.show(grid.getWidget(1, 0).getAbsoluteLeft()+15, grid.getWidget(1,0).getAbsoluteTop()+15, "Could not make plot.  Variable in panel must also be a vector.");
+			return;
+		} else if ( vizGalVariable.isVector() && var.isVector() ) {
+			lasRequest.addVariable(var.getDSID(), var.getComponents().get(0), 0);
+			if ( var.getGrid().hasX() ) {
+				if ( !view.contains("x") ) {
+					lasRequest.setRange("x", String.valueOf(panelAxesWidgets.getRefMap().getXlo()), String.valueOf(panelAxesWidgets.getRefMap().getXhi()), 2);
+				}
+			}
+
+			if ( var.getGrid().hasY() ) {
+				if ( !view.contains("y") ) {
+					lasRequest.setRange("y", String.valueOf(panelAxesWidgets.getRefMap().getYlo()), String.valueOf(panelAxesWidgets.getRefMap().getYhi()), 2);
+				}
+			}
+			if ( var.getGrid().hasZ() ) {
+				if ( !view.contains("z") ) {	
+					lasRequest.setRange("z", panelAxesWidgets.getZAxis().getLo(), panelAxesWidgets.getZAxis().getHi(), 2);
+				}				
+			}
+			if ( var.getGrid().hasT() ) {
+				lasRequest.setRange("t", panelAxesWidgets.getTAxis().getFerretDateLo(), panelAxesWidgets.getTAxis().getFerretDateHi(), 2);
+			}	
+
+
+			//  And the other variable component.  Same as above...
+			lasRequest.addVariable(var.getDSID(), var.getComponents().get(1), 1);
+			if ( var.getGrid().hasX() ) {
+				if ( !view.contains("x") ) {
+					lasRequest.setRange("x", String.valueOf(panelAxesWidgets.getRefMap().getXlo()), String.valueOf(panelAxesWidgets.getRefMap().getXhi()), 3);
+				}
+			}
+
+			if ( var.getGrid().hasY() ) {
+				if ( !view.contains("y") ) {
+					lasRequest.setRange("y", String.valueOf(panelAxesWidgets.getRefMap().getYlo()), String.valueOf(panelAxesWidgets.getRefMap().getYhi()), 3);
+				}
+			}
+			if ( var.getGrid().hasZ() ) {
+				if ( !view.contains("z") ) {	
+					lasRequest.setRange("z", panelAxesWidgets.getZAxis().getLo(), panelAxesWidgets.getZAxis().getHi(), 3);
+				}				
+			}
+			if ( var.getGrid().hasT() ) {
+				if ( !view.contains("t") ) {
+					lasRequest.setRange("t", panelAxesWidgets.getTAxis().getFerretDateLo(), panelAxesWidgets.getTAxis().getFerretDateHi(), 3);
+				}	
+			}	
+		}
+		lasRequest.setProperty("ferret", "image_format", "gif");
+		if ( containerType.equals(Constants.IMAGE) ) {
+			lasRequest.setProperty("las", "output_type", "xml");
+		}
+
+		// Use the global options.
+		if ( options != null ) {
+			for (Iterator opIt = options.keySet().iterator(); opIt.hasNext();) {
+				String key = (String) opIt.next();
+				String value = options.get(key);
+				if ( !value.toLowerCase().equals("default") && !value.equals("") ) {
+					lasRequest.setProperty("ferret", key, value);
+				}
+			}
+		}
+
+		lasRequest.setProperty("product_server", "ui_timeout", "20");
+		String url = Util.getProductServer()+"?xml="+URL.encode(lasRequest.toString());
+
+		if ( !url.equals(currentURL) ) {
+			currentURL = url;
+			spin.show();
+			if ( containerType.equals(Constants.IMAGE) ) {
+
+				RequestBuilder sendRequest = new RequestBuilder(RequestBuilder.GET, url);
+				try {
+					sendRequest.sendRequest(null, lasRequestCallback);
+				} catch (RequestException e) {
+					spin.hide();
+					HTML error = new HTML(e.toString());
+					grid.setWidget(1, 0, error);
+
+				}
+			} else {
+				output.setUrl(url);
+				grid.setWidget(1, 0, output);
+			}
+		}
+	}
+
 	public boolean isComparePanel() {
 		return comparePanel;
 	}
@@ -933,27 +883,27 @@ public class OutputPanel extends Composite {
 									HTML error = new HTML(t.getData().toString().trim());
 									error.setSize(image_w*imageScaleRatio+"px", image_h*imageScaleRatio+"px");
 									grid.setWidget(1, 0, error);
-									retryShowing = true;
-									PushButton retry = new PushButton("Retry");
-									retry.addStyleDependentName("SMALLER");
-									retry.addClickHandler(new ClickHandler() {
-										
-										@Override
-										public void onClick(ClickEvent event) {
-											// Just send the same request again to see if it works the second time.
-											String url = Util.getProductServer()+"?xml="+URL.encode(lasRequest.toString());
-											RequestBuilder sendRequest = new RequestBuilder(RequestBuilder.GET, url);
-											try {
-												sendRequest.sendRequest(null, lasRequestCallback);
-											} catch (RequestException e) {
-												HTML error = new HTML(e.toString());
-												error.setSize(image_w*imageScaleRatio+"px", image_h*imageScaleRatio+"px");
-												grid.setWidget(1, 0, error);
-											}
-										}
-
-									});
-									grid.setWidget(2, 1, retry);
+//									retryShowing = true;
+//									PushButton retry = new PushButton("Retry");
+//									retry.addStyleDependentName("SMALLER");
+//									retry.addClickHandler(new ClickHandler() {
+//										
+//										@Override
+//										public void onClick(ClickEvent event) {
+//											// Just send the same request again to see if it works the second time.
+//											String url = Util.getProductServer()+"?xml="+URL.encode(lasRequest.toString());
+//											RequestBuilder sendRequest = new RequestBuilder(RequestBuilder.GET, url);
+//											try {
+//												sendRequest.sendRequest(null, lasRequestCallback);
+//											} catch (RequestException e) {
+//												HTML error = new HTML(e.toString());
+//												error.setSize(image_w*imageScaleRatio+"px", image_h*imageScaleRatio+"px");
+//												grid.setWidget(1, 0, error);
+//											}
+//										}
+//
+//									});
+//									grid.setWidget(2, 1, retry);
 								}
 							}
 							image_w = x_image_size;
@@ -1227,13 +1177,9 @@ public class OutputPanel extends Composite {
 
 	public void setAxisRangeValues(String axis, String lo_value, String hi_value) {
 		if ( axis.equals("z") ) {
-			zlo = lo_value;
-			zhi = hi_value;
 			panelAxesWidgets.getZAxis().setLo(lo_value);
 			panelAxesWidgets.getZAxis().setHi(hi_value);
 		} else if ( axis.equals("t") ) {
-			tlo = lo_value;
-			thi = hi_value;
 			panelAxesWidgets.getTAxis().setLo(lo_value);
 			panelAxesWidgets.getTAxis().setHi(hi_value);
 		}
@@ -1299,16 +1245,12 @@ public class OutputPanel extends Composite {
 	}
 	public String getHistoryToken() {
 		StringBuilder token = new StringBuilder();
-		if (compareAxis != null &&  !compareAxis.equals("") ) {
-			token.append(";compareAxis="+compareAxis);			
-		} 
 		if ( var.getGrid().hasZ() ) {
 			token.append(";zlo="+panelAxesWidgets.getZAxis().getLo()+";zhi="+panelAxesWidgets.getZAxis().getHi());
 		}
 		if ( var.getGrid().hasT() ) {
 		   token.append(";tlo="+panelAxesWidgets.getTAxis().getFerretDateLo()+";thi="+panelAxesWidgets.getTAxis().getFerretDateHi());
 		}
-
 		token.append(";dsid="+var.getDSID());
 		token.append(";varid="+var.getID());
 		token.append(getSettingsWidgetHistoryToken());
@@ -1396,9 +1338,10 @@ public class OutputPanel extends Composite {
 	public void setURL(String url) {
 		currentURL = url;
 	}
-	public void setVizGalState(VariableSerializable variable, String historyToken) {
+	public void setVizGalState(VariableSerializable variable, String historyToken, String comparePanelState) {
 		this.vizGalVariable = variable;
 		this.vizGalState = historyToken;	
+		this.comparePanelState = comparePanelState;
 	}
 	public void setImage(String image_url, String link_url) {
 		final String url = link_url;
