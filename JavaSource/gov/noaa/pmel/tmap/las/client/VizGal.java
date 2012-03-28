@@ -257,18 +257,10 @@ public class VizGal extends BaseUI {
 			init();
 			for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
 				OutputPanel panel = (OutputPanel) panelIt.next();
-				panel.setPanelColor("regularBackground");
 				panel.setVariable(xVariable);
 				panel.init(false, ops);
 				panel.showOrthoAxes(xView, xOrtho);
 				panel.setOperation(xOperationID, xView);
-				
-				
-//				if ( fixedAxis.equals("t") ) {
-//					panel.setAxisRangeValues("t", xAxesWidget.getTAxis().getFerretDateLo(), xAxesWidget.getTAxis().getFerretDateHi());
-//				} else if ( fixedAxis.equals("z") ) {
-//					panel.setAxisRangeValues("z", xAxesWidget.getZAxis().getLo(), xAxesWidget.getZAxis().getHi());
-//				}
 			}
 			
 			// Now that we have the grid, finish applying the changes.
@@ -492,107 +484,51 @@ public class VizGal extends BaseUI {
 		if (autoContourTextBox.getText().equals(Constants.NO_MIN_MAX) ) {
 			autoContourTextBox.setText("");
 		}
+		OutputPanel comparePanel = null;
+		for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
+			OutputPanel panel = (OutputPanel) panelIt.next();
+			if ( panel.isComparePanel() ) {
+				comparePanel = panel;
+			}
+		}
 		if ( differenceButton.isDown() ) {
 			if ( autoContourButton.isDown() ) {
 				autoContourButton.setDown(false);
 				autoContourTextBox.setText("");
 			}
-			OutputPanel comparePanel = null;
-			for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
-				OutputPanel panel = (OutputPanel) panelIt.next();
-				if ( panel.isComparePanel() ) {
-					comparePanel = panel;
-					panel.setVizGalState(xVariable, getHistoryToken());
-					panel.refreshPlot(xOptionsButton.getState(), switchAxis, true);	
-				}
-			}
-			if ( comparePanel != null ) {
+			
+			
 				for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
 					OutputPanel panel = (OutputPanel) panelIt.next();
-					panel.setVizGalState(comparePanel.getVariable(), comparePanel.getHistoryToken());
 					if ( !panel.getID().equals(comparePanel.getID()) ) {
-						String xXlo = "";
-						String xhi = "";
-						String ylo = "";
-						String yhi = "";
-						String zlo = "";
-						String zhi = "";
-						String tlo = "";
-						String thi = "";
-						// Pass in the values in the view from the global axis controls.
-						if ( xView.contains("x") ) {
-							xXlo = String.valueOf(xAxesWidget.getRefMap().getXlo());
-							xhi = String.valueOf(xAxesWidget.getRefMap().getXhi());
-						}
-						if ( xView.contains("y") ) {
-							ylo = String.valueOf(xAxesWidget.getRefMap().getYlo());
-							yhi = String.valueOf(xAxesWidget.getRefMap().getYhi());
-						}
-						
-						if ( xVariable.getGrid().hasT() ) {
-							tlo = xAxesWidget.getTAxis().getFerretDateLo();
-							thi = xAxesWidget.getTAxis().getFerretDateHi();
-						} else {
-							tlo = null;
-							thi = null;
-						}
-						if ( xVariable.getGrid().hasZ() ) {
-							zlo = xAxesWidget.getZAxis().getLo();
-							zhi = xAxesWidget.getZAxis().getHi();
-						} else {
-							zlo = null;
-							zhi = null;
-						}
-						panel.setVizGalState(xVariable, getHistoryToken());
+						panel.setVizGalState(xVariable, getHistoryToken(), comparePanel.getHistoryToken());
 						panel.computeDifference(xOptionsButton.getState(), switchAxis);
 					}
 				}
-			}
+			
 		} else {
-			OutputPanel comparePanel = null;
-			for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
-				OutputPanel panel = (OutputPanel) panelIt.next();
-				if ( panel.isComparePanel() ) {
-					comparePanel = panel;					
-				}
-			}
-			for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
-				OutputPanel panel = (OutputPanel) panelIt.next();
-				panel.setVizGalState(comparePanel.getVariable(), comparePanel.getHistoryToken());
-				// See if the panel settings are being used on this panel, if not
-				// reset the fixed axis and the view axis and the operation to the slide sorter value.
-				
-//					VariableSerializable v = panel.getVariable();
-//					if ( !v.getID().equals(xVariable.getID()) || !v.getDSID().equals(xVariable.getDSID() ) ) {
-//						panel.setVariable(xVariable);
-//						panel.init(false, ops);
-//					} 
-					panel.setVizGalState(xVariable, getHistoryToken());
-//					panel.setOperation(xOperationID, xView);
-				
 
-					if ( xVariable.isVector() ) {
-						if ( !xView.equals("xy") ) {
-							differenceButton.setDown(false);
-							differenceButton.setEnabled(false);
-						} else {
-						    differenceButton.setDown(false);
-						    differenceButton.setEnabled(true);
-						}
+			for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
+				OutputPanel panel = (OutputPanel) panelIt.next();
+				panel.setVizGalState(xVariable, getHistoryToken(), comparePanel.getHistoryToken());
+				if ( xVariable.isVector() ) {
+					if ( !xView.equals("xy") ) {
+						differenceButton.setDown(false);
+						differenceButton.setEnabled(false);
 					} else {
-				  	    differenceButton.setDown(false);
-					    differenceButton.setEnabled(true);
+						differenceButton.setDown(false);
+						differenceButton.setEnabled(true);
 					}
-				
-
-
+				} else {
+					differenceButton.setDown(false);
+					differenceButton.setEnabled(true);
+				}
 				// Get the current state of the options...
 				Map<String, String> ts = xOptionsButton.getState();
 				if ( !autoContourButton.isDown() ) {
 					// If it's not down, the current options value will be used.
 					autoContourTextBox.setText("");
 				}
-				
 				panel.setFillLevels(autoContourTextBox.getText());
 				panel.refreshPlot(ts, switchAxis, true);
 			}
