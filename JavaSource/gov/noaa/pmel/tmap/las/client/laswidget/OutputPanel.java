@@ -522,6 +522,7 @@ public class OutputPanel extends Composite {
 					spin.hide();
 					HTML error = new HTML(e.toString());
 					grid.setWidget(1, 0, error);
+					setImageWidth();
 				}
 			} else {
 				grid.setWidget(1, 0, spinImage);
@@ -727,7 +728,7 @@ public class OutputPanel extends Composite {
 					spin.hide();
 					HTML error = new HTML(e.toString());
 					grid.setWidget(1, 0, error);
-
+					setImageWidth();
 				}
 			} else {
 				output.setUrl(url);
@@ -800,8 +801,8 @@ public class OutputPanel extends Composite {
 			spin.hide();
 			HTML error = new HTML(exception.toString());
 			Widget size = grid.getWidget(1, 0);
-			error.setSize(image_w*imageScaleRatio+"px", image_h*imageScaleRatio+"px");
 			grid.setWidget(1, 0, error);
+			setImageWidth();
 		}
 
 		public void onResponseReceived(Request request, Response response) {
@@ -881,8 +882,8 @@ public class OutputPanel extends Composite {
 									spin.hide();
 									Text t = (Text) text;
 									HTML error = new HTML(t.getData().toString().trim());
-									error.setSize(image_w*imageScaleRatio+"px", image_h*imageScaleRatio+"px");
 									grid.setWidget(1, 0, error);
+									setImageWidth();
 //									retryShowing = true;
 //									PushButton retry = new PushButton("Retry");
 //									retry.addStyleDependentName("SMALLER");
@@ -920,8 +921,8 @@ public class OutputPanel extends Composite {
 								sendRequest.sendRequest(null, lasRequestCallback);
 							} catch (RequestException e) {
 								HTML error = new HTML(e.toString());
-								error.setSize(image_w*imageScaleRatio+"px", image_h*imageScaleRatio+"px");
 								grid.setWidget(1, 0, error);
+								setImageWidth();
 							}
 						}
 					}
