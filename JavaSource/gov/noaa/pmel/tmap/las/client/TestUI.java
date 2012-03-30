@@ -544,8 +544,6 @@ public class TestUI extends BaseUI {
 				analysisAxisSerializable.setHi(analysis_yhi);
 			}
 			
-			xAnalysisWidget.setLabel(xVariable.getName());
-			
 			// May be null... 
 			xPanels.get(0).setAnalysis(analysis);
 			

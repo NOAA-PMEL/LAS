@@ -483,9 +483,6 @@ public class BaseUI {
 		if ( count > 1 ) {
 			cols = 2;
 		}
-		if ( cols <= 0 ) {
-			cols = 1;
-		}
 		int width;
 		int win = Window.getClientWidth();
 		if ( xPanelHeaderHidden ) {

@@ -3,6 +3,7 @@ package gov.noaa.pmel.tmap.las.client;
 import gov.noaa.pmel.tmap.las.client.laswidget.AxesWidgetGroup;
 import gov.noaa.pmel.tmap.las.client.laswidget.Constants;
 import gov.noaa.pmel.tmap.las.client.laswidget.OperationRadioButton;
+import gov.noaa.pmel.tmap.las.client.serializable.AnalysisSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.CategorySerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.ConfigSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.GridSerializable;
@@ -34,6 +35,7 @@ import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.ChangeListener;
+import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.ClickListener;
 import com.google.gwt.user.client.ui.DisclosurePanel;
 import com.google.gwt.user.client.ui.FlexTable;
@@ -136,7 +138,10 @@ public class VizGal extends BaseUI {
 		differenceButton.addClickListener(differencesClick);
 		
 		
-	
+		xAnalysisWidget.addAnalysisAxesChangeHandler(analysisAxesChange);
+		xAnalysisWidget.addAnalysisCheckHandler(analysisActiveChange);
+		xAnalysisWidget.addAnalysisOpChangeHandler(analysisOpChange);
+		xAnalysisWidget.setActive(false);
 		
 		xAxesWidget.addTChangeHandler(needApply);
 		xAxesWidget.addZChangeHandler(needApply);
@@ -192,7 +197,143 @@ public class VizGal extends BaseUI {
 		}
 		History.addValueChangeHandler(historyHandler);
 	}
-	
+	ChangeHandler analysisAxesChange = new ChangeHandler() {
+
+		@Override
+		public void onChange(ChangeEvent event) {
+			if ( xAnalysisWidget.isActive() ) {
+				applyButton.addStyleDependentName("APPLY-NEEDED");
+				ListBox analysisAxis = (ListBox) event.getSource();
+				String v = analysisAxis.getValue(analysisAxis.getSelectedIndex());
+				setAnalysisAxes(v);			
+			}
+		}
+	};
+	private void setAnalysisAxes(String v) {
+
+		// Eliminate the transformed axis from the acceptable intervals for the variable.
+		String intervals = xVariable.getIntervals().replace(v, "");
+		// Eliminate the transformed axis from the view.
+		String view = xView.replace(v, "");
+		// If the view goes blank, find the next best view.
+		if ( view.equals("") ) {
+			if ( intervals.contains("xy") ) {
+				xView = "xy";
+			} else if ( intervals.contains("t") && xVariable.getGrid().hasT() ) {
+				xView = "t";
+			} else if (intervals.contains("z") && xVariable.getGrid().hasZ() ) {
+				xView = "z";
+			} else if ( intervals.contains("x") ) {
+				xView = "x";
+			} else if ( intervals.contains("y") ) {
+				xView = "y";
+			}
+		} else {
+			xView = view;
+		}
+		
+		// Get set the new operations that apply to the remaining views.
+		xOperationID = ops[0].getID();
+		xOperationsWidget.setOperations(intervals, ops[0].getID(), xView, ops);
+		setOperationsClickHandler(xVizGalOperationsClickHandler);
+
+		// Set the default operation.
+		xOperationID = xOperationsWidget.setZero(xView);
+		xOrtho = Util.setOrthoAxes(xView, xVariable.getGrid());
+		
+		for (Iterator panIt = xPanels.iterator(); panIt.hasNext();) {
+			OutputPanel panel = (OutputPanel) panIt.next();
+			panel.setOperation(xOperationID, xView);
+			panel.showOrthoAxes(xView, xOrtho);
+		}
+		xAxesWidget.showViewAxes(xView, xOrtho);
+		String mapTool = "";
+		String panelMapTool = "";
+		if ( xView.contains("x") ) {
+			mapTool = "x";
+		} else {
+			if ( v.contains("x") ) {
+				panelMapTool = "x";
+			}
+		}
+		if ( xView.contains("y") ) {
+			mapTool = mapTool + "y";
+		} else {
+			if ( v.contains("y") ) {
+				panelMapTool = panelMapTool + "y";
+			}
+		}
+		if ( mapTool.equals("") ) mapTool = "pt";
+		if ( panelMapTool.equals("") ) panelMapTool = "pt";
+		xAxesWidget.getRefMap().setTool(mapTool);
+		for (Iterator panIt = xPanels.iterator(); panIt.hasNext();) {
+			OutputPanel panel = (OutputPanel) panIt.next();
+			panel.setMapTool(panelMapTool);
+			if ( v.contains("z") ) {
+				panel.setRange("z", true);
+			} else {
+				panel.setRange("z", false);
+			}
+			if ( v.contains("t") ) {
+				panel.setRange("t", true);
+			} else {
+				panel.setRange("t", false);
+			}
+		}
+	}
+	ClickHandler analysisActiveChange = new ClickHandler() {
+
+		@Override
+		public void onClick(ClickEvent event) {
+			CheckBox analysis = (CheckBox) event.getSource();
+			applyButton.addStyleDependentName("APPLY-NEEDED");
+			String v = xAnalysisWidget.getAnalysisAxis();
+			if ( analysis.getValue() ) {
+				setAnalysisAxes(v);
+			} else {
+				turnOffAnalysis();
+			}
+		}
+
+		
+		
+	};
+	private void turnOffAnalysis() {
+		for (Iterator panIt = xPanels.iterator(); panIt.hasNext();) {
+			OutputPanel panel = (OutputPanel) panIt.next();
+			panel.setAnalysis(null);
+		}
+		xOperationID = ops[0].getID();
+		xOperationsWidget.setOperations(xVariable.getIntervals(), ops[0].getID(), xView, ops);
+		setOperationsClickHandler(xVizGalOperationsClickHandler);			
+		xView = "xy";
+		xOrtho = Util.setOrthoAxes(xView, xVariable.getGrid());
+		xAxesWidget.showViewAxes(xView, xOrtho);
+		xOperationID = xOperationsWidget.setZero(xView);
+		xAxesWidget.getRefMap().setTool(xView);
+		GridSerializable grid = xVariable.getGrid();
+		for (Iterator panIt = xPanels.iterator(); panIt.hasNext();) {
+			OutputPanel panel = (OutputPanel) panIt.next();
+			panel.setOperation(xOperationID, xView);
+			if ( grid.hasZ() ) {
+				panel.setRange("z", false);
+			}
+			if ( grid.hasT() ) {
+				panel.setRange("t", false);
+			}
+			panel.showOrthoAxes(xView, xOrtho);
+		}
+		xAxesWidget.setMessage("");
+		xAxesWidget.showMessage(false);
+		xAxesWidget.getRefMap().resizeMap();
+	}
+	ChangeHandler analysisOpChange = new ChangeHandler() {
+		
+		@Override
+		public void onChange(ChangeEvent event) {
+			applyButton.addStyleDependentName("APPLY-NEEDED");
+		}
+	};
 	ValueChangeHandler<String> historyHandler = new ValueChangeHandler<String>() {
 
 		@Override
@@ -299,6 +440,7 @@ public class VizGal extends BaseUI {
 		public void onSuccess(ConfigSerializable config) {
 			
 			GridSerializable grid = config.getGrid();
+			xAnalysisWidget.setAnalysisAxes(grid);
 			ops = config.getOperations();
 			
 			xVariable.setGrid(grid);
@@ -491,45 +633,54 @@ public class VizGal extends BaseUI {
 				comparePanel = panel;
 			}
 		}
+		
 		if ( differenceButton.isDown() ) {
 			if ( autoContourButton.isDown() ) {
 				autoContourButton.setDown(false);
 				autoContourTextBox.setText("");
 			}
-			
-			
-				for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
-					OutputPanel panel = (OutputPanel) panelIt.next();
-					if ( !panel.getID().equals(comparePanel.getID()) ) {
-						panel.setVizGalState(xVariable, getHistoryToken(), comparePanel.getHistoryToken());
-						panel.computeDifference(xOptionsButton.getState(), switchAxis);
-					}
-				}
-			
-		} else {
-
+			AnalysisSerializable analysis = null;
+			if ( xAnalysisWidget.isActive() ) analysis = xAnalysisWidget.getAnalysisSerializable();
+			comparePanel.setVizGalState(xVariable, getHistoryToken(), comparePanel.getHistoryToken());	
+			comparePanel.setAnalysis(analysis);
+            comparePanel.refreshPlot(null, false, true);
 			for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
 				OutputPanel panel = (OutputPanel) panelIt.next();
-				panel.setVizGalState(xVariable, getHistoryToken(), comparePanel.getHistoryToken());
-				if ( xVariable.isVector() ) {
-					if ( !xView.equals("xy") ) {
-						differenceButton.setDown(false);
-						differenceButton.setEnabled(false);
-					} else {
-						differenceButton.setDown(false);
-						differenceButton.setEnabled(true);
-					}
+				if ( !panel.getID().equals(comparePanel.getID()) ) {
+					panel.setVizGalState(xVariable, getHistoryToken(), comparePanel.getHistoryToken());
+					AnalysisSerializable a = null;
+					if ( xAnalysisWidget.isActive() ) a = xAnalysisWidget.getAnalysisSerializable();
+					panel.setAnalysis(a);
+					panel.computeDifference(xOptionsButton.getState(), switchAxis);
+				}
+			}
+
+		} else {
+			if ( xVariable.isVector() ) {
+				if ( !xView.equals("xy") ) {
+					differenceButton.setDown(false);
+					differenceButton.setEnabled(false);
 				} else {
 					differenceButton.setDown(false);
 					differenceButton.setEnabled(true);
 				}
-				// Get the current state of the options...
-				Map<String, String> ts = xOptionsButton.getState();
-				if ( !autoContourButton.isDown() ) {
-					// If it's not down, the current options value will be used.
-					autoContourTextBox.setText("");
-				}
+			} else {
+				differenceButton.setDown(false);
+				differenceButton.setEnabled(true);
+			}
+			// Get the current state of the options...
+			Map<String, String> ts = xOptionsButton.getState();
+			if ( !autoContourButton.isDown() ) {
+				// If it's not down, the current options value will be used.
+				autoContourTextBox.setText("");
+			}
+			for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
+				OutputPanel panel = (OutputPanel) panelIt.next();
+				panel.setVizGalState(xVariable, getHistoryToken(), comparePanel.getHistoryToken());
 				panel.setFillLevels(autoContourTextBox.getText());
+				AnalysisSerializable analysis = null;
+				if ( xAnalysisWidget.isActive() ) analysis = xAnalysisWidget.getAnalysisSerializable();
+				panel.setAnalysis(analysis);
 				panel.refreshPlot(ts, switchAxis, true);
 			}
 		}

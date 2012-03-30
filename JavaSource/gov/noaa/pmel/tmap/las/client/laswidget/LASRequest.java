@@ -416,6 +416,7 @@ public class LASRequest {
 					}
 					var.appendChild(anE);
 				}
+				counter++;
 			}
 	    }
 	}
