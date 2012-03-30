@@ -34,15 +34,7 @@ public class AnalysisWidget extends Composite {
 	ListBox analysisAxis = new ListBox();
 	CheckBox apply = new CheckBox("Apply Analysis");
 	
-	// Axis state information.
-	AnalysisAxisSerializable xAxis = new AnalysisAxisSerializable();
-	AnalysisAxisSerializable yAxis = new AnalysisAxisSerializable();
-	AnalysisAxisSerializable zAxis = new AnalysisAxisSerializable();
-	AnalysisAxisSerializable tAxis = new AnalysisAxisSerializable();
 	
-	// The container
-	AnalysisSerializable analysis = new AnalysisSerializable();
-
 	
 	public AnalysisWidget(String width) {
 		
@@ -53,7 +45,6 @@ public class AnalysisWidget extends Composite {
 		analysisType.addItem("Maximum");
 		analysisType.addItem("Sum");
 		analysisType.addItem("Variance");
-		analysisType.addChangeHandler(opChangeHandler);
 		
 		layoutPanel.getFlexCellFormatter().setColSpan(0, 0, 2);
 		layoutPanel.setWidget(0, 0, apply);
@@ -65,14 +56,8 @@ public class AnalysisWidget extends Composite {
         
         disclosurePanel.add(layoutPanel);		
         
-        analysis.getAxes().put("x", xAxis);
-        analysis.getAxes().put("y", yAxis);
-        analysis.getAxes().put("z", zAxis);
-        analysis.getAxes().put("t", tAxis);
-        
-        analysisAxis.addChangeHandler(axisChangeHandler);
-        
-        apply.addClickHandler(applyClickHandler);
+       
+
 		initWidget(disclosurePanel);
 		
 		
@@ -91,53 +76,15 @@ public class AnalysisWidget extends Composite {
 		
 	}
 	public AnalysisSerializable getAnalysisSerializable() {		
-		return analysis;
-	}
-	public void setLabel(String label) {
-		analysis.setLabel(label);
-	}
-	public void addAnalysisAxesChangeHandler(ChangeHandler analysisAxesChange) {
-		analysisAxis.addChangeHandler(analysisAxesChange);
-		
-	}
-	public void addAnalysisOpChangeHandler(ChangeHandler analysisOpChange) {
-		analysisType.addChangeHandler(analysisOpChange);
-	}
-	public boolean isActive() {
-		return apply.getValue();
-	}
-	public String getAnalysisAxis() {
-		return analysisAxis.getValue(analysisAxis.getSelectedIndex());
-	}
-	public void addAnalysisCheckHandler(ClickHandler analysisActiveChange) {
-		apply.addClickHandler(analysisActiveChange);
-	}
-	public ChangeHandler axisChangeHandler = new ChangeHandler() {
+		// Axis state information.
+		AnalysisAxisSerializable xAxis = new AnalysisAxisSerializable();
+		AnalysisAxisSerializable yAxis = new AnalysisAxisSerializable();
+		AnalysisAxisSerializable zAxis = new AnalysisAxisSerializable();
+		AnalysisAxisSerializable tAxis = new AnalysisAxisSerializable();
 
-		@Override
-		public void onChange(ChangeEvent event) {
-			set();
-		}
-		
-	};
-	public ChangeHandler opChangeHandler = new ChangeHandler() {
-
-		@Override
-		public void onChange(ChangeEvent event) {
-			set();	
-		}
-	};
-	public ClickHandler applyClickHandler = new ClickHandler() {
-
-		@Override
-		public void onClick(ClickEvent event) {
-			if (apply.getValue()) {
-				set();
-			}
-		}		
-	};
-	private void set() {
-	    String axis = analysisAxis.getValue(analysisAxis.getSelectedIndex());
+		// The container
+		AnalysisSerializable analysis = new AnalysisSerializable();
+		String axis = analysisAxis.getValue(analysisAxis.getSelectedIndex());
 		String op = analysisType.getValue(analysisType.getSelectedIndex());
 		xAxis.setOp(null);
 		yAxis.setOp(null);
@@ -161,6 +108,32 @@ public class AnalysisWidget extends Composite {
 			tAxis.setType("t");
 			tAxis.setOp(op);
 		}
+		analysis.getAxes().put("x", xAxis);
+		analysis.getAxes().put("y", yAxis);
+		analysis.getAxes().put("z", zAxis);
+		analysis.getAxes().put("t", tAxis);
+		return analysis;
+	}
+	
+	public void addAnalysisAxesChangeHandler(ChangeHandler analysisAxesChange) {
+		analysisAxis.addChangeHandler(analysisAxesChange);
+		
+	}
+	public void addAnalysisOpChangeHandler(ChangeHandler analysisOpChange) {
+		analysisType.addChangeHandler(analysisOpChange);
+	}
+	public boolean isActive() {
+		return apply.getValue();
+	}
+	public String getAnalysisAxis() {
+		return analysisAxis.getValue(analysisAxis.getSelectedIndex());
+	}
+	public void addAnalysisCheckHandler(ClickHandler analysisActiveChange) {
+		apply.addClickHandler(analysisActiveChange);
+	}
+	
+	private void set() {
+	   
 	}
 	public void setActive(boolean b) {
 		apply.setValue(b);
