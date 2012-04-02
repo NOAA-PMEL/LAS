@@ -145,6 +145,7 @@ public class VizGal extends BaseUI {
 		
 		xAxesWidget.addTChangeHandler(needApply);
 		xAxesWidget.addZChangeHandler(needApply);
+		xAxesWidget.getRefMap().setMapListener(mapListener);
 		
 		// xAxesWidget.addApplyHandler(settingsButtonApplyHandler);
 		// Comparison Axes Selector
@@ -1040,6 +1041,10 @@ public class VizGal extends BaseUI {
 				panel.showOrthoAxes(xView, xOrtho);
 				panel.setRanges(xView, xOrtho);
 			
+		}
+		if ( xAnalysisWidget.isActive() ) {
+			String v = xAnalysisWidget.getAnalysisAxis();
+			setAnalysisAxes(v);
 		}
 		applyChange();
 	}	
