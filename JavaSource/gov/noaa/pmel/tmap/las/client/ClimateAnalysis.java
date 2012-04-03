@@ -93,7 +93,7 @@ public class ClimateAnalysis implements EntryPoint {
 		}
 		xTlo = Util.getParameterString("tlo");
 		xThi = Util.getParameterString("thi");
-		xDateWidget.init(xTlo, xThi, "y", false);
+		xDateWidget.init(xTlo, xThi, "y", "360_day", false);
 		xDateWidget.setRange(true);
 		xDateWidget.addChangeHandler(new ChangeHandler() {
 
@@ -156,6 +156,11 @@ public class ClimateAnalysis implements EntryPoint {
 				lasRequest.setRange("t", xDateWidgetTwo.getFerretDateLo(), xDateWidgetTwo.getFerretDateHi(), 1);
 				String type = xAnalysisType.getValue(xAnalysisType.getSelectedIndex());
 				lasRequest.setProperty("climate_analysis", "type", type);
+				List<String> activeRegions = xRegions.getActiveVariablesAndRegions();
+				for (Iterator arIt = activeRegions.iterator(); arIt.hasNext();) {
+					String ar = (String) arIt.next();
+					lasRequest.setProperty("climate_analysis_regions", type+"_region_"+ar, ar);
+				}
 				Window.open(Util.getProductServer()+"?xml="+URL.encode(lasRequest.toString()), "_blank", "");
 			}
 		}
@@ -303,6 +308,27 @@ public class ClimateAnalysis implements EntryPoint {
 			formatter.setColSpan(0, 1, 7);
 			formatter.setColSpan(0, 2, 3);
 			formatter.setColSpan(0, 3, 3);
+			
+			// The FormValue is the string that must be passed to the Python code to get that variable calculated on that region.
+			ts_cb11.setFormValue("ts_nino3");
+			ts_cb12.setFormValue("ts_nino4");
+			ts_cb13.setFormValue("ts_nino34");
+			ts_cb14.setFormValue("ts_nino12");
+			ts_cb18.setFormValue("ts_eqatl");
+			ts_cb19.setFormValue("ts_tnatl");
+			ts_cb110.setFormValue("ts_tsatl");
+			ts_cb111.setFormValue("ts_eeqio");
+			ts_cb112.setFormValue("ts_weqio");
+			
+			tauu_cb21.setFormValue("tauu_nino3");
+			tauu_cb22.setFormValue("tauu_nino4");
+			tauu_cb25.setFormValue("tauu_weqpac");
+			tauu_cb28.setFormValue("tauu_eqatl");
+			tauu_cb213.setFormValue("tauu_eqio");
+			
+			ps_cb36.setFormValue("ps_darwin");
+			ps_cb37.setFormValue("ps_tahiti");
+			
 			
 			ts_cb11.addClickHandler(checkPacific);
 			ts_cb11.addClickHandler(checkTS);
@@ -459,9 +485,8 @@ public class ClimateAnalysis implements EntryPoint {
 				}
 				
 			});
-			
-			
-			ts.add(ts_cb11);
+						
+			ts.add(ts_cb11); 
 			ts.add(ts_cb12);
 			ts.add(ts_cb13);
 			ts.add(ts_cb14);
@@ -471,7 +496,7 @@ public class ClimateAnalysis implements EntryPoint {
 			ts.add(ts_cb111);
 			ts.add(ts_cb112);
 			
-			tauu.add(tauu_cb21);
+			tauu.add(tauu_cb21); 
 			tauu.add(tauu_cb22);
 			tauu.add(tauu_cb25);
 			tauu.add(tauu_cb28);
@@ -537,6 +562,28 @@ public class ClimateAnalysis implements EntryPoint {
 			
 			initWidget(layout);
 			
+		}
+		public List<String> getActiveVariablesAndRegions() {
+			List<String> active = new ArrayList<String>();
+			for (Iterator tsIt = ts.iterator(); tsIt.hasNext();) {
+				CheckBox checkBox = (CheckBox) tsIt.next();
+				if ( checkBox.getValue() ) {
+					active.add(checkBox.getFormValue());
+				}
+			}
+			for (Iterator tauuIt = tauu.iterator(); tauuIt.hasNext();) {
+				CheckBox checkBox = (CheckBox) tauuIt.next();
+				if ( checkBox.getValue() ) {
+					active.add(checkBox.getFormValue());
+				}
+			}
+			for (Iterator psIt = ps.iterator(); psIt.hasNext();) {
+				CheckBox checkBox = (CheckBox) psIt.next();
+				if ( checkBox.getValue() ) {
+					active.add(checkBox.getFormValue());
+				}
+			}
+			return active;
 		}
 		ClickHandler checkTS = new ClickHandler() {
 

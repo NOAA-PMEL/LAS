@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
@@ -23,7 +24,6 @@ import gov.noaa.pmel.tmap.las.jdom.LASFerretBackendConfig;
 import gov.noaa.pmel.tmap.las.service.RuntimeEnvironment;
 import gov.noaa.pmel.tmap.las.service.TemplateTool;
 import gov.noaa.pmel.tmap.las.service.ferret.FerretTool;
-import gov.noaa.pmel.tmap.las.util.FileListing;
 
 public class ClimateAnalysisTool extends TemplateTool {
 	LASClimateAnalysisBackendConfig lasClimateAnalysisBackendConfig;
@@ -52,7 +52,7 @@ public class ClimateAnalysisTool extends TemplateTool {
         }
         String tempDir   = lasClimateAnalysisBackendConfig.getTempDir();
         if (tempDir.equals("") ) {
-            tempDir = getResourcePath("resources/ferret/temp");
+            tempDir = getResourcePath("resources/climate/analysis/temp");
         }
         
       
@@ -104,15 +104,12 @@ public class ClimateAnalysisTool extends TemplateTool {
 				log.error("Output not found: "+output+"\n"+stderr);
 			} else {
 				log.debug("Output found: "+outputdir);
-				List<File> files = FileListing.getFileListing(new File(outputdir));
-                                log.debug("Found "+files.size()+" output files.");
+				List<File> files = (List<File>) FileUtils.listFiles(new File(outputdir), new String[]{"gz", "nc"}, true);
+				log.debug("Found "+files.size()+" output files.");
 				for (Iterator filesIt = files.iterator(); filesIt.hasNext();) {
 					File file = (File) filesIt.next();
-					if ( file.getAbsolutePath().endsWith(".ps.gz") || file.getAbsolutePath().endsWith(".nc") ) {
-                                                log.debug("Adding "+file.getAbsolutePath());
-						// For each plot make a result
-						lasResponse.makeResult(file.getAbsolutePath());
-					}
+					// For each plot make a result
+					lasResponse.makeResult(file.getAbsolutePath());
 				}
 			}
 			return lasResponse;
