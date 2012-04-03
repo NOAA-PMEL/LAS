@@ -138,32 +138,6 @@ public class DateTimeWidget extends Composite {
 		isMenu = false;
 		this.range = range;
 		
-		String calendar = tAxis.getCalendar();
-		
-        chrono = GregorianChronology.getInstance(DateTimeZone.UTC);
-		
-		if ( calendar != null && !calendar.equals("") )	{
-			if ( calendar.equalsIgnoreCase("proleptic_gregorian") ) {
-				chrono = GregorianChronology.getInstance(DateTimeZone.UTC);
-			} else if ( calendar.equalsIgnoreCase("noleap") || calendar.equals("365_day") ) {
-				chrono = NoLeapChronology.getInstanceUTC();
-			} else if (calendar.equals("julian") ) {
-				chrono = JulianChronology.getInstanceUTC();
-			} else if ( calendar.equals("all_leap") || calendar.equals("366_day") ) {
-				chrono = AllLeapChronology.getInstanceUTC();
-			} else if ( calendar.equals("360_day") ) {
-				chrono = ThreeSixtyDayChronology.getInstanceUTC();
-			}
-		} 
-				
-		monthFormat = DateTimeFormat.forPattern("MMM").withChronology(chrono).withZone(DateTimeZone.UTC);
-		longForm = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss").withChronology(chrono).withZone(DateTimeZone.UTC);
-		mediumForm = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm").withChronology(chrono).withZone(DateTimeZone.UTC);
-		shortForm = DateTimeFormat.forPattern("yyyy-MM-dd").withChronology(chrono).withZone(DateTimeZone.UTC);
-		shortFerretForm = DateTimeFormat.forPattern("dd-MMM-yyyy").withChronology(chrono).withZone(DateTimeZone.UTC);
-		mediumFerretForm = DateTimeFormat.forPattern("dd-MMM-yyyy HH:mm").withChronology(chrono).withZone(DateTimeZone.UTC);
-		longFerretForm = DateTimeFormat.forPattern("dd-MMM-yyyy HH:mm:ss").withChronology(chrono).withZone(DateTimeZone.UTC);
-		
 		if (tAxis.getNames() != null && tAxis.getNames().length > 0 ) {
 			
 			isMenu = true;
@@ -187,9 +161,9 @@ public class DateTimeWidget extends Composite {
 			lo_date = tAxis.getLo();
 			hi_date = tAxis.getHi();
 			if ( tAxis.getRenderString().toLowerCase().contains("t") ) {
-               init(lo_date, hi_date, (int)(tAxis.getMinuteInterval()), tAxis.getRenderString(), tAxis.isClimatology());
+               init(lo_date, hi_date, (int)(tAxis.getMinuteInterval()), tAxis.getRenderString(), tAxis.getCalendar(), tAxis.isClimatology());
 			} else {
-				init(lo_date, hi_date, tAxis.getRenderString(), tAxis.isClimatology());
+				init(lo_date, hi_date, tAxis.getRenderString(), tAxis.getCalendar(), tAxis.isClimatology());
 			}
 		}
 			
@@ -214,10 +188,34 @@ public class DateTimeWidget extends Composite {
 		hi_day.addChangeHandler(hiDayHandler);
 		hi_hour.addChangeHandler(hiHourHandler);
 	}
-	public void init(String lo_date, String hi_date, String render, boolean climo) {
-		init(lo_date, hi_date, -1, render, climo);
+	public void init(String lo_date, String hi_date, String render,  String calendar, boolean climo) {
+		init(lo_date, hi_date, -1, render, calendar, climo);
 	}
-	public void init(String lo_date, String hi_date, int delta, String render, boolean climo) {
+	public void init(String lo_date, String hi_date, int delta, String render, String calendar, boolean climo) {
+				
+        chrono = GregorianChronology.getInstance(DateTimeZone.UTC);
+		
+		if ( calendar != null && !calendar.equals("") )	{
+			if ( calendar.equalsIgnoreCase("proleptic_gregorian") ) {
+				chrono = GregorianChronology.getInstance(DateTimeZone.UTC);
+			} else if ( calendar.equalsIgnoreCase("noleap") || calendar.equals("365_day") ) {
+				chrono = NoLeapChronology.getInstanceUTC();
+			} else if (calendar.equals("julian") ) {
+				chrono = JulianChronology.getInstanceUTC();
+			} else if ( calendar.equals("all_leap") || calendar.equals("366_day") ) {
+				chrono = AllLeapChronology.getInstanceUTC();
+			} else if ( calendar.equals("360_day") ) {
+				chrono = ThreeSixtyDayChronology.getInstanceUTC();
+			}
+		} 
+				
+		monthFormat = DateTimeFormat.forPattern("MMM").withChronology(chrono).withZone(DateTimeZone.UTC);
+		longForm = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss").withChronology(chrono).withZone(DateTimeZone.UTC);
+		mediumForm = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm").withChronology(chrono).withZone(DateTimeZone.UTC);
+		shortForm = DateTimeFormat.forPattern("yyyy-MM-dd").withChronology(chrono).withZone(DateTimeZone.UTC);
+		shortFerretForm = DateTimeFormat.forPattern("dd-MMM-yyyy").withChronology(chrono).withZone(DateTimeZone.UTC);
+		mediumFerretForm = DateTimeFormat.forPattern("dd-MMM-yyyy HH:mm").withChronology(chrono).withZone(DateTimeZone.UTC);
+		longFerretForm = DateTimeFormat.forPattern("dd-MMM-yyyy HH:mm:ss").withChronology(chrono).withZone(DateTimeZone.UTC);
         
 		this.render = render;
 		this.climatology = climo;

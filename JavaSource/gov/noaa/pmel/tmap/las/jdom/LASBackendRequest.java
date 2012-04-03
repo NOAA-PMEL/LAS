@@ -23,6 +23,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.log4j.LogManager;
@@ -327,6 +328,17 @@ public class LASBackendRequest extends LASDocument {
 	}
 	else return null;
 
+    }
+    public String getPropertyValuesCommaSeparated(String group_name) {
+    	Map<String, String> group = getPropertyGroup(group_name);
+    	StringBuilder values = new StringBuilder();
+    	for (Iterator groupIt = group.keySet().iterator(); groupIt.hasNext();) {
+			String key = (String) groupIt.next();
+			String value = group.get(key);
+			values.append(value);
+			if ( groupIt.hasNext()) values.append(",");
+		}
+    	return values.toString();
     }
 
     /**
