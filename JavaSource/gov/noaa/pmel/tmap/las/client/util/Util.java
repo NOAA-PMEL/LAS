@@ -55,6 +55,8 @@ public class Util {
 		return tokenMap;
 	}
 	public static HashMap<String, String> getOptionsMap(String token) {
+		if ( token.startsWith(";") ) token = token.substring(1, token.length());
+		if ( token.endsWith(";") ) token = token.substring(0, token.length()-1);
 		String[] tokens = token.split(";");
 		HashMap<String, String> optionsMap = new HashMap<String, String>();
 		for( int i=0; i < tokens.length; i++ ) {

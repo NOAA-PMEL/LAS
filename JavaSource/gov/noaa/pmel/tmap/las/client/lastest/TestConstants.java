@@ -1,4 +1,4 @@
-package gov.noaa.pmel.tmap.las.client.test;
+package gov.noaa.pmel.tmap.las.client.lastest;
 
 public class TestConstants {
 
