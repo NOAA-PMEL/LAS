@@ -340,7 +340,7 @@ public class OutputPanel extends Composite {
 	 * @param switchAxis
 	 * @param popup
 	 */
-	public void refreshPlot(Map<String, String> options, boolean switchAxis, boolean popup) {
+	public void refreshPlot(Map<String, String> options, boolean switchAxis, boolean popup, boolean force) {
 		
 		// When called from vizGal this means the button is off...
 		
@@ -412,7 +412,7 @@ public class OutputPanel extends Composite {
         
 		String url = Util.getProductServer()+"?xml="+URL.encode(lasRequest.toString());
 		
-		if ( !url.equals(currentURL) ) {
+		if ( !url.equals(currentURL) || force) {
 			currentURL = url;
 			if ( containerType.equals(Constants.IMAGE) ) {
 				if (popup) {
@@ -436,6 +436,8 @@ public class OutputPanel extends Composite {
 				output.setUrl(url);
 				grid.setWidget(1, 0, output);
 			}
+		} else {
+			setImageWidth();
 		}
 	}
 	private boolean hasViewAxes() {
@@ -581,7 +583,7 @@ public class OutputPanel extends Composite {
 		}
 		return lasRequest;
 	}
-	public void computeDifference(Map<String, String> options, boolean switchAxis) {
+	public void computeDifference(Map<String, String> options, boolean switchAxis, boolean force) {
 
 		// When called from vizGal the button is down
 		difference = true;
@@ -840,7 +842,7 @@ public class OutputPanel extends Composite {
 		lasRequest.setProperty("product_server", "ui_timeout", "20");
 		String url = Util.getProductServer()+"?xml="+URL.encode(lasRequest.toString());
 
-		if ( !url.equals(currentURL) ) {
+		if ( !url.equals(currentURL) || force ) {
 			currentURL = url;
 			spin.show();
 			if ( containerType.equals(Constants.IMAGE) ) {
@@ -858,6 +860,8 @@ public class OutputPanel extends Composite {
 				output.setUrl(url);
 				grid.setWidget(1, 0, output);
 			}
+		} else {
+			setImageWidth();
 		}
 	}
 
@@ -1150,9 +1154,9 @@ public class OutputPanel extends Composite {
 		// When called locally, decide which to use base of value set from previous calls to refreshPlot or computeDifference.
 		// TODO make this into one method.  :-)
 		if ( difference ) {
-			computeDifference(null, false);
+			computeDifference(null, false, false);
 		} else {
-			refreshPlot(null, false, true);
+			refreshPlot(null, false, true, false);
 
 		}
 	}
@@ -1409,7 +1413,7 @@ public class OutputPanel extends Composite {
 		@Override
 		public void onFeatureChanged() {
 			
-			refreshPlot(null, false, true);
+			refreshPlot(null, false, true, false);
 			
 		}
 		

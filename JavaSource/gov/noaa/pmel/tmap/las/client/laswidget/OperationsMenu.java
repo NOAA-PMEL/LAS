@@ -44,7 +44,7 @@ public class OperationsMenu extends Composite {
         exportToDesktopButton.addStyleDependentName("SMALLER");
         saveAsButton.addStyleDependentName("SMALLER");
 		buttonBar.add(animationButton);
-		buttonBar.add(compareButton);
+		//buttonBar.add(compareButton);
 		buttonBar.add(googleEarthButton);
 		buttonBar.add(showValuesButton);
 		buttonBar.add(exportToDesktopButton);

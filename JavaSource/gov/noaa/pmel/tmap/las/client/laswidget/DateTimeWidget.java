@@ -139,7 +139,7 @@ public class DateTimeWidget extends Composite {
 		this.range = range;
 		
 		if (tAxis.getNames() != null && tAxis.getNames().length > 0 ) {
-			
+			initChrono(tAxis.getCalendar());
 			isMenu = true;
 			lo_day.clear();
 			hi_day.clear();
@@ -188,13 +188,9 @@ public class DateTimeWidget extends Composite {
 		hi_day.addChangeHandler(hiDayHandler);
 		hi_hour.addChangeHandler(hiHourHandler);
 	}
-	public void init(String lo_date, String hi_date, String render,  String calendar, boolean climo) {
-		init(lo_date, hi_date, -1, render, calendar, climo);
-	}
-	public void init(String lo_date, String hi_date, int delta, String render, String calendar, boolean climo) {
-				
-        chrono = GregorianChronology.getInstance(DateTimeZone.UTC);
-		
+	private void initChrono(String calendar) {
+		chrono = GregorianChronology.getInstance(DateTimeZone.UTC);
+
 		if ( calendar != null && !calendar.equals("") )	{
 			if ( calendar.equalsIgnoreCase("proleptic_gregorian") ) {
 				chrono = GregorianChronology.getInstance(DateTimeZone.UTC);
@@ -208,7 +204,6 @@ public class DateTimeWidget extends Composite {
 				chrono = ThreeSixtyDayChronology.getInstanceUTC();
 			}
 		} 
-				
 		monthFormat = DateTimeFormat.forPattern("MMM").withChronology(chrono).withZone(DateTimeZone.UTC);
 		longForm = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss").withChronology(chrono).withZone(DateTimeZone.UTC);
 		mediumForm = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm").withChronology(chrono).withZone(DateTimeZone.UTC);
@@ -216,7 +211,13 @@ public class DateTimeWidget extends Composite {
 		shortFerretForm = DateTimeFormat.forPattern("dd-MMM-yyyy").withChronology(chrono).withZone(DateTimeZone.UTC);
 		mediumFerretForm = DateTimeFormat.forPattern("dd-MMM-yyyy HH:mm").withChronology(chrono).withZone(DateTimeZone.UTC);
 		longFerretForm = DateTimeFormat.forPattern("dd-MMM-yyyy HH:mm:ss").withChronology(chrono).withZone(DateTimeZone.UTC);
-        
+
+	}
+	public void init(String lo_date, String hi_date, String render,  String calendar, boolean climo) {
+		init(lo_date, hi_date, -1, render, calendar, climo);
+	}
+	public void init(String lo_date, String hi_date, int delta, String render, String calendar, boolean climo) {
+		initChrono(calendar);
 		this.render = render;
 		this.climatology = climo;
         this.delta = delta;
