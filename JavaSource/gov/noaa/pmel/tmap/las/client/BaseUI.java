@@ -208,7 +208,7 @@ public class BaseUI {
 	 * Keep track of where you are in the button panel for when sub-classes add to it.
 	 */
 	
-	int xButtonLayoutIndex = 0;
+	private int xButtonLayoutIndex = 0;
 
 	/*
 	 * (non-Javadoc)
@@ -421,7 +421,7 @@ public class BaseUI {
 	};
 	public void init(int numPanels, String container_type) {
 		xContainerType = container_type;
-		xPanelCount = numPanels;
+		
 		int col = 0;
 		int row = 0;
 		if ( xPanelCount == 1 ) {
@@ -429,39 +429,79 @@ public class BaseUI {
 		} else {
 			applyButton.setText("Update Plots");
 		}
-		for(int i = 0; i < numPanels; i++ ) {
-			String title = "Panel-"+i;
-			boolean compare_panel = false;
-			if ( i == 0 ) {
-				compare_panel = true;
+		
+		
+		if ( xPanelCount > numPanels ) {
+			for (int p = 0; p < numPanels; p++) {
+				if( p%2 == 0 ) {
+					col++; // go to the next column
+				}
+				// If it's odd
+				if ( p%2 != 0) {
+					row++; // next row
+					col--; // previous column
+				}
 			}
-
-			boolean singlePanel = true;
-			if ( numPanels > 1 ) {
-				singlePanel = false;
+			for (int i = numPanels; i < xPanelCount; i++) {
+				OutputPanel panel = (OutputPanel) xPanelTable.getWidget(row, col);
+				xPanelTable.remove(panel);
+				xPanels.remove(panel);
+				if( i%2 == 0 ) {
+					col++; // go to the next column
+				}
+				// If it's odd
+				if ( i%2 != 0) {
+					row++; // next row
+					col--; // previous column
+				}
 			}
-
-			OutputPanel panel = new OutputPanel(title, compare_panel, xOperationID, xOptionID, xView, singlePanel, xContainerType, xTileServer);
-			panel.addAnnotationsClickHandler(annotationsClickHandler);
-
-			xPanelTable.setWidget(row, col, panel);			
-			xPanels.add(panel);
-
-			// This will make a 2 column by n row display of the panels
-			// If it's even
-			if( i%2 == 0 ) {
-				col++; // go to the next column
+		} else {
+			for (int p = 0; p < xPanelCount; p++) {
+				if( p%2 == 0 ) {
+					col++; // go to the next column
+				}
+				// If it's odd
+				if ( p%2 != 0) {
+					row++; // next row
+					col--; // previous column
+				}
 			}
-			// If it's odd
-			if ( i%2 != 0) {
-				row++; // next row
-				col--; // previous column
+			for(int i = xPanelCount; i < numPanels; i++ ) {
+				String title = "Panel-"+i;
+				boolean compare_panel = false;
+				if ( i == 0 ) {
+					compare_panel = true;
+				}
+
+				// DEBUG - pretending there is never single panel mode so the ortho axes always show up.
+				boolean singlePanel = false;
+				//			boolean singlePanel = true;
+				//			if ( numPanels > 1 ) {
+				//				singlePanel = false;
+				//			}
+
+
+				OutputPanel panel = new OutputPanel(title, compare_panel, xOperationID, xOptionID, xView, singlePanel, xContainerType, xTileServer);
+				panel.addAnnotationsClickHandler(annotationsClickHandler);
+
+				xPanelTable.setWidget(row, col, panel);			
+				xPanels.add(panel);
+
+				if( i%2 == 0 ) {
+					col++; // go to the next column
+				}
+				// If it's odd
+				if ( i%2 != 0) {
+					row++; // next row
+					col--; // previous column
+				}				
+
+				xPanelWidth = getPanelWidth(numPanels);
+				panel.setPanelWidth(xPanelWidth);
+
 			}
-
-			xPanelWidth = getPanelWidth(numPanels);
-			panel.setPanelWidth(xPanelWidth);
-
 		}
+		xPanelCount = numPanels;
 //		if ( numPanels == 1 ) {
 //			xComparisonAxesSelector.setVisible(false);
 //			//xAxesWidget.setOrthoTitle("Other Axes");
@@ -585,6 +625,9 @@ public class BaseUI {
 		applyButton.setVisible(true);
 		applyButton.addClickHandler(handler);
 	}
+	protected int getButtonIndex() {
+		return xButtonLayoutIndex;
+	}
 	public ChangeHandler needApply = new ChangeHandler() {
 
 		@Override
@@ -629,7 +672,18 @@ public class BaseUI {
 		
 		@Override
 		public void onFeatureChanged() {
-            applyButton.addStyleDependentName("APPLY-NEEDED");			
+            applyButton.addStyleDependentName("APPLY-NEEDED");
+            if ( xOrtho.contains("x") && !xOrtho.contains("y") ) {
+            	for (Iterator panIt = xPanels.iterator(); panIt.hasNext();) {
+					OutputPanel panel = (OutputPanel) panIt.next();
+					panel.setLat(String.valueOf(xAxesWidget.getRefMap().getYlo()), String.valueOf(xAxesWidget.getRefMap().getYhi()));
+				}
+            } else if ( !xOrtho.contains("x") && xOrtho.contains("y") ) {
+            	for (Iterator panIt = xPanels.iterator(); panIt.hasNext();) {
+					OutputPanel panel = (OutputPanel) panIt.next();
+					panel.setLon(String.valueOf(xAxesWidget.getRefMap().getXlo()), String.valueOf(xAxesWidget.getRefMap().getXhi()));
+				}
+            }
 		}
 	};
     private void setMapSelection(double s, double n, double w, double e) {

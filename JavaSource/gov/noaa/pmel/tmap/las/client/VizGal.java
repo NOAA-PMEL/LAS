@@ -2,7 +2,10 @@ package gov.noaa.pmel.tmap.las.client;
 
 import gov.noaa.pmel.tmap.las.client.laswidget.AxesWidgetGroup;
 import gov.noaa.pmel.tmap.las.client.laswidget.Constants;
+import gov.noaa.pmel.tmap.las.client.laswidget.LASRequest;
+import gov.noaa.pmel.tmap.las.client.laswidget.OperationPushButton;
 import gov.noaa.pmel.tmap.las.client.laswidget.OperationRadioButton;
+import gov.noaa.pmel.tmap.las.client.laswidget.OperationsMenu;
 import gov.noaa.pmel.tmap.las.client.serializable.AnalysisSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.CategorySerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.ConfigSerializable;
@@ -31,6 +34,7 @@ import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.http.client.URL;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -55,6 +59,11 @@ import com.google.gwt.user.client.ui.FlexTable.FlexCellFormatter;
  *
  */
 public class VizGal extends BaseUI {
+	/*
+	 * DEBUG
+	 * TODO // decide
+	 */
+	ListBox compareMenu = new ListBox();
 	
 	/*
 	 * The main panel for this UI, has custom vizGal Buttons and the BaseUI main panel
@@ -116,6 +125,7 @@ public class VizGal extends BaseUI {
      // Keep track of the current operations
      OperationSerializable[] ops;
      
+     OperationsMenu tOperationsMenu = new OperationsMenu();
     
      // Everybody that sub-classes BaseUI must implement three handlers for options OK, operations clicks and data set selections.
    
@@ -124,7 +134,10 @@ public class VizGal extends BaseUI {
 		
 		int col = 0;
 		
-		addMenuButtons(buttonLayout);
+		tOperationsMenu.addClickHandler(tExternalOperationClickHandler);
+		//addMenuButtons(buttonLayout);
+		int myButtonIndex = getButtonIndex();
+		xButtonLayout.setWidget(0, myButtonIndex++, tOperationsMenu);
 		vVizGalPanel.setWidget(1, 0, xMainPanel);
 		
 		initialHistory = getAnchor();
@@ -167,14 +180,45 @@ public class VizGal extends BaseUI {
 		autoContourButton.addStyleDependentName("SMALLER");
 		autoContourTextBox.addStyleDependentName("SMALLER");
 		
+		// DEBUG
+		compareMenu.addStyleDependentName("SMALLER");
+		
 		buttonLayout.setWidget(0, col++, differenceButton);
 		buttonLayout.setWidget(0, col++, autoContourButton);
 		buttonLayout.setWidget(0, col++, autoContourTextBox);
+		//DEBUG
+		compareMenu.addItem("Compare", "1");
+		compareMenu.addItem("Compare 2", "2");
+		compareMenu.addItem("Compare 4", "4");
+		compareMenu.addChangeHandler(new ChangeHandler() {
+
+			@Override
+			public void onChange(ChangeEvent event) {
+				
+				String p = compareMenu.getValue(compareMenu.getSelectedIndex());
+				init(Integer.valueOf(p), Constants.IMAGE);
+				resize();
+				if ( p.equals("1") ) {
+					initPanels(true);
+					Widget compareButtons = xButtonLayout.getWidget(0, getButtonIndex());
+					xButtonLayout.remove(compareButtons);
+					xButtonLayout.setWidget(0, getButtonIndex(), tOperationsMenu);
+				} else {
+				    initPanels();
+				    Widget menu = xButtonLayout.getWidget(0, getButtonIndex());
+				    xButtonLayout.remove(menu);
+					addMenuButtons(buttonLayout);
+				}
+			}
+			
+		});
+		
+		xButtonLayout.setWidget(0, myButtonIndex++, compareMenu);
 		
 		RootPanel.get("vizGal").add(vVizGalPanel);
 		//RootPanel.get("PLOT_LINK").setVisible(false);
 		
-		super.init(2, Constants.IMAGE);
+		super.init(1, Constants.IMAGE);
 		
 		// Set the three required handlers
 		setDatasetSelectionHandler(xVisGalDatasetSelectionHandler);
@@ -236,6 +280,7 @@ public class VizGal extends BaseUI {
 		// Get set the new operations that apply to the remaining views.
 		xOperationID = ops[0].getID();
 		xOperationsWidget.setOperations(intervals, ops[0].getID(), xView, ops);
+		tOperationsMenu.setMenus(ops, xView);
 		setOperationsClickHandler(xVizGalOperationsClickHandler);
 
 		// Set the default operation.
@@ -306,6 +351,7 @@ public class VizGal extends BaseUI {
 		}
 		xOperationID = ops[0].getID();
 		xOperationsWidget.setOperations(xVariable.getIntervals(), ops[0].getID(), xView, ops);
+		tOperationsMenu.setMenus(ops, xView);
 		setOperationsClickHandler(xVizGalOperationsClickHandler);			
 		xView = "xy";
 		xOrtho = Util.setOrthoAxes(xView, xVariable.getGrid());
@@ -393,6 +439,7 @@ public class VizGal extends BaseUI {
 			GridSerializable grid = config.getGrid();
 			ops = config.getOperations();
 			xOperationsWidget.setOperations(xVariable.getIntervals(), xOperationID, xView, ops);
+			tOperationsMenu.setMenus(ops, xView);
 			xOptionsButton.setOptions(xOperationsWidget.getCurrentOperation().getOptionsID());
 			xVariable.setGrid(grid);
 			// Figure out the compare and fixed axis
@@ -475,9 +522,7 @@ public class VizGal extends BaseUI {
 		}
 	};
 	
-	
-	private void initPanels() {
-
+	private void initPanels(boolean force) {
 		xOrtho.clear();
 		
 		
@@ -584,11 +629,15 @@ public class VizGal extends BaseUI {
 			OutputPanel p = (OutputPanel) panelIt.next();
 			p.setMouseMoves(mice);
 		}
-		refresh(false, true);
+		refresh(false, true, force);
+	}
+	private void initPanels() {
+		initPanels(false);
 	}
 	public boolean init() {
 
 		xOperationsWidget.setOperations(xVariable.getIntervals(), xOperationID, xView, ops);
+		tOperationsMenu.setMenus(ops, xView);
 		xOptionsButton.setOptions(xOperationsWidget.getCurrentOperation().getOptionsID());
 		GridSerializable ds_grid = xVariable.getGrid();
 		double grid_west = Double.valueOf(ds_grid.getXAxis().getLo());
@@ -620,7 +669,7 @@ public class VizGal extends BaseUI {
 			return true;
 		}
 	}
-	private void refresh(boolean switchAxis, boolean history) {
+	private void refresh(boolean switchAxis, boolean history, boolean force) {
 
 		applyButton.removeStyleDependentName("APPLY-NEEDED");
 		
@@ -644,7 +693,7 @@ public class VizGal extends BaseUI {
 			if ( xAnalysisWidget.isActive() ) analysis = xAnalysisWidget.getAnalysisSerializable();
 			comparePanel.setVizGalState(xVariable, getHistoryToken(), comparePanel.getHistoryToken());	
 			comparePanel.setAnalysis(analysis);
-            comparePanel.refreshPlot(null, false, true);
+            comparePanel.refreshPlot(null, false, true, force);
 			for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
 				OutputPanel panel = (OutputPanel) panelIt.next();
 				if ( !panel.getID().equals(comparePanel.getID()) ) {
@@ -652,7 +701,7 @@ public class VizGal extends BaseUI {
 					AnalysisSerializable a = null;
 					if ( xAnalysisWidget.isActive() ) a = xAnalysisWidget.getAnalysisSerializable();
 					panel.setAnalysis(a);
-					panel.computeDifference(xOptionsButton.getState(), switchAxis);
+					panel.computeDifference(xOptionsButton.getState(), switchAxis, force);
 				}
 			}
 
@@ -682,7 +731,7 @@ public class VizGal extends BaseUI {
 				AnalysisSerializable analysis = null;
 				if ( xAnalysisWidget.isActive() ) analysis = xAnalysisWidget.getAnalysisSerializable();
 				panel.setAnalysis(analysis);
-				panel.refreshPlot(ts, switchAxis, true);
+				panel.refreshPlot(ts, switchAxis, true, force);
 			}
 		}
 		if ( history ) {
@@ -829,22 +878,22 @@ public class VizGal extends BaseUI {
 		// The view may have changed if the operation changed before the apply.
 		xAxesWidget.getRefMap().setTool(xView);
 		
-		refresh(false, true);
+		refresh(false, true, false);
 	}
 	ClickHandler panelApplyButtonClick = new ClickHandler() {
 		@Override
 		public void onClick(ClickEvent event) {
-			refresh(false, true);
+			refresh(false, true, false);
 		}
 	};
 	ClickListener differencesClick = new ClickListener() {
 		public void onClick(Widget sender) {
-			refresh(false, true);	
+			refresh(false, true, false);	
 		}
 	};
 	public ChangeListener panelAxisMenuChange = new ChangeListener() {
 		public void onChange(Widget sender) {
-			refresh(false, true);
+			refresh(false, true, false);
 		}
 	};
 //	public ChangeListener fixedAxisMenuChange = new ChangeListener() {
@@ -901,7 +950,7 @@ public class VizGal extends BaseUI {
 	ClickHandler optionsOkHandler = new ClickHandler() {
 		@Override
 		public void onClick(ClickEvent arg0) {
-			refresh(false, true);
+			refresh(false, true, false);
 		}
 		
 	};
@@ -1196,7 +1245,7 @@ public class VizGal extends BaseUI {
 					Util.getRPCService().getGrid(tokenMap.get("xDSID"), tokenMap.get("vid"), requestGridForHistory);
 				}
 			}
-			refresh(switch_axis, false);
+			refresh(switch_axis, false, false);
 			// If necessary restore panels in usePanelSettings mode...
 			applyTokensToPanelModePanels(settings);		
 		}
@@ -1310,5 +1359,18 @@ public class VizGal extends BaseUI {
 		}
 		
 	};
+	public ClickHandler tExternalOperationClickHandler = new ClickHandler() {
 
+		@Override
+		public void onClick(ClickEvent event) {
+			OperationPushButton b = (OperationPushButton) event.getSource();
+			OperationSerializable xOperationID = b.getOperation();
+			LASRequest lasRequest = xPanels.get(0).getRequest();
+			lasRequest.setProperty("las", "output_type", "html");
+			lasRequest.setOperation(xOperationID.getID(), "v7");
+			String features = "toolbar=1,location=1,directories=1,status=1,menubar=1,scrollbars=1,resizable=1"; 
+			Window.open(Util.getProductServer()+"?xml="+URL.encode(lasRequest.toString()), xOperationID.getName(), features);
+		}
+
+	};
 }
