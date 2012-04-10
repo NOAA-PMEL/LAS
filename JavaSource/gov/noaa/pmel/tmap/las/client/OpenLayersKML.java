@@ -91,8 +91,8 @@ public class OpenLayersKML implements EntryPoint {
 					
 					@Override
 					public void onLoadStart(LoadStartEvent eventObject) {
-						int left = map.getAbsoluteLeft() + (map.getOffsetWidth()/2) - (load.getOffsetWidth()/2);
-						int top = map.getAbsoluteTop() + (map.getOffsetHeight()/2) - (load.getOffsetHeight()/2);
+						int left = kmlButton.getAbsoluteLeft();
+						int top = kmlButton.getAbsoluteTop();
 						load.setPopupPosition(left, top);
 						load.show();
 					}
