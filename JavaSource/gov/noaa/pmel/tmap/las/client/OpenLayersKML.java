@@ -135,7 +135,8 @@ public class OpenLayersKML implements EntryPoint {
 			public void onFeatureChanged() {
 				
 				map.zoomMapToSelection();
-				
+				map.removeFeatures();
+				map.toggleDrawing();
 			}
 		});
 		header.add(kmlURL);
