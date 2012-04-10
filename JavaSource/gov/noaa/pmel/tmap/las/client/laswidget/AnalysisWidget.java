@@ -131,10 +131,6 @@ public class AnalysisWidget extends Composite {
 	public void addAnalysisCheckHandler(ClickHandler analysisActiveChange) {
 		apply.addClickHandler(analysisActiveChange);
 	}
-	
-	private void set() {
-	   
-	}
 	public void setActive(boolean b) {
 		apply.setValue(b);
 	}

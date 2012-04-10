@@ -101,10 +101,10 @@ public class AxesWidgetGroup extends Composite {
 		if ( type.contains("y") ) {
 			refMap.setVisible(visible);
 		}
-		if ( type.equals("z") ) {
+		if ( type.equals("z") && hasZ) {
 			zWidget.setVisible(visible);
 		}
-		if ( type.equals("t") ) {
+		if ( type.equals("t") && hasT) {
 			dateTimeWidget.setVisible(visible);
 		}
 	}
