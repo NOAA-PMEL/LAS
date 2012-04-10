@@ -930,7 +930,7 @@ public class OLMapWidget extends Composite {
 		}
 		
 	};
-	private void toggleDrawing() {
+	public void toggleDrawing() {
 		if ( !drawing ) {
 			// Drawing is not active, so activate it.
 			drawing = true;
@@ -1394,6 +1394,10 @@ public class OLMapWidget extends Composite {
 	}
 	public void setMapListener(MapSelectionChangeListener mapListener) {
 		this.mapListener = mapListener;
+	}
+	public void removeFeatures() {
+		boxLayer.destroyFeatures();
+		lineLayer.destroyFeatures();
 	}
 	public static native void featureAdded() /*-{
         if (typeof $wnd.featureAddedCallback == 'function') {
