@@ -37,4 +37,15 @@ public class AnalysisSerializable {
 			return a.getOp() != null;
 		}		
 	}
+	public String toString() {
+		StringBuilder ts = new StringBuilder();
+		for (Iterator keyIt = axes.keySet().iterator(); keyIt.hasNext();) {
+			String key = (String) keyIt.next();
+			AnalysisAxisSerializable a = axes.get(key);
+			if (a.getOp() != null ) {
+				ts.append(a.toString());
+			}
+		}
+		return ts.toString();
+	}
 }

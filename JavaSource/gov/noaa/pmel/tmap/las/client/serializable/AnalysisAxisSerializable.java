@@ -31,4 +31,7 @@ public class AnalysisAxisSerializable {
 		this.type = type;
 	}
 
+	public String toString() {
+		return "Analysis Axis: type="+type+" op= "+op+" hi="+hi+" lo="+lo;
+	}
 }

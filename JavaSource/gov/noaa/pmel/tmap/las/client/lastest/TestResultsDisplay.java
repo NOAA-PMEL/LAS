@@ -1,4 +1,4 @@
-package gov.noaa.pmel.tmap.las.client.test;
+package gov.noaa.pmel.tmap.las.client.lastest;
 
 import gov.noaa.pmel.tmap.las.client.serializable.TestSerializable;
 import gov.noaa.pmel.tmap.las.client.util.Util;
