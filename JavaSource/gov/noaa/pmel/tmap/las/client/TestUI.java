@@ -140,8 +140,8 @@ public class TestUI extends BaseUI {
 			}
 			
 		});
-		
-		xButtonLayout.setWidget(0, xButtonLayoutIndex++, tOperationsMenu);
+		int myButtonIndex = getButtonIndex();
+		xButtonLayout.setWidget(0, myButtonIndex++, tOperationsMenu);
 		tTopPanel.add(tBreadCrumb);
 		tTopPanel.add(tVariables);
 		tVariables.addAddButtonClickHandler(tAddVariableClickHandler);
@@ -450,7 +450,7 @@ public class TestUI extends BaseUI {
 		}
 
 
-		xPanels.get(0).refreshPlot(null, false, false);
+		xPanels.get(0).refreshPlot(null, false, false, false);
 
 		resize();
 	}
@@ -548,7 +548,7 @@ public class TestUI extends BaseUI {
 			xPanels.get(0).setAnalysis(analysis);
 			
 			Map<String, String> temp_state = xOptionsButton.getState();
-			xPanels.get(0).refreshPlot(temp_state, false, true);
+			xPanels.get(0).refreshPlot(temp_state, false, true, false);
 		}
 	}
 	/**
@@ -594,7 +594,7 @@ public class TestUI extends BaseUI {
 	ClickHandler panelApply = new ClickHandler() {
 		@Override
 		public void onClick(ClickEvent arg0) {
-			xPanels.get(0).refreshPlot(xOptionsButton.getState(), false, true);
+			xPanels.get(0).refreshPlot(xOptionsButton.getState(), false, true, false);
 		}		
 	};
 	AsyncCallback<ConfigSerializable> getGridCallback = new AsyncCallback<ConfigSerializable>() {
@@ -693,7 +693,7 @@ public class TestUI extends BaseUI {
 	public ChangeHandler onAxisChange = new ChangeHandler() {
 		@Override
 		public void onChange(ChangeEvent arg0) {
-			xPanels.get(0).refreshPlot(null, false, true);	
+			xPanels.get(0).refreshPlot(null, false, true, false);	
 		}
 	};
 	public ClickHandler operationsClickHandler = new ClickHandler() {
