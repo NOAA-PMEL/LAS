@@ -19,6 +19,6 @@
   
   <!-- Other module inherits                                      -->
   <!-- Specify the app entry point class.                         -->
-  <entry-point class='gov.noaa.pmel.tmap.las.client.test.TestResultsDisplay'/>
+  <entry-point class='gov.noaa.pmel.tmap.las.client.lastest.TestResultsDisplay'/>
 
 </module>
