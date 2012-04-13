@@ -10,6 +10,7 @@
 !               indep axis, use D for the dep axis.
 !              
 ! 5/2010    ACM Write time range in formatted time strings if a time axis.
+! 4/2012    ACM Testing removal of the URL and variables from the map-scale file.
 ! .......................................................................................
 !
 ! LAS_results.jnl creates the result files. 
@@ -61,25 +62,28 @@ ENDIF
 
 ! Always write the map_scale file.
 
-   LET syms_names = {"DATA_0_URL"}
-   LET syms_vals = {"($DATA_0_URL)"}
-   LIST/CLOBBER/FILE="($result_map_scale_filename)"/NOHEAD/NOROWLAB syms_names, syms_vals
-   LET syms_names = {"DATA_0_VAR"}
-   LET syms_vals = {"($DATA_0_VAR)"}
-   LIST/APPEND/FILE="($result_map_scale_filename)"/NOHEAD/NOROWLAB syms_names, syms_vals
+!Comment out the url and variable name output. This info is not saved
+!when map_scale.xml is generated anyway. (See ferret ticket 1933)
 
-   LET syms_names = {"DATA_1_URL"}
-   LET syms_vals = {"($DATA_1_URL)"}
-   LIST/APPEND/FILE="($result_map_scale_filename)"/NOHEAD/NOROWLAB syms_names, syms_vals
-   LET syms_names = {"DATA_1_VAR"}
-   LET syms_vals = {"($DATA_1_VAR)"}
-   LIST/APPEND/FILE="($result_map_scale_filename)"/NOHEAD/NOROWLAB syms_names, syms_vals
+!   LET syms_names = {"DATA_0_URL"}
+!   LET syms_vals = {"($DATA_0_URL)"}
+!   LIST/CLOBBER/FILE="($result_map_scale_filename)"/NOHEAD/NOROWLAB syms_names, syms_vals
+!   LET syms_names = {"DATA_0_VAR"}
+!   LET syms_vals = {"($DATA_0_VAR)"}
+!   LIST/APPEND/FILE="($result_map_scale_filename)"/NOHEAD/NOROWLAB syms_names, syms_vals
+!
+!   LET syms_names = {"DATA_1_URL"}
+!   LET syms_vals = {"($DATA_1_URL)"}
+!   LIST/APPEND/FILE="($result_map_scale_filename)"/NOHEAD/NOROWLAB syms_names, syms_vals
+!   LET syms_names = {"DATA_1_VAR"}
+!   LET syms_vals = {"($DATA_1_VAR)"}
+!   LIST/APPEND/FILE="($result_map_scale_filename)"/NOHEAD/NOROWLAB syms_names, syms_vals
+!
+! assume we are running Ferret v5.81_ with /NOROWLAB qualifier on LIST command
+!   LIST/APPEND/FILE="($result_map_scale_filename)"/NOHEAD/NOROWLAB syms_names, syms_vals
 
    IF `($xstride"0|*>1) EQ 0` THEN DEFINE SYMBOL xstride = 1 
    IF `($ystride"0|*>1) EQ 0` THEN DEFINE SYMBOL ystride = 1
-
-! assume we are running Ferret v5.81_ with /NOROWLAB qualifier on LIST command
-   LIST/APPEND/FILE="($result_map_scale_filename)"/NOHEAD/NOROWLAB syms_names, syms_vals
 
    LET syms_names = {\
      "PPL$XMIN", "PPL$XMAX", \
