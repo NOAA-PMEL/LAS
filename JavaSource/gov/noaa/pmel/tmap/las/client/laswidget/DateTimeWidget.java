@@ -85,11 +85,28 @@ public class DateTimeWidget extends Composite {
 	private static final String[] MONTHS = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
 	
 	//public DateTimeWidget(String lo_date, String hi_date, int deltaMinutes, int minuteOffset, String render, boolean range, boolean climatology) {
+	/**
+	 * Construct using a TimeAxisSerializable object. Range set to false means there is only one widget (or set of
+	 * widgets in the case of time) visible and the user can only select one
+	 * point from that axis. Range set to true means that there are two
+	 * identical coordinated widgets (or set of widgets in the case of time)
+	 * from which you can select a starting point and an ending point from that
+	 * axis. The coordination between the widgets is such that you can not
+	 * select an endpoint that is before the starting point select. The widgets
+	 * update themselves to prevent this from happening.
+	 * 
+	 * @param tAxis
+	 * @param range
+	 */
 	public DateTimeWidget(TimeAxisSerializable tAxis, boolean range) {
         init(tAxis, range);
         setListeners();
 		initWidget(dateTimeWidget);
 	}
+	
+	/**
+	 * 
+	 */
 	public DateTimeWidget() {
 		setListeners();
 		initWidget(dateTimeWidget);
@@ -129,6 +146,19 @@ public class DateTimeWidget extends Composite {
 			}
 		}
 	}
+	/**
+	 * Initialize using a TimeAxisSerializable object. Range set to false means there is only one widget (or set of
+	 * widgets in the case of time) visible and the user can only select one
+	 * point from that axis. Range set to true means that there are two
+	 * identical coordinated widgets (or set of widgets in the case of time)
+	 * from which you can select a starting point and an ending point from that
+	 * axis. The coordination between the widgets is such that you can not
+	 * select an endpoint that is before the starting point select. The widgets
+	 * update themselves to prevent this from happening.
+	 * 
+	 * @param tAxis
+	 * @param range
+	 */
 	public void init(TimeAxisSerializable tAxis, boolean range) {
 		dateTimeWidget.clear();
 		hasYear = false;
@@ -310,11 +340,24 @@ public class DateTimeWidget extends Composite {
 			}
 		}
 	}
-	public void setRange(boolean b) {
-		if ( b ) {
+
+	/**
+	 * Range set to false means there is only one widget (or set of widgets in
+	 * the case of time) visible and the user can only select one point from
+	 * that axis. isRange set to true means that there are two identical
+	 * coordinated widgets (or set of widgets in the case of time) from which
+	 * you can select a starting point and an ending point from that axis. The
+	 * coordination between the widgets is such that you can not select an
+	 * ending point that is before the selected starting point. The widgets update
+	 * themselves to prevent this from happening.
+	 * 
+	 * @param isRange
+	 */
+	public void setRange(boolean isRange) {
+		if ( isRange ) {
 			// Want range, not currently range do something.
 			if ( !range ) {
-				range = b;
+				range = isRange;
 				CellFormatter cellFormatter = dateTimeWidget.getCellFormatter();
 				for ( int i = 0; i < 5; i++ ) {
 					cellFormatter.setVisible(1, i, true);
@@ -325,7 +368,7 @@ public class DateTimeWidget extends Composite {
 		} else {
 			// Don't want range.  Currently range, do something.
 			if ( range ) {
-				range = b;
+				range = isRange;
 				CellFormatter cellFormatter = dateTimeWidget.getCellFormatter();
 				for ( int i = 0; i < 5; i++ ) {
 					cellFormatter.setVisible(1, i, false);
@@ -334,6 +377,19 @@ public class DateTimeWidget extends Composite {
 			}
 		}
 	}
+
+	/**
+	 * Range set to false means there is only one widget (or set of widgets in
+	 * the case of time) visible and the user can only select one point from
+	 * that axis. Range set to true means that there are two identical
+	 * coordinated widgets (or set of widgets in the case of time) from which
+	 * you can select a starting point and an ending point from that axis. The
+	 * coordination between the widgets is such that you can not select an
+	 * endpoint that is before the starting point select. The widgets update
+	 * themselves to prevent this from happening.
+	 * 
+	 * @return
+	 */
 	public boolean isRange() {
 		return range;
 	}

@@ -16,7 +16,7 @@ import gov.noaa.pmel.tmap.las.client.serializable.VariableSerializable;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 /**
- * GWT RPC Defintions for LAS.
+ * GWT RPC Definitions for LAS.
  * @author rhs
  *
  */
@@ -29,6 +29,12 @@ public interface RPCService extends RemoteService {
 	public OptionSerializable[] getOptions(String opid) throws RPCException;
 	public CategorySerializable[] getTimeSeries() throws RPCException;
 	public HashMap<String, String> getPropertyGroup(String name) throws RPCException;
+	/**
+	 * @param dsid
+	 * @param varid
+	 * @return an RegionSerializable array of named Regions such as the Indian Ocean
+	 * @throws RPCException
+	 */
 	public RegionSerializable[] getRegions(String dsid, String varid) throws RPCException;
 	public ConfigSerializable getConfig(String view, String dsid, String varid) throws RPCException;
 	public TestSerializable[] getTestResults(String test_key) throws RPCException;

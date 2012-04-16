@@ -7,9 +7,12 @@ $las_response.toJSON()
 $las_response.toString()
 
 #else
+<!doctype html>
 <html>
-<HEAD>
-<TITLE>LAS Interactive Download</TITLE>
+	<head>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+
+
   <script language="JavaScript" src="JavaScript/components/xmldom.js"></script>
   <script language="JavaScript" src="JavaScript/components/LASRequest.js"></script>
   <script language="JavaScript" src="JavaScript/components/LASResponse.js"></script>
@@ -92,25 +95,47 @@ $las_response.toString()
   var showt = true;
   var showz = true;  
 
+console.debug("initReq.getAnalysis(0)=");
+console.debug(initReq.getAnalysis(0));
   if(initReq.getAnalysis(0)) {
 	for(var a=0;a < initReq.getAnalysis(0).axis.length;a++) {
 	    if ( initReq.getAnalysis(0).axis[a].type == "t" ) showt = false;
 	    if ( initReq.getAnalysis(0).axis[a].type == "z" ) showz = false;
-		if(initReq.getAnalysis(0).axis[a].lo) 
-			eval("(req"+initReq.getAnalysis(0).axis[a].type.toUpperCase()+"Lo='"+initReq.getAnalysis(0).axis[a].lo+"')");
-		if(initReq.getAnalysis(0).axis[a].hi)
-                        eval("(req"+initReq.getAnalysis(0).axis[a].type.toUpperCase()+"Hi='"+initReq.getAnalysis(0).axis[a].hi+"')");
+	    if(initReq.getAnalysis(0).axis[a].lo) { 
+		var eval1 = "(req"+initReq.getAnalysis(0).axis[a].type.toUpperCase()+"Lo='"+initReq.getAnalysis(0).axis[a].lo+"')";
+		console.debug(eval1);
+		eval(eval1);
+	    }
+	    if(initReq.getAnalysis(0).axis[a].hi) {
+		var eval2 = "(req"+initReq.getAnalysis(0).axis[a].type.toUpperCase()+"Hi='"+initReq.getAnalysis(0).axis[a].hi+"')";
+		console.debug(eval2);
+                eval(eval2);
+            }
 	}
   }
 
   if(Grid.hasAxis('t') && showt ){
       dataHasT = true;
+      console.debug("dataHasT");
+      console.debug(dataHasT);      
       dataTLo = Grid.getLo('t');                      //low end of time grid
+      console.debug("dataTLo");
+      console.debug(dataTLo);      
       dataTHi = Grid.getHi('t');                      //high end of time grid
+      console.debug("dataTHi");
+      console.debug(dataTHi);      
       tDisplayType = Grid.getDisplayType('t');
+      console.debug("tDisplayType:");
+      console.debug(tDisplayType);
       tRenderFmt = Grid.getRenderFormat('t');
+      console.debug("tRenderFmt:");
+      console.debug(tRenderFmt);
       tUnits = Grid.getUnits('t');                   //units of time grid
+      console.debug("tUnits:");
+      console.debug(tUnits);
       tDelta = Grid.getDelta('t');
+      console.debug("tDelta:");
+      console.debug(tDelta);
   }
 
   if(Grid.hasAxis('z') && showz){
@@ -411,9 +436,41 @@ $las_response.toString()
         }
     }
   } 
-</SCRIPT>
-</HEAD>
+</SCRIPT>	
+ #set($initXLo=$las_request.getXlo())
+ #if ($initXLo == "null")
+    #set($initXLo="")
+ #end
+ #set($initXHi=$las_request.getXhi())
+ #if ($initXHi == "null")
+    #set($initXHi=$initXLo)
+ #end
+ #set($initYLo=$las_request.getYlo())
+ #if ($initYLo == "null")
+    #set($initYLo="")
+ #end
+ #set($initYHi=$las_request.getYhi())
+ #if ($initYHi == "null")
+    #set($initYHi=$initYLo)
+ #end
+ #set ($lasxmldoc=$las_request.toEncodedJavaScriptSafeURLString())
+## TODO: Use velocity to get the rest of the vars JS had access too and feed to GWT page as parameters	
+<META http-equiv="refresh" content="0;URL=InteractiveDownloadData.html?dsID=$dsID&varID=$varID&initXLo=$initXLo&initXHi=$initXHi&initYLo=$initYLo&initYHi=$initYHi&lasxmldoc=$lasxmldoc"> 
+<!-- add &gwt.codesvr=127.0.0.1:9997 for GWt Development Mode--> 
+	</head>
 
+	<!--                                           -->
+	<!-- The body can have arbitrary html, or      -->
+	<!-- we leave the body empty because we want   -->
+	<!-- to create a completely dynamic ui         -->
+	<!--                                           -->
+##	<body>
+##
+##		<!-- OPTIONAL: include this if you want history support -->
+##		<iframe id="__gwt_historyFrame" style="width:0;height:0;border:0"></iframe>
+##
+##	</body>
+##</html>
 <BODY BGCOLOR="#FFFFFF" onLoad="launch()">
   <SCRIPT language="javascript">
     genUI();
