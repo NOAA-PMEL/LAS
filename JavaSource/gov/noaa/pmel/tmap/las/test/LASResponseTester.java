@@ -3,7 +3,7 @@ package gov.noaa.pmel.tmap.las.test;
 
 import gov.noaa.pmel.tmap.addxml.JDOMUtils;
 import gov.noaa.pmel.tmap.jdom.LASDocument;
-import gov.noaa.pmel.tmap.las.client.test.TestConstants;
+import gov.noaa.pmel.tmap.las.client.lastest.TestConstants;
 import gov.noaa.pmel.tmap.las.jdom.LASConfig;
 import gov.noaa.pmel.tmap.las.jdom.LASTestResults;
 import gov.noaa.pmel.tmap.las.jdom.LASUIRequest;

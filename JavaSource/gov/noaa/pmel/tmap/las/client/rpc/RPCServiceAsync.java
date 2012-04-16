@@ -21,6 +21,12 @@ public interface RPCServiceAsync {
     public void getTimeSeries(AsyncCallback timeSeriesCallback);
     public void getConfig(String view, String dsid, String varid, AsyncCallback<ConfigSerializable> timeSeriesCallback);
     public void getPropertyGroup(String name, AsyncCallback propertyGroupCallback);
+	/**
+	 * @param dsid
+	 * @param varid
+	 * regionCallback should get an array of RegionSerializable named Regions such as the Indian Ocean
+	 * @throws RPCException
+	 */
     public void getRegions(String dsid, String varid, AsyncCallback regionCallback);
 	public void getOperations(String view, String[] xpath,	AsyncCallback<OperationSerializable[]> callback);
 	public void getTestResults(String test_key, AsyncCallback<TestSerializable[]> callback);
