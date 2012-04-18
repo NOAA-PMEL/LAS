@@ -17,6 +17,10 @@
     <level value="DEBUG"/>
     <appender-ref ref="STDOUT"/>
   </logger>
+  <logger name="gov.noaa.pmel.tmap.addxml.ADDXMLProcessor">
+    <level value="DEBUG"/>
+    <appender-ref ref="STDOUT"/>
+  </logger>
   <logger name="org.apache.commons.httpclient">
     <level value="info"/>
     <appender-ref ref="STDOUT"/>
