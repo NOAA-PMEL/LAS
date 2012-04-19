@@ -89,6 +89,7 @@
 			<response ID="DBExtractResponse">
 				<result type="debug" ID="db_debug" file_suffix=".txt" />
 				<result type="netCDF" ID="netcdf" file_suffix=".nc" />
+                <result type="webrowset" ID="icon_webrowset" file_suffix=".xml" />
 				<result type="cancel" ID="cancel" />
 			</response>
 			<service>database</service>
@@ -200,7 +201,28 @@
 			<intervals name="xyt" type="Maps" title="Latitude-Longitude" />
 		</region>
 	</operation>
-
+ <!-- Private operation only invoked by correlation viewer when it knows the plot can be made from the existing netCDF file. -->
+    <operation name="Trajectory Correlation Plot" ID="Trajectgory_correlation"
+        service_action="Trajectory_correlation" private="true"
+        output_template="zoom">
+        <args>
+            <arg type="region" index="1" ID="in-situ-Region" />
+        </args>
+        <response ID="PlotResp" type="HTML" index="1">
+            <result type="map_scale" ID="map_scale" file_suffix=".xml" />
+            <result type="image" ID="plot_image" streamable="true" mime_type="image/png" file_suffix=".gif" />
+            <result type="debug" ID="debug" file_suffix=".txt" />
+            <result type="xml" ID="webrowset" file_suffix=".xml" />
+            <result type="cancel" ID="cancel" />
+        </response>
+        <service>ferret</service>
+        <region>
+            <intervals name="xyt" />
+        </region>
+        <grid_types>
+            <grid_type name="trajectory" />
+        </grid_types>
+    </operation>
     <!-- END Trajectory_interactive_plot -->
     <!-- This is the property-property operation for trajectory in-situ data. It gets called from the Correlation view defined below.  -->
       <operation name="Correlation Plot" ID="Trajectory_correlation_plot" default="true" category="file" output_template="zoom">
