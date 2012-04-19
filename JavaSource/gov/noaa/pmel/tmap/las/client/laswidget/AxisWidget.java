@@ -284,7 +284,13 @@ public class AxisWidget extends Composite {
 			}
 		}
 	}
-
+	public boolean isContainedBy(String lo, String hi) {
+		double dlo = Double.valueOf(lo);
+		double dhi = Double.valueOf(hi);
+		double cl = Double.valueOf(getLo());
+		double ch = Double.valueOf(getHi());
+		return cl >= dlo && cl <= dhi && ch >= dlo && ch <= dhi;
+	}
 	public ChangeHandler loAxisChangeHandler = new ChangeHandler() {
 		@Override
 		public void onChange(ChangeEvent arg0) {

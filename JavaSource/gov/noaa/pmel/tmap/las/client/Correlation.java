@@ -65,6 +65,7 @@ import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.ToggleButton;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.xml.client.Document;
 import com.google.gwt.xml.client.Element;
 import com.google.gwt.xml.client.Node;
@@ -108,7 +109,13 @@ public class Correlation implements EntryPoint {
     PushButton update = new PushButton("Update Plot");
     PushButton print = new PushButton("Print");
     CheckBox colorCheckBox = new CheckBox();
-    LASRequest lasRequest;
+    Label warnText;
+    PopupPanel warning = new PopupPanel(true);
+    PushButton ok;
+    PushButton cancel;
+    boolean youveBeenWarned = false;
+    // The current intermediate file
+    String netcdf = null;
     String dsid;
     String varid;
 	String currentURL;
@@ -150,11 +157,25 @@ public class Correlation implements EntryPoint {
 	protected String thi;
 	protected String zlo;
 	protected String zhi;
+	
+
+	// There are 3 states we want to track.
+	
+	// The values for the first plot.  This is used to determine if we need to warn the user about fetching new data.
+	LASRequest initialState;
+
+	// The state immediately previous to a widget change that might cause the prompt about new data.
+	// If the user cancels the change, revert to this state.
+	LASRequest undoState;
+	
+	// The current request.
+    LASRequest lasRequest;
+
     @Override
 	public void onModuleLoad() {
     	
     	mapConstraint.setMapListener(mapListener);
-    	timeConstraint.addChangeHandler(needApply);
+    	timeConstraint.addChangeHandler(dateTimeChangeHandler);
     	
     	timePanel.setWidget(0, 0, timeConstraint);
     	timePanel.setWidget(0, 1, reset);
@@ -227,7 +248,6 @@ public class Correlation implements EntryPoint {
 				
 				if ( colorCheckBox.getValue() ) {
 					colorVariables.setEnabled(true);
-					//warn();
 				} else {
 					colorVariables.setEnabled(false);
 				}
@@ -410,20 +430,69 @@ public class Correlation implements EntryPoint {
 		lasAnnotationsPanel.setPopupLeft(outputPanel.getAbsoluteLeft());
 		lasAnnotationsPanel.setPopupTop(outputPanel.getAbsoluteTop());
 		lasAnnotationsPanel.setTitle("Plot Annotations");
-		lasAnnotationsPanel.setError("Click \"Update plot\" to refresh the plot.&nbsp;");
+		lasAnnotationsPanel.setError("Click \"Update plot\" to refresh the plot.&nbsp;");		
+		ok = new PushButton("Ok");
+		ok.addClickHandler(new ClickHandler() {
+
+			@Override
+			public void onClick(ClickEvent event) {
+				warning.hide();
+				youveBeenWarned = true;
+			}
+			
+		});
+		ok.setWidth("80px");
+		cancel = new PushButton("Cancel");
+		cancel.addClickHandler(new ClickHandler() {
+
+			@Override
+			public void onClick(ClickEvent event) {
+				popHistory(undoState.toString());
+				warning.hide();
+			}
+			
+		});
+		cancel.setWidth("80px");
+		warnText = new Label("This operation will require new data to be extracted from the database.");
+		Label go = new Label("  It may take a while.  Do you want to continue?");
+		FlexTable layout = new FlexTable();
+		layout.getFlexCellFormatter().setColSpan(0, 0, 2);
+		layout.getFlexCellFormatter().setColSpan(1, 0, 2);
+		layout.setWidget(0, 0, warnText);
+		layout.setWidget(1, 0, go);
+		layout.setWidget(2, 0, ok);
+		layout.setWidget(2, 1, cancel);
+		warning.add(layout);
+		warning.setPopupPosition(update.getAbsoluteLeft(), update.getAbsoluteTop());
 		History.addValueChangeHandler(historyHandler);
 	}
     protected MapSelectionChangeListener mapListener = new MapSelectionChangeListener() {
 		
 		@Override
 		public void onFeatureChanged() {
-            update.addStyleDependentName("APPLY-NEEDED");			
+            update.addStyleDependentName("APPLY-NEEDED");		
+            if ( !mapConstraint.isContainedBy(initialState.getRangeLo("x", 0), initialState.getRangeHi("x", 0), initialState.getRangeLo("y", 0), initialState.getRangeHi("y",0)) ) {
+            	warn("Increasing the lat/lon range will require LAS to fetch new data from the database.");
+            }
 		}
 	};
 	public ChangeHandler needApply = new ChangeHandler() {
 
 		@Override
 		public void onChange(ChangeEvent event) {
+			update.addStyleDependentName("APPLY-NEEDED");
+		}
+		
+	};
+	public ChangeHandler dateTimeChangeHandler = new ChangeHandler() {
+
+		@Override
+		public void onChange(ChangeEvent event) {
+			String initiallo = initialState.getRangeLo("t", 0);
+			String initialhi = initialState.getRangeHi("t", 0);
+			if ( !timeConstraint.isContainedBy(initiallo, initialhi) ) {
+				warn("Increasing the time range will require LAS to fetch new data from the database.");
+			}
 			update.addStyleDependentName("APPLY-NEEDED");
 		}
 		
@@ -442,6 +511,9 @@ public class Correlation implements EntryPoint {
     	Window.open(urlfrag.toString(), "print", null);
     }
     private void updatePlot(boolean addHistory) {
+    	//TODO Before submitting...
+    	
+    	boolean contained = true;
     	setConstraints();
     	update.removeStyleDependentName("APPLY-NEEDED");
     	lasAnnotationsPanel.setTitle("Plot Annotations");
@@ -450,8 +522,6 @@ public class Correlation implements EntryPoint {
     	spin.setPopupPosition(outputPanel.getAbsoluteLeft(), outputPanel.getAbsoluteTop());
     	spin.show();
 
-
-    	//TODO get these from the map and the widget in the spaceTimeConstraint panel.
     	String tlo = null;
     	String thi = null;
     	if ( timeConstraint.isVisible() ) {
@@ -462,6 +532,7 @@ public class Correlation implements EntryPoint {
     	String xhi = String.valueOf(mapConstraint.getXhi());
     	String ylo = String.valueOf(mapConstraint.getYlo());
     	String yhi = String.valueOf(mapConstraint.getYhi());
+    	
     	String zlo = null;
 		String zhi = null;
     	if ( zAxisWidget.isVisible() ) {
@@ -469,39 +540,72 @@ public class Correlation implements EntryPoint {
     		zhi = zAxisWidget.getHi();
     	}
     	String vix = xVariables.getVariable(xVariables.getSelectedIndex()).getID();
-    	GridSerializable grid = xDatasetVariables.get(vix).getGrid();
+    	GridSerializable grid = xVariables.getVariable(xVariables.getSelectedIndex()).getGrid();
 
         if ( tlo != null && thi != null ) {
-     	   lasRequest.setRange("t", timeConstraint.getFerretDateMin(), timeConstraint.getFerretDateMax(), 0);
+      	   lasRequest.setRange("t", tlo, thi, 0);
+        } else {
+        	// Set them to the min and max available in the data set.
+        	tlo = timeConstraint.getFerretDateMin();
+        	thi = timeConstraint.getFerretDateMax();
+      	   lasRequest.setRange("t", tlo, thi, 0);
+
         }
-
-
+        // Check to see if this time range is contained in the original time range...
+        if ( grid.hasT() ) {
+        	contained = contained && timeConstraint.isContainedBy(initialState.getRangeLo("t", 0), initialState.getRangeHi("t", 0));
+        }
     	if ( xlo != null && xhi != null ) {
     		lasRequest.setRange("x", xlo, xhi, 0);
     	} else if ( xhi != null ) {
+    		xlo = xhi;
     		lasRequest.setRange("x", xhi, xhi, 0);
-    	} else {
-    		lasRequest.setRange("x", grid.getXAxis().getLo(), grid.getXAxis().getHi(), 0);
     	}
 
 
     	if ( ylo != null && yhi != null ) {
     		lasRequest.setRange("y", ylo, yhi, 0);
     	} else if ( yhi != null ) {
+    		ylo = yhi;
     		lasRequest.setRange("y", yhi, yhi, 0);
-    	} else {
-    		lasRequest.setRange("y", grid.getYAxis().getLo(), grid.getYAxis().getHi(), 0);
-    	}
+    	} 
 
-
+    	// Check if the current selection bounding box is contained in by original bounding box.
+    	
+    	contained = contained && mapConstraint.isContainedBy(initialState.getRangeLo("x", 0), initialState.getRangeHi("x", 0), initialState.getRangeLo("y", 0), initialState.getRangeHi("y",0));
+    	
     	if ( zlo != null && zhi != null ) {
     		lasRequest.setRange("z", zlo, zhi, 0);
     	} else if ( zhi != null ) {
     		lasRequest.setRange("z", zhi, zhi, 0);
     	}
-
+    	if ( grid.hasZ() ) {
+    		contained = contained && zAxisWidget.isContainedBy(initialState.getRangeLo("z", 0), initialState.getRangeHi("z", 0));
+    	}
+    	
     	lasRequest.setProperty("product_server", "ui_timeout", "20");
     	lasRequest.setProperty("las", "output_type", "xml");
+		String grid_type = xVariables.getVariable(0).getAttributes().get("grid_type");
+    	if ( netcdf != null && contained && grid_type.equals("trajectory")  ) {
+    		operationID = "Trajectgory_correlation";    // No data base access; plot only from existing netCDF file.
+    		String v0 = lasRequest.getVariable(0);
+    		String v1 = lasRequest.getVariable(1);
+    		String v2 = lasRequest.getVariable(2);
+    		if ( v0 != null ) {
+    			lasRequest.setProperty("data_0", "url", netcdf);
+    		}
+    		if ( v1 != null ) {
+    			lasRequest.setProperty("data_1", "url", netcdf);
+    		}
+    		if ( v2 != null ) {
+    			lasRequest.setProperty("data_2", "url", netcdf);
+    		}
+    		if ( !cruiseIcons.getIDs().equals("") ) lasRequest.setProperty("ferret", "cruise_list", cruiseIcons.getIDs());
+    	} else  if ( (!contained || netcdf == null ) && grid_type.equals("trajectory") ){
+    		operationID = "Trajectory_correlation_plot";
+    	} else {
+    		operationID = "prop_prop_plot";
+    	}
     	lasRequest.setOperation(operationID, operationType);
     	lasRequest.setProperty("ferret", "annotations", "file");
 
@@ -544,6 +648,14 @@ public class Correlation implements EntryPoint {
 
 		@Override
 		public void onResponseReceived(Request request, Response response) {
+			// If the submitted operation used the compound operation to
+			// pull a new data set, we need a new initial state
+			String plot_id = lasRequest.getOperation();
+			if ( plot_id.equals("Trajectory_correlation_plot") ) {
+				initialState = new LASRequest(lasRequest.toString());
+			}
+			// Need to warn again...
+			youveBeenWarned = false;
 			spin.hide();
 			print.setEnabled(true);
 			String doc = response.getText();
@@ -578,6 +690,8 @@ public class Correlation implements EntryPoint {
 						} else if ( result.getAttribute("type").equals("icon_webrowset") ) {
 							String iconurl = result.getAttribute("url");
 							cruiseIcons.init(iconurl);
+						} else if ( result.getAttribute("type").equals("netCDF") ) {
+							netcdf = result.getAttribute("file");
 						} else if ( result.getAttribute("type").equals("map_scale") ) {
 							NodeList map_scale = result.getElementsByTagName("map_scale");
 							for ( int m = 0; m < map_scale.getLength(); m++ ) {
@@ -962,6 +1076,8 @@ public class Correlation implements EntryPoint {
 				}
 				setConstraints();
 			}
+			// The request is now set up like a property-property plot request, so save it.
+			initialState = new LASRequest(lasRequest.toString());
 			updatePlot(true);
 		}
     };
@@ -1027,29 +1143,56 @@ public class Correlation implements EntryPoint {
 	}
 	private void setConstraints() {
 		update.addStyleDependentName("APPLY-NEEDED");
+		undoState = new LASRequest(lasRequest.toString());
 		lasRequest.removeConstraints();
 		String varY = yVariables.getVariable(yVariables.getSelectedIndex()).getID();
 		String varX = xVariables.getVariable(xVariables.getSelectedIndex()).getID();
+		// The initialState is null the first time this is called when setting up the very first correlation plot.
+		String vx = null;
+		if ( initialState != null ) {
+			vx = initialState.getVariable(0);
+		}
 		if ( xVariableConstraint.getApply().getValue() && xVariableConstraint.isActive() ) {
 			String min = xVariableConstraint.getMin();
 			String max = xVariableConstraint.getMax();
 			if ( min != null && !min.equals("") ) {
 				lasRequest.addVariableConstraint(dsid, varX, "gt", min, "minx");
+				if ( vx != null && vx.equals(varX) && Double.valueOf(min) < initialState.getVariableConstraintMin(varX) ) { 
+					warn("Increasing the range of this constraint will require LAS to fetch more data from the database.");
+				}
 			}
 			if ( max != null && !max.equals("") ) {
 				lasRequest.addVariableConstraint(dsid, varX, "le", max, "maxx");
+				if ( vx != null && vx.equals(varX) && Double.valueOf(max) > initialState.getVariableConstraintMax(varX) ) {
+					warn("Increasing the range of this constraint will require LAS to fetch more data from the database.");
+				}
 			}
+			
+			
 		}
-		
+		String vy = null;
+		if ( initialState != null ) {
+			vy = initialState.getVariable(1);
+		}
 		if ( yVariableConstraint.getApply().getValue() && yVariableConstraint.isActive() ) {
 			String min = yVariableConstraint.getMin();
 			String max = yVariableConstraint.getMax();
 			if ( min != null && !min.equals("") ) {
 				lasRequest.addVariableConstraint(dsid, varY, "gt", min, "miny");
+				if ( vy != null && vy.equals(varY) && Double.valueOf(min) < initialState.getVariableConstraintMin(varY) ) {
+					warn("Increasing the range of this constraint will require LAS to fetch more data from the database.");
+				}
 			}
 			if ( max != null && !max.equals("") ) {
 				lasRequest.addVariableConstraint(dsid, varY, "le", max, "maxy");
+				if ( vy != null && vy.equals(varY) && Double.valueOf(max) > initialState.getVariableConstraintMax(varY) ) {
+					warn("Increasing the range of this constraint will require LAS to fetch more data from the database.");
+				}
 			}
+		}
+		String vc = null;
+		if ( initialState != null ) {
+			vc = initialState.getVariable(2);
 		}
 		List<VariableConstraintWidget> oc = constraintsLayout.getWidgets();
 		for (Iterator cwIt = oc.iterator(); cwIt.hasNext();) {
@@ -1085,6 +1228,10 @@ public class Correlation implements EntryPoint {
 		}
 	}
 	private void popHistory(String xml) {
+		
+		// If the pop was requested from the undoState in particular and it is not set, return.
+		if ( xml == null || xml.equals("") ) return;
+		
 		lasRequest = new LASRequest(xml);
 		
 		String vx = lasRequest.getVariable(0);
@@ -1259,17 +1406,8 @@ public class Correlation implements EntryPoint {
 		if ( varY.getID().equals(id) ) return "y";
 		return "";
 	}
-	private void warn() {
-		PopupPanel warning = new PopupPanel(true);
-		PushButton ok = new PushButton("Ok");
-		PushButton cancel = new PushButton("Cancel");
-		Label warnText = new Label("This operation will require new data to be extracted from the database.  It may take a while.  Do you want to continue?");
-		FlexTable layout = new FlexTable();
-		layout.getFlexCellFormatter().setColSpan(0, 0, 2);
-		layout.setWidget(0, 0, warnText);
-		layout.setWidget(1, 0, ok);
-		layout.setWidget(1, 1, cancel);
-		warning.add(layout);
+	private void warn(String message) {
+		warnText.setText(message);
 		warning.show();
 	}
 	ChangeHandler constraintChange = new ChangeHandler() {
@@ -1277,10 +1415,12 @@ public class Correlation implements EntryPoint {
 		@Override
 		public void onChange(ChangeEvent event) {
 			TextBox w = (TextBox) event.getSource();
-			String id = w.getElement().getId();
-			int index = Integer.valueOf(id.substring(id.indexOf("-")+1, id.length()));
-			VariableConstraintLayout vl = (VariableConstraintLayout) ((FlexTable) w.getParent()).getParent();
-			vl.setApply(index, true);
+			Widget wp = w.getParent();
+			Widget gp = wp.getParent();
+			if ( gp instanceof VariableConstraintWidget ) {
+				VariableConstraintWidget vcw = (VariableConstraintWidget) gp;
+				vcw.setApply(true);
+			}
 			setConstraints();				
 		}
 		

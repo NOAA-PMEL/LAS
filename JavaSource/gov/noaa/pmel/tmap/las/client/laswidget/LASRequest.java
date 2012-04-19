@@ -9,6 +9,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.xml.client.Document;
 import com.google.gwt.xml.client.Element;
 import com.google.gwt.xml.client.Node;
@@ -419,5 +421,67 @@ public class LASRequest {
 				counter++;
 			}
 	    }
+	}
+	public double getVariableConstraintMin(String in_varid) {
+		// This is a bit of a kludge.  The XML doens't know what constraint is the min nor
+		// whether it's a constraint on on of the axis of a prop-prop plot so we
+		// use an ID.  Therefore the method name indicates this only works reliably
+		// with prop-prop plots.  Don't call it if the variable does not have a contraint.  Kludge
+		double min = Double.MIN_VALUE;
+		List<Map<String, String>> vcons= getVariableConstraints();
+		if ( vcons.size() > 0 ) {
+			for (Iterator vconsIt = vcons.iterator(); vconsIt.hasNext();) {
+				Map<String, String> con = (Map<String, String>) vconsIt.next();
+				String varid = con.get("varID");
+				String op = con.get("op");
+				String value = con.get("value");
+				String id = con.get("id");
+				if ( id.contains("min") ) {
+					if ( varid.equals(in_varid) ) {
+						min = Double.valueOf(value).doubleValue();
+					}
+				}
+			}
+		}
+		return min;
+	}
+	public double getVariableConstraintMax(String in_varid) {
+		double max = Double.MAX_VALUE;
+		List<Map<String, String>> vcons= getVariableConstraints();
+		if ( vcons.size() > 0 ) {
+			for (Iterator vconsIt = vcons.iterator(); vconsIt.hasNext();) {
+				Map<String, String> con = (Map<String, String>) vconsIt.next();
+				String varid = con.get("varID");
+				String op = con.get("op");
+				String value = con.get("value");
+				String id = con.get("id");
+				if ( id.contains("max") ) {
+					if ( varid.equals(in_varid) ) {
+						max = Double.valueOf(value).doubleValue();
+					}
+				}
+			}
+		}
+		return max;
+	}
+	public String getOperation() {
+
+		NodeList l = document.getDocumentElement().getElementsByTagName("link");
+		Element op = null;
+		if ( l != null && l.getLength() > 0 ) {
+			// This might be a variable in the <args> element.  Check it's parent.
+			for(int i = 0; i < l.getLength(); i++) {
+				Element link = (Element) l.item(i);
+				if ( op == null && !link.getParentNode().getNodeName().equals("args") ) {
+					op = (Element) l.item(i);
+				}
+			}
+		}
+		if ( op != null ) {
+			String opid = op.getAttribute("match");
+			return opid.substring(opid.indexOf("ID='")+4, opid.indexOf("']"));
+		} else {
+			return "";
+		}
 	}
 }

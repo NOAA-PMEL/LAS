@@ -27,4 +27,10 @@ public class IconCheckBox extends Composite {
 		layout.setWidget(0, 2, label);
 		initWidget(layout);
 	}
+	public String getID() {
+		return id;
+	}
+	public boolean isChecked() {
+		return checkbox.getValue();
+	}
 }

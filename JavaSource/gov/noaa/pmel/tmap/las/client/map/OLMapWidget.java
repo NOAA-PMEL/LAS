@@ -1005,6 +1005,14 @@ public class OLMapWidget extends Composite {
 			} 
 		}
 	}
+	public boolean isContainedBy(String xlo, String xhi, String ylo, String yhi) {
+		double dxl = Double.valueOf(xlo);
+		double dxh = Double.valueOf(xhi);
+		double dyl = Double.valueOf(ylo);
+		double dyh = Double.valueOf(yhi);
+		Bounds originalBounds = new Bounds(dxl, dyl, dxh, dyh);
+		return originalBounds.containsBounds(currentSelection, false, true);
+	}
 	public ClickHandler drawButtonClickHandler = new ClickHandler() {
 
 		@Override

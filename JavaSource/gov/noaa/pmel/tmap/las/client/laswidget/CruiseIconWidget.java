@@ -70,6 +70,18 @@ public class CruiseIconWidget extends Composite {
     		message.setHTML(e.toString());
     	}
     }
+    public String getIDs() {
+    	StringBuilder ids = new StringBuilder();
+    	for (Iterator iconsIt = icons.iterator(); iconsIt.hasNext();) {
+			IconCheckBox icb = (IconCheckBox) iconsIt.next();
+			if ( icb.isChecked() ) {
+				String id = icb.getID();
+				ids.append(id);
+				if (iconsIt.hasNext()) ids.append(",");
+			}
+		}
+    	return ids.toString();
+    }
     RequestCallback iconCallback = new RequestCallback() {
 
 		@Override
