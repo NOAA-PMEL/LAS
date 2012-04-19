@@ -992,6 +992,13 @@ public class DateTimeWidget extends Composite {
 			checkRangeStartHour();
 		}
 	};
+	public boolean isContainedBy(String ferretDateLo, String ferretDateHi) {
+		DateTime dateLo = parseFerretDate(ferretDateLo);
+		DateTime dateHi = parseFerretDate(ferretDateHi);
+		DateTime clo = parseFerretDate(getFerretDateLo());
+		DateTime chi = parseFerretDate(getFerretDateHi());
+		return (clo.isEqual(dateLo.getMillis()) || clo.isAfter(dateLo.getMillis())) && (chi.isEqual(dateHi.getMillis()) || chi.isBefore(dateHi.getMillis()));
+	}
 	/**
 	 * Helper method to parse ferret dates.
 	 * @param date_string of the form 15-Jan-1983, 20-Mar-1997 12:32 or 19-Mar-1962 12:11:03
