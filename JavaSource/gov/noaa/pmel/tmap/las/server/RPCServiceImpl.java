@@ -3,6 +3,7 @@ package gov.noaa.pmel.tmap.las.server;
 
 import gov.noaa.pmel.tmap.exception.LASException;
 import gov.noaa.pmel.tmap.jdom.LASDocument;
+import gov.noaa.pmel.tmap.las.client.lastest.TestConstants;
 import gov.noaa.pmel.tmap.las.client.rpc.RPCException;
 import gov.noaa.pmel.tmap.las.client.rpc.RPCService;
 import gov.noaa.pmel.tmap.las.client.serializable.CategorySerializable;
@@ -14,7 +15,7 @@ import gov.noaa.pmel.tmap.las.client.serializable.OptionSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.RegionSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.TestSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.VariableSerializable;
-import gov.noaa.pmel.tmap.las.client.lastest.TestConstants;
+
 import gov.noaa.pmel.tmap.las.client.util.Util;
 import gov.noaa.pmel.tmap.las.confluence.Confluence;
 import gov.noaa.pmel.tmap.las.jdom.JDOMUtils;
@@ -386,10 +387,15 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
 		int minvars = -1;
 		int maxvars = -1;
 		List<OperationSerializable> multi_variable_operations = new ArrayList<OperationSerializable>();
-		for (int o = 0; o < operations.size(); o++) {
-			OperationSerializable op = operations.get(o);
-			String min = op.getAttributes().get("minvars");
-			String max = op.getAttributes().get("maxvars");
+		for (Iterator opIt = operations.keySet().iterator(); opIt.hasNext();) {
+			String opKey = (String) opIt.next();
+			OperationSerializable op = operations.get(opKey);
+			String min = null;
+			String max = null;
+			if ( op.getAttributes() != null ) {
+				min = op.getAttributes().get("minvars");
+				max = op.getAttributes().get("maxvars");
+			}
 			if ( min != null && !min.equals("") ) {
 				try {
 					minvars = Integer.valueOf(min).intValue();
@@ -420,7 +426,14 @@ public class RPCServiceImpl extends RemoteServiceServlet implements RPCService {
 				}
 			}
 		}
-		return (OperationSerializable[]) multi_variable_operations.toArray();
+		int o = 0;
+		OperationSerializable[] returnOps = new OperationSerializable[multi_variable_operations.size()];
+		for (Iterator opIt = multi_variable_operations.iterator(); opIt.hasNext();) {
+			OperationSerializable op = (OperationSerializable) opIt.next();
+			returnOps[o] = op;
+			o++;
+		}
+		return returnOps;
 	}
 	public OperationSerializable[] getOperations(String view, String dsID, String varID) throws RPCException {
 		return getOperationsSerialziable(view, dsID, varID);
