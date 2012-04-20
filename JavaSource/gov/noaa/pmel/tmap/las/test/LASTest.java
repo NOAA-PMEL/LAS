@@ -6,7 +6,9 @@ import gov.noaa.pmel.tmap.las.jdom.JDOMUtils;
 import gov.noaa.pmel.tmap.las.jdom.LASConfig;
 import gov.noaa.pmel.tmap.las.ui.LASProxy;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.OutputStream;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -47,14 +49,16 @@ public class LASTest{
     
         try{
         	     	
-        	String config = lasProxy.executeGetMethodAndReturnResult(url+"getConfig.do?format=xml");
-        	JDOMUtils.XML2JDOM(config, lasConfig);
+        	ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        	lasProxy.executeGetMethodAndStreamResult(url+"getConfig.do?format=xml", stream);
+        	JDOMUtils.XML2JDOM(stream.toString(), lasConfig);
         	
         } catch (Exception e){
             
         	try {
-        		String config = lasProxy.executeGetMethodAndReturnResult(url+"/output/lasV7.xml");
-        		JDOMUtils.XML2JDOM(config, lasConfig);
+        		ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        		lasProxy.executeGetMethodAndStreamResult(url+"/output/lasV7.xml", stream);
+        		JDOMUtils.XML2JDOM(stream.toString(), lasConfig);
         	} catch (Exception exp){
         		System.err.println("Unable to get configuration information from "+l.getLAS()+".  Is the server running?");
         		System.exit(-1);
