@@ -22,12 +22,13 @@ import gov.noaa.pmel.tmap.jdom.LASDocument;
 import gov.noaa.pmel.tmap.jdom.filter.AttributeFilter;
 import gov.noaa.pmel.tmap.jdom.filter.CategoryFilter;
 import gov.noaa.pmel.tmap.jdom.filter.EmptySrcDatasetFilter;
+import gov.noaa.pmel.tmap.las.client.lastest.TestConstants;
 import gov.noaa.pmel.tmap.las.client.rpc.RPCException;
 import gov.noaa.pmel.tmap.las.client.serializable.CategorySerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.DatasetSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.EnsembleMemberSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.VariableSerializable;
-import gov.noaa.pmel.tmap.las.client.lastest.TestConstants;
+
 import gov.noaa.pmel.tmap.las.product.server.Cache;
 import gov.noaa.pmel.tmap.las.test.LASTest;
 import gov.noaa.pmel.tmap.las.test.LASTestOptions;
@@ -77,6 +78,8 @@ import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
 import org.apache.commons.httpclient.HttpException;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.LineIterator;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.jdom.Attribute;
@@ -403,14 +406,41 @@ public class LASConfig extends LASDocument {
 
                 if ( jnls.size() > 0 ) {
                     int index=0;
+                    String fds_temp = null;
+                    if ( fds_dir.endsWith("/") ) {
+                    	fds_temp = fds_dir.substring(0, fds_dir.lastIndexOf("/"));
+                    	fds_temp = fds_temp.substring(0, fds_temp.lastIndexOf("/")) + File.separator+ "temp";
+                    } else {
+                    	fds_temp = fds_dir.substring(0, fds_dir.lastIndexOf("/")) + File.separator + "temp";
+                    }
+                    List<File> headers = (List<File>) FileUtils.listFiles(new File(fds_temp), new String[]{"xml"}, true);
+                    Set<File> remove = new HashSet<File>();
                     for (Iterator jnlsIt = jnls.keySet().iterator(); jnlsIt.hasNext();) {
                         String key = (String) jnlsIt.next();
-                        File varjnl = new File(fds_dir+dsID+File.separator+"data_"+key+".jnl");
+                        String file = "data_"+key+".jnl";
+                        File varjnl = new File(fds_dir+dsID+File.separator+file);
                         PrintWriter data_script = new PrintWriter(new FileWriter(varjnl));
                         data_script.println(jnls.get(key));
                         data_script.close();
                         index++;
+                        for (Iterator headerIt = headers.iterator(); headerIt.hasNext();) {
+							File header = (File) headerIt.next();
+							LineIterator it = FileUtils.lineIterator(header);
+					        try{
+					            while (it.hasNext()){
+					                String line = it.nextLine();
+					                if(line.contains(file)){
+					                    remove.add(header);
+					                }
+					            }
+					         }
+					         finally {LineIterator.closeQuietly(it);}
+						}
                     }
+                    for (Iterator removeIt = remove.iterator(); removeIt.hasNext();) {
+						File file = (File) removeIt.next();
+						FileUtils.deleteQuietly(new File(file.getParent()));
+					}
                 }
             }
         }
