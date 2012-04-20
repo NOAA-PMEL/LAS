@@ -2,18 +2,14 @@ package gov.noaa.pmel.tmap.las.jdom;
 
 import gov.noaa.pmel.tmap.exception.LASException;
 import gov.noaa.pmel.tmap.jdom.LASDocument;
+import gov.noaa.pmel.tmap.las.client.lastest.TestConstants;
 import gov.noaa.pmel.tmap.las.client.serializable.TestDataset;
 import gov.noaa.pmel.tmap.las.client.serializable.TestResult;
 import gov.noaa.pmel.tmap.las.client.serializable.TestSerializable;
-import gov.noaa.pmel.tmap.las.client.lastest.TestConstants;
-import gov.noaa.pmel.tmap.las.test.LASTest;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-
-import oracle.sql.ARRAY;
 
 import org.jdom.Element;
 
