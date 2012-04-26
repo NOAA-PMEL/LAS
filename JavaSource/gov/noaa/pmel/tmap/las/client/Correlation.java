@@ -214,9 +214,12 @@ public class Correlation implements EntryPoint {
 		spin.add(spinImage);
     	update.addStyleDependentName("SMALLER");
     	update.setWidth("80px");
+    	update.ensureDebugId("update");
     	
     	xVariableConstraint.addChangeHandler(constraintChange);
+    	xVariableConstraint.setDebugId("xVariableConstraint");
     	yVariableConstraint.addChangeHandler(constraintChange);
+    	yVariableConstraint.setDebugId("yVariableConstraint");
     	xVariableConstraint.addApplyHandler(applyHandler);
     	yVariableConstraint.addApplyHandler(applyHandler);
     	    	
@@ -1129,6 +1132,20 @@ public class Correlation implements EntryPoint {
 		if ( colorCheckBox.getValue() ) {
 			String varColor = colorVariables.getVariable(colorVariables.getSelectedIndex()).getID();
 			lasRequest.addVariable(dsid, varColor, 0);
+		}
+		for (Iterator varIt = xDatasetVariables.keySet().iterator(); varIt.hasNext();) {
+			String id = (String) varIt.next();
+			VariableSerializable var = xDatasetVariables.get(id);
+			if ( !id.equals(vix) && !id.equals(viy) ) {
+				if( colorCheckBox.getValue() ) {
+					String varColor = colorVariables.getVariable(colorVariables.getSelectedIndex()).getID();
+					if ( !id.equals(varColor) ) {
+						lasRequest.addVariable(dsid, id, 0);
+					}
+				} else {
+					lasRequest.addVariable(dsid, id, 0);
+				}
+			}
 		}
 	}
 	private void resetConstraints(String vars) {

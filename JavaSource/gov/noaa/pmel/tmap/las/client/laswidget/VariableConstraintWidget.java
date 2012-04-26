@@ -126,4 +126,9 @@ public class VariableConstraintWidget extends Composite {
 	    lessThanEqual.setVisible(visible);
 	    greaterThan.setVisible(visible);
 	}
+	public void setDebugId(String id) {
+		xApply.ensureDebugId(id+"-xApply");
+		minTextBox.ensureDebugId(id+"-minTextBox");
+		maxTextBox.ensureDebugId(id+"-maxTextBox");
+	}
 }
