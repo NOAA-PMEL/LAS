@@ -613,7 +613,12 @@ public class BaseUI {
 		}
 	}
 	private void printerFriendly() {
-		StringBuilder urlfrag = new StringBuilder("getAnnotations.do?template=images_w_annotations.vm&");
+		StringBuilder urlfrag = new StringBuilder("getAnnotations.do?");
+		if ( xPanelCount == 1 ) {
+			urlfrag.append("template=image_w_annotations.vm&");
+		} else {
+			urlfrag.append("template=images_w_annotations.vm&");
+		}
 		for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
 			OutputPanel panel = (OutputPanel) panelIt.next();
 			urlfrag.append(panel.getPrintURL());
