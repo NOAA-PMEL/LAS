@@ -1040,6 +1040,7 @@ public class OutputPanel extends Composite {
 				    // set the canvas with the image and get to drawin'
 				    
 				    if ( !imageurl.equals("") ) {
+				    	currentPrintURL = Util.getAnnotationsFrag(annourl, imageurl);
 						plotImage = new Image(imageurl);
 						x_per_pixel = (x_axis_upper_right - x_axis_lower_left)/Double.valueOf(x_plot_size);
 						y_per_pixel = (y_axis_upper_right - y_axis_lower_left)/Double.valueOf(y_plot_size);
