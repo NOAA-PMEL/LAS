@@ -20,6 +20,7 @@ public class InitThread extends Thread {
 		} catch (ServletException e) {
 			log.error("Error in LAS init thread.");
 		}
+		context.removeAttribute(LASConfigPlugIn.LAS_LAZY_START_RUNNING_KEY);
 		context.removeAttribute(LASConfigPlugIn.LAS_LAZY_START_KEY);
 		log.info("END: Initialization complete.  Server ready for requests.");
 	}
