@@ -103,8 +103,13 @@ public class Confluence extends LASAction {
 			String lazy_start = (String) servlet.getServletContext().getAttribute(LASConfigPlugIn.LAS_LAZY_START_KEY);
 	        if ( lazy_start != null && lazy_start.equals("true") ) {
 	        	// Start the initialization and forward to lazy start page
-	        	InitThread thread = new InitThread(servlet.getServletContext());
-	        	thread.start();
+	        	String init_running = (String) servlet.getServletContext().getAttribute(LASConfigPlugIn.LAS_LAZY_START_RUNNING_KEY);
+	        	if ( init_running == null ) {
+	        		servlet.getServletContext().setAttribute(LASConfigPlugIn.LAS_LAZY_START_RUNNING_KEY, "true");
+	        	    InitThread thread = new InitThread(servlet.getServletContext());
+	        	    thread.start();
+	        	}
+	        	log.debug("Init is running...");
 	        	return mapping.findForward("lazy_start");
 	        }
 			

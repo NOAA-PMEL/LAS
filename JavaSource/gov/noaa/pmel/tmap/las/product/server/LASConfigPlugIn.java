@@ -53,6 +53,7 @@ public class LASConfigPlugIn implements PlugIn {
 	public final static String LAS_OPERATIONS_CONFIG_FILENAME_KEY = "operations_config_filename";
 	public final static String LAS_UI_CONFIG_FILENAME_KEY = "ui_config_filename";
 	public final static String LAS_LAZY_START_KEY = "lazy_start";
+	public final static String LAS_LAZY_START_RUNNING_KEY = "lazy_start_running";
 	public final static String LAS_LOCK_KEY = "lock";
 	public final static String LAS_SISTERS_CONFIG_FILENAME_KEY = "las_servers_filename";
 	public final static String LAS_VERSION_KEY = "las_version";
