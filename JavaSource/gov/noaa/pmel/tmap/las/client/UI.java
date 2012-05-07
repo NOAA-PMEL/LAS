@@ -9,8 +9,10 @@ import gov.noaa.pmel.tmap.las.client.laswidget.OperationsMenu;
 import gov.noaa.pmel.tmap.las.client.serializable.AnalysisSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.CategorySerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.ConfigSerializable;
+import gov.noaa.pmel.tmap.las.client.serializable.DatasetSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.GridSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.OperationSerializable;
+import gov.noaa.pmel.tmap.las.client.serializable.RegionSerializable;
 import gov.noaa.pmel.tmap.las.client.serializable.VariableSerializable;
 import gov.noaa.pmel.tmap.las.client.util.Util;
 import gov.noaa.pmel.tmap.las.client.laswidget.OutputPanel;
@@ -221,8 +223,6 @@ public class UI extends BaseUI {
 		RootPanel.get("vizGal").add(vVizGalPanel);
 		//RootPanel.get("PLOT_LINK").setVisible(false);
 		
-		super.init(1, Constants.IMAGE);
-		
 		// Set the three required handlers
 		setDatasetSelectionHandler(xVisGalDatasetSelectionHandler);
 		setOperationsClickHandler(xVizGalOperationsClickHandler);
@@ -241,7 +241,7 @@ public class UI extends BaseUI {
 		if ( xDSID != null && xVarID != null & xOperationID != null && xView != null) {
 			// If the proper information was sent to the widget, pull down the variable definition
 			// and initialize the slide sorter with this Ajax call.
-			Util.getRPCService().getVariable(xDSID, xVarID, requestGrid);
+			Util.getRPCService().getVariable(xDSID, xVarID, getGridCallback);
 		} else {
 			Util.getRPCService().getPropertyGroup("product_server", initPanelFromDefaultsCallback);	
 		}
@@ -454,26 +454,64 @@ public class UI extends BaseUI {
 
 			if ( xDSID != null && xVarID != null && xOperationID != null && xView != null && xOptionID != null) {
 				xOptionsButton.setOptions(xOptionID);
-				Util.getRPCService().getCategories(xDSID, requestGrid);
+				Util.getRPCService().getCategories(xDSID, initPanelFromParametersCallback);
 			} else {
 				Window.alert("Initalization failed.");
 			}
 		}		
 	};
-	AsyncCallback requestGrid = new AsyncCallback() {
+	public AsyncCallback initPanelFromParametersCallback = new AsyncCallback() {
 		public void onSuccess(Object result) {
-			xVariable = (VariableSerializable) result;
-			initial_var = xVariable;
-			// Null view to get all operations.
-			Util.getRPCService().getConfig(null, xDSID, xVarID, initVizGal);
+			CategorySerializable[] cats = (CategorySerializable[]) result;
+			if ( cats != null && cats.length > 1 ) {
+				Window.alert("Multiple categories found.");
+			} else {
+				if ( cats[0].isVariableChildren() ) {
+					DatasetSerializable ds = cats[0].getDatasetSerializable();
+					VariableSerializable[] vars = ds.getVariablesSerializable();
+					for (int i=0; i < vars.length; i++ ) {
+
+						if ( vars[i].getID().equals(xVarID) ) {
+							xVariable = vars[i];
+							// View is null to get all operations
+							Util.getRPCService().getConfig(null, xVariable.getDSID(), xVariable.getID(), getGridCallback);
+						}
+					}
+				}
+			}
 		}
-
-
-		@Override
 		public void onFailure(Throwable caught) {
 			Window.alert("Failed to initalizes VizGal."+caught.toString());
 		}
 	};
+	AsyncCallback<ConfigSerializable> getGridCallback = new AsyncCallback<ConfigSerializable>() {
+		public void onSuccess(ConfigSerializable config) {
+
+			GridSerializable grid = config.getGrid();
+			RegionSerializable[] regions = config.getRegions();
+			xAxesWidget.getRefMap().setRegions(regions);
+			ops = config.getOperations();
+			xVariable.setGrid(grid);
+			xAnalysisWidget.setAnalysisAxes(grid);
+			if ( xPanels == null || xPanels.size() == 0 ) {
+				UI.super.init(1, Constants.IMAGE);
+			}
+			if ( changeDataset ) {
+				applyChange();
+			} else {
+				initPanels();
+			}
+
+		}
+
+		@Override
+		public void onFailure(Throwable caught) {
+			Window.alert("Could not fetch grid.  "+caught.getLocalizedMessage());
+
+		}
+
+	};
+
 
 	AsyncCallback<ConfigSerializable> getGridForChangeDatasetCallback = new AsyncCallback<ConfigSerializable>() {
 		public void onSuccess(ConfigSerializable config) {
