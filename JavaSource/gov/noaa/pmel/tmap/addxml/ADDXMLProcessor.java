@@ -41,6 +41,7 @@ import gov.noaa.pmel.tmap.jdom.LASDocument;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.DecimalFormat;
@@ -48,9 +49,11 @@ import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Formatter;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.Vector;
 import java.util.regex.Pattern;
@@ -72,6 +75,7 @@ import org.joda.time.DateTimeZone;
 import org.joda.time.Duration;
 import org.joda.time.DurationFieldType;
 import org.joda.time.Hours;
+import org.joda.time.Interval;
 import org.joda.time.Period;
 import org.joda.time.chrono.GJChronology;
 import org.joda.time.chrono.GregorianChronology;
@@ -141,7 +145,7 @@ public class ADDXMLProcessor {
 	private static DateTimeFormatter ferret_time_formatter = DateTimeFormat.forPattern("dd-MMM-yyyy HH:mm:ss");
 
 	// Constants
-	private static final String Z_VALUES = "z_values";
+	private static final String Z_VALUES = "updownValues";
 	private static final String ZVALUES = "zvalues";
 
 
@@ -162,6 +166,7 @@ public class ADDXMLProcessor {
 	private static boolean oneDataset = false;
 	private static boolean irregular = false;
 	private static boolean esg = false;
+	private static boolean uaf = false;
 	private static String[] regex;
 
 	public ADDXMLProcessor() {
@@ -236,6 +241,8 @@ public class ADDXMLProcessor {
 		
 
 		esg = command_parameters.getBoolean("esg");
+		
+		uaf = command_parameters.getBoolean("metadata");
 
 		// Retrieve user credentials info.
 		String provider = command_parameters.getString("auth_provider");
@@ -702,7 +709,9 @@ public class ADDXMLProcessor {
 		else {
 			top.setName(catalog.getUriString());
 		}
-		Vector DGABeans = new Vector();
+		Set<DatasetBean> DatasetBeans = new HashSet<DatasetBean>();
+		Set<GridBean> GridBeans = new HashSet<GridBean>();
+		Set<AxisBean> AxisBeans = new HashSet<AxisBean>();
 		Vector CategoryBeans = new Vector();
 
 		
@@ -711,11 +720,12 @@ public class ADDXMLProcessor {
 			if ( category ) {
 				while (di.hasNext()) {
 					InvDataset ThreddsDataset = (InvDataset) di.next();
-					CategoryBean cb;
+					CategoryBean cb = null;
 					if ( esg ) {
-						cb = null;
 						// Do this below for ESG...
-					} else {
+					} else if ( uaf ) {
+						cb = processUAFCategories(ThreddsDataset);
+					}	else {
 						cb = processCategories(ThreddsDataset);
 					} 
 					if ( cb != null && (cb.getCategories().size() > 0 || cb.getFilters().size() > 0 )) {
@@ -726,18 +736,13 @@ public class ADDXMLProcessor {
 
 		// Discover and process all the THREDDS dataset elements that actually
 		// connect to a data source.
-
+	    Vector DGABeans = new Vector();
 		ThreddsDatasets = catalog.getDatasets();
 		di = ThreddsDatasets.iterator();
 		while (di.hasNext()) {
 			InvDataset ThreddsDataset = (InvDataset) di.next();
 			Vector d = processDatasets(ThreddsDataset);
-			for (Iterator dIt = d.iterator(); dIt.hasNext();) {
-				DatasetsGridsAxesBean bean = (DatasetsGridsAxesBean) dIt.next();
-				if ( bean != null ) {
-					DGABeans.add(bean);
-				}
-			}
+			DGABeans.addAll(d);
 		}
 
 		// Each THREDDS "dataset" is a separate LAS data set.
@@ -819,30 +824,32 @@ public class ADDXMLProcessor {
 		Iterator dgabit = DGABeans.iterator();
 		while (dgabit.hasNext()) {
 			DatasetsGridsAxesBean dgab_temp = (DatasetsGridsAxesBean) dgabit.next();
-			if (dgab_temp.getError() != null) {
-				lasdata.addContent(new Comment(dgab_temp.getError()));
-			}
-			else {
-				Vector datasets = dgab_temp.getDatasets();
-				Iterator dsit = datasets.iterator();
-				while (dsit.hasNext()) {
-					DatasetBean db = (DatasetBean) dsit.next();
-					Element dsE = db.toXml();
-					datasetsElement.addContent(dsE);
+			if ( dgab_temp != null ) {
+				if (dgab_temp.getError() != null) {
+					lasdata.addContent(new Comment(dgab_temp.getError()));
 				}
-				Vector grids = dgab_temp.getGrids();
-				Iterator git = grids.iterator();
-				while (git.hasNext()) {
-					GridBean gb = (GridBean) git.next();
-					Element gE = gb.toXml();
-					gridsElement.addContent(gE);
-				}
-				Vector axes = dgab_temp.getAxes();
-				Iterator ait = axes.iterator();
-				while (ait.hasNext()) {
-					AxisBean ab = (AxisBean) ait.next();
-					Element aE = ab.toXml();
-					axesElement.addContent(aE);
+				else {
+					Vector datasets = dgab_temp.getDatasets();
+					Iterator dsit = datasets.iterator();
+					while (dsit.hasNext()) {
+						DatasetBean db = (DatasetBean) dsit.next();
+						Element dsE = db.toXml();
+						datasetsElement.addContent(dsE);
+					}
+					Vector grids = dgab_temp.getGrids();
+					Iterator git = grids.iterator();
+					while (git.hasNext()) {
+						GridBean gb = (GridBean) git.next();
+						Element gE = gb.toXml();
+						gridsElement.addContent(gE);
+					}
+					Vector axes = dgab_temp.getAxes();
+					Iterator ait = axes.iterator();
+					while (ait.hasNext()) {
+						AxisBean ab = (AxisBean) ait.next();
+						Element aE = ab.toXml();
+						axesElement.addContent(aE);
+					}
 				}
 			}
 		}
@@ -858,15 +865,6 @@ public class ADDXMLProcessor {
 		doc.setRootElement(lasdata);
 		return doc;
 	}
-	public static Vector processDatasets(InvDataset ThreddsDataset, boolean esg) {
-		if ( esg ) {
-			// TODO fix for command line access...
-			return null;
-			// return processESGDatasets(ThreddsDataset);
-		} else {
-			return processDatasets(ThreddsDataset);
-		}
-	}
 	/**
 	 * processDataset
 	 *
@@ -875,25 +873,30 @@ public class ADDXMLProcessor {
 	 */
 	public static Vector processDatasets(InvDataset ThreddsDataset) {
 		Vector beans = new Vector();
-		if (ThreddsDataset.hasAccess()) {
-			boolean done = false;
-			for (Iterator iter = ThreddsDataset.getAccess().iterator();
-			iter.hasNext(); ) {
-				InvAccess access = (InvAccess) iter.next();
-				if ( (access.getService().getServiceType() == ServiceType.DODS ||
-						access.getService().getServiceType() == ServiceType.NETCDF ||
-						access.getService().getServiceType() == ServiceType.OPENDAP) &&
-						!done) {
-					done = true;
-					DatasetsGridsAxesBean dgab =
-						createBeansFromThreddsDataset(ThreddsDataset, access);
-					beans.add(dgab);
-				}
+		if ( uaf ) {
+			if ( ThreddsDataset.hasAccess() && ThreddsDataset.getAccess(ServiceType.OPENDAP) != null ) {
+				DatasetsGridsAxesBean dgab = createBeansFromUAFThreddsMetadata(ThreddsDataset);
+				beans.add(dgab);
 			}
-		}
-		for (Iterator iter = ThreddsDataset.getDatasets().iterator();
-		iter.hasNext(); ) {
-			beans.addAll(processDatasets( (InvDataset) iter.next()));
+			for (Iterator iter = ThreddsDataset.getDatasets().iterator();iter.hasNext(); ) {
+				beans.addAll(processDatasets( (InvDataset) iter.next()));
+			}
+		} else if ( esg ) {
+			if (ThreddsDataset.hasAccess() && ThreddsDataset.getAccess(ServiceType.OPENDAP) != null ) {
+				DatasetsGridsAxesBean dgab = createBeansFromThreddsDataset(ThreddsDataset, ThreddsDataset.getAccess(ServiceType.OPENDAP) );
+				beans.add(dgab);
+			}
+			for (Iterator iter = ThreddsDataset.getDatasets().iterator(); iter.hasNext(); ) {
+				beans.addAll(processDatasets( (InvDataset) iter.next()));
+			}
+		} else {
+			if (ThreddsDataset.hasAccess() && ThreddsDataset.getAccess(ServiceType.OPENDAP) != null ) {
+				DatasetsGridsAxesBean dgab = createBeansFromNetcdfDataset(ThreddsDataset.getAccess(ServiceType.OPENDAP).getStandardUrlName(), false, ThreddsDataset);
+				beans.add(dgab);
+			}
+			for (Iterator iter = ThreddsDataset.getDatasets().iterator(); iter.hasNext(); ) {
+				beans.addAll(processDatasets( (InvDataset) iter.next()));
+			}
 		}
 		return beans;
 	}
@@ -939,6 +942,8 @@ public class ADDXMLProcessor {
 		DatasetsGridsAxesBean bean = new DatasetsGridsAxesBean();
 		DatasetBean ds = new DatasetBean();
 		Vector datasets = new Vector();
+		Vector allGrids = new Vector();
+		Vector allAxes = new Vector();
 		ArrayList<VariableBean> variables = new ArrayList<VariableBean>();
 		for (Iterator topLevelIt = subCatalog.getDatasets().iterator(); topLevelIt.hasNext(); ) {
 			InvDataset topDS = (InvDataset) topLevelIt.next();
@@ -958,14 +963,12 @@ public class ADDXMLProcessor {
 							url = access.getStandardUrlName();
 						}
 					}
-					DatasetsGridsAxesBean dgab = createBeansFromThreddsMetadata(subDataset, url);
+					DatasetsGridsAxesBean dgab = createBeansFromThreddsMetadata(subDataset, url, allGrids, allAxes);
                     if ( dgab != null ) {
                     	for (Iterator dsit = dgab.getDatasets().iterator(); dsit.hasNext();) {
                     		DatasetBean dsb = (DatasetBean) dsit.next();
                     		variables.addAll(dsb.getVariables());
                     	}
-                    	bean.getGrids().addAll(dgab.getGrids());
-                    	bean.getAxes().addAll(dgab.getAxes());
                     }
 				} else {
 					// These will be the catalog containers that will contain the aggregations...
@@ -983,14 +986,12 @@ public class ADDXMLProcessor {
 									url = access.getStandardUrlName();
 								}
 							}
-							DatasetsGridsAxesBean dgab = createBeansFromThreddsMetadata(grandChild, url);
+							DatasetsGridsAxesBean dgab = createBeansFromThreddsMetadata(grandChild, url, allGrids, allAxes);
 							if ( dgab != null ) {
 								for (Iterator dsit = dgab.getDatasets().iterator(); dsit.hasNext();) {
 									DatasetBean dsb = (DatasetBean) dsit.next();
 									variables.addAll(dsb.getVariables());
 								}
-								bean.getGrids().addAll(dgab.getGrids());
-								bean.getAxes().addAll(dgab.getAxes());
 							}
 						} 
 					}
@@ -1000,6 +1001,8 @@ public class ADDXMLProcessor {
 		ds.setVariables(variables);
 		datasets.add(ds);
 		bean.setDatasets(datasets);
+		bean.setGrids(allGrids);
+		bean.setAxes(allAxes);
 		beans.add(bean);
 		return beans;
 	}
@@ -1009,8 +1012,7 @@ public class ADDXMLProcessor {
 	 * @param ThreddsDataset InvDataset
 	 * @return DatasetBean
 	 */
-	private static DatasetsGridsAxesBean createBeansFromThreddsDataset(
-			InvDataset ThreddsDataset, InvAccess access) {
+	private static DatasetsGridsAxesBean createBeansFromThreddsDataset(InvDataset threddsDataset, InvAccess access) {
 		DatasetsGridsAxesBean dgab = new DatasetsGridsAxesBean();
 
 		String url = access.getStandardUrlName();
@@ -1018,7 +1020,7 @@ public class ADDXMLProcessor {
 		if ( esg ) {
 			if ( url.contains("aggregation") ) {
 				// Try to get metadata from the catalog.
-				dgab = createBeansFromThreddsMetadata(ThreddsDataset, url);
+				//dgab = createBeansFromThreddsMetadata(ThreddsDataset, url);
 				if ( dgab == null ) {
 					/* 
 					 * Doing the initialization from the files is just too expensive.
@@ -1033,17 +1035,456 @@ public class ADDXMLProcessor {
 					 *
 					 * Log the data set and move on...
 					 */
-					log.warn("Not enough metadata to create LAS configuration for "+ThreddsDataset.getName()+".  Skipping...");
+					log.warn("Not enough metadata to create LAS configuration for "+threddsDataset.getName()+".  Skipping...");
 				}
 			}
 		} else {
-			dgab = createBeansFromNetcdfDataset(url, false, ThreddsDataset);
+			dgab = createBeansFromNetcdfDataset(url, false, null);
 		}
 		return dgab;
 	}
+    private static DatasetsGridsAxesBean createBeansFromUAFThreddsMetadata(InvDataset threddsDataset) {
+    	
+    	DatasetsGridsAxesBean dgab = new DatasetsGridsAxesBean();
+    	Vector DatasetBeans = new Vector();
+		DatasetBean dataset = new DatasetBean();
+		UniqueVector GridBeans = new UniqueVector();
+		Set AllAxesBeans = new HashSet();
 
-	private static DatasetsGridsAxesBean createBeansFromThreddsMetadata(
-			InvDataset threddsDataset, String url) {
+		if (verbose) {
+			log.info("Processing UAF THREDDS dataset: " + threddsDataset.getFullName() + "with id: "+threddsDataset.getID());
+		}
+
+		dataset.setName(threddsDataset.getFullName());
+		String id = fixid(threddsDataset);
+		
+		dataset.setElement(id);
+		dataset.setVersion(version_string);
+		dataset.setCreator(ADDXMLProcessor.class.getName());
+		dataset.setCreated((new DateTime()).toString());
+		
+			List<Variables> variables = threddsDataset.getVariables();
+			if (variables.size() > 0 ) {
+				
+				for (Iterator varlistIt = variables.iterator(); varlistIt.hasNext();) {
+					
+					Variables vars_container = (Variables) varlistIt.next();
+					List<Variable> vars = vars_container.getVariableList();
+					if ( vars.size() > 0 ) {
+						for (Iterator varIt = vars.iterator(); varIt.hasNext();) {
+							Variable variable = (Variable) varIt.next();
+							if ( !variable.getVocabularyName().equalsIgnoreCase("time") &&
+								 !variable.getVocabularyName().equalsIgnoreCase("latitude") && 
+								 !variable.getVocabularyName().equalsIgnoreCase("longitude") &&
+								 !variable.getVocabularyName().equalsIgnoreCase("longtitude") &&  // Handle PFEG misspelling...
+								 !variable.getVocabularyName().equalsIgnoreCase("altitude") &&
+								 !variable.getVocabularyName().equalsIgnoreCase("depth")) {
+							UniqueVector AxisBeans = new UniqueVector();
+							VariableBean las_var = new VariableBean();
+							las_var.setElement(id+"-"+variable.getName());
+							las_var.setName(variable.getName());
+							if ( variable.getUnits() != null && !variable.getUnits().equals("") ) {
+								las_var.setUnits(variable.getUnits());
+							} else {
+								las_var.setUnits("no units");
+							}
+							las_var.setUrl(threddsDataset.getAccess(ServiceType.OPENDAP).getStandardUrlName()+"#"+variable.getName());
+							log.info("Processing UAF THREDDS variable: " + variable.getName());
+
+							GeospatialCoverage coverage = threddsDataset.getGeospatialCoverage();
+							DateRange dateRange = threddsDataset.getTimeCoverage();
+
+							StringBuilder grid_name = new StringBuilder(variable.getName()+"-"+id+"-grid");
+							if (coverage != null ) {
+
+								boolean readX = false;
+								boolean readY = false;
+
+								double xsize = coverage.getLonExtent();
+								double xresolution = coverage.getLonResolution();
+								double xstart = coverage.getLonStart();
+								String xunits = coverage.getLonUnits();
+
+								if ( Double.isNaN(xsize) || Double.isNaN(xstart)) {
+									readX = true;
+								}
+								if ( Double.isNaN(xresolution) ) {
+									// We're going to pretend it is 1-degree data for purposes of the LAS UI.
+									xresolution = 1.0;
+								}
+								double ysize = coverage.getLatExtent();
+								double yresolution = coverage.getLatResolution();
+								double ystart = coverage.getLatStart();
+								String yunits = coverage.getLatUnits();
+								if ( Double.isNaN(ysize) || Double.isNaN(ystart) ) {
+									readY = true;
+								}
+								if ( Double.isNaN(yresolution) ) {
+									// We're going to pretend it is 1-degree data for purposes of the LAS UI.
+									yresolution = 1.0;
+								}
+								boolean hasZ = false;
+								boolean readZ = false;
+								String zvalues = null;
+
+								Range z = coverage.getUpDownRange();
+								if ( z != null ) {	
+									hasZ = true;
+									double zsize = z.getSize();
+									double zresolution = z.getResolution();
+									double zstart = z.getStart();
+									
+									try {
+										zvalues = threddsDataset.findProperty(Z_VALUES);
+									} catch (Exception e) {
+										try {
+											zvalues = threddsDataset.findProperty(ZVALUES);
+										} catch (Exception e1) {
+											zvalues = null;
+										}
+									}
+									//if ( zsize < 2 ) zvalues = String.valueOf(zstart);
+									if ( zvalues != null ) {
+										zvalues = zvalues.trim();
+									}
+									if ( ( Double.isNaN(zsize) || Double.isNaN(zresolution) || Double.isNaN(zstart) ) &&
+											zvalues == null ) {
+										readZ = true;
+									}
+								}
+
+								// One of these axes is not sufficiently specified in the metadata so prepare read the data out of the aggregation.
+								NetcdfDataset ncds = null;
+								GridDataset gridsDs = null;
+								GridCoordSys gcs = null;
+
+								if ( readX || readY || readZ ) {
+									return null;
+								}
+
+								// Grab the properties...
+								String timeCoverageNumberOfPoints = threddsDataset.findProperty("timeCoverageNumberOfPoints");
+								String eastwestNumberOfPoints = threddsDataset.findProperty("eastwestNumberOfPoints");
+								String eastwestResolution = threddsDataset.findProperty("eastwestResolution");
+								String northsouthNumberOfPoints = threddsDataset.findProperty("northsouthNumberOfPoints");
+								String northsouthResolution = threddsDataset.findProperty("northsouthResolution");
+
+								String elementName = variable.getName()+"-"+id+"-x-axis";
+								AxisBean xAxis = new AxisBean();
+
+								// Get the X Axis information...
+								log.info("Loading X from metadata: "+elementName);
+								xAxis.setElement(elementName);
+								grid_name.append("-x-axis");
+								xAxis.setType("x");
+								xAxis.setUnits(xunits);
+								int xsizei = (int)(xsize/xresolution);
+								ArangeBean xr = new ArangeBean();
+								xr.setSize(String.valueOf(xsizei));
+								xr.setStep(String.valueOf(xresolution));
+								xr.setStart(String.valueOf(xstart));
+								xAxis.setArange(xr);
+
+
+								if ( !AxisBeans.contains(xAxis) ) {
+									AxisBeans.add(xAxis);
+								} else {
+									xAxis.setElement(AxisBeans.getMatchingID(xAxis));
+								}
+								elementName = variable.getName()+"-"+id+"-y-axis";
+								AxisBean yAxis = new AxisBean();
+
+								log.info("Loading Y from metadata: "+elementName);
+								// Get the Y Axis information...
+								yAxis.setElement(elementName);
+								grid_name.append("-y-axis");
+								yAxis.setType("y");
+								yAxis.setUnits(yunits);
+								int ysizei = (int)(ysize/yresolution);
+								ArangeBean yr = new ArangeBean();
+								yr.setSize(String.valueOf(ysizei));
+								yr.setStep(String.valueOf(yresolution));
+								yr.setStart(String.valueOf(ystart));
+								yAxis.setArange(yr);
+
+								if ( !AxisBeans.contains(yAxis) ) {
+									AxisBeans.add(yAxis);
+								} else {
+									yAxis.setElement(AxisBeans.getMatchingID(yAxis));
+								}
+								elementName = variable.getName()+"-"+id+"-z-axis";
+								AxisBean zAxis = new AxisBean();
+								if ( hasZ ) {
+									if ( zvalues != null ) {
+										log.info("Loading Z from property metadata: "+elementName);
+										zAxis.setElement(elementName);
+										String zunits = z.getUnits();
+										zAxis.setType("z");
+										zAxis.setUnits(zunits);
+										String[] zvs = zvalues.split("\\s+");
+										DecimalFormat format = new DecimalFormat("###############.###############");
+										for (int zi = 0; zi < zvs.length; zi++ ) {
+											double zd = Double.valueOf(zvs[zi]).doubleValue();
+											zvs[zi] = format.format(zd);
+										}
+										zAxis.setV(zvs);
+									} else {
+										log.info("Loading Z without property metadata: "+elementName);
+										zAxis.setElement(elementName);
+										grid_name.append("-z-axis");
+										double zsize = z.getSize();
+										double zresolution = z.getResolution();
+										double zstart = z.getStart();
+										if ( !Double.isNaN(zsize) && !Double.isNaN(zresolution) && !Double.isNaN(zstart) ) {
+											String zunits = z.getUnits();
+											zAxis.setType("z");
+											zAxis.setUnits(zunits);
+											ArangeBean zr = new ArangeBean();
+											int zsizei = (int)(zsize/zresolution);
+											zr.setSize(String.valueOf(zsizei));
+											zr.setStep(String.valueOf(zresolution));
+											zr.setStart(String.valueOf(zstart));
+											zAxis.setArange(zr);
+
+										} 
+									}
+									if ( !AxisBeans.contains(zAxis) ) {
+										AxisBeans.add(zAxis);
+									} else {
+										zAxis.setElement(AxisBeans.getMatchingID(zAxis));
+									}
+								}
+
+								String calendar = threddsDataset.findProperty("TimeCoverageCalendar");;
+								// Use this chronology and the UTC Time Zone
+								Chronology chrono = GJChronology.getInstance(DateTimeZone.UTC);
+								if ( calendar != null ) {
+
+									// If calendar attribute is set, use appropriate Chronology.
+									if (calendar.equals("proleptic_gregorian") ) {
+										chrono = GregorianChronology.getInstance(DateTimeZone.UTC);
+									} else if (calendar.equals("noleap") || calendar.equals("365_day") ) {
+										chrono = NoLeapChronology.getInstanceUTC();
+									} else if (calendar.equals("julian") ) {
+										chrono = JulianChronology.getInstanceUTC();
+									} else if ( calendar.equals("all_leap") || calendar.equals("366_day") ) {
+										chrono = AllLeapChronology.getInstanceUTC();
+									} else if ( calendar.equals("360_day") ) {  /* aggiunto da lele */
+										chrono = ThreeSixtyDayChronology.getInstanceUTC();
+									}
+								}
+								// DEBUG!
+
+								// Get the date time from the metadata TimeCoverage if it exists...
+								DateTimeFormatter f = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ssZ").withChronology(chrono);
+								if ( dateRange == null ) return dgab;
+								DateType sd = dateRange.getStart();
+								DateTime metadata_sd = null;
+								if ( sd != null ) {
+									String date = sd.getText();
+									try {
+										metadata_sd = f.parseDateTime(sd.toDateTimeString()).withChronology(chrono);
+									} catch (Exception e) {
+										f = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss").withChronology(chrono);
+										metadata_sd = f.parseDateTime(sd.toDateTimeString()).withChronology(chrono);
+									}
+								}
+								DateType ed = dateRange.getEnd();
+								DateTime metadata_ed = null;
+								if ( ed != null ) {
+									String date = ed.getText();
+									if ( date.equalsIgnoreCase("present")) {
+										metadata_ed = new DateTime().withChronology(chrono);
+									} else {
+										try {
+											metadata_ed = f.parseDateTime(ed.toDateTimeString()).withChronology(chrono);
+										} catch (Exception e) {
+											f = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss").withChronology(chrono);
+											metadata_ed = f.parseDateTime(ed.toDateTimeString()).withChronology(chrono);
+										}
+									}
+								}
+								
+
+								log.info("Loading T from metadata: "+elementName);
+								AxisBean tAxis = new AxisBean();
+								if ( calendar != null ) {
+									tAxis.setCalendar(calendar);
+								}
+								tAxis.setElement(variable.getName()+"-"+id+"-t-axis");
+								grid_name.append("-t-axis");
+								tAxis.setType("t");
+
+								ArangeBean tr = new ArangeBean();
+								DateTimeFormatter hoursfmt = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
+								log.debug("Using start time: "+hoursfmt.print(metadata_sd));
+								tr.setStart(hoursfmt.print(metadata_sd));
+								double dm = (metadata_ed.getMillis() - metadata_sd.getMillis())/(Double.valueOf(timeCoverageNumberOfPoints) - 1.d);
+								long delta_millis = (long) dm;
+								Duration duration = new Duration(delta_millis);
+								if ( metadata_sd.equals(metadata_ed) || Integer.valueOf(timeCoverageNumberOfPoints) == 1 ) {
+									tAxis.setArange(null);
+									tAxis.setUnits("time");
+									String[] v = new String[1];
+									v[0] = hoursfmt.print(metadata_sd);
+									tAxis.setV(v);
+								} else if ( Integer.valueOf(timeCoverageNumberOfPoints) <= 10 ) {
+									tAxis.setArange(null);
+									tAxis.setUnits("time");
+									String[] v = new String[Integer.valueOf(timeCoverageNumberOfPoints)];
+									DateTimeFormatter fmt;
+									if ( duration.getStandardHours() >= 24 ) {
+										fmt = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
+									} else {
+										fmt = DateTimeFormat.forPattern("yyyy-MM-dd");
+									}
+									for ( int i = 0; i < Integer.valueOf(timeCoverageNumberOfPoints); i++ ) {
+										v[i] = fmt.print(metadata_sd);
+										metadata_sd = metadata_sd.plus(duration);
+									}
+									tAxis.setV(v);
+								} else {
+
+									Period p = duration.toPeriod(chrono);
+									int values[] = p.getValues();
+									int numPeriods = 0;
+									DurationFieldType types[] = p.getFieldTypes();
+									String periods = "";
+									// Finds spacing in terms of years, months, weeks, days, hours, minutes, seconds, millis
+									// We will check years, months, weeks, days, hours
+									int step = -1;
+									String typeName = "";
+									for (int i = 0; i < 5; i++) {
+										if (values[i] > 0) {
+											numPeriods++;
+											step = values[i];
+											typeName = types[i].getName();
+											// Get rid of the "s" in the plural form of the name.
+											typeName = typeName.substring(0, typeName.length() - 1);
+											// LAS doesn't understand "week" so make it "day" and
+											// multiply the step by 7.
+											periods = periods + " " + typeName;
+											if (typeName.equals("week")) {
+												typeName = "day";
+												step = step * 7;
+											}
+										}
+
+									}
+
+									if (numPeriods == 0 || numPeriods > 1) {
+
+										// This is special code to deal with climatology files that define
+										// the time axis in the "middle" of the month.  Since there is no
+										// "middle" of months (but there is certainly always a
+										// first of the month, geez-o) so we are left to figure this out by
+										// looking at the period values and guessing that this really means
+										// climo months.
+
+										// Is the gap in years and months 0?
+										// Are the values 4 weeks apart?
+										if ( (values[0] == 0 && values[1] == 0) &&
+												(values[2] == 4)) {
+											// We're guessing these are months
+											typeName = "month";
+											step = 1;
+										} else if ( values[1] > 0 ) {
+											// We're again guessing that the value is months (and everything else is in the noise)
+											typeName = "month";
+											step = values[1];
+										} else if ( numPeriods == 2 && periods.contains("week") && periods.contains("day")  ) {
+											// We can convert this to days. :-)
+											typeName = "day";
+											step = 7*values[2] + values[3];
+
+										}  else {
+											// Guess based on the size of the period in well-known units.
+											long days = duration.getStandardDays();
+
+											if ( days > 359 ) {
+												typeName = "year";
+												step = 1;
+											} else if ( days > 26 ) {
+												typeName = "month";
+												step = 1;
+											}
+
+										}
+									}
+
+
+									tr.setStep(String.valueOf(step));
+									tAxis.setUnits(typeName);
+
+
+									tr.setSize(timeCoverageNumberOfPoints);
+									tAxis.setArange(tr);
+								}
+								if ( !AxisBeans.contains(tAxis) ) {
+									AxisBeans.addUnique(tAxis);
+								} else {
+									tAxis.setElement(AxisBeans.getMatchingID(tAxis));
+								}
+
+								
+								GridBean grid = new GridBean();
+								grid.setElement(grid_name.toString());
+								grid.setAxes(AxisBeans);
+								AllAxesBeans.addAll(AxisBeans);
+								if ( !GridBeans.contains(grid) ) {
+									GridBeans.add(grid);
+								} else {
+									grid.setElement(GridBeans.getMatchingID(grid));
+								}
+
+								las_var.setGrid(grid);
+								dataset.addVariable(las_var);
+
+
+							} // coverage != null
+							}
+						} // for variables;
+
+						
+					} else { // vars > 0
+						return null;
+					}
+
+				}// for outer variables container iterator
+			} else { // outer variables list
+				return null;
+			}
+		
+		DatasetBeans.add(dataset);
+		dgab.setGrids(GridBeans);
+		Vector aa = new Vector();
+		for (Iterator axIt = AllAxesBeans.iterator(); axIt.hasNext();) {
+			AxisBean ab = (AxisBean) axIt.next();
+			aa.add(ab);
+		}
+		dgab.setAxes(aa);
+		dgab.setDatasets(DatasetBeans);
+    	return dgab;
+    }
+	private static String fixid(InvDataset t) {
+		String tid = t.getID();
+		String id;
+		if ( tid != null ) {
+			id = tid;
+			id = id.replace("/", ".");
+			if ( Pattern.matches("^[0-9].*", id) ) id = id + "dataset-";
+			id = id.replaceAll(" ", "-"); 
+		} else {
+			try {
+				id = "data-"+JDOMUtils.MD5Encode(t.getFullName());
+			} catch (UnsupportedEncodingException e) {
+				id = "data-"+String.valueOf(Math.random());
+			}
+		}
+		return id;
+	}
+
+	private static DatasetsGridsAxesBean createBeansFromThreddsMetadata(InvDataset threddsDataset, String url, Vector allGrids, Vector allAxes) {
 		DatasetsGridsAxesBean dgab = new DatasetsGridsAxesBean();
 		Vector DatasetBeans = new Vector();
 		DatasetBean dataset = new DatasetBean();
@@ -1525,6 +1966,55 @@ public class ADDXMLProcessor {
 			}
 		}
 		return topCB;
+	}
+	public static CategoryBean processUAFCategories(InvDataset ThreddsDataset) {
+		log.debug("Processing "+ThreddsDataset.getFullName());
+		String tid = ThreddsDataset.getID();
+		String id = fixid(ThreddsDataset);	
+		String name = ThreddsDataset.getFullName();
+		CategoryBean category = makeParent(ThreddsDataset);
+		category.setName(name);
+		category.setID(id);
+		if ( ThreddsDataset.hasAccess() && ThreddsDataset.getAccess(ServiceType.OPENDAP) != null ) {
+			FilterBean filter = new FilterBean();
+			filter.setAction("apply-dataset");
+			String tag = fixid(ThreddsDataset);
+			filter.setContainstag(tag);
+			category.addFilter(filter);
+		} else {
+			Vector subCats = new Vector();
+			for (Iterator subDatasetsIt = ThreddsDataset.getDatasets().iterator(); subDatasetsIt.hasNext(); ) {
+				InvDataset subDataset = (InvDataset) subDatasetsIt.next();
+				// Process the sub-categories
+				CategoryBean subCat = processUAFCategories(subDataset);
+				if ( !subCat.equals(category) && (subCat.getCategories().size() > 0 || subCat.getFilters().size() > 0 ) ) {
+					subCats.add(subCat);
+				}
+			}
+			category.setCategories(subCats);
+		}
+
+		return category;
+	}
+	private static CategoryBean makeParent(InvDataset t) {
+		String id = t.getID();	
+		CategoryBean parent = new CategoryBean();
+		// Make any THREDDS documentation links into LAS contributor links.
+		parent.setContributors(getContributors(t));
+
+		String name = t.getName();
+		if (name != null) {
+			parent.setName(t.getName());	
+		}
+		else {
+			parent.setName("THREDDS Dataset");
+		}
+		
+		if ( id != null && !id.equals("") ) {
+			id = id.replace("/", ".");
+			parent.setID(id);
+		}
+		return parent;
 	}
 	/**
 	 * processCategories

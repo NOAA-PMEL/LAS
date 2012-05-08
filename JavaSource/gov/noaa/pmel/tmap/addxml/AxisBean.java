@@ -1,5 +1,9 @@
 package gov.noaa.pmel.tmap.addxml;
 
+import gov.noaa.pmel.tmap.las.jdom.LASConfig;
+
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import org.jdom.*;
 
 /**
@@ -16,6 +20,9 @@ import org.jdom.*;
  * @version 1.0
  */
 public class AxisBean extends LasBean {
+	
+    private static Logger log = LogManager.getLogger(AxisBean.class.getName());
+
 	private String type;
 	private String units;
 	private String display_lo;
@@ -118,6 +125,9 @@ public class AxisBean extends LasBean {
 			axis.setAttribute("modulo", "true");
 		}
 		axis.setAttribute("units", this.units);
+		if ( calendar != null && !calendar.equals("") ) {
+			axis.setAttribute("calendar", calendar);
+		}
 		if (arange != null) {
 			Element arangeElement = new Element("arange");
 			if ( this.arange.getStart() == null ) {
@@ -170,22 +180,68 @@ public class AxisBean extends LasBean {
 	public boolean equals(LasBean bean) {
 		AxisBean b = null;
 		if ( !(bean instanceof AxisBean) ) {
+			log.debug("Compare failed.  Not comparing to an axis.");
 			return false;
 		} else {
 			b = (AxisBean) bean;
 		}
-		if ( !type.equals(b.getType() )) return false;
-		if ( !units.equals(b.getUnits() )) return false;
-		if ( !display_lo.equals(b.getDisplay_lo() )) return false;
-		if ( !display_hi.equals(b.getDisplay_hi() )) return false;
-		if ( !ddefault.equals(b.getDdefault()) ) return false;
+		if ( type != null ) {
+		   if ( !type.equals(b.getType() )) {
+			   log.debug("Type compare failed.");
+			   return false;
+		   }
+		}
+		if ( units != null ) {
+			if ( !units.equals(b.getUnits() )) {
+				log.debug("Units compare failed.");
+				return false;
+			}
+		}
+		if ( display_lo != null ) {
+			if ( !display_lo.equals(b.getDisplay_lo() )) {
+				log.debug("display_lo compare failed.");
+				return false;
+			}
+		}
+		if ( display_hi != null ) {
+			if ( !display_hi.equals(b.getDisplay_hi() )) {
+				log.debug("display_hi compare failed.");
+				return false;
+			}
+		}
+		if ( ddefault != null ) {
+			if ( !ddefault.equals(b.getDdefault()) ) {
+				log.debug("ddefault compare failed.");
+				return false;
+			}
+		}
 		if ( v != null ) {
-			if ( b.getV() == null ) return false;
-			if ( !v.equals(b.getV())) return false;
+			if ( b.getV() == null ) {
+				log.debug("v list compare failed.");
+				return false;
+			}
+			String[] bv = b.getV();
+			if ( v.length != bv.length ) {
+				log.debug("V compare failed on length.");
+				return false;
+			} else {
+				for (int i = 0; i < bv.length; i++) {
+					if ( !bv[0].equals(v[0] ) ) {
+						log.debug("V compare failed i="+i+" v= "+v[i]+" v="+bv[i]);
+						return false;
+					}
+				}
+			}
 		}
 		if ( arange != null ) {
-			if ( b.getArange() != null ) return false;
-			if ( !arange.equals(b.getArange() )) return false;
+			if ( b.getArange() == null ) {
+				log.debug("Arange compare failed.");
+				return false;
+			}
+			if ( !arange.equals(b.getArange() )) {
+				log.debug("Arange compare failed.");
+				return false;
+			}
 		}
 		return true;
 	}

@@ -486,46 +486,24 @@ public class LASConfig extends LASDocument {
      * @throws JDOMException
      */
     public void addIntervalsAndPoints() throws LASException, JDOMException {
-        Element root = getRootElement();
-        String version = root.getAttributeValue("version");
-        if ( version != null && !version.contains("7.")) {
-            throw new LASException("XML is not version 7.0 or above.  Try convertToSeven() first.");
-        }
-        List datasetsElements = root.getChildren("datasets");
-        for (Iterator dseIt = datasetsElements.iterator(); dseIt.hasNext();) {
-            Element datasetsE = (Element) dseIt.next();
-            List datasets = datasetsE.getChildren("dataset");
-            for (Iterator dsIt = datasets.iterator(); dsIt.hasNext();) {
-                Element dataset = (Element) dsIt.next();
-                // In theory there's only 1, but loop to be sure.
-                List variablesElements = dataset.getChildren("variables");
-                for (Iterator varseIt = variablesElements.iterator(); varseIt
-                        .hasNext();) {
-                    Element variablesE = (Element) varseIt.next();
-                    List variables = variablesE.getChildren("variable");
-                    for (Iterator varIt = variables.iterator(); varIt.hasNext();) {
-                        Element variable = (Element) varIt.next();
-                        // Get the reference to the grid
-                        if ( variable.getAttributeValue("grid_type") != null && variable.getAttributeValue("grid_type").equals("vector")) {
-                        	List<Element> compositeVars = variable.getChildren("variable");
-                        	if ( compositeVars.size() > 0 ) {
-                        		String VARID = compositeVars.get(0).getAttributeValue("IDREF");
-                        		Grid grid = getGrid(dataset.getAttributeValue("ID"), VARID);
-                        		Element gridE = new Element("grid");
-                        		gridE.setAttribute("IDREF", grid.getID());
-                        		variable.addContent(gridE);
-                        		setPointsAndIntervals(variable, grid);
-                        	}
-                        } else {
-                        	Grid grid = getGrid(dataset.getAttributeValue("ID"), variable.getAttributeValue("ID"));
-                        	setPointsAndIntervals(variable, grid);
-                        }
-                    }
-                }
-            }
-        }
+    	 Element root = getRootElement();
+         String version = root.getAttributeValue("version");
+         if ( version != null && !version.contains("7.")) {
+             throw new LASException("XML is not version 7.0 or above.  Try convertToSeven() first.");
+         }
+         List gridsElements = root.getChildren("grids");
+         for (Iterator gridsIt = gridsElements.iterator(); gridsIt.hasNext();) {
+ 			Element grids = (Element) gridsIt.next();
+ 			List gridElements = grids.getChildren("grid");
+ 			for (Iterator gridIt = gridElements.iterator(); gridIt.hasNext();) {
+ 				Element gridElement = (Element) gridIt.next();
+ 				Grid g = getGridById(gridElement.getAttributeValue("ID"));
+ 				setPointsAndIntervals(g);
+ 			}
+ 		}
     }
-    private void setPointsAndIntervals(Element variable, Grid grid) throws JDOMException {
+    private void setPointsAndIntervals(Grid grid) throws JDOMException {
+    	Element gridE = getElementByXPath("/lasdata/grids/grid[@ID='"+grid.getID()+"']");
     	List<Axis> axes = grid.getAxes();
     	String[] intervals = {"","","",""};
     	String[] points = {"","","",""};
@@ -587,14 +565,15 @@ public class LASConfig extends LASDocument {
     			}
     		}
     	}
-    	String existingPoints = variable.getAttributeValue("points");
-    	String existingIntervals = variable.getAttributeValue("intervals");
+    	// Set these on the original element, not the cloned grid with filled in axes.
+    	String existingPoints = gridE.getAttributeValue("points");
+    	String existingIntervals = gridE.getAttributeValue("intervals");
     	// Set them only if they don't already exist in the variable definition.
     	if ( existingPoints == null ) {
-    		variable.setAttribute("points", points[0]+points[1]+points[2]+points[3]);
+    		gridE.setAttribute("points", points[0]+points[1]+points[2]+points[3]);
     	}
     	if ( existingIntervals == null ) {
-    		variable.setAttribute("intervals", intervals[0]+intervals[1]+intervals[2]+intervals[3]);
+    		gridE.setAttribute("intervals", intervals[0]+intervals[1]+intervals[2]+intervals[3]);
     	}
     }
 
@@ -2102,38 +2081,53 @@ public class LASConfig extends LASDocument {
             String[] parts = varXPath.split("/");
             // Throw away index 0 since the string has a leading "/".
             varXPath = "/"+parts[1]+"/"+parts[2]+"/dataset[@ID='"+parts[3]+"']/"+parts[4]+"/variable[@ID='"+parts[5]+"']";
-        }
+        } 
     	Element variable = getElementByXPath(varXPath);
-        ArrayList<Element> axes_list = new ArrayList<Element>();
-        Element gridE = null;
         if (variable != null) {
             String ID = variable.getChild("grid").getAttributeValue("IDREF");
-            Element gt = getElementByXPath("/lasdata/grids/grid[@ID='"+ID+"']");
-            if ( gt == null ) return null;
-            gridE = (Element) gt.clone();
-            List axes = gridE.getChildren("axis");
-            for (Iterator axisIt = axes.iterator(); axisIt.hasNext();) {
-                Element axis_ref = (Element) axisIt.next();
-                String axisID = axis_ref.getAttributeValue("IDREF");
-                Element axisE = (Element) getElementByXPath("/lasdata/axes/axis[@ID='"+axisID+"']").clone();
-                String type = axisE.getAttributeValue("type");
-                if ( type.equals("x") || type.equals("y") || type.equals("z") ) {
-                    axes_list.add(axisE);
-                } else if (type.equals("t") ) {
-                    addTimeAxisAttributes(axisE);
-                    axes_list.add(axisE);
-                } else if ( type.equals("e") ) {
-                	axes_list.add(axisE);
-                }
-            }
-        }
-        // Replace the references with the actual axis definition.
-        if ( gridE != null ) {
-            gridE.setContent(axes_list);
-            return new Grid(gridE);
+            return fillGrid(ID);
         } else {
         	return null;
         }
+    }
+    /**
+     * Get the grid object with its axes filled by the grids ID.
+     * @param the ID
+     * @return the grid
+     * @throws LASException 
+     * @throws JDOMException 
+     */
+    public Grid getGridById(String ID) throws JDOMException, LASException {
+    	return fillGrid(ID);
+    }
+    private Grid fillGrid(String ID) throws JDOMException, LASException {
+    	Element gridE = null;
+    	ArrayList<Element> axes_list = new ArrayList<Element>();
+    	Element gt = getElementByXPath("/lasdata/grids/grid[@ID='"+ID+"']");
+    	if ( gt == null ) return null;
+    	gridE = (Element) gt.clone();
+    	List axes = gridE.getChildren("axis");
+    	for (Iterator axisIt = axes.iterator(); axisIt.hasNext();) {
+    		Element axis_ref = (Element) axisIt.next();
+    		String axisID = axis_ref.getAttributeValue("IDREF");
+    		Element axisE = (Element) getElementByXPath("/lasdata/axes/axis[@ID='"+axisID+"']").clone();
+    		String type = axisE.getAttributeValue("type");
+    		if ( type.equals("x") || type.equals("y") || type.equals("z") ) {
+    			axes_list.add(axisE);
+    		} else if (type.equals("t") ) {
+    			addTimeAxisAttributes(axisE);
+    			axes_list.add(axisE);
+    		} else if ( type.equals("e") ) {
+    			axes_list.add(axisE);
+    		}
+    	}
+    	// Replace the references with the actual axis definition.
+    	if ( gridE != null ) {
+    		gridE.setContent(axes_list);
+    		return new Grid(gridE);
+    	} else {
+    		return null;
+    	}
     }
     /**
      * Get grid for a particular dataset and variable.
@@ -3365,9 +3359,9 @@ public class LASConfig extends LASDocument {
 		        return null;
 		    }
 		}
-        public String getVariableIntervals(String xpath) throws JDOMException {
-		    Element variable = getElementByXPath(xpath);
-		    return variable.getAttributeValue("intervals");
+        public String getVariableIntervals(String xpath) throws JDOMException, LASException {
+        	Grid grid = getGrid(xpath);
+        	return grid.getAttributeValue("intervals");
 		}
         /**
 		 * !!! does not work with V7 XML...Returns the netCDF variable name from the variable's XPath (the #var or the variable ID)
@@ -3401,9 +3395,9 @@ public class LASConfig extends LASDocument {
         public String getVariableName(String dsID, String varID) throws JDOMException, LASException {
 			return getVariableName("/lasdata/datasets/dataset[@ID='"+dsID+"']/variables/variable[@ID='"+varID+"']");
 		}
-        public String getVariablePoints(String xpath) throws JDOMException {
-		    Element variable = getElementByXPath(xpath);
-		    return variable.getAttributeValue("points");
+        public String getVariablePoints(String xpath) throws JDOMException, LASException {
+        	Grid grid = getGrid(xpath);
+        	return grid.getAttributeValue("points");
 		}
         /**
          * Extract the properties group from a variable given its JDOM Element
