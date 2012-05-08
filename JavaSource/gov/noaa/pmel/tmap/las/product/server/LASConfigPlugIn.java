@@ -366,23 +366,36 @@ public class LASConfigPlugIn implements PlugIn {
 				log.error("Could not add the referencd dataset by addXML.", e);
 			}
 
+			log.debug("Starting convert to 7");
 			if ( !seven ) {
 				lasConfig.convertToSeven();
 			}
-
+			log.debug("Finished convert to 7");
+			
+			
+			
+			log.debug("Starting merge properties.");
+			
 			lasConfig.mergeProperites();
-
+			
+			log.debug("Finished merge properties.");
+			
+			
+			log.debug("Starting add intervals");
 			try {
 				lasConfig.addIntervalsAndPoints();        
 			} catch (Exception e) {
 				log.error("Could not add the intervals and points attributes to variables in this LAS configuration.", e);
 			}
-
+			log.debug("Finished add intervals");
+			
+			log.debug("Starting add grid type");
 			try {
 				lasConfig.addGridType();
 			} catch (Exception e) {
 				log.error("Could not add the grid_type to variables in this LAS configuration.", e);
 			}
+			log.debug("Finished add grid type");
 
 			String fds_base = serverConfig.getFTDSBase();
 			String fds_dir = serverConfig.getFTDSDir();
@@ -398,7 +411,7 @@ public class LASConfigPlugIn implements PlugIn {
 				log.error("Could not add F-TDS URLs to data configuration. "+e.toString());
 			}
 
-
+			log.debug("Staring add ui");
 			File lasUIFile = new File(lasUIFileName);
 			LASDocument lasUIDoc = new LASDocument();
 			try {
@@ -471,9 +484,12 @@ public class LASConfigPlugIn implements PlugIn {
 
 			lasConfig.getRootElement().addContent(ui);
 
-
+			log.debug("Finished all ui");
+			
+			log.debug("Starting add server ID");
 			// Finally add the server id to the options if applicable.
 			lasConfig.addServerID();
+			log.debug("Finished add server ID");
 
 			File v7 = new File(lasConfig.getOutputDir()+"/lasV7.xml");
 			try {
