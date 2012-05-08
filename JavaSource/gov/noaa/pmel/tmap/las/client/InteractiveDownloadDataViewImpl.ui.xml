@@ -9,7 +9,7 @@
 	</ui:style>
 
 	<g:FlowPanel styleName="{style.panel}" width="400" height="700"
-		ui:field="absPanel">
+		ui:field="iddPanel">
 		<g:HTML wordWrap="true" ui:field="lblDownloadData"
 			horizontalAlignment="ALIGN_CENTER">
 			<h2>Specify your data's requirements and then click "Save" to

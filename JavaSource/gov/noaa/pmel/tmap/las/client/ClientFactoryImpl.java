@@ -15,6 +15,9 @@
 package gov.noaa.pmel.tmap.las.client;
 
 
+import gov.noaa.pmel.tmap.las.client.laswidget.HelpMenuBar;
+import gov.noaa.pmel.tmap.las.client.laswidget.HelpMenuBarImpl;
+
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.event.shared.SimpleEventBus;
 //import com.google.gwt.place.shared.PlaceController;
@@ -26,7 +29,8 @@ public class ClientFactoryImpl implements ClientFactory {
   
 	private static final EventBus eventBus = new SimpleEventBus();
 //	private static final PlaceController placeController = new PlaceController(eventBus);
-	private static final InteractiveDownloadDataView view = new InteractiveDownloadDataViewImpl();
+	private static final InteractiveDownloadDataView interactiveDownloadDataView = new InteractiveDownloadDataViewImpl();
+	private static final HelpMenuBar helpMenuBar = new HelpMenuBarImpl();
 
 	@Override
 	public EventBus getEventBus() {
@@ -40,7 +44,12 @@ public class ClientFactoryImpl implements ClientFactory {
 
 	@Override
 	public InteractiveDownloadDataView getView() {
-		return view;
+		return interactiveDownloadDataView;
+	}
+
+	@Override
+	public HelpMenuBar getHelpMenuBar() {
+		return helpMenuBar;
 	}
 
 }

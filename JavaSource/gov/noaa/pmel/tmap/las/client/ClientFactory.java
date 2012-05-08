@@ -1,6 +1,8 @@
 package gov.noaa.pmel.tmap.las.client;
 
 
+import gov.noaa.pmel.tmap.las.client.laswidget.HelpMenuBar;
+
 import com.google.gwt.event.shared.EventBus;
 //import com.google.gwt.place.shared.PlaceController;
 
@@ -15,4 +17,6 @@ public interface ClientFactory {
 
 //	PlaceController getPlaceController();
 	public InteractiveDownloadDataView getView();
+
+	HelpMenuBar getHelpMenuBar();
 }

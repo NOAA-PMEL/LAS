@@ -1,5 +1,7 @@
 package gov.noaa.pmel.tmap.las.client;
 
+import gov.noaa.pmel.tmap.las.client.activity.HelpMenuBarActivity;
+import gov.noaa.pmel.tmap.las.client.activity.InteractiveDownloadDataViewActivity;
 import gov.noaa.pmel.tmap.las.client.laswidget.AxesWidgetGroup;
 import gov.noaa.pmel.tmap.las.client.laswidget.Constants;
 import gov.noaa.pmel.tmap.las.client.laswidget.LASRequest;
@@ -36,6 +38,7 @@ import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.http.client.URL;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.History;
@@ -51,6 +54,8 @@ import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.MenuBar;
 import com.google.gwt.user.client.ui.PushButton;
 import com.google.gwt.user.client.ui.RootPanel;
+import com.google.gwt.user.client.ui.ScrollPanel;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.ToggleButton;
 import com.google.gwt.user.client.ui.TreeItem;
@@ -234,36 +239,12 @@ public class UI extends BaseUI {
 
 		xButtonLayout.setWidget(0, myButtonIndex++, compareMenu);
 
-		// Make menu commands
-		Command aboutCmd = new Command() {
-			public void execute() {
-				Window.open("ProductServer.do", "_blank", "");
-			}
-		};
-
-		Command tutorialsCmd = new Command() {
-			public void execute() {
-				Window.open("http://ferret.pmel.noaa.gov/LAS/documentation/introduction/using-the-las-user-interface#videos", "_blank", "");
-			}
-		};
-
-		Command docsCmd = new Command() {
-			public void execute() {
-				Window.open("http://ferret.pmel.noaa.gov/LAS/home/documentation/introduction/using-the-las-user-interface/", "_blank", "");
-			}
-		};
-
-		// Make some sub-menus that we will cascade from the top menu.
-		MenuBar helpMenu = new MenuBar(true);
-		helpMenu.addItem("About", aboutCmd);
-		helpMenu.addItem("Video Tutorials", tutorialsCmd);
-		helpMenu.addItem("Online Documentation", docsCmd);
-
-		// Make a new menu bar, adding a few cascading menus to it.
-		MenuBar helpMenuBar = new MenuBar();
-		helpMenuBar.addItem("Help", helpMenu);
-
-		xButtonLayout.setWidget(0, myButtonIndex++, helpMenuBar);
+		ClientFactory clientFactory = GWT.create(ClientFactory.class);
+		EventBus eventBus = clientFactory.getEventBus();
+		HelpMenuBarActivity presenter = new HelpMenuBarActivity(clientFactory);
+		SimplePanel helpMenuBarPanel = new SimplePanel();
+		presenter.start(helpMenuBarPanel, eventBus);
+		xButtonLayout.setWidget(0, myButtonIndex++, helpMenuBarPanel);
 
 		RootPanel.get("vizGal").add(vVizGalPanel);
 		// RootPanel.get("PLOT_LINK").setVisible(false);
