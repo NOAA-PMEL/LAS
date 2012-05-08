@@ -24,6 +24,7 @@
     
     <!-- GWT Joda Time implementation. -->
     <inherits name='org.gwttime.Time'/>
+    <inherits name="com.google.gwt.activity.Activity"/>
 
     <!-- Specify the app entry point class.                         -->
     <entry-point class='gov.noaa.pmel.tmap.las.client.ClimateAnalysis' />

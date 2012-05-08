@@ -26,7 +26,7 @@ public class InteractiveDownloadDataViewImpl extends Composite implements
 	private static final Binder binder = GWT.create(Binder.class);
 	
 	@UiField
-	FlowPanel absPanel;
+	FlowPanel iddPanel;
 
 	@UiField
 	FlowPanel axisPanel;
