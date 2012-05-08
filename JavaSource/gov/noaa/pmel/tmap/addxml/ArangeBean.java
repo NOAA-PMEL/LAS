@@ -1,7 +1,5 @@
 package gov.noaa.pmel.tmap.addxml;
 
-import gov.noaa.pmel.tmap.las.jdom.LASConfig;
-
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
