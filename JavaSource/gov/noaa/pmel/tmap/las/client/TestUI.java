@@ -392,7 +392,7 @@ public class TestUI extends BaseUI {
 		double delta = Math.abs(Double.valueOf(ds_grid.getXAxis().getArangeSerializable().getStep()));
 		xAxesWidget.getRefMap().setTool(xView);
 		xAxesWidget.getRefMap().setDataExtent(grid_south, grid_north, grid_west, grid_east, delta);
-		xOperationsWidget.setOperations(xVariable.getIntervals(), xVariable.getDSID(), xVariable.getID(), xOperationID, xView);
+		xOperationsWidget.setOperations(xVariable.getGrid().getIntervals(), xVariable.getDSID(), xVariable.getID(), xOperationID, xView);
 		tOperationsMenu.setMenus(ops, xView);
 		// Examine the variable axes and determine which are orthogonal to the view. 
 
@@ -601,10 +601,10 @@ public class TestUI extends BaseUI {
 		public void onSuccess(ConfigSerializable config) {
 
 			GridSerializable grid = config.getGrid();
+			xVariable.setGrid(grid);
 			RegionSerializable[] regions = config.getRegions();
 			xAxesWidget.getRefMap().setRegions(regions);
 			ops = config.getOperations();
-			xVariable.setGrid(grid);
 			xAnalysisWidget.setAnalysisAxes(grid);
 			if ( xPanels == null || xPanels.size() == 0 ) {
 				TestUI.super.init(1, Constants.IMAGE);
@@ -806,7 +806,7 @@ public class TestUI extends BaseUI {
 	AsyncCallback<OperationSerializable[]> getOperationsCallback = new AsyncCallback<OperationSerializable[]>() {
 		public void onSuccess(OperationSerializable[] multi_var_ops) {
 			ops = multi_var_ops;
-			setOperations(xVariable.getIntervals());
+			setOperations(xVariable.getGrid().getIntervals());
 		}
 
 		@Override
@@ -853,7 +853,7 @@ public class TestUI extends BaseUI {
     };
     private void turnOffAnalysis() {
     	xPanels.get(0).setAnalysis(null);
-		setOperations(xVariable.getIntervals());
+		setOperations(xVariable.getGrid().getIntervals());
 		xView = "xy";
 		xOperationID = xOperationsWidget.setZero(xView);
 		xAxesWidget.getRefMap().setTool(xView);
@@ -872,7 +872,7 @@ public class TestUI extends BaseUI {
     private void setAnalysisAxes(String v) {
     	
 		// Eliminate the transformed axis from the acceptable intervals for the variable.
-		String intervals = xVariable.getIntervals().replace(v, "");
+		String intervals = xVariable.getGrid().getIntervals().replace(v, "");
 		// Eliminate the transformed axis from the view.
 		String view = xView.replace(v, "");
 		// If the view goes blank, find the next best view.
