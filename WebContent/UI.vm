@@ -54,7 +54,7 @@
     <script type="text/javascript" language="javascript" src="JavaScript/frameworks/OpenLayersExtensions/VerticalPath.js"></script>
     <script type="text/javascript" language="javascript" src="JavaScript/components/gov.noaa.pmel.tmap.las.UI/gov.noaa.pmel.tmap.las.UI.nocache.js"></script>
     
-    <link rel="stylesheet" href="JavaScript/components/cssLAS.css" type="text/css"/>
+    <link rel="stylesheet" href="JavaScript/components/css/LAS.css" type="text/css"/>
     <link rel="stylesheet" href="JavaScript/ui/LASUI.css" type="text/css"/>
     <link rel="stylesheet" href="css/UX/metallic/metallicGrn.css" type="text/css"/>
   </head>
