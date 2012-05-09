@@ -61,7 +61,7 @@ public class OpenLayersKML implements EntryPoint {
 		map = new OLMapWidget("512px", "1024px");
 		map.setTool("xy");
         map.setDataExtent(-90, 90, -180, 180);
-    	kmlURL.setValue("http://gazelle.weathertopconsulting.com:8282/baker/output/4D8EDF082029CB91B161DD9A12D198D7_kml.kml");
+    	kmlURL.setValue("http://dunkel.pmel.noaa.gov:8920/baker/output/4D8EDF082029CB91B161DD9A12D198D7_kml.kml");
     	spinImage = new Image(URLUtil.getImageURL()+"/mozilla_blu.gif");
 		spinImage.setSize("18px", "18px");
 		loadPanel.add(spinImage);
