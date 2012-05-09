@@ -210,6 +210,16 @@ public class Grid extends Container implements Cloneable, GridInterface {
 	}
 	public GridSerializable getGridSerializable() {
 		GridSerializable g = new GridSerializable();
+		if ( element != null ) {
+			String intervals = element.getAttributeValue("intervals");
+			if ( intervals != null ) {
+				g.setIntervals(intervals);
+			}
+			String points = element.getAttributeValue("points");
+			if ( points != null ) {
+				g.setPoints(points);
+			}
+		}
 		g.setID(getID());
 		if ( hasX() ) {
 			AxisSerializable a = getAxis("x").getAxisSerializable();
