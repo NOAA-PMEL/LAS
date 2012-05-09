@@ -1,15 +1,30 @@
 package gov.noaa.pmel.tmap.las.client.serializable;
 
 
+import com.cohort.array.Attributes;
 import com.google.gwt.user.client.rpc.IsSerializable;
 
 public class GridSerializable implements IsSerializable {
 	String ID;
+	String points;
+	String intervals;
 	AxisSerializable xAxis;
 	AxisSerializable yAxis;
 	AxisSerializable zAxis;
 	TimeAxisSerializable tAxis;
 	EnsembleAxisSerializable eAxis;
+	public String getPoints() {
+		return points;
+	}
+	public void setPoints(String points) {
+		this.points = points;
+	}
+	public void setIntervals(String intervals) {
+		this.intervals = intervals;
+	}
+	public String getIntervals() {
+		return intervals;
+	}
 	/**
 	 * @return the xAxis
 	 */
