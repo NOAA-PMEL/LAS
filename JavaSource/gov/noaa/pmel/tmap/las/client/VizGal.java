@@ -257,7 +257,7 @@ public class VizGal extends BaseUI {
 	private void setAnalysisAxes(String v) {
 
 		// Eliminate the transformed axis from the acceptable intervals for the variable.
-		String intervals = xVariable.getIntervals().replace(v, "");
+		String intervals = xVariable.getGrid().getIntervals().replace(v, "");
 		// Eliminate the transformed axis from the view.
 		String view = xView.replace(v, "");
 		// If the view goes blank, find the next best view.
@@ -350,7 +350,7 @@ public class VizGal extends BaseUI {
 			panel.setAnalysis(null);
 		}
 		xOperationID = ops[0].getID();
-		xOperationsWidget.setOperations(xVariable.getIntervals(), ops[0].getID(), xView, ops);
+		xOperationsWidget.setOperations(xVariable.getGrid().getIntervals(), ops[0].getID(), xView, ops);
 		tOperationsMenu.setMenus(ops, xView);
 		setOperationsClickHandler(xVizGalOperationsClickHandler);			
 		xView = "xy";
@@ -437,11 +437,11 @@ public class VizGal extends BaseUI {
 		public void onSuccess(ConfigSerializable config) {
 
 			GridSerializable grid = config.getGrid();
+			xVariable.setGrid(grid);
 			ops = config.getOperations();
-			xOperationsWidget.setOperations(xVariable.getIntervals(), xOperationID, xView, ops);
+			xOperationsWidget.setOperations(xVariable.getGrid().getIntervals(), xOperationID, xView, ops);
 			tOperationsMenu.setMenus(ops, xView);
 			xOptionsButton.setOptions(xOperationsWidget.getCurrentOperation().getOptionsID());
-			xVariable.setGrid(grid);
 			// Figure out the compare and fixed axis
 			init();
 			for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
@@ -636,7 +636,7 @@ public class VizGal extends BaseUI {
 	}
 	public boolean init() {
 
-		xOperationsWidget.setOperations(xVariable.getIntervals(), xOperationID, xView, ops);
+		xOperationsWidget.setOperations(xVariable.getGrid().getIntervals(), xOperationID, xView, ops);
 		tOperationsMenu.setMenus(ops, xView);
 		xOptionsButton.setOptions(xOperationsWidget.getCurrentOperation().getOptionsID());
 		GridSerializable ds_grid = xVariable.getGrid();
