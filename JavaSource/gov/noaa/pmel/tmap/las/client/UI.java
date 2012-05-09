@@ -229,7 +229,14 @@ public class UI extends BaseUI {
 		});
 		
 		xButtonLayout.setWidget(0, myButtonIndex++, compareMenu);
-		
+
+		ClientFactory clientFactory = GWT.create(ClientFactory.class);
+		EventBus eventBus = clientFactory.getEventBus();
+		HelpMenuBarActivity presenter = new HelpMenuBarActivity(clientFactory);
+		SimplePanel helpMenuBarPanel = new SimplePanel();
+		presenter.start(helpMenuBarPanel, eventBus);
+		xButtonLayout.setWidget(0, myButtonIndex++, helpMenuBarPanel);
+
 		RootPanel.get("vizGal").add(vVizGalPanel);
 		//RootPanel.get("PLOT_LINK").setVisible(false);
 		
