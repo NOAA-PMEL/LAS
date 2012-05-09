@@ -1,7 +1,6 @@
 package gov.noaa.pmel.tmap.las.client.serializable;
 
 
-import com.cohort.array.Attributes;
 import com.google.gwt.user.client.rpc.IsSerializable;
 
 public class GridSerializable implements IsSerializable {
