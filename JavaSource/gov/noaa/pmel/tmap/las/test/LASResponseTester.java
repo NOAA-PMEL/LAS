@@ -24,6 +24,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import org.jdom.Element;
 import org.joda.time.DateTime;
@@ -93,29 +94,47 @@ public class LASResponseTester{
 			if ( !web_output ) {
 				System.out.println("==== Product Server: "+ productServerURL);
 			}
+			
+            String dregex = lto.getDregex();
+            String vregex = lto.getVregex();
+                
 			//loop over each dataset
 			for(Iterator dsIt = datasetElements.iterator(); dsIt.hasNext();){
 				//Dataset ds = (Dataset)dsIt.next();
 				Element datasetE = (Element) dsIt.next();
 				dsID = datasetE.getAttributeValue("ID");
-				if ( web_output ) {
-					testResults.putDataset(TestConstants.TEST_PRODUCT_RESPONSE, datasetE.getAttributeValue("name"), dsID);
+				boolean dmatch = true;
+				if ( dregex != null ) {
+				    dmatch = Pattern.matches(dregex, dsID);
 				}
-				//get first variable of this dataset
-				variables = lasConfig.getVariables(dsID);
-				boolean allVar = lto.allVariable();
+				if ( dmatch ) {
+				    if ( web_output ) {
+				        testResults.putDataset(TestConstants.TEST_PRODUCT_RESPONSE, datasetE.getAttributeValue("name"), dsID);
+				    }
+				    //get first variable of this dataset
+				    variables = lasConfig.getVariables(dsID);
+				    boolean allVar = lto.allVariable() || vregex != null;
 
-				if(!allVar){
-					Variable firstVar = variables.get(0);
-					varLASRequest(datasetE, firstVar, web_output, testResults);
-				}else{
-					for(Iterator varIt = variables.iterator(); varIt.hasNext();){
-						Variable theVar = (Variable)varIt.next();
-						varLASRequest(datasetE, theVar, web_output, testResults);
-					}
+				    if(!allVar){
+				        Variable firstVar = variables.get(0);
+				        varLASRequest(datasetE, firstVar, web_output, testResults);
+				    }else{
+				        for(Iterator varIt = variables.iterator(); varIt.hasNext();){
+				            boolean vmatch = true;
+				            Variable theVar = (Variable)varIt.next();
+				            if ( vregex != null ) {
+				                vmatch = Pattern.matches(vregex, theVar.getID());
+				            }
+				            if ( vmatch ) {
+				                varLASRequest(datasetE, theVar, web_output, testResults);
+				            }
+				        }
+				    }
 				}
 			}
-			testResults.write(test_output_file);
+			if ( web_output ) {
+			    testResults.write(test_output_file);
+			}
 		} catch (Exception e){
 			e.printStackTrace();
 		}
