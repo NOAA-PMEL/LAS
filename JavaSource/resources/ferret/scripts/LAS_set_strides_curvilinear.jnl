@@ -174,6 +174,7 @@ IF `STRLEN("($ferret_view)") EQ 2` THEN
          LET rem = ( (($clon_imin)/($xstride)) - int(($clon_imin)/($xstride)) )* ($xstride)
          DEFINE SYMBOL xoff = /OFFSET=`INT(($xstride) - rem)`
          IF `rem EQ 0` THEN CANCEL SYMBOL xoff 
+         IF `($clon_imin) EQ 1` THEN CANCEL SYMBOL xoff 
 
          SET AXIS/STRIDE=($xstride)($xoff) `($data_var)[d=($data_num)],RETURN=xaxis`
 	 LET x_strided_var = ($data_var)[d=($data_num)]

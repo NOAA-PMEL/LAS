@@ -1,0 +1,57 @@
+! LAS_get_coords_att.jnl
+! If there are no curvilinear coordinates properties for the variable,
+! then check for a coordinates attribute. If one exits, check the 
+! coordinates listed for 2D coordinates having units of degrees 
+! longitude or latitude, and set the properties accordingly
+
+! If the configuratino has the properties already, use those.
+
+IF ($ferret_curvi_coord_lon"0|*>1") THEN EXIT/SCRIPT
+IF ($ferret_curvi_coord_lat"0|*>1") THEN EXIT/SCRIPT
+
+
+! Get the coordinates attribute for a variable. IF it exists
+! then parse it up and see if there are 2D lon and lat coordinate
+! variables in the dataset.  IF so, use them.
+
+
+LET allvars = ..varnames
+LET varatts = ($data_orig_var).attnames
+
+! Check for a coordinates attribute.
+LET has_coord = IS_ELEMENT_OF_STR(varatts, "coordinates")
+IF `has_coord EQ 0` THEN exit/script
+
+LET varcoords = "`($data_orig_var).coordinates`"
+
+! Get first coordinate variable.
+
+LET space = STRINDEX(varcoords, " ")
+LET coordstring = substring(varcoords, 1, `space-1`)
+DEFINE SYMBOL coordstring = `coordstring`
+
+! Is it a variable (and not a dimension) of the datset?
+
+LET isvar = IS_ELEMENT_OF_STR (allvars, "($coordstring)")
+IF `isvar NE 0` THEN
+
+! Is it 2D?  IF so does it have longitude or latitude units?
+   DEFINE SYMBOL cshape = `($coordstring),RETURN=shape`
+   IF `STRCMP("($cshape)", "XY") EQ 0` THEN 
+      LET cunits = DNCASE("`($coordstring).units`")
+      IF `STRINDEX(cunits, "degree_e") GT 0` THEN DEFINE SYMBOL ferret_curvi_coord_lon = ($coordstring)
+      IF `STRINDEX(cunits, "degrees_e") GT 0` THEN DEFINE SYMBOL ferret_curvi_coord_lon = ($coordstring)
+      IF `STRINDEX(cunits, "degree_n") GT 0` THEN DEFINE SYMBOL ferret_curvi_coord_lat = ($coordstring)
+      IF `STRINDEX(cunits, "degrees_n") GT 0` THEN DEFINE SYMBOL ferret_curvi_coord_lat = ($coordstring)
+   ENDIF
+ENDIF  ! isvar
+
+! Get next coordinate variable
+
+LET remainder = SUBSTRING(varcoords, `space+1`, `STRLEN(varcoords)`)
+DEFINE SYMBOL remainder = `remainder`
+
+! There may be 5 or 6 coordinates. Look at all of them.
+LET coords_done = 0
+REPEAT/RANGE=1:15 (GO get_next_coord; IF `coords_done EQ 1` THEN EXIT/LOOP)
+
