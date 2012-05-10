@@ -39,7 +39,11 @@ ELSE
   DEFINE SYMBOL data_url \"($data_($num)_url)\"
 ENDIF
 
-IF ($data_($num)_var"0|*>1") THEN DEFINE SYMBOL data_var ($data_($num)_var)
+IF ($data_($num)_var"0|*>1") THEN 
+   DEFINE SYMBOL data_var ($data_($num)_var)
+   DEFINE SYMBOL data_orig_var ($data_($num)_var)
+ENDIF
+
 DEFINE SYMBOL data_name ($data_($num)_name)
 IF `($data_($num)_name"0|*>1") EQ 0` THEN DEFINE SYMBOL data_name ($data_var)
 
