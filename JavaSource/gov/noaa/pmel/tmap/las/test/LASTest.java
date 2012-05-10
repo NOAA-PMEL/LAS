@@ -188,6 +188,14 @@ public class LASTest{
         if ( cl.hasOption("l") ) {
         	lto.setLAS(cl.getOptionValue("l") );
         }
+        
+        if ( cl.hasOption("vregex") ) {
+            lto.setVregex(cl.getOptionValue("vregex"));
+        }
+        
+        if ( cl.hasOption("dregex") ) {
+            lto.setDregex(cl.getOptionValue("dregex"));
+        }
 
         //if no options being set; test opendap, ftds, and products 
         if(cnt == 0){lto.setTestAll();}

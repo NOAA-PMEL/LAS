@@ -21,6 +21,9 @@ public class LASCLIOptions extends Options {
 		addOption("V", "verbose", false, "Verbose output.");
 		addOption("h", "help", false, "Print help message.");
 		
+		addOption("dregex", "dregex", true, "Test only data sets whose id matches this regular expression.");
+		addOption("vregex", "vregex", true, "Test only variables whose id matches this regular expression.");
+		
 		Option view = new Option("v", "view", true, "Test only the specified view, one of x,y,z,t,xy,xz,xt,yz,yt,zt");
 		view.setArgName("VIEW");
 		addOption(view);

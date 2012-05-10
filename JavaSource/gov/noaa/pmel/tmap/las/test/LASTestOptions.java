@@ -16,12 +16,17 @@ public class LASTestOptions{
     private boolean testFTDS;
     private String productTime;
     
+    private String dregex;
+    private String vregex;
+    
 	private long delay = 0;
     private long period = 86400000;   // 24 hours
 
 	private String las;
   
     public LASTestOptions(){
+        dregex    = null;
+        vregex    = null;
         dds       = false;
         view      = "";
         dataset   = null;
@@ -215,5 +220,21 @@ public class LASTestOptions{
         System.out.println("-Dv  = " + view);
         System.out.println("-Dvb = "+ verbose);
 
+    }
+
+    public String getDregex() {
+        return dregex;
+    }
+
+    public void setDregex(String dregex) {
+        this.dregex = dregex;
+    }
+
+    public String getVregex() {
+        return vregex;
+    }
+
+    public void setVregex(String vregex) {
+        this.vregex = vregex;
     }
 }
