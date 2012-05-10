@@ -116,8 +116,10 @@ public class LASResponseTester{
 				    boolean allVar = lto.allVariable() || vregex != null;
 
 				    if(!allVar){
-				        Variable firstVar = variables.get(0);
-				        varLASRequest(datasetE, firstVar, web_output, testResults);
+				        if ( variables != null && variables.size() > 0 ) {
+				            Variable firstVar = variables.get(0);
+				            varLASRequest(datasetE, firstVar, web_output, testResults);
+				        }
 				    }else{
 				        for(Iterator varIt = variables.iterator(); varIt.hasNext();){
 				            boolean vmatch = true;
