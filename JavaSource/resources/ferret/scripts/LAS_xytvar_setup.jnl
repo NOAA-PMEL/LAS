@@ -1,5 +1,3 @@
-
-! $Header$
 ! LAS_xytvar_setup.jnl 
 ! ACM 3/2009
 !
@@ -19,7 +17,6 @@
 PPL TICS .125,.25,.125,.25
 PPL axlabp,-1,-1
 
-! When this is a filmstrip plot, first the axes are defined for the whole data set.
 ! If this has already been done, just go make the underlay plot
 IF `($axes_already_defined"0|*>1") EQ 0` THEN
 

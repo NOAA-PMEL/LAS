@@ -71,7 +71,7 @@ IF ($do_curvi_xy"0|0|*>1") THEN DEFINE SYMBOL ferret_plot_var = ($ferret_plot_ba
 
 DEFINE SYMBOL ferret_plot_var_1 = ($ferret_plot_var)
 
-IF `($data_count"0") EQ 3` THEN ! color by 3rd variable
+IF `($data_count"0") GE 3` THEN ! color by 3rd variable
 
    ! Initialize the 3rd variable.
    ! In fact the region and dataset will be the
@@ -97,6 +97,14 @@ IF `($data_count"0") EQ 3` THEN ! color by 3rd variable
    LET/TITLE="($ferret_title_2)" zvar = XSEQUENCE(($ferret_plot_var_2))
 
    DEFINE SYMBOL color_by = 1
+
+! Is this a color-by-trajectory plot?  (this is already determined elsewhere)
+
+!   LET allatts = ($ferret_plot_var_2).attnames
+!   IF `IS_ELEMENT_OF_STR(allatts, "cf_role") EQ 1` THEN
+!      LET is_traj_id = STRCMP("`($ferret_plot_var_2).cf_role`", "trajectory_id")
+!      IF `is_traj_id EQ 0` THEN DEFINE SYMBOL color_by_traj = 1
+!   ENDIF
 
 ENDIF
 
@@ -226,64 +234,73 @@ IF `($ferret_annotations%0|*>1%) EQ 0` THEN
       ENDIF)
 ENDIF
 
-! Polygon plot
 
-DEFINE SYMBOL plot_arg = ($xvar), ($yvar), ($xvar)
-DEFINE SYMBOL poly_qual = /OVER/NOLAB
-
-
-IF ($color_by"0|*>1") THEN 
-   DEFINE SYMBOL plot_arg = ($xvar), ($yvar), zvar
-   let zsize = `zvar,return=isize`
-   IF `zsize NE xsize` THEN
-     MESSAGE/ERROR **ERROR The variables must have the same dimensions: ($data_0_var), ($data_2_var)
-      EXIT/PROGRAM
-   ENDIF
-   
-! Get color-plot qualifiers
-   IF ($ferret_fill_levels"0|*>1") THEN 
-      DEFINE SYMBOL poly_qual = ($poly_qual)/LEVELS=($ferret_fill_levels)
-   ELSE
-      DEFINE SYMBOL poly_qual = ($poly_qual)/LEVELS=v
-   ENDIF
-
-   IF ($ferret_plot_key"0|0|nokey>1|*>0") THEN 
-      DEFINE SYMBOL poly_qual = ($poly_qual)/NOKEY
-   ELSE
-      DEFINE SYMBOL poly_qual = ($poly_qual)/KEY
-   ENDIF
-
-! Dont use the palette coming in. Its for variable 0
-   DEFINE SYMBOL poly_qual = ($poly_qual)/PALETTE=($ferret_palette"rainbow|default>rainbow|*>*)
-   IF `($its_trajectory_corr"0|*>1") EQ 0` THEN DEFINE SYMBOL poly_qual = ($poly_qual)/PALETTE=rainbow
-   DEFINE SYMBOL color_by_title = `zvar,RETURN=title`
-ELSE
-   DEFINE SYMBOL poly_qual = ($poly_qual)/palette=($polycolor)
-ENDIF
-
-! Formatting of lon, lat, time axes if appropriate
+   ! Formatting of lon, lat, time axes if appropriate
 LET p = ($xvar) 
 LET q = ($yvar)
-
+   
 DEFINE SYMBOL data_prop_var = ($data_0_var)
 DEFINE SYMBOL ferret_prop_var = ($ferret_plot_var_0)
 DEFINE SYMBOL ferret_plot_var = ($ferret_plot_var_1)
 IF `STRINDEX( UPCASE("($data_0_var)"), "TIME") GT 0` THEN DEFINE SYMBOL tunits = ($data_0_units)
 IF `STRINDEX( UPCASE("($data_1_var)"), "TIME") GT 0` THEN DEFINE SYMBOL tunits = ($data_1_units)
+   
 
 GO LAS_xytvar_setup
 
-IF `($ferret_annotations%0|*>1%) EQ 0` THEN
-   LABEL/NOUSER `($ppl$xlen)/2`, -0.6, 0, 0, 0.14 ($ferret_title_0)
-   LABEL/NOUSER -0.8, `($ppl$ylen)/2`, 0, 90, 0.14 ($ferret_title_1)
-ENDIF
+! Polygon plot
 
-DEFINE SYMBOL poly_qual = ($poly_qual)/OVER/SET
+DEFINE SYMBOL plot_arg = ($xvar), ($yvar), ($xvar)
+DEFINE SYMBOL poly_qual = /OVER/NOLAB
 
-DEFINE SYMBOL poly_command POLYGON($poly_qual)
-GO polymark ($poly_command) ($plot_arg), ($polyshape), ($polysize)
-IF ($ferret_annotations%0|*>1%) THEN GO key_at_top
-PPL POLYGON
+IF ($color_by_traj"0|*>1") THEN 
+   GO LAS_pp_colorby_traj
+
+ELSE
+   IF ($color_by"0|*>1") THEN 
+      DEFINE SYMBOL plot_arg = ($xvar), ($yvar), zvar
+      let zsize = `zvar,return=isize`
+      IF `zsize NE xsize` THEN
+        MESSAGE/ERROR **ERROR The variables must have the same dimensions: ($data_0_var), ($data_2_var)
+         EXIT/PROGRAM
+      ENDIF
+      
+   ! Get color-plot qualifiers
+      IF ($ferret_fill_levels"0|*>1") THEN 
+         DEFINE SYMBOL poly_qual = ($poly_qual)/LEVELS=($ferret_fill_levels)
+      ELSE
+         DEFINE SYMBOL poly_qual = ($poly_qual)/LEVELS=v
+      ENDIF
+   
+      IF ($ferret_plot_key"0|0|nokey>1|*>0") THEN 
+         DEFINE SYMBOL poly_qual = ($poly_qual)/NOKEY
+      ELSE
+         DEFINE SYMBOL poly_qual = ($poly_qual)/KEY
+      ENDIF
+   
+   ! Dont use the palette coming in. Its for variable 0
+      DEFINE SYMBOL poly_qual = ($poly_qual)/PALETTE=($ferret_palette"rainbow|default>rainbow|*>*)
+      IF `($its_trajectory_corr"0|*>1") EQ 0` THEN DEFINE SYMBOL poly_qual = ($poly_qual)/PALETTE=rainbow
+      DEFINE SYMBOL color_by_title = `zvar,RETURN=title`
+   ELSE
+      DEFINE SYMBOL poly_qual = ($poly_qual)/palette=($polycolor)
+   ENDIF
+   
+   
+   IF `($ferret_annotations%0|*>1%) EQ 0` THEN
+      LABEL/NOUSER `($ppl$xlen)/2`, -0.6, 0, 0, 0.14 ($ferret_title_0)
+      LABEL/NOUSER -0.8, `($ppl$ylen)/2`, 0, 90, 0.14 ($ferret_title_1)
+   ENDIF
+   
+   DEFINE SYMBOL poly_qual = ($poly_qual)/OVER/SET
+   
+   DEFINE SYMBOL poly_command POLYGON($poly_qual)
+   GO polymark ($poly_command) ($plot_arg), ($polyshape), ($polysize)
+   IF ($ferret_annotations%0|*>1%) THEN GO key_at_top
+   PPL POLYGON
+
+ENDIF  ! color-by-trajectory or not...
+
 
 IF `($color_by_title"0|*>1") AND ($ferret_annotations%0|*>1%) EQ 0` THEN \ 
  LABEL/NOUSER `($ppl$width)-($ppl$xorg)-0.2`, -0.7, 1, 0, 0.12 Colored by <NL>($color_by_title)
@@ -299,13 +316,15 @@ LET p = ($xvar)  ! for regression line
 LET q = ($yvar)
 LET do_rsquare = 1
 
-
 DEFINE SYMBOL  line_color = blue  ! regression line
 IF ($polycolor%0|blue>1|*>0%) THEN DEFINE SYMBOL  line_color = red
 
 GO LAS_regressx
 
 IF `(p[x=@NGD] LE 1) OR (qhat[x=@NGD] LE 1)` THEN DEFINE SYMBOL do_rsquare = 0
+
+! Note do_rsquare is set in LAS_xytvar_setup, where plots with time, lon, or 
+! lat axes are set to NOT draw the regression line.
 IF ($do_rsquare"1|0|*>1) THEN 
 
 ! Note that qhat in the regress script is defined as

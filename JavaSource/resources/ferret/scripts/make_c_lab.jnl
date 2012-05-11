@@ -7,6 +7,7 @@
 ! Fix to let the rhs for month ranges have multiple items, 
 ! given in a comma-separated list
 
+DEFINE SYMBOL translate_math = 1
 IF ($ferret_annotations%0|*>1%) THEN DEFINE SYMBOL translate_math = 0
 
 

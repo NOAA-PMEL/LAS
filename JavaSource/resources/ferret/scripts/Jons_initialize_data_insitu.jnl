@@ -87,6 +87,7 @@ ENDIF
 
 ! If the plot is colored by trajectory ID then fake that variable, and exit
 IF `($data_($num)_var"0|vid>1|*>0") AND ($nodata"0|*>1) EQ 0`  THEN 
+
    USE "($data_($num)_url)"
    LET varnames = ..varnames
 
@@ -114,6 +115,8 @@ IF `($data_($num)_var"0|vid>1|*>0") AND ($nodata"0|*>1) EQ 0`  THEN
 
    DEFINE SYMBOL ferret_plot_title ($data_title)
    IF ($data_($num)_units"0|1|*>1") THEN DEFINE SYMBOL ferret_plot_title ($data_title) ($data_($num)_units)
+   
+   DEFINE SYMBOL color_by_traj = 1
 
    EXIT/SCRIPT  ! dont need the rest of the setup
 ENDIF

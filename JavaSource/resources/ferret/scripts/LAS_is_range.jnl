@@ -1,5 +1,5 @@
-! OCDMS_is_range
-!  called by OCDMS_xytvar_setup
+! LAS_is_range
+!  called by LAS_xytvar_setup
 !
 ! Given a min and max variables defined, see if they are valid data
 ! and use them to define axis min,max, delta. If min and max are not
@@ -51,4 +51,4 @@ ELSE
    IF `ABS(ax_hi - ax_lo) LT 0.06` THEN DEFINE SYMBOL dm_labels = dms
 
 ENDIF
-! End of file ------------ OCDMS_is_range.jnl--------------------------
+! End of file ------------ LAS_is_range.jnl--------------------------
