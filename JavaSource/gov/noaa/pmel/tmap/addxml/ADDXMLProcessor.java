@@ -75,7 +75,6 @@ import org.joda.time.DateTimeZone;
 import org.joda.time.Duration;
 import org.joda.time.DurationFieldType;
 import org.joda.time.Hours;
-import org.joda.time.Interval;
 import org.joda.time.Period;
 import org.joda.time.chrono.GJChronology;
 import org.joda.time.chrono.GregorianChronology;
@@ -875,8 +874,10 @@ public class ADDXMLProcessor {
 		Vector beans = new Vector();
 		if ( uaf ) {
 			if ( ThreddsDataset.hasAccess() && ThreddsDataset.getAccess(ServiceType.OPENDAP) != null ) {
-				DatasetsGridsAxesBean dgab = createBeansFromUAFThreddsMetadata(ThreddsDataset);
-				beans.add(dgab);
+			    if ( !ThreddsDataset.getName().contains("automated cleaning process") ) {
+			        DatasetsGridsAxesBean dgab = createBeansFromUAFThreddsMetadata(ThreddsDataset);
+			        beans.add(dgab);
+			    }
 			}
 			for (Iterator iter = ThreddsDataset.getDatasets().iterator();iter.hasNext(); ) {
 				beans.addAll(processDatasets( (InvDataset) iter.next()));
@@ -1052,7 +1053,7 @@ public class ADDXMLProcessor {
 		Set AllAxesBeans = new HashSet();
 
 		if (verbose) {
-			log.info("Processing UAF THREDDS dataset: " + threddsDataset.getFullName() + "with id: "+threddsDataset.getID());
+			log.info("Processing UAF THREDDS dataset: " + threddsDataset.getAccess(ServiceType.OPENDAP).getStandardUrlName()+" from "+threddsDataset.getParentCatalog().getUriString());
 		}
 
 		dataset.setName(threddsDataset.getFullName());
@@ -1071,387 +1072,405 @@ public class ADDXMLProcessor {
 					Variables vars_container = (Variables) varlistIt.next();
 					List<Variable> vars = vars_container.getVariableList();
 					if ( vars.size() > 0 ) {
-						for (Iterator varIt = vars.iterator(); varIt.hasNext();) {
-							Variable variable = (Variable) varIt.next();
-							if ( !variable.getVocabularyName().equalsIgnoreCase("time") &&
-								 !variable.getVocabularyName().equalsIgnoreCase("latitude") && 
-								 !variable.getVocabularyName().equalsIgnoreCase("longitude") &&
-								 !variable.getVocabularyName().equalsIgnoreCase("longtitude") &&  // Handle PFEG misspelling...
-								 !variable.getVocabularyName().equalsIgnoreCase("altitude") &&
-								 !variable.getVocabularyName().equalsIgnoreCase("depth")) {
-							UniqueVector AxisBeans = new UniqueVector();
-							VariableBean las_var = new VariableBean();
-							las_var.setElement(id+"-"+variable.getName());
-							las_var.setName(variable.getName());
-							if ( variable.getUnits() != null && !variable.getUnits().equals("") ) {
-								las_var.setUnits(variable.getUnits());
-							} else {
-								las_var.setUnits("no units");
-							}
-							las_var.setUrl(threddsDataset.getAccess(ServiceType.OPENDAP).getStandardUrlName()+"#"+variable.getName());
-							log.info("Processing UAF THREDDS variable: " + variable.getName());
+					    for (Iterator varIt = vars.iterator(); varIt.hasNext();) {
+					        Variable variable = (Variable) varIt.next();
+					        if ( !variable.getVocabularyName().equalsIgnoreCase("time") &&
+					                !variable.getVocabularyName().equalsIgnoreCase("latitude") && 
+					                !variable.getVocabularyName().equalsIgnoreCase("longitude") &&
+					                !variable.getVocabularyName().equalsIgnoreCase("longtitude") &&  // Handle PFEG misspelling...
+					                !variable.getVocabularyName().equalsIgnoreCase("altitude") &&
+					                !variable.getVocabularyName().equalsIgnoreCase("depth")) {
+					            UniqueVector AxisBeans = new UniqueVector();
+					            VariableBean las_var = new VariableBean();
+					            las_var.setElement(id+"-"+variable.getName());
+					            las_var.setName(variable.getName());
+					            if ( variable.getUnits() != null && !variable.getUnits().equals("") ) {
+					                las_var.setUnits(variable.getUnits());
+					            } else {
+					                las_var.setUnits("no units");
+					            }
+					            las_var.setUrl(threddsDataset.getAccess(ServiceType.OPENDAP).getStandardUrlName()+"#"+variable.getName());
+					            log.info("Processing UAF THREDDS variable: " + variable.getName());
 
-							GeospatialCoverage coverage = threddsDataset.getGeospatialCoverage();
-							DateRange dateRange = threddsDataset.getTimeCoverage();
+					            GeospatialCoverage coverage = threddsDataset.getGeospatialCoverage();
+					            DateRange dateRange = threddsDataset.getTimeCoverage();
 
-							StringBuilder grid_name = new StringBuilder(variable.getName()+"-"+id+"-grid");
-							if (coverage != null ) {
+					            StringBuilder grid_name = new StringBuilder(variable.getName()+"-"+id+"-grid");
+					            if (coverage != null ) {
 
-								boolean readX = false;
-								boolean readY = false;
+					                boolean readX = false;
+					                boolean readY = false;
 
-								double xsize = coverage.getLonExtent();
-								double xresolution = coverage.getLonResolution();
-								double xstart = coverage.getLonStart();
-								String xunits = coverage.getLonUnits();
+					                double xsize = coverage.getLonExtent();
+					                double xresolution = coverage.getLonResolution();
+					                double xstart = coverage.getLonStart();
+					                String xunits = coverage.getLonUnits();
 
-								if ( Double.isNaN(xsize) || Double.isNaN(xstart)) {
-									readX = true;
-								}
-								if ( Double.isNaN(xresolution) ) {
-									// We're going to pretend it is 1-degree data for purposes of the LAS UI.
-									xresolution = 1.0;
-								}
-								double ysize = coverage.getLatExtent();
-								double yresolution = coverage.getLatResolution();
-								double ystart = coverage.getLatStart();
-								String yunits = coverage.getLatUnits();
-								if ( Double.isNaN(ysize) || Double.isNaN(ystart) ) {
-									readY = true;
-								}
-								if ( Double.isNaN(yresolution) ) {
-									// We're going to pretend it is 1-degree data for purposes of the LAS UI.
-									yresolution = 1.0;
-								}
-								boolean hasZ = false;
-								boolean readZ = false;
-								String zvalues = null;
+					                if ( Double.isNaN(xsize) || Double.isNaN(xstart)) {
+					                    readX = true;
+					                }
+					                if ( Double.isNaN(xresolution) ) {
+					                    // We're going to pretend it is 1-degree data for purposes of the LAS UI.
+					                    xresolution = 1.0;
+					                }
+					                double ysize = coverage.getLatExtent();
+					                double yresolution = coverage.getLatResolution();
+					                double ystart = coverage.getLatStart();
+					                String yunits = coverage.getLatUnits();
+					                if ( Double.isNaN(ysize) || Double.isNaN(ystart) ) {
+					                    readY = true;
+					                }
+					                if ( Double.isNaN(yresolution) ) {
+					                    // We're going to pretend it is 1-degree data for purposes of the LAS UI.
+					                    yresolution = 1.0;
+					                }
+					                boolean hasZ = false;
+					                boolean readZ = false;
+					                String zvalues = null;
 
-								Range z = coverage.getUpDownRange();
-								if ( z != null ) {	
-									hasZ = true;
-									double zsize = z.getSize();
-									double zresolution = z.getResolution();
-									double zstart = z.getStart();
-									
-									try {
-										zvalues = threddsDataset.findProperty(Z_VALUES);
-									} catch (Exception e) {
-										try {
-											zvalues = threddsDataset.findProperty(ZVALUES);
-										} catch (Exception e1) {
-											zvalues = null;
-										}
-									}
-									//if ( zsize < 2 ) zvalues = String.valueOf(zstart);
-									if ( zvalues != null ) {
-										zvalues = zvalues.trim();
-									}
-									if ( ( Double.isNaN(zsize) || Double.isNaN(zresolution) || Double.isNaN(zstart) ) &&
-											zvalues == null ) {
-										readZ = true;
-									}
-								}
+					                Range z = coverage.getUpDownRange();
+					                if ( z != null ) {	
+					                    hasZ = true;
+					                    double zsize = z.getSize();
+					                    double zresolution = z.getResolution();
+					                    double zstart = z.getStart();
 
-								// One of these axes is not sufficiently specified in the metadata so prepare read the data out of the aggregation.
-								NetcdfDataset ncds = null;
-								GridDataset gridsDs = null;
-								GridCoordSys gcs = null;
+					                    try {
+					                        zvalues = threddsDataset.findProperty(Z_VALUES);
+					                    } catch (Exception e) {
+					                        try {
+					                            zvalues = threddsDataset.findProperty(ZVALUES);
+					                        } catch (Exception e1) {
+					                            zvalues = null;
+					                        }
+					                    }
+					                    if ( Double.compare(zsize, 0.0d) == 0.0 ) {
+					                        zvalues = String.valueOf(zstart);
+					                    }
+					                    if ( zvalues != null ) {
+					                        zvalues = zvalues.trim();
+					                    }
+					                    if ( ( Double.isNaN(zsize) || Double.isNaN(zresolution) || Double.isNaN(zstart) ) &&
+					                            zvalues == null ) {
+					                        readZ = true;
+					                    }
+					                }
 
-								if ( readX || readY || readZ ) {
-									return null;
-								}
+					                // One of these axes is not sufficiently specified in the metadata so prepare read the data out of the aggregation.
+					                NetcdfDataset ncds = null;
+					                GridDataset gridsDs = null;
+					                GridCoordSys gcs = null;
 
-								// Grab the properties...
-								String timeCoverageNumberOfPoints = threddsDataset.findProperty("timeCoverageNumberOfPoints");
-								String eastwestNumberOfPoints = threddsDataset.findProperty("eastwestNumberOfPoints");
-								String eastwestResolution = threddsDataset.findProperty("eastwestResolution");
-								String northsouthNumberOfPoints = threddsDataset.findProperty("northsouthNumberOfPoints");
-								String northsouthResolution = threddsDataset.findProperty("northsouthResolution");
+					                if ( readX || readY || readZ ) {
+					                    log.info("Problem found in " + threddsDataset.getParentCatalog().getUriString());
+					                    log.info("Unable to create LAS configuration for " + threddsDataset.getAccess(ServiceType.OPENDAP).getStandardUrlName() + " Read X=" + readX + " Read Y=" + readY + " Read Z=" + readZ);
+					                    return null;
+					                }
 
-								String elementName = variable.getName()+"-"+id+"-x-axis";
-								AxisBean xAxis = new AxisBean();
+					                // Grab the properties...
+					                String timeCoverageNumberOfPoints = threddsDataset.findProperty("timeCoverageNumberOfPoints");
+					                String eastwestNumberOfPoints = threddsDataset.findProperty("eastwestNumberOfPoints");
+					                String eastwestResolution = threddsDataset.findProperty("eastwestResolution");
+					                String northsouthNumberOfPoints = threddsDataset.findProperty("northsouthNumberOfPoints");
+					                String northsouthResolution = threddsDataset.findProperty("northsouthResolution");
 
-								// Get the X Axis information...
-								log.info("Loading X from metadata: "+elementName);
-								xAxis.setElement(elementName);
-								grid_name.append("-x-axis");
-								xAxis.setType("x");
-								xAxis.setUnits(xunits);
-								int xsizei = (int)(xsize/xresolution);
-								ArangeBean xr = new ArangeBean();
-								xr.setSize(String.valueOf(xsizei));
-								xr.setStep(String.valueOf(xresolution));
-								xr.setStart(String.valueOf(xstart));
-								xAxis.setArange(xr);
+					                String elementName = variable.getName()+"-"+id+"-x-axis";
+					                AxisBean xAxis = new AxisBean();
 
-
-								if ( !AxisBeans.contains(xAxis) ) {
-									AxisBeans.add(xAxis);
-								} else {
-									xAxis.setElement(AxisBeans.getMatchingID(xAxis));
-								}
-								elementName = variable.getName()+"-"+id+"-y-axis";
-								AxisBean yAxis = new AxisBean();
-
-								log.info("Loading Y from metadata: "+elementName);
-								// Get the Y Axis information...
-								yAxis.setElement(elementName);
-								grid_name.append("-y-axis");
-								yAxis.setType("y");
-								yAxis.setUnits(yunits);
-								int ysizei = (int)(ysize/yresolution);
-								ArangeBean yr = new ArangeBean();
-								yr.setSize(String.valueOf(ysizei));
-								yr.setStep(String.valueOf(yresolution));
-								yr.setStart(String.valueOf(ystart));
-								yAxis.setArange(yr);
-
-								if ( !AxisBeans.contains(yAxis) ) {
-									AxisBeans.add(yAxis);
-								} else {
-									yAxis.setElement(AxisBeans.getMatchingID(yAxis));
-								}
-								elementName = variable.getName()+"-"+id+"-z-axis";
-								AxisBean zAxis = new AxisBean();
-								if ( hasZ ) {
-									if ( zvalues != null ) {
-										log.info("Loading Z from property metadata: "+elementName);
-										zAxis.setElement(elementName);
-										String zunits = z.getUnits();
-										zAxis.setType("z");
-										zAxis.setUnits(zunits);
-										String[] zvs = zvalues.split("\\s+");
-										DecimalFormat format = new DecimalFormat("###############.###############");
-										for (int zi = 0; zi < zvs.length; zi++ ) {
-											double zd = Double.valueOf(zvs[zi]).doubleValue();
-											zvs[zi] = format.format(zd);
-										}
-										zAxis.setV(zvs);
-									} else {
-										log.info("Loading Z without property metadata: "+elementName);
-										zAxis.setElement(elementName);
-										grid_name.append("-z-axis");
-										double zsize = z.getSize();
-										double zresolution = z.getResolution();
-										double zstart = z.getStart();
-										if ( !Double.isNaN(zsize) && !Double.isNaN(zresolution) && !Double.isNaN(zstart) ) {
-											String zunits = z.getUnits();
-											zAxis.setType("z");
-											zAxis.setUnits(zunits);
-											ArangeBean zr = new ArangeBean();
-											int zsizei = (int)(zsize/zresolution);
-											zr.setSize(String.valueOf(zsizei));
-											zr.setStep(String.valueOf(zresolution));
-											zr.setStart(String.valueOf(zstart));
-											zAxis.setArange(zr);
-
-										} 
-									}
-									if ( !AxisBeans.contains(zAxis) ) {
-										AxisBeans.add(zAxis);
-									} else {
-										zAxis.setElement(AxisBeans.getMatchingID(zAxis));
-									}
-								}
-
-								String calendar = threddsDataset.findProperty("TimeCoverageCalendar");;
-								// Use this chronology and the UTC Time Zone
-								Chronology chrono = GJChronology.getInstance(DateTimeZone.UTC);
-								if ( calendar != null ) {
-
-									// If calendar attribute is set, use appropriate Chronology.
-									if (calendar.equals("proleptic_gregorian") ) {
-										chrono = GregorianChronology.getInstance(DateTimeZone.UTC);
-									} else if (calendar.equals("noleap") || calendar.equals("365_day") ) {
-										chrono = NoLeapChronology.getInstanceUTC();
-									} else if (calendar.equals("julian") ) {
-										chrono = JulianChronology.getInstanceUTC();
-									} else if ( calendar.equals("all_leap") || calendar.equals("366_day") ) {
-										chrono = AllLeapChronology.getInstanceUTC();
-									} else if ( calendar.equals("360_day") ) {  /* aggiunto da lele */
-										chrono = ThreeSixtyDayChronology.getInstanceUTC();
-									}
-								}
-								// DEBUG!
-
-								// Get the date time from the metadata TimeCoverage if it exists...
-								DateTimeFormatter f = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ssZ").withChronology(chrono);
-								if ( dateRange == null ) return dgab;
-								DateType sd = dateRange.getStart();
-								DateTime metadata_sd = null;
-								if ( sd != null ) {
-									String date = sd.getText();
-									try {
-										metadata_sd = f.parseDateTime(sd.toDateTimeString()).withChronology(chrono);
-									} catch (Exception e) {
-										f = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss").withChronology(chrono);
-										metadata_sd = f.parseDateTime(sd.toDateTimeString()).withChronology(chrono);
-									}
-								}
-								DateType ed = dateRange.getEnd();
-								DateTime metadata_ed = null;
-								if ( ed != null ) {
-									String date = ed.getText();
-									if ( date.equalsIgnoreCase("present")) {
-										metadata_ed = new DateTime().withChronology(chrono);
-									} else {
-										try {
-											metadata_ed = f.parseDateTime(ed.toDateTimeString()).withChronology(chrono);
-										} catch (Exception e) {
-											f = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss").withChronology(chrono);
-											metadata_ed = f.parseDateTime(ed.toDateTimeString()).withChronology(chrono);
-										}
-									}
-								}
-								
-
-								log.info("Loading T from metadata: "+elementName);
-								AxisBean tAxis = new AxisBean();
-								if ( calendar != null ) {
-									tAxis.setCalendar(calendar);
-								}
-								tAxis.setElement(variable.getName()+"-"+id+"-t-axis");
-								grid_name.append("-t-axis");
-								tAxis.setType("t");
-
-								ArangeBean tr = new ArangeBean();
-								DateTimeFormatter hoursfmt = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
-								log.debug("Using start time: "+hoursfmt.print(metadata_sd));
-								tr.setStart(hoursfmt.print(metadata_sd));
-								double dm = (metadata_ed.getMillis() - metadata_sd.getMillis())/(Double.valueOf(timeCoverageNumberOfPoints) - 1.d);
-								long delta_millis = (long) dm;
-								Duration duration = new Duration(delta_millis);
-								if ( metadata_sd.equals(metadata_ed) || Integer.valueOf(timeCoverageNumberOfPoints) == 1 ) {
-									tAxis.setArange(null);
-									tAxis.setUnits("time");
-									String[] v = new String[1];
-									v[0] = hoursfmt.print(metadata_sd);
-									tAxis.setV(v);
-								} else if ( Integer.valueOf(timeCoverageNumberOfPoints) <= 10 ) {
-									tAxis.setArange(null);
-									tAxis.setUnits("time");
-									String[] v = new String[Integer.valueOf(timeCoverageNumberOfPoints)];
-									DateTimeFormatter fmt;
-									if ( duration.getStandardHours() >= 24 ) {
-										fmt = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
-									} else {
-										fmt = DateTimeFormat.forPattern("yyyy-MM-dd");
-									}
-									for ( int i = 0; i < Integer.valueOf(timeCoverageNumberOfPoints); i++ ) {
-										v[i] = fmt.print(metadata_sd);
-										metadata_sd = metadata_sd.plus(duration);
-									}
-									tAxis.setV(v);
-								} else {
-
-									Period p = duration.toPeriod(chrono);
-									int values[] = p.getValues();
-									int numPeriods = 0;
-									DurationFieldType types[] = p.getFieldTypes();
-									String periods = "";
-									// Finds spacing in terms of years, months, weeks, days, hours, minutes, seconds, millis
-									// We will check years, months, weeks, days, hours
-									int step = -1;
-									String typeName = "";
-									for (int i = 0; i < 5; i++) {
-										if (values[i] > 0) {
-											numPeriods++;
-											step = values[i];
-											typeName = types[i].getName();
-											// Get rid of the "s" in the plural form of the name.
-											typeName = typeName.substring(0, typeName.length() - 1);
-											// LAS doesn't understand "week" so make it "day" and
-											// multiply the step by 7.
-											periods = periods + " " + typeName;
-											if (typeName.equals("week")) {
-												typeName = "day";
-												step = step * 7;
-											}
-										}
-
-									}
-
-									if (numPeriods == 0 || numPeriods > 1) {
-
-										// This is special code to deal with climatology files that define
-										// the time axis in the "middle" of the month.  Since there is no
-										// "middle" of months (but there is certainly always a
-										// first of the month, geez-o) so we are left to figure this out by
-										// looking at the period values and guessing that this really means
-										// climo months.
-
-										// Is the gap in years and months 0?
-										// Are the values 4 weeks apart?
-										if ( (values[0] == 0 && values[1] == 0) &&
-												(values[2] == 4)) {
-											// We're guessing these are months
-											typeName = "month";
-											step = 1;
-										} else if ( values[1] > 0 ) {
-											// We're again guessing that the value is months (and everything else is in the noise)
-											typeName = "month";
-											step = values[1];
-										} else if ( numPeriods == 2 && periods.contains("week") && periods.contains("day")  ) {
-											// We can convert this to days. :-)
-											typeName = "day";
-											step = 7*values[2] + values[3];
-
-										}  else {
-											// Guess based on the size of the period in well-known units.
-											long days = duration.getStandardDays();
-
-											if ( days > 359 ) {
-												typeName = "year";
-												step = 1;
-											} else if ( days > 26 ) {
-												typeName = "month";
-												step = 1;
-											}
-
-										}
-									}
+					                // Get the X Axis information...
+					                log.info("Loading X from metadata: "+elementName);
+					                xAxis.setElement(elementName);
+					                grid_name.append("-x-axis");
+					                xAxis.setType("x");
+					                xAxis.setUnits(xunits);
+					                int xsizei = (int)(xsize/xresolution);
+					                ArangeBean xr = new ArangeBean();
+					                xr.setSize(String.valueOf(xsizei));
+					                xr.setStep(String.valueOf(xresolution));
+					                xr.setStart(String.valueOf(xstart));
+					                xAxis.setArange(xr);
 
 
-									tr.setStep(String.valueOf(step));
-									tAxis.setUnits(typeName);
+					                if ( !AxisBeans.contains(xAxis) ) {
+					                    AxisBeans.add(xAxis);
+					                } else {
+					                    xAxis.setElement(AxisBeans.getMatchingID(xAxis));
+					                }
+					                elementName = variable.getName()+"-"+id+"-y-axis";
+					                AxisBean yAxis = new AxisBean();
+
+					                log.info("Loading Y from metadata: "+elementName);
+					                // Get the Y Axis information...
+					                yAxis.setElement(elementName);
+					                grid_name.append("-y-axis");
+					                yAxis.setType("y");
+					                yAxis.setUnits(yunits);
+					                int ysizei = (int)(ysize/yresolution);
+					                ArangeBean yr = new ArangeBean();
+					                yr.setSize(String.valueOf(ysizei));
+					                yr.setStep(String.valueOf(yresolution));
+					                yr.setStart(String.valueOf(ystart));
+					                yAxis.setArange(yr);
+
+					                if ( !AxisBeans.contains(yAxis) ) {
+					                    AxisBeans.add(yAxis);
+					                } else {
+					                    yAxis.setElement(AxisBeans.getMatchingID(yAxis));
+					                }
+					                elementName = variable.getName()+"-"+id+"-z-axis";
+					                AxisBean zAxis = new AxisBean();
+					                if ( hasZ ) {
+					                    if ( zvalues != null ) {
+					                        if ( zvalues.equals("") ) {
+					                            log.info("Problem found in "+threddsDataset.getParentCatalog().getUriString());
+					                            log.info("Unable to create LAS configuration for "+threddsDataset.getAccess(ServiceType.OPENDAP).getStandardUrlName()+" No z-axis values.");
+					                            return null;
+					                        }
+					                        log.info("Loading Z from property metadata: "+elementName);
+					                        zAxis.setElement(elementName);
+					                        String zunits = z.getUnits();
+					                        zAxis.setType("z");
+					                        zAxis.setUnits(zunits);
+					                        String[] zvs = zvalues.split("\\s+");
+					                        DecimalFormat format = new DecimalFormat("###############.###############");
+					                        for (int zi = 0; zi < zvs.length; zi++ ) {
+					                            double zd = Double.valueOf(zvs[zi]).doubleValue();
+					                            zvs[zi] = format.format(zd);
+					                        }
+					                        zAxis.setV(zvs);
+					                    } else {
+					                        log.info("Loading Z without property metadata: "+elementName);
+					                        zAxis.setElement(elementName);
+					                        grid_name.append("-z-axis");
+					                        double zsize = z.getSize();
+					                        double zresolution = z.getResolution();
+					                        double zstart = z.getStart();
+					                        if ( !Double.isNaN(zsize) && !Double.isNaN(zresolution) && !Double.isNaN(zstart) ) {
+					                            String zunits = z.getUnits();
+					                            zAxis.setType("z");
+					                            zAxis.setUnits(zunits);
+					                            ArangeBean zr = new ArangeBean();
+					                            int zsizei = (int)(zsize/zresolution);
+					                            zr.setSize(String.valueOf(zsizei));
+					                            zr.setStep(String.valueOf(zresolution));
+					                            zr.setStart(String.valueOf(zstart));
+					                            zAxis.setArange(zr);
+
+					                        } 
+					                    }
+					                    if ( !AxisBeans.contains(zAxis) ) {
+					                        AxisBeans.add(zAxis);
+					                    } else {
+					                        zAxis.setElement(AxisBeans.getMatchingID(zAxis));
+					                    }
+					                }
+
+					                String calendar = threddsDataset.findProperty("TimeCoverageCalendar");;
+					                // Use this chronology and the UTC Time Zone
+					                Chronology chrono = GJChronology.getInstance(DateTimeZone.UTC);
+					                if ( calendar != null ) {
+
+					                    // If calendar attribute is set, use appropriate Chronology.
+					                    if (calendar.equals("proleptic_gregorian") ) {
+					                        chrono = GregorianChronology.getInstance(DateTimeZone.UTC);
+					                    } else if (calendar.equals("noleap") || calendar.equals("365_day") ) {
+					                        chrono = NoLeapChronology.getInstanceUTC();
+					                    } else if (calendar.equals("julian") ) {
+					                        chrono = JulianChronology.getInstanceUTC();
+					                    } else if ( calendar.equals("all_leap") || calendar.equals("366_day") ) {
+					                        chrono = AllLeapChronology.getInstanceUTC();
+					                    } else if ( calendar.equals("360_day") ) {  /* aggiunto da lele */
+					                        chrono = ThreeSixtyDayChronology.getInstanceUTC();
+					                    }
+					                }
+					                // Get the date time from the metadata TimeCoverage if it exists...
+					                DateTimeFormatter f = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ssZ").withChronology(chrono);
+					                if ( dateRange != null ) {
+					                    
+					                    DateType sd = dateRange.getStart();
+					                    DateTime metadata_sd = null;
+					                    if ( sd != null ) {
+					                        String date = sd.getText();
+					                        try {
+					                            metadata_sd = f.parseDateTime(sd.toDateTimeString()).withChronology(chrono);
+					                        } catch (Exception e) {
+					                            f = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss").withChronology(chrono);
+					                            metadata_sd = f.parseDateTime(sd.toDateTimeString()).withChronology(chrono);
+					                        }
+					                    }
+					                    DateType ed = dateRange.getEnd();
+					                    DateTime metadata_ed = null;
+					                    if ( ed != null ) {
+					                        String date = ed.getText();
+					                        if ( date.equalsIgnoreCase("present")) {
+					                            metadata_ed = new DateTime().withChronology(chrono);
+					                        } else {
+					                            try {
+					                                metadata_ed = f.parseDateTime(ed.toDateTimeString()).withChronology(chrono);
+					                            } catch (Exception e) {
+					                                f = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss").withChronology(chrono);
+					                                metadata_ed = f.parseDateTime(ed.toDateTimeString()).withChronology(chrono);
+					                            }
+					                        }
+					                    }
 
 
-									tr.setSize(timeCoverageNumberOfPoints);
-									tAxis.setArange(tr);
-								}
-								if ( !AxisBeans.contains(tAxis) ) {
-									AxisBeans.addUnique(tAxis);
-								} else {
-									tAxis.setElement(AxisBeans.getMatchingID(tAxis));
-								}
+					                    log.info("Loading T from metadata: "+elementName);
+					                    AxisBean tAxis = new AxisBean();
+					                    if ( calendar != null ) {
+					                        tAxis.setCalendar(calendar);
+					                    }
+					                    tAxis.setElement(variable.getName()+"-"+id+"-t-axis");
+					                    grid_name.append("-t-axis");
+					                    tAxis.setType("t");
 
-								
-								GridBean grid = new GridBean();
-								grid.setElement(grid_name.toString());
-								grid.setAxes(AxisBeans);
-								AllAxesBeans.addAll(AxisBeans);
-								if ( !GridBeans.contains(grid) ) {
-									GridBeans.add(grid);
-								} else {
-									grid.setElement(GridBeans.getMatchingID(grid));
-								}
+					                    ArangeBean tr = new ArangeBean();
+					                    DateTimeFormatter hoursfmt = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
+					                    log.debug("Using start time: "+hoursfmt.print(metadata_sd));
+					                    tr.setStart(hoursfmt.print(metadata_sd));
+					                    double dm = (metadata_ed.getMillis() - metadata_sd.getMillis())/(Double.valueOf(timeCoverageNumberOfPoints) - 1.d);
+					                    long delta_millis = (long) dm;
+					                    Duration duration = new Duration(delta_millis);
+					                    if ( metadata_sd.equals(metadata_ed) || Integer.valueOf(timeCoverageNumberOfPoints) == 1 ) {
+					                        tAxis.setArange(null);
+					                        tAxis.setUnits("time");
+					                        String[] v = new String[1];
+					                        v[0] = hoursfmt.print(metadata_sd);
+					                        tAxis.setV(v);
+					                    } else if ( Integer.valueOf(timeCoverageNumberOfPoints) <= 10 ) {
+					                        tAxis.setArange(null);
+					                        tAxis.setUnits("time");
+					                        String[] v = new String[Integer.valueOf(timeCoverageNumberOfPoints)];
+					                        DateTimeFormatter fmt;
+					                        if ( duration.getStandardHours() >= 24 ) {
+					                            fmt = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
+					                        } else {
+					                            fmt = DateTimeFormat.forPattern("yyyy-MM-dd");
+					                        }
+					                        for ( int i = 0; i < Integer.valueOf(timeCoverageNumberOfPoints); i++ ) {
+					                            v[i] = fmt.print(metadata_sd);
+					                            metadata_sd = metadata_sd.plus(duration);
+					                        }
+					                        tAxis.setV(v);
+					                    } else {
 
-								las_var.setGrid(grid);
-								dataset.addVariable(las_var);
+					                        Period p = duration.toPeriod(chrono);
+					                        int values[] = p.getValues();
+					                        int numPeriods = 0;
+					                        DurationFieldType types[] = p.getFieldTypes();
+					                        String periods = "";
+					                        // Finds spacing in terms of years, months, weeks, days, hours, minutes, seconds, millis
+					                        // We will check years, months, weeks, days, hours
+					                        int step = -1;
+					                        String typeName = "";
+					                        for (int i = 0; i < 6; i++) {
+					                            if (values[i] > 0) {
+					                                numPeriods++;
+					                                step = values[i];
+					                                typeName = types[i].getName();
+					                                // Get rid of the "s" in the plural form of the name.
+					                                typeName = typeName.substring(0, typeName.length() - 1);
+					                                // LAS doesn't understand "week" so make it "day" and
+					                                // multiply the step by 7.
+					                                periods = periods + " " + typeName;
+					                                if (typeName.equals("week")) {
+					                                    typeName = "day";
+					                                    step = step * 7;
+					                                }
+					                            }
+
+					                        }
+
+					                        if (numPeriods == 0 || numPeriods > 1) {
+
+					                            // This is special code to deal with climatology files that define
+					                            // the time axis in the "middle" of the month.  Since there is no
+					                            // "middle" of months (but there is certainly always a
+					                            // first of the month, geez-o) so we are left to figure this out by
+					                            // looking at the period values and guessing that this really means
+					                            // climo months.
+
+					                            // Is the gap in years and months 0?
+					                            // Are the values 4 weeks apart?
+					                            if ( (values[0] == 0 && values[1] == 0) &&
+					                                    (values[2] == 4)) {
+					                                // We're guessing these are months
+					                                typeName = "month";
+					                                step = 1;
+					                            } else if ( values[1] > 0 ) {
+					                                // We're again guessing that the value is months (and everything else is in the noise)
+					                                typeName = "month";
+					                                step = values[1];
+					                            } else if ( numPeriods == 2 && periods.contains("week") && periods.contains("day")  ) {
+					                                // We can convert this to days. :-)
+					                                typeName = "day";
+					                                step = 7*values[2] + values[3];
+
+					                            }  else {
+					                                // Guess based on the size of the period in well-known units.
+					                                long days = duration.getStandardDays();
+
+					                                if ( days > 359 ) {
+					                                    typeName = "year";
+					                                    step = 1;
+					                                } else if ( days > 26 ) {
+					                                    typeName = "month";
+					                                    step = 1;
+					                                }
+
+					                            }
+					                        }
+					                        String sstep;
+					                        if ( typeName.contains("minute") ) {
+					                            double s = Double.valueOf(step)/60d;
+					                            sstep = String.valueOf(s);
+					                            typeName = "hours";
+					                        } else {
+					                            sstep = String.valueOf(step);
+					                        }
+
+					                        tr.setStep(sstep);
+					                        tAxis.setUnits(typeName);
 
 
-							} // coverage != null
-							}
-						} // for variables;
+					                        tr.setSize(timeCoverageNumberOfPoints);
+					                        tAxis.setArange(tr);
+					                    }
+					                    if ( !AxisBeans.contains(tAxis) ) {
+					                        AxisBeans.addUnique(tAxis);
+					                    } else {
+					                        tAxis.setElement(AxisBeans.getMatchingID(tAxis));
+					                    }
+					                }
+					                GridBean grid = new GridBean();
+					                grid.setElement(grid_name.toString());
+					                grid.setAxes(AxisBeans);
+					                AllAxesBeans.addAll(AxisBeans);
+					                if ( !GridBeans.contains(grid) ) {
+					                    GridBeans.add(grid);
+					                } else {
+					                    grid.setElement(GridBeans.getMatchingID(grid));
+					                }
+
+					                las_var.setGrid(grid);
+					                dataset.addVariable(las_var);
+
+
+					            } // coverage != null
+					        }
+					    } // for variables;
 
 						
 					} else { // vars > 0
+                        log.info("Problem found in "+threddsDataset.getParentCatalog().getUriString());
+		                log.info("Unable to create LAS configuration for "+threddsDataset.getAccess(ServiceType.OPENDAP).getStandardUrlName()+" No variables.");
 						return null;
 					}
 
 				}// for outer variables container iterator
 			} else { // outer variables list
+                log.info("Problem found in "+threddsDataset.getParentCatalog().getUriString());
+                log.info("Unable to create LAS configuration for "+threddsDataset.getAccess(ServiceType.OPENDAP).getStandardUrlName()+" No variables.");
 				return null;
 			}
 		
@@ -1492,7 +1511,7 @@ public class ADDXMLProcessor {
 		UniqueVector AxisBeans = new UniqueVector();
 
 		if (verbose) {
-			log.info("Processing ESG THREDDS dataset: " + threddsDataset.getFullName() + "with id: "+threddsDataset.getID());
+			log.info("Processing ESG THREDDS dataset: " + threddsDataset.getFullName() + " with id: "+threddsDataset.getID()+" and parent "+threddsDataset.getParent().getCatalogUrl());
 		}
 
 		dataset.setName(threddsDataset.getFullName());
@@ -1986,9 +2005,11 @@ public class ADDXMLProcessor {
 			for (Iterator subDatasetsIt = ThreddsDataset.getDatasets().iterator(); subDatasetsIt.hasNext(); ) {
 				InvDataset subDataset = (InvDataset) subDatasetsIt.next();
 				// Process the sub-categories
-				CategoryBean subCat = processUAFCategories(subDataset);
-				if ( !subCat.equals(category) && (subCat.getCategories().size() > 0 || subCat.getFilters().size() > 0 ) ) {
-					subCats.add(subCat);
+				if (!subDataset.getName().contains("automated cleaning process") ) {
+				    CategoryBean subCat = processUAFCategories(subDataset);
+				    if ( !subCat.equals(category) && (subCat.getCategories().size() > 0 || subCat.getFilters().size() > 0 ) ) {
+				        subCats.add(subCat);
+				    }
 				}
 			}
 			category.setCategories(subCats);
