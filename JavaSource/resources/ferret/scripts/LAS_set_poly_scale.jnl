@@ -15,7 +15,7 @@ IF ($ferret_poly_scale"1|*>0") THEN
    IF `($numobs"1") LT 20000` THEN DEFINE SYMBOL ferret_poly_scale 0.4
    IF `($numobs"1") LT 10000` THEN DEFINE SYMBOL ferret_poly_scale 0.6
    IF `($numobs"1") LT 5000` THEN DEFINE SYMBOL ferret_poly_scale 0.8
-   IF `($numobs"1") LT 500` THEN DEFINE SYMBOL ferret_poly_scale 1.
+!   IF `($numobs"1") LT 500` THEN DEFINE SYMBOL ferret_poly_scale 1.
 ENDIF
 
 !-----------------------------------------------------------------------
