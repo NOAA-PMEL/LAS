@@ -130,7 +130,18 @@ public class LASBackendRequest extends LASDocument {
                     Attribute attribute = (Attribute) attIt.next();
                     String name = attribute.getName();
                     String value = attribute.getValue();
-                    symbols.put("data_"+index+"_"+name, value);
+                    // If the data attribute is also defined as a property, use that instead
+                    String pre_defined = null;
+                    try {
+						pre_defined = getProperty("data_"+index, name);
+					} catch (LASException e) {
+						// That's ok.  We'll live with what we've got...	
+					}
+					if ( pre_defined != null && !pre_defined.equals("") ) {
+						symbols.put("data_"+index+"_"+name, pre_defined);
+					} else {
+						symbols.put("data_"+index+"_"+name, value);
+					}
                     // See if this variable has an associated transformation...
                     Element analysis = data.getChild("analysis");
                     if ( analysis != null ) {
@@ -401,8 +412,9 @@ public class LASBackendRequest extends LASDocument {
     /**
      * Get all the information in this request as Ferret symbols
      * @return a hashmap of symbol names and values
+     * @throws LASException 
      */
-    public HashMap<String, String> getFerretSymbols() {
+    public HashMap<String, String> getFerretSymbols() throws LASException {
 
         HashMap<String, String> symbols = new HashMap<String, String>();
         // Translate the results symbols for use by Ferret.
@@ -467,7 +479,10 @@ public class LASBackendRequest extends LASDocument {
         }
 
         // Add a count symbol
-        symbols.put("data_count", String.valueOf(getDataCount()));
+        String definedCount = getProperty("data", "count");
+        if ( definedCount == null || definedCount.equals("") ) {
+            symbols.put("data_count", String.valueOf(getDataCount()));
+        }
 
         // Data regions
         symbols.putAll(getRegionsAsSymbols());

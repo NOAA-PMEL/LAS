@@ -400,6 +400,16 @@ public class LASConfig extends LASDocument {
                                 }
                             }
                             variable.setAttribute("ftds_url", fds_base+dsID+"/data_"+key+".jnl");
+                        // HACK -- also adds the grid to a composite variable...
+                        } else if ( grid_type.equals("vector") ) {
+                        	List<Element> compositeVars = variable.getChildren("variable");
+                        	if ( compositeVars.size() > 0 ) {
+                        		String VARID = compositeVars.get(0).getAttributeValue("IDREF");
+                        		Grid grid = getGrid(dataset.getAttributeValue("ID"), VARID);
+                        		Element gridE = new Element("grid");
+                        		gridE.setAttribute("IDREF", grid.getID());
+                        		variable.addContent(gridE);
+                        	}
                         }
                     }
                 }
@@ -764,6 +774,19 @@ public class LASConfig extends LASDocument {
      *
      */
     public void convertToSeven() throws JDOMException, UnsupportedEncodingException {
+    	/*
+    	 * 
+    	 * 
+    	 * if ( variable.getAttributeValue("grid_type") != null && variable.getAttributeValue("grid_type").equals("vector")) {
+510	                                List<Element> compositeVars = variable.getChildren("variable");
+511	                                if ( compositeVars.size() > 0 ) {
+512	                                        String VARID = compositeVars.get(0).getAttributeValue("IDREF");
+513	                                        Grid grid = getGrid(dataset.getAttributeValue("ID"), VARID);
+514	                                        Element gridE = new Element("grid");
+515	                                        gridE.setAttribute("IDREF", grid.getID());
+516	                                        variable.addContent(gridE);
+517	                                        setPointsAndIntervals(variable, grid);
+    	 */
         Element root = getRootElement();
         String version = root.getAttributeValue("version");
 
@@ -1409,17 +1432,18 @@ public class LASConfig extends LASDocument {
                 // This config has no "categories", just datasets and variables.  Use them.
                 Element dataset = getDatasetElement(catid);
                 Element container_dataset;
+                Element category = new Element("category");
                 if ( dataset != null ) {
                     container_dataset = (Element) dataset.clone();
+                    category.setAttribute("name", container_dataset.getAttributeValue("name"));
+                    category.setAttribute("children", "variables");
+                    category.setAttribute("children_dsid", container_dataset.getAttributeValue("ID"));
+                    if ( dataset.getAttributeValue("doc") != null && !dataset.getAttributeValue("doc").equals("") ) {
+                    	category.setAttribute("doc", dataset.getAttributeValue("doc"));
+                    }
                 } else {
                     // send an empty one
                     container_dataset = new Element("dataset");
-                }
-                Element category = new Element("category");
-                category.setAttribute("children", "variables");
-                category.setAttribute("children_dsid", container_dataset.getAttributeValue("ID"));
-                if ( dataset.getAttributeValue("doc") != null && !dataset.getAttributeValue("doc").equals("") ) {
-                	category.setAttribute("doc", dataset.getAttributeValue("doc"));
                 }
                 category.addContent(container_dataset);
                 categories.add(new Category(category));

@@ -591,18 +591,9 @@ public class Correlation implements EntryPoint {
 		String grid_type = xVariables.getVariable(0).getAttributes().get("grid_type");
     	if ( netcdf != null && contained && grid_type.equals("trajectory")  ) {
     		operationID = "Trajectgory_correlation";    // No data base access; plot only from existing netCDF file.
-    		String v0 = lasRequest.getVariable(0);
-    		String v1 = lasRequest.getVariable(1);
-    		String v2 = lasRequest.getVariable(2);
-    		if ( v0 != null ) {
-    			lasRequest.setProperty("data_0", "url", netcdf);
-    		}
-    		if ( v1 != null ) {
-    			lasRequest.setProperty("data_1", "url", netcdf);
-    		}
-    		if ( v2 != null ) {
-    			lasRequest.setProperty("data_2", "url", netcdf);
-    		}
+    		for ( int v = 0; v < xDatasetVariables.size(); v++ ) {
+    		    lasRequest.setProperty("data_"+v, "url", netcdf);
+            }
     		if ( !cruiseIcons.getIDs().equals("") ) lasRequest.setProperty("ferret", "cruise_list", cruiseIcons.getIDs());
     	} else  if ( (!contained || netcdf == null ) && grid_type.equals("trajectory") ){
     		operationID = "Trajectory_correlation_plot";
@@ -1129,7 +1120,9 @@ public class Correlation implements EntryPoint {
 		lasRequest.removeVariables();
 		lasRequest.addVariable(dsid, vix, 0);
 		lasRequest.addVariable(dsid, viy, 0);
+		lasRequest.setProperty("data", "count", "2");
 		if ( colorCheckBox.getValue() ) {
+		    lasRequest.setProperty("data", "count", "3");
 			String varColor = colorVariables.getVariable(colorVariables.getSelectedIndex()).getID();
 			lasRequest.addVariable(dsid, varColor, 0);
 		}
