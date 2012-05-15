@@ -24,8 +24,24 @@ IF `has_coord EQ 0` THEN exit/script
 
 LET varcoords = "`($data_orig_var).coordinates`"
 
-! Get first coordinate variable.
+! Trim off leading white space.
+! Compress out extra spaces so there is just one.
 
+PPL SET C1 "`($data_orig_var).coordinates`"
+PPL SET C2 $EDIT( C1, TRIM)
+PPL SET C1 "($C2)"
+PPL SET C2 $EDIT( C1, COMPRESS)
+LET varcoords = "($C2)"
+
+! Get first coordinate variable.
+! The CF standard has coordinates separated by spaces.
+! Some coordinates attributes have commas or space-and-comma.
+
+IF `(STRINDEX(varcoords, ",") GT 0) AND (STRINDEX(varcoords, " ") GT 0)` THEN
+   PPL SET C1 "`($data_orig_var).coordinates`"
+   PPL SET C2 $EDIT( C1, COLLAPSE)
+   LET varcoords = "($C2)"
+ENDIF
 LET space = STRINDEX(varcoords, " ")
 IF `space EQ 0` THEN LET space = STRINDEX(varcoords, ",")
 
