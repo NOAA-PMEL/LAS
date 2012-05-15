@@ -1,6 +1,7 @@
 
 
 LET space = STRINDEX(remainder, " ")
+IF `space EQ 0` THEN LET space = STRINDEX(remainder, ",")
 IF `space EQ 0` THEN
    DEFINE SYMBOL coordstring = `remainder`
 ELSE  

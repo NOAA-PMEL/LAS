@@ -27,6 +27,8 @@ LET varcoords = "`($data_orig_var).coordinates`"
 ! Get first coordinate variable.
 
 LET space = STRINDEX(varcoords, " ")
+IF `space EQ 0` THEN LET space = STRINDEX(varcoords, ",")
+
 LET coordstring = substring(varcoords, 1, `space-1`)
 DEFINE SYMBOL coordstring = `coordstring`
 
