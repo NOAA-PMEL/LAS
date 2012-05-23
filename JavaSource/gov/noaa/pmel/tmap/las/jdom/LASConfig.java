@@ -1209,6 +1209,103 @@ public class LASConfig extends LASDocument {
 		}
     	return constraints;
     }
+
+    /**
+	 * Get any applicable data constraints for a particular data set and variable and returns them in a HashMap.
+	 * @param dsID
+	 * @param varID
+	 * @return the list of constraints
+	 * @throws JDOMException
+	 */
+	public HashMap<String, DataConstraint> getConstraintsHash(String dsID, String varID) throws JDOMException {
+		String ui_default = getUIDefaultName(dsID, varID);
+		ui_default = ui_default.substring(ui_default.indexOf("#")+1);
+		if ( ui_default != null && !ui_default.equals("") ) {
+			return getConstraintsHash(ui_default, dsID, varID);
+		} else {
+			return new HashMap<String, DataConstraint>();
+		}
+	}
+	/**
+	 * Get any constraints from the named UI default and returns them in a HashMap.
+	 *
+	 * @param ui_default
+	 * @param dsID
+	 * @param varID
+	 * @return the constraints in a hash map
+	 * @throws JDOMException
+	 */
+	public HashMap<String, DataConstraint> getConstraintsHash(String ui_default, String dsID, String varID) throws JDOMException {
+		HashMap<String, DataConstraint> constraints = new HashMap<String, DataConstraint>();
+		Element def = getUIDefault(ui_default);
+		Element op = getUIMap(def, "ops");
+		List cons = op.getChildren("constraint");
+		int ct = -1;
+		for (Iterator consIt = cons.iterator(); consIt.hasNext();) {
+			// Get the reference to the constraint...
+			Element constraint = (Element) consIt.next();
+
+			String type = constraint.getAttributeValue("type");
+			String name = constraint.getAttributeValue("name");
+			String ID = constraint.getAttributeValue("ID");
+			if ( type.equals("variable") ) {
+				DataConstraint vc = getVariableConstraint(dsID, varID);
+
+				if ( name != null ) {
+					vc.setName(name);
+				} else {
+					vc.setName("variable");
+				}
+
+				if ( ID != null ) {
+					vc.setID(ID);
+				}
+				constraints.put(vc.getId(), vc);
+			} else {
+				// Build the constraint...
+				Element full_constraint = new Element("constraint");
+				if ( name != null ) {
+					full_constraint.setAttribute("name", name);
+				}
+				else{
+					ct ++;
+				}
+				if ( ID != null ) {
+					full_constraint.setAttribute("ID", ID);
+				}
+				full_constraint.setAttribute("type", "menu");
+				// First copy the attributes...
+				List attrs = constraint.getAttributes();
+				for (Iterator attIt = attrs.iterator(); attIt.hasNext();) {
+					Attribute attr = (Attribute) attIt.next();
+					full_constraint.setAttribute(attr.getName(), attr.getValue());
+				}
+				// Then follow the references to get the three parts, left-hand side menu, operations, right-hand side menu
+				List menus = constraint.getChildren("menu");
+				int it = 0;
+				for (Iterator menuIt = menus.iterator(); menuIt.hasNext();) {
+					Element menu_ref = (Element) menuIt.next();
+					String href = menu_ref.getAttributeValue("href");
+					href = href.substring(1, href.length());
+					Element menu = getUIMenu(href);
+					Element menu_clone = (Element) menu.clone();
+					if ( it == 0 ) {
+						menu_clone.setAttribute("position", "lhs");
+					} else if ( it == 1 ) {
+						menu_clone.setAttribute("position", "ops");
+					} else if ( it == 2 ) {
+						menu_clone.setAttribute("position", "rhs");
+					}
+					full_constraint.addContent(menu_clone);
+					it++;
+				}
+				DataConstraint fc = new DataConstraint(full_constraint);
+				constraints.put(fc.getId(), fc);
+			}
+		}
+		return constraints;
+	}
+
     /**
      * Build a variable constraint from a particular variable
      * @param dsID the data set ID of the variable
@@ -1448,7 +1545,7 @@ public class LASConfig extends LASDocument {
                 category.addContent(container_dataset);
                 categories.add(new Category(category));
             }
-            
+
         }
         return categories;
     }
@@ -1680,7 +1777,7 @@ public class LASConfig extends LASDocument {
                     	container_dataset_element.removeChildren("variables");
 
                         Element varsE = dataset.getChild("variables");
-                        
+
                         List memberVariables = new ArrayList<Element>();
                         if ( varsE != null ) {
                             memberVariables = varsE.getChildren("variable");
@@ -2105,7 +2202,7 @@ public class LASConfig extends LASDocument {
             String[] parts = varXPath.split("/");
             // Throw away index 0 since the string has a leading "/".
             varXPath = "/"+parts[1]+"/"+parts[2]+"/dataset[@ID='"+parts[3]+"']/"+parts[4]+"/variable[@ID='"+parts[5]+"']";
-        } 
+        }
     	Element variable = getElementByXPath(varXPath);
         if (variable != null) {
             String ID = variable.getChild("grid").getAttributeValue("IDREF");
@@ -2118,8 +2215,8 @@ public class LASConfig extends LASDocument {
      * Get the grid object with its axes filled by the grids ID.
      * @param the ID
      * @return the grid
-     * @throws LASException 
-     * @throws JDOMException 
+     * @throws LASException
+     * @throws JDOMException
      */
     public Grid getGridById(String ID) throws JDOMException, LASException {
     	return fillGrid(ID);
@@ -2359,7 +2456,7 @@ public class LASConfig extends LASDocument {
 	                String currentValue = group.get(propName);
 	                if (propValue != null && propName != null ) {
 	                    group.put(propName, propValue);
-	                } 
+	                }
 	            }
 
 	            propertyGroups.put(propGroupE.getAttributeValue("type"), group);
@@ -4396,7 +4493,7 @@ public class LASConfig extends LASDocument {
 			CatalogRefHandler esgCatalogHandler = new CatalogRefHandler();
 			SAXParser parser;
 			try {
-				parser = factory.newSAXParser();			
+				parser = factory.newSAXParser();
 				parser.parse(src, esgCatalogHandler);
 			} catch (ParserConfigurationException e) {
 				log.error("Unable to make ESG Categories: "+e.getMessage());
@@ -4423,14 +4520,14 @@ public class LASConfig extends LASDocument {
 				System.out.println(name+","+url);
 			}
 			for (Iterator catIt = lasCatalogs.keySet().iterator(); catIt.hasNext();) {
-				
+
 				String name = (String) catIt.next();
 				String url = (String) lasCatalogs.get(name);
 				InvCatalogFactory thredds_factory = new InvCatalogFactory("default", false);
 				InvCatalog catalog = (InvCatalog) thredds_factory.readXML(base+url);
 				CategoryBean cb = ADDXMLProcessor.processESGCategories(catalog);
-				categories.add(cb);				
-			}			
+				categories.add(cb);
+			}
 		} else {
 			InvCatalogFactory factory = new InvCatalogFactory("default", false);
 			InvCatalog catalog = (InvCatalog) factory.readXML(src);
@@ -4446,14 +4543,14 @@ public class LASConfig extends LASDocument {
 
 			List ThreddsDatasets = catalog.getDatasets();
 			Iterator di = ThreddsDatasets.iterator();
-		
+
 			while (di.hasNext() ) {
 				InvDataset ThreddsDataset = (InvDataset) di.next();
 				if (ThreddsDataset.hasNestedDatasets()) {
-					
-					CategoryBean cb = ADDXMLProcessor.processCategories(ThreddsDataset);		 
+
+					CategoryBean cb = ADDXMLProcessor.processCategories(ThreddsDataset);
 					categories.add(cb);
-					
+
 				}
 			}
 		}
@@ -4533,13 +4630,13 @@ public class LASConfig extends LASDocument {
 		Vector<DatasetsGridsAxesBean> beans = new Vector<DatasetsGridsAxesBean>();
 		if ( src_type.equalsIgnoreCase("netcdf") ) {
 
-		
+
 			dgab = myAddXML.createBeansFromNetcdfDataset(src, false, null);
 			if ( dgab == null ) {
 				log.error("Unable to make configuration from "+src);
 				return beans;
 			}
-			
+
 
 			String created = null;
 			String expires = null;
@@ -4611,7 +4708,7 @@ public class LASConfig extends LASDocument {
 				CatalogRefHandler esgCatalogHandler = new CatalogRefHandler();
 				SAXParser parser;
 				try {
-					parser = factory.newSAXParser();			
+					parser = factory.newSAXParser();
 					parser.parse(src, esgCatalogHandler);
 				} catch (ParserConfigurationException e) {
 					log.error("Error parsing the ESG THREDDS catalog."+e.getMessage());
@@ -4636,7 +4733,7 @@ public class LASConfig extends LASDocument {
 					String url = (String) lasCatalogs.get(name);
 					System.out.println(name+","+url);
 				}
-				for (Iterator catIt = lasCatalogs.keySet().iterator(); catIt.hasNext();) {					
+				for (Iterator catIt = lasCatalogs.keySet().iterator(); catIt.hasNext();) {
 					String name = (String) catIt.next();
 					String url = catalogs.get(name);
 					InvCatalog catalog = (InvCatalog) thredds_factory.readXML(base+url);
@@ -4644,11 +4741,11 @@ public class LASConfig extends LASDocument {
 					beans.addAll(myAddXML.processESGDatasets(catalog));
 				}
 			} else {
-				
+
 				InvCatalog catalog = (InvCatalog) thredds_factory.readXML(src);
 				List ThreddsDatasets = catalog.getDatasets();
 				Iterator di = ThreddsDatasets.iterator();
-				
+
 				ThreddsDatasets = catalog.getDatasets();
 				di = ThreddsDatasets.iterator();
 				while (di.hasNext() ) {
@@ -5035,12 +5132,12 @@ public class LASConfig extends LASDocument {
 	 * <tests>
 	 *     <test type="OPeNDAP"/> <!-- Test all OPeNDAP connections. -->
 	 *     <test type="F-TDS"/>   <!-- Test all F-TDS connections. -->
-	 *     
-	 *     <!-- Test generation of products, 
-	 *          default view is "xy" and 
+	 *
+	 *     <!-- Test generation of products,
+	 *          default view is "xy" and
 	 *          default is to test the first variable, set to "all" to test all and
 	 *          default is all dataset, use an ID to test a particular dataset.  -->
-	 *     <test type="Products" view="xy" variable="all" dataset="DSID"> 
+	 *     <test type="Products" view="xy" variable="all" dataset="DSID">
 	 * </tests>
 	 * @return
 	 */
@@ -5051,7 +5148,7 @@ public class LASConfig extends LASDocument {
 			lto = new LASTestOptions();
 			List tests = testsE.getChildren("test");
 			String delay = testsE.getAttributeValue("delay");
-			
+
 			if ( delay != null ) {
 				try {
 					long d = Long.valueOf(delay).longValue();
