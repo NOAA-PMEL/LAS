@@ -373,7 +373,7 @@ public class TestUI extends BaseUI {
 		
 		xPanels.get(0).setVariable(xVariable);
 		xPanels.get(0).init(false, ops);
-
+	
 		List<Mouse> mice = new ArrayList<Mouse>();
 		Mouse mouse = new Mouse();
 		mice.add(mouse);
@@ -448,8 +448,9 @@ public class TestUI extends BaseUI {
 			xPanels.get(0).setMapTool(xView);
 			xPanels.get(0).setLatLon(String.valueOf(tmp_ylo), String.valueOf(tmp_yhi), String.valueOf(tmp_xlo), String.valueOf(tmp_xhi));
 		}
-
-
+		xPanels.get(0).showOrthoAxes(xView, xOrtho);
+		xAxesWidget.showViewAxes(xView, xOrtho);
+        xPanels.get(0).setVizGalState(xVariable, xPanels.get(0).getHistoryToken(), xPanels.get(0).getHistoryToken());
 		xPanels.get(0).refreshPlot(null, false, false, false);
 
 		resize();
@@ -693,6 +694,7 @@ public class TestUI extends BaseUI {
 	public ChangeHandler onAxisChange = new ChangeHandler() {
 		@Override
 		public void onChange(ChangeEvent arg0) {
+		    xPanels.get(0).setVizGalState(xVariable, xPanels.get(0).getHistoryToken(), xPanels.get(0).getHistoryToken());
 			xPanels.get(0).refreshPlot(null, false, true, false);	
 		}
 	};
