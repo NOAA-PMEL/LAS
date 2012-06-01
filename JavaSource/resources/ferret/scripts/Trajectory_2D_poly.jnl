@@ -11,7 +11,7 @@
 !
 ! Initialize the region and data.
 
-DEFINE SYMBOL data_initialization_script = Jons_initialize_data_insitu
+DEFINE SYMBOL data_initialization_script = Trajectory_initialize_data_insitu
 
 ! DEFINE SYMBOL ferret_label = 0
 
