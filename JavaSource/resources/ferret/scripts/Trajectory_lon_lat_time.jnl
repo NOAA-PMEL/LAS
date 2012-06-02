@@ -13,6 +13,7 @@ LET nvars = ..nvars
 
 REPEAT/I=1:`nvars` (DEFINE SYMBOL ivar = `all_varnames`;\
  LET all_attnames = ($ivar).attnames;\
+ LET vartype = "nostring";\
  IF `IS_ELEMENT_OF_STR(all_attnames, "_CoordinateAxisType") GT 0` THEN LET vartype = "`($ivar)._CoordinateAxisType`";\
  IF `STRCMP(vartype,"Lon") EQ 0` THEN DEFINE SYMBOL data_x_var = ($ivar);\
  IF `STRCMP(vartype,"Lat") EQ 0` THEN DEFINE SYMBOL data_y_var = ($ivar);\
