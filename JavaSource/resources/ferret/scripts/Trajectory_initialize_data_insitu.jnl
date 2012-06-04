@@ -7,7 +7,7 @@
 !
 DEFINE SYMBOL num ($1"0")
 
-DEFINE SYMBOL data_($num)_dataset_id = ($database_access_($num)_db_title)
+DEFINE SYMBOL data_($num)_dataset_id = ($data_($num)_dataset_name)
 
 ! The variable at the x and y locations
 
