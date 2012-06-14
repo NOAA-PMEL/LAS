@@ -52,6 +52,15 @@ public class LAS_JSAP
     esg.setHelp(
     "Look for ESG metadata in the data source.");
 
+    Switch uaf = new Switch("metadata")
+    .setShortFlag('m')
+    .setDefault("false")
+    .setLongFlag("metadata");
+
+    esg.setHelp(
+    "Look for UAF metadata in the source THREDDS catalog.");
+    
+    
     QualifiedSwitch dataset = (QualifiedSwitch)new QualifiedSwitch("dataset")
         .setStringParser(new StringStringParser())
         .setAllowMultipleDeclarations(false)
@@ -233,6 +242,7 @@ public class LAS_JSAP
       this.registerParameter(groupname);
       this.registerParameter(grouptype);
       this.registerParameter(esg);
+      this.registerParameter(uaf);
       this.registerParameter(generate_names);
     }
     catch (JSAPException ex) {
