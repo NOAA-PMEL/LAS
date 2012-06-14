@@ -1,3 +1,10 @@
+! key_at_top
+! for annotations plots (VizGal and LAS v8.) make the color key across the top of the plot
+! 
+! Google Earth plots have their own, separate color bar image file.
+IF ($its_GE"0|*>1") THEN EXIT/SCRIPT
+
+
 LET key_label_size = ($text_size"0.08")
 
 ppl ylab
