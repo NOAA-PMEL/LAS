@@ -1,6 +1,13 @@
 ! Set up for small margins, color key at the top
 ! full_view2 is for property-property plots to use.
 
+! Google Earth plots need no margins. This has already been set up.
+IF ($its_GE"0|*>1") THEN 
+   DEFINE VIEW/AXES/XLIM=0:1/YLIM=0:1 full_view
+   DEFINE VIEW/AXES/XLIM=0:1/YLIM=0:1 full_view2
+   EXIT/SCRIPT
+ENDIF
+
 DEFINE SYMBOL text_size = ($ferret_text_size"0.09")
 CAN view
 
@@ -26,6 +33,7 @@ if ($ferret_view%0|x>1|x>1|*>0%) THEN
    DEFINE VIEW/AXES/X=0.06:0.99/y=0.06:0.99  full_view
    DEFINE VIEW/AXES/X=0.06:0.99/y=0.06:0.99  full_view2
 ENDIF
+pause
 
 SET VIEW full_view
 keymark 1
