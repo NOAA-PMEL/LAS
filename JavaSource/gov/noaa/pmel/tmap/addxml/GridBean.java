@@ -51,6 +51,7 @@ public class GridBean extends LasBean{
 		} else {
 			b = (GridBean) bean;
 		}
+		if ( axes.size() != b.getAxes().size() ) return false;
 		boolean match = true;
 		for (Iterator axesIt = axes.iterator(); axesIt.hasNext();) {
 			AxisBean a = (AxisBean) axesIt.next();

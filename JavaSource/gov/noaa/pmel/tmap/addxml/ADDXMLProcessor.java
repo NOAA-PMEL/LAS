@@ -47,6 +47,7 @@ import java.security.NoSuchAlgorithmException;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Formatter;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -105,7 +106,6 @@ import ucar.nc2.dt.GridDatatype;
 import ucar.nc2.dt.grid.GridCoordSys;
 import ucar.nc2.dt.grid.GridDataset;
 import ucar.nc2.ft.FeatureDatasetFactoryManager;
-import ucar.nc2.stream.CdmRemote;
 import ucar.nc2.units.DateRange;
 import ucar.nc2.units.DateType;
 import ucar.nc2.units.DateUnit;
@@ -1127,10 +1127,22 @@ public class ADDXMLProcessor {
 					                boolean hasZ = false;
 					                boolean readZ = false;
 					                String zvalues = null;
+					                String zvariables = null;
 
 					                Range z = coverage.getUpDownRange();
 					                if ( z != null ) {	
-					                    hasZ = true;
+					                    try {
+					                        zvariables = threddsDataset.findProperty("hasZ");
+					                        String[] zvars = zvariables.split("\\s+");
+					                        List<String> hasZvars = new ArrayList(Arrays.asList(zvars));
+					                        if ( hasZvars.contains(variable.getName())) {
+					                            hasZ = true;
+					                        } else {
+					                            hasZ = false;
+					                        }
+					                    } catch (Exception e) {
+					                        hasZ = false;
+					                    }
 					                    double zsize = z.getSize();
 					                    double zresolution = z.getResolution();
 					                    double zstart = z.getStart();
@@ -1220,6 +1232,7 @@ public class ADDXMLProcessor {
 					                elementName = variable.getName()+"-"+id+"-z-axis";
 					                AxisBean zAxis = new AxisBean();
 					                if ( hasZ ) {
+					                    grid_name.append("-z-axis");
 					                    if ( zvalues != null ) {
 					                        if ( zvalues.equals("") ) {
 					                            log.info("Problem found in "+threddsDataset.getParentCatalog().getUriString());
@@ -1241,7 +1254,6 @@ public class ADDXMLProcessor {
 					                    } else {
 					                        log.info("Loading Z without property metadata: "+elementName);
 					                        zAxis.setElement(elementName);
-					                        grid_name.append("-z-axis");
 					                        double zsize = z.getSize();
 					                        double zresolution = z.getResolution();
 					                        double zstart = z.getStart();
@@ -1445,9 +1457,9 @@ public class ADDXMLProcessor {
 					                GridBean grid = new GridBean();
 					                grid.setElement(grid_name.toString());
 					                grid.setAxes(AxisBeans);
-					                AllAxesBeans.addAll(AxisBeans);
 					                if ( !GridBeans.contains(grid) ) {
 					                    GridBeans.add(grid);
+					                    AllAxesBeans.addAll(AxisBeans);
 					                } else {
 					                    grid.setElement(GridBeans.getMatchingID(grid));
 					                }
@@ -1664,6 +1676,7 @@ public class ADDXMLProcessor {
 								elementName = id+"-z-axis";
 								AxisBean zAxis = new AxisBean();
 								if ( hasZ ) {
+                                    grid_name.append("-z-axis");
 									if ( zvalues != null ) {
 										log.info("Loading Z from property metadata: "+elementName);
 										zAxis.setElement(elementName);
@@ -1680,7 +1693,6 @@ public class ADDXMLProcessor {
 									} else {
 										log.info("Loading Z without property metadata: "+elementName);
 										zAxis.setElement(elementName);
-										grid_name.append("-z-axis");
 										double zsize = z.getSize();
 										double zresolution = z.getResolution();
 										double zstart = z.getStart();
@@ -2180,9 +2192,16 @@ public class ADDXMLProcessor {
 			return dagb;
 		}
 		 try {
+		     ClassLoader loader = ADDXMLProcessor.class.getClassLoader();
+             System.out.println(loader.getResource("org/slf4j/spi/LocationAwareLogger.class"));
+             System.out.println(loader.getResource("org/apache/commons/logging/impl/SLF4JLocationAwareLog.class"));
+             System.out.println(loader.getResource("opendap/dap/BaseType.class"));
+
+             
+             
 			gridDs = (GridDataset) FeatureDatasetFactoryManager.open(FeatureType.GRID, curl, null, error);
 			if ( gridDs == null ) {
-				gridDs = (GridDataset) FeatureDatasetFactoryManager.open(FeatureType.FMRC, CdmRemote.canonicalURL(url), null, error);
+				gridDs = (GridDataset) FeatureDatasetFactoryManager.open(FeatureType.GRID, curl, null, error);
 			}
 		} catch (IOException e) {
 			log.error("Unable to open dataset at "+DODSNetcdfFile.canonicalURL(url));
@@ -2364,6 +2383,7 @@ public class ADDXMLProcessor {
 				if (verbose) {
 					log.info("\t\t Time axis: ");
 				}
+				
 				AxisBean taxis = makeTimeAxis(tAxis, elementName);
 				if ( taxis != null ) {
 					GridAxisBeans.addUnique(taxis);
