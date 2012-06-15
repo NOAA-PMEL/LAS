@@ -21,6 +21,9 @@
 !define this symbol so that Google earth settings will be made.
 DEFINE SYMBOL ferret_google_plot = 1
 
+! HACK, if data_0_intervals is not defined, then set it to xy.
+IF ($data_0_intervals"1|*>0) THEN DEFINE SYMBOL data_0_intervals = xy
+
 GO LAS_initialize_region 0
 GO LAS_initialize_data 0
 
@@ -84,7 +87,10 @@ ENDIF  ! native_curvi_xy
 
 ! mask is 1 where ferret_list_var is valid, and missing otherwise.
 
-IF ($data_0_intervals"|xy>1|*>0") THEN
+! Default mask if no other mask is defined 
+LET mask = 1
+
+IF ($data_0_intervals"0|xy>1|*>0") THEN
 
   DEFINE SYMBOL tmp = ($data_var)[d=($data_num),\
    X=($region_x_lo):($region_x_hi):($xstride_coord),Y=($region_y_lo):($region_y_hi):($ystride_coord)]
@@ -96,7 +102,7 @@ IF ($data_0_intervals"|xy>1|*>0") THEN
   LET mask =  IF xyvar GT -9000 THEN 1
 ENDIF
 
-IF ($data_0_intervals"|xyt>1|*>0") THEN
+IF ($data_0_intervals"0|xyt>1|*>0") THEN
 
   DEFINE SYMBOL tmp = ($data_var)[d=($data_num),\
     X=($region_x_lo):($region_x_hi):($xstride_coord),Y=($region_y_lo):($region_y_hi):($ystride_coord),\
@@ -111,7 +117,7 @@ IF ($data_0_intervals"|xyt>1|*>0") THEN
   LET mask =  IF xytvar[T=@NGD] GT 0 THEN 1
 ENDIF
 
-IF ($data_0_intervals"|xyz>1|*>0") THEN
+IF ($data_0_intervals"0|xyz>1|*>0") THEN
   DEFINE SYMBOL tmp = ($data_var)[d=($data_num),\
   X=($region_x_lo):($region_x_hi):($xstride_coord),Y=($region_y_lo):($region_y_hi):($ystride_coord),\
   Z=($region_z_lo):($region_z_hi)]
@@ -125,7 +131,7 @@ IF ($data_0_intervals"|xyz>1|*>0") THEN
   LET mask =  IF xyzvar[Z=@NGD] GT 0 THEN 1
 ENDIF
 
-IF ($data_0_intervals"|xyzt>1|*>0") THEN
+IF ($data_0_intervals"0|xyzt>1|*>0") THEN
   DEFINE SYMBOL tmp = ($data_var)[d=($data_num),\
   X=($region_x_lo):($region_x_hi):($xstride_coord),Y=($region_y_lo):($region_y_hi):($ystride_coord),\
   Z=($region_z_lo):($region_z_hi),T="($region_t_lo)":"($region_t_hi)"]
@@ -372,7 +378,7 @@ ENDIF
     DEFINE SYMBOL max_tpoints 21   ! should be an odd number
 
     !XYT dataset
-    IF ($data_0_intervals"|xyt>1|*>0") THEN
+    IF ($data_0_intervals"0|xyt>1|*>0") THEN
         DEFINE SYMBOL nt `($ferret_list_var),return=lsize`   ! no. of time points requested
         IF `($nt) eq 1` THEN
             LET L0 = `($ferret_list_var),return=lstart`
@@ -412,7 +418,7 @@ ENDIF
     ENDIF
 
     !XYZ dataset
-    IF ($data_0_intervals"|xyz>1|*>0") THEN
+    IF ($data_0_intervals"0|xyz>1|*>0") THEN
 
         DEFINE SYMBOL nz `($ferret_list_var),return=ksize`   ! no. of depth points requested
     
@@ -443,7 +449,7 @@ ENDIF
     ENDIF
 
     !XYZT
-    IF ($data_0_intervals"|xyzt>1|*>0") THEN
+    IF ($data_0_intervals"0|xyzt>1|*>0") THEN
 
         IF ($ferret_view"|xy>1|*>0") THEN    ! XY view being selected
 
@@ -543,4 +549,3 @@ list/norowhead/nohead/format=(A15)/FILE/append f
 
     LIST/I=1/NOHEADER/NOROWHEADER/CLOBBER/FORMAT=(f7.2, f7.2)/FILE  COMPRESSI(llon_list), COMPRESSI(llat_list)
     LIST/I=2:`ngood`/NOHEADER/NOROWHEADER/APPEND/FORMAT=(f7.2, f7.2)/FILE  COMPRESSI(llon_list), COMPRESSI(llat_list)
-
