@@ -22,7 +22,10 @@
 DEFINE SYMBOL ferret_google_plot = 1
 
 ! HACK, if data_0_intervals is not defined, then set it to xy.
-IF ($data_0_intervals"1|*>0) THEN DEFINE SYMBOL data_0_intervals = xy
+IF `($data_0_intervals"1|*>0) EQ 0` THEN 
+  MESSAGE/ERROR **ERROR: In list_grid.jnl data_0_intervals symbol must be defined.
+  EXIT/PROGRAM
+ENDIF
 
 GO LAS_initialize_region 0
 GO LAS_initialize_data 0
