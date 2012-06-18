@@ -304,6 +304,13 @@ public class ProductRequest {
                             // However, it may be a user defined variable, part of an operation that requires
                             // regriding or both or neither.  :-)
                             
+                            HashMap<String, String> ptinv = lasConfig.getPointsAndIntervals(varXPath);
+                            for ( Iterator ptinvIt = ptinv.keySet().iterator(); ptinvIt.hasNext(); ) {
+                                String name = (String) ptinvIt.next();
+                                String value = ptinv.get(name);
+                                data.setAttribute(name, value);
+                            }
+                            
                             String current_url = lasConfig.getDataObjectURL(varXPath);
                             String current_var = lasConfig.getVariableName(varXPath);
                             String current_title = lasConfig.getVariableTitle(varXPath);
