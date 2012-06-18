@@ -21,9 +21,9 @@
 !define this symbol so that Google earth settings will be made.
 DEFINE SYMBOL ferret_google_plot = 1
 
-! HACK, if data_0_intervals is not defined, then set it to xy.
+! If data_0_intervals is not defined, issue an error.
 IF `($data_0_intervals"1|*>0) EQ 0` THEN 
-  MESSAGE/ERROR **ERROR: In list_grid.jnl data_0_intervals symbol must be defined.
+  MESSAGE/ERROR **ERROR: In list_grid.jnl, data_0_intervals symbol must be defined.
   EXIT/PROGRAM
 ENDIF
 
