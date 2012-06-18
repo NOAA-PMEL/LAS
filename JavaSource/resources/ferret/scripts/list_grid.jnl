@@ -22,7 +22,7 @@
 DEFINE SYMBOL ferret_google_plot = 1
 
 ! If data_0_intervals is not defined, issue an error.
-IF `($data_0_intervals"1|*>0) EQ 0` THEN 
+IF `($data_0_intervals"0|*>1) EQ 0` THEN 
   MESSAGE/ERROR **ERROR: In list_grid.jnl, data_0_intervals symbol must be defined.
   EXIT/PROGRAM
 ENDIF
