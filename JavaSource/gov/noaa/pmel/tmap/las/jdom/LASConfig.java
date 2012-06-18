@@ -5198,4 +5198,14 @@ public class LASConfig extends LASDocument {
 		}
 		return lto;
 	}
+    public HashMap<String, String> getPointsAndIntervals(String varXPath) throws JDOMException, LASException {
+        Grid grid = getGrid(varXPath);
+        String points = grid.getAttributeValue("points");
+        String intervals = grid.getAttributeValue("intervals");
+        HashMap<String, String> ptinv = new HashMap<String, String>();
+        ptinv.put("points", points);
+        ptinv.put("intervals", intervals);
+        return ptinv;
+        
+    }
 }

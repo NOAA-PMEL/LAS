@@ -247,6 +247,13 @@ public class ProductRequest {
                                             data.setAttribute("var",lasConfig.getVariableName(varXPath));
                                             data.setAttribute("title", lasConfig.getVariableTitle(varXPath));
                                             data.setAttribute("xpath", varXPath);
+                                            
+                                            HashMap<String, String> ptinv = lasConfig.getPointsAndIntervals(varXPath);
+                                            for ( Iterator ptinvIt = ptinv.keySet().iterator(); ptinvIt.hasNext(); ) {
+                                                String name = (String) ptinvIt.next();
+                                                String value = ptinv.get(name);
+                                                data.setAttribute(name, value);
+                                            }
 
                                             // Add all the attributes from the parent data set element to this data object.
                                             HashMap <String, String> dataset_attrs = lasConfig.getDatasetAttributes(varXPath);
