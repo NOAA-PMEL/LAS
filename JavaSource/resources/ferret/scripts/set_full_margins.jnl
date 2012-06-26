@@ -33,7 +33,6 @@ if ($ferret_view%0|x>1|x>1|*>0%) THEN
    DEFINE VIEW/AXES/X=0.06:0.99/y=0.06:0.99  full_view
    DEFINE VIEW/AXES/X=0.06:0.99/y=0.06:0.99  full_view2
 ENDIF
-pause
 
 SET VIEW full_view
 keymark 1
