@@ -126,8 +126,7 @@ SET ATTRIBUTE/OUTPUT ($data_var_nq).coordinates
 
 SET VAR/name=old_($var_num) ($data_($var_num)_var)
 LET/TITLE="($data_title)($data_var_transform)"/UNITS="`old_($var_num),RETURN=units`" \
-($data_($var_num)_var) = old_($var_num)[d=($data_num),i=($clon_imin):($clon_imax),j=($clat_jmin):($clat_jmax),\
-k=($kmin):($kmax),l=($lmin):($lmax)]
+($data_($var_num)_var) = old_($var_num)[d=($data_num),i=($clon_imin):($clon_imax),j=($clat_jmin):($clat_jmax)]
 SET ATTR/LIKE=old_($var_num) ($data_($var_num)_var)
 
 IF `size LE max_size` THEN
@@ -170,7 +169,7 @@ ELSE
    ENDIF
 
      ! ... netCDF output in chunks
-   REPEAT/L=($lmin):($lmax):`lchunk` REPEAT/K=($kmin):($kmax):`kchunk` REPEAT/J=($clat_jmin):($clat_jmax):`jchunk` (LIST/APPEND/FILE/($frmt)/J=`j`:`jtop`/K=`k`:`ktop`/L=`l`:`ltop`/JLIMITS=($clat_jmin):($clat_jmax)/KLIMITS=($kmin):($kmax)/LLIMITS=($lmin):($lmax)/I=($clon_imin):($clon_imax) ($data_($var_num)_var); CANC MEM/ALL)
+   REPEAT/L=($lmin):($lmax):`lchunk` REPEAT/K=($kmin):($kmax):`kchunk` REPEAT/J=($clat_jmin):($clat_jmax):`jchunk` (LIST/APPEND/FILE/($frmt)/J=`j`:`jtop`/K=`k`:`ktop`/L=`l`:`ltop`/JLIMITS=($clat_jmin):($clat_jmax)/KLIMITS=($kmin):($kmax)/I=($clon_imin):($clon_imax) ($data_($var_num)_var); CANC MEM/ALL)
 
 ENDIF
 
