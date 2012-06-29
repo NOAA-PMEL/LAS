@@ -67,22 +67,24 @@ ENDIF
 
 DEFINE SYMBOL shape = `UPCASE("($4)")`
 
-
 IF `STRINDEX("($shape)", "I") GT 0` THEN
 ! write the coordinates as X coordinates.
    LET COORDS = x[gx=($myvar)]
+   SET VAR/outtype=float coords
    SAVE/FILE="$1"/CLOBBER COORDS[i=`lo_index_1`:`hi_index_1`:`stride_1`]
 ENDIF
 
 IF `STRINDEX("($shape)", "J") GT 0` THEN
 ! write the coordinates as Y coordinates.
    LET COORDS = y[gy=($myvar)]
+   SET VAR/outtype=float coords
    SAVE/FILE="$1"/CLOBBER COORDS[j=`lo_index_1`:`hi_index_1`:`stride_1`]
 ENDIF
 
 IF `STRINDEX("($shape)", "K") GT 0` THEN
 ! write the coordinates as Y coordinates.
    LET COORDS = z[gz=($myvar)]
+   SET VAR/outtype=float coords
    SAVE/FILE="$1"/CLOBBER COORDS[k=`lo_index_1`:`hi_index_1`:`stride_1`]
 ENDIF
 
@@ -90,6 +92,7 @@ IF `STRINDEX("($shape)", "L") GT 0` THEN
 
 ! write the coordinates as Y coordinates.
    LET COORDS = t[gt=($myvar)]
+   SET VAR/outtype=float coords
    SAVE/FILE="$1"/CLOBBER COORDS[l=`lo_index_1`:`hi_index_1`:`stride_1`]
 ENDIF
 
