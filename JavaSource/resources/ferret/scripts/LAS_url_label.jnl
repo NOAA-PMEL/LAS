@@ -107,10 +107,10 @@ IF `($num) GT 0` THEN
 
 ! Throw up our hands if its a difference of vectors with multiple URLs
    IF `(($num) EQ 2) AND ($diffurl)` THEN \
-         `STRCMP("($dataset_url_0_lab)", "($dataset_url_2_lab)") NE 0` THEN CANCEL SYMBOL dataset_url_lab
+        IF `STRCMP("($dataset_url_0_lab)", "($dataset_url_2_lab)") NE 0` THEN CANCEL SYMBOL dataset_url_lab
 
    IF `(($num) EQ 3) AND ($diffurl)` THEN \
-         `STRCMP("($dataset_url_1_lab)", "($dataset_url_3_lab)") NE 0` THEN CANCEL SYMBOL dataset_url_lab
+        IF `STRCMP("($dataset_url_1_lab)", "($dataset_url_3_lab)") NE 0` THEN CANCEL SYMBOL dataset_url_lab
 
 ELSE
    IF `($dataset_url_0_lab"0|*>1")` THEN DEFINE SYMBOL dataset_url_lab ($dataset_url_0_lab)
