@@ -1337,7 +1337,7 @@ public class ADDXMLProcessor {
 					                    tAxis.setType("t");
 
 					                    ArangeBean tr = new ArangeBean();
-					                    DateTimeFormatter hoursfmt = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
+					                    DateTimeFormatter hoursfmt = DateTimeFormat.forPattern("yyyy-MMM-dd HH:mm:ss");
 					                    log.debug("Using start time: "+hoursfmt.print(metadata_sd));
 					                    tr.setStart(hoursfmt.print(metadata_sd));
 					                    double dm = (metadata_ed.getMillis() - metadata_sd.getMillis())/(Double.valueOf(timeCoverageNumberOfPoints) - 1.d);
@@ -1354,10 +1354,10 @@ public class ADDXMLProcessor {
 					                        tAxis.setUnits("time");
 					                        String[] v = new String[Integer.valueOf(timeCoverageNumberOfPoints)];
 					                        DateTimeFormatter fmt;
-					                        if ( duration.getStandardHours() >= 24 ) {
-					                            fmt = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
+					                        if ( duration.getStandardHours() < 24 ) {
+					                            fmt = DateTimeFormat.forPattern("yyyy-MMM-dd HH:mm:ss");
 					                        } else {
-					                            fmt = DateTimeFormat.forPattern("yyyy-MM-dd");
+					                            fmt = DateTimeFormat.forPattern("yyyy-MMM-dd");
 					                        }
 					                        for ( int i = 0; i < Integer.valueOf(timeCoverageNumberOfPoints); i++ ) {
 					                            v[i] = fmt.print(metadata_sd);
