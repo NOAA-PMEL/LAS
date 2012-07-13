@@ -1337,17 +1337,19 @@ public class ADDXMLProcessor {
 					                    tAxis.setType("t");
 
 					                    ArangeBean tr = new ArangeBean();
-					                    DateTimeFormatter hoursfmt = DateTimeFormat.forPattern("yyyy-MMM-dd HH:mm:ss");
+					                    DateTimeFormatter hoursfmt = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
 					                    log.debug("Using start time: "+hoursfmt.print(metadata_sd));
 					                    tr.setStart(hoursfmt.print(metadata_sd));
 					                    double dm = (metadata_ed.getMillis() - metadata_sd.getMillis())/(Double.valueOf(timeCoverageNumberOfPoints) - 1.d);
 					                    long delta_millis = (long) dm;
 					                    Duration duration = new Duration(delta_millis);
 					                    if ( metadata_sd.equals(metadata_ed) || Integer.valueOf(timeCoverageNumberOfPoints) == 1 ) {
+					                        DateTimeFormatter fmt;
+					                        fmt = DateTimeFormat.forPattern("yyyy-MMM-dd HH:mm:ss");
 					                        tAxis.setArange(null);
 					                        tAxis.setUnits("time");
 					                        String[] v = new String[1];
-					                        v[0] = hoursfmt.print(metadata_sd);
+					                        v[0] = fmt.print(metadata_sd);
 					                        tAxis.setV(v);
 					                    } else if ( Integer.valueOf(timeCoverageNumberOfPoints) <= 10 ) {
 					                        tAxis.setArange(null);
