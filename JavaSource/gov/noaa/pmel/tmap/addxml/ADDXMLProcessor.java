@@ -1345,7 +1345,7 @@ public class ADDXMLProcessor {
 					                    Duration duration = new Duration(delta_millis);
 					                    if ( metadata_sd.equals(metadata_ed) || Integer.valueOf(timeCoverageNumberOfPoints) == 1 ) {
 					                        DateTimeFormatter fmt;
-					                        fmt = DateTimeFormat.forPattern("yyyy-MMM-dd HH:mm:ss");
+					                        fmt = DateTimeFormat.forPattern("dd-MMM-yyyy HH:mm:ss");
 					                        tAxis.setArange(null);
 					                        tAxis.setUnits("time");
 					                        String[] v = new String[1];
@@ -1357,9 +1357,9 @@ public class ADDXMLProcessor {
 					                        String[] v = new String[Integer.valueOf(timeCoverageNumberOfPoints)];
 					                        DateTimeFormatter fmt;
 					                        if ( duration.getStandardHours() < 24 ) {
-					                            fmt = DateTimeFormat.forPattern("yyyy-MMM-dd HH:mm:ss");
+					                            fmt = DateTimeFormat.forPattern("dd-MMM-yyyy HH:mm:ss");
 					                        } else {
-					                            fmt = DateTimeFormat.forPattern("yyyy-MMM-dd");
+					                            fmt = DateTimeFormat.forPattern("dd-MMM-yyyy");
 					                        }
 					                        for ( int i = 0; i < Integer.valueOf(timeCoverageNumberOfPoints); i++ ) {
 					                            v[i] = fmt.print(metadata_sd);
