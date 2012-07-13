@@ -14,7 +14,7 @@ DEFINE SYMBOL fland_palette ($2"gray")
 
 LET lon_range = `($region_X_hi) - ($region_X_lo)`
 LET lat_range = `($region_Y_hi) - ($region_Y_lo)`
-LET fland_area = `(lon_range * lat_range) / (360 * 180)`
+LET fland_area = `ABS(lon_range * lat_range) / (360 * 180)`
 
 ! If a tiny region then use smith_sandwell topo from PMEL server
 IF `fland_area LT 0.005` THEN
