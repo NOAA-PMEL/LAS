@@ -1380,16 +1380,20 @@ public class ADDXMLProcessor {
 					                        for (int i = 0; i < 6; i++) {
 					                            if (values[i] > 0) {
 					                                numPeriods++;
-					                                step = values[i];
-					                                typeName = types[i].getName();
+					                                String tn = types[i].getName();
 					                                // Get rid of the "s" in the plural form of the name.
-					                                typeName = typeName.substring(0, typeName.length() - 1);
+					                                tn = tn.substring(0, tn.length() - 1);
 					                                // LAS doesn't understand "week" so make it "day" and
 					                                // multiply the step by 7.
-					                                periods = periods + " " + typeName;
-					                                if (typeName.equals("week")) {
-					                                    typeName = "day";
+					                                periods = periods + " " + tn;
+					                                if (tn.equals("week")) {
+					                                    tn = "day";
 					                                    step = step * 7;
+					                                }
+					                                // Keep only the largest whole period...
+					                                if ( typeName.equals("") ) {
+					                                    typeName = tn;
+					                                    step = values[i];
 					                                }
 					                            }
 
@@ -1406,8 +1410,7 @@ public class ADDXMLProcessor {
 
 					                            // Is the gap in years and months 0?
 					                            // Are the values 4 weeks apart?
-					                            if ( (values[0] == 0 && values[1] == 0) &&
-					                                    (values[2] == 4)) {
+					                            if ( (values[0] == 0 && values[1] == 0) && (values[2] == 4)) {
 					                                // We're guessing these are months
 					                                typeName = "month";
 					                                step = 1;
@@ -1415,12 +1418,17 @@ public class ADDXMLProcessor {
 					                                // We're again guessing that the value is months (and everything else is in the noise)
 					                                typeName = "month";
 					                                step = values[1];
-					                            } else if ( numPeriods == 2 && periods.contains("week") && periods.contains("day")  ) {
+					                            } else if ( !periods.contains("year") && !periods.contains("month") && periods.contains("week") && periods.contains("day")  ) {
 					                                // We can convert this to days. :-)
 					                                typeName = "day";
 					                                step = 7*values[2] + values[3];
 
-					                            }  else {
+					                            }  else if ( !periods.contains("year") && !periods.contains("month") && !periods.contains("week") && !periods.contains("day") && periods.contains("hour") && periods.contains("minute") ) {
+					                                // Hours is the best we can do...
+					                                typeName = "hour";
+					                                step = values[4];
+					                            
+					                            } else {
 					                                // Guess based on the size of the period in well-known units.
 					                                long days = duration.getStandardDays();
 
