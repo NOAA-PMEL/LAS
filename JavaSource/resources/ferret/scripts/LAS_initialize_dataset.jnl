@@ -62,20 +62,24 @@ ELSE
 ENDIF
 
 ! Do the same for curvilinear coordinate variables if they are defined
-IF ($ferret_curvi_coord_lon"0|*>1") THEN DEFINE SYMBOL f_curv_lon = `UPCASE("($ferret_curvi_coord_lon)")`
-LET varlen = `STRLEN("($ferret_curvi_coord_lon)")`
-IF `STRINDEX("($ferret_curvi_coord_lon)", "'") EQ 1 AND STRRINDEX("($ferret_curvi_coord_lon)", "'") EQ varlen` THEN
-   DEFINE SYMBOL curv_already_quote = 1
-ELSE 
-   IF ($data_($num)_var"0|*>1") THEN DEFINE SYMBOL ferret_curvi_coord_lon = '($f_curv_lon)'
+IF ($ferret_curvi_coord_lon"0|*>1") THEN 
+   DEFINE SYMBOL f_curv_lon = `UPCASE("($ferret_curvi_coord_lon)")`
+   LET varlen = `STRLEN("($ferret_curvi_coord_lon)")`
+   IF `STRINDEX("($ferret_curvi_coord_lon)", "'") EQ 1 AND STRRINDEX("($ferret_curvi_coord_lon)", "'") EQ varlen` THEN
+      DEFINE SYMBOL curv_already_quote = 1
+   ELSE 
+      IF ($data_($num)_var"0|*>1") THEN DEFINE SYMBOL ferret_curvi_coord_lon = '($f_curv_lon)'
+   ENDIF
 ENDIF
 
-IF ($ferret_curvi_coord_lat"0|*>1") THEN DEFINE SYMBOL f_curv_lat = `UPCASE("($ferret_curvi_coord_lat)")`
-LET varlen = `STRLEN("($ferret_curvi_coord_lat)")`
-IF `STRINDEX("($ferret_curvi_coord_lat)", "'") EQ 1 AND STRRINDEX("($ferret_curvi_coord_lat)", "'") EQ varlen` THEN
-   DEFINE SYMBOL curv_already_quote = 1
-ELSE 
-   IF ($data_($num)_var"0|*>1") THEN DEFINE SYMBOL ferret_curvi_coord_lat = '($f_curv_lat)'
+IF ($ferret_curvi_coord_lat"0|*>1") THEN 
+   DEFINE SYMBOL f_curv_lat = `UPCASE("($ferret_curvi_coord_lat)")`
+   LET varlen = `STRLEN("($ferret_curvi_coord_lat)")`
+   IF `STRINDEX("($ferret_curvi_coord_lat)", "'") EQ 1 AND STRRINDEX("($ferret_curvi_coord_lat)", "'") EQ varlen` THEN
+      DEFINE SYMBOL curv_already_quote = 1
+   ELSE 
+      IF ($data_($num)_var"0|*>1") THEN DEFINE SYMBOL ferret_curvi_coord_lat = '($f_curv_lat)'
+   ENDIF
 ENDIF
 
 ! If the grids werent the same but were reconciled with an add_var, add that.
