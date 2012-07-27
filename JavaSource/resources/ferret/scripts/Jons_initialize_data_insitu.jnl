@@ -12,9 +12,22 @@
 !
 DEFINE SYMBOL num ($1"0")
 
+!
+! First reset the default gif filename used internally by Ferret.
+! This must be done before PPLUS is opened.  Some of the scripts use PPL
+! symbol editing, so even before any plot commands are issued, pplus is 
+! started.
+
+! Define the gif filename (preventing collisions of file named ".gif" in VizGal)
+IF `($reset_gifname"0|*>1") AND ($FERRET_VERSION"0") GE 6.721` THEN 
+   IF ($result_plot_image_filename%0|*>1%) THEN 
+      IF `STRINDEX("($result_plot_image_filename)", "gif") GT 0` THEN\
+ SET GIFFILE "($result_plot_image_filename)"
+      DEFINE SYMBOL reset_gifname = 1
+   ENDIF
+ENDIF
+
 ! The x and y locations for insitu plots
-! ACM note: These are assumed to be in the same dataset, along
-!           with data_($num)_var if it exists, but we could
 !           extend to different data sets with further symbols
 
 DEFINE SYMBOL data_x_var = ($database_access_($num)_longitude)
