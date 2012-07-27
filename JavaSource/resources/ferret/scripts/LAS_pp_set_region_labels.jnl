@@ -156,6 +156,7 @@ IF `($have_time_lab"0|*>1") EQ 0` THEN
 ENDIF
 
 ! Do we need a YEAR label?  If its a 1-D Time plot then we do
+IF ($its_prop_prop_plot"0|*>1") THEN
 LET L_time = `($ferret_plot_var),return=Lsize`
 IF `(($have_year_lab"0|*>1") EQ 0) AND (L_time GT 1)` THEN
    IF `(STRCMP("($fview%A%)", "T") EQ 0) AND ($region_t_lo"0|*>1") AND ($do_t"0")` THEN
@@ -174,13 +175,12 @@ IF `(($have_year_lab"0|*>1") EQ 0) AND (L_time GT 1)` THEN
 
    ENDIF
 ENDIF
-
+ENDIF
 
 IF ($longitude_0_lab"0|*>1") THEN DEFINE SYMBOL longitude_lab ($longitude_0_lab)
 IF ($latitude_0_lab"0|*>1") THEN DEFINE SYMBOL  latitude_lab ($latitude_0_lab)
 IF ($depth_0_lab"0|*>1") THEN DEFINE SYMBOL depth_lab ($depth_0_lab)
 IF ($time_0_lab"0|*>1") THEN DEFINE SYMBOL time_lab ($time_0_lab)
-
 
 ! End of LAS_pp_set_region_labels.jnl -----------------------------------------
 

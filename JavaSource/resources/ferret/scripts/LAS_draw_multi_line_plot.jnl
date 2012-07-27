@@ -4,22 +4,6 @@
 
 set mode ver:always
 
-! By default use graticules only the independent axis. 
-! Dependent-axis ones can be a mess. The user can turn them on 
-! if desired.  If explicitly turned off, do not draw them.
-
-!SET MODE LINECOLORS:8
-!PPL COLOR,7,70,70,70  ! gray
-!PPL COLOR,8,100,100,100  ! white
-!DEFINE SYMBOL graticuleColor = 7
-
-!CANCEL MODE GRATICULE
-!IF ($ferret_use_graticules"0|none>0|default>0|*>1) THEN
-!  SET MODE GRATICULE:(DASH,COLOR=($graticuleColor))
-!ELSE
-!   DEFINE SYMBOL qualifiers_0 = /VGRATICULE=DASH,COLOR=($graticuleColor))
-!   IF `($ferret_use_graticules"1|0|default>1|1|*>1) EQ 0` THEN CANCEL SYMBOL qualifiers_0
-!ENDIF
 
 CANCEL MODE GRATICULE
 DEFINE SYMBOL qualifiers_0 = /VGRATICULE=DASH,COLOR=($graticuleColor))
@@ -71,11 +55,24 @@ DEFINE SYMBOL qualifiers = ($qualifiers)/TITLE=" "
 ! If there are two variables with different units, scale each independently, putting
 ! one dependent axis on the left an the other on the right.
 
+LET xpl = 0.9
+LET yv = 0.13
+
 IF `(($data_count"0") EQ 2) AND (STRCMP("($units_0)", "($units_1)") NE 0)` THEN 
 
 ! Plot second variable in red, with its axis on the right.
 
+   PLOT($qualifiers)/AXES=0,0,0,1/NOKEY/COLOR=red/SET ($ferret_plot_var_1)
+
+   IF ($ferret_annotations"0|*>1") THEN
+      LET maxlablen = 0
+      LET maxlablen = `MAX(maxlablen, STRLEN("($PPL$YMIN1)"))`
+      LET maxlablen = `MAX(maxlablen, STRLEN("($PPL$YMAX1)"))`
+      IF `maxlablen GT 6` THEN LET xpl = `xpl - (0.012*(maxlablen-6)/2)`
+   ENDIF
+
    DEFINE VIEWPORT/x=0:1/y=0:1 right_axis_view
+   IF ($ferret_annotations"0|*>1") THEN DEFINE VIEWPORT/axes/x=.1:`xpl`/y=`yv`:.99 right_axis_view
    SET VIEW right_axis_view
    SET VAR/UNITS="@P2@AC($data_1_units)" ($ferret_plot_var_1)
    PLOT($qualifiers)/AXES=0,0,0,1/NOKEY/COLOR=red/SET ($ferret_plot_var_1)
@@ -89,6 +86,7 @@ IF `(($data_count"0") EQ 2) AND (STRCMP("($units_0)", "($units_1)") NE 0)` THEN
       IF `($labnum_datitl%0|*>1%)` THEN GO unlabel ($labnum_datitl)
       IF `($labnum_dods%0|*>1%)` THEN GO unlabel ($labnum_dods)
       IF `($labnum_calend%0|*>1%)` THEN GO unlabel ($labnum_calend)
+      ppl txlsze,0.07
       PPL xlab
    PPL PLOT
 
@@ -100,7 +98,12 @@ IF `(($data_count"0") EQ 2) AND (STRCMP("($units_0)", "($units_1)") NE 0)` THEN
    DEFINE SYMBOL two_axes = 1
    SET VAR/UNITS="@AC($data_0_units)" ($ferret_plot_var_0)
 
-   SET VIEW FULL
+   SET VIEW full
+   IF ($ferret_annotations"0|*>1") THEN 
+      DEFINE VIEWPORT/axes/x=.1:`xpl`/y=`yv`:.99 full_axes1
+      SET VIEW full_axes1
+   ENDIF
+
 ENDIF
 
 ! If line style is just symbols, we need to do lines separately to get different colors.
@@ -130,6 +133,13 @@ IF `(($all_units_same) EQ 0) AND (($data_count) GT 2)` THEN
       DEFINE SYMBOL in_units = ($units_($mm)); \
       GO collect_units_vars )
 
+   LET maxlablen = 0
+   REPEAT/RANGE=2:`($iplot)+1`/NAME=m (\
+      DEFINE SYMBOL vm = `m-1`; \
+      PLOT/SET ($plot_vars_($vm)) ;\
+      LET maxlablen = `MAX(maxlablen, STRLEN("($PPL$YMIN1)"))`;\
+      LET maxlablen = `MAX(maxlablen, STRLEN("($PPL$YMAX1)"))`)
+
 ! Draw the other plot axes scaled for each set of variables with common units
 ! Plot axis with first set of units will be on the left.
 ! Draw the plots for other sets of variables as /SYM=dot/COLOR=8 (COLOR=white) so that
@@ -137,24 +147,34 @@ IF `(($all_units_same) EQ 0) AND (($data_count) GT 2)` THEN
 ! so that we can control the line color.
 
    LET xpl = `1 - margin_del* (($iplot)-1)`
+   IF ($ferret_annotations"0|*>1") THEN 
+      LET xpl = `0.9 - margin_del* (($iplot)-1)`
+      IF `maxlablen GT 6` THEN LET xpl = `xpl - (0.012*(maxlablen-6)/2)`
+   ENDIF
+ 
    LET ypl = 1
 
    REPEAT/RANGE=2:`($iplot)+1`/NAME=m (\
       DEFINE SYMBOL vm = `m-1`; \
       DEFINE VIEWPORT/X=0:`xpl`/y=0:`ypl` v($vm); \
+      IF ($ferret_annotations"0|*>1") THEN DEFINE VIEWPORT/axes/x=.1:`xpl`/y=`yv`:.99 v($vm); \
       SET VIEW v($vm); \
       PLOT/AXES=0,0,0,1/SYM=dot/COLOR=8/NOLAB ($plot_vars_($vm));\
       LABEL/NOUSER `($ppl$xlen) + 0.7`, `($ppl$ylen)/2`, 0, 90, 0.12, @AC($group_label_($vm)); \
-      LET xpl = `xpl + margin_del` \
-   )
+      LET xpl = `xpl + margin_del`)
 
 ! Draw the lines each in its own viewport
 
    LET xpl = `1 - margin_del* (($iplot)-1)`
+   IF ($ferret_annotations"0|*>1") THEN 
+      LET xpl = `0.9 - margin_del* (($iplot)-1)`
+      IF `maxlablen GT 6` THEN LET xpl = `xpl - (0.012*(maxlablen-6)/2)`
+   ENDIF
 
 ! Draw the first variable
    DEFINE SYMBOL vm = 0
    DEFINE VIEWPORT/X=0:`xpl`/y=0:`ypl` v0_($vm)
+   IF ($ferret_annotations"0|*>1") THEN DEFINE VIEWPORT/axes/x=.1:`xpl`/y=`yv`:.99 v0_($vm)
    SET VIEW v0_0
    PLOT($qualifiers)($qualifiers_0)/AXES=1,1,1,0/COLOR=($color($vm))/NOLAB ($ferret_plot_var_($vm))
    LABEL/NOUSER `-0.7`, `($ppl$ylen)/2`, 0, 90, 0.12, @AC($group_label_($vm))
@@ -162,12 +182,19 @@ IF `(($all_units_same) EQ 0) AND (($data_count) GT 2)` THEN
    REPEAT/RANGE=2:($data_count)/name=m (\
       DEFINE SYMBOL vm = `m-1`; \
       DEFINE VIEWPORT/X=0:`xpl`/y=0:`ypl` v0_($vm);\
+      IF ($ferret_annotations"0|*>1") THEN DEFINE VIEWPORT/axes/x=.1:`xpl`/y=`yv`:.99 v0_($vm);\
       SET VIEW v0_($vm);\
-      PLOT($qualifiers)/AXES=0,0,0,0/COLOR=($color($vm))/NOLAB ($ferret_plot_var_($vm)) )
+      PLOT($qualifiers)/AXES=0,0,0,0/COLOR=($color($vm))/NOLAB ($ferret_plot_var_($vm)))
       
 ELSE
 
-SET VIEW FULL
+SET VIEW full
+
+IF ($ferret_annotations"0|*>1") THEN 
+   DEFINE VIEWPORT/axes/x=.1:`xpl`/y=`yv`:.99 full_axes2
+   SET VIEW full_axes2
+ENDIF
+
 IF `($ferret_line_or_sym%0|sym>1|*>0%)` THEN
    PLOT($qualifiers_0)/NOKEY/SET/COLOR=8 ($plot_arg)
       IF `($labnum_x%0|*>1%)` THEN GO unlabel ($labnum_x)
@@ -179,6 +206,7 @@ IF `($ferret_line_or_sym%0|sym>1|*>0%)` THEN
       IF `($labnum_dods%0|*>1%)` THEN GO unlabel ($labnum_dods)
       IF `($labnum_calend%0|*>1%)` THEN GO unlabel ($labnum_calend)
       IF `($title_size%0|*>1%)` THEN PPL LABSET ($title_size)
+      ppl txlsze,0.07
       PPL xlab
       PPL ylab ($data_0_units)
    PPL PLOT
@@ -203,12 +231,12 @@ ELSE
       IF `($labnum_calend%0|*>1%)` THEN GO unlabel ($labnum_calend)
       IF `($title_size%0|*>1%)` THEN PPL LABSET ($title_size)
       IF `($ferret_dep_axis_scale"0|*>1")` THEN PPL YAXIS ($ferret_dep_axis_scale)
+      ppl txlsze,0.07
       PPL xlab
       PPL ylab ($data_0_units)
    PPL PLOT
    
 ENDIF
-
 ENDIF ! same units for all 
 
 IF ($labnum_calend%0|*>1%) THEN
@@ -223,24 +251,38 @@ DEFINE SYMBOL xax_min_save = ($xaxis_min)
 DEFINE SYMBOL xax_max_save = ($xaxis_max)
 
 ! Draw the legend.
+sh view
+sh sym ppl$xorg, ppl$yorg
 
 ! Make an invisible xy plot. The legline script doesnt work well with z and t plots.
 IF `($two_axes"0") EQ 1` THEN DEFINE SYMBOL data_count = 2
 
-DEFINE VIEWPORT/x=0:1/y=0:1 overview
+!DEFINE VIEWPORT/x=0:1/y=0:1 overview
+! IF ($ferret_annotations"0|*>1") THEN DEFINE VIEWPORT/axes/x=0.1:0.9/y=0.18:0.9 overview
+
+DEFINE VIEWPORT/x=0:1/y=0:1/axes overview
 SET VIEW overview
-PLOT/NOLAB/NOAX/I=1:2/VLIM=100:102 i
+PLOT/NOYADJUST/NOLAB/NOAX/I=1:2/VLIM=100:102 i
+
+LET titlesiz = 0.09
 
 ! The start (x,y) position for each line drawn on the key
 
-LET x1 = -0.2
-LET xkey = {`x1` , `x1` , `x1` , `0.6*($ppl$xlen)`, `0.6*($ppl$xlen)`, `0.6*($ppl$xlen)`,     0, 0}
-LET ykey = {-0.65, -0.85, -1.05,            -0.65,             -0.85,             -1.05, -1.25, -1.25}
+!LET x1 = -0.2
+!LET xkey = {`x1` , `x1` , `x1` , `0.6*($ppl$xlen)`, `0.6*($ppl$xlen)`, `0.6*($ppl$xlen)`,     0, 0}
 
-LET titlesiz = 0.11
-IF `title_len GE 40 AND ($data_count"0") GT 3` THEN LET titlesiz = 0.10
-IF `title_len GE 50 AND ($data_count"0") GT 3` THEN LET titlesiz = 0.09
-IF `title_len GE 60 AND ($data_count"0") GT 3` THEN LET titlesiz = 0.08
+!LET ykey = {-0.65, -0.85, -1.05,            -0.65,             -0.85,             -1.05, -1.25, -1.25}
+!IF `($data_count) EQ 2` THEN LET ykey = \
+!           {-0.7,  -0.9,  -1.05,            -0.65,             -0.85,             -1.05, -1.25, -1.25}
+
+
+LET x1 = 1.
+LET xkey = {`x1` , `x1` , `x1` , `0.6*($ppl$xlen)`, `0.6*($ppl$xlen)`, `0.6*($ppl$xlen)`,     0, 0}
+
+LET ykey = {0.7, 0.5, 0.3, 0.7, 0.5, 0.3, 0.1, 0.1}
+!IF `($data_count) EQ 2` THEN LET ykey = \
+!           {-0.7,  -0.9,  -1.05,            -0.65,             -0.85,             -1.05, -1.25, -1.25}
+
 
 REPEAT/range=1:`($data_count)`/NAME=m (; \
    DEFINE SYMBOL m = `m`;  \

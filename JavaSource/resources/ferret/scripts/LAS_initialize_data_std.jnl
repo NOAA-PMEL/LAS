@@ -40,7 +40,15 @@ ENDIF
 
 GO LAS_initialize_variable 
 DEFINE SYMBOL variable_($1"0")_lab = ($data_title) ($data_units)
-IF `($1"0") EQ 0` THEN DEFINE SYMBOL variable_lab = ($data_title) ($data_units)
+IF `($its_prop_prop_plot"0|*>1") EQ 0` THEN
+   IF ($variable_lab"0|*>1") THEN 
+      DEFINE SYMBOL variable_lab = ($variable_lab), ($data_title) ($data_units)
+   ELSE
+      DEFINE SYMBOL variable_lab = ($data_title) ($data_units)
+   ENDIF
+ENDIF
+IF `($its_prop_prop_plot"0|*>1")` THEN DEFINE SYMBOL variable_lab = ($data_title) ($data_units)
+
 
 IF `STRLEN("($ferret_view)") GT 1 AND ($its_prop_prop_plot"0|*>1") EQ 0 AND \
 ($itsa_vector_plot"0|*>1") EQ 0` THEN DEFINE SYMBOL qualifiers = ($qualifiers)/KEY=CONT
