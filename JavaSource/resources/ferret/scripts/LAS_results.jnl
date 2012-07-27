@@ -62,25 +62,8 @@ ENDIF
 
 ! Always write the map_scale file.
 
-!Comment out the url and variable name output. This info is not saved
+!Do not write out the url and variable name output. This info is not saved
 !when map_scale.xml is generated anyway. (See ferret ticket 1933)
-
-!   LET syms_names = {"DATA_0_URL"}
-!   LET syms_vals = {"($DATA_0_URL)"}
-!   LIST/CLOBBER/FILE="($result_map_scale_filename)"/NOHEAD/NOROWLAB syms_names, syms_vals
-!   LET syms_names = {"DATA_0_VAR"}
-!   LET syms_vals = {"($DATA_0_VAR)"}
-!   LIST/APPEND/FILE="($result_map_scale_filename)"/NOHEAD/NOROWLAB syms_names, syms_vals
-!
-!   LET syms_names = {"DATA_1_URL"}
-!   LET syms_vals = {"($DATA_1_URL)"}
-!   LIST/APPEND/FILE="($result_map_scale_filename)"/NOHEAD/NOROWLAB syms_names, syms_vals
-!   LET syms_names = {"DATA_1_VAR"}
-!   LET syms_vals = {"($DATA_1_VAR)"}
-!   LIST/APPEND/FILE="($result_map_scale_filename)"/NOHEAD/NOROWLAB syms_names, syms_vals
-!
-! assume we are running Ferret v5.81_ with /NOROWLAB qualifier on LIST command
-!   LIST/APPEND/FILE="($result_map_scale_filename)"/NOHEAD/NOROWLAB syms_names, syms_vals
 
    IF `($xstride"0|*>1) EQ 0` THEN DEFINE SYMBOL xstride = 1 
    IF `($ystride"0|*>1) EQ 0` THEN DEFINE SYMBOL ystride = 1
@@ -97,13 +80,24 @@ ENDIF
       "VP_TOP_MARGIN","VP_RT_MARGIN",\
       "XSTRIDE","YSTRIDE"}
 
-! For curvilienar grids, region_0_x_lo and region_0_x_hi may
+! When animating a Z profile, drawing the first plot: 
+! The symbols XAXIS_MIN and XAXIS_MAX may not be defined.
+! Set them here using the data min and max.
+
+   DEFINE SYMBOL has_xaxis_sym = ($XAXIS_MIN"0|*>1")
+   IF `($has_xaxis_sym) EQ 0` THEN
+      PPL %RANGE ($PPL$XMIN1) ($PPL$XMAX1) 10
+      DEFINE SYMBOL xaxis_min = ($ppl$range_low) 
+      DEFINE SYMBOL xaxis_max = ($ppl$range_high)
+   ENDIF
+
+! For curvilinear grids, region_0_x_lo and region_0_x_hi may
 ! have been changed to another modulo longitude branch. If so
 ! then the x axis min and max need to be reset.
-
-
+      
    DEFINE SYMBOL xaxlo = ($XAXIS_MIN)
    DEFINE SYMBOL xaxhi = ($XAXIS_MAX)
+
    IF ($region_0_x_lo_orig"0|*>1") THEN
       IF `($region_0_x_lo_orig) - ($XAXIS_MIN) LT (-350)` THEN 
          DEFINE SYMBOL xaxlo = `($XAXIS_MIN) - 360`
@@ -141,7 +135,7 @@ ENDIF
       "($xstride)","($ystride)"}
 
 ! assume we are running Ferret v5.81 or higher with /NOROWLAB qualifier on LIST command
-   LIST/APPEND/FILE="($result_map_scale_filename)"/NOHEAD/NOROWLAB syms_names, syms_vals
+   LIST/CLOBBER/FILE="($result_map_scale_filename)"/NOHEAD/NOROWLAB syms_names, syms_vals
 
 ! If symbols for formatted time-axis ends have been defined, write those.
 ! These are used by correlation plots.
