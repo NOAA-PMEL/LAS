@@ -7,6 +7,21 @@
 !
 DEFINE SYMBOL num ($1"0")
 
+!
+! First reset the default gif filename used internally by Ferret.
+! This must be done before PPLUS is opened.  Some of the scripts use PPL
+! symbol editing, so even before any plot commands are issued, pplus is 
+! started.
+
+! Define the gif filename (preventing collisions of file named ".gif" in VizGal)
+IF `($reset_gifname"0|*>1") AND ($FERRET_VERSION"0") GE 6.721` THEN 
+   IF ($result_plot_image_filename%0|*>1%) THEN 
+      IF `STRINDEX("($result_plot_image_filename)", "gif") GT 0` THEN\
+ SET GIFFILE "($result_plot_image_filename)"
+      DEFINE SYMBOL reset_gifname = 1
+   ENDIF
+ENDIF
+
 DEFINE SYMBOL data_($num)_dataset_id = ($data_($num)_dataset_name)
 
 ! The variable at the x and y locations
