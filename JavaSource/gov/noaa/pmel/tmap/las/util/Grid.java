@@ -219,8 +219,8 @@ public class Grid extends Container implements Cloneable, GridInterface {
 			if ( points != null ) {
 				g.setPoints(points);
 			}
-		}
 		g.setID(getID());
+		}
 		if ( hasX() ) {
 			AxisSerializable a = getAxis("x").getAxisSerializable();
 			g.setXAxis(a);

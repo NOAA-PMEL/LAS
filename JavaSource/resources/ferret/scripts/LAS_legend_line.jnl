@@ -32,6 +32,10 @@
 !          ! this one handles either z pos up or down axes                    |
 !-----------------------------------------------------------------------------+
 
+! Make room for a 2-line time axis label, e.g. month and year.
+  DEFINE SYMBOL yv = ($3)
+  IF ($ferret_view"0|T>1|t>1|*>0") THEN DEFINE SYMBOL yv = `($yv)-0.15`
+
 !LINE : xy coordinates in nouser units
 
   !$ppl$yaxis_min : y axis minimum / $ppl$yaxis_max : y axis maximum
@@ -52,7 +56,7 @@
   DEFINE SYMBOL x1 = `($xaxis_min) + ($1) * ($xr)/($xl)`
   DEFINE SYMBOL x2 = `($x1)        + ($2) * ($xr)/($xl)`
   DEFINE SYMBOL xhalf = `(($x2) + ($x1)) / 2.`
-  DEFINE SYMBOL y1 = `($yaxis_min) + ($3) * ($yr)/($yl)`
+  DEFINE SYMBOL y1 = `($yaxis_min) + ($yv) * ($yr)/($yl)`
 
 ! use plot/vs rather than aline
   ppl window,off
@@ -62,7 +66,7 @@
 ! note that these are relative to the beginning of the plot x-axis
 ! this is not necessarily the same as ($xaxis_min)!
   DEFINE SYMBOL tx = `($1) + ($2)+($2)/5`
-  DEFINE SYMBOL ty = `($3)-($5)/2`
+  DEFINE SYMBOL ty = `($yv)-($5)/2`
 
   !LABEL/[no]user xpos, ypos, center, angle, size   text
   LABEL/nouser ($tx) ($ty) -1 0 ($5) @AC($6)

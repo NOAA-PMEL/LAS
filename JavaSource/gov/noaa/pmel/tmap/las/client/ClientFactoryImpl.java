@@ -1,55 +1,84 @@
-/*******************************************************************************
- * Copyright 2011 Google Inc. All Rights Reserved.
- *
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *******************************************************************************/
 package gov.noaa.pmel.tmap.las.client;
 
-
+import gov.noaa.pmel.tmap.las.client.laswidget.ActionsMenuBar;
+import gov.noaa.pmel.tmap.las.client.laswidget.ActionsMenuBarImpl;
 import gov.noaa.pmel.tmap.las.client.laswidget.HelpMenuBar;
 import gov.noaa.pmel.tmap.las.client.laswidget.HelpMenuBarImpl;
+import gov.noaa.pmel.tmap.las.client.laswidget.MultiVariableSelector;
+import gov.noaa.pmel.tmap.las.client.laswidget.MultiVariableSelectorImpl;
+import gov.noaa.pmel.tmap.las.client.laswidget.OutputControlPanel;
+import gov.noaa.pmel.tmap.las.client.laswidget.OutputControlPanelImpl;
+import gov.noaa.pmel.tmap.las.client.laswidget.VariableControls;
+import gov.noaa.pmel.tmap.las.client.laswidget.VariableControlsImpl;
+import gov.noaa.pmel.tmap.las.client.laswidget.VariableMetadataView;
+import gov.noaa.pmel.tmap.las.client.laswidget.VariableMetadataViewImpl;
+import gov.noaa.pmel.tmap.las.client.laswidget.VariableSelector;
+import gov.noaa.pmel.tmap.las.client.laswidget.VariableSelectorImpl;
 
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.event.shared.SimpleEventBus;
+
 //import com.google.gwt.place.shared.PlaceController;
 
 /**
  * Sample implementation of {@link ClientFactory}.
  */
 public class ClientFactoryImpl implements ClientFactory {
-  
-	private static final EventBus eventBus = new SimpleEventBus();
-//	private static final PlaceController placeController = new PlaceController(eventBus);
-	private static final InteractiveDownloadDataView interactiveDownloadDataView = new InteractiveDownloadDataViewImpl();
-	private static final HelpMenuBar helpMenuBar = new HelpMenuBarImpl();
 
-	@Override
-	public EventBus getEventBus() {
-		return eventBus;
-	}
+    private static final EventBus eventBus = new SimpleEventBus();
+    // private static final PlaceController placeController = new
+    // PlaceController(eventBus);
+    private static final InteractiveDownloadDataView interactiveDownloadDataView = new InteractiveDownloadDataViewImpl();
+    private static final HelpMenuBar helpMenuBar = new HelpMenuBarImpl();
 
-//	@Override
-//	public PlaceController getPlaceController() {
-//		return placeController;
-//	}
+    @Override
+    public EventBus getEventBus() {
+        return eventBus;
+    }
 
-	@Override
-	public InteractiveDownloadDataView getView() {
-		return interactiveDownloadDataView;
-	}
+    // @Override
+    // public PlaceController getPlaceController() {
+    // return placeController;
+    // }
 
-	@Override
-	public HelpMenuBar getHelpMenuBar() {
-		return helpMenuBar;
-	}
+    @Override
+    public InteractiveDownloadDataView getInteractiveDownloadDataView() {
+        return interactiveDownloadDataView;
+    }
+
+    @Override
+    public HelpMenuBar getHelpMenuBar() {
+        return helpMenuBar;
+    }
+
+    @Override
+    public OutputControlPanel getOutputControlPanel(String id) {
+        return new OutputControlPanelImpl(id);
+    }
+
+    @Override
+    public VariableControls getVariableControls(String id) {
+        return new VariableControlsImpl(id);
+    }
+
+    @Override
+    public MultiVariableSelector getMultiVariableSelector(String id) {
+        return new MultiVariableSelectorImpl(id);
+    }
+
+    @Override
+    public VariableMetadataView getVariableMetadataView(String id) {
+        return new VariableMetadataViewImpl(id);
+    }
+
+    @Override
+    public VariableSelector getVariableSelectorView(String id) {
+        return new VariableSelectorImpl(id);
+    }
+
+    @Override
+    public ActionsMenuBar getActionsMenuBar(String id) {
+        return new ActionsMenuBarImpl(id);
+    }
 
 }

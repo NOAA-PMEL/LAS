@@ -7,6 +7,8 @@
 ! See Compare_Plot.jnl., Do we need to do similar things here,
 ! reconciling the regions?
 !
-go prop_prop_plot.jnl
+! Set the gif filename, changing it from .gif to the name from this request
+GO LAS_reset_gifname
 
+go prop_prop_plot.jnl
 

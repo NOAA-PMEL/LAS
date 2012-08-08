@@ -16,11 +16,15 @@
  */
 package gov.noaa.pmel.tmap.las.client.map;
 
+import gov.noaa.pmel.tmap.las.client.ClientFactory;
+import gov.noaa.pmel.tmap.las.client.event.FeatureModifiedEvent;
+import gov.noaa.pmel.tmap.las.client.event.MapChangeEvent;
 import gov.noaa.pmel.tmap.las.client.openlayers.DrawSingleFeature;
+import gov.noaa.pmel.tmap.las.client.openlayers.DrawSingleFeature.FeatureAddedListener;
 import gov.noaa.pmel.tmap.las.client.openlayers.DrawSingleFeatureOptions;
 import gov.noaa.pmel.tmap.las.client.openlayers.HorizontalPathHandler;
+import gov.noaa.pmel.tmap.las.client.openlayers.JumpPathHandler;
 import gov.noaa.pmel.tmap.las.client.openlayers.VerticalPathHandler;
-import gov.noaa.pmel.tmap.las.client.openlayers.DrawSingleFeature.FeatureAddedListener;
 import gov.noaa.pmel.tmap.las.client.serializable.RegionSerializable;
 
 import org.gwtopenmaps.openlayers.client.Bounds;
@@ -33,11 +37,12 @@ import org.gwtopenmaps.openlayers.client.StyleMap;
 import org.gwtopenmaps.openlayers.client.control.ArgParser;
 import org.gwtopenmaps.openlayers.client.control.Attribution;
 import org.gwtopenmaps.openlayers.client.control.ModifyFeature;
-import org.gwtopenmaps.openlayers.client.control.ModifyFeatureOptions;
-import org.gwtopenmaps.openlayers.client.control.Navigation;
 import org.gwtopenmaps.openlayers.client.control.ModifyFeature.OnModificationEndListener;
 import org.gwtopenmaps.openlayers.client.control.ModifyFeature.OnModificationListener;
 import org.gwtopenmaps.openlayers.client.control.ModifyFeature.OnModificationStartListener;
+import org.gwtopenmaps.openlayers.client.control.ModifyFeatureOptions;
+import org.gwtopenmaps.openlayers.client.control.Navigation;
+import org.gwtopenmaps.openlayers.client.event.MapClickListener;
 import org.gwtopenmaps.openlayers.client.event.MapMoveListener;
 import org.gwtopenmaps.openlayers.client.feature.VectorFeature;
 import org.gwtopenmaps.openlayers.client.geometry.Geometry;
@@ -57,6 +62,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.user.client.Window;
@@ -104,7 +110,9 @@ public class OLMapWidget extends Composite {
 	private DrawSingleFeatureOptions drawSingleFeatureOptionsForLines;
 	
 	private DrawSingleFeature drawXLine;
+	private DrawSingleFeature drawXPoint;
 	private DrawSingleFeature drawYLine;
+	private DrawSingleFeature drawYPoint;
 	private DrawSingleFeature drawPoint;
 	
 	private ModifyFeature modifyFeatureXY;
@@ -172,17 +180,29 @@ public class OLMapWidget extends Composite {
     // public static final String WMS_URL = "http://strider.weathertopconsulting.com:8282/geoserver/wms?";
     // public static final String WMS_URL = "http://labs.metacarta.com/wms/vmap0";
     private final static String WMS_URL = "http://vmap0.tiles.osgeo.org/wms/vmap0";
+    
+    private ClientFactory clientFactory = GWT.create(ClientFactory.class);
+    private EventBus eventBus;
+    
+    private final OLMapWidget thisMapWidget;
+    
     public OLMapWidget() {
+        thisMapWidget = this;
     	init("128px", "256px", WMS_URL);
     }
     
 	public OLMapWidget(String height, String width) {
+	    thisMapWidget = this;
 		init(height, width, WMS_URL);
 	}
 	public OLMapWidget(String height, String width, String tile_url) {
+	    thisMapWidget = this;
 		init(height, width, tile_url);
 	}
 	private void init(String height, String width, String tile_url) {
+	    
+        eventBus = clientFactory.getEventBus();
+
 		regionWidget.setChangeListener(regionChangeListener);
 		textWidget.addSouthChangeListener(southChangeListener);
 		textWidget.addNorthChangeListener(northChangeListener);
@@ -437,8 +457,14 @@ public class OLMapWidget extends Composite {
 		// The X-Line drawing control
 		drawXLine = new DrawSingleFeature(lineLayer, new HorizontalPathHandler(), drawSingleFeatureOptionsForLines);
 		
+		// A tool to place a point that only moves in X
+		drawXPoint = new DrawSingleFeature(boxLayer, new JumpPathHandler(), drawSingleFeatureOptionsForLines);
+		
 		// The Y-Line drawing control
 		drawYLine = new DrawSingleFeature(lineLayer, new VerticalPathHandler(), drawSingleFeatureOptionsForLines);
+		
+		// A tool to place a point that only moves in Y
+		drawYPoint = new DrawSingleFeature(boxLayer, new JumpPathHandler(), drawSingleFeatureOptionsForLines);
 		
 		// The Point drawing control
 		drawPoint = new DrawSingleFeature(boxLayer, new PointHandler(), drawSingleFeatureOptionsForLines);
@@ -453,6 +479,7 @@ public class OLMapWidget extends Composite {
 				Geometry geo = Geometry.narrowToGeometry(vectorFeature.getGeometry().getJSObject());
 				trimSelection(geo.getBounds());	
 				selectionMade = true;
+                eventBus.fireEventFromSource(new FeatureModifiedEvent(getYlo(), getYhi(), getXlo(), getXhi()), thisMapWidget);
 				featureModified();
 			}
 			
@@ -465,7 +492,9 @@ public class OLMapWidget extends Composite {
 				drawButton.setDown(false);
 				drawRectangle.deactivate();
 				drawXLine.deactivate();
+				drawXPoint.deactivate();
 				drawYLine.deactivate();
+				drawYPoint.deactivate();
 				drawPoint.deactivate();
 			}
 		};
@@ -491,14 +520,18 @@ public class OLMapWidget extends Composite {
 			
 		this.map.addControl(drawRectangle);
 		this.map.addControl(drawXLine);
+		this.map.addControl(drawXPoint);
 		this.map.addControl(drawYLine);
+		this.map.addControl(drawYPoint);
 		this.map.addControl(drawPoint);
 		this.map.addControl(modifyFeatureXY);
 		this.map.addControl(modifyFeatureLine);
 		
 		drawRectangle.deactivate();
 		drawXLine.deactivate();
+		drawXPoint.deactivate();
 		drawYLine.deactivate();
+		drawYPoint.deactivate();
 		drawPoint.deactivate();
 		modifyFeatureXY.deactivate();
 		modifyFeatureLine.deactivate();
@@ -506,6 +539,7 @@ public class OLMapWidget extends Composite {
 		map.setCenter(new LonLat(0, 0), 0);
 		map.setOptions(wrapMapOptions);		
 		map.addMapMoveListener(mapMoveListener);
+		map.addMapClickListener(mapClickListener);
 		dockPanel.add(buttonPanel, DockPanel.NORTH);
 		dockPanel.add(mapWidget, DockPanel.CENTER);
 		dockPanel.add(textWidget, DockPanel.SOUTH);
@@ -639,6 +673,29 @@ public class OLMapWidget extends Composite {
 			mapMoved();
 		}	
 	};
+	MapClickListener mapClickListener = new MapClickListener() {
+	    
+	    // We are going to listen for map clicks and treat them in the very special case where the tool type is px or py and the drawing is on.
+        // In that case and that case only, move the the line to the click point.
+	    
+        @Override
+        public void onClick(MapClickEvent mapClickEvent) {
+            if ( tool.equals("px") || tool.equals("py") ) {
+                if ( drawButton.isDown() ) {
+                    LonLat click = mapClickEvent.getLonLat();
+                    if ( tool.equals("py") ) {
+                        setCurrentSelection(getYlo(), getYhi(), click.lon(), click.lon());
+                        eventBus.fireEventFromSource(new MapChangeEvent(getYlo(), getYhi(), click.lon(), click.lon()), this);
+                    } else if ( tool.equals("px") ) {
+                        setCurrentSelection(click.lat(), click.lat(), getXlo(), getXhi()); 
+                        eventBus.fireEventFromSource(new MapChangeEvent(click.lat(), click.lat(), getXlo(), getXhi()), this);
+                    }
+                }
+            }
+        }
+	   
+	    
+	};
 	FeatureAddedListener featureAddedListener = new FeatureAddedListener() {
 
 		@Override
@@ -663,11 +720,11 @@ public class OLMapWidget extends Composite {
 			LonLat center = currentSelection.getCenterLonLat();
 			textWidget.setText(center.lat(), center.lat(), 
 					center.lon(), center.lon());
-		} else if ( tool.equals("x") || tool.equals("xz") || tool.equals("xt") ) {
+		} else if ( tool.equals("x") || tool.equals("xz") || tool.equals("xt") || tool.equals("px")) {
 			LonLat c = currentSelection.getCenterLonLat();
 			textWidget.setText(c.lat(), c.lat(), 
 					currentSelection.getUpperRightX(), currentSelection.getLowerLeftX() );
-		} else if ( tool.equals("y") || tool.equals("yz") || tool.equals("yt")) {
+		} else if ( tool.equals("y") || tool.equals("yz") || tool.equals("yt") || tool.equals("py") ) {
 			LonLat c = currentSelection.getCenterLonLat();
 			textWidget.setText(currentSelection.getUpperRightY(), currentSelection.getLowerLeftY(), 
 					c.lon(), c.lon());
@@ -714,12 +771,12 @@ public class OLMapWidget extends Composite {
 			// Use it.
 			boxLayer.addFeature(new VectorFeature(selectionBounds.toGeometry()));
 			setSelection(selectionBounds);
-		} else if ( tool.equals("x") || tool.equals("xz") || tool.equals("xt") ) {
+		} else if ( tool.equals("x") || tool.equals("xz") || tool.equals("xt")  || tool.equals("px") ) {
 			// Modify it then use it.
 			selectionBounds = new Bounds(w_selection, center.lat(), e_selection, center.lat());
 			lineLayer.addFeature(new VectorFeature(selectionBounds.toGeometry()));
 			setSelection(selectionBounds);
-		} else if (  tool.equals("y") || tool.equals("yz") || tool.equals("yt") ) {
+		} else if (  tool.equals("y") || tool.equals("yz") || tool.equals("yt") || tool.equals("py") ) {
 			selectionBounds = new Bounds(center.lon(), s_selection, center.lon(), n_selection);
 			lineLayer.addFeature(new VectorFeature(selectionBounds.toGeometry()));
 			setSelection(selectionBounds);
@@ -744,10 +801,10 @@ public class OLMapWidget extends Composite {
 			boxLayer.destroyFeatures();
 			if ( tool.equals("t") || tool.equals("z") || tool.equals("zt") || tool.equals("pt") ) {	
 				trimSelection(bounds);
-			} else if ( tool.equals("x") || tool.equals("xz") || tool.equals("xt") ) {
+			} else if ( tool.equals("x") || tool.equals("xz") || tool.equals("xt") || tool.equals("px") ) {
 				Bounds lineBounds = new Bounds(wlon, bounds.getCenterLonLat().lat(), elon, bounds.getCenterLonLat().lat());
 				trimSelection(lineBounds);
-			} else if ( tool.equals("y") || tool.equals("yz") || tool.equals("yt") ) {
+			} else if ( tool.equals("y") || tool.equals("yz") || tool.equals("yt") || tool.equals("py") ) {
 				Bounds lineBounds = new Bounds(bounds.getCenterLonLat().lon(), slat, bounds.getCenterLonLat().lon(), nlat);
 				trimSelection(lineBounds);
 			} else {
@@ -780,7 +837,9 @@ public class OLMapWidget extends Composite {
 			
 			drawRectangle.deactivate();
 			drawXLine.deactivate();
+			drawXPoint.deactivate();
 			drawYLine.deactivate();
+			drawYPoint.deactivate();
 			drawPoint.deactivate();
 			
 			
@@ -803,6 +862,18 @@ public class OLMapWidget extends Composite {
 				if ( drawButton.isDown() ) {
 					drawYLine.activate();
 				}
+			} else if ( tool.equals("py") ) {
+			    drawButtonUp.setUrl(GWT.getModuleBaseURL()+"../images/draw_y_line_off.png");
+                drawButtonDown.setUrl(GWT.getModuleBaseURL()+"../images/draw_y_line_on.png");
+                if ( drawButton.isDown() ) {
+                    drawYPoint.activate();
+                }
+			} else if ( tool.equals("px") ) {
+			    drawButtonUp.setUrl(GWT.getModuleBaseURL()+"../images/draw_x_line_off.png");
+                drawButtonDown.setUrl(GWT.getModuleBaseURL()+"../images/draw_x_line_on.png");
+                if ( drawButton.isDown() ) {
+                    drawXPoint.activate();
+                }
 			} else {
 				drawButtonUp.setUrl(GWT.getModuleBaseURL()+"../images/draw_off.png");
 				drawButtonDown.setUrl(GWT.getModuleBaseURL()+"../images/draw_on.png");
@@ -820,7 +891,7 @@ public class OLMapWidget extends Composite {
 			}
 			trimSelection(b);
 
-			if ( tool.equals("t") || tool.equals("z") || tool.equals("zt") || tool.equals("pt") ) {
+			if ( tool.equals("t") || tool.equals("z") || tool.equals("zt") || tool.equals("pt") || tool.equals("py") || tool.equals("px") ) {
 				// Disable selecting for points
 				editButton.setEnabled(false);
 			} else {
@@ -834,7 +905,9 @@ public class OLMapWidget extends Composite {
 		this.tool = tool;
 		drawRectangle.deactivate();
 		drawXLine.deactivate();
+		drawXPoint.deactivate();
 		drawYLine.deactivate();
+		drawYPoint.deactivate();
 		drawPoint.deactivate();
 		if ( tool.equals("t") || tool.equals("z") || tool.equals("zt") || tool.equals("pt") ) {	
 			drawButtonUp.setUrl(GWT.getModuleBaseURL()+"../images/draw_pt_off.png");
@@ -854,6 +927,18 @@ public class OLMapWidget extends Composite {
 			if ( drawButton.isDown() ) {
 				drawYLine.activate();
 			}
+        } else if ( tool.equals("py") ) {
+            drawButtonUp.setUrl(GWT.getModuleBaseURL()+"../images/draw_y_line_off.png");
+            drawButtonDown.setUrl(GWT.getModuleBaseURL()+"../images/draw_y_line_on.png");
+            if ( drawButton.isDown() ) {
+                drawYPoint.activate();
+            }
+        } else if ( tool.equals("px") ) {
+            drawButtonUp.setUrl(GWT.getModuleBaseURL()+"../images/draw_x_line_off.png");
+            drawButtonDown.setUrl(GWT.getModuleBaseURL()+"../images/draw_x_line_on.png");
+            if ( drawButton.isDown() ) {
+                drawXPoint.activate();
+            }
 		} else {
 			drawButtonUp.setUrl(GWT.getModuleBaseURL()+"../images/draw_off.png");
 			drawButtonDown.setUrl(GWT.getModuleBaseURL()+"../images/draw_on.png");
@@ -861,7 +946,7 @@ public class OLMapWidget extends Composite {
 				drawRectangle.activate();
 			}
 		}
-		if ( tool.equals("t") || tool.equals("z") || tool.equals("zt") || tool.equals("pt") ) {
+		if ( tool.equals("t") || tool.equals("z") || tool.equals("zt") || tool.equals("pt") || tool.equals("py") || tool.equals("px") ) {
 			// Disable selecting for points
 			editButton.setEnabled(false);
 		} else {
@@ -879,7 +964,9 @@ public class OLMapWidget extends Composite {
 			drawPoint.deactivate();
 			drawRectangle.deactivate();
 			drawXLine.deactivate();
+			drawXPoint.deactivate();
 			drawYLine.deactivate();
+			drawYPoint.deactivate();
 			if ( tool.equals("xy") ) {
 				if ( boxLayer.getFeatures() == null ) {
 					Window.alert("Make a selection on the map then select this button, to edit it.");
@@ -902,7 +989,7 @@ public class OLMapWidget extends Composite {
 					modifyFeatureLine.activate();
 				}
 
-			} else if ( tool.equals("t") || tool.equals("z") || tool.equals("zt") || tool.equals("pt") ) {
+			} else if ( tool.equals("t") || tool.equals("z") || tool.equals("zt") || tool.equals("pt") || tool.equals("py") || tool.equals("px")  ) {
 				// A view of z to t is a point tool type
 
 				modifyFeatureXY.deactivate();
@@ -924,7 +1011,9 @@ public class OLMapWidget extends Composite {
 			drawPoint.deactivate();
 			drawRectangle.deactivate();
 			drawXLine.deactivate();
+			drawXPoint.deactivate();
 			drawYLine.deactivate();
+			drawYPoint.deactivate();
 		    modifyFeatureXY.deactivate();
 		    modifyFeatureLine.deactivate();
 		}
@@ -941,21 +1030,27 @@ public class OLMapWidget extends Composite {
 
 				drawRectangle.activate();
 				drawXLine.deactivate();
+				drawXPoint.deactivate();
 				drawYLine.deactivate();
+				drawYPoint.deactivate();
 				drawPoint.deactivate();
 
 			} else if ( tool.equals("x") || tool.equals("xz") || tool.equals("xt") ) {
 
 				drawRectangle.deactivate();
 				drawXLine.activate();
+                drawXPoint.deactivate();
 				drawYLine.deactivate();
+                drawYPoint.deactivate();
 				drawPoint.deactivate();
 
 			} else if ( tool.equals("y") || tool.equals("yz") || tool.equals("yt") ) {
 
 				drawRectangle.deactivate();
 				drawXLine.deactivate();
+                drawXPoint.deactivate();
 				drawYLine.activate();
+                drawYPoint.deactivate();
 				drawPoint.deactivate();
 
 			} else if ( tool.equals("t") || tool.equals("z") || tool.equals("zt") || tool.equals("pt") ) {
@@ -963,46 +1058,40 @@ public class OLMapWidget extends Composite {
 
 				drawRectangle.deactivate();
 				drawXLine.deactivate();
+				drawXPoint.deactivate();
 				drawYLine.deactivate();
+				drawYPoint.deactivate();
 				drawPoint.activate();
 
-			} 
+			} else if ( tool.equals("py") ) {
+			    drawRectangle.deactivate();
+                drawXLine.deactivate();
+                drawXPoint.deactivate();
+                drawYLine.deactivate();
+                drawYPoint.activate();
+                drawPoint.deactivate();
+			} else if ( tool.equals("px") ) {
+			    drawRectangle.deactivate();
+                drawXLine.deactivate();
+                drawXPoint.activate();
+                drawYLine.deactivate();
+                drawYPoint.deactivate();
+                drawPoint.deactivate();
+			}
 		} else {
-			// Turn off drawing to allow selections
-			drawing = false;
-			drawButton.setDown(false);
-			panButton.setDown(true);
-			editButton.setDown(false);
-			if ( tool.equals("xy") ) {
+		    // Turn off drawing to allow selections
+		    drawing = false;
+		    drawButton.setDown(false);
+		    panButton.setDown(true);
+		    editButton.setDown(false);
 
-				drawRectangle.deactivate();
-				drawXLine.deactivate();
-				drawYLine.deactivate();
-				drawPoint.deactivate();
-
-			} else if ( tool.equals("x") || tool.equals("xz") || tool.equals("xt") ) {
-
-				drawRectangle.deactivate();
-				drawXLine.deactivate();
-				drawYLine.deactivate();
-				drawPoint.deactivate();
-
-			} else if ( tool.equals("y") || tool.equals("yz") || tool.equals("yt") ) {
-
-				drawRectangle.deactivate();
-				drawXLine.deactivate();
-				drawYLine.deactivate();
-				drawPoint.deactivate();
-
-			} else if ( tool.equals("t") || tool.equals("z") || tool.equals("zt") || tool.equals("pt") ) {
-				// A view of z to t is a point tool type
-
-				drawRectangle.deactivate();
-				drawXLine.deactivate();
-				drawYLine.deactivate();
-				drawPoint.deactivate();
-
-			} 
+		    drawRectangle.deactivate();
+		    drawXLine.deactivate();
+		    drawXPoint.deactivate();
+		    drawYLine.deactivate();
+		    drawYPoint.deactivate();
+		    drawPoint.deactivate();
+		    
 		}
 	}
 	public boolean isContainedBy(String xlo, String xhi, String ylo, String yhi) {
@@ -1064,7 +1153,7 @@ public class OLMapWidget extends Composite {
 			
 
 			// If it's a point or an x tool bring the hi down to the lo that was just set.
-			if  ( tool.equals("t") || tool.equals("z") || tool.equals("zt") || tool.equals("pt") || 
+			if  ( tool.equals("t") || tool.equals("z") || tool.equals("zt") || tool.equals("pt") || tool.equals("px") || 
 	              tool.equals("x") || tool.equals("xz") || tool.equals("xt") ) {
 				yhi = ylo;
 			} else {
@@ -1127,7 +1216,7 @@ public class OLMapWidget extends Composite {
 			
 			
 			// If it's a point or an x tool bring the lo up to the hi.
-			if  ( tool.equals("t") || tool.equals("z") || tool.equals("zt") || tool.equals("pt") || 
+			if  ( tool.equals("t") || tool.equals("z") || tool.equals("zt") || tool.equals("pt") || tool.equals("px") || 
 	              tool.equals("x") || tool.equals("xz") || tool.equals("xt") ) {
 				ylo = yhi;
 			} else {
@@ -1181,7 +1270,7 @@ public class OLMapWidget extends Composite {
 				}
 			}
 			xlo = GeoUtil.normalizeLon(xlo);
-			if ( tool.equals("t") || tool.equals("z") || tool.equals("zt") || tool.equals("pt") || 
+			if ( tool.equals("t") || tool.equals("z") || tool.equals("zt") || tool.equals("pt") || tool.equals("px") || 
 				 tool.equals("y") || tool.equals("yz") || tool.equals("yt")) {	
 				// If it's a point or a Y line, move the selection to this location by setting the East to the same value.
 				xhi = xlo;
@@ -1253,7 +1342,7 @@ public class OLMapWidget extends Composite {
 			}
 			
 			xhi = GeoUtil.normalizeLon(xhi);
-			if ( tool.equals("t") || tool.equals("z") || tool.equals("zt") || tool.equals("pt") || 
+			if ( tool.equals("t") || tool.equals("z") || tool.equals("zt") || tool.equals("pt") || tool.equals("px") || 
 				 tool.equals("y") || tool.equals("yz") || tool.equals("yt")) {	
 				// If it's a point or a X line, move the selection to this location by setting the East to the same value.
 				xlo = xhi;

@@ -96,7 +96,7 @@ public class FerretTool extends TemplateTool{
         
         String journalName = null;
         synchronized(this) {
-            journalName = "ferret_operation"
+            journalName = "ferret_operation_" + (int)(Math.random()*1000000)
                 + "_" + System.currentTimeMillis();
         }
 

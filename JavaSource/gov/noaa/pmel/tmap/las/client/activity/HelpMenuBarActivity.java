@@ -3,8 +3,10 @@ package gov.noaa.pmel.tmap.las.client.activity;
 //import gov.noaa.pmel.tmap.las.client.laswidget.%placeName%;
 import gov.noaa.pmel.tmap.las.client.ClientFactory;
 import gov.noaa.pmel.tmap.las.client.laswidget.HelpMenuBar;
+import gov.noaa.pmel.tmap.las.client.util.Util;
 
 import com.google.gwt.activity.shared.AbstractActivity;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.shared.EventBus;
 //import com.google.gwt.place.shared.Place;
 import com.google.gwt.user.client.Command;
@@ -19,9 +21,13 @@ public class HelpMenuBarActivity extends AbstractActivity implements HelpMenuBar
 	private ClientFactory clientFactory;
 	private String name = "Help";
 
-	public HelpMenuBarActivity(ClientFactory clientFactory) {
-		this.clientFactory =  clientFactory;
-	}
+    public HelpMenuBarActivity() {
+        clientFactory = GWT.create(ClientFactory.class);
+    }
+
+    public HelpMenuBarActivity(ClientFactory clientFactory) {
+        this.clientFactory =  clientFactory;
+    }
 
 	@Override
 	public void start(AcceptsOneWidget containerWidget, EventBus eventBus) {
@@ -31,7 +37,7 @@ public class HelpMenuBarActivity extends AbstractActivity implements HelpMenuBar
 		// Make menu commands
 		Command aboutCmd = new Command() {
 			public void execute() {
-				Window.open("ProductServer.do", "_blank", "");
+				Window.open(Util.getProductServer(), "_blank", "");
 			}
 		};
 		view.getAboutItem().setCommand(aboutCmd);

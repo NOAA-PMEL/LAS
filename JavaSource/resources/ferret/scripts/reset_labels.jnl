@@ -47,6 +47,13 @@ IF ($ferret_annotations"0|*>1") THEN
    IF ($labnum_z"0|*>1") THEN GO unlabel ($labnum_z)
    IF ($labnum_t"0|*>1") THEN GO unlabel ($labnum_t)
    IF ($labnum_calend"0|*>1") THEN GO unlabel ($labnum_calend)
+   GO unlabel 1  ! Just for good measure
+   GO unlabel 2
+   GO unlabel 3
+   GO unlabel 4
+   GO unlabel 5
+   GO unlabel 6
+   GO unlabel 7
 ENDIF
 
 IF ($ferret_annotations"0|*>1") THEN GO key_at_top

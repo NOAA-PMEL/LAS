@@ -4,4 +4,7 @@
 !
 ! Call the script that does the work; property-depth insitu plot.
 
+! Set the gif filename, changing it from .gif to the name from this request
+GO LAS_reset_gifname
+
 GO pt_insitu_plot

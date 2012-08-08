@@ -32,6 +32,9 @@ $las_response.toString()
        
 *#
 	<head>
+    <!-- Let IE know to use the IE9 standard browser and document modes -->
+    <meta http-equiv="X-UA-Compatible" content="IE=9">
+
 		<title>LAS OUTPUT</title>
 		<style type="text/css">
 		   div.color {

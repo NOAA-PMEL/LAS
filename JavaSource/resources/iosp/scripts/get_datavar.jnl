@@ -109,6 +109,15 @@ IF `STRINDEX("($shape)", "L") GT 0` THEN
 
 ENDIF
 
+! If the variable has no missing or _FillValue attribute, it's assumed to be NaN.
+! Set it to a known value, matching whats in the LAS compare scripts.
+
+LET attlist = ($3).attnames
+IF `IS_ELEMENT_OF_STR(attlist,{"missing_value","_FillValue"} ) EQ 0` THEN
+   SET VAR/BAD=-9999999 $3
+   DEFINE ATT/OUTPUT $3._FillValue = -9999999
+ENDIF
+
 ! All the region information has been gathered. Now write the file.  
 SET VAR/OUTTYPE=float $3
 SAVE/FILE="$1"/CLOBBER $3[($region_full)]

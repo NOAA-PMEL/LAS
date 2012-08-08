@@ -11,6 +11,7 @@ import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.DisclosurePanel;
 import com.google.gwt.user.client.ui.FlexTable;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 
 public class NavAxesGroup extends Composite {
@@ -18,15 +19,13 @@ public class NavAxesGroup extends Composite {
 	DateTimeWidget dateTimeWidget;
 	AxisWidget zWidget;
 	FlexTable axesLayout = new FlexTable();
-	DisclosurePanel axesPanel;
+	FlowPanel axesPanel;//DisclosurePanel axesPanel;
 	String axesTitle;
 	HTML message = new HTML("message");
 	boolean hasZ;
 	boolean hasT;
 	boolean hasE;
 	boolean axesPanelIsOpen = true;
-	List<ChangeHandler> zChangeHandlers = new ArrayList<ChangeHandler>();
-	List<ChangeHandler> tChangeHandlers = new ArrayList<ChangeHandler>();
 	public NavAxesGroup(String title, String width, String tile_server) {
 		refMap = new OLMapWidget("128px", "256px", tile_server);
 		refMap.activateNativeHooks();
@@ -37,9 +36,9 @@ public class NavAxesGroup extends Composite {
 		message.setVisible(false);
 		axesLayout.setWidget(0, 0, message);
 		axesLayout.setWidget(1, 0, refMap);
-		axesPanel = new DisclosurePanel(title);
+		axesPanel = new FlowPanel();//new DisclosurePanel(title);
 		axesPanel.add(axesLayout);
-		axesPanel.setOpen(true);
+		axesPanel.setVisible(true);//.setOpen(true);
 		message.addStyleName("TinyBlue");
 		initWidget(axesPanel);
 	}
@@ -72,8 +71,6 @@ public class NavAxesGroup extends Composite {
 					             Double.valueOf(grid.getXAxis().getLo()), 
 					             Double.valueOf(grid.getXAxis().getHi()));
 		}
-		addTChangeHandlersToWidget();
-		addZChangeHandlersToWidget();
 	}
 	public DateTimeWidget getTAxis() {
     	return dateTimeWidget;
@@ -85,20 +82,14 @@ public class NavAxesGroup extends Composite {
     	return refMap;
     }
     public void setOpen(boolean value) {
-    	axesPanel.setOpen(value);
+    	axesPanel.setVisible(value);//.setOpen(value);
     }
     public void closePanels() {
-    	axesPanelIsOpen = axesPanel.isOpen();
-    	axesPanel.setOpen(false);
+    	axesPanelIsOpen = axesPanel.isVisible();//.isOpen();
+    	axesPanel.setVisible(false);//.setOpen(false);
     }
     public void restorePanels() {
-    	axesPanel.setOpen(axesPanelIsOpen);
-    }
-    public void addZChangeHandler(ChangeHandler zchange) {
-    	zChangeHandlers.add(zchange);
-    }
-    public void addTChangeHandler(ChangeHandler tchange) {
-    	tChangeHandlers.add(tchange);
+    	axesPanel.setVisible(axesPanelIsOpen);//.setOpen(axesPanelIsOpen);
     }
     public void setRange(String type, boolean range) {
 		// Does not apply to x and y
@@ -109,22 +100,10 @@ public class NavAxesGroup extends Composite {
 			dateTimeWidget.setRange(range);
 		}
 	}
-	private void addTChangeHandlersToWidget() {
-    	for (Iterator changeIt = tChangeHandlers.iterator(); changeIt.hasNext();) {
-			ChangeHandler handler = (ChangeHandler) changeIt.next();
-			dateTimeWidget.addChangeHandler(handler);
-		}
-    }
-    private void addZChangeHandlersToWidget() {
-    	for (Iterator changeIt = zChangeHandlers.iterator(); changeIt.hasNext();) {
-			ChangeHandler handler = (ChangeHandler) changeIt.next();
-			zWidget.addChangeHandler(handler);
-		}
-    }
 	public void showMessage(boolean b) {
 		message.setVisible(b);
 	}
-	public void showViewAxes(String xView, List<String> ortho) {
+	public void showViewAxes(String xView, List<String> ortho, String analysis) {
 		for (Iterator orthoIt = ortho.iterator(); orthoIt.hasNext();) {
     		String ax = (String) orthoIt.next();
     		setAxisVisible(ax, false);
@@ -135,6 +114,16 @@ public class NavAxesGroup extends Composite {
 			setAxisVisible(type, true);
 			setRange(type, true);
 		}
+		if ( analysis != null ) {
+		    for ( int i = 0; i < analysis.length(); i++ ) {
+		        String type = analysis.substring(i, i+1);
+		        setAxisVisible(type, true);
+		        setRange(type, true);
+		    }
+		}
+		// Always show the map in the nav window since it will always control the compare panel selection.
+		setAxisVisible("x", true);
+		setAxisVisible("y", true);
 	}
 	public void setFixedAxis(String xView, List<String> ortho, String compareAxis) {
 		if ( compareAxis != null ) {

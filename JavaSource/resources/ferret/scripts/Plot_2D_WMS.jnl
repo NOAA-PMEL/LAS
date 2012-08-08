@@ -5,6 +5,9 @@
 !
 ! Always make 2D plots without borders or axes.
 
+! Set the gif filename, changing it from .gif to the name from this request
+GO LAS_reset_gifname
+
 DEFINE SYMBOL ferret_margins = 0
 ! going to defined all of these separately :)
 ! go Plot_2D

@@ -1,6 +1,9 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html debug="true">
 	<head>
+    <!-- Let IE know to use the IE9 standard browser and document modes -->
+    <meta http-equiv="X-UA-Compatible" content="IE=9">
+
 		<title>$las_config.getTitle()</title>
 	</head>
 		<stylesheet src="JavaScript/frameworks/OpenLayersExtension/OLMapWidget.css"></stylesheet>
@@ -96,6 +99,7 @@
                 <script type="text/javascript" language="javascript" src="JavaScript/frameworks/OpenLayersExtensions/DrawSingleFeature.js"></script>
                 <script type="text/javascript" language="javascript" src="JavaScript/frameworks/OpenLayersExtensions/HorizontalPath.js"></script>
                 <script type="text/javascript" language="javascript" src="JavaScript/frameworks/OpenLayersExtensions/VerticalPath.js"></script>
+                <script type="text/javascript" language="javascript" src="JavaScript/frameworks/OpenLayersExtensions/JumpPath.js"></script>
 		<script type="text/javascript" language="javascript" src="JavaScript/frameworks/json2.js"></script>
                  <script type="text/javascript" language="javascript">
                 var LAS = new LASUI();

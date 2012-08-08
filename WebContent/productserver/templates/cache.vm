@@ -2,6 +2,9 @@
 #parse ("/productserver/templates/revision.vm")
 <html debug="true">
 	<head>
+    <!-- Let IE know to use the IE9 standard browser and document modes -->
+    <meta http-equiv="X-UA-Compatible" content="IE=9">
+
 		<title>Cache Manager: $las_config.getTitle()</title>
 		
 		<style media="all" type="text/css">

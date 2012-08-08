@@ -2,7 +2,10 @@
 #parse ("/productserver/templates/revision.vm")
 <html>
 <!-- LAS SERVER OK -->
-<head><title>LAS Output</title></head>
+<head>
+    <!-- Let IE know to use the IE9 standard browser and document modes -->
+    <meta http-equiv="X-UA-Compatible" content="IE=9">
+<title>LAS Output</title></head>
 <body bgcolor="white">
 <h3>This $!title LAS Product Server (Revision: $revision)</h3>
 <h4>$!message</h4>

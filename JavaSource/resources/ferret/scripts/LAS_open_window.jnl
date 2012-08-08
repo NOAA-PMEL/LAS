@@ -38,6 +38,11 @@ ELSE
    ELSE
 ! For 1D plots we may be doing a line key in a new viewport, so set the initial viewport.
       SET VIEW full
+      IF ($ferret_view"0|z>1|*>0") THEN  
+         SET WIN/asp=.8
+      ELSE
+         SET WIN/asp=0.6
+      ENDIF
    ENDIF
 
 ENDIF
@@ -45,5 +50,3 @@ ENDIF
 ! If the annotations are going to be collected and sent back to LAS for presentation,
 ! set up the viewport for small margins around the edge.
 IF ($ferret_annotations"0|*>1") THEN GO set_full_margins
-
-

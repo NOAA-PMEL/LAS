@@ -89,4 +89,7 @@ public class OptionsButton extends Composite {
 	public HandlerRegistration addOkClickHandler(ClickHandler handler) {
 		return options.addOkClickHandler(handler);
 	}
+    public boolean isWaitingForRPC() {
+      return options.rpc;
+    }
 }

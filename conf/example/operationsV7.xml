@@ -266,7 +266,7 @@
     </operation>
     <!-- End of trajectory operations -->
 	<operation name="Correlation Plot" ID="Correlation"
-		service_action="" default="true" category="file" output_template="Correlation">
+		service_action="" default="true" category="correlation" output_template="Correlation">
 		<response ID="PlotResp" type="HTML" index="1">
 			<result type="map_scale" ID="map_scale" file_suffix=".xml" />
 			<result type="image" ID="plot_image" streamable="true"
@@ -277,8 +277,21 @@
 		</response>
 		<service>template</service>
 		<region>
-		    <intervals name="xy" />
-			<intervals name="xyt" />
+            <intervals name="x" />
+            <intervals name="y" />
+            <intervals name="z" />
+            <intervals name="t" />
+            <intervals name="xy" />
+            <intervals name="xz" />
+            <intervals name="xt" />
+            <intervals name="yz" />
+            <intervals name="yt" />
+            <intervals name="zt" />
+            <intervals name="xyz" />
+            <intervals name="xyt" />
+            <intervals name="xzt" />
+            <intervals name="yzt" />
+            <intervals name="xyzt" />
 		</region>
 		<grid_types>
 			<grid_type name="regular" />

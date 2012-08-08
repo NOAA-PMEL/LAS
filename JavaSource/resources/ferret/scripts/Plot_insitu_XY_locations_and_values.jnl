@@ -3,6 +3,10 @@
 ! $Author: rhs $
 !
 ! Set a couple of variables and call the script that does the work.
+
+! Set the gif filename, changing it from .gif to the name from this request
+GO LAS_reset_gifname
+
 IF ($database_access_0_longitude"0|1|*>1) THEN 
 DEFINE SYMBOL data_0_x_var = ($database_access_0_longitude)
 ELSE

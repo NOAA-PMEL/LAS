@@ -23,6 +23,20 @@
 ! in this case use the variable defined by plot_var. Get the range of this variable
 ! that was needed to plot the variable.
 
+! Define the gif filename (preventing collisions of file named ".gif" in VizGal)
+! The gif filename will have already been set to ($result_plot_image_filename)
+! Needs to restart PPLUS to take effect, so call PPL CLSPLT
+
+!IF `($FERRET_VERSION"0") GE 6.721` THEN 
+!   PPL CLSPLT  
+!   IF ($result_colorbar_filename%0|*>1%) THEN 
+!      IF `STRINDEX("($result_colorbar_filename)", "gif") GT 0` THEN\
+! SET GIFFILE "($result_colorbar_filename)"
+!      DEFINE SYMBOL reset_gifname = 1
+!   ENDIF
+!ENDIF
+!pause
+
 IF ($native_curvilinear_xy"0|*>1") THEN  ! see LAS_transforms.jnl   
    GO get_curv_coord_bbox
    LET the_var = plot_var[d=($data_num),i=($clon_imin):($clon_imax),j=($clat_jmin):($clat_jmax)]
@@ -67,8 +81,7 @@ SHADE/SET/($colorbar_quals) blank_var
    PPL SHAKEY 1,1,0.2,,,,`(($PPL$WIDTH)/2)-bar_wid`,`(($PPL$WIDTH)/2)+bar_wid`,1,`($PPL$HEIGHT)-1`
    PPL SHADE
 
-! ?? save the result as a gif image -- needs a name.
+! Save the result as a gif image.
 
-! IF ($result_plot_image_filename%0|*>1%) THEN FRAME/FORMAT=gif/FILE="colorbar_($result_plot_image_filename)"
 IF ($result_colorbar_filename%0|*>1%) THEN FRAME/FORMAT=gif/FILE="($result_colorbar_filename)"
 

@@ -12,6 +12,8 @@
 
 <html>
   <head>
+    <!-- Let IE know to use the IE9 standard browser and document modes -->
+    <meta http-equiv="X-UA-Compatible" content="IE=9">
     <meta http-equiv="content-type" content="text/html; charset=UTF-8">
     <!--                                           -->
     <!-- Any title is fine                         -->
@@ -42,7 +44,8 @@
     <script type="text/javascript" language="javascript" src="../../JavaScript/frameworks/OpenLayersExtensions/DrawSingleFeature.js"></script>
     <script type="text/javascript" language="javascript" src="../../JavaScript/frameworks/OpenLayersExtensions/HorizontalPath.js"></script>
     <script type="text/javascript" language="javascript" src="../../JavaScript/frameworks/OpenLayersExtensions/VerticalPath.js"></script>
- 
+    <script type="text/javascript" language="javascript" src="../../JavaScript/frameworks/OpenLayersExtensions/JumpPath.js"></script>
+    
     <script type="text/javascript" language="javascript" src="../../JavaScript/components/gov.noaa.pmel.tmap.las.Correlation/gov.noaa.pmel.tmap.las.Correlation.nocache.js"></script>
     <link rel="stylesheet" href="../../JavaScript/components/css/OLMapWidget.css" type="text/css">
     <link rel="stylesheet" href="../../JavaScript/components/css/LAS.css" type="text/css">
@@ -58,16 +61,16 @@
   #parse ("productserver/templates/V7UIHeader.vm")
   <table class="allBorder" >
   <tr>
-  <td style="vertical-align:top;">
+  <td style="vertical-align:top;" id="leftPadding">
      <div style="padding:10px" id="icons"></div>
   </td>
-  <td class="regularBackground" width="40%" style="vertical-align:top;">
+  <td class="regularBackground" width="409px" style="vertical-align:top;word-wrap:pre;" id="leftControls">
     <div style="padding:0px 10px 10px 10px"  class="regularBackground" id="button_panel"></div>
     <div style="padding:10px" id="space_time_constraints"></div>
     <div style="padding:0px 10px 10px 10px" class="regularBackground noBottomBorder" id="data_selection"></div>
     <div style="padding:0px 10px 10px 10px" class="regularBackground noTopBottomBorder" id="data_constraints"></div>
   </td>
-  <td style="vertical-align:top;">
+  <td style="vertical-align:top;" id="correlationOutputs">
      <div style="padding:10px" id="correlation"></div>
   </td>
   </tr>

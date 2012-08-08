@@ -16,8 +16,10 @@
 ! clat_jmax
 
 ! If this has already been called, we are done.
-IF ($curv_coord_bbox_done"0") THEN EXIT/SCRIPT
-DEFINE SYMBOL curv_coord_bbox_done = 1
+! Do for each variable, difference plots may have different
+! x or y regions.
+IF ($curv_coord_bbox_done($num)"0") THEN EXIT/SCRIPT
+DEFINE SYMBOL curv_coord_bbox_done($num) = 1
 
 
 ! For analysis operations on curvilienar grids we may not have definitions for region_x_* and
