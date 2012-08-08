@@ -73,7 +73,7 @@ $las_response.toString()
 		<p>
 		<b>Note: </b>Each variable has its own OPeNDAP URL.
 		<p>
-		<a href="www.opendap.org">Visit the OPeNDAP web site</a> for more information about the protocol and what it can do.
+		<a href="http://www.opendap.org">Visit the OPeNDAP web site</a> for more information about the protocol and what it can do.
 		<p>
 		The OPeNDAP URL to your selected variables:
 		<p>
