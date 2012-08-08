@@ -111,6 +111,14 @@ public class RequestInputFilter implements Filter {
 		"varid",
 		"view",
 		"xml",
+		"xlo",
+		"xhi",
+		"ylo",
+                "yhi",
+                "zlo",
+                "zhi",
+                "tlo",
+                "thi",
 		"xpath"
     };
     private final static Set<String> LAS_PARAMETERS = new HashSet<String>(Arrays.asList(p));
