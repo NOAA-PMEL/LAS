@@ -382,6 +382,7 @@ public final class ProductServerAction extends LASAction {
                             productCacheKey = productRequest.getCacheKey(key);
                         } catch (LASException e) {
                             logerror(request, "Unable to send cancel request to backend service.", e);
+                            removeOnError(productRequest);
                             return mapping.findForward("error");
                         }
                     
@@ -432,24 +433,31 @@ public final class ProductServerAction extends LASAction {
                     	}
                     } catch (LASException e) {
                         logerror(request, "Error building Web service request for "+ methodName , e);
+                        removeOnError(productRequest);
                         return mapping.findForward("error");
                     } catch (IOException e) {
                         logerror(request, "Error building Web service request for "+ methodName , e);
+                        removeOnError(productRequest);
                         return mapping.findForward("error");
                     } catch (SecurityException e) {
                     	logerror(request, "Error building Local service request for "+ methodName , e);
+                    	removeOnError(productRequest);
                         return mapping.findForward("error");
 					} catch (NoSuchMethodException e) {
 						logerror(request, "Error building Local service request for "+ methodName , e);
+						removeOnError(productRequest);
                         return mapping.findForward("error");
 					} catch (IllegalArgumentException e) {
 						logerror(request, "Error running Local service request for "+ methodName , e);
+						removeOnError(productRequest);
                         return mapping.findForward("error");
 					} catch (IllegalAccessException e) {
 						logerror(request, "Error running Local service request for "+ methodName , e);
+						removeOnError(productRequest);
                         return mapping.findForward("error");
 					} catch (InvocationTargetException e) {
 						logerror(request, "Error running Local service request for "+ methodName , e);
+						removeOnError(productRequest);
                         return mapping.findForward("error");
 					}
                     String responseXML="";
@@ -463,6 +471,7 @@ public final class ProductServerAction extends LASAction {
                     	}
                     } catch (Exception e) {
                     	logerror(request, "Error was returned from the backend server.", e);
+                    	removeOnError(productRequest);
                     	return mapping.findForward("error");
                     }
                     log.debug("Finished canceling request.");
@@ -471,6 +480,7 @@ public final class ProductServerAction extends LASAction {
                         JDOMUtils.XML2JDOM(responseXML, lasResponse);
                     } catch (Exception e) {
                         logerror(request, "Error parsing the XML returned from the backend server.", e);
+                        removeOnError(productRequest);
                         return mapping.findForward("error");
                     }
                     request.setAttribute("server_url", serverURL);
@@ -525,6 +535,7 @@ public final class ProductServerAction extends LASAction {
                         }                        
                     } catch (Exception e) {
                         logerror(request, "Error joining the thread creating this product.", e);
+                        removeOnError(productRequest);
                         return mapping.findForward("error");
                     }
                     
@@ -578,6 +589,7 @@ public final class ProductServerAction extends LASAction {
                     }   
                 } catch (Exception e) {
                     logerror(request, "Could not join the newly created action runner thread", e);
+                    removeOnError(productRequest);
                     return mapping.findForward("error");
                 }
                 
@@ -644,12 +656,15 @@ public final class ProductServerAction extends LASAction {
 
                 } catch (MalformedURLException e) {
                     logerror(request, "Error parsing the annotations file.", e);
+                    removeOnError(productRequest);
                     return mapping.findForward("error");
                 } catch (IOException e) {
                     logerror(request, "Error parsing the annotations file.", e);
+                    removeOnError(productRequest);
                     return mapping.findForward("error");
                 } catch (JDOMException e) {
                 	logerror(request, "Error parsing the annotations file.", e);
+                	removeOnError(productRequest);
                     return mapping.findForward("error");
 				}
                 
@@ -660,19 +675,22 @@ public final class ProductServerAction extends LASAction {
         } else {
         	String annotations_filename = compoundResponse.getResultAsFileByType("annotations");
         	if ( !annotations_filename.equals("")) {
+                File file = new File(annotations_filename);
         		try {
-        			File file = new File(annotations_filename);
         			JDOMUtils.XML2JDOM(file, lasAnnotations);
+        			// Put these objects in the context so the output template can use them.
+                    request.setAttribute("las_annotations", lasAnnotations);
+                    request.setAttribute("annotations_URL", "getAnnotations.do?file="+annotations_filename.substring(annotations_filename.lastIndexOf("/")+1, annotations_filename.length()));
         		} catch (IOException e) {
+        		    file.delete();
+        		    removeOnError(productRequest);
         			logerror(request, "Error parsing the annotations file.", e);
-        			return mapping.findForward("error");
         		} catch (JDOMException e) {
+        		    file.delete();
+        		    removeOnError(productRequest);
         			logerror(request, "Error parsing the annotations file.", e);
-        			return mapping.findForward("error");
 				}
-        		// Put these objects in the context so the output template can use them.
-        		request.setAttribute("las_annotations", lasAnnotations);
-        		request.setAttribute("annotations_URL", "getAnnotations.do?file="+annotations_filename.substring(annotations_filename.lastIndexOf("/")+1, annotations_filename.length()));
+        		
         	}
         }
         
@@ -697,15 +715,18 @@ public final class ProductServerAction extends LASAction {
                     in.close();
                 } catch (MalformedURLException e) {
                     logerror(request, "Error parsing the map scale file.", e);
+                    removeOnError(productRequest);
                     return mapping.findForward("error");
                 } catch (IOException e) {
                     logerror(request, "Error parsing the map scale file.", e);
+                    removeOnError(productRequest);
                     return mapping.findForward("error");
                 }
                 try {
                     JDOMUtils.XML2JDOM(map_buffer.toString(), lasMapScale);
                 } catch (Exception e) {
                     logerror(request, "Error parsing the map scale file.", e);
+                    removeOnError(productRequest);
                     return mapping.findForward("error");
                 }
                 // Put these objects in the context so the output template can use them.
@@ -719,6 +740,8 @@ public final class ProductServerAction extends LASAction {
                     JDOMUtils.XML2JDOM(map_scale_file, lasMapScale);
                 } catch (Exception e) {
                     logerror(request, "Error parsing the map scale file.", e);
+                    removeOnError(productRequest);
+                    map_scale_file.delete();
                     return mapping.findForward("error");
                 }
                 // Put these objects in the context so the output template can use them.
@@ -746,15 +769,18 @@ public final class ProductServerAction extends LASAction {
                     in.close();
                 } catch (MalformedURLException e) {
                     logerror(request, "Error parsing the region index file.", e);
+                    removeOnError(productRequest);
                     return mapping.findForward("error");
                 } catch (IOException e) {
                     logerror(request, "Error parsing the region file.", e);
+                    removeOnError(productRequest);
                     return mapping.findForward("error");
                 }
                 try {
                     JDOMUtils.XML2JDOM(index_buffer.toString(), lasRegionIndex);
                 } catch (Exception e) {
                     logerror(request, "Error parsing the map scale file.", e);
+                    removeOnError(productRequest);
                     return mapping.findForward("error");
                 }
             }            
@@ -769,6 +795,7 @@ public final class ProductServerAction extends LASAction {
                     JDOMUtils.XML2JDOM(region_index_file, lasRegionIndex);
                 } catch (Exception e) {
                     logerror(request, "Error parsing the region index file.", e);
+                    removeOnError(productRequest);
                     return mapping.findForward("error");
                 }
 
@@ -788,9 +815,11 @@ public final class ProductServerAction extends LASAction {
 				}
 			} catch (JDOMException e) {
 				logerror(request, "Unable to create webrowset.  Can't find db_type: ", e);
+				removeOnError(productRequest);
         		return mapping.findForward("error");
 			} catch (LASException e) {
 				logerror(request, "Unable to create webrowset.  Can't find db_type: ", e);
+				removeOnError(productRequest);
         		return mapping.findForward("error");
 			}           
         	WebRowSet webrowset;
@@ -803,6 +832,7 @@ public final class ProductServerAction extends LASAction {
         		}
         	} catch (Exception e) {
         		logerror(request, "Unable to create webrowset: ", e);
+        		removeOnError(productRequest);
         		return mapping.findForward("error");
         	}
         	if ( compoundResponse.isResultByTypeRemote("webrowset")) {
@@ -817,12 +847,15 @@ public final class ProductServerAction extends LASAction {
         				webrowset.readXml(in);
         			} catch (MalformedURLException e) {
         				logerror(request, "Error parsing the webrowset file.", e);
+        				removeOnError(productRequest);
         				return mapping.findForward("error");
         			} catch (IOException e) {
         				logerror(request, "Error parsing the webrowset file.", e);
+        				removeOnError(productRequest);
         				return mapping.findForward("error");
         			} catch (SQLException e) {
         				logerror(request, "Error parsing the webrowset file.", e);
+        				removeOnError(productRequest);
         				return mapping.findForward("error");
         			}
         		}            
@@ -836,9 +869,11 @@ public final class ProductServerAction extends LASAction {
         				webrowset.readXml(in);
         			} catch (FileNotFoundException e) {
         				logerror(request, "Error parsing the webrowset file.", e);
+        				removeOnError(productRequest);
         				return mapping.findForward("error");
         			} catch (SQLException e) {
         				logerror(request, "Error parsing the webrowset file.", e);
+        				removeOnError(productRequest);
         				return mapping.findForward("error");
         			}
         			// Put these objects in the context so the output template can use them.
@@ -964,6 +999,10 @@ public final class ProductServerAction extends LASAction {
             return new ActionForward("/productserver/templates/"+productRequest.getTemplate()+".vm");
         }
         
+    }
+    private void removeOnError(ProductRequest productRequest) {
+        servlet.getServletContext().removeAttribute("sessions_"+productRequest.getCacheKey());
+        servlet.getServletContext().removeAttribute("runner_"+productRequest.getCacheKey());
     }
     private boolean testFTDS(LASConfig lasConfig) {
 		int max = 10;

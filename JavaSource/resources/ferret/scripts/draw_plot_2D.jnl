@@ -1,5 +1,5 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! all_plot_2D.jnl 
+! draw_plot_2D.jnl 
 ! 
 ! Author: ansley 
 ! Date: 2006/08/11 16:45:54 
@@ -12,7 +12,7 @@
 ! 3/2008 ACM Use SHADE/TRIM for shade underlays of FILL plots (Ferret v6.1)
 !11/2011 ACM Consolidate all except XY plots into a single 2D plot script.
 
-! all_plot_2D.jnl creates a 2D plot for use with the Back End Server
+! draw_plot_2D.jnl creates a 2D plot for use with the Back End Server
 ! code that sits behind a Live Access Server (LAS). 
 
 ! Set any Ferret modes
@@ -118,5 +118,5 @@ IF ($ferret_mark_grid"0|no>0|all>1|subsample>1|*>0") THEN GO mark_grid
 GO LAS_results box
 
 
-! End of file ------------ all_plot_2D.jnl--------------------------
+! End of file ------------ draw_plot_2D.jnl--------------------------
 

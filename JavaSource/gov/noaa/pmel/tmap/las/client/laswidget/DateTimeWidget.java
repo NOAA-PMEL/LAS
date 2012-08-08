@@ -1,5 +1,8 @@
 package gov.noaa.pmel.tmap.las.client.laswidget;
 
+import gov.noaa.pmel.tmap.las.client.ClientFactory;
+import gov.noaa.pmel.tmap.las.client.ClientFactoryImpl;
+import gov.noaa.pmel.tmap.las.client.event.WidgetSelectionChangeEvent;
 import gov.noaa.pmel.tmap.las.client.map.GeoUtil;
 import gov.noaa.pmel.tmap.las.client.serializable.TimeAxisSerializable;
 import gov.noaa.pmel.tmap.las.client.time.AllLeapChronology;
@@ -14,10 +17,13 @@ import org.gwttime.time.format.DateTimeFormatter;
 import org.gwttime.time.chrono.GregorianChronology;
 import org.gwttime.time.chrono.JulianChronology;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.shared.EventBus;
+import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.maps.jsio.rebind.LongFragmentGenerator;
 import com.google.gwt.user.client.Window;
@@ -27,6 +33,8 @@ import com.google.gwt.user.client.ui.HTMLTable.CellFormatter;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.PushButton;
+
+
 /**
  * A pure GWT implementation of the LAS Date Widget.
  * @author rhs
@@ -82,6 +90,8 @@ public class DateTimeWidget extends Composite {
 	
 	DateTimeFormatter monthFormat;
 	
+	EventBus eventBus;
+	
 	private static final String[] MONTHS = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
 	
 	//public DateTimeWidget(String lo_date, String hi_date, int deltaMinutes, int minuteOffset, String render, boolean range, boolean climatology) {
@@ -99,6 +109,8 @@ public class DateTimeWidget extends Composite {
 	 * @param range
 	 */
 	public DateTimeWidget(TimeAxisSerializable tAxis, boolean range) {
+	    ClientFactory factory = GWT.create(ClientFactory.class);
+	    eventBus = factory.getEventBus();
         init(tAxis, range);
         setListeners();
 		initWidget(dateTimeWidget);
@@ -108,6 +120,8 @@ public class DateTimeWidget extends Composite {
 	 * 
 	 */
 	public DateTimeWidget() {
+	    ClientFactory factory = GWT.create(ClientFactory.class);
+        eventBus = factory.getEventBus();
 		setListeners();
 		initWidget(dateTimeWidget);
 	}
@@ -536,17 +550,6 @@ public class DateTimeWidget extends Composite {
 			return getFerretDateLo();
 		}
 	}
-	public void addChangeHandler(ChangeHandler change) {
-		lo_year.addChangeHandler(change);
-		lo_month.addChangeHandler(change);
-		lo_day.addChangeHandler(change);
-		lo_hour.addChangeHandler(change);
-
-		hi_year.addChangeHandler(change);
-		hi_month.addChangeHandler(change);
-		hi_day.addChangeHandler(change);
-		hi_hour.addChangeHandler(change);
-	}
 	public void setLo(String tlo) {
 		
 		if ( isMenu ) {
@@ -766,21 +769,28 @@ public class DateTimeWidget extends Composite {
 		}
 	}
 	private void checkRangeEndYear() {
-		String current_lo = getFerretDateLo();
-		String current_hi = getFerretDateHi();
-		
-		DateTime clo = parseFerretDate(current_lo);
-		DateTime chi = parseFerretDate(current_hi);
-		
-		// Set the hi year to the lo year and check the month...
-		if ( clo.isAfter(chi) ) {
-			int year = Integer.valueOf(lo_year.getValue(lo_year.getSelectedIndex()));
-			hi_year.setSelectedIndex(lo_year.getSelectedIndex());
-			
-			loadAndSetMonthDayHour(hi_month, hi_day, hi_hour, year, monthToInt(hi_month.getValue(hi_month.getSelectedIndex())), Integer.valueOf(hi_day.getValue(hi_day.getSelectedIndex())).intValue(), hi_hour.getHour(), hi_hour.getMin());
-			checkRangeEndMonth();
-		}
-		
+	    if ( isMenu ) {
+	        // This is the start of the cascade to check the end date, but since it's a menu
+	        // it's the only one you have to check and the values are stored in the "day" widget.
+	        if ( hi_day.getSelectedIndex() < lo_day.getSelectedIndex() ) {
+	            hi_day.setSelectedIndex(lo_day.getSelectedIndex());
+	        }
+	    } else {
+	        String current_lo = getFerretDateLo();
+	        String current_hi = getFerretDateHi();
+
+	        DateTime clo = parseFerretDate(current_lo);
+	        DateTime chi = parseFerretDate(current_hi);
+
+	        // Set the hi year to the lo year and check the month...
+	        if ( clo.isAfter(chi) ) {
+	            int year = Integer.valueOf(lo_year.getValue(lo_year.getSelectedIndex()));
+	            hi_year.setSelectedIndex(lo_year.getSelectedIndex());
+
+	            loadAndSetMonthDayHour(hi_month, hi_day, hi_hour, year, monthToInt(hi_month.getValue(hi_month.getSelectedIndex())), Integer.valueOf(hi_day.getValue(hi_day.getSelectedIndex())).intValue(), hi_hour.getHour(), hi_hour.getMin());
+	            checkRangeEndMonth();
+	        }
+	    }
 	}
 	private void checkRangeEndMonth() {
 		String current_lo = getFerretDateLo();
@@ -875,6 +885,7 @@ public class DateTimeWidget extends Composite {
 	public ChangeHandler loYearHandler = new ChangeHandler() {
 		@Override
 		public void onChange(ChangeEvent arg0) {
+		    eventBus.fireEvent(new WidgetSelectionChangeEvent(false));
 			loYearChange();
 		}
 	};
@@ -890,6 +901,7 @@ public class DateTimeWidget extends Composite {
 	public ChangeHandler loMonthHandler = new ChangeHandler() {
 		@Override
 		public void onChange(ChangeEvent event) {
+		    eventBus.fireEvent(new WidgetSelectionChangeEvent(false));
 			loMonthChange();
 		}	
 	};
@@ -907,6 +919,7 @@ public class DateTimeWidget extends Composite {
 
 		@Override
 		public void onChange(ChangeEvent arg0) {
+		    eventBus.fireEvent(new WidgetSelectionChangeEvent(false));
 			loDayChange();
 		}
 	};
@@ -930,12 +943,14 @@ public class DateTimeWidget extends Composite {
 	public ChangeHandler loHourHandler = new ChangeHandler() {
 		@Override
 		public void onChange(ChangeEvent arg0) {
+		    eventBus.fireEvent(new WidgetSelectionChangeEvent(false));
 			checkRangeEndHour();
 		}
 	};
 	public ChangeHandler hiYearHandler = new ChangeHandler() {
 		@Override
 		public void onChange(ChangeEvent arg0) {
+		    eventBus.fireEvent(new WidgetSelectionChangeEvent(false));
 			hiYearChange();
 		}
 	};
@@ -951,6 +966,7 @@ public class DateTimeWidget extends Composite {
 	public ChangeHandler hiMonthHandler = new ChangeHandler() {
 		@Override
 		public void onChange(ChangeEvent arg0) {
+		    eventBus.fireEvent(new WidgetSelectionChangeEvent(false));
 			hiMonthChange();
 		}	
 	};
@@ -966,6 +982,7 @@ public class DateTimeWidget extends Composite {
 	public ChangeHandler hiDayHandler = new ChangeHandler() {
 		@Override
 		public void onChange(ChangeEvent arg0) {
+		    eventBus.fireEvent(new WidgetSelectionChangeEvent(false));
 			hiDayChange();
 		}
 	};

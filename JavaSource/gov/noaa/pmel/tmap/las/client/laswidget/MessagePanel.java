@@ -1,48 +1,41 @@
 package gov.noaa.pmel.tmap.las.client.laswidget;
 
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.ClickListener;
-import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.Grid;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.PopupPanel;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.DialogBox;
 /**
- * A popup panel with a close button that can take a message.  Like and Alert, but not as ugly.
+ * A popup panel with a close button that can take a message.  Like an Alert, but not as ugly.
  * @author rhs
  *
  */
-public class MessagePanel extends Composite {
-	PopupPanel messagePanel;
-	Grid messageGrid;
-	Button messageButton;
-	HTML message;
+public class MessagePanel extends DialogBox {
+	
+	
+	final Button messageButton;
 	String messageText = "Empty message.";
 	public MessagePanel() {
-		messagePanel = new PopupPanel();
-		messageGrid = new Grid(2, 1);
+	    setModal(false);
+	    setAutoHideEnabled(true);
+	    setAutoHideOnHistoryEventsEnabled(true);
 		messageButton = new Button("Close");
-		messageButton.addClickListener(new ClickListener() {
-
-			public void onClick(Widget sender) {
-				messagePanel.hide();
-			}
-
-		});
-        messageButton.setWidth("60px");
-		message = new HTML(messageText);
-		messageGrid.setWidget(0, 0, message);
-		messageGrid.setWidget(1, 0, messageButton);
-
-		messagePanel.add(messageGrid);
+		messageButton.addClickHandler(closeHandler);
+		setText(messageText);
+        setWidget(messageButton);
 	}
 	public void show(int left, int top, String text) {
-		messagePanel.setPopupPosition(left, top);
+		this.setPopupPosition(left, top);
 		messageText = text;
-		message.setHTML(messageText);
-		messagePanel.show();
+		this.setText(messageText);
+		this.show();
 	}
-	public void hide() {
-		messagePanel.hide();
-	}
+	
+	private ClickHandler closeHandler = new ClickHandler() {
+        
+        @Override
+        public void onClick(ClickEvent arg0) {
+            hide();
+        }
+    };
+	
 }

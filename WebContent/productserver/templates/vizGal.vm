@@ -53,6 +53,9 @@
     #set($region=$region+"&thi="+$las_request.getThi())
  #end
 <head>
+    <!-- Let IE know to use the IE9 standard browser and document modes -->
+    <meta http-equiv="X-UA-Compatible" content="IE=9">
+
 
 <title>LAS Output -- $las_config.getTitle()</title>
 <META http-equiv="refresh" content="0;URL=VizGal.vm?dsid=$dsid&vid=$vid&opid=$op&optionid=$optionid&view=$las_request.getProperty("ferret","view")$region"> 

@@ -94,11 +94,15 @@ public class InteractiveDownloadDataViewActivity extends AbstractActivity
 
 	private String zRangeLo;
 
-	// public InteractiveDownloadDataViewActivity(SamplePlace place, ClientFactory clientFactory) {
-	public InteractiveDownloadDataViewActivity(ClientFactory clientFactory) {
-		// this.name = place.getName();
-		this.clientFactory = clientFactory;
-	}
+    public InteractiveDownloadDataViewActivity() {
+        clientFactory = GWT.create(ClientFactory.class);
+    }
+
+    // public InteractiveDownloadDataViewActivity(SamplePlace place, ClientFactory clientFactory) {
+    public InteractiveDownloadDataViewActivity(ClientFactory clientFactory) {
+        // this.name = place.getName();
+        this.clientFactory = clientFactory;
+    }
 
 	/**
 	 * Dynamically generate the appropriate time selector and set it to the
@@ -388,7 +392,7 @@ public class InteractiveDownloadDataViewActivity extends AbstractActivity
 				+ URL.encode(lasRequestString);
 		GWT.log("sendLASRequest is about to open url:");
 		GWT.log(url);
-		String windowName = "downloadWindow";
+		String windowName = "_blank";
 		String features = "height=450, width=650,toolbar=1,menubar=1,scrollbars=1,status=1";
 		Window.open(url, windowName, features);
 	}
@@ -396,7 +400,7 @@ public class InteractiveDownloadDataViewActivity extends AbstractActivity
 	@Override
 	public void start(AcceptsOneWidget containerWidget, EventBus eventBus) {
 		// TODO: Use eventBus
-		view = clientFactory.getView();
+		view = clientFactory.getInteractiveDownloadDataView();
 		view.setName(name);
 		view.setPresenter(this);
 		containerWidget.setWidget(view.asWidget());

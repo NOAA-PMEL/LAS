@@ -28,6 +28,12 @@ DEFINE SYMBOL num ($1"0")
 DEFINE SYMBOL region_name data_($num)_region
 DEFINE SYMBOL region ($($region_name)"region_0")
 
+! Dont use the data_n_region symbol coming in. The info for the region of each
+! variable matches the variable number so that region_0_t_lo is the region for
+! data_0_var, etc.
+
+DEFINE SYMBOL region region_($num)
+
 ! NOTE:  Occasionally the LAS applet will send in a longitude or latitude
 ! NOTE:  that looks like "24.400000000000002".  Such long, numerically
 ! NOTE:  irrelevant numbers can overflow Ferret's maximum symbol length.

@@ -10,6 +10,9 @@ $las_response.toString()
 <!doctype html>
 <html>
 	<head>
+    <!-- Let IE know to use the IE9 standard browser and document modes -->
+    <meta http-equiv="X-UA-Compatible" content="IE=9">
+
 		<meta http-equiv="content-type" content="text/html; charset=UTF-8">
 
 
@@ -95,20 +98,20 @@ $las_response.toString()
   var showt = true;
   var showz = true;  
 
-console.debug("initReq.getAnalysis(0)=");
-console.debug(initReq.getAnalysis(0));
+//console.debug("initReq.getAnalysis(0)=");
+//console.debug(initReq.getAnalysis(0));
   if(initReq.getAnalysis(0)) {
 	for(var a=0;a < initReq.getAnalysis(0).axis.length;a++) {
 	    if ( initReq.getAnalysis(0).axis[a].type == "t" ) showt = false;
 	    if ( initReq.getAnalysis(0).axis[a].type == "z" ) showz = false;
 	    if(initReq.getAnalysis(0).axis[a].lo) { 
 		var eval1 = "(req"+initReq.getAnalysis(0).axis[a].type.toUpperCase()+"Lo='"+initReq.getAnalysis(0).axis[a].lo+"')";
-		console.debug(eval1);
+		//console.debug(eval1);
 		eval(eval1);
 	    }
 	    if(initReq.getAnalysis(0).axis[a].hi) {
 		var eval2 = "(req"+initReq.getAnalysis(0).axis[a].type.toUpperCase()+"Hi='"+initReq.getAnalysis(0).axis[a].hi+"')";
-		console.debug(eval2);
+		//console.debug(eval2);
                 eval(eval2);
             }
 	}
@@ -116,26 +119,26 @@ console.debug(initReq.getAnalysis(0));
 
   if(Grid.hasAxis('t') && showt ){
       dataHasT = true;
-      console.debug("dataHasT");
-      console.debug(dataHasT);      
+      //console.debug("dataHasT");
+      //console.debug(dataHasT);      
       dataTLo = Grid.getLo('t');                      //low end of time grid
-      console.debug("dataTLo");
-      console.debug(dataTLo);      
+      //console.debug("dataTLo");
+      //console.debug(dataTLo);      
       dataTHi = Grid.getHi('t');                      //high end of time grid
-      console.debug("dataTHi");
-      console.debug(dataTHi);      
+      //console.debug("dataTHi");
+      //console.debug(dataTHi);      
       tDisplayType = Grid.getDisplayType('t');
-      console.debug("tDisplayType:");
-      console.debug(tDisplayType);
+      //console.debug("tDisplayType:");
+      //console.debug(tDisplayType);
       tRenderFmt = Grid.getRenderFormat('t');
-      console.debug("tRenderFmt:");
-      console.debug(tRenderFmt);
+      //console.debug("tRenderFmt:");
+      //console.debug(tRenderFmt);
       tUnits = Grid.getUnits('t');                   //units of time grid
-      console.debug("tUnits:");
-      console.debug(tUnits);
+      //console.debug("tUnits:");
+      //console.debug(tUnits);
       tDelta = Grid.getDelta('t');
-      console.debug("tDelta:");
-      console.debug(tDelta);
+      //console.debug("tDelta:");
+      //console.debug(tDelta);
   }
 
   if(Grid.hasAxis('z') && showz){
@@ -471,10 +474,12 @@ console.debug(initReq.getAnalysis(0));
 ##
 ##	</body>
 ##</html>
-<BODY BGCOLOR="#FFFFFF" onLoad="launch()">
+<!-- BODY BGCOLOR="#FFFFFF" onLoad="launch()">
   <SCRIPT language="javascript">
     genUI();
   </SCRIPT>
- </BODY>
+ </BODY -->
+<BODY>
+</BODY>
 </html>
 #end

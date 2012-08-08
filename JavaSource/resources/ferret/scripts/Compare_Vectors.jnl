@@ -6,6 +6,8 @@
 ! difference plot.
 !
 
+! Set the gif filename, changing it from .gif to the name from this request
+GO LAS_reset_gifname
 
 IF ($ferret_view"|xy>1|*>0") THEN
 

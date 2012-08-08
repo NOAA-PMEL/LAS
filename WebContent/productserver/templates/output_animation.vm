@@ -1,6 +1,9 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <HTML>
-<HEAD>
+<head>
+    <!-- Let IE know to use the IE9 standard browser and document modes -->
+    <meta http-equiv="X-UA-Compatible" content="IE=9">
+
   <style type="text/css">
     input{
       color:#000000;
@@ -81,6 +84,7 @@
   //==============================================
   var initReq_xml = "$las_request.toJavaScriptSafeString()"; //initial LAS request
   var initReq = new LASRequest(initReq_xml);
+  initReq.removeProperty('ferret', 'annotations');
   var initView = initReq.getProperty('ferret','view');
   var initStep = initReq.getProperty('ferret','time_step');//initial time step 
   var dsId   = "$dsID";                              //initial dataset ID
@@ -1158,17 +1162,17 @@
     }else if(tDisplayType == 'widget'){
 
         if(tRenderFmt == 'YMDT'){
-            if(tUnits == 'hour'){ 
+            if(tUnits.toLowerCase().indexOf('hour') != -1){ 
                 DW = new DateWidget(tLo, tHi, 60*tDelta);
             }
-            if(tUnits == 'minute'){
+            if(tUnits.toLowerCase().indexOf('min') !=  -1){
                 DW = new DateWidget(tLo, tHi, tDelta);
             }
         }else{
             DW = new DateWidget(tLo, tHi);
         }
         
-        if(tRenderFmt == '' && tUnits == "month"){
+        if(tRenderFmt == '' && tUnits.toLowerCase().indexOf("month") != -1){
             DW.render('DateWidgetRange', 'M', 'M');
         }else{
             DW.render('DateWidgetRange', tRenderFmt, tRenderFmt);

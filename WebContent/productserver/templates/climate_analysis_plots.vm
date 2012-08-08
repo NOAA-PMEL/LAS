@@ -12,6 +12,9 @@ $las_response.toString()
 <html>
 <!-- LAS SERVER OK -->
 <head>
+    <!-- Let IE know to use the IE9 standard browser and document modes -->
+    <meta http-equiv="X-UA-Compatible" content="IE=9">
+
 <title>LAS Output -- $las_config.getTitle()</title>
 <body>
     #set($results = $las_response.getResults())

@@ -5,6 +5,9 @@
 ! Plot_vector.jnl decides which script to call to make a 2D vector plot.
 ! as in Plot_2D.jnl, choose the direction and call the appropriate script
 !
+! Set the gif filename, changing it from .gif to the name from this request
+GO LAS_reset_gifname
+
 IF ($ferret_view"|xt>1|*>0") THEN
 
    !! Make a plot in XT...

@@ -31,24 +31,34 @@ public class VariableConstraintWidget extends Composite {
 		init();
 		initWidget(layout);
 	}
+	/**
+	 * @wbp.parser.constructor
+	 */
 	public VariableConstraintWidget() {
 		init();
 		initWidget(layout);
 	}
 	private void init() {
 		xRemove.addStyleDependentName("SMALLER");
-		xLabel.setWidth("220px");
+		xLabel.setWidth("100px");
 		minTextBox.setWidth("80px");
 		maxTextBox.setWidth("80px");
 		layout.setWidget(0, 0, xApply);
+		layout.getCellFormatter().setWordWrap(0, 0, false);
 		layout.setWidget(0, 1, minTextBox);
+        layout.getCellFormatter().setWordWrap(0, 1, false);
 		layout.setWidget(0, 2, greaterThan);
+        layout.getCellFormatter().setWordWrap(0, 2, false);
 		layout.setWidget(0, 3, xLabel);
+        layout.getCellFormatter().setWordWrap(0, 3, false);
 		layout.setWidget(0, 4, lessThanEqual);
+        layout.getCellFormatter().setWordWrap(0, 4, false);
 		layout.setWidget(0, 5, maxTextBox);
+        layout.getCellFormatter().setWordWrap(0, 5, false);
 		xLabel.addStyleName("hideextra");
 		if ( removeable ) {
 			layout.setWidget(0, 6, xRemove);
+	        layout.getCellFormatter().setWordWrap(0, 6, false);
 		}
 	}
 	public void setConstraint(String min, String max) {

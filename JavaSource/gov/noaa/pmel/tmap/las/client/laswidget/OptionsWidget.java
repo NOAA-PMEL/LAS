@@ -9,6 +9,8 @@
  */
 package gov.noaa.pmel.tmap.las.client.laswidget;
 
+import gov.noaa.pmel.tmap.las.client.ClientFactory;
+import gov.noaa.pmel.tmap.las.client.event.WidgetSelectionChangeEvent;
 import gov.noaa.pmel.tmap.las.client.serializable.OptionSerializable;
 import gov.noaa.pmel.tmap.las.client.util.Util;
 
@@ -20,7 +22,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -47,16 +51,21 @@ public class OptionsWidget extends VerticalPanel {
 	Grid layout_grid = new Grid(1,2);
 	List<Widget> widgets = new ArrayList<Widget>();
 	Map<String, String> callbackState = null;
+	boolean rpc = false;
+	private ClientFactory clientFactory = GWT.create(ClientFactory.class);
+    private EventBus eventBus;
 	public OptionsWidget() {
 		layout_grid.setWidget(0, 0, ok);
 		layout_grid.setWidget(0, 1, cancel);
 	}
 	public OptionsWidget(String opID) {
+	    eventBus = clientFactory.getEventBus();
 		layout_grid.setWidget(0, 0, ok);
 		layout_grid.setWidget(0, 1, cancel);
 		Util.getRPCService().getOptions(opID, optionsCallback);	
 	}
 	public OptionsWidget(String optionID, ClickListener okListener, ClickListener cancelListener) {
+	    eventBus = clientFactory.getEventBus();
 		layout_grid.setWidget(0, 0, ok);
 		layout_grid.setWidget(0, 1, cancel);
 		ok.addClickListener(okListener);
@@ -64,12 +73,14 @@ public class OptionsWidget extends VerticalPanel {
 		Util.getRPCService().getOptions(optionID, optionsCallback);	
 	}
 	public OptionsWidget(ClickListener okListener, ClickListener cancelListener) {
+	    eventBus = clientFactory.getEventBus();
 		layout_grid.setWidget(0, 0, ok);
 		layout_grid.setWidget(0, 1, cancel);
 		ok.addClickListener(okListener);
 		cancel.addClickListener(cancelListener);
 	}
 	public OptionsWidget(ClickListener listener) {
+	    eventBus = clientFactory.getEventBus();
 		ok.addClickListener(listener);
 		cancel.addClickListener(listener);
 		layout_grid.setWidget(0, 0, ok);
@@ -79,29 +90,40 @@ public class OptionsWidget extends VerticalPanel {
 	public void setOptions(String id) {
 		callbackState = null;
 		if ( id != null && !id.equals("") ) {
+		    rpc = true;
 		    Util.getRPCService().getOptions(id, optionsCallback);
+		} else {
+		    // If there are no options, show the OK and Cancel buttons.
+		    setOptions(new OptionSerializable[0]);
 		}
 	}
 	public void setOptions(String id, Map<String, String> options ) {
 		callbackState = options;
 		if ( id != null && !id.equals("") ) {
+		    rpc = true;
 		    Util.getRPCService().getOptions(id, optionsCallback);
 		}
 	}
 	AsyncCallback optionsCallback = new AsyncCallback() {
 		public void onSuccess(Object result) {
 			options = (OptionSerializable[]) result;
-			clear();
 			setOptions(options);
+			rpc = false;
 			if ( callbackState != null ) {
 				restore(callbackState);
 			}
+			eventBus.fireEventFromSource(new WidgetSelectionChangeEvent(false, false, false), OptionsWidget.this);
 		}
 		public void onFailure(Throwable e) {
+		    setOptions(new OptionSerializable[0]);
 			Window.alert(e.toString());
 		}
 	};
 	public void restore(Map<String, String> state) {
+	    if ( rpc ) {
+	        callbackState = state;
+	        return;
+	    }
 		for (Iterator widIt = widgets.iterator(); widIt.hasNext();) {
 			Widget w = (Widget) widIt.next();
 			if ( w instanceof TextBox ) {
@@ -149,6 +171,8 @@ public class OptionsWidget extends VerticalPanel {
 	}
 	public void setOptions(OptionSerializable[] op) {
 		options = op;
+		clear();
+		widgets.clear();
 		for (int i = 0; i < options.length; i++) {
 			OptionSerializable opt = op[i];
 			Button help = new Button("help");

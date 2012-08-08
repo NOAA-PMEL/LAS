@@ -1,5 +1,7 @@
 package gov.noaa.pmel.tmap.las.client;
 
+import gov.noaa.pmel.tmap.las.client.event.WidgetSelectionChangeEvent;
+import gov.noaa.pmel.tmap.las.client.event.WidgetSelectionChangeEvent.Handler;
 import gov.noaa.pmel.tmap.las.client.laswidget.DatasetFilter;
 import gov.noaa.pmel.tmap.las.client.laswidget.DatasetWidget;
 import gov.noaa.pmel.tmap.las.client.laswidget.DateTimeWidget;
@@ -19,12 +21,14 @@ import java.util.Map;
 import java.util.Set;
 
 import com.google.gwt.core.client.EntryPoint;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
+import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.http.client.URL;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -39,6 +43,7 @@ import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.PushButton;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.TreeItem;
+import com.google.gwt.user.client.ui.Widget;
 
 public class ClimateAnalysis implements EntryPoint {
     DatasetWidget xDatasetWidget = new DatasetWidget();
@@ -65,9 +70,28 @@ public class ClimateAnalysis implements EntryPoint {
 	String selectionStyle = "selection";
 	Set<Integer> set = new HashSet<Integer>();
 	PacificRegionsByVariable xRegions = new PacificRegionsByVariable();
+	EventBus eventBus;
 	@Override
 	public void onModuleLoad() {	
 	
+	    ClientFactory cf = GWT.create(ClientFactory.class);
+	    eventBus = cf.getEventBus();
+	    eventBus.addHandler(WidgetSelectionChangeEvent.TYPE, new WidgetSelectionChangeEvent.Handler() {
+           
+            @Override
+            public void onAxisSelectionChange(WidgetSelectionChangeEvent event) {
+                Widget w = (Widget) event.getSource();
+                if ( w instanceof DateTimeWidget ) {
+                    if ( w.equals(xDateWidget) ) {
+                        set.add(3);
+                        setBackground(4);
+                    } else if (w.equals(xDateWidgetTwo) ) {
+                        set.add(4);
+                        setBackground(5);   
+                    }
+                }                
+            }
+        });
 		set.clear();
 		xSubmit.addClickHandler(xSubmitClick);
 		xSubmit.setWidth("80px");
@@ -95,24 +119,7 @@ public class ClimateAnalysis implements EntryPoint {
 		xThi = Util.getParameterString("thi");
 		xDateWidget.init(xTlo, xThi, "y", "360_day", false);
 		xDateWidget.setRange(true);
-		xDateWidget.addChangeHandler(new ChangeHandler() {
-
-			@Override
-			public void onChange(ChangeEvent arg0) {
-				set.add(3);
-				setBackground(4);
-			}
 			
-		});
-		xDateWidgetTwo.addChangeHandler(new ChangeHandler() {
-
-			@Override
-			public void onChange(ChangeEvent arg0) {
-				set.add(4);
-				setBackground(5);	
-			}
-			
-		});
 		RootPanel.get("DateRange").add(xDateWidget);
 		RootPanel.get("DateRange2").add(xDateWidgetTwo);
 		RootPanel.get("SecondDataset").add(xSecondDataset);

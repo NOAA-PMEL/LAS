@@ -11,6 +11,7 @@ package gov.noaa.pmel.tmap.las.client.serializable;
 
 
 
+import java.util.Vector;
 import com.google.gwt.user.client.rpc.IsSerializable;
 
 /**
@@ -41,4 +42,12 @@ public class DatasetSerializable extends Serializable implements IsSerializable 
 			VariableSerializable[] variablesSerializable) {
 		this.variablesSerializable = variablesSerializable;
 	}
+
+    public Vector<VariableSerializable> getVariablesSerializableAsVector() {
+        Vector<VariableSerializable> vecs = new Vector<VariableSerializable>();
+        for(int i = 0; i < variablesSerializable.length; i++ ) {
+            vecs.add(variablesSerializable[i]);
+        }
+        return vecs;
+    }
 }

@@ -5,4 +5,11 @@
 ! Extracting to a netCDF file and some text and table files have different
 ! options in the UI.  Need to separate them at this level to keep the UI
 ! happy.  All the Data_Extract* scripts launch the same list_data.jnl script.
+
+! Reset .gif filename. The auto-levels script makes a test plot.
+
+IF `($result_plot_image_filename%0|*>1%) EQ 0` THEN DEFINE SYMBOL \
+result_plot_image_filename = ($result_debug_filename).gif
+GO LAS_reset_gifname
+
 GO list_frames

@@ -8,6 +8,8 @@
 !           individual plot scripts.
 ! 3/29/2007 ACM Fix logic interpreting contents of ferret_interpolate_data 
 ! 11/9/2007 ACM If ferret_dep_axis_scale is defined, apply vertical axis scaling.
+! 8/2012 ACM Fixing ticket 1337, F-TDS bug. If there no _FillValue, set it 
+!            to a known value that matches the value used in get_datavar.jnl
 !
 ! oneD_compare_difference.jnl creates a T line plot for use with the Back 
 ! End Server code that sits behind a Live Access Server (LAS). 
@@ -15,6 +17,10 @@
 ! grid in the plot direction
 !
 ! Set any Ferret modes
+!
+! Set the gif filename, changing it from .gif to the name from this request
+GO LAS_reset_gifname
+
 
 IF ($ferret_interpolate_data%0|false>0|true>1|1|0|*>1%) THEN SET MODE INTERPOLATE
 
@@ -48,6 +54,11 @@ ENDIF
 DEFINE SYMBOL ferret_var_0 = ($ferret_plot_var)
 DEFINE SYMBOL ferret_title_0 = ($ferret_plot_title"($data_var)")
 
+LET attlist = ($data_0_var).attnames
+IF `IS_ELEMENT_OF_STR(attlist,{"missing_value","_FillValue"} ) EQ 0` THEN
+   SET VAR/BAD=-9999999 ($data_0_var)
+ENDIF
+
 ! Initialize next dataset. 
 ! Assume the interface has returned correct, matching regions in the plot direction.
 
@@ -68,6 +79,11 @@ ENDIF
 
 DEFINE SYMBOL ferret_var_1 = ($ferret_plot_var)
 DEFINE SYMBOL ferret_title_1 = ($ferret_plot_title"($data_var)")
+
+LET attlist = ($data_1_var).attnames
+IF `IS_ELEMENT_OF_STR(attlist,{"missing_value","_FillValue"} ) EQ 0` THEN
+   SET VAR/BAD=-9999999 ($data_1_var)
+ENDIF
 
 ! If this is a Time plot, then if the output axis is a modulo time axis, 
 ! check for the case of the first dataset on a modulo axis and the second 

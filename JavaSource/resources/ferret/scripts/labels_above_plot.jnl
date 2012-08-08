@@ -76,7 +76,7 @@ IF ($n_right_labels"0|0|*>1") THEN
 
 
    REPEAT/RANGE=1:($n_right_labels)/NAME=m (DEFINE SYMBOL m = `m` ;\
-      LABEL/NOUSER `labxloc`, `labyloc`, 1, 0.0, `labsiz`, ($upper_right_($m)) ;\
+      LABEL/NOUSER `labxloc`, `labyloc`, 1, 0.0, `labsiz`, @AS($upper_right_($m)) ;\
       LET labyloc = `labyloc - labdel` ;\
    )
 ENDIF 

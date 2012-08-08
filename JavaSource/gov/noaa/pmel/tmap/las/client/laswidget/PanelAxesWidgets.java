@@ -43,12 +43,6 @@ public class PanelAxesWidgets extends Composite {
 			layout.remove(zAxisWidget);
 		}		
 	}
-	public void addTChangeListener(ChangeHandler handler) {
-		dateTimeWidget.addChangeHandler(handler);
-	}
-	public void addZChangeListener(ChangeHandler handler) {
-		zAxisWidget.addChangeHandler(handler);
-	}
 	public void setRange(String type, boolean b) {
 		if ( type.equals("z") ) {
 			zAxisWidget.setRange(b);

@@ -3,7 +3,7 @@ package gov.noaa.pmel.tmap.las.client;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
-import gov.noaa.pmel.tmap.las.Messages;
+import gov.noaa.pmel.tmap.las.TestMessages;
 import gov.noaa.pmel.tmap.las.client.activity.InteractiveDownloadDataViewActivity;
 import gov.noaa.pmel.tmap.las.client.laswidget.AxisWidget;
 import gov.noaa.pmel.tmap.las.client.laswidget.DateTimeWidget;
@@ -78,7 +78,7 @@ public class InteractiveDownloadDataTest extends GwtTestWithMockito {
 		// underTest = GwtReflectionUtils.getPrivateFieldValue(iddEntryPoint,
 		// "presenter");
 		Assert.assertNotNull(underTest);
-		view = clientFactory.getView();
+		view = clientFactory.getInteractiveDownloadDataView();
 		Assert.assertNotNull(view);
 		GwtReflectionUtils.setPrivateFieldValue(underTest, "view", view); //$NON-NLS-1$
 		String name = GwtReflectionUtils
@@ -94,8 +94,8 @@ public class InteractiveDownloadDataTest extends GwtTestWithMockito {
 		// underTest.init();
 		Object[] empty = new Object[0];
 		GwtReflectionUtils.callPrivateMethod(underTest, "init", empty);
-		String dsID = Messages.getString("InteractiveDownloadDataTest.dsID"); //$NON-NLS-1$
-		String varID = Messages.getString("InteractiveDownloadDataTest.varID"); //$NON-NLS-1$
+		String dsID = TestMessages.getString("InteractiveDownloadDataTest.dsID"); //$NON-NLS-1$
+		String varID = TestMessages.getString("InteractiveDownloadDataTest.varID"); //$NON-NLS-1$
 		GwtReflectionUtils.setPrivateFieldValue(underTest, "dsID", dsID); //$NON-NLS-1$
 		GwtReflectionUtils.setPrivateFieldValue(underTest, "varID", varID); //$NON-NLS-1$
 		// TODO: set lasRequestXMLString
@@ -108,7 +108,7 @@ public class InteractiveDownloadDataTest extends GwtTestWithMockito {
 
 		// Mock RPC calls using Mockito.
 		GridSerializable grid = new GridSerializable();
-		grid.setID(Messages.getString("InteractiveDownloadDataTest.gridID")); //$NON-NLS-1$
+		grid.setID(TestMessages.getString("InteractiveDownloadDataTest.gridID")); //$NON-NLS-1$
 		// GwtTestWithMockito.doSuccessCallback(Object result) tells Mockito to
 		// make the mocked object return the "result" object as a success
 		// response.
@@ -163,13 +163,13 @@ public class InteractiveDownloadDataTest extends GwtTestWithMockito {
 	/*
 	 * @Test public void testClicksaveButton() { WebDriver driver = new
 	 * FirefoxDriver(); String thisClassSimpleName =
-	 * this.getClass().getSimpleName(); driver.get(Messages.getString("Test" +
+	 * this.getClass().getSimpleName(); driver.get(TestMessages.getString("Test" +
 	 * ".baseURL") //$NON-NLS-1$ //$NON-NLS-2$ + ":" //$NON-NLS-1$ +
-	 * Messages.getString("Test" + ".port") //$NON-NLS-1$ //$NON-NLS-2$ +
-	 * Messages
+	 * TestMessages.getString("Test" + ".port") //$NON-NLS-1$ //$NON-NLS-2$ +
+	 * TestMessages
 	 * .getString("InteractiveDownloadDataTest.defaultInteractiveDownlodDataURL"
 	 * )); //$NON-NLS-1$ WebElement element =
-	 * driver.findElement(By.className(Messages .getString(thisClassSimpleName +
+	 * driver.findElement(By.className(TestMessages .getString(thisClassSimpleName +
 	 * ".saveButtonClassName"))); //$NON-NLS-1$ element.click(); driver.close();
 	 * }
 	 */

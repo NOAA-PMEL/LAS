@@ -9,12 +9,14 @@
 !              leave a thin dotted line at the original density
 !              add to the title, "from data sampled every xxx"
 !
+! Set the gif filename, changing it from .gif to the name from this request
+GO LAS_reset_gifname
+
 ! Initialize the region and data.
 
 DEFINE SYMBOL data_initialization_script = Trajectory_initialize_data_insitu
 
 ! DEFINE SYMBOL ferret_label = 0
-
 
 SET MODE verify:always  ! allows for debugging
 

@@ -12,7 +12,8 @@
 
 <html>
   <head>
-    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <!-- Let IE know to use the IE9 standard browser and document modes -->
+    <meta http-equiv="X-UA-Compatible" content="IE=9">
     <!--                                           -->
     <!-- Any title is fine                         -->
     <!--                                           -->
@@ -52,9 +53,13 @@
     <script type="text/javascript" language="javascript" src="JavaScript/frameworks/OpenLayersExtensions/DrawSingleFeature.js"></script>
     <script type="text/javascript" language="javascript" src="JavaScript/frameworks/OpenLayersExtensions/HorizontalPath.js"></script>
     <script type="text/javascript" language="javascript" src="JavaScript/frameworks/OpenLayersExtensions/VerticalPath.js"></script>
+    <script type="text/javascript" language="javascript" src="JavaScript/frameworks/OpenLayersExtensions/JumpPath.js"></script>
     <script type="text/javascript" language="javascript" src="JavaScript/components/gov.noaa.pmel.tmap.las.UI/gov.noaa.pmel.tmap.las.UI.nocache.js"></script>
     
+<!--
+Moved reference to the UI.gxt.xml file so it will take precedence over the GWT theme and show in debug mode.
     <link rel="stylesheet" href="JavaScript/components/css/LAS.css" type="text/css"/>
+-->
     <link rel="stylesheet" href="JavaScript/ui/LASUI.css" type="text/css"/>
     <link rel="stylesheet" href="css/UX/metallic/metallicGrn.css" type="text/css"/>
   </head>

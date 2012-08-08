@@ -189,9 +189,9 @@ public class SettingsWidget extends Composite {
 		// TODO Auto-generated method stub
 		
 	}
-	public HandlerRegistration addSelectionHandler(SelectionHandler<TreeItem> handler) {
-		return datasetButton.addSelectionHandler(handler);
-	}
+//	public HandlerRegistration addSelectionHandler(SelectionHandler<TreeItem> handler) {
+//		return datasetButton.addSelectionHandler(handler);
+//	}
 
 	public void addOpenHandler(ClickHandler handler) {
 		settingsButton.addClickHandler(handler);

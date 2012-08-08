@@ -18,6 +18,9 @@
 ! NOTE If the two variables are going to have DIFFERENT region settings,
 ! changes will need to be made to annotate that info on the plot.
 
+! Set the gif filename, changing it from .gif to the name from this request
+GO LAS_reset_gifname
+
 set mode ver:always
 DEFINE SYMBOL data_initialization_script = Trajectory_initialize_data_insitu
 

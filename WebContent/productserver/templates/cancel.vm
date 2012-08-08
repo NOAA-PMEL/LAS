@@ -2,6 +2,9 @@
 <html>
    <!-- LAS SERVER OK -->
    <head>
+    <!-- Let IE know to use the IE9 standard browser and document modes -->
+    <meta http-equiv="X-UA-Compatible" content="IE=9">
+
        <title>LAS Output</title>
    </head>
    <body bgcolor="white">
@@ -12,9 +15,6 @@
        #end
        <hr>
        <h2>$!las_response.getResult("exception_message")</h2>
-<h4>Changed your mind?</h4>
-<form action="javascript:window.location.replace('$server_url?xml=$las_request.toEncodedJavaScriptSafeURLString()&JSESSIONID=$JSESSIONID')" method="POST">
-<INPUT TYPE=SUBMIT NAME="submit" VALUE="Submit Job Again">
 </form>
    </body>
 </html> 

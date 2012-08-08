@@ -1,37 +1,38 @@
 /** Add css rules here for your application. */
-
 .gwt-PushButton-APPLY-NEEDED {
-  
-  color: red;
-
+	color: red;
+}
+.gwt-MenuItem-APPLY-NEEDED {
+	color: red;
 }
 
 .gwt-PushButton-SMALLER {
 	padding: 0px;
 	font-size: .8em;
-	white-space:nowrap;
+	margin: 1px;
+	padding: 1px;
 }
 
 .gwt-ToggleButton-SMALLER {
 	padding: 0px;
 	font-size: .8em;
-	white-space:nowrap;
+	margin: 1px;
+	padding: 1px;
 }
 
 .OL_MAP-ToggleButton-WIDTH {
-  margin: 0;
-  width: 30px;
-  height: 30px;
+	margin: 0;
+	width: 30px;
+	height: 30px;
 }
 
-
-.gwt.TextBox-SMALLER {
+.gwt-TextBox-SMALLER {
 	padding: 0px;
-	font-size: 1.0em;
+	font-size: 0.75em;
 }
 
 .regularBackground {
-    background-color: #ACE;
+	background-color: #ACE;
 }
 
 .panelBackground {
@@ -59,28 +60,55 @@
 	border-right: 1px solid blue;
 	border-bottom: none;
 }
+
 .noTopBorder {
 	border-top: none;
 	border-left: 1px solid blue;
 	border-right: 1px solid blue;
 	border-bottom: 1px solid blue;
 }
+
+.HEADER-WIDTH {
+	word-wrap: pre;
+	min-width: 72em;
+	width: 1150px;
+	overflow: auto;
+}
+
 .allBorder {
 	border-top: 1px solid blue;
 	border-left: 1px solid blue;
 	border-right: 1px solid blue;
 	border-bottom: 1px solid blue;
 }
+
 .padding30 {
 	padding: 30px;
 }
+
 .las-align-right {
-    text-align: right;
+	text-align: right;
 }
 
-.hideextra { white-space: nowrap; overflow: hidden; text-overflow:ellipsis; padding:5px; }
+.hideextra {
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	padding: 5px;
+}
 
 .TinyBlue {
 	background-color: #ACE;
-    font-size: .75em;	
+	font-size: .75em;
+}
+
+.gwt-TextBox {
+	padding: 0px;
+	font-size: 0.8em;
+	color: black;
+}
+
+.gwt-ListBox {
+	font-size: 0.8em;
+	color: black;
 }

@@ -3,17 +3,12 @@
 		<TD bgcolor="#7391AD"  height="10px" width="280px" align="left">
 			<div style="position: relative; width: 280px; height: 10px;margin-right:2px">
 				<a href="http://ferret.pmel.noaa.gov/LAS/" target="_new"><span class="top_link_title">Live Access Server</span></a><span style="position: absolute; top: 0px; left: 150px; font-size:7pt; color:#FFFFFC;">
-				        #if ($!profile == "timeseries")
-				        LAS&nbsp;Time&nbsp;Series&nbsp;UI&nbsp;(Beta)
-				        #else
-						<a class="top_link_title" href="./ProductServer.do" target="_new">About&nbsp;LAS</a>
-						#end
+				        
 					</span>
 				
 			</div>
 		</TD>  			
                 <td bgcolor="#7391AD" align="right" >
-		   <a class="top_link_left"  href="http://ferret.pmel.noaa.gov/LAS/home/documentation/introduction/using-the-las-user-interface/" target="_new">Help</a><br>
 	           <a class="top_link_left"  href="$server_config.getFTDSBase()" target="_new">OPeNDAP (F-TDS) / THREDDS</a> 
 		</td>
 		</tr>

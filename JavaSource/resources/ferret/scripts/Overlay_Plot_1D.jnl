@@ -5,6 +5,8 @@
 ! Overlay_Plot_1d.jnl decides which script to call to make a 1D 
 ! overlay plot.
 !
+! Set the gif filename, changing it from .gif to the name from this request
+GO LAS_reset_gifname
 
 IF ($ferret_view"|x>1|*>0") THEN
 

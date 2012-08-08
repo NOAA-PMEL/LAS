@@ -11,9 +11,11 @@
 	<g:MenuBar ui:field="helpMenuBar">
 		<g:MenuItem text="Help" ui:field="helpMenu">
 			<g:MenuBar vertical="true" ui:field="helpSubMenuBar">
-				<g:MenuItem text="About" ui:field="aboutItem" />
-				<g:MenuItem text="Video Tutorials" ui:field="videoTutorialsItem" />
 				<g:MenuItem text="Online Documentation" ui:field="onlineDocsItem" />
+				<g:MenuItem text="Video Tutorials" ui:field="videoTutorialsItem" />
+				<g:MenuItemSeparator>
+				</g:MenuItemSeparator>
+				<g:MenuItem text="About" ui:field="aboutItem" />
 			</g:MenuBar>
 		</g:MenuItem>
 	</g:MenuBar>

@@ -8,6 +8,9 @@
 ! Compare_Plot.jnl decides which script to call to make a
 ! difference plot.
 !
+!
+! Set the gif filename, changing it from .gif to the name from this request
+GO LAS_reset_gifname
 
 ! Ferret v6.7.1+ includes new palette no_white_greenpink_centered
 IF `($ferret_version"0") GT 6.7` THEN
