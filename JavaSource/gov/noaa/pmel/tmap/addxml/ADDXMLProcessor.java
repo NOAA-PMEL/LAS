@@ -89,6 +89,7 @@ import thredds.catalog.InvCatalog;
 import thredds.catalog.InvCatalogFactory;
 import thredds.catalog.InvDataset;
 import thredds.catalog.InvDocumentation;
+import thredds.catalog.InvProperty;
 import thredds.catalog.ServiceType;
 import thredds.catalog.ThreddsMetadata.GeospatialCoverage;
 import thredds.catalog.ThreddsMetadata.Range;
@@ -138,6 +139,8 @@ public class ADDXMLProcessor {
         "yyyy-MM-dd", "yyyy-MM-dd", "yyyy-MM-dd", "yyyy-MM-dd",
         "yyyy-MM-dd HH:mm:ss", "yyyy-MM-dd HH:mm:ss",
         "yyyy-MM-dd HH:mm:ss", "yyyy-MM-dd HH:mm:ss"};
+
+    private static final DecimalFormat decimalFormat = new DecimalFormat("###############.###############");
 
     private static final String pattern_with_hours = "yyyy-MM-dd HH:mm:ss";
 
@@ -1097,6 +1100,12 @@ public class ADDXMLProcessor {
 
                                 StringBuilder grid_name = new StringBuilder(variable.getName()+"-"+id+"-grid");
                                 if (coverage != null ) {
+                                    int xsizei;
+                                    int ysizei;
+                                    String eastwestNumberOfPoints = threddsDataset.findProperty("eastwestNumberOfPoints");
+                                    String eastwestResolution = threddsDataset.findProperty("eastwestResolution");
+                                    String northsouthNumberOfPoints = threddsDataset.findProperty("northsouthNumberOfPoints");
+                                    String northsouthResolution = threddsDataset.findProperty("northsouthResolution");
 
                                     boolean readX = false;
                                     boolean readY = false;
@@ -1105,13 +1114,25 @@ public class ADDXMLProcessor {
                                     double xresolution = coverage.getLonResolution();
                                     double xstart = coverage.getLonStart();
                                     String xunits = coverage.getLonUnits();
-
                                     if ( Double.isNaN(xsize) || Double.isNaN(xstart)) {
                                         readX = true;
                                     }
                                     if ( Double.isNaN(xresolution) ) {
-                                        // We're going to pretend it is 1-degree data for purposes of the LAS UI.
-                                        xresolution = 1.0;
+                                        if ( eastwestNumberOfPoints != null ) {
+                                                try {
+                                                    xsizei = Integer.valueOf(eastwestNumberOfPoints);
+                                                } catch ( Exception e ) {
+                                                    xsizei = 50;
+                                                }
+                                        } else {
+                                            xsizei = 50;
+                                        }
+                                        // Set the resolution so we get 50 grid cells in each direction.
+                                        
+                                        xresolution = xsize / (double) xsizei;
+                                    } else {
+                                        xsizei = (int)(xsize / xresolution);
+                                        if ( xsizei == 0 ) xsizei = 1;
                                     }
                                     double ysize = coverage.getLatExtent();
                                     double yresolution = coverage.getLatResolution();
@@ -1121,51 +1142,92 @@ public class ADDXMLProcessor {
                                         readY = true;
                                     }
                                     if ( Double.isNaN(yresolution) ) {
-                                        // We're going to pretend it is 1-degree data for purposes of the LAS UI.
-                                        yresolution = 1.0;
+                                        if ( northsouthNumberOfPoints != null ) {
+                                            try {
+                                                ysizei = Integer.valueOf(northsouthNumberOfPoints);
+                                            } catch ( Exception e ) {
+                                                ysizei = 50;
+                                            }
+                                        } else {
+                                            ysizei = 50;
+                                        }
+                                        yresolution = ysize / (double) ysizei;
+                                    } else {
+                                        ysizei = (int)(ysize/yresolution);
+                                        if ( ysizei == 0 ) ysizei = 1;
                                     }
                                     boolean hasZ = false;
                                     boolean readZ = false;
                                     String zvalues = null;
                                     String zvariables = null;
-
                                     Range z = coverage.getUpDownRange();
                                     if ( z != null ) {  
-                                        try {
-                                            zvariables = threddsDataset.findProperty("hasZ");
-                                            String[] zvars = zvariables.split("\\s+");
-                                            List<String> hasZvars = new ArrayList(Arrays.asList(zvars));
-                                            if ( hasZvars.contains(variable.getName())) {
-                                                hasZ = true;
-                                            } else {
-                                                hasZ = false;
-                                            }
-                                        } catch (Exception e) {
-                                            hasZ = false;
-                                        }
                                         double zsize = z.getSize();
                                         double zresolution = z.getResolution();
                                         double zstart = z.getStart();
-
                                         try {
-                                            zvalues = threddsDataset.findProperty(Z_VALUES);
-                                        } catch (Exception e) {
-                                            try {
-                                                zvalues = threddsDataset.findProperty(ZVALUES);
-                                            } catch (Exception e1) {
-                                                zvalues = null;
+                                            List<InvProperty> properites = threddsDataset.getProperties();
+                                            for ( Iterator propIt = properites.iterator(); propIt.hasNext(); ) {
+                                                InvProperty invProperty = (InvProperty) propIt.next();
+                                                String name = invProperty.getName();
+                                                String value = invProperty.getValue();
+                                                if ( name.equals("hasZ") ) {
+                                                    zvariables = threddsDataset.findProperty("hasZ");
+                                                    String[] zvars = zvariables.split("\\s+");
+                                                    List<String> hasZvars = new ArrayList(Arrays.asList(zvars));
+                                                    if ( hasZvars.contains(variable.getName())) {
+                                                        hasZ = true;
+                                                    } else {
+                                                        hasZ = false;
+                                                    }
+                                                    try {
+                                                        zvalues = threddsDataset.findProperty(Z_VALUES);
+                                                    } catch (Exception e) {
+                                                        try {
+                                                            zvalues = threddsDataset.findProperty(ZVALUES);
+                                                        } catch (Exception e1) {
+                                                            zvalues = null;
+                                                        }
+                                                    }
+                                                    if ( Double.compare(zsize, 0.0d) == 0.0 ) {
+                                                        zvalues = String.valueOf(zstart);
+                                                    }
+                                                    if ( zvalues != null ) {
+                                                        zvalues = zvalues.trim();
+                                                    }
+                                                    if ( ( Double.isNaN(zsize) || Double.isNaN(zresolution) || Double.isNaN(zstart) ) &&
+                                                            zvalues == null ) {
+                                                        readZ = true;
+                                                    }
+                                                } else if ( name.contains("hasZ_") ) {
+                                                    String zname = name.split("_")[1];
+                                                    String[] zvars = value.split("\\s+");
+                                                    List<String> hasZvars = new ArrayList(Arrays.asList(zvars));
+                                                    if ( hasZvars.contains(variable.getName())) {
+                                                        hasZ = true;
+                                                    } else {
+                                                        hasZ = false;
+                                                    }
+                                                    zvalues = threddsDataset.findProperty(zname);
+                                                    if ( Double.compare(zsize, 0.0d) == 0.0 ) {
+                                                        zvalues = String.valueOf(zstart);
+                                                    }
+                                                    if ( zvalues != null ) {
+                                                        zvalues = zvalues.trim();
+                                                    }
+                                                    if ( ( Double.isNaN(zsize) || Double.isNaN(zresolution) || Double.isNaN(zstart) ) &&
+                                                            zvalues == null ) {
+                                                        readZ = true;
+                                                    }
+                                                }
                                             }
+                                            
+                                        } catch (Exception e) {
+                                            hasZ = false;
                                         }
-                                        if ( Double.compare(zsize, 0.0d) == 0.0 ) {
-                                            zvalues = String.valueOf(zstart);
-                                        }
-                                        if ( zvalues != null ) {
-                                            zvalues = zvalues.trim();
-                                        }
-                                        if ( ( Double.isNaN(zsize) || Double.isNaN(zresolution) || Double.isNaN(zstart) ) &&
-                                                zvalues == null ) {
-                                            readZ = true;
-                                        }
+                                        
+
+                                        
                                     }
 
                                     // One of these axes is not sufficiently specified in the metadata so prepare read the data out of the aggregation.
@@ -1182,11 +1244,7 @@ public class ADDXMLProcessor {
                                     // Grab the properties...
                                     String timeCoverageNumberOfPoints = threddsDataset.findProperty("timeCoverageNumberOfPoints");
                                     String timeUnits = threddsDataset.findProperty("timeAxisUnits");
-                                    String eastwestNumberOfPoints = threddsDataset.findProperty("eastwestNumberOfPoints");
-                                    String eastwestResolution = threddsDataset.findProperty("eastwestResolution");
-                                    String northsouthNumberOfPoints = threddsDataset.findProperty("northsouthNumberOfPoints");
-                                    String northsouthResolution = threddsDataset.findProperty("northsouthResolution");
-
+                                    
                                     String elementName = variable.getName()+"-"+id+"-x-axis";
                                     AxisBean xAxis = new AxisBean();
 
@@ -1196,10 +1254,10 @@ public class ADDXMLProcessor {
                                     grid_name.append("-x-axis");
                                     xAxis.setType("x");
                                     xAxis.setUnits(xunits);
-                                    int xsizei = (int)(xsize/xresolution);
+                                    
                                     ArangeBean xr = new ArangeBean();
                                     xr.setSize(String.valueOf(xsizei));
-                                    xr.setStep(String.valueOf(xresolution));
+                                    xr.setStep(String.valueOf(decimalFormat.format(xresolution)));
                                     xr.setStart(String.valueOf(xstart));
                                     xAxis.setArange(xr);
 
@@ -1218,10 +1276,9 @@ public class ADDXMLProcessor {
                                     grid_name.append("-y-axis");
                                     yAxis.setType("y");
                                     yAxis.setUnits(yunits);
-                                    int ysizei = (int)(ysize/yresolution);
                                     ArangeBean yr = new ArangeBean();
                                     yr.setSize(String.valueOf(ysizei));
-                                    yr.setStep(String.valueOf(yresolution));
+                                    yr.setStep(String.valueOf(decimalFormat.format(yresolution)));
                                     yr.setStart(String.valueOf(ystart));
                                     yAxis.setArange(yr);
 
@@ -1246,10 +1303,9 @@ public class ADDXMLProcessor {
                                             zAxis.setType("z");
                                             zAxis.setUnits(zunits);
                                             String[] zvs = zvalues.split("\\s+");
-                                            DecimalFormat format = new DecimalFormat("###############.###############");
                                             for (int zi = 0; zi < zvs.length; zi++ ) {
                                                 double zd = Double.valueOf(zvs[zi]).doubleValue();
-                                                zvs[zi] = format.format(zd);
+                                                zvs[zi] = decimalFormat.format(zd);
                                             }
                                             zAxis.setV(zvs);
                                         } else {
