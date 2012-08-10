@@ -1180,20 +1180,24 @@ public class ADDXMLProcessor {
                                                     } else {
                                                         hasZ = false;
                                                     }
-                                                    try {
-                                                        zvalues = threddsDataset.findProperty(Z_VALUES);
-                                                    } catch (Exception e) {
+                                                    if ( hasZ ) {
                                                         try {
-                                                            zvalues = threddsDataset.findProperty(ZVALUES);
-                                                        } catch (Exception e1) {
-                                                            zvalues = null;
+                                                            zvalues = threddsDataset.findProperty(Z_VALUES);
+                                                        } catch (Exception e) {
+                                                            try {
+                                                                zvalues = threddsDataset.findProperty(ZVALUES);
+                                                            } catch (Exception e1) {
+                                                                zvalues = null;
+                                                            }
                                                         }
-                                                    }
-                                                    if ( Double.compare(zsize, 0.0d) == 0.0 ) {
-                                                        zvalues = String.valueOf(zstart);
-                                                    }
-                                                    if ( zvalues != null ) {
-                                                        zvalues = zvalues.trim();
+                                                        if ( Double.compare(zsize, 0.0d) == 0.0 ) {
+                                                            zvalues = String.valueOf(zstart);
+                                                        }
+                                                        if ( zvalues != null ) {
+                                                            zvalues = zvalues.trim();
+                                                        }
+                                                        // Having found the z for this variable and read the values, break out of the property loop.
+                                                        break;
                                                     }
                                                     if ( ( Double.isNaN(zsize) || Double.isNaN(zresolution) || Double.isNaN(zstart) ) &&
                                                             zvalues == null ) {
@@ -1208,16 +1212,20 @@ public class ADDXMLProcessor {
                                                     } else {
                                                         hasZ = false;
                                                     }
-                                                    zvalues = threddsDataset.findProperty(zname);
-                                                    if ( Double.compare(zsize, 0.0d) == 0.0 ) {
-                                                        zvalues = String.valueOf(zstart);
-                                                    }
-                                                    if ( zvalues != null ) {
-                                                        zvalues = zvalues.trim();
-                                                    }
-                                                    if ( ( Double.isNaN(zsize) || Double.isNaN(zresolution) || Double.isNaN(zstart) ) &&
-                                                            zvalues == null ) {
-                                                        readZ = true;
+                                                    if ( hasZ ) {
+                                                        zvalues = threddsDataset.findProperty("updownValues_"+zname);
+                                                        if ( Double.compare(zsize, 0.0d) == 0.0 ) {
+                                                            zvalues = String.valueOf(zstart);
+                                                        }
+                                                        if ( zvalues != null ) {
+                                                            zvalues = zvalues.trim();
+                                                        }
+                                                        if ( ( Double.isNaN(zsize) || Double.isNaN(zresolution) || Double.isNaN(zstart) ) &&
+                                                                zvalues == null ) {
+                                                            readZ = true;
+                                                        }
+                                                        // Having found the z and read the values, break out of the property loop.
+                                                        break;
                                                     }
                                                 }
                                             }
