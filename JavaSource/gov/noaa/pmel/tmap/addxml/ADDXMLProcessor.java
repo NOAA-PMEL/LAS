@@ -1196,12 +1196,12 @@ public class ADDXMLProcessor {
                                                         if ( zvalues != null ) {
                                                             zvalues = zvalues.trim();
                                                         }
+                                                        if ( ( Double.isNaN(zsize) || Double.isNaN(zresolution) || Double.isNaN(zstart) ) &&
+                                                                zvalues == null ) {
+                                                            readZ = true;
+                                                        }
                                                         // Having found the z for this variable and read the values, break out of the property loop.
                                                         break;
-                                                    }
-                                                    if ( ( Double.isNaN(zsize) || Double.isNaN(zresolution) || Double.isNaN(zstart) ) &&
-                                                            zvalues == null ) {
-                                                        readZ = true;
                                                     }
                                                 } else if ( name.contains("hasZ_") ) {
                                                     String zname = name.split("_")[1];
