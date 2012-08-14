@@ -162,7 +162,8 @@ public class LASDatasetTester{
                 Element datasetE = (Element) dsIt.next();
                 dsID = datasetE.getAttributeValue("ID");
 
-                testResults.putDataset(TestConstants.TEST_F_TDS_OPENDAP, datasetE.getAttributeValue("name"), dsID);
+                if ( web_output) 
+                    testResults.putDataset(TestConstants.TEST_F_TDS_OPENDAP, datasetE.getAttributeValue("name"), dsID);
                 
                 //get first variable of this dataset
                 variables = lasConfig.getVariables(dsID);
