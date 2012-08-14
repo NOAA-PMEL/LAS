@@ -20,6 +20,7 @@ public class ArangeBean extends LasBean {
   private String start;
   private String step;
   private String size;
+  private String end;
   
   private static Logger log = LogManager.getLogger(ArangeBean.class.getName());
 
@@ -37,6 +38,10 @@ public class ArangeBean extends LasBean {
   public void setSize(String size) {
     this.size = size;
   }
+  
+  public void setEnd(String end) {
+	  this.end = end;
+  }
 
   public String getStart() {
     return start;
@@ -48,6 +53,10 @@ public class ArangeBean extends LasBean {
 
   public String getSize() {
     return size;
+  }
+  
+  public String getEnd() {
+	  return end;
   }
 
   public String toString() {
