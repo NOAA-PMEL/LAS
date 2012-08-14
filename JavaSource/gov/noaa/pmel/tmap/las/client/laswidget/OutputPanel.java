@@ -457,7 +457,7 @@ public class OutputPanel extends Composite implements HasName {
                         for ( Iterator<Mouse> mouseIt = mouseMoves.iterator(); mouseIt.hasNext(); ) {
                             Mouse mouse = mouseIt.next();
                             if ( axisVertical.equals("y") && axisHorizontal.equals("x") ) {
-                                mouse.updateMap(world_starty, world_endy, world_startx, world_endx);
+                                mouse.updateMap(world_endy, world_starty, world_startx, world_endx);
                             } else if ( axisVertical.equals("x") && axisHorizontal.equals("y") ) {
                                 mouse.updateMap(world_startx, world_endx, world_starty, world_endy);
                             } else if ( axisVertical.equals("y") && !axisHorizontal.equals("x") ) {
@@ -693,7 +693,7 @@ public class OutputPanel extends Composite implements HasName {
                         }
                     }
                 }
-                if (axisVerticalPositive != null && axisVerticalPositive.equalsIgnoreCase("down") ) {
+                if (axisVerticalPositive != null && axisVerticalPositive.equalsIgnoreCase("down") && axisVertical.equals("z") ) {
                     double t = y_axis_lower_left;
                     y_axis_lower_left = y_axis_upper_right;
                     y_axis_upper_right = t;
