@@ -461,7 +461,7 @@ public class OutputPanel extends Composite implements HasName {
                             } else if ( axisVertical.equals("x") && axisHorizontal.equals("y") ) {
                                 mouse.updateMap(world_startx, world_endx, world_starty, world_endy);
                             } else if ( axisVertical.equals("y") && !axisHorizontal.equals("x") ) {
-                                mouse.updateLat(world_starty, world_endy);
+                                mouse.updateLat(world_endy, world_starty);
                             } else if ( axisVertical.equals("x") && !axisHorizontal.equals("y") ) {
                                 mouse.updateLon(world_starty, world_endy);
                             } else if ( !axisVertical.equals("y") && axisHorizontal.equals("x") ) {
