@@ -2614,7 +2614,14 @@ public class ADDXMLProcessor {
 
     } // end of createXMLfromDatasetsGridsAxesBean
 
+    static public AxisBean makeTimeAxisStartEnd(CoordinateAxis1DTime axis){
+    	// id doesn't matter
+    	return makeTimeAxis(axis, "", true);
+    }
     static private AxisBean makeTimeAxis(CoordinateAxis1DTime axis, String id) {
+    	return makeTimeAxis(axis, id, false);
+    }
+    static private AxisBean makeTimeAxis(CoordinateAxis1DTime axis, String id, boolean setEnd) {
 
         // LAS only understands time units of: 'year', 'month', 'day', and 'hour'
 
@@ -2755,6 +2762,11 @@ public class ADDXMLProcessor {
                 }
                 arange.setSize(String.valueOf(hrs));
                 arange.setStart(fmt.print(jodaDate1.withZone(DateTimeZone.UTC)));
+                if(setEnd){
+                	double t3 = axis.getCoordValue(axis.getCoordValues().length - 1);
+                	DateTime jodaDate3 = makeDate(t3, dateUnit, chrono);
+                	arange.setEnd(fmt.print(jodaDate3.withZone(DateTimeZone.UTC)));
+                }
                 arange.setStep("1");
                 axisbean.setUnits("hour");
                 axisbean.setArange(arange);
@@ -2891,6 +2903,18 @@ public class ADDXMLProcessor {
                         axisbean.setModulo(true);
                     }
                     arange.setStart(str);
+                    if(setEnd){
+                    	double t3 = axis.getCoordValue(axis.getCoordValues().length - 1);
+                    	DateTime jodaDate3 = makeDate(t3, dateUnit, chrono);
+                    	String str3 = fmt.print(jodaDate3.withZone(DateTimeZone.UTC));
+
+                        if ( str.startsWith("-") ) {
+
+                            str3 = str3.substring(1, str.length());
+                            str3 = str3.replace("0001", "0000");
+                        }
+                        arange.setEnd(str3);
+                    }
                     axisbean.setArange(arange);
                 }
                 else {
@@ -2914,7 +2938,6 @@ public class ADDXMLProcessor {
 
         return axisbean;
     }
-
     private static DateTime makeDate(double d, DateUnit dateUnit, Chronology chrono) {
         // Extract the bits and pieces from the dataUnit
         String pstring = dateUnit.getUnitsString().toLowerCase();
