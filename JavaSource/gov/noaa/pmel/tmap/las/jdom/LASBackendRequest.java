@@ -1250,18 +1250,21 @@ public class LASBackendRequest extends LASDocument {
     public double getDatabaseTimeAsDouble(String time, String time_units) throws LASException {
 
         DateTimeFormatter short_fmt = DateTimeFormat.forPattern("dd-MMM-yyyy").withZone(DateTimeZone.UTC);
+        DateTimeFormatter medium_fmt = DateTimeFormat.forPattern("dd-MMM-yyyy HH:mm").withZone(DateTimeZone.UTC);
         DateTimeFormatter long_fmt = DateTimeFormat.forPattern("dd-MMM-yyyy HH:mm:ss").withZone(DateTimeZone.UTC);
         DateUnit dateUnit;
-		try {
-			dateUnit = new DateUnit(time_units);
-		} catch (Exception e) {
-			throw new LASException(e.toString());
-		}
+        try {
+            dateUnit = new DateUnit(time_units);
+        } catch (Exception e) {
+            throw new LASException(e.toString());
+        }
 
 
-        DateTime dt;
-        if (time.length() > 11) {
+        DateTime dt = null;
+        if (time.length() > 17) {          
             dt = long_fmt.withZone(DateTimeZone.UTC).parseDateTime(time);
+        } else if ( time.length() > 11) { 
+            dt = medium_fmt.withZone(DateTimeZone.UTC).parseDateTime(time);
         } else {
             dt = short_fmt.withZone(DateTimeZone.UTC).parseDateTime(time);
         }

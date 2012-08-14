@@ -2584,9 +2584,13 @@ public class OutputPanel extends Composite implements HasName {
             String type = xView.substring(i, i + 1);
             panelAxesWidgets.setRange(type, true);
         }
+        boolean range = false;
+        if ( var.getGrid() != null && var.isScattered() ) {
+            range = true;
+        }
         for ( Iterator<String> oIt = xOrtho.iterator(); oIt.hasNext(); ) {
             String type = oIt.next();
-            panelAxesWidgets.setRange(type, false);
+            panelAxesWidgets.setRange(type, range);
         }
     }
 

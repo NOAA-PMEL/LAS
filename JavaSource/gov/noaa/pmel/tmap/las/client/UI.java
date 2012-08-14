@@ -485,7 +485,7 @@ public class UI extends BaseUI {
             ops = config.getOperations();
 
             xVariable.setGrid(grid);
-            if ( xVariable.isVector() ) {
+            if ( xVariable.isVector() || xVariable.isScattered() ) {
                 autoContourTextBox.setText("");
                 autoContourButton.setDown(false);
                 autoContourButton.setEnabled(false);
@@ -663,7 +663,7 @@ public class UI extends BaseUI {
                 UserListBox lb = (UserListBox) source;
                 VariableSerializable v = lb.getUserObject(lb.getSelectedIndex());
                 xNewVariable = v;
-                if ( v.isVector() ) {
+                if ( v.isVector() || v.isScattered() ) {
                     lb.setAddButtonEnabled(false);
                 } else {
                     lb.setAddButtonEnabled(true);
@@ -745,6 +745,7 @@ public class UI extends BaseUI {
         for ( Iterator panelIt = xPanels.iterator(); panelIt.hasNext(); ) {
             OutputPanel panel = (OutputPanel) panelIt.next();
             panel.showOrthoAxes(xView, xOrtho, getAnalysisAxis());
+            panel.setRanges(xView, xOrtho);
         }
 
         if ( tokenMap.containsKey("globalMin") ) {
@@ -802,7 +803,7 @@ public class UI extends BaseUI {
             xPanels.get(0).getOutputControlPanel().getVariableControls().getMultiVariableSelector().getVariableSelector().getLatestListBox().setAddButtonVisible(false);
         }
 
-        if ( xVariable.isVector() ) {
+        if ( xVariable.isVector() || xVariable.isScattered() ) {
             xPanels.get(0).getOutputControlPanel().getVariableControls().getMultiVariableSelector().getVariableSelector().getLatestListBox().setAddButtonEnabled(false);
         } else {
             xPanels.get(0).getOutputControlPanel().getVariableControls().getMultiVariableSelector().getVariableSelector().getLatestListBox().setAddButtonEnabled(true);
@@ -895,7 +896,7 @@ public class UI extends BaseUI {
     public void changeDataset() {
         logger.info("changeDataset() called");
         xVariable = xNewVariable;
-        if ( xVariable.isVector() ) {
+        if ( xVariable.isVector() || xVariable.isScattered() ) {
             autoContourTextBox.setText("");
             autoContourButton.setDown(false);
             autoContourButton.setEnabled(false);
@@ -919,6 +920,8 @@ public class UI extends BaseUI {
                 xOperationID = "Plot_2D_XY_zoom";
             } else if ( xNewVariable.isVector()) {
                 xOperationID = "Plot_vector";
+            } else if ( xNewVariable.isScattered() ) {
+                xOperationID = "Insitu_extract_location_value_plot";
             } else {
                 xOperationID = "Insitu_extract_location_value_plot";
             }
@@ -1136,6 +1139,7 @@ public class UI extends BaseUI {
             for ( Iterator panelIt = xPanels.iterator(); panelIt.hasNext(); ) {
                 OutputPanel panel = (OutputPanel) panelIt.next();
                 panel.showOrthoAxes(xView, xOrtho, getAnalysisAxis());
+                panel.setRanges(xView, xOrtho);
             }
             return true;
         }
@@ -1604,7 +1608,7 @@ public class UI extends BaseUI {
             }
 
         } else {
-            if ( xVariable.isVector() ) {
+            if ( xVariable.isVector() || xVariable.isScattered() ) {
                 if ( !xView.equals("xy") ) {
                     differenceButton.setDown(false);
                     differenceButton.setEnabled(false);
@@ -1897,6 +1901,7 @@ public class UI extends BaseUI {
             panel.setVariable(xVariable);
             panel.init(false, ops);
             panel.showOrthoAxes(xView, xOrtho, getAnalysisAxis());
+            panel.setRanges(xView, xOrtho);
             panel.setOperation(xOperationID, xView);
         }
         turnOffAnalysis();
@@ -1923,7 +1928,7 @@ public class UI extends BaseUI {
         xOptionsButton.setOptions(xOperationsWidget.getCurrentOperation().getOptionsID(), operationChangeOptions);
         xOrtho = Util.setOrthoAxes(xView, xVariable.getGrid());
 
-        if ( xVariable.isVector() ) {
+        if ( xVariable.isVector() || xVariable.isScattered() ) {
             if ( !xView.equals("xy") ) {
                 differenceButton.setDown(false);
                 differenceButton.setEnabled(false);
@@ -1942,7 +1947,7 @@ public class UI extends BaseUI {
             autoContourButton.setDown(false);
             autoContourButton.setEnabled(false);
         } else {
-            if ( xVariable.isVector() ) {
+            if ( xVariable.isVector() || xVariable.isScattered() ) {
                 autoContourTextBox.setText("");
                 autoContourButton.setDown(false);
                 autoContourButton.setEnabled(false);
@@ -1995,6 +2000,7 @@ public class UI extends BaseUI {
                 panel.setRange("t", false);
             }
             panel.showOrthoAxes(xView, xOrtho, null);
+            panel.setRanges(xView, xOrtho);
         }
         xAxesWidget.setMessage("");
         xAxesWidget.showMessage(false);
