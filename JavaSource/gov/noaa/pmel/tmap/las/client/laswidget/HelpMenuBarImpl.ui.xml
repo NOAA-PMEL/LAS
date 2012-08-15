@@ -8,8 +8,8 @@
 		}
 	</ui:style>
 
-	<g:MenuBar ui:field="helpMenuBar">
-		<g:MenuItem text="Help" ui:field="helpMenu">
+	<g:MenuBar ui:field="helpMenuBar" width="100%" height="100%" animationEnabled="true">
+		<g:MenuItem text="Help" ui:field="helpMenu" width="100%" height="100%">
 			<g:MenuBar vertical="true" ui:field="helpSubMenuBar">
 				<g:MenuItem text="Online Documentation" ui:field="onlineDocsItem" />
 				<g:MenuItem text="Video Tutorials" ui:field="videoTutorialsItem" />

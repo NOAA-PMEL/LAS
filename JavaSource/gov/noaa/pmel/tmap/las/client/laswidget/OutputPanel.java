@@ -763,7 +763,7 @@ public class OutputPanel extends Composite implements HasName {
         }
     };
 
-    Logger logger = Logger.getLogger("OutputPanel");
+    private static final Logger logger = Logger.getLogger(OutputPanel.class.getName());
 
     private MapChangeEvent.Handler mapChangeHandler = new MapChangeEvent.Handler() {
 

@@ -19,12 +19,14 @@ import gov.noaa.pmel.tmap.las.client.activity.HelpMenuBarActivity;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.shared.EventBus;
+import com.google.gwt.user.client.ui.DockPanel;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 
 public class HelpMenu implements EntryPoint {
 
     private SimplePanel appWidget = new SimplePanel();
+    RootPanel rootPanel;
 
     @Override
     public void onModuleLoad() {
@@ -32,11 +34,18 @@ public class HelpMenu implements EntryPoint {
         // different impls in gwt.xml
         ClientFactory clientFactory = GWT.create(ClientFactory.class);
         EventBus eventBus = clientFactory.getEventBus();
-        RootPanel.get("headerBottomRight").add(appWidget);
+        rootPanel = RootPanel.get("headerBottomRight");
 
         HelpMenuBarActivity helpMenuBarPresenter = new HelpMenuBarActivity(clientFactory);
-        appWidget.setWidth("55px");
         appWidget.ensureDebugId("helpMenuPanel");
+
+        DockPanel dockPanel = new DockPanel();
+        rootPanel.add(dockPanel);
+        dockPanel.setSize("160px", "20px");
+
+        dockPanel.add(appWidget, DockPanel.WEST);
+        appWidget.setSize("55px", "20px");
+        rootPanel.add(dockPanel);
         helpMenuBarPresenter.start(appWidget, eventBus);
     }
 }
