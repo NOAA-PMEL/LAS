@@ -23,7 +23,7 @@
 					<span  style="color:#FFFFFC;position:relative;left:11px;top:1px;height:35px;font-weight:bold;font-size:18pt;position:absolute;">$las_config.getTitle()</span>
 				</div>
 			</TD>
-                	<TD id="headerBottomRight" bgcolor="#7391AD" width="55px" valign="top" style="align:right;border-bottom:1pt solid #FFFFFC">
+                	<TD id="headerBottomRight" bgcolor="#7391AD" width="160px" align="right" valign="top" style="align:right;border-bottom:1pt solid #FFFFFC">
 				<link rel="stylesheet" href="JavaScript/ui/LASUI.css" type="text/css"/>
 				<script type="text/javascript" language="javascript" src="JavaScript/components/gov.noaa.pmel.tmap.las.HelpMenu/gov.noaa.pmel.tmap.las.HelpMenu.nocache.js"></script>
                 	</TD>

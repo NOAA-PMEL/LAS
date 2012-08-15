@@ -13,56 +13,72 @@ import com.google.gwt.user.client.ui.Widget;
  */
 public class HelpMenuBarImpl extends Composite implements HelpMenuBar {
 
-	interface Binder extends UiBinder<Widget, HelpMenuBarImpl> {
-	}
-	
-	private static final Binder binder = GWT.create(Binder.class);
-	@UiField MenuBar helpMenuBar;
-	@UiField MenuItem helpMenu;
-	@UiField MenuBar helpSubMenuBar;
-	@UiField MenuItem aboutItem;
-	/**
-	 * @return the aboutItem
-	 */
-	@Override
-	public MenuItem getAboutItem() {
-		return aboutItem;
-	}
+    interface Binder extends UiBinder<Widget, HelpMenuBarImpl> {
+    }
 
-	/**
-	 * @return the videoTutorialsItem
-	 */
-	@Override
-	public MenuItem getVideoTutorialsItem() {
-		return videoTutorialsItem;
-	}
+    private static final Binder binder = GWT.create(Binder.class);
+    @UiField
+    MenuItem aboutItem;
+    @UiField
+    MenuItem helpMenu;
+    @UiField
+    MenuBar helpMenuBar;
+    @UiField
+    MenuBar helpSubMenuBar;
+    private Presenter listener;
 
-	/**
-	 * @return the onlineDocsItem
-	 */
-	@Override
-	public MenuItem getOnlineDocsItem() {
-		return onlineDocsItem;
-	}
+    @UiField
+    MenuItem onlineDocsItem;
 
-	@UiField MenuItem videoTutorialsItem;
-	@UiField MenuItem onlineDocsItem;
+    @UiField
+    MenuItem videoTutorialsItem;
 
-	private Presenter listener;
+    public HelpMenuBarImpl() {
+        initWidget(binder.createAndBindUi(this));
+        helpMenu.ensureDebugId("helpMenu");
+    }
 
-	public HelpMenuBarImpl() {
-		initWidget(binder.createAndBindUi(this));
-		helpMenu.ensureDebugId("helpMenu");
-	}
+    /**
+     * @return the aboutItem
+     */
+    @Override
+    public MenuItem getAboutItem() {
+        return aboutItem;
+    }
 
-	@Override
-	public void setName(String name) {
-//		button.setHTML(name);
-		helpMenu.setText(name);
-	}
+    /**
+     * @return the onlineDocsItem
+     */
+    @Override
+    public MenuItem getOnlineDocsItem() {
+        return onlineDocsItem;
+    }
 
-	@Override
-	public void setPresenter(Presenter listener) {
-		this.listener = listener;
-	}
+    /**
+     * @return the videoTutorialsItem
+     */
+    @Override
+    public MenuItem getVideoTutorialsItem() {
+        return videoTutorialsItem;
+    }
+
+    @Override
+    public void setName(String name) {
+        // button.setHTML(name);
+        helpMenu.setText(name);
+    }
+
+    @Override
+    public void setPresenter(Presenter listener) {
+        this.listener = listener;
+    }
+
+    /**
+     * @see com.google.gwt.user.client.ui.UIObject#setSize(java.lang.String,
+     *      java.lang.String)
+     */
+    @Override
+    public void setSize(String width, String height) {
+        super.setSize(width, height);
+    }
 }

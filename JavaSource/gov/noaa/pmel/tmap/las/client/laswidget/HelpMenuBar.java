@@ -5,25 +5,27 @@ import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.MenuItem;
 
 /**
- * View base interface.
- * Extends IsWidget so a view impl can easily provide its container widget.
+ * View base interface. Extends IsWidget so a view impl can easily provide its
+ * container widget.
  */
 public interface HelpMenuBar extends IsWidget {
-  
-	void setName(String helloName);
 
-	void setPresenter(Presenter listener);
+    public interface Presenter {
+        /**
+         * Navigate to a new Place in the browser.
+         */
+        // void goTo(Place place);
+    }
 
-	public interface Presenter {
-		/**
-		 * Navigate to a new Place in the browser.
-		 */
-//		void goTo(Place place);
-	}
+    MenuItem getAboutItem();
 
-	MenuItem getAboutItem();
+    MenuItem getOnlineDocsItem();
 
-	MenuItem getVideoTutorialsItem();
+    MenuItem getVideoTutorialsItem();
 
-	MenuItem getOnlineDocsItem();
+    void setName(String helloName);
+
+    void setPresenter(Presenter listener);
+
+    void setSize(String width, String height);
 }
