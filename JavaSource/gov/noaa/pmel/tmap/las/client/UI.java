@@ -1,6 +1,5 @@
 package gov.noaa.pmel.tmap.las.client;
 
-import gov.noaa.pmel.tmap.las.client.activity.HelpMenuBarActivity;
 import gov.noaa.pmel.tmap.las.client.event.ComparisonModeChangeEvent;
 import gov.noaa.pmel.tmap.las.client.event.FeatureModifiedEvent;
 import gov.noaa.pmel.tmap.las.client.event.MapChangeEvent;
@@ -1391,13 +1390,6 @@ public class UI extends BaseUI {
         });
         xButtonLayout.setWidget(0, myButtonIndex++, compareMenu);
         xButtonLayout.getCellFormatter().setWordWrap(0, myButtonIndex - 1, false);
-
-        HelpMenuBarActivity helpMenuBarPresenter = new HelpMenuBarActivity(clientFactory);
-        SimplePanel helpMenuBarPanel = new SimplePanel();
-        helpMenuBarPresenter.start(helpMenuBarPanel, eventBus);
-        xButtonLayout.setWidget(0, myButtonIndex++, helpMenuBarPanel);
-        xButtonLayout.getCellFormatter().setWordWrap(0, myButtonIndex, false);
-        xButtonLayout.getFlexCellFormatter().setHorizontalAlignment(0, myButtonIndex, HasHorizontalAlignment.ALIGN_RIGHT);
 
         RootPanel.get("vizGal").add(xButtonLayout);
         RootPanel.get("vizGal").add(vVizGalPanel);

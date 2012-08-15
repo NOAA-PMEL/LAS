@@ -1441,8 +1441,10 @@ public class OutputPanel extends Composite implements HasName {
     }
 
     private void drawToScreen(ImageData imageData) {
-        if ( frontCanvasContext != null )
+        if ( frontCanvasContext != null ){
+            logger.severe("CALLING frontCanvasContext.putImageData(imageData, 0, 0);");
             frontCanvasContext.putImageData(imageData, 0, 0);
+        }
     }
 
     private double getDouble(Node firstChild) {
@@ -2414,6 +2416,7 @@ public class OutputPanel extends Composite implements HasName {
 
         });
         image.setTitle("  Click to Enlarge.  Images will size with browser.");
+        logger.severe("CALLING grid.setWidget(1, 0, image);");
         grid.setWidget(1, 0, image);
     }
 

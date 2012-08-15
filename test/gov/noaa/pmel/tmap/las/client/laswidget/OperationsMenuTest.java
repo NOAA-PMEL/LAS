@@ -99,25 +99,22 @@ public class OperationsMenuTest {
          */
         final By findSaveAsButtonElementByID = By.id(TestMessages
                 .getString(thisClassSimpleName + ".SaveAsButtonElementID")); //$NON-NLS-1$
-/*        // Try finding saveAsButtonElement1 for 10 seconds
-        ExpectedCondition<Boolean> foundSaveAsButton = new ExpectedCondition<Boolean>() {
-            public Boolean apply(WebDriver d) {
-                WebElement saveAsButtonElement = driver.findElement(findSaveAsButtonElementByID);
-                return (saveAsButtonElement != null);
-            }
-        };
-        new WebDriverWait(driver, 30).until(foundSaveAsButton);
-        final WebElement saveAsButtonElement1 = driver.findElement(findSaveAsButtonElementByID);
-        Assert.assertNotNull(saveAsButtonElement1);
-        // Wait for the button to be enabled, timeout after 10 seconds
-        WebDriverWait wait1 = new WebDriverWait(driver, 10);
-        ExpectedCondition<Boolean> saveAsButtonIsEnabled = new ExpectedCondition<Boolean>() {
-            public Boolean apply(WebDriver d) {
-                return saveAsButtonElement1.isEnabled();
-            }
-        };
-        wait1.until(saveAsButtonIsEnabled);
-*/
+        /*
+         * // Try finding saveAsButtonElement1 for 10 seconds
+         * ExpectedCondition<Boolean> foundSaveAsButton = new
+         * ExpectedCondition<Boolean>() { public Boolean apply(WebDriver d) {
+         * WebElement saveAsButtonElement =
+         * driver.findElement(findSaveAsButtonElementByID); return
+         * (saveAsButtonElement != null); } }; new WebDriverWait(driver,
+         * 30).until(foundSaveAsButton); final WebElement saveAsButtonElement1 =
+         * driver.findElement(findSaveAsButtonElementByID);
+         * Assert.assertNotNull(saveAsButtonElement1); // Wait for the button to
+         * be enabled, timeout after 10 seconds WebDriverWait wait1 = new
+         * WebDriverWait(driver, 10); ExpectedCondition<Boolean>
+         * saveAsButtonIsEnabled = new ExpectedCondition<Boolean>() { public
+         * Boolean apply(WebDriver d) { return saveAsButtonElement1.isEnabled();
+         * } }; wait1.until(saveAsButtonIsEnabled);
+         */
         // Wait 10 sec more before trying to click the Save As button
         final WebElement saveAsButtonElement = driver
                 .findElement(findSaveAsButtonElementByID);
@@ -129,8 +126,29 @@ public class OperationsMenuTest {
             }
         };
         wait10sec.until(saveAsButtonIsEnabled);
+        saveAsButtonElement.click();
 
         String firstWindow = driver.getWindowHandle();
+
+        // Wait 10 sec more before trying to click the ok button
+        final By findOkElementByID = By.id(TestMessages
+                .getString(thisClassSimpleName + ".okElementID")); //$NON-NLS-1$
+        final WebElement okElement = driver
+                .findElement(findOkElementByID);
+        if ( okElement != null ) {
+            ExpectedCondition<Boolean> okIsEnabled = new ExpectedCondition<Boolean>() {
+                public Boolean apply(WebDriver d) {
+                    return okElement.isEnabled();
+                }
+            };
+            try {
+                wait10sec.until(okIsEnabled);
+                okElement.click();
+            } catch ( TimeoutException te ) {
+                // Ignore as the dialog might have been skipped
+            }
+        }
+
         ExpectedCondition<Boolean> thereIsMoreThanOneWindow = new ExpectedCondition<Boolean>() {
             public Boolean apply(WebDriver d) {
                 return driver.getWindowHandles().size() > 1;

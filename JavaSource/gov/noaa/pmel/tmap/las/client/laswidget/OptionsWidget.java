@@ -167,6 +167,7 @@ public class OptionsWidget extends VerticalPanel {
 		return state;
 	}
 	public HandlerRegistration addOkClickHandler(ClickHandler handler) {
+	    ok.ensureDebugId("ok");
 		return ok.addClickHandler(handler);
 	}
 	public void setOptions(OptionSerializable[] op) {
