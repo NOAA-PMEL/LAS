@@ -456,18 +456,22 @@ public class OutputPanel extends Composite implements HasName {
                         frontCanvasContext.fillRect(startx, starty, currentx - startx, currenty - starty);
                         for ( Iterator<Mouse> mouseIt = mouseMoves.iterator(); mouseIt.hasNext(); ) {
                             Mouse mouse = mouseIt.next();
+                            double minx = Math.min(world_startx, world_endx);
+                            double maxx = Math.max(world_startx, world_endx);
+                            double miny = Math.min(world_starty, world_endy);
+                            double maxy = Math.max(world_starty, world_endy);
                             if ( axisVertical.equals("y") && axisHorizontal.equals("x") ) {
-                                mouse.updateMap(world_endy, world_starty, world_startx, world_endx);
+                                mouse.updateMap(miny, maxy, minx, maxx);
                             } else if ( axisVertical.equals("x") && axisHorizontal.equals("y") ) {
-                                mouse.updateMap(world_startx, world_endx, world_starty, world_endy);
+                                mouse.updateMap(minx, maxx, miny, maxy);
                             } else if ( axisVertical.equals("y") && !axisHorizontal.equals("x") ) {
-                                mouse.updateLat(world_endy, world_starty);
+                                mouse.updateLat(miny, maxy);
                             } else if ( axisVertical.equals("x") && !axisHorizontal.equals("y") ) {
-                                mouse.updateLon(world_starty, world_endy);
+                                mouse.updateLon(miny, maxy);
                             } else if ( !axisVertical.equals("y") && axisHorizontal.equals("x") ) {
-                                mouse.updateLon(world_startx, world_endx);
+                                mouse.updateLon(minx, maxx);
                             } else if ( !axisVertical.equals("x") && axisHorizontal.equals("y") ) {
-                                mouse.updateLat(world_startx, world_endx);
+                                mouse.updateLat(minx, maxx);
                             }
                         }
                     }
@@ -480,24 +484,20 @@ public class OutputPanel extends Composite implements HasName {
 
                 @Override
                 public void onMouseUp(MouseUpEvent arg0) {
+                    double minx = Math.min(world_startx, world_endx);
+                    double maxx = Math.max(world_startx, world_endx);
+                    double miny = Math.min(world_starty, world_endy);
+                    double maxy = Math.max(world_starty, world_endy);
                     if ( axisVertical.equals("z")  ) {
                         for ( Iterator<Mouse> mouseIt = mouseMoves.iterator(); mouseIt.hasNext(); ) {
                             Mouse mouse = mouseIt.next();
-                            if ( world_starty < world_endy ) {
-                                mouse.setZ(world_starty, world_endy);
-                            } else {
-                                mouse.setZ(world_endy, world_starty);
-                            }
+                            mouse.setZ(miny, maxy); 
                         }
                     }
                     if ( axisHorizontal.equals("z") ) {
                         for ( Iterator<Mouse> mouseIt = mouseMoves.iterator(); mouseIt.hasNext(); ) {
                             Mouse mouse = mouseIt.next();
-                            if ( world_startx < world_endx) {
-                                mouse.setZ(world_startx, world_endx);
-                            } else{
-                                mouse.setZ(world_endx, world_startx);
-                            }
+                            mouse.setZ(minx, maxx);
                         }
                     }
                     if ( !view.equals("t") ) {
