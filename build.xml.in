@@ -1,4 +1,4 @@
-<project name="SATCHMO" default="dist" basedir=".">
+<project name="BAKER" default="dist" basedir=".">
 
 	<property environment="env" />
 	<property name="app.name" value="@APPNAME@" />
@@ -418,7 +418,7 @@
              <fileset id="mapwidget-libs" dir="lib">
                   <include name="**/*.jar" />
              </fileset>
-             <fileset id="gwt-libs" dir="/home/rhs/gwt">
+             <fileset id="gwt-libs" dir="/home/@JAKARTA_HOME@/../gwt">
                   <include name="**/*.jar" />
              </fileset>
          </classpath>
@@ -443,4 +443,115 @@
      <delete file="dist/olmapwidget.${map_version}.tar" />
      <delete file="dist/olmapwidget.${map_version}.tar.gz" />
   </target>
+    <path id="test.classpath">
+        <pathelement location="WebContent/WEB-INF/classes"/>
+        <pathelement location="WebContent/JavaScript/components/WEB-INF/classes"/>
+        <pathelement location="test-classes"/>
+        <pathelement location="lib/junit-4.8.2.jar"/>
+        <pathelement location="lib/antlr-runtime-3.1.1.jar"/>
+        <pathelement location="lib/easymock-3.0.jar"/>
+        <pathelement location="lib/gwt-test-utils-0.36.jar"/>
+        <pathelement location="lib/gwt-test-utils-csv-0.36.jar"/>
+        <pathelement location="lib/jackson-core-asl-1.9.1.jar"/>
+        <pathelement location="lib/javassist-3.15.0-GA.jar"/>
+        <pathelement location="lib/slf4j-api-1.6.1.jar"/>
+        <pathelement location="lib/mockito-all-1.8.5.jar"/>
+        <pathelement location="lib/selenium-jars/apache-mime4j-0.6.jar"/>
+        <pathelement location="lib/selenium-jars/bsh-1.3.0.jar"/>
+        <pathelement location="lib/selenium-jars/cglib-nodep-2.1_3.jar"/>
+        <pathelement location="lib/selenium-jars/commons-codec-1.6.jar"/>
+        <pathelement location="lib/selenium-jars/commons-collections-3.2.1.jar"/>
+        <pathelement location="lib/selenium-jars/commons-exec-1.1.jar"/>
+        <pathelement location="lib/selenium-jars/commons-jxpath-1.3.jar"/>
+        <pathelement location="lib/selenium-jars/commons-lang-2.6.jar"/>
+        <pathelement location="lib/selenium-jars/commons-logging-1.1.1.jar"/>
+        <pathelement location="lib/selenium-jars/cssparser-0.9.5.jar"/>
+        <pathelement location="lib/selenium-jars/hamcrest-core-1.1.jar"/>
+        <pathelement location="lib/selenium-jars/hamcrest-library-1.1.jar"/>
+        <pathelement location="lib/selenium-jars/htmlunit-2.9.jar"/>
+        <pathelement location="lib/selenium-jars/htmlunit-core-js-2.9.jar"/>
+        <pathelement location="lib/selenium-jars/httpclient-4.1.3.jar"/>
+        <pathelement location="lib/selenium-jars/httpcore-4.1.3.jar"/>
+        <pathelement location="lib/selenium-jars/httpmime-4.1.3.jar"/>
+        <pathelement location="lib/selenium-jars/ini4j-0.5.2.jar"/>
+        <pathelement location="lib/selenium-jars/jcommander-1.13.jar"/>
+        <pathelement location="lib/selenium-jars/jna-3.4.0.jar"/>
+        <pathelement location="lib/selenium-jars/jna-platform-3.4.0.jar"/>
+        <pathelement location="lib/selenium-jars/json-20080701.jar"/>
+        <pathelement location="lib/selenium-jars/junit-dep-4.10.jar"/>
+        <pathelement location="lib/selenium-jars/nekohtml-1.9.15.jar"/>
+        <pathelement location="lib/selenium-jars/protobuf-java-2.4.1.jar"/>
+        <pathelement location="lib/selenium-jars/sac-1.3.jar"/>
+        <pathelement location="lib/selenium-jars/serializer-2.7.1.jar"/>
+        <pathelement location="lib/selenium-jars/testng-6.0.1-nobsh-noguice.jar"/>
+        <pathelement location="lib/selenium-jars/xalan-2.7.1.jar"/>
+        <pathelement location="lib/selenium-jars/xercesImpl-2.9.1.jar"/>
+        <pathelement location="lib/selenium-jars/xml-apis-1.3.04.jar"/>
+        <pathelement location="lib/selenium-jars/guava-12.0.jar"/>
+        <pathelement location="lib/selenium-jars/netty-3.2.7.Final.jar"/>
+        <pathelement location="lib/selenium-jars/operadriver-0.14.jar"/>
+        <pathelement location="lib/selenium-jars/selenium-java-2.25.0.jar"/>
+        <pathelement location="lib/selenium-jars/webbit-0.4.8-SNAPSHOT.jar"/>
+        <!-- <path refid="EAR Libraries.libraryclasspath"/>
+        <path refid="Web App Libraries.libraryclasspath"/>
+        <path refid="Java EE 5 Libraries.libraryclasspath"/>
+        <path refid="GWT SDK [GWT (2) - 2.4.0].libraryclasspath"/> -->
+    </path>
+    <target name="build-test-init">
+        <mkdir dir="test-classes"/>
+        <copy includeemptydirs="false" todir="test-classes">
+            <fileset dir="test">
+                <exclude name="**/*.launch"/>
+                <exclude name="**/*.java"/>
+            </fileset>
+        </copy>
+    </target>
+    <target depends="build-test-init" name="build-test">
+        <echo message="${ant.project.name}: ${ant.file}"/>
+        <javac debug="true" debuglevel="${debuglevel}" destdir="test-classes" source="${source}">
+            <src path="test"/>
+            <classpath refid="test.classpath"/>
+        </javac>
+    </target>
+	<target depends="build-test" name="test">
+		<property name="test.lib" value="lib" />
+		<property name="build.dir" value="test-classes" />
+		<property name="build.tests" value="test-classes" />
+		<property name="src.tests" value="test" />
+		<property name="reports.tests" value="reports" />
+		<mkdir dir="${reports.tests}" />
+		<junit printsummary="yes" haltonfailure="yes" showoutput="yes">
+		  <classpath>
+			<fileset dir="${test.lib}">
+				<include name="**/*.jar" />
+			</fileset>
+		    <pathelement location="${build.tests}"/>
+			<pathelement path="WebContent/WEB-INF/classes" />
+			<fileset dir="WebContent/WEB-INF/lib">
+				<include name="**/*.jar" />
+			</fileset>
+			<fileset dir="${jakarta.lib}">
+				<include name="**/*.jar" />
+			</fileset>
+		    <!-- <pathelement path="${java.class.path}"/> -->
+		  </classpath>
+
+		  <!-- formatter type="plain"/>
+
+		  <test name="my.test.TestCase" haltonfailure="no" outfile="result">
+		    <formatter type="xml"/>
+		  </test -->
+
+		  <batchtest fork="yes" todir="${reports.tests}">
+		    <formatter type="xml"/>
+		    <fileset dir="${src.tests}">
+		      <include name="**/*Test*.java"/>
+			  <exclude name="**/AllTests.java"/>
+				  <exclude name="**/TestMessages.java"/>
+				  <exclude name="**/HelpMenuBarImplTest.java"/>
+		    </fileset>
+		  </batchtest>
+		</junit>
+		<junitreport/>
+	</target>
 </project>

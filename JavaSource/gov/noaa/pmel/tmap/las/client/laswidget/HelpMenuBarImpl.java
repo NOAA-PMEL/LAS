@@ -52,6 +52,7 @@ public class HelpMenuBarImpl extends Composite implements HelpMenuBar {
 
 	public HelpMenuBarImpl() {
 		initWidget(binder.createAndBindUi(this));
+		helpMenu.ensureDebugId("helpMenu");
 	}
 
 	@Override

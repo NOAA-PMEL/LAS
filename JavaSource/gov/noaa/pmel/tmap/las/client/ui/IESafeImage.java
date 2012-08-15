@@ -26,7 +26,7 @@ import com.google.gwt.user.client.ui.RootPanel;
 public class IESafeImage extends Image {
     private HandlerRegistration initLoadHandlerReg = null;
 
-    Logger logger = Logger.getLogger("IESafeImage");
+    private static final Logger logger = Logger.getLogger(IESafeImage.class.getName());
 
     /**
 	 * 
@@ -99,8 +99,8 @@ public class IESafeImage extends Image {
     @Override
     public int getHeight() {
         int superHeight = super.getHeight();
-        logger.log(Level.WARNING, "superHeight:" + superHeight);
-        logger.log(Level.WARNING, "isAttached():" + isAttached());
+        logger.log(Level.INFO, "superHeight:" + superHeight);
+        logger.log(Level.INFO, "isAttached():" + isAttached());
         if ( (superHeight <= 0) ) {
             // If this is being run under IE the default answer may be 0 when it
             // shouldn't be, so return the height from a hidden and attached
@@ -133,8 +133,8 @@ public class IESafeImage extends Image {
     @Override
     public int getWidth() {
         int superWidth = super.getWidth();
-        logger.log(Level.WARNING, "superWidth:" + superWidth);
-        logger.log(Level.WARNING, "isAttached():" + isAttached());
+        logger.log(Level.INFO, "superWidth:" + superWidth);
+        logger.log(Level.INFO, "isAttached():" + isAttached());
         if ( (superWidth <= 0) ) {
             // If this is being run under IE the default answer may be 0 when it
             // shouldn't be, so return the height from a hidden and attached
