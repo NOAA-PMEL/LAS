@@ -27,6 +27,11 @@ IF ($error_status"0|*>1") THEN
   EXIT/PROGRAM
 ENDIF
 
+! Set up upper-left labels with the region info
+GO LAS_pp_set_region_labels
+
+GO LAS_url_label 0
+
 ! Open the window, apply size, scale options
 GO LAS_open_window
 
@@ -69,9 +74,13 @@ LABEL/NOUSER `($ppl$xlen)/2`, `-1*($ppl$yorg)/2`, 0, 0, 0.14, ($ferret_plot_titl
 ! Make the polygon overlay plot
 
 IF ($ferret_plot_var"0|*>1") THEN
-   GO polymark ($poly_command) ($data_x_var) ($data_y_var) ($ferret_plot_var) ($ferret_poly_shape"triangle|delta|square|diamond|pentagon|hexagon|circle|star|plus|ex|*>triangle") ($ferret_poly_scale)
+   GO polymark ($poly_command)/SET ($data_x_var) ($data_y_var) ($ferret_plot_var) ($ferret_poly_shape"triangle|delta|square|diamond|pentagon|hexagon|circle|star|plus|ex|*>triangle") ($ferret_poly_scale)
+   IF ($ferret_annotations%0|*>1%) THEN GO key_at_top
+   PPL POLYGON
 ELSE
-   GO polymark ($poly_command) ($data_x_var) ($data_y_var) " " ($ferret_poly_shape"triangle|delta|square|diamond|pentagon|hexagon|circle|star|plus|ex|*>triangle") ($ferret_poly_scale)
+   GO polymark ($poly_command)/SET ($data_x_var) ($data_y_var) " " ($ferret_poly_shape"triangle|delta|square|diamond|pentagon|hexagon|circle|star|plus|ex|*>triangle") ($ferret_poly_scale)
+   IF ($ferret_annotations%0|*>1%) THEN GO key_at_top
+   PPL POLYGON
 ENDIF
 
 ! What if the x locations are a modulo-360 distance outside the region?

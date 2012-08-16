@@ -99,6 +99,7 @@ ENDIF
 IF ($data_($num)_title"0|1|*>1) THEN 
    DEFINE SYMBOL data_title ($data_($num)_title) 
    IF ($data_units"0|*>1") THEN DEFINE SYMBOL data_title ($data_($num)_title) ($data_units)
+   DEFINE SYMBOL variable_lab = ($data_title) ($data_units)
 ENDIF
 
 DEFINE SYMBOL ferret_plot_title ($data_title)
@@ -133,6 +134,7 @@ ENDIF
 
 IF ($data_title"0|*>1") THEN \
   SET VAR/TITLE="($data_title)" ($data_x_var)[d=`data_num`]
+
 
 ! Mark whether there are contour levels set on first entry. 
 ! Compute automatic open-ended levels.
