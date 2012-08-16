@@ -1392,7 +1392,7 @@ public class OutputPanel extends Composite implements HasName {
                     w = w - 10;
                 }
                 messagePanel.setWidth(w + "px");
-                messagePanel.show(plotWidget.getAbsoluteLeft() + 15, plotWidget.getAbsoluteTop() + 350, "Cancel the curret request before making another.");
+                messagePanel.show(plotWidget.getAbsoluteLeft() + 15, plotWidget.getAbsoluteTop() + 350, "Cancel the current request before making another.");
                 
                 cancelButton.setTime(0);
                 cancelButton.setSize(image_w * imageScaleRatio + "px", image_h * imageScaleRatio + "px");
@@ -2027,7 +2027,7 @@ public class OutputPanel extends Composite implements HasName {
                     w = w - 10;
                 }
                 messagePanel.setWidth(w + "px");
-                messagePanel.show(pw.getAbsoluteLeft() + 15, pw.getAbsoluteTop() + 350, "Cancel the curret request before making another.");
+                messagePanel.show(pw.getAbsoluteLeft() + 15, pw.getAbsoluteTop() + 350, "Cancel the current request before making another.");
                 
                 cancelButton.setTime(0);
                 cancelButton.setSize(image_w * imageScaleRatio + "px", image_h * imageScaleRatio + "px");
@@ -2587,6 +2587,8 @@ public class OutputPanel extends Composite implements HasName {
             String type = xView.substring(i, i + 1);
             panelAxesWidgets.setRange(type, true);
         }
+    }
+    public void setOrthoRanges(String xView, List<String> xOrtho) {
         boolean range = false;
         if ( var != null && var.getGrid() != null && var.isScattered() ) {
             range = true;
@@ -2596,7 +2598,6 @@ public class OutputPanel extends Composite implements HasName {
             panelAxesWidgets.setRange(type, range);
         }
     }
-
     public void setT(String tlo, String thi) {
         panelAxesWidgets.getTAxis().setLo(tlo);
         // TODO also set the hi value
