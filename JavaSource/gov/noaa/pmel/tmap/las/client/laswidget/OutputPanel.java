@@ -527,7 +527,7 @@ public class OutputPanel extends Composite implements HasName {
     private RequestCallback lasRequestCallback = new RequestCallback() {
         @Override
         public void onError(Request request, Throwable exception) {
-            currentURL = "error";
+            currentURL = currentURL + "&error=true";
             logger.warning("enterring lasRequestCallback.onError request:" + request + "\nexception:" + exception);
             spin.hide();
             updating = false;
@@ -551,7 +551,7 @@ public class OutputPanel extends Composite implements HasName {
             // Look at the doc. If it's not obviously XML, treat it as HTML.
             if ( !doc.substring(0, 100).contains("<?xml") ) {
                 logger.info("!doc.substring(0, 100).contains(\"<?xml\")");
-                currentURL = "error";
+                currentURL = currentURL + "&error=true";
                 evalScripts(new HTML(response.getText()).getElement());
                 VerticalPanel p = new VerticalPanel();
                 ScrollPanel sp = new ScrollPanel();
