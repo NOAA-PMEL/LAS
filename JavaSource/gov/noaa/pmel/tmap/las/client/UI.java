@@ -744,7 +744,7 @@ public class UI extends BaseUI {
         for ( Iterator panelIt = xPanels.iterator(); panelIt.hasNext(); ) {
             OutputPanel panel = (OutputPanel) panelIt.next();
             panel.showOrthoAxes(xView, xOrtho, getAnalysisAxis());
-            panel.setRanges(xView, xOrtho);
+            panel.setOrthoRanges(xView, xOrtho);
         }
 
         if ( tokenMap.containsKey("globalMin") ) {
@@ -1138,7 +1138,7 @@ public class UI extends BaseUI {
             for ( Iterator panelIt = xPanels.iterator(); panelIt.hasNext(); ) {
                 OutputPanel panel = (OutputPanel) panelIt.next();
                 panel.showOrthoAxes(xView, xOrtho, getAnalysisAxis());
-                panel.setRanges(xView, xOrtho);
+                panel.setOrthoRanges(xView, xOrtho);
             }
             return true;
         }
@@ -1893,7 +1893,7 @@ public class UI extends BaseUI {
             panel.setVariable(xVariable);
             panel.init(false, ops);
             panel.showOrthoAxes(xView, xOrtho, getAnalysisAxis());
-            panel.setRanges(xView, xOrtho);
+            panel.setOrthoRanges(xView, xOrtho);
             panel.setOperation(xOperationID, xView);
         }
         turnOffAnalysis();
@@ -1953,7 +1953,7 @@ public class UI extends BaseUI {
 
             panel.setOperation(xOperationID, xView);
             panel.showOrthoAxes(xView, xOrtho, getAnalysisAxis());
-            panel.setRanges(xView, xOrtho);
+            panel.setOrthoRanges(xView, xOrtho);
         }
         if ( xAnalysisWidget.isActive() ) {
             String v = xAnalysisWidget.getAnalysisAxis();
@@ -1992,7 +1992,7 @@ public class UI extends BaseUI {
                 panel.setRange("t", false);
             }
             panel.showOrthoAxes(xView, xOrtho, null);
-            panel.setRanges(xView, xOrtho);
+            panel.setOrthoRanges(xView, xOrtho);
         }
         xAxesWidget.setMessage("");
         xAxesWidget.showMessage(false);
