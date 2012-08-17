@@ -49,6 +49,7 @@ public class OperationsMenu extends Composite {
 		buttonBar.add(exportToDesktopButton);
 		buttonBar.add(saveAsButton);
 		initWidget(buttonBar);
+		buttonBar.setSize("100%", "100%");
 	}
     private void turnOffButtons() {
 		animationButton.setEnabled(false);
