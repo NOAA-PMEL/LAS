@@ -41,10 +41,10 @@ public class HelpMenu implements EntryPoint {
 
         DockPanel dockPanel = new DockPanel();
         rootPanel.add(dockPanel);
-        dockPanel.setSize("160px", "20px");
+        dockPanel.setSize("160px", "24px");
 
         dockPanel.add(appWidget, DockPanel.WEST);
-        appWidget.setSize("59px", "24px");
+        appWidget.setSize("61px", "24px");
         rootPanel.add(dockPanel);
         helpMenuBarPresenter.start(appWidget, eventBus);
     }
