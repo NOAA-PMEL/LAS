@@ -28,10 +28,16 @@ IF `fland_area LT 0.005` THEN
 
    DEF SYM map_reg = [x=($xlo_hack):($xhi_hack),y=($ylo_hack):($yhi_hack)]
 
-   USE "http://ferret.pmel.noaa.gov/thredds/dodsC/data/PMEL/smith_sandwell_topo_v8_2.nc"
+   IF `TEST_OPENDAP("http://ferret.pmel.noaa.gov/thredds/dodsC/data/PMEL/smith_sandwell_topo_v8_2.nc") EQ 0` THEN
+      USE "http://ferret.pmel.noaa.gov/thredds/dodsC/data/PMEL/smith_sandwell_topo_v8_2.nc"
+      DEFINE SYMBOL toponame = smith_sandwell_topo_v8_2
+   ELSE
+      USE etopo05
+      DEFINE SYMBOL toponame = etopo05
+   ENDIF
 
    SHADE/NOLAB/NOKEY/LEV=(0,10000,10000)/PAL=gray/OVERLAY rose($map_reg)
-   CAN DATA smith_sandwell_topo_v8_2
+   CAN DATA ($toponame)
    SET DATA/RESTORE
    DEFINE SYMBOL fland_done = 1
 
