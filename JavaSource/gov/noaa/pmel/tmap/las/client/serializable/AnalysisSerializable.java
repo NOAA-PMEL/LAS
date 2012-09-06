@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class AnalysisSerializable {
@@ -22,6 +23,7 @@ public class AnalysisSerializable {
     }
 
     public void setLabel(String label) {
+    	logger.setLevel(Level.OFF);
         this.label = label;
         logger.info("label set to:");
         if ( label == null )

@@ -529,7 +529,7 @@ public final class ProductServerAction extends LASAction {
                             
                         } else {
                             // No time out set.  Very unlikely, but possible if a new request wants the same
-                            // product without an assoicated session.
+                            // product without an associated session.
                         	
                             productServerRunner.join();
                         }                        

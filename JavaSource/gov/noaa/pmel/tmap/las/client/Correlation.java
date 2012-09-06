@@ -215,6 +215,7 @@ public class Correlation implements EntryPoint {
 
     @Override
     public void onModuleLoad() {
+        logger.setLevel(Level.OFF);
 
         ClientFactory cf = GWT.create(ClientFactory.class);
         eventBus = cf.getEventBus();
