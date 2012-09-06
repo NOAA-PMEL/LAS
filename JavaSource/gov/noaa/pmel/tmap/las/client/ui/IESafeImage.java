@@ -34,6 +34,7 @@ public class IESafeImage extends Image {
     public IESafeImage() {
         super();
         // hide();
+        logger.setLevel(Level.OFF);
     }
 
     /**
@@ -41,6 +42,7 @@ public class IESafeImage extends Image {
      */
     public IESafeImage(Element element) {
         super(element);
+        logger.setLevel(Level.OFF);
     }
 
     /**
@@ -48,6 +50,7 @@ public class IESafeImage extends Image {
      */
     public IESafeImage(ImageResource resource) {
         super(resource);
+        logger.setLevel(Level.OFF);
     }
 
     public IESafeImage(LoadHandler loadHandler) {
@@ -60,6 +63,7 @@ public class IESafeImage extends Image {
      */
     public IESafeImage(SafeUri url) {
         super(url);
+        logger.setLevel(Level.OFF);
     }
 
     /**
@@ -71,6 +75,7 @@ public class IESafeImage extends Image {
      */
     public IESafeImage(SafeUri url, int left, int top, int width, int height) {
         super(url, left, top, width, height);
+        logger.setLevel(Level.OFF);
     }
 
     /**
@@ -78,6 +83,7 @@ public class IESafeImage extends Image {
      */
     public IESafeImage(String url) {
         super(url);
+        logger.setLevel(Level.OFF);
     }
 
     /**
@@ -89,6 +95,7 @@ public class IESafeImage extends Image {
      */
     public IESafeImage(String url, int left, int top, int width, int height) {
         super(url, left, top, width, height);
+        logger.setLevel(Level.OFF);
     }
 
     /**
