@@ -690,6 +690,8 @@ public class BaseUI {
         xButtonLayout.setWidget(0, xButtonLayoutIndex++, xHideControls);
         xButtonLayout.getCellFormatter().setWordWrap(0, xButtonLayoutIndex - 1, false);
         xButtonLayout.setWidget(0, xButtonLayoutIndex++, applyButton);
+        xButtonLayout.getCellFormatter().setHeight(0, xButtonLayoutIndex - 1, "23");
+        xButtonLayout.getCellFormatter().setWidth(0, xButtonLayoutIndex - 1, "90");
         xButtonLayout.getCellFormatter().setWordWrap(0, xButtonLayoutIndex - 1, false);
         xButtonLayout.setWidget(0, xButtonLayoutIndex++, xDatasetButton);
         xButtonLayout.getCellFormatter().setWordWrap(0, xButtonLayoutIndex - 1, false);
@@ -845,10 +847,6 @@ public class BaseUI {
 
     private void setMapSelection(double s, double n, double w, double e) {
         xAxesWidget.getRefMap().setCurrentSelection(s, n, w, e);
-    }
-
-    public void setMenuButtons(Widget buttons, int column) {
-        xButtonLayout.setWidget(0, column, buttons);
     }
 
     public void setOperationsClickHandler(ClickHandler handler) {
