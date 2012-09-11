@@ -1149,6 +1149,22 @@ public class LASConfig extends LASDocument {
     	}
     }
     /**
+     * Get any applicable data constraints for a particular data set and variable 
+     * as a HashMap keyed on the constraint ID.
+     * @param dsID
+     * @param varID
+     * @return the HashMap of constraints
+     * @throws JDOMException
+     */
+    public HashMap<String, DataConstraint> getConstraintsHash(String dsID, String varID) throws JDOMException {
+    	ArrayList<DataConstraint> constraintsList = getConstraints(dsID, varID);
+    	HashMap<String, DataConstraint> constraints = new HashMap<String, DataConstraint>(constraintsList.size());
+    	for (DataConstraint val : constraintsList) {
+    		constraints.put(val.getId(), val);
+    	}
+    	return constraints;
+    }
+    /**
      * Get any constraints from the named UI default.
      *
      * @param ui_default
@@ -1218,6 +1234,22 @@ public class LASConfig extends LASDocument {
 		    	constraints.add(new DataConstraint(full_constraint));
 		    }
 		}
+    	return constraints;
+    }
+    /**
+     * Get any constraints from the named UI default 
+     * as a HashMap keyed on the constraint ID.
+     *
+     * @param ui_default
+     * @return the HashMap of constraints
+     * @throws JDOMException
+     */
+    public HashMap<String, DataConstraint> getConstraintsHash(String ui_default, String dsID, String varID) throws JDOMException {
+    	ArrayList<DataConstraint> constraintsList = getConstraints(ui_default, dsID, varID);
+    	HashMap<String, DataConstraint> constraints = new HashMap<String, DataConstraint>(constraintsList.size());
+    	for (DataConstraint val : constraintsList) {
+    		constraints.put(val.getId(), val);
+    	}
     	return constraints;
     }
     /**
