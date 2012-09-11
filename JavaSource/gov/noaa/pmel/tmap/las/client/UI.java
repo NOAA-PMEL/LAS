@@ -183,7 +183,7 @@ public class UI extends BaseUI {
 	TextBox autoContourTextBox;
 
 	FlexCellFormatter buttonFormatter;
-	FlexTable buttonLayout = new FlexTable();
+	FlexTable compareButtonsLayout = new FlexTable();
 
 	boolean changeDataset = false;
 
@@ -1005,7 +1005,7 @@ public class UI extends BaseUI {
 			String p = compareMenu.getValue(compareMenu.getSelectedIndex());
 			init(Integer.valueOf(p), Constants.IMAGE);
 			// resize OutputPanel(s) according to the current Window size
-	        logger.info("compareMenuChanged() calling resize(...)");
+			logger.info("compareMenuChanged() calling resize(...)");
 			resize(Window.getClientWidth(), Window.getClientHeight());
 			String galleryHistory = getGalleryToken();
 			Map<String, String> galleryTokens = Util
@@ -1227,9 +1227,11 @@ public class UI extends BaseUI {
 		}
 		xAnalysisWidget.setVisible(false);
 		initPanels();
-		Widget menu = xButtonLayout.getWidget(0, getButtonIndex());
-		xButtonLayout.remove(menu);
-		setMenuButtons(buttonLayout, getButtonIndex());
+		int buttonIndex = getButtonIndex();
+		Widget tOpsMenu = xButtonLayout.getWidget(0, buttonIndex);
+		xButtonLayout.remove(tOpsMenu);
+		xButtonLayout.setWidget(0, buttonIndex, compareButtonsLayout);
+		xButtonLayout.getCellFormatter().setWidth(0, buttonIndex, "271");
 	}
 
 	private void initOne() {
@@ -1237,9 +1239,10 @@ public class UI extends BaseUI {
 		autoContourButton.setDown(false);
 		autoContourTextBox.setText("");
 		initPanels(true);
-		Widget compareButtons = xButtonLayout.getWidget(0, getButtonIndex());
+		int buttonIndex = getButtonIndex();
+		Widget compareButtons = xButtonLayout.getWidget(0, buttonIndex);
 		xButtonLayout.remove(compareButtons);
-		xButtonLayout.setWidget(0, getButtonIndex(), tOperationsMenu);
+		xButtonLayout.setWidget(0, buttonIndex, tOperationsMenu);
 	}
 
 	private void initPanels() {
@@ -1341,7 +1344,7 @@ public class UI extends BaseUI {
 		int col = 0;
 
 		tOperationsMenu.addClickHandler(tExternalOperationClickHandler);
-		// addMenuButtons(buttonLayout);
+		// addMenuButtons(compareButtonsLayout);
 		int myButtonIndex = getButtonIndex();
 		xButtonLayout.setWidget(0, myButtonIndex++, tOperationsMenu);
 		xButtonLayout.getCellFormatter().setWordWrap(0, myButtonIndex - 1,
@@ -1394,9 +1397,9 @@ public class UI extends BaseUI {
 		differenceButton.addStyleDependentName("SMALLER");
 		autoContourButton.addStyleDependentName("SMALLER");
 		autoContourTextBox.addStyleDependentName("SMALLER");
-		buttonLayout.setWidget(0, col++, differenceButton);
-		buttonLayout.setWidget(0, col++, autoContourButton);
-		buttonLayout.setWidget(0, col++, autoContourTextBox);
+		compareButtonsLayout.setWidget(0, col++, differenceButton);
+		compareButtonsLayout.setWidget(0, col++, autoContourButton);
+		compareButtonsLayout.setWidget(0, col++, autoContourTextBox);
 
 		annotationsControl = new ToggleButton("Plot Info",
 				annotationsClickHandler);
@@ -1746,7 +1749,7 @@ public class UI extends BaseUI {
 			pushHistory();
 		}
 		// resize OutputPanel(s) according to the current Window size
-        logger.info("refresh(boolean switchAxis, boolean history, boolean force) calling resize(...)");
+		logger.info("refresh(boolean switchAxis, boolean history, boolean force) calling resize(...)");
 		resize(Window.getClientWidth(), Window.getClientHeight());
 
 		required_update = false;

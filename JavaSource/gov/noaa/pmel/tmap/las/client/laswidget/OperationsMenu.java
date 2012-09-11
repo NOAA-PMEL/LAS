@@ -8,6 +8,7 @@ import java.util.List;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.HasVerticalAlignment;
 /**
  * A widget that shows the "non-plot" operations from an LAS (like Google Earth, animation, etc).
  * @author rhs
@@ -33,6 +34,7 @@ public class OperationsMenu extends Composite {
 	ClickHandler clickHandler;
 	public OperationsMenu() {
 		buttonBar = new HorizontalPanel();
+		buttonBar.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
         turnOffButtons();
         animationButton.addStyleDependentName("SMALLER");
         compareButton.addStyleDependentName("SMALLER");

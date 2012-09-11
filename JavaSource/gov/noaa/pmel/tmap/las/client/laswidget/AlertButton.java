@@ -39,7 +39,9 @@ public class AlertButton extends Composite {
         panel.setBorderWidth(1);
         checkBox = new CheckBox();
         panel.add(button);
+        button.setSize("66", "21");
         panel.add(checkBox);
+        checkBox.setSize("20", "20");
         ClientFactory cf = GWT.create(ClientFactory.class);
         eventBus = cf.getEventBus();
         this.alertStyle = alertStyle;
@@ -47,6 +49,8 @@ public class AlertButton extends Composite {
         eventBus.addHandler(UpdateFinishedEvent.TYPE, updateFinishedHandler);
         eventBus.addHandler(MapChangeEvent.TYPE, mapChangeHandler);
         initWidget(panel);
+        panel.setSize("90", "23");
+        this.ensureDebugId("AlertButton");
     }
     WidgetSelectionChangeEvent.Handler updateNeededEventHandler = new WidgetSelectionChangeEvent.Handler() {
 
