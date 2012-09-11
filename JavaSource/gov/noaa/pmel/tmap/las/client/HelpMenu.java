@@ -22,6 +22,8 @@ import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.user.client.ui.DockPanel;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.user.client.ui.HasHorizontalAlignment;
+import com.google.gwt.user.client.ui.HasVerticalAlignment;
 
 public class HelpMenu implements EntryPoint {
 
@@ -44,6 +46,8 @@ public class HelpMenu implements EntryPoint {
         dockPanel.setSize("160px", "24px");
 
         dockPanel.add(appWidget, DockPanel.WEST);
+        dockPanel.setCellVerticalAlignment(appWidget, HasVerticalAlignment.ALIGN_MIDDLE);
+        dockPanel.setCellHorizontalAlignment(appWidget, HasHorizontalAlignment.ALIGN_CENTER);
         appWidget.setSize("61px", "24px");
         rootPanel.add(dockPanel);
         helpMenuBarPresenter.start(appWidget, eventBus);

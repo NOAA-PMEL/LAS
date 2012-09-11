@@ -1,30 +1,35 @@
 package gov.noaa.pmel.tmap.las.client.laswidget;
 
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.uibinder.client.UiBinder;
+import gov.noaa.pmel.tmap.las.client.ui.AutoCloseMenuBar;
+
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.MenuBar;
 import com.google.gwt.user.client.ui.MenuItem;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.MenuItemSeparator;
 
 /**
  * Implementation of {@link HelpMenuBar}.
  */
 public class HelpMenuBarImpl extends Composite implements HelpMenuBar {
 
-    interface Binder extends UiBinder<Widget, HelpMenuBarImpl> {
-    }
-
-    private static final Binder binder = GWT.create(Binder.class);
+//    interface Binder extends UiBinder<Widget, HelpMenuBarImpl> {
+//    }
+//
+//    private static final Binder binder = GWT.create(Binder.class);
     @UiField
     MenuItem aboutItem;
+    
     @UiField
     MenuItem helpMenu;
+    
     @UiField
-    MenuBar helpMenuBar;
+    AutoCloseMenuBar helpMenuBar;
+    
     @UiField
     MenuBar helpSubMenuBar;
+    
     private Presenter listener;
 
     @UiField
@@ -32,9 +37,35 @@ public class HelpMenuBarImpl extends Composite implements HelpMenuBar {
 
     @UiField
     MenuItem videoTutorialsItem;
+    
+    private MenuItemSeparator separator;
 
     public HelpMenuBarImpl() {
-        initWidget(binder.createAndBindUi(this));
+    	
+    	helpMenuBar = new AutoCloseMenuBar(false);
+    	helpMenuBar.setSize("100%", "100%");
+    	helpMenuBar.setAnimationEnabled(true);
+    	initWidget(helpMenuBar);
+    	helpSubMenuBar = new AutoCloseMenuBar(true);
+    	helpSubMenuBar.setAnimationEnabled(true);
+    	
+    	helpMenu = new MenuItem("Help", false, helpSubMenuBar);
+    	helpMenu.setSize("100%", "100%");
+    	
+    	onlineDocsItem = new MenuItem("Online Documentation", false, (Command) null);
+    	helpSubMenuBar.addItem(onlineDocsItem);
+    	
+    	videoTutorialsItem = new MenuItem("Video Tutorials", false, (Command) null);
+    	helpSubMenuBar.addItem(videoTutorialsItem);
+    	
+    	separator = new MenuItemSeparator();
+    	helpSubMenuBar.addSeparator(separator);
+    	
+    	aboutItem = new MenuItem("About", false, (Command) null);
+    	helpSubMenuBar.addItem(aboutItem);
+    	
+    	helpMenuBar.addItem(helpMenu);
+//        initWidget(binder.createAndBindUi(this));
         helpMenu.ensureDebugId("helpMenu");
     }
 
