@@ -539,7 +539,7 @@ public class UI extends BaseUI {
 		}
 	};
 
-	Logger logger = Logger.getLogger("UI");
+	private final Logger logger = Logger.getLogger(UI.class.getName());
 
 	// Keep track of the current operations
 	OperationSerializable[] ops;
@@ -745,16 +745,16 @@ public class UI extends BaseUI {
 
 		@Override
 		public void onRequest(LASRequestEvent event) {
-	        logger.setLevel(Level.ALL);
-			logger.info("onValueChange(LASRequestEvent event) called.");
+			logger.setLevel(Level.ALL);
+			logger.info("onRequest(LASRequestEvent event) called.");
 			Object source = event.getSource();
 			if (source == null) {
 				logger.warning("source == null");
 			} else if (source instanceof OutputPanel) {
 				oprController.process(event);
 			} else {
-				logger.warning("The source is NOT and instanceof OutputPanel. source:");
-				logger.warning(source.toString());
+				logger.warning("The source is NOT and instanceof OutputPanel. source:"
+						+ source.toString());
 			}
 		}
 	};
@@ -1005,6 +1005,7 @@ public class UI extends BaseUI {
 			String p = compareMenu.getValue(compareMenu.getSelectedIndex());
 			init(Integer.valueOf(p), Constants.IMAGE);
 			// resize OutputPanel(s) according to the current Window size
+	        logger.info("compareMenuChanged() calling resize(...)");
 			resize(Window.getClientWidth(), Window.getClientHeight());
 			String galleryHistory = getGalleryToken();
 			Map<String, String> galleryTokens = Util
@@ -1335,7 +1336,7 @@ public class UI extends BaseUI {
 	 */
 	public void onModuleLoad() {
 		super.initialize();
-        logger.setLevel(Level.OFF);
+		logger.setLevel(Level.ALL);
 
 		int col = 0;
 
@@ -1745,6 +1746,7 @@ public class UI extends BaseUI {
 			pushHistory();
 		}
 		// resize OutputPanel(s) according to the current Window size
+        logger.info("refresh(boolean switchAxis, boolean history, boolean force) calling resize(...)");
 		resize(Window.getClientWidth(), Window.getClientHeight());
 
 		required_update = false;
