@@ -91,6 +91,30 @@
               </text>
            </message>
            <message type="startsWith" level="error">
+              <key>*** NOTE: unrepairable repeated axis coords</key>
+              <text>
+                The dataset has an invalid coordinate axis. 
+              </text>
+           </message>
+           <message type="startsWith" level="error">
+              <key>*** NOTE: Coordinates out of order or missing</key>
+              <text>
+                The dataset has an invalid coordinate axis. 
+              </text>
+           </message>
+           <message type="startsWith" level="error">
+              <key>*** NOTE: calendar attribute on axis</key>
+              <text>
+                A time axis in the dataset has an invalid calendar definition. 
+              </text>
+           </message>
+           <message type="startsWith" level="error">
+              <key>*** NOTE: A dummy value of 1</key>
+              <text>
+                A coordinate axis has no coordinates. 
+              </text>
+           </message>
+           <message type="startsWith" level="error">
               <key>**ERROR</key>
               <text>
                 An error occurred in the service that was creating your product.
