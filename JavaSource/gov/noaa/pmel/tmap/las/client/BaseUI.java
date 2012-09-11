@@ -122,7 +122,8 @@ public class BaseUI {
 
     EventBus eventBus = clientFactory.getEventBus();
 
-    Logger logger = Logger.getLogger("BaseUI");
+    private final Logger logger = Logger.getLogger(BaseUI.class.getName());
+
     protected MapSelectionChangeListener mapListener = new MapSelectionChangeListener() {
 
         @Override
@@ -425,6 +426,7 @@ public class BaseUI {
             eventBus.fireEventFromSource(new ControlVisibilityEvent(false), this);
         }
         // resize OutputPanel(s) according to the current Window size
+        logger.info("handlePanelShowHide() calling resize(...)");
         resize(Window.getClientWidth(), Window.getClientHeight());
     }
 
@@ -713,6 +715,7 @@ public class BaseUI {
         Window.addResizeHandler(new ResizeHandler() {
             @Override
             public void onResize(ResizeEvent event) {
+                logger.info("onResize(ResizeEvent event) calling resize(...)");
                 resize(event.getWidth(), event.getHeight());
             }
         });
@@ -734,7 +737,8 @@ public class BaseUI {
                                 logger.info("imageURL:" + imageURL);
                                 // An OutputPanel has loaded a new plotImage,
                                 // resize
-                                logger.info("An OutputPanel has loaded a new plotImage, resize.");
+                                                   logger.info("An OutputPanel has loaded a new plotImage, resize.");
+                                                   logger.info("onValueChange(StringValueChangeEvent event) calling resize(...)");
                                 resize(Window.getClientWidth(), Window.getClientHeight());
                             }
                         }
