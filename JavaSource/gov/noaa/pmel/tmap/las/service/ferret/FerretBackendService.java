@@ -5,39 +5,56 @@ import gov.noaa.pmel.tmap.las.jdom.LASBackendRequest;
 import gov.noaa.pmel.tmap.las.jdom.LASBackendResponse;
 import gov.noaa.pmel.tmap.las.service.BackendService;
 
+import java.util.Date;
+import java.util.logging.*;
+
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
 public class FerretBackendService extends BackendService {
-    // This object could be persisted between requests if this
-    // were packaged in a servlet.
-    private static Logger log = LogManager.getLogger(FerretBackendService.class.getName());
-    public String getProduct(String backendRequestXML, String cacheFileName) throws Exception {  
+	// This object could be persisted between requests if this
+	// were packaged in a servlet.
+	private static Logger log = LogManager.getLogger(FerretBackendService.class
+			.getName());
+
+	private final java.util.logging.Logger logger = java.util.logging.Logger
+			.getLogger(FerretBackendService.class.getName());
+
+	public String getProduct(String backendRequestXML, String cacheFileName) throws Exception {  
        
         LASBackendRequest lasBackendRequest = new LASBackendRequest();      
         JDOMUtils.XML2JDOM(backendRequestXML, lasBackendRequest);
-        log.info("START: "+lasBackendRequest.getServiceAction());
-        log.debug("Starting request: "+lasBackendRequest.toCompactString());
+        log.info(new Date().toString()+ ":"+"START: "+lasBackendRequest.getServiceAction());
+        log.debug(new Date().toString()+ ":"+"Starting request: "+lasBackendRequest.toCompactString());
         String debug = lasBackendRequest.getProperty("las", "debug");
         
         setLogLevel(debug);
+        logger.setLevel(Level.ALL);
         
         // Report logging level only for "debug" levels.
-        log.debug("Logging set to " + log.getEffectiveLevel().toString()+ " for "+log.getName());
+        log.debug(new Date().toString()+ ":"+"Logging set to " + log.getEffectiveLevel().toString()+ " for "+log.getName());
         
         LASBackendResponse lasBackendResponse = new LASBackendResponse();    
+        
+		String logMessage = new Date().toString()+
+				":Thread " + Thread.currentThread().getId() + 
+				" is working on "+lasBackendRequest.getCancelFile();
+		System.err.println(logMessage);
+        log.debug(logMessage);
+        logger.info(logMessage);
+        
         if ( lasBackendRequest.isCancelRequest()) {           
             lasBackendResponse.setError("Ferret backend request canceled.");
-            log.debug("Ferret backend request canceled: "+lasBackendRequest.toCompactString());
+            log.debug(new Date().toString()+ ":"+"Ferret backend request canceled: "+lasBackendRequest.toCompactString());
             return lasBackendResponse.toString();
         }
         FerretTool ferretTool = new FerretTool();
         lasBackendResponse = ferretTool.run(lasBackendRequest);
         if ( lasBackendResponse.getError() != null && !lasBackendResponse.getError().equals("") ) {
-          log.error("Ferret backend request failed: "+lasBackendResponse.getError());
+          log.error(new Date().toString()+ ":"+"Ferret backend request failed: "+lasBackendResponse.getError());
         }
-        log.debug("Ending request: "+lasBackendRequest.toCompactString());
-        log.info("END:   "+lasBackendRequest.getServiceAction());
+        log.debug(new Date().toString()+ ":"+"Ending request: "+lasBackendRequest.toCompactString());
+        log.info(new Date().toString()+ ":"+"END:   "+lasBackendRequest.getServiceAction());
         return lasBackendResponse.toString();
     }
 }
