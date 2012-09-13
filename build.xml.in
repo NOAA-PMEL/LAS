@@ -272,6 +272,23 @@
 		<jar jarfile="${addxml-dist}/lib/addXML.jar"
 			basedir="${addxml-build}" />
 	</target>
+        <target name="addxml-jar">
+		<delete dir="${addxml-build}" />
+		<mkdir dir="${addxml-build}" />
+		<mkdir dir="${addxml-dist}/lib" />
+		<javac
+			srcdir="${addxml-src}/gov/noaa/pmel/tmap/exception:${addxml-src}/gov/noaa/pmel/tmap/jdom:${addxml-src}/gov/noaa/pmel/tmap/addxml:${addxml-src}/uk/ac/rdg/resc/edal"
+			destdir="${addxml-build}">
+			<classpath>
+				<fileset id="addxml-libs"
+					dir="WebContent/WEB-INF/lib">
+					<include name="**/*.jar" />
+				</fileset>
+			</classpath>
+		</javac>
+		<jar jarfile="${addxml-dist}/lib/addXML.jar"
+			basedir="${addxml-build}" />
+        </target>
 	<target name="addxml-clean">
 		<delete dir="${addxml-build}" />
 	</target>
