@@ -12,69 +12,53 @@ import com.google.gwt.http.client.RequestBuilder;
  * Listeners must have a class that implements (or implement themselves) the
  * {@link LASRequestEvent.Handler} interface.
  * 
+ * If the method is not explicitly set, the requests are {@link RequestBuilder.GET} by default.
+ * 
  * @author weusijana
  * 
  */
 public class LASRequestEvent extends GwtEvent<LASRequestEvent.Handler> {
 
-    public interface Handler extends EventHandler {
-        void onRequest(LASRequestEvent event);
-    }
-
-    public static final Type<LASRequestEvent.Handler> TYPE = new Type<LASRequestEvent.Handler>();
-
-    private String url;
-    private RequestBuilder.Method method = RequestBuilder.GET;
-    private String requestCallbackObjectName;
-
-    public LASRequestEvent(String url, String requestCallbackObjectName) {
-        this.url = url;
-        this.requestCallbackObjectName = requestCallbackObjectName;
-    }
-
-    public LASRequestEvent(String url, RequestBuilder.Method method, String requestCallbackObjectName) {
-        this.url = url;
-        this.method = method;
-        this.requestCallbackObjectName = requestCallbackObjectName;
-    }
-
-    @Override
-    protected void dispatch(LASRequestEvent.Handler handler) {
-        handler.onRequest(this);
-    }
-
-    @Override
-    public final Type<LASRequestEvent.Handler> getAssociatedType() {
-        return TYPE;
-    }
-
-    /**
-     * @return the url
-     */
-    public String getUrl() {
-        return url;
-    }
-
-    /**
-     * @param url
-     *            the url to set
-     */
-    void setUrl(String url) {
-        this.url = url;
-    }
-
-	/**
-	 * @return the requestCallbackObjectName
-	 */
-	public String getRequestCallbackObjectName() {
-		return requestCallbackObjectName;
+	public interface Handler extends EventHandler {
+		void onRequest(LASRequestEvent event);
 	}
 
-	/**
-	 * @param requestCallbackObjectName the requestCallbackObjectName to set
-	 */
-	void setRequestCallbackObjectName(String requestCallbackObjectName) {
+	public static final Type<LASRequestEvent.Handler> TYPE = new Type<LASRequestEvent.Handler>();
+
+	private RequestBuilder.Method method = RequestBuilder.GET;
+	private RequestBuilder requestBuilder = null;
+	private String requestCallbackObjectName = null;
+	private String url = null;
+
+	public LASRequestEvent(RequestBuilder requestBuilder,
+			String requestCallbackObjectName) {
+		this.requestBuilder = requestBuilder;
 		this.requestCallbackObjectName = requestCallbackObjectName;
+		this.url = requestBuilder.getUrl();
+	}
+
+	public LASRequestEvent(String url, RequestBuilder.Method method,
+			String requestCallbackObjectName) {
+		this.url = url;
+		this.method = method;
+		this.requestCallbackObjectName = requestCallbackObjectName;
+		this.requestBuilder = new RequestBuilder(this.method, this.url);
+	}
+
+	public LASRequestEvent(String url, String requestCallbackObjectName) {
+		this.url = url;
+		this.requestCallbackObjectName = requestCallbackObjectName;
+		this.requestBuilder = new RequestBuilder(this.method, this.url);
+	}
+
+	@Override
+	protected void dispatch(LASRequestEvent.Handler handler) {
+		handler.onRequest(this);
+	}
+
+	@Override
+	public final Type<LASRequestEvent.Handler> getAssociatedType() {
+		return TYPE;
 	}
 
 	/**
@@ -85,9 +69,70 @@ public class LASRequestEvent extends GwtEvent<LASRequestEvent.Handler> {
 	}
 
 	/**
-	 * @param method the method to set
+	 * @return the requestBuilder
+	 */
+	public RequestBuilder getRequestBuilder() {
+		return requestBuilder;
+	}
+
+	/**
+	 * @return the requestCallbackObjectName
+	 */
+	public String getRequestCallbackObjectName() {
+		return requestCallbackObjectName;
+	}
+
+	/**
+	 * @return the url
+	 */
+	public String getUrl() {
+		return url;
+	}
+
+	/**
+	 * @param method
+	 *            the method to set
 	 */
 	void setMethod(RequestBuilder.Method method) {
 		this.method = method;
+		this.requestBuilder = new RequestBuilder(this.method, this.url);
+	}
+
+	/**
+	 * @param requestBuilder
+	 *            the requestBuilder to set
+	 */
+	void setRequestBuilder(RequestBuilder requestBuilder) {
+		this.requestBuilder = requestBuilder;
+		this.url = this.requestBuilder.getUrl();
+		String httpMethod = this.requestBuilder.getHTTPMethod();
+		if (RequestBuilder.GET.toString().equalsIgnoreCase(httpMethod)) {
+			this.method = RequestBuilder.GET;
+		} else if (RequestBuilder.POST.toString().equalsIgnoreCase(httpMethod)) {
+			this.method = RequestBuilder.POST;
+		} else if (RequestBuilder.DELETE.toString().equalsIgnoreCase(httpMethod)) {
+			this.method = RequestBuilder.DELETE;
+		} else if (RequestBuilder.HEAD.toString().equalsIgnoreCase(httpMethod)) {
+			this.method = RequestBuilder.HEAD;
+		} else if (RequestBuilder.PUT.toString().equalsIgnoreCase(httpMethod)) {
+			this.method = RequestBuilder.PUT;
+		}
+	}
+
+	/**
+	 * @param requestCallbackObjectName
+	 *            the requestCallbackObjectName to set
+	 */
+	void setRequestCallbackObjectName(String requestCallbackObjectName) {
+		this.requestCallbackObjectName = requestCallbackObjectName;
+	}
+
+	/**
+	 * @param url
+	 *            the url to set
+	 */
+	void setUrl(String url) {
+		this.url = url;
+		this.requestBuilder = new RequestBuilder(this.method, this.url);
 	}
 }
