@@ -750,11 +750,15 @@ public class UI extends BaseUI {
 			Object source = event.getSource();
 			if (source == null) {
 				logger.warning("source == null");
-			} else if (source instanceof OutputPanel) {
-				oprController.process(event);
 			} else {
-				logger.warning("The source is NOT and instanceof OutputPanel. source:"
-						+ source.toString());
+				String sourceString = source.toString();
+				if ((source instanceof OutputPanel)
+						|| (sourceString.contains(".OutputPanel$"))) {
+					oprController.process(event);
+				} else {
+					logger.warning("The source is NOT and instanceof OutputPanel. source:"
+							+ sourceString);
+				}
 			}
 		}
 	};

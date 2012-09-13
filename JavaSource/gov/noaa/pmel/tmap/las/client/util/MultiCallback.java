@@ -17,7 +17,7 @@ import com.google.gwt.http.client.RequestCallback;
 import com.google.gwt.http.client.Response;
 
 /**
- * Publishes LASResponseEvents for multiple listeners when onResponseReceived or
+ * Publishes {@link LASResponseEvent}s for multiple listeners when onResponseReceived or
  * onError is called.
  * 
  * @author weusijana
@@ -53,9 +53,6 @@ public class MultiCallback implements RequestCallback {
 	@Override
 	public void onResponseReceived(Request request, Response response) {
 		for (ArrayList<String> callbackPair : callbackPairs) {
-			// TODO: send event so callback.onResponseReceived(request,
-			// response) gets called in it's holder object (the original source)
-			// callbackObjectName.onResponseReceived(request, response);
 			LASResponseEvent lasResponseEvent = new LASResponseEvent(request,
 					response, callbackPair.get(0), callbackPair.get(1));
 			logger.info("MultiCallback is firing lasResponseEvent:"
@@ -69,10 +66,6 @@ public class MultiCallback implements RequestCallback {
 	@Override
 	public void onError(Request request, Throwable exception) {
 		for (ArrayList<String> callbackPair : callbackPairs) {
-			// TODO: send event so callback.onError(Request request, Throwable
-			// exception) gets called in it's holder object (the original
-			// source)
-			// callbackObjectName.onError(request, exception);
 			LASResponseEvent lasResponseEvent = new LASResponseEvent(request,
 					exception, callbackPair.get(0), callbackPair.get(1));
 			logger.info("MultiCallback is firing lasResponseEvent:"

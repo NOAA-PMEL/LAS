@@ -110,19 +110,19 @@ public class OutputPanel extends Composite implements HasName {
 	public static native void evalScripts(
 			com.google.gwt.user.client.Element element)
 	/*-{
-	  var scripts = element.getElementsByTagName("script");
-	
-	  for (i=0; i < scripts.length; i++) {
-	  // if src, eval it, otherwise eval the body
-	  if (scripts[i].hasAttribute("src")) {
-	  var src = scripts[i].getAttribute("src");
-	  var script = $doc.createElement('script');
-	  script.setAttribute("src", src);
-	  $doc.getElementsByTagName('body')[0].appendChild(script);
-	  } else {
-	  $wnd.eval(scripts[i].innerHTML);
-	  }
-	  }
+		var scripts = element.getElementsByTagName("script");
+
+		for (i = 0; i < scripts.length; i++) {
+			// if src, eval it, otherwise eval the body
+			if (scripts[i].hasAttribute("src")) {
+				var src = scripts[i].getAttribute("src");
+				var script = $doc.createElement('script');
+				script.setAttribute("src", src);
+				$doc.getElementsByTagName('body')[0].appendChild(script);
+			} else {
+				$wnd.eval(scripts[i].innerHTML);
+			}
+		}
 	}-*/;
 
 	/*
@@ -576,7 +576,8 @@ public class OutputPanel extends Composite implements HasName {
 		@Override
 		public void onError(Request request, Throwable exception) {
 			currentURL = currentURL + "&error=true";
-			logger.warning("enterring lasRequestCallback.onError request:"
+			logger.warning(getName()
+					+ ": enterring lasRequestCallback.onError request:"
 					+ request + "\nexception:" + exception);
 			spin.hide();
 			updating = false;
@@ -593,7 +594,8 @@ public class OutputPanel extends Composite implements HasName {
 
 		@Override
 		public void onResponseReceived(Request request, Response response) {
-			logger.info("enterring lasRequestCallback.onResponseReceived request:"
+			logger.info(getName()
+					+ ": enterring lasRequestCallback.onResponseReceived request:"
 					+ request + "\nresponse:" + response);
 			eventBus.fireEventFromSource(new UpdateFinishedEvent(),
 					OutputPanel.this);
@@ -637,6 +639,8 @@ public class OutputPanel extends Composite implements HasName {
 							// HTML("<a target=\"_blank\" href=\""+result.getAttribute("url")+"\"><img width=\"100%\" src=\""+result.getAttribute("url")+"\"></a>");
 							image_ready = true;
 							imageurl = result.getAttribute("url");
+							logger.info("imageurl = result.getAttribute(\"url\"):"
+									+ imageurl);
 						} else if (typeAttribute.equals("annotations")) {
 							annourl = result.getAttribute("url");
 							lasAnnotationsPanel.setAnnotationsHTMLURL(Util
@@ -802,11 +806,22 @@ public class OutputPanel extends Composite implements HasName {
 								logger.info("If-Modified-Since:"
 										+ sendRequest
 												.getHeader("If-Modified-Since"));
-								logger.info("calling sendRequest with url:"
-										+ url);
-								sendRequest.sendRequest(null,
-										lasRequestCallback);
-							} catch (RequestException e) {
+								// logger.info("calling sendRequest with url:"
+								// + url);
+								// sendRequest.sendRequest(null,
+								// lasRequestCallback);
+								LASRequestEvent lasRequestEvent = new LASRequestEvent(
+										sendRequest, "lasRequestCallback");
+								Logger.getLogger(this.getClass().getName())
+										.info(getName()
+												+ " is firing lasRequestEvent:"
+												+ lasRequestEvent
+												+ " with sendRequest:"
+												+ sendRequest + "and url:"
+												+ sendRequest.getUrl());
+								eventBus.fireEventFromSource(lasRequestEvent,
+										this);
+							} catch (Exception e) {
 								HTML error = new HTML(e.toString());
 								error.setSize(image_w * imageScaleRatio + "px",
 										image_h * imageScaleRatio + "px");
@@ -1675,12 +1690,18 @@ public class OutputPanel extends Composite implements HasName {
 			spin.show();
 			if (containerType.equals(Constants.IMAGE)) {
 
-				RequestBuilder sendRequest = new RequestBuilder(
-						RequestBuilder.GET, url);
+				// RequestBuilder sendRequest = new RequestBuilder(
+				// RequestBuilder.GET, url);
 				try {
 					updating = true;
-					sendRequest.sendRequest(null, lasRequestCallback);
-				} catch (RequestException e) {
+					// sendRequest.sendRequest(null, lasRequestCallback);
+					LASRequestEvent lasRequestEvent = new LASRequestEvent(url,
+							RequestBuilder.GET, "lasRequestCallback");
+					Logger.getLogger("computeDifference").info(
+							getName() + " is firing lasRequestEvent:"
+									+ lasRequestEvent + " with url:" + url);
+					eventBus.fireEventFromSource(lasRequestEvent, this);
+				} catch (Exception e) {
 					spin.hide();
 					HTML error = new HTML(e.toString());
 					error.setSize(image_w * imageScaleRatio + "px", image_h
@@ -2368,7 +2389,7 @@ public class OutputPanel extends Composite implements HasName {
 					LASRequestEvent lasRequestEvent = new LASRequestEvent(url,
 							RequestBuilder.GET, "lasRequestCallback");
 					Logger.getLogger("refreshPlot").info(
-							this.getName() + " is firing lasRequestEvent:"
+							getName() + " is firing lasRequestEvent:"
 									+ lasRequestEvent + " with url:" + url);
 					eventBus.fireEventFromSource(lasRequestEvent, this);
 				} catch (Exception e) {
