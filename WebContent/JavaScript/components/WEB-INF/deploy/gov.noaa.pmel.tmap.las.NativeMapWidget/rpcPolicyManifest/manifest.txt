@@ -1,0 +1,3 @@
+# Module gov.noaa.pmel.tmap.las.NativeMapWidget
+# RPC service class, partial path of RPC policy file
+gov.noaa.pmel.tmap.las.client.rpc.RPCService, 889E58E7D44D5C55A8CC40E00A9A0DDD.gwt.rpc
