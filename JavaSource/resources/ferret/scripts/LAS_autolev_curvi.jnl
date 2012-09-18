@@ -16,7 +16,7 @@ IF `xsize GT max_size` THEN
 ENDIF
 IF `ysize GT max_size` THEN 
    DEFINE SYMBOL ystride = `INT(ysize/10)`
-   DEFINE SYMBOL clat_imin = `INT(($clat_jmin)/($ystride))`
+   DEFINE SYMBOL clat_jmin = `INT(($clat_jmin)/($ystride))`
    DEFINE SYMBOL clat_jmax = `INT(($clat_jmax)/($ystride))`
    IF `($clat_jmin) LT 1` THEN DEFINE SYMBOL clat_jmin = 1
    IF `($clat_jmax) LT 1` THEN DEFINE SYMBOL clat_jmax = 1
