@@ -1,2 +1,0 @@
-serviceClass: gov.noaa.pmel.tmap.las.client.rpc.RPCService
-path: 889E58E7D44D5C55A8CC40E00A9A0DDD.gwt.rpc
