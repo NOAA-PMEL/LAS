@@ -45,7 +45,12 @@ ENDIF
 LET space = STRINDEX(varcoords, " ")
 IF `space EQ 0` THEN LET space = STRINDEX(varcoords, ",")
 
-LET coordstring = substring(varcoords, 1, `space-1`)
+IF `space GT 0` THEN 
+   LET coordstring = substring(varcoords, 1, `space-1`)
+ELSE
+   LET coordstring = varcoords
+ENDIF
+
 DEFINE SYMBOL coordstring = `coordstring`
 
 ! Is it a variable (and not a dimension) of the datset?
