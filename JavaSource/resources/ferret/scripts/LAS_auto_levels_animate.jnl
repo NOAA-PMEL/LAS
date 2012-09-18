@@ -228,7 +228,16 @@ IF `($index_strides"0|*>1") EQ 0` THEN
    DEFINE SYMBOL ppvar = pvar
 ENDIF
 IF `($zstride"0") GT 1` THEN SET AXIS/STRIDE=($zstride) `pvar,RETURN=zaxis`
-IF `($tstride"0") GT 1` THEN SET AXIS/STRIDE=($tstride) `pvar,RETURN=taxis`
+
+! This section to handle the netCDF striding bug, to be fixed in Netcdf4.1.1+
+! IF `($tstride"0") GT 1` THEN
+IF `($tstride"0") GT 1` THEN 
+   LET index_l_max = `L[gt=pvar,t=($region_t_hi)] - ($tstride)`
+   LET index_l_min = `L[gt=pvar,t=($region_t_lo)]`
+   LET pvar = ($data_var)[($region_xyz),L=`index_l_min`:`index_l_max`:($tstride)]
+   DEFINE SYMBOL new_region_t = L=`index_l_min`:`index_l_max`:($tstride)
+ENDIF
+! End of section to handle the netCDF striding bug, to be fixed in Netcdf4.1.1+
 
 ! Use Ferrets variance-based levels.
 LET varxd = ($ppvar)
@@ -257,8 +266,18 @@ IF `STRINDEX("($shapevar)", "Z") GT 0` THEN
 ENDIF
 IF `STRINDEX("($shapevar)", "T") GT 0` THEN 
    LET cvar = t[gt=varxd]
-   IF `($do_curvi_xy"0|0|*>1") EQ 0` THEN LET cvar = t[gt=varxd,($region_t)]
-   LET csiz = `cvar,RETURN=lsize`
+   
+! This section to handle the netCDF striding bug, to be fixed in Netcdf4.1.1+
+   IF ($new_region_t"0|*>1") THEN 
+      LET csiz = INT((index_l_max-index_l_min)/($tstride) + 1)
+      list csiz
+   ELSE
+! End of section to handle the netCDF striding bug, to be fixed in Netcdf4.1.1+
+
+      IF `($do_curvi_xy"0|0|*>1") EQ 0` THEN LET cvar = t[gt=varxd,($region_t)]
+      LET csiz = `cvar,RETURN=lsize`
+   ENDIF
+
    DEFINE SYMBOL vsiz = `csiz * ($vsiz)`
 ENDIF
 
@@ -296,7 +315,10 @@ IF `($zstride"0") GT 1` THEN
   CANCEL AXIS/STRIDE `pvar,RETURN=zaxis`
   CANCEL SYMBOL zstride
 ENDIF
-IF `($tstride"0") GT 1` THEN 
+
+! This section to handle the netCDF striding bug, to be fixed in Netcdf4.1.1+
+! Otherwise cancel axis/stride as above.
+IF `($tstride"0") GT 1 AND (($new_region_t"0|*>1") EQ 0)` THEN 
   CANCEL AXIS/STRIDE `pvar,RETURN=taxis`
   CANCEL SYMBOL tstride
 ENDIF
