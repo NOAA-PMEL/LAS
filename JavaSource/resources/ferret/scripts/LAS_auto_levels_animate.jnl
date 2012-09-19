@@ -207,7 +207,7 @@ IF ($ferret_time_step"0|1>0|*>1") THEN
 ELSE
    LET strd_del = 1
    IF `tsize GT max_size` THEN 
-      LET strd_del = `INT(tsize/10)`
+      LET strd_del = `INT(tsize/20)`
       IF `strd_del LE 2` THEN LET strd_del = 2
    ENDIF 
 ENDIF
@@ -230,7 +230,7 @@ ENDIF
 IF `($zstride"0") GT 1` THEN SET AXIS/STRIDE=($zstride) `pvar,RETURN=zaxis`
 
 ! This section to handle the netCDF striding bug, to be fixed in Netcdf4.1.1+
-! IF `($tstride"0") GT 1` THEN
+! That bug results in DAP errors on the stride request, see ticket 1348.
 IF `($tstride"0") GT 1` THEN 
    LET index_l_max = `L[gt=pvar,t=($region_t_hi)] - ($tstride)`
    LET index_l_min = `L[gt=pvar,t=($region_t_lo)]`
@@ -278,6 +278,7 @@ IF `STRINDEX("($shapevar)", "T") GT 0` THEN
       LET csiz = `cvar,RETURN=lsize`
    ENDIF
 
+   DEFINE SYMBOL vsizxyz = ($vsiz)
    DEFINE SYMBOL vsiz = `csiz * ($vsiz)`
 ENDIF
 
@@ -295,9 +296,49 @@ ELSE
   SHADE/LEV=($num_fine_levels)v var2d
 ENDIF
 
+! There seems to be another striding bug in all versions of NetCDF,
+! or a problem with with handling some datasets.
+! The last timestep gets set to all zeros for some stride requests.
+! Look for this and dont use that last step that was returned.
+! For instance, this dataset
+! http://data1.gfdl.noaa.gov:8380/thredds3/dodsC/CM2.0_Cntr-ITFblock_R1_ocean_tripolar_monthly_01010101-02001231  
+! list thetao[x=46,y=-10,z=5,l=1:1150:50]
+
+! Here is a test for this and commands to skip those zero's.
+LET ipts = `var1d,RETURN=isize`
+LET last = var1d
+IF `ipts GT 10` THEN LET last = var1d[i=`ipts-10`:`ipts`]
+IF  `last[i=@min] EQ 0 AND last[i=@max] EQ 0` THEN 
+   LET fsiz = `ipts-($vsizxyz)`
+   LET fix1d = var1d[i=1:`fsiz`]
+
+
+   LET isqr = INT(fsiz^0.5)
+
+   DEFINE AXIS/y=1:`isqr`:1 yshortaxis
+   DEFINE AXIS/x=1:`INT(($vsiz)/isqr)`:1 xhalfaxis
+   LET varshape = x[gx=xhalfaxis] + y[gy=yshortaxis]
+   LET var2d = RESHAPE(fix1d, varshape)
+   IF ($ferret_center_levels) THEN 
+     SHADE/LEV=($num_fine_levels)vc var2d
+   ELSE
+   
+     SHADE/LEV=($num_fine_levels)v var2d
+   ENDIF
+ENDIF
+! End of hack around the "other striding bug".
+
+! Require open levels on both ends - in case an extreme value was missed.
 IF ($LEV_OPNLEVS"0|*>1") THEN 
+
+   IF `STRINDEX("($LEV_OPNLEVS)", "(-inf)") EQ 0` THEN \
+ DEFINE SYMBOL LEV_OPNLEVS = (-inf)($LEV_OPNLEVS)
+   IF `STRINDEX("($LEV_OPNLEVS)", "(inf)") EQ 0` THEN \
+ DEFINE SYMBOL LEV_OPNLEVS = ($LEV_OPNLEVS)(inf)
+
    DEFINE SYMBOL ferret_fill_levels = ($LEV_OPNLEVS)
    DEFINE SYMBOL ferret_contour_levels = ($LEV_OPNLEVS)
+
 ENDIF
 
 ! Restore original axes
@@ -325,3 +366,4 @@ ENDIF
 
 ENDIF
 ! End of file ------------LAS_auto_levels_animate.jnl--------------------------
+
