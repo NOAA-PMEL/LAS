@@ -1077,15 +1077,17 @@ public class UI extends BaseUI {
 		setTool(av);
 		// We are finally ready to transfer the current map selection on to the
 		// panels, in the dimension where it applies.
+		// TODO: Avoid synchronizing the visible NavAxesGroup xAxesWidget in UI
+		// and the invisible (never attached to the web page's DOM)
+		// AxesWidgetGroup panelAxesWidgets in the main/compare (upper left)
+		// OutputPanel, perhaps by sharing the same OLMapWidget refMap member
+		// object. Weusijana 2012-09-20
 		for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
 			OutputPanel panel = (OutputPanel) panelIt.next();
 			if (panel.isComparePanel()) {
-				// Set both Lat and Long as the current map selection in the
-				// non-attached axes group must match all four dimensions
-				panel.setLat(String.valueOf(xAxesWidget.getRefMap().getYlo()),
-						String.valueOf(xAxesWidget.getRefMap().getYhi()));
-				panel.setLon(String.valueOf(xAxesWidget.getRefMap().getXlo()),
-						String.valueOf(xAxesWidget.getRefMap().getXhi()));
+				// Set both Lats and Longs because the current map selection in
+				// the non-attached axes group must match all four dimensions
+				panel.setLatLon(xAxesWidget.getRefMap().getCurrentSelection());
 			} else if (xView.contains("x") && !xView.contains("y")) {
 				panel.setLon(String.valueOf(xAxesWidget.getRefMap().getXlo()),
 						String.valueOf(xAxesWidget.getRefMap().getXhi()));
