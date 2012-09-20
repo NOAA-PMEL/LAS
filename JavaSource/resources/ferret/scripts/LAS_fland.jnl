@@ -17,6 +17,10 @@ LET lat_range = `($region_Y_hi) - ($region_Y_lo)`
 LET fland_area = `ABS(lon_range * lat_range) / (360 * 180)`
 
 ! If a tiny region then use smith_sandwell topo from PMEL server
+! (see the Jons_fland.jnl under the SOCAT customization for use of
+! etopo1. Need to decide how to make it availabe - on the Ferret thredds
+! server as below?)
+
 IF `fland_area LT 0.005` THEN
   
    SET DATA/SAVE
