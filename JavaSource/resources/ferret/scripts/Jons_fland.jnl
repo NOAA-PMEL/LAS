@@ -22,9 +22,22 @@ DEFINE SYMBOL fland_resolution 20
 IF `($fland_area) LT 0.25` THEN DEFINE SYMBOL fland_resolution 05
 
 ! For more-zoomed-in plots use special landmask dataset.
+! See the customized SOCAT version of this script for use of 
+! etopo1 and etopo2. Need to decide what to do about making those
+! datasets available.
 
+
+! Is the landmask dataset available?  Server could be down or
+! the LAS running such that we cant open an opendap datset.
+
+LET use_landmask = 0
 IF `($basemap_area) LT 0.1` THEN
-!   USE "/home/porter/ansley/landmask02.nc"
+   LET use_landmask = 1
+   IF `TEST_OPENDAP("http://ferret.pmel.noaa.gov/thredds/dodsC/data/PMEL/landmask02.nc") NE 0` THEN\
+    LET use_landmask = 0
+ENDIF
+
+IF `use_landmask EQ 1` THEN
    USE "http://ferret.pmel.noaa.gov/thredds/dodsC/data/PMEL/landmask02.nc"
    DEFINE SYMBOL xlo_hack ($xaxis_min%0%)
    DEFINE SYMBOL xhi_hack ($xaxis_max%360%)
@@ -32,7 +45,6 @@ IF `($basemap_area) LT 0.1` THEN
    LET landvar = landmask($map_reg)
 
    IF ($topo_regrid"0|*>1") THEN 
-      USE "http://ferret.pmel.noaa.gov/thredds/dodsC/data/PMEL/landmask02.nc"
       LET landvar = landmask[GX=x_super_fine,GY=y_super_fine]
    ENDIF
 
@@ -46,4 +58,3 @@ ENDIF
 CANCEL MEMORY
 
 ! End of $RCSfile: LAS_fland.jnl,v $ -----------------------------------------------------
-
