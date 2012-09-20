@@ -745,7 +745,7 @@ public class UI extends BaseUI {
 
 		@Override
 		public void onRequest(LASRequestEvent event) {
-			logger.setLevel(Level.ALL);
+			logger.setLevel(Level.OFF);
 			logger.info("onRequest(LASRequestEvent event) called.");
 			Object source = event.getSource();
 			if (source == null) {
@@ -1079,7 +1079,14 @@ public class UI extends BaseUI {
 		// panels, in the dimension where it applies.
 		for (Iterator panelIt = xPanels.iterator(); panelIt.hasNext();) {
 			OutputPanel panel = (OutputPanel) panelIt.next();
-			if (xView.contains("x") && !xView.contains("y")) {
+			if (panel.isComparePanel()) {
+				// Set both Lat and Long as the current map selection in the
+				// non-attached axes group must match all four dimensions
+				panel.setLat(String.valueOf(xAxesWidget.getRefMap().getYlo()),
+						String.valueOf(xAxesWidget.getRefMap().getYhi()));
+				panel.setLon(String.valueOf(xAxesWidget.getRefMap().getXlo()),
+						String.valueOf(xAxesWidget.getRefMap().getXhi()));
+			} else if (xView.contains("x") && !xView.contains("y")) {
 				panel.setLon(String.valueOf(xAxesWidget.getRefMap().getXlo()),
 						String.valueOf(xAxesWidget.getRefMap().getXhi()));
 			} else if (!xView.contains("x") && xView.contains("y")) {
@@ -1343,7 +1350,7 @@ public class UI extends BaseUI {
 	 */
 	public void onModuleLoad() {
 		super.initialize();
-		logger.setLevel(Level.ALL);
+		logger.setLevel(Level.OFF);
 
 		int col = 0;
 

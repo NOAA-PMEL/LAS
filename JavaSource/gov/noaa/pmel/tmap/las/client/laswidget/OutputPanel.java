@@ -1143,7 +1143,7 @@ public class OutputPanel extends Composite implements HasName {
 			String optionID, String view, boolean single,
 			String container_type, String tile_server,
 			boolean annotationsShowing) {
-		logger.setLevel(Level.ALL);
+		logger.setLevel(Level.OFF);
 		logger.info("OutputPanel constructor called with id:" + id);
 		this.ID = id;
 		this.comparePanel = comparePanel;
@@ -1661,7 +1661,9 @@ public class OutputPanel extends Composite implements HasName {
 		String url = Util.getProductServer() + "?xml="
 				+ URL.encode(lasRequest.toString());
 
-		if (!url.equals(currentURL) || force) {
+		if (!url.equals(currentURL) || force) {// TODO: Why is url == currentURL
+												// when comparing to new data in
+												// main plot?
 
 			if (updating) {
 				pending = true;
@@ -1688,6 +1690,7 @@ public class OutputPanel extends Composite implements HasName {
 			Widget plotWidget = grid.getWidget(1, 0);
 			spinSetPopupPositionCenter(plotWidget);
 			spin.show();
+			logger.info("containerType:" + containerType);
 			if (containerType.equals(Constants.IMAGE)) {
 
 				// RequestBuilder sendRequest = new RequestBuilder(
@@ -1697,9 +1700,9 @@ public class OutputPanel extends Composite implements HasName {
 					// sendRequest.sendRequest(null, lasRequestCallback);
 					LASRequestEvent lasRequestEvent = new LASRequestEvent(url,
 							RequestBuilder.GET, "lasRequestCallback");
-					Logger.getLogger("computeDifference").info(
-							getName() + " is firing lasRequestEvent:"
-									+ lasRequestEvent + " with url:" + url);
+					logger.info(getName()
+							+ " in computeDifference(...) is firing lasRequestEvent:"
+							+ lasRequestEvent + " with url:" + url);
 					eventBus.fireEventFromSource(lasRequestEvent, this);
 				} catch (Exception e) {
 					spin.hide();
@@ -1709,6 +1712,7 @@ public class OutputPanel extends Composite implements HasName {
 					grid.setWidget(1, 0, error);
 				}
 			} else {
+				logger.info("Reusing for output url:" + url);
 				output.setUrl(url);
 				grid.setWidget(1, 0, output);
 			}
@@ -2388,8 +2392,9 @@ public class OutputPanel extends Composite implements HasName {
 					// } catch ( RequestException e ) {
 					LASRequestEvent lasRequestEvent = new LASRequestEvent(url,
 							RequestBuilder.GET, "lasRequestCallback");
-					Logger.getLogger("refreshPlot").info(
-							getName() + " is firing lasRequestEvent:"
+					Logger.getLogger(this.getClass().getName())
+							.info(getName()
+									+ " in refreshPlot(...) is firing lasRequestEvent:"
 									+ lasRequestEvent + " with url:" + url);
 					eventBus.fireEventFromSource(lasRequestEvent, this);
 				} catch (Exception e) {
@@ -3010,9 +3015,14 @@ public class OutputPanel extends Composite implements HasName {
 
 	public void setVizGalState(VariableSerializable variable,
 			String historyToken, String comparePanelState) {
+		logger.info("setVizGalState(VariableSerializable variable, String historyToken, String comparePanelState) called in"
+				+ this.getName());
 		this.vizGalVariable = variable;
+		logger.info("vizGalVariable:" + vizGalVariable);
 		this.vizGalState = historyToken;
+		logger.info("vizGalState:" + vizGalState);
 		this.comparePanelState = comparePanelState;
+		logger.info("comparePanelState:" + comparePanelState);
 	}
 
 	public void setWidth(int width) {
