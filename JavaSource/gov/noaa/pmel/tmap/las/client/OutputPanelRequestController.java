@@ -59,6 +59,7 @@ public class OutputPanelRequestController implements RequestController {
 	 */
 	public OutputPanelRequestController() {
 		super();
+		logger.setLevel(Level.OFF);
 	}
 
 	/**

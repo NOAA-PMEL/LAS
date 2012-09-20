@@ -29,7 +29,7 @@ public class FerretBackendService extends BackendService {
         String debug = lasBackendRequest.getProperty("las", "debug");
         
         setLogLevel(debug);
-        logger.setLevel(Level.ALL);
+        logger.setLevel(Level.OFF);
         
         // Report logging level only for "debug" levels.
         log.debug(new Date().toString()+ ":"+"Logging set to " + log.getEffectiveLevel().toString()+ " for "+log.getName());

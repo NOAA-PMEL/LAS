@@ -40,13 +40,11 @@ public class LASRequest {
         if ( style.contains("7") ) {
             NodeList l = document.getDocumentElement().getElementsByTagName("link");
             Element op = findOp(l);
-            if ( op != null ) {
-                op.setAttribute("match", "/lasdata/operations/operation[@ID='" + operation + "']");
-            } else {
+            if ( op == null ) {
                 op = document.createElement("link");
                 document.getDocumentElement().appendChild(op);
-                op.setAttribute("match", "/lasdata/operations/operation[@ID='" + operation + "']");
             }
+            op.setAttribute("match", "/lasdata/operations/operation[@ID='" + operation + "']");
         }
     }
 

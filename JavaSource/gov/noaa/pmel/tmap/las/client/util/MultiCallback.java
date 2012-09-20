@@ -8,6 +8,7 @@ import gov.noaa.pmel.tmap.las.client.RequestController;
 import gov.noaa.pmel.tmap.las.client.event.LASResponseEvent;
 
 import java.util.ArrayList;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.google.gwt.core.client.GWT;
@@ -17,8 +18,8 @@ import com.google.gwt.http.client.RequestCallback;
 import com.google.gwt.http.client.Response;
 
 /**
- * Publishes {@link LASResponseEvent}s for multiple listeners when onResponseReceived or
- * onError is called.
+ * Publishes {@link LASResponseEvent}s for multiple listeners when
+ * onResponseReceived or onError is called.
  * 
  * @author weusijana
  * 
@@ -28,12 +29,13 @@ public class MultiCallback implements RequestCallback {
 	private String url = "";
 
 	/**
-	 * @param requestCallbackObjectName 
+	 * @param requestCallbackObjectName
 	 * @param callbackPairs
 	 */
 	public MultiCallback(RequestController controller, String url,
 			String firstSourceName, String firstCallbackName) {
 		super();
+		logger.setLevel(Level.OFF);
 		this.controller = controller;
 		this.url = url;
 		this.add(firstSourceName, firstCallbackName);
@@ -41,6 +43,7 @@ public class MultiCallback implements RequestCallback {
 
 	public MultiCallback(RequestController controller) {
 		super();
+		logger.setLevel(Level.OFF);
 		this.controller = controller;
 	}
 
@@ -56,8 +59,8 @@ public class MultiCallback implements RequestCallback {
 			LASResponseEvent lasResponseEvent = new LASResponseEvent(request,
 					response, callbackPair.get(0), callbackPair.get(1));
 			logger.info("MultiCallback is firing lasResponseEvent:"
-					+ lasResponseEvent + "for callbackPair:"
-					+ callbackPair + " with response:" + response);
+					+ lasResponseEvent + "for callbackPair:" + callbackPair
+					+ " with response:" + response);
 			eventBus.fireEventFromSource(lasResponseEvent, this);
 		}
 		controller.done(this);
@@ -94,8 +97,11 @@ public class MultiCallback implements RequestCallback {
 	}
 
 	/**
-	 * @param sourceName name of the object that made the request
-	 * @param callbackObjectName name of the object to handle the response inside the source object
+	 * @param sourceName
+	 *            name of the object that made the request
+	 * @param callbackObjectName
+	 *            name of the object to handle the response inside the source
+	 *            object
 	 * @return
 	 * @see java.util.ArrayList#add(java.lang.Object)
 	 */

@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.google.gwt.core.client.GWT;
@@ -578,6 +579,7 @@ public class BaseUI {
      * @wbp.parser.entryPoint
      */
     public void initialize() {
+		logger.setLevel(Level.OFF);
         xTileServer = getTileServer();
         xAnalysisWidget = new AnalysisWidget(xControlsWidthPx);
         // Somebody might have already set these. Only get them from the query
