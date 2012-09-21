@@ -35,7 +35,7 @@ public class MultiCallback implements RequestCallback {
 	public MultiCallback(RequestController controller, String url,
 			String firstSourceName, String firstCallbackName) {
 		super();
-		logger.setLevel(Level.OFF);
+		logger.setLevel(Level.ALL);
 		this.controller = controller;
 		this.url = url;
 		this.add(firstSourceName, firstCallbackName);
@@ -43,7 +43,7 @@ public class MultiCallback implements RequestCallback {
 
 	public MultiCallback(RequestController controller) {
 		super();
-		logger.setLevel(Level.OFF);
+		logger.setLevel(Level.ALL);
 		this.controller = controller;
 	}
 
@@ -55,6 +55,7 @@ public class MultiCallback implements RequestCallback {
 
 	@Override
 	public void onResponseReceived(Request request, Response response) {
+		controller.done(this);
 		for (ArrayList<String> callbackPair : callbackPairs) {
 			LASResponseEvent lasResponseEvent = new LASResponseEvent(request,
 					response, callbackPair.get(0), callbackPair.get(1));
@@ -63,11 +64,11 @@ public class MultiCallback implements RequestCallback {
 					+ " with response:" + response);
 			eventBus.fireEventFromSource(lasResponseEvent, this);
 		}
-		controller.done(this);
 	}
 
 	@Override
 	public void onError(Request request, Throwable exception) {
+		controller.done(this);
 		for (ArrayList<String> callbackPair : callbackPairs) {
 			LASResponseEvent lasResponseEvent = new LASResponseEvent(request,
 					exception, callbackPair.get(0), callbackPair.get(1));
@@ -76,7 +77,6 @@ public class MultiCallback implements RequestCallback {
 					+ callbackPair + " with exception:" + exception);
 			eventBus.fireEventFromSource(lasResponseEvent, this);
 		}
-		controller.done(this);
 	}
 
 	/**

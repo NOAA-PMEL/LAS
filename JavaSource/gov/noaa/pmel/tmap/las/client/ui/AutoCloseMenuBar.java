@@ -3,6 +3,7 @@
  */
 package gov.noaa.pmel.tmap.las.client.ui;
 
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.google.gwt.event.logical.shared.ResizeEvent;
@@ -63,6 +64,7 @@ public class AutoCloseMenuBar extends com.google.gwt.user.client.ui.MenuBar {
 	 * 
 	 */
 	private void closeChildrenOnResize() {
+		logger.setLevel(Level.OFF);
 		Window.addResizeHandler(new CloseChildrenResizeHandler());
 	}
 

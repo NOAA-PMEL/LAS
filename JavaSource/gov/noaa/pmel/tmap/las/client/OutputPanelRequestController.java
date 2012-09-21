@@ -59,7 +59,7 @@ public class OutputPanelRequestController implements RequestController {
 	 */
 	public OutputPanelRequestController() {
 		super();
-		logger.setLevel(Level.OFF);
+		logger.setLevel(Level.ALL);
 	}
 
 	/**
@@ -76,40 +76,49 @@ public class OutputPanelRequestController implements RequestController {
 	@Override
 	public void process(LASRequestEvent event) {
 		Object source = event.getSource();
-		OutputPanel sourceOutputPanel = (OutputPanel) source;
-		String sourceName = sourceOutputPanel.getName();
-		logger.info("sourceOutputPanel.getName():" + sourceName);
-		String url = event.getUrl();
-		String requestCallbackObjectName = event.getRequestCallbackObjectName();
-		if (seenUrls.containsKey(url)) {
-			logger.info("Already seen url:" + url);
-			// Set the multiCallback for the current url to use
-			// the current requestCallback when the request is done
-			MultiCallback multiCallback = seenUrls.get(url);
-			multiCallback.add(sourceName, requestCallbackObjectName);
-			// save the current url and multiCallback back into
-			// seenUrls
-			seenUrls.put(url, multiCallback);
-			logger.info("Just added sourceName:" + sourceName
-					+ " to multiCallback:" + multiCallback);
-		} else {
-			try {
-				RequestBuilder sendRequest = new RequestBuilder(
-						event.getMethod(), url);
-				// Set a new multiCallback to use the current
-				// requestCallback when the request is done
-				MultiCallback multiCallback = new MultiCallback(this, url,
-						sourceName, requestCallbackObjectName);
-				// save the current url and multiCallback in seenUrls,
+		String sourceString = source.toString();
+		if ((source instanceof OutputPanel)
+				|| (sourceString.contains(".OutputPanel$"))) {
+			String sourceName = event.getSourceName();
+			logger.info("event.getSourceName():" + sourceName);
+			String url = event.getUrl();
+			String requestCallbackObjectName = event
+					.getRequestCallbackObjectName();
+			if (seenUrls.containsKey(url)) {
+				logger.info("Already seen url:" + url);
+				// Set the multiCallback for the current url to use
+				// the current requestCallback when the request is done
+				MultiCallback multiCallback = seenUrls.get(url);
+				multiCallback.add(sourceName, requestCallbackObjectName);
+				// save the current url and multiCallback back into
+				// seenUrls
 				seenUrls.put(url, multiCallback);
-				// then send the request with multiCallback
-				Request request = sendRequest.sendRequest(null, multiCallback);
-				logger.info("Just called sendRequest for sourceName:"
-						+ sourceName + " with multiCallback:" + multiCallback);
-				logger.info("request:" + request);
-			} catch (Exception e) {
-				logger.log(Level.SEVERE, e.getLocalizedMessage(), e);
+				logger.info("Just added sourceName:" + sourceName
+						+ " to multiCallback:" + multiCallback);
+			} else {
+				try {
+					RequestBuilder sendRequest = new RequestBuilder(
+							event.getMethod(), url);
+					// Set a new multiCallback to use the current
+					// requestCallback when the request is done
+					MultiCallback multiCallback = new MultiCallback(this, url,
+							sourceName, requestCallbackObjectName);
+					// save the current url and multiCallback in seenUrls,
+					seenUrls.put(url, multiCallback);
+					// then send the request with multiCallback
+					Request request = sendRequest.sendRequest(null,
+							multiCallback);
+					logger.info("Just called sendRequest for sourceName:"
+							+ sourceName + " with multiCallback:"
+							+ multiCallback);
+					logger.info("request:" + request);
+				} catch (Exception e) {
+					logger.log(Level.SEVERE, e.getLocalizedMessage(), e);
+				}
 			}
+		} else {
+			logger.warning("The source is NOT and instanceof OutputPanel. source:"
+					+ sourceString);
 		}
 	}
 
