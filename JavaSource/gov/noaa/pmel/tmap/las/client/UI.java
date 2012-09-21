@@ -745,7 +745,7 @@ public class UI extends BaseUI {
 
 		@Override
 		public void onRequest(LASRequestEvent event) {
-			logger.setLevel(Level.OFF);
+			logger.setLevel(Level.ALL);
 			logger.info("onRequest(LASRequestEvent event) called.");
 			Object source = event.getSource();
 			if (source == null) {
@@ -1352,7 +1352,7 @@ public class UI extends BaseUI {
 	 */
 	public void onModuleLoad() {
 		super.initialize();
-		logger.setLevel(Level.OFF);
+		logger.setLevel(Level.ALL);
 
 		int col = 0;
 

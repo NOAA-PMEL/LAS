@@ -28,27 +28,31 @@ public class LASRequestEvent extends GwtEvent<LASRequestEvent.Handler> {
 	private RequestBuilder.Method method = RequestBuilder.GET;
 	private RequestBuilder requestBuilder = null;
 	private String requestCallbackObjectName = null;
+	private String sourceName;
 	private String url = null;
 
 	public LASRequestEvent(RequestBuilder requestBuilder,
-			String requestCallbackObjectName) {
+			String requestCallbackObjectName, String sourceName) {
 		this.requestBuilder = requestBuilder;
 		this.requestCallbackObjectName = requestCallbackObjectName;
 		this.url = requestBuilder.getUrl();
+		this.sourceName = sourceName;
 	}
 
 	public LASRequestEvent(String url, RequestBuilder.Method method,
-			String requestCallbackObjectName) {
+			String requestCallbackObjectName, String sourceName) {
 		this.url = url;
 		this.method = method;
 		this.requestCallbackObjectName = requestCallbackObjectName;
 		this.requestBuilder = new RequestBuilder(this.method, this.url);
+		this.sourceName = sourceName;
 	}
 
-	public LASRequestEvent(String url, String requestCallbackObjectName) {
+	public LASRequestEvent(String url, String requestCallbackObjectName, String sourceName) {
 		this.url = url;
 		this.requestCallbackObjectName = requestCallbackObjectName;
 		this.requestBuilder = new RequestBuilder(this.method, this.url);
+		this.sourceName = sourceName;
 	}
 
 	@Override
@@ -80,6 +84,13 @@ public class LASRequestEvent extends GwtEvent<LASRequestEvent.Handler> {
 	 */
 	public String getRequestCallbackObjectName() {
 		return requestCallbackObjectName;
+	}
+
+	/**
+	 * @return the sourceName
+	 */
+	public String getSourceName() {
+		return sourceName;
 	}
 
 	/**
@@ -125,6 +136,13 @@ public class LASRequestEvent extends GwtEvent<LASRequestEvent.Handler> {
 	 */
 	void setRequestCallbackObjectName(String requestCallbackObjectName) {
 		this.requestCallbackObjectName = requestCallbackObjectName;
+	}
+
+	/**
+	 * @param sourceName the sourceName to set
+	 */
+	void setSourceName(String sourceName) {
+		this.sourceName = sourceName;
 	}
 
 	/**

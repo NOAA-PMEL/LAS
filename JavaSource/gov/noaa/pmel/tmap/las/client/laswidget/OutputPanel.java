@@ -603,22 +603,32 @@ public class OutputPanel extends Composite implements HasName {
 			String doc = response.getText();
 			spin.hide();
 			// Look at the doc. If it's not obviously XML, treat it as HTML.
-			if (!doc.substring(0, 100).contains("<?xml")) {
-				logger.info("!doc.substring(0, 100).contains(\"<?xml\")");
+			boolean isObviouslyXML = false;
+			if (doc != null) {
+				if (doc.length() > 99) {
+					isObviouslyXML = doc.substring(0, 100).contains("<?xml");
+				} else if (doc.length() > 5) {
+					isObviouslyXML = doc.contains("<?xml");
+				}
+			}
+			if (!isObviouslyXML) {
+				logger.info("The doc is not obviously XML, treat it as HTML");
 				currentURL = currentURL + "&error=true";
 				evalScripts(new HTML(response.getText()).getElement());
 				VerticalPanel p = new VerticalPanel();
+				p.ensureDebugId("VerticalPanel");
 				ScrollPanel sp = new ScrollPanel();
+				sp.ensureDebugId("ScrollPanel");
 				HTML result = new HTML(doc);
 				p.add(result);
 				HTML again = new HTML(
 						"<b>Push the Update Plots button when you're ready to make your next request.");
 				p.add(again);
 				sp.add(p);
-				sp.setSize(image_w + "px", image_h + "px");
+				sp.setSize("30em", "20em");
 				grid.setWidget(1, 0, sp);
 			} else {
-				logger.info("doc.substring(0, 100).contains(\"<?xml\")");
+				logger.info("The doc is obviously XML");
 				doc = doc.replaceAll("\n", "").trim();
 				Document responseXML = XMLParser.parse(doc);
 				NodeList results = responseXML.getElementsByTagName("result");
@@ -811,7 +821,8 @@ public class OutputPanel extends Composite implements HasName {
 								// sendRequest.sendRequest(null,
 								// lasRequestCallback);
 								LASRequestEvent lasRequestEvent = new LASRequestEvent(
-										sendRequest, "lasRequestCallback");
+										sendRequest, "lasRequestCallback",
+										getName());
 								Logger.getLogger(this.getClass().getName())
 										.info(getName()
 												+ " is firing lasRequestEvent:"
@@ -822,6 +833,8 @@ public class OutputPanel extends Composite implements HasName {
 								eventBus.fireEventFromSource(lasRequestEvent,
 										this);
 							} catch (Exception e) {
+								logger.log(Level.SEVERE,
+										e.getLocalizedMessage(), e);
 								HTML error = new HTML(e.toString());
 								error.setSize(image_w * imageScaleRatio + "px",
 										image_h * imageScaleRatio + "px");
@@ -1143,7 +1156,7 @@ public class OutputPanel extends Composite implements HasName {
 			String optionID, String view, boolean single,
 			String container_type, String tile_server,
 			boolean annotationsShowing) {
-		logger.setLevel(Level.OFF);
+		logger.setLevel(Level.ALL);
 		logger.info("OutputPanel constructor called with id:" + id);
 		this.ID = id;
 		this.comparePanel = comparePanel;
@@ -1699,12 +1712,13 @@ public class OutputPanel extends Composite implements HasName {
 					updating = true;
 					// sendRequest.sendRequest(null, lasRequestCallback);
 					LASRequestEvent lasRequestEvent = new LASRequestEvent(url,
-							RequestBuilder.GET, "lasRequestCallback");
+							RequestBuilder.GET, "lasRequestCallback", getName());
 					logger.info(getName()
 							+ " in computeDifference(...) is firing lasRequestEvent:"
 							+ lasRequestEvent + " with url:" + url);
 					eventBus.fireEventFromSource(lasRequestEvent, this);
 				} catch (Exception e) {
+					logger.log(Level.SEVERE, e.getLocalizedMessage(), e);
 					spin.hide();
 					HTML error = new HTML(e.toString());
 					error.setSize(image_w * imageScaleRatio + "px", image_h
@@ -2391,13 +2405,14 @@ public class OutputPanel extends Composite implements HasName {
 					// logger.info("Just called sendRequest.sendRequest(null, lasRequestCallback);");
 					// } catch ( RequestException e ) {
 					LASRequestEvent lasRequestEvent = new LASRequestEvent(url,
-							RequestBuilder.GET, "lasRequestCallback");
+							RequestBuilder.GET, "lasRequestCallback", getName());
 					Logger.getLogger(this.getClass().getName())
 							.info(getName()
 									+ " in refreshPlot(...) is firing lasRequestEvent:"
 									+ lasRequestEvent + " with url:" + url);
 					eventBus.fireEventFromSource(lasRequestEvent, this);
 				} catch (Exception e) {
+					logger.log(Level.SEVERE, e.getLocalizedMessage(), e);
 					spin.hide();
 					HTML error = new HTML(e.toString());
 					error.setSize(image_w * imageScaleRatio + "px", image_h
