@@ -816,23 +816,29 @@ public class OutputPanel extends Composite implements HasName {
 								logger.info("If-Modified-Since:"
 										+ sendRequest
 												.getHeader("If-Modified-Since"));
-								// logger.info("calling sendRequest with url:"
-								// + url);
-								// sendRequest.sendRequest(null,
-								// lasRequestCallback);
-								LASRequestEvent lasRequestEvent = new LASRequestEvent(
-										sendRequest, "lasRequestCallback",
-										getName());
-								Logger.getLogger(this.getClass().getName())
-										.info(getName()
-												+ " is firing lasRequestEvent:"
-												+ lasRequestEvent
-												+ " with sendRequest:"
-												+ sendRequest + "and url:"
-												+ sendRequest.getUrl());
-								eventBus.fireEventFromSource(lasRequestEvent,
-										this);
-							} catch (Exception e) {
+								// Can't use a LASRequestEvent controller for
+								// such batch requests as the processing for
+								// them in the client slows the browser down to
+								// the point of crashing the WebApp. Weusijana
+								// 2012-09-24
+								logger.warning("BYPASSING LAS EVENT CONTROLLER BY calling sendRequest with url:"
+										+ url);
+								sendRequest.sendRequest(null,
+										lasRequestCallback);
+								// LASRequestEvent lasRequestEvent = new
+								// LASRequestEvent(
+								// sendRequest, "lasRequestCallback",
+								// getName());
+								// Logger.getLogger(this.getClass().getName())
+								// .info(getName()
+								// + " is firing lasRequestEvent:"
+								// + lasRequestEvent
+								// + " with sendRequest:"
+								// + sendRequest + "and url:"
+								// + sendRequest.getUrl());
+								// eventBus.fireEventFromSource(lasRequestEvent,
+								// this);
+							} catch (RequestException e) {
 								logger.log(Level.SEVERE,
 										e.getLocalizedMessage(), e);
 								HTML error = new HTML(e.toString());
