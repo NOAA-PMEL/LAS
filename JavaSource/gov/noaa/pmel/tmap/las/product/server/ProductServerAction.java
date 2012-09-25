@@ -523,7 +523,7 @@ public final class ProductServerAction extends LASAction {
                         if ( timeout > 0 ) {
                         	
                             // Timeout set in the request.
-                            long to = Math.min(timeout, 2000);
+                            long to = Math.max(timeout, 2000);
                            
                             productServerRunner.join(to);
                             
