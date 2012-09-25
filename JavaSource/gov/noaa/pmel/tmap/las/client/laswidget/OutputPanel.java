@@ -148,8 +148,21 @@ public class OutputPanel extends Composite implements HasName {
 					lasAnnotationsPanel
 							.setError("Fetching plot annotations...");
 					updating = true;
-					sendRequest.sendRequest(null, lasRequestCallback);
-				} catch (RequestException e) {
+					// sendRequest.sendRequest(null, lasRequestCallback);
+					// Using LASRequestEvent Controller so a cancel in one
+					// OutputPanel cancels related requests too
+					LASRequestEvent lasRequestEvent = new LASRequestEvent(
+							sendRequest, "lasRequestCallback", getName());
+					Logger.getLogger(this.getClass().getName()).info(
+							getName() + " is firing lasRequestEvent:"
+									+ lasRequestEvent + " with sendRequest:"
+									+ sendRequest + "and url:"
+									+ sendRequest.getUrl());
+					eventBus.fireEventFromSource(lasRequestEvent,
+							thisOutputPanel);
+					// } catch (RequestException e) {
+				} catch (Exception e) {
+					logger.log(Level.WARNING, e.getLocalizedMessage(), e);
 					Window.alert("Unable to cancel request.");
 				}
 			}
@@ -577,7 +590,7 @@ public class OutputPanel extends Composite implements HasName {
 		public void onError(Request request, Throwable exception) {
 			currentURL = currentURL + "&error=true";
 			logger.warning(getName()
-					+ ": enterring lasRequestCallback.onError request:"
+					+ ": entering lasRequestCallback.onError request:"
 					+ request + "\nexception:" + exception);
 			spin.hide();
 			updating = false;
@@ -595,7 +608,7 @@ public class OutputPanel extends Composite implements HasName {
 		@Override
 		public void onResponseReceived(Request request, Response response) {
 			logger.info(getName()
-					+ ": enterring lasRequestCallback.onResponseReceived request:"
+					+ ": entering lasRequestCallback.onResponseReceived request:"
 					+ request + "\nresponse:" + response);
 			eventBus.fireEventFromSource(new UpdateFinishedEvent(),
 					OutputPanel.this);
@@ -816,29 +829,24 @@ public class OutputPanel extends Composite implements HasName {
 								logger.info("If-Modified-Since:"
 										+ sendRequest
 												.getHeader("If-Modified-Since"));
-								// Can't use a LASRequestEvent controller for
-								// such batch requests as the processing for
-								// them in the client slows the browser down to
-								// the point of crashing the WebApp. Weusijana
-								// 2012-09-24
-								logger.warning("BYPASSING LAS EVENT CONTROLLER BY calling sendRequest with url:"
-										+ url);
-								sendRequest.sendRequest(null,
-										lasRequestCallback);
-								// LASRequestEvent lasRequestEvent = new
-								// LASRequestEvent(
-								// sendRequest, "lasRequestCallback",
-								// getName());
-								// Logger.getLogger(this.getClass().getName())
-								// .info(getName()
-								// + " is firing lasRequestEvent:"
-								// + lasRequestEvent
-								// + " with sendRequest:"
-								// + sendRequest + "and url:"
-								// + sendRequest.getUrl());
-								// eventBus.fireEventFromSource(lasRequestEvent,
-								// this);
-							} catch (RequestException e) {
+								// logger.warning("BYPASSING LAS EVENT CONTROLLER BY calling sendRequest with url:"
+								// + url);
+								// sendRequest.sendRequest(null,
+								// lasRequestCallback);
+								LASRequestEvent lasRequestEvent = new LASRequestEvent(
+										sendRequest, "lasRequestCallback",
+										getName());
+								Logger.getLogger(this.getClass().getName())
+										.info(getName()
+												+ " is firing lasRequestEvent:"
+												+ lasRequestEvent
+												+ " with sendRequest:"
+												+ sendRequest + "and url:"
+												+ sendRequest.getUrl());
+								eventBus.fireEventFromSource(lasRequestEvent,
+										thisOutputPanel);
+								// } catch (RequestException e) {
+							} catch (Exception e) {
 								logger.log(Level.SEVERE,
 										e.getLocalizedMessage(), e);
 								HTML error = new HTML(e.toString());
@@ -1882,7 +1890,7 @@ public class OutputPanel extends Composite implements HasName {
 	}
 
 	String getPlotWidth() {
-		logger.fine("enterring getPlotWidth()");
+		logger.fine("entering getPlotWidth()");
 		int antipadding = 0;// 100;
 		String w = CONSTANTS.DEFAULT_ANNOTATION_PANEL_WIDTH();
 		if (plotImage != null) {
@@ -2447,7 +2455,7 @@ public class OutputPanel extends Composite implements HasName {
 	}
 
 	private ImageData scaleImage(Image image, double scaleToRatio) {
-		logger.info("enterring scaleImage with scaleToRatio:" + scaleToRatio);
+		logger.info("entering scaleImage with scaleToRatio:" + scaleToRatio);
 		Canvas canvasTmp = Canvas.createIfSupported();
 		Context2d context = canvasTmp.getContext2d();
 

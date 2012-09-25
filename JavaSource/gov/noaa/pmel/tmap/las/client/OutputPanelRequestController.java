@@ -67,7 +67,10 @@ public class OutputPanelRequestController implements RequestController {
 	 */
 	@Override
 	public void done(MultiCallback multiCallback) {
-		seenUrls.remove(multiCallback.getUrl());
+		String url = multiCallback.getUrl();
+		Object previousValue = seenUrls.remove(url);
+		logger.info("done with seen multiCallback url:" + url + " and value:"
+				+ previousValue.toString());
 	}
 
 	/**
@@ -89,16 +92,21 @@ public class OutputPanelRequestController implements RequestController {
 				// Set the multiCallback for the current url to use
 				// the current requestCallback when the request is done
 				MultiCallback multiCallback = seenUrls.get(url);
-				multiCallback.add(sourceName, requestCallbackObjectName);
+				boolean addSucessful = multiCallback.add(sourceName,
+						requestCallbackObjectName);
+				logger.info("Attempt to add sourceName:" + sourceName
+						+ ", requestCallbackObjectName:"
+						+ requestCallbackObjectName + " to multiCallback:"
+						+ multiCallback + " was:" + addSucessful);
 				// save the current url and multiCallback back into
 				// seenUrls
-				seenUrls.put(url, multiCallback);
-				logger.info("Just added sourceName:" + sourceName
-						+ " to multiCallback:" + multiCallback);
+				Object previousValue = seenUrls.put(url, multiCallback);
+				if (previousValue == null)
+					previousValue = "null";
+				logger.info("seenUrls.put(url, multiCallback) returned previousValue:"+previousValue);
 			} else {
 				try {
-					RequestBuilder sendRequest = new RequestBuilder(
-							event.getMethod(), url);
+					RequestBuilder sendRequest = event.getRequestBuilder();
 					// Set a new multiCallback to use the current
 					// requestCallback when the request is done
 					MultiCallback multiCallback = new MultiCallback(this, url,
@@ -106,11 +114,11 @@ public class OutputPanelRequestController implements RequestController {
 					// save the current url and multiCallback in seenUrls,
 					seenUrls.put(url, multiCallback);
 					// then send the request with multiCallback
-					Request request = sendRequest.sendRequest(null,
-							multiCallback);
-					logger.info("Just called sendRequest for sourceName:"
+					logger.info("Calling sendRequest for sourceName:"
 							+ sourceName + " with multiCallback:"
 							+ multiCallback);
+					Request request = sendRequest.sendRequest(null,
+							multiCallback);
 					logger.info("request:" + request);
 				} catch (Exception e) {
 					logger.log(Level.SEVERE, e.getLocalizedMessage(), e);
